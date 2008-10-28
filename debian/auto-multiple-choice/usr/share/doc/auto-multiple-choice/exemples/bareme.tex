@@ -1,0 +1,124 @@
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}
+
+\begin{document}
+
+% preparation du groupe de questions appelé qqs (on mettra au maximum
+% 20 elements dans ce groupe) :
+
+\nouveaugroupe{qqs}{20}
+
+\element{qqs}{
+\begin{question}{le bon choix}
+  Combien de points voulez-vous à cette question~?
+  \begin{reponses}
+    \bonne{Le maximun : 10}\bareme{10}
+    \mauvaise{Seulement 5}\bareme{5}
+    \mauvaise{Deux me suffiront}\bareme{2}
+    \mauvaise{Aucun, merci}\bareme{0}
+  \end{reponses}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{engrange}
+  Engrangez des points gratuitement en cochant les cases ci-dessous~:
+  \begin{reponses}
+    \bonne{2 points}\bareme{b=2}
+    \mauvaise{Un point négatif}\bareme{b=0,m=-1}
+    \bonne{3 points}\bareme{b=3}
+    \bonne{1 point}
+    \bonne{Un demi point}\bareme{b=0.5}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{2 justes}\bareme{b=3,d=-9,p=0}
+  Il faut cocher exactement comme il faut pour avoir trois points, sinon vous n'en
+  aurez aucun.
+  \begin{reponses}
+    \mauvaise{Fausse}
+    \mauvaise{Fausse}
+    \bonne{Juste}
+    \bonne{Juste}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{tout}\bareme{d=-3,p=0}
+  Deux points pour tout juste, et un point pour chaque erreur...
+  \begin{reponses}
+    \bonne{Bonne réponse}
+    \bonne{Ceci est juste}
+    \bonne{Exact}
+    \mauvaise{Faux~!}
+    \mauvaise{Ne pas cocher~!}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{question}{attention}\bareme{b=2}
+  Alors là, la réponse très fausse mérite sanction (-2 points), mais
+  viser juste rapporte 2 points.
+  \begin{reponses}
+    \bonne{C'est bon !}
+    \mauvaise{Pas bon}
+    \mauvaise{Pas bon}
+    \mauvaise{Pas bon}
+    \mauvaise{Très faux !}\bareme{-2}
+  \end{reponses}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{au choix}
+  Choisissez vos points :
+  \begin{reponses}
+    \bonne{J'en veux 2}\bareme{b=2}
+    \mauvaise{J'en donne trois}\bareme{b=0,m=3}
+    \bonne{J'en veux un (et sinon j'en perds un)}\bareme{m=-1}
+  \end{reponses}
+\end{questionmult}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\exemplaire{20}{
+
+\noindent{\bf QCM  \hfill TEST DE BARÈME}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Nom et prénom :
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+\begin{center}\em
+Durée : 10 minutes.
+\end{center}
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\melangegroupe{qqs}
+
+\restituegroupe{qqs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+
+}
+
+\end{document}

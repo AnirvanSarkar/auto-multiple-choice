@@ -1,0 +1,1175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<article lang="fr">
+  <articleinfo>
+    <title>Auto Multiple Choice</title>
+
+    <subtitle>Correction automatisée de QCM</subtitle>
+
+    <abstract>
+      <para>AMC est un ensemble d'utilitaires permettant l'utilisation de QCM
+      rédigés en LaTeX et leur correction automatique à partir des scans des
+      copies des étudiants. Le présent document décrit son utilisation.</para>
+    </abstract>
+
+    <author>
+      <firstname>Alexis</firstname>
+
+      <affiliation>
+        <address><email>paamc@passoire.fr</email></address>
+      </affiliation>
+
+      <surname>Bienvenüe</surname>
+    </author>
+
+    <copyright>
+      <year>2008</year>
+
+      <holder>Alexis Bienvenüe</holder>
+    </copyright>
+  </articleinfo>
+
+  <sect1>
+    <title>Prérequis</title>
+
+    <sect2>
+      <title>Système d'exploitation</title>
+
+      <para>Les utilitaires AMC sont pour l'instant écrits pour Linux. Ils
+      devraient pouvoir être adaptés à Windows sans trop de difficulté, mais
+      ceci ne sera pas fait dans un avenir proche.</para>
+    </sect2>
+
+    <sect2>
+      <title>Logiciels</title>
+
+      <para>Les paquets/logiciels principaux requis pour l'utilisation d'AMC
+      sont les suivants :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>LaTeX</para>
+        </listitem>
+
+        <listitem>
+          <para>ImageMagick</para>
+        </listitem>
+
+        <listitem>
+          <para>Perl, ainsi que Gtk2-Perl et Glade::XML pour l'interface
+          graphique</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+
+    <sect2>
+      <title>LaTeX</title>
+
+      <para>Une connaissance de LaTeX est bien utile pour la conception des
+      QCM. Cependant, les modèles fournis permettent à ceux qui ne sont par
+      réfractaires aux formats de documents du type LaTeX/XML/HTML d'écrire
+      assez rapidement ses premiers formulaires.</para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Installation</title>
+
+    <sect2>
+      <title>Sur un système debian</title>
+
+      <para>Un paquet debian est fourni. Il permet d'installer facilement AMC
+      sur un système debian ou dérivé (par exemple ubuntu).</para>
+    </sect2>
+
+    <sect2>
+      <title>À partir des sources</title>
+
+      <para>Après avoir téléchargé l'archive tgz des sources :</para>
+
+      <screen>tar xvzf auto-multiple-choice_xxxx.tgz
+cd auto-qcm
+make
+sudo make install</screen>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Préparation du fichier LaTeX</title>
+
+    <para>Avant toute chose, un questionnaire à choix multiples doit être
+    décrit sous la forme d'une fichier LaTeX utilisant le package
+    <package>automultiplechoice</package>. Ce chapitre décrit les commandes
+    LaTeX permettant d'écrire un QCM. Vous pouvez à tout moment tester le
+    fichier LaTeX que vous êtes en train de concevoir en le compilant avec la
+    commande <command>latex</command> puis en visualisant le fichier dvi qui
+    en résulte.</para>
+
+    <para>Nous commençons par quelques exemples qui permettent d'appréhender
+    rapidemment la construction de fichiers LaTeX de QCM ; les fichiers tex de
+    ces exemples sont fournis avec AMC.</para>
+
+    <sect2>
+      <title>Un exemple simple</title>
+
+      <para><programlisting id="exemples-simple.tex" linenumbering="numbered">\documentclass{article}
+
+\usepackage[latin1]{inputenc}    <co id="simple.latin1"
+            linkends="simple.latin1.exp" />
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}    <co id="simple.amc"
+            linkends="simple.amc.exp" />
+\begin{document}
+
+\exemplaire{10}{    <co id="simple.exemplaire"
+            linkends="simple.exemplaire.exp" />
+
+%%% debut de l'en-tête des copies :    <co id="simple.entete"
+            linkends="simple.entete.exp" />
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{    <co id="simple.champnom" linkends="simple.champnom.exp" />
+                \begin{minipage}{.5\linewidth}
+                  Nom et prénom :
+
+                  \vspace*{.5cm}\dotfill
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\begin{center}\em
+Durée : 10 minutes.
+
+  Aucun document n'est autorisé.
+  L'usage de la calculatrice est interdit.
+
+  Les questions faisant apparaître le symbole \multiSymbole{} peuvent
+  présenter zéro, une ou plusieurs bonnes réponses. Les autres ont
+  une unique bonne réponse.
+
+  Des points négatifs pourront être affectés à de \emph{très
+    mauvaises} réponses.
+\end{center}
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\begin{question}{prez}    <co id="simple.qr" linkends="simple.qr.exp" />
+  Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
+  \begin{reponses}
+    \bonne{René Coty}
+    \mauvaise{Alain Prost}
+    \mauvaise{Marcel Proust}
+    \mauvaise{Claude Monet}
+  \end{reponses}
+\end{question}
+
+\begin{questionmult}{pref}    <co id="simple.qrmult"
+            linkends="simple.qrmult.exp" />
+  Parmi les villes suivantes, lesquelles sont des préfectures~?
+  \begin{reponses}
+    \bonne{Poitiers}
+    \mauvaise{Sainte-Menehould}
+    \bonne{Avignon}
+  \end{reponses}
+\end{questionmult}
+
+\cleardoublepage    <co id="simple.clear" linkends="simple.clear.exp" />
+
+}   <co id="simple.fin" linkends="simple.fin.exp" />
+
+\end{document}
+</programlisting></para>
+
+      <para>Quelques précisions sur cet exemple :</para>
+
+      <para><calloutlist>
+          <callout arearefs="simple.latin1" id="simple.latin1.exp">
+            <para>Les deux paquets <package>inputenc</package> et
+            <package>fontenc</package> permettent d'écrire le texte du
+            questionnaire en utilisant l'encodage ISO-8859-1 (latin1). Vous
+            pouvez bien entendu les modifier suivant l'encodage que vous
+            utilisez.</para>
+          </callout>
+
+          <callout arearefs="simple.amc" id="simple.amc.exp">
+            <para>Les options utilisées ici pour le paquet LaTeX
+            <package>automultiplechoice</package> permettent d'éviter le
+            changement de page à l'intérieur des questions
+            (<option>bloc</option>) et de compléter automatiquement chaque
+            question multiple par une réponse type permettant à l'étudiant
+            d'indiquer qu'il considère qu'aucune des réposes proposées n'est
+            exacte (<option>completemulti</option>).</para>
+          </callout>
+
+          <callout arearefs="simple.exemplaire" id="simple.exemplaire.exp">
+            <para>La commande <command>exemplaire</command> permet de
+            fabriquer autant d'exemplaires (différents) du questionnaire QCM
+            que l'on souhaite (ici, 10).</para>
+          </callout>
+
+          <callout arearefs="simple.entete" id="simple.entete.exp">
+            <para>Les lignes qui commencent ici permettent la mise en forme de
+            l'en-tête de chaque copie.</para>
+          </callout>
+
+          <callout arearefs="simple.champnom" id="simple.champnom.exp">
+            <para>La commande <command>champnom</command> permet d'indiquer la
+            partie du questionnaire dans laquelle chaque étudiant inscrira son
+            nom.</para>
+          </callout>
+
+          <callout arearefs="simple.qr" id="simple.qr.exp">
+            <para>Les environnements <command>question</command> et
+            <command>reponses</command> permettent de fabriquer une question à
+            choix multiples pour laquelle une unique réponse est correcte. Il
+            faut indiquer un identifiant unique de la question (ici :
+            <emphasis>prez</emphasis>).</para>
+          </callout>
+
+          <callout arearefs="simple.qrmult" id="simple.qrmult.exp">
+            <para>Les environnements <command>questionmult</command> et
+            <command>reponses</command> permettent de fabriquer une question
+            pouvant avoir zéro, une ou plusieurs bonnes réponses. L'étudiant
+            est donc invité à cocher toutes les cases correspondant aux
+            réponses qu'il pense correctes, ou la dernière case (ajoutée
+            automatiquement grâce à l'option <option>completemulti</option>
+            passée au paquet en ligne 6).</para>
+          </callout>
+
+          <callout arearefs="simple.clear" id="simple.clear.exp">
+            <para>La commande <command>cleardoublepage</command> permet de
+            passer à la double page suivante (dans l'optique d'une impression
+            recto-verso). Pour une impression recto simple, on privilégiera la
+            commande <command>clearpage</command>.</para>
+          </callout>
+
+          <callout arearefs="simple.fin" id="simple.fin.exp">
+            <para>Cette fermeture d'accolade marque la fin de la commande
+            <command>exemplaire</command> (débutée à la ligne 9).</para>
+          </callout>
+        </calloutlist></para>
+    </sect2>
+
+    <sect2>
+      <title>Un exemple avec groupes de questions mélangées</title>
+
+      <para>Dans cet exemple, on veut que l'ordre dans lequel les questions
+      sont posées sopit différent d'une copie à l'autre, tout en laissant
+      ensemble les questions traitant du même sujet. On va donc créer deux
+      groupes de questions, et les mélanger lors de la fabrication de chaque
+      copie. <programlisting id="exemples-groupes.tex"
+      linenumbering="numbered">\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}
+\begin{document}
+
+%%% préparation des groupes
+
+\nouveaugroupe{geographie}{10}
+
+\element{geographie}{
+  \begin{question}{Paris}
+    Dans quel continent se situe Paris~?
+    \begin{reponses}
+      \bonne{L'Europe}
+      \mauvaise{L'asie}
+      \mauvaise{La planète Mars}
+    \end{reponses}
+  \end{question}
+}
+
+\element{geographie}{
+  \begin{question}{Cameroun}
+    Quelle est la capitale du Cameroun~?
+    \begin{reponses}
+      \bonne{Yaoundé}
+      \mauvaise{Douala}
+      \mauvaise{Abou-Dabi}
+    \end{reponses}
+  \end{question}
+}
+
+\nouveaugroupe{histoire}{10}
+
+\element{histoire}{
+  \begin{question}{Marignan}
+    En quelle année a eu lieu la batialle de Marignan~?
+    \begin{reponseshoriz}
+      \bonne{1515}
+      \mauvaise{1915}
+      \mauvaise{1519}
+    \end{reponseshoriz}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{questionmult}{Nantes}
+    Que peut-on dire de l'Édit de Nantes~?
+    \begin{reponses}
+      \bonne{Il a été signé en 1598}
+      \bonne{Il a été définitivement révoqué par Louis XIV}
+      \mauvaise{Il a été signé par Henri II}
+    \end{reponses}
+  \end{questionmult}
+}
+
+%%% fabrication des copies
+
+\exemplaire{10}{
+
+%%% debut de l'en-tête des copies :
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Nom et prénom :
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%% fin de l'en-tête
+
+\begin{center}
+\hrule
+\bf\Large Géographie
+\hrule
+\end{center}
+
+\melangegroupe{geographie}
+\restituegroupe{geographie}
+
+\begin{center}
+\hrule
+\bf\Large Histoire
+\hrule
+\end{center}
+
+\melangegroupe{histoire}
+\restituegroupe{histoire}
+
+\cleardoublepage
+
+}
+
+\end{document}
+</programlisting></para>
+    </sect2>
+
+    <sect2>
+      <title>Description des commandes LaTeX</title>
+
+      <sect3>
+        <title>Options du paquet</title>
+
+        <para>L'utilisation du paquet <package>automultiplechoice</package> se
+        fait grâce à la ligne <programlisting>\usepackage[...]{automultiplechoice}</programlisting>où
+        les pointillés sont remplacés par une liste d'options séparées par des
+        virgules. Les options disponibles sont les suivantes :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><option>bloc</option> : place chaque question dans un bloc,
+            de telle sorte qu'elle ne puisse pas être coupée par un saut de
+            page.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>completemulti</option> : ajoute de manière
+            automatique une réponse type « aucune de ces réponses n'est
+            correcte » à la fin de chaque question multiple. Ceci permet de
+            différencier, pour ces questions, une absence de réponse et la
+            réponse qui consiste à ne choisir aucune des réponses
+            proposées.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>ordre</option> : annule le mélange automatique de
+            l'ordre des réponses dans toutes les questions.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>correc</option> : produit la correction du QCM, et
+            non le sujet.</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+
+      <sect3>
+        <title>Questions et réponses</title>
+
+        <para>Pour les questions simples (une seule réponse correcte), on
+        utilisera le modèle suivant : <programlisting
+        linenumbering="unnumbered">\begin{question}{identifiant}
+  Texte de la question...
+  \begin{reponses}
+    \bonne{La bonne réponse}
+    \mauvaise{Une mauvaise réponse}
+    \mauvaise{Une autre mauvaise réponse}
+  \end{reponses}
+\end{question}</programlisting></para>
+
+        <important>
+          <para>Il faut utiliser un <parameter>identifiant</parameter>
+          différent pour chaque question. Un identifiant peut être constitué
+          de chiffres, lettres et caractères simples (ne pas utiliser les
+          acolades, crochets, par exemple !).</para>
+        </important>
+
+        <note>
+          <para>Le nombre de réponses pour une question est actuellement
+          limité à 20.</para>
+        </note>
+
+        <para>Pour demander à garder l'ordre des réponses pour cette
+        question-ci, on peut utiliser l'option <option>o</option> de
+        l'environnement <option>reponses</option>, en remplaçant la ligne 3
+        par <programlisting>\begin{reponses}[o]</programlisting></para>
+
+        <para>Pour mettre les réponses sur deux colonnes, on peut utiliser le
+        package <package>multicol</package> en mettant dans le préambule
+        (juste après l'appel au paquet <package>automultiplechoice</package>
+        par exemple) la ligne <programlisting>\usepackage{multicol}</programlisting>et
+        en incluant l'environnement reponses à l'intérieur d'un environnement
+        multicols de la manière suivante : <programlisting>  \begin{multicols}{2}
+    \begin{reponses}
+      \bonne{La bonne réponse}
+      \mauvaise{Une mauvaise réponse}
+      \mauvaise{Une autre mauvaise réponse}
+    \end{reponses}
+  \end{multicols}</programlisting></para>
+
+        <para>Pour les réponses plus courtes encore, on peut demander à ce que
+        les réponses soient imprimées les unes à la suite des autres, en
+        utilisant l'environnement <option>reponseshoriz</option> au lieu de
+        <option>reponses</option>.</para>
+
+        <para>Enfin, les questions multiples (celles pour lesquelles aucune,
+        une ou plusieurs réponses peuvent être correctes) utiliseront
+        l'environnement <option>questionmult</option> au lieu de
+        <option>question</option>.</para>
+      </sect3>
+
+      <sect3>
+        <title>Groupes de questions</title>
+
+        <para>L'inclusion de questions dans des groupes permet de mélanger les
+        questions à l'intérieur de ces groupes, de manière différente pour
+        chaque copie. Il faut tout d'abord créer un groupe de questions, en
+        lui donnant un nom (formé uniquement de lettres non-accentuées) et en
+        fixant un nombre maximal de questions que nous pourrons affecter à ce
+        groupe, par la commande <command>nouveaugroupe</command>. Par exemple,
+        pour créer un groupe nommé « <parameter>ungroupe</parameter> » pouvant
+        contenir 20 questions : <programlisting>\nouveaugroupe{ungroupe}{20}</programlisting></para>
+
+        <para>On peut ensuite mettre une à une des questions dans ce groupe,
+        comme dans l'exemple suivant : <programlisting>\element{ungroupe}{
+  \begin{question}{facile}
+    Alors, combien font un plus un~?
+    \begin{reponseshoriz}
+      \bonne{deux}
+      \mauvaise{zéro}
+      \mauvaise{trois}
+    \end{reponseshoriz}
+  \end{question}
+}</programlisting></para>
+
+        <important>
+          <para>La constitution du groupe, par les commandes
+          <command>nouveaugroupe</command> et <command>element</command>, doit
+          être faite une seule fois : ces commandes doivent donc être
+          utilisées <emphasis>avant</emphasis> la commande
+          <command>exemplaire</command>, qui va répéter certaines actions pour
+          chaque copie.</para>
+        </important>
+
+        <para>Une fois un groupe constitué, on peut mélanger les questions qui
+        le composent par la commande <command>melangegroupe</command> : par
+        exemple, <programlisting>\melangegroupe{ungroupe}</programlisting></para>
+
+        <para>Enfin, on restitue les questions du groupe par la commande
+        <command>restituegroupe</command>, comme dans <programlisting>\restituegroupe{ungroupe}</programlisting></para>
+
+        <note>
+          <para>Ces deux dernières commandes (<command>melangegroupe</command>
+          et <command>restituegroupe</command>) seront quand à elles
+          normalement utilisées à l'intérieur du texte en argument de la
+          commande <command>exemplaire</command>, pour que le mélange soit
+          effectué avant chaque copie.</para>
+        </note>
+      </sect3>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Mise en œuvre - interface graphique</title>
+
+    <para>Nous décrivons ici un exemple de cheminement avec l'interface
+    graphique depuis la conception du QCM jusqu'à l'édition des notes des
+    élèves.</para>
+
+    <sect2>
+      <title>Création du nouveau projet et du sujet</title>
+
+      <para>Commençons par ouvrir l'interface graphique. On peut normalement
+      le faire en sélectionnant <menuchoice>
+          <guimenu>Applications</guimenu>
+
+          <guisubmenu>Éducation</guisubmenu>
+
+          <guimenuitem>Auto Multiple Choice</guimenuitem>
+        </menuchoice> du menu général de Gnome (ou son équivalent dans KDE ou
+      autre), mais on peut aussi utiliser la commande
+      <userinput>auto-multiple-choice</userinput>.</para>
+
+      <para>Créons maintenant un nouveau projet, grâce à <menuchoice>
+          <guimenu>Projet</guimenu>
+
+          <guimenuitem>Nouveau</guimenuitem>
+        </menuchoice>. Une fenêtre s'ouvre et permet encore d'utiliser un
+      projet déjà existant (si il en existe), mais nous voulons créer un
+      nouveau projet, alors nous choisissons un nom (composé de caractères
+      simples ; « test » conviendra par exemple à notre petit essai), que nous
+      inscrivons dans le champ <guilabel>Nouveau projet</guilabel>, puis nous
+      appuyons sur le bouton <guibutton>Créer un projet</guibutton>.</para>
+
+      <para>Nous devons maintenant désigner un fichier LaTeX comme source du
+      QCM. Pour cela, cliquons sur le bouton nommé <guilabel>Fichier
+      LaTeX</guilabel>. Le répertoire dans lequel nous nous situons est celui
+      des exemples fournis avec AMC : sélectionnons
+      <filename>simple.tex</filename>. Pour pouvoir le modifier à loisir, il
+      faut maintenant le copier dans le réertoire du projet, grâce au bouton
+      <guibutton>importer</guibutton>. On peut maintenant l'éditer pour
+      modifier la forme du questionnaire ou les questions, grâce au bouton
+      <guibutton>éditer</guibutton> qui lance l'éditeur par défaut.</para>
+    </sect2>
+
+    <sect2>
+      <title>Préparation du sujet</title>
+
+      <para>La préparation du projet se fait en deux étapes. Il faut tout
+      d'abord fabriquer les documents de référence à partir du fichier source
+      LaTeX. Ceci se fait en cliquant sur le bouton <guibutton>Mise à
+      jour</guibutton> de la section <guilabel>Documents de
+      travail</guilabel>. Les documents produits sont les suivants :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Le <emphasis>sujet</emphasis>. C'est le fichier qu'il faudra
+          imprimer pour que ses pages soient distribuées aux étudiants.</para>
+        </listitem>
+
+        <listitem>
+          <para>Le <emphasis>corrigé</emphasis>. On peut y vérifier que les
+          réponses cochées sont les bonnes. Il est aussi destiné à être
+          distribué aux étudiants.</para>
+        </listitem>
+
+        <listitem>
+          <para>Le <emphasis>document de calage</emphasis>. Les marques de
+          calages, les cases à cocher, ainsi que la zone où les étudiants
+          marquent leur nom y sont représentées en couleurs. C'est à partir de
+          ce document que le logiciel va repérer la localisation exacte de ces
+          éléments.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Une fois produits, ces documents pourront être visualisés (et
+      éventuellement imprimés) par un doucle-clic sur leur nom.</para>
+
+      <para>Nous pouvons maintenant passer à cette dernière étape de
+      préparation : l'analyse du document de calage. Elle se lance à partir du
+      bouton <guibutton>Calculer</guibutton> dans la section <guilabel>Mises
+      en page</guilabel>. Cette analyse détecte, dans chaque page du sujet, la
+      position exacte des différents éléments qui devront être analysés sur
+      les copies des étudiants. Cette analyse peut être un peu longue (surtout
+      quand le nombre de copies est important). On peut voir le résultat dans
+      la liste de droite, qui présente pour chaque page son numéro, son
+      identifiant (un code contenant le numéro de l'étudiant, le numéro de la
+      page pour cet étudiant, puis un code permettant la vérification de
+      l'identification), ainsi que la date de mise à jour de la mise en
+      page.</para>
+    </sect2>
+
+    <sect2>
+      <title>Examen</title>
+
+      <para>Une fois la préparation effectuée, nous pouvons imprimer le sujet,
+      et le distribuer aux étudiants...</para>
+
+      <important>
+        <para>Une fois que le sujet est imprimé et distribué, il ne faut plus
+        modifier les <emphasis>documents de travail</emphasis> car il faut
+        garder la certitude qu'ils sont conformes aux copies
+        distribuées.</para>
+      </important>
+    </sect2>
+
+    <sect2>
+      <title>Lecture des copies</title>
+
+      <para>Nous allons maintenant passer à la saisie des copies des
+      étudiants, qui peut se faire de manière automatique et/ou
+      manuelle.</para>
+
+      <para>Pour cela, nous passons sur l'onglet <guilabel>Saisie</guilabel>
+      de l'interface graphique.</para>
+
+      <sect3>
+        <title>Saisie automatique</title>
+
+        <para>Pour une reconnaissance automatisée des cases cochées dans les
+        copies des étudiants, il faut tout d'abord les numériser. J'utilise
+        pour ma part une photocopieuse/scanner qui le fait de manière
+        automatique (toutes les pages à la suite sans intervention de ma
+        part), avec les réglages suivants : 300dpi, mode OCR (prévu pour la
+        reconnaissance de caractères, noir et blanc), scan délivré en un
+        fichier TIFF par page.</para>
+
+        <note>
+          <para>Pour l'analyse des scans, nous devons disposer d'un fichier
+          image (TIFF, JPG, PNG, etc.) par page.</para>
+        </note>
+
+        <para>On sélectionne alors l'ensemble des fichiers obtenus à partir du
+        dialogue ouvert par le bouton <guibutton>Automatique</guibutton> de la
+        section <guilabel>Saisie des copies après examen</guilabel>, puis on
+        valide par le bouton <guibutton>Utiliser</guibutton> de ce même
+        dialogue. Nous pouvons alors aller boire un café car l'analyse des
+        copies peut être très longue (on peut laisser faire tranquilement car
+        elle ne demande aucune intervention).</para>
+
+        <para>Le résultat de l'analyse de chaque page est indiqué dans les
+        listes de la section <guilabel>Diagnostic</guilabel> :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>La valeur EQM (écart quadratique moyen) est un indicateur du
+            bon calage sur les marques de calage (les quatre ronds noirs
+            entourant chaque copie). Si il est trop important, il faudra
+            vérifier le calage (un clic droit sur la ligne correspondant à la
+            page puis le choix <guimenuitem>page</guimenuitem> permet de
+            visualiser la page scannée et le cadre et les cases tels qu'ils
+            sont détectés).</para>
+          </listitem>
+
+          <listitem>
+            <para>La valeur sensibilité est un indicateur de la proximité du
+            remplissage des cases avec la valeur seuil. Si elle est trop
+            importante (à partir de 8 et jusqu'à sa valeur maximale 10), il
+            faudra vérifier que les cases reconnues comme étant cochées sont
+            bien les bonnes (un clic droit sur la ligne correspondant à la
+            page puis le choix <guimenuitem>zoom</guimenuitem> permet de
+            visualiser l'ensemble des cases de la copie, et de voir si la
+            détection s'est bien déroulée).</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+
+      <sect3>
+        <title>Saisie manuelle</title>
+
+        <para>Si nous ne pouvons pas utiliser facilement de scanner, ou si,
+        pour quelques copies, la saisie automatique n'a pas bien fonctionné,
+        nous pouvons effectuer la saisie de manière manuelle. Pour cela,
+        ouvrons la fenêtre adéquate grâce au bouton
+        <guibutton>Manuelle</guibutton> de la section <guilabel>Saisie des
+        copies après examen</guilabel>. Dans cette fenêtre, nous pourrons
+        entrer nous-même les cases qui ont été cochées (en cliquant dessus)
+        sur les pages désirées.</para>
+
+        <note>
+          <para>Toute saisie manuelle effctuée sur une page prendra la place
+          des résultats éventuels d'une saisie automatique pour cette même
+          page.</para>
+        </note>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Identification des étudiants</title>
+
+      <para>Cette étape n'est pas obligatoire. Il s'agit d'associer chaque
+      copie à un étudiant. La lecture du nom d'étudiant n'est pas faite de
+      manière automatique, mais, grâce à l'interface graphique, elle ne nous
+      prendra pas trop de temps.</para>
+
+      <para>Sélectionnons tout d'abord l'onglet <guilabel>Notation</guilabel>
+      de l'interface graphique.</para>
+
+      <sect3 id="liste.etudiants">
+        <title id="liste.etudiants.title">Liste des étudiants</title>
+
+        <para>Il faut tout d'abord disposer d'une liste d'étudiants. Cette
+        liste pourra bien sûr être utilisée pour plusieurs QCM. Pour une
+        utilisation simple, on préparera un fichier texte contenant un nom
+        d'étudiant par ligne. Si on souhaite automatiser certaines tâches
+        futures, comme l'envoi des corrigés aux étudiants, on pourra ajouter
+        certaines informations complémentaires dans le fichier, comme dans
+        l'exemple suivant :<programlisting># liste des étudiants de première année
+nom:prenom:no:email
+Bienvenüe:Alexis:001:paamc@passoire.fr
+Boulix:Jojo:002:jojo.boulix@rien.xx
+Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
+
+        <para>Les lignes du fichier qui commencent par le caratère
+        `<code>#'</code> sont des commentaires. La première des autres lignes
+        contient, séparés par le caractère <code>`:'</code>, les titres des
+        colonnes. Ensuite, en une ligne par étudiant, on place les
+        informations voulues.</para>
+
+        <para>La liste des étudiants préparée (que se soit une liste simple ou
+        comprenant plus d'informations), nous la désignons maintenant en la
+        sélectionnant à partir du bouton <guilabel>Liste des
+        étudiants</guilabel>.</para>
+      </sect3>
+
+      <sect3>
+        <title>Association</title>
+
+        <para>Pour ouvrir la fenêtre de reconnaissance des noms d'étudiants,
+        cliquons sur le bouton <guibutton>Associer aux copies</guibutton>.
+        Cette fenêtre se compose d'une partie haute présentant successivement
+        les noms inscrits par les étudiants, et d'une partie basse comprenant
+        un bouton par étudiant de la liste que nous avons fabriquée. Nous
+        cliquons sur le bouton correspondant au nom inscrit en partie haute
+        pour chaque page qui nous est présentée. Quand toutes les pages sont
+        lues, une petite image OK apparaît à la place des noms, et il ne nous
+        reste plus qu'à cliquer sur le bouton
+        <guibutton>Enregistrer</guibutton> de la fenêtre.</para>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Notation et correction</title>
+
+      <para>Toujours dans l'onglet <guilabel>Notation</guilabel> de
+      l'interface graphique, la partie <guilabel>Correction</guilabel> va
+      maintenant nous permettre de déduire les notes des étudiants à partir
+      des saisies effectuées.</para>
+
+      <sect3>
+        <title>Processus</title>
+
+        <para>Le calcul des notes se lance à l'aide du bouton
+        <guibutton>Corriger</guibutton>, mais nous avons auparavant un choix à
+        effectuer sur plusieurs paramètres :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Si nous cochons la case <guilabel>Mettre à jour le
+            barème</guilabel>, le barème sera tout d'abord extrait du fichier
+            source LaTeX. Ceci permet de tester plusieurs barèmes à la fin du
+            processus de correction. La façon de spécifier le barème dans le
+            fichier LaTeX sera expliquée à la section <xref
+            endterm="bareme.title" linkend="bareme" /> (un barème par défaut
+            est utilisé quand aucune indication n'est donnée).</para>
+          </listitem>
+
+          <listitem>
+            <para>Si nous cochons la case <guilabel>Annoter les
+            copies</guilabel>, la notation sera accompagnée de l'annotation
+            des pages des étudiants : sur chaque scan, les mauvaises réponses
+            seront entourées en rouge, les bonnes réponses seront indiquées
+            par des croix bleues, les notes aux questions et la note globale
+            seront écrites.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Après avoir décidé de l'utilisation de ces options, nous pouvons
+        cliquer sur le bouton <guibutton>Corriger</guibutton>. La correction
+        est alors effectuée (cela peut prendre un peu de temps si on a aussi
+        demandé l'annotation des copies), et le fichier des notes (au format
+        CSV) est ouvert. Si l'annotation des copies a été demandée, la liste
+        <guilabel>Copies corrigées</guilabel> se remplit quand à elle, et un
+        double clic sur les pages qu'elle contient permet de visualiser les
+        pages annotées.</para>
+
+        <para>Si nous souhaitons distribuer les copies corrigées aux étudiants
+        au format électronique, il est utile de fabriquer un fichier PDF par
+        étudiant, à partir des pages annotées au format JPG qui lui
+        correspondent. Ceci est effectué par l'action du bouton
+        <guibutton>Regrouper</guibutton>. Le nom du fichier PDF qui contiendra
+        la copie corrigée d'un étudiant donné est formé à partir du modèle
+        indiqué dans le champ <guilabel>Modèle de nom de fichier</guilabel>.
+        Dans ce modèle, les textes du type
+        « (<replaceable>col</replaceable>) » seront remplacés par le contenu
+        de la colonne nommée <code><replaceable>col</replaceable></code> dans
+        le fichier listant les étudiants (voir section <xref
+        endterm="liste.etudiants.title" linkend="liste.etudiants" />). Si on
+        laisse ce champ vide, une valeur par défaut formée du nom de
+        l'étudiant sera utilisée.</para>
+      </sect3>
+
+      <sect3 id="bareme">
+        <title id="bareme.title">Barème</title>
+
+        <para>Le barème utilisé pour la notation des copies est indiqué dans
+        le fichier source LaTeX du questionnaire, à l'aide de la commande
+        <command>bareme</command>. Elle peut être utilisée dans un
+        environnement <command>question</command> ou
+        <command>questionmult</command>, pour fixer des paramètres de barème
+        concernant toutes les réponses, mais aussi dans l'environnement
+        <command>reponses</command>, pour donner des indications de barème ne
+        concernant qu'une réponse. L'argument de la commande LaTeX bareme est
+        constitué d'indications du type
+        <code><replaceable>parametre</replaceable>=<replaceable>valeur</replaceable></code>,
+        séparés par des virgules. Les paramètres utilisables sont les suivants
+        (le tableau indique aussi dans quels cadres ces paramètres peuvent
+        être utilisés) :</para>
+
+        <informaltable>
+          <tgroup cols="6">
+            <colspec align="center" colname="param" colwidth="3pc" />
+
+            <colspec align="center" colname="q" colwidth="1pc" />
+
+            <colspec align="center" colname="r" colwidth="1pc" />
+
+            <colspec align="center" colname="qm" colwidth="1pc" />
+
+            <colspec align="center" colname="rm" colwidth="1pc" />
+
+            <colspec align="left" colname="valeur" />
+
+            <spanspec nameend="r" namest="q" spanname="simple" />
+
+            <spanspec nameend="rm" namest="qm" spanname="multiple" />
+
+            <tbody>
+              <row>
+                <entry morerows="1">paramètre</entry>
+
+                <entry spanname="simple">simple</entry>
+
+                <entry spanname="multiple">multiple</entry>
+
+                <entry morerows="1">valeur</entry>
+              </row>
+
+              <row>
+                <entry>Q</entry>
+
+                <entry>R</entry>
+
+                <entry>Q</entry>
+
+                <entry>R</entry>
+              </row>
+
+              <row>
+                <entry>e</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>La note affectée en cas d'incohérence des réponses :
+                plusieurs cases cochées pour une question simple, ou, pour une
+                question multiple, case « aucune de ces réponses n'est
+                correcte » cochée en même temps qu'une autre case.</entry>
+              </row>
+
+              <row>
+                <entry>v</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>La note affectée en cas de non-réponse (aucune case
+                n'est cochée).</entry>
+              </row>
+
+              <row>
+                <entry>d</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>Un décalage, c'est-à-dire une valeur ajoutée à toutes
+                les notes qui ne relèvent pas des cas correspondant aux
+                paramètres e et v.</entry>
+              </row>
+
+              <row>
+                <entry>p</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>La note plancher. Si le calcul de la note obtenue à la
+                question donne une valeur inférieure à la valeur plancher,
+                cette note est ramenée à la valeur plancher.</entry>
+              </row>
+
+              <row>
+                <entry>b</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>Points à donner pour une bonne réponse à une
+                question.</entry>
+              </row>
+
+              <row>
+                <entry>m</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>Points à donner pour une mauvaise réponse à une
+                question.</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>Sans nom de paramètre (syntaxe
+                <code>\bareme{2}</code>), on indique le nombre de points à
+                donner si l'étudiant a coché <emphasis>cette</emphasis>
+                réponse.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <para>Le barème par défaut pour une question simple est
+        <code>e=0,v=0,b=1,m=0</code>, ce qui donne un point pour une bonne
+        réponse et aucun point dans tous les autres cas. Le barème par défaut
+        pour une question multiple est
+        <code>e=0,v=0,b=1,m=0,p=-100,d=0</code>, ce qui donne un point pour
+        chaque case qui est cochée ou non à bon escient (case d'une bonne
+        réponse cochée, ou case d'une mauvaise réponse non cochée).</para>
+
+        <para>L'utilisation combinée de tous ces paramètres permet de définir
+        toutes sortes de barèmes, comme dans l'exemple suivant :</para>
+
+        <para><programlisting id="exemples-bareme.tex"
+        linenumbering="numbered">\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}
+
+\begin{document}
+
+% preparation du groupe de questions appelé qqs (on mettra au maximum
+% 20 elements dans ce groupe) :
+
+\nouveaugroupe{qqs}{20}
+
+\element{qqs}{
+\begin{question}{le bon choix}
+  Combien de points voulez-vous à cette question~?
+  \begin{reponses}
+    \bonne{Le maximun : 10}\bareme{10}
+    \mauvaise{Seulement 5}\bareme{5}
+    \mauvaise{Deux me suffiront}\bareme{2}
+    \mauvaise{Aucun, merci}\bareme{0}
+  \end{reponses}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{engrange}
+  Engrangez des points gratuitement en cochant les cases ci-dessous~:
+  \begin{reponses}
+    \bonne{2 points}\bareme{b=2}
+    \mauvaise{Un point négatif}\bareme{b=0,m=-1}
+    \bonne{3 points}\bareme{b=3}
+    \bonne{1 point}
+    \bonne{Un demi point}\bareme{b=0.5}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{2 justes}\bareme{b=3,d=-9,p=0}
+  Il faut cocher exactement comme il faut pour avoir trois points, sinon vous n'en
+  aurez aucun.
+  \begin{reponses}
+    \mauvaise{Fausse}
+    \mauvaise{Fausse}
+    \bonne{Juste}
+    \bonne{Juste}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{tout}\bareme{d=-3,p=0}
+  Deux points pour tout juste, et un point pour chaque erreur...
+  \begin{reponses}
+    \bonne{Bonne réponse}
+    \bonne{Ceci est juste}
+    \bonne{Exact}
+    \mauvaise{Faux~!}
+    \mauvaise{Ne pas cocher~!}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{question}{attention}\bareme{b=2}
+  Alors là, la réponse très fausse mérite sanction (-2 points), mais
+  viser juste rapporte 2 points.
+  \begin{reponses}
+    \bonne{C'est bon !}
+    \mauvaise{Pas bon}
+    \mauvaise{Pas bon}
+    \mauvaise{Pas bon}
+    \mauvaise{Très faux !}\bareme{-2}
+  \end{reponses}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{au choix}
+  Choisissez vos points :
+  \begin{reponses}
+    \bonne{J'en veux 2}\bareme{b=2}
+    \mauvaise{J'en donne trois}\bareme{b=0,m=3}
+    \bonne{J'en veux un (et sinon j'en perds un)}\bareme{m=-1}
+  \end{reponses}
+\end{questionmult}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\exemplaire{20}{
+
+\noindent{\bf QCM  \hfill TEST DE BARÈME}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Nom et prénom :
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+\begin{center}\em
+Durée : 10 minutes.
+\end{center}
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\melangegroupe{qqs}
+
+\restituegroupe{qqs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+
+}
+
+\end{document}</programlisting></para>
+      </sect3>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Manuel des commandes</title>
+
+    <para>Vous pouvez vous passer de la lecture de cette partie si vous
+    souhaitez utiliser uniquement l'interface graphique. Cependant, toutes les
+    actions effectuées par l'interface graphique peuvent aussi être exécutées
+    par les différentes commandes dont nous décrivons ici la syntaxe.</para>
+
+    <refentry id="auto-multiple-choice">
+      <refmeta>
+        <refentrytitle>auto-multiple-choice</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+        <refname>auto-multiple-choice</refname>
+
+        <refpurpose>Gestion automatisée de questionnaires QCM</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">action <arg rep="repeat">arguments</arg></arg>
+        </cmdsynopsis>
+
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg>projet</arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+        <para>La commande <command>auto-multiple-choice</command> transmet à
+        la commande <command>AMC-action.pl</command> les arguments qu'on lui
+        donne.</para>
+
+        <para>La deuxième forme, qui ne mentionne aucune action, appelle
+        l'interface graphique <command>AMC-gui.pl</command> en lui
+        transmettant éventuellement le nom d'un projet à ouvrir.</para>
+      </refsect1>
+    </refentry>
+  </sect1>
+</article>

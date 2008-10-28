@@ -1,0 +1,304 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Mise en &#339;uvre - interface graphique</title><link rel="stylesheet" href="../style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.73.2"><link rel="start" href="index.html" title="Auto Multiple Choice"><link rel="up" href="index.html" title="Auto Multiple Choice"><link rel="prev" href="ar01s03.html" title="Préparation du fichier LaTeX"><link rel="next" href="ar01s05.html" title="Manuel des commandes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Mise en &#339;uvre - interface graphique</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s03.html">Précédent</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s05.html">Suivant</a></td></tr></table><hr></div><div class="sect1" lang="fr"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2548688"></a>Mise en &#339;uvre - interface graphique</h2></div></div></div><p>Nous décrivons ici un exemple de cheminement avec l'interface
+    graphique depuis la conception du QCM jusqu'à l'édition des notes des
+    élèves.</p><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2527866"></a>Création du nouveau projet et du sujet</h3></div></div></div><p>Commençons par ouvrir l'interface graphique. On peut normalement
+      le faire en sélectionnant <span class="guimenu">Applications</span> &#8594; <span class="guisubmenu">Éducation</span> &#8594; <span class="guimenuitem">Auto Multiple Choice</span> du menu général de Gnome (ou son équivalent dans KDE ou
+      autre), mais on peut aussi utiliser la commande
+      <strong class="userinput"><code>auto-multiple-choice</code></strong>.</p><p>Créons maintenant un nouveau projet, grâce à <span class="guimenu">Projet</span> &#8594; <span class="guimenuitem">Nouveau</span>. Une fenêtre s'ouvre et permet encore d'utiliser un
+      projet déjà existant (si il en existe), mais nous voulons créer un
+      nouveau projet, alors nous choisissons un nom (composé de caractères
+      simples ; « test » conviendra par exemple à notre petit essai), que nous
+      inscrivons dans le champ <span class="guilabel">Nouveau projet</span>, puis nous
+      appuyons sur le bouton <span class="guibutton">Créer un projet</span>.</p><p>Nous devons maintenant désigner un fichier LaTeX comme source du
+      QCM. Pour cela, cliquons sur le bouton nommé <span class="guilabel">Fichier
+      LaTeX</span>. Le répertoire dans lequel nous nous situons est celui
+      des exemples fournis avec AMC : sélectionnons
+      <code class="filename">simple.tex</code>. Pour pouvoir le modifier à loisir, il
+      faut maintenant le copier dans le réertoire du projet, grâce au bouton
+      <span class="guibutton">importer</span>. On peut maintenant l'éditer pour
+      modifier la forme du questionnaire ou les questions, grâce au bouton
+      <span class="guibutton">éditer</span> qui lance l'éditeur par défaut.</p></div><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2529721"></a>Préparation du sujet</h3></div></div></div><p>La préparation du projet se fait en deux étapes. Il faut tout
+      d'abord fabriquer les documents de référence à partir du fichier source
+      LaTeX. Ceci se fait en cliquant sur le bouton <span class="guibutton">Mise à
+      jour</span> de la section <span class="guilabel">Documents de
+      travail</span>. Les documents produits sont les suivants :</p><div class="itemizedlist"><ul type="disc"><li><p>Le <span class="emphasis"><em>sujet</em></span>. C'est le fichier qu'il faudra
+          imprimer pour que ses pages soient distribuées aux étudiants.</p></li><li><p>Le <span class="emphasis"><em>corrigé</em></span>. On peut y vérifier que les
+          réponses cochées sont les bonnes. Il est aussi destiné à être
+          distribué aux étudiants.</p></li><li><p>Le <span class="emphasis"><em>document de calage</em></span>. Les marques de
+          calages, les cases à cocher, ainsi que la zone où les étudiants
+          marquent leur nom y sont représentées en couleurs. C'est à partir de
+          ce document que le logiciel va repérer la localisation exacte de ces
+          éléments.</p></li></ul></div><p>Une fois produits, ces documents pourront être visualisés (et
+      éventuellement imprimés) par un doucle-clic sur leur nom.</p><p>Nous pouvons maintenant passer à cette dernière étape de
+      préparation : l'analyse du document de calage. Elle se lance à partir du
+      bouton <span class="guibutton">Calculer</span> dans la section <span class="guilabel">Mises
+      en page</span>. Cette analyse détecte, dans chaque page du sujet, la
+      position exacte des différents éléments qui devront être analysés sur
+      les copies des étudiants. Cette analyse peut être un peu longue (surtout
+      quand le nombre de copies est important). On peut voir le résultat dans
+      la liste de droite, qui présente pour chaque page son numéro, son
+      identifiant (un code contenant le numéro de l'étudiant, le numéro de la
+      page pour cet étudiant, puis un code permettant la vérification de
+      l'identification), ainsi que la date de mise à jour de la mise en
+      page.</p></div><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2550699"></a>Examen</h3></div></div></div><p>Une fois la préparation effectuée, nous pouvons imprimer le sujet,
+      et le distribuer aux étudiants...</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="../images/important.png"></td><th align="left">Important</th></tr><tr><td align="left" valign="top"><p>Une fois que le sujet est imprimé et distribué, il ne faut plus
+        modifier les <span class="emphasis"><em>documents de travail</em></span> car il faut
+        garder la certitude qu'ils sont conformes aux copies
+        distribuées.</p></td></tr></table></div></div><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2534084"></a>Lecture des copies</h3></div></div></div><p>Nous allons maintenant passer à la saisie des copies des
+      étudiants, qui peut se faire de manière automatique et/ou
+      manuelle.</p><p>Pour cela, nous passons sur l'onglet <span class="guilabel">Saisie</span>
+      de l'interface graphique.</p><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="id2533009"></a>Saisie automatique</h4></div></div></div><p>Pour une reconnaissance automatisée des cases cochées dans les
+        copies des étudiants, il faut tout d'abord les numériser. J'utilise
+        pour ma part une photocopieuse/scanner qui le fait de manière
+        automatique (toutes les pages à la suite sans intervention de ma
+        part), avec les réglages suivants : 300dpi, mode OCR (prévu pour la
+        reconnaissance de caractères, noir et blanc), scan délivré en un
+        fichier TIFF par page.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>Pour l'analyse des scans, nous devons disposer d'un fichier
+          image (TIFF, JPG, PNG, etc.) par page.</p></td></tr></table></div><p>On sélectionne alors l'ensemble des fichiers obtenus à partir du
+        dialogue ouvert par le bouton <span class="guibutton">Automatique</span> de la
+        section <span class="guilabel">Saisie des copies après examen</span>, puis on
+        valide par le bouton <span class="guibutton">Utiliser</span> de ce même
+        dialogue. Nous pouvons alors aller boire un café car l'analyse des
+        copies peut être très longue (on peut laisser faire tranquilement car
+        elle ne demande aucune intervention).</p><p>Le résultat de l'analyse de chaque page est indiqué dans les
+        listes de la section <span class="guilabel">Diagnostic</span> :</p><div class="itemizedlist"><ul type="disc"><li><p>La valeur EQM (écart quadratique moyen) est un indicateur du
+            bon calage sur les marques de calage (les quatre ronds noirs
+            entourant chaque copie). Si il est trop important, il faudra
+            vérifier le calage (un clic droit sur la ligne correspondant à la
+            page puis le choix <span class="guimenuitem">page</span> permet de
+            visualiser la page scannée et le cadre et les cases tels qu'ils
+            sont détectés).</p></li><li><p>La valeur sensibilité est un indicateur de la proximité du
+            remplissage des cases avec la valeur seuil. Si elle est trop
+            importante (à partir de 8 et jusqu'à sa valeur maximale 10), il
+            faudra vérifier que les cases reconnues comme étant cochées sont
+            bien les bonnes (un clic droit sur la ligne correspondant à la
+            page puis le choix <span class="guimenuitem">zoom</span> permet de
+            visualiser l'ensemble des cases de la copie, et de voir si la
+            détection s'est bien déroulée).</p></li></ul></div></div><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="id2523907"></a>Saisie manuelle</h4></div></div></div><p>Si nous ne pouvons pas utiliser facilement de scanner, ou si,
+        pour quelques copies, la saisie automatique n'a pas bien fonctionné,
+        nous pouvons effectuer la saisie de manière manuelle. Pour cela,
+        ouvrons la fenêtre adéquate grâce au bouton
+        <span class="guibutton">Manuelle</span> de la section <span class="guilabel">Saisie des
+        copies après examen</span>. Dans cette fenêtre, nous pourrons
+        entrer nous-même les cases qui ont été cochées (en cliquant dessus)
+        sur les pages désirées.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>Toute saisie manuelle effctuée sur une page prendra la place
+          des résultats éventuels d'une saisie automatique pour cette même
+          page.</p></td></tr></table></div></div></div><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2523892"></a>Identification des étudiants</h3></div></div></div><p>Cette étape n'est pas obligatoire. Il s'agit d'associer chaque
+      copie à un étudiant. La lecture du nom d'étudiant n'est pas faite de
+      manière automatique, mais, grâce à l'interface graphique, elle ne nous
+      prendra pas trop de temps.</p><p>Sélectionnons tout d'abord l'onglet <span class="guilabel">Notation</span>
+      de l'interface graphique.</p><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="liste.etudiants"></a>Liste des étudiants</h4></div></div></div><p>Il faut tout d'abord disposer d'une liste d'étudiants. Cette
+        liste pourra bien sûr être utilisée pour plusieurs QCM. Pour une
+        utilisation simple, on préparera un fichier texte contenant un nom
+        d'étudiant par ligne. Si on souhaite automatiser certaines tâches
+        futures, comme l'envoi des corrigés aux étudiants, on pourra ajouter
+        certaines informations complémentaires dans le fichier, comme dans
+        l'exemple suivant :</p><pre class="programlisting"># liste des étudiants de première année
+nom:prenom:no:email
+Bienvenüe:Alexis:001:paamc@passoire.fr
+Boulix:Jojo:002:jojo.boulix@rien.xx
+Noël:Père:003:pere.noel@pole-nord.xx</pre><p>Les lignes du fichier qui commencent par le caratère
+        `<code class="code">#'</code> sont des commentaires. La première des autres lignes
+        contient, séparés par le caractère <code class="code">`:'</code>, les titres des
+        colonnes. Ensuite, en une ligne par étudiant, on place les
+        informations voulues.</p><p>La liste des étudiants préparée (que se soit une liste simple ou
+        comprenant plus d'informations), nous la désignons maintenant en la
+        sélectionnant à partir du bouton <span class="guilabel">Liste des
+        étudiants</span>.</p></div><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="id2543938"></a>Association</h4></div></div></div><p>Pour ouvrir la fenêtre de reconnaissance des noms d'étudiants,
+        cliquons sur le bouton <span class="guibutton">Associer aux copies</span>.
+        Cette fenêtre se compose d'une partie haute présentant successivement
+        les noms inscrits par les étudiants, et d'une partie basse comprenant
+        un bouton par étudiant de la liste que nous avons fabriquée. Nous
+        cliquons sur le bouton correspondant au nom inscrit en partie haute
+        pour chaque page qui nous est présentée. Quand toutes les pages sont
+        lues, une petite image OK apparaît à la place des noms, et il ne nous
+        reste plus qu'à cliquer sur le bouton
+        <span class="guibutton">Enregistrer</span> de la fenêtre.</p></div></div><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2515704"></a>Notation et correction</h3></div></div></div><p>Toujours dans l'onglet <span class="guilabel">Notation</span> de
+      l'interface graphique, la partie <span class="guilabel">Correction</span> va
+      maintenant nous permettre de déduire les notes des étudiants à partir
+      des saisies effectuées.</p><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="id2534351"></a>Processus</h4></div></div></div><p>Le calcul des notes se lance à l'aide du bouton
+        <span class="guibutton">Corriger</span>, mais nous avons auparavant un choix à
+        effectuer sur plusieurs paramètres :</p><div class="itemizedlist"><ul type="disc"><li><p>Si nous cochons la case <span class="guilabel">Mettre à jour le
+            barème</span>, le barème sera tout d'abord extrait du fichier
+            source LaTeX. Ceci permet de tester plusieurs barèmes à la fin du
+            processus de correction. La façon de spécifier le barème dans le
+            fichier LaTeX sera expliquée à la section <a class="xref" href="ar01s04.html#bareme" title="Barème">Barème</a> (un barème par défaut
+            est utilisé quand aucune indication n'est donnée).</p></li><li><p>Si nous cochons la case <span class="guilabel">Annoter les
+            copies</span>, la notation sera accompagnée de l'annotation
+            des pages des étudiants : sur chaque scan, les mauvaises réponses
+            seront entourées en rouge, les bonnes réponses seront indiquées
+            par des croix bleues, les notes aux questions et la note globale
+            seront écrites.</p></li></ul></div><p>Après avoir décidé de l'utilisation de ces options, nous pouvons
+        cliquer sur le bouton <span class="guibutton">Corriger</span>. La correction
+        est alors effectuée (cela peut prendre un peu de temps si on a aussi
+        demandé l'annotation des copies), et le fichier des notes (au format
+        CSV) est ouvert. Si l'annotation des copies a été demandée, la liste
+        <span class="guilabel">Copies corrigées</span> se remplit quand à elle, et un
+        double clic sur les pages qu'elle contient permet de visualiser les
+        pages annotées.</p><p>Si nous souhaitons distribuer les copies corrigées aux étudiants
+        au format électronique, il est utile de fabriquer un fichier PDF par
+        étudiant, à partir des pages annotées au format JPG qui lui
+        correspondent. Ceci est effectué par l'action du bouton
+        <span class="guibutton">Regrouper</span>. Le nom du fichier PDF qui contiendra
+        la copie corrigée d'un étudiant donné est formé à partir du modèle
+        indiqué dans le champ <span class="guilabel">Modèle de nom de fichier</span>.
+        Dans ce modèle, les textes du type
+        « (<em class="replaceable"><code>col</code></em>) » seront remplacés par le contenu
+        de la colonne nommée <code class="code"><em class="replaceable"><code>col</code></em></code> dans
+        le fichier listant les étudiants (voir section <a class="xref" href="ar01s04.html#liste.etudiants" title="Liste des étudiants">Liste des étudiants</a>). Si on
+        laisse ce champ vide, une valeur par défaut formée du nom de
+        l'étudiant sera utilisée.</p></div><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="bareme"></a>Barème</h4></div></div></div><p>Le barème utilisé pour la notation des copies est indiqué dans
+        le fichier source LaTeX du questionnaire, à l'aide de la commande
+        <span class="command"><strong>bareme</strong></span>. Elle peut être utilisée dans un
+        environnement <span class="command"><strong>question</strong></span> ou
+        <span class="command"><strong>questionmult</strong></span>, pour fixer des paramètres de barème
+        concernant toutes les réponses, mais aussi dans l'environnement
+        <span class="command"><strong>reponses</strong></span>, pour donner des indications de barème ne
+        concernant qu'une réponse. L'argument de la commande LaTeX bareme est
+        constitué d'indications du type
+        <code class="code"><em class="replaceable"><code>parametre</code></em>=<em class="replaceable"><code>valeur</code></em></code>,
+        séparés par des virgules. Les paramètres utilisables sont les suivants
+        (le tableau indique aussi dans quels cadres ces paramètres peuvent
+        être utilisés) :</p><div class="informaltable"><table border="1"><colgroup><col align="center"><col align="center"><col align="center"><col align="center"><col align="center"><col align="left"></colgroup><tbody><tr><td rowspan="2" align="center">paramètre</td><td colspan="2" align="center">simple</td><td colspan="2" align="center">multiple</td><td rowspan="2" align="left">valeur</td></tr><tr><td align="center">Q</td><td align="center">R</td><td align="center">Q</td><td align="center">R</td></tr><tr><td align="center">e</td><td align="center">&#9679;</td><td align="center"> </td><td align="center">&#9679;</td><td align="center"> </td><td align="left">La note affectée en cas d'incohérence des réponses :
+                plusieurs cases cochées pour une question simple, ou, pour une
+                question multiple, case « aucune de ces réponses n'est
+                correcte » cochée en même temps qu'une autre case.</td></tr><tr><td align="center">v</td><td align="center">&#9679;</td><td align="center"> </td><td align="center">&#9679;</td><td align="center"> </td><td align="left">La note affectée en cas de non-réponse (aucune case
+                n'est cochée).</td></tr><tr><td align="center">d</td><td align="center"> </td><td align="center"> </td><td align="center">&#9679;</td><td align="center"> </td><td align="left">Un décalage, c'est-à-dire une valeur ajoutée à toutes
+                les notes qui ne relèvent pas des cas correspondant aux
+                paramètres e et v.</td></tr><tr><td align="center">p</td><td align="center"> </td><td align="center"> </td><td align="center">&#9679;</td><td align="center"> </td><td align="left">La note plancher. Si le calcul de la note obtenue à la
+                question donne une valeur inférieure à la valeur plancher,
+                cette note est ramenée à la valeur plancher.</td></tr><tr><td align="center">b</td><td align="center">&#9679;</td><td align="center"> </td><td align="center">&#9679;</td><td align="center">&#9679;</td><td align="left">Points à donner pour une bonne réponse à une
+                question.</td></tr><tr><td align="center">m</td><td align="center">&#9679;</td><td align="center"> </td><td align="center">&#9679;</td><td align="center">&#9679;</td><td align="left">Points à donner pour une mauvaise réponse à une
+                question.</td></tr><tr><td align="center"> </td><td align="center"> </td><td align="center">&#9679;</td><td align="center"> </td><td align="center"> </td><td align="left">Sans nom de paramètre (syntaxe
+                <code class="code">\bareme{2}</code>), on indique le nombre de points à
+                donner si l'étudiant a coché <span class="emphasis"><em>cette</em></span>
+                réponse.</td></tr></tbody></table></div><p>Le barème par défaut pour une question simple est
+        <code class="code">e=0,v=0,b=1,m=0</code>, ce qui donne un point pour une bonne
+        réponse et aucun point dans tous les autres cas. Le barème par défaut
+        pour une question multiple est
+        <code class="code">e=0,v=0,b=1,m=0,p=-100,d=0</code>, ce qui donne un point pour
+        chaque case qui est cochée ou non à bon escient (case d'une bonne
+        réponse cochée, ou case d'une mauvaise réponse non cochée).</p><p>L'utilisation combinée de tous ces paramètres permet de définir
+        toutes sortes de barèmes, comme dans l'exemple suivant :</p><p><a name="exemples-bareme.tex"></a></p><pre class="programlisting">\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}
+
+\begin{document}
+
+% preparation du groupe de questions appelé qqs (on mettra au maximum
+% 20 elements dans ce groupe) :
+
+\nouveaugroupe{qqs}{20}
+
+\element{qqs}{
+\begin{question}{le bon choix}
+  Combien de points voulez-vous à cette question~?
+  \begin{reponses}
+    \bonne{Le maximun : 10}\bareme{10}
+    \mauvaise{Seulement 5}\bareme{5}
+    \mauvaise{Deux me suffiront}\bareme{2}
+    \mauvaise{Aucun, merci}\bareme{0}
+  \end{reponses}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{engrange}
+  Engrangez des points gratuitement en cochant les cases ci-dessous~:
+  \begin{reponses}
+    \bonne{2 points}\bareme{b=2}
+    \mauvaise{Un point négatif}\bareme{b=0,m=-1}
+    \bonne{3 points}\bareme{b=3}
+    \bonne{1 point}
+    \bonne{Un demi point}\bareme{b=0.5}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{2 justes}\bareme{b=3,d=-9,p=0}
+  Il faut cocher exactement comme il faut pour avoir trois points, sinon vous n'en
+  aurez aucun.
+  \begin{reponses}
+    \mauvaise{Fausse}
+    \mauvaise{Fausse}
+    \bonne{Juste}
+    \bonne{Juste}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{tout}\bareme{d=-3,p=0}
+  Deux points pour tout juste, et un point pour chaque erreur...
+  \begin{reponses}
+    \bonne{Bonne réponse}
+    \bonne{Ceci est juste}
+    \bonne{Exact}
+    \mauvaise{Faux~!}
+    \mauvaise{Ne pas cocher~!}
+  \end{reponses}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{question}{attention}\bareme{b=2}
+  Alors là, la réponse très fausse mérite sanction (-2 points), mais
+  viser juste rapporte 2 points.
+  \begin{reponses}
+    \bonne{C'est bon !}
+    \mauvaise{Pas bon}
+    \mauvaise{Pas bon}
+    \mauvaise{Pas bon}
+    \mauvaise{Très faux !}\bareme{-2}
+  \end{reponses}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{au choix}
+  Choisissez vos points :
+  \begin{reponses}
+    \bonne{J'en veux 2}\bareme{b=2}
+    \mauvaise{J'en donne trois}\bareme{b=0,m=3}
+    \bonne{J'en veux un (et sinon j'en perds un)}\bareme{m=-1}
+  \end{reponses}
+\end{questionmult}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\exemplaire{20}{
+
+\noindent{\bf QCM  \hfill TEST DE BARÈME}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Nom et prénom :
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+\begin{center}\em
+Durée : 10 minutes.
+\end{center}
+\vspace{1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\melangegroupe{qqs}
+
+\restituegroupe{qqs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+
+}
+
+\end{document}</pre></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s03.html">Précédent</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s05.html">Suivant</a></td></tr><tr><td width="40%" align="left" valign="top">Préparation du fichier LaTeX </td><td width="20%" align="center"><a accesskey="h" href="index.html">Sommaire</a></td><td width="40%" align="right" valign="top"> Manuel des commandes</td></tr></table></div></body></html>

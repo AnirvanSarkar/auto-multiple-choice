@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
+<!--Generated with glade3 3.4.5 on Thu Sep 11 16:27:01 2008 -->
+<glade-interface>
+  <widget class="GtkWindow" id="general">
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">Saisie des copies de QCM</property>
+    <property name="icon_name">auto-multiple-choice</property>
+    <signal name="delete_event" handler="quitter"/>
+    <child>
+      <widget class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="spacing">4</property>
+        <child>
+          <widget class="GtkHBox" id="hbox1">
+            <property name="visible">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <widget class="GtkViewport" id="viewport_area">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Cliquer sur les cases en rouge comme sur la copie</property>
+                <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                <child>
+                  <widget class="GtkDrawingArea" id="area">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+                    <signal name="button_press_event" handler="choix"/>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </widget>
+        </child>
+        <child>
+          <widget class="GtkHBox" id="hbox2">
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkHBox" id="deplacement">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">numéro de copie, ou copie/page</property>
+                <property name="spacing">2</property>
+                <child>
+                  <widget class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Aller à :</property>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkEntry" id="goto">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <signal name="activate" handler="goto_activate_cb"/>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="etudiant">
+                <property name="visible">True</property>
+                <property name="spacing">2</property>
+                <child>
+                  <widget class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Étudiant :</property>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkComboBoxEntry" id="etudiant_cb">
+                    <property name="visible">True</property>
+                    <child internal-child="entry">
+                      <widget class="GtkEntry" id="etudiant_cbe">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <signal name="changed" handler="une_modif"/>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkHButtonBox" id="hbuttonbox1">
+            <property name="visible">True</property>
+            <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
+            <child>
+              <widget class="GtkButton" id="button1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip" translatable="yes">Sauvegarder et passer à la page précédente</property>
+                <property name="label" translatable="yes">Page précédente</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="passe_precedent"/>
+              </widget>
+            </child>
+            <child>
+              <widget class="GtkButton" id="button2">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip" translatable="yes">Annuler les modifications faites à cette page</property>
+                <property name="label" translatable="yes">Annuler</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="annule"/>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="button3">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip" translatable="yes">Sauvegarder et passer à la page suivante</property>
+                <property name="label" translatable="yes">Page suivante</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="passe_suivant"/>
+              </widget>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkHButtonBox" id="hbuttonbox2">
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkButton" id="button4">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip" translatable="yes">Sauvegarder et quitter</property>
+                <property name="label" translatable="yes">Quitter</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="ok_quitter"/>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+</glade-interface>

@@ -1,0 +1,283 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Préparation du fichier LaTeX</title><link rel="stylesheet" href="../style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.73.2"><link rel="start" href="index.html" title="Auto Multiple Choice"><link rel="up" href="index.html" title="Auto Multiple Choice"><link rel="prev" href="ar01s02.html" title="Installation"><link rel="next" href="ar01s04.html" title="Mise en &#339;uvre - interface graphique"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Préparation du fichier LaTeX</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s02.html">Précédent</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ar01s04.html">Suivant</a></td></tr></table><hr></div><div class="sect1" lang="fr"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2551476"></a>Préparation du fichier LaTeX</h2></div></div></div><p>Avant toute chose, un questionnaire à choix multiples doit être
+    décrit sous la forme d'une fichier LaTeX utilisant le package
+    <span class="package">automultiplechoice</span>. Ce chapitre décrit les commandes
+    LaTeX permettant d'écrire un QCM. Vous pouvez à tout moment tester le
+    fichier LaTeX que vous êtes en train de concevoir en le compilant avec la
+    commande <span class="command"><strong>latex</strong></span> puis en visualisant le fichier dvi qui
+    en résulte.</p><p>Nous commençons par quelques exemples qui permettent d'appréhender
+    rapidemment la construction de fichiers LaTeX de QCM ; les fichiers tex de
+    ces exemples sont fournis avec AMC.</p><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2533318"></a>Un exemple simple</h3></div></div></div><p><a name="exemples-simple.tex"></a></p><pre class="programlisting">\documentclass{article}
+
+\usepackage[latin1]{inputenc}    <a class="co" name="simple.latin1" href="ar01s03.html#simple.latin1.exp"><img src="../images/callouts/1.png" alt="1" border="0"></a>
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}    <a class="co" name="simple.amc" href="ar01s03.html#simple.amc.exp"><img src="../images/callouts/2.png" alt="2" border="0"></a>
+\begin{document}
+
+\exemplaire{10}{    <a class="co" name="simple.exemplaire" href="ar01s03.html#simple.exemplaire.exp"><img src="../images/callouts/3.png" alt="3" border="0"></a>
+
+%%% debut de l'en-tête des copies :    <a class="co" name="simple.entete" href="ar01s03.html#simple.entete.exp"><img src="../images/callouts/4.png" alt="4" border="0"></a>
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{    <a class="co" name="simple.champnom" href="ar01s03.html#simple.champnom.exp"><img src="../images/callouts/5.png" alt="5" border="0"></a>
+                \begin{minipage}{.5\linewidth}
+                  Nom et prénom :
+
+                  \vspace*{.5cm}\dotfill
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\begin{center}\em
+Durée : 10 minutes.
+
+  Aucun document n'est autorisé.
+  L'usage de la calculatrice est interdit.
+
+  Les questions faisant apparaître le symbole \multiSymbole{} peuvent
+  présenter zéro, une ou plusieurs bonnes réponses. Les autres ont
+  une unique bonne réponse.
+
+  Des points négatifs pourront être affectés à de \emph{très
+    mauvaises} réponses.
+\end{center}
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\begin{question}{prez}    <a class="co" name="simple.qr" href="ar01s03.html#simple.qr.exp"><img src="../images/callouts/6.png" alt="6" border="0"></a>
+  Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
+  \begin{reponses}
+    \bonne{René Coty}
+    \mauvaise{Alain Prost}
+    \mauvaise{Marcel Proust}
+    \mauvaise{Claude Monet}
+  \end{reponses}
+\end{question}
+
+\begin{questionmult}{pref}    <a class="co" name="simple.qrmult" href="ar01s03.html#simple.qrmult.exp"><img src="../images/callouts/7.png" alt="7" border="0"></a>
+  Parmi les villes suivantes, lesquelles sont des préfectures~?
+  \begin{reponses}
+    \bonne{Poitiers}
+    \mauvaise{Sainte-Menehould}
+    \bonne{Avignon}
+  \end{reponses}
+\end{questionmult}
+
+\cleardoublepage    <a class="co" name="simple.clear" href="ar01s03.html#simple.clear.exp"><img src="../images/callouts/8.png" alt="8" border="0"></a>
+
+}   <a class="co" name="simple.fin" href="ar01s03.html#simple.fin.exp"><img src="../images/callouts/9.png" alt="9" border="0"></a>
+
+\end{document}
+</pre><p>Quelques précisions sur cet exemple :</p><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a name="simple.latin1.exp"></a><a href="#simple.latin1"><img src="../images/callouts/1.png" alt="1" border="0"></a> </p></td><td valign="top" align="left"><p>Les deux paquets <span class="package">inputenc</span> et
+            <span class="package">fontenc</span> permettent d'écrire le texte du
+            questionnaire en utilisant l'encodage ISO-8859-1 (latin1). Vous
+            pouvez bien entendu les modifier suivant l'encodage que vous
+            utilisez.</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.amc.exp"></a><a href="#simple.amc"><img src="../images/callouts/2.png" alt="2" border="0"></a> </p></td><td valign="top" align="left"><p>Les options utilisées ici pour le paquet LaTeX
+            <span class="package">automultiplechoice</span> permettent d'éviter le
+            changement de page à l'intérieur des questions
+            (<code class="option">bloc</code>) et de compléter automatiquement chaque
+            question multiple par une réponse type permettant à l'étudiant
+            d'indiquer qu'il considère qu'aucune des réposes proposées n'est
+            exacte (<code class="option">completemulti</code>).</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.exemplaire.exp"></a><a href="#simple.exemplaire"><img src="../images/callouts/3.png" alt="3" border="0"></a> </p></td><td valign="top" align="left"><p>La commande <span class="command"><strong>exemplaire</strong></span> permet de
+            fabriquer autant d'exemplaires (différents) du questionnaire QCM
+            que l'on souhaite (ici, 10).</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.entete.exp"></a><a href="#simple.entete"><img src="../images/callouts/4.png" alt="4" border="0"></a> </p></td><td valign="top" align="left"><p>Les lignes qui commencent ici permettent la mise en forme de
+            l'en-tête de chaque copie.</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.champnom.exp"></a><a href="#simple.champnom"><img src="../images/callouts/5.png" alt="5" border="0"></a> </p></td><td valign="top" align="left"><p>La commande <span class="command"><strong>champnom</strong></span> permet d'indiquer la
+            partie du questionnaire dans laquelle chaque étudiant inscrira son
+            nom.</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.qr.exp"></a><a href="#simple.qr"><img src="../images/callouts/6.png" alt="6" border="0"></a> </p></td><td valign="top" align="left"><p>Les environnements <span class="command"><strong>question</strong></span> et
+            <span class="command"><strong>reponses</strong></span> permettent de fabriquer une question à
+            choix multiples pour laquelle une unique réponse est correcte. Il
+            faut indiquer un identifiant unique de la question (ici :
+            <span class="emphasis"><em>prez</em></span>).</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.qrmult.exp"></a><a href="#simple.qrmult"><img src="../images/callouts/7.png" alt="7" border="0"></a> </p></td><td valign="top" align="left"><p>Les environnements <span class="command"><strong>questionmult</strong></span> et
+            <span class="command"><strong>reponses</strong></span> permettent de fabriquer une question
+            pouvant avoir zéro, une ou plusieurs bonnes réponses. L'étudiant
+            est donc invité à cocher toutes les cases correspondant aux
+            réponses qu'il pense correctes, ou la dernière case (ajoutée
+            automatiquement grâce à l'option <code class="option">completemulti</code>
+            passée au paquet en ligne 6).</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.clear.exp"></a><a href="#simple.clear"><img src="../images/callouts/8.png" alt="8" border="0"></a> </p></td><td valign="top" align="left"><p>La commande <span class="command"><strong>cleardoublepage</strong></span> permet de
+            passer à la double page suivante (dans l'optique d'une impression
+            recto-verso). Pour une impression recto simple, on privilégiera la
+            commande <span class="command"><strong>clearpage</strong></span>.</p></td></tr><tr><td width="5%" valign="top" align="left"><p><a name="simple.fin.exp"></a><a href="#simple.fin"><img src="../images/callouts/9.png" alt="9" border="0"></a> </p></td><td valign="top" align="left"><p>Cette fermeture d'accolade marque la fin de la commande
+            <span class="command"><strong>exemplaire</strong></span> (débutée à la ligne 9).</p></td></tr></table></div></div><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2550996"></a>Un exemple avec groupes de questions mélangées</h3></div></div></div><p>Dans cet exemple, on veut que l'ordre dans lequel les questions
+      sont posées sopit différent d'une copie à l'autre, tout en laissant
+      ensemble les questions traitant du même sujet. On va donc créer deux
+      groupes de questions, et les mélanger lors de la fabrication de chaque
+      copie. <a name="exemples-groupes.tex"></a></p><pre class="programlisting">\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}
+\begin{document}
+
+%%% préparation des groupes
+
+\nouveaugroupe{geographie}{10}
+
+\element{geographie}{
+  \begin{question}{Paris}
+    Dans quel continent se situe Paris~?
+    \begin{reponses}
+      \bonne{L'Europe}
+      \mauvaise{L'asie}
+      \mauvaise{La planète Mars}
+    \end{reponses}
+  \end{question}
+}
+
+\element{geographie}{
+  \begin{question}{Cameroun}
+    Quelle est la capitale du Cameroun~?
+    \begin{reponses}
+      \bonne{Yaoundé}
+      \mauvaise{Douala}
+      \mauvaise{Abou-Dabi}
+    \end{reponses}
+  \end{question}
+}
+
+\nouveaugroupe{histoire}{10}
+
+\element{histoire}{
+  \begin{question}{Marignan}
+    En quelle année a eu lieu la batialle de Marignan~?
+    \begin{reponseshoriz}
+      \bonne{1515}
+      \mauvaise{1915}
+      \mauvaise{1519}
+    \end{reponseshoriz}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{questionmult}{Nantes}
+    Que peut-on dire de l'Édit de Nantes~?
+    \begin{reponses}
+      \bonne{Il a été signé en 1598}
+      \bonne{Il a été définitivement révoqué par Louis XIV}
+      \mauvaise{Il a été signé par Henri II}
+    \end{reponses}
+  \end{questionmult}
+}
+
+%%% fabrication des copies
+
+\exemplaire{10}{
+
+%%% debut de l'en-tête des copies :
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Nom et prénom :
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%% fin de l'en-tête
+
+\begin{center}
+\hrule
+\bf\Large Géographie
+\hrule
+\end{center}
+
+\melangegroupe{geographie}
+\restituegroupe{geographie}
+
+\begin{center}
+\hrule
+\bf\Large Histoire
+\hrule
+\end{center}
+
+\melangegroupe{histoire}
+\restituegroupe{histoire}
+
+\cleardoublepage
+
+}
+
+\end{document}
+</pre></div><div class="sect2" lang="fr"><div class="titlepage"><div><div><h3 class="title"><a name="id2549441"></a>Description des commandes LaTeX</h3></div></div></div><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="id2535517"></a>Options du paquet</h4></div></div></div><p>L'utilisation du paquet <span class="package">automultiplechoice</span> se
+        fait grâce à la ligne </p><pre class="programlisting">\usepackage[...]{automultiplechoice}</pre><p>où
+        les pointillés sont remplacés par une liste d'options séparées par des
+        virgules. Les options disponibles sont les suivantes :</p><div class="itemizedlist"><ul type="disc"><li><p><code class="option">bloc</code> : place chaque question dans un bloc,
+            de telle sorte qu'elle ne puisse pas être coupée par un saut de
+            page.</p></li><li><p><code class="option">completemulti</code> : ajoute de manière
+            automatique une réponse type « aucune de ces réponses n'est
+            correcte » à la fin de chaque question multiple. Ceci permet de
+            différencier, pour ces questions, une absence de réponse et la
+            réponse qui consiste à ne choisir aucune des réponses
+            proposées.</p></li><li><p><code class="option">ordre</code> : annule le mélange automatique de
+            l'ordre des réponses dans toutes les questions.</p></li><li><p><code class="option">correc</code> : produit la correction du QCM, et
+            non le sujet.</p></li></ul></div></div><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="id2517051"></a>Questions et réponses</h4></div></div></div><p>Pour les questions simples (une seule réponse correcte), on
+        utilisera le modèle suivant : </p><pre class="programlisting">\begin{question}{identifiant}
+  Texte de la question...
+  \begin{reponses}
+    \bonne{La bonne réponse}
+    \mauvaise{Une mauvaise réponse}
+    \mauvaise{Une autre mauvaise réponse}
+  \end{reponses}
+\end{question}</pre><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="../images/important.png"></td><th align="left">Important</th></tr><tr><td align="left" valign="top"><p>Il faut utiliser un <em class="parameter"><code>identifiant</code></em>
+          différent pour chaque question. Un identifiant peut être constitué
+          de chiffres, lettres et caractères simples (ne pas utiliser les
+          acolades, crochets, par exemple !).</p></td></tr></table></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>Le nombre de réponses pour une question est actuellement
+          limité à 20.</p></td></tr></table></div><p>Pour demander à garder l'ordre des réponses pour cette
+        question-ci, on peut utiliser l'option <code class="option">o</code> de
+        l'environnement <code class="option">reponses</code>, en remplaçant la ligne 3
+        par </p><pre class="programlisting">\begin{reponses}[o]</pre><p>Pour mettre les réponses sur deux colonnes, on peut utiliser le
+        package <span class="package">multicol</span> en mettant dans le préambule
+        (juste après l'appel au paquet <span class="package">automultiplechoice</span>
+        par exemple) la ligne </p><pre class="programlisting">\usepackage{multicol}</pre><p>et
+        en incluant l'environnement reponses à l'intérieur d'un environnement
+        multicols de la manière suivante : </p><pre class="programlisting">  \begin{multicols}{2}
+    \begin{reponses}
+      \bonne{La bonne réponse}
+      \mauvaise{Une mauvaise réponse}
+      \mauvaise{Une autre mauvaise réponse}
+    \end{reponses}
+  \end{multicols}</pre><p>Pour les réponses plus courtes encore, on peut demander à ce que
+        les réponses soient imprimées les unes à la suite des autres, en
+        utilisant l'environnement <code class="option">reponseshoriz</code> au lieu de
+        <code class="option">reponses</code>.</p><p>Enfin, les questions multiples (celles pour lesquelles aucune,
+        une ou plusieurs réponses peuvent être correctes) utiliseront
+        l'environnement <code class="option">questionmult</code> au lieu de
+        <code class="option">question</code>.</p></div><div class="sect3" lang="fr"><div class="titlepage"><div><div><h4 class="title"><a name="id2548368"></a>Groupes de questions</h4></div></div></div><p>L'inclusion de questions dans des groupes permet de mélanger les
+        questions à l'intérieur de ces groupes, de manière différente pour
+        chaque copie. Il faut tout d'abord créer un groupe de questions, en
+        lui donnant un nom (formé uniquement de lettres non-accentuées) et en
+        fixant un nombre maximal de questions que nous pourrons affecter à ce
+        groupe, par la commande <span class="command"><strong>nouveaugroupe</strong></span>. Par exemple,
+        pour créer un groupe nommé « <em class="parameter"><code>ungroupe</code></em> » pouvant
+        contenir 20 questions : </p><pre class="programlisting">\nouveaugroupe{ungroupe}{20}</pre><p>On peut ensuite mettre une à une des questions dans ce groupe,
+        comme dans l'exemple suivant : </p><pre class="programlisting">\element{ungroupe}{
+  \begin{question}{facile}
+    Alors, combien font un plus un~?
+    \begin{reponseshoriz}
+      \bonne{deux}
+      \mauvaise{zéro}
+      \mauvaise{trois}
+    \end{reponseshoriz}
+  \end{question}
+}</pre><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="../images/important.png"></td><th align="left">Important</th></tr><tr><td align="left" valign="top"><p>La constitution du groupe, par les commandes
+          <span class="command"><strong>nouveaugroupe</strong></span> et <span class="command"><strong>element</strong></span>, doit
+          être faite une seule fois : ces commandes doivent donc être
+          utilisées <span class="emphasis"><em>avant</em></span> la commande
+          <span class="command"><strong>exemplaire</strong></span>, qui va répéter certaines actions pour
+          chaque copie.</p></td></tr></table></div><p>Une fois un groupe constitué, on peut mélanger les questions qui
+        le composent par la commande <span class="command"><strong>melangegroupe</strong></span> : par
+        exemple, </p><pre class="programlisting">\melangegroupe{ungroupe}</pre><p>Enfin, on restitue les questions du groupe par la commande
+        <span class="command"><strong>restituegroupe</strong></span>, comme dans </p><pre class="programlisting">\restituegroupe{ungroupe}</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>Ces deux dernières commandes (<span class="command"><strong>melangegroupe</strong></span>
+          et <span class="command"><strong>restituegroupe</strong></span>) seront quand à elles
+          normalement utilisées à l'intérieur du texte en argument de la
+          commande <span class="command"><strong>exemplaire</strong></span>, pour que le mélange soit
+          effectué avant chaque copie.</p></td></tr></table></div></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s02.html">Précédent</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ar01s04.html">Suivant</a></td></tr><tr><td width="40%" align="left" valign="top">Installation </td><td width="20%" align="center"><a accesskey="h" href="index.html">Sommaire</a></td><td width="40%" align="right" valign="top"> Mise en &#339;uvre - interface graphique</td></tr></table></div></body></html>
