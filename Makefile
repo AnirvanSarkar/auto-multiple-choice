@@ -92,7 +92,7 @@ install: FORCE
 # netpbm -> ppmtoxpm (Manuel.pm)
 # xpdf-reader -> pdftoppm (Manuel.pm)
 deb: logo.xpm FORCE
-	dpkg-buildpackage -rsudo -k42067447
+	dpkg-buildpackage -I.svn -Idownload-area -rsudo -k42067447
 
 VERSION=0.1.0
 RELEASE=4
