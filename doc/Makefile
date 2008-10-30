@@ -39,7 +39,8 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ;
 
 
 %.html: %.xml
-	xsltproc --nonet --param admon.graphics 1 --stringparam admon.graphics.path ../images/ --stringparam html.stylesheet ../style.css  --stringparam callout.graphics.path ../images/callouts/ --stringparam base.dir html/$*/ /usr/share/xml/docbook/stylesheet/nwalsh/html/chunk.xsl $<
+	-rm html/$*/*.html
+	xsltproc --nonet --param use.id.as.filename 1 --param admon.graphics 1 --stringparam admon.graphics.path ../images/ --stringparam html.stylesheet ../style.css  --stringparam callout.graphics.path ../images/callouts/ --stringparam base.dir html/$*/ /usr/share/xml/docbook/stylesheet/nwalsh/html/chunk.xsl $<
 	date > $@
 
 # xmlto -o html/$*  html $<

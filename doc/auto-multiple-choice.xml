@@ -30,7 +30,7 @@
     </copyright>
   </articleinfo>
 
-  <sect1>
+  <sect1 id="prerequis">
     <title>Prérequis</title>
 
     <sect2>
@@ -73,29 +73,39 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="installation">
     <title>Installation</title>
+
+    <para>Vous trouverez dans l'<ulink
+    url="http://download.gna.org/auto-qcm/">espace de téléchargement</ulink>
+    du projet les paquets nécessaires à l'installation d'AMC.</para>
 
     <sect2>
       <title>Sur un système debian</title>
 
-      <para>Un paquet debian est fourni. Il permet d'installer facilement AMC
-      sur un système debian ou dérivé (par exemple ubuntu).</para>
+      <para>Un paquet debian (fichier .deb) permet d'installer facilement AMC
+      sur un système debian ou dérivé (par exemple ubuntu). On pourra par
+      exemple utiliser <command>gdeb</command> (du paquet
+      <package>gdeb</package>) en ligne de commande (<code>gdeb --info
+      auto-multiple-choice_xxxx.deb</code>), ou en suivant le menu
+      <guimenuitem>Ouvrir avec</guimenuitem> obtenu par un clic droit sur le
+      fichier .deb dans l'explorateur de fichiers
+      <command>nautilus</command>.</para>
     </sect2>
 
     <sect2>
       <title>À partir des sources</title>
 
-      <para>Après avoir téléchargé l'archive tgz des sources :</para>
+      <para>Après avoir téléchargé l'archive des sources :</para>
 
-      <screen>tar xvzf auto-multiple-choice_xxxx.tgz
+      <screen>tar xvzf auto-multiple-choice_xxxx.tar.gz
 cd auto-qcm
 make
 sudo make install</screen>
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="latex">
     <title>Préparation du fichier LaTeX</title>
 
     <para>Avant toute chose, un questionnaire à choix multiples doit être
@@ -514,7 +524,7 @@ Nom et prénom :
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="interface-graphique">
     <title>Mise en œuvre - interface graphique</title>
 
     <para>Nous décrivons ici un exemple de cheminement avec l'interface
@@ -1124,7 +1134,7 @@ Durée : 10 minutes.
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="commandes">
     <title>Manuel des commandes</title>
 
     <para>Vous pouvez vous passer de la lecture de cette partie si vous

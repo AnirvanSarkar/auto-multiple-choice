@@ -43,6 +43,9 @@ AMC-traitement-image: AMC-traitement-image.c Makefile
 doc:
 	$(MAKE) -C doc
 
+sync:
+	$(MAKE) -C download-area sync
+
 %.ps: %.dvi
 	dvips $< -o $@
 

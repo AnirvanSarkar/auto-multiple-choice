@@ -140,6 +140,8 @@ for my $k (keys %o_defaut) {
     $o{'modifie'}=0;
 }
 
+###
+
 my %projet=();
 
 sub id2file {
@@ -394,6 +396,41 @@ $column = Gtk2::TreeViewColumn->new_with_attributes ("ID",
 						     text=> INCONNU_ID);
 $w{'inconnu_tree'}->append_column ($column);
 
+
+# peut-on acceder a cette commande par exec ?
+sub commande_accessible {
+    my $c=shift;
+    if($c =~ /^\//) {
+	return (-x $c);
+    } else {
+	$ok='';
+	for (split(/:/,$ENV{'PATH'})) {
+	    $ok=1 if(-x "$_/$c");
+	}
+	return($ok);
+    }
+}
+
+# toutes les commandes prevues sont-elles accessibles ? Si non, on
+# avertit l'utilisateur
+
+sub test_commandes {
+    my @pasbon=();
+    for my $c (grep { /_(viewer|editor|opener)$/ } keys(%o)) {
+	my $nc=$o{$c};
+	$nc =~ s/\s.*// if($c =~ /_opener$/);
+	push @pasbon,$nc if(!commande_accessible($nc));
+    }
+    if(@pasbon) {
+	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+					       'destroy-with-parent',
+					       'warning', # message type
+					       'ok', # which set of buttons?
+					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join("",@pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
+	$dialog->run;
+	$dialog->destroy;
+    }
+}
 
 ### Appel à des commandes externes -- log, annulation
 
@@ -952,6 +989,8 @@ sub accepte_preferences {
 	$dialog->run;
 	$dialog->destroy;      
     }
+
+    test_commandes();
 }
 
 sub annule_preferences {
@@ -1247,6 +1286,8 @@ $gui->signal_autoconnect_from_package('main');
 ###
 
 projet_ouvre($ARGV[0]);
+
+test_commandes();
 
 Gtk2->main();
 
