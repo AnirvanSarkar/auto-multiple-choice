@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Fri Oct 24 23:04:23 2008 -->
+<!--Generated with glade3 3.4.5 on Fri Oct 31 12:31:57 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="visible">True</property>
@@ -966,6 +966,7 @@
   </widget>
   <widget class="GtkFileChooserDialog" id="saisie_auto">
     <property name="visible">True</property>
+    <property name="tooltip" translatable="yes">Sélectionnez tous les scans des copies des étudiants (un fichier pour chaque page)</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Saisie automatique</property>
     <property name="modal">True</property>
@@ -979,48 +980,40 @@
         <property name="visible">True</property>
         <property name="spacing">2</property>
         <child>
-          <widget class="GtkLabel" id="label44">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Pour effectuer une saisie automatique à partir des copies des étudiants, vous devez avoir déjà scanné ces copies. Sélectionnez maintenant les fichiers image de ces scans (chaque fichier doit contenir une unique page).</property>
-            <property name="wrap">True</property>
-          </widget>
+          <placeholder/>
         </child>
         <child>
           <widget class="GtkHBox" id="hbox4">
             <property name="visible">True</property>
             <child>
-              <widget class="GtkLabel" id="label14">
-                <property name="visible">True</property>
-                <property name="xalign">0</property>
-                <property name="yalign">0</property>
-                <property name="label" translatable="yes">Si vous voulez que les fichiers sélectionnés soient en plus copiés dans un sous-répertoire du répertoire du projet, cochez la case ci-contre :</property>
-                <property name="wrap">True</property>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
               <widget class="GtkCheckButton" id="copie_scans">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip" translatable="yes">Pour copier tous les fichiers sélectionnés dans un sous-répertoire du projet</property>
                 <property name="label" translatable="yes">copie</property>
                 <property name="response_id">0</property>
                 <property name="draw_indicator">True</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="fill">False</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child internal-child="action_area">
           <widget class="GtkHButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
+            <property name="tooltip" translatable="yes">Lancez l'analyse des scans avec le bouton Utiliser</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
             <child>
               <widget class="GtkButton" id="button6">
@@ -1049,7 +1042,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="pack_type">GTK_PACK_END</property>
-            <property name="position">3</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </widget>
