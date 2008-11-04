@@ -30,6 +30,17 @@ use AMC::Image;
 use AMC::Boite qw/min max/;
 use AMC::Gui::Avancement;
 
+my $cmd_pid='';
+
+sub catch_signal {
+    my $signame = shift;
+    print "*** AMC-calepage : signal $signame, je tue $cmd_pid...\n";
+    kill 9,$cmd_pid if($cmd_pid);
+    die "Killed";
+}
+
+$SIG{INT} = \&catch_signal;
+
 ($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
 sub with_prog {
     my $fich=shift;
@@ -137,6 +148,20 @@ sub erreur {
     exit(1);
 }
 
+sub commande_externe {
+    my @c=@_;
+
+    print "Commande : ".join(' ',@c)."\n" if($debug);
+
+    $cmd_pid=fork();
+    if($cmd_pid) {
+	waitpid($cmd_pid,0);
+    } else {
+	exec(@c);
+    }
+
+}
+
 ################################################################
 
 my $avance=AMC::Gui::Avancement::new($progress);
@@ -153,10 +178,11 @@ $avance->progres(1/3);
 if($blur || $threshold || $scan !~ /\.ppm$/) {
     print "Transformation en ppm...\n";
 
-    system("convert "
-	   .($blur ? "-blur $blur ":"")
-	   .($threshold ? "-threshold $threshold ":"")
-	   ." $scan $ppm");
+    my @ca=('convert');
+    push @ca,"-blur",$blur if($blur);
+    push @ca,"-threshold",$threshold if($threshold);
+    push @ca,$scan,$ppm;
+    commande_externe(@ca);
 } else {
     $ppm=$scan;
 }
@@ -347,9 +373,10 @@ my $xb=$cadre_general->coordonnees(1,'x');
 
 # coupe le haut de la page et le tourne pour qu'il soit droit
 
-$cmd="convert $scan -crop "
-    .int($xb-$xa)."x".$dy_head."+".$xa."+0 -rotate ".(-$angle*180/$M_PI)." $page_droite";
-`$cmd`;
+commande_externe("convert",$scan,
+		 "-crop",int($xb-$xa)."x".$dy_head."+".$xa."+0",
+		 "-rotate",(-$angle*180/$M_PI),
+		 $page_droite);
 
 # utilise gocr pour reconnaitre l'ID
 
@@ -411,7 +438,7 @@ sub valide_id_page {
 
 sub une_ligne {
     my ($ax,$ay,$bx,$by)=(@_);
-    return(sprintf(" -draw \"line %.2f,%.2f %.2f,%.2f\" ",$ax,$ay,$bx,$by));
+    return("-draw",sprintf("line %.2f,%.2f %.2f,%.2f",$ax,$ay,$bx,$by));
 }
 
 ###################################################
@@ -604,9 +631,12 @@ if($modele) {
 sub rassemble_cases {
     my ($f,@zooms)=@_;
     print "Fabrication du zoom $f ...\n";
-    $cz="montage -tile 4x -background blue -geometry +3+3 "
-	.join(" ",sort { $a cmp $b } @zooms)." $f";
-    `$cz`;
+    commande_externe("montage",
+		     "-tile","4x",
+		     "-background","blue",
+		     "-geometry","+3+3",
+		     (sort { $a cmp $b } @zooms),
+		     $f);
 }
 
 if(!$modele) {
@@ -652,14 +682,15 @@ $traitement->ferme_commande();
 
 if($out_cadre || $zoom_file) {
 
-    $cmd="convert -fill none";
+    @cmd=("convert","-fill","none");
     $scan_score="$temp_dir/scan-score.ppm";
     
     # transcription de l'identifiant lu
 
-    $cmd.=" -stroke blue -font Courier -pointsize 96 -draw \"text 0,96 \'$id_page\'\" ";
+    push @cmd,"-stroke","blue","-font","Courier","-pointsize",96,
+    "-draw","text 0,96 \'$id_page\'";
 
-    $cmd.=" -stroke blue -font Courier -pointsize 12";
+    push @cmd,"-stroke","blue","-font","Courier","-pointsize",12;
 
     @zoom_files=();
 
@@ -673,27 +704,27 @@ if($out_cadre || $zoom_file) {
 
 	if($score{$k}) {
 	    $detection=$score{$k}>$seuil_coche;
-	    $cmd.=" -stroke ".($detection ? "red" : "blue");
+	    push @cmd,"-stroke",($detection ? "red" : "blue");
 	    
 	    if($k !~ /:/) {
 		($x,$y)=$case{$k}->pos_txt(0);
-		$cmd.=" -draw \"text ".$x.",".$y." \'$k\'\"";
+		push @cmd,"-draw","text ".$x.",".$y." \'$k\'";
 		($x,$y)=$case{$k}->pos_txt(1);
-		$cmd.=" -draw \"text ".$x.",".$y." \'".sprintf("%.3f",$score{$k})."\'\"";
+		push @cmd,"-draw","text ".$x.",".$y." \'".sprintf("%.3f",$score{$k})."\'";
 	    }
 	}
 
 	# case
-	$cmd.=" -stroke blue" if($detection);
-	$cmd.=$case{$k}->draw();
+	push @cmd,"-stroke","blue" if($detection);
+	push @cmd,$case{$k}->draw_list();
 
 	# part de la case testee
-	$cmd.=" -stroke magenta";
+	push @cmd,"-stroke","magenta";
 	for my $j (0..3) {
 	    $jb=$j+1;
 	    $jb-=4 if($jb>3);
-	    $cmd.=une_ligne($coins_test{$k}->[$j]->[0],$coins_test{$k}->[$j]->[1],
-			    $coins_test{$k}->[$jb]->[0],$coins_test{$k}->[$jb]->[1]);
+	    push @cmd,une_ligne($coins_test{$k}->[$j]->[0],$coins_test{$k}->[$j]->[1],
+				$coins_test{$k}->[$jb]->[0],$coins_test{$k}->[$jb]->[1]);
 	}
 		  
 
@@ -701,7 +732,7 @@ if($out_cadre || $zoom_file) {
 
     print "Annotation/decoupage de l'image...\n";
 
-    `$cmd $scan $scan_score`;
+    commande_externe(@cmd,$scan,$scan_score);
 
     ###############################################
     # extraction des zooms...
@@ -710,8 +741,14 @@ if($out_cadre || $zoom_file) {
 
 	my $pdr="$temp_dir/haut-reduit.ppm";
 
-	$pdr_cmd="convert -fill blue $page_droite -stroke blue -font Courier -pointsize 96 -draw \"text 0,96 \'$id_page\'\" -resize 25% $pdr";
-	`$pdr_cmd`;
+	commande_externe("convert",
+			 "-fill","blue",
+			 $page_droite,
+			 "-stroke","blue",
+			 "-font","Courier",
+			 "-pointsize",96,
+			 "-draw","text 0,96 \'$id_page\'",
+			 "-resize","25%",$pdr);
 
 	$zoid=0;
 	
@@ -730,10 +767,11 @@ if($out_cadre || $zoom_file) {
 		push @zoom_files,$zof;
 	    }
 	    
-	    $cz="convert -fill none $scan_score -crop "
-		.$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom')
-		." $zof";
-	    `$cz`;
+	    commande_externe("convert",
+			     "-fill","none",
+			     $scan_score,
+			     "-crop",$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom'),
+			     $zof);
 	}
 
 	###############################################
@@ -760,8 +798,15 @@ if($out_cadre || $zoom_file) {
 	    push @pile,"autres","$cases_zoom-x.ppm";
 	}
 
-	my $cz="montage -tile 1x -background blue -fill white -geometry +0+0 -pointsize 22 -font Helvetica ".join(' ',@pile,$zoom_file);
-	`$cz`;
+	commande_externe("montage",
+			 "-tile","1x",
+			 "-background","blue",
+			 "-fill","white",
+			 "-geometry","+0+0",
+			 "-pointsize",22,
+			 "-font","Helvetica",
+			 @pile,$zoom_file);
+
 	print "-> $zoom_file\n";
 
     }
@@ -770,20 +815,20 @@ if($out_cadre || $zoom_file) {
     # tracé des cadres
 
     if($out_cadre) {
-	$cmd="convert -fill none -stroke red";
+	@cmd=("convert","-fill","none","-stroke","red");
 	
 	# cadre repéré
 
-	$cmd.=$cadre_general->draw();
+	push @cmd,$cadre_general->draw_list();
 	
-	$cmd.=" -stroke blue";
+	push @cmd,"-stroke","blue";
 	
 	# cadre du modele transforme
 
 	$cadre_origine->transforme($cale);
-	$cmd.=$cadre_origine->draw();
+	push @cmd,$cadre_origine->draw_list();
 
-	`$cmd $scan_score $out_cadre`;
+	commande_externe(@cmd,$scan_score,$out_cadre);
 
 	print "-> $out_cadre\n";
     }

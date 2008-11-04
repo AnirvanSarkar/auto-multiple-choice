@@ -25,6 +25,17 @@ use Data::Dumper;
 use AMC::Basic;
 use AMC::ANList;
 
+my $cmd_pid='';
+
+sub catch_signal {
+    my $signame = shift;
+    print "*** AMC-note : signal $signame, je tue $cmd_pid...\n";
+    kill 9,$cmd_pid if($cmd_pid);
+    die "Killed";
+}
+
+$SIG{INT} = \&catch_signal;
+
 my $cr_dir="";
 my $bareme="";
 my $association="-";
@@ -61,6 +72,20 @@ if($type_arrondi) {
 	    $arrondi=$fonction_arrondi{$k};
 	}
     }
+}
+
+sub commande_externe {
+    my @c=@_;
+
+    print "Commande : ".join(' ',@c)."\n" if($debug);
+
+    $cmd_pid=fork();
+    if($cmd_pid) {
+	waitpid($cmd_pid,0);
+    } else {
+	exec(@c);
+    }
+
 }
 
 sub office_nombre {
@@ -357,21 +382,21 @@ sub milieu_cercle {
 sub cercle_coors {
     my $c=shift;
     my ($x,$y)=milieu_cercle($c);
-    return(sprintf(" -draw \"circle %.2f,%.2f %.2f,%.2f\" ",
+    return("-draw",sprintf("circle %.2f,%.2f %.2f,%.2f",
 		   $x,$y,
 		   $c->{1}->{'x'},$c->{1}->{'y'}));
 }
     
 sub croix_coors {
     my $c=shift;
-    my $r='';
+    my @r=();
     for my $i (1,2) {
-	$r.=sprintf(" -draw \"line %.2f,%.2f %.2f,%.2f\" ",
+	push @r,"-draw",sprintf("line %.2f,%.2f %.2f,%.2f",
 		    $c->{$i}->{'x'},$c->{$i}->{'y'},
 		    $c->{$i+2}->{'x'},$c->{$i+2}->{'y'},
 		    );
     }
-    return($r);
+    return(@r);
 }
     
 
@@ -383,7 +408,7 @@ sub croix_coors {
 	 
      if(-f $scan) {
 	 
-	 my $cmd="convert $scan -pointsize 60 ";
+	 my @cmd=("convert",$scan,"-pointsize",60);
 	 
 	 print "Annotation de $scan...\n";
 	 
@@ -399,9 +424,10 @@ sub croix_coors {
 	 # note finale
 	 
 	 if($n_page==1) {
-	     $cmd.=" -stroke red -fill red -draw \"text 100,100 \'TOTAL : "
+	     push @cmd,"-stroke","red",
+	     "-fill","red","-draw","text 100,100 \'TOTAL : "
 		 .$note_question{$etud}->{'total'}."/".$note_question{$etud}->{'tmax'}
-	     ."\'\" ";
+	     ."\'";
 	 }
 	 
 	 # cercles autour des mauvaises reponses
@@ -413,8 +439,8 @@ sub croix_coors {
 	     #print "Case $q.$r\n";
 	     
 	     if($bar->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'}) {
-		 $cmd.=" -strokewidth 2 -stroke blue "
-		     .croix_coors($page->{$k}->{'coin'});
+		 push @cmd,"-strokewidth",2,"-stroke","blue",
+		 croix_coors($page->{$k}->{'coin'});
 	     }
 	     
 	     $question{$q}={} if(!$question{$q});
@@ -429,9 +455,9 @@ sub croix_coors {
 		 # mauvaise reponse
 		 if($bar->{'question'}->{$q}->{'multiple'} ||
 		    $bb[0]) {
-		     $cmd.= " -fill none -strokewidth 2 -stroke red ";
+		     push @cmd,"-fill","none","-strokewidth",2,"-stroke","red";
 		     #.($bb[0] ? "red" : "green");
-		     $cmd.=cercle_coors($page->{$k}->{'coin'});
+		     push @cmd,cercle_coors($page->{$k}->{'coin'});
 		 }
 	     }
 	 }
@@ -442,12 +468,13 @@ sub croix_coors {
 	     my $x=60;
 	     my $y=$question{$q}->{'y'}/$question{$q}->{'n'};
 	     #print "MARQUE : ($x,$y) ".$note_question{$etud}->{$q}."\n";
-	     $cmd.=sprintf(" -stroke red -fill red -strokewidth 1 -draw \"text %.2f,%.2f \'%s\'\"",
-			   $x,$y,$note_question{$etud}->{$q}."/".$note_question{'max'}->{$q});
+	     push @cmd,"-stroke","red","-fill","red",
+	     "-strokewidth",1,"-draw",sprintf("text %.2f,%.2f \'%s\'",
+					      $x,$y,$note_question{$etud}->{$q}."/".$note_question{'max'}->{$q});
 	 }
 	 
-	 $cmd .= " $cr_dir/corrections/jpg/page-$idf.jpg";
-	 #print $cmd."\n";
-	 system($cmd);
+	 push @cmd,"$cr_dir/corrections/jpg/page-$idf.jpg";
+
+	 commande_externe(@cmd);
      }
  }

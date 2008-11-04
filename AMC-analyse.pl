@@ -22,20 +22,45 @@ use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs t
 use Getopt::Long;
 use AMC::Gui::Avancement;
 
+my $pid='';
+
+sub catch_signal {
+    my $signame = shift;
+    print "*** AMC-analyse : signal $signame, je signale $pid...\n";
+    kill 2,$pid if($pid);
+    die "Killed";
+}
+
+$SIG{INT} = \&catch_signal;
+
 my $mep_dir="";
 my $cr_dir="";
 my $binaire='';
 my $debug='';
 my $progress=0;
+my $liste_f;
 
 GetOptions("mep=s"=>\$mep_dir,
 	   "cr=s"=>\$cr_dir,
 	   "binaire!"=>\$binaire,
 	   "debug!"=>\$debug,
 	   "progression=s"=>\$progress,
+	   "liste-fichiers=s"=>\$liste_f,
 	   );
 
 my @scans=@ARGV;
+
+if($liste_f && open(LISTE,$liste_f)) {
+    while(<LISTE>) {
+	chomp;
+	if(-f $_) {
+	    push @scans,$_;
+	} else {
+	    print STDERR "ATTENTION : fichier inexistant : $_\n";
+	}
+    }
+    close(LISTE);
+}
 
 exit(0) if($#scans <0);
 
@@ -69,7 +94,13 @@ for my $s (@scans) {
     push @c,"--progression",($progress+1) if($progress);
     push @c,"--binaire" if($binaire);
     push @c,"--mep",$mep_dir,"--cr",$cr_dir,$s;
-    system(@c);
+    
+    $pid=fork();
+    if($pid) {
+	waitpid($pid,0);
+    } else {
+	exec(@c);
+    }
 }
 
 $avance->fin();

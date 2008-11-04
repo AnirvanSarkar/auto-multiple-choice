@@ -183,14 +183,21 @@ sub txt {
 
 
 # renvoie une commande draw pour tracer la boîte grâce à ImageMagick
+sub draw_list {
+    my $self=shift;
+    return("-draw",sprintf("polygon %.2f,%.2f %.2f,%.2f %.2f,%.2f %.2f,%.2f",
+			   @{$self->{'coins'}->[0]},
+			   @{$self->{'coins'}->[1]},
+			   @{$self->{'coins'}->[2]},
+			   @{$self->{'coins'}->[3]},
+			   )
+	   );
+}
+
+# renvoie une commande draw pour tracer la boîte grâce à ImageMagick
 sub draw {
     my $self=shift;
-    return(sprintf(" -draw \"polygon %.2f,%.2f %.2f,%.2f %.2f,%.2f %.2f,%.2f\" ",
-		   @{$self->{'coins'}->[0]},
-		   @{$self->{'coins'}->[1]},
-		   @{$self->{'coins'}->[2]},
-		   @{$self->{'coins'}->[3]},
-		   ));
+    return(' '.join(' ',map { '"'.$_.'"' } ($self->draw_list())).' ');
 }
 
 # renvoie une description XML des coins de la boîte.

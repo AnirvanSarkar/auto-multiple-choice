@@ -26,7 +26,7 @@ use XML::Simple;
 use IO::File;
 use IO::Select;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
-use File::Temp qw/ tempfile tempdir /;
+use File::Temp;
 use File::Copy;
 use Time::localtime;
 
@@ -36,6 +36,7 @@ use AMC::ANList;
 use AMC::Gui::Avancement;
 use AMC::Gui::Manuel;
 use AMC::Gui::Association;
+use AMC::Gui::Commande;
 
 use Data::Dumper;
 
@@ -434,78 +435,30 @@ sub test_commandes {
 
 ### Appel à des commandes externes -- log, annulation
 
-my @commande_pids=();
+my @les_commandes=();
 
 sub commande {
-    my ($cmd,$text,$log,$progres,%oo)=(@_);
+    my (@opts)=@_;
     
-    my @erreurs=();
-
-    my $fh = IO::File->new();
-    my $pid=$fh->open("$cmd |");
-    $fh->blocking(0);
-    my $io = IO::Select->new([$fh]);
-
-    print "Commande [$pid] : $cmd\n";
-
-    push @commande_pids,$pid;
+    my $c=AMC::Gui::Commande::new('avancement'=>$w{'avancement'},
+				  'log'=>$w{'log_general'},
+				  'finw'=>sub {
+				      my $c=shift;
+				      $w{'onglets_projet'}->set_sensitive(1);
+				      $w{'commande'}->hide();
+				  },
+				  @opts);
+    push @les_commandes,$c;
 
     $w{'onglets_projet'}->set_sensitive(0);
-    
     $w{'commande'}->show();
 
-    $w{'avancement'}->set_text($text);
-    $w{'avancement'}->set_fraction(0);
-    $w{'avancement'}->set_pulse_step(-$progres) if($progres<0);
-
-    $avance->init();
-
-    my $logbuff=$log->get_buffer();
-    $logbuff->set_text('');
-
-  LIGNE: while (1) {
-      if ($io->can_read(0.1)) {
-	  my $read = $fh->getline();
-	  if(defined($read)) {
-	      $logbuff->insert($logbuff->get_end_iter(),$read);
-	      $logbuff->place_cursor($logbuff->get_end_iter());
-	      $log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
-	      
-	      for(split(/\n+/,$read)) {
-		  push @erreurs,$_ if(/^ERREUR/);
-	      }
-	      
-	      if($progres<0) {
-		  $w{'avancement'}->pulse;
-	      } else {
-		  my ($r,$niv)=$avance->lit($read);
-		  $w{'avancement'}->set_fraction($r) if($r);
-		  if($niv>0 && $oo{"niveau".$niv}) {
-		      &{$oo{"niveau".$niv}}();
-		  }
-	      }
-	  } else {
-	      last LIGNE;
-	  }
-      }
-      Gtk2->main_iteration while ( Gtk2->events_pending );
-   }
-
-    print "Commande : OK\n";
- 
-    $w{'onglets_projet'}->set_sensitive(1);
-
-    $w{'commande'}->hide();
-    $w{'avancement'}->set_text('');
-
-    return(@erreurs);
+    $c->open();
 }
-
+    
 sub commande_annule {
-    print "Annulation commande.\n";
-
-    kill 9,@commande_pids;
-    @commande_pids=();
+    for (@les_commandes) { $_->quitte(); }
+    @les_commandes=();
 }
 
 ### Actions des menus
@@ -641,12 +594,14 @@ sub mep_active {
 }
 
 sub doc_maj {
-    commande(with_prog("AMC-prepare.pl")
-	     ." --mode s ".localise($projet{'texsrc'})
-	     ." --prefix ".localise(''),
-	     'Mise à jour des documents...',$w{'log_general'},
-	     -0.01);
-    detecte_documents();
+    commande('commande'=>[with_prog("AMC-prepare.pl"),
+			  "--mode","s",
+			  localise($projet{'texsrc'}),
+			  "--prefix",localise(''),
+			  ],
+	     'texte'=>'Mise à jour des documents...',
+	     'progres'=>-0.01,
+	     'fin'=>sub { detecte_documents(); });
 }
 
 sub calcule_mep {
@@ -658,13 +613,15 @@ sub calcule_mep {
     closedir MDIR;
     unlink @meps;
     # on recalcule...
-    commande(with_prog("AMC-prepare.pl")
-	     ." --calage ".localise($projet{'docs'}->[2])
-	     ." --progression 1 --mode m ".localise($projet{'texsrc'})
-	     ." --mep ".$md,
-	     'Calcul des mises en page...',$w{'log_general'},
-	     1);
-    detecte_mep();
+    commande('commande'=>[with_prog("AMC-prepare.pl"),
+			  "--calage",localise($projet{'docs'}->[2]),
+			  "--progression",1,
+			  "--mode","m",
+			  localise($projet{'texsrc'}),
+			  "--mep",$md,
+			  ],
+	     'texte'=>'Calcul des mises en page...',
+	     'progres'=>1,'fin'=>sub { detecte_mep(); });
 }
 
 ### Actions des boutons de la partie SAISIE
@@ -699,17 +656,47 @@ sub saisie_auto_ok {
     my @f=$w{'saisie_auto'}->get_filenames();
     print "Scans : ".join(',',@f)."\n";
     $w{'saisie_auto'}->destroy();
-    my @err=commande(with_prog("AMC-analyse.pl")." --binaire --progression 1 --mep ".localise($projet{'mep'})." --cr ".localise($projet{'cr'})." ".join(" ",@f),
-		     'Saisie automatique...',$w{'log_general'},
-		     1,
-		     'niveau1'=>sub { detecte_analyse('interne'=>1); });
-    my @fe=();
-    for(@err) {
-	if(/ERREUR\(([^\)]+)\)\(([^\)]+)\)/) {
-	    push @fe,[$1,$2];
-	}
-    }
-    detecte_analyse('erreurs'=>\@fe);
+
+    # pour eviter tout probleme du a une longueur excessive de la
+    # ligne de commande, fabrication fichier temporaire avec la liste
+    # des fichiers...
+
+    my $fh=File::Temp->new(TEMPLATE => "liste-XXXXXX",
+			   TMPDIR => 1,
+			   UNLINK=> 1);
+    print $fh join("\n",@f)."\n";
+    $fh->seek( 0, SEEK_END );
+
+    # appel AMC-analyse avec cette liste
+
+    my @err;
+    commande('commande'=>[with_prog("AMC-analyse.pl"),
+			  "--binaire",
+			  "--progression",1,
+			  "--mep",localise($projet{'mep'}),
+			  "--cr",localise($projet{'cr'}),
+			  "--liste-fichiers",$fh,
+			  ],
+	     'signal'=>2,
+	     'texte'=>'Saisie automatique...',
+	     'progres'=>1,
+	     'niveau1'=>sub { detecte_analyse('interne'=>1); },
+	     'fin'=>sub {
+		 my $c=shift;
+		 my @err=$c->erreurs();
+
+		 close($fh);
+
+		 my @fe=();
+		 for(@err) {
+		     if(/ERREUR\(([^\)]+)\)\(([^\)]+)\)/) {
+			 push @fe,[$1,$2];
+		     }
+		 }
+		 detecte_analyse('erreurs'=>\@fe);
+	     }
+	     );
+    
 }
 
 sub valide_liste {
@@ -776,29 +763,35 @@ sub voir_notes {
 
 sub noter {
     if($projet{'majbareme'}) {
-	commande(with_prog("AMC-prepare.pl")." --mode b --bareme "
-		 .localise($projet{'fichbareme'})
-		 ." ".localise($projet{'texsrc'}),
-		 'Lecture du bareme...',$w{'log_general'},
-		 -0.01);
+	commande('commande'=>[with_prog("AMC-prepare.pl"),
+			      "--mode","b",
+			      "--bareme",localise($projet{'fichbareme'}),
+			      localise($projet{'texsrc'}),
+			      ],
+		 'texte'=>'Lecture du bareme...',
+		 'progres'=>-0.01);
     }
-    commande(join(' ',with_prog("AMC-note.pl"),
-		  "--cr",localise($projet{'cr'}),
-		  "--bareme ",localise($projet{'fichbareme'}),
-		  "-o ",localise($projet{'notes'}),
-		  ($projet{'annotecopies'} ? "--copies" : "--no-copies"),
-		  "--seuil",$projet{'seuil'},
-
-		  "--grain",$projet{'note_grain'},
-		  "--arrondi",$projet{'note_arrondi'},
-		  "--notemax",$projet{'note_max'},
-
-		  "--delimiteur",$o{'delimiteur_decimal'},
-		  ),
-	     'Calcul des notes...',$w{'log_general'},
-	     -0.01);
-    voir_notes();
-    detecte_correc() if($projet{'annotecopies'});
+    commande('commande'=>[with_prog("AMC-note.pl"),
+			  "--cr",localise($projet{'cr'}),
+			  "--bareme",localise($projet{'fichbareme'}),
+			  "-o",localise($projet{'notes'}),
+			  ($projet{'annotecopies'} ? "--copies" : "--no-copies"),
+			  "--seuil",$projet{'seuil'},
+			  
+			  "--grain",$projet{'note_grain'},
+			  "--arrondi",$projet{'note_arrondi'},
+			  "--notemax",$projet{'note_max'},
+			  
+			  "--delimiteur",$o{'delimiteur_decimal'},
+			  ],
+	     'signal'=>2,
+	     'texte'=>'Calcul des notes...',
+	     'progres'=>-0.01,
+	     'fin'=>sub {
+		 voir_notes();
+		 detecte_correc() if($projet{'annotecopies'});
+	     },
+	     );
 }
 
 sub visualise_correc {
@@ -813,14 +806,14 @@ sub visualise_correc {
 
 sub regroupement {
 
-    commande(join(' ',with_prog("AMC-regroupe.pl"),
-		  "--cr",localise($projet{'cr'}),
-		  "--progression 1",
-		  "--modele","'".$projet{'modele_regroupement'}."'",
-		  ),
-	     'Regroupement des pages corrigées par étudiant...',
-	     $w{'log_general'},
-	     1);
+    commande('commande'=>[with_prog("AMC-regroupe.pl"),
+			  "--cr",localise($projet{'cr'}),
+			  "--progression",1,
+			  "--modele",$projet{'modele_regroupement'},
+			  ],
+	     'texte'=>'Regroupement des pages corrigées par étudiant...',
+	     'progres'=>1,
+	     );
 }
 
 sub regarde_regroupements {
