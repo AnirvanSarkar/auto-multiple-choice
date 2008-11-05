@@ -1176,9 +1176,25 @@ sub valide_source_tex {
 }
 
 sub importe_source {
-    my $dest=localise("source.tex");
+    my ($fxa,$fxb,$fb) = splitpath(localise($projet{'texsrc'}));
+    my $dest=localise($fb);
+
+    if(-f $dest) {
+	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'yes-no', # which set of buttons?
+					       "Le fichier %s existe déjà dans le répertoire projet : voulez-vous écraser son ancien contenu ? Cliquez sur oui pour remplacer le fichier pré-existant par celui que vous venez de sélectionner, ou sur non pour annuler l'import du fichier source.",$fb);
+	my $reponse=$dialog->run;
+	$dialog->destroy;      
+
+	if($reponse eq 'no') {
+	    return(0);
+	} 
+    }
+
     if(copy(localise($projet{'texsrc'}),$dest)) {
-	$projet{'texsrc'}="source.tex";
+	$projet{'texsrc'}=$fb;
 	set_source_tex();
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
