@@ -199,7 +199,7 @@ if($mode =~ /m/) {
 	or die "Erreur d'identification : $!";
     while(<IDCMD>) {
 	if(/^([^\[]+)\[([0-9]+)\]\s+(PDF|PS)/) {
-	    push @pages,"$1\'[$2]\'";
+	    push @pages,$1."[".$2."]";
 	}
     }
     close(IDCMD);

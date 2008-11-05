@@ -83,7 +83,12 @@ for my $e (keys %r) {
 
     $f="$pdfdir/$f";
     my @sp=sort { $a <=> $b } (keys %{$r{$e}});
-    system('convert -quality 50 -adjoin -page A4 '.join(' ',map { $r{$e}->{$_} } @sp).' '.$f);
+    system('convert',
+	   '-quality',50,
+	   '-adjoin',
+	   '-page','A4',
+	   (map { $r{$e}->{$_} } @sp),
+	   $f);
 
     $avance->progres(1/(1+$#pages));
 }

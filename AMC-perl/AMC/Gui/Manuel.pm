@@ -254,18 +254,17 @@ sub charge_i {
 
     # fabrication du xpm
     print "ID ".$self->{'ids'}->[$self->{'iid'}]." PAGE $page\n";
-    system("pdftoppm -f $page -l $page -r ".$self->{'dpi'}." "
-	   .$self->{'sujet'}
-	   ." "
-	   .$self->{'temp-dir'}
-	   ."/page");
+    system("pdftoppm","-f",$page,"-l",$page,
+	   "-r",$self->{'dpi'},
+	   $self->{'sujet'},
+	   $self->{'temp-dir'}."/page");
     # recherche de ce qui a ete fabrique...
     opendir(TDIR,$self->{'temp-dir'}) || die "can't opendir $self->{'temp-dir'} : $!";
     my @candidats = grep { /^page-.*\.ppm$/ && -f $self->{'temp-dir'}."/$_" } readdir(TDIR);
     closedir TDIR;
     my $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
     # sprintf($self->{'temp-dir'}."/page-%06d.ppm",$page);
-    system("ppmtoxpm $tmp_ppm > ".$self->{'tmp-xpm'});
+    system("ppmtoxpm \"$tmp_ppm\" > \"".$self->{'tmp-xpm'},"\"");
     unlink($tmp_ppm);
 
     $self->{'etudiant_cbe'}->set_text('');

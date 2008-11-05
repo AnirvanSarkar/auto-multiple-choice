@@ -427,7 +427,7 @@ sub test_commandes {
 					       'destroy-with-parent',
 					       'warning', # message type
 					       'ok', # which set of buttons?
-					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join("",@pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
+					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join("",@pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
 	$dialog->run;
 	$dialog->destroy;
     }
@@ -435,20 +435,25 @@ sub test_commandes {
 
 ### Appel à des commandes externes -- log, annulation
 
-my @les_commandes=();
+my %les_commandes=();
+my $cmd_id=0;
 
 sub commande {
     my (@opts)=@_;
-    
+    $cmd_id++;
+
     my $c=AMC::Gui::Commande::new('avancement'=>$w{'avancement'},
 				  'log'=>$w{'log_general'},
 				  'finw'=>sub {
 				      my $c=shift;
 				      $w{'onglets_projet'}->set_sensitive(1);
 				      $w{'commande'}->hide();
+				      delete $les_commandes{$c->{'_cmdid'}};
 				  },
 				  @opts);
-    push @les_commandes,$c;
+
+    $c->{'_cmdid'}=$cmd_id;
+    $les_commandes{$cmd_id}=$c;
 
     $w{'onglets_projet'}->set_sensitive(0);
     $w{'commande'}->show();
@@ -457,8 +462,7 @@ sub commande {
 }
     
 sub commande_annule {
-    for (@les_commandes) { $_->quitte(); }
-    @les_commandes=();
+    for (keys %les_commandes) { $les_commandes{$_}->quitte(); }
 }
 
 ### Actions des menus
@@ -593,7 +597,54 @@ sub mep_active {
     }
 }
 
+sub fichiers_mep {
+    my $md=localise($projet{'mep'});
+    opendir(MDIR, $md) || die "can't opendir $md: $!";
+    my @meps = map { "$md/$_" } grep { /^mep.*xml$/ && -f "$md/$_" } readdir(MDIR);
+    closedir MDIR;
+    return(@meps);
+}
+
 sub doc_maj {
+    my $sur=0;
+    if($an_list->nombre()>0) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'warning', # message type
+					       'ok-cancel', # which set of buttons?
+					       "L'analyse de certaines copies a déjà été effectuée sur la base des documents de travail actuels. Vous avez donc vraisemblablement déjà effectué l'examen sur la base de ces documents. Si vous modifiez les documents de travail, vous ne serez plus en mesure d'analyser les copies que vous avez déjà distribué ! Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
+	my $reponse=$dialog->run;
+	$dialog->destroy;      
+	
+	if($reponse eq 'cancel') {
+	    return(0);
+	} 
+
+	$sur=1;
+    }
+	
+    # deja des MEP fabriquees ?
+    my @meps=fichiers_mep();
+    if(@meps) {
+	if(!$sur) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							       'destroy-with-parent',
+							       'question', # message type
+							       'ok-cancel', # which set of buttons?
+							       "Certaines mises en page on déjà été calculées pour les documents actuels. En refabriquant les documents de travail, les mises en page deviendront obsolètes et seront donc effacées. Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
+	    my $reponse=$dialog->run;
+	    $dialog->destroy;      
+	    
+	    if($reponse eq 'cancel') {
+		return(0);
+	    } 
+	}
+	
+	unlink @meps;
+	detecte_mep();
+    }   
+
+    #
     commande('commande'=>[with_prog("AMC-prepare.pl"),
 			  "--mode","s",
 			  localise($projet{'texsrc'}),
@@ -606,11 +657,7 @@ sub doc_maj {
 
 sub calcule_mep {
     # on efface les anciennes MEP
-    my $md=localise($projet{'mep'});
-    opendir(MDIR, $md) || die "can't opendir $md: $!";
-    my @meps = map { "$md/$_" } 
-    grep { /^mep.*xml$/ && -f "$md/$_" } readdir(MDIR);
-    closedir MDIR;
+    my @meps=fichiers_mep();
     unlink @meps;
     # on recalcule...
     commande('commande'=>[with_prog("AMC-prepare.pl"),
@@ -618,7 +665,7 @@ sub calcule_mep {
 			  "--progression",1,
 			  "--mode","m",
 			  localise($projet{'texsrc'}),
-			  "--mep",$md,
+			  "--mep",localise($projet{'mep'}),
 			  ],
 	     'texte'=>'Calcul des mises en page...',
 	     'progres'=>1,'fin'=>sub { detecte_mep(); });
