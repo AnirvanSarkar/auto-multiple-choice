@@ -27,6 +27,17 @@ use Getopt::Long;
 
 use AMC::Gui::Avancement;
 
+my $cmd_pid='';
+
+sub catch_signal {
+    my $signame = shift;
+    print "*** AMC-calepage : signal $signame, je tue $cmd_pid...\n";
+    kill 9,$cmd_pid if($cmd_pid);
+    die "Killed";
+}
+
+$SIG{INT} = \&catch_signal;
+
 my $mode="mbs";
 my $mep_dir="";
 my $bareme="";
@@ -56,7 +67,7 @@ GetOptions("mode=s"=>\$mode,
 
 my $avance=AMC::Gui::Avancement::new($progress);
 
-$debug=($debug ? " --debug " : "");
+$debug=($debug ? "--debug" : "--no-debug");
 
 my $tex_source=$ARGV[0];
 
@@ -85,15 +96,15 @@ sub with_prog {
 }
 
 sub execute {
-    my $s=shift;
+    my @s=@_;
 
-    open(EXEC,"$s |") or die "Impossible d'executer $s";
+    $cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer $s";
     while(<EXEC>) {
 	s/AUTOQCM\[.*\]//g;
 	print $_ if(/^.+$/);
     }
     close(EXEC);
-    #system($s);
+    $cmd_pid='';
 }
 
 $temp_loc=tmpdir();
@@ -101,20 +112,21 @@ $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => 1 );
 
 # reconnaissance mode binaire/decimal :
 
-$binaire=' --binaire ';
+$binaire='--binaire';
 
-open(SCANTEX,$tex_source) or die "Impossible de lire $tex_source : $!";
+$cmd_pid=open(SCANTEX,$tex_source) or die "Impossible de lire $tex_source : $!";
 while(<SCANTEX>) {
     if(/usepackage\[([^\]]+)\]\{autoQCM\}/) {
 	my $opts=$1;
 	if($opts =~ /\bdecimal\b/) {
-	    $binaire="";
+	    $binaire="--no-binaire";
 	    print "Mode decimal.\n";
 	}
 
     }
 }
 close(SCANTEX);
+$cmd_pid='';
 
 # on se place dans le repertoire du LaTeX
 ($v,$d,$f_tex)=splitpath($tex_source);
@@ -124,24 +136,31 @@ $f_base =~ s/\.tex$//i;
 
 $prefix=$f_base."-" if(!$prefix);
 
-$latex_cmd="latex \"\\nonstopmode\\def\\CalibrationExterne{1}\\def\\NoHyperRef{1} \\input $f_tex\"";
+sub latex_cmd {
+    my ($prefix,@o)=@_;
+    
+    return($prefix."latex",
+	   "\\nonstopmode"
+	   .join('',map { "\\def\\".$_."{1}"; } @o )
+	   ." \\input{\"$f_tex\"}");
+}
 
 if($mode =~ /s/) {
     # SUJETS
 
     # 1) compilation du sujet
 
-    execute("pdflatex \"\\nonstopmode\\def\\SujetExterne{1}\\def\\NoHyperRef{1} \\input $f_tex\"");
+    execute(latex_cmd('pdf',qw/SujetExterne NoHyperRef/));
     move("$f_base.pdf",$prefix."sujet.pdf");
 
     # 2) compilation de la correction
 
-    execute("pdflatex \"\\nonstopmode\\def\\CorrigeExterne{1}\\def\\NoHyperRef{1} \\input $f_tex\"");
+    execute(latex_cmd('pdf',qw/CorrigeExterne NoHyperRef/));
     move("$f_base.pdf",$prefix."corrige.pdf");
 
     # 3) document de calage
 
-    execute("pdf".$latex_cmd);
+    execute(latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/));
     move("$f_base.pdf",$prefix."calage.pdf");
 
 }
@@ -159,10 +178,10 @@ if($mode =~ /m/) {
 	print "Utilisation du fichier de calage $calage\n";
     } else {
 	if($ppm_via eq 'pdf') {
-	    execute("pdf".$latex_cmd);
+	    execute(latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/));
 	} elsif($ppm_via eq 'ps') {
-	    execute($latex_cmd);
-	    execute("dvips $f_base -o");
+	    execute(latex_cmd('',qw/CalibrationExterne NoHyperRef/));
+	    execute("dvips",$f_base,"-o");
 	} else {
 	    die "Mauvaise valeur pour --via : $ppm_via";
 	}
@@ -176,13 +195,15 @@ if($mode =~ /m/) {
     $avance->progres(0.03);
     
     @pages=();
-    open(IDCMD,"identify $calage |") or die "Erreur d'identification : $!";
+    $cmd_pid=open(IDCMD,"-|","identify",$calage)
+	or die "Erreur d'identification : $!";
     while(<IDCMD>) {
 	if(/^([^\[]+)\[([0-9]+)\]\s+(PDF|PS)/) {
 	    push @pages,"$1\'[$2]\'";
 	}
     }
     close(IDCMD);
+    $cmd_pid='';
     
     my $npage=0;
     my $np=1+$#pages;
@@ -190,12 +211,22 @@ if($mode =~ /m/) {
 	$npage++;
 	print "*** $p\n";
 	$avance->progres(0.9/$np*.4);
-	execute("convert $convert_opts -density $dpi -depth 8 +antialias $p $temp_dir/page.ppm");
+	execute("convert",split(/\s+/,$convert_opts),
+		"-density",$dpi,
+		"-depth",8,
+		"+antialias",
+		$p,"$temp_dir/page.ppm");
 	$avance->progres(0.9/$np*.6);
-	$cmd=with_prog("AMC-calepage.pl")
-	    ." --progression ".($progress>0 ? $progress+1 : 0)
-	    ." $debug $binaire --tex-source $tex_source --page $npage --dpi $dpi --modele --mep $mep_dir $temp_dir/page.ppm";
-	execute($cmd);
+	execute(with_prog("AMC-calepage.pl"),
+		"--progression",($progress>0 ? $progress+1 : 0),
+		$debug,
+		$binaire,
+		"--tex-source",$tex_source,
+		"--page",$npage,
+		"--dpi",$dpi,
+		"--modele",
+		"--mep",$mep_dir,
+		"$temp_dir/page.ppm");
     }
 }
 
@@ -212,7 +243,8 @@ if($mode =~ /b/) {
 
     my $quest='';
     my $rep='';
-    open(TEX,"$latex_cmd |") or die "Impossible d'executer latex";
+    $cmd_pid=open(TEX,"-|",latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/))
+	or die "Impossible d'executer latex";
     while(<TEX>) {
 	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
 	    $quest=$1;$rep=''; 
@@ -233,8 +265,9 @@ if($mode =~ /b/) {
 	}
     }
     close(TEX);
+    $cmd_pid='';
 
-    open(BAR,">$bareme") or die "Impossible d'ecrire dans $bareme";
+    open(BAR,">",$bareme) or die "Impossible d'ecrire dans $bareme";
     print BAR "<?xml version='1.0' standalone='yes'?>\n";
     print BAR "<bareme src=\"$f_tex\">\n";
     for my $q (keys %qs) {

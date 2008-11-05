@@ -50,6 +50,7 @@ sub new {
 	'fin'=>'',
 	'finw'=>'',
 	'signal'=>9,
+	'o'=>{},
 
 	'erreurs'=>[],
 	

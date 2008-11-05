@@ -669,7 +669,6 @@ sub saisie_auto_ok {
 
     # appel AMC-analyse avec cette liste
 
-    my @err;
     commande('commande'=>[with_prog("AMC-analyse.pl"),
 			  "--binaire",
 			  "--progression",1,
@@ -681,11 +680,12 @@ sub saisie_auto_ok {
 	     'texte'=>'Saisie automatique...',
 	     'progres'=>1,
 	     'niveau1'=>sub { detecte_analyse('interne'=>1); },
+	     'o'=>{'fh'=>$fh},
 	     'fin'=>sub {
 		 my $c=shift;
 		 my @err=$c->erreurs();
 
-		 close($fh);
+		 close($c->{'o'}->{'fh'});
 
 		 my @fe=();
 		 for(@err) {
