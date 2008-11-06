@@ -115,8 +115,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'listeetudiants'=>'',
 		   'notes'=>'notes.dat',
 		   'seuil'=>0.1,
-		   'majbareme'=>1,
-		   'annotecopies'=>0,
+		   'maj_bareme'=>1,
+		   'annote_copies'=>0,
 		   'fichbareme'=>'bareme.xml',
 		   'docs'=>['sujet.pdf','corrige.pdf','calage.pdf'],
 		   
@@ -794,8 +794,10 @@ sub valide_cb {
 }
 
 sub valide_options_correction {
-    valide_cb(\$projet{'majbareme'},$w{'maj_bareme'});
-    valide_cb(\$projet{'annotecopies'},$w{'annote_copies'});
+    my ($ww,$o)=@_;
+    my $name=$ww->get_name();
+    print "Valide OC depuis $name\n" if($debug);
+    valide_cb(\$projet{$name},$w{$name});
 }
 
 sub valide_options_notation {
@@ -820,7 +822,7 @@ sub voir_notes {
 }
 
 sub noter {
-    if($projet{'majbareme'}) {
+    if($projet{'maj_bareme'}) {
 	commande('commande'=>[with_prog("AMC-prepare.pl"),
 			      "--mode","b",
 			      "--bareme",localise($projet{'fichbareme'}),
@@ -833,7 +835,7 @@ sub noter {
 			  "--cr",localise($projet{'cr'}),
 			  "--bareme",localise($projet{'fichbareme'}),
 			  "-o",localise($projet{'notes'}),
-			  ($projet{'annotecopies'} ? "--copies" : "--no-copies"),
+			  ($projet{'annote_copies'} ? "--copies" : "--no-copies"),
 			  "--seuil",$projet{'seuil'},
 			  
 			  "--grain",$projet{'note_grain'},
@@ -847,7 +849,7 @@ sub noter {
 	     'progres'=>-0.01,
 	     'fin'=>sub {
 		 voir_notes();
-		 detecte_correc() if($projet{'annotecopies'});
+		 detecte_correc() if($projet{'annote_copies'});
 	     },
 	     );
 }
@@ -863,6 +865,8 @@ sub visualise_correc {
 }
 
 sub regroupement {
+
+    valide_options_notation();
 
     commande('commande'=>[with_prog("AMC-regroupe.pl"),
 			  "--cr",localise($projet{'cr'}),
@@ -927,6 +931,7 @@ sub model_id_to_iter {
     return($result);
 }
 
+# transmet les preferences vers les widgets correspondants
 sub transmet_pref {
     my ($gap,$prefixe,$h)=@_;
 
@@ -963,6 +968,7 @@ sub transmet_pref {
     }
 }
 
+# met a jour les preferences depuis les widgets correspondants
 sub reprend_pref {
     my ($prefixe,$h)=@_;
 
@@ -1282,8 +1288,10 @@ sub valide_projet {
     $an_list=AMC::ANList::new(localise($projet{'cr'}),'new_vide'=>1);
     detecte_analyse();
 
-    $w{'maj_bareme'}->set_active($projet{'majbareme'});
-    $w{'annote_copies'}->set_active($projet{'annotecopies'});
+    print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
+    $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
+    print "Options correction : AC".$projet{'annote_copies'}."\n" if($debug);
+    $w{'annote_copies'}->set_active($projet{'annote_copies'});
 
     transmet_pref($gui,'notation',\%projet);
 
@@ -1297,6 +1305,9 @@ sub projet_ouvre {
     my ($proj,$deja)=(@_);
 
     if($proj) {
+	
+	quitte_projet();
+
 	if(!$deja) {
 	    print "Ouverture du projet $proj...\n";
 	    
@@ -1329,20 +1340,30 @@ sub projet_ouvre {
     }
 }
 
-sub quitter {
-    if($projet{'modifie'}) {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'question', # message type
-					       'yes-no', # which set of buttons?
-					       "Vous n'avez pas sauvegardé les options de votre projet, qui ont pourtant été modifiées : voulez-vous le faire avant de quitter ?");
-	my $reponse=$dialog->run;
-	$dialog->destroy;      
-
-	if($reponse eq 'yes') {
-	    projet_sauve();
-	} 
+sub quitte_projet {
+    if($projet{'nom'}) {
+	
+	valide_options_notation();
+	
+	if($projet{'modifie'}) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+						   'destroy-with-parent',
+						   'question', # message type
+						   'yes-no', # which set of buttons?
+						   sprintf("Vous n'avez pas sauvegardé les options du projet <i>%s</i>, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?",$projet{'nom'}));
+	    my $reponse=$dialog->run;
+	    $dialog->destroy;      
+	    
+	    if($reponse eq 'yes') {
+		projet_sauve();
+	    } 
+	}
     }
+}
+
+sub quitter {
+
+    quitte_projet();
 
     Gtk2->main_quit;
     
