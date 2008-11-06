@@ -48,7 +48,7 @@ my $avance=AMC::Gui::Avancement::new($progress);
 
 my $ass='';
 
-$ass=XMLin($association,KeyAttr=> [ 'id' ]) if($association);
+$ass=XMLin($association,KeyAttr=> [ 'id' ],ForceArray=>['etudiant']) if($association);
 
 opendir(JDIR, $jpgdir) || die "can't opendir $jpgdir: $!";
 @pages = grep { /^page.*jpg$/ && -f "$jpgdir/$_" } readdir(JDIR);

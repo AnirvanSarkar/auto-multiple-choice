@@ -125,7 +125,7 @@ sub new {
     my $xmax=-1;
     my $ymax=-1;
     
-    open(GETSIZE,"identify ".join(" ",@images)." |");
+    open(GETSIZE,"-|","identify",@images);
     while(<GETSIZE>) {
 	if(/\s+([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+)\s+/) {
 	    $xmax=$1 if($xmax<$1);
@@ -185,7 +185,9 @@ sub new {
 sub get_identifiant {
     my ($self,$n)=@_;
     my $id=$self->{'identifiant'};
-    $id =~ s/\(([^\)]+)\)/(defined($self->{'heads'}->{$1}) ? $n->[$self->{'heads'}->{$1}] : '??')/gei;
+    $id =~ s/\(([^\)]+)\)/(defined($self->{'heads'}->{$1}) ? $n->[$self->{'heads'}->{$1}] : '')/gei;
+    $id =~ s/^\s+//;
+    $id =~ s/\s+$//;
     return($id);
 }
 

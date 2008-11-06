@@ -77,6 +77,8 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
+    print "DEBUG MODE\n" if($self->{'debug'});
+
     # recupere la liste des fichiers MEP des pages qui correspondent 
 
     my $dispos=AMC::MEPList::new($self->{'mep-dir'},'id'=>$self->{'etud'});
@@ -262,10 +264,11 @@ sub charge_i {
     opendir(TDIR,$self->{'temp-dir'}) || die "can't opendir $self->{'temp-dir'} : $!";
     my @candidats = grep { /^page-.*\.ppm$/ && -f $self->{'temp-dir'}."/$_" } readdir(TDIR);
     closedir TDIR;
+    print "Candidats : ".join(' ',@candidats)."\n" if($self->{'debug'});
     my $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
     # sprintf($self->{'temp-dir'}."/page-%06d.ppm",$page);
-    system("ppmtoxpm \"$tmp_ppm\" > \"".$self->{'tmp-xpm'},"\"");
-    unlink($tmp_ppm);
+    system("ppmtoxpm \"$tmp_ppm\" > \"".$self->{'tmp-xpm'}."\"");
+    unlink($tmp_ppm) if(!$self->{'debug'});
 
     $self->{'etudiant_cbe'}->set_text('');
     $self->{'scan-file'}='';

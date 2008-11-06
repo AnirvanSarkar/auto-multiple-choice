@@ -25,6 +25,8 @@ use Data::Dumper;
 use AMC::Basic;
 use AMC::ANList;
 
+use encoding 'utf8';
+
 my $cmd_pid='';
 
 sub catch_signal {
@@ -102,11 +104,20 @@ die "Repertoire inexistant : $cr_dir" if(! -d $cr_dir);
 die "Fichier inexistant : $bareme" if(! -f $bareme);
 
 $association="$cr_dir/association.xml" if($association eq '-');
-$association='' if(! -f $association);
+
+if(! -f $association) {
+    print "Fichier association inexistant : $f\n";
+    $association='';
+}
 
 my $ass='';
 
-$ass=XMLin($association,KeyAttr=> [ 'id' ]) if($association);
+if($association) {
+    $ass=XMLin($association,KeyAttr=> [ 'id' ],ForceArray=>['etudiant']);
+    my @k=keys %{$ass->{'etudiant'}};
+    print "Associations : ".(1+$#k). " etudiants\n";
+    #print Dumper($ass);
+}
 
 opendir(DIR, $cr_dir) || die "can't opendir $cr_dir: $!";
 my @xmls = grep { /\.xml$/ && -f "$cr_dir/$_" } readdir(DIR);
@@ -475,6 +486,7 @@ sub croix_coors {
 	 
 	 push @cmd,"$cr_dir/corrections/jpg/page-$idf.jpg";
 
+	 #print "Fabrication de page-$idf.jpg...\n";
 	 commande_externe(@cmd);
      }
  }

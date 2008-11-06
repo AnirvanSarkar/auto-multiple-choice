@@ -29,6 +29,8 @@ use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs t
 use File::Temp;
 use File::Copy;
 use Time::localtime;
+use Encode;
+use I18N::Langinfo qw(langinfo CODESET);
 
 use AMC::Basic;
 use AMC::MEPList;
@@ -71,8 +73,10 @@ use constant {
 
 my $debug=0;
 
-GetOptions("debug!"=>$debug,
+GetOptions("debug!"=>\$debug,
 	   );
+
+print "DEBUG MODE\n" if($debug);
 
 my $avance=AMC::Gui::Avancement::new(0);
 
@@ -482,8 +486,11 @@ sub projet_charge {
     if(-d $o{'rep_projets'}) {
 	opendir(DIR, $o{'rep_projets'}) 
 	    || die "Erreur a l'ouverture du repertoire ".$o{'rep_projets'}." : $!";
-	@projs = grep { ! /^\./ && -d $o{'rep_projets'}."/$_" } readdir(DIR);
+	my @f=map { decode("utf-8",$_); } readdir(DIR);
+	#print "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f).".\n";
+	@projs = grep { ! /^\./ && -d $o{'rep_projets'}."/".$_ } @f;
 	closedir DIR;
+	#print "[".$o{'rep_projets'}."] P:".join(',',@projs).".\n";
     }
 
     if($#projs>=0 || $cree) {
@@ -513,7 +520,8 @@ sub projet_charge {
 	
 	my $pb=$w{'main_window'}->render_icon ('gtk-open', 'menu');
 	
-	for (@projs) { 
+	for (@projs) {
+	    #print "Projet : $_.\n";
 	    $proj_store->set($proj_store->append,
 			     PROJ_NOM,$_,
 			     PROJ_ICO,$pb); 
@@ -559,8 +567,10 @@ sub projet_charge_non {
 sub projet_sauve {
     print "Sauvegarde du projet...\n";
     my $of=fich_options($projet{'nom'});
-    if(open(OPTS,">$of")) {
-	print OPTS XMLout(\%projet,"RootName"=>'projetAMC','NoAttr'=>1)."\n";
+    if(open(OPTS,">:encoding(utf-8)",$of)) {
+	print OPTS XMLout(\%projet,
+			  "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+			  "RootName"=>'projetAMC','NoAttr'=>1)."\n";
 	close OPTS;
 	$projet{'modifie'}=0;
     } else {
@@ -593,7 +603,7 @@ sub mep_active {
     my $f=$mep_list->filename($id);
     print "Visualisation $f...\n";
     if(fork()!=0) {
-	exec($o{'xml_viewer'}." ".$f);
+	exec($o{'xml_viewer'},$f);
     }
 }
 
@@ -650,6 +660,7 @@ sub doc_maj {
 			  localise($projet{'texsrc'}),
 			  "--prefix",localise(''),
 			  ],
+	     'signal'=>2,
 	     'texte'=>'Mise à jour des documents...',
 	     'progres'=>-0.01,
 	     'fin'=>sub { detecte_documents(); });
@@ -680,7 +691,7 @@ sub saisie_manuelle {
 				 'sujet'=>localise($projet{'docs'}->[0]),
 				 'etud'=>'',
 				 'dpi'=>$o{'saisie_dpi'},
-				 'debug'=>0,
+				 'debug'=>$debug,
 				 'seuil'=>$projet{'seuil'},
 				 'global'=>0,
 				 'en_quittant'=>\&detecte_analyse,
@@ -865,14 +876,15 @@ sub regroupement {
 
 sub regarde_regroupements {
     my $f=localise($projet{'cr'})."/corrections/pdf";
-    my $c=$o{'dir_opener'};
-    if($c =~ /[%]d/) {
-	$c =~ s/[%]d/$f/g;
-    } else {
-	$c .= ' '.$f;
-    }
+    print STDERR "Je vais voir $f\n";
+    my $seq=0;
+    my @c=map { $seq+=s/[%]d/$f/g;$_; } split(/\s+/,$o{'dir_opener'});
+    push @c,$f if(!$seq);
+    # nautilus attend des arguments dans l'encodage specifie par LANG & co.
+    @c=map { encode(langinfo(CODESET),$_); } @c;
+
     if(fork()!=0) {
-	exec($c);
+	exec(@c);
     }
 }
 
