@@ -75,7 +75,10 @@ sub new {
 		    if($mep_dispos{$laymep}) {
 			attention("ATTENTION : identifiant multiple : $laymep");
 		    }
-		    $mep_dispos{$laymep}="$f";
+		    $mep_dispos{$laymep}={
+			'filename'=>$f,
+			map { $_=>$lay->{'mep'}->{$laymep}->{$_} } qw/page src/,
+		    };
 		}
 	    }
 	}
@@ -96,12 +99,15 @@ sub nombre {
     return($self->{'n'});
 }
 
+sub attr {
+    my ($self,$id,$a)=(@_);
+    $id=$self->{'au-hasard'} if(!$id);
+    return($self->{'dispos'}->{$id}->{$a});
+}
+
 sub filename {
     my ($self,$id)=(@_);
-
-    $id=$self->{'au-hasard'} if(!$id);
-    
-    return($self->{'dispos'}->{$id});
+    return($self->attr($id,'filename'));
 }
 
 sub mep {
@@ -109,8 +115,9 @@ sub mep {
 
     $id=$self->{'au-hasard'} if(!$id);
     
-    if($self->{'dispos'}->{$id}) {
-	return(XMLin($self->{'dispos'}->{$id},ForceArray => 1,
+    if($self->{'dispos'}->{$id}->{'filename'}) {
+	return(XMLin($self->{'dispos'}->{$id}->{'filename'},
+		     ForceArray => 1,
 		     KeyAttr=> [ 'id' ]));
     } else {
 	return(undef);

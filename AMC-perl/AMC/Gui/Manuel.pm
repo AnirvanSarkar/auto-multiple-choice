@@ -88,10 +88,10 @@ sub new {
     # intuite le sujet.pdf s'il n'est pas donne, a partir du source latex
 
     if(!$self->{'sujet'}) {
-	my $lay=$dispos->mep();
-	if($lay->{'src'}) {
+	my $src=$dispos->attr('','src');
+	if($src) {
 	    my $sujet;
-	    $sujet=$lay->{'src'};
+	    $sujet=$src;
 	    $sujet =~ s/\.tex$/-sujet.pdf/ or $sujet='';
 	    $self->{'sujet'}=$sujet;
 	}

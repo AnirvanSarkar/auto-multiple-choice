@@ -1094,8 +1094,7 @@ sub detecte_mep {
     my $ii=0;
     for my $i ($mep_list->ids()) {
 	my $iter=$mep_store->append;
-	my $mep=$mep_list->mep($i);
-	$mep_store->set($iter,MEP_ID,$i,MEP_PAGE,$mep->{'page'},MEP_MAJ,file_maj($mep_list->filename($i)));
+	$mep_store->set($iter,MEP_ID,$i,MEP_PAGE,$mep_list->attr($i,'page'),MEP_MAJ,file_maj($mep_list->filename($i)));
 
 	$ii++;
 	$w{'avancement'}->set_fraction($ii/$mep_list->nombre());

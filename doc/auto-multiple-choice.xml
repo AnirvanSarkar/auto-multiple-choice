@@ -5,12 +5,19 @@
   <articleinfo>
     <title>Auto Multiple Choice</title>
 
-    <subtitle>Correction automatisée de QCM</subtitle>
+    <subtitle>Production et correction automatisée de QCM</subtitle>
 
     <abstract>
       <para>AMC est un ensemble d'utilitaires permettant l'utilisation de QCM
       rédigés en LaTeX et leur correction automatique à partir des scans des
       copies des étudiants. Le présent document décrit son utilisation.</para>
+
+      <para>Le projet AMC est hébergé par <ulink
+      url="http://gna.org/">Gna !</ulink> : vous retrouverez son site internet
+      à l'adresse <ulink
+      url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>,
+      et la page d'hébergement du projet à l'adresse <ulink
+      url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>.</para>
     </abstract>
 
     <author>
@@ -83,20 +90,90 @@
     <sect2>
       <title>Sur un système debian</title>
 
-      <para>Un paquet debian (fichier .deb) permet d'installer facilement AMC
-      sur un système debian ou dérivé (par exemple ubuntu). On pourra par
-      exemple utiliser <command>gdeb</command> (du paquet
-      <package>gdeb</package>) en ligne de commande (<code>gdeb --info
-      auto-multiple-choice_xxxx.deb</code>), ou en suivant le menu
-      <guimenuitem>Ouvrir avec</guimenuitem> obtenu par un clic droit sur le
-      fichier .deb dans l'explorateur de fichiers
-      <command>nautilus</command>.</para>
+      <para>Un paquet debian (fichier <filename>.deb</filename>) permet
+      d'installer facilement AMC sur un système <ulink
+      url="http://www.debian.org/">debian</ulink> ou dérivé (par exemple
+      <ulink url="http://www.ubuntu-fr.org/">ubuntu</ulink>). On procèdera
+      d'une des manières suivantes :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Méthode manuelle, ponctuelle :</para>
+
+          <orderedlist>
+            <listitem>
+              <para>Télécharger le fichier
+              <filename>auto-multiple-choice_<replaceable>xxxx</replaceable>.deb</filename>
+              (où <replaceable>xxxx</replaceable> est la version désirée)
+              depuis l'espace de téléchargement.</para>
+            </listitem>
+
+            <listitem>
+              <para>Au choix :</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Dans l'explorateur de fichiers
+                  (<command>nautilus</command>, si vous utilisez
+                  <emphasis>gnome</emphasis>), effectuer un clic droit sur le
+                  fichier <filename>.deb</filename> téléchargé, puis suivre le
+                  menu <guimenuitem>Ouvrir avec « Gdeb »</guimenuitem>. Si
+                  <command>gdeb</command> n'est pas installé, on peut choisir
+                  <guimenuitem>Ouvrir avec une autre application</guimenuitem>
+                  et sélectionner <guimenuitem>Gdeb</guimenuitem> dans
+                  l'onglet <guilabel>Applications
+                  disponibles</guilabel>.</para>
+
+                  <para>Il suffit ensuite de cliquer sur le bouton
+                  <guibutton>Install</guibutton> de
+                  <command>Gdeb</command>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Utiliser la commande <userinput>gdeb --info
+                  auto-multiple-choice_<replaceable>xxxx</replaceable>.deb</userinput>
+                  dans un terminal.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Installer à la main les dépendances requises, puis le
+                  paquet lui-même, par exemple à l'aide des commandes
+                  suivantes : <screen>sudo apt-get install libnetpbm9 texlive-latex-base latex-xcolor\
+         texlive-generic-recommended texlive-fonts-extra\
+         perl-base libxml-simple-perl libxml-writer-perl\
+         libtext-unaccent-perl libgtk2-gladexml-perl imagemagick\
+         netpbm xpdf-reader
+dpkg -i auto-multiple-choice_xxxx.deb</screen></para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </orderedlist>
+        </listitem>
+
+        <listitem>
+          <para>Méthode automatique :</para>
+
+          <para>Un dépôt de paquets debian est mis en place pour une mise à
+          jour automatique. Pour l'utiliser, ajoutez un fichier
+          <filename>/etc/apt/sources.list.d/amc</filename> dont le contenu
+          sera <programlisting>deb http://dl.gna.org/auto-qcm/ testing.pkg/</programlisting></para>
+
+          <para><package>auto-multiple-choice</package> sera alors disponible
+          dans le programme de gestion de paquets que vous utilisez
+          (<command>apt-get</command>, <command>aptitude</command> ou
+          <command>synaptic</command> par exemple).</para>
+        </listitem>
+      </itemizedlist>
     </sect2>
 
     <sect2>
       <title>À partir des sources</title>
 
-      <para>Après avoir téléchargé l'archive des sources :</para>
+      <para>Après avoir téléchargé l'archive des sources (fichier
+      <filename>auto-multiple-choice_<replaceable>xxxx</replaceable>.tar.gz</filename>,
+      où <replaceable>xxxx</replaceable> est la version désirée), on pourra
+      installer le logiciel grâce aux commandes suivantes, à écrire dans un
+      terminal :</para>
 
       <screen>tar xvzf auto-multiple-choice_xxxx.tar.gz
 cd auto-qcm
@@ -118,7 +195,8 @@ sudo make install</screen>
 
     <para>Nous commençons par quelques exemples qui permettent d'appréhender
     rapidemment la construction de fichiers LaTeX de QCM ; les fichiers tex de
-    ces exemples sont fournis avec AMC.</para>
+    ces exemples sont fournis avec AMC, dans le répertoire
+    <filename>/usr/share/doc/auto-multiple-choice/exemples/</filename>.</para>
 
     <sect2>
       <title>Un exemple simple</title>
@@ -262,7 +340,7 @@ Durée : 10 minutes.
 
           <callout arearefs="simple.fin" id="simple.fin.exp">
             <para>Cette fermeture d'accolade marque la fin de la commande
-            <command>exemplaire</command> (débutée à la ligne 9).</para>
+            <command>exemplaire</command> (débutée à la ligne 9).</para>
           </callout>
         </calloutlist></para>
     </sect2>
@@ -292,6 +370,7 @@ Durée : 10 minutes.
     Dans quel continent se situe Paris~?
     \begin{reponses}
       \bonne{L'Europe}
+      \mauvaise{L'afrique}
       \mauvaise{L'asie}
       \mauvaise{La planète Mars}
     \end{reponses}
@@ -343,7 +422,8 @@ Durée : 10 minutes.
 
 \vspace*{.5cm}
 \begin{minipage}{.4\linewidth}
-\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+  \centering\large\bf Histoire et géographie\\ Examen du 01/01/2008
+\end{minipage}
 \champnom{\fbox{\begin{minipage}{.5\linewidth}
 Nom et prénom :
 
@@ -354,24 +434,24 @@ Nom et prénom :
 %%% fin de l'en-tête
 
 \begin{center}
-\hrule
-\bf\Large Géographie
-\hrule
+  \hrule\vspace{2mm}
+  \bf\Large Géographie
+  \vspace{1mm}\hrule
 \end{center}
 
 \melangegroupe{geographie}
 \restituegroupe{geographie}
 
 \begin{center}
-\hrule
-\bf\Large Histoire
-\hrule
+  \hrule\vspace{2mm}
+  \bf\Large Histoire
+  \vspace{2mm}\hrule
 \end{center}
 
 \melangegroupe{histoire}
 \restituegroupe{histoire}
 
-\cleardoublepage
+\clearpage
 
 }
 
@@ -559,12 +639,14 @@ Nom et prénom :
       <para>Nous devons maintenant désigner un fichier LaTeX comme source du
       QCM. Pour cela, cliquons sur le bouton nommé <guilabel>Fichier
       LaTeX</guilabel>. Le répertoire dans lequel nous nous situons est celui
-      des exemples fournis avec AMC : sélectionnons
-      <filename>simple.tex</filename>. Pour pouvoir le modifier à loisir, il
-      faut maintenant le copier dans le réertoire du projet, grâce au bouton
-      <guibutton>importer</guibutton>. On peut maintenant l'éditer pour
-      modifier la forme du questionnaire ou les questions, grâce au bouton
-      <guibutton>éditer</guibutton> qui lance l'éditeur par défaut.</para>
+      des exemples fournis avec AMC (il s'agit en général de
+      <filename>/usr/share/doc/auto-multiple-choice/exemples/</filename>) :
+      sélectionnons <filename>simple.tex</filename>. Pour pouvoir le modifier
+      à loisir, il faut maintenant le copier dans le réertoire du projet,
+      grâce au bouton <guibutton>importer</guibutton>. On peut maintenant
+      l'éditer pour modifier la forme du questionnaire ou les questions, grâce
+      au bouton <guibutton>éditer</guibutton> qui lance l'éditeur par
+      défaut.</para>
     </sect2>
 
     <sect2>
@@ -667,24 +749,26 @@ Nom et prénom :
 
         <itemizedlist>
           <listitem>
-            <para>La valeur EQM (écart quadratique moyen) est un indicateur du
-            bon calage sur les marques de calage (les quatre ronds noirs
-            entourant chaque copie). Si il est trop important, il faudra
-            vérifier le calage (un clic droit sur la ligne correspondant à la
-            page puis le choix <guimenuitem>page</guimenuitem> permet de
-            visualiser la page scannée et le cadre et les cases tels qu'ils
-            sont détectés).</para>
+            <para>La valeur <emphasis>EQM</emphasis> (écart quadratique moyen)
+            est un indicateur du bon calage sur les marques de calage (les
+            quatre ronds noirs entourant chaque copie). Si il est trop
+            important, il faudra vérifier le calage (un clic droit sur la
+            ligne correspondant à la page puis le choix
+            <guimenuitem>page</guimenuitem> permet de visualiser la page
+            scannée et le cadre et les cases tels qu'ils sont
+            détectés).</para>
           </listitem>
 
           <listitem>
-            <para>La valeur sensibilité est un indicateur de la proximité du
-            remplissage des cases avec la valeur seuil. Si elle est trop
-            importante (à partir de 8 et jusqu'à sa valeur maximale 10), il
-            faudra vérifier que les cases reconnues comme étant cochées sont
-            bien les bonnes (un clic droit sur la ligne correspondant à la
-            page puis le choix <guimenuitem>zoom</guimenuitem> permet de
-            visualiser l'ensemble des cases de la copie, et de voir si la
-            détection s'est bien déroulée).</para>
+            <para>La valeur <emphasis>sensibilité</emphasis> est un indicateur
+            de la proximité du remplissage des cases avec la valeur seuil. Si
+            elle est trop importante (à partir de 8 et jusqu'à sa valeur
+            maximale 10), il faudra vérifier que les cases reconnues comme
+            étant cochées sont bien les bonnes (un clic droit sur la ligne
+            correspondant à la page puis le choix
+            <guimenuitem>zoom</guimenuitem> permet de visualiser l'ensemble
+            des cases de la copie, et de voir si la détection s'est bien
+            déroulée).</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -1159,7 +1243,8 @@ Durée : 10 minutes.
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">action <arg rep="repeat">arguments</arg></arg>
+          <arg choice="plain"><replaceable>action</replaceable> <arg
+          rep="repeat">arguments</arg></arg>
         </cmdsynopsis>
 
         <cmdsynopsis>
@@ -1173,8 +1258,9 @@ Durée : 10 minutes.
         <title>Description</title>
 
         <para>La commande <command>auto-multiple-choice</command> transmet à
-        la commande <command>AMC-action.pl</command> les arguments qu'on lui
-        donne.</para>
+        la commande
+        <command>AMC-<replaceable>action</replaceable>.pl</command> les
+        arguments qu'on lui donne.</para>
 
         <para>La deuxième forme, qui ne mentionne aucune action, appelle
         l'interface graphique <command>AMC-gui.pl</command> en lui
