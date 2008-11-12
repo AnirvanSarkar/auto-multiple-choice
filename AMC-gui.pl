@@ -701,7 +701,7 @@ sub saisie_manuelle {
 sub saisie_automatique {
     my $gsa=Gtk2::GladeXML->new($glade_xml,'saisie_auto');
     $gsa->signal_autoconnect_from_package('main');
-    for(qw/saisie_auto/) {
+    for(qw/saisie_auto copie_scans/) {
 	$w{$_}=$gsa->get_widget($_);
     }
 }
@@ -712,8 +712,28 @@ sub saisie_auto_annule {
 
 sub saisie_auto_ok {
     my @f=$w{'saisie_auto'}->get_filenames();
+    my $copie=$w{'copie_scans'}->get_active();
     print "Scans : ".join(',',@f)."\n";
     $w{'saisie_auto'}->destroy();
+
+    # copie eventuelle dans le repertoire projet
+
+    if($copie) {
+	my @fl=();
+	my $c=0;
+	for my $fich (@f) {
+	    my ($fxa,$fxb,$fb) = splitpath($fich);
+	    my $dest=localise("scans/".$fb);
+	    if(copy($fich,$dest)) {
+		push @fl,$dest; 
+		$c++;
+	    } else {
+		push @fl,$fich;
+	    }
+	}
+	print "Copie des fichiers scan : ".$c."/".(1+$#f)."\n";
+	@f=@fl;
+    }
 
     # pour eviter tout probleme du a une longueur excessive de la
     # ligne de commande, fabrication fichier temporaire avec la liste

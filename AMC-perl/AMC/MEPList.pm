@@ -35,6 +35,7 @@ BEGIN {
     @EXPORT_OK   = qw();
 }
 
+use AMC::Basic;
 use XML::Simple;
 
 sub new {
@@ -124,20 +125,21 @@ sub mep {
     }
 }
 
-sub id_triable {
-    my $id=shift;
-    if($id =~ /\+([0-9]+)\/([0-9]+)\/([0-9]+)\+/) {
-	return(sprintf("%50d-%30d-%40d",$1,$2,$3));
-    } else {
-	return($id);
-    }
-}
-
 sub ids {
     my ($self)=(@_);
 
     return(sort { id_triable($a) cmp id_triable($b) }
 	   (keys %{$self->{'dispos'}}));
+}
+
+sub pages_etudiant {
+    my ($self,$etu)=@_;
+    my @r=();
+    for my $i ($self->ids()) {
+	my ($e,$p)=get_ep($i);
+	push @r,$self->attr($i,'page') if($e == $etu);
+    }
+    return(@r);
 }
 
 1;
