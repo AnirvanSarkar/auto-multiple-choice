@@ -132,6 +132,16 @@ sub ids {
 	   (keys %{$self->{'dispos'}}));
 }
 
+sub etus {
+    my ($self)=(@_);
+    my %r=();
+    for my $i (keys %{$self->{'dispos'}}) {
+	my ($e,$p)=get_ep($i);;
+	$r{$e}=1;
+    }
+    return(keys %r);
+}
+
 sub pages_etudiant {
     my ($self,$etu)=@_;
     my @r=();

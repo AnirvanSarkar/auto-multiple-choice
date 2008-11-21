@@ -36,6 +36,7 @@ BEGIN {
 }
 
 use XML::Simple;
+use AMC::Basic;
 
 # perl -e 'use AMC::ANList; use Data::Dumper; print Dumper(AMC::ANList::new("points-cr","debug",1)->analyse());'
 
@@ -159,15 +160,6 @@ sub analyse {
 		    KeyAttr=> [ 'id' ]));
     } else {
 	return(undef);
-    }
-}
-
-sub id_triable {
-    my $id=shift;
-    if($id =~ /\+([0-9]+)\/([0-9]+)\/([0-9]+)\+/) {
-	return(sprintf("%50d-%30d-%40d",$1,$2,$3));
-    } else {
-	return($id);
     }
 }
 

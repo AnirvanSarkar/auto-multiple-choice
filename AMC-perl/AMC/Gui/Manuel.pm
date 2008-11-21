@@ -379,6 +379,9 @@ sub goto_activate_cb {
     my ($self)=(@_);
 
     my $dest=$self->{'goto'}->get_text();
+
+    $self->ecrit();
+
     print "On va a $dest\n";
     
     # recherche d'un ID correspondant 

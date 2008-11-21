@@ -76,7 +76,7 @@
       <para>Une connaissance de LaTeX est bien utile pour la conception des
       QCM. Cependant, les modèles fournis permettent à ceux qui ne sont par
       réfractaires aux formats de documents du type LaTeX/XML/HTML d'écrire
-      assez rapidement ses premiers formulaires.</para>
+      assez rapidement leurs premiers formulaires.</para>
     </sect2>
   </sect1>
 
@@ -155,8 +155,8 @@ dpkg -i auto-multiple-choice_xxxx.deb</screen></para>
 
           <para>Un dépôt de paquets debian est mis en place pour une mise à
           jour automatique. Pour l'utiliser, ajoutez un fichier
-          <filename>/etc/apt/sources.list.d/amc</filename> dont le contenu
-          sera <programlisting>deb http://dl.gna.org/auto-qcm/ testing.pkg/</programlisting></para>
+          <filename>/etc/apt/sources.list.d/amc.list</filename> dont le
+          contenu sera <programlisting>deb http://dl.gna.org/auto-qcm/ testing.pkg/</programlisting></para>
 
           <para><package>auto-multiple-choice</package> sera alors disponible
           dans le programme de gestion de paquets que vous utilisez
@@ -370,8 +370,8 @@ Durée : 10 minutes.
     Dans quel continent se situe Paris~?
     \begin{reponses}
       \bonne{L'Europe}
-      \mauvaise{L'afrique}
-      \mauvaise{L'asie}
+      \mauvaise{L'Afrique}
+      \mauvaise{L'Asie}
       \mauvaise{La planète Mars}
     \end{reponses}
   \end{question}
@@ -392,7 +392,7 @@ Durée : 10 minutes.
 
 \element{histoire}{
   \begin{question}{Marignan}
-    En quelle année a eu lieu la batialle de Marignan~?
+    En quelle année a eu lieu la bataille de Marignan~?
     \begin{reponseshoriz}
       \bonne{1515}
       \mauvaise{1915}
@@ -700,7 +700,19 @@ Nom et prénom :
       <title>Examen</title>
 
       <para>Une fois la préparation effectuée, nous pouvons imprimer le sujet,
-      et le distribuer aux étudiants...</para>
+      et le distribuer aux étudiants... Dans les cas simples, l'impression
+      peut s'effectuer directement à partir de la visualisation du sujet (par
+      un double-clic sur la ligne <guilabel>Sujet</guilabel> de la liste des
+      documents de travail). Dans le cas où il est préférable d'imprimer les
+      copies une à une (par exemple si les copies sont constituées de
+      plusieurs pages et si l'imprimante permet d'agrafer ces pages), on
+      utilisera plutôt le bouton <guibutton>Impressions</guibutton> après
+      avoir calculé les mises en page. La commande utilisée pour l'impression
+      doit alors être correctement configurée à l'aide de l'action <menuchoice>
+          <guimenu>Édition</guimenu>
+
+          <guimenuitem>Préférences</guimenuitem>
+        </menuchoice>.</para>
 
       <important>
         <para>Une fois que le sujet est imprimé et distribué, il ne faut plus

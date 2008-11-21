@@ -107,7 +107,9 @@ my %o_defaut=('pdf_viewer'=>'evince',
 	      'seuil_sens'=>8.0,
 	      'saisie_dpi'=>75,
 	      'delimiteur_decimal'=>',',
-	      'encodage_texte'=>'UTF-8');
+	      'encodage_texte'=>'UTF-8',
+	      'print_command_pdf'=>'cupsdoprint %f',
+	      );
 
 my %projet_defaut=('texsrc'=>'',
 		   'mep'=>'mep',
@@ -370,7 +372,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		    $item->signal_connect (activate => sub {
 			my (undef, $sortkey) = @_;
 			print "Visualisation $f...\n";
-			if(fork()!=0) {
+			if(fork()==0) {
 			    exec($o{'img_viewer'},$f);
 			}
 		    }, $_);
@@ -591,7 +593,7 @@ sub doc_active {
     #print "Active $sel...\n";
     my $f=localise($projet{'docs'}->[$sel]);
     print "Visualisation $f...\n";
-    if(fork()!=0) {
+    if(fork()==0) {
 	exec($o{'pdf_viewer'},$f);
     }
 }
@@ -602,7 +604,7 @@ sub mep_active {
     print "Active MEP $sel : ID=$id...\n";
     my $f=$mep_list->filename($id);
     print "Visualisation $f...\n";
-    if(fork()!=0) {
+    if(fork()==0) {
 	exec($o{'xml_viewer'},$f);
     }
 }
@@ -664,6 +666,19 @@ sub doc_maj {
 	     'texte'=>'Mise à jour des documents...',
 	     'progres'=>-0.01,
 	     'fin'=>sub { detecte_documents(); });
+}
+
+sub sujet_impressions {
+    commande('commande'=>[with_prog("AMC-imprime.pl"),
+			  "--sujet",localise($projet{'docs'}->[0]),
+			  "--mep",localise($projet{'mep'}),
+			  "--progression",1,
+			  "--print-command",$o{'print_command_pdf'},
+			  ],
+	     'signal'=>2,
+	     'texte'=>'Impression copie par copie...',
+	     'progres'=>1,
+	     );
 }
 
 sub calcule_mep {
@@ -826,7 +841,7 @@ sub valide_options_notation {
 
 sub voir_notes {
     if(-f localise($projet{'notes'})) {
-	if(fork()!=0) {
+	if(fork()==0) {
 	    exec($o{'dat_viewer'},localise($projet{'notes'}));
 	}
     } else {
@@ -879,7 +894,7 @@ sub visualise_correc {
     #print "Correc $sel $correc_store\n";
     my $f=$correc_store->get($correc_store->get_iter($sel),CORREC_FILE);
     print "Visualisation $f...\n";
-    if(fork()!=0) {
+    if(fork()==0) {
 	exec($o{'img_viewer'},$f);
     }
 }
@@ -907,7 +922,7 @@ sub regarde_regroupements {
     # nautilus attend des arguments dans l'encodage specifie par LANG & co.
     @c=map { encode(langinfo(CODESET),$_); } @c;
 
-    if(fork()!=0) {
+    if(fork()==0) {
 	exec(@c);
     }
 }
@@ -1294,7 +1309,7 @@ sub importe_source {
 sub edite_source {
     my $f=localise($projet{'texsrc'});
     print "Edition $f...\n";
-    if(fork()!=0) {
+    if(fork()==0) {
 	exec($o{'tex_editor'},$f);
     }
 }

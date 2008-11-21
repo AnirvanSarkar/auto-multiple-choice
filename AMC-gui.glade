@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Thu Nov  6 14:14:11 2008 -->
+<!--Generated with glade3 3.4.5 on Fri Nov 21 18:28:50 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="visible">True</property>
@@ -141,7 +141,8 @@
                     <child>
                       <widget class="GtkFileChooserButton" id="source_latex">
                         <property name="visible">True</property>
-                        <property name="title" translatable="yes">Sélectionner le fichier LaTeX source</property>
+                        <property name="preview_widget_active">False</property>
+                        <property name="title" translatable="yes">Sélection du fichier LaTeX source</property>
                         <signal name="file_set" handler="valide_source_tex" object="0"/>
                       </widget>
                       <packing>
@@ -236,9 +237,9 @@
                             <property name="visible">True</property>
                             <property name="spacing">4</property>
                             <child>
-                              <widget class="GtkHButtonBox" id="hbuttonbox3">
+                              <widget class="GtkVButtonBox" id="vbuttonbox2">
                                 <property name="visible">True</property>
-                                <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
+                                <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
                                 <child>
                                   <widget class="GtkButton" id="button3">
                                     <property name="visible">True</property>
@@ -251,7 +252,6 @@
                                   </widget>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="pack_type">GTK_PACK_END</property>
                                   </packing>
                                 </child>
                               </widget>
@@ -309,7 +309,7 @@
                                 <child>
                                   <widget class="GtkVButtonBox" id="vbuttonbox1">
                                     <property name="visible">True</property>
-                                    <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
+                                    <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
                                     <child>
                                       <widget class="GtkButton" id="button4">
                                         <property name="visible">True</property>
@@ -323,6 +323,21 @@
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkButton" id="button13">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip" translatable="yes">Lance l'impression, copie par copie</property>
+                                        <property name="label" translatable="yes">Impressions</property>
+                                        <property name="response_id">0</property>
+                                        <signal name="pressed" handler="sujet_impressions"/>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
                                       </packing>
                                     </child>
                                   </widget>
@@ -2287,6 +2302,56 @@ Windows-1252
                   </widget>
                   <packing>
                     <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkFrame" id="frame8">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">GTK_SHADOW_NONE</property>
+                    <child>
+                      <widget class="GtkAlignment" id="alignment11">
+                        <property name="visible">True</property>
+                        <property name="left_padding">12</property>
+                        <child>
+                          <widget class="GtkTable" id="table7">
+                            <property name="visible">True</property>
+                            <property name="n_rows">1</property>
+                            <property name="n_columns">2</property>
+                            <child>
+                              <widget class="GtkEntry" id="pref_x_print_command_pdf">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip" translatable="yes">Commande pour imprimer une copie (avec agrafage). La séquence %f sera remplacée par le nom d'un fichier PDF à imprimer.</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label44">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">PDF</property>
+                              </widget>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label14">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Impression&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="type">label_item</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </widget>
