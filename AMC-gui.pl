@@ -429,11 +429,11 @@ sub test_commandes {
 	push @pasbon,$nc if(!commande_accessible($nc));
     }
     if(@pasbon) {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 					       'destroy-with-parent',
 					       'warning', # message type
 					       'ok', # which set of buttons?
-					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join("",@pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
+					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
 	$dialog->run;
 	$dialog->destroy;
     }
@@ -767,7 +767,7 @@ sub saisie_auto_ok {
 			  "--progression",1,
 			  "--mep",localise($projet{'mep'}),
 			  "--cr",localise($projet{'cr'}),
-			  "--liste-fichiers",$fh,
+			  "--liste-fichiers",$fh->filename,
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Saisie automatique...',
@@ -878,6 +878,7 @@ sub noter {
 			  "--notemax",$projet{'note_max'},
 			  
 			  "--delimiteur",$o{'delimiteur_decimal'},
+			  "--encoding",$o{'encodage_texte'},
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Calcul des notes...',

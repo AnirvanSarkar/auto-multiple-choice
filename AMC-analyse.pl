@@ -19,8 +19,10 @@
 # <http://www.gnu.org/licenses/>.
 
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
+use File::Temp;
 use Getopt::Long;
 use AMC::Gui::Avancement;
+use AMC::MEPList;
 
 my $pid='';
 
@@ -39,6 +41,7 @@ my $binaire='';
 my $debug='';
 my $progress=0;
 my $liste_f;
+my $mep_file='';
 
 GetOptions("mep=s"=>\$mep_dir,
 	   "cr=s"=>\$cr_dir,
@@ -85,6 +88,17 @@ check_rep($mep_dir);
 check_rep($cr_dir,1);
 
 my $delta=1/(1+$#scans);
+my $fh;
+
+if(!$mep_file) {
+    $fh=File::Temp->new(TEMPLATE => "mep-XXXXXX",
+			TMPDIR => 1,
+			UNLINK=> 1);
+    $mep_file=$fh->filename;
+    my $m=AMC::MEPList::new($mep_dir);
+    $m->save($mep_file);
+    $fh->seek( 0, SEEK_END );
+}
 
 for my $s (@scans) {
     print "********** $s\n";
@@ -93,7 +107,8 @@ for my $s (@scans) {
     push @c,"--debug" if($debug);
     push @c,"--progression",($progress+1) if($progress);
     push @c,"--binaire" if($binaire);
-    push @c,"--mep",$mep_dir,"--cr",$cr_dir,$s;
+    push @c,"--mep-saved",$mep_file;
+    push @c,"--cr",$cr_dir,$s;
     
     $pid=fork();
     if($pid) {

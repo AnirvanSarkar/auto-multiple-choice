@@ -104,9 +104,12 @@ my $binaire='';
 my $debug='';
 my $progress=0;
 
+my $mep_saved='';
+
 GetOptions("page=s"=>\$out_cadre,
 	   "modele!"=>\$modele,
 	   "mep=s"=>\$xml_layout,
+	   "mep-saved=s"=>\$mep_saved,
 	   "transfo=s"=>\$t_type,
 	   "zooms=s"=>\$zoom_file,
 	   "nom=s"=>\$nom_file,
@@ -203,7 +206,12 @@ print "IMAGE = $scan ($tiff_x x $tiff_y)\n";
 ##########################################################
 # Initiation des utilitaires
 
-my $mep_dispos=AMC::MEPList::new($xml_layout);
+my $mep_dispos;
+if($mep_saved) {
+    $mep_dispos=AMC::MEPList::new($mep_saved,"saved"=>1);
+} else {
+    $mep_dispos=AMC::MEPList::new($xml_layout);
+}
 
 erreur("Aucune mise en page disponible") if($mep_dispos->nombre()==0 && !$modele);
 
@@ -575,11 +583,11 @@ if($modele) {
 
     # ce n'est pas un modele
 
-    erreur("Je n'ai pas d'instructions de mise en page...") if(!$xml_layout);
+    erreur("Je n'ai pas d'instructions de mise en page...") if(!($mep_saved || $xml_layout));
     
     # perl -e 'use XML::Simple;use Data::Dumper;$lay=XMLin("test-layout/mep-103-1-993.xml",ForceArray => 1,KeepRoot => 1);print Dumper($lay);'
 
-    if(-d $xml_layout) {
+    if($mep_saved || -d $xml_layout) {
 	#####
 	# calage sur une MEP au hasard pour recuperer l'ID binaire
 

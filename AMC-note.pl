@@ -49,6 +49,7 @@ my $notemax=20;
 my $grain='0,5';
 my $arrondi='.INF';
 my $delimiteur=',';
+my $encoding='UTF-8';
 
 my $debug='';
 
@@ -63,6 +64,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "arrondi=s"=>\$type_arrondi,
 	   "notemax=s"=>\$notemax,
 	   "delimiteur=s"=>\$delimiteur,
+	   "encoding=s"=>\$encoding,
 	   );
 
 my %fonction_arrondi=(-1=>'.INF',0=>'',1=>'.SUP',
@@ -204,7 +206,7 @@ print "entetes supplementaires : ".join(' ',@heads)."\n";
 print ("-" x 40);
 print "\n";
 
-open(NOTES,">$fichnotes") || die "Probleme a l'ecriture de $fichnotes : $!";
+open(NOTES,">:encoding($encoding)",$fichnotes) || die "Probleme a l'ecriture de $fichnotes : $!";
 
 print NOTES "NOM\tNOTE\t";
 print NOTES "ID\t".join("\t",map { "Q$_" } @qids)."\tTOTAL\tMAX";

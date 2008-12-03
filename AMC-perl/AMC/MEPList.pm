@@ -43,6 +43,7 @@ sub new {
 
     my $self={'mep'=>$mep,
 	      'id'=>'',
+	      'saved'=>'',
 	  };
 
     for (keys %o) {
@@ -51,6 +52,18 @@ sub new {
 
     bless $self;
 
+    if($self->{'saved'}) {
+	$self->load($mep);
+    } else {
+	$self->from_files($mep);
+    }
+
+    return($self);
+}
+
+sub from_files {
+    my ($self,$mep)=@_;
+    
     my @xmls;
     
     if(-d $mep) {
@@ -90,8 +103,21 @@ sub new {
     $self->{'dispos'}=\%mep_dispos;
     $self->{'au-hasard'}=$kmep[0];
     $self->{'n'}=1+$#kmep;
-    
-    return($self);
+}
+
+sub save {
+    my ($self,$file)=@_;
+    open(SAVE,">$file");
+    print SAVE XMLout($self);
+    close(SAVE);
+}
+
+sub load {
+    my ($self,$file)=@_;
+    my $f=XMLin($file);
+    for my $k (keys %$f) {
+	$self->{$k}=$f->{$k};
+    }
 }
 
 sub nombre {

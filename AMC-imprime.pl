@@ -28,7 +28,7 @@ my $cmd_pid='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-calepage : signal $signame, je tue $cmd_pid...\n";
+    print "*** AMC-imprime : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
     die "Killed";
 }
@@ -39,17 +39,33 @@ my $mep_dir="";
 my $sujet='';
 my $print_cmd='cupsdoprint %f';
 my $progress='';
+my $debug='';
 
 GetOptions(
 	   "mep=s"=>\$mep_dir,
 	   "sujet=s"=>\$sujet,
 	   "progression=s"=>\$progress,
 	   "print-command=s"=>\$print_cmd,
+	   "debug!"=>\$debug,
 	   );
 
 die "Repertoire MEP non specifie" if(!$mep_dir);
 die "Fichier sujet non specifie" if(!$sujet);
 die "Commande impression non specifiee" if(!$print_cmd);
+
+sub commande_externe {
+    my @c=@_;
+
+    print "Commande : ".join(' ',@c)."\n" if($debug);
+
+    $cmd_pid=fork();
+    if($cmd_pid) {
+	waitpid($cmd_pid,0);
+    } else {
+	exec(@c);
+    }
+
+}
 
 my $avance=AMC::Gui::Avancement::new($progress);
 
@@ -75,14 +91,14 @@ for my $e (@es) {
 
     print "Etudiant $e : pages $debut-$fin dans le fichier $fn...\n";
 
-    $cmd_pid=system("pdftk",$sujet,
-		    "cat","$debut-$fin",
-		    "output",$fn);
+    commande_externe("pdftk",$sujet,
+		     "cat","$debut-$fin",
+		     "output",$fn);
     $avance->progres_abs((2*$n-1)/(2*(1+$#es)));
 
     my @c=map { s/[%]f/$fn/g;$_; } split(/\s+/,$print_cmd);
     #print STDERR join(' ',@c)."\n";
-    $cmd_pid=system(@c);
+    commande_externe(@c);
 
     close($tmp);
 
