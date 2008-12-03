@@ -638,12 +638,12 @@ if($modele) {
 
 sub rassemble_cases {
     my ($f,@zooms)=@_;
-    print "Fabrication du zoom $f ...\n";
+    print "Fabrication de la collection $f ...\n";
     commande_externe("montage",
 		     "-tile","4x",
 		     "-background","blue",
 		     "-geometry","+3+3",
-		     (sort { $a cmp $b } @zooms),
+		     @zooms,
 		     $f);
 }
 
@@ -747,7 +747,7 @@ if($out_cadre || $zoom_file) {
 
     if($zoom_file) {
 
-	my $pdr="$temp_dir/haut-reduit.ppm";
+	my $pdr="$temp_dir/haut-reduit.miff";
 
 	commande_externe("convert",
 			 "-fill","blue",
@@ -756,30 +756,36 @@ if($out_cadre || $zoom_file) {
 			 "-font","Courier",
 			 "-pointsize",96,
 			 "-draw","text 0,96 \'$id_page\'",
-			 "-resize","25%",$pdr);
+			 "-resize","25%","miff:$pdr");
 
 	$zoid=0;
+
+	my %morceaux=(0=>[],1=>[],'x'=>[],'nom'=>[]);
 	
 	for my $k (grep { ! /:/ } (keys %case)) {
 	    # le zoom... 
+	    my $i;
 
 	    my $coche=($score{$k}>$seuil_coche ? 1 : 0);
+	    my $geometry=$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom');
 
 	    if($k =~ /([0-9]+)\.([0-9]+)/) {
-		$zof=sprintf("%s/z%d-%03d-%02d.ppm",$temp_dir,$coche,$1,$2);
-		push @zoom_files,$zof;
+		$i=$coche;
 	    } elsif($k eq "nom") {
-		$zof=$nom_file;
+		$i='nom';
 	    } else {
-		$zof=sprintf("%s/X-%d",$temp_dir,$zoid++);
-		push @zoom_files,$zof;
+		$i='x';
 	    }
+
+	    push @{$morceaux{$i}},$scan_score."[".$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom')."]";
 	    
-	    commande_externe("convert",
-			     "-fill","none",
-			     $scan_score,
-			     "-crop",$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom'),
-			     $zof);
+	}
+
+	###############################################
+	# Le nom
+
+	if($morceaux{'nom'}->[0]) {
+	    commande_externe("convert",$morceaux{'nom'}->[0],$nom_file);
 	}
 
 	###############################################
@@ -789,21 +795,12 @@ if($out_cadre || $zoom_file) {
 	my @lc;
 	my @pile=($pdr);
 
-	for my $i (0..1) {
-	    @lc=grep { /\/z$i[^\/]*$/ } @zoom_files;
-	    if(@lc) {
-		rassemble_cases($cases_zoom."-".$i.".ppm",
-				@lc);
-		push @pile,
-		"label:".($i ? "cochees" : "non-cochees"),
-		"$cases_zoom-$i.ppm";
+	for my $i (0,1,'x') {
+	    if($#{$morceaux{$i}}>=0) {
+		my $f="miff:$cases_zoom-$i.miff";
+		rassemble_cases($f,@{$morceaux{$i}});
+		push @pile,"label:".($i ? "cochees" : "non-cochees"),$f;
 	    }
-	}
-	@lc=grep { /\/X[^\/]*$/ } @zoom_files;
-	if(@lc) {
-	    rassemble_cases($cases_zoom."-".'x'.".ppm",
-			    @lc);
-	    push @pile,"autres","$cases_zoom-x.ppm";
 	}
 
 	commande_externe("montage",
