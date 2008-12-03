@@ -702,6 +702,7 @@ sub calcule_mep {
 sub saisie_manuelle {
     my $gm=AMC::Gui::Manuel::new('cr-dir'=>localise($projet{'cr'}),
 				 'mep-dir'=>localise($projet{'mep'}),
+				 'mep-data'=>$mep_list,
 				 'liste'=>$projet{'listeetudiants'},
 				 'sujet'=>localise($projet{'docs'}->[0]),
 				 'etud'=>'',

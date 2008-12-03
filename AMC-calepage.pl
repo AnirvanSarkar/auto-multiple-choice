@@ -637,14 +637,18 @@ if($modele) {
 }
 
 sub rassemble_cases {
-    my ($f,@zooms)=@_;
+    my ($src,$f,@zooms)=@_;
+    my @clones=();
+    for (@zooms) {
+	push @clones,"(","-clone",0,"-crop",$_,")";
+    }
     print "Fabrication de la collection $f ...\n";
+    commande_externe("convert",$src,@clones,"-delete",0,$f);
     commande_externe("montage",
 		     "-tile","4x",
 		     "-background","blue",
 		     "-geometry","+3+3",
-		     @zooms,
-		     $f);
+		     $f,$f);
 }
 
 if(!$modele) {
@@ -777,7 +781,7 @@ if($out_cadre || $zoom_file) {
 		$i='x';
 	    }
 
-	    push @{$morceaux{$i}},$scan_score."[".$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom')."]";
+	    push @{$morceaux{$i}},$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom');
 	    
 	}
 
@@ -785,7 +789,9 @@ if($out_cadre || $zoom_file) {
 	# Le nom
 
 	if($morceaux{'nom'}->[0]) {
-	    commande_externe("convert",$morceaux{'nom'}->[0],$nom_file);
+	    commande_externe("convert",
+			     $scan_score."[".$morceaux{'nom'}->[0]."]",
+			     $nom_file);
 	}
 
 	###############################################
@@ -798,7 +804,7 @@ if($out_cadre || $zoom_file) {
 	for my $i (0,1,'x') {
 	    if($#{$morceaux{$i}}>=0) {
 		my $f="miff:$cases_zoom-$i.miff";
-		rassemble_cases($f,@{$morceaux{$i}});
+		rassemble_cases($scan_score,$f,@{$morceaux{$i}});
 		push @pile,"label:".($i ? "cochees" : "non-cochees"),$f;
 	    }
 	}

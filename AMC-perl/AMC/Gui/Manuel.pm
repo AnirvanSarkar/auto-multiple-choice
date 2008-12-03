@@ -57,6 +57,7 @@ sub attention {
 sub new {
     my %o=(@_);
     my $self={'mep-dir'=>'',
+	      'mep-data'=>'',
 	      'cr-dir'=>'',
 	      'liste'=>'',
 	      'sujet'=>'',
@@ -81,7 +82,13 @@ sub new {
 
     # recupere la liste des fichiers MEP des pages qui correspondent 
 
-    my $dispos=AMC::MEPList::new($self->{'mep-dir'},'id'=>$self->{'etud'});
+    my $dispos;
+
+    if($self->{'mep-data'}) {
+	$dispos=$self->{'mep-data'};
+    } else {
+	$dispos=AMC::MEPList::new($self->{'mep-dir'},'id'=>$self->{'etud'});
+    }
 
     $self->{'dispos'}=$dispos;
 
