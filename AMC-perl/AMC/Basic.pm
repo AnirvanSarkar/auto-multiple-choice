@@ -27,7 +27,7 @@ BEGIN {
     $VERSION     = 0.1.1;
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &file_triable &sort_id );
+    @EXPORT      = qw( &id_triable &file2id &get_ep &file_triable &sort_id &attention);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -77,5 +77,21 @@ sub sort_id {
     my $b = $liststore->get ($iterb, $sortkey);
     return id_triable($a) cmp id_triable($b);
 }
+
+sub attention {
+    my @l=();
+    my $lm=0;
+    for my $u (@_) { push  @l,split(/\n/,$u); }
+    for my $u (@l) { $lm=length($u) if(length($u)>$lm); }
+    print "\n";
+    print "*" x ($lm+4)."\n";
+    for my $u (@l) {
+	print "* ".$u.(" " x ($lm-length($u)))." *\n";
+    }
+    print "*" x ($lm+4)."\n";
+    print "\n";
+}
+
+
 
 1;

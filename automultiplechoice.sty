@@ -315,7 +315,7 @@
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
 \AMCid@etud=100\AMCid@etudfin=#1\advance\AMCid@etudfin by 100%
 \ifAMC@correchead\AMCid@etudfin=100\fi
-\loop \setcounter{page}{1}\setcounter{questionA}{0} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+\loop \setcounter{page}{1}\setcounter{questionA}{0}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
 \def\exemplairepair{\ifodd\AMCid@etud}

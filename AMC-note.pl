@@ -27,6 +27,8 @@ use AMC::ANList;
 
 use encoding 'utf8';
 
+$VERSION_BAREME=2;
+
 my $cmd_pid='';
 
 sub catch_signal {
@@ -68,7 +70,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   );
 
 my %fonction_arrondi=(-1=>'.INF',0=>'',1=>'.SUP',
-		      i=>'.INF',n=>0,s=>'.SUP');
+		      i=>'.INF',n=>'',s=>'.SUP');
 
 if($type_arrondi) {
     for my $k (keys %fonction_arrondi) {
@@ -100,10 +102,23 @@ sub office_nombre {
     return($n);
 }
 
+if(! -d $cr_dir) {
+    attention("Repertoire de compte-rendus inexistant : $cr_dir");
+    die "Repertoire inexistant : $cr_dir";
+}
+if(! -f $bareme) {
+    attention("Fichier bareme inexistant : $bareme");
+    die "Fichier inexistant : $bareme";
+}
+
 my $bar=XMLin($bareme,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
-die "Repertoire inexistant : $cr_dir" if(! -d $cr_dir);
-die "Fichier inexistant : $bareme" if(! -f $bareme);
+if($VERSION_BAREME ne $bar->{'version'}) {
+    attention("La version du fichier bareme (".$bar->{'version'}.")",
+	      "est differente de la version utilisee pour la notation ($VERSIN_BAREME) :",
+	      "veuillez refabriquer le fichier bareme...");
+    die("Version du fichier bareme differente : $VERSION_BAREME / ".$bar->{'version'});
+}
 
 $association="$cr_dir/association.xml" if($association eq '-');
 
@@ -146,13 +161,18 @@ sub degroupe {
     return(%r);
 }
 
-my %bons=('max'=>{});
+my %bons=();
 my %qidsh=();
 
-for my $q (keys %{$bar->{'question'}}) {
-    $bons{'max'}->{$q}={};
-    for my $r (keys %{$bar->{'question'}->{$q}->{'reponse'}}) {
-	$bons{'max'}->{$q}->{$r}=[$bar->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'},1];
+for my $etu (keys %{$bar->{'etudiant'}}) {
+    my $baretu=$bar->{'etudiant'}->{$etu};
+    $bons{'max'.$etu}={};
+    my $bonsetu=$bons{'max'.$etu};
+    for my $q (keys %{$baretu->{'question'}}) {
+	$bonsetu->{$q}={};
+	for my $r (keys %{$baretu->{'question'}->{$q}->{'reponse'}}) {
+	    $bonsetu->{$q}->{$r}=[$baretu->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'},1];
+	}
     }
 }
 
@@ -174,7 +194,7 @@ sub action {
 	$qidsh{$q}=1;
 	
 	my $coche=($page->{$k}->{'r'}>$seuil ? 1 : 0);
-	my $ok=($coche == $bar->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
+	my $ok=($coche == $bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
 	print "Question $q reponse $r : ".($coche ? "X" : "O")." -> $ok\n" if($debug);
 	$pbons->{$etud}->{$q}={} if(!$pbons->{$etud}->{$q});
 	$pbons->{$etud}->{$q}->{$r}=[$coche,$ok];
@@ -209,14 +229,16 @@ print "\n";
 open(NOTES,">:encoding($encoding)",$fichnotes) || die "Probleme a l'ecriture de $fichnotes : $!";
 
 print NOTES "NOM\tNOTE\t";
-print NOTES "ID\t".join("\t",map { $bar->{'question'}->{$_}->{'titre'} } @qids)."TOTAL\tMAX\t";
+print NOTES "ID\t".join("\t",map { $bar->{'etudiant'}->{$un_etud}->{'question'}->{$_}->{'titre'} } @qids)."\tTOTAL\tMAX";
 for (@heads) { print NOTES "\t$_"; }
 print NOTES "\n";
+
+print NOTES "Note maximale\t$notemax\n";
 
 %lesnoms=();
 
 if($ass) {
-    for my $etud (keys %bons) {
+    for my $etud (grep { ! /^max/ } (keys %bons)) {
 	$lesnoms{$etud}=$ass->{'etudiant'}->{$etud}->{'content'};
     }
 }
@@ -239,19 +261,25 @@ sub office_cle {
     return($c);
 }
 
-$n_ligne=1;
+$n_ligne=2;
 $cle_max=office_cle(3+$#qids+1+2);
 $cle_total=office_cle(3+$#qids+1+1);
 $cle_debut=office_cle(3+1);
 $cle_fin=office_cle(3+$#qids+1);
+$case_notemax=office_cle(2,2);
 
-for my $etud (sort { $lesnoms{$a} cmp $lesnoms{$b} ||
-		     $a <=> $b } (keys %bons)) {
-    $n_ligne++;
+for my $etud ((grep { /^max/ } (keys %bons)),
+	      sort { $lesnoms{$a} cmp $lesnoms{$b} ||
+		     $a <=> $b } (grep { ! /^max/ } (keys %bons))) {
+    $vrai=$etud !~ /^max/;
 
-    print NOTES $lesnoms{$etud}."\t";
-    print NOTES "=ARRONDI$arrondi($notemax*$cle_total$n_ligne/$cle_max$n_ligne/$grain)*$grain\t";
-    print NOTES $etud."\t";
+    if($vrai) {
+	$n_ligne++;
+
+	print NOTES $lesnoms{$etud}."\t";
+	print NOTES "=ARRONDI$arrondi($case_notemax*$cle_total$n_ligne/$cle_max$n_ligne/$grain)*$grain\t";
+	print NOTES $etud."\t";
+    }
 
     $note_question{$etud}={};
 
@@ -261,7 +289,7 @@ for my $etud (sort { $lesnoms{$a} cmp $lesnoms{$b} ||
 
 	if($bons{$etud}->{$q}) {
 
-	    $barq=$bar->{'question'}->{$q};
+	    $barq=$bar->{'etudiant'}->{$etud}->{'question'}->{$q};
 
 	    $xx='';
 	    $raison='';
@@ -344,31 +372,57 @@ for my $etud (sort { $lesnoms{$a} cmp $lesnoms{$b} ||
 	    }
 
 	    $note_question{$etud}->{$q}=$xx;
-	    $note_question{$etud}->{'tmax'}+=$note_question{'max'}->{$q};
+	    $note_question{$etud}->{'tmax'}+=$note_question{'max'.$etud}->{$q};
 	    $total+=$xx;
 	    
-	    print NOTES office_nombre($xx);
-	    
 	    print $raison if($debug);
-	    print NOTES "\t";
+	    
+	    if($vrai) {
+		print NOTES office_nombre($xx);
+		print NOTES "\t";
+	    }
 	} else {
-	    print NOTES "-\t";
+	    if($vrai) {
+		print NOTES "-\t";
+	    }
 	}
     }
     $note_question{$etud}->{'total'}=$total;
-    print NOTES "=SOMME($cle_debut$n_ligne:$cle_fin$n_ligne)\t";
+    if($vrai) {
+	print NOTES "=SOMME($cle_debut$n_ligne:$cle_fin$n_ligne)\t";
 #    print NOTES office_nombre($total)."\t";
-    print NOTES office_nombre($note_question{$etud}->{'tmax'});
-    for(@heads) { print NOTES "\t".$ass->{'etudiant'}->{$etud}->{$_}; }
-    print NOTES "\n";
+	print NOTES office_nombre($note_question{$etud}->{'tmax'});
+	for(@heads) { print NOTES "\t".$ass->{'etudiant'}->{$etud}->{$_}; }
+	print NOTES "\n";
+    }
 }
+
+# ligne du maximum
+
+my %maximums=();
+for my $q (@qids) {
+    $maximums{$q}=0;
+    for my $etud (grep { ! /^max/ } (keys %bons)) {
+	$maximums{$q}=$note_question{'max'.$etud}->{$q} 
+	if($note_question{'max'.$etud}->{$q}>$maximums{$q});
+    }
+}
+
+print NOTES "Maximum\t";
+print NOTES "\t"; # note
+print NOTES "max\t";
+print NOTES join("\t",map { $maximums{$_} } (@qids))."\t";
+print NOTES "\t"; # total
+for(@heads) { print NOTES "\t"; }
+print NOTES "\n"; # max
+
 
 # ligne des moyennes :
 
 print NOTES "Moyenne\t";
 print NOTES "=MOYENNE(".office_cle(2,3).":".office_cle(2,$n_ligne).")\t"; # note
 print NOTES "moy\t";
-print NOTES join("\t",map { "=MOYENNE(".office_cle(4+$_,3).":".office_cle(4+$_,$n_ligne).")/".office_cle(4+$_,2) } (0..$#qids))."\t";
+print NOTES join("\t",map { "=MOYENNE(".office_cle(4+$_,3).":".office_cle(4+$_,$n_ligne).")/".office_cle(4+$_,$n_ligne+1) } (0..$#qids))."\t";
 print NOTES "\t"; # total
 for(@heads) { print NOTES "\t"; }
 print NOTES "\n"; # max
@@ -455,7 +509,7 @@ sub croix_coors {
 	     
 	     #print "Case $q.$r\n";
 	     
-	     if($bar->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'}) {
+	     if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'}) {
 		 push @cmd,"-strokewidth",2,"-stroke","blue",
 		 croix_coors($page->{$k}->{'coin'});
 	     }
@@ -470,7 +524,7 @@ sub croix_coors {
 	     
 	     if(!$bb[1]) {
 		 # mauvaise reponse
-		 if($bar->{'question'}->{$q}->{'multiple'} ||
+		 if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'multiple'} ||
 		    $bb[0]) {
 		     push @cmd,"-fill","none","-strokewidth",2,"-stroke","red";
 		     #.($bb[0] ? "red" : "green");

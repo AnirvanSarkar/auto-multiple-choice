@@ -24,6 +24,7 @@ use File::Temp qw/ tempfile tempdir /;
 use Data::Dumper;
 use Getopt::Long;
 
+use AMC::Basic;
 use AMC::MEPList;
 use AMC::Calage;
 use AMC::Image;
@@ -135,15 +136,6 @@ $threshold = ($modele ? "" : "60%") if($threshold eq 'defaut');
 $ocr_file="$repertoire_cr/ocr-manuel.xml" if($repertoire_cr && !$ocr_file);
 
 $scan=$ARGV[0];
-
-sub attention {
-    my $msg=shift;
-    print "\n";
-    print "*" x (length($msg)+4)."\n";
-    print "* ".$msg." *\n";
-    print "*" x (length($msg)+4)."\n";
-    print "\n";
-}
 
 sub erreur {
     my $e=shift;

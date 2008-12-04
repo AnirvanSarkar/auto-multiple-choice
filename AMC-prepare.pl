@@ -27,6 +27,8 @@ use Getopt::Long;
 
 use AMC::Gui::Avancement;
 
+$VERSION_BAREME=2;
+
 my $cmd_pid='';
 
 sub catch_signal {
@@ -243,12 +245,18 @@ if($mode =~ /b/) {
 
     my $quest='';
     my $rep='';
+    my $etu='';
+
     $cmd_pid=open(TEX,"-|",latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/))
 	or die "Impossible d'executer latex";
     while(<TEX>) {
 	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
 	    $quest=$1;$rep=''; 
 	    $qs{$quest}=1;
+	}
+	if(/AUTOQCM\[ETU=([0-9]+)\]/) { 
+	    $etu=$1;
+	    $bs{$etu}={};
 	}
 	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
 	    $titres{$1}=$2;
@@ -258,10 +266,10 @@ if($mode =~ /b/) {
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	    $rep=$1;
-	    $bs{"$quest.$rep"}={-bonne=>($2 eq 'B' ? 1 : 0)};
+	    $bs{$etu}->{"$quest.$rep"}={-bonne=>($2 eq 'B' ? 1 : 0)};
 	}
 	if(/AUTOQCM\[B=([^\]]+)\]/) {
-	    $bs{"$quest.$rep"}->{-bareme}=$1;
+	    $bs{$etu}->{"$quest.$rep"}->{-bareme}=$1;
 	}
     }
     close(TEX);
@@ -269,23 +277,28 @@ if($mode =~ /b/) {
 
     open(BAR,">",$bareme) or die "Impossible d'ecrire dans $bareme";
     print BAR "<?xml version='1.0' standalone='yes'?>\n";
-    print BAR "<bareme src=\"$f_tex\">\n";
-    for my $q (keys %qs) {
-	print BAR "  <question id=\"$q\""
-	    ." titre=\"".$titres{$q}."\""
-	    .($bs{"$q."} ? " bareme=\"".$bs{"$q."}->{-bareme}."\"" : "")
-	    ." multiple=\"".($qs{$q} eq "M" ? 1 : "")."\""
-	    .">\n";
-	for my $i (keys %bs) {
-	    if($i =~ /^$q\.([0-9]+)/) {
-		my $rep=$1;
-		print BAR "    <reponse id=\"$rep\" bonne=\""
-		    .$bs{$i}->{-bonne}."\""
-		    .($bs{"$i"}->{-bareme} ? " bareme=\"".$bs{"$i"}->{-bareme}."\"" : "")
-		    ." />\n";
+    print BAR "<bareme src=\"$f_tex\" version=\"$VERSION_BAREME\">\n";
+    for my $etu (keys %bs) {
+	print BAR "  <etudiant id=\"$etu\">\n";
+	my $bse=$bs{$etu};
+	for my $q (keys %qs) {
+	    print BAR "    <question id=\"$q\""
+		." titre=\"".$titres{$q}."\""
+		.($bse->{"$q."} ? " bareme=\"".$bse->{"$q."}->{-bareme}."\"" : "")
+		." multiple=\"".($qs{$q} eq "M" ? 1 : "")."\""
+		.">\n";
+	    for my $i (keys %$bse) {
+		if($i =~ /^$q\.([0-9]+)/) {
+		    my $rep=$1;
+		    print BAR "      <reponse id=\"$rep\" bonne=\""
+			.$bse->{$i}->{-bonne}."\""
+			.($bse->{"$i"}->{-bareme} ? " bareme=\"".$bse->{"$i"}->{-bareme}."\"" : "")
+			." />\n";
+		}
 	    }
+	    print BAR "    </question>\n";
 	}
-	print BAR "  </question>\n";
+	print BAR "  </etudiant>\n";
     }
     print BAR "</bareme>\n";
     close(BAR);
