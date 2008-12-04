@@ -209,7 +209,7 @@ print "\n";
 open(NOTES,">:encoding($encoding)",$fichnotes) || die "Probleme a l'ecriture de $fichnotes : $!";
 
 print NOTES "NOM\tNOTE\t";
-print NOTES "ID\t".join("\t",map { "Q$_" } @qids)."\tTOTAL\tMAX";
+print NOTES "ID\t".join("\t",map { $bar->{'question'}->{$_}->{'titre'} } @qids)."TOTAL\tMAX\t";
 for (@heads) { print NOTES "\t$_"; }
 print NOTES "\n";
 
@@ -242,6 +242,8 @@ sub office_cle {
 $n_ligne=1;
 $cle_max=office_cle(3+$#qids+1+2);
 $cle_total=office_cle(3+$#qids+1+1);
+$cle_debut=office_cle(3+1);
+$cle_fin=office_cle(3+$#qids+1);
 
 for my $etud (sort { $lesnoms{$a} cmp $lesnoms{$b} ||
 		     $a <=> $b } (keys %bons)) {
@@ -354,7 +356,9 @@ for my $etud (sort { $lesnoms{$a} cmp $lesnoms{$b} ||
 	}
     }
     $note_question{$etud}->{'total'}=$total;
-    print NOTES office_nombre($total)."\t".office_nombre($note_question{$etud}->{'tmax'});
+    print NOTES "=SOMME($cle_debut$n_ligne:$cle_fin$n_ligne)\t";
+#    print NOTES office_nombre($total)."\t";
+    print NOTES office_nombre($note_question{$etud}->{'tmax'});
     for(@heads) { print NOTES "\t".$ass->{'etudiant'}->{$etud}->{$_}; }
     print NOTES "\n";
 }
