@@ -36,26 +36,42 @@ BEGIN {
 }
 
 use XML::Simple;
+use XML::Dumper;
 use AMC::Basic;
 
 # perl -e 'use AMC::ANList; use Data::Dumper; print Dumper(AMC::ANList::new("points-cr","debug",1)->analyse());'
 
+%an_defaut=('debug'=>0,
+	    'action'=>'',
+	    'timestamp'=>0,
+	    'dispos'=>{},
+	    'new_vide'=>'',
+	    'saved'=>'',
+	    );
+
 sub new {
     my ($cr,%o)=(@_);
+    my $self;
 
-    my $self={'cr'=>$cr,
-	      'debug'=>0,
-	      'action'=>'',
-	      'timestamp'=>0,
-	      'dispos'=>{},
-	      'new_vide'=>'',
-	  };
+    if($o{'saved'} && -f $o{'saved'}) {
 
+	$self=load($o{'saved'});
+	
+    } else {
+
+	$self={};
+	bless $self;
+	
+    }
+
+    $self->{'cr'}=$cr;
+
+    for (keys %an_defaut) {
+	$self->{$_}=$an_defaut{$_} if(! defined($self->{$_}));
+    }
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
-
-    bless $self;
 
     $self->maj() if(!$self->{'new_vide'});
 
@@ -66,8 +82,22 @@ sub maj {
     my ($self)=@_;
 
     my $an_dispos=$self->{'dispos'};
+    my @ids_effaces=();
     my @ids_modifies=();
     my @xmls;
+
+    # on enleve les entrees qui n'existent plus...
+
+    for my $i (keys %$an_dispos) {
+	if((! $an_dispos->{$i}->{'fichier'})
+	   || (! -f $an_dispos->{$i}->{'fichier'})) {
+	    print STDERR "AN : entree $i effacee\n";
+	    push @ids_effaces,$i;
+	    delete($an_dispos->{$i});
+	}
+    }
+
+    # on detecte les nouveau fichiers...
     
     if(-d $self->{'cr'}) {
 	opendir(DIR, $self->{'cr'}) || die "can't opendir ".$self->{'cr'}.": $!";
@@ -117,7 +147,7 @@ sub maj {
 	if($self->{'action'}) {
 	    my @args=@{$self->{'action'}};
 	    my $cmd=shift @args;
-	    &$cmd($id,$x->{'analyse'}->{$id},@args);
+	    &$cmd($id,$x->{'analyse'}->{$id},@args) if(ref($cmd) eq 'CODE');
 	}
     }
   }
@@ -126,6 +156,8 @@ sub maj {
     
     $self->{'au-hasard'}=$kan[0];
     $self->{'n'}=1+$#kan;
+
+    $self->save() if($#ids_modifies>=0 || $#ids_effaces>=0);
     
     return(@ids_modifies);
 }
@@ -141,7 +173,9 @@ sub attribut {
 
     $id=$self->{'au-hasard'} if(!$id);
     
-    return($self->{'dispos'}->{$id}->{$att});
+    # pour ne pas creer artificiellement l'entree $id :
+    return(defined($self->{'dispos'}->{$id}) ?
+	   $self->{'dispos'}->{$id}->{$att} : undef);
 }
 
 sub filename {
@@ -154,7 +188,8 @@ sub analyse {
 
     $id=$self->{'au-hasard'} if(!$id);
     
-    if($self->{'dispos'}->{$id}->{'fichier'}) {
+    if($self->{'dispos'}->{$id}->{'fichier'} &&
+       -f $self->{'dispos'}->{$id}->{'fichier'}) {
 	return(XMLin($self->{'dispos'}->{$id}->{'fichier'},
 		    ForceArray => [ 'chiffre' ],
 		    KeyAttr=> [ 'id' ]));
@@ -168,6 +203,20 @@ sub ids {
 
     return(sort { id_triable($a) cmp id_triable($b) }
 	   (keys %{$self->{'dispos'}}));
+}
+
+sub save {
+    my ($self,$file)=@_;
+    if(!$file) {
+	$file=$self->{'saved'};
+    }
+    return() if(!$file);
+    pl2xml($self,$file);
+}
+
+sub load {
+    my ($file)=@_;
+    return(xml2pl($file));
 }
 
 1;

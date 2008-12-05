@@ -72,6 +72,7 @@ sub new {
 	      'iid'=>0,
 	      'global'=>0,
 	      'en_quittant'=>'',
+	      'encoding'=>'UTF-8',
 	  };
 
     for (keys %o) {
@@ -134,7 +135,7 @@ sub new {
 	
 	$self->{'liste-ent'}=Gtk2::ListStore->new ('Glib::String');
 	
-	open(LISTE,$self->{'liste'}) 
+	open(LISTE,"<:encoding(".$self->{'encoding'}.")",$self->{'liste'}) 
 	    or die "Erreur a l'ouverture du fichier <".$self->{'liste'}."> : $!";
       NOM: while(<LISTE>) {
 	  s/\#.*//;

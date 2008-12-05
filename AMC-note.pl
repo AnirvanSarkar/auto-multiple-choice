@@ -52,10 +52,12 @@ my $grain='0,5';
 my $arrondi='.INF';
 my $delimiteur=',';
 my $encoding='UTF-8';
+my $an_saved='';
 
 my $debug='';
 
 GetOptions("cr=s"=>\$cr_dir,
+	   "an-saved"=>\$an_saved,
 	   "bareme=s"=>\$bareme,
 	   "association=s"=>\$association,
 	   "seuil=s"=>\$seuil,
@@ -201,7 +203,22 @@ sub action {
     }
 }
 
-my $anl=AMC::ANList::new($cr_dir,'action'=>[\&action,\%bons,$bar]);
+my $anl;
+
+if($an_saved) {
+    $anl=AMC::ANList::new($cr_dir,
+			  'saved'=>$an_saved,
+			  'action'=>'',
+			  );
+    for my $id ($anl->ids()) {
+	action($id,$anl->analyse($id),\%bons,$bar);
+    }
+} else {
+    $anl=AMC::ANList::new($cr_dir,
+			  'saved'=>'',
+			  'action'=>[\&action,\%bons,$bar]
+			  );
+}
 
 #print Dumper(\%bons)."\n";
 
@@ -218,7 +235,7 @@ my %note_question=();
 
 my @qids=sort { $a <=> $b } (keys %qidsh);
 
-my $un_etud=(keys %{$ass->{'etudiant'}})[0];
+my $un_etud=(keys %{$bar->{'etudiant'}})[0];
 my @heads=grep { ! /^(content|id)$/ } (keys %{$ass->{'etudiant'}->{$un_etud}});
 
 print "entetes supplementaires : ".join(' ',@heads)."\n";
@@ -271,6 +288,10 @@ $case_notemax=office_cle(2,2);
 for my $etud ((grep { /^max/ } (keys %bons)),
 	      sort { $lesnoms{$a} cmp $lesnoms{$b} ||
 		     $a <=> $b } (grep { ! /^max/ } (keys %bons))) {
+
+    my $refetud=$etud;
+    $refetud =~ s/^max//;
+
     $vrai=$etud !~ /^max/;
 
     if($vrai) {
@@ -289,7 +310,7 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 
 	if($bons{$etud}->{$q}) {
 
-	    $barq=$bar->{'etudiant'}->{$etud}->{'question'}->{$q};
+	    $barq=$bar->{'etudiant'}->{$refetud}->{'question'}->{$q};
 
 	    $xx='';
 	    $raison='';
@@ -541,7 +562,7 @@ sub croix_coors {
 	     #print "MARQUE : ($x,$y) ".$note_question{$etud}->{$q}."\n";
 	     push @cmd,"-stroke","red","-fill","red",
 	     "-strokewidth",1,"-draw",sprintf("text %.2f,%.2f \'%s\'",
-					      $x,$y,$note_question{$etud}->{$q}."/".$note_question{'max'}->{$q});
+					      $x,$y,$note_question{$etud}->{$q}."/".$note_question{'max'.$etud}->{$q});
 	 }
 	 
 	 push @cmd,"$cr_dir/corrections/jpg/page-$idf.jpg";

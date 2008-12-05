@@ -33,7 +33,7 @@ my $cmd_pid='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-calepage : signal $signame, je tue $cmd_pid...\n";
+    print "*** AMC-prepare : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
     die "Killed";
 }

@@ -37,28 +37,59 @@ BEGIN {
 
 use AMC::Basic;
 use XML::Simple;
+use XML::Dumper;
+
+my %mep_defaut=('id'=>'',
+		'saved'=>'',
+		);
 
 sub new {
     my ($mep,%o)=(@_);
+    my $self;
+    my $renew=1;
 
-    my $self={'mep'=>$mep,
-	      'id'=>'',
-	      'saved'=>'',
-	  };
+    if($o{'saved'} && -f $o{'saved'}) {
 
+	$self=load($o{'saved'});
+	$renew=0;
+	
+    } else {
+	
+	$self={};
+	bless $self;
+
+    }
+    
+    $self->{'mep'}=$mep;
+    
+    for (keys %mep_defaut) {
+	$self->{$_}=$mep_defaut{$_} if(! defined($self->{$_}));
+    }
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
+    
+    $self->maj();
+    $self->from_files($mep) if($renew);
+    return($self);
+}
 
-    bless $self;
+sub maj {
+    my ($self)=@_;
+    my @ie=();
 
-    if($self->{'saved'}) {
-	$self->load($mep);
-    } else {
-	$self->from_files($mep);
+    # enleve les fichiers qui n'existent plus...
+    
+    for my $i (keys %{$self->{'dispos'}}) {
+	if((! $self->{'dispos'}->{$i}->{'filename'})
+	   || (! -f $self->{'dispos'}->{$i}->{'filename'})) {
+	    print STDERR "MEP : entree $i effacee\n";
+	    push @ie,$i;
+	    delete($self->{'dispos'}->{$i});
+	}
     }
 
-    return($self);
+    $self->save() if($#ie>=0);
 }
 
 sub from_files {
@@ -103,21 +134,22 @@ sub from_files {
     $self->{'dispos'}=\%mep_dispos;
     $self->{'au-hasard'}=$kmep[0];
     $self->{'n'}=1+$#kmep;
+
+    $self->save();
 }
 
 sub save {
     my ($self,$file)=@_;
-    open(SAVE,">$file");
-    print SAVE XMLout($self);
-    close(SAVE);
+    if(!$file) {
+	$file=$self->{'saved'};
+    }
+    return() if(!$file);
+    pl2xml($self,$file);
 }
 
 sub load {
-    my ($self,$file)=@_;
-    my $f=XMLin($file);
-    for my $k (keys %$f) {
-	$self->{$k}=$f->{$k};
-    }
+    my ($file)=@_;
+    return(xml2pl($file));
 }
 
 sub nombre {
@@ -179,3 +211,9 @@ sub pages_etudiant {
 }
 
 1;
+
+__END__
+
+perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep");$m->save("/tmp/a.gz");'
+perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/tmp/a.gz","saved"=>1);print join(", ",$m->ids())."\n";'
+

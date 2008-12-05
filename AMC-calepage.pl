@@ -199,11 +199,8 @@ print "IMAGE = $scan ($tiff_x x $tiff_y)\n";
 # Initiation des utilitaires
 
 my $mep_dispos;
-if($mep_saved) {
-    $mep_dispos=AMC::MEPList::new($mep_saved,"saved"=>1);
-} else {
-    $mep_dispos=AMC::MEPList::new($xml_layout);
-}
+
+$mep_dispos=AMC::MEPList::new($xml_layout,"saved"=>$mep_saved);
 
 erreur("Aucune mise en page disponible") if($mep_dispos->nombre()==0 && !$modele);
 

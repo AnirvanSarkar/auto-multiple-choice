@@ -131,6 +131,9 @@ my %projet_defaut=('texsrc'=>'',
 		   'modifie'=>1,
 		   );
 
+my $mep_saved='mep.xml.gz';
+my $an_saved='an.xml.gz';
+
 # lecture options ...
 
 my %o=();
@@ -710,6 +713,7 @@ sub saisie_manuelle {
 				 'debug'=>$debug,
 				 'seuil'=>$projet{'seuil'},
 				 'global'=>0,
+				 'encoding'=>$o{'encodage_texte'},
 				 'en_quittant'=>\&detecte_analyse,
 				 );
 }
@@ -867,8 +871,10 @@ sub noter {
 		 'texte'=>'Lecture du bareme...',
 		 'progres'=>-0.01);
     }
+
     commande('commande'=>[with_prog("AMC-note.pl"),
 			  "--cr",localise($projet{'cr'}),
+			  "--an-saved",localise($an_saved),
 			  "--bareme",localise($projet{'fichbareme'}),
 			  "-o",localise($projet{'notes'}),
 			  ($projet{'annote_copies'} ? "--copies" : "--no-copies"),
@@ -1123,7 +1129,8 @@ sub detecte_mep {
     $w{'avancement'}->set_fraction(0);
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    $mep_list=AMC::MEPList::new(localise($projet{'mep'}));
+    $mep_list=AMC::MEPList::new(localise($projet{'mep'}),
+				'saved'=>localise($mep_saved));
     $mep_store->clear();
 
     $w{'onglet_saisie'}->set_sensitive($mep_list->nombre()>0);
@@ -1174,7 +1181,12 @@ sub detecte_analyse {
     $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    my @ids_m=$an_list->maj();
+    my @ids_m;
+    if($oo{'premier'}) {
+	@ids_m=$an_list->ids();
+    } else {
+	@ids_m=$an_list->maj();
+    }
 
     print "IDS_M : ".join(' ',@ids_m)."\n";
 
@@ -1243,6 +1255,8 @@ sub detecte_analyse {
     $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
     $w{'commande'}->hide() if(!$oo{'interne'});
     Gtk2->main_iteration while ( Gtk2->events_pending );
+
+    #print "IDS> ".join(" ",$an_list->ids())."\n";
 }
 
 sub set_source_tex {
@@ -1321,8 +1335,10 @@ sub valide_projet {
     $w{'liste'}->set_filename($projet{'listeetudiants'});
     detecte_mep();
 
-    $an_list=AMC::ANList::new(localise($projet{'cr'}),'new_vide'=>1);
-    detecte_analyse();
+    $an_list=AMC::ANList::new(localise($projet{'cr'}),
+			      'new_vide'=>0,
+			      'saved'=>localise($an_saved));
+    detecte_analyse('premier'=>1);
 
     print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
     $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
