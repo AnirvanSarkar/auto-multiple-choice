@@ -70,11 +70,13 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
     
-    $self->maj();
     if($renew) {
 	$self->from_files();
 	$self->save();
+    } else {
+	$self->maj();
     }
+
     return($self);
 }
 
@@ -223,7 +225,7 @@ sub etus {
 	my ($e,$p)=get_ep($i);;
 	$r{$e}=1;
     }
-    return(keys %r);
+    return(sort { $a <=> $b } (keys %r));
 }
 
 sub pages_etudiant {
