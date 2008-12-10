@@ -99,7 +99,8 @@ my %o_defaut=('pdf_viewer'=>'evince',
 	      'img_viewer'=>'eog',
 	      'dat_viewer'=>'oocalc',
 	      'xml_viewer'=>'gedit',
-	      'tex_editor'=>'gedit',
+	      'tex_editor'=>'kile',
+	      'html_browser'=>'sensible-browser %u',
 	      'dir_opener'=>'nautilus --no-desktop file://%d',
 	      'rep_projets'=>Glib::get_home_dir().'/Projets-QCM',
 	      'rep_modeles'=>'/usr/share/doc/auto-multiple-choice/exemples',
@@ -525,7 +526,7 @@ sub projet_charge {
 	
 	my $pb=$w{'main_window'}->render_icon ('gtk-open', 'menu');
 	
-	for (@projs) {
+	for (sort { $a cmp $b } @projs) {
 	    #print "Projet : $_.\n";
 	    $proj_store->set($proj_store->append,
 			     PROJ_NOM,$_,
@@ -947,6 +948,19 @@ sub activate_apropos {
 
 sub close_apropos {
     $w{'apropos'}->destroy();
+}
+
+sub activate_doc {
+    my $url='file:///usr/share/doc/auto-multiple-choice/html/auto-multiple-choice/index.html';
+
+    if(fork()==0) {
+	my $seq=0;
+	my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
+	push @c,$url if(!$seq);
+	@c=map { encode(langinfo(CODESET),$_); } @c;
+
+	exec(@c);
+    }
 }
 
 sub bon_id {

@@ -35,10 +35,13 @@ MODS=AMC-*.pl AMC-traitement-image
 GLADE=AMC-*.glade
 STY=automultiplechoice.sty
 
-all: AMC-traitement-image doc ;
+all: AMC-traitement-image AMC-gui.glade doc ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
 	gcc -O3 -I. -lppm $< -o $@
+
+%.glade: %.in.glade FORCE
+	./versions.pl < $< > $@
 
 doc:
 	$(MAKE) -C doc
@@ -94,6 +97,7 @@ install: FORCE
 # libnetpbm9 -> libppm (AMC-traitement-image)
 # netpbm -> ppmtoxpm (Manuel.pm)
 # xpdf-reader -> pdftoppm (Manuel.pm)
+# xpdf-utils -> pdfinfo (AMC-prepare)
 deb: logo.xpm FORCE
 	dpkg-buildpackage -I.svn -Idownload-area -rsudo -k42067447
 
