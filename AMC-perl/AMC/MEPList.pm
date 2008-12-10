@@ -41,6 +41,7 @@ use XML::Dumper;
 
 my %mep_defaut=('id'=>'',
 		'saved'=>'',
+		'timestamp'=>0,
 		);
 
 sub new {
@@ -70,7 +71,10 @@ sub new {
     }
     
     $self->maj();
-    $self->from_files($mep) if($renew);
+    if($renew) {
+	$self->from_files();
+	$self->save();
+    }
     return($self);
 }
 
@@ -88,54 +92,76 @@ sub maj {
 	    delete($self->{'dispos'}->{$i});
 	}
     }
+    
+    # va voir ceux qui sont apparu...
+
+    my @xmls=();
+
+    if(-d $self->{'mep'}) {
+	opendir(DIR, $self->{'mep'}) || die "can't opendir ".$self->{'mep'}.": $!";
+	@xmls = grep { @st=stat($_); 
+		       /\.xml$/ && -f $_ && $st[9]>$self->{'timestamp'} } 
+	map { $self->{'mep'}."/$_" } readdir(DIR);
+	closedir DIR;
+
+	push @ie,$self->from_files(@xmls) if($#xmls>=0);
+    }
+
 
     $self->save() if($#ie>=0);
 }
 
 sub from_files {
-    my ($self,$mep)=@_;
-    
-    my @xmls;
-    
-    if(-d $mep) {
-	#####
-	# rechercher toutes les possibilites de mise en page :
-	opendir(DIR, $mep) 
-	    || die "Erreur a l'ouverture du repertoire $mep : $!";
-	@xmls = map { "$mep/$_"; } 
-	grep { /\.xml$/ && -f "$mep/$_" } readdir(DIR);
-	closedir DIR;
-    } else {
-	@xmls=($mep);
-    }
+    my ($self,@xmls)=@_;
+    my @r=();
 
-    my %mep_dispos=();
+    if($#xmls<0) {
+
+	if(-d $self->{'mep'}) {
+	    #####
+	    # rechercher toutes les possibilites de mise en page :
+	    opendir(DIR, $self->{'mep'}) 
+		|| die "Erreur a l'ouverture du repertoire ".$self->{'mep'}." : $!";
+	    @xmls = map { $self->{'mep'}."/$_"; } 
+	    grep { /\.xml$/ && -f $self->{'mep'}."/$_" } readdir(DIR);
+	    closedir DIR;
+	} else {
+	    @xmls=($self->{'mep'});
+	}
+
+	$self->{'dispos'}={};
+
+    }
     
     for my $f (@xmls) {
 	my $lay=XMLin($f,ForceArray => 1,KeepRoot => 1, KeyAttr=> [ 'id' ]);
+
+	my @st=stat($f);
+	$self->{'timestamp'}=$st[9] if($st[9]>$self->{'timestamp'});
+
 	if($lay->{'mep'}) {
 	    for my $laymep (keys %{$lay->{'mep'}}) {
 		if($self->{'id'} eq '' ||
 		   $laymep =~ /^\+$self->{'id'}\//) {
-		    if($mep_dispos{$laymep}) {
+		    if($self->{'dispos'}->{$laymep}) {
 			attention("ATTENTION : identifiant multiple : $laymep");
 		    }
-		    $mep_dispos{$laymep}={
+		    $self->{'dispos'}->{$laymep}={
 			'filename'=>$f,
 			map { $_=>$lay->{'mep'}->{$laymep}->{$_} } qw/page src/,
 		    };
+		    push @r,$laymep;
 		}
 	    }
 	}
     }
     
-    my @kmep=(keys %mep_dispos);
+    my @kmep=(keys %{$self->{'dispos'}});
     
-    $self->{'dispos'}=\%mep_dispos;
     $self->{'au-hasard'}=$kmep[0];
     $self->{'n'}=1+$#kmep;
 
-    $self->save();
+    return(@r);
 }
 
 sub save {

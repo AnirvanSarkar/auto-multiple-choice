@@ -1129,8 +1129,8 @@ sub detecte_mep {
     $w{'avancement'}->set_fraction(0);
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    $mep_list=AMC::MEPList::new(localise($projet{'mep'}),
-				'saved'=>localise($mep_saved));
+    $mep_list->maj();
+
     $mep_store->clear();
 
     $w{'onglet_saisie'}->set_sensitive($mep_list->nombre()>0);
@@ -1333,6 +1333,11 @@ sub edite_source {
 sub valide_projet {
     set_source_tex();
     $w{'liste'}->set_filename($projet{'listeetudiants'});
+
+
+    $mep_list=AMC::MEPList::new(localise($projet{'mep'}),
+				'saved'=>localise($mep_saved));
+
     detecte_mep();
 
     $an_list=AMC::ANList::new(localise($projet{'cr'}),
