@@ -197,15 +197,31 @@ if($mode =~ /m/) {
     $avance->progres(0.03);
     
     @pages=();
-    $cmd_pid=open(IDCMD,"-|","identify",$calage)
-	or die "Erreur d'identification : $!";
-    while(<IDCMD>) {
-	if(/^([^\[]+)\[([0-9]+)\]\s+(PDF|PS)/) {
-	    push @pages,$1."[".$2."]";
+
+    if($ppm_via eq 'pdf') {
+	$cmd_pid=open(IDCMD,"-|","pdfinfo",$calage)
+	    or die "Erreur d'identification : $!";
+	while(<IDCMD>) {
+	    if(/^Pages:\s+([0-9]+)/) {
+		my $npages=$1;
+		for my $j (1..$npages) {
+		    push @pages,$calage."[".($j-1)."]";
+		}
+	    }
 	}
+	close(IDCMD);
+	$cmd_pid='';
+    } else {
+	$cmd_pid=open(IDCMD,"-|","identify",$calage)
+	    or die "Erreur d'identification : $!";
+	while(<IDCMD>) {
+	    if(/^([^\[]+)\[([0-9]+)\]\s+(PDF|PS)/) {
+		push @pages,$1."[".$2."]";
+	    }
+	}
+	close(IDCMD);
+	$cmd_pid='';
     }
-    close(IDCMD);
-    $cmd_pid='';
     
     my $npage=0;
     my $np=1+$#pages;
