@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version='1.0'?> <!-- -*- coding:utf-8 -*-  -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:import href="/usr/share/xml/docbook/stylesheet/nwalsh/xhtml/chunk.xsl"/>
 <xsl:param name="use.id.as.filename" select="1"/>
@@ -41,7 +41,7 @@
 	</xsl:if>
 	</td>
 	<td class="milieu">
-	<a href="index.html">Documentation</a> » <xsl:apply-templates select="." mode="object.title.markup"/>
+	<a href="../index.shtml">Accueil</a> » <a href="index.html">Doc</a> » <xsl:apply-templates select="." mode="object.title.markup"/>
 	</td>
 	<td class="droite" width="25%">
         <xsl:if test="count($next)&gt;0">

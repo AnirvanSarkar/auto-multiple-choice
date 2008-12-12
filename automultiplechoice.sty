@@ -17,6 +17,8 @@
 % along with Auto-Multiple-Choice.  If not, see
 % <http://www.gnu.org/licenses/>.
 %
+% $Revision$
+% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{automultiplechoice}
 \RequirePackage{theorem,graphicx}
@@ -318,6 +320,9 @@
 \loop \setcounter{page}{1}\setcounter{questionA}{0}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
+%
+%\newenvironment{exemplaires}[1][10]{\exemplaire{#1}\bgroup}{\egroup}
+%
 \def\exemplairepair{\ifodd\AMCid@etud}
 %--------------------------------------------------------------
 % Options

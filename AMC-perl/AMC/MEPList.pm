@@ -146,7 +146,14 @@ sub from_files {
 		if($self->{'id'} eq '' ||
 		   $laymep =~ /^\+$self->{'id'}\//) {
 		    if($self->{'dispos'}->{$laymep}) {
-			attention("ATTENTION : identifiant multiple : $laymep");
+			# deja en stock :
+			if($self->{'dispos'}->{$laymep}->{'filename'} eq $f) {
+			    # cas (1) meme fichier, sans doute mis a jour
+			    print "MEP maj : $laymep\n";
+			} else {
+			    # cas (2) autre fichier...
+			    attention("ATTENTION : identifiant multiple : $laymep");
+			}
 		    }
 		    $self->{'dispos'}->{$laymep}={
 			'filename'=>$f,
