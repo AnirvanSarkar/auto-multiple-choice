@@ -25,7 +25,8 @@
 \RequirePackage[geometry]{ifsym}
 \RequirePackage{xcolor}
 \RequirePackage{fancyhdr}
-\RequirePackage{multido}
+\RequirePackage{everypage}
+%\RequirePackage{multido}
 %%% debug -> diagnostiquer un no room for a new \count
 %\let\newcount@@=\newcount
 %\def\newcount#1{\newcount@@{#1}\message{^^JNEWCOUNT=#1^^J}}
@@ -48,6 +49,8 @@
   \ifodd\AMC@SR#2\else#1\fi\ignorespaces}
 \providecommand\AMC@SRvalue{\number\AMC@SR }
 \AMC@SRset{1515}
+%
+\def\AMCrandomseed#1{\AMC@SRset{#1}}
 %--------------------------------------------------------------
 % pour tirer des *nombres* (presque) uniformement
 %--------------------------------------------------------------
@@ -117,6 +120,7 @@
 \newif\ifAMC@couleur\AMC@couleurtrue
 \newif\ifAMCune@bonne % il y a au moins une bonne reponse dans la question en cours
 \newif\ifAMCtype@multi % la question en cours est de type multiple
+\newif\ifAMC@watermark\AMC@watermarktrue
 %
 %
 % cases cochees ou non avec la bonne couleur et la bonne forme
@@ -280,6 +284,31 @@
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+% watermark
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareFontShape{OT1}{cmr}{b}{n}{<35->cmr17}{}
+\def\AMC@watertext{PROJET}
+\newcommand\AMCw@termark{%
+  \setlength{\@tempdimb}{.5\paperwidth}%
+  \setlength{\@tempdimc}{-.5\paperheight}%
+  \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+    \makebox(0,0){\rotatebox{45}{%
+        \textcolor[gray]{0.8}{
+          \fontencoding{OT1}\fontfamily{cmr}
+          \fontseries{b}\fontshape{n}
+          \fontsize{90pt}{120pt}
+          \selectfont
+          \AMC@watertext}}}}}
+\newcommand\AMCw@terprint[1]{%
+  \setbox\@tempboxa\vbox to \z@{%
+    \vskip -1in \moveleft 1in \vbox{%
+      \hbox to \z@{%
+        #1\hss}}\vss}
+  \dp\@tempboxa\z@
+  \box\@tempboxa}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % mise en page
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -309,10 +338,11 @@
 \else%
 \LARGE\tt +\the\AMCid@etud/\thepage/\the\AMCid@check+%
 \fi}}
-\cfoot{}
 \fancyhfoffset[EOLR]{5mm}
 \fi
+\cfoot{\AMC@note}
 }
+\def\AMC@note{}
 %
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
 \AMCid@etud=100\AMCid@etudfin=#1\advance\AMCid@etudfin by 100%
@@ -339,17 +369,24 @@
 \DeclareOption{decimal}{\AMC@codebinairefalse\def\AMCid@checkmax{999}}
 \DeclareOption{couleur}{\AMC@couleurtrue}
 \DeclareOption{id}{\AMC@couleurfalse}
+\DeclareOption{nowatermark}{\AMC@watermarkfalse}
 %
 \ProcessOptions
 %
 \ifx\CalibrationExterne\undefined\else\AMC@calibrationtrue\AMC@correcheadfalse\message{***CALIBRATION***^^J}\fi
+%
 \ifx\SujetExterne\undefined\else
 \message{***SUJET***^^J}
 \AMC@calibrationfalse\AMC@correcfalse\AMC@correcheadfalse
 \fi
+%
 \ifx\CorrigeExterne\undefined\else
 \message{***CORRIGE***^^J}
 \AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue
+\fi
+%
+\ifx\NoWatermarkExterne\undefined\else
+\AMC@watermarkfalse
 \fi
 %
 \definecolor{souschampnom}{RGB}{255,255,255}
@@ -371,3 +408,13 @@
 \usepackage[a4paper,hmargin=3cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=3cm,bottom=2.5cm]{geometry}
 \fi
 \AMCid@check=\AMCid@checkmax\advance\AMCid@check by 1
+%
+\ifAMC@watermark
+\ifAMC@correchead\else
+  \AddEverypageHook{\AMCw@terprint{\AMCw@termark}}
+  \def\AMC@note{\begin{minipage}{0.6\linewidth}
+      \textcolor{blue}{Pour votre examen, imprimez de préférence les documents fabriqués à l'aide de auto-multiple-choice.}
+    \end{minipage}
+  }
+\fi
+\fi

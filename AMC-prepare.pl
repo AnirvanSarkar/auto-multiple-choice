@@ -152,17 +152,17 @@ if($mode =~ /s/) {
 
     # 1) compilation du sujet
 
-    execute(latex_cmd('pdf',qw/SujetExterne NoHyperRef/));
+    execute(latex_cmd('pdf',qw/NoWatermarkExterne SujetExterne NoHyperRef/));
     move("$f_base.pdf",$prefix."sujet.pdf");
 
     # 2) compilation de la correction
 
-    execute(latex_cmd('pdf',qw/CorrigeExterne NoHyperRef/));
+    execute(latex_cmd('pdf',qw/NoWatermarkExterne CorrigeExterne NoHyperRef/));
     move("$f_base.pdf",$prefix."corrige.pdf");
 
     # 3) document de calage
 
-    execute(latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/));
+    execute(latex_cmd('pdf',qw/NoWatermarkExterne CalibrationExterne NoHyperRef/));
     move("$f_base.pdf",$prefix."calage.pdf");
 
 }
