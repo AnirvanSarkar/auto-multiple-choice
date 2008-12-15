@@ -679,7 +679,7 @@ sub doc_maj {
 									'destroy-with-parent',
 									'error', # message type
 									'ok', # which set of buttons?
-									"La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n".join("\n",@err[0..mini(10,$#err)]));
+									"La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(Seules les dix premières erreurs ont été retranscrites)</i>": "") );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
 		 }

@@ -150,8 +150,11 @@ sub get_output {
 	$logbuff->place_cursor($logbuff->get_end_iter());
 	$log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
 	
-	push @{$self->{'erreurs'}},$line if($line =~ /^ERR/);
-	
+	if($line =~ /^ERR/) {
+	    chomp(my $lc=$line);
+	    push @{$self->{'erreurs'}},$lc;
+	}
+
 	if($self->{'avancement'}) {
 	    if($self->{'progres'}<0) {
 		$self->{'avancement'}->pulse;

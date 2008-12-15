@@ -98,32 +98,38 @@ sub with_prog {
 }
 
 my $n_erreurs;
+my $a_erreurs;
 my $analyse_q='';
 
 sub execute {
     my @s=@_;
     my %analyse_data=();
+    my %titres=();
 
     $n_erreurs=0;
+    $a_erreurs=0;
 
     $cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer $s";
     while(<EXEC>) {
 	if($analyse_q) {
 	    
 	    if(/AUTOQCM\[Q=([0-9]+)\]/) { 
-		verifie_q($analyse_data{'q'},$analyse_q{'etu'}.":".$analyse_data{'titre'});
+		verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
 		$analyse_data{'q'}={};
+		if($analyse_data{'qs'}->{$1}) {
+		    $a_erreurs++;
+		    print "ERR: identifiant d'exercice utilisé plusieurs fois : « ".$titres{$1}." » [".$analyse_data{'etu'}."]\n";
+		}
+		$analyse_data{'titre'}=$titres{$1};
+		$analyse_data{'qs'}->{$1}=1;
 	    }
-	    if(/AUTOQCM\[ETU=([0-9]+)\]/) { 
-		%analyse_data=('etu'=>$1,'titres'=>{});
+	    if(/AUTOQCM\[ETU=([0-9]+)\]/) {
+		verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+		%analyse_data=('etu'=>$1,'qs'=>{});
 	    }
 	    if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
-		if($analyse_data{'titres'}->$titres{$2}) {
-		    $n_erreurs++;
-		    print "ERR: identifiant d'exercice utilisé plusieurs fois : << $2 >> [".$analyse_q{'etu'}."]\n";
-		}
-		$analyse_data{'titre'}=$2;
-		$analyse_data{'titres'}->$titres{$2}=1;
+		$titres{$1}=$2;
+		$analyse_data{'titres'}->{$2}=1;
 	    }
 	    if(/AUTOQCM\[MULT\]/) { 
 		$analyse_data{'q'}->{'mult'}=1;
@@ -131,7 +137,7 @@ sub execute {
 	    if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 		my $rep="R".$1;
 		if($analyse_data{'q'}->{$rep}) {
-		    $n_erreurs++;
+		    $a_erreurs++;
 		    print "ERR: numéro de réponse utilisé plusieurs fois : $1 [".$analyse_q{'etu'}.":".$analyse_data{'titre'}."]\n";
 		}
 		$analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
@@ -142,12 +148,12 @@ sub execute {
 	print $_ if(/^.+$/);
     }
     close(EXEC);
-    verifie_q($analyse_data{'q'},$analyse_q{'etu'}.":".$analyse_data{'titre'}) if($analyse_q);
+    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'}) if($analyse_q);
     $cmd_pid='';
 }
 
 sub verifie_q {
-    my ($q,$t)=shift;
+    my ($q,$t)=@_;
     if($q) {
 	if(! $q->{'mult'}) {
 	    my $oui=0;
@@ -157,7 +163,7 @@ sub verifie_q {
 		$oui++ if($q->{$i});
 	    }
 	    if($oui!=1) {
-		$n_erreurs++;
+		$a_erreurs++;
 		print "ERR: $oui/$tot bonnes réponses dans une question simple [$t]\n";
 	    }
 	}
@@ -214,6 +220,7 @@ if($mode =~ /s/) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
 	exit(1);
     }
+    exit(1) if($a_erreurs>0);
     move("$f_base.pdf",$prefix."calage.pdf");
 
     # 2) compilation de la correction
