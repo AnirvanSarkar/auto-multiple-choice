@@ -669,7 +669,21 @@ sub doc_maj {
 	     'signal'=>2,
 	     'texte'=>'Mise à jour des documents...',
 	     'progres'=>-0.01,
-	     'fin'=>sub { detecte_documents(); });
+	     'fin'=>sub { 
+		 my $c=shift;
+		 my @err=$c->erreurs();
+		 if(@err) {
+		     my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+									'destroy-with-parent',
+									'error', # message type
+									'ok', # which set of buttons?
+									"La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n".join("\n",@err));
+		     my $reponse=$dialog->run;
+		     $dialog->destroy;
+		 }
+		 detecte_documents(); 
+	     });
+    
 }
 
 sub sujet_impressions {

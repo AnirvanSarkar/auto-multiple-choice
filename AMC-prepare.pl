@@ -97,12 +97,17 @@ sub with_prog {
     return(catpath($e_volume,$e_vdirectories,$fich));
 }
 
+my $n_erreurs;
+
 sub execute {
     my @s=@_;
+
+    $n_erreurs=0;
 
     $cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer $s";
     while(<EXEC>) {
 	s/AUTOQCM\[.*\]//g;
+	$n_erreurs++ if(/^\!.*\.$/);
 	print $_ if(/^.+$/);
     }
     close(EXEC);
@@ -153,16 +158,28 @@ if($mode =~ /s/) {
     # 1) compilation du sujet
 
     execute(latex_cmd('pdf',qw/NoWatermarkExterne SujetExterne NoHyperRef/));
+    if($n_erreurs>0) {
+	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
+	exit(1);
+    }
     move("$f_base.pdf",$prefix."sujet.pdf");
 
     # 2) compilation de la correction
 
     execute(latex_cmd('pdf',qw/NoWatermarkExterne CorrigeExterne NoHyperRef/));
+    if($n_erreurs>0) {
+	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
+	exit(1);
+    }
     move("$f_base.pdf",$prefix."corrige.pdf");
 
     # 3) document de calage
 
     execute(latex_cmd('pdf',qw/NoWatermarkExterne CalibrationExterne NoHyperRef/));
+    if($n_erreurs>0) {
+	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
+	exit(1);
+    }
     move("$f_base.pdf",$prefix."calage.pdf");
 
 }

@@ -127,18 +127,18 @@ sub get_output {
     if( eof($self->{'fh'}) ) {
         Gtk2::Helper->remove_watch( $self->{'tag'} );
 	  close($self->{'fh'});
-
-	print "Commande [".$self->{'pid'}."] : OK\n";
-
+	  
+	  print "Commande [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
+	  
 	  $self->{'pid'}='';
 	  $self->{'tag'}='';
 	  $self->{'fh'}='';
- 
+	  
 	  $self->{'avancement'}->set_text('');
-
+	  
 	  &{$self->{'fin'}}($self) if($self->{'fin'});
 	  &{$self->{'finw'}}($self) if($self->{'finw'});
-	  
+
     } else {
 	my $fh=$self->{'fh'};
 	my $line = <$fh>;
@@ -150,7 +150,7 @@ sub get_output {
 	$logbuff->place_cursor($logbuff->get_end_iter());
 	$log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
 	
-	push @{$self->{'erreurs'}},$line if($line =~ /^ERREUR/);
+	push @{$self->{'erreurs'}},$line if($line =~ /^ERR/);
 	
 	if($self->{'avancement'}) {
 	    if($self->{'progres'}<0) {
