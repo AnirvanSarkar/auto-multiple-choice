@@ -98,20 +98,70 @@ sub with_prog {
 }
 
 my $n_erreurs;
+my $analyse_q='';
 
 sub execute {
     my @s=@_;
+    my %analyse_data=();
 
     $n_erreurs=0;
 
     $cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer $s";
     while(<EXEC>) {
+	if($analyse_q) {
+	    
+	    if(/AUTOQCM\[Q=([0-9]+)\]/) { 
+		verifie_q($analyse_data{'q'},$analyse_q{'etu'}.":".$analyse_data{'titre'});
+		$analyse_data{'q'}={};
+	    }
+	    if(/AUTOQCM\[ETU=([0-9]+)\]/) { 
+		%analyse_data=('etu'=>$1,'titres'=>{});
+	    }
+	    if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
+		if($analyse_data{'titres'}->$titres{$2}) {
+		    $n_erreurs++;
+		    print "ERR: identifiant d'exercice utilisé plusieurs fois : << $2 >> [".$analyse_q{'etu'}."]\n";
+		}
+		$analyse_data{'titre'}=$2;
+		$analyse_data{'titres'}->$titres{$2}=1;
+	    }
+	    if(/AUTOQCM\[MULT\]/) { 
+		$analyse_data{'q'}->{'mult'}=1;
+	    }
+	    if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
+		my $rep="R".$1;
+		if($analyse_data{'q'}->{$rep}) {
+		    $n_erreurs++;
+		    print "ERR: numéro de réponse utilisé plusieurs fois : $1 [".$analyse_q{'etu'}.":".$analyse_data{'titre'}."]\n";
+		}
+		$analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
+	    }
+	}
 	s/AUTOQCM\[.*\]//g;
 	$n_erreurs++ if(/^\!.*\.$/);
 	print $_ if(/^.+$/);
     }
     close(EXEC);
+    verifie_q($analyse_data{'q'},$analyse_q{'etu'}.":".$analyse_data{'titre'}) if($analyse_q);
     $cmd_pid='';
+}
+
+sub verifie_q {
+    my ($q,$t)=shift;
+    if($q) {
+	if(! $q->{'mult'}) {
+	    my $oui=0;
+	    my $tot=0;
+	    for my $i (grep { /^R/ } (keys %$q)) {
+		$tot++;
+		$oui++ if($q->{$i});
+	    }
+	    if($oui!=1) {
+		$n_erreurs++;
+		print "ERR: $oui/$tot bonnes réponses dans une question simple [$t]\n";
+	    }
+	}
+    }
 }
 
 $temp_loc=tmpdir();
@@ -155,14 +205,16 @@ sub latex_cmd {
 if($mode =~ /s/) {
     # SUJETS
 
-    # 1) compilation du sujet
+    # 1) document de calage
 
-    execute(latex_cmd('pdf',qw/NoWatermarkExterne SujetExterne NoHyperRef/));
+    $analyse_q=1;
+    execute(latex_cmd('pdf',qw/NoWatermarkExterne CalibrationExterne NoHyperRef/));
+    $analyse_q='';
     if($n_erreurs>0) {
-	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
+	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
 	exit(1);
     }
-    move("$f_base.pdf",$prefix."sujet.pdf");
+    move("$f_base.pdf",$prefix."calage.pdf");
 
     # 2) compilation de la correction
 
@@ -173,14 +225,14 @@ if($mode =~ /s/) {
     }
     move("$f_base.pdf",$prefix."corrige.pdf");
 
-    # 3) document de calage
+    # 3) compilation du sujet
 
-    execute(latex_cmd('pdf',qw/NoWatermarkExterne CalibrationExterne NoHyperRef/));
+    execute(latex_cmd('pdf',qw/NoWatermarkExterne SujetExterne NoHyperRef/));
     if($n_erreurs>0) {
-	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
+	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
 	exit(1);
     }
-    move("$f_base.pdf",$prefix."calage.pdf");
+    move("$f_base.pdf",$prefix."sujet.pdf");
 
 }
 

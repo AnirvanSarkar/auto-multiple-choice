@@ -621,6 +621,8 @@ sub fichiers_mep {
     return(@meps);
 }
 
+sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
+
 sub doc_maj {
     my $sur=0;
     if($an_list->nombre()>0) {
@@ -677,7 +679,7 @@ sub doc_maj {
 									'destroy-with-parent',
 									'error', # message type
 									'ok', # which set of buttons?
-									"La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n".join("\n",@err));
+									"La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n".join("\n",@err[0..mini(10,$#err)]));
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
 		 }
