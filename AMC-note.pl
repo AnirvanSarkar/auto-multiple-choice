@@ -57,7 +57,7 @@ my $an_saved='';
 my $debug='';
 
 GetOptions("cr=s"=>\$cr_dir,
-	   "an-saved"=>\$an_saved,
+	   "an-saved=s"=>\$an_saved,
 	   "bareme=s"=>\$bareme,
 	   "association=s"=>\$association,
 	   "seuil=s"=>\$seuil,
@@ -206,6 +206,7 @@ sub action {
 my $anl;
 
 if($an_saved) {
+    #print "CR=$cr_dir\nSAVED=$an_saved\n";
     $anl=AMC::ANList::new($cr_dir,
 			  'saved'=>$an_saved,
 			  'action'=>'',
@@ -493,7 +494,7 @@ sub croix_coors {
     
 
  XMLFB: for my $id ($anl->ids()) {
-     my $x=$anl->analyse($id);
+     my $x=$anl->analyse($id,'scan'=>1);
      print "Analyse $id...\n";
 
      my $scan=$x->{'src'};

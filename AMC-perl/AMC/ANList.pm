@@ -131,12 +131,20 @@ sub maj {
 		    .$an_dispos->{$id}->{'fichier'}.", "
 		    .$xf.")";
 	    }
-	    next BID if($an_dispos->{$id}->{'manuel'} && ! $mm);
+	    if($an_dispos->{$id}->{'manuel'} && ! $mm) {
+		$an_dispos->{$id}->{'fichier-scan'}=$xf,
+		next BID;
+	    }
 	}
 	
-	$an_dispos->{$id}={'fichier'=>"$xf",
+	my $f_scan='';
+	$f_scan=$an_dispos->{$id}->{'fichier'} 
+	if(! $an_dispos->{$id}->{'manuel'});
+
+	$an_dispos->{$id}={'fichier'=>$xf,
 			   'manuel'=>$mm,
 			   'nometudiant'=>$x->{'analyse'}->{$id}->{'nometudiant'},
+			   'fichier-scan'=>$f_scan,
 		      };
 	
 	push @ids_modifies,$id;
@@ -184,13 +192,18 @@ sub filename {
 }
 
 sub analyse {
-    my ($self,$id)=(@_);
+    my ($self,$id,%oo)=(@_);
+
+    my $key='fichier';
+    if($oo{'scan'}) {
+	$key='fichier-scan' 
+	    if(-f $self->{'dispos'}->{$id}->{'fichier-scan'});
+    }
 
     $id=$self->{'au-hasard'} if(!$id);
     
-    if($self->{'dispos'}->{$id}->{'fichier'} &&
-       -f $self->{'dispos'}->{$id}->{'fichier'}) {
-	return(XMLin($self->{'dispos'}->{$id}->{'fichier'},
+    if(-f $self->{'dispos'}->{$id}->{$key}) {
+	return(XMLin($self->{'dispos'}->{$id}->{$key},
 		    ForceArray => [ 'chiffre' ],
 		    KeyAttr=> [ 'id' ]));
     } else {
