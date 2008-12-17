@@ -40,10 +40,12 @@ my $sujet='';
 my $print_cmd='cupsdoprint %f';
 my $progress='';
 my $debug='';
+my $fich_nums='';
 
 GetOptions(
 	   "mep=s"=>\$mep_dir,
 	   "sujet=s"=>\$sujet,
+	   "fich-numeros=s"=>\$fich_nums,
 	   "progression=s"=>\$progress,
 	   "print-command=s"=>\$print_cmd,
 	   "debug!"=>\$debug,
@@ -73,9 +75,20 @@ $avance->init();
 
 my $mep=AMC::MEPList::new($mep_dir);
 
-my @es=$mep->etus();
-my $n=0;
+my @es;
 
+if($fich_nums) {
+    open(NUMS,$fich_nums);
+    while(<NUMS>) {
+	push @es,$1 if(/^([0-9]+)$/);
+    }
+    close(NUMS);
+} else {
+    @es=$mep->etus();
+}
+
+
+my $n=0;
 
 for my $e (@es) {
     my $debut=10000;

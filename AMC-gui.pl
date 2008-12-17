@@ -69,6 +69,8 @@ use constant {
 
     COMBO_ID => 1,
     COMBO_TEXT => 0,
+
+    COPIE_N => 0,
 };
 
 my $debug=0;
@@ -249,6 +251,11 @@ $column = Gtk2::TreeViewColumn->new_with_attributes ("MAJ",
 						     $renderer,
 						     text=> MEP_MAJ);
 $w{'mep_tree'}->append_column ($column);
+
+### COPIES
+
+$copies_store = Gtk2::ListStore->new ('Glib::String');
+
 
 ### modele CORREC
 
@@ -689,15 +696,68 @@ sub doc_maj {
 }
 
 sub sujet_impressions {
+    print "Choix des impressions...\n";
+
+    my $gi=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression');
+    $gi->signal_autoconnect_from_package('main');
+    for(qw/choix_pages_impression arbre_choix_copies/) {
+	$w{$_}=$gi->get_widget($_);
+    }
+
+    $copies_store->clear();
+    for my $c ($mep_list->etus()) {
+	$copies_store->set($copies_store->append(),COPIE_N,$c);
+    }
+
+    $w{'arbre_choix_copies'}->set_model($copies_store);
+
+    my $renderer=Gtk2::CellRendererText->new;
+    my $column = Gtk2::TreeViewColumn->new_with_attributes ("copies",
+							    $renderer,
+							    text=> COPIE_N );
+    $w{'arbre_choix_copies'}->append_column ($column);
+
+    $w{'arbre_choix_copies'}->get_selection->set_mode("multiple");
+
+}
+
+sub sujet_impressions_cancel {
+    $w{'choix_pages_impression'}->destroy;
+}
+
+sub sujet_impressions_ok {
+
+    my @e=();
+    for my $i ($w{'arbre_choix_copies'}->get_selection()->get_selected_rows() ) {
+	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N);
+    }
+
+    $w{'choix_pages_impression'}->destroy;
+    
+    print "Impression : ".join(",",@e)."\n";
+
+    my $fh=File::Temp->new(TEMPLATE => "nums-XXXXXX",
+			   TMPDIR => 1,
+			   UNLINK=> 1);
+    print $fh join("\n",@e)."\n";
+    $fh->seek( 0, SEEK_END );
+
     commande('commande'=>[with_prog("AMC-imprime.pl"),
 			  "--sujet",localise($projet{'docs'}->[0]),
 			  "--mep",localise($projet{'mep'}),
 			  "--progression",1,
+			  "--fich-numeros",$fh->filename,
 			  "--print-command",$o{'print_command_pdf'},
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Impression copie par copie...',
 	     'progres'=>1,
+	     'o'=>{'fh'=>$fh},
+	     'fin'=>sub {
+		 my $c=shift;
+		 close($c->{'o'}->{'fh'});
+	     },
+
 	     );
 }
 
