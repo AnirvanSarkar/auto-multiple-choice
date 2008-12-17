@@ -981,9 +981,14 @@ sub noter {
 			      localise($projet{'texsrc'}),
 			      ],
 		 'texte'=>'Lecture du bareme...',
+		 'fin'=>\&noter_calcul,
 		 'progres'=>-0.01);
+    } else {
+	noter_calcul();
     }
+}
 
+sub noter_calcul {
     commande('commande'=>[with_prog("AMC-note.pl"),
 			  "--cr",localise($projet{'cr'}),
 			  "--an-saved",localise($an_saved),

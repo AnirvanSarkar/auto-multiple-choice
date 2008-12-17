@@ -136,8 +136,8 @@ sub get_output {
 	  
 	  $self->{'avancement'}->set_text('');
 	  
-	  &{$self->{'fin'}}($self) if($self->{'fin'});
 	  &{$self->{'finw'}}($self) if($self->{'finw'});
+	  &{$self->{'fin'}}($self) if($self->{'fin'});
 
     } else {
 	my $fh=$self->{'fh'};
