@@ -406,3 +406,7 @@ sub goto_activate_cb {
 }
 
 1;
+
+__END__
+
+perl -e 'use Gtk2 -init; my $screen = Gtk2::Gdk::Screen->get_default();print $screen->get_height()."\n";'

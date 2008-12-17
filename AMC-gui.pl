@@ -97,13 +97,32 @@ $glade_xml =~ s/\.p[ml]$/.glade/i;
 my $o_file=Glib::get_home_dir().'/.AMC.xml';
 
 my %w=();
-my %o_defaut=('pdf_viewer'=>'evince',
-	      'img_viewer'=>'eog',
-	      'dat_viewer'=>'oocalc',
-	      'xml_viewer'=>'gedit',
-	      'tex_editor'=>'kile',
-	      'html_browser'=>'sensible-browser %u',
-	      'dir_opener'=>'nautilus --no-desktop file://%d',
+my %o_defaut=('pdf_viewer'=>['commande',
+			     'evince','acroread','gpdf','xpdf',
+			     ],
+	      'img_viewer'=>['commande',
+			     'eog',
+			     ],
+	      'dat_viewer'=>['commande',
+			     'oocalc','gnumeric',
+			     ],
+	      'xml_viewer'=>['commande',
+			     'gedit','kedit','mousepad',
+			     ],
+	      'tex_editor'=>['commande',
+			     'texmaker','kile','emacs','gedit','mousepad',
+			     ],
+	      'html_browser'=>['commande',
+			       'sensible-browser %u','firefox %u','galeon %u','konqueror %u','dillo %u',
+			       ],
+	      'dir_opener'=>['commande',
+			     'nautilus --no-desktop file://%d',
+			     'Thunar %d',
+			     'konqueror file://%d',
+			     ],
+	      'print_command_pdf'=>['commande',
+				    'cupsdoprint %f','lpr %f',
+				    ],
 	      'rep_projets'=>Glib::get_home_dir().'/Projets-QCM',
 	      'rep_modeles'=>'/usr/share/doc/auto-multiple-choice/exemples',
 	      'seuil_eqm'=>3.0,
@@ -111,7 +130,6 @@ my %o_defaut=('pdf_viewer'=>'evince',
 	      'saisie_dpi'=>75,
 	      'delimiteur_decimal'=>',',
 	      'encodage_texte'=>'UTF-8',
-	      'print_command_pdf'=>'cupsdoprint %f',
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -137,6 +155,43 @@ my %projet_defaut=('texsrc'=>'',
 my $mep_saved='mep.xml.gz';
 my $an_saved='an.xml.gz';
 
+# peut-on acceder a cette commande par exec ?
+sub commande_accessible {
+    my $c=shift;
+    $c =~ s/(?<=[^\s])\s.*//;
+    $c =~ s/^\s+//;
+    if($c =~ /^\//) {
+	return (-x $c);
+    } else {
+	$ok='';
+	for (split(/:/,$ENV{'PATH'})) {
+	    $ok=1 if(-x "$_/$c");
+	}
+	return($ok);
+    }
+}
+
+# toutes les commandes prevues sont-elles accessibles ? Si non, on
+# avertit l'utilisateur
+
+sub test_commandes {
+    my @pasbon=();
+    for my $c (grep { /_(viewer|editor|opener)$/ } keys(%o)) {
+	my $nc=$o{$c};
+	$nc =~ s/\s.*//;
+	push @pasbon,$nc if(!commande_accessible($nc));
+    }
+    if(@pasbon) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'warning', # message type
+					       'ok', # which set of buttons?
+					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
+	$dialog->run;
+	$dialog->destroy;
+    }
+}
+
 # lecture options ...
 
 my %o=();
@@ -147,8 +202,23 @@ if(-r $o_file) {
 
 for my $k (keys %o_defaut) {
     if(! exists($o{$k})) {
-	$o{$k}=$o_defaut{$k};
-	print "Nouveau parametre global : $k\n";
+	if(ref($o_defaut{$k}) eq 'ARRAY') {
+	    my ($type,@valeurs)=@{$o_defaut{$k}};
+	    if($type eq 'commande') {
+	      UC: for my $c (@valeurs) {
+		  if(commande_accessible($c)) {
+		      $o{$k}=$c;
+		      last UC;
+		  }
+	      }
+		$o{$k}=$valeurs[0] if(!$o{$k});
+	    } else {
+		print STDERR "ERR: Type d'option inconnu : $type\n";
+	    }
+	} else {
+	    $o{$k}=$o_defaut{$k};
+	}
+	print "Nouveau parametre global : $k = $o{$k}\n" if($o{$k});
     }
     $o{'modifie'}=0;
 }
@@ -414,41 +484,6 @@ $column = Gtk2::TreeViewColumn->new_with_attributes ("ID",
 						     text=> INCONNU_ID);
 $w{'inconnu_tree'}->append_column ($column);
 
-
-# peut-on acceder a cette commande par exec ?
-sub commande_accessible {
-    my $c=shift;
-    if($c =~ /^\//) {
-	return (-x $c);
-    } else {
-	$ok='';
-	for (split(/:/,$ENV{'PATH'})) {
-	    $ok=1 if(-x "$_/$c");
-	}
-	return($ok);
-    }
-}
-
-# toutes les commandes prevues sont-elles accessibles ? Si non, on
-# avertit l'utilisateur
-
-sub test_commandes {
-    my @pasbon=();
-    for my $c (grep { /_(viewer|editor|opener)$/ } keys(%o)) {
-	my $nc=$o{$c};
-	$nc =~ s/\s.*// if($c =~ /_opener$/);
-	push @pasbon,$nc if(!commande_accessible($nc));
-    }
-    if(@pasbon) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'warning', # message type
-					       'ok', # which set of buttons?
-					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
-	$dialog->run;
-	$dialog->destroy;
-    }
-}
 
 ### Appel à des commandes externes -- log, annulation
 
