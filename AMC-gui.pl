@@ -71,6 +71,8 @@ use constant {
     COMBO_TEXT => 0,
 
     COPIE_N => 0,
+
+    LISTE_TXT =>0,
 };
 
 my $debug=0;
@@ -259,7 +261,7 @@ sub fich_options {
 
 $gui=Gtk2::GladeXML->new($glade_xml,'main_window');
 
-for(qw/onglets_projet preparation_etats documents_tree source_latex main_window mep_tree import_latex edition_latex
+for(qw/onglets_projet preparation_etats documents_tree source_latex_nom main_window mep_tree import_latex edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
     liste diag_tree inconnu_tree
@@ -1391,21 +1393,16 @@ sub detecte_analyse {
 
 sub set_source_tex {
     if($projet{'texsrc'}) {
-	$w{'source_latex'}->set_filename(localise($projet{'texsrc'}));
+	my ($volume,$directories,$file) = 
+	    File::Spec->splitpath($projet{'texsrc'});
+	$w{'source_latex_nom'}->set_label($file);
     } else {
-	$w{'source_latex'}->set_filename('');
-	$w{'source_latex'}->set_current_folder($o{'rep_modeles'});
+	$w{'source_latex_nom'}->set_label('(aucun)');
     }
-    valide_source_tex('',1);
+    valide_source_tex();
 }
 
 sub valide_source_tex {
-    shift;
-    my ($direct)=(@_);
-    if(!$direct) {
-	$projet{'texsrc'}=$w{'source_latex'}->get_filename();
-	print "Source LaTeX : ".$projet{'texsrc'}."\n";
-    }
     $projet{'modifie'}=1; print "* valide_source_tex\n" if($debug);
     $w{'preparation_etats'}->set_sensitive(-f localise($projet{'texsrc'}));
 
@@ -1418,6 +1415,119 @@ sub valide_source_tex {
     }
 
     detecte_documents();
+}
+
+sub source_latex_choisir {
+    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog');
+    $gap->signal_autoconnect_from_package('main');
+    for(qw/source_latex_dialog sl_type_new/) {
+	$w{$_}=$gap->get_widget($_);
+    }
+}
+
+sub source_latex_quit1 {
+    $w{'source_latex_dialog'}->destroy();
+}
+
+sub source_latex_choixfich {
+    my ($folder)=@_;
+    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix');
+    $gap->signal_autoconnect_from_package('main');
+    for(qw/source_latex_choix/) {
+	$w{$_}=$gap->get_widget($_);
+    }
+    $w{'source_latex_choix'}->set_current_folder($folder);
+}
+
+my @modeles=();
+my %modeles_i=();
+
+sub charge_modeles {
+    return if($#modeles>=0);
+    opendir(DIR, $o{'rep_modeles'});
+    my @ms = grep { /\.tex$/ && -f $o{'rep_modeles'}."/$_" } readdir(DIR);
+    closedir DIR;
+    for my $m (@ms) {
+	my $d={'id'=>$m,
+	       'fichier'=>$o{'rep_modeles'}."/$m",
+	   };
+	my $mt=$o{'rep_modeles'}."/$m";
+	$mt =~ s/\.tex$/.txt/;
+	if(-f $mt) {
+	    open(DESC,"<:encoding(UTF-8)",$mt);
+	  LIG: while(<DESC>) {
+	      chomp;
+	      s/\#.*//;
+	      next LIG if(!$_);
+	      $d->{'desc'}.=$_;
+	  }
+	} else {
+	    $d->{'desc'}='(aucune description)';
+	}
+	#print "MOD : $m\n";
+	push @modeles,$d;
+    }
+}
+
+sub source_latex_2 {
+    my $new=$w{'sl_type_new'}->get_active();
+    $w{'source_latex_dialog'}->destroy();
+    if($new) {
+	#source_latex_choixfich($o{'rep_modeles'});
+	my $g=Gtk2::GladeXML->new($glade_xml,'source_latex_modele');
+	$g->signal_autoconnect_from_package('main');
+	for(qw/source_latex_modele modeles_liste modeles_description/) {
+	    $w{$_}=$g->get_widget($_);
+	}
+	charge_modeles();
+	my $modeles_store = Gtk2::ListStore->new ('Glib::String');
+	for my $i (0..$#modeles) {
+	    #print "$i->".$modeles[$i]->{'id'}."\n";
+	    $modeles_store->set($modeles_store->append(),LISTE_TXT,
+				$modeles[$i]->{'id'});
+	    
+	    $modeles_i{$modeles[$i]->{'id'}}=$i;
+	}
+	$w{'modeles_liste'}->set_model($modeles_store);
+	my $renderer=Gtk2::CellRendererText->new;
+	my $column = Gtk2::TreeViewColumn->new_with_attributes("modèle",
+							       $renderer,
+							       text=> LISTE_TXT );
+	$w{'modeles_liste'}->append_column ($column);
+	$w{'modeles_liste'}->get_selection->signal_connect("changed",\&source_latex_mmaj);
+    } else {
+	source_latex_choixfich(Glib::get_home_dir());
+    }
+}
+
+sub source_latex_mmaj {
+    my $i=$w{'modeles_liste'}->get_selection()->get_selected_rows()->get_indices();
+    $w{'modeles_description'}->get_buffer->set_text($modeles[$i]->{'desc'});
+}
+
+sub source_latex_quit2 {
+    $w{'source_latex_choix'}->destroy();
+}
+
+sub source_latex_quit2m {
+    $w{'source_latex_modele'}->destroy();
+}
+
+sub source_latex_ok {
+    my $f=$w{'source_latex_choix'}->get_filename();
+    print "Source $f\n";
+    $projet{'texsrc'}=$f;
+    $w{'source_latex_choix'}->destroy();
+    set_source_tex();
+}
+
+sub source_latex_okm {
+    my @i=$w{'modeles_liste'}->get_selection()->get_selected_rows()->get_indices();
+    $w{'source_latex_modele'}->destroy();
+    if(@i) {
+	$projet{'texsrc'}=$modeles[$i[0]]->{'fichier'};
+	set_source_tex();
+    }
 }
 
 sub importe_source {

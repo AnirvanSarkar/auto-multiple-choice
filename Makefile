@@ -70,7 +70,8 @@ local: global
 	sudo ln -s /home/alexis/enseignement/auto-qcm/logo.svg $(ICONSDIR)/auto-multiple-choice.svg
 	sudo ln -s /home/alexis/enseignement/auto-qcm/doc /usr/share/doc/auto-multiple-choice
 
-clean: ;
+clean: FORCE
+	-rm AMC-traitement-image AMC-gui.glade
 
 install: FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODSDIR)
