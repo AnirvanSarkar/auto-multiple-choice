@@ -132,6 +132,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'saisie_dpi'=>75,
 	      'delimiteur_decimal'=>',',
 	      'encodage_texte'=>'UTF-8',
+	      'taille_max_correction'=>'1000x1500',
+	      'qualite_correction'=>'65',
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -997,6 +999,8 @@ sub noter_calcul {
 			  "--bareme",localise($projet{'fichbareme'}),
 			  "-o",localise($projet{'notes'}),
 			  ($projet{'annote_copies'} ? "--copies" : "--no-copies"),
+			  "--taille-max",$o{'taille_max_correction'},
+			  "--qualite",$o{'qualite_correction'},
 			  "--seuil",$projet{'seuil'},
 			  
 			  "--grain",$projet{'note_grain'},

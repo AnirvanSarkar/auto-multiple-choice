@@ -54,6 +54,9 @@ my $delimiteur=',';
 my $encoding='UTF-8';
 my $an_saved='';
 
+my $taille_max="1000x1500";
+my $qualite_jpg="65";
+
 my $debug='';
 
 GetOptions("cr=s"=>\$cr_dir,
@@ -69,6 +72,8 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "notemax=s"=>\$notemax,
 	   "delimiteur=s"=>\$delimiteur,
 	   "encoding=s"=>\$encoding,
+	   "taille-max=s"=>\$taille_max,
+	   "qualite=s"=>\$qualite_jpg,
 	   );
 
 my %fonction_arrondi=(-1=>'.INF',0=>'',1=>'.SUP',
@@ -565,6 +570,13 @@ sub croix_coors {
 	     "-strokewidth",1,"-draw",sprintf("text %.2f,%.2f \'%s\'",
 					      $x,$y,$note_question{$etud}->{$q}."/".$note_question{'max'.$etud}->{$q});
 	 }
+
+	 # taille et qualite...
+	 
+	 push @cmd,"-resize",$taille_max if($taille_max);
+	 push @cmd,"-quality",$qualite_jpg if($qualite_jpg);
+
+	 # fin
 	 
 	 push @cmd,"$cr_dir/corrections/jpg/page-$idf.jpg";
 
