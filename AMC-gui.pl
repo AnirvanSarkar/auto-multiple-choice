@@ -261,7 +261,7 @@ sub fich_options {
 
 $gui=Gtk2::GladeXML->new($glade_xml,'main_window');
 
-for(qw/onglets_projet preparation_etats documents_tree source_latex_nom main_window mep_tree import_latex edition_latex
+for(qw/onglets_projet preparation_etats documents_tree source_latex_nom main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
     liste diag_tree inconnu_tree
@@ -1392,13 +1392,17 @@ sub detecte_analyse {
 }
 
 sub set_source_tex {
+    my ($importe)=@_;
+
     if($projet{'texsrc'}) {
 	my ($volume,$directories,$file) = 
 	    File::Spec->splitpath($projet{'texsrc'});
-	$w{'source_latex_nom'}->set_label($file);
+	$w{'source_latex_nom'}->set_label(localise($file));
     } else {
 	$w{'source_latex_nom'}->set_label('(aucun)');
     }
+    
+    importe_source() if($importe);
     valide_source_tex();
 }
 
@@ -1407,10 +1411,8 @@ sub valide_source_tex {
     $w{'preparation_etats'}->set_sensitive(-f localise($projet{'texsrc'}));
 
     if(is_local($projet{'texsrc'})) {
-	$w{'import_latex'}->hide();
 	$w{'edition_latex'}->show();
     } else {
-	$w{'import_latex'}->show();
 	$w{'edition_latex'}->hide();
     }
 
@@ -1518,7 +1520,7 @@ sub source_latex_ok {
     print "Source $f\n";
     $projet{'texsrc'}=$f;
     $w{'source_latex_choix'}->destroy();
-    set_source_tex();
+    set_source_tex(1);
 }
 
 sub source_latex_okm {
@@ -1526,7 +1528,7 @@ sub source_latex_okm {
     $w{'source_latex_modele'}->destroy();
     if(@i) {
 	$projet{'texsrc'}=$modeles[$i[0]]->{'fichier'};
-	set_source_tex();
+	set_source_tex(1);
     }
 }
 
@@ -1551,6 +1553,13 @@ sub importe_source {
     if(copy(localise($projet{'texsrc'}),$dest)) {
 	$projet{'texsrc'}=$fb;
 	set_source_tex();
+	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+					       'destroy-with-parent',
+					       'info', # message type
+					       'ok', # which set of buttons?
+					       "Le fichier LaTeX a été copié dans le répertoire projet. Vous pouvez maintenant l'éditer soit en utilisant le bouton \"Éditer le fichier LaTeX\", soit directement grâce au logiciel de votre choix.");
+	$dialog->run;
+	$dialog->destroy;   
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',
@@ -1634,6 +1643,12 @@ sub projet_ouvre {
 	valide_projet();
 
 	$projet{'modifie'}='';
+
+	# choix fichier latex si nouveau projet...
+	if(! $projet{'texsrc'}) {
+	    source_latex_choisir();
+	}
+
     }
 }
 
