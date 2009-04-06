@@ -36,8 +36,8 @@ BEGIN {
 }
 
 use XML::Simple;
-use XML::Dumper;
 use AMC::Basic;
+use Storable;
 
 # perl -e 'use AMC::ANList; use Data::Dumper; print Dumper(AMC::ANList::new("points-cr","debug",1)->analyse());'
 
@@ -45,7 +45,6 @@ use AMC::Basic;
 	    'action'=>'',
 	    'timestamp'=>0,
 	    'dispos'=>{},
-	    'new_vide'=>'',
 	    'saved'=>'',
 	    );
 
@@ -55,9 +54,14 @@ sub new {
 
     if($o{'saved'} && -f $o{'saved'}) {
 
-	$self=load($o{'saved'});
+	$self=load_an($o{'saved'});
+	if(!$self) {
+	    print "Load(ANList)->erreur\n";
+	}
 	
-    } else {
+    } 
+
+    if(!$self) {
 
 	$self={};
 	bless $self;
@@ -73,7 +77,7 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
-    $self->maj() if(!$self->{'new_vide'});
+    $self->maj();
 
     return($self);
 }
@@ -224,12 +228,14 @@ sub save {
 	$file=$self->{'saved'};
     }
     return() if(!$file);
-    pl2xml($self,$file);
+    store(\$self,$file);
 }
 
-sub load {
+sub load_an {
     my ($file)=@_;
-    return(xml2pl($file));
+    my $d;
+    eval{$d=retrieve($file)};
+    return($d ? $$d : undef);
 }
 
 1;

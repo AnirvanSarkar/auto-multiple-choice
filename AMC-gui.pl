@@ -154,8 +154,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'modifie'=>1,
 		   );
 
-my $mep_saved='mep.xml.gz';
-my $an_saved='an.xml.gz';
+my $mep_saved='mep.storable';
+my $an_saved='an.storable';
 
 # peut-on acceder a cette commande par exec ?
 sub commande_accessible {
@@ -1590,7 +1590,6 @@ sub valide_projet {
     detecte_mep();
 
     $an_list=AMC::ANList::new(localise($projet{'cr'}),
-			      'new_vide'=>0,
 			      'saved'=>localise($an_saved));
     detecte_analyse('premier'=>1);
 

@@ -37,7 +37,8 @@ BEGIN {
 
 use AMC::Basic;
 use XML::Simple;
-use XML::Dumper;
+#use XML::Dumper;
+use Storable;
 
 my %mep_defaut=('id'=>'',
 		'saved'=>'',
@@ -46,15 +47,21 @@ my %mep_defaut=('id'=>'',
 
 sub new {
     my ($mep,%o)=(@_);
-    my $self;
+    my $self='';
     my $renew=1;
 
     if($o{'saved'} && -f $o{'saved'}) {
 
-	$self=load($o{'saved'});
-	$renew=0;
+	$self=load_mep($o{'saved'});
+	if($self) {
+	    $renew=0;
+	} else {
+	    print "Load(MEPList)->erreur\n";
+	}
 	
-    } else {
+    }
+
+    if(!$self) {
 	
 	$self={};
 	bless $self;
@@ -179,12 +186,14 @@ sub save {
 	$file=$self->{'saved'};
     }
     return() if(!$file);
-    pl2xml($self,$file);
+    store(\$self,$file);
 }
 
-sub load {
+sub load_mep {
     my ($file)=@_;
-    return(xml2pl($file));
+    my $d;
+    eval{$d=retrieve($file)};
+    return($d ? $$d : undef);
 }
 
 sub nombre {
