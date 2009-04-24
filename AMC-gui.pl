@@ -263,7 +263,7 @@ sub fich_options {
 
 $gui=Gtk2::GladeXML->new($glade_xml,'main_window');
 
-for(qw/onglets_projet preparation_etats documents_tree source_latex_nom main_window mep_tree edition_latex
+for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
     liste diag_tree inconnu_tree
@@ -1398,16 +1398,19 @@ sub detecte_analyse {
 sub set_source_tex {
     my ($importe)=@_;
 
-    if($projet{'texsrc'}) {
-	my ($volume,$directories,$file) = 
-	    File::Spec->splitpath($projet{'texsrc'});
-	$w{'source_latex_nom'}->set_label(localise($file));
-    } else {
-	$w{'source_latex_nom'}->set_label('(aucun)');
-    }
-    
     importe_source() if($importe);
     valide_source_tex();
+}
+
+sub source_latex_montre_nom {
+    my $dialog = Gtk2::MessageDialog->new($w{'main_window'},
+					  'destroy-with-parent',
+					  'info', # message type
+					  'ok', # which set of buttons?
+					  "Le fichier LaTeX qui décrit le QCM de ce projet est situé à l'emplacement suivant :\n%s",
+					  ($projet{'texsrc'} ? localise($projet{'texsrc'}) : "(aucun fichier)" ));
+    $dialog->run;
+    $dialog->destroy;
 }
 
 sub valide_source_tex {

@@ -79,7 +79,7 @@ binary-arch: build install
 	dh_strip
 	dh_compress -X.tex
 	dh_fixperms
-#	dh_perl
+	dh_perl usr/lib/AMC usr/share/perl5/AMC usr/share/perl5/AMC/Gui
 #	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
