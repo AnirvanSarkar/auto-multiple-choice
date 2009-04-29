@@ -23,8 +23,12 @@ DOCBOOKS=$(shell ls *.xml)
 
 all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ; 
 
-%.pdf: %.xml
-	dblatex $<
+%.tex: %.xml
+	dblatex -t tex $< -o $@
+	./addlink.pl $@
+
+%.pdf: %.tex
+	pdflatex $< ; pdflatex $<
 
 #	fop -xml $< -xsl /usr/share/xml/docbook/stylesheet/nwalsh/fo/docbook.xsl -pdf $@
 
