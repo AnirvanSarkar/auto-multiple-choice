@@ -22,13 +22,16 @@ use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs t
 use File::Temp;
 use Getopt::Long;
 use AMC::MEPList;
+use AMC::Queue;
 
 my $pid='';
+my $queue='';
 
 sub catch_signal {
     my $signame = shift;
     print "*** AMC-analyse : signal $signame, je signale $pid...\n";
     kill 2,$pid if($pid);
+    $queue->killall() if($queue);
     die "Killed";
 }
 
@@ -42,6 +45,7 @@ my $progress=0;
 my $progress_id=0;
 my $liste_f;
 my $mep_file='';
+my $n_procs=0;
 
 GetOptions("mep=s"=>\$mep_dir,
 	   "cr=s"=>\$cr_dir,
@@ -50,7 +54,10 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "liste-fichiers=s"=>\$liste_f,
+	   "n-procs=s"=>\$n_procs,
 	   );
+
+$queue=AMC::Queue::new('max.procs',$n_procs);
 
 my @scans=@ARGV;
 
@@ -100,7 +107,6 @@ if(!$mep_file) {
 }
 
 for my $s (@scans) {
-    print "********** $s\n";
     my @c=with_prog("AMC-calepage.pl");
     push @c,"--debug" if($debug);
     push @c,"--progression-id",$progress_id;
@@ -109,12 +115,9 @@ for my $s (@scans) {
     push @c,"--mep-saved",$mep_file;
     push @c,"--cr",$cr_dir,$s;
 
-    $pid=fork();
-    if($pid) {
-	print STDERR "Commande [$pid] : ".join(' ',@c)."\n";
-	waitpid($pid,0);
-    } else {
-	exec(@c);
-    }
+    $queue->add_process(@c);
 }
+
+$queue->run();
+
 

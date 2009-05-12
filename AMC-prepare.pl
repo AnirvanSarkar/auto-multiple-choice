@@ -26,15 +26,19 @@ use Data::Dumper;
 use Getopt::Long;
 
 use AMC::Gui::Avancement;
+use AMC::Queue;
 
 $VERSION_BAREME=2;
 
 my $cmd_pid='';
 
+my $queue='';
+
 sub catch_signal {
     my $signame = shift;
     print "*** AMC-prepare : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
+    $queue->killall() if($queue);
     die "Killed";
 }
 
@@ -53,6 +57,8 @@ my $prefix='';
 
 my $debug=0;
 
+my $n_procs=0;
+
 my $progress=1;
 my $progress_id='';
 
@@ -67,7 +73,10 @@ GetOptions("mode=s"=>\$mode,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "prefix=s"=>\$prefix,
+	   "n-procs=s"=>\$n_procs,
 	   );
+
+$queue=AMC::Queue::new('max.procs',$n_procs);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
@@ -305,26 +314,27 @@ if($mode =~ /m/) {
     my $np=1+$#pages;
     for my $p (@pages) {
 	$npage++;
-	print "*** calage de la page $p\n";
-	execute("convert",split(/\s+/,$convert_opts),
-		"-density",$dpi,
-		"-depth",8,
-		"+antialias",
-		$p,"$temp_dir/page.ppm");
 
-	execute(with_prog("AMC-calepage.pl"),
-		"--progression-debut",.4,
-		"--progression",0.9/$np*$progress,
-		"--progression-id",$progress_id,
-		$debug,
-		$binaire,
-		"--tex-source",$tex_source,
-		"--page",$npage,
-		"--dpi",$dpi,
-		"--modele",
-		"--mep",$mep_dir,
-		"$temp_dir/page.ppm");
+	$queue->add_process(["convert",split(/\s+/,$convert_opts),
+			     "-density",$dpi,
+			     "-depth",8,
+			     "+antialias",
+			     $p,"$temp_dir/page.ppm"],
+			    [with_prog("AMC-calepage.pl"),
+			     "--progression-debut",.4,
+			     "--progression",0.9/$np*$progress,
+			     "--progression-id",$progress_id,
+			     $debug,
+			     $binaire,
+			     "--tex-source",$tex_source,
+			     "--page",$npage,
+			     "--dpi",$dpi,
+			     "--modele",
+			     "--mep",$mep_dir,
+			     "$temp_dir/page.ppm"]);
     }
+
+    $queue->run();
 }
 
 if($mode =~ /b/) {

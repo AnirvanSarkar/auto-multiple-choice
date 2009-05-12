@@ -19,6 +19,8 @@
 
 package AMC::Queue;
 
+use Sys::CPU;
+
 BEGIN {
     use Exporter   ();
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
@@ -40,13 +42,15 @@ sub new {
 
     my $self={'pids'=>[],
 	      'queue'=>[],
-	      'max.procs'=>1,
-	      'debug'=>1,
+	      'max.procs'=>0,
+	      'debug'=>'',
 	  };
     
     for my $k (keys %o) {
 	$self->{$k}=$o{$k} if(defined($self->{$k}));
     }
+
+    $self->{'max.procs'}=Sys::CPU::cpu_count() if(!$self->{'max.procs'});
 
     bless $self;
     
@@ -67,6 +71,16 @@ sub maj {
     @{$self->{'pids'}}=@p;
     print "MAJ : ".join(' ',@p)."\n" if($self->{'debug'});
     return(1+$#{$self->{'pids'}});
+}
+
+sub killall {
+    my ($self)=@_;
+    $self->{'queue'}=[];
+    print "Interruption de la queue\n";
+    for my $p (@{$self->{'pids'}}) {
+	print "Queue : je tue $p\n";
+	kill 9,$p;
+    }
 }
 
 sub run {
