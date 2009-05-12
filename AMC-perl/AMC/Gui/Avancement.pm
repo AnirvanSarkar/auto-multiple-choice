@@ -36,10 +36,11 @@ BEGIN {
 }
 
 sub new {
-    my ($niveau,%o)=(@_);
-    my $self={'niveau'=>$niveau,
+    my ($entier,%o)=(@_);
+    my $self={'entier'=>$entier,
+	      'progres'=>0,
 	      'debug'=>0,
-	      'etat'=>[],
+	      'id'=>'',
 	  };
  
     for (keys %o) {
@@ -47,60 +48,56 @@ sub new {
     }
 
     bless $self;
-    print "===<".$self->{'niveau'}.">=z0\n" if($self->{'niveau'}>0);
-    $|++ if($niveau>0);
+    $|++ if($self->{'id'});
     return($self);
-}
-
-sub init {
-    my ($self)=(@_);
-    $self->{'etat'}=[];
 }
 
 sub progres {
     my ($self,$suite)=(@_);
-    print "===<".$self->{'niveau'}.">=+$suite\n" if($self->{'niveau'}>0);
+    $suite *=  $self->{'entier'};
+    $self->{'progres'}+=$suite;
+    if($self->{'progres'}>$self->{'entier'}) {
+	$suite-=$self->{'progres'}-$self->{'entier'};
+	$self->{'progres'}=$self->{'entier'};
+    }
+    print "===<".$self->{'id'}.">=+$suite\n" if($self->{'id'});
 }
 
 sub progres_abs {
     my ($self,$suite)=(@_);
-    print "===<".$self->{'niveau'}.">==$suite\n" if($self->{'niveau'}>0);
+    $self->progres($suite-$self->{'progres'});
 }
 
 sub fin {
     my ($self,$suite)=(@_);
     $self->progres_abs(1);
-}    
+}   
+
+sub etat {
+    my ($self)=@_;
+    return($self->{'progres'});
+}
 
 sub lit {
     my ($self,$s)=(@_);
-    my $r=0;
-    my $niv=0;
-    if($s =~ /===<([0-9]+)>=([+=z])([0-9.]+)/) {
-	my $type;
-	my $suite;
-	($niv,$type,$suite)=($1,$2,$3);
-	$self->{'etat'}->[$niv]->[0]
-	    =$self->{'etat'}->[$niv]->[1];
-	if($type eq '+') {
-	    $self->{'etat'}->[$niv]->[1] += $suite;
-	} elsif($type eq 'z') {
-	    $self->{'etat'}->[$niv]=[0,0];
-	} else {
-	    $self->{'etat'}->[$niv]->[1] = $suite; 
+    my $r='';
+    if($s =~ /===<(.*)>=\+([0-9.]+)/) {
+	my $id=$1;
+	my $suite=$2;
+	$self->{'progres'}+=$suite;
+
+	if($self->{'progres'}<0) {
+	    print STDERR "progres($self->{'id'})=$self->{'progres'}\n";
+	    $self->{'progres'}=0;
 	}
-	my $x=1;
-	print "AV:pile" if($self->{'debug'});
-	for my $i (1..$niv) {
-	    print " [".join(',',@{$self->{'etat'}->[$i]})."]" if($self->{'debug'});
-	    $r+=$x * $self->{'etat'}->[$i]->[0];
-	    $x*=($self->{'etat'}->[$i]->[1]-$self->{'etat'}->[$i]->[0]);
+	if($self->{'progres'}>1) {
+	    print STDERR "progres($self->{'id'})=$self->{'progres'}\n";
+	    $self->{'progres'}=1;
 	}
-	print " -> $r\n" if($self->{'debug'});
-	$r=0 if($r<0);
-	$r=1 if($r>1);
+
+	$r=$self->{'progres'};
     }
-    return(wantarray ? ($r,$niv) : $r);
+    return($r);
 }
 
 1;

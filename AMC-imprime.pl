@@ -39,6 +39,7 @@ my $mep_dir="";
 my $sujet='';
 my $print_cmd='cupsdoprint %f';
 my $progress='';
+my $progress_id='';
 my $debug='';
 my $fich_nums='';
 
@@ -47,6 +48,7 @@ GetOptions(
 	   "sujet=s"=>\$sujet,
 	   "fich-numeros=s"=>\$fich_nums,
 	   "progression=s"=>\$progress,
+	   "progression-id=s"=>\$progress_id,
 	   "print-command=s"=>\$print_cmd,
 	   "debug!"=>\$debug,
 	   );
@@ -69,9 +71,7 @@ sub commande_externe {
 
 }
 
-my $avance=AMC::Gui::Avancement::new($progress);
-
-$avance->init();
+my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $mep=AMC::MEPList::new($mep_dir);
 
@@ -107,7 +107,8 @@ for my $e (@es) {
     commande_externe("pdftk",$sujet,
 		     "cat","$debut-$fin",
 		     "output",$fn);
-    $avance->progres_abs((2*$n-1)/(2*(1+$#es)));
+
+    $avance->progres(1/(2*(1+$#es)));
 
     my @c=map { s/[%]f/$fn/g;$_; } split(/\s+/,$print_cmd);
     #print STDERR join(' ',@c)."\n";
@@ -115,7 +116,7 @@ for my $e (@es) {
 
     close($tmp);
 
-    $avance->progres_abs($n/(1+$#es));
+    $avance->progres(1/(2*(1+$#es)));
 }
 
 $avance->fin();

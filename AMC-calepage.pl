@@ -104,6 +104,7 @@ my $binaire='';
 
 my $debug='';
 my $progress=0;
+my $progress_id='';
 
 my $mep_saved='';
 
@@ -126,6 +127,7 @@ GetOptions("page=s"=>\$out_cadre,
 	   "ocr=s"=>\$ocr_file,
 	   "debug!"=>\$debug,
 	   "progression=s"=>\$progress,
+	   "progression-id=s"=>\$progress_id,
 	   "manuel!"=>\$manuel,
 	   "binaire!"=>\$binaire,
 	   );
@@ -159,7 +161,7 @@ sub commande_externe {
 
 ################################################################
 
-my $avance=AMC::Gui::Avancement::new($progress);
+my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 $temp_loc=tmpdir();
 $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => (!$debug) );
@@ -167,8 +169,6 @@ $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => (!$debug) );
 print "dir = $temp_dir\n";
 
 $ppm="$temp_dir/image.ppm";
-
-$avance->progres(1/3);
 
 if($blur || $threshold || $scan !~ /\.ppm$/) {
     print "Transformation en ppm...\n";

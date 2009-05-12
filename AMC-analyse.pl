@@ -21,7 +21,6 @@
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp;
 use Getopt::Long;
-use AMC::Gui::Avancement;
 use AMC::MEPList;
 
 my $pid='';
@@ -40,6 +39,7 @@ my $cr_dir="";
 my $binaire='';
 my $debug='';
 my $progress=0;
+my $progress_id=0;
 my $liste_f;
 my $mep_file='';
 
@@ -48,6 +48,7 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "binaire!"=>\$binaire,
 	   "debug!"=>\$debug,
 	   "progression=s"=>\$progress,
+	   "progression-id=s"=>\$progress_id,
 	   "liste-fichiers=s"=>\$liste_f,
 	   );
 
@@ -67,8 +68,6 @@ if($liste_f && open(LISTE,$liste_f)) {
 
 exit(0) if($#scans <0);
 
-my $avance=AMC::Gui::Avancement::new($progress);
-
 ($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
 sub with_prog {
     my $fich=shift;
@@ -87,7 +86,7 @@ sub check_rep {
 check_rep($mep_dir);
 check_rep($cr_dir,1);
 
-my $delta=1/(1+$#scans);
+my $delta=$progress/(1+$#scans);
 my $fh;
 
 if(!$mep_file) {
@@ -102,21 +101,20 @@ if(!$mep_file) {
 
 for my $s (@scans) {
     print "********** $s\n";
-    $avance->progres($delta);
     my @c=with_prog("AMC-calepage.pl");
     push @c,"--debug" if($debug);
-    push @c,"--progression",($progress+1) if($progress);
+    push @c,"--progression-id",$progress_id;
+    push @c,"--progression",$delta;
     push @c,"--binaire" if($binaire);
     push @c,"--mep-saved",$mep_file;
     push @c,"--cr",$cr_dir,$s;
-    
+
     $pid=fork();
     if($pid) {
+	print STDERR "Commande [$pid] : ".join(' ',@c)."\n";
 	waitpid($pid,0);
     } else {
 	exec(@c);
     }
 }
-
-$avance->fin();
 

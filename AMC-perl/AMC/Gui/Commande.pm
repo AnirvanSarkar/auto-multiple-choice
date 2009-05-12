@@ -46,7 +46,8 @@ sub new {
 	'log'=>'',
 	'avancement'=>'',
 	'texte'=>'',
-	'progres'=>0,
+	'progres.id'=>'',
+	'progres.pulse'=>'',
 	'fin'=>'',
 	'finw'=>'',
 	'signal'=>9,
@@ -105,13 +106,11 @@ sub open {
 	if($self->{'avancement'}) {
 	    $self->{'avancement'}->set_text($self->{'texte'});
 	    $self->{'avancement'}->set_fraction(0);
-	    $self->{'avancement'}->set_pulse_step(-$self->{'progres'})
-		if($self->{'progres'}<0);
+	    $self->{'avancement'}->set_pulse_step($self->{'progres.pulse'})
+		if($self->{'progres.pulse'});
 	}
 	
 	$self->{'avance'}=AMC::Gui::Avancement::new(0);
-	
-	$self->{'avance'}->init();
 	
 	$self->{'log'}->get_buffer()->set_text('');
 
@@ -156,14 +155,11 @@ sub get_output {
 	}
 
 	if($self->{'avancement'}) {
-	    if($self->{'progres'}<0) {
+	    if($self->{'progres.pulse'}) {
 		$self->{'avancement'}->pulse;
 	    } else {
-		my ($r,$niv)=$self->{'avance'}->lit($line);
+		my $r=$self->{'avance'}->lit($line);
 		$self->{'avancement'}->set_fraction($r) if($r);
-		if($niv>0 && $self->{"niveau".$niv}) {
-		    &{$self->{"niveau".$niv}}();
-		}
 	    }
 	}
 	

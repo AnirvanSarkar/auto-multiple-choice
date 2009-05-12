@@ -29,6 +29,7 @@ my $jpgdir='';
 my $pdfdir='';
 my $modele="";
 my $progress=1;
+my $progress_id='';
 my $association='';
 
 my $debug='';
@@ -37,6 +38,7 @@ GetOptions("cr=s"=>\$cr,
 	   "modele=s"=>\$modele,
 	   "association=s"=>\$association,
 	   "progression=s"=>\$progress,
+	   "progression-id=s"=>\$progress_id,
 	   );
 
 my $jpgdir="$cr/corrections/jpg";
@@ -44,7 +46,7 @@ my $pdfdir="$cr/corrections/pdf";
 
 my $association="$cr/association.xml" if(-f "$cr/association.xml" && ! $association);
 
-my $avance=AMC::Gui::Avancement::new($progress);
+my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $ass='';
 

@@ -53,7 +53,8 @@ my $prefix='';
 
 my $debug=0;
 
-my $progress=0;
+my $progress=1;
+my $progress_id='';
 
 GetOptions("mode=s"=>\$mode,
 	   "via=s"=>\$ppm_via,
@@ -64,10 +65,11 @@ GetOptions("mode=s"=>\$mode,
 	   "convert-opts=s"=>\$convert_opts,
 	   "debug!"=>\$debug,
 	   "progression=s"=>\$progress,
+	   "progression-id=s"=>\$progress_id,
 	   "prefix=s"=>\$prefix,
 	   );
 
-my $avance=AMC::Gui::Avancement::new($progress);
+my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 $debug=($debug ? "--debug" : "--no-debug");
 
@@ -250,8 +252,6 @@ if($mode =~ /m/) {
 
     print "********** Compilation...\n";
 
-    $avance->progres(0.07);
-
     if(-f $calage && $calage =~ /\.$ppm_via$/) {
 	print "Utilisation du fichier de calage $calage\n";
     } else {
@@ -266,12 +266,12 @@ if($mode =~ /m/) {
 	$calage="$f_base.$ppm_via";
     }
 
+    $avance->progres(0.07);
+
     # 2) analyse page par page
 
     print "********** Conversion en bitmap et analyse...\n";
 
-    $avance->progres(0.03);
-    
     @pages=();
 
     if($ppm_via eq 'pdf') {
@@ -299,20 +299,23 @@ if($mode =~ /m/) {
 	$cmd_pid='';
     }
     
+    $avance->progres(0.03);
+    
     my $npage=0;
     my $np=1+$#pages;
     for my $p (@pages) {
 	$npage++;
 	print "*** $p\n";
-	$avance->progres(0.9/$np*.4);
 	execute("convert",split(/\s+/,$convert_opts),
 		"-density",$dpi,
 		"-depth",8,
 		"+antialias",
 		$p,"$temp_dir/page.ppm");
-	$avance->progres(0.9/$np*.6);
+	$avance->progres(0.9/$np*.4);
+
 	execute(with_prog("AMC-calepage.pl"),
-		"--progression",($progress>0 ? $progress+1 : 0),
+		"--progression",0.9/$np*.6*$progress,
+		"--progression-id",$progress_id,
 		$debug,
 		$binaire,
 		"--tex-source",$tex_source,
@@ -396,3 +399,4 @@ if($mode =~ /b/) {
     close(BAR);
 }
 
+$avance->fin();

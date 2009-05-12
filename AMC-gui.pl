@@ -35,7 +35,6 @@ use I18N::Langinfo qw(langinfo CODESET);
 use AMC::Basic;
 use AMC::MEPList;
 use AMC::ANList;
-use AMC::Gui::Avancement;
 use AMC::Gui::Manuel;
 use AMC::Gui::Association;
 use AMC::Gui::Commande;
@@ -81,8 +80,6 @@ GetOptions("debug!"=>\$debug,
 	   );
 
 print "DEBUG MODE\n" if($debug);
-
-my $avance=AMC::Gui::Avancement::new(0);
 
 ($e_volume,$e_vdirectories,undef) = splitpath( rel2abs($0) );
 sub with_prog {
@@ -716,7 +713,8 @@ sub doc_maj {
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Mise à jour des documents...',
-	     'progres'=>-0.01,
+	     'progres.id'=>'MAJ',
+	     'progres.pulse'=>0.01,
 	     'fin'=>sub { 
 		 my $c=shift;
 		 my @err=$c->erreurs();
@@ -784,13 +782,14 @@ sub sujet_impressions_ok {
     commande('commande'=>[with_prog("AMC-imprime.pl"),
 			  "--sujet",localise($projet{'docs'}->[0]),
 			  "--mep",localise($projet{'mep'}),
+			  "--progression-id",'impression',
 			  "--progression",1,
 			  "--fich-numeros",$fh->filename,
 			  "--print-command",$o{'print_command_pdf'},
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Impression copie par copie...',
-	     'progres'=>1,
+	     'progres.id'=>'impression',
 	     'o'=>{'fh'=>$fh},
 	     'fin'=>sub {
 		 my $c=shift;
@@ -807,13 +806,15 @@ sub calcule_mep {
     # on recalcule...
     commande('commande'=>[with_prog("AMC-prepare.pl"),
 			  "--calage",localise($projet{'docs'}->[2]),
+			  "--progression-id",'MEP',
 			  "--progression",1,
 			  "--mode","m",
 			  localise($projet{'texsrc'}),
 			  "--mep",localise($projet{'mep'}),
 			  ],
 	     'texte'=>'Calcul des mises en page...',
-	     'progres'=>1,'fin'=>sub { detecte_mep(); });
+	     'progres.id'=>'MEP',
+	     'fin'=>sub { detecte_mep(); });
 }
 
 ### Actions des boutons de la partie SAISIE
@@ -885,6 +886,7 @@ sub saisie_auto_ok {
 
     commande('commande'=>[with_prog("AMC-analyse.pl"),
 			  "--binaire",
+			  "--progression-id",'analyse',
 			  "--progression",1,
 			  "--mep",localise($projet{'mep'}),
 			  "--cr",localise($projet{'cr'}),
@@ -892,7 +894,7 @@ sub saisie_auto_ok {
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Saisie automatique...',
-	     'progres'=>1,
+	     'progres.id'=>'analyse',
 	     'niveau1'=>sub { detecte_analyse('interne'=>1); },
 	     'o'=>{'fh'=>$fh},
 	     'fin'=>sub {
@@ -986,7 +988,7 @@ sub noter {
 			      ],
 		 'texte'=>'Lecture du bareme...',
 		 'fin'=>\&noter_calcul,
-		 'progres'=>-0.01);
+		 'progres.pulse'=>0.01);
     } else {
 	noter_calcul();
     }
@@ -1012,7 +1014,7 @@ sub noter_calcul {
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Calcul des notes...',
-	     'progres'=>-0.01,
+	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
 		 voir_notes();
 		 detecte_correc() if($projet{'annote_copies'});
@@ -1036,11 +1038,12 @@ sub regroupement {
 
     commande('commande'=>[with_prog("AMC-regroupe.pl"),
 			  "--cr",localise($projet{'cr'}),
+			  "--progression-id",'regroupe',
 			  "--progression",1,
 			  "--modele",$projet{'modele_regroupement'},
 			  ],
 	     'texte'=>'Regroupement des pages corrigées par étudiant...',
-	     'progres'=>1,
+	     'progres.id'=>'regroupe',
 	     );
 }
 
