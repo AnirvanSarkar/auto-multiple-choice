@@ -105,6 +105,7 @@ my $binaire='';
 my $debug='';
 my $progress=0;
 my $progress_id='';
+my $progress_debut=0;
 
 my $mep_saved='';
 
@@ -128,6 +129,7 @@ GetOptions("page=s"=>\$out_cadre,
 	   "debug!"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
+	   "progression-debut=s"=>\$progress_debut,
 	   "manuel!"=>\$manuel,
 	   "binaire!"=>\$binaire,
 	   );
@@ -162,6 +164,8 @@ sub commande_externe {
 ################################################################
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+
+$avance->progres($progress_debut);
 
 $temp_loc=tmpdir();
 $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => (!$debug) );
@@ -248,7 +252,7 @@ sub decimal {
 ##########################################################
 # Localisation des quatre marques
 
-$avance->progres(1/3);
+$avance->progres((1-$progress_debut)/3);
 
 my $diametre_marque;
 
@@ -356,7 +360,7 @@ print "Cadre general :\n"
 ###############################################################
 # identification du numéro de page : cas ecriture standard
 
-$avance->progres(1/3);
+$avance->progres((1-$progress_debut)/3);
 
 my $page_droite="$temp_dir/droit.pnm";
 

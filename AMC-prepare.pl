@@ -305,16 +305,16 @@ if($mode =~ /m/) {
     my $np=1+$#pages;
     for my $p (@pages) {
 	$npage++;
-	print "*** $p\n";
+	print "*** calage de la page $p\n";
 	execute("convert",split(/\s+/,$convert_opts),
 		"-density",$dpi,
 		"-depth",8,
 		"+antialias",
 		$p,"$temp_dir/page.ppm");
-	$avance->progres(0.9/$np*.4);
 
 	execute(with_prog("AMC-calepage.pl"),
-		"--progression",0.9/$np*.6*$progress,
+		"--progression-debut",.4,
+		"--progression",0.9/$np*$progress,
 		"--progression-id",$progress_id,
 		$debug,
 		$binaire,
