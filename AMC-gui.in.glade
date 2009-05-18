@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue May 12 16:04:59 2009 -->
+<!--Generated with glade3 3.4.5 on Mon May 18 15:15:59 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="visible">True</property>
@@ -207,7 +207,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max_length">4</property>
-                                <property name="adjustment">1 1 500 1 10 10</property>
+                                <property name="adjustment">1 1 500 1 10 0</property>
                                 <property name="snap_to_ticks">True</property>
                                 <property name="numeric">True</property>
                                 <property name="wrap">True</property>
@@ -2224,6 +2224,7 @@ Windows-1252
                         <child>
                           <widget class="GtkTable" id="table7">
                             <property name="visible">True</property>
+                            <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
                               <widget class="GtkEntry" id="pref_x_print_command_pdf">
@@ -2234,6 +2235,8 @@ Windows-1252
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -2241,6 +2244,28 @@ Windows-1252
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">PDF</property>
                               </widget>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label57">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Méthode d'impression</property>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkComboBox" id="pref_c_methode_impression">
+                                <property name="visible">True</property>
+                                <property name="items" translatable="yes"></property>
+                                <signal name="changed" handler="change_methode_impression"/>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="y_options"></property>
+                              </packing>
                             </child>
                           </widget>
                         </child>
@@ -2760,7 +2785,7 @@ Windows-1252
     </child>
   </widget>
   <widget class="GtkDialog" id="choix_pages_impression">
-    <property name="height_request">250</property>
+    <property name="height_request">450</property>
     <property name="visible">True</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Impression de copies</property>
@@ -2811,6 +2836,115 @@ que vous souhaitez imprimer :</property>
           <packing>
             <property name="position">1</property>
           </packing>
+        </child>
+        <child>
+          <widget class="GtkVBox" id="bloc_imprimante">
+            <child>
+              <widget class="GtkHBox" id="hbox3">
+                <property name="visible">True</property>
+                <property name="spacing">4</property>
+                <child>
+                  <widget class="GtkLabel" id="label55">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Imprimante :</property>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkComboBox" id="imprimante">
+                    <property name="visible">True</property>
+                    <property name="items" translatable="yes"></property>
+                    <signal name="changed" handler="autre_imprimante"/>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkExpander" id="expander1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <child>
+                  <widget class="GtkTable" id="table12">
+                    <property name="visible">True</property>
+                    <property name="n_rows">2</property>
+                    <property name="n_columns">2</property>
+                    <child>
+                      <widget class="GtkLabel" id="label58">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">recto/verso</property>
+                      </widget>
+                      <packing>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label59">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">agrafage</property>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkComboBox" id="imp_c_sides">
+                        <property name="visible">True</property>
+                        <property name="items" translatable="yes"></property>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkComboBox" id="imp_c_agrafe">
+                        <property name="visible">True</property>
+                        <property name="items" translatable="yes"></property>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="label56">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">options d'impression</property>
+                  </widget>
+                  <packing>
+                    <property name="type">label_item</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child internal-child="action_area">
           <widget class="GtkHButtonBox" id="dialog-action_area4">

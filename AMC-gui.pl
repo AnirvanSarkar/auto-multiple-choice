@@ -32,6 +32,9 @@ use Time::localtime;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
 
+use Net::CUPS;
+use Net::CUPS::PPD;
+
 use AMC::Basic;
 use AMC::MEPList;
 use AMC::ANList;
@@ -132,6 +135,11 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'encodage_texte'=>'UTF-8',
 	      'taille_max_correction'=>'1000x1500',
 	      'qualite_correction'=>'65',
+	      'methode_impression'=>'CUPS',
+	      'imprimante'=>'',
+	      'options_impression'=>{'sides'=>'two-sided-long-edge',
+				     'number-up'=>1,
+				     },
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -393,22 +401,29 @@ $w{'diag_tree'}->append_column ($column);
 ### modeles combobox
 
 sub cb_model {
-    my %texte=(@_);
+    my @texte=(@_);
     my $cs=Gtk2::ListStore->new ('Glib::String','Glib::String');
-    for my $k (keys %texte) {
+    my $k;
+    my $t;
+    while(($k,$t)=splice(@texte,0,2)) {
 	$cs->set($cs->append,
 		 COMBO_ID,$k,
-		 COMBO_TEXT,$texte{$k});
+		 COMBO_TEXT,$t);
     }
     return($cs);
 }
 
 my %cb_stores=(
-	       'delimiteur_decimal'=>cb_model(','=>', (virgule)',
-					      '.'=>'. (point)'),
-	       'note_arrondi'=>cb_model('inf'=>'inférieur',
-					'normal'=>'normal',
-					'sup'=>'supérieur'),
+	       'delimiteur_decimal'=>cb_model(',',', (virgule)',
+					      '.','. (point)'),
+	       'note_arrondi'=>cb_model('inf','inférieur',
+					'normal','normal',
+					'sup','supérieur'),
+	       'methode_impression'=>cb_model('CUPS','CUPS',
+					      'commande','commande'),
+	       'sides'=>cb_model('one-sided','Non',
+				 'two-sided-long-edge','Grand côté',
+				 'two-sided-short-edge','Petit côté'),
 	       );
 
 ## tri pour nombres
@@ -733,13 +748,74 @@ sub doc_maj {
     
 }
 
+my $cups;
+my $g_imprime;
+
+sub nonnul {
+    my $s=shift;
+    $s =~ s/\000//g;
+    return($s);
+}
+
+sub autre_imprimante {
+    my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
+    print "Choix imprimante $i\n";
+    my $ppd=$cups->getPPD($i);
+    my $k='';
+
+  CHOIX: for my $i (qw/StapleLocation/) {
+      my $oi=$ppd->getOption($i);
+      if(%$oi) {
+	  $k=nonnul($oi->{'keyword'});
+	  print "- $k\n";
+	  my $ok=$o{'options_impression'}->{$k};
+	  $o{'options_impression'}->{$k}=nonnul($oi->{'defchoice'})
+	      if(!$ok);
+	  $cb_stores{'agrafe'}=cb_model(map { (nonnul($_->{'choice'}),
+					       nonnul($_->{'text'})) } (@{$oi->{'choices'}}));
+	  transmet_pref($g_imprime,'imp',$o{'options_impression'},
+			{$k=>'agrafe'});
+	  $o{'options_impression'}->{$k}=$ok;
+	  last CHOIX;
+      }
+  }
+    if(!$k) {
+	$cb_stores{'agrafe'}=cb_model();
+	$w{'imp_c_agrafe'}->set_model($cb_stores{'agrafe'});
+    }
+}
+
 sub sujet_impressions {
     print "Choix des impressions...\n";
 
-    my $gi=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression');
-    $gi->signal_autoconnect_from_package('main');
-    for(qw/choix_pages_impression arbre_choix_copies/) {
-	$w{$_}=$gi->get_widget($_);
+    $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression');
+    $g_imprime->signal_autoconnect_from_package('main');
+    for(qw/choix_pages_impression arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe/) {
+	$w{$_}=$g_imprime->get_widget($_);
+    }
+
+    if($o{'methode_impression'} eq 'CUPS') {
+	$w{'bloc_imprimante'}->show();
+
+	$cups=Net::CUPS->new();
+
+	# les imprimantes :
+
+	my @printers = $cups->getDestinations();
+	print "Imprimantes : ".join(' ',map { $_->getName() } @printers)."\n";
+	my $p_model=cb_model(map { ($_->getName(),$_->getDescription()) } @printers);
+	$w{'imprimante'}->set_model($p_model);
+	if(! $o{'imprimante'}) {
+	    $o{'imprimante'}=$cups->getDestination()->getName();
+	}
+	my $i=model_id_to_iter($p_model,COMBO_ID,$o{'imprimante'});
+	if($i) {
+	    $w{'imprimante'}->set_active_iter($i);
+	}
+
+	# transmission
+
+	transmet_pref($g_imprime,'imp',$o{'options_impression'});
     }
 
     $copies_store->clear();
@@ -764,10 +840,29 @@ sub sujet_impressions_cancel {
 }
 
 sub sujet_impressions_ok {
-
+    my $os='none';
     my @e=();
     for my $i ($w{'arbre_choix_copies'}->get_selection()->get_selected_rows() ) {
 	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N);
+    }
+
+    if($o{'methode_impression'} eq 'CUPS') {
+	my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
+	if($i ne $o{'imprimante'}) {
+	    $o{'imprimante'}=$i;
+	    $o{'modifie'}=1;
+	}
+
+	reprend_pref('imp',$o{'options_impression'});
+
+	if($o{'options_impression'}->{'modifie'}) {
+	    $o{'modifie'}=1;
+	    delete $o{'options_impression'}->{'modifie'};
+	}
+
+	$os=join(',',map { $_."=".$o{'options_impression'}->{$_} } 
+		 grep { $o{'options_impression'}->{$_} }
+		 (keys %{$o{'options_impression'}}) );
     }
 
     $w{'choix_pages_impression'}->destroy;
@@ -781,12 +876,15 @@ sub sujet_impressions_ok {
     $fh->seek( 0, SEEK_END );
 
     commande('commande'=>[with_prog("AMC-imprime.pl"),
+			  "--methode",$o{'methode_impression'},
+			  "--imprimante",$o{'imprimante'},
+			  "--options",$os,
+			  "--print-command",$o{'print_command_pdf'},
 			  "--sujet",localise($projet{'docs'}->[0]),
 			  "--mep",localise($projet{'mep'}),
 			  "--progression-id",'impression',
 			  "--progression",1,
 			  "--fich-numeros",$fh->filename,
-			  "--print-command",$o{'print_command_pdf'},
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Impression copie par copie...',
@@ -1118,15 +1216,18 @@ sub model_id_to_iter {
 
 # transmet les preferences vers les widgets correspondants
 sub transmet_pref {
-    my ($gap,$prefixe,$h)=@_;
+    my ($gap,$prefixe,$h,$alias)=@_;
 
     for my $t (keys %$h) {
-	my $wp=$gap->get_widget($prefixe.'_x_'.$t);
+	my $ta=$t;
+	$ta=$alias->{$t} if($alias->{$t});
+
+	my $wp=$gap->get_widget($prefixe.'_x_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_x_'.$t}=$wp;
 	    $wp->set_text($h->{$t});
 	}
-	$wp=$gap->get_widget($prefixe.'_f_'.$t);
+	$wp=$gap->get_widget($prefixe.'_f_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_f_'.$t}=$wp;
 	    if($wp->get_action =~ /-folder$/i) {
@@ -1135,11 +1236,11 @@ sub transmet_pref {
 		$wp->set_filename($h->{$t});
 	    }
 	}
-	$wp=$gap->get_widget($prefixe.'_c_'.$t);
+	$wp=$gap->get_widget($prefixe.'_c_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
-	    if($cb_stores{$t}) {
-		$wp->set_model($cb_stores{$t});
+	    if($cb_stores{$ta}) {
+		$wp->set_model($cb_stores{$ta});
 		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
 		if($i) {
 		    #print "[$t] trouve $i\n";
@@ -1178,7 +1279,11 @@ sub reprend_pref {
 	$wp=$w{$prefixe.'_c_'.$t};
 	if($wp) {
 	    if($wp->get_model) {
-		$n=$wp->get_model->get($wp->get_active_iter,COMBO_ID);
+		if($wp->get_active_iter) {
+		    $n=$wp->get_model->get($wp->get_active_iter,COMBO_ID);
+		} else {
+		    $n='';
+		}
 		#print "[$t] valeur=$n\n";
 	    } else {
 		$n=$wp->get_active();
@@ -1190,12 +1295,25 @@ sub reprend_pref {
     
 }
 
+sub change_methode_impression {
+    if($w{'pref_x_print_command_pdf'}) {
+	my $m='';
+	if($w{'pref_c_methode_impression'}->get_active_iter) {
+	    $m=$w{'pref_c_methode_impression'}->get_model->get($w{'pref_c_methode_impression'}->get_active_iter,COMBO_ID);
+	}
+	$w{'pref_x_print_command_pdf'}->set_sensitive($m eq 'commande');
+    }
+}
+
 sub edit_preferences {
     my $gap=Gtk2::GladeXML->new($glade_xml,'edit_preferences');
-    $gap->signal_autoconnect_from_package('main');
-    for(qw/edit_preferences pref_projet_tous pref_projet_annonce/) {
+
+    for(qw/edit_preferences pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression/) {
 	$w{$_}=$gap->get_widget($_);
     }
+
+    $gap->signal_autoconnect_from_package('main');
+
     for my $t (grep { /^pref(_projet)?_[xfc]_/ } (keys %w)) {
 	delete $w{$t};
     }
@@ -1210,6 +1328,8 @@ sub edit_preferences {
 	$w{'pref_projet_tous'}->set_sensitive(0);
 	$w{'pref_projet_annonce'}->set_label('<i>Préférences du projet</i>');
     }
+
+    change_methode_impression();
 }
 
 sub accepte_preferences {
@@ -1217,6 +1337,12 @@ sub accepte_preferences {
     reprend_pref('pref_projet',\%projet) if($projet{'nom'});
     $w{'edit_preferences'}->destroy();
 
+    sauve_pref_generales();
+
+    test_commandes();
+}
+
+sub sauve_pref_generales {
     print "Sauvegarde des preferences generales...\n";
 
     if(open(OPTS,">$o_file")) {
@@ -1232,8 +1358,6 @@ sub accepte_preferences {
 	$dialog->run;
 	$dialog->destroy;      
     }
-
-    test_commandes();
 }
 
 sub annule_preferences {
@@ -1688,6 +1812,20 @@ sub quitte_projet {
 sub quitter {
 
     quitte_projet();
+
+    if($o{'modifie'}) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							   'destroy-with-parent',
+							   'question', # message type
+							   'yes-no', # which set of buttons?
+							   "Vous n'avez pas sauvegardé les options générales, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?");
+	my $reponse=$dialog->run;
+	$dialog->destroy;      
+	
+	if($reponse eq 'yes') {
+	    sauve_pref_generales();
+	} 
+    }
 
     Gtk2->main_quit;
     

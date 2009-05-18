@@ -21,6 +21,9 @@
 use Getopt::Long;
 use File::Temp qw/ tempfile tempdir /;
 
+use Net::CUPS;
+use Net::CUPS::PPD;
+
 use AMC::MEPList;
 use AMC::Gui::Avancement;
 
@@ -42,6 +45,9 @@ my $progress='';
 my $progress_id='';
 my $debug='';
 my $fich_nums='';
+my $methode='CUPS';
+my $imprimante='';
+my $options='number-up=1';
 
 GetOptions(
 	   "mep=s"=>\$mep_dir,
@@ -50,6 +56,9 @@ GetOptions(
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "print-command=s"=>\$print_cmd,
+	   "methode=s"=>\$methode,
+	   "imprimante=s"=>\$imprimante,
+	   "options=s"=>\$options,
 	   "debug!"=>\$debug,
 	   );
 
@@ -89,6 +98,24 @@ if($fich_nums) {
 
 
 my $n=0;
+my $cups;
+my $dest;
+
+if($methode =~ /^cups/i) {
+    $cups=Net::CUPS->new();
+    $dest=$cups->getDestination($imprimante);
+    die "Imprimante inaccessible : $imprimante" if(!$dest);
+    for my $o (split(/\s*,+\s*/,$options)) {
+	my $on=$o;
+	my $ov=1;
+	if($o =~ /([^=]+)=(.*)/) {
+	    $on=$1;
+	    $ov=$2;
+	}
+	print "Option : $on=$ov\n";
+	$dest->addOption($on,$ov);
+    }
+}
 
 for my $e (@es) {
     my $debut=10000;
@@ -110,9 +137,16 @@ for my $e (@es) {
 
     $avance->progres(1/(2*(1+$#es)));
 
-    my @c=map { s/[%]f/$fn/g;$_; } split(/\s+/,$print_cmd);
-    #print STDERR join(' ',@c)."\n";
-    commande_externe(@c);
+    if($methode =~ /^cups/i) {
+	$dest->printFile($fn,"QCM : copie $e");
+    } elsif($methode =~ /^command/i) {
+	my @c=map { s/[%]f/$fn/g;$_; } split(/\s+/,$print_cmd);
+	
+	#print STDERR join(' ',@c)."\n";
+	commande_externe(@c);
+    } else {
+	die "Methode non reconnue : $methode";
+    }
 
     close($tmp);
 
