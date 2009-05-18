@@ -132,7 +132,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'saisie_dpi'=>75,
 	      'n_procs'=>0,
 	      'delimiteur_decimal'=>',',
-	      'encodage_texte'=>'UTF-8',
+	      'encodage_liste'=>'UTF-8',
+	      'encodage_interne'=>'UTF-8',
+	      'encodage_csv'=>'UTF-8',
 	      'taille_max_correction'=>'1000x1500',
 	      'qualite_correction'=>'65',
 	      'methode_impression'=>'CUPS',
@@ -930,7 +932,8 @@ sub saisie_manuelle {
 				 'debug'=>$debug,
 				 'seuil'=>$projet{'seuil'},
 				 'global'=>0,
-				 'encoding'=>$o{'encodage_texte'},
+				 'encodage_interne'=>$o{'encodage_interne'},
+				 'encodage_liste'=>$o{'encodage_liste'},
 				 'en_quittant'=>\&detecte_analyse,
 				 );
 }
@@ -1028,7 +1031,8 @@ sub associe {
 	my $ga=AMC::Gui::Association::new('cr'=>localise($projet{'cr'}),
 					  'liste'=>$projet{'listeetudiants'},
 					  'global'=>0,
-					  'encoding'=>$o{'encodage_texte'},
+					  'encodage_liste'=>$o{'encodage_liste'},
+					  'encodage_interne'=>$o{'encodage_interne'},
 					  );
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
@@ -1111,7 +1115,7 @@ sub noter_calcul {
 			  "--notemax",$projet{'note_max'},
 			  
 			  "--delimiteur",$o{'delimiteur_decimal'},
-			  "--encoding",$o{'encodage_texte'},
+			  "--encodage-csv",$o{'encodage_csv'},
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Calcul des notes...',

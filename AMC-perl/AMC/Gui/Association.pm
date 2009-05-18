@@ -61,7 +61,8 @@ sub new {
 	      'liste'=>'',
 	      'fichier-liens'=>'',
 	      'global'=>0,
-	      'encoding'=>'UTF-8',
+	      'encodage_liste'=>'UTF-8',
+	      'encodage_interne'=>'UTF-8',
 	      'separateur'=>":",
 	      'identifiant'=>'(nom) (prenom)',
 	  };
@@ -78,7 +79,7 @@ sub new {
 
     my @heads=();
     
-    open LISTE,"<:encoding(".$self->{'encoding'}.")",$self->{'liste'}
+    open LISTE,"<:encoding(".$self->{'encodage_liste'}.")",$self->{'liste'}
 	or die "Erreur a l'ouverture du fichier \"$self->{'liste'}\" : $!";
   NOM: while(<LISTE>) {
       chomp();
@@ -204,14 +205,14 @@ sub quitter {
 sub enregistrer {
     my ($self)=(@_);
     
-    my $output=new IO::File($self->{'fichier-liens'},">:encoding(".$self->{'encoding'}.")");
+    my $output=new IO::File($self->{'fichier-liens'},">:encoding(".$self->{'encodage_interne'}.")");
     if(! $output) {
 	print "Impossible d'ouvrir ".$self->{'fichier-liens'}." : $!";
 	return();
     }
     
-    my $writer = new XML::Writer(OUTPUT=>$output,NEWLINES=>1,ENCODING=>$self->{'encoding'},DATA_INDENT=>2);
-    $writer->xmlDecl($self->{'encoding'});
+    my $writer = new XML::Writer(OUTPUT=>$output,NEWLINES=>1,ENCODING=>$self->{'encodage_interne'},DATA_INDENT=>2);
+    $writer->xmlDecl($self->{'encodage_interne'});
     $writer->startTag('association');
 
     for my $i (keys %{$self->{'liens'}}) {

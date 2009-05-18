@@ -51,7 +51,7 @@ my $notemax=20;
 my $grain='0,5';
 my $arrondi='.INF';
 my $delimiteur=',';
-my $encoding='UTF-8';
+my $encodage_csv='UTF-8';
 my $an_saved='';
 
 my $taille_max="1000x1500";
@@ -71,7 +71,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "arrondi=s"=>\$type_arrondi,
 	   "notemax=s"=>\$notemax,
 	   "delimiteur=s"=>\$delimiteur,
-	   "encoding=s"=>\$encoding,
+	   "encodage-csv=s"=>\$encodage_csv,
 	   "taille-max=s"=>\$taille_max,
 	   "qualite=s"=>\$qualite_jpg,
 	   );
@@ -249,7 +249,7 @@ print "entetes supplementaires : ".join(' ',@heads)."\n";
 print ("-" x 40);
 print "\n";
 
-open(NOTES,">:encoding($encoding)",$fichnotes) || die "Probleme a l'ecriture de $fichnotes : $!";
+open(NOTES,">:encoding($encodage_csv)",$fichnotes) || die "Probleme a l'ecriture de $fichnotes : $!";
 
 print NOTES "NOM\tNOTE\t";
 print NOTES "ID\t".join("\t",map { $bar->{'etudiant'}->{$un_etud}->{'question'}->{$_}->{'titre'} } @qids)."\tTOTAL\tMAX";

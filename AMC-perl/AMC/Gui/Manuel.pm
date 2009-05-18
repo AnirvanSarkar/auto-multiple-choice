@@ -72,7 +72,8 @@ sub new {
 	      'iid'=>0,
 	      'global'=>0,
 	      'en_quittant'=>'',
-	      'encoding'=>'UTF-8',
+	      'encodage_liste'=>'UTF-8',
+	      'encodage_interne'=>'UTF-8',
 	  };
 
     for (keys %o) {
@@ -135,7 +136,7 @@ sub new {
 	
 	$self->{'liste-ent'}=Gtk2::ListStore->new ('Glib::String');
 	
-	open(LISTE,"<:encoding(".$self->{'encoding'}.")",$self->{'liste'}) 
+	open(LISTE,"<:encoding(".$self->{'encodage_liste'}.")",$self->{'liste'}) 
 	    or die "Erreur a l'ouverture du fichier <".$self->{'liste'}."> : $!";
       NOM: while(<LISTE>) {
 	  s/\#.*//;
@@ -315,9 +316,9 @@ sub ecrit {
 
     if($self->{'xml-file'} && $self->{'modifs'}) {
 	print "Sauvegarde du fichier ".$self->{'xml-file'}."\n";
-	open(XML,">".$self->{'xml-file'}) 
+	open(XML,">:encoding(".$self->{'encodage_interne'}.")",$self->{'xml-file'}) 
 	    or die "Erreur a l'ecriture de ".$self->{'xml-file'}." : $!";
-	print XML "<?xml version='1.0' standalone='yes'?>\n<analyse src=\""
+	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
 	    .$self->{'scan-file'}."\" manuel=\"1\" id=\""
 	    .$self->{'ids'}->[$self->{'iid'}]."\" nometudiant=\""
 	    .$self->{'etudiant_cbe'}->get_text()."\">\n";
