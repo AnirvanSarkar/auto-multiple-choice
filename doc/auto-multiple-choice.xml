@@ -380,8 +380,6 @@ Durée : 10 minutes.
 
 %%% préparation des groupes
 
-\nouveaugroupe{geographie}{10}
-
 \element{geographie}{
   \begin{question}{Paris}
     Dans quel continent se situe Paris~?
@@ -404,8 +402,6 @@ Durée : 10 minutes.
     \end{reponses}
   \end{question}
 }
-
-\nouveaugroupe{histoire}{10}
 
 \element{histoire}{
   \begin{question}{Marignan}
@@ -575,15 +571,11 @@ Nom et prénom :
 
         <para>L'inclusion de questions dans des groupes permet de mélanger les
         questions à l'intérieur de ces groupes, de manière différente pour
-        chaque copie. Il faut tout d'abord créer un groupe de questions, en
-        lui donnant un nom (formé uniquement de lettres non-accentuées) et en
-        fixant un nombre maximal de questions que nous pourrons affecter à ce
-        groupe, par la commande <command>nouveaugroupe</command>. Par exemple,
-        pour créer un groupe nommé « <parameter>ungroupe</parameter> » pouvant
-        contenir 20 questions : <programlisting>\nouveaugroupe{ungroupe}{20}</programlisting></para>
+        chaque copie. Chaque groupe de questions devra avoir un nom formé
+        uniquement de lettres non-accentuées.</para>
 
-        <para>On peut ensuite mettre une à une des questions dans ce groupe,
-        comme dans l'exemple suivant : <programlisting>\element{ungroupe}{
+        <para>On peut mettre une à une des questions dans un groupe, comme
+        dans l'exemple suivant : <programlisting>\element{ungroupe}{
   \begin{question}{facile}
     Alors, combien font un plus un~?
     \begin{reponseshoriz}
@@ -596,11 +588,10 @@ Nom et prénom :
 
         <important>
           <para>La constitution du groupe, par les commandes
-          <command>nouveaugroupe</command> et <command>element</command>, doit
-          être faite une seule fois : ces commandes doivent donc être
-          utilisées <emphasis>avant</emphasis> la commande
-          <command>exemplaire</command>, qui va répéter certaines actions pour
-          chaque copie.</para>
+          <command>element</command>, doit être faite une seule fois : ces
+          commandes doivent donc être utilisées <emphasis>avant</emphasis> la
+          commande <command>exemplaire</command>, qui va répéter certaines
+          actions pour chaque copie.</para>
         </important>
 
         <para>Une fois un groupe constitué, on peut mélanger les questions qui
@@ -1231,8 +1222,6 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
 % preparation du groupe de questions appelé qqs (on mettra au maximum
 % 20 elements dans ce groupe) :
-
-\nouveaugroupe{qqs}{20}
 
 \element{qqs}{
 \begin{question}{le bon choix}

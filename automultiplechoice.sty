@@ -135,21 +135,20 @@
 %
 \newcount\AMCtok@k
 \newcount\AMCtok@max
-\newcommand{\nouveaugroupe}[2]{% nom_groupe nombre_max
-\AMCtok@k=#2
-% definition des registres de tokens
-\@whilenum\AMCtok@k>0\do{
-  \expandafter\newtoks\csname #1@\romannumeral\AMCtok@k\endcsname
-  \advance\AMCtok@k by -1
-}
+\newcommand{\nouveaugroupe}[2]{% nom_groupe (nombre_max)
+% (le deuxieme argument ne sert plus a rien)
 % definition du compteur
 \expandafter\newcount\csname #1@k\endcsname
 \csname #1@k\endcsname=0
 }
 \newcommand{\element}[2]{% nom_groupe tok
+  % definition du compteur si pas deja fait
+  \expandafter\ifx\csname #1@k\endcsname\relax\nouveaugroupe{#1}{}\fi
+  % augmentation du compteur
   \advance\csname #1@k\endcsname by 1
   \AMCtok@k=\csname #1@k\endcsname
 %  < \the\AMCtok@k >
+  \expandafter\ifx\csname #1@\romannumeral\AMCtok@k\endcsname\relax\expandafter\newtoks\csname #1@\romannumeral\AMCtok@k\endcsname\fi
   \csname #1@\romannumeral\AMCtok@k\endcsname={#2}
 }
 \newcommand{\melangegroupe}[1]{%
@@ -161,10 +160,7 @@
   \AMCtok@max=\csname #2@k\endcsname
 \fi
 \AMCtok@k=0
-% \@whilenum\AMCtok@k<\AMCtok@max\do{
-%   \advance\AMCtok@k by 1
-%   \the\csname #2@\romannumeral\AMCtok@k\endcsname
-%   }
+%
 {\loop
     \advance\AMCtok@k by 1
     \the\csname #2@\romannumeral\AMCtok@k\endcsname
@@ -259,9 +255,7 @@
 \def\couleur@case{\ifAMC@calibration\ifAMC@couleur\advance\numer@casebinaire by 1\definecolor{colcasebin}{RGB}{201,\the\nb@id,\the\numer@casebinaire}\else\definecolor{colcasebin}{RGB}{0,0,0}\fi\else\definecolor{colcasebin}{RGB}{0,0,0}\fi}
 \def\chiffre@zero{\couleur@case\case@couleur{white}}
 \def\chiffre@un{\couleur@case\case@couleur{colcasebin}}
-%\def\casebinaire#1{\ifAMC@calibration\ifAMC@couleur\advance\numer@casebinaire by 1\textcolor[RGB]{201,\the\nb@id,\the\numer@casebinaire}{#1}\else #1\fi\else #1\fi}
-%\def\chiffre@zero{\casebinaire{\BigSquare}}
-%\def\chiffre@un{\casebinaire{\FilledBigSquare}}
+%
 \def\commence@nb#1{\nb@id=#1\numer@casebinaire=0}
 \newcommand\chiffresbinaires[2]{
 \def\chiffre@zero{#1}
