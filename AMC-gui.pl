@@ -98,6 +98,8 @@ $glade_xml =~ s/\.p[ml]$/.glade/i;
 
 my $o_file=Glib::get_home_dir().'/.AMC.xml';
 
+chomp(my $encodage_systeme=eval { `locale charmap` });
+
 my %w=();
 my %o_defaut=('pdf_viewer'=>['commande',
 			     'evince','acroread','gpdf','xpdf',
@@ -132,9 +134,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'saisie_dpi'=>75,
 	      'n_procs'=>0,
 	      'delimiteur_decimal'=>',',
-	      'encodage_liste'=>'UTF-8',
+	      'encodage_liste'=>'',
 	      'encodage_interne'=>'UTF-8',
-	      'encodage_csv'=>'UTF-8',
+	      'encodage_csv'=>'',
 	      'taille_max_correction'=>'1000x1500',
 	      'qualite_correction'=>'65',
 	      'methode_impression'=>'CUPS',
@@ -227,8 +229,11 @@ for my $k (keys %o_defaut) {
 	    } else {
 		print STDERR "ERR: Type d'option inconnu : $type\n";
 	    }
+	} elsif(ref($o_defaut{$k}) eq 'HASH') {
+	    $o{$k}={%{$o_defaut{$k}}};
 	} else {
 	    $o{$k}=$o_defaut{$k};
+	    $o{$k}=$encodage_systeme if($k =~ /^encodage_/ && !$o{$k});
 	}
 	print "Nouveau parametre global : $k = $o{$k}\n" if($o{$k});
     }
