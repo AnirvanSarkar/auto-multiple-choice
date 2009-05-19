@@ -41,7 +41,7 @@ AMC-traitement-image: AMC-traitement-image.c Makefile
 	gcc -O3 -I. -lppm $< -o $@
 
 %.glade: %.in.glade FORCE
-	./versions.pl < $< > $@
+	perl versions.pl < $< > $@
 
 doc:
 	$(MAKE) -C doc

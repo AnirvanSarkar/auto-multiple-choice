@@ -99,6 +99,7 @@ $glade_xml =~ s/\.p[ml]$/.glade/i;
 my $o_file=Glib::get_home_dir().'/.AMC.xml';
 
 chomp(my $encodage_systeme=eval { `locale charmap` });
+$encodage_systeme='UTF-8' if(!$encodage_systeme);
 
 my %w=();
 my %o_defaut=('pdf_viewer'=>['commande',
