@@ -423,17 +423,30 @@ sub cb_model {
 }
 
 # rajouter a partir de Encode::Supported
-my $encodages=[{qw/inputenc latin1 iso ISO-8859-1 txt ISO-8859-1/},
-	       {qw/inputenc utf8 iso UTF-8 txt UTF-8/},
-	       {qw/inputenc cp1252 iso cp1252 txt Windows-1252/},
+my $encodages=[{qw/inputenc latin1 iso ISO-8859-1/,'txt'=>'ISO-8859-1 (Europe occidentale)'},
+	       {qw/inputenc latin2 iso ISO-8859-2/,'txt'=>'ISO-8859-2 (Europe centrale)'},
+	       {qw/inputenc latin3 iso ISO-8859-3/,'txt'=>'ISO-8859-3 (Europe du sud)'},
+	       {qw/inputenc latin4 iso ISO-8859-4/,'txt'=>'ISO-8859-4 (Europe du Nord)'},
+	       {qw/inputenc latin5 iso ISO-8859-5/,'txt'=>'ISO-8859-5 (Cyrillique)'},
+	       {qw/inputenc latin9 iso ISO-8859-9/,'txt'=>'ISO-8859-9 (Turc)'},
+	       {qw/inputenc latin10 iso ISO-8859-10/,'txt'=>'ISO-8859-10 (Nordique)'},
+	       {qw/inputenc utf8 iso UTF-8/,'txt'=>'UTF-8 (Unicode)'},
+	       {qw/inputenc cp1252 iso cp1252/,'txt'=>'Windows-1252',
+		alias=>['Windows-1252','Windows']},
+	       {qw/inputenc applemac iso MacRoman/,'txt'=>'Macintosh Europe occidentale'},
+	       {qw/inputenc macce iso MacCentralEurRoman/,'txt'=>'Macintosh Europe centrale'},
 	       ];
 
 sub get_enc {
-    my ($e)=@_;
-    for(@$encodages) {
-	return($_) if($_->{'inputenc'} =~ /^$e$/i ||
-		      $_->{'iso'} =~ /^$e$/i ||
-		      $_->{'txt'} =~ /^$e$/i);
+    my ($txt)=@_;
+    for my $e (@$encodages) {
+	return($e) if($e->{'inputenc'} =~ /^$txt$/i ||
+		      $e->{'iso'} =~ /^$txt$/i);
+	if($e->{'alias'}) {
+	    for my $a (@{$e->{'alias'}}) {
+		return($e) if($a =~ /^$txt$/i);
+	    }
+	}
     }
     return('');
 }
