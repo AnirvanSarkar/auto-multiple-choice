@@ -138,6 +138,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'encodage_liste'=>'',
 	      'encodage_interne'=>'UTF-8',
 	      'encodage_csv'=>'',
+	      'encodage_latex'=>'',
 	      'taille_max_correction'=>'1000x1500',
 	      'qualite_correction'=>'65',
 	      'methode_impression'=>'CUPS',
@@ -421,6 +422,22 @@ sub cb_model {
     return($cs);
 }
 
+# rajouter a partir de Encode::Supported
+my $encodages=[{qw/inputenc latin1 iso ISO-8859-1 txt ISO-8859-1/},
+	       {qw/inputenc utf8 iso UTF-8 txt UTF-8/},
+	       {qw/inputenc cp1252 iso cp1252 txt Windows-1252/},
+	       ];
+
+sub get_enc {
+    my ($e)=@_;
+    for(@$encodages) {
+	return($_) if($_->{'inputenc'} =~ /^$e$/i ||
+		      $_->{'iso'} =~ /^$e$/i ||
+		      $_->{'txt'} =~ /^$e$/i);
+    }
+    return('');
+}
+
 my %cb_stores=(
 	       'delimiteur_decimal'=>cb_model(',',', (virgule)',
 					      '.','. (point)'),
@@ -432,6 +449,8 @@ my %cb_stores=(
 	       'sides'=>cb_model('one-sided','Non',
 				 'two-sided-long-edge','Grand côté',
 				 'two-sided-short-edge','Petit côté'),
+	       'encodage_latex'=>cb_model(map { $_->{'iso'}=>$_->{'txt'} }
+					  (@$encodages)),
 	       );
 
 ## tri pour nombres
@@ -1679,6 +1698,40 @@ sub source_latex_okm {
     }
 }
 
+# copie en changeant eventuellement d'encodage
+sub copy_latex {
+    my ($src,$dest)=@_;
+    # 1) reperage du inputenc dans le source
+    my $i='';
+    open(SRC,$src);
+  LIG: while(<SRC>) {
+      s/%.*//;
+      if(/\\usepackage\[([^\]]*)\]\{inputenc\}/) {
+	  $i=$1;
+	  last LIG;
+      }
+  }
+    close(SRC);
+    
+    my $ie=get_enc($i);
+    my $id=get_enc($o{'encodage_latex'});
+    if($ie && $id && $ie->{'iso'} ne $id->{'iso'}) {
+	print "Reencodage $ie->{'iso'} => $id->{'iso'}\n";
+	open(SRC,"<:encoding($ie->{'iso'})",$src) or return('');
+	open(DEST,">:encoding($id->{'iso'})",$dest) or close(SRC),return('');
+	while(<SRC>) {
+	    chomp;
+	    s/\\usepackage\[([^\]]*)\]\{inputenc\}/\\usepackage[$id->{'inputenc'}]{inputenc}/;
+	    print DEST "$_\n";
+	}
+	close(DEST);
+	close(SRC);
+	return(1);
+    } else {
+	return(copy($src,$dest));
+    }
+}
+
 sub importe_source {
     my ($fxa,$fxb,$fb) = splitpath(localise($projet{'texsrc'}));
     my $dest=localise($fb);
@@ -1697,7 +1750,7 @@ sub importe_source {
 	} 
     }
 
-    if(copy(localise($projet{'texsrc'}),$dest)) {
+    if(copy_latex(localise($projet{'texsrc'}),$dest)) {
 	$projet{'texsrc'}=$fb;
 	set_source_tex();
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
