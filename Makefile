@@ -35,7 +35,7 @@ MODS=AMC-*.pl AMC-traitement-image
 GLADE=AMC-*.glade
 STY=automultiplechoice.sty
 
-all: AMC-traitement-image AMC-gui.glade doc ;
+all: AMC-traitement-image AMC-gui.glade doc logo.xpm ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
 	gcc -O3 -I. -lppm $< -o $@
@@ -92,14 +92,15 @@ install: FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 -o root -g root AMC-perl/AMC/*.pm $(DESTDIR)/$(PERLDIR)/AMC
-	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.{pm,glade} $(DESTDIR)/$(PERLDIR)/AMC/Gui
+	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
+	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
 
 # perl >= 5.10 pour operateur //
 # libnetpbm9 -> libppm (AMC-traitement-image)
 # netpbm -> ppmtoxpm (Manuel.pm)
 # xpdf-reader -> pdftoppm (Manuel.pm)
 # xpdf-utils -> pdfinfo (AMC-prepare)
-deb: logo.xpm FORCE
+deb: FORCE
 	dpkg-buildpackage -I.svn -Idownload-area -rsudo -k42067447
 
 VERSION=0.1.0

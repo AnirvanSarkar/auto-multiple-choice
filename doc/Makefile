@@ -25,7 +25,7 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ;
 
 %.tex: %.xml
 	dblatex -t tex $< -o $@
-	./addlink.pl $@
+	perl addlink.pl $@
 
 %.pdf: %.tex
 	pdflatex $< ; pdflatex $<
@@ -35,7 +35,7 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ;
 %.x: %.ext %.man %.html ;
 
 %.ext: %.xml
-	./extrait-fichiers.pl --liste $@ $<
+	perl extrait-fichiers.pl --liste $@ $<
 
 %.man: %.xml
 	xsltproc --nonet --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl $<
