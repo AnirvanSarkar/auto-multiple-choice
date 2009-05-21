@@ -47,7 +47,7 @@ doc:
 	$(MAKE) -C doc
 
 sync:
-	$(MAKE) -C download-area sync
+	$(MAKE) -C download-area all
 
 %.ps: %.dvi
 	dvips $< -o $@
@@ -102,6 +102,10 @@ install: FORCE
 # xpdf-utils -> pdfinfo (AMC-prepare)
 deb: FORCE
 	dpkg-buildpackage -I.svn -Idownload-area -rsudo -k42067447
+
+experimental: FORCE
+	$(MAKE) -C download-area repos
+	$(MAKE) -C download-area sync
 
 VERSION=0.1.0
 RELEASE=4
