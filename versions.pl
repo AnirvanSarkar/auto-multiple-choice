@@ -4,7 +4,7 @@ my %k=();
 
 $s=`svnversion`;
 if($s =~ /([0-9]+)[SM]*$/) {
-    $k{'svn'}=1+$1;
+    $k{'svn'}=$1;
 }
 
 open(CHL,"debian/changelog");
