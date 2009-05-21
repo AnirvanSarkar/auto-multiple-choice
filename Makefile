@@ -112,6 +112,6 @@ RELEASE=4
 
 FORCE: ;
 
-.PHONY: install deb debsimple clean global doc FORCE
+.PHONY: install deb debsimple clean global doc experimental FORCE
 
 
