@@ -121,11 +121,56 @@
 \newif\ifAMCune@bonne % il y a au moins une bonne reponse dans la question en cours
 \newif\ifAMCtype@multi % la question en cours est de type multiple
 \newif\ifAMC@watermark\AMC@watermarktrue
+\newif\ifAMC@ensemble\AMC@ensemblefalse % les cases a cocher sont mises ensemble a la fin
+% tests internes...
+\newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
 %
 %
 % cases cochees ou non avec la bonne couleur et la bonne forme
-\newcommand{\AMC@marquebonne}{\ifAMC@calibration\ifAMC@couleur\textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\FilledBigSquare}\else[B\the\AMCid@quest,\the\AMCrep@count]\fi\else\FilledBigSquare\fi}
-\newcommand{\AMC@marquevide}{\ifAMC@calibration\ifAMC@couleur\textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\BigSquare}\else[M\the\AMCid@quest,\the\AMCrep@count]\fi\else\BigSquare\fi}
+\newcommand{\AMC@marquebonne}{%
+\ifAMC@calibration%
+  \ifAMC@couleur% calibration en couleurs
+    \ifAMC@ensemble%
+      \ifAMCformulaire@dedans%
+        \AMC@caselettre{200,\the\AMCid@quest,\the\AMCrep@count}{0,255,0}%
+      \else%
+        \AMC@caselettre{0,0,0}{0,255,0}%
+      \fi
+    \else%
+      \textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\FilledBigSquare}%
+    \fi%
+  \else% calibration numerique (pour test)
+    [B\the\AMCid@quest,\the\AMCrep@count]%
+  \fi%
+\else% mode normal
+  \ifAMC@ensemble%
+    \AMC@caselettre{0,0,0}{0,255,0}%
+  \else%
+    \FilledBigSquare%
+  \fi%
+\fi}
+\newcommand{\AMC@marquevide}{%
+\ifAMC@calibration%
+  \ifAMC@couleur%
+    \ifAMC@ensemble%
+      \ifAMCformulaire@dedans%
+        \AMC@caselettre{200,\the\AMCid@quest,\the\AMCrep@count}{255,255,255}%
+      \else%
+        \AMC@caselettre{0,0,0}{255,255,255}%
+      \fi
+    \else%
+      \textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\BigSquare}%
+    \fi%
+  \else%
+    [M\the\AMCid@quest,\the\AMCrep@count]%
+  \fi%
+\else%
+  \ifAMC@ensemble%
+    \AMC@caselettre{0,0,0}{255,255,255}%
+  \else%
+    \BigSquare%
+  \fi%
+\fi}
 % champ a remplir pour mettre son nom -> bonne couleur
 \newcommand{\champnom}[1]{\colorbox{souschampnom}{#1}}
 %
@@ -197,8 +242,30 @@
 %
 \newcommand\AMCrep@o{\def\AMCload@@reponse{\AMCrien@deux}\def\AMCrep@fini{}}
 \newcommand\AMCrep@r{\def\AMCload@@reponse{\AMCload@reponse}\def\AMCrep@fini{\shuffle@it\AMCdump@reponses}}
-\newcommand\AMCrep@itemize[2]{\item[#1]{#2}}
-\newcommand\AMCrep@ligne[2]{\mbox{#1\hspace*{1em}#2}\hspace{3em plus 4em}}
+%
+% cases avec une lettre dedans
+%
+\newlength\AMC@boxeddim\AMC@boxeddim=2.5ex
+\def\AMC@boxedchar#1#2#3{{\setlength{\fboxsep}{0pt}\fcolorbox[RGB]{#2}[RGB]{#3}{\vbox to \AMC@boxeddim{\vfill \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}}}}
+\newcounter{AMC@ncase}
+\setcounter{AMC@ncase}{0}
+\def\AMC@caselettre#1#2{%
+\AMC@boxedchar{\Alph{AMC@ncase}}{#1}{#2}}
+%
+% memoire pour mettre les cases a cocher en fin de copie
+%
+\def\AMCmem@ireData{}
+\def\formulaireQuestion#1{\par{\bf Question #1 :} }
+\def\formulaireReponse#1{#1 }
+\newcommand\AMCmem@ireAJ[1]{\ifAMC@ensemble\begingroup\AMCformulaire@dedanstrue\let\protect\@unexpandable@protect\global\edef\AMCmem@ireData{\AMCmem@ireData #1}\endgroup\fi}
+\newcommand\AMCmem@ireAJRep[1]{\addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\formulaireReponse{#1}}}
+\newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\formulaireQuestion{#1}}}
+\newcommand\formulaire{\ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData\def\AMCmem@ireData{}\fi}
+%
+% mise en forme des questions
+%
+\newcommand\AMCrep@itemize[2]{\AMCmem@ireAJRep{#1}\item[#1] #2}
+\newcommand\AMCrep@ligne[2]{\AMCmem@ireAJRep{#1}\mbox{#1\hspace*{1em}#2}\hspace{3em plus 4em}}
 %
 \newcommand{\bonne}[1]{\advance\AMCrep@count by 1%
 \ifAMC@calibration\message{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
@@ -214,7 +281,7 @@
 \def\AMCmessage#1{\message{AUTOQCM[#1]^^J}}
 % annule une definition precedente (exercices.sty, par ex.)
 \ifx\question\undefined\else\let\question\undefined\fi
-\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\begin{questionA}#1}{\end{questionA}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
+\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\begin{questionA}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{questionA}}#1}{\end{questionA}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
 \def\@aucune{\emph{Aucune de ces r\'eponses n'est correcte.}}
 \newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}{#1}[{{\multiSymbole}}]\AMCtype@multitrue\ifAMC@calibration\message{AUTOQCM[MULT]^^J}\fi}{\end{question}}
 \newdimen\ouverte@vs
@@ -357,6 +424,7 @@
 \DeclareOption{init}{\AMC@SR@time}
 \DeclareOption{bloc}{\AMC@qbloctrue}
 \DeclareOption{completemulti}{\AMCcomplete@multitrue}
+\DeclareOption{ensemble}{\AMC@ensembletrue}
 %
 \DeclareOption{calibration}{\AMC@calibrationtrue}
 \DeclareOption{binaire}{\AMC@codebinairetrue\def\AMCid@checkmax{31}} % par defaut

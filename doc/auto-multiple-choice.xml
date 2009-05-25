@@ -472,6 +472,157 @@ Nom et prénom :
 </programlisting></para>
     </sect2>
 
+    <sect2 id="secensemble">
+      <title>Un exemple avec une feuille de réponses séparée</title>
+
+      <para>Dans cet exemple, on souhaite que les cases à cocher soient toutes
+      rassemblées sur une feuille à part. De cette manière, la triche entre
+      étudiants est plus difficile, et surtout, il suffira de scanner une
+      seule page par étudiant, ce qui allège la tâche de l'enseignant dans le
+      cas où son matériel ne lui permet de scanner les copies que de manière
+      manuelle. Dans cet exemple, le nombre de questions est réduit : elles
+      tiennent toutes sur une page et il serait donc inutile d'utiliser une
+      telle mise en page dans ce cas précis. À vous de modifier cette base
+      pour utiliser cette mise en page avec de nombreuses questions !</para>
+
+      <para><programlisting id="exemples-ensemble.tex"
+      linenumbering="numbered">\documentclass{article}
+
+\usepackage[latin1]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti,ensemble]{automultiplechoice}    <co
+            id="ensemble.opt" linkends="ensemble.opt.exp" />
+\begin{document}
+
+\AMCrandomseed{1237893}
+
+\def\formulaireQuestion#1{\par {\sc Question #1 :} }    <co id="ensemble.fq"
+            linkends="ensemble.fq.exp" />
+
+\element{general}{
+  \begin{question}{prez}    
+    Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
+    \begin{reponses}
+      \bonne{René Coty}
+      \mauvaise{Alain Prost}
+      \mauvaise{Marcel Proust}
+      \mauvaise{Claude Monet}
+    \end{reponses}
+  \end{question}
+}
+
+\element{general}{
+  \begin{questionmult}{pref}    
+    Parmi les villes suivantes, lesquelles sont des préfectures~?
+    \begin{reponses}
+      \bonne{Poitiers}
+      \mauvaise{Sainte-Menehould}
+      \bonne{Avignon}
+    \end{reponses}
+  \end{questionmult}
+}
+
+\element{general}{
+  \begin{question}{nb-ue}
+    Combien d'états sont membres de l'Union Européenne en janvier 2009 ?
+    \begin{reponseshoriz}[o]
+      \mauvaise{15}
+      \mauvaise{21}
+      \mauvaise{25}
+      \bonne{27}
+      \mauvaise{31}
+    \end{reponseshoriz}
+  \end{question}
+}
+
+\exemplaire{5}{    
+
+%%% debut de l'en-tête des copies :    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf Test\\ Examen du 01/01/2008
+\end{minipage}
+
+\begin{center}\em
+Durée : 10 minutes.
+
+  Aucun document n'est autorisé.
+  L'usage de la calculatrice est interdit.
+
+  Les questions faisant apparaître le symbole \multiSymbole{} peuvent
+  présenter zéro, une ou plusieurs bonnes réponses. Les autres ont
+  une unique bonne réponse.
+
+  Des points négatifs pourront être affectés à de \emph{très
+    mauvaises} réponses.
+\end{center}
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\melangegroupe{general}
+\restituegroupe{general}
+
+\clearpage    <co id="ensemble.cp" linkends="ensemble.cp.exp" />
+
+%%% début de l'en-tête de la feuille de réponses
+
+{\large\bf Feuille de réponses :}
+\hfill \champnom{\fbox{    <co id="ensemble.nom" linkends="ensemble.nom.exp" />
+    \begin{minipage}{.5\linewidth}
+      Nom et prénom :
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\begin{center}
+  \bf\em Les réponses aux questions sont à donner exclusivement sur cette feuille : les réponses données sur les feuilles précédentes ne seront pas prises en compte.
+\end{center}
+
+%%% fin de l'en-tête de la feuille de réponses
+
+\formulaire    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp" />
+
+\cleardoublepage    
+
+}  
+
+\end{document}</programlisting>Les remarques suivantes devraient écraicir cet
+      exemple :<calloutlist>
+          <callout arearefs="ensemble.opt" id="ensemble.opt.exp">
+            <para>C'est l'option <option>ensemble</option> qui permet de faire
+            ce que l'on veut faire ici.</para>
+          </callout>
+
+          <callout arearefs="ensemble.fq" id="ensemble.fq.exp">
+            <para>On peut redéfinir de cette manière la façon dont les
+            questions seront identifiées sur la page des réponses (cette ligne
+            est facultative).</para>
+          </callout>
+
+          <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
+            <para>Ce saut de page précède la page spéciale où seront
+            regroupées toutes les cases à cocher.</para>
+          </callout>
+
+          <callout arearefs="ensemble.nom" id="ensemble.nom.exp">
+            <para>La case où écrire son nom doit normalement être située sur
+            la page des réponses !</para>
+          </callout>
+
+          <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
+            <para>C'est la commande LaTeX <command>formulaire</command> qui
+            écrit toutes les cases à cocher.</para>
+          </callout>
+        </calloutlist></para>
+    </sect2>
+
     <sect2>
       <title>Description des commandes LaTeX</title>
 
@@ -507,6 +658,14 @@ Nom et prénom :
           <listitem>
             <para><option>correc</option> : produit la correction du QCM, et
             non le sujet.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>ensemble</option> : demande à ce que les cases à
+            cocher soient toutes rassemblées en fin de copie (cette option est
+            en général utilisée quand on ne veut scanner qu'une seule page par
+            étudiant - voir l'exemple de la section <xref
+            linkend="secensemble" />).</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -608,6 +767,23 @@ Nom et prénom :
           commande <command>exemplaire</command>, pour que le mélange soit
           effectué avant chaque copie.</para>
         </note>
+      </sect3>
+
+      <sect3>
+        <title>Choix du mélange</title>
+
+        <para>Si le mélange des question et des réponses ne nous convient pas,
+        on peut toujours en changer en modifiant la graine du générateur
+        aléatoire utilisé pour le mélange, grâce à la commande suivante (à
+        utiliser juste au début du document, et en tous cas en-dehors de la
+        commande <command>exemplaires</command>) :</para>
+
+        <para><programlisting>\AMCrandomseed{1527384}</programlisting></para>
+
+        <para>Si la valeur fournie (à choisir entre 1 et 4194303) est
+        modifiée, alors le mélange sera différent. Bien entendu, une fois les
+        copies d'examen imprimées, il ne faut surtout pas modifier cette
+        valeur !</para>
       </sect3>
     </sect2>
 
