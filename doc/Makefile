@@ -47,13 +47,6 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ;
 	xsltproc --nonet --stringparam base.dir html/$*/ doc-xhtml.xsl $<
 	date > $@
 
-SITEDOC=../../AMC-site/htdocs/auto-multiple-choice
-
-site: auto-multiple-choice.xml doc-xhtml-site.xsl
-	-rm $(SITEDOC)/*.html
-	xsltproc --nonet --stringparam base.dir $(SITEDOC)/ doc-xhtml-site.xsl $<
-	date > $@
-
 # xmlto -o html/$*  html $<
 
 # xalan -in auto-multiple-choice.xml -xsl /usr/share/xml/docbook/stylesheet/nwalsh/html/docbook.xsl -param use.extensions 1 -param linenumbering.extension 1 -out html/a.html

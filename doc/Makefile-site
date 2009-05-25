@@ -1,0 +1,26 @@
+
+SHELL=/bin/sh
+
+HVERSION=htdocs/version.shtml
+
+TMPDIR:=$(shell mktemp -d)
+
+TEST_DEB=`../auto-qcm/derniere-version.pl --mode f --base ../auto-qcm/download-area/files/testing.pkg`
+TEST_XML=$(TMPDIR)/usr/share/doc/auto-multiple-choice/auto-multiple-choice.xml
+SITEDOC=htdocs/auto-multiple-choice
+
+version:
+	../auto-qcm/derniere-version.pl --mode h --base ../auto-qcm/download-area/files/testing.pkg > $(HVERSION)
+
+# doc a partir de la derniere version dans testing
+doc: FORCE
+	dpkg-deb -x $(TEST_DEB) $(TMPDIR)
+	-gunzip $(TEST_XML).gz
+	xsltproc --nonet --stringparam base.dir $(SITEDOC)/ ../auto-qcm/doc/doc-xhtml-site.xsl $(TEST_XML)
+
+site: version doc
+	$(MAKE) -C ../auto-qcm/download-area sync
+
+FORCE: ;
+
+.PHONY: site version FORCE
