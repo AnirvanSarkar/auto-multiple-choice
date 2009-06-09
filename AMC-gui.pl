@@ -98,7 +98,8 @@ $glade_xml =~ s/\.p[ml]$/.glade/i;
 
 my $o_file=Glib::get_home_dir().'/.AMC.xml';
 
-chomp(my $encodage_systeme=eval { `locale charmap` });
+#chomp(my $encodage_systeme=eval { `locale charmap` });
+my $encodage_systeme=langinfo(CODESET());
 $encodage_systeme='UTF-8' if(!$encodage_systeme);
 
 my %w=();
@@ -1197,7 +1198,7 @@ sub regarde_regroupements {
     my @c=map { $seq+=s/[%]d/$f/g;$_; } split(/\s+/,$o{'dir_opener'});
     push @c,$f if(!$seq);
     # nautilus attend des arguments dans l'encodage specifie par LANG & co.
-    @c=map { encode(langinfo(CODESET),$_); } @c;
+    @c=map { encode($encodage_systeme,$_); } @c;
 
     if(fork()==0) {
 	exec(@c);
@@ -1225,7 +1226,7 @@ sub activate_doc {
 	my $seq=0;
 	my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
 	push @c,$url if(!$seq);
-	@c=map { encode(langinfo(CODESET),$_); } @c;
+	@c=map { encode($encodage_systeme,$_); } @c;
 
 	exec(@c);
     }
