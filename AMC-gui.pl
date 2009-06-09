@@ -1621,7 +1621,8 @@ sub valide_source_tex {
 sub source_latex_choisir {
     my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog');
     $gap->signal_autoconnect_from_package('main');
-    for(qw/source_latex_dialog sl_type_new/) {
+    $w{'source_latex_gap'}=$gap;
+    for(qw/source_latex_dialog/) {
 	$w{$_}=$gap->get_widget($_);
     }
 }
@@ -1671,9 +1672,12 @@ sub charge_modeles {
 }
 
 sub source_latex_2 {
-    my $new=$w{'sl_type_new'}->get_active();
+    my %bouton;
+    for (qw/new choix vide/) {
+	$bouton{$_}=$w{'source_latex_gap'}->get_widget('sl_type_'.$_)->get_active();
+    }
     $w{'source_latex_dialog'}->destroy();
-    if($new) {
+    if($bouton{'new'}) {
 	#source_latex_choixfich($o{'rep_modeles'});
 	my $g=Gtk2::GladeXML->new($glade_xml,'source_latex_modele');
 	$g->signal_autoconnect_from_package('main');
@@ -1696,8 +1700,28 @@ sub source_latex_2 {
 							       text=> LISTE_TXT );
 	$w{'modeles_liste'}->append_column ($column);
 	$w{'modeles_liste'}->get_selection->signal_connect("changed",\&source_latex_mmaj);
-    } else {
+    } elsif($bouton{'choix'}) {
 	source_latex_choixfich(Glib::get_home_dir());
+    } elsif($bouton{'vide'}) {
+	my $sl=localise('source.tex');
+	if(-e $sl) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							       'destroy-with-parent',
+							       'error', # message type
+							       'ok', # which set of buttons?
+							       sprintf("Un fichier <i>source.tex</i> existe déjà dans le répertoire du projet %s. Je ne l'ai pas effacé et il servira de fichier source.",$projet{'nom'}));
+	    $dialog->run;
+	    $dialog->destroy;      
+	    
+	    $projet{'texsrc'}='source.tex';
+	    set_source_tex();
+	} else {
+	    open(FV,">$sl");
+	    close(FV);
+	    $projet{'texsrc'}='source.tex';
+	    set_source_tex();
+	}
+	
     }
 }
 
