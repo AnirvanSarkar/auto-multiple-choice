@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Wed May 20 01:44:32 2009 -->
+<!--Generated with glade3 3.4.5 on Tue Jun  9 11:57:12 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="visible">True</property>
@@ -149,6 +149,147 @@
                     <property name="column_spacing">4</property>
                     <property name="row_spacing">4</property>
                     <child>
+                      <widget class="GtkButton" id="edition_latex">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="label" translatable="yes">Éditer le fichier LaTeX</property>
+                        <property name="response_id">0</property>
+                        <signal name="clicked" handler="edite_source"/>
+                      </widget>
+                      <packing>
+                        <property name="x_options">GTK_FILL</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkVButtonBox" id="vbuttonbox2">
+                        <property name="visible">True</property>
+                        <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
+                        <child>
+                          <widget class="GtkButton" id="button3">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip" translatable="yes">Mettre à jour les documents de travail</property>
+                            <property name="label" translatable="yes">Mettre à jour des documents</property>
+                            <property name="response_id">0</property>
+                            <signal name="pressed" handler="doc_maj"/>
+                          </widget>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                        <property name="x_options">GTK_FILL</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkTreeView" id="documents_tree">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="enable_grid_lines">GTK_TREE_VIEW_GRID_LINES_BOTH</property>
+                        <signal name="row_activated" handler="doc_active"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkVButtonBox" id="vbuttonbox3">
+                        <property name="visible">True</property>
+                        <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="button4">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip" translatable="yes">Analyser la mise en page de chaque page à partir du document de calage.</property>
+                            <property name="label" translatable="yes">Calculer les mises en page</property>
+                            <property name="response_id">0</property>
+                            <signal name="pressed" handler="calcule_mep"/>
+                          </widget>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="button13">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip" translatable="yes">Lance l'impression, copie par copie</property>
+                            <property name="label" translatable="yes">Imprimer des copies</property>
+                            <property name="response_id">0</property>
+                            <signal name="pressed" handler="sujet_impressions"/>
+                          </widget>
+                          <packing>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                        <property name="x_options">GTK_FILL</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkScrolledWindow" id="scrolledwindow1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                        <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                        <child>
+                          <widget class="GtkTreeView" id="mep_tree">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="enable_grid_lines">GTK_TREE_VIEW_GRID_LINES_BOTH</property>
+                            <signal name="row_activated" handler="mep_active"/>
+                          </widget>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkHSeparator" id="hseparator1">
+                        <property name="visible">True</property>
+                      </widget>
+                      <packing>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkHSeparator" id="hseparator2">
+                        <property name="visible">True</property>
+                      </widget>
+                      <packing>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
                       <widget class="GtkVBox" id="vbox11">
                         <property name="visible">True</property>
                         <child>
@@ -227,147 +368,6 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="y_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator2">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                        <property name="y_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator1">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkScrolledWindow" id="scrolledwindow1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                        <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                        <child>
-                          <widget class="GtkTreeView" id="mep_tree">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="enable_grid_lines">GTK_TREE_VIEW_GRID_LINES_BOTH</property>
-                            <signal name="row_activated" handler="mep_active"/>
-                          </widget>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkVButtonBox" id="vbuttonbox3">
-                        <property name="visible">True</property>
-                        <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <widget class="GtkButton" id="button4">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip" translatable="yes">Analyser la mise en page de chaque page à partir du document de calage.</property>
-                            <property name="label" translatable="yes">Calculer les mises en page</property>
-                            <property name="response_id">0</property>
-                            <signal name="pressed" handler="calcule_mep"/>
-                          </widget>
-                          <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkButton" id="button13">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip" translatable="yes">Lance l'impression, copie par copie</property>
-                            <property name="label" translatable="yes">Imprimer des copies</property>
-                            <property name="response_id">0</property>
-                            <signal name="pressed" handler="sujet_impressions"/>
-                          </widget>
-                          <packing>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                        <property name="x_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkTreeView" id="documents_tree">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="enable_grid_lines">GTK_TREE_VIEW_GRID_LINES_BOTH</property>
-                        <signal name="row_activated" handler="doc_active"/>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                        <property name="y_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkVButtonBox" id="vbuttonbox2">
-                        <property name="visible">True</property>
-                        <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
-                        <child>
-                          <widget class="GtkButton" id="button3">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip" translatable="yes">Mettre à jour les documents de travail</property>
-                            <property name="label" translatable="yes">Mettre à jour des documents</property>
-                            <property name="response_id">0</property>
-                            <signal name="pressed" handler="doc_maj"/>
-                          </widget>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                        <property name="x_options">GTK_FILL</property>
-                        <property name="y_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkButton" id="edition_latex">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Éditer le fichier LaTeX</property>
-                        <property name="response_id">0</property>
-                        <signal name="clicked" handler="edite_source"/>
-                      </widget>
-                      <packing>
-                        <property name="x_options">GTK_FILL</property>
                         <property name="y_options"></property>
                       </packing>
                     </child>
@@ -688,17 +688,6 @@
                                   <placeholder/>
                                 </child>
                                 <child>
-                                  <widget class="GtkCheckButton" id="maj_bareme">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="tooltip" translatable="yes">Faut-il extraire le barème du fichier LaTeX a nouveau ?</property>
-                                    <property name="label" translatable="yes">Mettre a jour le barème</property>
-                                    <property name="response_id">0</property>
-                                    <property name="draw_indicator">True</property>
-                                    <signal name="toggled" handler="valide_options_correction"/>
-                                  </widget>
-                                </child>
-                                <child>
                                   <widget class="GtkCheckButton" id="annote_copies">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -712,6 +701,17 @@
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
                                   </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkCheckButton" id="maj_bareme">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="tooltip" translatable="yes">Faut-il extraire le barème du fichier LaTeX a nouveau ?</property>
+                                    <property name="label" translatable="yes">Mettre a jour le barème</property>
+                                    <property name="response_id">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <signal name="toggled" handler="valide_options_correction"/>
+                                  </widget>
                                 </child>
                               </widget>
                             </child>
@@ -1759,26 +1759,57 @@ copy of the Program in return for a fee.
                 <property name="position">1</property>
               </packing>
             </child>
+            <child>
+              <widget class="GtkHSeparator" id="hseparator3">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="padding">4</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </widget>
           <packing>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkHBox" id="projet_nouveau">
-            <property name="spacing">4</property>
+          <widget class="GtkVBox" id="projet_nouveau">
             <child>
-              <widget class="GtkLabel" id="label20">
+              <widget class="GtkLabel" id="label63">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Nouveau projet :</property>
-              </widget>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="projet_nom">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="label" translatable="yes">&lt;b&gt;Création d'un nouveau projet :&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
               </widget>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="padding">3</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="projet_nouveau_nom">
+                <property name="visible">True</property>
+                <property name="spacing">4</property>
+                <child>
+                  <widget class="GtkLabel" id="label20">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Nouveau projet :</property>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkEntry" id="projet_nom">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -1867,10 +1898,28 @@ copy of the Program in return for a fee.
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <widget class="GtkLabel" id="label22">
+                              <widget class="GtkFileChooserButton" id="pref_f_rep_modeles">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Répertoire des projets</property>
+                                <property name="tooltip" translatable="yes">Répertoire contenant les modèles de fichiers LaTeX.</property>
+                                <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                                <property name="title" translatable="yes">Sélectionner le répertoire qui contient les modèles de fichiers LaTeX de QCM</property>
                               </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label43">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Répertoire des modèles LaTeX</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
                             </child>
                             <child>
                               <widget class="GtkFileChooserButton" id="pref_f_rep_projets">
@@ -1886,28 +1935,10 @@ copy of the Program in return for a fee.
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label43">
+                              <widget class="GtkLabel" id="label22">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Répertoire des modèles LaTeX</property>
+                                <property name="label" translatable="yes">Répertoire des projets</property>
                               </widget>
-                              <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkFileChooserButton" id="pref_f_rep_modeles">
-                                <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Répertoire contenant les modèles de fichiers LaTeX.</property>
-                                <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                                <property name="title" translatable="yes">Sélectionner le répertoire qui contient les modèles de fichiers LaTeX de QCM</property>
-                              </widget>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                              </packing>
                             </child>
                           </widget>
                         </child>
@@ -1944,99 +1975,51 @@ copy of the Program in return for a fee.
                             <property name="n_rows">7</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <widget class="GtkEntry" id="pref_x_html_browser">
+                              <widget class="GtkLabel" id="label35">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Fichiers PDF</property>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label36">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Images</property>
                               </widget>
                               <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">6</property>
-                                <property name="bottom_attach">7</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label48">
+                              <widget class="GtkLabel" id="label37">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Navigateur web</property>
+                                <property name="label" translatable="yes">Fichiers de données</property>
                               </widget>
                               <packing>
-                                <property name="top_attach">6</property>
-                                <property name="bottom_attach">7</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="pref_x_dir_opener">
+                              <widget class="GtkLabel" id="label38">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Fichiers XML</property>
                               </widget>
                               <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">5</property>
-                                <property name="bottom_attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label42">
-                                <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Commande pour explorer un répertoire (la séquence %d sera remplacée par le répertoire avant exécution)</property>
-                                <property name="label" translatable="yes">Navigateur de fichiers</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">5</property>
-                                <property name="bottom_attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkEntry" id="pref_x_tex_editor">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                              </widget>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">4</property>
-                                <property name="bottom_attach">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label32">
-                                <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Programme d'édition des fichiers LaTeX</property>
-                                <property name="label" translatable="yes">Editeur LaTeX</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">4</property>
-                                <property name="bottom_attach">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkEntry" id="pref_x_xml_viewer">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Nom du programme permettant de lire un fichier XML</property>
-                              </widget>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
                                 <property name="top_attach">3</property>
                                 <property name="bottom_attach">4</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="pref_x_dat_viewer">
+                              <widget class="GtkEntry" id="pref_x_pdf_viewer">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Nom du programme permettant de lire un fichier CSV</property>
+                                <property name="tooltip_text">Nom du programme à utiliser pour visionner les fichiers PDF</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="top_attach">2</property>
-                                <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -2054,52 +2037,100 @@ copy of the Program in return for a fee.
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="pref_x_pdf_viewer">
+                              <widget class="GtkEntry" id="pref_x_dat_viewer">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Nom du programme à utiliser pour visionner les fichiers PDF</property>
+                                <property name="tooltip_text">Nom du programme permettant de lire un fichier CSV</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label38">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Fichiers XML</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">3</property>
-                                <property name="bottom_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label37">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Fichiers de données</property>
-                              </widget>
-                              <packing>
                                 <property name="top_attach">2</property>
                                 <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label36">
+                              <widget class="GtkEntry" id="pref_x_xml_viewer">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Images</property>
+                                <property name="can_focus">True</property>
+                                <property name="has_tooltip">True</property>
+                                <property name="tooltip_text">Nom du programme permettant de lire un fichier XML</property>
                               </widget>
                               <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label35">
+                              <widget class="GtkLabel" id="label32">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Fichiers PDF</property>
+                                <property name="tooltip" translatable="yes">Programme d'édition des fichiers LaTeX</property>
+                                <property name="label" translatable="yes">Editeur LaTeX</property>
                               </widget>
+                              <packing>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEntry" id="pref_x_tex_editor">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label42">
+                                <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">Commande pour explorer un répertoire (la séquence %d sera remplacée par le répertoire avant exécution)</property>
+                                <property name="label" translatable="yes">Navigateur de fichiers</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">5</property>
+                                <property name="bottom_attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEntry" id="pref_x_dir_opener">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">5</property>
+                                <property name="bottom_attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label48">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Navigateur web</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">6</property>
+                                <property name="bottom_attach">7</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEntry" id="pref_x_html_browser">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">6</property>
+                                <property name="bottom_attach">7</property>
+                              </packing>
                             </child>
                           </widget>
                         </child>
@@ -2137,73 +2168,16 @@ copy of the Program in return for a fee.
                             <property name="n_rows">5</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <widget class="GtkComboBox" id="pref_c_encodage_latex">
-                                <property name="visible">True</property>
-                                <property name="items" translatable="yes"></property>
-                              </widget>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">2</property>
-                                <property name="bottom_attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label62">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Encodage des fichiers LaTeX</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">2</property>
-                                <property name="bottom_attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkComboBox" id="pref_c_delimiteur_decimal">
+                              <widget class="GtkComboBoxEntry" id="pref_ce_encodage_interne">
                                 <property name="visible">True</property>
                                 <property name="has_tooltip">True</property>
-                                <property name="tooltip_markup">Caractère de séparation des décimales à utiliser pour la fabrication du fichier de notes</property>
-                                <property name="items" translatable="yes"></property>
-                              </widget>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">4</property>
-                                <property name="bottom_attach">5</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label24">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Encodage de la liste d'étudiants</property>
-                              </widget>
-                              <packing>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label30">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Délimiteur décimal</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">4</property>
-                                <property name="bottom_attach">5</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkComboBoxEntry" id="pref_ce_encodage_texte">
-                                <property name="visible">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Encodage utilisé pour le fichier texte contenant les noms des étudiants</property>
+                                <property name="tooltip_text">Encodage utilisé pour les fichiers textes utilisés en interne</property>
                                 <property name="items" translatable="yes">UTF-8
 ISO-8859-15
 Windows-1252
 </property>
                                 <child internal-child="entry">
-                                  <widget class="GtkEntry" id="pref_x_encodage_liste">
+                                  <widget class="GtkEntry" id="pref_x_encodage_interne">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </widget>
@@ -2212,17 +2186,19 @@ Windows-1252
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
                                 <property name="y_options"></property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label60">
+                              <widget class="GtkLabel" id="label61">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Encodage des fichiers CSV</property>
+                                <property name="label" translatable="yes">Encodage interne</property>
                               </widget>
                               <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
                               </packing>
                             </child>
                             <child>
@@ -2250,26 +2226,26 @@ Windows-1252
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label61">
+                              <widget class="GtkLabel" id="label60">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Encodage interne</property>
+                                <property name="label" translatable="yes">Encodage des fichiers CSV</property>
                               </widget>
                               <packing>
-                                <property name="top_attach">3</property>
-                                <property name="bottom_attach">4</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkComboBoxEntry" id="pref_ce_encodage_interne">
+                              <widget class="GtkComboBoxEntry" id="pref_ce_encodage_texte">
                                 <property name="visible">True</property>
                                 <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Encodage utilisé pour les fichiers textes utilisés en interne</property>
+                                <property name="tooltip_text">Encodage utilisé pour le fichier texte contenant les noms des étudiants</property>
                                 <property name="items" translatable="yes">UTF-8
 ISO-8859-15
 Windows-1252
 </property>
                                 <child internal-child="entry">
-                                  <widget class="GtkEntry" id="pref_x_encodage_interne">
+                                  <widget class="GtkEntry" id="pref_x_encodage_liste">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </widget>
@@ -2278,9 +2254,64 @@ Windows-1252
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="top_attach">3</property>
-                                <property name="bottom_attach">4</property>
                                 <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label30">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Délimiteur décimal</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label24">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Encodage de la liste d'étudiants</property>
+                              </widget>
+                              <packing>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkComboBox" id="pref_c_delimiteur_decimal">
+                                <property name="visible">True</property>
+                                <property name="has_tooltip">True</property>
+                                <property name="tooltip_markup">Caractère de séparation des décimales à utiliser pour la fabrication du fichier de notes</property>
+                                <property name="items" translatable="yes"></property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label62">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Encodage des fichiers LaTeX</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkComboBox" id="pref_c_encodage_latex">
+                                <property name="visible">True</property>
+                                <property name="items" translatable="yes"></property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                           </widget>
@@ -2317,17 +2348,22 @@ Windows-1252
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <widget class="GtkEntry" id="pref_x_print_command_pdf">
+                              <widget class="GtkComboBox" id="pref_c_methode_impression">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip" translatable="yes">Commande pour imprimer une copie (avec agrafage). La séquence %f sera remplacée par le nom d'un fichier PDF à imprimer.</property>
+                                <property name="items" translatable="yes"></property>
+                                <signal name="changed" handler="change_methode_impression"/>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
+                                <property name="y_options"></property>
                               </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label57">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Méthode d'impression</property>
+                              </widget>
                             </child>
                             <child>
                               <widget class="GtkLabel" id="label44">
@@ -2340,21 +2376,16 @@ Windows-1252
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label57">
+                              <widget class="GtkEntry" id="pref_x_print_command_pdf">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Méthode d'impression</property>
-                              </widget>
-                            </child>
-                            <child>
-                              <widget class="GtkComboBox" id="pref_c_methode_impression">
-                                <property name="visible">True</property>
-                                <property name="items" translatable="yes"></property>
-                                <signal name="changed" handler="change_methode_impression"/>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip" translatable="yes">Commande pour imprimer une copie (avec agrafage). La séquence %f sera remplacée par le nom d'un fichier PDF à imprimer.</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="y_options"></property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                           </widget>
@@ -2390,6 +2421,12 @@ Windows-1252
                             <property name="visible">True</property>
                             <property name="n_columns">2</property>
                             <child>
+                              <widget class="GtkLabel" id="label54">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Processus en parallèle</property>
+                              </widget>
+                            </child>
+                            <child>
                               <widget class="GtkEntry" id="pref_x_n_procs">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -2399,12 +2436,6 @@ Windows-1252
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
                               </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label54">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Processus en parallèle</property>
-                              </widget>
                             </child>
                           </widget>
                         </child>
@@ -2459,17 +2490,15 @@ Windows-1252
                                 <property name="n_rows">2</property>
                                 <property name="n_columns">2</property>
                                 <child>
-                                  <widget class="GtkLabel" id="label39">
+                                  <widget class="GtkEntry" id="pref_x_seuil_sens">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">EQM limite</property>
-                                  </widget>
-                                </child>
-                                <child>
-                                  <widget class="GtkLabel" id="label40">
-                                    <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Sensibilité limite</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text">Sensibilité à partir de laquelle la couleur rouge sera utilisée dans la liste des analyses effectuées</property>
                                   </widget>
                                   <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="right_attach">2</property>
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
                                   </packing>
@@ -2487,18 +2516,20 @@ Windows-1252
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkEntry" id="pref_x_seuil_sens">
+                                  <widget class="GtkLabel" id="label40">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="has_tooltip">True</property>
-                                    <property name="tooltip_text">Sensibilité à partir de laquelle la couleur rouge sera utilisée dans la liste des analyses effectuées</property>
+                                    <property name="label" translatable="yes">Sensibilité limite</property>
                                   </widget>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="right_attach">2</property>
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
                                   </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkLabel" id="label39">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">EQM limite</property>
+                                  </widget>
                                 </child>
                               </widget>
                             </child>
@@ -2535,6 +2566,12 @@ Windows-1252
                             <property name="visible">True</property>
                             <property name="n_columns">2</property>
                             <child>
+                              <widget class="GtkLabel" id="label41">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Échelle pour la saisie (dpi)</property>
+                              </widget>
+                            </child>
+                            <child>
                               <widget class="GtkEntry" id="pref_x_saisie_dpi">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -2545,12 +2582,6 @@ Windows-1252
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
                               </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label41">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Échelle pour la saisie (dpi)</property>
-                              </widget>
                             </child>
                           </widget>
                         </child>
@@ -2606,13 +2637,26 @@ Windows-1252
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <widget class="GtkLabel" id="label51">
+                              <widget class="GtkEntry" id="pref_x_qualite_correction">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Taille maximale en pixels</property>
+                                <property name="can_focus">True</property>
                               </widget>
                               <packing>
-                                <property name="x_options"></property>
-                                <property name="y_options"></property>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEntry" id="pref_x_taille_max_correction">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip" translatable="yes">Format "largeur"x"hauteur", par exemple 1000x1500</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -2628,26 +2672,13 @@ Windows-1252
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="pref_x_taille_max_correction">
+                              <widget class="GtkLabel" id="label51">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip" translatable="yes">Format "largeur"x"hauteur", par exemple 1000x1500</property>
+                                <property name="label" translatable="yes">Taille maximale en pixels</property>
                               </widget>
                               <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkEntry" id="pref_x_qualite_correction">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                              </widget>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
+                                <property name="x_options"></property>
+                                <property name="y_options"></property>
                               </packing>
                             </child>
                           </widget>
@@ -2726,46 +2757,17 @@ Windows-1252
                               <placeholder/>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label27">
+                              <widget class="GtkComboBox" id="pref_projet_c_note_arrondi">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Note maximale</property>
-                              </widget>
-                              <packing>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label28">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Granularité</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label29">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">Type d'arrondi</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">2</property>
-                                <property name="bottom_attach">3</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkEntry" id="pref_projet_x_note_max">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
                                 <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Note à donner à une copie parfaite</property>
+                                <property name="tooltip_text">Type d'arrondi à utiliser pour l'arrondi des notes</property>
+                                <property name="items" translatable="yes"></property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
                                 <property name="y_options"></property>
                               </packing>
                             </child>
@@ -2785,17 +2787,46 @@ Windows-1252
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkComboBox" id="pref_projet_c_note_arrondi">
+                              <widget class="GtkEntry" id="pref_projet_x_note_max">
                                 <property name="visible">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Type d'arrondi à utiliser pour l'arrondi des notes</property>
-                                <property name="items" translatable="yes"></property>
+                                <property name="tooltip_text">Note à donner à une copie parfaite</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label29">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Type d'arrondi</property>
+                              </widget>
+                              <packing>
                                 <property name="top_attach">2</property>
                                 <property name="bottom_attach">3</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label28">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Granularité</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label27">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Note maximale</property>
+                              </widget>
+                              <packing>
                                 <property name="y_options"></property>
                               </packing>
                             </child>
@@ -2965,20 +2996,13 @@ que vous souhaitez imprimer :</property>
                     <property name="n_rows">2</property>
                     <property name="n_columns">2</property>
                     <child>
-                      <widget class="GtkLabel" id="label58">
+                      <widget class="GtkComboBox" id="imp_c_agrafe">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">recto/verso</property>
+                        <property name="items" translatable="yes"></property>
                       </widget>
                       <packing>
-                        <property name="y_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="label59">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">agrafage</property>
-                      </widget>
-                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
                         <property name="y_options"></property>
@@ -2996,15 +3020,22 @@ que vous souhaitez imprimer :</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkComboBox" id="imp_c_agrafe">
+                      <widget class="GtkLabel" id="label59">
                         <property name="visible">True</property>
-                        <property name="items" translatable="yes"></property>
+                        <property name="label" translatable="yes">agrafage</property>
                       </widget>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label58">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">recto/verso</property>
+                      </widget>
+                      <packing>
                         <property name="y_options"></property>
                       </packing>
                     </child>
@@ -3108,15 +3139,31 @@ que vous souhaitez imprimer :</property>
                 <property name="column_spacing">2</property>
                 <property name="row_spacing">4</property>
                 <child>
-                  <widget class="GtkRadioButton" id="sl_type_new">
+                  <widget class="GtkTextView" id="sl_text_choix">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="response_id">0</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="editable">False</property>
+                    <property name="wrap_mode">GTK_WRAP_WORD</property>
+                    <property name="cursor_visible">False</property>
+                    <property name="text" translatable="yes">Vous avez déjà écrit une description LaTeX de votre questionnaire et vous voulez l'utiliser pour ce projet</property>
                   </widget>
                   <packing>
-                    <property name="x_options">GTK_FILL</property>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkTextView" id="sl_text_new">
+                    <property name="visible">True</property>
+                    <property name="editable">False</property>
+                    <property name="wrap_mode">GTK_WRAP_WORD</property>
+                    <property name="cursor_visible">False</property>
+                    <property name="text" translatable="yes">Vous n'avez pas encore écrit cette description ; vous voulez partir d'un exemple de source LaTeX que vous modifierez</property>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
                   </packing>
                 </child>
                 <child>
@@ -3134,31 +3181,15 @@ que vous souhaitez imprimer :</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkTextView" id="sl_text_new">
+                  <widget class="GtkRadioButton" id="sl_type_new">
                     <property name="visible">True</property>
-                    <property name="editable">False</property>
-                    <property name="wrap_mode">GTK_WRAP_WORD</property>
-                    <property name="cursor_visible">False</property>
-                    <property name="text" translatable="yes">Vous n'avez pas encore écrit cette description ; vous voulez partir d'un exemple de source LaTeX que vous modifierez</property>
+                    <property name="can_focus">True</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkTextView" id="sl_text_choix">
-                    <property name="visible">True</property>
-                    <property name="editable">False</property>
-                    <property name="wrap_mode">GTK_WRAP_WORD</property>
-                    <property name="cursor_visible">False</property>
-                    <property name="text" translatable="yes">Vous avez déjà écrit une description LaTeX de votre questionnaire et vous voulez l'utiliser pour ce projet</property>
-                  </widget>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                    <property name="top_attach">1</property>
-                    <property name="bottom_attach">2</property>
+                    <property name="x_options">GTK_FILL</property>
                   </packing>
                 </child>
               </widget>

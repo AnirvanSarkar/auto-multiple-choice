@@ -264,9 +264,11 @@ sub localise {
 }
 
 sub is_local {
-    my $f=shift;
+    my ($f,$proj)=@_;
+    my $prefix=$o{'rep_projets'}."/";
+    $prefix .= $projet{'nom'}."/" if($proj);
     if(defined($f)) {
-	return($f !~ /^\// || $f =~ /^$o{'rep_projets'}\//);
+	return($f !~ /^\// || $f =~ /^$prefix/);
     } else {
 	return('');
     }
@@ -662,8 +664,25 @@ sub projet_charge_nouveau {
     my $proj=$w{'projet_nom'}->get_text();
     $w{'choix_projet'}->destroy();
 
-    projet_ouvre($proj,1);
-    projet_sauve();
+    # existe deja ?
+
+    if(-e $o{'rep_projets'}."/$proj") {
+
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       sprintf("Le nom <b>%s</b> est déjà utilisé dans le répertoire des projets. Pour créer un nouveau projet, il faut choisir un autre nom.",$proj));
+	$dialog->run;
+	$dialog->destroy;      
+	
+
+    } else {
+
+	projet_ouvre($proj,1);
+	projet_sauve();
+
+    }
 }
 
 sub projet_charge_non {
@@ -1726,7 +1745,7 @@ sub copy_latex {
       }
   }
     close(SRC);
-    
+
     my $ie=get_enc($i);
     my $id=get_enc($o{'encodage_latex'});
     if($ie && $id && $ie->{'iso'} ne $id->{'iso'}) {
@@ -1747,8 +1766,11 @@ sub copy_latex {
 }
 
 sub importe_source {
-    my ($fxa,$fxb,$fb) = splitpath(localise($projet{'texsrc'}));
+    my ($fxa,$fxb,$fb) = splitpath($projet{'texsrc'});
     my $dest=localise($fb);
+
+    # fichier deja dans le repertoire projet...
+    return() if(is_local($projet{'texsrc'},1));
 
     if(-f $dest) {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
@@ -1764,7 +1786,7 @@ sub importe_source {
 	} 
     }
 
-    if(copy_latex(localise($projet{'texsrc'}),$dest)) {
+    if(copy_latex($projet{'texsrc'},$dest)) {
 	$projet{'texsrc'}=$fb;
 	set_source_tex();
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
