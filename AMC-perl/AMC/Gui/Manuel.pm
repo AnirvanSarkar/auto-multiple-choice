@@ -128,7 +128,7 @@ sub new {
 
     bless $self;
 
-    for my $k (qw/area scrolled_area viewport_area goto etudiant_cb etudiant_cbe/) {
+    for my $k (qw/area scrolled_area viewport_area goto etudiant_cb etudiant_cbe nom_etudiant/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
     
@@ -304,6 +304,8 @@ sub charge_i {
     $xml_file=$self->{'cr-dir'}."/analyse-manuelle-$tid.xml";
 
     $self->{'xml-file'}=$xml_file;
+
+    $self->{'nom_etudiant'}->set_sensitive($self->{'lay'}->{'nom'});
 
     # utilisation
     $self->charge_image();

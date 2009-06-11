@@ -980,20 +980,30 @@ sub calcule_mep {
 ### Actions des boutons de la partie SAISIE
 
 sub saisie_manuelle {
-    my $gm=AMC::Gui::Manuel::new('cr-dir'=>localise($projet{'cr'}),
-				 'mep-dir'=>localise($projet{'mep'}),
-				 'mep-data'=>$mep_list,
-				 'liste'=>$projet{'listeetudiants'},
-				 'sujet'=>localise($projet{'docs'}->[0]),
-				 'etud'=>'',
-				 'dpi'=>$o{'saisie_dpi'},
-				 'debug'=>$debug,
-				 'seuil'=>$projet{'seuil'},
-				 'global'=>0,
-				 'encodage_interne'=>$o{'encodage_interne'},
-				 'encodage_liste'=>$o{'encodage_liste'},
-				 'en_quittant'=>\&detecte_analyse,
-				 );
+    if($mep_list->nombre()>0) {
+	my $gm=AMC::Gui::Manuel::new('cr-dir'=>localise($projet{'cr'}),
+				     'mep-dir'=>localise($projet{'mep'}),
+				     'mep-data'=>$mep_list,
+				     'liste'=>$projet{'listeetudiants'},
+				     'sujet'=>localise($projet{'docs'}->[0]),
+				     'etud'=>'',
+				     'dpi'=>$o{'saisie_dpi'},
+				     'debug'=>$debug,
+				     'seuil'=>$projet{'seuil'},
+				     'global'=>0,
+				     'encodage_interne'=>$o{'encodage_interne'},
+				     'encodage_liste'=>$o{'encodage_liste'},
+				     'en_quittant'=>\&detecte_analyse,
+				     );
+    } else {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "Aucune mise en page n'est disponible pour ce projet. Veuillez utiliser le bouton <i>calculer les mises en page</i> de l'onglet <i>préparation</i> avant la saisie manuelle.");
+	$dialog->run;
+	$dialog->destroy;      
+    }
 }
 
 sub saisie_automatique {
