@@ -319,7 +319,7 @@ if($mode =~ /m/) {
 			     "-density",$dpi,
 			     "-depth",8,
 			     "+antialias",
-			     $p,"$temp_dir/page.ppm"],
+			     $p,"$temp_dir/page-$npage.ppm"],
 			    [with_prog("AMC-calepage.pl"),
 			     "--progression-debut",.4,
 			     "--progression",0.9/$np*$progress,
@@ -331,7 +331,9 @@ if($mode =~ /m/) {
 			     "--dpi",$dpi,
 			     "--modele",
 			     "--mep",$mep_dir,
-			     "$temp_dir/page.ppm"]);
+			     "$temp_dir/page-$npage.ppm"],
+			    ['rm',"$temp_dir/page-$npage.ppm"],
+			    );
     }
 
     $queue->run();
