@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Thu Jun 11 10:41:49 2009 -->
+<!--Generated with glade3 3.4.5 on Mon Jun 15 23:40:25 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="general">
     <property name="visible">True</property>
@@ -14,27 +14,37 @@
         <child>
           <widget class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
+            <property name="spacing">2</property>
             <child>
-              <widget class="GtkViewport" id="viewport_area">
+              <widget class="GtkDrawingArea" id="area">
+                <property name="width_request">420</property>
+                <property name="height_request">600</property>
                 <property name="visible">True</property>
-                <property name="tooltip" translatable="yes">Cliquer sur les cases en rouge comme sur la copie</property>
-                <property name="resize_mode">GTK_RESIZE_QUEUE</property>
-                <child>
-                  <widget class="GtkDrawingArea" id="area">
-                    <property name="visible">True</property>
-                    <property name="events">GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
-                    <signal name="button_press_event" handler="choix"/>
-                  </widget>
-                </child>
+                <property name="events">GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+                <signal name="button_press_event" handler="choix"/>
+                <signal name="expose_event" handler="expose_area"/>
               </widget>
+            </child>
+            <child>
+              <widget class="GtkVSeparator" id="vseparator1">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
+                <property name="spacing">2</property>
                 <child>
-                  <widget class="GtkHButtonBox" id="hbuttonbox4">
+                  <widget class="GtkHBox" id="hbox2">
                     <property name="visible">True</property>
-                    <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
+                    <property name="spacing">2</property>
+                    <child>
+                      <placeholder/>
+                    </child>
                     <child>
                       <widget class="GtkLabel" id="label1">
                         <property name="visible">True</property>
@@ -43,6 +53,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -53,8 +64,11 @@
                         <signal name="activate" handler="goto_activate_cb"/>
                       </widget>
                       <packing>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </widget>
                   <packing>
@@ -65,7 +79,7 @@
                 <child>
                   <widget class="GtkHButtonBox" id="hbuttonbox5">
                     <property name="visible">True</property>
-                    <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
+                    <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
                     <child>
                       <widget class="GtkButton" id="button1">
                         <property name="visible">True</property>
@@ -101,17 +115,22 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkHButtonBox" id="nom_etudiant">
+                  <widget class="GtkHBox" id="nom_etudiant">
                     <property name="visible">True</property>
-                    <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
+                    <property name="spacing">2</property>
+                    <child>
+                      <placeholder/>
+                    </child>
                     <child>
                       <widget class="GtkLabel" id="label2">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Étudiant :</property>
+                        <property name="justify">GTK_JUSTIFY_CENTER</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -128,8 +147,11 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </widget>
                   <packing>
@@ -150,7 +172,7 @@
                 <child>
                   <widget class="GtkHButtonBox" id="hbuttonbox3">
                     <property name="visible">True</property>
-                    <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
+                    <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
                     <child>
                       <widget class="GtkButton" id="button2">
                         <property name="visible">True</property>
@@ -185,7 +207,9 @@
                 </child>
               </widget>
               <packing>
-                <property name="position">1</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </widget>

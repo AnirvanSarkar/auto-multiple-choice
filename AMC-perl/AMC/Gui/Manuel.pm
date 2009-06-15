@@ -43,6 +43,7 @@ use XML::Simple;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 
+use AMC::Gui::PageArea;
 use AMC::MEPList;
 
 sub attention {
@@ -128,9 +129,11 @@ sub new {
 
     bless $self;
 
-    for my $k (qw/area scrolled_area viewport_area goto etudiant_cb etudiant_cbe nom_etudiant/) {
+    for my $k (qw/area goto etudiant_cb etudiant_cbe nom_etudiant/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
+
+    AMC::Gui::PageArea::add_feuille($self->{'area'});
     
     if(-f $self->{'liste'}) {
 	
@@ -162,97 +165,20 @@ sub new {
 
 ###
 
-sub get_color {
-    my ($colormap,$name) = @_;
-    my $ret;
-
-    if ($ret = $allocated_colors{$name}) {
-        return $ret;
-    }
-
-    my $color = Gtk2::Gdk::Color->parse($name);
-    $colormap->alloc_color($color,TRUE,TRUE);
-
-    $allocated_colors{$name} = $color;
-
-    return $color;
-}
-
-sub dessine_case {
-    my ($self,$i)=(@_);
-
-    my $case=$self->{'lay'}->{'case'}->[$i];
-    my $coche=$self->{'coches'}->[$i];
-    if(!$coche) {
-	$self->{'gc'}->set_foreground(get_color($self->{'area'}->get_colormap,'white'));
-	$self->{'pixmap'}->draw_rectangle(
-				$self->{'gc'},
-				1,
-				$case->{'xmin'}*$self->{'fact'},
-				$case->{'ymin'}*$self->{'fact'},
-				($case->{'xmax'}-$case->{'xmin'})*$self->{'fact'},
-				($case->{'ymax'}-$case->{'ymin'})*$self->{'fact'}
-				);
-    }
-    $self->{'gc'}->set_foreground(get_color($self->{'area'}->get_colormap,'red'));
-    $self->{'pixmap'}->draw_rectangle(
-				      $self->{'gc'},
-				      $coche,
-				      $case->{'xmin'}*$self->{'fact'},
-				      $case->{'ymin'}*$self->{'fact'},
-				      ($case->{'xmax'}-$case->{'xmin'})*$self->{'fact'},
-				      ($case->{'ymax'}-$case->{'ymin'})*$self->{'fact'}
-				      );
-}
-
 sub choix {
-  my ($self,$widget,$event)=(@_);
-
-  if ($event->button == 1) {
-      my ($x,$y)=$event->coords;
-      print "Clic $x $y\n" if($self->{'debug'});
-      for my $i (0..$#{$self->{'lay'}->{'case'}}) {
-	  $self->{'modifs'}=1;
-
-	  my $case=$self->{'lay'}->{'case'}->[$i];
-	  if($x<=$case->{'xmax'}*$self->{'fact'} && $x>=$case->{'xmin'}*$self->{'fact'}
-	     && $y<=$case->{'ymax'}*$self->{'fact'} && $y>=$case->{'ymin'}*$self->{'fact'}) {
-	      print " -> case $i\n" if($self->{'debug'});
-	      $self->{'coches'}->[$i]=!$self->{'coches'}->[$i];
-	      $self->dessine_case($i);
-	      $self->{'area'}->window->show;
-	  }
-      }
-  }
-  return TRUE;
+    my ($self,$widget,$event)=(@_);
+    $widget->choix($event);
 }
 
-sub charge_image {
-    my ($self)=(@_);
+sub expose_area {
+    my ($self,$widget,$evenement,@donnees)=@_;
 
-    ($self->{'pixmap'},undef)=Gtk2::Gdk::Pixmap->create_from_xpm($self->{'area'}->window,undef,$self->{'tmp-xpm'});
+    $widget->expose_drawing($evenement,@donnees);
+}
 
-    ($sx,$sy)=$self->{'pixmap'}->get_size();
-    $self->{'area'}->set_size_request($sx,$sy);
-    #$self->{'viewport_area'}->set_size_request($sx,$sy);
-
-    print "Taille : $sx $sy\n";
-
-    if($self->{'lay'}->{'tx'} && $self->{'lay'}->{'ty'}) {
-	$self->{'fact'}=($sx/$self->{'lay'}->{'tx'} + $sy/$self->{'lay'}->{'ty'})/2;
-	print "Rapport : ".$self->{'fact'}."\n";
-    }
-
-    $self->{'gc'} = Gtk2::Gdk::GC->new( $self->{'pixmap'} );
-    $self->{'gc'}->set_foreground(get_color($self->{'area'}->get_colormap,'red'));
-
-    for my $i (0..$#{$self->{'lay'}->{'case'}}) {
-	$self->dessine_case($i);
-    }
-
-    $self->{'area'}->window->set_back_pixmap($self->{'pixmap'},0);
-    $self->{'area'}->window->show();
-
+sub une_modif {
+    my ($self)=@_;
+    $self->{'area'}->modif();
 }
 
 sub charge_i {
@@ -263,7 +189,10 @@ sub charge_i {
     $self->{'lay'}=$self->{'dispos'}->mep($self->{'ids'}->[$self->{'iid'}]);
     my $page=$self->{'lay'}->{'page'};
 
+    ################################
     # fabrication du xpm
+    ################################
+
     print "ID ".$self->{'ids'}->[$self->{'iid'}]." PAGE $page\n";
     system("pdftoppm","-f",$page,"-l",$page,
 	   "-r",$self->{'dpi'},
@@ -275,9 +204,10 @@ sub charge_i {
     closedir TDIR;
     print "Candidats : ".join(' ',@candidats)."\n" if($self->{'debug'});
     my $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
-    # sprintf($self->{'temp-dir'}."/page-%06d.ppm",$page);
-    system("ppmtoxpm \"$tmp_ppm\" > \"".$self->{'tmp-xpm'}."\"");
-    unlink($tmp_ppm) if(!$self->{'debug'});
+
+    ################################
+    # synchro variables
+    ################################
 
     $self->{'etudiant_cbe'}->set_text('');
     $self->{'scan-file'}='';
@@ -308,15 +238,19 @@ sub charge_i {
     $self->{'nom_etudiant'}->set_sensitive($self->{'lay'}->{'nom'});
 
     # utilisation
-    $self->charge_image();
 
-    $self->{'modifs'}=0;
+    $self->{'area'}->set_image($tmp_ppm,
+			       $self->{'lay'},
+			       $self->{'coches'});
+
+    unlink($tmp_ppm) if(!$self->{'debug'});
+
 }
 
 sub ecrit {
     my ($self)=(@_);
 
-    if($self->{'xml-file'} && $self->{'modifs'}) {
+    if($self->{'xml-file'} && $self->{'area'}->modifs()) {
 	print "Sauvegarde du fichier ".$self->{'xml-file'}."\n";
 	open(XML,">:encoding(".$self->{'encodage_interne'}.")",$self->{'xml-file'}) 
 	    or die "Erreur a l'ecriture de ".$self->{'xml-file'}." : $!";
@@ -333,7 +267,7 @@ sub ecrit {
 	print XML "</analyse>\n";
 	close(XML);
 
-	$self->{'modifs'}=0;
+	$self->{'area'}->sync();
     }
 }
 
@@ -353,12 +287,6 @@ sub passe_precedent {
     $self->{'iid'}--;
     $self->{'iid'}=$#{$self->{'ids'}} if($self->{'iid'}<0);
     $self->charge_i();
-}
-
-sub une_modif {
-    my ($self)=(@_);
-
-    $self->{'modifs'}=1;
 }
 
 sub annule {
