@@ -37,12 +37,14 @@ BEGIN {
 
 use AMC::Basic;
 use XML::Simple;
-#use XML::Dumper;
 use Storable;
+
+my $VERSION=1;
 
 my %mep_defaut=('id'=>'',
 		'saved'=>'',
 		'timestamp'=>0,
+		'version'=>$VERSION,
 		);
 
 sub new {
@@ -193,6 +195,14 @@ sub load_mep {
     my ($file)=@_;
     my $d;
     eval{$d=retrieve($file)};
+    if($d) {
+	my $v=$$d->{'version'};
+	$v=0 if(!defined($v));
+	if($v < $VERSION ) {
+	    print STDERR "Version de fichier MEPList perimee : $v < $VERSION\n";
+	    $d='';
+	}
+    }
     return($d ? $$d : undef);
 }
 

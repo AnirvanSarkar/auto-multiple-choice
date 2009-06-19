@@ -39,6 +39,8 @@ use XML::Simple;
 use AMC::Basic;
 use Storable;
 
+my $VERSION=2;
+
 # perl -e 'use AMC::ANList; use Data::Dumper; print Dumper(AMC::ANList::new("points-cr","debug",1)->analyse());'
 
 # perl -e 'use XML::Simple;use Data::Dumper;  print Dumper(XMLin("",ForceArray => ["analyse","chiffre","case","id"],KeepRoot=>1,KeyAttr=> ["id"]));' |less
@@ -48,6 +50,7 @@ use Storable;
 	    'timestamp'=>0,
 	    'dispos'=>{},
 	    'saved'=>'',
+	    'version'=>$VERSION,
 	    );
 
 sub new {
@@ -282,6 +285,14 @@ sub load_an {
     my ($file)=@_;
     my $d;
     eval{$d=retrieve($file)};
+    if($d) {
+	my $v=$$d->{'version'};
+	$v=0 if(!defined($v));
+	if($v < $VERSION ) {
+	    print STDERR "Version de fichier ANList perimee : $v < $VERSION\n";
+	    $d='';
+	}
+    }
     return($d ? $$d : undef);
 }
 
