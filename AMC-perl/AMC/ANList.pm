@@ -41,6 +41,8 @@ use Storable;
 
 # perl -e 'use AMC::ANList; use Data::Dumper; print Dumper(AMC::ANList::new("points-cr","debug",1)->analyse());'
 
+# perl -e 'use XML::Simple;use Data::Dumper;  print Dumper(XMLin("",ForceArray => ["analyse","chiffre","case","id"],KeepRoot=>1,KeyAttr=> ["id"]));' |less
+
 %an_defaut=('debug'=>0,
 	    'action'=>'',
 	    'timestamp'=>0,
@@ -114,7 +116,10 @@ sub maj {
     }
 
   XMLF: for my $xf (@xmls) {
-      my $x=XMLin("$xf",ForceArray => 1,KeepRoot=>1,KeyAttr=> [ 'id' ]);
+      my $x=XMLin("$xf",
+		  ForceArray => ["analyse","chiffre","case","id"],
+		  KeepRoot=>1,
+		  KeyAttr=> [ 'id' ]);
       print "Fichier $xf...\n" if($self->{'debug'});
 
       next XMLF if(!$x->{'analyse'});
@@ -123,34 +128,37 @@ sub maj {
     BID:for my $id (@ids) {
 	print "ID=$id\n" if($self->{'debug'});
 
-	$an_dispos->{$id}={} if(!$an_dispos->{$id});
+	$an_dispos->{$id}={'manuel'=>0} if(!$an_dispos->{$id});
 
 	my $mm=$x->{'analyse'}->{$id}->{'manuel'};
 	$mm=0 if(!defined($mm));
 	
+	# un autre fichier donnait deja des infos pour cet ID
 	if($an_dispos->{$id}->{'fichier'}) {
 	    if($an_dispos->{$id}->{'manuel'} == $mm
 	       && $an_dispos->{$id}->{'fichier'} ne $xf) {
+		# avec la meme valeur de <manuel> : ca doit etre une erreur
 		die "Plusieurs fichiers differents pour la page $id ("
 		    .$an_dispos->{$id}->{'fichier'}.", "
 		    .$xf.")";
 	    }
-	    if($an_dispos->{$id}->{'manuel'} && ! $mm) {
-		$an_dispos->{$id}->{'fichier-scan'}=$xf,
-		next BID;
-	    }
 	}
 	
-	my $f_scan='';
-	$f_scan=$an_dispos->{$id}->{'fichier'} 
-	if(! $an_dispos->{$id}->{'manuel'});
 
-	$an_dispos->{$id}={'fichier'=>$xf,
-			   'manuel'=>$mm,
-			   'nometudiant'=>$x->{'analyse'}->{$id}->{'nometudiant'},
-			   'fichier-scan'=>$f_scan,
-		      };
-	
+	if($mm) { # manuel
+	    $an_dispos->{$id}->{'fichier'}=$xf;
+	    $an_dispos->{$id}->{'manuel'}=1;
+	} else { # auto
+	    $an_dispos->{$id}->{'fichier-scan'}=$xf;
+	    $an_dispos->{$id}->{'fichier'}=$xf if(!$an_dispos->{$id}->{'fichier'});
+	    $an_dispos->{$id}->{'r'}=[map { $x->{'analyse'}->{$id}->{'case'}->{$_}->{'r'} } (keys %{$x->{'analyse'}->{$id}->{'case'}})] if($x->{'analyse'}->{$id}->{'case'});
+	}
+
+	$an_dispos->{$id}->{'nometudiant'}=$x->{'analyse'}->{$id}->{'nometudiant'};
+	if($x->{'analyse'}->{$id}->{'transformation'}) {
+	    $an_dispos->{$id}->{'mse'}=$x->{'analyse'}->{$id}->{'transformation'}->{'mse'};
+	}
+
 	push @ids_modifies,$id;
 
 	my @st=stat($xf);
@@ -190,6 +198,43 @@ sub attribut {
 	   $self->{'dispos'}->{$id}->{$att} : undef);
 }
 
+sub mse_string {
+    my ($self,$id,$seuil_mse,$couleur)=(@_);
+    my $man=$self->attribut($id,'manuel');
+    my $mse=$self->attribut($id,'mse');
+    my $st=(defined($mse)? 
+	    sprintf($man ? "(%.01f)" : "%.01f",$mse) : "---");
+    return(wantarray ?
+	   ($st,defined($mse) && $mse>$seuil_mse ? $couleur:undef)
+	   : $st);
+}
+
+sub sensibilite {
+    my ($self,$id,$seuil)=(@_);
+    my $r=$self->attribut($id,'r');
+    my $deltamin=1;
+    if($r) {
+	for my $c (@$r) {
+	    my $d=abs($seuil-$c);
+	    $deltamin=$d if($d<$deltamin);
+	}
+	return($deltamin<$seuil ? 10*($seuil-$deltamin)/$seuil : 0);
+    } else {
+	return(undef);
+    }
+}
+
+sub sensibilite_string {
+    my ($self,$id,$seuil,$seuil_sens,$couleur)=(@_);
+    my $man=$self->attribut($id,'manuel');
+    my $s=$self->sensibilite($id,$seuil);
+    my $st=(defined($s) ? 
+	    sprintf($man ? "(%.01f)" : "%.01f",$s) : "---");
+    return(wantarray ?
+	   ($st,defined($s) && $s>$seuil_sens ? $couleur:undef)
+	   : $st);
+}
+
 sub filename {
     my ($self,$id)=(@_);
     return $self->attribut($id,'fichier');
@@ -201,14 +246,16 @@ sub analyse {
     my $key='fichier';
     if($oo{'scan'}) {
 	$key='fichier-scan' 
-	    if(-f $self->{'dispos'}->{$id}->{'fichier-scan'});
+	    if($self->{'dispos'}->{$id}->{'fichier-scan'} 
+	       && -f $self->{'dispos'}->{$id}->{'fichier-scan'});
     }
 
     $id=$self->{'au-hasard'} if(!$id);
     
-    if(-f $self->{'dispos'}->{$id}->{$key}) {
+    if($self->{'dispos'}->{$id}->{$key} 
+       && -f $self->{'dispos'}->{$id}->{$key}) {
 	return(XMLin($self->{'dispos'}->{$id}->{$key},
-		    ForceArray => [ 'chiffre' ],
+		    ForceArray => [ 'analyse','chiffre','case','id' ],
 		    KeyAttr=> [ 'id' ]));
     } else {
 	return(undef);

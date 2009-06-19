@@ -27,7 +27,7 @@ BEGIN {
     $VERSION     = 0.1.1;
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &file_triable &sort_id &attention);
+    @EXPORT      = qw( &id_triable &file2id &get_ep &file_triable &sort_id &sort_num &attention &model_id_to_iter);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -71,6 +71,17 @@ sub file_triable {
     }
 }
 
+sub sort_num {
+    my ($liststore, $itera, $iterb, $sortkey) = @_;
+    my $a = $liststore->get ($itera, $sortkey);
+    my $b = $liststore->get ($iterb, $sortkey);
+    my $para=$a =~ s/^\((.*)\)$/$1/;
+    my $parb=$b =~ s/^\((.*)\)$/$1/;
+    $a=0 if($a !~ /^-?[0-9.]+$/);
+    $b=0 if($b !~ /^-?[0-9.]+$/);
+    return($parb <=> $para || $a <=> $b);
+}
+
 sub sort_id {
     my ($liststore, $itera, $iterb, $sortkey) = @_;
     my $a = $liststore->get ($itera, $sortkey);
@@ -92,6 +103,29 @@ sub attention {
     print "\n";
 }
 
+sub bon_id {
 
+    #print join(" --- ",@_),"\n";
+
+    my ($l,$path,$iter,$data)=@_;
+
+    my ($col,$v,$result)=@$data;
+
+    #print "BON [=$v] ? ".$l->get($iter,$col)."\n";
+
+    if($l->get($iter,$col) eq $v) {
+	$$result=$iter->copy;
+	return(1);
+    } else {
+	return(0);
+    }
+}
+
+sub model_id_to_iter {
+    my ($cl,$a,$val)=@_;
+    my $result=undef;
+    $cl->foreach(\&bon_id,[$a,$val,\$result]);
+    return($result);
+}
 
 1;

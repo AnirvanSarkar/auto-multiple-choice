@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Mon Jun 15 23:40:25 2009 -->
+<!--Generated with glade3 3.4.5 on Fri Jun 19 12:00:21 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="general">
     <property name="visible">True</property>
@@ -161,7 +161,23 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <widget class="GtkScrolledWindow" id="scrolledwindow1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <child>
+                      <widget class="GtkTreeView" id="diag_tree">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <signal name="button_press_event" handler="goto_from_list"/>
+                        <signal name="button_release_event" handler="goto_from_list"/>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">3</property>
+                  </packing>
                 </child>
                 <child>
                   <placeholder/>

@@ -43,17 +43,18 @@ use XML::Simple;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 
+use AMC::Basic;
 use AMC::Gui::PageArea;
 use AMC::MEPList;
 
-sub attention {
-    my $msg=shift;
-    print "\n";
-    print "*" x (length($msg)+4)."\n";
-    print "* ".$msg." *\n";
-    print "*" x (length($msg)+4)."\n";
-    print "\n";
-}
+use constant {
+    MDIAG_ID => 0,
+    MDIAG_EQM => 1,
+    MDIAG_DELTA => 2,
+    MDIAG_EQM_BACK => 3,
+    MDIAG_DELTA_BACK => 4,
+    MDIAG_I => 5,
+};
 
 sub new {
     my %o=(@_);
@@ -66,6 +67,8 @@ sub new {
 	      'dpi'=>75,
 	      'debug'=>0,
 	      'seuil'=>0.1,
+	      'seuil_sens'=>8.0,
+	      'seuil_eqm'=>3.0,
 	      'fact'=>1/4,
 	      'coches'=>[],
 	      'lay'=>{},
@@ -94,6 +97,18 @@ sub new {
     }
 
     $self->{'dispos'}=$dispos;
+
+    # an-list aussi
+
+    my $an_list;
+
+    if($self->{'an-data'}) {
+	$an_list=$self->{'an-data'};
+    } else {
+	$an_list=AMC::ANList::new($self->{'cr-dir'});
+    }
+
+    $self->{'an_list'}=$an_list;
 
     # intuite le sujet.pdf s'il n'est pas donne, a partir du source latex
 
@@ -129,12 +144,64 @@ sub new {
 
     bless $self;
 
-    for my $k (qw/area goto etudiant_cb etudiant_cbe nom_etudiant/) {
+    for my $k (qw/area goto etudiant_cb etudiant_cbe nom_etudiant diag_tree/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
 
     AMC::Gui::PageArea::add_feuille($self->{'area'});
     
+    ### modele DIAGNOSTIQUE SAISIE
+
+    my ($diag_store,$renderer,$column);
+
+    $diag_store = Gtk2::ListStore->new ('Glib::String',
+					'Glib::String', 
+					'Glib::String', 
+					'Glib::String', 
+					'Glib::String', 
+					'Glib::String', 
+					);
+
+    $self->{'diag_tree'}->set_model($diag_store);
+
+    $renderer=Gtk2::CellRendererText->new;
+    $column = Gtk2::TreeViewColumn->new_with_attributes ("page",
+							 $renderer,
+							 text=> MDIAG_ID);
+    $column->set_sort_column_id(MDIAG_ID);
+    $self->{'diag_tree'}->append_column ($column);
+
+    $renderer=Gtk2::CellRendererText->new;
+    $column = Gtk2::TreeViewColumn->new_with_attributes ("EQM",
+							 $renderer,
+							 'text'=> MDIAG_EQM,
+							 'background'=> MDIAG_EQM_BACK);
+    $column->set_sort_column_id(MDIAG_EQM);
+    $self->{'diag_tree'}->append_column ($column);
+
+    $renderer=Gtk2::CellRendererText->new;
+    $column = Gtk2::TreeViewColumn->new_with_attributes ("sensibilité",
+							 $renderer,
+							 'text'=> MDIAG_DELTA,
+							 'background'=> MDIAG_DELTA_BACK);
+    $column->set_sort_column_id(MDIAG_DELTA);
+    $self->{'diag_tree'}->append_column ($column);
+
+    $diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
+    $diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
+    $diag_store->set_sort_func(MDIAG_ID,\&sort_id,MDIAG_ID);
+
+    $self->{'diag_store'}=$diag_store;
+
+    my @ids=$dispos->ids();
+    if(@ids) {
+	for my $i (0..$#ids) {
+	    $self->maj_list($ids[$i],$i);
+	}
+    }
+
+    ### liste des noms d'etudiants
+
     if(-f $self->{'liste'}) {
 	
 	$self->{'liste-ent'}=Gtk2::ListStore->new ('Glib::String');
@@ -164,6 +231,49 @@ sub new {
 }
 
 ###
+
+sub goto_from_list {
+    my ($self,$widget, $event) = @_;
+    return FALSE unless $event->button == 1;
+    return TRUE unless $event->type eq 'button-release';
+    my ($path, $column, $cell_x, $cell_y) = 
+	$self->{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
+    if($path) {
+	$self->ecrit();
+	$self->{'iid'}=$self->{'diag_store'}->get($self->{'diag_store'}->get_iter($path),
+						  MDIAG_I);
+	$self->charge_i();
+    }
+    return TRUE;
+}
+
+sub maj_list {
+    my ($self,$id,$i)=(@_);
+    my $iter=model_id_to_iter($self->{'diag_store'},MDIAG_ID,$id);
+    $iter=$self->{'diag_store'}->append if(!$iter);
+
+    my ($eqm,$eqm_coul)=$self->{'an_list'}
+    ->mse_string($id,
+		 $self->{'seuil_eqm'},
+		 'red');
+    my ($sens,$sens_coul)=$self->{'an_list'}
+    ->sensibilite_string($id,$self->{'seuil'},
+			 $self->{'seuil_sens'},
+			 'red');
+
+    $self->{'diag_store'}->set($iter,
+			       MDIAG_ID,$id,
+			       MDIAG_EQM,$eqm,
+			       MDIAG_EQM_BACK,$eqm_coul,
+			       MDIAG_DELTA,$sens,
+			       MDIAG_DELTA_BACK,$sens_coul,
+			       );
+    if(defined($i)) {
+	$self->{'diag_store'}->set($iter,
+				   MDIAG_I,$i);
+    }
+    
+}
 
 sub choix {
     my ($self,$widget,$event)=(@_);
@@ -216,14 +326,13 @@ sub charge_i {
     $_=$self->{'ids'}->[$self->{'iid'}]; s/\+//g; s/\//-/g; s/^-+//; s/-+$//;
     my $tid=$_;
     
-    my $xml_file;
-    $xml_file=$self->{'cr-dir'}."/analyse-manuelle-$tid.xml";
-    $xml_file=$self->{'cr-dir'}."/analyse-$tid.xml" if(! -f $xml_file);
-    if(-f $xml_file) {
-	my $x=XMLin($xml_file,ForceArray => 1,KeyAttr=>['id']);
+    my $x=$self->{'an_list'}->analyse($self->{'ids'}->[$self->{'iid'}]);
+
+    if(defined($x)) {
 	for my $i (0..$#{$self->{'lay'}->{'case'}}) {
 	    my $id=$self->{'lay'}->{'case'}->[$i]->{'question'}."."
 		.$self->{'lay'}->{'case'}->[$i]->{'reponse'};
+	    print STDERR "ID=".$tid." Q=$id R=".$x->{'case'}->{$id}->{'r'}."\n" if($self->{'debug'});
 	    $self->{'coches'}->[$i]=$x->{'case'}->{$id}->{'r'} > $self->{'seuil'};
 	}
 	my $t=$x->{'nometudiant'}; $t='' if(!defined($t));
@@ -231,9 +340,7 @@ sub charge_i {
 	$self->{'scan-file'}=$x->{'src'};
     }
     
-    $xml_file=$self->{'cr-dir'}."/analyse-manuelle-$tid.xml";
-
-    $self->{'xml-file'}=$xml_file;
+    $self->{'xml-file'}=$self->{'cr-dir'}."/analyse-manuelle-$tid.xml";
 
     $self->{'nom_etudiant'}->set_sensitive($self->{'lay'}->{'nom'});
 
@@ -245,6 +352,9 @@ sub charge_i {
 
     unlink($tmp_ppm) if(!$self->{'debug'});
 
+    # dans la liste
+
+    $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path(model_id_to_iter($self->{'diag_store'},MDIAG_I,$self->{'iid'})));
 }
 
 sub ecrit {
@@ -268,6 +378,9 @@ sub ecrit {
 	close(XML);
 
 	$self->{'area'}->sync();
+
+	$self->{'an_list'}->maj();
+	$self->maj_list($self->{'ids'}->[$self->{'iid'}],undef);
     }
 }
 

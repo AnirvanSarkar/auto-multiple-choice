@@ -469,17 +469,6 @@ my %cb_stores=(
 					  (@$encodages)),
 	       );
 
-## tri pour nombres
-
-sub sort_num {
-    my ($liststore, $itera, $iterb, $sortkey) = @_;
-    my $a = $liststore->get ($itera, $sortkey);
-    my $b = $liststore->get ($iterb, $sortkey);
-    $a=0 if($a !~ /^-?[0-9.]+$/);
-    $b=0 if($b !~ /^-?[0-9.]+$/);
-    return $a <=> $b;
-}
-
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
 $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 
@@ -984,12 +973,15 @@ sub saisie_manuelle {
 	my $gm=AMC::Gui::Manuel::new('cr-dir'=>localise($projet{'cr'}),
 				     'mep-dir'=>localise($projet{'mep'}),
 				     'mep-data'=>$mep_list,
+				     'an-data'=>$an_list,
 				     'liste'=>$projet{'listeetudiants'},
 				     'sujet'=>localise($projet{'docs'}->[0]),
 				     'etud'=>'',
 				     'dpi'=>$o{'saisie_dpi'},
 				     'debug'=>$debug,
 				     'seuil'=>$projet{'seuil'},
+				     'seuil_sens'=>$o{'seuil_sens'},
+				     'seuil_eqm'=>$o{'seuil_eqm'},
 				     'global'=>0,
 				     'encodage_interne'=>$o{'encodage_interne'},
 				     'encodage_liste'=>$o{'encodage_liste'},
@@ -1261,31 +1253,6 @@ sub activate_doc {
     }
 }
 
-sub bon_id {
-
-    #print join(" --- ",@_),"\n";
-
-    my ($l,$path,$iter,$data)=@_;
-
-    my ($col,$v,$result)=@$data;
-
-    #print "BON [=$v] ? ".$l->get($iter,$col)."\n";
-
-    if($l->get($iter,$col) eq $v) {
-	$$result=$iter->copy;
-	return(1);
-    } else {
-	return(0);
-    }
-}
-
-sub model_id_to_iter {
-    my ($cl,$a,$val)=@_;
-    my $result=undef;
-    $cl->foreach(\&bon_id,[$a,$val,\$result]);
-    return($result);
-}
-
 # transmet les preferences vers les widgets correspondants
 sub transmet_pref {
     my ($gap,$prefixe,$h,$alias)=@_;
@@ -1538,25 +1505,20 @@ sub detecte_analyse {
 	my $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
 	$iter=$diag_store->append if(!$iter);
 
-	my $a=$an_list->analyse($i);
-
-	my $deltamin=1;
-	for my $c (keys %{$a->{'case'}}) {
-	    my $d=abs($projet{'seuil'}-$a->{'case'}->{$c}->{'r'});
-	    $deltamin=$d if($d<$deltamin);
-	}
-
-	my $eqm=$a->{'transformation'}->{'mse'};
-	my $sens=10*($projet{'seuil'}-$deltamin)/$projet{'seuil'};
-	my $man=$a->{'manuel'};
+	my ($eqm,$eqm_coul)=$an_list->mse_string($i,
+						 $o{'seuil_eqm'},
+						 'red');
+	my ($sens,$sens_coul)=$an_list->sensibilite_string($i,$projet{'seuil'},
+							   $o{'seuil_sens'},
+							   'red');
 
 	$diag_store->set($iter,
 			 DIAG_ID,$i,
-			 DIAG_EQM,($man ? "---" : sprintf("%.01f",$eqm)),
-			 DIAG_EQM_BACK,(!$man && $eqm>$o{'seuil_eqm'} ? 'red' : undef),
+			 DIAG_EQM,$eqm,
+			 DIAG_EQM_BACK,$eqm_coul,
 			 DIAG_MAJ,file_maj($an_list->filename($i)),
-			 DIAG_DELTA,($man ? "---" : sprintf("%.01f",$sens)),
-			 DIAG_DELTA_BACK,(!$man && $sens>$o{'seuil_sens'} ? 'red' : undef),
+			 DIAG_DELTA,$sens,
+			 DIAG_DELTA_BACK,$sens_coul,
 			 );
 
 	$ii++;
