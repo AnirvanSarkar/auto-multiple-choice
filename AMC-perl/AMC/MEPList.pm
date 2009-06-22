@@ -282,6 +282,37 @@ sub pages_etudiant {
     return(@r);
 }
 
+sub stats {
+    my ($self,$an_list)=@_;
+    my %r=('complet'=>0,'incomplet'=>0,'manque'=>0,
+	   'incomplet_id'=>[],'manque_id'=>[]);
+    my %an=map { $_=>1 } ($an_list->ids());
+    for my $e ($self->etus()) {
+	my $manque=0;
+	my $present=0;
+	my @m_id=();
+	for my $i ($self->pages_etudiant($e,'case'=>1,'id'=>1)) {
+	    if($an{$i}) {
+		$present++;
+	    } else {
+		$manque++;
+		push @m_id,$i;
+	    }
+	}
+	if($present>0) {
+	    if($manque>0) {
+		push @{$r{'manque_id'}},@m_id;
+		push @{$r{'incomplet_id'}},$e;
+		$r{'manque'}+=$manque;
+		$r{'incomplet'}++;
+	    } else {
+		$r{'complet'}++;
+	    }
+	}
+    }
+    return(%r);
+}
+
 1;
 
 __END__
@@ -289,4 +320,5 @@ __END__
 perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep");$m->save("/tmp/a.gz");'
 perl -e 'use AMC::MEPList;use Data::Dumper;print Dumper(AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep")->mep());'
 perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/tmp/a.gz","saved"=>1);print join(", ",$m->ids())."\n";'
+perl -e 'use AMC::MEPList;use AMC::ANList;use Data::Dumper;$r=AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep");$an=AMC::ANList::new("/home/alexis/Projets-QCM/essai/cr");print Dumper($r);%s=$r->stats($an);print Dumper(\%s);'|less
 

@@ -284,7 +284,7 @@ $gui=Gtk2::GladeXML->new($glade_xml,'main_window');
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
-    liste diag_tree inconnu_tree
+    liste diag_tree inconnu_tree diag_result
     maj_bareme annote_copies correc_tree regroupement_corriges/) {
     $w{$_}=$gui->get_widget($_);
 }
@@ -1539,15 +1539,24 @@ sub detecte_analyse {
 	}
     }
 
+    # resume
+
+    my %r=$mep_list->stats($an_list);
+    my $tt='';
+    if($r{'incomplet'}) {
+	$tt=sprintf("Saisie de %d copie(s) complète(s) et <span foreground=\"red\">%d copie(s) incomplète(s)</span>",$r{'complet'},$r{'incomplet'});
+    } else {
+	$tt=sprintf("<span foreground=\"green\">Saisie de %d copie(s) complète(s)</span>",$r{'complet'});
+    }
+    $w{'diag_result'}->set_markup($tt);
+
     # ID manquants :
 
-    for my $i ($mep_list->ids()) {
-	if(! $an_list->filename($i)) {
-	    my $iter=$inconnu_store->append;
-	    $inconnu_store->set($iter,
-				INCONNU_SCAN,'absent',
-				INCONNU_ID,$i);
-	}
+    for my $i (@{$r{'manque_id'}}) {
+	my $iter=$inconnu_store->append;
+	$inconnu_store->set($iter,
+			    INCONNU_SCAN,'absent',
+			    INCONNU_ID,$i);
     }
     
 
@@ -1556,7 +1565,6 @@ sub detecte_analyse {
     $w{'commande'}->hide() if(!$oo{'interne'});
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    #print "IDS> ".join(" ",$an_list->ids())."\n";
 }
 
 sub set_source_tex {
