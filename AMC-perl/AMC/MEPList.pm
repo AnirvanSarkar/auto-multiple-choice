@@ -39,7 +39,7 @@ use AMC::Basic;
 use XML::Simple;
 use Storable;
 
-my $VERSION=1;
+my $VERSION=2;
 
 my %mep_defaut=('id'=>'',
 		'saved'=>'',
@@ -166,6 +166,8 @@ sub from_files {
 		    }
 		    $self->{'dispos'}->{$laymep}={
 			'filename'=>$f,
+			'case'=>($lay->{'mep'}->{$laymep}->{'case'} ? 1:0),
+			'nom'=>($lay->{'mep'}->{$laymep}->{'nom'} ? 1:0),
 			map { $_=>$lay->{'mep'}->{$laymep}->{$_} } qw/page src/,
 		    };
 		    push @r,$laymep;
@@ -237,6 +239,7 @@ sub mep {
     }
 }
 
+# renvoie la liats des identifiants de page
 sub ids {
     my ($self)=(@_);
 
@@ -244,6 +247,7 @@ sub ids {
 	   (keys %{$self->{'dispos'}}));
 }
 
+# renvoie la liste des numeros d'etudiants
 sub etus {
     my ($self)=(@_);
     my %r=();
@@ -254,12 +258,26 @@ sub etus {
     return(sort { $a <=> $b } (keys %r));
 }
 
+# renvoie les pages correspondantes au numero d'etudiant fourni
+# options :
+# * 'case'=>1 si on ne veut que les pages avec des cases a cocher
+# * 'contenu'=>1 si on ne veut que les pages soit avec des cases
+#                a cocher, soit avec le nom a ecrire
+# * 'id'=>1 si on veut les pages sous la forme de l' ID de page plutot
+#           que sous la forme d'un numero de page du document
 sub pages_etudiant {
-    my ($self,$etu)=@_;
+    my ($self,$etu,%oo)=@_;
     my @r=();
     for my $i ($self->ids()) {
 	my ($e,$p)=get_ep($i);
-	push @r,$self->attr($i,'page') if($e == $etu);
+	my $ok=1;
+	$ok=0 if($oo{'contenu'} 
+		 && (!$self->attr($i,'case')) 
+		 && (!$self->attr($i,'nom')));
+	$ok=0 if($oo{'case'} 
+		 && (!$self->attr($i,'case')));
+	push @r,($oo{'id'} ? $i : $self->attr($i,'page')) 
+	    if($e == $etu && $ok);
     }
     return(@r);
 }
@@ -269,5 +287,6 @@ sub pages_etudiant {
 __END__
 
 perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep");$m->save("/tmp/a.gz");'
+perl -e 'use AMC::MEPList;use Data::Dumper;print Dumper(AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep")->mep());'
 perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/tmp/a.gz","saved"=>1);print join(", ",$m->ids())."\n";'
 
