@@ -49,11 +49,12 @@ use AMC::MEPList;
 
 use constant {
     MDIAG_ID => 0,
-    MDIAG_EQM => 1,
-    MDIAG_DELTA => 2,
-    MDIAG_EQM_BACK => 3,
-    MDIAG_DELTA_BACK => 4,
-    MDIAG_I => 5,
+    MDIAG_ID_BACK => 1,
+    MDIAG_EQM => 2,
+    MDIAG_DELTA => 3,
+    MDIAG_EQM_BACK => 4,
+    MDIAG_DELTA_BACK => 5,
+    MDIAG_I => 6,
 };
 
 sub new {
@@ -160,6 +161,7 @@ sub new {
 					'Glib::String', 
 					'Glib::String', 
 					'Glib::String', 
+					'Glib::String', 
 					);
 
     $self->{'diag_tree'}->set_model($diag_store);
@@ -167,7 +169,8 @@ sub new {
     $renderer=Gtk2::CellRendererText->new;
     $column = Gtk2::TreeViewColumn->new_with_attributes ("page",
 							 $renderer,
-							 text=> MDIAG_ID);
+							 text=> MDIAG_ID,
+							 'background'=> MDIAG_ID_BACK);
     $column->set_sort_column_id(MDIAG_ID);
     $self->{'diag_tree'}->append_column ($column);
 
@@ -260,9 +263,9 @@ sub maj_list {
     ->sensibilite_string($id,$self->{'seuil'},
 			 $self->{'seuil_sens'},
 			 'red');
-
     $self->{'diag_store'}->set($iter,
 			       MDIAG_ID,$id,
+			       MDIAG_ID_BACK,$self->{'an_list'}->couleur($id),
 			       MDIAG_EQM,$eqm,
 			       MDIAG_EQM_BACK,$eqm_coul,
 			       MDIAG_DELTA,$sens,

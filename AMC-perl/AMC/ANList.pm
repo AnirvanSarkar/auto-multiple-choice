@@ -219,7 +219,7 @@ sub mse_string {
     my $st=(defined($mse)? 
 	    sprintf($man ? "(%.01f)" : "%.01f",$mse) : "---");
     return(wantarray ?
-	   ($st,defined($mse) && $mse>$seuil_mse ? $couleur:undef)
+	   ($st,defined($mse) && $mse>$seuil_mse && (!$man) ? $couleur:undef)
 	   : $st);
 }
 
@@ -245,13 +245,23 @@ sub sensibilite_string {
     my $st=(defined($s) ? 
 	    sprintf($man ? "(%.01f)" : "%.01f",$s) : "---");
     return(wantarray ?
-	   ($st,defined($s) && $s>$seuil_sens ? $couleur:undef)
+	   ($st,defined($s) && $s>$seuil_sens && (!$man) ? $couleur:undef)
 	   : $st);
 }
 
 sub filename {
     my ($self,$id)=(@_);
     return $self->attribut($id,'fichier');
+}
+
+sub couleur {
+    my ($self,$id)=(@_);
+    my $id_coul=undef;
+    if($self->attribut($id,'fichier')) {
+	$id_coul=($self->attribut($id,'manuel') ?
+		  'lightgreen' : 'lightblue');
+    }
+    return($id_coul);
 }
 
 sub analyse {

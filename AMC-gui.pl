@@ -53,11 +53,12 @@ use constant {
     MEP_MAJ => 2,
 
     DIAG_ID => 0,
-    DIAG_MAJ => 1,
-    DIAG_EQM => 2,
-    DIAG_EQM_BACK => 3,
-    DIAG_DELTA => 4,
-    DIAG_DELTA_BACK => 5,
+    DIAG_ID_BACK => 1,
+    DIAG_MAJ => 2,
+    DIAG_EQM => 3,
+    DIAG_EQM_BACK => 4,
+    DIAG_DELTA => 5,
+    DIAG_DELTA_BACK => 6,
 
     INCONNU_SCAN => 0,
     INCONNU_ID => 1,
@@ -377,6 +378,7 @@ $diag_store = Gtk2::ListStore->new ('Glib::String',
 				    'Glib::String', 
 				    'Glib::String', 
 				    'Glib::String', 
+				    'Glib::String', 
 				    'Glib::String');
 
 $w{'diag_tree'}->set_model($diag_store);
@@ -384,7 +386,8 @@ $w{'diag_tree'}->set_model($diag_store);
 $renderer=Gtk2::CellRendererText->new;
 $column = Gtk2::TreeViewColumn->new_with_attributes ("identifiant",
 						     $renderer,
-						     text=> DIAG_ID);
+						     text=> DIAG_ID,
+						     'background'=> DIAG_ID_BACK);
 $column->set_sort_column_id(DIAG_ID);
 $w{'diag_tree'}->append_column ($column);
 
@@ -1525,6 +1528,7 @@ sub detecte_analyse {
 
 	$diag_store->set($iter,
 			 DIAG_ID,$i,
+			 DIAG_ID_BACK,$an_list->couleur($i),
 			 DIAG_EQM,$eqm,
 			 DIAG_EQM_BACK,$eqm_coul,
 			 DIAG_MAJ,file_maj($an_list->filename($i)),
