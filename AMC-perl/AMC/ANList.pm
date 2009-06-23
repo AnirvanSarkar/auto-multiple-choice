@@ -82,25 +82,33 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
-    $self->maj();
+    $self->maj() if(!$o{'brut'});
 
     return($self);
 }
 
 sub maj {
-    my ($self)=@_;
+    my ($self,%oo)=@_;
 
     my $an_dispos=$self->{'dispos'};
     my @ids_effaces=();
     my @ids_modifies=();
     my @xmls;
 
+    my %a_retraiter=();
+
     # on enleve les entrees qui n'existent plus...
 
     for my $i (keys %$an_dispos) {
 	if((! $an_dispos->{$i}->{'fichier'})
-	   || (! -f $an_dispos->{$i}->{'fichier'})) {
-	    print STDERR "AN : entree $i effacee\n";
+	   || (! -f $an_dispos->{$i}->{'fichier'})
+	   || ($an_dispos->{$i}->{'fichier-scan'} && ! -f $an_dispos->{$i}->{'fichier-scan'})
+	   ) {
+	    $a_retraiter{$an_dispos->{$i}->{'fichier'}}=1
+		if($an_dispos->{$i}->{'fichier'});
+	    $a_retraiter{$an_dispos->{$i}->{'fichier-scan'}}=1
+		if($an_dispos->{$i}->{'fichier-scan'});
+	    print STDERR "AN : entree $i a retraiter\n";
 	    push @ids_effaces,$i;
 	    delete($an_dispos->{$i});
 	}
@@ -111,7 +119,9 @@ sub maj {
     if(-d $self->{'cr'}) {
 	opendir(DIR, $self->{'cr'}) || die "can't opendir ".$self->{'cr'}.": $!";
 	@xmls = grep { @st=stat($_); 
-		       /\.xml$/ && -f $_ && $st[9]>$self->{'timestamp'} } 
+		       /\.xml$/ && -f $_ 
+			   && ($st[9]>$self->{'timestamp'} 
+			       || $a_retraiter{$_} )} 
 	map { $self->{'cr'}."/$_" } readdir(DIR);
 	closedir DIR;
     } else {
@@ -119,6 +129,7 @@ sub maj {
     }
 
   XMLF: for my $xf (@xmls) {
+      &{$oo{'progres'}}() if($oo{'progres'});
       my $x=XMLin("$xf",
 		  ForceArray => ["analyse","chiffre","case","id"],
 		  KeepRoot=>1,

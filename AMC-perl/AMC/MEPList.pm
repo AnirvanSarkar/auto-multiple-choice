@@ -79,18 +79,13 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
     
-    if($renew) {
-	$self->from_files();
-	$self->save();
-    } else {
-	$self->maj();
-    }
+    $self->maj() if(!$o{'brut'});
 
     return($self);
 }
 
 sub maj {
-    my ($self)=@_;
+    my ($self,%oo)=@_;
     my @ie=();
 
     # enleve les fichiers qui n'existent plus...
@@ -114,37 +109,13 @@ sub maj {
 		       /\.xml$/ && -f $_ && $st[9]>$self->{'timestamp'} } 
 	map { $self->{'mep'}."/$_" } readdir(DIR);
 	closedir DIR;
-
-	push @ie,$self->from_files(@xmls) if($#xmls>=0);
     }
 
+    # va analyser chacun de ces fichiers ...
 
-    $self->save() if($#ie>=0);
-}
-
-sub from_files {
-    my ($self,@xmls)=@_;
-    my @r=();
-
-    if($#xmls<0) {
-
-	if(-d $self->{'mep'}) {
-	    #####
-	    # rechercher toutes les possibilites de mise en page :
-	    opendir(DIR, $self->{'mep'}) 
-		|| die "Erreur a l'ouverture du repertoire ".$self->{'mep'}." : $!";
-	    @xmls = map { $self->{'mep'}."/$_"; } 
-	    grep { /\.xml$/ && -f $self->{'mep'}."/$_" } readdir(DIR);
-	    closedir DIR;
-	} else {
-	    @xmls=($self->{'mep'});
-	}
-
-	$self->{'dispos'}={};
-
-    }
-    
     for my $f (@xmls) {
+	&{$oo{'progres'}}() if($oo{'progres'});
+	
 	my $lay=XMLin($f,ForceArray => 1,KeepRoot => 1, KeyAttr=> [ 'id' ]);
 
 	my @st=stat($f);
@@ -170,7 +141,7 @@ sub from_files {
 			'nom'=>($lay->{'mep'}->{$laymep}->{'nom'} ? 1:0),
 			map { $_=>$lay->{'mep'}->{$laymep}->{$_} } qw/page src/,
 		    };
-		    push @r,$laymep;
+		    push @ie,$laymep;
 		}
 	    }
 	}
@@ -181,7 +152,8 @@ sub from_files {
     $self->{'au-hasard'}=$kmep[0];
     $self->{'n'}=1+$#kmep;
 
-    return(@r);
+
+    $self->save() if($#ie>=0);
 }
 
 sub save {

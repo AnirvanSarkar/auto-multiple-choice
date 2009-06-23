@@ -1434,7 +1434,12 @@ sub detecte_mep {
     $w{'avancement'}->set_fraction(0);
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    $mep_list->maj();
+    $mep_list->maj('progres'=>sub {
+	$w{'avancement'}->set_pulse_step(.02);
+	$w{'avancement'}->pulse();
+	Gtk2->main_iteration while ( Gtk2->events_pending );
+    },
+		   );
 
     $mep_store->clear();
 
@@ -1487,10 +1492,16 @@ sub detecte_analyse {
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
     my @ids_m;
+
+    @ids_m=$an_list->maj('progres'=>sub {
+	$w{'avancement'}->set_pulse_step(.1);
+	$w{'avancement'}->pulse();
+	Gtk2->main_iteration while ( Gtk2->events_pending );
+    },
+			 );
+
     if($oo{'premier'}) {
 	@ids_m=$an_list->ids();
-    } else {
-	@ids_m=$an_list->maj();
     }
 
     print "IDS_M : ".join(' ',@ids_m)."\n";
@@ -1522,7 +1533,7 @@ sub detecte_analyse {
 			 );
 
 	$ii++;
-	$w{'avancement'}->set_fraction($ii/(1+$#ids_m)) if(!$oo{'interne'});
+	$w{'avancement'}->set_fraction(0.9*$ii/(1+$#ids_m)) if(!$oo{'interne'});
 	Gtk2->main_iteration while ( Gtk2->events_pending );
     }
 
@@ -1546,7 +1557,7 @@ sub detecte_analyse {
     if($r{'incomplet'}) {
 	$tt=sprintf("Saisie de %d copie(s) complète(s) et <span foreground=\"red\">%d copie(s) incomplète(s)</span>",$r{'complet'},$r{'incomplet'});
     } else {
-	$tt=sprintf("<span foreground=\"green\">Saisie de %d copie(s) complète(s)</span>",$r{'complet'});
+	$tt=sprintf("<span foreground=\"darkgreen\">Saisie de %d copie(s) complète(s)</span>",$r{'complet'});
     }
     $w{'diag_result'}->set_markup($tt);
 
@@ -1825,11 +1836,13 @@ sub valide_projet {
 
 
     $mep_list=AMC::MEPList::new(localise($projet{'mep'}),
+				'brut'=>1,
 				'saved'=>localise($mep_saved));
 
     detecte_mep();
 
     $an_list=AMC::ANList::new(localise($projet{'cr'}),
+			      'brut'=>1,
 			      'saved'=>localise($an_saved));
     detecte_analyse('premier'=>1);
 

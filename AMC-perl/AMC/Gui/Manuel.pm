@@ -377,11 +377,17 @@ sub ecrit {
 	print XML "</analyse>\n";
 	close(XML);
 
-	$self->{'area'}->sync();
-
-	$self->{'an_list'}->maj();
-	$self->maj_list($self->{'ids'}->[$self->{'iid'}],undef);
+	$self->synchronise();
     }
+}
+
+sub synchronise {
+    my ($self)=(@_);
+
+    $self->{'area'}->sync();
+
+    $self->{'an_list'}->maj();
+    $self->maj_list($self->{'ids'}->[$self->{'iid'}],undef);
 }
 
 sub passe_suivant {
@@ -405,6 +411,19 @@ sub passe_precedent {
 sub annule {
     my ($self)=(@_);
 
+    $self->charge_i();
+}
+
+sub efface_saisie {
+    my ($self)=(@_);
+
+    my $id=$self->{'ids'}->[$self->{'iid'}];
+    my $fs=$self->{'an_list'}->attribut($id,'fichier-scan');
+    my $f=$self->{'an_list'}->attribut($id,'fichier');
+    if(-e $f && ($f ne $fs)) {
+	unlink($f);
+    }
+    $self->synchronise();
     $self->charge_i();
 }
 
