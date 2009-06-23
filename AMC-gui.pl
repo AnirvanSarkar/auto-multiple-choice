@@ -142,7 +142,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'encodage_csv'=>'',
 	      'encodage_latex'=>'',
 	      'taille_max_correction'=>'1000x1500',
-	      'qualite_correction'=>'65',
+	      'qualite_correction'=>'150',
+	      'conserve_taille'=>1,
 	      'methode_impression'=>'CUPS',
 	      'imprimante'=>'',
 	      'options_impression'=>{'sides'=>'two-sided-long-edge',
@@ -1278,6 +1279,11 @@ sub transmet_pref {
 		$wp->set_filename($h->{$t});
 	    }
 	}
+	$wp=$gap->get_widget($prefixe.'_v_'.$ta);
+	if($wp) {
+	    $w{$prefixe.'_v_'.$t}=$wp;
+	    $wp->set_active($h->{$t});
+	}
 	$wp=$gap->get_widget($prefixe.'_c_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
@@ -1315,6 +1321,12 @@ sub reprend_pref {
 	    } else {
 		$n=$wp->get_filename();
 	    }
+	    $h->{'modifie'}=1 if($h->{$t} ne $n);
+	    $h->{$t}=$n;
+	}
+	$wp=$w{$prefixe.'_v_'.$t};
+	if($wp) {
+	    $n=$wp->get_active();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
@@ -1356,7 +1368,7 @@ sub edit_preferences {
 
     $gap->signal_autoconnect_from_package('main');
 
-    for my $t (grep { /^pref(_projet)?_[xfc]_/ } (keys %w)) {
+    for my $t (grep { /^pref(_projet)?_[xfcv]_/ } (keys %w)) {
 	delete $w{$t};
     }
     transmet_pref($gap,'pref',\%o);
@@ -1930,19 +1942,34 @@ sub quitte_projet {
 }
 
 sub quitter {
+    my $ok=0;
+    my $reponse='';
 
     quitte_projet();
 
+    if($o{'conserve_taille'}) {
+	my ($x,$y)=$w{'main_window'}->get_size();
+	if(!$o{'taille_x_main'} || !$o{'taille_y_main'}
+	   || $x != $o{'taille_x_main'} || $y != $o{'taille_y_main'}) {
+	    $o{'taille_x_main'}=$x;
+	    $o{'taille_y_main'}=$y;
+	    $o{'modifie'}=1;
+	    $ok=1;
+	}
+    }
+
     if($o{'modifie'}) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							   'destroy-with-parent',
-							   'question', # message type
-							   'yes-no', # which set of buttons?
-							   "Vous n'avez pas sauvegardé les options générales, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?");
-	my $reponse=$dialog->run;
-	$dialog->destroy;      
+	if(!$ok) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							       'destroy-with-parent',
+							       'question', # message type
+							       'yes-no', # which set of buttons?
+							       "Vous n'avez pas sauvegardé les options générales, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?");
+	    $reponse=$dialog->run;
+	    $dialog->destroy;      
+	}
 	
-	if($reponse eq 'yes') {
+	if($reponse eq 'yes' || $ok) {
 	    sauve_pref_generales();
 	} 
     }
@@ -1953,6 +1980,9 @@ sub quitter {
 
 $gui->signal_autoconnect_from_package('main');
 
+if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
+    $w{'main_window'}->resize($o{'taille_x_main'},$o{'taille_y_main'});
+}
 
 ###
 
