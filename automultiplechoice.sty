@@ -274,18 +274,20 @@
 \ifAMC@calibration\message{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
 \AMCload@@reponse{\une@rep{\AMC@marquevide}{#1}}{\the\AMCrep@count}}
 %
-\theoremstyle{plain}
-\theorembodyfont{\rm}
-\newtheorem{questionA}{Question}
+\newcounter{AMCquestionaff}
+\newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
+\def\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
+\def\CommenceQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}
+%
 \def\multiSymbole{$\clubsuit$}
 \def\AMCmessage#1{\message{AUTOQCM[#1]^^J}}
 % annule une definition precedente (exercices.sty, par ex.)
 \ifx\question\undefined\else\let\question\undefined\fi
-\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\begin{questionA}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{questionA}}#1}{\end{questionA}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
+\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\CommenceQuestion{\AMC@qaff}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
 \def\@aucune{\emph{Aucune de ces r\'eponses n'est correcte.}}
-\newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}{#1}[{{\multiSymbole}}]\AMCtype@multitrue\ifAMC@calibration\message{AUTOQCM[MULT]^^J}\fi}{\end{question}}
+\newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}\AMCtype@multitrue\ifAMC@calibration\message{AUTOQCM[MULT]^^J}\fi}{\end{question}}
 \newdimen\ouverte@vs
-\newenvironment{questionouverte}[1][3cm]{\AMCtype@multifalse\ouverte@vs=#1\begin{questionA}}{\vspace*{\ouverte@vs}\end{questionA}}
+\newenvironment{questionouverte}[1][3cm]{\AMCtype@multifalse\ouverte@vs=#1\CommenceQuestion{\AMC@qaff}{}}{\vspace*{\ouverte@vs}}
 %
 \def\bareme#1{\ifAMC@calibration\message{AUTOQCM[B=#1]^^J}\fi}
 %
@@ -408,7 +410,7 @@
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
 \AMCid@etud=100\AMCid@etudfin=#1\advance\AMCid@etudfin by 100%
 \ifAMC@correchead\AMCid@etudfin=100\fi
-\loop \setcounter{page}{1}\setcounter{questionA}{0}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+\loop \setcounter{page}{1}\AMCnumero{1}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
 %

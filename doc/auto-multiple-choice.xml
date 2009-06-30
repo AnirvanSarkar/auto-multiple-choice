@@ -785,6 +785,36 @@ Durée : 10 minutes.
         copies d'examen imprimées, il ne faut surtout pas modifier cette
         valeur !</para>
       </sect3>
+
+      <sect3>
+        <title>Style</title>
+
+        <para>La façon dont chaque question est présentée peut être modifiée
+        en redéfinissant la commande LaTeX
+        <command>CommenceQuestion</command>, dont la définition par défaut est
+        la suivante :</para>
+
+        <para><programlisting>\def\CommenceQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
+
+        <para>Le premier paramètre transmis à cette commande est le numéro de
+        question à afficher. Le second paramètre contient
+        <code>\multiSymbole</code> dans le cas dune question à plusieures
+        réponses possibles, et est vide dans les autres cas. La commande
+        <code>\multiSymbole</code> peut aussi être modifiée : elle a pour
+        charge de différentier les questions à réponses multiples des autres.
+        Par défaut, elle affiche un trèfle :</para>
+
+        <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
+
+        <para>Enfin, on peut modifier le numéro de la prochaine question à
+        laide de la commande <code>\AMCnumero</code>. Au début de chaque
+        copie, un appel à</para>
+
+        <para><programlisting>\AMCnumero{1}</programlisting></para>
+
+        <para>est effectué, mais cette commande peut être utilisée à tout
+        moment.</para>
+      </sect3>
     </sect2>
 
     <sect2>
