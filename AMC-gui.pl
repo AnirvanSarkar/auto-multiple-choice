@@ -1284,6 +1284,11 @@ sub transmet_pref {
 	    $w{$prefixe.'_v_'.$t}=$wp;
 	    $wp->set_active($h->{$t});
 	}
+	$wp=$gap->get_widget($prefixe.'_s_'.$ta);
+	if($wp) {
+	    $w{$prefixe.'_s_'.$t}=$wp;
+	    $wp->set_value($h->{$t});
+	}
 	$wp=$gap->get_widget($prefixe.'_c_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
@@ -1327,6 +1332,12 @@ sub reprend_pref {
 	$wp=$w{$prefixe.'_v_'.$t};
 	if($wp) {
 	    $n=$wp->get_active();
+	    $h->{'modifie'}=1 if($h->{$t} ne $n);
+	    $h->{$t}=$n;
+	}
+	$wp=$w{$prefixe.'_s_'.$t};
+	if($wp) {
+	    $n=$wp->get_value();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
