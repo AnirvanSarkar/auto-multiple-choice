@@ -311,8 +311,12 @@ for my $etud ((grep { /^max/ } (keys %bons)),
     $note_question{$etud}={};
 
     my $total=0;
+    my $n_col=3;
+    my @a_ajouter=();
 
     for my $q (@qids) {
+
+	$n_col++;
 
 	if($bons{$etud}->{$q}) {
 
@@ -349,7 +353,8 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 
 		$xx=0;
 		
-		%b_q=degroupe($barq->{'bareme'},e=>0,b=>1,m=>0,v=>0,p=>-100,d=>0);
+		%b_q=degroupe($barq->{'bareme'},
+			      'e'=>0,'b'=>1,'m'=>0,'v'=>0,'p'=>-100,'d'=>0);
 		
 		if($n_coche !=1 && $bons{$etud}->{$q}->{0}->[0]) {
 		    # coche deux dont "aucune des precedentes"
@@ -380,7 +385,8 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 		}
 	    } else {
 		# QUESTION SIMPLE
-		%b_q=degroupe($barq->{'bareme'},e=>0,b=>1,m=>0,v=>0);
+		%b_q=degroupe($barq->{'bareme'},
+			      'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1);
 
 		if($n_coche==0) {
 		    $xx=$b_q{'v'};
@@ -393,14 +399,25 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 		    if($sb ne '') {
 			$xx=$sb; 
 		    } else {
-			$xx=($n_ok==$n_tous ? $b_q{'b'} : $b_q{'m'});
+			$xx=($b_q{'auto'}>-1
+			     ? $id_coche+$b_q{'auto'}-1
+			     : ($n_ok==$n_tous ? $b_q{'b'} : $b_q{'m'}));
 		    }
 		}
+
+	    }
+
+	    if($barq->{'indicative'} && !$vrai) {
+		$xx=1;
 	    }
 
 	    $note_question{$etud}->{$q}=$xx;
-	    $note_question{$etud}->{'tmax'}+=$note_question{'max'.$etud}->{$q};
-	    $total+=$xx;
+
+	    if(!$barq->{'indicative'}) {
+		$note_question{$etud}->{'tmax'}+=$note_question{'max'.$etud}->{$q};
+		$total+=$xx;
+		push @a_ajouter,(office_cle($n_col).$n_ligne);
+	    }
 	    
 	    print $raison if($debug);
 	    
@@ -416,7 +433,7 @@ for my $etud ((grep { /^max/ } (keys %bons)),
     }
     $note_question{$etud}->{'total'}=$total;
     if($vrai) {
-	print NOTES "=SOMME($cle_debut$n_ligne:$cle_fin$n_ligne)\t";
+	print NOTES "=SOMME(".join(";",@a_ajouter).")\t";
 #    print NOTES office_nombre($total)."\t";
 	print NOTES office_nombre($note_question{$etud}->{'tmax'});
 	for(@heads) { print NOTES "\t".$ass->{'etudiant'}->{$etud}->{$_}; }
@@ -531,45 +548,47 @@ sub croix_coors {
 	 # cercles autour des mauvaises reponses
 	 
 	 my $page=$x->{'case'};
-	 for my $k (keys %$page) {
-	     my ($q,$r)=get_qr($k);
-	     
-	     #print "Case $q.$r\n";
-	     
-	     if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'}) {
-		 push @cmd,"-strokewidth",2,"-stroke","blue",
-		 croix_coors($page->{$k}->{'coin'});
-	     }
-	     
-	     $question{$q}={} if(!$question{$q});
-	     my @mil=milieu_cercle($page->{$k}->{'coin'});
-	     $question{$q}->{'n'}++;
-	     $question{$q}->{'x'}+=$mil[0];
-	     $question{$q}->{'y'}+=$mil[1];
-	     
-	     my @bb=@{$bons{$etud}->{$q}->{$r}};
-	     
-	     if(!$bb[1]) {
-		 # mauvaise reponse
-		 if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'multiple'} ||
-		    $bb[0]) {
-		     push @cmd,"-fill","none","-strokewidth",2,"-stroke","red";
-		     #.($bb[0] ? "red" : "green");
-		     push @cmd,cercle_coors($page->{$k}->{'coin'});
-		 }
-	     }
-	 }
+       CASE: for my $k (keys %$page) {
+	   my ($q,$r)=get_qr($k);
+	   next CASE if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indocative'});
+	   
+	   #print "Case $q.$r\n";
+	   
+	   if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'}) {
+	       push @cmd,"-strokewidth",2,"-stroke","blue",
+	       croix_coors($page->{$k}->{'coin'});
+	   }
+	   
+	   $question{$q}={} if(!$question{$q});
+	   my @mil=milieu_cercle($page->{$k}->{'coin'});
+	   $question{$q}->{'n'}++;
+	   $question{$q}->{'x'}+=$mil[0];
+	   $question{$q}->{'y'}+=$mil[1];
+	   
+	   my @bb=@{$bons{$etud}->{$q}->{$r}};
+	   
+	   if(!$bb[1]) {
+	       # mauvaise reponse
+	       if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'multiple'} ||
+		  $bb[0]) {
+		   push @cmd,"-fill","none","-strokewidth",2,"-stroke","red";
+		   #.($bb[0] ? "red" : "green");
+		   push @cmd,cercle_coors($page->{$k}->{'coin'});
+	       }
+	   }
+       }
 	 
 	 # notes aux questions
 	 
-	 for my $q (keys %question) {
-	     my $x=60;
-	     my $y=$question{$q}->{'y'}/$question{$q}->{'n'};
-	     #print "MARQUE : ($x,$y) ".$note_question{$etud}->{$q}."\n";
-	     push @cmd,"-stroke","red","-fill","red",
-	     "-strokewidth",1,"-draw",sprintf("text %.2f,%.2f \'%s\'",
-					      $x,$y,$note_question{$etud}->{$q}."/".$note_question{'max'.$etud}->{$q});
-	 }
+       QUEST: for my $q (keys %question) {
+	   next QUEST if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indocative'});
+	   my $x=60;
+	   my $y=$question{$q}->{'y'}/$question{$q}->{'n'};
+	   #print "MARQUE : ($x,$y) ".$note_question{$etud}->{$q}."\n";
+	   push @cmd,"-stroke","red","-fill","red",
+	   "-strokewidth",1,"-draw",sprintf("text %.2f,%.2f \'%s\'",
+					    $x,$y,$note_question{$etud}->{$q}."/".$note_question{'max'.$etud}->{$q});
+       }
 
 	 # taille et qualite...
 	 

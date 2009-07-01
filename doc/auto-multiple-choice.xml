@@ -670,8 +670,8 @@ Durée : 10 minutes.
         </itemizedlist>
       </sect3>
 
-      <sect3>
-        <title>Questions et réponses</title>
+      <sect3 id="latex.qr">
+        <title id="latex.qr.title">Questions et réponses</title>
 
         <para>Pour les questions simples (une seule réponse correcte), on
         utilisera le modèle suivant : <programlisting
@@ -719,10 +719,29 @@ Durée : 10 minutes.
         utilisant l'environnement <option>reponseshoriz</option> au lieu de
         <option>reponses</option>.</para>
 
-        <para>Enfin, les questions multiples (celles pour lesquelles aucune,
-        une ou plusieurs réponses peuvent être correctes) utiliseront
-        l'environnement <option>questionmult</option> au lieu de
+        <para>Les questions multiples (celles pour lesquelles aucune, une ou
+        plusieurs réponses peuvent être correctes) utiliseront l'environnement
+        <option>questionmult</option> au lieu de
         <option>question</option>.</para>
+
+        <para>Dans le cas où la question posée est juste informative et ne
+        doit pas contribuer à la note de l'étudiant, on utilisera la commande
+        <code>\QuestionIndicative</code>, comme dans l'exemple
+        suivant :</para>
+
+        <para><programlisting>\begin{question}{facilite}\QuestionIndicative
+  \bareme{auto=0,v=-1,e=-2}
+  Vous êtes-vous sentis à l'aise ou en difficulté dans cet enseignement ?
+  Répondez sur une échelle de 0 (grandes difficultés) à 5 (très à l'aise).
+  \begin{reponseshoriz}[o]
+    \bonne{0}
+    \bonne{1}
+    \bonne{2}
+    \bonne{3}
+    \bonne{4}
+    \bonne{5}
+  \end{reponseshoriz}
+\end{question}</programlisting></para>
       </sect3>
 
       <sect3>
@@ -1400,6 +1419,23 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
                 <code>\bareme{2}</code>), on indique le nombre de points à
                 donner si l'étudiant a coché <emphasis>cette</emphasis>
                 réponse.</entry>
+              </row>
+
+              <row>
+                <entry>auto</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>Avec ce paramètre, la valeur de la réponse numéro i
+                sera auto+i-1. Cette option est principalement utilisée avec
+                <code>\QuestionIndicative</code> (voir section <xref
+                endterm="latex.qr.title" linkend="latex.qr" />).</entry>
               </row>
             </tbody>
           </tgroup>

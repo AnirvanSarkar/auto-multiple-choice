@@ -145,6 +145,9 @@ sub execute {
 	    if(/AUTOQCM\[MULT\]/) { 
 		$analyse_data{'q'}->{'mult'}=1;
 	    }
+	    if(/AUTOQCM\[INDIC\]/) { 
+		$analyse_data{'q'}->{'indicative'}=1;
+	    }
 	    if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 		my $rep="R".$1;
 		if($analyse_data{'q'}->{$rep}) {
@@ -173,7 +176,7 @@ sub verifie_q {
 		$tot++;
 		$oui++ if($q->{$i});
 	    }
-	    if($oui!=1) {
+	    if($oui!=1 && !$q->{'indicative'}) {
 		$a_erreurs++;
 		print "ERR: $oui/$tot bonnes réponses dans une question simple [$t]\n";
 	    }
@@ -358,8 +361,9 @@ if($mode =~ /b/) {
 	or die "Impossible d'executer latex";
     while(<TEX>) {
 	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
-	    $quest=$1;$rep=''; 
-	    $qs{$quest}=1;
+	    $quest=$1;
+	    $rep=''; 
+	    $qs{$quest}={};
 	}
 	if(/AUTOQCM\[ETU=([0-9]+)\]/) { 
 	    $etu=$1;
@@ -369,7 +373,10 @@ if($mode =~ /b/) {
 	    $titres{$1}=$2;
 	}
 	if(/AUTOQCM\[MULT\]/) { 
-	    $qs{$quest}='M';
+	    $qs{$quest}->{'multiple'}=1;
+	}
+	if(/AUTOQCM\[INDIC\]/) { 
+	    $qs{$quest}->{'indicative'}=1;
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	    $rep=$1;
@@ -392,7 +399,9 @@ if($mode =~ /b/) {
 	    print BAR "    <question id=\"$q\""
 		." titre=\"".$titres{$q}."\""
 		.($bse->{"$q."} ? " bareme=\"".$bse->{"$q."}->{-bareme}."\"" : "")
-		." multiple=\"".($qs{$q} eq "M" ? 1 : "")."\""
+		.join(" ",map { " ".$_."=\"".$qs{$q}->{$_}."\"" } 
+		      grep { /^(indicative|multiple)$/ }
+		      (keys %{$qs{$q}}) )
 		.">\n";
 	    for my $i (keys %$bse) {
 		if($i =~ /^$q\.([0-9]+)/) {
