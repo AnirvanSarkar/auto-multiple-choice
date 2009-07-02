@@ -239,6 +239,7 @@
 \newenvironment{reponses}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@itemize}\begin{itemize}\AMCrep@init{#1}}{\AMC@fin@rep\end{itemize}}
 %
 \newenvironment{reponseshoriz}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}\par\begin{center}}{\AMC@fin@rep\end{center}}
+\newenvironment{reponsesperso}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}\AMCbeginAnswer}{\AMC@fin@rep\AMCendAnswer}
 %
 \newcommand\AMCrep@o{\def\AMCload@@reponse{\AMCrien@deux}\def\AMCrep@fini{}}
 \newcommand\AMCrep@r{\def\AMCload@@reponse{\AMCload@reponse}\def\AMCrep@fini{\shuffle@it\AMCdump@reponses}}
@@ -266,6 +267,10 @@
 %
 \newcommand\AMCrep@itemize[2]{\AMCmem@ireAJRep{#1}\item[#1] #2}
 \newcommand\AMCrep@ligne[2]{\AMCmem@ireAJRep{#1}\mbox{#1\hspace*{1em}#2}\hspace{3em plus 4em}}
+\newcommand\AMCrep@perso[2]{\AMCmem@ireAJRep{#1}\AMCanswer{#1}{#2}}
+\def\AMCbeginAnswer{}
+\def\AMCendAnswer{}
+\def\AMCanswer#1#2{#1 #2}
 %
 \newcommand{\bonne}[1]{\advance\AMCrep@count by 1%
 \ifAMC@calibration\message{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
@@ -277,18 +282,46 @@
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
 \def\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
-\def\CommenceQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}
+\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}
 \def\QuestionIndicative{\message{AUTOQCM[INDIC]^^J}}
 %
 \def\multiSymbole{$\clubsuit$}
 \def\AMCmessage#1{\message{AUTOQCM[#1]^^J}}
 % annule une definition precedente (exercices.sty, par ex.)
 \ifx\question\undefined\else\let\question\undefined\fi
-\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\CommenceQuestion{\AMC@qaff}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
+\def\AMCnobloc{\AMC@qblocfalse}
+\def\AMCbloc{\AMC@qbloctrue}
+\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\AMCbeginQuestion{\AMC@qaff}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
 \def\@aucune{\emph{Aucune de ces r\'eponses n'est correcte.}}
 \newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}\AMCtype@multitrue\ifAMC@calibration\message{AUTOQCM[MULT]^^J}\fi}{\end{question}}
 \newdimen\ouverte@vs
-\newenvironment{questionouverte}[1][3cm]{\AMCtype@multifalse\ouverte@vs=#1\CommenceQuestion{\AMC@qaff}{}}{\vspace*{\ouverte@vs}}
+\newenvironment{questionouverte}[1][3cm]{\AMCtype@multifalse\ouverte@vs=#1\AMCbeginQuestion{\AMC@qaff}{}}{\vspace*{\ouverte@vs}}
+%
+\newcount\AMC@chiffres
+
+\newcommand{\AMCcode}[2]{
+{ \def\AMCbeginQuestion##1##2{}
+ \def\AMCbeginAnswer{\begin{minipage}{2em}}
+ \def\AMCendAnswer{\end{minipage}}
+ \def\AMCanswer##1##2{##1 \raisebox{.4ex}{\bf ##2}\\}
+ \AMCnobloc
+ \AMC@chiffres=#2\loop
+ \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative
+   \begin{reponsesperso}[o]\bareme{auto=0}
+     \mauvaise{0}
+     \mauvaise{1}
+     \mauvaise{2}
+     \mauvaise{3}
+     \mauvaise{4}
+     \mauvaise{5}
+     \mauvaise{6}
+     \mauvaise{7}
+     \mauvaise{8}
+     \mauvaise{9}
+   \end{reponsesperso}
+ \end{question}
+ \advance\AMC@chiffres by -1 \ifnum\AMC@chiffres>0\repeat
+}}
 %
 \def\bareme#1{\ifAMC@calibration\message{AUTOQCM[B=#1]^^J}\fi}
 %

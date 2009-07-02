@@ -810,10 +810,10 @@ Durée : 10 minutes.
 
         <para>La façon dont chaque question est présentée peut être modifiée
         en redéfinissant la commande LaTeX
-        <command>CommenceQuestion</command>, dont la définition par défaut est
+        <command>AMCbeginQuestion</command>, dont la définition par défaut est
         la suivante :</para>
 
-        <para><programlisting>\def\CommenceQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
+        <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
 
         <para>Le premier paramètre transmis à cette commande est le numéro de
         question à afficher. Le second paramètre contient
@@ -833,6 +833,46 @@ Durée : 10 minutes.
 
         <para>est effectué, mais cette commande peut être utilisée à tout
         moment.</para>
+
+        <para>La présentation des réponses peut être modifiée de la même
+        façon, si on utilise l'environnement <option>reponsesperso</option> au
+        lieu de <option>reponses</option> ou <option>reponseshoriz</option>,
+        en redéfinissant les trois macros LaTeX suivantes :</para>
+
+        <para><programlisting>\def\AMCbeginAnswer{}
+\def\AMCendAnswer{}
+\def\AMCanswer#1#2{#1 #2}
+</programlisting></para>
+      </sect3>
+
+      <sect3>
+        <title>Saisie de codes</title>
+
+        <para>L'entrée de codes peut être aisément effectuée à l'aide de la
+        commande LaTeX <command>AMCcode</command>, par exemple pour que chaque
+        étudiant codifie son numéro d'étudiant lui-même sur sa copie. Les deux
+        arguments de cette commande sont un identifiant de question, auquel
+        sera ajouté le numéro du chiffre dans le code, ainsi que le nombre de
+        chiffres du codage désiré. On pourra par exemple utiliser l'entête de
+        copie suivant :</para>
+
+        <para><programlisting>\noindent\AMCcode{num.etud}{8}\hspace*{\fill}
+\begin{minipage}{.5\linewidth}
+$\longleftarrow{}$ codez votre numéro d'étudiant ci-contre,
+et écrivez votre nom et prénom ci-dessous.
+
+\vspace{3ex}
+
+\champnom{\fbox{    
+    \begin{minipage}{.9\linewidth}
+      Nom et prénom :
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+\end{minipage}
+</programlisting></para>
       </sect3>
     </sect2>
 
