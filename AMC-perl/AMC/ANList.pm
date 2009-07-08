@@ -101,7 +101,7 @@ sub maj {
 
     for my $i (keys %$an_dispos) {
 	if((! $an_dispos->{$i}->{'fichier'})
-	   || (! -f $an_dispos->{$i}->{'fichier'})
+	   || (! -s $an_dispos->{$i}->{'fichier'})
 	   || ($an_dispos->{$i}->{'fichier-scan'} && ! -f $an_dispos->{$i}->{'fichier-scan'})
 	   ) {
 	    $a_retraiter{$an_dispos->{$i}->{'fichier'}}=1
@@ -119,7 +119,7 @@ sub maj {
     if(-d $self->{'cr'}) {
 	opendir(DIR, $self->{'cr'}) || die "can't opendir ".$self->{'cr'}.": $!";
 	@xmls = grep { @st=stat($_); 
-		       /\.xml$/ && -f $_ 
+		       /\.xml$/ && -s $_ 
 			   && ($st[9]>$self->{'timestamp'} 
 			       || $a_retraiter{$_} )} 
 	map { $self->{'cr'}."/$_" } readdir(DIR);
