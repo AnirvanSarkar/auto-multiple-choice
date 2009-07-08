@@ -568,6 +568,7 @@ Durée : 10 minutes.
 \restituegroupe{general}
 
 \clearpage    <co id="ensemble.cp" linkends="ensemble.cp.exp" />
+\AMCdebutFormulaire    <co id="debut.form" linkends="debut.form.exp" />
 
 %%% début de l'en-tête de la feuille de réponses
 
@@ -609,6 +610,13 @@ Durée : 10 minutes.
           <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
             <para>Ce saut de page précède la page spéciale où seront
             regroupées toutes les cases à cocher.</para>
+          </callout>
+
+          <callout arearefs="debut.form" id="debut.form.exp">
+            <para>Cette commande marque le début de la partie formulaire de la
+            copie. Son utilisation est indispensable pour un bon traitement
+            des questions qui n'apparaissent que dans cette partie, comme par
+            exemple celles générées par <command>AMCcode</command>.</para>
           </callout>
 
           <callout arearefs="ensemble.nom" id="ensemble.nom.exp">
@@ -873,6 +881,11 @@ et écrivez votre nom et prénom ci-dessous.
   }}
 \end{minipage}
 </programlisting></para>
+
+        <para>Dans le cas de l'utilisation de l'option
+        <option>ensemble</option>, la commande <command>AMCcode</command>
+        devra se trouver dans la partie formulaire, c'est-à-dire après la
+        commande <command>AMCdebutFormulaire</command>.</para>
       </sect3>
     </sect2>
 

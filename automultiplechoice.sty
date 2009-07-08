@@ -124,17 +124,22 @@
 \newif\ifAMC@ensemble\AMC@ensemblefalse % les cases a cocher sont mises ensemble a la fin
 % tests internes...
 \newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
+\newif\ifAMC@zoneformulaire
 %
 %
 % cases cochees ou non avec la bonne couleur et la bonne forme
-\newcommand{\AMC@marquebonne}{%
+\newcommand{\AMC@marquebonne}[1]{%
 \ifAMC@calibration%
   \ifAMC@couleur% calibration en couleurs
     \ifAMC@ensemble%
       \ifAMCformulaire@dedans%
-        \AMC@caselettre{200,\the\AMCid@quest,\the\AMCrep@count}{0,255,0}%
+        \AMC@caselettre{#1}{200,\the\AMCid@quest,\the\AMCrep@count}{0,255,0}%
       \else%
-        \AMC@caselettre{0,0,0}{0,255,0}%
+        \ifAMC@zoneformulaire%
+          \AMC@caselettre{#1}{200,\the\AMCid@quest,\the\AMCrep@count}{0,255,0}%
+        \else%
+          \AMC@caselettre{#1}{0,0,0}{0,255,0}%
+        \fi%
       \fi
     \else%
       \textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\FilledBigSquare}%
@@ -144,19 +149,24 @@
   \fi%
 \else% mode normal
   \ifAMC@ensemble%
-    \AMC@caselettre{0,0,0}{0,255,0}%
+    \AMC@caselettre{#1}{0,0,0}{0,255,0}%
   \else%
     \FilledBigSquare%
   \fi%
 \fi}
-\newcommand{\AMC@marquevide}{%
+\newcommand{\AMC@marquevide}[1]{%
+%\AMC@tmpfalse\ifAMCformulaire@dedans\AMC@tmptrue\fi\ifAMC@zoneformulaire\AMC@tmptrue\fi
 \ifAMC@calibration%
   \ifAMC@couleur%
     \ifAMC@ensemble%
       \ifAMCformulaire@dedans%
-        \AMC@caselettre{200,\the\AMCid@quest,\the\AMCrep@count}{255,255,255}%
+        \AMC@caselettre{#1}{200,\the\AMCid@quest,\the\AMCrep@count}{255,255,255}%
       \else%
-        \AMC@caselettre{0,0,0}{255,255,255}%
+        \ifAMC@zoneformulaire%
+          \AMC@caselettre{#1}{200,\the\AMCid@quest,\the\AMCrep@count}{255,255,255}%
+        \else%
+          \AMC@caselettre{#1}{0,0,0}{255,255,255}%
+        \fi%
       \fi
     \else%
       \textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\BigSquare}%
@@ -166,7 +176,7 @@
   \fi%
 \else%
   \ifAMC@ensemble%
-    \AMC@caselettre{0,0,0}{255,255,255}%
+    \AMC@caselettre{#1}{0,0,0}{255,255,255}%
   \else%
     \BigSquare%
   \fi%
@@ -250,15 +260,17 @@
 \def\AMC@boxedchar#1#2#3{{\setlength{\fboxsep}{0pt}\fcolorbox[RGB]{#2}[RGB]{#3}{\vbox to \AMC@boxeddim{\vfill \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}}}}
 \newcounter{AMC@ncase}
 \setcounter{AMC@ncase}{0}
-\def\AMC@caselettre#1#2{%
-\AMC@boxedchar{\Alph{AMC@ncase}}{#1}{#2}}
+\def\AMC@caselettre#1#2#3{%
+\AMC@boxedchar{\ifx\@empty#1\@empty\Alph{AMC@ncase}\else #1\fi}{#2}{#3}}
 %
 % memoire pour mettre les cases a cocher en fin de copie
 %
 \def\AMCmem@ireData{}
 \def\formulaireQuestion#1{\par{\bf Question #1 :} }
 \def\formulaireReponse#1{#1 }
-\newcommand\AMCmem@ireAJ[1]{\ifAMC@ensemble\begingroup\AMCformulaire@dedanstrue\let\protect\@unexpandable@protect\global\edef\AMCmem@ireData{\AMCmem@ireData #1}\endgroup\fi}
+\def\AMCdebutFormulaire{\AMC@zoneformulairetrue}
+%
+\newcommand\AMCmem@ireAJ[1]{\ifAMC@ensemble\ifAMC@zoneformulaire\else\begingroup\AMCformulaire@dedanstrue\let\protect\@unexpandable@protect\global\edef\AMCmem@ireData{\AMCmem@ireData #1}\endgroup\fi\fi}
 \newcommand\AMCmem@ireAJRep[1]{\addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\formulaireReponse{#1}}}
 \newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\formulaireQuestion{#1}}}
 \newcommand\formulaire{\ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData\def\AMCmem@ireData{}\fi}
@@ -272,12 +284,12 @@
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}
 %
-\newcommand{\bonne}[1]{\advance\AMCrep@count by 1%
+\newcommand{\bonne}[2][]{\advance\AMCrep@count by 1%
 \ifAMC@calibration\message{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
-\AMCune@bonnetrue\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marquebonne\else\AMC@marquevide\fi}{#1}}{\the\AMCrep@count}}
-\newcommand{\mauvaise}[1]{\advance\AMCrep@count by 1%
+\AMCune@bonnetrue\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marquebonne{#1}\else\AMC@marquevide{#1}\fi}{#2}}{\the\AMCrep@count}}
+\newcommand{\mauvaise}[2][]{\advance\AMCrep@count by 1%
 \ifAMC@calibration\message{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
-\AMCload@@reponse{\une@rep{\AMC@marquevide}{#1}}{\the\AMCrep@count}}
+\AMCload@@reponse{\une@rep{\AMC@marquevide{#1}}{#2}}{\the\AMCrep@count}}
 %
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
@@ -301,23 +313,23 @@
 
 \newcommand{\AMCcode}[2]{
 { \def\AMCbeginQuestion##1##2{}
- \def\AMCbeginAnswer{\begin{minipage}{2em}}
+ \def\AMCbeginAnswer{\begin{minipage}{\ifAMC@ensemble 1.15em\else 2em\fi}}
  \def\AMCendAnswer{\end{minipage}}
- \def\AMCanswer##1##2{##1 \raisebox{.4ex}{\bf ##2}\\}
+ \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else\raisebox{.4ex}{\bf ##2}\fi\\}
  \AMCnobloc
  \AMC@chiffres=#2\loop
  \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative
    \begin{reponsesperso}[o]\bareme{auto=0}
-     \mauvaise{0}
-     \mauvaise{1}
-     \mauvaise{2}
-     \mauvaise{3}
-     \mauvaise{4}
-     \mauvaise{5}
-     \mauvaise{6}
-     \mauvaise{7}
-     \mauvaise{8}
-     \mauvaise{9}
+     \mauvaise[0]{0}
+     \mauvaise[1]{1}
+     \mauvaise[2]{2}
+     \mauvaise[3]{3}
+     \mauvaise[4]{4}
+     \mauvaise[5]{5}
+     \mauvaise[6]{6}
+     \mauvaise[7]{7}
+     \mauvaise[8]{8}
+     \mauvaise[9]{9}
    \end{reponsesperso}
  \end{question}
  \advance\AMC@chiffres by -1 \ifnum\AMC@chiffres>0\repeat
@@ -444,7 +456,7 @@
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
 \AMCid@etud=100\AMCid@etudfin=#1\advance\AMCid@etudfin by 100%
 \ifAMC@correchead\AMCid@etudfin=100\fi
-\loop \setcounter{page}{1}\AMCnumero{1}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+\loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
 %
