@@ -243,6 +243,12 @@ for my $k (keys %o_defaut) {
 	print "Nouveau parametre global : $k = $o{$k}\n" if($o{$k});
     }
     $o{'modifie'}=0;
+
+    # XML::Writer utilise dans Association.pm n'accepte rien d'autre...
+    if($o{'encodage_interne'} ne 'UTF-8') {
+	$o{'encodage_interne'}='UTF-8';
+	$o{'modifie'}=1;
+    }
 }
 
 ###
