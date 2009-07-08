@@ -52,7 +52,7 @@ STY=automultiplechoice.sty
 all: AMC-traitement-image AMC-gui.glade doc logo.xpm ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
-	$(GCC) $(GCCARCHFLAGS) -O3 -I. -lppm $< -o $@
+	$(GCC) $(GCCARCHFLAGS) -O3 -I. -lnetpbm $< -o $@
 
 %.glade: %.in.glade FORCE
 	perl versions.pl < $< > $@
