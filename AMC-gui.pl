@@ -1053,6 +1053,7 @@ sub saisie_auto_ok {
 
     commande('commande'=>[with_prog("AMC-analyse.pl"),
 			  "--binaire",
+			  "--seuil-coche",$projet{'seuil'},
 			  "--progression-id",'analyse',
 			  "--progression",1,
 			  "--n-procs",$o{'n_procs'},

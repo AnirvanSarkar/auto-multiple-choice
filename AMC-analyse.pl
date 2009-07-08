@@ -46,10 +46,12 @@ my $progress_id=0;
 my $liste_f;
 my $mep_file='';
 my $n_procs=0;
+my $seuil_coche='';
 
 GetOptions("mep=s"=>\$mep_dir,
 	   "cr=s"=>\$cr_dir,
 	   "binaire!"=>\$binaire,
+	   "seuil-coche=s"=>\$seuil_coche,
 	   "debug!"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
@@ -109,6 +111,7 @@ if(!$mep_file) {
 for my $s (@scans) {
     my @c=with_prog("AMC-calepage.pl");
     push @c,"--debug" if($debug);
+    push @c,"--seuil-coche",$seuil_coche if($seuil_coche);
     push @c,"--progression-id",$progress_id;
     push @c,"--progression",$delta;
     push @c,"--binaire" if($binaire);

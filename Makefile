@@ -19,8 +19,22 @@
 
 SHELL=/bin/sh
 
-
 DESTDIR=
+
+DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_BUILD_ARCH := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+ifeq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
+GCC=gcc
+GCCARCHFLAGS=
+else
+GCC=gcc
+ifeq ($(DEB_HOST_ARCH),amd64)
+GCCARCHFLAGS=-m64
+endif
+ifeq ($(DEB_HOST_ARCH),i386)
+GCCARCHFLAGS=-m32
+endif
+endif
 
 BINDIR=/usr/bin
 PERLDIR=/usr/share/perl5
@@ -38,7 +52,7 @@ STY=automultiplechoice.sty
 all: AMC-traitement-image AMC-gui.glade doc logo.xpm ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
-	gcc -O3 -I. -lppm $< -o $@
+	$(GCC) $(GCCARCHFLAGS) -O3 -I. -lppm $< -o $@
 
 %.glade: %.in.glade FORCE
 	perl versions.pl < $< > $@
