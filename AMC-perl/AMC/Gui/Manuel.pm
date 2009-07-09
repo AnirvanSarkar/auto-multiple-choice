@@ -145,9 +145,11 @@ sub new {
 
     bless $self;
 
-    for my $k (qw/area goto etudiant_cb etudiant_cbe nom_etudiant diag_tree/) {
+    for my $k (qw/general area goto etudiant_cb etudiant_cbe nom_etudiant diag_tree/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
+
+    $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
 
     AMC::Gui::PageArea::add_feuille($self->{'area'});
     
@@ -306,6 +308,9 @@ sub charge_i {
     # fabrication du xpm
     ################################
 
+    $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+    Gtk2->main_iteration while ( Gtk2->events_pending );
+
     print "ID ".$self->{'ids'}->[$self->{'iid'}]." PAGE $page\n";
     system("pdftoppm","-f",$page,"-l",$page,
 	   "-r",$self->{'dpi'},
@@ -358,6 +363,10 @@ sub charge_i {
     # dans la liste
 
     $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path(model_id_to_iter($self->{'diag_store'},MDIAG_I,$self->{'iid'})));
+
+    # fin du traitement...
+
+    $self->{'general'}->window()->set_cursor(undef);
 }
 
 sub ecrit {
