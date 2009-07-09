@@ -25,7 +25,7 @@ use Gtk2;
 @ISA=("Gtk2::DrawingArea");
 
 sub add_feuille {
-    my ($self,$coul)=@_;
+    my ($self,$coul,%oo)=@_;
     bless($self,"AMC::Gui::PageArea");
 
     $coul='red' if(!$coul);
@@ -42,6 +42,10 @@ sub add_feuille {
 
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
     $self->window->get_colormap->alloc_color($self->{'color'},TRUE,TRUE);
+
+    for (keys %oo) {
+	$self->{$_}=$oo{$_};
+    }
 
     return($self);
 }
@@ -121,7 +125,7 @@ sub expose_drawing {
 
     return() if($self->{'tx'}<=0 || $self->{'ty'}<=0);
 
-    my $i=Gtk2::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,0,8,$self->{'tx'},$self->{'ty'});
+    my $i=Gtk2::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,1,8,$self->{'tx'},$self->{'ty'});
 
     $self->{'i-src'}->scale($i,0,0,$self->{'tx'},$self->{'ty'},0,0,
 			    $sx,$sy,

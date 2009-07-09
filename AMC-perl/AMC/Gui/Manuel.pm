@@ -79,6 +79,7 @@ sub new {
 	      'en_quittant'=>'',
 	      'encodage_liste'=>'UTF-8',
 	      'encodage_interne'=>'UTF-8',
+	      'image_type'=>'xpm',
 	  };
 
     for (keys %o) {
@@ -130,7 +131,7 @@ sub new {
     $self->{'temp-dir'} = tempdir( DIR=>$temp_loc,
 				   CLEANUP => (!$self->{'debug'}) );
 
-    $self->{'tmp-xpm'}=$self->{'temp-dir'}."/page.xpm";
+    $self->{'tmp-image'}=$self->{'temp-dir'}."/page";
 
     $self->{'ids'}=[$dispos->ids()];
 
@@ -322,6 +323,15 @@ sub charge_i {
     closedir TDIR;
     print "Candidats : ".join(' ',@candidats)."\n" if($self->{'debug'});
     my $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
+    my $tmp_image=$tmp_ppm;
+
+    if($self->{'image_type'} && $self->{'image_type'} ne 'ppm') {
+	$tmp_image=$self->{'tmp-image'}.".".$self->{'image_type'};
+	if($self->{'debug'}) {
+	    print "ppmto".$self->{'image_type'}." : $tmp_ppm -> $tmp_image\n";
+	}
+	system("ppmto".$self->{'image_type'}." \"$tmp_ppm\" > \"$tmp_image\"");
+    }
 
     ################################
     # synchro variables
@@ -354,11 +364,12 @@ sub charge_i {
 
     # utilisation
 
-    $self->{'area'}->set_image($tmp_ppm,
+    $self->{'area'}->set_image($tmp_image,
 			       $self->{'lay'},
 			       $self->{'coches'});
 
-    unlink($tmp_ppm) if(!$self->{'debug'});
+    unlink($tmp_ppm);
+    unlink($tmp_image) if($tmp_ppm ne $tmp_image && !$self->{'debug'});
 
     # dans la liste
 

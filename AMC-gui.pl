@@ -149,6 +149,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'options_impression'=>{'sides'=>'two-sided-long-edge',
 				     'number-up'=>1,
 				     },
+	      'manuel_image_type'=>'xpm',
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -477,6 +478,9 @@ my %cb_stores=(
 				 'two-sided-short-edge','Petit côté'),
 	       'encodage_latex'=>cb_model(map { $_->{'iso'}=>$_->{'txt'} }
 					  (@$encodages)),
+	       'manuel_image_type'=>cb_model('ppm'=>'(aucun)',
+					     'xpm'=>'XPM',
+					     'gif'=>'GIF'),
 	       );
 
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
@@ -995,6 +999,7 @@ sub saisie_manuelle {
 				     'global'=>0,
 				     'encodage_interne'=>$o{'encodage_interne'},
 				     'encodage_liste'=>$o{'encodage_liste'},
+				     'image_type'=>$o{'manuel_image_type'},
 				     'en_quittant'=>\&detecte_analyse,
 				     );
     } else {
