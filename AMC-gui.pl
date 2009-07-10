@@ -159,7 +159,6 @@ my %projet_defaut=('texsrc'=>'',
 		   'notes'=>'notes.xml',
 		   'seuil'=>0.1,
 		   'maj_bareme'=>1,
-		   'annote_copies'=>0,
 		   'fichbareme'=>'bareme.xml',
 		   'docs'=>['sujet.pdf','corrige.pdf','calage.pdf'],
 		   
@@ -294,7 +293,7 @@ for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edit
     onglet_notation onglet_saisie
     log_general commande avancement
     liste diag_tree inconnu_tree diag_result
-    maj_bareme annote_copies correc_tree regroupement_corriges/) {
+    maj_bareme correc_tree correction_result regroupement_corriges/) {
     $w{$_}=$gui->get_widget($_);
 }
 
@@ -1193,8 +1192,24 @@ sub noter_calcul {
 	     'texte'=>'Calcul des notes...',
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
+		 noter_resultat();
 	     },
 	     );
+}
+
+sub noter_resultat {
+    my $moy;
+    if(-s localise($projet{'notes'})) {
+	my $notes=eval { XMLin(localise($projet{'notes'})) };
+	if($notes) {
+	    $moy=$notes->{'moyenne'};
+	    $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">Moyenne : $moy</span>");
+	} else {
+	    $w{'correction_result'}->set_markup("<span foreground=\"red\">Notes illisibles</span>");
+	}
+    } else {
+	$w{'correction_result'}->set_markup("<span foreground=\"red\">Aucun calcul de notes</span>");
+    }
 }
 
 sub visualise_correc {
@@ -1881,8 +1896,6 @@ sub valide_projet {
 
     print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
     $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
-    print "Options correction : AC".$projet{'annote_copies'}."\n" if($debug);
-    $w{'annote_copies'}->set_active($projet{'annote_copies'});
 
     transmet_pref($gui,'notation',\%projet);
 
@@ -1890,6 +1903,8 @@ sub valide_projet {
     $t.= ' - projet '.$projet{'nom'} 
         if(!($t =~ s/-.*/- projet $projet{'nom'}/));
     $w{'main_window'}->set_title($t);
+
+    noter_resultat();
 }
 
 sub projet_ouvre {
