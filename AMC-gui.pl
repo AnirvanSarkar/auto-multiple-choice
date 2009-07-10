@@ -156,7 +156,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'mep'=>'mep',
 		   'cr'=>'cr',
 		   'listeetudiants'=>'',
-		   'notes'=>'notes.dat',
+		   'notes'=>'notes.xml',
 		   'seuil'=>0.1,
 		   'maj_bareme'=>1,
 		   'annote_copies'=>0,
@@ -1181,24 +1181,18 @@ sub noter_calcul {
 			  "--an-saved",localise($an_saved),
 			  "--bareme",localise($projet{'fichbareme'}),
 			  "-o",localise($projet{'notes'}),
-			  ($projet{'annote_copies'} ? "--copies" : "--no-copies"),
-			  "--taille-max",$o{'taille_max_correction'},
-			  "--qualite",$o{'qualite_correction'},
 			  "--seuil",$projet{'seuil'},
 			  
 			  "--grain",$projet{'note_grain'},
 			  "--arrondi",$projet{'note_arrondi'},
 			  "--notemax",$projet{'note_max'},
 			  
-			  "--delimiteur",$o{'delimiteur_decimal'},
-			  "--encodage-csv",$o{'encodage_csv'},
+			  "--encodage-interne",$o{'encodage_interne'},
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Calcul des notes...',
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
-		 voir_notes();
-		 detecte_correc() if($projet{'annote_copies'});
 	     },
 	     );
 }
