@@ -1155,7 +1155,7 @@ sub valide_liste {
 	$cb_stores{'liste_key'}=cb_model('','(aucun)',
 					 map { ($_,$_) } (@heads));
     }
-    transmet_pref($gui,'notation',\%projet);
+    transmet_pref($gui,'pref_assoc',\%projet);
 }
 
 ### Actions des boutons de la partie NOTATION
@@ -1199,6 +1199,10 @@ sub valide_options_correction {
 
 sub valide_options_notation {
     reprend_pref('notation',\%projet);
+}
+
+sub valide_options_association {
+    reprend_pref('pref_assoc',\%projet);
 }
 
 sub voir_notes {
@@ -1958,7 +1962,7 @@ sub valide_projet {
     print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
     $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
 
-    #transmet_pref($gui,'notation',\%projet);
+    transmet_pref($gui,'notation',\%projet);
 
     my $t=$w{'main_window'}->get_title();
     $t.= ' - projet '.$projet{'nom'} 
