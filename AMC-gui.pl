@@ -167,8 +167,12 @@ my %projet_defaut=('texsrc'=>'',
 		   'note_max'=>20,
 		   'note_grain'=>"0,5",
 		   'note_arrondi'=>'inf',
+
+		   'liste_key'=>'',
+		   'assoc_code'=>'',
 	    
 		   'modifie'=>1,
+		   
 		   );
 
 my $mep_saved='mep.storable';
@@ -464,6 +468,8 @@ sub get_enc {
     return('');
 }
 
+my $cb_model_vide=cb_model(''=>'(aucun)');
+
 my %cb_stores=(
 	       'delimiteur_decimal'=>cb_model(',',', (virgule)',
 					      '.','. (point)'),
@@ -480,6 +486,8 @@ my %cb_stores=(
 	       'manuel_image_type'=>cb_model('ppm'=>'(aucun)',
 					     'xpm'=>'XPM',
 					     'gif'=>'GIF'),
+	       'liste_key'=>$cb_model_vide,
+	       'assoc_code'=>$cb_model_vide,
 	       );
 
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
@@ -1095,8 +1103,59 @@ sub saisie_auto_ok {
 }
 
 sub valide_liste {
-    $projet{'listeetudiants'}=$w{'liste'}->get_filename();
-    $projet{'modifie'}=1; print "* valide_liste\n" if($debug);
+    my (%oo)=@_;
+    print "* valide_liste\n" if($debug);
+
+    my $fl=$w{'liste'}->get_filename();
+
+    # lecture du fichier pour verification de format...
+    my @heads=();
+    my $err=0;
+    my $nl=0;
+    my $nd;
+    open(FL,"<:encoding(".$o{'encodage_liste'}.")",$fl);
+  LIG: while(<FL>) {
+      chomp;
+      $nl++;
+      s/\#.*//;
+      next LIG if(/^\s*$/);
+      if(@heads) {
+	  $nd = 1+tr/:/:/;
+	  if($nd != (1+$#heads)) {
+	      $err=$nl;
+	      last LIG;
+	  }
+      } else {
+	  @heads=split(/:/,$_);
+      }
+  }
+    close(FL);
+
+    if($err) {
+	if(!$oo{'noinfo'}) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							       'destroy-with-parent',
+							       'error', # message type
+							       'ok', # which set of buttons?
+							       "Le fichier choisi ne convient pas : ".($#heads>0 ? ($#heads+1)." entêtes ont été détectés (".join(', ',@heads).")," : "aucun entête n'est présent,")." mais il y a $nd champs en ligne $err.");
+	    $dialog->run;
+	    $dialog->destroy;
+	} else {
+	    print "Ligne $err : $nd champs / ".join(', ',@heads)."\n" if($debug);
+	}
+	$cb_stores{'liste_key'}=$cb_model_vide;
+    } else {
+	# ok
+	if(!$oo{'nomodif'}) {
+	    $projet{'listeetudiants'}=$fl;
+	    $projet{'modifie'}=1;
+	}
+	# transmission liste des en-tetes
+	print "entetes : ".join(",",@heads)."\n" if($debug);
+	$cb_stores{'liste_key'}=cb_model('','(aucun)',
+					 map { ($_,$_) } (@heads));
+    }
+    transmet_pref($gui,'notation',\%projet);
 }
 
 ### Actions des boutons de la partie NOTATION
@@ -1314,14 +1373,16 @@ sub transmet_pref {
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
+		print "CB_STORE($t) modifie\n" if($debug);
 		$wp->set_model($cb_stores{$ta});
 		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
 		if($i) {
-		    #print "[$t] trouve $i\n";
-		    #print " -> ".$cb_stores{$t}->get($i,COMBO_TEXT)."\n";
+		    print "[$t] trouve $i\n" if($debug);
+		    print " -> ".$cb_stores{$t}->get($i,COMBO_TEXT)."\n" if($debug);
 		    $wp->set_active_iter($i);
 		}
 	    } else {
+		print "pas de CB_STORE pour $t\n" if($debug);
 		$wp->set_active($h->{$t});
 	    }
 	}
@@ -1897,7 +1958,7 @@ sub valide_projet {
     print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
     $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
 
-    transmet_pref($gui,'notation',\%projet);
+    #transmet_pref($gui,'notation',\%projet);
 
     my $t=$w{'main_window'}->get_title();
     $t.= ' - projet '.$projet{'nom'} 
@@ -1905,6 +1966,8 @@ sub valide_projet {
     $w{'main_window'}->set_title($t);
 
     noter_resultat();
+
+    valide_liste('noinfo'=>1,'nomodif'=>1);
 }
 
 sub projet_ouvre {
