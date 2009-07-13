@@ -1153,9 +1153,10 @@ sub valide_liste {
 	# transmission liste des en-tetes
 	print "entetes : ".join(",",@heads)."\n" if($debug);
 	$cb_stores{'liste_key'}=cb_model('','(aucun)',
-					 map { ($_,$_) } (@heads));
+					 map { ($_,$_) } 
+					 sort { $a cmp $b } (@heads));
     }
-    transmet_pref($gui,'pref_assoc',\%projet);
+    transmet_pref($gui,'pref_assoc',\%projet,{},{'liste_key'=>1});
 }
 
 ### Actions des boutons de la partie NOTATION
@@ -1263,13 +1264,26 @@ sub noter_calcul {
 sub noter_resultat {
     my $moy;
     if(-s localise($projet{'notes'})) {
-	my $notes=eval { XMLin(localise($projet{'notes'})) };
+	print "* lecture notes\n" if($debug);
+	my @codes=();
+	my $notes=eval { XMLin(localise($projet{'notes'}),
+			       'ForceArray'=>1,
+			       'KeyAttr'=>['id'],
+			       ) };
 	if($notes) {
-	    $moy=$notes->{'moyenne'};
+	    # recuperation de la moyenne
+	    $moy=$notes->{'moyenne'}->[0];
 	    $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">Moyenne : $moy</span>");
+	    # recuperation des codes disponibles
+	    @codes=(keys %{$notes->{'code'}});
 	} else {
 	    $w{'correction_result'}->set_markup("<span foreground=\"red\">Notes illisibles</span>");
 	}
+	print "Codes : ".join(',',@codes)."\n" if($debug);
+	$cb_stores{'assoc_code'}=cb_model(''=>'(aucun)',
+					   map { $_=>$_ } 
+					   sort { $a cmp $b } (@codes));
+	transmet_pref($gui,'pref_assoc',\%projet,{},{'assoc_code'=>1});
     } else {
 	$w{'correction_result'}->set_markup("<span foreground=\"red\">Aucun calcul de notes</span>");
     }
@@ -1343,9 +1357,10 @@ sub activate_doc {
 
 # transmet les preferences vers les widgets correspondants
 sub transmet_pref {
-    my ($gap,$prefixe,$h,$alias)=@_;
+    my ($gap,$prefixe,$h,$alias,$seulement)=@_;
 
     for my $t (keys %$h) {
+	if(!$seulement || $seulement->{$t}) {
 	my $ta=$t;
 	$ta=$alias->{$t} if($alias->{$t});
 
@@ -1390,7 +1405,7 @@ sub transmet_pref {
 		$wp->set_active($h->{$t});
 	    }
 	}
-    }
+    }}
 }
 
 # met a jour les preferences depuis les widgets correspondants
