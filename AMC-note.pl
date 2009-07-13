@@ -260,6 +260,7 @@ $writer->startTag('notes',
 
 my $somme_notes=0;
 my $n_notes=0;
+my %les_codes=();
 
 for my $etud ((grep { /^max/ } (keys %bons)),
 	      sort { $a <=> $b } (grep { ! /^max/ } (keys %bons))) {
@@ -278,6 +279,7 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 
     my $total=0;
     my $n_col=3;
+    my %codes=();
 
     for my $q (@qids) {
 
@@ -385,9 +387,15 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 	    print $raison if($debug);
 	    
 	    if($vrai) {
+		my $tit=titre_q($q);
+		if($tit =~ /^(.*)\.([0-9]+)$/) {
+		    $codes{$1}->{$2}=$xx;
+		}
+
 		$writer->emptyTag('question',
-				  'id'=>titre_q($q),
+				  'id'=>$tit,
 				  'note'=>$xx,
+				  'raison'=>$raison,
 				  'indicative'=>$barq->{'indicative'},
 				  'max'=>$note_question{'max'.$etud}->{$q},
 				  );
@@ -410,6 +418,19 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 			  'max'=>$note_question{'max'.$etud}->{'total'},
 			  'note'=>$x,
 			  );
+
+	for my $k (keys %codes) {
+	    my @i=(keys %{$codes{$k}});
+	    if($#i>0) {
+		my $v=join('',map { $codes{$k}->{$_} }
+			   sort { $b <=> $a } (@i));
+		$les_codes{$k}->{$v}++;
+		$writer->dataElement('code',
+				     $v,
+				     'id'=>$k);
+	    }
+	}
+
 	$writer->endTag('copie');
     }
 }
@@ -446,6 +467,17 @@ for my $q (@qids) {
 }
 
 $writer->endTag('copie');
+
+# les codes rencontres
+
+for my $k (keys %les_codes) {
+    $writer->startTag('code','id'=>$k);
+    for (keys %{$les_codes{$k}}) {
+	$writer->dataElement('valeur',$_,
+			     'nombre'=>$les_codes{$k}->{$_});
+    }
+    $writer->endTag('code');
+}
 
 # moyenne
 
