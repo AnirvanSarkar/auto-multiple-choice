@@ -169,6 +169,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'note_arrondi'=>'inf',
 
 		   'liste_key'=>'',
+		   'association'=>'association.xml',
 		   'assoc_code'=>'',
 	    
 		   'modifie'=>1,
@@ -1181,6 +1182,53 @@ sub associe {
     }
 }
 
+sub associe_auto {
+    if(! -s localise($projet{'listeetudiants'})) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "Il faut tout d'abord choisir un fichier contenant la liste des étudiants");
+	$dialog->run;
+	$dialog->destroy;
+    } elsif(!$projet{'liste_key'}) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "Aucun identifiant n'a été choisi parmi les titres de colonnes du fichier contenant la liste des étudiants. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+	$dialog->run;
+	$dialog->destroy;
+    } elsif(! $projet{'assoc_code'}) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "Aucun code n'a été choisi parmi les codes (éventuellement fabriqués avec la commande LaTeX \\AMCcode) disponibles. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+	$dialog->run;
+	$dialog->destroy;
+    } else {
+	commande('commande'=>[with_prog("AMC-association-auto.pl"),
+			      "--notes",localise($projet{'notes'}),
+			      "--notes-id",$projet{'assoc_code'},
+			      "--liste",localise($projet{'listeetudiants'}),
+			      "--liste-key",$projet{'liste_key'},
+			      "--encodage-liste",$o{'encodage_liste'},
+			      "--assoc",localise($projet{'association'}),
+			      "--encodage-interne",$o{'encodage_interne'},
+			      ($debug ? "--debug" : "--no-debug")
+			      ],
+		 'texte'=>'Association automatique...',
+		 'fin'=>sub {
+		     assoc_resultat();
+		 },
+		 );
+    }
+}
+
+sub assoc_resultat {
+}
+
 sub valide_cb {
     my ($var,$cb)=@_;
     my $cbc=$cb->get_active();
@@ -1263,9 +1311,9 @@ sub noter_calcul {
 
 sub noter_resultat {
     my $moy;
+    my @codes=();
     if(-s localise($projet{'notes'})) {
 	print "* lecture notes\n" if($debug);
-	my @codes=();
 	my $notes=eval { XMLin(localise($projet{'notes'}),
 			       'ForceArray'=>1,
 			       'KeyAttr'=>['id'],
@@ -1280,13 +1328,13 @@ sub noter_resultat {
 	    $w{'correction_result'}->set_markup("<span foreground=\"red\">Notes illisibles</span>");
 	}
 	print "Codes : ".join(',',@codes)."\n" if($debug);
-	$cb_stores{'assoc_code'}=cb_model(''=>'(aucun)',
-					   map { $_=>$_ } 
-					   sort { $a cmp $b } (@codes));
-	transmet_pref($gui,'pref_assoc',\%projet,{},{'assoc_code'=>1});
     } else {
 	$w{'correction_result'}->set_markup("<span foreground=\"red\">Aucun calcul de notes</span>");
     }
+    $cb_stores{'assoc_code'}=cb_model(''=>'(aucun)',
+				      map { $_=>$_ } 
+				      sort { $a cmp $b } (@codes));
+    transmet_pref($gui,'pref_assoc',\%projet,{},{'assoc_code'=>1});
 }
 
 sub visualise_correc {
