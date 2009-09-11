@@ -36,6 +36,8 @@ BEGIN {
     @EXPORT_OK   = qw();
 }
 
+use AMC::Gui::PageArea;
+
 use Getopt::Long;
 use XML::Writer;
 use IO::File;
@@ -146,7 +148,7 @@ sub new {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
 
-    $self->{'photo'}->set_size_request($xmax,$ymax);
+    AMC::Gui::PageArea::add_feuille($self->{'photo'});
     
     my $nligs=POSIX::ceil((1+$#liste)/$self->{'assoc-ncols'});
     
@@ -181,6 +183,12 @@ sub new {
     $self->charge_image(0);
 
     return($self);
+}
+
+sub expose_photo {
+    my ($self,$widget,$evenement,@donnees)=@_;
+
+    $widget->expose_drawing($evenement,@donnees);
 }
 
 sub get_identifiant {
@@ -277,11 +285,11 @@ sub lie {
 sub charge_image {
     my ($self,$i)=(@_);
     if($i>=0 && $i<=$#{$self->{'images'}} && -f $self->{'images'}->[$i]) {
-	$self->{'photo'}->set_from_file($self->{'images'}->[$i]);
+	$self->{'photo'}->set_image($self->{'images'}->[$i]);
 	$self->{'image_etud'} = fich2etud($self->{'images'}->[$i]) || 'xxx';
     } else {
 	$i=-1;
-	$self->{'photo'}->set_from_icon_name("emblem-OK",GTK_ICON_SIZE_BUTTON);
+	$self->{'photo'}->set_image();
     }
     $self->{'iimage'}=$i;
     $self->{'titre'}->set_text(($i>=0 ? $self->{'images'}->[$i] : "---"));
