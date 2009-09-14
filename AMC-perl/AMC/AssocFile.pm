@@ -46,11 +46,13 @@ my %type_ok=('auto'=>1,
 
 sub new {
     my ($f,%o)=@_;
-    my $self={'file'=>$f,'a'=>{'copie'=>{},
-			       'liste_key'=>'',
-			       'notes_id'=>'',
-			       'version'=>$VERSION,
-			   },
+    my $self={'file'=>$f,
+	      'a'=>{'copie'=>{},
+		    'liste_key'=>'',
+		    'notes_id'=>'',
+		    'version'=>$VERSION,
+		},
+	      'maj'=>0,
 	      'encodage'=>'utf-8',
 	      'debug'=>''};
 
@@ -83,7 +85,10 @@ sub load {
 	    $ok=0;
 	}
     }
-    $self->{'a'}=$a if($ok);
+    if($ok) {
+	$self->{'a'}=$a;
+	$self->{'maj'}=1;
+    }
     return($ok);
 }
 
@@ -110,10 +115,41 @@ sub get {
     return($self->{'a'}->{'copie'}->{$id}->{$type});
 }
 
+sub effectif {
+    my ($self,$id)=@_;
+    my $e=$self->{'a'}->{'copie'}->{$id};
+    return($e->{'manuel'} ? $e->{'manuel'} : $e->{'auto'});
+}
+
+sub maj { # actualisation des donnees induites
+    my ($self)=@_;
+    if(!$self->{'maj'}) {
+	# liste des codes associes avec nb de sources
+	$self->{'dest'}={};
+	for($self->ids()) {
+	    $self->{'dest'}->{$self->effectif($_)} ++;
+	}
+
+	$self->{'maj'}=1;
+    }
+}
+
+sub etat { # 0: aucune assoc 1: une assoc valide 2: une assoc multiple
+    my ($self,$id)=@_;
+    $self->maj();
+    my $d=$self->effectif($id);
+    if($d) {
+	return($self->{'dest'}->{$d} == 1 ? 1 : 2);
+    } else {
+	return(0);
+    }
+}
+
 sub set {
     my ($self,$type,$id,$valeur)=@_;
     die "mauvais type : $type" if(!$type_ok{$type});
     $self->{'a'}->{'copie'}->{$id}->{$type}=$valeur;
+    $self->{'maj'}=0;
 }
 
 sub ids {
@@ -128,6 +164,7 @@ sub clear {
     
     for my $i ($self->ids()) {
 	delete($self->{'a'}->{'copie'}->{$i}->{$type});
+	$self->{'maj'}=0;
     }
 }
 
