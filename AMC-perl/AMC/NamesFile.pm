@@ -41,6 +41,7 @@ sub new {
 	      'encodage'=>'utf-8',
 	      'separateur'=>':',
 	      'debug'=>'',
+	      'identifiant'=>'(nom) (prenom)',
 
 	      'heads'=>[],
 	  };
@@ -104,13 +105,39 @@ sub load {
 	  }
       }
 	close LISTE;
+	# entetes et cles
 	$self->{'heads'}=\@heads;
 	$self->{'keys'}=[grep { my @lk=(keys %{$data{$_}}); 
 				$#lk==$#{$self->{'noms'}}; } @heads];
+	# rajout identifiant
+	$self->calc_identifiants();
+	$self->tri('_ID_');
+
 	return(1+$#{$self->{'noms'}});
     } else {
 	return(0);
     }
+}
+
+sub calc_identifiants {
+    my ($self)=@_;
+    for my $n (@{$self->{'noms'}}) {
+	my $id=$self->{'identifiant'};
+	$id =~ s/\(([^\)]+)\)/(defined($n->{$1}) ? $n->{$1} : '')/gei;
+	$id =~ s/^\s+//;
+	$id =~ s/\s+$//;
+	$n->{'_ID_'}=$id;
+    }
+}
+
+sub tri {
+    my ($self,$cle)=@_;
+    $self->{'noms'}=[sort { $a->{$cle} cmp $b->{$cle} } @{$self->{'noms'}}];
+}
+
+sub taille {
+    my ($self)=@_;
+    return(1+$#{$self->{'noms'}});
 }
 
 sub heads { # entetes
@@ -129,18 +156,29 @@ sub liste {
 }
 
 sub data {
-    my ($self,$head,$c)=@_;
-    my @k=grep { $_->{$head} eq $c } @{$self->{'noms'}};
-    if($#k==0) {
-	return($k[0]);
-    } else {
-	print STDERR "Erreur : nom non unique (".(1+$#k)." exemplaires)\n";
-	return();
+    my ($self,$head,$c,%oo)=@_;
+    my @k=grep { $self->{'noms'}->[$_]->{$head} eq $c }
+    (0..$#{$self->{'noms'}});
+    if(!$oo{'all'}) {
+	if($#k!=0) {
+	    print STDERR "Erreur : nom non unique (".(1+$#k)." exemplaires)\n";
+	    return();
+	}
     }
+    if($oo{'i'}) {
+	return(@k);
+    } else {
+	return(map { $self->{'noms'}->[$_] } @k);
+    }
+}
+
+sub data_n {
+    my ($self,$n,$cle)=@_;
+    return($self->{'noms'}->[$n]->{$cle});
 }
 
 1;
 
 __END__
 
-perl -e 'use AMC::NamesFile;use Data::Dumper; $a=AMC::NamesFile::new("essais/liste.txt","debug"=>1);print $a->{"lines"}."\n";print "CLES : ".join(", ",$a->keys())."\n";print "PRENOMS : ".join(", ",$a->liste("prenom"))."\n";print Dumper($a->data("etu","10807389"));print Dumper($a->data("prenom","Mathieu"));'
+perl -e 'use AMC::NamesFile;use Data::Dumper; $a=AMC::NamesFile::new("essais/liste.txt","debug"=>1);print $a->{"lines"}."\n";print "CLES : ".join(", ",$a->keys())."\n";print "NOMS : ".join(", ",$a->liste("nom"))."\n";print Dumper($a->data("etu","10807389"));print Dumper($a->data("prenom","Mathieu"));'

@@ -48,8 +48,8 @@ sub new {
     my ($f,%o)=@_;
     my $self={'file'=>$f,
 	      'a'=>{'copie'=>{},
-		    'liste_key'=>'',
-		    'notes_id'=>'',
+		    'liste_key'=>'', # cle dans la liste de noms utilisee pour identifier les noms
+		    'notes_id'=>'', # code d'identification auto
 		    'version'=>$VERSION,
 		},
 	      'maj'=>0,
@@ -80,14 +80,14 @@ sub load {
 
     my $ok=1;
     for (qw/version liste_key notes_id/) {
-	if($self->{'a'}->{$_} ne $a->{$_}) {
+	if($self->{'a'}->{$_} && ($self->{'a'}->{$_} ne $a->{$_})) {
 	    print "*** fichier d'associations incompatible : $_\n";
 	    $ok=0;
 	}
     }
     if($ok) {
 	$self->{'a'}=$a;
-	$self->{'maj'}=1;
+	$self->{'maj'}=0;
     }
     return($ok);
 }
@@ -110,14 +110,14 @@ sub print {
 }
 
 sub get {
-    my ($self,$type,$id)=@_;
+    my ($self,$type,$copie)=@_;
     die "mauvais type : $type" if(!$type_ok{$type});
-    return($self->{'a'}->{'copie'}->{$id}->{$type});
+    return($self->{'a'}->{'copie'}->{$copie}->{$type});
 }
 
 sub effectif {
-    my ($self,$id)=@_;
-    my $e=$self->{'a'}->{'copie'}->{$id};
+    my ($self,$copie)=@_;
+    my $e=$self->{'a'}->{'copie'}->{$copie};
     return($e->{'manuel'} ? $e->{'manuel'} : $e->{'auto'});
 }
 
@@ -127,17 +127,29 @@ sub maj { # actualisation des donnees induites
 	# liste des codes associes avec nb de sources
 	$self->{'dest'}={};
 	for($self->ids()) {
-	    $self->{'dest'}->{$self->effectif($_)} ++;
+	    # print STDERR "$_ -> ".$self->effectif($_)."\n";
+	    push @{$self->{'dest'}->{$self->effectif($_)}},$_;
 	}
 
 	$self->{'maj'}=1;
     }
 }
 
-sub etat { # 0: aucune assoc 1: une assoc valide 2: une assoc multiple
+sub inverse {
     my ($self,$id)=@_;
     $self->maj();
-    my $d=$self->effectif($id);
+    if($self->{'dest'}->{$id}) {
+	return(@{$self->{'dest'}->{$id}});
+    } else {
+	#print STDERR Dumper($self->{'dest'});
+	return();
+    }
+}
+
+sub etat { # 0: aucune assoc 1: une assoc valide 2: une assoc multiple
+    my ($self,$copie)=@_;
+    $self->maj();
+    my $d=$self->effectif($copie);
     if($d) {
 	return($self->{'dest'}->{$d} == 1 ? 1 : 2);
     } else {
@@ -146,9 +158,9 @@ sub etat { # 0: aucune assoc 1: une assoc valide 2: une assoc multiple
 }
 
 sub set {
-    my ($self,$type,$id,$valeur)=@_;
+    my ($self,$type,$copie,$valeur)=@_;
     die "mauvais type : $type" if(!$type_ok{$type});
-    $self->{'a'}->{'copie'}->{$id}->{$type}=$valeur;
+    $self->{'a'}->{'copie'}->{$copie}->{$type}=$valeur;
     $self->{'maj'}=0;
 }
 

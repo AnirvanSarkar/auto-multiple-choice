@@ -1166,6 +1166,8 @@ sub associe {
     if(-f $projet{'listeetudiants'}) {
 	my $ga=AMC::Gui::Association::new('cr'=>localise($projet{'cr'}),
 					  'liste'=>$projet{'listeetudiants'},
+					  'liste_key'=>$projet{'liste_key'},
+					  'fichier-liens'=>localise($projet{'association'}),
 					  'global'=>0,
 					  'encodage_liste'=>$o{'encodage_liste'},
 					  'encodage_interne'=>$o{'encodage_interne'},

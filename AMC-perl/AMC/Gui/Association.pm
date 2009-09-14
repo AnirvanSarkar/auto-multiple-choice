@@ -37,6 +37,8 @@ BEGIN {
 }
 
 use AMC::Gui::PageArea;
+use AMC::AssocFile;
+use AMC::NamesFile;
 
 use Getopt::Long;
 use XML::Writer;
@@ -61,6 +63,7 @@ sub new {
     my $self={'assoc-ncols'=>5,
 	      'cr'=>'',
 	      'liste'=>'',
+	      'liste_key'=>'',
 	      'fichier-liens'=>'',
 	      'global'=>0,
 	      'encodage_liste'=>'UTF-8',
@@ -77,38 +80,21 @@ sub new {
     
     $self->{'fichier-liens'}=$self->{'cr'}."/association.xml" if(!$self->{'fichier-liens'});
 
-    my @liste;
+    $self->{'assoc'}=AMC::AssocFile::new($self->{'fichier-liens'},
+					 'liste_key'=>$self->{'liste_key'},
+					 'encodage'=>$self->{'encodage_interne'},
+					 );
+    $self->{'assoc'}->load();
 
-    my @heads=();
-    
-    open LISTE,"<:encoding(".$self->{'encodage_liste'}.")",$self->{'liste'}
-	or die "Erreur a l'ouverture du fichier \"$self->{'liste'}\" : $!";
-  NOM: while(<LISTE>) {
-      chomp();
-      s/\#.*//;
-      next NOM if(/^\s*$/);
-      if(!@heads) {
-	  if(/$self->{'separateur'}/) {
-	      @heads=map { reduit($_) } split(/$self->{'separateur'}/,$_);
-	      next NOM;
-	  } else {
-	      @heads='nom';
-	  }
-      }
-      s/^\s+//;
-      s/\s+$//;
-      push @liste,[map { reduit($_) } split(/$self->{'separateur'}/,$_)];
-  }
-    close(LISTE);
+    $self->{'liste'}=AMC::NamesFile::new($self->{'liste'},
+					 'encodage'=>$self->{'encodage_liste'},
+					 'separateur'=>$self->{'separateur'},
+					 'identifiant'=>$self->{'identifiant'},
+					 );
 
-    my %h=();
-    for (0..$#heads) { $h{$heads[$_]}=$_; }
+    print "".$self->{'liste'}->taille()." noms\n";
     
-    $self->{'heads'}=\%h;
-
-    print "".($#liste+1)." noms\n";
-    
-    return($self) if($#liste<0);
+    return($self) if(!$self->{'liste'}->taille());
     
     # liste des images :
     my @images;
@@ -150,14 +136,16 @@ sub new {
 
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
     
-    my $nligs=POSIX::ceil((1+$#liste)/$self->{'assoc-ncols'});
+    my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
     
     $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
     
     my @bouton_nom=();
+    $self->{'boutons'}=\@bouton_nom;
+
     my ($x,$y)=(0,0);
-    for my $i (0..$#liste) {
-	my $b=Gtk2::Button->new($self->get_identifiant($liste[$i]));
+    for my $i (0..($self->{'liste'}->taille()-1)) {
+	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
 	$self->{'tableau'}->attach_defaults($b,$x,$x+1,$y,$y+1);
 	$y++;
 	if($y>=$nligs) {
@@ -168,14 +156,13 @@ sub new {
 	$b->show();
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
+
+	$self->style_bouton($i);
     }
 
     # retenir...
     
-    $self->{'liens'}={}; # inom=>etud
-    $self->{'liste-noms'}=\@liste;
     $self->{'images'}=\@images;
-    $self->{'boutons'}=\@bouton_nom;
     $self->{'iimage'}='';
 
     $self->{'gui'}->signal_autoconnect_from_package($self);
@@ -191,15 +178,6 @@ sub expose_photo {
     $widget->expose_drawing($evenement,@donnees);
 }
 
-sub get_identifiant {
-    my ($self,$n)=@_;
-    my $id=$self->{'identifiant'};
-    $id =~ s/\(([^\)]+)\)/(defined($self->{'heads'}->{$1}) ? $n->[$self->{'heads'}->{$1}] : '')/gei;
-    $id =~ s/^\s+//;
-    $id =~ s/\s+$//;
-    return($id);
-}
-
 sub quitter {
     my ($self)=(@_);
 
@@ -212,30 +190,9 @@ sub quitter {
 
 sub enregistrer {
     my ($self)=(@_);
-    
-    my $output=new IO::File($self->{'fichier-liens'},">:encoding(".$self->{'encodage_interne'}.")");
-    if(! $output) {
-	print "Impossible d'ouvrir ".$self->{'fichier-liens'}." : $!";
-	return();
-    }
-    
-    my $writer = new XML::Writer(OUTPUT=>$output,NEWLINES=>1,ENCODING=>$self->{'encodage_interne'},DATA_INDENT=>2);
-    $writer->xmlDecl($self->{'encodage_interne'});
-    $writer->startTag('association');
 
-    for my $i (keys %{$self->{'liens'}}) {
-	$writer->startTag('etudiant',
-			  'id'=>$self->{'liens'}->{$i},
-			  map { $_=>$self->{'liste-noms'}->[$i]->[$self->{'heads'}->{$_}] } (keys %{$self->{'heads'}}),
-			  );
-	$writer->characters($self->get_identifiant($self->{'liste-noms'}->[$i]));
-	$writer->endTag('etudiant');
-    }
-    $writer->endTag('association');
-    
-    $writer->end();
-    $output->close();
-    
+    $self->{'assoc'}->save();
+
     $self->quitter();
 }
 
@@ -248,38 +205,47 @@ sub fich2etud {
     }
 }
 
-sub get_etud {
-    my $inom=shift;
-    return($liens{$inom});
+sub inom2id {
+    my ($self,$inom)=@_;
+    return($self->{'liste'}->data_n($inom,$self->{'assoc'}->{'a'}->{'liste_key'}));
 }
 
-sub get_inom {
-    my ($self,$etud)=(@_);
-    my $i=-1;
-    for my $k (keys %{$self->{'liens'}}) {
-	$i=$k if($self->{'liens'}->{$k} eq $etud);
+sub id2inom {
+    my ($self,$id)=@_;
+    if($self->{'assoc'}->effectif($id)) {
+	return($self->{'liste'}->data($self->{'assoc'}->{'a'}->{'liste_key'},
+				      $self->{'assoc'}->effectif($id),
+				      'all'=>1,'i'=>1));
+    } else {
+	return();
     }
-    return($i);
 }
 
 sub delie {
     my ($self,$inom,$etud)=(@_);
 
-    $self->style_bouton($inom,'');
-    $self->{'liens'}->{$inom}='';
-    for my $k (keys %{$self->{'liens'}}) {
-	if($self->{'liens'}->{$k} eq $etud) { 
-	    $self->{'liens'}->{$k}='';
-	    $self->style_bouton($k,'');
-	}
+    my $id=$self->inom2id($inom);
+    # tout lien vers le nom choisi est efface
+    for ($self->{'assoc'}->inverse($id)) {
+	# print STDERR "Efface $_ -> i=$inom\n";
+	$self->{'assoc'}->set('manuel',$_,
+			      ( $self->{'assoc'}->get('auto',$_) eq $id ? 'NONE' : ''));
     }
+
+    # l'ancien nom ne pointe plus vers rien -> bouton
+    my @r=$self->id2inom($etud);
+    $self->{'assoc'}->set('manuel',$etud,'NONE');
+    for(@r) {
+	$self->style_bouton($_);
+    }
+
 }
 
 sub lie {
     my ($self,$inom,$etud)=(@_);
     $self->delie($inom,$etud);
-    $self->style_bouton($inom,$etud);
-    $self->{'liens'}->{$inom}=$etud;
+    $self->{'assoc'}->set('manuel',$etud,$self->inom2id($inom));
+    $self->style_bouton($inom);
 }
 
 sub charge_image {
@@ -307,7 +273,7 @@ sub image_suivante {
     my $i=$self->i_suivant($self->{'iimage'});
     #print "Suivant($iimage/$i)\n";
     while($i != $self->{'iimage'}
-	  && $self->get_inom(fich2etud($self->{'images'}->[$i]))>=0 ) {
+	  && $self->{'assoc'}->effectif(fich2etud($self->{'images'}->[$i])) ) {
 	$i=$self->i_suivant($i);
 	#print "->$i\n";
     }
@@ -321,19 +287,25 @@ sub image_suivante {
 #<
 
 sub style_bouton {
-    my ($self,$i,$pris)=(@_);
-    #print "STYLE $i <$pris>\n";
+    my ($self,$i)=(@_);
+    
+    my $pris=join(',',$self->{'assoc'}->inverse($self->inom2id($i)));
+
+    #print STDERR "STYLE($i,".$self->inom2id($i)."):$pris\n";
+
     my $b=$self->{'boutons'}->[$i];
     if($b) {
 	if($pris) {
 	    $b->set_relief(GTK_RELIEF_NONE);
 	    $b->modify_bg('prelight',$col_pris);
-	    $b->set_label($self->get_identifiant($self->{'liste-noms'}->[$i])." ($pris)");
+	    $b->set_label($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
 	} else {
 	    $b->set_relief(GTK_RELIEF_NORMAL);
 	    $b->modify_bg('prelight',undef);
-	    $b->set_label($self->get_identifiant($self->{'liste-noms'}->[$i]));
+	    $b->set_label($self->{'liste'}->data_n($i,'_ID_'));
 	}
+    } else {
+	print STDERR "*** pas de bouton $i ***\n";
     }
 }
 
