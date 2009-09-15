@@ -119,7 +119,7 @@ sub effectif {
     my ($self,$copie)=@_;
     my $e=$self->{'a'}->{'copie'}->{$copie};
     my $v=($e->{'manuel'} ? $e->{'manuel'} : $e->{'auto'});
-    return($v eq 'NONE' ? '' : $v );
+    return($v && ($v eq 'NONE') ? '' : $v );
 }
 
 sub maj { # actualisation des donnees induites

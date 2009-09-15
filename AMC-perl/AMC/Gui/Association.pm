@@ -50,6 +50,8 @@ use Gtk2 -init;
 use Gtk2::GladeXML;
 
 my $col_pris = Gtk2::Gdk::Color->new(65353,208*256,169*256);
+my $col_actif = Gtk2::Gdk::Color->new(20*256,147*256,58*256);
+my $col_actif_fond = Gtk2::Gdk::Color->new(95*256,213*256,129*256);
 
 sub reduit {
     my $s=shift;
@@ -141,19 +143,25 @@ sub new {
     $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
     
     my @bouton_nom=();
+    my @bouton_eb=();
     $self->{'boutons'}=\@bouton_nom;
+    $self->{'boutons_eb'}=\@bouton_eb;
 
     my ($x,$y)=(0,0);
     for my $i (0..($self->{'liste'}->taille()-1)) {
+	my $eb=Gtk2::EventBox->new();
 	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
-	$self->{'tableau'}->attach_defaults($b,$x,$x+1,$y,$y+1);
+	$eb->add($b);
+	$self->{'tableau'}->attach_defaults($eb,$x,$x+1,$y,$y+1);
 	$y++;
 	if($y>=$nligs) {
 	    $y=0;
 	    $x++;
 	}
 	push @bouton_nom,$b;
+	push @bouton_eb,$eb;
 	$b->show();
+	$eb->show();
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
 
@@ -250,6 +258,7 @@ sub lie {
 
 sub charge_image {
     my ($self,$i)=(@_);
+    $self->style_bouton('IMAGE',0);
     if($i>=0 && $i<=$#{$self->{'images'}} && -f $self->{'images'}->[$i]) {
 	$self->{'photo'}->set_image($self->{'images'}->[$i]);
 	$self->{'image_etud'} = fich2etud($self->{'images'}->[$i]) || 'xxx';
@@ -258,6 +267,7 @@ sub charge_image {
 	$self->{'photo'}->set_image();
     }
     $self->{'iimage'}=$i;
+    $self->style_bouton('IMAGE',1);
     $self->{'titre'}->set_text(($i>=0 ? $self->{'images'}->[$i] : "---"));
 }
 
@@ -310,22 +320,45 @@ sub va_precedent {
 #<
 
 sub style_bouton {
-    my ($self,$i)=(@_);
-    
+    my ($self,$i,$actif)=(@_);
+
+    if($i eq 'IMAGE') {
+	return() if($self->{iimage}<0);
+	my $id=fich2etud($self->{'images'}->[$self->{iimage}]);
+
+	if($id) {
+	    ($i)=$self->id2inom($id);
+
+	    return() if(!defined($i));
+	} else {
+	    return();
+	}
+    }
+
     my $pris=join(',',$self->{'assoc'}->inverse($self->inom2id($i)));
 
     #print STDERR "STYLE($i,".$self->inom2id($i)."):$pris\n";
 
     my $b=$self->{'boutons'}->[$i];
+    my $eb=$self->{'boutons_eb'}->[$i];
     if($b) {
 	if($pris) {
 	    $b->set_relief(GTK_RELIEF_NONE);
-	    $b->modify_bg('prelight',$col_pris);
+	    $b->modify_bg('prelight',($actif ? $col_actif : $col_pris));
 	    $b->set_label($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
 	} else {
 	    $b->set_relief(GTK_RELIEF_NORMAL);
 	    $b->modify_bg('prelight',undef);
 	    $b->set_label($self->{'liste'}->data_n($i,'_ID_'));
+	}
+	if($eb) {
+	    my $col=undef;
+	    $col=$col_actif_fond if($actif);
+	    for(qw/normal active selected/) {
+		$eb->modify_bg($_,$col);
+	    }
+	} else {
+	    print STDERR "*** pas de EventBox $i ***\n";
 	}
     } else {
 	print STDERR "*** pas de bouton $i ***\n";
