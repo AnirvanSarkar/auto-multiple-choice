@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -130,7 +130,7 @@ sub new {
 
     $self->{'gui'}=Gtk2::GladeXML->new($glade_xml);
 
-    for my $k (qw/tableau titre photo/) {
+    for my $k (qw/tableau titre photo associes_cb/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
 
@@ -163,11 +163,11 @@ sub new {
     # retenir...
     
     $self->{'images'}=\@images;
-    $self->{'iimage'}='';
 
     $self->{'gui'}->signal_autoconnect_from_package($self);
 
-    $self->charge_image(0);
+    $self->{'iimage'}=-1;
+    $self->image_suivante();
 
     return($self);
 }
@@ -262,26 +262,49 @@ sub charge_image {
 }
 
 sub i_suivant {
-    my ($self,$i)=(@_);
-    $i++;
-    $i=0 if($i>$#{$self->{'images'}});
+    my ($self,$i,$pas)=(@_);
+    $pas=1 if(!$pas);
+    $i+=$pas;
+    if($i<0) {
+	$i=$#{$self->{'images'}};
+    }
+    if($i>$#{$self->{'images'}}) {
+	$i=0;
+    }
     return($i);
 }
 
 sub image_suivante {
-    my ($self)=(@_);
-    my $i=$self->i_suivant($self->{'iimage'});
-    #print "Suivant($iimage/$i)\n";
+    my ($self,$pas)=(@_);
+    $pas=1 if(!$pas);
+    my $i=$self->i_suivant($self->{'iimage'},$pas);
+
     while($i != $self->{'iimage'}
-	  && $self->{'assoc'}->effectif(fich2etud($self->{'images'}->[$i])) ) {
-	$i=$self->i_suivant($i);
-	#print "->$i\n";
+	  && ($self->{'assoc'}->effectif(fich2etud($self->{'images'}->[$i]))
+	      && ! $self->{'associes_cb'}->get_active()) ) {
+	$i=$self->i_suivant($i,$pas);
+	if($pas==1) {
+	    $i=-1 if($i==0 && $self->{'iimage'}==-1);
+	}
+	if($pas==-1) {
+	    $i=-1 if($i==$#{$self->{'images'}} && $self->{'iimage'}==-1);
+	}
     }
     if($self->{'iimage'} != $i) {
 	$self->charge_image($i) ;
     } else {
 	$self->charge_image(-1) ;
     }
+}
+
+sub va_suivant {
+    my ($self)=(@_);
+    $self->image_suivante(1);
+}
+
+sub va_precedent {
+    my ($self)=(@_);
+    $self->image_suivante(-1);
 }
 
 #<
