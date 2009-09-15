@@ -1109,28 +1109,10 @@ sub valide_liste {
 
     my $fl=$w{'liste'}->get_filename();
 
-    # lecture du fichier pour verification de format...
-    my @heads=();
-    my $err=0;
-    my $nl=0;
-    my $nd;
-    open(FL,"<:encoding(".$o{'encodage_liste'}.")",$fl);
-  LIG: while(<FL>) {
-      chomp;
-      $nl++;
-      s/\#.*//;
-      next LIG if(/^\s*$/);
-      if(@heads) {
-	  $nd = 1+tr/:/:/;
-	  if($nd != (1+$#heads)) {
-	      $err=$nl;
-	      last LIG;
-	  }
-      } else {
-	  @heads=split(/:/,$_);
-      }
-  }
-    close(FL);
+    my $l=AMC::NamesFile::new($fl,
+			      'encodage'=>$o{'encodage_liste'},
+			      );
+    my ($err,$errlig)=$l->errors();
 
     if($err) {
 	if(!$oo{'noinfo'}) {
@@ -1138,11 +1120,9 @@ sub valide_liste {
 							       'destroy-with-parent',
 							       'error', # message type
 							       'ok', # which set of buttons?
-							       "Le fichier choisi ne convient pas : ".($#heads>0 ? ($#heads+1)." entêtes ont été détectés (".join(', ',@heads).")," : "aucun entête n'est présent,")." mais il y a $nd champs en ligne $err.");
+							       "Le fichier choisi ne convient pas : $err erreurs détectées, la première en ligne $errlig.");
 	    $dialog->run;
 	    $dialog->destroy;
-	} else {
-	    print "Ligne $err : $nd champs / ".join(', ',@heads)."\n" if($debug);
 	}
 	$cb_stores{'liste_key'}=$cb_model_vide;
     } else {
@@ -1152,10 +1132,11 @@ sub valide_liste {
 	    $projet{'modifie'}=1;
 	}
 	# transmission liste des en-tetes
-	print "entetes : ".join(",",@heads)."\n" if($debug);
+	my @keys=$l->keys;
+	print "entetes : ".join(",",@keys)."\n" if($debug);
 	$cb_stores{'liste_key'}=cb_model('','(aucun)',
 					 map { ($_,$_) } 
-					 sort { $a cmp $b } (@heads));
+					 sort { $a cmp $b } (@keys));
     }
     transmet_pref($gui,'pref_assoc',\%projet,{},{'liste_key'=>1});
 }

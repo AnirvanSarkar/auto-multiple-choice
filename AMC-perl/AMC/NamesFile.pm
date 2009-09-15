@@ -44,6 +44,7 @@ sub new {
 	      'identifiant'=>'(nom) (prenom)',
 
 	      'heads'=>[],
+	      'err'=>[0,0],
 	  };
 
     for (keys %o) {
@@ -52,7 +53,7 @@ sub new {
 
     bless $self;
 
-    $self->{'lines'}=$self->load();
+    @{$self->{'err'}}=($self->load());
 
     return($self);
 }    
@@ -64,10 +65,17 @@ sub reduit {
     return($s);
 }
 
+sub errors {
+    my ($self)=@_;
+    return(@{$self->{'err'}});
+}
+
 sub load {
     my ($self)=@_;
     my @heads=();
     my %data=();
+    my $err=0;
+    my $errlig=0;
 
     $self->{'noms'}=[];
 
@@ -95,6 +103,8 @@ sub load {
 	  }
 	  if($#l!=$#heads) {
 	      print STDERR "Mauvais nombre de champs (".(1+$#l)." au lieu de ".(1+$#heads).") fichier ".$self->{'fichier'}." ligne $.\n";
+	      $errlig=$. if(!$errlig);
+	      $err++;
 	  } else {
 	      my $nom={};
 	      for(0..$#l) {
@@ -113,9 +123,9 @@ sub load {
 	$self->calc_identifiants();
 	$self->tri('_ID_');
 
-	return(1+$#{$self->{'noms'}});
+	return($err,$errlig);
     } else {
-	return(0);
+	return(-1,0);
     }
 }
 
