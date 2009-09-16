@@ -141,7 +141,7 @@ sub new {
 
     $self->{'gui'}=Gtk2::GladeXML->new($glade_xml);
 
-    for my $k (qw/tableau titre photo associes_cb copies_tree/) {
+    for my $k (qw/tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
 
@@ -421,7 +421,7 @@ sub goto_from_list {
 	my $iter=$self->{'copies_store'}->get_iter($path);
 	my $etu=$self->{'copies_store'}->get($iter,COPIES_N);
 	my $i=$self->{'copies_store'}->get($iter,COPIES_IIMAGE);
-	print STDERR "N=$etu I=$i\n";
+	#print STDERR "N=$etu I=$i\n";
 	if(defined($i)) {
 	    $self->charge_image($i);
 	}
@@ -442,15 +442,24 @@ sub goto_image {
     }
 }
 
+sub vraie_copie {
+    my ($self,$oui)=@_;
+    for(qw/bouton_effacer bouton_inconnu/) {
+	$self->{$_}->set_sensitive($oui);
+    }
+}
+
 sub charge_image {
     my ($self,$i)=(@_);
     $self->style_bouton('IMAGE',0);
     if($i>=0 && $i<=$#{$self->{'images'}} && -f $self->{'images'}->[$i]) {
 	$self->{'photo'}->set_image($self->{'images'}->[$i]);
 	$self->{'image_etud'} = fich2etud($self->{'images'}->[$i]) || 'xxx';
+	$self->vraie_copie(1);
     } else {
 	$i=-1;
 	$self->{'photo'}->set_image();
+	$self->vraie_copie(0);
     }
     $self->{'iimage'}=$i;
     $self->style_bouton('IMAGE',1);
