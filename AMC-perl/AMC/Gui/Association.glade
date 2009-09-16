@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Wed Sep 16 11:21:45 2009 -->
+<!--Generated with glade3 3.4.5 on Wed Sep 16 12:05:12 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="general">
     <property name="visible">True</property>
@@ -167,9 +167,28 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text">Signale cette copie comme associée à aucun étudiant de la liste</property>
-                    <property name="label" translatable="yes">Inconnu</property>
                     <property name="response_id">0</property>
                     <signal name="clicked" handler="inconnu"/>
+                    <child>
+                      <widget class="GtkHBox" id="hbox2">
+                        <property name="visible">True</property>
+                        <child>
+                          <widget class="GtkImage" id="image1">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-dialog-error</property>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label1">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Inconnu</property>
+                          </widget>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </widget>
+                    </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -215,7 +234,8 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text">Enregistre les associations effectuées.</property>
-                    <property name="label" translatable="yes">Enregistrer</property>
+                    <property name="label" translatable="yes">gtk-save</property>
+                    <property name="use_stock">True</property>
                     <property name="response_id">0</property>
                     <signal name="clicked" handler="enregistrer"/>
                   </widget>
@@ -230,7 +250,8 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text">Annule toutes les associations effectuées cette fois-ci.</property>
-                    <property name="label" translatable="yes">Annuler</property>
+                    <property name="label" translatable="yes">gtk-cancel</property>
+                    <property name="use_stock">True</property>
                     <property name="response_id">0</property>
                     <signal name="clicked" handler="quitter"/>
                   </widget>
