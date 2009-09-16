@@ -128,8 +128,8 @@ sub maj { # actualisation des donnees induites
 	# liste des codes associes avec nb de sources
 	$self->{'dest'}={};
 	for($self->ids()) {
-	    # print STDERR "$_ -> ".$self->effectif($_)."\n";
-	    push @{$self->{'dest'}->{$self->effectif($_)}},$_;
+	    my $k=$self->effectif($_);
+	    push @{$self->{'dest'}->{$k}},$_ if($k);
 	}
 
 	$self->{'maj'}=1;
@@ -152,7 +152,7 @@ sub etat { # 0: aucune assoc 1: une assoc valide 2: une assoc multiple
     $self->maj();
     my $d=$self->effectif($copie);
     if($d) {
-	return($self->{'dest'}->{$d} == 1 ? 1 : 2);
+	return($#{$self->{'dest'}->{$d}} == 0 ? 1 : 2);
     } else {
 	return(0);
     }
@@ -171,14 +171,22 @@ sub ids {
     return(keys %{$self->{'a'}->{'copie'}});
 }
 
+sub efface {
+    my ($self,$type,$copie)=@_;
+    if(defined($self->{'a'}->{'copie'}->{$copie}->{$type})) {
+	delete($self->{'a'}->{'copie'}->{$copie}->{$type});
+	$self->{'maj'}=0;
+    }
+}
+
 sub clear {
     my ($self,$type)=@_;
     die "mauvais type : $type" if(!$type_ok{$type});
     
     for my $i ($self->ids()) {
 	delete($self->{'a'}->{'copie'}->{$i}->{$type});
-	$self->{'maj'}=0;
     }
+    $self->{'maj'}=0;
 }
 
 1;

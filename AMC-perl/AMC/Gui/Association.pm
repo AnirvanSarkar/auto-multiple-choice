@@ -36,6 +36,7 @@ BEGIN {
     @EXPORT_OK   = qw();
 }
 
+use AMC::Basic;
 use AMC::Gui::PageArea;
 use AMC::AssocFile;
 use AMC::NamesFile;
@@ -48,6 +49,14 @@ use Encode;
 use POSIX;
 use Gtk2 -init;
 use Gtk2::GladeXML;
+
+use constant {
+    COPIES_N => 0,
+    COPIES_AUTO => 1,
+    COPIES_MANUEL => 2,
+    COPIES_BG => 3,
+    COPIES_IIMAGE => 4,
+};
 
 my $col_pris = Gtk2::Gdk::Color->new(65353,208*256,169*256);
 my $col_actif = Gtk2::Gdk::Color->new(20*256,147*256,58*256);
@@ -132,7 +141,7 @@ sub new {
 
     $self->{'gui'}=Gtk2::GladeXML->new($glade_xml);
 
-    for my $k (qw/tableau titre photo associes_cb/) {
+    for my $k (qw/tableau titre photo associes_cb copies_tree/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
 
@@ -168,6 +177,62 @@ sub new {
 	$self->style_bouton($i);
     }
 
+    # vue arborescente
+
+    my ($copies_store,$renderer,$column);
+    $copies_store = Gtk2::ListStore->new ('Glib::String',
+					  'Glib::String', 
+					  'Glib::String', 
+					  'Glib::String', 
+					  'Glib::String', 
+					  );
+
+    $self->{'copies_tree'}->set_model($copies_store);
+
+    $renderer=Gtk2::CellRendererText->new;
+    $column = Gtk2::TreeViewColumn->new_with_attributes ("copie",
+							 $renderer,
+							 text=> COPIES_N,
+							 'background'=> COPIES_BG);
+    $column->set_sort_column_id(COPIES_N);
+
+    $self->{'copies_tree'}->append_column ($column);
+
+    $renderer=Gtk2::CellRendererText->new;
+    $column = Gtk2::TreeViewColumn->new_with_attributes ("auto",
+							 $renderer,
+							 text=> COPIES_AUTO,
+							 'background'=> COPIES_BG);
+    $column->set_sort_column_id(COPIES_AUTO);
+    $self->{'copies_tree'}->append_column ($column);
+
+    $renderer=Gtk2::CellRendererText->new;
+    $column = Gtk2::TreeViewColumn->new_with_attributes ("manuel",
+							 $renderer,
+							 text=> COPIES_MANUEL,
+							 'background'=> COPIES_BG);
+    $column->set_sort_column_id(COPIES_MANUEL);
+    $self->{'copies_tree'}->append_column ($column);
+
+    $copies_store->set_sort_func(COPIES_N,\&sort_num,COPIES_N);
+    $copies_store->set_sort_func(COPIES_AUTO,\&sort_num,COPIES_AUTO);
+    $copies_store->set_sort_func(COPIES_MANUEL,\&sort_num,COPIES_MANUEL);
+
+    $self->{'copies_store'}=$copies_store;    
+
+    # remplissage de la liste
+
+    for my $i (0..$#images) {
+	my $e=fich2etud($images[$i]);
+	my $iter=$copies_store->append();
+	$copies_store->set($iter,
+			   COPIES_N,$e,
+			   COPIES_AUTO,$self->{'assoc'}->get('auto',$e),
+			   COPIES_MANUEL,$self->{'assoc'}->get('manuel',$e),
+			   COPIES_IIMAGE,$i,
+			   );
+    }
+
     # retenir...
     
     $self->{'images'}=\@images;
@@ -175,9 +240,58 @@ sub new {
     $self->{'gui'}->signal_autoconnect_from_package($self);
 
     $self->{'iimage'}=-1;
+
     $self->image_suivante();
+    $self->maj_couleurs_liste();
 
     return($self);
+}
+
+sub maj_contenu_liste {
+    my ($self,$etu)=@_;
+
+    my $iter=model_id_to_iter($self->{'copies_store'},COPIES_N,$etu);
+    if($iter) {
+	$self->{'copies_store'}->set($iter,
+				     COPIES_AUTO,$self->{'assoc'}->get('auto',$etu),
+				     COPIES_MANUEL,$self->{'assoc'}->get('manuel',$etu),
+				     );
+    } else {
+	print STDERR "*** [contenu] iter introuvable pour $etu ***\n";
+    }
+}
+
+sub maj_couleurs_liste { # mise a jour des couleurs la liste
+    my ($self)=@_;
+
+    for my $e (map { fich2etud($_) ; } @{$self->{'images'}}) {
+	my $iter=model_id_to_iter($self->{'copies_store'},COPIES_N,$e);
+	if($iter) {
+	    my $etat=$self->{'assoc'}->etat($e);
+	    my $coul;
+	    if($etat==0) {
+		if($self->{'assoc'}->get('manuel',$e) eq 'NONE') {
+		    $coul='salmon';
+		} else {
+		    $coul=undef;
+		}
+	    } elsif($etat==1) {
+		if($self->{'assoc'}->get('manuel',$e)) {
+		    $coul='lightgreen';
+		} else {
+		    $coul='lightblue';
+		}
+	    } else {
+		$coul='salmon';
+	    }
+	    $self->{'copies_store'}->set($iter,
+					 COPIES_BG,$coul,
+					 );
+	} else {
+	    print STDERR "*** [coul] iter introuvable pour $e ***\n";
+	}
+    }
+    
 }
 
 sub expose_photo {
@@ -238,11 +352,13 @@ sub delie {
 	# print STDERR "Efface $_ -> i=$inom\n";
 	$self->{'assoc'}->set('manuel',$_,
 			      ( $self->{'assoc'}->get('auto',$_) eq $id ? 'NONE' : ''));
+	$self->maj_contenu_liste($_);
     }
 
     # l'ancien nom ne pointe plus vers rien -> bouton
     my @r=$self->id2inom($etud);
     $self->{'assoc'}->set('manuel',$etud,'NONE');
+    $self->maj_contenu_liste($etud);
     for(@r) {
 	$self->style_bouton($_);
     }
@@ -253,7 +369,77 @@ sub lie {
     my ($self,$inom,$etud)=(@_);
     $self->delie($inom,$etud);
     $self->{'assoc'}->set('manuel',$etud,$self->inom2id($inom));
+    
+    $self->maj_contenu_liste($etud);
+    $self->maj_couleurs_liste();
+
     $self->style_bouton($inom);
+}
+
+sub efface_manuel {
+    my ($self)=@_;
+    my $i=$self->{'iimage'};
+
+    if($i>=0) {
+	my $e=fich2etud($self->{'images'}->[$i]);
+
+	my @r=$self->id2inom($e);
+
+	$self->{'assoc'}->efface('manuel',$e);
+
+	for(@r) {
+	    $self->style_bouton($_);
+	}
+	$self->maj_contenu_liste($e);
+	$self->maj_couleurs_liste();
+    }
+}
+
+sub inconnu {
+    my ($self)=@_;
+    my $i=$self->{'iimage'};
+
+    if($i>=0) {
+	my $e=fich2etud($self->{'images'}->[$i]);
+	my @r=$self->id2inom($e);
+
+	$self->{'assoc'}->set('manuel',$e,'NONE');
+
+	for(@r) {
+	    $self->style_bouton($_);
+	}
+	$self->maj_contenu_liste($e);
+	$self->maj_couleurs_liste();
+    }
+}
+
+sub goto_from_list {
+    my ($self,$widget, $event) = @_;
+
+    my ($path,$focus)=$self->{'copies_tree'}->get_cursor();
+    if($path) {
+	my $iter=$self->{'copies_store'}->get_iter($path);
+	my $etu=$self->{'copies_store'}->get($iter,COPIES_N);
+	my $i=$self->{'copies_store'}->get($iter,COPIES_IIMAGE);
+	print STDERR "N=$etu I=$i\n";
+	if(defined($i)) {
+	    $self->charge_image($i);
+	}
+    }
+    return TRUE;
+}
+
+sub goto_image {
+    my ($self,$i)=@_;
+    if($i>=0) {
+	my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$i);
+	my $path=$self->{'copies_store'}->get_path($iter);
+	$self->{'copies_tree'}->set_cursor($path);
+    } else {
+	my $sel=$self->{'copies_tree'}->get_selection;
+	$sel->unselect_all();
+	$self->charge_image($i);
+    }
 }
 
 sub charge_image {
@@ -301,9 +487,9 @@ sub image_suivante {
 	}
     }
     if($self->{'iimage'} != $i) {
-	$self->charge_image($i) ;
+	$self->goto_image($i) ;
     } else {
-	$self->charge_image(-1) ;
+	$self->goto_image(-1) ;
     }
 }
 
@@ -367,7 +553,7 @@ sub style_bouton {
 
 sub choisit {
     my ($self,$i)=(@_);
-    #print "Bouton $i\n";
+
     $self->lie($i,$self->{'image_etud'});
     $self->image_suivante();
 }
