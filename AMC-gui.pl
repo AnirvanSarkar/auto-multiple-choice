@@ -41,6 +41,7 @@ use AMC::ANList;
 use AMC::Gui::Manuel;
 use AMC::Gui::Association;
 use AMC::Gui::Commande;
+use AMC::Gui::Notes;
 
 use Data::Dumper;
 
@@ -1239,9 +1240,7 @@ sub valide_options_association {
 
 sub voir_notes {
     if(-f localise($projet{'notes'})) {
-	if(fork()==0) {
-	    exec($o{'dat_viewer'},localise($projet{'notes'}));
-	}
+	my $n=AMC::Gui::Notes::new('fichier'=>localise($projet{'notes'}));
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',

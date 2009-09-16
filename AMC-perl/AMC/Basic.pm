@@ -27,7 +27,7 @@ BEGIN {
     $VERSION     = 0.1.1;
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &file_triable &sort_id &sort_num &attention &model_id_to_iter);
+    @EXPORT      = qw( &id_triable &file2id &get_ep &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -75,6 +75,8 @@ sub sort_num {
     my ($liststore, $itera, $iterb, $sortkey) = @_;
     my $a = $liststore->get ($itera, $sortkey);
     my $b = $liststore->get ($iterb, $sortkey);
+    $a='' if(!defined($a));
+    $b='' if(!defined($b));
     my $para=$a =~ s/^\((.*)\)$/$1/;
     my $parb=$b =~ s/^\((.*)\)$/$1/;
     $a=0 if($a !~ /^-?[0-9.]+$/);
@@ -82,10 +84,21 @@ sub sort_num {
     return($parb <=> $para || $a <=> $b);
 }
 
+sub sort_string {
+    my ($liststore, $itera, $iterb, $sortkey) = @_;
+    my $a = $liststore->get ($itera, $sortkey);
+    my $b = $liststore->get ($iterb, $sortkey);
+    $a='' if(!defined($a));
+    $b='' if(!defined($b));
+    return($a cmp $b);
+}
+
 sub sort_id {
     my ($liststore, $itera, $iterb, $sortkey) = @_;
     my $a = $liststore->get ($itera, $sortkey);
     my $b = $liststore->get ($iterb, $sortkey);
+    $a='' if(!defined($a));
+    $b='' if(!defined($b));
     return id_triable($a) cmp id_triable($b);
 }
 
