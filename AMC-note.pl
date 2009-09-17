@@ -25,6 +25,7 @@ use Getopt::Long;
 use POSIX qw(ceil floor);
 use AMC::Basic;
 use AMC::ANList;
+use AMC::Gui::Avancement;
 
 use encoding 'utf8';
 
@@ -58,6 +59,9 @@ my $an_saved='';
 my $taille_max="1000x1500";
 my $qualite_jpg="65";
 
+my $progres=1;
+my $progres_id='';
+
 my $debug='';
 
 GetOptions("cr=s"=>\$cr_dir,
@@ -71,6 +75,8 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "arrondi=s"=>\$type_arrondi,
 	   "notemax=s"=>\$notemax,
 	   "encodage-interne=s"=>\$encodage_interne,
+	   "progression-id=s"=>\$progres_id,
+	   "progression=s"=>\$progres,
 	   );
 
 $grain =~ s/,/./;
@@ -127,6 +133,8 @@ if($grain<=0) {
     attention("Le grain doit etre strictement positif (grain=$grain)");
     die "Grain $grain<=0";
 }
+
+my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
 
 my $bar=XMLin($bareme,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
@@ -193,6 +201,8 @@ sub action {
     }
 }
 
+$avance->progres(0.05);
+
 my $anl;
 
 if($an_saved) {
@@ -201,8 +211,12 @@ if($an_saved) {
 			  'saved'=>$an_saved,
 			  'action'=>'',
 			  );
-    for my $id ($anl->ids()) {
+    my @ids=$anl->ids();
+    my $delta=0.75;
+    $delta/=(1+$#ids) if($#ids>=0);
+    for my $id (@ids) {
 	action($id,$anl->analyse($id),\%bons,$bar);
+	$avance->progres($delta);
     }
 } else {
     $anl=AMC::ANList::new($cr_dir,
@@ -254,8 +268,13 @@ my $somme_notes=0;
 my $n_notes=0;
 my %les_codes=();
 
-for my $etud ((grep { /^max/ } (keys %bons)),
-	      sort { $a <=> $b } (grep { ! /^max/ } (keys %bons))) {
+my @a_calculer=((grep { /^max/ } (keys %bons)),
+		sort { $a <=> $b } (grep { ! /^max/ } (keys %bons)));
+
+my $delta=0.19;
+$delta/=(1+$#a_calculer) if($#a_calculer>=0);
+
+for my $etud (@a_calculer) {
 
     my $refetud=$etud;
     $refetud =~ s/^max//;
@@ -426,6 +445,8 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 
 	$writer->endTag('copie');
     }
+
+    $avance->progres($delta);
 }
 
 # ligne du maximum
@@ -495,3 +516,5 @@ $writer->endTag('notes');
     
 $writer->end();
 $output->close();
+
+$avance->fin();

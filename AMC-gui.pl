@@ -1260,7 +1260,7 @@ sub noter {
 			      "--bareme",localise($projet{'fichbareme'}),
 			      localise($projet{'texsrc'}),
 			      ],
-		 'texte'=>'Lecture du bareme...',
+		 'texte'=>'Analyse du bareme...',
 		 'fin'=>\&noter_calcul,
 		 'progres.pulse'=>0.01);
     } else {
@@ -1281,10 +1281,12 @@ sub noter_calcul {
 			  "--notemax",$projet{'note_max'},
 			  
 			  "--encodage-interne",$o{'encodage_interne'},
+			  "--progression-id",'notation',
+			  "--progression",1,
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Calcul des notes...',
-	     'progres.pulse'=>0.01,
+	     'progres.id'=>'notation',
 	     'fin'=>sub {
 		 noter_resultat();
 	     },
