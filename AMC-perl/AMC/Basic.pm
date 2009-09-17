@@ -27,7 +27,7 @@ BEGIN {
     $VERSION     = 0.1.1;
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter);
+    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -50,6 +50,15 @@ sub file2id {
 	return(sprintf("+%d/%d/%d+",$1,$2,$3));
     } else {
 	return($f);
+    }
+}
+
+sub get_qr {
+    my $k=shift;
+    if($k =~ /([0-9]+)\.([0-9]+)/) {
+	return($1,$2);
+    } else {
+	die "Format de cle inconnu : $k";
     }
 }
 

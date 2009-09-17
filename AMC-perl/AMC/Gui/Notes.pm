@@ -145,4 +145,4 @@ sub quitter {
 
 __END__
 
-perl -e 'use XML::Simple;use Data::Dumper; $a=XMLin("~/Projets-QCM/essai/notes.dat","ForceArray"=>1,"KeyAttr"=>["id"]);print Dumper($a);'
+perl -e 'use XML::Simple;use Data::Dumper; $a=XMLin("/home/alexis/Projets-QCM/essai/notes.dat","ForceArray"=>1,"KeyAttr"=>["id"]);print Dumper($a);'

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -141,15 +141,6 @@ opendir(DIR, $cr_dir) || die "can't opendir $cr_dir: $!";
 my @xmls = grep { /\.xml$/ && -f "$cr_dir/$_" } readdir(DIR);
 closedir DIR;
 
-sub get_qr {
-    my $k=shift;
-    if($k =~ /([0-9]+)\.([0-9]+)/) {
-	return($1,$2);
-    } else {
-	die "Format de cle inconnu : $k";
-    }
-}
-
 sub degroupe {
     my ($s,%r)=(@_);
     for my $i (split(/,+/,$s)) {
@@ -254,6 +245,7 @@ my $writer = new XML::Writer(OUTPUT=>$output,
 
 $writer->xmlDecl($encodage_interne);
 $writer->startTag('notes',
+		  'seuil'=>$seuil,
 		  'notemax'=>$notemax,
 		  'arrondi'=>$type_arrondi,
 		  'grain'=>$grain);

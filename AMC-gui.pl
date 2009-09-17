@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -1327,6 +1327,22 @@ sub visualise_correc {
     if(fork()==0) {
 	exec($o{'img_viewer'},$f);
     }
+}
+
+sub annote_copies {
+    commande('commande'=>[with_prog("AMC-annote.pl"),
+			  "--progression-id",'annote',
+			  "--progression",1,
+			  "--cr",localise($projet{'cr'}),
+			  "--an-saved",localise($an_saved),
+			  "--notes",localise($projet{'notes'}),
+			  "--taille-max",$o{'taille_max_correction'},
+			  "--bareme",localise($projet{'fichbareme'}),
+			  "--qualite",$o{'qualite_correction'},
+			  ],
+	     'texte'=>'Annotation des copies...',
+	     'progres.id'=>'annote',
+	     );
 }
 
 sub regroupement {
