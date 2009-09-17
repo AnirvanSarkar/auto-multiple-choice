@@ -392,6 +392,7 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 				  'max'=>$note_question{'max'.$etud}->{$q},
 				  );
 		$note_question{'somme'}->{$q}+=$xx;
+		$note_question{'nb.somme'}->{$q}++;
 		$note_question{'max.somme'}->{$q}+=$note_question{'max'.$etud}->{$q};
 	    }
 	}
@@ -432,6 +433,7 @@ for my $etud ((grep { /^max/ } (keys %bons)),
 $writer->startTag('copie',id=>'max');
 
 my %maximums=();
+my $total=0;
 for my $q (@qids) {
     my $max=0;
     for my $etud (grep { ! /^max/ } (keys %bons)) {
@@ -441,8 +443,14 @@ for my $q (@qids) {
     $writer->emptyTag('question',
 		      'id'=>titre_q($q),
 		      'note'=>$max);
+    $total+=$max;
 }
 
+$writer->emptyTag('total',
+		  'total'=>$total,
+		  'max'=>$total,
+		  'note'=>$notemax,
+		  );
 $writer->endTag('copie');
 
 # ligne des moyennes
@@ -453,11 +461,17 @@ my %maximums=();
 for my $q (@qids) {
     $writer->emptyTag('question',
 		      'id'=>titre_q($q),
-		      'note'=>$note_question{'somme'}->{$q},
-		      'max'=>$note_question{'max.somme'}->{$q},
+		      'n'=>$note_question{'nb.somme'}->{$q},
+		      'note'=>$note_question{'somme'}->{$q}/$note_question{'nb.somme'}->{$q},
+		      'max'=>$note_question{'max.somme'}->{$q}/$note_question{'nb.somme'}->{$q},
 		      );
 }
 
+$writer->emptyTag('total',
+		  'total'=>$somme_notes,
+		  'max'=>$notemax,
+		  'note'=>$somme_notes/$n_notes,
+		  );
 $writer->endTag('copie');
 
 # les codes rencontres

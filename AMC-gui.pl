@@ -1302,7 +1302,7 @@ sub noter_resultat {
 			       ) };
 	if($notes) {
 	    # recuperation de la moyenne
-	    $moy=$notes->{'moyenne'}->[0];
+	    $moy=sprintf("%.02f",$notes->{'moyenne'}->[0]);
 	    $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">Moyenne : $moy</span>");
 	    # recuperation des codes disponibles
 	    @codes=(keys %{$notes->{'code'}});

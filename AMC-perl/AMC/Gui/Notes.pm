@@ -60,6 +60,14 @@ sub ajoute_colonne {
     $store->set_sort_func($i,\&sort_num,$i);
 }
 
+sub formatte {
+    my ($x)=@_;
+    $x=sprintf("%.2f",$x);
+    $x =~ s/0+$//;
+    $x =~ s/\.$//;
+    return($x);
+}
+
 sub new {
     my %o=(@_);
     my $self={'fichier'=>'',
@@ -116,12 +124,13 @@ sub new {
       
       $store->set($it,
 		  TAB_ID,$k,
-		  TAB_NOTE,$c->{'total'}->[0]->{'note'},
+		  TAB_NOTE,formatte($c->{'total'}->[0]->{'note'}),
 		  );
       
       my $i=TAB_DETAIL ;
       for(@keys) {
-	  $store->set($it,$i++,$c->{'question'}->{$_}->{'note'});
+	  $store->set($it,$i++,
+		      formatte($c->{'question'}->{$_}->{'note'}));
       }
       for(@codes) {
 	  $store->set($it,$i++,$c->{'code'}->{$_}->{'content'});
