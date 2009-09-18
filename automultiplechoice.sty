@@ -454,6 +454,7 @@
 \def\AMC@note{}
 %
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
+\message{AUTOQCM[TOTAL=#1]^^J}%
 \AMCid@etud=100\AMCid@etudfin=#1\advance\AMCid@etudfin by 100%
 \ifAMC@correchead\AMCid@etudfin=100\fi
 \loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%

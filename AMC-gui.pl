@@ -1256,13 +1256,15 @@ sub voir_notes {
 sub noter {
     if($projet{'maj_bareme'}) {
 	commande('commande'=>[with_prog("AMC-prepare.pl"),
+			      "--progression-id",'bareme',
+			      "--progression",1,
 			      "--mode","b",
 			      "--bareme",localise($projet{'fichbareme'}),
 			      localise($projet{'texsrc'}),
 			      ],
 		 'texte'=>'Analyse du bareme...',
 		 'fin'=>\&noter_calcul,
-		 'progres.pulse'=>0.01);
+		 'progres.id'=>'bareme');
     } else {
 	noter_calcul();
     }
