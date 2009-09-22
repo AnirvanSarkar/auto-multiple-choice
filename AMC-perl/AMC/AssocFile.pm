@@ -23,22 +23,6 @@ use IO::File;
 use XML::Simple;
 use Data::Dumper;
 
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw( );
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
-
 my $VERSION=1;
 
 my %type_ok=('auto'=>1,
@@ -107,6 +91,12 @@ sub print {
     my $self=shift;
 
     print Dumper($self->{'a'});
+}
+
+sub get_param {
+    my ($self,$p)=@_;
+    print STDERR "[ASSOC] Parametre inexistant : $p\n" if(!defined($self->{'a'}->{$p}));
+    return($self->{'a'}->{$p});
 }
 
 sub get {
