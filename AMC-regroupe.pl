@@ -122,8 +122,10 @@ for my $e (keys %r) {
     if($assoc && $noms) {
 	my $i=$assoc->effectif($e);
 	my $nom='XXX';
+	my $n;
+
 	if($i) {
-	    my ($n)=$noms->data($lk,$i);
+	    ($n)=$noms->data($lk,$i);
 	    if($n) {
 		$nom=$n->{'_ID_'};
 	    }
@@ -136,10 +138,15 @@ for my $e (keys %r) {
 
 	$f =~ s/\(NOM\)/$nom/gi;
 
-	for my $k ($noms->heads()) {
-	    my ($t)=$noms->data($lk,$i);
-	    $f =~ s/\($k:([0-9]+)\)/sprintf("%0$1d",$t)/gie;
-	    $f =~ s/\($k\)/$t/gi;
+	if($n) {
+	    for my $k ($noms->heads()) {
+		my ($t)=$n->{$k};
+		if($t) {
+		    print STDERR "$k -> $t\n";
+		    $f =~ s/\($k:([0-9]+)\)/sprintf("%0$1d",$t)/gie;
+		    $f =~ s/\($k\)/$t/gi;
+		}
+	    }
 	}
     }
     
