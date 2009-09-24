@@ -1429,7 +1429,12 @@ sub regroupement {
 			  "--progression-id",'regroupe',
 			  "--progression",1,
 			  "--modele",$projet{'modele_regroupement'},
+			  "--fich-assoc",localise($projet{'association'}),
+			  "--fich-noms",$projet{'listeetudiants'},
+			  "--noms-encodage",$o{'encodage_liste'},
+
 			  ],
+	     'signal'=>2,
 	     'texte'=>'Regroupement des pages corrigées par étudiant...',
 	     'progres.id'=>'regroupe',
 	     );
