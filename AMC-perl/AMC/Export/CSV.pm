@@ -27,7 +27,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
     $self->{'out.encodage'}='utf-8';
-    $self->{'out.separateur'}="\t";
+    $self->{'out.separateur'}=",";
     $self->{'out.decimal'}=",";
     $self->{'out.entoure'}="\"";
     bless ($self, $class);
@@ -39,7 +39,7 @@ sub parse_num {
     if($self->{'out.decimal'} ne '.') {
 	$n =~ s/\./$self->{'out.decimal'}/;
     }
-    return($n);
+    return($self->parse_string($n));
 }
 
 sub parse_string {
@@ -60,8 +60,10 @@ sub export {
 
     my @cont=(qw/_NOM_ _NOTE_ _ID_/,@{$self->{'keys'}},@{$self->{'codes'}});
 
-    print OUT join($self->{'out.separateur'},"nom","note","copie",
-		   @{$self->{'keys'}},@{$self->{'codes'}})."\n";
+    print OUT join($self->{'out.separateur'},
+		   map  { $self->parse_string($_) }
+		   ("nom","note","copie",
+		    @{$self->{'keys'}},@{$self->{'codes'}}))."\n";
     
     for my $etu (@{$self->{'copies'}}) {
 	print OUT join($self->{'out.separateur'},

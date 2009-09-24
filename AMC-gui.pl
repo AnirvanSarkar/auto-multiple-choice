@@ -112,7 +112,10 @@ my %o_defaut=('pdf_viewer'=>['commande',
 			     'eog',
 			     ],
 	      'dat_viewer'=>['commande',
-			     'oocalc','gnumeric',
+			     'gnumeric','kspread','oocalc',
+			     ],
+	      'ooo_viewer'=>['commande',
+			     'oocalc',
 			     ],
 	      'xml_viewer'=>['commande',
 			     'gedit','kedit','mousepad',
@@ -175,6 +178,7 @@ my %projet_defaut=('texsrc'=>'',
 	    
 		   'modifie'=>1,
 		   
+		   'format_export'=>'CSV',
 		   );
 
 my $mep_saved='mep.storable';
@@ -299,7 +303,9 @@ for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edit
     onglet_notation onglet_saisie
     log_general commande avancement
     liste diag_tree inconnu_tree diag_result
-    maj_bareme correc_tree correction_result regroupement_corriges/) {
+    maj_bareme correc_tree correction_result regroupement_corriges
+    export_c_format_export options_CSV options_ods
+    /) {
     $w{$_}=$gui->get_widget($_);
 }
 
@@ -490,10 +496,75 @@ my %cb_stores=(
 					     'gif'=>'GIF'),
 	       'liste_key'=>$cb_model_vide,
 	       'assoc_code'=>$cb_model_vide,
+	       'export_c_format_export'=>cb_model('CSV'=>'CSV',
+						  'ods'=>'OpenOffice'),
 	       );
+
+my %extension_fichier=();
 
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
 $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
+
+### export
+
+for(qw/export_c_format_export/) {
+    $w{$_}->set_model($cb_stores{$_});
+}
+
+sub maj_format_export {
+    reprend_pref('export',\%projet);
+    print STDERR "Format : ".$projet{'format_export'}."\n";
+    for(qw/CSV ods/) {
+	if($projet{'format_export'} eq $_) {
+	    $w{'options_'.$_}->show;
+	} else {
+	    $w{'options_'.$_}->hide;
+	}
+    }
+}
+
+sub exporte {
+    my $format=$projet{'format_export'};
+    my @options=();
+    my $ext=$extension_fichier{$format};
+    if(!$ext) {
+	$ext=lc($format);
+    }
+    my $output=localise('export-notes.'.$ext);
+
+    if($format eq 'CSV') {
+	push @options,"--option-out","encodage=".$o{'encodage_csv'},
+	"--option-out","decimal=".$o{'delimiteur_decimal'};
+    }
+    
+    commande('commande'=>[with_prog("AMC-export.pl"),
+			  "--fich-notes",localise($projet{'notes'}),
+			  "--fich-assoc",localise($projet{'association'}),
+			  "--fich-noms",$projet{'listeetudiants'},
+			  "--noms-encodage",$o{'encodage_liste'},
+			  "--output",$output,
+			  @options
+			  ],
+	     'texte'=>'Export des notes...',
+	     'progres.id'=>'export',
+	     'progres.pulse'=>0.01,
+	     'fin'=>sub {
+		 if(-f $output) {
+		     if(fork()==0) {
+			 exec($o{'dat_viewer'},$output);
+		     }
+		 } else {
+		     my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+							    'destroy-with-parent',
+							    'warning', # message type
+							    'ok', # which set of buttons?
+							    "L'export des notes dans le fichier $output n'a sans doute pas fonctionné, car ce dernier fichier est inexistant...");
+		     $dialog->run;
+		     $dialog->destroy;
+		 }
+	     }
+	     );
+}
 
 ## tri pour IDS
 
@@ -1460,17 +1531,19 @@ sub transmet_pref {
 
 # met a jour les preferences depuis les widgets correspondants
 sub reprend_pref {
-    my ($prefixe,$h)=@_;
+    my ($prefixe,$h,$oprefix)=@_;
 
     for my $t (keys %$h) {
+	my $tgui=$t;
+	$tgui =~ s/$oprefix$// if($oprefix);
 	my $n;
-	my $wp=$w{$prefixe.'_x_'.$t};
+	my $wp=$w{$prefixe.'_x_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_text();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_f_'.$t};
+	$wp=$w{$prefixe.'_f_'.$tgui};
 	if($wp) {
 	    if($wp->get_action =~ /-folder$/i) {
 		$n=$wp->get_current_folder();
@@ -1480,19 +1553,19 @@ sub reprend_pref {
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_v_'.$t};
+	$wp=$w{$prefixe.'_v_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_active();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_s_'.$t};
+	$wp=$w{$prefixe.'_s_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_value();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_c_'.$t};
+	$wp=$w{$prefixe.'_c_'.$tgui};
 	if($wp) {
 	    if($wp->get_model) {
 		if($wp->get_active_iter) {
@@ -2037,6 +2110,8 @@ sub valide_projet {
     noter_resultat();
 
     valide_liste('noinfo'=>1,'nomodif'=>1);
+
+    transmet_pref($gui,'export',\%projet);
 }
 
 sub projet_ouvre {

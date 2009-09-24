@@ -35,12 +35,14 @@ my $fich_assoc='';
 my $fich_noms='';
 my $noms_encodage='utf-8';
 my $noms_identifiant='';
+my @o_out=();
 
 GetOptions("fich-notes=s"=>\$fich_notes,
 	   "fich-assoc=s"=>\$fich_assoc,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "noms-identifiant=s"=>\$noms_identifiant,
+	   "option-out=s"=>\@o_out,
 	   "output|o=s"=>\$output,
 	   );
 	   
@@ -57,5 +59,11 @@ $ex->set_options("noms",
 		 "encodage"=>$noms_encodage,
 		 "identifiant"=>$noms_identifiant,
 		 );
+
+for my $oo (@o_out) {
+    if($oo =~ /([^=]+)=(.*)/) {
+	$ex->set_options("out",$1=>$2);
+    }
+}
 
 $ex->export($output);
