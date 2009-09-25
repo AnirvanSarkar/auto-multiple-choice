@@ -175,6 +175,9 @@ my %projet_defaut=('texsrc'=>'',
 		   'liste_key'=>'',
 		   'association'=>'association.xml',
 		   'assoc_code'=>'',
+
+		   'nom_examen'=>'',
+		   'code_examen'=>'',
 	    
 		   'modifie'=>1,
 		   
