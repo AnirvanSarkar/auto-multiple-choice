@@ -111,10 +111,10 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'img_viewer'=>['commande',
 			     'eog',
 			     ],
-	      'dat_viewer'=>['commande',
+	      'csv_viewer'=>['commande',
 			     'gnumeric','kspread','oocalc',
 			     ],
-	      'ooo_viewer'=>['commande',
+	      'ods_viewer'=>['commande',
 			     'oocalc',
 			     ],
 	      'xml_viewer'=>['commande',
@@ -536,11 +536,18 @@ sub exporte {
     my $output=localise('export-notes.'.$ext);
 
     if($format eq 'CSV') {
-	push @options,"--option-out","encodage=".$o{'encodage_csv'},
+	push @options,
+	"--option-out","encodage=".$o{'encodage_csv'},
 	"--option-out","decimal=".$o{'delimiteur_decimal'};
+    }
+    if($format eq 'ods') {
+	push @options,
+	"--option-out","nom=".$projet{'nom_examen'},
+	"--option-out","code=".$projet{'code_examen'};
     }
     
     commande('commande'=>[with_prog("AMC-export.pl"),
+			  "--module",$format,
 			  "--fich-notes",localise($projet{'notes'}),
 			  "--fich-assoc",localise($projet{'association'}),
 			  "--fich-noms",$projet{'listeetudiants'},
@@ -554,7 +561,7 @@ sub exporte {
 	     'fin'=>sub {
 		 if(-f $output) {
 		     if(fork()==0) {
-			 exec($o{'dat_viewer'},$output);
+			 exec($o{$ext.'_viewer'},$output);
 		     }
 		 } else {
 		     my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
@@ -2120,6 +2127,7 @@ sub valide_projet {
     valide_liste('noinfo'=>1,'nomodif'=>1);
 
     transmet_pref($gui,'export',\%projet);
+
 }
 
 sub projet_ouvre {

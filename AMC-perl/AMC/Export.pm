@@ -46,6 +46,7 @@ sub new {
 	'noms.identifiant'=>'',
 
 	'c'=>{},
+	'calcul'=>{},
     };
     bless ($self, $class);
     return $self;
@@ -81,7 +82,12 @@ sub load {
 				      'ForceArray'=>1,
 				      'KeyAttr'=>['id'],
 				      ) };
-	if(!$self->{'notes'}) {
+	if($self->{'notes'}) {
+	    for(qw/seuil notemax arrondi grain/) {
+		$self->{'calcul'}->{$_}=
+		    $self->{'notes'}->{$_};
+	    }
+	} else {
 	    print STDERR "Erreur a l'analyse du fichier de notes ".$self->{'fich.notes'}."\n";
 	}
     }
@@ -112,6 +118,8 @@ sub pre_process {
 	my $c=$self->{'notes'}->{'copie'}->{$etu};
       
 	$self->{'c'}->{$etu}->{'_NOTE_'}=$c->{'total'}->[0]->{'note'};
+	$self->{'c'}->{$etu}->{'_TOTAL_'}=$c->{'total'}->[0]->{'total'};
+	$self->{'c'}->{$etu}->{'_MAX_'}=$c->{'total'}->[0]->{'max'};
 	
 	for my $k (@keys) {
 	    $self->{'c'}->{$etu}->{$k}=$c->{'question'}->{$k}->{'note'};
