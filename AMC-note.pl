@@ -325,14 +325,24 @@ for my $etud (@a_calculer) {
 	    # v=pas de réponse sur toute la question
 	    # p=note plancher
 	    # d=décalage ajouté avant plancher
+	    # haut=on met le max a cette valeur et on enleve 1 pt par faute (MULT)
 	    
 	    if($barq->{'multiple'}) {
 		# QUESTION MULTIPLE
 
+		my @rep=(keys %{$bons{$etud}->{$q}});
+
 		$xx=0;
 		
 		%b_q=degroupe($barq->{'bareme'},
-			      'e'=>0,'b'=>1,'m'=>0,'v'=>0,'p'=>-100,'d'=>0);
+			      'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0);
+
+		if($b_q{'haut'}) {
+		    $b_q{'d'}=$b_q{'haut'}-(1+$#rep);
+		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
+		} else {
+		    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
+		}
 		
 		if($n_coche !=1 && $bons{$etud}->{$q}->{0}->[0]) {
 		    # coche deux dont "aucune des precedentes"
@@ -343,7 +353,7 @@ for my $etud (@a_calculer) {
 		    $xx=$b_q{'v'};
 		    $raison='V';
 		} else {
-		    for(keys %{$bons{$etud}->{$q}}) {
+		    for(@rep) {
 			if($_ != 0) {
 			    $code=($bons{$etud}->{$q}->{$_}->[1] ? "b" : "m");
 			    my %b_qspec=degroupe($barq->{'reponse'}->{$_}->{'bareme'},%b_q);
