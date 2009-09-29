@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -177,7 +177,7 @@ $ppm="$temp_dir/image.ppm";
 if($blur || $threshold || $scan !~ /\.ppm$/) {
     print "Transformation en ppm...\n";
 
-    my @ca=('convert');
+    my @ca=(magick_module('convert'));
     push @ca,"-blur",$blur if($blur);
     push @ca,"-threshold",$threshold if($threshold);
     push @ca,$scan,$ppm;
@@ -374,7 +374,7 @@ my $xb=$cadre_general->coordonnees(1,'x');
 
 # coupe le haut de la page et le tourne pour qu'il soit droit
 
-commande_externe("convert",$scan,
+commande_externe(magick_module("convert"),$scan,
 		 "-crop",int($xb-$xa)."x".$dy_head."+".$xa."+0",
 		 "-rotate",(-$angle*180/$M_PI),
 		 $page_droite);
@@ -636,8 +636,8 @@ sub rassemble_cases {
 	push @clones,"(","-clone",0,"-crop",$_,")";
     }
     print "Fabrication de la collection $f ...\n";
-    commande_externe("convert",$src,@clones,"-delete",0,$f);
-    commande_externe("montage",
+    commande_externe(magick_module("convert"),$src,@clones,"-delete",0,$f);
+    commande_externe(magick_module("montage"),
 		     "-tile","4x",
 		     "-background","blue",
 		     "-geometry","+3+3",
@@ -687,7 +687,7 @@ $traitement->ferme_commande();
 
 if($out_cadre || $zoom_file) {
 
-    @cmd=("convert","-fill","none");
+    @cmd=(magick_module("convert"),"-fill","none");
     $scan_score="$temp_dir/scan-score.ppm";
     
     # transcription de l'identifiant lu
@@ -746,7 +746,7 @@ if($out_cadre || $zoom_file) {
 
 	my $pdr="$temp_dir/haut-reduit.miff";
 
-	commande_externe("convert",
+	commande_externe(magick_module("convert"),
 			 "-fill","blue",
 			 $page_droite,
 			 "-stroke","blue",
@@ -782,7 +782,7 @@ if($out_cadre || $zoom_file) {
 	# Le nom
 
 	if($morceaux{'nom'}->[0]) {
-	    commande_externe("convert",
+	    commande_externe(magick_module("convert"),
 			     $scan_score."[".$morceaux{'nom'}->[0]."]",
 			     $nom_file);
 	}
@@ -819,7 +819,7 @@ if($out_cadre || $zoom_file) {
     # tracé des cadres
 
     if($out_cadre) {
-	@cmd=("convert","-fill","none","-stroke","red");
+	@cmd=(magick_module("convert"),"-fill","none","-stroke","red");
 	
 	# cadre repéré
 

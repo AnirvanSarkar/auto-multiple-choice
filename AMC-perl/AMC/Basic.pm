@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -27,12 +27,39 @@ BEGIN {
     $VERSION     = 0.1.1;
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter);
+    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
     # as well as any optionally exported functions
     @EXPORT_OK   = qw();
+}
+
+# peut-on acceder a cette commande par exec ?
+sub commande_accessible {
+    my $c=shift;
+    $c =~ s/(?<=[^\s])\s.*//;
+    $c =~ s/^\s+//;
+    if($c =~ /^\//) {
+	return (-x $c);
+    } else {
+	$ok='';
+	for (split(/:/,$ENV{'PATH'})) {
+	    $ok=1 if(-x "$_/$c");
+	}
+	return($ok);
+    }
+}
+
+my $gm_ok=commande_accessible('gm');
+
+sub magick_module {
+    my ($m)=@_;
+    if($gm_ok) {
+	return('gm',$m);
+    } else {
+	return($m);
+    }
 }
 
 sub id_triable {

@@ -187,22 +187,6 @@ my %projet_defaut=('texsrc'=>'',
 my $mep_saved='mep.storable';
 my $an_saved='an.storable';
 
-# peut-on acceder a cette commande par exec ?
-sub commande_accessible {
-    my $c=shift;
-    $c =~ s/(?<=[^\s])\s.*//;
-    $c =~ s/^\s+//;
-    if($c =~ /^\//) {
-	return (-x $c);
-    } else {
-	$ok='';
-	for (split(/:/,$ENV{'PATH'})) {
-	    $ok=1 if(-x "$_/$c");
-	}
-	return($ok);
-    }
-}
-
 # toutes les commandes prevues sont-elles accessibles ? Si non, on
 # avertit l'utilisateur
 
