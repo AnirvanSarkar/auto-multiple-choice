@@ -186,7 +186,8 @@ my @ids=$anl->ids();
 $delta=1/$#ids if($#ids>0);
 
  XMLFB: for my $id (@ids) {
-     my $x=$anl->analyse($id); #,'scan'=>1);
+     my $x=$anl->analyse($id,'scan'=>1);
+     my $x_coche=$anl->analyse($id);
      print "Analyse $id...\n";
 
      my $scan=$x->{'src'};
@@ -227,6 +228,8 @@ $delta=1/$#ids if($#ids>0);
 	 # signalisation autour de chaque case :
 	 
 	 my $page=$x->{'case'};
+	 my $page_coche=$x_coche->{'case'};
+	 
        CASE: for my $k (keys %$page) {
 	   my ($q,$r)=get_qr($k);
 	   next CASE if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'});
@@ -235,7 +238,7 @@ $delta=1/$#ids if($#ids>0);
 	   my $bonne=$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'};
 
 	   # cochee ?
-	   my $cochee=($page->{$k}->{'r'} > $seuil);
+	   my $cochee=($page_coche->{$k}->{'r'} > $seuil);
 	   
 	   if($bonne) {
 	       push @cmd,"-strokewidth",2,"-stroke",($cochee ? "blue" : "red"),
