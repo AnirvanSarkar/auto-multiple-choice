@@ -107,8 +107,8 @@ $as->clear("auto");
 
 for my $id (keys %{$notes->{'copie'}}) {
     my $k=$notes->{'copie'}->{$id}->{'code'}->{$notes_id}->{'content'};
-    print "Copie $id -> $k\n" if($debug);
     if($bon_code{$k}) {
+	print "Copie $id -> $k\n" if($debug);
 	$as->set("auto",$id,$k);
     }
 }

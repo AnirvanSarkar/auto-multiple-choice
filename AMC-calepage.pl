@@ -374,7 +374,7 @@ my $xb=$cadre_general->coordonnees(1,'x');
 
 # coupe le haut de la page et le tourne pour qu'il soit droit
 
-commande_externe(magick_module("convert"),$scan,
+commande_externe("convert",$scan,
 		 "-crop",int($xb-$xa)."x".$dy_head."+".$xa."+0",
 		 "-rotate",(-$angle*180/$M_PI),
 		 $page_droite);
@@ -636,7 +636,8 @@ sub rassemble_cases {
 	push @clones,"(","-clone",0,"-crop",$_,")";
     }
     print "Fabrication de la collection $f ...\n";
-    commande_externe(magick_module("convert"),$src,@clones,"-delete",0,$f);
+    commande_externe("convert",$src,@clones,"-delete",0,$f);
+    # (clone non disponible dans gm ?)
     commande_externe(magick_module("montage"),
 		     "-tile","4x",
 		     "-background","blue",
@@ -746,7 +747,7 @@ if($out_cadre || $zoom_file) {
 
 	my $pdr="$temp_dir/haut-reduit.miff";
 
-	commande_externe(magick_module("convert"),
+	commande_externe("convert",
 			 "-fill","blue",
 			 $page_droite,
 			 "-stroke","blue",
@@ -783,7 +784,7 @@ if($out_cadre || $zoom_file) {
 
 	if($morceaux{'nom'}->[0]) {
 	    commande_externe(magick_module("convert"),
-			     $scan_score."[".$morceaux{'nom'}->[0]."]",
+			     $scan_score,"-crop",$morceaux{'nom'}->[0],
 			     $nom_file);
 	}
 

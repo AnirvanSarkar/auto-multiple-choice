@@ -128,6 +128,7 @@ sub maj { # actualisation des donnees induites
 
 sub inverse {
     my ($self,$id)=@_;
+    return() if(!$id);
     $self->maj();
     if($self->{'dest'}->{$id}) {
 	return(@{$self->{'dest'}->{$id}});

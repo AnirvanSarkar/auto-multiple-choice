@@ -59,7 +59,7 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "n-procs=s"=>\$n_procs,
 	   );
 
-$queue=AMC::Queue::new('max.procs',$n_procs);
+$queue=AMC::Queue::new('max.procs',$n_procs,'debug',$debug);
 
 my @scans=@ARGV;
 

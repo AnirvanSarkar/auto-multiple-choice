@@ -154,6 +154,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 				     'number-up'=>1,
 				     },
 	      'manuel_image_type'=>'xpm',
+	      'assoc_ncols'=>4,
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -1216,6 +1217,7 @@ sub associe {
 					  'liste_key'=>$projet{'liste_key'},
 					  'fichier-liens'=>localise($projet{'association'}),
 					  'global'=>0,
+					  'assoc-ncols'=>$o{'assoc_ncols'},
 					  'encodage_liste'=>$o{'encodage_liste'},
 					  'encodage_interne'=>$o{'encodage_interne'},
 					  );

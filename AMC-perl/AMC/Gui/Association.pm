@@ -71,7 +71,7 @@ sub reduit {
 
 sub new {
     my %o=(@_);
-    my $self={'assoc-ncols'=>5,
+    my $self={'assoc-ncols'=>3,
 	      'cr'=>'',
 	      'liste'=>'',
 	      'liste_key'=>'',
@@ -148,7 +148,7 @@ sub new {
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
     
     my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
-    
+   
     $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
     
     my @bouton_nom=();
@@ -156,25 +156,29 @@ sub new {
     $self->{'boutons'}=\@bouton_nom;
     $self->{'boutons_eb'}=\@bouton_eb;
 
+    $self->{'lignes'}=[];
+
     my ($x,$y)=(0,0);
     for my $i (0..($self->{'liste'}->taille()-1)) {
 	my $eb=Gtk2::EventBox->new();
 	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
 	$eb->add($b);
 	$self->{'tableau'}->attach_defaults($eb,$x,$x+1,$y,$y+1);
-	$y++;
-	if($y>=$nligs) {
-	    $y=0;
-	    $x++;
-	}
 	push @bouton_nom,$b;
 	push @bouton_eb,$eb;
 	$b->show();
 	$eb->show();
+	push @{$self->{'lignes'}->[$y]},$eb;
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
 
 	$self->style_bouton($i);
+
+	$x++;
+	if($x>=$self->{'assoc-ncols'}) {
+	    $y++;
+	    $x=0;
+	}
     }
 
     # vue arborescente
@@ -270,7 +274,8 @@ sub maj_couleurs_liste { # mise a jour des couleurs la liste
 	    my $etat=$self->{'assoc'}->etat($e);
 	    my $coul;
 	    if($etat==0) {
-		if($self->{'assoc'}->get('manuel',$e) eq 'NONE') {
+		my $x=$self->{'assoc'}->get('manuel',$e);
+		if(defined($x) && $x eq 'NONE') {
 		    $coul='salmon';
 		} else {
 		    $coul=undef;
