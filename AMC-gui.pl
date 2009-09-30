@@ -1413,6 +1413,7 @@ sub annote_copies {
 			  ],
 	     'texte'=>'Annotation des copies...',
 	     'progres.id'=>'annote',
+	     'fin'=>sub { detecte_correc(); },
 	     );
 }
 
