@@ -267,6 +267,7 @@ $writer->startTag('notes',
 my $somme_notes=0;
 my $n_notes=0;
 my %les_codes=();
+my %indicatives=();
 
 my @a_calculer=((grep { /^max/ } (keys %bons)),
 		sort { $a <=> $b } (grep { ! /^max/ } (keys %bons)));
@@ -403,7 +404,9 @@ for my $etud (@a_calculer) {
 
 	    $note_question{$etud}->{$q}=$xx;
 
-	    if(!$barq->{'indicative'}) {
+	    if($barq->{'indicative'}) {
+		$indicatives{$q}=1;
+	    } else {
 		$total+=$xx;
 	    }
 	    
@@ -475,7 +478,9 @@ for my $q (@qids) {
     }
     $writer->emptyTag('question',
 		      'id'=>titre_q($q),
-		      'note'=>$max);
+		      'note'=>$max,
+		      'indicative'=>$indicatives{$q},
+		      );
     $total+=$max;
 }
 

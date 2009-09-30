@@ -109,8 +109,19 @@ sub pre_process {
 
     my @copies=(keys %{$self->{'notes'}->{'copie'}});
 
-    my @codes=sort { $a cmp $b } (keys %{$self->{'notes'}->{'code'}});
-    my @keys=sort { $a cmp $b } grep { if(s/\.[0-9]+$//) { !$self->{'notes'}->{'code'}->{$_} } else { 1; } } (keys %{$self->{'notes'}->{'copie'}->{'max'}->{'question'}});
+    my @codes=(keys %{$self->{'notes'}->{'code'}});
+    my @keys=();
+
+    for(grep { if(s/\.[0-9]+$//) { !$self->{'notes'}->{'code'}->{$_} } else { 1; } } (keys %{$self->{'notes'}->{'copie'}->{'max'}->{'question'}})) {
+	if($self->{'notes'}->{'copie'}->{'max'}->{'question'}->{$_}->{'indicative'}) {
+	    push @codes,$_;
+	} else {
+	    push @keys,$_;
+	}
+    }
+
+    @keys=sort { $a cmp $b } @keys;
+    @codes=sort { $a cmp $b } @codes;
  
     for my $etu (@copies) {
 	$self->{'c'}->{$etu}={'_ID_'=>$etu};
