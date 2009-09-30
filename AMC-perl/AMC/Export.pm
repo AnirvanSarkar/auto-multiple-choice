@@ -134,18 +134,22 @@ sub pre_process {
     if($self->{'assoc'} && $self->{'noms'}) {
 	my $lk=$self->{'assoc'}->get_param('liste_key');
 	for my $etu (@copies) {
-	    my $i=$self->{'assoc'}->effectif($etu);
-	    if($i) {
-		my ($n)=$self->{'noms'}->data($lk,$i);
-		if($n) {
-		    $self->{'c'}->{$etu}->{'_NOM_'}=
-			$n->{'_ID_'};
-		} else {
-		    $self->{'c'}->{$etu}->{'_NOM_'}='?';
-		}
+	    if($etu =~ /^(max|moyenne)$/) {
+		$self->{'c'}->{$etu}->{'_NOM_'}='';
 	    } else {
-		$self->{'c'}->{$etu}->{'_NOM_'}='?';
-	    }	
+		my $i=$self->{'assoc'}->effectif($etu);
+		if($i) {
+		    my ($n)=$self->{'noms'}->data($lk,$i);
+		    if($n) {
+			$self->{'c'}->{$etu}->{'_NOM_'}=
+			    $n->{'_ID_'};
+		    } else {
+			$self->{'c'}->{$etu}->{'_NOM_'}='?';
+		    }
+		} else {
+		    $self->{'c'}->{$etu}->{'_NOM_'}='??';
+		}	
+	    }
 	}
 
 	$k_id='_NOM_';

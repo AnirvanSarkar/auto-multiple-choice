@@ -338,8 +338,10 @@ for my $etud (@a_calculer) {
 			      'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0);
 
 		if($b_q{'haut'}) {
-		    $b_q{'d'}=$b_q{'haut'}-(1+$#rep);
+		    my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
+		    $b_q{'d'}=$b_q{'haut'}-(1+$#rep_pleine);
 		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
+		    print "Q=$q REPS=".join(',',@rep)." HAUT=$b_q{'haut'} D=$b_q{'d'} P=$b_q{'p'}\n" if($debug);
 		} else {
 		    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
 		}
