@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -41,6 +41,7 @@ use AMC::ANList;
 use AMC::Gui::Manuel;
 use AMC::Gui::Association;
 use AMC::Gui::Commande;
+use AMC::Gui::Notes;
 
 use Data::Dumper;
 
@@ -110,8 +111,11 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'img_viewer'=>['commande',
 			     'eog',
 			     ],
-	      'dat_viewer'=>['commande',
-			     'oocalc','gnumeric',
+	      'csv_viewer'=>['commande',
+			     'gnumeric','kspread','oocalc',
+			     ],
+	      'ods_viewer'=>['commande',
+			     'oocalc',
 			     ],
 	      'xml_viewer'=>['commande',
 			     'gedit','kedit','mousepad',
@@ -150,16 +154,16 @@ my %o_defaut=('pdf_viewer'=>['commande',
 				     'number-up'=>1,
 				     },
 	      'manuel_image_type'=>'xpm',
+	      'assoc_ncols'=>4,
 	      );
 
 my %projet_defaut=('texsrc'=>'',
 		   'mep'=>'mep',
 		   'cr'=>'cr',
 		   'listeetudiants'=>'',
-		   'notes'=>'notes.dat',
+		   'notes'=>'notes.xml',
 		   'seuil'=>0.1,
 		   'maj_bareme'=>1,
-		   'annote_copies'=>0,
 		   'fichbareme'=>'bareme.xml',
 		   'docs'=>['sujet.pdf','corrige.pdf','calage.pdf'],
 		   
@@ -168,28 +172,21 @@ my %projet_defaut=('texsrc'=>'',
 		   'note_max'=>20,
 		   'note_grain'=>"0,5",
 		   'note_arrondi'=>'inf',
+
+		   'liste_key'=>'',
+		   'association'=>'association.xml',
+		   'assoc_code'=>'',
+
+		   'nom_examen'=>'',
+		   'code_examen'=>'',
 	    
 		   'modifie'=>1,
+		   
+		   'format_export'=>'CSV',
 		   );
 
 my $mep_saved='mep.storable';
 my $an_saved='an.storable';
-
-# peut-on acceder a cette commande par exec ?
-sub commande_accessible {
-    my $c=shift;
-    $c =~ s/(?<=[^\s])\s.*//;
-    $c =~ s/^\s+//;
-    if($c =~ /^\//) {
-	return (-x $c);
-    } else {
-	$ok='';
-	for (split(/:/,$ENV{'PATH'})) {
-	    $ok=1 if(-x "$_/$c");
-	}
-	return($ok);
-    }
-}
 
 # toutes les commandes prevues sont-elles accessibles ? Si non, on
 # avertit l'utilisateur
@@ -294,7 +291,9 @@ for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edit
     onglet_notation onglet_saisie
     log_general commande avancement
     liste diag_tree inconnu_tree diag_result
-    maj_bareme annote_copies correc_tree regroupement_corriges/) {
+    maj_bareme correc_tree correction_result regroupement_corriges
+    export_c_format_export options_CSV options_ods
+    /) {
     $w{$_}=$gui->get_widget($_);
 }
 
@@ -465,6 +464,8 @@ sub get_enc {
     return('');
 }
 
+my $cb_model_vide=cb_model(''=>'(aucun)');
+
 my %cb_stores=(
 	       'delimiteur_decimal'=>cb_model(',',', (virgule)',
 					      '.','. (point)'),
@@ -481,10 +482,84 @@ my %cb_stores=(
 	       'manuel_image_type'=>cb_model('ppm'=>'(aucun)',
 					     'xpm'=>'XPM',
 					     'gif'=>'GIF'),
+	       'liste_key'=>$cb_model_vide,
+	       'assoc_code'=>$cb_model_vide,
+	       'export_c_format_export'=>cb_model('CSV'=>'CSV',
+						  'ods'=>'OpenOffice'),
 	       );
+
+my %extension_fichier=();
 
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
 $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
+
+### export
+
+for(qw/export_c_format_export/) {
+    $w{$_}->set_model($cb_stores{$_});
+}
+
+sub maj_format_export {
+    reprend_pref('export',\%projet);
+    print STDERR "Format : ".$projet{'format_export'}."\n";
+    for(qw/CSV ods/) {
+	if($projet{'format_export'} eq $_) {
+	    $w{'options_'.$_}->show;
+	} else {
+	    $w{'options_'.$_}->hide;
+	}
+    }
+}
+
+sub exporte {
+    my $format=$projet{'format_export'};
+    my @options=();
+    my $ext=$extension_fichier{$format};
+    if(!$ext) {
+	$ext=lc($format);
+    }
+    my $output=localise('export-notes.'.$ext);
+
+    if($format eq 'CSV') {
+	push @options,
+	"--option-out","encodage=".$o{'encodage_csv'},
+	"--option-out","decimal=".$o{'delimiteur_decimal'};
+    }
+    if($format eq 'ods') {
+	push @options,
+	"--option-out","nom=".$projet{'nom_examen'},
+	"--option-out","code=".$projet{'code_examen'};
+    }
+    
+    commande('commande'=>[with_prog("AMC-export.pl"),
+			  "--module",$format,
+			  "--fich-notes",localise($projet{'notes'}),
+			  "--fich-assoc",localise($projet{'association'}),
+			  "--fich-noms",$projet{'listeetudiants'},
+			  "--noms-encodage",$o{'encodage_liste'},
+			  "--output",$output,
+			  @options
+			  ],
+	     'texte'=>'Export des notes...',
+	     'progres.id'=>'export',
+	     'progres.pulse'=>0.01,
+	     'fin'=>sub {
+		 if(-f $output) {
+		     if(fork()==0) {
+			 exec($o{$ext.'_viewer'},$output);
+		     }
+		 } else {
+		     my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+							    'destroy-with-parent',
+							    'warning', # message type
+							    'ok', # which set of buttons?
+							    "L'export des notes dans le fichier $output n'a sans doute pas fonctionné, car ce dernier fichier est inexistant...");
+		     $dialog->run;
+		     $dialog->destroy;
+		 }
+	     }
+	     );
+}
 
 ## tri pour IDS
 
@@ -1096,8 +1171,41 @@ sub saisie_auto_ok {
 }
 
 sub valide_liste {
-    $projet{'listeetudiants'}=$w{'liste'}->get_filename();
-    $projet{'modifie'}=1; print "* valide_liste\n" if($debug);
+    my (%oo)=@_;
+    print "* valide_liste\n" if($debug);
+
+    my $fl=$w{'liste'}->get_filename();
+
+    my $l=AMC::NamesFile::new($fl,
+			      'encodage'=>$o{'encodage_liste'},
+			      );
+    my ($err,$errlig)=$l->errors();
+
+    if($err) {
+	if(!$oo{'noinfo'}) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							       'destroy-with-parent',
+							       'error', # message type
+							       'ok', # which set of buttons?
+							       "Le fichier choisi ne convient pas : $err erreurs détectées, la première en ligne $errlig.");
+	    $dialog->run;
+	    $dialog->destroy;
+	}
+	$cb_stores{'liste_key'}=$cb_model_vide;
+    } else {
+	# ok
+	if(!$oo{'nomodif'}) {
+	    $projet{'listeetudiants'}=$fl;
+	    $projet{'modifie'}=1;
+	}
+	# transmission liste des en-tetes
+	my @keys=$l->keys;
+	print "entetes : ".join(",",@keys)."\n" if($debug);
+	$cb_stores{'liste_key'}=cb_model('','(aucun)',
+					 map { ($_,$_) } 
+					 sort { $a cmp $b } (@keys));
+    }
+    transmet_pref($gui,'pref_assoc',\%projet,{},{'liste_key'=>1});
 }
 
 ### Actions des boutons de la partie NOTATION
@@ -1106,7 +1214,10 @@ sub associe {
     if(-f $projet{'listeetudiants'}) {
 	my $ga=AMC::Gui::Association::new('cr'=>localise($projet{'cr'}),
 					  'liste'=>$projet{'listeetudiants'},
+					  'liste_key'=>$projet{'liste_key'},
+					  'fichier-liens'=>localise($projet{'association'}),
 					  'global'=>0,
+					  'assoc-ncols'=>$o{'assoc_ncols'},
 					  'encodage_liste'=>$o{'encodage_liste'},
 					  'encodage_interne'=>$o{'encodage_interne'},
 					  );
@@ -1120,6 +1231,53 @@ sub associe {
 	$dialog->destroy;
 	
     }
+}
+
+sub associe_auto {
+    if(! -s localise($projet{'listeetudiants'})) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "Il faut tout d'abord choisir un fichier contenant la liste des étudiants");
+	$dialog->run;
+	$dialog->destroy;
+    } elsif(!$projet{'liste_key'}) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "Aucun identifiant n'a été choisi parmi les titres de colonnes du fichier contenant la liste des étudiants. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+	$dialog->run;
+	$dialog->destroy;
+    } elsif(! $projet{'assoc_code'}) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "Aucun code n'a été choisi parmi les codes (éventuellement fabriqués avec la commande LaTeX \\AMCcode) disponibles. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+	$dialog->run;
+	$dialog->destroy;
+    } else {
+	commande('commande'=>[with_prog("AMC-association-auto.pl"),
+			      "--notes",localise($projet{'notes'}),
+			      "--notes-id",$projet{'assoc_code'},
+			      "--liste",localise($projet{'listeetudiants'}),
+			      "--liste-key",$projet{'liste_key'},
+			      "--encodage-liste",$o{'encodage_liste'},
+			      "--assoc",localise($projet{'association'}),
+			      "--encodage-interne",$o{'encodage_interne'},
+			      ($debug ? "--debug" : "--no-debug")
+			      ],
+		 'texte'=>'Association automatique...',
+		 'fin'=>sub {
+		     assoc_resultat();
+		 },
+		 );
+    }
+}
+
+sub assoc_resultat {
 }
 
 sub valide_cb {
@@ -1143,11 +1301,13 @@ sub valide_options_notation {
     reprend_pref('notation',\%projet);
 }
 
+sub valide_options_association {
+    reprend_pref('pref_assoc',\%projet);
+}
+
 sub voir_notes {
     if(-f localise($projet{'notes'})) {
-	if(fork()==0) {
-	    exec($o{'dat_viewer'},localise($projet{'notes'}));
-	}
+	my $n=AMC::Gui::Notes::new('fichier'=>localise($projet{'notes'}));
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',
@@ -1163,13 +1323,15 @@ sub voir_notes {
 sub noter {
     if($projet{'maj_bareme'}) {
 	commande('commande'=>[with_prog("AMC-prepare.pl"),
+			      "--progression-id",'bareme',
+			      "--progression",1,
 			      "--mode","b",
 			      "--bareme",localise($projet{'fichbareme'}),
 			      localise($projet{'texsrc'}),
 			      ],
-		 'texte'=>'Lecture du bareme...',
+		 'texte'=>'Analyse du bareme...',
 		 'fin'=>\&noter_calcul,
-		 'progres.pulse'=>0.01);
+		 'progres.id'=>'bareme');
     } else {
 	noter_calcul();
     }
@@ -1181,26 +1343,51 @@ sub noter_calcul {
 			  "--an-saved",localise($an_saved),
 			  "--bareme",localise($projet{'fichbareme'}),
 			  "-o",localise($projet{'notes'}),
-			  ($projet{'annote_copies'} ? "--copies" : "--no-copies"),
-			  "--taille-max",$o{'taille_max_correction'},
-			  "--qualite",$o{'qualite_correction'},
 			  "--seuil",$projet{'seuil'},
 			  
 			  "--grain",$projet{'note_grain'},
 			  "--arrondi",$projet{'note_arrondi'},
 			  "--notemax",$projet{'note_max'},
 			  
-			  "--delimiteur",$o{'delimiteur_decimal'},
-			  "--encodage-csv",$o{'encodage_csv'},
+			  "--encodage-interne",$o{'encodage_interne'},
+			  "--progression-id",'notation',
+			  "--progression",1,
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Calcul des notes...',
-	     'progres.pulse'=>0.01,
+	     'progres.id'=>'notation',
 	     'fin'=>sub {
-		 voir_notes();
-		 detecte_correc() if($projet{'annote_copies'});
+		 noter_resultat();
 	     },
 	     );
+}
+
+sub noter_resultat {
+    my $moy;
+    my @codes=();
+    if(-s localise($projet{'notes'})) {
+	print "* lecture notes\n" if($debug);
+	my $notes=eval { XMLin(localise($projet{'notes'}),
+			       'ForceArray'=>1,
+			       'KeyAttr'=>['id'],
+			       ) };
+	if($notes) {
+	    # recuperation de la moyenne
+	    $moy=sprintf("%.02f",$notes->{'moyenne'}->[0]);
+	    $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">Moyenne : $moy</span>");
+	    # recuperation des codes disponibles
+	    @codes=(keys %{$notes->{'code'}});
+	} else {
+	    $w{'correction_result'}->set_markup("<span foreground=\"red\">Notes illisibles</span>");
+	}
+	print "Codes : ".join(',',@codes)."\n" if($debug);
+    } else {
+	$w{'correction_result'}->set_markup("<span foreground=\"red\">Aucun calcul de notes</span>");
+    }
+    $cb_stores{'assoc_code'}=cb_model(''=>'(aucun)',
+				      map { $_=>$_ } 
+				      sort { $a cmp $b } (@codes));
+    transmet_pref($gui,'pref_assoc',\%projet,{},{'assoc_code'=>1});
 }
 
 sub visualise_correc {
@@ -1213,6 +1400,23 @@ sub visualise_correc {
     }
 }
 
+sub annote_copies {
+    commande('commande'=>[with_prog("AMC-annote.pl"),
+			  "--progression-id",'annote',
+			  "--progression",1,
+			  "--cr",localise($projet{'cr'}),
+			  "--an-saved",localise($an_saved),
+			  "--notes",localise($projet{'notes'}),
+			  "--taille-max",$o{'taille_max_correction'},
+			  "--bareme",localise($projet{'fichbareme'}),
+			  "--qualite",$o{'qualite_correction'},
+			  ],
+	     'texte'=>'Annotation des copies...',
+	     'progres.id'=>'annote',
+	     'fin'=>sub { detecte_correc(); },
+	     );
+}
+
 sub regroupement {
 
     valide_options_notation();
@@ -1222,7 +1426,12 @@ sub regroupement {
 			  "--progression-id",'regroupe',
 			  "--progression",1,
 			  "--modele",$projet{'modele_regroupement'},
+			  "--fich-assoc",localise($projet{'association'}),
+			  "--fich-noms",$projet{'listeetudiants'},
+			  "--noms-encodage",$o{'encodage_liste'},
+
 			  ],
+	     'signal'=>2,
 	     'texte'=>'Regroupement des pages corrigées par étudiant...',
 	     'progres.id'=>'regroupe',
 	     );
@@ -1271,9 +1480,10 @@ sub activate_doc {
 
 # transmet les preferences vers les widgets correspondants
 sub transmet_pref {
-    my ($gap,$prefixe,$h,$alias)=@_;
+    my ($gap,$prefixe,$h,$alias,$seulement)=@_;
 
     for my $t (keys %$h) {
+	if(!$seulement || $seulement->{$t}) {
 	my $ta=$t;
 	$ta=$alias->{$t} if($alias->{$t});
 
@@ -1305,33 +1515,37 @@ sub transmet_pref {
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
+		print "CB_STORE($t) modifie\n" if($debug);
 		$wp->set_model($cb_stores{$ta});
 		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
 		if($i) {
-		    #print "[$t] trouve $i\n";
-		    #print " -> ".$cb_stores{$t}->get($i,COMBO_TEXT)."\n";
+		    print "[$t] trouve $i\n" if($debug);
+		    print " -> ".$cb_stores{$t}->get($i,COMBO_TEXT)."\n" if($debug);
 		    $wp->set_active_iter($i);
 		}
 	    } else {
+		print "pas de CB_STORE pour $t\n" if($debug);
 		$wp->set_active($h->{$t});
 	    }
 	}
-    }
+    }}
 }
 
 # met a jour les preferences depuis les widgets correspondants
 sub reprend_pref {
-    my ($prefixe,$h)=@_;
+    my ($prefixe,$h,$oprefix)=@_;
 
     for my $t (keys %$h) {
+	my $tgui=$t;
+	$tgui =~ s/$oprefix$// if($oprefix);
 	my $n;
-	my $wp=$w{$prefixe.'_x_'.$t};
+	my $wp=$w{$prefixe.'_x_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_text();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_f_'.$t};
+	$wp=$w{$prefixe.'_f_'.$tgui};
 	if($wp) {
 	    if($wp->get_action =~ /-folder$/i) {
 		$n=$wp->get_current_folder();
@@ -1341,19 +1555,19 @@ sub reprend_pref {
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_v_'.$t};
+	$wp=$w{$prefixe.'_v_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_active();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_s_'.$t};
+	$wp=$w{$prefixe.'_s_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_value();
 	    $h->{'modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-	$wp=$w{$prefixe.'_c_'.$t};
+	$wp=$w{$prefixe.'_c_'.$tgui};
 	if($wp) {
 	    if($wp->get_model) {
 		if($wp->get_active_iter) {
@@ -1887,8 +2101,6 @@ sub valide_projet {
 
     print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
     $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
-    print "Options correction : AC".$projet{'annote_copies'}."\n" if($debug);
-    $w{'annote_copies'}->set_active($projet{'annote_copies'});
 
     transmet_pref($gui,'notation',\%projet);
 
@@ -1896,6 +2108,13 @@ sub valide_projet {
     $t.= ' - projet '.$projet{'nom'} 
         if(!($t =~ s/-.*/- projet $projet{'nom'}/));
     $w{'main_window'}->set_title($t);
+
+    noter_resultat();
+
+    valide_liste('noinfo'=>1,'nomodif'=>1);
+
+    transmet_pref($gui,'export',\%projet);
+
 }
 
 sub projet_ouvre {

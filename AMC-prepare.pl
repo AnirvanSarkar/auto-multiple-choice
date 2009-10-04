@@ -357,16 +357,29 @@ if($mode =~ /b/) {
     my $rep='';
     my $etu='';
 
+    my $delta=0;
+
     $cmd_pid=open(TEX,"-|",latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/))
 	or die "Impossible d'executer latex";
     while(<TEX>) {
+	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 
+	    my $t=$1;
+	    $t =~ s/\s//g;
+	    if($t>0) {
+		$delta=1/$t;
+	    } else {
+		print "*** TOTAL=$t ***\n";
+	    }
+	}
 	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
 	    $quest=$1;
 	    $rep=''; 
 	    $qs{$quest}={};
 	}
-	if(/AUTOQCM\[ETU=([0-9]+)\]/) { 
+	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
+	    $avance->progres($delta) if($etu ne '');
 	    $etu=$1;
+	    print "Copie $etu...\n";
 	    $bs{$etu}={};
 	}
 	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {

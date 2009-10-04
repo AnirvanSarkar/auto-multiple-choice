@@ -83,7 +83,7 @@ void erode(pixel **img,int tx,int ty,pixval maxval,double distance) {
     }}
   for(i=0;i<tx;i++) {
     for(j=0;j<ty;j++) {
-      if(PPM_GETG(img[j][i]) >= SEUIL) { /* blanc */
+      if(PPM_GETG(img[j][i]) > SEUIL) { /* blanc */
 	for(dx=-d;dx<=d;dx++) {
 	  for(dy=-d;dy<=d;dy++) {
 	    if(i+dx>=0 && i+dx<tx &&
@@ -105,7 +105,7 @@ void manhattan(pixel **img,int tx,int ty,pixval maxval,int noir) {
   int i,j,d;
   for(i=0;i<tx;i++) {
     for(j=0;j<ty;j++) {
-      if( (PPM_GETG(img[j][i]) >= SEUIL ? 1 : 0) ^ noir) {
+      if( (PPM_GETG(img[j][i]) > SEUIL ? 1 : 0) ^ noir) {
 	PPM_PUTR(img[j][i],0);
       } else {
 	d=tx+ty;
@@ -276,7 +276,7 @@ void mesure_case(pixel **img,int tx,int ty,pixval maxval,
       }
       if(ok==1) {
 	npix++;
-	if(PPM_GETG(img[y][x]) < SEUIL) npixnoir++;
+	if(PPM_GETG(img[y][x]) <= SEUIL) npixnoir++;
       }
     }
   }
@@ -396,6 +396,9 @@ int main(int argc,char **argv) {
     printf("! Erreur a la lecture du fichier image <%s>\n__END__\n",argv[1]);
     exit(0);
   }
+
+  printf("__LOAD__ tx=%d ty=%d maxval=%d\n",
+	 tx,ty,maxval);
 
   commande=NULL;
   while(getline(&commande,&taille,stdin)>=6) {

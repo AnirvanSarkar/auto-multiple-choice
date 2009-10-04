@@ -61,6 +61,7 @@ sub new {
     my %o=(@_);
     my $self={'mep-dir'=>'',
 	      'mep-data'=>'',
+	      'an-data'=>'',
 	      'cr-dir'=>'',
 	      'liste'=>'',
 	      'sujet'=>'',
@@ -95,7 +96,9 @@ sub new {
     if($self->{'mep-data'}) {
 	$dispos=$self->{'mep-data'};
     } else {
+	print STDERR "Reconstruction de la liste des mises en page...\n";
 	$dispos=AMC::MEPList::new($self->{'mep-dir'},'id'=>$self->{'etud'});
+	print STDERR "ok\n";
     }
 
     $self->{'dispos'}=$dispos;
@@ -107,7 +110,9 @@ sub new {
     if($self->{'an-data'}) {
 	$an_list=$self->{'an-data'};
     } else {
+	print STDERR "Reconstruction de la liste des analyses...\n";
 	$an_list=AMC::ANList::new($self->{'cr-dir'});
+	print STDERR "ok\n";
     }
 
     $self->{'an_list'}=$an_list;

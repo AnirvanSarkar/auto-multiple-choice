@@ -1,5 +1,5 @@
 %
-% Copyright (C) 2008 Alexis Bienvenue
+% Copyright (C) 2008-2009 Alexis Bienvenue
 %
 % This file is part of Auto-Multiple-Choice
 %
@@ -454,6 +454,7 @@
 \def\AMC@note{}
 %
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
+\message{AUTOQCM[TOTAL=#1]^^J}%
 \AMCid@etud=100\AMCid@etudfin=#1\advance\AMCid@etudfin by 100%
 \ifAMC@correchead\AMCid@etudfin=100\fi
 \loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
@@ -468,6 +469,7 @@
 %--------------------------------------------------------------
 \DeclareOption{ordre}{\AMC@ordretrue}
 \DeclareOption{correc}{\AMC@correcheadtrue\AMC@correctrue}
+\DeclareOption{modele}{\AMC@correcheadtrue\AMC@correcfalse\AMC@ordretrue}
 \DeclareOption{correcindiv}{\AMC@correctrue}
 \DeclareOption{init}{\AMC@SR@time}
 \DeclareOption{bloc}{\AMC@qbloctrue}

@@ -59,7 +59,7 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "n-procs=s"=>\$n_procs,
 	   );
 
-$queue=AMC::Queue::new('max.procs',$n_procs);
+$queue=AMC::Queue::new('max.procs',$n_procs,'debug',$debug);
 
 my @scans=@ARGV;
 
@@ -99,6 +99,7 @@ my $delta=$progress/(1+$#scans);
 my $fh;
 
 if(!$mep_file) {
+    print "Reconstruction de la liste des mises en page...\n";
     $fh=File::Temp->new(TEMPLATE => "mep-XXXXXX",
 			TMPDIR => 1,
 			UNLINK=> 1);
@@ -106,6 +107,7 @@ if(!$mep_file) {
     my $m=AMC::MEPList::new($mep_dir);
     $m->save($mep_file);
     $fh->seek( 0, SEEK_END );
+    print "OK\n";
 }
 
 for my $s (@scans) {

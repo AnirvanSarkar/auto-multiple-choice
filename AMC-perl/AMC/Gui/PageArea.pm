@@ -53,7 +53,12 @@ sub add_feuille {
 sub set_image {
     my ($self,$image,$lay,$coches)=@_;
     $self->{'i-file'}=$image;
-    $self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image);
+    if($image && -f $image) {
+	$self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image);
+    } else {
+	$self->{'i-src'}=Gtk2::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,0,8,40,10);
+	$self->{'i-src'}->fill(0x48B6FF);
+    }
     $self->{'lay'}=$lay;
     $self->{'coches'}=$coches;
     $self->{'modifs'}=0;
