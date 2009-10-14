@@ -104,8 +104,10 @@ install: FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(PIXDIR)
 	install    -m 0644 -o root -g root -T logo.xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC
+	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC/Export
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 -o root -g root AMC-perl/AMC/*.pm $(DESTDIR)/$(PERLDIR)/AMC
+	install    -m 0644 -o root -g root AMC-perl/AMC/Export/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Export
 	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
 
