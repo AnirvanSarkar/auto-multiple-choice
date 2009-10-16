@@ -287,6 +287,7 @@ $gui=Gtk2::GladeXML->new($glade_xml,'main_window');
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
+    menu_debug
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
     export_c_format_export options_CSV options_ods
@@ -295,6 +296,13 @@ for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edit
 }
 
 $w{'commande'}->hide();
+
+$w{'menu_debug'}->set_active($debug);
+
+sub debug_set {
+    $debug=$w{'menu_debug'}->get_active;
+    print "DEBUG MODE : ".($debug ? "ON" : "OFF")."\n";
+}
 
 ### modele documents
 
