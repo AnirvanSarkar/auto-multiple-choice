@@ -106,8 +106,8 @@
 \newcount\AMCnum@questions
 \newcount\AMCid@quest\AMCid@quest=-1 % numero de la question en cours
 \newcount\AMCid@check % code de verification de la question en cours
-\def\AMCid@checkmax{31} % code de verification maximal
-\newcount\AMCid@etud\AMCid@etud=100 % numero de la copie en cours
+\def\AMCid@checkmax{60} % code de verification maximal
+\newcount\AMCid@etud\AMCid@etud=1 % numero de la copie en cours
 \newcount\AMCid@etudfin % numero de la copie a laquelle on va s'arreter
 % options :
 \newif\ifAMC@ordre\AMC@ordrefalse % on laisse les reponses dans l'ordre
@@ -439,9 +439,9 @@
 \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
 \he@dhaut{%
 \ifAMC@codebinaire%
-\begin{minipage}[b]{4cm}
-\commence@nb{1}\noindent\binaire[9]{\the\AMCid@etud}\\
-\commence@nb{2}\noindent\binaire[4]{\thepage}\commence@nb{3}\binaire[5]{\the\AMCid@check}%
+\begin{minipage}[b]{5cm}
+\commence@nb{1}\noindent\binaire[12]{\the\AMCid@etud}\\
+\commence@nb{2}\noindent\binaire[6]{\thepage}\commence@nb{3}\binaire[6]{\the\AMCid@check}%
 \end{minipage}
 \hbox to 4cm{\hspace*{\fill}{\tt +\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
 \else%
@@ -455,8 +455,8 @@
 %
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
 \message{AUTOQCM[TOTAL=#1]^^J}%
-\AMCid@etud=100\AMCid@etudfin=#1\advance\AMCid@etudfin by 100%
-\ifAMC@correchead\AMCid@etudfin=100\fi
+\AMCid@etud=1\AMCid@etudfin=#1\advance\AMCid@etudfin by 1%
+\ifAMC@correchead\AMCid@etudfin=1\fi
 \loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
