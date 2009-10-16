@@ -92,9 +92,6 @@ sub with_prog {
     return(catpath($e_volume,$e_vdirectories,$fich));
 }
 
-my $mep_list;
-my $an_list;
-
 my $glade_xml=__FILE__;
 $glade_xml =~ s/\.p[ml]$/.glade/i;
 
@@ -484,8 +481,8 @@ my %cb_stores=(
 					     'gif'=>'GIF'),
 	       'liste_key'=>$cb_model_vide,
 	       'assoc_code'=>$cb_model_vide,
-	       'export_c_format_export'=>cb_model('CSV'=>'CSV',
-						  'ods'=>'OpenOffice'),
+	       'format_export'=>cb_model('CSV'=>'CSV',
+					 'ods'=>'OpenOffice'),
 	       );
 
 my %extension_fichier=();
@@ -494,10 +491,6 @@ $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
 $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 
 ### export
-
-for(qw/export_c_format_export/) {
-    $w{$_}->set_model($cb_stores{$_});
-}
 
 sub maj_format_export {
     reprend_pref('export',\%projet);
@@ -801,9 +794,9 @@ sub doc_active {
 
 sub mep_active {
     my $sel=$w{'mep_tree'}->get_selection()->get_selected_rows()->get_indices();
-    my $id=($mep_list->ids())[$sel];
+    my $id=($projet{'_mep_list'}->ids())[$sel];
     print "Active MEP $sel : ID=$id...\n";
-    my $f=$mep_list->filename($id);
+    my $f=$projet{'_mep_list'}->filename($id);
     print "Visualisation $f...\n";
     if(fork()==0) {
 	exec($o{'xml_viewer'},$f);
@@ -822,7 +815,7 @@ sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
 
 sub doc_maj {
     my $sur=0;
-    if($an_list->nombre()>0) {
+    if($projet{'_an_list'}->nombre()>0) {
 	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 					       'destroy-with-parent',
 					       'warning', # message type
@@ -957,7 +950,7 @@ sub sujet_impressions {
     }
 
     $copies_store->clear();
-    for my $c ($mep_list->etus()) {
+    for my $c ($projet{'_mep_list'}->etus()) {
 	$copies_store->set($copies_store->append(),COPIE_N,$c);
     }
 
@@ -1058,11 +1051,11 @@ sub calcule_mep {
 ### Actions des boutons de la partie SAISIE
 
 sub saisie_manuelle {
-    if($mep_list->nombre()>0) {
+    if($projet{'_mep_list'}->nombre()>0) {
 	my $gm=AMC::Gui::Manuel::new('cr-dir'=>localise($projet{'cr'}),
 				     'mep-dir'=>localise($projet{'mep'}),
-				     'mep-data'=>$mep_list,
-				     'an-data'=>$an_list,
+				     'mep-data'=>$projet{'_mep_list'},
+				     'an-data'=>$projet{'_an_list'},
 				     'liste'=>$projet{'listeetudiants'},
 				     'sujet'=>localise($projet{'docs'}->[0]),
 				     'etud'=>'',
@@ -1686,7 +1679,7 @@ sub detecte_mep {
     $w{'avancement'}->set_fraction(0);
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    $mep_list->maj('progres'=>sub {
+    $projet{'_mep_list'}->maj('progres'=>sub {
 	$w{'avancement'}->set_pulse_step(.02);
 	$w{'avancement'}->pulse();
 	Gtk2->main_iteration while ( Gtk2->events_pending );
@@ -1695,15 +1688,15 @@ sub detecte_mep {
 
     $mep_store->clear();
 
-    $w{'onglet_saisie'}->set_sensitive($mep_list->nombre()>0);
+    $w{'onglet_saisie'}->set_sensitive($projet{'_mep_list'}->nombre()>0);
 
     my $ii=0;
-    for my $i ($mep_list->ids()) {
+    for my $i ($projet{'_mep_list'}->ids()) {
 	my $iter=$mep_store->append;
-	$mep_store->set($iter,MEP_ID,$i,MEP_PAGE,$mep_list->attr($i,'page'),MEP_MAJ,file_maj($mep_list->filename($i)));
+	$mep_store->set($iter,MEP_ID,$i,MEP_PAGE,$projet{'_mep_list'}->attr($i,'page'),MEP_MAJ,file_maj($projet{'_mep_list'}->filename($i)));
 
 	$ii++;
-	$w{'avancement'}->set_fraction($ii/$mep_list->nombre());
+	$w{'avancement'}->set_fraction($ii/$projet{'_mep_list'}->nombre());
 	Gtk2->main_iteration while ( Gtk2->events_pending );
     }
 
@@ -1745,7 +1738,7 @@ sub detecte_analyse {
 
     my @ids_m;
 
-    @ids_m=$an_list->maj('progres'=>sub {
+    @ids_m=$projet{'_an_list'}->maj('progres'=>sub {
 	$w{'avancement'}->set_pulse_step(.1);
 	$w{'avancement'}->pulse();
 	Gtk2->main_iteration while ( Gtk2->events_pending );
@@ -1753,13 +1746,14 @@ sub detecte_analyse {
 			 );
 
     if($oo{'premier'}) {
-	@ids_m=$an_list->ids();
+	@ids_m=$projet{'_an_list'}->ids();
+	$diag_store->clear;
     }
 
     print "IDS_M : ".join(' ',@ids_m)."\n";
 
-    $w{'onglet_notation'}->set_sensitive($an_list->nombre()>0);
-    detecte_correc() if($an_list->nombre()>0);
+    $w{'onglet_notation'}->set_sensitive($projet{'_an_list'}->nombre()>0);
+    detecte_correc() if($projet{'_an_list'}->nombre()>0);
 
     my $ii=0;
 
@@ -1768,19 +1762,19 @@ sub detecte_analyse {
 	my $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
 	$iter=$diag_store->append if(!$iter);
 
-	my ($eqm,$eqm_coul)=$an_list->mse_string($i,
+	my ($eqm,$eqm_coul)=$projet{'_an_list'}->mse_string($i,
 						 $o{'seuil_eqm'},
 						 'red');
-	my ($sens,$sens_coul)=$an_list->sensibilite_string($i,$projet{'seuil'},
+	my ($sens,$sens_coul)=$projet{'_an_list'}->sensibilite_string($i,$projet{'seuil'},
 							   $o{'seuil_sens'},
 							   'red');
 
 	$diag_store->set($iter,
 			 DIAG_ID,$i,
-			 DIAG_ID_BACK,$an_list->couleur($i),
+			 DIAG_ID_BACK,$projet{'_an_list'}->couleur($i),
 			 DIAG_EQM,$eqm,
 			 DIAG_EQM_BACK,$eqm_coul,
-			 DIAG_MAJ,file_maj($an_list->filename($i)),
+			 DIAG_MAJ,file_maj($projet{'_an_list'}->filename($i)),
 			 DIAG_DELTA,$sens,
 			 DIAG_DELTA_BACK,$sens_coul,
 			 );
@@ -1805,7 +1799,7 @@ sub detecte_analyse {
 
     # resume
 
-    my %r=$mep_list->stats($an_list);
+    my %r=$projet{'_mep_list'}->stats($projet{'_an_list'});
     my $tt='';
     if($r{'incomplet'}) {
 	$tt=sprintf("Saisie de %d copie(s) complète(s) et <span foreground=\"red\">%d copie(s) incomplète(s)</span>",$r{'complet'},$r{'incomplet'});
@@ -2088,15 +2082,15 @@ sub valide_projet {
     $w{'liste'}->set_filename($projet{'listeetudiants'});
 
 
-    $mep_list=AMC::MEPList::new(localise($projet{'mep'}),
-				'brut'=>1,
-				'saved'=>localise($mep_saved));
+    $projet{'_mep_list'}=AMC::MEPList::new(localise($projet{'mep'}),
+					   'brut'=>1,
+					   'saved'=>localise($mep_saved));
 
     detecte_mep();
 
-    $an_list=AMC::ANList::new(localise($projet{'cr'}),
-			      'brut'=>1,
-			      'saved'=>localise($an_saved));
+    $projet{'_an_list'}=AMC::ANList::new(localise($projet{'cr'}),
+					 'brut'=>1,
+					 'saved'=>localise($an_saved));
     detecte_analyse('premier'=>1);
 
     print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
@@ -2180,6 +2174,8 @@ sub quitte_projet {
 		projet_sauve();
 	    } 
 	}
+
+	%projet=();
     }
 }
 
