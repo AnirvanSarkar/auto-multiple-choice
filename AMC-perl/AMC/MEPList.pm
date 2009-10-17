@@ -254,8 +254,30 @@ sub pages_etudiant {
     return(@r);
 }
 
+# meme chose mais pour tous les etudiants a la fois
+sub pages_etudiants {
+    my ($self,%oo)=@_;
+    my %r=();
+    for my $i ($self->ids()) {
+	my ($e,$p)=get_ep($i);
+	my $ok=1;
+	$ok=0 if($oo{'contenu'} 
+		 && (!$self->attr($i,'case')) 
+		 && (!$self->attr($i,'nom')));
+	$ok=0 if($oo{'case'} 
+		 && (!$self->attr($i,'case')));
+	push @{$r{$e}},($oo{'id'} ? $i : $self->attr($i,'page')) 
+	    if($ok);
+    }
+    return(%r);
+}
+
 sub stats {
     my ($self,$an_list)=@_;
+
+    debug "Calcul des stats (nombre de copies saisies)...";
+
+    my %pages_etu=$self->pages_etudiants('case'=>1,'id'=>1);
     my %r=('complet'=>0,'incomplet'=>0,'manque'=>0,
 	   'incomplet_id'=>[],'manque_id'=>[]);
     my %an=map { $_=>1 } ($an_list->ids());
@@ -263,7 +285,7 @@ sub stats {
 	my $manque=0;
 	my $present=0;
 	my @m_id=();
-	for my $i ($self->pages_etudiant($e,'case'=>1,'id'=>1)) {
+	for my $i (@{$pages_etu{$e}}) {
 	    if($an{$i}) {
 		$present++;
 	    } else {
@@ -282,6 +304,9 @@ sub stats {
 	    }
 	}
     }
+
+    debug "OK";
+
     return(%r);
 }
 

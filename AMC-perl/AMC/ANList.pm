@@ -116,8 +116,12 @@ sub maj {
     # on detecte les nouveau fichiers...
     
     if(-d $self->{'cr'}) {
+
+	debug "Timestamp : ".$self->{'timestamp'};
+
 	opendir(DIR, $self->{'cr'}) || die "can't opendir ".$self->{'cr'}.": $!";
 	@xmls = grep { @st=stat($_); 
+		       debug $st[9]." : ".$_;
 		       /\.xml$/ && -s $_ 
 			   && ($st[9]>$self->{'timestamp'} 
 			       || $a_retraiter{$_} )} 
@@ -129,11 +133,13 @@ sub maj {
 
   XMLF: for my $xf (@xmls) {
       &{$oo{'progres'}}() if($oo{'progres'});
+
+      debug "Exploration fichier $xf pour ANList...";
+
       my $x=XMLin("$xf",
 		  ForceArray => ["analyse","chiffre","case","id"],
 		  KeepRoot=>1,
 		  KeyAttr=> [ 'id' ]);
-      debug "Fichier $xf...";
 
       next XMLF if(!$x->{'analyse'});
 
@@ -185,6 +191,8 @@ sub maj {
     }
   }
 
+    debug "Nouveau timestamp : ".$self->{'timestamp'};
+
     my @kan=(keys %$an_dispos);
     
     $self->{'au-hasard'}=$kan[0];
@@ -192,6 +200,8 @@ sub maj {
 
     $self->save() if($#ids_modifies>=0 || $#ids_effaces>=0);
     
+    push @ids_modifies,@ids_effaces if($oo{'effaces'});
+
     return(@ids_modifies);
 }
 
@@ -209,6 +219,11 @@ sub attribut {
     # pour ne pas creer artificiellement l'entree $id :
     return(defined($self->{'dispos'}->{$id}) ?
 	   $self->{'dispos'}->{$id}->{$att} : undef);
+}
+
+sub existe {
+    my ($self,$id)=(@_);
+    return(defined($self->{'dispos'}->{$id}));
 }
 
 sub mse_string {

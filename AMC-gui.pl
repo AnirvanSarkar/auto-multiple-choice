@@ -1091,6 +1091,7 @@ sub saisie_manuelle {
 				     'encodage_interne'=>$o{'encodage_interne'},
 				     'encodage_liste'=>$o{'encodage_liste'},
 				     'image_type'=>$o{'manuel_image_type'},
+				     'retient_m'=>1,
 				     'en_quittant'=>\&detecte_analyse,
 				     );
     } else {
@@ -1679,7 +1680,7 @@ sub annule_preferences {
 
 sub file_maj {
     my $f=shift;
-    if(-f $f) {
+    if($f && -f $f) {
 	if(-r $f) {
 	    my @s=stat($f);
 	    my $t=localtime($s[9]);
@@ -1725,7 +1726,9 @@ sub detecte_mep {
 
 	$ii++;
 	$w{'avancement'}->set_fraction($ii/$projet{'_mep_list'}->nombre());
-	Gtk2->main_iteration while ( Gtk2->events_pending );
+	if($ii % 50 ==0) {
+	    Gtk2->main_iteration while ( Gtk2->events_pending );
+	}
     }
 
     $w{'avancement'}->set_text('');
@@ -1758,6 +1761,8 @@ sub detecte_correc {
 sub detecte_analyse {
     my (%oo)=(@_);
 
+    debug "Detection analyses / ".join(', ',map { $_."=".$oo{$_} } (keys %oo));
+
     $w{'commande'}->show();
     my $av_text=$w{'avancement'}->get_text();
     $w{'avancement'}->set_text("Recherche des analyses effectuées...");
@@ -1766,12 +1771,16 @@ sub detecte_analyse {
 
     my @ids_m;
 
-    @ids_m=$projet{'_an_list'}->maj('progres'=>sub {
-	$w{'avancement'}->set_pulse_step(.1);
-	$w{'avancement'}->pulse();
-	Gtk2->main_iteration while ( Gtk2->events_pending );
-    },
-			 );
+    if($oo{'ids_m'}) {
+	@ids_m=@{$oo{'ids_m'}};
+    } else {
+	@ids_m=$projet{'_an_list'}->maj('progres'=>sub {
+	    $w{'avancement'}->set_pulse_step(.1);
+	    $w{'avancement'}->pulse();
+	    Gtk2->main_iteration while ( Gtk2->events_pending );
+	},
+					);
+    }
 
     if($oo{'premier'}) {
 	@ids_m=$projet{'_an_list'}->ids();
@@ -1785,33 +1794,53 @@ sub detecte_analyse {
 
     my $ii=0;
 
-    for my $i (@ids_m) {
-	# deja dans la liste ? sinon on rajoute...
-	my $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
-	$iter=$diag_store->append if(!$iter);
+  UNID: for my $i (@ids_m) {
+      my $iter='';
 
-	my ($eqm,$eqm_coul)=$projet{'_an_list'}->mse_string($i,
-						 $o{'seuil_eqm'},
-						 'red');
-	my ($sens,$sens_coul)=$projet{'_an_list'}->sensibilite_string($i,$projet{'seuil'},
-							   $o{'seuil_sens'},
-							   'red');
+      $ii++;
 
-	$diag_store->set($iter,
-			 DIAG_ID,$i,
-			 DIAG_ID_BACK,$projet{'_an_list'}->couleur($i),
-			 DIAG_EQM,$eqm,
-			 DIAG_EQM_BACK,$eqm_coul,
-			 DIAG_MAJ,file_maj($projet{'_an_list'}->filename($i)),
-			 DIAG_DELTA,$sens,
-			 DIAG_DELTA_BACK,$sens_coul,
-			 );
-
-	$ii++;
-	$w{'avancement'}->set_fraction(0.9*$ii/(1+$#ids_m)) if(!$oo{'interne'});
-	Gtk2->main_iteration while ( Gtk2->events_pending );
-    }
-
+      # a ete efface ?
+      if(! $projet{'_an_list'}->existe($i)) {
+	  debug "Efface $i";
+	  $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
+	  if($iter) {
+	      $diag_store->remove($iter);
+	  } else {
+	      debug "- introuvable";
+	  }
+      } else {
+	  
+	  # deja dans la liste ? sinon on rajoute...
+	  
+	  if(!$oo{'premier'}) {
+	      $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
+	  }
+	  $iter=$diag_store->append if(!$iter);
+	  
+	  my ($eqm,$eqm_coul)=$projet{'_an_list'}->mse_string($i,
+							      $o{'seuil_eqm'},
+							      'red');
+	  my ($sens,$sens_coul)=$projet{'_an_list'}->sensibilite_string($i,$projet{'seuil'},
+									$o{'seuil_sens'},
+									'red');
+	  
+	  $diag_store->set($iter,
+			   DIAG_ID,$i,
+			   DIAG_ID_BACK,$projet{'_an_list'}->couleur($i),
+			   DIAG_EQM,$eqm,
+			   DIAG_EQM_BACK,$eqm_coul,
+			   DIAG_MAJ,file_maj($projet{'_an_list'}->filename($i)),
+			   DIAG_DELTA,$sens,
+			   DIAG_DELTA_BACK,$sens_coul,
+			   );
+      }
+	  
+      $w{'avancement'}->set_fraction(0.9*$ii/(1+$#ids_m)) if(!$oo{'interne'});
+      if($ii % 50 ==0) {
+	  Gtk2->main_iteration while ( Gtk2->events_pending );
+      }
+  }
+    
     # erreurs lors du traitement automatique des scans :
 
     $inconnu_store->clear();

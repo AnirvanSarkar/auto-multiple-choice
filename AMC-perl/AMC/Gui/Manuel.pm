@@ -58,6 +58,8 @@ sub new {
 	      'coches'=>[],
 	      'lay'=>{},
 	      'ids'=>[],
+	      'retient_m'=>'',
+	      'ids_m'=>{},
 	      'iid'=>0,
 	      'global'=>0,
 	      'en_quittant'=>'',
@@ -393,7 +395,7 @@ sub synchronise {
 
     $self->{'area'}->sync();
 
-    $self->{'an_list'}->maj();
+    for($self->{'an_list'}->maj('effaces'=>1)) { $self->{'ids_m'}->{$_}=1; }
     $self->maj_list($self->{'ids'}->[$self->{'iid'}],undef);
 }
 
@@ -427,7 +429,7 @@ sub efface_saisie {
     my $id=$self->{'ids'}->[$self->{'iid'}];
     my $fs=$self->{'an_list'}->attribut($id,'fichier-scan');
     my $f=$self->{'an_list'}->attribut($id,'fichier');
-    if(-e $f && ($f ne $fs)) {
+    if(-e $f && (!$fs || ($f ne $fs))) {
 	unlink($f);
     }
     $self->synchronise();
@@ -448,7 +450,11 @@ sub quitter {
     } else {
 	$self->{'gui'}->get_widget('general')->destroy;
 	if($self->{'en_quittant'}) {
-	    &{$self->{'en_quittant'}}();
+	    if($self->{'retient_m'}) {
+		&{$self->{'en_quittant'}}('ids_m'=>[keys %{$self->{'ids_m'}}]);
+	    } else {
+		&{$self->{'en_quittant'}}();
+	    }
 	}
     }
 }
