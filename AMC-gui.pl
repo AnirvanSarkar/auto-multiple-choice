@@ -84,7 +84,12 @@ my $debug=0;
 GetOptions("debug!"=>\$debug,
 	   );
 
-print "DEBUG MODE\n" if($debug);
+
+if($debug) {
+    set_debug($debug);
+    debug "DEBUG MODE";
+    print "DEBUG ==> ".AMC::Basic::debug_file()."\n";
+}
 
 ($e_volume,$e_vdirectories,undef) = splitpath( rel2abs($0) );
 sub with_prog {
@@ -227,7 +232,7 @@ for my $k (keys %o_defaut) {
 	      }
 		$o{$k}=$valeurs[0] if(!$o{$k});
 	    } else {
-		print STDERR "ERR: Type d'option inconnu : $type\n";
+		debug "ERR: Type d'option inconnu : $type";
 	    }
 	} elsif(ref($o_defaut{$k}) eq 'HASH') {
 	    $o{$k}={%{$o_defaut{$k}}};
@@ -235,7 +240,7 @@ for my $k (keys %o_defaut) {
 	    $o{$k}=$o_defaut{$k};
 	    $o{$k}=$encodage_systeme if($k =~ /^encodage_/ && !$o{$k});
 	}
-	print "Nouveau parametre global : $k = $o{$k}\n" if($o{$k});
+	debug "Nouveau parametre global : $k = $o{$k}" if($o{$k});
     }
     $o{'modifie'}=0;
 
@@ -297,12 +302,22 @@ for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edit
 
 $w{'commande'}->hide();
 
-$w{'menu_debug'}->set_active($debug);
-
 sub debug_set {
     $debug=$w{'menu_debug'}->get_active;
-    print "DEBUG MODE : ".($debug ? "ON" : "OFF")."\n";
+    set_debug($debug);
+    debug "DEBUG MODE : ".($debug ? "ON" : "OFF");
+    if($debug) {
+	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+					       'destroy-with-parent',
+					       'info', # message type
+					       'ok', # which set of buttons?
+					       "Passage en mode débogage. Les informations de débogage de cette cession seront disponibles dans le fichier ".AMC::Basic::debug_file());
+	$dialog->run;
+	$dialog->destroy;
+    }
 }
+
+$w{'menu_debug'}->set_active($debug);
 
 ### modele documents
 
@@ -502,7 +517,7 @@ $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 
 sub maj_format_export {
     reprend_pref('export',\%projet);
-    print STDERR "Format : ".$projet{'format_export'}."\n";
+    debug "Format : ".$projet{'format_export'};
     for(qw/CSV ods/) {
 	if($projet{'format_export'} eq $_) {
 	    $w{'options_'.$_}->show;
@@ -575,8 +590,6 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	my ($path, $column, $cell_x, $cell_y) = 
 	    $w{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
 	if ($path) {
-	    #my $row = $path->to_string();
-	    #print "X=$cell_x Y=$cell_y ROW=$row\n";
 	    
 	    my $menu = Gtk2::Menu->new;
 	    my $c=0;
@@ -591,7 +604,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		    $item->show;
 		    $item->signal_connect (activate => sub {
 			my (undef, $sortkey) = @_;
-			print "Visualisation $f...\n";
+			debug "Visualisation $f...";
 			if(fork()==0) {
 			    exec($o{'img_viewer'},$f);
 			}
@@ -769,7 +782,7 @@ sub projet_charge_non {
 }
 
 sub projet_sauve {
-    print "Sauvegarde du projet...\n";
+    debug "Sauvegarde du projet...";
     my $of=fich_options($projet{'nom'});
     if(open(OPTS,">:encoding(utf-8)",$of)) {
 	print OPTS XMLout(\%projet,
@@ -794,7 +807,7 @@ sub doc_active {
     my $sel=$w{'documents_tree'}->get_selection()->get_selected_rows()->get_indices();
     #print "Active $sel...\n";
     my $f=localise($projet{'docs'}->[$sel]);
-    print "Visualisation $f...\n";
+    debug "Visualisation $f...";
     if(fork()==0) {
 	exec($o{'pdf_viewer'},$f);
     }
@@ -803,9 +816,9 @@ sub doc_active {
 sub mep_active {
     my $sel=$w{'mep_tree'}->get_selection()->get_selected_rows()->get_indices();
     my $id=($projet{'_mep_list'}->ids())[$sel];
-    print "Active MEP $sel : ID=$id...\n";
+    debug "Active MEP $sel : ID=$id...";
     my $f=$projet{'_mep_list'}->filename($id);
-    print "Visualisation $f...\n";
+    debug "Visualisation $f...";
     if(fork()==0) {
 	exec($o{'xml_viewer'},$f);
     }
@@ -862,6 +875,7 @@ sub doc_maj {
 
     #
     commande('commande'=>[with_prog("AMC-prepare.pl"),
+			  "--debug",debug_file(),
 			  "--mode","s",
 			  localise($projet{'texsrc'}),
 			  "--prefix",localise(''),
@@ -898,7 +912,7 @@ sub nonnul {
 
 sub autre_imprimante {
     my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
-    print "Choix imprimante $i\n";
+    debug "Choix imprimante $i";
     my $ppd=$cups->getPPD($i);
     my $k='';
 
@@ -906,7 +920,7 @@ sub autre_imprimante {
       my $oi=$ppd->getOption($i);
       if(%$oi) {
 	  $k=nonnul($oi->{'keyword'});
-	  print "- $k\n";
+	  debug "- $k";
 	  my $ok=$o{'options_impression'}->{$k};
 	  $o{'options_impression'}->{$k}=nonnul($oi->{'defchoice'})
 	      if(!$ok);
@@ -925,7 +939,7 @@ sub autre_imprimante {
 }
 
 sub sujet_impressions {
-    print "Choix des impressions...\n";
+    debug "Choix des impressions...";
 
     $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression');
     $g_imprime->signal_autoconnect_from_package('main');
@@ -941,7 +955,7 @@ sub sujet_impressions {
 	# les imprimantes :
 
 	my @printers = $cups->getDestinations();
-	print "Imprimantes : ".join(' ',map { $_->getName() } @printers)."\n";
+	debug "Imprimantes : ".join(' ',map { $_->getName() } @printers);
 	my $p_model=cb_model(map { ($_->getName(),$_->getDescription()) } @printers);
 	$w{'imprimante'}->set_model($p_model);
 	if(! $o{'imprimante'}) {
@@ -1006,7 +1020,7 @@ sub sujet_impressions_ok {
 
     $w{'choix_pages_impression'}->destroy;
     
-    print "Impression : ".join(",",@e)."\n";
+    debug "Impression : ".join(",",@e);
 
     my $fh=File::Temp->new(TEMPLATE => "nums-XXXXXX",
 			   TMPDIR => 1,
@@ -1023,6 +1037,7 @@ sub sujet_impressions_ok {
 			  "--mep",localise($projet{'mep'}),
 			  "--progression-id",'impression',
 			  "--progression",1,
+			  "--debug",debug_file(),
 			  "--fich-numeros",$fh->filename,
 			  ],
 	     'signal'=>2,
@@ -1043,6 +1058,7 @@ sub calcule_mep {
     unlink @meps;
     # on recalcule...
     commande('commande'=>[with_prog("AMC-prepare.pl"),
+			  "--debug",debug_file(),
 			  "--calage",localise($projet{'docs'}->[2]),
 			  "--progression-id",'MEP',
 			  "--progression",1,
@@ -1068,7 +1084,6 @@ sub saisie_manuelle {
 				     'sujet'=>localise($projet{'docs'}->[0]),
 				     'etud'=>'',
 				     'dpi'=>$o{'saisie_dpi'},
-				     'debug'=>$debug,
 				     'seuil'=>$projet{'seuil'},
 				     'seuil_sens'=>$o{'seuil_sens'},
 				     'seuil_eqm'=>$o{'seuil_eqm'},
@@ -1104,7 +1119,7 @@ sub saisie_auto_annule {
 sub saisie_auto_ok {
     my @f=$w{'saisie_auto'}->get_filenames();
     my $copie=$w{'copie_scans'}->get_active();
-    print "Scans : ".join(',',@f)."\n";
+    debug "Scans : ".join(',',@f);
     $w{'saisie_auto'}->destroy();
 
     # copie eventuelle dans le repertoire projet
@@ -1122,7 +1137,7 @@ sub saisie_auto_ok {
 		push @fl,$fich;
 	    }
 	}
-	print "Copie des fichiers scan : ".$c."/".(1+$#f)."\n";
+	debug "Copie des fichiers scan : ".$c."/".(1+$#f);
 	@f=@fl;
     }
 
@@ -1139,6 +1154,7 @@ sub saisie_auto_ok {
     # appel AMC-analyse avec cette liste
 
     commande('commande'=>[with_prog("AMC-analyse.pl"),
+			  "--debug",debug_file(),
 			  "--binaire",
 			  "--seuil-coche",$projet{'seuil'},
 			  "--progression-id",'analyse',
@@ -1173,7 +1189,7 @@ sub saisie_auto_ok {
 
 sub valide_liste {
     my (%oo)=@_;
-    print "* valide_liste\n" if($debug);
+    debug "* valide_liste";
 
     my $fl=$w{'liste'}->get_filename();
 
@@ -1201,7 +1217,7 @@ sub valide_liste {
 	}
 	# transmission liste des en-tetes
 	my @keys=$l->keys;
-	print "entetes : ".join(",",@keys)."\n" if($debug);
+	debug "entetes : ".join(",",@keys);
 	$cb_stores{'liste_key'}=cb_model('','(aucun)',
 					 map { ($_,$_) } 
 					 sort { $a cmp $b } (@keys));
@@ -1268,7 +1284,7 @@ sub associe_auto {
 			      "--encodage-liste",$o{'encodage_liste'},
 			      "--assoc",localise($projet{'association'}),
 			      "--encodage-interne",$o{'encodage_interne'},
-			      ($debug ? "--debug" : "--no-debug")
+			      "--debug",debug_file(),
 			      ],
 		 'texte'=>'Association automatique...',
 		 'fin'=>sub {
@@ -1287,14 +1303,14 @@ sub valide_cb {
     if($cbc xor $$var) {
 	$$var=$cbc;
 	$projet{'modifie'}=1;
-	print "* valide_cb\n" if($debug);
+	debug "* valide_cb";
     }
 }
 
 sub valide_options_correction {
     my ($ww,$o)=@_;
     my $name=$ww->get_name();
-    print "Valide OC depuis $name\n" if($debug);
+    debug "Valide OC depuis $name";
     valide_cb(\$projet{$name},$w{$name});
 }
 
@@ -1324,6 +1340,7 @@ sub voir_notes {
 sub noter {
     if($projet{'maj_bareme'}) {
 	commande('commande'=>[with_prog("AMC-prepare.pl"),
+			      "--debug",debug_file(),
 			      "--progression-id",'bareme',
 			      "--progression",1,
 			      "--mode","b",
@@ -1340,6 +1357,7 @@ sub noter {
 
 sub noter_calcul {
     commande('commande'=>[with_prog("AMC-note.pl"),
+			  "--debug",debug_file(),
 			  "--cr",localise($projet{'cr'}),
 			  "--an-saved",localise($an_saved),
 			  "--bareme",localise($projet{'fichbareme'}),
@@ -1367,7 +1385,7 @@ sub noter_resultat {
     my $moy;
     my @codes=();
     if(-s localise($projet{'notes'})) {
-	print "* lecture notes\n" if($debug);
+	debug "* lecture notes";
 	my $notes=eval { XMLin(localise($projet{'notes'}),
 			       'ForceArray'=>1,
 			       'KeyAttr'=>['id'],
@@ -1381,7 +1399,7 @@ sub noter_resultat {
 	} else {
 	    $w{'correction_result'}->set_markup("<span foreground=\"red\">Notes illisibles</span>");
 	}
-	print "Codes : ".join(',',@codes)."\n" if($debug);
+	debug "Codes : ".join(',',@codes);
     } else {
 	$w{'correction_result'}->set_markup("<span foreground=\"red\">Aucun calcul de notes</span>");
     }
@@ -1395,7 +1413,7 @@ sub visualise_correc {
     my $sel=$w{'correc_tree'}->get_selection()->get_selected_rows();
     #print "Correc $sel $correc_store\n";
     my $f=$correc_store->get($correc_store->get_iter($sel),CORREC_FILE);
-    print "Visualisation $f...\n";
+    debug "Visualisation $f...";
     if(fork()==0) {
 	exec($o{'img_viewer'},$f);
     }
@@ -1403,6 +1421,7 @@ sub visualise_correc {
 
 sub annote_copies {
     commande('commande'=>[with_prog("AMC-annote.pl"),
+			  "--debug",debug_file(),
 			  "--progression-id",'annote',
 			  "--progression",1,
 			  "--cr",localise($projet{'cr'}),
@@ -1423,6 +1442,7 @@ sub regroupement {
     valide_options_notation();
 
     commande('commande'=>[with_prog("AMC-regroupe.pl"),
+			  "--debug",debug_file(),
 			  "--cr",localise($projet{'cr'}),
 			  "--progression-id",'regroupe',
 			  "--progression",1,
@@ -1440,7 +1460,7 @@ sub regroupement {
 
 sub regarde_regroupements {
     my $f=localise($projet{'cr'})."/corrections/pdf";
-    print STDERR "Je vais voir $f\n";
+    debug "Je vais voir $f";
     my $seq=0;
     my @c=map { $seq+=s/[%]d/$f/g;$_; } split(/\s+/,$o{'dir_opener'});
     push @c,$f if(!$seq);
@@ -1516,16 +1536,16 @@ sub transmet_pref {
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
-		print "CB_STORE($t) modifie\n" if($debug);
+		debug "CB_STORE($t) modifie";
 		$wp->set_model($cb_stores{$ta});
 		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
 		if($i) {
-		    print "[$t] trouve $i\n" if($debug);
-		    print " -> ".$cb_stores{$t}->get($i,COMBO_TEXT)."\n" if($debug);
+		    debug("[$t] trouve $i",
+			  " -> ".$cb_stores{$t}->get($i,COMBO_TEXT));
 		    $wp->set_active_iter($i);
 		}
 	    } else {
-		print "pas de CB_STORE pour $t\n" if($debug);
+		debug "pas de CB_STORE pour $t";
 		$wp->set_active($h->{$t});
 	    }
 	}
@@ -1635,7 +1655,7 @@ sub accepte_preferences {
 }
 
 sub sauve_pref_generales {
-    print "Sauvegarde des preferences generales...\n";
+    debug "Sauvegarde des preferences generales...";
 
     if(open(OPTS,">$o_file")) {
 	print OPTS XMLout(\%o,"RootName"=>'AMC','NoAttr'=>1)."\n";
@@ -1653,7 +1673,7 @@ sub sauve_pref_generales {
 }
 
 sub annule_preferences {
-    print "Annule\n";
+    debug "Annule modifs preferences";
     $w{'edit_preferences'}->destroy();
 }
 
@@ -1758,7 +1778,7 @@ sub detecte_analyse {
 	$diag_store->clear;
     }
 
-    print "IDS_M : ".join(' ',@ids_m)."\n";
+    debug "IDS_M : ".join(' ',@ids_m);
 
     $w{'onglet_notation'}->set_sensitive($projet{'_an_list'}->nombre()>0);
     detecte_correc() if($projet{'_an_list'}->nombre()>0);
@@ -1852,7 +1872,7 @@ sub source_latex_montre_nom {
 }
 
 sub valide_source_tex {
-    $projet{'modifie'}=1; print "* valide_source_tex\n" if($debug);
+    $projet{'modifie'}=1; debug "* valide_source_tex";
     $w{'preparation_etats'}->set_sensitive(-f localise($projet{'texsrc'}));
 
     if(is_local($projet{'texsrc'})) {
@@ -1986,7 +2006,7 @@ sub source_latex_quit2m {
 
 sub source_latex_ok {
     my $f=$w{'source_latex_choix'}->get_filename();
-    print "Source $f\n";
+    debug "Source LaTeX $f";
     $projet{'texsrc'}=$f;
     $w{'source_latex_choix'}->destroy();
     set_source_tex(1);
@@ -2019,7 +2039,7 @@ sub copy_latex {
     my $ie=get_enc($i);
     my $id=get_enc($o{'encodage_latex'});
     if($ie && $id && $ie->{'iso'} ne $id->{'iso'}) {
-	print "Reencodage $ie->{'iso'} => $id->{'iso'}\n";
+	debug "Reencodage $ie->{'iso'} => $id->{'iso'}";
 	open(SRC,"<:encoding($ie->{'iso'})",$src) or return('');
 	open(DEST,">:encoding($id->{'iso'})",$dest) or close(SRC),return('');
 	while(<SRC>) {
@@ -2079,7 +2099,7 @@ sub importe_source {
 
 sub edite_source {
     my $f=localise($projet{'texsrc'});
-    print "Edition $f...\n";
+    debug "Edition $f...";
     if(fork()==0) {
 	exec($o{'tex_editor'},$f);
     }
@@ -2101,7 +2121,7 @@ sub valide_projet {
 					 'saved'=>localise($an_saved));
     detecte_analyse('premier'=>1);
 
-    print "Options correction : MB".$projet{'maj_bareme'}."\n" if($debug);
+    debug "Options correction : MB".$projet{'maj_bareme'};
     $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
 
     transmet_pref($gui,'notation',\%projet);
@@ -2127,7 +2147,7 @@ sub projet_ouvre {
 	quitte_projet();
 
 	if(!$deja) {
-	    print "Ouverture du projet $proj...\n";
+	    debug "Ouverture du projet $proj...";
 	    
 	    %projet=%{XMLin(fich_options($proj),SuppressEmpty => '')};
 	}
@@ -2137,7 +2157,7 @@ sub projet_ouvre {
 	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf mep scans:) {
 	    my $rep=$o{'rep_projets'}."/$proj/$sous";
 	    if(! -x $rep) {
-		print "Creation du repertoire $rep...\n";
+		debug "Creation du repertoire $rep...";
 		mkdir($rep);
 	    }
 	}
@@ -2145,7 +2165,7 @@ sub projet_ouvre {
 	for my $k (keys %projet_defaut) {
 	    if(! exists($projet{$k})) {
 		$projet{$k}=$projet_defaut{$k};
-		print "Nouveau parametre : $k\n";
+		debug "Nouveau parametre : $k";
 	    }
 	}
 

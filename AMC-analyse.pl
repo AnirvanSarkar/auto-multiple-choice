@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -21,6 +21,8 @@
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp;
 use Getopt::Long;
+
+use AMC::Basic;
 use AMC::MEPList;
 use AMC::Queue;
 
@@ -29,7 +31,7 @@ my $queue='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-analyse : signal $signame, je signale $pid...\n";
+    debug "*** AMC-analyse : signal $signame, je signale $pid...";
     kill 2,$pid if($pid);
     $queue->killall() if($queue);
     die "Killed";
@@ -52,14 +54,16 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "cr=s"=>\$cr_dir,
 	   "binaire!"=>\$binaire,
 	   "seuil-coche=s"=>\$seuil_coche,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "liste-fichiers=s"=>\$liste_f,
 	   "n-procs=s"=>\$n_procs,
 	   );
 
-$queue=AMC::Queue::new('max.procs',$n_procs,'debug',$debug);
+set_debug($debug);
+
+$queue=AMC::Queue::new('max.procs',$n_procs);
 
 my @scans=@ARGV;
 
@@ -99,7 +103,7 @@ my $delta=$progress/(1+$#scans);
 my $fh;
 
 if(!$mep_file) {
-    print "Reconstruction de la liste des mises en page...\n";
+    debug "Reconstruction de la liste des mises en page...";
     $fh=File::Temp->new(TEMPLATE => "mep-XXXXXX",
 			TMPDIR => 1,
 			UNLINK=> 1);
@@ -107,7 +111,7 @@ if(!$mep_file) {
     my $m=AMC::MEPList::new($mep_dir);
     $m->save($mep_file);
     $fh->seek( 0, SEEK_END );
-    print "OK\n";
+    debug "OK";
 }
 
 for my $s (@scans) {

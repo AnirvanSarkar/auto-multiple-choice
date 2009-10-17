@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -19,22 +19,7 @@
 
 package AMC::Image;
 
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
-
+use AMC::Basic;
 use IPC::Open2;
 
 sub new {
@@ -43,8 +28,6 @@ sub new {
 	      'ipc_in'=>'',
 	      'ipc_out'=>'',
 	      'ipc'=>'',
-	      'log'=>1,
-	      'debug'=>0,
 	      'traitement'=>'/usr/lib/AMC/AMC-traitement-image',
 	  };
 
@@ -63,21 +46,19 @@ sub commande {
     my @r=();
 
     if(!$self->{'ipc'}) {
-	print "Lancement de traitement-image...\n" 
-	    if($self->{'log'} || $self->{'debug'});
+	debug "Lancement de traitement-image..."; 
 	$self->{'ipc'}=open2($self->{'ipc_out'},$self->{'ipc_in'},
 			     $self->{'traitement'},$self->{'fichier'});
-	print $self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'}."\n"
-	    if($self->{'debug'});
+	debug "PID=".$self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'};
     }
 
-    print "CMD : ".join(' ',@cmd)."\n" if($self->{'debug'});
+    debug "CMD : ".join(' ',@cmd);
 
     print { $self->{'ipc_in'} } join(' ',@cmd)."\n";
 
   GETREPONSE: while($_=readline($self->{'ipc_out'})) {
       chomp;
-      print "| $_\n" if($self->{'debug'} || /^\!/);
+      debug "|> $_";
       last GETREPONSE if(/_{2}END_{2}/);
       push @r,$_;
   }

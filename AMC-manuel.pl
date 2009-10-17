@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -19,6 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
+use AMC::Basic;
 use AMC::Gui::Manuel;
 
 my $mep_dir='points-mep';
@@ -37,8 +38,10 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "liste=s"=>\$liste,
 	   "copie=s"=>\$etud,
 	   "dpi=s"=>\$dpi,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   );
+
+set_debug($debug);
 
 my $g=AMC::Gui::Manuel::new('cr-dir'=>$cr_dir,
 			    'mep-dir'=>$mep_dir,
@@ -46,7 +49,6 @@ my $g=AMC::Gui::Manuel::new('cr-dir'=>$cr_dir,
 			    'sujet'=>$sujet,
 			    'etud'=>$etud,
 			    'dpi'=>$dpi,
-			    'debug'=>$debug,
 			    'seuil'=>$seuil,
 			    'global'=>1,
 			    );

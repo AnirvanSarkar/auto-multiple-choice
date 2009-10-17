@@ -19,6 +19,8 @@
 
 package AMC::AssocFile;
 
+use AMC::Basic;
+
 use IO::File;
 use XML::Simple;
 use Data::Dumper;
@@ -38,7 +40,7 @@ sub new {
 		},
 	      'maj'=>0,
 	      'encodage'=>'utf-8',
-	      'debug'=>''};
+	  };
 
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
@@ -65,7 +67,7 @@ sub load {
     my $ok=1;
     for (qw/version liste_key notes_id/) {
 	if($self->{'a'}->{$_} && ($self->{'a'}->{$_} ne $a->{$_})) {
-	    print "*** fichier d'associations incompatible : $_\n";
+	    debug "*** fichier d'associations incompatible : $_\n";
 	    $ok=0;
 	}
     }

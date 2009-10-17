@@ -34,7 +34,7 @@ my $cmd_pid='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-note : signal $signame, je tue $cmd_pid...\n";
+    debug "*** AMC-note : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
     die "Killed";
 }
@@ -61,17 +61,19 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "an-saved=s"=>\$an_saved,
 	   "bareme=s"=>\$fich_bareme,
 	   "notes=s"=>\$fichnotes,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   "taille-max=s"=>\$taille_max,
 	   "qualite=s"=>\$qualite_jpg,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   );
 
+set_debug($debug);
+
 sub commande_externe {
     my @c=@_;
 
-    print "Commande : ".join(' ',@c)."\n" if($debug);
+    debug "Commande : ".join(' ',@c);
 
     $cmd_pid=fork();
     if($cmd_pid) {
@@ -108,7 +110,7 @@ if($an_saved) {
 			  'saved'=>$an_saved,
 			  );
 } else {
-    print STDERR "Reconstruction de la liste des analyses...\n";
+    debug "Reconstruction de la liste des analyses...";
     $anl=AMC::ANList::new($cr_dir,
 			  'saved'=>'',
 			  );
@@ -139,7 +141,7 @@ my $notes=eval { XMLin($fichnotes,
 		       ) };
 
 if(!$notes) {
-    print STDERR "Erreur a l'analyse du fichier de notes ".$fichnotes."\n";
+    debug "Erreur a l'analyse du fichier de notes ".$fichnotes."\n";
     return($self);
 }
 
@@ -210,7 +212,7 @@ $delta=1/$#ids if($#ids>0);
 	 my $ne=$notes->{'copie'}->{$etud};
 
 	 if(!$ne) {
-	     print STDERR "*** pas d'informations pour copie $etud ***\n";
+	     print "*** pas d'informations pour copie $etud ***\n";
 	     next XMLFB;
 	 }
 	 
@@ -287,7 +289,7 @@ $delta=1/$#ids if($#ids>0);
 	 #print "Fabrication de page-$idf.jpg...\n";
 	 commande_externe(@cmd);
      } else {
-	 print STDERR "*** scan $scan introuvable ***\n";
+	 print "*** scan $scan introuvable ***\n";
      }
 
      $avance->progres($delta);

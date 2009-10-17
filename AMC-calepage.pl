@@ -37,7 +37,7 @@ my $cmd_pid='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-calepage : signal $signame, je tue $cmd_pid...\n";
+    debug "*** AMC-calepage : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
     die "Killed";
 }
@@ -128,13 +128,15 @@ GetOptions("page=s"=>\$out_cadre,
 	   "dust-size-id=s"=>\$dust_size_id,
 	   "cr=s"=>\$repertoire_cr,
 	   "ocr=s"=>\$ocr_file,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "progression-debut=s"=>\$progress_debut,
 	   "manuel!"=>\$manuel,
 	   "binaire!"=>\$binaire,
 	   );
+
+set_debug($debug);
 
 $blur = ($modele ? "" : "1x1") if($blur eq 'defaut');
 $threshold = ($modele ? "" : "60%") if($threshold eq 'defaut');
@@ -152,7 +154,7 @@ sub erreur {
 sub commande_externe {
     my @c=@_;
 
-    print "Commande : ".join(' ',@c)."\n" if($debug);
+    debug "Commande : ".join(' ',@c);
 
     $cmd_pid=fork();
     if($cmd_pid) {
@@ -170,9 +172,10 @@ my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 $avance->progres($progress_debut);
 
 $temp_loc=tmpdir();
-$temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => (!$debug) );
+$temp_dir = tempdir( DIR=>$temp_loc,
+		     CLEANUP => (!get_debug()) );
 
-print "dir = $temp_dir\n";
+debug "dir = $temp_dir";
 
 $ppm="$temp_dir/image.ppm";
 
@@ -199,7 +202,7 @@ close(CMD);
 
 erreur("Taille non reconnue") if(!$tiff_x);
 
-print "IMAGE = $scan ($tiff_x x $tiff_y)\n";
+debug "IMAGE = $scan ($tiff_x x $tiff_y)\n";
 
 ##########################################################
 # Initiation des utilitaires
@@ -210,7 +213,7 @@ $mep_dispos=AMC::MEPList::new($xml_layout,"saved"=>$mep_saved);
 
 erreur("Aucune mise en page disponible") if($mep_dispos->nombre()==0 && !$modele);
 
-print "".$mep_dispos->nombre()." mises en page disponibles\n";
+debug "".$mep_dispos->nombre()." mises en page disponibles\n";
 
 my $cale=AMC::Calage::new('type'=>$t_type);
 
@@ -225,7 +228,7 @@ sub calage_reperes {
     if($lay) {
         $cadre_origine=AMC::Boite::new_complete_xml($lay);
 
-	print "Origine : ".$cadre_origine->txt()."\n";
+	debug "Origine : ".$cadre_origine->txt()."\n";
 
 	my @cx=map { $cadre_origine->coordonnees($_,'x') } (0..3);
 	my @cy=map { $cadre_origine->coordonnees($_,'y') } (0..3);
@@ -236,7 +239,7 @@ sub calage_reperes {
     }
 }
 
-my $traitement=AMC::Image::new($ppm,'debug'=>$debug);
+my $traitement=AMC::Image::new($ppm);
 
 ##########################################################
 # vecteur binaire -> nombre decimal
@@ -280,7 +283,7 @@ if($modele) {
     $cadre_general=AMC::Boite::new_complete(map { $_->centre() } (@box));
 
     for my $b (@box) {
-	print " Boite ".$b->txt()."\n";
+	debug " Boite ".$b->txt();
 	$diametre_marque+=$b->diametre();
     }
     $diametre_marque /= $nm;
@@ -330,7 +333,7 @@ if($modele) {
 
     print "".($#box+1)." boites.\n";
 
-    print join("\n",map { $_->txt(); } @box)."\n" if($debug);
+    debug join("\n",map { $_->txt(); } @box);
 
     print "Examen des formes...\n";
 
@@ -346,9 +349,9 @@ if($modele) {
     $taille_max=$taille*(1+$tol_marque_plus);
     $taille_min=$taille*(1-$tol_marque_moins);
     
-    print "rx = $rx   ry = $ry\n";
-    printf("Taille de marque cible : %.2f a %.2f\n",
-	   $taille_min,$taille_max);
+    debug "rx = $rx   ry = $ry\n";
+    debug(sprintf("Taille de marque cible : %.2f a %.2f",
+		  $taille_min,$taille_max));
 
     @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
 
@@ -356,8 +359,8 @@ if($modele) {
 
 }
 
-print "Cadre general :\n"
-    .$cadre_general->txt()."\n";
+debug "Cadre general :",
+    $cadre_general->txt();
 
 ###############################################################
 # identification du numéro de page : cas ecriture standard
@@ -521,7 +524,7 @@ if($modele) {
     print "Recherche des cases...\n";
     
     for($traitement->commande("magick")) {
-	print "$_\n" if($debug);
+	debug "$_";
 	if(/magick=([0-9]+)\s+exo=([0-9]+)\s+quest=([0-9]+)\s+\(([0-9]+),([0-9]+)\)-\(([0-9]+),([0-9]+)\)/) {
 	    my $k='';
 	    my $mag=$1;
@@ -543,7 +546,7 @@ if($modele) {
 	}
     }
 
-    print "Cases : ".join(" ",sort { $a cmp $b } (keys %case))."\n";
+    debug "Cases : ".join(" ",sort { $a cmp $b } (keys %case));
 
     if($binaire) {
 	get_id_binaire();
@@ -805,7 +808,7 @@ if($out_cadre || $zoom_file) {
 	$zooms=$zooms->Montage(tile=>'1x',geometry=>'+0+0',borderwidth=>3);
 	$zooms->Write($zoom_file);
 
-	print "-> $zoom_file\n";
+	debug "-> $zoom_file\n";
 
     }
 
@@ -825,7 +828,7 @@ if($out_cadre || $zoom_file) {
 
 	$page_entiere->Write($out_cadre);
 
-	print "-> $out_cadre\n";
+	debug "-> $out_cadre\n";
     }
 
 }

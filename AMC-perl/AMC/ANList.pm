@@ -45,8 +45,7 @@ my $VERSION=2;
 
 # perl -e 'use XML::Simple;use Data::Dumper;  print Dumper(XMLin("",ForceArray => ["analyse","chiffre","case","id"],KeepRoot=>1,KeyAttr=> ["id"]));' |less
 
-%an_defaut=('debug'=>0,
-	    'action'=>'',
+%an_defaut=('action'=>'',
 	    'timestamp'=>0,
 	    'dispos'=>{},
 	    'saved'=>'',
@@ -61,7 +60,7 @@ sub new {
 
 	$self=load_an($o{'saved'});
 	if(!$self) {
-	    print "Load(ANList)->erreur\n";
+	    debug "Load(ANList)->erreur\n";
 	}
 	
     } 
@@ -108,7 +107,7 @@ sub maj {
 		if($an_dispos->{$i}->{'fichier'});
 	    $a_retraiter{$an_dispos->{$i}->{'fichier-scan'}}=1
 		if($an_dispos->{$i}->{'fichier-scan'});
-	    print STDERR "AN : entree $i a retraiter\n";
+	    debug "AN : entree $i a retraiter\n";
 	    push @ids_effaces,$i;
 	    delete($an_dispos->{$i});
 	}
@@ -134,13 +133,13 @@ sub maj {
 		  ForceArray => ["analyse","chiffre","case","id"],
 		  KeepRoot=>1,
 		  KeyAttr=> [ 'id' ]);
-      print "Fichier $xf...\n" if($self->{'debug'});
+      debug "Fichier $xf...";
 
       next XMLF if(!$x->{'analyse'});
 
       my @ids=(keys %{$x->{'analyse'}});
     BID:for my $id (@ids) {
-	print "ID=$id\n" if($self->{'debug'});
+	debug "ID=$id";
 
 	$an_dispos->{$id}={'manuel'=>0} if(!$an_dispos->{$id});
 
@@ -310,7 +309,7 @@ sub load_an {
 	my $v=$$d->{'version'};
 	$v=0 if(!defined($v));
 	if($v < $VERSION ) {
-	    print STDERR "Version de fichier ANList perimee : $v < $VERSION\n";
+	    debug "Version de fichier ANList perimee : $v < $VERSION";
 	    $d='';
 	}
     }

@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -20,23 +20,9 @@
 
 package AMC::Gui::Commande;
 
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
-
 use Gtk2::Helper;
+
+use AMC::Basic;
 use AMC::Gui::Avancement;
 
 sub new {
@@ -86,7 +72,7 @@ sub erreurs {
 sub quitte {
     my ($self)=(@_);
     my $pid=$self->proc_pid();
-    print "Annulation commande [".$self->{'signal'}."->".$pid."].\n";
+    debug "Annulation commande [".$self->{'signal'}."->".$pid."].";
     
     kill $self->{'signal'},$pid if($pid =~ /^[0-9]+$/);
 }
@@ -101,7 +87,7 @@ sub open {
 						in => sub { $self->get_output() }
 						);
 	
-	print "Commande [".$self->{'pid'}."] : ".join(' ',@{$self->{'commande'}})."\n";
+	debug "Commande [".$self->{'pid'}."] : ".join(' ',@{$self->{'commande'}});
 	
 	if($self->{'avancement'}) {
 	    $self->{'avancement'}->set_text($self->{'texte'});
@@ -115,7 +101,7 @@ sub open {
 	$self->{'log'}->get_buffer()->set_text('');
 
     } else {
-	print STDERR "ERREUR !\n"; 
+	print STDERR "ERREUR au lancement de la commande\n".join(' ',@{$self->{'commande'}})."\n"; 
     }
 }
 
@@ -127,7 +113,7 @@ sub get_output {
         Gtk2::Helper->remove_watch( $self->{'tag'} );
 	  close($self->{'fh'});
 	  
-	  print "Commande [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
+	  debug "Commande [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
 	  
 	  $self->{'pid'}='';
 	  $self->{'tag'}='';

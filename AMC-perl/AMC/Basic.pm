@@ -19,15 +19,16 @@
 
 package AMC::Basic;
 
+use File::Temp;
+use File::Spec;
+use IO::File;
+
 BEGIN {
     use Exporter   ();
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module);
+    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -175,6 +176,58 @@ sub model_id_to_iter {
     my $result=undef;
     $cl->foreach(\&bon_id,[$a,$val,\$result]);
     return($result);
+}
+
+# aide au debogage
+
+my $amc_debug='';
+my $amc_debug_fh='';
+my $amc_debug_filename='';
+
+sub set_debug_file {
+    if(!$amc_debug_fh) {
+	$amc_debug_fh = new File::Temp(TEMPLATE =>'AMC-DEBUG-XXXXXXXX',
+				       SUFFIX => '.log',
+				       UNLINK=>0,
+				       DIR=>File::Spec->tmpdir);
+	$amc_debug_filename=$amc_debug_fh->filename;
+	$amc_debug_fh->autoflush(1);
+    }
+}
+
+sub debug_file {
+    return($amc_debug ? $amc_debug_filename : '');
+}
+
+sub set_debug {
+    my ($debug)=@_;
+    if($debug =~ /\// && -f $debug) {
+	# c'est un nom de fichier
+	$amc_debug_fh=new IO::File;
+	$amc_debug_fh->open(">>$debug");
+	$amc_debug_fh->autoflush(1);
+	$amc_debug_filename=$debug;
+	$debug=1;
+    }
+    $amc_debug=$debug;
+    set_debug_file() if($amc_debug && !$amc_debug_fh);
+}
+
+sub get_debug {
+    return($amc_debug);
+}
+
+sub debug {
+    my @s=@_;
+    return if(!$amc_debug);
+    for my $l (@s) {
+	$l=$l."\n" if($l !~ /\n$/);
+	if($amc_debug_fh) {
+	    print $amc_debug_fh $l;
+	} else {
+	    print $l;
+	}
+    }
 }
 
 1;

@@ -19,28 +19,13 @@
 
 package AMC::NamesFile;
 
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw( );
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
+use AMC::Basic;
 
 sub new {
     my ($f,%o)=@_;
     my $self={'fichier'=>$f,
 	      'encodage'=>'utf-8',
 	      'separateur'=>':',
-	      'debug'=>'',
 	      'identifiant'=>'(nom) (prenom)',
 
 	      'heads'=>[],
@@ -87,7 +72,7 @@ sub load {
 	  if(!@heads) {
 	      if(/$self->{'separateur'}/) {
 		  @heads=map { reduit($_) } split(/$self->{'separateur'}/,$_);
-		  print STDERR "ENTETES : ".join(", ",@heads)."\n" if($self->{'debug'});
+		  debug "ENTETES : ".join(", ",@heads);
 		  next NOM;
 	      } else {
 		  @heads='nom';

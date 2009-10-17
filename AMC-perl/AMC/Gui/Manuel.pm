@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -19,22 +19,6 @@
 # <http://www.gnu.org/licenses/>.
 
 package AMC::Gui::Manuel;
-
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
 
 use Getopt::Long;
 use Gtk2 -init;
@@ -67,7 +51,6 @@ sub new {
 	      'sujet'=>'',
 	      'etud'=>'',
 	      'dpi'=>75,
-	      'debug'=>0,
 	      'seuil'=>0.1,
 	      'seuil_sens'=>8.0,
 	      'seuil_eqm'=>3.0,
@@ -87,8 +70,6 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
-    print "DEBUG MODE\n" if($self->{'debug'});
-
     # recupere la liste des fichiers MEP des pages qui correspondent 
 
     my $dispos;
@@ -96,9 +77,9 @@ sub new {
     if($self->{'mep-data'}) {
 	$dispos=$self->{'mep-data'};
     } else {
-	print STDERR "Reconstruction de la liste des mises en page...\n";
+	debug "Reconstruction de la liste des mises en page...";
 	$dispos=AMC::MEPList::new($self->{'mep-dir'},'id'=>$self->{'etud'});
-	print STDERR "ok\n";
+	debug "ok";
     }
 
     $self->{'dispos'}=$dispos;
@@ -110,9 +91,9 @@ sub new {
     if($self->{'an-data'}) {
 	$an_list=$self->{'an-data'};
     } else {
-	print STDERR "Reconstruction de la liste des analyses...\n";
+	debug "Reconstruction de la liste des analyses...";
 	$an_list=AMC::ANList::new($self->{'cr-dir'});
-	print STDERR "ok\n";
+	debug "ok";
     }
 
     $self->{'an_list'}=$an_list;
@@ -134,7 +115,7 @@ sub new {
 
     my $temp_loc=tmpdir();
     $self->{'temp-dir'} = tempdir( DIR=>$temp_loc,
-				   CLEANUP => (!$self->{'debug'}) );
+				   CLEANUP => (!get_debug()) );
 
     $self->{'tmp-image'}=$self->{'temp-dir'}."/page";
 
@@ -317,7 +298,7 @@ sub charge_i {
     $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    print "ID ".$self->{'ids'}->[$self->{'iid'}]." PAGE $page\n";
+    debug "ID ".$self->{'ids'}->[$self->{'iid'}]." PAGE $page\n";
     system("pdftoppm","-f",$page,"-l",$page,
 	   "-r",$self->{'dpi'},
 	   $self->{'sujet'},
@@ -326,15 +307,13 @@ sub charge_i {
     opendir(TDIR,$self->{'temp-dir'}) || die "can't opendir $self->{'temp-dir'} : $!";
     my @candidats = grep { /^page-.*\.ppm$/ && -f $self->{'temp-dir'}."/$_" } readdir(TDIR);
     closedir TDIR;
-    print "Candidats : ".join(' ',@candidats)."\n" if($self->{'debug'});
+    debug "Candidats : ".join(' ',@candidats);
     my $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
     my $tmp_image=$tmp_ppm;
 
     if($self->{'image_type'} && $self->{'image_type'} ne 'ppm') {
 	$tmp_image=$self->{'tmp-image'}.".".$self->{'image_type'};
-	if($self->{'debug'}) {
-	    print "ppmto".$self->{'image_type'}." : $tmp_ppm -> $tmp_image\n";
-	}
+	debug "ppmto".$self->{'image_type'}." : $tmp_ppm -> $tmp_image";
 	system("ppmto".$self->{'image_type'}." \"$tmp_ppm\" > \"$tmp_image\"");
     }
 
@@ -355,7 +334,7 @@ sub charge_i {
 	for my $i (0..$#{$self->{'lay'}->{'case'}}) {
 	    my $id=$self->{'lay'}->{'case'}->[$i]->{'question'}."."
 		.$self->{'lay'}->{'case'}->[$i]->{'reponse'};
-	    print STDERR "ID=".$tid." Q=$id R=".$x->{'case'}->{$id}->{'r'}."\n" if($self->{'debug'});
+	    debug "ID=".$tid." Q=$id R=".$x->{'case'}->{$id}->{'r'};
 	    $self->{'coches'}->[$i]=$x->{'case'}->{$id}->{'r'} > $self->{'seuil'};
 	}
 	my $t=$x->{'nometudiant'}; $t='' if(!defined($t));
@@ -374,7 +353,7 @@ sub charge_i {
 			       $self->{'coches'});
 
     unlink($tmp_ppm);
-    unlink($tmp_image) if($tmp_ppm ne $tmp_image && !$self->{'debug'});
+    unlink($tmp_image) if($tmp_ppm ne $tmp_image && !get_debug());
 
     # dans la liste
 
@@ -389,7 +368,7 @@ sub ecrit {
     my ($self)=(@_);
 
     if($self->{'xml-file'} && $self->{'area'}->modifs()) {
-	print "Sauvegarde du fichier ".$self->{'xml-file'}."\n";
+	debug "Sauvegarde du fichier ".$self->{'xml-file'};
 	open(XML,">:encoding(".$self->{'encodage_interne'}.")",$self->{'xml-file'}) 
 	    or die "Erreur a l'ecriture de ".$self->{'xml-file'}." : $!";
 	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
@@ -481,7 +460,7 @@ sub goto_activate_cb {
 
     $self->ecrit();
 
-    print "On va a $dest\n";
+    debug "On va a $dest";
     
     # recherche d'un ID correspondant 
     my $did='';

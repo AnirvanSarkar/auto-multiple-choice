@@ -35,7 +35,7 @@ my $cmd_pid='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-note : signal $signame, je tue $cmd_pid...\n";
+    debug "*** AMC-note : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
     die "Killed";
 }
@@ -68,7 +68,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "an-saved=s"=>\$an_saved,
 	   "bareme=s"=>\$bareme,
 	   "seuil=s"=>\$seuil,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   "copies!"=>\$annotation_copies,
 	   "o=s"=>\$fichnotes,
 	   "grain=s"=>\$grain,
@@ -78,6 +78,8 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "progression-id=s"=>\$progres_id,
 	   "progression=s"=>\$progres,
 	   );
+
+set_debug($debug);
 
 $grain =~ s/,/./;
 
@@ -110,7 +112,7 @@ if($type_arrondi) {
 sub commande_externe {
     my @c=@_;
 
-    print "Commande : ".join(' ',@c)."\n" if($debug);
+    debug "Commande : ".join(' ',@c);
 
     $cmd_pid=fork();
     if($cmd_pid) {
@@ -195,7 +197,7 @@ sub action {
 	
 	my $coche=($page->{$k}->{'r'}>$seuil ? 1 : 0);
 	my $ok=($coche == $bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
-	print "Question $q reponse $r : ".($coche ? "X" : "O")." -> $ok\n" if($debug);
+	debug "Question $q reponse $r : ".($coche ? "X" : "O")." -> $ok";
 	$pbons->{$etud}->{$q}={} if(!$pbons->{$etud}->{$q});
 	$pbons->{$etud}->{$q}->{$r}=[$coche,$ok];
     }
@@ -316,7 +318,7 @@ for my $etud (@a_calculer) {
 		$n_tous++;
 	    }
 
-	    print "{$n_ok/$n_tous,$n_coche,$id_coche}" if($debug);
+	    debug "{$n_ok/$n_tous,$n_coche,$id_coche}";
 		
 	    # baremes :
 
@@ -342,7 +344,7 @@ for my $etud (@a_calculer) {
 		    my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
 		    $b_q{'d'}=$b_q{'haut'}-(1+$#rep_pleine);
 		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
-		    print "Q=$q REPS=".join(',',@rep)." HAUT=$b_q{'haut'} D=$b_q{'d'} P=$b_q{'p'}\n" if($debug);
+		    debug "Q=$q REPS=".join(',',@rep)." HAUT=$b_q{'haut'} D=$b_q{'d'} P=$b_q{'p'}";
 		} else {
 		    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
 		}
@@ -360,7 +362,7 @@ for my $etud (@a_calculer) {
 			if($_ != 0) {
 			    $code=($bons{$etud}->{$q}->{$_}->[1] ? "b" : "m");
 			    my %b_qspec=degroupe($barq->{'reponse'}->{$_}->{'bareme'},%b_q);
-			    print "[$b_qspec{$code}]" if($debug);
+			    debug "[$b_qspec{$code}]";
 			    $xx+=$b_qspec{$code};
 			}
 		    }
@@ -410,7 +412,7 @@ for my $etud (@a_calculer) {
 		$total+=$xx;
 	    }
 	    
-	    print $raison if($debug);
+	    debug $raison;
 	    
 	    if($vrai) {
 		my $tit=titre_q($q);

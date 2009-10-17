@@ -20,6 +20,7 @@
 
 use Getopt::Long;
 use XML::Simple;
+use AMC::Basic;
 use AMC::AssocFile;
 use Data::Dumper;
 
@@ -39,8 +40,10 @@ GetOptions("notes=s"=>\$notes_file,
 	   "assoc=s"=>\$assoc_file,
 	   "encodage-interne=s"=>\$assoc_enc,
 	   "encodage-liste=s"=>\$liste_enc,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   );
+
+set_debug($debug);
 
 die "Manque notes-id" if(!$notes_id);
 die "Manque liste-key" if(!$liste_key);
@@ -81,7 +84,7 @@ open(FL,"<:encoding(".$liste_enc.")",$liste_file);
  }
 close(FL);
 
-print "Codes liste etudiants : ".join(',',keys %bon_code)."\n" if($debug);
+debug "Codes liste etudiants : ".join(',',keys %bon_code);
 
 # lecture notes (et codes reconnus une fois exactement)
 
@@ -96,7 +99,7 @@ die "Probleme syntaxe fichier notes" if(!$notes);
 
 for my $i (@{$notes->{'code'}->{$notes_id}->{'valeur'}}) {
     if($i->{'nombre'} != 1) {
-	print "Retire ".$i->{'content'}." : ".$i->{'nombre'}." fois\n" if($debug);
+	debug "Retire ".$i->{'content'}." : ".$i->{'nombre'}." fois";
 	$bon_code{$i->{'content'}}='';
     }
 }
@@ -108,7 +111,7 @@ $as->clear("auto");
 for my $id (keys %{$notes->{'copie'}}) {
     my $k=$notes->{'copie'}->{$id}->{'code'}->{$notes_id}->{'content'};
     if($bon_code{$k}) {
-	print "Copie $id -> $k\n" if($debug);
+	debug "Copie $id -> $k";
 	$as->set("auto",$id,$k);
     }
 }

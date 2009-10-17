@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -33,7 +33,7 @@ my $cmd_pid='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-regroupe : signal $signame, je tue $cmd_pid...\n";
+    debug "*** AMC-regroupe : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
     die "Killed";
 }
@@ -43,7 +43,7 @@ $SIG{INT} = \&catch_signal;
 sub commande_externe {
     my @c=@_;
 
-    print "Commande : ".join(' ',@c)."\n" if($debug);
+    debug "Commande : ".join(' ',@c);
 
     $cmd_pid=fork();
     if($cmd_pid) {
@@ -74,8 +74,10 @@ GetOptions("cr=s"=>\$cr,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   );
+
+set_debug($debug);
 
 my $jpgdir="$cr/corrections/jpg";
 my $pdfdir="$cr/corrections/pdf";
@@ -142,7 +144,7 @@ for my $e (keys %r) {
 	    for my $k ($noms->heads()) {
 		my ($t)=$n->{$k};
 		if($t) {
-		    print STDERR "$k -> $t\n";
+		    debug "$k -> $t\n";
 		    $f =~ s/\($k:([0-9]+)\)/sprintf("%0$1d",$t)/gie;
 		    $f =~ s/\($k\)/$t/gi;
 		}
@@ -152,11 +154,11 @@ for my $e (keys %r) {
     
     $f="$pdfdir/$f";
 
-    print "Fichier destination : $f\n";
+    debug "Fichier destination : $f";
 
     my @sp=sort { $a <=> $b } (keys %{$r{$e}});
 
-    print "Pages : ".join(", ",@sp)."\n";
+    debug "Pages : ".join(", ",@sp);
     #print "Sources : ".join(", ",map { $r{$e}->{$_} } @sp)."\n";
 
     commande_externe('convert',

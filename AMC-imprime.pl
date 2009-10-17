@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -24,6 +24,7 @@ use File::Temp qw/ tempfile tempdir /;
 use Net::CUPS;
 use Net::CUPS::PPD;
 
+use AMC::Basic;
 use AMC::MEPList;
 use AMC::Gui::Avancement;
 
@@ -31,7 +32,7 @@ my $cmd_pid='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-imprime : signal $signame, je tue $cmd_pid...\n";
+    debug "*** AMC-imprime : signal $signame, je tue $cmd_pid...\n";
     kill 9,$cmd_pid if($cmd_pid);
     die "Killed";
 }
@@ -59,8 +60,10 @@ GetOptions(
 	   "methode=s"=>\$methode,
 	   "imprimante=s"=>\$imprimante,
 	   "options=s"=>\$options,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   );
+
+set_debug($debug);
 
 die "Repertoire MEP non specifie" if(!$mep_dir);
 die "Fichier sujet non specifie" if(!$sujet);
@@ -69,7 +72,7 @@ die "Commande impression non specifiee" if(!$print_cmd);
 sub commande_externe {
     my @c=@_;
 
-    print "Commande : ".join(' ',@c)."\n" if($debug);
+    debug "Commande : ".join(' ',@c);
 
     $cmd_pid=fork();
     if($cmd_pid) {
@@ -112,7 +115,7 @@ if($methode =~ /^cups/i) {
 	    $on=$1;
 	    $ov=$2;
 	}
-	print "Option : $on=$ov\n";
+	debug "Option : $on=$ov";
 	$dest->addOption($on,$ov);
     }
 }

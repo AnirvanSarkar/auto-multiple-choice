@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -25,6 +25,7 @@ use File::Temp qw/ tempfile tempdir /;
 use Data::Dumper;
 use Getopt::Long;
 
+use AMC::Basic;
 use AMC::Gui::Avancement;
 use AMC::Queue;
 
@@ -36,7 +37,7 @@ my $queue='';
 
 sub catch_signal {
     my $signame = shift;
-    print "*** AMC-prepare : signal $signame, je tue $cmd_pid...\n";
+    debug "*** AMC-prepare : signal $signame, je tue $cmd_pid...";
     kill 9,$cmd_pid if($cmd_pid);
     $queue->killall() if($queue);
     die "Killed";
@@ -55,7 +56,7 @@ my $ppm_via='pdf';
 
 my $prefix='';
 
-my $debug=0;
+my $debug='';
 
 my $n_procs=0;
 
@@ -69,18 +70,20 @@ GetOptions("mode=s"=>\$mode,
 	   "calage=s"=>\$calage,
 	   "dpi=s"=>\$dpi,
 	   "convert-opts=s"=>\$convert_opts,
-	   "debug!"=>\$debug,
+	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "prefix=s"=>\$prefix,
 	   "n-procs=s"=>\$n_procs,
 	   );
 
+set_debug($debug);
+
+debug("AMC-prepare / DEBUG") if($debug);
+
 $queue=AMC::Queue::new('max.procs',$n_procs);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
-
-$debug=($debug ? "--debug" : "--no-debug");
 
 my $tex_source=$ARGV[0];
 
@@ -327,7 +330,7 @@ if($mode =~ /m/) {
 			     "--progression-debut",.4,
 			     "--progression",0.9/$np*$progress,
 			     "--progression-id",$progress_id,
-			     $debug,
+			     "--debug",debug_file(),
 			     $binaire,
 			     "--tex-source",$tex_source,
 			     "--page",$npage,

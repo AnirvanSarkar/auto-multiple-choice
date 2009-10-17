@@ -19,23 +19,8 @@
 
 package AMC::Queue;
 
+use AMC::Basic;
 use Sys::CPU;
-
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw( );
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
 
 sub new {
     my (%o)=@_;
@@ -43,7 +28,6 @@ sub new {
     my $self={'pids'=>[],
 	      'queue'=>[],
 	      'max.procs'=>0,
-	      'debug'=>'',
 	  };
     
     for my $k (keys %o) {
@@ -69,7 +53,7 @@ sub maj {
 	push @p,$pid if(kill(0,$pid));
     }
     @{$self->{'pids'}}=@p;
-    print "MAJ : ".join(' ',@p)."\n" if($self->{'debug'});
+    debug "MAJ : ".join(' ',@p);
     return(1+$#{$self->{'pids'}});
 }
 
@@ -91,16 +75,16 @@ sub run {
 	    if($cs) {
 		my $p=fork();
 		if($p) {
-		    print "Fork : $p\n" if($self->{'debug'});
+		    debug "Fork : $p";
 		    push @{$self->{'pids'}},$p;
 		} else {
 		    if(ref($cs->[0]) eq 'ARRAY') { 
 			for my $c (@$cs) {
-			    print STDERR "Command [$$] : ".join(' ',@$c)."\n" if($self->{'debug'});
+			    debug "Command [$$] : ".join(' ',@$c);
 			    if(system(@$c)==0) {
-				print "Command [$$] OK\n" if($self->{'debug'});
+				debug "Command [$$] OK";
 			    } else {
-				print STDERR "Erreur [$$] : $?\n";
+				debug "Erreur [$$] : $?\n";
 			    }
 			}
 			exit(0);
@@ -109,7 +93,7 @@ sub run {
 		    }
 		}
 	    } else {
-		print "Fin de queue\n" if($self->{'debug'});
+		debug "Fin de queue";
 	    }
 	}
 	waitpid(-1,0);

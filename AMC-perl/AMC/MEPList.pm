@@ -58,7 +58,7 @@ sub new {
 	if($self) {
 	    $renew=0;
 	} else {
-	    print "Load(MEPList)->erreur\n";
+	    debug "Load(MEPList)->erreur\n";
 	}
 	
     }
@@ -93,7 +93,7 @@ sub maj {
     for my $i (keys %{$self->{'dispos'}}) {
 	if((! $self->{'dispos'}->{$i}->{'filename'})
 	   || (! -s $self->{'dispos'}->{$i}->{'filename'})) {
-	    print STDERR "MEP : entree $i effacee\n";
+	    debug "MEP : entree $i effacee\n";
 	    push @ie,$i;
 	    delete($self->{'dispos'}->{$i});
 	}
@@ -129,7 +129,7 @@ sub maj {
 			# deja en stock :
 			if($self->{'dispos'}->{$laymep}->{'filename'} eq $f) {
 			    # cas (1) meme fichier, sans doute mis a jour
-			    print "MEP maj : $laymep\n";
+			    debug "MEP maj : $laymep";
 			} else {
 			    # cas (2) autre fichier...
 			    attention("ATTENTION : identifiant multiple : $laymep");
@@ -173,7 +173,7 @@ sub load_mep {
 	my $v=$$d->{'version'};
 	$v=0 if(!defined($v));
 	if($v < $VERSION ) {
-	    print STDERR "Version de fichier MEPList perimee : $v < $VERSION\n";
+	    debug "Version de fichier MEPList perimee : $v < $VERSION";
 	    $d='';
 	}
     }
