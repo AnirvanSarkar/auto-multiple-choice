@@ -295,7 +295,7 @@
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
 \def\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
 \def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}
-\def\QuestionIndicative{\message{AUTOQCM[INDIC]^^J}}
+\def\QuestionIndicative{\ifAMC@calibration\message{AUTOQCM[INDIC]^^J}\fi}
 %
 \def\multiSymbole{$\clubsuit$}
 \def\AMCmessage#1{\message{AUTOQCM[#1]^^J}}
@@ -457,7 +457,7 @@
 \message{AUTOQCM[TOTAL=#1]^^J}%
 \AMCid@etud=1\AMCid@etudfin=#1\advance\AMCid@etudfin by 1%
 \ifAMC@correchead\AMCid@etudfin=1\fi
-\loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J} #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+\loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
 %
