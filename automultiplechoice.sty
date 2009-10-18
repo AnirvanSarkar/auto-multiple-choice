@@ -314,7 +314,7 @@
 \newcommand{\AMCcode}[2]{
 { \def\AMCbeginQuestion##1##2{}
  \def\AMCbeginAnswer{\begin{minipage}{\ifAMC@ensemble 1.15em\else 2em\fi}}
- \def\AMCendAnswer{\end{minipage}}
+ \def\AMCendAnswer{\hspace*{\fill}\end{minipage}}
  \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else\raisebox{.4ex}{\bf ##2}\fi\\}
  \AMCnobloc
  \AMC@chiffres=#2\loop
