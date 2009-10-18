@@ -1809,6 +1809,8 @@ sub detecte_analyse {
 	      debug "- introuvable";
 	  }
       } else {
+
+	  debug "ID=$i ::",Dumper($projet{'_an_list'}->{'dispos'}->{$i});
 	  
 	  # deja dans la liste ? sinon on rajoute...
 	  

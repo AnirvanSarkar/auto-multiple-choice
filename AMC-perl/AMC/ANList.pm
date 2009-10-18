@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,22 +18,6 @@
 # <http://www.gnu.org/licenses/>.
 
 package AMC::ANList;
-
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
 
 use XML::Simple;
 use AMC::Basic;
@@ -103,11 +87,16 @@ sub maj {
 	   || (! -s $an_dispos->{$i}->{'fichier'})
 	   || ($an_dispos->{$i}->{'fichier-scan'} && ! -f $an_dispos->{$i}->{'fichier-scan'})
 	   ) {
-	    $a_retraiter{$an_dispos->{$i}->{'fichier'}}=1
-		if($an_dispos->{$i}->{'fichier'});
-	    $a_retraiter{$an_dispos->{$i}->{'fichier-scan'}}=1
-		if($an_dispos->{$i}->{'fichier-scan'});
-	    debug "AN : entree $i a retraiter\n";
+	    if($an_dispos->{$i}->{'fichier'}) {
+		$a_retraiter{$an_dispos->{$i}->{'fichier'}}=1;
+		debug "Fichier ".$an_dispos->{$i}->{'fichier'}. " a retraiter";
+	    }
+	    if($an_dispos->{$i}->{'fichier-scan'}) {
+		$a_retraiter{$an_dispos->{$i}->{'fichier-scan'}}=1;
+		debug "Fichier ".$an_dispos->{$i}->{'fichier-scan'}. " a retraiter";
+	    }
+		
+	    debug "AN : entree $i effacee\n";
 	    push @ids_effaces,$i;
 	    delete($an_dispos->{$i});
 	}
@@ -223,7 +212,8 @@ sub attribut {
 
 sub existe {
     my ($self,$id)=(@_);
-    return(defined($self->{'dispos'}->{$id}));
+    return(defined($self->{'dispos'}->{$id}) &&
+	   keys(%{$self->{'dispos'}->{$id}}));
 }
 
 sub mse_string {
@@ -281,6 +271,10 @@ sub couleur {
 sub analyse {
     my ($self,$id,%oo)=(@_);
 
+    $id=$self->{'au-hasard'} if(!$id);
+
+    return(undef) if(!$self->existe($id));
+    
     my $key='fichier';
     if($oo{'scan'}) {
 	$key='fichier-scan' 
@@ -288,8 +282,6 @@ sub analyse {
 	       && -f $self->{'dispos'}->{$id}->{'fichier-scan'});
     }
 
-    $id=$self->{'au-hasard'} if(!$id);
-    
     if($self->{'dispos'}->{$id}->{$key} 
        && -f $self->{'dispos'}->{$id}->{$key}) {
 	return(XMLin($self->{'dispos'}->{$id}->{$key},
@@ -304,6 +296,7 @@ sub ids {
     my ($self)=(@_);
 
     return(sort { id_triable($a) cmp id_triable($b) }
+	   grep { $self->existe($_) }
 	   (keys %{$self->{'dispos'}}));
 }
 

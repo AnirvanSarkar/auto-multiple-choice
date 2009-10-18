@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,22 +18,6 @@
 # <http://www.gnu.org/licenses/>.
 
 package AMC::MEPList;
-
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
 
 use AMC::Basic;
 use XML::Simple;
@@ -189,6 +173,7 @@ sub nombre {
 sub attr {
     my ($self,$id,$a)=(@_);
     $id=$self->{'au-hasard'} if(!$id);
+    return(undef) if(!defined($self->{'dispos'}->{$id}));
     return($self->{'dispos'}->{$id}->{$a});
 }
 
@@ -201,6 +186,7 @@ sub mep {
     my ($self,$id)=(@_);
 
     $id=$self->{'au-hasard'} if(!$id);
+    return(undef) if(!defined($self->{'dispos'}->{$id}));
     
     if($self->{'dispos'}->{$id}->{'filename'}) {
 	return(XMLin($self->{'dispos'}->{$id}->{'filename'},
@@ -313,9 +299,4 @@ sub stats {
 1;
 
 __END__
-
-perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep");$m->save("/tmp/a.gz");'
-perl -e 'use AMC::MEPList;use Data::Dumper;print Dumper(AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep")->mep());'
-perl -e 'use AMC::MEPList;$m=AMC::MEPList::new("/tmp/a.gz","saved"=>1);print join(", ",$m->ids())."\n";'
-perl -e 'use AMC::MEPList;use AMC::ANList;use Data::Dumper;$r=AMC::MEPList::new("/home/alexis/Projets-QCM/essai/mep");$an=AMC::ANList::new("/home/alexis/Projets-QCM/essai/cr");print Dumper($r);%s=$r->stats($an);print Dumper(\%s);'|less
 
