@@ -259,7 +259,7 @@ sub id2file {
     my ($id,$prefix,$extension)=(@_);
     $id =~ s/\+//g;
     $id =~ s/\//-/g;
-    return(localise($projet{'cr'})."/$prefix-$id.$extension");
+    return(localise($projet{'options'}->{'cr'})."/$prefix-$id.$extension");
 }
 
 sub localise {
@@ -516,10 +516,10 @@ $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 ### export
 
 sub maj_format_export {
-    reprend_pref('export',\%projet);
-    debug "Format : ".$projet{'format_export'};
+    reprend_pref('export',$projet{'options'});
+    debug "Format : ".$projet{'options'}->{'format_export'};
     for(qw/CSV ods/) {
-	if($projet{'format_export'} eq $_) {
+	if($projet{'options'}->{'format_export'} eq $_) {
 	    $w{'options_'.$_}->show;
 	} else {
 	    $w{'options_'.$_}->hide;
@@ -528,7 +528,7 @@ sub maj_format_export {
 }
 
 sub exporte {
-    my $format=$projet{'format_export'};
+    my $format=$projet{'options'}->{'format_export'};
     my @options=();
     my $ext=$extension_fichier{$format};
     if(!$ext) {
@@ -543,15 +543,15 @@ sub exporte {
     }
     if($format eq 'ods') {
 	push @options,
-	"--option-out","nom=".$projet{'nom_examen'},
-	"--option-out","code=".$projet{'code_examen'};
+	"--option-out","nom=".$projet{'options'}->{'nom_examen'},
+	"--option-out","code=".$projet{'options'}->{'code_examen'};
     }
     
     commande('commande'=>[with_prog("AMC-export.pl"),
 			  "--module",$format,
-			  "--fich-notes",localise($projet{'notes'}),
-			  "--fich-assoc",localise($projet{'association'}),
-			  "--fich-noms",$projet{'listeetudiants'},
+			  "--fich-notes",localise($projet{'options'}->{'notes'}),
+			  "--fich-assoc",localise($projet{'options'}->{'association'}),
+			  "--fich-noms",$projet{'options'}->{'listeetudiants'},
 			  "--noms-encodage",$o{'encodage_liste'},
 			  "--output",$output,
 			  @options
@@ -785,7 +785,7 @@ sub projet_sauve {
     debug "Sauvegarde du projet...";
     my $of=fich_options($projet{'nom'});
     if(open(OPTS,">:encoding(utf-8)",$of)) {
-	print OPTS XMLout(\%projet,
+	print OPTS XMLout($projet{'options'},
 			  "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
 			  "RootName"=>'projetAMC','NoAttr'=>1)."\n";
 	close OPTS;
@@ -806,7 +806,7 @@ sub projet_sauve {
 sub doc_active {
     my $sel=$w{'documents_tree'}->get_selection()->get_selected_rows()->get_indices();
     #print "Active $sel...\n";
-    my $f=localise($projet{'docs'}->[$sel]);
+    my $f=localise($projet{'options'}->{'docs'}->[$sel]);
     debug "Visualisation $f...";
     if(fork()==0) {
 	exec($o{'pdf_viewer'},$f);
@@ -825,7 +825,7 @@ sub mep_active {
 }
 
 sub fichiers_mep {
-    my $md=localise($projet{'mep'});
+    my $md=localise($projet{'options'}->{'mep'});
     opendir(MDIR, $md) || die "can't opendir $md: $!";
     my @meps = map { "$md/$_" } grep { /^mep.*xml$/ && -f "$md/$_" } readdir(MDIR);
     closedir MDIR;
@@ -877,7 +877,7 @@ sub doc_maj {
     commande('commande'=>[with_prog("AMC-prepare.pl"),
 			  "--debug",debug_file(),
 			  "--mode","s",
-			  localise($projet{'texsrc'}),
+			  localise($projet{'options'}->{'texsrc'}),
 			  "--prefix",localise(''),
 			  ],
 	     'signal'=>2,
@@ -1033,8 +1033,8 @@ sub sujet_impressions_ok {
 			  "--imprimante",$o{'imprimante'},
 			  "--options",$os,
 			  "--print-command",$o{'print_command_pdf'},
-			  "--sujet",localise($projet{'docs'}->[0]),
-			  "--mep",localise($projet{'mep'}),
+			  "--sujet",localise($projet{'options'}->{'docs'}->[0]),
+			  "--mep",localise($projet{'options'}->{'mep'}),
 			  "--progression-id",'impression',
 			  "--progression",1,
 			  "--debug",debug_file(),
@@ -1059,13 +1059,13 @@ sub calcule_mep {
     # on recalcule...
     commande('commande'=>[with_prog("AMC-prepare.pl"),
 			  "--debug",debug_file(),
-			  "--calage",localise($projet{'docs'}->[2]),
+			  "--calage",localise($projet{'options'}->{'docs'}->[2]),
 			  "--progression-id",'MEP',
 			  "--progression",1,
 			  "--n-procs",$o{'n_procs'},
 			  "--mode","m",
-			  localise($projet{'texsrc'}),
-			  "--mep",localise($projet{'mep'}),
+			  localise($projet{'options'}->{'texsrc'}),
+			  "--mep",localise($projet{'options'}->{'mep'}),
 			  ],
 	     'texte'=>'Calcul des mises en page...',
 	     'progres.id'=>'MEP',
@@ -1076,15 +1076,15 @@ sub calcule_mep {
 
 sub saisie_manuelle {
     if($projet{'_mep_list'}->nombre()>0) {
-	my $gm=AMC::Gui::Manuel::new('cr-dir'=>localise($projet{'cr'}),
-				     'mep-dir'=>localise($projet{'mep'}),
+	my $gm=AMC::Gui::Manuel::new('cr-dir'=>localise($projet{'options'}->{'cr'}),
+				     'mep-dir'=>localise($projet{'options'}->{'mep'}),
 				     'mep-data'=>$projet{'_mep_list'},
 				     'an-data'=>$projet{'_an_list'},
-				     'liste'=>$projet{'listeetudiants'},
-				     'sujet'=>localise($projet{'docs'}->[0]),
+				     'liste'=>$projet{'options'}->{'listeetudiants'},
+				     'sujet'=>localise($projet{'options'}->{'docs'}->[0]),
 				     'etud'=>'',
 				     'dpi'=>$o{'saisie_dpi'},
-				     'seuil'=>$projet{'seuil'},
+				     'seuil'=>$projet{'options'}->{'seuil'},
 				     'seuil_sens'=>$o{'seuil_sens'},
 				     'seuil_eqm'=>$o{'seuil_eqm'},
 				     'global'=>0,
@@ -1157,12 +1157,12 @@ sub saisie_auto_ok {
     commande('commande'=>[with_prog("AMC-analyse.pl"),
 			  "--debug",debug_file(),
 			  "--binaire",
-			  "--seuil-coche",$projet{'seuil'},
+			  "--seuil-coche",$projet{'options'}->{'seuil'},
 			  "--progression-id",'analyse',
 			  "--progression",1,
 			  "--n-procs",$o{'n_procs'},
-			  "--mep",localise($projet{'mep'}),
-			  "--cr",localise($projet{'cr'}),
+			  "--mep",localise($projet{'options'}->{'mep'}),
+			  "--cr",localise($projet{'options'}->{'cr'}),
 			  "--liste-fichiers",$fh->filename,
 			  ],
 	     'signal'=>2,
@@ -1213,7 +1213,7 @@ sub valide_liste {
     } else {
 	# ok
 	if(!$oo{'nomodif'}) {
-	    $projet{'listeetudiants'}=$fl;
+	    $projet{'options'}->{'listeetudiants'}=$fl;
 	    $projet{'modifie'}=1;
 	}
 	# transmission liste des en-tetes
@@ -1223,17 +1223,17 @@ sub valide_liste {
 					 map { ($_,$_) } 
 					 sort { $a cmp $b } (@keys));
     }
-    transmet_pref($gui,'pref_assoc',\%projet,{},{'liste_key'=>1});
+    transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});
 }
 
 ### Actions des boutons de la partie NOTATION
 
 sub associe {
-    if(-f $projet{'listeetudiants'}) {
-	my $ga=AMC::Gui::Association::new('cr'=>localise($projet{'cr'}),
-					  'liste'=>$projet{'listeetudiants'},
-					  'liste_key'=>$projet{'liste_key'},
-					  'fichier-liens'=>localise($projet{'association'}),
+    if(-f $projet{'options'}->{'listeetudiants'}) {
+	my $ga=AMC::Gui::Association::new('cr'=>localise($projet{'options'}->{'cr'}),
+					  'liste'=>$projet{'options'}->{'listeetudiants'},
+					  'liste_key'=>$projet{'options'}->{'liste_key'},
+					  'fichier-liens'=>localise($projet{'options'}->{'association'}),
 					  'global'=>0,
 					  'assoc-ncols'=>$o{'assoc_ncols'},
 					  'encodage_liste'=>$o{'encodage_liste'},
@@ -1252,7 +1252,7 @@ sub associe {
 }
 
 sub associe_auto {
-    if(! -s localise($projet{'listeetudiants'})) {
+    if(! -s localise($projet{'options'}->{'listeetudiants'})) {
 	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 					       'destroy-with-parent',
 					       'error', # message type
@@ -1260,7 +1260,7 @@ sub associe_auto {
 					       "Il faut tout d'abord choisir un fichier contenant la liste des étudiants");
 	$dialog->run;
 	$dialog->destroy;
-    } elsif(!$projet{'liste_key'}) {
+    } elsif(!$projet{'options'}->{'liste_key'}) {
 	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 					       'destroy-with-parent',
 					       'error', # message type
@@ -1268,7 +1268,7 @@ sub associe_auto {
 					       "Aucun identifiant n'a été choisi parmi les titres de colonnes du fichier contenant la liste des étudiants. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
 	$dialog->run;
 	$dialog->destroy;
-    } elsif(! $projet{'assoc_code'}) {
+    } elsif(! $projet{'options'}->{'assoc_code'}) {
 	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 					       'destroy-with-parent',
 					       'error', # message type
@@ -1278,12 +1278,12 @@ sub associe_auto {
 	$dialog->destroy;
     } else {
 	commande('commande'=>[with_prog("AMC-association-auto.pl"),
-			      "--notes",localise($projet{'notes'}),
-			      "--notes-id",$projet{'assoc_code'},
-			      "--liste",localise($projet{'listeetudiants'}),
-			      "--liste-key",$projet{'liste_key'},
+			      "--notes",localise($projet{'options'}->{'notes'}),
+			      "--notes-id",$projet{'options'}->{'assoc_code'},
+			      "--liste",localise($projet{'options'}->{'listeetudiants'}),
+			      "--liste-key",$projet{'options'}->{'liste_key'},
 			      "--encodage-liste",$o{'encodage_liste'},
-			      "--assoc",localise($projet{'association'}),
+			      "--assoc",localise($projet{'options'}->{'association'}),
 			      "--encodage-interne",$o{'encodage_interne'},
 			      "--debug",debug_file(),
 			      ],
@@ -1312,20 +1312,20 @@ sub valide_options_correction {
     my ($ww,$o)=@_;
     my $name=$ww->get_name();
     debug "Valide OC depuis $name";
-    valide_cb(\$projet{$name},$w{$name});
+    valide_cb(\$projet{'options'}->{$name},$w{$name});
 }
 
 sub valide_options_notation {
-    reprend_pref('notation',\%projet);
+    reprend_pref('notation',$projet{'options'});
 }
 
 sub valide_options_association {
-    reprend_pref('pref_assoc',\%projet);
+    reprend_pref('pref_assoc',$projet{'options'});
 }
 
 sub voir_notes {
-    if(-f localise($projet{'notes'})) {
-	my $n=AMC::Gui::Notes::new('fichier'=>localise($projet{'notes'}));
+    if(-f localise($projet{'options'}->{'notes'})) {
+	my $n=AMC::Gui::Notes::new('fichier'=>localise($projet{'options'}->{'notes'}));
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',
@@ -1339,14 +1339,14 @@ sub voir_notes {
 }
 
 sub noter {
-    if($projet{'maj_bareme'}) {
+    if($projet{'options'}->{'maj_bareme'}) {
 	commande('commande'=>[with_prog("AMC-prepare.pl"),
 			      "--debug",debug_file(),
 			      "--progression-id",'bareme',
 			      "--progression",1,
 			      "--mode","b",
-			      "--bareme",localise($projet{'fichbareme'}),
-			      localise($projet{'texsrc'}),
+			      "--bareme",localise($projet{'options'}->{'fichbareme'}),
+			      localise($projet{'options'}->{'texsrc'}),
 			      ],
 		 'texte'=>'Analyse du bareme...',
 		 'fin'=>\&noter_calcul,
@@ -1359,15 +1359,15 @@ sub noter {
 sub noter_calcul {
     commande('commande'=>[with_prog("AMC-note.pl"),
 			  "--debug",debug_file(),
-			  "--cr",localise($projet{'cr'}),
+			  "--cr",localise($projet{'options'}->{'cr'}),
 			  "--an-saved",localise($an_saved),
-			  "--bareme",localise($projet{'fichbareme'}),
-			  "-o",localise($projet{'notes'}),
-			  "--seuil",$projet{'seuil'},
+			  "--bareme",localise($projet{'options'}->{'fichbareme'}),
+			  "-o",localise($projet{'options'}->{'notes'}),
+			  "--seuil",$projet{'options'}->{'seuil'},
 			  
-			  "--grain",$projet{'note_grain'},
-			  "--arrondi",$projet{'note_arrondi'},
-			  "--notemax",$projet{'note_max'},
+			  "--grain",$projet{'options'}->{'note_grain'},
+			  "--arrondi",$projet{'options'}->{'note_arrondi'},
+			  "--notemax",$projet{'options'}->{'note_max'},
 			  
 			  "--encodage-interne",$o{'encodage_interne'},
 			  "--progression-id",'notation',
@@ -1385,9 +1385,9 @@ sub noter_calcul {
 sub noter_resultat {
     my $moy;
     my @codes=();
-    if(-s localise($projet{'notes'})) {
+    if(-s localise($projet{'options'}->{'notes'})) {
 	debug "* lecture notes";
-	my $notes=eval { XMLin(localise($projet{'notes'}),
+	my $notes=eval { XMLin(localise($projet{'options'}->{'notes'}),
 			       'ForceArray'=>1,
 			       'KeyAttr'=>['id'],
 			       ) };
@@ -1407,7 +1407,7 @@ sub noter_resultat {
     $cb_stores{'assoc_code'}=cb_model(''=>'(aucun)',
 				      map { $_=>$_ } 
 				      sort { $a cmp $b } (@codes));
-    transmet_pref($gui,'pref_assoc',\%projet,{},{'assoc_code'=>1});
+    transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'assoc_code'=>1});
 }
 
 sub visualise_correc {
@@ -1425,11 +1425,11 @@ sub annote_copies {
 			  "--debug",debug_file(),
 			  "--progression-id",'annote',
 			  "--progression",1,
-			  "--cr",localise($projet{'cr'}),
+			  "--cr",localise($projet{'options'}->{'cr'}),
 			  "--an-saved",localise($an_saved),
-			  "--notes",localise($projet{'notes'}),
+			  "--notes",localise($projet{'options'}->{'notes'}),
 			  "--taille-max",$o{'taille_max_correction'},
-			  "--bareme",localise($projet{'fichbareme'}),
+			  "--bareme",localise($projet{'options'}->{'fichbareme'}),
 			  "--qualite",$o{'qualite_correction'},
 			  ],
 	     'texte'=>'Annotation des copies...',
@@ -1444,12 +1444,12 @@ sub regroupement {
 
     commande('commande'=>[with_prog("AMC-regroupe.pl"),
 			  "--debug",debug_file(),
-			  "--cr",localise($projet{'cr'}),
+			  "--cr",localise($projet{'options'}->{'cr'}),
 			  "--progression-id",'regroupe',
 			  "--progression",1,
-			  "--modele",$projet{'modele_regroupement'},
-			  "--fich-assoc",localise($projet{'association'}),
-			  "--fich-noms",$projet{'listeetudiants'},
+			  "--modele",$projet{'options'}->{'modele_regroupement'},
+			  "--fich-assoc",localise($projet{'options'}->{'association'}),
+			  "--fich-noms",$projet{'options'}->{'listeetudiants'},
 			  "--noms-encodage",$o{'encodage_liste'},
 
 			  ],
@@ -1460,7 +1460,7 @@ sub regroupement {
 }
 
 sub regarde_regroupements {
-    my $f=localise($projet{'cr'})."/corrections/pdf";
+    my $f=localise($projet{'options'}->{'cr'})."/corrections/pdf";
     debug "Je vais voir $f";
     my $seq=0;
     my @c=map { $seq+=s/[%]d/$f/g;$_; } split(/\s+/,$o{'dir_opener'});
@@ -1631,7 +1631,7 @@ sub edit_preferences {
 	delete $w{$t};
     }
     transmet_pref($gap,'pref',\%o);
-    transmet_pref($gap,'pref_projet',\%projet) if($projet{'nom'});
+    transmet_pref($gap,'pref_projet',$projet{'options'}) if($projet{'nom'});
 
     # projet ouvert -> ne pas changer localisation
     if($projet{'nom'}) {
@@ -1647,7 +1647,7 @@ sub edit_preferences {
 
 sub accepte_preferences {
     reprend_pref('pref',\%o);
-    reprend_pref('pref_projet',\%projet) if($projet{'nom'});
+    reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
     $w{'edit_preferences'}->destroy();
 
     sauve_pref_generales();
@@ -1697,7 +1697,7 @@ sub file_maj {
 sub detecte_documents {
     for my $i (0..2) {
 	my $r='';
-	my $f=localise($projet{'docs'}->[$i]);
+	my $f=localise($projet{'options'}->{'docs'}->[$i]);
 	$doc_store->set($doc_ligne[$i],DOC_MAJ,file_maj($f));
     }
 }
@@ -1822,7 +1822,7 @@ sub detecte_analyse {
 	  my ($eqm,$eqm_coul)=$projet{'_an_list'}->mse_string($i,
 							      $o{'seuil_eqm'},
 							      'red');
-	  my ($sens,$sens_coul)=$projet{'_an_list'}->sensibilite_string($i,$projet{'seuil'},
+	  my ($sens,$sens_coul)=$projet{'_an_list'}->sensibilite_string($i,$projet{'options'}->{'seuil'},
 									$o{'seuil_sens'},
 									'red');
 	  
@@ -1897,16 +1897,16 @@ sub source_latex_montre_nom {
 					  'info', # message type
 					  'ok', # which set of buttons?
 					  "Le fichier LaTeX qui décrit le QCM de ce projet est situé à l'emplacement suivant :\n%s",
-					  ($projet{'texsrc'} ? localise($projet{'texsrc'}) : "(aucun fichier)" ));
+					  ($projet{'options'}->{'texsrc'} ? localise($projet{'options'}->{'texsrc'}) : "(aucun fichier)" ));
     $dialog->run;
     $dialog->destroy;
 }
 
 sub valide_source_tex {
     $projet{'modifie'}=1; debug "* valide_source_tex";
-    $w{'preparation_etats'}->set_sensitive(-f localise($projet{'texsrc'}));
+    $w{'preparation_etats'}->set_sensitive(-f localise($projet{'options'}->{'texsrc'}));
 
-    if(is_local($projet{'texsrc'})) {
+    if(is_local($projet{'options'}->{'texsrc'})) {
 	$w{'edition_latex'}->show();
     } else {
 	$w{'edition_latex'}->hide();
@@ -2010,12 +2010,12 @@ sub source_latex_2 {
 	    $dialog->run;
 	    $dialog->destroy;      
 	    
-	    $projet{'texsrc'}='source.tex';
+	    $projet{'options'}->{'texsrc'}='source.tex';
 	    set_source_tex();
 	} else {
 	    open(FV,">$sl");
 	    close(FV);
-	    $projet{'texsrc'}='source.tex';
+	    $projet{'options'}->{'texsrc'}='source.tex';
 	    set_source_tex();
 	}
 	
@@ -2038,7 +2038,7 @@ sub source_latex_quit2m {
 sub source_latex_ok {
     my $f=$w{'source_latex_choix'}->get_filename();
     debug "Source LaTeX $f";
-    $projet{'texsrc'}=$f;
+    $projet{'options'}->{'texsrc'}=$f;
     $w{'source_latex_choix'}->destroy();
     set_source_tex(1);
 }
@@ -2047,7 +2047,7 @@ sub source_latex_okm {
     my @i=$w{'modeles_liste'}->get_selection()->get_selected_rows()->get_indices();
     $w{'source_latex_modele'}->destroy();
     if(@i) {
-	$projet{'texsrc'}=$modeles[$i[0]]->{'fichier'};
+	$projet{'options'}->{'texsrc'}=$modeles[$i[0]]->{'fichier'};
 	set_source_tex(1);
     }
 }
@@ -2087,11 +2087,11 @@ sub copy_latex {
 }
 
 sub importe_source {
-    my ($fxa,$fxb,$fb) = splitpath($projet{'texsrc'});
+    my ($fxa,$fxb,$fb) = splitpath($projet{'options'}->{'texsrc'});
     my $dest=localise($fb);
 
     # fichier deja dans le repertoire projet...
-    return() if(is_local($projet{'texsrc'},1));
+    return() if(is_local($projet{'options'}->{'texsrc'},1));
 
     if(-f $dest) {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
@@ -2107,8 +2107,8 @@ sub importe_source {
 	} 
     }
 
-    if(copy_latex($projet{'texsrc'},$dest)) {
-	$projet{'texsrc'}=$fb;
+    if(copy_latex($projet{'options'}->{'texsrc'},$dest)) {
+	$projet{'options'}->{'texsrc'}=$fb;
 	set_source_tex();
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',
@@ -2129,7 +2129,7 @@ sub importe_source {
 }
 
 sub edite_source {
-    my $f=localise($projet{'texsrc'});
+    my $f=localise($projet{'options'}->{'texsrc'});
     debug "Edition $f...";
     if(fork()==0) {
 	exec($o{'tex_editor'},$f);
@@ -2138,24 +2138,24 @@ sub edite_source {
 
 sub valide_projet {
     set_source_tex();
-    $w{'liste'}->set_filename($projet{'listeetudiants'});
+    $w{'liste'}->set_filename($projet{'options'}->{'listeetudiants'});
 
 
-    $projet{'_mep_list'}=AMC::MEPList::new(localise($projet{'mep'}),
+    $projet{'_mep_list'}=AMC::MEPList::new(localise($projet{'options'}->{'mep'}),
 					   'brut'=>1,
 					   'saved'=>localise($mep_saved));
 
     detecte_mep();
 
-    $projet{'_an_list'}=AMC::ANList::new(localise($projet{'cr'}),
+    $projet{'_an_list'}=AMC::ANList::new(localise($projet{'options'}->{'cr'}),
 					 'brut'=>1,
 					 'saved'=>localise($an_saved));
     detecte_analyse('premier'=>1);
 
-    debug "Options correction : MB".$projet{'maj_bareme'};
-    $w{'maj_bareme'}->set_active($projet{'maj_bareme'});
+    debug "Options correction : MB".$projet{'options'}->{'maj_bareme'};
+    $w{'maj_bareme'}->set_active($projet{'options'}->{'maj_bareme'});
 
-    transmet_pref($gui,'notation',\%projet);
+    transmet_pref($gui,'notation',$projet{'options'});
 
     my $t=$w{'main_window'}->get_title();
     $t.= ' - projet '.$projet{'nom'} 
@@ -2166,7 +2166,7 @@ sub valide_projet {
 
     valide_liste('noinfo'=>1,'nomodif'=>1);
 
-    transmet_pref($gui,'export',\%projet);
+    transmet_pref($gui,'export',$projet{'options'});
 
 }
 
@@ -2180,7 +2180,13 @@ sub projet_ouvre {
 	if(!$deja) {
 	    debug "Ouverture du projet $proj...";
 	    
-	    %projet=%{XMLin(fich_options($proj),SuppressEmpty => '')};
+	    $projet{'options'}=XMLin(fich_options($proj),SuppressEmpty => '');
+	    # pour effacer des trucs en trop venant d'un bug anterieur...
+	    for(keys %{$projet{'options'}}) {
+		delete($projet{'options'}->{$_}) if(!exists($projet_defaut{$_}));
+	    }
+	    debug "Options lues :",
+	    Dumper(\%projet);
 	}
 	
 	$projet{'nom'}=$proj;
@@ -2194,8 +2200,8 @@ sub projet_ouvre {
 	}
     
 	for my $k (keys %projet_defaut) {
-	    if(! exists($projet{$k})) {
-		$projet{$k}=$projet_defaut{$k};
+	    if(! exists($projet{'options'}->{$k})) {
+		$projet{'options'}->{$k}=$projet_defaut{$k};
 		debug "Nouveau parametre : $k";
 	    }
 	}
@@ -2208,7 +2214,7 @@ sub projet_ouvre {
 	$projet{'modifie'}='';
 
 	# choix fichier latex si nouveau projet...
-	if(! $projet{'texsrc'}) {
+	if(! $projet{'options'}->{'texsrc'}) {
 	    source_latex_choisir();
 	}
 
