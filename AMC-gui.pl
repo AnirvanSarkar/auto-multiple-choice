@@ -323,7 +323,7 @@ sub debug_set {
 					       'destroy-with-parent',
 					       'info', # message type
 					       'ok', # which set of buttons?
-					       "Passage en mode débogage. Les informations de débogage de cette cession seront disponibles dans le fichier ".AMC::Basic::debug_file());
+					       "Passage en mode débogage. Les informations de débogage de cette session seront disponibles dans le fichier ".AMC::Basic::debug_file());
 	$dialog->run;
 	$dialog->destroy;
     }
