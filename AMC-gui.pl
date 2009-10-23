@@ -914,28 +914,46 @@ sub autre_imprimante {
     my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
     debug "Choix imprimante $i";
     my $ppd=$cups->getPPD($i);
-    my $k='';
+
+    my %alias=();
+    my %trouve=();
+
+    debug "Recherche agrafage...";
 
   CHOIX: for my $i (qw/StapleLocation/) {
       my $oi=$ppd->getOption($i);
+      
+      $alias{$i}='agrafe';
+      
       if(%$oi) {
 	  $k=nonnul($oi->{'keyword'});
-	  debug "- $k";
+	  debug "$i -> KEYWORD $k";
 	  my $ok=$o{'options_impression'}->{$k};
+	  my @possibilites=(map { (nonnul($_->{'choice'}),
+				   nonnul($_->{'text'})) }
+			    (@{$oi->{'choices'}}));
+	  my %ph=(@possibilites);
+	  $cb_stores{'agrafe'}=cb_model(@possibilites);
 	  $o{'options_impression'}->{$k}=nonnul($oi->{'defchoice'})
-	      if(!$ok);
-	  $cb_stores{'agrafe'}=cb_model(map { (nonnul($_->{'choice'}),
-					       nonnul($_->{'text'})) } (@{$oi->{'choices'}}));
-	  transmet_pref($g_imprime,'imp',$o{'options_impression'},
-			{$k=>'agrafe'});
-	  $o{'options_impression'}->{$k}=$ok;
+	      if(!$ok || !$ph{$ok});
+
+	  $alias{$k}='agrafe';
+	  $trouve{'agrafe'}=$k;
+
 	  last CHOIX;
+      } else {
+	  $o{'options_impression'}->{$k}='';
       }
   }
-    if(!$k) {
-	$cb_stores{'agrafe'}=cb_model();
+    if(!$trouve{'agrafe'}) {
+	debug "Agrafage impossible";
+
+	$cb_stores{'agrafe'}=cb_model(''=>'(impossible)');
 	$w{'imp_c_agrafe'}->set_model($cb_stores{'agrafe'});
     }
+
+    transmet_pref($g_imprime,'imp',$o{'options_impression'},
+		  \%alias);
 }
 
 sub sujet_impressions {
@@ -956,7 +974,7 @@ sub sujet_impressions {
 
 	my @printers = $cups->getDestinations();
 	debug "Imprimantes : ".join(' ',map { $_->getName() } @printers);
-	my $p_model=cb_model(map { ($_->getName(),$_->getDescription()) } @printers);
+	my $p_model=cb_model(map { ($_->getName(),$_->getDescription() || $_->getName()) } @printers);
 	$w{'imprimante'}->set_model($p_model);
 	if(! $o{'imprimante'}) {
 	    $o{'imprimante'}=$cups->getDestination()->getName();
@@ -989,6 +1007,12 @@ sub sujet_impressions {
 }
 
 sub sujet_impressions_cancel {
+    
+    if(get_debug()) {
+	reprend_pref('imp',$o{'options_impression'});
+	debug(Dumper($o{'options_impression'}));
+    }
+
     $w{'choix_pages_impression'}->destroy;
 }
 
@@ -1016,6 +1040,8 @@ sub sujet_impressions_ok {
 	$os=join(',',map { $_."=".$o{'options_impression'}->{$_} } 
 		 grep { $o{'options_impression'}->{$_} }
 		 (keys %{$o{'options_impression'}}) );
+
+	debug("Options d'impression : $os");
     }
 
     $w{'choix_pages_impression'}->destroy;
@@ -1537,16 +1563,16 @@ sub transmet_pref {
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
-		debug "CB_STORE($t) modifie";
+		debug "CB_STORE($t) ALIAS $ta modifie";
 		$wp->set_model($cb_stores{$ta});
 		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
 		if($i) {
 		    debug("[$t] trouve $i",
-			  " -> ".$cb_stores{$t}->get($i,COMBO_TEXT));
+			  " -> ".$cb_stores{$ta}->get($i,COMBO_TEXT));
 		    $wp->set_active_iter($i);
 		}
 	    } else {
-		debug "pas de CB_STORE pour $t";
+		debug "pas de CB_STORE pour $ta";
 		$wp->set_active($h->{$t});
 	    }
 	}
