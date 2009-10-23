@@ -192,6 +192,7 @@ sub set_debug_file {
 				       DIR=>File::Spec->tmpdir);
 	$amc_debug_filename=$amc_debug_fh->filename;
 	$amc_debug_fh->autoflush(1);
+	open(STDERR,">&",$amc_debug_fh);
     }
 }
 
@@ -208,6 +209,7 @@ sub set_debug {
 	$amc_debug_fh->autoflush(1);
 	$amc_debug_filename=$debug;
 	$debug=1;
+	open(STDERR,">&",$amc_debug_fh);
     }
     $amc_debug=$debug;
     set_debug_file() if($amc_debug && !$amc_debug_fh);

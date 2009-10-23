@@ -80,10 +80,21 @@ use constant {
 };
 
 my $debug=0;
+my $debug_file='';
 
 GetOptions("debug!"=>\$debug,
+	   "debug-file=s"=>\$debug_file,
 	   );
 
+if($debug_file) {
+    my $t=localtime();
+    my $date=sprintf("%02d/%02d/%04d %02d:%02d",
+		     $t->mday,$t->mon+1,$t->year+1900,$t->hour,$t->min);
+    open(DBG,">>",$debug_file);
+    print DBG "\n\n".('#' x 40)."\n# DEBUG - $date\n".('#' x 40)."\n\n";
+    close(DBG);
+    $debug=$debug_file;
+}
 
 if($debug) {
     set_debug($debug);
@@ -304,8 +315,9 @@ $w{'commande'}->hide();
 
 sub debug_set {
     $debug=$w{'menu_debug'}->get_active;
+    debug "DEBUG MODE : OFF" if(!$debug);
     set_debug($debug);
-    debug "DEBUG MODE : ".($debug ? "ON" : "OFF");
+    debug "DEBUG MODE : ON" if($debug);
     if($debug) {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',
