@@ -182,7 +182,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'nom_examen'=>'',
 		   'code_examen'=>'',
 	    
-		   'modifie'=>1,
+		   '_modifie'=>1,
 		   
 		   'format_export'=>'CSV',
 		   );
@@ -242,12 +242,12 @@ for my $k (keys %o_defaut) {
 	}
 	debug "Nouveau parametre global : $k = $o{$k}" if($o{$k});
     }
-    $o{'modifie'}=0;
+    $o{'_modifie'}=0;
 
     # XML::Writer utilise dans Association.pm n'accepte rien d'autre...
     if($o{'encodage_interne'} ne 'UTF-8') {
 	$o{'encodage_interne'}='UTF-8';
-	$o{'modifie'}=1;
+	$o{'_modifie'}=1;
     }
 }
 
@@ -789,7 +789,7 @@ sub projet_sauve {
 			  "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
 			  "RootName"=>'projetAMC','NoAttr'=>1)."\n";
 	close OPTS;
-	$projet{'modifie'}=0;
+	$projet{'options'}->{'_modifie'}=0;
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',
@@ -1003,14 +1003,14 @@ sub sujet_impressions_ok {
 	my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
 	if($i ne $o{'imprimante'}) {
 	    $o{'imprimante'}=$i;
-	    $o{'modifie'}=1;
+	    $o{'_modifie'}=1;
 	}
 
 	reprend_pref('imp',$o{'options_impression'});
 
-	if($o{'options_impression'}->{'modifie'}) {
-	    $o{'modifie'}=1;
-	    delete $o{'options_impression'}->{'modifie'};
+	if($o{'options_impression'}->{'_modifie'}) {
+	    $o{'_modifie'}=1;
+	    delete $o{'options_impression'}->{'_modifie'};
 	}
 
 	$os=join(',',map { $_."=".$o{'options_impression'}->{$_} } 
@@ -1214,7 +1214,7 @@ sub valide_liste {
 	# ok
 	if(!$oo{'nomodif'}) {
 	    $projet{'options'}->{'listeetudiants'}=$fl;
-	    $projet{'modifie'}=1;
+	    $projet{'options'}->{'_modifie'}=1;
 	}
 	# transmission liste des en-tetes
 	my @keys=$l->keys;
@@ -1303,7 +1303,7 @@ sub valide_cb {
     my $cbc=$cb->get_active();
     if($cbc xor $$var) {
 	$$var=$cbc;
-	$projet{'modifie'}=1;
+	$projet{'options'}->{'_modifie'}=1;
 	debug "* valide_cb";
     }
 }
@@ -1564,7 +1564,7 @@ sub reprend_pref {
 	my $wp=$w{$prefixe.'_x_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_text();
-	    $h->{'modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_f_'.$tgui};
@@ -1574,19 +1574,19 @@ sub reprend_pref {
 	    } else {
 		$n=$wp->get_filename();
 	    }
-	    $h->{'modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_v_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_active();
-	    $h->{'modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_s_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_value();
-	    $h->{'modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_c_'.$tgui};
@@ -1601,7 +1601,7 @@ sub reprend_pref {
 	    } else {
 		$n=$wp->get_active();
 	    }
-	    $h->{'modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
     }
@@ -1661,7 +1661,7 @@ sub sauve_pref_generales {
     if(open(OPTS,">$o_file")) {
 	print OPTS XMLout(\%o,"RootName"=>'AMC','NoAttr'=>1)."\n";
 	close OPTS;
-	$o{'modifie'}=0;
+	$o{'_modifie'}=0;
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',
@@ -1903,7 +1903,7 @@ sub source_latex_montre_nom {
 }
 
 sub valide_source_tex {
-    $projet{'modifie'}=1; debug "* valide_source_tex";
+    $projet{'options'}->{'_modifie'}=1; debug "* valide_source_tex";
     $w{'preparation_etats'}->set_sensitive(-f localise($projet{'options'}->{'texsrc'}));
 
     if(is_local($projet{'options'}->{'texsrc'})) {
@@ -2211,7 +2211,7 @@ sub projet_ouvre {
 
 	valide_projet();
 
-	$projet{'modifie'}='';
+	$projet{'options'}->{'_modifie'}='';
 
 	# choix fichier latex si nouveau projet...
 	if(! $projet{'options'}->{'texsrc'}) {
@@ -2226,7 +2226,7 @@ sub quitte_projet {
 	
 	valide_options_notation();
 	
-	if($projet{'modifie'}) {
+	if($projet{'options'}->{'_modifie'}) {
 	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 						   'destroy-with-parent',
 						   'question', # message type
@@ -2256,12 +2256,12 @@ sub quitter {
 	   || $x != $o{'taille_x_main'} || $y != $o{'taille_y_main'}) {
 	    $o{'taille_x_main'}=$x;
 	    $o{'taille_y_main'}=$y;
-	    $o{'modifie'}=1;
+	    $o{'_modifie'}=1;
 	    $ok=1;
 	}
     }
 
-    if($o{'modifie'}) {
+    if($o{'_modifie'}) {
 	if(!$ok) {
 	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 							       'destroy-with-parent',
