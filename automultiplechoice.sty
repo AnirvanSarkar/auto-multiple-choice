@@ -106,7 +106,6 @@
 \newcount\AMCnum@questions
 \newcount\AMCid@quest\AMCid@quest=-1 % numero de la question en cours
 \newcount\AMCid@check % code de verification de la question en cours
-\def\AMCid@checkmax{60} % code de verification maximal
 \newcount\AMCid@etud\AMCid@etud=1 % numero de la copie en cours
 \newcount\AMCid@etudfin % numero de la copie a laquelle on va s'arreter
 % options :
@@ -126,6 +125,13 @@
 \newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
 \newif\ifAMC@zoneformulaire
 %
+% parametres codage et cases binaires
+\def\AMCid@checkmax{60} % code de verification maximal
+\def\AMC@NCBetud{12}
+\def\AMC@NCBpage{6}
+\def\AMC@NCBcheck{6}
+\newlength{\AMC@CBtaille}\setlength{\AMC@CBtaille}{5cm}
+\def\AMC@premierecopie{1}
 %
 % cases cochees ou non avec la bonne couleur et la bonne forme
 \newcommand{\AMC@marquebonne}[1]{%
@@ -439,9 +445,9 @@
 \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
 \he@dhaut{%
 \ifAMC@codebinaire%
-\begin{minipage}[b]{5cm}
-\commence@nb{1}\noindent\binaire[12]{\the\AMCid@etud}\\
-\commence@nb{2}\noindent\binaire[6]{\thepage}\commence@nb{3}\binaire[6]{\the\AMCid@check}%
+\begin{minipage}[b]{\AMC@CBtaille}
+\commence@nb{1}\noindent\binaire[\AMC@NCBetud]{\the\AMCid@etud}\\
+\commence@nb{2}\noindent\binaire[\AMC@NCBpage]{\thepage}\commence@nb{3}\binaire[\AMC@NCBcheck]{\the\AMCid@check}%
 \end{minipage}
 \hbox to 4cm{\hspace*{\fill}{\tt +\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
 \else%
@@ -455,8 +461,8 @@
 %
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
 \message{AUTOQCM[TOTAL=#1]^^J}%
-\AMCid@etud=1\AMCid@etudfin=#1\advance\AMCid@etudfin by 1%
-\ifAMC@correchead\AMCid@etudfin=1\fi
+\AMCid@etud=\AMC@premierecopie\AMCid@etudfin=#1\advance\AMCid@etudfin by \AMC@premierecopie%
+\ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
 \loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
@@ -477,11 +483,13 @@
 \DeclareOption{ensemble}{\AMC@ensembletrue}
 %
 \DeclareOption{calibration}{\AMC@calibrationtrue}
-\DeclareOption{binaire}{\AMC@codebinairetrue\def\AMCid@checkmax{31}} % par defaut
+\DeclareOption{binaire}{\AMC@codebinairetrue} % par defaut
 \DeclareOption{decimal}{\AMC@codebinairefalse\def\AMCid@checkmax{999}}
 \DeclareOption{couleur}{\AMC@couleurtrue}
 \DeclareOption{id}{\AMC@couleurfalse}
 \DeclareOption{nowatermark}{\AMC@watermarkfalse}
+%
+\DeclareOption{versionA}{\def\AMCid@checkmax{31}\def\AMC@NCBetud{9}\def\AMC@NCBpage{4}\def\AMC@NCBcheck{5}\setlength{\AMC@CBtaille}{4cm}\def\AMC@premierecopie{100}}
 %
 \ProcessOptions
 %

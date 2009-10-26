@@ -83,10 +83,40 @@
   </sect1>
 
   <sect1>
-    <title>Limitations numériques</title>
+    <title>Notes d'utilisation</title>
 
-    <para>Dans la version actuelle, le nombre de copies est limité à 4095 et
-    le nombre de pages par copies est limité à 63.</para>
+    <sect2>
+      <title>Limitations numériques</title>
+
+      <para>Dans la version actuelle (à partir de la version 0.156), le nombre
+      de copies est limité à 4095 et le nombre de pages par copies est limité
+      à 63.</para>
+    </sect2>
+
+    <sect2>
+      <title>Versions</title>
+
+      <para>Même si cela ne devrait pas avoir trop de conséquences, il vaut
+      mieux essayer de ne pas changer de version du programme en cours
+      d'utilisation pour un projet donné (entre le moment où les copies sont
+      imprimé et le moment où les notes sont calculées et les copies
+      annotées). Il existe quelques modifications qui risquent de perturber le
+      fonctionnement d'AMC si vous les appliquez au cours de la gestion d'un
+      projet :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Si vous avez compilé et imprimé un sujet avec une version
+          d'AMC égale ou inférieure à 0.155, et que vous continuez la gestion
+          du projet avec la version 0.156 ou postérieure, ajoutez l'option
+          <option>versionA</option> dans l'appel au paquet
+          <package>automultiplechoice</package> dans le fichier LaTeX. Exemple
+          :</para>
+
+          <programlisting>\usepackage[bloc,completemulti,versionA]{automultiplechoice}</programlisting>
+        </listitem>
+      </itemizedlist>
+    </sect2>
   </sect1>
 
   <sect1 id="installation">
