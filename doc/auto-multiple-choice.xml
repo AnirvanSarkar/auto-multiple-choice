@@ -1598,6 +1598,34 @@ Durée : 10 minutes.
 
 \end{document}</programlisting></para>
       </sect3>
+
+      <sect3>
+        <title>Barèmes généraux</title>
+
+        <para>Pour utiliser un barème de manière générale pour tout un
+        ensemble de questions, on pourra le définir dans une commande LaTeX,
+        comme dans l'exemple suivant :</para>
+
+        <programlisting>\def\barQmult{haut=3,p=-1}
+
+\begin{questionmult}\bareme{\barQmult}
+[...]
+\end{questionmult}</programlisting>
+
+        <para>Dans certains cas de figure, il peut être intéressant de définir
+        un barème de manière générale <emphasis>en fonction du nombre de
+        réponses proposées</emphasis>. Il suffit pour cela de mettre les
+        valeurs intervenant dans le barème sous la forme de formules utilisant
+        la variable <varname>N</varname>. Par exemple, pour obtenir un barème
+        qui fixe à 4 la note maximale et tel que l'espérance de la note d'un
+        étudiant cochant au hasard chaque case soit de 1, on peut utiliser le
+        barème <code>d=4,b=0,m=-(4-1)*2/N</code> (qui donne une note de -2 si
+        toutes les reonses sont fausses, c'est-à-dire si on a coché les cases
+        qu'il ne fallait pas cocher et si on n'a pas coché les cases qu'il
+        fallait cocher). Les opérations acceptées dans ces formules sont les
+        quatre opérations simples (<code>+</code> <code>-</code>
+        <code>*</code> <code>/</code>), et le parenthésage.</para>
+      </sect3>
     </sect2>
 
     <sect2>
