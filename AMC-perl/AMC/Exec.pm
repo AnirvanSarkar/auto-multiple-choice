@@ -63,6 +63,7 @@ sub execute {
 	    debug "Cmd PID=$cmd_pid retourne $?"; 
 	} else {
 	    exec(@c);
+	    die "Commande inexistante : $prg";
 	}
 
     } else {
