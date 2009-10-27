@@ -152,14 +152,28 @@ my @xmls = grep { /\.xml$/ && -f "$cr_dir/$_" } readdir(DIR);
 closedir DIR;
 
 sub degroupe {
-    my ($s,%r)=(@_);
+    my ($s,$defaut,$vars)=(@_);
+    my %r=(%$defaut);
     for my $i (split(/,+/,$s)) {
-	if($i =~ /^([^=]+)=(-?[0-9\.]+)$/) {
+	if($i =~ /^([^=]+)=([-+*\/0-9a-zA-Z\.]+)$/) {
 	    $r{$1}=$2;
 	} else {
 	    die "Erreur de syntaxe pour le bareme : $s";
 	}
     }
+    # remplacement des variables et evaluation :
+    for my $k (keys %r) {
+	my $v=$r{$k};
+	for my $vv (keys %$vars) {
+	    $v=~ s/\b$vv\b/$vars->{$vv}/g;
+	}
+	die "Erreur de syntaxe (variables inconnues) : $v" if($v =~ /[a-z]/i);
+	my $calc=eval($v);
+	die "Erreur de syntaxe (calcul impossible) : $v" if(!defined($calc));
+	debug "Evaluation : $r{$k} => $calc" if($r{$k} ne $calc);
+	$r{$k}=$calc;
+    }
+    #
     return(%r);
 }
 
@@ -197,7 +211,7 @@ sub action {
 	
 	my $coche=($page->{$k}->{'r'}>$seuil ? 1 : 0);
 	my $ok=($coche == $bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
-	debug "Question $q reponse $r : ".($coche ? "X" : "O")." -> $ok";
+	debug "Etud $etud Q $q R $r : ".($coche ? "X" : "O")." -> ".($ok ? "BIEN" : "NON");
 	$pbons->{$etud}->{$q}={} if(!$pbons->{$etud}->{$q});
 	$pbons->{$etud}->{$q}->{$r}=[$coche,$ok];
     }
@@ -311,15 +325,16 @@ for my $etud (@a_calculer) {
 	    $id_coche=-1;
 	    $n_tous=0;
 	    
-	    for (keys %{$bons{$etud}->{$q}}) {
+	    my @rep=(keys %{$bons{$etud}->{$q}});
+	    my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
+
+	    for (@rep) {
 		$n_ok+=$bons{$etud}->{$q}->{$_}->[1];
 		$n_coche+=$bons{$etud}->{$q}->{$_}->[0];
 		$id_coche=$_ if($bons{$etud}->{$q}->{$_}->[0]);
 		$n_tous++;
 	    }
 
-	    debug "{$n_ok/$n_tous,$n_coche,$id_coche}";
-		
 	    # baremes :
 
 	    # e=erreur logique dans les réponses
@@ -330,18 +345,22 @@ for my $etud (@a_calculer) {
 	    # d=décalage ajouté avant plancher
 	    # haut=on met le max a cette valeur et on enleve 1 pt par faute (MULT)
 	    
+	    # variables possibles dans la specification du bareme
+	    my $vars={'N'=>(1+$#rep_pleine),
+		      'IMULT'=>($barq->{'multiple'} ? 1 : 0),
+		      'IS'=>($barq->{'multiple'} ? 0 : 1),
+		  };
+
 	    if($barq->{'multiple'}) {
 		# QUESTION MULTIPLE
-
-		my @rep=(keys %{$bons{$etud}->{$q}});
 
 		$xx=0;
 		
 		%b_q=degroupe($barq->{'bareme'},
-			      'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0);
+			      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0},
+			      $vars);
 
 		if($b_q{'haut'}) {
-		    my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
 		    $b_q{'d'}=$b_q{'haut'}-(1+$#rep_pleine);
 		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
 		    debug "Q=$q REPS=".join(',',@rep)." HAUT=$b_q{'haut'} D=$b_q{'d'} P=$b_q{'p'}";
@@ -361,8 +380,8 @@ for my $etud (@a_calculer) {
 		    for(@rep) {
 			if($_ != 0) {
 			    $code=($bons{$etud}->{$q}->{$_}->[1] ? "b" : "m");
-			    my %b_qspec=degroupe($barq->{'reponse'}->{$_}->{'bareme'},%b_q);
-			    debug "[$b_qspec{$code}]";
+			    my %b_qspec=degroupe($barq->{'reponse'}->{$_}->{'bareme'},
+						 \%b_q,$vars);
 			    $xx+=$b_qspec{$code};
 			}
 		    }
@@ -379,7 +398,8 @@ for my $etud (@a_calculer) {
 	    } else {
 		# QUESTION SIMPLE
 		%b_q=degroupe($barq->{'bareme'},
-			      'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1);
+			      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1},
+			      $vars);
 
 		if($n_coche==0) {
 		    $xx=$b_q{'v'};
@@ -411,8 +431,6 @@ for my $etud (@a_calculer) {
 	    } else {
 		$total+=$xx;
 	    }
-	    
-	    debug $raison;
 	    
 	    if($vrai) {
 		my $tit=titre_q($q);
