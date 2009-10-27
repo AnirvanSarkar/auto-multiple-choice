@@ -23,23 +23,13 @@ use Getopt::Long;
 use Data::Dumper;
 
 use AMC::Basic;
+use AMC::Exec;
 use AMC::ANList;
 use AMC::Gui::Avancement;
 
 use encoding 'utf8';
 
 $VERSION_BAREME=2;
-
-my $cmd_pid='';
-
-sub catch_signal {
-    my $signame = shift;
-    debug "*** AMC-note : signal $signame, je tue $cmd_pid...\n";
-    kill 9,$cmd_pid if($cmd_pid);
-    die "Killed";
-}
-
-$SIG{INT} = \&catch_signal;
 
 my $cr_dir="";
 my $fichnotes='';
@@ -70,19 +60,8 @@ GetOptions("cr=s"=>\$cr_dir,
 
 set_debug($debug);
 
-sub commande_externe {
-    my @c=@_;
-
-    debug "Commande : ".join(' ',@c);
-
-    $cmd_pid=fork();
-    if($cmd_pid) {
-	waitpid($cmd_pid,0);
-    } else {
-	exec(@c);
-    }
-
-}
+my $commandes=AMC::Exec::new("AMC-annote");
+$commandes->signalise();
 
 if(! -d $cr_dir) {
     attention("Repertoire de compte-rendus inexistant : $cr_dir");
@@ -287,7 +266,7 @@ $delta=1/$#ids if($#ids>0);
 	 push @cmd,"$cr_dir/corrections/jpg/page-$idf.jpg";
 
 	 #print "Fabrication de page-$idf.jpg...\n";
-	 commande_externe(@cmd);
+	 $commandes->execute(@cmd);
      } else {
 	 print "*** scan $scan introuvable ***\n";
      }

@@ -383,6 +383,7 @@ if($mode =~ /b/) {
 	    $avance->progres($delta) if($etu ne '');
 	    $etu=$1;
 	    print "Copie $etu...\n";
+	    debug "Copie $etu...\n";
 	    $bs{$etu}={};
 	}
 	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
@@ -404,6 +405,8 @@ if($mode =~ /b/) {
     }
     close(TEX);
     $cmd_pid='';
+
+    debug "Ecriture bareme dans $bareme";
 
     open(BAR,">",$bareme) or die "Impossible d'ecrire dans $bareme";
     print BAR "<?xml version='1.0' standalone='yes'?>\n";

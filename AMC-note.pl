@@ -31,17 +31,6 @@ use encoding 'utf8';
 
 $VERSION_BAREME=2;
 
-my $cmd_pid='';
-
-sub catch_signal {
-    my $signame = shift;
-    debug "*** AMC-note : signal $signame, je tue $cmd_pid...\n";
-    kill 9,$cmd_pid if($cmd_pid);
-    die "Killed";
-}
-
-$SIG{INT} = \&catch_signal;
-
 my $cr_dir="";
 my $bareme="";
 my $association="-";
@@ -107,20 +96,6 @@ if($type_arrondi) {
 	    $arrondi=$fonction_arrondi{$k};
 	}
     }
-}
-
-sub commande_externe {
-    my @c=@_;
-
-    debug "Commande : ".join(' ',@c);
-
-    $cmd_pid=fork();
-    if($cmd_pid) {
-	waitpid($cmd_pid,0);
-    } else {
-	exec(@c);
-    }
-
 }
 
 if(! -d $cr_dir) {

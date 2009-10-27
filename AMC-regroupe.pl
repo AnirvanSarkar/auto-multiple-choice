@@ -23,36 +23,15 @@ use Text::Unaccent;
 use XML::Simple;
 
 use AMC::Basic;
+use AMC::Exec;
 use AMC::Gui::Avancement;
 use AMC::AssocFile;
 use AMC::NamesFile;
 
 my $debug='';
 
-my $cmd_pid='';
-
-sub catch_signal {
-    my $signame = shift;
-    debug "*** AMC-regroupe : signal $signame, je tue $cmd_pid...\n";
-    kill 9,$cmd_pid if($cmd_pid);
-    die "Killed";
-}
-
-$SIG{INT} = \&catch_signal;
-
-sub commande_externe {
-    my @c=@_;
-
-    debug "Commande : ".join(' ',@c);
-
-    $cmd_pid=fork();
-    if($cmd_pid) {
-	waitpid($cmd_pid,0);
-    } else {
-	exec(@c);
-    }
-
-}
+my $commandes=AMC::Exec::new('AMC-regroupe');
+$commandes->signalise();
 
 ################################################################
 
@@ -161,11 +140,11 @@ for my $e (keys %r) {
     debug "Pages : ".join(", ",@sp);
     #print "Sources : ".join(", ",map { $r{$e}->{$_} } @sp)."\n";
 
-    commande_externe('convert',
-		     '-adjoin',
-		     '-page','A4',
-		     (map { $r{$e}->{$_} } @sp),
-		     $f);
+    $commandes->execute(magick_module('convert'),
+			'-adjoin',
+			'-page','A4',
+			(map { $r{$e}->{$_} } @sp),
+			$f);
     
     $avance->progres(1/(1+$#pages));
 }

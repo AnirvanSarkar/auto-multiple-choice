@@ -27,22 +27,12 @@ use Getopt::Long;
 use Graphics::Magick;
 
 use AMC::Basic;
+use AMC::Exec;
 use AMC::MEPList;
 use AMC::Calage;
 use AMC::Image;
 use AMC::Boite qw/min max/;
 use AMC::Gui::Avancement;
-
-my $cmd_pid='';
-
-sub catch_signal {
-    my $signame = shift;
-    debug "*** AMC-calepage : signal $signame, je tue $cmd_pid...\n";
-    kill 9,$cmd_pid if($cmd_pid);
-    die "Killed";
-}
-
-$SIG{INT} = \&catch_signal;
 
 ($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
 sub with_prog {
@@ -138,6 +128,9 @@ GetOptions("page=s"=>\$out_cadre,
 
 set_debug($debug);
 
+my $commandes=AMC::Exec::new('AMC-calepage');
+$commandes->signalise();
+
 $blur = ($modele ? "" : "1x1") if($blur eq 'defaut');
 $threshold = ($modele ? "" : "60%") if($threshold eq 'defaut');
 
@@ -149,20 +142,6 @@ sub erreur {
     my $e=shift;
     print "ERREUR($scan)($id_page) : $e\n";
     exit(1);
-}
-
-sub commande_externe {
-    my @c=@_;
-
-    debug "Commande : ".join(' ',@c);
-
-    $cmd_pid=fork();
-    if($cmd_pid) {
-	waitpid($cmd_pid,0);
-    } else {
-	exec(@c);
-    }
-
 }
 
 ################################################################
@@ -186,7 +165,7 @@ if($blur || $threshold || $scan !~ /\.ppm$/) {
     push @ca,"-blur",$blur if($blur);
     push @ca,"-threshold",$threshold if($threshold);
     push @ca,$scan,$ppm;
-    commande_externe(@ca);
+    $commandes->execute(@ca);
 } else {
     $ppm=$scan;
 }
