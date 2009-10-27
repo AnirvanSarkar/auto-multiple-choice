@@ -155,7 +155,7 @@ sub degroupe {
     my ($s,$defaut,$vars)=(@_);
     my %r=(%$defaut);
     for my $i (split(/,+/,$s)) {
-	if($i =~ /^([^=]+)=([-+*\/0-9a-zA-Z\.]+)$/) {
+	if($i =~ /^([^=]+)=([-+*\/0-9a-zA-Z\.\(\)]+)$/) {
 	    $r{$1}=$2;
 	} else {
 	    die "Erreur de syntaxe pour le bareme : $s";
