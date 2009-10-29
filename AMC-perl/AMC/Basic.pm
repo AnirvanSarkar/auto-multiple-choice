@@ -28,7 +28,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file);
+    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -229,6 +229,53 @@ sub debug {
 	} else {
 	    print $l;
 	}
+    }
+}
+
+# noms de fichiers absolus ou relatifs
+
+sub abs2proj {
+    my ($surnoms,$fich)=@_;
+    if(defined($fich) && $fich) {
+
+	$fich =~ s/\/{2,}/\//g;
+
+      CLES:for my $s (sort { length($surnoms->{$b}) <=> length($surnoms->{$a}) } grep { $_ } (keys %$surnoms)) {
+	  my $rep=$surnoms->{$s};
+	  $rep.="/" if($rep !~ /\/$/);
+	  $rep =~ s/\/{2,}/\//g;
+	  if($fich =~ s/^$rep\/*//) {
+	      $fich="$s/$fich";
+	      last CLES;
+	  }
+      }
+
+	return($fich);
+    } else {
+	return('');
+    }
+}
+
+sub proj2abs {
+    my ($surnoms,$fich)=@_;
+    if(defined($fich)) {
+	if($fich =~ /^\//) {
+	    return($fich);
+	} else {
+	    $fich =~ s/^([^\/]*)//;
+	    my $code=$1;
+	    if(!$surnoms->{$code}) {
+		$fich=$code.$fich;
+		$code=$surnoms->{''};
+	    }
+	    my $rep=$surnoms->{$code};
+	    $rep.="/" if($rep !~ /\/$/);
+	    $rep.=$fich;
+	    $rep =~ s/\/{2,}/\//g;
+	    return($rep);
+	}
+    } else {
+	return('');
     }
 }
 
