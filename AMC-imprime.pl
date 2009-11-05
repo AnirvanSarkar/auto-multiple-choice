@@ -25,6 +25,7 @@ use Net::CUPS;
 use Net::CUPS::PPD;
 
 use AMC::Basic;
+use AMC::Exec;
 use AMC::MEPList;
 use AMC::Gui::Avancement;
 
