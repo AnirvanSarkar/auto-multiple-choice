@@ -902,7 +902,7 @@ sub doc_maj {
 			  "--debug",debug_file(),
 			  "--mode","s",
 			  absolu($projet{'options'}->{'texsrc'}),
-			  "--prefix",absolu(''),
+			  "--prefix",absolu('%PROJET/'),
 			  ],
 	     'signal'=>2,
 	     'texte'=>'Mise à jour des documents...',
