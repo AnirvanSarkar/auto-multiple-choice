@@ -95,7 +95,7 @@ sub run {
 		    } else {
 			debug "Command [$$] : ".join(' ',@$cs);
 			exec(@$cs);
-			debug "Exec a rate : $$ [".$cs->[0]."] commande inconnue";
+			debug "Exec infructueux : $$ [".$cs->[0]."] commande inconnue";
 			die "Commande inconnue";
 		    }
 		}

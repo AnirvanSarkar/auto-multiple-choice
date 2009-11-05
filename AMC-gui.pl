@@ -585,9 +585,7 @@ sub exporte {
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
 		 if(-f $output) {
-		     if(fork()==0) {
-			 exec($o{$ext.'_viewer'},$output);
-		     }
+		     commande_parallele($o{$ext.'_viewer'},$output);
 		 } else {
 		     my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 							    'destroy-with-parent',
@@ -629,9 +627,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		    $item->signal_connect (activate => sub {
 			my (undef, $sortkey) = @_;
 			debug "Visualisation $f...";
-			if(fork()==0) {
-			    exec($o{'img_viewer'},$f);
-			}
+			commande_parallele($o{'img_viewer'},$f);
 		    }, $_);
 		}
 	    }
@@ -691,6 +687,28 @@ sub commande {
     
 sub commande_annule {
     for (keys %les_commandes) { $les_commandes{$_}->quitte(); }
+}
+
+sub commande_parallele {
+    my (@c)=(@_);
+    if(commande_accessible($c[0])) {
+	my $pid=fork();
+	if($pid==0) {
+	    debug "Commande // [$$] : ".join(" ",@c);
+	    exec(@c) ||
+		debug "Exec $$ defectueux";
+	    exit(0);
+	}
+    } else {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+					       'destroy-with-parent',
+					       'error', # message type
+					       'ok', # which set of buttons?
+					       "La commande suivante n'a pas pu être exécutée : <b>$c[0]</b>. Peut-être est-ce dû à une mauvaise configuration ?");
+	$dialog->run;
+	$dialog->destroy;
+	
+    }
 }
 
 ### Actions des menus
@@ -832,9 +850,7 @@ sub doc_active {
     #print "Active $sel...\n";
     my $f=absolu($projet{'options'}->{'docs'}->[$sel]);
     debug "Visualisation $f...";
-    if(fork()==0) {
-	exec($o{'pdf_viewer'},$f);
-    }
+    commande_parallele($o{'pdf_viewer'},$f);
 }
 
 sub mep_active {
@@ -843,9 +859,7 @@ sub mep_active {
     debug "Active MEP $sel : ID=$id...";
     my $f=$projet{'_mep_list'}->filename($id);
     debug "Visualisation $f...";
-    if(fork()==0) {
-	exec($o{'xml_viewer'},$f);
-    }
+    commande_parallele($o{'xml_viewer'},$f);
 }
 
 sub fichiers_mep {
@@ -1465,9 +1479,7 @@ sub visualise_correc {
     #print "Correc $sel $correc_store\n";
     my $f=$correc_store->get($correc_store->get_iter($sel),CORREC_FILE);
     debug "Visualisation $f...";
-    if(fork()==0) {
-	exec($o{'img_viewer'},$f);
-    }
+    commande_parallele($o{'img_viewer'},$f);
 }
 
 sub annote_copies {
@@ -1518,9 +1530,7 @@ sub regarde_regroupements {
     # nautilus attend des arguments dans l'encodage specifie par LANG & co.
     @c=map { encode($encodage_systeme,$_); } @c;
 
-    if(fork()==0) {
-	exec(@c);
-    }
+    commande_parallele(@c);
 }
 
 ###
@@ -1540,14 +1550,12 @@ sub close_apropos {
 sub activate_doc {
     my $url='file:///usr/share/doc/auto-multiple-choice/html/auto-multiple-choice/index.html';
 
-    if(fork()==0) {
-	my $seq=0;
-	my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
-	push @c,$url if(!$seq);
-	@c=map { encode($encodage_systeme,$_); } @c;
-
-	exec(@c);
-    }
+    my $seq=0;
+    my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
+    push @c,$url if(!$seq);
+    @c=map { encode($encodage_systeme,$_); } @c;
+    
+    commande_parallele(@c);
 }
 
 # transmet les preferences vers les widgets correspondants
@@ -2181,9 +2189,7 @@ sub importe_source {
 sub edite_source {
     my $f=absolu($projet{'options'}->{'texsrc'});
     debug "Edition $f...";
-    if(fork()==0) {
-	exec($o{'tex_editor'},$f);
-    }
+    commande_parallele($o{'tex_editor'},$f);
 }
 
 sub valide_projet {
