@@ -203,6 +203,8 @@ my %projet_defaut=('texsrc'=>'',
 my $mep_saved='mep.storable';
 my $an_saved='an.storable';
 
+my %o=();
+
 # toutes les commandes prevues sont-elles accessibles ? Si non, on
 # avertit l'utilisateur
 
@@ -218,15 +220,13 @@ sub test_commandes {
 					       'destroy-with-parent',
 					       'warning', # message type
 					       'ok', # which set of buttons?
-					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant Préférences dans le menu Édition.");
+					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant <i>Préférences</i> dans le menu <i>Édition</i>.");
 	$dialog->run;
 	$dialog->destroy;
     }
 }
 
 # lecture options ...
-
-my %o=();
 
 if(-r $o_file) {
     %o=%{XMLin($o_file,SuppressEmpty => '')};
