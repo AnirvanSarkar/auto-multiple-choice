@@ -34,7 +34,10 @@ sub new {
 	$self->{$k}=$o{$k} if(defined($self->{$k}));
     }
 
-    $self->{'max.procs'}=Sys::CPU::cpu_count() if(!$self->{'max.procs'});
+    if($self->{'max.procs'}<1) {
+	$self->{'max.procs'}=Sys::CPU::cpu_count();
+	debug "Nombre maximal de processus fixe a ".$self->{'max.procs'};
+    }
 
     bless $self;
     
@@ -69,6 +72,7 @@ sub killall {
 
 sub run {
     my ($self,$subsys)=@_;
+    debug "Queue RUN";
     while(@{$self->{'queue'}}) {
 	while($self->maj() < $self->{'max.procs'}) {
 	    my $cs=shift(@{$self->{'queue'}});
@@ -89,7 +93,10 @@ sub run {
 			}
 			exit(0);
 		    } else {
+			debug "Command [$$] : ".join(' ',@$cs);
 			exec(@$cs);
+			debug "Exec a rate : $$ [".$cs->[0]."] commande inconnue";
+			die "Commande inconnue";
 		    }
 		}
 	    } else {

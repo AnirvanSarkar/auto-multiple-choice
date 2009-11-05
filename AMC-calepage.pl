@@ -140,6 +140,7 @@ $scan=$ARGV[0];
 
 sub erreur {
     my $e=shift;
+    debug "ERREUR($scan)($id_page) : $e\n";
     print "ERREUR($scan)($id_page) : $e\n";
     exit(1);
 }

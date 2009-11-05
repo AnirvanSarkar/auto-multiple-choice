@@ -71,6 +71,7 @@ if($liste_f && open(LISTE,$liste_f)) {
     while(<LISTE>) {
 	chomp;
 	if(-f $_) {
+	    debug "Scan from list : $_";
 	    push @scans,$_;
 	} else {
 	    print STDERR "ATTENTION : fichier inexistant : $_\n";
@@ -116,7 +117,7 @@ if(!$mep_file) {
 
 for my $s (@scans) {
     my @c=with_prog("AMC-calepage.pl");
-    push @c,"--debug" if($debug);
+    push @c,"--debug",debug_file();
     push @c,"--seuil-coche",$seuil_coche if($seuil_coche);
     push @c,"--progression-id",$progress_id;
     push @c,"--progression",$delta;

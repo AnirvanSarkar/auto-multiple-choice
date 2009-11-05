@@ -200,16 +200,32 @@ sub debug_file {
     return($amc_debug ? $amc_debug_filename : '');
 }
 
+sub debug {
+    my @s=@_;
+    return if(!$amc_debug);
+    for my $l (@s) {
+	$l=$l."\n" if($l !~ /\n$/);
+	if($amc_debug_fh) {
+	    $amc_debug_fh->sync;
+	    print $amc_debug_fh $l;
+	} else {
+	    print $l;
+	}
+    }
+}
+
 sub set_debug {
     my ($debug)=@_;
     if($debug =~ /\// && -f $debug) {
 	# c'est un nom de fichier
 	$amc_debug_fh=new IO::File;
-	$amc_debug_fh->open(">>$debug");
+	$amc_debug_fh->open($debug,">>");
 	$amc_debug_fh->autoflush(1);
 	$amc_debug_filename=$debug;
 	$debug=1;
-	open(STDERR,">&",$amc_debug_fh);
+	open(STDERR,">>&",$amc_debug_fh);
+	$amc_debug=1;
+	debug("[".$$."]>>");
     }
     $amc_debug=$debug;
     set_debug_file() if($amc_debug && !$amc_debug_fh);
@@ -217,19 +233,6 @@ sub set_debug {
 
 sub get_debug {
     return($amc_debug);
-}
-
-sub debug {
-    my @s=@_;
-    return if(!$amc_debug);
-    for my $l (@s) {
-	$l=$l."\n" if($l !~ /\n$/);
-	if($amc_debug_fh) {
-	    print $amc_debug_fh $l;
-	} else {
-	    print $l;
-	}
-    }
 }
 
 # noms de fichiers absolus ou relatifs
