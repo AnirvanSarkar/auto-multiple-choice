@@ -103,7 +103,7 @@ sub new {
 					 'identifiant'=>$self->{'identifiant'},
 					 );
 
-    print "".$self->{'liste'}->taille()." noms\n";
+    debug "".$self->{'liste'}->taille()." noms dans la liste\n";
     
     return($self) if(!$self->{'liste'}->taille());
     
@@ -119,21 +119,10 @@ sub new {
     
     if($#images<0) {
 	print "Je ne trouve pas d'images de noms...\n";
+	$self->{'erreur'}="Je ne trouve pas d'images de noms... Peut-être n'avez-vous pas encore effectué la saisie automatique à partir des scans, ou bien avez-vous oublié d'utiliser la commande \\champnom dans le source LaTeX, ou tout simplement n'avez-vous pas de scans des copies ?\nDans les deux derniers cas, vous pouvez associer les copies aux étudiants en utilisant l'interface de saisie manuelle.";
 	return($self);
     }
     
-    my $xmax=-1;
-    my $ymax=-1;
-    
-    open(GETSIZE,"-|","identify",@images);
-    while(<GETSIZE>) {
-	if(/\s+([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+)\s+/) {
-	    $xmax=$1 if($xmax<$1);
-	    $ymax=$2 if($ymax<$2);
-	}
-    }
-    close(GETSIZE);
-
     ### GUI
 
     my $glade_xml=__FILE__;

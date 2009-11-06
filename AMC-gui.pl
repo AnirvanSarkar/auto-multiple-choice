@@ -1303,6 +1303,15 @@ sub associe {
 					  'encodage_liste'=>$o{'encodage_liste'},
 					  'encodage_interne'=>$o{'encodage_interne'},
 					  );
+	if($ga->{'erreur'}) {
+	    my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+						   'destroy-with-parent',
+						   'error', # message type
+						   'ok', # which set of buttons?
+						   $ga->{'erreur'});
+	    $dialog->run;
+	    $dialog->destroy;
+	}
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
 					       'destroy-with-parent',

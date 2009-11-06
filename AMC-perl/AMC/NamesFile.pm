@@ -152,7 +152,8 @@ sub liste {
 
 sub data {
     my ($self,$head,$c,%oo)=@_;
-    my @k=grep { $self->{'noms'}->[$_]->{$head} eq $c }
+    my @k=grep { defined($self->{'noms'}->[$_]->{$head}) 
+		     && ($self->{'noms'}->[$_]->{$head} eq $c) }
     (0..$#{$self->{'noms'}});
     if(!$oo{'all'}) {
 	if($#k!=0) {
@@ -176,4 +177,3 @@ sub data_n {
 
 __END__
 
-perl -e 'use AMC::NamesFile;use Data::Dumper; $a=AMC::NamesFile::new("essais/liste.txt","debug"=>1);print $a->{"lines"}."\n";print "CLES : ".join(", ",$a->keys())."\n";print "NOMS : ".join(", ",$a->liste("nom"))."\n";print Dumper($a->data("etu","10807389"));print Dumper($a->data("prenom","Mathieu"));'
