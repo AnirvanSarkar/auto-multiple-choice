@@ -678,6 +678,8 @@ if($out_cadre || $zoom_file) {
 
     @zoom_files=();
 
+    %categories=(0=>'non cochées',1=>'cases cochées','x'=>'erreurs de codage');
+
     ###############################################
     # cases du modele $cale->transformees, avec annotation
     for my $k (keys %coins_test) {
@@ -776,9 +778,23 @@ if($out_cadre || $zoom_file) {
 
 	my $cases_zoom="$temp_dir/cases";
 	my @lc;
+	my $largeur=$zooms->Get('width');
 
 	for my $i (0,1,'x') {
 	    if($#{$morceaux{$i}}>=0) {
+
+		my $titre=Graphics::Magick->new;
+		$titre->Set(size=>$largeur.'x50');
+		$titre->ReadImage('xc:white');
+		$titre->Annotate("pointsize"=>40,
+				 "gravity"=>'center',
+				 "font"=>'Helvetica',
+				 "fill"=>'blue',
+				 "text"=>$categories{$i},
+				 );
+		
+		push @$zooms,$titre;
+		
 		push @$zooms,$morceaux{$i}->Montage(tile=>'4x',
 						    background=>'blue',
 						    geometry=>'+3+3');
