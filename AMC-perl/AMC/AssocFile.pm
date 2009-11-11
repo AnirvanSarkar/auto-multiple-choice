@@ -66,9 +66,9 @@ sub load {
 
     my $ok=1;
     for (qw/version liste_key notes_id/) {
-	if(defined($self->{'a'}->{$_})
+	if(defined($self->{'a'}->{$_}) && ($self->{'a'}->{$_})
 	   && (!defined($a->{$_}) || ($self->{'a'}->{$_} ne $a->{$_})) ) {
-	    debug "*** fichier d'associations incompatible : $_\n";
+	    debug "*** fichier d'associations incompatible : $_ = $self->{'a'}->{$_} | $a->{$_}\n";
 	    $ok=0;
 	}
     }

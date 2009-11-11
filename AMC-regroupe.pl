@@ -28,6 +28,8 @@ use AMC::Gui::Avancement;
 use AMC::AssocFile;
 use AMC::NamesFile;
 
+use Graphics::Magick;
+
 my $debug='';
 
 my $commandes=AMC::Exec::new('AMC-regroupe');
@@ -68,8 +70,10 @@ my $lk='';
 
 if($association) {
     $assoc=AMC::AssocFile::new($association);
-    $assoc->load() if($assoc);
-    $lk=$assoc->get_param('liste_key');
+    if($assoc) {
+	$assoc->load();
+	$lk=$assoc->get_param('liste_key');
+    }
 }
 
 my $noms='';
@@ -77,6 +81,8 @@ my $noms='';
 if($fich_noms) {
     $noms=AMC::NamesFile::new($fich_noms,
 			      "encodage"=>$noms_encodage);
+
+    debug "Dans le fichier de noms, on trouve les champs : ".join(", ",$noms->heads());
 }
 
 opendir(JDIR, $jpgdir) || die "can't opendir $jpgdir: $!";
@@ -105,9 +111,12 @@ for my $e (keys %r) {
 	my $nom='XXX';
 	my $n;
 
+	debug "Association -> ID=$i";
+
 	if($i) {
 	    ($n)=$noms->data($lk,$i);
 	    if($n) {
+		debug "Nom retrouve";
 		$nom=$n->{'_ID_'};
 	    }
 	}
@@ -140,11 +149,29 @@ for my $e (keys %r) {
     debug "Pages : ".join(", ",@sp);
     #print "Sources : ".join(", ",map { $r{$e}->{$_} } @sp)."\n";
 
-    $commandes->execute(magick_module('convert'),
-			'-adjoin',
-			'-page','A4',
-			(map { $r{$e}->{$_} } @sp),
-			$f);
+    my $img=Graphics::Magick->new();
+
+    for (map { $r{$e}->{$_} } @sp) {
+	$img->ReadImage($_);
+    }
+    
+    my ($h,$w)=$img->Get('height','width');
+    my $d_x=$w/(21.0/2.54);
+    my $d_y=$h/(29.7/2.54);
+    my $dens=($d_x > $d_y ? $d_x : $d_y);
+
+    debug "GEOMETRY : $w x $h\n";
+    debug "DENSITY : $d_x x $d_y --> $dens\n";
+
+    my $w=$img->Write('filename'=>$f,
+		      'page'=>($dens*21/2.54).'x'.($dens*29.7/2.54),
+		      'adjoin'=>'True','units'=>'PixelsPerInch',
+		      'compression'=>'jpeg','density'=>$dens.'x'.$dens);
+    
+    if($w) {
+	print "ERREUR ecriture : $w\n";
+	debug "ERREUR ecriture : $w\n";
+    }
     
     $avance->progres(1/(1+$#pages));
 }
