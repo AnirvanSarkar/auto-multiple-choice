@@ -243,7 +243,7 @@ sub abs2proj {
 
 	$fich =~ s/\/{2,}/\//g;
 
-      CLES:for my $s (sort { length($surnoms->{$b}) <=> length($surnoms->{$a}) } grep { $_ } (keys %$surnoms)) {
+      CLES:for my $s (sort { length($surnoms->{$b}) <=> length($surnoms->{$a}) } grep { $_ && $surnoms->{$_} } (keys %$surnoms)) {
 	  my $rep=$surnoms->{$s};
 	  $rep.="/" if($rep !~ /\/$/);
 	  $rep =~ s/\/{2,}/\//g;

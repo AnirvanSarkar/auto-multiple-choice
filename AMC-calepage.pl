@@ -88,6 +88,7 @@ my $n_page="";
 my $dpi="";
 my $id_page_fourni="";
 
+my $rep_projet='';
 my $repertoire_cr="";
 my $ocr_file='';
 
@@ -116,6 +117,7 @@ GetOptions("page=s"=>\$out_cadre,
 	   "seuil-coche=s"=>\$seuil_coche,
 	   "dust-size=s"=>\$dust_size,
 	   "dust-size-id=s"=>\$dust_size_id,
+	   "projet=s"=>\$rep_projet,
 	   "cr=s"=>\$repertoire_cr,
 	   "ocr=s"=>\$ocr_file,
 	   "debug=s"=>\$debug,
@@ -629,7 +631,17 @@ if(!$modele) {
     if($analyse_file) {
 	open(ANF,">$analyse_file");
 	print ANF "<?xml version='1.0' standalone='yes'?>\n";
-	print ANF "<analyse src=\"$scan\" id=\"$id_page\">\n";
+
+	my $sf=$scan;
+	if($rep_projet) {
+	    $sf=abs2proj({'%PROJET',$rep_projet,
+			  '%HOME'=>$ENV{'HOME'},
+			  ''=>'%PROJET',
+		      },
+			 $sf);
+	}
+
+	print ANF "<analyse src=\"".$sf."\" id=\"$id_page\">\n";
 	print ANF $cale->xml(2);
 	for my $k (keys %case) {
 	    my $e="";

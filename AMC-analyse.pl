@@ -49,6 +49,7 @@ my $liste_f;
 my $mep_file='';
 my $n_procs=0;
 my $seuil_coche='';
+my $rep_projet='';
 
 GetOptions("mep=s"=>\$mep_dir,
 	   "cr=s"=>\$cr_dir,
@@ -58,6 +59,7 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "liste-fichiers=s"=>\$liste_f,
+	   "projet=s"=>\$rep_projet,
 	   "n-procs=s"=>\$n_procs,
 	   );
 
@@ -123,6 +125,7 @@ for my $s (@scans) {
     push @c,"--progression",$delta;
     push @c,"--binaire" if($binaire);
     push @c,"--mep-saved",$mep_file;
+    push @c,"--projet",$rep_projet if($rep_projet);
     push @c,"--cr",$cr_dir,$s;
 
     $queue->add_process(@c);
