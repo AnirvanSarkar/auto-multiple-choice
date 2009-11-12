@@ -332,7 +332,7 @@ if($mode =~ /m/) {
 			     "--progression-id",$progress_id,
 			     "--debug",debug_file(),
 			     $binaire,
-			     "--tex-source",$tex_source,
+			     "--pdf-source",$calage,
 			     "--page",$npage,
 			     "--dpi",$dpi,
 			     "--modele",

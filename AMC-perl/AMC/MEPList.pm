@@ -23,7 +23,7 @@ use AMC::Basic;
 use XML::Simple;
 use Storable;
 
-my $VERSION=2;
+my $VERSION=3;
 
 my %mep_defaut=('id'=>'',
 		'saved'=>'',
@@ -76,7 +76,7 @@ sub maj {
     
     for my $i (keys %{$self->{'dispos'}}) {
 	if((! $self->{'dispos'}->{$i}->{'filename'})
-	   || (! -s $self->{'dispos'}->{$i}->{'filename'})) {
+	   || (! -s $self->{'mep'}."/".$self->{'dispos'}->{$i}->{'filename'})) {
 	    debug "MEP : entree $i effacee\n";
 	    push @ie,$i;
 	    delete($self->{'dispos'}->{$i});
@@ -89,9 +89,10 @@ sub maj {
 
     if(-d $self->{'mep'}) {
 	opendir(DIR, $self->{'mep'}) || die "can't opendir ".$self->{'mep'}.": $!";
-	@xmls = grep { @st=stat($_); 
-		       /\.xml$/ && -s $_ && $st[9]>$self->{'timestamp'} } 
-	map { $self->{'mep'}."/$_" } readdir(DIR);
+	@xmls = grep { @st=stat($self->{'mep'}."/".$_); 
+		       /\.xml$/ && -s $self->{'mep'}."/".$_ 
+			   && $st[9]>$self->{'timestamp'} } 
+	readdir(DIR);
 	closedir DIR;
     }
 
@@ -100,9 +101,10 @@ sub maj {
     for my $f (@xmls) {
 	&{$oo{'progres'}}() if($oo{'progres'});
 	
-	my $lay=XMLin($f,ForceArray => 1,KeepRoot => 1, KeyAttr=> [ 'id' ]);
+	my $lay=XMLin($self->{'mep'}."/".$f,
+		      ForceArray => 1,KeepRoot => 1, KeyAttr=> [ 'id' ]);
 
-	my @st=stat($f);
+	my @st=stat($self->{'mep'}."/".$f);
 	$self->{'timestamp'}=$st[9] if($st[9]>$self->{'timestamp'});
 
 	if($lay->{'mep'}) {
@@ -174,7 +176,9 @@ sub attr {
     my ($self,$id,$a)=(@_);
     $id=$self->{'au-hasard'} if(!$id);
     return(undef) if(!defined($self->{'dispos'}->{$id}));
-    return($self->{'dispos'}->{$id}->{$a});
+    my $v=$self->{'dispos'}->{$id}->{$a};
+    $v=$self->{'mep'}."/".$v if($a eq 'filename');
+    return($v);
 }
 
 sub filename {
@@ -188,8 +192,9 @@ sub mep {
     $id=$self->{'au-hasard'} if(!$id);
     return(undef) if(!defined($self->{'dispos'}->{$id}));
     
-    if($self->{'dispos'}->{$id}->{'filename'}) {
-	return(XMLin($self->{'dispos'}->{$id}->{'filename'},
+    if($self->{'dispos'}->{$id}->{'filename'}
+       && -f $self->{'mep'}."/".$self->{'dispos'}->{$id}->{'filename'}) {
+	return(XMLin($self->{'mep'}."/".$self->{'dispos'}->{$id}->{'filename'},
 		     ForceArray => 1,
 		     KeyAttr=> [ 'id' ]));
     } else {

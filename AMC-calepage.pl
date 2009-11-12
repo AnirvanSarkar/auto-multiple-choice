@@ -83,7 +83,6 @@ my $prop=0.8;
 
 my $id_sep="/";
 
-my $tex_source="";
 my $n_page="";
 my $dpi="";
 my $id_page_fourni="";
@@ -100,10 +99,13 @@ my $progress=0;
 my $progress_id='';
 my $progress_debut=0;
 
+my $pdf_source='';
+
 my $mep_saved='';
 
 GetOptions("page=s"=>\$out_cadre,
 	   "modele!"=>\$modele,
+	   "pdf-source=s"=>\$pdf_source,
 	   "mep=s"=>\$xml_layout,
 	   "mep-saved=s"=>\$mep_saved,
 	   "transfo=s"=>\$t_type,
@@ -111,7 +113,6 @@ GetOptions("page=s"=>\$out_cadre,
 	   "nom=s"=>\$nom_file,
 	   "analyse=s"=>\$analyse_file,
 	   "id-page=s"=>\$id_page_fourni,
-	   "tex-source=s"=>\$tex_source,
 	   "page=s"=>\$n_page,
 	   "dpi=s"=>\$dpi,
 	   "seuil-coche=s"=>\$seuil_coche,
@@ -543,7 +544,7 @@ if($modele) {
     if($xml_layout) {
 	open(XML,">$xml_layout");
 	print XML "<?xml version='1.0' standalone='yes'?>\n";
-	print XML "<mep image=\"$scan\" id=\"$id_page\" src=\"$tex_source\" page=\"$n_page\" dpi=\"$dpi\" tx=\"$tiff_x\" ty=\"$tiff_y\" diametremarque=\"$diametre_marque\">\n";
+	print XML "<mep image=\"$scan\" id=\"$id_page\" src=\"$pdf_source\" page=\"$n_page\" dpi=\"$dpi\" tx=\"$tiff_x\" ty=\"$tiff_y\" diametremarque=\"$diametre_marque\">\n";
 	print XML $cadre_general->xml(2);
 	for my $k (keys %case) {
 	    if($k =~ /([0-9]+)\.([0-9]+)/) {

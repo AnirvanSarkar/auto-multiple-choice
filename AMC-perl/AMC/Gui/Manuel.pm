@@ -100,18 +100,6 @@ sub new {
 
     $self->{'an_list'}=$an_list;
 
-    # intuite le sujet.pdf s'il n'est pas donne, a partir du source latex
-
-    if(!$self->{'sujet'}) {
-	my $src=$dispos->attr('','src');
-	if($src) {
-	    my $sujet;
-	    $sujet=$src;
-	    $sujet =~ s/\.tex$/-sujet.pdf/ or $sujet='';
-	    $self->{'sujet'}=$sujet;
-	}
-    }
-
     die "Aucun fichier pdf de sujet fourni" if(! $self->{'sujet'});
     die "Fichier sujet ".$self->{'sujet'}." introuvable" if(! -f $self->{'sujet'});
 
