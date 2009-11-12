@@ -270,6 +270,7 @@ my %projet=();
 
 sub absolu {
     my $f=shift;
+    return($f) if(!defined($f));
     return(proj2abs({'%PROJET'=>$o{'rep_projets'}."/".$projet{'nom'},
 		     '%PROJETS'=>$o{'rep_projets'},
 		     '%HOME',$home_dir,
@@ -280,6 +281,7 @@ sub absolu {
 
 sub relatif {
     my $f=shift;
+    return($f) if(!defined($f));
     return(abs2proj({'%PROJET'=>$o{'rep_projets'}."/".$projet{'nom'},
 		     '%PROJETS'=>$o{'rep_projets'},
 		     '%HOME',$home_dir,
@@ -827,7 +829,13 @@ sub projet_sauve {
     debug "Sauvegarde du projet...";
     my $of=fich_options($projet{'nom'});
     if(open(OPTS,">:encoding(utf-8)",$of)) {
-	print OPTS XMLout($projet{'options'},
+	my $po={%{$projet{'options'}}};
+
+	for(qw/listeetudiants/) {
+	    $po->{$_}=relatif($po->{$_});
+	}
+
+	print OPTS XMLout($po,
 			  "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
 			  "RootName"=>'projetAMC','NoAttr'=>1)."\n";
 	close OPTS;
@@ -2249,6 +2257,13 @@ sub projet_ouvre {
 	    debug "Ouverture du projet $proj...";
 	    
 	    $projet{'options'}=XMLin(fich_options($proj),SuppressEmpty => '');
+
+	    # passage en chemin absolu
+
+	    for(qw/listeetudiants/) {
+		$projet{'options'}->{$_}=absolu($projet{'options'}->{$_});
+	    }
+
 	    # pour effacer des trucs en trop venant d'un bug anterieur...
 	    for(keys %{$projet{'options'}}) {
 		delete($projet{'options'}->{$_}) if(!exists($projet_defaut{$_}));
