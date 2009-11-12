@@ -23,11 +23,7 @@ use XML::Simple;
 use AMC::Basic;
 use Storable;
 
-my $VERSION=2;
-
-# perl -e 'use AMC::ANList; use Data::Dumper; print Dumper(AMC::ANList::new("points-cr","debug",1)->analyse());'
-
-# perl -e 'use XML::Simple;use Data::Dumper;  print Dumper(XMLin("",ForceArray => ["analyse","chiffre","case","id"],KeepRoot=>1,KeyAttr=> ["id"]));' |less
+my $VERSION=3;
 
 %an_defaut=('action'=>'',
 	    'timestamp'=>0,
@@ -84,8 +80,9 @@ sub maj {
 
     for my $i (keys %$an_dispos) {
 	if((! $an_dispos->{$i}->{'fichier'})
-	   || (! -s $an_dispos->{$i}->{'fichier'})
-	   || ($an_dispos->{$i}->{'fichier-scan'} && ! -f $an_dispos->{$i}->{'fichier-scan'})
+	   || (! -s $self->{'cr'}."/".$an_dispos->{$i}->{'fichier'})
+	   || ($an_dispos->{$i}->{'fichier-scan'} && 
+	       ! -f $self->{'cr'}."/".$an_dispos->{$i}->{'fichier-scan'})
 	   ) {
 	    if($an_dispos->{$i}->{'fichier'}) {
 		$a_retraiter{$an_dispos->{$i}->{'fichier'}}=1;
@@ -109,12 +106,12 @@ sub maj {
 	debug "Timestamp : ".$self->{'timestamp'};
 
 	opendir(DIR, $self->{'cr'}) || die "can't opendir ".$self->{'cr'}.": $!";
-	@xmls = grep { @st=stat($_); 
+	@xmls = grep { @st=stat($self->{'cr'}."/".$_); 
 		       debug $st[9]." : ".$_;
-		       /\.xml$/ && -s $_ 
+		       /\.xml$/ && -s $self->{'cr'}."/".$_ 
 			   && ($st[9]>$self->{'timestamp'} 
 			       || $a_retraiter{$_} )} 
-	map { $self->{'cr'}."/$_" } readdir(DIR);
+	readdir(DIR);
 	closedir DIR;
     } else {
 	@xmls=($self->{'cr'});
@@ -125,7 +122,7 @@ sub maj {
 
       debug "Exploration fichier $xf pour ANList...";
 
-      my $x=XMLin("$xf",
+      my $x=XMLin($self->{'cr'}."/".$xf,
 		  ForceArray => ["analyse","chiffre","case","id"],
 		  KeepRoot=>1,
 		  KeyAttr=> [ 'id' ]);
@@ -169,7 +166,7 @@ sub maj {
 
 	push @ids_modifies,$id;
 
-	my @st=stat($xf);
+	my @st=stat($self->{'cr'}."/".$xf);
 	$self->{'timestamp'}=$st[9] if($st[9]>$self->{'timestamp'});
 
 	if($self->{'action'}) {
@@ -206,8 +203,14 @@ sub attribut {
     $id=$self->{'au-hasard'} if(!$id);
     
     # pour ne pas creer artificiellement l'entree $id :
-    return(defined($self->{'dispos'}->{$id}) ?
-	   $self->{'dispos'}->{$id}->{$att} : undef);
+    if(defined($self->{'dispos'}->{$id})) {
+	my $v=$self->{'dispos'}->{$id}->{$att};
+	$v=$self->{'cr'}."/".$v 
+	    if($att eq 'fichier' || $att eq 'fichier-scan');
+	return($v);
+    } else {
+	return(undef);
+    }
 }
 
 sub existe {
@@ -279,14 +282,14 @@ sub analyse {
     if($oo{'scan'}) {
 	$key='fichier-scan' 
 	    if($self->{'dispos'}->{$id}->{'fichier-scan'} 
-	       && -f $self->{'dispos'}->{$id}->{'fichier-scan'});
+	       && -f $self->{'cr'}."/".$self->{'dispos'}->{$id}->{'fichier-scan'});
     }
 
     if($self->{'dispos'}->{$id}->{$key} 
-       && -f $self->{'dispos'}->{$id}->{$key}) {
-	return(XMLin($self->{'dispos'}->{$id}->{$key},
-		    ForceArray => [ 'analyse','chiffre','case','id' ],
-		    KeyAttr=> [ 'id' ]));
+       && -f $self->{'cr'}."/".$self->{'dispos'}->{$id}->{$key}) {
+	return(XMLin($self->{'cr'}."/".$self->{'dispos'}->{$id}->{$key},
+		     ForceArray => [ 'analyse','chiffre','case','id' ],
+		     KeyAttr=> [ 'id' ]));
     } else {
 	return(undef);
     }
