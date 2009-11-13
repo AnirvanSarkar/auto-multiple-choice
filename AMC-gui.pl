@@ -582,6 +582,7 @@ sub exporte {
     }
     
     commande('commande'=>[with_prog("AMC-export.pl"),
+			  "--debug",debug_file(),
 			  "--module",$format,
 			  "--fich-notes",absolu($projet{'options'}->{'notes'}),
 			  "--fich-assoc",absolu($projet{'options'}->{'association'}),

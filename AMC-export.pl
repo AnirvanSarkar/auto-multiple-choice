@@ -25,7 +25,7 @@ use AMC::Gui::Avancement;
 
 use Module::Runtime qw/use_module/;
 
-use encoding 'utf8';
+#use encoding 'utf8';
 
 my $module='CSV';
 my $output='';
@@ -36,6 +36,7 @@ my $fich_noms='';
 my $noms_encodage='utf-8';
 my $noms_identifiant='';
 my @o_out=();
+my $debug='';
 
 GetOptions("module=s"=>\$module,
 	   "fich-notes=s"=>\$fich_notes,
@@ -45,8 +46,10 @@ GetOptions("module=s"=>\$module,
 	   "noms-identifiant=s"=>\$noms_identifiant,
 	   "option-out=s"=>\@o_out,
 	   "output|o=s"=>\$output,
+	   "debug=s"=>\$debug,
 	   );
 	   
+set_debug($debug);
 
 $ex = use_module("AMC::Export::$module")->new();
 
