@@ -25,7 +25,7 @@ sub new {
     my ($f,%o)=@_;
     my $self={'fichier'=>$f,
 	      'encodage'=>'utf-8',
-	      'separateur'=>':',
+	      'separateur'=>":;\t",
 	      'identifiant'=>'(nom) (prenom)',
 
 	      'heads'=>[],
@@ -61,8 +61,11 @@ sub load {
     my %data=();
     my $err=0;
     my $errlig=0;
+    my $sep=$self->{'separateur'};
 
     $self->{'noms'}=[];
+
+    debug "Lecture du fichier de noms $self->{'fichier'}";
 
     if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",$self->{'fichier'})) {
       NOM: while(<LISTE>) {
@@ -70,8 +73,24 @@ sub load {
 	  s/\#.*//;
 	  next NOM if(/^\s*$/);
 	  if(!@heads) {
-	      if(/$self->{'separateur'}/) {
-		  @heads=map { reduit($_) } split(/$self->{'separateur'}/,$_);
+	      if($sep) {
+
+		  my $entetes=$_;
+
+		  if(length($self->{'separateur'})>1) {
+		      my $nn=-1;
+		      for my $s (split(//,$self->{'separateur'})) {
+			  my $k=0;
+			  while($entetes =~ /$s/g) { $k++; }
+			  if($k>$nn) {
+			      $nn=$k;
+			      $sep=$s;
+			  }
+		      }
+		      debug "Separateur detecte : ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
+		  }
+
+		  @heads=map { reduit($_) } split(/$sep/,$entetes);
 		  debug "ENTETES : ".join(", ",@heads);
 		  next NOM;
 	      } else {
@@ -82,7 +101,7 @@ sub load {
 	  s/\s+$//;
 	  my @l=();
 	  if($#heads>0) {
-	      @l=map { reduit($_) } split(/$self->{'separateur'}/,$_);
+	      @l=map { reduit($_) } split(/$sep/,$_);
 	  } else {
 	      @l=(reduit($_));
 	  }

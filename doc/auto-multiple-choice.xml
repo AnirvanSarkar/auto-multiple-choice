@@ -1641,7 +1641,7 @@ Durée : 10 minutes.
           <para>Il est possible de demander aux étudiants de s'identifier sur
           leur copie grâce à leur numéro d'étudiant, qui sera renseigné en
           cochant une case par chiffre. Une commande LaTeX est prévue pour
-          mettre cette méthode en oeuvre sur la copie (voir la partie <xref
+          mettre cette méthode en œuvre sur la copie (voir la partie <xref
           linkend="latex.codes" />). Après l'examen, les copies seront
           identifiées automatiquement à partir d'une liste mettant en
           correspondance les numéros d'étudiants et les noms.</para>
@@ -1680,6 +1680,15 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         informations voulues. Il est préférable d'inclure au moins une colonne
         nommée <code>nom</code>.</para>
 
+        <note>
+          <para>On peut remplacer le séparateur <code>`:'</code> par un
+          point-virgule ou une tabulation. Il faut cependant utiliser le même
+          séparateur partout dans le fichier contenant la liste des étudiants.
+          Le séparateur utilisé sera détecté en prenant le caractère (parmi
+          les trois possibles) qui apparaît le plus de fois dans la première
+          ligne qui nest pas un commentaire.</para>
+        </note>
+
         <para>La liste des étudiants préparée (que se soit une liste simple ou
         comprenant plus d'informations), nous la désignons maintenant en la
         sélectionnant à partir du bouton <guilabel>Liste des
@@ -1701,6 +1710,16 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           étudiants</guilabel>, la recherche parmi la liste des codes
           renseignés par les étudiants s'opère. On peut ensuite observer ou
           paufiner le résultat grâce à une association manuelle.</para>
+
+          <warning>
+            <para>Pour effectuer une association automatique, il est
+            nécessaire d'avoir utilisé au moins une fois la commande
+            <command>AMCcode</command> (voir <xref linkend="latex.codes" />)
+            dans le fichier source LaTeX, et d'avoir une liste d'étudiants
+            avec une colonne qui contient une référence (en général un numéro
+            d'étudiant) qui sera identique à la saisie effectuée au niveau des
+            cases produites par <command>AMCcode</command>.</para>
+          </warning>
         </sect4>
 
         <sect4>

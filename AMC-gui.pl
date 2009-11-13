@@ -1291,7 +1291,7 @@ sub valide_liste {
 	}
 	# transmission liste des en-tetes
 	my @keys=$l->keys;
-	debug "entetes : ".join(",",@keys);
+	debug "cles primaires : ".join(",",@keys);
 	$cb_stores{'liste_key'}=cb_model('','(aucun)',
 					 map { ($_,$_) } 
 					 sort { $a cmp $b } (@keys));
