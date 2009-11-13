@@ -53,6 +53,9 @@ sub parse_string {
 
 sub export {
     my ($self,$fichier)=@_;
+    my $sep=$self->{'out.separateur'};
+
+    $sep="\t" if($sep =~ /^tab$/i);
 
     $self->pre_process();
 
@@ -60,13 +63,13 @@ sub export {
 
     my @cont=(qw/_NOM_ _NOTE_ _ID_/,@{$self->{'keys'}},@{$self->{'codes'}});
 
-    print OUT join($self->{'out.separateur'},
+    print OUT join($sep,
 		   map  { $self->parse_string($_) }
 		   ("nom","note","copie",
 		    @{$self->{'keys'}},@{$self->{'codes'}}))."\n";
     
     for my $etu (@{$self->{'copies'}}) {
-	print OUT join($self->{'out.separateur'},
+	print OUT join($sep,
 		       map { my $k=$_;
 			     my $c=$self->{'c'}->{$etu}->{$k};
 			     if($k =~ /^_NOM_$/) {

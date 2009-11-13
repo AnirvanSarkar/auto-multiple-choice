@@ -57,6 +57,7 @@ sub set_options {
     for(keys %f) {
 	my $k=$domaine.'.'.$_;
 	if(defined($self->{$k})) {
+	    debug "Option $k = $f{$_}";
 	    $self->{$k}=$f{$_};
 	} else {
 	    print STDERR "Option <$domaine.$_> inutilisable\n";

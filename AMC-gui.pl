@@ -198,6 +198,7 @@ my %projet_defaut=('texsrc'=>'',
 		   '_modifie'=>1,
 		   
 		   'format_export'=>'CSV',
+		   'export_csv_separateur'=>",",
 		   );
 
 my $mep_saved='mep.storable';
@@ -320,7 +321,7 @@ for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edit
     menu_debug
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
-    export_c_format_export options_CSV options_ods
+    options_CSV options_ods
     /) {
     $w{$_}=$gui->get_widget($_);
 }
@@ -532,6 +533,9 @@ my %cb_stores=(
 	       'assoc_code'=>$cb_model_vide,
 	       'format_export'=>cb_model('CSV'=>'CSV',
 					 'ods'=>'OpenOffice'),
+	       'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
+						 ";"=>";",
+						 ","=>","),
 	       );
 
 my %extension_fichier=();
@@ -541,9 +545,12 @@ $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 
 ### export
 
-sub maj_format_export {
+sub maj_export {
+    my $old_format=$projet{'options'}->{'format_export'};
     reprend_pref('export',$projet{'options'});
+
     debug "Format : ".$projet{'options'}->{'format_export'};
+
     for(qw/CSV ods/) {
 	if($projet{'options'}->{'format_export'} eq $_) {
 	    $w{'options_'.$_}->show;
@@ -565,7 +572,8 @@ sub exporte {
     if($format eq 'CSV') {
 	push @options,
 	"--option-out","encodage=".$o{'encodage_csv'},
-	"--option-out","decimal=".$o{'delimiteur_decimal'};
+	"--option-out","decimal=".$o{'delimiteur_decimal'},
+	"--option-out","separateur=".$projet{'options'}->{'export_csv_separateur'};
     }
     if($format eq 'ods') {
 	push @options,
