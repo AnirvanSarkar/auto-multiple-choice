@@ -53,8 +53,8 @@ sub new {
 	bless $self;
 
     }
-    
-    $self->{'mep'}=$mep;
+
+    $self->{'mep'}=$mep if($mep && -d $mep);
     
     for (keys %mep_defaut) {
 	$self->{$_}=$mep_defaut{$_} if(! defined($self->{$_}));
@@ -77,7 +77,7 @@ sub maj {
     for my $i (keys %{$self->{'dispos'}}) {
 	if((! $self->{'dispos'}->{$i}->{'filename'})
 	   || (! -s $self->{'mep'}."/".$self->{'dispos'}->{$i}->{'filename'})) {
-	    debug "MEP : entree $i effacee\n";
+	    debug "MEP : entree $i effacee (fichier $self->{'dispos'}->{$i}->{'filename'} dans $self->{'mep'})\n";
 	    push @ie,$i;
 	    delete($self->{'dispos'}->{$i});
 	}

@@ -52,6 +52,7 @@ my $seuil_coche='';
 my $rep_projet='';
 
 GetOptions("mep=s"=>\$mep_dir,
+	   "mep-saved=s"=>\$mep_file,
 	   "cr=s"=>\$cr_dir,
 	   "binaire!"=>\$binaire,
 	   "seuil-coche=s"=>\$seuil_coche,
@@ -124,6 +125,7 @@ for my $s (@scans) {
     push @c,"--progression-id",$progress_id;
     push @c,"--progression",$delta;
     push @c,"--binaire" if($binaire);
+    push @c,"--mep",$mep_dir if($mep_dir);
     push @c,"--mep-saved",$mep_file;
     push @c,"--projet",$rep_projet if($rep_projet);
     push @c,"--cr",$cr_dir,$s;

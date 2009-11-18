@@ -1243,6 +1243,7 @@ sub saisie_auto_ok {
 			  "--progression",1,
 			  "--n-procs",$o{'n_procs'},
 			  "--mep",absolu($projet{'options'}->{'mep'}),
+			  "--mep-saved",absolu($mep_saved),
 			  "--projet",absolu('%PROJET/'),
 			  "--cr",absolu($projet{'options'}->{'cr'}),
 			  "--liste-fichiers",$fh->filename,
