@@ -302,7 +302,9 @@ sub is_local {
     my $prefix=$o{'rep_projets'}."/";
     $prefix .= $projet{'nom'}."/" if($proj);
     if(defined($f)) {
-	return($f !~ /^\// || $f =~ /^$prefix/);
+	return($f !~ /^[\/%]/ 
+	       || $f =~ /^$prefix/
+	       || $f =~ /[\%]PROJET\//);
     } else {
 	return('');
     }
@@ -2194,7 +2196,7 @@ sub importe_source {
 	} 
     }
 
-    if(copy_latex($projet{'options'}->{'texsrc'},$dest)) {
+    if(copy_latex(absolu($projet{'options'}->{'texsrc'}),$dest)) {
 	$projet{'options'}->{'texsrc'}=relatif($dest);
 	set_source_tex();
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
