@@ -119,59 +119,82 @@ sub with_prog {
 my $n_erreurs;
 my $a_erreurs;
 my $analyse_q='';
+my @erreurs_msg=();
 
 sub execute {
     my @s=@_;
-    my %analyse_data=();
-    my %titres=();
+    my %analyse_data;
+    my %titres;
 
-    $n_erreurs=0;
-    $a_erreurs=0;
+    my $n_run=0;
+    my $rerun=0;
 
-    $cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer $s";
-    while(<EXEC>) {
-	if($analyse_q) {
-	    
-	    if(/AUTOQCM\[Q=([0-9]+)\]/) { 
-		verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
-		$analyse_data{'q'}={};
-		if($analyse_data{'qs'}->{$1}) {
-		    $a_erreurs++;
-		    print "ERR: identifiant d'exercice utilisé plusieurs fois : « ".$titres{$1}." » [".$analyse_data{'etu'}."]\n";
+    do {
+
+	$n_run++;
+	
+	$n_erreurs=0;
+	$a_erreurs=0;
+
+	%analyse_data=();
+	%titres=();
+
+	@erreurs_msg=();
+
+	debug "%%% Compilation : passe $n_run";
+
+	$cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer $s";
+
+	while(<EXEC>) {
+	    if($analyse_q) {
+		
+		if(/AUTOQCM\[Q=([0-9]+)\]/) { 
+		    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+		    $analyse_data{'q'}={};
+		    if($analyse_data{'qs'}->{$1}) {
+			$a_erreurs++;
+			push @erreurs_msg,"ERR: identifiant d'exercice utilisé plusieurs fois : « ".$titres{$1}." » [".$analyse_data{'etu'}."]\n";
+		    }
+		    $analyse_data{'titre'}=$titres{$1};
+		    $analyse_data{'qs'}->{$1}=1;
 		}
-		$analyse_data{'titre'}=$titres{$1};
-		$analyse_data{'qs'}->{$1}=1;
-	    }
-	    if(/AUTOQCM\[ETU=([0-9]+)\]/) {
-		verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
-		%analyse_data=('etu'=>$1,'qs'=>{});
-	    }
-	    if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
-		$titres{$1}=$2;
-		$analyse_data{'titres'}->{$2}=1;
-	    }
-	    if(/AUTOQCM\[MULT\]/) { 
-		$analyse_data{'q'}->{'mult'}=1;
-	    }
-	    if(/AUTOQCM\[INDIC\]/) { 
-		$analyse_data{'q'}->{'indicative'}=1;
-	    }
-	    if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
-		my $rep="R".$1;
-		if($analyse_data{'q'}->{$rep}) {
-		    $a_erreurs++;
-		    print "ERR: numéro de réponse utilisé plusieurs fois : $1 [".$analyse_q{'etu'}.":".$analyse_data{'titre'}."]\n";
+		if(/AUTOQCM\[ETU=([0-9]+)\]/) {
+		    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+		    %analyse_data=('etu'=>$1,'qs'=>{});
 		}
-		$analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
+		if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
+		    $titres{$1}=$2;
+		    $analyse_data{'titres'}->{$2}=1;
+		}
+		if(/AUTOQCM\[MULT\]/) { 
+		    $analyse_data{'q'}->{'mult'}=1;
+		}
+		if(/AUTOQCM\[INDIC\]/) { 
+		    $analyse_data{'q'}->{'indicative'}=1;
+		}
+		if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
+		    my $rep="R".$1;
+		    if($analyse_data{'q'}->{$rep}) {
+			$a_erreurs++;
+			push @erreurs_msg,"ERR: numéro de réponse utilisé plusieurs fois : $1 [".$analyse_q{'etu'}.":".$analyse_data{'titre'}."]\n";
+		    }
+		    $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
+		}
 	    }
+	    #LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+	    $rerun=1 if(/^LaTeX Warning:.*Rerun to get cross-references right/);
+
+	    s/AUTOQCM\[.*\]//g;
+	    $n_erreurs++ if(/^\!.*\.$/);
+	    print $_ if(/^.+$/);
 	}
-	s/AUTOQCM\[.*\]//g;
-	$n_erreurs++ if(/^\!.*\.$/);
-	print $_ if(/^.+$/);
-    }
-    close(EXEC);
-    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'}) if($analyse_q);
-    $cmd_pid='';
+	close(EXEC);
+	verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'}) if($analyse_q);
+	$cmd_pid='';
+
+    } while($rerun && $n_run<=1);
+
+    print join('',@erreurs_msg);
 }
 
 sub verifie_q {
@@ -186,7 +209,7 @@ sub verifie_q {
 	    }
 	    if($oui!=1 && !$q->{'indicative'}) {
 		$a_erreurs++;
-		print "ERR: $oui/$tot bonnes réponses dans une question simple [$t]\n";
+		push @erreurs_msg,"ERR: $oui/$tot bonnes réponses dans une question simple [$t]\n";
 	    }
 	}
     }
