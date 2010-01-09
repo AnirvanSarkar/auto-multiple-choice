@@ -160,6 +160,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'encodage_interne'=>'UTF-8',
 	      'encodage_csv'=>'',
 	      'encodage_latex'=>'',
+	      'defaut_moteur_latex'=>'latex',
 	      'taille_max_correction'=>'1000x1500',
 	      'qualite_correction'=>'150',
 	      'conserve_taille'=>1,
@@ -191,6 +192,9 @@ my %projet_defaut=('texsrc'=>'',
 		   'liste_key'=>'',
 		   'association'=>'association.xml',
 		   'assoc_code'=>'',
+
+		   'moteur_latex'=>'',
+
 
 		   'nom_examen'=>'',
 		   'code_examen'=>'',
@@ -313,6 +317,13 @@ sub is_local {
 sub fich_options {
     my $nom=shift;
     return $o{'rep_projets'}."/$nom/options.xml";
+}
+
+sub moteur_latex {
+    my $m=$projet{'options'}->{'moteur_latex'};
+    $m=$o{'defaut_moteur_latex'} if(!$m);
+    $m=$o_defaut{'defaut_moteur_latex'} if(!$m);
+    return($m);
 }
 
 $gui=Gtk2::GladeXML->new($glade_xml,'main_window');
@@ -932,6 +943,7 @@ sub doc_maj {
 
     #
     commande('commande'=>[with_prog("AMC-prepare.pl"),
+			  "--with",moteur_latex(),
 			  "--debug",debug_file(),
 			  "--mode","s",
 			  absolu($projet{'options'}->{'texsrc'}),
@@ -1141,6 +1153,7 @@ sub calcule_mep {
     unlink @meps;
     # on recalcule...
     commande('commande'=>[with_prog("AMC-prepare.pl"),
+			  "--with",moteur_latex(),
 			  "--debug",debug_file(),
 			  "--calage",absolu($projet{'options'}->{'docs'}->[2]),
 			  "--progression-id",'MEP',
@@ -1435,6 +1448,7 @@ sub voir_notes {
 sub noter {
     if($projet{'options'}->{'maj_bareme'}) {
 	commande('commande'=>[with_prog("AMC-prepare.pl"),
+			      "--with",moteur_latex(),
 			      "--debug",debug_file(),
 			      "--progression-id",'bareme',
 			      "--progression",1,
@@ -1638,6 +1652,17 @@ sub transmet_pref {
 		debug "pas de CB_STORE pour $ta";
 		$wp->set_active($h->{$t});
 	    }
+	}
+	$wp=$gap->get_widget($prefixe.'_ce_'.$ta);
+	if($wp) {
+	    $w{$prefixe.'_ce_'.$t}=$wp;
+	    if($cb_stores{$ta}) {
+		debug "CB_STORE($t) ALIAS $ta modifie";
+		$wp->set_model($cb_stores{$ta});
+	    }
+	    my $we=$wp->get_children();
+	    $we->set_text($h->{$t});
+	    $w{$prefixe.'_x_'.$t}=$we;
 	}
     }}
 }
@@ -2296,8 +2321,13 @@ sub projet_ouvre {
     
 	for my $k (keys %projet_defaut) {
 	    if(! exists($projet{'options'}->{$k})) {
-		$projet{'options'}->{$k}=$projet_defaut{$k};
-		debug "Nouveau parametre : $k";
+		if($o{'defaut_'.$k}) {
+		    $projet{'options'}->{$k}=$o{'defaut_'.$k};
+		    debug "Nouveau parametre (defaut) : $k";
+		} else {
+		    $projet{'options'}->{$k}=$projet_defaut{$k};
+		    debug "Nouveau parametre : $k";
+		}
 	    }
 	}
 

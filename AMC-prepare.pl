@@ -53,6 +53,7 @@ my $dpi=300;
 my $calage='';
 
 my $ppm_via='pdf';
+my $with_prog='latex';
 
 my $prefix='';
 
@@ -65,6 +66,7 @@ my $progress_id='';
 
 GetOptions("mode=s"=>\$mode,
 	   "via=s"=>\$ppm_via,
+	   "with=s"=>\$with_prog,
 	   "mep=s"=>\$mep_dir,
 	   "bareme=s"=>\$bareme,
 	   "calage=s"=>\$calage,
@@ -218,8 +220,10 @@ $prefix=$f_base."-" if(!$prefix);
 
 sub latex_cmd {
     my ($prefix,@o)=@_;
+
+    my $cmd=($with_prog ne 'latex' ? $with_prog : $prefix."latex");
     
-    return($prefix."latex",
+    return($cmd,
 	   "\\nonstopmode"
 	   .join('',map { "\\def\\".$_."{1}"; } @o )
 	   ." \\input{\"$f_tex\"}");
