@@ -1,6 +1,6 @@
 /*
 
- Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+ Copyright (C) 2008,2010 Alexis Bienvenue <paamc@passoire.fr>
 
  This file is part of Auto-Multiple-Choice
 
@@ -30,9 +30,9 @@
 
 /* codes RGB particuliers :
 
-  200,quest,reponse  : case a cocher
+  200,quest,reponse  : case a cocher (avec reponse<200)
   201,nombre,chiffre : case identification ID page
-  201,100,i          : marques de position
+  201,100,i          : marques de position (i=1 a 4)
   201,255,255        : sous la case NOM
   202,0,ID           : composante connexe ID
 
@@ -294,6 +294,7 @@ int repere_magick(pixel **img,int tx,int ty,pixval maxval) {
 
   int ninfo,ninfo_alloc;
   int i,x,y,red,att;
+  int en_couleur;
 
   int trouve_id(int magick,int exo,int quest) {
     int i,ii;
@@ -334,17 +335,16 @@ int repere_magick(pixel **img,int tx,int ty,pixval maxval) {
   ninfo_alloc=0;
 
   ninfo=0;
-  att=1;
 
   for(x=0;x<tx;x++) {
     for(y=0;y<ty;y++) {
       red=PPM_GETR(img[y][x]);
       if(red>=MAGICK_MIN && red<=MAGICK_MAX) {
-	ajoute(trouve_id(red,PPM_GETG(img[y][x]),PPM_GETB(img[y][x])),x,y);
-      } else if(red!=0 && red!=maxval) {
-	if(att) printf("! Attention : pixel rouge=%d/%d : (%d,%d)\n",
-		       red,maxval,x,y);
-	att=0;
+	en_couleur=0;
+	if(red!=PPM_GETG(img[y][x])) en_couleur=1;
+	if(red!=PPM_GETB(img[y][x])) en_couleur=1;
+	if(en_couleur)
+	  ajoute(trouve_id(red,PPM_GETG(img[y][x]),PPM_GETB(img[y][x])),x,y);
       }
     }
   }
