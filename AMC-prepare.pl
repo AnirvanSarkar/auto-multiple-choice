@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -53,7 +53,7 @@ my $dpi=300;
 my $calage='';
 
 my $ppm_via='pdf';
-my $with_prog='latex';
+my $moteur_latex='latex';
 
 my $prefix='';
 
@@ -64,9 +64,11 @@ my $n_procs=0;
 my $progress=1;
 my $progress_id='';
 
+my $moteur_raster='auto';
+
 GetOptions("mode=s"=>\$mode,
 	   "via=s"=>\$ppm_via,
-	   "with=s"=>\$with_prog,
+	   "with=s"=>\$moteur_latex,
 	   "mep=s"=>\$mep_dir,
 	   "bareme=s"=>\$bareme,
 	   "calage=s"=>\$calage,
@@ -77,6 +79,7 @@ GetOptions("mode=s"=>\$mode,
 	   "progression-id=s"=>\$progress_id,
 	   "prefix=s"=>\$prefix,
 	   "n-procs=s"=>\$n_procs,
+	   "raster=s"=>\$moteur_raster,
 	   );
 
 set_debug($debug);
@@ -221,7 +224,7 @@ $prefix=$f_base."-" if(!$prefix);
 sub latex_cmd {
     my ($prefix,@o)=@_;
 
-    my $cmd=($with_prog ne 'latex' ? $with_prog : $prefix."latex");
+    my $cmd=($moteur_latex ne 'latex' ? $moteur_latex : $prefix."latex");
     
     return($cmd,
 	   "\\nonstopmode"
@@ -299,9 +302,7 @@ if($mode =~ /m/) {
 	while(<IDCMD>) {
 	    if(/^Pages:\s+([0-9]+)/) {
 		my $npages=$1;
-		for my $j (1..$npages) {
-		    push @pages,$calage."[".($j-1)."]";
-		}
+		@pages=(1..$npages);
 	    }
 	}
 	close(IDCMD);
@@ -311,7 +312,7 @@ if($mode =~ /m/) {
 	    or die "Erreur d'identification : $!";
 	while(<IDCMD>) {
 	    if(/^([^\[]+)\[([0-9]+)\]\s+(PDF|PS)/) {
-		push @pages,$1."[".$2."]";
+		push @pages,($2+1);
 	    }
 	}
 	close(IDCMD);
@@ -325,11 +326,12 @@ if($mode =~ /m/) {
     for my $p (@pages) {
 	$npage++;
 
-	$queue->add_process(["convert",split(/\s+/,$convert_opts),
-			     "-density",$dpi,
-			     "-depth",8,
-			     "+antialias",
-			     $p,"$temp_dir/page-$npage.ppm"],
+	$queue->add_process([with_prog("AMC-raster.pl"),
+			     "--moteur",$moteur_raster,
+			     "--page",$p,
+			     "--dpi",$dpi,
+			     $calage,"$temp_dir/page-$npage.ppm",
+			     ],
 			    [with_prog("AMC-calepage.pl"),
 			     "--progression-debut",.4,
 			     "--progression",0.9/$np*$progress,
