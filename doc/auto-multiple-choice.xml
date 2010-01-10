@@ -943,6 +943,55 @@ et écrivez votre nom et prénom ci-dessous.
         devra se trouver dans la partie formulaire, c'est-à-dire après la
         commande <command>AMCdebutFormulaire</command>.</para>
       </sect3>
+
+      <sect3>
+        <title>Références à l'intérieur des copies</title>
+
+        <para>Dans la description du sujet, les commandes LaTeX
+        <command>\label</command> et <command>\ref</command> posent problème
+        car elles seront appelées avec les mêmes arguments pour chaque copie
+        produite, ce qui perturbera la numérotation des références. Pour
+        résoudre ce problème, les commandes <command>\AMClabel</command> et
+        <command>\AMCref</command> peuvent leur être substituées : elles
+        ajoutent le numéro de la copie avant leur argument avant de le
+        transmettre à <command>\label</command> et
+        <command>\ref</command>.</para>
+
+        <para>Il faudra en outre penser à remettre les compteurs utilisés à
+        zéro au début de chaque copie. Par exemple, si on veut inclure des
+        références à des images regroupées dans une page à part dans certaines
+        questions, on pourra écrire quelque chose comme</para>
+
+        <programlisting>\element{animaux}{
+  \begin{figure}[p]
+    \centering
+    \includegraphics[width=.6\linewidth]{tigre}
+    \caption{Un animal}
+    \AMClabel{tigre}
+  \end{figure}
+    
+  \begin{question}{tigre}
+    Quel est l'animal sur la photographie de la figure~\AMCref{tigre}~?
+    \begin{reponses}
+      \bonne{Un tigre}
+      \mauvaise{Une girafe}
+      \mauvaise{Un éléphant}
+      \mauvaise{Un chat}
+    \end{reponses}
+  \end{question}
+}</programlisting>
+
+        <para>en prenant soin d'ajouter au début de l'appel à
+        <command>\exemplaire</command> (lors de la description de l'en-tête
+        des copies) la ligne</para>
+
+        <programlisting>\setcounter{figure}{0}</programlisting>
+
+        <para>afin que les figures soient numérotées à partir de 1 pour chaque
+        copie. Sans cette dernière commande, la numérotation des figures
+        continuerait d'une copie à l'autre, ce qui n'est pas
+        souhaitable.</para>
+      </sect3>
     </sect2>
 
     <sect2>

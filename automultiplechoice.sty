@@ -1,5 +1,5 @@
 %
-% Copyright (C) 2008-2009 Alexis Bienvenue
+% Copyright (C) 2008-2010 Alexis Bienvenue
 %
 % This file is part of Auto-Multiple-Choice
 %
@@ -470,6 +470,10 @@
 %\newenvironment{exemplaires}[1][10]{\exemplaire{#1}\bgroup}{\egroup}
 %
 \def\exemplairepair{\ifodd\AMCid@etud}
+%
+% label/ref a l'interieur de chaque copie :
+\def\AMCref#1{\expandafter\ref{\the\AMCid@etud-#1}}
+\def\AMClabel#1{\expandafter\label{\the\AMCid@etud-#1}}
 %--------------------------------------------------------------
 % Options
 %--------------------------------------------------------------
