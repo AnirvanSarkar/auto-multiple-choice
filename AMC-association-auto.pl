@@ -22,6 +22,7 @@ use Getopt::Long;
 use XML::Simple;
 use AMC::Basic;
 use AMC::AssocFile;
+use AMC::NamesFile;
 use Data::Dumper;
 
 my $notes_file='';
@@ -60,29 +61,18 @@ $as->load();
 
 my %bon_code;
 
+debug "------------------------------------";
+
+debug "Association automatique $liste_file [$liste_enc] / $liste_key";
+
 # lecture liste des etudiants (codes disponibles)
 
-my $ii=0;
+my $liste_e=AMC::NamesFile::new($liste_file,
+				'encodage'=>$liste_enc);
 
-open(FL,"<:encoding(".$liste_enc.")",$liste_file);
- LIG: while(<FL>) {
-     chomp;
-     s/\#.*//;
-     next LIG if(/^\s*$/);
-     if($ii) {
-	 my @v=split(/:/,$_);
-	 $bon_code{$v[$ii-1]}=1;
-     } else {
-	 my $i=0;
-	 for my $h (split(/:/,$_)) {
-	     $i++;
-	     if($h eq $liste_key) {
-		 $ii=$i;
-	     }
-	 }
-     }
- }
-close(FL);
+for my $ii (0..($liste_e->taille()-1)) {
+    $bon_code{$liste_e->data_n($ii,$liste_key)}=1;
+}
 
 debug "Codes liste etudiants : ".join(',',keys %bon_code);
 

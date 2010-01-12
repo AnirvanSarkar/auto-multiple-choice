@@ -2250,8 +2250,14 @@ sub edite_source {
 
 sub valide_projet {
     set_source_tex();
+
     my $fl=absolu($projet{'options'}->{'listeetudiants'});
-    $w{'liste'}->set_filename(-f $fl ? $fl : '');
+    if(-f $fl) {
+	$w{'liste'}->set_filename($fl);
+    } else {
+	debug("Fichier liste introuvable : $fl");
+	$w{'liste'}->set_filename('');
+    }
 
 
     $projet{'_mep_list'}=AMC::MEPList::new(absolu($projet{'options'}->{'mep'}),
@@ -2294,12 +2300,6 @@ sub projet_ouvre {
 	    debug "Ouverture du projet $proj...";
 	    
 	    $projet{'options'}=XMLin(fich_options($proj),SuppressEmpty => '');
-
-	    # passage en chemin absolu
-
-	    for(qw/listeetudiants/) {
-		$projet{'options'}->{$_}=absolu($projet{'options'}->{$_});
-	    }
 
 	    # pour effacer des trucs en trop venant d'un bug anterieur...
 	    for(keys %{$projet{'options'}}) {

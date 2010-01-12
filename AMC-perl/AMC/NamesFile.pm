@@ -25,7 +25,7 @@ sub new {
     my ($f,%o)=@_;
     my $self={'fichier'=>$f,
 	      'encodage'=>'utf-8',
-	      'separateur'=>":;\t",
+	      'separateur'=>'',
 	      'identifiant'=>'(nom) (prenom)',
 
 	      'heads'=>[],
@@ -35,6 +35,8 @@ sub new {
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
+
+    $self->{'separateur'}=":;\t" if(!$self->{'separateur'});
 
     bless $self;
 

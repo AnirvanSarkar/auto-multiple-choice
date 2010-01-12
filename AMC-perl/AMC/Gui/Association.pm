@@ -79,7 +79,7 @@ sub new {
 	      'global'=>0,
 	      'encodage_liste'=>'UTF-8',
 	      'encodage_interne'=>'UTF-8',
-	      'separateur'=>":",
+	      'separateur'=>"",
 	      'identifiant'=>'(nom) (prenom)',
 	  };
 
@@ -152,7 +152,7 @@ sub new {
 	my $eb=Gtk2::EventBox->new();
 	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
 	$eb->add($b);
-	$self->{'tableau'}->attach_defaults($eb,$x,$x+1,$y,$y+1);
+	$self->{'tableau'}->attach($eb,$x,$x+1,$y,$y+1,["expand","fill"],[],1,1);
 	push @bouton_nom,$b;
 	push @bouton_eb,$eb;
 	$b->show();
@@ -160,7 +160,6 @@ sub new {
 	push @{$self->{'lignes'}->[$y]},$eb;
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
-
 	$self->style_bouton($i);
 
 	$x++;
