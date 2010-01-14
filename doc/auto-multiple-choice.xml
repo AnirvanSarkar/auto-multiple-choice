@@ -70,6 +70,31 @@
           graphique</para>
         </listitem>
       </itemizedlist>
+
+      <sect3>
+        <title>Versions conseillées pour les logiciels utilisés par
+        AMC</title>
+
+        <para>Quelques anciens bugs des logiciels utilisés par AMC sont
+        particulièrement préjudiciables à son bon fonctionnement :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Avec d'anciennes versions de <package>Net::CUPS</package>
+            (paquet debian <package>libnet-cups-perl</package>), la demande
+            d'impression du sujet provoque la fermeture prématurée de toute
+            l'interface graphique d'AMC. Ce bug a été corrigé à partir de la
+            version 0.61 de <package>Net::CUPS</package>.</para>
+          </listitem>
+
+          <listitem>
+            <para>Avec d'anciennes versions de ImageMagick, le regroupement
+            des pages corrigées en un fichier PDF par étudiant ne fonctionne
+            pas dans le cas où ces copies comprennent plusieurs pages. Ce bug
+            a été corrigé à partie de la version 6.5.5 de ImageMagick.</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
     </sect2>
 
     <sect2>
