@@ -33,7 +33,7 @@
     </author>
 
     <copyright>
-      <year>2008-2009</year>
+      <year>2008-2010</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -107,7 +107,7 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="notesutilisation">
     <title>Notes d'utilisation</title>
 
     <sect2>
@@ -158,104 +158,19 @@
         </listitem>
       </itemizedlist>
     </sect2>
-  </sect1>
-
-  <sect1 id="installation">
-    <title>Installation</title>
-
-    <para>Vous trouverez dans l'<ulink
-    url="http://download.gna.org/auto-qcm/">espace de téléchargement</ulink>
-    du projet les paquets nécessaires à l'installation d'AMC.</para>
 
     <sect2>
-      <title>Sur un système debian</title>
+      <title>Installation</title>
 
-      <para>Un paquet debian (fichier <filename>.deb</filename>) permet
-      d'installer facilement AMC sur un système <ulink
-      url="http://www.debian.org/">debian</ulink> ou dérivé (par exemple
-      <ulink url="http://www.ubuntu-fr.org/">ubuntu</ulink>). On procèdera
-      d'une des manières suivantes :</para>
+      <para>Sur un système debian (comme par exemple Ubuntu), l'installation
+      est facilitée par l'utilisation du dépôt debian d'AMC. La procédure
+      d'installation est décrite sur le <ulink
+      url="http://home.gna.org/auto-qcm/download.shtml">site
+      d'AMC</ulink>.</para>
 
-      <itemizedlist>
-        <listitem>
-          <para>Méthode manuelle, ponctuelle :</para>
-
-          <orderedlist>
-            <listitem>
-              <para>Télécharger le fichier
-              <filename>auto-multiple-choice_<replaceable>xxxx</replaceable>.deb</filename>
-              (où <replaceable>xxxx</replaceable> est la version désirée)
-              depuis l'espace de téléchargement.</para>
-            </listitem>
-
-            <listitem>
-              <para>Au choix :</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Dans l'explorateur de fichiers
-                  (<command>nautilus</command>, si vous utilisez
-                  <emphasis>gnome</emphasis>), effectuer un clic droit sur le
-                  fichier <filename>.deb</filename> téléchargé, puis suivre le
-                  menu <guimenuitem>Ouvrir avec « Gdeb »</guimenuitem>. Si
-                  <command>gdeb</command> n'est pas installé, on peut choisir
-                  <guimenuitem>Ouvrir avec une autre application</guimenuitem>
-                  et sélectionner <guimenuitem>Gdeb</guimenuitem> dans
-                  l'onglet <guilabel>Applications
-                  disponibles</guilabel>.</para>
-
-                  <para>Il suffit ensuite de cliquer sur le bouton
-                  <guibutton>Install</guibutton> de
-                  <command>Gdeb</command>.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Utiliser la commande <userinput>gdeb --info
-                  auto-multiple-choice_<replaceable>xxxx</replaceable>.deb</userinput>
-                  dans un terminal.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Installer à la main les dépendances requises, puis le
-                  paquet lui-même, par exemple à l'aide des commandes
-                  suivantes : <screen>sudo apt-get install perl-base libxml-simple-perl libxml-writer-perl\
-         libtext-unaccent-perl libgtk2-gladexml-perl libcompress-zlib-perl\
-         libsys-cpu-perl libnet-cups-perl libmodule-runtime-perl\
-         libopenoffice-oodoc-perl libgraphics-magick-perl\
-         texlive-latex-base latex-xcolor texlive-generic-recommended\
-         texlive-fonts-extra imagemagick netpbm xpdf-reader\
-         xpdf-utils
-
-dpkg -i auto-multiple-choice_xxxx.deb</screen></para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-          </orderedlist>
-        </listitem>
-
-        <listitem>
-          <para>Méthode automatique :</para>
-
-          <para>Un dépôt de paquets debian est mis en place pour une mise à
-          jour automatique. Pour l'utiliser, ajoutez un fichier
-          <filename>/etc/apt/sources.list.d/amc.list</filename> dont le
-          contenu sera <programlisting>deb http://dl.gna.org/auto-qcm/ testing.pkg/</programlisting></para>
-
-          <para><package>auto-multiple-choice</package> sera alors disponible
-          dans le programme de gestion de paquets que vous utilisez
-          (<command>apt-get</command>, <command>aptitude</command> ou
-          <command>synaptic</command> par exemple).</para>
-        </listitem>
-      </itemizedlist>
-    </sect2>
-
-    <sect2>
-      <title>À partir des sources</title>
-
-      <para>Après avoir téléchargé l'archive des sources (fichier
-      <filename>auto-multiple-choice_<replaceable>xxxx</replaceable>.tar.gz</filename>,
-      où <replaceable>xxxx</replaceable> est la version désirée), on pourra
-      installer le logiciel grâce aux commandes suivantes, à écrire dans un
+      <para>Vous pouvez aussi télécharger l'archive des sources dans l'<ulink
+      url="http://download.gna.org/auto-qcm/">espace de téléchargement</ulink>
+      du projet, puis utiliser les commandes suivantes dans un
       terminal :</para>
 
       <screen>tar xvzf auto-multiple-choice_xxxx.tar.gz

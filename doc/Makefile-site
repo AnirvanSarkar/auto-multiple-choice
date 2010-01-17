@@ -7,19 +7,31 @@ TMPDIR:=$(shell mktemp -d)
 
 TEST_DEB=`../auto-qcm/derniere-version.pl --mode f --base ../auto-qcm/download-area/files/testing.pkg`
 TEST_XML=$(TMPDIR)/usr/share/doc/auto-multiple-choice/auto-multiple-choice.xml
+TEST_PDF=$(TMPDIR)/auto-multiple-choice.pdf
+TEST_TEX=$(TMPDIR)/auto-multiple-choice.tex
 SITEDOC=htdocs/auto-multiple-choice
 
 version:
 	../auto-qcm/derniere-version.pl --mode h --base ../auto-qcm/download-area/files/testing.pkg > $(HVERSION)
 
-# doc a partir de la derniere version dans testing
-doc: FORCE
+$(TEST_XML): FORCE
 	dpkg-deb -x $(TEST_DEB) $(TMPDIR)
 	-gunzip $(TEST_XML).gz
+
+$(TEST_TEX): $(TEST_XML)
+	dblatex -t tex $< -o $@
+	perl ../auto-qcm/doc/addlink.pl $@
+
+%.pdf: %.tex
+	cd `dirname $<`; pdflatex `basename $<` ; pdflatex `basename $<`
+
+# doc a partir de la derniere version dans testing
+doc: FORCE $(TEST_XML) $(TEST_PDF)
 	xsltproc --nonet --stringparam base.dir $(SITEDOC)/ ../auto-qcm/doc/doc-xhtml-site.xsl $(TEST_XML)
+	cp $(TEST_PDF)  ../auto-qcm/download-area/files/auto-multiple-choice.pdf
 
 site: version doc
-	$(MAKE) -C ../auto-qcm/download-area sync
+	$(MAKE) -C ../auto-qcm/download-area signe sync
 
 FORCE: ;
 
