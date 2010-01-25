@@ -22,6 +22,7 @@ package AMC::Basic;
 use File::Temp;
 use File::Spec;
 use IO::File;
+use Fcntl qw(:flock :seek);
 
 BEGIN {
     use Exporter   ();
@@ -206,8 +207,11 @@ sub debug {
     for my $l (@s) {
 	$l=$l."\n" if($l !~ /\n$/);
 	if($amc_debug_fh) {
+	    flock($amc_debug_fh, LOCK_EX);
 	    $amc_debug_fh->sync;
+	    seek($amc_debug_fh, 0, SEEK_END);
 	    print $amc_debug_fh $l;
+	    flock($amc_debug_fh, LOCK_UN);
 	} else {
 	    print $l;
 	}
