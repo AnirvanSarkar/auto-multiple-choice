@@ -21,17 +21,20 @@
 use Getopt::Long;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
+use File::Copy;
 use AMC::Image;
 use AMC::Basic;
 
 my $debug='';
 
-my $moteur_latex='latex,xelatex';
-my $moteur_raster='im,gm,pdftoppm';
+my $moteur_latex='latex,pdflatex,xelatex';
+my $moteur_raster='im,gm,gs,pdftoppm';
+my $keep=0;
 
 GetOptions("latex=s"=>\$moteur_latex,
 	   "raster=s"=>\$moteur_raster,
            "debug=s"=>\$debug,
+	   "keep!"=>\$keep,
  	   );
 
 set_debug($debug);
@@ -43,7 +46,9 @@ sub with_prog {
 }
 
 $temp_loc=tmpdir();
-$temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => 1 );
+$temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => !$keep );
+
+print "Repertoire $temp_dir\n" if($keep);
 
 $tex_file="$temp_dir/source.tex";
 $ppm_file="$temp_dir/source.ppm";
@@ -109,7 +114,7 @@ sub execute {
 }
 
  ML:for my $m_l (split(/,+/,$moteur_latex)) {
-    
+
      execute(with_prog("AMC-prepare.pl"),
 	     "--mode","s","--with",$m_l,"--prefix","$temp_dir/",$tex_file);
 
@@ -117,6 +122,8 @@ sub execute {
 	 print "$m_l+*:ERREUR COMPILATION\n";
 	 next ML;
      }
+
+     copy("$temp_dir/calage.pdf","$temp_dir/$m_l-calage.pdf") if($keep);
      
    MR:for my $m_r (split(/,+/,$moteur_raster)) {
        
@@ -128,8 +135,16 @@ sub execute {
 	   next ML;
        }
 
+       copy($ppm_file,"$temp_dir/$m_l-$m_r-image.ppm") if($keep);
+
        my $im=AMC::Image::new($ppm_file);
        my @mag=$im->commande('magick');
+
+       if($keep) {
+	   open(MAG,">$temp_dir/$m_l-$m_r-boites.log");
+	   print MAG join("\n",@mag)."\n";
+	   close(MAG);
+       }
        
        %codes=();
        

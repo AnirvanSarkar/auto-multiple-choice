@@ -52,7 +52,6 @@ my $convert_opts="-limit memory 512mb";
 my $dpi=300;
 my $calage='';
 
-my $ppm_via='pdf';
 my $moteur_latex='latex';
 
 my $prefix='';
@@ -67,7 +66,6 @@ my $progress_id='';
 my $moteur_raster='auto';
 
 GetOptions("mode=s"=>\$mode,
-	   "via=s"=>\$ppm_via,
 	   "with=s"=>\$moteur_latex,
 	   "mep=s"=>\$mep_dir,
 	   "bareme=s"=>\$bareme,
@@ -128,6 +126,7 @@ sub execute {
 
     my $n_run=0;
     my $rerun=0;
+    my $format='';
 
     do {
 
@@ -183,6 +182,7 @@ sub execute {
 	    }
 	    #LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 	    $rerun=1 if(/^LaTeX Warning:.*Rerun to get cross-references right/);
+	    $format=$1 if(/^Output written on .*\.([a-z]+) \(/);
 
 	    s/AUTOQCM\[.*\]//g;
 	    $n_erreurs++ if(/^\!.*\.$/);
@@ -193,6 +193,20 @@ sub execute {
 	$cmd_pid='';
 
     } while($rerun && $n_run<=1);
+
+    # transformation dvi en pdf si besoin...
+
+    $format='dvi' if($moteur_latex eq 'latex');
+    $format='pdf' if($moteur_latex eq 'pdflatex');
+    $format='pdf' if($moteur_latex eq 'xelatex');
+
+    print "Format de sortie : $format\n";
+    debug "Format de sortie : $format\n";
+
+    if($format eq 'dvi') {
+	system("dvips","-q",$f_base,"-o",$f_base.".ps") || print "Erreur dvips : $!\n";
+	system("ps2pdf",$f_base.".ps",$f_base.".pdf") || print "Erreur ps2pdf : $!\n";
+    }
 
     print join('',@erreurs_msg);
 }
@@ -245,11 +259,9 @@ $f_base =~ s/\.tex$//i;
 $prefix=$f_base."-" if(!$prefix);
 
 sub latex_cmd {
-    my ($prefix,@o)=@_;
+    my (@o)=@_;
 
-    my $cmd=($moteur_latex ne 'latex' ? $moteur_latex : $prefix."latex");
-    
-    return($cmd,
+    return($moteur_latex,
 	   "\\nonstopmode"
 	   .join('',map { "\\def\\".$_."{1}"; } @o )
 	   ." \\input{\"$f_tex\"}");
@@ -261,7 +273,7 @@ if($mode =~ /s/) {
     # 1) document de calage
 
     $analyse_q=1;
-    execute(latex_cmd('pdf',qw/NoWatermarkExterne CalibrationExterne NoHyperRef/));
+    execute(latex_cmd(qw/NoWatermarkExterne CalibrationExterne NoHyperRef/));
     $analyse_q='';
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
@@ -272,7 +284,7 @@ if($mode =~ /s/) {
 
     # 2) compilation de la correction
 
-    execute(latex_cmd('pdf',qw/NoWatermarkExterne CorrigeExterne NoHyperRef/));
+    execute(latex_cmd(qw/NoWatermarkExterne CorrigeExterne NoHyperRef/));
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
 	exit(1);
@@ -281,7 +293,7 @@ if($mode =~ /s/) {
 
     # 3) compilation du sujet
 
-    execute(latex_cmd('pdf',qw/NoWatermarkExterne SujetExterne NoHyperRef/));
+    execute(latex_cmd(qw/NoWatermarkExterne SujetExterne NoHyperRef/));
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
 	exit(1);
@@ -297,18 +309,11 @@ if($mode =~ /m/) {
 
     print "********** Compilation...\n";
 
-    if(-f $calage && $calage =~ /\.$ppm_via$/) {
+    if(-f $calage) {
 	print "Utilisation du fichier de calage $calage\n";
     } else {
-	if($ppm_via eq 'pdf') {
-	    execute(latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/));
-	} elsif($ppm_via eq 'ps') {
-	    execute(latex_cmd('',qw/CalibrationExterne NoHyperRef/));
-	    execute("dvips",$f_base,"-o");
-	} else {
-	    die "Mauvaise valeur pour --via : $ppm_via";
-	}
-	$calage="$f_base.$ppm_via";
+	execute(latex_cmd(qw/CalibrationExterne NoHyperRef/));
+	$calage="$f_base.pdf";
     }
 
     $avance->progres(0.07);
@@ -319,28 +324,16 @@ if($mode =~ /m/) {
 
     @pages=();
 
-    if($ppm_via eq 'pdf') {
-	$cmd_pid=open(IDCMD,"-|","pdfinfo",$calage)
-	    or die "Erreur d'identification : $!";
-	while(<IDCMD>) {
-	    if(/^Pages:\s+([0-9]+)/) {
-		my $npages=$1;
-		@pages=(1..$npages);
-	    }
+    $cmd_pid=open(IDCMD,"-|","pdfinfo",$calage)
+	or die "Erreur d'identification : $!";
+    while(<IDCMD>) {
+	if(/^Pages:\s+([0-9]+)/) {
+	    my $npages=$1;
+	    @pages=(1..$npages);
 	}
-	close(IDCMD);
-	$cmd_pid='';
-    } else {
-	$cmd_pid=open(IDCMD,"-|","identify",$calage)
-	    or die "Erreur d'identification : $!";
-	while(<IDCMD>) {
-	    if(/^([^\[]+)\[([0-9]+)\]\s+(PDF|PS)/) {
-		push @pages,($2+1);
-	    }
-	}
-	close(IDCMD);
-	$cmd_pid='';
     }
+    close(IDCMD);
+    $cmd_pid='';
     
     $avance->progres(0.03);
     
@@ -391,7 +384,7 @@ if($mode =~ /b/) {
 
     my $delta=0;
 
-    $cmd_pid=open(TEX,"-|",latex_cmd('pdf',qw/CalibrationExterne NoHyperRef/))
+    $cmd_pid=open(TEX,"-|",latex_cmd(qw/CalibrationExterne NoHyperRef/))
 	or die "Impossible d'executer latex";
     while(<TEX>) {
 	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 

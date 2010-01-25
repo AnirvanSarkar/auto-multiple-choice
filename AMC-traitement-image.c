@@ -368,7 +368,7 @@ int main(int argc,char **argv) {
 
   double prop;
   point coins[4];
-  int sel_r,sel_g,sel_b;
+  int sel_r,sel_g,sel_b,x,y;
 
   int tx,ty;
   pixval maxval;
@@ -433,6 +433,8 @@ int main(int argc,char **argv) {
       comp_connexes(img,tx,ty,maxval);
     } else if(strcmp(commande,"magick\n")==0) {
       repere_magick(img,tx,ty,maxval);
+    } else if(sscanf(commande,"pixel %d %d",&x,&y)==2) {
+      printf(">> RGB=%d %d %d\n",PPM_GETR(img[y][x]),PPM_GETG(img[y][x]),PPM_GETB(img[y][x]));
     } else {
       printf("! Erreur de syntaxe pour la commande.\n");
     }

@@ -41,6 +41,7 @@ if($moteur eq 'auto') {
     while(<INFO>) {
 	# imagemagick ne garde pas les bonnes couleurs pour un pdf xetex...
 	$moteur='pdftoppm' if(/^Creator:.*xetex/i);
+	$moteur='pdftoppm' if(/^Creator:.*dvips/i);
     }
     close(INFO);
     $moteur='im' if(!$moteur);
@@ -59,6 +60,8 @@ if($moteur eq 'im') {
 	 "-depth",8,
 	 "+antialias",
 	 $pdf.'['.($page-1).']',$ppm);
+} elsif($moteur eq 'gs') {
+    exec("gs","-sDEVICE=ppmraw","-dNOPAUSE","-dBATCH","-q","-o",$ppm,"-r".$dpi."x".$dpi,"-dFirstPage=$page","-dLastPage=$page",$pdf);
 } elsif($moteur eq 'pdftoppm') {
     my $fh = File::Temp->new();
     system("pdftoppm","-f",$page,"-l",$page,

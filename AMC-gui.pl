@@ -160,7 +160,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'encodage_interne'=>'UTF-8',
 	      'encodage_csv'=>'',
 	      'encodage_latex'=>'',
-	      'defaut_moteur_latex'=>'latex',
+	      'defaut_moteur_latex_b'=>'pdflatex',
 	      'taille_max_correction'=>'1000x1500',
 	      'qualite_correction'=>'150',
 	      'conserve_taille'=>1,
@@ -193,7 +193,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'association'=>'association.xml',
 		   'assoc_code'=>'',
 
-		   'moteur_latex'=>'',
+		   'moteur_latex_b'=>'',
 
 
 		   'nom_examen'=>'',
@@ -320,9 +320,9 @@ sub fich_options {
 }
 
 sub moteur_latex {
-    my $m=$projet{'options'}->{'moteur_latex'};
-    $m=$o{'defaut_moteur_latex'} if(!$m);
-    $m=$o_defaut{'defaut_moteur_latex'} if(!$m);
+    my $m=$projet{'options'}->{'moteur_latex_b'};
+    $m=$o{'defaut_moteur_latex_b'} if(!$m);
+    $m=$o_defaut{'defaut_moteur_latex_b'} if(!$m);
     return($m);
 }
 
