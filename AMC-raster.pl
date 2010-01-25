@@ -69,7 +69,7 @@ if($moteur eq 'im') {
 	   "-aa","no","-aaVector","no",
 	   $pdf,$fh->filename);
     my $p=sprintf("%s-%06d.ppm",$fh->filename,$page);
-    copy($p,$ppm);
+    move($p,$ppm);
 } else {
     die "Moteur non repertorie : $moteur";
 }
