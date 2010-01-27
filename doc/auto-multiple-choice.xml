@@ -749,6 +749,43 @@ Durée : 10 minutes.
       </sect3>
 
       <sect3>
+        <title>Réponses sur plusieurs colonnes</title>
+
+        <para>Afin de présenter les réponses sur plusieurs colonnes (et gagner
+        de la place), on pourra englober l'environnement
+        <option>reponses</option> dans un environnement
+        <option>multicols</option>, en utilisant le paquet LaTeX
+        <package>multicol</package>.</para>
+
+        <para>Si de plus les réponses tiennent sur plusieurs lignes, cela
+        pourrait entraîner le passage d'une réponse d'une colonne à l'autre,
+        ce qui est un peu déroutant pour le lecteur. La commande
+        <command>\AMCBoxedAnswers</command> a été définie afin d'éviter ce
+        phénomène, en enveloppant chaque réponse dans une boite. On pourra
+        l'utiliser comme dans l'exemple suivant :</para>
+
+        <para><programlisting>\begin{question}{deux colonnes}
+  Qu'est-ce qu'un oiseau ?
+  \begin{multicols}{2}\AMCBoxedAnswers
+    \begin{reponses}
+      \bonne{C'est un animal à ailes et qui pond des \oe ufs.
+        Il y en a de toutes les couleurs}
+      \mauvaise{C'est un grand meuble en bois qui sert la plupart
+        du temps à ranger du linge de maison}
+      \mauvaise{C'est une machine à vapeur qui permet de fermer
+        les boîtes de conserve à grande vitesse}
+    \end{reponses}
+  \end{multicols}
+\end{question}</programlisting></para>
+
+        <para>On notera qu'il est aussi possible de paramétrer l'espace
+        vertical séparant deux blocs de réponse grâce à la dimension
+        <parameter>AMCinterBrep</parameter> :</para>
+
+        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
+      </sect3>
+
+      <sect3>
         <title>Groupes de questions</title>
 
         <para>L'inclusion de questions dans des groupes permet de mélanger les
@@ -790,23 +827,6 @@ Durée : 10 minutes.
           commande <command>exemplaire</command>, pour que le mélange soit
           effectué avant chaque copie.</para>
         </note>
-      </sect3>
-
-      <sect3>
-        <title>Choix du mélange</title>
-
-        <para>Si le mélange des question et des réponses ne nous convient pas,
-        on peut toujours en changer en modifiant la graine du générateur
-        aléatoire utilisé pour le mélange, grâce à la commande suivante (à
-        utiliser juste au début du document, et en tous cas en-dehors de la
-        commande <command>exemplaire</command>) :</para>
-
-        <para><programlisting>\AMCrandomseed{1527384}</programlisting></para>
-
-        <para>Si la valeur fournie (à choisir entre 1 et 4194303) est
-        modifiée, alors le mélange sera différent. Bien entendu, une fois les
-        copies d'examen imprimées, il ne faut surtout pas modifier cette
-        valeur !</para>
       </sect3>
 
       <sect3>
@@ -882,6 +902,23 @@ et écrivez votre nom et prénom ci-dessous.
         <option>ensemble</option>, la commande <command>AMCcode</command>
         devra se trouver dans la partie formulaire, c'est-à-dire après la
         commande <command>AMCdebutFormulaire</command>.</para>
+      </sect3>
+
+      <sect3>
+        <title>Choix du mélange</title>
+
+        <para>Si le mélange des question et des réponses ne nous convient pas,
+        on peut toujours en changer en modifiant la graine du générateur
+        aléatoire utilisé pour le mélange, grâce à la commande suivante (à
+        utiliser juste au début du document, et en tous cas en-dehors de la
+        commande <command>exemplaire</command>) :</para>
+
+        <para><programlisting>\AMCrandomseed{1527384}</programlisting></para>
+
+        <para>Si la valeur fournie (à choisir entre 1 et 4194303) est
+        modifiée, alors le mélange sera différent. Bien entendu, une fois les
+        copies d'examen imprimées, il ne faut surtout pas modifier cette
+        valeur !</para>
       </sect3>
 
       <sect3>

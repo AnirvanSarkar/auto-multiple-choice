@@ -2,13 +2,22 @@ Source: auto-multiple-choice
 Section: x11
 Priority: optional
 Maintainer: Alexis Bienvenüe <paamc@passoire.fr>
-Build-Depends: debhelper (>= 7), gcc, libnetpbm10-dev, libxml-xpath-perl, dblatex, xsltproc, docbook-xsl, inkscape
+Build-Depends: debhelper (>= 7), gcc, libnetpbm10-dev, libxml-xpath-perl,
+  dblatex, xsltproc, docbook-xsl, inkscape
 Standards-Version: 3.8.0
 Homepage: 
 
 Package: auto-multiple-choice
 Architecture: any
-Depends: ${shlibs:Depends}, perl-base (>= 5.8), libxml-simple-perl, libxml-writer-perl, libtext-unaccent-perl, libgtk2-gladexml-perl, libcompress-zlib-perl, libsys-cpu-perl, libnet-cups-perl (>= 0.60), libmodule-runtime-perl, libopenoffice-oodoc-perl, libgraphics-magick-perl, texlive-latex-base, latex-xcolor, texlive-generic-recommended, texlive-latex-extra, texlive-fonts-extra, imagemagick (>= 7:6.5.5), netpbm, pdftk, xpdf-reader, xpdf-utils
+Depends: ${shlibs:Depends}, perl-base (>= 5.8),
+  libxml-simple-perl, libxml-writer-perl, libtext-unaccent-perl,
+  libgtk2-gladexml-perl, libcompress-zlib-perl, libsys-cpu-perl,
+  libnet-cups-perl (>= 0.60), libmodule-runtime-perl,
+  libopenoffice-oodoc-perl, libgraphics-magick-perl,
+  texlive-latex-base, latex-xcolor, texlive-generic-recommended,
+  texlive-latex-extra, texlive-fonts-extra,
+  imagemagick (>= 7:6.5.5), netpbm, pdftk, xpdf-reader, xpdf-utils
+Suggests: texmaker | kile, openoffice.org-calc
 Description: Auto Multiple Choice
   Utility to manage multiple choice questionnaires, with optionnaly
   mixed questions and answers, with automatic marking from papers' scans.
