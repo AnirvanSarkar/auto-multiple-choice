@@ -171,6 +171,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 				     },
 	      'manuel_image_type'=>'xpm',
 	      'assoc_ncols'=>4,
+	      'tolerance_marque_inf'=>0.2,
+	      'tolerance_marque_sup'=>0.2,
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -1254,6 +1256,7 @@ sub saisie_auto_ok {
 			  "--debug",debug_file(),
 			  "--binaire",
 			  "--seuil-coche",$projet{'options'}->{'seuil'},
+			  "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
 			  "--progression-id",'analyse',
 			  "--progression",1,
 			  "--n-procs",$o{'n_procs'},

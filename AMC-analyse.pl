@@ -50,12 +50,14 @@ my $mep_file='';
 my $n_procs=0;
 my $seuil_coche='';
 my $rep_projet='';
+my $tol_marque='';
 
 GetOptions("mep=s"=>\$mep_dir,
 	   "mep-saved=s"=>\$mep_file,
 	   "cr=s"=>\$cr_dir,
 	   "binaire!"=>\$binaire,
 	   "seuil-coche=s"=>\$seuil_coche,
+	   "tol-marque=s"=>\$tol_marque,
 	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
@@ -122,6 +124,7 @@ for my $s (@scans) {
     my @c=with_prog("AMC-calepage.pl");
     push @c,"--debug",debug_file();
     push @c,"--seuil-coche",$seuil_coche if($seuil_coche);
+    push @c,"--tol-marque",$tol_marque if($tol_marque);
     push @c,"--progression-id",$progress_id;
     push @c,"--progression",$delta;
     push @c,"--binaire" if($binaire);

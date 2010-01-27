@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -64,9 +64,9 @@ my $zoom_file="";
 my $zoom_plus=10;
 my $nom_file="";
 my $seuil_coche=0.1;
-my $seuil_mse=3;
 
-my $tol_marque_plus=1/10;
+my $tol_marque='';
+my $tol_marque_plus=1/5;
 my $tol_marque_moins=1/5;
 
 my $detecte_via='c'; # gocr ou c
@@ -127,12 +127,23 @@ GetOptions("page=s"=>\$out_cadre,
 	   "progression-debut=s"=>\$progress_debut,
 	   "manuel!"=>\$manuel,
 	   "binaire!"=>\$binaire,
+	   "tol-marque=s"=>\$tol_marque,
 	   );
 
 set_debug($debug);
 
 my $commandes=AMC::Exec::new('AMC-calepage');
 $commandes->signalise();
+
+if($tol_marque) {
+    if($tol_marque =~ /(.*),(.*)/) {
+	$tol_marque_moins=$1;
+	$tol_marque_plus=$2;
+    } else {
+	$tol_marque_moins=$tol_marque;
+	$tol_marque_plus=$tol_marque;
+    }
+}
 
 $blur = ($modele ? "" : "1x1") if($blur eq 'defaut');
 $threshold = ($modele ? "" : "60%") if($threshold eq 'defaut');
@@ -219,6 +230,8 @@ sub calage_reperes {
 	my @cyp=map { $cadre_general->coordonnees($_,'y') } (0..3);
 	
 	$cale->calage(\@cx,\@cy,\@cxp,\@cyp);
+
+	debug "MSE=".$cale->mse();
     }
 }
 
