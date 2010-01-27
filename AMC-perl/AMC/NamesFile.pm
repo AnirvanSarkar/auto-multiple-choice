@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -36,7 +36,7 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
-    $self->{'separateur'}=":;\t" if(!$self->{'separateur'});
+    $self->{'separateur'}=":,;\t" if(!$self->{'separateur'});
 
     bless $self;
 
@@ -49,6 +49,8 @@ sub reduit {
     my $s=shift;
     $s =~ s/^\s+//;
     $s =~ s/\s+$//;
+    $s=$1 if($s =~ /^\"(.*)\"$/);
+    $s=$1 if($s =~ /^\'(.*)\'$/);
     return($s);
 }
 
