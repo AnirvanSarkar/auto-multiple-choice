@@ -3497,7 +3497,7 @@ gif</property>
                         <child>
                           <widget class="GtkTable" id="table18">
                             <property name="visible">True</property>
-                            <property name="n_rows">2</property>
+                            <property name="n_rows">3</property>
                             <property name="n_columns">2</property>
                             <child>
                               <widget class="GtkLabel" id="label99">
@@ -3547,6 +3547,33 @@ gif</property>
                                 <property name="bottom_attach">2</property>
                               </packing>
                             </child>
+                            <child>
+                              <widget class="GtkLabel" id="label101">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Seuil de noirceur par d&#xE9;faut</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkSpinButton" id="pref_s_defaut_seuil">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip" translatable="yes">Proportion de noir dans la case &#xE0; partir de laquelle la case est consid&#xE9;r&#xE9;e comme &#xE9;tant coch&#xE9;e, par d&#xE9;faut. Cette valeur est individualisable pour chaque projet.</property>
+                                <property name="invisible_char">&#x2022;</property>
+                                <property name="adjustment">0.1 0 1 0.01 0.1 0</property>
+                                <property name="digits">2</property>
+                                <property name="numeric">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                              </packing>
+                            </child>
                           </widget>
                         </child>
                       </widget>
@@ -3554,7 +3581,7 @@ gif</property>
                     <child>
                       <widget class="GtkLabel" id="label98">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Tol&#xE9;rance&lt;/b&gt;</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Param&#xE8;tres de d&#xE9;tection&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </widget>
                       <packing>
@@ -3734,7 +3761,7 @@ gif</property>
                               <widget class="GtkSpinButton" id="pref_projet_s_seuil">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip" translatable="yes">Seuil de proportion de pixels noirs &#xE0; partir duquel une case sera consid&#xE9;r&#xE9;e comme &#xE9;tant coch&#xE9;e. Si la consigne est de noircir tptalement la case, on peut utiliser 0,5. Si la consigne permet de cocher par des croix, une valeur de l'ordre de 0,1 semble appropri&#xE9;e.</property>
+                                <property name="tooltip" translatable="yes">Seuil de proportion de pixels noirs &#xE0; partir duquel une case sera consid&#xE9;r&#xE9;e comme &#xE9;tant coch&#xE9;e. Si la consigne est de noircir tptalement la case, on peut utiliser 0,5. Si la consigne permet de cocher par des croix, une valeur de l'ordre de 0,15 semble appropri&#xE9;e.</property>
                                 <property name="adjustment">0.10000000000000001 0 1 0.01 0.10000000000000001 0</property>
                                 <property name="digits">2</property>
                                 <property name="numeric">True</property>
