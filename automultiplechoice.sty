@@ -21,7 +21,6 @@
 % 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{automultiplechoice}
-\RequirePackage{theorem,graphicx}
 \RequirePackage[geometry]{ifsym}
 \RequirePackage{xcolor}
 \RequirePackage{fancyhdr}
@@ -550,4 +549,10 @@
     \end{minipage}
   }
 \fi
+\fi
+%
+\ifAMC@calibration
+  \usepackage[draft]{graphicx}
+\else
+  \usepackage{graphicx}
 \fi

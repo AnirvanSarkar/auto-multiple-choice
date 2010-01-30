@@ -124,14 +124,23 @@
       à 199.</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.couleurs">
       <title>Sujets en couleurs</title>
 
-      <para>Le production de sujets comprenant des couleurs (par exemple dans
-      des images ou graphiques) est impossible, car cela risque de perturber
-      le processus de détection des mises en pages qui utilise une
-      codification en couleurs dans un « document de calage » identique au
-      sujet.</para>
+      <para>Le production de sujets comprenant des couleurs (textes en
+      couleurs en utilisant la commande <command>textcolor</command> par
+      exemple) est impossible, car cela risque de perturber le processus de
+      détection des mises en pages qui utilise une codification en couleurs
+      dans un « document de calage » identique au sujet.</para>
+
+      <para>On peut tout de même inclure des images dans le sujet grâce à la
+      commande <command>\includegraphics</command> du paquet LaTeX
+      <package>graphicx</package>. En effet,
+      <package>automultiplechoice</package> charge <package>graphicx</package>
+      de telle sorte que les images ne soient pas affichées dans le document
+      de calage qui sert à la détection des mises en page. Il ne faut donc pas
+      le charger explicitement : le sujet ne doit pas contenir la commande
+      <code>\usepackage{graphicx}</code>.</para>
     </sect2>
 
     <sect2>
