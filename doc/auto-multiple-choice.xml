@@ -1662,6 +1662,15 @@ Durée : 10 minutes.
 [...]
 \end{questionmult}</programlisting>
 
+        <para>Une autre possibilité est offerte par les commandes LaTeX
+        <command>\baremeDefautS</command> et
+        <command>\baremeDefautM</command>, à utiliser en début de document (en
+        dehors de la commande <command>\exemplaire</command>), qui permettent
+        de donner des valeurs par défaut pour les barèmes des questions
+        simples et des questions multiples :</para>
+
+        <programlisting>\baremeDefautM{haut=3,p=-1}</programlisting>
+
         <para>Dans certains cas de figure, il peut être intéressant de définir
         un barème de manière générale <emphasis>en fonction du nombre de
         réponses proposées</emphasis>. Il suffit pour cela de mettre les
@@ -1675,6 +1684,46 @@ Durée : 10 minutes.
         fallait cocher). Les opérations acceptées dans ces formules sont les
         quatre opérations simples (<code>+</code> <code>-</code>
         <code>*</code> <code>/</code>), et le parenthésage.</para>
+
+        <para>D'autres variables sont aussi utilisables :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><varname>N</varname> est le nombre de réponses proposées,
+            sans compter la réponse automatiquement ajoutée par l'option
+            <option>completemulti</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NB</varname> est le nombre de bonnes réponses à la
+            question (sans tenir compte des cases cochées ou non).</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NBC</varname> est le nombre de bonnes réponses qui
+            ont été cochées.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NM</varname> est le nombre de mauvaises réponses à
+            la question (sans tenir compte des cases cochées ou non).</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NMC</varname> est le nombre de mauvaises réponses
+            qui ont été cochées.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>IS</varname> vaut 1 si la question est simple et 0
+            sinon.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>IMULT</varname> vaut 1 si la question est multiple
+            et 0 sinon.</para>
+          </listitem>
+        </itemizedlist>
       </sect3>
     </sect2>
 

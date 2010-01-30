@@ -424,6 +424,9 @@ if($mode =~ /b/) {
 	if(/AUTOQCM\[B=([^\]]+)\]/) {
 	    $bs{$etu}->{"$quest.$rep"}->{-bareme}=$1;
 	}
+	if(/AUTOQCM\[BD(S|M)=([^\]]+)\]/) {
+	    $bs{'defaut'}->{"$1."}->{-bareme}=$2;
+	}
     }
     close(TEX);
     $cmd_pid='';
@@ -436,7 +439,13 @@ if($mode =~ /b/) {
     for my $etu (keys %bs) {
 	print BAR "  <etudiant id=\"$etu\">\n";
 	my $bse=$bs{$etu};
-	for my $q (keys %qs) {
+	my @q_ids=();
+	if($etu eq 'defaut') {
+	    @q_ids=('S','M');
+	} else {
+	    @q_ids=(keys %qs);
+	}
+	for my $q (@q_ids) {
 	    print BAR "    <question id=\"$q\""
 		." titre=\"".$titres{$q}."\""
 		.($bse->{"$q."} ? " bareme=\"".$bse->{"$q."}->{-bareme}."\"" : "")

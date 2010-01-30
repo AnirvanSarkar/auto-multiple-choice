@@ -130,10 +130,12 @@ sub degroupe {
     my ($s,$defaut,$vars)=(@_);
     my %r=(%$defaut);
     for my $i (split(/,+/,$s)) {
-	if($i =~ /^([^=]+)=([-+*\/0-9a-zA-Z\.\(\)]+)$/) {
+	$i =~ s/^\s+//;
+	$i =~ s/\s+$//;
+	if($i =~ /^([^=]+)=([-+*\/0-9a-zA-Z\.\(\)?:|&=<>!\s]+)$/) {
 	    $r{$1}=$2;
 	} else {
-	    die "Erreur de syntaxe pour le bareme : $s";
+	    die "Erreur de syntaxe pour le bareme : $i dans $s" if($i);
 	}
     }
     # remplacement des variables et evaluation :
@@ -162,7 +164,7 @@ for my $etu (keys %{$bar->{'etudiant'}}) {
     for my $q (keys %{$baretu->{'question'}}) {
 	$bonsetu->{$q}={};
 	for my $r (keys %{$baretu->{'question'}->{$q}->{'reponse'}}) {
-	    $bonsetu->{$q}->{$r}=[$baretu->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'},1];
+	    $bonsetu->{$q}->{$r}=[$baretu->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'},1,$baretu->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'}];
 	}
     }
 }
@@ -185,10 +187,12 @@ sub action {
 	$qidsh{$q}=1;
 	
 	my $coche=($page->{$k}->{'r'}>$seuil ? 1 : 0);
-	my $ok=($coche == $bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
-	debug "Etud $etud Q $q R $r : ".($coche ? "X" : "O")." -> ".($ok ? "BIEN" : "NON");
+	my $bonne=($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
+	my $ok=($coche == $bonne ? 1 : 0);
+	debug "Etud $etud Q $q R $r : ".($bonne ? "B" : "M")." "
+	    .($coche ? "X" : "O")." -> ".($ok ? "BIEN" : "NON");
 	$pbons->{$etud}->{$q}={} if(!$pbons->{$etud}->{$q});
-	$pbons->{$etud}->{$q}->{$r}=[$coche,$ok];
+	$pbons->{$etud}->{$q}->{$r}=[$coche,$ok,$bonne];
     }
 }
 
@@ -216,7 +220,7 @@ if($an_saved) {
 			  );
 }
 
-#print Dumper(\%bons)."\n";
+#debug Dumper(\%bons)."\n";
 
 print "Sources :\n";
 for my $id ($anl->ids()) {
@@ -224,8 +228,6 @@ for my $id ($anl->ids()) {
     .($anl->attribut($id,'manuel') ? " (manuel)" : "")."\n";
 }
 print "\n";
-
-#print Dumper(\%bons);
 
 my %note_question=();
 
@@ -284,11 +286,15 @@ for my $etud (@a_calculer) {
     my $n_col=3;
     my %codes=();
 
+    my $bar_def=$bar->{'etudiant'}->{'defaut'}->{'question'};
+
     for my $q (@qids) {
 
 	$n_col++;
 
 	if($bons{$etud}->{$q}) {
+
+	    my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0};
 
 	    $barq=$bar->{'etudiant'}->{$refetud}->{'question'}->{$q};
 
@@ -310,6 +316,14 @@ for my $etud (@a_calculer) {
 		$n_tous++;
 	    }
 
+	    for(@rep_pleine) {
+		debug "REP[$_]<=".join(',',@{$bons{$etud}->{$q}->{$_}});
+		my $bn=($bons{$etud}->{$q}->{$_}->[2] ? 'B' : 'M');
+		my $co=($bons{$etud}->{$q}->{$_}->[0] ? 'C' : '');
+		$vars->{'N'.$bn}++;
+		$vars->{'N'.$bn.$co}++ if($co);
+	    }
+
 	    # baremes :
 
 	    # e=erreur logique dans les réponses
@@ -321,17 +335,17 @@ for my $etud (@a_calculer) {
 	    # haut=on met le max a cette valeur et on enleve 1 pt par faute (MULT)
 	    
 	    # variables possibles dans la specification du bareme
-	    my $vars={'N'=>(1+$#rep_pleine),
-		      'IMULT'=>($barq->{'multiple'} ? 1 : 0),
-		      'IS'=>($barq->{'multiple'} ? 0 : 1),
-		  };
+	    $vars->{'N'}=(1+$#rep_pleine);
+	    $vars->{'IMULT'}=($barq->{'multiple'} ? 1 : 0);
+	    $vars->{'IS'}=($barq->{'multiple'} ? 0 : 1);
 
 	    if($barq->{'multiple'}) {
 		# QUESTION MULTIPLE
 
 		$xx=0;
 		
-		%b_q=degroupe($barq->{'bareme'},
+		%b_q=degroupe($bar_def->{'M'}->{'bareme'}
+			      .",".$barq->{'bareme'},
 			      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0},
 			      $vars);
 
@@ -372,7 +386,8 @@ for my $etud (@a_calculer) {
 		}
 	    } else {
 		# QUESTION SIMPLE
-		%b_q=degroupe($barq->{'bareme'},
+		%b_q=degroupe($bar_def->{'S'}->{'bareme'}
+			      .",".$barq->{'bareme'},
 			      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1},
 			      $vars);
 
