@@ -124,6 +124,7 @@
 \newif\ifAMCtype@multi % la question en cours est de type multiple
 \newif\ifAMC@watermark\AMC@watermarktrue
 \newif\ifAMC@ensemble\AMC@ensemblefalse % les cases a cocher sont mises ensemble a la fin
+\newif\ifAMC@ensemble@chiffres\AMC@ensemble@chiffresfalse % mettre des chiffres dans les cases plutot que des lettres
 % tests internes...
 \newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
 \newif\ifAMC@zoneformulaire
@@ -270,7 +271,7 @@
 \newcounter{AMC@ncase}
 \setcounter{AMC@ncase}{0}
 \def\AMC@caselettre#1#2#3{%
-\AMC@boxedchar{\ifx\@empty#1\@empty\Alph{AMC@ncase}\else #1\fi}{#2}{#3}}
+\AMC@boxedchar{\ifx\@empty#1\@empty\ifAMC@ensemble@chiffres\arabic{AMC@ncase}\else\Alph{AMC@ncase}\fi\else #1\fi}{#2}{#3}}
 %
 % memoire pour mettre les cases a cocher en fin de copie
 %
@@ -489,6 +490,7 @@
 \DeclareOption{bloc}{\AMC@qbloctrue}
 \DeclareOption{completemulti}{\AMCcomplete@multitrue}
 \DeclareOption{ensemble}{\AMC@ensembletrue}
+\DeclareOption{chiffres}{\AMC@ensemble@chiffrestrue}
 %
 \DeclareOption{calibration}{\AMC@calibrationtrue}
 \DeclareOption{binaire}{\AMC@codebinairetrue} % par defaut
