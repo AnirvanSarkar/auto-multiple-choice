@@ -282,7 +282,7 @@
 \newcommand\AMCmem@ireAJ[1]{\ifAMC@ensemble\ifAMC@zoneformulaire\else\begingroup\AMCformulaire@dedanstrue\let\protect\@unexpandable@protect\global\edef\AMCmem@ireData{\AMCmem@ireData #1}\endgroup\fi\fi}
 \newcommand\AMCmem@ireAJRep[1]{\addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\formulaireReponse{#1}}}
 \newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\formulaireQuestion{#1}}}
-\newcommand\formulaire{\ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData\def\AMCmem@ireData{}\fi}
+\newcommand\formulaire{\ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData\global\def\AMCmem@ireData{}\fi}
 %
 % mise en forme des questions
 %
