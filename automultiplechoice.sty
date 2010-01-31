@@ -551,8 +551,15 @@
 \fi
 \fi
 %
+\@ifpackageloaded{graphicx}{\PackageWarning{automultiplechoice}{Package graphicx is loaded by automultiplechoice and should NOT be loaded directly.}}{}
+%
 \ifAMC@calibration
   \usepackage[draft]{graphicx}
 \else
   \usepackage{graphicx}
 \fi
+% environnement exemplaire
+\ifx\AMCNombreCopies\undefined\def\AMCNombreCopies{5}\fi % nombre de copies par defaut
+\@ifpackageloaded{environ}{%
+\NewEnviron{exemplaires}[1][\AMCNombreCopies]{\exemplaire{#1}{\BODY}}
+}{\PackageWarning{automultiplechoice}{Package environ not loaded : environnement exemplaires will NOT be defined.}}

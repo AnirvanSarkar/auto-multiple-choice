@@ -321,7 +321,8 @@ Durée : 10 minutes.
           <callout arearefs="simple.exemplaire" id="simple.exemplaire.exp">
             <para>La commande <command>exemplaire</command> permet de
             fabriquer autant d'exemplaires (différents) du questionnaire QCM
-            que l'on souhaite (ici, 10).</para>
+            que l'on souhaite (ici, 10). Voir <xref linkend="sec.unecopie" />
+            pour une syntaxe alternative utilisant un environnement.</para>
           </callout>
 
           <callout arearefs="simple.entete" id="simple.entete.exp">
@@ -689,6 +690,33 @@ Durée : 10 minutes.
             défaut).</para>
           </listitem>
         </itemizedlist>
+      </sect3>
+
+      <sect3 id="sec.unecopie">
+        <title>Description d'une copie</title>
+
+        <para>Le code LaTeX décrivant le contenu de chaque copie doit être
+        inclus dans un appel à la commande <command>\exemplaire</command>,
+        avec pour premier argument le nombre de copies et pour deuxième
+        argument le code utilisé pour générer une copie.</para>
+
+        <programlisting>\exemplaire{50}{ ... }</programlisting>
+
+        <para>Si vous avez chargé le paquet LaTeX <package>environ</package>
+        <emphasis>avant</emphasis> <package>automultiplechoice</package>, vous
+        disposez d'une syntaxe alternative utilisant l'environnement
+        exemplaires, qui a en option le nombre de copies désiré (5 par
+        défaut).</para>
+
+        <programlisting>\begin{exemplaires}[50]
+...
+\end{exemplaires}</programlisting>
+
+        <note>
+          <para>Le paquet environ n'est pas disponible dans la distribution
+          TeX Live 2007, encore utilisée dans des distributions Ubuntu jusqu'à
+          la version 9.10 (Karmic Koala).</para>
+        </note>
       </sect3>
 
       <sect3 id="latex.qr">
