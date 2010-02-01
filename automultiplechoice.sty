@@ -107,6 +107,7 @@
 \newcount\AMCid@check % code de verification de la question en cours
 \newcount\AMCid@etud\AMCid@etud=1 % numero de la copie en cours
 \newcount\AMCid@etudfin % numero de la copie a laquelle on va s'arreter
+\newcount\AMCnum@copies % nombre de copies
 % options :
 \newif\ifAMC@ordre\AMC@ordrefalse % on laisse les reponses dans l'ordre
 \newif\ifAMC@correchead\AMC@correcheadfalse % en-tete corrige
@@ -467,8 +468,9 @@
 \def\AMC@note{}
 %
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
-\message{AUTOQCM[TOTAL=#1]^^J}%
-\AMCid@etud=\AMC@premierecopie\AMCid@etudfin=#1\advance\AMCid@etudfin by \AMC@premierecopie%
+\ifx\AMCNombreCopies\undefined\AMCnum@copies=#1\else\AMCnum@copies=\AMCNombreCopies\fi%
+\message{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
+\AMCid@etud=\AMC@premierecopie\AMCid@etudfin=\AMCnum@copies\advance\AMCid@etudfin by \AMC@premierecopie%
 \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
 \loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
@@ -559,7 +561,6 @@
   \usepackage{graphicx}
 \fi
 % environnement exemplaire
-\ifx\AMCNombreCopies\undefined\def\AMCNombreCopies{5}\fi % nombre de copies par defaut
 \@ifpackageloaded{environ}{%
-\NewEnviron{exemplaires}[1][\AMCNombreCopies]{\exemplaire{#1}{\BODY}}
-}{\PackageWarning{automultiplechoice}{Package environ not loaded : environnement exemplaires will NOT be defined.}}
+\NewEnviron{copieexamen}[1][5]{\exemplaire{#1}{\BODY}}
+}{\PackageWarning{automultiplechoice}{Package environ not loaded : environnement copieexamen will NOT be defined.}}

@@ -201,6 +201,8 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'nom_examen'=>'',
 		   'code_examen'=>'',
+
+		   'nombre_copies'=>0,
 	    
 		   '_modifie'=>1,
 		   
@@ -949,6 +951,7 @@ sub doc_maj {
 			  "--with",moteur_latex(),
 			  "--debug",debug_file(),
 			  "--mode","s",
+			  "--n-copies",$projet{'options'}->{'nombre_copies'},
 			  absolu($projet{'options'}->{'texsrc'}),
 			  "--prefix",absolu('%PROJET/'),
 			  ],
@@ -1432,6 +1435,10 @@ sub valide_options_notation {
 
 sub valide_options_association {
     reprend_pref('pref_assoc',$projet{'options'});
+}
+
+sub valide_options_preparation {
+    reprend_pref('pref_prep',$projet{'options'});
 }
 
 sub voir_notes {
@@ -2290,7 +2297,7 @@ sub valide_projet {
     valide_liste('noinfo'=>1,'nomodif'=>1);
 
     transmet_pref($gui,'export',$projet{'options'});
-
+    transmet_pref($gui,'pref_prep',$projet{'options'});
 }
 
 sub projet_ouvre {

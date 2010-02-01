@@ -59,6 +59,7 @@ my $prefix='';
 my $debug='';
 
 my $n_procs=0;
+my $nombre_copies=0;
 
 my $progress=1;
 my $progress_id='';
@@ -77,6 +78,7 @@ GetOptions("mode=s"=>\$mode,
 	   "progression-id=s"=>\$progress_id,
 	   "prefix=s"=>\$prefix,
 	   "n-procs=s"=>\$n_procs,
+	   "n-copies=s"=>\$nombre_copies,
 	   "raster=s"=>\$moteur_raster,
 	   );
 
@@ -259,21 +261,24 @@ $f_base =~ s/\.tex$//i;
 $prefix=$f_base."-" if(!$prefix);
 
 sub latex_cmd {
-    my (@o)=@_;
+    my (%o)=@_;
 
     return($moteur_latex,
 	   "\\nonstopmode"
-	   .join('',map { "\\def\\".$_."{1}"; } @o )
+	   .join('',map { "\\def\\".$_."{".$o{$_}."}"; } (keys %o) )
 	   ." \\input{\"$f_tex\"}");
 }
 
 if($mode =~ /s/) {
     # SUJETS
 
+    my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
+    $opts{'AMCNombreCopies'}=$nombre_copies if($nombre_copies>0);
+
     # 1) document de calage
 
     $analyse_q=1;
-    execute(latex_cmd(qw/NoWatermarkExterne CalibrationExterne NoHyperRef/));
+    execute(latex_cmd(%opts,'CalibrationExterne'=>1));
     $analyse_q='';
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
@@ -284,7 +289,7 @@ if($mode =~ /s/) {
 
     # 2) compilation de la correction
 
-    execute(latex_cmd(qw/NoWatermarkExterne CorrigeExterne NoHyperRef/));
+    execute(latex_cmd(%opts,'CorrigeExterne'=>1));
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
 	exit(1);
@@ -293,7 +298,7 @@ if($mode =~ /s/) {
 
     # 3) compilation du sujet
 
-    execute(latex_cmd(qw/NoWatermarkExterne SujetExterne NoHyperRef/));
+    execute(latex_cmd(%opts,'SujetExterne'=>1));
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
 	exit(1);
@@ -312,7 +317,7 @@ if($mode =~ /m/) {
     if(-f $calage) {
 	print "Utilisation du fichier de calage $calage\n";
     } else {
-	execute(latex_cmd(qw/CalibrationExterne NoHyperRef/));
+	execute(latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/));
 	$calage="$f_base.pdf";
     }
 
@@ -384,7 +389,7 @@ if($mode =~ /b/) {
 
     my $delta=0;
 
-    $cmd_pid=open(TEX,"-|",latex_cmd(qw/CalibrationExterne NoHyperRef/))
+    $cmd_pid=open(TEX,"-|",latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/))
 	or die "Impossible d'executer latex";
     while(<TEX>) {
 	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 

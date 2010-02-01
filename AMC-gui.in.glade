@@ -436,41 +436,33 @@
                         </child>
                         <child>
                           <widget class="GtkHBox" id="hbox1">
+                            <property name="visible">True</property>
+                            <property name="spacing">2</property>
                             <child>
                               <widget class="GtkLabel" id="label8">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Nombre de copies :</property>
                               </widget>
                               <packing>
+                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkCheckButton" id="nb_etud_latex">
-                                <property name="label" translatable="yes">donn&#xE9; dans le fichier LaTeX</property>
+                              <widget class="GtkSpinButton" id="pref_prep_s_nombre_copies">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                              </widget>
-                              <packing>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkSpinButton" id="nb_etud">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="tooltip" translatable="yes">Nombre de copies &#xE0; produire. La valeur z&#xE9;ro demande de prendre en compte le nombre de copies d&#xE9;fini dans le fichier LaTeX.</property>
                                 <property name="max_length">4</property>
-                                <property name="adjustment">1 1 500 1 10 0</property>
+                                <property name="adjustment">0 0 4095 1 10 0</property>
                                 <property name="snap_to_ticks">True</property>
                                 <property name="numeric">True</property>
                                 <property name="wrap">True</property>
+                                <signal name="value_changed" handler="valide_options_preparation"/>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="position">2</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                           </widget>
@@ -3563,7 +3555,7 @@ gif</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip" translatable="yes">Proportion de noir dans la case &#xE0; partir de laquelle la case est consid&#xE9;r&#xE9;e comme &#xE9;tant coch&#xE9;e, par d&#xE9;faut. Cette valeur est individualisable pour chaque projet.</property>
                                 <property name="invisible_char">&#x2022;</property>
-                                <property name="adjustment">0.1 0 1 0.01 0.1 0</property>
+                                <property name="adjustment">0.10000000000000001 0 1 0.01 0.10000000000000001 0</property>
                                 <property name="digits">2</property>
                                 <property name="numeric">True</property>
                               </widget>
