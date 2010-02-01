@@ -25,6 +25,9 @@ use File::Temp qw/ tempfile tempdir /;
 use Data::Dumper;
 use Getopt::Long;
 
+use IO::File;
+use XML::Writer;
+
 use AMC::Basic;
 use AMC::Gui::Avancement;
 use AMC::Queue;
@@ -65,6 +68,8 @@ my $progress=1;
 my $progress_id='';
 
 my $moteur_raster='auto';
+
+my $encodage_interne='UTF-8';
 
 GetOptions("mode=s"=>\$mode,
 	   "with=s"=>\$moteur_latex,
@@ -438,11 +443,23 @@ if($mode =~ /b/) {
 
     debug "Ecriture bareme dans $bareme";
 
-    open(BAR,">",$bareme) or die "Impossible d'ecrire dans $bareme";
-    print BAR "<?xml version='1.0' standalone='yes'?>\n";
-    print BAR "<bareme src=\"$f_tex\" version=\"$VERSION_BAREME\">\n";
+    my $output=new IO::File($bareme,
+			    ">:encoding($encodage_interne)");
+    if(! $output) {
+	die "Impossible d'ouvrir $bareme : $!";
+    }
+
+    my $writer = new XML::Writer(OUTPUT=>$output,
+				 ENCODING=>$encodage_interne,
+				 DATA_MODE=>1,
+				 DATA_INDENT=>2);
+    $writer->xmlDecl($encodage_interne);
+
+    $writer->startTag('bareme',src=>$f_tex,version=>$VERSION_BAREME);
+
     for my $etu (keys %bs) {
-	print BAR "  <etudiant id=\"$etu\">\n";
+	$writer->startTag('etudiant',id=>$etu);
+
 	my $bse=$bs{$etu};
 	my @q_ids=();
 	if($etu eq 'defaut') {
@@ -451,28 +468,30 @@ if($mode =~ /b/) {
 	    @q_ids=(keys %qs);
 	}
 	for my $q (@q_ids) {
-	    print BAR "    <question id=\"$q\""
-		." titre=\"".$titres{$q}."\""
-		.($bse->{"$q."} ? " bareme=\"".$bse->{"$q."}->{-bareme}."\"" : "")
-		.join(" ",map { " ".$_."=\"".$qs{$q}->{$_}."\"" } 
-		      grep { /^(indicative|multiple)$/ }
-		      (keys %{$qs{$q}}) )
-		.">\n";
+	    $writer->startTag('question',id=>$q,
+			     titre=>$titres{$q},
+			     bareme=>$bse->{"$q."}->{-bareme},
+			     indicative=>$qs{$q}->{'indicative'},
+			     multiple=>$qs{$q}->{'multiple'},
+			     );
+
 	    for my $i (keys %$bse) {
 		if($i =~ /^$q\.([0-9]+)/) {
 		    my $rep=$1;
-		    print BAR "      <reponse id=\"$rep\" bonne=\""
-			.$bse->{$i}->{-bonne}."\""
-			.($bse->{"$i"}->{-bareme} ? " bareme=\"".$bse->{"$i"}->{-bareme}."\"" : "")
-			." />\n";
+		    $writer->emptyTag('reponse',
+				      id=>$rep,
+				      bonne=>$bse->{$i}->{-bonne},
+				      bareme=>$bse->{"$i"}->{-bareme},
+				      );
 		}
 	    }
-	    print BAR "    </question>\n";
+	    $writer->endTag('question');
 	}
-	print BAR "  </etudiant>\n";
+	$writer->endTag('etudiant');
     }
-    print BAR "</bareme>\n";
-    close(BAR);
+    $writer->endTag('bareme');
+    $writer->end();
+    $output->close();
 }
 
 $avance->fin();
