@@ -968,8 +968,21 @@ sub doc_maj {
 									'error', # message type
 									'ok', # which set of buttons?
 									"La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(Seules les dix premières erreurs ont été retranscrites)</i>": "") );
+		     $dialog->run;
+		     $dialog->destroy;
+		 }
+		 if($c->variable('ensemble') && $projet{'options'}->{'seuil'}<0.4) {
+		     my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+									'destroy-with-parent',
+									'question', # message type
+									'yes-no', # which set of buttons?
+									sprintf("Votre sujet propose une feuille de réponses séparée. Dans ce cas, des lettres sont inscrites dans les cases à cocher. Pour une bonne détection des cases à cocher, il faut donc demander aux étudiants de remplir totalement les cases voulues, et aussi fixer le paramètre \"seuil de noirceur\" du projet à une valeur de l'ordre de 0.5. Pour l'instant, la valeur de ce paramètre est %.02f. Voulez-vous changer cette valeur en 0.5 ?",$projet{'options'}->{'seuil'}) );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
+		     if($reponse) {
+			 $projet{'options'}->{'seuil'}=0.5;
+			 $projet{'options'}->{'_modifie'}=1;
+		     }
 		 }
 		 detecte_documents(); 
 	     });

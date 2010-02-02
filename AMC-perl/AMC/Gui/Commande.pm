@@ -40,6 +40,7 @@ sub new {
 	'o'=>{},
 
 	'erreurs'=>[],
+	'variables'=>{},
 	
 	'pid'=>'',
 	'avance'=>'',
@@ -67,6 +68,16 @@ sub proc_pid {
 sub erreurs {
     my ($self)=(@_);
     return(@{$self->{'erreurs'}});
+}
+
+sub variables {
+    my ($self)=(@_);
+    return(%{$self->{'variables'}});
+}
+
+sub variable {
+    my ($self,$k)=(@_);
+    return $self->{'variables'}->{$k};
 }
 
 sub quitte {
@@ -138,6 +149,9 @@ sub get_output {
 	if($line =~ /^ERR/) {
 	    chomp(my $lc=$line);
 	    push @{$self->{'erreurs'}},$lc;
+	}
+	if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
+	    $self->{'variables'}->{$1}=$2;
 	}
 
 	if($self->{'avancement'}) {

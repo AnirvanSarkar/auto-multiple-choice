@@ -125,6 +125,7 @@ my $n_erreurs;
 my $a_erreurs;
 my $analyse_q='';
 my @erreurs_msg=();
+my %info_vars=();
 
 sub execute {
     my @s=@_;
@@ -185,6 +186,9 @@ sub execute {
 			push @erreurs_msg,"ERR: numéro de réponse utilisé plusieurs fois : $1 [".$analyse_q{'etu'}.":".$analyse_data{'titre'}."]\n";
 		    }
 		    $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
+		}
+		if(/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
+		    $info_vars{$1}=$2;
 		}
 	    }
 	    #LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
@@ -291,6 +295,13 @@ if($mode =~ /s/) {
     }
     exit(1) if($a_erreurs>0);
     move("$f_base.pdf",$prefix."calage.pdf");
+
+    # transmission des variables
+
+    print "Variables :\n";
+    for my $k (keys %info_vars) {
+	print "VAR: $k=".$info_vars{$k}."\n";
+    }
 
     # 2) compilation de la correction
 
