@@ -486,7 +486,7 @@ Nom et prénom :
       étudiants est plus difficile, et surtout, il suffira de scanner une
       seule page par étudiant, ce qui allège la tâche de l'enseignant dans le
       cas où son matériel ne lui permet de scanner les copies que de manière
-      manuelle. Dans cet exemple, le nombre de questions est réduit : elles
+      manuelle. Dans cet exemple, le nombre de questions est réduit : elles
       tiennent toutes sur une page et il serait donc inutile d'utiliser une
       telle mise en page dans ce cas précis. À vous de modifier cette base
       pour utiliser cette mise en page avec de nombreuses questions !</para>
@@ -589,7 +589,8 @@ Durée : 10 minutes.
   }}
 
 \begin{center}
-  \bf\em Les réponses aux questions sont à donner exclusivement sur cette feuille : les réponses données sur les feuilles précédentes ne seront pas prises en compte.
+  \bf\em Les réponses aux questions sont à donner exclusivement sur cette feuille :
+  les réponses données sur les feuilles précédentes ne seront pas prises en compte.
 \end{center}
 
 %%% fin de l'en-tête de la feuille de réponses
@@ -635,12 +636,26 @@ Durée : 10 minutes.
             écrit toutes les cases à cocher.</para>
           </callout>
         </calloutlist></para>
+
+      <warning>
+        <para>Quand on utilise une page de réponses séparée, des lettres (ou
+        des chiffres, avec l'utilisation de l'option
+        <option>chiffres</option>, voir <xref
+        linkend="sec.package.options" />) sont inscrites dans les cases à
+        cocher. Pour obtenir une bonne détection des cases cochées, il est
+        donc indispensable de demander aux étudiants de remplir totalement les
+        cases voulues (cocher uniquement les cases à l'aide d'une croix ne
+        serait pas suffisant). Il faut par ailleurs fixer le paramètre « seuil
+        de noirceur » (qui définit la proportion de noir dans une case à
+        partir de laquelle cette case est considérée comme étant cochée) à une
+        valeur de l'ordre de 0,5.</para>
+      </warning>
     </sect2>
 
     <sect2>
       <title>Description des commandes LaTeX</title>
 
-      <sect3>
+      <sect3 id="sec.package.options">
         <title>Options du paquet</title>
 
         <para>L'utilisation du paquet <package>automultiplechoice</package> se
@@ -686,8 +701,9 @@ Durée : 10 minutes.
             <para><option>chiffres</option> : si on utilise l'option
             <option>ensemble</option>, l'option <option>chiffres</option>
             demande d'identifier les questions avec des chiffres plutôt
-            qu'avec des lettres (ce qui est le comportement par
-            défaut).</para>
+            qu'avec des lettres (ce qui est le comportement par défaut). Avec
+            cette option, il faut bien entendu veiller à ce que le nombre de
+            réponses ne dépasse pas 9 pour chaque question.</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -813,7 +829,7 @@ Durée : 10 minutes.
   Qu'est-ce qu'un oiseau ?
   \begin{multicols}{2}\AMCBoxedAnswers
     \begin{reponses}
-      \bonne{C'est un animal à ailes et qui pond des \oe ufs.
+      \bonne{C'est un animal à ailes et qui pond des \oe{}ufs.
         Il y en a de toutes les couleurs}
       \mauvaise{C'est un grand meuble en bois qui sert la plupart
         du temps à ranger du linge de maison}
@@ -1208,6 +1224,15 @@ et écrivez votre nom et prénom ci-dessous.
       page pour cet étudiant, puis un code permettant la vérification de
       l'identification), ainsi que la date de mise à jour de la mise en
       page.</para>
+
+      <para>Pour vérifier que les mises en page ont été correctement
+      détectées, on peut commencer une saisie manuelle (dans l'onglet
+      <guilabel>Saisie</guilabel>). Bien entendu, il faut juste vérifier que
+      les cases à cocher en rouge sont bien positionées sur les cases du
+      sujet, mais ne pas cliquer dessus, sans quoi une saisie manuelle
+      pourrait être enregistrée. Cette mauvaise saisie sera de plus considérée
+      comme plus fiable que les saisies automatiques... On veillera donc à
+      effacer les éventuelles saisies manuelles effectuées par erreur.</para>
     </sect2>
 
     <sect2>
@@ -1249,8 +1274,8 @@ et écrivez votre nom et prénom ci-dessous.
         pour ma part une photocopieuse/scanner qui le fait de manière
         automatique (toutes les pages à la suite sans intervention de ma
         part), avec les réglages suivants : 300dpi, mode OCR (prévu pour la
-        reconnaissance de caractères, noir et blanc), scan délivré en un
-        fichier TIFF par page.</para>
+        reconnaissance de caractères, noir et blanc sans nuances de gris),
+        scan délivré en un fichier TIFF par page.</para>
 
         <note>
           <para>Pour l'analyse des scans, nous devons disposer d'un fichier
@@ -1895,11 +1920,37 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
       <para>En appuyant sur le bouton <guibutton>Annoter les
       copies</guibutton>, l'annotation des pages des étudiants commencera :
-      sur chaque scan, les mauvaises réponses seront entourées en rouge, les
-      bonnes réponses seront indiquées par des croix bleues, les notes aux
-      questions et la note globale seront écrites. Cette opération est
-      effectuée page par page, et le résultat est constitué de pages corrigées
-      au format JPG.</para>
+      sur chaque scan, les annotations suivantes sont effectuées :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>les cases cochées à tort par l'étudiant sont entourées en
+          rouge ;</para>
+        </listitem>
+
+        <listitem>
+          <para>les cases non-cochées qui auraient dû l'être sont cochées en
+          rouge ;</para>
+        </listitem>
+
+        <listitem>
+          <para>les cases cochées et qui devaient l'être sont cochées en
+          bleu ;</para>
+        </listitem>
+
+        <listitem>
+          <para>pour chaque question, sont indiquées la note obtenue ainsi que
+          la note maximale pouvant être obtenue ;</para>
+        </listitem>
+
+        <listitem>
+          <para>la note globale de la copie est indiquée en première page de
+          la copie.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Cette opération est effectuée page par page, et le résultat est
+      constitué de pages corrigées au format JPG.</para>
 
       <para>Si nous souhaitons distribuer les copies corrigées aux étudiants
       au format électronique, il est utile de fabriquer un fichier PDF par

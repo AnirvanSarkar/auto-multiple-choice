@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -61,7 +61,14 @@ sub export {
 
     open(OUT,">:encoding(".$self->{'out.encodage'}.")",$fichier);
 
-    my @cont=(qw/_NOM_ _NOTE_ _ID_/,@{$self->{'keys'}},@{$self->{'codes'}});
+    my @cont=();
+
+    if($self->{'liste_key'}) { 
+	push @cont,'_ASSOC_';
+	print OUT $self->parse_string("A:".$self->{'liste_key'}).$sep;
+    }
+
+    push @cont,(qw/_NOM_ _NOTE_ _ID_/,@{$self->{'keys'}},@{$self->{'codes'}});
 
     print OUT join($sep,
 		   map  { $self->parse_string($_) }
@@ -72,7 +79,7 @@ sub export {
 	print OUT join($sep,
 		       map { my $k=$_;
 			     my $c=$self->{'c'}->{$etu}->{$k};
-			     if($k =~ /^_NOM_$/) {
+			     if($k =~ /^_(NOM|ASSOC)_$/) {
 				 $c=$self->parse_string($c);
 			     } elsif($k =~ /^_ID_$/) {
 			     } else {

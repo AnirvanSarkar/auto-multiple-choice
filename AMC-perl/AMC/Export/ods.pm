@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -62,13 +62,15 @@ sub yx2ooo {
     return($c);
 }
 
-my %largeurs=(qw/note 1.5cm
+my %largeurs=(qw/ASSOC 4cm
+	      note 1.5cm
 	      nom 5cm
 	      copie 1.75cm
 	      total 1.2cm
 	      max 1cm/);
 
-my %style_col=(qw/NOM Tableau
+my %style_col=(qw/ASSOC CodeA
+	       NOM Tableau
 	       NOTE NoteF
 	       ID NumCopie
 	       TOTAL NoteQ
@@ -115,7 +117,7 @@ sub export {
 			  'column-width' => "1cm", 
 		      },
 		      );
-   
+
     for(keys %largeurs) {
 	$doc->createStyle('col.'.$_,
 			  family=>'table-column',
@@ -179,6 +181,22 @@ sub export {
 			 properties=>{
 			     -area=>'table-cell',
 			     'fo:background-color'=>"#e6e6ff",
+			 },
+			 );
+
+    $styles->createStyle('CodeA',
+			 parent=>'Tableau',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'paragraph',
+			     'fo:text-align' => "center",
+			 },
+			 );
+
+    $styles->updateStyle('CodeA',
+			 properties=>{
+			     -area=>'table-cell',
+			     'fo:background-color'=>"#ffddc4",
 			 },
 			 );
 
@@ -259,7 +277,7 @@ sub export {
 
     my $nkeys=$#{$self->{'keys'}}+1;
 
-    my $dimx=7+$#keys+$#codes;
+    my $dimx=7+$#keys+$#codes+($self->{'liste_key'} ? 1:0);
     my $dimy=6+$#{$self->{'copies'}};
 
     my $feuille=$doc->getTable(0,$dimy,$dimx);
@@ -284,10 +302,15 @@ sub export {
     # premiere ligne
     
     $ii=$x0;
-    for(qw/nom note copie total max/) {
+    for(($self->{'liste_key'} ? 'ASSOC' : ()),
+	qw/nom note copie total max/) {
 	$doc->columnStyle($feuille,$ii,"col.$_");
 	$doc->cellStyle($feuille,$y0,$ii,'Entete');
-	$doc->cellValue($feuille,$y0,$ii,$_);
+	if($_ eq 'ASSOC') {
+	    $doc->cellValue($feuille,$y0,$ii,"A:".$self->{'liste_key'});
+	} else {
+	    $doc->cellValue($feuille,$y0,$ii,$_);
+	}
 	$code_col{$_}=$ii;
 	$ii++;
     }
@@ -321,7 +344,8 @@ sub export {
 	}
 
 	$ii=$x0;
-	for(qw/NOM NOTE ID TOTAL MAX/) {
+	for(($self->{'liste_key'} ? 'ASSOC' : ()),
+	    qw/NOM NOTE ID TOTAL MAX/) {
 	    $doc->cellValueType($feuille,$jj,$ii,'float')
 		if(/^(NOTE|TOTAL|MAX)$/);
 	    $doc->cellStyle($feuille,$jj,$ii,$style_col{$_});

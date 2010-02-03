@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -60,7 +60,7 @@ sub set_options {
 	    debug "Option $k = $f{$_}";
 	    $self->{$k}=$f{$_};
 	} else {
-	    print STDERR "Option <$domaine.$_> inutilisable\n";
+	    debug "Option <$domaine.$_> inutilisable\n";
 	}
     }
 }
@@ -89,7 +89,7 @@ sub load {
 		    $self->{'notes'}->{$_};
 	    }
 	} else {
-	    print STDERR "Erreur a l'analyse du fichier de notes ".$self->{'fich.notes'}."\n";
+	    debug "Erreur a l'analyse du fichier de notes ".$self->{'fich.notes'}."\n";
 	}
     }
     if($self->{'fich.association'} && ! $self->{'assoc'}) {
@@ -145,12 +145,14 @@ sub pre_process {
 
     if($self->{'assoc'} && $self->{'noms'}) {
 	my $lk=$self->{'assoc'}->get_param('liste_key');
+	$self->{'liste_key'}=$lk;
 	for my $etu (@copies) {
 	    if($etu =~ /^(max|moyenne)$/) {
 		$self->{'c'}->{$etu}->{'_NOM_'}='';
 	    } else {
 		my $i=$self->{'assoc'}->effectif($etu);
 		if($i) {
+		    $self->{'c'}->{$etu}->{'_ASSOC_'}=$i;
 		    my ($n)=$self->{'noms'}->data($lk,$i);
 		    if($n) {
 			$self->{'c'}->{$etu}->{'_NOM_'}=
@@ -166,7 +168,8 @@ sub pre_process {
 
 	$k_id='_NOM_';
     } else {
-	print STDERR "Pas d'association utilisable\n";
+	$self->{'liste_key'}='';
+	debug "Pas d'association utilisable\n";
     }
 
     $self->{'keys'}=\@keys;
@@ -182,7 +185,7 @@ sub pre_process {
 sub export {
     my ($self,$fichier)=@_;
 
-    print STDERR "Export dans la classe de base : $fichier\n";
+    debug "Export dans la classe de base : $fichier\n";
 }
 
 1;
