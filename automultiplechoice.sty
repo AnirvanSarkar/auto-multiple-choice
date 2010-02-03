@@ -276,8 +276,8 @@
 % memoire pour mettre les cases a cocher en fin de copie
 %
 \def\AMCmem@ireData{}
-\def\formulaireQuestion#1{\par{\bf Question #1 :} }
-\def\formulaireReponse#1{#1 }
+\def\formulaireQuestion#1{\vspace{1.2ex}\par{\bf Question #1 :}}
+\def\formulaireReponse#1{\hspace{.3em} #1}
 \def\AMCdebutFormulaire{\AMC@zoneformulairetrue}
 %
 \newcommand\AMCmem@ireAJ[1]{\ifAMC@ensemble\ifAMC@zoneformulaire\else\begingroup\AMCformulaire@dedanstrue\let\protect\@unexpandable@protect\global\edef\AMCmem@ireData{\AMCmem@ireData #1}\endgroup\fi\fi}
@@ -475,6 +475,8 @@
 \loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
+%
+\def\AMCcleardoublepage{\ifodd\thepage\clearpage~\fi\clearpage}
 %
 %\newenvironment{exemplaires}[1][10]{\exemplaire{#1}\bgroup}{\egroup}
 %

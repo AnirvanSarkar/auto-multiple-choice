@@ -290,7 +290,7 @@ Durée : 10 minutes.
   \end{reponses}
 \end{questionmult}
 
-\cleardoublepage    <co id="simple.clear" linkends="simple.clear.exp" />
+\clearpage    <co id="simple.clear" linkends="simple.clear.exp" />
 
 }   <co id="simple.fin" linkends="simple.fin.exp" />
 
@@ -355,10 +355,8 @@ Durée : 10 minutes.
           </callout>
 
           <callout arearefs="simple.clear" id="simple.clear.exp">
-            <para>La commande <command>cleardoublepage</command> permet de
-            passer à la double page suivante (dans l'optique d'une impression
-            recto-verso). Pour une impression recto simple, on privilégiera la
-            commande <command>clearpage</command>.</para>
+            <para>La commande <command>clearpage</command> permet de passer à
+            la double page suivante pour le début de la copie suivante.</para>
           </callout>
 
           <callout arearefs="simple.fin" id="simple.fin.exp">
@@ -573,7 +571,8 @@ Durée : 10 minutes.
 \melangegroupe{general}
 \restituegroupe{general}
 
-\clearpage    <co id="ensemble.cp" linkends="ensemble.cp.exp" />
+\AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp" />
+
 \AMCdebutFormulaire    <co id="debut.form" linkends="debut.form.exp" />
 
 %%% début de l'en-tête de la feuille de réponses
@@ -597,7 +596,7 @@ Durée : 10 minutes.
 
 \formulaire    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp" />
 
-\cleardoublepage    
+\clearpage    
 
 }  
 
@@ -616,7 +615,12 @@ Durée : 10 minutes.
 
           <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
             <para>Ce saut de page précède la page spéciale où seront
-            regroupées toutes les cases à cocher.</para>
+            regroupées toutes les cases à cocher. Si on imprime en
+            recto-verso, il vaut mieux utiliser
+            <command>\AMCcleardoublepage</command> pour que la page de
+            formulaire soit sur une feuille séparée des autres. Si on imprime
+            en recto simple, on peut utiliser simplement
+            <command>\clearpage</command>.</para>
           </callout>
 
           <callout arearefs="debut.form" id="debut.form.exp">
@@ -1704,7 +1708,7 @@ Durée : 10 minutes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\cleardoublepage
+\clearpage
 
 }
 
