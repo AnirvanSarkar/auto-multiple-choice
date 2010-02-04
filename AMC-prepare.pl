@@ -67,6 +67,10 @@ my $nombre_copies=0;
 my $progress=1;
 my $progress_id='';
 
+my $out_calage='';
+my $out_sujet='';
+my $out_corrige='';
+
 my $moteur_raster='auto';
 
 my $encodage_interne='UTF-8';
@@ -76,6 +80,9 @@ GetOptions("mode=s"=>\$mode,
 	   "mep=s"=>\$mep_dir,
 	   "bareme=s"=>\$bareme,
 	   "calage=s"=>\$calage,
+	   "out-calage=s"=>\$out_calage,
+	   "out-sujet=s"=>\$out_sujet,
+	   "out-corrige=s"=>\$out_corrige,
 	   "dpi=s"=>\$dpi,
 	   "convert-opts=s"=>\$convert_opts,
 	   "debug=s"=>\$debug,
@@ -294,7 +301,7 @@ if($mode =~ /s/) {
 	exit(1);
     }
     exit(1) if($a_erreurs>0);
-    move("$f_base.pdf",$prefix."calage.pdf");
+    move("$f_base.pdf",($out_calage ? $out_calage : $prefix."calage.pdf"));
 
     # transmission des variables
 
@@ -310,7 +317,7 @@ if($mode =~ /s/) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
 	exit(1);
     }
-    move("$f_base.pdf",$prefix."corrige.pdf");
+    move("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
 
     # 3) compilation du sujet
 
@@ -319,7 +326,7 @@ if($mode =~ /s/) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
 	exit(1);
     }
-    move("$f_base.pdf",$prefix."sujet.pdf");
+    move("$f_base.pdf",($out_sujet ? $out_sujet : $prefix."sujet.pdf"));
 
 }
 
