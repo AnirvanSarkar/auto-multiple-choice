@@ -754,17 +754,22 @@ sub projet_charge {
     
     mkdir($o{'rep_projets'}) if($cree && ! -d $o{'rep_projets'});
     
+    # construit la liste des projets existants
+
     if(-d $o{'rep_projets'}) {
 	opendir(DIR, $o{'rep_projets'}) 
 	    || die "Erreur a l'ouverture du repertoire ".$o{'rep_projets'}." : $!";
 	my @f=map { decode("utf-8",$_); } readdir(DIR);
-	#print "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f).".\n";
+	debug "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f);
+
 	@projs = grep { ! /^\./ && -d $o{'rep_projets'}."/".$_ } @f;
 	closedir DIR;
-	#print "[".$o{'rep_projets'}."] P:".join(',',@projs).".\n";
+	debug "[".$o{'rep_projets'}."] P:".join(',',@projs);
     }
 
     if($#projs>=0 || $cree) {
+
+	# fenetre pour demander le nom du projet
 	
 	my $gp=Gtk2::GladeXML->new($glade_xml,'choix_projet');
 	$gp->signal_autoconnect_from_package('main');
@@ -780,6 +785,8 @@ sub projet_charge {
 	    $w{'projet_bouton_creation'}->show();
 	    $w{'projet_bouton_ouverture'}->hide();
 	}
+
+	# mise a jour liste des projets dans la fenetre
 	
 	$proj_store = Gtk2::ListStore->new ('Glib::String',
 					    'Gtk2::Gdk::Pixbuf');
@@ -792,11 +799,12 @@ sub projet_charge {
 	my $pb=$w{'main_window'}->render_icon ('gtk-open', 'menu');
 	
 	for (sort { $a cmp $b } @projs) {
-	    #print "Projet : $_.\n";
 	    $proj_store->set($proj_store->append,
 			     PROJ_NOM,$_,
 			     PROJ_ICO,$pb); 
 	}
+
+	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
 	
     } else {
 	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
@@ -811,6 +819,9 @@ sub projet_charge {
 }
 
 sub projet_charge_ok {
+
+    # ouverture projet deja existant
+
     my $sel=$w{'choix_projets_liste'}->get_selected_items();
     my $proj;
 
@@ -824,6 +835,9 @@ sub projet_charge_ok {
 }
 
 sub projet_charge_nouveau {
+
+    # creation nouveau projet
+
     my $proj=$w{'projet_nom'}->get_text();
     $w{'choix_projet'}->destroy();
 
@@ -842,8 +856,9 @@ sub projet_charge_nouveau {
 
     } else {
 
-	projet_ouvre($proj,1);
-	projet_sauve();
+	if(projet_ouvre($proj,1)) {
+	    projet_sauve();
+	}
 
     }
 }
@@ -2041,7 +2056,8 @@ sub source_latex_montre_nom {
 }
 
 sub valide_source_tex {
-    $projet{'options'}->{'_modifie'}=1; debug "* valide_source_tex";
+    $projet{'options'}->{'_modifie'}=1;
+    debug "* valide_source_tex";
     $w{'preparation_etats'}->set_sensitive(-f absolu($projet{'options'}->{'texsrc'}));
 
     if(is_local($projet{'options'}->{'texsrc'})) {
@@ -2053,29 +2069,6 @@ sub valide_source_tex {
     detecte_documents();
 }
 
-sub source_latex_choisir {
-    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog');
-    $gap->signal_autoconnect_from_package('main');
-    $w{'source_latex_gap'}=$gap;
-    for(qw/source_latex_dialog/) {
-	$w{$_}=$gap->get_widget($_);
-    }
-}
-
-sub source_latex_quit1 {
-    $w{'source_latex_dialog'}->destroy();
-}
-
-sub source_latex_choixfich {
-    my ($folder)=@_;
-    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix');
-    $gap->signal_autoconnect_from_package('main');
-    for(qw/source_latex_choix/) {
-	$w{$_}=$gap->get_widget($_);
-    }
-    $w{'source_latex_choix'}->set_current_folder($folder);
-}
-
 my @modeles=();
 my %modeles_i=();
 
@@ -2085,6 +2078,7 @@ sub charge_modeles {
     my @ms = grep { /\.tex$/ && -f $o{'rep_modeles'}."/$_" } readdir(DIR);
     closedir DIR;
     for my $m (@ms) {
+	debug "Fichier modele $m";
 	my $d={'id'=>$m,
 	       'fichier'=>$o{'rep_modeles'}."/$m",
 	   };
@@ -2106,19 +2100,40 @@ sub charge_modeles {
     }
 }
 
-sub source_latex_2 {
-    my %bouton;
-    for (qw/new choix vide/) {
-	$bouton{$_}=$w{'source_latex_gap'}->get_widget('sl_type_'.$_)->get_active();
+sub source_latex_choisir {
+
+    # fenetre de choix du source latex
+
+    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog');
+
+    my $dialog=$gap->get_widget('source_latex_dialog');
+
+    my $reponse=$dialog->run();
+
+    my %bouton=();
+    for(qw/new choix vide/) {
+	$bouton{$_}=$gap->get_widget('sl_type_'.$_)->get_active();
+	debug "Bouton $_" if($bouton{$_});
     }
-    $w{'source_latex_dialog'}->destroy();
+
+    $dialog->destroy();
+
+    debug "REPONSE=$reponse";
+
+    return(0) if(!$reponse);
+
+    # actions apres avoir choisi le type de source latex a utiliser
+
     if($bouton{'new'}) {
-	#source_latex_choixfich($o{'rep_modeles'});
-	my $g=Gtk2::GladeXML->new($glade_xml,'source_latex_modele');
-	$g->signal_autoconnect_from_package('main');
+	
+	# choix d'un modele
+
+	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_modele');
+
 	for(qw/source_latex_modele modeles_liste modeles_description/) {
-	    $w{$_}=$g->get_widget($_);
+	    $w{$_}=$gap->get_widget($_);
 	}
+
 	charge_modeles();
 	my $modeles_store = Gtk2::ListStore->new ('Glib::String');
 	for my $i (0..$#modeles) {
@@ -2126,7 +2141,6 @@ sub source_latex_2 {
 	    $modeles_store->set($modeles_store->append(),LISTE_TXT,
 				$modeles[$i]->{'id'});
 	    
-	    $modeles_i{$modeles[$i]->{'id'}}=$i;
 	}
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;
@@ -2135,9 +2149,67 @@ sub source_latex_2 {
 							       text=> LISTE_TXT );
 	$w{'modeles_liste'}->append_column ($column);
 	$w{'modeles_liste'}->get_selection->signal_connect("changed",\&source_latex_mmaj);
+
+	$reponse=$w{'source_latex_modele'}->run();
+
+	debug "Dialogue modele : $reponse";
+
+	# le modele est choisi : l'installer
+
+	my @i;
+
+	if($reponse) {
+	    my $sr=$w{'modeles_liste'}->get_selection()->get_selected_rows();
+	    if($sr) {
+		@i=$sr->get_indices();
+	    } else {
+		@i=();
+	    }
+	}
+
+	$w{'source_latex_modele'}->destroy();
+
+	return(0) if(!$reponse);
+
+	if(@i) {
+	    debug "Installation modele $i[0] : ".$modeles[$i[0]]->{'fichier'};
+	    $projet{'options'}->{'texsrc'}=$modeles[$i[0]]->{'fichier'};
+	} else {
+	    debug "Aucun modele selectionne";
+	    return(0);
+	}
+
     } elsif($bouton{'choix'}) {
-	source_latex_choixfich($home_dir);
+
+	# choisi un fichier deja present
+
+	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix');
+
+	for(qw/source_latex_choix/) {
+	    $w{$_}=$gap->get_widget($_);
+	}
+	$w{'source_latex_choix'}->set_current_folder($home_dir);
+
+	my $filtre_latex=Gtk2::FileFilter->new();
+	$filtre_latex->set_name("Fichier LaTeX (*.tex)");
+        $filtre_latex->add_pattern("*.tex");
+	$w{'source_latex_choix'}->add_filter($filtre_latex);
+	
+	$reponse=$w{'source_latex_choix'}->run();
+
+	my $f=$w{'source_latex_choix'}->get_filename();
+
+	$w{'source_latex_choix'}->destroy();
+
+	return(0) if(!$reponse);
+
+	$projet{'options'}->{'texsrc'}=relatif($f);
+	debug "Source LaTeX $f";
+
     } elsif($bouton{'vide'}) {
+
+	# choisi un fichier vide
+
 	my $sl=absolu('source.tex');
 	if(-e $sl) {
 	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
@@ -2149,15 +2221,32 @@ sub source_latex_2 {
 	    $dialog->destroy;      
 	    
 	    $projet{'options'}->{'texsrc'}='source.tex';
-	    set_source_tex();
+
 	} else {
-	    open(FV,">$sl");
+
+	    # creation repertoire si inexistant
+
+	    my $hd=$o{'rep_projets'}."/".$projet{'nom'};
+
+	    mkdir($hd) if(! -e $hd);
+
+	    # creation fichier vide
+
+	    if(! open(FV,">$sl")) {
+		debug "Ouverture impossible en creation / $sl : $!";
+		return(0);
+	    }
 	    close(FV);
 	    $projet{'options'}->{'texsrc'}='source.tex';
-	    set_source_tex();
+
 	}
 	
+    } else {
+	return(0);
     }
+
+    return(1);
+    
 }
 
 sub source_latex_mmaj {
@@ -2165,30 +2254,6 @@ sub source_latex_mmaj {
     $w{'modeles_description'}->get_buffer->set_text($modeles[$i]->{'desc'});
 }
 
-sub source_latex_quit2 {
-    $w{'source_latex_choix'}->destroy();
-}
-
-sub source_latex_quit2m {
-    $w{'source_latex_modele'}->destroy();
-}
-
-sub source_latex_ok {
-    my $f=$w{'source_latex_choix'}->get_filename();
-    debug "Source LaTeX $f";
-    $projet{'options'}->{'texsrc'}=relatif($f);
-    $w{'source_latex_choix'}->destroy();
-    set_source_tex(1);
-}
-
-sub source_latex_okm {
-    my @i=$w{'modeles_liste'}->get_selection()->get_selected_rows()->get_indices();
-    $w{'source_latex_modele'}->destroy();
-    if(@i) {
-	$projet{'options'}->{'texsrc'}=$modeles[$i[0]]->{'fichier'};
-	set_source_tex(1);
-    }
-}
 
 # copie en changeant eventuellement d'encodage
 sub copy_latex {
@@ -2316,6 +2381,10 @@ sub valide_projet {
 sub projet_ouvre {
     my ($proj,$deja)=(@_);
 
+    my $new_source=0;
+    
+    # ouverture du projet $projet. Si $deja==1, alors il faut le creer
+
     if($proj) {
 	
 	quitte_projet();
@@ -2335,6 +2404,18 @@ sub projet_ouvre {
 	
 	$projet{'nom'}=$proj;
 
+	# choix fichier latex si nouveau projet...
+	if($deja) {
+	    my $ok=source_latex_choisir();
+	    if(!$ok) {
+		$projet{'nom'}='';
+		return(0);
+	    }
+	    $new_source=1;
+	}
+
+	# creation du repertoire et des sous-repertoires de projet
+
 	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf mep scans:) {
 	    my $rep=$o{'rep_projets'}."/$proj/$sous";
 	    if(! -x $rep) {
@@ -2342,6 +2423,8 @@ sub projet_ouvre {
 		mkdir($rep);
 	    }
 	}
+
+	# recuperation des options par defaut si elles ne sont pas encore definies dans la conf du projet
     
 	for my $k (keys %projet_defaut) {
 	    if(! exists($projet{'options'}->{$k})) {
@@ -2355,18 +2438,15 @@ sub projet_ouvre {
 	    }
 	}
 
-	#print Dumper(\%projet)."\n";
 	$w{'onglets_projet'}->set_sensitive(1);
 
 	valide_projet();
 
 	$projet{'options'}->{'_modifie'}='';
 
-	# choix fichier latex si nouveau projet...
-	if(! $projet{'options'}->{'texsrc'}) {
-	    source_latex_choisir();
-	}
+	set_source_tex(1) if($new_source);
 
+	return(1);
     }
 }
 
