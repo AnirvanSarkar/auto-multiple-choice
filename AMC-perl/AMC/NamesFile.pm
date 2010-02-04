@@ -94,7 +94,7 @@ sub load {
 		      debug "Separateur detecte : ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
 		  }
 
-		  @heads=map { reduit($_) } split(/$sep/,$entetes);
+		  @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
 		  debug "ENTETES : ".join(", ",@heads);
 		  next NOM;
 	      } else {
@@ -105,7 +105,7 @@ sub load {
 	  s/\s+$//;
 	  my @l=();
 	  if($#heads>0) {
-	      @l=map { reduit($_) } split(/$sep/,$_);
+	      @l=map { reduit($_) } split(/$sep/,$_,-1);
 	  } else {
 	      @l=(reduit($_));
 	  }
