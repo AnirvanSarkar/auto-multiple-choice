@@ -26,7 +26,7 @@ use XML::Simple;
 use IO::File;
 use IO::Select;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
-use File::Temp;
+use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 use Time::localtime;
 use Encode;
@@ -2100,6 +2100,16 @@ sub charge_modeles {
     }
 }
 
+sub n_fich {
+    my ($dir)=@_;
+
+    opendir(NFICH,$dir) or return(0);
+    my @f=grep { ! /^\./ } readdir(NFICH);
+    closedir(NFICH);
+
+    return(1+$#f,$f[0]);
+}
+
 sub source_latex_choisir {
 
     # fenetre de choix du source latex
@@ -2111,7 +2121,7 @@ sub source_latex_choisir {
     my $reponse=$dialog->run();
 
     my %bouton=();
-    for(qw/new choix vide/) {
+    for(qw/new choix vide zip/) {
 	$bouton{$_}=$gap->get_widget('sl_type_'.$_)->get_active();
 	debug "Bouton $_" if($bouton{$_});
     }
@@ -2181,7 +2191,7 @@ sub source_latex_choisir {
 
     } elsif($bouton{'choix'}) {
 
-	# choisi un fichier deja present
+	# choisir un fichier deja present
 
 	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix');
 
@@ -2193,6 +2203,7 @@ sub source_latex_choisir {
 	my $filtre_latex=Gtk2::FileFilter->new();
 	$filtre_latex->set_name("Fichier LaTeX (*.tex)");
         $filtre_latex->add_pattern("*.tex");
+        $filtre_latex->add_pattern("*.TEX");
 	$w{'source_latex_choix'}->add_filter($filtre_latex);
 	
 	$reponse=$w{'source_latex_choix'}->run();
@@ -2205,6 +2216,92 @@ sub source_latex_choisir {
 
 	$projet{'options'}->{'texsrc'}=relatif($f);
 	debug "Source LaTeX $f";
+
+    } elsif($bouton{'zip'}) {
+	
+	# choisir un fichier ZIP
+
+	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix_zip');
+
+	for(qw/source_latex_choix_zip/) {
+	    $w{$_}=$gap->get_widget($_);
+	}
+	$w{'source_latex_choix_zip'}->set_current_folder($home_dir);
+
+	my $filtre_zip=Gtk2::FileFilter->new();
+	$filtre_zip->set_name("Fichier archive (*.zip)");
+        $filtre_zip->add_pattern("*.zip");
+        $filtre_zip->add_pattern("*.ZIP");
+	$w{'source_latex_choix_zip'}->add_filter($filtre_zip);
+	
+	$reponse=$w{'source_latex_choix_zip'}->run();
+
+	my $f=$w{'source_latex_choix_zip'}->get_filename();
+
+	$w{'source_latex_choix_zip'}->destroy();
+
+	return(0) if(!$reponse);
+
+	# cree un repertoire temporaire pour dezipper
+
+	my $temp_dir = tempdir( DIR=>tmpdir(),CLEANUP => 1 );
+
+	my $rv=0;
+
+	if(open(UNZIP,"-|","unzip","-d",$temp_dir,$f) ) {
+	    while(<UNZIP>) {
+		debug $_;
+	    }
+	    close(UNZIP);
+	} else {
+	    $rv=1;
+	}
+
+	my ($n,$suivant)=n_fich($temp_dir);
+
+	if($rv || $n==0) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							       'destroy-with-parent',
+							       'error', # message type
+							       'ok', # which set of buttons?
+							       sprintf("Rien n'a pu être extrait du fichier %s. Vérifiez qu'il est correct.",$f));
+	    $dialog->run;
+	    $dialog->destroy;
+	    return(0);
+	} else {
+	    # unzip OK
+	    # vire les repertoires intermediaires :
+
+	    while($n<=1) {
+		$temp_dir=$suivant;
+		($n,$suivant)=n_fich($temp_dir);
+	    }
+
+	    # bouge les fichiers la ou il faut
+
+	    my $hd=$o{'rep_projets'}."/".$projet{'nom'};
+
+	    mkdir($hd) if(! -e $hd);
+
+	    opendir(MVR,$temp_dir);
+	    my @archive_files=grep { ! /^\./ } readdir(MVR);
+	    closedir(MVR);
+
+	    my $latex;
+
+	    for(@archive_files) {
+		debug "Deplace dans projet : $_";
+		$latex=$_ if(/\.tex$/i);
+		system("mv","$temp_dir/$_",$hd);
+	    }
+
+	    if($latex) {
+		$projet{'options'}->{'texsrc'}="%PROJET/$latex";
+		debug "LaTeX trouve : $latex";
+	    }
+
+	    return(2);
+	}
 
     } elsif($bouton{'vide'}) {
 
@@ -2389,19 +2486,6 @@ sub projet_ouvre {
 	
 	quitte_projet();
 
-	if(!$deja) {
-	    debug "Ouverture du projet $proj...";
-	    
-	    $projet{'options'}=XMLin(fich_options($proj),SuppressEmpty => '');
-
-	    # pour effacer des trucs en trop venant d'un bug anterieur...
-	    for(keys %{$projet{'options'}}) {
-		delete($projet{'options'}->{$_}) if(!exists($projet_defaut{$_}));
-	    }
-	    debug "Options lues :",
-	    Dumper(\%projet);
-	}
-	
 	$projet{'nom'}=$proj;
 
 	# choix fichier latex si nouveau projet...
@@ -2411,8 +2495,33 @@ sub projet_ouvre {
 		$projet{'nom'}='';
 		return(0);
 	    }
-	    $new_source=1;
+	    if($ok==1) {
+		$new_source=1;
+	    } elsif($ok==2) {
+		$deja='';
+	    }
 	}
+
+	if(!$deja) {
+
+	    if(-f fich_options($proj)) {
+		debug "Lecture options du projet $proj...";
+		
+		$projet{'options'}=XMLin(fich_options($proj),SuppressEmpty => '');
+		
+		# pour effacer des trucs en trop venant d'un bug anterieur...
+		for(keys %{$projet{'options'}}) {
+		    delete($projet{'options'}->{$_}) 
+			if($_ !~ /^ext_/ && !exists($projet_defaut{$_}));
+		}
+		debug "Options lues :",
+		Dumper(\%projet);
+	    } else {
+		debug "Pas de fichier options a lire...";
+	    }
+	}
+	
+	$projet{'nom'}=$proj;
 
 	# creation du repertoire et des sous-repertoires de projet
 
