@@ -2992,9 +2992,10 @@ xelatex
                             <property name="n_rows">5</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <widget class="GtkComboBoxEntry" id="pref_ce_encodage_csv">
+                              <widget class="GtkComboBoxEntry" id="pref_ce_defaut_encodage_csv">
                                 <property name="visible">True</property>
                                 <property name="has_tooltip">True</property>
+                                <property name="tooltip" translatable="yes">Encodage par d&#xE9;faut du fichier CSV (&#xE9;ventuellement) produit par AMC.</property>
                                 <property name="items" translatable="yes">UTF-8
 ISO-8859-15
 Windows-1252
@@ -3019,9 +3020,10 @@ Windows-1252
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkComboBoxEntry" id="pref_ce_encodage_liste">
+                              <widget class="GtkComboBoxEntry" id="pref_ce_defaut_encodage_liste">
                                 <property name="visible">True</property>
                                 <property name="has_tooltip">True</property>
+                                <property name="tooltip" translatable="yes">Encodage par d&#xE9;faut du fichier contenant la liste des &#xE9;tudiants.</property>
                                 <property name="items" translatable="yes">UTF-8
 ISO-8859-15
 Windows-1252
@@ -3080,6 +3082,7 @@ Windows-1252
                             <child>
                               <widget class="GtkComboBox" id="pref_c_encodage_latex">
                                 <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">Encodage utilis&#xE9; pour mettre &#xE0; votre disposition les mod&#xE8;les de fichiers LaTeX.</property>
                                 <property name="items" translatable="yes"></property>
                               </widget>
                               <packing>
@@ -4027,6 +4030,91 @@ xelatex
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkFrame" id="frame15">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <widget class="GtkAlignment" id="alignment22">
+                        <property name="visible">True</property>
+                        <property name="left_padding">12</property>
+                        <child>
+                          <widget class="GtkTable" id="table19">
+                            <property name="visible">True</property>
+                            <property name="n_rows">2</property>
+                            <property name="n_columns">2</property>
+                            <child>
+                              <widget class="GtkLabel" id="label103">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Encodage de la liste des &#xE9;tudiants</property>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label104">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Encodage des fichiers CSV</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkComboBoxEntry" id="pref_projet_ce_encodage_liste">
+                                <property name="visible">True</property>
+                                <property name="has_tooltip">True</property>
+                                <property name="tooltip" translatable="yes">Encodage du fichier contenant la liste des &#xE9;tudiants.</property>
+                                <property name="items" translatable="yes">UTF-8
+ISO-8859-15
+Windows-1252
+</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkComboBoxEntry" id="pref_projet_ce_encodage_csv">
+                                <property name="visible">True</property>
+                                <property name="has_tooltip">True</property>
+                                <property name="tooltip" translatable="yes">Encodage du fichier CSV (&#xE9;ventuellement) produit par AMC.</property>
+                                <property name="items" translatable="yes">UTF-8
+ISO-8859-15
+Windows-1252
+</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label102">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Internationnalisation&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="type">label_item</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
               </widget>

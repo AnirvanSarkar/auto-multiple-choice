@@ -156,9 +156,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'saisie_dpi'=>150,
 	      'n_procs'=>0,
 	      'delimiteur_decimal'=>',',
-	      'encodage_liste'=>'',
+	      'defaut_encodage_liste'=>'UTF-8',
 	      'encodage_interne'=>'UTF-8',
-	      'encodage_csv'=>'',
+	      'defaut_encodage_csv'=>'UTF-8',
 	      'encodage_latex'=>'',
 	      'defaut_moteur_latex_b'=>'pdflatex',
 	      'defaut_seuil'=>0.15,
@@ -182,6 +182,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'listeetudiants'=>'',
 		   'notes'=>'notes.xml',
 		   'seuil'=>'',
+		   'encodage_csv'=>'',
+		   'encodage_liste'=>'',
 		   'maj_bareme'=>1,
 		   'fichbareme'=>'bareme.xml',
 		   'docs'=>['sujet.pdf','corrige.pdf','calage.pdf'],
@@ -267,6 +269,15 @@ for my $k (keys %o_defaut) {
     }
     $o{'_modifie'}=0;
 
+    # options passees en defaut_ 
+
+    for(qw/encodage_liste encodage_csv/) {
+	if($o{"$_"} && ! $o{"defaut_$_"}) {
+	    $o{"defaut_$_"}=$o{"$_"};
+	    $o{'_modifie'}=1;
+	}
+    }
+
     # XML::Writer utilise dans Association.pm n'accepte rien d'autre...
     if($o{'encodage_interne'} ne 'UTF-8') {
 	$o{'encodage_interne'}='UTF-8';
@@ -277,6 +288,16 @@ for my $k (keys %o_defaut) {
 ###
 
 my %projet=();
+
+sub bon_encodage {
+    my ($type)=@_;
+    return($projet{'options'}->{"encodage_$type"}
+	   || $o{"defaut_encodage_$type"}
+	   || $o{"encodage_$type"}
+	   || $o_defaut{"defaut_encodage_$type"}
+	   || $o_defaut{"encodage_$type"}
+	   || "UTF-8");
+}
 
 sub absolu {
     my $f=shift;
@@ -589,7 +610,7 @@ sub exporte {
 
     if($format eq 'CSV') {
 	push @options,
-	"--option-out","encodage=".$o{'encodage_csv'},
+	"--option-out","encodage=".bon_encodage('csv'),
 	"--option-out","decimal=".$o{'delimiteur_decimal'},
 	"--option-out","separateur=".$projet{'options'}->{'export_csv_separateur'};
     }
@@ -605,7 +626,7 @@ sub exporte {
 			  "--fich-notes",absolu($projet{'options'}->{'notes'}),
 			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-			  "--noms-encodage",$o{'encodage_liste'},
+			  "--noms-encodage",bon_encodage('liste'),
 			  "--output",$output,
 			  @options
 			  ],
@@ -1222,7 +1243,7 @@ sub saisie_manuelle {
 				     'seuil_eqm'=>$o{'seuil_eqm'},
 				     'global'=>0,
 				     'encodage_interne'=>$o{'encodage_interne'},
-				     'encodage_liste'=>$o{'encodage_liste'},
+				     'encodage_liste'=>bon_encodage('liste'),
 				     'image_type'=>$o{'manuel_image_type'},
 				     'retient_m'=>1,
 				     'en_quittant'=>\&detecte_analyse,
@@ -1331,7 +1352,7 @@ sub valide_liste {
     my $fl=$w{'liste'}->get_filename();
 
     my $l=AMC::NamesFile::new($fl,
-			      'encodage'=>$o{'encodage_liste'},
+			      'encodage'=>bon_encodage('liste'),
 			      );
     my ($err,$errlig)=$l->errors();
 
@@ -1372,7 +1393,7 @@ sub associe {
 					  'fichier-liens'=>absolu($projet{'options'}->{'association'}),
 					  'global'=>0,
 					  'assoc-ncols'=>$o{'assoc_ncols'},
-					  'encodage_liste'=>$o{'encodage_liste'},
+					  'encodage_liste'=>bon_encodage('liste'),
 					  'encodage_interne'=>$o{'encodage_interne'},
 					  );
 	if($ga->{'erreur'}) {
@@ -1427,7 +1448,7 @@ sub associe_auto {
 			      "--notes-id",$projet{'options'}->{'assoc_code'},
 			      "--liste",absolu($projet{'options'}->{'listeetudiants'}),
 			      "--liste-key",$projet{'options'}->{'liste_key'},
-			      "--encodage-liste",$o{'encodage_liste'},
+			      "--encodage-liste",bon_encodage('liste'),
 			      "--assoc",absolu($projet{'options'}->{'association'}),
 			      "--encodage-interne",$o{'encodage_interne'},
 			      "--debug",debug_file(),
@@ -1599,7 +1620,7 @@ sub regroupement {
 			  "--modele",$projet{'options'}->{'modele_regroupement'},
 			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-			  "--noms-encodage",$o{'encodage_liste'},
+			  "--noms-encodage",bon_encodage('liste'),
 
 			  ],
 	     'signal'=>2,
