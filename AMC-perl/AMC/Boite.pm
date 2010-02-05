@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -46,9 +46,16 @@ sub new {
 	$self->{$k}=$o{$k} if(defined($self->{$k}));
     }
 
+    $self->{'point.actuel'}=0;
+
     bless $self;
     
     return($self);
+}
+
+sub def_point_suivant {
+    my ($self,$x,$y)=(@_);
+    $self->{'coins'}->[$self->{'point.actuel'}++]=[$x,$y];
 }
 
 # definit la boite (droite) à l'aide de point haut-gauche et des
@@ -102,11 +109,14 @@ sub def_complete {
 
 sub un_seul {
     my $x=shift;
-    if(ref($x) eq 'SCALAR') {
-	return($x); 
-    } elsif(ref($x) eq 'ARRAY') {
+    my $t=ref($x);
+    if($t eq '') {
+	return($x);
+    } elsif($t eq 'SCALAR') {
+	return($$x); 
+    } elsif($t eq 'ARRAY') {
 	return($x->[0]);
-    } elsif(ref($x) eq 'HASH') {
+    } elsif($t eq 'HASH') {
 	my @k=keys %$x;
 	return($x->{$k[0]});
     }

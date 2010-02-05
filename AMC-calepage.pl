@@ -34,6 +34,8 @@ use AMC::Image;
 use AMC::Boite qw/min max/;
 use AMC::Gui::Avancement;
 
+my $anf_version=1;
+
 ($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
 sub with_prog {
     my $fich=shift;
@@ -458,12 +460,12 @@ sub mesure_case {
     my ($k)=(@_);
     my $r=0;
 
-    $coins_test{$k}=[];
+    $coins_test{$k}=AMC::Boite::new();
     
     for($traitement->commande($case{$k}->commande_mesure($prop))) {
 	
 	if(/^COIN\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
-	    push @{$coins_test{$k}},[$1,$2];
+	    $coins_test{$k}->def_point_suivant($1,$2);
 	}
 	if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
 	    $r=($2==0 ? 0 : $1/$2);
@@ -655,13 +657,19 @@ if(!$modele) {
 			 $sf);
 	}
 
-	print ANF "<analyse src=\"".$sf."\" id=\"$id_page\">\n";
+	print ANF "<analyse version=\"$anf_version\" src=\"".$sf."\" id=\"$id_page\">\n";
 	print ANF $cale->xml(2);
+	print ANF "  <cadre>\n";
+	print ANF $cadre_general->xml(4);
+	print ANF "  </cadre>\n";
 	for my $k (keys %case) {
 	    my $e="";
 	    my $q="";
 	    if($k =~ /^([0-9]+)\.([0-9]+)$/) {
 		$e=$1;$q=$2;
+		print ANF "  <casetest id=\"$k\">\n";
+		print ANF $coins_test{$k}->xml(4);
+		print ANF "  </casetest>\n";
 		print ANF "  <case id=\"$k\" question=\"$e\" reponse=\"$q\" ";
 		$close="  </case>\n";
 	    } elsif(($n,$i)=detecte_cb($k)) {
@@ -685,9 +693,7 @@ $traitement->ferme_commande();
 
 # tracés sur le scan pour localiser les cases et le cadre
 
-if($out_cadre || $zoom_file) {
-
-    my $color;
+if($out_cadre) {
 
     print "Annotation de l'image...\n";
 
@@ -702,35 +708,9 @@ if($out_cadre || $zoom_file) {
 			    font=>"Courier",
 			    fill=>"blue",stroke=>'blue');
 
-    @zoom_files=();
-
-    %categories=(0=>'non cochées',1=>'cases cochées','x'=>'erreurs de codage');
-
     ###############################################
     # cases du modele $cale->transformees, avec annotation
     for my $k (keys %coins_test) {
-
-	# annotations
-	
-	$detection=1;
-
-	if($score{$k}) {
-	    $detection=$score{$k}>$seuil_coche;
-	    $color=($detection ? "red" : "blue");
-	    
-	    if($k !~ /:/) {
-		($x,$y)=$case{$k}->pos_txt(0);
-		$page_entiere->Annotate(text=>$k,
-					geometry=>"+$x+$y",
-					font=>"Courier",pointsize=>12,
-					fill=>$color,stroke=>$color);
-		($x,$y)=$case{$k}->pos_txt(1);
-		$page_entiere->Annotate(text=>sprintf("%.3f",$score{$k}),
-					geometry=>"+$x+$y",
-					font=>"Courier",pointsize=>12,
-					fill=>$color,stroke=>$color);
-	    }
-	}
 
 	# case
 	$page_entiere->Draw(primitive=>'polygon',
@@ -740,119 +720,40 @@ if($out_cadre || $zoom_file) {
 	# part de la case testee
 	$page_entiere->Draw(primitive=>'polygon',
 			    fill=>'none',stroke=>'magenta',strokewidth=>1,
-			    points=>join(' ',
-					 map { ($coins_test{$k}->[$_]->[0],$coins_test{$k}->[$_]->[1]) } (0..3)),
-			    );
-		  
-
-    }
-
-    #$scan_score="$temp_dir/scan-score.ppm";
-    #$page_entiere->Write($scan_score);
-
-    ###############################################
-    # extraction des zooms...
-
-    if($zoom_file) {
-
-	# le titre des zooms...
-
-	my $zooms=$bandeau->Clone();
-	$zooms->Annotate(text=>$id_page,
-			 geometry=>"+0+96",
-			 font=>"Courier",pointsize=>96,
-			 fill=>"blue",stroke=>"blue");
-	$zooms->Resize(geometry=>'25%');
-
-	# les zooms...
-
-	$zoid=0;
-
-	my %morceaux=(0=>Graphics::Magick::new(),
-		      1=>Graphics::Magick::new(),
-		      'x'=>Graphics::Magick::new(),
-		      'nom'=>Graphics::Magick::new());
-	
-	for my $k (grep { ! /:/ } (keys %case)) {
-	    # le zoom... 
-	    my $i;
-
-	    my $coche=($score{$k}>$seuil_coche ? 1 : 0);
-	    my $geometry=$case{$k}->etendue_xy('geometry',$zoom_plus,$k ne 'nom');
-
-	    if($k =~ /([0-9]+)\.([0-9]+)/) {
-		$i=$coche;
-	    } elsif($k eq "nom") {
-		$i='nom';
-	    } else {
-		$i='x';
-	    }
-
-	    my $e=$page_entiere->Clone();
-	    $e->Crop(geometry=>$geometry);
-	    push @{$morceaux{$i}},$e;
-	    
-	}
-
-	###############################################
-	# Le nom
-
-	$morceaux{'nom'}->Write($nom_file);
-
-	###############################################
-	# fabrication de la collection de zooms en une seule image
-
-	my $cases_zoom="$temp_dir/cases";
-	my @lc;
-	my $largeur=$zooms->Get('width');
-
-	for my $i (0,1,'x') {
-	    if($#{$morceaux{$i}}>=0) {
-
-		my $titre=Graphics::Magick->new;
-		$titre->Set(size=>$largeur.'x50');
-		$titre->ReadImage('xc:white');
-		$titre->Annotate("pointsize"=>40,
-				 "gravity"=>'center',
-				 "font"=>'Helvetica',
-				 "fill"=>'blue',
-				 "text"=>$categories{$i},
-				 );
-		
-		push @$zooms,$titre;
-		
-		push @$zooms,$morceaux{$i}->Montage(tile=>'4x',
-						    background=>'blue',
-						    geometry=>'+3+3');
-	    }
-	}
-
-	$zooms=$zooms->Montage(tile=>'1x',geometry=>'+0+0',borderwidth=>3);
-	$zooms->Write($zoom_file);
-
-	debug "-> $zoom_file\n";
+			    points=>$coins_test{$k}->draw_points());
 
     }
 
     ###############################################
     # tracé des cadres
 
-    if($out_cadre) {
+    $page_entiere->Draw(primitive=>'polygon',
+			fill=>'none',stroke=>'red',strokewidth=>1,
+			points=>$cadre_general->draw_points());
+    
+    $cadre_origine->transforme($cale);
+    $page_entiere->Draw(primitive=>'polygon',
+			fill=>'none',stroke=>'blue',strokewidth=>1,
+			points=>$cadre_origine->draw_points());
+    
+    $page_entiere->Write($out_cadre);
+    
+    debug "-> $out_cadre\n";
+}
 
-	$page_entiere->Draw(primitive=>'polygon',
-			    fill=>'none',stroke=>'red',strokewidth=>1,
-			    points=>$cadre_general->draw_points());
+if($zoom_file) {
 
-	$cadre_origine->transforme($cale);
-	$page_entiere->Draw(primitive=>'polygon',
-			    fill=>'none',stroke=>'blue',strokewidth=>1,
-			    points=>$cadre_origine->draw_points());
+    print "Construction des zooms...\n";
 
-	$page_entiere->Write($out_cadre);
+    my $commandes=AMC::Exec::new("AMC-calepage");
+    $commandes->signalise();
 
-	debug "-> $out_cadre\n";
-    }
-
+    $commandes->execute(with_prog("AMC-zoom.pl"),
+			"--seuil",$seuil_coche,
+			"--analyse",$analyse_file,
+			"--scan",$scan,
+			"--output",$zoom_file,
+			);
 }
 
 $avance->fin();
