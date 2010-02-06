@@ -139,6 +139,17 @@ sub export {
 			 },
 			 );
 
+    $styles->createStyle('NombreVide',
+			 namespace=>'number',
+			 type=>'number-style',
+			 properties=>{
+			     'number:decimal-places'=>"0",
+			     'number:min-integer-digits'=>"0",
+			     'number:grouping'=>'true', # espace tous les 3 chiffres
+			     'number:decimal-replacement'=>"", # n'ecrit pas les decimales nulles
+			 },
+			 );
+
     $styles->createStyle('num.Note',
 			 namespace=>'number',
 			 type=>'number-style',
@@ -166,6 +177,23 @@ sub export {
 			     'fo:text-align' => "center",
 			 },
 			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},		     
+			 );
+
+    $styles->createStyle('NoteX',
+			 parent=>'Tableau',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'paragraph',
+			     'fo:text-align' => "center",
+			 },
+			 'references'=>{'style:data-style-name' => 'NombreVide'},		     
+			 );
+
+    $styles->updateStyle('NoteX',
+			 properties=>{
+			     -area=>'table-cell',
+			     'fo:background-color'=>"#b3b3b3",
+			 },
 			 );
 
     $styles->createStyle('CodeV',
@@ -373,7 +401,7 @@ sub export {
 	
 	for(@keys) {
 	    $doc->cellValueType($feuille,$jj,$ii,'float');
-	    $doc->cellStyle($feuille,$jj,$ii,'NoteQ');
+	    $doc->cellStyle($feuille,$jj,$ii,($e->{$_} ne '' ? 'NoteQ' : 'NoteX'));
 	    $doc->cellValue($feuille,$jj,$ii++,$e->{$_});
 	}
 	for(@codes) {

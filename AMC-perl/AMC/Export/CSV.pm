@@ -83,7 +83,7 @@ sub export {
 				 $c=$self->parse_string($c);
 			     } elsif($k =~ /^_ID_$/) {
 			     } else {
-				 $c=$self->parse_num($c);
+				 $c=$self->parse_num($c) if($c ne '');
 			     }
 			     $c } @cont)."\n";
     }
