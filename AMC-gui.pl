@@ -1574,6 +1574,8 @@ sub noter_resultat {
 	debug "Codes : ".join(',',@codes);
     } else {
 	$w{'correction_result'}->set_markup("<span foreground=\"red\">Aucun calcul de notes</span>");
+	push @codes,$projet{'options'}->{'assoc_code'}
+	if($projet{'options'}->{'assoc_code'});
     }
     $cb_stores{'assoc_code'}=cb_model(''=>'(aucun)',
 				      map { $_=>$_ } 
@@ -2131,7 +2133,7 @@ sub n_fich {
     my @f=grep { ! /^\./ } readdir(NFICH);
     closedir(NFICH);
 
-    return(1+$#f,$f[0]);
+    return(1+$#f,"$dir/$f[0]");
 }
 
 sub source_latex_choisir {
@@ -2296,7 +2298,8 @@ sub source_latex_choisir {
 	    # unzip OK
 	    # vire les repertoires intermediaires :
 
-	    while($n<=1) {
+	    while($n==1) {
+		debug "Changement repertoire racine : $suivant";
 		$temp_dir=$suivant;
 		($n,$suivant)=n_fich($temp_dir);
 	    }
