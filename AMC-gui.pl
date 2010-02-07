@@ -2298,7 +2298,7 @@ sub source_latex_choisir {
 	    # unzip OK
 	    # vire les repertoires intermediaires :
 
-	    while($n==1) {
+	    while($n==1 && -d $suivant) {
 		debug "Changement repertoire racine : $suivant";
 		$temp_dir=$suivant;
 		($n,$suivant)=n_fich($temp_dir);
