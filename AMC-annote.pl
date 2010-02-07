@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -188,10 +188,7 @@ $delta=1/$#ids if($#ids>0);
 	 
 	 print "Annotation de $scan...\n";
 
-	 my $idf=$id;
-	 $idf =~ s/[\+\/]+/-/g;
-	 $idf =~ s/^-+//;
-	 $idf =~ s/-+$//;
+	 my $idf=id2idf($id);
 	 
 	 my ($etud,$n_page)=get_ep($id);
 	 

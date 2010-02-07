@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -202,7 +202,7 @@ sub mep {
     }
 }
 
-# renvoie la liats des identifiants de page
+# renvoie la liste triee des identifiants de page
 sub ids {
     my ($self)=(@_);
 
@@ -226,8 +226,9 @@ sub etus {
 # * 'case'=>1 si on ne veut que les pages avec des cases a cocher
 # * 'contenu'=>1 si on ne veut que les pages soit avec des cases
 #                a cocher, soit avec le nom a ecrire
-# * 'id'=>1 si on veut les pages sous la forme de l' ID de page plutot
+# * 'id'=>1 si on veut les pages sous la forme de l'ID de page plutot
 #           que sous la forme d'un numero de page du document
+# * 'ip'=>1 si on veut a la fois ID & numero de page de document
 sub pages_etudiant {
     my ($self,$etu,%oo)=@_;
     my @r=();
@@ -257,8 +258,13 @@ sub pages_etudiants {
 		 && (!$self->attr($i,'nom')));
 	$ok=0 if($oo{'case'} 
 		 && (!$self->attr($i,'case')));
-	push @{$r{$e}},($oo{'id'} ? $i : $self->attr($i,'page')) 
-	    if($ok);
+	if($ok) {
+	    if($oo{'ip'}) {
+		push @{$r{$e}},{'id'=>$i,'page'=>$self->attr($i,'page')};
+	    } else {
+		push @{$r{$e}},($oo{'id'} ? $i : $self->attr($i,'page'));
+	    }
+	}
     }
     return(%r);
 }

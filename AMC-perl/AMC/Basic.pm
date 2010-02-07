@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -29,7 +29,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs);
+    @EXPORT      = qw( &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -80,6 +80,14 @@ sub file2id {
     } else {
 	return($f);
     }
+}
+
+sub id2idf {
+    my $id=shift;
+    $id =~ s/[\+\/]+/-/g;
+    $id =~ s/^-+//;
+    $id =~ s/-+$//;
+    return($id);
 }
 
 sub get_qr {

@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -189,6 +189,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'docs'=>['sujet.pdf','corrige.pdf','calage.pdf'],
 		   
 		   'modele_regroupement'=>'',
+		   'regroupement_compose'=>'',
 
 		   'note_max'=>20,
 		   'note_grain'=>"0,5",
@@ -1630,7 +1631,13 @@ sub regroupement {
 
     commande('commande'=>[with_prog("AMC-regroupe.pl"),
 			  "--debug",debug_file(),
+			  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
 			  "--cr",absolu($projet{'options'}->{'cr'}),
+			  "--an-saved",absolu($an_saved),
+			  "--mep",absolu($projet{'options'}->{'mep'}),
+			  "--mep-saved",absolu($mep_saved),
+			  "--tex-src",absolu($projet{'options'}->{'texsrc'}),
+			  "--with",moteur_latex(),
 			  "--progression-id",'regroupe',
 			  "--progression",1,
 			  "--modele",$projet{'options'}->{'modele_regroupement'},
@@ -1715,6 +1722,11 @@ sub transmet_pref {
 	    $w{$prefixe.'_s_'.$t}=$wp;
 	    $wp->set_value($h->{$t});
 	}
+	$wp=$gap->get_widget($prefixe.'_cb_'.$ta);
+	if($wp) {
+	    $w{$prefixe.'_cb_'.$t}=$wp;
+	    $wp->set_active($h->{$t});
+	}
 	$wp=$gap->get_widget($prefixe.'_c_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
@@ -1779,6 +1791,12 @@ sub reprend_pref {
 	$wp=$w{$prefixe.'_s_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_value();
+	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{$t}=$n;
+	}
+	$wp=$w{$prefixe.'_cb_'.$tgui};
+	if($wp) {
+	    $n=$wp->get_active();
 	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}

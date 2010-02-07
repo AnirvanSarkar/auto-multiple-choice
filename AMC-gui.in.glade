@@ -1367,6 +1367,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="tooltip" translatable="yes">Annoter les scans des copies en signalant les erreurs et en &#xE9;crivant le d&#xE9;tail de la note.</property>
                                     <signal name="clicked" handler="annote_copies"/>
                                     <child>
                                       <widget class="GtkHBox" id="hbox23">
@@ -1424,6 +1425,16 @@
                               </packing>
                             </child>
                             <child>
+                              <widget class="GtkHSeparator" id="hseparator11">
+                                <property name="visible">True</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="padding">2</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
                               <widget class="GtkHBox" id="regroupement_corriges">
                                 <property name="visible">True</property>
                                 <property name="spacing">4</property>
@@ -1440,16 +1451,41 @@
                                   <widget class="GtkEntry" id="notation_x_modele_regroupement">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
+                                    <property name="tooltip" translatable="yes">Mod&#xE8;le utilis&#xE9; pour former les noms des fichiers qui contiendront les copies corrig&#xE9;es en PDF rassembl&#xE9;es par &#xE9;tudiant. On peut laisser vide pour obtenir le num&#xE9;ro de copie.</property>
                                   </widget>
                                   <packing>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
+                                  <widget class="GtkCheckButton" id="notation_cb_regroupement_compose">
+                                    <property name="label" translatable="yes">composer</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip" translatable="yes">Doit-on aller chercher dans la correction les pages qui n'ont pas &#xE9;t&#xE9; annot&#xE9;es &#xE0; partir de scans ? Cette option est utile en particulier pour les sujets &#xE0; page de r&#xE9;ponses s&#xE9;par&#xE9;es.</property>
+                                    <property name="draw_indicator">True</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkHButtonBox" id="hbuttonbox7">
+                                <property name="visible">True</property>
+                                <property name="layout_style">end</property>
+                                <child>
                                   <widget class="GtkButton" id="button10">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="has_tooltip">True</property>
                                     <property name="tooltip" translatable="yes">Regrouper les pages corrig&#xE9;es en un fichier par &#xE9;tudiant</property>
                                     <signal name="clicked" handler="regroupement"/>
                                     <child>
@@ -1479,7 +1515,8 @@
                                   </widget>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="position">2</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -1487,6 +1524,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="has_tooltip">True</property>
                                     <property name="tooltip" translatable="yes">Voir les fichiers fabriqu&#xE9;s</property>
                                     <signal name="clicked" handler="regarde_regroupements"/>
                                     <child>
@@ -1516,13 +1554,13 @@
                                   </widget>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="position">3</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                               </widget>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="position">2</property>
+                                <property name="position">4</property>
                               </packing>
                             </child>
                           </widget>

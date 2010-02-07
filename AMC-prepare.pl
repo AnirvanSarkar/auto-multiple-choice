@@ -104,7 +104,7 @@ my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $tex_source=$ARGV[0];
 
-die "Fichier inconnu : $tex_source" if(! -f $tex_source);
+die "Fichier source LaTeX introuvable : $tex_source" if(! -f $tex_source);
 
 my $base=$tex_source;
 $base =~ s/\.tex$//gi;
@@ -157,7 +157,7 @@ sub execute {
 
 	debug "%%% Compilation : passe $n_run";
 
-	$cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer $s";
+	$cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer ".join(' ',@s);
 
 	while(<EXEC>) {
 	    if($analyse_q) {
@@ -285,6 +285,17 @@ sub latex_cmd {
 	   "\\nonstopmode"
 	   .join('',map { "\\def\\".$_."{".$o{$_}."}"; } (keys %o) )
 	   ." \\input{\"$f_tex\"}");
+}
+
+if($mode =~ /k/) {
+    # CORRECTION INDIVIDUELLE
+
+    execute(latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/));
+    if($n_erreurs>0) {
+	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
+	exit(1);
+    }
+    move("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
 }
 
 if($mode =~ /s/) {
