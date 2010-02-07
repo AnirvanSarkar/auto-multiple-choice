@@ -1223,7 +1223,21 @@ sub calcule_mep {
 			  ],
 	     'texte'=>'Calcul des mises en page...',
 	     'progres.id'=>'MEP',
-	     'fin'=>sub { detecte_mep(); });
+	     'fin'=>sub { 
+		 detecte_mep();
+		 if($projet{'_mep_list'}->nombre()<1) {
+		     # avertissement...
+		     my $dialog = Gtk2::MessageDialog
+			 ->new_with_markup ($w{'main_window'},
+					    'destroy-with-parent',
+					    'error', # message type
+					    'ok', # which set of buttons?
+					    "Aucune mise en page n'a été fabriquée. <b>Ne faites pas passer l'examen</b> avant d'avoir réglé le problème, sinon vous ne pourrez pas utiliser AMC pour la correction.");
+		     $dialog->run;
+		     $dialog->destroy;
+		     
+		 }
+	     });
 }
 
 ### Actions des boutons de la partie SAISIE

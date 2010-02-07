@@ -222,8 +222,10 @@ sub execute {
     debug "Format de sortie : $format\n";
 
     if($format eq 'dvi') {
-	system("dvips","-q",$f_base,"-o",$f_base.".ps") || print "Erreur dvips : $!\n";
-	system("ps2pdf",$f_base.".ps",$f_base.".pdf") || print "Erreur ps2pdf : $!\n";
+	system("dvips","-q",$f_base,"-o",$f_base.".ps");
+	print "Erreur dvips : $?\n" if($?);
+	system("ps2pdf",$f_base.".ps",$f_base.".pdf");
+	print "Erreur ps2pdf : $?\n" if($?);
     }
 
     print join('',@erreurs_msg);
