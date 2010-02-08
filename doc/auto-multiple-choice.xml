@@ -934,6 +934,41 @@ Durée : 10 minutes.
 </programlisting></para>
       </sect3>
 
+      <sect3>
+        <title>Style du formulaire séparé</title>
+
+        <para>Il est aussi possible de modifier la mise en page du formulaire
+        de réponses séparé produit avec l'option <option>ensemble</option>
+        (voir section <xref linkend="secensemble" />).</para>
+
+        <orderedlist>
+          <listitem>
+            <para>Si on veut simplement modifier l'espacement horizontal entre
+            deux cases de réponses ou l'espacement vertical entre deux
+            questions, il suffit de redéfinir les dimensions
+            suivantes :</para>
+
+            <programlisting>\AMCformHSpace=.3em
+\AMCformVSpace=1.2ex
+</programlisting>
+          </listitem>
+
+          <listitem>
+            <para>Pour un changement plus profond de la mise en page, on peut
+            aussi redéfinir les commandes utilisées en début de chaque
+            question et pour chaque réponse (ici c'est la définition par
+            défaut) :</para>
+
+            <programlisting>\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}}
+\def\AMCformulaireReponse#1{\hspace{\AMCformHSpace} #1}
+</programlisting>
+          </listitem>
+        </orderedlist>
+
+        <para>Ces définitions sont à insérer juste après la balise
+        <code>\begin{document}</code> dans le document LaTeX.</para>
+      </sect3>
+
       <sect3 id="latex.codes">
         <title>Saisie de codes</title>
 

@@ -125,6 +125,8 @@
 \newif\ifAMC@watermark\AMC@watermarktrue
 \newif\ifAMC@ensemble\AMC@ensemblefalse % les cases a cocher sont mises ensemble a la fin
 \newif\ifAMC@ensemble@chiffres\AMC@ensemble@chiffresfalse % mettre des chiffres dans les cases plutot que des lettres
+\newdimen\AMCformVSpace\AMCformVSpace=1.2ex % espace vertical entre deux questions dans la page separee
+\newdimen\AMCformHSpace\AMCformHSpace=.3em % espace horizontal entre deux reponses dans la page separee
 % tests internes...
 \newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
 \newif\ifAMC@zoneformulaire
@@ -276,13 +278,13 @@
 % memoire pour mettre les cases a cocher en fin de copie
 %
 \def\AMCmem@ireData{}
-\def\formulaireQuestion#1{\vspace{1.2ex}\par{\bf Question #1 :}}
-\def\formulaireReponse#1{\hspace{.3em} #1}
+\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}}
+\def\AMCformulaireReponse#1{\hspace{\AMCformHSpace} #1}
 \def\AMCdebutFormulaire{\AMC@zoneformulairetrue}
 %
 \newcommand\AMCmem@ireAJ[1]{\ifAMC@ensemble\ifAMC@zoneformulaire\else\begingroup\AMCformulaire@dedanstrue\let\protect\@unexpandable@protect\global\edef\AMCmem@ireData{\AMCmem@ireData #1}\endgroup\fi\fi}
-\newcommand\AMCmem@ireAJRep[1]{\addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\formulaireReponse{#1}}}
-\newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\formulaireQuestion{#1}}}
+\newcommand\AMCmem@ireAJRep[1]{\addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformulaireReponse{#1}}}
+\newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\AMCformulaireQuestion{#1}}}
 \newcommand\formulaire{\ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData\global\def\AMCmem@ireData{}\fi}
 %
 % mise en forme des questions
