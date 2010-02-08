@@ -19,17 +19,24 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
-use File::Temp;
+use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
+use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
+
+use AMC::Basic;
 
 my $moteur='auto';
 my $page=1;
 my $dpi=300;
+my $debug='';
 
 GetOptions('moteur=s'=>\$moteur,
 	   'page=s'=>\$page,
 	   'dpi=s'=>\$dpi,
+	   'debug=s'=>\$debug,
 	   );
+
+set_debug($debug);
 
 die "Mauvais nombre d'arguments" if($#ARGV!=1);
 
@@ -39,13 +46,14 @@ if($moteur eq 'auto') {
     $moteur='';
     open(INFO,"-|","pdfinfo","-meta",$pdf);
     while(<INFO>) {
-	# imagemagick ne garde pas les bonnes couleurs pour un pdf xetex...
+	# imagemagick ne garde pas les bonnes couleurs pour un pdf xetex ou dvips/pstopdf...
 	$moteur='pdftoppm' if(/^Creator:.*xetex/i);
 	$moteur='pdftoppm' if(/^Creator:.*dvips/i);
     }
     close(INFO);
     $moteur='im' if(!$moteur);
     print "Moteur utilise : $moteur\n";
+    debug "Moteur utilise : $moteur\n";
 }
 
 if($moteur eq 'im') {
@@ -63,13 +71,26 @@ if($moteur eq 'im') {
 } elsif($moteur eq 'gs') {
     exec("gs","-sDEVICE=ppmraw","-dNOPAUSE","-dBATCH","-q","-o",$ppm,"-r".$dpi."x".$dpi,"-dFirstPage=$page","-dLastPage=$page",$pdf);
 } elsif($moteur eq 'pdftoppm') {
-    my $fh = File::Temp->new();
+    $temp_dir = tempdir( DIR=>tmpdir(),
+			 CLEANUP => (!get_debug()) );
+    
+    debug "Raster - dir = $temp_dir";
+
     system("pdftoppm","-f",$page,"-l",$page,
 	   "-r",$dpi,
 	   "-aa","no","-aaVector","no",
-	   $pdf,$fh->filename);
-    my $p=sprintf("%s-%06d.ppm",$fh->filename,$page);
-    move($p,$ppm);
+	   $pdf,"$temp_dir/raster");
+    opendir(RD,$temp_dir);
+    my @ppms=grep { /^raster.*\.ppm/ } readdir(RD);
+    closedir(RD);
+
+    debug "Raster - PPM produits (".(1+$#ppms).") : ".join(' ',@ppms);
+
+    if($#ppms==0) {
+	move($temp_dir."/".$ppms[0],$ppm);
+    } else {
+	die "Plusieurs ppm produits par pdftoppm.";
+    }
 } else {
     die "Moteur non repertorie : $moteur";
 }

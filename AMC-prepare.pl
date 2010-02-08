@@ -384,6 +384,7 @@ if($mode =~ /m/) {
 	$npage++;
 
 	$queue->add_process([with_prog("AMC-raster.pl"),
+			     "--debug",debug_file(),
 			     "--moteur",$moteur_raster,
 			     "--page",$p,
 			     "--dpi",$dpi,
