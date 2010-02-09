@@ -32,6 +32,7 @@ use AMC::MEPList;
 
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
+use File::Copy;
 
 use Graphics::Magick;
 
@@ -211,6 +212,89 @@ my %pages_e=$mep->pages_etudiants('ip'=>1);
 
 # 3) rassemblement
 
+# stockage de bouts de PDF ou de collections d'images
+
+my $stk_ii;
+my @stk_pages=();
+my $stk_type;
+
+sub stk_begin {
+    $stk_ii=1;
+    $stk_file="$temp_dir/$stk_ii.pdf";
+    $stk_type='';
+    @stk_pages=();
+    stk_pdf_begin();
+    stk_ppm_begin();
+}
+
+sub stk_push {
+    push @stk_pages,$stk_file;
+    $stk_ii++;
+    $stk_file="$temp_dir/$stk_ii.pdf";
+}
+
+sub stk_go {
+    stk_pdf_go() if($stk_type eq 'pdf');
+    stk_ppm_go() if($stk_type eq 'ppm');
+    $stk_type='';
+}
+
+sub stk_add {
+    my ($t)=@_;
+    if($stk_type ne $t) {
+	stk_go();
+	$stk_type=$t;
+    }
+}
+
+# pdf
+
+my @stk_pdf_pages=();
+
+sub stk_pdf_begin {
+    @stk_pdf_pages=();
+}
+
+sub stk_pdf_add {
+    stk_add('pdf');
+    push @stk_pdf_pages,@_;
+}
+
+sub stk_pdf_go {
+    debug "Page(s) ".join(',',@stk_pdf_pages)." de la correction";
+    
+    check_correc();
+    
+    $commandes->execute("pdftk",$correc_indiv,
+			"cat",@stk_pdf_pages,
+			"output",$stk_file);
+
+    stk_push();
+
+    stk_pdf_begin();
+}
+
+# ppm
+
+my $stk_ppm_im;
+
+sub stk_ppm_begin {
+    $stk_ppm_im=Graphics::Magick->new();
+}
+
+sub stk_ppm_add {
+    stk_add('ppm');
+    $stk_ppm_im->ReadImage(shift);
+}
+
+sub stk_ppm_go {
+    stk_push() if(write_pdf($stk_ppm_im,$stk_file));    
+
+    stk_ppm_begin();
+}
+
+# boucle sur les copies...
+
 for my $e (sort { $a <=> $b } (keys %copie_utile)) {
     print "Regroupement des pages pour ID=$e...\n";
 
@@ -259,12 +343,7 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 
     debug "Fichier destination : $f";
 
-    my $ii=0;
-    my @pages_pdf=();
-
-    my $img_tout;
-
-    $img_tout=Graphics::Magick->new() if(!$compose);
+    stk_begin();
 
     for my $pp (@{$pages_e{$e}}) {
 
@@ -277,43 +356,31 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	    # correction JPG presente : on transforme en PDF
 
 	    debug "Page $pp->{id} annotee";
-	    
 
-	    if($compose) {
-		my $img=Graphics::Magick->new();
-		$img->ReadImage($f_j);
-		
-		push @pages_pdf,$f_p if(write_pdf($img,$f_p));
-	    } else {
-		$img_tout->ReadImage($f_j);
-	    }
+	    stk_ppm_add($f_j);
+
 	} elsif($compose) {
 	    # pas de JPG annote : on prend la page corrigee
 
 	    debug "Page $pp->{id} de la correction";
 
-	    check_correc();
-	    
-	    $commandes->execute("pdftk",$correc_indiv,
-				"cat",$pp->{page},
-				"output",$f_p);
-
-	    push @pages_pdf,$f_p;
+	    stk_pdf_add($pp->{page});
 	}
     }
 
     # on regroupe les pages PDF
 
-    if($compose) {
-	if($#pages_pdf>=0) {
-	    $commandes->execute("pdftk",
-				@pages_pdf,
-				"output",$f,"compress");
-	}
-    } else {
-	write_pdf($img_tout,$f);
+    stk_go();
+
+    if($#stk_pages==0) {
+	debug "Move $stk_pages[0] to $f";
+	move($stk_pages[0],$f);
+    } elsif($#stk_pages>0) {
+	$commandes->execute("pdftk",
+			    @stk_pages,
+			    "output",$f,"compress");
     }
-    
+
     $avance->progres(1/$n_copies);
 }
 
