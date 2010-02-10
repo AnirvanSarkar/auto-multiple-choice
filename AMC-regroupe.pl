@@ -67,8 +67,10 @@ my $moteur_latex='pdflatex';
 my $tex_src='';
 
 my $debug='';
+my $nombre_copies=0;
 
 GetOptions("cr=s"=>\$cr,
+	   "n-copies=s"=>\$nombre_copies,
 	   "an-saved=s"=>\$an_saved,
 	   "mep=s"=>\$mep_dir,
 	   "mep-saved=s"=>\$mep_saved,
@@ -142,6 +144,7 @@ sub check_correc {
 	debug "Preparation de la correction individuelle...";
 
 	$commandes->execute(with_prog("AMC-prepare.pl"),
+			    "--n-copies",$nombre_copies,
 			    "--with",$moteur_latex,
 			    "--mode","k",
 			    "--out-corrige",$correc_indiv,

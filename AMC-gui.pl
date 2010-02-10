@@ -1526,6 +1526,7 @@ sub voir_notes {
 sub noter {
     if($projet{'options'}->{'maj_bareme'}) {
 	commande('commande'=>[with_prog("AMC-prepare.pl"),
+			      "--n-copies",$projet{'options'}->{'nombre_copies'},
 			      "--with",moteur_latex(),
 			      "--debug",debug_file(),
 			      "--progression-id",'bareme',
@@ -1638,6 +1639,7 @@ sub regroupement {
 			  "--mep-saved",absolu($mep_saved),
 			  "--tex-src",absolu($projet{'options'}->{'texsrc'}),
 			  "--with",moteur_latex(),
+			  "--n-copies",$projet{'options'}->{'nombre_copies'},
 			  "--progression-id",'regroupe',
 			  "--progression",1,
 			  "--modele",$projet{'options'}->{'modele_regroupement'},

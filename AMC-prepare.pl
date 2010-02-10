@@ -281,6 +281,8 @@ $prefix=$f_base."-" if(!$prefix);
 sub latex_cmd {
     my (%o)=@_;
 
+    $o{'AMCNombreCopies'}=$nombre_copies if($nombre_copies>0);
+
     return($moteur_latex,
 	   "\\nonstopmode"
 	   .join('',map { "\\def\\".$_."{".$o{$_}."}"; } (keys %o) )
@@ -302,7 +304,6 @@ if($mode =~ /s/) {
     # SUJETS
 
     my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
-    $opts{'AMCNombreCopies'}=$nombre_copies if($nombre_copies>0);
 
     # 1) document de calage
 

@@ -62,7 +62,7 @@ sub ajoute_colonne {
 
 sub formatte {
     my ($x)=@_;
-    $x=sprintf("%.2f",$x);
+    $x=(defined($x) ? sprintf("%.2f",$x) : '');
     $x =~ s/0+$//;
     $x =~ s/\.$//;
     return($x);
