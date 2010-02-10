@@ -201,9 +201,9 @@ $delta=1/$#ids if($#ids>0);
 	     next XMLFB;
 	 }
 	 
-	 # note finale sur la premiere page
+	 # note finale sur la page avec le nom
 	 
-	 if($n_page==1) {
+	 if($n_page==1 || $x->{'nom'}) {
 	     my $t=$ne->{'total'}->[0];
 	     push @cmd,"-stroke","red",
 	     "-fill","red","-draw","text 100,100 \'TOTAL : "
