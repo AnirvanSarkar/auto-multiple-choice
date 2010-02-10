@@ -174,6 +174,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'assoc_ncols'=>4,
 	      'tolerance_marque_inf'=>0.2,
 	      'tolerance_marque_sup'=>0.2,
+	      'moteur_mep'=>'auto',
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -576,6 +577,8 @@ my %cb_stores=(
 	       'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
 						 ";"=>";",
 						 ","=>","),
+	       'moteur_mep'=>cb_model("auto"=>'découplé automatique',
+				      "poppler"=>'direct'),
 	       );
 
 my %extension_fichier=();
@@ -1213,6 +1216,7 @@ sub calcule_mep {
     # on recalcule...
     commande('commande'=>[with_prog("AMC-prepare.pl"),
 			  "--with",moteur_latex(),
+			  "--raster",$o{'moteur_mep'},
 			  "--debug",debug_file(),
 			  "--calage",absolu($projet{'options'}->{'docs'}->[2]),
 			  "--progression-id",'MEP',

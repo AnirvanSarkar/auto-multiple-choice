@@ -36,6 +36,8 @@ GCCARCHFLAGS=-m32
 endif
 endif
 
+GCCPOPPLER=-I /usr/include/poppler -lpoppler
+
 BINDIR=/usr/bin
 PERLDIR=/usr/share/perl5
 MODSDIR=/usr/lib/AMC
@@ -45,14 +47,17 @@ DESKTOPDIR=/usr/share/applications
 ICONSDIR=/usr/share/icons/hicolor/scalable/apps
 PIXDIR=/usr/share/pixmaps
 
-MODS=AMC-*.pl AMC-traitement-image
+MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
 GLADE=AMC-*.glade
 STY=automultiplechoice.sty
 
-all: AMC-traitement-image AMC-gui.glade doc logo.xpm ;
+all: AMC-traitement-image AMC-mepdirect AMC-gui.glade doc logo.xpm ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
 	$(GCC) $(GCCARCHFLAGS) -O3 -I. -lnetpbm $< -o $@
+
+AMC-mepdirect: AMC-mepdirect.cc Makefile
+	$(GCC) $(GCCARCHFLAGS) $(GCCPOPPLER) -O3 $< -o $@
 
 %.glade: %.in.glade FORCE
 	perl versions.pl < $< > $@
@@ -76,16 +81,17 @@ sync:
 	pngtopnm $< | ppmtoxpm > $@
 
 global: FORCE
-	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image $(ICONSDIR)/auto-multiple-choice.svg /usr/share/doc/auto-multiple-choice
+	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-mepdirect $(ICONSDIR)/auto-multiple-choice.svg /usr/share/doc/auto-multiple-choice
 
 local: global
 	sudo ln -s /home/alexis/enseignement/auto-qcm/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s /home/alexis/enseignement/auto-qcm/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
+	sudo ln -s /home/alexis/enseignement/auto-qcm/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect
 	sudo ln -s /home/alexis/enseignement/auto-qcm/logo.svg $(ICONSDIR)/auto-multiple-choice.svg
 	sudo ln -s /home/alexis/enseignement/auto-qcm/doc /usr/share/doc/auto-multiple-choice
 
 clean: FORCE
-	-rm AMC-traitement-image AMC-gui.glade
+	-rm AMC-traitement-image AMC-mepdirect AMC-gui.glade
 
 install: FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODSDIR)

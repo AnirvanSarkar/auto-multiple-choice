@@ -3,7 +3,7 @@ Section: x11
 Priority: optional
 Maintainer: Alexis Bienvenüe <paamc@passoire.fr>
 Build-Depends: debhelper (>= 7), gcc, libnetpbm10-dev, libxml-xpath-perl,
-  dblatex, xsltproc, docbook-xsl, inkscape
+  dblatex, xsltproc, docbook-xsl, inkscape, libc6-dev, libpoppler-dev
 Standards-Version: 3.8.0
 Homepage: 
 
@@ -16,7 +16,8 @@ Depends: ${shlibs:Depends}, perl-base (>= 5.8),
   libopenoffice-oodoc-perl, libgraphics-magick-perl,
   texlive-latex-base, latex-xcolor, texlive-generic-recommended,
   texlive-latex-extra, texlive-fonts-extra,
-  imagemagick (>= 7:6.5.5), netpbm, pdftk, xpdf-reader, xpdf-utils,
+  imagemagick (>= 7:6.5.5), netpbm, pdftk, xpdf-reader,
+  poppler-utils, libpoppler5,
   coreutils, unzip
 Suggests: texmaker | kile, openoffice.org-calc
 Description: Auto Multiple Choice

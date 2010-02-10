@@ -157,7 +157,8 @@ sub execute {
 
 	debug "%%% Compilation : passe $n_run";
 
-	$cmd_pid=open(EXEC,"-|",@s) or die "Impossible d'executer ".join(' ',@s);
+	$cmd_pid=open(EXEC,"-|",@s);
+	die "Impossible d'executer ".join(' ',@s) if(!$cmd_pid);
 
 	while(<EXEC>) {
 	    if($analyse_q) {
@@ -256,7 +257,9 @@ $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => 1 );
 
 $binaire='--binaire';
 
-$cmd_pid=open(SCANTEX,$tex_source) or die "Impossible de lire $tex_source : $!";
+$cmd_pid=open(SCANTEX,$tex_source);
+die "Impossible de lire $tex_source : $!" if(!$cmd_pid);
+
 while(<SCANTEX>) {
     if(/usepackage\[([^\]]+)\]\{autoQCM\}/) {
 	my $opts=$1;
@@ -349,11 +352,11 @@ if($mode =~ /m/) {
 
     # 1) compilation en mode calibration
 
-    print "********** Compilation...\n";
-
     if(-f $calage) {
 	print "Utilisation du fichier de calage $calage\n";
     } else {
+	print "********** Compilation...\n";
+    
 	execute(latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/));
 	$calage="$f_base.pdf";
     }
@@ -364,50 +367,78 @@ if($mode =~ /m/) {
 
     print "********** Conversion en bitmap et analyse...\n";
 
-    @pages=();
+    if($moteur_raster eq 'poppler') {
 
-    $cmd_pid=open(IDCMD,"-|","pdfinfo",$calage)
-	or die "Erreur d'identification : $!";
-    while(<IDCMD>) {
-	if(/^Pages:\s+([0-9]+)/) {
-	    my $npages=$1;
-	    @pages=(1..$npages);
+	# tout en un grace a poppler
+
+	$|++;
+	my @c=(with_prog("AMC-mepdirect"),
+	       "-r",$dpi,
+	       "-d",$mep_dir,
+	       "-e",0.93*$progress,
+	       "-n",$progress_id,
+	       $calage);
+
+	$cmd_pid=open(EXEC,"-|",@c) ;
+
+	debug "[$cmd_pid] Poppler : ".join(' ',@c);
+
+	die "Impossible d'executer AMC-mepdirect : $!" if(!$cmd_pid);
+	while(<EXEC>) {
+	    print $_;
 	}
-    }
-    close(IDCMD);
-    $cmd_pid='';
-    
-    $avance->progres(0.03);
-    
-    my $npage=0;
-    my $np=1+$#pages;
-    for my $p (@pages) {
-	$npage++;
+	close(EXEC);
 
-	$queue->add_process([with_prog("AMC-raster.pl"),
-			     "--debug",debug_file(),
-			     "--moteur",$moteur_raster,
-			     "--page",$p,
-			     "--dpi",$dpi,
-			     $calage,"$temp_dir/page-$npage.ppm",
-			     ],
-			    [with_prog("AMC-calepage.pl"),
-			     "--progression-debut",.4,
-			     "--progression",0.9/$np*$progress,
-			     "--progression-id",$progress_id,
-			     "--debug",debug_file(),
-			     $binaire,
-			     "--pdf-source",$calage,
-			     "--page",$npage,
-			     "--dpi",$dpi,
-			     "--modele",
-			     "--mep",$mep_dir,
-			     "$temp_dir/page-$npage.ppm"],
-			    ['rm',"$temp_dir/page-$npage.ppm"],
-			    );
-    }
+    } else {
 
-    $queue->run();
+	# deux etapes : rasterisation, et analyse
+
+	@pages=();
+	
+	$cmd_pid=open(IDCMD,"-|","pdfinfo",$calage);
+	die "Erreur d'identification : $!" if(!$cmd_pid);
+
+	while(<IDCMD>) {
+	    if(/^Pages:\s+([0-9]+)/) {
+		my $npages=$1;
+		@pages=(1..$npages);
+	    }
+	}
+	close(IDCMD);
+	$cmd_pid='';
+	
+	$avance->progres(0.03);
+	
+	my $npage=0;
+	my $np=1+$#pages;
+	for my $p (@pages) {
+	    $npage++;
+	    
+	    $queue->add_process([with_prog("AMC-raster.pl"),
+				 "--debug",debug_file(),
+				 "--moteur",$moteur_raster,
+				 "--page",$p,
+				 "--dpi",$dpi,
+				 $calage,"$temp_dir/page-$npage.ppm",
+				 ],
+				[with_prog("AMC-calepage.pl"),
+				 "--progression-debut",.4,
+				 "--progression",0.9/$np*$progress,
+				 "--progression-id",$progress_id,
+				 "--debug",debug_file(),
+				 $binaire,
+				 "--pdf-source",$calage,
+				 "--page",$npage,
+				 "--dpi",$dpi,
+				 "--modele",
+				 "--mep",$mep_dir,
+				 "$temp_dir/page-$npage.ppm"],
+				['rm',"$temp_dir/page-$npage.ppm"],
+				);
+	}
+	
+	$queue->run();
+    }
 }
 
 if($mode =~ /b/) {
@@ -427,8 +458,8 @@ if($mode =~ /b/) {
 
     my $delta=0;
 
-    $cmd_pid=open(TEX,"-|",latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/))
-	or die "Impossible d'executer latex";
+    $cmd_pid=open(TEX,"-|",latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/));
+    die "Impossible d'executer latex" if(!$cmd_pid);
     while(<TEX>) {
 	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 
 	    my $t=$1;
