@@ -169,6 +169,7 @@ sub export {
 			 },
 			 );
     
+    # NoteQ : note pour une question
     $styles->createStyle('NoteQ',
 			 parent=>'Tableau',
 			 family=>'table-cell',
@@ -179,6 +180,29 @@ sub export {
 			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},		     
 			 );
 
+    # NoteV : note car pas de reponse
+    $styles->createStyle('NoteV',
+			 parent=>'NoteQ',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#f7ffbd",
+			 },
+			 'references'=>{'style:data-style-name' => 'NombreVide'},		     
+			 );
+
+    # NoteE : note car erreur "de syntaxe"
+    $styles->createStyle('NoteE',
+			 parent=>'NoteQ',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#ffbaba",
+			 },
+			 'references'=>{'style:data-style-name' => 'NombreVide'},		     
+			 );
+
+    # NoteX : pas de note car la question ne figure pas dans cette copie là
     $styles->createStyle('NoteX',
 			 parent=>'Tableau',
 			 family=>'table-cell',
@@ -196,6 +220,7 @@ sub export {
 			 },
 			 );
 
+    # CodeV : entree de AMCcode
     $styles->createStyle('CodeV',
 			 parent=>'Tableau',
 			 family=>'table-cell',
@@ -212,6 +237,7 @@ sub export {
 			 },
 			 );
 
+    # CodeA : code d'association
     $styles->createStyle('CodeA',
 			 parent=>'Tableau',
 			 family=>'table-cell',
@@ -228,6 +254,7 @@ sub export {
 			 },
 			 );
 
+    # NoteF : note finale pour la copie
     $styles->createStyle('NoteF',
 			 parent=>'Tableau',
 			 family=>'table-cell',
@@ -290,6 +317,7 @@ sub export {
 			 },
 			 );
 
+    # EnteteVertical : en-tete, ecrit verticalement
     $styles->createStyle('EnteteVertical',
 			 parent=>'Entete',
 			 family=>'table-cell',
@@ -298,12 +326,24 @@ sub export {
 			     'style:rotation-angle'=>"90",
 			 },
 			 );
+    
+    # EnteteIndic : en-tete d'une question indicative
+    $styles->createStyle('EnteteIndic',
+			 parent=>'EnteteVertical',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#e6e6ff",
+			 },
+			 );
 			     
 
-    my @keys=(sort { $a cmp $b } @{$self->{'keys'}}),
-    my @codes=(sort { $a cmp $b } @{$self->{'codes'}});
+    my @keys=@{$self->{'keys'}};
+    my @codes=@{$self->{'codes'}};
 
     my $nkeys=$#{$self->{'keys'}}+1;
+    my @keys_compte=grep {!$self->{'indicative'}->{$_}} @keys;
+    my $nkeys_compte=1+$#keys_compte;
 
     my $dimx=7+$#keys+$#codes+($self->{'liste_key'} ? 1:0);
     my $dimy=6+$#{$self->{'copies'}};
@@ -347,11 +387,12 @@ sub export {
 
     for(@keys) {
 	$doc->columnStyle($feuille,$ii,'col.notes');
-	$doc->cellStyle($feuille,$y0,$ii,'EnteteVertical');
+	$doc->cellStyle($feuille,$y0,$ii,
+			($self->{'indicative'}->{$_} ? 'EnteteIndic' : 'EnteteVertical'));
 	$doc->cellValue($feuille,$y0,$ii++,$_);
     }
     for(@codes) {
-	$doc->cellStyle($feuille,$y0,$ii,'EnteteVertical');
+	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
 	$doc->cellValue($feuille,$y0,$ii++,$_);
     }
 
@@ -379,7 +420,7 @@ sub export {
 	    $doc->cellStyle($feuille,$jj,$ii,$style_col{$_});
 	    if($_ eq 'TOTAL') {
 		$doc->cellFormula($feuille,$jj,$ii,
-				  "oooc:=SUM([.".yx2ooo($jj,$x1).":.".yx2ooo($jj,$x1+$nkeys-1)."])");
+				  "oooc:=SUM([.".yx2ooo($jj,$x1).":.".yx2ooo($jj,$x1+$nkeys_compte-1)."])");
 	    } elsif($_ eq 'NOTE') {
 		if($e->{_ID_} eq 'max') {
 		    $notemax='[.'.yx2ooo($jj,$ii,1,1).']';
@@ -400,8 +441,9 @@ sub export {
 	}
 	
 	for(@keys) {
+	    my $raison=$self->{'notes'}->{'copie'}->{$etu}->{'question'}->{$_}->{'raison'};
 	    $doc->cellValueType($feuille,$jj,$ii,'float');
-	    $doc->cellStyle($feuille,$jj,$ii,($e->{$_} ne '' ? 'NoteQ' : 'NoteX'));
+	    $doc->cellStyle($feuille,$jj,$ii,($e->{$_} ne '' ? ($raison eq 'V' ? 'NoteV' : ($raison eq 'E' ? 'NoteE' : 'NoteQ')) : 'NoteX'));
 	    $doc->cellValue($feuille,$jj,$ii++,$e->{$_});
 	}
 	for(@codes) {

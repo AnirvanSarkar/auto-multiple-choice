@@ -113,15 +113,15 @@ sub pre_process {
     my @codes=(keys %{$self->{'notes'}->{'code'}});
     my @keys=();
 
-    for(grep { if(s/\.[0-9]+$//) { !$self->{'notes'}->{'code'}->{$_} } else { 1; } } (keys %{$self->{'notes'}->{'copie'}->{'max'}->{'question'}})) {
-	if($self->{'notes'}->{'copie'}->{'max'}->{'question'}->{$_}->{'indicative'}) {
-	    push @codes,$_;
-	} else {
-	    push @keys,$_;
-	}
+    push @keys,(grep { if(s/\.[0-9]+$//) { !$self->{'notes'}->{'code'}->{$_} } else { 1; } } (keys %{$self->{'notes'}->{'copie'}->{'max'}->{'question'}}));
+
+    $self->{'indicative'}={};
+    for my $k (@keys) {
+	$self->{'indicative'}->{$k}=1 if($self->{'notes'}->{'copie'}->{'max'}->{'question'}->{$k}->{'indicative'});
     }
 
-    @keys=sort { $a cmp $b } @keys;
+    @keys=sort { $self->{'indicative'}->{$a} <=> $self->{'indicative'}->{$b}
+		  || $a cmp $b } @keys;
     @codes=sort { $a cmp $b } @codes;
  
     for my $etu (@copies) {
