@@ -693,12 +693,22 @@ $traitement->ferme_commande();
 
 # tracés sur le scan pour localiser les cases et le cadre
 
+my $page_entiere;
+
+if($out_cadre || $nom_file) {
+    $page_entiere=Graphics::Magick::new();
+    $page_entiere->Read($scan);
+}
+
+if($nom_file && $case{'nom'}) {
+    my $e=$page_entiere->Clone(); 	 
+    $e->Crop(geometry=>$case{'nom'}->etendue_xy('geometry',$zoom_plus));
+    $e->Write($nom_file);
+}
+
 if($out_cadre) {
 
     print "Annotation de l'image...\n";
-
-    my $page_entiere=Graphics::Magick::new();
-    $page_entiere->Read($scan);
 
     # transcription de l'identifiant lu
 
