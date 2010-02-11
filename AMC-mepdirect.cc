@@ -100,10 +100,10 @@ static void savePageSlice(PDFDoc *doc,
   char *xml_file=NULL;
   FILE *xml;
 
-  struct minMax question[N_QUEST+1][N_REP+1];
-  struct minMax identification[N_NID+1][N_CH+1];
-  struct minMax nom;
-  struct minMax marque[N_MARQUE+1];
+  static struct minMax question[N_QUEST+1][N_REP+1];
+  static struct minMax identification[N_NID+1][N_CH+1];
+  static struct minMax nom;
+  static struct minMax marque[N_MARQUE+1];
 
   int row_size;
   int id_etu,id_page,id_check;
@@ -252,48 +252,21 @@ int main(int argc, char *argv[]) {
   opterr = 0;
      
   while ((c = getopt (argc, argv, "f:l:r:d:o:e:n:")) != -1) {
-#ifdef _DEBUG_
-    printf("Option %c ",c);
-#endif
     switch (c) {
     case 'f': firstPage=atoi(optarg);
-#ifdef _DEBUG_
-      printf("Valeur : %d\n",firstPage);
-#endif
       break;
     case 'l': lastPage=atoi(optarg);
-#ifdef _DEBUG_
-      printf("Valeur : %d\n",lastPage);
-#endif
       break;
     case 'r': resolution=atof(optarg);
-#ifdef _DEBUG_
-      printf("Valeur : %f\n",resolution);
-#endif
       break;
-    case 'd': repertoire=strdup(optarg);
-#ifdef _DEBUG_
-      printf("Valeur : %s\n",repertoire);
-#endif
+    case 'd': repertoire=optarg;
       break;
-    case 'o': ppmFile=strdup(optarg);
-#ifdef _DEBUG_
-      printf("Valeur : %s\n",ppmFile);
-#endif
+    case 'o': ppmFile=optarg;
       break;
     case 'e': progres_pas=atof(optarg);
-#ifdef _DEBUG_
-      printf("Valeur : %f\n",progres_pas);
-#endif
       break;
-    case 'n': progres_nom=strdup(optarg);
-#ifdef _DEBUG_
-      printf("Valeur : %s\n",progres_nom);
-#endif
+    case 'n': progres_nom=optarg;
       break;
-#ifdef _DEBUG_
-    default: printf("\n");
-#endif
     }
   }
 
@@ -325,7 +298,8 @@ int main(int argc, char *argv[]) {
   if(fileName != NULL) {
     doc = new PDFDoc(fileName, NULL, NULL);
   } else {
-    // erreur
+    printf("Manque le nom du PDF\n");
+    goto err0;
   }
 
   if (!doc->isOk()) {
@@ -375,11 +349,8 @@ int main(int argc, char *argv[]) {
  err1:
   delete doc;
   delete globalParams;
-  delete repertoire;
-  delete fileName;
+
  err0:
-  free(ppmFile);
-  free(progres_nom);
 
   // check for memory leaks
   Object::memCheck(stderr);

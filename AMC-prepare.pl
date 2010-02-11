@@ -386,6 +386,8 @@ if($mode =~ /m/) {
 	die "Impossible d'executer AMC-mepdirect : $!" if(!$cmd_pid);
 	while(<EXEC>) {
 	    print $_;
+	    chomp;
+	    debug($_);
 	}
 	close(EXEC);
 
