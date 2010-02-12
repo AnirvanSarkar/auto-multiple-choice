@@ -4432,7 +4432,31 @@ que vous souhaitez imprimer :</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <widget class="GtkHBox" id="bloc_fichier">
+            <child>
+              <widget class="GtkLabel" id="label110">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">R&#xE9;pertoire destination :</property>
+              </widget>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkFileChooserButton" id="impf_f_repertoire">
+                <property name="visible">True</property>
+                <property name="action">select-folder</property>
+                <property name="title" translatable="yes">S&#xE9;lectionner un r&#xE9;pertoire destination</property>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">3</property>
+          </packing>
         </child>
         <child internal-child="action_area">
           <widget class="GtkHButtonBox" id="dialog-action_area4">

@@ -169,6 +169,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'imprimante'=>'',
 	      'options_impression'=>{'sides'=>'two-sided-long-edge',
 				     'number-up'=>1,
+				     'repertoire'=>'/tmp',
 				     },
 	      'manuel_image_type'=>'xpm',
 	      'assoc_ncols'=>4,
@@ -268,7 +269,17 @@ for my $k (keys %o_defaut) {
 	    $o{$k}=$encodage_systeme if($k =~ /^encodage_/ && !$o{$k});
 	}
 	debug "Nouveau parametre global : $k = $o{$k}" if($o{$k});
+    } else {
+	if(ref($o_defaut{$k}) eq 'HASH') {
+	    for my $kk (keys %{$o_defaut{$k}}) {
+		if(! exists($o{$k}->{$kk})) {
+		    $o{$k}->{$kk}=$o_defaut{$k}->{$kk};
+		    debug "Nouveau sous-parametre global : $k/$kk = $o{$k}->{$kk}";
+		}
+	    }
+	}
     }
+
     $o{'_modifie'}=0;
 
     # options passees en defaut_ 
@@ -561,7 +572,8 @@ my %cb_stores=(
 					'normal','normal',
 					'sup','supérieur'),
 	       'methode_impression'=>cb_model('CUPS','CUPS',
-					      'commande','commande'),
+					      'commande','par une commande',
+					      'file'=>'dans des fichiers'),
 	       'sides'=>cb_model('one-sided','Non',
 				 'two-sided-long-edge','Grand côté',
 				 'two-sided-short-edge','Petit côté'),
@@ -1092,7 +1104,7 @@ sub sujet_impressions {
 
     $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression');
     $g_imprime->signal_autoconnect_from_package('main');
-    for(qw/choix_pages_impression arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe/) {
+    for(qw/choix_pages_impression arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe bloc_fichier/) {
 	$w{$_}=$g_imprime->get_widget($_);
     }
 
@@ -1118,6 +1130,13 @@ sub sujet_impressions {
 	# transmission
 
 	transmet_pref($g_imprime,'imp',$o{'options_impression'});
+    }
+
+    if($o{'methode_impression'} eq 'file') {
+	$w{'bloc_imprimante'}->hide();
+	$w{'bloc_fichier'}->show();
+
+	transmet_pref($g_imprime,'impf',$o{'options_impression'});
     }
 
     $copies_store->clear();
@@ -1150,6 +1169,7 @@ sub sujet_impressions_cancel {
 sub sujet_impressions_ok {
     my $os='none';
     my @e=();
+
     for my $i ($w{'arbre_choix_copies'}->get_selection()->get_selected_rows() ) {
 	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N);
     }
@@ -1175,6 +1195,23 @@ sub sujet_impressions_ok {
 	debug("Options d'impression : $os");
     }
 
+    if($o{'methode_impression'} eq 'file') {
+	reprend_pref('impf',$o{'options_impression'});
+	
+	if($o{'options_impression'}->{'_modifie'}) {
+	    $o{'_modifie'}=1;
+	    delete $o{'options_impression'}->{'_modifie'};
+	}
+
+	if(!$o{'options_impression'}->{'repertoire'}) {
+	    debug "Impression fichier : pas de destionation...";
+	    $o{'options_impression'}->{'repertoire'}='';
+	} else {
+	    mkdir($o{'options_impression'}->{'repertoire'})
+		if(! -e $o{'options_impression'}->{'repertoire'});
+	}
+    }
+
     $w{'choix_pages_impression'}->destroy;
     
     debug "Impression : ".join(",",@e);
@@ -1189,6 +1226,7 @@ sub sujet_impressions_ok {
 			  "--methode",$o{'methode_impression'},
 			  "--imprimante",$o{'imprimante'},
 			  "--options",$os,
+			  "--output",$o{'options_impression'}->{'repertoire'}."/copie-%e.pdf",
 			  "--print-command",$o{'print_command_pdf'},
 			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
 			  "--mep",absolu($projet{'options'}->{'mep'}),
@@ -1761,6 +1799,7 @@ sub transmet_pref {
 	    $we->set_text($h->{$t});
 	    $w{$prefixe.'_x_'.$t}=$we;
 	}
+	debug "Cle $t --> $ta : ".(defined($wp) ? "trouve widget $wp" : "RIEN");
     }}
 }
 

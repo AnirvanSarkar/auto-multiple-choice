@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -19,7 +19,9 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
+use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
+use File::Copy;
 
 use Net::CUPS;
 use Net::CUPS::PPD;
@@ -39,6 +41,7 @@ my $fich_nums='';
 my $methode='CUPS';
 my $imprimante='';
 my $options='number-up=1';
+my $output_file='';
 
 GetOptions(
 	   "mep=s"=>\$mep_dir,
@@ -49,6 +52,7 @@ GetOptions(
 	   "print-command=s"=>\$print_cmd,
 	   "methode=s"=>\$methode,
 	   "imprimante=s"=>\$imprimante,
+	   "output=s"=>\$output_file,
 	   "options=s"=>\$options,
 	   "debug=s"=>\$debug,
 	   );
@@ -61,6 +65,8 @@ $commandes->signalise();
 die "Repertoire MEP non specifie" if(!$mep_dir);
 die "Fichier sujet non specifie" if(!$sujet);
 die "Commande impression non specifiee" if(!$print_cmd);
+
+die "Fichier sortie non specifie" if($methode =~ /^file/i && !$output_file);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
@@ -102,13 +108,14 @@ if($methode =~ /^cups/i) {
 for my $e (@es) {
     my $debut=10000;
     my $fin=0;
+    my $elong=sprintf("%04d",$e);
     for ($mep->pages_etudiant($e)) {
 	$debut=$_ if($_<$debut);
 	$fin=$_ if($_>$fin);
     }
     $n++;
     
-    $tmp = File::Temp->new( UNLINK => 1, SUFFIX => '.pdf' );
+    $tmp = File::Temp->new( DIR=>tmpdir(),UNLINK => 1, SUFFIX => '.pdf' );
     $fn=$tmp->filename();
 
     print "Etudiant $e : pages $debut-$fin dans le fichier $fn...\n";
@@ -121,8 +128,15 @@ for my $e (@es) {
 
     if($methode =~ /^cups/i) {
 	$dest->printFile($fn,"QCM : copie $e");
+    } elsif($methode =~ /^file/i) {
+	my $f_dest=$output_file;
+	$f_dest.="-%e.pdf" if($f_dest !~ /[%]e/);
+	$f_dest =~ s/[%]e/$elong/g;
+	
+	debug "Deplacement vers $f_dest";
+	move($fn,$f_dest);
     } elsif($methode =~ /^command/i) {
-	my @c=map { s/[%]f/$fn/g;$_; } split(/\s+/,$print_cmd);
+	my @c=map { s/[%]f/$fn/g; s/[%]e/$elong/g; $_; } split(/\s+/,$print_cmd);
 	
 	#print STDERR join(' ',@c)."\n";
 	$commandes->execute(@c);
