@@ -27,6 +27,8 @@ use AMC::Exec;
 use AMC::ANList;
 use AMC::Gui::Avancement;
 
+use Graphics::Magick;
+
 use encoding 'utf8';
 
 $VERSION_BAREME=2;
@@ -48,6 +50,22 @@ my $debug='';
 my $progress=1;
 my $progress_id='';
 
+my $line_width=2;
+my @o_symbols=();
+my $annote_indicatives='';
+my $position='marge';
+my $ecart=5.5;
+my $ecart_marge=1.5;
+my $pointsize_rel=60;
+
+# cle : "a_cocher-cochee"
+my %symboles=(
+    '0-0'=>{qw/type none/},
+    '0-1'=>{qw/type circle color red/},
+    '1-0'=>{qw/type mark color red/},
+    '1-1'=>{qw/type mark color blue/},
+);
+
 GetOptions("cr=s"=>\$cr_dir,
 	   "projet=s",\$rep_projet,
 	   "an-saved=s"=>\$an_saved,
@@ -58,9 +76,24 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "qualite=s"=>\$qualite_jpg,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
+	   "line-width=s"=>\$line_width,
+	   "symbols=s"=>\@o_symbols,
+	   "indicatives=s"=>\$annote_indicatives,
+	   "position=s"=>\$position,
+	   "pointsize-nl=s"=>\$pointsize_rel,
+	   "ecart=s"=>\$ecart,
+	   "ecart-marge=s"=>\$ecart_marge,
 	   );
 
 set_debug($debug);
+
+for(split(/,/,join(',',@o_symbols))) {
+    if(/^([01]-[01]):(none|circle|mark|box)(?:\/([\#a-z0-9]+))?$/) {
+	$symboles{$1}={type=>$2,color=>$3};
+    } else {
+	die "Mauvaise syntaxe de symbole : $_";
+    }
+}
 
 my $commandes=AMC::Exec::new("AMC-annote");
 $commandes->signalise();
@@ -143,23 +176,45 @@ sub milieu_cercle {
 }
 
 sub cercle_coors {
-    my $c=shift;
+    my ($im,$c,$color)=@_;
     my ($x,$y)=milieu_cercle($c);
-    return("-draw",sprintf("circle %.2f,%.2f %.2f,%.2f",
-		   $x,$y,
-		   $c->{1}->{'x'},$c->{1}->{'y'}));
+    $im->Draw(qw/primitive circle fill none/,
+	      'strokewidth'=>$line_width,
+	      'stroke'=>$color,
+	      'points'=>sprintf("%.2f,%.2f %.2f,%.2f",
+				$x,$y,
+				$c->{1}->{'x'},$c->{1}->{'y'}),
+	      );
 }
     
 sub croix_coors {
-    my $c=shift;
-    my @r=();
+    my ($im,$c,$color)=@_;
     for my $i (1,2) {
-	push @r,"-draw",sprintf("line %.2f,%.2f %.2f,%.2f",
-		    $c->{$i}->{'x'},$c->{$i}->{'y'},
-		    $c->{$i+2}->{'x'},$c->{$i+2}->{'y'},
-		    );
+	$im->Draw(qw/primitive line fill none/,
+		  'strokewidth'=>$line_width,
+		  'stroke'=>$color,
+		  'points'=>sprintf("%.2f,%.2f %.2f,%.2f",
+				    $c->{$i}->{'x'},$c->{$i}->{'y'},
+				    $c->{$i+2}->{'x'},$c->{$i+2}->{'y'},
+				    ),
+		  );
     }
-    return(@r);
+}
+
+sub boite_coors {
+    my ($im,$c,$color)=@_;
+    my @pts="";
+    for my $i (1..4) {
+	push @pts,sprintf("%.2f,%.2f",
+			  $c->{$i}->{'x'},$c->{$i}->{'y'},
+			  );
+    }
+    $im->Draw(qw/primitive polygon fill none/,
+	      'strokewidth'=>$line_width,
+	      'stroke'=>$color,
+	      'points'=>join(' ',@pts),
+	      );
+    
 }
 
 my $delta=1;
@@ -183,9 +238,21 @@ $delta=1/$#ids if($#ids>0);
      }
 	 
      if(-f $scan) {
-	 
-	 my @cmd=("convert",$scan,"-pointsize",60);
-	 
+
+	 my $im=Graphics::Magick->new();
+
+	 my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
+
+	 debug "Lecture $scan";
+
+	 $im->Read($scan);
+
+	 $im->Set('pointsize'=>$im->Get('height')/$pointsize_rel);
+	 $im->Set('quality',$qualite_jpg) if($qualite_jpg);
+
+	 debug "Taille Y : ".$im->Get('height');
+	 debug "Pointsize : ".$im->Get('height')/$pointsize_rel;
+
 	 print "Annotation de $scan...\n";
 
 	 my $idf=id2idf($id);
@@ -203,12 +270,20 @@ $delta=1/$#ids if($#ids>0);
 	 
 	 # note finale sur la page avec le nom
 	 
+	 ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance) =
+	     $im->QueryFontMetrics(text=>'TOTAL');
+	 
 	 if($n_page==1 || $x->{'nom'}) {
 	     my $t=$ne->{'total'}->[0];
-	     push @cmd,"-stroke","red",
-	     "-fill","red","-draw","text 100,100 \'TOTAL : "
-		 .$t->{'total'}."/".$t->{'max'}." => ".$t->{'note'}." / ".$notes->{'notemax'}
-	     ."\'";
+	     $im->Draw(qw/primitive text stroke red fill red strokewidth 1/,
+		       'points'=>sprintf("%.1f,%.1f \'%s\'",
+					 $x_ppem,0.7*$y_ppem+$ascender,
+					 "TOTAL : "
+					 .$t->{'total'}."/".$t->{'max'}
+					 ." => ".$t->{'note'}." / ".$notes->{'notemax'}
+					 ),
+		       'antialias'=>'true',
+		      ); 
 	 }
 	 
 	 #########################################
@@ -219,22 +294,27 @@ $delta=1/$#ids if($#ids>0);
 	 
        CASE: for my $k (keys %$page) {
 	   my ($q,$r)=get_qr($k);
-	   next CASE if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'});
+	   my $indic=$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'};
+
+	   next CASE if($indic && !$annote_indicatives);
 	   
 	   # a cocher ?
-	   my $bonne=$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'};
+	   my $bonne=($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
 
 	   # cochee ?
-	   my $cochee=($page_coche->{$k}->{'r'} > $seuil);
+	   my $cochee=($page_coche->{$k}->{'r'} > $seuil ? 1 :0);
+
+	   my $sy=$symboles{"$bonne-$cochee"};
 	   
-	   if($bonne) {
-	       push @cmd,"-strokewidth",2,"-stroke",($cochee ? "blue" : "red"),
-	       croix_coors($page->{$k}->{'coin'});
+	   if($sy->{type} eq 'circle') {
+	       cercle_coors($im,$page->{$k}->{'coin'},$sy->{color});
+	   } elsif($sy->{type} eq 'mark') {
+	       croix_coors($im,$page->{$k}->{'coin'},$sy->{color});
+	   } elsif($sy->{type} eq 'box') {
+	       boite_coors($im,$page->{$k}->{'coin'},$sy->{color});
+	   } elsif($sy->{type} eq 'none') {
 	   } else {
-	       if($cochee) {
-		   push @cmd,"-fill","none","-strokewidth",2,"-stroke","red";
-		   push @cmd,cercle_coors($page->{$k}->{'coin'});
-	       }
+	       debug "Type de symbole inconnu ($k) : $sy->{type}";
 	   }
 
 	   # pour avoir la moyenne des coors pour marquer la note de
@@ -243,7 +323,8 @@ $delta=1/$#ids if($#ids>0);
 	   $question{$q}={} if(!$question{$q});
 	   my @mil=milieu_cercle($page->{$k}->{'coin'});
 	   $question{$q}->{'n'}++;
-	   $question{$q}->{'x'}+=$mil[0];
+	   $question{$q}->{'x'}=$mil[0] 
+	       if((!$question{$q}->{'x'}) || ($mil[0]<$question{$q}->{'x'}));
 	   $question{$q}->{'y'}+=$mil[1];
 	   
        }
@@ -251,28 +332,46 @@ $delta=1/$#ids if($#ids>0);
 	 #########################################
 	 # notes aux questions
 	 
-       QUEST: for my $q (keys %question) {
-	   next QUEST if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'});
-	   my $x=60;
-	   my $y=$question{$q}->{'y'}/$question{$q}->{'n'};
-	   my $nq=$ne->{'question'}->{$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'titre'}};
+	 if($position ne 'none') {
+	   QUEST: for my $q (keys %question) {
+	       next QUEST if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'});
+	       my $x;
 
-	   push @cmd,"-stroke","red","-fill","red",
-	   "-strokewidth",1,"-draw",sprintf("text %.2f,%.2f \'%s\'",
-					    $x,$y,$nq->{'note'}."/".$nq->{'max'});
-       }
+	       my $nq=$ne->{'question'}->{$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'titre'}};
+	       
+	       my $text=$nq->{'note'}."/".$nq->{'max'};
+	       
+	       ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance) =
+		   $im->QueryFontMetrics(text=>$text);
 
-	 # taille et qualite...
+
+	       if($position eq 'marge') {
+		   $x=$ecart_marge*$x_ppem;
+	       } elsif($position eq 'case') {
+		   $x=$question{$q}->{'x'} - $ecart*$x_ppem - $width;
+	       } else {
+		   debug "Annotation : position invalide : $position";
+		   $x=$ecart;
+	       }
+	       
+	       # moyenne des y des cases de la question
+	       my $y=$question{$q}->{'y'}/$question{$q}->{'n'} + $ascender - $height/2;
+	       
+	       $im->Draw(qw/primitive text stroke red fill red strokewidth 1/,
+			 'points'=>sprintf("%.2f,%.2f \'%s\'",
+					   $x,$y,$text),
+			 );
+	   }
+	 }
+
+	 # taille...
 	 
-	 push @cmd,"-resize",$taille_max if($taille_max);
-	 push @cmd,"-quality",$qualite_jpg if($qualite_jpg);
+	 $im->Resize('geometry'=>$taille_max) if($taille_max);
 
 	 # fin
 	 
-	 push @cmd,"$cr_dir/corrections/jpg/page-$idf.jpg";
+	 $im->Write("$cr_dir/corrections/jpg/page-$idf.jpg");
 
-	 #print "Fabrication de page-$idf.jpg...\n";
-	 $commandes->execute(@cmd);
      } else {
 	 print "*** scan $scan introuvable ***\n";
      }
@@ -285,4 +384,3 @@ $avance->fin();
 
 __END__
 
-./AMC-annote.pl --cr ~/Projets-QCM/p1-2008-12-02.bak/cr --bareme ~/Projets-QCM/p1-2008-12-02.bak/bareme.xml --notes ~/Projets-QCM/p1-2008-12-02.bak/notes.dat --an-saved ~/Projets-QCM/p1-2008-12-02.bak/an.storable --seuil 0.1

@@ -125,6 +125,9 @@ install: FORCE
 deb: FORCE
 	dpkg-buildpackage -I.svn -Idownload-area -rsudo -k42067447
 
+debppa: FORCE
+	debuild -S -sa -I.svn -Idownload-area -rsudo -k42067447
+
 experimental: FORCE
 	$(MAKE) -C download-area repos
 	$(MAKE) -C download-area sync

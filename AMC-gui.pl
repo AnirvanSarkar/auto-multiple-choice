@@ -119,6 +119,11 @@ my $o_file=$home_dir.'/.AMC.xml';
 my $encodage_systeme=langinfo(CODESET());
 $encodage_systeme='UTF-8' if(!$encodage_systeme);
 
+sub hex_color {
+    my $s=shift;
+    return(Gtk2::Gdk::Color->parse($s)->to_string());
+}
+
 my %w=();
 my %o_defaut=('pdf_viewer'=>['commande',
 			     'evince','acroread','gpdf','xpdf',
@@ -176,6 +181,20 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'tolerance_marque_inf'=>0.2,
 	      'tolerance_marque_sup'=>0.2,
 	      'moteur_mep'=>'auto',
+
+	      'symboles_trait'=>2,
+	      'symboles_indicatives'=>'',
+	      'symbole_0_0_type'=>'none',
+	      'symbole_0_0_color'=>hex_color('black'),
+	      'symbole_0_1_type'=>'circle',
+	      'symbole_0_1_color'=>hex_color('red'),
+	      'symbole_1_0_type'=>'mark',
+	      'symbole_1_0_color'=>hex_color('red'),
+	      'symbole_1_1_type'=>'mark',
+	      'symbole_1_1_color'=>hex_color('blue'),
+	      
+	      'annote_ps_nl'=>60,
+	      'annote_ecart'=>5.5,
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -213,6 +232,8 @@ my %projet_defaut=('texsrc'=>'',
 		   
 		   'format_export'=>'CSV',
 		   'export_csv_separateur'=>",",
+
+		   'annote_position'=>'marge',
 		   );
 
 my $mep_saved='mep.storable';
@@ -591,7 +612,21 @@ my %cb_stores=(
 						 ","=>","),
 	       'moteur_mep'=>cb_model("auto"=>'découplé automatique',
 				      "poppler"=>'direct'),
+	       'annote_position'=>cb_model("none"=>'(aucune)',
+					   "marge"=>'Dans la marge',
+					   "case"=>'A côté des cases',
+					   ),
 	       );
+
+my $symbole_type_cb=cb_model("none"=>"rien",
+			     "circle"=>"cercle",
+			     "mark"=>"croix",
+			     "box"=>"carré",
+			     );
+
+for my $k (qw/0_0 0_1 1_0 1_1/) {
+    $cb_stores{"symbole_".$k."_type"}=$symbole_type_cb;
+}
 
 my %extension_fichier=();
 
@@ -1026,6 +1061,12 @@ sub doc_maj {
 		     $dialog->run;
 		     $dialog->destroy;
 		 }
+
+		 my $ap=($c->variable('ensemble') ? 'case' : 'marge');
+		 $projet{'options'}->{'_modifie'}=1 
+		     if($projet{'options'}->{'annote_position'} ne $ap);
+		 $projet{'options'}->{'annote_position'}=$ap;
+
 		 if($c->variable('ensemble') && $projet{'options'}->{'seuil'}<0.4) {
 		     my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 									'destroy-with-parent',
@@ -1649,6 +1690,19 @@ sub visualise_correc {
     commande_parallele($o{'img_viewer'},$f);
 }
 
+sub opt_symbole {
+    my ($s)=@_;
+    my $k=$s;
+    my $type='none';
+    my $color='red';
+
+    $k =~ s/-/_/g;
+    $type=$o{'symbole_'.$k.'_type'} if(defined($o{'symbole_'.$k.'_type'}));
+    $color=$o{'symbole_'.$k.'_color'} if(defined($o{'symbole_'.$k.'_color'}));
+
+    return("$s:$type/$color");
+}
+
 sub annote_copies {
     commande('commande'=>[with_prog("AMC-annote.pl"),
 			  "--debug",debug_file(),
@@ -1661,6 +1715,13 @@ sub annote_copies {
 			  "--taille-max",$o{'taille_max_correction'},
 			  "--bareme",absolu($projet{'options'}->{'fichbareme'}),
 			  "--qualite",$o{'qualite_correction'},
+			  "--line-width",$o{'symboles_trait'},
+
+			  "--indicatives",$o{'symboles_indicatives'},
+			  "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)), 
+			  "--position",$projet{'options'}->{'annote_position'},
+			  "--pointsize-nl",$o{'annote_ps_nl'},
+			  "--ecart",$o{'annote_ecart'},
 			  ],
 	     'texte'=>'Annotation des copies...',
 	     'progres.id'=>'annote',
@@ -1766,6 +1827,11 @@ sub transmet_pref {
 	    $w{$prefixe.'_s_'.$t}=$wp;
 	    $wp->set_value($h->{$t});
 	}
+	$wp=$gap->get_widget($prefixe.'_col_'.$ta);
+	if($wp) {
+	    $w{$prefixe.'_col_'.$t}=$wp;
+	    $wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
+	}
 	$wp=$gap->get_widget($prefixe.'_cb_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_cb_'.$t}=$wp;
@@ -1839,6 +1905,12 @@ sub reprend_pref {
 	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
+	$wp=$w{$prefixe.'_col_'.$tgui};
+	if($wp) {
+	    $n=$wp->get_color()->to_string();
+	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{$t}=$n;
+	}
 	$wp=$w{$prefixe.'_cb_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_active();
@@ -1877,11 +1949,13 @@ sub change_methode_impression {
 sub edit_preferences {
     my $gap=Gtk2::GladeXML->new($glade_xml,'edit_preferences');
 
-    for(qw/edit_preferences pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression/) {
+    for(qw/edit_preferences pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree/) {
 	$w{$_}=$gap->get_widget($_);
     }
 
     $gap->signal_autoconnect_from_package('main');
+
+    # tableau type/couleurs pour correction
 
     for my $t (grep { /^pref(_projet)?_[xfcv]_/ } (keys %w)) {
 	delete $w{$t};
