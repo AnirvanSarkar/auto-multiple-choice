@@ -92,6 +92,7 @@ local: global
 
 clean: FORCE
 	-rm AMC-traitement-image AMC-mepdirect AMC-gui.glade
+	$(MAKE) -C doc clean
 
 install: FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODSDIR)
@@ -123,10 +124,7 @@ install: FORCE
 # xpdf-reader -> pdftoppm (Manuel.pm)
 # xpdf-utils -> pdfinfo (AMC-prepare)
 deb: FORCE
-	dpkg-buildpackage -I.svn -Idownload-area -rsudo -k42067447
-
-debppa: FORCE
-	debuild -S -sa -I.svn -Idownload-area -rsudo -k42067447
+	dpkg-buildpackage -I.svn -Idownload-area -Iessais -rsudo -k42067447
 
 experimental: FORCE
 	$(MAKE) -C download-area repos
