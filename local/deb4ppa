@@ -1,0 +1,69 @@
+#! /bin/sh
+
+PROG_DIR=`dirname $0`
+
+TARGZ=
+SERIE=
+EXT=
+
+while [ "$#" -gt "0" ]
+do
+  case $1 in
+      -t)
+	  shift
+	  TARGZ=$1
+	  ;;
+      -s)
+	  shift
+	  SERIE=$1
+	  ;;
+      -e)
+	  shift
+	  EXT=$1
+	  ;;
+      *)
+	  echo "Syntax Error"
+	  exit 1
+	  ;;
+  esac
+  shift
+done
+
+if [ ! "$TARGZ" ];
+then
+    TARGZ=`$PROG_DIR/derniere-version.pl --extension tar.gz`
+fi
+
+if [ ! "$SERIE" ];
+then
+    SERIE=karmic
+fi
+
+if [ ! "$EXT" ];
+then
+    EXT=0ubuntu1
+fi
+
+DIR=auto-qcm
+
+CHL=$DIR/debian/changelog
+
+cd /tmp
+
+if [ -e "$DIR" ];
+then
+    rm -r $DIR
+fi
+
+tar xvzf $TARGZ
+
+CHL_TEMP=/tmp/changelog
+
+cp $CHL $CHL_TEMP
+sed -e "s/\\([0-9.]\\+\\)) unstable;/\\1-$EXT~ab~$SERIE) $SERIE;/;" $CHL_TEMP > $CHL
+
+cd $DIR
+
+debuild -S -sa -rsudo -k42067447
+
+ls -l /tmp/*.changes

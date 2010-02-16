@@ -62,7 +62,7 @@ AMC-mepdirect: AMC-mepdirect.cc Makefile
 nv.pl: FORCE
 	perl local/versions.pl
 
-%.glade: %.in.glade nv.pl
+%.glade: %.in.glade
 	perl versions.pl < $< > $@
 
 doc:
@@ -96,7 +96,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 
 clean: FORCE
-	-rm AMC-traitement-image AMC-mepdirect AMC-gui.glade
+	-rm AMC-traitement-image AMC-mepdirect AMC-gui.glade logo.xpm
 	$(MAKE) -C doc clean
 
 install: FORCE
@@ -131,8 +131,10 @@ install: FORCE
 
 BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k42067447
 
-deb: nv.pl
+debsrc: nv.pl
 	dpkg-buildpackage -S -sa $(BUILDOPTS)
+
+deb: nv.pl
 	dpkg-buildpackage -b $(BUILDOPTS)
 
 experimental: FORCE
@@ -140,6 +142,6 @@ experimental: FORCE
 
 FORCE: ;
 
-.PHONY: install deb debsimple clean global doc experimental FORCE
+.PHONY: install deb debsrc clean global doc experimental FORCE
 
 
