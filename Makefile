@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -59,7 +59,10 @@ AMC-traitement-image: AMC-traitement-image.c Makefile
 AMC-mepdirect: AMC-mepdirect.cc Makefile
 	$(GCC) $(GCCARCHFLAGS) $(GCCPOPPLER) -O3 $< -o $@
 
-%.glade: %.in.glade FORCE
+nv.pl: FORCE
+	perl local/versions.pl
+
+%.glade: %.in.glade nv.pl
 	perl versions.pl < $< > $@
 
 doc:
@@ -83,12 +86,14 @@ sync:
 global: FORCE
 	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-mepdirect $(ICONSDIR)/auto-multiple-choice.svg /usr/share/doc/auto-multiple-choice
 
+LOCALDIR=/home/alexis/enseignement/auto-qcm
+
 local: global
-	sudo ln -s /home/alexis/enseignement/auto-qcm/AMC-perl/AMC /usr/share/perl5/AMC
-	sudo ln -s /home/alexis/enseignement/auto-qcm/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
-	sudo ln -s /home/alexis/enseignement/auto-qcm/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect
-	sudo ln -s /home/alexis/enseignement/auto-qcm/logo.svg $(ICONSDIR)/auto-multiple-choice.svg
-	sudo ln -s /home/alexis/enseignement/auto-qcm/doc /usr/share/doc/auto-multiple-choice
+	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
+	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
+	sudo ln -s $(LOCALDIR)/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect
+	sudo ln -s $(LOCALDIR)/logo.svg $(ICONSDIR)/auto-multiple-choice.svg
+	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 
 clean: FORCE
 	-rm AMC-traitement-image AMC-mepdirect AMC-gui.glade
@@ -123,15 +128,15 @@ install: FORCE
 # netpbm -> ppmtoxpm (Manuel.pm)
 # xpdf-reader -> pdftoppm (Manuel.pm)
 # xpdf-utils -> pdfinfo (AMC-prepare)
-deb: FORCE
-	dpkg-buildpackage -I.svn -Idownload-area -Iessais -rsudo -k42067447
+
+BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k42067447
+
+deb: nv.pl
+	dpkg-buildpackage -S -sa $(BUILDOPTS)
+	dpkg-buildpackage -b $(BUILDOPTS)
 
 experimental: FORCE
-	$(MAKE) -C download-area repos
-	$(MAKE) -C download-area sync
-
-VERSION=0.1.0
-RELEASE=4
+	$(MAKE) -C download-area repos sync
 
 FORCE: ;
 
