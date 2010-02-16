@@ -303,7 +303,7 @@ for my $k (keys %o_defaut) {
 
     $o{'_modifie'}=0;
 
-    # options passees en defaut_ 
+    # options passees en defaut_ entre version 0.226 et version 0.227
 
     for(qw/encodage_liste encodage_csv/) {
 	if($o{"$_"} && ! $o{"defaut_$_"}) {
@@ -317,6 +317,12 @@ for my $k (keys %o_defaut) {
 	$o{'encodage_interne'}='UTF-8';
 	$o{'_modifie'}=1;
     }
+
+    # creation du repertoire si besoin (sinon la conf peut etre
+    # perturbee lors de Edition/Parametres)
+
+    mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
+    
 }
 
 ###
@@ -824,7 +830,7 @@ sub projet_charge {
     my (undef,$cree)=(@_);
     my @projs;
     
-    mkdir($o{'rep_projets'}) if($cree && ! -d $o{'rep_projets'});
+    mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
     
     # construit la liste des projets existants
 
