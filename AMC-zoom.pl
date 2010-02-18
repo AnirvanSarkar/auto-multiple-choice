@@ -1,9 +1,29 @@
 #! /usr/bin/perl
+#
+# Copyright (C) 2010 Alexis Bienvenue <paamc@passoire.fr>
+#
+# This file is part of Auto-Multiple-Choice
+#
+# Auto-Multiple-Choice is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Auto-Multiple-Choice is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Auto-Multiple-Choice.  If not, see
+# <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
 use Graphics::Magick;
+use AMC::Basic;
 use AMC::Boite qw/min max/;
 use XML::Simple;
+use AMC::Gui::Avancement;
 
 my $scan='';
 my $seuil=0.15;
@@ -14,17 +34,31 @@ my $largeur=800;
 
 my $M_PI=atan2(1,1)*4;
 
+my $progress=1;
+my $progress_id='';
+
+my $debug='';
+
 GetOptions("scan=s"=>\$scan,
 	   "seuil=s"=>\$seuil,
 	   "analyse=s"=>\$analyse,
 	   "output=s"=>\$output,
 	   "largeur=s"=>\$largeur,
+	   "progression=s"=>\$progress,
+	   "progression-id=s"=>\$progress_id,
+	   "debug=s"=>\$debug,
 	   );
+
+set_debug($debug);
+
+debug("AMC-zooms / DEBUG") if($debug);
 
 sub adapte {
     my ($im)=@_;
     return(sprintf("%.02f",100*$largeur/$im->Get('width')).'%');
 }
+
+my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $an=XMLin($analyse,
 	     ForceArray => [ 'analyse','chiffre','case','id','casetest' ],
@@ -144,4 +178,5 @@ for(0..1) {
 
 $bandeau->Montage(tile=>'1x',geometry=>'+0+0',borderwidth=>3)->Write($output);
 
+$avance->fin();
 

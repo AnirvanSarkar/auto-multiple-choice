@@ -397,7 +397,7 @@ $gui=Gtk2::GladeXML->new($glade_xml,'main_window');
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
-    menu_debug
+    menu_debug menu_outils
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
     options_CSV options_ods
@@ -1800,6 +1800,38 @@ sub activate_doc {
     commande_parallele(@c);
 }
 
+###
+
+# mise a jour des zooms depuis le menu par ex.
+sub activate_zoom_maj {
+    if($projet{'_an_list'}->nombre()==0) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							   'destroy-with-parent',
+							   'error', # message type
+							   'ok', # which set of buttons?
+							   "Aucune saisie automatique n'a été effectuée : il n'y a donc pas de zooms à reconstruire...");
+	$dialog->run;
+	$dialog->destroy;      
+	return(0);
+    }
+
+    commande('commande'=>[with_prog("AMC-zooms.pl"),
+			  "--debug",debug_file(),
+			  "--projet",absolu('%PROJET/'),
+			  "--seuil",$projet{'options'}->{'seuil'},
+			  "--n-procs",$o{'n_procs'},
+			  "--an-saved",absolu($an_saved),
+			  "--cr-dir",absolu($projet{'options'}->{'cr'}),
+			  "--progression",1,
+			  "--progression-id",'zooms',
+			  ],
+	     'texte'=>'Re-extraction des zooms...',
+	     'progres.id'=>'zooms',
+	     );
+}
+
+###
+
 # transmet les preferences vers les widgets correspondants
 sub transmet_pref {
     my ($gap,$prefixe,$h,$alias,$seulement)=@_;
@@ -2732,6 +2764,8 @@ sub projet_ouvre {
 	}
 
 	$w{'onglets_projet'}->set_sensitive(1);
+
+	$w{'menu_outils'}->set_sensitive(1);
 
 	valide_projet();
 

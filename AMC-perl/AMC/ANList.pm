@@ -23,7 +23,7 @@ use XML::Simple;
 use AMC::Basic;
 use Storable;
 
-my $VERSION=3;
+my $VERSION=4;
 
 %an_defaut=('action'=>'',
 	    'timestamp'=>0,
@@ -163,6 +163,8 @@ sub maj {
 	if($x->{'analyse'}->{$id}->{'transformation'}) {
 	    $an_dispos->{$id}->{'mse'}=$x->{'analyse'}->{$id}->{'transformation'}->{'mse'};
 	}
+
+	$an_dispos->{$id}->{'src'}=$x->{'analyse'}->{$id}->{'src'};
 
 	push @ids_modifies,$id;
 

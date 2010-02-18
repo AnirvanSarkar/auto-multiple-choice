@@ -12,7 +12,7 @@ TEST_TEX=$(TMPDIR)/auto-multiple-choice.tex
 SITEDOC=htdocs/auto-multiple-choice
 
 version:
-	../auto-qcm/derniere-version.pl --mode h --base ../auto-qcm/download-area/files/testing.pkg > $(HVERSION)
+	../auto-qcm/local/derniere-version.pl --mode h --base ../auto-qcm/download-area/files/testing.pkg > $(HVERSION)
 
 $(TEST_XML): FORCE
 	dpkg-deb -x $(TEST_DEB) $(TMPDIR)
