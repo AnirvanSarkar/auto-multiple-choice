@@ -279,16 +279,39 @@ if(! -d $o_dir) {
     }
 }
 
+# lecture/ecriture des fichiers de preferences
+
+sub pref_xx_lit {
+    my ($fichier)=@_;
+    if((! -f $fichier) || -z $fichier) {
+	return();
+    } else {
+	return(%{XMLin($fichier,SuppressEmpty => '')});
+    }
+}
+
+sub pref_xx_ecrit {
+    my ($data,$key,$fichier)=@_;
+    if(open my $fh,">:encoding(utf-8)",$fichier) {
+	XMLout($data,
+	       "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+	       "RootName"=>$key,'NoAttr'=>1,
+	       "OutputFile" => $fh,
+	       );
+	close $fh;
+	return(0);
+    } else {
+	return(1);
+    }
+}
+
 # lecture etat...
 
 sub sauve_state {
     if($state{'_modifie'}) {
 	debug "Sauvegarde de l'etat...";
 	
-	if(open(OPTS,">$state_file")) {
-	    print OPTS XMLout(\%state,"RootName"=>'AMCSTATE','NoAttr'=>1)."\n";
-	    close OPTS;
-	} else {
+	if(pref_xx_ecrit(\%state,'AMCState',$state_file)) {
 	    my $dialog = Gtk2::MessageDialog
 		->new($w{'main_window'},
 		      'destroy-with-parent',
@@ -296,13 +319,14 @@ sub sauve_state {
 		      "Erreur à l'ecriture du fichier d'état %s : %s",$state_file,$!);
 	    $dialog->run;
 	    $dialog->destroy;      
+	} else {
+	    $state{'_modifie'}=0;
 	}
-	$state{'_modifie'}=0;
     }
 }
 
 if(-r $state_file) {
-    %state=%{XMLin($state_file,SuppressEmpty => '')};
+    %state=pref_xx_lit($state_file);
 }
 
 $state{'_modifie'}=0;
@@ -326,7 +350,7 @@ $o_file=$o_dir."/cf.".$state{'profile'}.".xml";
 # lecture options ...
 
 if(-r $o_file) {
-    %o=%{XMLin($o_file,SuppressEmpty => '')};
+    %o=pref_xx_lit($o_file);
 }
 
 for my $k (keys %o_defaut) {
@@ -362,30 +386,30 @@ for my $k (keys %o_defaut) {
 	}
     }
 
-    $o{'_modifie'}=0;
-
-    # options passees en defaut_ entre version 0.226 et version 0.227
-
-    for(qw/encodage_liste encodage_csv/) {
-	if($o{"$_"} && ! $o{"defaut_$_"}) {
-	    $o{"defaut_$_"}=$o{"$_"};
-	    $o{'_modifie'}=1;
-	}
-    }
-
-    # XML::Writer utilise dans Association.pm n'accepte rien d'autre...
-    if($o{'encodage_interne'} ne 'UTF-8') {
-	$o{'encodage_interne'}='UTF-8';
-	$o{'_modifie'}=1;
-    }
-
-    # creation du repertoire si besoin (sinon la conf peut etre
-    # perturbee lors de Edition/Parametres)
-
-    mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
-    
 }
 
+$o{'_modifie'}=0;
+
+# options passees en defaut_ entre version 0.226 et version 0.227
+
+for(qw/encodage_liste encodage_csv/) {
+    if($o{"$_"} && ! $o{"defaut_$_"}) {
+	$o{"defaut_$_"}=$o{"$_"};
+	$o{'_modifie'}=1;
+    }
+}
+
+# XML::Writer utilise dans Association.pm n'accepte rien d'autre...
+if($o{'encodage_interne'} ne 'UTF-8') {
+    $o{'encodage_interne'}='UTF-8';
+    $o{'_modifie'}=1;
+}
+
+# creation du repertoire si besoin (sinon la conf peut etre
+# perturbee lors de Edition/Parametres)
+
+mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
+    
 ###
 
 my %projet=();
@@ -1042,19 +1066,13 @@ sub projet_charge_non {
 sub projet_sauve {
     debug "Sauvegarde du projet...";
     my $of=fich_options($projet{'nom'});
-    if(open(OPTS,">:encoding(utf-8)",$of)) {
-	my $po={%{$projet{'options'}}};
+    my $po={%{$projet{'options'}}};
 
-	for(qw/listeetudiants/) {
-	    $po->{$_}=relatif($po->{$_});
-	}
-
-	print OPTS XMLout($po,
-			  "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-			  "RootName"=>'projetAMC','NoAttr'=>1)."\n";
-	close OPTS;
-	$projet{'options'}->{'_modifie'}=0;
-    } else {
+    for(qw/listeetudiants/) {
+	$po->{$_}=relatif($po->{$_});
+    }
+    
+    if(pref_xx_ecrit($po,'projetAMC',$of)) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
@@ -1062,6 +1080,8 @@ sub projet_sauve {
 		  "Erreur à l'ecriture du fichier d'options %s : %s",$of,$!);
 	$dialog->run;
 	$dialog->destroy;      
+    } else {
+	$projet{'options'}->{'_modifie'}=0;
     }
 }
 
@@ -2181,11 +2201,7 @@ sub accepte_preferences {
 sub sauve_pref_generales {
     debug "Sauvegarde des preferences generales...";
 
-    if(open(OPTS,">$o_file")) {
-	print OPTS XMLout(\%o,"RootName"=>'AMC','NoAttr'=>1)."\n";
-	close OPTS;
-	$o{'_modifie'}=0;
-    } else {
+    if(pref_xx_ecrit(\%o,'AMC',$o_file)) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
@@ -2193,6 +2209,8 @@ sub sauve_pref_generales {
 		  "Erreur à l'ecriture du fichier d'options %s : %s",$o_file,$!);
 	$dialog->run;
 	$dialog->destroy;      
+    } else {
+	$o{'_modifie'}=0;
     }
 }
 
@@ -2878,7 +2896,7 @@ sub projet_ouvre {
 	    if(-f fich_options($proj)) {
 		debug "Lecture options du projet $proj...";
 		
-		$projet{'options'}=XMLin(fich_options($proj),SuppressEmpty => '');
+		$projet{'options'}={pref_xx_lit(fich_options($proj))};
 		
 		# pour effacer des trucs en trop venant d'un bug anterieur...
 		for(keys %{$projet{'options'}}) {
