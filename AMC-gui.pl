@@ -82,8 +82,11 @@ use constant {
 my $debug=0;
 my $debug_file='';
 
+my $profile='';
+
 GetOptions("debug!"=>\$debug,
 	   "debug-file=s"=>\$debug_file,
+	   "profile=s"=>\$profile,
 	   );
 
 if($debug_file) {
@@ -113,7 +116,9 @@ $glade_xml =~ s/\.p[ml]$/.glade/i;
 
 my $home_dir=Glib::get_home_dir();
 
-my $o_file=$home_dir.'/.AMC.xml';
+my $o_file='';
+my $o_dir=$home_dir.'/.AMC.d';
+my $state_file="$o_dir/state.xml";
 
 #chomp(my $encodage_systeme=eval { `locale charmap` });
 my $encodage_systeme=langinfo(CODESET());
@@ -240,6 +245,7 @@ my $mep_saved='mep.storable';
 my $an_saved='an.storable';
 
 my %o=();
+my %state=();
 
 # toutes les commandes prevues sont-elles accessibles ? Si non, on
 # avertit l'utilisateur
@@ -261,6 +267,59 @@ sub test_commandes {
 	$dialog->destroy;
     }
 }
+
+if(! -d $o_dir) {
+    mkdir($o_dir) or die "Impossible de creer $o_dir : $!";
+
+    # changement organisation des fichiers config generale (<=0.254)
+
+    if(-f $home_dir.'/.AMC.xml') {
+	debug "Deplacement de l'ancien fichier de config generale";
+	move($home_dir.'/.AMC.xml',$o_dir."/cf.default.xml");
+    }
+}
+
+# lecture etat...
+
+sub sauve_state {
+    if($state{'_modifie'}) {
+	debug "Sauvegarde de l'etat...";
+	
+	if(open(OPTS,">$state_file")) {
+	    print OPTS XMLout(\%state,"RootName"=>'AMCSTATE','NoAttr'=>1)."\n";
+	    close OPTS;
+	} else {
+	    my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
+						   'destroy-with-parent',
+						   'error', # message type
+						   'ok', # which set of buttons?
+						   "Erreur à l'ecriture du fichier d'état %s : %s",$state_file,$!);
+	    $dialog->run;
+	    $dialog->destroy;      
+	}
+	$state{'_modifie'}=0;
+    }
+}
+
+if(-r $state_file) {
+    %state=%{XMLin($state_file,SuppressEmpty => '')};
+}
+
+if(!$state{'profile'}) {
+    $state{'profile'}='default';
+    $state{'_modifie'}=1;
+}
+
+if($profile && $profile ne $state{'profile'}) {
+    $state{'profile'}=$profile;
+    $state{'_modifie'}=1;
+}
+
+sauve_state();
+
+debug "Profile : $state{'profile'}";
+
+$o_file=$o_dir."/cf.".$state{'profile'}.".xml";
 
 # lecture options ...
 
@@ -1925,7 +1984,11 @@ sub reprend_pref {
 	$wp=$w{$prefixe.'_f_'.$tgui};
 	if($wp) {
 	    if($wp->get_action =~ /-folder$/i) {
-		$n=$wp->get_current_folder();
+		if(-d $wp->get_filename()) {
+		    $n=$wp->get_filename();
+		} else {
+		    $n=$wp->get_current_folder();
+		}
 	    } else {
 		$n=$wp->get_filename();
 	    }
@@ -1973,6 +2036,7 @@ sub reprend_pref {
 	}
     }
     
+    debug "Modifications : $h->{'_modifie'}";
 }
 
 sub change_methode_impression {
@@ -2023,7 +2087,8 @@ sub accepte_preferences {
 
     test_commandes();
 
-    if($projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
+    if(defined($projet{'options'}->{'_modifie'})
+       && $projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
 	if($projet{'_an_list'}->nombre()>0) {
 	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
 							       'destroy-with-parent',
