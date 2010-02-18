@@ -305,6 +305,8 @@ if(-r $state_file) {
     %state=%{XMLin($state_file,SuppressEmpty => '')};
 }
 
+$state{'_modifie'}=0;
+
 if(!$state{'profile'}) {
     $state{'profile'}='default';
     $state{'_modifie'}=1;
@@ -1206,6 +1208,31 @@ sub autre_imprimante {
 }
 
 sub sujet_impressions {
+
+    if(! -f absolu($projet{'options'}->{'docs'}->[0])) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							   'destroy-with-parent',
+							   'error', # message type
+							   'ok', # which set of buttons?
+							   "Vous n'avez pas de sujet à imprimer : veuillez vérifier votre source LaTeX et mettre à jour les documents de travail.");
+	$dialog->run;
+	$dialog->destroy;
+	
+	return();
+    }
+
+    if($projet{'_mep_list'}->nombre==0) {
+	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							   'destroy-with-parent',
+							   'error', # message type
+							   'ok', # which set of buttons?
+							   "Aucune copie n'a été détectée sur le document de calage. Peut-être avez-vous oublié de calculer les mises en page ?");
+	$dialog->run;
+	$dialog->destroy;
+	
+	return();
+    }
+
     debug "Choix des impressions...";
 
     $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression');

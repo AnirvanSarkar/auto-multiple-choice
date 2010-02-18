@@ -143,6 +143,13 @@ sub execute {
     my $rerun=0;
     my $format='';
 
+    for my $ext (qw/pdf dvi ps/) {
+	if(-f $f_base.".$ext") {
+	    debug "Effacement de l'ancien $ext";
+	    unlink($f_base.".$ext");
+	}
+    }
+
     do {
 
 	$n_run++;
@@ -223,10 +230,18 @@ sub execute {
     debug "Format de sortie : $format\n";
 
     if($format eq 'dvi') {
-	system("dvips","-q",$f_base,"-o",$f_base.".ps");
-	print "Erreur dvips : $?\n" if($?);
-	system("ps2pdf",$f_base.".ps",$f_base.".pdf");
-	print "Erreur ps2pdf : $?\n" if($?);
+	if(-f $f_base.".dvi") {
+	    system("dvips","-q",$f_base,"-o",$f_base.".ps");
+	    print "Erreur dvips : $?\n" if($?);
+	    if(-f $f_base.".ps") {
+		system("ps2pdf",$f_base.".ps",$f_base.".pdf");
+		print "Erreur ps2pdf : $?\n" if($?);
+	    } else {
+		debug "Pas de PS";
+	    }
+	} else {
+	    debug "Pas de DVI";
+	}
     }
 
     print join('',@erreurs_msg);
@@ -281,6 +296,17 @@ $f_base =~ s/\.tex$//i;
 
 $prefix=$f_base."-" if(!$prefix);
 
+sub transfere {
+    my ($orig,$dest)=@_;
+    if(-f $orig) {
+	debug "Transfert $orig --> $dest";
+	move($orig,$dest);
+    } else {
+	debug "Pas de source : j'efface $dest";
+	unlink($dest);
+    }
+}
+
 sub latex_cmd {
     my (%o)=@_;
 
@@ -296,11 +322,11 @@ if($mode =~ /k/) {
     # CORRECTION INDIVIDUELLE
 
     execute(latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/));
+    transfere("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
 	exit(1);
     }
-    move("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
 }
 
 if($mode =~ /s/) {
@@ -308,17 +334,29 @@ if($mode =~ /s/) {
 
     my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
 
+    $out_calage=$prefix."calage.pdf" if(!$out_calage);
+    $out_corrige=$prefix."corrige.pdf" if(!$out_corrige);
+    $out_sujet=$prefix."sujet.pdf" if(!$out_sujet);
+
+    for my $f ($out_calage,$out_corrige,$out_sujet) {
+	if(-f $f) {
+	    debug "Effacement du fichier deja present : $f";
+	    unlink($f);
+	}
+    }
+	       
+
     # 1) document de calage
 
     $analyse_q=1;
     execute(latex_cmd(%opts,'CalibrationExterne'=>1));
     $analyse_q='';
+    transfere("$f_base.pdf",$out_calage);
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
 	exit(1);
     }
     exit(1) if($a_erreurs>0);
-    move("$f_base.pdf",($out_calage ? $out_calage : $prefix."calage.pdf"));
 
     # transmission des variables
 
@@ -330,20 +368,20 @@ if($mode =~ /s/) {
     # 2) compilation de la correction
 
     execute(latex_cmd(%opts,'CorrigeExterne'=>1));
+    transfere("$f_base.pdf",$out_corrige);
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
 	exit(1);
     }
-    move("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
 
     # 3) compilation du sujet
 
     execute(latex_cmd(%opts,'SujetExterne'=>1));
+    transfere("$f_base.pdf",$out_sujet);
     if($n_erreurs>0) {
 	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
 	exit(1);
     }
-    move("$f_base.pdf",($out_sujet ? $out_sujet : $prefix."sujet.pdf"));
 
 }
 
