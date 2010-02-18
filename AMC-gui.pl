@@ -1910,6 +1910,7 @@ sub transmet_pref {
 # met a jour les preferences depuis les widgets correspondants
 sub reprend_pref {
     my ($prefixe,$h,$oprefix)=@_;
+    $h->{'_modifie'}=($h->{'_modifie'} ? 1 : '');
 
     for my $t (keys %$h) {
 	my $tgui=$t;
@@ -1918,7 +1919,7 @@ sub reprend_pref {
 	my $wp=$w{$prefixe.'_x_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_text();
-	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_f_'.$tgui};
@@ -1928,31 +1929,31 @@ sub reprend_pref {
 	    } else {
 		$n=$wp->get_filename();
 	    }
-	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_v_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_active();
-	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_s_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_value();
-	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_col_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_color()->to_string();
-	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_cb_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_active();
-	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_c_'.$tgui};
@@ -1967,7 +1968,7 @@ sub reprend_pref {
 	    } else {
 		$n=$wp->get_active();
 	    }
-	    $h->{'_modifie'}=1 if($h->{$t} ne $n);
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
     }
@@ -2021,6 +2022,23 @@ sub accepte_preferences {
     sauve_pref_generales();
 
     test_commandes();
+
+    if($projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
+	if($projet{'_an_list'}->nombre()>0) {
+	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
+							       'destroy-with-parent',
+							       'question', # message type
+							       'yes-no', # which set of buttons?
+							       "Vous avez modifié le seuil de noirceur. Si vous avez déjà effectué une saisie automatique, les zooms fabriqués pour chaque copie ne sont plus correctement organisés. Voulez-vous les refabriquer ? Cela prend un peu de temps. Vous pouvez aussi les refabriquer plus tard grâce à l'action <i>re-extraire les zooms</i> du menu <i>Outils</i>.");
+	my $reponse=$dialog->run;
+	$dialog->destroy;      
+	
+	if($reponse eq 'yes') {
+	    activate_zoom_maj();	    
+	} 
+	    
+	}
+    }
 }
 
 sub sauve_pref_generales {
