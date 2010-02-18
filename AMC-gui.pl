@@ -258,11 +258,11 @@ sub test_commandes {
 	push @pasbon,$nc if(!commande_accessible($nc));
     }
     if(@pasbon) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'warning', # message type
-					       'ok', # which set of buttons?
-					       "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant <i>Préférences</i> dans le menu <i>Édition</i>.");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'warning','ok',
+			      "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant <i>Préférences</i> dans le menu <i>Édition</i>.");
 	$dialog->run;
 	$dialog->destroy;
     }
@@ -289,11 +289,11 @@ sub sauve_state {
 	    print OPTS XMLout(\%state,"RootName"=>'AMCSTATE','NoAttr'=>1)."\n";
 	    close OPTS;
 	} else {
-	    my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-						   'destroy-with-parent',
-						   'error', # message type
-						   'ok', # which set of buttons?
-						   "Erreur à l'ecriture du fichier d'état %s : %s",$state_file,$!);
+	    my $dialog = Gtk2::MessageDialog
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'error','ok',
+		      "Erreur à l'ecriture du fichier d'état %s : %s",$state_file,$!);
 	    $dialog->run;
 	    $dialog->destroy;      
 	}
@@ -474,17 +474,50 @@ sub debug_set {
     set_debug($debug);
     debug "DEBUG MODE : ON" if($debug);
     if($debug) {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'info', # message type
-					       'ok', # which set of buttons?
-					       "Passage en mode débogage. Les informations de débogage de cette session seront disponibles dans le fichier ".AMC::Basic::debug_file());
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'info','ok',
+		  "Passage en mode débogage. Les informations de débogage de cette session seront disponibles dans le fichier ".AMC::Basic::debug_file());
 	$dialog->run;
 	$dialog->destroy;
     }
 }
 
 $w{'menu_debug'}->set_active($debug);
+
+###
+
+sub dialogue_apprentissage {
+    my ($key,@oo)=@_;
+    if(!$state{'apprentissage'}->{$key}) {
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'info',
+			      'ok',
+			      @oo);
+
+	my $garde=Gtk2::CheckButton->new("Conserver ce message la prochaine fois");
+	$garde->set_active(0);
+	$garde->can_focus(0);
+
+	$dialog->get_content_area()->add($garde);
+	$dialog->show_all();
+	
+	$dialog->run;
+
+	if(!$garde->get_active()) {
+	    debug "Apprentissage : $key";
+	    $state{'apprentissage'}->{$key}=1;
+	    $state{'_modifie'}=1;
+	    sauve_state();
+	}
+
+	$dialog->destroy;
+	
+    }
+}
 
 ### modele documents
 
@@ -755,11 +788,11 @@ sub exporte {
 		 if(-f $output) {
 		     commande_parallele($o{$ext.'_viewer'},$output);
 		 } else {
-		     my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-							    'destroy-with-parent',
-							    'warning', # message type
-							    'ok', # which set of buttons?
-							    "L'export des notes dans le fichier $output n'a sans doute pas fonctionné, car ce dernier fichier est inexistant...");
+		     my $dialog = Gtk2::MessageDialog
+			 ->new($w{'main_window'},
+			       'destroy-with-parent',
+			       'warning','ok',
+			       "L'export des notes dans le fichier $output n'a sans doute pas fonctionné, car ce dernier fichier est inexistant...");
 		     $dialog->run;
 		     $dialog->destroy;
 		 }
@@ -868,11 +901,11 @@ sub commande_parallele {
 	    exit(0);
 	}
     } else {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "La commande suivante n'a pas pu être exécutée : <b>$c[0]</b>. Peut-être est-ce dû à une mauvaise configuration ?");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "La commande suivante n'a pas pu être exécutée : <b>$c[0]</b>. Peut-être est-ce dû à une mauvaise configuration ?");
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -946,11 +979,11 @@ sub projet_charge {
 	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
 	
     } else {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'info', # message type
-					       'ok', # which set of buttons?
-					       "Vous n'avez aucun projet de QCM dans le répertoire %s !",$o{'rep_projets'});
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'info','ok',
+		  "Vous n'avez aucun projet de QCM dans le répertoire %s !",$o{'rep_projets'});
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -984,11 +1017,11 @@ sub projet_charge_nouveau {
 
     if(-e $o{'rep_projets'}."/$proj") {
 
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       sprintf("Le nom <b>%s</b> est déjà utilisé dans le répertoire des projets. Pour créer un nouveau projet, il faut choisir un autre nom.",$proj));
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      sprintf("Le nom <b>%s</b> est déjà utilisé dans le répertoire des projets. Pour créer un nouveau projet, il faut choisir un autre nom.",$proj));
 	$dialog->run;
 	$dialog->destroy;      
 	
@@ -1022,11 +1055,11 @@ sub projet_sauve {
 	close OPTS;
 	$projet{'options'}->{'_modifie'}=0;
     } else {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "Erreur à l'ecriture du fichier d'options %s : %s",$of,$!);
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok',
+		  "Erreur à l'ecriture du fichier d'options %s : %s",$of,$!);
 	$dialog->run;
 	$dialog->destroy;      
     }
@@ -1064,11 +1097,11 @@ sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
 sub doc_maj {
     my $sur=0;
     if($projet{'_an_list'}->nombre()>0) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'warning', # message type
-					       'ok-cancel', # which set of buttons?
-					       "L'analyse de certaines copies a déjà été effectuée sur la base des documents de travail actuels. Vous avez donc vraisemblablement déjà effectué l'examen sur la base de ces documents. Si vous modifiez les documents de travail, vous ne serez plus en mesure d'analyser les copies que vous avez déjà distribué ! Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'warning','ok-cancel',
+			      "L'analyse de certaines copies a déjà été effectuée sur la base des documents de travail actuels. Vous avez donc vraisemblablement déjà effectué l'examen sur la base de ces documents. Si vous modifiez les documents de travail, vous ne serez plus en mesure d'analyser les copies que vous avez déjà distribué ! Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
 	my $reponse=$dialog->run;
 	$dialog->destroy;      
 	
@@ -1083,11 +1116,11 @@ sub doc_maj {
     my @meps=fichiers_mep();
     if(@meps) {
 	if(!$sur) {
-	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							       'destroy-with-parent',
-							       'question', # message type
-							       'ok-cancel', # which set of buttons?
-							       "Certaines mises en page on déjà été calculées pour les documents actuels. En refabriquant les documents de travail, les mises en page deviendront obsolètes et seront donc effacées. Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'question','ok-cancel',
+				  "Certaines mises en page on déjà été calculées pour les documents actuels. En refabriquant les documents de travail, les mises en page deviendront obsolètes et seront donc effacées. Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;      
 	    
@@ -1120,13 +1153,22 @@ sub doc_maj {
 		 my $c=shift;
 		 my @err=$c->erreurs();
 		 if(@err) {
-		     my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-									'destroy-with-parent',
-									'error', # message type
-									'ok', # which set of buttons?
-									"La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(Seules les dix premières erreurs ont été retranscrites)</i>": "") );
+		     my $dialog = Gtk2::MessageDialog
+			 ->new_with_markup($w{'main_window'},
+					   'destroy-with-parent',
+					   'error','ok',
+					   "La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(Seules les dix premières erreurs ont été retranscrites)</i>": "") );
 		     $dialog->run;
 		     $dialog->destroy;
+		 } else {
+		     # verif que tout y est
+
+		     my $ok=1;
+		     for(0..2) {
+			 $ok=0 if(! -f absolu($projet{'options'}->{'docs'}->[$_]));
+		     }
+		     dialogue_apprentissage('MAJ_DOCS_OK',
+					    "Les documents de travail ont bien été générés. Vous pouvez y jeter un oeuil grâce à un double-clic sur les lignes de la liste correspondante. Si tout vous parraît correct, l'étape suivante est la détection des mises en page...") if($ok);
 		 }
 
 		 my $ap=($c->variable('ensemble') ? 'case' : 'marge');
@@ -1135,11 +1177,11 @@ sub doc_maj {
 		 $projet{'options'}->{'annote_position'}=$ap;
 
 		 if($c->variable('ensemble') && $projet{'options'}->{'seuil'}<0.4) {
-		     my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-									'destroy-with-parent',
-									'question', # message type
-									'yes-no', # which set of buttons?
-									sprintf("Votre sujet propose une feuille de réponses séparée. Dans ce cas, des lettres sont inscrites dans les cases à cocher. Pour une bonne détection des cases à cocher, il faut donc demander aux étudiants de remplir totalement les cases voulues, et aussi fixer le paramètre \"seuil de noirceur\" du projet à une valeur de l'ordre de 0.5. Pour l'instant, la valeur de ce paramètre est %.02f. Voulez-vous changer cette valeur en 0.5 ?",$projet{'options'}->{'seuil'}) );
+		     my $dialog = Gtk2::MessageDialog
+			 ->new_with_markup($w{'main_window'},
+					   'destroy-with-parent',
+					   'question','yes-no',
+					   sprintf("Votre sujet propose une feuille de réponses séparée. Dans ce cas, des lettres sont inscrites dans les cases à cocher. Pour une bonne détection des cases à cocher, il faut donc demander aux étudiants de remplir totalement les cases voulues, et aussi fixer le paramètre \"seuil de noirceur\" du projet à une valeur de l'ordre de 0.5. Pour l'instant, la valeur de ce paramètre est %.02f. Voulez-vous changer cette valeur en 0.5 ?",$projet{'options'}->{'seuil'}) );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
 		     if($reponse) {
@@ -1210,11 +1252,11 @@ sub autre_imprimante {
 sub sujet_impressions {
 
     if(! -f absolu($projet{'options'}->{'docs'}->[0])) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							   'destroy-with-parent',
-							   'error', # message type
-							   'ok', # which set of buttons?
-							   "Vous n'avez pas de sujet à imprimer : veuillez vérifier votre source LaTeX et mettre à jour les documents de travail.");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "Vous n'avez pas de sujet à imprimer : veuillez vérifier votre source LaTeX et mettre à jour les documents de travail.");
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1222,11 +1264,11 @@ sub sujet_impressions {
     }
 
     if($projet{'_mep_list'}->nombre==0) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							   'destroy-with-parent',
-							   'error', # message type
-							   'ok', # which set of buttons?
-							   "Aucune copie n'a été détectée sur le document de calage. Peut-être avez-vous oublié de calculer les mises en page ?");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "Aucune copie n'a été détectée sur le document de calage. Peut-être avez-vous oublié de calculer les mises en page ?");
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1404,14 +1446,17 @@ sub calcule_mep {
 		 if($projet{'_mep_list'}->nombre()<1) {
 		     # avertissement...
 		     my $dialog = Gtk2::MessageDialog
-			 ->new_with_markup ($w{'main_window'},
-					    'destroy-with-parent',
-					    'error', # message type
-					    'ok', # which set of buttons?
-					    "Aucune mise en page n'a été fabriquée. <b>Ne faites pas passer l'examen</b> avant d'avoir réglé le problème, sinon vous ne pourrez pas utiliser AMC pour la correction.");
+			 ->new_with_markup($w{'main_window'},
+					   'destroy-with-parent',
+					   'error', # message type
+					   'ok', # which set of buttons?
+					   "Aucune mise en page n'a été fabriquée. <b>Ne faites pas passer l'examen</b> avant d'avoir réglé le problème, sinon vous ne pourrez pas utiliser AMC pour la correction.");
 		     $dialog->run;
 		     $dialog->destroy;
 		     
+		 } else {
+		     dialogue_apprentissage('MAJ_MEP_OK',
+					    "Les mises en page sont maintenant détectées. Vous pouvez vérifier que tout est correct en ouvrant la fenêtre de saisie manuelle (dans l' onglet <i>Saisie</i>) et en navigant dans les pages du sujet pour vérifier que les cases à cocher sont bien marquées en rouge à la bonne position (mais attention à ne pas cliquer dans ces cases). Vous pouvez ensuite passer à l'impression des copies et faire passer l'examen.");
 		 }
 	     });
 }
@@ -1439,11 +1484,11 @@ sub saisie_manuelle {
 				     'en_quittant'=>\&detecte_analyse,
 				     );
     } else {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "Aucune mise en page n'est disponible pour ce projet. Veuillez utiliser le bouton <i>calculer les mises en page</i> de l'onglet <i>préparation</i> avant la saisie manuelle.");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "Aucune mise en page n'est disponible pour ce projet. Veuillez utiliser le bouton <i>calculer les mises en page</i> de l'onglet <i>préparation</i> avant la saisie manuelle.");
 	$dialog->run;
 	$dialog->destroy;      
     }
@@ -1548,11 +1593,11 @@ sub valide_liste {
 
     if($err) {
 	if(!$oo{'noinfo'}) {
-	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							       'destroy-with-parent',
-							       'error', # message type
-							       'ok', # which set of buttons?
-							       "Le fichier choisi ne convient pas : $err erreurs détectées, la première en ligne $errlig.");
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'error','ok',
+				  "Le fichier choisi ne convient pas : $err erreurs détectées, la première en ligne $errlig.");
 	    $dialog->run;
 	    $dialog->destroy;
 	}
@@ -1587,20 +1632,20 @@ sub associe {
 					  'encodage_interne'=>$o{'encodage_interne'},
 					  );
 	if($ga->{'erreur'}) {
-	    my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-						   'destroy-with-parent',
-						   'error', # message type
-						   'ok', # which set of buttons?
-						   $ga->{'erreur'});
+	    my $dialog = Gtk2::MessageDialog
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'error','ok',
+		      $ga->{'erreur'});
 	    $dialog->run;
 	    $dialog->destroy;
 	}
     } else {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'info', # message type
-					       'ok', # which set of buttons?
-					       "Avant d'associer les noms aux copies, il faut indiquer un fichier de liste des étudiants dans l'onglet « Saisie ».");
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'info','ok',
+		  "Avant d'associer les noms aux copies, il faut indiquer un fichier de liste des étudiants dans l'onglet « Saisie ».");
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1609,27 +1654,27 @@ sub associe {
 
 sub associe_auto {
     if(! -s absolu($projet{'options'}->{'listeetudiants'})) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "Il faut tout d'abord choisir un fichier contenant la liste des étudiants");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "Il faut tout d'abord choisir un fichier contenant la liste des étudiants");
 	$dialog->run;
 	$dialog->destroy;
     } elsif(!$projet{'options'}->{'liste_key'}) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "Aucun identifiant n'a été choisi parmi les titres de colonnes du fichier contenant la liste des étudiants. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "Aucun identifiant n'a été choisi parmi les titres de colonnes du fichier contenant la liste des étudiants. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
 	$dialog->run;
 	$dialog->destroy;
     } elsif(! $projet{'options'}->{'assoc_code'}) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "Aucun code n'a été choisi parmi les codes (éventuellement fabriqués avec la commande LaTeX \\AMCcode) disponibles. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "Aucun code n'a été choisi parmi les codes (éventuellement fabriqués avec la commande LaTeX \\AMCcode) disponibles. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
 	$dialog->run;
 	$dialog->destroy;
     } else {
@@ -1687,11 +1732,11 @@ sub voir_notes {
     if(-f absolu($projet{'options'}->{'notes'})) {
 	my $n=AMC::Gui::Notes::new('fichier'=>absolu($projet{'options'}->{'notes'}));
     } else {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'info', # message type
-					       'ok', # which set of buttons?
-					       "Les copies ne sont pas encore corrigées : veuillez d'abord utiliser le bouton « Corriger ».");
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'info','ok',
+		  "Les copies ne sont pas encore corrigées : veuillez d'abord utiliser le bouton « Corriger ».");
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1891,11 +1936,11 @@ sub activate_doc {
 # mise a jour des zooms depuis le menu par ex.
 sub activate_zoom_maj {
     if($projet{'_an_list'}->nombre()==0) {
-	my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							   'destroy-with-parent',
-							   'error', # message type
-							   'ok', # which set of buttons?
-							   "Aucune saisie automatique n'a été effectuée : il n'y a donc pas de zooms à reconstruire...");
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      "Aucune saisie automatique n'a été effectuée : il n'y a donc pas de zooms à reconstruire...");
 	$dialog->run;
 	$dialog->destroy;      
 	return(0);
@@ -2117,17 +2162,17 @@ sub accepte_preferences {
     if(defined($projet{'options'}->{'_modifie'})
        && $projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
 	if($projet{'_an_list'}->nombre()>0) {
-	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							       'destroy-with-parent',
-							       'question', # message type
-							       'yes-no', # which set of buttons?
-							       "Vous avez modifié le seuil de noirceur. Si vous avez déjà effectué une saisie automatique, les zooms fabriqués pour chaque copie ne sont plus correctement organisés. Voulez-vous les refabriquer ? Cela prend un peu de temps. Vous pouvez aussi les refabriquer plus tard grâce à l'action <i>re-extraire les zooms</i> du menu <i>Outils</i>.");
-	my $reponse=$dialog->run;
-	$dialog->destroy;      
-	
-	if($reponse eq 'yes') {
-	    activate_zoom_maj();	    
-	} 
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'question','yes-no',
+				  "Vous avez modifié le seuil de noirceur. Si vous avez déjà effectué une saisie automatique, les zooms fabriqués pour chaque copie ne sont plus correctement organisés. Voulez-vous les refabriquer ? Cela prend un peu de temps. Vous pouvez aussi les refabriquer plus tard grâce à l'action <i>re-extraire les zooms</i> du menu <i>Outils</i>.");
+	    my $reponse=$dialog->run;
+	    $dialog->destroy;      
+	    
+	    if($reponse eq 'yes') {
+		activate_zoom_maj();	    
+	    } 
 	    
 	}
     }
@@ -2141,11 +2186,11 @@ sub sauve_pref_generales {
 	close OPTS;
 	$o{'_modifie'}=0;
     } else {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "Erreur à l'ecriture du fichier d'options %s : %s",$o_file,$!);
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok',
+		  "Erreur à l'ecriture du fichier d'options %s : %s",$o_file,$!);
 	$dialog->run;
 	$dialog->destroy;      
     }
@@ -2370,12 +2415,12 @@ sub set_source_tex {
 }
 
 sub source_latex_montre_nom {
-    my $dialog = Gtk2::MessageDialog->new($w{'main_window'},
-					  'destroy-with-parent',
-					  'info', # message type
-					  'ok', # which set of buttons?
-					  "Le fichier LaTeX qui décrit le QCM de ce projet est situé à l'emplacement suivant :\n%s",
-					  ($projet{'options'}->{'texsrc'} ? absolu($projet{'options'}->{'texsrc'}) : "(aucun fichier)" ));
+    my $dialog = Gtk2::MessageDialog
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'info','ok',
+	      "Le fichier LaTeX qui décrit le QCM de ce projet est situé à l'emplacement suivant :\n%s",
+	      ($projet{'options'}->{'texsrc'} ? absolu($projet{'options'}->{'texsrc'}) : "(aucun fichier)" ));
     $dialog->run;
     $dialog->destroy;
 }
@@ -2585,11 +2630,11 @@ sub source_latex_choisir {
 	my ($n,$suivant)=n_fich($temp_dir);
 
 	if($rv || $n==0) {
-	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							       'destroy-with-parent',
-							       'error', # message type
-							       'ok', # which set of buttons?
-							       sprintf("Rien n'a pu être extrait du fichier %s. Vérifiez qu'il est correct.",$f));
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'error','ok',
+				  sprintf("Rien n'a pu être extrait du fichier %s. Vérifiez qu'il est correct.",$f));
 	    $dialog->run;
 	    $dialog->destroy;
 	    return(0);
@@ -2635,11 +2680,11 @@ sub source_latex_choisir {
 
 	my $sl=absolu('source.tex');
 	if(-e $sl) {
-	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							       'destroy-with-parent',
-							       'error', # message type
-							       'ok', # which set of buttons?
-							       sprintf("Un fichier <i>source.tex</i> existe déjà dans le répertoire du projet %s. Je ne l'ai pas effacé et il servira de fichier source.",$projet{'nom'}));
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'error','ok',
+				  sprintf("Un fichier <i>source.tex</i> existe déjà dans le répertoire du projet %s. Je ne l'ai pas effacé et il servira de fichier source.",$projet{'nom'}));
 	    $dialog->run;
 	    $dialog->destroy;      
 	    
@@ -2720,11 +2765,11 @@ sub importe_source {
     return() if(is_local($projet{'options'}->{'texsrc'},1));
 
     if(-f $dest) {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'yes-no', # which set of buttons?
-					       "Le fichier %s existe déjà dans le répertoire projet : voulez-vous écraser son ancien contenu ? Cliquez sur oui pour remplacer le fichier pré-existant par celui que vous venez de sélectionner, ou sur non pour annuler l'import du fichier source.",$fb);
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','yes-no',
+		  "Le fichier %s existe déjà dans le répertoire projet : voulez-vous écraser son ancien contenu ? Cliquez sur oui pour remplacer le fichier pré-existant par celui que vous venez de sélectionner, ou sur non pour annuler l'import du fichier source.",$fb);
 	my $reponse=$dialog->run;
 	$dialog->destroy;      
 
@@ -2736,19 +2781,19 @@ sub importe_source {
     if(copy_latex(absolu($projet{'options'}->{'texsrc'}),$dest)) {
 	$projet{'options'}->{'texsrc'}=relatif($dest);
 	set_source_tex();
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'info', # message type
-					       'ok', # which set of buttons?
-					       "Le fichier LaTeX a été copié dans le répertoire projet. Vous pouvez maintenant l'éditer soit en utilisant le bouton \"Éditer le fichier LaTeX\", soit directement grâce au logiciel de votre choix.");
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'info','ok',
+		  "Le fichier LaTeX a été copié dans le répertoire projet. Vous pouvez maintenant l'éditer soit en utilisant le bouton \"Éditer le fichier LaTeX\", soit directement grâce au logiciel de votre choix.");
 	$dialog->run;
 	$dialog->destroy;   
     } else {
-	my $dialog = Gtk2::MessageDialog->new ($w{'main_window'},
-					       'destroy-with-parent',
-					       'error', # message type
-					       'ok', # which set of buttons?
-					       "Erreur durant la copie du fichier source : %s",$!);
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok',
+		  "Erreur durant la copie du fichier source : %s",$!);
 	$dialog->run;
 	$dialog->destroy;      
     }
@@ -2893,11 +2938,11 @@ sub quitte_projet {
 	valide_options_notation();
 	
 	if($projet{'options'}->{'_modifie'}) {
-	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-						   'destroy-with-parent',
-						   'question', # message type
-						   'yes-no', # which set of buttons?
-						   sprintf("Vous n'avez pas sauvegardé les options du projet <i>%s</i>, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?",$projet{'nom'}));
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'question','yes-no',
+				  sprintf("Vous n'avez pas sauvegardé les options du projet <i>%s</i>, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?",$projet{'nom'}));
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;      
 	    
@@ -2929,11 +2974,11 @@ sub quitter {
 
     if($o{'_modifie'}) {
 	if(!$ok) {
-	    my $dialog = Gtk2::MessageDialog->new_with_markup ($w{'main_window'},
-							       'destroy-with-parent',
-							       'question', # message type
-							       'yes-no', # which set of buttons?
-							       "Vous n'avez pas sauvegardé les options générales, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?");
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'question','yes-no',
+				  "Vous n'avez pas sauvegardé les options générales, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?");
 	    $reponse=$dialog->run;
 	    $dialog->destroy;      
 	}
