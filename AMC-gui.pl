@@ -970,9 +970,9 @@ sub projet_charge {
 	my $gp=Gtk2::GladeXML->new($glade_xml,'choix_projet');
 	$gp->signal_autoconnect_from_package('main');
 
-	for(qw/choix_projet choix_projets_liste
+	for(qw/choix_projet deja_la choix_projets_liste
 	    projet_bouton_ouverture projet_bouton_creation
-	    projet_nom projet_nouveau/) {
+	    projet_nom projet_nouveau_syntaxe projet_nouveau/) {
 	    $w{$_}=$gp->get_widget($_);
 	}
 
@@ -980,7 +980,12 @@ sub projet_charge {
 	    $w{'projet_nouveau'}->show();
 	    $w{'projet_bouton_creation'}->show();
 	    $w{'projet_bouton_ouverture'}->hide();
-	}
+
+	    $w{'deja_la'}->set_text("Projets déjà existants :");
+
+	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
+
+	    $w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;	}
 
 	# mise a jour liste des projets dans la fenetre
 	
@@ -1001,7 +1006,7 @@ sub projet_charge {
 	}
 
 	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
-	
+
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
@@ -1028,6 +1033,22 @@ sub projet_charge_ok {
     $w{'choix_projet'}->destroy();
 
     projet_ouvre($proj) if($proj);
+}
+
+sub projet_nom_verif {
+    my $nom=$w{'projet_nom'}->get_text();
+    if($nom =~ s/[^a-zA-Z0-9._+:-]//g) {
+	$w{'projet_nom'}->set_text($nom);
+	$w{'projet_nouveau_syntaxe'}->show();
+
+	for(qw/normal active/) {
+	    $w{'projet_nom'}->modify_base($_,Gtk2::Gdk::Color->parse('#FFC0C0'));
+	}
+	Glib::Timeout->add (500, sub {
+	    $w{'projet_nom'}->modify_style($w{'projet_nom_style'});
+	    return 0;
+	});
+    }
 }
 
 sub projet_charge_nouveau {

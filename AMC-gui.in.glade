@@ -2489,8 +2489,6 @@ copy of the Program in return for a fee.
     </child>
   </widget>
   <widget class="GtkDialog" id="choix_projet">
-    <property name="width_request">300</property>
-    <property name="height_request">400</property>
     <property name="visible">True</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Ouverture d'un projet de QCM</property>
@@ -2511,7 +2509,7 @@ copy of the Program in return for a fee.
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <widget class="GtkLabel" id="label19">
+              <widget class="GtkLabel" id="deja_la">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Ouverture d'un projet existant :</property>
               </widget>
@@ -2528,12 +2526,14 @@ copy of the Program in return for a fee.
                 <property name="vscrollbar_policy">automatic</property>
                 <child>
                   <widget class="GtkIconView" id="choix_projets_liste">
+                    <property name="height_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="orientation">horizontal</property>
-                    <property name="row_spacing">2</property>
-                    <property name="column_spacing">2</property>
+                    <property name="row_spacing">1</property>
+                    <property name="column_spacing">1</property>
                     <property name="margin">4</property>
+                    <property name="item_padding">2</property>
                     <signal name="item_activated" handler="projet_charge_ok"/>
                   </widget>
                 </child>
@@ -2590,7 +2590,8 @@ copy of the Program in return for a fee.
                   <widget class="GtkEntry" id="projet_nom">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="has_focus">True</property>
+                    <property name="invisible_char">&#x2022;</property>
+                    <signal name="changed" handler="projet_nom_verif"/>
                   </widget>
                   <packing>
                     <property name="position">1</property>
@@ -2600,6 +2601,18 @@ copy of the Program in return for a fee.
               <packing>
                 <property name="expand">False</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="projet_nouveau_syntaxe">
+                <property name="visible">True</property>
+                <property name="ypad">5</property>
+                <property name="label" translatable="yes">&lt;b&gt;Note :&lt;/b&gt; Un nom de projet ne peut contenir que des carat&#xE8;res alphanum&#xE9;riques et quelques autres caract&#xE8;res simples (-_+.:).</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+              </widget>
+              <packing>
+                <property name="position">2</property>
               </packing>
             </child>
           </widget>
@@ -2613,21 +2626,6 @@ copy of the Program in return for a fee.
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
-              <widget class="GtkButton" id="projet_bouton_ouverture">
-                <property name="label">gtk-open</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="projet_charge_ok"/>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkButton" id="button9">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
@@ -2639,7 +2637,7 @@ copy of the Program in return for a fee.
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">1</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -2648,10 +2646,10 @@ copy of the Program in return for a fee.
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="projet_charge_nouveau"/>
                 <child>
-                  <widget class="GtkHBox" id="hbox14">
+                  <widget class="GtkHBox" id="hbox27">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkImage" id="image7">
+                      <widget class="GtkImage" id="image21">
                         <property name="visible">True</property>
                         <property name="stock">gtk-new</property>
                       </widget>
@@ -2660,7 +2658,7 @@ copy of the Program in return for a fee.
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="label74">
+                      <widget class="GtkLabel" id="label129">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Cr&#xE9;er un projet</property>
                       </widget>
@@ -2670,6 +2668,21 @@ copy of the Program in return for a fee.
                     </child>
                   </widget>
                 </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="projet_bouton_ouverture">
+                <property name="label">gtk-open</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="projet_charge_ok"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
