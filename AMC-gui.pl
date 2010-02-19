@@ -1594,7 +1594,7 @@ sub saisie_auto_ok {
 			 push @fe,[$1,$2];
 		     }
 		 }
-		 detecte_analyse('erreurs'=>\@fe);
+		 detecte_analyse('erreurs'=>\@fe,'apprend'=>1);
 	     }
 	     );
     
@@ -2182,6 +2182,10 @@ sub accepte_preferences {
     if(defined($projet{'options'}->{'_modifie'})
        && $projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
 	if($projet{'_an_list'}->nombre()>0) {
+	    # mise a jour de la liste diagnostic
+	    detecte_analyse('ids_m'=>[$projet{'_an_list'}->ids()]);
+
+	    # recalcul des zooms ?
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
@@ -2422,6 +2426,22 @@ sub detecte_analyse {
     $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
     $w{'commande'}->hide() if(!$oo{'interne'});
     Gtk2->main_iteration while ( Gtk2->events_pending );
+
+    # dialogue apprentissage :
+
+    if($oo{'apprend'}) {
+	dialogue_apprentissage('SAISIE_AUTO',
+			       "La saisie automatique de vos scans est maintenant terminée. "
+			       .($r{'incomplet'}>0 ? sprintf("Elle n'est pas complète (il manque certaines pages pour %d copie(s)). ",$r{'incomplet'}) : '')
+			       ."Vous pouvez analyser la qualité de la détection grâce à la valeur des indicateurs donnée dans la liste des analyses :"
+			       ."\n"
+			       ."- <b>EQM</b> représente l'écart de positionnement des quatre marques de coin. Une grande valeur signale une déformation anormale de la page."
+			       ."\n"
+			       ."- une grande valeur de <b>sensibilité</b> correspond à une situation dans laquelle le taux de remplissage de certaines cases est très proche du seuil défini."
+			       ."\n"
+			       ."Vous pouvez aussi observer le calage du scan (<i>page</i>) ainsi que les cases cochées ou non (<i>zooms</i>) en utilisant le menu déployé par un clic-droit sur chaque ligne du tableau <i>Diagnostic</i>."
+			       );
+    }
 
 }
 
