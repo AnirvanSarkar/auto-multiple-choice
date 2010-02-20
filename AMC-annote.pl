@@ -35,6 +35,7 @@ $VERSION_BAREME=2;
 
 my $cr_dir="";
 my $rep_projet='';
+my $rep_projets='';
 my $fichnotes='';
 my $fich_bareme='';
 
@@ -68,6 +69,7 @@ my %symboles=(
 
 GetOptions("cr=s"=>\$cr_dir,
 	   "projet=s",\$rep_projet,
+	   "projets=s",\$rep_projets,
 	   "an-saved=s"=>\$an_saved,
 	   "bareme=s"=>\$fich_bareme,
 	   "notes=s"=>\$fichnotes,
@@ -232,6 +234,7 @@ $delta=1/$#ids if($#ids>0);
 
      if($rep_projet) {
 	 $scan=proj2abs({'%PROJET',$rep_projet,
+			 '%PROJETS',$rep_projets,
 			 '%HOME'=>$ENV{'HOME'},
 		     },
 			$scan);

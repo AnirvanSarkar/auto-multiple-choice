@@ -42,6 +42,7 @@ my $progress_id='';
 my $debug='';
 
 my $rep_projet='';
+my $rep_projets='';
 
 GetOptions("seuil=s"=>\$seuil,
 	   "n-procs=s"=>\$n_procs,
@@ -51,6 +52,7 @@ GetOptions("seuil=s"=>\$seuil,
 	   "progression-id=s"=>\$progress_id,
 	   "debug=s"=>\$debug,
 	   "projet=s"=>\$rep_projet,
+	   "projets=s"=>\$rep_projets,
 	   );
 
 
@@ -72,6 +74,7 @@ $SIG{INT} = \&catch_signal;
 sub absolu {
     my $s=shift;
     $s=proj2abs({'%PROJET',$rep_projet,
+		 '%PROJETS',$rep_projets,
 		 '%HOME'=>$ENV{'HOME'},
 	     },
 		$s);
