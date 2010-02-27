@@ -21,10 +21,11 @@
 % 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{automultiplechoice}
-\RequirePackage[geometry]{ifsym}
+\RequirePackage[geometry]{ifsym}% marques de calage
 \RequirePackage{xcolor}
 \RequirePackage{fancyhdr}
 \RequirePackage{everypage}
+\RequirePackage{keyval}
 %\RequirePackage{multido}
 %%% debug -> diagnostiquer un no room for a new \count
 %\let\newcount@@=\newcount
@@ -154,7 +155,7 @@
         \fi%
       \fi
     \else%
-      \textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\FilledBigSquare}%
+      \AMC@boxedchar{}{200,\the\AMCid@quest,\the\AMCrep@count}{200,\the\AMCid@quest,\the\AMCrep@count}
     \fi%
   \else% calibration numerique (pour test)
     [B\the\AMCid@quest,\the\AMCrep@count]%
@@ -163,7 +164,7 @@
   \ifAMC@ensemble%
     \AMC@caselettre{#1}{0,0,0}{0,255,0}%
   \else%
-    \FilledBigSquare%
+    \AMC@boxedchar{}{0,0,0}{0,0,0}
   \fi%
 \fi}
 \newcommand{\AMC@marquevide}[1]{%
@@ -181,7 +182,7 @@
         \fi%
       \fi
     \else%
-      \textcolor[RGB]{200,\the\AMCid@quest,\the\AMCrep@count}{\BigSquare}%
+      \AMC@boxedchar{}{200,\the\AMCid@quest,\the\AMCrep@count}{255,255,255}
     \fi%
   \else%
     [M\the\AMCid@quest,\the\AMCrep@count]%
@@ -190,7 +191,7 @@
   \ifAMC@ensemble%
     \AMC@caselettre{#1}{0,0,0}{255,255,255}%
   \else%
-    \BigSquare%
+    \AMC@boxedchar{}{0,0,0}{255,255,255}
   \fi%
 \fi}
 % champ a remplir pour mettre son nom -> bonne couleur
@@ -268,8 +269,15 @@
 %
 % cases avec une lettre dedans
 %
-\newlength\AMC@boxeddim\AMC@boxeddim=2.5ex
-\def\AMC@boxedchar#1#2#3{{\setlength{\fboxsep}{0pt}\fcolorbox[RGB]{#2}[RGB]{#3}{\vbox to \AMC@boxeddim{\vfill \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}}}}
+\newlength\AMC@boxedrule
+\newlength\AMC@boxeddown
+\newlength\AMC@boxeddim
+\define@key{AMCdim}{size}{\AMC@boxeddim=#1}
+\define@key{AMCdim}{rule}{\AMC@boxedrule=#1}
+\define@key{AMCdim}{down}{\AMC@boxeddown=#1}
+\def\AMCboxDimensions#1{\setkeys{AMCdim}{#1}}
+\AMCboxDimensions{size=2.5ex,down=.4ex,rule=.5pt}
+\newcommand\AMC@boxedchar[3]{\hspace{0pt}{\fboxsep=0pt\fboxrule=\AMC@boxedrule\lower\AMC@boxeddown\hbox{\fcolorbox[RGB]{#2}[RGB]{#3}{\vbox to \AMC@boxeddim{\vfill \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}}}}}
 \newcounter{AMC@ncase}
 \setcounter{AMC@ncase}{0}
 \def\AMC@caselettre#1#2#3{%
@@ -326,9 +334,9 @@
 
 \newcommand{\AMCcode}[2]{
 { \def\AMCbeginQuestion##1##2{}
- \def\AMCbeginAnswer{\begin{minipage}{\ifAMC@ensemble 1.15em\else 2em\fi}}
+ \def\AMCbeginAnswer{\begin{minipage}{\ifAMC@ensemble 1.15em\else 2.5em\fi}}
  \def\AMCendAnswer{\hspace*{\fill}\end{minipage}}
- \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else\raisebox{.4ex}{\bf ##2}\fi\\}
+ \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else{\bf ##2}\fi\\[1mm]}
  \AMCnobloc
  \AMC@chiffres=#2\loop
  \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative

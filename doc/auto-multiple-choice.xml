@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
   <title>Auto Multiple Choice</title>
 
@@ -894,7 +895,37 @@ Durée : 10 minutes.
       </sect3>
 
       <sect3>
-        <title>Style</title>
+        <title>Style des cases à cocher</title>
+
+        <para>La commande <command>\AMCboxDimensions</command> permet de
+        modifier une ou plusieurs dimensions relatives aux cases à
+        cocher :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><option>size</option> représente la taille de ces
+            cases ;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>rule</option> représente l'épaisseur du contour des
+            cases ;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>down</option> représente la taille du déplacement
+            vers le bas des cases.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Pour obtenir des cases plus petites, on pourra par exemple
+        utiliser la commande</para>
+
+        <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
+      </sect3>
+
+      <sect3>
+        <title>Style du questionnaire</title>
 
         <para>La façon dont chaque question est présentée peut être modifiée
         en redéfinissant la commande LaTeX
