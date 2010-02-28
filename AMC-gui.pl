@@ -28,6 +28,7 @@ use IO::Select;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
+use File::Path;
 use Time::localtime;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
@@ -946,11 +947,19 @@ sub commande_parallele {
 my $proj_store;
 
 sub projet_nouveau {
-    projet_charge('',1);
+    liste_des_projets('cree'=>1);
 }
 
 sub projet_charge {
-    my (undef,$cree)=(@_);
+    liste_des_projets();
+}
+
+sub projet_gestion {
+    liste_des_projets('gestion'=>1);
+}
+
+sub liste_des_projets {
+    my %oo=(@_);
     my @projs;
     
     mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
@@ -968,29 +977,44 @@ sub projet_charge {
 	debug "[".$o{'rep_projets'}."] P:".join(',',@projs);
     }
 
-    if($#projs>=0 || $cree) {
+    if($#projs>=0 || $oo{'cree'}) {
 
 	# fenetre pour demander le nom du projet
 	
 	my $gp=Gtk2::GladeXML->new($glade_xml,'choix_projet');
 	$gp->signal_autoconnect_from_package('main');
 
-	for(qw/choix_projet deja_la choix_projets_liste
+	for(qw/choix_projet label_etat label_action choix_projets_liste
 	    projet_bouton_ouverture projet_bouton_creation
+	    projet_bouton_supprime projet_bouton_annule 
+	    projet_bouton_annule_label projet_bouton_renomme
+	    projet_bouton_mv_yes projet_bouton_mv_no
 	    projet_nom projet_nouveau_syntaxe projet_nouveau/) {
 	    $w{$_}=$gp->get_widget($_);
 	}
 
-	if($cree) {
+	if($oo{'cree'}) {
 	    $w{'projet_nouveau'}->show();
 	    $w{'projet_bouton_creation'}->show();
 	    $w{'projet_bouton_ouverture'}->hide();
 
-	    $w{'deja_la'}->set_text("Projets déjà existants :");
+	    $w{'label_etat'}->set_text("Projets déjà existants :");
 
 	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
 
-	    $w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;	}
+	}
+
+	$w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;	
+	
+	if($oo{'gestion'}) {
+	    $w{'label_etat'}->set_text("Gestion des projets :");
+	    $w{'label_action'}->set_markup("Changement du nom d'un projet :");
+	    $w{'projet_bouton_ouverture'}->hide();
+	    for (qw/supprime renomme/) {
+		$w{'projet_bouton_'.$_}->show();
+	    }
+	    $w{'projet_bouton_annule_label'}->set_text("Retour");
+	}
 
 	# mise a jour liste des projets dans la fenetre
 	
@@ -1014,6 +1038,8 @@ sub projet_charge {
 
 	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
 
+	$w{'choix_projet'}->set_keep_above(1);
+
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
@@ -1023,6 +1049,155 @@ sub projet_charge {
 	$dialog->run;
 	$dialog->destroy;
 	
+    }
+}
+
+sub projet_gestion_check {
+    # lequel ?
+    
+    my $sel=$w{'choix_projets_liste'}->get_selected_items();
+    my $iter;
+    my $proj;
+
+    if($sel) {
+	$iter=$proj_store->get_iter($sel);
+	$proj=$proj_store->get($iter,PROJ_NOM) if($iter);
+    }
+
+    return('','') if(!$proj);
+
+    # est-ce le projet en cours ?
+
+    if($projet{'nom'} && $proj eq $projet{'nom'}) {
+	$w{'choix_projet'}->set_keep_above(0);
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok',
+		  "Vous ne pouvez pas modifier le projet %s car il est ouvert.",$proj);
+	$dialog->run;
+	$dialog->destroy;
+	$w{'choix_projet'}->set_keep_above(1);
+	$proj='';
+    }
+
+    return($proj,$iter);
+}
+
+my $nom_original='';
+my $nom_original_iter='';
+
+sub projet_liste_renomme {
+    my ($proj,$iter)=projet_gestion_check();
+    return if(!$proj);
+
+    # ouverture zone :
+    $w{'projet_nouveau'}->show();
+    $w{'projet_nom'}->set_text($proj);
+
+    $nom_original=$proj;
+    $nom_original_iter=$iter;
+
+    # boutons...
+    for (qw/annule renomme supprime/) {
+	$w{'projet_bouton_'.$_}->hide();
+    }
+    for (qw/mv_no mv_yes/) {
+	$w{'projet_bouton_'.$_}->show();
+    }
+}
+
+sub projet_renomme_fin {
+    # fermeture zone :
+    $w{'projet_nouveau'}->hide();
+
+    # boutons...
+    for (qw/annule renomme supprime/) {
+	$w{'projet_bouton_'.$_}->show();
+    }
+    for (qw/mv_no mv_yes/) {
+	$w{'projet_bouton_'.$_}->hide();
+    }
+}
+
+sub projet_mv_yes {
+    projet_renomme_fin();
+    
+    my $nom_nouveau=$w{'projet_nom'}->get_text();
+
+    return if($nom_nouveau eq $nom_original || !$nom_nouveau);
+
+    if($o{'rep_projets'}) {
+	my $dir_original=$o{'rep_projets'}."/".$nom_original;
+	if(-d $dir_original) {
+	    my $dir_nouveau=$o{'rep_projets'}."/".$nom_nouveau;
+	    if(-d $dir_nouveau) {
+		$w{'choix_projet'}->set_keep_above(0);
+		my $dialog = Gtk2::MessageDialog
+		    ->new_with_markup($w{'main_window'},
+				      'destroy-with-parent',
+				      'error','ok',
+				      sprintf("Un répertoire <i>%s</i> existe déjà. Vous ne pouvez donc pas renommer ce projet ainsi.",$dir_nouveau));
+		$dialog->run;
+		$dialog->destroy;      
+		$w{'choix_projet'}->set_keep_above(1);
+
+		return;
+	    } else {
+		# OK
+
+		move($dir_original,$dir_nouveau);
+
+		$proj_store->set($nom_original_iter,
+				 PROJ_NOM,$nom_nouveau,
+				 );
+	    }
+	} else {
+	    debug "Repertoire original inexistant";
+	}
+    } else {
+	debug "Pas de repertoire projets";
+    }
+}
+
+sub projet_mv_no {
+    projet_renomme_fin();
+}
+
+sub projet_liste_supprime {
+    my ($proj,$iter)=projet_gestion_check();
+    return if(!$proj);
+
+    # on demande confirmation...
+    $w{'choix_projet'}->set_keep_above(0);
+    my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'warning','ok-cancel',
+			  sprintf("Vous avez demandé la suppression du projet <b>%s</b>. Ceci va effacer définitivement tous les fichiers de ce projet, y compris le sujet ainsi que tous les fichiers que vous avez pu mettre dans le répertoire de ce projet, comme les scans par exemple. Est-ce bien ce que vous désirez ?",$proj));
+    my $reponse=$dialog->run;
+    $dialog->destroy;      
+    $w{'choix_projet'}->set_keep_above(1);
+    
+    if($reponse ne 'ok') {
+	return;
+    } 
+    
+    debug "Suppression projet $proj !";
+    
+    $proj_store->remove($iter);
+    
+    # suppression effective des fichiers...
+    
+    if($o{'rep_projets'}) {
+	my $dir=$o{'rep_projets'}."/".$proj;
+	if(-d $dir) {
+	    rmtree($dir,0,1);
+	} else {
+	    debug "Repertoire inexistant";
+	}
+    } else {
+	debug "Pas de repertoire projets";
     }
 }
 

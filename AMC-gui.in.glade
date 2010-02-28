@@ -57,6 +57,20 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkImageMenuItem" id="menuitem2">
+                        <property name="label" translatable="yes">G&#xE9;rer</property>
+                        <property name="visible">True</property>
+                        <property name="use_stock">False</property>
+                        <signal name="activate" handler="projet_gestion"/>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="image22">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-directory</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="menu_quitter">
                         <property name="label">gtk-quit</property>
                         <property name="visible">True</property>
@@ -2540,7 +2554,7 @@ copy of the Program in return for a fee.
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <widget class="GtkLabel" id="deja_la">
+              <widget class="GtkLabel" id="label_etat">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Ouverture d'un projet existant :</property>
               </widget>
@@ -2593,7 +2607,7 @@ copy of the Program in return for a fee.
           <widget class="GtkVBox" id="projet_nouveau">
             <property name="orientation">vertical</property>
             <child>
-              <widget class="GtkLabel" id="label63">
+              <widget class="GtkLabel" id="label_action">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">&lt;b&gt;Cr&#xE9;ation d'un nouveau projet :&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
@@ -2612,7 +2626,7 @@ copy of the Program in return for a fee.
                 <child>
                   <widget class="GtkLabel" id="label20">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Nouveau projet :</property>
+                    <property name="label" translatable="yes">Nom du projet :</property>
                   </widget>
                   <packing>
                     <property name="position">0</property>
@@ -2658,13 +2672,34 @@ copy of the Program in return for a fee.
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
-              <widget class="GtkButton" id="button9">
-                <property name="label">gtk-cancel</property>
+              <widget class="GtkButton" id="projet_bouton_annule">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
                 <signal name="clicked" handler="projet_charge_non"/>
+                <child>
+                  <widget class="GtkHBox" id="hbox29">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkImage" id="image24">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-undo</property>
+                      </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="projet_bouton_annule_label">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Annuler</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </widget>
+                </child>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -2720,6 +2755,83 @@ copy of the Program in return for a fee.
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="projet_bouton_renomme">
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="projet_liste_renomme"/>
+                <child>
+                  <widget class="GtkHBox" id="hbox28">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkImage" id="image23">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-edit</property>
+                      </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label63">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Renommer</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="projet_bouton_supprime">
+                <property name="label">gtk-delete</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="projet_liste_supprime"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="projet_bouton_mv_no">
+                <property name="label">gtk-undo</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="projet_mv_no"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="projet_bouton_mv_yes">
+                <property name="label">gtk-ok</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="projet_mv_yes"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">6</property>
               </packing>
             </child>
           </widget>
