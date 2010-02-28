@@ -830,6 +830,10 @@ $diag_store->set_sort_func(DIAG_ID,\&sort_id,DIAG_ID);
 
 ## menu contextuel sur liste diagnostique -> visualisation zoom/page
 
+my %diag_menu=(page=>{text=>'calage de la page',icon=>'gtk-zoom-fit'},
+	       zoom=>{text=>'zooms sur les cases',icon=>'gtk-zoom-in'},
+	       );
+
 $w{'diag_tree'}->signal_connect('button_release_event' =>
     sub {
 	my ($self, $event) = @_;
@@ -846,7 +850,8 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		my $f=id2file($id,$_,'jpg');
 		if(-f $f) {
 		    $c++;
-		    my $item = Gtk2::MenuItem->new ($_);
+		    my $item = Gtk2::ImageMenuItem->new($diag_menu{$_}->{text});
+		    $item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{$_}->{icon},'menu'));
 		    $menu->append ($item);
 		    $item->show;
 		    $item->signal_connect (activate => sub {
@@ -2213,7 +2218,7 @@ sub accepte_preferences {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'question','yes-no',
-				  "Vous avez modifié le seuil de noirceur. Si vous avez déjà effectué une saisie automatique, les zooms fabriqués pour chaque copie ne sont plus correctement organisés. Voulez-vous les refabriquer ? Cela prend un peu de temps. Vous pouvez aussi les refabriquer plus tard grâce à l'action <i>re-extraire les zooms</i> du menu <i>Outils</i>.");
+				  "Vous avez modifié le seuil de noirceur. Si vous avez déjà effectué une saisie automatique, les zooms des cases fabriqués pour chaque copie ne sont plus correctement organisés. Voulez-vous les refabriquer ? Cela prend un peu de temps. Vous pouvez aussi les refabriquer plus tard grâce à l'action <i>re-extraire les zooms</i> du menu <i>Outils</i>.");
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;      
 	    
@@ -2462,7 +2467,7 @@ sub detecte_analyse {
 			       ."\n"
 			       ."- une grande valeur de <b>sensibilité</b> correspond à une situation dans laquelle le taux de remplissage de certaines cases est très proche du seuil défini."
 			       ."\n"
-			       ."Vous pouvez aussi observer le calage du scan (<i>page</i>) ainsi que les cases cochées ou non (<i>zooms</i>) en utilisant le menu déployé par un clic-droit sur chaque ligne du tableau <i>Diagnostic</i>."
+			       ."Vous pouvez aussi observer le calage du scan (<i>calage de la page</i>) ainsi que les cases cochées ou non (<i>zooms sur les cases</i>) en utilisant le menu déployé par un clic-droit sur chaque ligne du tableau <i>Diagnostic</i>."
 			       );
     }
 
