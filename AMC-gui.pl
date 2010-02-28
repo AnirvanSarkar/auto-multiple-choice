@@ -1002,8 +1002,10 @@ sub projet_charge {
 	$w{'choix_projets_liste'}->set_text_column(PROJ_NOM);
 	$w{'choix_projets_liste'}->set_pixbuf_column(PROJ_ICO);
 	
-	my $pb=$w{'main_window'}->render_icon ('gtk-open', 'menu');
-	
+	my ($taille,undef)=Gtk2::IconSize->lookup('menu');
+        my $pb = Gtk2::IconTheme->new->load_icon("auto-multiple-choice",$taille ,"force-svg");
+	$pb=$w{'main_window'}->render_icon ('gtk-open', 'menu') if(!$pb);
+
 	for (sort { $a cmp $b } @projs) {
 	    $proj_store->set($proj_store->append,
 			     PROJ_NOM,$_,
