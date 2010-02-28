@@ -292,10 +292,8 @@
                       <widget class="GtkVButtonBox" id="vbuttonbox3">
                         <property name="visible">True</property>
                         <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
                         <property name="layout_style">center</property>
-                        <child>
-                          <placeholder/>
-                        </child>
                         <child>
                           <widget class="GtkButton" id="button4">
                             <property name="visible">True</property>
@@ -319,6 +317,42 @@
                                   <widget class="GtkLabel" id="label86">
                                     <property name="visible">True</property>
                                     <property name="label" translatable="yes">Calculer les mises en page</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="verif_mep_b">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <signal name="clicked" handler="verif_mep"/>
+                            <child>
+                              <widget class="GtkHBox" id="hbox14">
+                                <property name="visible">True</property>
+                                <child>
+                                  <widget class="GtkImage" id="image7">
+                                    <property name="visible">True</property>
+                                    <property name="stock">gtk-info</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkLabel" id="label19">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">V&#xE9;rifier les mises en page</property>
                                   </widget>
                                   <packing>
                                     <property name="position">1</property>
@@ -369,9 +403,6 @@
                             <property name="fill">False</property>
                             <property name="position">2</property>
                           </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
                         </child>
                       </widget>
                       <packing>

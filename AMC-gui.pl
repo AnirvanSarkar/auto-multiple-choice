@@ -1502,14 +1502,19 @@ sub calcule_mep {
 		     
 		 } else {
 		     dialogue_apprentissage('MAJ_MEP_OK',
-					    "Les mises en page sont maintenant détectées. Vous pouvez vérifier que tout est correct en ouvrant la fenêtre de saisie manuelle (dans l' onglet <i>Saisie</i>) et en navigant dans les pages du sujet pour vérifier que les cases à cocher sont bien marquées en rouge à la bonne position (mais attention à ne pas cliquer dans ces cases). Vous pouvez ensuite passer à l'impression des copies et faire passer l'examen.");
+					    "Les mises en page sont maintenant détectées. Vous pouvez vérifier que tout est correct en cliquant sur le bouton <i>vérifier les mises en page</i> et en navigant dans les pages du sujet pour vérifier que les cases à cocher sont bien marquées en rouge à la bonne position. Vous pouvez ensuite passer à l'impression des copies et faire passer l'examen.");
 		 }
 	     });
+}
+
+sub verif_mep {
+    saisie_manuelle(0,0,1);
 }
 
 ### Actions des boutons de la partie SAISIE
 
 sub saisie_manuelle {
+    my ($self,$event,$regarder)=@_;
     if($projet{'_mep_list'}->nombre()>0) {
 	my $gm=AMC::Gui::Manuel::new('cr-dir'=>absolu($projet{'options'}->{'cr'}),
 				     'mep-dir'=>absolu($projet{'options'}->{'mep'}),
@@ -1527,7 +1532,8 @@ sub saisie_manuelle {
 				     'encodage_liste'=>bon_encodage('liste'),
 				     'image_type'=>$o{'manuel_image_type'},
 				     'retient_m'=>1,
-				     'en_quittant'=>\&detecte_analyse,
+				     'editable'=>($regarder ? 0 : 1),
+				     'en_quittant'=>($regarder ? '' : \&detecte_analyse),
 				     );
     } else {
 	my $dialog = Gtk2::MessageDialog

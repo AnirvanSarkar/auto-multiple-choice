@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -66,6 +66,7 @@ sub new {
 	      'encodage_liste'=>'UTF-8',
 	      'encodage_interne'=>'UTF-8',
 	      'image_type'=>'xpm',
+	      'editable'=>1,
 	  };
 
     for (keys %o) {
@@ -122,8 +123,16 @@ sub new {
 
     bless $self;
 
-    for my $k (qw/general area goto etudiant_cb etudiant_cbe nom_etudiant diag_tree/) {
+    for my $k (qw/general area navigation_h navigation_v goto goto_v etudiant_cb nom_etudiant diag_tree/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
+    }
+
+    $self->{'etudiant_cbe'}=$self->{'etudiant_cb'}->get_children();
+
+    if(!$self->{'editable'}) {
+	$self->{'navigation_v'}->show();
+    } else {
+	$self->{'navigation_h'}->show();
     }
 
     $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
@@ -132,59 +141,62 @@ sub new {
     
     ### modele DIAGNOSTIQUE SAISIE
 
-    my ($diag_store,$renderer,$column);
+    if($self->{'editable'}) {
+	
+	my ($diag_store,$renderer,$column);
+	
+	$diag_store = Gtk2::ListStore->new ('Glib::String',
+					    'Glib::String', 
+					    'Glib::String', 
+					    'Glib::String', 
+					    'Glib::String', 
+					    'Glib::String', 
+					    'Glib::String', 
+					    );
+	
+	$self->{'diag_tree'}->set_model($diag_store);
+	
+	$renderer=Gtk2::CellRendererText->new;
+	$column = Gtk2::TreeViewColumn->new_with_attributes ("page",
+							     $renderer,
+							     text=> MDIAG_ID,
+							     'background'=> MDIAG_ID_BACK);
+	$column->set_sort_column_id(MDIAG_ID);
+	$self->{'diag_tree'}->append_column ($column);
 
-    $diag_store = Gtk2::ListStore->new ('Glib::String',
-					'Glib::String', 
-					'Glib::String', 
-					'Glib::String', 
-					'Glib::String', 
-					'Glib::String', 
-					'Glib::String', 
-					);
+	$renderer=Gtk2::CellRendererText->new;
+	$column = Gtk2::TreeViewColumn->new_with_attributes ("EQM",
+							     $renderer,
+							     'text'=> MDIAG_EQM,
+							     'background'=> MDIAG_EQM_BACK);
+	$column->set_sort_column_id(MDIAG_EQM);
+	$self->{'diag_tree'}->append_column ($column);
 
-    $self->{'diag_tree'}->set_model($diag_store);
+	$renderer=Gtk2::CellRendererText->new;
+	$column = Gtk2::TreeViewColumn->new_with_attributes ("sensibilité",
+							     $renderer,
+							     'text'=> MDIAG_DELTA,
+							     'background'=> MDIAG_DELTA_BACK);
+	$column->set_sort_column_id(MDIAG_DELTA);
+	$self->{'diag_tree'}->append_column ($column);
 
-    $renderer=Gtk2::CellRendererText->new;
-    $column = Gtk2::TreeViewColumn->new_with_attributes ("page",
-							 $renderer,
-							 text=> MDIAG_ID,
-							 'background'=> MDIAG_ID_BACK);
-    $column->set_sort_column_id(MDIAG_ID);
-    $self->{'diag_tree'}->append_column ($column);
+	$diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
+	$diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
+	$diag_store->set_sort_func(MDIAG_ID,\&sort_id,MDIAG_ID);
 
-    $renderer=Gtk2::CellRendererText->new;
-    $column = Gtk2::TreeViewColumn->new_with_attributes ("EQM",
-							 $renderer,
-							 'text'=> MDIAG_EQM,
-							 'background'=> MDIAG_EQM_BACK);
-    $column->set_sort_column_id(MDIAG_EQM);
-    $self->{'diag_tree'}->append_column ($column);
+	$self->{'diag_store'}=$diag_store;
 
-    $renderer=Gtk2::CellRendererText->new;
-    $column = Gtk2::TreeViewColumn->new_with_attributes ("sensibilité",
-							 $renderer,
-							 'text'=> MDIAG_DELTA,
-							 'background'=> MDIAG_DELTA_BACK);
-    $column->set_sort_column_id(MDIAG_DELTA);
-    $self->{'diag_tree'}->append_column ($column);
-
-    $diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
-    $diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
-    $diag_store->set_sort_func(MDIAG_ID,\&sort_id,MDIAG_ID);
-
-    $self->{'diag_store'}=$diag_store;
-
-    my @ids=$dispos->ids();
-    if(@ids) {
-	for my $i (0..$#ids) {
-	    $self->maj_list($ids[$i],$i);
+	my @ids=$dispos->ids();
+	if(@ids) {
+	    for my $i (0..$#ids) {
+		$self->maj_list($ids[$i],$i);
+	    }
 	}
     }
 
     ### liste des noms d'etudiants
 
-    if(-f $self->{'liste'}) {
+    if(-f $self->{'liste'} && $self->{'editable'}) {
 	
 	$self->{'liste-ent'}=Gtk2::ListStore->new ('Glib::String');
 	
@@ -231,6 +243,8 @@ sub goto_from_list {
 
 sub maj_list {
     my ($self,$id,$i)=(@_);
+    return if(!$self->{'editable'});
+
     my $iter=model_id_to_iter($self->{'diag_store'},MDIAG_ID,$id);
     $iter=$self->{'diag_store'}->append if(!$iter);
 
@@ -347,7 +361,7 @@ sub charge_i {
 
     # dans la liste
 
-    $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path(model_id_to_iter($self->{'diag_store'},MDIAG_I,$self->{'iid'})));
+    $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path(model_id_to_iter($self->{'diag_store'},MDIAG_I,$self->{'iid'}))) if($self->{'editable'});
 
     # fin du traitement...
 
@@ -356,6 +370,8 @@ sub charge_i {
 
 sub ecrit {
     my ($self)=(@_);
+
+    return if(!$self->{'editable'});
 
     if($self->{'xml-file'} && $self->{'area'}->modifs()) {
 	debug "Sauvegarde du fichier ".$self->{'xml-file'};
@@ -450,7 +466,7 @@ sub quitter {
 sub goto_activate_cb {
     my ($self)=(@_);
 
-    my $dest=$self->{'goto'}->get_text();
+    my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->get_text();
 
     $self->ecrit();
 
