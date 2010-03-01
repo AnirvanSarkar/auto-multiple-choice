@@ -69,9 +69,14 @@ my $tex_src='';
 my $debug='';
 my $nombre_copies=0;
 
+my $sujet='';
+my $dest_size_x=21/2.54;
+my $dest_size_y=29.7/2.54;
+
 GetOptions("cr=s"=>\$cr,
 	   "n-copies=s"=>\$nombre_copies,
 	   "an-saved=s"=>\$an_saved,
+	   "sujet=s"=>\$sujet,
 	   "mep=s"=>\$mep_dir,
 	   "mep-saved=s"=>\$mep_saved,
 	   "tex-src=s"=>\$tex_src,
@@ -153,21 +158,44 @@ sub check_correc {
     }
 }
 
+# detecte bonne dimension depuis le sujet, si disponible
+
+if($sujet) {
+    if(-f $sujet) {
+	my @c=("identify","-format","%w,%h",$sujet.'[0]');
+	debug "IDENT << ".join(' ',@c);
+	if(open(IDENT,"-|",@c)) {
+	    while(<IDENT>) {
+		if(/^([0-9.]+),([0-9.]+)$/) {
+		    debug "Taille depuis le sujet : $1 x $2";
+		    $dest_size_x=$1/72;
+		    $dest_size_y=$2/72;
+		}
+	    }
+	    close IDENT;
+	} else {
+	    debug "Erreur de la commande : $!";
+	}
+    } else {
+	debug "Sujet introuvable : $sujet";
+    }
+}
+
 # ecriture d'une image en PDF, bonne dimension
 
 sub write_pdf {
     my ($img,$file)=@_;
 
     my ($h,$w)=$img->Get('height','width');
-    my $d_x=$w/(21.0/2.54);
-    my $d_y=$h/(29.7/2.54);
+    my $d_x=$w/$dest_size_x;
+    my $d_y=$h/$dest_size_y;
     my $dens=($d_x > $d_y ? $d_x : $d_y);
     
     debug "GEOMETRY : $w x $h\n";
     debug "DENSITY : $d_x x $d_y --> $dens\n";
     
     my $w=$img->Write('filename'=>$file,
-		      'page'=>($dens*21/2.54).'x'.($dens*29.7/2.54),
+		      'page'=>($dens*$dest_size_x).'x'.($dens*$dest_size_y),
 		      'adjoin'=>'True','units'=>'PixelsPerInch',
 		      'compression'=>'jpeg','density'=>$dens.'x'.$dens);
     

@@ -2105,6 +2105,7 @@ sub regroupement {
 			  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
 			  "--cr",absolu($projet{'options'}->{'cr'}),
 			  "--an-saved",absolu($an_saved),
+			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
 			  "--mep",absolu($projet{'options'}->{'mep'}),
 			  "--mep-saved",absolu($mep_saved),
 			  "--tex-src",absolu($projet{'options'}->{'texsrc'}),

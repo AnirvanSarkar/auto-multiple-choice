@@ -165,6 +165,20 @@
 
           <programlisting>\usepackage[bloc,completemulti,versionA]{automultiplechoice}</programlisting>
         </listitem>
+
+        <listitem>
+          <para>À partir de la version 0.262, le dessin des cases à cocher est
+          différent, légèrement plus gros, ce qui risaue de modifier la
+          disposition de vos sujets.</para>
+        </listitem>
+
+        <listitem>
+          <para>À partir de la version 0.267, si vous souhaitez produire vos
+          sujets en format A4, vous devez l'indiquer explicitement dans le
+          sujet LaTeX :</para>
+
+          <programlisting>\documentclass[a4paper]{article} </programlisting>
+        </listitem>
       </itemizedlist>
     </sect2>
 
@@ -223,7 +237,7 @@ sudo make install</screen>
     <sect2>
       <title>Un exemple simple</title>
 
-      <para><programlisting id="exemples-simple.tex" linenumbering="numbered">\documentclass{article}
+      <para><programlisting id="exemples-simple.tex" linenumbering="numbered">\documentclass[a4paper]{article}
 
 \usepackage[latin1]{inputenc}    <co id="simple.latin1"
             linkends="simple.latin1.exp" />
@@ -374,7 +388,7 @@ Durée : 10 minutes.
       ensemble les questions traitant du même sujet. On va donc créer deux
       groupes de questions, et les mélanger lors de la fabrication de chaque
       copie. <programlisting id="exemples-groupes.tex"
-      linenumbering="numbered">\documentclass{article}
+      linenumbering="numbered">\documentclass[a4paper]{article}
 
 \usepackage[latin1]{inputenc}
 \usepackage[T1]{fontenc}
@@ -490,7 +504,7 @@ Nom et prénom :
       pour utiliser cette mise en page avec de nombreuses questions !</para>
 
       <para><programlisting id="exemples-ensemble.tex"
-      linenumbering="numbered">\documentclass{article}
+      linenumbering="numbered">\documentclass[a4paper]{article}
 
 \usepackage[latin1]{inputenc}    
 \usepackage[T1]{fontenc}
