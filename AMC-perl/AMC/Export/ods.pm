@@ -202,7 +202,7 @@ sub export {
 			 'references'=>{'style:data-style-name' => 'NombreVide'},		     
 			 );
 
-    # NoteX : pas de note car la question ne figure pas dans cette copie là
+    # NoteX : pas de note car la question ne figure pas dans cette copie la
     $styles->createStyle('NoteX',
 			 parent=>'Tableau',
 			 family=>'table-cell',

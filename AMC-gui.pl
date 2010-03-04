@@ -25,11 +25,12 @@ use Gtk2::GladeXML;
 use XML::Simple;
 use IO::File;
 use IO::Select;
+use POSIX qw/strftime/;
+use Time::Local;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 use File::Path;
-use Time::localtime;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
 
@@ -80,6 +81,8 @@ use constant {
     LISTE_TXT =>0,
 };
 
+use_gettext;
+
 my $debug=0;
 my $debug_file='';
 
@@ -91,9 +94,7 @@ GetOptions("debug!"=>\$debug,
 	   );
 
 if($debug_file) {
-    my $t=localtime();
-    my $date=sprintf("%02d/%02d/%04d %02d:%02d",
-		     $t->mday,$t->mon+1,$t->year+1900,$t->hour,$t->min);
+    my $date=strftime("%c",localtime());
     open(DBG,">>",$debug_file);
     print DBG "\n\n".('#' x 40)."\n# DEBUG - $date\n".('#' x 40)."\n\n";
     close(DBG);
@@ -160,7 +161,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'print_command_pdf'=>['commande',
 				    'cupsdoprint %f','lpr %f',
 				    ],
-	      'rep_projets'=>$home_dir.'/Projets-QCM',
+# TRANSLATORS: directory name for projects
+	      'rep_projets'=>$home_dir.'/'.__"MC-Projects",
 	      'rep_modeles'=>'/usr/share/doc/auto-multiple-choice/exemples',
 	      'seuil_eqm'=>3.0,
 	      'seuil_sens'=>8.0,
@@ -263,19 +265,26 @@ sub test_commandes {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'warning','ok',
-			      "Certaines commandes prévues pour l'ouverture de documents ne sont pas accessibles : ".join(", ",map { "<b>$_</b>"; } @pasbon).". Vérifiez que les commandes sont les bonnes et que les programmes correspondants sont bien installés. Vous pouvez aussi modifier les commandes à utiliser en sélectionnant <i>Préférences</i> dans le menu <i>Édition</i>.");
+			      __("Some commands allowing to open documents can't be found:")
+			      ." ".join(", ",map { "<b>$_</b>"; } @pasbon).". "
+			      .__("Please check its correct spelling and install missing software.")." "
+			      .sprintf(__"You can change used commands following <i>%s</i> from menu <i>%s</i>.",
+# TRANSLATORS: "Preferences" menu
+				       __"Preferences",
+# TRANSLATORS: "Edit" menu
+				       __"Edit"));
 	$dialog->run;
 	$dialog->destroy;
     }
 }
 
 if(! -d $o_dir) {
-    mkdir($o_dir) or die "Impossible de creer $o_dir : $!";
+    mkdir($o_dir) or die "Error creating $o_dir : $!";
 
     # changement organisation des fichiers config generale (<=0.254)
 
     if(-f $home_dir.'/.AMC.xml') {
-	debug "Deplacement de l'ancien fichier de config generale";
+	debug "Moving old configuration file";
 	move($home_dir.'/.AMC.xml',$o_dir."/cf.default.xml");
     }
 }
@@ -310,14 +319,15 @@ sub pref_xx_ecrit {
 
 sub sauve_state {
     if($state{'_modifie'}) {
-	debug "Sauvegarde de l'etat...";
+	debug "Saving state...";
 	
 	if(pref_xx_ecrit(\%state,'AMCState',$state_file)) {
 	    my $dialog = Gtk2::MessageDialog
 		->new($w{'main_window'},
 		      'destroy-with-parent',
 		      'error','ok',
-		      "Erreur à l'ecriture du fichier d'état %s : %s",$state_file,$!);
+		      __"Error writing state file %s : %s",
+		      $state_file,$!);
 	    $dialog->run;
 	    $dialog->destroy;      
 	} else {
@@ -367,7 +377,7 @@ for my $k (keys %o_defaut) {
 	      }
 		$o{$k}=$valeurs[0] if(!$o{$k});
 	    } else {
-		debug "ERR: Type d'option inconnu : $type";
+		debug "ERR: unknown option type : $type";
 	    }
 	} elsif(ref($o_defaut{$k}) eq 'HASH') {
 	    $o{$k}={%{$o_defaut{$k}}};
@@ -375,13 +385,13 @@ for my $k (keys %o_defaut) {
 	    $o{$k}=$o_defaut{$k};
 	    $o{$k}=$encodage_systeme if($k =~ /^encodage_/ && !$o{$k});
 	}
-	debug "Nouveau parametre global : $k = $o{$k}" if($o{$k});
+	debug "New global parameter : $k = $o{$k}" if($o{$k});
     } else {
 	if(ref($o_defaut{$k}) eq 'HASH') {
 	    for my $kk (keys %{$o_defaut{$k}}) {
 		if(! exists($o{$k}->{$kk})) {
 		    $o{$k}->{$kk}=$o_defaut{$k}->{$kk};
-		    debug "Nouveau sous-parametre global : $k/$kk = $o{$k}->{$kk}";
+		    debug "New sub-global parameter : $k/$kk = $o{$k}->{$kk}";
 		}
 	    }
 	}
@@ -478,7 +488,7 @@ sub moteur_latex {
     return($m);
 }
 
-$gui=Gtk2::GladeXML->new($glade_xml,'main_window');
+$gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
 
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
@@ -503,7 +513,8 @@ sub debug_set {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  "Passage en mode débogage. Les informations de débogage de cette session seront disponibles dans le fichier ".AMC::Basic::debug_file());
+		  __("Debugging mode.")." "
+		  .sprintf(__"Debugging informations will be written in file %s.",AMC::Basic::debug_file()));
 	$dialog->run;
 	$dialog->destroy;
     }
@@ -523,7 +534,7 @@ sub dialogue_apprentissage {
 			      'ok',
 			      @oo);
 
-	my $garde=Gtk2::CheckButton->new("Conserver ce message la prochaine fois");
+	my $garde=Gtk2::CheckButton->new(__"Show this message again next time");
 	$garde->set_active(0);
 	$garde->can_focus(0);
 
@@ -533,7 +544,7 @@ sub dialogue_apprentissage {
 	$dialog->run;
 
 	if(!$garde->get_active()) {
-	    debug "Apprentissage : $key";
+	    debug "Learning : $key";
 	    $state{'apprentissage'}->{$key}=1;
 	    $state{'_modifie'}=1;
 	    sauve_state();
@@ -551,22 +562,23 @@ $doc_store = Gtk2::ListStore->new ('Glib::String',
 
 my @doc_ligne=($doc_store->append,$doc_store->append,$doc_store->append);
 
-$doc_store->set($doc_ligne[0],DOC_TITRE,'sujet',DOC_MAJ,'');
-$doc_store->set($doc_ligne[1],DOC_TITRE,'corrigé',DOC_MAJ,'');
-$doc_store->set($doc_ligne[2],DOC_TITRE,'calage',DOC_MAJ,'');
+$doc_store->set($doc_ligne[0],DOC_TITRE,__"question",DOC_MAJ,'');
+$doc_store->set($doc_ligne[1],DOC_TITRE,__"solution",DOC_MAJ,'');
+$doc_store->set($doc_ligne[2],DOC_TITRE,__"adjustment",DOC_MAJ,'');
 $w{'documents_tree'}->set_model($doc_store);
 
 my $renderer;
 my $column;
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("document",
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"document",
 						     $renderer,
 						     text=> DOC_TITRE);
 $w{'documents_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("état",
+# TRANSLATORS: document state, in short (exists or not, last change date)
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"state",
 						     $renderer,
 						     text=> DOC_MAJ);
 $w{'documents_tree'}->append_column ($column);
@@ -580,19 +592,22 @@ $mep_store = Gtk2::ListStore->new ('Glib::String',
 $w{'mep_tree'}->set_model($mep_store);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("page",
+# TRANSLATORS: (in short)
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"page",
 						     $renderer,
 						     text=> MEP_PAGE);
 $w{'mep_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("ID",
+# TRANSLATORS: identification code for a page (in short)
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"ID",
 						     $renderer,
 						     text=> MEP_ID);
 $w{'mep_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("MAJ",
+# TRANSLATORS: last modification date (in short)
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"Updated",
 						     $renderer,
 						     text=> MEP_MAJ);
 $w{'mep_tree'}->append_column ($column);
@@ -612,13 +627,13 @@ $correc_store = Gtk2::ListStore->new ('Glib::String',
 $w{'correc_tree'}->set_model($correc_store);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("ID",
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"ID",
 						     $renderer,
 						     text=> CORREC_ID);
 $w{'correc_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("MAJ",
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"Updated",
 						     $renderer,
 						     text=> CORREC_MAJ);
 $w{'correc_tree'}->append_column ($column);
@@ -636,7 +651,7 @@ $diag_store = Gtk2::ListStore->new ('Glib::String',
 $w{'diag_tree'}->set_model($diag_store);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("identifiant",
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"identifier",
 						     $renderer,
 						     text=> DIAG_ID,
 						     'background'=> DIAG_ID_BACK);
@@ -644,13 +659,14 @@ $column->set_sort_column_id(DIAG_ID);
 $w{'diag_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("mise à jour",
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"updated",
 						     $renderer,
 						     text=> DIAG_MAJ);
 $w{'diag_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("EQM",
+# TRANSLATORS: mean square error distance (in short)
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"MSE",
 						     $renderer,
 						     'text'=> DIAG_EQM,
 						     'background'=> DIAG_EQM_BACK);
@@ -658,7 +674,7 @@ $column->set_sort_column_id(DIAG_EQM);
 $w{'diag_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes ("sensibilité",
+$column = Gtk2::TreeViewColumn->new_with_attributes (__"sensitivity",
 						     $renderer,
 						     'text'=> DIAG_DELTA,
 						     'background'=> DIAG_DELTA_BACK);
@@ -681,18 +697,26 @@ sub cb_model {
 }
 
 # rajouter a partir de Encode::Supported
-my $encodages=[{qw/inputenc latin1 iso ISO-8859-1/,'txt'=>'ISO-8859-1 (Europe occidentale)'},
-	       {qw/inputenc latin2 iso ISO-8859-2/,'txt'=>'ISO-8859-2 (Europe centrale)'},
-	       {qw/inputenc latin3 iso ISO-8859-3/,'txt'=>'ISO-8859-3 (Europe du sud)'},
-	       {qw/inputenc latin4 iso ISO-8859-4/,'txt'=>'ISO-8859-4 (Europe du Nord)'},
-	       {qw/inputenc latin5 iso ISO-8859-5/,'txt'=>'ISO-8859-5 (Cyrillique)'},
-	       {qw/inputenc latin9 iso ISO-8859-9/,'txt'=>'ISO-8859-9 (Turc)'},
-	       {qw/inputenc latin10 iso ISO-8859-10/,'txt'=>'ISO-8859-10 (Nordique)'},
-	       {qw/inputenc utf8 iso UTF-8/,'txt'=>'UTF-8 (Unicode)'},
+# TRANSLATORS: for encodings
+my $encodages=[{qw/inputenc latin1 iso ISO-8859-1/,'txt'=>'ISO-8859-1 ('.__("Western Europe").')'},
+# TRANSLATORS: for encodings
+	       {qw/inputenc latin2 iso ISO-8859-2/,'txt'=>'ISO-8859-2 ('.__("Central Europe").')'},
+# TRANSLATORS: for encodings
+	       {qw/inputenc latin3 iso ISO-8859-3/,'txt'=>'ISO-8859-3 ('.__("Southern Europe").')'},
+# TRANSLATORS: for encodings
+	       {qw/inputenc latin4 iso ISO-8859-4/,'txt'=>'ISO-8859-4 ('.__("Northern Europe").')'},
+# TRANSLATORS: for encodings
+	       {qw/inputenc latin5 iso ISO-8859-5/,'txt'=>'ISO-8859-5 ('.__("Cyrillic").')'},
+# TRANSLATORS: for encodings
+	       {qw/inputenc latin9 iso ISO-8859-9/,'txt'=>'ISO-8859-9 ('.__("Turkish").')'},
+# TRANSLATORS: for encodings
+	       {qw/inputenc latin10 iso ISO-8859-10/,'txt'=>'ISO-8859-10 ('.__("Northern").')'},
+# TRANSLATORS: for encodings
+	       {qw/inputenc utf8 iso UTF-8/,'txt'=>'UTF-8 ('.__("Unicode").')'},
 	       {qw/inputenc cp1252 iso cp1252/,'txt'=>'Windows-1252',
 		alias=>['Windows-1252','Windows']},
-	       {qw/inputenc applemac iso MacRoman/,'txt'=>'Macintosh Europe occidentale'},
-	       {qw/inputenc macce iso MacCentralEurRoman/,'txt'=>'Macintosh Europe centrale'},
+	       {qw/inputenc applemac iso MacRoman/,'txt'=>'Macintosh '.__"Western Europe"},
+	       {qw/inputenc macce iso MacCentralEurRoman/,'txt'=>'Macintosh '.__"Central Europe"},
 	       ];
 
 sub get_enc {
@@ -709,44 +733,57 @@ sub get_enc {
     return('');
 }
 
-my $cb_model_vide=cb_model(''=>'(aucun)');
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+my $cb_model_vide_key=cb_model(''=>__p"(none) [No primary key found in association list]");
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+my $cb_model_vide_code=cb_model(''=>__p"(none) [No code found in LaTeX file]");
 
 my %cb_stores=(
-	       'delimiteur_decimal'=>cb_model(',',', (virgule)',
-					      '.','. (point)'),
-	       'note_arrondi'=>cb_model('inf','inférieur',
-					'normal','normal',
-					'sup','supérieur'),
+	       'delimiteur_decimal'=>cb_model(',',__", (comma)",
+					      '.',__". (dot)"),
+# TRANSLATORS: rounding method for marks
+	       'note_arrondi'=>cb_model('inf',__"floor",
+# TRANSLATORS: rounding method for marks
+					'normal',__"rounding",
+# TRANSLATORS: rounding method for marks
+					'sup',__"ceiling"),
 	       'methode_impression'=>cb_model('CUPS','CUPS',
-					      'commande','par une commande',
-					      'file'=>'dans des fichiers'),
-	       'sides'=>cb_model('one-sided','Non',
-				 'two-sided-long-edge','Grand côté',
-				 'two-sided-short-edge','Petit côté'),
+# TRANSLATORS: printing method
+					      'commande',__"command",
+# TRANSLATORS: printing method
+					      'file'=>__"to files"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	       'sides'=>cb_model('one-sided',__p("one sided [No two-sided printing]"),
+# TRANSLATORS: two-side printing type
+				 'two-sided-long-edge',__"long edge",
+# TRANSLATORS: two-side printing type
+				 'two-sided-short-edge',__"short edge"),
 	       'encodage_latex'=>cb_model(map { $_->{'iso'}=>$_->{'txt'} }
 					  (@$encodages)),
-	       'manuel_image_type'=>cb_model('ppm'=>'(aucun)',
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	       'manuel_image_type'=>cb_model('ppm'=>__p("(none) [No transitional image type (direct processing)]"),
 					     'xpm'=>'XPM',
 					     'gif'=>'GIF'),
-	       'liste_key'=>$cb_model_vide,
-	       'assoc_code'=>$cb_model_vide,
+	       'liste_key'=>$cb_model_vide_key,
+	       'assoc_code'=>$cb_model_vide_code,
 	       'format_export'=>cb_model('CSV'=>'CSV',
 					 'ods'=>'OpenOffice'),
 	       'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
 						 ";"=>";",
 						 ","=>","),
-	       'moteur_mep'=>cb_model("auto"=>'découplé automatique',
-				      "poppler"=>'direct'),
-	       'annote_position'=>cb_model("none"=>'(aucune)',
-					   "marge"=>'Dans la marge',
-					   "case"=>'A côté des cases',
+	       'moteur_mep'=>cb_model("auto"=>__"automatic decoupled",
+				      "poppler"=>__"direct"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	       'annote_position'=>cb_model("none"=>__p("(none) [No annotation position (do not write anything)]"),
+					   "marge"=>__"margin",
+					   "case"=>__"near boxes",
 					   ),
 	       );
 
-my $symbole_type_cb=cb_model("none"=>"rien",
-			     "circle"=>"cercle",
-			     "mark"=>"croix",
-			     "box"=>"carré",
+my $symbole_type_cb=cb_model("none"=>__"mothing",
+			     "circle"=>__"circle",
+			     "mark"=>__"mark",
+			     "box"=>__"box",
 			     );
 
 for my $k (qw/0_0 0_1 1_0 1_1/) {
@@ -806,7 +843,7 @@ sub exporte {
 			  "--output",$output,
 			  @options
 			  ],
-	     'texte'=>'Export des notes...',
+	     'texte'=>__"Exporting marks...",
 	     'progres.id'=>'export',
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
@@ -817,7 +854,7 @@ sub exporte {
 			 ->new($w{'main_window'},
 			       'destroy-with-parent',
 			       'warning','ok',
-			       "L'export des notes dans le fichier $output n'a sans doute pas fonctionné, car ce dernier fichier est inexistant...");
+			       __"Export to %s did not work: file not created...",$output);
 		     $dialog->run;
 		     $dialog->destroy;
 		 }
@@ -831,8 +868,8 @@ $diag_store->set_sort_func(DIAG_ID,\&sort_id,DIAG_ID);
 
 ## menu contextuel sur liste diagnostique -> visualisation zoom/page
 
-my %diag_menu=(page=>{text=>'calage de la page',icon=>'gtk-zoom-fit'},
-	       zoom=>{text=>'zooms sur les cases',icon=>'gtk-zoom-in'},
+my %diag_menu=(page=>{text=>__"page adjustment",icon=>'gtk-zoom-fit'},
+	       zoom=>{text=>__"boxes zooms",icon=>'gtk-zoom-in'},
 	       );
 
 $w{'diag_tree'}->signal_connect('button_release_event' =>
@@ -857,7 +894,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		    $item->show;
 		    $item->signal_connect (activate => sub {
 			my (undef, $sortkey) = @_;
-			debug "Visualisation $f...";
+			debug "Looking at $f...";
 			commande_parallele($o{'img_viewer'},$f);
 		    }, $_);
 		}
@@ -888,7 +925,7 @@ $column = Gtk2::TreeViewColumn->new_with_attributes ("ID",
 $w{'inconnu_tree'}->append_column ($column);
 
 
-### Appel à des commandes externes -- log, annulation
+### Appel a des commandes externes -- log, annulation
 
 my %les_commandes=();
 my $cmd_id=0;
@@ -925,9 +962,9 @@ sub commande_parallele {
     if(commande_accessible($c[0])) {
 	my $pid=fork();
 	if($pid==0) {
-	    debug "Commande // [$$] : ".join(" ",@c);
+	    debug "Command // [$$] : ".join(" ",@c);
 	    exec(@c) ||
-		debug "Exec $$ defectueux";
+		debug "Exec $$ : error";
 	    exit(0);
 	}
     } else {
@@ -935,7 +972,7 @@ sub commande_parallele {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "La commande suivante n'a pas pu être exécutée : <b>$c[0]</b>. Peut-être est-ce dû à une mauvaise configuration ?");
+			      sprintf(__"Following command could not be run: <b>%s</b>, perhaps due to a poor configuration?",$c[0]));
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -968,7 +1005,7 @@ sub liste_des_projets {
 
     if(-d $o{'rep_projets'}) {
 	opendir(DIR, $o{'rep_projets'}) 
-	    || die "Erreur a l'ouverture du repertoire ".$o{'rep_projets'}." : $!";
+	    || die "Error opening directory ".$o{'rep_projets'}." : $!";
 	my @f=map { decode("utf-8",$_); } readdir(DIR);
 	debug "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f);
 
@@ -981,7 +1018,7 @@ sub liste_des_projets {
 
 	# fenetre pour demander le nom du projet
 	
-	my $gp=Gtk2::GladeXML->new($glade_xml,'choix_projet');
+	my $gp=Gtk2::GladeXML->new($glade_xml,'choix_projet','auto-multiple-choice');
 	$gp->signal_autoconnect_from_package('main');
 
 	for(qw/choix_projet label_etat label_action choix_projets_liste
@@ -998,7 +1035,7 @@ sub liste_des_projets {
 	    $w{'projet_bouton_creation'}->show();
 	    $w{'projet_bouton_ouverture'}->hide();
 
-	    $w{'label_etat'}->set_text("Projets déjà existants :");
+	    $w{'label_etat'}->set_text(__"Existing projects:");
 
 	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
 
@@ -1007,13 +1044,13 @@ sub liste_des_projets {
 	$w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;	
 	
 	if($oo{'gestion'}) {
-	    $w{'label_etat'}->set_text("Gestion des projets :");
-	    $w{'label_action'}->set_markup("Changement du nom d'un projet :");
+	    $w{'label_etat'}->set_text(__"Projects management:");
+	    $w{'label_action'}->set_markup(__"Change project name:");
 	    $w{'projet_bouton_ouverture'}->hide();
 	    for (qw/supprime renomme/) {
 		$w{'projet_bouton_'.$_}->show();
 	    }
-	    $w{'projet_bouton_annule_label'}->set_text("Retour");
+	    $w{'projet_bouton_annule_label'}->set_text(__"Back");
 	}
 
 	# mise a jour liste des projets dans la fenetre
@@ -1045,7 +1082,7 @@ sub liste_des_projets {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  "Vous n'avez aucun projet de QCM dans le répertoire %s !",$o{'rep_projets'});
+		  __"You don't have any MC project in directory %s!",$o{'rep_projets'});
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1074,7 +1111,7 @@ sub projet_gestion_check {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
-		  "Vous ne pouvez pas modifier le projet %s car il est ouvert.",$proj);
+		  __"You can't change project %s since it's open.",$proj);
 	$dialog->run;
 	$dialog->destroy;
 	$w{'choix_projet'}->set_keep_above(1);
@@ -1137,7 +1174,7 @@ sub projet_mv_yes {
 		    ->new_with_markup($w{'main_window'},
 				      'destroy-with-parent',
 				      'error','ok',
-				      sprintf("Un répertoire <i>%s</i> existe déjà. Vous ne pouvez donc pas renommer ce projet ainsi.",$dir_nouveau));
+				      sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),$dir_nouveau));
 		$dialog->run;
 		$dialog->destroy;      
 		$w{'choix_projet'}->set_keep_above(1);
@@ -1153,10 +1190,10 @@ sub projet_mv_yes {
 				 );
 	    }
 	} else {
-	    debug "Repertoire original inexistant";
+	    debug "No original directory";
 	}
     } else {
-	debug "Pas de repertoire projets";
+	debug "No projects directory";
     }
 }
 
@@ -1174,7 +1211,9 @@ sub projet_liste_supprime {
 	->new_with_markup($w{'main_window'},
 			  'destroy-with-parent',
 			  'warning','ok-cancel',
-			  sprintf("Vous avez demandé la suppression du projet <b>%s</b>. Ceci va effacer définitivement tous les fichiers de ce projet, y compris le sujet ainsi que tous les fichiers que vous avez pu mettre dans le répertoire de ce projet, comme les scans par exemple. Est-ce bien ce que vous désirez ?",$proj));
+			  sprintf(__("You asked to remove project <b>%s</b>.")." "
+				  .__("This will permanently erase all the files of this project, including the LaTeX source as well as all the files you put in the directory of this project, as the scans for example.")." "
+				  .__("Is this really what you want?"),$proj));
     my $reponse=$dialog->run;
     $dialog->destroy;      
     $w{'choix_projet'}->set_keep_above(1);
@@ -1183,7 +1222,7 @@ sub projet_liste_supprime {
 	return;
     } 
     
-    debug "Suppression projet $proj !";
+    debug "Removing project $proj !";
     
     $proj_store->remove($iter);
     
@@ -1194,10 +1233,10 @@ sub projet_liste_supprime {
 	if(-d $dir) {
 	    rmtree($dir,0,1);
 	} else {
-	    debug "Repertoire inexistant";
+	    debug "No directory $dir";
 	}
     } else {
-	debug "Pas de repertoire projets";
+	debug "No projects directory";
     }
 }
 
@@ -1248,7 +1287,8 @@ sub projet_charge_nouveau {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      sprintf("Le nom <b>%s</b> est déjà utilisé dans le répertoire des projets. Pour créer un nouveau projet, il faut choisir un autre nom.",$proj));
+			      sprintf(__("The name <b>%s</b> is already used in the projects directory.")." "
+				      .__"You must choose another name to create a project.",$proj));
 	$dialog->run;
 	$dialog->destroy;      
 	
@@ -1267,7 +1307,7 @@ sub projet_charge_non {
 }
 
 sub projet_sauve {
-    debug "Sauvegarde du projet...";
+    debug "Saving project...";
     my $of=fich_options($projet{'nom'});
     my $po={%{$projet{'options'}}};
 
@@ -1280,7 +1320,7 @@ sub projet_sauve {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
-		  "Erreur à l'ecriture du fichier d'options %s : %s",$of,$!);
+		  __"Error writing to options file %s : %s",$of,$!);
 	$dialog->run;
 	$dialog->destroy;      
     } else {
@@ -1294,7 +1334,7 @@ sub doc_active {
     my $sel=$w{'documents_tree'}->get_selection()->get_selected_rows()->get_indices();
     #print "Active $sel...\n";
     my $f=absolu($projet{'options'}->{'docs'}->[$sel]);
-    debug "Visualisation $f...";
+    debug "Looking at $f...";
     commande_parallele($o{'pdf_viewer'},$f);
 }
 
@@ -1303,7 +1343,7 @@ sub mep_active {
     my $id=($projet{'_mep_list'}->ids())[$sel];
     debug "Active MEP $sel : ID=$id...";
     my $f=$projet{'_mep_list'}->filename($id);
-    debug "Visualisation $f...";
+    debug "Looking at $f...";
     commande_parallele($o{'xml_viewer'},$f);
 }
 
@@ -1324,7 +1364,12 @@ sub doc_maj {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'warning','ok-cancel',
-			      "L'analyse de certaines copies a déjà été effectuée sur la base des documents de travail actuels. Vous avez donc vraisemblablement déjà effectué l'examen sur la base de ces documents. Si vous modifiez les documents de travail, vous ne serez plus en mesure d'analyser les copies que vous avez déjà distribué ! Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
+			      __("Papers analysis was already made on the basis of the current working documents.")." "
+			      .__("You already made the examination on the basis of these documents.")." "
+			      .__("If you modify working documents, you will not be capable any more of analyzing the papers you have already distributed!")." "
+			      .__("Do you wish to continue?")." "
+			      .__("Click on Validate to erase the former layouts and update working documents, or on Cancel to cancel this operation.")." "
+			      ."<b>".__("To allow the use of an already printed question, cancel!")."</b>");
 	my $reponse=$dialog->run;
 	$dialog->destroy;      
 	
@@ -1343,7 +1388,11 @@ sub doc_maj {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'question','ok-cancel',
-				  "Certaines mises en page on déjà été calculées pour les documents actuels. En refabriquant les documents de travail, les mises en page deviendront obsolètes et seront donc effacées. Souhaitez-vous tout de même continuer ? Cliquez sur Valider pour effacer les anciennes mises en page et mettre à jour les documents de travail, ou sur Annuler pour annuler cette opération. <b>Pour permettre l'utilisation d'un sujet déjà imprimé, annulez !</b>");
+				  __("Layouts are already calculated for the current documents.")." "
+				  .__("Updating working documents, the layouts will become obsolete and will thus be erased.")." "
+				  .__("Do you wish to continue?")." "
+				  .__("Click on Validate to erase the former layouts and update working documents, or on Cancel to cancel this operation.")
+				  ." <b>".__("To allow the use of an already printed question, cancel!")."</b>");
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;      
 	    
@@ -1369,7 +1418,7 @@ sub doc_maj {
 			  "--prefix",absolu('%PROJET/'),
 			  ],
 	     'signal'=>2,
-	     'texte'=>'Mise à jour des documents...',
+	     'texte'=>__"Documents update...",
 	     'progres.id'=>'MAJ',
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub { 
@@ -1380,7 +1429,9 @@ sub doc_maj {
 			 ->new_with_markup($w{'main_window'},
 					   'destroy-with-parent',
 					   'error','ok',
-					   "La compilation de votre source LaTeX a occasionné des erreurs. Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents. Utilisez votre éditeur LaTeX ou la commande latex pour un diagnostic précis des erreurs.\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(Seules les dix premières erreurs ont été retranscrites)</i>": "") );
+					   __("Errors while compiling LaTeX source.")." "
+					   .__("You have to correct LaTeX source and re-run documents update.")." "
+					   .__("Use LaTeX editor or latex command for a precise diagnosis.")."\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "") );
 		     $dialog->run;
 		     $dialog->destroy;
 		 } else {
@@ -1391,7 +1442,9 @@ sub doc_maj {
 			 $ok=0 if(! -f absolu($projet{'options'}->{'docs'}->[$_]));
 		     }
 		     dialogue_apprentissage('MAJ_DOCS_OK',
-					    "Les documents de travail ont bien été générés. Vous pouvez y jeter un oeuil grâce à un double-clic sur les lignes de la liste correspondante. Si tout vous parraît correct, l'étape suivante est la détection des mises en page...") if($ok);
+					    __("Working documents successfully generated.")." "
+					    .__("You can take a look at them double-clicking on the list.")." "
+					    .__("If they are correct, proceed to layouts detection...")) if($ok);
 		 }
 
 		 my $ap=($c->variable('ensemble') ? 'case' : 'marge');
@@ -1404,7 +1457,12 @@ sub doc_maj {
 			 ->new_with_markup($w{'main_window'},
 					   'destroy-with-parent',
 					   'question','yes-no',
-					   sprintf("Votre sujet propose une feuille de réponses séparée. Dans ce cas, des lettres sont inscrites dans les cases à cocher. Pour une bonne détection des cases à cocher, il faut donc demander aux étudiants de remplir totalement les cases voulues, et aussi fixer le paramètre \"seuil de noirceur\" du projet à une valeur de l'ordre de 0.5. Pour l'instant, la valeur de ce paramètre est %.02f. Voulez-vous changer cette valeur en 0.5 ?",$projet{'options'}->{'seuil'}) );
+					   sprintf(__("Your question has a separate answers page.")." "
+						   .__("In this case, letters are shown inside boxes.")." "
+						   .__("For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project.")." "
+						   .__("At the moment, this parameter is set to %.02f.")." "
+						   .__("Would you like to set it to 0.5?")
+						   ,__"darkness threshold",$projet{'options'}->{'seuil'}) );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
 		     if($reponse) {
@@ -1434,7 +1492,7 @@ sub autre_imprimante {
     my %alias=();
     my %trouve=();
 
-    debug "Recherche agrafage...";
+    debug "Looking for staple opton...";
 
   CHOIX: for my $i (qw/StapleLocation/) {
       my $oi=$ppd->getOption($i);
@@ -1462,9 +1520,9 @@ sub autre_imprimante {
       }
   }
     if(!$trouve{'agrafe'}) {
-	debug "Agrafage impossible";
+	debug "No possible staple";
 
-	$cb_stores{'agrafe'}=cb_model(''=>'(impossible)');
+	$cb_stores{'agrafe'}=cb_model(''=>__"(not supported)");
 	$w{'imp_c_agrafe'}->set_model($cb_stores{'agrafe'});
     }
 
@@ -1479,7 +1537,7 @@ sub sujet_impressions {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "Vous n'avez pas de sujet à imprimer : veuillez vérifier votre source LaTeX et mettre à jour les documents de travail.");
+			      __"You don't have any question to print: please check your LaTeX source and update working documents first.");
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1491,16 +1549,17 @@ sub sujet_impressions {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "Aucune copie n'a été détectée sur le document de calage. Peut-être avez-vous oublié de calculer les mises en page ?");
+			      __("Question's pages are not detected.")." "
+			      .__"Perhaps you forgot to compute layouts?");
 	$dialog->run;
 	$dialog->destroy;
 	
 	return();
     }
 
-    debug "Choix des impressions...";
+    debug "Choosing pages to print...";
 
-    $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression');
+    $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression','auto-multiple-choice');
     $g_imprime->signal_autoconnect_from_package('main');
     for(qw/choix_pages_impression arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe bloc_fichier/) {
 	$w{$_}=$g_imprime->get_widget($_);
@@ -1514,7 +1573,7 @@ sub sujet_impressions {
 	# les imprimantes :
 
 	my @printers = $cups->getDestinations();
-	debug "Imprimantes : ".join(' ',map { $_->getName() } @printers);
+	debug "Printers : ".join(' ',map { $_->getName() } @printers);
 	my $p_model=cb_model(map { ($_->getName(),$_->getDescription() || $_->getName()) } @printers);
 	$w{'imprimante'}->set_model($p_model);
 	if(! $o{'imprimante'}) {
@@ -1545,7 +1604,7 @@ sub sujet_impressions {
     $w{'arbre_choix_copies'}->set_model($copies_store);
 
     my $renderer=Gtk2::CellRendererText->new;
-    my $column = Gtk2::TreeViewColumn->new_with_attributes ("copies",
+    my $column = Gtk2::TreeViewColumn->new_with_attributes (__"papers",
 							    $renderer,
 							    text=> COPIE_N );
     $w{'arbre_choix_copies'}->append_column ($column);
@@ -1590,7 +1649,7 @@ sub sujet_impressions_ok {
 		 grep { $o{'options_impression'}->{$_} }
 		 (keys %{$o{'options_impression'}}) );
 
-	debug("Options d'impression : $os");
+	debug("Printing options : $os");
     }
 
     if($o{'methode_impression'} eq 'file') {
@@ -1602,7 +1661,7 @@ sub sujet_impressions_ok {
 	}
 
 	if(!$o{'options_impression'}->{'repertoire'}) {
-	    debug "Impression fichier : pas de destionation...";
+	    debug "Print to file : no destionation...";
 	    $o{'options_impression'}->{'repertoire'}='';
 	} else {
 	    mkdir($o{'options_impression'}->{'repertoire'})
@@ -1612,7 +1671,7 @@ sub sujet_impressions_ok {
 
     $w{'choix_pages_impression'}->destroy;
     
-    debug "Impression : ".join(",",@e);
+    debug "Printing: ".join(",",@e);
 
     my $fh=File::Temp->new(TEMPLATE => "nums-XXXXXX",
 			   TMPDIR => 1,
@@ -1634,7 +1693,7 @@ sub sujet_impressions_ok {
 			  "--fich-numeros",$fh->filename,
 			  ],
 	     'signal'=>2,
-	     'texte'=>'Impression copie par copie...',
+	     'texte'=>__"Print papers one by one...",
 	     'progres.id'=>'impression',
 	     'o'=>{'fh'=>$fh},
 	     'fin'=>sub {
@@ -1662,7 +1721,7 @@ sub calcule_mep {
 			  absolu($projet{'options'}->{'texsrc'}),
 			  "--mep",absolu($projet{'options'}->{'mep'}),
 			  ],
-	     'texte'=>'Calcul des mises en page...',
+	     'texte'=>__"Detecting layouts...",
 	     'progres.id'=>'MEP',
 	     'fin'=>sub { 
 		 detecte_mep();
@@ -1673,13 +1732,16 @@ sub calcule_mep {
 					   'destroy-with-parent',
 					   'error', # message type
 					   'ok', # which set of buttons?
-					   "Aucune mise en page n'a été fabriquée. <b>Ne faites pas passer l'examen</b> avant d'avoir réglé le problème, sinon vous ne pourrez pas utiliser AMC pour la correction.");
+					   __("No layout detected.")." "
+					   .__("<b>Don't go through the examination</b> before fixing this problem, otherwise you won't be able to use AMC for correction."));
 		     $dialog->run;
 		     $dialog->destroy;
 		     
 		 } else {
 		     dialogue_apprentissage('MAJ_MEP_OK',
-					    "Les mises en page sont maintenant détectées. Vous pouvez vérifier que tout est correct en cliquant sur le bouton <i>vérifier les mises en page</i> et en navigant dans les pages du sujet pour vérifier que les cases à cocher sont bien marquées en rouge à la bonne position. Vous pouvez ensuite passer à l'impression des copies et faire passer l'examen.");
+					    __("Layouts are detected.")." "
+					    .sprintf(__"You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red bozes are weel positioned.",__"Check layouts")." "
+					    .__"Then you can proceed to printing and to examination.");
 		 }
 	     });
 }
@@ -1717,14 +1779,15 @@ sub saisie_manuelle {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "Aucune mise en page n'est disponible pour ce projet. Veuillez utiliser le bouton <i>calculer les mises en page</i> de l'onglet <i>préparation</i> avant la saisie manuelle.");
+			      __("No layout for this project.")." "
+			      .sprintf(__("Please use button <i>%s</i> in <i>%s</i> before manual data capture."),__"Compute layouts",__"Preparation"));
 	$dialog->run;
 	$dialog->destroy;      
     }
 }
 
 sub saisie_automatique {
-    my $gsa=Gtk2::GladeXML->new($glade_xml,'saisie_auto');
+    my $gsa=Gtk2::GladeXML->new($glade_xml,'saisie_auto','auto-multiple-choice');
     $gsa->signal_autoconnect_from_package('main');
     for(qw/saisie_auto copie_scans/) {
 	$w{$_}=$gsa->get_widget($_);
@@ -1756,7 +1819,7 @@ sub saisie_auto_ok {
 		push @fl,$fich;
 	    }
 	}
-	debug "Copie des fichiers scan : ".$c."/".(1+$#f);
+	debug "Copying scan files: ".$c."/".(1+$#f);
 	@f=@fl;
     }
 
@@ -1787,7 +1850,7 @@ sub saisie_auto_ok {
 			  "--liste-fichiers",$fh->filename,
 			  ],
 	     'signal'=>2,
-	     'texte'=>'Saisie automatique...',
+	     'texte'=>__"Automatic data capture...",
 	     'progres.id'=>'analyse',
 	     'niveau1'=>sub { detecte_analyse('interne'=>1); },
 	     'o'=>{'fh'=>$fh},
@@ -1826,11 +1889,11 @@ sub valide_liste {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'error','ok',
-				  "Le fichier choisi ne convient pas : $err erreurs détectées, la première en ligne $errlig.");
+				  sprintf(__"Unsuitable file: %d errors, first on line %d.",$err,$errlig));
 	    $dialog->run;
 	    $dialog->destroy;
 	}
-	$cb_stores{'liste_key'}=$cb_model_vide;
+	$cb_stores{'liste_key'}=$cb_model_vide_key;
     } else {
 	# ok
 	if(!$oo{'nomodif'}) {
@@ -1839,8 +1902,9 @@ sub valide_liste {
 	}
 	# transmission liste des en-tetes
 	my @keys=$l->keys;
-	debug "cles primaires : ".join(",",@keys);
-	$cb_stores{'liste_key'}=cb_model('','(aucun)',
+	debug "primary keys: ".join(",",@keys);
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	$cb_stores{'liste_key'}=cb_model('',__p("(none) [No primary key found in association list]"),
 					 map { ($_,$_) } 
 					 sort { $a cmp $b } (@keys));
     }
@@ -1874,7 +1938,7 @@ sub associe {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  "Avant d'associer les noms aux copies, il faut indiquer un fichier de liste des étudiants dans l'onglet « Saisie ».");
+		  sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",__"Data capture"));
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1887,7 +1951,7 @@ sub associe_auto {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "Il faut tout d'abord choisir un fichier contenant la liste des étudiants");
+			      sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",__"Data capture"));
 	$dialog->run;
 	$dialog->destroy;
     } elsif(!$projet{'options'}->{'liste_key'}) {
@@ -1895,7 +1959,7 @@ sub associe_auto {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "Aucun identifiant n'a été choisi parmi les titres de colonnes du fichier contenant la liste des étudiants. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+			      __("Please choose a key from primary keys in students list before association."));
 	$dialog->run;
 	$dialog->destroy;
     } elsif(! $projet{'options'}->{'assoc_code'}) {
@@ -1903,7 +1967,7 @@ sub associe_auto {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "Aucun code n'a été choisi parmi les codes (éventuellement fabriqués avec la commande LaTeX \\AMCcode) disponibles. Il faut en choisir un avant de pouvoir effectuer une association automatique.");
+			      __("Please choose a code (made with LaTeX command \\AMCcode) before automatic association."));
 	$dialog->run;
 	$dialog->destroy;
     } else {
@@ -1917,7 +1981,7 @@ sub associe_auto {
 			      "--encodage-interne",$o{'encodage_interne'},
 			      "--debug",debug_file(),
 			      ],
-		 'texte'=>'Association automatique...',
+		 'texte'=>__"Automatic association...",
 		 'fin'=>sub {
 		     assoc_resultat();
 		 },
@@ -1941,7 +2005,7 @@ sub valide_cb {
 sub valide_options_correction {
     my ($ww,$o)=@_;
     my $name=$ww->get_name();
-    debug "Valide OC depuis $name";
+    debug "Valide OC from $name";
     valide_cb(\$projet{'options'}->{$name},$w{$name});
 }
 
@@ -1965,7 +2029,7 @@ sub voir_notes {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  "Les copies ne sont pas encore corrigées : veuillez d'abord utiliser le bouton « Corriger ».");
+		  sprintf(__"Papers are not yet corrected: use button \"%s\".",__"Mark"));
 	$dialog->run;
 	$dialog->destroy;
 	
@@ -1984,7 +2048,7 @@ sub noter {
 			      "--bareme",absolu($projet{'options'}->{'fichbareme'}),
 			      absolu($projet{'options'}->{'texsrc'}),
 			      ],
-		 'texte'=>'Analyse du bareme...',
+		 'texte'=>__"Extracting marking scale...",
 		 'fin'=>\&noter_calcul,
 		 'progres.id'=>'bareme');
     } else {
@@ -2010,7 +2074,7 @@ sub noter_calcul {
 			  "--progression",1,
 			  ],
 	     'signal'=>2,
-	     'texte'=>'Calcul des notes...',
+	     'texte'=>__"Computing marks...",
 	     'progres.id'=>'notation',
 	     'fin'=>sub {
 		 noter_resultat();
@@ -2022,7 +2086,7 @@ sub noter_resultat {
     my $moy;
     my @codes=();
     if(-s absolu($projet{'options'}->{'notes'})) {
-	debug "* lecture notes";
+	debug "* reading marks";
 	my $notes=eval { XMLin(absolu($projet{'options'}->{'notes'}),
 			       'ForceArray'=>1,
 			       'KeyAttr'=>['id'],
@@ -2030,19 +2094,20 @@ sub noter_resultat {
 	if($notes) {
 	    # recuperation de la moyenne
 	    $moy=sprintf("%.02f",$notes->{'moyenne'}->[0]);
-	    $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">Moyenne : $moy</span>");
+	    $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">".sprintf(__"Mean: %s",$moy)."</span>");
 	    # recuperation des codes disponibles
 	    @codes=(keys %{$notes->{'code'}});
 	} else {
-	    $w{'correction_result'}->set_markup("<span foreground=\"red\">Notes illisibles</span>");
+	    $w{'correction_result'}->set_markup("<span foreground=\"red\">".__("Unreadable marks")."</span>");
 	}
 	debug "Codes : ".join(',',@codes);
     } else {
-	$w{'correction_result'}->set_markup("<span foreground=\"red\">Aucun calcul de notes</span>");
+	$w{'correction_result'}->set_markup("<span foreground=\"red\">".__("No marks computed")."</span>");
 	push @codes,$projet{'options'}->{'assoc_code'}
 	if($projet{'options'}->{'assoc_code'});
     }
-    $cb_stores{'assoc_code'}=cb_model(''=>'(aucun)',
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    $cb_stores{'assoc_code'}=cb_model(''=>__p("(none) [No code found in LaTeX file]"),
 				      map { $_=>$_ } 
 				      sort { $a cmp $b } (@codes));
     transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'assoc_code'=>1});
@@ -2052,7 +2117,7 @@ sub visualise_correc {
     my $sel=$w{'correc_tree'}->get_selection()->get_selected_rows();
     #print "Correc $sel $correc_store\n";
     my $f=$correc_store->get($correc_store->get_iter($sel),CORREC_FILE);
-    debug "Visualisation $f...";
+    debug "Looking at $f...";
     commande_parallele($o{'img_viewer'},$f);
 }
 
@@ -2090,7 +2155,7 @@ sub annote_copies {
 			  "--pointsize-nl",$o{'annote_ps_nl'},
 			  "--ecart",$o{'annote_ecart'},
 			  ],
-	     'texte'=>'Annotation des copies...',
+	     'texte'=>__"Annotating papers...",
 	     'progres.id'=>'annote',
 	     'fin'=>sub { detecte_correc(); },
 	     );
@@ -2120,14 +2185,14 @@ sub regroupement {
 
 			  ],
 	     'signal'=>2,
-	     'texte'=>'Regroupement des pages corrigées par étudiant...',
+	     'texte'=>__"Grouping students annotated pages together...",
 	     'progres.id'=>'regroupe',
 	     );
 }
 
 sub regarde_regroupements {
     my $f=absolu($projet{'options'}->{'cr'})."/corrections/pdf";
-    debug "Je vais voir $f";
+    debug "Look at $f";
     my $seq=0;
     my @c=map { $seq+=s/[%]d/$f/g;$_; } split(/\s+/,$o{'dir_opener'});
     push @c,$f if(!$seq);
@@ -2140,7 +2205,7 @@ sub regarde_regroupements {
 ###
 
 sub activate_apropos {
-    my $gap=Gtk2::GladeXML->new($glade_xml,'apropos');
+    my $gap=Gtk2::GladeXML->new($glade_xml,'apropos','auto-multiple-choice');
     $gap->signal_autoconnect_from_package('main');
     for(qw/apropos/) {
 	$w{$_}=$gap->get_widget($_);
@@ -2171,7 +2236,7 @@ sub activate_zoom_maj {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      "Aucune saisie automatique n'a été effectuée : il n'y a donc pas de zooms à reconstruire...");
+			      __"No automatic data capture: no zoom to build...");
 	$dialog->run;
 	$dialog->destroy;      
 	return(0);
@@ -2188,7 +2253,7 @@ sub activate_zoom_maj {
 			  "--progression",1,
 			  "--progression-id",'zooms',
 			  ],
-	     'texte'=>'Re-extraction des zooms...',
+	     'texte'=>__"Re-extracting zooms...",
 	     'progres.id'=>'zooms',
 	     );
 }
@@ -2246,12 +2311,12 @@ sub transmet_pref {
 		$wp->set_model($cb_stores{$ta});
 		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
 		if($i) {
-		    debug("[$t] trouve $i",
+		    debug("[$t] find $i",
 			  " -> ".$cb_stores{$ta}->get($i,COMBO_TEXT));
 		    $wp->set_active_iter($i);
 		}
 	    } else {
-		debug "pas de CB_STORE pour $ta";
+		debug "no CB_STORE for $ta";
 		$wp->set_active($h->{$t});
 	    }
 	}
@@ -2259,14 +2324,14 @@ sub transmet_pref {
 	if($wp) {
 	    $w{$prefixe.'_ce_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
-		debug "CB_STORE($t) ALIAS $ta modifie";
+		debug "CB_STORE($t) ALIAS $ta changed";
 		$wp->set_model($cb_stores{$ta});
 	    }
 	    my $we=$wp->get_children();
 	    $we->set_text($h->{$t});
 	    $w{$prefixe.'_x_'.$t}=$we;
 	}
-	debug "Cle $t --> $ta : ".(defined($wp) ? "trouve widget $wp" : "RIEN");
+	debug "Key $t --> $ta : ".(defined($wp) ? "found widget $wp" : "NONE");
     }}
 }
 
@@ -2340,7 +2405,7 @@ sub reprend_pref {
 	}
     }
     
-    debug "Modifications : $h->{'_modifie'}";
+    debug "Changes : $h->{'_modifie'}";
 }
 
 sub change_methode_impression {
@@ -2354,7 +2419,7 @@ sub change_methode_impression {
 }
 
 sub edit_preferences {
-    my $gap=Gtk2::GladeXML->new($glade_xml,'edit_preferences');
+    my $gap=Gtk2::GladeXML->new($glade_xml,'edit_preferences','auto-multiple-choice');
 
     for(qw/edit_preferences pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree/) {
 	$w{$_}=$gap->get_widget($_);
@@ -2373,10 +2438,10 @@ sub edit_preferences {
     # projet ouvert -> ne pas changer localisation
     if($projet{'nom'}) {
 	$w{'pref_f_rep_projets'}->set_sensitive(0);
-	$w{'pref_projet_annonce'}->set_label('<i>Préférences du projet « <b>'.$projet{'nom'}.'</b> »</i>');
+	$w{'pref_projet_annonce'}->set_label('<i>'.sprintf(__"Project \"%s\" preferences",$projet{'nom'}).'</i>.');
     } else {
 	$w{'pref_projet_tous'}->set_sensitive(0);
-	$w{'pref_projet_annonce'}->set_label('<i>Préférences du projet</i>');
+	$w{'pref_projet_annonce'}->set_label('<i>'.__("Project preferences").'</i>');
     }
 
     change_methode_impression();
@@ -2402,7 +2467,11 @@ sub accepte_preferences {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'question','yes-no',
-				  "Vous avez modifié le seuil de noirceur. Si vous avez déjà effectué une saisie automatique, les zooms des cases fabriqués pour chaque copie ne sont plus correctement organisés. Voulez-vous les refabriquer ? Cela prend un peu de temps. Vous pouvez aussi les refabriquer plus tard grâce à l'action <i>re-extraire les zooms</i> du menu <i>Outils</i>.");
+				  sprintf(__"You changed parameter \"%s\".",__"darkness threshold")." "
+				  .__("Il you already captured data from scans, boxes zooms are no longer correctly grouped.")." "
+				  .__("Do you want to re-build them?")." "
+				  .__("It will take some time.")." "
+				  .sprintf(__"You will be able to build them later with <i>%s</i> in menu <i>%s</i>.",__"Re-extract zooms",__"Tools"));
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;      
 	    
@@ -2415,14 +2484,15 @@ sub accepte_preferences {
 }
 
 sub sauve_pref_generales {
-    debug "Sauvegarde des preferences generales...";
+    debug "Saving general preferences...";
 
     if(pref_xx_ecrit(\%o,'AMC',$o_file)) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
-		  "Erreur à l'ecriture du fichier d'options %s : %s",$o_file,$!);
+		  __"Error writing to options file %s: %s"
+		  ,$o_file,$!);
 	$dialog->run;
 	$dialog->destroy;      
     } else {
@@ -2431,7 +2501,7 @@ sub sauve_pref_generales {
 }
 
 sub annule_preferences {
-    debug "Annule modifs preferences";
+    debug "Canceling preferences modification";
     $w{'edit_preferences'}->destroy();
 }
 
@@ -2440,14 +2510,12 @@ sub file_maj {
     if($f && -f $f) {
 	if(-r $f) {
 	    my @s=stat($f);
-	    my $t=localtime($s[9]);
-	    return(sprintf("%02d/%02d/%04d %02d:%02d",
-			   $t->mday,$t->mon+1,$t->year+1900,$t->hour,$t->min));
+	    return(strftime("%x %X",localtime($s[9])));
 	} else {
-	    return('illisible');
+	    return(__"unreadable");
 	}
     } else {
-	return('inexistant');
+	return(__"not found");
     }
 }
 
@@ -2461,7 +2529,7 @@ sub detecte_documents {
 
 sub detecte_mep {
     $w{'commande'}->show();
-    $w{'avancement'}->set_text("Recherche des mises en page détectées...");
+    $w{'avancement'}->set_text(__"Looking for detected layouts...");
     $w{'avancement'}->set_fraction(0);
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
@@ -2518,11 +2586,11 @@ sub detecte_correc {
 sub detecte_analyse {
     my (%oo)=(@_);
 
-    debug "Detection analyses / ".join(', ',map { $_."=".$oo{$_} } (keys %oo));
+    debug "Detecting analysis / ".join(', ',map { $_."=".$oo{$_} } (keys %oo));
 
     $w{'commande'}->show();
     my $av_text=$w{'avancement'}->get_text();
-    $w{'avancement'}->set_text("Recherche des analyses effectuées...");
+    $w{'avancement'}->set_text(__"Looking for analysis...");
     $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
@@ -2558,12 +2626,12 @@ sub detecte_analyse {
 
       # a ete efface ?
       if(! $projet{'_an_list'}->existe($i)) {
-	  debug "Efface $i";
+	  debug "Deleting $i";
 	  $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
 	  if($iter) {
 	      $diag_store->remove($iter);
 	  } else {
-	      debug "- introuvable";
+	      debug "- not found";
 	  }
       } else {
 
@@ -2618,9 +2686,9 @@ sub detecte_analyse {
     my %r=$projet{'_mep_list'}->stats($projet{'_an_list'});
     my $tt='';
     if($r{'incomplet'}) {
-	$tt=sprintf("Saisie de %d copie(s) complète(s) et <span foreground=\"red\">%d copie(s) incomplète(s)</span>",$r{'complet'},$r{'incomplet'});
+	$tt=sprintf(__"Data capture from %d complete papers and <span foreground=\"red\">%d incomplete papers</span>",$r{'complet'},$r{'incomplet'});
     } else {
-	$tt=sprintf("<span foreground=\"darkgreen\">Saisie de %d copie(s) complète(s)</span>",$r{'complet'});
+	$tt=sprintf("<span foreground=\"darkgreen\">".__("Data capture from %d complete papers")."</span>",$r{'complet'});
     }
     $w{'diag_result'}->set_markup($tt);
 
@@ -2629,7 +2697,7 @@ sub detecte_analyse {
     for my $i (@{$r{'manque_id'}}) {
 	my $iter=$inconnu_store->append;
 	$inconnu_store->set($iter,
-			    INCONNU_SCAN,'absent',
+			    INCONNU_SCAN,__"not found",
 			    INCONNU_ID,$i);
     }
     
@@ -2643,15 +2711,15 @@ sub detecte_analyse {
 
     if($oo{'apprend'}) {
 	dialogue_apprentissage('SAISIE_AUTO',
-			       "La saisie automatique de vos scans est maintenant terminée. "
-			       .($r{'incomplet'}>0 ? sprintf("Elle n'est pas complète (il manque certaines pages pour %d copie(s)). ",$r{'incomplet'}) : '')
-			       ."Vous pouvez analyser la qualité de la détection grâce à la valeur des indicateurs donnée dans la liste des analyses :"
+			       __("Automatic data capture now completed.")." "
+			       .($r{'incomplet'}>0 ? sprintf(__("It is not complete (missing pages from %d papers).")." ",$r{'incomplet'}) : '')
+			       .__("You can analyse data capture quality with some indicators values in analysis list:")
 			       ."\n"
-			       ."- <b>EQM</b> représente l'écart de positionnement des quatre marques de coin. Une grande valeur signale une déformation anormale de la page."
+			       .sprintf(__"- <b>%s</b> represents positioning gap for the four corner marks. Great value means abnormal page distortion.",__"MSE")
 			       ."\n"
-			       ."- une grande valeur de <b>sensibilité</b> correspond à une situation dans laquelle le taux de remplissage de certaines cases est très proche du seuil défini."
+			       .sprintf(__"- great values of <b>%s</b> are seen when darkness ratio is very close to the threshold for some boxes.",__"sensitivity")
 			       ."\n"
-			       ."Vous pouvez aussi observer le calage du scan (<i>calage de la page</i>) ainsi que les cases cochées ou non (<i>zooms sur les cases</i>) en utilisant le menu déployé par un clic-droit sur chaque ligne du tableau <i>Diagnostic</i>."
+			       .sprintf(__"You can also look at the scan adjustment (<i>%s</i>) and ticked and unticked boxes (<i>%s</i>) using right-click on lines from table <i>%s</i>.",__"page adjustment",__"boxes zooms",__"Diagnosis")
 			       );
     }
 
@@ -2669,8 +2737,8 @@ sub source_latex_montre_nom {
 	->new($w{'main_window'},
 	      'destroy-with-parent',
 	      'info','ok',
-	      "Le fichier LaTeX qui décrit le QCM de ce projet est situé à l'emplacement suivant :\n%s",
-	      ($projet{'options'}->{'texsrc'} ? absolu($projet{'options'}->{'texsrc'}) : "(aucun fichier)" ));
+	      __"LaTeX source file for this project is:\n%s",
+	      ($projet{'options'}->{'texsrc'} ? absolu($projet{'options'}->{'texsrc'}) : __"(no file)" ));
     $dialog->run;
     $dialog->destroy;
 }
@@ -2713,7 +2781,7 @@ sub charge_modeles {
 	      $d->{'desc'}.=$_;
 	  }
 	} else {
-	    $d->{'desc'}='(aucune description)';
+	    $d->{'desc'}=__"(no description)";
 	}
 	#print "MOD : $m\n";
 	push @modeles,$d;
@@ -2734,7 +2802,7 @@ sub source_latex_choisir {
 
     # fenetre de choix du source latex
 
-    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog');
+    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog','auto-multiple-choice');
 
     my $dialog=$gap->get_widget('source_latex_dialog');
 
@@ -2748,7 +2816,7 @@ sub source_latex_choisir {
 
     $dialog->destroy();
 
-    debug "REPONSE=$reponse";
+    debug "RESPONSE=$reponse";
 
     return(0) if(!$reponse);
 
@@ -2758,7 +2826,7 @@ sub source_latex_choisir {
 	
 	# choix d'un modele
 
-	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_modele');
+	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_modele','auto-multiple-choice');
 
 	for(qw/source_latex_modele modeles_liste modeles_description/) {
 	    $w{$_}=$gap->get_widget($_);
@@ -2774,7 +2842,7 @@ sub source_latex_choisir {
 	}
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;
-	my $column = Gtk2::TreeViewColumn->new_with_attributes("modèle",
+	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"model",
 							       $renderer,
 							       text=> LISTE_TXT );
 	$w{'modeles_liste'}->append_column ($column);
@@ -2782,7 +2850,7 @@ sub source_latex_choisir {
 
 	$reponse=$w{'source_latex_modele'}->run();
 
-	debug "Dialogue modele : $reponse";
+	debug "Dialog modele : $reponse";
 
 	# le modele est choisi : l'installer
 
@@ -2802,10 +2870,10 @@ sub source_latex_choisir {
 	return(0) if(!$reponse);
 
 	if(@i) {
-	    debug "Installation modele $i[0] : ".$modeles[$i[0]]->{'fichier'};
+	    debug "Installing model $i[0] : ".$modeles[$i[0]]->{'fichier'};
 	    $projet{'options'}->{'texsrc'}=$modeles[$i[0]]->{'fichier'};
 	} else {
-	    debug "Aucun modele selectionne";
+	    debug "No model";
 	    return(0);
 	}
 
@@ -2813,7 +2881,7 @@ sub source_latex_choisir {
 
 	# choisir un fichier deja present
 
-	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix');
+	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix','auto-multiple-choice');
 
 	for(qw/source_latex_choix/) {
 	    $w{$_}=$gap->get_widget($_);
@@ -2821,7 +2889,7 @@ sub source_latex_choisir {
 	$w{'source_latex_choix'}->set_current_folder($home_dir);
 
 	my $filtre_latex=Gtk2::FileFilter->new();
-	$filtre_latex->set_name("Fichier LaTeX (*.tex)");
+	$filtre_latex->set_name(__"LaTeX file (*.tex)");
         $filtre_latex->add_pattern("*.tex");
         $filtre_latex->add_pattern("*.TEX");
 	$w{'source_latex_choix'}->add_filter($filtre_latex);
@@ -2841,7 +2909,7 @@ sub source_latex_choisir {
 	
 	# choisir un fichier ZIP
 
-	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix_zip');
+	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix_zip','auto-multiple-choice');
 
 	for(qw/source_latex_choix_zip/) {
 	    $w{$_}=$gap->get_widget($_);
@@ -2849,7 +2917,7 @@ sub source_latex_choisir {
 	$w{'source_latex_choix_zip'}->set_current_folder($home_dir);
 
 	my $filtre_zip=Gtk2::FileFilter->new();
-	$filtre_zip->set_name("Fichier archive (*.zip)");
+	$filtre_zip->set_name(__"ZIP archive (*.zip)");
         $filtre_zip->add_pattern("*.zip");
         $filtre_zip->add_pattern("*.ZIP");
 	$w{'source_latex_choix_zip'}->add_filter($filtre_zip);
@@ -2884,7 +2952,7 @@ sub source_latex_choisir {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'error','ok',
-				  sprintf("Rien n'a pu être extrait du fichier %s. Vérifiez qu'il est correct.",$f));
+				  sprintf(__"Nothing extracted from archive %s. Check it.",$f));
 	    $dialog->run;
 	    $dialog->destroy;
 	    return(0);
@@ -2893,7 +2961,7 @@ sub source_latex_choisir {
 	    # vire les repertoires intermediaires :
 
 	    while($n==1 && -d $suivant) {
-		debug "Changement repertoire racine : $suivant";
+		debug "Changing root directory : $suivant";
 		$temp_dir=$suivant;
 		($n,$suivant)=n_fich($temp_dir);
 	    }
@@ -2911,14 +2979,14 @@ sub source_latex_choisir {
 	    my $latex;
 
 	    for(@archive_files) {
-		debug "Deplace dans projet : $_";
+		debug "Moving to project: $_";
 		$latex=$_ if(/\.tex$/i);
 		system("mv","$temp_dir/$_",$hd);
 	    }
 
 	    if($latex) {
 		$projet{'options'}->{'texsrc'}="%PROJET/$latex";
-		debug "LaTeX trouve : $latex";
+		debug "LaTeX found : $latex";
 	    }
 
 	    return(2);
@@ -2934,7 +3002,7 @@ sub source_latex_choisir {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'error','ok',
-				  sprintf("Un fichier <i>source.tex</i> existe déjà dans le répertoire du projet %s. Je ne l'ai pas effacé et il servira de fichier source.",$projet{'nom'}));
+				  sprintf(__"File <i>source.tex</i> already exists in project directory %s. It has not been removed, and will be used as the project source file.",$projet{'nom'}));
 	    $dialog->run;
 	    $dialog->destroy;      
 	    
@@ -2951,7 +3019,7 @@ sub source_latex_choisir {
 	    # creation fichier vide
 
 	    if(! open(FV,">$sl")) {
-		debug "Ouverture impossible en creation / $sl : $!";
+		debug "Error opening $sl : $!";
 		return(0);
 	    }
 	    close(FV);
@@ -2991,7 +3059,7 @@ sub copy_latex {
     my $ie=get_enc($i);
     my $id=get_enc($o{'encodage_latex'});
     if($ie && $id && $ie->{'iso'} ne $id->{'iso'}) {
-	debug "Reencodage $ie->{'iso'} => $id->{'iso'}";
+	debug "Reencoding $ie->{'iso'} => $id->{'iso'}";
 	open(SRC,"<:encoding($ie->{'iso'})",$src) or return('');
 	open(DEST,">:encoding($id->{'iso'})",$dest) or close(SRC),return('');
 	while(<SRC>) {
@@ -3019,7 +3087,8 @@ sub importe_source {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','yes-no',
-		  "Le fichier %s existe déjà dans le répertoire projet : voulez-vous écraser son ancien contenu ? Cliquez sur oui pour remplacer le fichier pré-existant par celui que vous venez de sélectionner, ou sur non pour annuler l'import du fichier source.",$fb);
+		  __("File %s already exists in project directory: do you wnant to replace it?")." "
+		  .__("Click yes to replace it and loose pre-existing contents, or No to cancel source file import."),$fb);
 	my $reponse=$dialog->run;
 	$dialog->destroy;      
 
@@ -3035,7 +3104,7 @@ sub importe_source {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  "Le fichier LaTeX a été copié dans le répertoire projet. Vous pouvez maintenant l'éditer soit en utilisant le bouton \"Éditer le fichier LaTeX\", soit directement grâce au logiciel de votre choix.");
+		  __("LaTeX file has been copied to project directory.")." ".sprintf(__"You can now edit it with button \"%s\" or with any editor.",__"Edit LaTeX file"));
 	$dialog->run;
 	$dialog->destroy;   
     } else {
@@ -3043,7 +3112,7 @@ sub importe_source {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
-		  "Erreur durant la copie du fichier source : %s",$!);
+		  __"Error copying source file: %s",$!);
 	$dialog->run;
 	$dialog->destroy;      
     }
@@ -3051,7 +3120,7 @@ sub importe_source {
 
 sub edite_source {
     my $f=absolu($projet{'options'}->{'texsrc'});
-    debug "Edition $f...";
+    debug "Editing $f...";
     commande_parallele($o{'tex_editor'},$f);
 }
 
@@ -3062,7 +3131,7 @@ sub valide_projet {
     if(-f $fl) {
 	$w{'liste'}->set_filename($fl);
     } else {
-	debug("Fichier liste introuvable : $fl");
+	debug("List file not found : $fl");
 	$w{'liste'}->set_filename('');
     }
 
@@ -3078,7 +3147,7 @@ sub valide_projet {
 					 'saved'=>absolu($an_saved));
     detecte_analyse('premier'=>1);
 
-    debug "Options correction : MB".$projet{'options'}->{'maj_bareme'};
+    debug "Correction options : MB".$projet{'options'}->{'maj_bareme'};
     $w{'maj_bareme'}->set_active($projet{'options'}->{'maj_bareme'});
 
     transmet_pref($gui,'notation',$projet{'options'});
@@ -3126,7 +3195,7 @@ sub projet_ouvre {
 	if(!$deja) {
 
 	    if(-f fich_options($proj)) {
-		debug "Lecture options du projet $proj...";
+		debug "Reading options for project $proj...";
 		
 		$projet{'options'}={pref_xx_lit(fich_options($proj))};
 		
@@ -3135,10 +3204,10 @@ sub projet_ouvre {
 		    delete($projet{'options'}->{$_}) 
 			if($_ !~ /^ext_/ && !exists($projet_defaut{$_}));
 		}
-		debug "Options lues :",
+		debug "Read options:",
 		Dumper(\%projet);
 	    } else {
-		debug "Pas de fichier options a lire...";
+		debug "No options file...";
 	    }
 	}
 	
@@ -3149,7 +3218,7 @@ sub projet_ouvre {
 	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf mep scans:) {
 	    my $rep=$o{'rep_projets'}."/$proj/$sous";
 	    if(! -x $rep) {
-		debug "Creation du repertoire $rep...";
+		debug "Creating directory $rep...";
 		mkdir($rep);
 	    }
 	}
@@ -3160,10 +3229,10 @@ sub projet_ouvre {
 	    if(! exists($projet{'options'}->{$k})) {
 		if($o{'defaut_'.$k}) {
 		    $projet{'options'}->{$k}=$o{'defaut_'.$k};
-		    debug "Nouveau parametre (defaut) : $k";
+		    debug "New parameter (default) : $k";
 		} else {
 		    $projet{'options'}->{$k}=$projet_defaut{$k};
-		    debug "Nouveau parametre : $k";
+		    debug "New parameter : $k";
 		}
 	    }
 	}
@@ -3192,7 +3261,7 @@ sub quitte_projet {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'question','yes-no',
-				  sprintf("Vous n'avez pas sauvegardé les options du projet <i>%s</i>, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?",$projet{'nom'}));
+				  sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;      
 	    
@@ -3228,7 +3297,7 @@ sub quitter {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'question','yes-no',
-				  "Vous n'avez pas sauvegardé les options générales, qui ont pourtant été modifiées : voulez-vous le faire avant de le quitter ?");
+				  __"You did not save main options, which have been modified: do you want to save them before leaving?");
 	    $reponse=$dialog->run;
 	    $dialog->destroy;      
 	}

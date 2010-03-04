@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -40,7 +40,7 @@ sub new {
 
 	$self=load_an($o{'saved'});
 	if(!$self) {
-	    debug "Load(ANList)->erreur\n";
+	    debug "Load(ANList)->error\n";
 	}
 	
     } 
@@ -86,11 +86,11 @@ sub maj {
 	   ) {
 	    if($an_dispos->{$i}->{'fichier'}) {
 		$a_retraiter{$an_dispos->{$i}->{'fichier'}}=1;
-		debug "Fichier ".$an_dispos->{$i}->{'fichier'}. " a retraiter";
+		debug "File ".$an_dispos->{$i}->{'fichier'}. " to be updated";
 	    }
 	    if($an_dispos->{$i}->{'fichier-scan'}) {
 		$a_retraiter{$an_dispos->{$i}->{'fichier-scan'}}=1;
-		debug "Fichier ".$an_dispos->{$i}->{'fichier-scan'}. " a retraiter";
+		debug "File ".$an_dispos->{$i}->{'fichier-scan'}. " to be updated";
 	    }
 		
 	    debug "AN : entree $i effacee\n";
@@ -120,7 +120,7 @@ sub maj {
   XMLF: for my $xf (@xmls) {
       &{$oo{'progres'}}() if($oo{'progres'});
 
-      debug "Exploration fichier $xf pour ANList...";
+      debug "Looking at $xf for ANList...";
 
       my $x=XMLin($self->{'cr'}."/".$xf,
 		  ForceArray => ["analyse","chiffre","case","id"],
@@ -143,7 +143,7 @@ sub maj {
 	    if($an_dispos->{$id}->{'manuel'} == $mm
 	       && $an_dispos->{$id}->{'fichier'} ne $xf) {
 		# avec la meme valeur de <manuel> : ca doit etre une erreur
-		die "Plusieurs fichiers differents pour la page $id ("
+		die "Different files for page $id ("
 		    .$an_dispos->{$id}->{'fichier'}.", "
 		    .$xf.")";
 	    }
@@ -179,7 +179,7 @@ sub maj {
     }
   }
 
-    debug "Nouveau timestamp : ".$self->{'timestamp'};
+    debug "New timestamp : ".$self->{'timestamp'};
 
     my @kan=(keys %$an_dispos);
     
@@ -322,7 +322,7 @@ sub load_an {
 	my $v=$$d->{'version'};
 	$v=0 if(!defined($v));
 	if($v < $VERSION ) {
-	    debug "Version de fichier ANList perimee : $v < $VERSION";
+	    debug "Old ANList version: $v < $VERSION";
 	    $d='';
 	}
     }

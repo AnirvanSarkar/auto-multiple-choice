@@ -62,11 +62,11 @@ set_debug($debug);
 my $commandes=AMC::Exec::new('AMC-imprime');
 $commandes->signalise();
 
-die "Repertoire MEP non specifie" if(!$mep_dir);
-die "Fichier sujet non specifie" if(!$sujet);
-die "Commande impression non specifiee" if(!$print_cmd);
+die "Needs layout directory" if(!$mep_dir);
+die "Needs subject file" if(!$sujet);
+die "Needs print command" if(!$print_cmd);
 
-die "Fichier sortie non specifie" if($methode =~ /^file/i && !$output_file);
+die "Needs output file" if($methode =~ /^file/i && !$output_file);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
@@ -92,7 +92,7 @@ my $dest;
 if($methode =~ /^cups/i) {
     $cups=Net::CUPS->new();
     $dest=$cups->getDestination($imprimante);
-    die "Imprimante inaccessible : $imprimante" if(!$dest);
+    die "Can't access printer: $imprimante" if(!$dest);
     for my $o (split(/\s*,+\s*/,$options)) {
 	my $on=$o;
 	my $ov=1;
@@ -118,7 +118,7 @@ for my $e (@es) {
     $tmp = File::Temp->new( DIR=>tmpdir(),UNLINK => 1, SUFFIX => '.pdf' );
     $fn=$tmp->filename();
 
-    print "Etudiant $e : pages $debut-$fin dans le fichier $fn...\n";
+    print "Student $e : pages $debut-$fin in file $fn...\n";
 
     $commandes->execute("pdftk",$sujet,
 			"cat","$debut-$fin",
@@ -127,13 +127,13 @@ for my $e (@es) {
     $avance->progres(1/(2*(1+$#es)));
 
     if($methode =~ /^cups/i) {
-	$dest->printFile($fn,"QCM : copie $e");
+	$dest->printFile($fn,"QCM : sheet $e");
     } elsif($methode =~ /^file/i) {
 	my $f_dest=$output_file;
 	$f_dest.="-%e.pdf" if($f_dest !~ /[%]e/);
 	$f_dest =~ s/[%]e/$elong/g;
 	
-	debug "Deplacement vers $f_dest";
+	debug "Moving to $f_dest";
 	move($fn,$f_dest);
     } elsif($methode =~ /^command/i) {
 	my @c=map { s/[%]f/$fn/g; s/[%]e/$elong/g; $_; } split(/\s+/,$print_cmd);
@@ -141,7 +141,7 @@ for my $e (@es) {
 	#print STDERR join(' ',@c)."\n";
 	$commandes->execute(@c);
     } else {
-	die "Methode non reconnue : $methode";
+	die "Unknown method: $methode";
     }
 
     close($tmp);

@@ -60,7 +60,7 @@ sub set_options {
 	    debug "Option $k = $f{$_}";
 	    $self->{$k}=$f{$_};
 	} else {
-	    debug "Option <$domaine.$_> inutilisable\n";
+	    debug "Unusable option <$domaine.$_>\n";
 	}
     }
 }
@@ -89,7 +89,7 @@ sub load {
 		    $self->{'notes'}->{$_};
 	    }
 	} else {
-	    debug "Erreur a l'analyse du fichier de notes ".$self->{'fich.notes'}."\n";
+	    debug "Marks file analysis error: ".$self->{'fich.notes'}."\n";
 	}
     }
     if($self->{'fich.association'} && ! $self->{'assoc'}) {
@@ -169,7 +169,7 @@ sub pre_process {
 	$k_id='_NOM_';
     } else {
 	$self->{'liste_key'}='';
-	debug "Pas d'association utilisable\n";
+	debug "No association\n";
     }
 
     $self->{'keys'}=\@keys;
@@ -185,7 +185,7 @@ sub pre_process {
 sub export {
     my ($self,$fichier)=@_;
 
-    debug "Export dans la classe de base : $fichier\n";
+    debug "WARNING: Base class export to $fichier\n";
 }
 
 1;

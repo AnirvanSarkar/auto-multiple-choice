@@ -122,7 +122,7 @@ if($fich_noms) {
     $noms=AMC::NamesFile::new($fich_noms,
 			      "encodage"=>$noms_encodage);
 
-    debug "Dans le fichier de noms, on trouve les champs : ".join(", ",$noms->heads());
+    debug "Keys in names file: ".join(", ",$noms->heads());
 }
 
 my $anl='';
@@ -146,7 +146,7 @@ sub check_correc {
     if(!$correc_indiv_ok) {
 	$correc_indiv_ok=1;
 
-	debug "Preparation de la correction individuelle...";
+	debug "Making individual corrected sheet...";
 
 	$commandes->execute(with_prog("AMC-prepare.pl"),
 			    "--n-copies",$nombre_copies,
@@ -167,17 +167,17 @@ if($sujet) {
 	if(open(IDENT,"-|",@c)) {
 	    while(<IDENT>) {
 		if(/^([0-9.]+),([0-9.]+)$/) {
-		    debug "Taille depuis le sujet : $1 x $2";
+		    debug "Size from subject : $1 x $2";
 		    $dest_size_x=$1/72;
 		    $dest_size_y=$2/72;
 		}
 	    }
 	    close IDENT;
 	} else {
-	    debug "Erreur de la commande : $!";
+	    debug "Error execing: $!";
 	}
     } else {
-	debug "Sujet introuvable : $sujet";
+	debug "No subject: $sujet";
     }
 }
 
@@ -200,8 +200,8 @@ sub write_pdf {
 		      'compression'=>'jpeg','density'=>$dens.'x'.$dens);
     
     if($w) {
-	print "ERREUR ecriture : $w\n";
-	debug "ERREUR ecriture : $w\n";
+	print "Write error: $w\n";
+	debug "Write error: $w\n";
 	return(0);
     } else {
 	return(1);
@@ -292,7 +292,7 @@ sub stk_pdf_add {
 }
 
 sub stk_pdf_go {
-    debug "Page(s) ".join(',',@stk_pdf_pages)." de la correction";
+    debug "Page(s) ".join(',',@stk_pdf_pages)." form corrected sheet";
     
     check_correc();
     
@@ -327,7 +327,7 @@ sub stk_ppm_go {
 # boucle sur les copies...
 
 for my $e (sort { $a <=> $b } (keys %copie_utile)) {
-    print "Regroupement des pages pour ID=$e...\n";
+    print "Pages for ID=$e...\n";
 
     my $f=$modele;
     $f='(N)' if(!$f);
@@ -346,7 +346,7 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	if($i) {
 	    ($n)=$noms->data($lk,$i);
 	    if($n) {
-		debug "Nom retrouve";
+		debug "Name found";
 		$nom=$n->{'_ID_'};
 	    }
 	}
@@ -372,7 +372,7 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
     
     $f="$pdfdir/$f";
 
-    debug "Fichier destination : $f";
+    debug "Dest file: $f";
 
     stk_begin();
 
@@ -386,14 +386,14 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	if(-f $f_j) {
 	    # correction JPG presente : on transforme en PDF
 
-	    debug "Page $pp->{id} annotee";
+	    debug "Page $pp->{id} annotated";
 
 	    stk_ppm_add($f_j);
 
 	} elsif($compose) {
 	    # pas de JPG annote : on prend la page corrigee
 
-	    debug "Page $pp->{id} de la correction";
+	    debug "Page $pp->{id} from corrected sheet";
 
 	    stk_pdf_add($pp->{page});
 	}

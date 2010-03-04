@@ -38,7 +38,7 @@ GetOptions('moteur=s'=>\$moteur,
 
 set_debug($debug);
 
-die "Mauvais nombre d'arguments" if($#ARGV!=1);
+die "Bad arguments number" if($#ARGV!=1);
 
 my ($pdf,$ppm)=@ARGV;
 
@@ -52,8 +52,8 @@ if($moteur eq 'auto') {
     }
     close(INFO);
     $moteur='im' if(!$moteur);
-    print "Moteur utilise : $moteur\n";
-    debug "Moteur utilise : $moteur\n";
+    print "Unsing: $moteur\n";
+    debug "Using: $moteur\n";
 }
 
 if($moteur eq 'im') {
@@ -84,13 +84,13 @@ if($moteur eq 'im') {
     my @ppms=grep { /^raster.*\.ppm/ } readdir(RD);
     closedir(RD);
 
-    debug "Raster - PPM produits (".(1+$#ppms).") : ".join(' ',@ppms);
+    debug "Raster - PPMs (".(1+$#ppms).") : ".join(' ',@ppms);
 
     if($#ppms==0) {
 	move($temp_dir."/".$ppms[0],$ppm);
     } else {
-	die "Plusieurs ppm produits par pdftoppm.";
+	die "Several produced ppm (pdftoppm).";
     }
 } else {
-    die "Moteur non repertorie : $moteur";
+    die "Unknown rasterisation engine: $moteur";
 }

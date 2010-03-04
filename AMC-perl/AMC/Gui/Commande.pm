@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -83,7 +83,7 @@ sub variable {
 sub quitte {
     my ($self)=(@_);
     my $pid=$self->proc_pid();
-    debug "Annulation commande [".$self->{'signal'}."->".$pid."].";
+    debug "Canceling command [".$self->{'signal'}."->".$pid."].";
     
     kill $self->{'signal'},$pid if($pid =~ /^[0-9]+$/);
 }
@@ -98,7 +98,7 @@ sub open {
 						in => sub { $self->get_output() }
 						);
 	
-	debug "Commande [".$self->{'pid'}."] : ".join(' ',@{$self->{'commande'}});
+	debug "Command [".$self->{'pid'}."] : ".join(' ',@{$self->{'commande'}});
 	
 	if($self->{'avancement'}) {
 	    $self->{'avancement'}->set_text($self->{'texte'});
@@ -112,7 +112,7 @@ sub open {
 	$self->{'log'}->get_buffer()->set_text('');
 
     } else {
-	print STDERR "ERREUR au lancement de la commande\n".join(' ',@{$self->{'commande'}})."\n"; 
+	print STDERR "ERROR execing command\n".join(' ',@{$self->{'commande'}})."\n"; 
     }
 }
 
@@ -124,7 +124,7 @@ sub get_output {
         Gtk2::Helper->remove_watch( $self->{'tag'} );
 	  close($self->{'fh'});
 	  
-	  debug "Commande [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
+	  debug "Command [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
 	  
 	  $self->{'pid'}='';
 	  $self->{'tag'}='';

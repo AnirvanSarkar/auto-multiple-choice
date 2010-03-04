@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,6 +18,8 @@
 # <http://www.gnu.org/licenses/>.
 
 package AMC::Calage;
+
+use AMC::Basic;
 
 BEGIN {
     use Exporter   ();
@@ -146,7 +148,7 @@ sub calage {
 	$theta=atan2(crochet($cx,$cyp)-crochet($cxp,$cy),
 		     crochet($cx,$cxp)+crochet($cy,$cyp));
 
-	printf("theta = %.3f\n",$theta*180/$M_PI) if($self->{'log'});
+	debug sprintf("theta = %.3f\n",$theta*180/$M_PI);
 
 	my $den=crochet($cx,$cx)+crochet($cy,$cy);
 	if(abs(cos($theta))>abs(sin($theta))) {
@@ -163,7 +165,7 @@ sub calage {
 	$self->{'t_e'}=moyenne(@$cxp)-$alpha*(moyenne(@$cx)*cos($theta)-moyenne(@$cy)*sin($theta));
 	$self->{'t_f'}=moyenne(@$cyp)-$alpha*(moyenne(@$cx)*sin($theta)+moyenne(@$cy)*cos($theta));
 
-	print "alpha = $alpha\n" if($self->{'log'});
+	debug "alpha = $alpha\n";
 
 	$self->{'t_a'}=$alpha*cos($theta);
 	$self->{'t_b'}=-$alpha*sin($theta);
@@ -191,17 +193,17 @@ sub calage {
 	$self->{'t_f'}=moyenne(@$cyp)-($self->{'t_c'}*moyenne(@$cx)+$self->{'t_d'}*moyenne(@$cy));
 	
     } else {
-	print "ERR : type invalide\n";
+	debug "ERR: invalid type: $self->{'type'}\n";
     }
 
     if($self->{'log'} && $self->{'type'} =~ /^[hl]/i) {
-	print "Transformation lineaire :\n";
-	printf " %7.3f %7.3f     %10.3f\n %7.3f %7.3f     %10.3f\n",
-	$self->{'t_a'},$self->{'t_b'},$self->{'t_e'},
-	$self->{'t_c'},$self->{'t_d'},$self->{'t_f'};
+	debug "Linear transform:\n";
+	debug sprintf(" %7.3f %7.3f     %10.3f\n %7.3f %7.3f     %10.3f\n",
+		      $self->{'t_a'},$self->{'t_b'},$self->{'t_e'},
+		      $self->{'t_c'},$self->{'t_d'},$self->{'t_f'});
     }
 
-    ############ évaluation de la qualité de l'ajustement
+    ############ evaluation de la qualite de l'ajustement
 
     my $sd=0;
     for my $i (0..$#{$cx}) {
@@ -210,7 +212,8 @@ sub calage {
     }
     $self->{'MSE'}=sqrt($sd/($#{$cx}+1));
 
-    printf("Ajustement : MSE = %.3f\n",$self->{'MSE'}) if($self->{'log'});
+    debug("MSE = %.3f\n",$self->{'MSE'});
+    printf("Adjust: MSE = %.3f\n",$self->{'MSE'}) if($self->{'log'});
 
     return($self->{'MSE'});
 }

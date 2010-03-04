@@ -156,8 +156,8 @@ $scan=$ARGV[0];
 
 sub erreur {
     my $e=shift;
-    debug "ERREUR($scan)($id_page) : $e\n";
-    print "ERREUR($scan)($id_page) : $e\n";
+    debug "ERROR($scan)($id_page) : $e\n";
+    print "ERROR($scan)($id_page) : $e\n";
     exit(1);
 }
 
@@ -176,7 +176,7 @@ debug "dir = $temp_dir";
 $ppm="$temp_dir/image.ppm";
 
 if($blur || $threshold || $scan !~ /\.ppm$/) {
-    print "Transformation en ppm...\n";
+    print "Converting to ppm...\n";
 
     my @ca=(magick_module('convert'));
     push @ca,"-blur",$blur if($blur);
@@ -207,9 +207,9 @@ my $mep_dispos;
 
 $mep_dispos=AMC::MEPList::new($xml_layout,"saved"=>$mep_saved);
 
-erreur("Aucune mise en page disponible") if($mep_dispos->nombre()==0 && !$modele);
+erreur("No layout") if($mep_dispos->nombre()==0 && !$modele);
 
-debug "".$mep_dispos->nombre()." mises en page disponibles\n";
+debug "".$mep_dispos->nombre()." layouts\n";
 
 my $cale=AMC::Calage::new('type'=>$t_type);
 
@@ -264,7 +264,7 @@ if($modele) {
 
     # pour le modele, on utilise les couleurs specifiques
 
-    print "Positionnement des marques...\n";
+    print "Looking for signs...\n";
 
     my $nm=0;
     for($traitement->commande("magick")) {
@@ -276,12 +276,12 @@ if($modele) {
 	}
     }
     
-    erreur("$nm marques ont ete reconnues, au lieu de 4") if($nm != 4);
+    erreur("$nm signs found, instead of 4") if($nm != 4);
 
     $cadre_general=AMC::Boite::new_complete(map { $_->centre() } (@box));
 
     for my $b (@box) {
-	debug " Boite ".$b->txt();
+	debug " Box ".$b->txt();
 	$diametre_marque+=$b->diametre();
     }
     $diametre_marque /= $nm;
@@ -293,7 +293,7 @@ if($modele) {
 
 	$xml="$temp_dir/ocr.xml";
 
-	print "Reconnaissance de formes...\n";
+	print "gOCR...\n";
 
 	open(CMD,"gocr -f XML -d $dust_size -C \"\" $ppm |");
 	open(XF,">$xml");
@@ -310,7 +310,7 @@ if($modele) {
 	close(XF);
     } elsif($detecte_via eq 'c') {
 
-	print "Operations morphologiques (+$lisse_trous-$lisse_pouss) et detection des marques...\n";
+	print "Morphological operations (+$lisse_trous-$lisse_pouss) and signs detection...\n";
 	
 	$traitement->commande("etend $lisse_trous");
 	$traitement->commande("erode ".($lisse_trous+$lisse_pouss));
@@ -326,14 +326,14 @@ if($modele) {
 	$traitement->ferme_commande();
 
     } else {
-	erreur("Mauvaise valeur de --detecte-via : $detecte_via");
+	erreur("Bad value for --detecte-via : $detecte_via");
     }
 
-    print "".($#box+1)." boites.\n";
+    print "".($#box+1)." boxes.\n";
 
     debug join("\n",map { $_->txt(); } @box);
 
-    print "Examen des formes...\n";
+    print "Searching signs...\n";
 
     #####
     # chargement d'une MEP au hasard pour recuperer la taille
@@ -348,7 +348,7 @@ if($modele) {
     $taille_min=$taille*(1-$tol_marque_moins);
     
     debug "rx = $rx   ry = $ry\n";
-    debug(sprintf("Taille de marque cible : %.2f a %.2f",
+    debug(sprintf("Target sign size : %.2f a %.2f",
 		  $taille_min,$taille_max));
 
     @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
@@ -357,11 +357,11 @@ if($modele) {
 
 }
 
-debug "Cadre general :",
+debug "Global frame:",
     $cadre_general->txt();
 
 ###############################################################
-# identification du numéro de page : cas ecriture standard
+# identification du numero de page : cas ecriture standard
 
 $avance->progres((1-$progress_debut)/3);
 
@@ -369,7 +369,7 @@ my $bandeau=Graphics::Magick::new();
 
 $bandeau->Read($scan);
 
-# mesure de l'angle de la ligne supérieure
+# mesure de l'angle de la ligne superieure
 
 my $angle=$cadre_general->direction(0,1);
 my $dy_head=max($cadre_general->coordonnees(0,'y'),
@@ -385,7 +385,7 @@ $bandeau->Rotate(-$angle*180/$M_PI);
 # utilise gocr pour reconnaitre l'ID
 
 if(!$binaire) {
-    print "Extraction du numero de page...\n";
+    print "Reading page ID...\n";
 
     my $page_droite="$temp_dir/droit.pnm";
 
@@ -415,7 +415,7 @@ sub valide_id_page {
 	my $oc=XMLin($ocr_file,ForceArray => 1,KeyAttr=>['scan']);
 	my $m=$oc->{'page'}->{$scan}->{'id'};
 	if($m) {
-	    print "Page (manuel) : $m\n";
+	    print "Page (manual) : $m\n";
 	    $id_page=$m;
 	}
     }
@@ -424,12 +424,12 @@ sub valide_id_page {
     if($id_page_fourni) {
 	print "Page (option) : $m\n";
 	if($id_page && $id_page ne $id_page_fourni) {
-	    attention("ATTENTION : l'identifiant de page reconnu est différent de celui fourni !");
+	    attention("WARNING: page ID mismatch!");
 	}
 	$id_page=$id_page_fourni;
     }
 
-    attention("ATTENTION : identifiant de page non reconnu !") if(!$id_page);
+    attention("WARNING: No page ID!") if(!$id_page);
     
     $id_page_f=$id_page;
     $id_page_f =~ s/[^0-9]/-/g;
@@ -516,10 +516,10 @@ sub get_id_binaire {
 
 if($modele) {
 
-    # c'est le modèle : on repère la localisation des cases (par leur
-    # couleur RGB) et on met ça dans le XML
+    # c'est le modele : on repere la localisation des cases (par leur
+    # couleur RGB) et on met ca dans le XML
 
-    print "Recherche des cases...\n";
+    print "Searching for boxes...\n";
     
     for($traitement->commande("magick")) {
 	debug "$_";
@@ -544,7 +544,7 @@ if($modele) {
 	}
     }
 
-    debug "Cases : ".join(" ",sort { $a cmp $b } (keys %case));
+    debug "Boxes: ".join(" ",sort { $a cmp $b } (keys %case));
 
     if($binaire) {
 	get_id_binaire();
@@ -583,7 +583,7 @@ if($modele) {
 
     # ce n'est pas un modele
 
-    erreur("Je n'ai pas d'instructions de mise en page...") if(!($mep_saved || $xml_layout));
+    erreur("No layouy instructions...") if(!($mep_saved || $xml_layout));
     
     # perl -e 'use XML::Simple;use Data::Dumper;$lay=XMLin("test-layout/mep-103-1-993.xml",ForceArray => 1,KeepRoot => 1);print Dumper($lay);'
 
@@ -593,7 +593,7 @@ if($modele) {
 
 	if($binaire) {
 	    # caler sur une mise en page quelconque :
-	    print "Calage pour reperage ID...\n";
+	    print "Positionning to read ID...\n";
 	    
 	    calage_reperes();
 
@@ -619,11 +619,11 @@ if($modele) {
 
     calage_reperes($id_page);
 
-    erreur("Fichier XML introuvable pour l'identifiant $id_page") if(! $lay);
+    erreur("No XML for ID $id_page") if(! $lay);
     
-    # On cherche à caler les marques.
+    # On cherche a caler les marques.
 
-    ############ récupération des positions des cases sur le modèle
+    ############ recuperation des positions des cases sur le modele
 
     for my $c (@{$lay->{'case'}}) {
 	$case{$c->{'question'}.".".$c->{'reponse'}}=
@@ -637,8 +637,8 @@ if($modele) {
 }
 
 if(!$modele) {
-    # on localise les cases récupérées depuis le modèle dans le scan, et
-    # on mesure la quantité de noir dedans
+    # on localise les cases recuperees depuis le modele dans le scan, et
+    # on mesure la quantite de noir dedans
     
     for my $k (keys %case) {
 	mesure_case($k) if($k =~ /^[0-9]+\.[0-9]+$/);
@@ -691,7 +691,7 @@ if(!$modele) {
 
 $traitement->ferme_commande();
 
-# tracés sur le scan pour localiser les cases et le cadre
+# traces sur le scan pour localiser les cases et le cadre
 
 my $page_entiere;
 
@@ -708,7 +708,7 @@ if($nom_file && $case{'nom'}) {
 
 if($out_cadre) {
 
-    print "Annotation de l'image...\n";
+    print "Annotating image...\n";
 
     # transcription de l'identifiant lu
 
@@ -735,7 +735,7 @@ if($out_cadre) {
     }
 
     ###############################################
-    # tracé des cadres
+    # trace des cadres
 
     $page_entiere->Draw(primitive=>'polygon',
 			fill=>'none',stroke=>'red',strokewidth=>1,
@@ -753,7 +753,7 @@ if($out_cadre) {
 
 if($zoom_file) {
 
-    print "Construction des zooms...\n";
+    print "Making zooms...\n";
 
     my $commandes=AMC::Exec::new("AMC-calepage");
     $commandes->signalise();

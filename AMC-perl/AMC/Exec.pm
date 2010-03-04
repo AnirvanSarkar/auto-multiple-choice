@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -33,7 +33,7 @@ sub new {
 sub catch_signal {
     my ($self,$signame)=@_;
     if($self->{'pid'}) {
-	debug "*** $self->{'nom'} : signal $signame, je tue $self->{'pid'}...\n";
+	debug "*** $self->{'nom'} : signal $signame, killing $self->{'pid'}...\n";
 	kill 9,$self->{'pid'};
     }
     die "$self->{'nom'} killed";
@@ -52,22 +52,22 @@ sub execute {
     if($prg) {
 
 	if(!commande_accessible($prg)) {
-	    debug "*** ATTENTION : programme \"$prg\" introuvable dans le PATH !";
+	    debug "*** WARNING: program \"$prg\" not found in PATH!";
 	}
 	
 	my $cmd_pid=fork();
 	if($cmd_pid) {
 	    $self->{'pid'}=$cmd_pid;
-	    debug "Commande [$cmd_pid] : ".join(' ',@c);
+	    debug "Command [$cmd_pid] : ".join(' ',@c);
 	    waitpid($cmd_pid,0);
-	    debug "Cmd PID=$cmd_pid retourne $?"; 
+	    debug "Cmd PID=$cmd_pid returns $?"; 
 	} else {
 	    exec(@c);
 	    die "Commande inexistante : $prg";
 	}
 
     } else {
-	debug "Commande : pas de programme ! ".join(' ',@c);
+	debug "Command: no executable! ".join(' ',@c);
     }
 
 }

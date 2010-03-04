@@ -93,7 +93,7 @@ for(split(/,/,join(',',@o_symbols))) {
     if(/^([01]-[01]):(none|circle|mark|box)(?:\/([\#a-z0-9]+))?$/) {
 	$symboles{$1}={type=>$2,color=>$3};
     } else {
-	die "Mauvaise syntaxe de symbole : $_";
+	die "Bad symbol syntax: $_";
     }
 }
 
@@ -101,16 +101,16 @@ my $commandes=AMC::Exec::new("AMC-annote");
 $commandes->signalise();
 
 if(! -d $cr_dir) {
-    attention("Repertoire de compte-rendus inexistant : $cr_dir");
-    die "Repertoire inexistant : $cr_dir";
+    attention("No CR directory: $cr_dir");
+    die "No CR directory: $cr_dir";
 }
 if(! -f $fichnotes) {
-    attention("Fichier notes inexistant : $fichnotes");
-    die "Fichier inexistant : $fichnotes";
+    attention("No marks file: $fichnotes");
+    die "No marks file: $fichnotes";
 }
 if(! -f $fich_bareme) {
-    attention("Fichier bareme inexistant : $fich_bareme");
-    die "Fichier inexistant : $fich_bareme";
+    attention("No marking scale file: $fich_bareme");
+    die "No marking scale file: $fich_bareme";
 }
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
@@ -126,7 +126,7 @@ if($an_saved) {
 			  'saved'=>$an_saved,
 			  );
 } else {
-    debug "Reconstruction de la liste des analyses...";
+    debug "Making analysis list...";
     $anl=AMC::ANList::new($cr_dir,
 			  'saved'=>'',
 			  );
@@ -142,10 +142,10 @@ print "\n";
 my $bar=XMLin($fich_bareme,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
 if($VERSION_BAREME ne $bar->{'version'}) {
-    attention("La version du fichier bareme (".$bar->{'version'}.")",
-	      "est differente de la version utilisee pour la notation ($VERSIN_BAREME) :",
-	      "veuillez refabriquer le fichier bareme...");
-    die("Version du fichier bareme differente : $VERSION_BAREME / ".$bar->{'version'});
+    attention("Marking scale file version (".$bar->{'version'}.")",
+	      "is old (here $VERSIN_BAREME) :",
+	      "please make marking scale file again...");
+    die("Marking scale file version mismatch : $VERSION_BAREME / ".$bar->{'version'});
 }
 
 
@@ -157,7 +157,7 @@ my $notes=eval { XMLin($fichnotes,
 		       ) };
 
 if(!$notes) {
-    debug "Erreur a l'analyse du fichier de notes ".$fichnotes."\n";
+    debug "Error analysing marks file ".$fichnotes."\n";
     return($self);
 }
 
@@ -246,17 +246,17 @@ $delta=1/$#ids if($#ids>0);
 
 	 my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
 
-	 debug "Lecture $scan";
+	 debug "Reading $scan";
 
 	 $im->Read($scan);
 
 	 $im->Set('pointsize'=>$im->Get('height')/$pointsize_rel);
 	 $im->Set('quality',$qualite_jpg) if($qualite_jpg);
 
-	 debug "Taille Y : ".$im->Get('height');
+	 debug "Size Y : ".$im->Get('height');
 	 debug "Pointsize : ".$im->Get('height')/$pointsize_rel;
 
-	 print "Annotation de $scan...\n";
+	 print "Annotating $scan...\n";
 
 	 my $idf=id2idf($id);
 	 
@@ -267,7 +267,7 @@ $delta=1/$#ids if($#ids>0);
 	 my $ne=$notes->{'copie'}->{$etud};
 
 	 if(!$ne) {
-	     print "*** pas d'informations pour copie $etud ***\n";
+	     print "*** no information for sheet $etud ***\n";
 	     next XMLFB;
 	 }
 	 
@@ -317,7 +317,7 @@ $delta=1/$#ids if($#ids>0);
 	       boite_coors($im,$page->{$k}->{'coin'},$sy->{color});
 	   } elsif($sy->{type} eq 'none') {
 	   } else {
-	       debug "Type de symbole inconnu ($k) : $sy->{type}";
+	       debug "Unknown symbol type ($k): $sy->{type}";
 	   }
 
 	   # pour avoir la moyenne des coors pour marquer la note de
@@ -376,14 +376,11 @@ $delta=1/$#ids if($#ids>0);
 	 $im->Write("$cr_dir/corrections/jpg/page-$idf.jpg");
 
      } else {
-	 print "*** scan $scan introuvable ***\n";
+	 print "*** no scan $scan ***\n";
      }
 
      $avance->progres($delta);
  }
 
 $avance->fin();
-
-
-__END__
 

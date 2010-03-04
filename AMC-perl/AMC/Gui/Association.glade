@@ -4,7 +4,7 @@
 <glade-interface>
   <widget class="GtkWindow" id="general">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">Association manuelle</property>
+    <property name="title" translatable="yes">Manual association</property>
     <property name="icon_name">auto-multiple-choice</property>
     <child>
       <widget class="GtkHBox" id="hbox1">
@@ -199,8 +199,8 @@
                   <widget class="GtkCheckButton" id="associes_cb">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip_text">Si cette case n'est pas cochée, vous navigez uniquement parmi les copies qui ne sont pas associées. Cochez-là pour naviger parmi toutes les copies.</property>
-                    <property name="label" translatable="yes">associés</property>
+                    <property name="tooltip" translatable="yes">Unticking this box, you see only non-associated papers. Tick it to be able to check already associated papers.</property>
+                    <property name="label" translatable="yes">associated</property>
                     <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
@@ -240,7 +240,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text">Effacer l'association manuelle pour cette copie</property>
+                    <property name="tooltip" translatable="yes">Remove manual association for this paper</property>
                     <property name="label" translatable="yes">gtk-clear</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>
@@ -256,7 +256,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text">Signale cette copie comme associée à aucun étudiant de la liste</property>
+                    <property name="tooltip" translatable="yes">Tell the system that this papers does not correspond to any of the students from the list.</property>
                     <property name="response_id">0</property>
                     <signal name="clicked" handler="inconnu"/>
                     <child>
@@ -271,7 +271,7 @@
                         <child>
                           <widget class="GtkLabel" id="label1">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Inconnu</property>
+                            <property name="label" translatable="yes">Unknown</property>
                           </widget>
                           <packing>
                             <property name="position">1</property>
@@ -323,7 +323,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text">Enregistre les associations effectuées.</property>
+                    <property name="tooltip" translatable="yes">Save associations.</property>
                     <property name="label" translatable="yes">gtk-save</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>
@@ -339,7 +339,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text">Annule toutes les associations effectuées cette fois-ci.</property>
+                    <property name="tooltip" translatable="yes">Cancel all associations made this time.</property>
                     <property name="label" translatable="yes">gtk-cancel</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>

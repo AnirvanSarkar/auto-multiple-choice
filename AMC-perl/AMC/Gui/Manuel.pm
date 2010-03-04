@@ -41,6 +41,8 @@ use constant {
     MDIAG_I => 6,
 };
 
+use_gettext;
+
 sub new {
     my %o=(@_);
     my $self={'mep-dir'=>'',
@@ -80,7 +82,7 @@ sub new {
     if($self->{'mep-data'}) {
 	$dispos=$self->{'mep-data'};
     } else {
-	debug "Reconstruction de la liste des mises en page...";
+	debug "Making again MEPList...";
 	$dispos=AMC::MEPList::new($self->{'mep-dir'},'id'=>$self->{'etud'});
 	debug "ok";
     }
@@ -94,15 +96,15 @@ sub new {
     if($self->{'an-data'}) {
 	$an_list=$self->{'an-data'};
     } else {
-	debug "Reconstruction de la liste des analyses...";
+	debug "Making again ANList...";
 	$an_list=AMC::ANList::new($self->{'cr-dir'});
 	debug "ok";
     }
 
     $self->{'an_list'}=$an_list;
 
-    die "Aucun fichier pdf de sujet fourni" if(! $self->{'sujet'});
-    die "Fichier sujet ".$self->{'sujet'}." introuvable" if(! -f $self->{'sujet'});
+    die "No PDF subject file" if(! $self->{'sujet'});
+    die "Subject file ".$self->{'sujet'}." not found" if(! -f $self->{'sujet'});
 
     my $temp_loc=tmpdir();
     $self->{'temp-dir'} = tempdir( DIR=>$temp_loc,
@@ -119,7 +121,7 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml);
+    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
 
     bless $self;
 
@@ -157,7 +159,7 @@ sub new {
 	$self->{'diag_tree'}->set_model($diag_store);
 	
 	$renderer=Gtk2::CellRendererText->new;
-	$column = Gtk2::TreeViewColumn->new_with_attributes ("page",
+	$column = Gtk2::TreeViewColumn->new_with_attributes (__"page",
 							     $renderer,
 							     text=> MDIAG_ID,
 							     'background'=> MDIAG_ID_BACK);
@@ -165,7 +167,7 @@ sub new {
 	$self->{'diag_tree'}->append_column ($column);
 
 	$renderer=Gtk2::CellRendererText->new;
-	$column = Gtk2::TreeViewColumn->new_with_attributes ("EQM",
+	$column = Gtk2::TreeViewColumn->new_with_attributes (__"MSE",
 							     $renderer,
 							     'text'=> MDIAG_EQM,
 							     'background'=> MDIAG_EQM_BACK);
@@ -173,7 +175,7 @@ sub new {
 	$self->{'diag_tree'}->append_column ($column);
 
 	$renderer=Gtk2::CellRendererText->new;
-	$column = Gtk2::TreeViewColumn->new_with_attributes ("sensibilité",
+	$column = Gtk2::TreeViewColumn->new_with_attributes (__"sensitivity",
 							     $renderer,
 							     'text'=> MDIAG_DELTA,
 							     'background'=> MDIAG_DELTA_BACK);
@@ -201,7 +203,7 @@ sub new {
 	$self->{'liste-ent'}=Gtk2::ListStore->new ('Glib::String');
 	
 	open(LISTE,"<:encoding(".$self->{'encodage_liste'}.")",$self->{'liste'}) 
-	    or die "Erreur a l'ouverture du fichier <".$self->{'liste'}."> : $!";
+	    or die "Error opening <".$self->{'liste'}."> : $!";
       NOM: while(<LISTE>) {
 	  s/\#.*//;
 	  next NOM if(/^\s*$/);
@@ -311,7 +313,7 @@ sub charge_i {
     opendir(TDIR,$self->{'temp-dir'}) || die "can't opendir $self->{'temp-dir'} : $!";
     my @candidats = grep { /^page-.*\.ppm$/ && -f $self->{'temp-dir'}."/$_" } readdir(TDIR);
     closedir TDIR;
-    debug "Candidats : ".join(' ',@candidats);
+    debug "Candidates : ".join(' ',@candidats);
     my $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
     my $tmp_image=$tmp_ppm;
 
@@ -374,9 +376,9 @@ sub ecrit {
     return if(!$self->{'editable'});
 
     if($self->{'xml-file'} && $self->{'area'}->modifs()) {
-	debug "Sauvegarde du fichier ".$self->{'xml-file'};
+	debug "Saving file ".$self->{'xml-file'};
 	open(XML,">:encoding(".$self->{'encodage_interne'}.")",$self->{'xml-file'}) 
-	    or die "Erreur a l'ecriture de ".$self->{'xml-file'}." : $!";
+	    or die "Error writing ".$self->{'xml-file'}." : $!";
 	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
 	    .$self->{'scan-file'}."\" manuel=\"1\" id=\""
 	    .$self->{'ids'}->[$self->{'iid'}]."\" nometudiant=\""
@@ -470,7 +472,7 @@ sub goto_activate_cb {
 
     $self->ecrit();
 
-    debug "On va a $dest";
+    debug "Go to $dest";
     
     # recherche d'un ID correspondant 
     my $did='';
@@ -489,4 +491,3 @@ sub goto_activate_cb {
 
 __END__
 
-perl -e 'use Gtk2 -init; my $screen = Gtk2::Gdk::Screen->get_default();print $screen->get_height()."\n";'

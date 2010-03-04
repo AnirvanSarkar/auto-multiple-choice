@@ -46,7 +46,7 @@ sub commande {
     my @r=();
 
     if(!$self->{'ipc'}) {
-	debug "Lancement de traitement-image..."; 
+	debug "Exec traitement-image..."; 
 	$self->{'ipc'}=open2($self->{'ipc_out'},$self->{'ipc_in'},
 			     $self->{'traitement'},$self->{'fichier'});
 	debug "PID=".$self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'};

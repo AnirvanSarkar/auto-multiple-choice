@@ -32,6 +32,8 @@ use AMC::Basic;
 use AMC::Gui::Avancement;
 use AMC::Queue;
 
+use_gettext;
+
 $VERSION_BAREME=2;
 
 my $cmd_pid='';
@@ -40,7 +42,7 @@ my $queue='';
 
 sub catch_signal {
     my $signame = shift;
-    debug "*** AMC-prepare : signal $signame, je tue $cmd_pid...";
+    debug "*** AMC-prepare : signal $signame, killing $cmd_pid...";
     kill 9,$cmd_pid if($cmd_pid);
     $queue->killall() if($queue);
     die "Killed";
@@ -104,7 +106,7 @@ my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $tex_source=$ARGV[0];
 
-die "Fichier source LaTeX introuvable : $tex_source" if(! -f $tex_source);
+die "Nonexistent LaTeX file: $tex_source" if(! -f $tex_source);
 
 my $base=$tex_source;
 $base =~ s/\.tex$//gi;
@@ -120,7 +122,7 @@ if(! -x $mep_dir) {
     mkdir($mep_dir);
 }
 
-die "Repertoire inexistant : $mep_dir" if(! -d $mep_dir);
+die "Nonexistent directory: $mep_dir" if(! -d $mep_dir);
 
 ($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
 sub with_prog {
@@ -145,7 +147,7 @@ sub execute {
 
     for my $ext (qw/pdf dvi ps/) {
 	if(-f $f_base.".$ext") {
-	    debug "Effacement de l'ancien $ext";
+	    debug "Removing old $ext";
 	    unlink($f_base.".$ext");
 	}
     }
@@ -162,10 +164,10 @@ sub execute {
 
 	@erreurs_msg=();
 
-	debug "%%% Compilation : passe $n_run";
+	debug "%%% Compiling: pass $n_run";
 
 	$cmd_pid=open(EXEC,"-|",@s);
-	die "Impossible d'executer ".join(' ',@s) if(!$cmd_pid);
+	die "Can't exec ".join(' ',@s) if(!$cmd_pid);
 
 	while(<EXEC>) {
 	    if($analyse_q) {
@@ -175,7 +177,8 @@ sub execute {
 		    $analyse_data{'q'}={};
 		    if($analyse_data{'qs'}->{$1}) {
 			$a_erreurs++;
-			push @erreurs_msg,"ERR: identifiant d'exercice utilisé plusieurs fois : « ".$titres{$1}." » [".$analyse_data{'etu'}."]\n";
+			push @erreurs_msg,"ERR: "
+			    .sprintf(__("question ID used several times for the sams paper: \"%s\"")." [%s]\n",$titres{$1},$analyse_data{'etu'});
 		    }
 		    $analyse_data{'titre'}=$titres{$1};
 		    $analyse_data{'qs'}->{$1}=1;
@@ -198,7 +201,8 @@ sub execute {
 		    my $rep="R".$1;
 		    if($analyse_data{'q'}->{$rep}) {
 			$a_erreurs++;
-			push @erreurs_msg,"ERR: numéro de réponse utilisé plusieurs fois : $1 [".$analyse_q{'etu'}.":".$analyse_data{'titre'}."]\n";
+			push @erreurs_msg,"ERR: "
+			    .sprintf(__("Answer number ID used several times for the same question: %s")." [%s:%s]\n",$1,$analyse_q{'etu'},$analyse_data{'titre'});
 		    }
 		    $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
 		}
@@ -226,21 +230,21 @@ sub execute {
     $format='pdf' if($moteur_latex eq 'pdflatex');
     $format='pdf' if($moteur_latex eq 'xelatex');
 
-    print "Format de sortie : $format\n";
-    debug "Format de sortie : $format\n";
+    print "Output format: $format\n";
+    debug "Output format: $format\n";
 
     if($format eq 'dvi') {
 	if(-f $f_base.".dvi") {
 	    system("dvips","-q",$f_base,"-o",$f_base.".ps");
-	    print "Erreur dvips : $?\n" if($?);
+	    print "Error dvips : $?\n" if($?);
 	    if(-f $f_base.".ps") {
 		system("ps2pdf",$f_base.".ps",$f_base.".pdf");
-		print "Erreur ps2pdf : $?\n" if($?);
+		print "Error ps2pdf : $?\n" if($?);
 	    } else {
-		debug "Pas de PS";
+		debug "No PS";
 	    }
 	} else {
-	    debug "Pas de DVI";
+	    debug "No DVI";
 	}
     }
 
@@ -259,7 +263,8 @@ sub verifie_q {
 	    }
 	    if($oui!=1 && !$q->{'indicative'}) {
 		$a_erreurs++;
-		push @erreurs_msg,"ERR: $oui/$tot bonnes réponses dans une question simple [$t]\n";
+		push @erreurs_msg,"ERR: "
+		    .sprintf(__("%d/%d good answers not coherent for a simple question")." [%s]\n",$oui,$tot,$t);
 	    }
 	}
     }
@@ -273,14 +278,14 @@ $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => 1 );
 $binaire='--binaire';
 
 $cmd_pid=open(SCANTEX,$tex_source);
-die "Impossible de lire $tex_source : $!" if(!$cmd_pid);
+die "Error reading $tex_source: $!" if(!$cmd_pid);
 
 while(<SCANTEX>) {
     if(/usepackage\[([^\]]+)\]\{autoQCM\}/) {
 	my $opts=$1;
 	if($opts =~ /\bdecimal\b/) {
 	    $binaire="--no-binaire";
-	    print "Mode decimal.\n";
+	    print "Decimal mode.\n";
 	}
 
     }
@@ -299,10 +304,10 @@ $prefix=$f_base."-" if(!$prefix);
 sub transfere {
     my ($orig,$dest)=@_;
     if(-f $orig) {
-	debug "Transfert $orig --> $dest";
+	debug "Moving $orig --> $dest";
 	move($orig,$dest);
     } else {
-	debug "Pas de source : j'efface $dest";
+	debug "No source: removing $dest";
 	unlink($dest);
     }
 }
@@ -324,7 +329,8 @@ if($mode =~ /k/) {
     execute(latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/));
     transfere("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
     if($n_erreurs>0) {
-	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
+	print "ERR: "
+	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"individual solution");
 	exit(1);
     }
 }
@@ -340,7 +346,7 @@ if($mode =~ /s/) {
 
     for my $f ($out_calage,$out_corrige,$out_sujet) {
 	if(-f $f) {
-	    debug "Effacement du fichier deja present : $f";
+	    debug "Removing already existing file: $f";
 	    unlink($f);
 	}
     }
@@ -353,7 +359,8 @@ if($mode =~ /s/) {
     $analyse_q='';
     transfere("$f_base.pdf",$out_calage);
     if($n_erreurs>0) {
-	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (calage)\n";
+	print "ERR: "
+	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"adjustment document");
 	exit(1);
     }
     exit(1) if($a_erreurs>0);
@@ -370,7 +377,8 @@ if($mode =~ /s/) {
     execute(latex_cmd(%opts,'CorrigeExterne'=>1));
     transfere("$f_base.pdf",$out_corrige);
     if($n_erreurs>0) {
-	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (correction)\n";
+	print "ERR: "
+	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"solution");
 	exit(1);
     }
 
@@ -379,7 +387,8 @@ if($mode =~ /s/) {
     execute(latex_cmd(%opts,'SujetExterne'=>1));
     transfere("$f_base.pdf",$out_sujet);
     if($n_erreurs>0) {
-	print "ERR: $n_erreurs erreurs lors de la compilation LaTeX (sujet)\n";
+	print "ERR: "
+	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"question sheet");
 	exit(1);
     }
 
@@ -391,7 +400,7 @@ if($mode =~ /m/) {
     # 1) compilation en mode calibration
 
     if(-f $calage) {
-	print "Utilisation du fichier de calage $calage\n";
+	print "Using file $calage\n";
     } else {
 	print "********** Compilation...\n";
     
@@ -403,7 +412,7 @@ if($mode =~ /m/) {
 
     # 2) analyse page par page
 
-    print "********** Conversion en bitmap et analyse...\n";
+    print "********** To bitmap and analysis...\n";
 
     if($moteur_raster eq 'poppler') {
 
@@ -419,9 +428,9 @@ if($mode =~ /m/) {
 
 	$cmd_pid=open(EXEC,"-|",@c) ;
 
-	debug "[$cmd_pid] Poppler : ".join(' ',@c);
+	debug "[$cmd_pid] Poppler: ".join(' ',@c);
 
-	die "Impossible d'executer AMC-mepdirect : $!" if(!$cmd_pid);
+	die "Can't exec AMC-mepdirect: $!" if(!$cmd_pid);
 	while(<EXEC>) {
 	    print $_;
 	    chomp;
@@ -436,7 +445,7 @@ if($mode =~ /m/) {
 	@pages=();
 	
 	$cmd_pid=open(IDCMD,"-|","pdfinfo",$calage);
-	die "Erreur d'identification : $!" if(!$cmd_pid);
+	die "Identification error: $!" if(!$cmd_pid);
 
 	while(<IDCMD>) {
 	    if(/^Pages:\s+([0-9]+)/) {
@@ -484,7 +493,7 @@ if($mode =~ /m/) {
 if($mode =~ /b/) {
     # BAREME
 
-    print "********** Preparation du bareme...\n";
+    print "********** Making marks scale...\n";
 
     # compilation en mode calibration
 
@@ -499,7 +508,7 @@ if($mode =~ /b/) {
     my $delta=0;
 
     $cmd_pid=open(TEX,"-|",latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/));
-    die "Impossible d'executer latex" if(!$cmd_pid);
+    die "Can't exec latex" if(!$cmd_pid);
     while(<TEX>) {
 	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 
 	    my $t=$1;
@@ -518,8 +527,8 @@ if($mode =~ /b/) {
 	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
 	    $avance->progres($delta) if($etu ne '');
 	    $etu=$1;
-	    print "Copie $etu...\n";
-	    debug "Copie $etu...\n";
+	    print "Sheet $etu...\n";
+	    debug "Sheet $etu...\n";
 	    $bs{$etu}={};
 	}
 	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
@@ -545,12 +554,12 @@ if($mode =~ /b/) {
     close(TEX);
     $cmd_pid='';
 
-    debug "Ecriture bareme dans $bareme";
+    debug "Writing $bareme";
 
     my $output=new IO::File($bareme,
 			    ">:encoding($encodage_interne)");
     if(! $output) {
-	die "Impossible d'ouvrir $bareme : $!";
+	die "Can't open $bareme: $!";
     }
 
     my $writer = new XML::Writer(OUTPUT=>$output,

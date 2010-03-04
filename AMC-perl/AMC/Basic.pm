@@ -19,6 +19,8 @@
 
 package AMC::Basic;
 
+use Locale::gettext ':libintl_h';
+
 use File::Temp;
 use File::Spec;
 use IO::File;
@@ -29,7 +31,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs);
+    @EXPORT      = qw( &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &__ &__p);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -95,7 +97,7 @@ sub get_qr {
     if($k =~ /([0-9]+)\.([0-9]+)/) {
 	return($1,$2);
     } else {
-	die "Format de cle inconnu : $k";
+	die "Unparsable Q/A key: $k";
     }
 }
 
@@ -104,7 +106,7 @@ sub get_ep {
     if($id =~ /^\+([0-9]+)\/([0-9]+)\/([0-9]+)\+$/) {
 	return($1,$2);
     } else {
-	die "Format d'ID inconnu";
+	die "Unparsable ID: $id";
     }
 }
 
@@ -293,5 +295,20 @@ sub proj2abs {
 	return('');
     }
 }
+
+my $localisation;
+
+sub use_gettext {
+    $localisation=Locale::gettext->domain("auto-multiple-choice");
+}
+
+sub __($) { return($localisation->get(shift)); }
+sub __p($) { 
+    my $str=$localisation->get(shift);
+    $str =~ s/\s+\[.*\]\s*$//;
+    return($str); 
+}
+
+
 
 1;

@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -85,14 +85,14 @@ sub new {
 			   ) };
 
     if(!$notes) {
-	print STDERR "Erreur a l'analyse du fichier de notes ".$self->{'fichier'}."\n";
+	print STDERR "Error analysing marks file ".$self->{'fichier'}."\n";
 	return($self);
     }
     
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml);
+    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
 
     for my $k (qw/general tableau/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
@@ -153,5 +153,3 @@ sub quitter {
 1;
 
 __END__
-
-perl -e 'use XML::Simple;use Data::Dumper; $a=XMLin("/home/alexis/Projets-QCM/essai/notes.dat","ForceArray"=>1,"KeyAttr"=>["id"]);print Dumper($a);'

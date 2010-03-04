@@ -124,7 +124,7 @@ static void savePageSlice(PDFDoc *doc,
 
   im=splashOut->getBitmap();
 
-  printf(" - analyse\n",pg);
+  printf(" - analysis\n",pg);
 
   for(x=0;x<=N_QUEST;x++) for(y=0;y<=N_REP;y++) {
     mm_init(&question[x][y]);
@@ -189,7 +189,7 @@ static void savePageSlice(PDFDoc *doc,
     asprintf(&xml_file,"%s/mep-%d-%d-%d.xml",repertoire,id_etu,id_page,id_check);
     xml = fopen (xml_file,"w");
     
-    printf(" - ecriture dans %s\n",xml_file);
+    printf(" - writing to %s\n",xml_file);
     
     if (xml!=NULL) {
       
@@ -225,7 +225,7 @@ static void savePageSlice(PDFDoc *doc,
       fprintf(xml,"</mep>\n");    
       fclose (xml);
     } else {
-      printf("Erreur.\n");
+      printf("Output error.\n");
     }
     
     free(xml_file);
@@ -274,9 +274,9 @@ int main(int argc, char *argv[]) {
     fileName=new GooString(argv[optind]);
   } else {
     if(argc-1<optind) {
-      printf("Manque le nom du fichier PDF\n");
+      printf("Needs PDF filename\n");
     } else {
-      printf("Trop d'arguments\n");
+      printf("Too much arguments\n");
     }
     exitCode=2;
     goto err0;
@@ -298,12 +298,12 @@ int main(int argc, char *argv[]) {
   if(fileName != NULL) {
     doc = new PDFDoc(fileName, NULL, NULL);
   } else {
-    printf("Manque le nom du PDF\n");
+    printf("Needs PDF filename\n");
     goto err0;
   }
 
   if (!doc->isOk()) {
-    fprintf(stderr,"Erreur %d a l'ouverture du PDF\n",doc->getErrorCode());
+    fprintf(stderr,"Error %d opening PDF file\n",doc->getErrorCode());
     exitCode = 1;
     goto err1;
   }

@@ -64,7 +64,7 @@ my $queue='';
 
 sub catch_signal {
     my $signame = shift;
-    debug "*** AMC-prepare : signal $signame, je tue la queue...";
+    debug "*** AMC-prepare : signal $signame, killing queue...";
     $queue->killall() if($queue);
     die "Killed";
 }
@@ -121,14 +121,14 @@ if($n>0) {
 			"--debug",$debug,
 			];
 	} else {
-	    debug "ID=$id --> pas de scan";
+	    debug "ID=$id --> no scan";
 	}
     }
     
     $n=1+$#cmds;
 
     if($n>0) {
-	debug "Zooms a extraire : $n";
+	debug "Zooms to extract: $n";
 
 	for(@cmds) {
 	    $queue->add_process(@$_,"--progression",1/$n);
@@ -136,7 +136,7 @@ if($n>0) {
 			    
 	$queue->run();
     } else {
-	debug "Pas de zoom a extraire...";
+	debug "No zooms to extract...";
     }
 }
 

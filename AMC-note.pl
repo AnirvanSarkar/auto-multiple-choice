@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -99,15 +99,15 @@ if($type_arrondi) {
 }
 
 if(! -d $cr_dir) {
-    attention("Repertoire de compte-rendus inexistant : $cr_dir");
-    die "Repertoire inexistant : $cr_dir";
+    attention("No CR directory: $cr_dir");
+    die "No CR directory: $cr_dir";
 }
 if(! -f $bareme) {
-    attention("Fichier bareme inexistant : $bareme");
-    die "Fichier inexistant : $bareme";
+    attention("No marking scale file: $bareme");
+    die "No marking scale file: $bareme";
 }
 if($grain<=0) {
-    attention("Le grain doit etre strictement positif (grain=$grain)");
+    attention("Grain must be positive (grain=$grain)");
     die "Grain $grain<=0";
 }
 
@@ -116,10 +116,10 @@ my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
 my $bar=XMLin($bareme,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
 if($VERSION_BAREME ne $bar->{'version'}) {
-    attention("La version du fichier bareme (".$bar->{'version'}.")",
-	      "est differente de la version utilisee pour la notation ($VERSIN_BAREME) :",
-	      "veuillez refabriquer le fichier bareme...");
-    die("Version du fichier bareme differente : $VERSION_BAREME / ".$bar->{'version'});
+    attention("Marking scale file version (".$bar->{'version'}.")",
+	      "is too old (here $VERSIN_BAREME):",
+	      "please make marking scale file again...");
+    die("Marking scale file version mismatch: $VERSION_BAREME / ".$bar->{'version'});
 }
 
 opendir(DIR, $cr_dir) || die "can't opendir $cr_dir: $!";
@@ -135,7 +135,7 @@ sub degroupe {
 	if($i =~ /^([^=]+)=([-+*\/0-9a-zA-Z\.\(\)?:|&=<>!\s]+)$/) {
 	    $r{$1}=$2;
 	} else {
-	    die "Erreur de syntaxe pour le bareme : $i dans $s" if($i);
+	    die "Marking scale syntax error: $i within $s" if($i);
 	}
     }
     # remplacement des variables et evaluation :
@@ -144,9 +144,9 @@ sub degroupe {
 	for my $vv (keys %$vars) {
 	    $v=~ s/\b$vv\b/$vars->{$vv}/g;
 	}
-	die "Erreur de syntaxe (variables inconnues) : $v" if($v =~ /[a-z]/i);
+	die "Syntax error (unknown variable): $v" if($v =~ /[a-z]/i);
 	my $calc=eval($v);
-	die "Erreur de syntaxe (calcul impossible) : $v" if(!defined($calc));
+	die "Syntax error (operation) : $v" if(!defined($calc));
 	debug "Evaluation : $r{$k} => $calc" if($r{$k} ne $calc);
 	$r{$k}=$calc;
     }
@@ -189,8 +189,8 @@ sub action {
 	my $coche=($page->{$k}->{'r'}>$seuil ? 1 : 0);
 	my $bonne=($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
 	my $ok=($coche == $bonne ? 1 : 0);
-	debug "Etud $etud Q $q R $r : ".($bonne ? "B" : "M")." "
-	    .($coche ? "X" : "O")." -> ".($ok ? "BIEN" : "NON");
+	debug "Student $etud Q $q A $r : ".($bonne ? "G" : "B")." "
+	    .($coche ? "X" : "O")." -> ".($ok ? "OK" : "NO");
 	$pbons->{$etud}->{$q}={} if(!$pbons->{$etud}->{$q});
 	$pbons->{$etud}->{$q}->{$r}=[$coche,$ok,$bonne];
     }
@@ -225,7 +225,7 @@ if($an_saved) {
 print "Sources :\n";
 for my $id ($anl->ids()) {
     print "ID=$id : ".$anl->filename($id)
-    .($anl->attribut($id,'manuel') ? " (manuel)" : "")."\n";
+    .($anl->attribut($id,'manuel') ? " (manual)" : "")."\n";
 }
 print "\n";
 
@@ -242,7 +242,7 @@ sub titre_q {
 my $output=new IO::File($fichnotes,
 			">:encoding($encodage_interne)");
 if(! $output) {
-    die "Impossible d'ouvrir $fichnotes : $!";
+    die "Error opening $fichnotes: $!";
 }
 
 my $writer = new XML::Writer(OUTPUT=>$output,
@@ -326,12 +326,12 @@ for my $etud (@a_calculer) {
 
 	    # baremes :
 
-	    # e=erreur logique dans les réponses
-	    # b=bonne réponse
-	    # m=mauvaise réponse
-	    # v=pas de réponse sur toute la question
+	    # e=erreur logique dans les reponses
+	    # b=bonne reponse
+	    # m=mauvaise reponse
+	    # v=pas de reponse sur toute la question
 	    # p=note plancher
-	    # d=décalage ajouté avant plancher
+	    # d=decalage ajoute avant plancher
 	    # haut=on met le max a cette valeur et on enleve 1 pt par faute (MULT)
 	    
 	    # variables possibles dans la specification du bareme

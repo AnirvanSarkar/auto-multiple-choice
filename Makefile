@@ -46,12 +46,14 @@ MENUDIR=/usr/share/menu
 DESKTOPDIR=/usr/share/applications
 ICONSDIR=/usr/share/icons/hicolor/scalable/apps
 PIXDIR=/usr/share/pixmaps
+LOCALEDIR=/usr/share/locale
 
 MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
 GLADE=AMC-*.glade
 STY=automultiplechoice.sty
+MOS=I18N/lang/*.mo
 
-all: AMC-traitement-image AMC-mepdirect AMC-gui.glade doc logo.xpm ;
+all: AMC-traitement-image AMC-mepdirect AMC-gui.glade doc logo.xpm I18N ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
 	$(GCC) $(GCCARCHFLAGS) -O3 -I. -lnetpbm $< -o $@
@@ -67,6 +69,9 @@ nv.pl: FORCE
 
 doc:
 	$(MAKE) -C doc
+
+i18N:
+	$(MAKE) -C I18N
 
 sync:
 	$(MAKE) -C download-area all
@@ -98,8 +103,15 @@ local: global
 clean: FORCE
 	-rm AMC-traitement-image AMC-mepdirect AMC-gui.glade logo.xpm
 	$(MAKE) -C doc clean
+	$(MAKE) -C I18N clean
 
-install: FORCE
+install_lang_%: FORCE
+	install    -m 0644 -o root -g root I18N/lang/$*.mo $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES/auto-multiple-choice.mo
+
+install_lang_all: $(addprefix install_lang_,$(basename $(MOS)))
+	install -d -m 0755 -o root -g root $(DESTDIR)/$(LOCALEDIR)
+
+install: install_lang_all FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODSDIR)
 	install    -m 0755 -o root -g root $(MODS) $(DESTDIR)/$(MODSDIR)
 	install    -m 0644 -o root -g root $(GLADE) $(DESTDIR)/$(MODSDIR)
@@ -142,6 +154,6 @@ experimental: FORCE
 
 FORCE: ;
 
-.PHONY: install deb debsrc clean global doc experimental FORCE
+.PHONY: install deb debsrc clean global doc I18N experimental FORCE
 
 

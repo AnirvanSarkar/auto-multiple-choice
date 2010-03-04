@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -36,7 +36,7 @@ sub new {
 
     if($self->{'max.procs'}<1) {
 	$self->{'max.procs'}=Sys::CPU::cpu_count();
-	debug "Nombre maximal de processus fixe a ".$self->{'max.procs'};
+	debug "Max number of processes: ".$self->{'max.procs'};
     }
 
     bless $self;
@@ -63,9 +63,9 @@ sub maj {
 sub killall {
     my ($self)=@_;
     $self->{'queue'}=[];
-    print "Interruption de la queue\n";
+    print "Queue interruption\n";
     for my $p (@{$self->{'pids'}}) {
-	print "Queue : je tue $p\n";
+	print "Queue: killing $p\n";
 	kill 9,$p;
     }
 }
@@ -88,19 +88,19 @@ sub run {
 			    if(system(@$c)==0) {
 				debug "Command [$$] OK";
 			    } else {
-				debug "Erreur [$$] : $?\n";
+				debug "Error [$$] : $?\n";
 			    }
 			}
 			exit(0);
 		    } else {
 			debug "Command [$$] : ".join(' ',@$cs);
 			exec(@$cs);
-			debug "Exec infructueux : $$ [".$cs->[0]."] commande inconnue";
-			die "Commande inconnue";
+			debug "Bad exec $$ [".$cs->[0]."] unknown command";
+			die "Unknown command";
 		    }
 		}
 	    } else {
-		debug "Fin de queue";
+		debug "Queue ends";
 	    }
 	}
 	waitpid(-1,0);

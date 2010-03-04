@@ -42,7 +42,7 @@ sub new {
 	if($self) {
 	    $renew=0;
 	} else {
-	    debug "Load(MEPList)->erreur\n";
+	    debug "Load(MEPList)->error\n";
 	}
 	
     }
@@ -77,7 +77,7 @@ sub maj {
     for my $i (keys %{$self->{'dispos'}}) {
 	if((! $self->{'dispos'}->{$i}->{'filename'})
 	   || (! -s $self->{'mep'}."/".$self->{'dispos'}->{$i}->{'filename'})) {
-	    debug "MEP : entree $i effacee (fichier $self->{'dispos'}->{$i}->{'filename'} dans $self->{'mep'})\n";
+	    debug "MEP : removed entry $i (file $self->{'dispos'}->{$i}->{'filename'} in $self->{'mep'})\n";
 	    push @ie,$i;
 	    delete($self->{'dispos'}->{$i});
 	}
@@ -115,10 +115,10 @@ sub maj {
 			# deja en stock :
 			if($self->{'dispos'}->{$laymep}->{'filename'} eq $f) {
 			    # cas (1) meme fichier, sans doute mis a jour
-			    debug "MEP maj : $laymep";
+			    debug "MEP update: $laymep";
 			} else {
 			    # cas (2) autre fichier...
-			    attention("ATTENTION : identifiant multiple : $laymep");
+			    attention("WARNING: multiple ID $laymep");
 			}
 		    }
 		    $self->{'dispos'}->{$laymep}={
@@ -159,7 +159,7 @@ sub load_mep {
 	my $v=$$d->{'version'};
 	$v=0 if(!defined($v));
 	if($v < $VERSION ) {
-	    debug "Version de fichier MEPList perimee : $v < $VERSION";
+	    debug "Old MEPList version: $v < $VERSION";
 	    $d='';
 	}
     }
@@ -272,7 +272,7 @@ sub pages_etudiants {
 sub stats {
     my ($self,$an_list)=@_;
 
-    debug "Calcul des stats (nombre de copies saisies)...";
+    debug "Computing stats (number of sheets)...";
 
     my %pages_etu=$self->pages_etudiants('case'=>1,'id'=>1);
     my %r=('complet'=>0,'incomplet'=>0,'manque'=>0,
@@ -308,6 +308,4 @@ sub stats {
 }
 
 1;
-
-__END__
 

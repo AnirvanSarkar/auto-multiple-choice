@@ -31,7 +31,7 @@ my $queue='';
 
 sub catch_signal {
     my $signame = shift;
-    debug "*** AMC-analyse : signal $signame, je signale $pid...";
+    debug "*** AMC-analyse : signal $signame, transfered to $pid...";
     kill 2,$pid if($pid);
     $queue->killall() if($queue);
     die "Killed";
@@ -79,7 +79,7 @@ if($liste_f && open(LISTE,$liste_f)) {
 	    debug "Scan from list : $_";
 	    push @scans,$_;
 	} else {
-	    print STDERR "ATTENTION : fichier inexistant : $_\n";
+	    print STDERR "WARNING. File does not exist : $_\n";
 	}
     }
     close(LISTE);
@@ -99,7 +99,7 @@ sub check_rep {
 	mkdir($r);
     }
     
-    die "ERREUR: Repertoire inexistant : $r" if(! -d $r);
+    die "ERROR: directory does not exist: $r" if(! -d $r);
 }
 
 check_rep($mep_dir);
@@ -109,7 +109,7 @@ my $delta=$progress/(1+$#scans);
 my $fh;
 
 if(!$mep_file) {
-    debug "Reconstruction de la liste des mises en page...";
+    debug "Making layouts list...";
     $fh=File::Temp->new(TEMPLATE => "mep-XXXXXX",
 			TMPDIR => 1,
 			UNLINK=> 1);

@@ -55,7 +55,7 @@ sub makepdf {
     my $col=sprintf("%.10f %.10f %.10f",$r,$g,$b);
     open(PDF,">$fich");
     print PDF q|%PDF-1.4
-%‚„œ”
+%aaIO
 1 0 obj
 <</ITXT(2.1.7)/Kids[2 0 R]/Type/Pages/Count 1>>
 endobj

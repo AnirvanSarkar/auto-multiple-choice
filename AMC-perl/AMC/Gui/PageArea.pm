@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -87,7 +87,7 @@ sub choix {
       
       if ($event->button == 1) {
 	  my ($x,$y)=$event->coords;
-	  print "Clic $x $y\n" if($self->{'debug'});
+	  print "Click $x $y\n" if($self->{'debug'});
 	  for my $i (0..$#{$self->{'lay'}->{'case'}}) {
 	      
 	      my $case=$self->{'lay'}->{'case'}->[$i];
@@ -95,7 +95,7 @@ sub choix {
 		 && $y<=$case->{'ymax'}*$self->{'ry'} && $y>=$case->{'ymin'}*$self->{'ry'}) {
 		  $self->{'modifs'}=1;
 
-		  print " -> case $i\n" if($self->{'debug'});
+		  print " -> box $i\n" if($self->{'debug'});
 		  $self->{'coches'}->[$i]=!$self->{'coches'}->[$i];
 
 		  $self->window->show;

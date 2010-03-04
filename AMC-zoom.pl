@@ -25,6 +25,8 @@ use AMC::Boite qw/min max/;
 use XML::Simple;
 use AMC::Gui::Avancement;
 
+use_gettext;
+
 my $scan='';
 my $seuil=0.15;
 my $analyse='';
@@ -75,7 +77,7 @@ my $bandeau;
 if($an->{version}>=1) {
     $bandeau=$page->Clone();
     
-    # mesure de l'angle de la ligne supérieure
+    # mesure de l'angle de la ligne superieure
     
     my $angle=$cadre_general->direction(0,1);
     my $dy_head=max($cadre_general->coordonnees(0,'y'),
@@ -157,7 +159,7 @@ for my $k (sort { $an->{case}->{$a}->{r} <=> $an->{case}->{$b}->{r} } (keys %{$a
     push @{$morceaux{$coche}},$e->Montage(geometry=>'+0+0');
 }
 
-%categories=(0=>'non cochées',1=>'cases cochées');
+%categories=(0=>__("unticked boxes"),1=>__("ticked boxes"));
 
 for(0..1) {
     my $titre=Graphics::Magick->new;

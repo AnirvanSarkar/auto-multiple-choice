@@ -378,14 +378,14 @@ int main(int argc,char **argv) {
   double distance;
 
   if(argc!=2) {
-    printf("! Erreur de syntaxe : mauvais nombre d'arguments\n__END__\n");
+    printf("! Syntax error: bad arguments number\n__END__\n");
     exit(0);
   }
 
   fo=fopen(argv[1],"r");
 
   if(!fo) {
-    printf("! Erreur a l'ouverture du fichier image <%s>\n__END__\n",argv[1]);
+    printf("! Error opening <%s>\n__END__\n",argv[1]);
     exit(0);
   }
 
@@ -393,7 +393,7 @@ int main(int argc,char **argv) {
   fclose(fo);
 
   if(!img) {
-    printf("! Erreur a la lecture du fichier image <%s>\n__END__\n",argv[1]);
+    printf("! Error reading <%s>\n__END__\n",argv[1]);
     exit(0);
   }
 
@@ -436,7 +436,7 @@ int main(int argc,char **argv) {
     } else if(sscanf(commande,"pixel %d %d",&x,&y)==2) {
       printf(">> RGB=%d %d %d\n",PPM_GETR(img[y][x]),PPM_GETG(img[y][x]),PPM_GETB(img[y][x]));
     } else {
-      printf("! Erreur de syntaxe pour la commande.\n");
+      printf("! Command syntax error.\n");
     }
     printf("__END__\n");
     fflush(stdout);

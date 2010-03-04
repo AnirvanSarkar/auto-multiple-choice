@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -68,7 +68,7 @@ sub load {
     for (qw/version liste_key notes_id/) {
 	if(defined($self->{'a'}->{$_}) && ($self->{'a'}->{$_})
 	   && (!defined($a->{$_}) || ($self->{'a'}->{$_} ne $a->{$_})) ) {
-	    debug "*** fichier d'associations incompatible : $_ = $self->{'a'}->{$_} | $a->{$_}\n";
+	    debug "*** variable mismatch in associations file: $_ = $self->{'a'}->{$_} | $a->{$_}\n";
 	    $ok=0;
 	}
     }
@@ -98,13 +98,13 @@ sub print {
 
 sub get_param {
     my ($self,$p)=@_;
-    print STDERR "[ASSOC] Parametre inexistant : $p\n" if(!defined($self->{'a'}->{$p}));
+    print STDERR "[ASSOC] no parameter value: $p\n" if(!defined($self->{'a'}->{$p}));
     return($self->{'a'}->{$p});
 }
 
 sub get {
     my ($self,$type,$copie)=@_;
-    die "mauvais type : $type" if(!$type_ok{$type});
+    die "Unknown type : $type" if(!$type_ok{$type});
     return($self->{'a'}->{'copie'}->{$copie}->{$type});
 }
 
@@ -154,7 +154,7 @@ sub etat { # 0: aucune assoc 1: une assoc valide 2: une assoc multiple
 
 sub set {
     my ($self,$type,$copie,$valeur)=@_;
-    die "mauvais type : $type" if(!$type_ok{$type});
+    die "Unknown type : $type" if(!$type_ok{$type});
     $self->{'a'}->{'copie'}->{$copie}->{$type}=$valeur;
     $self->{'maj'}=0;
 }
@@ -175,7 +175,7 @@ sub efface {
 
 sub clear {
     my ($self,$type)=@_;
-    die "mauvais type : $type" if(!$type_ok{$type});
+    die "Unknown type : $type" if(!$type_ok{$type});
     
     for my $i ($self->ids()) {
 	delete($self->{'a'}->{'copie'}->{$i}->{$type});
@@ -186,7 +186,3 @@ sub clear {
 1;
 
 
-__END__
-
-perl -e 'use AMC::AssocFile;$a=AMC::AssocFile::new("/tmp/a.xml","liste_key"=>"etu","notes_id"=>"id");$a->set("manuel",100,12345);$a->set("auto",100,12346);$a->set("manuel",101,99);$a->print();$a->save();'
-perl -e 'use AMC::AssocFile;$a=AMC::AssocFile::new("/tmp/a.xml");$a->load();$a->print();$a->clear("auto");$a->print();'

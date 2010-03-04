@@ -2,14 +2,15 @@ Source: auto-multiple-choice
 Section: x11
 Priority: optional
 Maintainer: Alexis Bienvenüe <paamc@passoire.fr>
-Build-Depends: debhelper (>= 7), libnetpbm10-dev, libxml-xpath-perl,
+Build-Depends: debhelper (>= 7), gettext, libnetpbm10-dev,
+  libxml-xpath-perl,
   dblatex, xsltproc, docbook-xml, docbook-xsl, inkscape, libpoppler-dev, netpbm
 Standards-Version: 3.8.0
 Homepage: 
 
 Package: auto-multiple-choice
 Architecture: any
-Depends: ${shlibs:Depends}, perl-base (>= 5.8),
+Depends: ${shlibs:Depends}, perl-base (>= 5.8), liblocale-gettext-perl,
   libxml-simple-perl, libxml-writer-perl, libtext-unaccent-perl,
   libgtk2-gladexml-perl, libcompress-zlib-perl, libsys-cpu-perl,
   libnet-cups-perl (>= 0.60), libmodule-runtime-perl,

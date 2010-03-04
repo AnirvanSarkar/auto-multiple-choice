@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -46,11 +46,11 @@ GetOptions("notes=s"=>\$notes_file,
 
 set_debug($debug);
 
-die "Manque notes-id" if(!$notes_id);
-die "Manque liste-key" if(!$liste_key);
-die "Manque notes_file" if(! -s $notes_file);
-die "Manque liste_file" if(! -s $liste_file);
-die "Manque assoc_file" if(!$assoc_file);
+die "Needs notes-id" if(!$notes_id);
+die "Needs liste-key" if(!$liste_key);
+die "Needs notes_file" if(! -s $notes_file);
+die "Needs liste_file" if(! -s $liste_file);
+die "Needs assoc_file" if(!$assoc_file);
 
 my $as=AMC::AssocFile::new($assoc_file,
 			   'encodage'=>$assoc_enc,
@@ -63,7 +63,7 @@ my %bon_code;
 
 debug "------------------------------------";
 
-debug "Association automatique $liste_file [$liste_enc] / $liste_key";
+debug "Automatic association $liste_file [$liste_enc] / $liste_key";
 
 # lecture liste des etudiants (codes disponibles)
 
@@ -74,7 +74,7 @@ for my $ii (0..($liste_e->taille()-1)) {
     $bon_code{$liste_e->data_n($ii,$liste_key)}=1;
 }
 
-debug "Codes liste etudiants : ".join(',',keys %bon_code);
+debug "Student list keys : ".join(',',keys %bon_code);
 
 # lecture notes (et codes reconnus une fois exactement)
 
@@ -83,13 +83,13 @@ my $notes=eval { XMLin($notes_file,
 		       'KeyAttr'=>['id'],
 		       ) };
 
-die "Probleme syntaxe fichier notes" if(!$notes);
+die "Bad syntax in students list file" if(!$notes);
 
 #print Dumper($notes) if($debug);
 
 for my $i (@{$notes->{'code'}->{$notes_id}->{'valeur'}}) {
     if($i->{'nombre'} != 1) {
-	debug "Retire ".$i->{'content'}." : ".$i->{'nombre'}." fois";
+	debug "Removing ".$i->{'content'}." : ".$i->{'nombre'}." times";
 	$bon_code{$i->{'content'}}='';
     }
 }
@@ -101,7 +101,7 @@ $as->clear("auto");
 for my $id (keys %{$notes->{'copie'}}) {
     my $k=$notes->{'copie'}->{$id}->{'code'}->{$notes_id}->{'content'};
     if($bon_code{$k}) {
-	debug "Copie $id -> $k";
+	debug "Sheet $id -> $k";
 	$as->set("auto",$id,$k);
     }
 }

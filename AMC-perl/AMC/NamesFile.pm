@@ -69,7 +69,7 @@ sub load {
 
     $self->{'noms'}=[];
 
-    debug "Lecture du fichier de noms $self->{'fichier'}";
+    debug "Reading names file $self->{'fichier'}";
 
     if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",$self->{'fichier'})) {
       NOM: while(<LISTE>) {
@@ -91,11 +91,11 @@ sub load {
 			      $sep=$s;
 			  }
 		      }
-		      debug "Separateur detecte : ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
+		      debug "Detected separator: ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
 		  }
 
 		  @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
-		  debug "ENTETES : ".join(", ",@heads);
+		  debug "KEYS: ".join(", ",@heads);
 		  next NOM;
 	      } else {
 		  @heads='nom';
@@ -110,7 +110,7 @@ sub load {
 	      @l=(reduit($_));
 	  }
 	  if($#l!=$#heads) {
-	      print STDERR "Mauvais nombre de champs (".(1+$#l)." au lieu de ".(1+$#heads).") fichier ".$self->{'fichier'}." ligne $.\n";
+	      print STDERR "Bad number of fields (".(1+$#l)." instead of ".(1+$#heads).") file ".$self->{'fichier'}." line $.\n";
 	      $errlig=$. if(!$errlig);
 	      $err++;
 	  } else {
@@ -180,7 +180,7 @@ sub data {
     (0..$#{$self->{'noms'}});
     if(!$oo{'all'}) {
 	if($#k!=0) {
-	    print STDERR "Erreur : nom non unique (".(1+$#k)." exemplaires)\n";
+	    print STDERR "Error: non-unique name (".(1+$#k)." records)\n";
 	    return();
 	}
     }
@@ -197,6 +197,4 @@ sub data_n {
 }
 
 1;
-
-__END__
 

@@ -58,6 +58,8 @@ use constant {
     COPIES_IIMAGE => 4,
 };
 
+use_gettext;
+
 my $col_pris = Gtk2::Gdk::Color->new(65353,208*256,169*256);
 my $col_actif = Gtk2::Gdk::Color->new(20*256,147*256,58*256);
 my $col_actif_fond = Gtk2::Gdk::Color->new(95*256,213*256,129*256);
@@ -103,14 +105,14 @@ sub new {
 					 'identifiant'=>$self->{'identifiant'},
 					 );
 
-    debug "".$self->{'liste'}->taille()." noms dans la liste\n";
+    debug "".$self->{'liste'}->taille()." names in list\n";
     
     return($self) if(!$self->{'liste'}->taille());
     
     # liste des images :
     my @images;
     opendir(DIR, $self->{'cr'}) 
-	|| die "Erreur a l'ouverture du repertoire <$self->{'cr'}> : $!";
+	|| die "Erreur opening directory <$self->{'cr'}> : $!";
     @images = map {"$self->{'cr'}/$_" } sort { $a cmp $b } grep { /^nom-/ && -f "$self->{'cr'}/$_" } readdir(DIR);
     closedir DIR;
     
@@ -118,8 +120,9 @@ sub new {
     my $image_etud='';
     
     if($#images<0) {
-	print "Je ne trouve pas d'images de noms...\n";
-	$self->{'erreur'}="Je ne trouve pas d'images de noms... Peut-être n'avez-vous pas encore effectué la saisie automatique à partir des scans, ou bien avez-vous oublié d'utiliser la commande \\champnom dans le source LaTeX, ou tout simplement n'avez-vous pas de scans des copies ?\nDans les deux derniers cas, vous pouvez associer les copies aux étudiants en utilisant l'interface de saisie manuelle.";
+	print "Can't find names images...\n";
+	$self->{'erreur'}=__("Names images not found... Maybe you did not run automatic data capture yet, or you forgot using \\champnom command in LaTeX source, or you don't have papers' scans ?")."\n"
+	    .__"For both two latest cases, you can use graphical interface for manual data caption.";
 	return($self);
     }
     
@@ -128,7 +131,7 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml);
+    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
 
     for my $k (qw/tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
@@ -249,7 +252,7 @@ sub maj_contenu_liste {
 				     COPIES_MANUEL,$self->{'assoc'}->get('manuel',$etu),
 				     );
     } else {
-	print STDERR "*** [contenu] iter introuvable pour $etu ***\n";
+	print STDERR "*** [content] no iter for sheet $etu ***\n";
     }
 }
 
@@ -281,7 +284,7 @@ sub maj_couleurs_liste { # mise a jour des couleurs la liste
 					 COPIES_BG,$coul,
 					 );
 	} else {
-	    print STDERR "*** [coul] iter introuvable pour $e ***\n";
+	    print STDERR "*** [color] no iter for sheet $e ***\n";
 	}
     }
     
@@ -546,10 +549,10 @@ sub style_bouton {
 		$eb->modify_bg($_,$col);
 	    }
 	} else {
-	    print STDERR "*** pas de EventBox $i ***\n";
+	    print STDERR "*** no EventBox for $i ***\n";
 	}
     } else {
-	print STDERR "*** pas de bouton $i ***\n";
+	print STDERR "*** no buttun for $i ***\n";
     }
 }
 

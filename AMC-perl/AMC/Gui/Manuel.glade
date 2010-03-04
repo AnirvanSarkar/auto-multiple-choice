@@ -4,7 +4,7 @@
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="general">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">Saisie des copies de QCM</property>
+    <property name="title" translatable="yes">Papers data capture</property>
     <property name="icon_name">auto-multiple-choice</property>
     <signal name="delete_event" handler="quitter"/>
     <child>
@@ -22,7 +22,7 @@
                 <child>
                   <widget class="GtkLabel" id="label3">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Aller &#xE0; :</property>
+                    <property name="label" translatable="yes">Go to:</property>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -34,7 +34,7 @@
                   <widget class="GtkEntry" id="goto_v">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip" translatable="yes">Entrer un num&#xE9;ro d'&#xE9;tudiant, ou un num&#xE9;ro de page sous la forme 102/4 (ici pour la page 4 de l'&#xE9;tudiant 102), puis appuyez sur la touche entr&#xE9;e.</property>
+                    <property name="tooltip" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
                     <property name="invisible_char">&#x2022;</property>
                     <signal name="activate" handler="goto_activate_cb"/>
                   </widget>
@@ -61,7 +61,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
-                    <property name="tooltip" translatable="yes">Sauvegarder les modifications de cette page puis passer &#xE0; la page pr&#xE9;c&#xE9;dente.</property>
+                    <property name="tooltip" translatable="yes">Go to the previous page.</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="passe_precedent"/>
                   </widget>
@@ -78,7 +78,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
-                    <property name="tooltip" translatable="yes">Quitter</property>
+                    <property name="tooltip" translatable="yes">Quit</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="ok_quitter"/>
                   </widget>
@@ -95,7 +95,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
-                    <property name="tooltip" translatable="yes">Sauvegarder les modifications de cette page puis passer &#xE0; la page suivante.</property>
+                    <property name="tooltip" translatable="yes">Go to next page.</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="passe_suivant"/>
                   </widget>
@@ -170,7 +170,7 @@
                         <child>
                           <widget class="GtkLabel" id="label1">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Aller &#xE0; :</property>
+                            <property name="label" translatable="yes">Go to:</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -182,7 +182,7 @@
                           <widget class="GtkEntry" id="goto">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip" translatable="yes">Entrer un num&#xE9;ro d'&#xE9;tudiant, ou un num&#xE9;ro de page sous la forme 102/4 (ici pour la page 4 de l'&#xE9;tudiant 102), puis appuyez sur la touche entr&#xE9;e.</property>
+                            <property name="tooltip" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
                             <property name="invisible_char">&#x2022;</property>
                             <signal name="activate" handler="goto_activate_cb"/>
                           </widget>
@@ -211,7 +211,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip" translatable="yes">Sauvegarder les modifications de cette page puis passer &#xE0; la page pr&#xE9;c&#xE9;dente.</property>
+                            <property name="tooltip" translatable="yes">Save this page modifications, then go to the previous page.</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="passe_precedent"/>
                           </widget>
@@ -228,7 +228,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip" translatable="yes">Sauvegarder les modifications de cette page puis passer &#xE0; la page suivante.</property>
+                            <property name="tooltip" translatable="yes">Save this page modifications, then go to next page.</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="passe_suivant"/>
                           </widget>
@@ -255,7 +255,7 @@
                         <child>
                           <widget class="GtkLabel" id="label2">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&#xC9;tudiant :</property>
+                            <property name="label" translatable="yes">Student:</property>
                             <property name="justify">center</property>
                           </widget>
                           <packing>
@@ -268,7 +268,7 @@
                           <widget class="GtkComboBoxEntry" id="etudiant_cb">
                             <property name="visible">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip" translatable="yes">Entrez ici le nom que l'&#xE9;tudiant a inscrit sur cette page.</property>
+                            <property name="tooltip" translatable="yes">Enter the student name written on this page.</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -318,7 +318,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip" translatable="yes">Effacer la saisie manuelle pour cette page. Les r&#xE9;sultats &#xE9;ventuels de la saisie automatique ne seront pas modifi&#xE9;s.</property>
+                            <property name="tooltip" translatable="yes">Remove manual modifications for this page. Automatic data capture for this page, if any, won' t be changed.</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="efface_saisie"/>
                           </widget>
@@ -349,7 +349,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip" translatable="yes">Annuler les modifications faites &#xE0; cette page</property>
+                            <property name="tooltip" translatable="yes">Cancel modifications for this page</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="annule"/>
                           </widget>
@@ -366,7 +366,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip" translatable="yes">Sauvegarder et quitter</property>
+                            <property name="tooltip" translatable="yes">Save and quit</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="ok_quitter"/>
                           </widget>

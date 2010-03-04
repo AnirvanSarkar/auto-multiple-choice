@@ -58,7 +58,7 @@ sub def_point_suivant {
     $self->{'coins'}->[$self->{'point.actuel'}++]=[$x,$y];
 }
 
-# definit la boite (droite) à l'aide de point haut-gauche et des
+# definit la boite (droite) a l'aide de point haut-gauche et des
 # tailles en x et y.
 
 sub def_droite_MD {
@@ -72,7 +72,7 @@ sub def_droite_MD {
     return($self);
 }
 
-# definit la boite (droite) à l'aide de point haut-gauche et du point
+# definit la boite (droite) a l'aide de point haut-gauche et du point
 # bas-droit.
 
 sub def_droite_MN {
@@ -86,8 +86,8 @@ sub def_droite_MN {
     return($self);
 }
 
-# definit la boite (droite) à l'aide d'une élément XML (obtenu grâce à
-# XML::Simple) qui comporte les éléments xmin, xmax, ymin, ymax.
+# definit la boite (droite) a l'aide d'une element XML (obtenu grace a
+# XML::Simple) qui comporte les elements xmin, xmax, ymin, ymax.
 
 sub def_droite_xml {
     my ($self,$x)=(@_);
@@ -122,7 +122,7 @@ sub un_seul {
     }
 }
 
-# definit la boite à l'aide d'une élément XML (obtenu grâce à
+# definit la boite a l'aide d'une element XML (obtenu grace a
 # XML::Simple) fabrique par AMC::Boite::xml.
 
 sub def_complete_xml {
@@ -170,7 +170,7 @@ sub new_complete_xml {
     return($self);
 }
 
-# renvoie une description textuelle de la boîte.
+# renvoie une description textuelle de la boite.
 
 sub txt {
     my $self=shift;
@@ -192,7 +192,7 @@ sub txt {
 }
 
 
-# renvoie une commande draw pour tracer la boîte grâce à ImageMagick
+# renvoie une commande draw pour tracer la boite grace a ImageMagick
 sub draw_list {
     my $self=shift;
     return("-draw","polygon ".$self->draw_points());
@@ -209,13 +209,13 @@ sub draw_points {
 	   );
 }
 
-# renvoie une commande draw pour tracer la boîte grâce à ImageMagick
+# renvoie une commande draw pour tracer la boite grace a ImageMagick
 sub draw {
     my $self=shift;
     return(' '.join(' ',map { '"'.$_.'"' } ($self->draw_list())).' ');
 }
 
-# renvoie une description XML des coins de la boîte.
+# renvoie une description XML des coins de la boite.
 
 sub xml {
     my ($self,$n)=(@_);
@@ -228,8 +228,8 @@ sub xml {
     return($x);
 }
 
-# renvoie la commande à passer à AMC::Image pour mesurer le contenu de
-# la boîte dans une image.
+# renvoie la commande a passer a AMC::Image pour mesurer le contenu de
+# la boite dans une image.
 
 sub commande_mesure {
     my ($self,$prop)=(@_);
@@ -240,7 +240,7 @@ sub commande_mesure {
     return($c);
 }
 
-# renvoie les coordonnées du centre de la boîte.
+# renvoie les coordonnees du centre de la boite.
 
 sub centre {
     my $self=shift;
@@ -253,7 +253,7 @@ sub centre {
     return($x/4,$y/4);
 }
 
-# renvoie la projection du centre de la boîte sur une direction donnée.
+# renvoie la projection du centre de la boite sur une direction donnee.
 
 sub centre_projete {
     my ($self,$ux,$uy)=(@_);
@@ -266,7 +266,7 @@ sub tri_dir {
     @$bx=sort { $a->centre_projete($x,$y) <=> $b->centre_projete($x,$y) } @$bx;
 }
 
-# à partir d'une liste de boîtes, renvoie les quatres boîtes extrêmes
+# a partir d'une liste de boites, renvoie les quatres boites extremes
 # : HG, HD, BD, BG
 
 sub extremes {
@@ -298,7 +298,7 @@ sub direction {
 
 }
 
-# renvoie le rayon du cercle circonscrit, si la boîte est un losange.
+# renvoie le rayon du cercle circonscrit, si la boite est un losange.
 
 sub rayon {
     my $self=shift;
