@@ -51,7 +51,8 @@ LOCALEDIR=/usr/share/locale
 MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
 GLADE=AMC-*.glade
 STY=automultiplechoice.sty
-MOS=I18N/lang/*.mo
+MOS=$(shell ls I18N/lang/*.mo)
+LANGS=$(notdir $(basename $(MOS)))
 
 all: AMC-traitement-image AMC-mepdirect AMC-gui.glade doc logo.xpm I18N ;
 
@@ -70,7 +71,7 @@ nv.pl: FORCE
 doc:
 	$(MAKE) -C doc
 
-i18N:
+I18N:
 	$(MAKE) -C I18N
 
 sync:
@@ -106,12 +107,12 @@ clean: FORCE
 	$(MAKE) -C I18N clean
 
 install_lang_%: FORCE
+	install -d -m 0755 -o root -g root $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES
 	install    -m 0644 -o root -g root I18N/lang/$*.mo $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES/auto-multiple-choice.mo
 
-install_lang_all: $(addprefix install_lang_,$(basename $(MOS)))
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(LOCALEDIR)
+install_lang: $(addprefix install_lang_,$(LANGS)) ;
 
-install: install_lang_all FORCE
+install: install_lang FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODSDIR)
 	install    -m 0755 -o root -g root $(MODS) $(DESTDIR)/$(MODSDIR)
 	install    -m 0644 -o root -g root $(GLADE) $(DESTDIR)/$(MODSDIR)
