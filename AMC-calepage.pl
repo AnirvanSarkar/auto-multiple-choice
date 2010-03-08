@@ -696,11 +696,14 @@ $traitement->ferme_commande();
 my $page_entiere;
 
 if($out_cadre || $nom_file) {
+    debug "Reading scan $scan for extractions...";
     $page_entiere=Graphics::Magick::new();
     $page_entiere->Read($scan);
 }
 
 if($nom_file && $case{'nom'}) {
+    debug "Name zone extraction to $nom_file...";
+    debug "Name box : ".$case{'nom'}->txt();
     my $e=$page_entiere->Clone(); 	 
     $e->Crop(geometry=>$case{'nom'}->etendue_xy('geometry',$zoom_plus));
     $e->Write($nom_file);

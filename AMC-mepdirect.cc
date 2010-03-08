@@ -201,6 +201,11 @@ static void savePageSlice(PDFDoc *doc,
 	      im->getWidth(),im->getHeight(),
 	      diametre_marque
 	      );
+      if(nom.xmin>=0) {
+	    fprintf(xml,"  <nom xmin=\"%d\" xmax=\"%d\" ymin=\"%d\" ymax=\"%d\"/>\n",
+		    nom.xmin,nom.xmax,
+		    nom.ymin,nom.ymax);
+      }
       for(x=0;x<=N_NID;x++) {
 	for(y=0;y<=N_CH;y++) {
 	  if(identification[x][y].xmin>=0)
