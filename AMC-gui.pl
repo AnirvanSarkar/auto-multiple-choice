@@ -315,7 +315,7 @@ sub pref_xx_ecrit {
     }
 }
 
-# lecture etat...
+# lecture/ecriture etat...
 
 sub sauve_state {
     if($state{'_modifie'}) {
@@ -335,6 +335,29 @@ sub sauve_state {
 	}
     }
 }
+
+# annulation apprentissage
+
+sub annule_apprentissage {
+    my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'question','yes-no',
+			  __("Several dialogs try to help you be at ease handling AMC.")." ".
+			  sprintf(__"Unless you tick the \"%s\" box, they are shown only once.",__"Show this message again next time")." ".
+			  __"Do you want to forgot which dialogs you have already seen and ask to show all of them next time they should appear ?"
+			  );
+    my $reponse=$dialog->run;
+    $dialog->destroy;      
+    if($reponse eq 'yes') {
+	debug "Clearing learning states...";
+	$state{'apprentissage'}={};
+	$state{'_modifie'}=1;
+	sauve_state();
+    }
+}
+
+# lecture etat, detection du profil utilise
 
 if(-r $state_file) {
     %state=pref_xx_lit($state_file);
