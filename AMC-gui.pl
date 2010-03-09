@@ -18,8 +18,6 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-use strict;
-
 use Getopt::Long;
 
 use Gtk2 -init;
@@ -191,7 +189,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'assoc_ncols'=>4,
 	      'tolerance_marque_inf'=>0.2,
 	      'tolerance_marque_sup'=>0.2,
-	      'moteur_mep'=>'auto',
+	      'moteur_mep'=>'poppler',
 
 	      'symboles_trait'=>2,
 	      'symboles_indicatives'=>'',
@@ -364,6 +362,7 @@ sub annule_apprentissage {
 
 if(-r $state_file) {
     %state=pref_xx_lit($state_file);
+    $state{'apprentissage'}={} if(!$state{'apprentissage'});
 }
 
 $state{'_modifie'}=0;
@@ -3346,6 +3345,40 @@ if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
 projet_ouvre($ARGV[0]);
 
 test_commandes();
+
+# Migration vers poppler (a partir 0.275)
+
+if(!$state{'apprentissage'}->{'MIGRATION_POPPLER'}) {
+    debug "Avertissement migration poppler";
+
+    if($o{'moteur_mep'} eq 'auto') {
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'question','yes-no',
+			      __("A new layout detection process has been developped.")." ".
+			      __("It is faster than the one that you used so far.")." ".
+			      __("Do you want to use it from now on?")." ".
+			      sprintf(__"If you experience any problem with this new implementation, you can change back to the old one setting \"%s\" to \"%s\" in %s (tab \"%s\").",
+				      __"Detection",
+				      __"direct",__"Preferences",__"Main"));
+	my $reponse=$dialog->run;
+	$dialog->destroy;
+	
+	if($reponse eq 'yes') {
+	    $o{'moteur_mep'}='poppler';
+	    $o{'_modifie'}=1;
+	}
+	
+	$state{'apprentissage'}->{'MIGRATION_POPPLER'}=1;
+	$state{'_modifie'}=1;
+	sauve_state();
+    } else {
+	$state{'apprentissage'}->{'MIGRATION_POPPLER'}=1;
+	$state{'_modifie'}=1;
+	sauve_state();
+    }
+}
 
 Gtk2->main();
 
