@@ -18,6 +18,8 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use strict;
+
 use Getopt::Long;
 
 use Gtk2 -init;
@@ -107,7 +109,7 @@ if($debug) {
     print "DEBUG ==> ".AMC::Basic::debug_file()."\n";
 }
 
-($e_volume,$e_vdirectories,undef) = splitpath( rel2abs($0) );
+my ($e_volume,$e_vdirectories,undef) = splitpath( rel2abs($0) );
 sub with_prog {
     my $fich=shift;
     return(catpath($e_volume,$e_vdirectories,$fich));
@@ -512,7 +514,7 @@ sub moteur_latex {
     return($m);
 }
 
-$gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
+my $gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
 
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
@@ -581,8 +583,8 @@ sub dialogue_apprentissage {
 
 ### modele documents
 
-$doc_store = Gtk2::ListStore->new ('Glib::String', 
-				   'Glib::String');
+my $doc_store = Gtk2::ListStore->new ('Glib::String', 
+				      'Glib::String');
 
 my @doc_ligne=($doc_store->append,$doc_store->append,$doc_store->append);
 
@@ -609,9 +611,9 @@ $w{'documents_tree'}->append_column ($column);
 
 ### modele MEP
 
-$mep_store = Gtk2::ListStore->new ('Glib::String',
-				   'Glib::String', 
-				   'Glib::String');
+my $mep_store = Gtk2::ListStore->new ('Glib::String',
+				      'Glib::String', 
+				      'Glib::String');
 
 $w{'mep_tree'}->set_model($mep_store);
 
@@ -638,15 +640,15 @@ $w{'mep_tree'}->append_column ($column);
 
 ### COPIES
 
-$copies_store = Gtk2::ListStore->new ('Glib::String');
+my $copies_store = Gtk2::ListStore->new ('Glib::String');
 
 
 ### modele CORREC
 
-$correc_store = Gtk2::ListStore->new ('Glib::String',
-				      'Glib::String', 
-				      'Glib::String', 
-				      );
+my $correc_store = Gtk2::ListStore->new ('Glib::String',
+					 'Glib::String', 
+					 'Glib::String', 
+					 );
 
 $w{'correc_tree'}->set_model($correc_store);
 
@@ -664,13 +666,13 @@ $w{'correc_tree'}->append_column ($column);
 
 ### modele DIAGNOSTIQUE SAISIE
 
-$diag_store = Gtk2::ListStore->new ('Glib::String',
-				    'Glib::String', 
-				    'Glib::String', 
-				    'Glib::String', 
-				    'Glib::String', 
-				    'Glib::String', 
-				    'Glib::String');
+my $diag_store = Gtk2::ListStore->new ('Glib::String',
+				       'Glib::String', 
+				       'Glib::String', 
+				       'Glib::String', 
+				       'Glib::String', 
+				       'Glib::String', 
+				       'Glib::String');
 
 $w{'diag_tree'}->set_model($diag_store);
 
@@ -899,7 +901,7 @@ my %diag_menu=(page=>{text=>__"page adjustment",icon=>'gtk-zoom-fit'},
 $w{'diag_tree'}->signal_connect('button_release_event' =>
     sub {
 	my ($self, $event) = @_;
-	return FALSE unless $event->button == 3;
+	return 0 unless $event->button == 3;
 	my ($path, $column, $cell_x, $cell_y) = 
 	    $w{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
 	if ($path) {
@@ -925,14 +927,14 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	    }
 	    $menu->popup (undef, undef, undef, undef,
 			  $event->button, $event->time) if($c>0);
-	    return TRUE; # stop propagation!
+	    return 1; # stop propagation!
 	    
 	}
     });
 
 ### modele inconnus
 
-$inconnu_store = Gtk2::ListStore->new ('Glib::String','Glib::String');
+my $inconnu_store = Gtk2::ListStore->new ('Glib::String','Glib::String');
 
 $w{'inconnu_tree'}->set_model($inconnu_store);
 
@@ -1524,7 +1526,7 @@ sub autre_imprimante {
       $alias{$i}='agrafe';
       
       if(%$oi) {
-	  $k=nonnul($oi->{'keyword'});
+	  my $k=nonnul($oi->{'keyword'});
 	  debug "$i -> KEYWORD $k";
 	  my $ok=$o{'options_impression'}->{$k};
 	  my @possibilites=(map { (nonnul($_->{'choice'}),
@@ -1539,8 +1541,6 @@ sub autre_imprimante {
 	  $trouve{'agrafe'}=$k;
 
 	  last CHOIX;
-      } else {
-	  $o{'options_impression'}->{$k}='';
       }
   }
     if(!$trouve{'agrafe'}) {
