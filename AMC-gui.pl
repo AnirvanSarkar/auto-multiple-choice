@@ -444,7 +444,7 @@ if($o{'encodage_interne'} ne 'UTF-8') {
 # creation du repertoire si besoin (sinon la conf peut etre
 # perturbee lors de Edition/Parametres)
 
-mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
+mkdir($o{'rep_projets'}) if(! -d $o{'rep_projets'});
     
 ###
 
