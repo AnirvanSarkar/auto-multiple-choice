@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -25,7 +25,8 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ;
 
 clean:
 	-rm *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext}
-	-rm exemples/*.tex
+	-rm exemples/*.tgz
+	-rm exemples/**/*.tgz
 	-rm html/auto-multiple-choice/*.html
 
 %.tex: %.xml

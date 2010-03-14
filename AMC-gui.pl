@@ -31,6 +31,7 @@ use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs t
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 use File::Path;
+use Archive::Tar;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
 
@@ -76,9 +77,12 @@ use constant {
     COMBO_ID => 1,
     COMBO_TEXT => 0,
 
+    MODEL_NOM => 0,
+    MODEL_PATH => 1,
+    MODEL_DESC => 2,
+
     COPIE_N => 0,
 
-    LISTE_TXT =>0,
 };
 
 use_gettext;
@@ -737,7 +741,7 @@ my $encodages=[{qw/inputenc latin1 iso ISO-8859-1/,'txt'=>'ISO-8859-1 ('.__("Wes
 # TRANSLATORS: for encodings
 	       {qw/inputenc latin10 iso ISO-8859-10/,'txt'=>'ISO-8859-10 ('.__("Northern").')'},
 # TRANSLATORS: for encodings
-	       {qw/inputenc utf8 iso UTF-8/,'txt'=>'UTF-8 ('.__("Unicode").')'},
+	       {qw/inputenc utf8x iso UTF-8/,'txt'=>'UTF-8 ('.__("Unicode").')'},
 	       {qw/inputenc cp1252 iso cp1252/,'txt'=>'Windows-1252',
 		alias=>['Windows-1252','Windows']},
 	       {qw/inputenc applemac iso MacRoman/,'txt'=>'Macintosh '.__"Western Europe"},
@@ -2780,34 +2784,52 @@ sub valide_source_tex {
     detecte_documents();
 }
 
-my @modeles=();
-my %modeles_i=();
+my $modeles_store;
 
 sub charge_modeles {
-    return if($#modeles>=0);
-    opendir(DIR, $o{'rep_modeles'});
-    my @ms = grep { /\.tex$/ && -f $o{'rep_modeles'}."/$_" } readdir(DIR);
+    my ($store,$parent,$rep)=@_;
+
+    opendir(DIR,$rep);
+    my @all=readdir(DIR);
+    my @ms=grep { /\.tgz$/ && -f $rep."/$_" } @all;
+    my @subdirs=grep { -d $rep."/$_" && ! /^\./ } @all;
     closedir DIR;
-    for my $m (@ms) {
-	debug "Fichier modele $m";
-	my $d={'id'=>$m,
-	       'fichier'=>$o{'rep_modeles'}."/$m",
-	   };
-	my $mt=$o{'rep_modeles'}."/$m";
-	$mt =~ s/\.tex$/.txt/;
-	if(-f $mt) {
-	    open(DESC,"<:encoding(UTF-8)",$mt);
-	  LIG: while(<DESC>) {
-	      chomp;
-	      s/\#.*//;
-	      next LIG if(!$_);
-	      $d->{'desc'}.=$_;
-	  }
-	} else {
-	    $d->{'desc'}=__"(no description)";
+
+    for my $sd (@subdirs) {
+	my $nom=$sd;
+	my $desc_text='';
+
+	my $child = $store->append($parent);
+	if(-f $rep."/$sd/directory.xml") {
+	    my $d=XMLin($rep."/$sd/directory.xml");
+	    $nom=$d->{'title'} if($d->{'title'});
+	    $desc_text=$d->{'text'} if($d->{'text'});
 	}
-	#print "MOD : $m\n";
-	push @modeles,$d;
+	$store->set($child,MODEL_NOM,$nom,
+		    MODEL_PATH,'',
+		    MODEL_DESC,$desc_text);
+	charge_modeles($store,$child,$rep."/$sd");
+    }
+
+    for my $m (@ms) {
+	my $child = $store->append($parent);
+
+	my $nom=$m;
+	$nom =~ s/\.tgz$//i;
+	my $desc_text=__"(aucune description)";
+	my $tar=Archive::Tar->new($rep."/$m");
+	my @desc=grep { /description.xml$/ } ($tar->list_files());
+	if($desc[0]) {
+	    my $d=XMLin($tar->get_content($desc[0]));
+	    $nom=$d->{'title'} if($d->{'title'});
+	    $desc_text=$d->{'text'} if($d->{'text'});
+	}
+	debug "Adding model $m";
+	debug "NAME=$nom DESC=$desc_text";
+	$store->set($child,
+		    MODEL_NOM,$nom,
+		    MODEL_PATH,$rep."/$m",
+		    MODEL_DESC,$desc_text);
     }
 }
 
@@ -2823,25 +2845,33 @@ sub n_fich {
 
 sub source_latex_choisir {
 
-    # fenetre de choix du source latex
-
-    my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog','auto-multiple-choice');
-
-    my $dialog=$gap->get_widget('source_latex_dialog');
-
-    my $reponse=$dialog->run();
+    my %oo=@_;
 
     my %bouton=();
-    for(qw/new choix vide zip/) {
-	$bouton{$_}=$gap->get_widget('sl_type_'.$_)->get_active();
-	debug "Bouton $_" if($bouton{$_});
+
+    if($oo{'type'}) {
+	$bouton{$oo{'type'}}=1;
+    } else {
+	
+	# fenetre de choix du source latex
+	
+	my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog','auto-multiple-choice');
+	
+	my $dialog=$gap->get_widget('source_latex_dialog');
+	
+	my $reponse=$dialog->run();
+	
+	for(qw/new choix vide zip/) {
+	    $bouton{$_}=$gap->get_widget('sl_type_'.$_)->get_active();
+	    debug "Bouton $_" if($bouton{$_});
+	}
+	
+	$dialog->destroy();
+	
+	debug "RESPONSE=$reponse";
+	
+	return(0) if(!$reponse);
     }
-
-    $dialog->destroy();
-
-    debug "RESPONSE=$reponse";
-
-    return(0) if(!$reponse);
 
     # actions apres avoir choisi le type de source latex a utiliser
 
@@ -2855,19 +2885,16 @@ sub source_latex_choisir {
 	    $w{$_}=$gap->get_widget($_);
 	}
 
-	charge_modeles();
-	my $modeles_store = Gtk2::ListStore->new ('Glib::String');
-	for my $i (0..$#modeles) {
-	    #print "$i->".$modeles[$i]->{'id'}."\n";
-	    $modeles_store->set($modeles_store->append(),LISTE_TXT,
-				$modeles[$i]->{'id'});
-	    
-	}
+	$modeles_store = Gtk2::TreeStore->new('Glib::String',
+					      'Glib::String',
+					      'Glib::String');
+	charge_modeles($modeles_store,undef,$o{'rep_modeles'});
+
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;
 	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"model",
 							       $renderer,
-							       text=> LISTE_TXT );
+							       text=> MODEL_NOM );
 	$w{'modeles_liste'}->append_column ($column);
 	$w{'modeles_liste'}->get_selection->signal_connect("changed",\&source_latex_mmaj);
 
@@ -2877,24 +2904,21 @@ sub source_latex_choisir {
 
 	# le modele est choisi : l'installer
 
-	my @i;
+	my $mod;
 
 	if($reponse) {
-	    my $sr=$w{'modeles_liste'}->get_selection()->get_selected_rows();
-	    if($sr) {
-		@i=$sr->get_indices();
-	    } else {
-		@i=();
-	    }
+	    my $iter=$w{'modeles_liste'}->get_selection()->get_selected();
+	    $mod=$modeles_store->get($iter,MODEL_PATH) if($iter);
 	}
 
 	$w{'source_latex_modele'}->destroy();
 
 	return(0) if(!$reponse);
 
-	if(@i) {
-	    debug "Installing model $i[0] : ".$modeles[$i[0]]->{'fichier'};
-	    $projet{'options'}->{'texsrc'}=$modeles[$i[0]]->{'fichier'};
+	if($mod) {
+	    debug "Installing model $mod";
+	    return(source_latex_choisir('type'=>'zip','fich'=>$mod,
+					'decode'=>1));
 	} else {
 	    debug "No model";
 	    return(0);
@@ -2929,31 +2953,38 @@ sub source_latex_choisir {
 	debug "Source LaTeX $f";
 
     } elsif($bouton{'zip'}) {
-	
-	# choisir un fichier ZIP
 
-	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix_zip','auto-multiple-choice');
+	my $fich;
 
-	for(qw/source_latex_choix_zip/) {
-	    $w{$_}=$gap->get_widget($_);
+	if($oo{'fich'}) {
+	    $fich=$oo{'fich'};
+	} else {
+	    
+	    # choisir un fichier ZIP
+	    
+	    $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix_zip','auto-multiple-choice');
+	    
+	    for(qw/source_latex_choix_zip/) {
+		$w{$_}=$gap->get_widget($_);
+	    }
+	    $w{'source_latex_choix_zip'}->set_current_folder($home_dir);
+	    
+	    my $filtre_zip=Gtk2::FileFilter->new();
+	    $filtre_zip->set_name(__"Archive (zip, tgz)");
+	    $filtre_zip->add_pattern("*.zip");
+	    $filtre_zip->add_pattern("*.tgz");
+	    $filtre_zip->add_pattern("*.TGZ");
+	    $filtre_zip->add_pattern("*.ZIP");
+	    $w{'source_latex_choix_zip'}->add_filter($filtre_zip);
+	    
+	    $reponse=$w{'source_latex_choix_zip'}->run();
+	    
+	    $fich=$w{'source_latex_choix_zip'}->get_filename();
+	    
+	    $w{'source_latex_choix_zip'}->destroy();
+	    
+	    return(0) if(!$reponse);
 	}
-	$w{'source_latex_choix_zip'}->set_current_folder($home_dir);
-
-	my $filtre_zip=Gtk2::FileFilter->new();
-	$filtre_zip->set_name(__"Archive (zip, tgz)");
-        $filtre_zip->add_pattern("*.zip");
-        $filtre_zip->add_pattern("*.tgz");
-        $filtre_zip->add_pattern("*.TGZ");
-        $filtre_zip->add_pattern("*.ZIP");
-	$w{'source_latex_choix_zip'}->add_filter($filtre_zip);
-	
-	$reponse=$w{'source_latex_choix_zip'}->run();
-
-	my $f=$w{'source_latex_choix_zip'}->get_filename();
-
-	$w{'source_latex_choix_zip'}->destroy();
-
-	return(0) if(!$reponse);
 
 	# cree un repertoire temporaire pour dezipper
 
@@ -2963,13 +2994,13 @@ sub source_latex_choisir {
 
 	my @cmd;
 
-	if($f =~ /\.zip$/i) {
-	    @cmd=("unzip","-d",$temp_dir,$f);
+	if($fich =~ /\.zip$/i) {
+	    @cmd=("unzip","-d",$temp_dir,$fich);
 	} else {
-	    @cmd=("tar","-x","-v","-z","-f",$f,"-C",$temp_dir);
+	    @cmd=("tar","-x","-v","-z","-f",$fich,"-C",$temp_dir);
 	}
 
-	debug "Extracting archive files\nFROM: $f\nWITH: ".join(' ',@cmd);
+	debug "Extracting archive files\nFROM: $fich\nWITH: ".join(' ',@cmd);
 	if(open(UNZIP,"-|",@cmd) ) {
 	    while(<UNZIP>) {
 		debug $_;
@@ -2986,7 +3017,7 @@ sub source_latex_choisir {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'error','ok',
-				  sprintf(__"Nothing extracted from archive %s. Check it.",$f));
+				  sprintf(__"Nothing extracted from archive %s. Check it.",$fich));
 	    $dialog->run;
 	    $dialog->destroy;
 	    return(0);
@@ -3012,10 +3043,17 @@ sub source_latex_choisir {
 
 	    my $latex;
 
-	    for(@archive_files) {
-		debug "Moving to project: $_";
-		$latex=$_ if(/\.tex$/i);
-		system("mv","$temp_dir/$_",$hd);
+	    for my $ff (@archive_files) {
+		debug "Moving to project: $ff";
+		if($ff =~ /\.tex$/i) {
+		    $latex=$ff;
+		    if($oo{'decode'}) {
+			debug "Decoding $ff...";
+			move("$temp_dir/$ff","$temp_dir/$ff.0enc");
+			copy_latex("$temp_dir/$ff.0enc","$temp_dir/$ff");
+		    }
+		}
+		system("mv","$temp_dir/$ff",$hd);
 	    }
 
 	    if($latex) {
@@ -3070,8 +3108,11 @@ sub source_latex_choisir {
 }
 
 sub source_latex_mmaj {
-    my $i=$w{'modeles_liste'}->get_selection()->get_selected_rows()->get_indices();
-    $w{'modeles_description'}->get_buffer->set_text($modeles[$i]->{'desc'});
+    my $iter=$w{'modeles_liste'}->get_selection()->get_selected();
+    my $desc='';
+
+    $desc=$modeles_store->get($iter,MODEL_DESC) if($iter);
+    $w{'modeles_description'}->get_buffer->set_text($desc);
 }
 
 
