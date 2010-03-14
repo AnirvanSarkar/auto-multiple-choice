@@ -118,7 +118,14 @@
       à 63.</para>
 
       <para>Le nombre de questions utilisées dans un même examen est limité à
-      255.</para>
+      255. L'utilisation de la commande <command>\AMCcode</command> (voir
+      section <xref linkend="latex.codes" />) utilise un nombre de questions
+      égal au nombre de chiffres pour le code à saisir. Par ailleurs, les
+      limitations de LaTeX pourront bloquer la compilation avant d'utiliser
+      255 questions (erreur du type « <errortext>No room for a new
+      \toks</errortext> »). Dans ce cas, essayez en utilisant le package
+      <package>etex</package>, grâce à la commande
+      <code>\usepackage{etex}</code>.</para>
 
       <para>Le nombre de réponses proposées pour une même question est limité
       à 199.</para>
