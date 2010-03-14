@@ -2940,8 +2940,10 @@ sub source_latex_choisir {
 	$w{'source_latex_choix_zip'}->set_current_folder($home_dir);
 
 	my $filtre_zip=Gtk2::FileFilter->new();
-	$filtre_zip->set_name(__"ZIP archive (*.zip)");
+	$filtre_zip->set_name(__"Archive (zip, tgz)");
         $filtre_zip->add_pattern("*.zip");
+        $filtre_zip->add_pattern("*.tgz");
+        $filtre_zip->add_pattern("*.TGZ");
         $filtre_zip->add_pattern("*.ZIP");
 	$w{'source_latex_choix_zip'}->add_filter($filtre_zip);
 	
@@ -2959,7 +2961,16 @@ sub source_latex_choisir {
 
 	my $rv=0;
 
-	if(open(UNZIP,"-|","unzip","-d",$temp_dir,$f) ) {
+	my @cmd;
+
+	if($f =~ /\.zip$/i) {
+	    @cmd=("unzip","-d",$temp_dir,$f);
+	} else {
+	    @cmd=("tar","-x","-v","-z","-f",$f,"-C",$temp_dir);
+	}
+
+	debug "Extracting archive files\nFROM: $f\nWITH: ".join(' ',@cmd);
+	if(open(UNZIP,"-|",@cmd) ) {
 	    while(<UNZIP>) {
 		debug $_;
 	    }
