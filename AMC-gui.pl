@@ -166,9 +166,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'print_command_pdf'=>['commande',
 				    'cupsdoprint %f','lpr %f',
 				    ],
-# TRANSLATORS: directory name for projects
+# TRANSLATORS: directory name for projects. Please use only alphanumeric characters, and - or _. No accentuated characters.
 	      'rep_projets'=>$home_dir.'/'.__"MC-Projects",
-	      'rep_modeles'=>'/usr/share/doc/auto-multiple-choice/exemples',
+	      'rep_modeles'=>$o_dir."/Models",
 	      'seuil_eqm'=>3.0,
 	      'seuil_sens'=>8.0,
 	      'saisie_dpi'=>150,
@@ -439,6 +439,13 @@ for(qw/encodage_liste encodage_csv/) {
     }
 }
 
+# Migration rep_modeles a partir de 0.280
+
+if($o{'rep_modeles'} eq '/usr/share/doc/auto-multiple-choice/exemples') {
+    $o{'rep_modeles'}=$o_defaut{'rep_modeles'};
+    $o{'_modifie'}=1;
+}
+
 # XML::Writer utilise dans Association.pm n'accepte rien d'autre...
 if($o{'encodage_interne'} ne 'UTF-8') {
     $o{'encodage_interne'}='UTF-8';
@@ -449,6 +456,7 @@ if($o{'encodage_interne'} ne 'UTF-8') {
 # perturbee lors de Edition/Parametres)
 
 mkdir($o{'rep_projets'}) if(! -d $o{'rep_projets'});
+mkdir($o{'rep_modeles'}) if(! -d $o{'rep_modeles'});
     
 ###
 
@@ -2789,6 +2797,8 @@ my $modeles_store;
 sub charge_modeles {
     my ($store,$parent,$rep)=@_;
 
+    return if(! -d $rep);
+
     opendir(DIR,$rep);
     my @all=readdir(DIR);
     my @ms=grep { /\.tgz$/ && -f $rep."/$_" } @all;
@@ -2816,7 +2826,7 @@ sub charge_modeles {
 
 	my $nom=$m;
 	$nom =~ s/\.tgz$//i;
-	my $desc_text=__"(aucune description)";
+	my $desc_text=__"(no description)";
 	my $tar=Archive::Tar->new($rep."/$m");
 	my @desc=grep { /description.xml$/ } ($tar->list_files());
 	if($desc[0]) {
@@ -2888,7 +2898,10 @@ sub source_latex_choisir {
 	$modeles_store = Gtk2::TreeStore->new('Glib::String',
 					      'Glib::String',
 					      'Glib::String');
-	charge_modeles($modeles_store,undef,$o{'rep_modeles'});
+	
+	charge_modeles($modeles_store,undef,$o{'rep_modeles'}) if($o{'rep_modeles'});
+
+	charge_modeles($modeles_store,undef,"/usr/share/auto-multiple-choice/models");
 
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;

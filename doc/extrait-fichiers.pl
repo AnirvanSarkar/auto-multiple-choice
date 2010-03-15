@@ -44,7 +44,7 @@ for my $f (@fichiers) {
     my @articles= $xp->find('/article')->get_nodelist;
     if($articles[0] && $articles[0]->getAttribute('lang')) {
 	$lang=$articles[0]->getAttribute('lang');
-	$lang =~ s/-.*//;
+	$lang =~ s/[.-].*//;
 	print "  I lang=$lang\n";
     }
 
@@ -55,7 +55,7 @@ for my $f (@fichiers) {
 	my $id=$node->getAttribute('id');
 	my $ex=$node->string_value;
 
-	if($id =~ /^(exemples)-(.*\.tex)$/) {
+	if($id =~ /^(modeles)-(.*\.tex)$/) {
 
 	    my $rep=$1;
 	    $rep.="/$lang" if($lang);

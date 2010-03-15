@@ -77,7 +77,7 @@ binary-arch: build install
 	dh_installman doc/*.[1-9]
 	dh_link
 	dh_strip
-	dh_compress -X.tex -X.tgz -X.xml
+	dh_compress
 	dh_fixperms
 	dh_perl usr/lib/AMC usr/share/perl5/AMC usr/share/perl5/AMC/Gui usr/share/perl5/AMC/Export
 #	dh_makeshlibs

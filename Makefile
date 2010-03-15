@@ -47,12 +47,14 @@ DESKTOPDIR=/usr/share/applications
 ICONSDIR=/usr/share/icons/hicolor/scalable/apps
 PIXDIR=/usr/share/pixmaps
 LOCALEDIR=/usr/share/locale
+MODELSDIR=/usr/share/auto-multiple-choice/models
 
 MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
 GLADE=AMC-*.glade
 STY=automultiplechoice.sty
 MOS=$(shell ls I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
+SUBMODS=$(notdir $(shell ls doc/modeles))
 
 all: AMC-traitement-image AMC-mepdirect AMC-gui.glade doc logo.xpm I18N ;
 
@@ -112,7 +114,14 @@ install_lang_%: FORCE
 
 install_lang: $(addprefix install_lang_,$(LANGS)) ;
 
-install: install_lang FORCE
+install_models_%: FORCE
+	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODELSDIR)/$*
+	install    -m 0644 -o root -g root doc/modeles/$*/*.tgz $(DESTDIR)/$(MODELSDIR)/$*
+	install    -m 0644 -o root -g root doc/modeles/$*/*.xml $(DESTDIR)/$(MODELSDIR)/$*
+
+install_models: $(addprefix install_models_,$(SUBMODS)) ;
+
+install: install_lang install_models FORCE
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODSDIR)
 	install    -m 0755 -o root -g root $(MODS) $(DESTDIR)/$(MODSDIR)
 	install    -m 0644 -o root -g root $(GLADE) $(DESTDIR)/$(MODSDIR)

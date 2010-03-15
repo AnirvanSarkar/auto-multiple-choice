@@ -25,8 +25,8 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ;
 
 clean:
 	-rm *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext}
-	-rm exemples/*.tgz
-	-rm exemples/**/*.tgz
+	-rm modeles/*.tgz
+	-rm modeles/**/*.tgz
 	-rm html/auto-multiple-choice/*.html
 
 %.tex: %.xml
