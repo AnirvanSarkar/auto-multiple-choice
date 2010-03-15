@@ -17,37 +17,20 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+BASE_VARS:=$(.VARIABLES)
+
+include Makefile.versions
+include Makefile.conf
+
+SUBST_VARS:=$(filter-out $(BASE_VARS) BASE_VARS,$(.VARIABLES))
+
 SHELL=/bin/sh
 
 DESTDIR=
 
-DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
-DEB_BUILD_ARCH := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-ifeq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
 GCC=gcc
-GCCARCHFLAGS=
-else
-GCC=gcc
-ifeq ($(DEB_HOST_ARCH),amd64)
-GCCARCHFLAGS=-m64
-endif
-ifeq ($(DEB_HOST_ARCH),i386)
-GCCARCHFLAGS=-m32
-endif
-endif
 
 GCCPOPPLER=-I /usr/include/poppler -lpoppler
-
-BINDIR=/usr/bin
-PERLDIR=/usr/share/perl5
-MODSDIR=/usr/lib/AMC
-TEXDIR=/usr/share/texmf-texlive/tex/latex/AMC
-MENUDIR=/usr/share/menu
-DESKTOPDIR=/usr/share/applications
-ICONSDIR=/usr/share/icons/hicolor/scalable/apps
-PIXDIR=/usr/share/pixmaps
-LOCALEDIR=/usr/share/locale
-MODELSDIR=/usr/share/auto-multiple-choice/models
 
 MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
 GLADE=AMC-*.glade
@@ -56,19 +39,38 @@ MOS=$(shell ls I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
 SUBMODS=$(notdir $(shell ls doc/modeles))
 
-all: AMC-traitement-image AMC-mepdirect AMC-gui.glade doc logo.xpm I18N ;
+FROM_IN=menu auto-multiple-choice AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl doc/auto-multiple-choice.xml
+
+all: $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm doc I18N ;
+
+MAJ: $(FROM_IN) ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
-	$(GCC) $(GCCARCHFLAGS) -O3 -I. -lnetpbm $< -o $@
+	$(GCC) -O3 -I. -lnetpbm $< -o $@
 
 AMC-mepdirect: AMC-mepdirect.cc Makefile
-	$(GCC) $(GCCARCHFLAGS) $(GCCPOPPLER) -O3 $< -o $@
+	$(GCC) $(GCCPOPPLER) -O3 $< -o $@
 
 nv.pl: FORCE
 	perl local/versions.pl
 
 %.glade: %.in.glade
-	perl versions.pl < $< > $@
+	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
+
+%.pl: %.in.pl
+	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
+
+%.pm: %.in.pm
+	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
+
+%.xsl: %.in.xsl
+	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
+
+%.xml: %.in.xml
+	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
+
+%: %.in
+	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
 
 doc:
 	$(MAKE) -C doc
@@ -104,7 +106,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 
 clean: FORCE
-	-rm AMC-traitement-image AMC-mepdirect AMC-gui.glade logo.xpm
+	-rm $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
 
@@ -153,17 +155,23 @@ install: install_lang install_models FORCE
 
 BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k42067447
 
-debsrc: nv.pl
+debsrc_vok:
 	dpkg-buildpackage -S -sa $(BUILDOPTS)
 
-deb: nv.pl
+debsrc: nv.pl
+	$(MAKE) debsrc_vok
+
+deb_vok:
 	dpkg-buildpackage -b $(BUILDOPTS)
+
+deb: nv.pl
+	$(MAKE) deb_vok
 
 experimental: FORCE
 	$(MAKE) -C download-area repos sync
 
 FORCE: ;
 
-.PHONY: install deb debsrc clean global doc I18N experimental FORCE
+.PHONY: install deb debsrc clean global doc I18N experimental FORCE MAJ
 
 

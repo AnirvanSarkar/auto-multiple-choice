@@ -31,12 +31,16 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &__ &__p);
+    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &__ &__p);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
     # as well as any optionally exported functions
     @EXPORT_OK   = qw();
+}
+
+sub amc_libdir {
+    return "@/MODSDIR/@";
 }
 
 # peut-on acceder a cette commande par exec ?

@@ -2252,7 +2252,7 @@ sub close_apropos {
 }
 
 sub activate_doc {
-    my $url='file:///usr/share/doc/auto-multiple-choice/html/auto-multiple-choice/index.html';
+    my $url='file://@/DOCDIR/@/html/auto-multiple-choice/index.html';
 
     my $seq=0;
     my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
@@ -2901,7 +2901,7 @@ sub source_latex_choisir {
 	
 	charge_modeles($modeles_store,undef,$o{'rep_modeles'}) if($o{'rep_modeles'});
 
-	charge_modeles($modeles_store,undef,"/usr/share/auto-multiple-choice/models");
+	charge_modeles($modeles_store,undef,"@/MODELSDIR/@");
 
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;

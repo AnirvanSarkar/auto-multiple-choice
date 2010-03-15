@@ -19,6 +19,8 @@
 
 SHELL=/bin/sh
 
+include ../Makefile.conf
+
 DOCBOOKS=$(shell ls *.xml)
 
 all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ; 
@@ -44,7 +46,7 @@ clean:
 	perl extrait-fichiers.pl --liste $@ $<
 
 %.man: %.xml
-	xsltproc --nonet --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl $<
+	xsltproc --nonet --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" $(DOCBOOK_MAN_XSL) $<
 	date > $@
 
 

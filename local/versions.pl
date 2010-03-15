@@ -22,3 +22,8 @@ $d = Data::Dumper->new([\%k], ['k']);
 open(VPL,">nv.pl");
 print VPL $d->Dump;
 close(VPL);
+
+open(VMK,">Makefile.versions");
+print VMK "PACKAGE_V_DEB=$k{'deb'}\n";
+print VMK "PACKAGE_V_SVN=$k{'svn'}\n";
+close(VMK);
