@@ -21,7 +21,7 @@ SHELL=/bin/sh
 
 include ../Makefile.conf
 
-DOCBOOKS=$(shell ls *.xml)
+DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard *.xml))
 
 all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ; 
 
