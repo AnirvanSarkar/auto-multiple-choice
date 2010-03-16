@@ -33,13 +33,13 @@ GCC=gcc
 GCCPOPPLER=-I /usr/include/poppler -lpoppler
 
 MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
-GLADE=AMC-*.glade
+GLADE=AMC-gui.glade
 STY=automultiplechoice.sty
-MOS=$(shell ls I18N/lang/*.mo)
+MOS=$(wildcard I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
 SUBMODS=$(notdir $(shell ls doc/modeles))
 
-FROM_IN=menu auto-multiple-choice AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl doc/auto-multiple-choice.xml
+FROM_IN=debian/menu auto-multiple-choice AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl doc/auto-multiple-choice.xml
 
 all: $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm doc I18N ;
 
@@ -53,18 +53,6 @@ AMC-mepdirect: AMC-mepdirect.cc Makefile
 
 nv.pl: FORCE
 	perl local/versions.pl
-
-%.glade: %.in.glade
-	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
-
-%.pl: %.in.pl
-	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
-
-%.pm: %.in.pm
-	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
-
-%.xsl: %.in.xsl
-	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) $< > $@
 
 %.xml: %.in.xml
 	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
@@ -106,7 +94,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 
 clean: FORCE
-	-rm $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm
+	rm -f $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
 
@@ -129,8 +117,10 @@ install: install_lang install_models FORCE
 	install    -m 0644 -o root -g root $(GLADE) $(DESTDIR)/$(MODSDIR)
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(TEXDIR)
 	install    -m 0644 -o root -g root $(STY) $(DESTDIR)/$(TEXDIR)
+ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_installmenu
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(MENUDIR)
-	install    -m 0644 -o root -g root -T menu $(DESTDIR)/$(MENUDIR)/auto-multiple-choice
+	install    -m 0644 -o root -g root -T debian/menu $(DESTDIR)/$(MENUDIR)/auto-multiple-choice
+endif
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(DESKTOPDIR)
 	install    -m 0644 -o root -g root -T desktop $(DESTDIR)/$(DESKTOPDIR)/auto-multiple-choice.desktop
 	install -d -m 0755 -o root -g root $(DESTDIR)/$(BINDIR)
@@ -146,6 +136,13 @@ install: install_lang install_models FORCE
 	install    -m 0644 -o root -g root AMC-perl/AMC/Export/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Export
 	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
+ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
+	install -d -m 0755 -o root -g root $(DESTDIR)/$(DOCDIR)
+	install    -m 0644 -o root -g root doc/auto-multiple-choice.{xml,pdf} $(DESTDIR)/$(DOCDIR)
+	cp -r doc/html $(DESTDIR)/$(DOCDIR)
+	install -d -m 0755 -o root -g root $(DESTDIR)/$(MAN1DIR)
+	install    -m 0644 -o root -g root doc/*.1 $(DESTDIR)/$(MAN1DIR)
+endif
 
 # perl >= 5.10 pour operateur //
 # libnetpbm9 -> libppm (AMC-traitement-image)

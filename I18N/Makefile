@@ -29,16 +29,16 @@ PERL=$(AMC)/*.pl $(AMC)/AMC-perl/AMC/*.pm $(AMC)/AMC-perl/AMC/**/*.pm
 
 GLADE=$(AMC)/AMC-gui.in.glade $(AMC)/AMC-perl/AMC/**/*.glade
 
-POS:=$(shell ls lang/*.po)
+POS=$(wildcard lang/*.po)
 MOS=$(POS:.po=.mo)
 LANGS=$(basename $(notdir $(POS)))
 
 all: $(MOS)
 
 clean: FORCE
-	-rm $(MOS)
-	-rm *.bpot
-	-rm *.po
+	rm -f $(MOS)
+	rm -f *.bpot
+	rm -f *.po
 
 %.mo: %.po
 	msgfmt $< -o $@

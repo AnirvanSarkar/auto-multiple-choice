@@ -26,10 +26,10 @@ DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard *.xml))
 all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ; 
 
 clean:
-	-rm *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext}
-	-rm modeles/*.tgz
-	-rm modeles/**/*.tgz
-	-rm html/auto-multiple-choice/*.html
+	rm -f *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext}
+	rm -f modeles/*.tgz
+	rm -f modeles/**/*.tgz
+	rm -f html/auto-multiple-choice/*.html
 
 %.tex: %.xml
 	dblatex -t tex $< -o $@
@@ -37,8 +37,6 @@ clean:
 
 %.pdf: %.tex
 	pdflatex $< ; pdflatex $<
-
-#	fop -xml $< -xsl /usr/share/xml/docbook/stylesheet/nwalsh/fo/docbook.xsl -pdf $@
 
 %.x: %.ext %.man %.html ;
 
@@ -51,10 +49,7 @@ clean:
 
 
 %.html: %.xml doc-xhtml.xsl
-	-rm html/$*/*.html
+	rm -f html/$*/*.html
 	xsltproc --nonet --stringparam base.dir html/$*/ doc-xhtml.xsl $<
 	date > $@
 
-# xmlto -o html/$*  html $<
-
-# xalan -in auto-multiple-choice.xml -xsl /usr/share/xml/docbook/stylesheet/nwalsh/html/docbook.xsl -param use.extensions 1 -param linenumbering.extension 1 -out html/a.html
