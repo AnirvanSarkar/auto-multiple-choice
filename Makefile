@@ -43,6 +43,8 @@ FROM_IN=debian/menu auto-multiple-choice AMC-gui.glade AMC-gui.pl AMC-perl/AMC/B
 
 all: $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm doc I18N ;
 
+all_precomp: $(FROM_IN) AMC-traitement-image AMC-mepdirect ;
+
 MAJ: $(FROM_IN) ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
@@ -93,8 +95,11 @@ local: global
 	sudo ln -s $(LOCALDIR)/logo.svg $(ICONSDIR)/auto-multiple-choice.svg
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 
-clean: FORCE
-	rm -f $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm
+clean_IN: FORCE
+	rm -f $(FROM_IN)
+
+clean: clean_IN FORCE
+	rm -f AMC-traitement-image AMC-mepdirect logo.xpm
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
 
@@ -152,6 +157,15 @@ endif
 
 BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k42067447
 
+precomp_vok: logo.xpm I18N doc
+	$(MAKE) clean_IN
+	tar cvzf ../auto-multiple-choice_$(PACKAGE_V_SVN)_precomp.tar.gz --exclude-vcs '--exclude=*~' .
+
+precomp: 
+	$(MAKE) clean
+	$(MAKE) MAJ nv.pl
+	$(MAKE) precomp_vok
+
 debsrc_vok:
 	dpkg-buildpackage -S -sa $(BUILDOPTS)
 
@@ -169,6 +183,6 @@ experimental: FORCE
 
 FORCE: ;
 
-.PHONY: install deb debsrc clean global doc I18N experimental FORCE MAJ
+.PHONY: install deb debsrc precomp clean global doc I18N experimental FORCE MAJ
 
 

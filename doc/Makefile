@@ -37,6 +37,7 @@ clean:
 
 %.pdf: %.tex
 	pdflatex $< ; pdflatex $<
+	rm -f $*.{aux,cb,cb2,glo,idx,log,out,toc}
 
 %.x: %.ext %.man %.html ;
 
