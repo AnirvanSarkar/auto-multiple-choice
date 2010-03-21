@@ -28,7 +28,7 @@ sub new {
 	      'ipc_in'=>'',
 	      'ipc_out'=>'',
 	      'ipc'=>'',
-	      'traitement'=>$amc_libdir.'/AMC-traitement-image',
+	      'traitement'=>amc_libdir.'/AMC-traitement-image',
 	  };
 
     for my $k (keys %o) {

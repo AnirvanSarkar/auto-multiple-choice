@@ -159,7 +159,7 @@ BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k42067447
 
 precomp_vok: logo.xpm I18N doc
 	$(MAKE) clean_IN
-	tar cvzf ../auto-multiple-choice_$(PACKAGE_V_SVN)_precomp.tar.gz --exclude-vcs '--exclude=*~' .
+	tar cvzf ../auto-multiple-choice_$(PACKAGE_V_SVN)_precomp.tar.gz --exclude-vcs '--exclude=*~' --exclude download_area .
 
 precomp: 
 	$(MAKE) clean
