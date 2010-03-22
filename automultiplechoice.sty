@@ -21,7 +21,6 @@
 % 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{automultiplechoice}
-\RequirePackage[geometry]{ifsym}% marques de calage
 \RequirePackage{xcolor}
 \RequirePackage{fancyhdr}
 \RequirePackage{everypage}
@@ -445,7 +444,9 @@
 % mise en page
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\def\m@rque#1{\textcolor{#1}{\FilledBigCircle}}
+\def\AMCcercle#1#2{{\setlength{\unitlength}{1mm}\begin{picture}(#1,#1)(-#2,-#2)\thinlines\circle*{#1}\end{picture}}}
+\def\m@rqueCalage{\AMCcercle{3.6}{1.8}}
+\def\m@rque#1{\textcolor{#1}{\m@rqueCalage}}
 \def\he@dtaille#1{\vbox to 1cm{#1}}
 \def\he@dbas#1{\he@dtaille{\vspace*{\fill}#1}}
 \def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}

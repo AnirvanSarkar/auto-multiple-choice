@@ -17,7 +17,7 @@ GetOptions("base=s"=>\$d,
 	   );
 
 opendir(DIR,$d);
-my @v=grep { /^auto-multiple-choice_.*\.$ext$/ } readdir(DIR);
+my @v=grep { /^auto-multiple-choice_.*\.$ext$/ && ! /precomp/ } readdir(DIR);
 closedir(DIR);
 
 @mois=qw/janvier février mars avril mai juin juillet août septembre octobre novembre décembre/;
