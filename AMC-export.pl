@@ -23,7 +23,7 @@ use Getopt::Long;
 use AMC::Basic;
 use AMC::Gui::Avancement;
 
-use Module::Runtime qw/use_module/;
+use Module::Load;
 
 #use encoding 'utf8';
 
@@ -51,7 +51,8 @@ GetOptions("module=s"=>\$module,
 	   
 set_debug($debug);
 
-$ex = use_module("AMC::Export::$module")->new();
+load("AMC::Export::$module");
+$ex = "AMC::Export::$module"->new();
 
 $ex->set_options("fich",
 		 "notes"=>$fich_notes,
