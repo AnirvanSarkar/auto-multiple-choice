@@ -414,8 +414,12 @@ for my $etud (@a_calculer) {
 		$xx=1;
 	    }
 
-	    $note_question{$etud}->{$q}=$xx;
+	    if(exists($b_q{'MAX'}) && !$vrai) {
+		$xx=$b_q{'MAX'};
+	    }
 
+	    $note_question{$etud}->{$q}=$xx;
+	    
 	    if($barq->{'indicative'}) {
 		$indicatives{$q}=1;
 	    } else {
@@ -427,17 +431,18 @@ for my $etud (@a_calculer) {
 		if($tit =~ /^(.*)\.([0-9]+)$/) {
 		    $codes{$1}->{$2}=$xx;
 		}
-
+		
+		my $notemax=$note_question{'max'.$etud}->{$q};
 		$writer->emptyTag('question',
 				  'id'=>$tit,
 				  'note'=>$xx,
 				  'raison'=>$raison,
 				  'indicative'=>$barq->{'indicative'},
-				  'max'=>$note_question{'max'.$etud}->{$q},
+				  'max'=>$notemax,
 				  );
 		$note_question{'somme'}->{$q}+=$xx;
 		$note_question{'nb.somme'}->{$q}++;
-		$note_question{'max.somme'}->{$q}+=$note_question{'max'.$etud}->{$q};
+		$note_question{'max.somme'}->{$q}+=$notemax;
 	    }
 	}
     }
