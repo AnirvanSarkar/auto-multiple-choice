@@ -20,7 +20,25 @@
 package AMC::Queue;
 
 use AMC::Basic;
-use Sys::CPU;
+use Module::Load;
+use Module::Load::Conditional qw/check_install/;
+
+# recupere le nombre de CPU, avec Sys::CPU si ce module est installe
+sub get_ncpu {
+    my $n=0;
+    if(check_install("Sys::CPU")) {
+	load("Sys::CPU");
+	$n=Sys::CPU::cpu_count();
+    } else {
+	open(CI,"/proc/cpuinfo");
+	while(<CI>) {
+	    $n++ if(/^processor\s*:/);
+	}
+	close(CI);
+    }
+    $n=1 if($n<=0);
+    return($n);
+}
 
 sub new {
     my (%o)=@_;
@@ -35,7 +53,7 @@ sub new {
     }
 
     if($self->{'max.procs'}<1) {
-	$self->{'max.procs'}=Sys::CPU::cpu_count();
+	$self->{'max.procs'}=get_ncpu();
 	debug "Max number of processes: ".$self->{'max.procs'};
     }
 
