@@ -59,6 +59,8 @@ my $ecart=5.5;
 my $ecart_marge=1.5;
 my $pointsize_rel=60;
 
+my $chiffres_significatifs=4;
+
 # cle : "a_cocher-cochee"
 my %symboles=(
     '0-0'=>{qw/type none/},
@@ -85,6 +87,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "pointsize-nl=s"=>\$pointsize_rel,
 	   "ecart=s"=>\$ecart,
 	   "ecart-marge=s"=>\$ecart_marge,
+	   "ch-sign=s"=>\$chiffres_significatifs,
 	   );
 
 set_debug($debug);
@@ -111,6 +114,14 @@ if(! -f $fichnotes) {
 if(! -f $fich_bareme) {
     attention("No marking scale file: $fich_bareme");
     die "No marking scale file: $fich_bareme";
+}
+
+sub format_note {
+    my $x=shift;
+    if($chiffres_significatifs>0) {
+	$x=sprintf("%.*g",$chiffres_significatifs,$x);
+    }
+    return($x);
 }
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
@@ -282,7 +293,7 @@ $delta=1/$#ids if($#ids>0);
 		       'points'=>sprintf("%.1f,%.1f \'%s\'",
 					 $x_ppem,0.7*$y_ppem+$ascender,
 					 "TOTAL : "
-					 .$t->{'total'}."/".$t->{'max'}
+					 .format_note($t->{'total'})."/".format_note($t->{'max'})
 					 ." => ".$t->{'note'}." / ".$notes->{'notemax'}
 					 ),
 		       'antialias'=>'true',
@@ -342,7 +353,7 @@ $delta=1/$#ids if($#ids>0);
 
 	       my $nq=$ne->{'question'}->{$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'titre'}};
 	       
-	       my $text=$nq->{'note'}."/".$nq->{'max'};
+	       my $text=format_note($nq->{'note'})."/".format_note($nq->{'max'});
 	       
 	       ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance) =
 		   $im->QueryFontMetrics(text=>$text);

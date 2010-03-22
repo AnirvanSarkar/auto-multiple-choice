@@ -208,6 +208,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      
 	      'annote_ps_nl'=>60,
 	      'annote_ecart'=>5.5,
+	      'annote_chsign'=>4,
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -2176,6 +2177,7 @@ sub annote_copies {
 			  "--progression",1,
 			  "--projet",absolu('%PROJET/'),
 			  "--projets",absolu('%PROJETS/'),
+			  "--ch-sign",$o{'annote_chsign'},
 			  "--cr",absolu($projet{'options'}->{'cr'}),
 			  "--an-saved",absolu($an_saved),
 			  "--notes",absolu($projet{'options'}->{'notes'}),
