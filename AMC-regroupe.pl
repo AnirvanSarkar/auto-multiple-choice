@@ -19,7 +19,8 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
-use Text::Unaccent;
+use Encode;
+use Unicode::Normalize;
 use XML::Simple;
 
 use AMC::Basic;
@@ -354,7 +355,10 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	$nom =~ s/^\s+//;
 	$nom =~ s/\s+$//;
 	$nom =~ s/\s+/_/g;
-	$nom=unac_string("UTF-8",$nom);
+
+	# enlever accents et caracteres un peu speciaux...
+	$nom=NFKD($nom);
+	$nom =~ s/\pM//og;
 
 	$f =~ s/\(NOM\)/$nom/gi;
 
