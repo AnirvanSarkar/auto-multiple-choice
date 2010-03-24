@@ -25,10 +25,33 @@
 \RequirePackage{fancyhdr}
 \RequirePackage{everypage}
 \RequirePackage{keyval}
-%\RequirePackage{multido}
-%%% debug -> diagnostiquer un no room for a new \count
-%\let\newcount@@=\newcount
-%\def\newcount#1{\newcount@@{#1}\message{^^JNEWCOUNT=#1^^J}}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% localisation : english
+%
+% watermark for drafts
+\def\AMC@loc@projet{DRAFT}
+%
+% message at page bottom when compiled out of AMC gui
+\def\AMC@loc@message{For your examination, preferably print documents compiled from auto-multiple-choice.}
+%
+% annoucing a question in a separate sheet (#1=question number)
+\def\AMC@loc@qf#1{{\bf Question #1:}}
+%
+% annoucing a question (#1=question number,
+%                       #2=multiple question symbol, or empty)
+\def\AMC@loc@q#1#2{{\bf Question #1} #2}
+%
+%%% localisation : french
+\def\AMC@loc@FR{
+%
+\def\AMC@loc@projet{PROJET}
+\def\AMC@loc@message{Pour votre examen, imprimez de pr\'ef\'erence les documents compil\'es \`a l'aide de auto-multiple-choice.}
+\def\AMC@loc@qf##1{{\bf Question ##1 :}}
+\def\AMC@loc@q##1##2{{\bf Question ##1} ##2}
+%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %--------------------------------------------------------------
 % generateur aleatoire de bits, cf. TuGBoat1994, vol 15,1
@@ -285,7 +308,7 @@
 % memoire pour mettre les cases a cocher en fin de copie
 %
 \def\AMCmem@ireData{}
-\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}}
+\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\AMC@loc@qf{#1}}}
 \def\AMCformulaireReponse#1{\hspace{\AMCformHSpace} #1}
 \def\AMCdebutFormulaire{\AMC@zoneformulairetrue}
 %
@@ -314,7 +337,7 @@
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
 \def\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
-\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}
+\def\AMCbeginQuestion#1#2{\par\noindent\AMC@loc@q{#1}{#2}\hspace*{1em}}
 \def\QuestionIndicative{\ifAMC@calibration\message{AUTOQCM[INDIC]^^J}\fi}
 %
 \def\multiSymbole{$\clubsuit$}
@@ -420,7 +443,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \DeclareFontShape{OT1}{cmr}{b}{n}{<35->cmr17}{}
-\def\AMC@watertext{PROJET}
+\def\AMC@watertext{\AMC@loc@projet}
 \newcommand\AMCw@termark{%
   \setlength{\@tempdimb}{.5\paperwidth}%
   \setlength{\@tempdimc}{-.5\paperheight}%
@@ -479,6 +502,7 @@
 \def\AMC@note{}
 %
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
+\AMC@loc@FR
 \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1\else\AMCnum@copies=\AMCNombreCopies\fi%
 \message{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
 \AMCid@etud=\AMC@premierecopie\AMCid@etudfin=\AMCnum@copies\advance\AMCid@etudfin by \AMC@premierecopie%
@@ -488,8 +512,6 @@
 }
 %
 \def\AMCcleardoublepage{\ifodd\thepage\clearpage~\fi\clearpage}
-%
-%\newenvironment{exemplaires}[1][10]{\exemplaire{#1}\bgroup}{\egroup}
 %
 \def\exemplairepair{\ifodd\AMCid@etud}
 %
@@ -515,6 +537,8 @@
 \DeclareOption{couleur}{\AMC@couleurtrue}
 \DeclareOption{id}{\AMC@couleurfalse}
 \DeclareOption{nowatermark}{\AMC@watermarkfalse}
+%
+\DeclareOption{francais}{\AMC@loc@FR}
 %
 \DeclareOption{versionA}{\def\AMCid@checkmax{31}\def\AMC@NCBetud{9}\def\AMC@NCBpage{4}\def\AMC@NCBcheck{5}\setlength{\AMC@CBtaille}{4cm}\def\AMC@premierecopie{100}}
 %
@@ -566,7 +590,7 @@
 \ifAMC@correchead\else
   \AddEverypageHook{\AMCw@terprint{\AMCw@termark}}
   \def\AMC@note{\begin{minipage}{0.65\linewidth}
-      \textcolor{blue}{Pour votre examen, imprimez de pr\'ef\'erence les documents compil\'es \`a l'aide de auto-multiple-choice.}
+      \textcolor{blue}{\AMC@loc@message}
     \end{minipage}
   }
 \fi
