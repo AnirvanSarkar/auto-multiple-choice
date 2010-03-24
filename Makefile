@@ -17,20 +17,19 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-BASE_VARS:=$(.VARIABLES)
+SUB_MAKEFILES=Makefile.versions Makefile.conf
 
-include Makefile.versions
-include Makefile.conf
+include $(SUB_MAKEFILES)
 
-SUBST_VARS:=$(filter-out $(BASE_VARS) BASE_VARS,$(.VARIABLES))
+SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) |sed 's/=.*//;')
+
+GCC ?= gcc
+CFLAGS ?= -O2
+CXXFLAGS ?= -O2
 
 SHELL=/bin/sh
 
 DESTDIR=
-
-GCC=gcc
-
-GCCPOPPLER=-I /usr/include/poppler -lpoppler
 
 MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
 GLADE=AMC-gui.glade
@@ -48,10 +47,10 @@ all_precomp: $(FROM_IN) AMC-traitement-image AMC-mepdirect ;
 MAJ: $(FROM_IN) ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
-	$(GCC) -O3 -I. -lnetpbm $< -o $@
+	$(GCC) $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)  $< -o $@
 
 AMC-mepdirect: AMC-mepdirect.cc Makefile
-	$(GCC) $(GCCPOPPLER) -O3 $< -o $@
+	$(GCC) $(GCC_POPPLER) $(CXXFLAGS) $(LDFLAGS) $< -o $@
 
 nv.pl: FORCE
 	perl local/versions.pl
@@ -155,7 +154,7 @@ endif
 # xpdf-reader -> pdftoppm (Manuel.pm)
 # xpdf-utils -> pdfinfo (AMC-prepare)
 
-BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k42067447
+BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k$(DEBSIGN_KEY)
 
 precomp_vok: logo.xpm I18N doc
 	$(MAKE) clean_IN
