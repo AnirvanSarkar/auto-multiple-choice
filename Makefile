@@ -17,7 +17,7 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-SUB_MAKEFILES=Makefile.versions Makefile.conf
+SUB_MAKEFILES=$(wildcard Makefile.versions Makefile.conf)
 
 include $(SUB_MAKEFILES)
 
@@ -154,7 +154,13 @@ endif
 # xpdf-reader -> pdftoppm (Manuel.pm)
 # xpdf-utils -> pdfinfo (AMC-prepare)
 
-BUILDOPTS=-I.svn -Idownload-area -Ilocal -rsudo -k$(DEBSIGN_KEY)
+ifdef DEBSIGN_KEY
+DEBSIGN=-k$(DEBSIGN_KEY)
+else
+DEBSIGN=-us -uc
+endif
+
+BUILDOPTS=-I.svn -Idownload_area -Ilocal $(DEBSIGN)
 
 precomp_vok: logo.xpm I18N doc
 	$(MAKE) clean_IN
