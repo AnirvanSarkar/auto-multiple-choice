@@ -44,28 +44,40 @@ then
     EXT=0ubuntu1
 fi
 
-DIR=auto-qcm
+TMPDIR=`mktemp -d`
 
-CHL=$DIR/debian/changelog
+echo "Je vais dans $TMPDIR..."
 
-echo "Je vais dans /tmp..."
+cd $TMPDIR
 
-cd /tmp
+DIR=`tar xvzf $TARGZ | grep -E '^[^/]+/$'`
 
-if [ -e "$DIR" ];
-then
-    rm -r $DIR
-fi
+echo "Repertoire d'extraction : $DIR"
 
-tar xvzf $TARGZ
+echo "Transformation du changelog..."
 
-CHL_TEMP=/tmp/changelog
+CHL=$TMPDIR/$DIR/debian/changelog
+
+CHL_TEMP=$TMPDIR/changelog
 
 cp $CHL $CHL_TEMP
 sed -e "s/\\([0-9.]\\+\\)) unstable;/\\1-$EXT~ab~$SERIE) $SERIE;/;" $CHL_TEMP > $CHL
 
 cd $DIR
 
-debuild -S -sa -rsudo -k42067447
+echo "Empaquetage..."
 
-ls -l /tmp/*.changes
+debuild -S -sa -k42067447
+
+ls -l $TMPDIR/*.changes
+
+CHGF=`ls $TMPDIR/*.changes`
+
+echo -e "*********************************************************************\n$CHGF\n*********************************************************************\n";
+
+if [ -d "$TMPDIR/$DIR" ];
+then
+    echo "J'efface le repertoire d'extraction..."
+    rm -r $TMPDIR/$DIR
+fi
+

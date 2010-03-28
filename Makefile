@@ -171,8 +171,18 @@ precomp:
 	$(MAKE) MAJ nv.pl
 	$(MAKE) precomp_vok
 
+SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
+
 debsrc_vok:
-	dpkg-buildpackage -S -sa $(BUILDOPTS)
+ifeq ($(SUDOER),)
+	dpkg-buildpackage -S -sn $(BUILDOPTS)
+else
+	-mkdir ../$(SOURCE_DIR)
+	sudo mount --bind $(PWD) ../$(SOURCE_DIR)
+	cd ../$(SOURCE_DIR) ; dpkg-buildpackage -S -sn $(BUILDOPTS)
+	sudo umount ../$(SOURCE_DIR)
+	rmdir ../$(SOURCE_DIR)
+endif
 
 debsrc: nv.pl
 	$(MAKE) debsrc_vok
@@ -183,8 +193,11 @@ deb_vok:
 deb: nv.pl
 	$(MAKE) deb_vok
 
-experimental: FORCE
-	$(MAKE) -C download-area repos sync
+unstable: FORCE
+	$(MAKE) -C download_area unstable sync
+
+re_unstable: FORCE
+	$(MAKE) -C download_area re_unstable sync
 
 FORCE: ;
 

@@ -7,7 +7,7 @@ use File::stat;
 
 $d="/home/alexis/enseignement";
 $mode='f';
-$ext='deb';
+$ext='i386.deb';
 $debug='';
 
 GetOptions("base=s"=>\$d,
@@ -17,7 +17,7 @@ GetOptions("base=s"=>\$d,
 	   );
 
 opendir(DIR,$d);
-my @v=grep { /^auto-multiple-choice_.*\.$ext$/ && ! /precomp/ } readdir(DIR);
+my @v=grep { /^auto-multiple-choice_.*$ext$/ && ! /precomp/ } readdir(DIR);
 closedir(DIR);
 
 @mois=qw/janvier février mars avril mai juin juillet août septembre octobre novembre décembre/;
@@ -29,7 +29,7 @@ sub la_date {
 
 sub version {
     my $f=shift;
-    $f =~ s/^[^_]*_([^_]+)(_[^.]*)?\.$ext/$1/;
+    $f =~ s/^[^_]*_([^_]+)(_[^_.]*)?\.?$ext/$1/;
     return($f);
 }
 
