@@ -40,7 +40,14 @@ SUBMODS=$(notdir $(shell ls doc/modeles))
 
 FROM_IN=debian/menu auto-multiple-choice AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl doc/auto-multiple-choice.xml
 
+PRECOMP_FLAG_FILE=PRECOMP
+PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
+
+ifeq ($(PRECOMP_ARCHIVE),)
 all: $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm doc I18N ;
+else
+all: all_precomp ;
+endif
 
 all_precomp: $(FROM_IN) AMC-traitement-image AMC-mepdirect ;
 
@@ -98,7 +105,7 @@ clean_IN: FORCE
 	rm -f $(FROM_IN)
 
 clean: clean_IN FORCE
-	rm -f AMC-traitement-image AMC-mepdirect logo.xpm
+	rm -f AMC-traitement-image AMC-mepdirect logo.xpm $(PRECOMP_FLAG_FILE)
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
 
@@ -162,16 +169,25 @@ endif
 
 BUILDOPTS=-I.svn -Idownload_area -Ilocal $(DEBSIGN)
 
+SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
+
 precomp_vok: logo.xpm I18N doc
 	$(MAKE) clean_IN
-	tar cvzf ../auto-multiple-choice_$(PACKAGE_V_SVN)_precomp.tar.gz --exclude-vcs '--exclude=*~' --exclude download_area .
+	touch $(PRECOMP_FLAG_FILE)
+ifeq ($(SUDOER),)
+	tar cvzf ../auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz --exclude-vcs '--exclude=*~' --exclude download_area .
+else
+	-mkdir ../$(SOURCE_DIR)
+	sudo mount --bind $(PWD) ../$(SOURCE_DIR)
+	cd .. ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz --exclude-vcs '--exclude=*~' --exclude download_area $(SOURCE_DIR)
+	sudo umount ../$(SOURCE_DIR)
+	rmdir ../$(SOURCE_DIR)
+endif
 
 precomp: 
 	$(MAKE) clean
 	$(MAKE) MAJ nv.pl
 	$(MAKE) precomp_vok
-
-SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 
 debsrc_vok:
 ifeq ($(SUDOER),)
@@ -201,6 +217,6 @@ re_unstable: FORCE
 
 FORCE: ;
 
-.PHONY: install deb debsrc precomp clean global doc I18N experimental FORCE MAJ
+.PHONY: all all_precomp install deb debsrc precomp clean global doc I18N experimental FORCE MAJ
 
 

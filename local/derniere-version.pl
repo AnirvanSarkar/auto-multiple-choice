@@ -9,15 +9,17 @@ $d="/home/alexis/enseignement";
 $mode='f';
 $ext='i386.deb';
 $debug='';
+$precomp='';
 
 GetOptions("base=s"=>\$d,
+	   "precomp!"=>\$precomp,
 	   "extension=s"=>\$ext,
 	   "mode=s"=>\$mode,
 	   "debug!"=>\$debug,
 	   );
 
 opendir(DIR,$d);
-my @v=grep { /^auto-multiple-choice_.*$ext$/ && ! /precomp/ } readdir(DIR);
+my @v=grep { /^auto-multiple-choice_.*$ext$/ && ($precomp || ! /precomp/) && ! /current/ } readdir(DIR);
 closedir(DIR);
 
 @mois=qw/janvier février mars avril mai juin juillet août septembre octobre novembre décembre/;
