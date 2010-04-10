@@ -194,6 +194,7 @@ sub write_pdf {
     
     debug "GEOMETRY : $w x $h\n";
     debug "DENSITY : $d_x x $d_y --> $dens\n";
+    debug "destination: $file";
     
     my $w=$img->Write('filename'=>$file,
 		      'page'=>($dens*$dest_size_x).'x'.($dens*$dest_size_y),
@@ -297,10 +298,39 @@ sub stk_pdf_go {
     
     check_correc();
     
-    $commandes->execute("pdftk",$correc_indiv,
-			"cat",@stk_pdf_pages,
-			"output",$stk_file);
+    my @ps=sort { $a <=> $b } @stk_pdf_pages;
+    my @morceaux=();
+    my $mii=0;
+    while(@ps) {
+	my $debut=shift @ps;
+	my $fin=$debut;
+	while($ps[0]==$fin+1) { $fin=shift @ps; }
+	
+	$mii++;
+	my $un_morceau="$temp_dir/m.$mii.pdf";
 
+	debug "Slice $debut-$fin to $un_morceau";
+
+	$commandes->execute("gs","-dBATCH","-dNOPAUSE","-q",
+			    "-sDEVICE=pdfwrite",
+			    "-sOutputFile=$un_morceau",
+			    "-dFirstPage=$debut","-dLastPage=$fin",
+			    $correc_indiv);
+	push @morceaux,$un_morceau;
+    }
+
+    if($#morceaux==0) {
+	debug "Moving single slice to destination $stk_file";
+	move($morceaux[0],$stk_file);
+    } else {
+	debug "Joining slices...";
+	$commandes->execute("gs","-dBATCH","-dNOPAUSE","-q",
+			    "-sDEVICE=pdfwrite",
+			    "-sOutputFile=$stk_file",
+			    @morceaux);
+	unlink @morceaux;
+    }
+			
     stk_push();
 
     stk_pdf_begin();
@@ -390,7 +420,7 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	if(-f $f_j) {
 	    # correction JPG presente : on transforme en PDF
 
-	    debug "Page $pp->{id} annotated";
+	    debug "Page $pp->{id} annotated ($f_j)";
 
 	    stk_ppm_add($f_j);
 
@@ -411,9 +441,9 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	debug "Move $stk_pages[0] to $f";
 	move($stk_pages[0],$f);
     } elsif($#stk_pages>0) {
-	$commandes->execute("pdftk",
-			    @stk_pages,
-			    "output",$f,"compress");
+	$commandes->execute("gs","-dBATCH","-dNOPAUSE","-q",
+			    "-sDEVICE=pdfwrite",
+			    "-sOutputFile=$f",@stk_pages);
     }
 
     $avance->progres(1/$n_copies);

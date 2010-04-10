@@ -35,8 +35,8 @@ use Archive::Tar;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
 
-use Net::CUPS;
-use Net::CUPS::PPD;
+use Module::Load;
+use Module::Load::Conditional qw/check_install/;
 
 use AMC::Basic;
 use AMC::MEPList;
@@ -771,6 +771,11 @@ sub get_enc {
     return('');
 }
 
+my %formats_noms=(
+		  'CSV'=>'CSV',
+		  'ods'=>'OpenOffice',
+		  );
+
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 my $cb_model_vide_key=cb_model(''=>__p"(none) [No primary key found in association list]");
 # TRANSLATORS: you can omit the [...] part, just here to explain context
@@ -804,8 +809,7 @@ my %cb_stores=(
 					     'gif'=>'GIF'),
 	       'liste_key'=>$cb_model_vide_key,
 	       'assoc_code'=>$cb_model_vide_code,
-	       'format_export'=>cb_model('CSV'=>'CSV',
-					 'ods'=>'OpenOffice'),
+	       'format_export'=>cb_model(%formats_noms),
 	       'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
 						 ";"=>";",
 						 ","=>","),
@@ -858,6 +862,7 @@ sub exporte {
 	$ext=lc($format);
     }
     my $output=absolu('export-notes.'.$ext);
+    my @needs_module=();
 
     if($format eq 'CSV') {
 	push @options,
@@ -869,6 +874,35 @@ sub exporte {
 	push @options,
 	"--option-out","nom=".$projet{'options'}->{'nom_examen'},
 	"--option-out","code=".$projet{'options'}->{'code_examen'};
+	push @needs_module,'OpenOffice::OODoc';
+    }
+
+    if(@needs_module) {
+	# teste si les modules necessaires sont disponibles
+
+	my @manque=();
+
+	for my $m (@needs_module) {
+	    if(!check_install(module=>$m)) {
+		push @manque,$m;
+	    }
+	}
+	
+	if(@manque) {
+	    debug 'Exporting to '.$format.': Needs perl modules '.join(', ',@manque);
+
+	    my $dialog = Gtk2::MessageDialog
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'error','ok',
+		      __("Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."),
+		      $formats_noms{$format},join(', ',@manque)
+		      );
+	    $dialog->run;
+	    $dialog->destroy;      
+	    
+	    return();
+	}
     }
     
     commande('commande'=>[with_prog("AMC-export.pl"),
@@ -1595,6 +1629,36 @@ sub sujet_impressions {
 
     debug "Choosing pages to print...";
 
+    if($o{'methode_impression'} eq 'CUPS') {
+	# teste si le paquet Net::CUPS est disponible
+
+	my @manque=();
+
+	for my $m ("Net::CUPS","Net::CUPS::PPD") {
+	    if(check_install(module=>$m)) {
+		load($m);
+	    } else {
+		push @manque,$m;
+	    }
+	}
+	
+	if(@manque) {
+	    debug 'Printing with CUPS: Needs perl modules '.join(', ',@manque);
+
+	    my $dialog = Gtk2::MessageDialog
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'error','ok',
+		      __("Printing with method '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another printing method."),
+		      __"CUPS",join(', ',@manque)
+		      );
+	    $dialog->run;
+	    $dialog->destroy;      
+	    
+	    return();
+	}
+    }
+
     $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression','auto-multiple-choice');
     $g_imprime->signal_autoconnect_from_package('main');
     for(qw/choix_pages_impression arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe bloc_fichier/) {
@@ -1613,7 +1677,12 @@ sub sujet_impressions {
 	my $p_model=cb_model(map { ($_->getName(),$_->getDescription() || $_->getName()) } @printers);
 	$w{'imprimante'}->set_model($p_model);
 	if(! $o{'imprimante'}) {
-	    $o{'imprimante'}=$cups->getDestination()->getName();
+	    my $defaut=$cups->getDestination();
+	    if($defaut) {
+		$o{'imprimante'}=$defaut->getName();
+	    } else {
+		$o{'imprimante'}=$printers[0]->getName();
+	    }
 	}
 	my $i=model_id_to_iter($p_model,COMBO_ID,$o{'imprimante'});
 	if($i) {

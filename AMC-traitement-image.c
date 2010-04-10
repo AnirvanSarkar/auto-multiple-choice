@@ -289,11 +289,11 @@ typedef struct {
   int xmin,xmax,ymin,ymax;
 } infocol;
 
-int repere_magick(pixel **img,int tx,int ty,pixval maxval) {
+void repere_magick(pixel **img,int tx,int ty,pixval maxval) {
   infocol *infos;
 
   int ninfo,ninfo_alloc;
-  int i,x,y,red,att;
+  int i,x,y,red;
   int en_couleur;
 
   int trouve_id(int magick,int exo,int quest) {
@@ -443,4 +443,6 @@ int main(int argc,char **argv) {
   }
 
   free(commande);
+
+  return(0);
 }

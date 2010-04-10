@@ -26,7 +26,7 @@ use Module::Load::Conditional qw/check_install/;
 # recupere le nombre de CPU, avec Sys::CPU si ce module est installe
 sub get_ncpu {
     my $n=0;
-    if(check_install("Sys::CPU")) {
+    if(check_install(module=>"Sys::CPU")) {
 	load("Sys::CPU");
 	$n=Sys::CPU::cpu_count();
     } else {

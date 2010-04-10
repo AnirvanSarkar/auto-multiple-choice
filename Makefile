@@ -24,6 +24,7 @@ include $(SUB_MAKEFILES)
 SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) |sed 's/=.*//;')
 
 GCC ?= gcc
+GCC_PP ?= gcc
 CFLAGS ?= -O2
 CXXFLAGS ?= -O2
 
@@ -38,7 +39,7 @@ MOS=$(wildcard I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
 SUBMODS=$(notdir $(shell ls doc/modeles))
 
-FROM_IN=debian/menu auto-multiple-choice AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl doc/auto-multiple-choice.xml
+FROM_IN=debian/menu auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl doc/auto-multiple-choice.xml
 
 PRECOMP_FLAG_FILE=PRECOMP
 PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
@@ -54,13 +55,14 @@ all_precomp: $(FROM_IN) AMC-traitement-image AMC-mepdirect ;
 MAJ: $(FROM_IN) ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
-	$(GCC) $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)  $< -o $@
+	$(GCC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
 
 AMC-mepdirect: AMC-mepdirect.cc Makefile
-	$(GCC) $(GCC_POPPLER) $(CXXFLAGS) $(LDFLAGS) $< -o $@
+	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(GCC_POPPLER)
 
 nv.pl: FORCE
 	perl local/versions.pl
+	make auto-multiple-choice.spec
 
 %.xml: %.in.xml
 	sed $(foreach varname,$(SUBST_VARS), -e 's+@/$(varname)/@+$($(varname))+g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
@@ -102,57 +104,63 @@ local: global
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 
 clean_IN: FORCE
+	rm -rf debian/auto-multiple-choice
 	rm -f $(FROM_IN)
 
 clean: clean_IN FORCE
 	rm -f AMC-traitement-image AMC-mepdirect logo.xpm $(PRECOMP_FLAG_FILE)
+	rm -f auto-multiple-choice.spec
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
 
 install_lang_%: FORCE
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES
-	install    -m 0644 -o root -g root I18N/lang/$*.mo $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES/auto-multiple-choice.mo
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES
+	install    -m 0644 $(USER_GROUP) I18N/lang/$*.mo $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES/auto-multiple-choice.mo
 
 install_lang: $(addprefix install_lang_,$(LANGS)) ;
 
 install_models_%: FORCE
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODELSDIR)/$*
-	install    -m 0644 -o root -g root doc/modeles/$*/*.tgz $(DESTDIR)/$(MODELSDIR)/$*
-	install    -m 0644 -o root -g root doc/modeles/$*/*.xml $(DESTDIR)/$(MODELSDIR)/$*
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODELSDIR)/$*
+	install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.tgz $(DESTDIR)/$(MODELSDIR)/$*
+	install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.xml $(DESTDIR)/$(MODELSDIR)/$*
 
 install_models: $(addprefix install_models_,$(SUBMODS)) ;
 
 install: install_lang install_models FORCE
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(MODSDIR)
-	install    -m 0755 -o root -g root $(MODS) $(DESTDIR)/$(MODSDIR)
-	install    -m 0644 -o root -g root $(GLADE) $(DESTDIR)/$(MODSDIR)
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(TEXDIR)
-	install    -m 0644 -o root -g root $(STY) $(DESTDIR)/$(TEXDIR)
-ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_installmenu
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(MENUDIR)
-	install    -m 0644 -o root -g root -T debian/menu $(DESTDIR)/$(MENUDIR)/auto-multiple-choice
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)
+	install    -m 0755 $(USER_GROUP) $(MODS) $(DESTDIR)/$(MODSDIR)
+	install    -m 0644 $(USER_GROUP) $(GLADE) $(DESTDIR)/$(MODSDIR)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDIR)
+	install    -m 0644 $(USER_GROUP) $(STY) $(DESTDIR)/$(TEXDIR)
+ifneq ($(MENUDIR),)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MENUDIR)
+	install    -m 0644 $(USER_GROUP) -T debian/menu $(DESTDIR)/$(MENUDIR)/auto-multiple-choice
 endif
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(DESKTOPDIR)
-	install    -m 0644 -o root -g root -T desktop $(DESTDIR)/$(DESKTOPDIR)/auto-multiple-choice.desktop
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(BINDIR)
-	install    -m 0755 -o root -g root auto-multiple-choice $(DESTDIR)/$(BINDIR)
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(ICONSDIR)
-	install    -m 0644 -o root -g root -T logo.svg $(DESTDIR)/$(ICONSDIR)/auto-multiple-choice.svg
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(PIXDIR)
-	install    -m 0644 -o root -g root -T logo.xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC/Export
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(PERLDIR)/AMC/Gui
-	install    -m 0644 -o root -g root AMC-perl/AMC/*.pm $(DESTDIR)/$(PERLDIR)/AMC
-	install    -m 0644 -o root -g root AMC-perl/AMC/Export/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Export
-	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
-	install    -m 0644 -o root -g root AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
+ifneq ($(DESKTOPDIR),)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DESKTOPDIR)
+	install    -m 0644 $(USER_GROUP) -T auto-multiple-choice.desktop $(DESTDIR)/$(DESKTOPDIR)/auto-multiple-choice.desktop
+endif
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(BINDIR)
+	install    -m 0755 $(USER_GROUP) auto-multiple-choice $(DESTDIR)/$(BINDIR)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(ICONSDIR)
+	install    -m 0644 $(USER_GROUP) -T logo.svg $(DESTDIR)/$(ICONSDIR)/auto-multiple-choice.svg
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PIXDIR)
+	install    -m 0644 $(USER_GROUP) -T logo.xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Export
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Gui
+	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/*.pm $(DESTDIR)/$(PERLDIR)/AMC
+	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Export/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Export
+	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
+	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
 ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(DOCDIR)
-	install    -m 0644 -o root -g root doc/auto-multiple-choice.{xml,pdf} $(DESTDIR)/$(DOCDIR)
+ifneq ($(SYSTEM_TYPE),rpm)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DOCDIR)
+	install    -m 0644 $(USER_GROUP) doc/auto-multiple-choice.{xml,pdf} $(DESTDIR)/$(DOCDIR)
 	cp -r doc/html $(DESTDIR)/$(DOCDIR)
-	install -d -m 0755 -o root -g root $(DESTDIR)/$(MAN1DIR)
-	install    -m 0644 -o root -g root doc/*.1 $(DESTDIR)/$(MAN1DIR)
+endif
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MAN1DIR)
+	install    -m 0644 $(USER_GROUP) doc/*.1 $(DESTDIR)/$(MAN1DIR)
 endif
 
 # perl >= 5.10 pour operateur //
@@ -171,7 +179,7 @@ BUILDOPTS=-I.svn -Idownload_area -Ilocal $(DEBSIGN)
 
 SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 
-precomp_vok: logo.xpm I18N doc
+precomp_base: FORCE
 	$(MAKE) clean_IN
 	touch $(PRECOMP_FLAG_FILE)
 ifeq ($(SUDOER),)
@@ -184,10 +192,20 @@ else
 	rmdir ../$(SOURCE_DIR)
 endif
 
+precomp_simple_vok:
+	$(MAKE) precomp_base
+
+precomp_vok: logo.xpm I18N doc
+	$(MAKE) precomp_base
+
 precomp: 
 	$(MAKE) clean
 	$(MAKE) MAJ nv.pl
 	$(MAKE) precomp_vok
+
+precomp_simple: 
+	$(MAKE) MAJ nv.pl
+	$(MAKE) precomp_simple_vok
 
 debsrc_vok:
 ifeq ($(SUDOER),)

@@ -23,8 +23,8 @@ use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 
-use Net::CUPS;
-use Net::CUPS::PPD;
+use Module::Load;
+use Module::Load::Conditional qw/check_install/;
 
 use AMC::Basic;
 use AMC::Exec;
@@ -90,6 +90,12 @@ my $cups;
 my $dest;
 
 if($methode =~ /^cups/i) {
+    if(check_install(module=>"Net::CUPS")) {
+	load("Net::CUPS");
+    } else {
+	die "Needs Net::CUPS perl module for CUPS printing";
+    }
+
     $cups=Net::CUPS->new();
     $dest=$cups->getDestination($imprimante);
     die "Can't access printer: $imprimante" if(!$dest);
@@ -120,9 +126,10 @@ for my $e (@es) {
 
     print "Student $e : pages $debut-$fin in file $fn...\n";
 
-    $commandes->execute("pdftk",$sujet,
-			"cat","$debut-$fin",
-			"output",$fn);
+    $commandes->execute("gs","-dBATCH","-dNOPAUSE","-q","-sDEVICE=pdfwrite",
+			"-sOutputFile=$fn",
+			"-dFirstPage=$debut","-dLastPage=$fin",
+			$sujet);
 
     $avance->progres(1/(2*(1+$#es)));
 
