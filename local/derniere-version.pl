@@ -5,22 +5,28 @@ use Getopt::Long;
 use Time::localtime;
 use File::stat;
 
-$d="/home/alexis/enseignement";
+@d=();
 $mode='f';
 $ext='i386.deb';
 $debug='';
 $precomp='';
 
-GetOptions("base=s"=>\$d,
+GetOptions("base=s"=>\@d,
 	   "precomp!"=>\$precomp,
 	   "extension=s"=>\$ext,
 	   "mode=s"=>\$mode,
 	   "debug!"=>\$debug,
 	   );
 
-opendir(DIR,$d);
-my @v=grep { /^auto-multiple-choice_.*$ext$/ && ($precomp || ! /precomp/) && ! /current/ } readdir(DIR);
-closedir(DIR);
+@d=("/home/alexis/enseignement","/tmp") if(!@d);
+
+my @v;
+
+for my $d (@d) {
+    opendir(DIR,$d);
+    push @v,map { "$d/$_" } grep { /^auto-multiple-choice_.*$ext$/ && ($precomp || ! /precomp/) && ! /current/ } readdir(DIR);
+    closedir(DIR);
+}
 
 @mois=qw/janvier février mars avril mai juin juillet août septembre octobre novembre décembre/;
 
@@ -47,12 +53,12 @@ sub vc {
 @v=sort { vc($a,$b); } @v;
 
 if($mode =~ /f/i) {
-    print "$d/$v[0]\n";
+    print "$v[0]\n";
 } elsif($mode =~ /v/i) {
     print version($v[0])."\n";
 } elsif($mode =~ /h/i) {
     print "<!--#set var=\"VERSION\" value=\"".version($v[0])."\"-->\n";
-    print "<!--#set var=\"VERSIONDATE\" value=\"".la_date("$d/$v[0]")."\"-->\n";
+    print "<!--#set var=\"VERSIONDATE\" value=\"".la_date($v[0])."\"-->\n";
 }
 
 

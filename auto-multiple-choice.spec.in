@@ -23,7 +23,7 @@
 %define AMC_cat Education;
 %endif
 
-%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" MENUDIR="" DESKTOP_CAT="%{AMC_cat}"
+%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}"
 
 Name: auto-multiple-choice
 Summary: Auto Multiple Choice - Multiple Choice Papers Management
@@ -46,7 +46,7 @@ BuildRequires: update-desktop-files, libnetpbm-devel, libpoppler-devel >= 0.12.3
 %if 0%{?fedora} > 0
 BuildRequires: desktop-file-utils, netpbm-devel, poppler-devel, texlive
 %endif
-Requires: /usr/bin/pdftoppm, GraphicsMagick, ImageMagick, perl >= 5.8
+Requires: /usr/bin/pdftoppm, GraphicsMagick, ImageMagick, perl >= 5.8, ghostscript
 
 %if 0%{?suse_version} > 0
 Requires: poppler >= 0.12.3, poppler-tools >= 0.12.3
@@ -110,7 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -f %{name}.lang
 %defattr(-,root,root,-)
 
-%doc COPYING doc/html doc/auto-multiple-choice.xml doc/auto-multiple-choice.pdf 
+%doc COPYING ChangeLog doc/html doc/auto-multiple-choice.xml doc/auto-multiple-choice.pdf 
 %dir /usr/share/auto-multiple-choice
 %dir /usr/share/icons/hicolor
 %dir /usr/share/icons/hicolor/scalable
@@ -148,6 +148,6 @@ texconfig-sys rehash
 
 %changelog
 
-* Tue Apr  6 2010 Alexis Bienvenue <pado@passoire.fr> 0.297-1
+* @/DATE_RPMCHL/@ Alexis Bienvenue <pado@passoire.fr> @/PACKAGE_V_DEB/@-1
 
-  - first spec file for Fedora and SUSE.
+  - auto spec file for Fedora and SUSE. See ChangeLog for information.

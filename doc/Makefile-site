@@ -1,3 +1,4 @@
+# -*- Makefile -*-
 
 SHELL=/bin/sh
 
@@ -5,14 +6,14 @@ HVERSION=htdocs/version.shtml
 
 TMPDIR:=$(shell mktemp -d)
 
-TEST_DEB=`../auto-qcm/derniere-version.pl --mode f --base ../auto-qcm/download-area/files/testing.pkg`
+TEST_DEB=`../auto-qcm/derniere-version.pl --mode f --base ../auto-qcm/download_area/files/testing.pkg`
 TEST_XML=$(TMPDIR)/usr/share/doc/auto-multiple-choice/auto-multiple-choice.xml
 TEST_PDF=$(TMPDIR)/auto-multiple-choice.pdf
 TEST_TEX=$(TMPDIR)/auto-multiple-choice.tex
 SITEDOC=htdocs/auto-multiple-choice
 
 version:
-	../auto-qcm/local/derniere-version.pl --mode h --base ../auto-qcm/download-area/files/testing.pkg > $(HVERSION)
+	../auto-qcm/local/derniere-version.pl --mode h --base ../auto-qcm/download_area/files/testing.pkg > $(HVERSION)
 
 $(TEST_XML): FORCE
 	dpkg-deb -x $(TEST_DEB) $(TMPDIR)
@@ -28,10 +29,10 @@ $(TEST_TEX): $(TEST_XML)
 # doc a partir de la derniere version dans testing
 doc: FORCE $(TEST_XML) $(TEST_PDF)
 	xsltproc --nonet --stringparam base.dir $(SITEDOC)/ ../auto-qcm/doc/doc-xhtml-site.xsl $(TEST_XML)
-	cp $(TEST_PDF)  ../auto-qcm/download-area/files/auto-multiple-choice.pdf
+	cp $(TEST_PDF)  ../auto-qcm/download_area/files/auto-multiple-choice.pdf
 
 site: version doc
-	$(MAKE) -C ../auto-qcm/download-area signe sync
+	$(MAKE) -C ../auto-qcm/download_area signe sync
 
 FORCE: ;
 

@@ -9,9 +9,9 @@ if($s =~ /([0-9]+)[SM]*$/) {
     $k{'svn'}=$1;
 }
 
-open(CHL,"debian/changelog");
+open(CHL,"ChangeLog");
 LINES: while(<CHL>) {
-    if(/^[^\s]+ \(([0-9:.-]+)\)/) {
+    if(/^([0-9:.-svn]+)/) {
 	$k{'deb'}=$1;
 	last LINES;
     }
