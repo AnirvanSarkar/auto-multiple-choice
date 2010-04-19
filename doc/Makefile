@@ -23,13 +23,23 @@ include ../Makefile.conf
 
 DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard *.xml))
 
-all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) ; 
+IMAGES=$(addprefix html/images/,$(notdir $(wildcard img_src/*.svg))) $(addprefix html/images/callouts/,$(notdir $(wildcard img_src/callouts/*.svg)))
+
+all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) ; 
+
+images: $(IMAGES:.svg=.png)
 
 clean:
 	rm -f *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext}
 	rm -f modeles/*.tgz
 	rm -f modeles/**/*.tgz
 	rm -f html/auto-multiple-choice/*.html
+
+html/images/callouts/%.png: img_src/callouts/%.svg
+	inkscape --export-width=12 --export-height=12 --export-png=$@ $<
+
+html/images/%.png: img_src/%.svg
+	inkscape --export-width=24 --export-height=24 --export-png=$@ $<
 
 %.tex: %.xml
 	dblatex -t tex $< -o $@
@@ -54,3 +64,4 @@ clean:
 	xsltproc --nonet --stringparam base.dir html/$*/ doc-xhtml.xsl $<
 	date > $@
 
+.PHONY: all images clean
