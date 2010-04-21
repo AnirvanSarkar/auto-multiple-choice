@@ -1657,6 +1657,25 @@ sub sujet_impressions {
 	    
 	    return();
 	}
+
+	# verifie aussi qu'il y a au moins une imprimante configuree
+
+	my $sc=Net::CUPS->new();
+	my @pl = $sc->getDestinations();
+
+	if(!@pl) {
+	    my $dialog = Gtk2::MessageDialog
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'error','ok',
+		      __("You chose printing method '%s' but there are no configured printer in CUPS. Please configure some printer or switch to another printing method."),
+		      __"CUPS"
+		      );
+	    $dialog->run;
+	    $dialog->destroy;      
+	    
+	    return();
+	}
     }
 
     $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression','auto-multiple-choice');

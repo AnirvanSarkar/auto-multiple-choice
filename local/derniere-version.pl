@@ -35,6 +35,11 @@ sub la_date {
     return($f->mday." ".$mois[$f->mon]." ".($f->year+1900));
 }
 
+sub la_date_en {
+    my $f=localtime(stat(shift)->mtime);
+    return(sprintf("%d-%02d-%02d",$f->year+1900,$f->mon+1,$f->mday));
+}
+
 sub version {
     my $f=shift;
     $f =~ s/^[^_]*_([^_]+)(_[^_.]*)?\.?$ext/$1/;
@@ -59,6 +64,7 @@ if($mode =~ /f/i) {
 } elsif($mode =~ /h/i) {
     print "<!--#set var=\"VERSION\" value=\"".version($v[0])."\"-->\n";
     print "<!--#set var=\"VERSIONDATE\" value=\"".la_date($v[0])."\"-->\n";
+    print "<!--#set var=\"VERSIONDATEEN\" value=\"".la_date_en($v[0])."\"-->\n";
 }
 
 
