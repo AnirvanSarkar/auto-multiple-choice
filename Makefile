@@ -172,7 +172,7 @@ TMP_DIR=/tmp
 SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
 
-SRC_EXCL=--exclude debian '--exclude=*~'
+SRC_EXCL=--exclude debian '--exclude=*~' --exclude local 
 
 nv.pl: FORCE
 	perl local/versions.pl
@@ -181,7 +181,7 @@ nv.pl: FORCE
 tmp_copy: clean nv.pl
 	rm -rf $(TMP_SOURCE_DIR)
 	mkdir $(TMP_SOURCE_DIR)
-	rsync -aC --exclude '*~' --exclude download_area --exclude local . $(TMP_SOURCE_DIR)
+	rsync -aC --exclude '*~' --exclude download_area . $(TMP_SOURCE_DIR)
 
 sources:
 	$(MAKE) tmp_copy
