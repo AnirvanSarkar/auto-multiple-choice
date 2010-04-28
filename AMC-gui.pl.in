@@ -226,6 +226,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'modele_regroupement'=>'',
 		   'regroupement_compose'=>'',
 
+		   'note_min'=>'',
 		   'note_max'=>20,
 		   'note_grain'=>"0,5",
 		   'note_arrondi'=>'inf',
@@ -1976,7 +1977,7 @@ sub saisie_auto_ok {
 	     'signal'=>2,
 	     'texte'=>__"Automatic data capture...",
 	     'progres.id'=>'analyse',
-	     'niveau1'=>sub { detecte_analyse('interne'=>1); },
+#	     'niveau1'=>sub { detecte_analyse('interne'=>1); },
 	     'o'=>{'fh'=>$fh},
 	     'fin'=>sub {
 		 my $c=shift;
@@ -2192,6 +2193,7 @@ sub noter_calcul {
 			  "--grain",$projet{'options'}->{'note_grain'},
 			  "--arrondi",$projet{'options'}->{'note_arrondi'},
 			  "--notemax",$projet{'options'}->{'note_max'},
+			  "--notemin",$projet{'options'}->{'note_min'},
 			  
 			  "--encodage-interne",$o{'encodage_interne'},
 			  "--progression-id",'notation',
@@ -2577,6 +2579,10 @@ sub accepte_preferences {
     reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
     $w{'edit_preferences'}->destroy();
 
+    $projet{'options'}->{'note_min'} =~ s/\s+//g;
+    $projet{'options'}->{'note_max'} =~ s/\s+//g;
+    $projet{'options'}->{'note_grain'} =~ s/\s+//g;
+
     sauve_pref_generales();
 
     test_commandes();
@@ -2593,7 +2599,7 @@ sub accepte_preferences {
 				  'destroy-with-parent',
 				  'question','yes-no',
 				  sprintf(__"You changed parameter \"%s\".",__"darkness threshold")." "
-				  .__("Il you already captured data from scans, boxes zooms are no longer correctly grouped.")." "
+				  .__("If you already captured data from scans, boxes zooms are no longer correctly grouped.")." "
 				  .__("Do you want to re-build them?")." "
 				  .__("It will take some time.")." "
 				  .sprintf(__"You will be able to build them later with <i>%s</i> in menu <i>%s</i>.",__"Re-extract zooms",__"Tools"));

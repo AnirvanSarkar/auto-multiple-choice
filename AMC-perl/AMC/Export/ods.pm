@@ -98,6 +98,10 @@ sub export {
 	$arrondi=$fonction_arrondi{$1};
     }
 
+    my $notemin=$self->{'calcul'}->{'notemin'};
+
+    $notemin='' if($notemin =~ /[a-z]/i);
+
     my $la_date = odfLocaltime();
 
     my $archive = odfContainer($fichier, 
@@ -428,11 +432,15 @@ sub export {
 		} elsif($e->{_ID_} eq 'moyenne') {
 		} else {
 		    $doc->cellFormula($feuille,$jj,$ii,
-				      "oooc:=$arrondi([."
+				      "oooc:="
+				      .($notemin ne '' ? "MAX($notemin;" : "")
+				      ."$arrondi([."
 				      .yx2ooo($jj,$code_col{'total'})
 				      ."]/[."
 				      .yx2ooo($jj,$code_col{'max'})
-				      ."]*$notemax/$grain)*$grain");
+				      ."]*$notemax/$grain)*$grain"
+				      .($notemin ne '' ? ")" : "")
+				      );
 		}
 	    } else {
 		$doc->cellValue($feuille,$jj,$ii,$e->{'_'.$_.'_'});

@@ -84,7 +84,7 @@ sub load {
 				      'KeyAttr'=>['id'],
 				      ) };
 	if($self->{'notes'}) {
-	    for(qw/seuil notemax arrondi grain/) {
+	    for(qw/seuil notemin notemax arrondi grain/) {
 		$self->{'calcul'}->{$_}=
 		    $self->{'notes'}->{$_};
 	    }

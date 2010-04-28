@@ -38,6 +38,7 @@ my $seuil=0.1;
 my $fichnotes='-';
 my $annotation_copies='';
 
+my $notemin='';
 my $notemax=20;
 my $grain='0.5';
 my $arrondi='';
@@ -63,6 +64,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "grain=s"=>\$grain,
 	   "arrondi=s"=>\$type_arrondi,
 	   "notemax=s"=>\$notemax,
+	   "notemin=s"=>\$notemin,
 	   "encodage-interne=s"=>\$encodage_interne,
 	   "progression-id=s"=>\$progres_id,
 	   "progression=s"=>\$progres,
@@ -71,6 +73,8 @@ GetOptions("cr=s"=>\$cr_dir,
 set_debug($debug);
 
 $grain =~ s/,/./;
+$notemin =~ s/,/./;
+$notemax =~ s/,/./;
 
 sub arrondi_inf {
     my $x=shift;
@@ -253,6 +257,7 @@ my $writer = new XML::Writer(OUTPUT=>$output,
 $writer->xmlDecl($encodage_interne);
 $writer->startTag('notes',
 		  'seuil'=>$seuil,
+		  'notemin'=>$notemin,
 		  'notemax'=>$notemax,
 		  'arrondi'=>$type_arrondi,
 		  'grain'=>$grain);
@@ -448,9 +453,20 @@ for my $etud (@a_calculer) {
     }
     $note_question{$etud}->{'total'}=$total;
     if($vrai) {
+	# calcul de la note finale --
+
+	# application du grain et de la note max
 	my $x=$notemax/$grain*$total/$note_question{'max'.$etud}->{'total'};
 	$x=&$arrondi($x) if($arrondi);
 	$x*=$grain;
+
+	# plancher
+
+	if($notemin ne '' && $notemin !~ /[a-z]/i) {
+	    $x=$notemin if($x<$notemin);
+	} 
+
+	#--
 
 	$n_notes++;
 	$somme_notes+=$x;
