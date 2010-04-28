@@ -7,7 +7,7 @@
 %define AMC_iconsdir /usr/share/icons/hicolor/scalable/apps
 %define AMC_pixdir /usr/share/pixmaps
 
-%if 0%{?fedora} > 0
+%if 0%{?fedora}
 %define AMC_perldir %{perl_privlib}
 %else
 %define AMC_perldir %{perl_vendorlib}
@@ -17,7 +17,7 @@
 %define AMC_docdir %{_docdir}/%{name}
 
 
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version}
 %define AMC_cat Education;Teaching;
 %else
 %define AMC_cat Education;
@@ -32,7 +32,7 @@ Release: 1%{?dist}
 License: GPLv3
 Group: Productivity/Other
 Source: auto-multiple-choice_@/PACKAGE_V_DEB/@_precomp.tar.gz
-%if 0%{?fedora} > 0
+%if 0%{?fedora}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
 %else
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
@@ -40,24 +40,42 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 URL: http://home.gna.org/auto-qcm/
 Packager: Alexis Bienvenüe <pado@passoire.fr>
 BuildRequires: gcc-c++, fontconfig-devel
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version}
 BuildRequires: update-desktop-files, libnetpbm-devel, libpoppler-devel >= 0.12.3, texlive
 %endif
-%if 0%{?fedora} > 0
+%if 0%{?fedora}
 BuildRequires: desktop-file-utils, netpbm-devel, poppler-devel, texlive
 %endif
-Requires: /usr/bin/pdftoppm, GraphicsMagick, ImageMagick, perl >= 5.8, ghostscript
+%if 0%{?mandriva_version}
+BuildRequires: desktop-file-utils, libnetpbm-devel, libpoppler-devel
+%endif
 
-%if 0%{?suse_version} > 0
+Requires: perl >= 5.8, ghostscript
+%if 0%{?mandriva_version}
+Requires: poppler, graphicsmagick, imagemagick, texlive-texmf-cmsuper
+%else
+Requires: /usr/bin/pdftoppm, GraphicsMagick, ImageMagick
+%endif
+
+%if 0%{?suse_version}
 Requires: poppler >= 0.12.3, poppler-tools >= 0.12.3
 Requires: texlive, texlive-bin-latex, texlive-latex
 Requires: perl(Archive::Tar), perl(Data::Dumper), perl(Encode), perl(Exporter), perl(Fcntl), perl(File::Copy), perl(File::Path), perl(File::Spec), perl(File::Spec::Functions), perl(File::Temp), perl(Getopt::Long), perl(Graphics::Magick), perl(Gtk2), perl(Gtk2::GladeXML), perl(I18N::Langinfo), perl(IO::File), perl(IO::Select), perl(IPC::Open2), perl(Locale::gettext), perl(Module::Load), perl(Module::Load::Conditional), perl(POSIX), perl(Storable), perl(Unicode::Normalize), perl(Time::Local), perl(XML::Simple), perl(XML::Writer), perl(constant), perl(encoding)
 %endif
-%if 0%{?fedora} > 0
+%if 0%{?fedora}
 Requires: texlive-latex, texlive-texmf-latex, perl(Net::CUPS), perl(Net::CUPS::PPD)
 %endif
+%if 0%{?mandriva_version}
+Requires: texlive, texlive-latex, perl(Net::CUPS), perl(Net::CUPS::PPD)
+%endif
+
+%if 0%{?mandriva_version}
+Requires(post): tetex
+Requires(postun): tetex
+%else
 Requires(post): texlive
 Requires(postun): texlive
+%endif
 
 %{?perl_default_filter}
 
@@ -72,7 +90,7 @@ OpenOffice.org sheet file.
 %prep
 %setup
 
-%if 0%{?fedora} > 0
+%if 0%{?fedora}
 # filter out package Perl modules, and optional OpenOffice::OODoc module.
 
 cat << \EOF > %{name}-req
@@ -94,11 +112,11 @@ make %{AMC_makepass} GCC_NETPBM="-I /usr/include/netpbm -lnetpbm" GCC_POPPLER="-
 %install
 make DESTDIR=$RPM_BUILD_ROOT %{AMC_makepass} install
 
-%if 0%{?fedora} > 0
+%if 0%{?fedora:1}%{?mandriva_version:1}
 desktop-file-install --delete-original --dir=%{buildroot}%{_datadir}/applications auto-multiple-choice.desktop
 %endif
 
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version}
 %suse_update_desktop_file -i %{name}
 %endif
 
@@ -125,25 +143,33 @@ rm -rf $RPM_BUILD_ROOT
 %{AMC_iconsdir}/auto-multiple-choice.svg
 %{AMC_pixdir}/auto-multiple-choice.xpm
 %{AMC_perldir}/AMC
-%{AMC_man1dir}/auto-multiple-choice.1.gz
 %{_datadir}/applications/auto-multiple-choice.desktop
+%{AMC_man1dir}/auto-multiple-choice.1.*
 
 %post
 
-%if 0%{?fedora} > 0
+%if 0%{?fedora}
 texhash
 %endif
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version}
+texconfig-sys rehash
+%endif
+%if 0%{?mandriva_version}
+%update_icon_cache hicolor
 texconfig-sys rehash
 %endif
 
 %postun
 
-%if 0%{?fedora} > 0
+%if 0%{?fedora}
 texhash
 %endif
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version}
 texconfig-sys rehash
+%endif
+%if 0%{?mandriva_version}
+%update_icon_cache hicolor
+texhash
 %endif
 
 %changelog
