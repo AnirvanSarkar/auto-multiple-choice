@@ -172,18 +172,18 @@ TMP_DIR=/tmp
 SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
 
-SRC_EXCL=--exclude debian '--exclude=*~' --exclude local 
+SRC_EXCL=--exclude debian '--exclude=*~' 
 
-nv.pl: FORCE
+version_files:
 	perl local/versions.pl
 	make auto-multiple-choice.spec
 
-tmp_copy: clean nv.pl
+tmp_copy:
 	rm -rf $(TMP_SOURCE_DIR)
 	mkdir $(TMP_SOURCE_DIR)
-	rsync -aC --exclude '*~' --exclude download_area . $(TMP_SOURCE_DIR)
+	rsync -aC --exclude '*~' --exclude download_area --exclude local . $(TMP_SOURCE_DIR)
 
-sources:
+sources_vok:
 	$(MAKE) tmp_copy
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) MAJ
@@ -192,30 +192,31 @@ sources:
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 
-debsrc_ok:
-	dpkg-buildpackage -S -sn $(BUILDOPTS)
-
-debsrc: nv.pl local/deb-auto-changelog
+tmp_deb:
+	$(MAKE) local/deb-auto-changelog
 	$(MAKE) tmp_copy
 	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
-	$(MAKE) -C $(TMP_SOURCE_DIR) debsrc_ok
 
-deb_ok:
-	dpkg-buildpackage -b $(BUILDOPTS)
+debsrc_vok: tmp_deb
+	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S -sn $(BUILDOPTS)
 
-deb: nv.pl local/deb-auto-changelog
-	$(MAKE) tmp_copy
-	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
-	$(MAKE) -C $(TMP_SOURCE_DIR) deb_ok
+deb_vok: tmp_deb
+	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -b $(BUILDOPTS)
 
-unstable: FORCE
+# % : make sure version_files are rebuilt before calling target %_vok
+
+$(foreach key,deb debsrc sources,$(eval $(key): clean version_files ; $$(MAKE) $(key)_vok))
+
+# debian repository
+
+unstable:
 	$(MAKE) -C download_area unstable sync
 
-re_unstable: FORCE
+re_unstable:
 	$(MAKE) -C download_area re_unstable sync
 
 FORCE: ;
 
-.PHONY: all all_precomp install deb deb_ok debsrc debsrc_ok precomp_base precomp precomp_vok precomp_simple precomp_simple_vok clean global doc I18N experimental tmp_copy unstable re_unstable FORCE MAJ
+.PHONY: all all_precomp install version_files deb deb_vok debsrc debsrc_vok sources sources_vok clean clean_IN global local doc I18N tmp_copy tmp_deb unstable re_unstable FORCE MAJ
 
 
