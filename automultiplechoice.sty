@@ -42,6 +42,15 @@
 %                       #2=multiple question symbol, or empty)
 \def\AMC@loc@q#1#2{{\bf Question #1} #2}
 %
+% headers for corrected version / catalog
+%
+\def\AMC@loc@correction{Corrected}
+\def\AMC@loc@catalog{Catalog}
+%
+% see completemulti option
+%
+\def\AMC@loc@none{None of these answers are correct.}
+%
 %%% localisation : french
 \def\AMC@loc@FR{
 %
@@ -49,6 +58,9 @@
 \def\AMC@loc@message{Pour votre examen, imprimez de pr\'ef\'erence les documents compil\'es \`a l'aide de auto-multiple-choice.}
 \def\AMC@loc@qf##1{{\bf Question ##1 :}}
 \def\AMC@loc@q##1##2{{\bf Question ##1} ##2}
+\def\AMC@loc@correction{Correction}
+\def\AMC@loc@catalog{Catalogue}
+\def\AMC@loc@none{Aucune de ces r\'eponses n'est correcte.}
 %
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -134,6 +146,7 @@
 % options :
 \newif\ifAMC@ordre\AMC@ordrefalse % on laisse les reponses dans l'ordre
 \newif\ifAMC@correchead\AMC@correcheadfalse % en-tete corrige
+\newif\ifAMC@affichekeys\AMC@affichekeysfalse % affichage des noms des exercices
 \newif\ifAMC@correc\AMC@correcfalse % corrige des questions
 \newif\ifAMC@qbloc\AMC@qblocfalse % on met les questions dans des blocs, pour ne pas les couper par des sauts de page
 \newif\ifAMC@rbloc\AMC@rblocfalse % on met les reponses dans des blocs, pour ne pas les couper par des sauts de page (par ex dans multicol)
@@ -346,8 +359,8 @@
 \ifx\question\undefined\else\let\question\undefined\fi
 \def\AMCnobloc{\AMC@qblocfalse}
 \def\AMCbloc{\AMC@qbloctrue}
-\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\AMCbeginQuestion{\AMC@qaff}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
-\def\@aucune{\emph{Aucune de ces r\'eponses n'est correcte.}}
+\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\ifAMC@affichekeys\index{{\tt #2}}\fi\AMCbeginQuestion{\ifAMC@affichekeys[{\tt #2}]\else\AMC@qaff\fi}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
+\def\@aucune{\emph{\AMC@loc@none}}
 \newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}\AMCtype@multitrue\ifAMC@calibration\message{AUTOQCM[MULT]^^J}\fi}{\end{question}}
 \newdimen\ouverte@vs
 \newenvironment{questionouverte}[1][3cm]{\AMCtype@multifalse\ouverte@vs=#1\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\AMCbeginQuestion{\AMC@qaff}{}}{\vspace*{\ouverte@vs}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
@@ -473,11 +486,12 @@
 \def\he@dtaille#1{\vbox to 1cm{#1}}
 \def\he@dbas#1{\he@dtaille{\vspace*{\fill}#1}}
 \def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}
+\def\AMC@intituleHead{\AMC@loc@correction}
 \AtBeginDocument{
 \pagestyle{fancy}
 \renewcommand{\headrulewidth}{0pt}
 \ifAMC@correchead
-\lhead{}\rhead{}\chead{{\sc Correction}}\lfoot{}\rfoot{}\cfoot{\thepage}
+\lhead{}\rhead{}\chead{{\sc \AMC@intituleHead}}\lfoot{}\rfoot{}\cfoot{\thepage}
 \else
 \lhead{\he@dbas{\m@rque{positionHG}}}
 \rhead{\he@dbas{\m@rque{positionHD}}}
@@ -537,6 +551,8 @@
 \DeclareOption{couleur}{\AMC@couleurtrue}
 \DeclareOption{id}{\AMC@couleurfalse}
 \DeclareOption{nowatermark}{\AMC@watermarkfalse}
+%
+\DeclareOption{catalog}{\AMC@watermarkfalse\AMC@correcheadtrue\AMC@correctrue\AMC@ordretrue\def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue}
 %
 \DeclareOption{francais}{\AMC@loc@FR}
 %
