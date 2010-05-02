@@ -38,8 +38,8 @@ my $seuil=0.1;
 my $fichnotes='-';
 my $annotation_copies='';
 
-my $notemin='';
-my $notemax=20;
+my $note_plancher='';
+my $note_parfaite=20;
 my $grain='0.5';
 my $arrondi='';
 my $delimiteur=',';
@@ -63,8 +63,8 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "o=s"=>\$fichnotes,
 	   "grain=s"=>\$grain,
 	   "arrondi=s"=>\$type_arrondi,
-	   "notemax=s"=>\$notemax,
-	   "notemin=s"=>\$notemin,
+	   "notemax=s"=>\$note_parfaite,
+	   "notemin=s"=>\$note_plancher,
 	   "encodage-interne=s"=>\$encodage_interne,
 	   "progression-id=s"=>\$progres_id,
 	   "progression=s"=>\$progres,
@@ -73,8 +73,8 @@ GetOptions("cr=s"=>\$cr_dir,
 set_debug($debug);
 
 $grain =~ s/,/./;
-$notemin =~ s/,/./;
-$notemax =~ s/,/./;
+$note_plancher =~ s/,/./;
+$note_parfaite =~ s/,/./;
 
 sub arrondi_inf {
     my $x=shift;
@@ -257,8 +257,8 @@ my $writer = new XML::Writer(OUTPUT=>$output,
 $writer->xmlDecl($encodage_interne);
 $writer->startTag('notes',
 		  'seuil'=>$seuil,
-		  'notemin'=>$notemin,
-		  'notemax'=>$notemax,
+		  'notemin'=>$note_plancher,
+		  'notemax'=>$note_parfaite,
 		  'arrondi'=>$type_arrondi,
 		  'grain'=>$grain);
 
@@ -456,14 +456,19 @@ for my $etud (@a_calculer) {
 	# calcul de la note finale --
 
 	# application du grain et de la note max
-	my $x=$notemax/$grain*$total/$note_question{'max'.$etud}->{'total'};
+	my $x;
+	if($note_parfaite>0) {
+	    $x=$note_parfaite/$grain*$total/$note_question{'max'.$etud}->{'total'};
+	} else {
+	    $x=$total/$grain;
+	}
 	$x=&$arrondi($x) if($arrondi);
 	$x*=$grain;
 
 	# plancher
 
-	if($notemin ne '' && $notemin !~ /[a-z]/i) {
-	    $x=$notemin if($x<$notemin);
+	if($note_plancher ne '' && $note_plancher !~ /[a-z]/i) {
+	    $x=$note_plancher if($x<$note_plancher);
 	} 
 
 	#--
@@ -518,7 +523,7 @@ for my $q (@qids) {
 $writer->emptyTag('total',
 		  'total'=>$total,
 		  'max'=>$total,
-		  'note'=>$notemax,
+		  'note'=>$note_parfaite,
 		  );
 $writer->endTag('copie');
 
@@ -538,7 +543,7 @@ for my $q (@qids) {
 
 $writer->emptyTag('total',
 		  'total'=>$somme_notes,
-		  'max'=>$notemax,
+		  'max'=>$note_parfaite,
 		  'note'=>$somme_notes/$n_notes,
 		  );
 $writer->endTag('copie');

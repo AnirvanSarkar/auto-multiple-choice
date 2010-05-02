@@ -432,7 +432,7 @@ sub export {
 		} elsif($e->{_ID_} eq 'moyenne') {
 		} else {
 		    $doc->cellFormula($feuille,$jj,$ii,
-				      "oooc:="
+				      "oooc:=IF($notemax>0;"
 				      .($notemin ne '' ? "MAX($notemin;" : "")
 				      ."$arrondi([."
 				      .yx2ooo($jj,$code_col{'total'})
@@ -440,6 +440,13 @@ sub export {
 				      .yx2ooo($jj,$code_col{'max'})
 				      ."]*$notemax/$grain)*$grain"
 				      .($notemin ne '' ? ")" : "")
+				      .";"
+				      .($notemin ne '' ? "MAX($notemin;" : "")
+				      ."$arrondi([."
+				      .yx2ooo($jj,$code_col{'total'})
+				      ."]/$grain)*$grain"
+				      .($notemin ne '' ? ")" : "")
+				      .")"
 				      );
 		}
 	    } else {
