@@ -47,6 +47,7 @@ sub commande {
 
     if(!$self->{'ipc'}) {
 	debug "Exec traitement-image..."; 
+	$self->{'times'}=[times()];
 	$self->{'ipc'}=open2($self->{'ipc_out'},$self->{'ipc_in'},
 			     $self->{'traitement'},$self->{'fichier'});
 	debug "PID=".$self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'};
@@ -69,11 +70,15 @@ sub commande {
 sub ferme_commande {
     my ($self)=(@_);
     if($self->{'ipc'}) {
+	debug "Image sending QUIT";
 	print { $self->{'ipc_in'} } "quit\n";
 	waitpid $self->{'ipc'},0;
 	$self->{'ipc'}='';
 	$self->{'ipc_in'}='';
 	$self->{'ipc_out'}='';
+	my @tb=times();
+	debug sprintf("Image finished: parent times [%7.02f,%7.02f]",
+		      $tb[0]+$tb[1]-$self->{'times'}->[0]-$self->{'times'}->[1],$tb[2]+$tb[3]-$self->{'times'}->[2]-$self->{'times'}->[3]);
     }
 }
 

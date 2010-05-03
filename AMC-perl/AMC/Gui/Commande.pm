@@ -91,6 +91,7 @@ sub quitte {
 sub open {
     my ($self)=@_;
 
+    $self->{'times'}=[times()];
     $self->{'pid'}=open($self->{'fh'},"-|",@{$self->{'commande'}});
     if(defined($self->{'pid'})) {
 	
@@ -125,6 +126,9 @@ sub get_output {
 	  close($self->{'fh'});
 	  
 	  debug "Command [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
+
+	  my @tb=times();
+	  debug sprintf("Total parent exec times during ".$self->{pid}.": [%7.02f,%7.02f]",$tb[0]+$tb[1]-$self->{'times'}->[0]-$self->{'times'}->[1],$tb[2]+$tb[3]-$self->{'times'}->[2]-$self->{'times'}->[3]);
 	  
 	  $self->{'pid'}='';
 	  $self->{'tag'}='';

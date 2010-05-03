@@ -220,6 +220,8 @@ sub debug {
     my @s=@_;
     return if(!$amc_debug);
     for my $l (@s) {
+	my @t = times();
+	$l=sprintf("[%7d,%7.02f] ",$$,$t[0]+$t[1]+$t[2]+$t[3]).$l;
 	$l=$l."\n" if($l !~ /\n$/);
 	if($amc_debug_fh) {
 	    flock($amc_debug_fh, LOCK_EX);

@@ -56,11 +56,14 @@ sub execute {
 	}
 	
 	my $cmd_pid=fork();
+	my @t=times();
 	if($cmd_pid) {
 	    $self->{'pid'}=$cmd_pid;
 	    debug "Command [$cmd_pid] : ".join(' ',@c);
 	    waitpid($cmd_pid,0);
-	    debug "Cmd PID=$cmd_pid returns $?"; 
+	    my @tb=times();
+	    debug "Cmd PID=$cmd_pid returns $?";
+	    debug sprintf("Total parent exec times during $cmd_pid: [%7.02f,%7.02f]",$tb[0]+$tb[1]-$t[0]-$t[1],$tb[2]+$tb[3]-$t[2]-$t[3]);
 	} else {
 	    exec(@c);
 	    die "Commande inexistante : $prg";
