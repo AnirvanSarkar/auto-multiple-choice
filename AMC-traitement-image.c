@@ -24,6 +24,7 @@
 
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
 #include<ppm.h>
 
 #define SEUIL (maxval/2)
@@ -363,7 +364,7 @@ void repere_magick(pixel **img,int tx,int ty,pixval maxval) {
 
 int main(int argc,char **argv) {
   char *commande;
-  char fichier[100];
+  char fichier[256];
   size_t taille;
 
   double prop;
@@ -425,7 +426,7 @@ int main(int argc,char **argv) {
       seuil(img,tx,ty,maxval,(int)distance,1);
     } else if(sscanf(commande,"selectionne %d %d %d",&sel_r,&sel_g,&sel_b)==3) {
       selectionne(img,tx,ty,maxval,sel_r,sel_g,sel_b);
-    } else if(sscanf(commande,"sauve %s",&fichier)==1) {
+    } else if(sscanf(commande,"sauve %256s",(char*)(&fichier))==1) {
       fo=fopen(fichier,"w");
       ppm_writeppm(fo,img,tx,ty,maxval,0);
       fclose(fo);

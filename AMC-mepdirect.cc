@@ -126,7 +126,7 @@ static void savePageSlice(PDFDoc *doc,
   static struct minMax nom;
   static struct minMax marque[N_MARQUE+1];
 
-  int row_size;
+  int row_size,error;
   int id_etu,id_page,id_check;
   double diametre_marque;
 
@@ -207,7 +207,12 @@ static void savePageSlice(PDFDoc *doc,
 
   if(repertoire != NULL) {
     
-    asprintf(&xml_file,"%s/mep-%d-%d-%d.xml",repertoire,id_etu,id_page,id_check);
+    error=asprintf(&xml_file,"%s/mep-%d-%d-%d.xml",repertoire,id_etu,id_page,id_check);
+    if(error<0) {
+      fprintf(stderr,"Memory allocation error in asprintf\n");
+      exit(-1);
+    }
+
     xml = fopen (xml_file,"w");
     
     printf(" - writing to %s\n",xml_file);
