@@ -1,51 +1,5 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	touch configure-stamp
-
-
-build: build-stamp
-
-build-stamp: configure-stamp  
-	dh_testdir
-	$(MAKE) SYSTEM_TYPE=deb
-	touch $@
-
-clean: 
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-	$(MAKE) SYSTEM_TYPE=deb clean
-	dh_clean 
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_prep 
-	dh_installdirs
-	$(MAKE) SYSTEM_TYPE=deb DESTDIR=$(CURDIR)/debian/auto-multiple-choice install
-
-binary-indep: build install
-
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs ChangeLog
-	dh_installdocs -X .svn
-	dh_installman doc/*.[1-9]
-	dh_installmenu
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_perl
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+%:
+	SYSTEM_TYPE=deb dh $@
