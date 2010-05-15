@@ -128,7 +128,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -f %{name}.lang
 %defattr(-,root,root,-)
 
-%doc COPYING ChangeLog doc/html doc/auto-multiple-choice.xml doc/auto-multiple-choice.pdf 
+%doc COPYING ChangeLog doc/html doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf 
 %dir /usr/share/auto-multiple-choice
 %dir /usr/share/icons/hicolor
 %dir /usr/share/icons/hicolor/scalable
@@ -144,7 +144,7 @@ rm -rf $RPM_BUILD_ROOT
 %{AMC_pixdir}/auto-multiple-choice.xpm
 %{AMC_perldir}/AMC
 %{_datadir}/applications/auto-multiple-choice.desktop
-%{AMC_man1dir}/auto-multiple-choice.1.*
+%{AMC_man1dir}/auto-multiple-choice.*.1*
 
 %post
 

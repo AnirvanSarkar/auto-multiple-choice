@@ -30,10 +30,10 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) ;
 images: $(IMAGES:.svg=.png)
 
 clean:
-	rm -f *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext}
+	rm -f *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext,man}
 	rm -f modeles/*.tgz
 	rm -f modeles/**/*.tgz
-	rm -f html/auto-multiple-choice/*.html
+	rm -f html/auto-multiple-choice.**/*.html
 
 html/images/callouts/%.png: img_src/callouts/%.svg
 	inkscape --export-width=12 --export-height=12 --export-png=$@ $<
@@ -55,7 +55,7 @@ html/images/%.png: img_src/%.svg
 	perl extrait-fichiers.pl --liste $@ $<
 
 %.man: %.xml
-	xsltproc --nonet --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" $(DOCBOOK_MAN_XSL) $<
+	xsltproc --nonet --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" --param man.output.lang.in.name.enabled "1" $(DOCBOOK_MAN_XSL) $<
 	date > $@
 
 

@@ -34,6 +34,7 @@ use File::Path;
 use Archive::Tar;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
+use Locale::Language;
 
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
@@ -532,7 +533,7 @@ my $gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
-    menu_debug menu_outils
+    doc_menu menu_debug menu_outils
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
     options_CSV options_ods
@@ -560,6 +561,41 @@ sub debug_set {
 }
 
 $w{'menu_debug'}->set_active($debug);
+
+# add doc list menu
+
+my $docs_menu=Gtk2::Menu->new();
+
+my @doc_langs=();
+
+opendir(DOD,"@/DOCDIR/@/html/");
+push @doc_langs,map { s/auto-multiple-choice\.//;$_; } grep { /auto-multiple-choice\...(_..)?/ } readdir(DOD);
+closedir(DOD);
+
+my %ltext_loc=('French'=>__"French",
+	       'English'=>__"English",
+	       );
+
+for my $l (@doc_langs) {
+    my $ltext;
+    $ltext=code2language($l);
+    $ltext=$l if(! $ltext);
+    $ltext=$ltext_loc{$ltext} if($ltext_loc{$ltext});
+    my $m=Gtk2::ImageMenuItem->new_with_label($ltext);
+    my $it=Gtk2::IconTheme->new();
+    my ($taille,undef)=Gtk2::IconSize->lookup('menu');
+    $it->prepend_search_path("@/DOCDIR/@/html/auto-multiple-choice.$l");
+    my $ii=$it->lookup_icon("flag",$taille ,"force-svg");
+    if($ii) {
+	$m->set_image(Gtk2::Image->new_from_pixbuf($it->load_icon("flag",$taille ,"force-svg")));
+    }
+    $m->signal_connect("activate",\&activate_doc,$l);
+    $docs_menu->append($m);
+}
+
+$docs_menu->show_all();
+
+$w{'doc_menu'}->set_submenu($docs_menu);
 
 ###
 
@@ -2344,7 +2380,12 @@ sub close_apropos {
 }
 
 sub activate_doc {
-    my $url='file://@/DOCDIR/@/html/auto-multiple-choice/index.html';
+    my ($w,$lang)=@_;
+
+    #print STDERR "$w / $lang\n";
+
+    my $url='file://@/DOCDIR/@/html/';
+    $url.="auto-multiple-choice.$lang/index.html" if($lang && -f "@/DOCDIR/@/html/auto-multiple-choice.$lang/index.html");
 
     my $seq=0;
     my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
