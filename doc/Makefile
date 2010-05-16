@@ -42,7 +42,7 @@ html/images/%.png: img_src/%.svg
 	inkscape --export-width=24 --export-height=24 --export-png=$@ $<
 
 %.tex: %.xml
-	dblatex -t tex $< -o $@
+	dblatex -t tex --xslt-opts="--nonet" --xslt-opts="--catalogs" $< -o $@
 	perl addlink.pl $@
 
 %.pdf: %.tex
@@ -55,13 +55,13 @@ html/images/%.png: img_src/%.svg
 	perl extrait-fichiers.pl --liste $@ $<
 
 %.man: %.xml
-	xsltproc --nonet --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" --param man.output.lang.in.name.enabled "1" $(DOCBOOK_MAN_XSL) $<
+	xsltproc --nonet --catalogs --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" --param man.output.lang.in.name.enabled "1" $(DOCBOOK_MAN_XSL) $<
 	date > $@
 
 
 %.html: %.xml doc-xhtml.xsl
 	rm -f html/$*/*.html
-	xsltproc --nonet --stringparam base.dir html/$*/ doc-xhtml.xsl $<
+	xsltproc --nonet --catalogs --stringparam base.dir html/$*/ doc-xhtml.xsl $<
 	date > $@
 
 .PHONY: all images clean

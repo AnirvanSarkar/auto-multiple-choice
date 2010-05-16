@@ -19,9 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
-use XML::XPath;
-use XML::XPath::Node;
-use XML::XPath::XMLParser;
+use XML::LibXML;
 use Encode;
 use Archive::Tar;
 
@@ -38,22 +36,23 @@ for my $f (@fichiers) {
 
     print "*** File $f\n";
 
-    my $xp = XML::XPath->new(filename => $f);
+    my $parser = XML::LibXML->new();
+    my $xp=$parser->parse_file($f);
     
     my $lang='';
-    my @articles= $xp->find('/article')->get_nodelist;
-    if($articles[0] && $articles[0]->getAttribute('lang')) {
-	$lang=$articles[0]->getAttribute('lang');
+    my @articles= $xp->findnodes('/article')->get_nodelist;
+    if($articles[0] && $articles[0]->findvalue('@lang')) {
+	$lang=$articles[0]->findvalue('@lang');
 	$lang =~ s/[.-].*//;
 	print "  I lang=$lang\n";
     }
 
-    my $nodeset = $xp->find('//programlisting');
+    my $nodeset = $xp->findnodes('//programlisting');
 
     foreach my $node ($nodeset->get_nodelist) {
 
-	my $id=$node->getAttribute('id');
-	my $ex=$node->string_value;
+	my $id=$node->findvalue('@id');
+	my $ex=$node->textContent();
 
 	if($id =~ /^(modeles)-(.*\.tex)$/) {
 
@@ -67,14 +66,14 @@ for my $f (@fichiers) {
 
 	    my $desc='Doc / sample LaTeX file';
 
-	    my $parent=$node->getParentNode();
-	    foreach my $fr ($parent->getChildNodes()) {
-		if($fr->getNodeType() == COMMENT_NODE) {
+	    my $parent=$node->parentNode();
+	    foreach my $fr ($parent->childNodes()) {
+		if($fr->nodeName() == '#comment') {
 		    my $c=$fr->toString();
 		    if($c =~ /^<!--\s*NAME:\s*(.*)\n\s*DESC:\s*((?:.|\n)*)-->$/) {
 			$name=$1;
 			$desc=$2;
-			print "    embedded description\n";
+			print "    embedded description / N=$name\n";
 		    }
 		}
 	    }
