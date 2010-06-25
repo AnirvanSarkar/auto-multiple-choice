@@ -251,6 +251,7 @@ my %projet_defaut=('texsrc'=>'',
 		   
 		   'format_export'=>'CSV',
 		   'export_csv_separateur'=>",",
+		   'export_csv_cochees'=>'',
 		   'after_export'=>'file',
 
 		   'annote_position'=>'marge',
@@ -916,7 +917,8 @@ sub exporte {
 	push @options,
 	"--option-out","encodage=".bon_encodage('csv'),
 	"--option-out","decimal=".$o{'delimiteur_decimal'},
-	"--option-out","separateur=".$projet{'options'}->{'export_csv_separateur'};
+	"--option-out","separateur=".$projet{'options'}->{'export_csv_separateur'},
+	"--option-out","cochees=".$projet{'options'}->{'export_csv_cochees'};
     }
     if($format eq 'ods') {
 	push @options,

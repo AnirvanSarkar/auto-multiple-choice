@@ -30,6 +30,7 @@ use AMC::Gui::Avancement;
 use encoding 'utf8';
 
 $VERSION_BAREME=2;
+$VERSION_NOTES=2;
 
 my $cr_dir="";
 my $bareme="";
@@ -256,6 +257,7 @@ my $writer = new XML::Writer(OUTPUT=>$output,
 
 $writer->xmlDecl($encodage_interne);
 $writer->startTag('notes',
+		  'version'=>$VERSION_NOTES,
 		  'seuil'=>$seuil,
 		  'notemin'=>$note_plancher,
 		  'notemax'=>$note_parfaite,
@@ -313,6 +315,9 @@ for my $etud (@a_calculer) {
 	    
 	    my @rep=(keys %{$bons{$etud}->{$q}});
 	    my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
+
+	    my $cochees=join(";",map { $bons{$etud}->{$q}->{$_}->[0] }
+			     sort { ($a==0 || $b==0 ? $b <=> $a : $a <=> $b) } (@rep));
 
 	    for (@rep) {
 		$n_ok+=$bons{$etud}->{$q}->{$_}->[1];
@@ -440,6 +445,7 @@ for my $etud (@a_calculer) {
 		my $notemax=$note_question{'max'.$etud}->{$q};
 		$writer->emptyTag('question',
 				  'id'=>$tit,
+				  'cochees'=>$cochees,
 				  'note'=>$xx,
 				  'raison'=>$raison,
 				  'indicative'=>$barq->{'indicative'},

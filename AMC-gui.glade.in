@@ -1471,7 +1471,7 @@
                                     <child>
                                       <widget class="GtkTable" id="options_CSV">
                                         <property name="n_rows">3</property>
-                                        <property name="n_columns">2</property>
+                                        <property name="n_columns">3</property>
                                         <child>
                                           <widget class="GtkLabel" id="label92">
                                             <property name="visible">True</property>
@@ -1504,6 +1504,27 @@
                                         </child>
                                         <child>
                                           <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkCheckButton" id="export_cb_export_csv_cochees">
+                                            <property name="label" translatable="yes">Ticked boxes</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="tooltip" translatable="yes">Shall AMC include in the marks file details about which boxes are ticked on the completed answer sheets?</property>
+                                            <property name="draw_indicator">True</property>
+                                            <signal name="toggled" handler="maj_export"/>
+                                          </widget>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                          </packing>
                                         </child>
                                       </widget>
                                       <packing>

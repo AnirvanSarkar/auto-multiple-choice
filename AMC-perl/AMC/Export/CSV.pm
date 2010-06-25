@@ -30,6 +30,7 @@ sub new {
     $self->{'out.separateur'}=",";
     $self->{'out.decimal'}=",";
     $self->{'out.entoure'}="\"";
+    $self->{'out.cochees'}="";
     bless ($self, $class);
     return $self;
 }
@@ -61,6 +62,14 @@ sub export {
 
     open(OUT,">:encoding(".$self->{'out.encodage'}.")",$fichier);
 
+    my @comp_keys;
+
+    if($self->{'out.cochees'}) {
+	@comp_keys=map { ($_,"TICKED:$_") } @{$self->{'keys'}};
+    } else {
+	@comp_keys=@{$self->{'keys'}};
+    }
+
     my @cont=();
 
     if($self->{'liste_key'}) { 
@@ -68,24 +77,28 @@ sub export {
 	print OUT $self->parse_string("A:".$self->{'liste_key'}).$sep;
     }
 
-    push @cont,(qw/_NOM_ _NOTE_ _ID_/,@{$self->{'keys'}},@{$self->{'codes'}});
+    push @cont,(qw/_NOM_ _NOTE_ _ID_/,@comp_keys,@{$self->{'codes'}});
 
     print OUT join($sep,
 		   map  { $self->parse_string($_) }
 		   ("nom","note","copie",
-		    @{$self->{'keys'}},@{$self->{'codes'}}))."\n";
+		    @comp_keys,
+		    @{$self->{'codes'}}))."\n";
     
     for my $etu (@{$self->{'copies'}}) {
 	print OUT join($sep,
-		       map { my $k=$_;
-			     my $c=$self->{'c'}->{$etu}->{$k};
-			     if($k =~ /^_(NOM|ASSOC)_$/) {
-				 $c=$self->parse_string($c);
-			     } elsif($k =~ /^_ID_$/) {
-			     } else {
-				 $c=$self->parse_num($c) if($c ne '');
-			     }
-			     $c } @cont)."\n";
+		       map { 
+			   my $k=$_;
+			   my $c=$self->{'c'}->{$etu}->{$k};
+			   if($k =~ /^_(NOM|ASSOC)_$/) {
+			       $c=$self->parse_string($c);
+			   } elsif($k =~ /^_ID_$/) {
+			   } elsif($k =~ /^TICKED:/) {
+			   } else {
+			       $c=$self->parse_num($c) if($c ne '');
+			   }
+			   $c 
+		       } @cont)."\n";
     }
     
     close(OUT);

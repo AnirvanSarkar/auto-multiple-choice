@@ -135,6 +135,7 @@ sub pre_process {
 	
 	for my $k (@keys) {
 	    $self->{'c'}->{$etu}->{$k}=$c->{'question'}->{$k}->{'note'};
+	    $self->{'c'}->{$etu}->{"TICKED:".$k}=$c->{'question'}->{$k}->{'cochees'};
 	}
 	for my $k (@codes) {
 	    $self->{'c'}->{$etu}->{$k}=$c->{'code'}->{$k}->{'content'};
