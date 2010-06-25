@@ -248,6 +248,7 @@ my %projet_defaut=('texsrc'=>'',
 		   
 		   'format_export'=>'CSV',
 		   'export_csv_separateur'=>",",
+		   'after_export'=>'file',
 
 		   'annote_position'=>'marge',
 		   );
@@ -847,6 +848,10 @@ my %cb_stores=(
 	       'liste_key'=>$cb_model_vide_key,
 	       'assoc_code'=>$cb_model_vide_code,
 	       'format_export'=>cb_model(%formats_noms),
+	       'after_export'=>cb_model(""=>__"that's all",
+					"file"=>__"open the file",
+					"dir"=>__"open the directory",
+					),
 	       'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
 						 ";"=>";",
 						 ","=>","),
@@ -959,7 +964,11 @@ sub exporte {
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
 		 if(-f $output) {
-		     commande_parallele($o{$ext.'_viewer'},$output);
+		     if($projet{'options'}->{'after_export'} eq 'file') {
+			 commande_parallele($o{$ext.'_viewer'},$output);
+		     } elsif($projet{'options'}->{'after_export'} eq 'dir') {
+			 view_dir(absolu('%PROJET/exports/'));
+		     }
 		 } else {
 		     my $dialog = Gtk2::MessageDialog
 			 ->new($w{'main_window'},
@@ -2355,16 +2364,21 @@ sub regroupement {
 	     );
 }
 
-sub regarde_regroupements {
-    my $f=absolu($projet{'options'}->{'cr'})."/corrections/pdf";
-    debug "Look at $f";
+sub view_dir {
+    my ($dir)=@_;
+
+    debug "Look at $dir";
     my $seq=0;
-    my @c=map { $seq+=s/[%]d/$f/g;$_; } split(/\s+/,$o{'dir_opener'});
-    push @c,$f if(!$seq);
+    my @c=map { $seq+=s/[%]d/$dir/g;$_; } split(/\s+/,$o{'dir_opener'});
+    push @c,$dir if(!$seq);
     # nautilus attend des arguments dans l'encodage specifie par LANG & co.
     @c=map { encode($encodage_systeme,$_); } @c;
 
     commande_parallele(@c);
+}
+
+sub regarde_regroupements {
+    view_dir(absolu($projet{'options'}->{'cr'})."/corrections/pdf");
 }
 
 ###
