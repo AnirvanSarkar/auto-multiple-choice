@@ -64,6 +64,9 @@
 %
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newwrite\AMC@logfile
+\immediate\openout\AMC@logfile=\jobname.amc
+\def\AMC@amclog#1{\immediate\write\AMC@logfile{#1}}
 %
 %--------------------------------------------------------------
 % generateur aleatoire de bits, cf. TuGBoat1994, vol 15,1
@@ -124,7 +127,7 @@
 % affecte un numero unique a chaque cle utilisee...
 %--------------------------------------------------------------
 % definit la valeur asociee a une cle
-\def\AMC@definitnumero#1#2{\message{AUTOQCM[NUM=#1=#2]^^J}\expandafter\global\expandafter\def\csname AMC@numtab@#2\endcsname{#1}}
+\def\AMC@definitnumero#1#2{\AMC@amclog{AUTOQCM[NUM=#1=#2]^^J}\expandafter\global\expandafter\def\csname AMC@numtab@#2\endcsname{#1}}
 % le compteur des numeros deja utilises
 \newcount\AMC@numerotation\AMC@numerotation=1
 % renvoie, si elle existe, la valeur deja associee, ou en associe une
@@ -341,27 +344,27 @@
 \def\AMCanswer#1#2{#1 #2}
 %
 \newcommand{\bonne}[2][]{\advance\AMCrep@count by 1%
-\ifAMC@calibration\message{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
+\ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
 \AMCune@bonnetrue\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marquebonne{#1}\else\AMC@marquevide{#1}\fi}{#2}}{\the\AMCrep@count}}
 \newcommand{\mauvaise}[2][]{\advance\AMCrep@count by 1%
-\ifAMC@calibration\message{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
+\ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
 \AMCload@@reponse{\une@rep{\AMC@marquevide{#1}}{#2}}{\the\AMCrep@count}}
 %
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
 \def\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
 \def\AMCbeginQuestion#1#2{\par\noindent\AMC@loc@q{#1}{#2}\hspace*{1em}}
-\def\QuestionIndicative{\ifAMC@calibration\message{AUTOQCM[INDIC]^^J}\fi}
+\def\QuestionIndicative{\ifAMC@calibration\AMC@amclog{AUTOQCM[INDIC]^^J}\fi}
 %
 \def\multiSymbole{$\clubsuit$}
-\def\AMCmessage#1{\message{AUTOQCM[#1]^^J}}
+\def\AMCmessage#1{\AMC@amclog{AUTOQCM[#1]^^J}}
 % annule une definition precedente (exercices.sty, par ex.)
 \ifx\question\undefined\else\let\question\undefined\fi
 \def\AMCnobloc{\AMC@qblocfalse}
 \def\AMCbloc{\AMC@qbloctrue}
 \newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\ifAMC@affichekeys\index{{\tt #2}}\fi\AMCbeginQuestion{\ifAMC@affichekeys[{\tt #2}]\else\AMC@qaff\fi}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
 \def\@aucune{\emph{\AMC@loc@none}}
-\newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}\AMCtype@multitrue\ifAMC@calibration\message{AUTOQCM[MULT]^^J}\fi}{\end{question}}
+\newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}\AMCtype@multitrue\ifAMC@calibration\AMC@amclog{AUTOQCM[MULT]^^J}\fi}{\end{question}}
 \newdimen\ouverte@vs
 \newenvironment{questionouverte}[1][3cm]{\AMCtype@multifalse\ouverte@vs=#1\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\AMCbeginQuestion{\AMC@qaff}{}}{\vspace*{\ouverte@vs}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
 %
@@ -391,10 +394,10 @@
  \advance\AMC@chiffres by -1 \ifnum\AMC@chiffres>0\repeat
 }}
 %
-\def\bareme#1{\ifAMC@calibration\message{AUTOQCM[B=#1]^^J}\fi}
+\def\bareme#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[B=#1]^^J}\fi}
 %
-\def\baremeDefautS#1{\ifAMC@calibration\message{AUTOQCM[BDS=#1]^^J}\fi}
-\def\baremeDefautM#1{\ifAMC@calibration\message{AUTOQCM[BDM=#1]^^J}\fi}
+\def\baremeDefautS#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDS=#1]^^J}\fi}
+\def\baremeDefautM#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDM=#1]^^J}\fi}
 %
 %--------------------------------------------------------------
 % liste automatique de reponses...
@@ -518,10 +521,10 @@
 \newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
 \AMC@loc@FR
 \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1\else\AMCnum@copies=\AMCNombreCopies\fi%
-\message{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
+\AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
 \AMCid@etud=\AMC@premierecopie\AMCid@etudfin=\AMCnum@copies\advance\AMCid@etudfin by \AMC@premierecopie%
 \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
-\loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\message{[AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+\loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 %\fi%
 }
 %
@@ -624,4 +627,4 @@
 \NewEnviron{copieexamen}[1][5]{\exemplaire{#1}{\BODY}}
 }{\PackageWarning{automultiplechoice}{Package environ not loaded : environnement copieexamen will NOT be defined.}}
 % VARS
-\ifAMC@ensemble\message{AUTOQCM[VAR:ensemble=1]^^J}\fi
+\ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi

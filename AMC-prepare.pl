@@ -132,14 +132,94 @@ sub with_prog {
 
 my $n_erreurs;
 my $a_erreurs;
-my $analyse_q='';
 my @erreurs_msg=();
 my %info_vars=();
 
+sub verifie_q {
+    my ($q,$t)=@_;
+    if($q) {
+	if(! $q->{'mult'}) {
+	    my $oui=0;
+	    my $tot=0;
+	    for my $i (grep { /^R/ } (keys %$q)) {
+		$tot++;
+		$oui++ if($q->{$i});
+	    }
+	    if($oui!=1 && !$q->{'indicative'}) {
+		$a_erreurs++;
+		push @erreurs_msg,"ERR: "
+		    .sprintf(__("%d/%d good answers not coherent for a simple question")." [%s]\n",$oui,$tot,$t);
+	    }
+	}
+    }
+}
+
+sub analyse_amclog {
+    # check common errors in LaTeX about questions:
+    # * same ID used multiple times for the same paper
+    # * simple questions with number of good answers != 1
+    my ($fich)=@_;
+
+    my %analyse_data=();
+    my %titres=();
+    @erreurs_msg=();
+
+    debug("Check AMC log : $fich");
+
+    open(AMCLOG,$fich) or die "Unable to open $fich : $!";
+    while(<AMCLOG>) {
+		
+	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
+	    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+	    $analyse_data{'q'}={};
+	    if($analyse_data{'qs'}->{$1}) {
+		$a_erreurs++;
+		push @erreurs_msg,"ERR: "
+		    .sprintf(__("question ID used several times for the same paper: \"%s\"")." [%s]\n",$titres{$1},$analyse_data{'etu'});
+	    }
+	    $analyse_data{'titre'}=$titres{$1};
+	    $analyse_data{'qs'}->{$1}=1;
+	}
+	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
+	    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+	    %analyse_data=('etu'=>$1,'qs'=>{});
+	}
+	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
+	    $titres{$1}=$2;
+	    $analyse_data{'titres'}->{$2}=1;
+	}
+	if(/AUTOQCM\[MULT\]/) { 
+	    $analyse_data{'q'}->{'mult'}=1;
+	}
+	if(/AUTOQCM\[INDIC\]/) { 
+	    $analyse_data{'q'}->{'indicative'}=1;
+	}
+	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
+	    my $rep="R".$1;
+	    if($analyse_data{'q'}->{$rep}) {
+		$a_erreurs++;
+		push @erreurs_msg,"ERR: "
+		    .sprintf(__("Answer number ID used several times for the same question: %s")." [%s]\n",$1,$analyse_data{'titre'});
+	    }
+	    $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
+	}
+	if(/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
+	    $info_vars{$1}=$2;
+	}
+    
+    }
+    close(AMCLOG);
+    
+    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+
+    debug(@erreurs_msg);
+    print join('',@erreurs_msg);
+
+    debug("AMC log $fich : $a_erreurs errors.");
+}
+
 sub execute {
-    my @s=@_;
-    my %analyse_data;
-    my %titres;
+    my %oo=(@_);
 
     my $n_run=0;
     my $rerun=0;
@@ -158,71 +238,24 @@ sub execute {
 	
 	$n_erreurs=0;
 	$a_erreurs=0;
-
-	%analyse_data=();
-	%titres=();
-
-	@erreurs_msg=();
-
+    
 	debug "%%% Compiling: pass $n_run";
 
-	$cmd_pid=open(EXEC,"-|",@s);
-	die "Can't exec ".join(' ',@s) if(!$cmd_pid);
+	$cmd_pid=open(EXEC,"-|",@{$oo{'command'}});
+	die "Can't exec ".join(' ',@{$oo{'command'}}) if(!$cmd_pid);
 
 	while(<EXEC>) {
-	    if($analyse_q) {
-		
-		if(/AUTOQCM\[Q=([0-9]+)\]/) { 
-		    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
-		    $analyse_data{'q'}={};
-		    if($analyse_data{'qs'}->{$1}) {
-			$a_erreurs++;
-			push @erreurs_msg,"ERR: "
-			    .sprintf(__("question ID used several times for the sams paper: \"%s\"")." [%s]\n",$titres{$1},$analyse_data{'etu'});
-		    }
-		    $analyse_data{'titre'}=$titres{$1};
-		    $analyse_data{'qs'}->{$1}=1;
-		}
-		if(/AUTOQCM\[ETU=([0-9]+)\]/) {
-		    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
-		    %analyse_data=('etu'=>$1,'qs'=>{});
-		}
-		if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
-		    $titres{$1}=$2;
-		    $analyse_data{'titres'}->{$2}=1;
-		}
-		if(/AUTOQCM\[MULT\]/) { 
-		    $analyse_data{'q'}->{'mult'}=1;
-		}
-		if(/AUTOQCM\[INDIC\]/) { 
-		    $analyse_data{'q'}->{'indicative'}=1;
-		}
-		if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
-		    my $rep="R".$1;
-		    if($analyse_data{'q'}->{$rep}) {
-			$a_erreurs++;
-			push @erreurs_msg,"ERR: "
-			    .sprintf(__("Answer number ID used several times for the same question: %s")." [%s:%s]\n",$1,$analyse_q{'etu'},$analyse_data{'titre'});
-		    }
-		    $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
-		}
-		if(/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
-		    $info_vars{$1}=$2;
-		}
-	    }
 	    #LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 	    $rerun=1 if(/^LaTeX Warning:.*Rerun to get cross-references right/);
 	    $format=$1 if(/^Output written on .*\.([a-z]+) \(/);
 
-	    s/AUTOQCM\[.*\]//g;
 	    $n_erreurs++ if(/^\!.*\.$/);
 	    print $_ if(/^.+$/);
 	}
 	close(EXEC);
-	verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'}) if($analyse_q);
 	$cmd_pid='';
 
-    } while($rerun && $n_run<=1);
+    } while($rerun && $n_run<=1 && ! $oo{'once'});
 
     # transformation dvi en pdf si besoin...
 
@@ -248,26 +281,6 @@ sub execute {
 	}
     }
 
-    print join('',@erreurs_msg);
-}
-
-sub verifie_q {
-    my ($q,$t)=@_;
-    if($q) {
-	if(! $q->{'mult'}) {
-	    my $oui=0;
-	    my $tot=0;
-	    for my $i (grep { /^R/ } (keys %$q)) {
-		$tot++;
-		$oui++ if($q->{$i});
-	    }
-	    if($oui!=1 && !$q->{'indicative'}) {
-		$a_erreurs++;
-		push @erreurs_msg,"ERR: "
-		    .sprintf(__("%d/%d good answers not coherent for a simple question")." [%s]\n",$oui,$tot,$t);
-	    }
-	}
-    }
 }
 
 $temp_loc=tmpdir();
@@ -281,7 +294,7 @@ $cmd_pid=open(SCANTEX,$tex_source);
 die "Error reading $tex_source: $!" if(!$cmd_pid);
 
 while(<SCANTEX>) {
-    if(/usepackage\[([^\]]+)\]\{autoQCM\}/) {
+    if(/usepackage\[([^\]]+)\]\{automultiplechoice\}/) {
 	my $opts=$1;
 	if($opts =~ /\bdecimal\b/) {
 	    $binaire="--no-binaire";
@@ -326,7 +339,7 @@ sub latex_cmd {
 if($mode =~ /k/) {
     # CORRECTION INDIVIDUELLE
 
-    execute(latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/));
+    execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
     transfere("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
     if($n_erreurs>0) {
 	print "ERR: "
@@ -354,16 +367,17 @@ if($mode =~ /s/) {
 
     # 1) document de calage
 
-    $analyse_q=1;
-    execute(latex_cmd(%opts,'CalibrationExterne'=>1));
-    $analyse_q='';
-    transfere("$f_base.pdf",$out_calage);
+    execute('command'=>[latex_cmd(%opts,'CalibrationExterne'=>1)]);
+    analyse_amclog("$f_base.amc");
+
     if($n_erreurs>0) {
 	print "ERR: "
 	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"adjustment document");
 	exit(1);
     }
     exit(1) if($a_erreurs>0);
+
+    transfere("$f_base.pdf",$out_calage);
 
     # transmission des variables
 
@@ -374,7 +388,7 @@ if($mode =~ /s/) {
 
     # 2) compilation de la correction
 
-    execute(latex_cmd(%opts,'CorrigeExterne'=>1));
+    execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
     transfere("$f_base.pdf",$out_corrige);
     if($n_erreurs>0) {
 	print "ERR: "
@@ -384,7 +398,7 @@ if($mode =~ /s/) {
 
     # 3) compilation du sujet
 
-    execute(latex_cmd(%opts,'SujetExterne'=>1));
+    execute('command'=>[latex_cmd(%opts,'SujetExterne'=>1)]);
     transfere("$f_base.pdf",$out_sujet);
     if($n_erreurs>0) {
 	print "ERR: "
@@ -404,7 +418,7 @@ if($mode =~ /m/) {
     } else {
 	print "********** Compilation...\n";
     
-	execute(latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/));
+	execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)]);
 	$calage="$f_base.pdf";
     }
 
@@ -507,9 +521,11 @@ if($mode =~ /b/) {
 
     my $delta=0;
 
-    $cmd_pid=open(TEX,"-|",latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/));
-    die "Can't exec latex" if(!$cmd_pid);
-    while(<TEX>) {
+    execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)],
+	    'once'=>1);
+    open(AMCLOG,"$f_base.amc") or die "Unable to open $f_base.amc : $!";
+    while(<AMCLOG>) {
+	debug($_);
 	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 
 	    my $t=$1;
 	    $t =~ s/\s//g;
@@ -551,7 +567,7 @@ if($mode =~ /b/) {
 	    $bs{'defaut'}->{"$1."}->{-bareme}=$2;
 	}
     }
-    close(TEX);
+    close(AMCLOG);
     $cmd_pid='';
 
     debug "Writing $bareme";
