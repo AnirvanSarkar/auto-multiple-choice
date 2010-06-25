@@ -66,6 +66,7 @@ sub export {
 
     if($self->{'out.cochees'}) {
 	@comp_keys=map { ($_,"TICKED:$_") } @{$self->{'keys'}};
+	$self->{'out.entoure'}="\"" if(!$self->{'out.entoure'});
     } else {
 	@comp_keys=@{$self->{'keys'}};
     }
@@ -94,6 +95,7 @@ sub export {
 			       $c=$self->parse_string($c);
 			   } elsif($k =~ /^_ID_$/) {
 			   } elsif($k =~ /^TICKED:/) {
+			       $c=$self->parse_string($c);
 			   } else {
 			       $c=$self->parse_num($c) if($c ne '');
 			   }
