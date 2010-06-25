@@ -71,69 +71,77 @@ sub load {
 
     debug "Reading names file $self->{'fichier'}";
 
-    if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",$self->{'fichier'})) {
-      NOM: while(<LISTE>) {
-	  chomp;
-	  s/\#.*//;
-	  next NOM if(/^\s*$/);
-	  if(!@heads) {
-	      if($sep) {
+    if(-f $self->{'fichier'} && ! -z $self->{'fichier'}) {
 
-		  my $entetes=$_;
+	if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",$self->{'fichier'})) {
+	  NOM: while(<LISTE>) {
+	      chomp;
+	      s/\#.*//;
+	      next NOM if(/^\s*$/);
+	      if(!@heads) {
+		  if($sep) {
 
-		  if(length($self->{'separateur'})>1) {
-		      my $nn=-1;
-		      for my $s (split(//,$self->{'separateur'})) {
-			  my $k=0;
-			  while($entetes =~ /$s/g) { $k++; }
-			  if($k>$nn) {
-			      $nn=$k;
-			      $sep=$s;
+		      my $entetes=$_;
+
+		      if(length($self->{'separateur'})>1) {
+			  my $nn=-1;
+			  for my $s (split(//,$self->{'separateur'})) {
+			      my $k=0;
+			      while($entetes =~ /$s/g) { $k++; }
+			      if($k>$nn) {
+				  $nn=$k;
+				  $sep=$s;
+			      }
 			  }
+			  debug "Detected separator: ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
 		      }
-		      debug "Detected separator: ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
+
+		      @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
+		      debug "KEYS: ".join(", ",@heads);
+		      next NOM;
+		  } else {
+		      @heads='nom';
 		  }
-
-		  @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
-		  debug "KEYS: ".join(", ",@heads);
-		  next NOM;
+	      }
+	      s/^\s+//;
+	      s/\s+$//;
+	      my @l=();
+	      if($#heads>0) {
+		  @l=map { reduit($_) } split(/$sep/,$_,-1);
 	      } else {
-		  @heads='nom';
+		  @l=(reduit($_));
+	      }
+	      if($#l!=$#heads) {
+		  print STDERR "Bad number of fields (".(1+$#l)." instead of ".(1+$#heads).") file ".$self->{'fichier'}." line $.\n";
+		  $errlig=$. if(!$errlig);
+		  $err++;
+	      } else {
+		  my $nom={};
+		  for(0..$#l) {
+		      $nom->{$heads[$_]}=$l[$_];
+		      $data{$heads[$_]}->{$l[$_]}++;
+		  }
+		  push @{$self->{'noms'}},$nom;
 	      }
 	  }
-	  s/^\s+//;
-	  s/\s+$//;
-	  my @l=();
-	  if($#heads>0) {
-	      @l=map { reduit($_) } split(/$sep/,$_,-1);
-	  } else {
-	      @l=(reduit($_));
-	  }
-	  if($#l!=$#heads) {
-	      print STDERR "Bad number of fields (".(1+$#l)." instead of ".(1+$#heads).") file ".$self->{'fichier'}." line $.\n";
-	      $errlig=$. if(!$errlig);
-	      $err++;
-	  } else {
-	      my $nom={};
-	      for(0..$#l) {
-		  $nom->{$heads[$_]}=$l[$_];
-		  $data{$heads[$_]}->{$l[$_]}++;
-	      }
-	      push @{$self->{'noms'}},$nom;
-	  }
-      }
-	close LISTE;
-	# entetes et cles
-	$self->{'heads'}=\@heads;
-	$self->{'keys'}=[grep { my @lk=(keys %{$data{$_}}); 
-				$#lk==$#{$self->{'noms'}}; } @heads];
-	# rajout identifiant
-	$self->calc_identifiants();
-	$self->tri('_ID_');
+	    close LISTE;
+	    # entetes et cles
+	    $self->{'heads'}=\@heads;
+	    $self->{'keys'}=[grep { my @lk=(keys %{$data{$_}}); 
+				    $#lk==$#{$self->{'noms'}}; } @heads];
+	    # rajout identifiant
+	    $self->calc_identifiants();
+	    $self->tri('_ID_');
 
-	return($err,$errlig);
+	    return($err,$errlig);
+	} else {
+	    return(-1,0);
+	}
     } else {
-	return(-1,0);
+	debug("Inexistant or empty names list file");
+	$self->{'heads'}=[];
+	$self->{'keys'}=[];
+	return(0,0);
     }
 }
 

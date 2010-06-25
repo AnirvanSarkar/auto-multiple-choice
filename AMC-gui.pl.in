@@ -155,6 +155,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'tex_editor'=>['commande',
 			     'texmaker','kile','emacs','gedit','kedit','kwrite','mousepad',
 			     ],
+	      'txt_editor'=>['commande',
+			     'gedit','kedit','kwrite','mousepad','emacs',
+			     ],
 	      'html_browser'=>['commande',
 			       'sensible-browser %u','firefox %u','galeon %u','konqueror %u','dillo %u',
 			       ],
@@ -534,6 +537,7 @@ my $gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
+    liste_filename liste_path liste_edit liste_setfile
     doc_menu menu_debug menu_outils
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
@@ -2044,11 +2048,60 @@ sub saisie_auto_ok {
     
 }
 
+sub choisit_liste {
+    my $gl=Gtk2::GladeXML->new($glade_xml,
+			       'liste_dialog','auto-multiple-choice')
+	->get_widget('liste_dialog');    
+    my $ret=$gl->run();
+    debug("Names list file choice [$ret]");
+    
+    if($ret eq '1') {
+	# file chosen
+	debug("List: ".$gl->get_filename());
+	valide_liste('set'=>$gl->get_filename());
+    } elsif($ret eq '2') {
+	# No list
+	valide_liste('set'=>'');
+    } else {
+	# Cancel
+    }
+
+    $gl->destroy();
+}
+
+sub edite_liste {
+    my $f=absolu($projet{'options'}->{'listeetudiants'});
+    debug "Editing $f...";
+    commande_parallele($o{'txt_editor'},$f);
+}
+
 sub valide_liste {
-    my (%oo)=@_;
+    my %oo=@_;
     debug "* valide_liste";
 
-    my $fl=$w{'liste'}->get_filename();
+    if(defined($oo{'set'}) && !$oo{'nomodif'}) {
+	$projet{'options'}->{'listeetudiants'}=relatif($oo{'set'});
+	$projet{'options'}->{'_modifie'}=1;
+    }
+
+    my $fl=absolu($projet{'options'}->{'listeetudiants'});
+    $fl='' if(!$projet{'options'}->{'listeetudiants'});
+
+    my $fn=$fl;
+    $fn =~ s/.*\///;
+
+    if($fl) {
+	$w{'liste_filename'}->set_markup("<b>$fn</b>");
+	for(qw/liste_path liste_edit/) {
+	    $w{$_}->set_sensitive(1);
+	}
+    } else {
+# TRANSLATORS: Names list file : (none)
+	$w{'liste_filename'}->set_markup(__"(none)");
+	for(qw/liste_path liste_edit/) {
+	    $w{$_}->set_sensitive(0);
+	}
+    }
 
     my $l=AMC::NamesFile::new($fl,
 			      'encodage'=>bon_encodage('liste'),
@@ -2067,11 +2120,6 @@ sub valide_liste {
 	}
 	$cb_stores{'liste_key'}=$cb_model_vide_key;
     } else {
-	# ok
-	if(!$oo{'nomodif'}) {
-	    $projet{'options'}->{'listeetudiants'}=relatif($fl);
-	    $projet{'options'}->{'_modifie'}=1;
-	}
 	# transmission liste des en-tetes
 	my @keys=$l->keys;
 	debug "primary keys: ".join(",",@keys);
@@ -2931,6 +2979,17 @@ sub source_latex_montre_nom {
     $dialog->destroy;
 }
 
+sub liste_montre_nom {
+    my $dialog = Gtk2::MessageDialog
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'info','ok',
+	      __"Names list file for this project is:\n%s",
+	      ($projet{'options'}->{'listeetudiants'} ? absolu($projet{'options'}->{'listeetudiants'}) : __"(no file)" ));
+    $dialog->run;
+    $dialog->destroy;
+}
+
 sub valide_source_tex {
     $projet{'options'}->{'_modifie'}=1;
     debug "* valide_source_tex";
@@ -3367,15 +3426,6 @@ sub edite_source {
 
 sub valide_projet {
     set_source_tex();
-
-    my $fl=absolu($projet{'options'}->{'listeetudiants'});
-    if(-f $fl) {
-	$w{'liste'}->set_filename($fl);
-    } else {
-	debug("List file not found : $fl");
-	$w{'liste'}->set_filename('');
-    }
-
 
     $projet{'_mep_list'}=AMC::MEPList::new(absolu($projet{'options'}->{'mep'}),
 					   'brut'=>1,
