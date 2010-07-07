@@ -6,6 +6,7 @@
 %define AMC_bindir %{_bindir}
 %define AMC_iconsdir /usr/share/icons/hicolor/scalable/apps
 %define AMC_pixdir /usr/share/pixmaps
+%define AMC_iconsdir /usr/share/auto-multiple-choice/icons
 
 %if 0%{?fedora}
 %define AMC_perldir %{perl_privlib}
@@ -23,7 +24,7 @@
 %define AMC_cat Education;
 %endif
 
-%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}"
+%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} ICONSDIR=%{AMC_iconsdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}"
 
 Name: auto-multiple-choice
 Summary: Auto Multiple Choice - Multiple Choice Papers Management
@@ -138,6 +139,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir /usr/share/texmf/tex/latex
 %{AMC_modsdir}
 %{AMC_modelsdir}
+%{AMC_iconsdir}
 %{AMC_texdir}
 %{AMC_bindir}/auto-multiple-choice
 %{AMC_iconsdir}/auto-multiple-choice.svg

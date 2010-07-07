@@ -36,6 +36,7 @@ DESTDIR=
 
 MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
 GLADE=AMC-gui.glade
+MOD_GLADE=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
 STY=automultiplechoice.sty
 MOS=$(wildcard I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
@@ -43,13 +44,15 @@ SUBMODS=$(notdir $(shell ls doc/modeles))
 
 DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
-FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml)
+FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade $(MOD_GLADE:.glade.in=.glade) AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml)
 
 PRECOMP_FLAG_FILE=PRECOMP
 PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
 
+MAIN_LOGO=icons/auto-multiple-choice
+
 ifeq ($(PRECOMP_ARCHIVE),)
-all: $(FROM_IN) AMC-traitement-image AMC-mepdirect logo.xpm doc I18N ;
+all: $(FROM_IN) AMC-traitement-image AMC-mepdirect $(MAIN_LOGO).xpm doc I18N ;
 else
 all: all_precomp ;
 endif
@@ -96,7 +99,7 @@ clean_IN: FORCE
 	rm -f $(FROM_IN)
 
 clean: clean_IN FORCE
-	rm -f AMC-traitement-image AMC-mepdirect logo.xpm
+	rm -f AMC-traitement-image AMC-mepdirect $(MAIN_LOGO).xpm
 	rm -f auto-multiple-choice.spec
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
@@ -127,9 +130,9 @@ endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(BINDIR)
 	install    -m 0755 $(USER_GROUP) auto-multiple-choice $(DESTDIR)/$(BINDIR)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(ICONSDIR)
-	install    -m 0644 $(USER_GROUP) -T logo.svg $(DESTDIR)/$(ICONSDIR)/auto-multiple-choice.svg
+	install    -m 0644 $(USER_GROUP) icons/*.svg $(DESTDIR)/$(ICONSDIR)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PIXDIR)
-	install    -m 0644 $(USER_GROUP) -T logo.xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
+	install    -m 0644 $(USER_GROUP) -T $(MAIN_LOGO).xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Export
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Gui
@@ -155,14 +158,15 @@ endif
 LOCALDIR=$(shell pwd)
 
 global: FORCE
-	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-mepdirect $(ICONSDIR)/auto-multiple-choice.svg /usr/share/doc/auto-multiple-choice
+	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice
 
 local: global
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
 	sudo ln -s $(LOCALDIR)/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect
-	sudo ln -s $(LOCALDIR)/logo.svg $(ICONSDIR)/auto-multiple-choice.svg
+	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
+	sudo ln -s $(LOCALDIR)/auto-multiple-choice.desktop $(DESKTOPDIR)/auto-multiple-choice.desktop
 
 ifdef DEBSIGN_KEY
 DEBSIGN=-k$(DEBSIGN_KEY)
@@ -191,7 +195,7 @@ sources_vok:
 	$(MAKE) tmp_copy
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) MAJ
-	$(MAKE) -C $(TMP_SOURCE_DIR) logo.xpm I18N doc
+	$(MAKE) -C $(TMP_SOURCE_DIR) $(MAIN_LOGO).xpm I18N doc
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean_IN
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz $(SRC_EXCL) $(SOURCE_DIR)

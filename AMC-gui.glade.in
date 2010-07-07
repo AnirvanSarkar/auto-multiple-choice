@@ -6,7 +6,7 @@
     <property name="visible">True</property>
     <property name="title" translatable="yes">Automatic Multiple Choice</property>
     <property name="role">amc-main-window</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="startup_id">amc-main-window</property>
     <signal name="delete_event" handler="quitter"/>
     <child>
@@ -626,7 +626,7 @@
                                     <child>
                                       <widget class="GtkImage" id="image4">
                                         <property name="visible">True</property>
-                                        <property name="stock">gtk-execute</property>
+                                        <property name="icon_name">amc-auto-capture</property>
                                       </widget>
                                       <packing>
                                         <property name="position">0</property>
@@ -663,7 +663,7 @@
                                     <child>
                                       <widget class="GtkImage" id="image14">
                                         <property name="visible">True</property>
-                                        <property name="stock">gtk-edit</property>
+                                        <property name="icon_name">amc-manual-capture</property>
                                       </widget>
                                       <packing>
                                         <property name="position">0</property>
@@ -925,7 +925,7 @@
                                         <child>
                                           <widget class="GtkImage" id="image9">
                                             <property name="visible">True</property>
-                                            <property name="stock">gtk-execute</property>
+                                            <property name="icon_name">amc-mark</property>
                                           </widget>
                                           <packing>
                                             <property name="position">0</property>
@@ -1270,7 +1270,7 @@
                                             <child>
                                               <widget class="GtkImage" id="image5">
                                                 <property name="visible">True</property>
-                                                <property name="stock">gtk-execute</property>
+                                                <property name="icon_name">amc-auto-assoc</property>
                                               </widget>
                                               <packing>
                                                 <property name="position">0</property>
@@ -1306,7 +1306,7 @@
                                             <child>
                                               <widget class="GtkImage" id="image15">
                                                 <property name="visible">True</property>
-                                                <property name="stock">gtk-edit</property>
+                                                <property name="icon_name">amc-manual-assoc</property>
                                               </widget>
                                               <packing>
                                                 <property name="position">0</property>
@@ -1494,24 +1494,6 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
                                           <widget class="GtkCheckButton" id="export_cb_export_csv_cochees">
                                             <property name="label" translatable="yes">Ticked boxes</property>
                                             <property name="visible">True</property>
@@ -1525,6 +1507,24 @@
                                             <property name="left_attach">2</property>
                                             <property name="right_attach">3</property>
                                           </packing>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
                                         </child>
                                       </widget>
                                       <packing>
@@ -1628,7 +1628,7 @@
                                         <child>
                                           <widget class="GtkImage" id="image16">
                                             <property name="visible">True</property>
-                                            <property name="stock">gtk-execute</property>
+                                            <property name="icon_name">amc-annotate</property>
                                           </widget>
                                           <packing>
                                             <property name="position">0</property>
@@ -1748,7 +1748,7 @@
                                         <child>
                                           <widget class="GtkImage" id="image17">
                                             <property name="visible">True</property>
-                                            <property name="stock">gtk-execute</property>
+                                            <property name="icon_name">amc-group</property>
                                           </widget>
                                           <packing>
                                             <property name="position">0</property>
@@ -1940,7 +1940,7 @@
     <property name="role">amc-saisie-auto</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/amc-auto-capture.svg</property>
     <property name="type_hint">dialog</property>
     <property name="startup_id">amc-saisie-auto</property>
     <property name="has_separator">False</property>
@@ -2055,7 +2055,7 @@
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">dialog</property>
     <property name="startup_id">amc-apropos</property>
     <property name="has_separator">False</property>
@@ -2716,7 +2716,7 @@ copy of the Program in return for a fee.
     <property name="role">amc-choix-projet</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">normal</property>
     <property name="startup_id">amc-choix-projet</property>
     <property name="has_separator">False</property>
@@ -3024,7 +3024,7 @@ copy of the Program in return for a fee.
     <property name="visible">True</property>
     <property name="title" translatable="yes">AMC Preferences</property>
     <property name="role">amc-preferences</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="startup_id">amc-preferences</property>
     <child>
       <widget class="GtkVBox" id="vbox6">
@@ -5302,7 +5302,7 @@ xelatex
     <property name="title" translatable="yes">Papers printing</property>
     <property name="role">amc-imprime-copies</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">dialog</property>
     <property name="startup_id">amc-imprime-copies</property>
     <property name="has_separator">False</property>
@@ -5537,7 +5537,7 @@ xelatex
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Choose LaTeX source</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">dialog</property>
     <property name="has_separator">False</property>
     <child internal-child="vbox">
@@ -5797,7 +5797,7 @@ xelatex
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Choose LaTeX source file</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">dialog</property>
     <property name="has_separator">False</property>
     <child internal-child="vbox">
@@ -5856,7 +5856,7 @@ xelatex
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Questionnaire model choice</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">dialog</property>
     <property name="has_separator">False</property>
     <child internal-child="vbox">
@@ -5946,7 +5946,7 @@ xelatex
     <property name="border_width">5</property>
     <property name="title" translatable="yes">ZIP file choice</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">dialog</property>
     <property name="has_separator">False</property>
     <child internal-child="vbox">
@@ -6004,7 +6004,7 @@ xelatex
     <property name="border_width">5</property>
     <property name="modal">True</property>
     <property name="destroy_with_parent">True</property>
-    <property name="icon_name">auto-multiple-choice</property>
+    <property name="icon">@/ICONSDIR/@/auto-multiple-choice.svg</property>
     <property name="type_hint">normal</property>
     <property name="has_separator">False</property>
     <child internal-child="vbox">
