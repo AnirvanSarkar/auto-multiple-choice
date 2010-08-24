@@ -92,7 +92,8 @@ sub run {
     my ($self,$subsys)=@_;
     debug "Queue RUN";
     while(@{$self->{'queue'}}) {
-	while($self->maj() < $self->{'max.procs'}) {
+	while($self->maj() < $self->{'max.procs'}
+	    && @{$self->{'queue'}}) {
 	    my $cs=shift(@{$self->{'queue'}});
 	    if($cs) {
 		my $p=fork();
@@ -118,12 +119,14 @@ sub run {
 		    }
 		}
 	    } else {
-		debug "Queue ends";
+		debug "Queue empty";
 	    }
 	}
 	waitpid(-1,0);
     }
+    debug("Waiting for all childs to end...");
     waitpid(-1,0);
+    debug("Leaving queue.");
 }
 
 1;
