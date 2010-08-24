@@ -72,8 +72,6 @@ my $tol_marque_plus=1/5;
 my $tol_marque_moins=1/5;
 
 my $detecte_via='c'; # gocr ou c
-my $lisse_pouss=5;
-my $lisse_trous=2;
 
 # amelioration du scan :
 my $blur='defaut';
@@ -287,6 +285,23 @@ if($modele) {
     $diametre_marque /= $nm;
 
 } else {
+
+    #####
+    # chargement d'une MEP au hasard pour recuperer la taille
+
+    my $hmep=$mep_dispos->mep();
+
+    $rx=$tiff_x / $hmep->{'tx'};
+    $ry=$tiff_y / $hmep->{'ty'};
+    
+    $taille=$hmep->{'diametremarque'}*($rx+$ry)/2;
+    $taille_max=$taille*(1+$tol_marque_plus);
+    $taille_min=$taille*(1-$tol_marque_moins);
+    
+    debug "rx = $rx   ry = $ry\n";
+    debug(sprintf("Target sign size : %.2f a %.2f",
+		  $taille_min,$taille_max));
+
     # pour un scan, on utilise gOCR, ou des manips morphologiques
 
     if($detecte_via eq 'gocr') {
@@ -309,6 +324,9 @@ if($modele) {
 	close(CMD);
 	close(XF);
     } elsif($detecte_via eq 'c') {
+
+	my $lisse_trous=1+int(($taille_min+$taille_max)/2 /20);
+	my $lisse_pouss=1+int(($taille_min+$taille_max)/2 /8);
 
 	print "Morphological operations (+$lisse_trous-$lisse_pouss) and signs detection...\n";
 	
@@ -334,22 +352,6 @@ if($modele) {
     debug join("\n",map { $_->txt(); } @box);
 
     print "Searching signs...\n";
-
-    #####
-    # chargement d'une MEP au hasard pour recuperer la taille
-
-    my $hmep=$mep_dispos->mep();
-
-    $rx=$tiff_x / $hmep->{'tx'};
-    $ry=$tiff_y / $hmep->{'ty'};
-    
-    $taille=$hmep->{'diametremarque'}*($rx+$ry)/2;
-    $taille_max=$taille*(1+$tol_marque_plus);
-    $taille_min=$taille*(1-$tol_marque_moins);
-    
-    debug "rx = $rx   ry = $ry\n";
-    debug(sprintf("Target sign size : %.2f a %.2f",
-		  $taille_min,$taille_max));
 
     @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
 
