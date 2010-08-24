@@ -576,9 +576,12 @@ my $docs_menu=Gtk2::Menu->new();
 
 my @doc_langs=();
 
-opendir(DOD,"@/DOCDIR/@/html/");
-push @doc_langs,map { s/auto-multiple-choice\.//;$_; } grep { /auto-multiple-choice\...(_..)?/ } readdir(DOD);
-closedir(DOD);
+if(opendir(DOD,"@/DOCDIR/@/html/")) {
+    push @doc_langs,map { s/auto-multiple-choice\.//;$_; } grep { /auto-multiple-choice\...(_..)?/ } readdir(DOD);
+    closedir(DOD);
+} else {
+    debug("DOCUMENTATION : Can't open directory @/DOCDIR/@/html/ : $!");
+}
 
 my %ltext_loc=('French'=>__"French",
 	       'English'=>__"English",
@@ -2818,6 +2821,8 @@ sub detecte_correc {
 			       CORREC_MAJ,file_maj("$cordir/$f"),
 			       CORREC_ID,file2id($f));
 	}
+    } else {
+	debug("JPEGS : Can't open directory $cordir : $!");
     }
 
     $w{'regroupement_corriges'}->set_sensitive($#corr>=0);
@@ -3015,11 +3020,18 @@ sub charge_modeles {
 
     return if(! -d $rep);
 
-    opendir(DIR,$rep);
-    my @all=readdir(DIR);
-    my @ms=grep { /\.tgz$/ && -f $rep."/$_" } @all;
-    my @subdirs=grep { -d $rep."/$_" && ! /^\./ } @all;
-    closedir DIR;
+    my @all;
+    my @ms;
+    my @subdirs;
+
+    if(opendir(DIR,$rep)) {
+	@all=readdir(DIR);
+	@ms=grep { /\.tgz$/ && -f $rep."/$_" } @all;
+	@subdirs=grep { -d $rep."/$_" && ! /^\./ } @all;
+	closedir DIR;
+    } else {
+	debug("MODELS : Can't open directory $rep : $!");
+    }
 
     for my $sd (@subdirs) {
 	my $nom=$sd;
@@ -3062,11 +3074,15 @@ sub charge_modeles {
 sub n_fich {
     my ($dir)=@_;
 
-    opendir(NFICH,$dir) or return(0);
-    my @f=grep { ! /^\./ } readdir(NFICH);
-    closedir(NFICH);
+    if(opendir(NFICH,$dir)) {
+	my @f=grep { ! /^\./ } readdir(NFICH);
+	closedir(NFICH);
 
-    return(1+$#f,"$dir/$f[0]");
+	return(1+$#f,"$dir/$f[0]");
+    } else {
+	debug("N_FICH : Can't open directory $dir : $!");
+ 	return(0);
+    }
 }
 
 sub source_latex_choisir {
@@ -3266,9 +3282,14 @@ sub source_latex_choisir {
 
 	    mkdir($hd) if(! -e $hd);
 
-	    opendir(MVR,$temp_dir);
-	    my @archive_files=grep { ! /^\./ } readdir(MVR);
-	    closedir(MVR);
+	    my @archive_files;
+	    
+	    if(opendir(MVR,$temp_dir)) {
+		@archive_files=grep { ! /^\./ } readdir(MVR);
+		closedir(MVR);
+	    } else {
+		debug("ARCHIVE : Can't open $temp_dir : $!");
+	    }
 
 	    my $latex;
 
