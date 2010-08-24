@@ -124,8 +124,10 @@ sub run {
 	}
 	waitpid(-1,0);
     }
-    debug("Waiting for all childs to end...");
-    waitpid(-1,0);
+    while($self->maj()) {
+	debug("Waiting for all childs to end...");
+	waitpid(-1,0);
+    }
     debug("Leaving queue.");
 }
 
