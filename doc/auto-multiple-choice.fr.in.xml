@@ -1037,7 +1037,7 @@ Durée : 10 minutes.
         <package>geometry</package>. Par exemple, pour resserer le haut des
         copies, on pourra utiliser <code>\geometry{top=3cm}</code> au lieu de
         la valeur 3.5cm utilisée par défaut, juste avant le
-        <code>\begin{document}</code>. </para>
+        <code>\begin{document}</code>.</para>
       </sect3>
 
       <sect3>
@@ -1378,17 +1378,53 @@ et écrivez votre nom et prénom ci-dessous.
     </sect2>
 
     <sect2>
-      <title>Examen</title>
+      <title>Impression du sujet</title>
 
       <para>Une fois la préparation effectuée, nous pouvons imprimer le sujet,
-      et le distribuer aux étudiants... Dans les cas simples, l'impression
-      peut s'effectuer directement à partir de la visualisation du sujet (par
-      un double-clic sur la ligne <guilabel>Sujet</guilabel> de la liste des
-      documents de travail). Dans le cas où il est préférable d'imprimer les
-      copies une à une (par exemple si les copies sont constituées de
-      plusieurs pages et si l'imprimante permet d'agrafer ces pages), on
-      utilisera plutôt le bouton <guibutton>Imprimer des copies</guibutton>
-      après avoir calculé les mises en page.</para>
+      et le distribuer aux étudiants... Nous avons pour cela plusieurs
+      possibilités :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Il est possible d'imprimer (ou de faire imprimer par un
+          service reprographie) directement le fichier
+          <filename>sujet.tex</filename> du répertoire projet, auquel on peut
+          accéder par un double-clic sur la ligne <guilabel>sujet</guilabel>
+          de la liste des <guilabel>documents de travail</guilabel>.</para>
+
+          <para>Cette méthode peut avoir un léger inconvénient : si votre
+          sujet comporte certaines copies ayant un nombre impair de pages, une
+          impression recto-verso mettra plusieurs sujets sur une même feuille,
+          ce qui les rendra inutilisables. Pour éviter ce problème, vous
+          pouvez remplacer (si ce n'est pas déjà fait), dans le fichier LaTeX
+          du sujet, la commande <command>\clearpage</command> par
+          <command>\AMCcleardoublepage</command>, qui ajoutera les pages
+          blanches nécessaires pour que tous les sujets aient un nombre pair
+          de pages (voir exemple section <xref
+          linkend="secensemble" />).</para>
+        </listitem>
+
+        <listitem>
+          <para>Si l'imprimante à utiliser est configurée sur l'ordinateur
+          utilisé par AMC, on utilisera de préférence le bouton
+          <guibutton>Imprimer des copies</guibutton> (après avoir calculé les
+          mises en page), qui permet de sélectionner les copies à imprimer (si
+          on ne souhaite pas toutes les imprimer, ou pour une réimpression
+          dans le cas où une copie aurait été mal imprimée), de choisir les
+          options d'impression (recto-verso, agrafage), et de gérer
+          correctement les copies avec un nombre impair de pages même dans le
+          cas d'une impression recto-verso sans utilisation de
+          <command>\AMCcleardoublepage</command> (en effet, AMC envoie une
+          tâche d'impression par copie). </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+
+    <sect2>
+      <title>Examen</title>
+
+      <para>Il ne reste plus qu'à faire passer l'examen aux
+      étudiants...</para>
 
       <important>
         <para>Une fois que le sujet est imprimé et distribué, il ne faut plus
