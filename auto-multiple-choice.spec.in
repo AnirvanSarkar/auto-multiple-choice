@@ -4,7 +4,6 @@
 %define AMC_modelsdir /usr/share/auto-multiple-choice/models
 %define AMC_texdir /usr/share/texmf/tex/latex/AMC
 %define AMC_bindir %{_bindir}
-%define AMC_iconsdir /usr/share/icons/hicolor/scalable/apps
 %define AMC_pixdir /usr/share/pixmaps
 %define AMC_iconsdir /usr/share/auto-multiple-choice/icons
 
@@ -131,9 +130,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %doc COPYING ChangeLog doc/html doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf 
 %dir /usr/share/auto-multiple-choice
-%dir /usr/share/icons/hicolor
-%dir /usr/share/icons/hicolor/scalable
-%dir /usr/share/icons/hicolor/scalable/apps
 %dir /usr/share/texmf
 %dir /usr/share/texmf/tex
 %dir /usr/share/texmf/tex/latex
@@ -142,7 +138,7 @@ rm -rf $RPM_BUILD_ROOT
 %{AMC_iconsdir}
 %{AMC_texdir}
 %{AMC_bindir}/auto-multiple-choice
-%{AMC_iconsdir}/auto-multiple-choice.svg
+%{AMC_iconsdir}
 %{AMC_pixdir}/auto-multiple-choice.xpm
 %{AMC_perldir}/AMC
 %{_datadir}/applications/auto-multiple-choice.desktop
@@ -157,7 +153,6 @@ texhash
 texconfig-sys rehash
 %endif
 %if 0%{?mandriva_version}
-%update_icon_cache hicolor
 texconfig-sys rehash
 %endif
 
@@ -170,7 +165,6 @@ texhash
 texconfig-sys rehash
 %endif
 %if 0%{?mandriva_version}
-%update_icon_cache hicolor
 texhash
 %endif
 
