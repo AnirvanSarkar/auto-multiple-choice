@@ -51,6 +51,7 @@
 %
 \def\AMC@loc@none{None of these answers are correct.}
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% localisation : french
 \def\AMC@loc@FR{
 %
@@ -153,6 +154,7 @@
 \newif\ifAMC@correc\AMC@correcfalse % corrige des questions
 \newif\ifAMC@qbloc\AMC@qblocfalse % on met les questions dans des blocs, pour ne pas les couper par des sauts de page
 \newif\ifAMC@rbloc\AMC@rblocfalse % on met les reponses dans des blocs, pour ne pas les couper par des sauts de page (par ex dans multicol)
+\newdimen\AMCinterIrep\AMCinterIrep=0pt % espace supplementaire entre les reponses classiques
 \newdimen\AMCinterBrep\AMCinterBrep=.5ex % espace entre les reponses bloc
 \def\AMCBoxedAnswers{\AMC@rbloctrue}
 \newif\ifAMCcomplete@multi\AMCcomplete@multifalse % on complete les questions multi par une option "rien n'est bon"
@@ -297,7 +299,8 @@
 \newcommand\AMCrep@init[1]{\ifAMC@ordre\AMCrep@o\else\csname AMCrep@#1\endcsname\fi\AMCload@counter=0}
 \newcommand\alafin{\AMCrep@@count=\AMCrep@count\AMCrep@fini\AMCrep@init{o}\AMCrep@count=\AMCrep@@count}
 \newcommand\AMC@fin@rep{\ifAMCcomplete@multi\ifAMCtype@multi\alafin\AMCrep@count=-1\ifAMCune@bonne\mauvaise{\@aucune}\else\bonne{\@aucune}\fi\fi\fi\AMCrep@fini}
-\newenvironment{reponses}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@itemize}\ifAMC@rbloc\def\une@rep{\AMCrep@bloc}\else\begin{itemize}\fi\AMCrep@init{#1}}{\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
+%
+\newenvironment{reponses}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@itemize}\ifAMC@rbloc\def\une@rep{\AMCrep@bloc}\else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi\AMCrep@init{#1}}{\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
 %
 \newenvironment{reponseshoriz}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}\par\begin{center}}{\AMC@fin@rep\end{center}}
 \newenvironment{reponsesperso}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}\AMCbeginAnswer}{\AMC@fin@rep\AMCendAnswer}
@@ -370,13 +373,13 @@
 %
 \newcount\AMC@chiffres
 
-\newcommand{\AMCcode}[2]{
-{ \def\AMCbeginQuestion##1##2{}
- \def\AMCbeginAnswer{\begin{minipage}{\ifAMC@ensemble 1.15em\else 2.5em\fi}}
- \def\AMCendAnswer{\hspace*{\fill}\end{minipage}}
- \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else{\bf ##2}\fi\\[1mm]}
- \AMCnobloc
- \AMC@chiffres=#2\loop
+\newcommand{\AMCcode}[2]{%
+{\def\AMCbeginQuestion##1##2{}%
+ \def\AMCbeginAnswer{\begin{minipage}{\ifAMC@ensemble 1.15em\else 2.5em\fi}}%
+ \def\AMCendAnswer{\hspace*{\fill}\end{minipage}}%
+ \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else{\bf ##2}\fi\\[1mm]}%
+ \AMCnobloc%
+ \AMC@chiffres=#2\loop%
  \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative
    \begin{reponsesperso}[o]\bareme{auto=0}
      \mauvaise[0]{0}
