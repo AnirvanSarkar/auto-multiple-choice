@@ -212,7 +212,7 @@ sub calage {
     }
     $self->{'MSE'}=sqrt($sd/($#{$cx}+1));
 
-    debug("MSE = %.3f\n",$self->{'MSE'});
+    debug(sprintf("MSE = %.3f\n",$self->{'MSE'}));
     printf("Adjust: MSE = %.3f\n",$self->{'MSE'}) if($self->{'log'});
 
     return($self->{'MSE'});

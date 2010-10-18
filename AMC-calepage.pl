@@ -299,7 +299,8 @@ if($modele) {
     $taille_min=$taille*(1-$tol_marque_moins);
     
     debug "rx = $rx   ry = $ry\n";
-    debug(sprintf("Target sign size : %.2f a %.2f",
+    debug(sprintf("Target sign size : %.2f (%.2f to %.2f)",
+		  $taille,
 		  $taille_min,$taille_max));
 
     # pour un scan, on utilise gOCR, ou des manips morphologiques
@@ -355,7 +356,17 @@ if($modele) {
 
     @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
 
-    $cadre_general=AMC::Boite::new_complete(AMC::Boite::centres_extremes(@okbox));
+    @okbox=AMC::Boite::extremes(@okbox);
+
+    if(get_debug()) {
+	for my $c (@okbox) {
+	    my ($dx,$dy)=$c->etendue_xy();
+	    debug(sprintf("Sign size: $dx x $dy (%6.2f | %6.2f %%)",
+			  100*($dx-$taille)/$taille,100*($dy-$taille)/$taille)); 
+	}
+    }
+
+    $cadre_general=AMC::Boite::new_complete(map { $_->centre() } (@okbox));
 
 }
 
@@ -514,6 +525,7 @@ sub get_nb_binaire {
 sub get_id_binaire {
     $id_page="+".get_nb_binaire(1)."/".get_nb_binaire(2)."/".get_nb_binaire(3)."+";
     print "Page : $id_page\n";
+    debug("Found binary ID: $id_page");
 }
 
 if($modele) {
@@ -585,7 +597,7 @@ if($modele) {
 
     # ce n'est pas un modele
 
-    erreur("No layouy instructions...") if(!($mep_saved || $xml_layout));
+    erreur("No layout instructions...") if(!($mep_saved || $xml_layout));
     
     # perl -e 'use XML::Simple;use Data::Dumper;$lay=XMLin("test-layout/mep-103-1-993.xml",ForceArray => 1,KeepRoot => 1);print Dumper($lay);'
 
@@ -596,6 +608,7 @@ if($modele) {
 	if($binaire) {
 	    # caler sur une mise en page quelconque :
 	    print "Positionning to read ID...\n";
+	    debug "Positionning to read ID...\n";
 	    
 	    calage_reperes();
 
