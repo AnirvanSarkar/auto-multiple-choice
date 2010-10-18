@@ -93,7 +93,7 @@ sub arrondi_sup {
 }
 
 my %fonction_arrondi=(-1=>\&arrondi_inf,0=>\&arrondi_central,1=>\&arrondi_sup,
-		      i=>\&arrondi_inf,n=>\&arrondi_central,s=>\&arrondi_sup);
+		      'i'=>\&arrondi_inf,'n'=>\&arrondi_central,'s'=>\&arrondi_sup);
 
 if($type_arrondi) {
     for my $k (keys %fonction_arrondi) {
@@ -111,9 +111,11 @@ if(! -f $bareme) {
     attention("No marking scale file: $bareme");
     die "No marking scale file: $bareme";
 }
+
 if($grain<=0) {
-    attention("Grain must be positive (grain=$grain)");
-    die "Grain $grain<=0";
+    $grain=1;
+    $arrondi='';
+    debug("Nonpositive grain: rounding off");
 }
 
 my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
