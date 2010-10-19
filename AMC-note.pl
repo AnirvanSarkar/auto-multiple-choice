@@ -92,8 +92,7 @@ sub arrondi_sup {
     return(ceil($x));
 }
 
-my %fonction_arrondi=(-1=>\&arrondi_inf,0=>\&arrondi_central,1=>\&arrondi_sup,
-		      'i'=>\&arrondi_inf,'n'=>\&arrondi_central,'s'=>\&arrondi_sup);
+my %fonction_arrondi=('i'=>\&arrondi_inf,'n'=>\&arrondi_central,'s'=>\&arrondi_sup);
 
 if($type_arrondi) {
     for my $k (keys %fonction_arrondi) {
@@ -115,6 +114,7 @@ if(! -f $bareme) {
 if($grain<=0) {
     $grain=1;
     $arrondi='';
+    $type_arrondi='';
     debug("Nonpositive grain: rounding off");
 }
 

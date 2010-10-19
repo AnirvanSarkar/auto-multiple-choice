@@ -93,7 +93,7 @@ sub export {
 	$ndg=length($1);
     }
 
-    my $arrondi='ROUND';
+    my $arrondi='';
     if($self->{'calcul'}->{'arrondi'} =~ /^([ins])/i) {
 	$arrondi=$fonction_arrondi{$1};
     }
