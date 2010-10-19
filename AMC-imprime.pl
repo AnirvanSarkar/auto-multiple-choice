@@ -92,6 +92,7 @@ my $dest;
 if($methode =~ /^cups/i) {
     if(check_install(module=>"Net::CUPS")) {
 	load("Net::CUPS");
+	debug_pm_version("Net::CUPS");
     } else {
 	die "Needs Net::CUPS perl module for CUPS printing";
     }

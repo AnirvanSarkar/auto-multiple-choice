@@ -114,6 +114,9 @@ if($debug) {
     print "DEBUG ==> ".AMC::Basic::debug_file()."\n";
 }
 
+debug_pm_version("Gtk2");
+debug_pm_version("Gtk2::GladeXML");
+
 my ($e_volume,$e_vdirectories,undef) = splitpath( rel2abs($0) );
 sub with_prog {
     my $fich=shift;

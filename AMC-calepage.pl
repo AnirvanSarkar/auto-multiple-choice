@@ -132,6 +132,8 @@ GetOptions("page=s"=>\$out_cadre,
 
 set_debug($debug);
 
+debug_pm_version("Graphics::Magick");
+
 my $commandes=AMC::Exec::new('AMC-calepage');
 $commandes->signalise();
 

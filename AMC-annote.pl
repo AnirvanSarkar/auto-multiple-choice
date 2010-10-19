@@ -92,6 +92,8 @@ GetOptions("cr=s"=>\$cr_dir,
 
 set_debug($debug);
 
+debug_pm_version("Graphics::Magick");
+
 for(split(/,/,join(',',@o_symbols))) {
     if(/^([01]-[01]):(none|circle|mark|box)(?:\/([\#a-z0-9]+))?$/) {
 	$symboles{$1}={type=>$2,color=>$3};

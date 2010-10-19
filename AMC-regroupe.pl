@@ -94,6 +94,8 @@ GetOptions("cr=s"=>\$cr,
 
 set_debug($debug);
 
+debug_pm_version("Graphics::Magick");
+
 $temp_dir = tempdir( DIR=>tmpdir(),
 		     CLEANUP => (!get_debug()) );
 

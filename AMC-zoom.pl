@@ -55,6 +55,8 @@ set_debug($debug);
 
 debug("AMC-zooms / DEBUG") if($debug);
 
+debug_pm_version("Graphics::Magick");
+
 sub adapte {
     my ($im)=@_;
     return(sprintf("%.02f",100*$largeur/$im->Get('width')).'%');

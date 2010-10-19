@@ -32,7 +32,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &__ &__p);
+    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &__ &__p);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -209,6 +209,29 @@ sub set_debug_file {
 	$amc_debug_filename=$amc_debug_fh->filename;
 	$amc_debug_fh->autoflush(1);
 	open(STDERR,">&",$amc_debug_fh);
+ 
+ 	# versions diverses...
+ 
+ 	print $amc_debug_fh ("=" x 40)."\n\n";
+ 	if(commande_accessible('convert')) {
+ 	    open(VERS,"-|",'convert','-version');
+ 	    while(<VERS>) { chomp; print $amc_debug_fh "$_\n"; }
+ 	    close(VERS);
+ 	} else {
+ 	    print $amc_debug_fh "ImageMagick: not found\n";
+ 	}
+ 	print $amc_debug_fh ("=" x 40)."\n\n";
+ 	    
+ 	print $amc_debug_fh ("=" x 40)."\n\n";
+ 	if(commande_accessible('gm')) {
+ 	    open(VERS,"-|",'gm','-version');
+ 	    while(<VERS>) { chomp; print $amc_debug_fh "$_\n"; }
+ 	    close(VERS);
+ 	} else {
+ 	    print $amc_debug_fh "GraphicsMagick: not found\n";
+ 	}
+ 	print $amc_debug_fh ("=" x 40)."\n\n";
+ 	    
     }
 }
 
@@ -235,6 +258,14 @@ sub debug {
     }
 }
 
+sub debug_pm_version {
+     my ($module)=@_;
+     my $version;
+     if (defined($version = $module->VERSION())) { 
+         debug "[VERSION] $module: $version";
+     }
+}
+ 
 sub set_debug {
     my ($debug)=@_;
     if($debug =~ /\// && -f $debug) {

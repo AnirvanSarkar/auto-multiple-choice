@@ -28,6 +28,7 @@ sub get_ncpu {
     my $n=0;
     if(check_install(module=>"Sys::CPU")) {
 	load("Sys::CPU");
+	debug_pm_version("Sys::CPU");
 	$n=Sys::CPU::cpu_count();
     } else {
 	open(CI,"/proc/cpuinfo");
