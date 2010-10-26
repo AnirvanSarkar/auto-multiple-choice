@@ -3630,6 +3630,20 @@ sub quitter {
     
 }
 
+sub bug_report {
+    my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'info','ok',
+			  __("In order to send a useful bug report, please attach the following documents:")."\n"
+			  ."- ".__("an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the <b>project directory</b>, <b>scan files</b> and <b>configuration directory</b> (.AMC.d in home directory), so as to reproduce and analyse this problem.")."\n"
+			  ."- ".__("the <b>log file</b> produced when the debugging mode (in Help menu) is checked. Please try to reproduce the bug with this mode activated.")."\n\n"
+			  .sprintf(__("Bug reports can be filled at %s or sent to %s"),"<tt>https://gna.org/support/?group=auto-qcm&amp;func=additem</tt>",'<tt>paamc@passoire.fr</tt>')
+	);
+    $dialog->run;
+    $dialog->destroy;
+}
+
 $gui->signal_autoconnect_from_package('main');
 
 if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
