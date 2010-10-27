@@ -26,7 +26,7 @@ sub new {
     my $self={'fichier'=>$f,
 	      'encodage'=>'utf-8',
 	      'separateur'=>'',
-	      'identifiant'=>'(nom) (prenom)',
+	      'identifiant'=>'(nom) (prenom) (surname) (name)',
 
 	      'heads'=>[],
 	      'err'=>[0,0],

@@ -34,6 +34,8 @@ clean:
 	rm -f modeles/*.tgz
 	rm -f modeles/**/*.tgz
 	rm -f html/auto-multiple-choice.**/*.html
+	rm -f html/images/callouts/*.png html/images/*.png
+	rm -f *~
 
 html/images/callouts/%.png: img_src/callouts/%.svg
 	inkscape --export-width=12 --export-height=12 --export-png=$@ $<

@@ -1,0 +1,2099 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
+<article lang="en">
+  <title>Auto Multiple Choice</title>
+
+  <articleinfo>
+    <title>Auto Multiple Choice</title>
+
+    <subtitle>Design of MCQ tests with automated correction and
+    grading</subtitle>
+
+    <abstract>
+      <para>AMC is a set of utilities allowing the use of MCQ written in
+      LaTeX, and their automated correction and grading from scans of the
+      answer sheets. This document describes its use (for the version
+      @/PACKAGE_V_DEB/@~svn @/PACKAGE_V_SVN/@).</para>
+
+      <para>The AMC project is hosted by <ulink
+      url="http://gna.org/">Gna !</ulink> : you can find the AMC web-site
+      there <ulink
+      url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>,
+      and the web-page where the project is hosted there <ulink
+      url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>.</para>
+    </abstract>
+
+    <author>
+      <firstname>Alexis</firstname>
+
+      <affiliation>
+        <address><email>paamc@passoire.fr</email></address>
+      </affiliation>
+
+      <surname>Bienvenüe</surname>
+    </author>
+
+    <copyright>
+      <year>2008-2010</year>
+
+      <holder>Alexis Bienvenüe</holder>
+    </copyright>
+
+    <othercredit class="translator">
+      <surname>Bérard</surname>
+
+      <firstname>Jean</firstname>
+
+      <contrib>Translation from french</contrib>
+    </othercredit>
+
+    <othercredit class="translator">
+      <surname>Khaznadar</surname>
+
+      <firstname>Georges</firstname>
+
+      <contrib>Translation from french</contrib>
+    </othercredit>
+
+    <legalnotice>
+      <para>This document can be used according to the terms of the GNU
+      General Public License, version 3 or later.</para>
+    </legalnotice>
+  </articleinfo>
+
+  <sect1>
+    <title>License</title>
+
+    <para>Auto Multiple Choice is free software: you can redistribute it
+    and/or modify it under the terms of the GNU General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.</para>
+
+    <para>This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+    for more details. You should have received a copy of the GNU General
+    Public License along with this program. If not, see <ulink
+    url="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</ulink>.</para>
+  </sect1>
+
+  <sect1 id="prerequis">
+    <title>Prerequisites</title>
+
+    <sect2>
+      <title>Operating system</title>
+
+      <para>The AMC utilities have been written for Linux. They might be
+      adapted to Windows without too many difficulties, but this will not be
+      done in the near future.</para>
+    </sect2>
+
+    <sect2>
+      <title>Software</title>
+
+      <para>The main packages/software that are required for the use of AMC
+      are the following:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>LaTeX</para>
+        </listitem>
+
+        <listitem>
+          <para>ImageMagick</para>
+        </listitem>
+
+        <listitem>
+          <para>Perl, together with Gtk2-Perl and Glade::XML for the graphical
+          user interface</para>
+        </listitem>
+      </itemizedlist>
+
+      <sect3>
+        <title>Recommended versions for software used by AMC</title>
+
+        <para>A few bugs in old versions of software used by AMC are
+        particularly detrimental to its operating normally:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>With old versions of <package>Net::CUPS</package> (debian
+            package <package>libnet-cups-perl</package>), the command for
+            printing the test sheets leads to a premature exit from the AMC
+            graphical user interface. This bug is fixed in versions 0.61 and
+            later of <package>Net::CUPS</package>.</para>
+          </listitem>
+
+          <listitem>
+            <para>With old versions of ImageMagick, the merging of corrected
+            answer sheets into a single PDF file per student does not work
+            when answer sheets comprise more than one page. This bug is fixed
+            in versions 6.5.5 ad later of ImageMagick.</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>LaTeX</title>
+
+      <para>Some knowledge of LaTeX is useful for the design of MCQs. However,
+      the templates that are provided should allow those who are not deterred
+      by LaTeX/XML/HTML formats to quickly start writing their own
+      MCQs.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="notesutilisation">
+    <title>Usage notes</title>
+
+    <sect2>
+      <title>Numerical limitations</title>
+
+      <para>In the present version (starting with version 0.156), the maximum
+      number of students per test is limited to 4095, and the maximum number
+      of pages per test is limited to 63.</para>
+
+      <para>The maximum number of questions per test is limited to 255. The
+      <command>\AMCcode</command> command (see section <xref
+      linkend="latex.codes" />) uses a number of questions equal to the number
+      of digits for the code to be input. On the other hand, LaTeX's own
+      limitations may make compilation impossible even with less than 255
+      questions (producing e.g. a « <errortext>No room for a new
+      \toks</errortext> » error). In that case, try again using the package
+      <package>etex</package>, thanks to the <code>\usepackage{etex}</code>
+      command.</para>
+
+      <para>The maximum number of answers for a given question is limited to
+      199.</para>
+    </sect2>
+
+    <sect2 id="sec.couleurs">
+      <title>Colors</title>
+
+      <para>Putting colors other than black and white in the questions (e.g.
+      by using the <command>textcolor</command> command) is not possible,
+      since it may interfere with the layout detection process, which uses
+      color codes in a « layout document » identical to the test sheet.</para>
+
+      <para>It is still possible to include colored pictures in the test sheet
+      thanks to the <command>\includegraphics</command> command from the LaTeX
+      package <package>graphicx</package>. Indeed,
+      <package>automultiplechoice</package> loads <package>graphicx</package>
+      in such a way that pictures are not included in the document used for
+      the layout detection. Hence, it must not be downloaded explicitly: don't
+      use <code>\usepackage{graphicx}</code> in your LaTeX file.</para>
+    </sect2>
+
+    <sect2>
+      <title>Versions</title>
+
+      <para>Even though it should not have too many consequences, it is
+      recommended not to change the program version while working with a given
+      project (between the time when the test sheets are printed and the time
+      when tests are corrected and graded). There are a few modifications
+      which may interfere with AMC operating normally if you apply them while
+      working with a given project:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>If you have compiled and printed with a version of AMC earlier
+          than 0.155, and then handle the project with version 0.156 or later,
+          add the option <option>versionA</option> in the reference to the
+          package <package>automultiplechoice</package> in the LaTeX file.
+          Example:</para>
+
+          <programlisting>\usepackage[box,completemulti,versionA]{automultiplechoice}</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>From version 0.262 on, the drawing of the checkboxes changed
+          to be slightly larger, which may alter the layout of the test
+          sheets.</para>
+        </listitem>
+
+        <listitem>
+          <para>From version 0.267, if you want to produce A4 format test
+          sheets, you have to state it explicitly in the LaTeX file:</para>
+
+          <programlisting>\documentclass[a4paper]{article} </programlisting>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+
+    <sect2>
+      <title>Installation</title>
+
+      <para>With debian, Ubuntu, or a derived operating system, you can use
+      the debian official repository and ubuntu AMC repositories. The
+      installation procedure is described on the <ulink
+      url="http://home.gna.org/auto-qcm/download">AMC web-site</ulink>.</para>
+
+      <para>You can also download the source code archive on the project
+      <ulink url="http://download.gna.org/auto-qcm/">download space</ulink>,
+      then use the following commands in a terminal:</para>
+
+      <screen>tar xvzf auto-multiple-choice_xxxx_precomp.tar.gz
+cd auto-multiple-choice-xxx
+make
+sudo make install</screen>
+    </sect2>
+
+    <sect2>
+      <title>Access</title>
+
+      <para>Once the installation is made, the graphical user interface can be
+      launched by choosing <menuchoice>
+          <guimenu>Applications</guimenu>
+
+          <guisubmenu>Education</guisubmenu>
+
+          <guimenuitem>Auto Multiple Choice</guimenuitem>
+        </menuchoice> in the Gnome general menu (or its KDE or other analog),
+      but one can also use the <userinput>auto-multiple-choice</userinput>
+      command.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="latex">
+    <title>Preparation of the LaTeX file</title>
+
+    <para>First of all, the MCQ has to be described as a LaTeX file using the
+    <package>automultiplechoice</package> package. This chapter describes the
+    relevant LaTeX commands. You can check the LaTeX file you are designing at
+    any moment by compiling it with the <command>latex</command> command, then
+    visualizing the resulting dvi file.</para>
+
+    <para>We start with a few examples giving quick illustrations of how to
+    build LaTeX files for MCQs; the corresponding tex file are available as
+    templates, so that one can create a new MCQ project starting with one of
+    these templates.</para>
+
+    <sect2>
+      <title>A simple example</title>
+
+      <para><!--NAME: Simple example
+DESC: A simple example (from the documentation) with one simple question and one multiple question.--><programlisting
+      id="modeles-simple.tex" linenumbering="numbered">\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    <co id="simple.latin1"
+            linkends="simple.latin1.exp" />
+\usepackage[T1]{fontenc}
+
+\usepackage[box,completemulti]{automultiplechoice}    <co id="simple.amc"
+            linkends="simple.amc.exp" />
+\begin{document}
+
+\onecopy{10}{    <co id="simple.exemplaire" linkends="simple.exemplaire.exp" />
+
+%%% beginning of the test sheet header:    <co id="simple.entete"
+            linkends="simple.entete.exp" />
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examination on Jan., 1st, 2008\end{minipage}
+\champnom{\fbox{    <co id="simple.champnom" linkends="simple.champnom.exp" />
+                \begin{minipage}{.5\linewidth}
+                  Firstname and lastname:
+
+                  \vspace*{.5cm}\dotfill
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\begin{center}\em
+Duration : 10 minutes.
+
+  No documents allowed. The use of electronic calculators is forbidden.
+
+
+  Questions using the sign \multiSymbole{} may have
+  zero, one or several correct answers.  Other questions have a single correct answer.
+
+  Negative points may be attributed to \emph{very
+    bad} answers.
+\end{center}
+\vspace{1ex}
+
+%%% end of the header
+
+\begin{question}{prez}    <co id="simple.qr" linkends="simple.qr.exp" />
+  Among the following persons, which one has ever been a President of the French Republic?
+  \begin{choices}
+    \correctchoice{René Coty}
+    \wrongchoice{Alain Prost}
+    \wrongchoice{Marcel Proust}
+    \wrongchoice{Claude Monet}
+  \end{choices}
+\end{question}
+
+\begin{questionmult}{pref}    <co id="simple.qrmult"
+            linkends="simple.qrmult.exp" />
+  Among the following cities, which ones are french prefectures?
+  \begin{choices}
+    \correctchoice{Poitiers}
+    \wrongchoice{Sainte-Menehould}
+    \correctchoice{Avignon}
+  \end{choices}
+\end{questionmult}
+
+\clearpage    <co id="simple.clear" linkends="simple.clear.exp" />
+
+}   <co id="simple.fin" linkends="simple.fin.exp" />
+
+\end{document}
+</programlisting></para>
+
+      <para>A few extra details on this example:</para>
+
+      <para><calloutlist>
+          <callout arearefs="simple.latin1" id="simple.latin1.exp">
+            <para>The packages <package>inputenc</package> and
+            <package>fontenc</package> allow one to use the ISO-8859-1
+            (latin1) encoding. You can of course modify them depending on the
+            encoding you want to use.</para>
+          </callout>
+
+          <callout arearefs="simple.amc" id="simple.amc.exp">
+            <para>The options used here for the <package>automultiplechoice
+            </package>LaTeX package prevent questions from being split between
+            two pages (<option>box</option>) and to automatically complete any
+            multiple choice question by a standard answer allowing the student
+            to mention that, in her/his opinion, none of the listed answers is
+            correct (<option>completemulti</option>).</para>
+          </callout>
+
+          <callout arearefs="simple.exemplaire" id="simple.exemplaire.exp">
+            <para>The <command>onecopy</command> command produces as many
+            (distinct) realizations of the MCQ test as desired (here 10).
+            See <xref linkend="sec.unecopie" /> for an alternative syntax
+            using an environment.</para>
+          </callout>
+
+          <callout arearefs="simple.entete" id="simple.entete.exp">
+            <para>Lines that start here describe the header of the
+            test-sheet.</para>
+          </callout>
+
+          <callout arearefs="simple.champnom" id="simple.champnom.exp">
+            <para>The <command>champnom</command> command specifies where
+            students write their name.</para>
+          </callout>
+
+          <callout arearefs="simple.qr" id="simple.qr.exp">
+            <para>The environments <command>question</command> and
+            <command>choices</command> allow one to build a multiple choice
+            question for which there is a single correct answer. A unique
+            identifier for the question has to be specified (here:
+            <emphasis>prez</emphasis>).</para>
+          </callout>
+
+          <callout arearefs="simple.qrmult" id="simple.qrmult.exp">
+            <para>The environments <command>questionmult</command> and
+            <command>choices</command> allow one to build a multiple choice
+            question that may have zero, one or several correct answers.
+            Student are asked to check all the boxes corresponding to an
+            answer that she/he thinks is correct, or the last box (added
+            automatically thanks to the <option>completemulti</option> option
+            used in the reference to the package in line 6).</para>
+          </callout>
+
+          <callout arearefs="simple.clear" id="simple.clear.exp">
+            <para>The <command>clearpage</command> is used to start the next
+            realization of the MCQ test on a new double page.</para>
+          </callout>
+
+          <callout arearefs="simple.fin" id="simple.fin.exp">
+            <para>This marks the end of the <command>onecopy</command> command
+            (started at line 9).</para>
+          </callout>
+        </calloutlist></para>
+    </sect2>
+
+    <sect2>
+      <title>An example with groups of questions and shuffling</title>
+
+      <para>In this example, we want the order in which questions appear in
+      the MCQ test to be different from one realization of the test to the
+      other, but still keeping together questions dealing with the same
+      subject. To this end, we create two groups of questions, whithin which
+      questions are shuffled at random.</para>
+
+      <para><!--NAME: Groups
+DESC: An example (from the documentation) in which questions are shuffled inside two distinct groups.--><programlisting
+      id="modeles-groups.tex" linenumbering="numbered">\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[box,completemulti]{automultiplechoice}
+\begin{document}
+
+%%% preparation of the groups
+
+\element{geographie}{
+  \begin{question}{Paris}
+    In which continent is Paris?
+    \begin{choices}
+      \correctchoice{Europe}
+      \wrongchoice{Africa}
+      \wrongchoice{Asia}
+      \wrongchoice{planet Mars}
+    \end{choices}
+  \end{question}
+}
+
+\element{geographie}{
+  \begin{question}{Cameroon}
+    Which is the capital city of Cameroon?
+    \begin{choices}
+      \correctchoice{Yaoundé}
+      \wrongchoice{Douala}
+      \wrongchoice{Abou-Dabi}
+    \end{choices}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{question}{Marignan}
+    In which year did the battle of Marignan take place?
+    \begin{choiceshoriz}
+      \correctchoice{1515}
+      \wrongchoice{1915}
+      \wrongchoice{1519}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{questionmult}{Nantes}
+    What can be said about the \emph{Édit de Nantes}?
+    \begin{choices}
+      \correctchoice{It was signed in 1598}
+      \correctchoice{Il has been revoked by Louis XIV}
+      \wrongchoice{It was signed by Henri II}
+    \end{choices}
+  \end{questionmult}
+}
+
+%%% copies
+
+\onecopy{10}{
+
+%%% beginning of the test sheet header:
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf History and geography\\ Examination on Jan. 1st, 2008
+\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Firstname and lastname:
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%% end of the header
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large Geography
+  \vspace{1mm}\hrule
+\end{center}
+
+\melangegroupe{geographie}
+\restituegroupe{geographie}
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large History
+  \vspace{2mm}\hrule
+\end{center}
+
+\melangegroupe{histoire}
+\restituegroupe{histoire}
+
+\clearpage
+
+}
+
+\end{document}
+</programlisting></para>
+    </sect2>
+
+    <sect2 id="secensemble">
+      <title>An example with a separate answer sheet</title>
+
+      <para>In this example, one wants the check-boxes to be put together in a
+      separate sheet. This makes cheating more difficult, and, more
+      importantly, it is enough to scan a single sheet per student, which
+      makes things easier if one has to do a manual scan. In this example, the
+      number of questions is limited: they fit into a single page, so that
+      such a layout would not be really useful in this particular case. It is
+      up to you to modify this example in order to use this layout with a
+      large number of questions!</para>
+
+      <para><!--NAME: Separate answers
+DESC: An example (from the documentation) where all check-boxes are put together on a separate sheet for each student.--><programlisting
+      id="modeles-separate.tex" linenumbering="numbered">\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[box,completemulti,separateanswersheet]{automultiplechoice}    <co
+            id="ensemble.opt" linkends="ensemble.opt.exp" />
+\begin{document}
+
+\AMCrandomseed{1237893}
+
+\def\formulaireQuestion#1{\par {\sc Question #1 :} }    <co id="ensemble.fq"
+            linkends="ensemble.fq.exp" />
+
+\element{general}{
+  \begin{question}{prez}    
+    Among the following persons, which one has ever been a President of the French Republic?
+    \begin{choices}
+      \correctchoice{René Coty}
+      \wrongchoice{Alain Prost}
+      \wrongchoice{Marcel Proust}
+      \wrongchoice{Claude Monet}
+    \end{choices}
+  \end{question}
+}
+
+\element{general}{
+  \begin{questionmult}{pref}    
+    Among the following cities, which ones are french prefectures?
+    \begin{choices}
+      \correctchoice{Poitiers}
+      \wrongchoice{Sainte-Menehould}
+      \correctchoice{Avignon}
+    \end{choices}
+  \end{questionmult}
+}
+
+\element{general}{
+  \begin{question}{nb-ue}
+    How many different states were members of the European Union in Jan. 2009?
+    \begin{choiceshoriz}[o]
+      \wrongchoice{15}
+      \wrongchoice{21}
+      \wrongchoice{25}
+      \correctchoice{27}
+      \wrongchoice{31}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\onecopy{5}{    
+
+%%% beginning of the test sheet header:    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf Test\\ Examination on Jan. 1st, 2008
+\end{minipage}
+
+\begin{center}\em
+Durée : 10 minutes.
+
+  No documents allowed. The use of electronic calculators is forbidden.
+
+
+
+  Questions using the sign \multiSymbole{} may have
+  zero, one or several correct answers.  Other questions have a single correct answer.
+
+  Negative points may be attributed to \emph{very
+    bad} answers.
+
+\end{center}
+\vspace{1ex}
+
+%%% end of the header
+
+\melangegroupe{general}
+\restituegroupe{general}
+
+\AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp" />
+
+\AMCdebutFormulaire    <co id="debut.form" linkends="debut.form.exp" />
+
+%%% beginning of the answer sheet header
+
+{\large\bf Answer sheet:}
+\hfill \champnom{\fbox{    <co id="ensemble.nom" linkends="ensemble.nom.exp" />
+    \begin{minipage}{.5\linewidth}
+      Firstname and lastname:
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\begin{center}
+  \bf\em Answers must be given exclusively on this sheet: 
+  answers given on the other sheets will be ignored.
+\end{center}
+
+%%% end of the answer sheet header
+
+
+\formulaire    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp" />
+
+\clearpage    
+
+}  
+
+\end{document}</programlisting>The following remarks should make the above
+      example clearer :<calloutlist>
+          <callout arearefs="ensemble.opt" id="ensemble.opt.exp">
+            <para>The <option>separateanswersheet</option> option is what
+            allows us to do what we wanted.</para>
+          </callout>
+
+          <callout arearefs="ensemble.fq" id="ensemble.fq.exp">
+            <para>One can re-define in this manner the way the questions are
+            identified on the answer sheet (this line is optional).</para>
+          </callout>
+
+          <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
+            <para>This page break is put before the special page where the
+            check-boxes are put together. If one does recto-verso printing, it
+            is preferable to use <command>\AMCcleardoublepage</command> so
+            that this page is printed apart from the others. In the case of
+            recto printing, one can simply use
+            <command>\clearpage</command>.</para>
+          </callout>
+
+          <callout arearefs="debut.form" id="debut.form.exp">
+            <para>This command marks the beginning of the answer sheet part.
+            Its use is necessary for the appropriate treatment of the
+            questions which appear only in that part, e.g. those generated by
+            <command>AMCcode</command>.</para>
+          </callout>
+
+          <callout arearefs="ensemble.nom" id="ensemble.nom.exp">
+            <para>Students should normally write their name on the answer
+            sheet!</para>
+          </callout>
+
+          <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
+            <para>The LaTeX command <command>formulaire</command> writes all
+            the check-boxes.</para>
+          </callout>
+        </calloutlist></para>
+
+      <warning>
+        <para>When one uses a separate answer sheet, letters (or digits, if
+        one uses the option <option>digits</option>, see <xref
+        linkend="sec.package.options" />) are written in the check-boxes. To
+        achieve a correct detection of the checked boxes, one has to ask
+        students to completely fill the relevant boxes (checking by simply
+        drawing a cross would not suffice). One also has to tune the grey
+        level threshold (defining the proportion of black dots in a box above
+        which that box is considered to be checked) to a value of order
+        0.5.</para>
+      </warning>
+    </sect2>
+
+    <sect2>
+      <title>Description of the LaTeX commands</title>
+
+      <sect3 id="sec.package.options">
+        <title>Package options</title>
+
+        <para>To use the <package>automultiplechoice</package> package, one
+        uses the line <programlisting>\usepackage[...]{automultiplechoice}</programlisting>where
+        the dots are replaced by a list of options separated by commas. Here
+        are the available options:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><option>box</option>: puts every question in a block, so
+            that it cannot be split by a page break.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>completemulti</option>: automatically adds a « None
+            of these answers are correct » choice at the end of each multiple
+            question. Thus, for these questions, a distinction can be made
+            between no answer and the answer consisting in treating none of
+            the listed answers as correct.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>noshuffle</option>: stops the automatic shuffling of
+            the answers for every question</para>
+          </listitem>
+
+          <listitem>
+            <para><option>answers</option>: produces the corrected version of
+            the MCQ test, not the test sheet itself.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>separateanswersheet</option>: requires that all
+            check-boxes be put together at the end of the test sheet (usually,
+            this option is used when one wants to have only one sheet to scan
+            per student - see the example in section <xref
+            linkend="secensemble" />).</para>
+          </listitem>
+
+          <listitem>
+            <para><option>digits</option>: if one uses the
+            <option>separateanswersheet</option> option, the
+            <option>digits</option> option requires the question to be
+            identified with digits rather than with letters (which corresponds
+            to the default setting). With this option, one has to take care
+            that the number of answers does not exceed 9.</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+
+      <sect3 id="sec.unecopie">
+        <title>Description of a copy</title>
+
+        <para>The LaTeX source code describing the content of the test sheet
+        has to be included in a call to the command
+        <command>\onecopy</command>, the first argument being the number of
+        distinct realizations to be produced, and the second argument being
+        the code used to generate a realization.</para>
+
+        <programlisting>\onecopy{50}{ ... }</programlisting>
+
+        <para>If you have downloaded the LaTeX package
+        <package>environ</package> <emphasis>before</emphasis>
+        <package>automultiplechoice</package>, an alternative syntax is
+        available, using the <command>examcopy</command> environment, where
+        the number of realizations is an option (default is 5).</para>
+
+        <programlisting>\begin{examcopy}[50]
+...
+\end{examcopy}</programlisting>
+
+        <note>
+          <para>The <package>environ</package> package is not available in the
+          TeX Live 2007 distribution, which is still used in Ubuntu
+          distributions up to version 9.10 (Karmic Koala).</para>
+        </note>
+      </sect3>
+
+      <sect3 id="latex.qr">
+        <title id="latex.qr.title">Questions and answers</title>
+
+        <para>For simple questions (a single correct answer), one uses the
+        following model: <programlisting linenumbering="unnumbered">\begin{question}{identifiant}
+  Here is the question...
+  \begin{choices}
+    \correctchoice{The correct answer}
+    \wrongchoice{A wrong answer}
+    \wrongchoice{Another wrong answer}
+  \end{choices}
+\end{question}</programlisting></para>
+
+        <important>
+          <para>One must use a different identifier for every question. An
+          identifier can be made of digits, letters, and simple characters
+          (but do not use e.g. braces or brackets). Don't end your question
+          identifier with a dot followed by digits, as this syntax is reserved
+          to codes input.</para>
+        </important>
+
+        <note>
+          <para>The maximum number of answers for a given question is limited
+          to 199.</para>
+        </note>
+
+        <para>To keep the original order of the answers and prevent shuffling
+        for this specific question, one can use the <option>o</option> option
+        of the <option>choices</option> environment, replacing line 3 by the
+        following:<programlisting>\begin{choices}[o]</programlisting></para>
+
+        <para>To put the answers on two columns, one can use the
+        <package>multicol</package> package by putting in the preamble (just
+        after the reference to the package
+        <package>automultiplechoice</package> for instance) the following
+        <programlisting>\usepackage{multicol}</programlisting>and by including
+        the choices enironment inside a multicols environment in the following
+        manner:<programlisting>  \begin{multicols}{2}
+    \begin{choices}
+      \correctchoice{The correct answer}
+      \wrongchoice{A wrong answer}
+      \wrongchoice{Another wrong answer}
+    \end{choices}
+  \end{multicols}</programlisting></para>
+
+        <para>For even shorter answers, one can require questions to be
+        printed following one another, using the
+        <option>choiceshoriz</option></para>
+
+        <para>environment instead of <option>choices</option>.</para>
+
+        <para>Multiple questions (those for which no, one, or several answers
+        can be correct) use the <option>questionmult</option> environment
+        instead of <option>question</option>.</para>
+
+        <para>When the answer to the question is not supposed to be taken into
+        account in the grading, one uses the <code>\QuestionIndicative</code>
+        command, as in the following example:</para>
+
+        <para><programlisting>\begin{question}{difficulty}\QuestionIndicative
+  \scoring{auto=0,v=-1,e=-2}
+  Did you find this class easy or difficult? Please answer on a scale from 0 (very difficult) to 5 
+(very easy).
+  \begin{choiceshoriz}[o]
+    \correctchoice{0}
+    \correctchoice{1}
+    \correctchoice{2}
+    \correctchoice{3}
+    \correctchoice{4}
+    \correctchoice{5}
+  \end{choiceshoriz}
+\end{question}</programlisting></para>
+      </sect3>
+
+      <sect3>
+        <title>Putting answers on multiple columns</title>
+
+        <para>To put answers on several columns (and thus save space), one can
+        embed the <option>choices</option> environment in a
+        <option>multicols</option> environment, using the LaTeX package
+        <package>multicol</package>.</para>
+
+        <para>If, moreover, the answers do not fit into a single line, an
+        answer might be split over several columns, which might be a little
+        puzzling for the reader. The <command>\AMCBoxedAnswers</command>
+        command was defined in order to prevent this phenomenon, by embedding
+        each answer into a box. Here is an example of use:</para>
+
+        <para><programlisting>\begin{question}{two columns}
+  What is a bird ?
+  \begin{multicols}{2}\AMCBoxedAnswers
+    \begin{choices}
+      \correctchoice{It is an animal with wings, laying eggs. There are birds with all sorts of colors.}
+      \wrongchoice{It is a large piece of furniture, made of wood, and used most of the time to store 
+      household linen}
+      \wrongchoice{It is a steam machine devised to seal cans at high speed.}
+    \end{choices}
+  \end{multicols}
+\end{question}</programlisting></para>
+
+        <para>Let us note that it is also possible to parametrize the vertical
+        space between two answer blocks, thanks to the dimension
+        <parameter>AMCinterBrep</parameter>:</para>
+
+        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
+      </sect3>
+
+      <sect3>
+        <title>Groups of questions</title>
+
+        <para>Putting questions into groups allows one to shuffle questions
+        inside these groups, in a different way for each realization of the
+        test. Every group of questions must have a name formed solely with
+        plain letters.</para>
+
+        <para>One can put questions in a group one by one, as in the following
+        example.</para>
+
+        <para><programlisting>\element{mygroup}{
+  \begin{question}{easy}
+    So, how much is one plus one?
+    \begin{choiceshoriz}
+      \correctchoice{two}
+      \wrongchoice{zero}
+      \wrongchoice{three}
+    \end{choiceshoriz}
+  \end{question}
+}</programlisting></para>
+
+        <important>
+          <para>The formation of the group, using the
+          <command>element</command> commands, must be made only once: thus,
+          these commands have to be used <emphasis>before</emphasis> the
+          <command>onecopy</command> command, which repeats some actions for
+          every realization.</para>
+        </important>
+
+        <para>Once a group is formed, it is possible to shuffle questions
+        inside this group using the <command>melangegroupe</command> command.
+        For instance<programlisting>\melangegroupe{mygroup}</programlisting></para>
+
+        <para>Finally, the group content can be output to the test sheet using
+        command <command>restituegroupe</command>, as in<programlisting>\restituegroupe{mygroup}</programlisting></para>
+
+        <note>
+          <para>These last two commands (<command>melangegroupe</command> and
+          <command>restituegroupe</command>) are to be used inside the
+          argument of the command <command>onecopy</command>, so that
+          shuffling is performed before each realization.</para>
+        </note>
+      </sect3>
+
+      <sect3>
+        <title>Check-box presentation style</title>
+
+        <para>The <command>\AMCboxDimensions</command> command allows one to
+        modify one or several dimensions of the check-boxes.</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><option>size</option> is the size of the box;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>rule</option> is the thickness of the boundary of
+            the box;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>down</option> controls by how much boxes are pushed
+            down.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>To obtain smaller boxes, one can e.g. use the command</para>
+
+        <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
+      </sect3>
+
+      <sect3>
+        <title>Questions presentation style</title>
+
+        <para>The way each question is presented can be modified by redefining
+        the LaTeX command <command>AMCbeginQuestion</command>, whose default
+        definition is the following:</para>
+
+        <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
+
+        <para>The first parameter transmitted to this command is the number of
+        the question to be displayed. The second parameter contains
+        <code>\multiSymbole</code> in the case of a multiple question, and is
+        void in all other cases. The <code>\multiSymbole</code> command too
+        can be modified: its goal is to distinguish multiple questions from
+        the others. By default, it displays a club.</para>
+
+        <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
+
+        <para>Finally, one can modify the number of the next question with the
+        <code>\AMCnumero command</code>. At the beginning of each realization
+        of the test, a call to</para>
+
+        <para><programlisting>\AMCnumero{1}</programlisting></para>
+
+        <para>is performed, but this command can be used at any place.</para>
+
+        <para>The display of answers can be modified in the same fashion, if
+        one uses the <option>choicescustom</option> environment instead of
+        <option>choices</option> or <option>choiceshoriz</option>, redefining
+        the three following LaTeX macros:</para>
+
+        <para><programlisting>\def\AMCbeginAnswer{}
+\def\AMCendAnswer{}
+\def\AMCanswer#1#2{#1 #2}
+</programlisting></para>
+      </sect3>
+
+      <sect3>
+        <title>Separate answer sheet presentation style</title>
+
+        <para>It is also possible to modify the layout of the separate answer
+        sheet produced with the <option>separateanswersheet</option> option
+        (see section <xref linkend="secensemble" />).</para>
+
+        <orderedlist>
+          <listitem>
+            <para>If one only wants to modify the horizontal spacing between
+            two check-boxes or the vertical spacing between two questions, one
+            just has to redefine the following dimensions:</para>
+
+            <programlisting>\AMCformHSpace=.3em
+\AMCformVSpace=1.2ex
+</programlisting>
+          </listitem>
+
+          <listitem>
+            <para>For a deeper modification of the display settings, one can
+            also redefine the commands that are used at the beginning of each
+            question and for each answer (here follows the default
+            definitions):</para>
+
+            <programlisting>\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1:}}
+\def\AMCformulaireReponse#1{\hspace{\AMCformHSpace} #1}
+</programlisting>
+          </listitem>
+        </orderedlist>
+
+        <para>These definitions have to be inserted just after
+        <code>\begin{document}</code> in the LaTeX file.</para>
+      </sect3>
+
+      <sect3 id="latex.codes">
+        <title>Code acquisition</title>
+
+        <para>Code acquisition can be easily performed thanks to the LaTeX
+        command <command>AMCcode</command>, for instance to allow each student
+        to enter her/his student number by herself/himself on the answer
+        sheet. The two arguments of this command are a code/question
+        identifier, and the number of digits to be used by the code. One can
+        e.g. use the following header</para>
+
+        <para><programlisting>\noindent\AMCcode{studentid}{8}\hspace*{\fill}
+\begin{minipage}{.5\linewidth}
+$\longleftarrow{}$ please encode your student number below,
+and write your first and last names below.
+
+\vspace{3ex}
+
+\champnom{\fbox{    
+    \begin{minipage}{.9\linewidth}
+      Firstname and lastname:
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+\end{minipage}
+</programlisting></para>
+
+        <para>If the <option>separateanswersheet</option> option is used, the
+        <command>AMCcode</command> command has to be placed after the
+        <command>AMCdebutFormulaire</command> command.</para>
+      </sect3>
+
+      <sect3>
+        <title>Choice of shuffling parameters</title>
+
+        <para>One can modify the seed of the random number generator used to
+        produce the shuffle, thanks to the following command (to be used just
+        at the beginning of the document, and in any case outside the
+        <command>onecopy</command> command):</para>
+
+        <para><programlisting>\AMCrandomseed{1527384}</programlisting></para>
+
+        <para>If the value that is assigned (to be chosen between 1 and
+        4194303) is modified, then the shuffling will differ. Of course, one
+        must not modify this value after the test sheets have been
+        printed.</para>
+      </sect3>
+
+      <sect3>
+        <title>Using references inside the test sheets</title>
+
+        <para>Using LaTeX commands <command>\label</command> and
+        <command>\ref</command> within questions or answers is problematic
+        since they will be called with the same arguments for every
+        realization of the test, which will alter the numbering of references.
+        To solve this problem, one should use instead the
+        commands<command>\AMClabel</command> and <command>\AMCref</command>:
+        they add the realization number to their argument before transmitting
+        it to <command>\label</command> et <command>\ref</command>.</para>
+
+        <para>One also has to reset counters to zero at the beginning of each
+        realization. For instance, if one wants to include references to
+        pictures that are put together in a separate page, one might write
+        something like</para>
+
+        <programlisting>\element{animals}{
+  \begin{figure}[p]
+    \centering
+    \includegraphics[width=.6\linewidth]{tiger}
+    \caption{An animal}
+    \AMClabel{tiger}
+  \end{figure}
+    
+  \begin{question}{tiger}
+    Which is the animal on figure~\AMCref{tiger}?
+    \begin{choices}
+      \correctchoice{A tiger}
+      \wrongchoice{A giraffe}
+      \wrongchoice{An elephant}
+      \wrongchoice{A cat}
+    \end{choices}
+  \end{question}
+}</programlisting>
+
+        <para>and it is then important to add, just after the command
+        <command>\onecopy</command> the line</para>
+
+        <programlisting>\setcounter{figure}{0}</programlisting>
+
+        <para>so that the numbering of figures starts at 1 for every
+        realization. Without that last command, the numbering of figures woud
+        go on from one realization to the next one, which is clearly not
+        desirable.</para>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Mathematical questions with randomized statements</title>
+
+      <para>Thanks to the LaTeX package <package>fp</package>, whose
+      documentation is available at <ulink
+      url="http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp">http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp</ulink>,
+      and which can be downloaded with the command <programlisting>\usepackage{fp}</programlisting>added
+      before that corresponding to <package>automultiplechoice</package>, one
+      can create exercices with randomized numerical data. Let us start with a
+      simple example.</para>
+
+      <para><programlisting>\begin{question}{addition}
+  \FPeval\VQa{trunc(1+random*8,0)}  <co id="alea.random"
+            linkends="alea.random.exp" />
+  \FPeval\VQb{trunc(4+random*5,0)}
+  \FPeval\VQsomme{clip(VQa+VQb)}  <co id="alea.result"
+            linkends="alea.result.exp" />
+  \FPeval\VQnonA{clip(VQa+VQb-1)}  <co id="alea.fausse"
+            linkends="alea.fausse.exp" />
+  \FPeval\VQnonB{clip(VQa*VQb)}
+  \FPeval\VQnonC{clip(VQa-VQb)}
+
+  What is the sum of \VQa{} et \VQb{} ?
+  \begin{choiceshoriz}
+    \correctchoice{\VQsomme}
+    \wrongchoice{\VQnonA}
+    \wrongchoice{\VQnonB}
+    \wrongchoice{\VQnonC}
+  \end{choiceshoriz}
+\end{question}</programlisting></para>
+
+      <para>The <command>\FPeval</command> command is used to perform
+      computations:</para>
+
+      <para><calloutlist>
+          <callout arearefs="alea.random" id="alea.random.exp">
+            <para>Since <command>random</command> returns a real number in the
+            interval [0,1], this command sets VQa to a random integer value
+            between 1 et 8. The next line sets VQb to a random integer value
+            between 4 et 8.</para>
+          </callout>
+
+          <callout arearefs="alea.result" id="alea.result.exp">
+            <para>Putting the correct answer in the variable VQsomme.</para>
+          </callout>
+
+          <callout arearefs="alea.fausse" id="alea.fausse.exp">
+            <para>Putting wrong answers in variables VQnonA, VQnonB et
+            VQnonC...</para>
+          </callout>
+        </calloutlist>Variable names beginning with VQ have been chosen so as
+      to avoid interference with other LaTeX commands.</para>
+
+      <para>The automultiplechoice package moreover defines a
+      <command>\choixIntervalle</command> command which makes this kind of
+      construction simpler, as illustrated in the next
+      example:<programlisting>\begin{question}{inf-expo-indep}
+  \FPeval\VQa{trunc(2 + random * 4,0)}
+  \FPeval\VQb{trunc(6 + random * 5,0)}
+  \FPeval\VQr{VQa/(VQa+VQb)}
+  
+  Let $X$ and $Y$ be two independent random variables, following the exponential distribution with
+respective parameters \VQa{} et \VQb{}.
+  To which interval does the probability $\mathbb{P}[X&lt;Y]$ belong ?
+
+  \begin{multicols}{5}
+    \begin{choices}[o]
+      \choixIntervalles{\VQr}{0}{1}{0.1}  <co id="choix.intervalles"
+            linkends="choix.intervalles.exp" />
+    \end{choices}
+  \end{multicols}
+\end{question}</programlisting></para>
+
+      <para><calloutlist>
+          <callout arearefs="choix.intervalles" id="choix.intervalles.exp">
+            <para>This lines inserts ten answers corresponding to the
+            intervals [0,0.1[ [0.1,0.2[ ... [0.9,1[, while indicating that the
+            correct interval is the one containing VQr. The arguments of the
+            <command>\choixIntervalle</command> command are the
+            following:</para>
+
+            <orderedlist>
+              <listitem>
+                <para>The correct answer,</para>
+              </listitem>
+
+              <listitem>
+                <para>The leftpoint of the first interval,</para>
+              </listitem>
+
+              <listitem>
+                <para>The righpoint of the last interval,</para>
+              </listitem>
+
+              <listitem>
+                <para>The length of each interval.</para>
+              </listitem>
+            </orderedlist>
+          </callout>
+        </calloutlist></para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="interface-graphique">
+    <title>Usage - Graphical interface</title>
+
+    <para>We shall describe here a usage example with the graphic interface
+    from the conception of the multiple-choice test until the edition of
+    students' scores.</para>
+
+    <sect2>
+      <title>Creating a new project and subject</title>
+
+      <para>Let's open the graphic interface. This can be done ordinarily by
+      selecting <menuchoice>
+          <guimenu>Applications</guimenu>
+
+          <guisubmenu>Education</guisubmenu>
+
+          <guimenuitem>Auto Multiple Choice</guimenuitem>
+        </menuchoice> in the general menu of Gnome (or its equivalent in KDE
+      or other), but the command <userinput>auto-multiple-choice</userinput>
+      can be used directly.</para>
+
+      <para>Let's now create a new project, thanks to <menuchoice>
+          <guimenu>Project</guimenu>
+
+          <guimenuitem>New</guimenuitem>
+        </menuchoice>. A window opens and allows us to see existing project
+      names (if any), but we want to create a new project, so we choose a name
+      (made with simple characters; « test » will be OK for our short test),
+      which we write in the field <guilabel>New project</guilabel>, then we
+      push the <guibutton>Create a project</guibutton> button.</para>
+
+      <para>Now we must choose a LaTeX file as a source for the
+      multiple-choice. To do so let's click on the button named
+      <guilabel>LaTeX file</guilabel>. The current directory is the one with
+      examples given with AMC (usually it is
+      <filename>/usr/share/doc/auto-multiple-choice/exemples/</filename>):
+      let's select <filename>simple.tex</filename>. To be able to modify it at
+      will, we must copy it into the project's directory, with the button
+      <guibutton>import</guibutton>. Now we can edit it to modify the shape of
+      the document or the questions, thanks to the <guibutton>edit</guibutton>
+      button which lanches the default editor.</para>
+    </sect2>
+
+    <sect2>
+      <title>Preparing the subject</title>
+
+      <para>Preparing a project is done in two steps. First we must make the
+      reference documents from the LaTeX source file. This can be done by
+      clicking the <guibutton>Update button</guibutton> in the section
+      <guilabel>Work documents</guilabel>. The following documents are
+      produced:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>The <emphasis>subject</emphasis>. This file must be printed to
+          distribute its pages to students.</para>
+        </listitem>
+
+        <listitem>
+          <para>The <emphasis>correction</emphasis>. We can check that the
+          chosen responses there are the good ones. It is also made to be
+          distributed to students.</para>
+        </listitem>
+
+        <listitem>
+          <para>The <emphasis>layout document</emphasis>. Framing marks,
+          checkboxes, and also the area where students write their names are
+          drawn with colors. The program will use this document to locate
+          exactly those elements.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>When produced, those documents can be viewed (and possibly
+      printed) with a double-click on their names.</para>
+
+      <para>Now we can begin the last step of the preparation: analyzing the
+      layout document. It can be launched with the button
+      <guibutton>Calculate</guibutton> in the section <guilabel>Layout
+      </guilabel>. This analysis detects, in every page of the subject, the
+      exact position of every element which must be analyzed in the students'
+      copies. This analysis can be a bit long (mainly when there are many
+      pages in the subject). We can see the result in the right-side list,
+      which displays for each page its number, its identificator (a code
+      containing the student's number), the page number for this student, and
+      a code to verify the identification), and also the date of the last
+      update of the layout.</para>
+
+      <para>To check whether the layouts have been correctly detected, we can
+      use the button <guibutton>Check the layouts</guibutton>. A short insight
+      allows to check that red checkboxes are correctly located over the boxes
+      of the subject.</para>
+    </sect2>
+
+    <sect2>
+      <title>Exam</title>
+
+      <para>When the preparation is over, we can print the subject, and
+      distribute it to the sudents... In simple cases, we can directly print
+      from the viewer (after clicking the line <guilabel>Subject</guilabel> in
+      the list of work documents). When it is better to print the copies
+      separately (for example if copies contain multiple pages and when the
+      printer allows to stapple them together), we shall rather use the button
+      <guibutton>Print copies</guibutton> after calculating the layout.</para>
+
+      <important>
+        <para>When the subject is printed and distributed, we may no more
+        modify the <emphasis>work documents</emphasis> because they must
+        remain identical to distributed copies.</para>
+      </important>
+    </sect2>
+
+    <sect2>
+      <title>Reading the copies</title>
+
+      <para>Now we shall describe the input from students' copies, which can
+      be done automatically and/or manually.</para>
+
+      <para>Let's move to the <guilabel>Input</guilabel> tab of the graphical
+      interface.</para>
+
+      <sect3>
+        <title>Automated input</title>
+
+        <para>For automatic recognition of the checked boxes in the students'
+        pages, they must be previously digitallized. I use a copier/scanner
+        which does it automatically (all the pages in a bundle without
+        interaction with me), with the following settings: 300 dpi, OCR mode
+        (for the characters' recognition, black and white without greyscale -
+        but the scanner does not process any character regognition), each scan
+        delivered as a single TIFF file per page.</para>
+
+        <note>
+          <para>To analyze the scans, we must have an image file (TIFF, JPG,
+          PNG, etc.) per page.</para>
+        </note>
+
+        <para>Then we select this set of scan files in the dialog opened by
+        the button <guibutton>Automated</guibutton> of the section
+        <guilabel>Input of copies after exam</guilabel>, then we validate with
+        the button <guibutton>Use</guibutton> of this dialog. It's now time to
+        drink a coffee because the analysis of copies can be very long (and
+        can be done quietly because it requires no interaction).</para>
+
+        <para>The result of the analysis of each page is indicated in the
+        lists of the section <guilabel>Diagnosis</guilabel>:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>The value <emphasis>MSD</emphasis> (mean square deviation)
+            is an indication of the good framing of the marks (the four black
+            dots surrounding each copy). When it is too great, the framing
+            must be checked (right click on the page's line then choose
+            <guimenuitem>page</guimenuitem> to view the scanned page and the
+            boxes as they were detected).</para>
+          </listitem>
+
+          <listitem>
+            <para>The value <emphasis>sensitivity</emphasis> is an indicator
+            of proximity of the filling of the boxes with the threshold. If it
+            is too great (from 8 to its max value 10), we must check whether
+            the boxes recognized as checked are the good ones (a right click
+            on the page's line the choose <guimenuitem>zoom</guimenuitem> to
+            view the set of boxes in the copy, and verify whether the
+            detection worked correctly).</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+
+      <sect3>
+        <title>Manual input</title>
+
+        <para>If we cannot use easily the scanner, or if, for a few copies,
+        the automated input did not work as expected, we can manage the input
+        manually. To do so, let's open the right window thanks to the button
+        <guibutton>Manual</guibutton> of the section <guilabel>Input of the
+        copies after exam</guilabel>. In that window, we can input the boxes
+        which have been checked ourselves (by clicking them) on the wanted
+        pages.</para>
+
+        <note>
+          <para>Every manual input will overwrite results eventually coming
+          from a previous or posterior automated input for the same
+          page.</para>
+        </note>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Correction</title>
+
+      <para>In the <guilabel>Scoring</guilabel> tab of the graphic interface,
+      the part <guilabel>Scoring</guilabel> allows us to deduce the scores of
+      the students from the inputs, but also to read the codes written by the
+      students (see <xref linkend="latex.codes" />).</para>
+
+      <sect3>
+        <title>Process</title>
+
+        <para>The computation of the scores is launched with the button
+        <guibutton>Correct</guibutton>, but we must previously make the
+        following choice:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>If we check the box <guilabel>Update the scale</guilabel>,
+            the scoring strategy will be first extracted from the LaTeX source
+            file. This allow to try many strategies at the end of the
+            correction process. The method to specify the strategy in the
+            LaTeX file will be explained in the section <xref
+            endterm="bareme.title" linkend="bareme" /> (a default scoring
+            strategy is used when no indication is given).</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>When we click the button <guibutton>Correction</guibutton>, the
+        correction is made (this can take some time if we also aked for the
+        reading of the scale).</para>
+      </sect3>
+
+      <sect3 id="bareme">
+        <title id="bareme.title">Scoring strategy</title>
+
+        <para>The strategy used to score the copies is indicated in the LaTeX
+        source file, with the command <command>scoring</command>. It can be
+        used in an environment <command>question</command> or
+        <command>questionmult</command>, to set it for every response, but
+        also in the environment <command>choices</command>, to give scaling
+        indications about a single response. The argument of the LaTeX command
+        scoring is made of indications like
+        <code><replaceable>parameter</replaceable>=<replaceable>value</replaceable></code>,
+        separated by comas. The usable parameters are the following (the table
+        shows also in which case those parameters can be used):</para>
+
+        <informaltable>
+          <tgroup cols="6">
+            <colspec align="center" colname="param" colwidth="3pc" />
+
+            <colspec align="center" colname="q" colwidth="1pc" />
+
+            <colspec align="center" colname="r" colwidth="1pc" />
+
+            <colspec align="center" colname="qm" colwidth="1pc" />
+
+            <colspec align="center" colname="rm" colwidth="1pc" />
+
+            <colspec align="left" colname="valeur" />
+
+            <spanspec nameend="r" namest="q" spanname="simple" />
+
+            <spanspec nameend="rm" namest="qm" spanname="multiple" />
+
+            <tbody>
+              <row>
+                <entry morerows="1">parameter</entry>
+
+                <entry spanname="simple">simple</entry>
+
+                <entry spanname="multiple">multiple</entry>
+
+                <entry morerows="1">value</entry>
+              </row>
+
+              <row>
+                <entry>Q</entry>
+
+                <entry>R</entry>
+
+                <entry>Q</entry>
+
+                <entry>R</entry>
+              </row>
+
+              <row>
+                <entry>e</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>The score given when responses are incoherent: many
+                boxes checked for a simple question, or, for a multiple
+                question, the box "none of the responses are correct" checked
+                while another box is also checked.</entry>
+              </row>
+
+              <row>
+                <entry>v</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>The score given in case of no response (no box is
+                checked).</entry>
+              </row>
+
+              <row>
+                <entry>d</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>An offset, i.e. a value added to every score not
+                relevant of parameters e and v.</entry>
+              </row>
+
+              <row>
+                <entry>p</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>The bottom score. If the calculation of the score in
+                that question yelds a value below the bottom value, the sore
+                is set to the bottom value.</entry>
+              </row>
+
+              <row>
+                <entry>b</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>Score for a good response to a question.</entry>
+              </row>
+
+              <row>
+                <entry>m</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>Score for a bad response to a question.</entry>
+              </row>
+
+              <row>
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>Without parameter name (syntax:
+                <code>\scoring{2}</code>), this indicates the score to give if
+                the student has checked <emphasis>this</emphasis>
+                response.</entry>
+              </row>
+
+              <row>
+                <entry>auto</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>With this parameter, the value of the response numbered
+                i will be auto+i-1. This option is mainly used with
+                <code>\QuestionIndicative</code> (see section <xref
+                endterm="latex.qr.title" linkend="latex.qr" />).</entry>
+              </row>
+
+              <row>
+                <entry>haut</entry>
+
+                <entry></entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>When you give this parameter a value n, the score given
+                for a perfect response will be n, and one point will be
+                withdrawn for each error.</entry>
+              </row>
+
+              <row>
+                <entry>MAX</entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>●</entry>
+
+                <entry></entry>
+
+                <entry>Gives the maximal value gived for the question (for a
+                "question scored 5", one can write MAX=5). To be used only
+                when it is not the same value as when one replies every good
+                response.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <para>The default scale for a simple question is
+        <code>e=0,v=0,b=1,m=0</code>, which gives one point for a good
+        response and and no point in the other cases. The default scaling for
+        a multiple question is <code>e=0,v=0,b=1,m=0,p=-100,d=0</code>, which
+        gives a point for every checked box, either good or not (good box
+        checked or wrong box not checked).</para>
+
+        <para>Using all of these parameters in combination allows to define
+        many kinds of scoring strategies, as in the following example:</para>
+
+        <para><!--NAME: Scoring strategy
+DESC: Exemple (from the documentation) with different scoring strategies.--><programlisting
+        id="modeles-scoring.tex" linenumbering="numbered">\documentclass{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}
+
+\begin{document}
+
+\element{qqs}{
+\begin{question}{good choice}
+  How many points would you like for this question?
+  \begin{choices}
+    \correctchoice{Maximum: 10}\scoring{10}
+    \wrongchoice{Only 5}\scoring{5}
+    \wrongchoice{Two will be enough}\scoring{2}
+    \wrongchoice{None, thanks}\scoring{0}
+  \end{choices}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{added}
+  Get free points checking the following boxes:
+  \begin{choices}
+    \correctchoice{2 points}\scoring{b=2}
+    \wrongchoice{One negative point!}\scoring{b=0,m=-1}
+    \correctchoice{3 points}\scoring{b=3}
+    \correctchoice{1 point}
+    \correctchoice{Half point}\scoring{b=0.5}
+  \end{choices}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{2 ok}\scoring{b=3,d=-9,p=0}
+  Only a perfect response will be scored 3 points - otherwise, null score.
+  \begin{choices}
+    \wrongchoice{Wrong}
+    \wrongchoice{Wrong}
+    \correctchoice{Right}
+    \correctchoice{Right}
+  \end{choices}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{all}\scoring{d=-3,p=0}
+  Perfect response scored 2 points, and give back one point for any error...
+  \begin{choices}
+    \correctchoice{Right}
+    \correctchoice{This one is OK}
+    \correctchoice{Yes!}
+    \wrongchoice{False!}
+    \wrongchoice{Don't check!}
+  \end{choices}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{question}{attention}\scoring{b=2}
+  Some very bad answer yields here to a negative score (-2), but the correct answer is rewarded 2 points.
+  \begin{choices}
+    \correctchoice{Good!}
+    \wrongchoice{Not correct}
+    \wrongchoice{Not correct}
+    \wrongchoice{Not correct}
+    \wrongchoice{Very bad answer!}\scoring{-2}
+  \end{choices}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{as you like}
+  Choose how much points you need:
+  \begin{choices}
+    \correctchoice{You take two points here}\scoring{b=2}
+    \wrongchoice{Check to give 3 points}\scoring{b=0,m=3}
+    \correctchoice{Get one if checked, but give one if not}\scoring{m=-1}
+  \end{choices}
+\end{questionmult}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\onecopy{20}{
+
+\noindent{\bf QCM  \hfill Scoring strategy test}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Jan. 2008\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Name:
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\melangegroupe{qqs}
+
+\restituegroupe{qqs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+}
+
+\end{document}</programlisting></para>
+      </sect3>
+
+      <sect3>
+        <title>Global scoring strategy</title>
+
+        <para>To use a strategy globally for a set of questions, one can
+        define it in a LaTeX command, as in the following example:</para>
+
+        <programlisting>\def\barQmult{haut=3,p=-1}
+
+\begin{questionmult}\scoring{\barQmult}
+[...]
+\end{questionmult}</programlisting>
+
+        <para>Another possibility comes with the LaTeX commands
+        <command>\scoringDefaultS</command> and
+        <command>\scoringDefaultM</command>, to be used in the begin of the
+        document (outside the command <command>\onecopy</command>), which
+        allow to give default values for the scoring strategy of simple and
+        multiple questions:</para>
+
+        <programlisting>\scoringDefaultM{haut=3,p=-1}</programlisting>
+
+        <para>In some cases, defining a global strategy can be interesting
+        <emphasis>depending of the number of proposed responses</emphasis>. To
+        do so, just input the value <varname>N</varname>. For example, to get
+        a scale yelding 4 as the maximal score and such as the mean expected
+        score of a student checking randomly the boxes is 1, one can use the
+        scale <code>d=4,b=0,m=-(4-1)*2/N</code> (which give the score -2 if
+        every response is false, i.e. the wrong boxes have been checked and
+        the right boxes are not). Operations allowed in those formulas are the
+        four simple operations (<code>+</code> <code>-</code> <code>*</code>
+        <code>/</code>), cases operator <code>( ? : )</code> and
+        parenthesis.</para>
+
+        <para>Other variables can also be used:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><varname>N</varname> is the number of proposed responses,
+            without counting the response eventually added by the option
+            <option>completemulti</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NB</varname> is the number of correct responses to
+            the question (without taking in account checked or non-checked
+            boses).</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NBC</varname> is the count of correct responses
+            which have been checked.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NM</varname> is the number of wrong responses to
+            the question (without taking in account checked or non-checked
+            boses).</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>NMC</varname> is the count of wrong responses which
+            have been checked.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>IS</varname> is set to 1 if the question is simple
+            and 0 if not.</para>
+          </listitem>
+
+          <listitem>
+            <para><varname>IMULT</varname> is set to 1 if the question is
+            multiple and 0 if not.</para>
+          </listitem>
+        </itemizedlist>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Identification of the students</title>
+
+      <para>This stage is not mandatory. It deals with associating each copy
+      with a student. The name of the student is not read in an automated
+      fashion, but two reasonable possibilities are proposed:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>It is possible to ask students to identify themselves on their
+          copy with their student number, which will be written by checking
+          one box per digit. A LaTeX command is designed to use this method on
+          the copy (see the part <xref linkend="latex.codes" />). After the
+          exam, copies will be identified automatically taking into account a
+          list matching the students' numbers and their names.</para>
+        </listitem>
+
+        <listitem>
+          <para>With no input of the students' numbers, or in the case when
+          the automatied identification has not succeeded perfectly (for
+          example when a student made a wrong input), the graphical interface
+          allows an assisted manual association.</para>
+        </listitem>
+      </orderedlist>
+
+      <para>Let's first move to the <guilabel>Scoring</guilabel> tab of the
+      graphical interface.</para>
+
+      <sect3 id="liste.etudiants">
+        <title id="liste.etudiants.title">List of the students</title>
+
+        <para>We must previously supply a list of students. This list can
+        obviously be used for many multiple-choices tests. This list is a text
+        file containing one student per line. We may also append a few
+        complementary informations in the file, as in the following example
+        (in the example above, email will not be used at all by
+        AMC):<programlisting># STUDENTS / 1ST YEAR
+surname:name:id:email
+Bienvenüe:Alexis:001:paamc@passoire.fr
+Boulix:Jojo:002:jojo.boulix@rien.xx
+Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
+
+        <para>The lines of the file which begin with the character
+        `<code>#'</code> are comments. The first of the other lines contains
+        (separated by the character <code>`:'</code>) the column titles. Then,
+        with one line per student, we write the corresponding informations.
+        There must be at least one column named <code>name</code> or
+        <code>surname</code>.</para>
+
+        <note>
+          <para>One can replace the separator <code>`:'</code> by a comma, a
+          semicolon or a tabulation. However the same separator must be used
+          eveywhere in the file which contains the list of students. The used
+          separator is detected by taking the character (out of the four
+          possible characters) which appears most frequently in the first line
+          which is not a comment.</para>
+        </note>
+
+        <para>The prepared list of students (either a simple list or with more
+        informations) will then be selected with the button <guilabel>List of
+        the students</guilabel>. We must also choose one of the columns as a
+        unique key wich will identify the students (generally, one chooses the
+        column containing the student's number). Last, to prepare an automated
+        association, we must choose the name of the relevant code used in the
+        LaTeX command <command>AMCcode</command> (if used).</para>
+      </sect3>
+
+      <sect3>
+        <title>Association</title>
+
+        <sect4>
+          <title>Automated association</title>
+
+          <para>When we push the button <guibutton>Automated
+          association</guibutton> in the part <guilabel>Identification of the
+          students</guilabel>, matching of the codes given by the students
+          begins. We can watch or improve the result later with a (partial)
+          manual association.</para>
+
+          <warning>
+            <para>To make an automated association, at least one command
+            <command>AMCcode</command> is required (see <xref
+            linkend="latex.codes" />) in the LaTeX source file, as well as a
+            list of students with a column containing a reference (generally a
+            number of student) which will be identical to the input given in
+            the boxes produced by the commnd
+            <command>AMCcode</command>.</para>
+          </warning>
+        </sect4>
+
+        <sect4>
+          <title>Manual association</title>
+
+          <para>To open the window allowing recognition of the students'
+          names, let's click on <guibutton>Manual association</guibutton>
+          button in the part <guilabel>Identification of students</guilabel>.
+          This window is made of an upper part which presents in sequence
+          images of the names written by the students, a lower part containing
+          a button for each student from the list we supplied, and a right
+          part allowing to browse easily the copies to be identified. Let's
+          click the button matching the name written in the upper part for
+          each presented page (by default, only the copies not or badly
+          identified are presented - this can be changed by checking the box
+          <guilabel>associated</guilabel>). When every page is read, a blue
+          background appears instead of the names, and we just need to click
+          the <guibutton>Save</guibutton> button to end with
+          association.</para>
+        </sect4>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Exporting the scores list</title>
+
+      <para>At this stage, we can get the list of scores under various formats
+      (currently CSV and OpenOffice), with the button
+      <guibutton>Export</guibutton>. This export will be followed by the
+      opening of the produced file by the appropriate software (if
+      available).</para>
+    </sect2>
+
+    <sect2>
+      <title>Annotation</title>
+
+      <para>When we push the button <guibutton>Annotate the
+      copies</guibutton>, copies annotation will begin: on every scan, the
+      following annotations will be made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>The boxes wrongly checked by the student will be circled in
+          red;</para>
+        </listitem>
+
+        <listitem>
+          <para>the non-checked boxes which should have been are checked in
+          red;</para>
+        </listitem>
+
+        <listitem>
+          <para>the checked boxes which had to be checked are checked in
+          blue;</para>
+        </listitem>
+
+        <listitem>
+          <para>for each question, obtained and maximal scores are
+          indicated;</para>
+        </listitem>
+
+        <listitem>
+          <para>the global score of the copy is indicated on the first page of
+          the copy.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>This operation is made for each page, giving as a result JPG
+      format annotated pages.</para>
+
+      <para>If we wish to distribute the annotated/corrected copies to
+      students in electronic format, it is useful to make a PDF file for each
+      student, from his/her JPG annotated pages. This is made by pushing the
+      button <guibutton>Gather</guibutton>. The name of the PDF file which
+      will contain the corrected copy of a student is based on the template
+      indicated in the field <guilabel>Template of file name</guilabel>. In
+      that template, every substring as « (<replaceable>col</replaceable>) »
+      is replaced by the contents of the column named
+      <code><replaceable>col</replaceable></code> in the file containing the
+      list of students (see section <xref endterm="liste.etudiants.title"
+      linkend="liste.etudiants" />). If we let this field empty, a default
+      value is built up based on the student's name.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="commandes">
+    <title>Command manual</title>
+
+    <para>You may skip this part if you want to use only the graphical user
+    interface. However, every action carried out with the graphical interface
+    can also be performed using the various commands whose syntax is described
+    here.</para>
+
+    <refentry id="auto-multiple-choice">
+      <refmeta>
+        <refentrytitle>auto-multiple-choice</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+        <refname>auto-multiple-choice</refname>
+
+        <refpurpose>Automated treatment of MCQs</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain"><replaceable>action</replaceable></arg>
+
+          <arg rep="repeat">agruments</arg>
+        </cmdsynopsis>
+
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg>project</arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+        <para>The <command>auto-multiple-choice</command> transmits its
+        arguments to the
+        <command>AMC-<replaceable>action</replaceable>.pl</command>
+        command.</para>
+
+        <para>The second form, which does not mention any action, calls the
+        graphical interface <command>AMC-gui.pl</command>, possibly with the
+        name of a project to be opened.</para>
+      </refsect1>
+    </refentry>
+  </sect1>
+</article>

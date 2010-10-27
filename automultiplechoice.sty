@@ -298,12 +298,12 @@
 %
 \newcommand\AMCrep@init[1]{\ifAMC@ordre\AMCrep@o\else\csname AMCrep@#1\endcsname\fi\AMCload@counter=0}
 \newcommand\alafin{\AMCrep@@count=\AMCrep@count\AMCrep@fini\AMCrep@init{o}\AMCrep@count=\AMCrep@@count}
-\newcommand\AMC@fin@rep{\ifAMCcomplete@multi\ifAMCtype@multi\alafin\AMCrep@count=-1\ifAMCune@bonne\mauvaise{\@aucune}\else\bonne{\@aucune}\fi\fi\fi\AMCrep@fini}
+\newcommand\AMC@fin@rep{\ifAMCcomplete@multi\ifAMCtype@multi\alafin\AMCrep@count=-1\ifAMCune@bonne\wrongchoice{\@aucune}\else\correctchoice{\@aucune}\fi\fi\fi\AMCrep@fini}
 %
-\newenvironment{reponses}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@itemize}\ifAMC@rbloc\def\une@rep{\AMCrep@bloc}\else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi\AMCrep@init{#1}}{\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
+\newenvironment{choices}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@itemize}\ifAMC@rbloc\def\une@rep{\AMCrep@bloc}\else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi\AMCrep@init{#1}}{\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
 %
-\newenvironment{reponseshoriz}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}\par\begin{center}}{\AMC@fin@rep\end{center}}
-\newenvironment{reponsesperso}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}\AMCbeginAnswer}{\AMC@fin@rep\AMCendAnswer}
+\newenvironment{choiceshoriz}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}\par\begin{center}}{\AMC@fin@rep\end{center}}
+\newenvironment{choicescustom}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}\AMCbeginAnswer}{\AMC@fin@rep\AMCendAnswer}
 %
 \newcommand\AMCrep@o{\def\AMCload@@reponse{\AMCrien@deux}\def\AMCrep@fini{}}
 \newcommand\AMCrep@r{\def\AMCload@@reponse{\AMCload@reponse}\def\AMCrep@fini{\shuffle@it\AMCdump@reponses}}
@@ -346,10 +346,10 @@
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}
 %
-\newcommand{\bonne}[2][]{\advance\AMCrep@count by 1%
+\newcommand{\correctchoice}[2][]{\advance\AMCrep@count by 1%
 \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
 \AMCune@bonnetrue\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marquebonne{#1}\else\AMC@marquevide{#1}\fi}{#2}}{\the\AMCrep@count}}
-\newcommand{\mauvaise}[2][]{\advance\AMCrep@count by 1%
+\newcommand{\wrongchoice}[2][]{\advance\AMCrep@count by 1%
 \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
 \AMCload@@reponse{\une@rep{\AMC@marquevide{#1}}{#2}}{\the\AMCrep@count}}
 %
@@ -381,26 +381,26 @@
  \AMCnobloc%
  \AMC@chiffres=#2\loop%
  \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative
-   \begin{reponsesperso}[o]\bareme{auto=0}
-     \mauvaise[0]{0}
-     \mauvaise[1]{1}
-     \mauvaise[2]{2}
-     \mauvaise[3]{3}
-     \mauvaise[4]{4}
-     \mauvaise[5]{5}
-     \mauvaise[6]{6}
-     \mauvaise[7]{7}
-     \mauvaise[8]{8}
-     \mauvaise[9]{9}
-   \end{reponsesperso}
+   \begin{choicescustom}[o]\scoring{auto=0}
+     \wrongchoice[0]{0}
+     \wrongchoice[1]{1}
+     \wrongchoice[2]{2}
+     \wrongchoice[3]{3}
+     \wrongchoice[4]{4}
+     \wrongchoice[5]{5}
+     \wrongchoice[6]{6}
+     \wrongchoice[7]{7}
+     \wrongchoice[8]{8}
+     \wrongchoice[9]{9}
+   \end{choicescustom}
  \end{question}
  \advance\AMC@chiffres by -1 \ifnum\AMC@chiffres>0\repeat
 }}
 %
-\def\bareme#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[B=#1]^^J}\fi}
+\def\scoring#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[B=#1]^^J}\fi}
 %
-\def\baremeDefautS#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDS=#1]^^J}\fi}
-\def\baremeDefautM#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDM=#1]^^J}\fi}
+\def\scoringDefaultS#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDS=#1]^^J}\fi}
+\def\scoringDefaultM#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDM=#1]^^J}\fi}
 %
 %--------------------------------------------------------------
 % liste automatique de reponses...
@@ -410,11 +410,11 @@
 % \choixIntervalles{bonne valeur}{x0}{x1}{delta}
 \def\choixIntervalles#1#2#3#4{%
 \FPeval\AMC@CI@a{clip(#2)}%
-\let\AMC@CI@cas=\mauvaise
+\let\AMC@CI@cas=\wrongchoice
 \loop%
   \FPeval\AMC@CI@b{clip(AMC@CI@a + #4)}%
-  \FPiflt{#1}\AMC@CI@b\let\AMC@CI@cas=\bonne\fi%
-  \FPiflt{#1}\AMC@CI@a\let\AMC@CI@cas=\mauvaise\fi%
+  \FPiflt{#1}\AMC@CI@b\let\AMC@CI@cas=\correctchoice\fi%
+  \FPiflt{#1}\AMC@CI@a\let\AMC@CI@cas=\wrongchoice\fi%
   \@expandtwoargs\AMC@intervx{\AMC@CI@a}{\AMC@CI@b}%
 \FPiflt\AMC@CI@b{#3}%
   \FPset\AMC@CI@a{\AMC@CI@b}%
@@ -521,7 +521,7 @@
 }
 \def\AMC@note{}
 %
-\newcommand{\exemplaire}[2]{%\ifAMC@correc #2\else%
+\newcommand{\onecopy}[2]{%\ifAMC@correc #2\else%
 \AMC@loc@FR
 \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1\else\AMCnum@copies=\AMCNombreCopies\fi%
 \AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
@@ -541,6 +541,13 @@
 %--------------------------------------------------------------
 % Options
 %--------------------------------------------------------------
+\DeclareOption{noshuffle}{\AMC@ordretrue}
+\DeclareOption{answers}{\AMC@correcheadtrue\AMC@correctrue}
+\DeclareOption{indivanswers}{\AMC@correctrue}
+\DeclareOption{box}{\AMC@qbloctrue}
+\DeclareOption{separateanswersheet}{\AMC@ensembletrue}
+\DeclareOption{digits}{\AMC@ensemble@chiffrestrue}
+%
 \DeclareOption{ordre}{\AMC@ordretrue}
 \DeclareOption{correc}{\AMC@correcheadtrue\AMC@correctrue}
 \DeclareOption{modele}{\AMC@correcheadtrue\AMC@correcfalse\AMC@ordretrue}
@@ -627,7 +634,25 @@
 \fi
 % environnement exemplaire
 \@ifpackageloaded{environ}{%
-\NewEnviron{copieexamen}[1][5]{\exemplaire{#1}{\BODY}}
-}{\PackageWarning{automultiplechoice}{Package environ not loaded : environnement copieexamen will NOT be defined.}}
+\NewEnviron{examcopy}[1][5]{\onecopy{#1}{\BODY}}
+}{\PackageWarning{automultiplechoice}{Package environ not loaded: environnement examcopy/copieexamen will NOT be defined.}}
 % VARS
 \ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% french commands localisation
+% allways active, for backward compatibility
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\let\reponses=\choices\let\endreponses=\endchoices
+\let\reponseshoriz=\choiceshoriz\let\endreponseshoriz=\endchoiceshoriz
+\let\reponsesperso=\choicescustom\let\endreponsesperso=\endchoicescustom
+\let\bonne=\correctchoice
+\let\mauvaise=\wrongchoice
+\let\bareme=\scoring
+\let\baremeDefautM=\scoringDefaultM
+\let\baremeDefautS=\scoringDefaultS
+\let\exemplaire=\onecopy
+\@ifpackageloaded{environ}{
+\let\copieexamen=\examcopy\let\endcopieexamen=\endexamcopy
+}{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
