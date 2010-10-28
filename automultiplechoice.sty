@@ -259,10 +259,10 @@
   \expandafter\ifx\csname #1@\romannumeral\AMCtok@k\endcsname\relax\expandafter\newtoks\csname #1@\romannumeral\AMCtok@k\endcsname\fi
   \csname #1@\romannumeral\AMCtok@k\endcsname={#2}
 }
-\newcommand{\melangegroupe}[1]{%
+\newcommand{\shufflegroup}[1]{%
   {\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}
 }
-\newcommand{\restituegroupe}[2][0]{%
+\newcommand{\insertgroup}[2][0]{%
 \AMCtok@max=#1
 \ifnum\the\AMCtok@max<1
   \AMCtok@max=\csname #2@k\endcsname
@@ -297,8 +297,8 @@
 \def\shuffle@it{\AMC@shuffletoks{\number\AMCload@counter}{reponse@}}
 %
 \newcommand\AMCrep@init[1]{\ifAMC@ordre\AMCrep@o\else\csname AMCrep@#1\endcsname\fi\AMCload@counter=0}
-\newcommand\alafin{\AMCrep@@count=\AMCrep@count\AMCrep@fini\AMCrep@init{o}\AMCrep@count=\AMCrep@@count}
-\newcommand\AMC@fin@rep{\ifAMCcomplete@multi\ifAMCtype@multi\alafin\AMCrep@count=-1\ifAMCune@bonne\wrongchoice{\@aucune}\else\correctchoice{\@aucune}\fi\fi\fi\AMCrep@fini}
+\newcommand\lastchoices{\AMCrep@@count=\AMCrep@count\AMCrep@fini\AMCrep@init{o}\AMCrep@count=\AMCrep@@count}
+\newcommand\AMC@fin@rep{\ifAMCcomplete@multi\ifAMCtype@multi\lastchoices\AMCrep@count=-1\ifAMCune@bonne\wrongchoice{\@aucune}\else\correctchoice{\@aucune}\fi\fi\fi\AMCrep@fini}
 %
 \newenvironment{choices}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@itemize}\ifAMC@rbloc\def\une@rep{\AMCrep@bloc}\else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi\AMCrep@init{#1}}{\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
 %
@@ -327,14 +327,14 @@
 % memoire pour mettre les cases a cocher en fin de copie
 %
 \def\AMCmem@ireData{}
-\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\AMC@loc@qf{#1}}}
-\def\AMCformulaireReponse#1{\hspace{\AMCformHSpace} #1}
-\def\AMCdebutFormulaire{\AMC@zoneformulairetrue}
+\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\AMC@loc@qf{#1}}}
+\def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
+\def\AMCformBegin{\AMC@zoneformulairetrue}
 %
 \newcommand\AMCmem@ireAJ[1]{\ifAMC@ensemble\ifAMC@zoneformulaire\else\begingroup\AMCformulaire@dedanstrue\let\protect\@unexpandable@protect\global\edef\AMCmem@ireData{\AMCmem@ireData #1}\endgroup\fi\fi}
-\newcommand\AMCmem@ireAJRep[1]{\addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformulaireReponse{#1}}}
-\newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\AMCformulaireQuestion{#1}}}
-\newcommand\formulaire{\ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData\global\def\AMCmem@ireData{}\fi}
+\newcommand\AMCmem@ireAJRep[1]{\addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformAnswer{#1}}}
+\newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\AMCformQuestion{#1}}}
+\newcommand\AMCform{\ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData\global\def\AMCmem@ireData{}\fi}
 %
 % mise en forme des questions
 %
@@ -655,4 +655,9 @@
 \@ifpackageloaded{environ}{
 \let\copieexamen=\examcopy\let\endcopieexamen=\endexamcopy
 }{}
+\let\melangegroupe=\shufflegroup
+\let\restituegroupe=\insertgroup
+\let\alafin=\lastchoices
+\let\formulaire=\AMCform
+\let\AMCdebutFormulaire=\AMCformBegin
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

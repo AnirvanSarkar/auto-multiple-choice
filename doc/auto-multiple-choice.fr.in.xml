@@ -210,6 +210,14 @@
 
           <programlisting>\documentclass[a4paper]{article} </programlisting>
         </listitem>
+
+        <listitem>
+          <para>À partir de la version 0.345, les commandes
+          <command>\AMCformulaireQuestion</command> et
+          <command>\AMCformulaireReponse</command> ont été renommées
+          respectivement <command>\AMCformQuestion</command> et
+          <command>\AMCformAnswer</command>.</para>
+        </listitem>
       </itemizedlist>
     </sect2>
 
@@ -549,8 +557,8 @@ DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont 
 
 \AMCrandomseed{1237893}
 
-\def\formulaireQuestion#1{\par {\sc Question #1 :} }    <co id="ensemble.fq"
-            linkends="ensemble.fq.exp" />
+\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1 :} }    <co
+            id="ensemble.fq" linkends="ensemble.fq.exp" />
 
 \element{general}{
   \begin{question}{prez}    
@@ -1075,8 +1083,8 @@ Durée : 10 minutes.
             question et pour chaque réponse (ici c'est la définition par
             défaut) :</para>
 
-            <programlisting>\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}}
-\def\AMCformulaireReponse#1{\hspace{\AMCformHSpace} #1}
+            <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}}
+\def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
           </listitem>
         </orderedlist>

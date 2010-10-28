@@ -145,7 +145,7 @@
     </sect2>
   </sect1>
 
-  <sect1 id="notesutilisation">
+  <sect1 id="usagenotes">
     <title>Usage notes</title>
 
     <sect2>
@@ -506,8 +506,8 @@ Firstname and lastname:
   \vspace{1mm}\hrule
 \end{center}
 
-\melangegroupe{geographie}
-\restituegroupe{geographie}
+\shufflegroup{geographie}
+\insertgroup{geographie}
 
 \begin{center}
   \hrule\vspace{2mm}
@@ -515,8 +515,8 @@ Firstname and lastname:
   \vspace{2mm}\hrule
 \end{center}
 
-\melangegroupe{histoire}
-\restituegroupe{histoire}
+\shufflegroup{histoire}
+\insertgroup{histoire}
 
 \clearpage
 
@@ -551,8 +551,8 @@ DESC: An example (from the documentation) where all check-boxes are put together
 
 \AMCrandomseed{1237893}
 
-\def\formulaireQuestion#1{\par {\sc Question #1 :} }    <co id="ensemble.fq"
-            linkends="ensemble.fq.exp" />
+\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1:} }    <co
+            id="ensemble.fq" linkends="ensemble.fq.exp" />
 
 \element{general}{
   \begin{question}{prez}    
@@ -619,12 +619,12 @@ Durée : 10 minutes.
 
 %%% end of the header
 
-\melangegroupe{general}
-\restituegroupe{general}
+\shufflegroup{general}
+\insertgroup{general}
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp" />
 
-\AMCdebutFormulaire    <co id="debut.form" linkends="debut.form.exp" />
+\AMCformBegin    <co id="debut.form" linkends="debut.form.exp" />
 
 %%% beginning of the answer sheet header
 
@@ -646,7 +646,7 @@ Durée : 10 minutes.
 %%% end of the answer sheet header
 
 
-\formulaire    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp" />
+\AMCform    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp" />
 
 \clearpage    
 
@@ -686,8 +686,8 @@ Durée : 10 minutes.
           </callout>
 
           <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
-            <para>The LaTeX command <command>formulaire</command> writes all
-            the check-boxes.</para>
+            <para>The LaTeX command <command>AMCform</command> writes all the
+            check-boxes.</para>
           </callout>
         </calloutlist></para>
 
@@ -924,17 +924,17 @@ Durée : 10 minutes.
         </important>
 
         <para>Once a group is formed, it is possible to shuffle questions
-        inside this group using the <command>melangegroupe</command> command.
-        For instance<programlisting>\melangegroupe{mygroup}</programlisting></para>
+        inside this group using the <command>shufflegroup</command> command.
+        For instance<programlisting>\shufflegroup{mygroup}</programlisting></para>
 
         <para>Finally, the group content can be output to the test sheet using
-        command <command>restituegroupe</command>, as in<programlisting>\restituegroupe{mygroup}</programlisting></para>
+        command <command>insertgroup</command>, as in<programlisting>\insertgroup{mygroup}</programlisting></para>
 
         <note>
-          <para>These last two commands (<command>melangegroupe</command> and
-          <command>restituegroupe</command>) are to be used inside the
-          argument of the command <command>onecopy</command>, so that
-          shuffling is performed before each realization.</para>
+          <para>These last two commands (<command>shufflegroup</command> and
+          <command>insertgroup</command>) are to be used inside the argument
+          of the command <command>onecopy</command>, so that shuffling is
+          performed before each realization.</para>
         </note>
       </sect3>
 
@@ -1026,8 +1026,8 @@ Durée : 10 minutes.
             question and for each answer (here follows the default
             definitions):</para>
 
-            <programlisting>\def\AMCformulaireQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1:}}
-\def\AMCformulaireReponse#1{\hspace{\AMCformHSpace} #1}
+            <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1:}}
+\def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
           </listitem>
         </orderedlist>
@@ -1236,7 +1236,7 @@ respective parameters \VQa{} et \VQb{}.
     </sect2>
   </sect1>
 
-  <sect1 id="interface-graphique">
+  <sect1 id="graphical-interface">
     <title>Usage - Graphical interface</title>
 
     <para>We shall describe here a usage example with the graphic interface
@@ -1782,9 +1782,9 @@ Name:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\melangegroupe{qqs}
+\shufflegroup{qqs}
 
-\restituegroupe{qqs}
+\insertgroup{qqs}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2045,7 +2045,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
     </sect2>
   </sect1>
 
-  <sect1 id="commandes">
+  <sect1 id="commands">
     <title>Command manual</title>
 
     <para>You may skip this part if you want to use only the graphical user
