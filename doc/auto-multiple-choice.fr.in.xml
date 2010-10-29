@@ -283,8 +283,8 @@ DESC: Un exemple simple (issu de la documentation) avec une question simple et u
             linkends="simple.latin1.exp" />
 \usepackage[T1]{fontenc}
 
-\usepackage[bloc,completemulti]{automultiplechoice}    <co id="simple.amc"
-            linkends="simple.amc.exp" />
+\usepackage[francais,bloc,completemulti]{automultiplechoice}    <co
+            id="simple.amc" linkends="simple.amc.exp" />
 \begin{document}
 
 \exemplaire{10}{    <co id="simple.exemplaire"
@@ -434,7 +434,7 @@ DESC: Un exemple (issu de la documentation) où les questions sont mélangées �
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 
-\usepackage[bloc,completemulti]{automultiplechoice}
+\usepackage[francais,bloc,completemulti]{automultiplechoice}
 \begin{document}
 
 %%% préparation des groupes
@@ -551,7 +551,7 @@ DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont 
 \usepackage[utf8x]{inputenc}    
 \usepackage[T1]{fontenc}
 
-\usepackage[bloc,completemulti,ensemble]{automultiplechoice}    <co
+\usepackage[francais,bloc,completemulti,ensemble]{automultiplechoice}    <co
             id="ensemble.opt" linkends="ensemble.opt.exp" />
 \begin{document}
 
@@ -724,6 +724,15 @@ Durée : 10 minutes.
         virgules. Les options disponibles sont les suivantes :</para>
 
         <itemizedlist>
+          <listitem>
+            <para><option>francais</option> : indique que le sujet d'examen
+            est en français. Les quelques mentions éventuellement ajoutées par
+            <package>automultiplechoice</package> seront alors écrites en
+            français (on peut en particulier penser à la phrase
+            « <emphasis>aucune de ces réponses n'est correcte</emphasis> »,
+            voir option <option>completemulti</option> plus loin).</para>
+          </listitem>
+
           <listitem>
             <para><option>bloc</option> : place chaque question dans un bloc,
             de telle sorte qu'elle ne puisse pas être coupée par un saut de
@@ -1806,7 +1815,7 @@ DESC: Exemple (issu de la documentation) de spécification du barème.--><progra
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 
-\usepackage[bloc,completemulti]{automultiplechoice}
+\usepackage[francais,bloc,completemulti]{automultiplechoice}
 
 \begin{document}
 

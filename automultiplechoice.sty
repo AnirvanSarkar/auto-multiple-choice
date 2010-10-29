@@ -522,7 +522,6 @@
 \def\AMC@note{}
 %
 \newcommand{\onecopy}[2]{%\ifAMC@correc #2\else%
-\AMC@loc@FR
 \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1\else\AMCnum@copies=\AMCNombreCopies\fi%
 \AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
 \AMCid@etud=\AMC@premierecopie\AMCid@etudfin=\AMCnum@copies\advance\AMCid@etudfin by \AMC@premierecopie%
@@ -651,7 +650,7 @@
 \let\bareme=\scoring
 \let\baremeDefautM=\scoringDefaultM
 \let\baremeDefautS=\scoringDefaultS
-\let\exemplaire=\onecopy
+\def\exemplaire{\AMC@loc@FR\onecopy}
 \@ifpackageloaded{environ}{
 \let\copieexamen=\examcopy\let\endcopieexamen=\endexamcopy
 }{}
