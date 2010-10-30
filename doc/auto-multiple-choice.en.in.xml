@@ -1131,6 +1131,46 @@ and write your first and last names below.
         go on from one realization to the next one, which is clearly not
         desirable.</para>
       </sect3>
+
+      <sect3>
+        <title>Customizing some texts inserted by AMC</title>
+
+        <para>Use <command>\AMCtext</command> for the following
+        customizations:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><code>\AMCtext{none}{<replaceable>sentence</replaceable>}</code>
+            replaces « None of these answers are correct. » (the english
+            default text) with the given <replaceable>sentence</replaceable>
+            when using option <option>completemulti</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\AMCtext{corrected}{<replaceable>title</replaceable>}</code>
+            replaces « Corrected » (the english default text) with the given
+            <replaceable>title</replaceable> on the corrected answer
+            sheet.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\AMCtext{catalog}{<replaceable>title</replaceable>}</code>
+            replaces « Catalog » (the english default text) with the given
+            <replaceable>title</replaceable> on the questions catalog produced
+            thanks to option <option>catalog</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para>You can also consider using commands like the following ones
+            (here the second argument is set to the default english
+            value):</para>
+
+            <programlisting>\AMCtext{draft}{DRAFT}
+\AMCtext{message}{For your examination, preferably print documents
+                  compiled from auto-multiple-choice.}</programlisting>
+          </listitem>
+        </itemizedlist>
+      </sect3>
     </sect2>
 
     <sect2>

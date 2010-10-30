@@ -1202,6 +1202,48 @@ et écrivez votre nom et prénom ci-dessous.
         continuerait d'une copie à l'autre, ce qui n'est pas
         souhaitable.</para>
       </sect3>
+
+      <sect3>
+        <title>Personnalisation des textes insérés par AMC</title>
+
+        <para>Il est possible de personnaliser certain textes insérés par le
+        paquet automultiplechoice, grâce à la commande
+        <command>\AMCtext</command> :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><code>\AMCtext{none}{<replaceable>phrase</replaceable>}</code>
+            remplace le texte par défaut « aucune de ces réponses n'est
+            correcte » (en français) par la <replaceable>phrase</replaceable>
+            fournie lors de l'utilisation de l'option
+            <option>completemulti</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\AMCtext{corrected}{<replaceable>titre</replaceable>}</code>
+            remplace « Correction » (en français) par le
+            <replaceable>titre</replaceable> fourni sur la correction de
+            l'examen.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\AMCtext{catalog}{<replaceable>titre</replaceable>}</code>
+            remplace « Catalogue » (en français) par le
+            <replaceable>titre</replaceable> fourni sur le catalogue de
+            questions fourni avec l'option <option>catalog</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para>Vous pouvez aussi considérer l'utilisation de commandes
+            comme celles-ci (données ici avec comme deuxième argument la
+            valeur par défaut en français) :</para>
+
+            <programlisting>\AMCtext{draft}{PROJET}
+\AMCtext{message}{Pour votre examen, imprimez de pr\'ef\'erence
+                  les documents compil\'es \`a l'aide de auto-multiple-choice.}</programlisting>
+          </listitem>
+        </itemizedlist>
+      </sect3>
     </sect2>
 
     <sect2>

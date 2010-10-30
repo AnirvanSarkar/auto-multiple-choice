@@ -26,11 +26,13 @@
 \RequirePackage{everypage}
 \RequirePackage{keyval}
 %
+\def\AMCtext#1#2{\expandafter\def\csname AMC@loc@#1\endcsname{#2}}
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% localisation : english
 %
 % watermark for drafts
-\def\AMC@loc@projet{DRAFT}
+\def\AMC@loc@draft{DRAFT}
 %
 % message at page bottom when compiled out of AMC gui
 \def\AMC@loc@message{For your examination, preferably print documents compiled from auto-multiple-choice.}
@@ -44,7 +46,7 @@
 %
 % headers for corrected version / catalog
 %
-\def\AMC@loc@correction{Corrected}
+\def\AMC@loc@corrected{Corrected}
 \def\AMC@loc@catalog{Catalog}
 %
 % see completemulti option
@@ -55,11 +57,11 @@
 %%% localisation : french
 \def\AMC@loc@FR{
 %
-\def\AMC@loc@projet{PROJET}
+\def\AMC@loc@draft{PROJET}
 \def\AMC@loc@message{Pour votre examen, imprimez de pr\'ef\'erence les documents compil\'es \`a l'aide de auto-multiple-choice.}
 \def\AMC@loc@qf##1{{\bf Question ##1 :}}
 \def\AMC@loc@q##1##2{{\bf Question ##1} ##2}
-\def\AMC@loc@correction{Correction}
+\def\AMC@loc@corrected{Correction}
 \def\AMC@loc@catalog{Catalogue}
 \def\AMC@loc@none{Aucune de ces r\'eponses n'est correcte.}
 %
@@ -462,7 +464,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \DeclareFontShape{OT1}{cmr}{b}{n}{<35->cmr17}{}
-\def\AMC@watertext{\AMC@loc@projet}
+\def\AMC@watertext{\AMC@loc@draft}
 \newcommand\AMCw@termark{%
   \setlength{\@tempdimb}{.5\paperwidth}%
   \setlength{\@tempdimc}{-.5\paperheight}%
@@ -492,7 +494,7 @@
 \def\he@dtaille#1{\vbox to 1cm{#1}}
 \def\he@dbas#1{\he@dtaille{\vspace*{\fill}#1}}
 \def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}
-\def\AMC@intituleHead{\AMC@loc@correction}
+\def\AMC@intituleHead{\AMC@loc@corrected}
 \AtBeginDocument{
 \pagestyle{fancy}
 \renewcommand{\headrulewidth}{0pt}
