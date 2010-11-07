@@ -19,6 +19,8 @@
 
 package AMC::Boite;
 
+use AMC::Basic;
+
 BEGIN {
     use Exporter   ();
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
@@ -272,14 +274,19 @@ sub tri_dir {
 sub extremes {
     my (@liste)=(@_);
     my @r=();
-    tri_dir(1,1,\@liste);
-    push @r,$liste[0];
-    tri_dir(-1,1,\@liste);
-    push @r,$liste[0];
-    tri_dir(-1,-1,\@liste);
-    push @r,$liste[0];
-    tri_dir(1,-1,\@liste);
-    push @r,$liste[0];
+
+    if(@liste) {
+	tri_dir(1,1,\@liste);
+	push @r,$liste[0];
+	tri_dir(-1,1,\@liste);
+	push @r,$liste[0];
+	tri_dir(-1,-1,\@liste);
+	push @r,$liste[0];
+	tri_dir(1,-1,\@liste);
+	push @r,$liste[0];
+    } else {
+	debug "Warning: Empty list in [extremes] call";
+    }
 
     return(@r);
 }

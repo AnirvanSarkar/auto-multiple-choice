@@ -208,7 +208,7 @@ sub attribut {
     if(defined($self->{'dispos'}->{$id})) {
 	my $v=$self->{'dispos'}->{$id}->{$att};
 	$v=$self->{'cr'}."/".$v 
-	    if($att eq 'fichier' || $att eq 'fichier-scan');
+	    if(defined($v) && ($att eq 'fichier' || $att eq 'fichier-scan'));
 	return($v);
     } else {
 	return(undef);

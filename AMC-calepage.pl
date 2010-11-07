@@ -358,6 +358,10 @@ if($modele) {
 
     @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
 
+    if($#okbox < 3) {
+	erreur("Only ".(1+$#okbox)." signs detected / needs at least 4");
+    }
+
     @okbox=AMC::Boite::extremes(@okbox);
 
     if(get_debug()) {
