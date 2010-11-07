@@ -2048,8 +2048,10 @@ sub saisie_auto_ok {
 
 		 my @fe=();
 		 for(@err) {
-		     if(/ERREUR\(([^\)]+)\)\(([^\)]+)\)/) {
+		     if(/ERROR\(([^\)]+)\)\(([^\)]*)\)/) {
 			 push @fe,[$1,$2];
+		     } else {
+			 debug "Unrecognized error : $_";
 		     }
 		 }
 		 detecte_analyse('erreurs'=>\@fe,'apprend'=>1);
@@ -2921,7 +2923,9 @@ sub detecte_analyse {
     $inconnu_store->clear();
     
     if($oo{'erreurs'}) {
+	debug "Errors list : ".(1+$#{$oo{'erreurs'}})." items";
 	for my $f (@{$oo{'erreurs'}}) {
+	    debug "Inserting error : $f->[1] $f->[0]";
 	    my $iter=$inconnu_store->append;
 	    $inconnu_store->set($iter,
 				INCONNU_SCAN,$f->[0],
