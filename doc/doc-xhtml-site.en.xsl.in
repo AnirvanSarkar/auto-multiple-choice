@@ -11,17 +11,22 @@
 <xsl:param name="callout.graphics.path" select="'../images/callouts/'"/>
 <xsl:param name="chunker.output.doctype-public" select="'-//W3C//DTD XHTML 1.0 Strict//EN'"/>
 <xsl:param name="chunker.output.doctype-system" select="'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'"/>
+<xsl:param name="html.ext">.shtml</xsl:param>
 
 <xsl:template name="header.navigation">
   <xsl:param name="prev" select="/foo"/>
   <xsl:param name="next" select="/foo"/>
   <xsl:param name="nav.context"/>
 
+  <xsl:comment>#set var="PARTIE" value="<xsl:apply-templates select="." mode="object.title.markup"/>"</xsl:comment>
+  <xsl:comment>#set var="LANG" value="doc-en"</xsl:comment>
+  <xsl:comment>#include virtual="../track"</xsl:comment>
+
       <div id="top">
           <h1>
-            <a href="../index.shtml" title="Page d'accueil de AMC">AMC</a>
+            <a href="../index.en" title="AMC home">AMC</a>
           </h1>
-          <p>Correction automatisée de formulaires QCM</p>      
+          <p>Multiple Choice sheets automated marking</p>      
       </div>
 
       
@@ -43,7 +48,8 @@
 	</xsl:if>
 	</td>
 	<td class="milieu">
-	<a href="../index.shtml">Accueil</a> » <a href="index.html">Doc</a> » <xsl:apply-templates select="." mode="object.title.markup"/>
+	<a href="../index.en">Home</a> » <a href="index.html">Doc</a> » <xsl:apply-templates select="." mode="object.title.markup"/> &#160;&#160;&#160;
+	<a href="../auto-multiple-choice.fr/"><img class="flag" src="../images/fr.png" alt="[FR]"/></a>
 	</td>
 	<td class="droite">
         <xsl:if test="count($next)&gt;0">

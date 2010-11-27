@@ -6,34 +6,43 @@ HVERSION=htdocs/version.shtml
 
 TMPDIR:=$(shell mktemp -d)
 
-TEST_DEB=`../auto-qcm/local/derniere-version.pl --mode f --base ../auto-qcm/download_area/files/debian/pool/main/a/auto-multiple-choice`
-TEST_XML=$(TMPDIR)/usr/share/doc/auto-multiple-choice/auto-multiple-choice.fr.xml
-TEST_PDF=$(TMPDIR)/auto-multiple-choice.fr.pdf
-TEST_TEX=$(TMPDIR)/auto-multiple-choice.fr.tex
+DOCVERSION=0.349
+TEST_DEB="../auto-multiple-choice_0.346-1_amd64.deb"
+#TEST_DEB=`../auto-qcm/local/derniere-version.pl --mode f --base ../auto-qcm/download_area/files/debian/pool/main/a/auto-multiple-choice`
+
+TEST_XML=$(TMPDIR)/usr/share/doc/auto-multiple-choice/auto-multiple-choice
+TEST_BASE=$(TMPDIR)/auto-multiple-choice
+
 SITEDOC=htdocs/auto-multiple-choice
 
 version:
-	../auto-qcm/local/derniere-version.pl --mode h --base ../auto-qcm/download_area/files/debian/pool/main/a/auto-multiple-choice > $(HVERSION)
+	../auto-qcm/local/derniere-version.pl --mode h --fich $(TEST_DEB) > $(HVERSION)
+	echo '<!--#set var="DOCVERSION" value="$(DOCVERSION)"-->' >> $(HVERSION)
+
+map: FORCE
+	./sitemap.pl --repertoire htdocs --root http://home.gna.org/auto-qcm --o htdocs/sitemap.xml
 
 $(TEST_XML): FORCE
 	dpkg-deb -x $(TEST_DEB) $(TMPDIR)
-	-gunzip $(TEST_XML).gz
+	-gunzip $@.fr.xml.gz
+	-gunzip $@.en.xml.gz
 
-$(TEST_TEX): $(TEST_XML)
-	dblatex -t tex $< -o $@
-	perl ../auto-qcm/doc/addlink.pl $@
-
-%.pdf: %.tex
-	cd `dirname $<`; pdflatex `basename $<` ; pdflatex `basename $<`
+$(TEST_BASE).%: $(TEST_XML)
+	dblatex -t tex $<.$*.xml -o $@.tex
+	perl ../auto-qcm/doc/addlink.pl $@.tex
+	cd `dirname $@`; pdflatex `basename $@` ; pdflatex `basename $@`
 
 # doc a partir de la derniere version dans testing
-doc: FORCE $(TEST_XML) $(TEST_PDF)
-	xsltproc --nonet --stringparam base.dir $(SITEDOC)/ ../auto-qcm/doc/doc-xhtml-site.xsl $(TEST_XML)
-	cp $(TEST_PDF)  ../auto-qcm/download_area/files/auto-multiple-choice.pdf
+doc: FORCE $(TEST_XML) $(TEST_BASE).fr $(TEST_BASE).en
+	$(MAKE) -C ../auto-qcm/ doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl
+	xsltproc --nonet --stringparam base.dir $(SITEDOC).fr/ ../auto-qcm/doc/doc-xhtml-site.fr.xsl $(TEST_XML).fr.xml
+	xsltproc --nonet --stringparam base.dir $(SITEDOC).en/ ../auto-qcm/doc/doc-xhtml-site.en.xsl $(TEST_XML).en.xml
+	cp $(TEST_BASE).fr.pdf  ../auto-qcm/download_area/files/auto-multiple-choice.fr.pdf
+	cp $(TEST_BASE).en.pdf  ../auto-qcm/download_area/files/auto-multiple-choice.en.pdf
 
-site: version doc
+site: version doc map
 	$(MAKE) -C ../auto-qcm/download_area signe sync
 
 FORCE: ;
 
-.PHONY: site version FORCE
+.PHONY: site version map FORCE

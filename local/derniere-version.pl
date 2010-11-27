@@ -25,11 +25,13 @@ use File::stat;
 
 @d=();
 $mode='f';
-$ext='i386.deb';
+$ext='(i386|amd64).deb';
 $debug='';
 $precomp='';
+$fich='';
 
 GetOptions("base=s"=>\@d,
+	   "fich=s"=>\$fich,
 	   "precomp!"=>\$precomp,
 	   "extension=s"=>\$ext,
 	   "mode=s"=>\$mode,
@@ -45,6 +47,8 @@ for my $d (@d) {
     push @v,map { "$d/$_" } grep { /^auto-multiple-choice_.*$ext$/ && ($precomp || ! /precomp/) && ! /current/ } readdir(DIR);
     closedir(DIR);
 }
+
+push @v,$fich if($fich);
 
 @mois=qw/janvier février mars avril mai juin juillet août septembre octobre novembre décembre/;
 
