@@ -23,7 +23,7 @@
 %define AMC_cat Education;
 %endif
 
-%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} ICONSDIR=%{AMC_iconsdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}"
+%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}"
 
 Name: auto-multiple-choice
 Summary: Auto Multiple Choice - Multiple Choice Papers Management
@@ -138,11 +138,11 @@ rm -rf $RPM_BUILD_ROOT
 %{AMC_iconsdir}
 %{AMC_texdir}
 %{AMC_bindir}/auto-multiple-choice
-%{AMC_iconsdir}
 %{AMC_pixdir}/auto-multiple-choice.xpm
 %{AMC_perldir}/AMC
 %{_datadir}/applications/auto-multiple-choice.desktop
 %{AMC_man1dir}/auto-multiple-choice.*.1*
+%{AMC_man1dir}/auto-multiple-choice.1*
 
 %post
 
