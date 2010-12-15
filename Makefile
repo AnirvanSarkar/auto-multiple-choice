@@ -158,9 +158,13 @@ endif
 LOCALDIR=$(shell pwd)
 
 global: FORCE
-	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice
+	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop
 
 local: global
+	test -d /usr/lib/AMC || sudo mkdir -p /usr/lib/AMC
+	test -d /usr/share/auto-multiple-choice  || sudo mkdir -p /usr/share/auto-multiple-choice
+	test -d $(LOCALEDIR)/fr/LC_MESSAGES || sudo mkdir -p $(LOCALEDIR)/fr/LC_MESSAGES
+	sudo ln -s $(LOCALDIR)/I18N/lang/fr.mo $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
 	sudo ln -s $(LOCALDIR)/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect

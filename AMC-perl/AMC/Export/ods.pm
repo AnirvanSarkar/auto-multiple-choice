@@ -99,6 +99,7 @@ sub export {
     }
 
     my $notemin=$self->{'calcul'}->{'notemin'};
+    my $plafond=$self->{'calcul'}->{'plafond'};
 
     $notemin='' if($notemin =~ /[a-z]/i);
 
@@ -434,11 +435,13 @@ sub export {
 		    $doc->cellFormula($feuille,$jj,$ii,
 				      "oooc:=IF($notemax>0;"
 				      .($notemin ne '' ? "MAX($notemin;" : "")
+				      .($plafond ? "MIN($notemax;" : "")
 				      ."$arrondi([."
 				      .yx2ooo($jj,$code_col{'total'})
 				      ."]/[."
 				      .yx2ooo($jj,$code_col{'max'})
 				      ."]*$notemax/$grain)*$grain"
+				      .($plafond ? ")" : "")
 				      .($notemin ne '' ? ")" : "")
 				      .";"
 				      .($notemin ne '' ? "MAX($notemin;" : "")

@@ -51,6 +51,7 @@ my $taille_max="1000x1500";
 my $qualite_jpg="65";
 
 my $progres=1;
+my $plafond=1;
 my $progres_id='';
 
 my $debug='';
@@ -65,6 +66,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "grain=s"=>\$grain,
 	   "arrondi=s"=>\$type_arrondi,
 	   "notemax=s"=>\$note_parfaite,
+	   "plafond!"=>\$plafond,
 	   "notemin=s"=>\$note_plancher,
 	   "encodage-interne=s"=>\$encodage_interne,
 	   "progression-id=s"=>\$progres_id,
@@ -160,6 +162,8 @@ sub degroupe {
     #
     return(%r);
 }
+
+my %main_bareme=degroupe($bar->{'main'},{},{});
 
 my %bons=();
 my %qidsh=();
@@ -263,6 +267,7 @@ $writer->startTag('notes',
 		  'seuil'=>$seuil,
 		  'notemin'=>$note_plancher,
 		  'notemax'=>$note_parfaite,
+		  'plafond'=>$plafond,
 		  'arrondi'=>$type_arrondi,
 		  'grain'=>$grain);
 
@@ -463,10 +468,15 @@ for my $etud (@a_calculer) {
     if($vrai) {
 	# calcul de la note finale --
 
+	# total qui faut pour avoir le max
+	my $max_i=$note_question{'max'.$etud}->{'total'};
+	$max_i=$main_bareme{'SUF'} if($main_bareme{'SUF'});
+
 	# application du grain et de la note max
 	my $x;
 	if($note_parfaite>0) {
-	    $x=$note_parfaite/$grain*$total/$note_question{'max'.$etud}->{'total'};
+	    $x=$note_parfaite/$grain*$total/$max_i;
+	    $x=$note_parfaite if($plafond && $x>$note_parfaite);
 	} else {
 	    $x=$total/$grain;
 	}
@@ -486,7 +496,7 @@ for my $etud (@a_calculer) {
 
 	$writer->emptyTag('total',
 			  'total'=>$total,
-			  'max'=>$note_question{'max'.$etud}->{'total'},
+			  'max'=>$max_i,
 			  'note'=>$x,
 			  );
 

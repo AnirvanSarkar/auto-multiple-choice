@@ -237,6 +237,7 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'note_min'=>'',
 		   'note_max'=>20,
+		   'note_max_plafond'=>1,
 		   'note_grain'=>"0,5",
 		   'note_arrondi'=>'inf',
 
@@ -2300,6 +2301,7 @@ sub noter_calcul {
 			  "--grain",$projet{'options'}->{'note_grain'},
 			  "--arrondi",$projet{'options'}->{'note_arrondi'},
 			  "--notemax",$projet{'options'}->{'note_max'},
+			  "--plafond",$projet{'options'}->{'note_max_plafond'},
 			  "--notemin",$projet{'options'}->{'note_min'},
 			  
 			  "--encodage-interne",$o{'encodage_interne'},

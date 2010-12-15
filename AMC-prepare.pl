@@ -168,7 +168,7 @@ sub analyse_amclog {
 
     open(AMCLOG,$fich) or die "Unable to open $fich : $!";
     while(<AMCLOG>) {
-		
+
 	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
 	    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
 	    $analyse_data{'q'}={};
@@ -535,6 +535,10 @@ if($mode =~ /b/) {
 		print "*** TOTAL=$t ***\n";
 	    }
 	}
+	if(/AUTOQCM\[FQ\]/) {
+	    $quest='';
+	    $rep='';
+	}
 	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
 	    $quest=$1;
 	    $rep=''; 
@@ -584,9 +588,14 @@ if($mode =~ /b/) {
 				 DATA_INDENT=>2);
     $writer->xmlDecl($encodage_interne);
 
-    $writer->startTag('bareme',src=>$f_tex,version=>$VERSION_BAREME);
+    my %opts=(src=>$f_tex,
+	      version=>$VERSION_BAREME);
 
-    for my $etu (keys %bs) {
+    $opts{'main'}=$bs{''}->{'.'}->{-bareme} if($bs{''}->{'.'}->{-bareme});
+
+    $writer->startTag('bareme',%opts);
+
+    for my $etu (grep { $_ ne '' } (keys %bs)) {
 	$writer->startTag('etudiant',id=>$etu);
 
 	my $bse=$bs{$etu};

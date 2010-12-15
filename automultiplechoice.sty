@@ -367,7 +367,7 @@
 \ifx\question\undefined\else\let\question\undefined\fi
 \def\AMCnobloc{\AMC@qblocfalse}
 \def\AMCbloc{\AMC@qbloctrue}
-\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\ifAMC@affichekeys\index{{\tt #2}}\fi\AMCbeginQuestion{\ifAMC@affichekeys[{\tt #2}]\else\AMC@qaff\fi}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
+\newenvironment{question}[2][]{\AMC@affecte{#2}{\AMCid@quest}\ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi\AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi\ifAMC@affichekeys\index{{\tt #2}}\fi\AMCbeginQuestion{\ifAMC@affichekeys[{\tt #2}]\else\AMC@qaff\fi}{#1}\AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}\AMCmem@ireQ{\arabic{AMCquestionaff}}}{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi\AMCmessage{FQ}}
 \def\@aucune{\emph{\AMC@loc@none}}
 \newenvironment{questionmult}[1]{\AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}\AMCtype@multitrue\ifAMC@calibration\AMC@amclog{AUTOQCM[MULT]^^J}\fi}{\end{question}}
 \newdimen\ouverte@vs
