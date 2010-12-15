@@ -476,12 +476,13 @@ for my $etud (@a_calculer) {
 	my $x;
 	if($note_parfaite>0) {
 	    $x=$note_parfaite/$grain*$total/$max_i;
-	    $x=$note_parfaite if($plafond && $x>$note_parfaite);
 	} else {
 	    $x=$total/$grain;
 	}
 	$x=&$arrondi($x) if($arrondi);
 	$x*=$grain;
+
+	$x=$note_parfaite if($note_parfaite>0 && $plafond && $x>$note_parfaite);
 
 	# plancher
 
