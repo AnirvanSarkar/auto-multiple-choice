@@ -363,7 +363,7 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
     print "Pages for ID=$e...\n";
 
     my $f=$modele;
-    $f='(N)' if(!$f);
+    $f='(N)-(ID)' if(!$f);
     $f.='.pdf' if($f !~ /\.pdf$/i);
     
     my $ex=sprintf("%04d",$e);
@@ -388,11 +388,7 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	$nom =~ s/\s+$//;
 	$nom =~ s/\s+/_/g;
 
-	# enlever accents et caracteres un peu speciaux...
-	$nom=NFKD($nom);
-	$nom =~ s/\pM//og;
-
-	$f =~ s/\(NOM\)/$nom/gi;
+	$f =~ s/\(ID\)/$nom/g;
 
 	if($n) {
 	    for my $k ($noms->heads()) {
@@ -404,6 +400,11 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 		}
 	    }
 	}
+	
+        # enlever accents et caracteres un peu speciaux...
+	$f=NFKD($f);
+	$f =~ s/\pM//og;
+
     }
     
     $f="$pdfdir/$f";

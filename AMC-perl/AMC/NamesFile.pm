@@ -26,7 +26,7 @@ sub new {
     my $self={'fichier'=>$f,
 	      'encodage'=>'utf-8',
 	      'separateur'=>'',
-	      'identifiant'=>'(nom) (prenom) (surname) (name)',
+	      'identifiant'=>'',
 
 	      'heads'=>[],
 	      'err'=>[0,0],
@@ -37,6 +37,8 @@ sub new {
     }
 
     $self->{'separateur'}=":,;\t" if(!$self->{'separateur'});
+    $self->{'identifiant'}='(nom|surname) (prenom|name)'
+	if(!$self->{'identifiant'});
 
     bless $self;
 
@@ -46,11 +48,12 @@ sub new {
 }    
 
 sub reduit {
-    my $s=shift;
+    my ($s)=@_;
     $s =~ s/^\s+//;
     $s =~ s/\s+$//;
     $s=$1 if($s =~ /^\"(.*)\"$/);
     $s=$1 if($s =~ /^\'(.*)\'$/);
+
     return($s);
 }
 
@@ -96,7 +99,7 @@ sub load {
 			  debug "Detected separator: ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
 		      }
 
-		      @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
+		      @heads=map { lc(reduit($_)) } split(/$sep/,$entetes,-1);
 		      debug "KEYS: ".join(", ",@heads);
 		      next NOM;
 		  } else {
@@ -145,11 +148,21 @@ sub load {
     }
 }
 
+sub get_value {
+    my ($key,$vals)=@_;
+    my $r='';
+  KEY: for my $k (split(/\|+/,$key)) {
+      $r=$vals->{$k} if(defined($vals->{$k}));
+      last KEY if($r);
+  }
+    return($r);
+}
+
 sub calc_identifiants {
     my ($self)=@_;
     for my $n (@{$self->{'noms'}}) {
 	my $id=$self->{'identifiant'};
-	$id =~ s/\(([^\)]+)\)/(defined($n->{$1}) ? $n->{$1} : '')/gei;
+	$id =~ s/\(([^\)]+)\)/get_value($1,$n)/gei;
 	$id =~ s/^\s+//;
 	$id =~ s/\s+$//;
 	$n->{'_ID_'}=$id;

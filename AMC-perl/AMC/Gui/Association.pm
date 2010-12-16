@@ -82,7 +82,7 @@ sub new {
 	      'encodage_liste'=>'UTF-8',
 	      'encodage_interne'=>'UTF-8',
 	      'separateur'=>"",
-	      'identifiant'=>'(nom) (prenom)',
+	      'identifiant'=>'',
 	  };
 
     for (keys %o) {
