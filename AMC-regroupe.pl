@@ -377,36 +377,19 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	debug "Association -> ID=$i";
 
 	if($i) {
+	    debug "Name found";
 	    ($n)=$noms->data($lk,$i);
 	    if($n) {
-		debug "Name found";
-		$nom=$n->{'_ID_'};
-	    }
-	}
-
-	$nom =~ s/^\s+//;
-	$nom =~ s/\s+$//;
-	$nom =~ s/\s+/_/g;
-
-	$f =~ s/\(ID\)/$nom/g;
-
-	if($n) {
-	    for my $k ($noms->heads()) {
-		my ($t)=$n->{$k};
-		if($t) {
-		    debug "$k -> $t\n";
-		    $f =~ s/\($k:([0-9]+)\)/sprintf("%0$1d",$t)/gie;
-		    $f =~ s/\($k\)/$t/gi;
-		}
+		$f=$noms->substitute($n,$f);
 	    }
 	}
 	
-        # enlever accents et caracteres un peu speciaux...
-	$f=NFKD($f);
-	$f =~ s/\pM//og;
-
     }
     
+    # enlever accents et caracteres un peu speciaux...
+    $f=NFKD($f);
+    $f =~ s/\pM//og;
+
     $f="$pdfdir/$f";
 
     debug "Dest file: $f";

@@ -99,7 +99,7 @@ sub load {
 			  debug "Detected separator: ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
 		      }
 
-		      @heads=map { lc(reduit($_)) } split(/$sep/,$entetes,-1);
+		      @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
 		      debug "KEYS: ".join(", ",@heads);
 		      next NOM;
 		  } else {
@@ -149,11 +149,19 @@ sub load {
 }
 
 sub get_value {
-    my ($key,$vals)=@_;
+    my ($self,$key,$vals)=@_;
     my $r='';
   KEY: for my $k (split(/\|+/,$key)) {
-      $r=$vals->{$k} if(defined($vals->{$k}));
-      last KEY if($r);
+      for my $h ($self->heads()) {
+	  if($k =~ /^$h:([0-9]+)$/i) {
+	      if(defined($vals->{$h})) {
+		  $r=sprintf("%0".$1."d",$vals->{$h});
+	      }
+	  } elsif((lc($h) eq lc($k)) && defined($vals->{$h})) {
+	      $r=$vals->{$h};
+	  }
+      }
+      last KEY if($r ne '');
   }
     return($r);
 }
@@ -161,11 +169,7 @@ sub get_value {
 sub calc_identifiants {
     my ($self)=@_;
     for my $n (@{$self->{'noms'}}) {
-	my $id=$self->{'identifiant'};
-	$id =~ s/\(([^\)]+)\)/get_value($1,$n)/gei;
-	$id =~ s/^\s+//;
-	$id =~ s/\s+$//;
-	$n->{'_ID_'}=$id;
+	$n->{'_ID_'}=$self->substitute($n,$self->{'identifiant'});
     }
 }
 
@@ -192,6 +196,27 @@ sub keys { # entetes qui peuvent servir de cle unique
 sub liste {
     my ($self,$head)=@_;
     return(map { $_->{$head} } @{$self->{'noms'}} );
+}
+
+# use names fields from $n to subsitute (HEADER) substrings in $s
+sub substitute {
+    my ($self,$n,$s)=@_;
+
+    if(defined($n->{'_ID_'})) {
+	my $nom=$n->{'_ID_'};
+	$nom =~ s/^\s+//;
+	$nom =~ s/\s+$//;
+	$nom =~ s/\s+/_/g;
+	
+	$s =~ s/\(ID\)/$nom/g;
+    }
+
+    $s =~ s/\(([^\)]+)\)/get_value($self,$1,$n)/gei;
+
+    $s =~ s/^\s+//;
+    $s =~ s/\s+$//;
+
+    return($s);
 }
 
 sub data {
