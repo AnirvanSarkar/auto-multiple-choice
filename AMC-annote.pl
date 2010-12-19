@@ -253,7 +253,11 @@ $delta=1/$#ids if($#ids>0);
 			$scan);
      }
 	 
-     if(-f $scan) {
+     my $scan_f=$scan;
+
+     $scan_f =~ s/\[[0-9]+\]$//;
+
+     if(-f $scan_f) {
 
 	 my $im=Graphics::Magick->new();
 
