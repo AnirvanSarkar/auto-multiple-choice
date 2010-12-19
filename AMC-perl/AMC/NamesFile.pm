@@ -29,6 +29,7 @@ sub new {
 	      'identifiant'=>'',
 
 	      'heads'=>[],
+	      'problems'=>{},
 	      'err'=>[0,0],
 	  };
 
@@ -168,9 +169,28 @@ sub get_value {
 
 sub calc_identifiants {
     my ($self)=@_;
+    my %ids=();
+
+    $self->{'problems'}={'ID.dup'=>[],'ID.empty'=>0};
+
     for my $n (@{$self->{'noms'}}) {
-	$n->{'_ID_'}=$self->substitute($n,$self->{'identifiant'});
+	my $i=$self->substitute($n,$self->{'identifiant'});
+	$n->{'_ID_'}=$i;
+	if($i) {
+	    if($ids{$i}) {
+		push @{$self->{'problems'}->{'ID.dup'}},$i;
+	    } else {
+		$ids{$i}=1;
+	    }
+	} else {
+	    $self->{'problems'}->{'ID.empty'}++;
+	}
     }
+}
+
+sub problem {
+    my ($self,$k)=@_;
+    return($self->{'problems'}->{$k});
 }
 
 sub tri {

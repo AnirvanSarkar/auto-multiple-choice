@@ -544,7 +544,7 @@ my $gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
 for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement
-    liste_filename liste_path liste_edit liste_setfile
+    liste_filename liste_path liste_edit liste_setfile liste_refresh
     doc_menu menu_debug menu_outils
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
@@ -2066,7 +2066,6 @@ sub choisit_liste {
 			       'liste_dialog','auto-multiple-choice')
 	->get_widget('liste_dialog');
 
-    my $dir;
     my @f;
     if($projet{'options'}->{'listeetudiants'}) {
 	@f=splitpath(absolu($projet{'options'}->{'listeetudiants'}));
@@ -2074,25 +2073,25 @@ sub choisit_liste {
 	@f=splitpath(absolu('%PROJET/'));
     }
     $f[2]='';
-    $dir=catpath(@f);
 
-    $dial->set_current_folder($dir);
+    $dial->set_current_folder(catpath(@f));
 
     my $ret=$dial->run();
     debug("Names list file choice [$ret]");
+
+    my $file=$dial->get_filename();
+    $dial->destroy();
     
     if($ret eq '1') {
 	# file chosen
-	debug("List: ".$dial->get_filename());
-	valide_liste('set'=>$dial->get_filename());
+	debug("List: ".$file);
+	valide_liste('set'=>$file);
     } elsif($ret eq '2') {
 	# No list
 	valide_liste('set'=>'');
     } else {
 	# Cancel
     }
-
-    $dial->destroy();
 }
 
 sub edite_liste {
@@ -2140,12 +2139,44 @@ sub valide_liste {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'error','ok',
-				  sprintf(__"Unsuitable file: %d errors, first on line %d.",$err,$errlig));
+				  sprintf(__"Unsuitable names file: %d errors, first on line %d.",$err,$errlig));
 	    $dialog->run;
 	    $dialog->destroy;
 	}
 	$cb_stores{'liste_key'}=$cb_model_vide_key;
     } else {
+	# problems with ID (name/surname)
+	my $e=$l->problem('ID.empty');
+	if($e>0) {
+	    debug "NamesFile: $e empty IDs";
+	    $w{'liste_refresh'}->show();
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'warning','ok',
+				  sprintf(__"Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled.",$e,$fl)." ".__"Edit the names file to correct it, and re-read.");
+	    $dialog->run;
+	    $dialog->destroy;
+	} else {
+	    my $d=$l->problem('ID.dup');
+	    if(@$d) {
+		debug "NamesFile: duplicate IDs [".join(',',@$d)."]";
+		if($#{$d}>8) {
+		    @$d=(@{$d}[0..8],'(and more)');
+		}
+		$w{'liste_refresh'}->show();
+		my $dialog = Gtk2::MessageDialog
+		    ->new_with_markup($w{'main_window'},
+				      'destroy-with-parent',
+				      'warning','ok',
+				      sprintf(__"Found duplicate names: <i>%s</i>. Check that all names are different.",join(', ',@$d))." ".__"Edit the names file to correct it, and re-read.");
+		$dialog->run;
+		$dialog->destroy;
+	    } else {
+		# OK, no need to refresh
+		$w{'liste_refresh'}->hide();
+	    }
+	}
 	# transmission liste des en-tetes
 	my @keys=$l->keys;
 	debug "primary keys: ".join(",",@keys);
