@@ -2062,16 +2062,29 @@ sub saisie_auto_ok {
 }
 
 sub choisit_liste {
-    my $gl=Gtk2::GladeXML->new($glade_xml,
+    my $dial=Gtk2::GladeXML->new($glade_xml,
 			       'liste_dialog','auto-multiple-choice')
-	->get_widget('liste_dialog');    
-    my $ret=$gl->run();
+	->get_widget('liste_dialog');
+
+    my $dir;
+    my @f;
+    if($projet{'options'}->{'listeetudiants'}) {
+	@f=splitpath(absolu($projet{'options'}->{'listeetudiants'}));
+    } else {
+	@f=splitpath(absolu('%PROJET/'));
+    }
+    $f[2]='';
+    $dir=catpath(@f);
+
+    $dial->set_current_folder($dir);
+
+    my $ret=$dial->run();
     debug("Names list file choice [$ret]");
     
     if($ret eq '1') {
 	# file chosen
-	debug("List: ".$gl->get_filename());
-	valide_liste('set'=>$gl->get_filename());
+	debug("List: ".$dial->get_filename());
+	valide_liste('set'=>$dial->get_filename());
     } elsif($ret eq '2') {
 	# No list
 	valide_liste('set'=>'');
@@ -2079,7 +2092,7 @@ sub choisit_liste {
 	# Cancel
     }
 
-    $gl->destroy();
+    $dial->destroy();
 }
 
 sub edite_liste {
