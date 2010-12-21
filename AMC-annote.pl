@@ -61,6 +61,8 @@ my $pointsize_rel=60;
 
 my $chiffres_significatifs=4;
 
+my $verdict='TOTAL : %S/%M => %s/%m';
+
 # cle : "a_cocher-cochee"
 my %symboles=(
     '0-0'=>{qw/type none/},
@@ -68,6 +70,8 @@ my %symboles=(
     '1-0'=>{qw/type mark color red/},
     '1-1'=>{qw/type mark color blue/},
 );
+
+@ARGV=unpack_args(@ARGV);
 
 GetOptions("cr=s"=>\$cr_dir,
 	   "projet=s",\$rep_projet,
@@ -88,6 +92,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "ecart=s"=>\$ecart,
 	   "ecart-marge=s"=>\$ecart_marge,
 	   "ch-sign=s"=>\$chiffres_significatifs,
+	   "verdict=s"=>\$verdict,
 	   );
 
 set_debug($debug);
@@ -236,7 +241,7 @@ my $delta=1;
 
 my @ids=$anl->ids();  
 
-$delta=1/$#ids if($#ids>0);
+$delta=1/(1+$#ids) if($#ids>=0);
 
  XMLFB: for my $id (@ids) {
      my $x=$anl->analyse($id,'scan'=>1);
@@ -295,12 +300,19 @@ $delta=1/$#ids if($#ids>0);
 	 
 	 if($n_page==1 || $x->{'nom'}) {
 	     my $t=$ne->{'total'}->[0];
+	     my $text=$verdict;
+
+	     $text =~ s/\%[S]/format_note($t->{'total'})/ge;
+	     $text =~ s/\%[M]/format_note($t->{'max'})/ge;
+	     $text =~ s/\%[s]/$t->{'note'}/g;
+	     $text =~ s/\%[m]/$notes->{'notemax'}/g;
+
+	     $text =~ s/\'/\\\'/g;
+
 	     $im->Draw(qw/primitive text stroke red fill red strokewidth 1/,
 		       'points'=>sprintf("%.1f,%.1f \'%s\'",
 					 $x_ppem,0.7*$y_ppem+$ascender,
-					 "TOTAL : "
-					 .format_note($t->{'total'})."/".format_note($t->{'max'})
-					 ." => ".$t->{'note'}." / ".$notes->{'notemax'}
+					 $text
 					 ),
 		       'antialias'=>'true',
 		      ); 

@@ -26,13 +26,15 @@ use File::Temp;
 use File::Spec;
 use IO::File;
 use Fcntl qw(:flock :seek);
+use XML::Writer;
+use XML::Simple;
 
 BEGIN {
     use Exporter   ();
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &__ &__p);
+    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &pack_args &unpack_args &__ &__p);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -332,6 +334,36 @@ sub proj2abs {
     } else {
 	return('');
     }
+}
+
+sub pack_args {
+    my @args=@_;
+    $pack_fh = new File::Temp(TEMPLATE =>'AMC-PACK-XXXXXXXX',
+			      SUFFIX => '.xml',
+			      UNLINK=>1,
+			      DIR=>File::Spec->tmpdir);
+    binmode($pack_fh,':utf8');
+    my $writer = new XML::Writer(OUTPUT=>$pack_fh,
+				 ENCODING=>'UTF-8',
+				 DATA_MODE=>1,
+				 DATA_INDENT=>2);
+    $writer->xmlDecl('UTF-8');
+    $writer->startTag('arguments');
+    for(@args) { $writer->dataElement('arg',$_); }
+    $writer->endTag('arguments');
+    return('--xmlargs',$pack_fh->filename);
+    $pack_fh->close;
+}
+
+sub unpack_args {
+    my @args=@_;
+    if($args[0] eq '--xmlargs') {
+	shift(@args);
+	my $file=shift(@args);
+	my $xa=XMLin($file,'ForceArray'=>1)->{'arg'};
+	unshift(@args,@$xa);
+    }
+    return(@args);
 }
 
 my $localisation;

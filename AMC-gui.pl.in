@@ -218,6 +218,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'annote_ps_nl'=>60,
 	      'annote_ecart'=>5.5,
 	      'annote_chsign'=>4,
+
+	      'defaut_verdict'=>'TOTAL : %S/%M => %s/%m',
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -261,6 +263,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'after_export'=>'file',
 
 		   'annote_position'=>'marge',
+
+		   'verdict'=>'',
 		   );
 
 my $mep_saved='mep.storable';
@@ -2415,7 +2419,7 @@ sub opt_symbole {
 
 sub annote_copies {
     commande('commande'=>[with_prog("AMC-annote.pl"),
-			  "--debug",debug_file(),
+			  pack_args("--debug",debug_file(),
 			  "--progression-id",'annote',
 			  "--progression",1,
 			  "--projet",absolu('%PROJET/'),
@@ -2434,6 +2438,7 @@ sub annote_copies {
 			  "--position",$projet{'options'}->{'annote_position'},
 			  "--pointsize-nl",$o{'annote_ps_nl'},
 			  "--ecart",$o{'annote_ecart'},
+			  "--verdict",$projet{'options'}->{'verdict'}),
 			  ],
 	     'texte'=>__"Annotating papers...",
 	     'progres.id'=>'annote',
