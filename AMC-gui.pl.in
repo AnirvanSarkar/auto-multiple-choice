@@ -2488,6 +2488,10 @@ sub view_dir {
     commande_parallele(@c);
 }
 
+sub open_exports_dir {
+    view_dir(absolu('%PROJET/exports/'));
+}
+
 sub regarde_regroupements {
     view_dir(absolu($projet{'options'}->{'cr'})."/corrections/pdf");
 }
