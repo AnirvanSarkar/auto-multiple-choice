@@ -2563,6 +2563,16 @@ sub activate_zoom_maj {
 ###
 
 # transmet les preferences vers les widgets correspondants
+# _c_ combo box (menu)
+# _cb_ check button
+# _ce_ combo box entry
+# _col_ color chooser
+# _f_ file name
+# _s_ spin button
+# _t_ text
+# _v_ check button
+# _x_ one line text
+
 sub transmet_pref {
     my ($gap,$prefixe,$h,$alias,$seulement)=@_;
 
@@ -2571,7 +2581,12 @@ sub transmet_pref {
 	my $ta=$t;
 	$ta=$alias->{$t} if($alias->{$t});
 
-	my $wp=$gap->get_widget($prefixe.'_x_'.$ta);
+	my $wp=$gap->get_widget($prefixe.'_t_'.$ta);
+	if($wp) {
+	    $w{$prefixe.'_t_'.$t}=$wp;
+	    $wp->get_buffer->set_text($h->{$t});
+	}
+	$wp=$gap->get_widget($prefixe.'_x_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_x_'.$t}=$wp;
 	    $wp->set_text($h->{$t});
@@ -2649,6 +2664,13 @@ sub reprend_pref {
 	my $wp=$w{$prefixe.'_x_'.$tgui};
 	if($wp) {
 	    $n=$wp->get_text();
+	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	    $h->{$t}=$n;
+	}
+	$wp=$w{$prefixe.'_t_'.$tgui};
+	if($wp) {
+	    my $buf=$wp->get_buffer;
+	    $n=$buf->get_text($buf->get_start_iter,$buf->get_end_iter,1);
 	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
