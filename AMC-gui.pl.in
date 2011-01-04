@@ -2749,6 +2749,8 @@ sub edit_preferences {
 	$w{$_}=$gap->get_widget($_);
     }
 
+    $w{'edit_preferences_manager'}=$gap;
+
     $gap->signal_autoconnect_from_package('main');
 
     # tableau type/couleurs pour correction
@@ -2774,7 +2776,67 @@ sub edit_preferences {
 sub accepte_preferences {
     reprend_pref('pref',\%o);
     reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
+
+    my %pm;
+    my @gm;
+    my %labels;
+
+    if($projet{'nom'}) {
+	%pm=map { $_=>1 } (split(/,/,$projet{'options'}->{'_modifie'}));
+	@gm=grep { /^defaut_/ } (split(/,/,$o{'_modifie'}));
+
+	for my $k (@gm) {
+	    my $l=$w{'edit_preferences_manager'}->get_widget('label_'.$k);
+	    $labels{$k}=$l->get_text() if($l);
+	    my $kp=$k;
+	    $kp =~ s/^defaut_//;
+	    $l=$w{'edit_preferences_manager'}->get_widget('label_'.$kp);
+	    $labels{$kp}=$l->get_text() if($l);
+	}
+    }
+
     $w{'edit_preferences'}->destroy();
+
+    # modified default value ?
+    if($projet{'nom'}) {
+	debug "Modified (general): $o{'_modifie'}";
+	debug "Modified (project): ".$projet{'options'}->{'_modifie'};
+	debug "Labels: ".join(',',keys %labels);
+
+	for my $k (@gm) {
+	    my $kp=$k;
+	    $kp =~ s/^defaut_//;
+
+	    debug "Test G:$k / P:$kp";
+	    if(!$pm{$kp}) {
+		# project option has NOT been modified. Ask the user for modifying also the project option value
+		$label_projet=$labels{$kp};
+		$label_general=$labels{$k};
+
+		debug "Ask user $label_general | $label_projet";
+
+		if($label_projet && $label_general) {
+		    my $dialog = Gtk2::MessageDialog
+			->new_with_markup($w{'main_window'},
+					  'destroy-with-parent',
+					  'question','yes-no',
+					  sprintf(__("You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"),
+					  $label_general,$label_projet,$projet{'nom'}));
+		    my $reponse=$dialog->run;
+		    $dialog->destroy;  
+
+		    debug "Reponse: $reponse";
+		    
+		    if($reponse eq 'yes') {
+			# change also project option value
+			$projet{'options'}->{$kp}=$o{$k};
+			$projet{'options'}->{'_modifie'}.=",$kp";
+		    } 
+    
+		}
+	    }
+	}
+    }
 
     $projet{'options'}->{'note_min'} =~ s/\s+//g;
     $projet{'options'}->{'note_max'} =~ s/\s+//g;
