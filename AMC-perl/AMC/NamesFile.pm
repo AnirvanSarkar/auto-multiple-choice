@@ -220,7 +220,11 @@ sub liste {
 
 # use names fields from $n to subsitute (HEADER) substrings in $s
 sub substitute {
-    my ($self,$n,$s)=@_;
+    my ($self,$n,$s,%oo)=@_;
+
+    my $prefix='';
+
+    $prefix=$oo{'prefix'} if(defined($oo{'prefix'}));
 
     if(defined($n->{'_ID_'})) {
 	my $nom=$n->{'_ID_'};
@@ -228,10 +232,10 @@ sub substitute {
 	$nom =~ s/\s+$//;
 	$nom =~ s/\s+/_/g;
 	
-	$s =~ s/\(ID\)/$nom/g;
+	$s =~ s/$prefix\(ID\)/$nom/g;
     }
 
-    $s =~ s/\(([^\)]+)\)/get_value($self,$1,$n)/gei;
+    $s =~ s/$prefix\(([^\)]+)\)/get_value($self,$1,$n)/gei;
 
     $s =~ s/^\s+//;
     $s =~ s/\s+$//;

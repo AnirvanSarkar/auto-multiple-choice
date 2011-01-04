@@ -26,6 +26,8 @@ use AMC::Basic;
 use AMC::Exec;
 use AMC::ANList;
 use AMC::Gui::Avancement;
+use AMC::AssocFile;
+use AMC::NamesFile;
 
 use Graphics::Magick;
 
@@ -63,6 +65,10 @@ my $chiffres_significatifs=4;
 
 my $verdict='TOTAL : %S/%M => %s/%m';
 
+my $association='';
+my $fich_noms='';
+my $noms_encodage='utf-8';
+
 # cle : "a_cocher-cochee"
 my %symboles=(
     '0-0'=>{qw/type none/},
@@ -93,6 +99,9 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "ecart-marge=s"=>\$ecart_marge,
 	   "ch-sign=s"=>\$chiffres_significatifs,
 	   "verdict=s"=>\$verdict,
+	   "fich-assoc=s"=>\$association,
+	   "fich-noms=s"=>\$fich_noms,
+	   "noms-encodage=s"=>\$noms_encodage,
 	   );
 
 set_debug($debug);
@@ -122,6 +131,28 @@ if(! -f $fich_bareme) {
     attention("No marking scale file: $fich_bareme");
     die "No marking scale file: $fich_bareme";
 }
+
+my $assoc='';
+my $lk='';
+
+if($association) {
+    $assoc=AMC::AssocFile::new($association);
+    if($assoc) {
+	$assoc->load();
+	$lk=$assoc->get_param('liste_key');
+    }
+}
+
+my $noms='';
+
+if($fich_noms) {
+    $noms=AMC::NamesFile::new($fich_noms,
+			      "encodage"=>$noms_encodage);
+
+    debug "Keys in names file: ".join(", ",$noms->heads());
+}
+
+# ---
 
 sub format_note {
     my $x=shift;
@@ -306,6 +337,21 @@ $delta=1/(1+$#ids) if($#ids>=0);
 	     $text =~ s/\%[M]/format_note($t->{'max'})/ge;
 	     $text =~ s/\%[s]/$t->{'note'}/g;
 	     $text =~ s/\%[m]/$notes->{'notemax'}/g;
+
+	     if($assoc && $noms) {
+		 my $i=$assoc->effectif($etud);
+		 my $n;
+		 
+		 debug "Association -> ID=$i";
+		 
+		 if($i) {
+		     debug "Name found";
+		     ($n)=$noms->data($lk,$i);
+		     if($n) {
+			 $text=$noms->substitute($n,$text,'prefix'=>'%');
+		     }
+		 }
+	     }
 
 	     $text =~ s/\'/\\\'/g;
 
