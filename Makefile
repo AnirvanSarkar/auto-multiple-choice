@@ -23,7 +23,7 @@ include $(SUB_MAKEFILES)
 
 PACKAGE_DEB_DV=1
 
-SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) |sed 's/=.*//;') PACKAGE_DEB_DV
+SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | grep -v '^\#' | sed 's/?\?=.*//;' ) PACKAGE_DEB_DV
 
 GCC ?= gcc
 GCC_PP ?= gcc
