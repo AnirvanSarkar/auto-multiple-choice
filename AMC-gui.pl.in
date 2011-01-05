@@ -2808,8 +2808,11 @@ sub accepte_preferences {
 	    $kp =~ s/^defaut_//;
 
 	    debug "Test G:$k / P:$kp";
-	    if(!$pm{$kp}) {
-		# project option has NOT been modified. Ask the user for modifying also the project option value
+	    if((!$pm{$kp}) && ($projet{'options'}->{$kp} ne $o{$k})) {
+		# project option has NOT been modified, and the new
+		# value of general default option is different from
+		# project option. Ask the user for modifying also the
+		# project option value
 		$label_projet=$labels{$kp};
 		$label_general=$labels{$k};
 
