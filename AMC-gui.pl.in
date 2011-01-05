@@ -219,7 +219,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'annote_ecart'=>5.5,
 	      'annote_chsign'=>4,
 
-	      'defaut_verdict'=>'TOTAL : %S/%M => %s/%m',
+	      'defaut_verdict'=>__("Mark: %s/%m (total score: %S/%M)"),
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -240,7 +240,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'note_min'=>'',
 		   'note_max'=>20,
 		   'note_max_plafond'=>1,
-		   'note_grain'=>"0,5",
+		   'note_grain'=>"0.5",
 		   'note_arrondi'=>'inf',
 
 		   'liste_key'=>'',
@@ -2841,9 +2841,11 @@ sub accepte_preferences {
 	}
     }
 
-    $projet{'options'}->{'note_min'} =~ s/\s+//g;
-    $projet{'options'}->{'note_max'} =~ s/\s+//g;
-    $projet{'options'}->{'note_grain'} =~ s/\s+//g;
+    if($projet{'nom'}) {
+	for my $k (qw/note_min note_max note_grain/) {
+	    $projet{'options'}->{$k} =~ s/\s+//g;
+	}
+    }
 
     sauve_pref_generales();
 
