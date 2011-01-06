@@ -386,9 +386,12 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	
     }
     
-    # enlever accents et caracteres un peu speciaux...
+    # no accents and special characters in filename
     $f=NFKD($f);
     $f =~ s/\pM//og;
+
+    # no whitespaces in filename
+    $f =~ s/\s+/_/g;
 
     $f="$pdfdir/$f";
 

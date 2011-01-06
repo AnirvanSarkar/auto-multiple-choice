@@ -230,9 +230,11 @@ sub substitute {
 	my $nom=$n->{'_ID_'};
 	$nom =~ s/^\s+//;
 	$nom =~ s/\s+$//;
-	$nom =~ s/\s+/_/g;
+	$nom =~ s/\s+/ /g;
 	
 	$s =~ s/$prefix\(ID\)/$nom/g;
+    } else {
+	$s =~ s/$prefix\(ID\)/X/g;
     }
 
     $s =~ s/$prefix\(([^\)]+)\)/get_value($self,$1,$n)/gei;
