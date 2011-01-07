@@ -2194,6 +2194,7 @@ sub valide_liste {
 
 ### Actions des boutons de la partie NOTATION
 
+# manual association 
 sub associe {
     if(-f absolu($projet{'options'}->{'listeetudiants'})) {
 	my $ga=AMC::Gui::Association::new('cr'=>absolu($projet{'options'}->{'cr'}),
@@ -2226,6 +2227,7 @@ sub associe {
     }
 }
 
+# automatic association
 sub associe_auto {
     if(! -s absolu($projet{'options'}->{'listeetudiants'})) {
 	my $dialog = Gtk2::MessageDialog
@@ -2270,7 +2272,10 @@ sub associe_auto {
     }
 }
 
+# automatic association finished : explain what to do after
 sub assoc_resultat {
+    dialogue_apprentissage('ASSOC_AUTO_OK',
+			   __("Automatic association is now finished. You can ask for manual association to check that all is fine and, if necessary, read manually students names which have not been automatically identified."));
 }
 
 sub valide_cb {
