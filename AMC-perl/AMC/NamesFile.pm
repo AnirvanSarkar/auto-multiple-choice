@@ -145,6 +145,7 @@ sub load {
 	debug("Inexistant or empty names list file");
 	$self->{'heads'}=[];
 	$self->{'keys'}=[];
+	$self->{'problems'}={'ID.dup'=>[],'ID.empty'=>0};
 	return(0,0);
     }
 }
