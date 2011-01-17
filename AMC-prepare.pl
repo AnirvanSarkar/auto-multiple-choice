@@ -336,8 +336,17 @@ sub latex_cmd {
 	   ." \\input{\"$f_tex\"}");
 }
 
+sub check_moteur {
+    if(!commande_accessible($moteur_latex)) {
+	print "ERR: ".sprintf(__("LaTeX command configured is not present (%s). Install it or change configuration, and then rerun."),$moteur_latex)."\n";
+	exit(1);
+    }
+}
+
 if($mode =~ /k/) {
     # CORRECTION INDIVIDUELLE
+
+    check_moteur();
 
     execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
     transfere("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
@@ -350,6 +359,8 @@ if($mode =~ /k/) {
 
 if($mode =~ /s/) {
     # SUJETS
+
+    check_moteur();
 
     my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
 
