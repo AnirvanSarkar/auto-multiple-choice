@@ -1474,7 +1474,7 @@ sub doc_active {
     #print "Active $sel...\n";
     my $f=absolu($projet{'options'}->{'docs'}->[$sel]);
     debug "Looking at $f...";
-    commande_parallele(($sel==2 ? $o{'txt_editor'} : $o{'pdf_viewer'}),$f);
+    commande_parallele(($f =~ /\.xy$/ ? $o{'txt_editor'} : $o{'pdf_viewer'}),$f);
 }
 
 sub mep_active {
@@ -1543,6 +1543,13 @@ sub doc_maj {
 	unlink @meps;
 	detecte_mep();
     }   
+
+    # new layout document : XY (from LaTeX)
+    
+    if($projet{'options'}->{'docs'}->[2] =~ /\.pdf$/) {
+	$projet{'options'}->{'docs'}->[2]=$projet_defaut{'docs'}->[2];
+	$projet{'options'}->{'_modifie'}=1;
+    }
 
     #
     commande('commande'=>[with_prog("AMC-prepare.pl"),
@@ -3721,14 +3728,6 @@ sub projet_ouvre {
 	$projet{'options'}->{'_modifie'}='';
 
 	set_source_tex(1) if($new_source);
-
-	# options a changer...
-
-	if($projet{'options'}->{'docs'}->[2] =~ /\.pdf$/) {
-	    $projet{'options'}->{'docs'}->[2]='DOC-calage.xy';
-	    $projet{'options'}->{'_modifie'}=1;
-	}
-	
 
 	return(1);
     }
