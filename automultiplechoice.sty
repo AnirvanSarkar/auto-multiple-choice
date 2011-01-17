@@ -258,34 +258,34 @@
 % binary boxes
 %--------------------------------------------------------------
 %
-\newtoks\en@binaire
-\newcount\le@nombre
-\newcount\nb@chiffres
-\newcount\nb@id
-\newcount\numer@casebinaire
+\newtoks\AMCbin@sequence
+\newcount\AMCbin@number
+\newcount\AMCbin@ndigits
+\newcount\AMCbin@id
+\newcount\AMCbin@digit
 %
-\def\chiffre@un{\advance\numer@casebinaire by 1\AMC@boxedchar{}{1}{chiffre:\the\nb@id,\the\numer@casebinaire}{1}}
-\def\chiffre@zero{\advance\numer@casebinaire by 1\AMC@boxedchar{}{1}{chiffre:\the\nb@id,\the\numer@casebinaire}{}}
+\def\AMCbin@one{\advance\AMCbin@digit by 1\AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{1}}
+\def\AMCbin@zero{\advance\AMCbin@digit by 1\AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{}}
 %
-\def\commence@nb#1{\nb@id=#1\numer@casebinaire=0}
-\newcommand\chiffresbinaires[2]{
-\def\chiffre@zero{#1}
-\def\chiffre@un{#2}
+\def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=0}
+\newcommand\AMCbinaryDigits[2]{
+\def\AMCbin@zero{#1}
+\def\AMCbin@one{#2}
 }
 \newcommand{\binaire}[2][1]{%
-{\AMCboxDimensions{size=.3cm,down=0pt,rule=.2pt}\en@binaire={}\le@nombre=#2%
-\nb@chiffres=0%
+{\AMCboxDimensions{size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2%
+\AMCbin@ndigits=0%
 \loop%
-\ifnum\le@nombre>0%
-\advance\nb@chiffres by 1%
-\ifodd\le@nombre\en@binaire=\expandafter{\expandafter\chiffre@un\the\en@binaire}%
-\else\en@binaire=\expandafter{\expandafter\chiffre@zero\the\en@binaire}\fi%
-\divide\le@nombre by 2%
+\ifnum\AMCbin@number>0%
+\advance\AMCbin@ndigits by 1%
+\ifodd\AMCbin@number\AMCbin@sequence=\expandafter{\expandafter\AMCbin@one\the\AMCbin@sequence}%
+\else\AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\fi%
+\divide\AMCbin@number by 2%
 \repeat%
 \loop\relax%
-\ifnum\nb@chiffres<#1\advance\nb@chiffres by 1%
-\en@binaire=\expandafter{\expandafter\chiffre@zero\the\en@binaire}\repeat%
-\the\en@binaire%
+\ifnum\AMCbin@ndigits<#1\advance\AMCbin@ndigits by 1%
+\AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\repeat%
+\the\AMCbin@sequence%
 }}
 %
 %--------------------------------------------------------------
@@ -520,8 +520,8 @@
 \fancyhead[C]{\he@dhaut{%
 \ifAMC@codebinaire%
 \begin{minipage}[b]{\AMC@CBtaille}
-\commence@nb{1}\noindent\binaire[\AMC@NCBetud]{\the\AMCid@etud}\\
-\commence@nb{2}\noindent\binaire[\AMC@NCBpage]{\thepage}\commence@nb{3}\binaire[\AMC@NCBcheck]{\the\AMCid@check}%
+\AMCbin@begin{1}\noindent\binaire[\AMC@NCBetud]{\the\AMCid@etud}\\
+\AMCbin@begin{2}\noindent\binaire[\AMC@NCBpage]{\thepage}\AMCbin@begin{3}\binaire[\AMC@NCBcheck]{\the\AMCid@check}%
 \end{minipage}
 \hbox to 4cm{\hspace*{\fill}{\tt +\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
 \else%
