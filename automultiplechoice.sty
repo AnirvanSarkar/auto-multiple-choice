@@ -197,7 +197,7 @@
       \string\tracepos%
         {\the\AMCid@etud/\thepage:#2}{0sp}{\noexpand\number\pdflastypos sp}}%
 \fi\fi}
-\long\def\tracebox#1#2#3{\vbox{\traceposy{#1}{#2}\leavevmode\traceposx{#1}{#2}#3\traceposx{#1}{#2}}\traceposy{#1}{#2}}
+\newcommand\tracebox[3]{\vbox{\traceposy{#1}{#2}\hbox{\traceposx{#1}{#2}#3\traceposx{#1}{#2}}\traceposy{#1}{#2}}}
 \def\pagepos{\ifAMC@calibration\protected@write\AMC@XYFILE{}{\string\page{\the\AMCid@etud/\thepage/\the\AMCid@check}{\the\paperwidth}{\the\paperheight}}\fi}
 %
 % parametres codage et cases binaires
@@ -510,13 +510,14 @@
 \renewcommand{\headrulewidth}{0pt}
 %
 \ifAMC@correchead
-\lhead{}\rhead{}\chead{{\sc \AMC@intituleHead}}\lfoot{}\rfoot{}\cfoot{}
+\fancyhf{}\fancyhead[C]{{\sc \AMC@intituleHead}}
 \else
-\lhead{\he@dbas{\m@rque{positionHG}}}
-\rhead{\he@dbas{\m@rque{positionHD}}}
-\lfoot{\m@rque{positionBG}}
-\rfoot{\m@rque{positionBD}}
-\chead{\he@dhaut{%
+\fancyhf{}
+\fancyhead[L]{\he@dbas{\m@rque{positionHG}}}
+\fancyhead[R]{\he@dbas{\hspace*{0pt}\m@rque{positionHD}}}
+\fancyfoot[L]{\m@rque{positionBG}}
+\fancyfoot[R]{\hspace*{0pt}\m@rque{positionBD}}
+\fancyhead[C]{\he@dhaut{%
 \ifAMC@codebinaire%
 \begin{minipage}[b]{\AMC@CBtaille}
 \commence@nb{1}\noindent\binaire[\AMC@NCBetud]{\the\AMCid@etud}\\
@@ -528,7 +529,7 @@
 \fi}}
 \fancyhfoffset[EOLR]{5mm}
 \fi
-\cfoot{\AMC@note}
+\fancyfoot[C]{\AMC@note}
 }
 \def\AMC@note{}
 %
