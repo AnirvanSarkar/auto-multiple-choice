@@ -601,6 +601,11 @@
 \AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
 \fi
 %
+\ifx\CalibrationExterne\undefined\else
+\message{***CALIBRATION***^^J}
+\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
+\fi
+%
 \ifx\CorrigeExterne\undefined\else
 \message{***CORRIGE***^^J}
 \AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue\AMC@watermarkfalse
