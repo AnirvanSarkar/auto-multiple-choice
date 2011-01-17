@@ -502,8 +502,8 @@
 %
 \AtBeginPage{\global\advance\AMCid@check by -1%
 \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
-\pagepos
-\AMCw@terprint{\AMCw@termark}}
+\pagepos%
+\ifAMC@watermark\ifAMC@correchead\else\AMCw@terprint{\AMCw@termark}\fi\fi}
 %
 \AtBeginDocument{
 \pagestyle{fancy}
@@ -598,17 +598,17 @@
 %
 \ifx\SujetExterne\undefined\else
 \message{***SUJET***^^J}
-\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse
+\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
 \fi
 %
 \ifx\CorrigeExterne\undefined\else
 \message{***CORRIGE***^^J}
-\AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue
+\AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue\AMC@watermarkfalse
 \fi
 %
 \ifx\CorrigeIndivExterne\undefined\else
 \message{***CORRIGE***^^J}
-\AMC@correctrue
+\AMC@correctrue\AMC@watermarkfalse
 \fi
 %
 \ifx\NoWatermarkExterne\undefined\else
