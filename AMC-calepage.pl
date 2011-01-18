@@ -309,26 +309,9 @@ debug "Global frame:",
     $cadre_general->txt();
 
 ###############################################################
-# identification du numero de page : cas ecriture standard
+# identification du numero de page
 
 $avance->progres((1-$progress_debut)/3);
-
-my $bandeau=Graphics::Magick::new();
-
-$bandeau->Read($scan);
-
-# mesure de l'angle de la ligne superieure
-
-my $angle=$cadre_general->direction(0,1);
-my $dy_head=max($cadre_general->coordonnees(0,'y'),
-		$cadre_general->coordonnees(1,'y'));
-my $xa=$cadre_general->coordonnees(0,'x');
-my $xb=$cadre_general->coordonnees(1,'x');
-
-# coupe le haut de la page et le tourne pour qu'il soit droit
-
-$bandeau->Crop(int($xb-$xa)."x".int($dy_head)."+".$xa."+0");
-$bandeau->Rotate(-$angle*180/$M_PI);
 
 my $id_page_f;
 
