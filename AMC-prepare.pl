@@ -73,7 +73,7 @@ my $out_calage='';
 my $out_sujet='';
 my $out_corrige='';
 
-my $moteur_raster='auto';
+my $moteur_raster='poppler';
 
 my $encodage_interne='UTF-8';
 
@@ -485,53 +485,7 @@ if($mode =~ /m/) {
 
 	} else {
 
-	    # deux etapes : rasterisation, et analyse
-
-	    @pages=();
-	    
-	    $cmd_pid=open(IDCMD,"-|","pdfinfo",$calage);
-	    die "Identification error: $!" if(!$cmd_pid);
-
-	    while(<IDCMD>) {
-		if(/^Pages:\s+([0-9]+)/) {
-		    my $npages=$1;
-		    @pages=(1..$npages);
-		}
-	    }
-	    close(IDCMD);
-	    $cmd_pid='';
-	    
-	    $avance->progres(0.03);
-	    
-	    my $npage=0;
-	    my $np=1+$#pages;
-	    for my $p (@pages) {
-		$npage++;
-		
-		$queue->add_process([with_prog("AMC-raster.pl"),
-				     "--debug",debug_file(),
-				     "--moteur",$moteur_raster,
-				     "--page",$p,
-				     "--dpi",$dpi,
-				     $calage,"$temp_dir/page-$npage.ppm",
-				    ],
-				    [with_prog("AMC-calepage.pl"),
-				     "--progression-debut",.4,
-				     "--progression",0.9/$np*$progress,
-				     "--progression-id",$progress_id,
-				     "--debug",debug_file(),
-				     $binaire,
-				     "--pdf-source",$calage,
-				     "--page",$npage,
-				     "--dpi",$dpi,
-				     "--modele",
-				     "--mep",$mep_dir,
-				     "$temp_dir/page-$npage.ppm"],
-				    ['rm',"$temp_dir/page-$npage.ppm"],
-		    );
-	    }
-	    
-	    $queue->run();
+	    die "This method is no longer supported... Please make new version of working documents, or switch to Poppler.";
 	}
     }
 }
