@@ -286,26 +286,6 @@ sub execute {
 $temp_loc=tmpdir();
 $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => 1 );
 
-# reconnaissance mode binaire/decimal :
-
-$binaire='--binaire';
-
-$cmd_pid=open(SCANTEX,$tex_source);
-die "Error reading $tex_source: $!" if(!$cmd_pid);
-
-while(<SCANTEX>) {
-    if(/usepackage\[([^\]]+)\]\{automultiplechoice\}/) {
-	my $opts=$1;
-	if($opts =~ /\bdecimal\b/) {
-	    $binaire="--no-binaire";
-	    print "Decimal mode.\n";
-	}
-
-    }
-}
-close(SCANTEX);
-$cmd_pid='';
-
 # on se place dans le repertoire du LaTeX
 ($v,$d,$f_tex)=splitpath($tex_source);
 chdir(catpath($v,$d,""));

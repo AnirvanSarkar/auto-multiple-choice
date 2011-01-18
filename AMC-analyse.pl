@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -41,7 +41,6 @@ $SIG{INT} = \&catch_signal;
 
 my $mep_dir="";
 my $cr_dir="";
-my $binaire='';
 my $debug='';
 my $progress=0;
 my $progress_id=0;
@@ -55,7 +54,6 @@ my $tol_marque='';
 GetOptions("mep=s"=>\$mep_dir,
 	   "mep-saved=s"=>\$mep_file,
 	   "cr=s"=>\$cr_dir,
-	   "binaire!"=>\$binaire,
 	   "seuil-coche=s"=>\$seuil_coche,
 	   "tol-marque=s"=>\$tol_marque,
 	   "debug=s"=>\$debug,
@@ -151,7 +149,6 @@ for my $s (@scans) {
     push @c,"--tol-marque",$tol_marque if($tol_marque);
     push @c,"--progression-id",$progress_id;
     push @c,"--progression",$delta;
-    push @c,"--binaire" if($binaire);
     push @c,"--mep",$mep_dir if($mep_dir);
     push @c,"--mep-saved",$mep_file;
     push @c,"--projet",$rep_projet if($rep_projet);
