@@ -136,6 +136,10 @@ for my $p (@pages) {
   }
     $diametre_marque/=$dmn;
 
+    for my $pos ('HG','HD','BD','BG') {
+	die "Needs position$pos from page $p->{-id}" if(!$c->{'position'.$pos});
+    }
+
     my $fn="$mep_dir/mep-".id2idf($p->{-id}).".xml";
     open(XML,">:encoding(UTF-8)",$fn) or die "Unable to write to $fn : $!";
     print XML "<?xml version='1.0' encoding='UTF-8'?>\n";
@@ -148,7 +152,6 @@ for my $p (@pages) {
 
     my $nc=0;
     for my $pos ('HG','HD','BD','BG') {
-	die "Needs position$pos from page $p->{-id}" if(!$c->{'position'.$pos});
 	$nc++;
 	print XML "<coin id=\"$nc\"><x>"
 	    .center($c->{'position'.$pos},'bx')
