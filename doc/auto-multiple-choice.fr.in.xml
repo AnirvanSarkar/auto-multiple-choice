@@ -141,37 +141,14 @@
       de copies est limité à 4095 et le nombre de pages par copies est limité
       à 63.</para>
 
-      <para>Le nombre de questions utilisées dans un même examen est limité à
-      255. L'utilisation de la commande <command>\AMCcode</command> (voir
-      section <xref linkend="latex.codes" />) utilise un nombre de questions
-      égal au nombre de chiffres pour le code à saisir. Par ailleurs, les
-      limitations de LaTeX pourront bloquer la compilation avant d'utiliser
-      255 questions (erreur du type « <errortext>No room for a new
-      \toks</errortext> »). Dans ce cas, essayez en utilisant le package
-      <package>etex</package>, grâce à la commande
-      <code>\usepackage{etex}</code>.</para>
-
       <para>Le nombre de réponses proposées pour une même question est limité
       à 199.</para>
-    </sect2>
 
-    <sect2 id="sec.couleurs">
-      <title>Sujets en couleurs</title>
-
-      <para>Le production de sujets comprenant des couleurs (textes en
-      couleurs en utilisant la commande <command>textcolor</command> par
-      exemple) est impossible, car cela risque de perturber le processus de
-      détection des mises en pages qui utilise une codification en couleurs
-      dans un « document de calage » identique au sujet.</para>
-
-      <para>On peut tout de même inclure des images dans le sujet grâce à la
-      commande <command>\includegraphics</command> du paquet LaTeX
-      <package>graphicx</package>. En effet,
-      <package>automultiplechoice</package> charge <package>graphicx</package>
-      de telle sorte que les images ne soient pas affichées dans le document
-      de calage qui sert à la détection des mises en page. Il ne faut donc pas
-      le charger explicitement : le sujet ne doit pas contenir la commande
-      <code>\usepackage{graphicx}</code>.</para>
+      <para>Par ailleurs, les limitations de LaTeX pourront bloquer la
+      compilation avant d'utiliser 255 questions (erreur du type
+      « <errortext>No room for a new \toks</errortext> »). Dans ce cas,
+      essayez en utilisant le package <package>etex</package>, grâce à la
+      commande <code>\usepackage{etex}</code>.</para>
     </sect2>
 
     <sect2>
@@ -217,6 +194,13 @@
           <command>\AMCformulaireReponse</command> ont été renommées
           respectivement <command>\AMCformQuestion</command> et
           <command>\AMCformAnswer</command>.</para>
+        </listitem>
+
+        <listitem>
+          <para>À partir de la version 0.394, vous devez indiquer
+          explicitement si vous utilisez le paquet LaTeX
+          <package>graphicx</package> (dans les versions précédentes, il était
+          chargé par AMC).</para>
         </listitem>
       </itemizedlist>
     </sect2>
