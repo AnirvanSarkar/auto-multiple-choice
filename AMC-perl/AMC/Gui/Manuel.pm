@@ -139,7 +139,8 @@ sub new {
 
     $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
 
-    AMC::Gui::PageArea::add_feuille($self->{'area'});
+    AMC::Gui::PageArea::add_feuille($self->{'area'},'',
+	'marks'=>($self->{'editable'} ? '' : 'blue'));
     
     ### modele DIAGNOSTIQUE SAISIE
 
