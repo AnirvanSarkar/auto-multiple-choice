@@ -137,7 +137,7 @@ for my $p (@pages) {
     $diametre_marque/=$dmn;
 
     for my $pos ('HG','HD','BD','BG') {
-	die "Needs position$pos from page $p->{-id}" if(!$c->{'position'.$pos});
+	die "Needs position$pos from page $p->{-id}" if(!$p->{-cases}->{'position'.$pos});
     }
 
     my $fn="$mep_dir/mep-".id2idf($p->{-id}).".xml";
