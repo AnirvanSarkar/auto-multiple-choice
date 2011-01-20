@@ -202,7 +202,6 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'assoc_ncols'=>4,
 	      'tolerance_marque_inf'=>0.2,
 	      'tolerance_marque_sup'=>0.2,
-	      'moteur_mep'=>'poppler',
 
 	      'symboles_trait'=>2,
 	      'symboles_indicatives'=>'',
@@ -232,7 +231,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'encodage_liste'=>'',
 		   'maj_bareme'=>1,
 		   'fichbareme'=>'bareme.xml',
-		   'docs'=>['sujet.pdf','corrige.pdf','calage.pdf'],
+		   'docs'=>['DOC-sujet.pdf','DOC-corrige.pdf','DOC-calage.xy'],
 		   
 		   'modele_regroupement'=>'',
 		   'regroupement_compose'=>'',
@@ -873,8 +872,6 @@ my %cb_stores=(
 	       'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
 						 ";"=>";",
 						 ","=>","),
-	       'moteur_mep'=>cb_model("auto"=>__"automatic decoupled",
-				      "poppler"=>__"direct"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 	       'annote_position'=>cb_model("none"=>__p("(none) [No annotation position (do not write anything)]"),
 					   "marge"=>__"margin",
@@ -1474,7 +1471,7 @@ sub doc_active {
     #print "Active $sel...\n";
     my $f=absolu($projet{'options'}->{'docs'}->[$sel]);
     debug "Looking at $f...";
-    commande_parallele($o{'pdf_viewer'},$f);
+    commande_parallele(($f =~ /\.xy$/ ? $o{'txt_editor'} : $o{'pdf_viewer'}),$f);
 }
 
 sub mep_active {
@@ -1543,6 +1540,13 @@ sub doc_maj {
 	unlink @meps;
 	detecte_mep();
     }   
+
+    # new layout document : XY (from LaTeX)
+    
+    if($projet{'options'}->{'docs'}->[2] =~ /\.pdf$/) {
+	$projet{'options'}->{'docs'}->[2]=$projet_defaut{'docs'}->[2];
+	$projet{'options'}->{'_modifie'}=1;
+    }
 
     #
     commande('commande'=>[with_prog("AMC-prepare.pl"),
@@ -1902,7 +1906,6 @@ sub calcule_mep {
     # on recalcule...
     commande('commande'=>[with_prog("AMC-prepare.pl"),
 			  "--with",moteur_latex(),
-			  "--raster",$o{'moteur_mep'},
 			  "--debug",debug_file(),
 			  "--calage",absolu($projet{'options'}->{'docs'}->[2]),
 			  "--progression-id",'MEP',
@@ -2028,7 +2031,6 @@ sub saisie_auto_ok {
 
     commande('commande'=>[with_prog("AMC-analyse.pl"),
 			  "--debug",debug_file(),
-			  "--binaire",
 			  "--seuil-coche",$projet{'options'}->{'seuil'},
 			  "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
 			  "--progression-id",'analyse',
@@ -3811,40 +3813,6 @@ if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
 projet_ouvre($ARGV[0]);
 
 test_commandes();
-
-# Migration vers poppler (a partir 0.275)
-
-if(!$state{'apprentissage'}->{'MIGRATION_POPPLER'}) {
-    debug "Avertissement migration poppler";
-
-    if($o{'moteur_mep'} eq 'auto') {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'question','yes-no',
-			      __("A new layout detection process has been developped.")." ".
-			      __("It is faster than the one that you used so far.")." ".
-			      __("Do you want to use it from now on?")." ".
-			      sprintf(__"If you experience any problem with this new implementation, you can change back to the old one setting \"%s\" to \"%s\" in %s (tab \"%s\").",
-				      __"Detection",
-				      __"direct",__"Preferences",__"Main"));
-	my $reponse=$dialog->run;
-	$dialog->destroy;
-	
-	if($reponse eq 'yes') {
-	    $o{'moteur_mep'}='poppler';
-	    $o{'_modifie'}=1;
-	}
-	
-	$state{'apprentissage'}->{'MIGRATION_POPPLER'}=1;
-	$state{'_modifie'}=1;
-	sauve_state();
-    } else {
-	$state{'apprentissage'}->{'MIGRATION_POPPLER'}=1;
-	$state{'_modifie'}=1;
-	sauve_state();
-    }
-}
 
 Gtk2->main();
 

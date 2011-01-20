@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -30,6 +30,8 @@ sub add_feuille {
 
     $coul='red' if(!$coul);
 
+    $self->{'marks'}='';
+
     $self->{'i-file'}='';
     $self->{'i-src'}='';
     $self->{'tx'}=1;
@@ -38,13 +40,18 @@ sub add_feuille {
     $self->{'case'}='';
     $self->{'coches'}='';
 
+    for (keys %oo) {
+	$self->{$_}=$oo{$_} if(defined($self->{$_}));
+    }
+
     $self->{'gc'} = Gtk2::Gdk::GC->new($self->window);
 
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
     $self->window->get_colormap->alloc_color($self->{'color'},TRUE,TRUE);
 
-    for (keys %oo) {
-	$self->{$_}=$oo{$_};
+    if($self->{'marks'}) {
+	$self->{'colormark'}= Gtk2::Gdk::Color->parse($self->{'marks'});
+	$self->window->get_colormap->alloc_color($self->{'colormark'},TRUE,TRUE);
     }
 
     return($self);
@@ -143,18 +150,64 @@ sub expose_drawing {
 			   $self->{'ty'},
 			   'none',0,0);
 
-    ## dessin des cases
-
-    if($self->{'lay'}->{'case'}) {
-
+    if($self->{'lay'}->{'case'} || $self->{'lay'}->{'nom'}) {
+	my $case;
+	my $coche;
+ 
 	$self->{'rx'}=$self->{'tx'}/$self->{'lay'}->{'tx'};
 	$self->{'ry'}=$self->{'ty'}/$self->{'lay'}->{'ty'};
+
+	# layout drawings
+
+	if($self->{'marks'}) {
+	    $self->{'gc'}->set_foreground($self->{'colormark'});
+	    
+	    for $case (@{$self->{'lay'}->{'nom'}}) {
+		$self->window->draw_rectangle(
+		    $self->{'gc'},
+		    '',
+		    $case->{'xmin'}*$self->{'rx'},
+		    $case->{'ymin'}*$self->{'ry'},
+		    ($case->{'xmax'}-$case->{'xmin'})*$self->{'rx'},
+		    ($case->{'ymax'}-$case->{'ymin'})*$self->{'ry'}
+		    );
+	    }
+
+	    $case=$self->{'lay'}->{'coin'};
+
+	    if($case) {
+		for my $i (1..4) {
+		    my $j=($i % 4)+1;
+		    $self->window->draw_line($self->{'gc'},
+					     $case->{$i}->{'x'}->[0]*$self->{'rx'},
+					     $case->{$i}->{'y'}->[0]*$self->{'ry'},
+					     $case->{$j}->{'x'}->[0]*$self->{'rx'},
+					     $case->{$j}->{'y'}->[0]*$self->{'ry'},
+			);
+		}
+	    }
+
+	    for my $case (@{$self->{'lay'}->{'chiffre'}}) {
+		$self->window->draw_rectangle(
+		    $self->{'gc'},
+		    '',
+		    $case->{'xmin'}*$self->{'rx'},
+		    $case->{'ymin'}*$self->{'ry'},
+		    ($case->{'xmax'}-$case->{'xmin'})*$self->{'rx'},
+		    ($case->{'ymax'}-$case->{'ymin'})*$self->{'ry'}
+		    );
+		
+	    }
+	    
+	}
+
+	## boxes drawings
 
 	$self->{'gc'}->set_foreground($self->{'color'});
 
 	for my $i (0..$#{$self->{'lay'}->{'case'}}) {
-	    my $case=$self->{'lay'}->{'case'}->[$i];
-	    my $coche=$self->{'coches'}->[$i];
+	    $case=$self->{'lay'}->{'case'}->[$i];
+	    $coche=$self->{'coches'}->[$i];
 
 	    $self->window->draw_rectangle(
 					  $self->{'gc'},

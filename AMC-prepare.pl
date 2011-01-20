@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -73,7 +73,7 @@ my $out_calage='';
 my $out_sujet='';
 my $out_corrige='';
 
-my $moteur_raster='auto';
+my $moteur_raster='poppler';
 
 my $encodage_interne='UTF-8';
 
@@ -286,26 +286,6 @@ sub execute {
 $temp_loc=tmpdir();
 $temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => 1 );
 
-# reconnaissance mode binaire/decimal :
-
-$binaire='--binaire';
-
-$cmd_pid=open(SCANTEX,$tex_source);
-die "Error reading $tex_source: $!" if(!$cmd_pid);
-
-while(<SCANTEX>) {
-    if(/usepackage\[([^\]]+)\]\{automultiplechoice\}/) {
-	my $opts=$1;
-	if($opts =~ /\bdecimal\b/) {
-	    $binaire="--no-binaire";
-	    print "Decimal mode.\n";
-	}
-
-    }
-}
-close(SCANTEX);
-$cmd_pid='';
-
 # on se place dans le repertoire du LaTeX
 ($v,$d,$f_tex)=splitpath($tex_source);
 chdir(catpath($v,$d,""));
@@ -336,8 +316,17 @@ sub latex_cmd {
 	   ." \\input{\"$f_tex\"}");
 }
 
+sub check_moteur {
+    if(!commande_accessible($moteur_latex)) {
+	print "ERR: ".sprintf(__("LaTeX command configured is not present (%s). Install it or change configuration, and then rerun."),$moteur_latex)."\n";
+	exit(1);
+    }
+}
+
 if($mode =~ /k/) {
     # CORRECTION INDIVIDUELLE
+
+    check_moteur();
 
     execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
     transfere("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
@@ -351,9 +340,11 @@ if($mode =~ /k/) {
 if($mode =~ /s/) {
     # SUJETS
 
+    check_moteur();
+
     my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
 
-    $out_calage=$prefix."calage.pdf" if(!$out_calage);
+    $out_calage=$prefix."calage.xy" if(!$out_calage);
     $out_corrige=$prefix."corrige.pdf" if(!$out_corrige);
     $out_sujet=$prefix."sujet.pdf" if(!$out_sujet);
 
@@ -365,19 +356,19 @@ if($mode =~ /s/) {
     }
 	       
 
-    # 1) document de calage
+    # 1) sujet et calage
 
-    execute('command'=>[latex_cmd(%opts,'CalibrationExterne'=>1)]);
+    execute('command'=>[latex_cmd(%opts,'SujetExterne'=>1)]);
     analyse_amclog("$f_base.amc");
-
+    transfere("$f_base.pdf",$out_sujet);
     if($n_erreurs>0) {
 	print "ERR: "
-	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"adjustment document");
+	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"question sheet");
 	exit(1);
     }
     exit(1) if($a_erreurs>0);
 
-    transfere("$f_base.pdf",$out_calage);
+    transfere("$f_base.xy",$out_calage);
 
     # transmission des variables
 
@@ -386,7 +377,7 @@ if($mode =~ /s/) {
 	print "VAR: $k=".$info_vars{$k}."\n";
     }
 
-    # 2) compilation de la correction
+    # 2) corrige
 
     execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
     transfere("$f_base.pdf",$out_corrige);
@@ -396,111 +387,86 @@ if($mode =~ /s/) {
 	exit(1);
     }
 
-    # 3) compilation du sujet
-
-    execute('command'=>[latex_cmd(%opts,'SujetExterne'=>1)]);
-    transfere("$f_base.pdf",$out_sujet);
-    if($n_erreurs>0) {
-	print "ERR: "
-	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"question sheet");
-	exit(1);
-    }
 
 }
 
 if($mode =~ /m/) {
     # MISE EN PAGE
 
-    # 1) compilation en mode calibration
-
-    if(-f $calage) {
-	print "Using file $calage\n";
-    } else {
-	print "********** Compilation...\n";
+    my $xyfile=$calage;
+    $xyfile =~ s/\.pdf/.xy/;
     
-	execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)]);
-	$calage="$f_base.pdf";
-    }
-
-    $avance->progres(0.07);
-
-    # 2) analyse page par page
-
-    print "********** To bitmap and analysis...\n";
-
-    if($moteur_raster eq 'poppler') {
-
-	# tout en un grace a poppler
+    if($xyfile =~ /\.xy$/ && -f $xyfile) {
 
 	$|++;
-	my @c=(with_prog("AMC-mepdirect"),
-	       "-r",$dpi,
-	       "-d",$mep_dir,
-	       "-e",0.93*$progress,
-	       "-n",$progress_id,
-	       $calage);
+	my @c=(with_prog("AMC-meptex.pl"),
+	       "--mep-dir",$mep_dir,
+	       "--progression",0.93*$progress,
+	       "--progression-id",$progress_id,
+	       "--src",$xyfile);
 
 	$cmd_pid=open(EXEC,"-|",@c) ;
+	
+	debug "[$cmd_pid] MEP-Tex: ".join(' ',@c);
 
-	debug "[$cmd_pid] Poppler: ".join(' ',@c);
-
-	die "Can't exec AMC-mepdirect: $!" if(!$cmd_pid);
+	die "Can't exec AMC-meptex.pl: $!" if(!$cmd_pid);
 	while(<EXEC>) {
 	    print $_;
 	    chomp;
 	    debug($_);
 	}
 	close(EXEC);
-
+	
     } else {
 
-	# deux etapes : rasterisation, et analyse
+	# OLD STYLE CALIBRATION PDF FILE - ONLY WHEN DOCUMENTS
+	# WERE MADE WITH OLD AMC VERSION
 
-	@pages=();
-	
-	$cmd_pid=open(IDCMD,"-|","pdfinfo",$calage);
-	die "Identification error: $!" if(!$cmd_pid);
+	# 1) compilation en mode calibration
 
-	while(<IDCMD>) {
-	    if(/^Pages:\s+([0-9]+)/) {
-		my $npages=$1;
-		@pages=(1..$npages);
-	    }
-	}
-	close(IDCMD);
-	$cmd_pid='';
-	
-	$avance->progres(0.03);
-	
-	my $npage=0;
-	my $np=1+$#pages;
-	for my $p (@pages) {
-	    $npage++;
+	if(-f $calage) {
+	    print "Using file $calage\n";
+	} else {
+	    print "********** Compilation...\n";
 	    
-	    $queue->add_process([with_prog("AMC-raster.pl"),
-				 "--debug",debug_file(),
-				 "--moteur",$moteur_raster,
-				 "--page",$p,
-				 "--dpi",$dpi,
-				 $calage,"$temp_dir/page-$npage.ppm",
-				 ],
-				[with_prog("AMC-calepage.pl"),
-				 "--progression-debut",.4,
-				 "--progression",0.9/$np*$progress,
-				 "--progression-id",$progress_id,
-				 "--debug",debug_file(),
-				 $binaire,
-				 "--pdf-source",$calage,
-				 "--page",$npage,
-				 "--dpi",$dpi,
-				 "--modele",
-				 "--mep",$mep_dir,
-				 "$temp_dir/page-$npage.ppm"],
-				['rm',"$temp_dir/page-$npage.ppm"],
-				);
+	    execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)]);
+	    $calage="$f_base.pdf";
 	}
-	
-	$queue->run();
+
+	$avance->progres(0.07);
+
+	# 2) analyse page par page
+
+	print "********** To bitmap and analysis...\n";
+
+	if($moteur_raster eq 'poppler') {
+
+	    # tout en un grace a poppler
+
+	    $|++;
+	    my @c=(with_prog("AMC-mepdirect"),
+		   "-r",$dpi,
+		   "-d",$mep_dir,
+		   "-e",0.93*$progress,
+		   "-n",$progress_id,
+		   $calage);
+
+	    $cmd_pid=open(EXEC,"-|",@c) ;
+
+	    debug "[$cmd_pid] Poppler: ".join(' ',@c);
+
+	    die "Can't exec AMC-mepdirect: $!" if(!$cmd_pid);
+	    while(<EXEC>) {
+		print $_;
+		chomp;
+		debug($_);
+	    }
+	    close(EXEC);
+
+	} else {
+
+	    die "This method is no longer supported... Please make new version of working documents, or switch to Poppler.";
+	}
     }
 }
 

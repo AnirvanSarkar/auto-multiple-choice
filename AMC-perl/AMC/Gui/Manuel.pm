@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -139,7 +139,8 @@ sub new {
 
     $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
 
-    AMC::Gui::PageArea::add_feuille($self->{'area'});
+    AMC::Gui::PageArea::add_feuille($self->{'area'},'',
+	'marks'=>($self->{'editable'} ? '' : 'blue'));
     
     ### modele DIAGNOSTIQUE SAISIE
 

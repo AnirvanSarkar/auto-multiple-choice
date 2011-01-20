@@ -155,35 +155,13 @@
       number of students per test is limited to 4095, and the maximum number
       of pages per test is limited to 63.</para>
 
-      <para>The maximum number of questions per test is limited to 255. The
-      <command>\AMCcode</command> command (see section <xref
-      linkend="latex.codes" />) uses a number of questions equal to the number
-      of digits for the code to be input. On the other hand, LaTeX's own
-      limitations may make compilation impossible even with less than 255
-      questions (producing e.g. a « <errortext>No room for a new
-      \toks</errortext> » error). In that case, try again using the package
-      <package>etex</package>, thanks to the <code>\usepackage{etex}</code>
-      command.</para>
-
       <para>The maximum number of answers for a given question is limited to
       199.</para>
-    </sect2>
 
-    <sect2 id="sec.couleurs">
-      <title>Colors</title>
-
-      <para>Putting colors other than black and white in the questions (e.g.
-      by using the <command>textcolor</command> command) is not possible,
-      since it may interfere with the layout detection process, which uses
-      color codes in a « layout document » identical to the test sheet.</para>
-
-      <para>It is still possible to include colored pictures in the test sheet
-      thanks to the <command>\includegraphics</command> command from the LaTeX
-      package <package>graphicx</package>. Indeed,
-      <package>automultiplechoice</package> loads <package>graphicx</package>
-      in such a way that pictures are not included in the document used for
-      the layout detection. Hence, it must not be downloaded explicitly: don't
-      use <code>\usepackage{graphicx}</code> in your LaTeX file.</para>
+      <para>LaTeX's own limitations may make compilation impossible, producing
+      e.g. a « <errortext>No room for a new \toks</errortext> » error. In that
+      case, try again using the package <package>etex</package>, thanks to the
+      <code>\usepackage{etex}</code> command.</para>
     </sect2>
 
     <sect2>
@@ -218,6 +196,12 @@
           sheets, you have to state it explicitly in the LaTeX file:</para>
 
           <programlisting>\documentclass[a4paper]{article} </programlisting>
+        </listitem>
+
+        <listitem>
+          <para>From version 0.394, if your LaTeX code needs package
+          <package>graphicx</package>, you have to load it explicitely
+          (earlier versions of AMC loaded it).</para>
         </listitem>
       </itemizedlist>
     </sect2>
