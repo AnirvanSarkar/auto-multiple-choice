@@ -34,7 +34,9 @@ SHELL=/bin/sh
 
 DESTDIR=
 
-MODS=AMC-*.pl AMC-traitement-image AMC-mepdirect
+BINARIES=AMC-traitement-image AMC-mepdirect AMC-detect
+
+MODS=AMC-*.pl $(BINARIES)
 GLADE=AMC-gui.glade
 MOD_GLADE=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
 STY=automultiplechoice.sty
@@ -52,12 +54,12 @@ PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
 MAIN_LOGO=icons/auto-multiple-choice
 
 ifeq ($(PRECOMP_ARCHIVE),)
-all: $(FROM_IN) AMC-traitement-image AMC-mepdirect $(MAIN_LOGO).xpm doc I18N ;
+all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm doc I18N ;
 else
 all: all_precomp ;
 endif
 
-all_precomp: $(FROM_IN) AMC-traitement-image AMC-mepdirect ;
+all_precomp: $(FROM_IN) $(BINARIES) ;
 
 MAJ: $(FROM_IN) ;
 
@@ -66,6 +68,9 @@ AMC-traitement-image: AMC-traitement-image.c Makefile
 
 AMC-mepdirect: AMC-mepdirect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(GCC_POPPLER)
+
+AMC-detect: AMC-detect.cc Makefile
+	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) -lm $(GCC_OPENCV)
 
 %.xml: %.in.xml
 	sed $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
@@ -158,7 +163,7 @@ endif
 LOCALDIR=$(shell pwd)
 
 global: FORCE
-	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop
+	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-detect /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop
 
 local: global
 	test -d /usr/lib/AMC || sudo mkdir -p /usr/lib/AMC
@@ -167,6 +172,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/I18N/lang/fr.mo $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
+	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/AMC-detect
 	sudo ln -s $(LOCALDIR)/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice

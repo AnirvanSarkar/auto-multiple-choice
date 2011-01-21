@@ -160,30 +160,39 @@ debug "dir = $temp_dir";
 
 $ppm="$temp_dir/image.ppm";
 
-if($blur || $threshold || $scan !~ /\.ppm$/) {
-    print "Converting to ppm...\n";
+my $traitement=AMC::Image::new($ppm);
 
-    my @ca=(magick_module('convert'));
-    push @ca,"-blur",$blur if($blur);
-    push @ca,"-threshold",$threshold if($threshold);
-    push @ca,$scan,$ppm;
-    $commandes->execute(@ca);
-} else {
+debug "Mode: ".$traitement->mode();
+
+if($traitement->mode() eq 'opencv') {
     $ppm=$scan;
-}
+} else{
 
-open(CMD,"identify $ppm|");
-while(<CMD>) {
-    if(/\sP[NBP]M\s+([0-9]+)x([0-9]+)/) {
-	$tiff_x=$1;
-	$tiff_y=$2;
+    if($blur || $threshold || $scan !~ /\.ppm$/) {
+	print "Converting to ppm...\n";
+	
+	my @ca=(magick_module('convert'));
+	push @ca,"-blur",$blur if($blur);
+	push @ca,"-threshold",$threshold if($threshold);
+	push @ca,$scan,$ppm;
+	$commandes->execute(@ca);
+    } else {
+	$ppm=$scan;
     }
+
+    open(CMD,"identify $ppm|");
+    while(<CMD>) {
+	if(/\sP[NBP]M\s+([0-9]+)x([0-9]+)/) {
+	    $tiff_x=$1;
+	    $tiff_y=$2;
+	}
+    }
+    close(CMD);
+    
+    erreur("Taille non reconnue") if(!$tiff_x);
+    
+    debug "IMAGE = $scan ($tiff_x x $tiff_y)\n";
 }
-close(CMD);
-
-erreur("Taille non reconnue") if(!$tiff_x);
-
-debug "IMAGE = $scan ($tiff_x x $tiff_y)\n";
 
 ##########################################################
 # Initiation des utilitaires
@@ -207,22 +216,33 @@ sub calage_reperes {
     $lay=$mep_dispos->mep($id);
 
     if($lay) {
-        $cadre_origine=AMC::Boite::new_complete_xml($lay);
-
+	$cadre_origine=AMC::Boite::new_complete_xml($lay);
 	debug "Origine : ".$cadre_origine->txt()."\n";
-
-	my @cx=map { $cadre_origine->coordonnees($_,'x') } (0..3);
-	my @cy=map { $cadre_origine->coordonnees($_,'y') } (0..3);
-	my @cxp=map { $cadre_general->coordonnees($_,'x') } (0..3);
-	my @cyp=map { $cadre_general->coordonnees($_,'y') } (0..3);
 	
-	$cale->calage(\@cx,\@cy,\@cxp,\@cyp);
+	if($traitement->mode() eq 'opencv') {
+
+	    $cale=AMC::Calage::new('type'=>'lineaire');
+	    my @r=$traitement->commande(join(' ',"optim",
+					     $cadre_origine->draw_points()));
+	    for(@r) {
+		$cale->{'t_'.$1}=$2 if(/([a-f])=(-?[0-9.]+)/);
+		$cale->{'MSE'}=$1 if(/MSE=([0-9.]+)/);
+	    }
+
+	} else {
+	    
+	    my @cx=map { $cadre_origine->coordonnees($_,'x') } (0..3);
+	    my @cy=map { $cadre_origine->coordonnees($_,'y') } (0..3);
+	    my @cxp=map { $cadre_general->coordonnees($_,'x') } (0..3);
+	    my @cyp=map { $cadre_general->coordonnees($_,'y') } (0..3);
+	    
+	    $cale->calage(\@cx,\@cy,\@cxp,\@cyp);
+	    
+	}
 
 	debug "MSE=".$cale->mse();
     }
 }
-
-my $traitement=AMC::Image::new($ppm);
 
 ##########################################################
 # vecteur binaire -> nombre decimal
@@ -249,61 +269,83 @@ my $diametre_marque;
 
 my $hmep=$mep_dispos->mep();
 
-$rx=$tiff_x / $hmep->{'tx'};
-$ry=$tiff_y / $hmep->{'ty'};
+if($traitement->mode() eq 'opencv') {
 
-$taille=$hmep->{'diametremarque'}*($rx+$ry)/2;
-$taille_max=$taille*(1+$tol_marque_plus);
-$taille_min=$taille*(1-$tol_marque_moins);
+    my @r;
+    my @args=('-x',$hmep->{'tx'},'-y',$hmep->{'ty'},
+	      '-d',$hmep->{'diametremarque'},
+	      '-p',$tol_marque_plus,'-m',$tol_marque_moins,
+	);
 
-debug "rx = $rx   ry = $ry\n";
-debug(sprintf("Target sign size : %.2f (%.2f to %.2f)",
-	      $taille,
-	      $taille_min,$taille_max));
+    push @args,'-o',1 if($repertoire_cr);
 
-# pour un scan, manips morphologiques et detection composantes connexes
+    $traitement->set('args',\@args);
 
-my $lisse_trous=1+int(($taille_min+$taille_max)/2 /20);
-my $lisse_pouss=1+int(($taille_min+$taille_max)/2 /8);
-
-print "Morphological operations (+$lisse_trous-$lisse_pouss) and signs detection...\n";
-
-$traitement->commande("etend $lisse_trous");
-$traitement->commande("erode ".($lisse_trous+$lisse_pouss));
-$traitement->commande("etend $lisse_pouss");
-$traitement->commande("calccc");
-
-for($traitement->commande("magick")) {
-    if(/\(([0-9]+),([0-9]+)\)-[^\s]*\s+:\s+([0-9]+)\s*x\s*([0-9]+)/) {
-	push @box,AMC::Boite::new_MD($1,$2,$3,$4);
+    @r=$traitement->commande("load ".$ppm);
+    my @c=();
+    for(@r) {
+	if(/Frame\[([0-9]+)\]:\s*(-?[0-9.]+)\s*[,;]\s*(-?[0-9.]+)/) {
+	    push @c,$2,$3;
+	}
     }
-}
+    $cadre_general=AMC::Boite::new_complete(@c);	    
 
-$traitement->ferme_commande();
+} else {
+    
+    $rx=$tiff_x / $hmep->{'tx'};
+    $ry=$tiff_y / $hmep->{'ty'};
+    
+    $taille=$hmep->{'diametremarque'}*($rx+$ry)/2;
+    $taille_max=$taille*(1+$tol_marque_plus);
+    $taille_min=$taille*(1-$tol_marque_moins);
+    
+    debug "rx = $rx   ry = $ry\n";
+    debug(sprintf("Target sign size : %.2f (%.2f to %.2f)",
+		  $taille,
+		  $taille_min,$taille_max));
 
-print "".($#box+1)." boxes.\n";
-
-debug join("\n",map { $_->txt(); } @box);
-
-print "Searching signs...\n";
-
-@okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
-
-if($#okbox < 3) {
-    erreur("Only ".(1+$#okbox)." signs detected / needs at least 4");
-}
-
-@okbox=AMC::Boite::extremes(@okbox);
-
-if(get_debug()) {
-    for my $c (@okbox) {
-	my ($dx,$dy)=$c->etendue_xy();
-	debug(sprintf("Sign size: $dx x $dy (%6.2f | %6.2f %%)",
-		      100*($dx-$taille)/$taille,100*($dy-$taille)/$taille)); 
+    my $lisse_trous=1+int(($taille_min+$taille_max)/2 /20);
+    my $lisse_pouss=1+int(($taille_min+$taille_max)/2 /8);
+    
+    print "Morphological operations (+$lisse_trous-$lisse_pouss) and signs detection...\n";
+    
+    $traitement->commande("etend $lisse_trous");
+    $traitement->commande("erode ".($lisse_trous+$lisse_pouss));
+    $traitement->commande("etend $lisse_pouss");
+    $traitement->commande("calccc");
+    
+    for($traitement->commande("magick")) {
+	if(/\(([0-9]+),([0-9]+)\)-[^\s]*\s+:\s+([0-9]+)\s*x\s*([0-9]+)/) {
+	    push @box,AMC::Boite::new_MD($1,$2,$3,$4);
+	}
     }
-}
+    
+    $traitement->ferme_commande();
 
-$cadre_general=AMC::Boite::new_complete(map { $_->centre() } (@okbox));
+    print "".($#box+1)." boxes.\n";
+    
+    debug join("\n",map { $_->txt(); } @box);
+    
+    print "Searching signs...\n";
+    
+    @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
+    
+    if($#okbox < 3) {
+	erreur("Only ".(1+$#okbox)." signs detected / needs at least 4");
+    }
+    
+    @okbox=AMC::Boite::extremes(@okbox);
+    
+    if(get_debug()) {
+	for my $c (@okbox) {
+	    my ($dx,$dy)=$c->etendue_xy();
+	    debug(sprintf("Sign size: $dx x $dy (%6.2f | %6.2f %%)",
+			  100*($dx-$taille)/$taille,100*($dy-$taille)/$taille)); 
+	}
+    }
+    
+    $cadre_general=AMC::Boite::new_complete(map { $_->centre() } (@okbox));
+}
 
 debug "Global frame:",
     $cadre_general->txt();
@@ -376,7 +418,7 @@ sub mesure_case {
 	}
 	if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
 	    $r=($2==0 ? 0 : $1/$2);
-	    printf " Case $k : %d/%d = %.4f\n",$1,$2,$r;
+	    debug " Case $k : %d/%d = %.4f\n",$1,$2,$r;
 	    $score{$k}=$r;
 	    $score_data{$k}="pixels=\"$2\" pixelsnoirs=\"$1\" r=\"$r\"";
 	}
@@ -422,30 +464,26 @@ sub get_id_binaire {
     debug("Found binary ID: $id_page");
 }
 
-erreur("No layout instructions...") if(!($mep_saved || $xml_layout));
+erreur("No layout instructions...") if(!($mep_saved || -d $xml_layout));
 
-if($mep_saved || -d $xml_layout) {
-    #####
-    # calage sur une MEP au hasard pour recuperer l'ID binaire
+#####
+# calage sur une MEP au hasard pour recuperer l'ID binaire
 
-    # caler sur une mise en page quelconque :
-    print "Positionning to read ID...\n";
-    debug "Positionning to read ID...\n";
-    
-    calage_reperes();
-    
-    for my $c (@{$lay->{'chiffre'}}) {
-	$case{code_cb($c->{'n'},$c->{'i'})}=
-	    AMC::Boite::new_xml($c)->transforme($cale);
-    }
-    
-    get_id_binaire();
+# caler sur une mise en page quelconque :
+print "Positionning to read ID...\n";
+debug "Positionning to read ID...\n";
 
-    valide_id_page();
+calage_reperes();
 
-} else {
-    valide_id_page();
+for my $c (@{$lay->{'chiffre'}}) {
+    my $k=code_cb($c->{'n'},$c->{'i'});
+    my $c0=AMC::Boite::new_xml($c);
+    $case{$k}=$c0->transforme($cale);
 }
+
+get_id_binaire();
+
+valide_id_page();
 
 calage_reperes($id_page);
 
@@ -471,6 +509,11 @@ for my $k (keys %case) {
     mesure_case($k) if($k =~ /^[0-9]+\.[0-9]+$/);
 }
 
+if($out_cadre && ($traitement->mode() eq 'opencv')) {
+    $traitement->commande("annote $id_page");
+    $traitement->commande("output ".$out_cadre);
+}
+
 if($analyse_file) {
     open(ANF,">$analyse_file");
     print ANF "<?xml version='1.0' standalone='yes'?>\n";
@@ -484,7 +527,7 @@ if($analyse_file) {
 		     $sf);
     }
 
-    print ANF "<analyse version=\"$anf_version\" src=\"".$sf."\" id=\"$id_page\">\n";
+    print ANF "<analyse version=\"$anf_version\" src=\"".$sf."\" id=\"$id_page\" mode=\"".$traitement->mode()."\">\n";
     print ANF $cale->xml(2);
     print ANF "  <cadre>\n";
     print ANF $cadre_general->xml(4);
@@ -535,9 +578,10 @@ if($nom_file && $case{'nom'}) {
     $e->Write($nom_file);
 }
 
-if($out_cadre) {
+if($out_cadre && ($traitement->mode ne 'opencv')) {
 
     print "Annotating image...\n";
+    debug "Annotating image...\n";
 
     # transcription de l'identifiant lu
 

@@ -45,6 +45,13 @@ sub new {
 
     my $self={'type'=>'lineaire',
 	      'log'=>1,
+	      't_a'=>'',
+	      't_b'=>'',
+	      't_c'=>'',
+	      't_d'=>'',
+	      't_e'=>'',
+	      't_f'=>'',
+	      'MSE'=>'',
 	  };
 
     for my $k (keys %o) {
