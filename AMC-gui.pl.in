@@ -3692,7 +3692,7 @@ sub projet_ouvre {
 
 	# creation du repertoire et des sous-repertoires de projet
 
-	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf mep scans exports:) {
+	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms mep scans exports:) {
 	    my $rep=$o{'rep_projets'}."/$proj/$sous";
 	    if(! -x $rep) {
 		debug "Creating directory $rep...";

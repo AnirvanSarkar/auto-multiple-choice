@@ -94,6 +94,8 @@ my $progress_debut=0;
 
 my $mep_saved='';
 
+my @stud_page;
+
 GetOptions("page=s"=>\$out_cadre,
 	   "mep=s"=>\$xml_layout,
 	   "mep-saved=s"=>\$mep_saved,
@@ -359,6 +361,8 @@ my $id_page_f;
 
 sub valide_id_page {
 
+    @stud_page=get_epo($id_page);
+
     # ID page reconnu manuellement, stocke dans fichier XML
     if($ocr_file && -f $ocr_file) {
 	my $oc=XMLin($ocr_file,ForceArray => 1,KeyAttr=>['scan']);
@@ -410,6 +414,12 @@ sub mesure_case {
     my $r=0;
 
     $coins_test{$k}=AMC::Boite::new();
+
+    if($traitement->mode() eq 'opencv' && @stud_page) {
+	if($k =~ /^([0-9]+)\.([0-9]+)$/) {
+	    $traitement->commande(join(' ',"id",@stud_page,$1,$2))
+	}
+    }
     
     for($traitement->commande($case{$k}->commande_mesure($prop))) {
 	
@@ -488,6 +498,10 @@ valide_id_page();
 calage_reperes($id_page);
 
 erreur("No XML for ID $id_page") if(! $lay);
+
+if($repertoire_cr && ($traitement->mode() eq 'opencv')) {
+    $traitement->commande("zooms $repertoire_cr/zooms");
+}
 
 # On cherche a caler les marques.
 
@@ -624,7 +638,7 @@ if($out_cadre && ($traitement->mode ne 'opencv')) {
     debug "-> $out_cadre\n";
 }
 
-if($zoom_file) {
+if($zoom_file && ($traitement->mode ne 'opencv')) {
 
     print "Making zooms...\n";
 
