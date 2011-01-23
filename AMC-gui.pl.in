@@ -46,6 +46,7 @@ use AMC::Gui::Manuel;
 use AMC::Gui::Association;
 use AMC::Gui::Commande;
 use AMC::Gui::Notes;
+use AMC::Gui::Zooms;
 
 use Data::Dumper;
 
@@ -219,6 +220,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'annote_chsign'=>4,
 
 	      'defaut_verdict'=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
+
+	      'zoom_window_height'=>400,
+	      'zoom_window_factor'=>1.0,
 	      );
 
 my %projet_defaut=('texsrc'=>'',
@@ -255,6 +259,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'nombre_copies'=>0,
 	    
 		   '_modifie'=>1,
+		   '_modifie_ok'=>0,
 		   
 		   'format_export'=>'CSV',
 		   'export_csv_separateur'=>",",
@@ -340,7 +345,7 @@ sub pref_xx_ecrit {
 # lecture/ecriture etat...
 
 sub sauve_state {
-    if($state{'_modifie'}) {
+    if($state{'_modifie'} || $state{'_modifie_ok'}) {
 	debug "Saving state...";
 	
 	if(pref_xx_ecrit(\%state,'AMCState',$state_file)) {
@@ -354,6 +359,7 @@ sub sauve_state {
 	    $dialog->destroy;      
 	} else {
 	    $state{'_modifie'}=0;
+	    $state{'_modifie_ok'}=0;
 	}
     }
 }
@@ -387,6 +393,7 @@ if(-r $state_file) {
 }
 
 $state{'_modifie'}=0;
+$state{'_modifie_ok'}=0;
 
 if(!$state{'profile'}) {
     $state{'profile'}='default';
@@ -446,6 +453,7 @@ for my $k (keys %o_defaut) {
 }
 
 $o{'_modifie'}=0;
+$o{'_modifie_ok'}=0;
 
 # options passees en defaut_ entre version 0.226 et version 0.227
 
@@ -1016,11 +1024,41 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	    $w{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
 	if ($path) {
 	    
+	    my $id=$diag_store->get($diag_store->get_iter($path),
+				    DIAG_ID);
+
 	    my $menu = Gtk2::Menu->new;
 	    my $c=0;
-	    foreach (qw/page zoom/) {
-		my $id=$diag_store->get($diag_store->get_iter($path),
-					DIAG_ID);
+	    my @actions=('page');
+
+	    # new zooms viewer
+
+	    my $zd=absolu('%PROJET/cr/zooms')."/".id2idf($id,'simple'=>1);
+
+	    if(-d $zd) {
+		my $item = Gtk2::ImageMenuItem->new($diag_menu{'zoom'}->{text});
+		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{'zoom'}->{icon},'menu'));
+		$menu->append ($item);
+		$item->show;
+		$item->signal_connect (activate => sub {
+		    my (undef, $sortkey) = @_;
+		    debug "Zooms view for $id...";
+		    my $gm=AMC::Gui::Zooms::new('seuil'=>$projet{'options'}->{'seuil'},
+						'n_cols'=>$o{'assoc_ncols'},
+						'zooms_dir'=>$zd,
+						'page_id'=>$id,
+						'size-prefs',\%o,
+						'an-data'=>$projet{'_an_list'},
+						'cr-dir'=>absolu($projet{'options'}->{'cr'}),
+			);
+				       }, $_);
+	    } else {
+		push  @actions,'zoom';
+	    }
+
+	    # page viewer and old zooms viewer
+
+	    foreach (@actions) {
 		my $f=id2file($id,$_,'jpg');
 		if(-f $f) {
 		    $c++;
@@ -1461,6 +1499,7 @@ sub projet_sauve {
 	$dialog->destroy;      
     } else {
 	$projet{'options'}->{'_modifie'}=0;
+	$projet{'options'}->{'_modifie_ok'}=0;
     }
 }
 
@@ -3752,7 +3791,6 @@ sub quitte_projet {
 }
 
 sub quitter {
-    my $ok=0;
     my $reponse='';
 
     quitte_projet();
@@ -3763,13 +3801,12 @@ sub quitter {
 	   || $x != $o{'taille_x_main'} || $y != $o{'taille_y_main'}) {
 	    $o{'taille_x_main'}=$x;
 	    $o{'taille_y_main'}=$y;
-	    $o{'_modifie'}=1;
-	    $ok=1;
+	    $o{'_modifie_ok'}=1;
 	}
     }
 
-    if($o{'_modifie'}) {
-	if(!$ok) {
+    if($o{'_modifie'} || $o{'_modifie_ok'}) {
+	if($o{'_modifie'}) {
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
@@ -3779,7 +3816,7 @@ sub quitter {
 	    $dialog->destroy;      
 	}
 	
-	if($reponse eq 'yes' || $ok) {
+	if($reponse eq 'yes' || !$o{'_modifie'}) {
 	    sauve_pref_generales();
 	} 
     }
