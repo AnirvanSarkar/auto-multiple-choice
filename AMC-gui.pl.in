@@ -2904,21 +2904,32 @@ sub accepte_preferences {
 	    detecte_analyse('ids_m'=>[$projet{'_an_list'}->ids()]);
 
 	    # recalcul des zooms ?
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'question','yes-no',
-				  sprintf(__"You changed parameter \"%s\".",__"darkness threshold")." "
-				  .__("If you already captured data from scans, boxes zooms are no longer correctly grouped.")." "
-				  .__("Do you want to re-build them?")." "
-				  .__("It will take some time.")." "
-				  .sprintf(__"You will be able to build them later with <i>%s</i> in menu <i>%s</i>.",__"Re-extract zooms",__"Tools"));
-	    my $reponse=$dialog->run;
-	    $dialog->destroy;      
-	    
-	    if($reponse eq 'yes') {
-		activate_zoom_maj();	    
-	    } 
+	    # this is only necessary with old-style zoom files:
+	    # first check if there are some of them...
+
+	    my $cr_dir=absolu($projet{'options'}->{'cr'});
+	    opendir(my $dh,$cr_dir) || debug "ERROR: can't opendir $cr_dir: $!";
+	    my @z = grep { /^zoom-/ && -f "$cr_dir/$_" } readdir($dh);
+	    closedir $dh;
+
+	    if(@z) {
+		
+		my $dialog = Gtk2::MessageDialog
+		    ->new_with_markup($w{'main_window'},
+				      'destroy-with-parent',
+				      'question','yes-no',
+				      sprintf(__"You changed parameter \"%s\".",__"darkness threshold")." "
+				      .__("If you already captured data from scans, boxes zooms are no longer correctly grouped.")." "
+				      .__("Do you want to re-build them?")." "
+				      .__("It will take some time.")." "
+				      .sprintf(__"You will be able to build them later with <i>%s</i> in menu <i>%s</i>.",__"Re-extract zooms",__"Tools"));
+		my $reponse=$dialog->run;
+		$dialog->destroy;      
+		
+		if($reponse eq 'yes') {
+		    activate_zoom_maj();	    
+		} 
+	    }
 	    
 	}
     }

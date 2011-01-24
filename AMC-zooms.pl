@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2010-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -111,15 +111,21 @@ if($n>0) {
 
 	if($scan) {
 	    my $zf=$cr_dir."/zoom-".id2idf($id).".jpg";
-	    
-	    push @cmds,[with_prog("AMC-zoom.pl"),
-			"--scan",absolu($scan),
-			"--seuil",$seuil,
-			"--analyse",$an_list->attribut($id,'fichier-scan'),
-			"--output",$zf,
-			"--progression-id",$progress_id,
-			"--debug",$debug,
-			];
+	    my $zd=$cr_dir."/zooms/".id2idf($id,'simple'=>1);
+
+	    if(-d $zd) {
+		debug "New zoom structure for ID $id: skipping...";
+	    } else {
+		
+		push @cmds,[with_prog("AMC-zoom.pl"),
+			    "--scan",absolu($scan),
+			    "--seuil",$seuil,
+			    "--analyse",$an_list->attribut($id,'fichier-scan'),
+			    "--output",$zf,
+			    "--progression-id",$progress_id,
+			    "--debug",$debug,
+		];
+	    }
 	} else {
 	    debug "ID=$id --> no scan";
 	}
