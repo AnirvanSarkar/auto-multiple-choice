@@ -30,7 +30,10 @@ use XML::Simple;
 
 use POSIX qw(ceil);
 
+use constant ID_AMC_BOX => 100;
+
 my $col_manuel = Gtk2::Gdk::Color->new(223*256,224*256,133*256);
+my $col_modif = Gtk2::Gdk::Color->new(226*256,184*256,178*256);
 
 sub new {
     my %o=(@_);
@@ -45,6 +48,7 @@ sub new {
 	'an-data'=>'',
 	'cr-dir'=>'',
 	'size-prefs'=>'',
+	'encodage_interne'=>'UTF-8',
     };
     
     for (keys %o) {
@@ -57,6 +61,9 @@ sub new {
     $self->{'image'}={};
     $self->{'label'}={};
     $self->{'n_ligs'}={};
+    $self->{'position'}={};
+    $self->{'eb'}={};
+    $self->{'conforme'}=1;
 
     bless $self;
 
@@ -81,26 +88,58 @@ sub new {
     my @ids;
     
     for my $id (keys %{$self->{'ANS'}->{'case'}}) {
+
 	my $fid=$id;
 	$fid =~ s/\./-/;
 	$fid=$self->{'zooms_dir'}."/$fid.png";
 	if(-f $fid) {
 	    $self->{'pb_src'}->{$id}=
 		Gtk2::Gdk::Pixbuf->new_from_file($fid);
+	    
 	    $self->{'image'}->{$id}=Gtk2::Image->new();
+
 	    $self->{'label'}->{$id}=Gtk2::Label->new(sprintf("%.3f",$self->{'ANS'}->{'case'}->{$id}->{'r'}));
+	    $self->{'label'}->{$id}->set_justify(GTK_JUSTIFY_LEFT);
+
+	    my $hb=Gtk2::HBox->new();
+	    $self->{'eb'}->{$id}=Gtk2::EventBox->new();
+	    $self->{'eb'}->{$id}->add($hb);
+	    
+	    $hb->add($self->{'image'}->{$id});
+	    $hb->add($self->{'label'}->{$id});
+	
+	    $self->{'eb'}->{$id}->drag_source_set(GDK_BUTTON1_MASK,
+						  GDK_ACTION_MOVE,
+						  {
+						      target => 'STRING',
+						      flags => [],
+						      info => ID_AMC_BOX,
+						  });
+	    $self->{'eb'}->{$id}->signal_connect(
+		'drag-data-get' => \&source_drag_data_get,
+		$id );
+	    $self->{'eb'}->{$id}->signal_connect(
+		'drag-begin'=>sub {
+		    $self->{'eb'}->{$id}
+		    ->drag_source_set_icon_pixbuf($self->{'image'}->{$id}->get_pixbuf);
+		});
+	    
 	    push @ids,$id;
 	}
     }
     
     $self->{'ids'}=[sort { $self->{'ANS'}->{'case'}->{$a}->{'r'} <=> $self->{'ANS'}->{'case'}->{$b}->{'r'} } (@ids)];
     
+    for my $id (@{$self->{'ids'}}) {
+	$self->{'position'}->{$id}=$self->category($id,'AN');
+    }
+
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
     
     $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
     
-    for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 button_apply button_close info/) {
+    for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info/) {
 	$self->{$_}=$self->{'gui'}->get_widget($_);
     }
     
@@ -114,6 +153,17 @@ sub new {
     $self->remplit(0);
     $self->remplit(1);
     $self->zoom_it();
+
+    for(0,1) {
+	$self->{'event_'.$_}->drag_dest_set('all', [GDK_ACTION_MOVE],
+					    {'target' => 'STRING',
+					      'flags' => [],
+					      'info' => ID_AMC_BOX },
+					    );
+	$self->{'event_'.$_}->signal_connect(
+	    'drag-data-received' => \&target_drag_data_received,[$self,$_]);
+    }
+
     
     $self->{'gui'}->signal_autoconnect_from_package($self);
     
@@ -137,14 +187,50 @@ sub new {
     return($self);
 }
 
+sub refill {
+    my ($self)=@_;
+    $self->{'conforme'}=1;
+    for(0,1) { $self->vide($_); }
+    for(0,1) { $self->remplit($_); }
+    if($self->{'conforme'}) {
+	$self->{'button_apply'}->hide();
+    } else {
+	$self->{'button_apply'}->show();
+    }
+}
+
 sub category {
     my ($self,$id,$antype)=@_;
     return($self->{$antype}->{'case'}->{$id}->{'r'}>$self->{'seuil'} ? 1 : 0);
 }
 
+sub source_drag_data_get {
+    my ($widget, $context, $data, $info, $time,$string) = @_;
+    $data->set_text($string,-1);
+}
+
+sub target_drag_data_received {
+    my ($widget, $context, $x, $y, $data, $info, $time,$args) = @_;
+    my ($self,$cat)=@$args;
+    my $id=$data->get_text();
+    debug "Page ".$self->{'page_id'}.": move $id to category $cat\n";
+    if($self->{'position'}->{$id} != $cat) {
+	$self->{'position'}->{$id}=$cat;
+	$self->refill;
+    }
+}
+
+sub vide {
+    my ($self,$cat)=@_;
+    for($self->{'zooms_table_'.$cat}->get_children) {
+	$self->{'zooms_table_'.$cat}->remove($_);
+    }
+}
+
 sub remplit {
     my ($self,$cat)=@_;
-    my @good_ids=grep { $self->category($_,'AN') == $cat } (@{$self->{'ids'}});
+
+    my @good_ids=grep { $self->{'position'}->{$_} == $cat } (@{$self->{'ids'}});
 
     my $n_ligs=ceil((@good_ids ? (1+$#good_ids)/$self->{'n_cols'} : 1));
     $self->{'zooms_table_'.$cat}->resize($n_ligs,$self->{'n_cols'});
@@ -155,21 +241,19 @@ sub remplit {
 	my $x=$i % $self->{'n_cols'};
 	my $y=int($i/$self->{'n_cols'});
 	
-	my $hb=Gtk2::HBox->new();
-	
-	$self->{'label'}->{$id}->set_justify(GTK_JUSTIFY_LEFT);
-	my $eb=Gtk2::EventBox->new();
-	$eb->add($self->{'label'}->{$id});
-	if($self->category($id,'ANS') == $cat) {
-	    $eb->modify_bg(GTK_STATE_NORMAL,undef);
+	if($self->category($id,'AN') != $cat) {
+	    $self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,$col_modif);
+	    $self->{'conforme'}=0;
 	} else {
-	    $eb->modify_bg(GTK_STATE_NORMAL,$col_manuel);
+	    if($self->category($id,'ANS') == $cat) {
+		$self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,undef);
+	    } else {
+		$self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,$col_manuel);
+	    }
 	}
 
-	$hb->add($self->{'image'}->{$id});
-	$hb->add($eb);
-	
-	$self->{'zooms_table_'.$cat}->attach($hb,$x,$x+1,$y,$y+1,[],[],4,3);
+	$self->{'zooms_table_'.$cat}->attach($self->{'eb'}->{$id},
+					     $x,$x+1,$y,$y+1,[],[],4,3);
     }
 }
 
@@ -205,7 +289,7 @@ sub zoom_arriere {
     $self->zoom_it();
 }
 
-sub close {
+sub quit {
     my ($self)=@_;
 
     if($self->{'size-prefs'}) {
@@ -220,6 +304,53 @@ sub close {
     } else {
         $self->{'main_window'}->destroy;
     }
+}
+
+sub all_keys {
+    my ($self)=@_;
+    my %k=();
+    for(keys %{$self->{'AN'}->{'case'}}) {
+	$k{$_}=1;
+    }
+    for(keys %{$self->{'position'}}) {
+	$k{$_}=1;
+    }
+    return(keys %k);
+}
+
+sub checked {
+    my ($self,$id)=@_;
+    if(defined($self->{'position'}->{$id})) {
+	return($self->{'position'}->{$id});
+    } else {
+	$self->category($id,'AN');
+    }
+}
+
+sub apply {
+    my ($self)=@_;
+
+    # save modifications to a manual analysis file
+    my $file=$self->{'cr-dir'}."/analyse-manuelle-".id2idf($self->{'page_id'}).".xml";
+
+    debug "Saving file $file";
+    if(open(XML,">:encoding(".$self->{'encodage_interne'}.")",$file)) {
+	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
+	    .$self->{'AN'}->{'src'}."\" manuel=\"1\" id=\""
+	    .$self->{'page_id'}."\" nometudiant=\""
+	    .$self->{'AN'}->{'nometudiant'}."\">\n";
+	for my $id ($self->all_keys()) {
+	    my ($q,$r)=get_qr($id);
+	    print XML "  <case id=\"$id\" question=\"$q\" reponse=\"$r\" r=\""
+		.$self->checked($id)."\"/>\n";
+	}
+	print XML "</analyse>\n";
+	close(XML);
+    } else {
+	# error saving file
+    }
+
+    $self->quit();
 }
 
 1;
