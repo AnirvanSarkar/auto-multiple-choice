@@ -67,10 +67,10 @@ AMC-traitement-image: AMC-traitement-image.c Makefile
 	$(GCC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
 
 AMC-mepdirect: AMC-mepdirect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(GCC_POPPLER)
+	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) $(GCC_POPPLER)
 
 AMC-detect: AMC-detect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) -lm $(GCC_OPENCV)
+	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lm $(GCC_OPENCV)
 
 %.xml: %.in.xml
 	sed $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
@@ -104,7 +104,7 @@ clean_IN: FORCE
 	rm -f $(FROM_IN)
 
 clean: clean_IN FORCE
-	rm -f AMC-traitement-image AMC-mepdirect $(MAIN_LOGO).xpm
+	rm -f $(BINARIES) $(MAIN_LOGO).xpm
 	rm -f auto-multiple-choice.spec
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
@@ -200,6 +200,7 @@ tmp_copy:
 	rm -rf $(TMP_SOURCE_DIR)
 	mkdir $(TMP_SOURCE_DIR)
 	rsync -aC --exclude '*~' --exclude download_area --exclude local . $(TMP_SOURCE_DIR)
+	$(MAKE) -C $(TMP_SOURCE_DIR) clean
 
 sources_vok:
 	$(MAKE) tmp_copy

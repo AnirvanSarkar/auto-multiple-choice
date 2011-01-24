@@ -20,6 +20,7 @@
 
 */
 
+#include <math.h>
 #include "cv.h"
 #include "highgui.h"
 #include <stdio.h>
@@ -29,6 +30,18 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#if CV_MAJOR_VERSION > 2
+  #define OPENCV_21 1
+  #define OPENCV_20 1
+#else
+  #if CV_MAJOR_VERSION == 2
+    #define OPENCV_20 1
+    #if CV_MINOR_VERSION >= 1
+       #define OPENCV_21 1
+    #endif
+  #endif
+#endif
 
 #define GET_PIXEL(src,x,y) *((uchar*)(src->imageData+src->widthStep*(y)+src->nChannels*(x)))
 #define PIXEL(src,x,y) GET_PIXEL(src,x,y)>100
@@ -194,10 +207,12 @@ void calage(IplImage* src,IplImage* illustr,
   cvFindContours( src, storage, &contour, sizeof(CvContour),
 		  CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 
+#ifdef OPENCV_21
   if(view) {
     *dst=cvCreateImage( cvGetSize(src), 8, 3 );
     cvZero( *dst );
   }
+#endif
 
   agrege_init(src->width,src->height,coins_x,coins_y);
   n_cc=0;
@@ -214,11 +229,13 @@ void calage(IplImage* src,IplImage* illustr,
 	     rect.x,rect.y,rect.width,rect.height);
       n_cc++;
 	
-      if(view) {
+#ifdef OPENCV_21
+     if(view) {
 	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
 	cvRectangle(*dst,cvPoint(rect.x,rect.y),cvPoint(rect.x+rect.width,rect.y+rect.height),color);
 	cvDrawContours( *dst, contour, color, color, -1, CV_FILLED, 8 );
       }
+#endif
     }
   }
 
@@ -232,9 +249,11 @@ void calage(IplImage* src,IplImage* illustr,
     }
     
     if(view) {
+#ifdef OPENCV_21
       for(int i=0;i<4;i++) {
 	cvLine(*dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(255,255,255),1,CV_AA);
       }
+#endif
     }
 
     if(illustr!=NULL) {
@@ -277,7 +296,10 @@ void mesure_case(IplImage *src,IplImage *illustr,
   CvPoint coins_int[4];
 
   static char* zoom_file=NULL;
+
+#if OPENCV_20
   static int save_options[3]={CV_IMWRITE_PNG_COMPRESSION,7,0};
+#endif
 
   struct stat zd;
   
@@ -329,11 +351,13 @@ void mesure_case(IplImage *src,IplImage *illustr,
       coins_int[i].y=(int)coins[i].y;
     }
   }
+#ifdef OPENCV_21
   if(view) {
     for(int i=0;i<4;i++) {
       cvLine(dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(255,255,255),1,CV_AA);
     }
   }
+#endif
   if(illustr!=NULL) {
     for(int i=0;i<4;i++) {
       cvLine(illustr,coins_int[i],coins_int[(i+1)%4],ROSE,1,CV_AA);
@@ -370,8 +394,11 @@ void mesure_case(IplImage *src,IplImage *illustr,
 		   z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin);
 	    cvSetImageROI(illustr,
 			  cvRect(z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin));
-
+#if OPENCV_20
 	    if(cvSaveImage(zoom_file,illustr,save_options)!=1) {
+#else
+	    if(cvSaveImage(zoom_file,illustr)!=1) {
+#endif
 	      printf("! ZOOMS : Zoom save error\n");
 	    }
 
@@ -455,7 +482,9 @@ int main( int argc, char** argv )
   char *zooms_dir=NULL;
   int view=0;
 
+#if OPENCV_20
   int save_options[3]={CV_IMWRITE_JPEG_QUALITY,75,0};
+#endif
 
   // Options
 
@@ -577,6 +606,7 @@ int main( int argc, char** argv )
     fflush(stdout);
   }
 
+#ifdef OPENCV_21
   if(view) {
     cvNamedWindow( "Source", CV_WINDOW_NORMAL );
     cvShowImage( "Source", src );
@@ -586,9 +616,14 @@ int main( int argc, char** argv )
 
     cvReleaseImage(&dst);
   }
+#endif
 
   if(illustr && strlen(out_image_file)>1) {
+#if OPENCV_20
     if(cvSaveImage(out_image_file,illustr,save_options)!=1) {
+#else
+    if(cvSaveImage(out_image_file,illustr)!=1) {
+#endif
       printf("! LAYS : Layout image save error\n");
     }
   }
