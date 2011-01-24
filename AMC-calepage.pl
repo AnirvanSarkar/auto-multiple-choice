@@ -63,6 +63,7 @@ my $M_PI=atan2(1,1)*4;
 my $cases='';
 my $out_cadre='';
 my $zoom_file="";
+my $zoom_dir="";
 my $zoom_plus=10;
 my $nom_file="";
 my $seuil_coche=0.1;
@@ -357,7 +358,7 @@ debug "Global frame:",
 
 $avance->progres((1-$progress_debut)/3);
 
-my $id_page_f;
+my $id_page_f,$id_page_f0;
 
 sub valide_id_page {
 
@@ -384,16 +385,20 @@ sub valide_id_page {
 
     attention("WARNING: No page ID!") if(!$id_page);
     
-    $id_page_f=$id_page;
-    $id_page_f =~ s/[^0-9]/-/g;
-    $id_page_f =~ s/^-+//g;
-    $id_page_f =~ s/-+$//g;
+    $id_page_f=id2idf($id_page);
+    $id_page_f0=id2idf($id_page,'simple'=>1);
     
     if($repertoire_cr) {
 	$out_cadre="$repertoire_cr/page-$id_page_f.jpg";
 	$zoom_file="$repertoire_cr/zoom-$id_page_f.jpg";
+	$zoom_dir="$repertoire_cr/zooms/$id_page_f0";
 	$nom_file="$repertoire_cr/nom-$id_page_f.jpg";
 	$analyse_file="$repertoire_cr/analyse-$id_page_f.xml";
+
+	# clear old analysis results files
+
+	clear_old('analysis result',
+		  $out_cadre,$zoom_file,$nom_file,$zoom_dir);
     }
 }
 

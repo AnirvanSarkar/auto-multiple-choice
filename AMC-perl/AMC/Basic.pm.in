@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -34,7 +34,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &pack_args &unpack_args &__ &__p);
+    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &pack_args &unpack_args &__ &__p);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -92,10 +92,11 @@ sub file2id {
 }
 
 sub id2idf {
-    my $id=shift;
+    my ($id,%oo)=@_;
     $id =~ s/[\+\/]+/-/g;
     $id =~ s/^-+//;
     $id =~ s/-+$//;
+    $id =~ s/([0-9]+-[0-9]+)-.*/$1/ if($oo{'simple'});
     return($id);
 }
 
@@ -108,12 +109,22 @@ sub get_qr {
     }
 }
 
-sub get_ep {
+sub get_epo {
     my $id=shift;
     if($id =~ /^\+([0-9]+)\/([0-9]+)\/([0-9]+)\+$/) {
-	return($1,$2);
+        return($1,$2);
     } else {
-	die "Unparsable ID: $id";
+        return();
+    }
+}
+
+sub get_ep {
+    my $id=shift;
+    my @r=get_epo($id);
+    if(@r) {
+        return(@r);
+    } else {
+        die "Unparsable ID: $id";
     }
 }
 
@@ -333,6 +344,22 @@ sub proj2abs {
 	}
     } else {
 	return('');
+    }
+}
+
+sub clear_old {
+    my ($type,@f)=@_;
+    for my $file (@f) {
+	if(-f $file) {
+	    debug "Clearing old $type file: $file";
+	    unlink($file);
+	} elsif(-d $file) {
+	    debug "Clearing old $type directory: $file";
+	    opendir(my $dh, $file) || debug "ERROR: can't opendir $file: $!";
+	    my @content = grep { -f "$file/$_" } readdir($dh);
+	    closedir $dh;
+	    unlink(@content);
+	}
     }
 }
 
