@@ -30,6 +30,8 @@ use XML::Simple;
 
 use POSIX qw(ceil);
 
+my $col_manuel = Gtk2::Gdk::Color->new(223*256,224*256,133*256);
+
 sub new {
     my %o=(@_);
 
@@ -135,12 +137,14 @@ sub new {
     return($self);
 }
 
+sub category {
+    my ($self,$id,$antype)=@_;
+    return($self->{$antype}->{'case'}->{$id}->{'r'}>$self->{'seuil'} ? 1 : 0);
+}
+
 sub remplit {
     my ($self,$cat)=@_;
-    my @good_ids=grep { 
-	$r=$self->{'AN'}->{'case'}->{$_}->{'r'};
-	($cat==1 ? $r>=$self->{'seuil'} : $r<$self->{'seuil'}); }
-    (@{$self->{'ids'}});
+    my @good_ids=grep { $self->category($_,'AN') == $cat } (@{$self->{'ids'}});
 
     my $n_ligs=ceil((@good_ids ? (1+$#good_ids)/$self->{'n_cols'} : 1));
     $self->{'zooms_table_'.$cat}->resize($n_ligs,$self->{'n_cols'});
@@ -154,9 +158,16 @@ sub remplit {
 	my $hb=Gtk2::HBox->new();
 	
 	$self->{'label'}->{$id}->set_justify(GTK_JUSTIFY_LEFT);
-	
+	my $eb=Gtk2::EventBox->new();
+	$eb->add($self->{'label'}->{$id});
+	if($self->category($id,'ANS') == $cat) {
+	    $eb->modify_bg(GTK_STATE_NORMAL,undef);
+	} else {
+	    $eb->modify_bg(GTK_STATE_NORMAL,$col_manuel);
+	}
+
 	$hb->add($self->{'image'}->{$id});
-	$hb->add($self->{'label'}->{$id});
+	$hb->add($eb);
 	
 	$self->{'zooms_table_'.$cat}->attach($hb,$x,$x+1,$y,$y+1,[],[],4,3);
     }
