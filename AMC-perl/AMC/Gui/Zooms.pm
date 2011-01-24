@@ -298,6 +298,18 @@ sub quit {
 	$self->{'size-prefs'}->{'zoom_window_height'}=$y;
 	$self->{'size-prefs'}->{'_modifie_ok'}=1;
     }
+    
+    if(!$self->{'conforme'}) {
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($self->{'main_window'},
+			      'destroy-with-parent',
+			      'warning','yes-no',
+			      __"You moved some boxes to correct automatic data query, but this work is not saved yet. Dou you really want to close and ignore these modifications?"
+	    );
+	my $reponse=$dialog->run;
+	$dialog->destroy;      
+	return() if($reponse eq 'no');
+    }
 
     if($self->{'global'}) {
         Gtk2->main_quit;
@@ -346,11 +358,21 @@ sub apply {
 	}
 	print XML "</analyse>\n";
 	close(XML);
+	
+	$self->{'conforme'}=1;
+	$self->quit();
     } else {
-	# error saving file
+	# error opening file
+	my $dialog = Gtk2::MessageDialog
+            ->new_with_markup($self->{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      sprintf(__("Error saving to <i>%s</i>: <b>%s</b>"),
+				      $file,$!));
+	$dialog->run;
+	$dialog->destroy;
     }
 
-    $self->quit();
 }
 
 1;
