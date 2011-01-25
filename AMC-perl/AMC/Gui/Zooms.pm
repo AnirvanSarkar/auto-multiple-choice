@@ -270,8 +270,9 @@ sub zoom_it {
 	$self->{'pb'}->{$id}=$self->{'pb_src'}->{$id}->scale_simple(int($self->{'pb_src'}->{$id}->get_width * $self->{'factor'}),int($self->{'pb_src'}->{$id}->get_height * $self->{'factor'}),GDK_INTERP_BILINEAR);
 	$self->{'image'}->{$id}->set_from_pixbuf($self->{'pb'}->{$id});
     }
-    $self->{'zooms_table_0'}->queue_resize();
-    $self->{'zooms_table_1'}->queue_resize();
+    $self->{'event_0'}->queue_resize();
+    $self->{'event_1'}->queue_resize();
+
     my @size=$self->{'main_window'}->get_size();
     $size[0]=1;
     $self->{'main_window'}->resize(@size);
