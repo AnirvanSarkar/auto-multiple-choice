@@ -20,7 +20,7 @@
 % $Revision$
 % 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{automultiplechoicepos}
+\ProvidesPackage{automultiplechoice}
 \RequirePackage{xcolor} % \fcolorbox to fill (or not) a box
 \RequirePackage{fancyhdr} % \pagestyle{empty}
 \RequirePackage{bophook} % \AtBeginPage
@@ -29,6 +29,7 @@
 %
 \def\AMCtext#1#2{\expandafter\def\csname AMC@loc@#1\endcsname{#2}}
 %
+\def\AMC@VERSION{AMC $Revision$}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% localisation : english
 %
@@ -649,6 +650,7 @@
 \ifAMC@calibration
 \newwrite\AMC@XYFILE%
 \immediate\openout\AMC@XYFILE\jobname.xy%
+\immediate\write\AMC@XYFILE{\string\version{\AMC@VERSION}}
 \fi
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
