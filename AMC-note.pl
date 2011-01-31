@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -75,9 +75,10 @@ GetOptions("cr=s"=>\$cr_dir,
 
 set_debug($debug);
 
-$grain =~ s/,/./;
-$note_plancher =~ s/,/./;
-$note_parfaite =~ s/,/./;
+for my $x (\$grain,\$note_plancher,\$note_parfaite) {
+    $$x =~ s/,/./;
+    $$x =~ s/\s+//;
+}
 
 sub arrondi_inf {
     my $x=shift;
@@ -180,11 +181,7 @@ for my $etu (keys %{$bar->{'etudiant'}}) {
     }
 }
 
-# perl -e 'use XML::Simple;use Data::Dumper;$lay=XMLin("test-bareme.xml",ForceArray => 1,KeyAttr=> [ "id" ]);print Dumper($lay);'
-
 %page_lue=();
-
-# perl -e 'use XML::Simple;use Data::Dumper;$lay=XMLin("points-cr/analyse-manuelle-100-1-31.xml",ForceArray => 1,KeepRoot=>1,KeyAttr=> [ "id" ]);print Dumper($lay);'
 
 sub action {
     my ($id,$aa,$pbons,$bar)=(@_);
@@ -471,6 +468,11 @@ for my $etud (@a_calculer) {
 	# total qui faut pour avoir le max
 	my $max_i=$note_question{'max'.$etud}->{'total'};
 	$max_i=$main_bareme{'SUF'} if($main_bareme{'SUF'});
+	if($max_i<=0) {
+	    debug "Warning: Negative value for MAX.";
+	    $max_i=1;
+	}
+
 
 	# application du grain et de la note max
 	my $x;
