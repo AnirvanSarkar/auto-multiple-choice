@@ -2129,12 +2129,25 @@ sub saisie_auto_ok {
 	for my $fich (@f) {
 	    my ($fxa,$fxb,$fb) = splitpath($fich);
 	    my $dest=absolu("scans/".$fb);
-	    if(($fich ne $dest) && copy($fich,$dest)) {
-		push @fl,$dest; 
-		$c++;
-	    } else {
-		push @fl,$fich;
+	    my $deplace=0;
+
+	    if($fich ne $dest) {
+		if(-e $dest) {
+		    # dest file already exists: change name
+		    debug "File $dest already exists";
+		    $dest=new_filename($dest);
+		    debug "--> $dest";
+		}
+		if(copy($fich,$dest)) {
+		    push @fl,$dest; 
+		    $deplace=1;
+		} else {
+		    debug "$fich --> $dest";
+		    debug "Copy error: $!";
+		}
 	    }
+	    $c+=$deplace;
+	    push @fl,$fich if(!$deplace);
 	}
 	debug "Copying scan files: ".$c."/".(1+$#f);
 	@f=@fl;
