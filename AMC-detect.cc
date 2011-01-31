@@ -65,7 +65,7 @@ void agrege(double x,double y,double* coins_x,double* coins_y) {
   AGREGE_POINT(-,<,3)
 }
 
-void load_image(IplImage** src,char *filename,double threshold=0.4,int view=0) {
+void load_image(IplImage** src,char *filename,double threshold=0.6,int view=0) {
   if((*src=cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE))!= 0) {
     double max;
     cvMinMaxLoc(*src,NULL,&max);
@@ -457,7 +457,7 @@ int main( int argc, char** argv )
     printf("! LOCALE : setlocale failed\n");
   }
 
-  double threshold=0.4;
+  double threshold=0.6;
   double taille_orig_x=0;
   double taille_orig_y=0;
   double dia_orig=0;
