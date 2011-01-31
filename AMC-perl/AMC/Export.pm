@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -44,6 +44,8 @@ sub new {
 	'noms.encodage'=>'',
 	'noms.separateur'=>'',
 	'noms.identifiant'=>'',
+
+	'sort.keys'=>['s:_NOM_','n:_ID_'],
 
 	'c'=>{},
 	'calcul'=>{},
@@ -142,8 +144,6 @@ sub pre_process {
 	}
     }
 
-    my $k_id='_ID_';
-
     if($self->{'assoc'} && $self->{'noms'}) {
 	my $lk=$self->{'assoc'}->get_param('liste_key');
 	$self->{'liste_key'}=$lk;
@@ -158,16 +158,20 @@ sub pre_process {
 		    if($n) {
 			$self->{'c'}->{$etu}->{'_NOM_'}=
 			    $n->{'_ID_'};
+			$self->{'c'}->{$etu}->{'_LINE_'}=
+			    $n->{'_LINE_'};
 		    } else {
-			$self->{'c'}->{$etu}->{'_NOM_'}='?';
+			for(qw/NOM LINE/) {
+			    $self->{'c'}->{$etu}->{'_'.$_.'_'}='?';
+			}
 		    }
 		} else {
-		    $self->{'c'}->{$etu}->{'_NOM_'}='??';
+		    for(qw/NOM LINE/) {
+			$self->{'c'}->{$etu}->{'_'.$_.'_'}='??';
+		    }
 		}	
 	    }
 	}
-
-	$k_id='_NOM_';
     } else {
 	$self->{'liste_key'}='';
 	debug "No association\n";
@@ -176,11 +180,43 @@ sub pre_process {
     $self->{'keys'}=\@keys;
     $self->{'codes'}=\@codes;
 
-    $self->{'copies'}=[sort { $self->{'c'}->{$a}->{$k_id}
-			      cmp $self->{'c'}->{$b}->{$k_id} }
+    debug "Sorting with keys ".join(", ",@{$self->{'sort.keys'}});
+    $self->{'copies'}=[sort { $self->compare($a,$b); }
 		       (keys %{$self->{'c'}})];
 
-    #print Dumper($self->{'c'});
+}
+
+sub compare {
+    my ($self,$a,$b)=@_;
+    my $r=0;
+
+    if($a =~ /[^0-9]/) {
+	if($b =~ /[^0-9]/) {
+	    return($a cmp $b);
+	} else {
+	    return(-1);
+	}
+    } elsif($b =~ /[^0-9]/) {
+	return(1);
+    }
+
+    for my $k (@{$self->{'sort.keys'}}) {
+	my $key=$k;
+	my $mode='s';
+
+	if($k =~ /^([ns]):(.*)/) {
+	    $mode=$1;
+	    $key=$2;
+	}
+	if($mode eq 'n') {
+	    $r=$r || ( $self->{'c'}->{$a}->{$key} <=> 
+		       $self->{'c'}->{$b}->{$key} );
+	} else {
+	    $r=$r || ( $self->{'c'}->{$a}->{$key} cmp
+		       $self->{'c'}->{$b}->{$key} );
+	}
+    }
+    return($r);
 }
 
 sub export {

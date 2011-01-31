@@ -69,6 +69,7 @@ sub load {
     my %data=();
     my $err=0;
     my $errlig=0;
+    my $line;
     my $sep=$self->{'separateur'};
 
     $self->{'noms'}=[];
@@ -78,7 +79,9 @@ sub load {
     if(-f $self->{'fichier'} && ! -z $self->{'fichier'}) {
 
 	if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",$self->{'fichier'})) {
+	    $line=0;
 	  NOM: while(<LISTE>) {
+	      $line++;
 	      chomp;
 	      s/\#.*//;
 	      next NOM if(/^\s*$/);
@@ -125,6 +128,7 @@ sub load {
 		      $nom->{$heads[$_]}=$l[$_];
 		      $data{$heads[$_]}->{$l[$_]}++;
 		  }
+		  $nom->{'_LINE_'}=$line;
 		  push @{$self->{'noms'}},$nom;
 	      }
 	  }

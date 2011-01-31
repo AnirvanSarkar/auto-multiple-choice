@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009,2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -37,8 +37,10 @@ my $noms_encodage='utf-8';
 my $noms_identifiant='';
 my @o_out=();
 my $debug='';
+my $sort='n';
 
 GetOptions("module=s"=>\$module,
+	   "sort=s"=>\$sort,
 	   "fich-notes=s"=>\$fich_notes,
 	   "fich-assoc=s"=>\$fich_assoc,
 	   "fich-noms=s"=>\$fich_noms,
@@ -53,6 +55,15 @@ set_debug($debug);
 
 load("AMC::Export::$module");
 $ex = "AMC::Export::$module"->new();
+
+my %sorting=('l'=>['n:_LINE_'],
+	     'm'=>['n:_NOTE_','s:_NOM_'],
+	     'i'=>['n:_ID_'],
+	     'n'=>['s:_NOM_','n:_LINE_','n:_ID_']
+    );
+
+$ex->set_options("sort",
+		 "keys"=>$sorting{lc($1)}) if($sort =~ /^\s*([lmin])/i);
 
 $ex->set_options("fich",
 		 "notes"=>$fich_notes,

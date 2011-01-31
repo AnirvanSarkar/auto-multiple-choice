@@ -1513,7 +1513,37 @@
                                     <property name="visible">True</property>
                                     <property name="orientation">vertical</property>
                                     <child>
-                                      <placeholder/>
+                                      <widget class="GtkTable" id="table25">
+                                        <property name="visible">True</property>
+                                        <property name="n_rows">2</property>
+                                        <property name="n_columns">2</property>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkLabel" id="label4">
+                                            <property name="visible">True</property>
+                                            <property name="label" translatable="yes">Sorting:</property>
+                                          </widget>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkComboBox" id="export_c_export_sort">
+                                            <property name="visible">True</property>
+                                            <property name="items" translatable="yes"></property>
+                                            <signal name="changed" handler="maj_export"/>
+                                          </widget>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                          </packing>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="position">0</property>
+                                      </packing>
                                     </child>
                                     <child>
                                       <widget class="GtkTable" id="options_CSV">

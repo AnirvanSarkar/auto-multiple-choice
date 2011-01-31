@@ -270,6 +270,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'annote_position'=>'marge',
 
 		   'verdict'=>'',
+
+		   'export_sort'=>'n',
 		   );
 
 my $mep_saved='mep.storable';
@@ -846,47 +848,54 @@ my $cb_model_vide_key=cb_model(''=>__p"(none) [No primary key found in associati
 my $cb_model_vide_code=cb_model(''=>__p"(none) [No code found in LaTeX file]");
 
 my %cb_stores=(
-	       'delimiteur_decimal'=>cb_model(',',__", (comma)",
-					      '.',__". (dot)"),
+    'delimiteur_decimal'=>cb_model(',',__", (comma)",
+				   '.',__". (dot)"),
 # TRANSLATORS: rounding method for marks
-	       'note_arrondi'=>cb_model('inf',__"floor",
+    'note_arrondi'=>cb_model('inf',__"floor",
 # TRANSLATORS: rounding method for marks
-					'normal',__"rounding",
+			     'normal',__"rounding",
 # TRANSLATORS: rounding method for marks
-					'sup',__"ceiling"),
-	       'methode_impression'=>cb_model('CUPS','CUPS',
+			     'sup',__"ceiling"),
+    'methode_impression'=>cb_model('CUPS','CUPS',
 # TRANSLATORS: printing method
-					      'commande',__"command",
+				   'commande',__"command",
 # TRANSLATORS: printing method
-					      'file'=>__"to files"),
+				   'file'=>__"to files"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	       'sides'=>cb_model('one-sided',__p("one sided [No two-sided printing]"),
+    'sides'=>cb_model('one-sided',__p("one sided [No two-sided printing]"),
 # TRANSLATORS: two-side printing type
-				 'two-sided-long-edge',__"long edge",
+		      'two-sided-long-edge',__"long edge",
 # TRANSLATORS: two-side printing type
-				 'two-sided-short-edge',__"short edge"),
-	       'encodage_latex'=>cb_model(map { $_->{'iso'}=>$_->{'txt'} }
-					  (@$encodages)),
+		      'two-sided-short-edge',__"short edge"),
+    'encodage_latex'=>cb_model(map { $_->{'iso'}=>$_->{'txt'} }
+			       (@$encodages)),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	       'manuel_image_type'=>cb_model('ppm'=>__p("(none) [No transitional image type (direct processing)]"),
-					     'xpm'=>'XPM',
-					     'gif'=>'GIF'),
-	       'liste_key'=>$cb_model_vide_key,
-	       'assoc_code'=>$cb_model_vide_code,
-	       'format_export'=>cb_model(%formats_noms),
-	       'after_export'=>cb_model(""=>__"that's all",
-					"file"=>__"open the file",
-					"dir"=>__"open the directory",
-					),
-	       'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
-						 ";"=>";",
-						 ","=>","),
+    'manuel_image_type'=>cb_model('ppm'=>__p("(none) [No transitional image type (direct processing)]"),
+				  'xpm'=>'XPM',
+				  'gif'=>'GIF'),
+    'liste_key'=>$cb_model_vide_key,
+    'assoc_code'=>$cb_model_vide_code,
+    'format_export'=>cb_model(%formats_noms),
+    'after_export'=>cb_model(""=>__"that's all",
+			     "file"=>__"open the file",
+			     "dir"=>__"open the directory",
+    ),
+    'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
+				      ";"=>";",
+				      ","=>","),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	       'annote_position'=>cb_model("none"=>__p("(none) [No annotation position (do not write anything)]"),
-					   "marge"=>__"margin",
-					   "case"=>__"near boxes",
-					   ),
-	       );
+    'annote_position'=>cb_model("none"=>__p("(none) [No annotation position (do not write anything)]"),
+				"marge"=>__"margin",
+				"case"=>__"near boxes",
+    ),
+    'export_sort'=>cb_model("n"=>__"name",
+			    "i"=>__"sheet number",
+			    "l"=>__"line in students list",
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+			    "m"=>__p("mark [student mark, for sorting]"),
+			    ),
+    
+    );
 
 my $symbole_type_cb=cb_model("none"=>__"mothing",
 			     "circle"=>__"circle",
@@ -977,6 +986,7 @@ sub exporte {
     commande('commande'=>[with_prog("AMC-export.pl"),
 			  "--debug",debug_file(),
 			  "--module",$format,
+			  "--sort",$projet{'options'}->{'export_sort'},
 			  "--fich-notes",absolu($projet{'options'}->{'notes'}),
 			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
