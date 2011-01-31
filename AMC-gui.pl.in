@@ -40,6 +40,7 @@ use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 
 use AMC::Basic;
+use AMC::State;
 use AMC::MEPList;
 use AMC::ANList;
 use AMC::Gui::Manuel;
@@ -1930,13 +1931,35 @@ sub sujet_impressions_ok {
 	     'signal'=>2,
 	     'texte'=>__"Print papers one by one...",
 	     'progres.id'=>'impression',
-	     'o'=>{'fh'=>$fh},
+	     'o'=>{'fh'=>$fh,'etu'=>\@e,'printer'=>$o{'imprimante'},'method'=>$o{'methode_impression'}},
 	     'fin'=>sub {
 		 my $c=shift;
 		 close($c->{'o'}->{'fh'});
+		 save_state_after_printing($c->{'o'});
 	     },
 
 	     );
+}
+
+sub save_state_after_printing {
+    my $c=shift;
+    my $st=AMC::State::new('directory'=>absolu('%PROJET/'));
+
+    $st->read();
+
+    my @files=(@{$projet{'options'}->{'docs'}},
+	       absolu($projet{'options'}->{'texsrc'}));
+    
+    if(!$st->check_local_md5(@files)) {
+	$st=AMC::State::new('directory'=>absolu('%PROJET/'));
+	$st->add_local_files(@files);
+    }
+    
+    $st->add_print('printer'=>$c->{'printer'},
+		   'method'=>$c->{'method'},
+		   'content'=>join(',',@{$c->{'etu'}}));
+    $st->write();
+    
 }
 
 sub calcule_mep {
