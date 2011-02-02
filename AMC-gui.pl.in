@@ -2081,7 +2081,7 @@ sub saisie_auto_ok {
 	my $np=0;
 	# any scene with number > 0 ? This should cause problems with OpenCV
 	my $scene=0;
-	open(NP,"-|",magick_module("identify"),"-format","%s",$fich);
+	open(NP,"-|",magick_module("identify"),"-format","%s\n",$fich);
 	while(<NP>) {
 	    chomp();
 	    if(/[^\s]/) {
