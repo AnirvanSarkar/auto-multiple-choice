@@ -104,29 +104,6 @@ sub check_rep {
 check_rep($mep_dir);
 check_rep($cr_dir,1);
 
-# split multi-page scans
-
-my @ss=();
-
-for my $s (@scans) {
-    my $np=0;
-    if(open(ID,"-|",magick_module('identify'),$s)) {
-	while(<ID>) {
-	    if(/^($s\[[0-9]+\])/) {
-		push(@ss,$1);
-		$np++;
-	    }
-	}
-	close(ID);
-    } else {
-	debug "Identify FAILED: $! on $s";
-    }
-    debug "$np subpages for $s" if($np);
-    push @ss,$s if(!$np);
-}
-
-@scans=@ss;
-
 my $delta=$progress/(1+$#scans);
 my $fh;
 

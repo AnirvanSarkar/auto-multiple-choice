@@ -2079,11 +2079,19 @@ sub saisie_auto_ok {
     for my $fich (@f) {
 	# number of pages :
 	my $np=0;
-	open(NP,"-|",magick_module("identify"),"-format","%p\n",$fich);
-	while(<NP>) { $np++ if(/[^\s]/); }
+	# any scene with number > 0 ? This should cause problems with OpenCV
+	my $scene=0;
+	open(NP,"-|",magick_module("identify"),"-format","%s",$fich);
+	while(<NP>) {
+	    chomp();
+	    if(/[^\s]/) {
+		$np++;
+		$scene=1 if($_ > 0);
+	    }
+	}
 	close(NP);
-	debug "> Scan $fich: $np pages.";
-	if($np>1) {
+	debug "> Scan $fich: $np page(s)".($scene ? " [has scene>0]" : "");
+	if($np>1 || $scene) {
 	    # split multipage image into 1-page images
 
 	    my $temp_loc=tmpdir();

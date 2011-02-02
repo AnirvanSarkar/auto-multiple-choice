@@ -163,7 +163,7 @@ endif
 LOCALDIR=$(shell pwd)
 
 global: FORCE
-	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-detect /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop
+	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-detect /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR)
 
 local: global
 	test -d /usr/lib/AMC || sudo mkdir -p /usr/lib/AMC
@@ -177,6 +177,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice.desktop $(DESKTOPDIR)/auto-multiple-choice.desktop
+	sudo ln -s $(LOCALDIR)/doc/modeles $(MODELSDIR)
 
 ifdef DEBSIGN_KEY
 DEBSIGN=-k$(DEBSIGN_KEY)
