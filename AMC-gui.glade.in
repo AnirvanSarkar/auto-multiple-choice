@@ -1517,12 +1517,7 @@
                                         <property name="visible">True</property>
                                         <property name="n_rows">2</property>
                                         <property name="n_columns">2</property>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
+                                        <property name="column_spacing">4</property>
                                         <child>
                                           <widget class="GtkLabel" id="label4">
                                             <property name="visible">True</property>
@@ -1540,6 +1535,22 @@
                                             <property name="right_attach">2</property>
                                           </packing>
                                         </child>
+                                        <child>
+                                          <widget class="GtkCheckButton" id="export_cb_export_include_abs">
+                                            <property name="label" translatable="yes">include absentees</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="tooltip" translatable="yes">Should exported data include absentees?</property>
+                                            <property name="draw_indicator">True</property>
+                                            <signal name="toggled" handler="maj_export"/>
+                                          </widget>
+                                          <packing>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
                                       </widget>
                                       <packing>
                                         <property name="position">0</property>
@@ -1549,6 +1560,7 @@
                                       <widget class="GtkTable" id="options_CSV">
                                         <property name="n_rows">3</property>
                                         <property name="n_columns">3</property>
+                                        <property name="column_spacing">4</property>
                                         <child>
                                           <widget class="GtkLabel" id="label92">
                                             <property name="visible">True</property>

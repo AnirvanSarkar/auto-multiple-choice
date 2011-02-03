@@ -38,9 +38,11 @@ my $noms_identifiant='';
 my @o_out=();
 my $debug='';
 my $sort='n';
+my $useall=1;
 
 GetOptions("module=s"=>\$module,
 	   "sort=s"=>\$sort,
+	   "useall=s"=>\$useall,
 	   "fich-notes=s"=>\$fich_notes,
 	   "fich-assoc=s"=>\$fich_assoc,
 	   "fich-noms=s"=>\$fich_noms,
@@ -59,7 +61,7 @@ $ex = "AMC::Export::$module"->new();
 my %sorting=('l'=>['n:_LINE_'],
 	     'm'=>['n:_NOTE_','s:_NOM_'],
 	     'i'=>['n:_ID_'],
-	     'n'=>['s:_NOM_','n:_LINE_','n:_ID_']
+	     'n'=>['s:_NOM_','n:_LINE_','n:_ID_'],
     );
 
 $ex->set_options("sort",
@@ -74,6 +76,7 @@ $ex->set_options("fich",
 $ex->set_options("noms",
 		 "encodage"=>$noms_encodage,
 		 "identifiant"=>$noms_identifiant,
+		 "useall"=>$useall,
 		 );
 
 for my $oo (@o_out) {

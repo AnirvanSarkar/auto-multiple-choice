@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -51,15 +51,52 @@ sub parse_string {
     return($s);
 }
 
-sub yx2ooo {
-    my ($y,$x,$fy,$fx)=@_;
-    my $c=($fx ? '$' : '');
+sub x2ooo {
+    my ($x)=@_;
+    my $c='';
     my $d=int($x/26);
     $x=$x % 26;
     $c.=chr(ord("A")+$d-1) if($d>0);
     $c.=chr(ord("A")+$x);
-    $c.=($fy ? '$' : '').($y+1);
     return($c);
+}
+
+sub yx2ooo {
+    my ($y,$x,$fy,$fx)=@_;
+    return(($fx ? '$' : '').x2ooo($x).($fy ? '$' : '').($y+1));
+}
+
+sub one_range {
+    my ($column,$a,$b)=@_;
+    if($a==$b) {
+	return("[.".$column.($a+1)."]");
+    } else {
+	return("[.".$column.($a+1).":".".".$column.($b+1)."]");
+    }
+}
+
+sub list_condensed {
+    my ($column,@lines)=@_;
+    my @l=sort { $a <=> $b } @lines;
+    my $debut='';
+    my $fin='';
+    my @sets=();
+    for my $i (@l) {
+	if($debut) {
+	    if($i == $fin+1) {
+		$fin=$i;
+	    } else {
+		push @sets,one_range($column,$debut,$fin);
+		$debut=$i;
+		$fin=$i;
+	    }
+	} else {
+	    $debut=$i;
+	    $fin=$i;
+	}
+    }
+    push @sets,one_range($column,$debut,$fin);
+    return(join(";",@sets));
 }
 
 my %largeurs=(qw/ASSOC 4cm
@@ -75,6 +112,11 @@ my %style_col=(qw/ASSOC CodeA
 	       ID NumCopie
 	       TOTAL NoteQ
 	       MAX NoteQ
+	       /);
+my %style_col_abs=(qw/NOTE Tableau
+	       ID NoteX
+	       TOTAL NoteX
+	       MAX NoteX
 	       /);
 
 my %fonction_arrondi=(qw/i ROUNDDOWN
@@ -144,6 +186,17 @@ sub export {
 			 },
 			 );
 
+    my $pc=$styles->createStyle('Percentage',
+				namespace=>'number',
+				type=>'percentage-style',
+				properties=>{
+				    'number:decimal-places'=>"0",
+				    'number:min-integer-digits'=>"1",
+				},
+	);
+    $styles->appendElement($pc,'number:text','text'=>'%');
+
+
     $styles->createStyle('NombreVide',
 			 namespace=>'number',
 			 type=>'number-style',
@@ -172,6 +225,17 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:border'=>"0.039cm solid \#000000", # epaisseur trait / solid|double / couleur
 			 },
+			 );
+
+    # Qpc : pourcentage de reussite global pour une question
+    $styles->createStyle('Qpc',
+			 parent=>'Tableau',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'paragraph',
+			     'fo:text-align' => "center",
+			 },
+			 'references'=>{'style:data-style-name' => 'Percentage'},		     
 			 );
     
     # NoteQ : note pour une question
@@ -372,7 +436,7 @@ sub export {
     my %code_col=();
     my %code_row=();
 
-    # premiere ligne
+    # first line: titles
     
     $ii=$x0;
     for(($self->{'liste_key'} ? 'ASSOC' : ()),
@@ -401,32 +465,48 @@ sub export {
 	$doc->cellValue($feuille,$y0,$ii++,$_);
     }
 
-    # lignes suivantes
+    # following lines
 
     my $notemax;
-
+    my @presents=();
+    my %presents_q=();
     my $jj=$y0;
     for my $etu (@{$self->{'copies'}}) {
 	my $e=$self->{'c'}->{$etu};
 	$jj++;
 
-	$code_row{$e->{_ID_}}=$jj;
+	$code_row{$e->{'_ID_'}}=$jj;
 
-	if($e->{_ID_} !~ /^(max|moyenne)$/) {
+	if($e->{'_ID_'} !~ /^(max|moyenne)$/) {
 	    $y1=$jj if(!$y1);
 	    $y2=$jj;
 	}
 
+	push @presents,$jj if(!($e->{'_ABS_'} || $e->{'_SPECIAL_'}));
+
+	# first: special columns (association key, name, mark, sheet
+	# number, total score, max score)
+	
 	$ii=$x0;
 	for(($self->{'liste_key'} ? 'ASSOC' : ()),
 	    qw/NOM NOTE ID TOTAL MAX/) {
+
+	    if($e->{'_ABS_'}) {
+		$doc->cellStyle($feuille,$jj,$ii,
+				($style_col_abs{$_} 
+				 ? $style_col_abs{$_}
+				 : $style_col{$_}));
+	    } else {
+		$doc->cellStyle($feuille,$jj,$ii,$style_col{$_});
+	    }
 	    $doc->cellValueType($feuille,$jj,$ii,'float')
-		if(/^(NOTE|TOTAL|MAX)$/);
-	    $doc->cellStyle($feuille,$jj,$ii,$style_col{$_});
+		if((/^(TOTAL|MAX)$/ && ! ($e->{'_ABS_'}||$e->{'_SPECIAL_'})) ||
+		   (/^(NOTE)$/ && ! $e->{'_ABS_'}));
 	    if($_ eq 'TOTAL') {
 		$doc->cellFormula($feuille,$jj,$ii,
-				  "oooc:=SUM([.".yx2ooo($jj,$x1).":.".yx2ooo($jj,$x1+$nkeys_compte-1)."])");
-	    } elsif($_ eq 'NOTE') {
+				  "oooc:=SUM([.".yx2ooo($jj,$x1).":.".yx2ooo($jj,$x1+$nkeys_compte-1)."])")
+		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
+	    } elsif($_ eq 'NOTE' && ! $e->{'_ABS_'}) {
 		if($e->{_ID_} eq 'max') {
 		    $notemax='[.'.yx2ooo($jj,$ii,1,1).']';
 		    $doc->cellValue($feuille,$jj,$ii,$e->{'_'.$_.'_'});
@@ -450,19 +530,35 @@ sub export {
 				      ."]/$grain)*$grain"
 				      .($notemin ne '' ? ")" : "")
 				      .")"
-				      );
+			);
 		}
+	    } elsif($_ eq 'MAX') {
+		$doc->cellValue($feuille,$jj,$ii,$e->{'_'.$_.'_'})
+		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
 	    } else {
 		$doc->cellValue($feuille,$jj,$ii,$e->{'_'.$_.'_'});
 	    }
 	    $ii++;
 	}
+
+	# second: columns for all questions scores 
 	
 	for(@keys) {
-	    my $raison=$self->{'notes'}->{'copie'}->{$etu}->{'question'}->{$_}->{'raison'};
-	    $doc->cellValueType($feuille,$jj,$ii,'float');
-	    $doc->cellStyle($feuille,$jj,$ii,($e->{$_} ne '' ? ($raison eq 'V' ? 'NoteV' : ($raison eq 'E' ? 'NoteE' : 'NoteQ')) : 'NoteX'));
-	    $doc->cellValue($feuille,$jj,$ii++,$e->{$_});
+	    if($e->{'_ABS_'}) {
+		$doc->cellStyle($feuille,$jj,$ii,'NoteX');
+	    } else {
+		my $raison=$self->{'notes'}->{'copie'}->{$etu}->{'question'}->{$_}->{'raison'};
+		$doc->cellValueType($feuille,$jj,$ii,
+				    ($e->{'_ID_'} eq 'moyenne' ? 'percentage' : 'float'));
+		$doc->cellStyle($feuille,$jj,$ii,
+				($e->{'_ID_'} eq 'moyenne' ? 'Qpc' :
+				 ($e->{$_} ne '' ? ($raison eq 'V' ? 'NoteV' : ($raison eq 'E' ? 'NoteE' : 'NoteQ')) : 'NoteX')));
+		$doc->cellValue($feuille,$jj,$ii,$e->{$_})
+		    if($e->{'_ID_'} ne 'moyenne');
+		push @{$presents_q{$ii}},$jj if($e->{$_} ne '' &&
+						!($e->{'_ABS_'} || $e->{'_SPECIAL_'}));
+	    }
+	    $ii++;
 	}
 	for(@codes) {
 	    $doc->cellValueType($feuille,$jj,$ii,'float');
@@ -471,14 +567,25 @@ sub export {
 	}
     }
 
+    # back to line for means
+
+    $ii=$x1;
+    for(@keys) {
+	$doc->cellFormula($feuille,$code_row{'moyenne'},$ii,
+			  "oooc:=AVERAGE("
+			  .list_condensed(x2ooo($ii),@{$presents_q{$ii}})
+			  .")/[.".yx2ooo($code_row{'max'},$ii)."]");
+
+	$ii++;
+    }
+
+    # mean mark cell
     $doc->cellFormula($feuille,$code_row{'moyenne'},$code_col{'note'},
-		      "oooc:=AVERAGE([."
-		      .yx2ooo($y1,$code_col{'note'})
-		      .":."
-		      .yx2ooo($y2,$code_col{'note'})."])");
+		      "oooc:=AVERAGE("
+		      .list_condensed(x2ooo($code_col{'note'}),@presents).")");
 
 
-    # meta-donnees et ecriture...
+    # set meta-data and write to file
     
     my $meta = odfMeta(container => $archive);
 

@@ -253,7 +253,6 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'moteur_latex_b'=>'',
 
-
 		   'nom_examen'=>'',
 		   'code_examen'=>'',
 
@@ -266,6 +265,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'export_csv_separateur'=>",",
 		   'export_csv_cochees'=>'',
 		   'after_export'=>'file',
+		   'export_include_abs'=>1,
 
 		   'annote_position'=>'marge',
 
@@ -986,6 +986,7 @@ sub exporte {
     commande('commande'=>[with_prog("AMC-export.pl"),
 			  "--debug",debug_file(),
 			  "--module",$format,
+			  "--useall",$projet{'options'}->{'export_include_abs'},
 			  "--sort",$projet{'options'}->{'export_sort'},
 			  "--fich-notes",absolu($projet{'options'}->{'notes'}),
 			  "--fich-assoc",absolu($projet{'options'}->{'association'}),

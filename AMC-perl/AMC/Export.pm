@@ -44,6 +44,8 @@ sub new {
 	'noms.encodage'=>'',
 	'noms.separateur'=>'',
 	'noms.identifiant'=>'',
+	'noms.useall'=>1,
+	'noms.abs'=>'ABS',
 
 	'sort.keys'=>['s:_NOM_','n:_ID_'],
 
@@ -146,14 +148,17 @@ sub pre_process {
 
     if($self->{'assoc'} && $self->{'noms'}) {
 	my $lk=$self->{'assoc'}->get_param('liste_key');
+	my %is=();
 	$self->{'liste_key'}=$lk;
 	for my $etu (@copies) {
 	    if($etu =~ /^(max|moyenne)$/) {
 		$self->{'c'}->{$etu}->{'_NOM_'}='';
+		$self->{'c'}->{$etu}->{'_SPECIAL_'}=1;
 	    } else {
 		my $i=$self->{'assoc'}->effectif($etu);
 		if($i) {
 		    $self->{'c'}->{$etu}->{'_ASSOC_'}=$i;
+		    $is{$i}=1;
 		    my ($n)=$self->{'noms'}->data($lk,$i);
 		    if($n) {
 			$self->{'c'}->{$etu}->{'_NOM_'}=
@@ -170,6 +175,23 @@ sub pre_process {
 			$self->{'c'}->{$etu}->{'_'.$_.'_'}='??';
 		    }
 		}	
+	    }
+	}
+	if($self->{'noms.useall'}) {
+	    my $n=0;
+	    for my $i ($self->{'noms'}->liste($lk)) {
+		if(!$is{$i}) {
+		    $n++;
+		    my $e=sprintf("none.%04d",$n);
+		    my ($name)=$self->{'noms'}->data($lk,$i);
+		    $self->{'c'}->{$e}={
+			'_ID_'=>'','_ASSOC_'=>$i,
+			'_ABS_'=>1,
+			'_NOTE_'=>$self->{'noms.abs'},
+			'_NOM_'=>$name->{'_ID_'},
+			'_LINE_'=>$name->{'_LINE_'},
+		    };
+		}
 	    }
 	}
     } else {
@@ -190,13 +212,13 @@ sub compare {
     my ($self,$a,$b)=@_;
     my $r=0;
 
-    if($a =~ /[^0-9]/) {
-	if($b =~ /[^0-9]/) {
+    if($a =~ /[^0-9]$/) {
+	if($b =~ /[^0-9]$/) {
 	    return($a cmp $b);
 	} else {
 	    return(-1);
 	}
-    } elsif($b =~ /[^0-9]/) {
+    } elsif($b =~ /[^0-9]$/) {
 	return(1);
     }
 
