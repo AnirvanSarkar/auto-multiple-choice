@@ -209,6 +209,7 @@ sources_vok:
 	$(MAKE) -C $(TMP_SOURCE_DIR) MAJ
 	$(MAKE) -C $(TMP_SOURCE_DIR) $(MAIN_LOGO).xpm I18N doc
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean_IN
+	$(MAKE) -C $(TMP_SOURCE_DIR) auto-multiple-choice.spec
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 

@@ -642,7 +642,8 @@
 % examcopy environment
 %
 \@ifpackageloaded{environ}{%
-\NewEnviron{examcopy}[1][5]{\onecopy{#1}{\BODY}}
+\ifx\NewEnviron\undefined\PackageWarning{automultiplechoice}{Package environ loaded but too old version: environnement examcopy/copieexamen will NOT be defined.}%
+\else\NewEnviron{examcopy}[1][5]{\onecopy{#1}{\BODY}}\fi
 }{\PackageWarning{automultiplechoice}{Package environ not loaded: environnement examcopy/copieexamen will NOT be defined.}}
 % VARS
 \ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi

@@ -39,15 +39,15 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 URL: http://home.gna.org/auto-qcm/
 Packager: Alexis Bienvenüe <pado@passoire.fr>
-BuildRequires: gcc-c++, fontconfig-devel, opencv-devel
+BuildRequires: gcc-c++
 %if 0%{?suse_version}
-BuildRequires: update-desktop-files, libnetpbm-devel, libpoppler-devel >= 0.12.3, texlive
+BuildRequires: update-desktop-files, libnetpbm-devel, libpoppler-devel >= 0.12.3, texlive, fontconfig-devel, opencv-devel
 %endif
 %if 0%{?fedora}
-BuildRequires: desktop-file-utils, netpbm-devel, poppler-devel, texlive
+BuildRequires: desktop-file-utils, netpbm-devel, poppler-devel, texlive, fontconfig-devel, opencv-devel
 %endif
 %if 0%{?mandriva_version}
-BuildRequires: desktop-file-utils, libnetpbm-devel, libpoppler-devel
+BuildRequires: desktop-file-utils, libnetpbm-devel, libpoppler-devel, libfontconfig-devel, opencv-devel
 %endif
 
 Requires: perl >= 5.8, ghostscript

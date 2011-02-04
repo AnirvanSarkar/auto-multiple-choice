@@ -515,8 +515,8 @@ int main( int argc, char** argv )
   while(getline(&commande,&commande_t,stdin)>=6) {
     //printf("LC_NUMERIC: %s\n",setlocale(LC_NUMERIC,NULL));
 
-    if(endline=strchr(commande,'\r')) *endline='\0';
-    if(endline=strchr(commande,'\n')) *endline='\0';
+    if((endline=strchr(commande,'\r'))) *endline='\0';
+    if((endline=strchr(commande,'\n'))) *endline='\0';
     if(strncmp(commande,"output ",7)==0) {
       free(out_image_file);
       out_image_file=strdup(commande+7);
@@ -556,8 +556,8 @@ int main( int argc, char** argv )
 		     &coins_x0[2],&coins_y0[2],
 		     &coins_x0[3],&coins_y0[3])==8) {
       /* "optim" and 8 arguments: 4 marks positions (x y,
-	  order: UL UR BR BL) */
-      /* return: optimal linear transform and MSE */
+	  order: UL UR BR BL)
+	  return: optimal linear transform and MSE */
       mse=optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
       printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
 	     transfo.a,transfo.b,transfo.c,transfo.d,transfo.e,transfo.f);
@@ -568,8 +568,8 @@ int main( int argc, char** argv )
     } else if(sscanf(commande,"mesure0 %lf %lf %lf %lf %lf",
 		     &prop,
 		     &xmin,&xmax,&ymin,&ymax)==5) {
-      /* "mesure0" and 5 arguments: proportion, xmin, xmax, ymin, ymax */
-      /* return: number of black pixels and total number of pixels */
+      /* "mesure0" and 5 arguments: proportion, xmin, xmax, ymin, ymax
+	 return: number of black pixels and total number of pixels */
       transforme(&transfo,xmin,ymin,&box[0].x,&box[0].y);
       transforme(&transfo,xmax,ymin,&box[1].x,&box[1].y);
       transforme(&transfo,xmax,ymax,&box[2].x,&box[2].y);
@@ -586,7 +586,7 @@ int main( int argc, char** argv )
 		     &box[3].x,&box[3].y)==9) {
       /* "mesure" and 9 arguments: proportion, and 4 vertices
 	 (x y, order: UL UR BR BL)
-      /* returns: number of black pixels and total number of pixels */
+	 returns: number of black pixels and total number of pixels */
       mesure_case(src,illustr,
 		  student,page,question,answer,
 		  prop,box,dst,zooms_dir,view);
