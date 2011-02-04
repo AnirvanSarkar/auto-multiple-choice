@@ -26,6 +26,8 @@ use AMC::AssocFile;
 use Data::Dumper;
 use XML::Simple;
 
+use_gettext;
+
 sub new {
     my $class = shift;
     my $self  = {
@@ -54,6 +56,36 @@ sub new {
     };
     bless ($self, $class);
     return $self;
+}
+
+my %titles=(
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    'nom'=>__p("Name [name column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    'note'=>__p("Mark [mark column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    'copie'=>__p("Sheet [sheet number column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    'total'=>__p("Score [total score column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    'max'=>__p("Max [maximum score column title in exported spreadsheet]"),
+    );
+
+sub get_title {
+    my ($self,$k)=@_;
+    return($titles{$k} ? $titles{$k} : $k);
+}
+
+my %id_names=(
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    'max'=>__p("max [maximum score row name in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+    'moyenne'=>__p("mean [means of scores row name in exported spreadsheet]"),
+    );
+
+sub id_name {
+    my ($self,$k)=@_;
+    return($id_names{$k} ? $id_names{$k} : $k);
 }
 
 sub set_options {

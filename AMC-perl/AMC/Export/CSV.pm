@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -82,7 +82,7 @@ sub export {
 
     print OUT join($sep,
 		   map  { $self->parse_string($_) }
-		   ("nom","note","copie",
+		   (map { $self->get_title($_); } ("nom","note","copie"),
 		    @comp_keys,
 		    @{$self->{'codes'}}))."\n";
     
@@ -94,6 +94,7 @@ sub export {
 			   if($k =~ /^_(NOM|ASSOC)_$/) {
 			       $c=$self->parse_string($c);
 			   } elsif($k =~ /^_ID_$/) {
+			       $c=$self->parse_string($self->id_name($c));
 			   } elsif($k =~ /^TICKED:/) {
 			       $c=$self->parse_string($c);
 			   } else {
