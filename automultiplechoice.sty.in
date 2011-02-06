@@ -29,7 +29,7 @@
 %
 \def\AMCtext#1#2{\expandafter\def\csname AMC@loc@#1\endcsname{#2}}
 %
-\def\AMC@VERSION{AMC $Revision$}
+\def\AMC@VERSION{AMC svn:@/PACKAGE_V_SVN/@ with style $Revision$}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% localisation : english
 %
@@ -253,7 +253,7 @@
 }
 %
 % champ a remplir pour mettre son nom -> bonne couleur
-\newcommand{\champnom}[1]{\tracebox{1}{nom}{#1}}
+\newcommand{\namefield}[1]{\tracebox{1}{nom}{#1}}
 %
 %--------------------------------------------------------------
 % binary boxes
@@ -675,4 +675,5 @@
 \let\alafin=\lastchoices
 \let\formulaire=\AMCform
 \let\AMCdebutFormulaire=\AMCformBegin
+\let\champnom=\namefield
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
