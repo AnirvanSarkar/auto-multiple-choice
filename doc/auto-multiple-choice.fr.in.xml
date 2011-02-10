@@ -77,6 +77,13 @@
     <sect2>
       <title>Logiciels</title>
 
+      <note>
+        <para>Si vous installez AMC à l'aide d'un paquet debian (sur une
+        distribution debian, ubuntu ou dérivés) ou RPM (distribution Mandriva,
+        openSUSE, Fedora), tout ce dont AMC a besoin sera automatiquement
+        installé.</para>
+      </note>
+
       <para>Les paquets/logiciels principaux requis pour l'utilisation d'AMC
       sont les suivants :</para>
 
@@ -176,7 +183,7 @@
 
         <listitem>
           <para>À partir de la version 0.262, le dessin des cases à cocher est
-          différent, légèrement plus gros, ce qui risaue de modifier la
+          différent, légèrement plus gros, ce qui risque de modifier la
           disposition de vos sujets.</para>
         </listitem>
 
@@ -208,10 +215,11 @@
     <sect2>
       <title>Installation</title>
 
-      <para>Sur un système debian ou Ubuntu ou dérivés, l'installation est
-      facilitée par l'utilisation des dépôts debian et ubuntu d'AMC. La
-      procédure d'installation est décrite sur le <ulink
-      url="http://home.gna.org/auto-qcm/download">site d'AMC</ulink>.</para>
+      <para>Sur un système debian ou Ubuntu ou dérivés, Mandriva, openSUSE ou
+      Fedora, l'installation est facilitée par l'utilisation des paquets deb
+      et RPM contenant AMC. La procédure d'installation est décrite sur le
+      <ulink url="http://home.gna.org/auto-qcm/download">site
+      d'AMC</ulink>.</para>
 
       <para>Vous pouvez aussi télécharger l'archive des sources dans l'<ulink
       url="http://download.gna.org/auto-qcm/">espace de téléchargement</ulink>
@@ -252,7 +260,7 @@ sudo make install</screen>
     en résulte.</para>
 
     <para>Nous commençons par quelques exemples qui permettent d'appréhender
-    rapidemment la construction de fichiers LaTeX de QCM ; les fichiers tex de
+    rapidement la construction de fichiers LaTeX de QCM ; les fichiers tex de
     ces exemples sont fournis avec AMC sous la forme de modèles utilisables en
     créant un nouveau projet de QCM à partir d'un de ces modèles.</para>
 
@@ -352,7 +360,7 @@ Durée : 10 minutes.
             changement de page à l'intérieur des questions
             (<option>bloc</option>) et de compléter automatiquement chaque
             question multiple par une réponse type permettant à l'étudiant
-            d'indiquer qu'il considère qu'aucune des réposes proposées n'est
+            d'indiquer qu'il considère qu'aucune des réponses proposées n'est
             exacte (<option>completemulti</option>).</para>
           </callout>
 
@@ -408,7 +416,7 @@ Durée : 10 minutes.
       <title>Un exemple avec groupes de questions mélangées</title>
 
       <para>Dans cet exemple, on veut que l'ordre dans lequel les questions
-      sont posées sopit différent d'une copie à l'autre, tout en laissant
+      sont posées soit différent d'une copie à l'autre, tout en laissant
       ensemble les questions traitant du même sujet. On va donc créer deux
       groupes de questions, et les mélanger lors de la fabrication de chaque
       copie. <!--NAME: Groupes
@@ -640,7 +648,7 @@ Durée : 10 minutes.
 
 }  
 
-\end{document}</programlisting>Les remarques suivantes devraient écraicir cet
+\end{document}</programlisting>Les remarques suivantes devraient éclaircir cet
       exemple :<calloutlist>
           <callout arearefs="ensemble.opt" id="ensemble.opt.exp">
             <para>C'est l'option <option>ensemble</option> qui permet de faire
@@ -815,7 +823,7 @@ Durée : 10 minutes.
           <para>Il faut utiliser un <parameter>identifiant</parameter>
           différent pour chaque question. Un identifiant peut être constitué
           de chiffres, lettres et caractères simples (ne pas utiliser les
-          acolades, crochets, par exemple !). Il ne faut pas utiliser
+          accolades, crochets, par exemple !). Il ne faut pas utiliser
           d'identifiants se terminant par un point suivi d'un ou plusieurs
           chiffres (comme <parameter>marine-marchande.2</parameter> ou
           <parameter>123.27</parameter>), car cette forme d'identifiants est
@@ -1010,7 +1018,7 @@ Durée : 10 minutes.
 
         <para>Le premier paramètre transmis à cette commande est le numéro de
         question à afficher. Le second paramètre contient
-        <code>\multiSymbole</code> dans le cas dune question à plusieures
+        <code>\multiSymbole</code> dans le cas dune question à plusieurs
         réponses possibles, et est vide dans les autres cas. La commande
         <code>\multiSymbole</code> peut aussi être modifiée : elle a pour
         charge de différentier les questions à réponses multiples des autres.
@@ -1045,7 +1053,7 @@ Durée : 10 minutes.
         s'imprime correctement sur la majorité des imprimantes. Si votre
         imprimante permet de les réduire, vous pouvez le faire en utilisant la
         commande <command>geometry</command> du paquet LaTeX
-        <package>geometry</package>. Par exemple, pour resserer le haut des
+        <package>geometry</package>. Par exemple, pour resserrer le haut des
         copies, on pourra utiliser <code>\geometry{top=3cm}</code> au lieu de
         la valeur 3.5cm utilisée par défaut, juste avant le
         <code>\begin{document}</code>.</para>
@@ -1266,7 +1274,7 @@ et écrivez votre nom et prénom ci-dessous.
 
       <para><calloutlist>
           <callout arearefs="alea.random" id="alea.random.exp">
-            <para>Comme <command>random</command> renvoie un monbre réel de
+            <para>Comme <command>random</command> renvoie un nombre réel de
             l'intervalle [0,1], cette commande met dans la variable VQa un
             entier aléatoire entre 1 et 8. La ligne suivante place dans VQb un
             entier aléatoire entre 4 et 8.</para>
@@ -1370,7 +1378,7 @@ et écrivez votre nom et prénom ci-dessous.
       des exemples fournis avec AMC (il s'agit en général de
       <filename>/usr/share/doc/auto-multiple-choice/exemples/</filename>) :
       sélectionnons <filename>simple.tex</filename>. Pour pouvoir le modifier
-      à loisir, il faut maintenant le copier dans le réertoire du projet,
+      à loisir, il faut maintenant le copier dans le répertoire du projet,
       grâce au bouton <guibutton>importer</guibutton>. On peut maintenant
       l'éditer pour modifier la forme du questionnaire ou les questions, grâce
       au bouton <guibutton>éditer</guibutton> qui lance l'éditeur par
@@ -1426,7 +1434,7 @@ et écrivez votre nom et prénom ci-dessous.
       <para>Pour vérifier que les mises en page ont été correctement
       détectées, on peut utiliser le bouton <guibutton>Vérifier les mises en
       page</guibutton>. Un petit coup d'œil permettra de vérifier que les
-      cases à cocher en rouge sont bien positionées sur les cases du
+      cases à cocher en rouge sont bien positionnées sur les cases du
       sujet.</para>
     </sect2>
 
@@ -1529,7 +1537,7 @@ et écrivez votre nom et prénom ci-dessous.
         section <guilabel>Saisie des copies après examen</guilabel>, puis on
         valide par le bouton <guibutton>Utiliser</guibutton> de ce même
         dialogue. Nous pouvons alors aller boire un café car l'analyse des
-        copies peut être très longue (on peut laisser faire tranquilement car
+        copies peut être très longue (on peut laisser faire tranquillement car
         elle ne demande aucune intervention).</para>
 
         <para>Le résultat de l'analyse de chaque page est indiqué dans les
@@ -1575,7 +1583,7 @@ et écrivez votre nom et prénom ci-dessous.
         sur les pages désirées.</para>
 
         <note>
-          <para>Toute saisie manuelle effctuée sur une page prendra la place
+          <para>Toute saisie manuelle effectuée sur une page prendra la place
           des résultats éventuels d'une saisie automatique pour cette même
           page.</para>
         </note>
@@ -2017,7 +2025,7 @@ Durée : 10 minutes.
         qui fixe à 4 la note maximale et tel que l'espérance de la note d'un
         étudiant cochant au hasard chaque case soit de 1, on peut utiliser le
         barème <code>d=4,b=0,m=-(4-1)*2/N</code> (qui donne une note de -2 si
-        toutes les reonses sont fausses, c'est-à-dire si on a coché les cases
+        toutes les réponses sont fausses, c'est-à-dire si on a coché les cases
         qu'il ne fallait pas cocher et si on n'a pas coché les cases qu'il
         fallait cocher). Les opérations acceptées dans ces formules sont les
         quatre opérations simples (<code>+</code> <code>-</code>
@@ -2110,7 +2118,7 @@ Bienvenüe:Alexis:001:paamc@passoire.fr
 Boulix:Jojo:002:jojo.boulix@rien.xx
 Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
-        <para>Les lignes du fichier qui commencent par le caratère
+        <para>Les lignes du fichier qui commencent par le caractère
         `<code>#'</code> sont des commentaires. La première des autres lignes
         contient, séparés par le caractère <code>`:'</code>, les titres des
         colonnes. Ensuite, en une ligne par étudiant, on place les
@@ -2123,7 +2131,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           utiliser le même séparateur partout dans le fichier contenant la
           liste des étudiants. Le séparateur utilisé sera détecté en prenant
           le caractère (parmi les quatre possibles) qui apparaît le plus de
-          fois dans la première ligne qui nest pas un commentaire.</para>
+          fois dans la première ligne qui n'est pas un commentaire.</para>
         </note>
 
         <para>La liste des étudiants préparée (que se soit une liste simple ou
@@ -2146,7 +2154,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           automatique</guibutton> de la partie <guilabel>Identification des
           étudiants</guilabel>, la recherche parmi la liste des codes
           renseignés par les étudiants s'opère. On peut ensuite observer ou
-          paufiner le résultat grâce à une association manuelle.</para>
+          peaufiner le résultat grâce à une association manuelle.</para>
 
           <warning>
             <para>Pour effectuer une association automatique, il est

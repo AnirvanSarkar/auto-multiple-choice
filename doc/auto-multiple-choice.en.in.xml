@@ -45,7 +45,7 @@
 
       <firstname>Jean</firstname>
 
-      <contrib>Translation from french</contrib>
+      <contrib>Translation from French</contrib>
     </othercredit>
 
     <othercredit class="translator">
@@ -53,7 +53,7 @@
 
       <firstname>Georges</firstname>
 
-      <contrib>Translation from french</contrib>
+      <contrib>Translation from French</contrib>
     </othercredit>
 
     <legalnotice>
@@ -91,6 +91,12 @@
 
     <sect2>
       <title>Software</title>
+
+      <note>
+        <para>If you install AMC with deb or RPM package (on debian, Ubuntu
+        and derivatives, Mandriva, openSUSE, Fedora), every software used by
+        AMC will be automatically installed.</para>
+      </note>
 
       <para>The main packages/software that are required for the use of AMC
       are the following:</para>
@@ -200,8 +206,8 @@
 
         <listitem>
           <para>From version 0.394, if your LaTeX code needs package
-          <package>graphicx</package>, you have to load it explicitely
-          (earlier versions of AMC loaded it).</para>
+          <package>graphicx</package>, you have to load it explicitly (earlier
+          versions of AMC loaded it).</para>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -210,8 +216,9 @@
       <title>Installation</title>
 
       <para>With debian, Ubuntu, or a derived operating system, you can use
-      the debian official repository and ubuntu AMC repositories. The
-      installation procedure is described on the <ulink
+      the debian official repository and ubuntu AMC repositories. On Mandriva,
+      openSUSE or Fedora, you can use prebuilt RPM packages. The installation
+      procedure is described on the <ulink
       url="http://home.gna.org/auto-qcm/download">AMC web-site</ulink>.</para>
 
       <para>You can also download the source code archive on the project
@@ -403,7 +410,7 @@ Duration : 10 minutes.
       <para>In this example, we want the order in which questions appear in
       the MCQ test to be different from one realization of the test to the
       other, but still keeping together questions dealing with the same
-      subject. To this end, we create two groups of questions, whithin which
+      subject. To this end, we create two groups of questions, within which
       questions are shuffled at random.</para>
 
       <para><!--NAME: Groups
@@ -806,8 +813,8 @@ Durée : 10 minutes.
         after the reference to the package
         <package>automultiplechoice</package> for instance) the following
         <programlisting>\usepackage{multicol}</programlisting>and by including
-        the choices enironment inside a multicols environment in the following
-        manner:<programlisting>  \begin{multicols}{2}
+        the choices environment inside a multicols environment in the
+        following manner:<programlisting>  \begin{multicols}{2}
     \begin{choices}
       \correctchoice{The correct answer}
       \wrongchoice{A wrong answer}
@@ -1111,7 +1118,7 @@ and write your first and last names below.
         <programlisting>\setcounter{figure}{0}</programlisting>
 
         <para>so that the numbering of figures starts at 1 for every
-        realization. Without that last command, the numbering of figures woud
+        realization. Without that last command, the numbering of figures would
         go on from one realization to the next one, which is clearly not
         desirable.</para>
       </sect3>
@@ -1125,28 +1132,28 @@ and write your first and last names below.
         <itemizedlist>
           <listitem>
             <para><code>\AMCtext{none}{<replaceable>sentence</replaceable>}</code>
-            replaces « None of these answers are correct. » (the english
+            replaces « None of these answers are correct. » (the English
             default text) with the given <replaceable>sentence</replaceable>
             when using option <option>completemulti</option>.</para>
           </listitem>
 
           <listitem>
             <para><code>\AMCtext{corrected}{<replaceable>title</replaceable>}</code>
-            replaces « Corrected » (the english default text) with the given
+            replaces « Corrected » (the English default text) with the given
             <replaceable>title</replaceable> on the corrected answer
             sheet.</para>
           </listitem>
 
           <listitem>
             <para><code>\AMCtext{catalog}{<replaceable>title</replaceable>}</code>
-            replaces « Catalog » (the english default text) with the given
+            replaces « Catalog » (the English default text) with the given
             <replaceable>title</replaceable> on the questions catalog produced
             thanks to option <option>catalog</option>.</para>
           </listitem>
 
           <listitem>
             <para>You can also consider using commands like the following ones
-            (here the second argument is set to the default english
+            (here the second argument is set to the default English
             value):</para>
 
             <programlisting>\AMCtext{draft}{DRAFT}
@@ -1165,7 +1172,7 @@ and write your first and last names below.
       url="http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp">http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp</ulink>,
       and which can be downloaded with the command <programlisting>\usepackage{fp}</programlisting>added
       before that corresponding to <package>automultiplechoice</package>, one
-      can create exercices with randomized numerical data. Let us start with a
+      can create exercises with randomized numerical data. Let us start with a
       simple example.</para>
 
       <para><programlisting>\begin{question}{addition}
@@ -1244,11 +1251,11 @@ respective parameters \VQa{} et \VQb{}.
               </listitem>
 
               <listitem>
-                <para>The leftpoint of the first interval,</para>
+                <para>The left point of the first interval,</para>
               </listitem>
 
               <listitem>
-                <para>The righpoint of the last interval,</para>
+                <para>The right point of the last interval,</para>
               </listitem>
 
               <listitem>
@@ -1300,7 +1307,7 @@ respective parameters \VQa{} et \VQb{}.
       will, we must copy it into the project's directory, with the button
       <guibutton>import</guibutton>. Now we can edit it to modify the shape of
       the document or the questions, thanks to the <guibutton>edit</guibutton>
-      button which lanches the default editor.</para>
+      button which launches the default editor.</para>
     </sect2>
 
     <sect2>
@@ -1364,11 +1371,11 @@ respective parameters \VQa{} et \VQb{}.
       </warning>
 
       <para>When the preparation is over, we can print the subject, and
-      distribute it to the sudents... In simple cases, we can directly print
+      distribute it to the students... In simple cases, we can directly print
       from the viewer (after clicking the line <guilabel>Subject</guilabel> in
       the list of work documents). When it is better to print the copies
       separately (for example if copies contain multiple pages and when the
-      printer allows to stapple them together), we shall rather use the button
+      printer allows to staple them together), we shall rather use the button
       <guibutton>Print copies</guibutton> after calculating the layout.</para>
 
       <important>
@@ -1391,11 +1398,11 @@ respective parameters \VQa{} et \VQb{}.
         <title>Automated input</title>
 
         <para>For automatic recognition of the checked boxes in the students'
-        pages, they must be previously digitallized. I use a copier/scanner
+        pages, they must be previously digitalized. I use a copier/scanner
         which does it automatically (all the pages in a bundle without
         interaction with me), with the following settings: 300 dpi, OCR mode
         (for the characters' recognition, black and white without greyscale -
-        but the scanner does not process any character regognition), each scan
+        but the scanner does not process any character recognition), each scan
         delivered as a single TIFF file per page.</para>
 
         <note>
@@ -1484,7 +1491,7 @@ respective parameters \VQa{} et \VQb{}.
         </itemizedlist>
 
         <para>When we click the button <guibutton>Correction</guibutton>, the
-        correction is made (this can take some time if we also aked for the
+        correction is made (this can take some time if we also asked for the
         reading of the scale).</para>
       </sect3>
 
@@ -1600,7 +1607,7 @@ respective parameters \VQa{} et \VQb{}.
                 <entry></entry>
 
                 <entry>The bottom score. If the calculation of the score in
-                that question yelds a value below the bottom value, the sore
+                that question yields a value below the bottom value, the sore
                 is set to the bottom value.</entry>
               </row>
 
@@ -1693,7 +1700,7 @@ respective parameters \VQa{} et \VQb{}.
 
                 <entry></entry>
 
-                <entry>Gives the maximal value gived for the question (for a
+                <entry>Gives the maximal value given for the question (for a
                 "question scored 5", one can write MAX=5). To be used only
                 when it is not the same value as when one replies every good
                 response.</entry>
@@ -1704,8 +1711,8 @@ respective parameters \VQa{} et \VQb{}.
 
         <para>The default scale for a simple question is
         <code>e=0,v=0,b=1,m=0</code>, which gives one point for a good
-        response and and no point in the other cases. The default scaling for
-        a multiple question is <code>e=0,v=0,b=1,m=0,p=-100,d=0</code>, which
+        response and no point in the other cases. The default scaling for a
+        multiple question is <code>e=0,v=0,b=1,m=0,p=-100,d=0</code>, which
         gives a point for every checked box, either good or not (good box
         checked or wrong box not checked).</para>
 
@@ -1866,7 +1873,7 @@ Name:
         <para>In some cases, defining a global strategy can be interesting
         <emphasis>depending of the number of proposed responses</emphasis>. To
         do so, just input the value <varname>N</varname>. For example, to get
-        a scale yelding 4 as the maximal score and such as the mean expected
+        a scale yielding 4 as the maximal score and such as the mean expected
         score of a student checking randomly the boxes is 1, one can use the
         scale <code>d=4,b=0,m=-(4-1)*2/N</code> (which give the score -2 if
         every response is false, i.e. the wrong boxes have been checked and
@@ -1887,7 +1894,7 @@ Name:
           <listitem>
             <para><varname>NB</varname> is the number of correct responses to
             the question (without taking in account checked or non-checked
-            boses).</para>
+            boxes).</para>
           </listitem>
 
           <listitem>
@@ -1898,7 +1905,7 @@ Name:
           <listitem>
             <para><varname>NM</varname> is the number of wrong responses to
             the question (without taking in account checked or non-checked
-            boses).</para>
+            boxes).</para>
           </listitem>
 
           <listitem>
@@ -1938,7 +1945,7 @@ Name:
 
         <listitem>
           <para>With no input of the students' numbers, or in the case when
-          the automatied identification has not succeeded perfectly (for
+          the automated identification has not succeeded perfectly (for
           example when a student made a wrong input), the graphical interface
           allows an assisted manual association.</para>
         </listitem>
@@ -1971,7 +1978,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <note>
           <para>One can replace the separator <code>`:'</code> by a comma, a
           semicolon or a tabulation. However the same separator must be used
-          eveywhere in the file which contains the list of students. The used
+          everywhere in the file which contains the list of students. The used
           separator is detected by taking the character (out of the four
           possible characters) which appears most frequently in the first line
           which is not a comment.</para>
@@ -1980,10 +1987,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <para>The prepared list of students (either a simple list or with more
         informations) will then be selected with the button <guilabel>List of
         the students</guilabel>. We must also choose one of the columns as a
-        unique key wich will identify the students (generally, one chooses the
-        column containing the student's number). Last, to prepare an automated
-        association, we must choose the name of the relevant code used in the
-        LaTeX command <command>AMCcode</command> (if used).</para>
+        unique key which will identify the students (generally, one chooses
+        the column containing the student's number). Last, to prepare an
+        automated association, we must choose the name of the relevant code
+        used in the LaTeX command <command>AMCcode</command> (if used).</para>
       </sect3>
 
       <sect3>
@@ -2004,7 +2011,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             linkend="latex.codes" />) in the LaTeX source file, as well as a
             list of students with a column containing a reference (generally a
             number of student) which will be identical to the input given in
-            the boxes produced by the commnd
+            the boxes produced by the command
             <command>AMCcode</command>.</para>
           </warning>
         </sect4>
@@ -2119,7 +2126,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <arg choice="plain"><replaceable>action</replaceable></arg>
 
-          <arg rep="repeat">agruments</arg>
+          <arg rep="repeat">arguments</arg>
         </cmdsynopsis>
 
         <cmdsynopsis>
