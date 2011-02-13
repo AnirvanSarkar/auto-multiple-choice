@@ -195,7 +195,7 @@ SRC_EXCL=--exclude debian '--exclude=*~'
 
 version_files:
 	perl local/versions.pl
-	make auto-multiple-choice.spec
+	$(MAKE) auto-multiple-choice.spec
 
 tmp_copy:
 	rm -rf $(TMP_SOURCE_DIR)

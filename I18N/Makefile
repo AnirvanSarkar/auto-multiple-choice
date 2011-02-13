@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2010-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -43,12 +43,20 @@ clean: FORCE
 %.mo: %.po
 	msgfmt $< -o $@
 
+###############################################################
+# The following targets are only for packaging :
+# not used for building or installing
+
+po-clean.pl: po-clean.pl.in ../Makefile.versions
+	$(MAKE) -C .. I18N/po-clean.pl
+
 %.pot: %.bpot po-clean.pl
 	perl po-clean.pl $< $@
 
 $(DOMAIN).bpot: $(PERL) $(GLADE)
 	xgettext $(XGETTO) --add-comments=TRANSLATORS: $(PERL) -k__ -k__p -k -o $@
 	xgettext $(XGETTO) -j $(GLADE) -o $@
+
 list:
 	grep -lr __ $(AMC) |grep '\.\(pl\|pm\)$$' | grep -v 'debian' ; ls $(GLADE)
 
@@ -56,6 +64,8 @@ list:
 	msgmerge -U lang/$*.po $(DOMAIN).pot
 
 merge: $(addsuffix .merge,$(LANGS)) ;
+
+###############################################################
 
 FORCE: ;
 
