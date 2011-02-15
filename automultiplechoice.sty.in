@@ -80,16 +80,16 @@
 \providecommand\AMC@SRconst{2097152}
 \providecommand\AMC@SRset[1]{\global\AMC@SR#1 \ignorespaces}
 \providecommand\AMC@SRadvance{%
-  \begingroup
-  \ifnum\AMC@SR<\AMC@SRconst\relax\AMC@SR@count\z@\else\AMC@SR@count\@ne\fi
-  \ifodd\AMC@SR\advance\AMC@SR@count\@ne\fi
-  \global\divide\AMC@SR\tw@
-  \ifodd\AMC@SR@count\global\advance\AMC@SR\AMC@SRconst\relax\fi
+  \begingroup%
+    \ifnum\AMC@SR<\AMC@SRconst\relax\AMC@SR@count\z@\else\AMC@SR@count\@ne\fi%
+    \ifodd\AMC@SR\advance\AMC@SR@count\@ne\fi%
+    \global\divide\AMC@SR\tw@%
+    \ifodd\AMC@SR@count\global\advance\AMC@SR\AMC@SRconst\relax\fi%
   \endgroup}
 \providecommand\AMC@SRbit{\AMC@SRadvance\ifodd\AMC@SR1\else0\fi}
-\providecommand\AMC@SRtest[2]{\AMC@SRadvance
+\providecommand\AMC@SRtest[2]{\AMC@SRadvance%
   \ifodd\AMC@SR#2\else#1\fi\ignorespaces}
-\providecommand\AMC@SRvalue{\number\AMC@SR }
+\providecommand\AMC@SRvalue{\number\AMC@SR}
 \AMC@SRset{1515}
 %
 \def\AMCrandomseed#1{\AMC@SRset{#1}}
@@ -99,35 +99,40 @@
 \newcount\AMC@SR@count
 \def\AMC@SR@time{\AMC@SRset{\time}}
 \newcount\AMC@SRnum
-\def\AMC@SRnextByte{\AMC@SRnum=0
-\AMC@SR@count=20
-\loop\multiply\AMC@SRnum by 2
-     \AMC@SRtest{\advance\AMC@SRnum by 1}{}
-\ifnum\AMC@SR@count>1\advance\AMC@SR@count by -1\repeat
+\def\AMC@SRnextByte{\AMC@SRnum=\z@%
+  \AMC@SR@count=20%
+  \loop\multiply\AMC@SRnum\tw@%
+     \AMC@SRtest{\advance\AMC@SRnum\@ne}{}%
+  \ifnum\AMC@SR@count>\@ne\advance\AMC@SR@count\m@ne\repeat%
 }
 % random sampling in {0,1,...,#1-1} -> \AMC@SRnum
 % #1 must be less than 2^20
-\newcommand\AMC@SRmax[1]{\AMC@SRnextByte
-\AMC@SR@count=\AMC@SRnum
-\divide\AMC@SR@count by #1
-\multiply\AMC@SR@count by #1
-\advance\AMC@SRnum by -\AMC@SR@count
+\newcommand\AMC@SRmax[1]{\AMC@SRnextByte%
+  \AMC@SR@count=\AMC@SRnum%
+  \divide\AMC@SR@count by #1\relax%
+  \multiply\AMC@SR@count by #1\relax%
+  \advance\AMC@SRnum by -\AMC@SR@count%
 }
 %--------------------------------------------------------------
 % tokens shuffling
 %--------------------------------------------------------------
 \newcount\AMC@sti
 \newtoks\AMCsw@p@
-\newcommand\AMCsw@p[2]{\global\AMCsw@p@=#1 \global #1=#2 \global #2=\AMCsw@p@}
-\newcommand\AMC@shuffletoks[2]{ % ARGS : number_of_tokens base_name
-  \AMC@sti=#1
-  \@whilenum\AMC@sti>1\do{
-  \AMC@SRmax{\AMC@sti}\advance\AMC@SRnum by 1
-% debug: show swaps
-%  \number\AMC@SRnum$\leftrightarrow$\number\AMC@sti\par
-  \AMCsw@p{\csname #2\romannumeral\AMC@SRnum\endcsname}{\csname #2\romannumeral\AMC@sti\endcsname}
-  \advance\AMC@sti by -1
-}}
+\newcommand\AMCsw@p[2]{%
+  \global\AMCsw@p@=#1%
+  \global#1=#2%
+  \global#2=\AMCsw@p@}
+\newcommand\AMC@shuffletoks[2]{% ARGS : number_of_tokens base_name
+  % [debug]
+  % \message{Shuffle #1 #2^^J}
+  \AMC@sti=#1\relax%
+  \@whilenum\AMC@sti>\@ne\do{%
+    \AMC@SRmax{\AMC@sti}\advance\AMC@SRnum\@ne\relax%
+    % [debug] show swaps
+    % \message{\number\AMC@SRnum <-->\number\AMC@sti^^J}
+    \AMCsw@p{\csname #2\romannumeral\AMC@SRnum\endcsname}{\csname #2\romannumeral\AMC@sti\endcsname}%
+    \advance\AMC@sti\m@ne\relax%
+  }}
 %--------------------------------------------------------------
 % affecte un numero unique a chaque cle utilisee...
 %--------------------------------------------------------------
@@ -137,7 +142,7 @@
 \newcount\AMC@numerotation\AMC@numerotation=1
 % renvoie, si elle existe, la valeur deja associee, ou en associe une
 % nouvelle et la renvoie
-\def\AMC@prepare#1{\expandafter\ifx\csname AMC@numtab@#1\endcsname\relax\global\advance\AMC@numerotation by 1\expandafter\AMC@definitnumero\expandafter{\the\AMC@numerotation}{#1}\fi}
+\def\AMC@prepare#1{\expandafter\ifx\csname AMC@numtab@#1\endcsname\relax\global\advance\AMC@numerotation\@ne\expandafter\AMC@definitnumero\expandafter{\the\AMC@numerotation}{#1}\fi}
 \def\AMC@unnumero#1{\AMC@prepare{#1}\csname AMC@numtab@#1\endcsname}
 \def\AMC@affecte#1#2{\AMC@prepare{#1}#2=\csname AMC@numtab@#1\endcsname}
 %
@@ -159,7 +164,7 @@
 \newif\ifAMC@correc\AMC@correcfalse % corrige des questions
 \newif\ifAMC@qbloc\AMC@qblocfalse % on met les questions dans des blocs, pour ne pas les couper par des sauts de page
 \newif\ifAMC@rbloc\AMC@rblocfalse % on met les reponses dans des blocs, pour ne pas les couper par des sauts de page (par ex dans multicol)
-\newdimen\AMCinterIrep\AMCinterIrep=0pt % espace supplementaire entre les reponses classiques
+\newdimen\AMCinterIrep\AMCinterIrep=\z@ % espace supplementaire entre les reponses classiques
 \newdimen\AMCinterBrep\AMCinterBrep=.5ex % espace entre les reponses bloc
 \def\AMCBoxedAnswers{\AMC@rbloctrue}
 \newif\ifAMCcomplete@multi\AMCcomplete@multifalse % on complete les questions multi par une option "rien n'est bon"
@@ -214,7 +219,7 @@
 % #2 = trace position ?
 % #3 = box ID key
 % #4 = fill the box ?
-\newcommand\AMC@boxedchar[4]{\hspace{0pt}{\fboxsep=0pt\fboxrule=\AMC@boxedrule\lower\AMC@boxeddown\hbox{\fcolorbox{black}{\ifx\@empty#4\@empty white\else black\fi}{\vbox to \AMC@boxeddim{\tracepos{#2}{#3}\vfill \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}\tracepos{#2}{#3}}}}}
+\newcommand\AMC@boxedchar[4]{\hspace{0pt}{\fboxsep=\z@\fboxrule=\AMC@boxedrule\lower\AMC@boxeddown\hbox{\fcolorbox{black}{\ifx\@empty#4\@empty white\else black\fi}{\vbox to \AMC@boxeddim{\tracepos{#2}{#3}\vfill \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}\tracepos{#2}{#3}}}}}
 %
 % AMC@caselettre: the same as AMC@boxedchar, but if #1 (content) is empty,
 % use a (arabic or alphanumeric) counter
@@ -265,26 +270,26 @@
 \newcount\AMCbin@id
 \newcount\AMCbin@digit
 %
-\def\AMCbin@one{\advance\AMCbin@digit by 1\AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{1}}
-\def\AMCbin@zero{\advance\AMCbin@digit by 1\AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{}}
+\def\AMCbin@one{\advance\AMCbin@digit\@ne\AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{1}}
+\def\AMCbin@zero{\advance\AMCbin@digit\@ne\AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{}}
 %
-\def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=0}
+\def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=\z@}
 \newcommand\AMCbinaryDigits[2]{
 \def\AMCbin@zero{#1}
 \def\AMCbin@one{#2}
 }
 \newcommand{\binaire}[2][1]{%
-{\AMCboxDimensions{size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2%
-\AMCbin@ndigits=0%
+{\AMCboxDimensions{size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2\relax%
+\AMCbin@ndigits=\z@%
 \loop%
-\ifnum\AMCbin@number>0%
-\advance\AMCbin@ndigits by 1%
+\ifnum\AMCbin@number>\z@%
+\advance\AMCbin@ndigits\@ne%
 \ifodd\AMCbin@number\AMCbin@sequence=\expandafter{\expandafter\AMCbin@one\the\AMCbin@sequence}%
 \else\AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\fi%
-\divide\AMCbin@number by 2%
+\divide\AMCbin@number\tw@%
 \repeat%
 \loop\relax%
-\ifnum\AMCbin@ndigits<#1\advance\AMCbin@ndigits by 1%
+\ifnum\AMCbin@ndigits<#1\advance\AMCbin@ndigits\@ne%
 \AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\repeat%
 \the\AMCbin@sequence%
 }}
@@ -299,31 +304,30 @@
 % (le deuxieme argument ne sert plus a rien)
 % definition du compteur
 \expandafter\newcount\csname #1@k\endcsname
-\csname #1@k\endcsname=0
+\csname #1@k\endcsname=\z@
 }
 \newcommand{\element}[2]{% nom_groupe tok
   % definition du compteur si pas deja fait
-  \expandafter\ifx\csname #1@k\endcsname\relax\nouveaugroupe{#1}{}\fi
+  \expandafter\ifx\csname #1@k\endcsname\relax\nouveaugroupe{#1}{}\fi%
   % augmentation du compteur
-  \advance\csname #1@k\endcsname by 1
-  \AMCtok@k=\csname #1@k\endcsname
-  \expandafter\ifx\csname #1@\romannumeral\AMCtok@k\endcsname\relax\expandafter\newtoks\csname #1@\romannumeral\AMCtok@k\endcsname\fi
-  \csname #1@\romannumeral\AMCtok@k\endcsname={#2}
+  \advance\csname #1@k\endcsname\@ne\relax%
+  \AMCtok@k=\csname #1@k\endcsname%
+  \expandafter\ifx\csname #1@\romannumeral\AMCtok@k\endcsname\relax\expandafter\newtoks\csname #1@\romannumeral\AMCtok@k\endcsname\fi%
+  \csname #1@\romannumeral\AMCtok@k\endcsname={#2}%
 }
 \newcommand{\shufflegroup}[1]{%
-  {\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}
+  {\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}%
 }
 \newcommand{\insertgroup}[2][0]{%
-\AMCtok@max=#1
-\ifnum\the\AMCtok@max<1
-  \AMCtok@max=\csname #2@k\endcsname
-\fi
-\AMCtok@k=0
-%
-{\loop
-    \advance\AMCtok@k by 1
-    \the\csname #2@\romannumeral\AMCtok@k\endcsname
-\ifnum\AMCtok@k<\AMCtok@max\repeat}%
+  \AMCtok@max=#1\relax%
+  \ifnum\the\AMCtok@max<1%
+    \AMCtok@max=\csname #2@k\endcsname%
+  \fi%
+  \AMCtok@k=\z@%
+  {\loop%
+    \advance\AMCtok@k\@ne\relax%
+    \the\csname #2@\romannumeral\AMCtok@k\endcsname%
+  \ifnum\AMCtok@k<\AMCtok@max\repeat}%
 }
 %
 %--------------------------------------------------------------
@@ -335,26 +339,26 @@
 % nbre maximal de reponses :
 \AMCload@counter=199
 % definition des registres de tokens
-\@whilenum\AMCload@counter>0\do{
-  \expandafter\newtoks\csname reponse@\romannumeral\AMCload@counter\endcsname
-  \advance\AMCload@counter by -1
+\@whilenum\AMCload@counter>0\do{%
+  \expandafter\newtoks\csname reponse@\romannumeral\AMCload@counter\endcsname%
+  \advance\AMCload@counter\m@ne%
 }
 \newcommand\AMCload@reponse[2]{%
-  \advance\AMCload@counter by 1
-  \csname reponse@\romannumeral\AMCload@counter\endcsname=\expandafter{\expandafter\AMCrep@count\expandafter=#2 #1}
+  \advance\AMCload@counter\@ne\relax%
+  \csname reponse@\romannumeral\AMCload@counter\endcsname=\expandafter{\expandafter\AMCrep@count\expandafter=#2 #1}%
 }
 \newcommand\AMCrien@deux[2]{#1}
-\newcommand\AMCdump@reponses{\global\AMCnum@questions=\AMCload@counter\@whilenum\AMCload@counter>0\do{\the\csname reponse@\romannumeral\AMCload@counter\endcsname\advance\AMCload@counter by -1}}
+\newcommand\AMCdump@reponses{\global\AMCnum@questions=\AMCload@counter\@whilenum\AMCload@counter>0\do{\the\csname reponse@\romannumeral\AMCload@counter\endcsname\advance\AMCload@counter\m@ne}}
 \def\shuffle@it{\AMC@shuffletoks{\number\AMCload@counter}{reponse@}}
 %
-\newcommand\AMCrep@init[1]{\ifAMC@ordre\AMCrep@o\else\csname AMCrep@#1\endcsname\fi\AMCload@counter=0}
+\newcommand\AMCrep@init[1]{\ifAMC@ordre\AMCrep@o\else\csname AMCrep@#1\endcsname\fi\AMCload@counter=\z@}
 \newcommand\lastchoices{\AMCrep@@count=\AMCrep@count\AMCrep@fini\AMCrep@init{o}\AMCrep@count=\AMCrep@@count}
 \newcommand\AMC@fin@rep{\ifAMCcomplete@multi\ifAMCtype@multi\lastchoices\AMCrep@count=-1\ifAMCune@bonne\wrongchoice{\@aucune}\else\correctchoice{\@aucune}\fi\fi\fi\AMCrep@fini}
 %
-\newenvironment{choices}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@itemize}\ifAMC@rbloc\def\une@rep{\AMCrep@bloc}\else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi\AMCrep@init{#1}}{\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
+\newenvironment{choices}[1][r]{\AMCrep@count=\z@\def\une@rep{\AMCrep@itemize}\ifAMC@rbloc\def\une@rep{\AMCrep@bloc}\else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi\AMCrep@init{#1}}{\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
 %
-\newenvironment{choiceshoriz}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}\par\begin{center}}{\AMC@fin@rep\end{center}}
-\newenvironment{choicescustom}[1][r]{\AMCrep@count=0\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}\AMCbeginAnswer}{\AMC@fin@rep\AMCendAnswer}
+\newenvironment{choiceshoriz}[1][r]{\AMCrep@count=\z@\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}\par\begin{center}}{\AMC@fin@rep\end{center}}
+\newenvironment{choicescustom}[1][r]{\AMCrep@count=\z@\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}\AMCbeginAnswer\ignorespaces}{\AMC@fin@rep\AMCendAnswer}
 %
 \newcommand\AMCrep@o{\def\AMCload@@reponse{\AMCrien@deux}\def\AMCrep@fini{}}
 \newcommand\AMCrep@r{\def\AMCload@@reponse{\AMCload@reponse}\def\AMCrep@fini{\shuffle@it\AMCdump@reponses}}
@@ -383,12 +387,12 @@
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}
 %
-\newcommand{\correctchoice}[2][]{\advance\AMCrep@count by 1%
-\ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
-\AMCune@bonnetrue\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marque{#1}{1}\else\AMC@marque{#1}{}\fi}{#2}}{\the\AMCrep@count}}
-\newcommand{\wrongchoice}[2][]{\advance\AMCrep@count by 1%
-\ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
-\AMCload@@reponse{\une@rep{\AMC@marque{#1}{}}{#2}}{\the\AMCrep@count}}
+\newcommand{\correctchoice}[2][]{\advance\AMCrep@count\@ne\relax%
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
+  \AMCune@bonnetrue\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marque{#1}{1}\else\AMC@marque{#1}{}\fi}{#2}}{\the\AMCrep@count}\ignorespaces}
+\newcommand{\wrongchoice}[2][]{\advance\AMCrep@count\@ne\relax%
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
+  \AMCload@@reponse{\une@rep{\AMC@marque{#1}{}}{#2}}{\the\AMCrep@count}\ignorespaces}
 %
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
@@ -436,7 +440,7 @@
      \wrongchoice[9]{9}
    \end{choicescustom}
  \end{question}
- \advance\AMC@chiffres by -1 \ifnum\AMC@chiffres>0\repeat
+ \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat
 }}
 %
 \def\scoring#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[B=#1]^^J}\fi}
@@ -454,7 +458,7 @@
 %
 \def\choixIntervalles#1#2#3#4{%
 \FPeval\AMC@CI@a{clip(#2)}%
-\let\AMC@CI@cas=\wrongchoice
+\let\AMC@CI@cas=\wrongchoice%
 \loop%
   \FPeval\AMC@CI@b{clip(AMC@CI@a + #4)}%
   \FPiflt{#1}\AMC@CI@b\let\AMC@CI@cas=\correctchoice\fi%
@@ -501,7 +505,7 @@
 \def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}
 \def\AMC@intituleHead{\AMC@loc@corrected}
 %
-\AtBeginPage{\global\advance\AMCid@check by -1%
+\AtBeginPage{\global\advance\AMCid@check\m@ne%
 \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
 \pagepos%
 \ifAMC@watermark\ifAMC@correchead\else\AMCw@terprint{\AMCw@termark}\fi\fi}
@@ -539,7 +543,7 @@
 \AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
 \AMCid@etud=\AMC@premierecopie\AMCid@etudfin=\AMCnum@copies\advance\AMCid@etudfin by \AMC@premierecopie%
 \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
-\loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\clearpage\advance\AMCid@etud by 1 \ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+\loop \AMC@zoneformulairefalse\setcounter{page}{1}\AMCnumero{1}\ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi #2\clearpage\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
 }
 %
 \def\AMCcleardoublepage{\ifodd\thepage\clearpage~\fi\clearpage}
@@ -628,7 +632,7 @@
 \else
 \geometry{hmargin=3cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=3.5cm,bottom=2.5cm}
 \fi
-\AMCid@check=\AMCid@checkmax\advance\AMCid@check by 1
+\AMCid@check=\AMCid@checkmax\advance\AMCid@check\@ne
 %
 \ifAMC@watermark
 \ifAMC@correchead\else
