@@ -312,7 +312,7 @@ sub abs2proj {
 	  my $rep=$surnoms->{$s};
 	  $rep.="/" if($rep !~ /\/$/);
 	  $rep =~ s/\/{2,}/\//g;
-	  if($fich =~ s/^$rep\/*//) {
+	  if($fich =~ s/^\Q$rep\E\/*//) {
 	      $fich="$s/$fich";
 	      last CLES;
 	  }
