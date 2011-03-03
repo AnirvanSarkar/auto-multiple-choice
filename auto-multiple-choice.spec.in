@@ -2,6 +2,7 @@
 
 %define AMC_modsdir %{_libdir}/AMC
 %define AMC_modelsdir /usr/share/auto-multiple-choice/models
+%define AMC_texdocdir /usr/share/texmf/doc/latex/AMC
 %define AMC_texdir /usr/share/texmf/tex/latex/AMC
 %define AMC_bindir %{_bindir}
 %define AMC_pixdir /usr/share/pixmaps
@@ -27,7 +28,7 @@
 %define AMC_cat Education;
 %endif
 
-%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDOCDIR="" TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}" GCC_OPENCV="%{AMC_OPENCV}"
+%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDOCDIR=%{AMC_texdocdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}" GCC_OPENCV="%{AMC_OPENCV}"
 
 Name: auto-multiple-choice
 Summary: Auto Multiple Choice - Multiple Choice Papers Management
@@ -65,13 +66,16 @@ Requires: /usr/bin/pdftoppm, GraphicsMagick, ImageMagick
 %if 0%{?suse_version}
 Requires: poppler >= 0.12.3, poppler-tools >= 0.12.3
 Requires: texlive, texlive-bin-latex, texlive-latex
+BuildRequires: texlive, texlive-bin-latex, texlive-latex
 Requires: perl(Archive::Tar), perl(Data::Dumper), perl(Encode), perl(Exporter), perl(Fcntl), perl(File::Copy), perl(File::Path), perl(File::Spec), perl(File::Spec::Functions), perl(File::Temp), perl(Getopt::Long), perl(Graphics::Magick), perl(Gtk2), perl(Gtk2::GladeXML), perl(I18N::Langinfo), perl(IO::File), perl(IO::Select), perl(IPC::Open2), perl(Locale::gettext), perl(Module::Load), perl(Module::Load::Conditional), perl(POSIX), perl(Storable), perl(Unicode::Normalize), perl(Time::Local), perl(XML::Simple), perl(XML::Writer), perl(constant), perl(encoding), perl(Digest::MD5), perl(Archive::Zip)
 %endif
 %if 0%{?fedora}
 Requires: texlive-latex, texlive-texmf-latex, perl(Net::CUPS), perl(Net::CUPS::PPD)
+BuildRequires: texlive-latex, texlive-texmf-latex
 %endif
 %if 0%{?mandriva_version}
 Requires: texlive, texlive-latex, perl(Net::CUPS), perl(Net::CUPS::PPD)
+BuildRequires: texlive, texlive-latex
 %endif
 
 %if 0%{?mandriva_version}
@@ -142,6 +146,7 @@ rm -rf $RPM_BUILD_ROOT
 %{AMC_modelsdir}
 %{AMC_iconsdir}
 %{AMC_texdir}
+%{AMC_texdocdir}
 %{AMC_bindir}/auto-multiple-choice
 %{AMC_pixdir}/auto-multiple-choice.xpm
 %{AMC_perldir}/AMC
