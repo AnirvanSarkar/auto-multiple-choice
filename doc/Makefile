@@ -30,7 +30,7 @@ all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) ;
 images: $(IMAGES:.svg=.png)
 
 clean:
-	rm -f *.{1,aux,cb,cb2,glo,idx,log,out,toc,tex,html,pdf,ext,man}
+	rm -f $(foreach ext,1 aux cb cb2 glo idx log out toc tex html pdf ext man,*.$(ext))
 	rm -f modeles/*.tgz
 	rm -f modeles/**/*.tgz
 	rm -f html/auto-multiple-choice.**/*.html
@@ -49,7 +49,7 @@ html/images/%.png: img_src/%.svg
 
 %.pdf: %.tex
 	pdflatex $< ; pdflatex $<
-	rm -f $*.{aux,cb,cb2,glo,idx,log,out,toc}
+	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,*.$(ext))
 
 %.x: %.ext %.man %.html ;
 

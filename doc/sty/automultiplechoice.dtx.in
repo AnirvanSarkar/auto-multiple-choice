@@ -1,0 +1,2326 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2008-2011 Alexis Bienvenue
+%
+% This file is part of Auto-Multiple-Choice
+%
+% Auto-Multiple-Choice is free software: you can redistribute it
+% and/or modify it under the terms of the GNU General Public License
+% as published by the Free Software Foundation, either version 2 of
+% the License, or (at your option) any later version.
+%
+% Auto-Multiple-Choice is distributed in the hope that it will be
+% useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+% of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+% General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Auto-Multiple-Choice.  If not, see
+% <http://www.gnu.org/licenses/>.
+%
+% $Revision: 431 $
+%
+% \fi
+% \iffalse
+%<package>\NeedsTeXFormat{LaTeX2e}
+%<package>\ProvidesPackage{automultiplechoice}
+%
+%<*batchfile>
+\begingroup
+\input docstrip.tex
+\keepsilent
+\preamble
+
+Copyright (C) 2008-2011 Alexis Bienvenue
+
+This file is part of Auto-Multiple-Choice
+
+Auto-Multiple-Choice is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version 2 of
+the License, or (at your option) any later version.
+
+Auto-Multiple-Choice is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Auto-Multiple-Choice.  If not, see
+<http://www.gnu.org/licenses/>.
+
+\endpreamble
+\askforoverwritefalse
+\generate{\file{automultiplechoice.sty}{\from{automultiplechoice.dtx}{package}}}
+\endgroup
+%</batchfile>
+%
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[nopage,calibration]{automultiplechoice}
+\usepackage{verbatim}
+\usepackage{fp}
+\usepackage{multicol}
+\usepackage[linenumberformat={{}}]{examplep}
+\usepackage{codep}
+\usepackage[hyperindex=false]{hyperref}
+\usepackage{pdfpages}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+\DocInput{automultiplechoice.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{0}
+%
+% \CharacterTable
+% {Upper-case      \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%  Lower-case      \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%  Digits          \0\1\2\3\4\5\6\7\8\9
+%  Exclamation     \!     Double quote  \"     Hash (number) \#
+%  Dollar          \$     Percent       \%     Ampersand     \&
+%  Acute accent    \'     Left paren    \(     Right paren   \)
+%  Asterisk        \*     Plus          \+     Comma         \,
+%  Minus           \-     Point         \.     Solidus       \/
+%  Colon           \:     Semicolon     \;     Less than     \<
+%  Equals          \=     Greater than  \>     Question mark \?
+%  Commercial at   \@     Left bracket  \[     Backslash     \\
+%  Right bracket   \]     Circumflex    \^     Underscore    \_
+%  Grave accent    \`     Left brace    \{     Vertical bar  \|
+%  Right brace     \}     Tilde         \~}
+%
+%
+% \changes{v0.376}{2011/01/11}{Old color using mechanism}
+% \changes{v0.426}{2011/02/08}{Using now savepos for layout detection}
+%
+% \DoNotIndex{\',\\,\`,\,,\@empty,\@expandtwoargs}
+% \DoNotIndex{\@ifpackageloaded,\z@,\@ne,\tw@,\m@ne,\@undefined}
+% \DoNotIndex{\@unexpandable@protect,\@whilenum,\addtocounter,\advance,\Alph}
+% \DoNotIndex{\arabic,\AtBeginDocument,\IfFileExists}
+% \DoNotIndex{\AtBeginPage,\begin,\end,\begingroup,\endgroup,\bf,\BODY}
+% \DoNotIndex{\box,\circle,\clubsuit,\csname,\DeclareFontShape}
+% \DoNotIndex{\DeclareOption,\def,\define@key,\divide,\do,\dp,\edef,\else}
+% \DoNotIndex{\emph,\endcsname,\eTeXversion,\expandafter,\fancyfoot}
+% \DoNotIndex{\fancyhead,\fancyhf,\fancyhfoffset,\fboxrule,\fboxsep}
+% \DoNotIndex{\fcolorbox,\fi,\fill,\fontencoding,\fontfamily,\fontseries}
+% \DoNotIndex{\fontshape,\fontsize,\FPeval,\FPiflt,\FPset,\geometry,\global}
+% \DoNotIndex{\hbox,\headrulewidth,\hfill,\hspace,\hss,\ifFileExists,\ifnum}
+% \DoNotIndex{\ifodd,\ifx,\ignorespaces,\immediate,\index,\item,\itemsep}
+% \DoNotIndex{\jobname,\label,\let,\linewidth,\loop,\lower,\makebox,\mbox}
+% \DoNotIndex{\message,\multiply,\newcommand,\newcount,\newcounter,\newdimen}
+% \DoNotIndex{\NewEnviron,\newenvironment,\newif,\newlength,\newtoks}
+% \DoNotIndex{\newwrite,\noexpand,\noindent,\number,\openout,\PackageWarning}
+% \DoNotIndex{\page,\pagestyle,\paperheight,\paperwidth,\par,\pdflastxpos}
+% \DoNotIndex{\pdflastypos,\pdfsavepos,\ProcessOptions,\protect}
+% \DoNotIndex{\protected@write,\providecommand,\put,\ref,\relax}
+% \DoNotIndex{\renewcommand,\repeat,\RequirePackage,\romannumeral,\rotatebox}
+% \DoNotIndex{\sc,\selectfont,\setbox,\setcounter,\setkeys,\setlength}
+% \DoNotIndex{\string,\strip@pt,\subsection,\textcolor,\the,\thepage}
+% \DoNotIndex{\thinlines,\time,\tt,\undefined,\unitlength,\usepackage,\vbox}
+% \DoNotIndex{\vfill,\vspace,\vss,\write}
+%
+% \DoNotIndex{\AMC@watermarktrue}
+% \DoNotIndex{\AMC@pagelayouttrue}
+% \DoNotIndex{\AMCformulaire@dedanstrue}
+% \DoNotIndex{\AMC@zoneformulairetrue}
+% \DoNotIndex{\AMCformulaire@dedanstrue}
+% \DoNotIndex{\AMC@rbloctrue}
+% \DoNotIndex{\AMCune@bonnetrue}
+% \DoNotIndex{\AMC@qbloctrue}
+% \DoNotIndex{\AMCtype@multitrue}
+% \DoNotIndex{\AMC@ordretrue}
+% \DoNotIndex{\AMC@correcheadtrue}
+% \DoNotIndex{\AMC@correctrue}
+% \DoNotIndex{\AMC@correctrue}
+% \DoNotIndex{\AMC@qbloctrue}
+% \DoNotIndex{\AMC@ensembletrue}
+% \DoNotIndex{\AMC@inside@boxtrue}
+% \DoNotIndex{\AMC@inside@boxfalse}
+% \DoNotIndex{\AMC@inside@digittrue}
+% \DoNotIndex{\AMC@ordretrue}
+% \DoNotIndex{\AMC@correcheadtrue}
+% \DoNotIndex{\AMC@correctrue}
+% \DoNotIndex{\AMC@correcheadtrue}
+% \DoNotIndex{\AMC@ordretrue}
+% \DoNotIndex{\AMC@correctrue}
+% \DoNotIndex{\AMC@qbloctrue}
+% \DoNotIndex{\AMCcomplete@multitrue}
+% \DoNotIndex{\AMC@ensembletrue}
+% \DoNotIndex{\AMC@inside@digittrue}
+% \DoNotIndex{\AMC@calibrationtrue}
+% \DoNotIndex{\AMC@correcheadtrue}
+% \DoNotIndex{\AMC@correctrue}
+% \DoNotIndex{\AMC@ordretrue}
+% \DoNotIndex{\AMC@affichekeystrue}
+% \DoNotIndex{\AMC@plaintrue}
+% \DoNotIndex{\AMC@calibrationtrue}
+% \DoNotIndex{\AMC@calibrationtrue}
+% \DoNotIndex{\AMC@correcheadtrue}
+% \DoNotIndex{\AMC@correctrue}
+% \DoNotIndex{\AMC@correctrue}
+% \DoNotIndex{\AMC@ordrefalse}
+% \DoNotIndex{\AMC@correcheadfalse}
+% \DoNotIndex{\AMC@affichekeysfalse}
+% \DoNotIndex{\AMC@correcfalse}
+% \DoNotIndex{\AMC@qblocfalse}
+% \DoNotIndex{\AMC@rblocfalse}
+% \DoNotIndex{\AMCcomplete@multifalse}
+% \DoNotIndex{\AMC@calibrationfalse}
+% \DoNotIndex{\AMC@plainfalse}
+% \DoNotIndex{\AMC@ensemblefalse}
+% \DoNotIndex{\AMC@inside@digitfalse}
+% \DoNotIndex{\AMCformulaire@dedansfalse}
+% \DoNotIndex{\AMC@qblocfalse}
+% \DoNotIndex{\AMCtype@multifalse}
+% \DoNotIndex{\AMCformulaire@dedansfalse}
+% \DoNotIndex{\AMCune@bonnefalse}
+% \DoNotIndex{\AMCtype@multifalse}
+% \DoNotIndex{\AMC@zoneformulairefalse}
+% \DoNotIndex{\AMC@correcfalse}
+% \DoNotIndex{\AMC@watermarkfalse}
+% \DoNotIndex{\AMC@watermarkfalse}
+% \DoNotIndex{\AMC@pagelayoutfalse}
+% \DoNotIndex{\AMC@correcfalse}
+% \DoNotIndex{\AMC@correcheadfalse}
+% \DoNotIndex{\AMC@watermarkfalse}
+% \DoNotIndex{\AMC@correcfalse}
+% \DoNotIndex{\AMC@correcheadfalse}
+% \DoNotIndex{\AMC@watermarkfalse}
+% \DoNotIndex{\AMC@calibrationfalse}
+% \DoNotIndex{\AMC@watermarkfalse}
+% \DoNotIndex{\AMC@watermarkfalse}
+% \DoNotIndex{\AMC@watermarkfalse}
+%
+% \makeatletter
+% \def\SpecialOptIndex#1{\@bsphack
+%    \index{#1\actualchar{\protect\ttfamily#1}
+%           (option)\encapchar usage}%
+%    \index{options:\levelchar#1\actualchar{\protect\ttfamily#1}\encapchar
+%           usage}\@esphack}
+% \makeatother
+% \def\amccode{\vspace{.8ex}\par}
+% \begingroup\catcode`\|=11\gdef\Vbar{|}\endgroup
+%
+% \title{The \textsf{automultiplechoice} package\thanks{This document
+% corresponds to version $Revision: 431 $ from AMC @/PACKAGE_V_DEB/@}}
+% \author{Alexis Bienven\"ue \\ \texttt{paamc@passoire.fr}}
+%
+% \maketitle
+%
+% \begin{abstract}
+%   This package helps designing multiple choice exams ready for automated
+%   marking from papers scans. 
+%
+%   Answers and questions are optionaly shuffled, creating different sheets
+%   for every student.
+% \end{abstract}
+%
+% \section{Introduction}
+%
+% The package {\sf automultiplechoice} helps formatting multiple
+% choice questionnaries with automated marking from papers scans in
+% mind:
+% \begin{itemize}
+% \item The package can produce different copies of the question sheet
+%   for each student, optionaly shuffling answers and questions for
+%   each student.
+% \item Markers can be printed on each sheet, so as to be able to
+%   analyse scans after examination. All the needed information about
+%   the position of the markers and the boxes to be checked by the
+%   students is given in an auxiliary file during \LaTeX{} run.
+% \end{itemize}
+%
+% See Auto Multiple Choice (AMC) software
+% (\url{http://home.gna.org/auto-qcm/}) for an integration of this
+% package, with user interface for automated marking.
+%
+%
+% \section{Samples}\label{d:samples}
+%
+% We begin with several samples to see what can be done with the {\sf
+% automultiplechoice} package. All {\sf automultiplechoice} commands
+% and options will be detailed further.
+%
+% For all these samples, two sets of questions are used: a group of
+% geography questions, and a group of history questions. These are
+% defined in a common \LaTeX{} file named |questions.tex|:
+% \verbatiminput{questions.tex}
+% 
+% We will ask {\sf automultiplechoice} package to include two
+% geography questions and two history questions at random for each
+% student, shuffling questions and answers, with the following code:
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\cleargroup{all}
+\shufflegroup{geography}
+\copygroup[2]{geography}{all}
+\shufflegroup{history}
+\copygroup[2]{history}{all}
+\shufflegroup{all}
+\insertgroup{all}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+% You can read these commands as ``clear group |all|, shuffle
+% questions inside group |geography| and copy the first two to group
+% |all|, do the same for group |history|, shuffle the four questions
+% copied into |all| and print them''.
+%
+%
+% \subsection{Standard layout}\label{s:amc}
+%
+% A set of 30 students sheets can be produced from the following
+% \LaTeX{} source named {\tt sample-amc.tex}:
+% \verbatiminput{sample-amc.tex} producing a 30-pages document (every
+% page has number 1), from which we show the first pages on
+% page~\pageref{p:amc}.
+%
+% Note that ``DRAFT'' indications can be cancelled using option {\tt
+% nowatermark}\SpecialOptIndex{nowatermark}, or using AMC software.
+% 
+% You can see on each page markers that can be used for automated
+% completed answer sheets scans analysis:
+% \begin{itemize}
+% \item Four circles \makeatletter\m@rqueCalage\makeatother{} are
+%   printed in the corners, to be able to analyse any rotation or
+%   scaling of the scans.
+% \item Binary boxes are printed in the header area, so as to be able
+%   to read student sheet number and page number. On page~2 for
+%   example, you can see that these binary boxes are coding |2/1/59|:
+%   \makeatletter
+%   \begin{center}
+%     \begin{minipage}[b]{\AMC@CBtaille}
+%       \AMCbin@begin{1}\noindent%
+%       \AMC@binaryBoxes[\AMC@NCBetud]{2}\\
+%       \AMCbin@begin{2}\noindent%
+%       \AMC@binaryBoxes[\AMC@NCBpage]{1}\ignorespaces%
+%       \AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{59}%
+%     \end{minipage}
+%     \hbox to 4cm{\hspace*{\fill}%
+%     {\tt +2/1/59+}}
+%   \end{center}
+%   \makeatother
+%   Here, |2| is the student sheet number, |1| is the page
+%   number for this student, and |59| is a checking value that can be
+%   used for checking correct identification from a scan.
+% \end{itemize}
+%
+% If you also use |calibration| option\SpecialOptIndex{calibration},
+% {\sf automultiplechoice} will produce a |.xy| file with informations
+% about the exact position in the page of all the markers, and all the
+% boxes. This option is automatically set by AMC software, which then
+% use the information in the |.xy| file for automated marking.
+%
+% \subsection{Separate answer sheet}\label{s:separate}
+%
+% In some situations, you may need a separate answer sheet:
+% \begin{itemize}
+% \item this makes cheating even more dificult;
+% \item this can reduce the number of pages to scan.
+% \end{itemize}
+%
+% This is done using |separateanswersheet|
+% option\SpecialOptIndex{separateanswersheet} of {\sf
+% automultiplechoice} package. You also have to use commands
+% |\AMCformBegin| to indicate the beginning of this separate answer
+% sheet (usually after a |\clearpage| or |\AMCcleardoublepage|
+% command), and |\AMCform| to insert the form to be completed by the
+% students, as in the following example (|sample-separate.tex|):
+% \verbatiminput{sample-separate.tex}
+%
+% First pages of the result are shown on
+% page~\pageref{p:separate}. There are now 2 pages per student: the
+% first with questions, and the second for answers. Only the second
+% will be completed by the students, and scanned for analysis.
+%
+% \subsection{Without markers}\label{s:plain}
+%
+% With the |nopage| option\SpecialOptIndex{nopage}, package {\sf
+% automultiplechoice} does not include any page markers for scan
+% processing. I'm afraid you can't use any automated marking software
+% with this layout, but you can still use answer sheet and corrected
+% answer sheet (option |indivanswers|\SpecialOptIndex{indivanswers},
+% added here) for a manual marking...
+%
+% The \LaTeX{} source {\tt sample-plain.tex} that only differs from
+% {\tt sample-amc.tex} by its options passed to {\sf
+% automultiplechoice}:
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\usepackage[nopage,indivanswers]{automultiplechoice}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+% produces a 30-pages document, from which we show the first pages on
+% page~\pageref{p:plain}.
+%
+% \newcommand{\isample}[1]{\IfFileExists{sample-#1.pdf}{\includepdf[pages={1-4},nup=2x2,frame=true,delta=.3cm .3cm,pagecommand={{\bf First pages from \LaTeX{} source detailed in section~\ref{s:#1} -- see {\tt sample-#1.pdf}}\label{p:#1}},scale=.6]{sample-#1.pdf}}}
+% \isample{amc}
+% \isample{separate}
+% \isample{plain}
+%
+%
+% \section{Usage}
+%
+% \subsection{Package options}\label{d:options}
+% The following options are available for package {\sf automultiplechoice}:
+% \def\ioption#1{\item[{\tt #1}]\SpecialOptIndex{#1}}
+% \begin{itemize}
+% \ioption{noshuffle} cancels answers shuffling for all questions.
+%
+% \ioption{answers} produces a common corrected answers sheet.
+%
+% \ioption{indivanswers} shows the boxes that corresponds to correct
+% choices on the question sheet.
+%
+% \ioption{box} includes every question in a \LaTeX{} box, so that
+% they can't be cutted on two different pages.
+%
+% \ioption{separateanswersheet} asks for a separate answer sheet (see
+% section~\ref{s:separate} for an example). Commands |\AMCformBegin|
+% and |\AMCform| must be used to describe the separate answer sheet
+% (see section~\ref{d:separate}).
+%
+% \ioption{digits} puts digits instead of letters in the boxes, when
+% |separateanswersheet| (or |insidebox|) is used.
+%
+% \ioption{init} initializes the random generator from
+% time. \emph{This option is only for testing: don't use it for a real
+% exam!}
+%
+% \ioption{completemulti} adds an answer
+% ``\makeatletter\AMC@loc@none\makeatother'' at the end of each
+% multiple question (question with no, one or several correct
+% answers), so as to make the difference between ``I don't know'' and
+% ``I think none of the answers are correct''.
+%
+% \ioption{insidebox} puts a letter (or a digit if |digits| option is
+% used) inside the boxes, even if |separateanswersheet| is not
+% used. The |insidebox| option is implicitely called when using
+% |separateanswersheet|: no need to call it then.
+%
+% \ioption{calibration} asks for logging positions of boxes and
+% markers in the |.xy| file. Without this option, a \LaTeX{} run
+% updates the document but not the |.xy| file.
+%
+% \ioption{nowatermark} calcels the ``DRAFT'' indications above pages.
+%
+% \ioption{catalog} is used for formatting a catalog of questions, not
+% an exam. Then the questions identifiers will be printed.
+%
+% \ioption{francais} asks for french localisation.
+%
+% \ioption{plain} cancels {\sf environ} and {\sf etex} automatic
+% loading. The default behaviour is to load {\sf environ} and {\sf
+% etex} packages if available, as they improve {\sf
+% automultiplechoice}. This is not done when |plain| option is set.
+%
+% \ioption{nopage} cancels markers print and page layout definition
+% (see sample in section~\ref{s:plain}).
+%
+% \end{itemize}
+%
+% See also section~\ref{d:french} for a french version of some of
+% these options.
+%
+% \subsection{Questions and answers}
+%
+% We make a difference between two kind of multiple choice questions:
+% \begin{itemize}
+% \item {\bf Simple questions}: there is one and only one correct
+%   choices among the proposed choices, \emph{and this is announced to
+%   the student}. Thus, the student is asked to check one answer if he
+%   thinks this is the good one, and to check none if he has no idea.
+% \item {\bf Multiple questions}: there can be zero, one or several
+%   correct choices among the proposed choices. This is also announced
+%   to the student (using the |\multiSymbole| sign, with
+%   default~\multiSymbole{}), so that the student is asked to check all
+%   the boxes corresponding to correct choices, and to let unchecked
+%   all boxes corresponding to wrong choices.
+% \end{itemize}
+%
+% \DescribeEnv{question}\DescribeEnv{questionmult} Simple questions
+% are enclosed in a |{question}|\marg{id} environment, and multiple
+% questions are enclosed in a |{questionmult}|\marg{id}
+% environment. These environments contain the question text, and the
+% proposed choices inside a |choices|-like environment (see next). The
+% \meta{id} argument is a question identifier. Each question must have
+% a unique identifier, different from the other questions identifiers.
+%
+% \DescribeEnv{choices}\DescribeEnv{choiceshoriz}\DescribeEnv{choicescustom}
+% Depending on the formatting style for answers, one can choose one of
+% the following ones:
+% \begin{itemize}
+% \item Environment |choices| is usualy chosen for long answers:
+% \amccode
+% \begin{code}
+%  \begin{questionmult}{latex}
+%    What are the possible uses of latex?
+%    \begin{choices}
+%      \correctchoice{Natural rubber is
+%        the most important product
+%        obtained from latex.}
+%      \correctchoice{Latex from the chicle
+%        and jelutong trees is used in
+%        chewing gum.}
+%      \wrongchoice{Latex is used as a fuel
+%        for some space launch vehicles.}
+%    \end{choices}
+%  \end{questionmult}
+% \end{code}
+% \item environment |choiceshoriz| is chosen for short answers:
+% \amccode
+% \begin{code}
+%  \begin{question}{insect}
+%    From those animals, which
+%    is an insect?
+%    \begin{choiceshoriz}
+%      \correctchoice{Ant}
+%      \wrongchoice{Horse}
+%      \wrongchoice{Turtle}
+%    \end{choiceshoriz}
+%  \end{question}
+% \end{code}
+%
+% \item environment |choicescustom| is provided to customize answers
+%   formatting. See~\ref{c:answers} for details.
+% \end{itemize}
+%
+% \DescribeMacro{\correctchoice}\DescribeMacro{\wrongchoice} As you
+% have seen in these examples, the |choices|-like environments contain
+% |\correctchoice|\marg{text} and |\wrongchoice|\marg{text} commands,
+% with the text of the proposed choice as argument.
+%
+% \subsection{Scoring}
+%
+% \DescribeMacro{\scoring}\DescribeMacro{\scoringDefaultM}
+% \DescribeMacro{\scoringDefaultS}\DescribeMacro{\QuestionIndicative}
+% Scoring strategies can be given in the \LaTeX{} source. They don't
+% have any impact on the question sheet: they are only transmitted to
+% the analysis software through the |.amc| file. See AMC documentation
+% to write proper commands for your needs.  |\scoring|\marg{score} can
+% be used inside a |question| or |questionmult| environment to
+% describe the scoring strategy for the question, or after a
+% |\correctchoice| or |\wrongchoice| command to describe score
+% associated to a particular choice. |\scoringDefaultM|\marg{score}
+% and |\scoringDefaultS|\marg{score} define default scoring strategies
+% for multiple and simple questions. |\QuestionIndicative| tags a
+% question that is not taken into account to compute the mark -- for
+% example, it can be used for a question about the way students have
+% enjoyed the course.
+%
+% \subsection{Groups of questions}\label{d:groups}
+%
+% Several commands are available that allows shuffling questions for
+% each question sheet. They handle groups of questions.  These groups
+% will usualy contain questions, but can be made of any \LaTeX{} content.
+% 
+% \DescribeMacro{\element}\DescribeMacro{\shufflegroup}\DescribeMacro{\insertgroup}
+% The command |\element|\marg{groupname}\marg{content} adds element
+% with content \meta{content} to the group named \meta{groupname}.
+% The command |\shufflegroup|\marg{groupname} shuffles elements of
+% group named \meta{groupname}. The command
+% |\insertgroup|\oarg{n}\marg{groupname} inserts elements of group
+% \meta{groupname} one after one. If optional parameter \meta{n} is
+% given, only the first \meta{n} elements of the group are inserted in
+% the document.
+%
+% As an example without questions in groups elements, consider the
+% following code:
+%
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\element{serie}{ one}
+\element{serie}{ two}
+\element{serie}{ three}
+\element{serie}{ four}
+\element{serie}{ five}
+Numbers:\insertgroup{serie}.
+
+\shufflegroup{serie}
+Two of them:\insertgroup[2]{serie}.
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+%   which produces:
+%   \AMCrandomseed{1237893}
+%   \element{serie}{ one}
+%   \element{serie}{ two}
+%   \element{serie}{ three}
+%   \element{serie}{ four}
+%   \element{serie}{ five}
+%   \begin{center}\fbox{\begin{minipage}{.7\linewidth}
+%       Numbers:\insertgroup{serie}.
+%       
+%       \shufflegroup{serie}
+%       Two of them:\insertgroup[2]{serie}.
+%   \end{minipage}}\end{center}
+%
+% \DescribeMacro{\cleargroup}\DescribeMacro{\copygroup} The command
+% |\cleargroup|\marg{groupname} clears all the elements of group
+% \meta{groupname}, making an empty group. The command
+% |\copygroup|\oarg{n}\marg{from}\marg{to} copies the elements of
+% group \meta{from} to grou \meta{to} -- if optional parameter
+% \meta{n} is given, only the \meta{n} first elements are copied.
+%
+% As an example again without questions, consider the following
+% code:
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\element{digits}{ 1}\element{digits}{ 2}\element{digits}{ 3}
+\element{digits}{ 4}\element{digits}{ 5}\element{digits}{ 6}
+\element{digits}{ 7}\element{digits}{ 8}\element{digits}{ 9}
+\element{letters}{ A}\element{letters}{ B}\element{letters}{ C}
+\element{letters}{ D}\element{letters}{ E}\element{letters}{ F}
+
+\shufflegroup{digits}\shufflegroup{letters}
+\cleargroup{mixed}
+\copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
+\shufflegroup{mixed}
+Three digits and two letters:\insertgroup{mixed}.
+
+\shufflegroup{digits}\shufflegroup{letters}
+\cleargroup{mixed}
+\copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
+\shufflegroup{mixed}
+Three digits and two letters:\insertgroup{mixed}.
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+% which produces:
+% \AMCrandomseed{1237899}
+%     \element{digits}{ 1}
+%     \element{digits}{ 2}
+%     \element{digits}{ 3}
+%     \element{digits}{ 4}
+%     \element{digits}{ 5}
+%     \element{digits}{ 6}
+%     \element{digits}{ 7}
+%     \element{digits}{ 8}
+%     \element{digits}{ 9}
+%     \element{letters}{ A}
+%     \element{letters}{ B}
+%     \element{letters}{ C}
+%     \element{letters}{ D}
+%     \element{letters}{ E}
+%     \element{letters}{ F}
+%     \begin{center}\fbox{\begin{minipage}{.7\linewidth}
+%         \shufflegroup{digits}\shufflegroup{letters}
+%         \cleargroup{mixed}
+%         \copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
+%         \shufflegroup{mixed}
+%         Three digits and two letters:\insertgroup{mixed}.
+%
+%         \shufflegroup{digits}\shufflegroup{letters}
+%         \cleargroup{mixed}
+%         \copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
+%         \shufflegroup{mixed}
+%         Three digits and two letters:\insertgroup{mixed}.
+%       \end{minipage}}\end{center}
+%
+%
+% You can find an example involving questions in
+% section~\ref{d:samples}.
+%
+% \subsection{Students identification}
+%
+% \DescribeMacro{\namefield}\DescribeMacro{\AMCcode}
+% There are two ways to associate students to their sheets.
+% \begin{itemize}
+% \item Always add to one page of each copy some place for the student
+%   to write down his name. If you want AMC software to be able to cut
+%   the scan arount this area to present it to you and ask you to read
+%   the written name (this is called manual association), you must use
+%   the |\namefield|\marg{descr} command. The \meta{descr} argument
+%   contains the \LaTeX{} code used to format the name field on the
+%   page. For example:
+%   \begin{code}
+%  \namefield{\fbox{    
+%    \begin{minipage}{15em}
+%      Name and surname:\vspace*{3ex}\par
+%      \noindent\dotfill\vspace{2mm}
+%    \end{minipage}
+%  }}
+%   \end{code}
+%   You can see that the |\namefield| command has no effect on the
+%   produced document. In fact, its only purpose is to log in the
+%   |.xy| file information about the position of the name field on the
+%   page, to be used by the software analysing the scans. 
+% \item For automated student identification, if for example students
+%   have a 6-digits student number, you can ask them to code it
+%   somewhere on the question sheet. This can be done using the
+%   |\AMCcode|\marg{key}\marg{ndigits} command, where \meta{key} is the key
+%   identifier, that can be used to retrieve coded student numbers
+%   from the scans, and \meta{ndigits} is the number of digits for
+%   numbers to be coded.
+%   \begin{code}
+%  \AMCcode{student}{6}  
+%   \end{code}
+% \end{itemize}
+%
+% \subsection{Separate answer sheet}\label{d:separate}
+%
+% \DescribeMacro{\AMCformBegin}\DescribeMacro{\AMCform}
+% \DescribeMacro{\AMCcleardoublepage}
+% To produce separate answer sheets as seen in section~\ref{s:separate},
+% \begin{enumerate}
+% \item use the
+%   \SpecialOptIndex{separateanswersheet}|separateanswersheet| package
+%   option.
+% \item use the |\AMCformBegin| command at the beginning of the answer
+%   sheet description. This command usualy follows a command to get a
+%   new page. This command can be the classical |\clearpage| for
+%   single-sided question sheets, or the |\AMCcleardoublepage|
+%   command, that go to the next odd numbered page, so that the answer
+%   sheet is on a separate sheet even when printing in duplex mode.
+% \item use the |\AMCform| command to insert all boxes for all
+%   questions.
+% \end{enumerate}
+%
+% See section~\ref{s:separate} for an example.
+%
+% \subsection{Random computation questions}
+%
+% One can use the \LaTeX{} package {\sf fp} to make random computation
+% questions, as can be seen in the following example (don't forget to
+% load package {\sf fp}):
+% \amccode
+% {\makeatletter\AMC@correctrue\makeatother
+% \begin{code}
+%  \begin{question}{simplesum}
+%    \FPeval\VQa{trunc(1+random*8,0)}
+%    \FPeval\VQb{trunc(4+random*5,0)}
+%    \FPeval\VQsum{clip(VQa+VQb)}
+%    \FPeval\VQnoA{clip(VQa+VQb-1)}
+%    \FPeval\VQnoB{clip(VQa*VQb)}
+%    \FPeval\VQnoC{clip(VQa-VQb)}
+%    How much are \VQa{} plus \VQb{}?
+%    \begin{choiceshoriz}
+%      \correctchoice{\VQsum}
+%      \wrongchoice{\VQnoA}
+%      \wrongchoice{\VQnoB}
+%      \wrongchoice{\VQnoC}
+%    \end{choiceshoriz}
+%  \end{question}
+% \end{code}
+% }
+% In this example, |\VQa| and |\VQb| are used to store two random
+% integers (the first between 1 and 8, and the second between 4 and
+% 8). Then |\VQsum| stores the sum of these two integers, and
+% |\VQnoA|, |\VQnoB| and |\VQnoC| are other values that will be used
+% as distractors in the multiple choice question.
+%
+% \DescribeMacro{\AMCIntervals}In some cases, command
+% |\AMCIntervals|\marg{x}\marg{x0}\marg{x1}\marg{delta} from {\sf
+%   automultiplechoice} can be usefull. It adds a sequence of choices
+% made of intervals $[x_i,x_i+\delta[$ of length \meta{delta} covering
+% the interval $[\meta{x0},\meta{x1}[$, using |\correctchoice| when
+% \meta{x} lies in the interval, and |\wrongchoice| otherwise.
+%
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\begin{question}{inf-expo-indep}
+  \FPeval\VQa{trunc(2 + random * 4,0)}
+  \FPeval\VQb{trunc(6 + random * 5,0)}
+  \FPeval\VQr{VQa/(VQa+VQb)}
+  Let $X$ and $Y$ be two independent random variables, following
+  exponential laws with respective parameters \VQa{} and \VQb{}.
+  In which interval lies the probability ${\rm P}[X<Y]$?
+  \begin{multicols}{5}
+    \begin{reponses}[o]
+      \AMCIntervals{\VQr}{0}{1}{0.1}
+    \end{reponses}
+  \end{multicols}
+\end{question}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+% {\makeatletter\AMC@correctrue\makeatother
+% \fbox{
+%  \begin{minipage}{.9\linewidth}
+%  \begin{question}{inf-expo-indep}
+%    \FPeval\VQa{trunc(2 + random * 4,0)}
+%    \FPeval\VQb{trunc(6 + random * 5,0)}
+%    \FPeval\VQr{VQa/(VQa+VQb)}
+%
+%    Let $X$ and $Y$ be two independent random variables, following
+%    exponential laws with respective parameters \VQa{} and \VQb{}.
+%    In which interval lies the probability ${\rm P}[X<Y]$?
+%    \begin{multicols}{5}
+%      \begin{reponses}[o]
+%        \AMCIntervals{\VQr}{0}{1}{0.1}
+%      \end{reponses}
+%    \end{multicols}
+%  \end{question}
+%  \vspace*{.1ex}
+% \end{minipage}
+% }}
+%
+% \subsection{French command names}\label{d:french}
+% For backward compatibility, some of {\sf automultiplechoice}
+% commands, environments and package option have their French
+% counterpart. You can always use either the English command or the
+% French equivalent. See table~\ref{t:french} for details.
+%
+% \begin{table}[htb]\centering
+% \SpecialUsageIndex{\champnom}
+% \SpecialUsageIndex{\bonne}
+% \SpecialUsageIndex{\mauvaise}
+% \SpecialUsageIndex{\alafin}
+% \SpecialUsageIndex{\choixIntervalles}
+% \SpecialUsageIndex{\bareme}
+% \SpecialUsageIndex{\baremeDefautM}
+% \SpecialUsageIndex{\baremeDefautS}
+% \SpecialUsageIndex{\exemplaire}
+% \SpecialUsageIndex{\melangegroupe}
+% \SpecialUsageIndex{\restituegroupe}
+% \SpecialUsageIndex{\formulaire}
+% \SpecialUsageIndex{\AMCdebutFormulaire}
+% \SpecialEnvIndex{reponses}
+% \SpecialEnvIndex{reponseshoriz}
+% \SpecialEnvIndex{reponsesperso}
+% \SpecialEnvIndex{copieexamen}
+% \SpecialOptIndex{ordre}
+% \SpecialOptIndex{correc}
+% \SpecialOptIndex{correcindiv}
+% \SpecialOptIndex{bloc}
+% \SpecialOptIndex{ensemble}
+% \SpecialOptIndex{chiffres}
+% \begin{tabular}{\Vbar c\Vbar c\Vbar c\Vbar }
+% \hline
+%   type & English & French \\
+% \hline
+%   command & |\namefield| & |\champnom| \\
+%   environment & |choices| & |reponses| \\
+%   environment & |choiceshoriz| & |reponseshoriz| \\
+%   environment & |choicescustom| & |reponsesperso| \\
+%   command & |\correctchoice| & |\bonne| \\
+%   command & |\wrongchoice| & |\mauvaise| \\
+%   command & |\lastchoices| & |\alafin| \\
+%   command & |\AMCIntervals| & |\choixIntervalles| \\
+%   \hline
+%   command & |\scoring| & |\bareme| \\
+%   command & |\scoringDefaultM| & |\baremeDefautM| \\
+%   command & |\scoringDefaultS| & |\baremeDefautS| \\
+%   \hline
+%   command & |\onecopy| & |\exemplaire| \\
+%   environment & |examcopy| & |copieexamen| \\
+%   \hline
+%   command & |\shufflegroup| & |\melangegroupe| \\
+%   command & |\insertgroup| & |\restituegroupe| \\
+%   \hline
+%   command & |\AMCform| & |\formulaire| \\
+%   command & |\AMCformBegin| & |\AMCdebutFormulaire| \\
+%   \hline
+%   option & |noshuffle| & |ordre| \\
+%   option & |answers| & |correc| \\
+%   option & |indivanswers| & |correcindiv| \\
+%   option & |box| & |bloc| \\
+%   option & |separateanswersheet| & |ensemble| \\
+%   option & |digits| & |chiffres| \\
+%   \hline
+% \end{tabular}
+% \caption{French equivalent commands}\label{t:french}
+% \end{table}
+%
+% \subsection{Customisation}
+%
+% \subsubsection{Boxes}
+% \DescribeMacro{\AMCboxDimensions} The command
+% |\AMCboxDimensions|\marg{dims} can be used to specify the dimensions
+% of the boxes to be ticked. The argument \meta{dims} is a
+% coma-separated list of \meta{key}|=|\meta{value} pairs, with the
+% following possible \meta{key}s:
+% \begin{itemize}
+% \item[|size|] for the size of the edges of the boxes.
+% \item[|down|] for the length the boxes are to be moved down.
+% \item[|rule|] for the rule width.
+% \end{itemize}
+% Default values are |\AMCboxDimensions{size=2.5ex,down=.4ex,rule=.5pt}|
+%
+%
+% \subsubsection{Answers}\label{c:answers}
+% Environment |choicescustom| will make use of the three commands
+%   |\AMCbeginAnswer| (before the first answer), |\AMCendAnswer|
+%   (after the last answer) and |\AMCanswer|\marg{box}\marg{text} (for
+%   each answer) to format the answers. Redefining them properly, some
+%   different answers formatting can be achieved. However, this does
+%   not seem to work with non-trivial settings...  \amccode
+% \begin{code}
+%  \begin{question}{add}
+%    \def\AMCbeginAnswer{$\Big($}
+%    \def\AMCendAnswer{$\Big)$}
+%    \def\AMCanswer#1#2{#1  #2\hfill}
+%    2+2=
+%    \begin{choicescustom}
+%      \correctchoice{4}
+%      \wrongchoice{2}
+%      \wrongchoice{3}
+%    \end{choicescustom}
+%  \end{question}
+% \end{code}
+%
+% \section{Implementation}
+%
+% This package uses the following other packages:
+%    \begin{macrocode}
+\RequirePackage{xcolor} % \fcolorbox to fill (or not) a box
+\RequirePackage{fancyhdr} % \pagestyle{empty}
+\RequirePackage{bophook} % \AtBeginPage
+\RequirePackage{keyval} % \setkeys
+\RequirePackage{rotating} % \rotatebox
+%    \end{macrocode}
+% It defines a version string:
+%    \begin{macrocode}
+\def\AMC@VERSION{AMC @/PACKAGE_V_DEB/@ svn:@/PACKAGE_V_SVN/@ with style $Revision: 431 $}
+%    \end{macrocode}
+% \begin{macro}{\AMC@amclog}\begin{macro}{\AMCmessage}
+%   Informations about questions and choices will be logged to a file
+%   with extension |amc|, to be parsed later. Macro |\AMC@amclog|
+%   writes to this file.
+%    \begin{macrocode}
+\newwrite\AMC@logfile
+\immediate\openout\AMC@logfile=\jobname.amc
+\def\AMC@amclog#1{\immediate\write\AMC@logfile{#1}}
+\def\AMCmessage#1{\AMC@amclog{AUTOQCM[#1]^^J}}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsection{Variables}
+%
+% Counters and boolean variables defined here are internal and should
+% not be modified by the user.
+%
+% The package defines the following counters:
+% \begin{description}
+% \item |\AMCload@counter| number of choices already loaded for
+%   current question.
+% \item |\AMCid@quest| current question ID number (see section~\ref{s:keyid}).
+% \item |\AMCid@etud| current student sheet number.
+% \item |\AMCid@check| current page checking number.
+% \item |\AMCid@etudfin| last student sheet number for the exam.
+% \item |\AMCnum@copies| number of exam sheets to produce.
+% \end{description}
+%
+% It also defines the following switches:
+% \begin{description}
+% \item |\ifAMC@ordre| if choices are never to be shuffled. 
+% \item |\ifAMC@correchead| if some correction header is to be printed
+%   at the beginning.
+% \item |\ifAMC@affichekeys| if questions keys are to be printed.
+% \item |\ifAMC@correc| if correct choices are to be checked on the
+%   produced document.
+% \item |\ifAMC@qbloc| if questions are to be included in \LaTeX{}
+%   boxes (so that they can't be splitted on two different pages).
+% \item |\ifAMC@rbloc| if answers are to be included in \LaTeX{} boxes
+%   (so that they can't be splitted on two different columns for
+%   example).
+% \item |\ifAMCcomplete@multi| if a choice
+%   ``\makeatletter\AMC@loc@none\makeatother'' is to be added to every
+%   multiple question.
+% \item |\ifAMC@calibration| if this \LaTeX{} run is used to get page layouts.
+% \item |\ifAMC@plain| if {\sf automultiplechoice} won't try to load
+%   usefull packages ({\sf etex}, {\sf environ}) that extend {\sf
+%   automultiplechoice} capabilities.
+% \item |\ifAMCune@bonne| if there is at least one correct answer for the current question.
+% \item |\ifAMCtype@multi| if the current question is a multiple question.
+% \item |\ifAMC@watermark| if the document is a draft, not to be used for exam.
+% \item |\ifAMC@ensemble| if answers are to be given on a separate
+%   answers sheet.
+% \item |\ifAMC@inside@box| if a letter or digit is to be printed
+%   inside all boxes.
+% \item |\ifAMC@inside@digit| if digits are to be written inside
+%   boxes instead of letters (when using a separate answer sheet for
+%   example).
+% \item |\ifAMCformulaire@dedans| is true for questions inside
+%   separate answer sheet.
+% \item |\ifAMC@zoneformulaire| is true for codes (made by |\AMCcode|)
+%   inside separate answer sheet.
+% \item |\ifAMC@pagelayout| is true if the AMC page layout, with signs
+%   for scan analysis, is to be used.
+% \end{description}
+%    \begin{macrocode}
+\newcount\AMCload@counter
+\newcount\AMCid@quest\AMCid@quest=-1
+\newcount\AMCid@check
+\newcount\AMCid@etud\AMCid@etud=1
+\newcount\AMCid@etudfin
+\newcount\AMCnum@copies
+%    \end{macrocode}
+%    \begin{macrocode}
+\newif\ifAMC@ordre\AMC@ordrefalse
+\newif\ifAMC@correchead\AMC@correcheadfalse
+\newif\ifAMC@affichekeys\AMC@affichekeysfalse
+\newif\ifAMC@correc\AMC@correcfalse
+\newif\ifAMC@qbloc\AMC@qblocfalse
+\newif\ifAMC@rbloc\AMC@rblocfalse
+\newif\ifAMCcomplete@multi\AMCcomplete@multifalse
+\newif\ifAMC@calibration\AMC@calibrationfalse
+\newif\ifAMC@plain\AMC@plainfalse
+\newif\ifAMCune@bonne
+\newif\ifAMCtype@multi
+\newif\ifAMC@watermark\AMC@watermarktrue
+\newif\ifAMC@inside@box\AMC@inside@boxfalse
+\newif\ifAMC@ensemble\AMC@ensemblefalse
+\newif\ifAMC@inside@digit\AMC@inside@digitfalse
+\newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
+\newif\ifAMC@zoneformulaire
+\newif\ifAMC@pagelayout\AMC@pagelayouttrue
+%    \end{macrocode}
+%
+% \begin{macro}{\AMCid@name}
+%   The package also defines command |\AMCid@name| to be the current
+%   question identifier key.
+%    \begin{macrocode}
+\def\AMCid@name{}
+%    \end{macrocode}\end{macro}
+%
+% \subsection{Dimensions}
+%
+% \begin{macro}{\AMCformVSpace}\begin{macro}{\AMCformHSpace}
+% \begin{macro}{\AMCinterIrep}\begin{macro}{\AMCinterBrep}
+% The following dimensions can be modified by the user to adjust
+% questions formatting:
+% \begin{description}
+% \item |\AMCformVSpace| is the amount of vertical space between two
+%   questions in a separate answer sheet.
+% \item |\AMCformHSpace| is the amount of horizontal space between two
+%   answers boxes in a separate answer sheet.
+% \item |\AMCinterIrep| is the amount of vertical space to be added
+%   between two answers.
+% \item |\AMCinterBrep| is the amount of vertical space between two
+%   boxed answers (see |\AMCBoxedAnswers| and |\ifAMC@rbloc|).
+% \end{description}
+%    \begin{macrocode}
+\newdimen\AMCformVSpace\AMCformVSpace=1.2ex
+\newdimen\AMCformHSpace\AMCformHSpace=.3em
+\newdimen\AMCinterIrep\AMCinterIrep=\z@
+\newdimen\AMCinterBrep\AMCinterBrep=.5ex
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
+%
+% \subsection{Localisation}
+%
+% In this section, some localised strings or commands are defined, for
+% English and French languages.
+% \begin{macro}{\AMCtext}
+%   To modify these texts, you can use command |\AMCtext|. For
+%   example, |\AMCtext{draft}|\marg{text} sets the text to be printed
+%   behind each page of a draft exam.
+%    \begin{macrocode}
+\def\AMCtext#1#2{\expandafter\def\csname AMC@loc@#1\endcsname{#2}}
+%    \end{macrocode}\end{macro}
+% \subsubsection{English}
+% Text indicating draft exams:
+%    \begin{macrocode}
+\def\AMC@loc@draft{DRAFT}
+%    \end{macrocode}
+% Message at page bottom when compiled out of AMC gui:
+%    \begin{macrocode}
+\def\AMC@loc@message{For your examination, preferably print
+  documents compiled from auto-multiple-choice.}
+%    \end{macrocode}
+% Annoucing a question in a separate sheet (parameter |#1| is the
+% question number):
+%    \begin{macrocode}
+\def\AMC@loc@qf#1{{\bf Question #1:}}
+%    \end{macrocode}
+% Annoucing a question (parameter |#1| is the question number and
+% pamareter |#2| can be the multiple question symbol, or be empty):
+%    \begin{macrocode}
+\def\AMC@loc@q#1#2{{\bf Question #1} #2}
+%    \end{macrocode}
+% Headers for corrected version and catalog:
+%    \begin{macrocode}
+\def\AMC@loc@corrected{Corrected}
+\def\AMC@loc@catalog{Catalog}
+%    \end{macrocode}
+% Last choice added at the end for multiple questions when option
+% |completemulti| is used:
+%    \begin{macrocode}
+\def\AMC@loc@none{None of these answers are correct.}
+%    \end{macrocode}
+%
+% \subsubsection{French}
+%
+% French localisation is called with option |francais|.
+%    \begin{macrocode}
+\def\AMC@loc@FR{
+  \def\AMC@loc@draft{PROJET}
+  \def\AMC@loc@message{Pour votre examen, imprimez de pr\'ef\'erence
+    les documents compil\'es \`a l'aide de auto-multiple-choice.}
+  \def\AMC@loc@qf##1{{\bf Question ##1 :}}
+  \def\AMC@loc@q##1##2{{\bf Question ##1} ##2}
+  \def\AMC@loc@corrected{Correction}
+  \def\AMC@loc@catalog{Catalogue}
+  \def\AMC@loc@none{Aucune de ces r\'eponses n'est correcte.}
+}
+%    \end{macrocode}
+%
+% \subsubsection{Other languages}
+%
+% Other languages can be integrated to {\sf automultiplechoice}
+% package upon request to the author.
+%
+% \subsection{Random}
+% \subsubsection{Random pseudo-generator}
+% The package uses the pseudo-random bit generator from
+% \emph{TuGBoat} 1994, vol~15:1:
+%    \begin{macrocode}
+\ifx\AMC@SR\undefined\newcount\AMC@SR\fi
+\providecommand\AMC@SRconst{2097152}
+\providecommand\AMC@SRset[1]{\global\AMC@SR#1 \ignorespaces}
+\providecommand\AMC@SRadvance{%
+  \begingroup%
+    \ifnum\AMC@SR<\AMC@SRconst\relax\AMC@SR@count\z@\else\AMC@SR@count\@ne\fi%
+    \ifodd\AMC@SR\advance\AMC@SR@count\@ne\fi%
+    \global\divide\AMC@SR\tw@%
+    \ifodd\AMC@SR@count\global\advance\AMC@SR\AMC@SRconst\relax\fi%
+  \endgroup}
+\providecommand\AMC@SRbit{\AMC@SRadvance\ifodd\AMC@SR1\else0\fi}
+\providecommand\AMC@SRtest[2]{\AMC@SRadvance%
+  \ifodd\AMC@SR#2\else#1\fi\ignorespaces}
+\providecommand\AMC@SRvalue{\number\AMC@SR}
+%    \end{macrocode}
+% \begin{macro}{\AMCrandomseed}
+%   The seed of this generator is set to 1515, but another value can
+%   be given using the command |\AMCrandomseed|\marg{seed}.
+%    \begin{macrocode}
+\AMC@SRset{1515}
+\def\AMCrandomseed#1{\AMC@SRset{#1}}
+%    \end{macrocode}\end{macro}
+% \subsubsection{Uniform random deviates}
+% \begin{macro}{\AMC@SRnextByte}\begin{macro}{\AMC@SRmax}
+%     This generator is used to build first a 20-bit uniform integer
+%     generator (macro |\AMC@SRnextByte|). Then, using modulo, a
+%     (nearly) uniform generator on $\{0,\ldots,n-1\}$ is built:
+%     command |\AMC@SRmax{|$n$|}| puts in |\AMC@SR@count| the random
+%     deviate.
+%    \begin{macrocode}
+\newcount\AMC@SR@count
+\def\AMC@SR@time{\AMC@SRset{\time}}
+\newcount\AMC@SRnum
+\def\AMC@SRnextByte{\AMC@SRnum=\z@%
+  \AMC@SR@count=20%
+  \loop\multiply\AMC@SRnum\tw@%
+     \AMC@SRtest{\advance\AMC@SRnum\@ne}{}%
+  \ifnum\AMC@SR@count>\@ne\advance\AMC@SR@count\m@ne\repeat%
+}
+\newcommand\AMC@SRmax[1]{\AMC@SRnextByte%
+  \AMC@SR@count=\AMC@SRnum%
+  \divide\AMC@SR@count by #1\relax%
+  \multiply\AMC@SR@count by #1\relax%
+  \advance\AMC@SRnum by -\AMC@SR@count%
+}
+%    \end{macrocode}\end{macro}\end{macro}
+% \subsubsection{Tokens shuffling}
+% \begin{macro}{\AMCsw@p}\begin{macro}{\AMC@shuffletoks}
+%     The package defines the macro |\AMCsw@p| to swap the values of
+%     two token registers given as parameters.
+%
+%     After defining $n$ token registers |\foo@i|, |\foo@ii|,
+%     |\foo@iii|, |\foo@iv| and so on, you can shuffle them using
+%     |\AMC@shuffletoks{|$n$|}{foo@}|.
+%    \begin{macrocode}
+\newcount\AMC@sti
+\newtoks\AMCsw@p@
+\newcommand\AMCsw@p[2]{%
+  \global\AMCsw@p@=#1%
+  \global#1=#2%
+  \global#2=\AMCsw@p@}
+\newcommand\AMC@shuffletoks[2]{%
+  \AMC@sti=#1\relax%
+  \@whilenum\AMC@sti>\@ne\do{%
+    \AMC@SRmax{\AMC@sti}\advance\AMC@SRnum\@ne\relax%
+    \AMCsw@p{\csname #2\romannumeral\AMC@SRnum\endcsname}%
+            {\csname #2\romannumeral\AMC@sti\endcsname}%
+    \advance\AMC@sti\m@ne\relax%
+  }}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsection{Keys numbering}\label{s:keyid}
+%
+% \begin{macro}{\AMC@unnumero}\begin{macro}{\AMC@affecte}
+%   This package allocates a unique integer ID to each question key
+%   from the questionnary. The counter |\AMC@numerotation| keeps track
+%   of the number of keys which already had an ID. Command
+%   |\AMC@definitnumero{|$n$|}{key}| allocates ID $n$ to the key
+%   |key|.  Command |\AMC@prepare{key}| looks if an ID had already
+%   been associated to |key|, and, if not, makes a new ID allocation
+%   for |key|.  Command |\AMC@unnumero{key}| returns the ID associated
+%   with |key| (creating one if necessary). Command
+%   |\AMC@affecte{key}{\cnt}| give to counter |\cnt| the value of the
+%   ID associated to |key| (creating one if necessary).
+%   \begin{macrocode}
+\newcount\AMC@numerotation\AMC@numerotation=\@ne
+\def\AMC@definitnumero#1#2{\AMC@amclog{AUTOQCM[NUM=#1=#2]^^J}%
+  \expandafter\global\expandafter\def\csname AMC@numtab@#2\endcsname{#1}}
+\def\AMC@prepare#1{\expandafter\ifx\csname AMC@numtab@#1\endcsname\relax%
+  \global\advance\AMC@numerotation\@ne%
+  \expandafter\AMC@definitnumero\expandafter{\the\AMC@numerotation}{#1}\fi}
+\def\AMC@unnumero#1{\AMC@prepare{#1}\csname AMC@numtab@#1\endcsname}
+\def\AMC@affecte#1#2{\AMC@prepare{#1}#2=\csname AMC@numtab@#1\endcsname}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsection{Boxes}
+% \subsubsection{Position logging}
+%
+% \begin{macro}{\AMC@tracebox}\begin{macro}{\AMC@pagepos}
+%     Command |\AMC@tracebox|\marg{trace}\marg{key}\marg{content} makes a
+%     \LaTeX{} box around \meta{content}, and, if \meta{trace} is not
+%     empty, logs to the |.xy| file informations to be able to compute
+%     exact location of this box on the page, attached to the box
+%     identification \meta{key}.
+%
+%   Command |\AMC@pagepos| logs page and page size informations at the
+%   beginning of each page.
+%
+%    \begin{macrocode}
+\def\AMC@tracepos#1#2{%
+  \ifAMC@calibration\ifx\@empty#1\@empty\else%
+  \pdfsavepos\protected@write\AMC@XYFILE{}{%
+    \string\tracepos%
+    {\the\AMCid@etud/\thepage:#2}%
+    {\noexpand\number\pdflastxpos sp}%
+    {\noexpand\number\pdflastypos sp}}%
+  \fi\fi}
+\def\AMC@traceposx#1#2{%
+  \ifAMC@calibration\ifx\@empty#1\@empty\else%
+  \pdfsavepos\protected@write\AMC@XYFILE{}{%
+    \string\tracepos%
+    {\the\AMCid@etud/\thepage:#2}%
+    {\noexpand\number\pdflastxpos sp}%
+    {0sp}}%
+  \fi\fi}
+\def\AMC@traceposy#1#2{%
+  \ifAMC@calibration\ifx\@empty#1\@empty\else%
+  \pdfsavepos\protected@write\AMC@XYFILE{}{%
+    \string\tracepos%
+    {\the\AMCid@etud/\thepage:#2}%
+    {0sp}%
+    {\noexpand\number\pdflastypos sp}}%
+\fi\fi}
+\newcommand\AMC@tracebox[3]{%
+  \vbox{\AMC@traceposy{#1}{#2}%
+    \hbox{\AMC@traceposx{#1}{#2}#3\AMC@traceposx{#1}{#2}}%
+    \AMC@traceposy{#1}{#2}}}
+\def\AMC@pagepos{%
+  \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
+    \string\page%
+    {\the\AMCid@etud/\thepage/\the\AMCid@check}%
+    {\the\paperwidth}{\the\paperheight}}\fi}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \begin{environment}{amcxyfile}
+%   The following lines defines an environment to use a particular file
+%   for positions outputs. This is used mainly for documentation or testing.
+%
+%    \begin{macrocode}
+\newwrite\AMC@XYspecial
+\newwrite\AMC@tmpXY
+\newenvironment{amcxyfile}[1]{%
+  \openout\AMC@XYspecial#1%
+  \let\AMC@tmpXY=\AMC@XYFILE%
+  \let\AMC@XYFILE=\AMC@XYspecial%
+}{\let\AMC@XYFILE=\AMC@tmpXY\closeout\AMC@XYspecial}
+%    \end{macrocode}\end{environment}
+%
+% \begin{macro}{\namefield}
+% The |\namefield|\marg{name field content} is a simple call to |\AMC@tracebox|:
+%    \begin{macrocode}
+\newcommand{\namefield}[1]{\AMC@tracebox{1}{nom}{#1}}
+%    \end{macrocode}\end{macro}
+% It is used to enclose the page region where students are to write
+% their names, so as te retreive it easily from the scans. For example,
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\namefield{\fbox{%
+  \begin{minipage}{5cm}
+    Name:
+
+    \vspace*{.5cm}\noindent\dotfill
+    \vspace{2mm}
+  \end{minipage}}}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+% produces the following box:
+% \begin{amcxyfile}{automultiplechoice.xy2}
+%   \begin{center}
+%     \namefield{\fbox{%
+%     \begin{minipage}{5cm}
+%       Name:
+%       
+%       \vspace*{.5cm}\noindent\dotfill
+%       \vspace{2mm}
+%     \end{minipage}}}
+%   \end{center}
+% \end{amcxyfile}
+% and outputs information about the position of the box in the |.xy|
+% file, as seen in section~\ref{a:name}.
+%
+% \subsubsection{Boxes to be checked by students}
+%
+% \begin{macro}{\AMC@boxedchar}
+%   There are two styles for boxes to be checked by the students. The
+%   first one is an empty box, printed beside the answer. The sencond
+%   is a box with a character in it. It is mainly used when answers
+%   are to be given on a separate answer sheet.
+%
+% These boxes can be drawn using command
+% |\AMC@boxedchar|\marg{char}\marg{trace}\marg{key}\marg{filled}:
+% \meta{char} is the character to print inside the box, \meta{trace}
+% is non-empty if you want to log the box position in the |.xy| file,
+% \meta{key} is the box identification, and \meta{filled} is non-empty
+% for filling the box.
+%
+% \begin{amcxyfile}{automultiplechoice.xy1}
+% For example, |\AMC@boxedchar{K}{1}{test}{}| produce the box
+% \makeatletter\AMC@boxedchar{K}{1}{test}{}\makeatother, writing the
+% lines in the |.xy| file shown in section~\ref{a:boxed}.
+% \end{amcxyfile}
+%
+%    \begin{macrocode}
+\newcommand\AMC@boxedchar[4]{\hspace{0pt}%
+  {\fboxsep=\z@\fboxrule=\AMC@boxedrule%
+    \lower\AMC@boxeddown\hbox{\fcolorbox{black}%
+      {\ifx\@empty#4\@empty white\else black\fi}%
+      {\vbox to \AMC@boxeddim{\AMC@tracepos{#2}{#3}\vfill %
+          \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}%
+        \AMC@tracepos{#2}{#3}}}}}
+%    \end{macrocode}\end{macro}
+%
+% \begin{macro}{\AMC@caselettre}
+% Command |\AMC@caselettre| is the same as |\AMC@boxedchar|, but if
+% \meta{char} is empty, it is replaced by an arabic or alphabetical
+% counter.
+%    \begin{macrocode}
+\newcounter{AMC@ncase}
+\setcounter{AMC@ncase}{0}
+\newcommand\AMC@caselettre[4]{%
+  \AMC@boxedchar{\ifx\@empty#1\@empty%
+    \ifAMC@inside@digit\arabic{AMC@ncase}%
+    \else\Alph{AMC@ncase}\fi%
+    \else #1\fi}{#2}{#3}{#4}}
+%    \end{macrocode}\end{macro}
+% 
+% \begin{macro}{\AMCboxDimensions}
+%   The dimensions of these box are managed by
+%   |\AMCboxDimensions|\marg{sizes}, where \meta{sizes} is a coma
+%   separated list of \meta{name}|=|\meta{dimension} constructs. Here,
+%   \meta{name} can be |size| for the box size, |rule| for the box rule
+%   width and |down| for moving the box down.
+%    \begin{macrocode}
+\newlength\AMC@boxedrule
+\newlength\AMC@boxeddown
+\newlength\AMC@boxeddim
+\define@key{AMCdim}{size}{\AMC@boxeddim=#1}
+\define@key{AMCdim}{rule}{\AMC@boxedrule=#1}
+\define@key{AMCdim}{down}{\AMC@boxeddown=#1}
+\def\AMCboxDimensions#1{\setkeys{AMCdim}{#1}}
+\AMCboxDimensions{size=2.5ex,down=.4ex,rule=.5pt}
+%    \end{macrocode}\end{macro}
+%
+% \begin{macro}{\AMC@marque}
+%   Command |\AMC@marque|\marg{char}\marg{filled} prints a box with
+%   character \meta{char} inside, and filled if \meta{filled} is
+%   non-empty, using global variables to identify the box (question
+%   and choice).
+%    \begin{macrocode}
+\newcommand{\AMC@marque}[2]{%
+  \ifAMC@ensemble%
+    \ifAMC@zoneformulaire % for codes inside form sheet
+      \protect\AMC@caselettre{#1}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
+    \else%
+    \ifAMCformulaire@dedans% for answer boxes inside form sheet
+      \protect\AMC@caselettre{#1}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
+    \else% outside form sheet: not to be read
+      \AMC@caselettre{#1}{}{}{#2}%
+    \fi\fi%
+  \else% no separate sheet for answers: always read
+    \ifAMC@inside@box%
+      \AMC@caselettre{#1}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
+    \else
+      \AMC@boxedchar{}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
+    \fi
+  \fi%
+}
+%    \end{macrocode}\end{macro}
+%
+% \subsubsection{Binary boxes}
+% 
+% The package prints on each page some boxes that code (like binary
+% digits) student sheet number, page number and a check number, so as
+% to be read easily from scans after exam.
+%
+% \begin{macro}{\AMCid@checkmax}\begin{macro}{\AMC@NCBetud}
+% \begin{macro}{\AMC@NCBpage}\begin{macro}{\AMC@NCBcheck}
+%     The check number is just decreased each page. Its maximum value
+%     is |\AMCid@checkmax|. The number of binary digits used to print
+%     student sheet number, page and check number are |\AMC@NCBetud|,
+%     |\AMC@NCBpage| and |\AMC@NCBcheck|. The number of the first page
+%     is |\AMC@premierecopie|.
+%     
+%     The length of zone reserved for binary boxes is |\AMC@CBtaille|.
+%    \begin{macrocode}
+\def\AMCid@checkmax{60}
+\def\AMC@NCBetud{12}
+\def\AMC@NCBpage{6}
+\def\AMC@NCBcheck{6}
+\newlength{\AMC@CBtaille}\setlength{\AMC@CBtaille}{5cm}
+\def\AMC@premierecopie{1}
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}\end{macro}
+%
+% \begin{macro}{\AMC@binaryBoxes}
+%   Command |\AMC@binaryBoxes|\oarg{ndigits}\marg{n} prints \meta{ndigits}
+%   boxes to represent number \meta{n} in its binary
+%   form. |\AMCbin@one| and |\AMCbin@zero| print individual
+%   digit-boxes.
+%
+%   For example, |\AMC@binaryBoxes[12]{367}| shows $367=000101101111_2$
+%   using 12 boxes:
+%   \begin{center}
+%     \makeatletter\AMC@binaryBoxes[12]{367}\makeatother
+%   \end{center}
+%
+%    \begin{macrocode}
+\newtoks\AMCbin@sequence
+\newcount\AMCbin@number
+\newcount\AMCbin@ndigits
+\newcount\AMCbin@id
+\newcount\AMCbin@digit
+\def\AMCbin@one{\advance\AMCbin@digit\@ne%
+  \AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{1}}
+\def\AMCbin@zero{\advance\AMCbin@digit\@ne%
+  \AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{}}
+\def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=\z@}
+\newcommand{\AMC@binaryBoxes}[2][1]{%
+{\AMCboxDimensions{size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2\relax%
+\AMCbin@ndigits=\z@%
+\loop%
+\ifnum\AMCbin@number>\z@%
+\advance\AMCbin@ndigits\@ne%
+\ifodd\AMCbin@number\AMCbin@sequence=\expandafter{\expandafter\AMCbin@one\the\AMCbin@sequence}%
+\else\AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\fi%
+\divide\AMCbin@number\tw@%
+\repeat%
+\loop\relax%
+\ifnum\AMCbin@ndigits<#1\advance\AMCbin@ndigits\@ne%
+\AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\repeat%
+\the\AMCbin@sequence%
+}}
+%    \end{macrocode}\end{macro}
+%
+% \subsection{Handling groups of questions}
+%
+% The package allows to handle groups of questions, so as to be able
+% to shuffle them before printing them to the sheets.
+%
+% \begin{macro}{\nouveaugroupe}\begin{macro}{\element}
+%     Command |\nouveaugroupe|\marg{group-name}\marg{n} creates a new
+%     (empty) group with name \meta{group-name} (argument \meta{n} is
+%     present only for compatibility reasons and is ignored). Command
+%     |\element|\marg{group-name}\marg{text} adds to group
+%     \meta{group-name} a new element that contains
+%     \meta{text}. \meta{text} can be a |question| environment, ore
+%     two successive |question|s to be kept together, or
+%     anything else. Calling command |\nouveaugroupe| is not
+%     compulsory, as |\element| calls it if necessary.
+%    \begin{macrocode}
+\newcount\AMCtok@k
+\newcount\AMCtok@max
+\newcommand{\nouveaugroupe}[2]{%
+  \expandafter\ifx\csname #1@k\endcsname\relax
+    \expandafter\newcount\csname #1@k\endcsname%
+    \csname #1@k\endcsname=\z@%
+  \fi%
+}
+\newcommand\AMC@prepare@element[1]{%
+  \nouveaugroupe{#1}{}%
+  \global\advance\csname #1@k\endcsname\@ne\relax%
+  \AMCtok@k=\csname #1@k\endcsname%
+  \expandafter\ifx\csname #1@\romannumeral\AMCtok@k\endcsname\relax%
+    \expandafter\newtoks\csname #1@\romannumeral\AMCtok@k\endcsname\fi%
+}
+\newcommand{\element}[2]{%
+  \AMC@prepare@element{#1}%
+  \csname #1@\romannumeral\AMCtok@k\endcsname={#2}%
+}
+%    \end{macrocode}\end{macro}\end{macro}
+% \begin{macro}{\shufflegroup}\begin{macro}{\insertgroup}
+%     Command |\shufflegroup|\marg{group-name} shuffles the elements
+%     of group \meta{group-name}. It can be called at each student
+%     sheet in order to get different student sheets and avoid
+%     cheating.  Command |\insertgroup|\oarg{n}\marg{groupname}
+%     inserts all the elements of group \meta{groupname}, or only the
+%     first \meta{n} elements if \meta{n} is given.
+%    \begin{macrocode}
+\newcommand{\shufflegroup}[1]{%
+  {\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}%
+}
+\newcount\AMCtok@ik
+\newcommand{\insertgroup}[2][0]{%
+  \AMCtok@max=#1\relax%
+  \ifnum\the\AMCtok@max<1%
+    \AMCtok@max=\csname #2@k\endcsname%
+  \fi%
+  \AMCtok@ik=\z@%
+  {\loop%
+    \advance\AMCtok@ik\@ne\relax%
+    \the\csname #2@\romannumeral\AMCtok@ik\endcsname%
+  \ifnum\AMCtok@ik<\AMCtok@max\repeat}%
+}
+%    \end{macrocode}\end{macro}\end{macro}
+% 
+% \begin{macro}{\cleargroup}\begin{macro}{\copygroup}
+%     The commands |\cleargroup| and |\copygroup| can also be used to
+%     make more complex questions combinations in the exams, allowing
+%     for example to ask the package to shuffle 3 questions taken at
+%     random from group |groupa| and 5 questions taken at random from
+%     group |groupb|.
+%
+%     |\cleargroup|\marg{group} clears the group \meta{group},
+%     ereasing all of its elements.
+%
+%     |\copygroup|\oarg{n}\marg{from}\marg{to} copies \meta{n}
+%     elements from group \meta{from} to group \meta{to}. If optional
+%     parameter \meta{n} is not given, all the questions from group
+%     \meta{from} are copied.
+%
+%     See section~\ref{d:groups} for an illustration for these commands.
+%
+%    \begin{macrocode}
+\newcommand{\cleargroup}[1]{%
+  \nouveaugroupe{#1}{}%
+  \csname #1@k\endcsname=\z@%
+}
+\newcommand{\copygroup}[3][0]{%
+  \AMCtok@max=#1\relax%
+  \ifnum\the\AMCtok@max<1%
+    \AMCtok@max=\csname #2@k\endcsname%
+  \fi%
+  \AMCtok@ik=\z@%
+  {\loop%
+    \advance\AMCtok@ik\@ne\relax%
+    \AMC@prepare@element{#3}%    
+    \global\csname #3@\romannumeral\AMCtok@k\endcsname=\csname #2@\romannumeral\AMCtok@ik\endcsname%
+  \ifnum\AMCtok@ik<\AMCtok@max\repeat}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% 
+% \subsection{Questions}
+%
+% To manage multiple choice questions, first set some counters and
+% token registers to handle answers. Token registers |\reponse@i|,
+% |\reponse@ii| and so on will be used for answers -- we restrict the
+% number of answers of a single questions to
+% |\AMCload@counter|${}=199$.
+%    \begin{macrocode}
+\newcount\AMCrep@count
+\AMCload@counter=199
+\@whilenum\AMCload@counter>0\do{%
+  \expandafter\newtoks\csname reponse@\romannumeral\AMCload@counter\endcsname%
+  \advance\AMCload@counter\m@ne%
+}
+%    \end{macrocode}
+% \begin{macro}{\AMCload@reponse}\begin{macro}{\AMCrien@deux}
+%     Command |\AMCload@reponse|\marg{n}\marg{text} will be used to
+%     add answer number \meta{n} with text \meta{text} (\meta{text}
+%     will include the box to be ticked and all the layout commands)
+%     to the set of answers (in a token register |\reponse@|\emph{xxx}
+%     -- counter |\AMCload@counter| keeps track of the number of
+%     answers), in order to shuffle them when all answers will be
+%     loaded.
+%
+%     When answers are not to be shuffled, command
+%     |\AMCrien@deux|\marg{n}\marg{text} will be used instead, only
+%     printing \meta{text}.
+%    \begin{macrocode}
+\newcommand\AMCload@reponse[2]{%
+  \advance\AMCload@counter\@ne\relax%
+  \csname reponse@\romannumeral\AMCload@counter\endcsname%
+  =\expandafter{\expandafter\AMCrep@count\expandafter=#2 #1}%
+}
+\newcommand\AMCrien@deux[2]{#1}
+%    \end{macrocode}\end{macro}\end{macro}
+% \begin{macro}{\shuffle@it}\begin{macro}{\AMCdump@reponses}
+%     After loading all answers, commands |\shuffle@it| will be used to
+%     shuffle them, and |\AMCdump@reponses| to print them.
+%    \begin{macrocode}
+\def\shuffle@it{\AMC@shuffletoks{\number\AMCload@counter}{reponse@}}
+\newcount\AMCnum@questions
+\newcommand\AMCdump@reponses{%
+  \global\AMCnum@questions=\AMCload@counter%
+  \@whilenum\AMCload@counter>0\do{%
+    \the\csname reponse@\romannumeral\AMCload@counter\endcsname%
+    \advance\AMCload@counter\m@ne}}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsubsection{Managing answers}
+% 
+% \begin{macro}{\lastchoices}\begin{macro}{\AMCrep@init}\begin{macro}{\AMC@fin@rep}
+%       Command |\AMCrep@init|\marg{mode} is called for each question
+%       before reading answers. \meta{mode} is |r| for suffled
+%       answers, and |o| if answers are not to be shuffled. It sets
+%       the number of answers counter to zero, and calls |\AMCrep@o|
+%       or |\AMCrep@r| depending on \meta{mode}. These commands sets
+%       |\AMCload@@reponse| and |\AMCrep@fini| that will be called for
+%       each answer and after the last answer respectively, depending
+%       on \meta{mode}:
+%       \begin{itemize}
+%       \item If \meta{mode}=|r|, |\AMCload@@reponse| is
+%         |\AMCload@reponse| (loads answer to token register) and
+%         |\AMCrep@fini| calls |\shuffle@it| and |\AMCdump@reponses|;
+%       \item If \meta{mode}=|o|, |\AMCload@@reponse| is
+%         |\AMCrien@deux| (prints answer directly) and |\AMCrep@fini|
+%         does nothing.
+%       \end{itemize}
+%
+%       Command |\lastchoices| is called before giving answers that
+%       are to be printed at the end (even when shuffling answers). It
+%       closes the answers list calling |\AMCrep@fini| and opens
+%       another one in ordered mode. Note that it also saves the value
+%       of |\AMCrep@count|, which is the number of the current answer
+%       among all answers given in the subject source for the current
+%       question.
+%
+%       Command |\AMC@fin@rep| is to be called after the last answer:
+%       it adds a ``\makeatletter\AMC@loc@none\makeatother'' answer if
+%       necessary (package option |completemulti|) with answer number
+%       zero, and calls |\AMCrep@fini|.
+%    \begin{macrocode}
+\newcommand\AMCrep@init[1]{%
+  \ifAMC@ordre\AMCrep@o\else%
+    \csname AMCrep@#1\endcsname\fi\AMCload@counter=\z@}
+\newcommand\AMCrep@o{%
+  \def\AMCload@@reponse{\AMCrien@deux}\def\AMCrep@fini{}}
+\newcommand\AMCrep@r{%
+  \def\AMCload@@reponse{\AMCload@reponse}%
+  \def\AMCrep@fini{\shuffle@it\AMCdump@reponses}}
+\newcount\AMCrep@@count
+\newcommand\lastchoices{%
+  \AMCrep@@count=\AMCrep@count%
+  \AMCrep@fini\AMCrep@init{o}%
+  \AMCrep@count=\AMCrep@@count}
+\newcommand\@aucune{\emph{\AMC@loc@none}}
+\newcommand\AMC@fin@rep{%
+  \ifAMCcomplete@multi\ifAMCtype@multi%
+    \lastchoices\AMCrep@count=-1%
+    \ifAMCune@bonne\wrongchoice{\@aucune}\else\correctchoice{\@aucune}%
+      \fi\fi\fi\AMCrep@fini}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
+%
+% \subsubsection{Separate answer sheet}
+%
+% This package needs some memory to print questions/answers boxes
+% again on a separate answer sheet.
+% 
+% \begin{macro}{\AMCformQuestion}\begin{macro}{\AMCformAnswer}
+%     First define commands that will announce questions and answers
+%     on the separate answer sheet (these commands can be modified by
+%     the user): |\AMCformQuestion|\marg{n} is responsible for
+%     announcing question number \meta{n}, and
+%     |\AMCformAnswer|\marg{box} is responsible for printing the box
+%     to be ticked, given as argument \meta{box}.
+%
+%     Commands |\AMCformQuestionA| and |\AMCformAnswerA| set up
+%     counter |\AMC@ncase| value before calling their counterparts.
+%
+%    \begin{macrocode}
+\def\AMCmem@ireData{}
+\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\AMC@loc@qf{#1}}}
+\def\AMCformQuestionA#1{\setcounter{AMC@ncase}{0}\AMCformQuestion{#1}}
+\def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
+\def\AMCformAnswerA#1{\addtocounter{AMC@ncase}{1}\AMCformAnswer{#1}}
+%    \end{macrocode}\end{macro}\end{macro}\
+%
+% \begin{macro}{\AMCmem@ireAJ}\begin{macro}{\AMCformBegin}\begin{macro}{\AMCform}
+%       These are commands to manage memory for separate answer
+%       sheet. |\AMCmem@ireAJ|\marg{code} adds \meta{code} to this
+%       memory. |\AMCmem@ireAJRep|\marg{code} adds to memory answer
+%       code \meta{code}, and |\AMCmem@ireQ|\marg{n} adds to memory
+%       question code to announce question number \meta{n}.
+%
+%       The command |\AMCformBegin| defines the beginning of the
+%       separate answer sheet for the current student sheet, and
+%       |\AMCform| prints the whole memory: questions and answers
+%       boxes.
+%    \begin{macrocode}
+\newcommand\AMCmem@ireAJ[1]{%
+  \ifAMC@ensemble\ifAMC@zoneformulaire\else%
+    \begingroup\AMCformulaire@dedanstrue%
+      \let\protect\@unexpandable@protect%
+      \global\edef\AMCmem@ireData{\AMCmem@ireData #1}%
+    \endgroup\fi\fi}
+\newcommand\AMCmem@ireAJRep[1]{%
+  \addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformAnswerA{#1}}}
+\newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\AMCformQuestionA{#1}}}
+\def\AMCformBegin{\AMC@zoneformulairetrue}
+\newcommand\AMCform{%
+  \ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData%
+  \global\def\AMCmem@ireData{}\fi}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
+%
+% \subsubsection{Formatting answers}
+%
+% \begin{environment}{choices}\begin{environment}{choiceshoriz}\begin{environment}{choicescustom}\begin{macro}{\AMCBoxedAnswers}
+%       Answers have to be included in an environment |choices|
+%       (standard), |choiceshoriz| (answers on one line) or
+%       |choicescustom| (user defined) depending on the desired
+%       formatting.
+%
+%       Use |\AMCBoxedAnswers| to request all answers to be included
+%       in \LaTeX{} boxes; this can be usefull for example when using
+%       multicolumn answers formatting.
+%    \begin{macrocode}
+\def\AMCBoxedAnswers{\AMC@rbloctrue}
+\newenvironment{choices}[1][r]{%
+  \AMCrep@count=\z@\def\une@rep{\AMCrep@itemize}%
+  \ifAMC@rbloc\def\une@rep{\AMCrep@bloc}%
+  \else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi%
+    \AMCrep@init{#1}}%
+  {\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
+\newenvironment{choiceshoriz}[1][r]{%
+  \AMCrep@count=\z@\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}%
+  \par\begin{center}}%
+  {\AMC@fin@rep\end{center}}
+\newenvironment{choicescustom}[1][r]{%
+  \AMCrep@count=\z@\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}%
+  \AMCbeginAnswer\ignorespaces}%
+  {\AMC@fin@rep\AMCendAnswer}
+%    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}
+%
+% \begin{macro}{\AMCrep@bloc}\begin{macro}{\AMCrep@itemize}
+% \begin{macro}{\AMCrep@ligne}\begin{macro}{\AMCrep@perso}
+%     For each of these styles, a corresponding
+%     |\AMCrep@|$xxx$\marg{box}\marg{text} is defined, which will
+%     format the answer with a box given in \meta{box} and text
+%     \meta{text}. |\AMCrep@bloc| is also defined and used in standard
+%     formatting when the user wants to put answers inside a \LaTeX{}
+%     box.
+%    \begin{macrocode}
+\newcommand\AMCrep@bloc[2]{\AMCmem@ireAJRep{#1}%
+  \par\noindent\begin{minipage}{\linewidth}%
+    \begin{itemize}\item[#1] #2\end{itemize}\end{minipage}%
+  \vspace{\AMCinterBrep}}
+\newcommand\AMCrep@itemize[2]{\AMCmem@ireAJRep{#1}\item[#1] #2}
+\newcommand\AMCrep@ligne[2]{\AMCmem@ireAJRep{#1}%
+  \mbox{#1\hspace*{1em}#2}\hspace{3em plus 4em}}
+\newcommand\AMCrep@perso[2]{\AMCmem@ireAJRep{#1}\AMCanswer{#1}{#2}}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
+%
+% \begin{macro}{\AMCbeginAnswer}\begin{macro}{\AMCendAnswer}\begin{macro}{\AMCanswer}
+%       The |custom| style will use user-defined commands to format
+%       answers: |\AMCbeginAnswer| is called once before answers,
+%       |\AMCanswer|\marg{box}\marg{text} is called for each answer
+%       (\meta{box} beeing the box to be ticked and \meta{text} the
+%       text associated with the proposed answer), and |\AMCendAnswer|
+%       is called after all answers.
+%    \begin{macrocode}
+\def\AMCbeginAnswer{}
+\def\AMCanswer#1#2{#1 #2}
+\def\AMCendAnswer{}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
+%
+% \begin{macro}{\correctchoice}\begin{macro}{\wrongchoice}
+%     The commands |\correctchoice| and |\wrongchoice| are used inside
+%     |choices|-like environments to give the proposed answers and
+%     specify if they are to be tocked by the students or not.
+%
+%    \begin{macrocode}
+\newcommand{\correctchoice}[2][]{\advance\AMCrep@count\@ne\relax%
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
+  \AMCune@bonnetrue%
+  \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marque{#1}{1}%
+      \else\AMC@marque{#1}{}\fi}{#2}}{\the\AMCrep@count}\ignorespaces}
+\newcommand{\wrongchoice}[2][]{\advance\AMCrep@count\@ne\relax%
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
+  \AMCload@@reponse{\une@rep{\AMC@marque{#1}{}}{#2}}{\the\AMCrep@count}%
+  \ignorespaces}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsubsection{Formatting questions}
+%
+% \begin{macro}{\AMCquestionaff}\begin{macro}{\AMC@qaff}
+%   The counter |\AMCquestionaff| keeps track of the current question
+%   number. It can be redefined by the user, for example to print
+%   several questions without a number, and then print questions with a
+%   number starting at one.
+%   
+%   |\AMC@qaff| will increase this counter and format the question
+%   number out.
+%    \begin{macrocode}
+\newcounter{AMCquestionaff}
+\newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
+\newcommand\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \begin{macro}{\AMCbeginQuestion}\begin{macro}{\multiSymbole}
+%   The command |\AMCbeginQuestion|\marg{n}\marg{sign} will format the
+%   question header, where \meta{n} is the question number and
+%   \meta{sign} beeing |\multiSymbole| in case of a multiple question,
+%   and empty in case of a simple one. |\AMCbeginQuestion| and
+%   |\multiSymbole| can be user-redifined.
+%    \begin{macrocode}
+\def\AMCbeginQuestion#1#2{\par\noindent\AMC@loc@q{#1}{#2}\hspace*{1em}}
+\def\multiSymbole{$\clubsuit$}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \begin{environment}{question}\begin{environment}{questionmult}\begin{environment}{questionouverte}\begin{macro}{\ouverte@vs}
+%         Environment |{question}|\marg{key} encloses a simple question
+%         (with one and only one correct choice) with associated
+%         unique key \meta{key} and the proposed answers.
+%
+%         Environment |{questionmult}|\marg{key} is the same for
+%         multiple questions (with none, one or several correct
+%         choices).
+%
+%         Environment |{questionouverte}|\oarg{width} is used for open
+%         questions (that won't be marked automatically!), with width
+%         given as an optional argument (defaults to 3\,cm).
+%    \begin{macrocode}
+\ifx\question\undefined\else\let\question\undefined\fi
+\def\AMCnobloc{\AMC@qblocfalse}
+\def\AMCbloc{\AMC@qbloctrue}
+\newenvironment{question}[2][]{%
+  \global\def\AMCid@name{#2}\AMC@affecte{#2}{\AMCid@quest}%
+  \ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi%
+  \AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
+  \ifAMC@affichekeys\index{{\tt #2}}\fi%
+  \AMCbeginQuestion{\ifAMC@affichekeys[{\tt #2}]\else\AMC@qaff\fi}{#1}%
+  \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
+  \AMCmem@ireQ{\arabic{AMCquestionaff}}}%
+{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi\AMCmessage{FQ}}
+\newenvironment{questionmult}[1]{%
+  \AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}%
+  \AMCtype@multitrue\ifAMC@calibration%
+  \AMC@amclog{AUTOQCM[MULT]^^J}\fi}%
+{\end{question}}
+\newdimen\ouverte@vs
+\newenvironment{questionouverte}[1][3cm]{%
+  \AMCtype@multifalse\ouverte@vs=#1%
+  \ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
+  \AMCbeginQuestion{\AMC@qaff}{}}%
+{\vspace*{\ouverte@vs}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
+%    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}
+%
+% \subsection{Scoring}
+%
+% \begin{macro}{\scoring}\begin{macro}{\scoringDefaultS}\begin{macro}{\scoringDefaultM}\begin{macro}{\QuestionIndicative}
+%         Scoring strategies are simply transmitted to the |.amc| file
+%         for later analysis.
+%         
+%         |\scoring|\marg{scrore} details the scoring strategy for
+%         current question or current answer,
+%         |\scoringDefaultS|\marg{score} and
+%         |\scoringDefaultM|\marg{score} gives default scoring
+%         strategy for simple and multiple questions, and
+%         |\QuestionIndicative| tells that the current question is not
+%         no be taken into account in the global mark.
+%    \begin{macrocode}
+\def\scoring#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[B=#1]^^J}\fi}
+\def\scoringDefaultS#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDS=#1]^^J}\fi}
+\def\scoringDefaultM#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDM=#1]^^J}\fi}
+\def\QuestionIndicative{\ifAMC@calibration\AMC@amclog{AUTOQCM[INDIC]^^J}\fi}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
+%
+% \subsection{Codes}
+%
+% \begin{macro}{\AMCcode}
+% \noindent\begin{minipage}[t]{.45\linewidth}
+% Students can code some numerical information (such as student
+% number) through special questions, which can be formatted easily
+% with the command |\AMCcode|\marg{key}\marg{ndigits}, where
+% \meta{key} is a key prefix and \meta{ndigits} is the number of
+% required digits. The digits entered by the student will be available
+% through the questions \meta{key}|.1|$,\ldots,$\meta{key}|.|\meta{ndigits}.
+%
+% As an example, |\AMCcode{code}{6}| produces the opposite boxes (two
+% results are show here: without or with |separateanswersheet|
+% option), and trace positions of all the boxes in the |.xy| file with
+% the |code| identifier: the first digit is represented by question
+% with key |code.6|, the second by question with key |code.5|, and so on.
+%
+% Positions of the boxes are logged in the |.xy| file, as shown in
+% section~\ref{a:code} for the first set of boxes (without
+% |separateanswersheet|, with digits outside boxes).
+% \end{minipage}\hfill
+% \begin{minipage}[t]{.45\linewidth}
+%   \begin{amcxyfile}{automultiplechoice.xy3}\AMCcode{code}{6}\end{amcxyfile}
+%
+%   \makeatletter\AMC@ensembletrue\makeatother
+%   \AMCcode{code}{6}
+% \end{minipage}
+%
+%   
+%    \begin{macrocode}
+\newcount\AMC@chiffres
+\newcommand{\AMCcode}[2]{%
+{\def\AMCbeginQuestion##1##2{}%
+ \def\AMCbeginAnswer{\begin{minipage}{%
+       \ifAMC@ensemble 1.15em\else\ifAMC@inside@box 1.15em\else 2.5em\fi\fi}}%
+ \def\AMCendAnswer{\hspace*{\fill}\end{minipage}}%
+ \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else%
+   \ifAMC@inside@box\else{\bf ##2}\fi\fi\\[1mm]}%
+ \AMCnobloc%
+ \AMC@chiffres=#2\loop%
+ \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative
+   \begin{choicescustom}[o]\scoring{auto=0}
+     \wrongchoice[0]{0}
+     \wrongchoice[1]{1}
+     \wrongchoice[2]{2}
+     \wrongchoice[3]{3}
+     \wrongchoice[4]{4}
+     \wrongchoice[5]{5}
+     \wrongchoice[6]{6}
+     \wrongchoice[7]{7}
+     \wrongchoice[8]{8}
+     \wrongchoice[9]{9}
+   \end{choicescustom}
+ \end{question}
+ \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat
+}}
+%    \end{macrocode}\end{macro}
+%
+% \subsubsection{Intervals}
+%
+% \begin{macro}{\AMCIntervals}
+%   The command |\AMCIntervals|\marg{x}\marg{x0}\marg{x1}\marg{delta}
+%   can be used to present answers as intervals $[x_i,x_i+\delta[$
+%   covering $[\meta{x0},\meta{x1}[$, such that the only interval
+%   containing \meta{x} is declared as |\wrightchoice|, and the other
+%   as |\wrongchoice|.
+%
+%   For this command to work, one has to load package {\sf fp}.
+%
+%   As an example, 
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\begin{question}{quarter}
+  In which interval falls $1/4$?
+  \begin{multicols}{5}
+    \begin{choices}[o]
+      \AMCIntervals{0.25}{0}{1}{0.1}
+    \end{choices}
+  \end{multicols}
+\end{question}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+%   produces (in correction mode):
+%    \begin{question}{quarter}
+%      \makeatletter\AMC@correctrue\makeatother
+%      In which interval falls $1/4$?
+%      \begin{multicols}{5}
+%        \begin{choices}[o]
+%          \AMCIntervals{0.25}{0}{1}{0.1}
+%        \end{choices}
+%      \end{multicols}
+%    \end{question}
+%
+%    \begin{macrocode}
+\def\AMC@intervx#1#2{\AMC@CI@cas{[#1,\,#2[}}
+\def\AMCIntervals#1#2#3#4{%
+\FPeval\AMC@CI@a{clip(#2)}%
+\let\AMC@CI@cas=\wrongchoice%
+\loop%
+  \FPeval\AMC@CI@b{clip(AMC@CI@a + #4)}%
+  \FPiflt{#1}\AMC@CI@b\let\AMC@CI@cas=\correctchoice\fi%
+  \FPiflt{#1}\AMC@CI@a\let\AMC@CI@cas=\wrongchoice\fi%
+  \@expandtwoargs\AMC@intervx{\AMC@CI@a}{\AMC@CI@b}%
+\FPiflt\AMC@CI@b{#3}%
+  \FPset\AMC@CI@a{\AMC@CI@b}%
+\repeat}
+%    \end{macrocode}\end{macro}
+%
+% \subsection{Page formatting}
+%
+% \subsubsection{Watermark}
+%
+% \begin{macro}{\AMCw@termark}\begin{macro}{\AMCw@terprint}
+%     These commands are used to print a grey ``DRAFT'' under each
+%     page, so as to prevent from printing old versions of the
+%     subject.
+%    \begin{macrocode}
+\DeclareFontShape{OT1}{cmr}{b}{n}{<35->cmr17}{}
+\def\AMC@watertext{\AMC@loc@draft}
+\newcommand\AMCw@termark{%
+  \setlength{\@tempdimb}{.5\paperwidth}%
+  \setlength{\@tempdimc}{-.5\paperheight}%
+  \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+    \makebox(0,0){\rotatebox{45}{%
+        \textcolor[gray]{0.8}{
+          \fontencoding{OT1}\fontfamily{cmr}
+          \fontseries{b}\fontshape{n}
+          \fontsize{90pt}{120pt}
+          \selectfont
+          \AMC@watertext}}}}}
+\newcommand\AMCw@terprint[1]{%
+  \setbox\@tempboxa\vbox to \z@{%
+    \vbox{%
+      \hbox to \z@{%
+        #1\hss}}\vss}
+  \dp\@tempboxa\z@
+  \box\@tempboxa}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsubsection{Signs for scan analysis}
+%
+% The following code sets up all the signs to be printed on the pages
+% so as to be able to recognize the position of the boxes on the
+% scans. Four circles \makeatletter\m@rqueCalage\makeatother{} are
+% printed on the corners (see |\m@rqueCalage|), and binary boxes show
+% the student sheet number, the page and a checking number.
+%
+% |\AMC@intituleHead| is the title to be printed at the beginning
+% (used for corrected sheet, and empty on subject). |\AMC@note| is
+% printed at the bottom of each page.
+%
+%    \begin{macrocode}
+\def\AMCcercle#1#2{%
+  {\setlength{\unitlength}{1mm}%
+    \begin{picture}(#1,#1)(-#2,-#2)\thinlines\circle*{#1}\end{picture}}}
+\def\m@rqueCalage{\AMCcercle{3.6}{1.8}}
+\def\m@rque#1{\AMC@tracebox{1}{#1}{\m@rqueCalage}}
+\def\he@dtaille#1{\vbox to 1cm{#1}}
+\def\he@dbas#1{\he@dtaille{\vspace*{\fill}#1}}
+\def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}
+\def\AMC@intituleHead{\AMC@loc@corrected}
+\def\AMC@note{}
+\AtBeginPage{\ifAMC@pagelayout\global\advance\AMCid@check\m@ne%
+  \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
+  \AMC@pagepos%
+  \ifAMC@watermark\ifAMC@correchead\else\AMCw@terprint{\AMCw@termark}%
+  \fi\fi\fi}
+\AtBeginDocument{%
+  \ifAMC@pagelayout%
+  \pagestyle{fancy}
+  \renewcommand{\headrulewidth}{0pt}
+  \ifAMC@correchead
+    \fancyhf{}\fancyhead[C]{{\sc \AMC@intituleHead}}
+  \else
+    \fancyhf{}
+    \fancyhead[L]{\he@dbas{\m@rque{positionHG}}}
+    \fancyhead[R]{\he@dbas{\hspace*{0pt}\m@rque{positionHD}}}
+    \fancyfoot[L]{\m@rque{positionBG}}
+    \fancyfoot[R]{\hspace*{0pt}\m@rque{positionBD}}
+    \fancyhead[C]{\he@dhaut{%
+        \begin{minipage}[b]{\AMC@CBtaille}
+          \AMCbin@begin{1}\noindent%
+          \AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}\\
+          \AMCbin@begin{2}\noindent%
+          \AMC@binaryBoxes[\AMC@NCBpage]{\thepage}\ignorespaces%
+          \AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{\the\AMCid@check}%
+        \end{minipage}
+        \hbox to 4cm{\hspace*{\fill}%
+          {\tt +\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
+      }}
+    \fancyhfoffset[EOLR]{5mm}
+  \fi
+  \fancyfoot[C]{\AMC@note}
+  \fi
+}
+%    \end{macrocode}
+%
+% \subsection{Defining a single exam copy content}
+%
+% \begin{macro}{\onecopy}
+%   The command |\onecopy|\oarg{n}\marg{code} generates \meta{n}
+%   copies of the subject that is described in \meta{code}. The \LaTeX
+%   code \meta{code} that generates a single copy can be a little
+%   long, so that the environment |examcopy| is often prefered.
+%
+%    \begin{macrocode}
+\newcommand{\onecopy}[2]{%
+  \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1%
+  \else\AMCnum@copies=\AMCNombreCopies\fi%
+  \AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
+  \AMCid@etud=\AMC@premierecopie%
+  \AMCid@etudfin=\AMCnum@copies%
+  \advance\AMCid@etudfin by \AMC@premierecopie%
+  \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
+  \loop%
+    \AMC@zoneformulairefalse\setcounter{page}{1}%
+    \AMCnumero{1}%
+    \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
+    #2\clearpage\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+}
+%    \end{macrocode}\end{macro}
+%
+% \begin{macro}{\AMCcleardoublepage}
+%   If you want to print the subject all at one time in duplex mode,
+%   it is necessary to end each subject with an even number of
+%   pages. This can be achieved using |\AMCcleardoublepage| at the end
+%   of the copy definition. This command is also usefull inserted
+%   before the separate answer sheet (if any).
+%
+%    \begin{macrocode}
+\def\AMCcleardoublepage{\ifodd\thepage\clearpage~\fi\clearpage}
+%    \end{macrocode}\end{macro}
+%
+% \begin{macro}{\exemplairepair}
+%   To make some differences in the copies, checking if the student
+%   sheet number is odd, with |\exemplairepair| construct, can be
+%   usefull.
+%    \begin{macrocode}
+\def\exemplairepair{\ifodd\AMCid@etud}
+%    \end{macrocode}\end{macro}
+%
+% \begin{macro}{\AMClabel}\begin{macro}{\AMCref}
+%     Commands |\AMCref| and |\AMClabel| replaces \LaTeX's |\label|
+%     and |\ref| to be able to use different labels for different
+%     sheets.
+%
+%    \begin{macrocode}
+\def\AMClabel#1{\expandafter\label{\the\AMCid@etud-#1}}
+\def\AMCref#1{\expandafter\ref{\the\AMCid@etud-#1}}
+%    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsection{Package options}
+%
+% See section~\ref{d:options} for the options descriptions.
+%
+%    \begin{macrocode}
+\DeclareOption{noshuffle}{\AMC@ordretrue}
+\DeclareOption{answers}{\AMC@correcheadtrue\AMC@correctrue}
+\DeclareOption{indivanswers}{\AMC@correctrue}
+\DeclareOption{box}{\AMC@qbloctrue}
+\DeclareOption{separateanswersheet}{\AMC@ensembletrue}
+\DeclareOption{digits}{\AMC@inside@digittrue}
+\DeclareOption{ordre}{\AMC@ordretrue}
+\DeclareOption{correc}{\AMC@correcheadtrue\AMC@correctrue}
+\DeclareOption{modele}{\AMC@correcheadtrue\AMC@correcfalse\AMC@ordretrue}
+\DeclareOption{correcindiv}{\AMC@correctrue}
+\DeclareOption{init}{\AMC@SR@time}
+\DeclareOption{bloc}{\AMC@qbloctrue}
+\DeclareOption{completemulti}{\AMCcomplete@multitrue}
+\DeclareOption{insidebox}{\AMC@inside@boxtrue}
+\DeclareOption{ensemble}{\AMC@ensembletrue}
+\DeclareOption{chiffres}{\AMC@inside@digittrue}
+\DeclareOption{calibration}{\AMC@calibrationtrue}
+\DeclareOption{nowatermark}{\AMC@watermarkfalse}
+\DeclareOption{catalog}{\AMC@watermarkfalse\AMC@correcheadtrue%
+  \AMC@correctrue\AMC@ordretrue%
+  \def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue}
+\DeclareOption{francais}{\AMC@loc@FR}
+\DeclareOption{versionA}{%
+  \def\AMCid@checkmax{31}\def\AMC@NCBetud{9}\def\AMC@NCBpage{4}%
+  \def\AMC@NCBcheck{5}\setlength{\AMC@CBtaille}{4cm}%
+  \def\AMC@premierecopie{100}}
+\DeclareOption{plain}{\AMC@plaintrue}
+\DeclareOption{nopage}{\AMC@pagelayoutfalse}
+\ProcessOptions
+%    \end{macrocode}
+%
+% \subsection{Optional features}
+%
+% This package tries to see if optional packages {\sf environ} and
+% {\sf etex} are loadable, and load them if possible.  This behaviour
+% can be cancelled by using |plain| option.
+%
+%    \begin{macrocode}
+\ifAMC@plain
+\else
+  \IfFileExists{environ.sty}{\RequirePackage{environ}}{}
+  \ifx\eTeXversion\@undefined
+  \else
+    \RequirePackage{etex}
+  \fi
+\fi
+%    \end{macrocode}
+%
+% \begin{environment}{examcopy}
+%   Then, if {\sf environ} package is loaded and defines command
+%   |\NewEnviron|, environment |examcopy| is defined.
+%
+%   Environment |{examcopy}|\oarg{n} does the same as command
+%   |onecopy|: it encloses \LaTeX{} code which makes \emph{one} exam
+%   copy. Optional argument \meta{n} gives the number of desired
+%   copies -- this can also be modified redefinig |\AMCNombreCopies|.
+%
+%    \begin{macrocode}
+\@ifpackageloaded{environ}{%
+  \ifx\NewEnviron\undefined\PackageWarning{automultiplechoice}%
+  {Package environ loaded but too old version:
+    environnement examcopy/copieexamen will NOT be defined.}%
+  \else\NewEnviron{examcopy}[1][5]{\onecopy{#1}{\BODY}}\fi}%
+{\PackageWarning{automultiplechoice}%
+  {Package environ not loaded: environnement
+    examcopy/copieexamen will NOT be defined.}}
+%    \end{macrocode}\end{environment}
+%
+% \subsection{External control}
+%
+% \begin{macro}{\SujetExterne}\begin{macro}{\CalibrationExterne}
+% \begin{macro}{\CorrigeExterne}\begin{macro}{\CorrigeIndivExterne}
+% \begin{macro}{\NoWatermarkExterne}
+%   Some of the package options can be controlled defining
+%   |\|$xxx$|Externe| commands. For example, the following command will
+%   format the subject document, whatever options are used in the
+%   \LaTeX{} file:
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.tex}'
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+%
+%    \begin{macrocode}
+\ifx\SujetExterne\undefined\else
+\message{***SUJET***^^J}
+\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
+\fi
+\ifx\CalibrationExterne\undefined\else
+\message{***CALIBRATION***^^J}
+\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
+\fi
+\ifx\CorrigeExterne\undefined\else
+\message{***CORRIGE***^^J}
+\AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue\AMC@watermarkfalse
+\fi
+\ifx\CorrigeIndivExterne\undefined\else
+\message{***CORRIGE***^^J}
+\AMC@correctrue\AMC@watermarkfalse
+\fi
+\ifx\NoWatermarkExterne\undefined\else
+\AMC@watermarkfalse
+\fi
+%    \end{macrocode}
+% \end{macro}\end{macro}\end{macro}\end{macro}\end{macro}
+%
+% \subsection{Page layout}
+%
+% The following code sets the correct page layout to have room for
+% signs for scan analysis, and prepares watermark printing:
+%    \begin{macrocode}
+\@ifpackageloaded{geometry}{}{\usepackage{geometry}}
+\ifAMC@pagelayout
+  \ifAMC@correchead
+    \geometry{hmargin=3cm,vmargin={1cm,1cm},includeheadfoot,headheight=1cm,footskip=1cm}
+  \else
+    \geometry{hmargin=3cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=3.5cm,bottom=2.5cm}
+  \fi
+  \ifAMC@watermark
+    \ifAMC@correchead\else
+      \def\AMC@note{\begin{minipage}{0.65\linewidth}
+          \textcolor{blue}{\AMC@loc@message}
+        \end{minipage}
+      }
+    \fi
+  \fi
+\fi
+%    \end{macrocode}
+%
+% \subsection{Initialisation}
+%
+% Initialisation of the check counter:
+%    \begin{macrocode}
+\AMCid@check=\AMCid@checkmax\advance\AMCid@check\@ne
+%    \end{macrocode}
+%
+% Telling outside if separate answer sheet are requested:
+%    \begin{macrocode}
+\ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi
+%    \end{macrocode}
+%
+% Preparing writing to |.xy| file :
+%    \begin{macrocode}
+\ifAMC@calibration
+\newwrite\AMC@XYFILE%
+\immediate\openout\AMC@XYFILE\jobname.xy%
+\immediate\write\AMC@XYFILE{\string\version{\AMC@VERSION}}
+\fi
+%    \end{macrocode}
+%
+% \subsection{French command names}
+%
+% For backward compatibility, a lot of commands have their french
+% counterpart:
+%    \begin{macrocode}
+\let\reponses=\choices\let\endreponses=\endchoices
+\let\reponseshoriz=\choiceshoriz\let\endreponseshoriz=\endchoiceshoriz
+\let\reponsesperso=\choicescustom\let\endreponsesperso=\endchoicescustom
+\let\bonne=\correctchoice
+\let\mauvaise=\wrongchoice
+\let\bareme=\scoring
+\let\baremeDefautM=\scoringDefaultM
+\let\baremeDefautS=\scoringDefaultS
+\def\exemplaire{\AMC@loc@FR\onecopy}
+\@ifpackageloaded{environ}{%
+  \let\copieexamen=\examcopy\let\endcopieexamen=\endexamcopy}{}
+\let\melangegroupe=\shufflegroup
+\let\restituegroupe=\insertgroup
+\let\alafin=\lastchoices
+\let\formulaire=\AMCform
+\let\AMCdebutFormulaire=\AMCformBegin
+\let\champnom=\namefield
+\let\choixIntervalles=\AMCIntervals
+%    \end{macrocode}
+%
+% \section{Outputs}
+%
+% In the |.xy| file, |1/|\meta{n} means
+% student sheet number~1 (there is only one ``student sheet'' for this
+% document as we did not use |\onecopy|) and page number~\meta{n} inside this
+% student sheet. Then, each instance of the |\tracepos| command shows
+% $x$ and $y$ positions as arguments \#2 and \#3 (unit is |sp|, such
+% that $65536\times 72.27\,|sp|$ is one inch). One has to take min and
+% max of the $x$-values to determine the left and right position of
+% the box, and min and max values of $y$-values to determine top and bottom
+% position of the box.
+%
+% \subsection{{\tt namefield} command}
+% \label{a:name}
+% Lines in the |.xy| file from a |\namefield| command:
+% \verbatiminput{automultiplechoice.xy2} 
+%
+% \subsection{{\tt AMCboxedchar} command}
+% \label{a:boxed}
+% Lines in the |.xy| file from a |\AMCboxedchar| command:
+% \verbatiminput{automultiplechoice.xy1} 
+%
+% \subsection{{\tt AMCcode} command}
+% \label{a:code}
+% Lines in the |.xy| file from a |\AMCcode| command. Here,
+% |code.|\meta{n}|:|\meta{q}|,|\meta{v} relates to digit number
+% \meta{n} from the right (\meta{n}=1 for units, \meta{n}=2 for tens,
+% \meta{n}=3 for hundreds and so on), question number \meta{q}
+% (|\AMCcode| uses a fake question; this number can be ignored), and
+% value \meta{v}-1 (box number \meta{v} for the digit).
+% \verbatiminput{automultiplechoice.xy3}
+%
+% \clearpage
+% \tableofcontents
+%
+% \clearpage
+% \PrintIndex
+%
+% \end{document}

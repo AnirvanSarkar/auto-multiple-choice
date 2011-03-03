@@ -39,14 +39,15 @@ BINARIES=AMC-traitement-image AMC-mepdirect AMC-detect
 MODS=AMC-*.pl $(BINARIES)
 GLADE=AMC-gui.glade
 MOD_GLADE=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
-STY=automultiplechoice.sty
+STY=doc/sty/automultiplechoice.sty
+DTX=doc/sty/automultiplechoice.dtx
 MOS=$(wildcard I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
 SUBMODS=$(notdir $(shell ls doc/modeles))
 
 DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
-FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade $(MOD_GLADE:.glade.in=.glade) AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) automultiplechoice.sty
+FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade $(MOD_GLADE:.glade.in=.glade) AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
 
 PRECOMP_FLAG_FILE=PRECOMP
 PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
@@ -80,6 +81,7 @@ AMC-detect: AMC-detect.cc Makefile
 
 doc:
 	$(MAKE) -C doc
+	$(MAKE) -C doc/sty
 
 I18N:
 	$(MAKE) -C I18N
@@ -106,6 +108,7 @@ clean_IN: FORCE
 clean: clean_IN FORCE
 	rm -f $(BINARIES) $(MAIN_LOGO).xpm
 	rm -f auto-multiple-choice.spec
+	$(MAKE) -C doc/sty clean
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
 
@@ -128,6 +131,10 @@ install: install_lang install_models FORCE
 	install    -m 0644 $(USER_GROUP) $(GLADE) $(DESTDIR)/$(MODSDIR)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDIR)
 	install    -m 0644 $(USER_GROUP) $(STY) $(DESTDIR)/$(TEXDIR)
+ifneq ($(TEXDOCDIR),)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDOCDIR)
+	install    -m 0644 $(USER_GROUP) doc/sty/*.pdf doc/sty/*.tex $(DESTDIR)/$(TEXDOCDIR)
+endif
 ifneq ($(DESKTOPDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DESKTOPDIR)
 	install    -m 0644 $(USER_GROUP) -T auto-multiple-choice.desktop $(DESTDIR)/$(DESKTOPDIR)/auto-multiple-choice.desktop
