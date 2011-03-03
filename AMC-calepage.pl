@@ -95,6 +95,8 @@ my $progress_debut=0;
 
 my $mep_saved='';
 
+my $debug_image='';
+
 my @stud_page;
 
 GetOptions("page=s"=>\$out_cadre,
@@ -116,6 +118,7 @@ GetOptions("page=s"=>\$out_cadre,
 	   "progression-id=s"=>\$progress_id,
 	   "progression-debut=s"=>\$progress_debut,
 	   "tol-marque=s"=>\$tol_marque,
+	   "debug-image=s"=>\$debug_image,
 	   );
 
 set_debug($debug);
@@ -280,7 +283,7 @@ if($traitement->mode() eq 'opencv') {
 	      '-p',$tol_marque_plus,'-m',$tol_marque_moins,
 	);
 
-    push @args,'-o',1 if($repertoire_cr);
+    push @args,'-o',$debug_image if($debug_image);
 
     $traitement->set('args',\@args);
 

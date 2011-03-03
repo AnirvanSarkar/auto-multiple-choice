@@ -42,6 +42,7 @@ $SIG{INT} = \&catch_signal;
 my $mep_dir="";
 my $cr_dir="";
 my $debug='';
+my $debug_image_dir='';
 my $progress=0;
 my $progress_id=0;
 my $liste_f;
@@ -62,6 +63,7 @@ GetOptions("mep=s"=>\$mep_dir,
 	   "liste-fichiers=s"=>\$liste_f,
 	   "projet=s"=>\$rep_projet,
 	   "n-procs=s"=>\$n_procs,
+	   "debug-image-dir=s"=>\$debug_image_dir,
 	   );
 
 set_debug($debug);
@@ -120,6 +122,8 @@ if(!$mep_file) {
 }
 
 for my $s (@scans) {
+    my $sf=$s;
+    $sf =~ s:.*/::;
     my @c=with_prog("AMC-calepage.pl");
     push @c,"--debug",debug_file();
     push @c,"--seuil-coche",$seuil_coche if($seuil_coche);
@@ -129,6 +133,7 @@ for my $s (@scans) {
     push @c,"--mep",$mep_dir if($mep_dir);
     push @c,"--mep-saved",$mep_file;
     push @c,"--projet",$rep_projet if($rep_projet);
+    push @c,"--debug-image",$debug_image_dir."/$sf" if(-d $debug_image_dir);
     push @c,"--cr",$cr_dir,$s;
 
     $queue->add_process(@c);
