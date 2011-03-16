@@ -68,10 +68,10 @@ AMC-traitement-image: AMC-traitement-image.c Makefile
 	$(GCC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
 
 AMC-mepdirect: AMC-mepdirect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) $(GCC_POPPLER)
+	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) $(GCC_POPPLER) -lstdc++ -lm
 
 AMC-detect: AMC-detect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lm $(GCC_OPENCV)
+	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV)
 
 %.xml: %.in.xml
 	sed $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
