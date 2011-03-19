@@ -96,7 +96,7 @@ sync:
 	convert -density 300 $< $*-%03d.ppm
 
 %.png: %.svg
-	inkscape --export-width=32 --export-height=32 --export-png=$@ $<
+	rsvg -w 32 -h 32 $< $@
 
 %.xpm: %.png
 	pngtopnm $< | ppmtoxpm > $@

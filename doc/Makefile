@@ -38,10 +38,10 @@ clean:
 	rm -f *~
 
 html/images/callouts/%.png: img_src/callouts/%.svg
-	inkscape --export-width=12 --export-height=12 --export-png=$@ $<
+	rsvg -w 12 -h 12 $< $@
 
 html/images/%.png: img_src/%.svg
-	inkscape --export-width=24 --export-height=24 --export-png=$@ $<
+	rsvg -w 24 -h 24 $< $@
 
 %.tex: %.xml
 	dblatex -t tex --xslt-opts="--nonet" --xslt-opts="--catalogs" $< -o $@
