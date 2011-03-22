@@ -281,9 +281,8 @@ if($traitement->mode() eq 'opencv') {
     my @args=('-x',$hmep->{'tx'},'-y',$hmep->{'ty'},
 	      '-d',$hmep->{'diametremarque'},
 	      '-p',$tol_marque_plus,'-m',$tol_marque_moins,
+	      '-o',($debug_image ? $debug_image : 1)
 	);
-
-    push @args,'-o',$debug_image if($debug_image);
 
     $traitement->set('args',\@args);
 

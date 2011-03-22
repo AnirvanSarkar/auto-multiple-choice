@@ -1048,6 +1048,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	    my $zd=absolu('%PROJET/cr/zooms')."/".id2idf($id,'simple'=>1);
 
 	    if(-d $zd) {
+		$c++;
 		my $item = Gtk2::ImageMenuItem->new($diag_menu{'zoom'}->{text});
 		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{'zoom'}->{icon},'menu'));
 		$menu->append ($item);

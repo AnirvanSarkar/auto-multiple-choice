@@ -375,6 +375,8 @@ void mesure_case(IplImage *src,IplImage *illustr,
 	    if(mkdir(zoom_file,0755)!=0) {
 	      ok=0;
 	      printf("! ZOOMDC : Zoom dir creation error %d : %s\n",errno,zoom_file);
+	    } else {
+	      printf(": Zoom dir created %s\n",zoom_file);
 	    }
 	  } else {
 	    ok=0;
