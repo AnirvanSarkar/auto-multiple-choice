@@ -85,8 +85,10 @@
       <title>Operating system</title>
 
       <para>The AMC utilities have been written for Linux. They might be
-      adapted to Windows without too many difficulties, but this will not be
-      done in the near future.</para>
+      adapted to MAC OS X or Windows without too many difficulties, but I won
+      do that in the near future. Please contact me if you are interested to
+      do it : I can help you a little, and I will include changes in AMC if
+      necessary.</para>
     </sect2>
 
     <sect2>
@@ -927,6 +929,43 @@ Durée : 10 minutes.
           of the command <command>onecopy</command>, so that shuffling is
           performed before each realization.</para>
         </note>
+
+        <para>Groups of questions can be manipulated more precisely thanks to
+        the following commands:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><code>\insertgroup[n]{mygroup}</code> (using optional
+            parameterl <replaceable>n</replaceable>) only inserts the
+            <replaceable>n</replaceable> first elements from the group.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\cleargroup{mygroup}</code> clears all group
+            content.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\copygroup{groupA}{groupB}</code> copies all the
+            elements from group <replaceable>groupA</replaceable> to the end
+            of group <replaceable>groupB</replaceable>. With an optional
+            argument <replaceable>n</replaceable>, only the n first elements
+            will be copied: <code>\copygroup[n]{groupA}{groupB}</code>.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>With these commands, you can for exemple make a exam taking 4
+        questions from group GA at random, 5 questions from group GB at
+        random, and all the questions from group GO, shuffling all these
+        questions, with the following code (to be used inside the argument of
+        the command <command>onecopy</command>):</para>
+
+        <programlisting>\cleargroup{all}
+\shufflegroup{GA}\copygroup[4]{GA}{all}
+\shufflegroup{GB}\copygroup[5]{GB}{all}
+\copygroup{GO}{all}
+\shufflegroupe{all}
+\insertgroup{all}</programlisting>
       </sect3>
 
       <sect3>

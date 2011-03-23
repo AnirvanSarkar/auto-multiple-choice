@@ -70,8 +70,10 @@
       <title>Système d'exploitation</title>
 
       <para>Les utilitaires AMC sont pour l'instant écrits pour Linux. Ils
-      devraient pouvoir être adaptés à Windows sans trop de difficulté, mais
-      ceci ne sera pas fait dans un avenir proche.</para>
+      devraient pouvoir être adaptés à MAC OS X ou Windows sans trop de
+      difficulté, mais je n'ai pas prévu de le faire dans un avenir proche.
+      N'hésitez pas à me contactez si vous souhaitez le faire : j'essayerai de
+      vous aider et j'intègrerai les changements nécessaires dans AMC.</para>
     </sect2>
 
     <sect2>
@@ -152,10 +154,10 @@
       à 199.</para>
 
       <para>Par ailleurs, les limitations de LaTeX pourront bloquer la
-      compilation avant d'utiliser 255 questions (erreur du type
-      « <errortext>No room for a new \toks</errortext> »). Dans ce cas,
-      essayez en utilisant le package <package>etex</package>, grâce à la
-      commande <code>\usepackage{etex}</code>.</para>
+      compilation avant ces limites (erreur du type « <errortext>No room for a
+      new \toks</errortext> »). Dans ce cas, essayez en utilisant le package
+      <package>etex</package>, grâce à la commande
+      <code>\usepackage{etex}</code>.</para>
     </sect2>
 
     <sect2>
@@ -974,6 +976,45 @@ Durée : 10 minutes.
           commande <command>exemplaire</command>, pour que le mélange soit
           effectué avant chaque copie.</para>
         </note>
+
+        <para>On peut manipuler les groupes de questions de manière plus
+        précise grâce aux commandes suivantes :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><code>\restituegroupe[n]{ungroupe}</code> (utilisation du
+            paramètre optionnel <replaceable>n</replaceable>) restitue
+            uniquement les <replaceable>n</replaceable> premiers éléments du
+            groupe.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\cleargroup{groupe}</code> efface tout le contenu du
+            groupe.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\copygroup{depuis}{vers}</code> copie le contenu du
+            groupe <replaceable>depuis</replaceable> à la fin du groupe
+            <replaceable>vers</replaceable>. Cette commande admet un argument
+            optionnel qui permet de ne copier qu'un certain nombre d'éléments,
+            comme dans <code>\copygroup[n]{depuis}{vers}</code>.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>À l'aide de ces commandes, on peut par exemple composer un sujet
+        en prenant 4 questions au hasard dans le groupe GA, 5 questions au
+        hasard dans le groupe GB, toutes les questions du groupe GO, puis en
+        mélangeant le tout, grâce aux commandes suivantes (à mettre à
+        l'intérieur du texte en argument de la commande
+        <command>exemplaire</command>) :</para>
+
+        <programlisting>\cleargroup{tout}
+\melangegroupe{GA}\copygroup[4]{GA}{tout}
+\melangegroupe{GB}\copygroup[5]{GB}{tout}
+\copygroup{GO}{tout}
+\melangegroupe{tout}
+\restituegroupe{tout}</programlisting>
       </sect3>
 
       <sect3>
