@@ -1332,21 +1332,48 @@ respective parameters \VQa{} et \VQb{}.
 
           <guimenuitem>New</guimenuitem>
         </menuchoice>. A window opens and allows us to see existing project
-      names (if any), but we want to create a new project, so we choose a name
-      (made with simple characters; « test » will be OK for our short test),
-      which we write in the field <guilabel>New project</guilabel>, then we
-      push the <guibutton>Create a project</guibutton> button.</para>
+      names (if any) and choose a name for our new project (made with simple
+      characters; « test » will be OK for our short test), which we write in
+      the field <guilabel>Project name</guilabel>. Then we push the
+      <guibutton>New project</guibutton> button.</para>
 
       <para>Now we must choose a LaTeX file as a source for the
-      multiple-choice. To do so let's click on the button named
-      <guilabel>LaTeX file</guilabel>. The current directory is the one with
-      examples given with AMC (usually it is
-      <filename>/usr/share/doc/auto-multiple-choice/exemples/</filename>):
-      let's select <filename>simple.tex</filename>. To be able to modify it at
-      will, we must copy it into the project's directory, with the button
-      <guibutton>import</guibutton>. Now we can edit it to modify the shape of
-      the document or the questions, thanks to the <guibutton>edit</guibutton>
-      button which launches the default editor.</para>
+      multiple-choice. Several possibilities are shown:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><guilabel>model</guilabel>: this choice allows to choose from
+          models shipped with AMC an exam to customize later.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>file</guilabel>: this choice allows to choose a
+          LaTeX file already prepared for this exam. Somebody may have
+          prepared the exam for you, or you can have prepared the exam outside
+          AMC, using your favorite LaTeX editor.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>empty</guilabel>: using this choice, an empty LaTeX
+          file will be created. You have to edit it to compose the exam from
+          zero.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>archive</guilabel>: use this choice if you have a
+          zip or tgz archive containing the exam definition (LaTeX source
+          file, along with image files, parameters file for example). This
+          archive can be made by an external software. It can also be a backup
+          of one of your AMC projects.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>For our test, let us choose <guilabel>model</guilabel>. The next
+      window presents the models: choose for example <guilabel>Simple
+      example</guilabel> from <guilabel>[EN] Documentation group</guilabel>.
+      Now we can edit it to modify the shape of the document or the questions,
+      thanks to the <guibutton>Edit LaTeX file</guibutton> button which
+      launches the default editor.</para>
     </sect2>
 
     <sect2>
@@ -1354,27 +1381,25 @@ respective parameters \VQa{} et \VQb{}.
 
       <para>Preparing a project is done in two steps. First we must make the
       reference documents from the LaTeX source file. This can be done by
-      clicking the <guibutton>Update button</guibutton> in the section
-      <guilabel>Work documents</guilabel>. The following documents are
-      produced:</para>
+      clicking the <guibutton>Update documents</guibutton>. The following
+      documents are produced:</para>
 
       <itemizedlist>
         <listitem>
-          <para>The <emphasis>subject</emphasis>. This file must be printed to
-          distribute its pages to students.</para>
+          <para>The <emphasis>question</emphasis>. This file can be printed to
+          distribute its pages to students (see below).</para>
         </listitem>
 
         <listitem>
-          <para>The <emphasis>correction</emphasis>. We can check that the
+          <para>The <emphasis>solution</emphasis>. We can check that the
           chosen responses there are the good ones. It is also made to be
           distributed to students.</para>
         </listitem>
 
         <listitem>
-          <para>The <emphasis>layout document</emphasis>. Framing marks,
-          checkboxes, and also the area where students write their names are
-          drawn with colors. The program will use this document to locate
-          exactly those elements.</para>
+          <para>The <emphasis>adjustment</emphasis> document. It contains
+          information to locate framing marks, checkboxes, and also the area
+          where students write their names are drawn on all the pages.</para>
         </listitem>
       </itemizedlist>
 
@@ -1384,17 +1409,17 @@ respective parameters \VQa{} et \VQb{}.
       <para>Now we can begin the last step of the preparation: analyzing the
       layout document. It can be launched with the button
       <guibutton>Calculate</guibutton> in the section <guilabel>Layout
-      </guilabel>. This analysis detects, in every page of the subject, the
-      exact position of every element which must be analyzed in the students'
-      copies. This analysis can be a bit long (mainly when there are many
-      pages in the subject). We can see the result in the right-side list,
-      which displays for each page its number, its identificator (a code
+      detection</guilabel>. This analysis detects, in every page of the
+      subject, the exact position of every element which must be analyzed in
+      the students' copies. This analysis can be a bit long (mainly when there
+      are many pages in the subject). We can see the result in the right-side
+      list, which displays for each page its number, its identificator (a code
       containing the student's number), the page number for this student, and
       a code to verify the identification), and also the date of the last
       update of the layout.</para>
 
       <para>To check whether the layouts have been correctly detected, we can
-      use the button <guibutton>Check the layouts</guibutton>. A short insight
+      use the button <guibutton>Check layouts</guibutton>. A short insight
       allows to check that red checkboxes are correctly located over the boxes
       of the subject.</para>
     </sect2>
@@ -1430,8 +1455,8 @@ respective parameters \VQa{} et \VQb{}.
       <para>Now we shall describe the input from students' copies, which can
       be done automatically and/or manually.</para>
 
-      <para>Let's move to the <guilabel>Input</guilabel> tab of the graphical
-      interface.</para>
+      <para>Let's move to the <guilabel>Data capture</guilabel> tab of the
+      graphical interface.</para>
 
       <sect3>
         <title>Automated input</title>
@@ -1452,10 +1477,10 @@ respective parameters \VQa{} et \VQb{}.
 
         <para>Then we select this set of scan files in the dialog opened by
         the button <guibutton>Automated</guibutton> of the section
-        <guilabel>Input of copies after exam</guilabel>, then we validate with
-        the button <guibutton>Use</guibutton> of this dialog. It's now time to
-        drink a coffee because the analysis of copies can be very long (and
-        can be done quietly because it requires no interaction).</para>
+        <guilabel>Data capture after examination</guilabel>, then we validate
+        with the button <guibutton>Use</guibutton> of this dialog. It's now
+        time to drink a coffee because the analysis of copies can be very long
+        (and can be done quietly because it requires no interaction).</para>
 
         <para>The result of the analysis of each page is indicated in the
         lists of the section <guilabel>Diagnosis</guilabel>:</para>
@@ -1505,8 +1530,8 @@ respective parameters \VQa{} et \VQb{}.
     <sect2>
       <title>Correction</title>
 
-      <para>In the <guilabel>Scoring</guilabel> tab of the graphic interface,
-      the part <guilabel>Scoring</guilabel> allows us to deduce the scores of
+      <para>In the <guilabel>Marking</guilabel> tab of the graphic interface,
+      the part <guilabel>Marking</guilabel> allows us to deduce the scores of
       the students from the inputs, but also to read the codes written by the
       students (see <xref linkend="latex.codes" />).</para>
 
@@ -1514,22 +1539,22 @@ respective parameters \VQa{} et \VQb{}.
         <title>Process</title>
 
         <para>The computation of the scores is launched with the button
-        <guibutton>Correct</guibutton>, but we must previously make the
-        following choice:</para>
+        <guibutton>Mark</guibutton>, but we must previously make the following
+        choice:</para>
 
         <itemizedlist>
           <listitem>
-            <para>If we check the box <guilabel>Update the scale</guilabel>,
-            the scoring strategy will be first extracted from the LaTeX source
-            file. This allow to try many strategies at the end of the
-            correction process. The method to specify the strategy in the
-            LaTeX file will be explained in the section <xref
+            <para>If we check the box <guilabel>Update marking
+            scale</guilabel>, the scoring strategy will be first extracted
+            from the LaTeX source file. This allow to try many strategies at
+            the end of the correction process. The method to specify the
+            strategy in the LaTeX file will be explained in the section <xref
             endterm="bareme.title" linkend="bareme" /> (a default scoring
             strategy is used when no indication is given).</para>
           </listitem>
         </itemizedlist>
 
-        <para>When we click the button <guibutton>Correction</guibutton>, the
+        <para>When we click the button <guibutton>Mark</guibutton>, the
         correction is made (this can take some time if we also asked for the
         reading of the scale).</para>
       </sect3>
@@ -1990,7 +2015,7 @@ Name:
         </listitem>
       </orderedlist>
 
-      <para>Let's first move to the <guilabel>Scoring</guilabel> tab of the
+      <para>Let's first move to the <guilabel>Marking</guilabel> tab of the
       graphical interface.</para>
 
       <sect3 id="liste.etudiants">
@@ -2038,11 +2063,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <sect4>
           <title>Automated association</title>
 
-          <para>When we push the button <guibutton>Automated
-          association</guibutton> in the part <guilabel>Identification of the
-          students</guilabel>, matching of the codes given by the students
-          begins. We can watch or improve the result later with a (partial)
-          manual association.</para>
+          <para>When we push the button <guibutton>Automatic</guibutton> in
+          the part <guilabel>Students identification</guilabel>, matching of
+          the codes given by the students begins. We can watch or improve the
+          result later with a (partial) manual association.</para>
 
           <warning>
             <para>To make an automated association, at least one command
@@ -2059,15 +2083,15 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <title>Manual association</title>
 
           <para>To open the window allowing recognition of the students'
-          names, let's click on <guibutton>Manual association</guibutton>
-          button in the part <guilabel>Identification of students</guilabel>.
-          This window is made of an upper part which presents in sequence
-          images of the names written by the students, a lower part containing
-          a button for each student from the list we supplied, and a right
-          part allowing to browse easily the copies to be identified. Let's
-          click the button matching the name written in the upper part for
-          each presented page (by default, only the copies not or badly
-          identified are presented - this can be changed by checking the box
+          names, let's click on <guibutton>Manual</guibutton> button in the
+          part <guilabel>Students identification</guilabel>. This window is
+          made of an upper part which presents in sequence images of the names
+          written by the students, a lower part containing a button for each
+          student from the list we supplied, and a right part allowing to
+          browse easily the copies to be identified. Let's click the button
+          matching the name written in the upper part for each presented page
+          (by default, only the copies not or badly identified are presented -
+          this can be changed by checking the box
           <guilabel>associated</guilabel>). When every page is read, a blue
           background appears instead of the names, and we just need to click
           the <guibutton>Save</guibutton> button to end with
@@ -2089,9 +2113,9 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
     <sect2>
       <title>Annotation</title>
 
-      <para>When we push the button <guibutton>Annotate the
-      copies</guibutton>, copies annotation will begin: on every scan, the
-      following annotations will be made:</para>
+      <para>When we push the button <guibutton>Annotate papers</guibutton>,
+      copies annotation will begin: on every scan, the following annotations
+      will be made:</para>
 
       <itemizedlist>
         <listitem>
@@ -2126,11 +2150,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <para>If we wish to distribute the annotated/corrected copies to
       students in electronic format, it is useful to make a PDF file for each
       student, from his/her JPG annotated pages. This is made by pushing the
-      button <guibutton>Gather</guibutton>. The name of the PDF file which
-      will contain the corrected copy of a student is based on the template
-      indicated in the field <guilabel>Template of file name</guilabel>. In
-      that template, every substring as « (<replaceable>col</replaceable>) »
-      is replaced by the contents of the column named
+      button <guibutton>Group</guibutton>. The name of the PDF file which will
+      contain the corrected copy of a student is based on the template
+      indicated in the field <guilabel>File name model</guilabel>. In that
+      template, every substring as « (<replaceable>col</replaceable>) » is
+      replaced by the contents of the column named
       <code><replaceable>col</replaceable></code> in the file containing the
       list of students (see section <xref endterm="liste.etudiants.title"
       linkend="liste.etudiants" />). If we let this field empty, a default

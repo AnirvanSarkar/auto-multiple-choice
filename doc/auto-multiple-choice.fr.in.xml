@@ -1406,24 +1406,53 @@ et écrivez votre nom et prénom ci-dessous.
           <guimenu>Projet</guimenu>
 
           <guimenuitem>Nouveau</guimenuitem>
-        </menuchoice>. Une fenêtre s'ouvre et permet encore d'utiliser un
-      projet déjà existant (si il en existe), mais nous voulons créer un
-      nouveau projet, alors nous choisissons un nom (composé de caractères
-      simples ; « test » conviendra par exemple à notre petit essai), que nous
-      inscrivons dans le champ <guilabel>Nouveau projet</guilabel>, puis nous
-      appuyons sur le bouton <guibutton>Créer un projet</guibutton>.</para>
+        </menuchoice>. Une fenêtre s'ouvre qui permet de visualiser les noms
+      des projets déjà existant (si il en existe), et de choisir un nom
+      (composé de caractères simples ; « test » conviendra par exemple à notre
+      petit essai), que nous inscrivons dans le champ <guilabel>Nouveau
+      projet</guilabel>. Nous validons enfin en appuyant sur le bouton
+      <guibutton>Créer un projet</guibutton>.</para>
 
       <para>Nous devons maintenant désigner un fichier LaTeX comme source du
-      QCM. Pour cela, cliquons sur le bouton nommé <guilabel>Fichier
-      LaTeX</guilabel>. Le répertoire dans lequel nous nous situons est celui
-      des exemples fournis avec AMC (il s'agit en général de
-      <filename>/usr/share/doc/auto-multiple-choice/exemples/</filename>) :
-      sélectionnons <filename>simple.tex</filename>. Pour pouvoir le modifier
-      à loisir, il faut maintenant le copier dans le répertoire du projet,
-      grâce au bouton <guibutton>importer</guibutton>. On peut maintenant
-      l'éditer pour modifier la forme du questionnaire ou les questions, grâce
-      au bouton <guibutton>éditer</guibutton> qui lance l'éditeur par
-      défaut.</para>
+      QCM. Plusieurs possibilités nous sont proposées :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><guilabel>modèle</guilabel> : ce choix permet de chercher
+          parmi les modèles fournis avec AMC un sujet que nous pourrons
+          modifier ensuite à loisir.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>fichier</guilabel> : ce choix permet de choisir un
+          fichier LaTeX déjà composé pour l'examen. Il est en effet possible
+          de composer son sujet en dehors d'AMC grâce à un éditeur LaTeX
+          classique, puis d'utiliser AMC quand celui-ci est au point.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>vide</guilabel> : ce choix crée un fichier vide
+          qu'il faudra éditer depuis zéro pour créer son sujet.</para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>archive</guilabel> : ce choix permet d'utiliser une
+          archive tgz ou zip dans laquelle on a placé le sujet et d'éventuels
+          autres fichiers (images, fichier décrivant les options pour AMC par
+          exemple). Il sera utilisé quand le sujet est fabriqué par un
+          programme extérieur (comme par exemple l'interfaçage avec la
+          plateforme nationale C2i niveau 1 pour les universités françaises)
+          ou pour reprendre un sujet AMC sauvegardé sous forme
+          d'archive.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Pour notre exemple, nous choisissons <guilabel>modèle</guilabel>.
+      Dans la fenêtre suivante, sélectionnons par exemple le modèle
+      <guilabel>Exemple simple</guilabel> dans le groupe <guilabel>[FR]
+      Documentation</guilabel>. Une fois le projet créé, nous pouvons modifier
+      ce sujet à loisir grâce au bouton <guibutton>Éditer le fichier
+      LaTeX</guibutton> qui lance l'éditeur par défaut.</para>
     </sect2>
 
     <sect2>
@@ -1438,7 +1467,8 @@ et écrivez votre nom et prénom ci-dessous.
       <itemizedlist>
         <listitem>
           <para>Le <emphasis>sujet</emphasis>. C'est le fichier qu'il faudra
-          imprimer pour que ses pages soient distribuées aux étudiants.</para>
+          imprimer pour que ses pages soient distribuées aux étudiants (voir
+          plus bas).</para>
         </listitem>
 
         <listitem>
@@ -1448,11 +1478,10 @@ et écrivez votre nom et prénom ci-dessous.
         </listitem>
 
         <listitem>
-          <para>Le <emphasis>document de calage</emphasis>. Les marques de
-          calages, les cases à cocher, ainsi que la zone où les étudiants
-          marquent leur nom y sont représentées en couleurs. C'est à partir de
-          ce document que le logiciel va repérer la localisation exacte de ces
-          éléments.</para>
+          <para>Le document de <emphasis>calage</emphasis>. Il contient les
+          informations permettant de localiser les marques de calages, les
+          cases à cocher, ainsi que la zone où les étudiants sur toutes les
+          pages.</para>
         </listitem>
       </itemizedlist>
 
@@ -1461,16 +1490,15 @@ et écrivez votre nom et prénom ci-dessous.
 
       <para>Nous pouvons maintenant passer à cette dernière étape de
       préparation : l'analyse du document de calage. Elle se lance à partir du
-      bouton <guibutton>Calculer</guibutton> dans la section <guilabel>Mises
-      en page</guilabel>. Cette analyse détecte, dans chaque page du sujet, la
-      position exacte des différents éléments qui devront être analysés sur
-      les copies des étudiants. Cette analyse peut être un peu longue (surtout
-      quand le nombre de copies est important). On peut voir le résultat dans
-      la liste de droite, qui présente pour chaque page son numéro, son
-      identifiant (un code contenant le numéro de l'étudiant, le numéro de la
-      page pour cet étudiant, puis un code permettant la vérification de
-      l'identification), ainsi que la date de mise à jour de la mise en
-      page.</para>
+      bouton <guibutton>Calculer les mises en page</guibutton>. Cette analyse
+      détecte, dans chaque page du sujet, la position exacte des différents
+      éléments qui devront être analysés sur les copies des étudiants. Cette
+      analyse peut être un peu longue (surtout quand le nombre de copies est
+      important). On peut voir le résultat dans la liste de droite, qui
+      présente pour chaque page son numéro, son identifiant (un code contenant
+      le numéro de l'étudiant, le numéro de la page pour cet étudiant, puis un
+      code permettant la vérification de l'identification), ainsi que la date
+      de mise à jour de la mise en page.</para>
 
       <para>Pour vérifier que les mises en page ont été correctement
       détectées, on peut utiliser le bouton <guibutton>Vérifier les mises en
@@ -2191,11 +2219,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <sect4>
           <title>Association automatique</title>
 
-          <para>En appuyant sur le bouton <guibutton>Association
-          automatique</guibutton> de la partie <guilabel>Identification des
-          étudiants</guilabel>, la recherche parmi la liste des codes
-          renseignés par les étudiants s'opère. On peut ensuite observer ou
-          peaufiner le résultat grâce à une association manuelle.</para>
+          <para>En appuyant sur le bouton <guibutton>Automatique</guibutton>
+          de la partie <guilabel>Identification des étudiants</guilabel>, la
+          recherche parmi la liste des codes renseignés par les étudiants
+          s'opère. On peut ensuite observer ou peaufiner le résultat grâce à
+          une association manuelle.</para>
 
           <warning>
             <para>Pour effectuer une association automatique, il est
@@ -2212,20 +2240,19 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <title>Association manuelle</title>
 
           <para>Pour ouvrir la fenêtre de reconnaissance des noms d'étudiants,
-          cliquons sur le bouton <guibutton>Association manuelle</guibutton>
-          de la partie <guilabel>Identification des étudiants</guilabel>.
-          Cette fenêtre se compose d'une partie haute présentant
-          successivement les noms inscrits par les étudiants, d'une partie
-          basse comprenant un bouton par étudiant de la liste que nous avons
-          fabriquée, ainsi que d'une partie droite qui permet une navigation
-          aisée parmi les copies à identifier. Nous cliquons sur le bouton
-          correspondant au nom inscrit en partie haute pour chaque page qui
-          nous est présentée (par défaut, seules les copies non ou mal
-          identifiées sont présentées. Ceci peut être changé en cochant la
-          case <guilabel>associés</guilabel>). Quand toutes les pages sont
-          lues, un fond bleu apparaît à la place des noms, et il ne nous reste
-          plus qu'à cliquer sur le bouton <guibutton>Enregistrer</guibutton>
-          de la fenêtre.</para>
+          cliquons sur le bouton <guibutton>Manuelle</guibutton> de la partie
+          <guilabel>Identification des étudiants</guilabel>. Cette fenêtre se
+          compose d'une partie haute présentant successivement les noms
+          inscrits par les étudiants, d'une partie basse comprenant un bouton
+          par étudiant de la liste que nous avons fabriquée, ainsi que d'une
+          partie droite qui permet une navigation aisée parmi les copies à
+          identifier. Nous cliquons sur le bouton correspondant au nom inscrit
+          en partie haute pour chaque page qui nous est présentée (par défaut,
+          seules les copies non ou mal identifiées sont présentées. Ceci peut
+          être changé en cochant la case <guilabel>associés</guilabel>). Quand
+          toutes les pages sont lues, un fond bleu apparaît à la place des
+          noms, et il ne nous reste plus qu'à cliquer sur le bouton
+          <guibutton>Enregistrer</guibutton> de la fenêtre.</para>
         </sect4>
       </sect3>
     </sect2>
