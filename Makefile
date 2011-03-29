@@ -17,7 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-SUB_MAKEFILES=$(wildcard Makefile.versions Makefile.conf)
+CONFFILE ?= Makefile.conf
+
+SUB_MAKEFILES=$(wildcard Makefile.versions $(CONFFILE))
 
 include $(SUB_MAKEFILES)
 
@@ -155,7 +157,7 @@ endif
 ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
 ifneq ($(SYSTEM_TYPE),rpm)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DOCDIR)
-	install    -m 0644 $(USER_GROUP) doc/auto-multiple-choice.{xml,pdf} $(DESTDIR)/$(DOCDIR)
+	install    -m 0644 $(USER_GROUP) $(wildcard doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf) $(DESTDIR)/$(DOCDIR)
 	cp -r doc/html $(DESTDIR)/$(DOCDIR)
 endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MAN1DIR)
