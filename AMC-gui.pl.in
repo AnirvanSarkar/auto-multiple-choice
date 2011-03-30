@@ -88,7 +88,8 @@ use constant {
 
 };
 
-Gtk2::IconTheme->get_default->append_search_path('@/ICONSDIR/@');
+Gtk2::IconTheme->get_default->prepend_search_path('@/ICONSDIR/@');
+Gtk2::Window->set_default_icon_list(map { Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$_,"force-svg") } (8,16,32,48,64,128));
 
 use_gettext;
 

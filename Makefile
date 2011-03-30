@@ -40,7 +40,6 @@ BINARIES=AMC-traitement-image AMC-mepdirect AMC-detect
 
 MODS=AMC-*.pl $(BINARIES)
 GLADE=AMC-gui.glade
-MOD_GLADE=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
 STY=doc/sty/automultiplechoice.sty
 DTX=doc/sty/automultiplechoice.dtx
 MOS=$(wildcard I18N/lang/*.mo)
@@ -49,7 +48,7 @@ SUBMODS=$(notdir $(shell ls doc/modeles))
 
 DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
-FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade $(MOD_GLADE:.glade.in=.glade) AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade AMC-gui.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
 
 PRECOMP_FLAG_FILE=PRECOMP
 PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
