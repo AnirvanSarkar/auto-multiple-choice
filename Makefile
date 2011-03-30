@@ -211,6 +211,15 @@ tmp_copy:
 	rsync -aC --exclude '*~' --exclude download_area --exclude local . $(TMP_SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean
 
+TMP_PORTABLE:=$(shell mktemp -ud)
+
+portable_vok:
+	$(MAKE) tmp_copy
+	make CONFFILE=Makefile-portable.conf INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR)
+	make CONFFILE=Makefile-portable.conf INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR) install
+	cd $(TMP_PORTABLE) ; tar cvzf /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_portable.tar.gz $(SRC_EXCL) AMC
+	rm -rf $(TMP_PORTABLE)
+
 sources_vok:
 	$(MAKE) tmp_copy
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
@@ -234,7 +243,7 @@ deb_vok: tmp_deb
 
 # % : make sure version_files are rebuilt before calling target %_vok
 
-$(foreach key,deb debsrc sources,$(eval $(key): clean version_files ; $$(MAKE) $(key)_vok))
+$(foreach key,deb debsrc sources portable,$(eval $(key): clean version_files ; $$(MAKE) $(key)_vok))
 
 # debian repository
 

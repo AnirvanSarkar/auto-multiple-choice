@@ -22,7 +22,7 @@ if [ "$1" ];
 then
 
     case "$1" in
-	"calepage"|"association"|"manuel"|"note"|"prepare"|"analyse"|"gui") 
+	"analyse"|"annote"|"association-auto"|"association"|"calepage"|"export"|"gui"|"imprime"|"manuel"|"meptex"|"note"|"prepare"|"regroupe"|"zoom"|"zooms") 
 	    ACTION=$1
 	    shift;;
 	*) ACTION=gui ;;
@@ -34,5 +34,18 @@ else
 
 fi
 
-exec @/MODSDIR/@/AMC-$ACTION.pl "$@"
+MODSDIR=@/MODSDIR/@
+
+# For portable distribution
+if [ ! -d "$MODSDIR" ];
+then
+  BASEDIR=`dirname $0`/..
+  BASEDIR=`cd $BASEDIR && pwd`
+  MODSDIR=$BASEDIR/lib
+  export PERL5LIB=$BASEDIR/perl:$PERL5LIB
+  export TEXINPUTS=$TEXINPUTS:$BASEDIR/latex
+  export AMCBASEDIR=$BASEDIR
+fi
+
+exec $MODSDIR/AMC-$ACTION.pl "$@"
 

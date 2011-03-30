@@ -39,16 +39,16 @@ sub new {
 
     if(! $self->{'traitement'}) {
 	if($self->{'mode'} eq 'auto') {
-	    if(-f amc_libdir.'/AMC-detect') {
+	    if(-f amc_specdir('lib').'/AMC-detect') {
 		$self->{'mode'}='opencv';
 	    } else {
 		$self->{'mode'}='manual';
 	    }
 	}
 	if($self->{'mode'} eq 'opencv') {
-	    $self->{'traitement'}=amc_libdir.'/AMC-detect';
+	    $self->{'traitement'}=amc_specdir('lib').'/AMC-detect';
 	} elsif($self->{'mode'} eq 'manual') {
-	    $self->{'traitement'}=amc_libdir.'/AMC-traitement-image';
+	    $self->{'traitement'}=amc_specdir('lib').'/AMC-traitement-image';
 	} else {
 	    die "AMC::Image: No program to execute";
 	}

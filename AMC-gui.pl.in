@@ -88,7 +88,7 @@ use constant {
 
 };
 
-Gtk2::IconTheme->get_default->prepend_search_path('@/ICONSDIR/@');
+Gtk2::IconTheme->get_default->prepend_search_path(amc_specdir('icons'));
 Gtk2::Window->set_default_icon_list(map { Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$_,"force-svg") } (8,16,32,48,64,128));
 
 use_gettext;
@@ -595,11 +595,12 @@ my $docs_menu=Gtk2::Menu->new();
 
 my @doc_langs=();
 
-if(opendir(DOD,"@/DOCDIR/@/html/")) {
+my $hdocdir=amc_specdir('doc/auto-multiple-choice')."/html/";
+if(opendir(DOD,$hdocdir)) {
     push @doc_langs,map { s/auto-multiple-choice\.//;$_; } grep { /auto-multiple-choice\...(_..)?/ } readdir(DOD);
     closedir(DOD);
 } else {
-    debug("DOCUMENTATION : Can't open directory @/DOCDIR/@/html/ : $!");
+    debug("DOCUMENTATION : Can't open directory $hdocdir: $!");
 }
 
 my %ltext_loc=('French'=>__"French",
@@ -614,7 +615,7 @@ for my $l (@doc_langs) {
     my $m=Gtk2::ImageMenuItem->new_with_label($ltext);
     my $it=Gtk2::IconTheme->new();
     my ($taille,undef)=Gtk2::IconSize->lookup('menu');
-    $it->prepend_search_path("@/DOCDIR/@/html/auto-multiple-choice.$l");
+    $it->prepend_search_path($hdocdir."auto-multiple-choice.$l");
     my $ii=$it->lookup_icon("flag",$taille ,"force-svg");
     if($ii) {
 	$m->set_image(Gtk2::Image->new_from_pixbuf($it->load_icon("flag",$taille ,"force-svg")));
@@ -2670,8 +2671,9 @@ sub activate_doc {
 
     #print STDERR "$w / $lang\n";
 
-    my $url='file://@/DOCDIR/@/html/';
-    $url.="auto-multiple-choice.$lang/index.html" if($lang && -f "@/DOCDIR/@/html/auto-multiple-choice.$lang/index.html");
+    my $url='file://'.$hdocdir;
+    $url.="auto-multiple-choice.$lang/index.html"
+	if($lang && -f $hdocdir."auto-multiple-choice.$lang/index.html");
 
     my $seq=0;
     my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
@@ -3450,7 +3452,7 @@ sub source_latex_choisir {
 	
 	charge_modeles($modeles_store,undef,$o{'rep_modeles'}) if($o{'rep_modeles'});
 
-	charge_modeles($modeles_store,undef,"@/MODELSDIR/@");
+	charge_modeles($modeles_store,undef,amc_specdir('models'));
 
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;

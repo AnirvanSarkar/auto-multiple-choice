@@ -34,7 +34,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_libdir &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p);
+    @EXPORT      = qw( &amc_specdir &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -42,8 +42,55 @@ BEGIN {
     @EXPORT_OK   = qw();
 }
 
-sub amc_libdir {
-    return "@/MODSDIR/@";
+# ---------------------------------------------------
+# for path guess with local installation
+
+my $amc_base_path;
+
+if($ENV{'AMCBASEDIR'}) {
+    $amc_base_path=$ENV{'AMCBASEDIR'};
+} else {
+    $amc_base_path=__FILE__;
+    $amc_base_path =~ s|/Basic\.pm$||;
+    $amc_base_path =~ s|/AMC$||;
+    $amc_base_path =~ s|/perl$||;
+}
+
+sub amc_adapt_path {
+    my %oo=@_;
+    my @p=();
+    my $r='';
+    push @p,$oo{'path'} if($oo{'path'});
+    push @p,map { "$amc_base_path/$_" } (@{$oo{'locals'}}) if($oo{'locals'});
+    push @p,@{$oo{'alt'}} if($oo{'alt'});
+    if($oo{'file'}) {
+      TFILE: for(@p) { if( -f "$_/$oo{'file'}" ) 
+		       { $r="$_/$oo{'file'}";last TFILE; } }
+    } else {
+      TDIR: for(@p) { if( -d ) { $r=$_;last TDIR; } }
+    }
+    return $r;
+}
+
+# ---------------------------------------------------
+
+%install_dirs=(
+    'lib'=>"@/MODSDIR/@",
+    'icons'=>"@/ICONSDIR/@",
+    'models'=>"@/MODELSDIR/@",
+    'doc/auto-multiple-choice'=>"@/DOCDIR/@",
+    );
+
+sub amc_specdir {
+    my ($class)=@_;
+    if($install_dirs{$class}) {
+	return(amc_adapt_path(
+		   'path'=>$install_dirs{$class},
+		   'locals'=>[$class,'.'],
+	       ));
+    } else {
+	die "Unknown class for amc_specdir: $class";
+    }
 }
 
 # peut-on acceder a cette commande par exec ?
@@ -420,6 +467,13 @@ my $localisation;
 
 sub use_gettext {
     $localisation=Locale::gettext->domain("auto-multiple-choice");
+    # For portable installs
+    if(! -f ($localisation->dir()."/fr/LC_MESSAGES/auto-multiple-choice.mo")) {
+	$localisation->dir(amc_adapt_path(
+			       'locals'=>['locale'],
+			       'alt'=>[$localisation->dir()],
+			   ));
+    }
 }
 
 sub __($) { return($localisation->get(shift)); }
