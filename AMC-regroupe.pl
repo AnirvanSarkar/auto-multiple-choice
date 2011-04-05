@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -50,6 +50,7 @@ sub with_prog {
 
 ################################################################
 
+my $projet_dir='';
 my $jpgdir='';
 my $pdfdir='';
 my $modele="";
@@ -74,7 +75,8 @@ my $sujet='';
 my $dest_size_x=21/2.54;
 my $dest_size_y=29.7/2.54;
 
-GetOptions("cr=s"=>\$cr,
+GetOptions("projet=s"=>\$projet_dir,
+	   "cr=s"=>\$cr,
 	   "n-copies=s"=>\$nombre_copies,
 	   "an-saved=s"=>\$an_saved,
 	   "sujet=s"=>\$sujet,
@@ -100,6 +102,9 @@ $temp_dir = tempdir( DIR=>tmpdir(),
 		     CLEANUP => (!get_debug()) );
 
 debug "dir = $temp_dir";
+
+$cr=$projet_dir."/cr" if($projet_dir && !$cr);
+$mep_dir=$projet_dir."/mep" if($projet_dir && !$mep_dir);
 
 my $correc_indiv="$temp_dir/correc.pdf";
 

@@ -119,6 +119,8 @@ for(split(/,/,join(',',@o_symbols))) {
 my $commandes=AMC::Exec::new("AMC-annote");
 $commandes->signalise();
 
+$cr_dir=$rep_projet."/cr" if(! $cr_dir);
+
 if(! -d $cr_dir) {
     attention("No CR directory: $cr_dir");
     die "No CR directory: $cr_dir";

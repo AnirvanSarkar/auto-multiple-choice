@@ -112,17 +112,12 @@ my $base=$tex_source;
 $base =~ s/\.tex$//gi;
 
 $bareme="$base-bareme.xml" if(!$bareme);
+
 $mep_dir="$base-mep" if(!$mep_dir);
 
 for(\$bareme,\$mep_dir,\$tex_source) {
     $$_=rel2abs($$_);
 }
-
-if(! -x $mep_dir) {
-    mkdir($mep_dir);
-}
-
-die "Nonexistent directory: $mep_dir" if(! -d $mep_dir);
 
 ($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
 sub with_prog {
@@ -392,6 +387,11 @@ if($mode =~ /s/) {
 
 if($mode =~ /m/) {
     # MISE EN PAGE
+
+    if(! -x $mep_dir) {
+	mkdir($mep_dir);
+    }
+    die "Nonexistent MEP directory: $mep_dir" if(! -d $mep_dir);
 
     my $xyfile=$calage;
     $xyfile =~ s/\.pdf/.xy/;

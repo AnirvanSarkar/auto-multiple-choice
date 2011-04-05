@@ -41,7 +41,7 @@
 
     <legalnotice>
       <para>Ce document peut être utilisé selon les termes de la Licence
-      publique générale de GNU version 3 ou suivante.</para>
+      publique générale de GNU version 2 ou suivante.</para>
     </legalnotice>
   </articleinfo>
 
@@ -2272,7 +2272,9 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
       <para>En appuyant sur le bouton <guibutton>Annoter les
       copies</guibutton>, l'annotation des pages des étudiants commencera :
-      sur chaque scan, les annotations suivantes sont effectuées :</para>
+      sur chaque scan, les annotations suivantes sont effectuées (nous
+      détaillons ici les annotations par défaut, qui peuvent être
+      configurées) :</para>
 
       <itemizedlist>
         <listitem>
@@ -2301,6 +2303,81 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         </listitem>
       </itemizedlist>
 
+      <para>Le texte inscrit en haut de la première page de chaque copie peut
+      être configuré (<menuchoice>
+          <guimenu>Édition</guimenu>
+
+          <guimenuitem>Préférences</guimenuitem>
+
+          <guimenuitem>Annotation</guimenuitem>
+
+          <guimenuitem>En-tête</guimenuitem>
+        </menuchoice> ou <menuchoice>
+          <guimenu>Édition</guimenu>
+
+          <guimenuitem>Préférences</guimenuitem>
+
+          <guimenuitem>Projet</guimenuitem>
+
+          <guimenuitem>Annotation des copies</guimenuitem>
+
+          <guimenuitem>Texte d'en-tête</guimenuitem>
+        </menuchoice>). Les substitutions suivantes s'applioquent sur ce
+      texte :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term><literal>%S</literal></term>
+
+          <listitem>
+            <para>est remplacé par le score total de l'étudiant.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>%M</literal></term>
+
+          <listitem>
+            <para>est remplacé par le score maximal (score obtenu par
+            l'étudiant si il ne fait aucune erreur).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>%s</literal></term>
+
+          <listitem>
+            <para>est remplacé par la note de l'étudiant.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>%m</literal></term>
+
+          <listitem>
+            <para>est remplacé par la note maximale.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>%(ID)</literal></term>
+
+          <listitem>
+            <para>est remplacé par le nom de l'étudiant.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>%(<replaceable>COL</replaceable>)</literal></term>
+
+          <listitem>
+            <para>est remplacé par la valeur de la colonne
+            <replaceable>COL</replaceable> dans la liste des étudiants pour
+            l'étudiant considéré.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
       <para>Cette opération est effectuée page par page, et le résultat est
       constitué de pages corrigées au format JPG.</para>
 
@@ -2316,7 +2393,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <code><replaceable>col</replaceable></code> dans le fichier listant les
       étudiants (voir section <xref endterm="liste.etudiants.title"
       linkend="liste.etudiants" />). Si on laisse ce champ vide, une valeur
-      par défaut formée du nom de l'étudiant sera utilisée.</para>
+      par défaut formée du nom et du numéro d'étudiant de l'étudiant sera
+      utilisée.</para>
     </sect2>
   </sect1>
 
@@ -2333,6 +2411,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <refentrytitle>auto-multiple-choice</refentrytitle>
 
         <manvolnum>1</manvolnum>
+
+        <refmiscinfo class="source">Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
       </refmeta>
 
       <refnamediv>
@@ -2367,6 +2449,44 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <para>La deuxième forme, qui ne mentionne aucune action, appelle
         l'interface graphique <command>AMC-gui.pl</command> en lui
         transmettant éventuellement le nom d'un projet à ouvrir.</para>
+      </refsect1>
+
+      <refsect1>
+        <title>See also</title>
+
+        <para>Différentes actions possibles : <citerefentry>
+            <refentrytitle>AMC-prepare.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>, <citerefentry>
+            <refentrytitle>AMC-imprime.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>, <citerefentry>
+            <refentrytitle>AMC-analyse.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>, <citerefentry>
+            <refentrytitle>AMC-note.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>, <citerefentry>
+            <refentrytitle>AMC-association-auto.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>, <citerefentry>
+            <refentrytitle>AMC-export.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>, <citerefentry>
+            <refentrytitle>AMC-annote.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>, <citerefentry>
+            <refentrytitle>AMC-regroupe.pl</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>.</para>
       </refsect1>
     </refentry>
   </sect1>

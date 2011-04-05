@@ -96,12 +96,15 @@ sub with_prog {
 
 sub check_rep {
     my ($r,$create)=(@_);
-    if($create && ! -x $r) {
+    if($create && $r && ! -x $r) {
 	mkdir($r);
     }
     
     die "ERROR: directory does not exist: $r" if(! -d $r);
 }
+
+$mep_dir=$rep_projet."/mep" if($rep_projet && !$mep_dir);
+$cr_dir=$rep_projet."/cr" if($rep_projet && !$cr_dir);
 
 check_rep($mep_dir);
 check_rep($cr_dir,1);
