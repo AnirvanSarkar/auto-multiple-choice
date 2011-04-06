@@ -21,6 +21,9 @@
 %if 0%{?fedora} > 12
 %define AMC_OPENCV -I /usr/include/opencv -lcv -lhighgui -lcxcore
 %endif
+%if 0%{?suse_version} >= 1140
+%define AMC_OPENCV -I /usr/include/opencv -lopencv_core -lopencv_highgui
+%endif
 
 %if 0%{?suse_version}
 %define AMC_cat Education;Teaching;
@@ -55,8 +58,19 @@ BuildRequires: desktop-file-utils, netpbm-devel, poppler-devel, texlive, fontcon
 BuildRequires: desktop-file-utils, libnetpbm-devel, libpoppler-devel, libfontconfig-devel, opencv-devel
 %endif
 
-Requires: perl >= 5.8, ghostscript
+%if 0%{?suse_version}
+%if 0%{?suse_version} < 1140
+Requires: perl = %{perl_version}
+%else
+%{perl_requires}
+%endif
+%else
+Requires: perl >= 5.8
+%endif
+
+Requires: ghostscript
 Requires: /usr/bin/ppmtoxpm
+
 %if 0%{?mandriva_version}
 Requires: poppler, graphicsmagick, imagemagick, texlive-texmf-cmsuper
 %else
@@ -86,6 +100,10 @@ Requires(post): texlive
 Requires(postun): texlive
 %endif
 
+#################################################################
+# DESCRIPTION                                                   #
+#################################################################
+
 %{?perl_default_filter}
 
 %description
@@ -97,6 +115,11 @@ OpenOffice.org sheet file.
 #'
 
 %prep
+
+#################################################################
+# SETUP                                                         #
+#################################################################
+
 %setup
 
 %if 0%{?fedora}
@@ -114,9 +137,17 @@ chmod +x %{__perl_requires}
 %endif
 
 
+#################################################################
+# BUILD                                                         #
+#################################################################
+
 %build
 
 make %{AMC_makepass} GCC_NETPBM="-I /usr/include/netpbm -lnetpbm" GCC_POPPLER="-I /usr/include/poppler -lpoppler -I /usr/include/fontconfig -lfontconfig" GCC="gcc" GCC_PP="g++" CFLAGS="$RPM_OPT_FLAGS -Wall" CXXFLAGS="$RPM_OPT_FLAGS -Wall"
+
+#################################################################
+# INSTALL                                                       #
+#################################################################
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT %{AMC_makepass} install
@@ -131,8 +162,16 @@ desktop-file-install --delete-original --dir=%{buildroot}%{_datadir}/application
 
 %find_lang %{name}
 
+#################################################################
+# CLEAN                                                         #
+#################################################################
+
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+#################################################################
+# FILES                                                         #
+#################################################################
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
@@ -153,6 +192,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/applications/auto-multiple-choice.desktop
 %{AMC_man1dir}/auto-multiple-choice.*.1*
 %{AMC_man1dir}/auto-multiple-choice.1*
+
+#################################################################
+# POST                                                          #
+#################################################################
 
 %post
 
@@ -177,6 +220,10 @@ texconfig-sys rehash
 %if 0%{?mandriva_version}
 texhash
 %endif
+
+#################################################################
+# CHANGELOG                                                     #
+#################################################################
 
 %changelog
 
