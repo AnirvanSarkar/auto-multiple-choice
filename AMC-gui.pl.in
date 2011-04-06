@@ -30,7 +30,7 @@ use Time::Local;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
-use File::Path;
+use File::Path qw/remove_tree/;
 use Archive::Tar;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
@@ -1255,12 +1255,15 @@ sub liste_des_projets {
 	
 	my ($taille,undef)=Gtk2::IconSize->lookup('menu');
         my $pb = Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$taille ,"force-svg");
+	my $pb_rep = Gtk2::IconTheme->get_default->load_icon("gtk-directory",$taille ,"force-svg");
 	$pb=$w{'main_window'}->render_icon ('gtk-open', 'menu') if(!$pb);
 
 	for (sort { $a cmp $b } @projs) {
 	    $proj_store->set($proj_store->append,
 			     PROJ_NOM,$_,
-			     PROJ_ICO,$pb); 
+			     PROJ_ICO,
+			     (-f fich_options($_) ?
+			       $pb : $pb_rep )); 
 	}
 
 	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
@@ -1421,7 +1424,7 @@ sub projet_liste_supprime {
     if($o{'rep_projets'}) {
 	my $dir=$o{'rep_projets'}."/".$proj;
 	if(-d $dir) {
-	    rmtree($dir,0,1);
+	    remove_tree($dir,{'verbose'=>0,'safe'=>1,'keep_root'=>0});
 	} else {
 	    debug "No directory $dir";
 	}
@@ -1443,7 +1446,20 @@ sub projet_charge_ok {
 
     $w{'choix_projet'}->destroy();
 
-    projet_ouvre($proj) if($proj);
+    if($proj) {
+	my $reponse='yes';
+	if(! -f fich_options($proj)) {
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'warning','yes-no',
+				  sprintf(__("You selected directory <b>%s</b> as a project to open.")." "
+					  .__("However, this directory does not seem to contain a project. Dou you still want to try?"),$proj));
+	    $reponse=$dialog->run;
+	    $dialog->destroy;      
+	}
+	projet_ouvre($proj) if($reponse eq 'yes');
+    }
 }
 
 sub projet_nom_verif {
