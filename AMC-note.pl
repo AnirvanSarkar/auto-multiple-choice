@@ -354,7 +354,7 @@ for my $etud (@a_calculer) {
 	    $vars->{'IS'}=($barq->{'multiple'} ? 0 : 1);
 
 	    if($barq->{'multiple'}) {
-		# QUESTION MULTIPLE
+		# MULTIPLE QUESTION
 
 		$xx=0;
 		
@@ -367,19 +367,26 @@ for my $etud (@a_calculer) {
 		    $b_q{'d'}=$b_q{'haut'}-(1+$#rep_pleine);
 		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
 		    debug "Q=$q REPS=".join(',',@rep)." HAUT=$b_q{'haut'} D=$b_q{'d'} P=$b_q{'p'}";
+		} elsif($b_q{'mz'}) {
+		    $b_q{'d'}=$b_q{'mz'};
+		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
+		    $b_q{'b'}=0;$b_q{'m'}=-( abs($b_q{'mz'})+abs($b_q{'p'})+1 );
 		} else {
 		    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
 		}
 		
 		if($n_coche !=1 && $bons{$etud}->{$q}->{0}->[0]) {
-		    # coche deux dont "aucune des precedentes"
+		    # incompatible answers: the student has ticked one
+		    # plain answer AND the answer "none of the
+		    # above"...
 		    $xx=$b_q{'e'};
 		    $raison='E';
 		} elsif($n_coche==0) {
-		    # aucune cochee
+		    # no ticked boxes
 		    $xx=$b_q{'v'};
 		    $raison='V';
 		} else {
+		    # standard case: adds the 'b' or 'm' scores for each answer
 		    for(@rep) {
 			if($_ != 0) {
 			    $code=($bons{$etud}->{$q}->{$_}->[1] ? "b" : "m");
@@ -390,32 +397,46 @@ for my $etud (@a_calculer) {
 		    }
 		}
 
-		# decalage
+		# adds the 'd' shift value
 		$xx+=$b_q{'d'} if($raison !~ /^[VE]/i);
 
-		# note plancher
-		if($xx<$b_q{'p'}) {
+		# applies the 'p' floor value
+		if($xx<$b_q{'p'} && $raison !~ /^[VE]/i) {
 		    $xx=$b_q{'p'};
 		    $raison='P';
 		}
 	    } else {
-		# QUESTION SIMPLE
+		# SIMPLE QUESTION
+
 		%b_q=degroupe($bar_def->{'S'}->{'bareme'}
 			      .",".$barq->{'bareme'},
 			      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1},
 			      $vars);
 
+		if(defined($b_q{'mz'})) {
+		    $b_q{'b'}=$b_q{'mz'};
+		    $b_q{'m'}=$b_q{'d'} if(defined($b_q{'d'}));
+		}
+
 		if($n_coche==0) {
+		    # no ticked boxes
 		    $xx=$b_q{'v'};
 		    $raison='V';
 		} elsif($n_coche>1) {
+		    # incompatible answers: there are more than one
+		    # ticked boxes
 		    $xx=$b_q{'e'};
 		    $raison='E';
 		} else {
+		    # standard case
 		    $sb=$barq->{'reponse'}->{$id_coche}->{'bareme'};
 		    if($sb ne '') {
+			# some value is given as a score for the
+			# ticked answer
 			$xx=$sb; 
 		    } else {
+			# take into account the scoring strategy for
+			# the question: 'auto', or 'b'/'m'
 			$xx=($b_q{'auto'}>-1
 			     ? $id_coche+$b_q{'auto'}-1
 			     : ($n_ok==$n_tous ? $b_q{'b'} : $b_q{'m'}));
