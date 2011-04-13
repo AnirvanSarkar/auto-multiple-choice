@@ -44,7 +44,7 @@ html/images/%.png: img_src/%.svg
 	rsvg -w 24 -h 24 $< $@
 
 %.tex: %.xml
-	dblatex -t tex --xslt-opts="--nonet" --xslt-opts="--catalogs" $< -o $@
+	dblatex -t tex --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
 	perl addlink.pl $@
 
 %.pdf: %.tex

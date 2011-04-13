@@ -4,6 +4,7 @@
 %define AMC_modelsdir /usr/share/auto-multiple-choice/models
 %define AMC_texdocdir /usr/share/texmf/doc/latex/AMC
 %define AMC_texdir /usr/share/texmf/tex/latex/AMC
+%define AMC_texdocdir /usr/share/doc/texlive-doc/latex/AMC
 %define AMC_bindir %{_bindir}
 %define AMC_pixdir /usr/share/pixmaps
 %define AMC_iconsdir /usr/share/auto-multiple-choice/icons
@@ -176,7 +177,8 @@ rm -rf $RPM_BUILD_ROOT
 %files -f %{name}.lang
 %defattr(-,root,root,-)
 
-%doc COPYING ChangeLog doc/html doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf 
+%doc COPYING ChangeLog doc/html doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf
+%doc %{AMC_texdocdir}
 %dir /usr/share/auto-multiple-choice
 %dir /usr/share/texmf
 %dir /usr/share/texmf/tex
@@ -192,6 +194,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/applications/auto-multiple-choice.desktop
 %{AMC_man1dir}/auto-multiple-choice.*.1*
 %{AMC_man1dir}/auto-multiple-choice.1*
+%{AMC_man1dir}/AMC-.1*
 
 #################################################################
 # POST                                                          #
