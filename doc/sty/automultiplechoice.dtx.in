@@ -1168,7 +1168,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   |\AMC@affecte{key}{\cnt}| give to counter |\cnt| the value of the
 %   ID associated to |key| (creating one if necessary).
 %   \begin{macrocode}
-\newcount\AMC@numerotation\AMC@numerotation=\@ne
+\newcount\AMC@numerotation\AMC@numerotation=\z@%
 \def\AMC@definitnumero#1#2{\AMC@amclog{AUTOQCM[NUM=#1=#2]^^J}%
   \expandafter\global\expandafter\def\csname AMC@numtab@#2\endcsname{#1}}
 \def\AMC@prepare#1{\expandafter\ifx\csname AMC@numtab@#1\endcsname\relax%
@@ -2062,7 +2062,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
   \AMCid@etud=\AMC@premierecopie%
   \AMCid@etudfin=\AMCnum@copies%
-  \advance\AMCid@etudfin by \AMC@premierecopie%
+  \advance\AMCid@etudfin by \AMC@premierecopie\relax%
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
   \loop%
     \AMC@zoneformulairefalse\setcounter{page}{1}%
