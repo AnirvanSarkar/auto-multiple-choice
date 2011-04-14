@@ -26,6 +26,7 @@ use POSIX qw(ceil floor);
 use AMC::Basic;
 use AMC::ANList;
 use AMC::Gui::Avancement;
+use AMC::Scoring;
 
 use encoding 'utf8';
 
@@ -46,9 +47,6 @@ my $arrondi='';
 my $delimiteur=',';
 my $encodage_interne='UTF-8';
 my $an_saved='';
-
-my $taille_max="1000x1500";
-my $qualite_jpg="65";
 
 my $progres=1;
 my $plafond=1;
@@ -75,10 +73,14 @@ GetOptions("cr=s"=>\$cr_dir,
 
 set_debug($debug);
 
+# fixes decimal separator , potential problem, replacing it with a
+# dot.
 for my $x (\$grain,\$note_plancher,\$note_parfaite) {
     $$x =~ s/,/./;
     $$x =~ s/\s+//;
 }
+
+# Implements the different possible rounding schemes.
 
 sub arrondi_inf {
     my $x=shift;
@@ -123,84 +125,34 @@ if($grain<=0) {
 
 my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
 
-my $bar=XMLin($bareme,ForceArray => 1,KeyAttr=> [ 'id' ]);
+my $bar=AMC::Scoring::new('file'=>$bareme,'onerror'=>'die');
 
-if($VERSION_BAREME ne $bar->{'version'}) {
-    attention("Marking scale file version (".$bar->{'version'}.")",
+if($VERSION_BAREME ne $bar->version) {
+    attention("Marking scale file version (".$bar->version.")",
 	      "is too old (here $VERSIN_BAREME):",
 	      "please make marking scale file again...");
-    die("Marking scale file version mismatch: $VERSION_BAREME / ".$bar->{'version'});
+    die("Marking scale file version mismatch: $VERSION_BAREME / ".$bar->version);
 }
 
 opendir(DIR, $cr_dir) || die "can't opendir $cr_dir: $!";
 my @xmls = grep { /\.xml$/ && -f "$cr_dir/$_" } readdir(DIR);
 closedir DIR;
 
-sub degroupe {
-    my ($s,$defaut,$vars)=(@_);
-    my %r=(%$defaut);
-    for my $i (split(/,+/,$s)) {
-	$i =~ s/^\s+//;
-	$i =~ s/\s+$//;
-	if($i =~ /^([^=]+)=([-+*\/0-9a-zA-Z\.\(\)?:|&=<>!\s]+)$/) {
-	    $r{$1}=$2;
-	} else {
-	    die "Marking scale syntax error: $i within $s" if($i);
-	}
-    }
-    # remplacement des variables et evaluation :
-    for my $k (keys %r) {
-	my $v=$r{$k};
-	for my $vv (keys %$vars) {
-	    $v=~ s/\b$vv\b/$vars->{$vv}/g;
-	}
-	die "Syntax error (unknown variable): $v" if($v =~ /[a-z]/i);
-	my $calc=eval($v);
-	die "Syntax error (operation) : $v" if(!defined($calc));
-	debug "Evaluation : $r{$k} => $calc" if($r{$k} ne $calc);
-	$r{$k}=$calc;
-    }
-    #
-    return(%r);
-}
-
-my %main_bareme=degroupe($bar->{'main'},{},{});
-
-my %bons=();
-my %qidsh=();
-
-for my $etu (keys %{$bar->{'etudiant'}}) {
-    my $baretu=$bar->{'etudiant'}->{$etu};
-    $bons{'max'.$etu}={};
-    my $bonsetu=$bons{'max'.$etu};
-    for my $q (keys %{$baretu->{'question'}}) {
-	$bonsetu->{$q}={};
-	for my $r (keys %{$baretu->{'question'}->{$q}->{'reponse'}}) {
-	    $bonsetu->{$q}->{$r}=[$baretu->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'},1,$baretu->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'}];
-	}
-    }
-}
-
-%page_lue=();
-
+# action to be called for each page when reading data capture reports:
+# sets the 'ticked' data for each box of the page, comparing black
+# ratio to the threshold.
 sub action {
-    my ($id,$aa,$pbons,$bar)=(@_);
+    my ($id,$aa,$bar)=(@_);
     my $page=$aa->{'case'};
     my ($etud,undef)=get_ep($id);
 
-    $pbons->{$etud}={} if(!$pbons->{$etud});
-
     for my $k (sort { $a <=> $b } (keys %$page)) {
 	my ($q,$r)=get_qr($k);
-	$qidsh{$q}=1;
 	
 	my $coche=($page->{$k}->{'r'}>$seuil ? 1 : 0);
-	my $bonne=($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
-	my $ok=($coche == $bonne ? 1 : 0);
-	debug "Student $etud Q $q A $r : ".($bonne ? "G" : "B")." "
-	    .($coche ? "X" : "O")." -> ".($ok ? "OK" : "NO");
-	$pbons->{$etud}->{$q}={} if(!$pbons->{$etud}->{$q});
-	$pbons->{$etud}->{$q}->{$r}=[$coche,$ok,$bonne];
+	debug "Student $etud Q $q A $r : "
+	    .($coche ? "X" : "O");
+	$bar->ticked_answer($etud,$q,$r,$coche);
     }
 }
 
@@ -208,8 +160,9 @@ $avance->progres(0.05);
 
 my $anl;
 
+# Reads data capture reports...
+
 if($an_saved) {
-    #print "CR=$cr_dir\nSAVED=$an_saved\n";
     $anl=AMC::ANList::new($cr_dir,
 			  'saved'=>$an_saved,
 			  'action'=>'',
@@ -218,17 +171,15 @@ if($an_saved) {
     my $delta=0.75;
     $delta/=(1+$#ids) if($#ids>=0);
     for my $id (@ids) {
-	action($id,$anl->analyse($id),\%bons,$bar);
+	action($id,$anl->analyse($id),$bar);
 	$avance->progres($delta);
     }
 } else {
     $anl=AMC::ANList::new($cr_dir,
 			  'saved'=>'',
-			  'action'=>[\&action,\%bons,$bar]
+			  'action'=>[\&action,$bar]
 			  );
 }
-
-#debug Dumper(\%bons)."\n";
 
 print "Sources :\n";
 for my $id ($anl->ids()) {
@@ -237,15 +188,7 @@ for my $id ($anl->ids()) {
 }
 print "\n";
 
-my %note_question=();
-
-my @qids=sort { $a <=> $b } (keys %qidsh);
-
-my $un_etud=(keys %{$bar->{'etudiant'}})[0];
-
-sub titre_q {
-    return($bar->{'etudiant'}->{$un_etud}->{'question'}->{shift()}->{'titre'});
-}
+# Prepares output file with marks...
 
 my $output=new IO::File($fichnotes,
 			">:encoding($encodage_interne)");
@@ -268,298 +211,136 @@ $writer->startTag('notes',
 		  'arrondi'=>$type_arrondi,
 		  'grain'=>$grain);
 
+# Computes and outputs marks...
+
 my $somme_notes=0;
 my $n_notes=0;
-my %les_codes=();
-my %indicatives=();
 
-my @a_calculer=((grep { /^max/ } (keys %bons)),
-		sort { $a <=> $b } (grep { ! /^max/ } (keys %bons)));
+my %les_codes=();
+
+my %qt_indicative=();
+my %qt_max=();
+my %qt_n=();
+my %qt_sum=();
+my %qt_summax=();
+
+my @a_calculer=grep { $bar->ticked_info($_) } ($bar->etus);
 
 my $delta=0.19;
 $delta/=(1+$#a_calculer) if($#a_calculer>=0);
 
 for my $etud (@a_calculer) {
 
-    my $refetud=$etud;
-    $refetud =~ s/^max//;
-
-    $vrai=$etud !~ /^max/;
-
-    if($vrai) {
-	$writer->startTag('copie',
-			  'id'=>$etud);
-    }
-
-    $note_question{$etud}={};
+    $writer->startTag('copie',
+		      'id'=>$etud);
 
     my $total=0;
-    my $n_col=3;
+    my $max_i=0;
     my %codes=();
 
-    my $bar_def=$bar->{'etudiant'}->{'defaut'}->{'question'};
+    for my $q ($bar->questions($etud)) {
+	($xx,$raison,$keys)=$bar->score_question($etud,$q);
+	($notemax)=$bar->score_max_question($etud,$q);
 
-    for my $q (@qids) {
-
-	$n_col++;
-
-	if($bons{$etud}->{$q}) {
-
-	    my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0};
-
-	    $barq=$bar->{'etudiant'}->{$refetud}->{'question'}->{$q};
-
-	    $xx='';
-	    $raison='';
-	    
-	    $n_ok=0;
-	    $n_coche=0;
-	    $id_coche=-1;
-	    $n_tous=0;
-	    
-	    my @rep=(keys %{$bons{$etud}->{$q}});
-	    my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
-
-	    my $cochees=join(";",map { $bons{$etud}->{$q}->{$_}->[0] }
-			     sort { ($a==0 || $b==0 ? $b <=> $a : $a <=> $b) } (@rep));
-
-	    for (@rep) {
-		$n_ok+=$bons{$etud}->{$q}->{$_}->[1];
-		$n_coche+=$bons{$etud}->{$q}->{$_}->[0];
-		$id_coche=$_ if($bons{$etud}->{$q}->{$_}->[0]);
-		$n_tous++;
-	    }
-
-	    for(@rep_pleine) {
-		debug "REP[$_]<=".join(',',@{$bons{$etud}->{$q}->{$_}});
-		my $bn=($bons{$etud}->{$q}->{$_}->[2] ? 'B' : 'M');
-		my $co=($bons{$etud}->{$q}->{$_}->[0] ? 'C' : '');
-		$vars->{'N'.$bn}++;
-		$vars->{'N'.$bn.$co}++ if($co);
-	    }
-
-	    # baremes :
-
-	    # e=erreur logique dans les reponses
-	    # b=bonne reponse
-	    # m=mauvaise reponse
-	    # v=pas de reponse sur toute la question
-	    # p=note plancher
-	    # d=decalage ajoute avant plancher
-	    # haut=on met le max a cette valeur et on enleve 1 pt par faute (MULT)
-	    
-	    # variables possibles dans la specification du bareme
-	    $vars->{'N'}=(1+$#rep_pleine);
-	    $vars->{'IMULT'}=($barq->{'multiple'} ? 1 : 0);
-	    $vars->{'IS'}=($barq->{'multiple'} ? 0 : 1);
-
-	    if($barq->{'multiple'}) {
-		# MULTIPLE QUESTION
-
-		$xx=0;
-		
-		%b_q=degroupe($bar_def->{'M'}->{'bareme'}
-			      .",".$barq->{'bareme'},
-			      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0},
-			      $vars);
-
-		if($b_q{'haut'}) {
-		    $b_q{'d'}=$b_q{'haut'}-(1+$#rep_pleine);
-		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
-		    debug "Q=$q REPS=".join(',',@rep)." HAUT=$b_q{'haut'} D=$b_q{'d'} P=$b_q{'p'}";
-		} elsif($b_q{'mz'}) {
-		    $b_q{'d'}=$b_q{'mz'};
-		    $b_q{'p'}=0 if(!defined($b_q{'p'}));
-		    $b_q{'b'}=0;$b_q{'m'}=-( abs($b_q{'mz'})+abs($b_q{'p'})+1 );
-		} else {
-		    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
-		}
-		
-		if($n_coche !=1 && $bons{$etud}->{$q}->{0}->[0]) {
-		    # incompatible answers: the student has ticked one
-		    # plain answer AND the answer "none of the
-		    # above"...
-		    $xx=$b_q{'e'};
-		    $raison='E';
-		} elsif($n_coche==0) {
-		    # no ticked boxes
-		    $xx=$b_q{'v'};
-		    $raison='V';
-		} else {
-		    # standard case: adds the 'b' or 'm' scores for each answer
-		    for(@rep) {
-			if($_ != 0) {
-			    $code=($bons{$etud}->{$q}->{$_}->[1] ? "b" : "m");
-			    my %b_qspec=degroupe($barq->{'reponse'}->{$_}->{'bareme'},
-						 \%b_q,$vars);
-			    $xx+=$b_qspec{$code};
-			}
-		    }
-		}
-
-		# adds the 'd' shift value
-		$xx+=$b_q{'d'} if($raison !~ /^[VE]/i);
-
-		# applies the 'p' floor value
-		if($xx<$b_q{'p'} && $raison !~ /^[VE]/i) {
-		    $xx=$b_q{'p'};
-		    $raison='P';
-		}
-	    } else {
-		# SIMPLE QUESTION
-
-		%b_q=degroupe($bar_def->{'S'}->{'bareme'}
-			      .",".$barq->{'bareme'},
-			      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1},
-			      $vars);
-
-		if(defined($b_q{'mz'})) {
-		    $b_q{'b'}=$b_q{'mz'};
-		    $b_q{'m'}=$b_q{'d'} if(defined($b_q{'d'}));
-		}
-
-		if($n_coche==0) {
-		    # no ticked boxes
-		    $xx=$b_q{'v'};
-		    $raison='V';
-		} elsif($n_coche>1) {
-		    # incompatible answers: there are more than one
-		    # ticked boxes
-		    $xx=$b_q{'e'};
-		    $raison='E';
-		} else {
-		    # standard case
-		    $sb=$barq->{'reponse'}->{$id_coche}->{'bareme'};
-		    if($sb ne '') {
-			# some value is given as a score for the
-			# ticked answer
-			$xx=$sb; 
-		    } else {
-			# take into account the scoring strategy for
-			# the question: 'auto', or 'b'/'m'
-			$xx=($b_q{'auto'}>-1
-			     ? $id_coche+$b_q{'auto'}-1
-			     : ($n_ok==$n_tous ? $b_q{'b'} : $b_q{'m'}));
-		    }
-		}
-
-	    }
-
-	    if($barq->{'indicative'} && !$vrai) {
-		$xx=1;
-	    }
-
-	    if(exists($b_q{'MAX'}) && !$vrai) {
-		$xx=$b_q{'MAX'};
-	    }
-
-	    $note_question{$etud}->{$q}=$xx;
-	    
-	    if($barq->{'indicative'}) {
-		$indicatives{$q}=1;
-	    } else {
-		$total+=$xx;
-	    }
-	    
-	    if($vrai) {
-		my $tit=titre_q($q);
-		if($tit =~ /^(.*)\.([0-9]+)$/) {
-		    $codes{$1}->{$2}=$xx;
-		}
-		
-		my $notemax=$note_question{'max'.$etud}->{$q};
-		$writer->emptyTag('question',
-				  'id'=>$tit,
-				  'cochees'=>$cochees,
-				  'note'=>$xx,
-				  'raison'=>$raison,
-				  'indicative'=>$barq->{'indicative'},
-				  'max'=>$notemax,
-				  );
-		$note_question{'somme'}->{$q}+=$xx;
-		$note_question{'nb.somme'}->{$q}++;
-		$note_question{'max.somme'}->{$q}+=$notemax;
-	    }
-	}
-    }
-    $note_question{$etud}->{'total'}=$total;
-    if($vrai) {
-	# calcul de la note finale --
-
-	# total qui faut pour avoir le max
-	my $max_i=$note_question{'max'.$etud}->{'total'};
-	$max_i=$main_bareme{'SUF'} if($main_bareme{'SUF'});
-	if($max_i<=0) {
-	    debug "Warning: Negative value for MAX.";
-	    $max_i=1;
-	}
-
-
-	# application du grain et de la note max
-	my $x;
-	if($note_parfaite>0) {
-	    $x=$note_parfaite/$grain*$total/$max_i;
-	} else {
-	    $x=$total/$grain;
-	}
-	$x=&$arrondi($x) if($arrondi);
-	$x*=$grain;
-
-	$x=$note_parfaite if($note_parfaite>0 && $plafond && $x>$note_parfaite);
-
-	# plancher
-
-	if($note_plancher ne '' && $note_plancher !~ /[a-z]/i) {
-	    $x=$note_plancher if($x<$note_plancher);
+	my $tit=$bar->question_title($etud,$q);
+	if($tit =~ /^(.*)\.([0-9]+)$/) {
+	    $codes{$1}->{$2}=$xx;
 	} 
 
-	#--
-
-	$n_notes++;
-	$somme_notes+=$x;
-
-	$writer->emptyTag('total',
-			  'total'=>$total,
-			  'max'=>$max_i,
-			  'note'=>$x,
-			  );
-
-	for my $k (keys %codes) {
-	    my @i=(keys %{$codes{$k}});
-	    if($#i>0) {
-		my $v=join('',map { $codes{$k}->{$_} }
-			   sort { $b <=> $a } (@i));
-		$les_codes{$k}->{$v}++;
-		$writer->dataElement('code',
-				     $v,
-				     'id'=>$k);
-	    }
+	if($bar->question_is_indicative($etud,$q)) {
+	    $qt_indicative{$tit}=1;
+	    $notemax=1;
+	} else {
+	    $total+=$xx;
+	    $max_i+=$notemax;
 	}
-
-	$writer->endTag('copie');
+	    
+	if(!defined($qt_max{$tit}) || $qt_max{$tit}<$notemax) {
+	    $qt_max{$tit}=$notemax;
+	}
+	$qt_n{$tit}++;
+	$qt_sum{$tit}+=$xx;
+	$qt_summax{$tit}+=$notemax;
+		
+	$writer->emptyTag('question',
+			  'id'=>$tit,
+			  'cochees'=>$bar->ticked_list($etud,$q),
+			  'note'=>$xx,
+			  'raison'=>$raison,
+			  'indicative'=>$bar->question_is_indicative($etud,$q),
+			  'max'=>$notemax,
+	    );
+	
     }
+
+    # Final mark --
+    
+    # total qui faut pour avoir le max
+    $max_i=$bar->main_tag('SUF',$max_i);
+    if($max_i<=0) {
+	debug "Warning: Nonpositive value for MAX.";
+	$max_i=1;
+    }
+    
+    # application du grain et de la note max
+    my $x;
+
+    if($note_parfaite>0) {
+	$x=$note_parfaite/$grain*$total/$max_i;
+    } else {
+	$x=$total/$grain;
+    }
+    $x=&$arrondi($x) if($arrondi);
+    $x*=$grain;
+    
+    $x=$note_parfaite if($note_parfaite>0 && $plafond && $x>$note_parfaite);
+    
+    # plancher
+    
+    if($note_plancher ne '' && $note_plancher !~ /[a-z]/i) {
+	$x=$note_plancher if($x<$note_plancher);
+    } 
+    
+    #--
+    
+    $n_notes++;
+    $somme_notes+=$x;
+    
+    $writer->emptyTag('total',
+		      'total'=>$total,
+		      'max'=>$max_i,
+		      'note'=>$x,
+	);
+    
+    for my $k (keys %codes) {
+	my @i=(keys %{$codes{$k}});
+	if($#i>0) {
+	    my $v=join('',map { $codes{$k}->{$_} }
+		       sort { $b <=> $a } (@i));
+	    $les_codes{$k}->{$v}++;
+	    $writer->dataElement('code',
+				 $v,
+				 'id'=>$k);
+	}
+    }
+    
+    $writer->endTag('copie');
 
     $avance->progres($delta);
 }
 
-# ligne du maximum
+# Special: maxima
 
 $writer->startTag('copie',id=>'max');
 
-my %maximums=();
 my $total=0;
-for my $q (@qids) {
-    my $max=0;
-    for my $etud (grep { ! /^max/ } (keys %bons)) {
-	$max=$note_question{'max'.$etud}->{$q} 
-	if($note_question{'max'.$etud}->{$q}>$max);
-    }
+for my $t (keys %qt_max) {
     $writer->emptyTag('question',
-		      'id'=>titre_q($q),
-		      'note'=>$max,
-		      'indicative'=>$indicatives{$q},
+		      'id'=>$t,
+		      'note'=>$qt_max{$t},
+		      'indicative'=>$qt_indicative{$t},
 		      );
-    $total+=$max;
+    $total+=$qt_max{$t};
 }
 
 $writer->emptyTag('total',
@@ -569,18 +350,18 @@ $writer->emptyTag('total',
 		  );
 $writer->endTag('copie');
 
-# ligne des moyennes
+# Special: means
 
 $writer->startTag('copie',id=>'moyenne');
 
-my %maximums=();
-for my $q (@qids) {
+for my $t (keys %qt_n) {
     $writer->emptyTag('question',
-		      'id'=>titre_q($q),
-		      'n'=>$note_question{'nb.somme'}->{$q},
-		      'note'=>$note_question{'somme'}->{$q}/$note_question{'nb.somme'}->{$q},
-		      'max'=>$note_question{'max.somme'}->{$q}/$note_question{'nb.somme'}->{$q},
-		      );
+		      'id'=>$t,
+		      'n'=>$qt_n{$t},
+		      'note'=>$qt_sum{$t}/$qt_n{$t},
+		      'max'=>$qt_summax{$t}/$qt_n{$t},
+		      )
+	if($qt_n{$t} > 0);
 }
 
 $writer->emptyTag('total',
@@ -590,7 +371,7 @@ $writer->emptyTag('total',
 		  );
 $writer->endTag('copie');
 
-# les codes rencontres
+# Special: codes that has been read.
 
 for my $k (keys %les_codes) {
     $writer->startTag('code','id'=>$k);
@@ -601,11 +382,11 @@ for my $k (keys %les_codes) {
     $writer->endTag('code');
 }
 
-# moyenne
+# Global mean
 
 $writer->dataElement('moyenne',$somme_notes/$n_notes);
 
-# fin
+# Closes output...
 
 $writer->endTag('notes');
     
