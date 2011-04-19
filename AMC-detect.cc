@@ -31,6 +31,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef NEEDS_GETLINE
+  #include<minimal-getline.c>
+#endif
+
 #if CV_MAJOR_VERSION > 2
   #define OPENCV_21 1
   #define OPENCV_20 1

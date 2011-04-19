@@ -20,12 +20,14 @@
 
 */
 
-/* libnetpbm9-dev */
-
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
 #include<ppm.h>
+
+#ifdef NEEDS_GETLINE
+  #include<minimal-getline.c>
+#endif
 
 #define SEUIL (maxval/2)
 
