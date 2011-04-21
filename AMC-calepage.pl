@@ -24,8 +24,6 @@ use File::Temp qw/ tempfile tempdir /;
 use Data::Dumper;
 use Getopt::Long;
 
-use Graphics::Magick;
-
 use AMC::Basic;
 use AMC::Exec;
 use AMC::MEPList;
@@ -122,8 +120,6 @@ GetOptions("page=s"=>\$out_cadre,
 	   );
 
 set_debug($debug);
-
-debug_pm_version("Graphics::Magick");
 
 my $commandes=AMC::Exec::new('AMC-calepage');
 $commandes->signalise();
@@ -587,7 +583,7 @@ my $page_entiere;
 
 if($out_cadre || $nom_file) {
     debug "Reading scan $scan for extractions...";
-    $page_entiere=Graphics::Magick::new();
+    $page_entiere=magick_perl_module()->new();
     $page_entiere->Read($scan);
 }
 

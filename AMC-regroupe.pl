@@ -35,8 +35,6 @@ use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs t
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 
-use Graphics::Magick;
-
 my $debug='';
 
 my $commandes=AMC::Exec::new('AMC-regroupe');
@@ -95,8 +93,6 @@ GetOptions("projet=s"=>\$projet_dir,
 	   );
 
 set_debug($debug);
-
-debug_pm_version("Graphics::Magick");
 
 $temp_dir = tempdir( DIR=>tmpdir(),
 		     CLEANUP => (!get_debug()) );
@@ -348,7 +344,7 @@ sub stk_pdf_go {
 my $stk_ppm_im;
 
 sub stk_ppm_begin {
-    $stk_ppm_im=Graphics::Magick->new();
+    $stk_ppm_im=magick_perl_module()->new();
 }
 
 sub stk_ppm_add {

@@ -29,8 +29,6 @@ use AMC::Gui::Avancement;
 use AMC::AssocFile;
 use AMC::NamesFile;
 
-use Graphics::Magick;
-
 use encoding 'utf8';
 
 $VERSION_BAREME=2;
@@ -105,8 +103,6 @@ GetOptions("cr=s"=>\$cr_dir,
 	   );
 
 set_debug($debug);
-
-debug_pm_version("Graphics::Magick");
 
 for(split(/,/,join(',',@o_symbols))) {
     if(/^([01]-[01]):(none|circle|mark|box)(?:\/([\#a-z0-9]+))?$/) {
@@ -297,7 +293,7 @@ $delta=1/(1+$#ids) if($#ids>=0);
 
      if(-f $scan_f) {
 
-	 my $im=Graphics::Magick->new();
+	 my $im=magick_perl_module()->new();
 
 	 my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
 

@@ -19,7 +19,6 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
-use Graphics::Magick;
 use AMC::Basic;
 use AMC::Boite qw/min max/;
 use XML::Simple;
@@ -55,8 +54,6 @@ set_debug($debug);
 
 debug("AMC-zooms / DEBUG") if($debug);
 
-debug_pm_version("Graphics::Magick");
-
 sub adapte {
     my ($im)=@_;
     return(sprintf("%.02f",100*$largeur/$im->Get('width')).'%');
@@ -70,7 +67,7 @@ my $an=XMLin($analyse,
 
 my $cadre_general=AMC::Boite::new_complete_xml($an->{cadre});
 
-my $page=Graphics::Magick::new();
+my $page=magick_perl_module()->new();
 
 $page->Read($scan);
 
@@ -99,11 +96,11 @@ if($an->{version}>=1) {
 
     $bandeau->Resize(geometry=>adapte($bandeau));
 } else {
-    $bandeau=Graphics::Magick::new();
+    $bandeau=magick_perl_module()->new();
 }
 
-my %morceaux=(0=>Graphics::Magick::new(),
-	      1=>Graphics::Magick::new(),
+my %morceaux=(0=>magick_perl_module()->new(),
+	      1=>magick_perl_module()->new(),
 	      );
 
 @text_params=(font=>"Courier");
@@ -141,7 +138,7 @@ for my $k (sort { $an->{case}->{$a}->{r} <=> $an->{case}->{$b}->{r} } (keys %{$a
     
     $pt=$pt*$e->Get('width')/$width*0.8;
 
-    my $texte=Graphics::Magick::new();
+    my $texte=magick_perl_module()->new();
     $texte->Set(size=>$e->Get('width').'x'.$e->Get('height'));
     $texte->ReadImage('xc:white');
 
@@ -164,7 +161,7 @@ for my $k (sort { $an->{case}->{$a}->{r} <=> $an->{case}->{$b}->{r} } (keys %{$a
 %categories=(0=>__("unticked boxes"),1=>__("ticked boxes"));
 
 for(0..1) {
-    my $titre=Graphics::Magick->new;
+    my $titre=magick_perl_module()->new;
     $titre->Set(size=>$largeur.'x50');
     $titre->ReadImage('xc:white');
     $titre->Annotate("pointsize"=>40,

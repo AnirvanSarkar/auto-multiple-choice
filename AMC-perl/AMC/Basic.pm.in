@@ -28,13 +28,15 @@ use IO::File;
 use Fcntl qw(:flock :seek);
 use XML::Writer;
 use XML::Simple;
+use Module::Load;
+use Module::Load::Conditional qw/check_install/;
 
 BEGIN {
     use Exporter   ();
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_specdir &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p);
+    @EXPORT      = qw( &amc_specdir &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -118,6 +120,25 @@ sub magick_module {
     } else {
 	return($m);
     }
+}
+
+my $magick_pmodule='';
+
+sub magick_perl_module {
+    my ($dont_load_it)=@_;
+    if(!$magick_pmodule) {
+      TEST: for my $m (qw/Graphics::Magick Image::Magick/) {
+	  if(check_install(module=>$m)) {
+	      $magick_pmodule=$m;
+	      last TEST;
+	  }
+      }
+	if($magick_pmodule && !$dont_load_it) {
+	    load($magick_pmodule);
+	    debug_pm_version($magick_pmodule);
+	}
+    }
+    return($magick_pmodule);
 }
 
 sub id_triable {
