@@ -36,7 +36,7 @@ SHELL=/bin/sh
 
 DESTDIR=
 
-BINARIES=AMC-traitement-image AMC-mepdirect AMC-detect
+BINARIES ?= AMC-traitement-image AMC-mepdirect AMC-detect
 
 MODS=AMC-*.pl $(BINARIES)
 GLADE=AMC-gui.glade
