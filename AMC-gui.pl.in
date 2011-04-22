@@ -221,6 +221,14 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'zoom_window_factor'=>1.0,
 	      );
 
+# MacOSX universal command to open files or directories : /usr/bin/open
+if(lc($^O) eq 'darwin') {
+    for my $k (qw/pdf_viewer img_viewer csv_viewer ods_viewer xml_viewer tex_editor txt_editor dir_opener/) {
+	$o_defaut{$k}=['commande','/usr/bin/open','open'];
+    }
+    $o_defaut{'html_browser'}=['commande','/usr/bin/open %u','open %u'];
+}
+
 my %projet_defaut=('texsrc'=>'',
 		   'mep'=>'mep',
 		   'cr'=>'cr',
