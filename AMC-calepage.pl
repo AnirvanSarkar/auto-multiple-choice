@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use XML::Simple;
-use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
+use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use Data::Dumper;
 use Getopt::Long;
@@ -33,12 +33,6 @@ use AMC::Boite qw/min max/;
 use AMC::Gui::Avancement;
 
 my $anf_version=1;
-
-($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
-sub with_prog {
-    my $fich=shift;
-    return(catpath($e_volume,$e_vdirectories,$fich));
-}
 
 my $theta=0;
 my $alpha=1;
@@ -648,7 +642,7 @@ if($zoom_file && ($traitement->mode ne 'opencv')) {
     my $commandes=AMC::Exec::new("AMC-calepage");
     $commandes->signalise();
 
-    $commandes->execute(with_prog("AMC-zoom.pl"),
+    $commandes->execute("auto-multiple-choice","zoom",
 			"--seuil",$seuil_coche,
 			"--analyse",$analyse_file,
 			"--scan",$scan,

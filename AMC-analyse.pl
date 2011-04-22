@@ -18,7 +18,6 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp;
 use Getopt::Long;
 
@@ -87,13 +86,6 @@ if($liste_f && open(LISTE,$liste_f)) {
 
 exit(0) if($#scans <0);
 
-
-($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
-sub with_prog {
-    my $fich=shift;
-    return(catpath($e_volume,$e_vdirectories,$fich));
-}
-
 sub check_rep {
     my ($r,$create)=(@_);
     if($create && $r && ! -x $r) {
@@ -127,7 +119,7 @@ if(!$mep_file) {
 for my $s (@scans) {
     my $sf=$s;
     $sf =~ s:.*/::;
-    my @c=with_prog("AMC-calepage.pl");
+    my @c=("auto-multiple-choice","calepage");
     push @c,"--debug",debug_file();
     push @c,"--seuil-coche",$seuil_coche if($seuil_coche);
     push @c,"--tol-marque",$tol_marque if($tol_marque);

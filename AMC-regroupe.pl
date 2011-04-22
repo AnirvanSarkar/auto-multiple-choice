@@ -31,7 +31,7 @@ use AMC::NamesFile;
 use AMC::ANList;
 use AMC::MEPList;
 
-use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
+use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 
@@ -39,12 +39,6 @@ my $debug='';
 
 my $commandes=AMC::Exec::new('AMC-regroupe');
 $commandes->signalise();
-
-($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
-sub with_prog {
-    my $fich=shift;
-    return(catpath($e_volume,$e_vdirectories,$fich));
-}
 
 ################################################################
 
@@ -152,7 +146,7 @@ sub check_correc {
 
 	debug "Making individual corrected sheet...";
 
-	$commandes->execute(with_prog("AMC-prepare.pl"),
+	$commandes->execute("auto-multiple-choice","prepare",
 			    "--n-copies",$nombre_copies,
 			    "--with",$moteur_latex,
 			    "--mode","k",

@@ -120,12 +120,6 @@ if($debug) {
 debug_pm_version("Gtk2");
 debug_pm_version("Gtk2::GladeXML");
 
-my ($e_volume,$e_vdirectories,undef) = splitpath( rel2abs($0) );
-sub with_prog {
-    my $fich=shift;
-    return(catpath($e_volume,$e_vdirectories,$fich));
-}
-
 my $glade_xml=__FILE__;
 $glade_xml =~ s/\.p[ml]$/.glade/i;
 
@@ -985,7 +979,7 @@ sub exporte {
 	}
     }
     
-    commande('commande'=>[with_prog("AMC-export.pl"),
+    commande('commande'=>["auto-multiple-choice","export",
 			  "--debug",debug_file(),
 			  "--module",$format,
 			  "--useall",$projet{'options'}->{'export_include_abs'},
@@ -1620,7 +1614,7 @@ sub doc_maj {
     }
 
     #
-    commande('commande'=>[with_prog("AMC-prepare.pl"),
+    commande('commande'=>["auto-multiple-choice","prepare",
 			  "--with",moteur_latex(),
 			  "--debug",debug_file(),
 			  "--out-sujet",absolu($projet{'options'}->{'docs'}->[0]),
@@ -1945,7 +1939,7 @@ sub sujet_impressions_ok {
     print $fh join("\n",@e)."\n";
     $fh->seek( 0, SEEK_END );
 
-    commande('commande'=>[with_prog("AMC-imprime.pl"),
+    commande('commande'=>["auto-multiple-choice","imprime",
 			  "--methode",$o{'methode_impression'},
 			  "--imprimante",$o{'imprimante'},
 			  "--options",$os,
@@ -1997,7 +1991,7 @@ sub calcule_mep {
     my @meps=fichiers_mep();
     unlink @meps;
     # on recalcule...
-    commande('commande'=>[with_prog("AMC-prepare.pl"),
+    commande('commande'=>["auto-multiple-choice","prepare",
 			  "--with",moteur_latex(),
 			  "--debug",debug_file(),
 			  "--calage",absolu($projet{'options'}->{'docs'}->[2]),
@@ -2191,7 +2185,7 @@ sub saisie_auto_ok {
 
     # call AMC-analyse
 
-    commande('commande'=>[with_prog("AMC-analyse.pl"),
+    commande('commande'=>["auto-multiple-choice","analyse",
 			  "--debug",debug_file(),
 			  "--seuil-coche",$projet{'options'}->{'seuil'},
 			  "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
@@ -2418,7 +2412,7 @@ sub associe_auto {
 	$dialog->run;
 	$dialog->destroy;
     } else {
-	commande('commande'=>[with_prog("AMC-association-auto.pl"),
+	commande('commande'=>["auto-multiple-choice","association-auto",
 			      "--notes",absolu($projet{'options'}->{'notes'}),
 			      "--notes-id",$projet{'options'}->{'assoc_code'},
 			      "--liste",absolu($projet{'options'}->{'listeetudiants'}),
@@ -2488,7 +2482,7 @@ sub voir_notes {
 
 sub noter {
     if($projet{'options'}->{'maj_bareme'}) {
-	commande('commande'=>[with_prog("AMC-prepare.pl"),
+	commande('commande'=>["auto-multiple-choice","prepare",
 			      "--n-copies",$projet{'options'}->{'nombre_copies'},
 			      "--with",moteur_latex(),
 			      "--debug",debug_file(),
@@ -2507,7 +2501,7 @@ sub noter {
 }
 
 sub noter_calcul {
-    commande('commande'=>[with_prog("AMC-note.pl"),
+    commande('commande'=>["auto-multiple-choice","note",
 			  "--debug",debug_file(),
 			  "--cr",absolu($projet{'options'}->{'cr'}),
 			  "--an-saved",absolu($an_saved),
@@ -2587,7 +2581,7 @@ sub opt_symbole {
 }
 
 sub annote_copies {
-    commande('commande'=>[with_prog("AMC-annote.pl"),
+    commande('commande'=>["auto-multiple-choice","annote",
 			  pack_args("--debug",debug_file(),
 			  "--progression-id",'annote',
 			  "--progression",1,
@@ -2622,7 +2616,7 @@ sub regroupement {
 
     valide_options_notation();
 
-    commande('commande'=>[with_prog("AMC-regroupe.pl"),
+    commande('commande'=>["auto-multiple-choice","regroupe",
 			  "--debug",debug_file(),
 			  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
 			  "--cr",absolu($projet{'options'}->{'cr'}),
@@ -2714,7 +2708,7 @@ sub activate_zoom_maj {
 	return(0);
     }
 
-    commande('commande'=>[with_prog("AMC-zooms.pl"),
+    commande('commande'=>["auto-multiple-choice","zooms",
 			  "--debug",debug_file(),
 			  "--projet",absolu('%PROJET/'),
 			  "--projets",absolu('%PROJETS/'),

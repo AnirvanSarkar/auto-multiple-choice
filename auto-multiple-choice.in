@@ -1,6 +1,6 @@
-#! /bin/sh
+#! @/PERLPATH/@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,34 +18,65 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-if [ "$1" ];
-then
+# Local Variables:
+# mode:perl
+# End:
 
-    case "$1" in
-	"analyse"|"annote"|"association-auto"|"association"|"calepage"|"export"|"gui"|"imprime"|"manuel"|"meptex"|"note"|"prepare"|"regroupe"|"zoom"|"zooms") 
-	    ACTION=$1
-	    shift;;
-	*) ACTION=gui ;;
-    esac
+use File::Spec::Functions qw/catfile catpath splitpath updir/;
+use Cwd;
 
-else
+$mods_dir="@/MODSDIR/@";
 
-    ACTION=gui
-
-fi
-
-MODSDIR=@/MODSDIR/@
+sub mod_path {
+    my ($action)=@_;
+    for my $ext ('.pl','') {
+	my $f=catfile($mods_dir,"AMC-$action".$ext);
+	return($f) if(-f $f);
+    }
+    return('');
+}
 
 # For portable distribution
-if [ ! -d "$MODSDIR" ];
-then
-  BASEDIR=`dirname $0`/..
-  BASEDIR=`cd $BASEDIR && pwd`
-  MODSDIR=$BASEDIR/lib
-  export PERL5LIB=$BASEDIR/perl:$PERL5LIB
-  export TEXINPUTS=$TEXINPUTS:$BASEDIR/latex
-  export AMCBASEDIR=$BASEDIR
-fi
+if(! -d $mods_dir) {
+    ($volume,$directory,$file) = splitpath(__FILE__);
+    my $wd=getcwd();
+    $base_dir=catfile(catpath( $volume, $directory ),updir);
+    chdir($base_dir);
+    $base_dir=getcwd();
+    chdir($wd);
+    $mods_dir=catfile($base_dir,'lib');
+    if(! -d $ENV{'AMCBASEDIR'}) {
+	$ENV{'PERL5LIB'}=catfile($base_dir,'perl').":".$ENV{'PERL5LIB'};
+	$ENV{'TEXINPUTS'}=catfile($base_dir,'latex').":".$ENV{'TEXINPUTS'};
+	$ENV{'AMCBASEDIR'}=$base_dir;
+	$ENV{'PATH'}=$ENV{'PATH'}.":".catfile($base_dir,'bin');
+    }
+}
 
-exec $MODSDIR/AMC-$ACTION.pl "$@"
+if($#ARGV==0) {
+    if(mod_path($ARGV[0])) {
+	$action=shift;
+    } else {
+	$action='gui';
+    }
+} elsif($#ARGV>0) {
+    $action=shift;
+} else {
+    $action='gui';
+}
+
+my $f=mod_path($action);
+
+if($f) {
+    if($f =~ /\.pl$/) {
+	exec($^X,$f,@ARGV);
+    } else {
+	exec($f,@ARGV);
+    }
+} else {
+    die "Unknown action";
+}
+
+die "Exec $f failed: $!";
+
 

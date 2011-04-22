@@ -119,12 +119,6 @@ for(\$bareme,\$mep_dir,\$tex_source) {
     $$_=rel2abs($$_);
 }
 
-($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
-sub with_prog {
-    my $fich=shift;
-    return(catpath($e_volume,$e_vdirectories,$fich));
-}
-
 my $n_erreurs;
 my $a_erreurs;
 my @erreurs_msg=();
@@ -399,7 +393,7 @@ if($mode =~ /m/) {
     if($xyfile =~ /\.xy$/ && -f $xyfile) {
 
 	$|++;
-	my @c=(with_prog("AMC-meptex.pl"),
+	my @c=("auto-multiple-choice","meptex",
 	       "--mep-dir",$mep_dir,
 	       "--progression",0.93*$progress,
 	       "--progression-id",$progress_id,
@@ -444,7 +438,7 @@ if($mode =~ /m/) {
 	    # tout en un grace a poppler
 
 	    $|++;
-	    my @c=(with_prog("AMC-mepdirect"),
+	    my @c=("auto-multiple-choice","mepdirect",
 		   "-r",$dpi,
 		   "-d",$mep_dir,
 		   "-e",0.93*$progress,

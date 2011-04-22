@@ -52,7 +52,7 @@ GetOptions("scan=s"=>\$scan,
 
 set_debug($debug);
 
-debug("AMC-zooms / DEBUG") if($debug);
+debug("AMC-zoom / DEBUG") if($debug);
 
 sub adapte {
     my ($im)=@_;

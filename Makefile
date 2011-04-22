@@ -24,8 +24,9 @@ SUB_MAKEFILES=$(wildcard Makefile.versions $(CONFFILE))
 include $(SUB_MAKEFILES)
 
 PACKAGE_DEB_DV=1
+PERLPATH ?= /usr/bin/perl
 
-SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | grep -v '^\#' | sed 's/?\?=.*//;' ) PACKAGE_DEB_DV
+SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | grep -v '^\#' | sed 's/?\?=.*//;' ) PACKAGE_DEB_DV PERLPATH
 
 GCC ?= gcc
 GCC_PP ?= gcc
@@ -171,7 +172,7 @@ endif
 LOCALDIR=$(shell pwd)
 
 global: FORCE
-	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-detect /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR)
+	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-detect /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/lib/AMC/*.pl /usr/lib/AMC/*.glade /usr/bin/auto-multiple-choice
 
 local: global
 	test -d /usr/lib/AMC || sudo mkdir -p /usr/lib/AMC
@@ -182,6 +183,8 @@ local: global
 	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
 	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/AMC-detect
 	sudo ln -s $(LOCALDIR)/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect
+	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC
+	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice.desktop $(DESKTOPDIR)/auto-multiple-choice.desktop

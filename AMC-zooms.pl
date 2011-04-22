@@ -23,14 +23,6 @@ use AMC::Basic;
 use AMC::Queue;
 use AMC::ANList;
 
-use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
-
-($e_volume,$e_vdirectories,$e_vfile) = splitpath( rel2abs($0) );
-sub with_prog {
-    my $fich=shift;
-    return(catpath($e_volume,$e_vdirectories,$fich));
-}
-
 my $seuil=0.15;
 my $n_procs=0;
 my $an_saved='';
@@ -117,7 +109,7 @@ if($n>0) {
 		debug "New zoom structure for ID $id: skipping...";
 	    } else {
 		
-		push @cmds,[with_prog("AMC-zoom.pl"),
+		push @cmds,["auto-multiple-choice","zoom",
 			    "--scan",absolu($scan),
 			    "--seuil",$seuil,
 			    "--analyse",$an_list->attribut($id,'fichier-scan'),
