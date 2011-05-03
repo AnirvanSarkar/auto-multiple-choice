@@ -21,6 +21,7 @@
 */
 
 #include <math.h>
+#include <cstddef>
 #include "cv.h"
 #include "highgui.h"
 #include <stdio.h>
