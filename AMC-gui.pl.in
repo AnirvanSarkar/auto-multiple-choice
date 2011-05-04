@@ -1257,7 +1257,7 @@ sub liste_des_projets {
 	
 	my ($taille,undef)=Gtk2::IconSize->lookup('menu');
         my $pb = Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$taille ,"force-svg");
-	my $pb_rep = Gtk2::IconTheme->get_default->load_icon("gtk-directory",$taille ,"force-svg");
+	my $pb_rep = Gtk2::IconTheme->get_default->load_icon("gtk-no",$taille ,"force-svg");
 	$pb=$w{'main_window'}->render_icon ('gtk-open', 'menu') if(!$pb);
 
 	for (sort { $a cmp $b } @projs) {
