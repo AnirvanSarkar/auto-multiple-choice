@@ -17,16 +17,20 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-CONFFILE ?= Makefile.conf
+ifeq ($(AMCCONF),)
+AMCCONFFILE ?= Makefile.conf
+else
+AMCCONFFILE = Makefile-$(AMCCONF).conf
+endif
 
-SUB_MAKEFILES=$(wildcard Makefile.versions $(CONFFILE))
+SUB_MAKEFILES=$(wildcard Makefile.versions $(AMCCONFFILE))
 
 include $(SUB_MAKEFILES)
 
 PACKAGE_DEB_DV=1
 PERLPATH ?= /usr/bin/perl
 
-SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | grep -v '^\#' | sed 's/?\?=.*//;' ) PACKAGE_DEB_DV PERLPATH
+SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | perl -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PERLPATH
 
 GCC ?= gcc
 GCC_PP ?= gcc
@@ -76,10 +80,10 @@ AMC-detect: AMC-detect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV)
 
 %.xml: %.in.xml
-	sed $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
+	perl -p $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
 
 %: %.in $(SUB_MAKEFILES)
-	sed $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) $< > $@
+	perl -p $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) $< > $@
 
 doc:
 	$(MAKE) -C doc
@@ -145,8 +149,10 @@ endif
 	install    -m 0755 $(USER_GROUP) auto-multiple-choice $(DESTDIR)/$(BINDIR)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(ICONSDIR)
 	install    -m 0644 $(USER_GROUP) icons/*.svg $(DESTDIR)/$(ICONSDIR)
+ifneq ($(PIXDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PIXDIR)
 	install    -m 0644 $(USER_GROUP) -T $(MAIN_LOGO).xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
+endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Export
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Gui
@@ -218,8 +224,8 @@ TMP_PORTABLE:=$(shell mktemp -ud)
 
 portable_vok:
 	$(MAKE) tmp_copy
-	make CONFFILE=Makefile-portable.conf INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR)
-	make CONFFILE=Makefile-portable.conf INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR) install
+	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR)
+	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR) install
 	cd $(TMP_PORTABLE) ; tar cvzf /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_portable.tar.gz $(SRC_EXCL) AMC
 	rm -rf $(TMP_PORTABLE)
 
