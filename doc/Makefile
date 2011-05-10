@@ -49,7 +49,7 @@ html/images/%.png: img_src/%.svg
 
 %.pdf: %.tex
 	pdflatex $< ; pdflatex $<
-	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,*.$(ext))
+	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
 
