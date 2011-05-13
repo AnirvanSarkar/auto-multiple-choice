@@ -129,7 +129,7 @@ my $o_file='';
 my $o_dir=$home_dir.'/.AMC.d';
 my $state_file="$o_dir/state.xml";
 
-#chomp(my $encodage_systeme=eval { `locale charmap` });
+# Gets system encoding
 my $encodage_systeme=langinfo(CODESET());
 $encodage_systeme='UTF-8' if(!$encodage_systeme);
 
@@ -139,6 +139,10 @@ sub hex_color {
 }
 
 my %w=();
+
+# Default general options, to be used when not set in the main options
+# file
+
 my %o_defaut=('pdf_viewer'=>['commande',
 			     'evince','acroread','gpdf','okular','xpdf',
 			     ],
@@ -229,6 +233,8 @@ if(lc($^O) eq 'darwin') {
     $o_defaut{'html_browser'}=['commande','/usr/bin/open %u','open %u'];
 }
 
+# Default options for projects
+
 my %projet_defaut=('texsrc'=>'',
 		   'mep'=>'mep',
 		   'cr'=>'cr',
@@ -283,17 +289,23 @@ my $an_saved='an.storable';
 my %o=();
 my %state=();
 
-# toutes les commandes prevues sont-elles accessibles ? Si non, on
-# avertit l'utilisateur
+# Test whether all commands defined to open/view files are
+# reachable. If not, the user is warned...
 
 sub test_commandes {
+    my ($dont_warn)=@_;
     my @pasbon=();
+    my @missing=();
     for my $c (grep { /_(viewer|editor|opener)$/ } keys(%o)) {
 	my $nc=$o{$c};
 	$nc =~ s/\s.*//;
-	push @pasbon,$nc if(!commande_accessible($nc));
+	if(!commande_accessible($nc)) {
+	    debug "Missing command [$c]: $nc";
+	    push @missing,$c;
+	    push @pasbon,$nc;
+	}
     }
-    if(@pasbon) {
+    if(@pasbon && !$dont_warn) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
@@ -309,12 +321,16 @@ sub test_commandes {
 	$dialog->run;
 	$dialog->destroy;
     }
+    return(@missing);
 }
+
+# Creates general options directory if not present
 
 if(! -d $o_dir) {
     mkdir($o_dir) or die "Error creating $o_dir : $!";
 
-    # changement organisation des fichiers config generale (<=0.254)
+    # gets older verions (<=0.254) main configuration file and move it
+    # to the new location
 
     if(-f $home_dir.'/.AMC.xml') {
 	debug "Moving old configuration file";
@@ -322,7 +338,7 @@ if(! -d $o_dir) {
     }
 }
 
-# lecture/ecriture des fichiers de preferences
+# Read/write options XML files
 
 sub pref_xx_lit {
     my ($fichier)=@_;
@@ -348,7 +364,7 @@ sub pref_xx_ecrit {
     }
 }
 
-# lecture/ecriture etat...
+# Read/write running state
 
 sub sauve_state {
     if($state{'_modifie'} || $state{'_modifie_ok'}) {
@@ -391,7 +407,7 @@ sub annule_apprentissage {
     }
 }
 
-# lecture etat, detection du profil utilise
+# Read the state file
 
 if(-r $state_file) {
     %state=pref_xx_lit($state_file);
@@ -401,10 +417,14 @@ if(-r $state_file) {
 $state{'_modifie'}=0;
 $state{'_modifie_ok'}=0;
 
+# gets the last used profile
+
 if(!$state{'profile'}) {
     $state{'profile'}='default';
     $state{'_modifie'}=1;
 }
+
+# sets new profile if given as a command argument
 
 if($profile && $profile ne $state{'profile'}) {
     $state{'profile'}=$profile;
@@ -417,51 +437,75 @@ debug "Profile : $state{'profile'}";
 
 $o_file=$o_dir."/cf.".$state{'profile'}.".xml";
 
-# lecture options ...
+# Read general options ...
 
 if(-r $o_file) {
     %o=pref_xx_lit($o_file);
 }
 
-for my $k (keys %o_defaut) {
-    if(! exists($o{$k})) {
-	if(ref($o_defaut{$k}) eq 'ARRAY') {
-	    my ($type,@valeurs)=@{$o_defaut{$k}};
-	    if($type eq 'commande') {
-	      UC: for my $c (@valeurs) {
-		  if(commande_accessible($c)) {
-		      $o{$k}=$c;
-		      last UC;
-		  }
-	      }
-		$o{$k}=$valeurs[0] if(!$o{$k});
-	    } else {
-		debug "ERR: unknown option type : $type";
-	    }
-	} elsif(ref($o_defaut{$k}) eq 'HASH') {
-	    $o{$k}={%{$o_defaut{$k}}};
-	} else {
-	    $o{$k}=$o_defaut{$k};
-	    $o{$k}=$encodage_systeme if($k =~ /^encodage_/ && !$o{$k});
+sub set_option_to_default {
+    my ($key,$subkey,$force)=@_;
+    if($subkey) {
+	if($force || ! exists($o{$key}->{$subkey})) {
+	    $o{$key}->{$subkey}=$o_defaut{$key}->{$subkey};
+	    debug "New sub-global parameter : $key/$subkey = $o{$key}->{$subkey}";
 	}
-	debug "New global parameter : $k = $o{$k}" if($o{$k});
     } else {
-	if(ref($o_defaut{$k}) eq 'HASH') {
-	    for my $kk (keys %{$o_defaut{$k}}) {
-		if(! exists($o{$k}->{$kk})) {
-		    $o{$k}->{$kk}=$o_defaut{$k}->{$kk};
-		    debug "New sub-global parameter : $k/$kk = $o{$k}->{$kk}";
+	if($force || ! exists($o{$key})) {
+	    # set to default
+	    if(ref($o_defaut{$key}) eq 'ARRAY') {
+		my ($type,@valeurs)=@{$o_defaut{$key}};
+		if($type eq 'commande') {
+		  UC: for my $c (@valeurs) {
+		      if(commande_accessible($c)) {
+			  $o{$key}=$c;
+			  last UC;
+		      }
+		  }
+		    if(!$o{$key}) {
+			debug "No available command for option $key: using the first one";
+			$o{$key}=$valeurs[0];
+		    }
+		} else {
+		    debug "ERR: unknown option type : $type";
+		}
+	    } elsif(ref($o_defaut{$key}) eq 'HASH') {
+		$o{$key}={%{$o_defaut{$key}}};
+	    } else {
+		$o{$key}=$o_defaut{$key};
+		$o{$key}=$encodage_systeme if($key =~ /^encodage_/ && !$o{$key});
+	    }
+	    debug "New global parameter : $key = $o{$key}" if($o{$key});
+	} else {
+	    # already defined option: go with sub-options if any
+	    if(ref($o_defaut{$key}) eq 'HASH') {
+		for my $kk (keys %{$o_defaut{$key}}) {
+		    set_option_to_default($key,$kk,$force);
 		}
 	    }
 	}
     }
-
 }
+
+# sets undefined options to default value
+
+for my $k (keys %o_defaut) {
+    set_option_to_default($k);
+}
+
+# for unexisting commands options, see if we can find an available one
+# from the default list
+
+for my $k (test_commandes(1)) {
+    set_option_to_default($k,'','FORCE');
+}
+
+# Clears modified flag for the options
 
 $o{'_modifie'}=0;
 $o{'_modifie_ok'}=0;
 
-# options passees en defaut_ entre version 0.226 et version 0.227
+# some options were renamed to defaut_* between 0.226 and 0.227
 
 for(qw/encodage_liste encodage_csv/) {
     if($o{"$_"} && ! $o{"defaut_$_"}) {
@@ -470,26 +514,27 @@ for(qw/encodage_liste encodage_csv/) {
     }
 }
 
-# Migration rep_modeles a partir de 0.280
+# Replace old (pre 0.280) rep_modeles value with new one
 
 if($o{'rep_modeles'} eq '/usr/share/doc/auto-multiple-choice/exemples') {
     $o{'rep_modeles'}=$o_defaut{'rep_modeles'};
     $o{'_modifie'}=1;
 }
 
-# XML::Writer utilise dans Association.pm n'accepte rien d'autre...
+# Internal encoding _must_ be UTF-8, for XML::Writer (used by
+# AMC::Gui::Association for example) to work
 if($o{'encodage_interne'} ne 'UTF-8') {
     $o{'encodage_interne'}='UTF-8';
     $o{'_modifie'}=1;
 }
 
-# creation du repertoire si besoin (sinon la conf peut etre
-# perturbee lors de Edition/Parametres)
+# creates projets and models directories if needed (if not present,
+# Edit/Parameters can be disrupted)
 
 mkdir($o{'rep_projets'}) if(! -d $o{'rep_projets'});
 mkdir($o{'rep_modeles'}) if(! -d $o{'rep_modeles'});
     
-###
+#############################################################################
 
 my %projet=();
 
@@ -3993,23 +4038,4 @@ Gtk2->main();
 1;
 
 __END__
-
-=head1 AMC-gui.pl
-
-Interface graphique de gestion de projet de QCM automatique
-
-=head1 SYNOPSIS
-
-  AMC-gui.pl [projet]
-
-=head1 OPTIONS
-
-B<AMC-gui.pl> a un unique paramètre optionnel : le nom du projet à ouvrir
-au lancement.
-
-=head1 AUTEUR
-
-Alexis Bienvenue <paamc@passoire.fr>
-
-=cut
 
