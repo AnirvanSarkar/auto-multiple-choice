@@ -60,6 +60,15 @@ PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
 
 MAIN_LOGO=icons/auto-multiple-choice
 
+ifeq ($(INSTALL_USER),)
+else
+USER_GROUP = -o $(INSTALL_USER)
+endif
+ifeq ($(INSTALL_GROUP),)
+else
+USER_GROUP += -g $(INSTALL_GROUP)
+endif
+
 ifeq ($(PRECOMP_ARCHIVE),)
 all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm doc I18N ;
 else
@@ -161,10 +170,16 @@ endif
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
 ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
-ifneq ($(SYSTEM_TYPE),rpm)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DOCDIR)
 	install    -m 0644 $(USER_GROUP) $(wildcard doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf) $(DESTDIR)/$(DOCDIR)
 	cp -r doc/html $(DESTDIR)/$(DOCDIR)
+ifeq ($(INSTALL_USER),)
+else
+	chown -hR $(INSTALL_USER) $(DESTDIR)/$(DOCDIR)
+endif
+ifeq ($(INSTALL_GROUP),)
+else
+	chgrp -hR $(INSTALL_GROUP) $(DESTDIR)/$(DOCDIR)
 endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MAN1DIR)
 	install    -m 0644 $(USER_GROUP) doc/*.1 $(DESTDIR)/$(MAN1DIR)
