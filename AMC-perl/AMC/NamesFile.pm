@@ -20,6 +20,7 @@
 package AMC::NamesFile;
 
 use AMC::Basic;
+use Encode;
 
 sub new {
     my ($f,%o)=@_;

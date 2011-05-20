@@ -20,6 +20,7 @@
 package AMC::Export::ods;
 
 use AMC::Export;
+use Encode;
 
 use OpenOffice::OODoc;
 
@@ -536,11 +537,10 @@ sub export {
 		$doc->cellValue($feuille,$jj,$ii,$e->{'_'.$_.'_'})
 		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
 	    } else {
-		$doc->cellValue($feuille,$jj,$ii,
-				($_ eq 'ID' 
-				 ? $self->id_name($e->{'_ID_'})
-				 : $e->{'_'.$_.'_'})
-		    );
+		my $c=$e->{'_'.$_.'_'};
+		$c=$self->id_name($e->{'_ID_'}) if($_ eq 'ID');
+		$c=encode('utf-8',$e->{'_NOM_'}) if($_ eq 'NOM');
+		$doc->cellValue($feuille,$jj,$ii,$c);
 	    }
 	    $ii++;
 	}
