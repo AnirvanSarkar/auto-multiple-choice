@@ -4052,6 +4052,31 @@ if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
 
 projet_ouvre($ARGV[0]);
 
+#######################################
+# For MacPorts with latexfree variant, for example
+
+if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
+    my $message='';
+    if(!commande_accessible("kpsewhich")) {
+	$message=sprintf(__("I don't find the command %s."),"kpsewhich")
+	    .__("Perhaps LaTeX is not installed?");
+    } else {
+	if(!get_sty()) {
+	    $message=__("The style file automultiplechoice.sty seems to be unreachable. Try to use command 'auto-multiple-choice latex-link' as root to fix this.");
+	}
+    }
+    if($message) {
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok',$message);
+	$dialog->run;
+	$dialog->destroy;
+    }
+}
+
+#######################################
+
 test_commandes();
 
 Gtk2->main();

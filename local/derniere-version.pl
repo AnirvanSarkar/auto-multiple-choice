@@ -38,7 +38,7 @@ GetOptions("base=s"=>\@d,
 	   "debug!"=>\$debug,
 	   );
 
-@d=("/home/alexis/enseignement","/tmp") if(!@d);
+@d=("/home/alexis/enseignement","/tmp") if(!@d && !$fich);
 
 my @v;
 
