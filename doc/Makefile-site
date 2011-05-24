@@ -6,7 +6,10 @@ HVERSION=htdocs/version.shtml
 
 TMPDIR:=$(shell mktemp -d)
 
-DOCVERSION=0.376
+STABLEVERSION=0.376
+STABLESRC=../download_area/files/auto-multiple-choice_$(STABLEVERSION)_sources.tar.gz
+
+DOCVERSION=0.468
 SRC=../download_area/files/auto-multiple-choice_$(DOCVERSION)_sources.tar.gz
 
 BASEDIR=$(TMPDIR)/auto-multiple-choice-$(DOCVERSION)
@@ -16,7 +19,7 @@ XML=$(DOCDIR)/auto-multiple-choice
 SITEDOC=htdocs/auto-multiple-choice
 
 version:
-	../work/local/derniere-version.pl --mode h --fich $(SRC) --ext _sources.tar.gz > $(HVERSION)
+	../work/local/derniere-version.pl --mode h --fich $(STABLESRC) --ext _sources.tar.gz > $(HVERSION)
 	echo '<!--#set var="DOCVERSION" value="$(DOCVERSION)"-->' >> $(HVERSION)
 
 map: FORCE
