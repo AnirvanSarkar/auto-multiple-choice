@@ -1692,6 +1692,7 @@ sub doc_maj {
 					   'error','ok',
 					   __("Errors while compiling LaTeX source.")." "
 					   .__("You have to correct LaTeX source and re-run documents update.")." "
+					   .sprintf(__("See the LaTeX log in '%s' below."),__"Command output details")." "
 					   .__("Use LaTeX editor or latex command for a precise diagnosis.")."\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "") );
 		     $dialog->run;
 		     $dialog->destroy;

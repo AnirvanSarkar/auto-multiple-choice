@@ -152,6 +152,7 @@ sub get_output {
 	
 	if($line =~ /^ERR/) {
 	    chomp(my $lc=$line);
+	    $lc =~ s/^ERR>//;
 	    push @{$self->{'erreurs'}},$lc;
 	}
 	if($line =~ /^VAR:\s*([^=]+)=(.*)/) {

@@ -119,8 +119,8 @@ for(\$bareme,\$mep_dir,\$tex_source) {
     $$_=rel2abs($$_);
 }
 
-my $n_erreurs;
 my $a_erreurs;
+my @latex_errors=();
 my @erreurs_msg=();
 my %info_vars=();
 
@@ -225,8 +225,8 @@ sub execute {
 
 	$n_run++;
 	
-	$n_erreurs=0;
 	$a_erreurs=0;
+	@latex_errors=();
     
 	debug "%%% Compiling: pass $n_run";
 
@@ -238,7 +238,9 @@ sub execute {
 	    $rerun=1 if(/^LaTeX Warning:.*Rerun to get cross-references right/);
 	    $format=$1 if(/^Output written on .*\.([a-z]+) \(/);
 
-	    $n_erreurs++ if(/^\!.*\.$/);
+	    if(/^\!\s*(.*\.)$/) {
+		push @latex_errors,$1;
+	    }
 	    print $_ if(/^.+$/);
 	}
 	close(EXEC);
@@ -283,6 +285,18 @@ $f_base =~ s/\.tex$//i;
 
 $prefix=$f_base."-" if(!$prefix);
 
+sub give_latex_errors {
+    my ($context)=@_;
+    if(@latex_errors) {
+	print "ERR: <i>"
+	    .sprintf(__("%d errors during LaTeX compiling")." (%s)</i>\n",(1+$#latex_errors),$context);
+	for(@latex_errors) {
+	    print "ERR>$_\n";
+	}
+	exit(1);
+    }
+}
+
 sub transfere {
     my ($orig,$dest)=@_;
     if(-f $orig) {
@@ -319,11 +333,7 @@ if($mode =~ /k/) {
 
     execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
     transfere("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
-    if($n_erreurs>0) {
-	print "ERR: "
-	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"individual solution");
-	exit(1);
-    }
+    give_latex_errors(__"individual solution");
 }
 
 if($mode =~ /s/) {
@@ -350,11 +360,8 @@ if($mode =~ /s/) {
     execute('command'=>[latex_cmd(%opts,'SujetExterne'=>1)]);
     analyse_amclog("$f_base.amc");
     transfere("$f_base.pdf",$out_sujet);
-    if($n_erreurs>0) {
-	print "ERR: "
-	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"question sheet");
-	exit(1);
-    }
+    give_latex_errors(__"question sheet");
+
     exit(1) if($a_erreurs>0);
 
     transfere("$f_base.xy",$out_calage);
@@ -370,13 +377,7 @@ if($mode =~ /s/) {
 
     execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
     transfere("$f_base.pdf",$out_corrige);
-    if($n_erreurs>0) {
-	print "ERR: "
-	    .sprintf(__("%d errors during LaTeX compiling")." (%s)\n",$n_erreurs,__"solution");
-	exit(1);
-    }
-
-
+    give_latex_errors(__"solution");
 }
 
 if($mode =~ /m/) {
