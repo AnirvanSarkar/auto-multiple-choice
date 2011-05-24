@@ -469,8 +469,9 @@ sub pack_args {
     $writer->startTag('arguments');
     for(@args) { $writer->dataElement('arg',$_); }
     $writer->endTag('arguments');
-    return('--xmlargs',$pack_fh->filename);
+    my $fn=$pack_fh->filename;
     $pack_fh->close;
+    return('--xmlargs',$fn);
 }
 
 sub unpack_args {
