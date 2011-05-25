@@ -3155,7 +3155,7 @@ sub file_maj {
     if($f && -f $f) {
 	if(-r $f) {
 	    my @s=stat($f);
-	    return(strftime("%x %X",localtime($s[9])));
+	    return(decode('UTF-8',strftime("%x %X",localtime($s[9]))));
 	} else {
 	    return(__"unreadable");
 	}
