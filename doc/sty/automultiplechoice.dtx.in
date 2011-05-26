@@ -109,7 +109,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\fontshape,\fontsize,\FPeval,\FPiflt,\FPset,\geometry,\global}
 % \DoNotIndex{\hbox,\headrulewidth,\hfill,\hspace,\hss,\ifFileExists,\ifnum}
 % \DoNotIndex{\ifodd,\ifx,\ignorespaces,\immediate,\index,\item,\itemsep}
-% \DoNotIndex{\jobname,\label,\let,\linewidth,\loop,\lower,\makebox,\mbox}
+% \DoNotIndex{\jobname,\label,\let,\linewidth,\loop,\lower,\LR,\makebox,\mbox}
 % \DoNotIndex{\message,\multiply,\newcommand,\newcount,\newcounter,\newdimen}
 % \DoNotIndex{\NewEnviron,\newenvironment,\newif,\newlength,\newtoks}
 % \DoNotIndex{\newwrite,\noexpand,\noindent,\number,\openout,\PackageWarning}
@@ -903,6 +903,19 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCmessage#1{\AMC@amclog{AUTOQCM[#1]^^J}}
 %    \end{macrocode}\end{macro}\end{macro}
 %
+% \begin{macro}{\AMC@LR}
+%   Colours management can be faulty in right-to-left mode: in these
+%   situations, we will make use of |\LR| from package {\sf bidi} to
+%   get back to left-to-right mode. |\AMC@LR| is |\LR| if {\sf bidi}
+%   is loaded.
+%    \begin{macrocode}
+\@ifpackageloaded{bidi}{%
+  \PackageInfo{automultiplechoice}{Package bidi loaded: using LR for boxes.}%
+  \let\AMC@LR=\LR}%
+{\let\AMC@LR=\relax}%
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Variables}
 %
 % Counters and boolean variables defined here are internal and should
@@ -1300,13 +1313,13 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{amcxyfile}
 %
 %    \begin{macrocode}
-\newcommand\AMC@boxedchar[4]{\hspace{0pt}%
+\newcommand\AMC@boxedchar[4]{\AMC@LR{\hspace{0pt}%
   {\fboxsep=\z@\fboxrule=\AMC@boxedrule%
     \lower\AMC@boxeddown\hbox{\fcolorbox{black}%
       {\ifx\@empty#4\@empty white\else black\fi}%
       {\vbox to \AMC@boxeddim{\AMC@tracepos{#2}{#3}\vfill %
           \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}%
-        \AMC@tracepos{#2}{#3}}}}}
+        \AMC@tracepos{#2}{#3}}}}}}
 %    \end{macrocode}\end{macro}
 %
 % \begin{macro}{\AMC@caselettre}
@@ -1973,13 +1986,13 @@ Three digits and two letters:\insertgroup{mixed}.
   \setlength{\@tempdimb}{.5\paperwidth}%
   \setlength{\@tempdimc}{-.5\paperheight}%
   \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
-    \makebox(0,0){\rotatebox{45}{%
+    \makebox(0,0){\rotatebox{45}{\AMC@LR{%
         \textcolor[gray]{0.8}{
           \fontencoding{OT1}\fontfamily{cmr}
           \fontseries{b}\fontshape{n}
           \fontsize{90pt}{120pt}
           \selectfont
-          \AMC@watertext}}}}}
+          \AMC@watertext}}}}}}
 \newcommand\AMCw@terprint[1]{%
   \setbox\@tempboxa\vbox to \z@{%
     \vbox{%
@@ -2231,7 +2244,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
   \ifAMC@watermark
     \ifAMC@correchead\else
       \def\AMC@note{\begin{minipage}{0.65\linewidth}
-          \textcolor{blue}{\AMC@loc@message}
+          \AMC@LR{\textcolor{blue}{\AMC@loc@message}}
         \end{minipage}
       }
     \fi
