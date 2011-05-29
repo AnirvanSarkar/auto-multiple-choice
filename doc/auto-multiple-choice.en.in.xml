@@ -995,6 +995,22 @@ Durée : 10 minutes.
         <para>To obtain smaller boxes, one can e.g. use the command</para>
 
         <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
+
+        <para>When using <option>separateanswersheet</option> package option,
+        you can also customize the boxes labelling. The default behaviour is
+        to use uppercase alphabetical labelling, or arabic numbering if the
+        <option>digits</option> package option is used. To use your own
+        labelling, one has to redefine the <command>\AMCchoiceLabel</command>
+        command which takes as argument the name of the counter used to number
+        the choices. For example, the following code will ask for lowercase
+        letters to label the boxes:</para>
+
+        <programlisting>\def\AMCchoiceLabel#1{\alph{#1}}</programlisting>
+
+        <para>As an other example, when using <package>arabxetex</package>
+        package, the following code may be useful:</para>
+
+        <programlisting>\def\AMCchoiceLabel#1{\textLR{\Alph{#1}}}</programlisting>
       </sect3>
 
       <sect3>

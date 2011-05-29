@@ -1322,19 +1322,28 @@ Three digits and two letters:\insertgroup{mixed}.
         \AMC@tracepos{#2}{#3}}}}}}
 %    \end{macrocode}\end{macro}
 %
-% \begin{macro}{\AMC@caselettre}
+% \begin{macro}{\AMC@caselettre}\begin{macro}{\AMCchoiceLabel}
 % Command |\AMC@caselettre| is the same as |\AMC@boxedchar|, but if
 % \meta{char} is empty, it is replaced by an arabic or alphabetical
-% counter.
+% counter, depending on the use of the |digits| package option.
+%
+% To use another way to label the choices boxes, the user can redefine
+% the |\AMCchoiceLabel| macro, which takes as argument the name of the
+% counter used to number the choices. One can for example use
+% |\def\AMCchoiceLabel#1{\alph{#1}}| to ask for lowercase letters.
+%
 %    \begin{macrocode}
+\def\AMCchoiceLabel#1{%
+  \ifAMC@inside@digit\arabic{#1}%
+  \else\Alph{#1}\fi%
+}
 \newcounter{AMC@ncase}
 \setcounter{AMC@ncase}{0}
 \newcommand\AMC@caselettre[4]{%
   \AMC@boxedchar{\ifx\@empty#1\@empty%
-    \ifAMC@inside@digit\arabic{AMC@ncase}%
-    \else\Alph{AMC@ncase}\fi%
+    \AMCchoiceLabel{AMC@ncase}%
     \else #1\fi}{#2}{#3}{#4}}
-%    \end{macrocode}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}
 % 
 % \begin{macro}{\AMCboxDimensions}
 %   The dimensions of these box are managed by

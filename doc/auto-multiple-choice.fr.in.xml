@@ -1045,6 +1045,23 @@ Durée : 10 minutes.
         utiliser la commande</para>
 
         <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
+
+        <para>Lors de l'utilisation de l'option <option>ensemble</option>, il
+        est possible de modifier la manière de nommer les cases à cocher
+        (c'est-à-dire ce qui sera inscrit dans chaque case). Le comportement
+        par défaut est d'écrire des lettres majuscules, ou des chiffres si
+        l'option <option>chiffres</option> est utilisée. Pour changer cela, il
+        faut redéfinir la commande <command>\AMCchoiceLabel</command>, qui
+        prend comme unique argument le nom du compteur utilisé pour la
+        numérotation des cases. Ainsi, pour obtenir des lettres minuscules, on
+        utilisera</para>
+
+        <programlisting>\def\AMCchoiceLabel#1{\alph{#1}}</programlisting>
+
+        <para>De même, lors de l'utilisation du paquet LaTeX arabxetex, la
+        commande suivante pourra se révéler utile :</para>
+
+        <programlisting>\def\AMCchoiceLabel#1{\textLR{\Alph{#1}}}</programlisting>
       </sect3>
 
       <sect3>
