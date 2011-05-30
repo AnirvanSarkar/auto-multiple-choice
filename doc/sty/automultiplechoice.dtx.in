@@ -909,10 +909,10 @@ Three digits and two letters:\insertgroup{mixed}.
 %   get back to left-to-right mode. |\AMC@LR| is |\LR| if {\sf bidi}
 %   is loaded.
 %    \begin{macrocode}
-\@ifpackageloaded{bidi}{%
+\AtBeginDocument{\@ifpackageloaded{bidi}{%
   \PackageInfo{automultiplechoice}{Package bidi loaded: using LR for boxes.}%
   \let\AMC@LR=\LR}%
-{\let\AMC@LR=\relax}%
+{\let\AMC@LR=\relax}}%
 %    \end{macrocode}
 % \end{macro}
 %
