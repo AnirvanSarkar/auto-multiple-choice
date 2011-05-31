@@ -30,7 +30,12 @@ include $(SUB_MAKEFILES)
 PACKAGE_DEB_DV=1
 PERLPATH ?= /usr/bin/perl
 
-SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | perl -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PERLPATH
+# DATE/TIME to be substituted
+
+DATE_RPMCHL:=$(shell LC_TIME=en_US date +"%a %b %e %Y")
+DATE_DEBCHL:=$(shell LANG=C date "+%a, %d %b %Y %H:%M:%S %z")
+
+SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | perl -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PERLPATH DATE_DEBCHL DATE_RPMCHL
 
 GCC ?= gcc
 GCC_PP ?= gcc
@@ -236,7 +241,7 @@ tmp_copy:
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean
 
 portable_vok:
-	$(eval TMP_PORTABLE:=$(shell mktemp -d))
+	$(eval TMP_PORTABLE:=$(shell mktemp -d /tmp/portable.XXXXXXXXXX))
 	$(MAKE) tmp_copy
 	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR)
 	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR) install
