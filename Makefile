@@ -235,9 +235,8 @@ tmp_copy:
 	rsync -aC --exclude '*~' --exclude download_area --exclude local . $(TMP_SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean
 
-TMP_PORTABLE:=$(shell mktemp -ud)
-
 portable_vok:
+	$(eval TMP_PORTABLE:=$(shell mktemp -d))
 	$(MAKE) tmp_copy
 	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR)
 	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR) install
