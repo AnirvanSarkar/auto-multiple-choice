@@ -678,13 +678,15 @@ $w{'doc_menu'}->set_submenu($docs_menu);
 ###
 
 sub dialogue_apprentissage {
-    my ($key,@oo)=@_;
+    my ($key,$type,$buttons,@oo)=@_;
+    my $resp='';
+    $type='info' if(!$type);
+    $buttons='ok' if(!$buttons);
     if(!$state{'apprentissage'}->{$key}) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
-			      'info',
-			      'ok',
+			      $type,$buttons,
 			      @oo);
 
 	my $garde=Gtk2::CheckButton->new(__"Show this message again next time");
@@ -694,7 +696,7 @@ sub dialogue_apprentissage {
 	$dialog->get_content_area()->add($garde);
 	$dialog->show_all();
 	
-	$dialog->run;
+	$resp=$dialog->run;
 
 	if(!$garde->get_active()) {
 	    debug "Learning : $key";
@@ -704,8 +706,8 @@ sub dialogue_apprentissage {
 	}
 
 	$dialog->destroy;
-	
     }
+    return($resp);
 }
 
 ### modele documents
@@ -1703,7 +1705,7 @@ sub doc_maj {
 		     for(0..2) {
 			 $ok=0 if(! -f absolu($projet{'options'}->{'docs'}->[$_]));
 		     }
-		     dialogue_apprentissage('MAJ_DOCS_OK',
+		     dialogue_apprentissage('MAJ_DOCS_OK','','',
 					    __("Working documents successfully generated.")." "
 					    .__("You can take a look at them double-clicking on the list.")." "
 					    .__("If they are correct, proceed to layouts detection...")) if($ok);
@@ -1987,6 +1989,31 @@ sub sujet_impressions_ok {
     
     debug "Printing: ".join(",",@e);
 
+    if(!@e) {
+	# No page selected: 
+	my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'info','ok',
+		  __("You did not select any sheet to print..."));
+	$dialog->run;
+	$dialog->destroy;
+	return();
+    }
+
+    if(1+$#e < 10) {
+	# Less than 10 pages selected: is it a mistake?
+	my $resp=dialogue_apprentissage('PRINT_FEW_PAGES',
+					'warning','yes-no',
+					__("You selected only a few sheets to print.")."\n".
+					__("You must create as many exam sheets as necessary for all your students, with different sheets numbers, and print them all.")." ".
+					__("If you print one or several sheets and photocopy them to have enough for all the students, <b>you won't be able to
+continue with AMC!</b>")."\n".
+					__("Do you want to print the selected sheets anyway?")
+	    );
+	return() if($resp eq 'no');
+    }
+
     my $fh=File::Temp->new(TEMPLATE => "nums-XXXXXX",
 			   TMPDIR => 1,
 			   UNLINK=> 1);
@@ -2073,7 +2100,7 @@ sub calcule_mep {
 		     $dialog->destroy;
 		     
 		 } else {
-		     dialogue_apprentissage('MAJ_MEP_OK',
+		     dialogue_apprentissage('MAJ_MEP_OK','','',
 					    __("Layouts are detected.")." "
 					    .sprintf(__"You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red bozes are weel positioned.",__"Check layouts")." "
 					    .__"Then you can proceed to printing and to examination.");
@@ -2507,7 +2534,7 @@ sub associe_auto {
 
 # automatic association finished : explain what to do after
 sub assoc_resultat {
-    dialogue_apprentissage('ASSOC_AUTO_OK',
+    dialogue_apprentissage('ASSOC_AUTO_OK','','',
 			   __("Automatic association is now finished. You can ask for manual association to check that all is fine and, if necessary, read manually students names which have not been automatically identified."));
 }
 
@@ -3359,7 +3386,7 @@ sub detecte_analyse {
     # dialogue apprentissage :
 
     if($oo{'apprend'}) {
-	dialogue_apprentissage('SAISIE_AUTO',
+	dialogue_apprentissage('SAISIE_AUTO','','',
 			       __("Automatic data capture now completed.")." "
 			       .($r{'incomplet'}>0 ? sprintf(__("It is not complete (missing pages from %d papers).")." ",$r{'incomplet'}) : '')
 			       .__("You can analyse data capture quality with some indicators values in analysis list:")
