@@ -2268,9 +2268,10 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \AMCid@check=\AMCid@checkmax\advance\AMCid@check\@ne
 %    \end{macrocode}
 %
-% Telling outside if separate answer sheet are requested:
+% Telling outside if separate answer sheet, and boxes labelling, are requested:
 %    \begin{macrocode}
 \ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi
+\ifAMC@inside@box\AMC@amclog{AUTOQCM[VAR:insidebox=1]^^J}\fi
 %    \end{macrocode}
 %
 % Preparing writing to |.xy| file :

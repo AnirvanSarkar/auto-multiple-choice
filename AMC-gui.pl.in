@@ -1716,13 +1716,17 @@ sub doc_maj {
 		     if($projet{'options'}->{'annote_position'} ne $ap);
 		 $projet{'options'}->{'annote_position'}=$ap;
 
-		 if($c->variable('ensemble') && $projet{'options'}->{'seuil'}<0.4) {
+		 if(($c->variable('ensemble')  || $c->variable('insidebox'))
+		    && $projet{'options'}->{'seuil'}<0.4) {
 		     my $dialog = Gtk2::MessageDialog
 			 ->new_with_markup($w{'main_window'},
 					   'destroy-with-parent',
 					   'question','yes-no',
-					   sprintf(__("Your question has a separate answers page.")." "
-						   .__("In this case, letters are shown inside boxes.")." "
+					   sprintf(($c->variable('ensemble') ?
+						    __("Your question has a separate answers page.")." "
+						    .__("In this case, letters are shown inside boxes.") :
+						   __("Your question is set to present labels inside the boxes to be ticked."))
+						   ." "
 						   .__("For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project.")." "
 						   .__("At the moment, this parameter is set to %.02f.")." "
 						   .__("Would you like to set it to 0.5?")
