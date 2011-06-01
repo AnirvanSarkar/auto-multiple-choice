@@ -615,6 +615,16 @@ for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edit
     $w{$_}=$gui->get_widget($_);
 }
 
+# Grid lines are not well-positioned in RTL environments, I don't know
+# why... so I remove them.
+if($w{'main_window'}->get_direction() eq 'rtl') {
+    debug "RTL mode: removing vertical grids";
+    for(qw/documents mep diag inconnu/) {
+	my $w=$gui->get_widget($_.'_tree');
+	$w->set_grid_lines('horizontal') if($w);
+    }
+}
+
 $w{'commande'}->hide();
 
 sub debug_set {
