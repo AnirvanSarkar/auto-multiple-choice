@@ -31,6 +31,9 @@
 %if 0%{?suse_version} >= 1140
 %define AMC_OPENCV -I /usr/include/opencv -lopencv_core -lopencv_highgui
 %endif
+%if 0%{?fedora} >= 15
+%define AMC_OPENCV -I /usr/include/opencv -lopencv_core -lopencv_highgui -lopencv_imgproc
+%endif
 
 %if 0%{?suse_version}
 %define AMC_cat Education;Teaching;
