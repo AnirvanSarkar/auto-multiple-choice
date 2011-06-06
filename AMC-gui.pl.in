@@ -182,6 +182,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'seuil_eqm'=>3.0,
 	      'seuil_sens'=>8.0,
 	      'saisie_dpi'=>150,
+	      'vector_scan_density'=>250,
 	      'n_procs'=>0,
 	      'delimiteur_decimal'=>',',
 	      'defaut_encodage_liste'=>'UTF-8',
@@ -2194,6 +2195,8 @@ sub saisie_auto_ok {
 
     for my $fich (@f) {
 	my (undef,undef,$fich_n)=splitpath($fich);
+	my $suffix_change='';
+	my @pre_options=();
 
 	# number of pages :
 	my $np=0;
@@ -2208,9 +2211,20 @@ sub saisie_auto_ok {
 	    }
 	}
 	close(NP);
+	# Is this a vector format file? If so, we have to convert it
+	# to bitmap
+	my $vector='';
+	if($fich_n =~ /\.(pdf|eps|ps)$/i) {
+	    $vector=1;
+	    $suffix_change='.png';
+	    @pre_options=('-density',$o{'vector_scan_density'})
+		if($o{'vector_scan_density'});
+	}
+
 	debug "> Scan $fich: $np page(s)".($scene ? " [has scene>0]" : "");
-	if($np>1 || $scene) {
-	    # split multipage image into 1-page images
+	if($np>1 || $scene || $vector) {
+	    # split multipage image into 1-page images, and/or convert
+	    # to bitmap format
 
 	    $w{'commande'}->show();
 	    $w{'avancement'}->set_text((__"Splitting multi-page image")." ".
@@ -2228,7 +2242,9 @@ sub saisie_auto_ok {
 	    if(! ($fb =~ s/\.([^.]+)$/_%04d.$1/)) { 
 		$fb .= '_%04d';
 	    }
-	    system(magick_module("convert"),$fich,"+adjoin","$temp_dir/$fb");
+	    $fb.=$suffix_change;
+
+	    system(magick_module("convert"),@pre_options,$fich,"+adjoin","$temp_dir/$fb");
 	    opendir(my $dh, $temp_dir) || debug "can't opendir $temp_dir: $!";
 	    my @split = grep { -f "$temp_dir/$_" } readdir($dh);
 	    closedir $dh;
