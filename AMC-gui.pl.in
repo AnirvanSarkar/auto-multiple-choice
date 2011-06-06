@@ -2484,8 +2484,41 @@ sub valide_liste {
 
 ### Actions des boutons de la partie NOTATION
 
+sub check_possible_assoc {
+    my ($code)=@_;
+    if(! -s absolu($projet{'options'}->{'listeetudiants'})) {
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",__"Data capture"));
+	$dialog->run;
+	$dialog->destroy;
+    } elsif(!$projet{'options'}->{'liste_key'}) {
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      __("Please choose a key from primary keys in students list before association."));
+	$dialog->run;
+	$dialog->destroy;
+    } elsif($code && ! $projet{'options'}->{'assoc_code'}) {
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      __("Please choose a code (made with LaTeX command \\AMCcode) before automatic association."));
+	$dialog->run;
+	$dialog->destroy;
+    } else {
+	return(1);
+    }
+    return(0);
+}
+
 # manual association 
 sub associe {
+    return() if(!check_possible_assoc(0));
     if(-f absolu($projet{'options'}->{'listeetudiants'})) {
 	my $ga=AMC::Gui::Association::new('cr'=>absolu($projet{'options'}->{'cr'}),
 					  'liste'=>absolu($projet{'options'}->{'listeetudiants'}),
@@ -2519,47 +2552,23 @@ sub associe {
 
 # automatic association
 sub associe_auto {
-    if(! -s absolu($projet{'options'}->{'listeetudiants'})) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",__"Data capture"));
-	$dialog->run;
-	$dialog->destroy;
-    } elsif(!$projet{'options'}->{'liste_key'}) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      __("Please choose a key from primary keys in students list before association."));
-	$dialog->run;
-	$dialog->destroy;
-    } elsif(! $projet{'options'}->{'assoc_code'}) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      __("Please choose a code (made with LaTeX command \\AMCcode) before automatic association."));
-	$dialog->run;
-	$dialog->destroy;
-    } else {
-	commande('commande'=>["auto-multiple-choice","association-auto",
-			      "--notes",absolu($projet{'options'}->{'notes'}),
-			      "--notes-id",$projet{'options'}->{'assoc_code'},
-			      "--liste",absolu($projet{'options'}->{'listeetudiants'}),
-			      "--liste-key",$projet{'options'}->{'liste_key'},
-			      "--encodage-liste",bon_encodage('liste'),
-			      "--assoc",absolu($projet{'options'}->{'association'}),
-			      "--encodage-interne",$o{'encodage_interne'},
-			      "--debug",debug_file(),
-			      ],
-		 'texte'=>__"Automatic association...",
-		 'fin'=>sub {
-		     assoc_resultat();
-		 },
-		 );
-    }
+    return() if(!check_possible_assoc(1));
+
+    commande('commande'=>["auto-multiple-choice","association-auto",
+			  "--notes",absolu($projet{'options'}->{'notes'}),
+			  "--notes-id",$projet{'options'}->{'assoc_code'},
+			  "--liste",absolu($projet{'options'}->{'listeetudiants'}),
+			  "--liste-key",$projet{'options'}->{'liste_key'},
+			  "--encodage-liste",bon_encodage('liste'),
+			  "--assoc",absolu($projet{'options'}->{'association'}),
+			  "--encodage-interne",$o{'encodage_interne'},
+			  "--debug",debug_file(),
+	     ],
+	     'texte'=>__"Automatic association...",
+	     'fin'=>sub {
+		 assoc_resultat();
+	     },
+	);
 }
 
 # automatic association finished : explain what to do after
