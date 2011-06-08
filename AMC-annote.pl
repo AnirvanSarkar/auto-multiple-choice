@@ -22,6 +22,9 @@ use XML::Simple;
 use Getopt::Long;
 use Data::Dumper;
 
+use Gtk2;
+use Cairo;
+
 use AMC::Basic;
 use AMC::Exec;
 use AMC::ANList;
@@ -55,13 +58,16 @@ my $line_width=2;
 my @o_symbols=();
 my $annote_indicatives='';
 my $position='marge';
-my $ecart=5.5;
+my $ecart=1;
 my $ecart_marge=1.5;
 my $pointsize_rel=60;
 
 my $chiffres_significatifs=4;
 
 my $verdict='TOTAL : %S/%M => %s/%m';
+
+my $font_name='FreeSans';
+my $test_font_size=100;
 
 my $association='';
 my $fich_noms='';
@@ -100,6 +106,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "fich-assoc=s"=>\$association,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
+	   "font=s"=>\$font_name,
 	   );
 
 set_debug($debug);
@@ -151,6 +158,12 @@ if($fich_noms) {
 }
 
 # ---
+
+sub color_rgb {
+    my ($s)=@_;
+    my $col=Gtk2::Gdk::Color->parse($s);
+    return($col->red/65535,$col->green/65535,$col->blue/65535);
+}
 
 sub format_note {
     my $x=shift;
@@ -225,45 +238,38 @@ sub milieu_cercle {
 }
 
 sub cercle_coors {
-    my ($im,$c,$color)=@_;
+    my ($context,$c,$color)=@_;
     my ($x,$y)=milieu_cercle($c);
-    $im->Draw(qw/primitive circle fill none/,
-	      'strokewidth'=>$line_width,
-	      'stroke'=>$color,
-	      'points'=>sprintf("%.2f,%.2f %.2f,%.2f",
-				$x,$y,
-				$c->{1}->{'x'},$c->{1}->{'y'}),
-	      );
+    my $t=0;
+    for(1..4) {
+	$t+=sqrt( ($x-$c->{1}->{'x'})**2+
+		  ($y-$c->{1}->{'y'})**2 );
+    }
+    $context->set_source_rgb(color_rgb($color));
+    $context->arc($x,$y,$t/4,0,360);
+    $context->stroke;
 }
     
 sub croix_coors {
-    my ($im,$c,$color)=@_;
+    my ($context,$c,$color)=@_;
+    $context->set_source_rgb(color_rgb($color));
     for my $i (1,2) {
-	$im->Draw(qw/primitive line fill none/,
-		  'strokewidth'=>$line_width,
-		  'stroke'=>$color,
-		  'points'=>sprintf("%.2f,%.2f %.2f,%.2f",
-				    $c->{$i}->{'x'},$c->{$i}->{'y'},
-				    $c->{$i+2}->{'x'},$c->{$i+2}->{'y'},
-				    ),
-		  );
+	$context->move_to($c->{$i}->{'x'},$c->{$i}->{'y'});
+	$context->line_to($c->{$i+2}->{'x'},$c->{$i+2}->{'y'});
     }
+    $context->stroke;
 }
 
 sub boite_coors {
-    my ($im,$c,$color)=@_;
+    my ($context,$c,$color)=@_;
     my @pts="";
-    for my $i (1..4) {
-	push @pts,sprintf("%.2f,%.2f",
-			  $c->{$i}->{'x'},$c->{$i}->{'y'},
-			  );
+    $context->set_source_rgb(color_rgb($color));
+    $context->move_to($c->{1}->{'x'},$c->{1}->{'y'});
+    for my $i (2..4) {
+	$context->line_to($c->{$i}->{'x'},$c->{$i}->{'y'});
     }
-    $im->Draw(qw/primitive polygon fill none/,
-	      'strokewidth'=>$line_width,
-	      'stroke'=>$color,
-	      'points'=>join(' ',@pts),
-	      );
-    
+    $context->close_path;
+    $context->stroke;
 }
 
 my $delta=1;
@@ -293,19 +299,41 @@ $delta=1/(1+$#ids) if($#ids>=0);
 
      if(-f $scan_f) {
 
-	 my $im=magick_perl_module()->new();
+	 # ONE SCAN FILE
+
+	 # read scan file (converting to PNG)
+	 debug "Reading $scan";
+	 open(CONV,"-|",magick_module("convert"),$scan,"png:-");
+	 my $surface = Cairo::ImageSurface->create_from_png_stream(
+	     sub {
+		 my ($cb_data,$length)=@_;
+		 read CONV,$data,$length;
+		 return($data);
+	     });
+	 close(CONV);
+
+	 my $context = Cairo::Context->create ($surface);
+	 $context->set_line_width($line_width);
+	 
+	 my $layout=Pango::Cairo::create_layout($context);
+	 
+         # adjusts text size...
+	 my $l0=Pango::Cairo::create_layout($context);
+	 $l0->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$test_font_size));
+	 $l0->set_text('H');
+	 my ($text_x,$text_y)=$l0->get_pixel_size();
+	 my $height=$surface->get_height;
+	 debug "Scan height: $height";
+	 my $target_y=$height/$pointsize_rel;
+	 debug "Target TY: $target_y";
+	 my $font_size=int($test_font_size*$target_y/$text_y);
+	 debug "Font size: $font_size";
+
+	 $layout->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$font_size));
+	 $layout->set_text('H');
+	 ($text_x,$text_y)=$layout->get_pixel_size();
 
 	 my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
-
-	 debug "Reading $scan";
-
-	 $im->Read($scan);
-
-	 $im->Set('pointsize'=>$im->Get('height')/$pointsize_rel);
-	 $im->Set('quality',$qualite_jpg) if($qualite_jpg);
-
-	 debug "Size Y : ".$im->Get('height');
-	 debug "Pointsize : ".$im->Get('height')/$pointsize_rel;
 
 	 print "Annotating $scan...\n";
 
@@ -323,9 +351,6 @@ $delta=1/(1+$#ids) if($#ids>=0);
 	 }
 	 
 	 # note finale sur la page avec le nom
-	 
-	 ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance) =
-	     $im->QueryFontMetrics(text=>'TOTAL');
 	 
 	 if($n_page==1 || $x->{'nom'}) {
 	     my $t=$ne->{'total'}->[0];
@@ -351,15 +376,11 @@ $delta=1/(1+$#ids) if($#ids>=0);
 		 }
 	     }
 
-	     $text =~ s/\'/\\\'/g;
-
-	     $im->Draw(qw/primitive text stroke red fill red strokewidth 1/,
-		       'points'=>sprintf("%.1f,%.1f \'%s\'",
-					 $x_ppem,0.7*$y_ppem+$ascender,
-					 $text
-					 ),
-		       'antialias'=>'true',
-		      ); 
+	     $layout->set_text($text);
+	     $context->set_source_rgb(color_rgb('red'));
+	     $context->move_to($text_x,$text_y*.7);
+	     Pango::Cairo::show_layout($context,$layout);
+	     
 	 }
 	 
 	 #########################################
@@ -383,11 +404,11 @@ $delta=1/(1+$#ids) if($#ids>=0);
 	   my $sy=$symboles{"$bonne-$cochee"};
 	   
 	   if($sy->{type} eq 'circle') {
-	       cercle_coors($im,$page->{$k}->{'coin'},$sy->{color});
+	       cercle_coors($context,$page->{$k}->{'coin'},$sy->{color});
 	   } elsif($sy->{type} eq 'mark') {
-	       croix_coors($im,$page->{$k}->{'coin'},$sy->{color});
+	       croix_coors($context,$page->{$k}->{'coin'},$sy->{color});
 	   } elsif($sy->{type} eq 'box') {
-	       boite_coors($im,$page->{$k}->{'coin'},$sy->{color});
+	       boite_coors($context,$page->{$k}->{'coin'},$sy->{color});
 	   } elsif($sy->{type} eq 'none') {
 	   } else {
 	       debug "Unknown symbol type ($k): $sy->{type}";
@@ -417,36 +438,39 @@ $delta=1/(1+$#ids) if($#ids>=0);
 	       
 	       my $text=format_note($nq->{'note'})."/".format_note($nq->{'max'});
 	       
-	       ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance) =
-		   $im->QueryFontMetrics(text=>$text);
-
-
+	       $layout->set_text($text);
+	       my ($tx,$ty)=$layout->get_pixel_size;
 	       if($position eq 'marge') {
-		   $x=$ecart_marge*$x_ppem;
+		   $x=$ecart_marge*$text_x;
 	       } elsif($position eq 'case') {
-		   $x=$question{$q}->{'x'} - $ecart*$x_ppem - $width;
+		   $x=$question{$q}->{'x'} - $ecart*$text_x - $tx;
 	       } else {
 		   debug "Annotation : position invalide : $position";
-		   $x=$ecart;
+		   $x=$text_x;
 	       }
 	       
 	       # moyenne des y des cases de la question
-	       my $y=$question{$q}->{'y'}/$question{$q}->{'n'} + $ascender - $height/2;
+	       my $y=$question{$q}->{'y'}/$question{$q}->{'n'}-$ty/2;
 	       
-	       $im->Draw(qw/primitive text stroke red fill red strokewidth 1/,
-			 'points'=>sprintf("%.2f,%.2f \'%s\'",
-					   $x,$y,$text),
-			 );
+	       $context->set_source_rgb(color_rgb('red'));
+	       $context->move_to($x,$y);
+	       Pango::Cairo::show_layout($context,$layout);
 	   }
 	 }
 
-	 # taille...
+	 # WRITE TO FILE
 	 
-	 $im->Resize('geometry'=>$taille_max) if($taille_max);
-
-	 # fin
+	 $context->show_page;
 	 
-	 $im->Write("$cr_dir/corrections/jpg/page-$idf.jpg");
+	 open(CONV,"|-",magick_module("convert"),"png:-",
+	      "-quality",$qualite_jpg,"-geometry",$taille_max,
+	      "$cr_dir/corrections/jpg/page-$idf.jpg");
+	 $surface->write_to_png_stream(
+	     sub {
+		 my ($cb_data,$data)=@_;
+		 print CONV $data;
+	     });
+	 close(CONV);
 
      } else {
 	 print "*** no scan $scan ***\n";
