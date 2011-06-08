@@ -42,6 +42,8 @@ sub new {
 	'n_cols'=>4,
 	'factor'=>0.75,
 	'seuil'=>0.15,
+	'prop_min'=>0.30,
+	'prop_max'=>0.60,
 	'global'=>0,
 	'zooms_dir'=>"",
 	'page_id'=>'',
@@ -260,8 +262,10 @@ sub remplit {
 sub ajuste_sep {
     my ($self)=@_;
     my $s=$self->{'decoupage'}->get_property('max-position');
-    
-    $self->{'decoupage'}->set_position($self->{'n_ligs'}->{0}/($self->{'n_ligs'}->{0}+$self->{'n_ligs'}->{1})*$s);
+    my $prop=$self->{'n_ligs'}->{0}/($self->{'n_ligs'}->{0}+$self->{'n_ligs'}->{1});
+    $prop=$self->{'prop_min'} if($prop<$self->{'prop_min'});
+    $prop=$self->{'prop_max'} if($prop>$self->{'prop_max'});
+    $self->{'decoupage'}->set_position($prop*$s);
 }
 
 sub zoom_it {
