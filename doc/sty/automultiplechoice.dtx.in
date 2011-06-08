@@ -139,6 +139,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@ensembletrue}
 % \DoNotIndex{\AMC@inside@boxtrue}
 % \DoNotIndex{\AMC@inside@boxfalse}
+% \DoNotIndex{\AMC@outside@boxtrue}
+% \DoNotIndex{\AMC@outside@boxfalse}
 % \DoNotIndex{\AMC@inside@digittrue}
 % \DoNotIndex{\AMC@ordretrue}
 % \DoNotIndex{\AMC@correcheadtrue}
@@ -392,6 +394,9 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \ioption{digits} puts digits instead of letters in the boxes, when
 % |separateanswersheet| (or |insidebox|) is used.
+%
+% \ioption{outsidebox} prints boxes labels outside the boxes on the
+% answersheet when |separateanswersheet| is set.
 %
 % \ioption{init} initializes the random generator from
 % time. \emph{This option is only for testing: don't use it for a real
@@ -962,6 +967,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % \item |\ifAMC@inside@digit| if digits are to be written inside
 %   boxes instead of letters (when using a separate answer sheet for
 %   example).
+% \item |\ifAMC@outside@box| if labels for boxes are to be printed outside
+%   the box on the answer sheet.
 % \item |\ifAMCformulaire@dedans| is true for questions inside
 %   separate answer sheet.
 % \item |\ifAMC@zoneformulaire| is true for codes (made by |\AMCcode|)
@@ -991,11 +998,13 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMCtype@multi
 \newif\ifAMC@watermark\AMC@watermarktrue
 \newif\ifAMC@inside@box\AMC@inside@boxfalse
+\newif\ifAMC@outside@box\AMC@outside@boxfalse
 \newif\ifAMC@ensemble\AMC@ensemblefalse
 \newif\ifAMC@inside@digit\AMC@inside@digitfalse
 \newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
 \newif\ifAMC@zoneformulaire
 \newif\ifAMC@pagelayout\AMC@pagelayouttrue
+\newif\ifAMC@tmp
 %    \end{macrocode}
 %
 % \begin{macro}{\AMCid@name}
@@ -1362,31 +1371,52 @@ Three digits and two letters:\insertgroup{mixed}.
 \AMCboxDimensions{size=2.5ex,down=.4ex,rule=.5pt}
 %    \end{macrocode}\end{macro}
 %
-% \begin{macro}{\AMC@marque}
+% \begin{macro}{\AMC@marque}\begin{macro}{\AMCformBox}\begin{macro}{\AMC@formBox}
 %   Command |\AMC@marque|\marg{char}\marg{filled} prints a box with
 %   character \meta{char} inside, and filled if \meta{filled} is
 %   non-empty, using global variables to identify the box (question
 %   and choice).
+%
+%   It calls
+%   |\AMCformBox|\marg{char}\marg{filled}\marg{trace}\marg{key} to
+%   actually render the box. This last command can be customized by
+%   the user.
+%
+%   Command |\AMC@formBox| simply sets the first argument when empty
+%   before calling |\AMCformBox|.
+%
 %    \begin{macrocode}
+\newcommand\AMCformBox[4]{%
+  \ifAMC@outside@box% letter to be written outside the box
+    \AMC@boxedchar{}{#3}{#4}{#2}\hspace{.1em}{\bf #1}%
+  \else%
+    \AMC@boxedchar{#1}{#3}{#4}{#2}%
+  \fi%
+}
+\newcommand\AMC@formBox[4]{%
+  \AMCformBox{\ifx\@empty#1\@empty%
+    \AMCchoiceLabel{AMC@ncase}%
+    \else #1\fi}{#2}{#3}{#4}%
+}
 \newcommand{\AMC@marque}[2]{%
   \ifAMC@ensemble%
-    \ifAMC@zoneformulaire % for codes inside form sheet
-      \protect\AMC@caselettre{#1}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
+    \ifAMC@zoneformulaire% for codes inside form sheet
+      \protect\AMC@formBox{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
     \else%
-    \ifAMCformulaire@dedans% for answer boxes inside form sheet
-      \protect\AMC@caselettre{#1}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
-    \else% outside form sheet: not to be read
-      \AMC@caselettre{#1}{}{}{#2}%
+      \ifAMCformulaire@dedans% for answer boxes inside form sheet
+        \protect\AMC@formBox{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
+      \else% outside form sheet: not to be read during data capture
+        \AMC@caselettre{#1}{}{}{#2}%
     \fi\fi%
   \else% no separate sheet for answers: always read
     \ifAMC@inside@box%
       \AMC@caselettre{#1}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
-    \else
+    \else%
       \AMC@boxedchar{}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#2}%
-    \fi
+    \fi%
   \fi%
 }
-%    \end{macrocode}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
 % \subsubsection{Binary boxes}
 % 
@@ -1902,7 +1932,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand{\AMCcode}[2]{%
 {\def\AMCbeginQuestion##1##2{}%
  \def\AMCbeginAnswer{\begin{minipage}{%
-       \ifAMC@ensemble 1.15em\else\ifAMC@inside@box 1.15em\else 2.5em\fi\fi}}%
+       \ifAMC@outside@box 2em\else%
+       \ifAMC@ensemble 1.15em\else\ifAMC@inside@box 1.15em\else 2.5em\fi\fi\fi}}%
  \def\AMCendAnswer{\hspace*{\fill}\end{minipage}}%
  \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else%
    \ifAMC@inside@box\else{\bf ##2}\fi\fi\\[1mm]}%
@@ -2144,6 +2175,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOption{insidebox}{\AMC@inside@boxtrue}
 \DeclareOption{ensemble}{\AMC@ensembletrue}
 \DeclareOption{chiffres}{\AMC@inside@digittrue}
+\DeclareOption{outsidebox}{\AMC@outside@boxtrue}
 \DeclareOption{calibration}{\AMC@calibrationtrue}
 \DeclareOption{nowatermark}{\AMC@watermarkfalse}
 \DeclareOption{catalog}{\AMC@watermarkfalse\AMC@correcheadtrue%
@@ -2272,6 +2304,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 %    \begin{macrocode}
 \ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi
 \ifAMC@inside@box\AMC@amclog{AUTOQCM[VAR:insidebox=1]^^J}\fi
+\ifAMC@outside@box\AMC@amclog{AUTOQCM[VAR:outsidebox=1]^^J}\fi
 %    \end{macrocode}
 %
 % Preparing writing to |.xy| file :

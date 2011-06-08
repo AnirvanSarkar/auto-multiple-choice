@@ -1727,13 +1727,14 @@ sub doc_maj {
 		     if($projet{'options'}->{'annote_position'} ne $ap);
 		 $projet{'options'}->{'annote_position'}=$ap;
 
-		 if(($c->variable('ensemble')  || $c->variable('insidebox'))
+		 my $ensemble=$c->variable('ensemble') && !$c->variable('outsidebox');
+		 if(($ensemble  || $c->variable('insidebox'))
 		    && $projet{'options'}->{'seuil'}<0.4) {
 		     my $dialog = Gtk2::MessageDialog
 			 ->new_with_markup($w{'main_window'},
 					   'destroy-with-parent',
 					   'question','yes-no',
-					   sprintf(($c->variable('ensemble') ?
+					   sprintf(($ensemble ?
 						    __("Your question has a separate answers page.")." "
 						    .__("In this case, letters are shown inside boxes.") :
 						   __("Your question is set to present labels inside the boxes to be ticked."))
