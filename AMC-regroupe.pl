@@ -379,6 +379,8 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	    }
 	}
 	
+    } else {
+	$f =~ s/-?\(ID\)//gi;
     }
     
     # no accents and special characters in filename
