@@ -562,29 +562,31 @@ if($mode =~ /b/) {
 	my $bse=$bs{$etu};
 	my @q_ids=();
 	if($etu eq 'defaut') {
-	    @q_ids=('S','M');
-	} else {
-	    @q_ids=(keys %qs);
-	}
-	for my $q (@q_ids) {
-	    $writer->startTag('question',id=>$q,
-			     titre=>$titres{$q},
-			     bareme=>$bse->{"$q."}->{-bareme},
-			     indicative=>$qs{$q}->{'indicative'},
-			     multiple=>$qs{$q}->{'multiple'},
-			     );
-
-	    for my $i (keys %$bse) {
-		if($i =~ /^$q\.([0-9]+)/) {
-		    my $rep=$1;
-		    $writer->emptyTag('reponse',
-				      id=>$rep,
-				      bonne=>$bse->{$i}->{-bonne},
-				      bareme=>$bse->{"$i"}->{-bareme},
-				      );
-		}
+	    for my $q ('S','M') {
+		$writer->emptyTag('question',id=>$q,
+				  bareme=>$bse->{"$q."}->{-bareme});
 	    }
-	    $writer->endTag('question');
+	} else {
+	    for my $q (keys %qs) {
+		$writer->startTag('question',id=>$q,
+				  titre=>$titres{$q},
+				  bareme=>$bse->{"$q."}->{-bareme},
+				  indicative=>$qs{$q}->{'indicative'},
+				  multiple=>$qs{$q}->{'multiple'},
+		    );
+		
+		for my $i (keys %$bse) {
+		    if($i =~ /^$q\.([0-9]+)/) {
+			my $rep=$1;
+			$writer->emptyTag('reponse',
+					  id=>$rep,
+					  bonne=>$bse->{$i}->{-bonne},
+					  bareme=>$bse->{"$i"}->{-bareme},
+			    );
+		    }
+		}
+		$writer->endTag('question');
+	    }
 	}
 	$writer->endTag('etudiant');
     }

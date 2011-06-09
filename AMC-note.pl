@@ -243,6 +243,9 @@ for my $etud (@a_calculer) {
 	($notemax)=$bar->score_max_question($etud,$q);
 
 	my $tit=$bar->question_title($etud,$q);
+
+	debug "MARK: SHEET $etud QUESTION $q TITLE $tit";
+
 	if($tit =~ /^(.*)\.([0-9]+)$/) {
 	    $codes{$1}->{$2}=$xx;
 	} 
