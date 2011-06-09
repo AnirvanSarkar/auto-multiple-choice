@@ -246,6 +246,7 @@ sub cercle_coors {
 		  ($y-$c->{1}->{'y'})**2 );
     }
     $context->set_source_rgb(color_rgb($color));
+    $context->new_path;
     $context->arc($x,$y,$t/4,0,360);
     $context->stroke;
 }
@@ -253,6 +254,7 @@ sub cercle_coors {
 sub croix_coors {
     my ($context,$c,$color)=@_;
     $context->set_source_rgb(color_rgb($color));
+    $context->new_path;
     for my $i (1,2) {
 	$context->move_to($c->{$i}->{'x'},$c->{$i}->{'y'});
 	$context->line_to($c->{$i+2}->{'x'},$c->{$i+2}->{'y'});
@@ -264,6 +266,7 @@ sub boite_coors {
     my ($context,$c,$color)=@_;
     my @pts="";
     $context->set_source_rgb(color_rgb($color));
+    $context->new_path;
     $context->move_to($c->{1}->{'x'},$c->{1}->{'y'});
     for my $i (2..4) {
 	$context->line_to($c->{$i}->{'x'},$c->{$i}->{'y'});
