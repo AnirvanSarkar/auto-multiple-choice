@@ -549,25 +549,28 @@ sub bon_encodage {
 	   || "UTF-8");
 }
 
+sub raccourcis {
+    my %pathes=('%PROJETS'=>$o{'rep_projets'},
+		'%HOME',$home_dir,
+		''=>'%PROJETS',
+	);
+    if($projet{'nom'}) {
+	$pathes{'%PROJET'}=$o{'rep_projets'}."/".$projet{'nom'};
+	$pathes{''}='%PROJET';
+    }
+    return(\%pathes);
+}
+
 sub absolu {
     my $f=shift;
     return($f) if(!defined($f));
-    return(proj2abs({'%PROJET'=>$o{'rep_projets'}."/".$projet{'nom'},
-		     '%PROJETS'=>$o{'rep_projets'},
-		     '%HOME',$home_dir,
-		     ''=>'%PROJET',
-		 },
-		    $f));
+    return(proj2abs(raccourcis(),$f));
 }
 
 sub relatif {
     my $f=shift;
     return($f) if(!defined($f));
-    return(abs2proj({'%PROJET'=>$o{'rep_projets'}."/".$projet{'nom'},
-		     '%PROJETS'=>$o{'rep_projets'},
-		     '%HOME',$home_dir,
-		     ''=>'%PROJET',
-		 },$f));
+    return(abs2proj(raccourcis(),$f));
 }
 
 sub id2file {
@@ -1090,6 +1093,34 @@ my %diag_menu=(page=>{text=>__"page adjustment",icon=>'gtk-zoom-fit'},
 	       zoom=>{text=>__"boxes zooms",icon=>'gtk-zoom-in'},
 	       );
 
+sub zooms_display {
+    my ($id,$forget_it)=@_;
+		    
+    debug "Zooms view for $id...";
+    my $zd=absolu('%PROJET/cr/zooms')."/".id2idf($id,'simple'=>1);
+    debug "Zooms directory $zd";
+    if($w{'zooms_window'} &&
+       $w{'zooms_window'}->actif) {
+	$w{'zooms_window'}->page($id,$zd,$forget_it);
+    } elsif(!$forget_it) {
+	$w{'zooms_window'}=AMC::Gui::Zooms::new('seuil'=>$projet{'options'}->{'seuil'},
+						'n_cols'=>$o{'assoc_ncols'},
+						'zooms_dir'=>$zd,
+						'page_id'=>$id,
+						'size-prefs',\%o,
+						'encodage_interne'=>$o{'encodage_interne'},
+						'an-data'=>$projet{'_an_list'},
+						'cr-dir'=>absolu($projet{'options'}->{'cr'}),
+	    );
+    }
+}
+
+sub zooms_line {
+    my $iter=$w{'diag_tree'}->get_selection->get_selected;
+    my $id=$diag_store->get($iter,DIAG_ID);
+    zooms_display($id,1);
+}
+
 $w{'diag_tree'}->signal_connect('button_release_event' =>
     sub {
 	my ($self, $event) = @_;
@@ -1117,16 +1148,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		$item->show;
 		$item->signal_connect (activate => sub {
 		    my (undef, $sortkey) = @_;
-		    debug "Zooms view for $id...";
-		    my $gm=AMC::Gui::Zooms::new('seuil'=>$projet{'options'}->{'seuil'},
-						'n_cols'=>$o{'assoc_ncols'},
-						'zooms_dir'=>$zd,
-						'page_id'=>$id,
-						'size-prefs',\%o,
-						'encodage_interne'=>$o{'encodage_interne'},
-						'an-data'=>$projet{'_an_list'},
-						'cr-dir'=>absolu($projet{'options'}->{'cr'}),
-			);
+		    zooms_display($id);
 				       }, $_);
 	    } else {
 		push  @actions,'zoom';

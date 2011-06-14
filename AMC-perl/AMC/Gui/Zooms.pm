@@ -77,15 +77,80 @@ sub new {
 	debug "ok";
     }
 
-    $self->{'ANS'}=$self->{'an_list'}->analyse($self->{'page_id'},'scan'=>1);
-    $self->{'AN'}=$self->{'an_list'}->analyse($self->{'page_id'});
-
     if($self->{'size-prefs'}) {
 	$self->{'factor'}=$self->{'size-prefs'}->{'zoom_window_factor'}
 	if($self->{'size-prefs'}->{'zoom_window_factor'});
     }
     $self->{'factor'}=0.1 if($self->{'factor'}<0.1);
     $self->{'factor'}=5 if($self->{'factor'}>5);
+
+    my $glade_xml=__FILE__;
+    $glade_xml =~ s/\.p[ml]$/.glade/i;
+    
+    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
+    
+    for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info/) {
+	$self->{$_}=$self->{'gui'}->get_widget($_);
+    }
+    
+    $self->{'label_0'}->set_markup('<b>'.$self->{'label_0'}->get_text.'</b>');
+    $self->{'label_1'}->set_markup('<b>'.$self->{'label_1'}->get_text.'</b>');
+    $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),$self->{'page_id'}).'</b>');
+
+    $self->{'decoupage'}->child1_resize(1);
+    $self->{'decoupage'}->child2_resize(1);
+
+    for(0,1) {
+	$self->{'event_'.$_}->drag_dest_set('all', [GDK_ACTION_MOVE],
+					    {'target' => 'STRING',
+					      'flags' => [],
+					      'info' => ID_AMC_BOX },
+					    );
+	$self->{'event_'.$_}->signal_connect(
+	    'drag-data-received' => \&target_drag_data_received,[$self,$_]);
+    }
+
+    $self->{'gui'}->signal_autoconnect_from_package($self);
+    
+    if($self->{'size-prefs'}) {
+	my @s=$self->{'main_window'}->get_size();
+	$s[1]=$self->{'size-prefs'}->{'zoom_window_height'};
+	$s[1]=200 if($s[1]<200);
+	$self->{'main_window'}->resize(@s);
+    }
+
+    $self->load_boxes();
+
+    return($self);
+}
+
+sub clear_boxes {
+    my ($self)=@_;
+
+    for(0,1) { $self->vide($_); }
+    $self->{'ids'}=[];
+    $self->{'pb_src'}={};
+    $self->{'pb'}={};
+    $self->{'image'}={};
+    $self->{'label'}={};
+    $self->{'n_ligs'}={};
+    $self->{'position'}={};
+    $self->{'eb'}={};
+    $self->{'conforme'}=1;
+    $self->{'button_apply'}->hide();
+}
+
+sub load_an {
+    my ($self)=@_;
+
+    $self->{'ANS'}=$self->{'an_list'}->analyse($self->{'page_id'},'scan'=>1);
+    $self->{'AN'}=$self->{'an_list'}->analyse($self->{'page_id'});
+}
+
+sub load_boxes {
+    my ($self)=@_;
+
+    $self->load_an;
 
     my @ids;
     
@@ -136,45 +201,11 @@ sub new {
 	$self->{'position'}->{$id}=$self->category($id,'AN');
     }
 
-    my $glade_xml=__FILE__;
-    $glade_xml =~ s/\.p[ml]$/.glade/i;
-    
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
-    
-    for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info/) {
-	$self->{$_}=$self->{'gui'}->get_widget($_);
-    }
-    
-    $self->{'label_0'}->set_markup('<b>'.$self->{'label_0'}->get_text.'</b>');
-    $self->{'label_1'}->set_markup('<b>'.$self->{'label_1'}->get_text.'</b>');
-    $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),$self->{'page_id'}).'</b>');
-
-    $self->{'decoupage'}->child1_resize(1);
-    $self->{'decoupage'}->child2_resize(1);
+    $self->{'conforme'}=1;
 
     $self->remplit(0);
     $self->remplit(1);
     $self->zoom_it();
-
-    for(0,1) {
-	$self->{'event_'.$_}->drag_dest_set('all', [GDK_ACTION_MOVE],
-					    {'target' => 'STRING',
-					      'flags' => [],
-					      'info' => ID_AMC_BOX },
-					    );
-	$self->{'event_'.$_}->signal_connect(
-	    'drag-data-received' => \&target_drag_data_received,[$self,$_]);
-    }
-
-    
-    $self->{'gui'}->signal_autoconnect_from_package($self);
-    
-    if($self->{'size-prefs'}) {
-	my @s=$self->{'main_window'}->get_size();
-	$s[1]=$self->{'size-prefs'}->{'zoom_window_height'};
-	$s[1]=200 if($s[1]<200);
-	$self->{'main_window'}->resize(@s);
-    }
 
     $self->{'main_window'}->show_all();
     $self->{'button_apply'}->hide();
@@ -186,7 +217,11 @@ sub new {
     my $va=$self->{'view_0'}->get_vadjustment();
     $va->value($va->upper());
 
-    return($self);
+    if($self->{'conforme'}) {
+	$self->{'button_apply'}->hide();
+    } else {
+	$self->{'button_apply'}->show();
+    }
 }
 
 sub refill {
@@ -199,6 +234,30 @@ sub refill {
     } else {
 	$self->{'button_apply'}->show();
     }
+}
+
+sub page {
+    my ($self,$id,$zd,$forget_it)=@_;
+    if(!$self->{'conforme'}) {
+	return() if($forget_it);
+	
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($self->{'main_window'},
+			      'destroy-with-parent',
+			      'warning','yes-no',
+			      __("You moved some boxes to correct automatic data query, but this work is not saved yet.")." ".__("Dou you want to save these modifications before looking at another page?")
+	    );
+	my $reponse=$dialog->run;
+	$dialog->destroy;      
+	if($reponse eq 'yes') {
+	    $self->apply;
+	}
+    }
+    $self->clear_boxes;
+    $self->{'page_id'}=$id;
+    $self->{'zooms_dir'}=$zd;
+    $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),$self->{'page_id'}).'</b>');
+    $self->load_boxes;
 }
 
 sub category {
@@ -309,7 +368,7 @@ sub quit {
 	    ->new_with_markup($self->{'main_window'},
 			      'destroy-with-parent',
 			      'warning','yes-no',
-			      __"You moved some boxes to correct automatic data query, but this work is not saved yet. Dou you really want to close and ignore these modifications?"
+			      __("You moved some boxes to correct automatic data query, but this work is not saved yet.")." ".__("Dou you really want to close and ignore these modifications?")
 	    );
 	my $reponse=$dialog->run;
 	$dialog->destroy;      
@@ -321,6 +380,12 @@ sub quit {
     } else {
         $self->{'main_window'}->destroy;
     }
+}
+
+sub actif {
+    my ($self)=@_;
+    return($self->{'main_window'} &&
+	   $self->{'main_window'}->realized);
 }
 
 sub all_keys {
@@ -354,8 +419,11 @@ sub apply {
     if(open(XML,">:encoding(".$self->{'encodage_interne'}.")",$file)) {
 	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
 	    .$self->{'AN'}->{'src'}."\" manuel=\"1\" id=\""
-	    .$self->{'page_id'}."\" nometudiant=\""
-	    .$self->{'AN'}->{'nometudiant'}."\">\n";
+	    .$self->{'page_id'}."\"";
+	print XML " nometudiant=\""
+	    .$self->{'AN'}->{'nometudiant'}."\""
+	    if($self->{'AN'}->{'nometudiant'});
+	print XML ">\n";
 	for my $id ($self->all_keys()) {
 	    my ($q,$r)=get_qr($id);
 	    print XML "  <case id=\"$id\" question=\"$q\" reponse=\"$r\" r=\""
@@ -363,9 +431,10 @@ sub apply {
 	}
 	print XML "</analyse>\n";
 	close(XML);
-	
-	$self->{'conforme'}=1;
-	$self->quit();
+
+	$self->{'an_list'}->maj();
+	$self->load_an;
+	$self->refill;
     } else {
 	# error opening file
 	my $dialog = Gtk2::MessageDialog
