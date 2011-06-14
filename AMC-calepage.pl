@@ -113,6 +113,8 @@ GetOptions("page=s"=>\$out_cadre,
 
 set_debug($debug);
 
+my $traitement;
+
 my $commandes=AMC::Exec::new('AMC-calepage');
 $commandes->signalise();
 
@@ -132,9 +134,18 @@ $threshold = "60%" if($threshold eq 'defaut');
 $scan=$ARGV[0];
 
 sub erreur {
-    my $e=shift;
-    debug "ERROR($scan)($id_page) : $e\n";
-    print "ERROR($scan)($id_page) : $e\n";
+    my ($e,$silent)=shift;
+    if($debug_image && 
+       $traitement->mode() eq 'opencv') {
+	$traitement->commande("output ".$debug_image);
+	$traitement->ferme_commande;
+    }
+    if($silent) {
+	debug $e;
+    } else {
+	debug "ERROR($scan)($id_page) : $e\n";
+	print "ERROR($scan)($id_page) : $e\n";
+    }
     exit(1);
 }
 
@@ -152,7 +163,7 @@ debug "dir = $temp_dir";
 
 $ppm="$temp_dir/image.ppm";
 
-my $traitement=AMC::Image::new($ppm);
+$traitement=AMC::Image::new($ppm);
 
 debug "Mode: ".$traitement->mode();
 
@@ -505,6 +516,11 @@ for my $k (keys %case) {
 
 if($out_cadre && ($traitement->mode() eq 'opencv')) {
     $traitement->commande("annote $id_page");
+}
+
+erreur("End of diagnostic",1) if($debug_image);
+
+if($out_cadre && ($traitement->mode() eq 'opencv')) {
     $traitement->commande("output ".$out_cadre);
 }
 
