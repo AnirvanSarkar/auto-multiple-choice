@@ -2201,6 +2201,47 @@ sub saisie_auto_annule {
     $w{'saisie_auto'}->destroy();
 }
 
+sub analyse_call {
+    my (%oo)=@_;
+    # make temporary file with the list of images to analyse
+
+    my $fh=File::Temp->new(TEMPLATE => "liste-XXXXXX",
+			   TMPDIR => 1,
+			   UNLINK=> 1);
+    print $fh join("\n",@{$oo{'f'}})."\n";
+    $fh->seek( 0, SEEK_END );
+
+    my @args=("--debug",debug_file(),
+	      "--seuil-coche",$projet{'options'}->{'seuil'},
+	      "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
+	      "--progression-id",'analyse',
+	      "--progression",1,
+	      "--n-procs",$o{'n_procs'},
+	      "--mep",absolu($projet{'options'}->{'mep'}),
+	      "--mep-saved",absolu($mep_saved),
+	      "--projet",absolu('%PROJET/'),
+	      "--cr",absolu($projet{'options'}->{'cr'}),
+	      "--liste-fichiers",$fh->filename,
+	);
+
+    # Diagnostic image file ?
+
+    if($oo{'diagnostic'}) {
+	push @args,"--debug-image-dir",absolu('%PROJET/cr/diagnostic');
+    }
+
+    # call AMC-analyse
+
+    commande('commande'=>["auto-multiple-choice","analyse",
+	     @args],
+	     'signal'=>2,
+	     'texte'=>$oo{'text'},
+	     'progres.id'=>$oo{'progres'},
+	     'o'=>{'fh'=>$fh},
+	     'fin'=>$oo{'fin'},
+	     );
+}
+
 sub saisie_auto_ok {
     my @f=$w{'saisie_auto'}->get_filenames();
     my $copie=$w{'copie_scans'}->get_active();
@@ -2329,54 +2370,29 @@ sub saisie_auto_ok {
 	@f=@fl;
     }
 
-    # make temporary file with the list of images to analyse
-
-    my $fh=File::Temp->new(TEMPLATE => "liste-XXXXXX",
-			   TMPDIR => 1,
-			   UNLINK=> 1);
-    print $fh join("\n",@f)."\n";
-    $fh->seek( 0, SEEK_END );
-
     $w{'avancement'}->set_text($splitinfo);
     $w{'annulation'}->set_sensitive(1);
 
-    # call AMC-analyse
-
-    commande('commande'=>["auto-multiple-choice","analyse",
-			  "--debug",debug_file(),
-			  "--seuil-coche",$projet{'options'}->{'seuil'},
-			  "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
-			  "--progression-id",'analyse',
-			  "--progression",1,
-			  "--n-procs",$o{'n_procs'},
-			  "--mep",absolu($projet{'options'}->{'mep'}),
-			  "--mep-saved",absolu($mep_saved),
-			  "--projet",absolu('%PROJET/'),
-			  "--cr",absolu($projet{'options'}->{'cr'}),
-			  "--liste-fichiers",$fh->filename,
-			  ],
-	     'signal'=>2,
-	     'texte'=>__"Automatic data capture...",
-	     'progres.id'=>'analyse',
-#	     'niveau1'=>sub { detecte_analyse('interne'=>1); },
-	     'o'=>{'fh'=>$fh},
-	     'fin'=>sub {
-		 my $c=shift;
-		 my @err=$c->erreurs();
-
-		 close($c->{'o'}->{'fh'});
-
-		 my @fe=();
-		 for(@err) {
-		     if(/ERROR\(([^\)]+)\)\(([^\)]*)\)/) {
-			 push @fe,[$1,$2];
-		     } else {
-			 debug "Unrecognized error : $_";
+    analyse_call('f'=>\@f,
+		 'text'=>__("Automatic data capture..."),
+		 'progres'=>'analyse',
+		 'fin'=>sub {
+		     my $c=shift;
+		     my @err=$c->erreurs();
+		     
+		     close($c->{'o'}->{'fh'});
+		     
+		     my @fe=();
+		     for(@err) {
+			 if(/ERROR\(([^\)]+)\)\(([^\)]*)\)/) {
+			     push @fe,[$1,$2];
+			 } else {
+			     debug "Unrecognized error : $_";
+			 }
 		     }
-		 }
-		 detecte_analyse('erreurs'=>\@fe,'apprend'=>1);
-	     }
-	     );
+		     detecte_analyse('erreurs'=>\@fe,'apprend'=>1);
+		 },
+	);
     
 }
 
@@ -3466,6 +3482,44 @@ sub detecte_analyse {
 
 }
 
+$w{'inconnu_tree'}->signal_connect('button_press_event' =>
+				   sub {
+				       my ($self, $event) = @_;
+				       return 0 unless $event->type eq '2button-press';
+				       return 0 unless $event->button == 1;
+				       analyse_diagnostic();
+				       return 1;
+				   }
+    );
+
+sub analyse_diagnostic {
+    my $iter=$w{'inconnu_tree'}->get_selection->get_selected;
+    if($iter) {
+	my $scan=$inconnu_store->get($iter,INCONNU_SCAN);
+	
+	my (undef,undef,$scan_n)=splitpath($scan);
+	my $diagnostic_file=absolu('%PROJET/cr/diagnostic')."/".$scan_n;
+	
+	if(-f $diagnostic_file) {
+	    affiche_diagnostic($diagnostic_file);
+	} else {
+	    analyse_call('f'=>[$scan],
+			 'text'=>__("Making diagnostic image..."),
+			 'progres'=>'diagnostic',
+			 'diagnostic'=>1,
+			 'fin'=>sub {
+			     affiche_diagnostic($diagnostic_file);
+			 },
+		);
+	}
+    }
+}
+
+sub affiche_diagnostic {
+    my ($dfile)=@_;
+    commande_parallele($o{'img_viewer'},$dfile);
+}
+
 sub set_source_tex {
     my ($importe)=@_;
 
@@ -4027,7 +4081,7 @@ sub projet_ouvre {
 
 	# creation du repertoire et des sous-repertoires de projet
 
-	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms mep scans exports:) {
+	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic mep scans exports:) {
 	    my $rep=$o{'rep_projets'}."/$proj/$sous";
 	    if(! -x $rep) {
 		debug "Creating directory $rep...";

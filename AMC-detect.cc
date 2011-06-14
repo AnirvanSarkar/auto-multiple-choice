@@ -204,6 +204,12 @@ void calage(IplImage* src,IplImage* illustr,
 		 1+(int)((target_min+target_max)/2 /20),
 		 1+(int)((target_min+target_max)/2 /8));
 
+  if(view==2) {
+    *dst=cvCreateImage( cvGetSize(src), 8, 3 );
+    cvConvertImage(src,*dst);
+    cvNot(*dst,*dst);
+  }
+
   printf("Target size: %.1f ; %.1f\n",target_min,target_max);
 
   static CvMemStorage* storage = cvCreateMemStorage(0);
@@ -213,7 +219,7 @@ void calage(IplImage* src,IplImage* illustr,
 		  CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 
 #ifdef OPENCV_21
-  if(view) {
+  if(view==1) {
     *dst=cvCreateImage( cvGetSize(src), 8, 3 );
     cvZero( *dst );
   }
@@ -235,30 +241,40 @@ void calage(IplImage* src,IplImage* illustr,
       n_cc++;
 	
 #ifdef OPENCV_21
-     if(view) {
+     if(view==1) {
 	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
 	cvRectangle(*dst,cvPoint(rect.x,rect.y),cvPoint(rect.x+rect.width,rect.y+rect.height),color);
 	cvDrawContours( *dst, contour, color, color, -1, CV_FILLED, 8 );
       }
 #endif
+     if(view==2) {
+       CvScalar color = CV_RGB( 60,198,127 );
+	cvRectangle(*dst,cvPoint(rect.x,rect.y),cvPoint(rect.x+rect.width,rect.y+rect.height),color);
+	cvDrawContours( *dst, contour, color, color, -1, CV_FILLED, 8 );
+     }
     }
   }
 
   if(n_cc>=4) {
     for(int i=0;i<4;i++) {
-      if(view || illustr!=NULL) {
+      if(view>0 || illustr!=NULL) {
 	coins_int[i].x=(int)coins_x[i];
 	coins_int[i].y=(int)coins_y[i];
       }
       printf("Frame[%d]: %.1f ; %.1f\n",i,coins_x[i],coins_y[i]);
     }
     
-    if(view) {
+    if(view==1) {
 #ifdef OPENCV_21
       for(int i=0;i<4;i++) {
 	cvLine(*dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(255,255,255),1,CV_AA);
       }
 #endif
+    }
+    if(view==2) {
+      for(int i=0;i<4;i++) {
+	cvLine(*dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(193,29,27),1,CV_AA);
+      }
     }
 
     if(illustr!=NULL) {
@@ -386,14 +402,14 @@ void mesure_case(IplImage *src,IplImage *illustr,
     printf("COIN %.3f,%.3f\n",coins[i].x,coins[i].y);
   }
 
-  if(view || illustr!=NULL) {
+  if(view==1 || illustr!=NULL) {
     for(int i=0;i<4;i++) {
       coins_int[i].x=(int)coins[i].x;
       coins_int[i].y=(int)coins[i].y;
     }
   }
 #ifdef OPENCV_21
-  if(view) {
+  if(view==1) {
     for(int i=0;i<4;i++) {
       cvLine(dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(255,255,255),1,CV_AA);
     }
@@ -502,6 +518,7 @@ int main( int argc, char** argv )
   char *out_image_file=NULL;
   char *zooms_dir=NULL;
   int view=0;
+  int post_process_image=0;
 
 #if OPENCV_20
   int save_options[3]={CV_IMWRITE_JPEG_QUALITY,75,0};
@@ -510,7 +527,7 @@ int main( int argc, char** argv )
   // Options
 
   char c;
-  while ((c = getopt (argc, argv, "x:y:d:i:p:m:o:v")) != -1) {
+  while ((c = getopt (argc, argv, "x:y:d:i:p:m:o:vP")) != -1) {
     switch (c) {
     case 'x': taille_orig_x=atof(optarg);break; 
     case 'y': taille_orig_y=atof(optarg);break; 
@@ -519,6 +536,7 @@ int main( int argc, char** argv )
     case 'm': tol_moins=atof(optarg);break;
     case 'o': out_image_file=strdup(optarg);break;
     case 'v': view=1;break;
+    case 'P': post_process_image=1;view=2;break;
     }
   }
 
@@ -551,7 +569,8 @@ int main( int argc, char** argv )
       free(scan_file);
       scan_file=strdup(commande+5);
 
-      if(out_image_file != NULL) {
+      if(out_image_file != NULL &&
+	 !post_process_image) {
 	illustr=cvLoadImage(scan_file, CV_LOAD_IMAGE_COLOR);
 	if(illustr==NULL) {
 	  printf("! LOAD : Error loading scan file with color mode [%s]\n",scan_file);
@@ -572,6 +591,12 @@ int main( int argc, char** argv )
 	     tol_plus, tol_moins,
 	     coins_x,coins_y,
 	     &dst,view);
+      
+      if(out_image_file != NULL && illustr==NULL) {
+	illustr=dst;
+	dst=NULL;
+      }
+      
       cvReleaseImage(&src_calage);
 
     } else if(sscanf(commande,"optim %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
@@ -631,7 +656,7 @@ int main( int argc, char** argv )
   }
 
 #ifdef OPENCV_21
-  if(view) {
+  if(view==1) {
     cvNamedWindow( "Source", CV_WINDOW_NORMAL );
     cvShowImage( "Source", src );
     cvNamedWindow( "Components", CV_WINDOW_NORMAL );

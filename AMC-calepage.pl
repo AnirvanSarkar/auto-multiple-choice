@@ -281,6 +281,8 @@ if($traitement->mode() eq 'opencv') {
 	      '-o',($debug_image ? $debug_image : 1)
 	);
 
+    push @args,'-P' if($debug_image);
+
     $traitement->set('args',\@args);
 
     @r=$traitement->commande("load ".$ppm);
