@@ -78,7 +78,6 @@ my $id_page_fourni="";
 
 my $rep_projet='';
 my $repertoire_cr="";
-my $ocr_file='';
 
 my $debug='';
 my $progress=0;
@@ -104,7 +103,6 @@ GetOptions("page=s"=>\$out_cadre,
 	   "dust-size-id=s"=>\$dust_size_id,
 	   "projet=s"=>\$rep_projet,
 	   "cr=s"=>\$repertoire_cr,
-	   "ocr=s"=>\$ocr_file,
 	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
@@ -130,8 +128,6 @@ if($tol_marque) {
 
 $blur = "1x1" if($blur eq 'defaut');
 $threshold = "60%" if($threshold eq 'defaut');
-
-$ocr_file="$repertoire_cr/ocr-manuel.xml" if($repertoire_cr && !$ocr_file);
 
 $scan=$ARGV[0];
 
@@ -356,22 +352,9 @@ sub valide_id_page {
 
     @stud_page=get_epo($id_page);
 
-    # ID page reconnu manuellement, stocke dans fichier XML
-    if($ocr_file && -f $ocr_file) {
-	my $oc=XMLin($ocr_file,ForceArray => 1,KeyAttr=>['scan']);
-	my $m=$oc->{'page'}->{$scan}->{'id'};
-	if($m) {
-	    print "Page (manual) : $m\n";
-	    $id_page=$m;
-	}
-    }
-    
     # ID fourni en ligne de commande
     if($id_page_fourni) {
-	print "Page (option) : $m\n";
-	if($id_page && $id_page ne $id_page_fourni) {
-	    attention("WARNING: page ID mismatch!");
-	}
+	print "Page (option) : $id_page_fourni\n";
 	$id_page=$id_page_fourni;
     }
 
