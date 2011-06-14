@@ -67,6 +67,7 @@ my $chiffres_significatifs=4;
 my $verdict='TOTAL : %S/%M => %s/%m';
 
 my $font_name='FreeSans';
+my $rtl='';
 my $test_font_size=100;
 
 my $association='';
@@ -107,6 +108,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "font=s"=>\$font_name,
+	   "rtl!"=>\$rtl,
 	   );
 
 set_debug($debug);
@@ -325,9 +327,10 @@ $delta=1/(1+$#ids) if($#ids>=0);
 	 $l0->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$test_font_size));
 	 $l0->set_text('H');
 	 my ($text_x,$text_y)=$l0->get_pixel_size();
-	 my $height=$surface->get_height;
-	 debug "Scan height: $height";
-	 my $target_y=$height/$pointsize_rel;
+	 my $page_width=$surface->get_width;
+	 my $page_height=$surface->get_height;
+	 debug "Scan height: $page_height";
+	 my $target_y=$page_height/$pointsize_rel;
 	 debug "Target TY: $target_y";
 	 my $font_size=int($test_font_size*$target_y/$text_y);
 	 debug "Font size: $font_size";
@@ -381,7 +384,12 @@ $delta=1/(1+$#ids) if($#ids>=0);
 
 	     $layout->set_text($text);
 	     $context->set_source_rgb(color_rgb('red'));
-	     $context->move_to($text_x,$text_y*.7);
+	     if($rtl) {
+		 my ($tx,$ty)=$layout->get_pixel_size;
+		 $context->move_to($page_width-$text_x-$tx,$text_y*.7);
+	     } else {
+		 $context->move_to($text_x,$text_y*.7);
+	     }
 	     Pango::Cairo::show_layout($context,$layout);
 	     
 	 }
@@ -425,6 +433,8 @@ $delta=1/(1+$#ids) if($#ids>=0);
 	   $question{$q}->{'n'}++;
 	   $question{$q}->{'x'}=$mil[0] 
 	       if((!$question{$q}->{'x'}) || ($mil[0]<$question{$q}->{'x'}));
+	   $question{$q}->{'xmax'}=$mil[0] 
+	       if((!$question{$q}->{'xmax'}) || ($mil[0]>$question{$q}->{'xmax'}));
 	   $question{$q}->{'y'}+=$mil[1];
 	   
        }
@@ -444,9 +454,17 @@ $delta=1/(1+$#ids) if($#ids>=0);
 	       $layout->set_text($text);
 	       my ($tx,$ty)=$layout->get_pixel_size;
 	       if($position eq 'marge') {
-		   $x=$ecart_marge*$text_x;
+		   if($rtl) {
+		       $x=$page_width-$ecart_marge*$text_x-$tx;
+		   } else {
+		       $x=$ecart_marge*$text_x;
+		   }
 	       } elsif($position eq 'case') {
-		   $x=$question{$q}->{'x'} - $ecart*$text_x - $tx;
+		   if($rtl) {
+		       $x=$question{$q}->{'xmax'} + $ecart*$text_x ;
+		   } else {
+		       $x=$question{$q}->{'x'} - $ecart*$text_x - $tx;
+		   }
 	       } else {
 		   debug "Annotation : position invalide : $position";
 		   $x=$text_x;

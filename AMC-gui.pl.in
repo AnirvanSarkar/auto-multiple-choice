@@ -220,6 +220,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'annote_ecart'=>5.5,
 	      'annote_chsign'=>4,
 
+	      'defaut_annote_rtl'=>'',
 	      'defaut_verdict'=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
 
 	      'zoom_window_height'=>400,
@@ -280,6 +281,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'annote_position'=>'marge',
 
 		   'verdict'=>'',
+		   'annote_rtl'=>'',
 
 		   'export_sort'=>'n',
 		   );
@@ -2769,6 +2771,7 @@ sub annote_copies {
 			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			  "--noms-encodage",bon_encodage('liste'),
+			  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
 			  ],
 	     'texte'=>__"Annotating papers...",
 	     'progres.id'=>'annote',

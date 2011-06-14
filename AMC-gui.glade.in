@@ -3725,7 +3725,7 @@ gif</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip" translatable="yes">Density used when converting vector format scans (PDF, EPS) into bitmap.</property>
                                 <property name="invisible_char">&#x25CF;</property>
-                                <property name="adjustment">30 30 500 10 100 10</property>
+                                <property name="adjustment">30 30 500 10 100 0</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -3979,6 +3979,7 @@ gif</property>
                         <child>
                           <widget class="GtkTable" id="table24">
                             <property name="visible">True</property>
+                            <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
                               <widget class="GtkLabel" id="label_defaut_verdict">
@@ -4010,6 +4011,31 @@ gif</property>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label60">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Writing direction</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkCheckButton" id="pref_v_defaut_annote_rtl">
+                                <property name="label" translatable="yes">right to left</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                           </widget>
@@ -4867,7 +4893,7 @@ gif</property>
                         <child>
                           <widget class="GtkTable" id="table21">
                             <property name="visible">True</property>
-                            <property name="n_rows">2</property>
+                            <property name="n_rows">3</property>
                             <property name="n_columns">2</property>
                             <child>
                               <widget class="GtkLabel" id="label126">
@@ -4875,8 +4901,8 @@ gif</property>
                                 <property name="label" translatable="yes">Questions marks position</property>
                               </widget>
                               <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -4888,8 +4914,8 @@ gif</property>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -4916,6 +4942,31 @@ gif</property>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label66">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Writing direction</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkCheckButton" id="pref_projet_v_annote_rtl">
+                                <property name="label" translatable="yes">right to left</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                           </widget>
