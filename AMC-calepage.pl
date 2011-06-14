@@ -492,6 +492,7 @@ erreur("No XML for ID $id_page") if(! $lay);
 
 if($repertoire_cr && ($traitement->mode() eq 'opencv')) {
     $traitement->commande("zooms $repertoire_cr/zooms");
+    $traitement->commande("createzd ".join(" ",@stud_page));
 }
 
 # On cherche a caler les marques.

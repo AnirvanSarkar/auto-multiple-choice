@@ -285,6 +285,44 @@ void restreint(int *x,int *y,int tx,int ty) {
   if(*y>=ty) *y=ty-1;
 }
 
+int check_zooms_dir(int student, int page, char *zooms_dir=NULL,int log=0) {
+  int ok=1;
+  static char* zoom_page_dir=NULL;
+  struct stat zd;
+  
+  if(student>=0) {
+    if(asprintf(&zoom_page_dir,"%s/%d-%d",zooms_dir,student,page)>0) {
+      if(stat(zoom_page_dir,&zd)!=0) {
+	if(errno==ENOENT) {
+	  if(mkdir(zoom_page_dir,0755)!=0) {
+	    ok=0;
+	    printf("! ZOOMDC : Zoom dir creation error %d : %s\n",errno,zoom_page_dir);
+	  } else {
+	    printf(": Zoom dir created %s\n",zoom_page_dir);
+	  }
+	} else {
+	  ok=0;
+	  printf("! ZOOMDS : Zoom dir stat error %d : %s\n",errno,zoom_page_dir);
+	}
+      } else {
+	if(!S_ISDIR(zd.st_mode)) {
+	  ok=0;
+	  printf("! ZOOMDP : Zoom dir is not a directory : %s\n",zoom_page_dir);
+	}
+      }	  
+    } else {
+      printf("! ZOOMDN : Zoom dir name error\n");
+      ok=0;
+    }
+  } else {
+    ok=0;
+    if(log) {
+      printf(": No zoom dir to create (student<0).\n");
+    }
+  }
+  return(ok);
+}
+
 void mesure_case(IplImage *src,IplImage *illustr,
 		 int student,int page,int question, int answer,
 		 double prop,point *coins,IplImage *dst=NULL,
@@ -306,8 +344,6 @@ void mesure_case(IplImage *src,IplImage *illustr,
   static int save_options[3]={CV_IMWRITE_PNG_COMPRESSION,7,0};
 #endif
 
-  struct stat zd;
-  
   npix=0;
   npixnoir=0;
 
@@ -373,52 +409,30 @@ void mesure_case(IplImage *src,IplImage *illustr,
     if(zooms_dir!=NULL && student>=0) {
 
       /* check if directory is present, or ceate it */
-      ok=1;
-      if(asprintf(&zoom_file,"%s/%d-%d",zooms_dir,student,page)>0) {
-	if(stat(zoom_file,&zd)!=0) {
-	  if(errno==ENOENT) {
-	    if(mkdir(zoom_file,0755)!=0) {
-	      ok=0;
-	      printf("! ZOOMDC : Zoom dir creation error %d : %s\n",errno,zoom_file);
-	    } else {
-	      printf(": Zoom dir created %s\n",zoom_file);
-	    }
-	  } else {
-	    ok=0;
-	    printf("! ZOOMDS : Zoom dir stat error %d : %s\n",errno,zoom_file);
-	  }
-	} else {
-	  if(!S_ISDIR(zd.st_mode)) {
-	    ok=0;
-	    printf("! ZOOMDP : Zoom dir is not a directory : %s\n",zoom_file);
-	  }
-	}	  
-	/* save zoom file */
-	if(ok) {
-	  if(asprintf(&zoom_file,"%s/%d-%d/%d-%d.png",zooms_dir,student,page,question,answer)>0) {
-	    printf(": Saving zoom to %s\n",zoom_file);
-	    printf(": Z=(%d,%d)+(%d,%d)\n",
-		   z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin);
-	    cvSetImageROI(illustr,
-			  cvRect(z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin));
-#if OPENCV_20
-	    if(cvSaveImage(zoom_file,illustr,save_options)!=1) {
-#else
-	    if(cvSaveImage(zoom_file,illustr)!=1) {
-#endif
-	      printf("! ZOOMS : Zoom save error\n");
-	    }
+      ok=check_zooms_dir(student,page,zooms_dir,0);
 
-	    cvResetImageROI(illustr);
-	  } else {
-	    printf("! ZOOMFN : Zoom file name error\n");
+      /* save zoom file */
+      if(ok) {
+	if(asprintf(&zoom_file,"%s/%d-%d/%d-%d.png",zooms_dir,student,page,question,answer)>0) {
+	  printf(": Saving zoom to %s\n",zoom_file);
+	  printf(": Z=(%d,%d)+(%d,%d)\n",
+		 z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin);
+	  cvSetImageROI(illustr,
+			cvRect(z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin));
+	  if(cvSaveImage(zoom_file,illustr
+#if OPENCV_20
+			 ,save_options
+#endif
+			 )!=1) {
+	    printf("! ZOOMS : Zoom save error\n");
 	  }
+	  
+	  cvResetImageROI(illustr);
+	} else {
+	  printf("! ZOOMFN : Zoom file name error\n");
 	}
-      } else {
-	printf("! ZOOMDN : Zoom dir name error\n");
       }
     }
-    
   }
 
   /* bounding box */
@@ -530,6 +544,9 @@ int main( int argc, char** argv )
     } else if(strncmp(commande,"zooms ",6)==0) {
       free(zooms_dir);
       zooms_dir=strdup(commande+6);
+    } else if(sscanf(commande,"createzd %d %d",&student,&page)==2) {
+      check_zooms_dir(student,page,zooms_dir,1);
+      student=-1;
     } else if(strncmp(commande,"load ",5)==0) {
       free(scan_file);
       scan_file=strdup(commande+5);
