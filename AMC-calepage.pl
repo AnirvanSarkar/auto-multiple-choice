@@ -421,7 +421,7 @@ sub mesure_case {
 	}
 	if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
 	    $r=($2==0 ? 0 : $1/$2);
-	    debug " Case $k : %d/%d = %.4f\n",$1,$2,$r;
+	    debug sprintf("Binary box $k: %d/%d = %.4f\n",$1,$2,$r);
 	    $score{$k}=$r;
 	    $score_data{$k}="pixels=\"$2\" pixelsnoirs=\"$1\" r=\"$r\"";
 	}
