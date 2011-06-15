@@ -370,7 +370,7 @@ for my $t (keys %qt_n) {
 $writer->emptyTag('total',
 		  'total'=>$somme_notes,
 		  'max'=>$note_parfaite,
-		  'note'=>$somme_notes/$n_notes,
+		  'note'=>($n_notes>0 ? $somme_notes/$n_notes : 0),
 		  );
 $writer->endTag('copie');
 
@@ -387,7 +387,8 @@ for my $k (keys %les_codes) {
 
 # Global mean
 
-$writer->dataElement('moyenne',$somme_notes/$n_notes);
+$writer->dataElement('moyenne',$somme_notes/$n_notes)
+    if($n_notes>0);
 
 # Closes output...
 
