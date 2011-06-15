@@ -438,8 +438,9 @@ sub clear_old {
 	} elsif(-d $file) {
 	    debug "Clearing old $type directory: $file";
 	    opendir(my $dh, $file) || debug "ERROR: can't opendir $file: $!";
-	    my @content = grep { -f "$file/$_" } readdir($dh);
+	    my @content = grep { -f $_ } map { "$file/$_" } readdir($dh);
 	    closedir $dh;
+	    debug "Removing ".(1+$#content)." files.";
 	    unlink(@content);
 	}
     }

@@ -2370,6 +2370,9 @@ sub saisie_auto_ok {
 	@f=@fl;
     }
 
+    clear_old('diagnostic',
+	      absolu('%PROJET/cr/diagnostic'));
+
     $w{'avancement'}->set_text($splitinfo);
     $w{'annulation'}->set_sensitive(1);
 
@@ -3498,7 +3501,7 @@ sub analyse_diagnostic {
 	my $scan=$inconnu_store->get($iter,INCONNU_SCAN);
 	
 	my (undef,undef,$scan_n)=splitpath($scan);
-	my $diagnostic_file=absolu('%PROJET/cr/diagnostic')."/".$scan_n;
+	my $diagnostic_file=absolu('%PROJET/cr/diagnostic')."/".$scan_n.".png";
 	
 	if(-f $diagnostic_file) {
 	    affiche_diagnostic($diagnostic_file);

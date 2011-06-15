@@ -128,7 +128,7 @@ for my $s (@scans) {
     push @c,"--mep",$mep_dir if($mep_dir);
     push @c,"--mep-saved",$mep_file;
     push @c,"--projet",$rep_projet if($rep_projet);
-    push @c,"--debug-image",$debug_image_dir."/$sf" if(-d $debug_image_dir);
+    push @c,"--debug-image",$debug_image_dir."/$sf.png" if(-d $debug_image_dir);
     push @c,"--cr",$cr_dir,$s;
 
     $queue->add_process(@c);

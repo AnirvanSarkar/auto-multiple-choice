@@ -668,11 +668,11 @@ int main( int argc, char** argv )
 #endif
 
   if(illustr && strlen(out_image_file)>1) {
+    if(cvSaveImage(out_image_file,illustr
 #if OPENCV_20
-    if(cvSaveImage(out_image_file,illustr,save_options)!=1) {
-#else
-    if(cvSaveImage(out_image_file,illustr)!=1) {
+		   ,save_options
 #endif
+		   )!=1) {
       printf("! LAYS : Layout image save error\n");
     }
   }
