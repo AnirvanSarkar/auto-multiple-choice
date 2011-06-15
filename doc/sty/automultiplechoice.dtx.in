@@ -1707,7 +1707,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCformAnswerA#1{\addtocounter{AMC@ncase}{1}\AMCformAnswer{#1}}
 %    \end{macrocode}\end{macro}\end{macro}\
 %
-% \begin{macro}{\AMCmem@ireAJ}\begin{macro}{\AMCformBegin}\begin{macro}{\AMCform}
+% \begin{macro}{\AMCmem@ireAJ}\begin{macro}{\AMCformBegin}\begin{macro}{\AMCform}\begin{macro}{\AMCformS}
 %       These are commands to manage memory for separate answer
 %       sheet. |\AMCmem@ireAJ|\marg{code} adds \meta{code} to this
 %       memory. |\AMCmem@ireAJRep|\marg{code} adds to memory answer
@@ -1718,6 +1718,13 @@ Three digits and two letters:\insertgroup{mixed}.
 %       separate answer sheet for the current student sheet, and
 %       |\AMCform| prints the whole memory: questions and answers
 %       boxes.
+%
+%       |\AMCformS| is a |\AMCform| variant that does not clear the
+%       list of answer boxes. It can be used to make the same exact
+%       subject for all students, displaying the questions before
+%       (outside) |onecopy|, so that |onecopy| contains only the
+%       answer sheet.
+%
 %    \begin{macrocode}
 \newcommand\AMCmem@ireAJ[1]{%
   \ifAMC@ensemble\ifAMC@zoneformulaire\else%
@@ -1732,7 +1739,11 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCform{%
   \ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData%
   \global\def\AMCmem@ireData{}\fi}
-%    \end{macrocode}\end{macro}\end{macro}\end{macro}
+\newcommand\AMCformS{%
+  \ifAMC@ensemble\AMCformulaire@dedanstrue%
+  \AMC@amclog{AUTOQCM[BR=0]^^J}\AMCmem@ireData%
+  \fi}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
 % \subsubsection{Formatting answers}
 %

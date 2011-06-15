@@ -478,7 +478,7 @@ if($mode =~ /b/) {
 
     my $quest='';
     my $rep='';
-    my $etu='';
+    my $etu=0;
 
     my $delta=0;
 
@@ -524,6 +524,9 @@ if($mode =~ /b/) {
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	    $rep=$1;
 	    $bs{$etu}->{"$quest.$rep"}={-bonne=>($2 eq 'B' ? 1 : 0)};
+	}
+	if(/AUTOQCM\[BR=([0-9]+)\]/) {
+	    $bs{$etu}=$bs{$1};
 	}
 	if(/AUTOQCM\[B=([^\]]+)\]/) {
 	    $bs{$etu}->{"$quest.$rep"}->{-bareme}=$1;
