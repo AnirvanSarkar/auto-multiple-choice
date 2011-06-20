@@ -1814,7 +1814,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcommand{\correctchoice}[2][]{\advance\AMCrep@count\@ne\relax%
   \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
-  \AMCune@bonnetrue%
+  \global\AMCune@bonnetrue%
   \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@marque{#1}{1}%
       \else\AMC@marque{#1}{}\fi}{#2}}{\the\AMCrep@count}\ignorespaces}
 \newcommand{\wrongchoice}[2][]{\advance\AMCrep@count\@ne\relax%
