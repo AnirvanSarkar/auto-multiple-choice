@@ -862,6 +862,20 @@ Three digits and two letters:\insertgroup{mixed}.
 % Default values are |\AMCboxDimensions{size=2.5ex,down=.4ex,rule=.5pt}|
 %
 %
+% \subsubsection{Codes}
+% One may adapt the codes rendering from |\AMCcode| to one's needs
+% modifying the following lengths:
+% \begin{itemize}
+% \item |\AMCcodeHspace| is the amount of horizontal space between two
+%   columns of digits,
+% \item |\AMCcodeHspace| is the amount of vertical space between two
+%   rows of digits,
+% \item |\AMCcodeBoxSep| is the amount of space between the box and
+%   the label, when the label is printed outside the box.
+% \end{itemize}
+% Default values are |\AMCcodeHspace=.5em|
+% |\AMCcodeVspace=.5em| |\AMCcodeBoxSep=.1em|
+% 
 % \subsubsection{Answers}\label{c:answers}
 % Environment |choicescustom| will make use of the three commands
 %   |\AMCbeginAnswer| (before the first answer), |\AMCendAnswer|
@@ -1939,31 +1953,37 @@ Three digits and two letters:\insertgroup{mixed}.
 %   
 %    \begin{macrocode}
 \newcount\AMC@chiffres
+\newdimen\AMCcodeHspace\AMCcodeHspace=.5em
+\newdimen\AMCcodeVspace\AMCcodeVspace=.5em
+\newdimen\AMCcodeBoxSep\AMCcodeBoxSep=.1em
 \newcommand{\AMCcode}[2]{%
 {\def\AMCbeginQuestion##1##2{}%
- \def\AMCbeginAnswer{\begin{minipage}{%
-       \ifAMC@outside@box 2em\else%
-       \ifAMC@ensemble 1.15em\else\ifAMC@inside@box 1.15em\else 2.5em\fi\fi\fi}}%
- \def\AMCendAnswer{\hspace*{\fill}\end{minipage}}%
- \def\AMCanswer##1##2{##1 \ifAMC@ensemble\else%
-   \ifAMC@inside@box\else{\bf ##2}\fi\fi\\[1mm]}%
+ \setlength{\parindent}{0pt}%
+ \def\AMCbeginAnswer{\hspace{0pt}%
+    \vbox\bgroup}%
+ \def\AMCendAnswer{\vspace{-\AMCcodeVspace}\egroup%
+    \hspace{\AMCcodeHspace}}%
+ \def\AMCanswer##1##2{\hbox{##1\ifAMC@ensemble\else%
+   \ifAMC@inside@box\else{\hspace{\AMCcodeBoxSep}\bf ##2}\fi\fi\hspace*{\fill}}%
+   \vspace{\AMCcodeVspace}}%
  \AMCnobloc%
  \AMC@chiffres=#2\loop%
- \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative
-   \begin{choicescustom}[o]\scoring{auto=0}
-     \wrongchoice[0]{0}
-     \wrongchoice[1]{1}
-     \wrongchoice[2]{2}
-     \wrongchoice[3]{3}
-     \wrongchoice[4]{4}
-     \wrongchoice[5]{5}
-     \wrongchoice[6]{6}
-     \wrongchoice[7]{7}
-     \wrongchoice[8]{8}
-     \wrongchoice[9]{9}
-   \end{choicescustom}
- \end{question}
- \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat
+ \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative%
+   \begin{choicescustom}[o]\scoring{auto=0}%
+     \wrongchoice[0]{0}%
+     \wrongchoice[1]{1}%
+     \wrongchoice[2]{2}%
+     \wrongchoice[3]{3}%
+     \wrongchoice[4]{4}%
+     \wrongchoice[5]{5}%
+     \wrongchoice[6]{6}%
+     \wrongchoice[7]{7}%
+     \wrongchoice[8]{8}%
+     \wrongchoice[9]{9}%
+   \end{choicescustom}%
+ \end{question}%
+ \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
+ \hspace{-\AMCcodeHspace}%
 }}
 %    \end{macrocode}\end{macro}
 %
