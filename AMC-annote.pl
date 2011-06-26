@@ -65,6 +65,7 @@ my $pointsize_rel=60;
 my $chiffres_significatifs=4;
 
 my $verdict='TOTAL : %S/%M => %s/%m';
+my $verdict_question='';
 
 my $font_name='FreeSans';
 my $rtl='';
@@ -104,6 +105,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "ecart-marge=s"=>\$ecart_marge,
 	   "ch-sign=s"=>\$chiffres_significatifs,
 	   "verdict=s"=>\$verdict,
+	   "verdict-question=s"=>\$verdict_question,
 	   "fich-assoc=s"=>\$association,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
@@ -364,8 +366,8 @@ $delta=1/(1+$#ids) if($#ids>=0);
 
 	     $text =~ s/\%[S]/format_note($t->{'total'})/ge;
 	     $text =~ s/\%[M]/format_note($t->{'max'})/ge;
-	     $text =~ s/\%[s]/$t->{'note'}/g;
-	     $text =~ s/\%[m]/$notes->{'notemax'}/g;
+	     $text =~ s/\%[s]/format_note($t->{'note'})/ge;
+	     $text =~ s/\%[m]/format_note($notes->{'notemax'})/ge;
 
 	     if($assoc && $noms) {
 		 my $i=$assoc->effectif($etud);
@@ -449,8 +451,21 @@ $delta=1/(1+$#ids) if($#ids>=0);
 
 	       my $nq=$ne->{'question'}->{$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'titre'}};
 	       
-	       my $text=format_note($nq->{'note'})."/".format_note($nq->{'max'});
+	       my $text=$verdict_question;
 	       
+	       $text =~ s/\%[S]/$nq->{'note'}/g;
+	       $text =~ s/\%[M]/$nq->{'max'}/g;
+	       $text =~ s/\%[s]/format_note($nq->{'note'})/ge;
+	       $text =~ s/\%[m]/format_note($nq->{'max'})/ge;
+	       
+	       my $te=eval($text);
+	       if($@) {
+		   debug "Annotation: $text";
+		   debug "Evaluation error $@";
+	       } else {
+		   $text=$te;
+	       }
+
 	       $layout->set_text($text);
 	       my ($tx,$ty)=$layout->get_pixel_size;
 	       if($position eq 'marge') {

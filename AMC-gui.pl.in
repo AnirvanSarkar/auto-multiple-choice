@@ -222,6 +222,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 
 	      'defaut_annote_rtl'=>'',
 	      'defaut_verdict'=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
+	      'defaut_verdict_q'=>"\"%"."s/%"."m\"",
 
 	      'zoom_window_height'=>400,
 	      'zoom_window_factor'=>1.0,
@@ -281,6 +282,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'annote_position'=>'marge',
 
 		   'verdict'=>'',
+		   'verdict_q'=>'',
 		   'annote_rtl'=>'',
 
 		   'export_sort'=>'n',
@@ -609,7 +611,8 @@ sub moteur_latex {
 
 my $gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
 
-for(qw/onglets_projet preparation_etats documents_tree main_window mep_tree edition_latex
+for(qw/onglets_projet preparation_etats documents_tree main_window
+    mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement annulation
     liste_filename liste_path liste_edit liste_setfile liste_refresh
@@ -2768,29 +2771,31 @@ sub opt_symbole {
 sub annote_copies {
     commande('commande'=>["auto-multiple-choice","annote",
 			  pack_args("--debug",debug_file(),
-			  "--progression-id",'annote',
-			  "--progression",1,
-			  "--projet",absolu('%PROJET/'),
-			  "--projets",absolu('%PROJETS/'),
-			  "--ch-sign",$o{'annote_chsign'},
-			  "--cr",absolu($projet{'options'}->{'cr'}),
-			  "--an-saved",absolu($an_saved),
-			  "--notes",absolu($projet{'options'}->{'notes'}),
-			  "--taille-max",$o{'taille_max_correction'},
-			  "--bareme",absolu($projet{'options'}->{'fichbareme'}),
-			  "--qualite",$o{'qualite_correction'},
-			  "--line-width",$o{'symboles_trait'},
-
-			  "--indicatives",$o{'symboles_indicatives'},
-			  "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)), 
-			  "--position",$projet{'options'}->{'annote_position'},
-			  "--pointsize-nl",$o{'annote_ps_nl'},
-			  "--ecart",$o{'annote_ecart'},
-			  "--verdict",$projet{'options'}->{'verdict'}),
-			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
-			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-			  "--noms-encodage",bon_encodage('liste'),
+				    "--progression-id",'annote',
+				    "--progression",1,
+				    "--projet",absolu('%PROJET/'),
+				    "--projets",absolu('%PROJETS/'),
+				    "--ch-sign",$o{'annote_chsign'},
+				    "--cr",absolu($projet{'options'}->{'cr'}),
+				    "--an-saved",absolu($an_saved),
+				    "--notes",absolu($projet{'options'}->{'notes'}),
+				    "--taille-max",$o{'taille_max_correction'},
+				    "--bareme",absolu($projet{'options'}->{'fichbareme'}),
+				    "--qualite",$o{'qualite_correction'},
+				    "--line-width",$o{'symboles_trait'},
+				    
+				    "--indicatives",$o{'symboles_indicatives'},
+				    "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)), 
+			            "--position",$projet{'options'}->{'annote_position'},
+			            "--pointsize-nl",$o{'annote_ps_nl'},
+			            "--ecart",$o{'annote_ecart'},
+			            "--verdict",$projet{'options'}->{'verdict'},
+			            "--verdict-question",$projet{'options'}->{'verdict_q'},
+			            "--fich-assoc",absolu($projet{'options'}->{'association'}),
+			            "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
+			            "--noms-encodage",bon_encodage('liste'),
 			  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
+                                   )
 			  ],
 	     'texte'=>__"Annotating papers...",
 	     'progres.id'=>'annote',
