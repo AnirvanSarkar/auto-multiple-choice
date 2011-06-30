@@ -204,6 +204,11 @@ sub tri {
     $self->{'noms'}=[sort { $a->{$cle} cmp $b->{$cle} } @{$self->{'noms'}}];
 }
 
+sub tri_num {
+    my ($self,$cle)=@_;
+    $self->{'noms'}=[sort { $a->{$cle} <=> $b->{$cle} } @{$self->{'noms'}}];
+}
+
 sub taille {
     my ($self)=@_;
     return(1+$#{$self->{'noms'}});
