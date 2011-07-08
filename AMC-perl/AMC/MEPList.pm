@@ -224,6 +224,7 @@ sub etus {
 # renvoie les pages correspondantes au numero d'etudiant fourni
 # options :
 # * 'case'=>1 si on ne veut que les pages avec des cases a cocher
+# * 'nom'=>1 si on ne veut que les pages avec le nom
 # * 'contenu'=>1 si on ne veut que les pages soit avec des cases
 #                a cocher, soit avec le nom a ecrire
 # * 'id'=>1 si on veut les pages sous la forme de l'ID de page plutot
@@ -240,6 +241,8 @@ sub pages_etudiant {
 		 && (!$self->attr($i,'nom')));
 	$ok=0 if($oo{'case'} 
 		 && (!$self->attr($i,'case')));
+	$ok=0 if($oo{'nom'} 
+		 && (!$self->attr($i,'nom')));
 	push @r,($oo{'id'} ? $i : $self->attr($i,'page')) 
 	    if($e == $etu && $ok);
     }
@@ -258,6 +261,8 @@ sub pages_etudiants {
 		 && (!$self->attr($i,'nom')));
 	$ok=0 if($oo{'case'} 
 		 && (!$self->attr($i,'case')));
+	$ok=0 if($oo{'nom'} 
+		 && (!$self->attr($i,'nom')));
 	if($ok) {
 	    if($oo{'ip'}) {
 		push @{$r{$e}},{'id'=>$i,'page'=>$self->attr($i,'page')};
@@ -265,6 +270,20 @@ sub pages_etudiants {
 		push @{$r{$e}},($oo{'id'} ? $i : $self->attr($i,'page'));
 	    }
 	}
+    }
+    return(%r);
+}
+
+# renvoie les copies etudiants avec defauts
+sub etudiants_defauts {
+    my ($self)=@_;
+    my %r=();
+    my %np=($self->pages_etudiants('nom'=>1));
+    my %nc=($self->pages_etudiants('case'=>1));
+    for my $etu ($self->etus()) {
+	push @{$r{'NO_BOX'}},$etu if($#{$nc{$etu}}==-1);
+	push @{$r{'NO_NAME'}},$etu if($#{$np{$etu}}==-1);
+	push @{$r{'SEVERAL_NAMES'}},$etu if($#{$np{$etu}}>0);
     }
     return(%r);
 }

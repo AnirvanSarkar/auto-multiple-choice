@@ -614,7 +614,7 @@ my $gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
 for(qw/onglets_projet preparation_etats documents_tree main_window
     mep_tree edition_latex
     onglet_notation onglet_saisie
-    log_general commande avancement annulation
+    log_general commande avancement annulation button_mep_warnings
     liste_filename liste_path liste_edit liste_setfile liste_refresh
     doc_menu menu_debug menu_outils
     liste diag_tree inconnu_tree diag_result
@@ -3317,10 +3317,54 @@ sub detecte_mep {
 	}
     }
 
+    $projet{'_mep_defauts'}={$projet{'_mep_list'}->etudiants_defauts()};
+    my @def=(keys %{$projet{'_mep_defauts'}});
+    if(@def) {
+	$w{'button_mep_warnings'}->show();
+    } else {
+	$w{'button_mep_warnings'}->hide();
+    }
+
     $w{'avancement'}->set_text('');
     $w{'avancement'}->set_fraction(0);
     $w{'commande'}->hide();
     Gtk2->main_iteration while ( Gtk2->events_pending );
+}
+
+my %defect_text=(
+    'NO_NAME'=>__("The \\namefield command is not used. Writing subjects without name field is not recommended."),
+    'SEVERAL_NAMES'=>__("The \\namefield command is used several times for the same subject. This should not be the case, as each student should write his name only once."),
+    'NO_BOX'=>__("No box to be ticked."),
+    );
+
+sub mep_warnings {
+    my $m='';
+    my @def=(keys %{$projet{'_mep_defauts'}});
+    if(@def) {
+	$m=__("Some potential defects were detected for this subject. Correct them in the LaTeX source and update the working documents.");
+	for my $k (keys %defect_text) {
+	    if($projet{'_mep_defauts'}->{$k}) {
+		my @e=sort { $a <=> $b } (@{$projet{'_mep_defauts'}->{$k}});
+		if(@e) {
+		    $m.="\n<b>".$defect_text{$k}."</b> ".
+			sprintf(__('(Concerns %1$d sheets, see for exemple sheet %2$d)'),1+$#e,$e[0]);
+		    
+		}
+	    }
+	}
+    } else {
+	# should not be possible to go there...
+	return();
+    }
+    my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'warning','ok',
+			  $m
+	);
+    $dialog->run;
+    $dialog->destroy;
+
 }
 
 sub detecte_correc {
