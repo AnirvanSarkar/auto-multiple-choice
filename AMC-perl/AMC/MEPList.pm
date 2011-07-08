@@ -281,9 +281,11 @@ sub etudiants_defauts {
     my %np=($self->pages_etudiants('nom'=>1));
     my %nc=($self->pages_etudiants('case'=>1));
     for my $etu ($self->etus()) {
-	push @{$r{'NO_BOX'}},$etu if($#{$nc{$etu}}==-1);
-	push @{$r{'NO_NAME'}},$etu if($#{$np{$etu}}==-1);
-	push @{$r{'SEVERAL_NAMES'}},$etu if($#{$np{$etu}}>0);
+	if($etu>0) {
+	    push @{$r{'NO_BOX'}},$etu if($#{$nc{$etu}}==-1);
+	    push @{$r{'NO_NAME'}},$etu if($#{$np{$etu}}==-1);
+	    push @{$r{'SEVERAL_NAMES'}},$etu if($#{$np{$etu}}>0);
+	}
     }
     return(%r);
 }
