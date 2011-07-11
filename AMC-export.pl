@@ -40,6 +40,8 @@ my $debug='';
 my $sort='n';
 my $useall=1;
 
+@ARGV=unpack_args(@ARGV);
+
 GetOptions("module=s"=>\$module,
 	   "sort=s"=>\$sort,
 	   "useall=s"=>\$useall,

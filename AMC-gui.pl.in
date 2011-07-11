@@ -278,6 +278,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'export_csv_cochees'=>'',
 		   'after_export'=>'file',
 		   'export_include_abs'=>'',
+		   'export_ncols'=>2,
+		   'export_pagesize'=>'a4',
 
 		   'annote_position'=>'marge',
 
@@ -619,7 +621,7 @@ for(qw/onglets_projet preparation_etats documents_tree main_window
     doc_menu menu_debug menu_outils
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
-    options_CSV options_ods
+    options_CSV options_ods options_List
     /) {
     $w{$_}=$gui->get_widget($_);
 }
@@ -910,6 +912,7 @@ sub get_enc {
 my %formats_noms=(
 		  'CSV'=>'CSV',
 		  'ods'=>'OpenOffice',
+		  'List'=>__("PDF list"),
 		  );
 
 # TRANSLATORS: you can omit the [...] part, just here to explain context
@@ -964,8 +967,13 @@ my %cb_stores=(
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 			    "m"=>__p("mark [student mark, for sorting]"),
 			    ),
-    
+    'export_pagesize'=>cb_model("a3"=>"A3",
+				"a4"=>"A4",
+				"letter"=>"Letter",
+				"legal"=>"Legal",
+    ),
     );
+
 
 my $symbole_type_cb=cb_model("none"=>__"mothing",
 			     "circle"=>__"circle",
@@ -977,7 +985,7 @@ for my $k (qw/0_0 0_1 1_0 1_1/) {
     $cb_stores{"symbole_".$k."_type"}=$symbole_type_cb;
 }
 
-my %extension_fichier=();
+my %extension_fichier=('List'=>'pdf');
 
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
 $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
@@ -990,7 +998,7 @@ sub maj_export {
 
     debug "Format : ".$projet{'options'}->{'format_export'};
 
-    for(qw/CSV ods/) {
+    for(qw/CSV ods List/) {
 	if($projet{'options'}->{'format_export'} eq $_) {
 	    $w{'options_'.$_}->show;
 	} else {
@@ -1024,6 +1032,14 @@ sub exporte {
 	"--option-out","code=".$projet{'options'}->{'code_examen'};
 	push @needs_module,'OpenOffice::OODoc';
     }
+    if($format eq 'List') {
+	push @options,
+	"--option-out","nom=".$projet{'options'}->{'nom_examen'},
+	"--option-out","code=".$projet{'options'}->{'code_examen'},
+	"--option-out","decimal=".$o{'delimiteur_decimal'},
+	"--option-out","pagesize=".$projet{'options'}->{'export_pagesize'},
+	"--option-out","ncols=".$projet{'options'}->{'export_ncols'};
+    }
 
     if(@needs_module) {
 	# teste si les modules necessaires sont disponibles
@@ -1054,16 +1070,18 @@ sub exporte {
     }
     
     commande('commande'=>["auto-multiple-choice","export",
-			  "--debug",debug_file(),
-			  "--module",$format,
-			  "--useall",$projet{'options'}->{'export_include_abs'},
-			  "--sort",$projet{'options'}->{'export_sort'},
-			  "--fich-notes",absolu($projet{'options'}->{'notes'}),
-			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
-			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-			  "--noms-encodage",bon_encodage('liste'),
-			  "--output",$output,
-			  @options
+			  pack_args(
+			      "--debug",debug_file(),
+			      "--module",$format,
+			      "--useall",$projet{'options'}->{'export_include_abs'},
+			      "--sort",$projet{'options'}->{'export_sort'},
+			      "--fich-notes",absolu($projet{'options'}->{'notes'}),
+			      "--fich-assoc",absolu($projet{'options'}->{'association'}),
+			      "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
+			      "--noms-encodage",bon_encodage('liste'),
+			      "--output",$output,
+			      @options
+			  ),
 			  ],
 	     'texte'=>__"Exporting marks...",
 	     'progres.id'=>'export',

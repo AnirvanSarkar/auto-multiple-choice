@@ -1685,7 +1685,64 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <placeholder/>
+                                      <widget class="GtkTable" id="options_List">
+                                        <property name="visible">True</property>
+                                        <property name="n_rows">3</property>
+                                        <property name="n_columns">2</property>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkLabel" id="label109">
+                                            <property name="visible">True</property>
+                                            <property name="label" translatable="yes">Number of columns</property>
+                                          </widget>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkSpinButton" id="export_s_export_ncols">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="invisible_char">&#x25CF;</property>
+                                            <property name="adjustment">1 1 5 1 1 0</property>
+                                            <property name="snap_to_ticks">True</property>
+                                            <property name="numeric">True</property>
+                                            <signal name="value_changed" handler="maj_export"/>
+                                          </widget>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkLabel" id="label143">
+                                            <property name="visible">True</property>
+                                            <property name="label" translatable="yes">Page size</property>
+                                          </widget>
+                                          <packing>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkComboBox" id="export_c_export_pagesize">
+                                            <property name="visible">True</property>
+                                            <property name="items" translatable="yes"></property>
+                                            <signal name="changed" handler="maj_export"/>
+                                          </widget>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="position">3</property>
+                                      </packing>
                                     </child>
                                   </widget>
                                   <packing>
