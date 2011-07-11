@@ -3673,6 +3673,19 @@ sub charge_modeles {
     }
 }
 
+sub modele_dispo {
+    my $iter=$w{'modeles_liste'}->get_selection()->get_selected();
+    if($iter) {
+	if($modeles_store->get($iter,MODEL_PATH)) {
+	    $w{'model_choice_button'}->show();
+	} else {
+	    $w{'model_choice_button'}->hide();
+	}
+    } else {
+	debug "No iter for models selection";
+    }
+}
+
 sub n_fich {
     my ($dir)=@_;
 
@@ -3724,8 +3737,9 @@ sub source_latex_choisir {
 	# choix d'un modele
 
 	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_modele','auto-multiple-choice');
+	$gap->signal_autoconnect_from_package('main');
 
-	for(qw/source_latex_modele modeles_liste modeles_description/) {
+	for(qw/source_latex_modele modeles_liste modeles_description model_choice_button/) {
 	    $w{$_}=$gap->get_widget($_);
 	}
 
