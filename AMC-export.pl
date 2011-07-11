@@ -41,6 +41,7 @@ my $sort='n';
 my $useall=1;
 
 @ARGV=unpack_args(@ARGV);
+@ARGV_ORIG=@ARGV;
 
 GetOptions("module=s"=>\$module,
 	   "sort=s"=>\$sort,
@@ -56,6 +57,8 @@ GetOptions("module=s"=>\$module,
 	   );
 	   
 set_debug($debug);
+
+debug "Parameters: ".join(" ",map { "<$_>" } @ARGV_ORIG);
 
 load("AMC::Export::$module");
 $ex = "AMC::Export::$module"->new();

@@ -494,7 +494,7 @@ sub unpack_args {
     if($args[0] eq '--xmlargs') {
 	shift(@args);
 	my $file=shift(@args);
-	my $xa=XMLin($file,'ForceArray'=>1)->{'arg'};
+	my $xa=XMLin($file,'ForceArray'=>1,'SuppressEmpty'=>'')->{'arg'};
 	unshift(@args,@$xa);
     }
     return(@args);
