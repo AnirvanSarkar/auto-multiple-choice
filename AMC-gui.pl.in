@@ -3676,11 +3676,7 @@ sub charge_modeles {
 sub modele_dispo {
     my $iter=$w{'modeles_liste'}->get_selection()->get_selected();
     if($iter) {
-	if($modeles_store->get($iter,MODEL_PATH)) {
-	    $w{'model_choice_button'}->show();
-	} else {
-	    $w{'model_choice_button'}->hide();
-	}
+	$w{'model_choice_button'}->set_sensitive($modeles_store->get($iter,MODEL_PATH) ? 1 : 0);
     } else {
 	debug "No iter for models selection";
     }
