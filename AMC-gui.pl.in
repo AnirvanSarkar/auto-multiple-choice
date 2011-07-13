@@ -3753,7 +3753,7 @@ sub source_latex_choisir {
 	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_modele','auto-multiple-choice');
 	$gap->signal_autoconnect_from_package('main');
 
-	for(qw/source_latex_modele modeles_liste modeles_description model_choice_button/) {
+	for(qw/source_latex_modele modeles_liste modeles_description model_choice_button mlist_separation/) {
 	    $w{$_}=$gap->get_widget($_);
 	}
 
@@ -3772,6 +3772,10 @@ sub source_latex_choisir {
 							       text=> MODEL_NOM );
 	$w{'modeles_liste'}->append_column ($column);
 	$w{'modeles_liste'}->get_selection->signal_connect("changed",\&source_latex_mmaj);
+
+	$w{'mlist_separation'}->set_position(.5*$w{'mlist_separation'}->get_property('max-position'));
+	$w{'mlist_separation'}->child1_resize(1);
+	$w{'mlist_separation'}->child2_resize(1);
 
 	$reponse=$w{'source_latex_modele'}->run();
 
