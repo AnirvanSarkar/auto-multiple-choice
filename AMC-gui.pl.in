@@ -3767,7 +3767,7 @@ sub source_latex_choisir {
 
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;
-	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"model",
+	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"template",
 							       $renderer,
 							       text=> MODEL_NOM );
 	$w{'modeles_liste'}->append_column ($column);
