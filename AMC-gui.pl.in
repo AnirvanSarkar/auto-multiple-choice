@@ -32,6 +32,7 @@ use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 use File::Path qw/remove_tree/;
 use Archive::Tar;
+use Archive::Tar::File;
 use Encode;
 use I18N::Langinfo qw(langinfo CODESET);
 use Locale::Language;
@@ -86,6 +87,8 @@ use constant {
 
     COPIE_N => 0,
 
+    TEMPLATE_FILES_PATH => 0,
+    TEMPLATE_FILES_FILE => 1,
 };
 
 Gtk2::IconTheme->get_default->prepend_search_path(amc_specdir('icons'));
@@ -792,6 +795,10 @@ $w{'mep_tree'}->append_column ($column);
 
 my $copies_store = Gtk2::ListStore->new ('Glib::String');
 
+### FILES FOR TEMPLATE
+
+my $template_files_store = Gtk2::TreeStore->new ('Glib::String',
+						 'Glib::String');
 
 ### modele CORREC
 
@@ -1333,10 +1340,9 @@ sub liste_des_projets {
 	    $w{'label_etat'}->set_text(__"Existing projects:");
 
 	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
-
+	    $w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;
 	}
 
-	$w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;	
 	
 	if($oo{'gestion'}) {
 	    $w{'label_etat'}->set_text(__"Projects management:");
@@ -1567,20 +1573,25 @@ sub projet_charge_ok {
     }
 }
 
-sub projet_nom_verif {
-    my $nom=$w{'projet_nom'}->get_text();
-    if($nom =~ s/[^a-zA-Z0-9._+:-]//g) {
-	$w{'projet_nom'}->set_text($nom);
-	$w{'projet_nouveau_syntaxe'}->show();
+sub restricted_check {
+    my ($text,$style,$warning,$chars)=@_;
+    my $nom=$text->get_text();
+    if($nom =~ s/[^$chars]//g) {
+	$text->set_text($nom);
+	$warning->show();
 
 	for(qw/normal active/) {
-	    $w{'projet_nom'}->modify_base($_,Gtk2::Gdk::Color->parse('#FFC0C0'));
+	    $text->modify_base($_,Gtk2::Gdk::Color->parse('#FFC0C0'));
 	}
 	Glib::Timeout->add (500, sub {
-	    $w{'projet_nom'}->modify_style($w{'projet_nom_style'});
+	    $text->modify_style($style);
 	    return 0;
 	});
     }
+}
+
+sub projet_nom_verif {
+    restricted_check($w{'projet_nom'},$w{'projet_nom_style'},$w{'projet_nouveau_syntaxe'},"a-zA-Z0-9._+:-");
 }
 
 sub projet_charge_nouveau {
@@ -3678,7 +3689,7 @@ sub charge_modeles {
 	my $tar=Archive::Tar->new($rep."/$m");
 	my @desc=grep { /description.xml$/ } ($tar->list_files());
 	if($desc[0]) {
-	    my $d=XMLin($tar->get_content($desc[0]));
+	    my $d=XMLin($tar->get_content($desc[0]),'SuppressEmpty'=>'');
 	    $nom=$d->{'title'} if($d->{'title'});
 	    $desc_text=$d->{'text'} if($d->{'text'});
 	}
@@ -3697,6 +3708,168 @@ sub modele_dispo {
 	$w{'model_choice_button'}->set_sensitive($modeles_store->get($iter,MODEL_PATH) ? 1 : 0);
     } else {
 	debug "No iter for models selection";
+    }
+}
+
+sub path_from_tree {
+    my ($store,$view,$f)=@_;
+    my $i=undef;
+
+    return(undef) if(!$f);
+
+    my $d='';
+    
+    for my $pp (split(m:/:,$f)) {
+	my $ipar=$i;
+	$d.='/' if($d);
+	$d.=$pp;
+	$i=model_id_to_iter($store,TEMPLATE_FILES_PATH,$d);
+	if(!$i) {
+	    $i=$store->append($ipar);
+	    $store->set($i,TEMPLATE_FILES_PATH,$d,
+			TEMPLATE_FILES_FILE,$pp);
+	}
+    }
+
+    $view->expand_to_path($store->get_path($i));
+    return($i);
+}
+
+sub template_add_file {
+    my ($store,$view,$f)=@_;
+
+    # removes local part
+    
+    my $p_dir=absolu('%PROJET/');
+    if($f =~ s:^\Q$p_dir\E::) {
+	my $i=path_from_tree($store,$view,$f);
+	return($i);
+    } else {
+	debug "Trying to add non local file: $f (local dir is $p_dir)";
+	return(undef);
+    }
+}
+
+sub make_template {
+    my $gt=Gtk2::GladeXML->new($glade_xml,'make_template','auto-multiple-choice');
+    for (qw/make_template template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok/) {
+	$w{$_}=$gt->get_widget($_);
+    }
+
+    $w{'template_file_name_style'} = $w{'template_file_name'}->get_modifier_style->copy;
+
+    $template_files_store->clear;
+
+    $w{'template_files_tree'}->set_model($template_files_store);
+	my $renderer=Gtk2::CellRendererText->new;
+	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"file",
+							       $renderer,
+							       text=> TEMPLATE_FILES_FILE );
+    $w{'template_files_tree'}->append_column ($column);
+    $w{'template_files_tree'}->get_selection->set_mode("multiple");
+
+    # Detects files to include
+
+    template_add_file($template_files_store,$w{'template_files_tree'},
+		      absolu($projet{'options'}->{'texsrc'}));
+    template_add_file($template_files_store,$w{'template_files_tree'},
+		      fich_options($projet{'nom'}));
+
+    # Waits for action
+    
+    $gt->signal_autoconnect_from_package('main');
+
+    $resp=$w{'make_template'}->run();
+
+    if($resp eq "1") {
+	# Creates template
+
+	my $tfile=$o{'rep_modeles'}.'/'.$w{'template_file_name'}->get_text().".tgz";
+	my $tar=Archive::Tar->new();
+	$template_files_store->foreach(\&add_to_archive,[$tar]);
+
+	# Description
+
+	my $buf=$w{'template_description'}->get_buffer;
+
+	my $desc='';
+	my $writer=new XML::Writer(OUTPUT=>\$desc,ENCODING=>'utf-8');
+	$writer->xmlDecl("UTF-8");
+	$writer->startTag('description');
+	$writer->dataElement('title',$w{'template_name'}->get_text());
+	$writer->dataElement('text',$buf->get_text($buf->get_start_iter,$buf->get_end_iter,1));
+	$writer->endTag('description');
+	$writer->end();
+
+	$tar->add_data('description.xml',encode_utf8($desc));
+
+	$tar->write($tfile,COMPRESS_GZIP);
+    }
+
+    $w{'make_template'}->destroy;
+}
+
+sub add_to_archive {
+    my ($store,$path,$iter,$data)=@_;
+    my ($tar)=@$data;
+
+    my $f=$store->get($iter,TEMPLATE_FILES_PATH);
+    my $af=absolu("%PROJET/$f");
+
+    return(0) if($f eq 'description.xml');
+
+    if(-f $af) {
+	debug "Adding to template archive: $f\n";
+	my $tf=Archive::Tar::File->new( file => $af);
+	$tf->rename($f);
+	$tar->add_files($tf);
+    }
+
+    return(0);
+}
+
+sub template_filename_verif {
+    restricted_check($w{'template_file_name'},$w{'template_file_name_style'},
+		     $w{'template_file_name_warning'},"a-zA-Z0-9_+-");
+    my $t=$w{'template_file_name'}->get_text();
+    my $tfile=$o{'rep_modeles'}.'/'.$t.".tgz";
+    $w{'mt_ok'}->set_sensitive($t && !-e $tfile);
+}
+
+sub make_template_add {
+    my $fs=Gtk2::FileSelection->new(__"Add files to template");
+    $fs->set_filename(absolu('%PROJET/'));
+    $fs->set_select_multiple(1);
+    $fs->hide_fileop_buttons;
+
+    my $err=0;
+    my $resp=$fs->run();
+    if($resp eq 'ok') {
+	for my $f ($fs->get_selections()) {
+	    $err++ 
+		if(!defined(template_add_file($template_files_store,$w{'template_files_tree'},$f)));
+	}
+    }
+    $fs->destroy();
+
+    if($err) {
+	my $dialog=Gtk2::MessageDialog
+	    ->new_with_markup($w{'make_template'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      __("When making a template, you can only add files that are within the project directory."));
+	$dialog->run();
+	$dialog->destroy();
+    }
+}
+
+sub make_template_del {
+    my @i=();
+    for my $path ($w{'template_files_tree'}->get_selection->get_selected_rows) {
+	push @i,$template_files_store->get_iter($path);
+    }
+    for(@i) {
+	$template_files_store->remove($_);
     }
 }
 

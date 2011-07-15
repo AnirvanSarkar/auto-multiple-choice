@@ -56,6 +56,20 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkImageMenuItem" id="menu_projet_modele">
+                        <property name="label" translatable="yes">Export as template</property>
+                        <property name="visible">True</property>
+                        <property name="use_stock">False</property>
+                        <signal name="activate" handler="make_template"/>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="image36">
+                            <property name="visible">True</property>
+                            <property name="icon_name">template_source</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="menuitem2">
                         <property name="label" translatable="yes">Manage</property>
                         <property name="visible">True</property>
@@ -2706,7 +2720,6 @@ POSSIBILITY OF SUCH DAMAGES.
             </child>
             <child>
               <widget class="GtkLabel" id="projet_nouveau_syntaxe">
-                <property name="visible">True</property>
                 <property name="ypad">5</property>
                 <property name="label" translatable="yes">&lt;b&gt;Note :&lt;/b&gt; a project name can only contain alphanumeric characters, plus some simple characters (-_+.:).</property>
                 <property name="use_markup">True</property>
@@ -6309,6 +6322,55 @@ xelatex
           </packing>
         </child>
         <child>
+          <widget class="GtkVBox" id="vbox17">
+            <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <widget class="GtkHBox" id="hbox5">
+                <property name="visible">True</property>
+                <child>
+                  <widget class="GtkLabel" id="label149">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">File name:</property>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkEntry" id="template_file_name">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="invisible_char">&#x25CF;</property>
+                    <signal name="changed" handler="template_filename_verif"/>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="template_file_name_warning">
+                <property name="label" translatable="yes">&lt;b&gt;Note:&lt;/b&gt; please use only alphanumeric characters and characters from "-_+" for the project file name.</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <widget class="GtkHBox" id="hbox40">
             <property name="visible">True</property>
             <property name="spacing">4</property>
@@ -6337,7 +6399,7 @@ xelatex
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -6350,9 +6412,18 @@ xelatex
                 <property name="visible">True</property>
                 <property name="left_padding">12</property>
                 <child>
-                  <widget class="GtkTextView" id="textview1">
+                  <widget class="GtkScrolledWindow" id="scrolledwindow12">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <widget class="GtkTextView" id="template_description">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="wrap_mode">word</property>
+                      </widget>
+                    </child>
                   </widget>
                 </child>
               </widget>
@@ -6369,7 +6440,7 @@ xelatex
             </child>
           </widget>
           <packing>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -6396,6 +6467,7 @@ xelatex
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="clicked" handler="make_template_add"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -6410,6 +6482,7 @@ xelatex
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="clicked" handler="make_template_del"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -6419,6 +6492,8 @@ xelatex
                         </child>
                       </widget>
                       <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -6429,7 +6504,7 @@ xelatex
                         <property name="hscrollbar_policy">automatic</property>
                         <property name="vscrollbar_policy">automatic</property>
                         <child>
-                          <widget class="GtkTreeView" id="files_tree">
+                          <widget class="GtkTreeView" id="template_files_tree">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="headers_visible">False</property>
@@ -6456,7 +6531,7 @@ xelatex
             </child>
           </widget>
           <packing>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child internal-child="action_area">
@@ -6482,6 +6557,7 @@ xelatex
                 <property name="label">gtk-ok</property>
                 <property name="response_id">1</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
