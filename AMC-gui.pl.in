@@ -4297,15 +4297,10 @@ sub projet_ouvre {
 
     if($proj) {
 	
-	quitte_projet();
-
-	$projet{'nom'}=$proj;
-
 	# choix fichier latex si nouveau projet...
 	if($deja) {
 	    my $ok=source_latex_choisir();
 	    if(!$ok) {
-		$projet{'nom'}='';
 		return(0);
 	    }
 	    if($ok==1) {
@@ -4314,6 +4309,9 @@ sub projet_ouvre {
 		$deja='';
 	    }
 	}
+
+	quitte_projet();
+	$projet{'nom'}=$proj;
 
 	if(!$deja) {
 
