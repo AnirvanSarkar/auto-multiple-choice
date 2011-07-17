@@ -100,7 +100,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\@ifpackageloaded,\z@,\@ne,\tw@,\m@ne,\@undefined}
 % \DoNotIndex{\@unexpandable@protect,\@whilenum,\addtocounter,\advance,\Alph}
 % \DoNotIndex{\arabic,\AtBeginDocument,\IfFileExists}
-% \DoNotIndex{\AtBeginPage,\begin,\end,\begingroup,\endgroup,\bf,\BODY}
+% \DoNotIndex{\AtBeginPage,\begin,\end,\begingroup,\endgroup,\textbf,\BODY}
 % \DoNotIndex{\box,\circle,\clubsuit,\csname,\DeclareFontShape}
 % \DoNotIndex{\DeclareOption,\def,\define@key,\divide,\do,\dp,\edef,\else}
 % \DoNotIndex{\emph,\endcsname,\eTeXversion,\expandafter,\fancyfoot}
@@ -119,7 +119,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\renewcommand,\repeat,\RequirePackage,\romannumeral,\rotatebox}
 % \DoNotIndex{\sc,\selectfont,\setbox,\setcounter,\setkeys,\setlength}
 % \DoNotIndex{\string,\strip@pt,\subsection,\textcolor,\the,\thepage}
-% \DoNotIndex{\thinlines,\time,\tt,\undefined,\unitlength,\usepackage,\vbox}
+% \DoNotIndex{\thinlines,\time,\texttt,\undefined,\unitlength,\usepackage,\vbox}
 % \DoNotIndex{\vfill,\vspace,\vss,\write}
 %
 % \DoNotIndex{\AMC@watermarktrue}
@@ -222,7 +222,7 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \section{Introduction}
 %
-% The package {\sf automultiplechoice} helps formatting multiple
+% The package \textsf{automultiplechoice} helps formatting multiple
 % choice questionnaries with automated marking from papers scans in
 % mind:
 % \begin{itemize}
@@ -242,8 +242,8 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \section{Samples}\label{d:samples}
 %
-% We begin with several samples to see what can be done with the {\sf
-% automultiplechoice} package. All {\sf automultiplechoice} commands
+% We begin with several samples to see what can be done with the
+% \textsf{automultiplechoice} package. All \textsf{automultiplechoice} commands
 % and options will be detailed further.
 %
 % For all these samples, two sets of questions are used: a group of
@@ -251,7 +251,7 @@ along with Auto-Multiple-Choice.  If not, see
 % defined in a common \LaTeX{} file named |questions.tex|:
 % \verbatiminput{questions.tex}
 % 
-% We will ask {\sf automultiplechoice} package to include two
+% We will ask \textsf{automultiplechoice} package to include two
 % geography questions and two history questions at random for each
 % student, shuffling questions and answers, with the following code:
 %\iffalse
@@ -278,7 +278,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \subsection{Standard layout}\label{s:amc}
 %
 % A set of 30 students sheets can be produced from the following
-% \LaTeX{} source named {\tt sample-amc.tex}:
+% \LaTeX{} source named \texttt{sample-amc.tex}:
 % \verbatiminput{sample-amc.tex} producing a 30-pages document (every
 % page has number 1), from which we show the first pages on
 % page~\pageref{p:amc}.
@@ -305,7 +305,7 @@ along with Auto-Multiple-Choice.  If not, see
 %       \AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{59}%
 %     \end{minipage}
 %     \hbox to 4cm{\hspace*{\fill}%
-%     {\tt +2/1/59+}}
+%     \texttt{+2/1/59+}}
 %   \end{center}
 %   \makeatother
 %   Here, |2| is the student sheet number, |1| is the page
@@ -314,7 +314,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \end{itemize}
 %
 % If you also use |calibration| option\SpecialOptIndex{calibration},
-% {\sf automultiplechoice} will produce a |.xy| file with informations
+% \textsf{automultiplechoice} will produce a |.xy| file with informations
 % about the exact position in the page of all the markers, and all the
 % boxes. This option is automatically set by AMC software, which then
 % use the information in the |.xy| file for automated marking.
@@ -328,8 +328,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \end{itemize}
 %
 % This is done using |separateanswersheet|
-% option\SpecialOptIndex{separateanswersheet} of {\sf
-% automultiplechoice} package. You also have to use commands
+% option\SpecialOptIndex{separateanswersheet} of
+% \textsf{automultiplechoice} package. You also have to use commands
 % |\AMCformBegin| to indicate the beginning of this separate answer
 % sheet (usually after a |\clearpage| or |\AMCcleardoublepage|
 % command), and |\AMCform| to insert the form to be completed by the
@@ -343,16 +343,16 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \subsection{Without markers}\label{s:plain}
 %
-% With the |nopage| option\SpecialOptIndex{nopage}, package {\sf
-% automultiplechoice} does not include any page markers for scan
+% With the |nopage| option\SpecialOptIndex{nopage}, package
+% \textsf{automultiplechoice} does not include any page markers for scan
 % processing. I'm afraid you can't use any automated marking software
 % with this layout, but you can still use answer sheet and corrected
 % answer sheet (option |indivanswers|\SpecialOptIndex{indivanswers},
 % added here) for a manual marking...
 %
-% The \LaTeX{} source {\tt sample-plain.tex} that only differs from
-% {\tt sample-amc.tex} by its options passed to {\sf
-% automultiplechoice}:
+% The \LaTeX{} source \texttt{sample-plain.tex} that only differs from
+% \texttt{sample-amc.tex} by its options passed to
+% \textsf{automultiplechoice}:
 %\iffalse
 %<*doc>
 %\fi
@@ -365,7 +365,7 @@ along with Auto-Multiple-Choice.  If not, see
 % produces a 30-pages document, from which we show the first pages on
 % page~\pageref{p:plain}.
 %
-% \newcommand{\isample}[1]{\IfFileExists{sample-#1.pdf}{\includepdf[pages={1-4},nup=2x2,frame=true,delta=.3cm .3cm,pagecommand={{\bf First pages from \LaTeX{} source detailed in section~\ref{s:#1} -- see {\tt sample-#1.pdf}}\label{p:#1}},scale=.6]{sample-#1.pdf}}{}}
+% \newcommand{\isample}[1]{\IfFileExists{sample-#1.pdf}{\includepdf[pages={1-4},nup=2x2,frame=true,delta=.3cm .3cm,pagecommand={\textbf{First pages from \LaTeX{} source detailed in section~\ref{s:#1} -- see \texttt{sample-#1.pdf}}\label{p:#1}},scale=.6]{sample-#1.pdf}}{}}
 % \isample{amc}
 % \isample{separate}
 % \isample{plain}
@@ -374,8 +374,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \section{Usage}
 %
 % \subsection{Package options}\label{d:options}
-% The following options are available for package {\sf automultiplechoice}:
-% \def\ioption#1{\item[{\tt #1}]\SpecialOptIndex{#1}}
+% The following options are available for package \textsf{automultiplechoice}:
+% \def\ioption#1{\item[\texttt{#1}]\SpecialOptIndex{#1}}
 % \begin{itemize}
 % \ioption{noshuffle} cancels answers shuffling for all questions.
 %
@@ -424,10 +424,10 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \ioption{francais} asks for french localisation.
 %
-% \ioption{plain} cancels {\sf environ} and {\sf etex} automatic
-% loading. The default behaviour is to load {\sf environ} and {\sf
-% etex} packages if available, as they improve {\sf
-% automultiplechoice}. This is not done when |plain| option is set.
+% \ioption{plain} cancels \textsf{environ} and \textsf{etex} automatic
+% loading. The default behaviour is to load \textsf{environ} and
+% \textsf{etex} packages if available, as they improve
+% \textsf{automultiplechoice}. This is not done when |plain| option is set.
 %
 % \ioption{nopage} cancels markers print and page layout definition
 % (see sample in section~\ref{s:plain}).
@@ -441,11 +441,11 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % We make a difference between two kind of multiple choice questions:
 % \begin{itemize}
-% \item {\bf Simple questions}: there is one and only one correct
+% \item \textbf{Simple questions}: there is one and only one correct
 %   choices among the proposed choices, \emph{and this is announced to
 %   the student}. Thus, the student is asked to check one answer if he
 %   thinks this is the good one, and to check none if he has no idea.
-% \item {\bf Multiple questions}: there can be zero, one or several
+% \item \textbf{Multiple questions}: there can be zero, one or several
 %   correct choices among the proposed choices. This is also announced
 %   to the student (using the |\multiSymbole| sign, with
 %   default~\multiSymbole{}), so that the student is asked to check all
@@ -701,9 +701,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{Random computation questions}
 %
-% One can use the \LaTeX{} package {\sf fp} to make random computation
+% One can use the \LaTeX{} package \textsf{fp} to make random computation
 % questions, as can be seen in the following example (don't forget to
-% load package {\sf fp}):
+% load package \textsf{fp}):
 % \amccode
 % {\makeatletter\AMC@correctrue\makeatother
 % \begin{code}
@@ -731,8 +731,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % as distractors in the multiple choice question.
 %
 % \DescribeMacro{\AMCIntervals}In some cases, command
-% |\AMCIntervals|\marg{x}\marg{x0}\marg{x1}\marg{delta} from {\sf
-%   automultiplechoice} can be usefull. It adds a sequence of choices
+% |\AMCIntervals|\marg{x}\marg{x0}\marg{x1}\marg{delta} from
+% \textsf{automultiplechoice} can be usefull. It adds a sequence of choices
 % made of intervals $[x_i,x_i+\delta[$ of length \meta{delta} covering
 % the interval $[\meta{x0},\meta{x1}[$, using |\correctchoice| when
 % \meta{x} lies in the interval, and |\wrongchoice| otherwise.
@@ -747,7 +747,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \FPeval\VQr{VQa/(VQa+VQb)}
   Let $X$ and $Y$ be two independent random variables, following
   exponential laws with respective parameters \VQa{} and \VQb{}.
-  In which interval lies the probability ${\rm P}[X<Y]$?
+  In which interval lies the probability $\textrm{P}[X<Y]$?
   \begin{multicols}{5}
     \begin{reponses}[o]
       \AMCIntervals{\VQr}{0}{1}{0.1}
@@ -768,7 +768,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %    Let $X$ and $Y$ be two independent random variables, following
 %    exponential laws with respective parameters \VQa{} and \VQb{}.
-%    In which interval lies the probability ${\rm P}[X<Y]$?
+%    In which interval lies the probability $\textrm{P}[X<Y]$?
 %    \begin{multicols}{5}
 %      \begin{reponses}[o]
 %        \AMCIntervals{\VQr}{0}{1}{0.1}
@@ -780,7 +780,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % }}
 %
 % \subsection{French command names}\label{d:french}
-% For backward compatibility, some of {\sf automultiplechoice}
+% For backward compatibility, some of \textsf{automultiplechoice}
 % commands, environments and package option have their French
 % counterpart. You can always use either the English command or the
 % French equivalent. See table~\ref{t:french} for details.
@@ -924,8 +924,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \begin{macro}{\AMC@LR}
 %   Colours management can be faulty in right-to-left mode: in these
-%   situations, we will make use of |\LR| from package {\sf bidi} to
-%   get back to left-to-right mode. |\AMC@LR| is |\LR| if {\sf bidi}
+%   situations, we will make use of |\LR| from package \textsf{bidi} to
+%   get back to left-to-right mode. |\AMC@LR| is |\LR| if \textsf{bidi}
 %   is loaded.
 %    \begin{macrocode}
 \AtBeginDocument{\@ifpackageloaded{bidi}{%
@@ -968,9 +968,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %   ``\makeatletter\AMC@loc@none\makeatother'' is to be added to every
 %   multiple question.
 % \item |\ifAMC@calibration| if this \LaTeX{} run is used to get page layouts.
-% \item |\ifAMC@plain| if {\sf automultiplechoice} won't try to load
-%   usefull packages ({\sf etex}, {\sf environ}) that extend {\sf
-%   automultiplechoice} capabilities.
+% \item |\ifAMC@plain| if \textsf{automultiplechoice} won't try to load
+%   usefull packages (\textsf{etex}, \textsf{environ}) that extend
+%   \textsf{automultiplechoice} capabilities.
 % \item |\ifAMCune@bonne| if there is at least one correct answer for the current question.
 % \item |\ifAMCtype@multi| if the current question is a multiple question.
 % \item |\ifAMC@watermark| if the document is a draft, not to be used for exam.
@@ -1074,12 +1074,12 @@ Three digits and two letters:\insertgroup{mixed}.
 % Annoucing a question in a separate sheet (parameter |#1| is the
 % question number):
 %    \begin{macrocode}
-\def\AMC@loc@qf#1{{\bf Question #1:}}
+\def\AMC@loc@qf#1{\textbf{Question #1:}}
 %    \end{macrocode}
 % Annoucing a question (parameter |#1| is the question number and
 % pamareter |#2| can be the multiple question symbol, or be empty):
 %    \begin{macrocode}
-\def\AMC@loc@q#1#2{{\bf Question #1} #2}
+\def\AMC@loc@q#1#2{\textbf{Question #1} #2}
 %    \end{macrocode}
 % Headers for corrected version and catalog:
 %    \begin{macrocode}
@@ -1100,8 +1100,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@draft{PROJET}
   \def\AMC@loc@message{Pour votre examen, imprimez de pr\'ef\'erence
     les documents compil\'es \`a l'aide de auto-multiple-choice.}
-  \def\AMC@loc@qf##1{{\bf Question ##1 :}}
-  \def\AMC@loc@q##1##2{{\bf Question ##1} ##2}
+  \def\AMC@loc@qf##1{\textbf{Question ##1 :}}
+  \def\AMC@loc@q##1##2{\textbf{Question ##1} ##2}
   \def\AMC@loc@corrected{Correction}
   \def\AMC@loc@catalog{Catalogue}
   \def\AMC@loc@none{Aucune de ces r\'eponses n'est correcte.}
@@ -1110,7 +1110,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsubsection{Other languages}
 %
-% Other languages can be integrated to {\sf automultiplechoice}
+% Other languages can be integrated to \textsf{automultiplechoice}
 % package upon request to the author.
 %
 % \subsection{Random}
@@ -1401,7 +1401,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcommand\AMCformBox[4]{%
   \ifAMC@outside@box% letter to be written outside the box
-    \AMC@boxedchar{}{#3}{#4}{#2}\hspace{.1em}{\bf #1}%
+    \AMC@boxedchar{}{#3}{#4}{#2}\hspace{.1em}{\textbf{#1}}%
   \else%
     \AMC@boxedchar{#1}{#3}{#4}{#2}%
   \fi%
@@ -1884,8 +1884,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \global\def\AMCid@name{#2}\AMC@affecte{#2}{\AMCid@quest}%
   \ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi%
   \AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
-  \ifAMC@affichekeys\index{{\tt #2}}\fi%
-  \AMCbeginQuestion{\ifAMC@affichekeys[{\tt #2}]\else\AMC@qaff\fi}{#1}%
+  \ifAMC@affichekeys\index{\texttt{#2}}\fi%
+  \AMCbeginQuestion{\ifAMC@affichekeys[\texttt{#2}]\else\AMC@qaff\fi}{#1}%
   \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
   \AMCmem@ireQ{\arabic{AMCquestionaff}}}%
 {\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi\AMCmessage{FQ}}
@@ -1964,7 +1964,7 @@ Three digits and two letters:\insertgroup{mixed}.
  \def\AMCendAnswer{\vspace{-\AMCcodeVspace}\egroup%
     \hspace{\AMCcodeHspace}}%
  \def\AMCanswer##1##2{\hbox{##1\ifAMC@ensemble\else%
-   \ifAMC@inside@box\else{\hspace{\AMCcodeBoxSep}\bf ##2}\fi\fi\hspace*{\fill}}%
+   \ifAMC@inside@box\else{\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi\hspace*{\fill}}%
    \vspace{\AMCcodeVspace}}%
  \AMCnobloc%
  \AMC@chiffres=#2\loop%
@@ -1996,7 +1996,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   containing \meta{x} is declared as |\wrightchoice|, and the other
 %   as |\wrongchoice|.
 %
-%   For this command to work, one has to load package {\sf fp}.
+%   For this command to work, one has to load package \textsf{fp}.
 %
 %   As an example, 
 %\iffalse
@@ -2105,7 +2105,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \pagestyle{fancy}
   \renewcommand{\headrulewidth}{0pt}
   \ifAMC@correchead
-    \fancyhf{}\fancyhead[C]{{\sc \AMC@intituleHead}}
+    \fancyhf{}\fancyhead[C]{\textsc{\AMC@intituleHead}}
   \else
     \fancyhf{}
     \fancyhead[L]{\he@dbas{\m@rque{positionHG}}}
@@ -2121,7 +2121,7 @@ Three digits and two letters:\insertgroup{mixed}.
           \AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{\the\AMCid@check}%
         \end{minipage}
         \hbox to 4cm{\hspace*{\fill}%
-          {\tt +\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
+          \texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
       }}
     \fancyhfoffset[EOLR]{5mm}
   \fi
@@ -2223,8 +2223,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{Optional features}
 %
-% This package tries to see if optional packages {\sf environ} and
-% {\sf etex} are loadable, and load them if possible.  This behaviour
+% This package tries to see if optional packages \textsf{environ} and
+% \textsf{etex} are loadable, and load them if possible.  This behaviour
 % can be cancelled by using |plain| option.
 %
 %    \begin{macrocode}
@@ -2239,7 +2239,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 %
 % \begin{environment}{examcopy}
-%   Then, if {\sf environ} package is loaded and defines command
+%   Then, if \textsf{environ} package is loaded and defines command
 %   |\NewEnviron|, environment |examcopy| is defined.
 %
 %   Environment |{examcopy}|\oarg{n} does the same as command
@@ -2383,17 +2383,17 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 % the box, and min and max values of $y$-values to determine top and bottom
 % position of the box.
 %
-% \subsection{{\tt namefield} command}
+% \subsection{\texttt{namefield} command}
 % \label{a:name}
 % Lines in the |.xy| file from a |\namefield| command:
 % \verbatiminput{automultiplechoice.xy2} 
 %
-% \subsection{{\tt AMCboxedchar} command}
+% \subsection{\texttt{AMCboxedchar} command}
 % \label{a:boxed}
 % Lines in the |.xy| file from a |\AMCboxedchar| command:
 % \verbatiminput{automultiplechoice.xy1} 
 %
-% \subsection{{\tt AMCcode} command}
+% \subsection{\texttt{AMCcode} command}
 % \label{a:code}
 % Lines in the |.xy| file from a |\AMCcode| command. Here,
 % |code.|\meta{n}|:|\meta{q}|,|\meta{v} relates to digit number
