@@ -1651,6 +1651,16 @@ sub projet_sauve {
     }
 }
 
+sub projet_check_and_save {
+    if($projet{'nom'}) {
+	valide_options_notation();
+	if($projet{'options'}->{'_modifie_ok'} 
+	   || $projet{'options'}->{'_modifie'}) {
+	    projet_sauve();
+	}
+    }
+}
+
 ### Actions des boutons de la partie DOCUMENTS
 
 sub doc_active {
@@ -3755,6 +3765,12 @@ sub template_add_file {
 }
 
 sub make_template {
+
+    if(!$projet{'nom'}) {
+	debug "Make template: no opened project";
+	return();
+    }
+
     my $gt=Gtk2::GladeXML->new($glade_xml,'make_template','auto-multiple-choice');
     for (qw/make_template template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok/) {
 	$w{$_}=$gt->get_widget($_);
@@ -3786,6 +3802,9 @@ sub make_template {
     $resp=$w{'make_template'}->run();
 
     if($resp eq "1") {
+
+	projet_check_and_save();
+
 	# Creates template
 
 	my $tfile=$o{'rep_modeles'}.'/'.$w{'template_file_name'}->get_text().".tgz";
@@ -4381,18 +4400,23 @@ sub quitte_projet {
 	
 	valide_options_notation();
 	
-	if($projet{'options'}->{'_modifie'}) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'question','yes-no',
-				  sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
-	    my $reponse=$dialog->run;
-	    $dialog->destroy;      
-	    
-	    if($reponse eq 'yes') {
-		projet_sauve();
-	    } 
+	if($projet{'options'}->{'_modifie'}
+	   || $projet{'options'}->{'_modifie_ok'}) {
+	    my $save=1;
+	    if($projet{'options'}->{'_modifie'}) {
+		my $dialog = Gtk2::MessageDialog
+		    ->new_with_markup($w{'main_window'},
+				      'destroy-with-parent',
+				      'question','yes-no',
+				      sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
+		my $reponse=$dialog->run;
+		$dialog->destroy;      
+		
+		if($reponse ne 'yes') {
+		    $save='';
+		} 
+	    }
+	    projet_sauve() if($save);
 	}
 
 	%projet=();
