@@ -559,27 +559,29 @@ sub bon_encodage {
 }
 
 sub raccourcis {
+    my ($proj)=@_;
     my %pathes=('%PROJETS'=>$o{'rep_projets'},
 		'%HOME',$home_dir,
 		''=>'%PROJETS',
 	);
-    if($projet{'nom'}) {
-	$pathes{'%PROJET'}=$o{'rep_projets'}."/".$projet{'nom'};
+    $proj=$projet{'nom'} if(!$proj);
+    if($proj) {
+	$pathes{'%PROJET'}=$o{'rep_projets'}."/".$proj;
 	$pathes{''}='%PROJET';
     }
     return(\%pathes);
 }
 
 sub absolu {
-    my $f=shift;
+    my ($f,$proj)=@_;
     return($f) if(!defined($f));
-    return(proj2abs(raccourcis(),$f));
+    return(proj2abs(raccourcis($proj),$f));
 }
 
 sub relatif {
-    my $f=shift;
+    my ($f,$proj)=@_;
     return($f) if(!defined($f));
-    return(abs2proj(raccourcis(),$f));
+    return(abs2proj(raccourcis($proj),$f));
 }
 
 sub id2file {
@@ -3913,6 +3915,17 @@ sub n_fich {
 sub source_latex_choisir {
 
     my %oo=@_;
+    my $texsrc='';
+
+    if(!$oo{'nom'}) {
+	debug "ERR: Empty name for source_latex_choisir";
+	return(0,'');
+    }
+
+    if(-e $o{'rep_projets'}."/".$oo{'nom'}) {
+	debug "ERR: existing project directory $oo{'nom'} for source_latex_choisir";
+	return(0,'');
+    }
 
     my %bouton=();
 
@@ -3937,7 +3950,7 @@ sub source_latex_choisir {
 	
 	debug "RESPONSE=$reponse";
 	
-	return(0) if(!$reponse);
+	return(0,'') if(!$reponse);
     }
 
     # actions apres avoir choisi le type de source latex a utiliser
@@ -3988,15 +4001,15 @@ sub source_latex_choisir {
 
 	$w{'source_latex_modele'}->destroy();
 
-	return(0) if(!$reponse);
+	return(0,'') if(!$reponse);
 
 	if($mod) {
 	    debug "Installing model $mod";
 	    return(source_latex_choisir('type'=>'zip','fich'=>$mod,
-					'decode'=>1));
+					'decode'=>1,'nom'=>$oo{'nom'}));
 	} else {
 	    debug "No model";
-	    return(0);
+	    return(0,'');
 	}
 
     } elsif($bouton{'choix'}) {
@@ -4022,9 +4035,9 @@ sub source_latex_choisir {
 
 	$w{'source_latex_choix'}->destroy();
 
-	return(0) if(!$reponse);
+	return(0,'') if(!$reponse);
 
-	$projet{'options'}->{'texsrc'}=relatif($f);
+	$texsrc=relatif($f,$oo{'nom'});
 	debug "Source LaTeX $f";
 
     } elsif($bouton{'zip'}) {
@@ -4058,7 +4071,7 @@ sub source_latex_choisir {
 	    
 	    $w{'source_latex_choix_zip'}->destroy();
 	    
-	    return(0) if(!$reponse);
+	    return(0,'') if(!$reponse);
 	}
 
 	# cree un repertoire temporaire pour dezipper
@@ -4095,7 +4108,7 @@ sub source_latex_choisir {
 				  sprintf(__"Nothing extracted from archive %s. Check it.",$fich));
 	    $dialog->run;
 	    $dialog->destroy;
-	    return(0);
+	    return(0,'');
 	} else {
 	    # unzip OK
 	    # vire les repertoires intermediaires :
@@ -4108,7 +4121,7 @@ sub source_latex_choisir {
 
 	    # bouge les fichiers la ou il faut
 
-	    my $hd=$o{'rep_projets'}."/".$projet{'nom'};
+	    my $hd=$o{'rep_projets'}."/".$oo{'nom'};
 
 	    mkdir($hd) if(! -e $hd);
 
@@ -4133,57 +4146,42 @@ sub source_latex_choisir {
 			copy_latex("$temp_dir/$ff.0enc","$temp_dir/$ff");
 		    }
 		}
-		system("mv","$temp_dir/$ff",$hd);
+		if(system("mv","$temp_dir/$ff","$hd/$ff") != 0) {
+		    debug "ERR: Move failed: $temp_dir/$ff --> $hd/$ff -- $!";
+		    debug "(already exists)" if(-e "$hd/$ff");
+		}
 	    }
 
 	    if($latex) {
-		$projet{'options'}->{'texsrc'}="%PROJET/$latex";
+		$texsrc="%PROJET/$latex";
 		debug "LaTeX found : $latex";
 	    }
 
-	    return(2);
+	    return(2,$texsrc);
 	}
 
     } elsif($bouton{'vide'}) {
 
-	# choisi un fichier vide
-
-	my $sl=absolu('source.tex');
-	if(-e $sl) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'error','ok',
-				  sprintf(__"File <i>source.tex</i> already exists in project directory %s. It has not been removed, and will be used as the project source file.",$projet{'nom'}));
-	    $dialog->run;
-	    $dialog->destroy;      
-	    
-	    $projet{'options'}->{'texsrc'}='source.tex';
-
-	} else {
-
-	    # creation repertoire si inexistant
-
-	    my $hd=$o{'rep_projets'}."/".$projet{'nom'};
-
-	    mkdir($hd) if(! -e $hd);
-
-	    # creation fichier vide
-
-	    if(! open(FV,">$sl")) {
-		debug "Error opening $sl : $!";
-		return(0);
-	    }
-	    close(FV);
-	    $projet{'options'}->{'texsrc'}='source.tex';
-
-	}
+	my $hd=$o{'rep_projets'}."/".$oo{'nom'};
 	
+	mkdir($hd) if(! -e $hd);
+
+	$texsrc='source.tex';
+	my $sl="$hd/$texsrc";
+
+	# creation fichier vide
+
+	if(! open(FV,">$sl")) {
+	    debug "Error opening $sl : $!";
+	    return(0,'');
+	}
+	close(FV);
+
     } else {
-	return(0);
+	return(0,'');
     }
 
-    return(1);
+    return(1,$texsrc);
     
 }
 
@@ -4316,13 +4314,14 @@ sub projet_ouvre {
 
     my $new_source=0;
     
-    # ouverture du projet $projet. Si $deja==1, alors il faut le creer
+    # ouverture du projet $proj. Si $deja==1, alors il faut le creer
 
     if($proj) {
+	my ($ok,$texsrc);
 	
 	# choix fichier latex si nouveau projet...
 	if($deja) {
-	    my $ok=source_latex_choisir();
+	    ($ok,$texsrc)=source_latex_choisir('nom'=>$proj);
 	    if(!$ok) {
 		return(0);
 	    }
@@ -4335,6 +4334,7 @@ sub projet_ouvre {
 
 	quitte_projet();
 	$projet{'nom'}=$proj;
+	$projet{'options'}->{'texsrc'}=$texsrc;
 
 	if(!$deja) {
 
