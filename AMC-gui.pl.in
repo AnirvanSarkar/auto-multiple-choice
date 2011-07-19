@@ -2784,7 +2784,7 @@ sub noter_resultat {
     }
 # TRANSLATORS: you can omit the [...] part, just here to explain context
     $cb_stores{'assoc_code'}=cb_model(''=>__p("(none) [No code found in LaTeX file]"),
-				      map { $_=>$_ } 
+				      map { $_=>decode($o{'encodage_latex'},$_) } 
 				      sort { $a cmp $b } (@codes));
     transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'assoc_code'=>1});
 }

@@ -38,6 +38,7 @@ BEGIN {
 
 use AMC::Basic;
 
+use Encode;
 use XML::Simple;
 
 use Gtk2 -init;
@@ -52,9 +53,10 @@ use constant {
 sub ajoute_colonne {
     my ($tree,$store,$titre,$i)=@_;
     my $renderer=Gtk2::CellRendererText->new;
-    my $column = Gtk2::TreeViewColumn->new_with_attributes ($titre,
-							   $renderer,
-							   text=> $i);
+    my $column = Gtk2::TreeViewColumn->new_with_attributes(
+	decode('utf-8',$titre),
+	$renderer,
+	text=> $i);
     $column->set_sort_column_id($i);
     $tree->append_column($column);
     $store->set_sort_func($i,\&sort_num,$i);
