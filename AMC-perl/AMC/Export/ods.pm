@@ -447,7 +447,8 @@ sub export {
 	if($_ eq 'ASSOC') {
 	    $doc->cellValue($feuille,$y0,$ii,"A:".$self->{'liste_key'});
 	} else {
-	    $doc->cellValue($feuille,$y0,$ii,$self->get_title($_));
+	    $doc->cellValue($feuille,$y0,$ii,
+			    encode('utf-8',$self->get_title($_)));
 	}
 	$code_col{$_}=$ii;
 	$ii++;
@@ -538,7 +539,7 @@ sub export {
 		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
 	    } else {
 		my $c=$e->{'_'.$_.'_'};
-		$c=$self->id_name($e->{'_ID_'}) if($_ eq 'ID');
+		$c=encode('utf-8',$self->id_name($e->{'_ID_'})) if($_ eq 'ID');
 		$c=encode('utf-8',$e->{'_NOM_'}) if($_ eq 'NOM');
 		$doc->cellValue($feuille,$jj,$ii,$c);
 	    }
