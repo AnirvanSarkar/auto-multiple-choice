@@ -647,8 +647,9 @@ sub debug_set {
     $debug=$w{'menu_debug'}->get_active;
     debug "DEBUG MODE : OFF" if(!$debug);
     set_debug($debug);
-    debug "DEBUG MODE : ON" if($debug);
     if($debug) {
+	debug "DEBUG MODE : ON";
+
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',

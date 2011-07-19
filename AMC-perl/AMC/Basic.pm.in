@@ -306,6 +306,8 @@ sub set_debug_file {
 	open(STDERR,">&",$amc_debug_fh);
  
  	# versions diverses...
+
+	print $amc_debug_fh "This is AutoMultipleChoice, version @/PACKAGE_V_DEB/@ (svn:@/PACKAGE_V_SVN/@)\n\n";
  
  	print $amc_debug_fh ("=" x 40)."\n\n";
  	if(commande_accessible('convert')) {
