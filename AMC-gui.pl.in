@@ -1089,6 +1089,7 @@ sub exporte {
 			      "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			      "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			      "--noms-encodage",bon_encodage('liste'),
+			      ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
 			      "--output",$output,
 			      @options
 			  ),

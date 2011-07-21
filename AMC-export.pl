@@ -39,6 +39,7 @@ my @o_out=();
 my $debug='';
 my $sort='n';
 my $useall=1;
+my $rtl='';
 
 @ARGV=unpack_args(@ARGV);
 @ARGV_ORIG=@ARGV;
@@ -51,6 +52,7 @@ GetOptions("module=s"=>\$module,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "noms-identifiant=s"=>\$noms_identifiant,
+	   "rtl!"=>\$rtl,
 	   "option-out=s"=>\@o_out,
 	   "output|o=s"=>\$output,
 	   "debug=s"=>\$debug,
@@ -83,6 +85,8 @@ $ex->set_options("noms",
 		 "identifiant"=>$noms_identifiant,
 		 "useall"=>$useall,
 		 );
+
+$ex->set_options("out","rtl"=>$rtl);
 
 for my $oo (@o_out) {
     if($oo =~ /([^=]+)=(.*)/) {

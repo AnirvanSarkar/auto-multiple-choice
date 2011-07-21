@@ -49,6 +49,8 @@ sub new {
 	'noms.useall'=>1,
 	'noms.abs'=>'ABS',
 
+	'out.rtl'=>'',
+
 	'sort.keys'=>['s:_NOM_','n:_ID_'],
 
 	'c'=>{},

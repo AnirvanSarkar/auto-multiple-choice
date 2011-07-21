@@ -88,10 +88,20 @@ sub show_title {
 
 	$l0->set_text($self->{'out.nom'});
 	($text_x,$text_y)=$l0->get_pixel_size();
-	$self->{'context'}->move_to($self->{'out.margin'},$self->{'out.margin'});
+	if($self->{'out.rtl'}) {
+	    $self->{'context'}->move_to($self->{'page_x'}-$text_x-$self->{'out.margin'},
+					$self->{'out.margin'});
+	} else {
+	    $self->{'context'}->move_to($self->{'out.margin'},$self->{'out.margin'});
+	}
 	Pango::Cairo::show_layout($self->{'context'},$l0);
 	$self->{'y0'}=$text_y+2*$self->{'out.margin'};
     }
+}
+
+sub dx_dir {
+    my ($self,$droite)=@_;
+    return($self->{ (!$droite != !$self->{'out.rtl'} ? 'cs_mark' : 'cs_name' ) });
 }
 
 sub debut_col {
@@ -107,10 +117,11 @@ sub debut_col {
 
     $self->{'x'}=$self->{'out.margin'}+$self->{'cs_name'}+
 	$self->{'icol'}*($self->{'cs_mark'}+$self->{'cs_name'}+$self->{'out.sep'});
+    $self->{'x'}=$self->{'page_x'}-$self->{'x'} if($self->{'out.rtl'});
     $self->{'y'}=$self->{'y0'};
 
-    $self->{'context'}->move_to($self->{'x'}-$self->{'cs_name'},$self->{'y'});
-    $self->{'context'}->line_to($self->{'x'}+$self->{'cs_mark'},$self->{'y'});
+    $self->{'context'}->move_to($self->{'x'}-$self->dx_dir(0),$self->{'y'});
+    $self->{'context'}->line_to($self->{'x'}+$self->dx_dir(1),$self->{'y'});
 }    
 
 sub export {
@@ -135,12 +146,22 @@ sub export {
 
     for my $etu (grep { ! /^(max|moyenne)$/ } (@{$self->{'copies'}})) {
 
+	# strings to write in columns
 	my $nom=$self->{'c'}->{$etu}->{'_NOM_'};
 	my $note=$self->{'c'}->{$etu}->{'_NOTE_'};
 
+	# prepares writting name
 	$self->{'layout'}->set_text($nom);
 	($text_x,$text_y)=$self->{'layout'}->get_pixel_size();
 
+	# remove end characters while string is too long
+	while($nom && $text_x > $self->{'cs_name'}-6*$self->{'space'}) {
+	    $nom =~s/.$//;
+	    $self->{'layout'}->set_text($nom);
+	    ($text_x,$text_y)=$self->{'layout'}->get_pixel_size();
+	}
+
+	# go to next column if necessary
 	if($self->{'y'}+2*$self->{'space'}+$text_y+$self->{'out.margin'}
 	   > $self->{'page_y'}) {
 	    $self->debut_col();
@@ -150,23 +171,37 @@ sub export {
 
 	$self->{'y'}+=$self->{'space'};
 
-	$self->{'context'}->move_to($self->{'x'}-$text_x-3*$self->{'space'},
-			  $self->{'y'});
+	if($self->{'out.rtl'}) {
+	    $self->{'context'}->move_to($self->{'x'}+3*$self->{'space'},
+					$self->{'y'});
+	} else {
+	    $self->{'context'}->move_to($self->{'x'}-$text_x-3*$self->{'space'},
+					$self->{'y'});
+	}
 	Pango::Cairo::show_layout($self->{'context'},$self->{'layout'});
+
+	# writes grade
 
 	$self->{'layout'}->set_text($self->parse_num($note));
 	($text_x,$text_y)=$self->{'layout'}->get_pixel_size();
-	$self->{'context'}->move_to($self->{'x'}+($self->{'cs_mark'}-$text_x)/2,
-			  $self->{'y'});
+	if($self->{'out.rtl'}) {
+	    $self->{'context'}->move_to($self->{'x'}-($self->{'cs_mark'}+$text_x)/2,
+					$self->{'y'});
+	} else {
+	    $self->{'context'}->move_to($self->{'x'}+($self->{'cs_mark'}-$text_x)/2,
+					$self->{'y'});
+	}
 	Pango::Cairo::show_layout($self->{'context'},$self->{'layout'});
 
 	$self->{'y'}+=$text_y+$self->{'space'};
 
-	$self->{'context'}->move_to($self->{'x'}-$self->{'cs_name'},$self->{'y'});
-	$self->{'context'}->line_to($self->{'x'}+$self->{'cs_mark'},$self->{'y'});
+	# lines
+
+	$self->{'context'}->move_to($self->{'x'}-$self->dx_dir(0),$self->{'y'});
+	$self->{'context'}->line_to($self->{'x'}+$self->dx_dir(1),$self->{'y'});
 	for my $xx ($self->{'x'},
-		    $self->{'x'}-$self->{'cs_name'},
-		    $self->{'x'}+$self->{'cs_mark'}) {
+		    $self->{'x'}-$self->dx_dir(0),
+		    $self->{'x'}+$self->dx_dir(1)) {
 	    $self->{'context'}->move_to($xx,$self->{'y'});
 	    $self->{'context'}->line_to($xx,$y0);
 	}
