@@ -172,7 +172,8 @@ sub export {
 	$self->{'y'}+=$self->{'space'};
 
 	if($self->{'out.rtl'}) {
-	    $self->{'context'}->move_to($self->{'x'}+3*$self->{'space'},
+	    $self->{'context'}->move_to($self->{'x'}+$self->{'cs_name'}
+					-3*$self->{'space'}-$text_x,
 					$self->{'y'});
 	} else {
 	    $self->{'context'}->move_to($self->{'x'}-$text_x-3*$self->{'space'},
