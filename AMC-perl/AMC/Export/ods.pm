@@ -420,12 +420,12 @@ sub export {
 
     my $feuille=$doc->getTable(0,$dimy,$dimx);
     $doc->expandTable($feuille, $dimy, $dimx);
-    $doc->renameTable($feuille,$self->{'out.code'})
+    $doc->renameTable($feuille,encode('utf-8',$self->{'out.code'}))
 	if($self->{'out.code'});
 
     if($self->{'out.nom'}) {
 	$doc->cellStyle($feuille,0,0,'Titre');
-	$doc->cellValue($feuille,0,0,$self->{'out.nom'});
+	$doc->cellValue($feuille,0,0,encode('utf-8',$self->{'out.nom'}));
     }
 
     my $x0=0;
@@ -594,7 +594,8 @@ sub export {
     
     my $meta = odfMeta(container => $archive);
 
-    $meta->title($self->{'out.nom'});
+    $meta->title(encode('utf-8',$self->{'out.nom'}));
+    $meta->subject('');
     $meta->creator($ENV{'USER'});
     $meta->initial_creator($ENV{'USER'});
     $meta->creation_date($la_date);
