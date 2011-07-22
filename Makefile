@@ -42,6 +42,18 @@ GCC_PP ?= gcc
 CFLAGS ?= -O2
 CXXFLAGS ?= -O2
 
+# try to find OpenCV libs 
+
+ifeq ($(GCC_OPENCV_LIBS),auto)
+ifeq ($(shell echo 'main(){}' | gcc -xc++ -lopencv_core - 2>/dev/null && echo "OK"),OK)
+  GCC_OPENCV_LIBS:=-lopencv_core -lopencv_highgui -lopencv_imgproc
+else
+  GCC_OPENCV_LIBS:=-lcv -lhighgui -lcxcore
+endif
+endif
+
+#
+
 SHELL=/bin/sh
 
 DESTDIR=
@@ -91,7 +103,7 @@ AMC-mepdirect: AMC-mepdirect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) $(GCC_POPPLER) -lstdc++ -lm
 
 AMC-detect: AMC-detect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV)
+	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
 %.xml: %.in.xml
 	perl -p $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
