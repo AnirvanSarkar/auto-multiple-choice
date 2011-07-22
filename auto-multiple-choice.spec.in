@@ -24,16 +24,7 @@
 %define AMC_man1dir %{_mandir}/man1
 %define AMC_docdir %{_docdir}/%{name}
 
-%define AMC_OPENCV -I /usr/include/opencv -lcv -lhighgui
-%if 0%{?fedora} > 12
-%define AMC_OPENCV -I /usr/include/opencv -lcv -lhighgui -lcxcore
-%endif
-%if 0%{?suse_version} >= 1140
-%define AMC_OPENCV -I /usr/include/opencv -lopencv_core -lopencv_highgui
-%endif
-%if 0%{?fedora} >= 15
-%define AMC_OPENCV -I /usr/include/opencv -lopencv_core -lopencv_highgui -lopencv_imgproc
-%endif
+%define AMC_OPENCV -I /usr/include/opencv
 
 %if 0%{?suse_version}
 %define AMC_cat Education;Teaching;
