@@ -17,6 +17,8 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+# Loads separate configuration file
+
 ifeq ($(AMCCONF),)
 AMCCONFFILE ?= Makefile.conf
 else
@@ -35,17 +37,21 @@ PERLPATH ?= /usr/bin/perl
 DATE_RPMCHL:=$(shell LC_TIME=en_US date +"%a %b %e %Y")
 DATE_DEBCHL:=$(shell LANG=C date "+%a, %d %b %Y %H:%M:%S %z")
 
+# list variables to be substituted in *.in files
+
 SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | perl -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PERLPATH DATE_DEBCHL DATE_RPMCHL
+
+# Some default values
 
 GCC ?= gcc
 GCC_PP ?= gcc
 CFLAGS ?= -O2
 CXXFLAGS ?= -O2
 
-# try to find OpenCV libs 
+# try to find right names for OpenCV libs 
 
 ifeq ($(GCC_OPENCV_LIBS),auto)
-ifeq ($(shell echo 'main(){}' | gcc -xc++ -lopencv_core - 2>/dev/null && echo "OK"),OK)
+ifeq ($(shell echo 'main(){}' | gcc -xc -lopencv_core - 2>/dev/null && echo "OK"),OK)
   GCC_OPENCV_LIBS:=-lopencv_core -lopencv_highgui -lopencv_imgproc
 else
   GCC_OPENCV_LIBS:=-lcv -lhighgui -lcxcore
@@ -57,6 +63,8 @@ endif
 SHELL=/bin/sh
 
 DESTDIR=
+
+# AMC components to build
 
 BINARIES ?= AMC-traitement-image AMC-mepdirect AMC-detect
 
@@ -70,12 +78,18 @@ SUBMODS=$(notdir $(shell ls doc/modeles))
 
 DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
+# list *.in files for @/VAR/@ substitution
+
 FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade AMC-gui.pl AMC-latex-link.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+
+# Is this a precomp tarball? If so, the PRECOMP file is present.
 
 PRECOMP_FLAG_FILE=PRECOMP
 PRECOMP_ARCHIVE:=$(wildcard $(PRECOMP_FLAG_FILE))
 
 MAIN_LOGO=icons/auto-multiple-choice
+
+# Sets user and group flags for install command
 
 ifeq ($(INSTALL_USER),)
 else
@@ -85,6 +99,8 @@ ifeq ($(INSTALL_GROUP),)
 else
 USER_GROUP += -g $(INSTALL_GROUP)
 endif
+
+# Target switch (precomp archive or not)
 
 ifeq ($(PRECOMP_ARCHIVE),)
 all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm doc I18N ;
@@ -96,6 +112,8 @@ all_precomp: $(FROM_IN) $(BINARIES) ;
 
 MAJ: $(FROM_IN) ;
 
+# Binaries
+
 AMC-traitement-image: AMC-traitement-image.c Makefile
 	$(GCC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
 
@@ -105,11 +123,15 @@ AMC-mepdirect: AMC-mepdirect.cc Makefile
 AMC-detect: AMC-detect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
+# substitution in *.in files
+
 %.xml: %.in.xml
 	perl -p $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
 
 %: %.in $(SUB_MAKEFILES)
 	perl -p $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) $< > $@
+
+# some components
 
 doc:
 	$(MAKE) -C doc
@@ -120,6 +142,8 @@ I18N:
 
 sync:
 	$(MAKE) -C download-area all
+
+# Individual rules
 
 %.ps: %.dvi
 	dvips $< -o $@
@@ -133,6 +157,8 @@ sync:
 %.xpm: %.png
 	pngtopnm $< | ppmtoxpm > $@
 
+# CLEAN
+
 clean_IN: FORCE
 	rm -rf debian/auto-multiple-choice
 	rm -f $(FROM_IN)
@@ -143,6 +169,8 @@ clean: clean_IN FORCE
 	$(MAKE) -C doc/sty clean
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
+
+# INSTALL
 
 install_lang_%: FORCE
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(LOCALEDIR)/$*/LC_MESSAGES
