@@ -445,7 +445,7 @@ sub export {
 	$doc->columnStyle($feuille,$ii,"col.$_");
 	$doc->cellStyle($feuille,$y0,$ii,'Entete');
 	if($_ eq 'ASSOC') {
-	    $doc->cellValue($feuille,$y0,$ii,"A:".$self->{'liste_key'});
+	    $doc->cellValue($feuille,$y0,$ii,"A:".encode('utf-8',$self->{'liste_key'}));
 	} else {
 	    $doc->cellValue($feuille,$y0,$ii,
 			    encode('utf-8',$self->get_title($_)));
@@ -460,11 +460,11 @@ sub export {
 	$doc->columnStyle($feuille,$ii,'col.notes');
 	$doc->cellStyle($feuille,$y0,$ii,
 			($self->{'indicative'}->{$_} ? 'EnteteIndic' : 'EnteteVertical'));
-	$doc->cellValue($feuille,$y0,$ii++,$_);
+	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_));
     }
     for(@codes) {
 	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
-	$doc->cellValue($feuille,$y0,$ii++,$_);
+	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_));
     }
 
     # following lines
@@ -539,9 +539,8 @@ sub export {
 		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
 	    } else {
 		my $c=$e->{'_'.$_.'_'};
-		$c=encode('utf-8',$self->id_name($e->{'_ID_'})) if($_ eq 'ID');
-		$c=encode('utf-8',$e->{'_NOM_'}) if($_ eq 'NOM');
-		$doc->cellValue($feuille,$jj,$ii,$c);
+		$c=$self->id_name($e->{'_ID_'}) if($_ eq 'ID');
+		$doc->cellValue($feuille,$jj,$ii,encode('utf-8',$c));
 	    }
 	    $ii++;
 	}
