@@ -89,6 +89,7 @@ sub load {
 	      s/\#.*//;
 	      next NOM if(/^\s*$/);
 	      if(!@heads) {
+		  my $keep=0;
 		  if($sep) {
 
 		      my $entetes=$_;
@@ -107,11 +108,16 @@ sub load {
 		      }
 
 		      @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
-		      debug "KEYS: ".join(", ",@heads);
-		      next NOM;
 		  } else {
 		      @heads='nom';
+		      $keep=1;
 		  }
+		  for(@heads) {
+		      $self->{'numeric.content'}->{$_}=0;
+		      $self->{'simple.content'}->{$_}=0;
+		  }
+		  debug "KEYS: ".join(", ",@heads);
+		  next NOM if(!$keep);
 	      }
 	      s/^\s+//;
 	      s/\s+$//;
