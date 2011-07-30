@@ -21,6 +21,7 @@
 package AMC::Gui::Commande;
 
 use Gtk2::Helper;
+use Encode;
 
 use AMC::Basic;
 use AMC::Gui::Avancement;
@@ -152,8 +153,8 @@ sub get_output {
 	
 	if($line =~ /^ERR/) {
 	    chomp(my $lc=$line);
-	    $lc =~ s/^ERR>//;
-	    push @{$self->{'erreurs'}},$lc;
+	    $lc =~ s/^ERR[:>]\s*//;
+	    push @{$self->{'erreurs'}},decode("utf-8",$lc);
 	}
 	if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
 	    $self->{'variables'}->{$1}=$2;

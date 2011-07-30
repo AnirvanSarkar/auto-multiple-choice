@@ -18,6 +18,8 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use encoding "utf-8";
+
 use XML::Simple;
 use File::Copy;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
