@@ -2688,12 +2688,27 @@ sub valide_options_notation {
     reprend_pref('notation',$projet{'options'});
 }
 
+sub valide_options_for_domain {
+    my ($domain,$widget,$user_data)=@_;
+    if($widget) {
+	my $name=$widget->get_name();
+	debug "<$domain> options validation for widget $name";
+	
+	if($name =~ /${domain}_[a-z]+_(.*)/) {
+	    reprend_pref($domain,$projet{'options'},'',{$1=>1});
+	}
+    } else {
+	debug "<$domain> options validation: ALL";
+	reprend_pref($domain,$projet{'options'});
+    }
+}
+
 sub valide_options_association {
-    reprend_pref('pref_assoc',$projet{'options'});
+    valide_options_for_domain('pref_assoc',@_);
 }
 
 sub valide_options_preparation {
-    reprend_pref('pref_prep',$projet{'options'});
+    valide_options_for_domain('pref_prep',@_);
 }
 
 sub voir_notes {
@@ -3026,7 +3041,7 @@ sub transmet_pref {
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
-		debug "CB_STORE($t) ALIAS $ta modifie";
+		debug "CB_STORE($t) ALIAS $ta modifie ($t=>$h->{$t})";
 		$wp->set_model($cb_stores{$ta});
 		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
 		if($i) {
@@ -3056,10 +3071,11 @@ sub transmet_pref {
 
 # met a jour les preferences depuis les widgets correspondants
 sub reprend_pref {
-    my ($prefixe,$h,$oprefix)=@_;
+    my ($prefixe,$h,$oprefix,$seulement)=@_;
     $h->{'_modifie'}=($h->{'_modifie'} ? 1 : '');
 
     for my $t (keys %$h) {
+	if(!$seulement || $seulement->{$t}) {
 	my $tgui=$t;
 	$tgui =~ s/$oprefix$// if($oprefix);
 	my $n;
@@ -3129,7 +3145,7 @@ sub reprend_pref {
 	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
-    }
+	}}
     
     debug "Changes : $h->{'_modifie'}";
 }
