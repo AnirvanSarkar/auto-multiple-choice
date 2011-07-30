@@ -19,6 +19,7 @@
 
 package AMC::Export::CSV;
 
+use AMC::Basic;
 use AMC::Export;
 
 @ISA=("AMC::Export");
@@ -82,7 +83,7 @@ sub export {
 
     print OUT join($sep,
 		   map  { $self->parse_string($_) }
-		   (map { $self->get_title($_); } ("nom","note","copie"),
+		   (map { translate_column_title($_); } ("nom","note","copie"),
 		    @comp_keys,
 		    @{$self->{'codes'}}))."\n";
     
@@ -94,7 +95,7 @@ sub export {
 			   if($k =~ /^_(NOM|ASSOC)_$/) {
 			       $c=$self->parse_string($c);
 			   } elsif($k =~ /^_ID_$/) {
-			       $c=$self->parse_string($self->id_name($c));
+			       $c=$self->parse_string(translate_id_name($c));
 			   } elsif($k =~ /^TICKED:/) {
 			       $c=$self->parse_string($c);
 			   } else {

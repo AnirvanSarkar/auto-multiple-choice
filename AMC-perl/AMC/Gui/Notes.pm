@@ -112,8 +112,10 @@ sub new {
 
     $self->{'tableau'}->set_model($store);
 
-    ajoute_colonne($self->{'tableau'},$store,"copie",TAB_ID);
-    ajoute_colonne($self->{'tableau'},$store,"note",TAB_NOTE);
+    ajoute_colonne($self->{'tableau'},$store,
+		   translate_column_title("copie"),TAB_ID);
+    ajoute_colonne($self->{'tableau'},$store,
+		   translate_column_title("note"),TAB_NOTE);
 
     my $i=TAB_DETAIL ;
     for(@keys,@codes) {
@@ -125,7 +127,7 @@ sub new {
       my $it=$store->append();
       
       $store->set($it,
-		  TAB_ID,$k,
+		  TAB_ID,translate_id_name($k),
 		  TAB_NOTE,formatte($c->{'total'}->[0]->{'note'}),
 		  );
       

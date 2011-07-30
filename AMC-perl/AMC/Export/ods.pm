@@ -19,6 +19,7 @@
 
 package AMC::Export::ods;
 
+use AMC::Basic;
 use AMC::Export;
 use Encode;
 
@@ -448,7 +449,7 @@ sub export {
 	    $doc->cellValue($feuille,$y0,$ii,"A:".encode('utf-8',$self->{'liste_key'}));
 	} else {
 	    $doc->cellValue($feuille,$y0,$ii,
-			    encode('utf-8',$self->get_title($_)));
+			    encode('utf-8',translate_column_title($_)));
 	}
 	$code_col{$_}=$ii;
 	$ii++;
@@ -539,7 +540,7 @@ sub export {
 		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
 	    } else {
 		my $c=$e->{'_'.$_.'_'};
-		$c=$self->id_name($e->{'_ID_'}) if($_ eq 'ID');
+		$c=translate_id_name($e->{'_ID_'}) if($_ eq 'ID');
 		$doc->cellValue($feuille,$jj,$ii,encode('utf-8',$c));
 	    }
 	    $ii++;
