@@ -31,6 +31,8 @@ sub new {
 
 	      'heads'=>[],
 	      'problems'=>{},
+	      'numeric.content'=>{},
+	      'simple.content'=>{},
 	      'err'=>[0,0],
 	  };
 
@@ -128,6 +130,10 @@ sub load {
 		  for(0..$#l) {
 		      $nom->{$heads[$_]}=$l[$_];
 		      $data{$heads[$_]}->{$l[$_]}++;
+		      $self->{'numeric.content'}->{$heads[$_]} ++
+			  if($l[$_] =~ /^[ 0-9.+-]*$/i);
+		      $self->{'simple.content'}->{$heads[$_]} ++
+			  if($l[$_] =~ /^[ a-z0-9.+-]*$/i);
 		  }
 		  $nom->{'_LINE_'}=$line;
 		  push @{$self->{'noms'}},$nom;
@@ -221,7 +227,12 @@ sub heads { # entetes
 
 sub keys { # entetes qui peuvent servir de cle unique
     my ($self)=@_;
-    return(@{$self->{'keys'}});
+    return(sort { $self->{'simple.content'}->{$b} <=>
+		      $self->{'simple.content'}->{$a}
+		  || $self->{'numeric.content'}->{$b} <=>
+		      $self->{'numeric.content'}->{$a}
+		  || $a cmp $b }
+		  @{$self->{'keys'}});
 }
 
 sub liste {

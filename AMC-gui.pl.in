@@ -2567,7 +2567,7 @@ sub valide_liste {
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 	$cb_stores{'liste_key'}=cb_model('',__p("(none) [No primary key found in association list]"),
 					 map { ($_,$_) } 
-					 sort { $a cmp $b } (@keys));
+					 (@keys));
     }
     transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});
 }
