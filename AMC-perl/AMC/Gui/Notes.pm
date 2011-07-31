@@ -54,7 +54,7 @@ sub ajoute_colonne {
     my ($tree,$store,$titre,$i)=@_;
     my $renderer=Gtk2::CellRendererText->new;
     my $column = Gtk2::TreeViewColumn->new_with_attributes(
-	decode('utf-8',$titre),
+	$titre,
 	$renderer,
 	text=> $i);
     $column->set_sort_column_id($i);
@@ -100,6 +100,10 @@ sub new {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
     
+    if($self->{'general'}->get_direction() eq 'rtl') {
+	$self->{'tableau'}->set_grid_lines('horizontal');
+    }
+
     $self->{'gui'}->signal_autoconnect_from_package($self);
 
     my @codes=sort { $a cmp $b } (keys %{$notes->{'code'}});
@@ -119,7 +123,7 @@ sub new {
 
     my $i=TAB_DETAIL ;
     for(@keys,@codes) {
-	ajoute_colonne($self->{'tableau'},$store,$_,$i++);
+	ajoute_colonne($self->{'tableau'},$store,decode('utf-8',$_),$i++);
     }
 
   COPIE:for my $k (sort { $a cmp $b } (keys %{$notes->{'copie'}})) {
