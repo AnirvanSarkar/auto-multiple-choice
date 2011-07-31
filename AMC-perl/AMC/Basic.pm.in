@@ -36,7 +36,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_specdir &get_sty &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p);
+    @EXPORT      = qw( &amc_specdir &get_sty &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -503,6 +503,8 @@ sub unpack_args {
 }
 
 my $localisation;
+my %titles=();
+my %id_names=();
 
 sub use_gettext {
     $localisation=Locale::gettext->domain("auto-multiple-choice");
@@ -513,6 +515,39 @@ sub use_gettext {
 			       'alt'=>[$localisation->dir()],
 			   ));
     }
+
+    init_translations();
+}
+
+sub init_translations {
+    %titles=(
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	'nom'=>__p("Name [name column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	'note'=>__p("Mark [mark column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	'copie'=>__p("Sheet [sheet number column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	'total'=>__p("Score [total score column title in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	'max'=>__p("Max [maximum score column title in exported spreadsheet]"),
+	);
+    %id_names=(
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	'max'=>__p("max [maximum score row name in exported spreadsheet]"),
+# TRANSLATORS: you can omit the [...] part, just here to explain context
+	'moyenne'=>__p("mean [means of scores row name in exported spreadsheet]"),
+	);
+}
+
+sub translate_column_title {
+    my ($k)=@_;
+    return($titles{$k} ? $titles{$k} : $k);
+}
+
+sub translate_id_name {
+    my ($k)=@_;
+    return($id_names{$k} ? $id_names{$k} : $k);
 }
 
 sub __($) { return($localisation->get(shift)); }
