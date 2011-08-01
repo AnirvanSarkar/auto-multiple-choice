@@ -2663,6 +2663,23 @@ sub associe_auto {
 
 # automatic association finished : explain what to do after
 sub assoc_resultat {
+    my $mesg=1;
+    my $af=absolu($projet{'options'}->{'association'});
+    if(-f $af) {
+	my $assoc=AMC::AssocFile::new($af);
+	if($assoc->load()) {
+	    my ($auto,$man,$both)=$assoc->counts();
+	    my $dialog=Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'info','ok',
+				  sprintf(__("Automatic association completed: %d students recognized."),$auto).
+				  ($auto==0 ? "\n<b>".sprintf(__("Please check \"%s\" and \"%s\" values and try again."),__("Primary key from this list"),__("Code name for automatic association"))."</b>" : "")
+		);
+	    $dialog->run;
+	    $dialog->destroy;
+	}
+    }
     dialogue_apprentissage('ASSOC_AUTO_OK','','',
 			   __("Automatic association is now finished. You can ask for manual association to check that all is fine and, if necessary, read manually students names which have not been automatically identified."));
 }
@@ -2709,6 +2726,76 @@ sub valide_options_association {
 
 sub valide_options_preparation {
     valide_options_for_domain('pref_prep',@_);
+}
+
+sub association_clear {
+    my $a=AMC::AssocFile::new(absolu($projet{'options'}->{'association'}),
+	'liste_key'=>$projet{'options'}->{'liste_key'},
+	'notes_id'=>$projet{'options'}->{'assoc_code'},
+	);
+    $a->save;
+}
+
+sub change_liste_key {
+    my $af=absolu($projet{'options'}->{'association'});
+    debug "New liste_key: ".$projet{'options'}->{'liste_key'};
+    if($projet{'options'}->{'liste_key'} && -f $af) {
+	my $assoc=AMC::AssocFile::new($af);
+	if($assoc->load()) {
+	    my $assoc_liste_key=$assoc->get_param('liste_key');
+	    my ($auto,$man,$both)=$assoc->counts();
+
+	    debug "Association [$assoc_liste_key] counts: AUTO=$auto MANUAL=$man BOTH=$both";
+	    
+	    if($assoc_liste_key ne $projet{'options'}->{'liste_key'}
+		&& $auto+$man>0) {
+		# liste_key has changed and some association has been
+		# made with another liste_key
+
+		if($man>0) {
+		    # manual association work has been made
+		    
+		    my $dialog=Gtk2::MessageDialog
+			->new_with_markup($w{'main_window'},
+					  'destroy-with-parent',
+					  'warning','yes-no',
+					  sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
+					  sprintf(__("Some manual association data has be found, which will be lost if the primary key is changed. Do you want to switch back to the primary key \"%s\" and keep association data?"),$assoc_liste_key)
+			    );
+		    my $resp=$dialog->run;
+		    $dialog->destroy;
+		    
+		    if($resp eq 'no') {
+			# clears association data
+			association_clear();
+			# automatic association run
+			if($projet{'options'}->{'assoc_code'} && $auto>0) {
+			    associe_auto;
+			}
+		    } else {
+			$projet{'options'}->{'liste_key'}=$assoc_liste_key;
+			transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});			
+		    }
+		} else {
+		    if($projet{'options'}->{'assoc_code'}) {
+			# only automated association, easy to re-run
+			my $dialog=Gtk2::MessageDialog
+			    ->new_with_markup($w{'main_window'},
+					      'destroy-with-parent',
+					      'info','ok',
+					      sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
+					      __("Automatic papers/students association will be re-run to update the association data.")
+			    );
+			$dialog->run;
+			$dialog->destroy;
+
+			association_clear;
+			associe_auto;
+		    }
+		}
+	    }
+	}
+    }
 }
 
 sub voir_notes {

@@ -115,6 +115,18 @@ sub effectif {
     return($v && ($v eq 'NONE') ? '' : $v );
 }
 
+sub counts {
+    my ($self)=@_;
+    my ($auto,$man,$both)=(0,0,0);
+    for my $c ($self->ids()) {
+	my $e=$self->{'a'}->{'copie'}->{$c};
+	$man++ if($e->{'manuel'});
+	$auto++ if($e->{'auto'});
+	$both++ if($e->{'auto'} && $e->{'manuel'});
+    }
+    return($auto,$man,$both);
+}
+
 sub maj { # actualisation des donnees induites
     my ($self)=@_;
     if(!$self->{'maj'}) {
