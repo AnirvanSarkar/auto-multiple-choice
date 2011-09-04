@@ -110,7 +110,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\fontshape,\fontsize,\FPeval,\FPiflt,\FPset,\geometry,\global}
 % \DoNotIndex{\hbox,\headrulewidth,\hfill,\hspace,\hss,\ifFileExists,\ifnum}
 % \DoNotIndex{\ifodd,\ifx,\ignorespaces,\immediate,\index,\item,\itemsep}
-% \DoNotIndex{\jobname,\label,\let,\linewidth,\loop,\lower,\LR,\makebox,\mbox}
+% \DoNotIndex{\jobname,\label,\let,\leavevmode,\linewidth,\loop,\lower,\LR,\makebox,\mbox}
 % \DoNotIndex{\message,\multiply,\newcommand,\newcount,\newcounter,\newdimen}
 % \DoNotIndex{\NewEnviron,\newenvironment,\newif,\newlength,\newtoks}
 % \DoNotIndex{\newwrite,\noexpand,\noindent,\number,\openout,\PackageWarning}
@@ -2109,10 +2109,10 @@ Three digits and two letters:\insertgroup{mixed}.
     \fancyhf{}\fancyhead[C]{\textsc{\AMC@intituleHead}}
   \else
     \fancyhf{}
-    \fancyhead[L]{\he@dbas{\m@rque{positionHG}}}
-    \fancyhead[R]{\he@dbas{\hspace*{0pt}\m@rque{positionHD}}}
-    \fancyfoot[L]{\m@rque{positionBG}}
-    \fancyfoot[R]{\hspace*{0pt}\m@rque{positionBD}}
+    \fancyhead[L]{\he@dbas{\leavevmode\m@rque{positionHG}}}
+    \fancyhead[R]{\he@dbas{\leavevmode\m@rque{positionHD}}}
+    \fancyfoot[L]{\leavevmode\m@rque{positionBG}}
+    \fancyfoot[R]{\leavevmode\m@rque{positionBD}}
     \fancyhead[C]{\he@dhaut{%
         \begin{minipage}[b]{\AMC@CBtaille}
           \AMCbin@begin{1}\noindent%
