@@ -2109,11 +2109,11 @@ Three digits and two letters:\insertgroup{mixed}.
     \fancyhf{}\fancyhead[C]{\textsc{\AMC@intituleHead}}
   \else
     \fancyhf{}
-    \fancyhead[L]{\he@dbas{\leavevmode\m@rque{positionHG}}}
-    \fancyhead[R]{\he@dbas{\leavevmode\m@rque{positionHD}}}
-    \fancyfoot[L]{\leavevmode\m@rque{positionBG}}
-    \fancyfoot[R]{\leavevmode\m@rque{positionBD}}
-    \fancyhead[C]{\he@dhaut{%
+    \fancyhead[L]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHG}}}}
+    \fancyhead[R]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHD}}}}
+    \fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}
+    \fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}
+    \fancyhead[C]{\AMC@LR{\he@dhaut{%
         \begin{minipage}[b]{\AMC@CBtaille}
           \AMCbin@begin{1}\noindent%
           \AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}\\
@@ -2123,7 +2123,7 @@ Three digits and two letters:\insertgroup{mixed}.
         \end{minipage}
         \hbox to 4cm{\hspace*{\fill}%
           \texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
-      }}
+      }}}
     \fancyhfoffset[EOLR]{5mm}
   \fi
   \fancyfoot[C]{\AMC@note}
