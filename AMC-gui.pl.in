@@ -3785,7 +3785,7 @@ sub charge_modeles {
 	debug("MODELS : Can't open directory $rep : $!");
     }
 
-    for my $sd (@subdirs) {
+    for my $sd (sort { $a cmp $b } @subdirs) {
 	my $nom=$sd;
 	my $desc_text='';
 
@@ -3801,7 +3801,7 @@ sub charge_modeles {
 	charge_modeles($store,$child,$rep."/$sd");
     }
 
-    for my $m (@ms) {
+    for my $m (sort { $a cmp $b } @ms) {
 	my $child = $store->append($parent);
 
 	my $nom=$m;
