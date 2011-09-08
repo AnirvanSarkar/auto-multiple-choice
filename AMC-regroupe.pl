@@ -54,7 +54,8 @@ my $noms_encodage='utf-8';
 my $an_saved='';
 my $mep_dir='';
 my $mep_saved='';
-
+my $single_output='';
+my $id_file='';
 my $compose='';
 
 my $moteur_latex='pdflatex';
@@ -83,6 +84,8 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "compose!"=>\$compose,
+	   "id-file=s"=>\$id_file,
+	   "single-output=s"=>\$single_output,
 	   "debug=s"=>\$debug,
 	   );
 
@@ -101,7 +104,8 @@ my $correc_indiv="$temp_dir/correc.pdf";
 my $jpgdir="$cr/corrections/jpg";
 my $pdfdir="$cr/corrections/pdf";
 
-my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+my $avance=AMC::Gui::Avancement::new($progress * ($single_output ? 0.8 : 1),
+				     'id'=>$progress_id);
 
 my $assoc='';
 my $lk='';
@@ -136,7 +140,12 @@ if($an_saved) {
 			  );
 }
 
-# fabrique eventuellement la correction individualisee
+# check_correc prepares the corrected answer sheet for all
+# students. This file is used when option --compose is on, to take
+# sheets when the scaned sheet is not present (for example if there
+# are sheets with no answer boxes on it). This can be very usefull to
+# produce a complete annotated answer sheet with subject *and* answers
+# when separate answer sheet layout is used.
 
 my $correc_indiv_ok='';
 
@@ -156,7 +165,7 @@ sub check_correc {
     }
 }
 
-# detecte bonne dimension depuis le sujet, si disponible
+# gets the dimensions of the page from the subject, if any.
 
 if($sujet) {
     if(-f $sujet) {
@@ -179,7 +188,7 @@ if($sujet) {
     }
 }
 
-# ecriture d'une image en PDF, bonne dimension
+# Convert image to PDF using the right page dimensions
 
 sub write_pdf {
     my ($img,$file)=@_;
@@ -207,42 +216,71 @@ sub write_pdf {
     }
 }
 
-# 1) rassemble tous les numeros de copie utilises
 
-my @ids_utiles=();
+###################################################################
+# Get students numbers to process.
 
-if($anl) {
-    # soit grace aux analyses
+my @students=();
 
-    @ids_utiles=$anl->ids();
-} else {
-    # soit grace aux jpg
+# a) first case: these numbers are given by --id-file option
 
-    opendir(JDIR, $jpgdir) || die "can't opendir $jpgdir: $!";
-    @ids_utiles = map { file2id($_); }
-    grep { /^page.*jpg$/ && -f "$jpgdir/$_" } readdir(JDIR);
-    closedir JDIR;
+if($id_file) {
+
+    open(NUMS,$id_file);
+    while(<NUMS>) {
+        push @students,$1 if(/^([0-9]+)$/);
+    }
+    close(NUMS);
+
 }
 
-my %copie_utile=();
+# b) second case: guess...
 
-for my $id (@ids_utiles) {
-    my ($e,$p)=get_ep($id);
-    $copie_utile{$e}=1;
+else {
+    my @ids_utiles=();
+    
+    if($anl) {
+	# get sheets IDS from the analysis data (if any)
+	@ids_utiles=$anl->ids();
+    } else {
+	# otherwise, get sheets IDS from the JPG files present
+	opendir(JDIR, $jpgdir) || die "can't opendir $jpgdir: $!";
+	@ids_utiles = map { file2id($_); }
+	grep { /^page.*jpg$/ && -f "$jpgdir/$_" } readdir(JDIR);
+	closedir JDIR;
+    }
+    
+    # now, extract the student IDs from the sheets IDs.
+
+    my %copie_utile=();
+    
+    for my $id (@ids_utiles) {
+	my ($e,$p)=get_ep($id);
+	$copie_utile{$e}=1;
+    }
+
+    @students=sort { $a <=> $b } (keys %copie_utile);
 }
 
-@ids_utiles=(keys %copie_utile);
-my $n_copies=1+$#ids_utiles;
+my $n_copies=1+$#students;
 
-# 2) pour chaque copie, quelles sont les pages existantes sur le sujet
+if($n_copies<=0) {
+    debug "No sheets to group.";
+    exit 0;
+}
+
+###################################################################
+# gets the list of sheets IDs for each student
 
 my $mep=AMC::MEPList::new($mep_dir,'saved'=>$mep_saved);
 
 my %pages_e=$mep->pages_etudiants('ip'=>1);
 
-# 3) rassemblement
+###################################################################
+# Processing
 
-# stockage de bouts de PDF ou de collections d'images
+# Stacks of PDF pages comming from the PDF corrected answer sheet or
+# the PPM annotated pages
 
 my $stk_ii;
 my @stk_pages=();
@@ -352,9 +390,27 @@ sub stk_ppm_go {
     stk_ppm_begin();
 }
 
-# boucle sur les copies...
+sub process_output {
+    my ($file)=@_;
 
-for my $e (sort { $a <=> $b } (keys %copie_utile)) {
+    stk_go();
+
+    if($#stk_pages==0) {
+	debug "Move $stk_pages[0] to $file";
+	move($stk_pages[0],$file);
+    } elsif($#stk_pages>0) {
+	$commandes->execute("gs","-dBATCH","-dNOPAUSE","-q",
+			    "-sDEVICE=pdfwrite",
+			    "-sOutputFile=$file",@stk_pages);
+    }
+}
+
+###################################################################
+# Going through the sheets to process...
+
+stk_begin() if($single_output);
+
+for my $e (@students) {
     print "Pages for ID=$e...\n";
 
     my $f=$modele;
@@ -394,7 +450,7 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 
     debug "Dest file: $f";
 
-    stk_begin();
+    stk_begin() if(! $single_output);
 
     for my $pp (@{$pages_e{$e}}) {
 
@@ -419,20 +475,11 @@ for my $e (sort { $a <=> $b } (keys %copie_utile)) {
 	}
     }
 
-    # on regroupe les pages PDF
-
-    stk_go();
-
-    if($#stk_pages==0) {
-	debug "Move $stk_pages[0] to $f";
-	move($stk_pages[0],$f);
-    } elsif($#stk_pages>0) {
-	$commandes->execute("gs","-dBATCH","-dNOPAUSE","-q",
-			    "-sDEVICE=pdfwrite",
-			    "-sOutputFile=$f",@stk_pages);
-    }
+    process_output($f) if(! $single_output);
 
     $avance->progres(1/$n_copies);
 }
+
+process_output($single_output) if($single_output);
 
 $avance->fin();

@@ -255,6 +255,7 @@ my %projet_defaut=('texsrc'=>'',
 		   
 		   'modele_regroupement'=>'',
 		   'regroupement_compose'=>'',
+		   'regroupement_type'=>'STUDENTS',
 
 		   'note_min'=>'',
 		   'note_max'=>20,
@@ -627,6 +628,7 @@ for(qw/onglets_projet preparation_etats documents_tree main_window
     liste diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
     options_CSV options_ods options_List
+    groupe_model
     /) {
     $w{$_}=$gui->get_widget($_);
 }
@@ -981,6 +983,9 @@ my %cb_stores=(
 				"a4"=>"A4",
 				"letter"=>"Letter",
 				"legal"=>"Legal",
+    ),
+    'regroupement_type'=>cb_model('STUDENTS'=>__"One file per student",
+				  'ALL'=>__"One file for all students",
     ),
     );
 
@@ -2701,10 +2706,6 @@ sub valide_options_correction {
     valide_cb(\$projet{'options'}->{$name},$w{$name});
 }
 
-sub valide_options_notation {
-    reprend_pref('notation',$projet{'options'});
-}
-
 sub valide_options_for_domain {
     my ($domain,$widget,$user_data)=@_;
     if($widget) {
@@ -2726,6 +2727,12 @@ sub valide_options_association {
 
 sub valide_options_preparation {
     valide_options_for_domain('pref_prep',@_);
+}
+
+sub valide_options_notation {
+    valide_options_for_domain('notation',@_);
+
+    $w{'groupe_model'}->set_sensitive($projet{'options'}->{'regroupement_type'} eq 'STUDENTS');
 }
 
 sub association_clear {
@@ -2952,6 +2959,14 @@ sub regroupement {
 
     valide_options_notation();
 
+    my $single_output='';
+
+    if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
+	$single_output=absolu($projet{'options'}->{'cr'})
+# TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
+	    ."/corrections/pdf/".(__("All_students")).".pdf";
+    }
+
     commande('commande'=>["auto-multiple-choice","regroupe",
 			  "--debug",debug_file(),
 			  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
@@ -2969,6 +2984,7 @@ sub regroupement {
 			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			  "--noms-encodage",bon_encodage('liste'),
+			  "--single-output",$single_output,
 
 			  ],
 	     'signal'=>2,
