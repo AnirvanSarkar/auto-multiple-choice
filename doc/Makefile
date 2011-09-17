@@ -25,7 +25,9 @@ DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard *.xml))
 
 IMAGES=$(addprefix html/images/,$(notdir $(wildcard img_src/*.svg))) $(addprefix html/images/callouts/,$(notdir $(wildcard img_src/callouts/*.svg)))
 
-all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) ; 
+MODELS=$(wildcard modeles/*/*.d)
+
+all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz); 
 
 images: $(IMAGES:.svg=.png)
 
@@ -65,5 +67,8 @@ html/images/%.png: img_src/%.svg
 	rm -f html/$*/*.html
 	xsltproc --nonet --catalogs --stringparam base.dir html/$*/ doc-xhtml.xsl $<
 	date > $@
+
+%.tgz: %.d
+	tar czf $@ -C $< .
 
 .PHONY: all images clean
