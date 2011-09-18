@@ -261,13 +261,13 @@ sub execute {
 
     if($format eq 'dvi') {
 	if(-f $f_base.".dvi") {
-	    system("dvips","-q",$f_base,"-o",$f_base.".ps");
-	    print "Error dvips : $?\n" if($?);
-	    if(-f $f_base.".ps") {
-		system("ps2pdf",$f_base.".ps",$f_base.".pdf");
-		print "Error ps2pdf : $?\n" if($?);
+	    if(commande_accessible('dvipdfm')) {
+		debug "Converting DVI to PDF with dvipdfm...";
+		system("dvipdfm","-o",$f_base.".pdf",$f_base.".dvi");
+		print "ERROR dvipdfm: $?\n" if($?);
 	    } else {
-		debug "No PS";
+		print "ERROR: I can't find dvipdfm command !";
+		debug "ERROR: I can't find dvipdfm command !";
 	    }
 	} else {
 	    debug "No DVI";
