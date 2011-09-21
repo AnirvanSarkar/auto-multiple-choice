@@ -128,6 +128,9 @@ my %info_vars=();
 
 sub verifie_q {
     my ($q,$t)=@_;
+
+    return() if($info_vars{'postcorrect'});
+
     if($q) {
 	if(! $q->{'mult'}) {
 	    my $oui=0;
@@ -536,6 +539,9 @@ if($mode =~ /b/) {
 	if(/AUTOQCM\[BD(S|M)=([^\]]+)\]/) {
 	    $bs{'defaut'}->{"$1."}->{-bareme}=$2;
 	}
+	if(/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
+	    $info_vars{$1}=$2;
+	}
     }
     close(AMCLOG);
     $cmd_pid='';
@@ -555,7 +561,9 @@ if($mode =~ /b/) {
     $writer->xmlDecl($encodage_interne);
 
     my %opts=(src=>$f_tex,
-	      version=>$VERSION_BAREME);
+	      version=>$VERSION_BAREME,
+	      postcorrect=>$info_vars{'postcorrect'},
+	);
 
     $opts{'main'}=$bs{''}->{'.'}->{-bareme} if($bs{''}->{'.'}->{-bareme});
 

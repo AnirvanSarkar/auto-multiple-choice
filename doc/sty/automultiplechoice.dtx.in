@@ -122,6 +122,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\string,\strip@pt,\subsection,\textcolor,\the,\thepage}
 % \DoNotIndex{\thinlines,\time,\texttt,\undefined,\unitlength,\usepackage,\vbox}
 % \DoNotIndex{\vfill,\vspace,\vss,\write}
+% \DoNotIndex{\AMC@postcorrecttrue}\DoNotIndex{\AMC@postcorrectfalse}
 %
 % \DoNotIndex{\AMC@watermarktrue}
 % \DoNotIndex{\AMC@pagelayouttrue}
@@ -432,6 +433,10 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \ioption{nopage} cancels markers print and page layout definition
 % (see sample in section~\ref{s:plain}).
+%
+% \ioption{postcorrect} tells that correct answers won't be given in
+% the LaTeX source. The teacher will fill one answer sheet for AMC to
+% analyse the scan and set correct answers from it.
 %
 % \end{itemize}
 %
@@ -990,6 +995,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %   inside separate answer sheet.
 % \item |\ifAMC@pagelayout| is true if the AMC page layout, with signs
 %   for scan analysis, is to be used.
+% \item |\ifAMC@postcorrect| corresponds to the use of the
+%   |postcorrect| package option.
 % \end{description}
 %    \begin{macrocode}
 \newcount\AMCload@counter
@@ -1019,6 +1026,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
 \newif\ifAMC@zoneformulaire
 \newif\ifAMC@pagelayout\AMC@pagelayouttrue
+\newif\ifAMC@postcorrect\AMC@postcorrectfalse
 %    \end{macrocode}
 %
 % \begin{macro}{\AMCid@name}
@@ -1694,8 +1702,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMC@fin@rep{%
   \ifAMCcomplete@multi\ifAMCtype@multi%
     \lastchoices\AMCrep@count=-1%
-    \ifAMCune@bonne\wrongchoice{\@aucune}\else\correctchoice{\@aucune}%
-      \fi\fi\fi\AMCrep@fini}
+    \ifAMCune@bonne\wrongchoice{\@aucune}\else%
+      \ifAMC@postcorrect\wrongchoice{\@aucune}\else\correctchoice{\@aucune}\fi%
+    \fi\fi\fi\AMCrep@fini}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
 % \subsubsection{Separate answer sheet}
@@ -2219,6 +2228,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@premierecopie{100}}
 \DeclareOption{plain}{\AMC@plaintrue}
 \DeclareOption{nopage}{\AMC@pagelayoutfalse}
+\DeclareOption{postcorrect}{\AMC@postcorrecttrue}
 \ProcessOptions
 %    \end{macrocode}
 %
@@ -2336,6 +2346,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi
 \ifAMC@inside@box\AMC@amclog{AUTOQCM[VAR:insidebox=1]^^J}\fi
 \ifAMC@outside@box\AMC@amclog{AUTOQCM[VAR:outsidebox=1]^^J}\fi
+\ifAMC@postcorrect\AMC@amclog{AUTOQCM[VAR:postcorrect=1]^^J}\fi
 %    \end{macrocode}
 %
 % Preparing writing to |.xy| file :

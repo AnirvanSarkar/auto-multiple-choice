@@ -48,6 +48,8 @@ my $delimiteur=',';
 my $encodage_interne='UTF-8';
 my $an_saved='';
 
+my $postcorrect='';
+
 my $progres=1;
 my $plafond=1;
 my $progres_id='';
@@ -66,6 +68,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "notemax=s"=>\$note_parfaite,
 	   "plafond!"=>\$plafond,
 	   "notemin=s"=>\$note_plancher,
+	   "postcorrect=s"=>\$postcorrect,
 	   "encodage-interne=s"=>\$encodage_interne,
 	   "progression-id=s"=>\$progres_id,
 	   "progression=s"=>\$progres,
@@ -73,7 +76,7 @@ GetOptions("cr=s"=>\$cr_dir,
 
 set_debug($debug);
 
-# fixes decimal separator , potential problem, replacing it with a
+# fixes decimal separator ',' potential problem, replacing it with a
 # dot.
 for my $x (\$grain,\$note_plancher,\$note_parfaite) {
     $$x =~ s/,/./;
@@ -224,10 +227,17 @@ my %qt_n=();
 my %qt_sum=();
 my %qt_summax=();
 
-my @a_calculer=grep { $bar->ticked_info($_) } ($bar->etus);
+my @a_calculer=sort { ($b==$postcorrect)-($a==$postcorrect) }
+grep { $bar->ticked_info($_) } ($bar->etus);
 
 my $delta=0.19;
 $delta/=(1+$#a_calculer) if($#a_calculer>=0);
+
+# postcorrect mode?
+if($postcorrect) {
+    $bar->postcorrect($postcorrect);
+    $bar->write();
+}
 
 for my $etud (@a_calculer) {
 
@@ -239,6 +249,7 @@ for my $etud (@a_calculer) {
     my %codes=();
 
     for my $q ($bar->questions($etud)) {
+	
 	($xx,$raison,$keys)=$bar->score_question($etud,$q);
 	($notemax)=$bar->score_max_question($etud,$q);
 
