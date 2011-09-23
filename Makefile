@@ -69,7 +69,9 @@ DESTDIR=
 BINARIES ?= AMC-traitement-image AMC-mepdirect AMC-detect
 
 MODS=AMC-*.pl $(BINARIES)
-GLADE=AMC-gui.glade
+GLADE_FROMIN:=$(basename $(wildcard AMC-gui-*.glade.in))
+GLADE_SIMPLE:=$(filter-out $(GLADE_FROMIN),$(wildcard AMC-gui-*.glade))
+GLADE=$(GLADE_FROMIN) $(GLADE_SIMPLE)
 STY=doc/sty/automultiplechoice.sty
 DTX=doc/sty/automultiplechoice.dtx
 MOS=$(wildcard I18N/lang/*.mo)
@@ -80,7 +82,7 @@ DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
 # list *.in files for @/VAR/@ substitution
 
-FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.glade AMC-gui.pl AMC-latex-link.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+FROM_IN=auto-multiple-choice auto-multiple-choice.desktop $(GLADE_FROMIN) AMC-gui.pl AMC-latex-link.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
 
 # Is this a precomp tarball? If so, the PRECOMP file is present.
 

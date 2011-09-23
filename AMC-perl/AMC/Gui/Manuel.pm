@@ -22,7 +22,7 @@ package AMC::Gui::Manuel;
 
 use Getopt::Long;
 use Gtk2 -init;
-use Gtk2::GladeXML;
+
 use XML::Simple;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
@@ -121,12 +121,14 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
+    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}->set_translation_domain('auto-multiple-choice');
+    $self->{'gui'}->add_from_file($glade_xml);
 
     bless $self;
 
     for my $k (qw/general area navigation_h navigation_v goto goto_v etudiant_cb nom_etudiant diag_tree/) {
-	$self->{$k}=$self->{'gui'}->get_widget($k);
+	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
     $self->{'etudiant_cbe'}=$self->{'etudiant_cb'}->get_children();
@@ -218,7 +220,7 @@ sub new {
 	$self->{'etudiant_cb'}->set_text_column(0);
     }
     
-    $self->{'gui'}->signal_autoconnect_from_package($self);
+    $self->{'gui'}->connect_signals(undef,$self);
     
     $self->charge_i();
     
@@ -455,7 +457,7 @@ sub quitter {
     if($self->{'global'}) {
 	Gtk2->main_quit;
     } else {
-	$self->{'gui'}->get_widget('general')->destroy;
+	$self->{'general'}->destroy;
 	if($self->{'en_quittant'}) {
 	    if($self->{'retient_m'}) {
 		&{$self->{'en_quittant'}}('ids_m'=>[keys %{$self->{'ids_m'}}]);

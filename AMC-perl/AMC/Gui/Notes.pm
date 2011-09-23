@@ -42,7 +42,6 @@ use Encode;
 use XML::Simple;
 
 use Gtk2 -init;
-use Gtk2::GladeXML;
 
 use constant {
     TAB_ID => 0,
@@ -94,17 +93,19 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
+    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}->set_translation_domain('auto-multiple-choice');
+    $self->{'gui'}->add_from_file($glade_xml);
 
     for my $k (qw/general tableau/) {
-	$self->{$k}=$self->{'gui'}->get_widget($k);
+	$self->{$k}=$self->{'gui'}->get_object($k);
     }
     
     if($self->{'general'}->get_direction() eq 'rtl') {
 	$self->{'tableau'}->set_grid_lines('horizontal');
     }
 
-    $self->{'gui'}->signal_autoconnect_from_package($self);
+    $self->{'gui'}->connect_signals(undef,$self);
 
     my @codes=sort { $a cmp $b } (keys %{$notes->{'code'}});
     my @keys=sort { $a cmp $b } grep { if(s/\.[0-9]+$//) { !$notes->{'code'}->{$_} } else { 1; } } (keys %{$notes->{'copie'}->{'max'}->{'question'}});
@@ -154,7 +155,7 @@ sub quitter {
     if($self->{'global'}) {
 	Gtk2->main_quit;
     } else {
-	$self->{'gui'}->get_widget('general')->destroy;
+	$self->{'general'}->destroy;
     }
 }
 

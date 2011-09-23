@@ -48,7 +48,6 @@ use Encode;
 
 use POSIX;
 use Gtk2 -init;
-use Gtk2::GladeXML;
 
 use constant {
     COPIES_N => 0,
@@ -131,10 +130,12 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
+    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}->set_translation_domain('auto-multiple-choice');
+    $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu/) {
-	$self->{$k}=$self->{'gui'}->get_widget($k);
+    for my $k (qw/general tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu/) {
+	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
@@ -232,7 +233,7 @@ sub new {
     
     $self->{'images'}=\@images;
 
-    $self->{'gui'}->signal_autoconnect_from_package($self);
+    $self->{'gui'}->connect_signals(undef,$self);
 
     $self->{'iimage'}=-1;
 
@@ -302,7 +303,7 @@ sub quitter {
     if($self->{'global'}) {
 	Gtk2->main_quit;
     } else {
-	$self->{'gui'}->get_widget('general')->destroy;
+	$self->{'general'}->destroy;
     }
 }
 

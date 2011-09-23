@@ -24,7 +24,6 @@ use AMC::Basic;
 use AMC::ANList;
 
 use Gtk2 -init;
-use Gtk2::GladeXML;
 
 use XML::Simple;
 
@@ -87,10 +86,12 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
     
-    $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
+    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}->set_translation_domain('auto-multiple-choice');
+    $self->{'gui'}->add_from_file($glade_xml);
     
     for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info/) {
-	$self->{$_}=$self->{'gui'}->get_widget($_);
+	$self->{$_}=$self->{'gui'}->get_object($_);
     }
     
     $self->{'label_0'}->set_markup('<b>'.$self->{'label_0'}->get_text.'</b>');
@@ -110,7 +111,7 @@ sub new {
 	    'drag-data-received' => \&target_drag_data_received,[$self,$_]);
     }
 
-    $self->{'gui'}->signal_autoconnect_from_package($self);
+    $self->{'gui'}->connect_signals(undef,$self);
     
     if($self->{'size-prefs'}) {
 	my @s=$self->{'main_window'}->get_size();

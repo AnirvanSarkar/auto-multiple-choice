@@ -1,56 +1,55 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
+<?xml version="1.0"?>
 <!--Generated with glade3 3.4.5 on Wed Sep 30 10:53:00 2009 -->
-<glade-interface>
-  <widget class="GtkWindow" id="general">
+<interface>
+  <object class="GtkWindow" id="general">
     <property name="visible">True</property>
     <property name="title" translatable="yes">Manual association</property>
     <child>
-      <widget class="GtkHBox" id="hbox1">
+      <object class="GtkHBox" id="hbox1">
         <property name="visible">True</property>
         <child>
-          <widget class="GtkVBox" id="vbox1">
+          <object class="GtkVBox" id="vbox1">
             <property name="visible">True</property>
             <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
             <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
             <child>
-              <widget class="GtkLabel" id="titre">
+              <object class="GtkLabel" id="titre">
                 <property name="visible">True</property>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkVPaned" id="vpaned1">
+              <object class="GtkVPaned" id="vpaned1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
                 <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
                 <child>
-                  <widget class="GtkDrawingArea" id="photo">
+                  <object class="GtkDrawingArea" id="photo">
                     <property name="width_request">400</property>
                     <property name="height_request">100</property>
                     <property name="visible">True</property>
-                    <signal name="expose_event" handler="expose_photo"/>
-                  </widget>
+                    <signal handler="expose_photo" name="expose_event"/>
+                  </object>
                   <packing>
                     <property name="resize">False</property>
                     <property name="shrink">True</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkScrolledWindow" id="scrolledwindow2">
+                  <object class="GtkScrolledWindow" id="scrolledwindow2">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
                     <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                     <child>
-                      <widget class="GtkViewport" id="viewport1">
+                      <object class="GtkViewport" id="viewport1">
                         <property name="visible">True</property>
                         <property name="resize_mode">GTK_RESIZE_QUEUE</property>
                         <child>
-                          <widget class="GtkTable" id="tableau">
+                          <object class="GtkTable" id="tableau">
                             <property name="visible">True</property>
                             <property name="n_rows">10</property>
                             <property name="n_columns">3</property>
@@ -144,65 +143,63 @@
                             <child>
                               <placeholder/>
                             </child>
-                          </widget>
+                          </object>
                         </child>
-                      </widget>
+                      </object>
                     </child>
-                  </widget>
+                  </object>
                   <packing>
                     <property name="resize">True</property>
                     <property name="shrink">True</property>
                   </packing>
                 </child>
-              </widget>
+              </object>
               <packing>
                 <property name="position">1</property>
               </packing>
             </child>
-          </widget>
+          </object>
         </child>
         <child>
-          <widget class="GtkVSeparator" id="vseparator1">
+          <object class="GtkVSeparator" id="vseparator1">
             <property name="visible">True</property>
             <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
-          </widget>
+          </object>
           <packing>
             <property name="expand">False</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkVBox" id="vbox2">
+          <object class="GtkVBox" id="vbox2">
             <property name="visible">True</property>
             <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
             <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
             <child>
-              <widget class="GtkHButtonBox" id="hbuttonbox2">
+              <object class="GtkHButtonBox" id="hbuttonbox2">
                 <property name="visible">True</property>
                 <child>
-                  <widget class="GtkButton" id="button1">
+                  <object class="GtkButton" id="button1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="label" translatable="yes">gtk-go-back</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
-                    <signal name="clicked" handler="va_precedent"/>
-                  </widget>
+                    <signal handler="va_precedent" name="clicked"/>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="associes_cb">
+                  <object class="GtkCheckButton" id="associes_cb">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip" translatable="yes">Unticking this box, you see only non-associated papers. Tick it to be able to check already associated papers.</property>
+                    <property name="tooltip-text" translatable="yes">Unticking this box, you see only non-associated papers. Tick it to be able to check already associated papers.</property>
                     <property name="label" translatable="yes">associated</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
-                  </widget>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -210,82 +207,79 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkButton" id="button2">
+                  <object class="GtkButton" id="button2">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="label" translatable="yes">gtk-go-forward</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
-                    <signal name="clicked" handler="va_suivant"/>
-                  </widget>
+                    <signal handler="va_suivant" name="clicked"/>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkHButtonBox" id="hbuttonbox3">
+              <object class="GtkHButtonBox" id="hbuttonbox3">
                 <property name="visible">True</property>
                 <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
                 <child>
-                  <widget class="GtkButton" id="bouton_effacer">
+                  <object class="GtkButton" id="bouton_effacer">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip" translatable="yes">Remove manual association for this paper</property>
+                    <property name="tooltip-text" translatable="yes">Remove manual association for this paper</property>
                     <property name="label" translatable="yes">gtk-clear</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
-                    <signal name="clicked" handler="efface_manuel"/>
-                  </widget>
+                    <signal handler="efface_manuel" name="clicked"/>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkButton" id="bouton_inconnu">
+                  <object class="GtkButton" id="bouton_inconnu">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip" translatable="yes">Tell the system that this papers does not correspond to any of the students from the list.</property>
-                    <property name="response_id">0</property>
-                    <signal name="clicked" handler="inconnu"/>
+                    <property name="tooltip-text" translatable="yes">Tell the system that this papers does not correspond to any of the students from the list.</property>
+                    <signal handler="inconnu" name="clicked"/>
                     <child>
-                      <widget class="GtkHBox" id="hbox2">
+                      <object class="GtkHBox" id="hbox2">
                         <property name="visible">True</property>
                         <child>
-                          <widget class="GtkImage" id="image1">
+                          <object class="GtkImage" id="image1">
                             <property name="visible">True</property>
                             <property name="stock">gtk-dialog-error</property>
-                          </widget>
+                          </object>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label1">
+                          <object class="GtkLabel" id="label1">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">Unknown</property>
-                          </widget>
+                          </object>
                           <packing>
                             <property name="position">1</property>
                           </packing>
                         </child>
-                      </widget>
+                      </object>
                     </child>
-                  </widget>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
@@ -293,19 +287,19 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkScrolledWindow" id="scrolledwindow1">
+              <object class="GtkScrolledWindow" id="scrolledwindow1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                 <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                 <child>
-                  <widget class="GtkTreeView" id="copies_tree">
+                  <object class="GtkTreeView" id="copies_tree">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <signal name="cursor_changed" handler="goto_from_list"/>
-                  </widget>
+                    <signal handler="goto_from_list" name="cursor_changed"/>
+                  </object>
                 </child>
-              </widget>
+              </object>
               <packing>
                 <property name="position">2</property>
               </packing>
@@ -314,54 +308,52 @@
               <placeholder/>
             </child>
             <child>
-              <widget class="GtkHButtonBox" id="hbuttonbox1">
+              <object class="GtkHButtonBox" id="hbuttonbox1">
                 <property name="visible">True</property>
                 <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
                 <child>
-                  <widget class="GtkButton" id="enregistrement">
+                  <object class="GtkButton" id="enregistrement">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip" translatable="yes">Save associations.</property>
+                    <property name="tooltip-text" translatable="yes">Save associations.</property>
                     <property name="label" translatable="yes">gtk-save</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
-                    <signal name="clicked" handler="enregistrer"/>
-                  </widget>
+                    <signal handler="enregistrer" name="clicked"/>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkButton" id="quit_button">
+                  <object class="GtkButton" id="quit_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip" translatable="yes">Cancel all associations made this time.</property>
+                    <property name="tooltip-text" translatable="yes">Cancel all associations made this time.</property>
                     <property name="label" translatable="yes">gtk-cancel</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
-                    <signal name="clicked" handler="quitter"/>
-                  </widget>
+                    <signal handler="quitter" name="clicked"/>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="position">4</property>
               </packing>
             </child>
-          </widget>
+          </object>
           <packing>
             <property name="position">2</property>
           </packing>
         </child>
-      </widget>
+      </object>
     </child>
-  </widget>
-</glade-interface>
+  </object>
+</interface>

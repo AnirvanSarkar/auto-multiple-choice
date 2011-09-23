@@ -21,7 +21,6 @@
 use Getopt::Long;
 
 use Gtk2 -init;
-use Gtk2::GladeXML;
 use XML::Simple;
 use IO::File;
 use IO::Select;
@@ -122,10 +121,9 @@ if($debug) {
 }
 
 debug_pm_version("Gtk2");
-debug_pm_version("Gtk2::GladeXML");
 
-my $glade_xml=__FILE__;
-$glade_xml =~ s/\.p[ml]$/.glade/i;
+my $glade_base=__FILE__;
+$glade_base =~ s/\.p[ml]$/-/i;
 
 my $home_dir=Glib::get_home_dir();
 
@@ -620,28 +618,49 @@ sub moteur_latex {
     return($m);
 }
 
-my $gui=Gtk2::GladeXML->new($glade_xml,'main_window','auto-multiple-choice');
+sub read_glade {
+    my ($main_widget,@widgets)=@_;
+    my $g=Gtk2::Builder->new();
+    $g->set_translation_domain('auto-multiple-choice');
+    $g->add_from_file($glade_base.$main_widget.".glade");
+    for ($main_widget,@widgets) {
+	$w{$_}=$g->get_object($_);
+	if($w{$_}) {
+	    $w{$_}->set_name($_) if(!/^(apropos)$/);
+	} else {
+	    debug "WARNING: Object $_ not found in $main_widget glade file.";
+	}
+    }
+    $g->connect_signals(undef);
+    return($g);
+}
 
-for(qw/onglets_projet preparation_etats documents_tree main_window
+my $gui=read_glade('main_window',
+		   qw/onglets_projet preparation_etats
+    documents_tree
     mep_tree edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement annulation button_mep_warnings
     liste_filename liste_path liste_edit liste_setfile liste_refresh
     doc_menu menu_debug menu_outils
-    liste diag_tree inconnu_tree diag_result
+    diag_tree inconnu_tree diag_result
     maj_bareme correc_tree correction_result regroupement_corriges
     options_CSV options_ods options_List
     groupe_model
-    /) {
-    $w{$_}=$gui->get_widget($_);
-}
+    pref_assoc_c_assoc_code pref_assoc_c_liste_key
+    export_c_export_sort export_cb_export_include_abs
+    export_c_export_csv_separateur export_cb_export_csv_cochees
+    export_s_export_ncols export_c_export_pagesize
+    notation_c_regroupement_type notation_cb_regroupement_compose
+    pref_prep_s_nombre_copies
+    /);
 
 # Grid lines are not well-positioned in RTL environments, I don't know
 # why... so I remove them.
 if($w{'main_window'}->get_direction() eq 'rtl') {
     debug "RTL mode: removing vertical grids";
     for(qw/documents mep diag inconnu/) {
-	my $w=$gui->get_widget($_.'_tree');
+	my $w=$gui->get_object($_.'_tree');
 	$w->set_grid_lines('horizontal') if($w);
     }
 }
@@ -1012,7 +1031,8 @@ $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 
 sub maj_export {
     my $old_format=$projet{'options'}->{'format_export'};
-    reprend_pref('export',$projet{'options'});
+
+    valide_options_for_domain('export',@_);
 
     debug "Format : ".$projet{'options'}->{'format_export'};
 
@@ -1332,17 +1352,14 @@ sub liste_des_projets {
 
 	# fenetre pour demander le nom du projet
 	
-	my $gp=Gtk2::GladeXML->new($glade_xml,'choix_projet','auto-multiple-choice');
-	$gp->signal_autoconnect_from_package('main');
-
-	for(qw/choix_projet label_etat label_action choix_projets_liste
+	my $gp=read_glade('choix_projet',
+			  qw/label_etat label_action
+            choix_projets_liste
 	    projet_bouton_ouverture projet_bouton_creation
 	    projet_bouton_supprime projet_bouton_annule 
 	    projet_bouton_annule_label projet_bouton_renomme
 	    projet_bouton_mv_yes projet_bouton_mv_no
-	    projet_nom projet_nouveau_syntaxe projet_nouveau/) {
-	    $w{$_}=$gp->get_widget($_);
-	}
+	    projet_nom projet_nouveau_syntaxe projet_nouveau/);
 
 	if($oo{'cree'}) {
 	    $w{'projet_nouveau'}->show();
@@ -1964,11 +1981,8 @@ sub sujet_impressions {
 	}
     }
 
-    $g_imprime=Gtk2::GladeXML->new($glade_xml,'choix_pages_impression','auto-multiple-choice');
-    $g_imprime->signal_autoconnect_from_package('main');
-    for(qw/choix_pages_impression arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe bloc_fichier/) {
-	$w{$_}=$g_imprime->get_widget($_);
-    }
+    $g_imprime=read_glade('choix_pages_impression',
+			  qw/arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe bloc_fichier/);
 
     if($o{'methode_impression'} eq 'CUPS') {
 	$w{'bloc_imprimante'}->show();
@@ -2243,11 +2257,7 @@ sub saisie_manuelle {
 }
 
 sub saisie_automatique {
-    my $gsa=Gtk2::GladeXML->new($glade_xml,'saisie_auto','auto-multiple-choice');
-    $gsa->signal_autoconnect_from_package('main');
-    for(qw/saisie_auto copie_scans/) {
-	$w{$_}=$gsa->get_widget($_);
-    }
+    my $gsa=read_glade('saisie_auto',qw/copie_scans/);
     $w{'copie_scans'}->set_active(1);
 }
 
@@ -2454,9 +2464,8 @@ sub saisie_auto_ok {
 }
 
 sub choisit_liste {
-    my $dial=Gtk2::GladeXML->new($glade_xml,
-			       'liste_dialog','auto-multiple-choice')
-	->get_widget('liste_dialog');
+    my $dial=read_glade('liste_dialog')
+	->get_object('liste_dialog');
 
     my @f;
     if($projet{'options'}->{'listeetudiants'}) {
@@ -2705,8 +2714,12 @@ sub valide_cb {
 sub valide_options_correction {
     my ($ww,$o)=@_;
     my $name=$ww->get_name();
-    debug "Valide OC from $name";
-    valide_cb(\$projet{'options'}->{$name},$w{$name});
+    debug "Options validation from $name";
+    if(!$w{$name}) {
+	debug "WARNING: Option validation failed, unknown name $name.";
+    } else {
+	valide_cb(\$projet{'options'}->{$name},$w{$name});
+    }
 }
 
 sub valide_options_for_domain {
@@ -2865,11 +2878,8 @@ sub noter_postcorrect {
 
 	# ask user for a choice
 
-	$g_pcid=Gtk2::GladeXML->new($glade_xml,'choix_postcorrect','auto-multiple-choice');
-	$g_pcid->signal_autoconnect_from_package('main');
-	for(qw/choix_postcorrect postcorrect_id postcorrect_apply/) {
-	    $w{$_}=$g_pcid->get_widget($_);
-	}
+	$g_pcid=read_glade('choix_postcorrect',
+			   qw/postcorrect_id postcorrect_apply/);
 
 	if(@ids) {
 	    $w{'postcorrect_id'}->set_range($ids[0],$ids[$#ids]);
@@ -3099,11 +3109,7 @@ sub regarde_regroupements {
 ###
 
 sub activate_apropos {
-    my $gap=Gtk2::GladeXML->new($glade_xml,'apropos','auto-multiple-choice');
-    $gap->signal_autoconnect_from_package('main');
-    for(qw/apropos/) {
-	$w{$_}=$gap->get_widget($_);
-    }
+    my $gap=read_glade('apropos');
 }
 
 sub close_apropos {
@@ -3179,17 +3185,17 @@ sub transmet_pref {
 	my $ta=$t;
 	$ta=$alias->{$t} if($alias->{$t});
 
-	my $wp=$gap->get_widget($prefixe.'_t_'.$ta);
+	my $wp=$gap->get_object($prefixe.'_t_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_t_'.$t}=$wp;
 	    $wp->get_buffer->set_text($h->{$t});
 	}
-	$wp=$gap->get_widget($prefixe.'_x_'.$ta);
+	$wp=$gap->get_object($prefixe.'_x_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_x_'.$t}=$wp;
 	    $wp->set_text($h->{$t});
 	}
-	$wp=$gap->get_widget($prefixe.'_f_'.$ta);
+	$wp=$gap->get_object($prefixe.'_f_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_f_'.$t}=$wp;
 	    if($wp->get_action =~ /-folder$/i) {
@@ -3198,27 +3204,27 @@ sub transmet_pref {
 		$wp->set_filename($h->{$t});
 	    }
 	}
-	$wp=$gap->get_widget($prefixe.'_v_'.$ta);
+	$wp=$gap->get_object($prefixe.'_v_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_v_'.$t}=$wp;
 	    $wp->set_active($h->{$t});
 	}
-	$wp=$gap->get_widget($prefixe.'_s_'.$ta);
+	$wp=$gap->get_object($prefixe.'_s_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_s_'.$t}=$wp;
 	    $wp->set_value($h->{$t});
 	}
-	$wp=$gap->get_widget($prefixe.'_col_'.$ta);
+	$wp=$gap->get_object($prefixe.'_col_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_col_'.$t}=$wp;
 	    $wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
 	}
-	$wp=$gap->get_widget($prefixe.'_cb_'.$ta);
+	$wp=$gap->get_object($prefixe.'_cb_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_cb_'.$t}=$wp;
 	    $wp->set_active($h->{$t});
 	}
-	$wp=$gap->get_widget($prefixe.'_c_'.$ta);
+	$wp=$gap->get_object($prefixe.'_c_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_c_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
@@ -3235,7 +3241,7 @@ sub transmet_pref {
 		$wp->set_active($h->{$t});
 	    }
 	}
-	$wp=$gap->get_widget($prefixe.'_ce_'.$ta);
+	$wp=$gap->get_object($prefixe.'_ce_'.$ta);
 	if($wp) {
 	    $w{$prefixe.'_ce_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
@@ -3342,15 +3348,10 @@ sub change_methode_impression {
 }
 
 sub edit_preferences {
-    my $gap=Gtk2::GladeXML->new($glade_xml,'edit_preferences','auto-multiple-choice');
-
-    for(qw/edit_preferences pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree/) {
-	$w{$_}=$gap->get_widget($_);
-    }
+    my $gap=read_glade('edit_preferences',
+		       qw/pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree/);
 
     $w{'edit_preferences_manager'}=$gap;
-
-    $gap->signal_autoconnect_from_package('main');
 
     # tableau type/couleurs pour correction
 
@@ -3385,11 +3386,11 @@ sub accepte_preferences {
 	@gm=grep { /^defaut_/ } (split(/,/,$o{'_modifie'}));
 
 	for my $k (@gm) {
-	    my $l=$w{'edit_preferences_manager'}->get_widget('label_'.$k);
+	    my $l=$w{'edit_preferences_manager'}->get_object('label_'.$k);
 	    $labels{$k}=$l->get_text() if($l);
 	    my $kp=$k;
 	    $kp =~ s/^defaut_//;
-	    $l=$w{'edit_preferences_manager'}->get_widget('label_'.$kp);
+	    $l=$w{'edit_preferences_manager'}->get_object('label_'.$kp);
 	    $labels{$kp}=$l->get_text() if($l);
 	}
     }
@@ -3972,10 +3973,8 @@ sub make_template {
 	return();
     }
 
-    my $gt=Gtk2::GladeXML->new($glade_xml,'make_template','auto-multiple-choice');
-    for (qw/make_template template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok/) {
-	$w{$_}=$gt->get_widget($_);
-    }
+    my $gt=read_glade('make_template',
+		      qw/template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok/);
 
     $w{'template_file_name_style'} = $w{'template_file_name'}->get_modifier_style->copy;
 
@@ -3998,8 +3997,6 @@ sub make_template {
 
     # Waits for action
     
-    $gt->signal_autoconnect_from_package('main');
-
     $resp=$w{'make_template'}->run();
 
     if($resp eq "1") {
@@ -4134,14 +4131,14 @@ sub source_latex_choisir {
 	
 	# fenetre de choix du source latex
 	
-	my $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_dialog','auto-multiple-choice');
+	my $gap=read_glade('source_latex_dialog');
 	
-	my $dialog=$gap->get_widget('source_latex_dialog');
+	my $dialog=$gap->get_object('source_latex_dialog');
 	
 	my $reponse=$dialog->run();
 	
 	for(qw/new choix vide zip/) {
-	    $bouton{$_}=$gap->get_widget('sl_type_'.$_)->get_active();
+	    $bouton{$_}=$gap->get_object('sl_type_'.$_)->get_active();
 	    debug "Bouton $_" if($bouton{$_});
 	}
 	
@@ -4158,12 +4155,8 @@ sub source_latex_choisir {
 	
 	# choix d'un modele
 
-	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_modele','auto-multiple-choice');
-	$gap->signal_autoconnect_from_package('main');
-
-	for(qw/source_latex_modele modeles_liste modeles_description model_choice_button mlist_separation/) {
-	    $w{$_}=$gap->get_widget($_);
-	}
+	$gap=read_glade('source_latex_modele',
+			qw/modeles_liste modeles_description model_choice_button mlist_separation/);
 
 	$modeles_store = Gtk2::TreeStore->new('Glib::String',
 					      'Glib::String',
@@ -4215,11 +4208,8 @@ sub source_latex_choisir {
 
 	# choisir un fichier deja present
 
-	$gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix','auto-multiple-choice');
+	$gap=read_glade('source_latex_choix');
 
-	for(qw/source_latex_choix/) {
-	    $w{$_}=$gap->get_widget($_);
-	}
 	$w{'source_latex_choix'}->set_current_folder($home_dir);
 
 	my $filtre_latex=Gtk2::FileFilter->new();
@@ -4249,11 +4239,8 @@ sub source_latex_choisir {
 	    
 	    # choisir un fichier ZIP
 	    
-	    $gap=Gtk2::GladeXML->new($glade_xml,'source_latex_choix_zip','auto-multiple-choice');
-	    
-	    for(qw/source_latex_choix_zip/) {
-		$w{$_}=$gap->get_widget($_);
-	    }
+	    $gap=read_glade('source_latex_choix_zip');	    
+
 	    $w{'source_latex_choix_zip'}->set_current_folder($home_dir);
 	    
 	    my $filtre_zip=Gtk2::FileFilter->new();
@@ -4670,8 +4657,6 @@ sub bug_report {
     $dialog->run;
     $dialog->destroy;
 }
-
-$gui->signal_autoconnect_from_package('main');
 
 if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
     $w{'main_window'}->resize($o{'taille_x_main'},$o{'taille_y_main'});
