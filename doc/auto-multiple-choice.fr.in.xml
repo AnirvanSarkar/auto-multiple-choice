@@ -1184,22 +1184,25 @@ Durée : 10 minutes.
         chiffres du codage désiré. On pourra par exemple utiliser l'entête de
         copie suivant :</para>
 
-        <para><programlisting>\noindent\AMCcode{num.etud}{8}\hspace*{\fill}
-\begin{minipage}{.5\linewidth}
-$\longleftarrow{}$ codez votre numéro d'étudiant ci-contre,
-et écrivez votre nom et prénom ci-dessous.
+        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+\begin{minipage}[b]{6.5cm}
+$\longleftarrow{}$\hspace{0pt plus 1cm} codez votre numéro d'étu\-diant ci-contre,
+et inscrivez votre nom et prénom ci-dessous.
 
 \vspace{3ex}
 
-\champnom{\fbox{    
+\hfill\champnom{\fbox{    
     \begin{minipage}{.9\linewidth}
       Nom et prénom :
       
       \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
-  }}
-\end{minipage}
+  }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
+
+}
 </programlisting></para>
 
         <para>Dans le cas de l'utilisation de l'option
@@ -1220,6 +1223,10 @@ et écrivez votre nom et prénom ci-dessous.
         <programlisting>\AMCcodeHspace=.5em
 \AMCcodeVspace=.5em
 \AMCcodeBoxSep=.1em</programlisting>
+
+        <para>Notons enfin qu'il existe aussi la version horizontale
+        <command>AMCcodeH</command> de cette commande, particulièrement utile
+        pour un faible nombre de chiffres dans le code à saisir.</para>
       </sect3>
 
       <sect3>
@@ -2567,8 +2574,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       l'enseignant de cocher sur une feuille de réponse les bonnes réponses,
       qui sera transmise à AMC pour qu'il y lise les bonnes réponses.</para>
 
-      <para>Pour mettre en œuvre ce schéma de fonctionnement, vous devez :
-      </para>
+      <para>Pour mettre en œuvre ce schéma de fonctionnement, vous
+      devez :</para>
 
       <itemizedlist>
         <listitem>

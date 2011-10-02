@@ -650,7 +650,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{Students identification}
 %
-% \DescribeMacro{\namefield}\DescribeMacro{\AMCcode}
+% \DescribeMacro{\namefield}\DescribeMacro{\AMCcode}\DescribeMacro{\AMCcodeH}
 % There are two ways to associate students to their sheets.
 % \begin{itemize}
 % \item Always add to one page of each copy some place for the student
@@ -682,6 +682,13 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \begin{code}
 %  \AMCcode{student}{6}  
 %   \end{code}
+%
+%   For smaller number of digits, the ``horizontal'' form can be preferred: 
+%   {\PexaDefaults{samplewidth=.7\PexaWidth}
+%   \begin{code}
+%  \AMCcodeH{student}{3}  
+%   \end{code}
+%   }
 % \end{itemize}
 %
 % \subsection{Separate answer sheet}\label{d:separate}
@@ -1934,7 +1941,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{Codes}
 %
-% \begin{macro}{\AMCcode}
+% \begin{macro}{\AMCcode}\begin{macro}{\AMCcodeH}
 % \noindent\begin{minipage}[t]{.45\linewidth}
 % Students can code some numerical information (such as student
 % number) through special questions, which can be formatted easily
@@ -1956,11 +1963,21 @@ Three digits and two letters:\insertgroup{mixed}.
 % \begin{minipage}[t]{.45\linewidth}
 %   \begin{amcxyfile}{automultiplechoice.xy3}\AMCcode{code}{6}\end{amcxyfile}
 %
+% \vspace{4mm}
 %   \makeatletter\AMC@ensembletrue\makeatother
 %   \AMCcode{code}{6}
 % \end{minipage}
+% \vspace{4mm}
 %
-%   
+% \noindent\begin{minipage}[t]{.35\linewidth}
+%   The ``horizontal'' version |\AMCcodeH| can also be considered,
+%   specially with a small number of digits. See opposite for the
+%   result of |\AMCcodeH{code}{3}|.
+% \end{minipage}\hfill
+% \begin{minipage}[t]{.6\linewidth}
+%   \AMCcodeH{code}{3}
+% \end{minipage}
+% 
 %    \begin{macrocode}
 \newcount\AMC@chiffres
 \newdimen\AMCcodeHspace\AMCcodeHspace=.5em
@@ -1995,7 +2012,33 @@ Three digits and two letters:\insertgroup{mixed}.
  \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
  \hspace{-\AMCcodeHspace}%
 }}
-%    \end{macrocode}\end{macro}
+\newcommand{\AMCcodeH}[2]{%
+{\def\AMCbeginQuestion##1##2{}%
+ \setlength{\parindent}{0pt}%
+ \def\AMCbeginAnswer{\hbox\bgroup}%
+ \def\AMCendAnswer{\egroup\vspace{\AMCcodeVspace}\par}%
+ \def\AMCanswer##1##2{\hbox{##1\ifAMC@ensemble\else%
+   \ifAMC@inside@box\else\hspace{\AMCcodeBoxSep}\textbf{##2}\fi\fi}%
+   \hspace{\AMCcodeHspace}}%
+ \AMCnobloc%
+ \AMC@chiffres=#2\loop%
+ \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative%
+   \begin{choicescustom}[o]\scoring{auto=0}%
+     \wrongchoice[0]{0}%
+     \wrongchoice[1]{1}%
+     \wrongchoice[2]{2}%
+     \wrongchoice[3]{3}%
+     \wrongchoice[4]{4}%
+     \wrongchoice[5]{5}%
+     \wrongchoice[6]{6}%
+     \wrongchoice[7]{7}%
+     \wrongchoice[8]{8}%
+     \wrongchoice[9]{9}%
+   \end{choicescustom}%
+ \end{question}%
+ \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
+}}
+%    \end{macrocode}\end{macro}\end{macro}
 %
 % \subsubsection{Intervals}
 %

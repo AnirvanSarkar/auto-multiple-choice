@@ -1126,22 +1126,25 @@ Durée : 10 minutes.
         identifier, and the number of digits to be used by the code. One can
         e.g. use the following header</para>
 
-        <para><programlisting>\noindent\AMCcode{studentid}{8}\hspace*{\fill}
-\begin{minipage}{.5\linewidth}
-$\longleftarrow{}$ please encode your student number below,
+        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+\begin{minipage}[b]{6.5cm}
+$\longleftarrow{}$\hspace{0pt plus 1cm} please encode your student number below,
 and write your first and last names below.
 
 \vspace{3ex}
 
-\namefield{\fbox{    
+\hfill\champnom{\fbox{    
     \begin{minipage}{.9\linewidth}
       Firstname and lastname:
       
       \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
-  }}
-\end{minipage}
+  }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
+
+}
 </programlisting></para>
 
         <para>If the <option>separateanswersheet</option> option is used, the
@@ -1159,6 +1162,10 @@ and write your first and last names below.
         <programlisting>\AMCcodeHspace=.5em
 \AMCcodeVspace=.5em
 \AMCcodeBoxSep=.1em</programlisting>
+
+        <para>Note that an horizontal version <command>AMCcodeH</command> is
+        also available, specially for the case of small number of
+        digits.</para>
       </sect3>
 
       <sect3>
