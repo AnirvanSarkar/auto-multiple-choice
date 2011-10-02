@@ -27,6 +27,7 @@ sub new {
     my (%o)=(@_);
 
     my $self={'file'=>'',
+	      'tick'=>{},
 	      'onerror'=>'stderr',
 	      'ticked_info'=>{},
 	  };
@@ -65,6 +66,24 @@ sub read {
     $self->{'bar'}=XMLin($f,ForceArray => 1,KeyAttr=> [ 'id' ]);
 }
 
+# writes scoring strategy (but not ticked boxes data).
+sub write {
+    my ($self,$f)=@_;
+    $f=$self->{'file'} if($self->{'file'} && !$f);
+
+    debug "Writing scoring strategy to $f ...";
+
+    if(open(BAR,">",$f)) {
+	print BAR XMLout($self->{'bar'},
+			 'RootName'=>'bareme',
+			 KeyAttr=> [ 'id' ],
+	    );
+	close(BAR);
+    } else {
+	$self->error("Unable to write to $f: $!");
+    }
+}
+
 # returns the scoring file version.
 sub version {
     my ($self)=@_;
@@ -75,6 +94,12 @@ sub version {
 sub main {
     my ($self)=@_;
     return($self->{'bar'}->{'main'});
+}
+
+# returns the main (outside questions) variable value
+sub main_var {
+    my ($self,$name)=@_;
+    return($self->{'bar'}->{$name});
 }
 
 # returns the list of all students sheets IDs
@@ -138,6 +163,14 @@ sub correct_answer {
     return($self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$answer}->{'bonne'});
 }
 
+# tells if the answer is correct, setting this value for ALL sheets
+sub postcorrect_answer {
+    my ($self,$question,$answer,$value)=@_;
+    for my $etu ($self->etus) {
+	$self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$answer}->{'bonne'}=$value;
+    }
+}
+
 # returns a list telling, for each answer (in the same order as
 # returned by answers_id), if it has to be ticked.
 sub correct_answers {
@@ -157,7 +190,14 @@ sub correct_answers {
 # state for an answer.
 sub ticked_answer {
     my ($self,$etu,$question,$answer,$t)=@_;
-    my $a=$self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$answer};
+    if(defined($t)) {
+	$self->{'tick'}->{$etu}={} if(!defined($self->{'tick'}->{$etu}));
+	$self->{'tick'}->{$etu}->{$question}={} 
+	if(!defined($self->{'tick'}->{$etu}->{$question}));
+	$self->{'tick'}->{$etu}->{$question}->{$answer}={} 
+	if(!defined($self->{'tick'}->{$etu}->{$question}->{$answer}));
+    }
+    my $a=$self->{'tick'}->{$etu}->{$question}->{$answer};
     if(defined($t)) {
 	$a->{'ticked'}=$t;
 	$self->{'ticked_info'}->{$etu}++;
@@ -208,6 +248,21 @@ sub ticked_question {
 sub ticked_list {
     my ($self,$etu,$question)=@_;
     return(join(";",$self->ticked_question($etu,$question)));
+}
+
+# takes correct answers from ticked answers of sheet id $postcorrect
+sub postcorrect {
+    my ($self,$postcorrect)=@_;
+    debug "PostCorrection: from E $postcorrect";
+    for my $q ($self->questions($postcorrect)) {
+	if(! $self->question_is_indicative($postcorrect,$q)) {
+	    for my $a ($self->answers_ids($postcorrect,$q)) {
+		my $value=$self->ticked_answer($postcorrect,$q,$a);
+		debug "PostCorrection: Q $q A $a -> $value";
+		$self->postcorrect_answer($q,$a,$value);
+	    }
+	}
+    }
 }
 
 #################

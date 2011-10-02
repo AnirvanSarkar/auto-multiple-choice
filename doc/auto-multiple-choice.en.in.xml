@@ -710,7 +710,7 @@ Durée : 10 minutes.
       <title>Description of the LaTeX commands</title>
 
       <sect3 id="sec.package.options">
-        <title>Package options</title>
+        <title id="sec.package.options.title">Package options</title>
 
         <para>To use the <package>automultiplechoice</package> package, one
         uses the line <programlisting>\usepackage[...]{automultiplechoice}</programlisting>where
@@ -775,6 +775,12 @@ Durée : 10 minutes.
             <para><option>catalog</option>: use this option to make a catalog
             of your questions to be used to compose future exams. No need to
             use <command>\onecopy</command> with this layout.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>postcorrect</option>: use this option if you want to
+            give the correct answers after scans analysis, from a teacher
+            completed answer sheet - see for details.</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -1120,22 +1126,25 @@ Durée : 10 minutes.
         identifier, and the number of digits to be used by the code. One can
         e.g. use the following header</para>
 
-        <para><programlisting>\noindent\AMCcode{studentid}{8}\hspace*{\fill}
-\begin{minipage}{.5\linewidth}
-$\longleftarrow{}$ please encode your student number below,
+        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+\begin{minipage}[b]{6.5cm}
+$\longleftarrow{}$\hspace{0pt plus 1cm} please encode your student number below,
 and write your first and last names below.
 
 \vspace{3ex}
 
-\namefield{\fbox{    
+\hfill\champnom{\fbox{    
     \begin{minipage}{.9\linewidth}
       Firstname and lastname:
       
       \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
-  }}
-\end{minipage}
+  }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
+
+}
 </programlisting></para>
 
         <para>If the <option>separateanswersheet</option> option is used, the
@@ -1153,6 +1162,10 @@ and write your first and last names below.
         <programlisting>\AMCcodeHspace=.5em
 \AMCcodeVspace=.5em
 \AMCcodeBoxSep=.1em</programlisting>
+
+        <para>Note that an horizontal version <command>AMCcodeH</command> is
+        also available, specially for the case of small number of
+        digits.</para>
       </sect3>
 
       <sect3>
@@ -1480,8 +1493,8 @@ respective parameters \VQa{} et \VQb{}.
       of the subject.</para>
     </sect2>
 
-    <sect2>
-      <title>Printing and exam</title>
+    <sect2 id="printing">
+      <title id="printing.title">Printing and exam</title>
 
       <warning>
         <para>You must create as many exam sheets as necessary for all your
@@ -2311,6 +2324,198 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       list of students (see section <xref endterm="liste.etudiants.title"
       linkend="liste.etudiants" />). If we let this field empty, a default
       value is built up based on the student's name and student number.</para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Alternative usages</title>
+
+    <sect2>
+      <title>Photocopied subject</title>
+
+      <para>As explained in <xref endterm="printing.title"
+      linkend="printing" />, it is not possible to photocopy one answer sheet
+      to give to several students. However, when using a separate answer sheet
+      and when questions and answers are not to be shuffled, you can photocopy
+      the subject, and print all the answer sheets separately. We detail here
+      the proper way to follow.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Use <option>separateanswersheet</option> package option (see
+          <xref endterm="sec.package.options.title"
+          linkend="sec.package.options" />).</para>
+        </listitem>
+
+        <listitem>
+          <para>Write the subject before calling <command>onecopy</command>
+          command or outside <command>examcopy</command> environment.</para>
+        </listitem>
+
+        <listitem>
+          <para>Use <command>\AMCformS</command> to output answer boxes in
+          each answer sheet, insine
+          <command>onecopy</command>/<command>examcopy</command>.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Here is a minimal exemple:</para>
+
+      <programlisting>\documentclass[a4paper]{article}
+\usepackage[separateanswersheet]{automultiplechoice}    
+\begin{document}
+
+\noindent{\bf Subject}
+
+\begin{question}{sum}
+  How much are one plus one?
+  \begin{choices}
+    \wrongchoice{1}
+    \correctchoice{2}
+    \wrongchoice{3}
+  \end{choices}
+\end{question}
+
+\begin{question}{k2}
+  How high is the K2?
+  \begin{choices}
+    \wrongchoice{around 8000m}
+    \correctchoice{around 8600m}
+    \wrongchoice{around 9000m}
+  \end{choices}
+\end{question}
+
+\AMCcleardoublepage    
+
+\onecopy{5}{    
+
+\AMCdebutFormulaire    
+
+{\large\bf Answer sheet:}
+\hfill \champnom{\fbox{    
+    \begin{minipage}{.5\linewidth}
+      Name:
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\AMCformS    
+
+}  
+
+\end{document}
+</programlisting>
+
+      <para>You will get from this LaTeX file one subject (sheet numbered 0)
+      to print and photocopy to all students, and several answer sheets to
+      print (one for each student).</para>
+    </sect2>
+
+    <sect2>
+      <title>Post correcting</title>
+
+      <para>Suppose you want to use a single generic answer sheet for all your
+      exams. You simply print answer boxes on it (say 5 for each questions,
+      and 40 questions), and give the students a subject that you wrote
+      somewhere else. The point here is that the correct choices are not
+      pointed out in the LaTeX file, so that AMC does not know about them. The
+      solution is to give one answer sheet to the teacher to fill correct
+      choices. Then, after scanning and AMC analysis, you simply have to tell
+      AMC which is the teacher completed answer sheet.</para>
+
+      <para>To implement this idea, follow these rules:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Use <option>postcorrect</option>, <option>insidebox</option>
+          and <option>noshuffle</option> package options (see <xref
+          endterm="sec.package.options.title"
+          linkend="sec.package.options" />).</para>
+        </listitem>
+
+        <listitem>
+          <para>Only use <command>\wrongchoice</command> for all your choices
+          (never <command>\correctchoice</command>).</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Here is a minimal exemple:</para>
+
+      <programlisting>\documentclass[a4paper]{article}
+\usepackage{multicol}
+\usepackage[insidebox,noshuffle,postcorrect]{automultiplechoice}    
+
+\begin{document}
+
+\onecopy{5}{    
+
+\noindent
+\begin{tabular}{|l|l|l|}
+\hline
+student number &amp; class &amp; subject\\
+\hline
+ \vspace{-0.25cm}
+ &amp; &amp;\\
+\AMCcode{StudentNum}{10}&amp;
+\AMCcode{class}{2}&amp;
+\AMCcode{subject}{3}
+\\
+\hline
+\end{tabular}
+\hfill\namefield{\fbox{    
+    \begin{minipage}{.25\linewidth}
+      Name:
+      
+      \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}\hfill
+
+
+\vspace{.5cm}
+\noindent\hrulefill
+
+\begin{multicols}{2}\columnseprule=.4pt
+
+\begin{question}{01}
+\begin{choicescustom}
+\wrongchoice{}%
+\wrongchoice{}%
+\wrongchoice{}%
+\wrongchoice{}%
+\wrongchoice{}%
+\end{choicescustom}
+\end{question}
+
+\begin{question}{02}
+\begin{choicescustom}
+\wrongchoice{}%
+\wrongchoice{}%
+\wrongchoice{}%
+\wrongchoice{}%
+\wrongchoice{}%
+\end{choicescustom}
+\end{question}
+
+% continue here to get as many questions as needed...
+
+\end{multicols}  
+
+}   
+
+\end{document}
+</programlisting>
+
+      <para>You can then process the LaTeX file in AMC, print the sheets, scan
+      them after the exam, and start AMC automatic data capture (including the
+      teacher sheet). When you click on <guibutton>Mark</guibutton> in the
+      <guilabel>Marking</guilabel> tab, letting <guilabel>Update marking
+      scale</guilabel> ticked, you will be prompted for the teacher answer
+      sheet number. You can then continue as usual.</para>
     </sect2>
   </sect1>
 

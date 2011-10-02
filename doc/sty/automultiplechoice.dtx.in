@@ -122,6 +122,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\string,\strip@pt,\subsection,\textcolor,\the,\thepage}
 % \DoNotIndex{\thinlines,\time,\texttt,\undefined,\unitlength,\usepackage,\vbox}
 % \DoNotIndex{\vfill,\vspace,\vss,\write}
+% \DoNotIndex{\AMC@postcorrecttrue}\DoNotIndex{\AMC@postcorrectfalse}
 %
 % \DoNotIndex{\AMC@watermarktrue}
 % \DoNotIndex{\AMC@pagelayouttrue}
@@ -433,6 +434,10 @@ along with Auto-Multiple-Choice.  If not, see
 % \ioption{nopage} cancels markers print and page layout definition
 % (see sample in section~\ref{s:plain}).
 %
+% \ioption{postcorrect} tells that correct answers won't be given in
+% the LaTeX source. The teacher will fill one answer sheet for AMC to
+% analyse the scan and set correct answers from it.
+%
 % \end{itemize}
 %
 % See also section~\ref{d:french} for a french version of some of
@@ -645,7 +650,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{Students identification}
 %
-% \DescribeMacro{\namefield}\DescribeMacro{\AMCcode}
+% \DescribeMacro{\namefield}\DescribeMacro{\AMCcode}\DescribeMacro{\AMCcodeH}
 % There are two ways to associate students to their sheets.
 % \begin{itemize}
 % \item Always add to one page of each copy some place for the student
@@ -677,6 +682,13 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \begin{code}
 %  \AMCcode{student}{6}  
 %   \end{code}
+%
+%   For smaller number of digits, the ``horizontal'' form can be preferred: 
+%   {\PexaDefaults{samplewidth=.7\PexaWidth}
+%   \begin{code}
+%  \AMCcodeH{student}{3}  
+%   \end{code}
+%   }
 % \end{itemize}
 %
 % \subsection{Separate answer sheet}\label{d:separate}
@@ -990,6 +1002,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %   inside separate answer sheet.
 % \item |\ifAMC@pagelayout| is true if the AMC page layout, with signs
 %   for scan analysis, is to be used.
+% \item |\ifAMC@postcorrect| corresponds to the use of the
+%   |postcorrect| package option.
 % \end{description}
 %    \begin{macrocode}
 \newcount\AMCload@counter
@@ -1019,6 +1033,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMCformulaire@dedans\AMCformulaire@dedansfalse
 \newif\ifAMC@zoneformulaire
 \newif\ifAMC@pagelayout\AMC@pagelayouttrue
+\newif\ifAMC@postcorrect\AMC@postcorrectfalse
 %    \end{macrocode}
 %
 % \begin{macro}{\AMCid@name}
@@ -1694,8 +1709,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMC@fin@rep{%
   \ifAMCcomplete@multi\ifAMCtype@multi%
     \lastchoices\AMCrep@count=-1%
-    \ifAMCune@bonne\wrongchoice{\@aucune}\else\correctchoice{\@aucune}%
-      \fi\fi\fi\AMCrep@fini}
+    \ifAMCune@bonne\wrongchoice{\@aucune}\else%
+      \ifAMC@postcorrect\wrongchoice{\@aucune}\else\correctchoice{\@aucune}\fi%
+    \fi\fi\fi\AMCrep@fini}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
 % \subsubsection{Separate answer sheet}
@@ -1925,7 +1941,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{Codes}
 %
-% \begin{macro}{\AMCcode}
+% \begin{macro}{\AMCcode}\begin{macro}{\AMCcodeH}
 % \noindent\begin{minipage}[t]{.45\linewidth}
 % Students can code some numerical information (such as student
 % number) through special questions, which can be formatted easily
@@ -1947,11 +1963,21 @@ Three digits and two letters:\insertgroup{mixed}.
 % \begin{minipage}[t]{.45\linewidth}
 %   \begin{amcxyfile}{automultiplechoice.xy3}\AMCcode{code}{6}\end{amcxyfile}
 %
+% \vspace{4mm}
 %   \makeatletter\AMC@ensembletrue\makeatother
 %   \AMCcode{code}{6}
 % \end{minipage}
+% \vspace{4mm}
 %
-%   
+% \noindent\begin{minipage}[t]{.35\linewidth}
+%   The ``horizontal'' version |\AMCcodeH| can also be considered,
+%   specially with a small number of digits. See opposite for the
+%   result of |\AMCcodeH{code}{3}|.
+% \end{minipage}\hfill
+% \begin{minipage}[t]{.6\linewidth}
+%   \AMCcodeH{code}{3}
+% \end{minipage}
+% 
 %    \begin{macrocode}
 \newcount\AMC@chiffres
 \newdimen\AMCcodeHspace\AMCcodeHspace=.5em
@@ -1986,7 +2012,33 @@ Three digits and two letters:\insertgroup{mixed}.
  \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
  \hspace{-\AMCcodeHspace}%
 }}
-%    \end{macrocode}\end{macro}
+\newcommand{\AMCcodeH}[2]{%
+{\def\AMCbeginQuestion##1##2{}%
+ \setlength{\parindent}{0pt}%
+ \def\AMCbeginAnswer{\hbox\bgroup}%
+ \def\AMCendAnswer{\egroup\vspace{\AMCcodeVspace}\par}%
+ \def\AMCanswer##1##2{\hbox{##1\ifAMC@ensemble\else%
+   \ifAMC@inside@box\else\hspace{\AMCcodeBoxSep}\textbf{##2}\fi\fi}%
+   \hspace{\AMCcodeHspace}}%
+ \AMCnobloc%
+ \AMC@chiffres=#2\loop%
+ \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative%
+   \begin{choicescustom}[o]\scoring{auto=0}%
+     \wrongchoice[0]{0}%
+     \wrongchoice[1]{1}%
+     \wrongchoice[2]{2}%
+     \wrongchoice[3]{3}%
+     \wrongchoice[4]{4}%
+     \wrongchoice[5]{5}%
+     \wrongchoice[6]{6}%
+     \wrongchoice[7]{7}%
+     \wrongchoice[8]{8}%
+     \wrongchoice[9]{9}%
+   \end{choicescustom}%
+ \end{question}%
+ \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
+}}
+%    \end{macrocode}\end{macro}\end{macro}
 %
 % \subsubsection{Intervals}
 %
@@ -2219,6 +2271,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@premierecopie{100}}
 \DeclareOption{plain}{\AMC@plaintrue}
 \DeclareOption{nopage}{\AMC@pagelayoutfalse}
+\DeclareOption{postcorrect}{\AMC@postcorrecttrue}
 \ProcessOptions
 %    \end{macrocode}
 %
@@ -2336,6 +2389,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi
 \ifAMC@inside@box\AMC@amclog{AUTOQCM[VAR:insidebox=1]^^J}\fi
 \ifAMC@outside@box\AMC@amclog{AUTOQCM[VAR:outsidebox=1]^^J}\fi
+\ifAMC@postcorrect\AMC@amclog{AUTOQCM[VAR:postcorrect=1]^^J}\fi
 %    \end{macrocode}
 %
 % Preparing writing to |.xy| file :

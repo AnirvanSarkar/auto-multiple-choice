@@ -216,7 +216,7 @@
           <para>La commande <command>\AMCcode</command> a été réécrite au
           passage à la version 0.518. La nouvelle version est plus propre et
           mieux configurable, mais vous aurez sans doute à adapter légèrement
-          votre code LaTeX pour que le résultat reste semblable. </para>
+          votre code LaTeX pour que le résultat reste semblable.</para>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -717,7 +717,7 @@ Durée : 10 minutes.
       <title>Description des commandes LaTeX</title>
 
       <sect3 id="sec.package.options">
-        <title>Options du paquet</title>
+        <title id="sec.package.options.titre">Options du paquet</title>
 
         <para>L'utilisation du paquet <package>automultiplechoice</package> se
         fait grâce à la ligne <programlisting>\usepackage[...]{automultiplechoice}</programlisting>où
@@ -1184,22 +1184,25 @@ Durée : 10 minutes.
         chiffres du codage désiré. On pourra par exemple utiliser l'entête de
         copie suivant :</para>
 
-        <para><programlisting>\noindent\AMCcode{num.etud}{8}\hspace*{\fill}
-\begin{minipage}{.5\linewidth}
-$\longleftarrow{}$ codez votre numéro d'étudiant ci-contre,
-et écrivez votre nom et prénom ci-dessous.
+        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+\begin{minipage}[b]{6.5cm}
+$\longleftarrow{}$\hspace{0pt plus 1cm} codez votre numéro d'étu\-diant ci-contre,
+et inscrivez votre nom et prénom ci-dessous.
 
 \vspace{3ex}
 
-\champnom{\fbox{    
+\hfill\champnom{\fbox{    
     \begin{minipage}{.9\linewidth}
       Nom et prénom :
       
       \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
-  }}
-\end{minipage}
+  }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
+
+}
 </programlisting></para>
 
         <para>Dans le cas de l'utilisation de l'option
@@ -1220,6 +1223,10 @@ et écrivez votre nom et prénom ci-dessous.
         <programlisting>\AMCcodeHspace=.5em
 \AMCcodeVspace=.5em
 \AMCcodeBoxSep=.1em</programlisting>
+
+        <para>Notons enfin qu'il existe aussi la version horizontale
+        <command>AMCcodeH</command> de cette commande, particulièrement utile
+        pour un faible nombre de chiffres dans le code à saisir.</para>
       </sect3>
 
       <sect3>
@@ -1559,8 +1566,8 @@ et écrivez votre nom et prénom ci-dessous.
       sujet.</para>
     </sect2>
 
-    <sect2>
-      <title>Impression du sujet</title>
+    <sect2 id="impression">
+      <title id="impression.titre">Impression du sujet</title>
 
       <warning>
         <para>Quelle que soit la méthode d'impression utilisée, il est
@@ -2467,6 +2474,201 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       linkend="liste.etudiants" />). Si on laisse ce champ vide, une valeur
       par défaut formée du nom et du numéro d'étudiant de l'étudiant sera
       utilisée.</para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Utilisations particulières</title>
+
+    <sect2>
+      <title>Photocopie du sujet</title>
+
+      <para>Comme expliqué dans <xref endterm="impression.titre"
+      linkend="impression" />, il n'est pas possible de photocopier une
+      feuille de réponses pour en donner à plusieurs étudiants. Cependant,
+      dans le cas de l'utilisation de la feuille de réponses séparée, et quand
+      les questions et réponses ne doivent pas être mélangées, il est possible
+      de photocopier le sujet et imprimer les feuilles de réponses séparément.
+      La conduite à suivre pour obtenir un tel résultat est indiquée
+      ici.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Utiliser l'option <option>ensemble</option> (voir <xref
+          endterm="sec.package.options.titre"
+          linkend="sec.package.options" />).</para>
+        </listitem>
+
+        <listitem>
+          <para>Écrire le sujet avant l'utilisation de la commande
+          <command>exemplaire</command>, ou de l'environnement
+          <command>copieexamen</command>.</para>
+        </listitem>
+
+        <listitem>
+          <para>Utiliser la commande <command>\AMCformS</command> pour
+          restituer les cases à cocher sur chaque feuille de réponses, à
+          l'intérieur de
+          <command>exemplaire</command>/<command>copieexamen</command>.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Voici un example minimal de fichier LaTeX :</para>
+
+      <programlisting>\documentclass[a4paper]{article}
+\usepackage[ensemble]{automultiplechoice}    
+\begin{document}
+
+\noindent{\bf Sujet}
+
+\begin{question}{sum}
+  Combien font un plus un ?
+  \begin{reponses}
+    \mauvaise{1}
+    \bonne{2}
+    \mauvaise{3}
+  \end{reponses}
+\end{question}
+
+\begin{question}{k2}
+  Quelle est l'altitude du K2?
+  \begin{reponses}
+    \mauvaise{around 8000m}
+    \bonne{around 8600m}
+    \mauvaise{around 9000m}
+  \end{reponses}
+\end{question}
+
+\AMCcleardoublepage    
+
+\exemplaire{5}{    
+
+\AMCdebutFormulaire    
+
+{\large\bf Feuille de r\'eponses :}
+\hfill \champnom{\fbox{    
+    \begin{minipage}{.5\linewidth}
+      Nom:
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\AMCformS    
+
+}  
+
+\end{document}</programlisting>
+    </sect2>
+
+    <sect2>
+      <title>Correction a posteriori</title>
+
+      <para>Supposons que vous souhaitez utiliser une unique feuille de
+      réponses générique pour tous vos examens. Elle contiendra simplement des
+      cases à cocher (par exemple 5 cases par question, et 40 questions). Les
+      sujets des examens seront rédigés à part. Le problème ici est que les
+      bonnes réponses ne sont pas indiquées dans le fichier LaTeX, ce qui fait
+      que AMC ne peut pas les connaître. La solution consiste à demander à
+      l'enseignant de cocher sur une feuille de réponse les bonnes réponses,
+      qui sera transmise à AMC pour qu'il y lise les bonnes réponses.</para>
+
+      <para>Pour mettre en œuvre ce schéma de fonctionnement, vous
+      devez :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>utiliser les options <option>postcorrect</option>,
+          <option>insidebox</option> et <option>noshuffle</option> (voir <xref
+          endterm="sec.package.options.titre"
+          linkend="sec.package.options" />) ;</para>
+        </listitem>
+
+        <listitem>
+          <para>utiliser <command>\mauvaise</command> pour toutes les réponses
+          (jamais <command>\bonne</command>).</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Voici un exemple minimal :</para>
+
+      <programlisting>\documentclass[a4paper]{article}
+\usepackage{multicol}
+\usepackage[insidebox,noshuffle,postcorrect]{automultiplechoice}    
+
+\begin{document}
+
+\exemplaire{5}{    
+
+\noindent
+\begin{tabular}{|l|l|l|}
+\hline
+num\'ero d'\'etudiant &amp; classe &amp; sujet\\
+\hline
+ \vspace{-0.25cm}
+ &amp; &amp;\\
+\AMCcode{NumEtud}{10}\hspace*{\fill}&amp;
+\AMCcode{Classe}{2}\hspace*{\fill}&amp;
+\AMCcode{Sujet}{3}\hspace*{\fill}
+\\
+\hline
+\end{tabular}
+\hfill\namefield{\fbox{    
+    \begin{minipage}{.25\linewidth}
+      Nom :
+      
+      \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}\hfill
+
+
+\vspace{.5cm}
+\noindent\hrulefill
+
+\begin{multicols}{2}\columnseprule=.4pt
+
+\begin{question}{01}
+\begin{reponsesperso}
+\mauvaise{}%
+\mauvaise{}%
+\mauvaise{}%
+\mauvaise{}%
+\mauvaise{}%
+\end{reponsesperso}
+\end{question}
+
+\begin{question}{02}
+\begin{reponsesperso}
+\mauvaise{}%
+\mauvaise{}%
+\mauvaise{}%
+\mauvaise{}%
+\mauvaise{}%
+\end{reponsesperso}
+\end{question}
+
+% continuez ici pour ajouter autant de questions que souhaité...
+
+\end{multicols}  
+
+}   
+
+\end{document}</programlisting>
+
+      <para>Après traitement du fichier LaTeX par AMC, imprimez les feuilles
+      de réponses obtenues, faites passer l'examen et demandez à l'enseignant
+      de remplir une feuille. Scannez ensuite les feuilles de réponses, et
+      lancez la saisie automatique dans AMC (y compris de la feuille remplie
+      par l'enseignant). Quand vous cliquez sur
+      <guibutton>Corriger</guibutton> dans l'onglet
+      <guilabel>Notation</guilabel>, en laissant la case <guilabel>Mettre à
+      jour le barème</guilabel> cochée, AMC vous demandera le numéro de la
+      copie remplie par l'enseignant. La suite des opérations est la même que
+      dans le cas standard.</para>
     </sect2>
   </sect1>
 

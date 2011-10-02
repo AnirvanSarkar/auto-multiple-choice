@@ -44,6 +44,7 @@ use AMC::Basic;
 use AMC::State;
 use AMC::MEPList;
 use AMC::ANList;
+use AMC::Scoring;
 use AMC::Gui::Manuel;
 use AMC::Gui::Association;
 use AMC::Gui::Commande;
@@ -273,6 +274,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'code_examen'=>'',
 
 		   'nombre_copies'=>0,
+
+		   'postcorrect_id'=>0,
 	    
 		   '_modifie'=>1,
 		   '_modifie_ok'=>0,
@@ -2833,14 +2836,88 @@ sub noter {
 			      absolu($projet{'options'}->{'texsrc'}),
 			      ],
 		 'texte'=>__"Extracting marking scale...",
-		 'fin'=>\&noter_calcul,
+		 'fin'=>\&noter_postcorrect,
 		 'progres.id'=>'bareme');
     } else {
 	noter_calcul();
     }
 }
 
+my $g_pcid;
+my %postcorrect_ids=();
+
+sub noter_postcorrect {
+
+    # check marking scale data: in PostCorrect mode, ask for a sheet
+    # number to get right answers from...
+
+    my $bar=AMC::Scoring::new('file'=>absolu($projet{'options'}->{'fichbareme'}),
+			      'onerror'=>'stderr');
+    if($bar->main_var('postcorrect')) {
+
+	debug "PostCorrect option ON";
+
+	# gets available sheet ids
+
+	my @ids=sort { $a <=> $b } map { my @a=get_epo($_);$a[0]; } ($projet{'_an_list'}->ids());
+
+	%postcorrect_ids=map { $_ => 1 } @ids;
+
+	# ask user for a choice
+
+	$g_pcid=Gtk2::GladeXML->new($glade_xml,'choix_postcorrect','auto-multiple-choice');
+	$g_pcid->signal_autoconnect_from_package('main');
+	for(qw/choix_postcorrect postcorrect_id postcorrect_apply/) {
+	    $w{$_}=$g_pcid->get_widget($_);
+	}
+
+	if(@ids) {
+	    $w{'postcorrect_id'}->set_range($ids[0],$ids[$#ids]);
+	}	    
+
+	if($projet{'options'}->{'postcorrect_id'}) {
+	    $w{'postcorrect_id'}->set_value($projet{'options'}->{'postcorrect_id'});
+	} elsif(@ids) {
+	    $w{'postcorrect_id'}->set_value($ids[0]);
+	} else {
+	    $w{'postcorrect_id'}->set_value(1);
+	}
+
+    } else {
+	noter_calcul();
+    }
+}
+
+sub postcorrect_change {
+    my $pc=$w{'postcorrect_id'}->get_value();
+    $w{'postcorrect_apply'}->set_sensitive($postcorrect_ids{$pc});
+}
+
+sub choix_postcorrect_cancel {
+    $w{'choix_postcorrect'}->destroy();
+}
+
+sub choix_postcorrect_ok {
+    my $pc=$w{'postcorrect_id'}->get_value();
+    $w{'choix_postcorrect'}->destroy();
+
+    if($pc != $projet{'options'}->{'postcorrect_id'}) {
+	$projet{'options'}->{'postcorrect_id'}=$pc;
+	$projet{'options'}->{'_modifie_ok'}=1;
+    }
+
+    noter_calcul($pc);
+}
+
 sub noter_calcul {
+
+    my ($postcorrect)=@_;
+
+    debug "Using sheet $postcorrect to get correct answers"
+	if($postcorrect);
+    
+    # computes marks.
+
     commande('commande'=>["auto-multiple-choice","note",
 			  "--debug",debug_file(),
 			  "--cr",absolu($projet{'options'}->{'cr'}),
@@ -2854,6 +2931,7 @@ sub noter_calcul {
 			  "--notemax",$projet{'options'}->{'note_max'},
 			  "--plafond",$projet{'options'}->{'note_max_plafond'},
 			  "--notemin",$projet{'options'}->{'note_min'},
+			  "--postcorrect",$postcorrect,
 			  
 			  "--encodage-interne",$o{'encodage_interne'},
 			  "--progression-id",'notation',
