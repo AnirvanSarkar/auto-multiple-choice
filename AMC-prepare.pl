@@ -478,7 +478,6 @@ if($mode =~ /b/) {
     # compilation en mode calibration
 
     my %bs=();
-    my %qs=();
     my %titres=();
 
     my $quest='';
@@ -508,7 +507,7 @@ if($mode =~ /b/) {
 	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
 	    $quest=$1;
 	    $rep=''; 
-	    $qs{$quest}={};
+	    $bs{$etu}->{'_QUESTIONS_'}->{$quest}={};
 	}
 	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
 	    $avance->progres($delta) if($etu ne '');
@@ -521,10 +520,10 @@ if($mode =~ /b/) {
 	    $titres{$1}=$2;
 	}
 	if(/AUTOQCM\[MULT\]/) { 
-	    $qs{$quest}->{'multiple'}=1;
+	    $bs{$etu}->{'_QUESTIONS_'}->{$quest}->{'multiple'}=1;
 	}
 	if(/AUTOQCM\[INDIC\]/) { 
-	    $qs{$quest}->{'indicative'}=1;
+	    $bs{$etu}->{'_QUESTIONS_'}->{$quest}->{'indicative'}=1;
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	    $rep=$1;
@@ -580,12 +579,12 @@ if($mode =~ /b/) {
 				  bareme=>$bse->{"$q."}->{-bareme});
 	    }
 	} else {
-	    for my $q (keys %qs) {
+	    for my $q (keys %{$bs{$etu}->{'_QUESTIONS_'}}) {
 		$writer->startTag('question',id=>$q,
 				  titre=>$titres{$q},
 				  bareme=>$bse->{"$q."}->{-bareme},
-				  indicative=>$qs{$q}->{'indicative'},
-				  multiple=>$qs{$q}->{'multiple'},
+				  indicative=>$bs{$etu}->{'_QUESTIONS_'}->{$q}->{'indicative'},
+				  multiple=>$bs{$etu}->{'_QUESTIONS_'}->{$q}->{'multiple'},
 		    );
 		
 		for my $i (keys %$bse) {
