@@ -290,7 +290,7 @@ for my $etud (@a_calculer) {
     # Final mark --
     
     # total qui faut pour avoir le max
-    $max_i=$bar->main_tag('SUF',$max_i);
+    $max_i=$bar->main_tag('SUF',$max_i,$etud);
     if($max_i<=0) {
 	debug "Warning: Nonpositive value for MAX.";
 	$max_i=1;
