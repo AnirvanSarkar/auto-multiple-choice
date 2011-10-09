@@ -564,12 +564,16 @@ if($mode =~ /b/) {
 	      postcorrect=>$info_vars{'postcorrect'},
 	);
 
-    $opts{'main'}=$bs{''}->{'.'}->{-bareme} if($bs{''}->{'.'}->{-bareme});
+    $opts{'main'}=$bs{0}->{'.'}->{-bareme} if($bs{0}->{'.'}->{-bareme});
 
     $writer->startTag('bareme',%opts);
 
     for my $etu (grep { $_ ne '' } (keys %bs)) {
-	$writer->startTag('etudiant',id=>$etu);
+	%opts=(id=>$etu);
+	$opts{'main'}=$bs{$etu}->{'.'}->{-bareme}
+	    if($bs{$etu}->{'.'}->{-bareme});
+
+	$writer->startTag('etudiant',%opts);
 
 	my $bse=$bs{$etu};
 	my @q_ids=();

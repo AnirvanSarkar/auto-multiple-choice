@@ -92,8 +92,12 @@ sub version {
 
 # returns the main (outside questions) scoring strategy string
 sub main {
-    my ($self)=@_;
-    return($self->{'bar'}->{'main'});
+    my ($self,$etu)=@_;
+    if($etu) {
+	return($self->{'bar'}->{'etudiant'}->{$etu}->{'main'});
+    } else {
+	return($self->{'bar'}->{'main'});
+    }
 }
 
 # returns the main (outside questions) variable value
@@ -310,9 +314,15 @@ sub degroupe {
 # returns a given parameter from the main scoring strategy, or
 # $default if not present.
 sub main_tag {
-    my ($self,$tag,$default)=@_;
+    my ($self,$tag,$default,$etu)=@_;
+    my $r=$default;
     my %m=($self->degroupe($self->main,{},{}));
-    return(defined($m{$tag}) ? $m{$tag} : $default);
+    $r=$m{$tag} if(defined($m{$tag}));
+    if($etu) {
+	%m=($self->degroupe($self->main($etu),{},{}));
+	$r=$m{$tag} if(defined($m{$tag}));
+    }
+    return($r);
 }
 
 # returns the score for a particular student-sheet/question, applying
