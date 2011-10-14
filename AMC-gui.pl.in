@@ -2314,7 +2314,7 @@ sub saisie_auto_ok {
     $w{'saisie_auto'}->destroy();
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    # split multipage files
+    # Begin scans pre-processing before sending them for analysis
 
     my @fs=();
 
@@ -2324,6 +2324,43 @@ sub saisie_auto_ok {
     $w{'annulation'}->set_sensitive(0);
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
+    # first pass: split multi-page PDF with pdftk, which uses less
+    # memory than ImageMagick
+    if(commande_accessible('pdftk')) {
+	for my $file (@f) {
+	    if($file =~ /\.pdf$/i) {
+
+	    $w{'avancement'}->set_text(sprintf(
+					   __("Splitting multi-page PDF file %s..."),
+					   $file));
+	    $w{'avancement'}->set_fraction(0);
+
+	    Gtk2->main_iteration while ( Gtk2->events_pending );
+		my $temp_loc=tmpdir();
+		my $temp_dir = tempdir( DIR=>$temp_loc,
+					CLEANUP => (!get_debug()) );
+	    
+		debug "PDF split tmp dir: $temp_dir";
+	    
+		system("pdftk",$file,"burst","output",
+		       $temp_dir.'/page-%04d.pdf');
+
+		opendir(my $dh, $temp_dir) 
+		    || debug "can't opendir $temp_dir: $!";
+		push @fs, map { "$temp_dir/$_" }
+		grep { /^page/ } readdir($dh);
+		closedir $dh;
+		
+	    } else {
+		push @fs,$file;
+	    }
+	}
+	@f=@fs;
+    }
+
+    # second pass: split other multi-page images (such as TIFF) with
+    # ImageMagick, and convert vector to bitmap
+    @fs=();
     for my $fich (@f) {
 	my (undef,undef,$fich_n)=splitpath($fich);
 	my $suffix_change='';
@@ -2358,8 +2395,11 @@ sub saisie_auto_ok {
 	    # to bitmap format
 
 	    $w{'commande'}->show();
-	    $w{'avancement'}->set_text((__"Splitting multi-page image")." ".
-				       $fich_n."...");
+	    $w{'avancement'}->set_text(sprintf(
+					   ($vector 
+					    ? __("Converting %s to bitmap...")
+					    : __("Splitting multi-page image %s...")),
+					   $fich_n));
 	    $w{'avancement'}->set_fraction(0);
 	    Gtk2->main_iteration while ( Gtk2->events_pending );
 	    
