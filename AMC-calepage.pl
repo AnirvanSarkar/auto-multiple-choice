@@ -114,6 +114,7 @@ GetOptions("page=s"=>\$out_cadre,
 set_debug($debug);
 
 my $traitement;
+my $upside_down;
 
 my $commandes=AMC::Exec::new('AMC-calepage');
 $commandes->signalise();
@@ -214,6 +215,14 @@ my $cadre_general,$cadre_origine;
 
 my $lay;
 
+sub commande_transfo {
+    my @r=$traitement->commande(@_);
+    for(@r) {
+	$cale->{'t_'.$1}=$2 if(/([a-f])=(-?[0-9.]+)/);
+	$cale->{'MSE'}=$1 if(/MSE=([0-9.]+)/);
+    }
+}
+
 sub calage_reperes {
     my $id=shift;
     $lay=$mep_dispos->mep($id);
@@ -225,12 +234,8 @@ sub calage_reperes {
 	if($traitement->mode() eq 'opencv') {
 
 	    $cale=AMC::Calage::new('type'=>'lineaire');
-	    my @r=$traitement->commande(join(' ',"optim",
-					     $cadre_origine->draw_points()));
-	    for(@r) {
-		$cale->{'t_'.$1}=$2 if(/([a-f])=(-?[0-9.]+)/);
-		$cale->{'MSE'}=$1 if(/MSE=([0-9.]+)/);
-	    }
+	    commande_transfo(join(' ',"optim",
+				  $cadre_origine->draw_points()));
 
 	} else {
 	    
@@ -469,28 +474,54 @@ sub get_id_binaire {
 
 erreur("No layout instructions...") if(!($mep_saved || -d $xml_layout));
 
-#####
-# calage sur une MEP au hasard pour recuperer l'ID binaire
+sub read_id {
+    print "Positionning to read ID...\n";
+    debug "Positionning to read ID...\n";
+    
+    # first, use the layout info from a random page (they should be
+    # the same for all pages) to get the transformation layout->scan
 
-# caler sur une mise en page quelconque :
-print "Positionning to read ID...\n";
-debug "Positionning to read ID...\n";
+    calage_reperes();
+    
+    # prepares digit-boxes reading 
 
-calage_reperes();
+    for my $c (@{$lay->{'chiffre'}}) {
+	my $k=code_cb($c->{'n'},$c->{'i'});
+	my $c0=AMC::Boite::new_xml($c);
+	$case{$k}=$c0->transforme($cale);
+    }
+    
+    # reads the ID from the binary boxes
 
-for my $c (@{$lay->{'chiffre'}}) {
-    my $k=code_cb($c->{'n'},$c->{'i'});
-    my $c0=AMC::Boite::new_xml($c);
-    $case{$k}=$c0->transforme($cale);
+    get_id_binaire();
+
+    # computes again the transformation from the layout info of the
+    # right page
+    
+    calage_reperes($id_page);
 }
 
-get_id_binaire();
+#####
 
-valide_id_page();
+read_id();
+$upside_down=0;
 
-calage_reperes($id_page);
+if(($traitement->mode() eq 'opencv') && !$lay) {
+    # Unknown ID: tries again upside down
+
+    $traitement->commande("rotate180");
+
+    read_id();
+    $upside_down=1;
+}
 
 erreur("No XML for ID $id_page") if(! $lay);
+
+if($traitement->mode() eq 'opencv') {
+    commande_transfo("rotateOK");
+}
+
+valide_id_page();
 
 if($repertoire_cr && ($traitement->mode() eq 'opencv')) {
     $traitement->commande("zooms $repertoire_cr/zooms");
@@ -641,15 +672,20 @@ if($zoom_file && ($traitement->mode ne 'opencv')) {
 
     print "Making zooms...\n";
 
-    my $commandes=AMC::Exec::new("AMC-calepage");
-    $commandes->signalise();
-
     $commandes->execute("auto-multiple-choice","zoom",
 			"--seuil",$seuil_coche,
 			"--analyse",$analyse_file,
 			"--scan",$scan,
 			"--output",$zoom_file,
 			);
+}
+
+if($upside_down) {
+    # Rotates the scan file
+    print "Rotating...\n";
+
+    $commandes->execute(magick_module("convert"),
+			"-rotate","180",$scan,$scan);
 }
 
 $avance->fin();
