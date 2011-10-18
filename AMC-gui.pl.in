@@ -2879,8 +2879,22 @@ sub voir_notes {
 
 sub noter {
     if($projet{'options'}->{'maj_bareme'}) {
+	my $n_copies=$projet{'options'}->{'nombre_copies'};
+	my @mep_etus=$projet{'_mep_list'}->etus();
+	my $n_mep=$mep_etus[$#mep_etus];
+	if($n_copies<$n_mep) {
+	    # number of requested copies is less than the number of
+	    # prepared copies: check that it is sufficient (look at
+	    # greater copy number within scans), and use a larger
+	    # one if not.
+	    debug "Requested $n_copies copies for scoring strategy, but has $n_mep layouts";
+	    my @ids=sort { $b <=> $a } map { my @a=get_epo($_);$a[0]; } ($projet{'_an_list'}->ids());
+	    my $n_an=$ids[0];
+	    debug "Max used copy number: $n_an";
+	    $n_copies=$n_an if($n_an>$n_copies);
+	}
 	commande('commande'=>["auto-multiple-choice","prepare",
-			      "--n-copies",$projet{'options'}->{'nombre_copies'},
+			      "--n-copies",$n_copies,
 			      "--with",moteur_latex(),
 			      "--debug",debug_file(),
 			      "--progression-id",'bareme',
