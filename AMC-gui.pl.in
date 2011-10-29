@@ -4305,6 +4305,7 @@ sub source_latex_choisir {
 	    my $filtre_zip=Gtk2::FileFilter->new();
 	    $filtre_zip->set_name(__"Archive (zip, tgz)");
 	    $filtre_zip->add_pattern("*.zip");
+	    $filtre_zip->add_pattern("*.tar.gz");
 	    $filtre_zip->add_pattern("*.tgz");
 	    $filtre_zip->add_pattern("*.TGZ");
 	    $filtre_zip->add_pattern("*.ZIP");
