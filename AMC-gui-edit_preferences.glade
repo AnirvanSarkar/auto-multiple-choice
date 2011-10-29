@@ -430,7 +430,23 @@
                               </object>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkComboBox" id="pref_ce_defaut_moteur_latex_b">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Default command to compile LaTeX file and make PDF, PS or DVI output (may be changed for each project).</property>
+                                <property name="model">moteurs_principaux</property>
+                                <property name="has_entry">True</property>
+                                <property name="entry_text_column">0</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="combobox-entry11">
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                              </packing>
                             </child>
                             <child>
                               <placeholder/>
@@ -560,10 +576,44 @@
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkComboBox" id="pref_ce_defaut_encodage_liste">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Default encoding for the students list file.</property>
+                                <property name="model">encodages_principaux</property>
+                                <property name="has_entry">True</property>
+                                <property name="entry_text_column">0</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="combobox-entry">
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkComboBox" id="pref_ce_defaut_encodage_csv">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Default charset for AMC CSV output.</property>
+                                <property name="model">encodages_principaux</property>
+                                <property name="has_entry">True</property>
+                                <property name="entry_text_column">0</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="combobox-entry3">
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
                             </child>
                             <child>
                               <placeholder/>
@@ -2546,10 +2596,44 @@
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkComboBox" id="pref_projet_ce_encodage_liste">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Charset used for the students list file</property>
+                                <property name="model">encodages_principaux</property>
+                                <property name="has_entry">True</property>
+                                <property name="entry_text_column">0</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="combobox-entry4">
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkComboBox" id="pref_projet_ce_encodage_csv">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Charset for the CSV marks sheet produced by AMC.</property>
+                                <property name="model">encodages_principaux</property>
+                                <property name="has_entry">True</property>
+                                <property name="entry_text_column">0</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="combobox-entry5">
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
                             </child>
                           </object>
                         </child>
@@ -2594,7 +2678,23 @@
                               </object>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkComboBox" id="pref_projet_ce_moteur_latex_b">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Command to compile LaTeX file and make PDF, PS or DVI output.</property>
+                                <property name="model">moteurs_principaux</property>
+                                <property name="has_entry">True</property>
+                                <property name="entry_text_column">0</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="combobox-entry6">
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                              </packing>
                             </child>
                           </object>
                         </child>
@@ -2713,6 +2813,23 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="encodages_principaux">
+    <columns>
+      <!-- column-name item -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">UTF-8</col>
+      </row>
+      <row>
+        <col id="0">ISO-8859-15</col>
+      </row>
+      <row>
+        <col id="0">Windows-1252</col>
+      </row>
+    </data>
   </object>
   <object class="GtkListStore" id="liststore1">
     <columns>
@@ -2942,6 +3059,23 @@
       </row>
       <row>
         <col id="0" translatable="yes"></col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="moteurs_principaux">
+    <columns>
+      <!-- column-name item -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">pdflatex</col>
+      </row>
+      <row>
+        <col id="0">latex</col>
+      </row>
+      <row>
+        <col id="0">xelatex</col>
       </row>
     </data>
   </object>
