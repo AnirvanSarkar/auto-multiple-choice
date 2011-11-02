@@ -60,7 +60,7 @@ my $dpi=300;
 my $calage='';
 
 my $moteur_latex='latex';
-my $moteur_topdf='';
+
 my $prefix='';
 
 my $debug='';
@@ -101,11 +101,6 @@ GetOptions("mode=s"=>\$mode,
 set_debug($debug);
 
 debug("AMC-prepare / DEBUG") if($debug);
-
-if($moteur_latex =~ /(.*)\+(.*)/) {
-    $moteur_latex=$1;
-    $moteur_topdf=$2;
-}
 
 $queue=AMC::Queue::new('max.procs',$n_procs);
 
@@ -269,25 +264,13 @@ sub execute {
 
     if($format eq 'dvi') {
 	if(-f $f_base.".dvi") {
-	    $moteur_topdf='dvipdfm'
-		if(!$moteur_topdf);
-	    if(!commande_accessible($moteur_topdf)) {
-		debug_and_stderr
-		    "WARNING: command $moteur_topdf not available";
-		$moteur_topdf=choose_command('dvipdfmx','dvipdfm','xdvipdfmx',
-					     'dvipdf');
-	    }
-	    if($moteur_topdf) {
-		debug "Converting DVI to PDF with $moteur_topdf ...";
-		if($moteur_topdf eq 'dvipdf') {
-		    system($moteur_topdf,$f_base.".dvi",$f_base.".pdf");
-		} else {
-		    system($moteur_topdf,"-o",$f_base.".pdf",$f_base.".dvi");
-		}
-		debug_and_stderr "ERROR $moteur_topdf: $?" if($?);
+	    if(commande_accessible('dvipdfm')) {
+		debug "Converting DVI to PDF with dvipdfm...";
+		system("dvipdfm","-o",$f_base.".pdf",$f_base.".dvi");
+		print "ERROR dvipdfm: $?\n" if($?);
 	    } else {
-		debug_and_stderr
-		    "ERROR: I can't find dvipdf/dvipdfm/xdvipdfmx command !";
+		print "ERROR: I can't find dvipdfm command !";
+		debug "ERROR: I can't find dvipdfm command !";
 	    }
 	} else {
 	    debug "No DVI";
