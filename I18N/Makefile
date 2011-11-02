@@ -27,7 +27,7 @@ AMC=..
 
 PERL=$(AMC)/*.pl $(AMC)/AMC-perl/AMC/*.pm $(AMC)/AMC-perl/AMC/**/*.pm 
 
-GLADE=$(AMC)/AMC-gui.glade $(AMC)/AMC-perl/AMC/**/*.glade
+GLADE=$(AMC)/AMC-*.glade $(AMC)/AMC-perl/AMC/**/*.glade
 
 POS=$(wildcard lang/*.po)
 MOS=$(POS:.po=.mo)
