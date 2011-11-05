@@ -103,7 +103,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\arabic,\AtBeginDocument,\IfFileExists}
 % \DoNotIndex{\AtBeginPage,\begin,\end,\begingroup,\endgroup,\textbf,\BODY}
 % \DoNotIndex{\box,\circle,\clubsuit,\csname,\DeclareFontShape}
-% \DoNotIndex{\DeclareOption,\def,\define@key,\divide,\do,\dp,\edef,\else}
+% \DoNotIndex{\DeclareOptionX,\def,\define@key,\divide,\do,\dp,\edef,\else}
 % \DoNotIndex{\emph,\endcsname,\eTeXversion,\expandafter,\fancyfoot}
 % \DoNotIndex{\fancyhead,\fancyhf,\fancyhfoffset,\fboxrule,\fboxsep}
 % \DoNotIndex{\fcolorbox,\fi,\fill,\fontencoding,\fontfamily,\fontseries}
@@ -115,7 +115,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\NewEnviron,\newenvironment,\newif,\newlength,\newtoks}
 % \DoNotIndex{\newwrite,\noexpand,\noindent,\number,\openout,\PackageWarning}
 % \DoNotIndex{\page,\pagestyle,\paperheight,\paperwidth,\par,\pdflastxpos}
-% \DoNotIndex{\pdflastypos,\pdfsavepos,\ProcessOptions,\protect}
+% \DoNotIndex{\pdflastypos,\pdfsavepos,\ProcessOptionsX,\protect}
 % \DoNotIndex{\protected@write,\providecommand,\put,\ref,\relax}
 % \DoNotIndex{\renewcommand,\repeat,\RequirePackage,\romannumeral,\rotatebox}
 % \DoNotIndex{\sc,\selectfont,\setbox,\setcounter,\setkeys,\setlength}
@@ -425,6 +425,9 @@ along with Auto-Multiple-Choice.  If not, see
 % an exam. Then the questions identifiers will be printed.
 %
 % \ioption{francais} asks for french localisation.
+%
+% \ioption{lang=XX} asks for localisation in |XX| language. At
+% present, only |FR| (french) ans |SP| (spanish) are available.
 %
 % \ioption{plain} cancels \textsf{environ} and \textsf{etex} automatic
 % loading. The default behaviour is to load \textsf{environ} and
@@ -917,7 +920,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{xcolor} % \fcolorbox to fill (or not) a box
 \RequirePackage{fancyhdr} % \pagestyle{empty}
 \RequirePackage{bophook} % \AtBeginPage
-\RequirePackage{keyval} % \setkeys
+\RequirePackage{xkeyval} % \setkeys
 \RequirePackage{rotating} % \rotatebox
 %    \end{macrocode}
 % It defines a version string:
@@ -1069,7 +1072,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % \subsection{Localisation}
 %
 % In this section, some localised strings or commands are defined, for
-% English and French languages.
+% English, French ans Spanish languages.
 % \begin{macro}{\AMCtext}
 %   To modify these texts, you can use command |\AMCtext|. For
 %   example, |\AMCtext{draft}|\marg{text} sets the text to be printed
@@ -1123,6 +1126,18 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@none{Aucune de ces r\'eponses n'est correcte.}
 }
 %    \end{macrocode}
+%
+% \subsubsection{Spanish}
+%
+\def\AMC@loc@SP{
+  \def\AMC@loc@draft{BORRADOR}
+  \def\AMC@loc@message{Para revisi\'on, preferentemente imprimir documentos compilados desde auto-multiple-choice.}
+  \def\AMC@loc@qf##1{\textbf{Pregunta ##1 :}}
+  \def\AMC@loc@q##1##2{\textbf{Pregunta ##1} ##2}
+  \def\AMC@loc@corrected{Correcci\'on}
+  \def\AMC@loc@catalog{Cat\'alogo}
+  \def\AMC@loc@none{Ninguna de estas preguntas son correctas.}
+}
 %
 % \subsubsection{Other languages}
 %
@@ -2242,37 +2257,38 @@ Three digits and two letters:\insertgroup{mixed}.
 % See section~\ref{d:options} for the options descriptions.
 %
 %    \begin{macrocode}
-\DeclareOption{noshuffle}{\AMC@ordretrue}
-\DeclareOption{answers}{\AMC@correcheadtrue\AMC@correctrue}
-\DeclareOption{indivanswers}{\AMC@correctrue}
-\DeclareOption{box}{\AMC@qbloctrue}
-\DeclareOption{separateanswersheet}{\AMC@ensembletrue}
-\DeclareOption{digits}{\AMC@inside@digittrue}
-\DeclareOption{ordre}{\AMC@ordretrue}
-\DeclareOption{correc}{\AMC@correcheadtrue\AMC@correctrue}
-\DeclareOption{modele}{\AMC@correcheadtrue\AMC@correcfalse\AMC@ordretrue}
-\DeclareOption{correcindiv}{\AMC@correctrue}
-\DeclareOption{init}{\AMC@SR@time}
-\DeclareOption{bloc}{\AMC@qbloctrue}
-\DeclareOption{completemulti}{\AMCcomplete@multitrue}
-\DeclareOption{insidebox}{\AMC@inside@boxtrue}
-\DeclareOption{ensemble}{\AMC@ensembletrue}
-\DeclareOption{chiffres}{\AMC@inside@digittrue}
-\DeclareOption{outsidebox}{\AMC@outside@boxtrue}
-\DeclareOption{calibration}{\AMC@calibrationtrue}
-\DeclareOption{nowatermark}{\AMC@watermarkfalse}
-\DeclareOption{catalog}{\AMC@watermarkfalse\AMC@correcheadtrue%
+\DeclareOptionX{noshuffle}{\AMC@ordretrue}
+\DeclareOptionX{answers}{\AMC@correcheadtrue\AMC@correctrue}
+\DeclareOptionX{indivanswers}{\AMC@correctrue}
+\DeclareOptionX{box}{\AMC@qbloctrue}
+\DeclareOptionX{separateanswersheet}{\AMC@ensembletrue}
+\DeclareOptionX{digits}{\AMC@inside@digittrue}
+\DeclareOptionX{ordre}{\AMC@ordretrue}
+\DeclareOptionX{correc}{\AMC@correcheadtrue\AMC@correctrue}
+\DeclareOptionX{modele}{\AMC@correcheadtrue\AMC@correcfalse\AMC@ordretrue}
+\DeclareOptionX{correcindiv}{\AMC@correctrue}
+\DeclareOptionX{init}{\AMC@SR@time}
+\DeclareOptionX{bloc}{\AMC@qbloctrue}
+\DeclareOptionX{completemulti}{\AMCcomplete@multitrue}
+\DeclareOptionX{insidebox}{\AMC@inside@boxtrue}
+\DeclareOptionX{ensemble}{\AMC@ensembletrue}
+\DeclareOptionX{chiffres}{\AMC@inside@digittrue}
+\DeclareOptionX{outsidebox}{\AMC@outside@boxtrue}
+\DeclareOptionX{calibration}{\AMC@calibrationtrue}
+\DeclareOptionX{nowatermark}{\AMC@watermarkfalse}
+\DeclareOptionX{catalog}{\AMC@watermarkfalse\AMC@correcheadtrue%
   \AMC@correctrue\AMC@ordretrue%
   \def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue}
-\DeclareOption{francais}{\AMC@loc@FR}
-\DeclareOption{versionA}{%
+\DeclareOptionX{francais}{\AMC@loc@FR}
+\DeclareOptionX{lang}{\csname AMC@loc@#1\endcsname}
+\DeclareOptionX{versionA}{%
   \def\AMCid@checkmax{31}\def\AMC@NCBetud{9}\def\AMC@NCBpage{4}%
   \def\AMC@NCBcheck{5}\setlength{\AMC@CBtaille}{4cm}%
   \def\AMC@premierecopie{100}}
-\DeclareOption{plain}{\AMC@plaintrue}
-\DeclareOption{nopage}{\AMC@pagelayoutfalse}
-\DeclareOption{postcorrect}{\AMC@postcorrecttrue}
-\ProcessOptions
+\DeclareOptionX{plain}{\AMC@plaintrue}
+\DeclareOptionX{nopage}{\AMC@pagelayoutfalse}
+\DeclareOptionX{postcorrect}{\AMC@postcorrecttrue}
+\ProcessOptionsX
 %    \end{macrocode}
 %
 % \subsection{Optional features}
