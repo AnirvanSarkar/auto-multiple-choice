@@ -60,6 +60,7 @@ my $dpi=300;
 my $calage='';
 
 my $moteur_latex='latex';
+my @moteur_args=();
 my $moteur_topdf='';
 my $prefix='';
 
@@ -76,6 +77,8 @@ my $out_sujet='';
 my $out_corrige='';
 
 my $moteur_raster='poppler';
+
+my $jobname="amc-compiled";
 
 my $encodage_interne='UTF-8';
 
@@ -101,6 +104,11 @@ GetOptions("mode=s"=>\$mode,
 set_debug($debug);
 
 debug("AMC-prepare / DEBUG") if($debug);
+
+if($moteur_latex =~ /([^ ]+)\s+(.*)/) {
+    $moteur_latex=$1;
+    @moteur_args=split(/ +/,$2);
+}
 
 if($moteur_latex =~ /(.*)\+(.*)/) {
     $moteur_latex=$1;
@@ -225,9 +233,9 @@ sub execute {
     my $format='';
 
     for my $ext (qw/pdf dvi ps/) {
-	if(-f $f_base.".$ext") {
+	if(-f "$jobname.$ext") {
 	    debug "Removing old $ext";
-	    unlink($f_base.".$ext");
+	    unlink("$jobname.$ext");
 	}
     }
 
@@ -268,7 +276,7 @@ sub execute {
     debug "Output format: $format\n";
 
     if($format eq 'dvi') {
-	if(-f $f_base.".dvi") {
+	if(-f "$jobname.dvi") {
 	    $moteur_topdf='dvipdfm'
 		if(!$moteur_topdf);
 	    if(!commande_accessible($moteur_topdf)) {
@@ -280,9 +288,9 @@ sub execute {
 	    if($moteur_topdf) {
 		debug "Converting DVI to PDF with $moteur_topdf ...";
 		if($moteur_topdf eq 'dvipdf') {
-		    system($moteur_topdf,$f_base.".dvi",$f_base.".pdf");
+		    system($moteur_topdf,"$jobname.dvi","$jobname.pdf");
 		} else {
-		    system($moteur_topdf,"-o",$f_base.".pdf",$f_base.".dvi");
+		    system($moteur_topdf,"-o","$jobname.pdf","$jobname.dvi");
 		}
 		debug_and_stderr "ERROR $moteur_topdf: $?" if($?);
 	    } else {
@@ -336,6 +344,8 @@ sub latex_cmd {
     $o{'AMCNombreCopies'}=$nombre_copies if($nombre_copies>0);
 
     return($moteur_latex,
+	   "--jobname=".$jobname,
+	   @moteur_args,
 	   "\\nonstopmode"
 	   .join('',map { "\\def\\".$_."{".$o{$_}."}"; } (keys %o) )
 	   ." \\input{\"$f_tex\"}");
@@ -354,7 +364,7 @@ if($mode =~ /k/) {
     check_moteur();
 
     execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
-    transfere("$f_base.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
+    transfere("$jobname.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
     give_latex_errors(__"individual solution");
 }
 
@@ -380,13 +390,13 @@ if($mode =~ /s/) {
     # 1) sujet et calage
 
     execute('command'=>[latex_cmd(%opts,'SujetExterne'=>1)]);
-    analyse_amclog("$f_base.amc");
-    transfere("$f_base.pdf",$out_sujet);
+    analyse_amclog("$jobname.amc");
+    transfere("$jobname.pdf",$out_sujet);
     give_latex_errors(__"question sheet");
 
     exit(1) if($a_erreurs>0);
 
-    transfere("$f_base.xy",$out_calage);
+    transfere("$jobname.xy",$out_calage);
 
     # transmission des variables
 
@@ -398,7 +408,7 @@ if($mode =~ /s/) {
     # 2) corrige
 
     execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
-    transfere("$f_base.pdf",$out_corrige);
+    transfere("$jobname.pdf",$out_corrige);
     give_latex_errors(__"solution");
 }
 
@@ -505,7 +515,7 @@ if($mode =~ /b/) {
 
     execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)],
 	    'once'=>1);
-    open(AMCLOG,"$f_base.amc") or die "Unable to open $f_base.amc : $!";
+    open(AMCLOG,"$jobname.amc") or die "Unable to open $jobname.amc : $!";
     while(<AMCLOG>) {
 	debug($_);
 	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 
