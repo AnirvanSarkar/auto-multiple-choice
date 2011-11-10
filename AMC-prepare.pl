@@ -53,7 +53,7 @@ sub catch_signal {
 $SIG{INT} = \&catch_signal;
 
 my $mode="mbs";
-my $mep_dir="";
+my $data_dir="";
 my $bareme="";
 my $convert_opts="-limit memory 512mb";
 my $dpi=300;
@@ -84,7 +84,7 @@ my $encodage_interne='UTF-8';
 
 GetOptions("mode=s"=>\$mode,
 	   "with=s"=>\$moteur_latex,
-	   "mep=s"=>\$mep_dir,
+	   "data=s"=>\$data_dir,
 	   "bareme=s"=>\$bareme,
 	   "calage=s"=>\$calage,
 	   "out-calage=s"=>\$out_calage,
@@ -128,9 +128,9 @@ $base =~ s/\.tex$//gi;
 
 $bareme="$base-bareme.xml" if(!$bareme);
 
-$mep_dir="$base-mep" if(!$mep_dir);
+$data_dir="$base-data" if(!$data_dir);
 
-for(\$bareme,\$mep_dir,\$tex_source) {
+for(\$bareme,\$data_dir,\$tex_source) {
     $$_=rel2abs($$_);
 }
 
@@ -410,91 +410,6 @@ if($mode =~ /s/) {
     execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
     transfere("$jobname.pdf",$out_corrige);
     give_latex_errors(__"solution");
-}
-
-if($mode =~ /m/) {
-    # MISE EN PAGE
-
-    if(! -x $mep_dir) {
-	mkdir($mep_dir);
-    }
-    die "Nonexistent MEP directory: $mep_dir" if(! -d $mep_dir);
-
-    my $xyfile=$calage;
-    $xyfile =~ s/\.pdf/.xy/;
-    
-    if($xyfile =~ /\.xy$/ && -f $xyfile) {
-
-	$|++;
-	my @c=("auto-multiple-choice","meptex",
-	       "--mep-dir",$mep_dir,
-	       "--progression",0.93*$progress,
-	       "--progression-id",$progress_id,
-	       "--src",$xyfile);
-
-	$cmd_pid=open(EXEC,"-|",@c) ;
-	
-	debug "[$cmd_pid] MEP-Tex: ".join(' ',@c);
-
-	die "Can't exec AMC-meptex.pl: $!" if(!$cmd_pid);
-	while(<EXEC>) {
-	    print $_;
-	    chomp;
-	    debug($_);
-	}
-	close(EXEC);
-	
-    } else {
-
-	# OLD STYLE CALIBRATION PDF FILE - ONLY WHEN DOCUMENTS
-	# WERE MADE WITH OLD AMC VERSION
-
-	# 1) compilation en mode calibration
-
-	if(-f $calage) {
-	    print "Using file $calage\n";
-	} else {
-	    print "********** Compilation...\n";
-	    
-	    execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)]);
-	    $calage="$f_base.pdf";
-	}
-
-	$avance->progres(0.07);
-
-	# 2) analyse page par page
-
-	print "********** To bitmap and analysis...\n";
-
-	if($moteur_raster eq 'poppler') {
-
-	    # tout en un grace a poppler
-
-	    $|++;
-	    my @c=("auto-multiple-choice","mepdirect",
-		   "-r",$dpi,
-		   "-d",$mep_dir,
-		   "-e",0.93*$progress,
-		   "-n",$progress_id,
-		   $calage);
-
-	    $cmd_pid=open(EXEC,"-|",@c) ;
-
-	    debug "[$cmd_pid] Poppler: ".join(' ',@c);
-
-	    die "Can't exec AMC-mepdirect: $!" if(!$cmd_pid);
-	    while(<EXEC>) {
-		print $_;
-		chomp;
-		debug($_);
-	    }
-	    close(EXEC);
-
-	} else {
-
-	    die "This method is no longer supported... Please make new version of working documents, or switch to Poppler.";
-	}
-    }
 }
 
 if($mode =~ /b/) {

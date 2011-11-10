@@ -29,7 +29,7 @@ use AMC::Gui::Avancement;
 use AMC::AssocFile;
 use AMC::NamesFile;
 use AMC::ANList;
-use AMC::MEPList;
+use AMC::Data;
 
 use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
@@ -52,8 +52,7 @@ my $association='';
 my $fich_noms='';
 my $noms_encodage='utf-8';
 my $an_saved='';
-my $mep_dir='';
-my $mep_saved='';
+my $data_dir='';
 my $single_output='';
 my $id_file='';
 my $compose='';
@@ -73,8 +72,7 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "n-copies=s"=>\$nombre_copies,
 	   "an-saved=s"=>\$an_saved,
 	   "sujet=s"=>\$sujet,
-	   "mep=s"=>\$mep_dir,
-	   "mep-saved=s"=>\$mep_saved,
+	   "data=s"=>\$data_dir,
 	   "tex-src=s"=>\$tex_src,
 	   "with=s"=>\$moteur_latex,
 	   "modele=s"=>\$modele,
@@ -97,7 +95,7 @@ $temp_dir = tempdir( DIR=>tmpdir(),
 debug "dir = $temp_dir";
 
 $cr=$projet_dir."/cr" if($projet_dir && !$cr);
-$mep_dir=$projet_dir."/mep" if($projet_dir && !$mep_dir);
+$data_dir=$projet_dir."/data" if($projet_dir && !$data_dir);
 
 my $correc_indiv="$temp_dir/correc.pdf";
 
@@ -270,11 +268,10 @@ if($n_copies<=0) {
 }
 
 ###################################################################
-# gets the list of sheets IDs for each student
+# Connect to the database
 
-my $mep=AMC::MEPList::new($mep_dir,'saved'=>$mep_saved);
-
-my %pages_e=$mep->pages_etudiants('ip'=>1);
+my $data=AMC::Data->new($data_dir);
+my $layout=$data->module('layout');
 
 ###################################################################
 # Processing
@@ -410,6 +407,8 @@ sub process_output {
 
 stk_begin() if($single_output);
 
+$layout->begin_read_transaction;
+
 for my $e (@students) {
     print "Pages for ID=$e...\n";
 
@@ -452,26 +451,27 @@ for my $e (@students) {
 
     stk_begin() if(! $single_output);
 
-    for my $pp (@{$pages_e{$e}}) {
+    for my $pp ($layout->pages_for_student($e)) {
 
 	$ii++;
 	my $f_p="$temp_dir/$ii.pdf";
 
-	my $f_j="$jpgdir/page-".id2idf($pp->{id}).".jpg";
+	my $f_j="$jpgdir/page-".
+	    $layout->query('pageFilename',$e,$pp).".jpg";
 
 	if(-f $f_j) {
 	    # correction JPG presente : on transforme en PDF
 
-	    debug "Page $pp->{id} annotated ($f_j)";
+	    debug "Page $e/$pp annotated ($f_j)";
 
 	    stk_ppm_add($f_j);
 
 	} elsif($compose) {
 	    # pas de JPG annote : on prend la page corrigee
 
-	    debug "Page $pp->{id} from corrected sheet";
+	    debug "Page $e/$pp from corrected sheet";
 
-	    stk_pdf_add($pp->{page});
+	    stk_pdf_add($layout->page_query('pageAttr','subjectpage',$e,$pp));
 	}
     }
 
@@ -479,6 +479,8 @@ for my $e (@students) {
 
     $avance->progres(1/$n_copies);
 }
+
+$layout->end_transaction;
 
 process_output($single_output) if($single_output);
 

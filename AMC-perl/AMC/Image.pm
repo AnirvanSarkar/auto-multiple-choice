@@ -90,11 +90,12 @@ sub commande {
 
     print { $self->{'ipc_in'} } join(' ',@cmd)."\n";
 
-  GETREPONSE: while($_=readline($self->{'ipc_out'})) {
-      chomp;
-      debug "|> $_";
-      last GETREPONSE if(/_{2}END_{2}/);
-      push @r,$_;
+    my $o;
+  GETREPONSE: while($o=readline($self->{'ipc_out'})) {
+      chomp($o);
+      debug "|> $o";
+      last GETREPONSE if($o =~ /_{2}END_{2}/);
+      push @r,$o;
   }
 
     return(@r);

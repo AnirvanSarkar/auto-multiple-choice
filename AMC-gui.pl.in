@@ -41,7 +41,7 @@ use Module::Load::Conditional qw/check_install/;
 
 use AMC::Basic;
 use AMC::State;
-use AMC::MEPList;
+use AMC::Data;
 use AMC::ANList;
 use AMC::Scoring;
 use AMC::Gui::Manuel;
@@ -241,7 +241,7 @@ if(lc($^O) eq 'darwin') {
 # Default options for projects
 
 my %projet_defaut=('texsrc'=>'',
-		   'mep'=>'mep',
+		   'data'=>'data',
 		   'cr'=>'cr',
 		   'listeetudiants'=>'',
 		   'notes'=>'notes.xml',
@@ -295,7 +295,6 @@ my %projet_defaut=('texsrc'=>'',
 		   'export_sort'=>'n',
 		   );
 
-my $mep_saved='mep.storable';
 my $an_saved='an.storable';
 
 my %o=();
@@ -638,7 +637,7 @@ sub read_glade {
 my $gui=read_glade('main_window',
 		   qw/onglets_projet preparation_etats
     documents_tree
-    mep_tree edition_latex
+    edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement annulation button_mep_warnings
     liste_filename liste_path liste_edit liste_setfile liste_refresh
@@ -660,7 +659,7 @@ my $gui=read_glade('main_window',
 # why... so I remove them.
 if($w{'main_window'}->get_direction() eq 'rtl') {
     debug "RTL mode: removing vertical grids";
-    for(qw/documents mep diag inconnu/) {
+    for(qw/documents diag inconnu/) {
 	my $w=$gui->get_object($_.'_tree');
 	$w->set_grid_lines('horizontal') if($w);
     }
@@ -789,35 +788,6 @@ $column = Gtk2::TreeViewColumn->new_with_attributes (__"state",
 						     $renderer,
 						     text=> DOC_MAJ);
 $w{'documents_tree'}->append_column ($column);
-
-### modele MEP
-
-my $mep_store = Gtk2::ListStore->new ('Glib::String',
-				      'Glib::String', 
-				      'Glib::String');
-
-$w{'mep_tree'}->set_model($mep_store);
-
-$renderer=Gtk2::CellRendererText->new;
-# TRANSLATORS: (in short)
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"page",
-						     $renderer,
-						     text=> MEP_PAGE);
-$w{'mep_tree'}->append_column ($column);
-
-$renderer=Gtk2::CellRendererText->new;
-# TRANSLATORS: identification code for a page (in short)
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"ID",
-						     $renderer,
-						     text=> MEP_ID);
-$w{'mep_tree'}->append_column ($column);
-
-$renderer=Gtk2::CellRendererText->new;
-# TRANSLATORS: last modification date (in short)
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"Updated",
-						     $renderer,
-						     text=> MEP_MAJ);
-$w{'mep_tree'}->append_column ($column);
 
 ### COPIES
 
@@ -1701,23 +1671,6 @@ sub doc_active {
     commande_parallele(($f =~ /\.xy$/ ? $o{'txt_editor'} : $o{'pdf_viewer'}),$f);
 }
 
-sub mep_active {
-    my $sel=$w{'mep_tree'}->get_selection()->get_selected_rows()->get_indices();
-    my $id=($projet{'_mep_list'}->ids())[$sel];
-    debug "Active MEP $sel : ID=$id...";
-    my $f=$projet{'_mep_list'}->filename($id);
-    debug "Looking at $f...";
-    commande_parallele($o{'xml_viewer'},$f);
-}
-
-sub fichiers_mep {
-    my $md=absolu($projet{'options'}->{'mep'});
-    opendir(MDIR, $md) || die "can't opendir $md: $!";
-    my @meps = map { "$md/$_" } grep { /^mep.*xml$/ && -f "$md/$_" } readdir(MDIR);
-    closedir MDIR;
-    return(@meps);
-}
-
 sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
 
 sub doc_maj {
@@ -1744,8 +1697,8 @@ sub doc_maj {
     }
 	
     # deja des MEP fabriquees ?
-    my @meps=fichiers_mep();
-    if(@meps) {
+    $projet{_layout}->begin_transaction;
+    if($projet{_layout}->pages_count > 0) {
 	if(!$sur) {
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
@@ -1764,9 +1717,12 @@ sub doc_maj {
 	    } 
 	}
 	
-	unlink @meps;
+	$projet{_layout}->clear_all;
+	$projet{_layout}->end_transaction;
 	detecte_mep();
-    }   
+    } else {
+	$projet{_layout}->end_transaction;
+    }
 
     # new layout document : XY (from LaTeX)
     
@@ -1918,7 +1874,10 @@ sub sujet_impressions {
 	return();
     }
 
-    if($projet{'_mep_list'}->nombre==0) {
+    $projet{'_layout'}->begin_read_transaction;
+    my $c=$projet{'_layout'}->pages_count;
+    $projet{'_layout'}->end_transaction;
+    if($c==0) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
@@ -2022,9 +1981,11 @@ sub sujet_impressions {
     }
 
     $copies_store->clear();
-    for my $c ($projet{'_mep_list'}->etus()) {
+    $projet{'_layout'}->begin_read_transaction;
+    for my $c ($projet{'_layout'}->students()) {
 	$copies_store->set($copies_store->append(),COPIE_N,$c);
     }
+    $projet{'_layout'}->end_transaction;
 
     $w{'arbre_choix_copies'}->set_model($copies_store);
 
@@ -2136,7 +2097,7 @@ continue with AMC!</b>")."\n".
 			  "--output",$o{'options_impression'}->{'repertoire'}."/copie-%e.pdf",
 			  "--print-command",$o{'print_command_pdf'},
 			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
-			  "--mep",absolu($projet{'options'}->{'mep'}),
+			  "--data",absolu($projet{'options'}->{'data'}),
 			  "--progression-id",'impression',
 			  "--progression",1,
 			  "--debug",debug_file(),
@@ -2177,26 +2138,36 @@ sub save_state_after_printing {
 }
 
 sub calcule_mep {
-    # on efface les anciennes MEP
-    my @meps=fichiers_mep();
-    unlink @meps;
-    # on recalcule...
-    commande('commande'=>["auto-multiple-choice","prepare",
-			  "--with",moteur_latex(),
+    if($projet{'options'}->{'docs'}->[2] !~ /\.xy$/) {
+	# OLD STYLE WORKING DOCUMENTS... Not supported anymore: update!
+	my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error', # message type
+			      'ok', # which set of buttons?
+			      __("Working documents are in an old format, which is not supported anymore.")." <b>"
+			      .__("Please generate again the working documents!")."</b>");
+	$dialog->run;
+	$dialog->destroy;
+
+	return;
+    }
+
+    commande('commande'=>["auto-multiple-choice","meptex",
 			  "--debug",debug_file(),
-			  "--calage",absolu($projet{'options'}->{'docs'}->[2]),
+			  "--src",absolu($projet{'options'}->{'docs'}->[2]),
 			  "--progression-id",'MEP',
 			  "--progression",1,
-			  "--n-procs",$o{'n_procs'},
-			  "--mode","m",
-			  absolu($projet{'options'}->{'texsrc'}),
-			  "--mep",absolu($projet{'options'}->{'mep'}),
+			  "--data",absolu($projet{'options'}->{'data'}),
 			  ],
 	     'texte'=>__"Detecting layouts...",
 	     'progres.id'=>'MEP',
 	     'fin'=>sub { 
 		 detecte_mep();
-		 if($projet{'_mep_list'}->nombre()<1) {
+		 $projet{'_layout'}->begin_read_transaction;
+		 my $c=$projet{'_layout'}->pages_count();
+		 $projet{'_layout'}->end_transaction;
+		 if($c<1) {
 		     # avertissement...
 		     my $dialog = Gtk2::MessageDialog
 			 ->new_with_markup($w{'main_window'},
@@ -2225,26 +2196,27 @@ sub verif_mep {
 
 sub saisie_manuelle {
     my ($self,$event,$regarder)=@_;
-    if($projet{'_mep_list'}->nombre()>0) {
-	my $gm=AMC::Gui::Manuel::new('cr-dir'=>absolu($projet{'options'}->{'cr'}),
-				     'mep-dir'=>absolu($projet{'options'}->{'mep'}),
-				     'mep-data'=>$projet{'_mep_list'},
-				     'an-data'=>$projet{'_an_list'},
-				     'liste'=>absolu($projet{'options'}->{'listeetudiants'}),
-				     'sujet'=>absolu($projet{'options'}->{'docs'}->[0]),
-				     'etud'=>'',
-				     'dpi'=>$o{'saisie_dpi'},
-				     'seuil'=>$projet{'options'}->{'seuil'},
-				     'seuil_sens'=>$o{'seuil_sens'},
-				     'seuil_eqm'=>$o{'seuil_eqm'},
-				     'global'=>0,
-				     'encodage_interne'=>$o{'encodage_interne'},
-				     'encodage_liste'=>bon_encodage('liste'),
-				     'image_type'=>$o{'manuel_image_type'},
-				     'retient_m'=>1,
-				     'editable'=>($regarder ? 0 : 1),
-				     'en_quittant'=>($regarder ? '' : \&detecte_analyse),
-				     );
+    $projet{'_layout'}->begin_read_transaction;
+    my $c=$projet{'_layout'}->pages_count();
+    $projet{'_layout'}->end_transaction;
+    if($c>0) {
+	my $gm=AMC::Gui::Manuel::new(
+	    'cr-dir'=>absolu($projet{'options'}->{'cr'}),
+	    'data-dir'=>absolu($projet{'options'}->{'data'}),
+	    'an-data'=>$projet{'_an_list'},
+	    'sujet'=>absolu($projet{'options'}->{'docs'}->[0]),
+	    'etud'=>'',
+	    'dpi'=>$o{'saisie_dpi'},
+	    'seuil'=>$projet{'options'}->{'seuil'},
+	    'seuil_sens'=>$o{'seuil_sens'},
+	    'seuil_eqm'=>$o{'seuil_eqm'},
+	    'global'=>0,
+	    'encodage_interne'=>$o{'encodage_interne'},
+	    'image_type'=>$o{'manuel_image_type'},
+	    'retient_m'=>1,
+	    'editable'=>($regarder ? 0 : 1),
+	    'en_quittant'=>($regarder ? '' : \&detecte_analyse),
+	    );
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
@@ -2282,8 +2254,7 @@ sub analyse_call {
 	      "--progression-id",'analyse',
 	      "--progression",1,
 	      "--n-procs",$o{'n_procs'},
-	      "--mep",absolu($projet{'options'}->{'mep'}),
-	      "--mep-saved",absolu($mep_saved),
+	      "--data",absolu($projet{'options'}->{'data'}),
 	      "--projet",absolu('%PROJET/'),
 	      "--cr",absolu($projet{'options'}->{'cr'}),
 	      "--liste-fichiers",$fh->filename,
@@ -2880,7 +2851,9 @@ sub voir_notes {
 sub noter {
     if($projet{'options'}->{'maj_bareme'}) {
 	my $n_copies=$projet{'options'}->{'nombre_copies'};
-	my @mep_etus=$projet{'_mep_list'}->etus();
+	$projet{'_layout'}->begin_read_transaction;
+	my @mep_etus=$projet{'_layout'}->students();
+	$projet{'_layout'}->end_transaction;
 	my $n_mep=$mep_etus[$#mep_etus];
 	if($n_copies<$n_mep) {
 	    # number of requested copies is less than the number of
@@ -3116,8 +3089,7 @@ sub regroupement {
 			  "--cr",absolu($projet{'options'}->{'cr'}),
 			  "--an-saved",absolu($an_saved),
 			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
-			  "--mep",absolu($projet{'options'}->{'mep'}),
-			  "--mep-saved",absolu($mep_saved),
+			  "--data",absolu($projet{'options'}->{'data'}),
 			  "--tex-src",absolu($projet{'options'}->{'texsrc'}),
 			  "--with",moteur_latex(),
 			  "--n-copies",$projet{'options'}->{'nombre_copies'},
@@ -3593,46 +3565,17 @@ sub detecte_documents {
 }
 
 sub detecte_mep {
-    $w{'commande'}->show();
-    $w{'avancement'}->set_text(__"Looking for detected layouts...");
-    $w{'avancement'}->set_fraction(0);
-    Gtk2->main_iteration while ( Gtk2->events_pending );
-
-    $projet{'_mep_list'}->maj('progres'=>sub {
-	$w{'avancement'}->set_pulse_step(.02);
-	$w{'avancement'}->pulse();
-	Gtk2->main_iteration while ( Gtk2->events_pending );
-    },
-		   );
-
-    $mep_store->clear();
-
-    $w{'onglet_saisie'}->set_sensitive($projet{'_mep_list'}->nombre()>0);
-
-    my $ii=0;
-    for my $i ($projet{'_mep_list'}->ids()) {
-	my $iter=$mep_store->append;
-	$mep_store->set($iter,MEP_ID,$i,MEP_PAGE,$projet{'_mep_list'}->attr($i,'page'),MEP_MAJ,file_maj($projet{'_mep_list'}->filename($i)));
-
-	$ii++;
-	$w{'avancement'}->set_fraction($ii/$projet{'_mep_list'}->nombre());
-	if($ii % 50 ==0) {
-	    Gtk2->main_iteration while ( Gtk2->events_pending );
-	}
-    }
-
-    $projet{'_mep_defauts'}={$projet{'_mep_list'}->etudiants_defauts()};
+    $projet{'_layout'}->begin_read_transaction;
+    $projet{'_mep_defauts'}={$projet{'_layout'}->defects()};
+    my $c=$projet{'_layout'}->pages_count;
+    $projet{'_layout'}->end_transaction;
     my @def=(keys %{$projet{'_mep_defauts'}});
     if(@def) {
 	$w{'button_mep_warnings'}->show();
     } else {
 	$w{'button_mep_warnings'}->hide();
     }
-
-    $w{'avancement'}->set_text('');
-    $w{'avancement'}->set_fraction(0);
-    $w{'commande'}->hide();
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    $w{'onglet_saisie'}->set_sensitive($c>0);
 }
 
 my %defect_text=(
@@ -3796,7 +3739,7 @@ sub detecte_analyse {
 
     # resume
 
-    my %r=$projet{'_mep_list'}->stats($projet{'_an_list'});
+#    my %r=$projet{'_layout'}->stats($projet{'_an_list'});
     my $tt='';
     if($r{'incomplet'}) {
 	$tt=sprintf(__"Data capture from %d complete papers and <span foreground=\"red\">%d incomplete papers</span>",$r{'complet'},$r{'incomplet'});
@@ -4526,9 +4469,7 @@ sub edite_source {
 sub valide_projet {
     set_source_tex();
 
-    $projet{'_mep_list'}=AMC::MEPList::new(absolu($projet{'options'}->{'mep'}),
-					   'brut'=>1,
-					   'saved'=>absolu($mep_saved));
+    $projet{'_layout'}=AMC::Data->new(absolu($projet{'options'}->{'data'}))->module('layout');
 
     detecte_mep();
 
@@ -4605,7 +4546,7 @@ sub projet_ouvre {
 
 	# creation du repertoire et des sous-repertoires de projet
 
-	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic mep scans exports:) {
+	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports:) {
 	    my $rep=$o{'rep_projets'}."/$proj/$sous";
 	    if(! -x $rep) {
 		debug "Creating directory $rep...";

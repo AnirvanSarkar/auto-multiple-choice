@@ -66,7 +66,7 @@ DESTDIR=
 
 # AMC components to build
 
-BINARIES ?= AMC-traitement-image AMC-mepdirect AMC-detect
+BINARIES ?= AMC-traitement-image AMC-detect
 
 MODS=AMC-*.pl $(BINARIES)
 GLADE_FROMIN:=$(basename $(wildcard AMC-gui-*.glade.in))
@@ -118,9 +118,6 @@ MAJ: $(FROM_IN) ;
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
 	$(GCC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
-
-AMC-mepdirect: AMC-mepdirect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) $(GCC_POPPLER) -lstdc++ -lm
 
 AMC-detect: AMC-detect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
@@ -250,7 +247,6 @@ local: global
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
 	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/AMC-detect
-	sudo ln -s $(LOCALDIR)/AMC-mepdirect /usr/lib/AMC/AMC-mepdirect
 	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)

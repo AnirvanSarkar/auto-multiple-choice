@@ -36,7 +36,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_specdir &get_sty &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name);
+    @EXPORT      = qw( &amc_specdir &get_sty &id_triable &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -193,8 +193,17 @@ sub get_qr {
 
 sub get_epo {
     my $id=shift;
-    if($id =~ /^\+([0-9]+)\/([0-9]+)\/([0-9]+)\+$/) {
+    if($id =~ /^\+?([0-9]+)\/([0-9]+)\/([0-9]+)\+?$/) {
         return($1,$2);
+    } else {
+        return();
+    }
+}
+
+sub get_epc {
+    my $id=shift;
+    if($id =~ /^\+?([0-9]+)\/([0-9]+)\/([0-9]+)\+?$/) {
+        return($1,$2,$3);
     } else {
         return();
     }

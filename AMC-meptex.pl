@@ -23,24 +23,30 @@ use Encode;
 
 use AMC::Basic;
 use AMC::Gui::Avancement;
+use AMC::Data;
 
 my $src;
-my $mep_dir;
+my $data_dir;
 my $dpi=300;
 
 my $progress;
 my $progress_id;
 
 GetOptions("src=s"=>\$src,
-	   "mep-dir=s"=>\$mep_dir,
+	   "data=s"=>\$data_dir,
 	   "progression-id=s"=>\$progress_id,
 	   "progression=s"=>\$progress,
     );
 
 die "No src file $src" if(! -f $src);
-die "No mep dir $mep_dir" if(! -d $mep_dir);
+die "No data dir $data_dir" if(! -d $data_dir);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+
+my $data=AMC::Data->new($data_dir);
+my $layout=$data->module('layout');
+
+my $timestamp=time();
 
 # how much units in one inch ?
 %u_in_one_inch=('in'=>1,
@@ -104,9 +110,8 @@ close(SRC);
 
 sub bbox {
     my ($c)=@_;
-    return(sprintf(" xmin=\"%.2f\" xmax=\"%.2f\" ymin=\"%.2f\" ymax=\"%.2f\"",
-		   $c->{'bx'}->[0],$c->{'bx'}->[1],
-		   $c->{'by'}->[1],$c->{'by'}->[0]));
+    return($c->{'bx'}->[0],$c->{'bx'}->[1],
+	   $c->{'by'}->[1],$c->{'by'}->[0]);
 }
 
 sub center {
@@ -115,6 +120,9 @@ sub center {
 }
 
 my $delta=(@pages ? 1/(1+$#pages) : 0);
+
+$layout->begin_transaction;
+$layout->clear_all;
 
 for my $p (@pages) {
 
@@ -140,41 +148,45 @@ for my $p (@pages) {
 	die "Needs position$pos from page $p->{-id}" if(!$p->{-cases}->{'position'.$pos});
     }
 
-    my $fn="$mep_dir/mep-".id2idf($p->{-id}).".xml";
-    open(XML,">:encoding(UTF-8)",$fn) or die "Unable to write to $fn : $!";
-    print XML "<?xml version='1.0' encoding='UTF-8'?>\n";
-    print XML sprintf("<mep image=\"latex.xy\" id=\"+%s+\" src=\"$src\" page=\"%d\" dpi=\"%.2f\" tx=\"%.2f\" ty=\"%.2f\" diametremarque=\"%.2f\">\n",
-		      $p->{-id},$p->{-p},
-		      $dpi,$dpi*$p->{-dim_x},$dpi*$p->{-dim_y},
-		      $diametre_marque);
+    my @epc=get_epc($p->{-id});
+    my @ep=@epc[0,1];
+
+    $layout->statement('NEWLayout')->execute(
+	@epc,
+	$p->{-p},
+	$dpi,$dpi*$p->{-dim_x},$dpi*$p->{-dim_y},
+	$diametre_marque,
+	$layout->source_id($src,$timestamp));
 
     my $c=$p->{-cases};
 
     my $nc=0;
     for my $pos ('HG','HD','BD','BG') {
 	$nc++;
-	print XML "<coin id=\"$nc\"><x>"
-	    .center($c->{'position'.$pos},'bx')
-	    ."</x><y>"
-	    .center($c->{'position'.$pos},'by')
-	    ."</y></coin>\n";
+	$layout->statement('NEWMark')->execute(
+	    @ep,$nc,
+	    center($c->{'position'.$pos},'bx'),
+	    center($c->{'position'.$pos},'by')
+	    );
     }
     if($c->{'nom'}) {
-	print XML "<nom".bbox($c->{'nom'})."/>\n";
+	$layout->statement('NEWNameField')->execute(
+	    @ep,bbox($c->{'nom'}));
     }
     for my $k (sort { $a cmp $b } (keys %$c)) {
 	if($k=~/chiffre:([0-9]+),([0-9]+)$/) {
-	    print XML "<chiffre n=\"$1\" i=\"$2\"".bbox($c->{$k})."/>\n";
+	    $layout->statement('NEWDigit')->execute(
+		@ep,$1,$2,bbox($c->{$k}));
 	}
 	if($k=~/case:(.*):([0-9]+),([0-9]+)$/) {
-	    print XML "<case question=\"$2\" reponse=\"$3\"".bbox($c->{$k})."/>\n";
+	    $layout->statement('NEWBox')->execute(
+		@ep,$2,$3,bbox($c->{$k}));
 	}
     }
 
-    print XML "</mep>\n";
-    close(XML);
-
     $avance->progres($delta);
 }
+
+$layout->end_transaction;
 
 $avance->fin();

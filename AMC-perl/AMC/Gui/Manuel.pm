@@ -29,7 +29,7 @@ use File::Temp qw/ tempfile tempdir /;
 
 use AMC::Basic;
 use AMC::Gui::PageArea;
-use AMC::MEPList;
+use AMC::Data;
 
 use constant {
     MDIAG_ID => 0,
@@ -45,11 +45,9 @@ use_gettext;
 
 sub new {
     my %o=(@_);
-    my $self={'mep-dir'=>'',
-	      'mep-data'=>'',
+    my $self={'data-dir'=>'',
 	      'an-data'=>'',
 	      'cr-dir'=>'',
-	      'liste'=>'',
 	      'sujet'=>'',
 	      'etud'=>'',
 	      'dpi'=>75,
@@ -57,15 +55,12 @@ sub new {
 	      'seuil_sens'=>8.0,
 	      'seuil_eqm'=>3.0,
 	      'fact'=>1/4,
-	      'coches'=>[],
-	      'lay'=>{},
 	      'ids'=>[],
 	      'retient_m'=>'',
 	      'ids_m'=>{},
 	      'iid'=>0,
 	      'global'=>0,
 	      'en_quittant'=>'',
-	      'encodage_liste'=>'UTF-8',
 	      'encodage_interne'=>'UTF-8',
 	      'image_type'=>'xpm',
 	      'editable'=>1,
@@ -77,18 +72,9 @@ sub new {
 
     # recupere la liste des fichiers MEP des pages qui correspondent 
 
-    my $dispos;
-
-    if($self->{'mep-data'}) {
-	$dispos=$self->{'mep-data'};
-    } else {
-	debug "Making again MEPList...";
-	$dispos=AMC::MEPList::new($self->{'mep-dir'},'id'=>$self->{'etud'});
-	debug "ok";
-    }
-
-    $self->{'dispos'}=$dispos;
-
+    $self->{'data'}=AMC::Data->new($self->{'data-dir'});
+    $self->{'layout'}=$self->{'data'}->module('layout');
+    
     # an-list aussi
 
     my $an_list;
@@ -112,7 +98,9 @@ sub new {
 
     $self->{'tmp-image'}=$self->{'temp-dir'}."/page";
 
-    $self->{'ids'}=[$dispos->ids()];
+    $self->{'layout'}->begin_read_transaction;
+    $self->{'ids'}=[$self->{'layout'}->full_ids()];
+    $self->{'layout'}->end_transaction;
 
     $self->{'iid'}=0;
 
@@ -127,11 +115,9 @@ sub new {
 
     bless $self;
 
-    for my $k (qw/general area navigation_h navigation_v goto goto_v etudiant_cb nom_etudiant diag_tree/) {
+    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
-
-    $self->{'etudiant_cbe'}=$self->{'etudiant_cb'}->get_children();
 
     if(!$self->{'editable'}) {
 	$self->{'navigation_v'}->show();
@@ -191,40 +177,17 @@ sub new {
 
 	$self->{'diag_store'}=$diag_store;
 
-	my @ids=$dispos->ids();
-	if(@ids) {
-	    for my $i (0..$#ids) {
-		$self->maj_list($ids[$i],$i);
-	    }
+	for my $i (0..$#{$self->{'ids'}}) {
+	    $self->maj_list($self->{'ids'}->[$i],$i);
 	}
     }
 
-    ### liste des noms d'etudiants
-
-    if(-f $self->{'liste'} && $self->{'editable'}) {
-	
-	$self->{'liste-ent'}=Gtk2::ListStore->new ('Glib::String');
-	
-	open(LISTE,"<:encoding(".$self->{'encodage_liste'}.")",$self->{'liste'}) 
-	    or die "Error opening <".$self->{'liste'}."> : $!";
-      NOM: while(<LISTE>) {
-	  s/\#.*//;
-	  next NOM if(/^\s*$/);
-	  s/^\s+//;
-	  s/\s+$//;
-	  $self->{'liste-ent'}->set($self->{'liste-ent'}->append,0,$_);
-      }
-	close(LISTE);
-	
-	$self->{'etudiant_cb'}->set_model($self->{'liste-ent'});
-	$self->{'etudiant_cb'}->set_text_column(0);
-    }
-    
     $self->{'gui'}->connect_signals(undef,$self);
     
     $self->charge_i();
     
-    
+
+    $self->{'area'}->signal_connect('expose_event'=>\&AMC::Gui::Manuel::expose_area);
     
     return($self);
 }
@@ -282,7 +245,7 @@ sub choix {
 }
 
 sub expose_area {
-    my ($self,$widget,$evenement,@donnees)=@_;
+    my ($widget,$evenement,@donnees)=@_;
 
     $widget->expose_drawing($evenement,@donnees);
 }
@@ -292,22 +255,41 @@ sub une_modif {
     $self->{'area'}->modif();
 }
 
+sub page_id {
+    my $i=shift;
+    return("+".join('/',map { $i->{$_} } (qw/student page checksum/))."+");
+}
+
 sub charge_i {
     my ($self)=(@_);
 
-    $self->{'coches'}=[];
+    $self->{'layinfo'}={'box'=>[],
+			'namefield'=>[],
+			'digit'=>[],
+			};
+
+    debug "ID ".$self->{'ids'}->[$self->{'iid'}];
+
+    $self->{'layout'}->begin_read_transaction;
+
+    debug "page_info";
     
-    $self->{'lay'}=$self->{'dispos'}->mep($self->{'ids'}->[$self->{'iid'}]);
-    my $page=$self->{'lay'}->{'page'};
+    my @ep=get_ep($self->{'ids'}->[$self->{'iid'}]);
+
+    $self->{'info'}=$self->{'layout'}->page_info(@ep);
+    my $page=$self->{'info'}->{'subjectpage'};
+
+    debug "PAGE $page";
 
     ################################
     # fabrication du xpm
     ################################
 
+    debug "Making XPM";
+
     $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    debug "ID ".$self->{'ids'}->[$self->{'iid'}]." PAGE $page\n";
     system("pdftoppm","-f",$page,"-l",$page,
 	   "-r",$self->{'dpi'},
 	   $self->{'sujet'},
@@ -330,36 +312,50 @@ sub charge_i {
     # synchro variables
     ################################
 
-    $self->{'etudiant_cbe'}->set_text('');
+    debug "Getting layout info";
+
     $self->{'scan-file'}='';
 
-    # mise a jour des cases suivant fichier XML deja present
-    $_=$self->{'ids'}->[$self->{'iid'}]; s/\+//g; s/\//-/g; s/^-+//; s/-+$//;
-    my $tid=$_;
+    my $c;
+    my $sth;
+
+    for my $type (qw/box digit namefield/) {
+	my $sth=$self->{'layout'}->statement($type.'Info');
+	$sth->execute(@ep);
+	while($c=$sth->fetchrow_hashref) {
+	    push @{$self->{'layinfo'}->{$type}},{%$c};
+	}
+    }
+
+    $self->{'layinfo'}->{'page'}=$self->{'layout'}->page_info(@ep);
+
     
-    my $x=$self->{'an_list'}->analyse($self->{'ids'}->[$self->{'iid'}]);
+
+    # mise a jour des cases suivant fichier XML deja present
+    
+    my $x=$self->{'an_list'}->analyse(page_id($self->{'info'}));
 
     if(defined($x)) {
-	for my $i (0..$#{$self->{'lay'}->{'case'}}) {
-	    my $id=$self->{'lay'}->{'case'}->[$i]->{'question'}."."
-		.$self->{'lay'}->{'case'}->[$i]->{'reponse'};
-	    debug "ID=".$tid." Q=$id R=".$x->{'case'}->{$id}->{'r'};
-	    $self->{'coches'}->[$i]=$x->{'case'}->{$id}->{'r'} > $self->{'seuil'};
+	for my $i (@{$self->{'layinfo'}->{'box'}}) {
+	    my $id=$i->{'question'}."."
+		.$i->{'answer'};
+	    debug "Q=$id R=".$x->{'case'}->{$id}->{'r'};
+	    $i->{'id'}=$id;
+	    $i->{'ticked'}=$x->{'case'}->{$id}->{'r'} > $self->{'seuil'};
 	}
-	my $t=$x->{'nometudiant'}; $t='' if(!defined($t));
-	$self->{'etudiant_cbe'}->set_text($t);
 	$self->{'scan-file'}=$x->{'src'};
     }
     
-    $self->{'xml-file'}=$self->{'cr-dir'}."/analyse-manuelle-$tid.xml";
+    $self->{'xml-file'}=sprintf("%s/analyse-manuelle-%d-%d-%d.xml",
+				$self->{'cr-dir'},
+				map { $self->{'info'}->{$_} } (qw/student page checksum/));
 
-    $self->{'nom_etudiant'}->set_sensitive($self->{'lay'}->{'nom'});
+    $self->{'layout'}->end_transaction;
 
     # utilisation
 
     $self->{'area'}->set_image($tmp_image,
-			       $self->{'lay'},
-			       $self->{'coches'});
+			       $self->{'layinfo'});
 
     unlink($tmp_ppm);
     unlink($tmp_image) if($tmp_ppm ne $tmp_image && !get_debug());
@@ -379,18 +375,17 @@ sub ecrit {
     return if(!$self->{'editable'});
 
     if($self->{'xml-file'} && $self->{'area'}->modifs()) {
-	debug "Saving file ".$self->{'xml-file'};
+	debug "Saving  ".$self->{'xml-file'};
 	open(XML,">:encoding(".$self->{'encodage_interne'}.")",$self->{'xml-file'}) 
 	    or die "Error writing ".$self->{'xml-file'}." : $!";
 	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
 	    .$self->{'scan-file'}."\" manuel=\"1\" id=\""
-	    .$self->{'ids'}->[$self->{'iid'}]."\" nometudiant=\""
-	    .$self->{'etudiant_cbe'}->get_text()."\">\n";
-	for my $i (0..$#{$self->{'lay'}->{'case'}}) {
-	    my $q=$self->{'lay'}->{'case'}->[$i]->{'question'};
-	    my $r=$self->{'lay'}->{'case'}->[$i]->{'reponse'};
-	    my $id="$q.$r";
-	    print XML "  <case id=\"$id\" question=\"$q\" reponse=\"$r\" r=\"".($self->{'coches'}->[$i] ? 1 : 0)."\"/>\n";
+	    .$self->{'ids'}->[$self->{'iid'}]."\">\n";
+	for my $i (@{$self->{'layinfo'}->{'box'}}) {
+	    print XML sprintf("  <case id=\"%s\" question=\"%d\" reponse=\"%d\" r=\"%d\"/>\n",
+			      $i->{'id'},$i->{'question'},$i->{'answer'},
+			      ($i->{'ticked'} ? 1 : 0)
+		);
 	}
 	print XML "</analyse>\n";
 	close(XML);

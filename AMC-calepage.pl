@@ -26,7 +26,7 @@ use Getopt::Long;
 
 use AMC::Basic;
 use AMC::Exec;
-use AMC::MEPList;
+use AMC::Data;
 use AMC::Calage;
 use AMC::Image;
 use AMC::Boite qw/min max/;
@@ -84,15 +84,12 @@ my $progress=0;
 my $progress_id='';
 my $progress_debut=0;
 
-my $mep_saved='';
-
 my $debug_image='';
 
 my @stud_page;
 
 GetOptions("page=s"=>\$out_cadre,
-	   "mep=s"=>\$xml_layout,
-	   "mep-saved=s"=>\$mep_saved,
+	   "data=s"=>\$data_dir,
 	   "transfo=s"=>\$t_type,
 	   "zooms=s"=>\$zoom_file,
 	   "nom=s"=>\$nom_file,
@@ -201,19 +198,19 @@ if($traitement->mode() eq 'opencv') {
 ##########################################################
 # Initiation des utilitaires
 
-my $mep_dispos;
+my $layout=AMC::Data->new($data_dir)->module('layout');
 
-$mep_dispos=AMC::MEPList::new($xml_layout,"saved"=>$mep_saved);
+$layout->begin_transaction;
 
-erreur("No layout") if($mep_dispos->nombre()==0);
+erreur("No layout") if($layout->pages_count()==0);
 
-debug "".$mep_dispos->nombre()." layouts\n";
+debug "".$layout->pages_count()." layouts\n";
 
 my $cale=AMC::Calage::new('type'=>$t_type);
 
 my $cadre_general,$cadre_origine;
 
-my $lay;
+my @epc;
 
 sub commande_transfo {
     my @r=$traitement->commande(@_);
@@ -225,18 +222,21 @@ sub commande_transfo {
 
 sub calage_reperes {
     my $id=shift;
-    $lay=$mep_dispos->mep($id);
 
-    if($lay) {
-	$cadre_origine=AMC::Boite::new_complete_xml($lay);
+    @epc=get_epc($id) if($id);
+    @epc=($layout->random_studentPage,-1) if(!@epc);
+
+    if($epc[2]<0 || $layout->exists(@epc)) {
+	
+	$cadre_origine=AMC::Boite::new_complete($layout->all_marks(@epc[0,1]));
 	debug "Origine : ".$cadre_origine->txt()."\n";
 	
 	if($traitement->mode() eq 'opencv') {
-
+	    
 	    $cale=AMC::Calage::new('type'=>'lineaire');
 	    commande_transfo(join(' ',"optim",
 				  $cadre_origine->draw_points()));
-
+	    
 	} else {
 	    
 	    my @cx=map { $cadre_origine->coordonnees($_,'x') } (0..3);
@@ -247,7 +247,7 @@ sub calage_reperes {
 	    $cale->calage(\@cx,\@cy,\@cxp,\@cyp);
 	    
 	}
-
+	
 	debug "MSE=".$cale->mse();
     }
 }
@@ -270,18 +270,18 @@ sub decimal {
 
 $avance->progres((1-$progress_debut)/3);
 
-my $diametre_marque;
-
-#####
 # chargement d'une MEP au hasard pour recuperer la taille
 
-my $hmep=$mep_dispos->mep();
+my @ran=$layout->random_studentPage;
+my ($width,$height,$markdiameter)=
+    $layout->dims(@ran);
 
 if($traitement->mode() eq 'opencv') {
 
     my @r;
-    my @args=('-x',$hmep->{'tx'},'-y',$hmep->{'ty'},
-	      '-d',$hmep->{'diametremarque'},
+    my @args=('-x',$width,
+	      '-y',$height,
+	      '-d',$markdiameter,
 	      '-p',$tol_marque_plus,'-m',$tol_marque_moins,
 	      '-o',($debug_image ? $debug_image : 1)
 	);
@@ -301,10 +301,10 @@ if($traitement->mode() eq 'opencv') {
 
 } else {
     
-    $rx=$tiff_x / $hmep->{'tx'};
-    $ry=$tiff_y / $hmep->{'ty'};
+    $rx=$tiff_x / $width;
+    $ry=$tiff_y / $height;
     
-    $taille=$hmep->{'diametremarque'}*($rx+$ry)/2;
+    $taille=$markdiameter*($rx+$ry)/2;
     $taille_max=$taille*(1+$tol_marque_plus);
     $taille_min=$taille*(1-$tol_marque_moins);
     
@@ -467,12 +467,13 @@ sub get_nb_binaire {
 }
 
 sub get_id_binaire {
-    $id_page="+".get_nb_binaire(1)."/".get_nb_binaire(2)."/".get_nb_binaire(3)."+";
+    @epc=map { get_nb_binaire($_) } (1,2,3);
+    $id_page="+".join('/',@epc)."+";
     print "Page : $id_page\n";
     debug("Found binary ID: $id_page");
 }
 
-erreur("No layout instructions...") if(!($mep_saved || -d $xml_layout));
+erreur("No layout instructions...") if(! -d $data_dir);
 
 sub read_id {
     print "Positionning to read ID...\n";
@@ -485,9 +486,13 @@ sub read_id {
     
     # prepares digit-boxes reading 
 
-    for my $c (@{$lay->{'chiffre'}}) {
-	my $k=code_cb($c->{'n'},$c->{'i'});
-	my $c0=AMC::Boite::new_xml($c);
+    my $c;
+    my $sth=$layout->statement('digitInfo');
+    $sth->execute(@epc[0,1]);
+    while($c=$sth->fetchrow_hashref) {
+	my $k=code_cb($c->{'numberid'},$c->{'digitid'});
+	my $c0=AMC::Boite::new_MN(map { $c->{$_} } 
+				  (qw/xmin ymin xmax ymax/));
 	$case{$k}=$c0->transforme($cale);
     }
     
@@ -498,7 +503,7 @@ sub read_id {
     # computes again the transformation from the layout info of the
     # right page
     
-    calage_reperes($id_page);
+    calage_reperes($id_page) if($layout->exists(@epc));
 }
 
 #####
@@ -506,7 +511,7 @@ sub read_id {
 read_id();
 $upside_down=0;
 
-if(($traitement->mode() eq 'opencv') && !$lay) {
+if(($traitement->mode() eq 'opencv') && !$layout->exists(@epc)) {
     # Unknown ID: tries again upside down
 
     $traitement->commande("rotate180");
@@ -515,7 +520,7 @@ if(($traitement->mode() eq 'opencv') && !$lay) {
     $upside_down=1;
 }
 
-erreur("No XML for ID $id_page") if(! $lay);
+erreur("No layout for ID $id_page") if(! $layout->exists(@epc));
 
 if($traitement->mode() eq 'opencv') {
     commande_transfo("rotateOK");
@@ -532,13 +537,20 @@ if($repertoire_cr && ($traitement->mode() eq 'opencv')) {
 
 ############ recuperation des positions des cases sur le modele
 
-for my $c (@{$lay->{'case'}}) {
-    $case{$c->{'question'}.".".$c->{'reponse'}}=
-	AMC::Boite::new_xml($c)->transforme($cale);
+my $c;
+my $sth=$layout->statement('boxInfo');
+$sth->execute(@epc[0,1]);
+while($c=$sth->fetchrow_hashref) {
+    $case{$c->{'question'}.".".$c->{'answer'}}=
+	AMC::Boite::new_MN(map { $c->{$_} } 
+			   (qw/xmin ymin xmax ymax/))->transforme($cale);
 }
-for my $c (@{$lay->{'nom'}}) {
+$sth=$layout->statement('namefieldInfo');
+$sth->execute(@epc[0,1]);
+while($c=$sth->fetchrow_hashref) {
     $case{'nom'}=
-	AMC::Boite::new_xml($c)->transforme($cale);
+	AMC::Boite::new_MN(map { $c->{$_} } 
+			   (qw/xmin ymin xmax ymax/))->transforme($cale);
 }
 
 # on localise les cases recuperees depuis le modele dans le scan, et
@@ -551,6 +563,8 @@ for my $k (keys %case) {
 if($out_cadre && ($traitement->mode() eq 'opencv')) {
     $traitement->commande("annote $id_page");
 }
+
+$layout->end_transaction;
 
 erreur("End of diagnostic",1) if($debug_image);
 
