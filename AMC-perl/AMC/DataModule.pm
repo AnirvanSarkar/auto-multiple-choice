@@ -20,7 +20,18 @@
 
 package AMC::DataModule;
 
+# AMC::DataModule is the base class for modules written to be loaded
+# by AMC::Data.
+
+# A module XXX is a SQLite database that contains at least a
+# 'variable' table for internal use, associated with methods written
+# for a AMC::DataModule::XXX class. The tables version number is
+# stored in the variable table.
+
 use AMC::Basic;
+
+# a AMC::DataModule object is a branch of a AMC::Data object, and
+# stores its root in $self->{'data'}
 
 sub new {
     my ($class,$data,%oo)=@_;
@@ -47,25 +58,43 @@ sub new {
     return $self;
 }
 
+# dbh returns the DBI object corresponding to the SQLite session
+# associated with the module.
+
 sub dbh {
     my ($self)=@_;
     return $self->{'data'}->dbh;
 }
+
+# table($table_subname) gives a table name to use for some particular
+# module data.
 
 sub table {
     my ($self,$table_subname)=@_;
     return($self->{'name'}.".".$self->{'name'}."_".$table_subname);
 }
 
+
+# sql_quote($string) can be used to quote a string before including it
+# in a SQL query.
+
 sub sql_quote {
     my ($self,$string)=@_;
     return($self->{'data'}->sql_quote($string));
 }
 
+# sql_do($sql,@bind) executes the SQL query $sql (can be SQL sentence
+# as a string, or a SQL statement prepared by DBI), replacing ? by the
+# elements of @bind.
+
 sub sql_do {
     my ($self,$sql)=@_;
     $self->{'data'}->sql_do($sql);
 }
+
+# sql_single($sql,@bind) calls the SQL query $sql (SQL string or
+# statement prepared by DBI) and returns a single value answer. In the
+# query, ? are replaced by the values from @bind.
 
 sub sql_single {
     my ($self,$sql,@bind)=@_;
@@ -77,13 +106,9 @@ sub sql_single {
     }
 }
 
-sub sql_single_embedded {
-    my ($self,$sql,@bind)=@_;
-    $self->begin_read_transaction;
-    my $r=$self->sql_single($sql,@bind);
-    $self->end_transaction;
-    return($r);
-}
+# same as sql_single, but returns an array with all the rows of the first
+# column (in fact there is often one only column in the query result)
+# of the result.
 
 sub sql_list {
     my ($self,$sql,@bind)=@_;
@@ -95,6 +120,17 @@ sub sql_list {
     }
 }
 
+# _embedded versions of the last two methods embeds these methods in a
+# read transaction
+
+sub sql_single_embedded {
+    my ($self,$sql,@bind)=@_;
+    $self->begin_read_transaction;
+    my $r=$self->sql_single($sql,@bind);
+    $self->end_transaction;
+    return($r);
+}
+
 sub sql_list_embedded {
     my ($self,$sql,@bind)=@_;
     $self->begin_read_transaction;
@@ -103,20 +139,74 @@ sub sql_list_embedded {
     return(@r);
 }
 
+# define_statements defines all the SQL statements often used by the
+# module - it is to be overloaded by inherited AMC::DataModule::XXX classes.
+
+sub define_statements {
+}
+
+# statement($sid) returns a prepared statement from the SQL string
+# named with ID $sid, defined by define_statements. The statement is
+# prepared only once, and only prepared if used.
+
+sub statement {
+    my ($self,$sid)=@_;
+    my $s=$self->{'statements'}->{$sid};
+    if($s->{'s'}) {
+	return($s->{'s'});
+    } elsif($s->{'sql'}) {
+	$s->{'s'}=$self->dbh->prepare($s->{'sql'});
+	return($s->{'s'});
+    } else {
+	debug_and_stderr("Undefined SQL statement: $sid");
+    }
+}
+
+# query($query,@bind) calls the SQL query named $query (see the
+# available query names in the define_statements function) and returns
+# a single value answer. In the query statement, ? are replaced by the
+# values from @bind.
+
+sub query {
+    my ($self,$query,@bind)=@_;
+    return($self->sql_single($self->statement($query),@bind));
+}
+
+# same as query, but returns an array with all the rows of the first
+# column (in fact there is often one only column in the query result)
+# of the result.
+
+sub query_list {
+    my ($self,$query,@bind)=@_;
+    return($self->sql_list($self->statement($query),@bind));
+}
+
+# begin_transaction begins a transaction in immediate mode, to be used
+# to eventually write to the database.
+
 sub begin_transaction {
     my ($self)=@_;
     $self->{'data'}->begin_transaction;
 }
+
+# begin_read_transaction begins a transaction for reading data.
 
 sub begin_read_transaction {
     my ($self)=@_;
     $self->{'data'}->begin_read_transaction;
 }
 
+# end_transaction end the transaction.
+
 sub end_transaction {
     my ($self)=@_;
     $self->{'data'}->end_transaction;
 }
+
+# variable($name) returns the value of variable $name, stored in the
+# table variable in the module database.
+#
+# variable($name,$value) sets the value of variable $name.
 
 sub variable {
     my ($self,$name,$value)=@_;
@@ -137,6 +227,8 @@ sub variable {
 	return($x->[0]);
     }
 }
+
+# version_check upgrades the module database to the last version.
 
 sub version_check {
     my ($self)=@_;
@@ -164,21 +256,10 @@ sub version_check {
     debug("Database version: $v");
 }
 
-sub define_statements {
-}
-
-sub statement {
-    my ($self,$sid)=@_;
-    my $s=$self->{'statements'}->{$sid};
-    if($s->{'s'}) {
-	return($s->{'s'});
-    } elsif($s->{'sql'}) {
-	$s->{'s'}=$self->dbh->prepare($s->{'sql'});
-	return($s->{'s'});
-    } else {
-	debug_and_stderr("Undefined SQL statement: $sid");
-    }
-}
+# version_upgrade($v) is to be overloaded by AMC::DataModule::XXX
+# classes. Called with argument $v, it has to upgrade the database
+# from version $v and return the version number after upgrade. If $v
+# is the latest version, version_upgrade must return a false value.
 
 sub version_upgrade {
     my ($self,$old_version)=@_;

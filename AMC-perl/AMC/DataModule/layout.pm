@@ -176,68 +176,75 @@ sub define_statements {
 	'COUNT'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")},
 	'NEWLayout'=>{
 	    'sql'=>"INSERT INTO ".$self->table("page")
-		." (student,page,checksum,subjectpage,dpi,width,height,markdiameter,sourceid) VALUES (?,?,?,?,?,?,?,?,?)"
+		." (student,page,checksum,subjectpage,dpi,width,height,markdiameter,sourceid)"
+		." VALUES (?,?,?,?,?,?,?,?,?)"
 	},
-		'NEWMark'=>{
-		    'sql'=>"INSERT INTO ".$self->table("mark")
-			." (student,page,corner,x,y) VALUES (?,?,?,?,?)"
-	    },
-			'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
-			   ." (student,page,question,answer,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?,?,?)"},
-	    'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
-			   ." (student,page,numberid,digitid,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?,?,?)"},
-	    'NEWNameField'=>{'sql'=>"INSERT INTO ".$self->table("namefield")
-				 ." (student,page,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?)"},
-	    'IDS'=>{'sql'=>"SELECT student || ',' || page FROM ".$self->table("page")
-			." ORDER BY student,page"},
-	    'FULLIDS'=>{'sql'=>"SELECT '+' || student || '/' || page || '/' || checksum || '+' FROM ".$self->table("page")
-			." ORDER BY student,page"},
-	    'PAGES_STUDENT_all'=>{'sql'=>"SELECT page FROM ".$self->table("page")
-				." WHERE student=? ORDER BY page"},
-	    'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
-			     ." GROUP BY student ORDER BY student"},
-	    'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM "
-				    .$self->table("box")." WHERE student=? GROUP BY student,page"},
-	    'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM "
-					  .$self->table("namefield")." WHERE student=? GROUP BY student,page"},
-	    'PAGES_STUDENT_enter'=>{'sql'=>"SELECT page FROM ("
-				      ."SELECT student,page FROM ".$self->table("box")." UNION "
-				      ."SELECT student,page FROM ".$self->table("namefield")
-					  .") AS enter WHERE student=? GROUP BY student,page"},
-      'DEFECT_NO_BOX'=>{'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
-  ." GROUP BY student) AS list WHERE NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local WHERE local.student=list.student)"},
-      'DEFECT_NO_NAME'=>{'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
-  ." GROUP BY student) AS list WHERE NOT EXISTS(SELECT * FROM ".$self->table("namefield")." AS local WHERE local.student=list.student)"},
-      'DEFECT_SEVERAL_NAMES'=>{'sql'=>"SELECT student FROM (SELECT student,COUNT(*) AS n FROM ".$self->table("namefield")." GROUP BY student) AS counts WHERE n>1"},
-
-      'pageFilename'=>{'sql'=>"SELECT student || '-' || page || '-' || checksum FROM ".$self->table("page")." WHERE student=? AND page=?"},
-      'pageAttr'=>{'sql'=>"SELECT ? FROM ".$self->table("page")." WHERE student=? AND page=?"},
-      'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")." GROUP BY student"},
-      'attrForStudent'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
-				     ." WHERE student=? ORDER BY page"},
-      'attrForPage'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
-				     ." WHERE student=? AND page=?"},
-      'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
-			  ." LIMIT 1"},
-      'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "
-		   .$self->table("page")
-		   ." WHERE student=? AND page=?"},
-      'mark'=>{'sql'=>"SELECT x,y FROM ".$self->table("mark")
-		   ." WHERE student=? AND page=? AND corner=?"},
-      'pageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
-		       ." WHERE student=? AND page=?"},
-      'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
-			 ." WHERE student=? AND page=?"},
-      'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
-			 ." WHERE student=? AND page=?"},
-      'namefieldInfo'=>{'sql'=>"SELECT * FROM ".$self->table("namefield")
-			 ." WHERE student=? AND page=?"},
-      'exists'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
-		     ." WHERE student=? AND page=? AND checksum=?"},
-      'sourceID'=>{'sql'=>"SELECT sourceid FROM ".$self->table("source")
-		       ." WHERE src=? AND timestamp=?"},
-      'NEWsource'=>{'sql'=>"INSERT INTO ".$self->table("source")
-		       ." (src,timestamp) VALUES(?,?)"},
+	'NEWMark'=>{
+		'sql'=>"INSERT INTO ".$self->table("mark")
+		." (student,page,corner,x,y) VALUES (?,?,?,?,?)"
+	},
+	'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
+		." (student,page,question,answer,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?,?,?)"},
+	'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
+		." (student,page,numberid,digitid,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?,?,?)"},
+	'NEWNameField'=>{'sql'=>"INSERT INTO ".$self->table("namefield")
+		." (student,page,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?)"},
+	'IDS'=>{'sql'=>"SELECT student || ',' || page FROM ".$self->table("page")
+		." ORDER BY student,page"},
+	'FULLIDS'=>{'sql'=>"SELECT '+' || student || '/' || page || '/' || checksum || '+' FROM "
+		.$self->table("page")
+		." ORDER BY student,page"},
+	'PAGES_STUDENT_all'=>{'sql'=>"SELECT page FROM ".$self->table("page")
+		." WHERE student=? ORDER BY page"},
+	'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
+		." GROUP BY student ORDER BY student"},
+	'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM "
+		.$self->table("box")." WHERE student=? GROUP BY student,page"},
+	'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM "
+		.$self->table("namefield")." WHERE student=? GROUP BY student,page"},
+	'PAGES_STUDENT_enter'=>{'sql'=>"SELECT page FROM ("
+			."SELECT student,page FROM ".$self->table("box")." UNION "
+			."SELECT student,page FROM ".$self->table("namefield")
+		.") AS enter WHERE student=? GROUP BY student,page"},
+    'DEFECT_NO_BOX'=>{'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
+		." GROUP BY student) AS list"
+		." WHERE NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local"
+		." WHERE local.student=list.student)"},
+    'DEFECT_NO_NAME'=>{'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
+		." GROUP BY student) AS list"
+		." WHERE NOT EXISTS(SELECT * FROM ".$self->table("namefield")." AS local"
+		." WHERE local.student=list.student)"},
+    'DEFECT_SEVERAL_NAMES'=>{'sql'=>"SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
+		.$self->table("namefield")." GROUP BY student) AS counts WHERE n>1"},
+    'pageFilename'=>{'sql'=>"SELECT student || '-' || page || '-' || checksum FROM "
+		.$self->table("page")." WHERE student=? AND page=?"},
+    'pageAttr'=>{'sql'=>"SELECT ? FROM ".$self->table("page")." WHERE student=? AND page=?"},
+    'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")." GROUP BY student"},
+    'attrForStudent'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
+		." WHERE student=? ORDER BY page"},
+    'attrForPage'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
+		." WHERE student=? AND page=?"},
+    'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
+		." LIMIT 1"},
+    'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "
+		.$self->table("page")
+		." WHERE student=? AND page=?"},
+    'mark'=>{'sql'=>"SELECT x,y FROM ".$self->table("mark")
+		." WHERE student=? AND page=? AND corner=?"},
+    'pageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
+		." WHERE student=? AND page=?"},
+    'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
+		." WHERE student=? AND page=?"},
+    'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
+		." WHERE student=? AND page=?"},
+    'namefieldInfo'=>{'sql'=>"SELECT * FROM ".$self->table("namefield")
+		." WHERE student=? AND page=?"},
+    'exists'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
+		." WHERE student=? AND page=? AND checksum=?"},
+    'sourceID'=>{'sql'=>"SELECT sourceid FROM ".$self->table("source")
+		." WHERE src=? AND timestamp=?"},
+    'NEWsource'=>{'sql'=>"INSERT INTO ".$self->table("source")
+		." (src,timestamp) VALUES(?,?)"},
     };
 }
 
@@ -341,25 +348,6 @@ sub pages_for_student {
 sub students {
     my ($self)=@_;
     return($self->sql_list($self->statement('STUDENTS')));
-}
-
-# query($query,@bind) calls the SQL query named $query (see the
-# available query names in the define_statements function) and returns
-# a single value answer. In the query statement, ? are replaced by the
-# values from @bind.
-
-sub query {
-    my ($self,$query,@bind)=@_;
-    return($self->sql_single($self->statement($query),@bind));
-}
-
-# same as query, but returns an array with all the rows of the first
-# column (in fact there is often one only column in the query result)
-# of the result.
-
-sub query_list {
-    my ($self,$query,@bind)=@_;
-    return($self->sql_list($self->statement($query),@bind));
 }
 
 # defetcs() returns a hash of the defects found in the subject:

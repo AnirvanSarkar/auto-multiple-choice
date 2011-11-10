@@ -20,6 +20,10 @@
 
 package AMC::Data;
 
+# AMC::Data handles data storage management for AMC. An AMC::Data can
+# load several "modules" which are SQLite database files in a common
+# directory $dir, with their associated methods to get/set data.
+
 use Module::Load;
 use AMC::Basic;
 use DBI;
@@ -48,35 +52,54 @@ sub new {
     return $self;
 }
 
+# directory returns the directory where databases files are stored.
+
 sub directory {
     my ($self)=@_;
     return($self->{'directory'});
 }
+
+# dbh returns the DBI object corresponding to the SQLite session with
+# required modules attached.
 
 sub dbh {
     my ($self)=@_;
     return($self->{'dbh'});
 }
 
+# begin_transaction begins a transaction in immediate mode, to be used
+# to eventually write to the database.
+
 sub begin_transaction {
     my ($self)=@_;
     $self->sql_do("BEGIN IMMEDIATE");
 }
+
+# begin_read_transaction begins a transaction for reading data.
 
 sub begin_read_transaction {
     my ($self)=@_;
     $self->sql_do("BEGIN");
 }
 
+# end_transaction end the transaction.
+
 sub end_transaction {
     my ($self)=@_;
     $self->sql_do("COMMIT");
 }
 
+# sql_quote($string) can be used to quote a string before including it
+# in a SQL query.
+
 sub sql_quote {
     my ($self,$string)=@_;
     return $self->{'dbh'}->quote($string);
 }
+
+# sql_do($sql,@bind) executes the SQL query $sql (can be SQL sentence
+# as a string, or a SQL statement prepared by DBI), replacing ? by the
+# elements of @bind.
 
 sub sql_do {
     my ($self,$sql,@bind)=@_;
@@ -87,10 +110,16 @@ sub sql_do {
     }
 }
 
+# sql_tables($tables) gets the list of tables matching pattern $tables.
+
 sub sql_tables {
     my ($self,$tables)=@_;
     return($self->{'dbh'}->tables('%','%',$tables));
 }
+
+# require_module($module) loads the database file corresponding to
+# module $module (found in the data directory), and associated methods
+# defined in AMC::DataModule::$module perl package.
 
 sub require_module {
     my ($self,$module)=@_;
@@ -110,6 +139,9 @@ sub require_module {
 	debug "Module $module loaded.";
     }
 }
+
+# module($module) returns the module object associated to module
+# $module (call the methods from module $module from this object).
 
 sub module {
     my ($self,$module)=@_;
