@@ -636,7 +636,7 @@ sub read_glade {
 
 my $gui=read_glade('main_window',
 		   qw/onglets_projet preparation_etats
-    documents_tree
+    status_documents but_question but_solution status_layout
     edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement annulation button_mep_warnings
@@ -760,34 +760,6 @@ sub dialogue_apprentissage {
     }
     return($resp);
 }
-
-### modele documents
-
-my $doc_store = Gtk2::ListStore->new ('Glib::String', 
-				      'Glib::String');
-
-my @doc_ligne=($doc_store->append,$doc_store->append,$doc_store->append);
-
-$doc_store->set($doc_ligne[0],DOC_TITRE,__"question",DOC_MAJ,'');
-$doc_store->set($doc_ligne[1],DOC_TITRE,__"solution",DOC_MAJ,'');
-$doc_store->set($doc_ligne[2],DOC_TITRE,__"adjustment",DOC_MAJ,'');
-$w{'documents_tree'}->set_model($doc_store);
-
-my $renderer;
-my $column;
-
-$renderer=Gtk2::CellRendererText->new;
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"document",
-						     $renderer,
-						     text=> DOC_TITRE);
-$w{'documents_tree'}->append_column ($column);
-
-$renderer=Gtk2::CellRendererText->new;
-# TRANSLATORS: document state, in short (exists or not, last change date)
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"state",
-						     $renderer,
-						     text=> DOC_MAJ);
-$w{'documents_tree'}->append_column ($column);
 
 ### COPIES
 
@@ -1662,14 +1634,6 @@ sub projet_check_and_save {
 }
 
 ### Actions des boutons de la partie DOCUMENTS
-
-sub doc_active {
-    my $sel=$w{'documents_tree'}->get_selection()->get_selected_rows()->get_indices();
-    #print "Active $sel...\n";
-    my $f=absolu($projet{'options'}->{'docs'}->[$sel]);
-    debug "Looking at $f...";
-    commande_parallele(($f =~ /\.xy$/ ? $o{'txt_editor'} : $o{'pdf_viewer'}),$f);
-}
 
 sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
 
@@ -3543,25 +3507,57 @@ sub annule_preferences {
 }
 
 sub file_maj {
-    my $f=shift;
-    if($f && -f $f) {
-	if(-r $f) {
-	    my @s=stat($f);
-	    return(decode('UTF-8',strftime("%x %X",localtime($s[9]))));
+    my (@f)=@_;
+    my $present=1;
+    my $oldest=0;
+    for my $file (@f) {
+	if($file && -f $file) {
+	    if(-r $file) {
+		my @s=stat($file);
+		$oldest=$s[9] if($s[9]>$oldest);
+	    } else {
+		return('UNREADABLE');
+	    }
 	} else {
-	    return(__"unreadable");
+	    return('NOTFOUND');
 	}
-    } else {
-	return(__"not found");
     }
+    return(decode('UTF-8',strftime("%x %X",localtime($oldest))));
+}
+
+sub check_document {
+    my ($filename,$k)=@_;
+    $w{'but_'.$k}->set_sensitive(-f $filename);
 }
 
 sub detecte_documents {
-    for my $i (0..2) {
-	my $r='';
-	my $f=absolu($projet{'options'}->{'docs'}->[$i]);
-	$doc_store->set($doc_ligne[$i],DOC_MAJ,file_maj($f));
+    check_document(absolu($projet{'options'}->{'docs'}->[0]),'question');
+    check_document(absolu($projet{'options'}->{'docs'}->[1]),'solution');
+    my $s=file_maj(map { absolu($projet{'options'}->{'docs'}->[$_])
+		   } (0..2));
+    if($s eq 'UNREADABLE') {
+	$s="<b>".__("Working documents are not readable")."</b>";
+    } elsif($s eq 'NOTFOUND') {
+	$s="<b>".__("Working documents are not present")."</b>";
+    } else {
+	$s=__("Working documents last update:")."\n".$s;
     }
+    $w{'status_documents'}->set_markup($s);
+}
+
+sub show_document {
+    my ($sel)=@_;
+    my $f=absolu($projet{'options'}->{'docs'}->[$sel]);
+    debug "Looking at $f...";
+    commande_parallele($o{'pdf_viewer'},absolu($projet{'options'}->{'docs'}->[$sel]));
+}
+
+sub show_question {
+    show_document(0);
+}
+
+sub show_solution {
+    show_document(1);
 }
 
 sub detecte_mep {
@@ -3576,6 +3572,19 @@ sub detecte_mep {
 	$w{'button_mep_warnings'}->hide();
     }
     $w{'onglet_saisie'}->set_sensitive($c>0);
+    my $s;
+    if($c<1) {
+	$s="<b>".__("No layout")."</b>";
+    } else {
+	$s=sprintf(__("Layout detection processed %d pages"),
+		   $c);
+	if(@def) {
+	    $s.=",\n<b>".__("but some defects were detected.")."</b>";
+	} else {
+	    $s.='.';
+	}
+    }
+    $w{'status_layout'}->set_markup($s);
 }
 
 my %defect_text=(
