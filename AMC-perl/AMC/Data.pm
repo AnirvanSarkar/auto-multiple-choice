@@ -47,7 +47,8 @@ sub new {
     }
 
     $self->{'dbh'}->sqlite_busy_timeout($self->{'timeout'});
-    
+    $self->{'dbh'}->{sqlite_unicode}=1;
+
     bless($self,$class);
     return $self;
 }

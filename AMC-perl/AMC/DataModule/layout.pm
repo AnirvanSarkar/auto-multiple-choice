@@ -29,7 +29,7 @@ package AMC::DataModule::layout;
 # All coordinates are given in pixels, with (0,0)=TopLeft.
 
 # TABLES:
-
+#
 # layout_page lists pages from the subject, with the following data:
 # * student is the student number
 # * page is the page number from the student copy (beginning from 1
@@ -42,23 +42,28 @@ package AMC::DataModule::layout;
 # * dpi is the DPI resolution of the page
 # * height,width are the page dimensions in pixels
 # * markdiameter is the diameter of the four marks in the corners, in pixels
-
+#
 # layout_mark lists the marks positions on all the pages:
 # * student,page identifies the page
 # * corner is the corner number, from 1..4
 #   (TopLeft=1, TopRight=2, BottomRight=3, BottomLeft=4)
 # * x,y are the mark center coordinates (in pixels, (0,0)=TopLeft)
-
+#
 # layout_namefield lists the name fields on the pages:
 # * student,page identifies the page
 # * xmin,xmax,ymin,ymax give the box around the name field
-
+#
 # layout_box lists all the boxes to be ticked on all the pages:
 # * student,page identifies the page
-# * question is the question number
+# * question is the question number. This is NOT the question number
+#   that is printed on the question paper, but an internal question
+#   number associated with question identifier from the LaTeX file
+#   (strings used as the first argument of the \begin{question} or
+#   \begin{questionmult} environment) as in table layout_question (see
+#   next)
 # * answer is the answer number for this question
 # * xmin,xmax,ymin,ymax give the box coordinates
-
+#
 # layout_digit lists all the binary boxes to read student/page number
 # and checksum from the scans (boxes white for digit 0, black for
 # digit 1):
@@ -67,13 +72,17 @@ package AMC::DataModule::layout;
 #   2=page number, 3=checksum)
 # * digitid is the digit ID (1 is the most significant bit)
 # * xmin,xmax,ymin,ymax give the box coordinates
-
+#
 # layout_source describes where are all these information computed
 # from:
 # * sourceid refers to the same field in the layout_page table
 # * src describes the file from which layout is read
 # * timestamp is the time when the src file were read to populate the
 #   layout_* tables
+#
+# layout_question describes the questions:
+# * question is the question ID (see explanation in layout_box)
+# * name is the question identifier from the LaTeX file
 
 use AMC::Basic;
 use AMC::DataModule;
@@ -101,7 +110,8 @@ sub version_upgrade {
 		      ." (student INTEGER, page INTEGER, numberid INTEGER, digitid INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("source")
 		      ." (sourceid INTEGER PRIMARY KEY, src TEXT, timestamp INTEGER)");
-	
+	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("question")
+		      ." (question INTEGER PRIMARY KEY, name TEXT)");
 	$self->populate_from_xml;
 
 	return(1);
@@ -171,81 +181,92 @@ sub populate_from_xml {
 
 sub define_statements {
     my ($self)=@_;
-    $self->{'statements'}={
-	'CLEARPAGE'=>{'sql'=>"DELETE FROM ? WHERE student=? AND page=?"},
-	'COUNT'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")},
-	'NEWLayout'=>{
-	    'sql'=>"INSERT INTO ".$self->table("page")
-		." (student,page,checksum,subjectpage,dpi,width,height,markdiameter,sourceid)"
-		." VALUES (?,?,?,?,?,?,?,?,?)"
-	},
-	'NEWMark'=>{
-		'sql'=>"INSERT INTO ".$self->table("mark")
-		." (student,page,corner,x,y) VALUES (?,?,?,?,?)"
-	},
-	'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
-		." (student,page,question,answer,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?,?,?)"},
-	'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
-		." (student,page,numberid,digitid,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?,?,?)"},
-	'NEWNameField'=>{'sql'=>"INSERT INTO ".$self->table("namefield")
-		." (student,page,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?)"},
-	'IDS'=>{'sql'=>"SELECT student || ',' || page FROM ".$self->table("page")
-		." ORDER BY student,page"},
-	'FULLIDS'=>{'sql'=>"SELECT '+' || student || '/' || page || '/' || checksum || '+' FROM "
+    $self->{'statements'}=
+      {
+       'CLEARPAGE'=>{'sql'=>"DELETE FROM ? WHERE student=? AND page=?"},
+       'COUNT'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")},
+       'NEWLayout'=>
+       {'sql'=>"INSERT INTO ".$self->table("page")
+	." (student,page,checksum,subjectpage,dpi,width,height,markdiameter,sourceid)"
+	." VALUES (?,?,?,?,?,?,?,?,?)"
+       },
+       'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
+		   ." (student,page,corner,x,y) VALUES (?,?,?,?,?)"},
+       'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
+		  ." (student,page,question,answer,xmin,xmax,ymin,ymax)"
+		  ." VALUES (?,?,?,?,?,?,?,?)"},
+       'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
+		    ." (student,page,numberid,digitid,xmin,xmax,ymin,ymax)"
+		    ." VALUES (?,?,?,?,?,?,?,?)"},
+       'NEWNameField'=>{'sql'=>"INSERT INTO ".$self->table("namefield")
+			." (student,page,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?)"},
+       'NEWQuestion'=>{'sql'=>"INSERT INTO ".$self->table("question")
+		       ." (question,name) VALUES (?,?)"},
+       'IDS'=>{'sql'=>"SELECT student || ',' || page FROM ".$self->table("page")
+	       ." ORDER BY student,page"},
+       'FULLIDS'=>{'sql'=>"SELECT '+' || student || '/' || page || '/' || checksum || '+' FROM "
+		   .$self->table("page")
+		   ." ORDER BY student,page"},
+       'PAGES_STUDENT_all'=>{'sql'=>"SELECT page FROM ".$self->table("page")
+			     ." WHERE student=? ORDER BY page"},
+       'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
+		    ." GROUP BY student ORDER BY student"},
+       'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM ".$self->table("box")
+			     ." WHERE student=? GROUP BY student,page"},
+       'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
+				   ." WHERE student=? GROUP BY student,page"},
+       'PAGES_STUDENT_enter'=>
+       {'sql'=>"SELECT page FROM ("
+	."SELECT student,page FROM ".$self->table("box")." UNION "
+	."SELECT student,page FROM ".$self->table("namefield")
+	.") AS enter WHERE student=? GROUP BY student,page"},
+       'DEFECT_NO_BOX'=>
+       {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
+	." GROUP BY student) AS list"
+	." WHERE NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local"
+	." WHERE local.student=list.student)"},
+       'DEFECT_NO_NAME'=>
+       {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
+	." GROUP BY student) AS list"
+	." WHERE NOT EXISTS(SELECT * FROM ".$self->table("namefield")." AS local"
+	." WHERE local.student=list.student)"},
+       'DEFECT_SEVERAL_NAMES'=>
+       {'sql'=>"SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
+	.$self->table("namefield")." GROUP BY student) AS counts WHERE n>1"},
+       'pageFilename'=>{'sql'=>"SELECT student || '-' || page || '-' || checksum FROM "
+			.$self->table("page")." WHERE student=? AND page=?"},
+       'pageAttr'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
+		    ." WHERE student=? AND page=?"},
+       'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")
+		    ." GROUP BY student"},
+       'attrForStudent'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
+			  ." WHERE student=? ORDER BY page"},
+       'attrForPage'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
+		       ." WHERE student=? AND page=?"},
+       'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
+		       ." LIMIT 1"},
+       'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "
 		.$self->table("page")
-		." ORDER BY student,page"},
-	'PAGES_STUDENT_all'=>{'sql'=>"SELECT page FROM ".$self->table("page")
-		." WHERE student=? ORDER BY page"},
-	'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
-		." GROUP BY student ORDER BY student"},
-	'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM "
-		.$self->table("box")." WHERE student=? GROUP BY student,page"},
-	'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM "
-		.$self->table("namefield")." WHERE student=? GROUP BY student,page"},
-	'PAGES_STUDENT_enter'=>{'sql'=>"SELECT page FROM ("
-			."SELECT student,page FROM ".$self->table("box")." UNION "
-			."SELECT student,page FROM ".$self->table("namefield")
-		.") AS enter WHERE student=? GROUP BY student,page"},
-    'DEFECT_NO_BOX'=>{'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
-		." GROUP BY student) AS list"
-		." WHERE NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local"
-		." WHERE local.student=list.student)"},
-    'DEFECT_NO_NAME'=>{'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
-		." GROUP BY student) AS list"
-		." WHERE NOT EXISTS(SELECT * FROM ".$self->table("namefield")." AS local"
-		." WHERE local.student=list.student)"},
-    'DEFECT_SEVERAL_NAMES'=>{'sql'=>"SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
-		.$self->table("namefield")." GROUP BY student) AS counts WHERE n>1"},
-    'pageFilename'=>{'sql'=>"SELECT student || '-' || page || '-' || checksum FROM "
-		.$self->table("page")." WHERE student=? AND page=?"},
-    'pageAttr'=>{'sql'=>"SELECT ? FROM ".$self->table("page")." WHERE student=? AND page=?"},
-    'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")." GROUP BY student"},
-    'attrForStudent'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
-		." WHERE student=? ORDER BY page"},
-    'attrForPage'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
 		." WHERE student=? AND page=?"},
-    'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
-		." LIMIT 1"},
-    'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "
-		.$self->table("page")
-		." WHERE student=? AND page=?"},
-    'mark'=>{'sql'=>"SELECT x,y FROM ".$self->table("mark")
+       'mark'=>{'sql'=>"SELECT x,y FROM ".$self->table("mark")
 		." WHERE student=? AND page=? AND corner=?"},
-    'pageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
-		." WHERE student=? AND page=?"},
-    'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
-		." WHERE student=? AND page=?"},
-    'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
-		." WHERE student=? AND page=?"},
-    'namefieldInfo'=>{'sql'=>"SELECT * FROM ".$self->table("namefield")
-		." WHERE student=? AND page=?"},
-    'exists'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
-		." WHERE student=? AND page=? AND checksum=?"},
-    'sourceID'=>{'sql'=>"SELECT sourceid FROM ".$self->table("source")
-		." WHERE src=? AND timestamp=?"},
-    'NEWsource'=>{'sql'=>"INSERT INTO ".$self->table("source")
-		." (src,timestamp) VALUES(?,?)"},
-    };
+       'pageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
+		    ." WHERE student=? AND page=?"},
+       'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
+		     ." WHERE student=? AND page=?"},
+       'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
+		   ." WHERE student=? AND page=?"},
+       'namefieldInfo'=>{'sql'=>"SELECT * FROM ".$self->table("namefield")
+			 ." WHERE student=? AND page=?"},
+       'exists'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
+		  ." WHERE student=? AND page=? AND checksum=?"},
+       'questionName'=>{'sql'=>"SELECT name FROM ".$self->table("question")
+			." WHERE question=?"},
+       'sourceID'=>{'sql'=>"SELECT sourceid FROM ".$self->table("source")
+		    ." WHERE src=? AND timestamp=?"},
+       'NEWsource'=>{'sql'=>"INSERT INTO ".$self->table("source")
+		     ." (src,timestamp) VALUES(?,?)"},
+      };
 }
 
 # clear_page_layout($student,$page) clears all the layout data for a
@@ -370,7 +391,7 @@ sub defects {
 
 # source_id($src,$timestamp) looks in the table source if a row with
 # values ($src,$timestamp) already exists. If it does, source_id
-# returns the sourceid valur for this row. If not, it creates a row
+# returns the sourceid value for this row. If not, it creates a row
 # with these values and returns the primary key sourceid for this new
 # row.
 
@@ -382,6 +403,29 @@ sub source_id {
     } else {
 	$self->statement('NEWsource')->execute($src,$timestamp);
 	return($self->dbh->sqlite_last_insert_rowid());
+    }
+}
+
+# question_name($question) returns the question name for question
+# number $question
+#
+# question_name($question,$name) sets the question name (identifier
+# string from LaTeX file) for question number $question.
+
+sub question_name {
+    my ($self,$question,$name)=@_;
+    if(defined($name)) {
+      my $n=$self->question_name($question);
+      if($n) {
+	if($n ne $name) {
+	  debug "ERROR: question ID=$question with different names ($n/$name)";
+	}
+      } else {
+	$self->statement('NEWQuestion')->execute($question,$name);
+      }
+    } else {
+      return($self->sql_single($self->statement('questionName'),
+			       $question));
     }
 }
 

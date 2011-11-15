@@ -174,14 +174,16 @@ for my $p (@pages) {
 	    @ep,bbox($c->{'nom'}));
     }
     for my $k (sort { $a cmp $b } (keys %$c)) {
-	if($k=~/chiffre:([0-9]+),([0-9]+)$/) {
-	    $layout->statement('NEWDigit')->execute(
-		@ep,$1,$2,bbox($c->{$k}));
-	}
-	if($k=~/case:(.*):([0-9]+),([0-9]+)$/) {
-	    $layout->statement('NEWBox')->execute(
-		@ep,$2,$3,bbox($c->{$k}));
-	}
+      if($k=~/chiffre:([0-9]+),([0-9]+)$/) {
+	$layout->statement('NEWDigit')
+	  ->execute(@ep,$1,$2,bbox($c->{$k}));
+      }
+      if($k=~/case:(.*):([0-9]+),([0-9]+)$/) {
+	my ($name,$q,$a)=($1,$2,$3);
+	$layout->question_name($q,$name);
+	$layout->statement('NEWBox')
+	  ->execute(@ep,$q,$a,bbox($c->{$k}));
+      }
     }
 
     $avance->progres($delta);
