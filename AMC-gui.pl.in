@@ -1765,7 +1765,7 @@ sub doc_maj {
 						   ,__"darkness threshold",$projet{'options'}->{'seuil'}) );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
-		     if($reponse) {
+		     if($reponse eq 'yes') {
 			 $projet{'options'}->{'seuil'}=0.5;
 			 $projet{'options'}->{'_modifie'}=1;
 		     }
@@ -4164,7 +4164,7 @@ sub source_latex_choisir {
 	
 	debug "RESPONSE=$reponse";
 	
-	return(0,'') if(!$reponse);
+	return(0,'') if($reponse!=10);
     }
 
     # actions apres avoir choisi le type de source latex a utiliser
@@ -4211,7 +4211,7 @@ sub source_latex_choisir {
 
 	$w{'source_latex_modele'}->destroy();
 
-	return(0,'') if(!$reponse);
+	return(0,'') if($reponse!=10);
 
 	if($mod) {
 	    debug "Installing model $mod";
@@ -4242,7 +4242,7 @@ sub source_latex_choisir {
 
 	$w{'source_latex_choix'}->destroy();
 
-	return(0,'') if(!$reponse);
+	return(0,'') if($reponse!=10);
 
 	$texsrc=relatif($f,$oo{'nom'});
 	debug "Source LaTeX $f";
@@ -4276,7 +4276,7 @@ sub source_latex_choisir {
 	    
 	    $w{'source_latex_choix_zip'}->destroy();
 	    
-	    return(0,'') if(!$reponse);
+	    return(0,'') if($reponse!=10);
 	}
 
 	# cree un repertoire temporaire pour dezipper
