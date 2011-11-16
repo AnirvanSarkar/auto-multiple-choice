@@ -1313,6 +1313,8 @@ sub liste_des_projets {
 
 	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
 	    $w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;
+
+	    $w{'choix_projet'}->set_title(__"New AMC project");
 	}
 
 	
@@ -1324,6 +1326,8 @@ sub liste_des_projets {
 		$w{'projet_bouton_'.$_}->show();
 	    }
 	    $w{'projet_bouton_annule_label'}->set_text(__"Back");
+
+	    $w{'choix_projet'}->set_title(__"AMC projects management");
 	}
 
 	# mise a jour liste des projets dans la fenetre
