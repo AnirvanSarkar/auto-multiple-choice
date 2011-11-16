@@ -3756,8 +3756,11 @@ sub detecte_analyse {
     my $tt='';
     if($r{'incomplet'}) {
 	$tt=sprintf(__"Data capture from %d complete papers and <span foreground=\"red\">%d incomplete papers</span>",$r{'complet'},$r{'incomplet'});
-    } else {
+    } elsif($r{'complet'}) {
 	$tt=sprintf("<span foreground=\"darkgreen\">".__("Data capture from %d complete papers")."</span>",$r{'complet'});
+    } else {
+# TRANSLATORS: this text points out that no data capture has been made yet.
+      $tt=sprintf(__"No data");
     }
     $w{'diag_result'}->set_markup($tt);
 
