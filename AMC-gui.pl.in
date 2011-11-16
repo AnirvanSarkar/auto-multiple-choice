@@ -33,6 +33,7 @@ use File::Path qw/remove_tree/;
 use Archive::Tar;
 use Archive::Tar::File;
 use Encode;
+use Unicode::Normalize;
 use I18N::Langinfo qw(langinfo CODESET);
 use Locale::Language;
 
@@ -2389,23 +2390,31 @@ sub saisie_auto_ok {
 	my $c=0;
 	for my $fich (@f) {
 	    my ($fxa,$fxb,$fb) = splitpath($fich);
+
+	    # no accentuated or special characters in filename, please!
+	    # this could break the process somewere...
+	    $fb=NFKD($fb);
+	    $fb =~ s/\pM//og;
+	    $fb =~ s/[^a-zA-Z0-9.-_+]+/_/g;
+	    $fb =~ s/^[^a-zA-Z0-9]/scan_/;
+
 	    my $dest=absolu("scans/".$fb);
 	    my $deplace=0;
 
 	    if($fich ne $dest) {
-		if(-e $dest) {
-		    # dest file already exists: change name
-		    debug "File $dest already exists";
-		    $dest=new_filename($dest);
-		    debug "--> $dest";
-		}
-		if(copy($fich,$dest)) {
-		    push @fl,$dest; 
-		    $deplace=1;
-		} else {
-		    debug "$fich --> $dest";
-		    debug "Copy error: $!";
-		}
+	      if(-e $dest) {
+		# dest file already exists: change name
+		debug "File $dest already exists";
+		$dest=new_filename($dest);
+		debug "--> $dest";
+	      }
+	      if(copy($fich,$dest)) {
+		push @fl,$dest; 
+		$deplace=1;
+	      } else {
+		debug "$fich --> $dest";
+		debug "Copy error: $!";
+	      }
 	    }
 	    $c+=$deplace;
 	    push @fl,$fich if(!$deplace);
