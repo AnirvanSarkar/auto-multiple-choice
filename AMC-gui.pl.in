@@ -636,8 +636,10 @@ sub read_glade {
 }
 
 my $gui=read_glade('main_window',
-		   qw/onglets_projet preparation_etats
-    status_documents but_question but_solution status_layout
+		   qw/onglets_projet onglet_preparation preparation_etats
+    but_question but_solution
+    prepare_docs prepare_layout prepare_src
+    state_layout state_src state_docs
     edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement annulation button_mep_warnings
@@ -726,6 +728,14 @@ for my $l (@doc_langs) {
 $docs_menu->show_all();
 
 $w{'doc_menu'}->set_submenu($docs_menu);
+
+# make state entries with same background color as around...
+$col=$w{'prepare_src'}->style()->bg('prelight');
+for my $s (qw/normal insensitive/) {
+  for my $k (qw/src docs layout/) {
+    $w{'state_'.$k}->modify_base($s,$col);
+  }
+}
 
 ###
 
@@ -3543,19 +3553,32 @@ sub check_document {
     $w{'but_'.$k}->set_sensitive(-f $filename);
 }
 
+sub state_image {
+  my ($k,$stock)=@_;
+  $w{'stateimg_'.$k}->set_from_stock($stock,
+				     GTK_ICON_SIZE_BUTTON)
+    if($w{'stateimg_'.$k});
+  $w{'state_'.$k}->set_icon_from_stock(GTK_ENTRY_ICON_PRIMARY,$stock)
+    if($w{'state_'.$k});
+}
+
 sub detecte_documents {
     check_document(absolu($projet{'options'}->{'docs'}->[0]),'question');
     check_document(absolu($projet{'options'}->{'docs'}->[1]),'solution');
     my $s=file_maj(map { absolu($projet{'options'}->{'docs'}->[$_])
 		   } (0..2));
+    my $ok='gtk-yes';
     if($s eq 'UNREADABLE') {
-	$s="<b>".__("Working documents are not readable")."</b>";
+	$s=__("Working documents are not readable");
+	$ok='gtk-dialog-error';
     } elsif($s eq 'NOTFOUND') {
-	$s="<b>".__("Working documents are not present")."</b>";
+	$s=__("No working documents");
+	$ok='gtk-dialog-error';
     } else {
-	$s=__("Working documents last update:")."\n".$s;
+	$s=__("Working documents last update:")." ".$s;
     }
-    $w{'status_documents'}->set_markup($s);
+    state_image('docs',$ok);
+    $w{'state_docs'}->set_text($s);
 }
 
 sub show_document {
@@ -3586,18 +3609,22 @@ sub detecte_mep {
     }
     $w{'onglet_saisie'}->set_sensitive($c>0);
     my $s;
+    my $ok='gtk-yes';
     if($c<1) {
-	$s="<b>".__("No layout")."</b>";
+	$s=__("No layout");
+	$ok='gtk-dialog-error';
     } else {
-	$s=sprintf(__("Layout detection processed %d pages"),
+	$s=sprintf(__("Processed %d pages"),
 		   $c);
 	if(@def) {
-	    $s.=",\n<b>".__("but some defects were detected.")."</b>";
+	    $s.=", ".__("but some defects were detected.");
+	    $ok='gtk-dialog-question';
 	} else {
 	    $s.='.';
 	}
     }
-    $w{'status_layout'}->set_markup($s);
+    $w{'state_layout'}->set_text($s);
+    state_image('layout',$ok);
 }
 
 my %defect_text=(
@@ -3851,17 +3878,6 @@ sub set_source_tex {
     valide_source_tex();
 }
 
-sub source_latex_montre_nom {
-    my $dialog = Gtk2::MessageDialog
-	->new($w{'main_window'},
-	      'destroy-with-parent',
-	      'info','ok',
-	      __"LaTeX source file for this project is:\n%s",
-	      ($projet{'options'}->{'texsrc'} ? absolu($projet{'options'}->{'texsrc'}) : __"(no file)" ));
-    $dialog->run;
-    $dialog->destroy;
-}
-
 sub liste_montre_nom {
     my $dialog = Gtk2::MessageDialog
 	->new($w{'main_window'},
@@ -3876,7 +3892,13 @@ sub liste_montre_nom {
 sub valide_source_tex {
     $projet{'options'}->{'_modifie'}=1;
     debug "* valide_source_tex";
-    $w{'preparation_etats'}->set_sensitive(-f absolu($projet{'options'}->{'texsrc'}));
+
+    $w{'state_src'}->set_text(absolu($projet{'options'}->{'texsrc'}));
+
+    my $ok=-f absolu($projet{'options'}->{'texsrc'});
+    for (qw/docs layout/) {
+      $w{'prepare_'.$_}->set_sensitive($ok);
+    }
 
     if(is_local($projet{'options'}->{'texsrc'})) {
 	$w{'edition_latex'}->show();
@@ -4485,7 +4507,7 @@ sub importe_source {
     }
 }
 
-sub edite_source {
+sub edit_src {
     my $f=absolu($projet{'options'}->{'texsrc'});
     debug "Editing $f...";
     commande_parallele($o{'tex_editor'},$f);
