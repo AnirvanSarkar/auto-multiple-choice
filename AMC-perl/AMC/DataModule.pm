@@ -69,6 +69,9 @@ sub dbh {
 
 # table($table_subname) gives a table name to use for some particular
 # module data.
+#
+# table($table_subname,$module_name) gives the table name
+# corresponding to another module
 
 sub table {
     my ($self,$table_subname,$module_name)=@_;

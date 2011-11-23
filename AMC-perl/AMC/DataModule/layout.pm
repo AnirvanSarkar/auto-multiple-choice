@@ -31,57 +31,83 @@ package AMC::DataModule::layout;
 # TABLES:
 #
 # layout_page lists pages from the subject, with the following data:
+#
 # * student is the student number
+#
 # * page is the page number from the student copy (beginning from 1
 #   for each student)
+#
 # * checksum is a number that is used to check that the student and
 #   page numbers are properly recognized frm the scan
+#
 # * sourceid is an ID to get from table source the source information
+#
 # * subjectpage is the page number from the subject.pdf file
 #   containing all subjects
+#
 # * dpi is the DPI resolution of the page
+#
 # * height,width are the page dimensions in pixels
+#
 # * markdiameter is the diameter of the four marks in the corners, in pixels
 #
 # layout_mark lists the marks positions on all the pages:
+#
 # * student,page identifies the page
+#
 # * corner is the corner number, from 1..4
 #   (TopLeft=1, TopRight=2, BottomRight=3, BottomLeft=4)
+#
 # * x,y are the mark center coordinates (in pixels, (0,0)=TopLeft)
 #
 # layout_namefield lists the name fields on the pages:
+#
 # * student,page identifies the page
+#
 # * xmin,xmax,ymin,ymax give the box around the name field
 #
 # layout_box lists all the boxes to be ticked on all the pages:
+#
 # * student,page identifies the page
+#
 # * question is the question number. This is NOT the question number
 #   that is printed on the question paper, but an internal question
 #   number associated with question identifier from the LaTeX file
 #   (strings used as the first argument of the \begin{question} or
 #   \begin{questionmult} environment) as in table layout_question (see
 #   next)
+#
 # * answer is the answer number for this question
+#
 # * xmin,xmax,ymin,ymax give the box coordinates
 #
 # layout_digit lists all the binary boxes to read student/page number
 # and checksum from the scans (boxes white for digit 0, black for
 # digit 1):
+#
 # * student,page identifies the page
+#
 # * numberid is the ID of the number to be read (1=student number,
 #   2=page number, 3=checksum)
+#
 # * digitid is the digit ID (1 is the most significant bit)
+#
 # * xmin,xmax,ymin,ymax give the box coordinates
 #
 # layout_source describes where are all these information computed
 # from:
+#
 # * sourceid refers to the same field in the layout_page table
+#
 # * src describes the file from which layout is read
+#
 # * timestamp is the time when the src file were read to populate the
 #   layout_* tables
 #
 # layout_question describes the questions:
+#
 # * question is the question ID (see explanation in layout_box)
+#
 # * name is the question identifier from the LaTeX file
 
 use AMC::Basic;
