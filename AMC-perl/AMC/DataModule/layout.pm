@@ -220,6 +220,11 @@ sub define_statements {
 	."SELECT student,page FROM ".$self->table("box")." UNION "
 	."SELECT student,page FROM ".$self->table("namefield")
 	.") AS enter WHERE student=? GROUP BY student,page"},
+       'PAGES_enter'=>
+       {'sql'=>"SELECT student,page FROM ("
+	."SELECT student,page FROM ".$self->table("box")." UNION "
+	."SELECT student,page FROM ".$self->table("namefield")
+	.") AS enter GROUP BY student,page ORDER BY student,page"},
        'DEFECT_NO_BOX'=>
        {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
@@ -437,5 +442,16 @@ sub clear_all {
 	$self->sql_do("DELETE FROM ".$self->table($t));
     }
 }
+
+sub get_pages {
+  my ($self,$add_copy)=@_;
+  my $r=$self->dbh
+    ->selectall_arrayref($self->statement('PAGES_enter'));
+  if(defined($add_copy)) {
+    for(@$r) { push @{$_},0 }
+  }
+  return $r;
+}
+
 
 1;

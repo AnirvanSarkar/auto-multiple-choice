@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -228,6 +228,13 @@ sub xml {
 		    $i+1,@{$self->{'coins'}->[$i]});
     }
     return($x);
+}
+
+sub to_data {
+  my ($self,$capture,$zoneid,$type)=@_;
+  for my $i (0..3) {
+    $capture->set_corner($zoneid,$i+1,$type,@{$self->{'coins'}->[$i]});
+  }
 }
 
 # renvoie la commande a passer a AMC::Image pour mesurer le contenu de

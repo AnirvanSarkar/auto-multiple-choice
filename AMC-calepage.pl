@@ -31,6 +31,7 @@ use AMC::Calage;
 use AMC::Image;
 use AMC::Boite qw/min max/;
 use AMC::Gui::Avancement;
+use AMC::DataModule::capture qw/:zone :position/;
 
 my $anf_version=1;
 
@@ -86,14 +87,15 @@ my $progress_debut=0;
 
 my $debug_image='';
 
+my $multiple='';
+
 my @stud_page;
 
 GetOptions("page=s"=>\$out_cadre,
+	   "multiple!"=>\$multiple,
 	   "data=s"=>\$data_dir,
 	   "transfo=s"=>\$t_type,
 	   "zooms=s"=>\$zoom_file,
-	   "nom=s"=>\$nom_file,
-	   "analyse=s"=>\$analyse_file,
 	   "id-page=s"=>\$id_page_fourni,
 	   "seuil-coche=s"=>\$seuil_coche,
 	   "dust-size=s"=>\$dust_size,
@@ -385,7 +387,6 @@ sub valide_id_page {
 	$out_cadre="$repertoire_cr/page-$id_page_f.jpg";
 	$zoom_file="$repertoire_cr/zoom-$id_page_f.jpg";
 	$zoom_dir="$repertoire_cr/zooms/$id_page_f0";
-	$nom_file="$repertoire_cr/nom-$id_page_f.jpg";
 	$analyse_file="$repertoire_cr/analyse-$id_page_f.xml";
 
 	# clear old analysis results files
@@ -405,7 +406,7 @@ sub une_ligne {
 
 my %case=();
 
-my %score,%score_data,%coins_test;
+my %zoom_file,%score_data,%coins_test;
 
 sub mesure_case {
     my ($k)=(@_);
@@ -427,8 +428,10 @@ sub mesure_case {
 	if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
 	    $r=($2==0 ? 0 : $1/$2);
 	    debug sprintf("Binary box $k: %d/%d = %.4f\n",$1,$2,$r);
-	    $score{$k}=$r;
-	    $score_data{$k}="pixels=\"$2\" pixelsnoirs=\"$1\" r=\"$r\"";
+	    $score_data{$k}=[$2,$1];
+	}
+	if(/^ZOOM\s+(.*)/) {
+	  $zoom_file{$k}=$1;
 	}
     }
     
@@ -572,51 +575,68 @@ if($out_cadre && ($traitement->mode() eq 'opencv')) {
     $traitement->commande("output ".$out_cadre);
 }
 
-if($analyse_file) {
-    open(ANF,">$analyse_file");
-    print ANF "<?xml version='1.0' standalone='yes'?>\n";
+$traitement->ferme_commande();
 
-    my $sf=$scan;
-    if($rep_projet) {
-	$sf=abs2proj({'%PROJET',$rep_projet,
-		      '%HOME'=>$ENV{'HOME'},
-		      ''=>'%PROJET',
-		     },
-		     $sf);
-    }
+my $capture=AMC::Data->new($data_dir)->module('capture');
 
-    print ANF "<analyse version=\"$anf_version\" src=\"".$sf."\" id=\"$id_page\" mode=\"".$traitement->mode()."\">\n";
-    print ANF $cale->xml(2);
-    print ANF "  <cadre>\n";
-    print ANF $cadre_general->xml(4);
-    print ANF "  </cadre>\n";
-    for my $k (keys %case) {
-	my $e="";
-	my $q="";
-	if($k =~ /^([0-9]+)\.([0-9]+)$/) {
-	    $e=$1;$q=$2;
-	    print ANF "  <casetest id=\"$k\">\n";
-	    print ANF $coins_test{$k}->xml(4);
-	    print ANF "  </casetest>\n";
-	    print ANF "  <case id=\"$k\" question=\"$e\" reponse=\"$q\" ";
-	    $close="  </case>\n";
-	} elsif(($n,$i)=detecte_cb($k)) {
-	    print ANF "  <chiffre n=\"$n\" i=\"$i\" ";
-	    $close="  </chiffre>\n";
-	} else {
-	    print ANF "  <$k ";
-	    $close="  </$k>\n";
-	}
-	print ANF $score_data{$k};
-	print ANF ">\n";
-	print ANF $case{$k}->xml(4);
-	print ANF $close;
-    }
-    print ANF "</analyse>\n";
-    close(ANF);
+$capture->begin_transaction;
+
+my $sf=$scan;
+if($rep_projet) {
+  $sf=abs2proj({'%PROJET',$rep_projet,
+		'%HOME'=>$ENV{'HOME'},
+		''=>'%PROJET',
+	       },
+	       $sf);
 }
 
-$traitement->ferme_commande();
+@stid=@epc[0,1];
+if($multiple) {
+  push @stid,$capture->new_page_copy(@epc[0,1]);
+} else {
+  push @stid,0;
+}
+
+$nom_file="name-".studentids_string(@stid[0,2]).".jpg";
+
+clear_old('name image file',"$repertoire_cr/$nom_file");
+
+$capture->set_page_auto($sf,@stid,time(),
+			$cale->params);
+
+$cadre_general->to_data($capture,
+			$capture->get_zoneid(@stid,ZONE_FRAME,0,0,1),
+			POSITION_BOX);
+
+for my $k (keys %case) {
+  my $zoneid;
+  if($k =~ /^([0-9]+)\.([0-9]+)$/) {
+    my $question=$1;
+    my $answer=$2;
+    $zoneid=$capture->get_zoneid(@stid,ZONE_BOX,$question,$answer,1);
+    $coins_test{$k}->to_data($capture,$zoneid,POSITION_MEASURE);
+  } elsif(($n,$i)=detecte_cb($k)) {
+    $zoneid=$capture->get_zoneid(@stid,ZONE_DIGIT,$n,$i,1);
+  } elsif($k eq 'nom') {
+    $zoneid=$capture->get_zoneid(@stid,ZONE_NAME,0,0,1);
+    $capture->statement('setZoneAuto')
+      ->execute(-1,-1,$nom_file,$zoneid);
+  }
+
+  if($zoneid) {
+    if($k ne 'nom') {
+      if($score_data{$k}) {
+	$capture->statement('setZoneAuto')
+	  ->execute(@{$score_data{$k}},$zoom_file{$k},$zoneid);
+      } else {
+	debug "No darkness data for box $k";
+      }
+    }
+    $case{$k}->to_data($capture,$zoneid,POSITION_BOX);
+  }
+}
+
+$capture->end_transaction;
 
 # traces sur le scan pour localiser les cases et le cadre
 
@@ -633,7 +653,7 @@ if($nom_file && $case{'nom'}) {
     debug "Name box : ".$case{'nom'}->txt();
     my $e=$page_entiere->Clone(); 	 
     $e->Crop(geometry=>$case{'nom'}->etendue_xy('geometry',$zoom_plus));
-    $e->Write($nom_file);
+    $e->Write("$repertoire_cr/$nom_file");
 }
 
 if($out_cadre && ($traitement->mode ne 'opencv')) {
@@ -680,18 +700,6 @@ if($out_cadre && ($traitement->mode ne 'opencv')) {
     $page_entiere->Write($out_cadre);
     
     debug "-> $out_cadre\n";
-}
-
-if($zoom_file && ($traitement->mode ne 'opencv')) {
-
-    print "Making zooms...\n";
-
-    $commandes->execute("auto-multiple-choice","zoom",
-			"--seuil",$seuil_coche,
-			"--analyse",$analyse_file,
-			"--scan",$scan,
-			"--output",$zoom_file,
-			);
 }
 
 if($upside_down) {

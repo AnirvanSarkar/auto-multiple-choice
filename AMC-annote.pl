@@ -27,11 +27,11 @@ use Cairo;
 
 use AMC::Basic;
 use AMC::Exec;
-use AMC::ANList;
 use AMC::Gui::Avancement;
 use AMC::AssocFile;
 use AMC::NamesFile;
-
+use AMC::Data;
+use AMC::DataModule::capture qw/:zone :position/;
 use encoding 'utf8';
 
 $VERSION_BAREME=2;
@@ -44,7 +44,7 @@ my $fich_bareme='';
 
 my $seuil=0.1;
 
-my $an_saved='';
+my $data_dir='';
 
 my $taille_max="1000x1500";
 my $qualite_jpg="65";
@@ -88,7 +88,7 @@ my %symboles=(
 GetOptions("cr=s"=>\$cr_dir,
 	   "projet=s",\$rep_projet,
 	   "projets=s",\$rep_projets,
-	   "an-saved=s"=>\$an_saved,
+	   "data=s"=>\$data_dir,
 	   "bareme=s"=>\$fich_bareme,
 	   "notes=s"=>\$fichnotes,
 	   "debug=s"=>\$debug,
@@ -179,29 +179,8 @@ sub format_note {
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
-opendir(DIR, $cr_dir) || die "can't opendir $cr_dir: $!";
-my @xmls = grep { /\.xml$/ && -f "$cr_dir/$_" } readdir(DIR);
-closedir DIR;
-
-my $anl;
-
-if($an_saved) {
-    $anl=AMC::ANList::new($cr_dir,
-			  'saved'=>$an_saved,
-			  );
-} else {
-    debug "Making analysis list...";
-    $anl=AMC::ANList::new($cr_dir,
-			  'saved'=>'',
-			  );
-}
-
-print "Sources :\n";
-for my $id ($anl->ids()) {
-    print "ID=$id : ".$anl->filename($id)
-    .($anl->attribut($id,'manuel') ? " (manuel)" : "")."\n";
-}
-print "\n";
+my $data=AMC::Data->new($data_dir);
+my $capture=$data->module('capture');
 
 my $bar=XMLin($fich_bareme,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
@@ -230,50 +209,40 @@ $seuil=$notes->{'seuil'} if($notes->{'seuil'});
 #################################
 
 sub milieu_cercle {
-    my $c=shift;
-    my $x=0;
-    my $y=0;
-    for my $i (1..4) {
-	$x+=$c->{$i}->{'x'};
-	$y+=$c->{$i}->{'y'};
-    }
-    $x/=4;$y/=4;
-    return($x,$y);
+    my $zoneid=shift;
+    return($capture->sql_row($capture->statement('zoneCenter'),
+			     $zoneid,POSITION_BOX));
 }
 
 sub cercle_coors {
-    my ($context,$c,$color)=@_;
-    my ($x,$y)=milieu_cercle($c);
-    my $t=0;
-    for(1..4) {
-	$t+=sqrt( ($x-$c->{1}->{'x'})**2+
-		  ($y-$c->{1}->{'y'})**2 );
-    }
+    my ($context,$zoneid,$color)=@_;
+    my ($x,$y)=milieu_cercle($zoneid);
+    my $t=sqrt($capture->zone_dist2($zoneid,$x,$y));
     $context->set_source_rgb(color_rgb($color));
     $context->new_path;
-    $context->arc($x,$y,$t/4,0,360);
+    $context->arc($x,$y,$t,0,360);
     $context->stroke;
 }
-    
+
 sub croix_coors {
-    my ($context,$c,$color)=@_;
+    my ($context,$zoneid,$color)=@_;
     $context->set_source_rgb(color_rgb($color));
     $context->new_path;
     for my $i (1,2) {
-	$context->move_to($c->{$i}->{'x'},$c->{$i}->{'y'});
-	$context->line_to($c->{$i+2}->{'x'},$c->{$i+2}->{'y'});
+	$context->move_to($capture->zone_corner($zoneid,$i));
+	$context->line_to($capture->zone_corner($zoneid,$i+2));
     }
     $context->stroke;
 }
 
 sub boite_coors {
-    my ($context,$c,$color)=@_;
+    my ($context,$zoneid,$color)=@_;
     my @pts="";
     $context->set_source_rgb(color_rgb($color));
     $context->new_path;
-    $context->move_to($c->{1}->{'x'},$c->{1}->{'y'});
+    $context->move_to($capture->zone_corner($zoneid,1));
     for my $i (2..4) {
-	$context->line_to($c->{$i}->{'x'},$c->{$i}->{'y'});
+	$context->line_to($capture->zone_corner($zoneid,$i));
     }
     $context->close_path;
     $context->stroke;
@@ -281,239 +250,263 @@ sub boite_coors {
 
 my $delta=1;
 
-my @ids=$anl->ids();  
+$capture->begin_read_transaction;
 
-$delta=1/(1+$#ids) if($#ids>=0);
+my @pages=@{$capture->dbh
+	      ->selectall_arrayref($capture->statement('pages'),
+				   {Slice => {}})};
 
- XMLFB: for my $id (@ids) {
-     my $x=$anl->analyse($id,'scan'=>1);
-     my $x_coche=$anl->analyse($id);
-     print "Analyse $id...\n";
+$capture->end_transaction;
 
-     my $scan=$x->{'src'};
+$delta=1/(1+$#pages) if($#pages>=0);
 
-     if($rep_projet) {
-	 $scan=proj2abs({'%PROJET',$rep_projet,
-			 '%PROJETS',$rep_projets,
-			 '%HOME'=>$ENV{'HOME'},
-		     },
-			$scan);
-     }
-	 
-     my $scan_f=$scan;
+ PAGE: for my $p (@pages) {
+  my @spc=map { $p->{$_} } (qw/student page copy/);
 
-     $scan_f =~ s/\[[0-9]+\]$//;
+  debug "Analyzing ".pageids_string(@spc);
 
-     if(-f $scan_f) {
+  my $scan=$p->{'src'};
 
-	 # ONE SCAN FILE
+  debug "Scan file: $scan";
 
-	 # read scan file (converting to PNG)
-	 debug "Reading $scan";
-	 open(CONV,"-|",magick_module("convert"),$scan,"png:-");
-	 my $surface = Cairo::ImageSurface->create_from_png_stream(
-	     sub {
-		 my ($cb_data,$length)=@_;
-		 read CONV,$data,$length;
-		 return($data);
-	     });
-	 close(CONV);
+  if($rep_projet) {
+    $scan=proj2abs({'%PROJET',$rep_projet,
+		    '%PROJETS',$rep_projets,
+		    '%HOME'=>$ENV{'HOME'},
+		   },
+		   $scan);
+  }
 
-	 my $context = Cairo::Context->create ($surface);
-	 $context->set_line_width($line_width);
-	 
-	 my $layout=Pango::Cairo::create_layout($context);
-	 
-         # adjusts text size...
-	 my $l0=Pango::Cairo::create_layout($context);
-	 $l0->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$test_font_size));
-	 $l0->set_text('H');
-	 my ($text_x,$text_y)=$l0->get_pixel_size();
-	 my $page_width=$surface->get_width;
-	 my $page_height=$surface->get_height;
-	 debug "Scan height: $page_height";
-	 my $target_y=$page_height/$pointsize_rel;
-	 debug "Target TY: $target_y";
-	 my $font_size=int($test_font_size*$target_y/$text_y);
-	 debug "Font size: $font_size";
+  my $scan_f=$scan;
 
-	 $layout->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$font_size));
-	 $layout->set_text('H');
-	 ($text_x,$text_y)=$layout->get_pixel_size();
+  $scan_f =~ s/\[[0-9]+\]$//;
 
-	 my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
+  if(-f $scan_f) {
 
-	 print "Annotating $scan...\n";
+    # ONE SCAN FILE
 
-	 my $idf=id2idf($id);
-	 
-	 my ($etud,$n_page)=get_ep($id);
-	 
-	 my %question=();
+    # read scan file (converting to PNG)
+    debug "Reading $scan";
+    open(CONV,"-|",magick_module("convert"),$scan,"png:-");
+    my $surface = Cairo::ImageSurface
+      ->create_from_png_stream(
+			       sub {
+				 my ($cb_data,$length)=@_;
+				 read CONV,$data,$length;
+				 return($data);
+			       });
+    close(CONV);
 
-	 my $ne=$notes->{'copie'}->{$etud};
+    my $context = Cairo::Context->create ($surface);
+    $context->set_line_width($line_width);
 
-	 if(!$ne) {
-	     print "*** no information for sheet $etud ***\n";
-	     next XMLFB;
-	 }
-	 
-	 # note finale sur la page avec le nom
-	 
-	 if($n_page==1 || $x->{'nom'}) {
-	     my $t=$ne->{'total'}->[0];
-	     my $text=$verdict;
+    my $layout=Pango::Cairo::create_layout($context);
 
-	     $text =~ s/\%[S]/format_note($t->{'total'})/ge;
-	     $text =~ s/\%[M]/format_note($t->{'max'})/ge;
-	     $text =~ s/\%[s]/format_note($t->{'note'})/ge;
-	     $text =~ s/\%[m]/format_note($notes->{'notemax'})/ge;
+    # adjusts text size...
+    my $l0=Pango::Cairo::create_layout($context);
+    $l0->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$test_font_size));
+    $l0->set_text('H');
+    my ($text_x,$text_y)=$l0->get_pixel_size();
+    my $page_width=$surface->get_width;
+    my $page_height=$surface->get_height;
+    debug "Scan height: $page_height";
+    my $target_y=$page_height/$pointsize_rel;
+    debug "Target TY: $target_y";
+    my $font_size=int($test_font_size*$target_y/$text_y);
+    debug "Font size: $font_size";
 
-	     if($assoc && $noms) {
-		 my $i=$assoc->effectif($etud);
-		 my $n;
-		 
-		 debug "Association -> ID=$i";
-		 
-		 if($i) {
-		     debug "Name found";
-		     ($n)=$noms->data($lk,$i);
-		     if($n) {
-			 $text=$noms->substitute($n,$text,'prefix'=>'%');
-		     }
-		 }
-	     }
+    $layout->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$font_size));
+    $layout->set_text('H');
+    ($text_x,$text_y)=$layout->get_pixel_size();
 
-	     $layout->set_text($text);
-	     $context->set_source_rgb(color_rgb('red'));
-	     if($rtl) {
-		 my ($tx,$ty)=$layout->get_pixel_size;
-		 $context->move_to($page_width-$text_x-$tx,$text_y*.7);
-	     } else {
-		 $context->move_to($text_x,$text_y*.7);
-	     }
-	     Pango::Cairo::show_layout($context,$layout);
-	     
-	 }
-	 
-	 #########################################
-	 # signalisation autour de chaque case :
-	 
-	 my $page=$x->{'case'};
-	 my $page_coche=$x_coche->{'case'};
-	 
-       CASE: for my $k (keys %$page) {
-	   my ($q,$r)=get_qr($k);
-	   my $indic=$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'};
+    my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
 
-	   next CASE if($indic && !$annote_indicatives);
-	   
-	   # a cocher ?
-	   my $bonne=($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
+    print "Annotating $scan...\n";
 
-	   # cochee ?
-	   my $cochee=($page_coche->{$k}->{'r'} > $seuil ? 1 :0);
+    my $idf=pageids_string(@spc,'path'=>1);
 
-	   my $sy=$symboles{"$bonne-$cochee"};
-	   
-	   if($sy->{type} eq 'circle') {
-	       cercle_coors($context,$page->{$k}->{'coin'},$sy->{color});
-	   } elsif($sy->{type} eq 'mark') {
-	       croix_coors($context,$page->{$k}->{'coin'},$sy->{color});
-	   } elsif($sy->{type} eq 'box') {
-	       boite_coors($context,$page->{$k}->{'coin'},$sy->{color});
-	   } elsif($sy->{type} eq 'none') {
-	   } else {
-	       debug "Unknown symbol type ($k): $sy->{type}";
-	   }
+    my %question=();
 
-	   # pour avoir la moyenne des coors pour marquer la note de
-	   # la question
+    my $ne=$notes->{'copie'}->{studentids_string(@spc[0,2])};
 
-	   $question{$q}={} if(!$question{$q});
-	   my @mil=milieu_cercle($page->{$k}->{'coin'});
-	   $question{$q}->{'n'}++;
-	   $question{$q}->{'x'}=$mil[0] 
-	       if((!$question{$q}->{'x'}) || ($mil[0]<$question{$q}->{'x'}));
-	   $question{$q}->{'xmax'}=$mil[0] 
-	       if((!$question{$q}->{'xmax'}) || ($mil[0]>$question{$q}->{'xmax'}));
-	   $question{$q}->{'y'}+=$mil[1];
-	   
-       }
-	 
-	 #########################################
-	 # notes aux questions
-	 
-	 if($position ne 'none') {
-	   QUEST: for my $q (keys %question) {
-	       next QUEST if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'});
-	       my $x;
+    if(!$ne) {
+      print "*** no marks for copy ".studentids_string(@spc[0,2])." ***\n";
+      debug "No marks found ! Copy=".studentids_string(@spc[0,2]);
+      next PAGE;
+    }
 
-	       my $nq=$ne->{'question'}->{$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'titre'}};
-	       
-	       my $text=$verdict_question;
-	       
-	       $text =~ s/\%[S]/$nq->{'note'}/g;
-	       $text =~ s/\%[M]/$nq->{'max'}/g;
-	       $text =~ s/\%[s]/format_note($nq->{'note'})/ge;
-	       $text =~ s/\%[m]/format_note($nq->{'max'})/ge;
-	       
-	       my $te=eval($text);
-	       if($@) {
-		   debug "Annotation: $text";
-		   debug "Evaluation error $@";
-	       } else {
-		   $text=$te;
-	       }
+    $capture->begin_read_transaction;
 
-	       $layout->set_text($text);
-	       my ($tx,$ty)=$layout->get_pixel_size;
-	       if($position eq 'marge') {
-		   if($rtl) {
-		       $x=$page_width-$ecart_marge*$text_x-$tx;
-		   } else {
-		       $x=$ecart_marge*$text_x;
-		   }
-	       } elsif($position eq 'case') {
-		   if($rtl) {
-		       $x=$question{$q}->{'xmax'} + $ecart*$text_x ;
-		   } else {
-		       $x=$question{$q}->{'x'} - $ecart*$text_x - $tx;
-		   }
-	       } else {
-		   debug "Annotation : position invalide : $position";
-		   $x=$text_x;
-	       }
-	       
-	       # moyenne des y des cases de la question
-	       my $y=$question{$q}->{'y'}/$question{$q}->{'n'}-$ty/2;
-	       
-	       $context->set_source_rgb(color_rgb('red'));
-	       $context->move_to($x,$y);
-	       Pango::Cairo::show_layout($context,$layout);
-	   }
-	 }
+    # print global mark and name on the page
 
-	 # WRITE TO FILE
-	 
-	 $context->show_page;
-	 
-	 open(CONV,"|-",magick_module("convert"),"png:-",
-	      "-quality",$qualite_jpg,"-geometry",$taille_max,
-	      "$cr_dir/corrections/jpg/page-$idf.jpg");
-	 $surface->write_to_png_stream(
-	     sub {
-		 my ($cb_data,$data)=@_;
-		 print CONV $data;
-	     });
-	 close(CONV);
+    if($p->{'page'}==1 || $capture->zones_count(@spc,ZONE_NAME)) {
+      my $t=$ne->{'total'}->[0];
+      my $text=$verdict;
 
-     } else {
-	 print "*** no scan $scan ***\n";
-     }
+      $text =~ s/\%[S]/format_note($t->{'total'})/ge;
+      $text =~ s/\%[M]/format_note($t->{'max'})/ge;
+      $text =~ s/\%[s]/format_note($t->{'note'})/ge;
+      $text =~ s/\%[m]/format_note($notes->{'notemax'})/ge;
 
-     $avance->progres($delta);
- }
+      if($assoc && $noms) {
+	my $i=$assoc->effectif($etud);
+	my $n;
+
+	debug "Association -> ID=$i";
+
+	if($i) {
+	  debug "Name found";
+	  ($n)=$noms->data($lk,$i);
+	  if($n) {
+	    $text=$noms->substitute($n,$text,'prefix'=>'%');
+	  }
+	}
+      }
+
+      $layout->set_text($text);
+      $context->set_source_rgb(color_rgb('red'));
+      if($rtl) {
+	my ($tx,$ty)=$layout->get_pixel_size;
+	$context->move_to($page_width-$text_x-$tx,$text_y*.7);
+      } else {
+	$context->move_to($text_x,$text_y*.7);
+      }
+      Pango::Cairo::show_layout($context,$layout);
+    }
+
+    #########################################
+    # signs around each box
+
+    my $sth=$capture->statement('pageZones');
+    $sth->execute(@spc,ZONE_BOX);
+  BOX: while(my $b=$sth->fetchrow_hashref) {
+
+      my $q=$b->{'id_a'};
+      my $r=$b->{'id_b'};
+      my $indic=$bar->{'etudiant'}->{$p->{'student'}}
+	->{'question'}->{$q}->{'indicative'};
+
+      next BOX if($indic && !$annote_indicatives);
+
+      # to be ticked?
+      my $bonne=($bar->{'etudiant'}->{$p->{'student'}}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
+
+      # ticked on this scan?
+      my $cochee=$capture->ticked($p->{'student'},$p->{'copy'},
+				  $q,$r,$seuil);
+
+      debug "Q=$q R=$r $bonne-$cochee";
+
+      my $sy=$symboles{"$bonne-$cochee"};
+
+      if($sy->{type} eq 'circle') {
+	cercle_coors($context,$b->{'zoneid'},$sy->{color});
+      } elsif($sy->{type} eq 'mark') {
+	croix_coors($context,$b->{'zoneid'},$sy->{color});
+      } elsif($sy->{type} eq 'box') {
+	boite_coors($context,$b->{'zoneid'},$sy->{color});
+      } elsif($sy->{type} eq 'none') {
+      } else {
+	debug "Unknown symbol type ($bonne-$cochee): $sy->{type}";
+      }
+
+      # pour avoir la moyenne des coors pour marquer la note de
+      # la question
+
+      $question{$q}={} if(!$question{$q});
+      my @mil=milieu_cercle($b->{'zoneid'});
+      $question{$q}->{'n'}++;
+      $question{$q}->{'x'}=$mil[0] 
+	if((!$question{$q}->{'x'}) || ($mil[0]<$question{$q}->{'x'}));
+      $question{$q}->{'xmax'}=$mil[0] 
+	if((!$question{$q}->{'xmax'}) || ($mil[0]>$question{$q}->{'xmax'}));
+      $question{$q}->{'y'}+=$mil[1];
+    }
+
+    #########################################
+    # write questions scores
+
+    if($position ne 'none') {
+    QUEST: for my $q (keys %question) {
+	next QUEST if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'});
+	my $x;
+
+	my $nq=$ne->{'question'}->{$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'titre'}};
+
+	my $text=$verdict_question;
+
+	$text =~ s/\%[S]/$nq->{'note'}/g;
+	$text =~ s/\%[M]/$nq->{'max'}/g;
+	$text =~ s/\%[s]/format_note($nq->{'note'})/ge;
+	$text =~ s/\%[m]/format_note($nq->{'max'})/ge;
+
+	my $te=eval($text);
+	if($@) {
+	  debug "Annotation: $text";
+	  debug "Evaluation error $@";
+	} else {
+	  $text=$te;
+	}
+
+	$layout->set_text($text);
+	my ($tx,$ty)=$layout->get_pixel_size;
+	if($position eq 'marge') {
+	  if($rtl) {
+	    $x=$page_width-$ecart_marge*$text_x-$tx;
+	  } else {
+	    $x=$ecart_marge*$text_x;
+	  }
+	} elsif($position eq 'case') {
+	  if($rtl) {
+	    $x=$question{$q}->{'xmax'} + $ecart*$text_x ;
+	  } else {
+	    $x=$question{$q}->{'x'} - $ecart*$text_x - $tx;
+	  }
+	} else {
+	  debug "Annotation : position invalide : $position";
+	  $x=$text_x;
+	}
+
+	# moyenne des y des cases de la question
+	my $y=$question{$q}->{'y'}/$question{$q}->{'n'}-$ty/2;
+
+	$context->set_source_rgb(color_rgb('red'));
+	$context->move_to($x,$y);
+	Pango::Cairo::show_layout($context,$layout);
+      }
+    }
+
+    $capture->end_transaction;
+
+    # WRITE TO FILE
+
+    $context->show_page;
+
+    my $out_file="page-$idf.jpg";
+
+    debug "Saving annotated scan to $cr_dir/corrections/jpg/$out_file";
+
+    open(CONV,"|-",magick_module("convert"),"png:-",
+	 "-quality",$qualite_jpg,"-geometry",$taille_max,
+	 "$cr_dir/corrections/jpg/$out_file");
+    $surface->write_to_png_stream(
+				  sub {
+				    my ($cb_data,$data)=@_;
+				    print CONV $data;
+				  });
+    close(CONV);
+
+    $capture->begin_transaction;
+    $capture->set_annotated(@spc,$out_file);
+    $capture->end_transaction;
+
+  } else {
+    print "*** no scan $scan_f ***\n";
+    debug "No scan: $scan_f";
+  }
+
+  $avance->progres($delta);
+}
 
 $avance->fin();
 

@@ -28,7 +28,6 @@ use AMC::Exec;
 use AMC::Gui::Avancement;
 use AMC::AssocFile;
 use AMC::NamesFile;
-use AMC::ANList;
 use AMC::Data;
 
 use File::Spec::Functions qw/tmpdir/;
@@ -70,7 +69,6 @@ my $dest_size_y=29.7/2.54;
 GetOptions("projet=s"=>\$projet_dir,
 	   "cr=s"=>\$cr,
 	   "n-copies=s"=>\$nombre_copies,
-	   "an-saved=s"=>\$an_saved,
 	   "sujet=s"=>\$sujet,
 	   "data=s"=>\$data_dir,
 	   "tex-src=s"=>\$tex_src,
@@ -123,19 +121,6 @@ if($fich_noms) {
 			      "encodage"=>$noms_encodage);
 
     debug "Keys in names file: ".join(", ",$noms->heads());
-}
-
-my $anl='';
-
-if($an_saved) {
-    $anl=AMC::ANList::new($cr,
-			  'saved'=>$an_saved,
-			  'action'=>'',
-			  );
-} elsif(-d $cr) {
-    $anl=AMC::ANList::new($cr,
-			  'saved'=>'',
-			  );
 }
 
 # check_correc prepares the corrected answer sheet for all
@@ -214,9 +199,15 @@ sub write_pdf {
     }
 }
 
+###################################################################
+# Connect to the database
+
+my $data=AMC::Data->new($data_dir);
+my $layout=$data->module('layout');
+my $capture=$data->module('capture');
 
 ###################################################################
-# Get students numbers to process.
+# Get student/copy numbers to process.
 
 my @students=();
 
@@ -226,38 +217,23 @@ if($id_file) {
 
     open(NUMS,$id_file);
     while(<NUMS>) {
-        push @students,$1 if(/^([0-9]+)$/);
+        if(/^([0-9]+):([0-9]+)$/) {
+	  push @students,[$1,$2];
+	} elsif(/^([0-9]+)$/) {
+	  push @students,[$1,0];
+	}
     }
     close(NUMS);
 
 }
 
-# b) second case: guess...
+# b) second case: guess from data capture data
 
 else {
-    my @ids_utiles=();
-    
-    if($anl) {
-	# get sheets IDS from the analysis data (if any)
-	@ids_utiles=$anl->ids();
-    } else {
-	# otherwise, get sheets IDS from the JPG files present
-	opendir(JDIR, $jpgdir) || die "can't opendir $jpgdir: $!";
-	@ids_utiles = map { file2id($_); }
-	grep { /^page.*jpg$/ && -f "$jpgdir/$_" } readdir(JDIR);
-	closedir JDIR;
-    }
-    
-    # now, extract the student IDs from the sheets IDs.
-
-    my %copie_utile=();
-    
-    for my $id (@ids_utiles) {
-	my ($e,$p)=get_ep($id);
-	$copie_utile{$e}=1;
-    }
-
-    @students=sort { $a <=> $b } (keys %copie_utile);
+  $capture->begin_read_transaction;
+  @students=@{$capture->dbh
+		->selectall_arrayref($capture->statement('studentCopies'))};
+  $capture->end_transaction;
 }
 
 my $n_copies=1+$#students;
@@ -266,12 +242,6 @@ if($n_copies<=0) {
     debug "No sheets to group.";
     exit 0;
 }
-
-###################################################################
-# Connect to the database
-
-my $data=AMC::Data->new($data_dir);
-my $layout=$data->module('layout');
 
 ###################################################################
 # Processing
@@ -327,9 +297,9 @@ sub stk_pdf_add {
 
 sub stk_pdf_go {
     debug "Page(s) ".join(',',@stk_pdf_pages)." form corrected sheet";
-    
+
     check_correc();
-    
+
     my @ps=sort { $a <=> $b } @stk_pdf_pages;
     my @morceaux=();
     my $mii=0;
@@ -337,7 +307,7 @@ sub stk_pdf_go {
 	my $debut=shift @ps;
 	my $fin=$debut;
 	while($ps[0]==$fin+1) { $fin=shift @ps; }
-	
+
 	$mii++;
 	my $un_morceau="$temp_dir/m.$mii.pdf";
 
@@ -362,7 +332,7 @@ sub stk_pdf_go {
 			    @morceaux);
 	unlink @morceaux;
     }
-			
+
     stk_push();
 
     stk_pdf_begin();
@@ -382,8 +352,7 @@ sub stk_ppm_add {
 }
 
 sub stk_ppm_go {
-    stk_push() if(write_pdf($stk_ppm_im,$stk_file));    
-
+    stk_push() if(write_pdf($stk_ppm_im,$stk_file));
     stk_ppm_begin();
 }
 
@@ -407,80 +376,85 @@ sub process_output {
 
 stk_begin() if($single_output);
 
-$layout->begin_read_transaction;
-
 for my $e (@students) {
-    print "Pages for ID=$e...\n";
+  $data->begin_read_transaction;
 
-    my $f=$modele;
-    $f='(N)-(ID)' if(!$f);
-    $f.='.pdf' if($f !~ /\.pdf$/i);
-    
-    my $ex=sprintf("%04d",$e);
-    $f =~ s/\(N\)/$ex/gi;
+  print "Pages for ID=".studentids_string(@$e)."...\n";
 
-    if($assoc && $noms) {
-	my $i=$assoc->effectif($e);
-	my $nom='XXX';
-	my $n;
+  my $f=$modele;
+  $f='(N)-(ID)' if(!$f);
+  $f.='.pdf' if($f !~ /\.pdf$/i);
 
-	debug "Association -> ID=$i";
+  my $ex;
+  if($e->[1]) {
+    $ex=sprintf("%04d:%04d",@$e);
+  } else {
+    $ex=sprintf("%04d",$e->[0]);
+  }
+  $f =~ s/\(N\)/$ex/gi;
 
-	if($i) {
-	    debug "Name found";
-	    ($n)=$noms->data($lk,$i);
-	    if($n) {
-		$f=$noms->substitute($n,$f);
-	    }
-	}
-	
-    } else {
-	$f =~ s/-?\(ID\)//gi;
-    }
-    
-    # no accents and special characters in filename
-    $f=NFKD($f);
-    $f =~ s/\pM//og;
+  if($assoc && $noms) {
+    my $i=$assoc->effectif(@$e);
+    my $nom='XXX';
+    my $n;
 
-    # no whitespaces in filename
-    $f =~ s/\s+/_/g;
+    debug "Association -> ID=$i";
 
-    $f="$pdfdir/$f";
-
-    debug "Dest file: $f";
-
-    stk_begin() if(! $single_output);
-
-    for my $pp ($layout->pages_for_student($e)) {
-
-	$ii++;
-	my $f_p="$temp_dir/$ii.pdf";
-
-	my $f_j="$jpgdir/page-".
-	    $layout->query('pageFilename',$e,$pp).".jpg";
-
-	if(-f $f_j) {
-	    # correction JPG presente : on transforme en PDF
-
-	    debug "Page $e/$pp annotated ($f_j)";
-
-	    stk_ppm_add($f_j);
-
-	} elsif($compose) {
-	    # pas de JPG annote : on prend la page corrigee
-
-	    debug "Page $e/$pp from corrected sheet";
-
-	    stk_pdf_add($layout->page_query('pageAttr','subjectpage',$e,$pp));
-	}
+    if($i) {
+      debug "Name found";
+      ($n)=$noms->data($lk,$i);
+      if($n) {
+	$f=$noms->substitute($n,$f);
+      }
     }
 
-    process_output($f) if(! $single_output);
+  } else {
+    $f =~ s/-?\(ID\)//gi;
+  }
 
-    $avance->progres(1/$n_copies);
+  # no accents and special characters in filename
+  $f=NFKD($f);
+  $f =~ s/\pM//og;
+
+  # no whitespaces in filename
+  $f =~ s/\s+/_/g;
+
+  $f="$pdfdir/$f";
+
+  debug "Dest file: $f";
+
+  stk_begin() if(! $single_output);
+
+  for my $pp ($layout->pages_for_student($e->[0])) {
+
+    $ii++;
+    my $f_p="$temp_dir/$ii.pdf";
+
+    my $f_j="$jpgdir/".$capture->get_annotated_page($e->[0],$pp,$e->[1]);
+
+    if(-f $f_j) {
+      # correction JPG presente : on transforme en PDF
+
+      debug "Page ".studentids_string(@$e)."/$pp annotated ($f_j)";
+
+      stk_ppm_add($f_j);
+
+    } elsif($compose) {
+      # pas de JPG annote : on prend la page corrigee
+
+      debug "Page ".studentids_string(@$e)."/$pp from corrected sheet";
+
+      stk_pdf_add($layout->query('pageAttr','subjectpage',$e->[0],$pp));
+    }
+  }
+
+  process_output($f) if(! $single_output);
+
+  $data->end_transaction;
+
+  $avance->progres(1/$n_copies);
 }
 
-$layout->end_transaction;
 
 process_output($single_output) if($single_output);
 

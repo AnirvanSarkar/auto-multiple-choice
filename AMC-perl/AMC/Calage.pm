@@ -225,6 +225,11 @@ sub calage {
     return($self->{'MSE'});
 }
 
+sub params {
+  my ($self)=@_;
+  return(map { $self->{$_} } (qw/t_a t_b t_c t_d t_e t_f MSE/));
+}
+
 sub xml {
     my ($self,$i)=(@_);
     my $pre=" " x $i;

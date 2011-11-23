@@ -98,8 +98,7 @@ sub sql_quote {
     return $self->{'dbh'}->quote($string);
 }
 
-# sql_do($sql,@bind) executes the SQL query $sql (can be SQL sentence
-# as a string, or a SQL statement prepared by DBI), replacing ? by the
+# sql_do($sql,@bind) executes the SQL query $sql, replacing ? by the
 # elements of @bind.
 
 sub sql_do {

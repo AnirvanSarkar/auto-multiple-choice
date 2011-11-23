@@ -24,16 +24,15 @@ use XML::Writer;
 use Getopt::Long;
 use POSIX qw(ceil floor);
 use AMC::Basic;
-use AMC::ANList;
 use AMC::Gui::Avancement;
 use AMC::Scoring;
+use AMC::Data;
 
 use encoding 'utf8';
 
 $VERSION_BAREME=2;
 $VERSION_NOTES=2;
 
-my $cr_dir="";
 my $bareme="";
 my $association="-";
 my $seuil=0.1;
@@ -46,7 +45,7 @@ my $grain='0.5';
 my $arrondi='';
 my $delimiteur=',';
 my $encodage_interne='UTF-8';
-my $an_saved='';
+my $data_dir='';
 
 my $postcorrect='';
 
@@ -56,8 +55,7 @@ my $progres_id='';
 
 my $debug='';
 
-GetOptions("cr=s"=>\$cr_dir,
-	   "an-saved=s"=>\$an_saved,
+GetOptions("data=s"=>\$data_dir,
 	   "bareme=s"=>\$bareme,
 	   "seuil=s"=>\$seuil,
 	   "debug=s"=>\$debug,
@@ -110,9 +108,9 @@ if($type_arrondi) {
     }
 }
 
-if(! -d $cr_dir) {
-    attention("No CR directory: $cr_dir");
-    die "No CR directory: $cr_dir";
+if(! -d $data_dir) {
+    attention("No DATA directory: $data_dir");
+    die "No DATA directory: $data_dir";
 }
 if(! -f $bareme) {
     attention("No marking scale file: $bareme");
@@ -128,7 +126,12 @@ if($grain<=0) {
 
 my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
 
-my $bar=AMC::Scoring::new('file'=>$bareme,'onerror'=>'die');
+my $data=AMC::Data->new($data_dir);
+my $capture=$data->module('capture');
+
+my $bar=AMC::Scoring::new('file'=>$bareme,'onerror'=>'die',
+			  'data'=>$data,
+			  'seuil'=>$seuil);
 
 if($VERSION_BAREME ne $bar->version) {
     attention("Marking scale file version (".$bar->version.")",
@@ -137,59 +140,7 @@ if($VERSION_BAREME ne $bar->version) {
     die("Marking scale file version mismatch: $VERSION_BAREME / ".$bar->version);
 }
 
-opendir(DIR, $cr_dir) || die "can't opendir $cr_dir: $!";
-my @xmls = grep { /\.xml$/ && -f "$cr_dir/$_" } readdir(DIR);
-closedir DIR;
-
-# action to be called for each page when reading data capture reports:
-# sets the 'ticked' data for each box of the page, comparing black
-# ratio to the threshold.
-sub action {
-    my ($id,$aa,$bar)=(@_);
-    my $page=$aa->{'case'};
-    my ($etud,undef)=get_ep($id);
-
-    for my $k (sort { $a <=> $b } (keys %$page)) {
-	my ($q,$r)=get_qr($k);
-	
-	my $coche=($page->{$k}->{'r'}>$seuil ? 1 : 0);
-	debug "Student $etud Q $q A $r : "
-	    .($coche ? "X" : "O");
-	$bar->ticked_answer($etud,$q,$r,$coche);
-    }
-}
-
 $avance->progres(0.05);
-
-my $anl;
-
-# Reads data capture reports...
-
-if($an_saved) {
-    $anl=AMC::ANList::new($cr_dir,
-			  'saved'=>$an_saved,
-			  'action'=>'',
-			  );
-    my @ids=$anl->ids();
-    my $delta=0.75;
-    $delta/=(1+$#ids) if($#ids>=0);
-    for my $id (@ids) {
-	action($id,$anl->analyse($id),$bar);
-	$avance->progres($delta);
-    }
-} else {
-    $anl=AMC::ANList::new($cr_dir,
-			  'saved'=>'',
-			  'action'=>[\&action,$bar]
-			  );
-}
-
-print "Sources :\n";
-for my $id ($anl->ids()) {
-    print "ID=$id : ".$anl->filename($id)
-    .($anl->attribut($id,'manuel') ? " (manual)" : "")."\n";
-}
-print "\n";
 
 # Prepares output file with marks...
 
@@ -216,6 +167,8 @@ $writer->startTag('notes',
 
 # Computes and outputs marks...
 
+$data->begin_read_transaction;
+
 my $somme_notes=0;
 my $n_notes=0;
 
@@ -227,8 +180,8 @@ my %qt_n=();
 my %qt_sum=();
 my %qt_summax=();
 
-my @a_calculer=sort { ($b==$postcorrect)-($a==$postcorrect) }
-grep { $bar->ticked_info($_) } ($bar->etus);
+my @a_calculer=@{$capture->dbh
+		   ->selectall_arrayref($capture->statement('studentCopies'),{})};
 
 my $delta=0.19;
 $delta/=(1+$#a_calculer) if($#a_calculer>=0);
@@ -239,10 +192,13 @@ if($postcorrect) {
     $bar->write();
 }
 
-for my $etud (@a_calculer) {
+for my $sc (@a_calculer) {
+  my $etud=$sc->[0];
+
+  debug "MARK: --- SHEET ".studentids_string(@$sc);
 
     $writer->startTag('copie',
-		      'id'=>$etud);
+		      'id'=>studentids_string(@$sc));
 
     my $total=0;
     my $max_i=0;
@@ -250,12 +206,12 @@ for my $etud (@a_calculer) {
 
     for my $q ($bar->questions($etud)) {
 	
-	($xx,$raison,$keys)=$bar->score_question($etud,$q);
+	($xx,$raison,$keys)=$bar->score_question(@$sc,$q);
 	($notemax)=$bar->score_max_question($etud,$q);
 
 	my $tit=$bar->question_title($etud,$q);
 
-	debug "MARK: SHEET $etud QUESTION $q TITLE $tit";
+	debug "MARK: QUESTION $q TITLE $tit";
 
 	if($tit =~ /^(.*)\.([0-9]+)$/) {
 	    $codes{$1}->{$2}=$xx;
@@ -278,7 +234,7 @@ for my $etud (@a_calculer) {
 		
 	$writer->emptyTag('question',
 			  'id'=>$tit,
-			  'cochees'=>$bar->ticked_list($etud,$q),
+			  'cochees'=>join(';',$capture->ticked_list(@$sc,$q,$seuil)),
 			  'note'=>$xx,
 			  'raison'=>$raison,
 			  'indicative'=>$bar->question_is_indicative($etud,$q),
@@ -407,5 +363,7 @@ $writer->endTag('notes');
     
 $writer->end();
 $output->close();
+
+$data->end_transaction;
 
 $avance->fin();

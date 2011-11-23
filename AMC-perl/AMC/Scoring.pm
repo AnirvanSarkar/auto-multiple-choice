@@ -27,9 +27,10 @@ sub new {
     my (%o)=(@_);
 
     my $self={'file'=>'',
-	      'tick'=>{},
 	      'onerror'=>'stderr',
-	      'ticked_info'=>{},
+	      'seuil'=>0,
+	      'data'=>'',
+	      '_capture'=>'',
 	  };
 
     for my $k (keys %o) {
@@ -37,8 +38,11 @@ sub new {
     }
 
     bless $self;
-    
+
     $self->read() if($self->{'file'});
+
+    $self->{'_capture'}=$self->{'data'}->module('capture')
+      if($self->{'data'});
 
     return($self);
 }
@@ -183,85 +187,35 @@ sub correct_answers {
     return(map { $self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$_}->{'bonne'} } (@a));
 }
 
-# The following method allows to access the 'ticked' state of
-# answers. This has to be called before computing scores, as this is
-# not known from the bareme.xml file.
-
-# $self->ticked_answer($etu,$question,$answer) returns a value telling
-# if this answer is ticked.
-
-# $self->ticked_answer($etu,$question,$answer,$t) sets the 'ticked'
-# state for an answer.
-sub ticked_answer {
-    my ($self,$etu,$question,$answer,$t)=@_;
-    if(defined($t)) {
-	$self->{'tick'}->{$etu}={} if(!defined($self->{'tick'}->{$etu}));
-	$self->{'tick'}->{$etu}->{$question}={} 
-	if(!defined($self->{'tick'}->{$etu}->{$question}));
-	$self->{'tick'}->{$etu}->{$question}->{$answer}={} 
-	if(!defined($self->{'tick'}->{$etu}->{$question}->{$answer}));
-    }
-    my $a=$self->{'tick'}->{$etu}->{$question}->{$answer};
-    if(defined($t)) {
-	$a->{'ticked'}=$t;
-	$self->{'ticked_info'}->{$etu}++;
-    }
-    return($a->{'ticked'});
-}
-
 ###################
 # derived methods #
 ###################
 
-# tells if we have 'ticked or not' data for some answer for this
-# student sheet.
-sub ticked_info {
-    my ($self,$etu)=@_;
-    return(defined($self->{'ticked_info'}->{$etu}) ?
-	   $self->{'ticked_info'}->{$etu} : 0);
+sub ticked {
+  my ($self,$student,$copy,$question,$answer)=@_;
+  return($self->{'_capture'}
+	 ->ticked($student,$copy,$question,$answer,$self->{'seuil'}));
 }
 
 # tells if the answer given by the student is the correct one (ticked
 # if it has to be, or not ticked if it has not to be).
 sub answer_is_correct {
-    my ($self,$etu,$question,$answer)=@_;
-    return($self->ticked_answer($etu,$question,$answer) 
-	   == $self->correct_answer($etu,$question,$answer));
+    my ($self,$student,$copy,$question,$answer)=@_;
+    return($self->ticked($student,$copy,$question,$answer)
+	   == $self->correct_answer($student,$question,$answer));
 }
 
-# sets/gets 'ticked' states for all answers of a question. When
-# setting (using the optional $t argument), $t is an array reference.
-sub ticked_question {
-    my ($self,$etu,$question,$t)=@_;
-    my @a=$self->answers_ids($etu,$question);
-    my @r=();
-    if($t && ($#{$t} != $#a)) {
-	debug "Error: ticked_question bad length : ".(1+$#{$t})." != ".(1+$#a);
-	return();
-    }
-    for my $i (0..$#a) {
-	my @par=($etu,$question,$a[$i]);
-	push @par,$t->[$i] if(defined($t));
-	push @r,$self->ticked_answer(@par);
-    }
-    return(@r);
-}
-
-# returns a semicolon separated list of 'ticked' states for the
-# answers of a question.
-sub ticked_list {
-    my ($self,$etu,$question)=@_;
-    return(join(";",$self->ticked_question($etu,$question)));
-}
-
-# takes correct answers from ticked answers of sheet id $postcorrect
+# takes correct answers from ticked answers of some particular
+# completed answer sheet
 sub postcorrect {
-    my ($self,$postcorrect)=@_;
-    debug "PostCorrection: from E $postcorrect";
-    for my $q ($self->questions($postcorrect)) {
-	if(! $self->question_is_indicative($postcorrect,$q)) {
-	    for my $a ($self->answers_ids($postcorrect,$q)) {
-		my $value=$self->ticked_answer($postcorrect,$q,$a);
+    my ($self,$student,$copy)=@_;
+    $copy=0 if(!$copy);
+    debug "PostCorrection: from $student:$copy";
+    for my $q ($self->questions($student)) {
+	if(! $self->question_is_indicative($student,$q)) {
+	    for my $a ($self->answers_ids($student,$q)) {
+		my $value=$self->{'_capture'}
+		  ->ticked($student,$copy,$q,$a,$self->{'seuil'});
 		debug "PostCorrection: Q $q A $a -> $value";
 		$self->postcorrect_answer($q,$a,$value);
 	    }
@@ -328,8 +282,8 @@ sub main_tag {
 # returns the score for a particular student-sheet/question, applying
 # the given scoring strategy.
 sub score_question {
-    my ($self,$etu,$question,$correct)=@_;
-    
+    my ($self,$etu,$copy,$question,$correct)=@_;
+
     my $xx='';
     my $raison='';
     my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0};
@@ -343,12 +297,13 @@ sub score_question {
     my @rep=$self->answers_ids($etu,$question);
     my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
 
-    debug("SCORE : $etu/$question - "
+    debug("SCORE : $etu:$copy/$question - "
 	  .$self->question_scoring($etu,$question));
     
     for my $a (@rep) {
 	my $c=$self->correct_answer($etu,$question,$a);
-	my $t=($correct ? $c : $self->ticked_answer($etu,$question,$a));
+	my $t=($correct ? $c :
+	       $self->ticked($etu,$copy,$question,$a));
 
 	debug("[$etu:$question:$a] $t ($c)\n");
 
@@ -392,7 +347,7 @@ sub score_question {
 	    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
 	}
 	
-	if($n_coche !=1 && (!$correct) && $self->ticked_answer($etu,$question,0)) {
+	if($n_coche !=1 && (!$correct) && $self->ticked($etu,$question,0)) {
 	    # incompatible answers: the student has ticked one
 	    # plain answer AND the answer "none of the
 	    # above"...
@@ -407,7 +362,7 @@ sub score_question {
 	    for my $a (@rep) {
 		if($a != 0) {
 		    $code=($correct || 
-			   $self->answer_is_correct($etu,$question,$a)
+			   $self->answer_is_correct($etu,$copy,$question,$a)
 			   ? "b" : "m");
 		    my %b_qspec=$self->degroupe($self->answer_scoring($etu,$question,$a),
 						\%b_q,$vars);
@@ -471,14 +426,14 @@ sub score_question {
 # returns the score associated with correct answers for a question.
 sub score_correct_question {
     my ($self,$etu,$question)=@_;
-    return($self->score_question($etu,$question,1));
+    return($self->score_question($etu,0,$question,1));
 }
 
 # returns the maximum score for a question: MAX parameter value, or,
 # if not present, the score_correct_question value.
 sub score_max_question {
    my ($self,$etu,$question)=@_;
-   my ($x,$raison,$b)=($self->score_question($etu,$question,1));
+   my ($x,$raison,$b)=($self->score_question($etu,0,$question,1));
    if(defined($b->{'MAX'})) {
        return($b->{'MAX'},'M',$b);
    } else {

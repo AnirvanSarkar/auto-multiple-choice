@@ -36,11 +36,12 @@ use AMC::Basic;
 sub new {
     my ($class,$data,%oo)=@_;
 
-    my $self={
-	'data'=>$data,
-	'name'=>'',
-	'statements'=>{},
-    };
+    my $self=
+      {
+       'data'=>$data,
+       'name'=>'',
+       'statements'=>{},
+      };
 
     for(keys %oo) {
 	$self->{$_}=$oo{$_} if(exists($self->{$_}));
@@ -70,8 +71,9 @@ sub dbh {
 # module data.
 
 sub table {
-    my ($self,$table_subname)=@_;
-    return($self->{'name'}.".".$self->{'name'}."_".$table_subname);
+    my ($self,$table_subname,$module_name)=@_;
+    $module_name=$self->{'name'} if(!$module_name);
+    return($module_name.".".$module_name."_".$table_subname);
 }
 
 
@@ -83,8 +85,7 @@ sub sql_quote {
     return($self->{'data'}->sql_quote($string));
 }
 
-# sql_do($sql,@bind) executes the SQL query $sql (can be SQL sentence
-# as a string, or a SQL statement prepared by DBI), replacing ? by the
+# sql_do($sql,@bind) executes the SQL query $sql, replacing ? by the
 # elements of @bind.
 
 sub sql_do {
@@ -113,6 +114,19 @@ sub sql_single {
 sub sql_list {
     my ($self,$sql,@bind)=@_;
     my $x=$self->dbh->selectcol_arrayref($sql,{},@bind);
+    if($x) {
+	return(@$x);
+    } else {
+	return(undef);
+    }
+}
+
+# same as sql_single, but returns an array with all the columns of the first
+# row of the result.
+
+sub sql_row {
+    my ($self,$sql,@bind)=@_;
+    my $x=$self->dbh->selectrow_arrayref($sql,{},@bind);
     if($x) {
 	return(@$x);
     } else {
@@ -155,6 +169,7 @@ sub statement {
     if($s->{'s'}) {
 	return($s->{'s'});
     } elsif($s->{'sql'}) {
+      debug "Preparing statement $sid";
 	$s->{'s'}=$self->dbh->prepare($s->{'sql'});
 	return($s->{'s'});
     } else {
@@ -237,18 +252,21 @@ sub version_check {
     $self->begin_transaction;
     my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
     if(!@vt) {
-	$self->sql_do("CREATE TABLE $vt (name TEXT, value TEXT)");
-	$self->variable('version','0');
+      debug "Empty database: creating variables table";
+      $self->sql_do("CREATE TABLE $vt (name TEXT, value TEXT)");
+      $self->variable('version','0');
     }
     $self->end_transaction;
 
     $self->begin_transaction;
     my $vu=$self->variable('version');
     my $v;
+    debug "Module version is $vu";
     do {
 	$v=$vu;
 	$vu=$self->version_upgrade($v);
-	debug("Updated data module ".$self->{'name'}." from version $v to $vu");
+	debug("Updated data module ".$self->{'name'}." from version $v to $vu")
+	  if($vu);
     } while($vu);
     $self->variable('version',$v);
     $self->end_transaction;

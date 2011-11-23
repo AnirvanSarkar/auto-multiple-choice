@@ -30,6 +30,7 @@ use File::Temp qw/ tempfile tempdir /;
 use AMC::Basic;
 use AMC::Gui::PageArea;
 use AMC::Data;
+use AMC::DataModule::capture qw/:zone/;
 
 use constant {
     MDIAG_ID => 0,
@@ -46,7 +47,6 @@ use_gettext;
 sub new {
     my %o=(@_);
     my $self={'data-dir'=>'',
-	      'an-data'=>'',
 	      'cr-dir'=>'',
 	      'sujet'=>'',
 	      'etud'=>'',
@@ -55,9 +55,7 @@ sub new {
 	      'seuil_sens'=>8.0,
 	      'seuil_eqm'=>3.0,
 	      'fact'=>1/4,
-	      'ids'=>[],
-	      'retient_m'=>'',
-	      'ids_m'=>{},
+	      'page'=>[],
 	      'iid'=>0,
 	      'global'=>0,
 	      'en_quittant'=>'',
@@ -70,24 +68,13 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
+    bless $self;
+
     # recupere la liste des fichiers MEP des pages qui correspondent 
 
     $self->{'data'}=AMC::Data->new($self->{'data-dir'});
     $self->{'layout'}=$self->{'data'}->module('layout');
-    
-    # an-list aussi
-
-    my $an_list;
-
-    if($self->{'an-data'}) {
-	$an_list=$self->{'an-data'};
-    } else {
-	debug "Making again ANList...";
-	$an_list=AMC::ANList::new($self->{'cr-dir'});
-	debug "ok";
-    }
-
-    $self->{'an_list'}=$an_list;
+    $self->{'capture'}=$self->{'data'}->module('capture');
 
     die "No PDF subject file" if(! $self->{'sujet'});
     die "Subject file ".$self->{'sujet'}." not found" if(! -f $self->{'sujet'});
@@ -99,7 +86,7 @@ sub new {
     $self->{'tmp-image'}=$self->{'temp-dir'}."/page";
 
     $self->{'layout'}->begin_read_transaction;
-    $self->{'ids'}=[$self->{'layout'}->full_ids()];
+    $self->get_pages;
     $self->{'layout'}->end_transaction;
 
     $self->{'iid'}=0;
@@ -112,8 +99,6 @@ sub new {
     $self->{'gui'}=Gtk2::Builder->new();
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
-
-    bless $self;
 
     for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
@@ -177,8 +162,8 @@ sub new {
 
 	$self->{'diag_store'}=$diag_store;
 
-	for my $i (0..$#{$self->{'ids'}}) {
-	    $self->maj_list($self->{'ids'}->[$i],$i);
+	for my $i (0..$#{$self->{'page'}}) {
+	    $self->maj_list($self->{'page'}->[$i],$i);
 	}
     }
 
@@ -190,6 +175,11 @@ sub new {
     $self->{'area'}->signal_connect('expose_event'=>\&AMC::Gui::Manuel::expose_area);
     
     return($self);
+}
+
+sub get_pages {
+  my ($self)=@_;
+  $self->{'page'}=$self->{'layout'}->get_pages(0);
 }
 
 ###
@@ -210,33 +200,34 @@ sub goto_from_list {
 }
 
 sub maj_list {
-    my ($self,$id,$i)=(@_);
+    my ($self,$page,$i)=(@_);
     return if(!$self->{'editable'});
 
-    my $iter=model_id_to_iter($self->{'diag_store'},MDIAG_ID,$id);
+    my $iter=model_id_to_iter($self->{'diag_store'},
+			      MDIAG_ID,pageids_string(@$page));
     $iter=$self->{'diag_store'}->append if(!$iter);
 
-    my ($eqm,$eqm_coul)=$self->{'an_list'}
-    ->mse_string($id,
-		 $self->{'seuil_eqm'},
-		 'red');
-    my ($sens,$sens_coul)=$self->{'an_list'}
-    ->sensibilite_string($id,$self->{'seuil'},
-			 $self->{'seuil_sens'},
-			 'red');
+    $self->{'capture'}->begin_read_transaction;
+    my %ps=$self->{'capture'}
+      ->page_summary(@$page,
+		     'mse_threshold'=>$self->{'seuil_eqm'},
+		     'blackness_threshold'=>$self->{'seuil'},
+		     'sensitivity_threshold'=>$self->{'seuil_sens'},
+		    );
+    $self->{'capture'}->end_transaction;
+
     $self->{'diag_store'}->set($iter,
-			       MDIAG_ID,$id,
-			       MDIAG_ID_BACK,$self->{'an_list'}->couleur($id),
-			       MDIAG_EQM,$eqm,
-			       MDIAG_EQM_BACK,$eqm_coul,
-			       MDIAG_DELTA,$sens,
-			       MDIAG_DELTA_BACK,$sens_coul,
+			       MDIAG_ID,pageids_string(@$page),
+			       MDIAG_ID_BACK,$ps{'color'},
+			       MDIAG_EQM,$ps{'mse'},
+			       MDIAG_EQM_BACK,$ps{'mse_color'},
+			       MDIAG_DELTA,$ps{'sensitivity'},
+			       MDIAG_DELTA_BACK,$ps{'sensitivity_color'},
 			       );
     if(defined($i)) {
 	$self->{'diag_store'}->set($iter,
 				   MDIAG_I,$i);
     }
-    
 }
 
 sub choix {
@@ -268,13 +259,15 @@ sub charge_i {
 			'digit'=>[],
 			};
 
-    debug "ID ".$self->{'ids'}->[$self->{'iid'}];
+    my @spc=@{$self->{'page'}->[$self->{'iid'}]};
+
+    debug "ID ".pageids_string(@spc);
 
     $self->{'layout'}->begin_read_transaction;
 
     debug "page_info";
-    
-    my @ep=get_ep($self->{'ids'}->[$self->{'iid'}]);
+
+    my @ep=@spc[0,1];
 
     $self->{'info'}=$self->{'layout'}->page_info(@ep);
     my $page=$self->{'info'}->{'subjectpage'};
@@ -314,8 +307,6 @@ sub charge_i {
 
     debug "Getting layout info";
 
-    $self->{'scan-file'}='';
-
     my $c;
     my $sth;
 
@@ -329,26 +320,21 @@ sub charge_i {
 
     $self->{'layinfo'}->{'page'}=$self->{'layout'}->page_info(@ep);
 
-    
+    # mise a jour des cases suivant saisies deja presentes
 
-    # mise a jour des cases suivant fichier XML deja present
-    
-    my $x=$self->{'an_list'}->analyse(page_id($self->{'info'}));
-
-    if(defined($x)) {
-	for my $i (@{$self->{'layinfo'}->{'box'}}) {
-	    my $id=$i->{'question'}."."
-		.$i->{'answer'};
-	    debug "Q=$id R=".$x->{'case'}->{$id}->{'r'};
-	    $i->{'id'}=$id;
-	    $i->{'ticked'}=$x->{'case'}->{$id}->{'r'} > $self->{'seuil'};
-	}
-	$self->{'scan-file'}=$x->{'src'};
+    for my $i (@{$self->{'layinfo'}->{'box'}}) {
+      my $id=$i->{'question'}."."
+	.$i->{'answer'};
+      my $t=$self->{'capture'}
+	->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
+		 $self->{'seuil'});
+      $t='' if(!defined($t));
+      debug "Q=$id R=$t";
+      $i->{'id'}=[@spc];
+      $i->{'ticked'}=$t;
     }
-    
-    $self->{'xml-file'}=sprintf("%s/analyse-manuelle-%d-%d-%d.xml",
-				$self->{'cr-dir'},
-				map { $self->{'info'}->{$_} } (qw/student page checksum/));
+
+    my $p=$self->{'capture'}->get_page(@spc);
 
     $self->{'layout'}->end_transaction;
 
@@ -374,23 +360,25 @@ sub ecrit {
 
     return if(!$self->{'editable'});
 
-    if($self->{'xml-file'} && $self->{'area'}->modifs()) {
-	debug "Saving  ".$self->{'xml-file'};
-	open(XML,">:encoding(".$self->{'encodage_interne'}.")",$self->{'xml-file'}) 
-	    or die "Error writing ".$self->{'xml-file'}." : $!";
-	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
-	    .$self->{'scan-file'}."\" manuel=\"1\" id=\""
-	    .$self->{'ids'}->[$self->{'iid'}]."\">\n";
-	for my $i (@{$self->{'layinfo'}->{'box'}}) {
-	    print XML sprintf("  <case id=\"%s\" question=\"%d\" reponse=\"%d\" r=\"%d\"/>\n",
-			      $i->{'id'},$i->{'question'},$i->{'answer'},
-			      ($i->{'ticked'} ? 1 : 0)
-		);
-	}
-	print XML "</analyse>\n";
-	close(XML);
+    my @spc=@{$self->{'page'}->[$self->{'iid'}]};
 
-	$self->synchronise();
+    if($self->{'area'}->modifs()) {
+      debug "Saving ".pageids_string(@spc);
+
+      $self->{'capture'}->begin_transaction;
+
+      $self->{'capture'}->statement('setManualPage')->execute(time(),@spc);
+
+      for my $i (@{$self->{'layinfo'}->{'box'}}) {
+	$self->{'capture'}
+	  ->set_manual(@{$i->{'id'}},
+		       ZONE_BOX,$i->{'question'},$i->{'answer'},
+		       ($i->{'ticked'} ? 1 : 0));
+      }
+
+      $self->{'capture'}->end_transaction;
+
+      $self->synchronise();
     }
 }
 
@@ -399,8 +387,7 @@ sub synchronise {
 
     $self->{'area'}->sync();
 
-    for($self->{'an_list'}->maj('effaces'=>1)) { $self->{'ids_m'}->{$_}=1; }
-    $self->maj_list($self->{'ids'}->[$self->{'iid'}],undef);
+    $self->maj_list($self->{'page'}->[$self->{'iid'}],undef);
 }
 
 sub passe_suivant {
@@ -408,7 +395,7 @@ sub passe_suivant {
 
     $self->ecrit();
     $self->{'iid'}++;
-    $self->{'iid'}=0 if($self->{'iid'}>$#{$self->{'ids'}});
+    $self->{'iid'}=0 if($self->{'iid'}>$#{$self->{'page'}});
     $self->charge_i();
 }
 
@@ -417,7 +404,7 @@ sub passe_precedent {
 
     $self->ecrit();
     $self->{'iid'}--;
-    $self->{'iid'}=$#{$self->{'ids'}} if($self->{'iid'}<0);
+    $self->{'iid'}=$#{$self->{'page'}} if($self->{'iid'}<0);
     $self->charge_i();
 }
 
@@ -430,12 +417,11 @@ sub annule {
 sub efface_saisie {
     my ($self)=(@_);
 
-    my $id=$self->{'ids'}->[$self->{'iid'}];
-    my $fs=$self->{'an_list'}->attribut($id,'fichier-scan');
-    my $f=$self->{'an_list'}->attribut($id,'fichier');
-    if(-e $f && (!$fs || ($f ne $fs))) {
-	unlink($f);
-    }
+    my $p=$self->{'page'}->[$self->{'iid'}];
+    $self->{'capture'}->begin_transaction;
+    $self->{'capture'}->remove_manual(@$p);
+    $self->{'capture'}->end_transaction;
+
     $self->synchronise();
     $self->charge_i();
 }
@@ -454,11 +440,7 @@ sub quitter {
     } else {
 	$self->{'general'}->destroy;
 	if($self->{'en_quittant'}) {
-	    if($self->{'retient_m'}) {
-		&{$self->{'en_quittant'}}('ids_m'=>[keys %{$self->{'ids_m'}}]);
-	    } else {
-		&{$self->{'en_quittant'}}();
-	    }
+	  &{$self->{'en_quittant'}}();
 	}
     }
 }
@@ -471,12 +453,13 @@ sub goto_activate_cb {
     $self->ecrit();
 
     debug "Go to $dest";
-    
+
     # recherche d'un ID correspondant 
+    $dest.='/' if($dest !~ m:/:);
     my $did='';
-  CHID: for my $i (0..$#{$self->{'ids'}}) {
-      my $k=$self->{'ids'}->[$i];
-      if($k =~ /\+$dest\//) {
+  CHID: for my $i (0..$#{$self->{'page'}}) {
+      my $k=pageids_string(@{$self->{'page'}->[$i]});
+      if($k =~ /^$dest/) {
 	  $self->{'iid'}=$i;
 	  last CHID;
       }

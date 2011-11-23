@@ -444,6 +444,8 @@ void mesure_case(IplImage *src,IplImage *illustr,
 #endif
 			 )!=1) {
 	    printf("! ZOOMS : Zoom save error\n");
+	  } else {
+	    printf("ZOOM %d-%d/%d-%d.png\n",student,page,question,answer);
 	  }
 	  
 	  cvResetImageROI(illustr);

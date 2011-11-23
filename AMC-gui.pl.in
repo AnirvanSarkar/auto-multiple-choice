@@ -68,6 +68,9 @@ use constant {
     DIAG_EQM_BACK => 4,
     DIAG_DELTA => 5,
     DIAG_DELTA_BACK => 6,
+    DIAG_ID_STUDENT => 7,
+    DIAG_ID_PAGE => 8,
+    DIAG_ID_COPY => 9,
 
     INCONNU_SCAN => 0,
     INCONNU_ID => 1,
@@ -645,7 +648,7 @@ my $gui=read_glade('main_window',
     log_general commande avancement annulation button_mep_warnings
     liste_filename liste_path liste_edit liste_setfile liste_refresh
     doc_menu menu_debug menu_outils
-    diag_tree inconnu_tree diag_result
+    diag_tree inconnu_tree state_capture
     maj_bareme correc_tree correction_result regroupement_corriges
     options_CSV options_ods options_List
     groupe_model
@@ -732,7 +735,7 @@ $w{'doc_menu'}->set_submenu($docs_menu);
 # make state entries with same background color as around...
 $col=$w{'prepare_src'}->style()->bg('prelight');
 for my $s (qw/normal insensitive/) {
-  for my $k (qw/src docs layout/) {
+  for my $k (qw/src docs layout capture/) {
     $w{'state_'.$k}->modify_base($s,$col);
   }
 }
@@ -805,11 +808,14 @@ $w{'correc_tree'}->append_column ($column);
 ### modele DIAGNOSTIQUE SAISIE
 
 my $diag_store = Gtk2::ListStore->new ('Glib::String',
-				       'Glib::String', 
-				       'Glib::String', 
-				       'Glib::String', 
-				       'Glib::String', 
-				       'Glib::String', 
+				       'Glib::String',
+				       'Glib::String',
+				       'Glib::String',
+				       'Glib::String',
+				       'Glib::String',
+				       'Glib::String',
+				       'Glib::String',
+				       'Glib::String',
 				       'Glib::String');
 
 $w{'diag_tree'}->set_model($diag_store);
@@ -1110,22 +1116,23 @@ my %diag_menu=(page=>{text=>__"page adjustment",icon=>'gtk-zoom-fit'},
 	       );
 
 sub zooms_display {
-    my ($id,$forget_it)=@_;
-		    
-    debug "Zooms view for $id...";
-    my $zd=absolu('%PROJET/cr/zooms')."/".id2idf($id,'simple'=>1);
+    my ($student,$page,$copy,$forget_it)=@_;
+
+    debug "Zooms view for ".pageids_string($student,$page,$copy)."...";
+    my $zd=absolu('%PROJET/cr/zooms')."/"
+      .pageids_string($student,$page,$copy,'path'=>1);
     debug "Zooms directory $zd";
     if($w{'zooms_window'} &&
        $w{'zooms_window'}->actif) {
-	$w{'zooms_window'}->page($id,$zd,$forget_it);
+	$w{'zooms_window'}->page([$student,$page,$copy],$zd,$forget_it);
     } elsif(!$forget_it) {
 	$w{'zooms_window'}=AMC::Gui::Zooms::new('seuil'=>$projet{'options'}->{'seuil'},
 						'n_cols'=>$o{'assoc_ncols'},
 						'zooms_dir'=>$zd,
-						'page_id'=>$id,
+						'page_id'=>[$student,$page,$copy],
 						'size-prefs',\%o,
 						'encodage_interne'=>$o{'encodage_interne'},
-						'an-data'=>$projet{'_an_list'},
+						'data'=>$projet{'_capture'},
 						'cr-dir'=>absolu($projet{'options'}->{'cr'}),
 	    );
     }
@@ -1134,7 +1141,10 @@ sub zooms_display {
 sub zooms_line {
     my $iter=$w{'diag_tree'}->get_selection->get_selected;
     my $id=$diag_store->get($iter,DIAG_ID);
-    zooms_display($id,1);
+    zooms_display((map { $diag_store->get($iter,$_) } (DIAG_ID_STUDENT,
+						       DIAG_ID_PAGE,
+						       DIAG_ID_COPY)
+		  ),1);
 }
 
 $w{'diag_tree'}->signal_connect('button_release_event' =>
@@ -1144,9 +1154,10 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	my ($path, $column, $cell_x, $cell_y) = 
 	    $w{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
 	if ($path) {
-	    
-	    my $id=$diag_store->get($diag_store->get_iter($path),
-				    DIAG_ID);
+	    my $iter=$diag_store->get_iter($path);
+	    my $id=[map { $diag_store->get($iter,$_) } (DIAG_ID_STUDENT,
+							DIAG_ID_PAGE,
+							DIAG_ID_COPY)];
 
 	    my $menu = Gtk2::Menu->new;
 	    my $c=0;
@@ -1154,7 +1165,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 
 	    # new zooms viewer
 
-	    my $zd=absolu('%PROJET/cr/zooms')."/".id2idf($id,'simple'=>1);
+	    my $zd=absolu('%PROJET/cr/zooms')."/".pageids_string(@$id,'path'=>1);
 
 	    if(-d $zd) {
 		$c++;
@@ -1164,7 +1175,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		$item->show;
 		$item->signal_connect (activate => sub {
 		    my (undef, $sortkey) = @_;
-		    zooms_display($id);
+		    zooms_display(@$id);
 				       }, $_);
 	    } else {
 		push  @actions,'zoom';
@@ -1654,7 +1665,7 @@ sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
 
 sub doc_maj {
     my $sur=0;
-    if($projet{'_an_list'}->nombre()>0) {
+    if($projet{'_capture'}->n_pages_transaction()>0) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
@@ -2182,7 +2193,6 @@ sub saisie_manuelle {
 	my $gm=AMC::Gui::Manuel::new(
 	    'cr-dir'=>absolu($projet{'options'}->{'cr'}),
 	    'data-dir'=>absolu($projet{'options'}->{'data'}),
-	    'an-data'=>$projet{'_an_list'},
 	    'sujet'=>absolu($projet{'options'}->{'docs'}->[0]),
 	    'etud'=>'',
 	    'dpi'=>$o{'saisie_dpi'},
@@ -2848,8 +2858,8 @@ sub noter {
 	    # greater copy number within scans), and use a larger
 	    # one if not.
 	    debug "Requested $n_copies copies for scoring strategy, but has $n_mep layouts";
-	    my @ids=sort { $b <=> $a } map { my @a=get_epo($_);$a[0]; } ($projet{'_an_list'}->ids());
-	    my $n_an=$ids[0];
+	    my @students=($projet{'_capture'}->students_transaction());
+	    my $n_an=$students[$#students];
 	    debug "Max used copy number: $n_an";
 	    $n_copies=$n_an if($n_an>$n_copies);
 	}
@@ -2887,7 +2897,7 @@ sub noter_postcorrect {
 
 	# gets available sheet ids
 
-	my @ids=sort { $a <=> $b } map { my @a=get_epo($_);$a[0]; } ($projet{'_an_list'}->ids());
+	my @ids=$projet{'_capture'}->students_transaction();
 
 	%postcorrect_ids=map { $_ => 1 } @ids;
 
@@ -2945,8 +2955,7 @@ sub noter_calcul {
 
     commande('commande'=>["auto-multiple-choice","note",
 			  "--debug",debug_file(),
-			  "--cr",absolu($projet{'options'}->{'cr'}),
-			  "--an-saved",absolu($an_saved),
+			  "--data",absolu($projet{'options'}->{'data'}),
 			  "--bareme",absolu($projet{'options'}->{'fichbareme'}),
 			  "-o",absolu($projet{'options'}->{'notes'}),
 			  "--seuil",$projet{'options'}->{'seuil'},
@@ -3032,7 +3041,7 @@ sub annote_copies {
 				    "--projets",absolu('%PROJETS/'),
 				    "--ch-sign",$o{'annote_chsign'},
 				    "--cr",absolu($projet{'options'}->{'cr'}),
-				    "--an-saved",absolu($an_saved),
+				    "--data",absolu($projet{'options'}->{'data'}),
 				    "--notes",absolu($projet{'options'}->{'notes'}),
 				    "--taille-max",$o{'taille_max_correction'},
 				    "--bareme",absolu($projet{'options'}->{'fichbareme'}),
@@ -3074,7 +3083,6 @@ sub regroupement {
 			  "--debug",debug_file(),
 			  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
 			  "--cr",absolu($projet{'options'}->{'cr'}),
-			  "--an-saved",absolu($an_saved),
 			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
 			  "--data",absolu($projet{'options'}->{'data'}),
 			  "--tex-src",absolu($projet{'options'}->{'texsrc'}),
@@ -3148,35 +3156,6 @@ sub activate_doc {
 }
 
 ###
-
-# mise a jour des zooms depuis le menu par ex.
-sub activate_zoom_maj {
-    if($projet{'_an_list'}->nombre()==0) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      __"No automatic data capture: no zoom to build...");
-	$dialog->run;
-	$dialog->destroy;      
-	return(0);
-    }
-
-    commande('commande'=>["auto-multiple-choice","zooms",
-			  "--debug",debug_file(),
-			  "--projet",absolu('%PROJET/'),
-			  "--projets",absolu('%PROJETS/'),
-			  "--seuil",$projet{'options'}->{'seuil'},
-			  "--n-procs",$o{'n_procs'},
-			  "--an-saved",absolu($an_saved),
-			  "--cr-dir",absolu($projet{'options'}->{'cr'}),
-			  "--progression",1,
-			  "--progression-id",'zooms',
-			  ],
-	     'texte'=>__"Re-extracting zooms...",
-	     'progres.id'=>'zooms',
-	     );
-}
 
 ###
 
@@ -3392,120 +3371,92 @@ sub edit_preferences {
 }
 
 sub accepte_preferences {
-    reprend_pref('pref',\%o);
-    reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
+  reprend_pref('pref',\%o);
+  reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
 
-    my %pm;
-    my @gm;
-    my %labels;
+  my %pm;
+  my @gm;
+  my %labels;
 
-    if($projet{'nom'}) {
-	%pm=map { $_=>1 } (split(/,/,$projet{'options'}->{'_modifie'}));
-	@gm=grep { /^defaut_/ } (split(/,/,$o{'_modifie'}));
+  if ($projet{'nom'}) {
+    %pm=map { $_=>1 } (split(/,/,$projet{'options'}->{'_modifie'}));
+    @gm=grep { /^defaut_/ } (split(/,/,$o{'_modifie'}));
 
-	for my $k (@gm) {
-	    my $l=$w{'edit_preferences_manager'}->get_object('label_'.$k);
-	    $labels{$k}=$l->get_text() if($l);
-	    my $kp=$k;
-	    $kp =~ s/^defaut_//;
-	    $l=$w{'edit_preferences_manager'}->get_object('label_'.$kp);
-	    $labels{$kp}=$l->get_text() if($l);
-	}
+    for my $k (@gm) {
+      my $l=$w{'edit_preferences_manager'}->get_object('label_'.$k);
+      $labels{$k}=$l->get_text() if($l);
+      my $kp=$k;
+      $kp =~ s/^defaut_//;
+      $l=$w{'edit_preferences_manager'}->get_object('label_'.$kp);
+      $labels{$kp}=$l->get_text() if($l);
     }
+  }
 
-    $w{'edit_preferences'}->destroy();
+  $w{'edit_preferences'}->destroy();
 
-    # modified default value ?
-    if($projet{'nom'}) {
-	debug "Modified (general): $o{'_modifie'}";
-	debug "Modified (project): ".$projet{'options'}->{'_modifie'};
-	debug "Labels: ".join(',',keys %labels);
+  # modified default value ?
+  if ($projet{'nom'}) {
+    debug "Modified (general): $o{'_modifie'}";
+    debug "Modified (project): ".$projet{'options'}->{'_modifie'};
+    debug "Labels: ".join(',',keys %labels);
 
-	for my $k (@gm) {
-	    my $kp=$k;
-	    $kp =~ s/^defaut_//;
+    for my $k (@gm) {
+      my $kp=$k;
+      $kp =~ s/^defaut_//;
 
-	    debug "Test G:$k / P:$kp";
-	    if((!$pm{$kp}) && ($projet{'options'}->{$kp} ne $o{$k})) {
-		# project option has NOT been modified, and the new
-		# value of general default option is different from
-		# project option. Ask the user for modifying also the
-		# project option value
-		$label_projet=$labels{$kp};
-		$label_general=$labels{$k};
+      debug "Test G:$k / P:$kp";
+      if ((!$pm{$kp}) && ($projet{'options'}->{$kp} ne $o{$k})) {
+	# project option has NOT been modified, and the new
+	# value of general default option is different from
+	# project option. Ask the user for modifying also the
+	# project option value
+	$label_projet=$labels{$kp};
+	$label_general=$labels{$k};
 
-		debug "Ask user $label_general | $label_projet";
+	debug "Ask user $label_general | $label_projet";
 
-		if($label_projet && $label_general) {
-		    my $dialog = Gtk2::MessageDialog
-			->new_with_markup($w{'main_window'},
-					  'destroy-with-parent',
-					  'question','yes-no',
-					  sprintf(__("You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"),
-					  $label_general,$label_projet,$projet{'nom'}));
-		    my $reponse=$dialog->run;
-		    $dialog->destroy;  
+	if ($label_projet && $label_general) {
+	  my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'question','yes-no',
+			      sprintf(__("You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"),
+				      $label_general,$label_projet,$projet{'nom'}));
+	  my $reponse=$dialog->run;
+	  $dialog->destroy;  
 
-		    debug "Reponse: $reponse";
+	  debug "Reponse: $reponse";
 		    
-		    if($reponse eq 'yes') {
-			# change also project option value
-			$projet{'options'}->{$kp}=$o{$k};
-			$projet{'options'}->{'_modifie'}.=",$kp";
-		    } 
+	  if ($reponse eq 'yes') {
+	    # change also project option value
+	    $projet{'options'}->{$kp}=$o{$k};
+	    $projet{'options'}->{'_modifie'}.=",$kp";
+	  } 
     
-		}
-	    }
 	}
+      }
     }
+  }
 
-    if($projet{'nom'}) {
-	for my $k (qw/note_min note_max note_grain/) {
-	    $projet{'options'}->{$k} =~ s/\s+//g;
-	}
+  if ($projet{'nom'}) {
+    for my $k (qw/note_min note_max note_grain/) {
+      $projet{'options'}->{$k} =~ s/\s+//g;
     }
+  }
 
-    sauve_pref_generales();
+  sauve_pref_generales();
 
-    test_commandes();
+  test_commandes();
 
-    if(defined($projet{'options'}->{'_modifie'})
-       && $projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
-	if($projet{'_an_list'}->nombre()>0) {
-	    # mise a jour de la liste diagnostic
-	    detecte_analyse('ids_m'=>[$projet{'_an_list'}->ids()]);
-
-	    # recalcul des zooms ?
-	    # this is only necessary with old-style zoom files:
-	    # first check if there are some of them...
-
-	    my $cr_dir=absolu($projet{'options'}->{'cr'});
-	    opendir(my $dh,$cr_dir) || debug "ERROR: can't opendir $cr_dir: $!";
-	    my @z = grep { /^zoom-/ && -f "$cr_dir/$_" } readdir($dh);
-	    closedir $dh;
-
-	    if(@z) {
-		
-		my $dialog = Gtk2::MessageDialog
-		    ->new_with_markup($w{'main_window'},
-				      'destroy-with-parent',
-				      'question','yes-no',
-				      sprintf(__"You changed parameter \"%s\".",__"darkness threshold")." "
-				      .__("If you already captured data from scans, boxes zooms are no longer correctly grouped.")." "
-				      .__("Do you want to re-build them?")." "
-				      .__("It will take some time.")." "
-				      .sprintf(__"You will be able to build them later with <i>%s</i> in menu <i>%s</i>.",__"Re-extract zooms",__"Tools"));
-		my $reponse=$dialog->run;
-		$dialog->destroy;      
-		
-		if($reponse eq 'yes') {
-		    activate_zoom_maj();	    
-		} 
-	    }
-	    
-	}
+  if (defined($projet{'options'}->{'_modifie'})
+      && $projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
+    if ($projet{'_capture'}->n_pages_transaction()>0) {
+      # mise a jour de la liste diagnostic
+      detecte_analyse();
     }
+  }
 }
+
 
 sub sauve_pref_generales {
     debug "Saving general preferences...";
@@ -3665,155 +3616,89 @@ sub mep_warnings {
 
 sub detecte_correc {
     my $cordir=absolu("cr/corrections/jpg");
+    my $n=0;
+
     $correc_store->clear();
-    my @corr=();
 
-    if(opendir(DIR, $cordir)) {
-	@corr = sort { file_triable($a) cmp file_triable($b) } 
-	grep { /\.jpg$/ && -f "$cordir/$_" } readdir(DIR);
-	closedir DIR;
-	
-	for my $f (@corr) {
-	    my $iter=$correc_store->append;
-	    $correc_store->set($iter,CORREC_FILE,"$cordir/$f",
-			       CORREC_MAJ,file_maj("$cordir/$f"),
-			       CORREC_ID,file2id($f));
-	}
-    } else {
-	debug("JPEGS : Can't open directory $cordir : $!");
+    $projet{'_capture'}->begin_read_transaction;
+    my $sth=$projet{'_capture'}->statement('getAnnotated');
+    $sth->execute();
+    while(my $p=$sth->fetchrow_hashref) {
+      if(-f $cordir.'/'.$p->{'annotated'}) {
+	my $iter=$correc_store->append;
+	$correc_store->set($iter,CORREC_FILE,"$cordir/".$p->{'annotated'},
+			   CORREC_MAJ,format_date($p->{'timestamp_annotate'}),
+			   CORREC_ID,pageids_string(map { $p->{$_} } (qw/student page copy/))
+			  );
+	$n++;
+      } else {
+	debug "Annotated scan is not here: ".$cordir.'/'.$p->{'annotated'};
+      }
     }
+    $projet{'_capture'}->end_transaction;
 
-    $w{'regroupement_corriges'}->set_sensitive($#corr>=0);
+    $w{'regroupement_corriges'}->set_sensitive($n>0);
 }
 
 sub detecte_analyse {
     my (%oo)=(@_);
+    my $iter;
+    my $row;
 
-    debug "Detecting analysis / ".join(', ',map { $_."=".$oo{$_} } (keys %oo));
+    $diag_store->clear;
 
-    $w{'commande'}->show();
-    my $av_text=$w{'avancement'}->get_text();
-    $w{'avancement'}->set_text(__"Looking for analysis...");
-    $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    $projet{'_capture'}->begin_read_transaction;
 
-    my @ids_m;
-
-    if($oo{'ids_m'}) {
-	@ids_m=@{$oo{'ids_m'}};
-    } else {
-	@ids_m=$projet{'_an_list'}->maj('progres'=>sub {
-	    $w{'avancement'}->set_pulse_step(.1);
-	    $w{'avancement'}->pulse();
-	    Gtk2->main_iteration while ( Gtk2->events_pending );
-	},
-					);
+    my $sth=$projet{'_capture'}->statement('pagesChanged');
+    $sth->execute(0,0);
+    while(@pageid=$sth->fetchrow_array) {
+      my %s=$projet{'_capture'}->page_summary(@pageid,
+					     'blackness_threshold'=>$projet{'options'}->{'seuil'},
+					     'sensitivity_threshold'=>$o{'seuil_sens'},
+					     'mse_threshold'=>$o{'seuil_eqm'});
+      $iter=$diag_store->append;
+      $diag_store->set($iter,
+		       DIAG_ID,pageids_string(@pageid),
+		       DIAG_ID_STUDENT,$pageid[0],
+		       DIAG_ID_PAGE,$pageid[1],
+		       DIAG_ID_COPY,$pageid[2],
+		       DIAG_ID_BACK,$s{'color'},
+		       DIAG_EQM,$s{'mse'},
+		       DIAG_EQM_BACK,$s{'mse_color'},
+		       DIAG_MAJ,$s{'update'},
+		       DIAG_DELTA,$s{'sensitivity'},
+		       DIAG_DELTA_BACK,$s{'sensitivity_color'},
+		      );
     }
 
-    if($oo{'premier'}) {
-	@ids_m=$projet{'_an_list'}->ids();
-	$diag_store->clear;
-    }
+    my $n=$projet{'_capture'}->n_pages;
 
-    debug "IDS_M : ".join(' ',@ids_m);
+    my %r=$projet{'_capture'}->counts;
 
-    $w{'onglet_notation'}->set_sensitive($projet{'_an_list'}->nombre()>0);
-    detecte_correc() if($projet{'_an_list'}->nombre()>0);
+    $projet{'_capture'}->end_transaction;
 
-    my $ii=0;
+    $w{'onglet_notation'}->set_sensitive($n>0);
+    detecte_correc() if($n>0);
 
-  UNID: for my $i (@ids_m) {
-      my $iter='';
-
-      $ii++;
-
-      # a ete efface ?
-      if(! $projet{'_an_list'}->existe($i)) {
-	  debug "Deleting $i";
-	  $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
-	  if($iter) {
-	      $diag_store->remove($iter);
-	  } else {
-	      debug "- not found";
-	  }
-      } else {
-
-	  debug "ID=$i ::",Dumper($projet{'_an_list'}->{'dispos'}->{$i});
-	  
-	  # deja dans la liste ? sinon on rajoute...
-	  
-	  if(!$oo{'premier'}) {
-	      $iter=model_id_to_iter($diag_store,DIAG_ID,$i);
-	  }
-	  $iter=$diag_store->append if(!$iter);
-	  
-	  my ($eqm,$eqm_coul)=$projet{'_an_list'}->mse_string($i,
-							      $o{'seuil_eqm'},
-							      'red');
-	  my ($sens,$sens_coul)=$projet{'_an_list'}->sensibilite_string($i,$projet{'options'}->{'seuil'},
-									$o{'seuil_sens'},
-									'red');
-	  
-	  $diag_store->set($iter,
-			   DIAG_ID,$i,
-			   DIAG_ID_BACK,$projet{'_an_list'}->couleur($i),
-			   DIAG_EQM,$eqm,
-			   DIAG_EQM_BACK,$eqm_coul,
-			   DIAG_MAJ,file_maj($projet{'_an_list'}->filename($i)),
-			   DIAG_DELTA,$sens,
-			   DIAG_DELTA_BACK,$sens_coul,
-			   );
-      }
-	  
-      $w{'avancement'}->set_fraction(0.9*$ii/(1+$#ids_m)) if(!$oo{'interne'});
-      if($ii % 50 ==0) {
-	  Gtk2->main_iteration while ( Gtk2->events_pending );
-      }
-  }
-    
     # erreurs lors du traitement automatique des scans :
 
     $inconnu_store->clear();
-    
-    if($oo{'erreurs'}) {
-	debug "Errors list : ".(1+$#{$oo{'erreurs'}})." items";
-	for my $f (@{$oo{'erreurs'}}) {
-	    debug "Inserting error : $f->[1] $f->[0]";
-	    my $iter=$inconnu_store->append;
-	    $inconnu_store->set($iter,
-				INCONNU_SCAN,$f->[0],
-				INCONNU_ID,$f->[1]);
-	}
-    }
 
     # resume
 
-#    my %r=$projet{'_layout'}->stats($projet{'_an_list'});
     my $tt='';
-    if($r{'incomplet'}) {
-	$tt=sprintf(__"Data capture from %d complete papers and <span foreground=\"red\">%d incomplete papers</span>",$r{'complet'},$r{'incomplet'});
-    } elsif($r{'complet'}) {
-	$tt=sprintf("<span foreground=\"darkgreen\">".__("Data capture from %d complete papers")."</span>",$r{'complet'});
+    if($r{'incomplete'}) {
+	$tt=sprintf(__"Data capture from %d complete papers and %d incomplete papers",$r{'complete'},$r{'incomplete'});
+	state_image('capture','gtk-dialog-error');
+    } elsif($r{'complete'}) {
+	$tt=sprintf(__("Data capture from %d complete papers"),$r{'complete'});
+	state_image('capture','gtk-yes');
     } else {
 # TRANSLATORS: this text points out that no data capture has been made yet.
       $tt=sprintf(__"No data");
+      state_image('capture','gtk-dialog-error');
     }
-    $w{'diag_result'}->set_markup($tt);
-
-    # ID manquants :
-
-    for my $i (@{$r{'manque_id'}}) {
-	my $iter=$inconnu_store->append;
-	$inconnu_store->set($iter,
-			    INCONNU_SCAN,__"not found",
-			    INCONNU_ID,$i);
-    }
-    
-
-    $w{'avancement'}->set_text($av_text);
-    $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
-    $w{'commande'}->hide() if(!$oo{'interne'});
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    $w{'state_capture'}->set_text($tt);
 
     # dialogue apprentissage :
 
@@ -4517,12 +4402,9 @@ sub valide_projet {
     set_source_tex();
 
     $projet{'_layout'}=AMC::Data->new(absolu($projet{'options'}->{'data'}))->module('layout');
+    $projet{'_capture'}=AMC::Data->new(absolu($projet{'options'}->{'data'}))->module('capture');
 
     detecte_mep();
-
-    $projet{'_an_list'}=AMC::ANList::new(absolu($projet{'options'}->{'cr'}),
-					 'brut'=>1,
-					 'saved'=>absolu($an_saved));
     detecte_analyse('premier'=>1);
 
     debug "Correction options : MB".$projet{'options'}->{'maj_bareme'};
