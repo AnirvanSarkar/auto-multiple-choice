@@ -392,7 +392,7 @@ sub valide_id_page {
 	# clear old analysis results files
 
 	clear_old('analysis result',
-		  $out_cadre,$zoom_file,$nom_file,$zoom_dir);
+		  $out_cadre,$zoom_file,$zoom_dir);
     }
 }
 

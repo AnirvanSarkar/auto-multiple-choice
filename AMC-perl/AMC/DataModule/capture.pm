@@ -245,14 +245,26 @@ sub populate_from_xml {
 	  my $zoneid=$self->get_zoneid(@ep,0,ZONE_NAME,0,0,1);
 	  $self->populate_position($an->{'nom'}->{'coin'},
 				   $zoneid,POSITION_BOX);
+	  # Look if the namefield image is present...
+	  my $nf="nom-".id2idf($id).".jpg";
+	  if(-f "$cr/$nf") {
+	    $self->statement('setZoneAuto')
+	      ->execute(-1,-1,$nf,$zoneid);
+	  }
 	}
 
 	for my $c (keys %{$an->{'case'}}) {
 	  my $case=$an->{'case'}->{$c};
 	  my $zoneid=$self->get_zoneid(@ep,0,ZONE_BOX,
 				       $case->{'question'},$case->{'reponse'},1);
+
+	  my $zf=sprintf("%d-%d/%d-%d.png",
+			 @ep,
+			 $case->{'question'},$case->{'reponse'});
+	  $zf='' if(!-f "$cr/zooms/$zf");
+
 	  $self->statement('setZoneAuto')
-	    ->execute($case->{'pixels'},$case->{'pixelsnoirs'},'',
+	    ->execute($case->{'pixels'},$case->{'pixelsnoirs'},$zf,
 		      $zoneid);
 
 	  $self->populate_position($case->{'coin'},$zoneid,POSITION_BOX);
