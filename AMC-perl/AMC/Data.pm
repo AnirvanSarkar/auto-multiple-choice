@@ -39,7 +39,7 @@ sub new {
 			     RaiseError => 0,
 			    }),
 	'modules'=>{},
-	'on_error'=>'die',
+	'on_error'=>'stdout,die',
     };
 
     for(keys %oo) {
@@ -50,7 +50,21 @@ sub new {
     $self->{'dbh'}->{sqlite_unicode}=1;
 
     bless($self,$class);
+
+    $self->{'dbh'}->{HandleError}=sub {
+      $self->sql_error(shift);
+    };
     return $self;
+}
+
+# SQL errors...
+
+sub sql_error {
+  my ($self,$e)=@_;
+  my $s="SQL ERROR: $e\nSQL STATEMENT: ".$DBI::lasth->{Statement};
+  debug "$s";
+  print "$s\n" if($self->{'on_error'} =~ /\bstdout\b/);
+  die "*SQL*" if($self->{'on_error'} =~ /\bdie\b/);
 }
 
 # directory returns the directory where databases files are stored.
@@ -103,11 +117,7 @@ sub sql_quote {
 
 sub sql_do {
     my ($self,$sql,@bind)=@_;
-    if(!$self->{'dbh'}->do($sql,{},@bind)) {
-	debug_and_stderr("SQL ERROR: ".$self->{'dbh'}->errstr);
-	debug_and_stderr("WHILE EXECUTING: ".$sql);
-	die "*SQL*" if($self->{'on_error'} =~ /die/);
-    }
+    $self->{'dbh'}->do($sql,{},@bind);
 }
 
 # sql_tables($tables) gets the list of tables matching pattern $tables.
