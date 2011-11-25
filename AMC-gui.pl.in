@@ -2830,7 +2830,7 @@ sub change_liste_key {
 
 sub voir_notes {
     if(-f absolu($projet{'options'}->{'notes'})) {
-	my $n=AMC::Gui::Notes::new('fichier'=>absolu($projet{'options'}->{'notes'}));
+	my $n=AMC::Gui::Notes::new('scoring'=>$projet{'_scoring'});
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},

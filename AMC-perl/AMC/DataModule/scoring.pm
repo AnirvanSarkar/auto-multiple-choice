@@ -180,6 +180,7 @@ sub define_statements {
 		  ." (student,copy,code,value)"
 		  ." VALUES (?,?,?,?)"},
 
+     'marks'=>{'sql'=>"SELECT * FROM ".$self->table("mark")},
      'codes'=>{'sql'=>"SELECT code from ".$self->table("code")
 	       ." GROUP BY code ORDER BY code"},
      'qStrat'=>{'sql'=>"SELECT strategy FROM ".$self->table("question")
@@ -189,16 +190,28 @@ sub define_statements {
      'answers'=>{'sql'=>"SELECT answer FROM ".$self->table("answer")
 		 ." WHERE student=? AND question=?"
 		." ORDER BY answer"},
-     'questions'=>{'sql'=>"SELECT question FROM ".$self->table("question")
-		   ." WHERE student=?"},
+     'studentQuestions'=>{'sql'=>"SELECT question FROM ".$self->table("question")
+			  ." WHERE student=?"},
+     'questions'=>{'sql'=>"SELECT question,title FROM ".$self->table("title")},
      'correct'=>{'sql'=>"SELECT correct FROM ".$self->table("answer")
 		 ." WHERE student=? AND question=? AND answer=?"},
      'multiple'=>{'sql'=>"SELECT type FROM ".$self->table("question")
 		 ." WHERE student=? AND question=?"},
      'indicative'=>{'sql'=>"SELECT indicative FROM ".$self->table("question")
 		    ." WHERE student=? AND question=?"},
+     'oneIndic'=>{'sql'=>"SELECT MAX(indicative) FROM ".$self->table("question")
+		  ." WHERE question=?"},
+     'getScore'=>{'sql'=>"SELECT score FROM ".$self->table("score")
+		  ." WHERE student=? AND copy=? AND question=?"},
+     'getCode'=>{'sql'=>"SELECT value FROM ".$self->table("code")
+		  ." WHERE student=? AND copy=? AND code=?"},
 
      'avgMark'=>{'sql'=>"SELECT AVG(mark) FROM ".$self->table("mark")},
+     'avgQuest'=>{'sql'=>"SELECT CASE"
+		  ." WHEN SUM(max)>0 THEN 100*SUM(score)/SUM(max)"
+		  ." ELSE '-' END"
+		  ." FROM ".$self->table("score")
+		  ." WHERE question=?"},
     };
 }
 
@@ -265,6 +278,11 @@ sub indicative {
   my ($self,$student,$question)=@_;
   return($self->sql_single($self->statement('indicative'),
 			   $student,$question));
+}
+
+sub one_indicative {
+  my ($self,$question)=@_;
+  return($self->sql_single($self->statement('oneIndic'),$question));
 }
 
 sub question_title {
@@ -340,8 +358,13 @@ sub new_code {
 
 sub student_questions {
   my ($self,$student)=@_;
-  return($self->sql_list($self->statement('questions'),
+  return($self->sql_list($self->statement('studentQuestions'),
 			 $student));
+}
+
+sub questions {
+  my ($self)=@_;
+  return(@{$self->dbh->selectall_arrayref($self->statement('questions'),{Slice=>{}})});
 }
 
 sub average_mark {
@@ -352,6 +375,28 @@ sub average_mark {
 sub codes {
   my ($self)=@_;
   return($self->sql_list($self->statement('codes')));
+}
+
+sub marks {
+  my ($self)=@_;
+  return(@{$self->dbh->selectall_arrayref($self->statement('marks'),{Slice=>{}})});
+}
+
+sub question_score {
+  my ($self,$student,$copy,$question)=@_;
+  return($self->sql_single($self->statement('getScore'),
+			   $student,$copy,$question));
+}
+
+sub student_code {
+  my ($self,$student,$copy,$code)=@_;
+  return($self->sql_single($self->statement('getCode'),
+			   $student,$copy,$code));
+}
+
+sub question_average {
+  my ($self,$question)=@_;
+  return($self->sql_single($self->statement('avgQuest'),$question));
 }
 
 1;

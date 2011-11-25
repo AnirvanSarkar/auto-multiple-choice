@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -19,22 +19,6 @@
 # <http://www.gnu.org/licenses/>.
 
 package AMC::Gui::Notes;
-
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
 
 use AMC::Basic;
 
@@ -71,8 +55,9 @@ sub formatte {
 
 sub new {
     my %o=(@_);
-    my $self={'fichier'=>'',
+    my $self={'scoring'=>'',
 	  };
+    my $it;
 
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
@@ -80,16 +65,6 @@ sub new {
 
     bless $self;
 
-    my $notes=eval { XMLin($self->{'fichier'},
-			   'ForceArray'=>1,
-			   'KeyAttr'=>['id'],
-			   ) };
-
-    if(!$notes) {
-	print STDERR "Error analysing marks file ".$self->{'fichier'}."\n";
-	return($self);
-    }
-    
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
@@ -107,13 +82,12 @@ sub new {
 
     $self->{'gui'}->connect_signals(undef,$self);
 
-    my @codes=sort { $a cmp $b } (keys %{$notes->{'code'}});
-    my @keys=sort { $a cmp $b } grep { if(s/\.[0-9]+$//) { !$notes->{'code'}->{$_} } else { 1; } } (keys %{$notes->{'copie'}->{'max'}->{'question'}});
-    
-    print STDERR "CODES : ".join(",",@codes)."\n";
-    print STDERR "KEYS : ".join(",",@keys)."\n";
+    my @codes=$self->{'scoring'}->codes;
+    my @questions=sort { $a->{'title'} cmp $b->{'title'} }
+      grep { $_->{'title'} !~ /\.[0-9]+$/ }
+      ($self->{'scoring'}->questions);
 
-    my $store = Gtk2::ListStore->new ( map {'Glib::String' } (1..(2+1+$#codes+1+$#keys)) ); 
+    my $store = Gtk2::ListStore->new ( map {'Glib::String' } (1..(2+1+$#codes+1+$#questions)) ); 
 
     $self->{'tableau'}->set_model($store);
 
@@ -123,28 +97,55 @@ sub new {
 		   translate_column_title("note"),TAB_NOTE);
 
     my $i=TAB_DETAIL ;
-    for(@keys,@codes) {
+    for((map { $_->{'title'}} @questions),@codes) {
 	ajoute_colonne($self->{'tableau'},$store,decode('utf-8',$_),$i++);
     }
 
-  COPIE:for my $k (sort { $a cmp $b } (keys %{$notes->{'copie'}})) {
-      my $c=$notes->{'copie'}->{$k};
-      my $it=$store->append();
-      
+  COPIE:for my $m ($self->{'scoring'}->marks) {
+      $it=$store->append();
+      my @sc=($m->{'student'},$m->{'copy'});
+
       $store->set($it,
-		  TAB_ID,translate_id_name($k),
-		  TAB_NOTE,formatte($c->{'total'}->[0]->{'note'}),
+		  TAB_ID,studentids_string(@sc),
+		  TAB_NOTE,formatte($m->{'mark'}),
 		  );
       
-      my $i=TAB_DETAIL ;
-      for(@keys) {
+      $i=TAB_DETAIL ;
+      for(@questions) {
 	  $store->set($it,$i++,
-		      formatte($c->{'question'}->{$_}->{'note'}));
+		      formatte($self->{'scoring'}->question_score(@sc,$_->{'question'})));
       }
       for(@codes) {
-	  $store->set($it,$i++,$c->{'code'}->{$_}->{'content'});
+	  $store->set($it,$i++,$self->{'scoring'}->student_code(@sc,$_));
       }
   }
+
+    # Average row
+
+    $it=$store->append();
+    $store->set($it,
+		TAB_ID,translate_id_name('moyenne'),
+		TAB_NOTE,formatte($self->{'scoring'}->average_mark),
+	       );
+
+    $i=TAB_DETAIL ;
+    for(@questions) {
+      my $p;
+      if($self->{'scoring'}->one_indicative($_->{'question'})) {
+	$p='-';
+      } else {
+	$p=$self->{'scoring'}->question_average($_->{'question'});
+	if($p ne '-') {
+	  $p=sprintf("%.0f%%",$p);
+	} else {
+	  $p='?';
+	}
+      }
+      $store->set($it,$i++,$p);
+    }
+    for(@codes) {
+      $store->set($it,$i++,'---');
+    }
 
     return($self);
 }
