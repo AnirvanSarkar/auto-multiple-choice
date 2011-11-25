@@ -26,11 +26,11 @@ use AMC::Basic;
 sub new {
     my (%o)=(@_);
 
-    my $self={'file'=>'',
-	      'onerror'=>'stderr',
+    my $self={'onerror'=>'stderr',
 	      'seuil'=>0,
 	      'data'=>'',
 	      '_capture'=>'',
+	      '_scoring'=>'',
 	  };
 
     for my $k (keys %o) {
@@ -39,10 +39,10 @@ sub new {
 
     bless $self;
 
-    $self->read() if($self->{'file'});
-
-    $self->{'_capture'}=$self->{'data'}->module('capture')
-      if($self->{'data'});
+    if($self->{'data'}) {
+      $self->{'_capture'}=$self->{'data'}->module('capture');
+      $self->{'_scoring'}=$self->{'data'}->module('scoring');
+    }
 
     return($self);
 }
@@ -56,135 +56,6 @@ sub error {
     if($self->{'onerror'} =~ /\bdie\b/i) {
 	die $t;
     }
-}
-
-############################
-# base data access methods #
-############################
-
-# Reads the XML file (usualy bareme.xml) dscribing the scoring
-# strategy.
-sub read {
-    my ($self,$f)=@_;
-    $f=$self->{'file'} if($self->{'file'} && !$f);
-    $self->{'bar'}=XMLin($f,ForceArray => 1,KeyAttr=> [ 'id' ]);
-}
-
-# writes scoring strategy (but not ticked boxes data).
-sub write {
-    my ($self,$f)=@_;
-    $f=$self->{'file'} if($self->{'file'} && !$f);
-
-    debug "Writing scoring strategy to $f ...";
-
-    if(open(BAR,">",$f)) {
-	print BAR XMLout($self->{'bar'},
-			 'RootName'=>'bareme',
-			 KeyAttr=> [ 'id' ],
-	    );
-	close(BAR);
-    } else {
-	$self->error("Unable to write to $f: $!");
-    }
-}
-
-# returns the scoring file version.
-sub version {
-    my ($self)=@_;
-    return($self->{'bar'}->{'version'});
-}
-
-# returns the main (outside questions) scoring strategy string
-sub main {
-    my ($self,$etu)=@_;
-    if($etu) {
-	return($self->{'bar'}->{'etudiant'}->{$etu}->{'main'});
-    } else {
-	return($self->{'bar'}->{'main'});
-    }
-}
-
-# returns the main (outside questions) variable value
-sub main_var {
-    my ($self,$name)=@_;
-    return($self->{'bar'}->{$name});
-}
-
-# returns the list of all students sheets IDs
-sub etus {
-    my ($self)=@_;
-    return( sort { $a <=> $b } (keys %{$self->{'bar'}->{'etudiant'}}) );
-}
-
-# returns the list of questions numbers for a particular student sheet ID
-sub questions {
-    my ($self,$etu)=@_;
-    return(sort { $a <=> $b }
-	   (keys %{$self->{'bar'}->{'etudiant'}->{$etu}->{'question'}}) );
-}
-
-# returns the question title (first argument of \begin{question}: this
-# in fact is an ID) from the question number.
-sub question_title {
-    my ($self,$etu,$question)=@_;
-    return($self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'titre'});
-}
-
-# tells is the question is a multiple question.
-sub question_is_multiple {
-    my ($self,$etu,$question)=@_;
-    return($self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'multiple'});
-}
-
-# tells if the question is an indicative question.
-sub question_is_indicative {
-    my ($self,$etu,$question)=@_;
-    return($self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'indicative'});
-}
-
-# returns the scoring strategy string for the question (\scoring used
-# inside question but outside answers environment).
-sub question_scoring {
-    my ($self,$etu,$question)=@_;
-    return($self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'bareme'});
-}
-
-# returns the scoring strategy string for a particular answer(\scoring
-# used inside answers environment).
-sub answer_scoring {
-    my ($self,$etu,$question,$answer)=@_;
-    return($self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$answer}->{'bareme'});
-}
-
-# returns an ordered list of answers numbers. Answer number 0, placed
-# at the end, corresponds to the answer "None of the above", when
-# present.
-sub answers_ids {
-    my ($self,$etu,$question)=@_;
-    return(sort { ($a==0 || $b==0 ? $b <=> $a : $a <=> $b) }
-	   (keys %{$self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}}) );
-}
-
-# tells if the answer is correct (does it have to be ticked?).
-sub correct_answer {
-    my ($self,$etu,$question,$answer)=@_;
-    return($self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$answer}->{'bonne'});
-}
-
-# tells if the answer is correct, setting this value for ALL sheets
-sub postcorrect_answer {
-    my ($self,$question,$answer,$value)=@_;
-    for my $etu ($self->etus) {
-	$self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$answer}->{'bonne'}=$value;
-    }
-}
-
-# returns a list telling, for each answer (in the same order as
-# returned by answers_id), if it has to be ticked.
-sub correct_answers {
-    my ($self,$etu,$question)=@_;
-    my @a=$self->answers_ids($etu,$question);
-    return(map { $self->{'bar'}->{'etudiant'}->{$etu}->{'question'}->{$question}->{'reponse'}->{$_}->{'bonne'} } (@a));
 }
 
 ###################
@@ -202,25 +73,7 @@ sub ticked {
 sub answer_is_correct {
     my ($self,$student,$copy,$question,$answer)=@_;
     return($self->ticked($student,$copy,$question,$answer)
-	   == $self->correct_answer($student,$question,$answer));
-}
-
-# takes correct answers from ticked answers of some particular
-# completed answer sheet
-sub postcorrect {
-    my ($self,$student,$copy)=@_;
-    $copy=0 if(!$copy);
-    debug "PostCorrection: from $student:$copy";
-    for my $q ($self->questions($student)) {
-	if(! $self->question_is_indicative($student,$q)) {
-	    for my $a ($self->answers_ids($student,$q)) {
-		my $value=$self->{'_capture'}
-		  ->ticked($student,$copy,$q,$a,$self->{'seuil'});
-		debug "PostCorrection: Q $q A $a -> $value";
-		$self->postcorrect_answer($q,$a,$value);
-	    }
-	}
-    }
+	   == $self->{'_scoring'}->correct_answer($student,$question,$answer));
 }
 
 #################
@@ -270,10 +123,10 @@ sub degroupe {
 sub main_tag {
     my ($self,$tag,$default,$etu)=@_;
     my $r=$default;
-    my %m=($self->degroupe($self->main,{},{}));
+    my %m=($self->degroupe($self->{'_scoring'}->main_strategy(0),{},{}));
     $r=$m{$tag} if(defined($m{$tag}));
     if($etu) {
-	%m=($self->degroupe($self->main($etu),{},{}));
+	%m=($self->degroupe($self->{'_scoring'}->main_strategy($etu),{},{}));
 	$r=$m{$tag} if(defined($m{$tag}));
     }
     return($r);
@@ -288,24 +141,24 @@ sub score_question {
     my $raison='';
     my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0};
     my %b_q=();
-	    
+
     my $n_ok=0;
     my $n_coche=0;
     my $id_coche=-1;
     my $n_tous=0;
-	    
-    my @rep=$self->answers_ids($etu,$question);
+
+    my @rep=$self->{'_scoring'}->answers($etu,$question);
     my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
 
     debug("SCORE : $etu:$copy/$question - "
-	  .$self->question_scoring($etu,$question));
-    
+	  .$self->{'_scoring'}->question_strategy($etu,$question));
+
     for my $a (@rep) {
-	my $c=$self->correct_answer($etu,$question,$a);
+	my $c=$self->{'_scoring'}->correct_answer($etu,$question,$a);
 	my $t=($correct ? $c :
 	       $self->ticked($etu,$copy,$question,$a));
 
-	debug("[$etu:$question:$a] $t ($c)\n");
+	debug("[$etu:$copy/$question:$a] $t ($c)\n");
 
 	$n_ok+=($c == $t ? 1 : 0);
 	$n_coche+=$t;
@@ -322,16 +175,16 @@ sub score_question {
 
     # question wide variables
     $vars->{'N'}=(1+$#rep_pleine);
-    $vars->{'IMULT'}=($self->question_is_multiple($etu,$question) ? 1 : 0);
+    $vars->{'IMULT'}=($self->{'_scoring'}->multiple($etu,$question) ? 1 : 0);
     $vars->{'IS'}=1-$vars->{'IMULT'};
-    
-    if($self->question_is_multiple($etu,$question)) {
+
+    if($vars->{'IMULT'}) {
 	# MULTIPLE QUESTION
-	
+
 	$xx=0;
-	
-	%b_q=$self->degroupe($self->question_scoring('defaut','M')
-		      .",".$self->question_scoring($etu,$question),
+
+	%b_q=$self->degroupe($self->{'_scoring'}->default_strategy(QUESTION_MULT)
+		      .",".$self->{'_scoring'}->question_strategy($etu,$question),
 		      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0},
 		      $vars);
 
@@ -346,7 +199,7 @@ sub score_question {
 	} else {
 	    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
 	}
-	
+
 	if($n_coche !=1 && (!$correct) && $self->ticked($etu,$question,0)) {
 	    # incompatible answers: the student has ticked one
 	    # plain answer AND the answer "none of the
@@ -361,10 +214,11 @@ sub score_question {
 	    # standard case: adds the 'b' or 'm' scores for each answer
 	    for my $a (@rep) {
 		if($a != 0) {
-		    $code=($correct || 
+		    $code=($correct ||
 			   $self->answer_is_correct($etu,$copy,$question,$a)
 			   ? "b" : "m");
-		    my %b_qspec=$self->degroupe($self->answer_scoring($etu,$question,$a),
+		    my %b_qspec=$self->degroupe($self->{'_scoring'}
+						->answer_strategy($etu,$question,$a),
 						\%b_q,$vars);
 		    debug("Delta($a|$code)=$b_qspec{$code}");
 		    $xx+=$b_qspec{$code};
@@ -383,8 +237,8 @@ sub score_question {
     } else {
 	# SIMPLE QUESTION
 	
-	%b_q=$self->degroupe($self->question_scoring('defaut','S')
-			     .",".$self->question_scoring($etu,$question),
+	%b_q=$self->degroupe($self->{'_scoring'}->default_strategy(QUESTION_SIMPLE)
+			     .",".$self->{'_scoring'}->question_strategy($etu,$question),
 			     {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1},
 			     $vars);
 	
@@ -404,7 +258,7 @@ sub score_question {
 	    $raison='E';
 	} else {
 	    # standard case
-	    $sb=$self->answer_scoring($etu,$question,$id_coche);
+	    $sb=$self->{'_scoring'}->answer_strategy($etu,$question,$id_coche);
 	    if($sb ne '') {
 		# some value is given as a score for the
 		# ticked answer
@@ -417,7 +271,6 @@ sub score_question {
 		     : ($n_ok==$n_tous ? $b_q{'b'} : $b_q{'m'}));
 	    }
 	}
-	
     }
 
     return($xx,$raison,\%b_q);

@@ -227,7 +227,7 @@ sub populate_from_xml {
       } else {
 	# This is a XML description of an automatic data
 	# capture: contains full information about darkness and
-	# positions of the oxes
+	# positions of the boxes
 	$oo{'mse'}=$an->{'transformation'}->{'mse'};
 	for my $k (qw/a b c d e f/) {
 	  $oo{$k}=$an->{'transformation'}->{'parametres'}->{$k};

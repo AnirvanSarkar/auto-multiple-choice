@@ -237,13 +237,32 @@ sub variable {
 			  $self->sql_quote($value)." WHERE name=".
 			  $self->sql_quote($name));
 	} else {
-	    $self->sql_do("INSERT INTO $vt VALUES (".
+	    $self->sql_do("INSERT INTO $vt (name,value) VALUES (".
 			  $self->sql_quote($name).",".
 			  $self->sql_quote($value).")");
 	}
     } else {
 	return($x->[0]);
     }
+}
+
+# The same, bu embedded in a SQL transaction
+
+sub variable_transaction {
+  my ($self,$name,$value)=@_;
+  $self->begin_transaction;
+  my $r=$self->variable($name,$value);
+  $self->end_transaction;
+  return($r);
+}
+
+# clear_variables clear all variables values that are not used
+# internally by the module (keeps the 'version' variable, for
+# exemple).
+
+sub clear_variables {
+  my ($self)=@_;
+  $self->sql_do("DELETE FROM ".$self->table("variables")." WHERE name != 'version'");
 }
 
 # version_check upgrades the module database to the last version.

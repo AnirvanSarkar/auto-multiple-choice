@@ -39,7 +39,7 @@ sub new {
 			     RaiseError => 0,
 			    }),
 	'modules'=>{},
-	'on_error'=>'stdout,die',
+	'on_error'=>'stdout,stderr,die',
     };
 
     for(keys %oo) {
@@ -64,6 +64,7 @@ sub sql_error {
   my $s="SQL ERROR: $e\nSQL STATEMENT: ".$DBI::lasth->{Statement};
   debug "$s";
   print "$s\n" if($self->{'on_error'} =~ /\bstdout\b/);
+  print STDERR "$s\n" if($self->{'on_error'} =~ /\bstderr\b/);
   die "*SQL*" if($self->{'on_error'} =~ /\bdie\b/);
 }
 

@@ -30,13 +30,8 @@ use AMC::Data;
 
 use encoding 'utf8';
 
-$VERSION_BAREME=2;
-$VERSION_NOTES=2;
-
-my $bareme="";
 my $association="-";
 my $seuil=0.1;
-my $fichnotes='-';
 my $annotation_copies='';
 
 my $note_plancher='';
@@ -56,11 +51,9 @@ my $progres_id='';
 my $debug='';
 
 GetOptions("data=s"=>\$data_dir,
-	   "bareme=s"=>\$bareme,
 	   "seuil=s"=>\$seuil,
 	   "debug=s"=>\$debug,
 	   "copies!"=>\$annotation_copies,
-	   "o=s"=>\$fichnotes,
 	   "grain=s"=>\$grain,
 	   "arrondi=s"=>\$type_arrondi,
 	   "notemax=s"=>\$note_parfaite,
@@ -112,10 +105,6 @@ if(! -d $data_dir) {
     attention("No DATA directory: $data_dir");
     die "No DATA directory: $data_dir";
 }
-if(! -f $bareme) {
-    attention("No marking scale file: $bareme");
-    die "No marking scale file: $bareme";
-}
 
 if($grain<=0) {
     $grain=1;
@@ -128,57 +117,27 @@ my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
 
 my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
+my $scoring=$data->module('scoring');
 
-my $bar=AMC::Scoring::new('file'=>$bareme,'onerror'=>'die',
+my $bar=AMC::Scoring::new('onerror'=>'die',
 			  'data'=>$data,
 			  'seuil'=>$seuil);
 
-if($VERSION_BAREME ne $bar->version) {
-    attention("Marking scale file version (".$bar->version.")",
-	      "is too old (here $VERSIN_BAREME):",
-	      "please make marking scale file again...");
-    die("Marking scale file version mismatch: $VERSION_BAREME / ".$bar->version);
-}
-
 $avance->progres(0.05);
 
-# Prepares output file with marks...
+$data->begin_transaction;
 
-my $output=new IO::File($fichnotes,
-			">:encoding($encodage_interne)");
-if(! $output) {
-    die "Error opening $fichnotes: $!";
-}
-
-my $writer = new XML::Writer(OUTPUT=>$output,
-			     ENCODING=>$encodage_interne,
-			     DATA_MODE=>1,
-			     DATA_INDENT=>2);
-
-$writer->xmlDecl($encodage_interne);
-$writer->startTag('notes',
-		  'version'=>$VERSION_NOTES,
-		  'seuil'=>$seuil,
-		  'notemin'=>$note_plancher,
-		  'notemax'=>$note_parfaite,
-		  'plafond'=>$plafond,
-		  'arrondi'=>$type_arrondi,
-		  'grain'=>$grain);
-
-# Computes and outputs marks...
-
-$data->begin_read_transaction;
+$scoring->clear_score;
+$scoring->variable('seuil',$seuil);
+$scoring->variable('notemin',$note_plancher);
+$scoring->variable('notemax',$note_parfaite);
+$scoring->variable('plafond',$plafond);
+$scoring->variable('arrondi',$type_arrondi);
+$scoring->variable('grain',$grain);
+$scoring->variable('postcorrect',$postcorrect);
 
 my $somme_notes=0;
 my $n_notes=0;
-
-my %les_codes=();
-
-my %qt_indicative=();
-my %qt_max=();
-my %qt_n=();
-my %qt_sum=();
-my %qt_summax=();
 
 my @a_calculer=@{$capture->dbh
 		   ->selectall_arrayref($capture->statement('studentCopies'),{})};
@@ -188,181 +147,87 @@ $delta/=(1+$#a_calculer) if($#a_calculer>=0);
 
 # postcorrect mode?
 if($postcorrect) {
-    $bar->postcorrect($postcorrect);
-    $bar->write();
+    $scoring->postcorrect($postcorrect);
 }
 
 for my $sc (@a_calculer) {
-  my $etud=$sc->[0];
+  my $student=$sc->[0];
+  my $student_strategy=$scoring->unalias($student);
 
   debug "MARK: --- SHEET ".studentids_string(@$sc);
 
-    $writer->startTag('copie',
-		      'id'=>studentids_string(@$sc));
+  my $total=0;
+  my $max_i=0;
+  my %codes=();
 
-    my $total=0;
-    my $max_i=0;
-    my %codes=();
+  for my $q ($scoring->student_questions($student_strategy)) {
+    ($xx,$raison,$keys)=$bar->score_question(@$sc,$q);
+    ($notemax)=$bar->score_max_question($student_strategy,$q);
 
-    for my $q ($bar->questions($etud)) {
-	
-	($xx,$raison,$keys)=$bar->score_question(@$sc,$q);
-	($notemax)=$bar->score_max_question($etud,$q);
+    my $tit=$scoring->question_title($q);
 
-	my $tit=$bar->question_title($etud,$q);
+    debug "MARK: QUESTION $q TITLE $tit";
 
-	debug "MARK: QUESTION $q TITLE $tit";
-
-	if($tit =~ /^(.*)\.([0-9]+)$/) {
-	    $codes{$1}->{$2}=$xx;
-	} 
-
-	if($bar->question_is_indicative($etud,$q)) {
-	    $qt_indicative{$tit}=1;
-	    $notemax=1;
-	} else {
-	    $total+=$xx;
-	    $max_i+=$notemax;
-	}
-	    
-	if(!defined($qt_max{$tit}) || $qt_max{$tit}<$notemax) {
-	    $qt_max{$tit}=$notemax;
-	}
-	$qt_n{$tit}++;
-	$qt_sum{$tit}+=$xx;
-	$qt_summax{$tit}+=$notemax;
-		
-	$writer->emptyTag('question',
-			  'id'=>$tit,
-			  'cochees'=>join(';',$capture->ticked_list(@$sc,$q,$seuil)),
-			  'note'=>$xx,
-			  'raison'=>$raison,
-			  'indicative'=>$bar->question_is_indicative($etud,$q),
-			  'max'=>$notemax,
-	    );
-	
+    if ($tit =~ /^(.*)\.([0-9]+)$/) {
+      $codes{$1}->{$2}=$xx;
     }
 
-    # Final mark --
-    
-    # total qui faut pour avoir le max
-    $max_i=$bar->main_tag('SUF',$max_i,$etud);
-    if($max_i<=0) {
-	debug "Warning: Nonpositive value for MAX.";
-	$max_i=1;
-    }
-    
-    # application du grain et de la note max
-    my $x;
-
-    if($note_parfaite>0) {
-	$x=$note_parfaite/$grain*$total/$max_i;
+    if ($scoring->indicative($student_strategy,$q)) {
+      $notemax=1;
     } else {
-	$x=$total/$grain;
+      $total+=$xx;
+      $max_i+=$notemax;
     }
-    $x=&$arrondi($x) if($arrondi);
-    $x*=$grain;
-    
-    $x=$note_parfaite if($note_parfaite>0 && $plafond && $x>$note_parfaite);
-    
-    # plancher
-    
-    if($note_plancher ne '' && $note_plancher !~ /[a-z]/i) {
-	$x=$note_plancher if($x<$note_plancher);
-    } 
-    
-    #--
-    
-    $n_notes++;
-    $somme_notes+=$x;
-    
-    $writer->emptyTag('total',
-		      'total'=>$total,
-		      'max'=>$max_i,
-		      'note'=>$x,
-	);
-    
-    for my $k (keys %codes) {
-	my @i=(keys %{$codes{$k}});
-	if($#i>0) {
-	    my $v=join('',map { $codes{$k}->{$_} }
-		       sort { $b <=> $a } (@i));
-	    $les_codes{$k}->{$v}++;
-	    $writer->dataElement('code',
-				 $v,
-				 'id'=>$k);
-	}
+
+    $scoring->new_score(@$sc,$q,$xx,$notemax,$raison);
+  }
+
+  # Final mark --
+
+  # total qui faut pour avoir le max
+  $max_i=$bar->main_tag('SUF',$max_i,$student_strategy);
+  if ($max_i<=0) {
+    debug "Warning: Nonpositive value for MAX.";
+    $max_i=1;
+  }
+
+  # application du grain et de la note max
+  my $x;
+
+  if ($note_parfaite>0) {
+    $x=$note_parfaite/$grain*$total/$max_i;
+  } else {
+    $x=$total/$grain;
+  }
+  $x=&$arrondi($x) if($arrondi);
+  $x*=$grain;
+
+  $x=$note_parfaite if($note_parfaite>0 && $plafond && $x>$note_parfaite);
+
+  # plancher
+
+  if ($note_plancher ne '' && $note_plancher !~ /[a-z]/i) {
+    $x=$note_plancher if($x<$note_plancher);
+  }
+
+  #--
+
+  $n_notes++;
+  $somme_notes+=$x;
+
+  $scoring->new_mark(@$sc,$total,$max,$x);
+
+  for my $k (keys %codes) {
+    my @i=(keys %{$codes{$k}});
+    if ($#i>0) {
+      my $v=join('',map { $codes{$k}->{$_} }
+		 sort { $b <=> $a } (@i));
+      $scoring->new_code(@$sc,$k,$v);
     }
-    
-    $writer->endTag('copie');
+  }
 
-    $avance->progres($delta);
+  $avance->progres($delta);
 }
-
-# Special: maxima
-
-$writer->startTag('copie',id=>'max');
-
-my $total=0;
-for my $t (keys %qt_max) {
-    $writer->emptyTag('question',
-		      'id'=>$t,
-		      'note'=>$qt_max{$t},
-		      'indicative'=>$qt_indicative{$t},
-		      );
-    $total+=$qt_max{$t};
-}
-
-$writer->emptyTag('total',
-		  'total'=>$total,
-		  'max'=>$total,
-		  'note'=>$note_parfaite,
-		  );
-$writer->endTag('copie');
-
-# Special: means
-
-$writer->startTag('copie',id=>'moyenne');
-
-for my $t (keys %qt_n) {
-    $writer->emptyTag('question',
-		      'id'=>$t,
-		      'n'=>$qt_n{$t},
-		      'note'=>$qt_sum{$t}/$qt_n{$t},
-		      'max'=>$qt_summax{$t}/$qt_n{$t},
-		      )
-	if($qt_n{$t} > 0);
-}
-
-$writer->emptyTag('total',
-		  'total'=>$somme_notes,
-		  'max'=>$note_parfaite,
-		  'note'=>($n_notes>0 ? $somme_notes/$n_notes : 0),
-		  );
-$writer->endTag('copie');
-
-# Special: codes that has been read.
-
-for my $k (keys %les_codes) {
-    $writer->startTag('code','id'=>$k);
-    for (keys %{$les_codes{$k}}) {
-	$writer->dataElement('valeur',$_,
-			     'nombre'=>$les_codes{$k}->{$_});
-    }
-    $writer->endTag('code');
-}
-
-# Global mean
-
-$writer->dataElement('moyenne',$somme_notes/$n_notes)
-    if($n_notes>0);
-
-# Closes output...
-
-$writer->endTag('notes');
-    
-$writer->end();
-$output->close();
 
 $data->end_transaction;
 

@@ -32,6 +32,8 @@ use XML::Writer;
 
 use AMC::Basic;
 use AMC::Gui::Avancement;
+use AMC::Data;
+use AMC::DataModule::scoring ':question';
 use AMC::Queue;
 
 use_gettext;
@@ -85,7 +87,6 @@ my $encodage_interne='UTF-8';
 GetOptions("mode=s"=>\$mode,
 	   "with=s"=>\$moteur_latex,
 	   "data=s"=>\$data_dir,
-	   "bareme=s"=>\$bareme,
 	   "calage=s"=>\$calage,
 	   "out-calage=s"=>\$out_calage,
 	   "out-sujet=s"=>\$out_sujet,
@@ -126,11 +127,9 @@ die "Nonexistent LaTeX file: $tex_source" if(! -f $tex_source);
 my $base=$tex_source;
 $base =~ s/\.tex$//gi;
 
-$bareme="$base-bareme.xml" if(!$bareme);
-
 $data_dir="$base-data" if(!$data_dir);
 
-for(\$bareme,\$data_dir,\$tex_source) {
+for(\$data_dir,\$tex_source) {
     $$_=rel2abs($$_);
 }
 
@@ -385,7 +384,6 @@ if($mode =~ /s/) {
 	    unlink($f);
 	}
     }
-	       
 
     # 1) sujet et calage
 
@@ -425,14 +423,22 @@ if($mode =~ /b/) {
     my $quest='';
     my $rep='';
     my $etu=0;
+    my $multiple;
+    my $indicative;
+    my $strategy;
 
     my $delta=0;
+
+    my $scoring=AMC::Data->new($data_dir)->module('scoring');
+
+    $scoring->begin_transaction;
+    $scoring->clear_strategy;
 
     execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)],
 	    'once'=>1);
     open(AMCLOG,"$jobname.amc") or die "Unable to open $jobname.amc : $!";
     while(<AMCLOG>) {
-	debug($_);
+	debug($_) if($_);
 	if(/AUTOQCM\[TOTAL=([\s0-9]+)\]/) { 
 	    my $t=$1;
 	    $t =~ s/\s//g;
@@ -443,114 +449,73 @@ if($mode =~ /b/) {
 	    }
 	}
 	if(/AUTOQCM\[FQ\]/) {
-	    $quest='';
-	    $rep='';
+	  # end of question: register it
+	  $scoring->statement('NEWQuestion')
+	    ->execute($etu,$quest,($multiple ? QUESTION_MULT : QUESTION_SIMPLE),
+		      $indicative,$strategy);
+	  $quest='';
+	  $rep='';
 	}
-	if(/AUTOQCM\[Q=([0-9]+)\]/) { 
-	    $quest=$1;
-	    $rep=''; 
-	    $bs{$etu}->{'_QUESTIONS_'}->{$quest}={};
+	if(/AUTOQCM\[Q=([0-9]+)\]/) {
+	  # beginning of question
+	  $quest=$1;
+	  $rep='';
+	  $multiple=0;
+	  $indicative=0;
+	  $strategy='';
 	}
 	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
-	    $avance->progres($delta) if($etu ne '');
-	    $etu=$1;
-	    print "Sheet $etu...\n";
-	    debug "Sheet $etu...\n";
-	    $bs{$etu}={};
+	  # beginning of student sheet
+	  $avance->progres($delta) if($etu ne '');
+	  $etu=$1;
+	  print "Sheet $etu...\n";
+	  debug "Sheet $etu...\n";
 	}
 	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
-	    $titres{$1}=$2;
+	  # association question-number<->question-title
+	  $scoring->question_title($1,$2);
 	}
-	if(/AUTOQCM\[MULT\]/) { 
-	    $bs{$etu}->{'_QUESTIONS_'}->{$quest}->{'multiple'}=1;
+	if(/AUTOQCM\[MULT\]/) {
+	  # this question is a multiple-style one
+	  $multiple=1;
 	}
-	if(/AUTOQCM\[INDIC\]/) { 
-	    $bs{$etu}->{'_QUESTIONS_'}->{$quest}->{'indicative'}=1;
+	if(/AUTOQCM\[INDIC\]/) {
+	  # this question is an indicative one
+	  $indicative=1;
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
-	    $rep=$1;
-	    $bs{$etu}->{"$quest.$rep"}={-bonne=>($2 eq 'B' ? 1 : 0)};
+	  $rep=$1;
+	  $scoring->statement('NEWAnswer')
+	    ->execute($etu,$quest,$rep,($2 eq 'B' ? 1 : 0),'');
 	}
 	if(/AUTOQCM\[BR=([0-9]+)\]/) {
-	    $bs{$etu}=$bs{$1};
+	  $scoring->replicate($1,$etu);
 	}
 	if(/AUTOQCM\[B=([^\]]+)\]/) {
-	    $bs{$etu}->{"$quest.$rep"}->{-bareme}=$1;
+	  if($quest) {
+	    if($rep) {
+	      $scoring->set_answer_strategy($etu,$quest,$rep,$1);
+	    } else {
+	      $strategy=$1;
+	    }
+	  } else {
+	    $scoring->main_strategy($etu,$1);
+	  }
 	}
 	if(/AUTOQCM\[BD(S|M)=([^\]]+)\]/) {
-	    $bs{'defaut'}->{"$1."}->{-bareme}=$2;
+	  $scoring->default_strategy(($1 eq 'S' ? QUESTION_SIMPLE : QUESTION_MULT),
+				  $2);
 	}
 	if(/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
-	    $info_vars{$1}=$2;
+	  $scoring->variable($1,$2);
 	}
     }
     close(AMCLOG);
     $cmd_pid='';
 
-    debug "Writing $bareme";
+    $scoring->variable('postcorrect_flag',($info_vars{'postcorrect'} ? 1 : 0));
 
-    my $output=new IO::File($bareme,
-			    ">:encoding($encodage_interne)");
-    if(! $output) {
-	die "Can't open $bareme: $!";
-    }
-
-    my $writer = new XML::Writer(OUTPUT=>$output,
-				 ENCODING=>$encodage_interne,
-				 DATA_MODE=>1,
-				 DATA_INDENT=>2);
-    $writer->xmlDecl($encodage_interne);
-
-    my %opts=(src=>$f_tex,
-	      version=>$VERSION_BAREME,
-	      postcorrect=>$info_vars{'postcorrect'},
-	);
-
-    $opts{'main'}=$bs{0}->{'.'}->{-bareme} if($bs{0}->{'.'}->{-bareme});
-
-    $writer->startTag('bareme',%opts);
-
-    for my $etu (grep { $_ ne '' } (keys %bs)) {
-	%opts=(id=>$etu);
-	$opts{'main'}=$bs{$etu}->{'.'}->{-bareme}
-	    if($bs{$etu}->{'.'}->{-bareme});
-
-	$writer->startTag('etudiant',%opts);
-
-	my $bse=$bs{$etu};
-	my @q_ids=();
-	if($etu eq 'defaut') {
-	    for my $q ('S','M') {
-		$writer->emptyTag('question',id=>$q,
-				  bareme=>$bse->{"$q."}->{-bareme});
-	    }
-	} else {
-	    for my $q (keys %{$bs{$etu}->{'_QUESTIONS_'}}) {
-		$writer->startTag('question',id=>$q,
-				  titre=>$titres{$q},
-				  bareme=>$bse->{"$q."}->{-bareme},
-				  indicative=>$bs{$etu}->{'_QUESTIONS_'}->{$q}->{'indicative'},
-				  multiple=>$bs{$etu}->{'_QUESTIONS_'}->{$q}->{'multiple'},
-		    );
-		
-		for my $i (keys %$bse) {
-		    if($i =~ /^$q\.([0-9]+)/) {
-			my $rep=$1;
-			$writer->emptyTag('reponse',
-					  id=>$rep,
-					  bonne=>$bse->{$i}->{-bonne},
-					  bareme=>$bse->{"$i"}->{-bareme},
-			    );
-		    }
-		}
-		$writer->endTag('question');
-	    }
-	}
-	$writer->endTag('etudiant');
-    }
-    $writer->endTag('bareme');
-    $writer->end();
-    $output->close();
+    $scoring->end_transaction;
 }
 
 $avance->fin();
