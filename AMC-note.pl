@@ -215,7 +215,7 @@ for my $sc (@a_calculer) {
   $n_notes++;
   $somme_notes+=$x;
 
-  $scoring->new_mark(@$sc,$total,$max,$x);
+  $scoring->new_mark(@$sc,$total,$max_i,$x);
 
   for my $k (keys %codes) {
     my @i=(keys %{$codes{$k}});
