@@ -140,10 +140,12 @@ sub require_module {
 	    debug("Creating unexistant database file for module $module...");
 	}
 
+	debug "Connecting to database $module...";
 	$self->{'dbh'}->{AutoCommit}=1;
 	$self->sql_do("ATTACH DATABASE ".$self->sql_quote($filename)." AS $module");
 	$self->{'dbh'}->{AutoCommit}=0;
 
+	debug "Loading perl module $module...";
 	load("AMC::DataModule::$module");
 	$self->{'modules'}->{$module}="AMC::DataModule::$module"->new($self);
 

@@ -54,6 +54,7 @@ sub new {
     bless($self,$class);
 
     $self->define_statements;
+    debug "Checking database version...";
     $self->version_check;
 
     return $self;
@@ -203,22 +204,31 @@ sub query_list {
 # to eventually write to the database.
 
 sub begin_transaction {
-    my ($self)=@_;
+    my ($self,$key)=@_;
+    $key='----' if(!defined($key));
+    debug "Opening RW transaction for $self->{'name'}...";
     $self->{'data'}->begin_transaction;
+    debug "[$key] <-> $self->{'name'}";
 }
 
 # begin_read_transaction begins a transaction for reading data.
 
 sub begin_read_transaction {
-    my ($self)=@_;
+    my ($self,$key)=@_;
+    $key='----' if(!defined($key));
+    debug "Opening RO transaction for $self->{'name'}...";
     $self->{'data'}->begin_read_transaction;
+    debug "[$key] <-  $self->{'name'}";
 }
 
 # end_transaction end the transaction.
 
 sub end_transaction {
-    my ($self)=@_;
+    my ($self,$key)=@_;
+    $key='----' if(!defined($key));
+    debug "Closing transaction for $self->{'name'}...";
     $self->{'data'}->end_transaction;
+    debug "[$key]  X  $self->{'name'}";
 }
 
 # variable($name) returns the value of variable $name, stored in the
@@ -246,13 +256,13 @@ sub variable {
     }
 }
 
-# The same, bu embedded in a SQL transaction
+# The same, but embedded in a SQL transaction
 
 sub variable_transaction {
   my ($self,$name,$value)=@_;
-  $self->begin_transaction;
+  $self->begin_transaction('iVAR');
   my $r=$self->variable($name,$value);
-  $self->end_transaction;
+  $self->end_transaction('iVAR');
   return($r);
 }
 
@@ -271,19 +281,21 @@ sub version_check {
     my ($self)=@_;
     my $vt=$self->table("variables");
 
-    $self->begin_transaction;
+    $self->begin_transaction('tVAR');
     my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
     if(!@vt) {
       debug "Empty database: creating variables table";
       $self->sql_do("CREATE TABLE $vt (name TEXT, value TEXT)");
       $self->variable('version','0');
+    } else {
+      debug "variables table present.";
     }
-    $self->end_transaction;
+    $self->end_transaction('tVAR');
 
-    $self->begin_transaction;
+    $self->begin_transaction('VERS');
     my $vu=$self->variable('version');
     my $v;
-    debug "Module version is $vu";
+    debug "Database version: $vu";
     do {
 	$v=$vu;
 	$vu=$self->version_upgrade($v);
@@ -291,9 +303,7 @@ sub version_check {
 	  if($vu);
     } while($vu);
     $self->variable('version',$v);
-    $self->end_transaction;
-
-    debug("Database version: $v");
+    $self->end_transaction('VERS');
 }
 
 # version_upgrade($v) is to be overloaded by AMC::DataModule::XXX
