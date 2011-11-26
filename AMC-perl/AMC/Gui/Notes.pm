@@ -75,12 +75,14 @@ sub new {
     for my $k (qw/general tableau/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
-    
+
     if($self->{'general'}->get_direction() eq 'rtl') {
 	$self->{'tableau'}->set_grid_lines('horizontal');
     }
 
     $self->{'gui'}->connect_signals(undef,$self);
+
+    $self->{'scoring'}->begin_read_transaction;
 
     my @codes=$self->{'scoring'}->codes;
     my @questions=sort { $a->{'title'} cmp $b->{'title'} }
@@ -109,7 +111,7 @@ sub new {
 		  TAB_ID,studentids_string(@sc),
 		  TAB_NOTE,formatte($m->{'mark'}),
 		  );
-      
+
       $i=TAB_DETAIL ;
       for(@questions) {
 	  $store->set($it,$i++,
@@ -147,6 +149,7 @@ sub new {
       $store->set($it,$i++,'---');
     }
 
+    $self->{'scoring'}->end_transaction;
     return($self);
 }
 
