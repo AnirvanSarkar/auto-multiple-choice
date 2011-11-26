@@ -180,6 +180,8 @@ sub define_statements {
 		  ." (student,copy,code,value)"
 		  ." VALUES (?,?,?,?)"},
 
+     'studentMark'=>{'sql'=>"SELECT * FROM ".$self->table("mark")
+		     ." WHERE student=? AND copy=?"},
      'marks'=>{'sql'=>"SELECT * FROM ".$self->table("mark")},
      'codes'=>{'sql'=>"SELECT code from ".$self->table("code")
 	       ." GROUP BY code ORDER BY code"},
@@ -203,6 +205,8 @@ sub define_statements {
 		  ." WHERE question=?"},
      'getScore'=>{'sql'=>"SELECT score FROM ".$self->table("score")
 		  ." WHERE student=? AND copy=? AND question=?"},
+     'getScoreC'=>{'sql'=>"SELECT score,max,why FROM ".$self->table("score")
+		   ." WHERE student=? AND copy=? AND question=?"},
      'getCode'=>{'sql'=>"SELECT value FROM ".$self->table("code")
 		  ." WHERE student=? AND copy=? AND code=?"},
 
@@ -388,6 +392,13 @@ sub question_score {
 			   $student,$copy,$question));
 }
 
+sub question_result {
+  my ($self,$student,$copy,$question)=@_;
+  my $sth=$self->statement('getScoreC');
+  $sth->execute($student,$copy,$question);
+  return($sth->fetchrow_hashref);
+}
+
 sub student_code {
   my ($self,$student,$copy,$code)=@_;
   return($self->sql_single($self->statement('getCode'),
@@ -397,6 +408,13 @@ sub student_code {
 sub question_average {
   my ($self,$question)=@_;
   return($self->sql_single($self->statement('avgQuest'),$question));
+}
+
+sub student_global {
+  my ($self,$student,$copy)=@_;
+  my $sth=$self->statement('studentMark');
+  $sth->execute($student,$copy);
+  return($x=$sth->fetchrow_hashref);
 }
 
 1;

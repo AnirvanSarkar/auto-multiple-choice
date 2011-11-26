@@ -34,8 +34,6 @@ use AMC::Data;
 use AMC::DataModule::capture qw/:zone :position/;
 use encoding 'utf8';
 
-$VERSION_BAREME=2;
-
 my $cr_dir="";
 my $rep_projet='';
 my $rep_projets='';
@@ -89,8 +87,6 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "projet=s",\$rep_projet,
 	   "projets=s",\$rep_projets,
 	   "data=s"=>\$data_dir,
-	   "bareme=s"=>\$fich_bareme,
-	   "notes=s"=>\$fichnotes,
 	   "debug=s"=>\$debug,
 	   "taille-max=s"=>\$taille_max,
 	   "qualite=s"=>\$qualite_jpg,
@@ -131,14 +127,6 @@ $cr_dir=$rep_projet."/cr" if(! $cr_dir);
 if(! -d $cr_dir) {
     attention("No CR directory: $cr_dir");
     die "No CR directory: $cr_dir";
-}
-if(! -f $fichnotes) {
-    attention("No marks file: $fichnotes");
-    die "No marks file: $fichnotes";
-}
-if(! -f $fich_bareme) {
-    attention("No marking scale file: $fich_bareme");
-    die "No marking scale file: $fich_bareme";
 }
 
 my $assoc='';
@@ -181,30 +169,9 @@ my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
+my $scoring=$data->module('scoring');
 
-my $bar=XMLin($fich_bareme,ForceArray => 1,KeyAttr=> [ 'id' ]);
-
-if($VERSION_BAREME ne $bar->{'version'}) {
-    attention("Marking scale file version (".$bar->{'version'}.")",
-	      "is old (here $VERSIN_BAREME) :",
-	      "please make marking scale file again...");
-    die("Marking scale file version mismatch : $VERSION_BAREME / ".$bar->{'version'});
-}
-
-
-# fichier des notes :
-
-my $notes=eval { XMLin($fichnotes,
-		       'ForceArray'=>1,
-		       'KeyAttr'=>['id'],
-		       ) };
-
-if(!$notes) {
-    debug "Error analysing marks file ".$fichnotes."\n";
-    return($self);
-}
-
-$seuil=$notes->{'seuil'} if($notes->{'seuil'});
+$seuil=$scoring->variable_transaction('seuil');
 
 #################################
 
@@ -250,13 +217,13 @@ sub boite_coors {
 
 my $delta=1;
 
-$capture->begin_read_transaction;
+$capture->begin_read_transaction('PAGE');
 
 my @pages=@{$capture->dbh
 	      ->selectall_arrayref($capture->statement('pages'),
 				   {Slice => {}})};
 
-$capture->end_transaction;
+$capture->end_transaction('PAGE');
 
 $delta=1/(1+$#pages) if($#pages>=0);
 
@@ -327,26 +294,25 @@ $delta=1/(1+$#pages) if($#pages>=0);
 
     my %question=();
 
-    my $ne=$notes->{'copie'}->{studentids_string(@spc[0,2])};
+    $capture->begin_read_transaction('xSTD');
 
-    if(!$ne) {
+    my $student_mark=$scoring->student_global(@spc[0,2]);
+
+    if(!$student_mark) {
       print "*** no marks for copy ".studentids_string(@spc[0,2])." ***\n";
       debug "No marks found ! Copy=".studentids_string(@spc[0,2]);
       next PAGE;
     }
 
-    $capture->begin_read_transaction;
-
     # print global mark and name on the page
 
     if($p->{'page'}==1 || $capture->zones_count(@spc,ZONE_NAME)) {
-      my $t=$ne->{'total'}->[0];
       my $text=$verdict;
 
-      $text =~ s/\%[S]/format_note($t->{'total'})/ge;
-      $text =~ s/\%[M]/format_note($t->{'max'})/ge;
-      $text =~ s/\%[s]/format_note($t->{'note'})/ge;
-      $text =~ s/\%[m]/format_note($notes->{'notemax'})/ge;
+      $text =~ s/\%[S]/format_note($student_mark->{'total'})/ge;
+      $text =~ s/\%[M]/format_note($student_mark->{'max'})/ge;
+      $text =~ s/\%[s]/format_note($student_mark->{'mark'})/ge;
+      $text =~ s/\%[m]/format_note($scoring->variable('notemax'))/ge;
 
       if($assoc && $noms) {
 	my $i=$assoc->effectif($etud);
@@ -383,13 +349,12 @@ $delta=1/(1+$#pages) if($#pages>=0);
 
       my $q=$b->{'id_a'};
       my $r=$b->{'id_b'};
-      my $indic=$bar->{'etudiant'}->{$p->{'student'}}
-	->{'question'}->{$q}->{'indicative'};
+      my $indic=$scoring->indicative($p->{'student'},$q);
 
       next BOX if($indic && !$annote_indicatives);
 
       # to be ticked?
-      my $bonne=($bar->{'etudiant'}->{$p->{'student'}}->{'question'}->{$q}->{'reponse'}->{$r}->{'bonne'} ? 1 : 0);
+      my $bonne=$scoring->correct_answer($p->{'student'},$q,$r);
 
       # ticked on this scan?
       my $cochee=$capture->ticked($p->{'student'},$p->{'copy'},
@@ -428,17 +393,17 @@ $delta=1/(1+$#pages) if($#pages>=0);
 
     if($position ne 'none') {
     QUEST: for my $q (keys %question) {
-	next QUEST if($bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'indicative'});
+	next QUEST if($scoring->indicative($p->{'student'},$q));
 	my $x;
 
-	my $nq=$ne->{'question'}->{$bar->{'etudiant'}->{$etud}->{'question'}->{$q}->{'titre'}};
+	my $result=$scoring->question_result(@spc[0,2],$q);
 
 	my $text=$verdict_question;
 
-	$text =~ s/\%[S]/$nq->{'note'}/g;
-	$text =~ s/\%[M]/$nq->{'max'}/g;
-	$text =~ s/\%[s]/format_note($nq->{'note'})/ge;
-	$text =~ s/\%[m]/format_note($nq->{'max'})/ge;
+	$text =~ s/\%[S]/$result->{'score'}/g;
+	$text =~ s/\%[M]/$result->{'max'}/g;
+	$text =~ s/\%[s]/format_note($result->{'score'})/ge;
+	$text =~ s/\%[m]/format_note($result->{'max'})/ge;
 
 	my $te=eval($text);
 	if($@) {
@@ -476,7 +441,7 @@ $delta=1/(1+$#pages) if($#pages>=0);
       }
     }
 
-    $capture->end_transaction;
+    $capture->end_transaction('xSTD');
 
     # WRITE TO FILE
 
@@ -496,9 +461,9 @@ $delta=1/(1+$#pages) if($#pages>=0);
 				  });
     close(CONV);
 
-    $capture->begin_transaction;
+    $capture->begin_transaction('ANNf');
     $capture->set_annotated(@spc,$out_file);
-    $capture->end_transaction;
+    $capture->end_transaction('ANNf');
 
   } else {
     print "*** no scan $scan_f ***\n";

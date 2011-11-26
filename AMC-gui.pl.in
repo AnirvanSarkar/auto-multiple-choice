@@ -1685,7 +1685,7 @@ sub doc_maj {
     }
 	
     # deja des MEP fabriquees ?
-    $projet{_layout}->begin_transaction;
+    $projet{_layout}->begin_transaction('DMAJ');
     if($projet{_layout}->pages_count > 0) {
 	if(!$sur) {
 	    my $dialog = Gtk2::MessageDialog
@@ -1706,10 +1706,10 @@ sub doc_maj {
 	}
 	
 	$projet{_layout}->clear_all;
-	$projet{_layout}->end_transaction;
+	$projet{_layout}->end_transaction('DMAJ');
 	detecte_mep();
     } else {
-	$projet{_layout}->end_transaction;
+	$projet{_layout}->end_transaction('DMAJ');
     }
 
     # new layout document : XY (from LaTeX)
@@ -1862,9 +1862,9 @@ sub sujet_impressions {
 	return();
     }
 
-    $projet{'_layout'}->begin_read_transaction;
+    $projet{'_layout'}->begin_read_transaction('PGCN');
     my $c=$projet{'_layout'}->pages_count;
-    $projet{'_layout'}->end_transaction;
+    $projet{'_layout'}->end_transaction('PGCN');
     if($c==0) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
@@ -1969,11 +1969,11 @@ sub sujet_impressions {
     }
 
     $copies_store->clear();
-    $projet{'_layout'}->begin_read_transaction;
+    $projet{'_layout'}->begin_read_transaction('PRNT');
     for my $c ($projet{'_layout'}->students()) {
 	$copies_store->set($copies_store->append(),COPIE_N,$c);
     }
-    $projet{'_layout'}->end_transaction;
+    $projet{'_layout'}->end_transaction('PRNT');
 
     $w{'arbre_choix_copies'}->set_model($copies_store);
 
@@ -2152,9 +2152,9 @@ sub calcule_mep {
 	     'progres.id'=>'MEP',
 	     'fin'=>sub { 
 		 detecte_mep();
-		 $projet{'_layout'}->begin_read_transaction;
+		 $projet{'_layout'}->begin_read_transaction('PGCN');
 		 my $c=$projet{'_layout'}->pages_count();
-		 $projet{'_layout'}->end_transaction;
+		 $projet{'_layout'}->end_transaction('PGCN');
 		 if($c<1) {
 		     # avertissement...
 		     my $dialog = Gtk2::MessageDialog
@@ -2184,9 +2184,9 @@ sub verif_mep {
 
 sub saisie_manuelle {
     my ($self,$event,$regarder)=@_;
-    $projet{'_layout'}->begin_read_transaction;
+    $projet{'_layout'}->begin_read_transaction('PGCN');
     my $c=$projet{'_layout'}->pages_count();
-    $projet{'_layout'}->end_transaction;
+    $projet{'_layout'}->end_transaction('PGCN');
     if($c>0) {
 	my $gm=AMC::Gui::Manuel::new(
 	    'cr-dir'=>absolu($projet{'options'}->{'cr'}),
@@ -2846,9 +2846,9 @@ sub voir_notes {
 sub noter {
     if($projet{'options'}->{'maj_bareme'}) {
 	my $n_copies=$projet{'options'}->{'nombre_copies'};
-	$projet{'_layout'}->begin_read_transaction;
+	$projet{'_layout'}->begin_read_transaction('STUD');
 	my @mep_etus=$projet{'_layout'}->students();
-	$projet{'_layout'}->end_transaction;
+	$projet{'_layout'}->end_transaction('STUD');
 	my $n_mep=$mep_etus[$#mep_etus];
 	if($n_copies<$n_mep) {
 	    # number of requested copies is less than the number of
@@ -2975,7 +2975,9 @@ sub noter_calcul {
 }
 
 sub noter_resultat {
+  $projet{'_scoring'}->begin_read_transaction('MARK');
   my $avg=$projet{'_scoring'}->average_mark;
+
   if($avg) {
     $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">".sprintf(__"Mean: %.2f",$avg)."</span>");
   } else {
@@ -2983,6 +2985,8 @@ sub noter_resultat {
   }
 
   my @codes=$projet{'_scoring'}->codes;
+  $projet{'_scoring'}->end_transaction('MARK');
+
   debug "Codes : ".join(',',@codes);
 # TRANSLATORS: you can omit the [...] part, just here to explain context
   $cb_stores{'assoc_code'}=cb_model(''=>__p("(none) [No code found in LaTeX file]"),
@@ -3022,9 +3026,7 @@ sub annote_copies {
 				    "--ch-sign",$o{'annote_chsign'},
 				    "--cr",absolu($projet{'options'}->{'cr'}),
 				    "--data",absolu($projet{'options'}->{'data'}),
-				    "--notes",absolu($projet{'options'}->{'notes'}),
 				    "--taille-max",$o{'taille_max_correction'},
-				    "--bareme",absolu($projet{'options'}->{'fichbareme'}),
 				    "--qualite",$o{'qualite_correction'},
 				    "--line-width",$o{'symboles_trait'},
 				    
@@ -3528,10 +3530,10 @@ sub show_solution {
 }
 
 sub detecte_mep {
-    $projet{'_layout'}->begin_read_transaction;
+    $projet{'_layout'}->begin_read_transaction('LAYO');
     $projet{'_mep_defauts'}={$projet{'_layout'}->defects()};
     my $c=$projet{'_layout'}->pages_count;
-    $projet{'_layout'}->end_transaction;
+    $projet{'_layout'}->end_transaction('LAYO');
     my @def=(keys %{$projet{'_mep_defauts'}});
     if(@def) {
 	$w{'button_mep_warnings'}->show();
@@ -3600,7 +3602,7 @@ sub detecte_correc {
 
     $correc_store->clear();
 
-    $projet{'_capture'}->begin_read_transaction;
+    $projet{'_capture'}->begin_read_transaction('ANNO');
     my $sth=$projet{'_capture'}->statement('getAnnotated');
     $sth->execute();
     while(my $p=$sth->fetchrow_hashref) {
@@ -3615,7 +3617,7 @@ sub detecte_correc {
 	debug "Annotated scan is not here: ".$cordir.'/'.$p->{'annotated'};
       }
     }
-    $projet{'_capture'}->end_transaction;
+    $projet{'_capture'}->end_transaction('ANNO');
 
     $w{'regroupement_corriges'}->set_sensitive($n>0);
 }
@@ -3627,15 +3629,16 @@ sub detecte_analyse {
 
     $diag_store->clear;
 
-    $projet{'_capture'}->begin_read_transaction;
+    $projet{'_capture'}->begin_read_transaction('ADCP');
 
     my $sth=$projet{'_capture'}->statement('pagesChanged');
     $sth->execute(0,0);
     while(@pageid=$sth->fetchrow_array) {
-      my %s=$projet{'_capture'}->page_summary(@pageid,
-					     'blackness_threshold'=>$projet{'options'}->{'seuil'},
-					     'sensitivity_threshold'=>$o{'seuil_sens'},
-					     'mse_threshold'=>$o{'seuil_eqm'});
+      my %s=$projet{'_capture'}
+	->page_summary(@pageid,
+		       'blackness_threshold'=>$projet{'options'}->{'seuil'},
+		       'sensitivity_threshold'=>$o{'seuil_sens'},
+		       'mse_threshold'=>$o{'seuil_eqm'});
       $iter=$diag_store->append;
       $diag_store->set($iter,
 		       DIAG_ID,pageids_string(@pageid),
@@ -3655,7 +3658,7 @@ sub detecte_analyse {
 
     my %r=$projet{'_capture'}->counts;
 
-    $projet{'_capture'}->end_transaction;
+    $projet{'_capture'}->end_transaction('ADCP');
 
     $w{'onglet_notation'}->set_sensitive($n>0);
     detecte_correc() if($n>0);
@@ -4381,9 +4384,10 @@ sub edit_src {
 sub valide_projet {
     set_source_tex();
 
-    $projet{'_layout'}=AMC::Data->new(absolu($projet{'options'}->{'data'}))->module('layout');
-    $projet{'_capture'}=AMC::Data->new(absolu($projet{'options'}->{'data'}))->module('capture');
-    $projet{'_scoring'}=AMC::Data->new(absolu($projet{'options'}->{'data'}))->module('scoring');
+    $projet{'_data'}=AMC::Data->new(absolu($projet{'options'}->{'data'}));
+    $projet{'_layout'}=$projet{'_data'}->module('layout');
+    $projet{'_capture'}=$projet{'_data'}->module('capture');
+    $projet{'_scoring'}=$projet{'_data'}->module('scoring');
 
     detecte_mep();
     detecte_analyse('premier'=>1);
