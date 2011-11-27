@@ -25,8 +25,160 @@ package AMC::DataModule::scoring;
 # This module is used to store (in a SQLite database) and handle all
 # data concerning data scoring (scoring strategies, scores and marks).
 
+# TERMINOLOGY NOTE:
+#
+# 'student' refers to the student number that is written at the top of
+# each page, in the format +<student>/<page>/<check>+
+#
+# If the questions are printed from AMC, and not photocopied, each
+# physical student has a different student number on his sheet.
+#
+# If some questions are photocopied before beeing distributed to the
+# students, several students can have the same student number. To make
+# a difference between their completed answer sheets, a 'copy' number
+# is added. 'copy' is 1 for the first student using a given student
+# number sheet, then 2, and so on.
+#
+# Hence, a completed answer sheet is identified by the (student,copy)
+# couple, and a printed sheet (and correct answers, scoring
+# strategies) is identified by the student number only.
+#
+# 'question' is a number associated by LaTeX with every different
+# question (based on the small text given as XXX in the
+# \begin{question}{XXX} or \begin{questionmult}{XXX} commands).
+#
+# 'answer' is the answer number, starting from 1 for each question,
+# before beeing shuffled.
+
 # TABLES:
 #
+# title contains the titles (argument of the \begin{question} and
+# \begin{questionmult} commands) of all the questions
+#
+# * question is the question number, as created by LaTeX and used in
+#   the databases <layout>, <capture>.
+#
+# * title id the title of the question.
+#
+# default holds the default scoring strategies, as specified with the
+# \scoringDefaultM and \scoringDefaultS commands in the LaTeX source
+# file. This table contains 2 rows.
+#
+# * type is the question type, either QUESTION_SIMPLE or QUESTION_MULT
+#   (these constants are defined in this module).
+#
+# * strategy is the default strategy string for this question type.
+#
+# main holds scoring strategies defined outside question/questionmult
+# environments, either outside the onecopy/examcopy data (with
+# student=-1), or inside (student=current student number).
+#
+# * student is the student number.
+#
+# * strategy is the strategy string given in the LaTeX file as an
+#   argument of the \scoring command.
+#
+# question holds scoring strategies for questions.
+#
+# * student is the student number.
+#
+# * question is the question number.
+#
+# * type is the question type, either QUESTION_SIMPLE or
+#   QUESTION_MULTIPLE
+#
+# * indicative is 1 if the question is indicative (the score is not
+#   taken into account when computing the student mark).
+#
+# * strategy is the question scoring strategy string, given in the
+#   LaTeX file inside the question/questionmult environment (but
+#   before \correctchoice and \wrongchoice commands).
+#
+# answer holds scoring strategies concerning answers.
+#
+# * student is the student number.
+#
+# * question is the question number.
+#
+# * answer is the answer number, starting from 1 for each question.
+#
+# * correct is 1 if this choice is correct (use of \correctchoice).
+#
+# * strategy is the answer scoring strategy string, given in the LaTeX
+#   file after the corresponding correctchoice/wrongchoice commands.
+#
+# score holds the questions scores for each student.
+#
+# * student is the student number.
+#
+# * copy is the copy number.
+#
+# * question is the question number.
+#
+# * score is the score resulting from applying the scoring strategy to
+#   the student's answers.
+#
+# * why is a small string that is used to know when special cases has
+#   been encountered:
+#
+#     E means syntax error (several boxes ticked for a simple
+#     question, or " none of the above" AND another box ticked for a
+#     multiple question).
+#
+#     V means that no box are ticked.
+#
+#     P means that a floor has been applied.
+#
+# * max is the question score associated to a copy where all answers
+#   are correct (or 1 for indicative questions).
+#
+# mark holds global marks of the students.
+#
+# * student is the student number.
+#
+# * copy is the copy number.
+#
+# * total is the total score (sum of the questions scores).
+#
+# * max is the total score associated to a perfect copy.
+#
+# * mark is the student mark.
+#
+# code holds the codes entered by the students (see \AMCcode).
+#
+# * student is the student number.
+#
+# * copy is the copy number.
+#
+# * code is the code name.
+#
+# * value is the code value.
+
+# VARIABLES:
+#
+# postcorrect_flag is 1 if the postcorrect mode is supposed to be used
+# (correct answers are not indicated in the LaTeX source, but will be
+# set from a teacher completed answer sheet).
+#
+# postcorrect_student
+# postcorrect_copy    identify the sheet completed by the teacher.
+#
+# --- the folleing values are supplied in the Preferences window
+#
+# darkness_threshold is the parameter used for determining wether a
+# box is ticked or not.
+#
+# mark_floor is the minimum mark to be given to a student.
+#
+# mark_max is the mark to be given to a perfect completed answer
+# sheet.
+#
+# ceiling is true if AMC should put a ceiling on the students marks
+# (this can be usefull if the SUF global scoring strategy is used).
+#
+# rounding is the rounding type to be used for the marks.
+#
+# granularity is the granularity for the marks rounding.
 
 use Exporter qw(import);
 
@@ -183,7 +335,7 @@ sub define_statements {
      'studentMark'=>{'sql'=>"SELECT * FROM ".$self->table("mark")
 		     ." WHERE student=? AND copy=?"},
      'marks'=>{'sql'=>"SELECT * FROM ".$self->table("mark")},
-     'codes'=>{'sql'=>"SELECT code from ".$self->table("code")
+     'codes'=>{'sql'=>"SELECT code FROM ".$self->table("code")
 	       ." GROUP BY code ORDER BY code"},
      'qStrat'=>{'sql'=>"SELECT strategy FROM ".$self->table("question")
 		." WHERE student=? AND question=?"},
@@ -219,6 +371,13 @@ sub define_statements {
     };
 }
 
+# default_strategy($type) returns the default scoring strategy string
+# to be used for questions with type $type (QUESTION_SIMPLE or
+# QUESTION_MULT).
+#
+# default_strategy($type,$strategy) sets the default strategy string
+# for questions with type $type.
+
 sub default_strategy {
   my ($self,$type,$strategy)=@_;
   if(defined($strategy)) {
@@ -227,6 +386,16 @@ sub default_strategy {
     return($self->sql_single($self->statement('getDefault'),$type));
   }
 }
+
+# main_strategy($student) returns the main scoring strategy string for
+# student $student. If $student<=0 (-1 in the database), this refers
+# to the argument of the \scoring command used outside the
+# onecopy/examcopy loop. If $student>0, this refers to the argument of
+# the \scoring command used inside the onecopy/examcopy loop, but
+# outside question/questionmult environments.
+#
+# main_strategy($student,$strategy) sets the main scoring strategy
+# string.
 
 sub main_strategy {
   my ($self,$student,$strategy)=@_;
@@ -242,10 +411,19 @@ sub main_strategy {
   }
 }
 
+# question_strategy($student,$question) returns the scoring strategy
+# string for a particlar question: argument of the \scoring command
+# used inside a question/questionmult environment, before the
+# \correctchoice and \wrongchoice commands.
+
 sub question_strategy {
   my ($self,$student,$question)=@_;
   return($self->sql_single($self->statement('qStrat'),$student,$question));
 }
+
+# answer_strategy($student,$question,$answer) returns the scoring
+# strategy string for a particular answer: argument of the \scoring
+# command used after \correctchoice and \wrongchoice commands.
 
 sub answer_strategy {
   my ($self,$student,$question,$answer)=@_;
@@ -253,8 +431,8 @@ sub answer_strategy {
 }
 
 # answers($student,$question) returns an ordered list of answers
-# numbers. Answer number 0, placed at the end, corresponds to the
-# answer "None of the above", when present.
+# numbers for a particular question. Answer number 0, placed at the
+# end, corresponds to the answer "None of the above", when present.
 
 sub answers {
   my ($self,$student,$question)=@_;
@@ -266,11 +444,18 @@ sub answers {
   return(@a);
 }
 
+# correct_answer($student,$question,$answer) returns 1 if the
+# corresponding box has to be ticked (the answer is a correct one),
+# and 0 if not.
+
 sub correct_answer {
   my ($self,$student,$question,$answer)=@_;
   return($self->sql_single($self->statement('correct'),
 			   $student,$question,$answer));
 }
+
+# correct_answer($student,$question) returns 1 if the corresponding
+# question is multiple (type=QUESTION_MULT), and 0 if not.
 
 sub multiple {
   my ($self,$student,$question)=@_;
@@ -278,16 +463,27 @@ sub multiple {
 			   $student,$question) == QUESTION_MULT);
 }
 
+# correct_answer($student,$question) returns 1 if the corresponding
+# question is indicative (use of \QuestionIndicative), and 0 if not.
+
 sub indicative {
   my ($self,$student,$question)=@_;
   return($self->sql_single($self->statement('indicative'),
 			   $student,$question));
 }
 
+# one_indicative($question) returns 1 if this question is indicative
+# for at least one student, and 0 if not. In fact, a single question
+# SHOULD be indicative for all students, or for none...
+
 sub one_indicative {
   my ($self,$question)=@_;
   return($self->sql_single($self->statement('oneIndic'),$question));
 }
+
+# question_title($question) returns a question title.
+#
+# question_title($question,$title) sets a question title.
 
 sub question_title {
   my ($self,$question,$title)=@_;
@@ -302,6 +498,9 @@ sub question_title {
   }
 }
 
+# clear_strategy clears all data concerning the scoring strategy of
+# the exam.
+
 sub clear_strategy {
   my ($self)=@_;
   $self->clear_variables;
@@ -311,6 +510,9 @@ sub clear_strategy {
   }
 }
 
+# clear_score clears all data concerning the scores/marks of the
+# students.
+
 sub clear_score {
   my ($self)=@_;
   for my $t (qw/score mark code/) {
@@ -318,15 +520,28 @@ sub clear_score {
   }
 }
 
+# set_answer_strategy($student,$question,$answer,$strategy) sets the
+# scoring strategy string associated to a particular answer.
+
 sub set_answer_strategy {
   my ($self,$student,$question,$answer,$strategy)=@_;
   $self->statement('setAnswerStrat')->execute($strategy,$student,$question,$answer);
 }
 
+# replicate($see,$student) tells that the scoring strategy used for
+# student $see has to be also used for student $student. This can be
+# used only when the questions/answers are not different from a sheet
+# to another (contrary to the use of random numerical values for
+# exemple).
+
 sub replicate {
   my ($self,$see,$student)=@_;
   $self->statement('NEWAlias')->execute($student,$see);
 }
+
+# unalias($student) gives the student number where to find scoring
+# strategy for student $student (following a replicate path if
+# present -- see previous method).
 
 sub unalias {
   my ($self,$student)=@_;
@@ -337,10 +552,19 @@ sub unalias {
   return($student);
 }
 
+# postcorrect($student,$copy) uses the ticked values from the copy
+# ($student,$copy) (filled by a teacher) to determine which answers
+# are correct for all sheets. This can be used only when the
+# questions/answers are not different from a sheet to another
+# (contrary to the use of random numerical values for exemple).
+
 sub postcorrect {
-  my ($self,$student)=@_;
-  $self->statement('postCorrect')->execute($student);
+  my ($self,$student,$copy)=@_;
+  $self->statement('postCorrect')->execute($student,$copy);
 }
+
+# new_score($student,$copy,$question,$score,$score_max,$why) adds a
+# question score row.
 
 sub new_score {
   my ($self,$student,$copy,$question,$score,$score_max,$why)=@_;
@@ -348,11 +572,15 @@ sub new_score {
     ->execute($student,$copy,$question,$score,$score_max,$why);
 }
 
+# new_mark($student,$copy,$total,$max,$mark) adds a mark row.
+
 sub new_mark {
   my ($self,$student,$copy,$total,$max,$mark)=@_;
   $self->statement('NEWMark')
     ->execute($student,$copy,$total,$max,$mark);
 }
+
+# new_code($student,$copy,$code,$value) adds a code row.
 
 sub new_code {
   my ($self,$student,$copy,$code,$value)=@_;
@@ -360,37 +588,58 @@ sub new_code {
     ->execute($student,$copy,$code,$value);
 }
 
+# student_questions($student) returns a list of the question numbers
+# used in the sheets for student number $student.
+
 sub student_questions {
   my ($self,$student)=@_;
   return($self->sql_list($self->statement('studentQuestions'),
 			 $student));
 }
 
+# questions returns an pointer to an array of pointers (one for each
+# question) to hashes
+# ('question'=><question_number>,'title'=>'question_title').
+
 sub questions {
   my ($self)=@_;
   return(@{$self->dbh->selectall_arrayref($self->statement('questions'),{Slice=>{}})});
 }
+
+# average_mark returns the average mark from all students marks.
 
 sub average_mark {
   my ($self)=@_;
   return($self->sql_single($self->statement('avgMark')));
 }
 
+# codes returns a list of codes names.
+
 sub codes {
   my ($self)=@_;
   return($self->sql_list($self->statement('codes')));
 }
+
+# marks returns a pointer to an array of pointers (one for each
+# student) to hashes giving all information from the mark table.
 
 sub marks {
   my ($self)=@_;
   return(@{$self->dbh->selectall_arrayref($self->statement('marks'),{Slice=>{}})});
 }
 
+# question_score($student,$copy,$question) returns the score of a
+# particular student for a particular question.
+
 sub question_score {
   my ($self,$student,$copy,$question)=@_;
   return($self->sql_single($self->statement('getScore'),
 			   $student,$copy,$question));
 }
+
+# question_result($student,$copy,$question) returns a pointer to a
+# hash ('score'=>XXX,'max'=>XXX,'why'=>XXX) extracted from the
+# question table.
 
 sub question_result {
   my ($self,$student,$copy,$question)=@_;
@@ -399,16 +648,27 @@ sub question_result {
   return($sth->fetchrow_hashref);
 }
 
+# student_code($student,$copy,$code) returns the value of the code
+# named $code entered by a particular student.
+
 sub student_code {
   my ($self,$student,$copy,$code)=@_;
   return($self->sql_single($self->statement('getCode'),
 			   $student,$copy,$code));
 }
 
+# question_average($question) returns the average (as a percentage of
+# the maximum score, from 0 to 100) of the scores for a particular
+# question.
+
 sub question_average {
   my ($self,$question)=@_;
   return($self->sql_single($self->statement('avgQuest'),$question));
 }
+
+# student_global($student,$copy) returns a pointer to a hash
+# ('student'=>XXX,'copy'=>XXX,'total'=>XXX,'max'=>XXX,'mark'=>XXX)
+# extracted from the mark table.
 
 sub student_global {
   my ($self,$student,$copy)=@_;
