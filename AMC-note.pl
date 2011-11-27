@@ -128,12 +128,12 @@ $avance->progres(0.05);
 $data->begin_transaction;
 
 $scoring->clear_score;
-$scoring->variable('seuil',$seuil);
-$scoring->variable('notemin',$note_plancher);
-$scoring->variable('notemax',$note_parfaite);
-$scoring->variable('plafond',$plafond);
-$scoring->variable('arrondi',$type_arrondi);
-$scoring->variable('grain',$grain);
+$scoring->variable('darkness_threshold',$seuil);
+$scoring->variable('mark_floor',$note_plancher);
+$scoring->variable('mark_max',$note_parfaite);
+$scoring->variable('ceiling',$plafond);
+$scoring->variable('rounding',$type_arrondi);
+$scoring->variable('granularity',$grain);
 $scoring->variable('postcorrect',$postcorrect);
 
 my $somme_notes=0;

@@ -171,7 +171,7 @@ my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
 my $scoring=$data->module('scoring');
 
-$seuil=$scoring->variable_transaction('seuil');
+$seuil=$scoring->variable_transaction('darkness_threshold');
 
 #################################
 
