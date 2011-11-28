@@ -70,7 +70,7 @@ sub new {
 
     bless $self;
 
-    # recupere la liste des fichiers MEP des pages qui correspondent 
+    # recupere la liste des fichiers MEP des pages qui correspondent
 
     $self->{'data'}=AMC::Data->new($self->{'data-dir'});
     $self->{'layout'}=$self->{'data'}->module('layout');
@@ -114,24 +114,24 @@ sub new {
 
     AMC::Gui::PageArea::add_feuille($self->{'area'},'',
 	'marks'=>($self->{'editable'} ? '' : 'blue'));
-    
+
     ### modele DIAGNOSTIQUE SAISIE
 
     if($self->{'editable'}) {
-	
+
 	my ($diag_store,$renderer,$column);
-	
+
 	$diag_store = Gtk2::ListStore->new ('Glib::String',
-					    'Glib::String', 
-					    'Glib::String', 
-					    'Glib::String', 
-					    'Glib::String', 
-					    'Glib::String', 
-					    'Glib::String', 
+					    'Glib::String',
+					    'Glib::String',
+					    'Glib::String',
+					    'Glib::String',
+					    'Glib::String',
+					    'Glib::String',
 					    );
-	
+
 	$self->{'diag_tree'}->set_model($diag_store);
-	
+
 	$renderer=Gtk2::CellRendererText->new;
 	$column = Gtk2::TreeViewColumn->new_with_attributes (__"page",
 							     $renderer,
@@ -168,12 +168,12 @@ sub new {
     }
 
     $self->{'gui'}->connect_signals(undef,$self);
-    
+
     $self->charge_i();
-    
+
 
     $self->{'area'}->signal_connect('expose_event'=>\&AMC::Gui::Manuel::expose_area);
-    
+
     return($self);
 }
 
@@ -188,7 +188,7 @@ sub goto_from_list {
     my ($self,$widget, $event) = @_;
     return FALSE unless $event->button == 1;
     return TRUE unless $event->type eq 'button-release';
-    my ($path, $column, $cell_x, $cell_y) = 
+    my ($path, $column, $cell_x, $cell_y) =
 	$self->{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
     if($path) {
 	$self->ecrit();
@@ -454,7 +454,7 @@ sub goto_activate_cb {
 
     debug "Go to $dest";
 
-    # recherche d'un ID correspondant 
+    # recherche d'un ID correspondant
     $dest.='/' if($dest !~ m:/:);
     my $did='';
   CHID: for my $i (0..$#{$self->{'page'}}) {
