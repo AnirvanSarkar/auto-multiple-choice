@@ -350,6 +350,8 @@ sub define_statements {
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
      'pageZones'=>{'sql'=>"SELECT * FROM ".$self->table("zone")
 		   ." WHERE student=? AND page=? AND copy=? AND type=?"},
+     'pageZonesAll'=>{'sql'=>"SELECT * FROM ".$self->table("zone")
+		      ." WHERE type=?"},
      'pageZonesD'=>{'sql'=>"SELECT * FROM ".$self->table("zone")
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"
 		    ." AND total>0"

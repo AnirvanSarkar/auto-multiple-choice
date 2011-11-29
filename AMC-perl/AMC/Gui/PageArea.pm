@@ -94,14 +94,14 @@ sub choix {
       
       if ($event->button == 1) {
 	  my ($x,$y)=$event->coords;
-	  print "Click $x $y\n" if($self->{'debug'});
+	  debug "Click $x $y\n";
 	  for my $i (@{$self->{'layinfo'}->{'box'}}) {
 	      
 	      if($x<=$i->{'xmax'}*$self->{'rx'} && $x>=$i->{'xmin'}*$self->{'rx'}
 		 && $y<=$i->{'ymax'}*$self->{'ry'} && $y>=$i->{'ymin'}*$self->{'ry'}) {
 		  $self->{'modifs'}=1;
 
-		  print " -> box $i\n" if($self->{'debug'});
+		  debug " -> box $i\n";
 		  $i->{'ticked'}=!$i->{'ticked'};
 
 		  $self->window->show;

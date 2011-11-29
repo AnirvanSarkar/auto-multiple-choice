@@ -361,6 +361,9 @@ sub define_statements {
 		   ." WHERE student=? AND copy=? AND question=?"},
      'getCode'=>{'sql'=>"SELECT value FROM ".$self->table("code")
 		  ." WHERE student=? AND copy=? AND code=?"},
+     'codesCounts'=>{'sql'=>"SELECT student,copy,value,COUNT(*) as nb"
+		     ." FROM ".$self->table("code")
+		     ." WHERE code=? GROUP BY value"},
 
      'avgMark'=>{'sql'=>"SELECT AVG(mark) FROM ".$self->table("mark")},
      'avgQuest'=>{'sql'=>"SELECT CASE"

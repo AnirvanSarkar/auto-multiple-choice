@@ -206,7 +206,7 @@ sub query_list {
 sub begin_transaction {
     my ($self,$key)=@_;
     $key='----' if(!defined($key));
-    debug "Opening RW transaction for $self->{'name'}...";
+    debug "Opening RW transaction for $self->{'name'} [$key]...";
     $self->{'data'}->begin_transaction;
     debug "[$key] <-> $self->{'name'}";
 }
@@ -216,7 +216,7 @@ sub begin_transaction {
 sub begin_read_transaction {
     my ($self,$key)=@_;
     $key='----' if(!defined($key));
-    debug "Opening RO transaction for $self->{'name'}...";
+    debug "Opening RO transaction for $self->{'name'} [$key]...";
     $self->{'data'}->begin_read_transaction;
     debug "[$key] <-  $self->{'name'}";
 }
