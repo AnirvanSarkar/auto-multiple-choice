@@ -265,7 +265,6 @@ my %projet_defaut=('texsrc'=>'',
 		   'note_arrondi'=>'inf',
 
 		   'liste_key'=>'',
-		   'association'=>'association.xml',
 		   'assoc_code'=>'',
 
 		   'moteur_latex_b'=>'',
@@ -3031,7 +3030,6 @@ sub annote_copies {
 			            "--ecart",$o{'annote_ecart'},
 			            "--verdict",$projet{'options'}->{'verdict'},
 			            "--verdict-question",$projet{'options'}->{'verdict_q'},
-			            "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			            "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			            "--noms-encodage",bon_encodage('liste'),
 			  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),

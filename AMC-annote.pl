@@ -28,7 +28,6 @@ use Cairo;
 use AMC::Basic;
 use AMC::Exec;
 use AMC::Gui::Avancement;
-use AMC::AssocFile;
 use AMC::NamesFile;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone :position/;
@@ -69,7 +68,6 @@ my $font_name='FreeSans';
 my $rtl='';
 my $test_font_size=100;
 
-my $association='';
 my $fich_noms='';
 my $noms_encodage='utf-8';
 
@@ -102,7 +100,6 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "ch-sign=s"=>\$chiffres_significatifs,
 	   "verdict=s"=>\$verdict,
 	   "verdict-question=s"=>\$verdict_question,
-	   "fich-assoc=s"=>\$association,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "font=s"=>\$font_name,
@@ -127,17 +124,6 @@ $cr_dir=$rep_projet."/cr" if(! $cr_dir);
 if(! -d $cr_dir) {
     attention("No CR directory: $cr_dir");
     die "No CR directory: $cr_dir";
-}
-
-my $assoc='';
-my $lk='';
-
-if($association) {
-    $assoc=AMC::AssocFile::new($association);
-    if($assoc) {
-	$assoc->load();
-	$lk=$assoc->get_param('liste_key');
-    }
 }
 
 my $noms='';
@@ -170,8 +156,10 @@ my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
 my $scoring=$data->module('scoring');
+my $assoc=$data->module('association');
 
 $seuil=$scoring->variable_transaction('darkness_threshold');
+$lk=$assoc->variable_transaction('key_in_list');
 
 #################################
 
@@ -315,7 +303,7 @@ $delta=1/(1+$#pages) if($#pages>=0);
       $text =~ s/\%[m]/format_note($scoring->variable('notemax'))/ge;
 
       if($assoc && $noms) {
-	my $i=$assoc->effectif($etud);
+	my $i=$assoc->get_real(@spc[0,2]);
 	my $n;
 
 	debug "Association -> ID=$i";
@@ -327,6 +315,8 @@ $delta=1/(1+$#pages) if($#pages>=0);
 	    $text=$noms->substitute($n,$text,'prefix'=>'%');
 	  }
 	}
+      } else {
+	debug "No association/names";
       }
 
       $layout->set_text($text);
@@ -381,9 +371,9 @@ $delta=1/(1+$#pages) if($#pages>=0);
       $question{$q}={} if(!$question{$q});
       my @mil=milieu_cercle($b->{'zoneid'});
       $question{$q}->{'n'}++;
-      $question{$q}->{'x'}=$mil[0] 
+      $question{$q}->{'x'}=$mil[0]
 	if((!$question{$q}->{'x'}) || ($mil[0]<$question{$q}->{'x'}));
-      $question{$q}->{'xmax'}=$mil[0] 
+      $question{$q}->{'xmax'}=$mil[0]
 	if((!$question{$q}->{'xmax'}) || ($mil[0]>$question{$q}->{'xmax'}));
       $question{$q}->{'y'}+=$mil[1];
     }
