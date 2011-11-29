@@ -2760,9 +2760,8 @@ sub association_clear {
 }
 
 sub change_liste_key {
-    my $af=absolu($projet{'options'}->{'association'});
     debug "New liste_key: ".$projet{'options'}->{'liste_key'};
-    if($projet{'options'}->{'liste_key'} && -f $af) {
+    if($projet{'options'}->{'liste_key'}) {
 
       $projet{'_association'}->begin_read_transaction;
       my $assoc_liste_key=$projet{'_association'}->variable('key_in_list');
@@ -3065,7 +3064,6 @@ sub regroupement {
 			  "--progression-id",'regroupe',
 			  "--progression",1,
 			  "--modele",$projet{'options'}->{'modele_regroupement'},
-			  "--fich-assoc",absolu($projet{'options'}->{'association'}),
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			  "--noms-encodage",bon_encodage('liste'),
 			  "--single-output",$single_output,

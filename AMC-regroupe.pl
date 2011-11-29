@@ -26,7 +26,6 @@ use XML::Simple;
 use AMC::Basic;
 use AMC::Exec;
 use AMC::Gui::Avancement;
-use AMC::AssocFile;
 use AMC::NamesFile;
 use AMC::Data;
 
@@ -47,7 +46,6 @@ my $pdfdir='';
 my $modele="";
 my $progress=1;
 my $progress_id='';
-my $association='';
 my $fich_noms='';
 my $noms_encodage='utf-8';
 my $an_saved='';
@@ -74,7 +72,6 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "tex-src=s"=>\$tex_src,
 	   "with=s"=>\$moteur_latex,
 	   "modele=s"=>\$modele,
-	   "fich-assoc=s"=>\$association,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "progression=s"=>\$progress,
@@ -102,17 +99,6 @@ my $pdfdir="$cr/corrections/pdf";
 
 my $avance=AMC::Gui::Avancement::new($progress * ($single_output ? 0.8 : 1),
 				     'id'=>$progress_id);
-
-my $assoc='';
-my $lk='';
-
-if($association) {
-    $assoc=AMC::AssocFile::new($association);
-    if($assoc) {
-	$assoc->load();
-	$lk=$assoc->get_param('liste_key');
-    }
-}
 
 my $noms='';
 
@@ -205,6 +191,9 @@ sub write_pdf {
 my $data=AMC::Data->new($data_dir);
 my $layout=$data->module('layout');
 my $capture=$data->module('capture');
+my $assoc=$data->module('association');
+
+$lk=$assoc->variable_transaction('key_in_list');
 
 ###################################################################
 # Get student/copy numbers to process.
@@ -394,7 +383,7 @@ for my $e (@students) {
   $f =~ s/\(N\)/$ex/gi;
 
   if($assoc && $noms) {
-    my $i=$assoc->effectif(@$e);
+    my $i=$assoc->get_real(@$e);
     my $nom='XXX';
     my $n;
 
