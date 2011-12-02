@@ -43,6 +43,7 @@ use Module::Load::Conditional qw/check_install/;
 use AMC::Basic;
 use AMC::State;
 use AMC::Data;
+use AMC::DataModule::capture ':zone';
 use AMC::Scoring;
 use AMC::Gui::Manuel;
 use AMC::Gui::Association;
@@ -274,7 +275,8 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'nombre_copies'=>0,
 
-		   'postcorrect_id'=>0,
+		   'postcorrect_student'=>0,
+		   'postcorrect_copy'=>0,
 	    
 		   '_modifie'=>1,
 		   '_modifie_ok'=>0,
@@ -2872,6 +2874,11 @@ sub noter {
 
 my $g_pcid;
 my %postcorrect_ids=();
+my $postcorrect_copy_0;
+my $postcorrect_copy_1;
+my $postcorrect_student_min;
+my $postcorrect_student_max;
+
 
 sub noter_postcorrect {
 
@@ -2884,25 +2891,38 @@ sub noter_postcorrect {
 
 	# gets available sheet ids
 
-	my @ids=$projet{'_capture'}->students_transaction();
+	%postcorrect_ids=();
 
-	%postcorrect_ids=map { $_ => 1 } @ids;
+	$projet{'_capture'}->begin_read_transaction;
+	my $sth=$projet{'_capture'}->statement('studentCopies');
+	$sth->execute;
+	while(my $sc=$sth->fetchrow_hashref) {
+	  $postcorrect_student_min=$sc->{'student'} if(!defined($postcorrect_student_min));
+	  $postcorrect_ids{$sc->{'student'}}->{$sc->{'copy'}}=1;
+	  $postcorrect_student_max=$sc->{'student'};
+	}
+	$projet{'_capture'}->end_transaction;
 
 	# ask user for a choice
 
 	$g_pcid=read_glade('choix_postcorrect',
-			   qw/postcorrect_id postcorrect_apply/);
+			   qw/postcorrect_student postcorrect_copy 
+			      postcorrect_photo postcorrect_apply/);
 
-	if(@ids) {
-	    $w{'postcorrect_id'}->set_range($ids[0],$ids[$#ids]);
-	}	    
+	AMC::Gui::PageArea::add_feuille($w{'postcorrect_photo'});
+	$w{'postcorrect_photo'}
+	  ->signal_connect('expose_event'=>\&AMC::Gui::PageArea::expose_drawing);
 
-	if($projet{'options'}->{'postcorrect_id'}) {
-	    $w{'postcorrect_id'}->set_value($projet{'options'}->{'postcorrect_id'});
-	} elsif(@ids) {
-	    $w{'postcorrect_id'}->set_value($ids[0]);
+	debug "Student range: $postcorrect_student_min,$postcorrect_student_max\n";
+	$w{'postcorrect_student'}->set_range($postcorrect_student_min,$postcorrect_student_max);
+
+	if($projet{'options'}->{'postcorrect_student'}) {
+	  for (qw/student copy/) {
+	    $w{'postcorrect_'.$_}
+	      ->set_value($projet{'options'}->{'postcorrect_'.$_});
+	  }
 	} else {
-	    $w{'postcorrect_id'}->set_value(1);
+	  $w{'postcorrect_student'}->set_value($postcorrect_student_min);
 	}
 
     } else {
@@ -2910,9 +2930,71 @@ sub noter_postcorrect {
     }
 }
 
+sub postcorrect_change_copy {
+    my $student=$w{'postcorrect_student'}->get_value();
+    my $copy=$w{'postcorrect_copy'}->get_value();
+
+    $w{'postcorrect_apply'}->set_sensitive($postcorrect_ids{$student}->{$copy});
+
+    $projet{'_capture'}->begin_read_transaction('PCCN');
+    my ($f)=$projet{'_capture'}->zone_images($student,$copy,ZONE_NAME);
+    $projet{'_capture'}->end_transaction('PCCN');
+    if(!defined($f)) {
+      $f='' ;
+    } else {
+      $f=absolu($projet{'options'}->{'cr'})."/$f";
+    }
+    debug "Postcorrect name field image: $f";
+    if(-f $f) {
+      $w{'postcorrect_photo'}->set_image($f);
+    } else {
+      $w{'postcorrect_photo'}->set_image('NONE');
+    }
+}
+
 sub postcorrect_change {
-    my $pc=$w{'postcorrect_id'}->get_value();
-    $w{'postcorrect_apply'}->set_sensitive($postcorrect_ids{$pc});
+  my $student=$w{'postcorrect_student'}->get_value();
+
+  my @c=sort { $a <=> $b } (keys %{$postcorrect_ids{$student}});
+  $postcorrect_copy_0=$c[0];
+  $postcorrect_copy_1=$c[$#c];
+
+  debug "Postcorrect copy range for student $student: $c[0],$c[$#c]\n";
+  $w{'postcorrect_copy'}->set_range($c[0],$c[$#c]);
+
+  postcorrect_change_copy;
+}
+
+sub postcorrect_previous {
+    my $student=$w{'postcorrect_student'}->get_value();
+    my $copy=$w{'postcorrect_copy'}->get_value();
+
+    $copy--;
+    if($copy<$postcorrect_copy_0) {
+      $student--;
+      if($student>=$postcorrect_student_min) {
+	$w{'postcorrect_student'}->set_value($student);
+	$w{'postcorrect_copy'}->set_value(10000);
+      }
+    } else {
+      $w{'postcorrect_copy'}->set_value($copy);
+    }
+}
+
+sub postcorrect_next {
+    my $student=$w{'postcorrect_student'}->get_value();
+    my $copy=$w{'postcorrect_copy'}->get_value();
+
+    $copy++;
+    if($copy>$postcorrect_copy_1) {
+      $student++;
+      if($student<=$postcorrect_student_max) {
+	$w{'postcorrect_student'}->set_value($student);
+	$w{'postcorrect_copy'}->set_value(0);
+      }
+    } else {
+      $w{'postcorrect_copy'}->set_value($copy);
+    }
 }
 
 sub choix_postcorrect_cancel {
@@ -2920,20 +3002,23 @@ sub choix_postcorrect_cancel {
 }
 
 sub choix_postcorrect_ok {
-    my $pc=$w{'postcorrect_id'}->get_value();
+    my $student=$w{'postcorrect_student'}->get_value();
+    my $copy=$w{'postcorrect_copy'}->get_value();
     $w{'choix_postcorrect'}->destroy();
 
-    if($pc != $projet{'options'}->{'postcorrect_id'}) {
-	$projet{'options'}->{'postcorrect_id'}=$pc;
+    if( $student != $projet{'options'}->{'postcorrect_student'}
+      || $copy !=$projet{'options'}->{'postcorrect_copy'} ) {
+	$projet{'options'}->{'postcorrect_student'}=$student;
+	$projet{'options'}->{'postcorrect_copy'}=$copy;
 	$projet{'options'}->{'_modifie_ok'}=1;
     }
 
-    noter_calcul($pc);
+    noter_calcul($student,$copy);
 }
 
 sub noter_calcul {
 
-    my ($postcorrect)=@_;
+    my ($postcorrect_student,$postcorrect_copy)=@_;
 
     debug "Using sheet $postcorrect to get correct answers"
 	if($postcorrect);
@@ -2950,7 +3035,8 @@ sub noter_calcul {
 			  "--notemax",$projet{'options'}->{'note_max'},
 			  "--plafond",$projet{'options'}->{'note_max_plafond'},
 			  "--notemin",$projet{'options'}->{'note_min'},
-			  "--postcorrect",$postcorrect,
+			  "--postcorrect-student",$postcorrect_student,
+			  "--postcorrect-copy",$postcorrect_copy,
 			  
 			  "--encodage-interne",$o{'encodage_interne'},
 			  "--progression-id",'notation',

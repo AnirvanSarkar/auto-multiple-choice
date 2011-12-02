@@ -42,7 +42,8 @@ my $delimiteur=',';
 my $encodage_interne='UTF-8';
 my $data_dir='';
 
-my $postcorrect='';
+my $postcorrect_student='';
+my $postcorrect_copy='';
 
 my $progres=1;
 my $plafond=1;
@@ -59,7 +60,8 @@ GetOptions("data=s"=>\$data_dir,
 	   "notemax=s"=>\$note_parfaite,
 	   "plafond!"=>\$plafond,
 	   "notemin=s"=>\$note_plancher,
-	   "postcorrect=s"=>\$postcorrect,
+	   "postcorrect-student=s"=>\$postcorrect_student,
+	   "postcorrect-copy=s"=>\$postcorrect_copy,
 	   "encodage-interne=s"=>\$encodage_interne,
 	   "progression-id=s"=>\$progres_id,
 	   "progression=s"=>\$progres,
@@ -134,7 +136,8 @@ $scoring->variable('mark_max',$note_parfaite);
 $scoring->variable('ceiling',$plafond);
 $scoring->variable('rounding',$type_arrondi);
 $scoring->variable('granularity',$grain);
-$scoring->variable('postcorrect',$postcorrect);
+$scoring->variable('postcorrect_student',$postcorrect_student);
+$scoring->variable('postcorrect_copy',$postcorrect_copy);
 
 my $somme_notes=0;
 my $n_notes=0;
@@ -146,8 +149,8 @@ my $delta=0.19;
 $delta/=(1+$#a_calculer) if($#a_calculer>=0);
 
 # postcorrect mode?
-if($postcorrect) {
-    $scoring->postcorrect($postcorrect);
+if($postcorrect_student) {
+    $scoring->postcorrect($postcorrect_student,$postcorrect_copy,$seuil);
 }
 
 for my $sc (@a_calculer) {

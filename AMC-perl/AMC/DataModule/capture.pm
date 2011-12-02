@@ -358,6 +358,8 @@ sub define_statements {
 		    ." ORDER BY 1.0*black/total"},
      'zoneDarkness'=>{'sql'=>"SELECT 1.0*black/total FROM ".$self->table("zone")
 		      ." WHERE zoneid=? AND total>0"},
+     'zoneImage'=>{'sql'=>"SELECT image FROM ".$self->table("zone")
+		      ." WHERE student=? AND copy=? AND type=?"},
      'setManualPage'=>{'sql'=>"UPDATE ".$self->table("page")
 		       ." SET timestamp_manual=?"
 		       ." WHERE student=? AND page=? AND copy=?"},
@@ -701,6 +703,15 @@ sub set_corner {
     $self->statement('NEWPosition')
       ->execute($zoneid,$corner,$x,$y,$type);
   }
+}
+
+# zone_images($student,$copy,$type) returns a list of the image values
+# of zones corresponding to $student,$value,$type.
+
+sub zone_images {
+  my ($self,$student,$copy,$type)=@_;
+  return($self->sql_list($self->statement('zoneImage'),
+			 $student,$copy,$type));
 }
 
 # set_annotated($student,$page,$copy,$file,$timestamp) sets the name

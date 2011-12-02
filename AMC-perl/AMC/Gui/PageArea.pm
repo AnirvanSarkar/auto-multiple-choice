@@ -38,6 +38,8 @@ sub add_feuille {
     $self->{'tx'}=1;
     $self->{'ty'}=1;
 
+    $self->{'min_render_size'}=10;
+
     $self->{'case'}='';
     $self->{'coches'}='';
 
@@ -63,6 +65,8 @@ sub set_image {
     $self->{'i-file'}=$image;
     if($image && -f $image) {
 	$self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image);
+    } elsif($image eq 'NONE') {
+      $self->{'i-src'}='';
     } else {
 	$self->{'i-src'}=Gtk2::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,0,8,40,10);
 	$self->{'i-src'}->fill(0x48B6FF);
@@ -91,12 +95,12 @@ sub choix {
   my ($self,$event)=(@_);
 
   if($self->{'layinfo'}->{'box'}) {
-      
+
       if ($event->button == 1) {
 	  my ($x,$y)=$event->coords;
 	  debug "Click $x $y\n";
 	  for my $i (@{$self->{'layinfo'}->{'box'}}) {
-	      
+
 	      if($x<=$i->{'xmax'}*$self->{'rx'} && $x>=$i->{'xmin'}*$self->{'rx'}
 		 && $y<=$i->{'ymax'}*$self->{'ry'} && $y>=$i->{'ymin'}*$self->{'ry'}) {
 		  $self->{'modifs'}=1;
@@ -114,7 +118,7 @@ sub choix {
 }
 
 sub expose_drawing {
-    my ($self,$evenement,@donnees)=@_;  
+    my ($self,$evenement,@donnees)=@_;
     my $r=$self->allocation();
 
     return() if(!$self->{'i-src'});
@@ -136,9 +140,10 @@ sub expose_drawing {
 	$sx=$self->{'tx'}/$self->{'i-src'}->get_width;
     }
 
-    debug("Rendering with SX=$sx SY=$sy");
+    return() if($self->{'tx'}<$self->{'min_render_size'}
+		|| $self->{'ty'}<$self->{'min_render_size'});
 
-    return() if($self->{'tx'}<=0 || $self->{'ty'}<=0);
+    debug("Rendering with SX=$sx SY=$sy");
 
     my $i=Gtk2::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,1,8,$self->{'tx'},$self->{'ty'});
 
@@ -153,9 +158,13 @@ sub expose_drawing {
 			   $self->{'ty'},
 			   'none',0,0);
 
+    debug "Done with rendering";
+
     if($self->{'layinfo'}->{'box'} || $self->{'layinfo'}->{'namefield'}) {
 	my $box;
- 
+
+	debug "Layout drawings...";
+
 	$self->{'rx'}=$self->{'tx'}/$self->{'layinfo'}->{'page'}->{'width'};
 	$self->{'ry'}=$self->{'ty'}/$self->{'layinfo'}->{'page'}->{'height'};
 
@@ -163,7 +172,7 @@ sub expose_drawing {
 
 	if($self->{'marks'}) {
 	    $self->{'gc'}->set_foreground($self->{'colormark'});
-	    
+
 	    for $box (@{$self->{'layinfo'}->{'namefield'}}) {
 		$self->window->draw_rectangle(
 		    $self->{'gc'},
@@ -198,9 +207,9 @@ sub expose_drawing {
 		    ($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'},
 		    ($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}
 		    );
-		
+
 	    }
-	    
+
 	}
 
 	## boxes drawings
@@ -216,7 +225,8 @@ sub expose_drawing {
 		($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'},
 		($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}
 		);
-	    
+
+	    debug "Done.";
 	}
     }
 }

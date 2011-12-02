@@ -193,6 +193,7 @@ our %EXPORT_TAGS = ( 'question' => [ qw/QUESTION_SIMPLE QUESTION_MULT/ ],
 
 use AMC::Basic;
 use AMC::DataModule;
+use AMC::DataModule::capture ':zone';
 
 use XML::Simple;
 
@@ -362,7 +363,16 @@ sub define_statements {
 		  ." (student,see) VALUES (?,?)"},
      'getAlias'=>{'sql'=>"SELECT see FROM ".$self->table("alias")
 		  ." WHERE student=?"},
-     'postCorrect'=>{'sql'=>""},
+     'postCorrect'=>{'sql'=>"UPDATE ".$self->table("answer")
+		     ." SET correct="
+		     ."(SELECT CASE"
+		     ." WHEN manual >= 0 THEN manual"
+		     ." WHEN total<=0 THEN -1"
+		     ." WHEN black >= ? * total THEN 1"
+		     ." ELSE 0"
+		     ." END AS ticked FROM ".$self->table("zone","capture")
+		     ." WHERE capture_zone.id_a=scoring_answer.question AND capture_zone.id_b=scoring_answer.answer"
+		     ." AND capture_zone.student=? AND capture_zone.copy=? AND capture_zone.type=?)"},
 
      'NEWScore'=>{'sql'=>"INSERT INTO ".$self->table("score")
 		  ." (student,copy,question,score,max,why)"
@@ -628,15 +638,18 @@ sub unalias {
   return($student);
 }
 
-# postcorrect($student,$copy) uses the ticked values from the copy
-# ($student,$copy) (filled by a teacher) to determine which answers
-# are correct for all sheets. This can be used only when the
-# questions/answers are not different from a sheet to another
-# (contrary to the use of random numerical values for exemple).
+# postcorrect($student,$copy,$darkness_threshold) uses the ticked
+# values from the copy ($student,$copy) (filled by a teacher) to
+# determine which answers are correct for all sheets. This can be used
+# only when the questions/answers are not different from a sheet to
+# another (contrary to the use of random numerical values for
+# exemple).
 
 sub postcorrect {
-  my ($self,$student,$copy)=@_;
-  $self->statement('postCorrect')->execute($student,$copy);
+  my ($self,$student,$copy,$darkness_threshold)=@_;
+  $self->{'data'}->require_module('capture');
+  $self->statement('postCorrect')
+    ->execute($darkness_threshold,$student,$copy,ZONE_BOX);
 }
 
 # new_score($student,$copy,$question,$score,$score_max,$why) adds a

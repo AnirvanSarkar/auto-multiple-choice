@@ -507,13 +507,14 @@ if($mode =~ /b/) {
 				  $2);
 	}
 	if(/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
-	  $scoring->variable($1,$2);
+	  my $name=$1;
+	  my $value=$2;
+	  $name='postcorrect_flag' if ($name eq 'postcorrect');
+	  $scoring->variable($name,$value);
 	}
     }
     close(AMCLOG);
     $cmd_pid='';
-
-    $scoring->variable('postcorrect_flag',($info_vars{'postcorrect'} ? 1 : 0));
 
     $scoring->end_transaction;
 }
