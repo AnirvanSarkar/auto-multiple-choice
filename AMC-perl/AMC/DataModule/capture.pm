@@ -408,6 +408,9 @@ sub define_statements {
      'setAnnotated'=>{'sql'=>"UPDATE ".$self->table("page")
 		      ." SET annotated=?, timestamp_annotate=?"
 		      ." WHERE student=? AND page=? AND copy=?"},
+     'questionHasZero'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("zone")
+			 ." WHERE student=? AND copy=? AND type=? AND id_a=?"
+			 ." AND id_b=0"},
     };
 }
 
@@ -630,12 +633,29 @@ sub ticked {
 
 # ticked_list($student,$copy,$question,$darkness_threshold) returns a
 # list with the ticked results for all the answers boxes from a
-# particular question.
+# particular question. Answers are ordered with the answer number, so
+# that the answer "None of the above" (if present), with answer number
+# 0, is placed at the beginning.
 
 sub ticked_list {
   my ($self,$student,$copy,$question,$darkness_threshold)=@_;
   return($self->sql_list($self->statement('tickedList'),$darkness_threshold,
 			 $student,$copy,ZONE_BOX,$question));
+}
+
+# ticked_list_0 id the same as ticked_list, but answer 0
+# (corresponding to "None of the above") is placed at the end of the
+# list.
+
+sub ticked_list_0 {
+  my ($self,$student,$copy,$question,$darkness_threshold)=@_;
+  my @tl=$self->ticked_list($student,$copy,$question,$darkness_threshold);
+  if($self->sql_single($self->statement('questionHasZero'),
+		       $student,$copy,ZONE_BOX,$question)) {
+    my $zero=shift @tl;
+    push @tl,$zero;
+  }
+  return(@tl);
 }
 
 # zones_count($student,$page,$copy,$type) returns the number of zones

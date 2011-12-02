@@ -280,6 +280,46 @@ sub populate_from_xml {
       debug "Unknown student id: <$student>";
     }
   }
+
+  $scoring_file=$self->{'data'}->directory;
+  $scoring_file =~ s:/[^/]+/?$:/notes.xml:;
+  return if(!-f $scoring_file);
+
+  $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
+
+  $self->variable('darkness_threshold',$xml->{'seuil'});
+  $self->variable('mark_floor',$xml->{'notemin'});
+  $self->variable('mark_max',$xml->{'notemax'});
+  $self->variable('ceiling',$xml->{'plafond'});
+  $self->variable('rounding',$xml->{'arrondi'});
+  $self->variable('granularity',$xml->{'grain'});
+
+  for my $student (keys %{$xml->{'copie'}}) {
+    my $s=$xml->{'copie'}->{$student};
+
+    if($student =~ /^(moyenne|max)$/) {
+      debug "Skipping student <$student>";
+    } elsif($student =~ /^[0-9]+$/) {
+      $self->statement('NEWMark')
+	->execute($student,0,
+		  map { $s->{'total'}->[0]->{$_} } (qw/total max note/));
+
+      for my $title (keys %{$s->{'question'}}) {
+	my $q=$s->{'question'}->{$title};
+	my $question=$self->question_number($title);
+	$self->statement('NEWScore')
+	  ->execute($student,0,$question,
+		    $q->{'note'},$q->{'max'},$q->{'raison'});
+      }
+
+      for my $code (keys %{$s->{'code'}}) {
+	$self->statement('NEWCode')->execute($student,0,$code,
+					     $s->{'code'}->{$code}->{'content'});
+      }
+    } else {
+      debug "WARNING: Unknown student <$student> importing XML marks";
+    }
+  }
 }
 
 # defines all the SQL statements that will be used
@@ -306,6 +346,8 @@ sub define_statements {
 		  ." (question,title) VALUES (?,?)"},
      'getTitle'=>{'sql'=>"SELECT title FROM ".$self->table("title")
 		  ." WHERE question=?"},
+     'getQNumber'=>{'sql'=>"SELECT question FROM ".$self->table("title")
+		    ." WHERE title=?"},
      'setTitle'=>{'sql'=>"UPDATE ".$self->table("title")
 		  ." SET title=? WHERE question=?"},
      'NEWQuestion'=>{'sql'=>"INSERT INTO ".$self->table("question")
@@ -346,15 +388,21 @@ sub define_statements {
 		." ORDER BY answer"},
      'studentQuestions'=>{'sql'=>"SELECT question FROM ".$self->table("question")
 			  ." WHERE student=?"},
-     'questions'=>{'sql'=>"SELECT question,title FROM ".$self->table("title")},
+     'questions'=>{'sql'=>"SELECT question,title FROM ".$self->table("title")
+		   ." ORDER BY title"},
+     'qMaxMax'=>{'sql'=>"SELECT MAX(max) FROM ".$self->table("score")
+		 ." WHERE question=?"},
      'correct'=>{'sql'=>"SELECT correct FROM ".$self->table("answer")
 		 ." WHERE student=? AND question=? AND answer=?"},
      'multiple'=>{'sql'=>"SELECT type FROM ".$self->table("question")
 		 ." WHERE student=? AND question=?"},
      'indicative'=>{'sql'=>"SELECT indicative FROM ".$self->table("question")
 		    ." WHERE student=? AND question=?"},
-     'oneIndic'=>{'sql'=>"SELECT MAX(indicative) FROM ".$self->table("question")
-		  ." WHERE question=?"},
+     'numQIndic'=>{'sql'=>"SELECT COUNT(*) FROM"
+		   ." ( SELECT question FROM ".$self->table("question")
+		   ." WHERE indicatve=? GROUP BY question)"},
+     'oneIndic'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("question")
+		  ." WHERE question=? AND indicative=?"},
      'getScore'=>{'sql'=>"SELECT score FROM ".$self->table("score")
 		  ." WHERE student=? AND copy=? AND question=?"},
      'getScoreC'=>{'sql'=>"SELECT score,max,why FROM ".$self->table("score")
@@ -475,13 +523,22 @@ sub indicative {
 			   $student,$question));
 }
 
-# one_indicative($question) returns 1 if this question is indicative
-# for at least one student, and 0 if not. In fact, a single question
+# one_indicative($question,$indic) returns the number of students for
+# which the question has indicative=$indic. In fact, a single question
 # SHOULD be indicative for all students, or for none...
 
 sub one_indicative {
-  my ($self,$question)=@_;
-  return($self->sql_single($self->statement('oneIndic'),$question));
+  my ($self,$question,$indic)=@_;
+  $indic=1 if(!defined($indic));
+  return($self->sql_single($self->statement('oneIndic'),$question,$indic));
+}
+
+# num_questions_indic($i) returns the number of questions that have
+# indicative=$i ($i is 0 or 1).
+
+sub num_questions_indic {
+  my ($self,$indicative)=@_;
+  return($self->sql_single($self->statement('numQIndic'),$indicative));
 }
 
 # question_title($question) returns a question title.
@@ -499,6 +556,22 @@ sub question_title {
   } else {
     return($self->sql_single($self->statement('getTitle'),$question));
   }
+}
+
+# question_number($title) returns the question number corresponding to
+# the given title.
+
+sub question_number {
+  my ($self,$title)=@_;
+  return($self->sql_single($self->statement('getQNumber'),$title));
+}
+
+# question_maxmax($question) returns the maximum of the max value for
+# question $question accross all students sheets
+
+sub question_maxmax {
+  my ($self,$question)=@_;
+  return($self->sql_single($self->statement('qMaxMax'),$question));
 }
 
 # clear_strategy clears all data concerning the scoring strategy of
@@ -600,9 +673,8 @@ sub student_questions {
 			 $student));
 }
 
-# questions returns an pointer to an array of pointers (one for each
-# question) to hashes
-# ('question'=><question_number>,'title'=>'question_title').
+# questions returns an array of pointers (one for each question) to
+# hashes ('question'=><question_number>,'title'=>'question_title').
 
 sub questions {
   my ($self)=@_;

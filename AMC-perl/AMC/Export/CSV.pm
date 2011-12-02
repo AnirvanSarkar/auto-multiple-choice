@@ -36,6 +36,12 @@ sub new {
     return $self;
 }
 
+sub load {
+  my ($self)=@_;
+  $self->SUPER::load();
+  $self->{'_capture'}=$self->{'_data'}->module('capture');
+}
+
 sub parse_num {
     my ($self,$n)=@_;
     if($self->{'out.decimal'} ne '.') {
@@ -63,48 +69,53 @@ sub export {
 
     open(OUT,">:encoding(".$self->{'out.encodage'}.")",$fichier);
 
-    my @comp_keys;
+    $self->{'_scoring'}->begin_read_transaction('XCSV');
+
+    my $dt=$self->{'_scoring'}->variable('darkness_threshold');
+    my $lk=$self->{'_assoc'}->variable('key_in_list');
+
+    my @columns=("A:$lk");
+
+    push @columns,map { translate_column_title($_); } ("nom","note","copie");
+
+    my @questions=$self->{'_scoring'}->questions;
+    my @codes=$self->{'_scoring'}->codes;
 
     if($self->{'out.cochees'}) {
-	@comp_keys=map { ($_,"TICKED:$_") } @{$self->{'keys'}};
-	$self->{'out.entoure'}="\"" if(!$self->{'out.entoure'});
+      push @columns,map { ($_->{'title'},"TICKED:".$_->{'title'}) } @questions;
+      $self->{'out.entoure'}="\"" if(!$self->{'out.entoure'});
     } else {
-	@comp_keys=@{$self->{'keys'}};
+      push @columns,map { $_->{'title'} } @questions;
     }
 
-    my @cont=();
+    push @columns,@codes;
 
-    if($self->{'liste_key'}) { 
-	push @cont,'_ASSOC_';
-	print OUT $self->parse_string("A:".$self->{'liste_key'}).$sep;
+    print OUT join($sep,map  { $self->parse_string($_) } @columns)."\n";
+
+    for my $m (@{$self->{'marks'}}) {
+      my @sc=($m->{'student'},$m->{'copy'});
+
+      @columns=($self->parse_string($m->{'key'}),
+		$self->parse_string($m->{'student.name'}),
+		$self->parse_num($m->{'mark'}),
+		$self->parse_string($m->{'sc'})
+		);
+
+      for my $q (@questions) {
+	push @columns,$self->{'_scoring'}->question_score(@sc,$q->{'question'});
+	if($self->{'out.cochees'}) {
+	  push @columns,join(';',$self->{'_capture'}
+			     ->ticked_list_0(@sc,$q->{'question'},$dt));
+	}
+      }
+
+      for my $c (@codes) {
+	push @columns,$self->{'_scoring'}->student_code(@sc,$c);
+      }
+
+      print OUT join($sep,@columns)."\n";
     }
 
-    push @cont,(qw/_NOM_ _NOTE_ _ID_/,@comp_keys,@{$self->{'codes'}});
-
-    print OUT join($sep,
-		   map  { $self->parse_string($_) }
-		   (map { translate_column_title($_); } ("nom","note","copie"),
-		    @comp_keys,
-		    @{$self->{'codes'}}))."\n";
-    
-    for my $etu (@{$self->{'copies'}}) {
-	print OUT join($sep,
-		       map { 
-			   my $k=$_;
-			   my $c=$self->{'c'}->{$etu}->{$k};
-			   if($k =~ /^_(NOM|ASSOC)_$/) {
-			       $c=$self->parse_string($c);
-			   } elsif($k =~ /^_ID_$/) {
-			       $c=$self->parse_string(translate_id_name($c));
-			   } elsif($k =~ /^TICKED:/) {
-			       $c=$self->parse_string($c);
-			   } else {
-			       $c=$self->parse_num($c) if($c ne '');
-			   }
-			   $c 
-		       } @cont)."\n";
-    }
-    
     close(OUT);
 }
 
