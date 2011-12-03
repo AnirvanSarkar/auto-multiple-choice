@@ -120,6 +120,15 @@ package AMC::DataModule::capture;
 #   reduced from the box zone, so as not to consider box contours when
 #   measuring the number of black pixels).
 
+# failed lists all the scans that could not be processed, as the page
+# numbers (student number, page number and check code, as binary
+# boxes) could not be read on the top of the page.
+#
+# * filename is the scan filename.
+#
+# * timestamp is the time when processing was done.
+
+
 use Exporter qw(import);
 
 use constant {
@@ -158,6 +167,8 @@ sub version_upgrade {
 		      ." (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("position")
 		      ." (zoneid INTEGER, corner INTEGER, x REAL, y REAL, type INTEGER)");
+	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("failed")
+		      ." (filename TEXT UNIQUE, timestamp INTEGER)");
 	$self->populate_from_xml;
 
 	return(1);
@@ -413,6 +424,10 @@ sub define_statements {
      'questionHasZero'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("zone")
 			 ." WHERE student=? AND copy=? AND type=? AND id_a=?"
 			 ." AND id_b=0"},
+     'Failed'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("failed")
+		." (filename,timestamp)"
+		." VALUES (?,?)"},
+     'failedList'=>{'sql'=>"SELECT * FROM ".$self->table("failed")},
     };
 }
 
@@ -789,6 +804,15 @@ sub counts {
     }
   }
   return(%r);
+}
+
+# failed($filename,$timestamp) creates or updates a failed row for
+# file $filename.
+
+sub failed {
+  my ($self,$filename,$timestamp)=@_;
+  $timestamp=time if(! $timestamp);
+  $self->statement('Failed')->execute($filename,$timestamp);
 }
 
 1;

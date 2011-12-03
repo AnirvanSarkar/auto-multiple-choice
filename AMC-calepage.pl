@@ -133,6 +133,15 @@ $threshold = "60%" if($threshold eq 'defaut');
 
 $scan=$ARGV[0];
 
+my $sf=$scan;
+if($rep_projet) {
+  $sf=abs2proj({'%PROJET',$rep_projet,
+		'%HOME'=>$ENV{'HOME'},
+		''=>'%PROJET',
+	       },
+	       $sf);
+}
+
 sub erreur {
     my ($e,$silent)=shift;
     if($debug_image && 
@@ -202,7 +211,7 @@ if($traitement->mode() eq 'opencv') {
 
 my $layout=AMC::Data->new($data_dir)->module('layout');
 
-$layout->begin_transaction;
+$layout->begin_read_transaction;
 
 erreur("No layout") if($layout->pages_count()==0);
 
@@ -476,7 +485,7 @@ sub get_id_binaire {
     debug("Found binary ID: $id_page");
 }
 
-erreur("No layout instructions...") if(! -d $data_dir);
+erreur("No data directory...") if(! -d $data_dir);
 
 sub read_id {
     print "Positionning to read ID...\n";
@@ -523,7 +532,17 @@ if(($traitement->mode() eq 'opencv') && !$layout->exists(@epc)) {
     $upside_down=1;
 }
 
-erreur("No layout for ID $id_page") if(! $layout->exists(@epc));
+if(! $layout->exists(@epc)) {
+  $layout->end_transaction;
+
+  # Page ID has not been found: report it in the database.
+  my $capture=AMC::Data->new($data_dir)->module('capture');
+  $capture->begin_transaction;
+  $capture->failed($sf);
+  $capture->end_transaction;
+
+  erreur("No layout for ID $id_page") ;
+}
 
 if($traitement->mode() eq 'opencv') {
     commande_transfo("rotateOK");
@@ -580,15 +599,6 @@ $traitement->ferme_commande();
 my $capture=AMC::Data->new($data_dir)->module('capture');
 
 $capture->begin_transaction;
-
-my $sf=$scan;
-if($rep_projet) {
-  $sf=abs2proj({'%PROJET',$rep_projet,
-		'%HOME'=>$ENV{'HOME'},
-		''=>'%PROJET',
-	       },
-	       $sf);
-}
 
 @stid=@epc[0,1];
 if($multiple) {

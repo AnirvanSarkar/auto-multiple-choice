@@ -75,7 +75,7 @@ if($liste_f && open(LISTE,$liste_f)) {
 	    debug "Scan from list : $_";
 	    push @scans,$_;
 	} else {
-	    print STDERR "WARNING. File does not exist : $_\n";
+	    debug_and_stderr "WARNING. File does not exist : $_";
 	}
     }
     close(LISTE);
