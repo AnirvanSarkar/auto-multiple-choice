@@ -144,7 +144,7 @@ if($rep_projet) {
 
 sub erreur {
     my ($e,$silent)=shift;
-    if($debug_image && 
+    if($debug_image &&
        $traitement->mode() eq 'opencv') {
 	$traitement->commande("output ".$debug_image);
 	$traitement->ferme_commande;
@@ -393,7 +393,6 @@ sub valide_id_page {
     $id_page_f0=id2idf($id_page,'simple'=>1);
     
     if($repertoire_cr) {
-	$out_cadre="$repertoire_cr/page-$id_page_f.jpg";
 	$zoom_file="$repertoire_cr/zoom-$id_page_f.jpg";
 	$zoom_dir="$repertoire_cr/zooms/$id_page_f0";
 	$analyse_file="$repertoire_cr/analyse-$id_page_f.xml";
@@ -590,12 +589,6 @@ $layout->end_transaction;
 
 erreur("End of diagnostic",1) if($debug_image);
 
-if($out_cadre && ($traitement->mode() eq 'opencv')) {
-    $traitement->commande("output ".$out_cadre);
-}
-
-$traitement->ferme_commande();
-
 my $capture=AMC::Data->new($data_dir)->module('capture');
 
 $capture->begin_transaction;
@@ -607,12 +600,24 @@ if($multiple) {
   push @stid,0;
 }
 
+$layout_file="page-".pageids_string(@stid,'path'=>1).".jpg";
+$out_cadre="$repertoire_cr/$layout_file"
+  if($repertoire_cr && !$out_cadre);
+
+if($out_cadre && ($traitement->mode() eq 'opencv')) {
+    $traitement->commande("output ".$out_cadre);
+}
+
+$traitement->ferme_commande();
+
 $nom_file="name-".studentids_string(@stid[0,2]).".jpg";
 
 clear_old('name image file',"$repertoire_cr/$nom_file");
 
 $capture->set_page_auto($sf,@stid,time(),
 			$cale->params);
+
+$capture->set_layout_image(@stid,$layout_file);
 
 $cadre_general->to_data($capture,
 			$capture->get_zoneid(@stid,ZONE_FRAME,0,0,1),

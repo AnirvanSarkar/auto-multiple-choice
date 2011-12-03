@@ -67,6 +67,9 @@ package AMC::DataModule::capture;
 #   to be perfectly transported from the question paper to the scan by
 #   the linear transform defined by (a,b,c,d,e,f).
 #
+# * layout_image is the filename of the scan image with added drawings
+#   showing where boxes are detected.
+#
 # * annotated is the filename of the annotated jpeg of the page, when
 #   available.
 #
@@ -162,7 +165,7 @@ sub version_upgrade {
 
 	debug "Creating capture tables...";
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("page")
-		      ." (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, annotated TEXT, timestamp_annotate INTEGER, PRIMARY KEY (student,page,copy))");
+		      ." (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, PRIMARY KEY (student,page,copy))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("zone")
 		      ." (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("position")
@@ -288,6 +291,11 @@ sub populate_from_xml {
 	if(-f $cordir.$af) {
 	  my @sta=stat($cordir.$af);
 	  $self->set_annotated(@ep,0,$af,$sta[9]);
+	}
+	# Look if layout scan is present...
+	if(-f $cr.'/'.$af) {
+	  my @sta=stat($cr.'/'.$af);
+	  $self->set_layout_image(@ep,0,$af,$sta[9]);
 	}
       }
     }
@@ -421,6 +429,11 @@ sub define_statements {
      'setAnnotated'=>{'sql'=>"UPDATE ".$self->table("page")
 		      ." SET annotated=?, timestamp_annotate=?"
 		      ." WHERE student=? AND page=? AND copy=?"},
+     'setLayout'=>{'sql'=>"UPDATE ".$self->table("page")
+		   ." SET layout_image=?"
+		   ." WHERE student=? AND page=? AND copy=?"},
+     'getLayout'=>{'sql'=>"SELECT layout_image FROM ".$self->table("page")
+		   ." WHERE student=? AND page=? AND copy=?"},
      'questionHasZero'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("zone")
 			 ." WHERE student=? AND copy=? AND type=? AND id_a=?"
 			 ." AND id_b=0"},
@@ -727,6 +740,24 @@ sub zone_images {
   my ($self,$student,$copy,$type)=@_;
   return($self->sql_list($self->statement('zoneImage'),
 			 $student,$copy,$type));
+}
+
+# set_layout_image($student,$page,$copy,$file) sets the name of the
+# scan with drawings of the boxes image file.
+
+sub set_layout_image {
+  my ($self,$student,$page,$copy,$file)=@_;
+  $self->statement('setLayout')
+    ->execute($file,$student,$page,$copy);
+}
+
+# get_layout_image($student,$page,$copy) gets the name of the
+# scan with drawings of the boxes image file.
+
+sub get_layout_image {
+  my ($self,$student,$page,$copy)=@_;
+  return($self->sql_single($self->statement('getLayout'),
+			   $student,$page,$copy));
 }
 
 # set_annotated($student,$page,$copy,$file,$timestamp) sets the name

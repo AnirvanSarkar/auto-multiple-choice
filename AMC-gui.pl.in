@@ -1183,19 +1183,22 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	    # page viewer and old zooms viewer
 
 	    foreach (@actions) {
-		my $f=id2file($id,$_,'jpg');
-		if(-f $f) {
-		    $c++;
-		    my $item = Gtk2::ImageMenuItem->new($diag_menu{$_}->{text});
-		    $item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{$_}->{icon},'menu'));
-		    $menu->append ($item);
-		    $item->show;
-		    $item->signal_connect (activate => sub {
-			my (undef, $sortkey) = @_;
-			debug "Looking at $f...";
-			commande_parallele($o{'img_viewer'},$f);
-		    }, $_);
-		}
+	      $projet{'_capture'}->begin_read_transaction;
+	      my $f=absolu($projet{'options'}->{'cr'}).'/'
+		.$projet{'_capture'}->get_layout_image(@$id);
+	      $projet{'_capture'}->end_transaction;
+	      if(-f $f) {
+		$c++;
+		my $item = Gtk2::ImageMenuItem->new($diag_menu{$_}->{text});
+		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{$_}->{icon},'menu'));
+		$menu->append ($item);
+		$item->show;
+		$item->signal_connect (activate => sub {
+					 my (undef, $sortkey) = @_;
+					 debug "Looking at $f...";
+					 commande_parallele($o{'img_viewer'},$f);
+				       }, $_);
+	      }
 	    }
 	    $menu->popup (undef, undef, undef, undef,
 			  $event->button, $event->time) if($c>0);
