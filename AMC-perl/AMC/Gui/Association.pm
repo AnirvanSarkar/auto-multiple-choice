@@ -580,7 +580,7 @@ sub style_bouton {
 	}
     }
 
-    my $pris=$self->{'assoc'}->real_back($self->inom2code($i));
+    my $pris=studentids_string($self->{'assoc'}->real_back($self->inom2code($i)));
 
     my $b=$self->{'boutons'}->[$i];
     my $eb=$self->{'boutons_eb'}->[$i];

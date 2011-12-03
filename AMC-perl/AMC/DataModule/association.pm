@@ -28,6 +28,23 @@ package AMC::DataModule::association;
 
 # TABLES:
 #
+# association holds data concerning association between a student
+# completed answer sheet (identified by its student number and its
+# copy number) and the student name (in fact the student identifier
+# found in the students list file).
+#
+# * student is the student number of the completed answer sheet.
+#
+# * copy is the copy number (0 if the question sheet has not been
+#   photocopied, and 1,2,... otherwise).
+#
+# * auto is the student ID (a primary key found in the students list
+#   file) associated with the answer sheet by automatic association,
+#   or NULL if no automatic association were made for this sheet.
+#
+# * manual is the student ID (a primary key found in the students list
+#   file) associated with the answer sheet by manual association,
+#   or NULL if no automatic association were made for this sheet.
 
 use AMC::Basic;
 use AMC::DataModule;
@@ -116,12 +133,14 @@ sub define_statements {
 		." FROM $at"},
      'clearAuto'=>{'sql'=>"UPDATE $at SET auto=NULL"},
      'findManual'=>{'sql'=>"SELECT student,copy FROM $at WHERE manual=?"},
-     'unlinkA'=>{'sql'=>"UPDATE $at SET auto=NULL"
-		 ." WHERE manual=? AND auto IS NULL"},
-     'unlinkB'=>{'sql'=>"UPDATE $at SET auto='NONE'"
-		 ." WHERE manual=? AND auto IS NOT NULL"},
+     'unlink'=>{'sql'=>"UPDATE $at SET manual="
+		." ( CASE WHEN manual IS NULL OR auto=? THEN 'NONE' ELSE NULL END )"
+		." WHERE manual=? OR ( auto=? AND manual IS NULL )"},
     };
 }
+
+# get_manual($student,$copy) returns the manual association ID for the
+# given answer sheet.
 
 sub get_manual {
   my ($self,$student,$copy)=@_;
@@ -129,17 +148,26 @@ sub get_manual {
 			   $student,$copy));
 }
 
+# get_auto($student,$copy) returns the automatic association ID for the
+# given answer sheet.
+
 sub get_auto {
   my ($self,$student,$copy)=@_;
   return($self->sql_single($self->statement('getAuto'),
 			   $student,$copy));
 }
 
+# get_real($student,$copy) returns the resulting association ID for the
+# given answer sheet (manual one if present, or automatic one).
+
 sub get_real {
   my ($self,$student,$copy)=@_;
   return($self->sql_single($self->statement('getReal'),
 			   $student,$copy));
 }
+
+# set_manual($student,$copy,$manual) sets the manual association ID for the
+# given answer sheet.
 
 sub set_manual {
   my ($self,$student,$copy,$manual)=@_;
@@ -149,6 +177,9 @@ sub set_manual {
   }
 }
 
+# set_auto($student,$copy,$manual) sets the automatic association ID for the
+# given answer sheet.
+
 sub set_auto {
   my ($self,$student,$copy,$auto)=@_;
   my $n=$self->statement('insert')->execute($student,$copy,undef,$auto);
@@ -157,6 +188,13 @@ sub set_auto {
   }
 }
 
+# counts returns a list containing the number A of automatic
+# associations, the number M of manual associations, and the total
+# number T of answer sheets that are associated. T is not always equal
+# to A+M, as a particular answer sheet may have automatic AND manual
+# associations, for exemple when automatic association did not work
+# well and has been corrected by manual association.
+
 sub counts {
   my ($self)=@_;
   my $sth=$self->statement('counts');
@@ -164,15 +202,23 @@ sub counts {
   return(@{$sth->fetchrow_arrayref});
 }
 
+# clear clears all association data.
+
 sub clear {
   my ($self)=@_;
   $self->sql_do("DELETE FROM ".$self->table('association'));
 }
 
+# clear_auto clears all automatic association data
+
 sub clear_auto {
   my ($self)=@_;
   $self->statement('clearAuto')->execute;
 }
+
+# check_keys($key_in_list,$code) checks that the value of the
+# variables 'key_in_list' and 'code' corresponds to the given
+# values. If not, all association data is cleared.
 
 sub check_keys {
   my ($self,$key_in_list,$code)=@_;
@@ -185,10 +231,24 @@ sub check_keys {
   }
 }
 
+# real_back($code) returns the (student,copy) list corresponding to
+# the answer sheet that is currently associated with the student ID
+# $code.
+
 sub real_back {
   my ($self,$code)=@_;
-  return($self->sql_single($self->statement('realBack'),$code));
+  return($self->sql_list($self->statement('realBack'),$code));
 }
+
+# state($student,$copy) returns:
+#
+# 0 if this answer sheet has not been associated with a student name ;
+#
+# 1 if this answer sheet has been associated with a student name, and
+#   no other sheet has been associated with the same student name ;
+#
+# 2 if this answer sheet has been associated with a student name, but
+#   some other sheets has been associated with the same student name.
 
 sub state {
   my ($self,$student,$copy)=@_;
@@ -201,12 +261,18 @@ sub state {
   }
 }
 
+# delete_target($code) removes associations made with student ID $code
+# (manual associations with this ID are removed, and automatic
+# associations with this ID are overwritten with a manual association
+# with 'NONE'). This method also returns a reference to an array of
+# array references [<student>,<copy>] with all the sheets
+# that were associated with this student name.
+
 sub delete_target {
   my ($self,$code)=@_;
-  my @r=$self->dbh->selectall_arrayref($self->statement('findManual'),{},$code);
-  $self->statement('unlinkA')->execute($code);
-  $self->statement('unlinkB')->execute($code);
-  return(@r);
+  my $r=$self->dbh->selectall_arrayref($self->statement('realBack'),{},$code);
+  $self->statement('unlink')->execute($code,$code,$code);
+  return($r);
 }
 
 1;
