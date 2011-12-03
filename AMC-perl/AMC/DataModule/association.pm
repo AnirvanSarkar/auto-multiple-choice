@@ -46,6 +46,15 @@ package AMC::DataModule::association;
 #   file) associated with the answer sheet by manual association,
 #   or NULL if no automatic association were made for this sheet.
 
+# VARIABLES:
+#
+# key_in_list is the column name from students list file where to find
+#   the primary key that will be used in the association data to
+#   identify a student.
+#
+# code is the code name in the LaTeX source file (first argument given
+#   to the \AMCcode command) that is used for automatic association.
+
 use AMC::Basic;
 use AMC::DataModule;
 
@@ -218,15 +227,18 @@ sub clear_auto {
 
 # check_keys($key_in_list,$code) checks that the value of the
 # variables 'key_in_list' and 'code' corresponds to the given
-# values. If not, all association data is cleared.
+# values. If not, association data is cleared.
 
 sub check_keys {
   my ($self,$key_in_list,$code)=@_;
-  if($self->variable('key_in_list') ne $key_in_list
-     || ($code ne '---' && $self->variable('code') ne $code)) {
+  if($self->variable('key_in_list') ne $key_in_list) {
     debug "Association variable mismatch: clearing database";
     $self->clear;
     $self->variable('key_in_list',$key_in_list);
+    $self->variable('code',$code);
+  } elsif($code ne '---' && $self->variable('code') ne $code) {
+    debug "Association <code> variable mismatch: clearing automatic association";
+    $self->clear_auto;
     $self->variable('code',$code);
   }
 }
