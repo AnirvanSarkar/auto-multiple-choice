@@ -1164,9 +1164,12 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 
 	    # new zooms viewer
 
-	    my $zd=absolu('%PROJET/cr/zooms')."/".pageids_string(@$id,'path'=>1);
+	    $projet{'_capture'}->begin_read_transaction;
+	    my @bi=grep { -f absolu('%PROJET/cr/zooms')."/".$_ }
+	      $projet{'_capture'}->zone_images($id->[0],$id->[2],ZONE_BOX);
+	    $projet{'_capture'}->end_transaction;
 
-	    if(-d $zd) {
+	    if(@bi) {
 		$c++;
 		my $item = Gtk2::ImageMenuItem->new($diag_menu{'zoom'}->{text});
 		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{'zoom'}->{icon},'menu'));
@@ -1182,15 +1185,20 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 
 	    # page viewer and old zooms viewer
 
-	    foreach (@actions) {
-	      $projet{'_capture'}->begin_read_transaction;
-	      my $f=absolu($projet{'options'}->{'cr'}).'/'
-		.$projet{'_capture'}->get_layout_image(@$id);
-	      $projet{'_capture'}->end_transaction;
+	    foreach $a (@actions) {
+	      my $f;
+	      if($a eq 'page') {
+		$projet{'_capture'}->begin_read_transaction;
+		$f=absolu($projet{'options'}->{'cr'}).'/'
+		  .$projet{'_capture'}->get_layout_image(@$id);
+		$projet{'_capture'}->end_transaction;
+	      } else {
+		$f=id2file($id,$a,'jpg');
+	      }
 	      if(-f $f) {
 		$c++;
-		my $item = Gtk2::ImageMenuItem->new($diag_menu{$_}->{text});
-		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{$_}->{icon},'menu'));
+		my $item = Gtk2::ImageMenuItem->new($diag_menu{$a}->{text});
+		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{$a}->{icon},'menu'));
 		$menu->append ($item);
 		$item->show;
 		$item->signal_connect (activate => sub {
