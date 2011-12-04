@@ -162,6 +162,15 @@ sub new {
 	$column->set_sort_column_id(MDIAG_DELTA);
 	$self->{'diag_tree'}->append_column ($column);
 
+	$self->{'diag_store'}=$diag_store;
+
+	$self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+	Gtk2->main_iteration while ( Gtk2->events_pending );
+
+	for my $i (0..$#{$self->{'page'}}) {
+	    $self->maj_list($self->{'page'}->[$i],$i);
+	}
+
 	$diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
 	$diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
 	$diag_store->set_sort_func(MDIAG_ID,\&sort_from_columns,
@@ -170,11 +179,7 @@ sub new {
 				    {'type'=>'n','col'=>MDIAG_PAGE},
 				   ]);
 
-	$self->{'diag_store'}=$diag_store;
-
-	for my $i (0..$#{$self->{'page'}}) {
-	    $self->maj_list($self->{'page'}->[$i],$i);
-	}
+	$self->{'general'}->window()->set_cursor(undef);
     }
 
     $self->{'gui'}->connect_signals(undef,$self);
