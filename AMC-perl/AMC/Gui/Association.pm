@@ -50,13 +50,6 @@ my $col_pris = Gtk2::Gdk::Color->new(65353,208*256,169*256);
 my $col_actif = Gtk2::Gdk::Color->new(20*256,147*256,58*256);
 my $col_actif_fond = Gtk2::Gdk::Color->new(95*256,213*256,129*256);
 
-sub reduit {
-    my $s=shift;
-    $s =~ s/^\s+//;
-    $s =~ s/\s+$//;
-    return($s);
-}
-
 sub new {
     my %o=(@_);
     my $self={'assoc-ncols'=>3,
@@ -262,6 +255,10 @@ sub new {
     return($self);
 }
 
+# Updates the content of the sheets list (associations already made)
+# for one give sheet.
+#
+# {IN:}
 sub maj_contenu_liste {
     my ($self,$ii,$iter,@sc)=@_;
 
@@ -277,6 +274,9 @@ sub maj_contenu_liste {
     }
 }
 
+# Updates the line $iimage of the sheets list.
+#
+# {X:IN}
 sub maj_contenu_liste_iimage {
   my ($self,$iimage)=@_;
   my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$ii);
@@ -284,6 +284,10 @@ sub maj_contenu_liste_iimage {
   $self->maj_contenu_liste($iimage,$iter,@sc);
 }
 
+# Updates the line corresponding to @sc=(student,copy) of the sheets
+# list
+#
+# {X:IN}
 sub maj_contenu_liste_sc {
   my ($self,@sc)=@_;
   my $iter=model_id_to_iter($self->{'copies_store'},
@@ -293,6 +297,9 @@ sub maj_contenu_liste_sc {
   $self->maj_contenu_liste($iimage,$iter,@sc);
 }
 
+# Updates the colours of the sheets list.
+#
+# {IN:}
 sub maj_couleurs_liste { # mise a jour des couleurs la liste
     my ($self)=@_;
 
@@ -328,6 +335,7 @@ sub maj_couleurs_liste { # mise a jour des couleurs la liste
     }
 }
 
+# Quits.
 sub quitter {
     my ($self)=(@_);
 
@@ -344,11 +352,19 @@ sub enregistrer {
     $self->quitter();
 }
 
+# inom2code($i) returns the primary key ID corresponding to student on
+# line $i from the students list file.
+#
+# {X:X}
 sub inom2code {
     my ($self,$inom)=@_;
     return($self->{'liste'}->data_n($inom,$self->{'liste_key'}));
 }
 
+# sc2inom($student,$copy) returns the line number where is the student
+# associated with sheet ($student,$copy) in the students list file.
+#
+# {IN:}
 sub sc2inom {
     my ($self,$student,$copy)=@_;
     my $code=$self->{'assoc'}->get_real($student,$copy);
@@ -361,6 +377,10 @@ sub sc2inom {
     }
 }
 
+# cancels association to the student at line number $inom in the
+# students list file.
+#
+# {IN:}
 sub delie {
     my ($self,$inom)=(@_);
 
@@ -375,6 +395,10 @@ sub delie {
     $self->style_bouton_code($code);
 }
 
+# Associates sheet ($student,$copy) with student at line number $inom
+# in the students list file.
+#
+# {IN:}
 sub lie {
     my ($self,$inom,$student,$copy)=(@_);
     $self->delie($inom);
@@ -392,6 +416,9 @@ sub lie {
     $self->style_bouton($inom,1);
 }
 
+# Cancels manual association of current sheet.
+#
+# {OUT:}
 sub efface_manuel {
     my ($self)=@_;
     my $i=$self->{'iimage'};
@@ -414,6 +441,10 @@ sub efface_manuel {
     }
 }
 
+# Tells that current sheet is not to be associated with any of the
+# students from the list.
+#
+# {OUT:}
 sub inconnu {
     my ($self)=@_;
     my $i=$self->{'iimage'};
@@ -422,9 +453,9 @@ sub inconnu {
       $self->{'assoc'}->begin_transaction('AUNK');
 
       my @sc=$self->image_sc($i);
-      my @r=$self->id2inom($e);
+      my @r=$self->sc2inom(@sc);
 
-      $self->{'assoc'}->set_manual('NONE');
+      $self->{'assoc'}->set_manual(@sc,'NONE');
 
       for(@r) {
 	$self->style_bouton($_);
@@ -436,6 +467,9 @@ sub inconnu {
     }
 }
 
+# Go to the sheet pointed with the mouse in the list.
+#
+# {OUT:}
 sub goto_from_list {
     my ($self,$widget, $event) = @_;
 
@@ -454,8 +488,12 @@ sub goto_from_list {
     return TRUE;
 }
 
+# Go to line $i of the list.
+#
+# {OUT:}
 sub goto_image {
     my ($self,$i)=@_;
+    debug "goto_image($i)";
     if($i>=0) {
 	my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$i);
 	my $path=$self->{'copies_store'}->get_path($iter);
@@ -463,10 +501,15 @@ sub goto_image {
     } else {
 	my $sel=$self->{'copies_tree'}->get_selection;
 	$sel->unselect_all();
+	$self->{'assoc'}->begin_read_transaction('ACHI');
 	$self->charge_image($i);
+	$self->{'assoc'}->end_transaction('ACHI');
     }
 }
 
+# Is a sheet selected? Activate buttons or not depending on that.
+#
+# {X:X}
 sub vraie_copie {
     my ($self,$oui)=@_;
     for(qw/bouton_effacer bouton_inconnu/) {
@@ -474,16 +517,28 @@ sub vraie_copie {
     }
 }
 
+# Returns the (student,copy) array corresponding to sheet at line $i
+# in the sheets list.
+#
+# {X:X}
 sub image_sc {
   my ($self,$i)=@_;
   return(map { $self->{'images'}->[$i]->{$_} } (qw/student copy/));
 }
 
+# Returns (student,copy) as a single string, corresponding to sheet at
+# line $i in the sheets list.
+#
+# {X:X}
 sub image_sc_string {
   my ($self,$i)=@_;
   return(studentids_string($self->image_sc($i)));
 }
 
+# Returns the image file name corresponding to sheet at line $i in the
+# sheets list.
+#
+# {X:X}
 sub image_filename {
   my ($self,$i)=@_;
   return('') if ($i<0 || $i>$#{$self->{'images'}});
@@ -491,6 +546,10 @@ sub image_filename {
   return(-r $f ? $f : '');
 }
 
+# Shows name field image corresponding to sheet at line $i in the
+# sheets list.
+#
+# {X:IN}
 sub charge_image {
     my ($self,$i)=(@_);
     $self->style_bouton('IMAGE',0);
@@ -511,6 +570,9 @@ sub charge_image {
     $self->{'titre'}->set_text(($i>=0 ? $self->image_sc_string($i) : "---"));
 }
 
+# Returns the line number $i from sheets list adding $pas to it.
+#
+# {X:X}
 sub i_suivant {
     my ($self,$i,$pas)=(@_);
     $pas=1 if(!$pas);
@@ -524,6 +586,9 @@ sub i_suivant {
     return($i);
 }
 
+# Move in the sheets list, adding $pas to current position.
+#
+# {OUT:}
 sub image_suivante {
     my ($self,$pas)=(@_);
     $pas=1 if(!$pas);
@@ -542,27 +607,35 @@ sub image_suivante {
 	}
     }
 
+    $self->{'assoc'}->end_transaction('ALIS');
+
     if($self->{'iimage'} != $i) {
 	$self->goto_image($i) ;
     } else {
 	$self->goto_image(-1) ;
     }
-
-    $self->{'assoc'}->end_transaction('ALIS');
 }
 
+# Go to next sheet.
+#
+# {X:OUT}
 sub va_suivant {
     my ($self)=(@_);
     $self->image_suivante(1);
 }
 
+# Go to previous sheet.
+#
+# {X:OUT}
 sub va_precedent {
     my ($self)=(@_);
     $self->image_suivante(-1);
 }
 
-#<
-
+# Sets the content and style of a button, according to the association
+# made with the student corresponding to the button.
+#
+# {IN:}
 sub style_bouton {
     my ($self,$i,$actif)=(@_);
     my @sc;
@@ -608,6 +681,10 @@ sub style_bouton {
     }
 }
 
+# Calls style_button for the button of the student whose primary key
+# ID is $code.
+#
+# {X:IN}
 sub style_bouton_code {
   my ($self,$code,$actif)=@_;
   for($self->{'liste'}->data($self->{'liste_key'},$code,
@@ -616,6 +693,10 @@ sub style_bouton_code {
   }
 }
 
+# Choose student at line $i in the students list file to be associated
+# with current sheet from the list.
+#
+# {OUT:}
 sub choisit {
     my ($self,$i)=(@_);
 
