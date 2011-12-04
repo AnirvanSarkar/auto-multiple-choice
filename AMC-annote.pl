@@ -276,9 +276,9 @@ $delta=1/(1+$#pages) if($#pages>=0);
 
     my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
 
-    print "Annotating $scan...\n";
-
     my $idf=pageids_string(@spc,'path'=>1);
+
+    print "Annotating $scan (sheet $idf)...\n";
 
     my %question=();
 
@@ -300,7 +300,7 @@ $delta=1/(1+$#pages) if($#pages>=0);
       $text =~ s/\%[S]/format_note($student_mark->{'total'})/ge;
       $text =~ s/\%[M]/format_note($student_mark->{'max'})/ge;
       $text =~ s/\%[s]/format_note($student_mark->{'mark'})/ge;
-      $text =~ s/\%[m]/format_note($scoring->variable('notemax'))/ge;
+      $text =~ s/\%[m]/format_note($scoring->variable('mark_max'))/ge;
 
       if($assoc && $noms) {
 	my $i=$assoc->get_real(@spc[0,2]);
