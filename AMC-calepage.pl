@@ -536,9 +536,9 @@ if(! $layout->exists(@epc)) {
 
   # Page ID has not been found: report it in the database.
   my $capture=AMC::Data->new($data_dir)->module('capture');
-  $capture->begin_transaction;
+  $capture->begin_transaction('CFLD');
   $capture->failed($sf);
-  $capture->end_transaction;
+  $capture->end_transaction('CFLD');
 
   erreur("No layout for ID $id_page") ;
 }
@@ -591,14 +591,14 @@ erreur("End of diagnostic",1) if($debug_image);
 
 my $capture=AMC::Data->new($data_dir)->module('capture');
 
-$capture->begin_transaction;
-
+$capture->begin_transaction('CPAG');
 @stid=@epc[0,1];
 if($multiple) {
   push @stid,$capture->new_page_copy(@epc[0,1]);
 } else {
   push @stid,0;
 }
+$capture->end_transaction('CPAG');
 
 $layout_file="page-".pageids_string(@stid,'path'=>1).".jpg";
 $out_cadre="$repertoire_cr/$layout_file"
@@ -613,6 +613,8 @@ $traitement->ferme_commande();
 $nom_file="name-".studentids_string(@stid[0,2]).".jpg";
 
 clear_old('name image file',"$repertoire_cr/$nom_file");
+
+$capture->begin_transaction('CRSL');
 
 $capture->set_page_auto($sf,@stid,time(),
 			$cale->params);
@@ -651,7 +653,7 @@ for my $k (keys %case) {
   }
 }
 
-$capture->end_transaction;
+$capture->end_transaction('CRSL');
 
 # traces sur le scan pour localiser les cases et le cadre
 
