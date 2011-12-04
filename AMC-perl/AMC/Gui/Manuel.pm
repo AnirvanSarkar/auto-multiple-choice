@@ -40,6 +40,9 @@ use constant {
     MDIAG_EQM_BACK => 4,
     MDIAG_DELTA_BACK => 5,
     MDIAG_I => 6,
+    MDIAG_STUDENT => 7,
+    MDIAG_PAGE => 8,
+    MDIAG_COPY => 9,
 };
 
 use_gettext;
@@ -128,6 +131,9 @@ sub new {
 					    'Glib::String',
 					    'Glib::String',
 					    'Glib::String',
+					    'Glib::String',
+					    'Glib::String',
+					    'Glib::String',
 					    );
 
 	$self->{'diag_tree'}->set_model($diag_store);
@@ -158,7 +164,11 @@ sub new {
 
 	$diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
 	$diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
-	$diag_store->set_sort_func(MDIAG_ID,\&sort_id,MDIAG_ID);
+	$diag_store->set_sort_func(MDIAG_ID,\&sort_from_columns,
+				   [{'type'=>'n','col'=>MDIAG_STUDENT},
+				    {'type'=>'n','col'=>MDIAG_COPY},
+				    {'type'=>'n','col'=>MDIAG_PAGE},
+				   ]);
 
 	$self->{'diag_store'}=$diag_store;
 
@@ -218,6 +228,9 @@ sub maj_list {
 
     $self->{'diag_store'}->set($iter,
 			       MDIAG_ID,pageids_string(@$page),
+			       MDIAG_STUDENT,$page->[0],
+			       MDIAG_PAGE,$page->[1],
+			       MDIAG_COPY,$page->[2],
 			       MDIAG_ID_BACK,$ps{'color'},
 			       MDIAG_EQM,$ps{'mse'},
 			       MDIAG_EQM_BACK,$ps{'mse_color'},

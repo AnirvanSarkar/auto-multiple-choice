@@ -1106,7 +1106,11 @@ sub exporte {
 
 ## tri pour IDS
 
-$diag_store->set_sort_func(DIAG_ID,\&sort_id,DIAG_ID);
+$diag_store->set_sort_func(DIAG_ID,\&sort_from_columns,
+			   [{'type'=>'n','col'=>DIAG_ID_STUDENT},
+			    {'type'=>'n','col'=>DIAG_ID_COPY},
+			    {'type'=>'n','col'=>DIAG_ID_PAGE},
+			   ]);
 
 ## menu contextuel sur liste diagnostique -> visualisation zoom/page
 
