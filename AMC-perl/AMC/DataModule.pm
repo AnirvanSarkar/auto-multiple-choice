@@ -238,7 +238,7 @@ sub begin_read_transaction {
 sub end_transaction {
     my ($self,$key)=@_;
     $key='----' if(!defined($key));
-    debug "Closing transaction for $self->{'name'}...";
+    debug "Closing transaction for $self->{'name'} [$key]...";
     $self->{'data'}->end_transaction;
     debug "[$key]  X  $self->{'name'}";
 }
@@ -251,20 +251,14 @@ sub end_transaction {
 sub variable {
     my ($self,$name,$value)=@_;
     my $vt=$self->table("variables");
-    my $x=$self->dbh->selectrow_arrayref("SELECT value FROM $vt WHERE name=".
-					 $self->sql_quote($name));
     if(defined($value)) {
-	if($x) {
-	    $self->sql_do("UPDATE $vt SET value=".
-			  $self->sql_quote($value)." WHERE name=".
-			  $self->sql_quote($name));
-	} else {
-	    $self->sql_do("INSERT INTO $vt (name,value) VALUES (".
-			  $self->sql_quote($name).",".
-			  $self->sql_quote($value).")");
-	}
+      $self->sql_do("INSERT OR REPLACE INTO $vt (name,value) VALUES (".
+		    $self->sql_quote($name).",".
+		    $self->sql_quote($value).")");
     } else {
-	return($x->[0]);
+      my $x=$self->dbh->selectrow_arrayref("SELECT value FROM $vt WHERE name=".
+					   $self->sql_quote($name));
+      return($x->[0]);
     }
 }
 
@@ -277,18 +271,14 @@ sub variable_transaction {
     my $x=$self->dbh->selectrow_arrayref("SELECT value FROM $vt WHERE name=".
 					 $self->sql_quote($name));
     $self->end_transaction('vTRS');
-    if(defined($value) && $value ne $x->[0]) {
-      $self->begin_transaction('sTRS');
-      if($x) {
-	$self->sql_do("UPDATE $vt SET value=".
-		      $self->sql_quote($value)." WHERE name=".
-		      $self->sql_quote($name));
-      } else {
-	$self->sql_do("INSERT INTO $vt (name,value) VALUES (".
+    if(defined($value)) {
+      if($value ne $x->[0]) {
+	$self->begin_transaction('sTRS');
+	$self->sql_do("INSERT OR REPLACE INTO $vt (name,value) VALUES (".
 		      $self->sql_quote($name).",".
 		      $self->sql_quote($value).")");
+	$self->end_transaction('sTRS');
       }
-      $self->end_transaction('sTRS');
     } else {
 	return($x->[0]);
     }
@@ -319,7 +309,7 @@ sub version_check {
       $self->begin_transaction('tVAR');
       my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
       debug "Empty database: creating variables table";
-      $self->sql_do("CREATE TABLE $vt (name TEXT, value TEXT)");
+      $self->sql_do("CREATE TABLE $vt (name TEXT UNIQUE, value TEXT)");
       $self->variable('version','0');
       $self->end_transaction('tVAR');
     } else {
