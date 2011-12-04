@@ -170,7 +170,7 @@ sub version_upgrade {
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("zone")
 		      ." (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("position")
-		      ." (zoneid INTEGER, corner INTEGER, x REAL, y REAL, type INTEGER)");
+		      ." (zoneid INTEGER, corner INTEGER, x REAL, y REAL, type INTEGER, PRIMARY KEY (zoneid,corner,type))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("failed")
 		      ." (filename TEXT UNIQUE, timestamp INTEGER)");
 	$self->populate_from_xml;
@@ -332,7 +332,7 @@ sub define_statements {
      'zone'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("zone")
 	      ." WHERE student=? AND page=? AND copy=? AND type=?"
 	      ." AND id_a=? AND id_b=?"},
-     'NEWPosition'=>{'sql'=>"INSERT INTO ".$self->table("position")
+     'NEWPosition'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("position")
 		     ." (zoneid,corner,x,y,type)"
 		     ." VALUES (?,?,?,?,?)"},
      'setPosition'=>{'sql'=>"UPDATE ".$self->table("position")
@@ -726,13 +726,8 @@ sub zone_corner {
 
 sub set_corner {
   my ($self,$zoneid,$corner,$type,$x,$y)=@_;
-  if($self->zone_corner($zoneid,$corner,$type)) {
-    $self->statement('setPosition')
-      ->execute($x,$y,$zoneid,$corner,$type);
-  } else {
-    $self->statement('NEWPosition')
-      ->execute($zoneid,$corner,$x,$y,$type);
-  }
+  $self->statement('NEWPosition')
+    ->execute($zoneid,$corner,$x,$y,$type);
 }
 
 # zone_images($student,$copy,$type) returns a list of the image values
