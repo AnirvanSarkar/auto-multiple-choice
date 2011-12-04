@@ -205,20 +205,32 @@ sub query_list {
 
 sub begin_transaction {
     my ($self,$key)=@_;
+    my $time;
     $key='----' if(!defined($key));
     debug "Opening RW transaction for $self->{'name'} [$key]...";
+    $time=time;
     $self->{'data'}->begin_transaction;
+    $time=time-$time;
     debug "[$key] <-> $self->{'name'}";
+    if($time>1) {
+      debug_and_stderr "[$key] Waited for database RW lock $time seconds";
+    }
 }
 
 # begin_read_transaction begins a transaction for reading data.
 
 sub begin_read_transaction {
     my ($self,$key)=@_;
+    my $time;
     $key='----' if(!defined($key));
     debug "Opening RO transaction for $self->{'name'} [$key]...";
+    $time=time;
     $self->{'data'}->begin_read_transaction;
+    $time=time-$time;
     debug "[$key] <-  $self->{'name'}";
+    if($time>1) {
+      debug_and_stderr "[$key] Waited for database R lock $time seconds";
+    }
 }
 
 # end_transaction end the transaction.
@@ -259,11 +271,27 @@ sub variable {
 # The same, but embedded in a SQL transaction
 
 sub variable_transaction {
-  my ($self,$name,$value)=@_;
-  $self->begin_transaction('iVAR');
-  my $r=$self->variable($name,$value);
-  $self->end_transaction('iVAR');
-  return($r);
+    my ($self,$name,$value)=@_;
+    my $vt=$self->table("variables");
+    $self->begin_read_transaction('vTRS');
+    my $x=$self->dbh->selectrow_arrayref("SELECT value FROM $vt WHERE name=".
+					 $self->sql_quote($name));
+    $self->end_transaction('vTRS');
+    if(defined($value) && $value ne $x->[0]) {
+      $self->begin_transaction('sTRS');
+      if($x) {
+	$self->sql_do("UPDATE $vt SET value=".
+		      $self->sql_quote($value)." WHERE name=".
+		      $self->sql_quote($name));
+      } else {
+	$self->sql_do("INSERT INTO $vt (name,value) VALUES (".
+		      $self->sql_quote($name).",".
+		      $self->sql_quote($value).")");
+      }
+      $self->end_transaction('sTRS');
+    } else {
+	return($x->[0]);
+    }
 }
 
 # clear_variables clear all variables values that are not used
@@ -281,19 +309,25 @@ sub version_check {
     my ($self)=@_;
     my $vt=$self->table("variables");
 
-    $self->begin_transaction('tVAR');
+    # First try with only a read transaction, so that the process is
+    # not blocked if someone else is using the database.
+    $self->begin_read_transaction('rVAR');
     my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
+    $self->end_transaction('rVAR');
     if(!@vt) {
+      # opens a RW transaction only if necessary
+      $self->begin_transaction('tVAR');
+      my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
       debug "Empty database: creating variables table";
       $self->sql_do("CREATE TABLE $vt (name TEXT, value TEXT)");
       $self->variable('version','0');
+      $self->end_transaction('tVAR');
     } else {
       debug "variables table present.";
     }
-    $self->end_transaction('tVAR');
 
-    $self->begin_transaction('VERS');
-    my $vu=$self->variable('version');
+    my $vu=$self->variable_transaction('version');
+    my $v_before=$vu;
     my $v;
     debug "Database version: $vu";
     do {
@@ -302,8 +336,7 @@ sub version_check {
 	debug("Updated data module ".$self->{'name'}." from version $v to $vu")
 	  if($vu);
     } while($vu);
-    $self->variable('version',$v);
-    $self->end_transaction('VERS');
+    $self->variable_transaction('version',$v) if($v != $v_before);
 }
 
 # version_upgrade($v) is to be overloaded by AMC::DataModule::XXX

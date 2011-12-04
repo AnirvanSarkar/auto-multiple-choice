@@ -207,6 +207,7 @@ sub version_upgrade {
 	# creates all the tables.
 
 	debug "Creating scoring tables...";
+	$self->begin_transaction('SvUP');
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("title")
 		      ." (question INTEGER, title TEXT)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("default")
@@ -232,6 +233,7 @@ sub version_upgrade {
 
 	$self->populate_from_xml;
 
+	$self->end_transaction('SvUP');
 	return(1);
     }
     return('');

@@ -164,6 +164,7 @@ sub version_upgrade {
 	# creates all the tables.
 
 	debug "Creating capture tables...";
+	$self->begin_transaction('CvUP');
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("page")
 		      ." (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, PRIMARY KEY (student,page,copy))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("zone")
@@ -174,6 +175,7 @@ sub version_upgrade {
 		      ." (filename TEXT UNIQUE, timestamp INTEGER)");
 	$self->populate_from_xml;
 
+	$self->end_transaction('CvUP');
 	return(1);
     }
     return('');

@@ -124,6 +124,7 @@ sub version_upgrade {
 	# creates all the tables.
 
 	debug "Creating layout tables...";
+	$self->begin_transaction('LvUP');
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("page")
 		      ." (student INTEGER, page INTEGER, checksum INTEGER, sourceid INTEGER, subjectpage INTEGER, dpi REAL, width REAL, height REAL, markdiameter REAL, PRIMARY KEY (student,page))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("mark")
@@ -140,6 +141,7 @@ sub version_upgrade {
 		      ." (question INTEGER PRIMARY KEY, name TEXT)");
 	$self->populate_from_xml;
 
+	$self->end_transaction('LvUP');
 	return(1);
     }
     return('');
