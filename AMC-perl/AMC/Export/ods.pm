@@ -640,13 +640,13 @@ sub export {
 	    if($self->{'_scoring'}->indicative($m->{'student'},$q->{'question'})) {
 	      $doc->cellStyle($feuille,$jj,$ii,'CodeV');
 	    } else {
-	      if($r->{'score'}) {
+	      if(defined($r->{'score'})) {
 		if(!$scores{$q->{'question'}}) {
 		  $scores{$q->{'question'}}=1;
 		  push @scores_columns,$ii;
 		  push @{$col_cells{$ii}},$jj;
 		  if($r->{'why'} =~ /v/i) {
-		    $doc->cellStyle($feuille,$jj,$ii,'CodeV');
+		    $doc->cellStyle($feuille,$jj,$ii,'NoteV');
 		  } elsif($r->{'why'} =~ /e/i) {
 		    $doc->cellStyle($feuille,$jj,$ii,'NoteE');
 		  } else {
