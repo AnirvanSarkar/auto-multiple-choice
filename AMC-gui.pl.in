@@ -2767,6 +2767,7 @@ sub change_liste_key {
 
       $projet{'_association'}->begin_read_transaction;
       my $assoc_liste_key=$projet{'_association'}->variable('key_in_list');
+      $assoc_liste_key='' if(!$assoc_liste_key);
       my ($auto,$man,$both)=$projet{'_association'}->counts();
       $projet{'_association'}->end_transaction;
 
