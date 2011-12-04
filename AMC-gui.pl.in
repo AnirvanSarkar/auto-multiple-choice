@@ -3800,6 +3800,14 @@ $w{'inconnu_tree'}->signal_connect('button_press_event' =>
 				   }
     );
 
+sub analyse_view_scan {
+    my $iter=$w{'inconnu_tree'}->get_selection->get_selected;
+    if($iter) {
+	my $scan=absolu($inconnu_store->get($iter,INCONNU_FILE));
+	commande_parallele($o{'img_viewer'},$scan);
+   }
+}
+
 sub analyse_diagnostic {
     my $iter=$w{'inconnu_tree'}->get_selection->get_selected;
     if($iter) {
