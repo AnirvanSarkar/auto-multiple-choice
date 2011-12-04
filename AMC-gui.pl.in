@@ -222,7 +222,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'symbole_1_0_color'=>hex_color('red'),
 	      'symbole_1_1_type'=>'mark',
 	      'symbole_1_1_color'=>hex_color('blue'),
-	      
+
 	      'annote_ps_nl'=>60,
 	      'annote_ecart'=>5.5,
 	      'annote_chsign'=>4,
@@ -255,7 +255,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'encodage_liste'=>'',
 		   'maj_bareme'=>1,
 		   'docs'=>['DOC-sujet.pdf','DOC-corrige.pdf','DOC-calage.xy'],
-		   
+
 		   'modele_regroupement'=>'',
 		   'regroupement_compose'=>'',
 		   'regroupement_type'=>'STUDENTS',
@@ -278,10 +278,10 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'postcorrect_student'=>0,
 		   'postcorrect_copy'=>0,
-	    
+
 		   '_modifie'=>1,
 		   '_modifie_ok'=>0,
-		   
+
 		   'format_export'=>'CSV',
 		   'export_csv_separateur'=>",",
 		   'export_csv_cochees'=>'',
@@ -384,7 +384,7 @@ sub pref_xx_ecrit {
 sub sauve_state {
     if($state{'_modifie'} || $state{'_modifie_ok'}) {
 	debug "Saving state...";
-	
+
 	if(pref_xx_ecrit(\%state,'AMCState',$state_file)) {
 	    my $dialog = Gtk2::MessageDialog
 		->new($w{'main_window'},
@@ -393,7 +393,7 @@ sub sauve_state {
 		      __"Error writing state file %s : %s",
 		      $state_file,$!);
 	    $dialog->run;
-	    $dialog->destroy;      
+	    $dialog->destroy;
 	} else {
 	    $state{'_modifie'}=0;
 	    $state{'_modifie_ok'}=0;
@@ -413,7 +413,7 @@ sub annule_apprentissage {
 			  __"Do you want to forgot which dialogs you have already seen and ask to show all of them next time they should appear ?"
 			  );
     my $reponse=$dialog->run;
-    $dialog->destroy;      
+    $dialog->destroy;
     if($reponse eq 'yes') {
 	debug "Clearing learning states...";
 	$state{'apprentissage'}={};
@@ -548,7 +548,7 @@ if($o{'encodage_interne'} ne 'UTF-8') {
 
 mkdir($o{'rep_projets'}) if(! -d $o{'rep_projets'});
 mkdir($o{'rep_modeles'}) if(! -d $o{'rep_modeles'});
-    
+
 #############################################################################
 
 my %projet=();
@@ -601,7 +601,7 @@ sub is_local {
     my $prefix=$o{'rep_projets'}."/";
     $prefix .= $projet{'nom'}."/" if($proj);
     if(defined($f)) {
-	return($f !~ /^[\/%]/ 
+	return($f !~ /^[\/%]/
 	       || $f =~ /^$prefix/
 	       || $f =~ /[\%]PROJET\//);
     } else {
@@ -760,7 +760,7 @@ sub dialogue_apprentissage {
 
 	$dialog->get_content_area()->add($garde);
 	$dialog->show_all();
-	
+
 	$resp=$dialog->run;
 
 	if(!$garde->get_active()) {
@@ -787,8 +787,8 @@ my $template_files_store = Gtk2::TreeStore->new ('Glib::String',
 ### modele CORREC
 
 my $correc_store = Gtk2::ListStore->new ('Glib::String',
-					 'Glib::String', 
-					 'Glib::String', 
+					 'Glib::String',
+					 'Glib::String',
 					 );
 
 $w{'correc_tree'}->set_model($correc_store);
@@ -1049,7 +1049,7 @@ sub exporte {
 		push @manque,$m;
 	    }
 	}
-	
+
 	if(@manque) {
 	    debug 'Exporting to '.$format.': Needs perl modules '.join(', ',@manque);
 
@@ -1061,12 +1061,12 @@ sub exporte {
 		      $formats_noms{$format},join(', ',@manque)
 		      );
 	    $dialog->run;
-	    $dialog->destroy;      
-	    
+	    $dialog->destroy;
+
 	    return();
 	}
     }
-    
+
     commande('commande'=>["auto-multiple-choice","export",
 			  pack_args(
 				    "--debug",debug_file(),
@@ -1150,7 +1150,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
     sub {
 	my ($self, $event) = @_;
 	return 0 unless $event->button == 3;
-	my ($path, $column, $cell_x, $cell_y) = 
+	my ($path, $column, $cell_x, $cell_y) =
 	    $w{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
 	if ($path) {
 	    my $iter=$diag_store->get_iter($path);
@@ -1211,7 +1211,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	    $menu->popup (undef, undef, undef, undef,
 			  $event->button, $event->time) if($c>0);
 	    return 1; # stop propagation!
-	    
+
 	}
     });
 
@@ -1261,7 +1261,7 @@ sub commande {
 
     $c->open();
 }
-    
+
 sub commande_annule {
     for (keys %les_commandes) { $les_commandes{$_}->quitte(); }
 }
@@ -1284,7 +1284,7 @@ sub commande_parallele {
 			      sprintf(__"Following command could not be run: <b>%s</b>, perhaps due to a poor configuration?",$c[0]));
 	$dialog->run;
 	$dialog->destroy;
-	
+
     }
 }
 
@@ -1307,13 +1307,13 @@ sub projet_gestion {
 sub liste_des_projets {
     my %oo=(@_);
     my @projs;
-    
+
     mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
-    
+
     # construit la liste des projets existants
 
     if(-d $o{'rep_projets'}) {
-	opendir(DIR, $o{'rep_projets'}) 
+	opendir(DIR, $o{'rep_projets'})
 	    || die "Error opening directory ".$o{'rep_projets'}." : $!";
 	my @f=map { decode("utf-8",$_); } readdir(DIR);
 	debug "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f);
@@ -1326,12 +1326,12 @@ sub liste_des_projets {
     if($#projs>=0 || $oo{'cree'}) {
 
 	# fenetre pour demander le nom du projet
-	
+
 	my $gp=read_glade('choix_projet',
 			  qw/label_etat label_action
             choix_projets_liste
 	    projet_bouton_ouverture projet_bouton_creation
-	    projet_bouton_supprime projet_bouton_annule 
+	    projet_bouton_supprime projet_bouton_annule
 	    projet_bouton_annule_label projet_bouton_renomme
 	    projet_bouton_mv_yes projet_bouton_mv_no
 	    projet_nom projet_nouveau_syntaxe projet_nouveau/);
@@ -1349,7 +1349,7 @@ sub liste_des_projets {
 	    $w{'choix_projet'}->set_title(__"New AMC project");
 	}
 
-	
+
 	if($oo{'gestion'}) {
 	    $w{'label_etat'}->set_text(__"Projects management:");
 	    $w{'label_action'}->set_markup(__"Change project name:");
@@ -1363,15 +1363,15 @@ sub liste_des_projets {
 	}
 
 	# mise a jour liste des projets dans la fenetre
-	
+
 	$proj_store = Gtk2::ListStore->new ('Glib::String',
 					    'Gtk2::Gdk::Pixbuf');
-	
+
 	$w{'choix_projets_liste'}->set_model($proj_store);
-	
+
 	$w{'choix_projets_liste'}->set_text_column(PROJ_NOM);
 	$w{'choix_projets_liste'}->set_pixbuf_column(PROJ_ICO);
-	
+
 	my ($taille,undef)=Gtk2::IconSize->lookup('menu');
         my $pb = Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$taille ,"force-svg");
 	my $pb_rep = Gtk2::IconTheme->get_default->load_icon("gtk-no",$taille ,"force-svg");
@@ -1382,7 +1382,7 @@ sub liste_des_projets {
 			     PROJ_NOM,$_,
 			     PROJ_ICO,
 			     (-f fich_options($_) ?
-			       $pb : $pb_rep )); 
+			       $pb : $pb_rep ));
 	}
 
 	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
@@ -1397,13 +1397,13 @@ sub liste_des_projets {
 		  __"You don't have any MC project in directory %s!",$o{'rep_projets'});
 	$dialog->run;
 	$dialog->destroy;
-	
+
     }
 }
 
 sub projet_gestion_check {
     # lequel ?
-    
+
     my $sel=$w{'choix_projets_liste'}->get_selected_items();
     my $iter;
     my $proj;
@@ -1471,7 +1471,7 @@ sub projet_renomme_fin {
 
 sub projet_mv_yes {
     projet_renomme_fin();
-    
+
     my $nom_nouveau=$w{'projet_nom'}->get_text();
 
     return if($nom_nouveau eq $nom_original || !$nom_nouveau);
@@ -1488,7 +1488,7 @@ sub projet_mv_yes {
 				      'error','ok',
 				      sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),$dir_nouveau));
 		$dialog->run;
-		$dialog->destroy;      
+		$dialog->destroy;
 		$w{'choix_projet'}->set_keep_above(1);
 
 		return;
@@ -1527,19 +1527,19 @@ sub projet_liste_supprime {
 				  .__("This will permanently erase all the files of this project, including the LaTeX source as well as all the files you put in the directory of this project, as the scans for example.")." "
 				  .__("Is this really what you want?"),$proj));
     my $reponse=$dialog->run;
-    $dialog->destroy;      
+    $dialog->destroy;
     $w{'choix_projet'}->set_keep_above(1);
-    
+
     if($reponse ne 'ok') {
 	return;
-    } 
-    
+    }
+
     debug "Removing project $proj !";
-    
+
     $proj_store->remove($iter);
-    
+
     # suppression effective des fichiers...
-    
+
     if($o{'rep_projets'}) {
 	my $dir=$o{'rep_projets'}."/".$proj;
 	if(-d $dir) {
@@ -1575,7 +1575,7 @@ sub projet_charge_ok {
 				  sprintf(__("You selected directory <b>%s</b> as a project to open.")." "
 					  .__("However, this directory does not seem to contain a project. Dou you still want to try?"),$proj));
 	    $reponse=$dialog->run;
-	    $dialog->destroy;      
+	    $dialog->destroy;
 	}
 	projet_ouvre($proj) if($reponse eq 'yes');
     }
@@ -1620,8 +1620,8 @@ sub projet_charge_nouveau {
 			      sprintf(__("The name <b>%s</b> is already used in the projects directory.")." "
 				      .__"You must choose another name to create a project.",$proj));
 	$dialog->run;
-	$dialog->destroy;      
-	
+	$dialog->destroy;
+
 
     } else {
 
@@ -1644,7 +1644,7 @@ sub projet_sauve {
     for(qw/listeetudiants/) {
 	$po->{$_}=relatif($po->{$_});
     }
-    
+
     if(pref_xx_ecrit($po,'projetAMC',$of)) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
@@ -1652,7 +1652,7 @@ sub projet_sauve {
 		  'error','ok',
 		  __"Error writing to options file %s : %s",$of,$!);
 	$dialog->run;
-	$dialog->destroy;      
+	$dialog->destroy;
     } else {
 	$projet{'options'}->{'_modifie'}=0;
 	$projet{'options'}->{'_modifie_ok'}=0;
@@ -1662,7 +1662,7 @@ sub projet_sauve {
 sub projet_check_and_save {
     if($projet{'nom'}) {
 	valide_options_notation();
-	if($projet{'options'}->{'_modifie_ok'} 
+	if($projet{'options'}->{'_modifie_ok'}
 	   || $projet{'options'}->{'_modifie'}) {
 	    projet_sauve();
 	}
@@ -1687,15 +1687,15 @@ sub doc_maj {
 			      .__("Click on Validate to erase the former layouts and update working documents, or on Cancel to cancel this operation.")." "
 			      ."<b>".__("To allow the use of an already printed question, cancel!")."</b>");
 	my $reponse=$dialog->run;
-	$dialog->destroy;      
-	
+	$dialog->destroy;
+
 	if($reponse eq 'cancel') {
 	    return(0);
-	} 
+	}
 
 	$sur=1;
     }
-	
+
     # deja des MEP fabriquees ?
     $projet{_layout}->begin_transaction('DMAJ');
     if($projet{_layout}->pages_count > 0) {
@@ -1710,13 +1710,13 @@ sub doc_maj {
 				  .__("Click on Validate to erase the former layouts and update working documents, or on Cancel to cancel this operation.")
 				  ." <b>".__("To allow the use of an already printed question, cancel!")."</b>");
 	    my $reponse=$dialog->run;
-	    $dialog->destroy;      
-	    
+	    $dialog->destroy;
+
 	    if($reponse eq 'cancel') {
 		return(0);
-	    } 
+	    }
 	}
-	
+
 	$projet{_layout}->clear_all;
 	$projet{_layout}->end_transaction('DMAJ');
 	detecte_mep();
@@ -1725,7 +1725,7 @@ sub doc_maj {
     }
 
     # new layout document : XY (from LaTeX)
-    
+
     if($projet{'options'}->{'docs'}->[2] =~ /\.pdf$/) {
 	$projet{'options'}->{'docs'}->[2]=$projet_defaut{'docs'}->[2];
 	$projet{'options'}->{'_modifie'}=1;
@@ -1747,7 +1747,7 @@ sub doc_maj {
 	     'texte'=>__"Documents update...",
 	     'progres.id'=>'MAJ',
 	     'progres.pulse'=>0.01,
-	     'fin'=>sub { 
+	     'fin'=>sub {
 		 my $c=shift;
 		 my @err=$c->erreurs();
 		 if(@err) {
@@ -1775,7 +1775,7 @@ sub doc_maj {
 		 }
 
 		 my $ap=($c->variable('ensemble') ? 'case' : 'marge');
-		 $projet{'options'}->{'_modifie'}=1 
+		 $projet{'options'}->{'_modifie'}=1
 		     if($projet{'options'}->{'annote_position'} ne $ap);
 		 $projet{'options'}->{'annote_position'}=$ap;
 
@@ -1802,9 +1802,9 @@ sub doc_maj {
 			 $projet{'options'}->{'_modifie'}=1;
 		     }
 		 }
-		 detecte_documents(); 
+		 detecte_documents();
 	     });
-    
+
 }
 
 my $cups;
@@ -1828,9 +1828,9 @@ sub autre_imprimante {
 
   CHOIX: for my $i (qw/StapleLocation/) {
       my $oi=$ppd->getOption($i);
-      
+
       $alias{$i}='agrafe';
-      
+
       if(%$oi) {
 	  my $k=nonnul($oi->{'keyword'});
 	  debug "$i -> KEYWORD $k";
@@ -1870,7 +1870,7 @@ sub sujet_impressions {
 			      __"You don't have any question to print: please check your LaTeX source and update working documents first.");
 	$dialog->run;
 	$dialog->destroy;
-	
+
 	return();
     }
 
@@ -1886,7 +1886,7 @@ sub sujet_impressions {
 			      .__"Perhaps you forgot to compute layouts?");
 	$dialog->run;
 	$dialog->destroy;
-	
+
 	return();
     }
 
@@ -1904,7 +1904,7 @@ sub sujet_impressions {
 		push @manque,$m;
 	    }
 	}
-	
+
 	if(@manque) {
 	    debug 'Printing with CUPS: Needs perl modules '.join(', ',@manque);
 
@@ -1916,8 +1916,8 @@ sub sujet_impressions {
 		      __"CUPS",join(', ',@manque)
 		      );
 	    $dialog->run;
-	    $dialog->destroy;      
-	    
+	    $dialog->destroy;
+
 	    return();
 	}
 
@@ -1935,8 +1935,8 @@ sub sujet_impressions {
 		      __"CUPS"
 		      );
 	    $dialog->run;
-	    $dialog->destroy;      
-	    
+	    $dialog->destroy;
+
 	    return();
 	}
     }
@@ -2000,7 +2000,7 @@ sub sujet_impressions {
 }
 
 sub sujet_impressions_cancel {
-    
+
     if(get_debug()) {
 	reprend_pref('imp',$o{'options_impression'});
 	debug(Dumper($o{'options_impression'}));
@@ -2031,7 +2031,7 @@ sub sujet_impressions_ok {
 	    delete $o{'options_impression'}->{'_modifie'};
 	}
 
-	$os=join(',',map { $_."=".$o{'options_impression'}->{$_} } 
+	$os=join(',',map { $_."=".$o{'options_impression'}->{$_} }
 		 grep { $o{'options_impression'}->{$_} }
 		 (keys %{$o{'options_impression'}}) );
 
@@ -2040,7 +2040,7 @@ sub sujet_impressions_ok {
 
     if($o{'methode_impression'} eq 'file') {
 	reprend_pref('impf',$o{'options_impression'});
-	
+
 	if($o{'options_impression'}->{'_modifie'}) {
 	    $o{'_modifie'}=1;
 	    delete $o{'options_impression'}->{'_modifie'};
@@ -2056,11 +2056,11 @@ sub sujet_impressions_ok {
     }
 
     $w{'choix_pages_impression'}->destroy;
-    
+
     debug "Printing: ".join(",",@e);
 
     if(!@e) {
-	# No page selected: 
+	# No page selected:
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
@@ -2124,17 +2124,17 @@ sub save_state_after_printing {
 
     my @files=(@{$projet{'options'}->{'docs'}},
 	       absolu($projet{'options'}->{'texsrc'}));
-    
+
     if(!$st->check_local_md5(@files)) {
 	$st=AMC::State::new('directory'=>absolu('%PROJET/'));
 	$st->add_local_files(@files);
     }
-    
+
     $st->add_print('printer'=>$c->{'printer'},
 		   'method'=>$c->{'method'},
 		   'content'=>join(',',@{$c->{'etu'}}));
     $st->write();
-    
+
 }
 
 sub calcule_mep {
@@ -2162,7 +2162,7 @@ sub calcule_mep {
 			  ],
 	     'texte'=>__"Detecting layouts...",
 	     'progres.id'=>'MEP',
-	     'fin'=>sub { 
+	     'fin'=>sub {
 		 detecte_mep();
 		 $projet{'_layout'}->begin_read_transaction('PGCN');
 		 my $c=$projet{'_layout'}->pages_count();
@@ -2178,7 +2178,7 @@ sub calcule_mep {
 					   .__("<b>Don't go through the examination</b> before fixing this problem, otherwise you won't be able to use AMC for correction."));
 		     $dialog->run;
 		     $dialog->destroy;
-		     
+
 		 } else {
 		     dialogue_apprentissage('MAJ_MEP_OK','','',
 					    __("Layouts are detected.")." "
@@ -2224,7 +2224,7 @@ sub saisie_manuelle {
 			      __("No layout for this project.")." "
 			      .sprintf(__("Please use button <i>%s</i> in <i>%s</i> before manual data capture."),__"Compute layouts",__"Preparation"));
 	$dialog->run;
-	$dialog->destroy;      
+	$dialog->destroy;
     }
 }
 
@@ -2309,18 +2309,18 @@ sub saisie_auto_ok {
 		my $temp_loc=tmpdir();
 		my $temp_dir = tempdir( DIR=>$temp_loc,
 					CLEANUP => (!get_debug()) );
-	    
+
 		debug "PDF split tmp dir: $temp_dir";
-	    
+
 		system("pdftk",$file,"burst","output",
 		       $temp_dir.'/page-%04d.pdf');
 
-		opendir(my $dh, $temp_dir) 
+		opendir(my $dh, $temp_dir)
 		    || debug "can't opendir $temp_dir: $!";
 		push @fs, map { "$temp_dir/$_" }
 		grep { /^page/ } readdir($dh);
 		closedir $dh;
-		
+
 	    } else {
 		push @fs,$file;
 	    }
@@ -2366,21 +2366,21 @@ sub saisie_auto_ok {
 
 	    $w{'commande'}->show();
 	    $w{'avancement'}->set_text(sprintf(
-					   ($vector 
+					   ($vector
 					    ? __("Converting %s to bitmap...")
 					    : __("Splitting multi-page image %s...")),
 					   $fich_n));
 	    $w{'avancement'}->set_fraction(0);
 	    Gtk2->main_iteration while ( Gtk2->events_pending );
-	    
+
 	    my $temp_loc=tmpdir();
 	    my $temp_dir = tempdir( DIR=>$temp_loc,
 				    CLEANUP => (!get_debug()) );
-	    
+
 	    debug "Image split tmp dir: $temp_dir";
-	    
+
 	    my ($fxa,$fxb,$fb) = splitpath($fich);
-	    if(! ($fb =~ s/\.([^.]+)$/_%04d.$1/)) { 
+	    if(! ($fb =~ s/\.([^.]+)$/_%04d.$1/)) {
 		$fb .= '_%04d';
 	    }
 	    $fb.=$suffix_change;
@@ -2389,10 +2389,10 @@ sub saisie_auto_ok {
 	    opendir(my $dh, $temp_dir) || debug "can't opendir $temp_dir: $!";
 	    my @split = grep { -f "$temp_dir/$_" } readdir($dh);
 	    closedir $dh;
-	    
+
 	    # if not to be copied in project dir, put them in the
 	    # same directory as original image
-	    
+
 	    if($copie) {
 		push @fs,map { "$temp_dir/$_" } @split;
 	    } else {
@@ -2439,7 +2439,7 @@ sub saisie_auto_ok {
 		debug "--> $dest";
 	      }
 	      if(copy($fich,$dest)) {
-		push @fl,$dest; 
+		push @fl,$dest;
 		$deplace=1;
 	      } else {
 		debug "$fich --> $dest";
@@ -2468,7 +2468,7 @@ sub saisie_auto_ok {
 		     detecte_analyse('apprend'=>1);
 		 },
 	);
-    
+
 }
 
 sub choisit_liste {
@@ -2490,7 +2490,7 @@ sub choisit_liste {
 
     my $file=$dial->get_filename();
     $dial->destroy();
-    
+
     if($ret eq '1') {
 	# file chosen
 	debug("List: ".$file);
@@ -2591,7 +2591,7 @@ sub valide_liste {
 	debug "primary keys: ".join(",",@keys);
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 	$cb_stores{'liste_key'}=cb_model('',__p("(none) [No primary key found in association list]"),
-					 map { ($_,$_) } 
+					 map { ($_,$_) }
 					 (@keys));
     }
     transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});
@@ -2631,29 +2631,29 @@ sub check_possible_assoc {
     return(0);
 }
 
-# manual association 
+# manual association
 sub associe {
     return() if(!check_possible_assoc(0));
     if(-f absolu($projet{'options'}->{'listeetudiants'})) {
       my $ga=AMC::Gui::Association::new('cr'=>absolu($projet{'options'}->{'cr'}),
 					'data_dir'=>absolu($projet{'options'}->{'data'}),
-					  'liste'=>absolu($projet{'options'}->{'listeetudiants'}),
-					  'liste_key'=>$projet{'options'}->{'liste_key'},
-					  'fichier-liens'=>absolu($projet{'options'}->{'association'}),
-					  'global'=>0,
-					  'assoc-ncols'=>$o{'assoc_ncols'},
-					  'encodage_liste'=>bon_encodage('liste'),
-					  'encodage_interne'=>$o{'encodage_interne'},
-					  );
-	if($ga->{'erreur'}) {
-	    my $dialog = Gtk2::MessageDialog
-		->new($w{'main_window'},
-		      'destroy-with-parent',
-		      'error','ok',
-		      $ga->{'erreur'});
-	    $dialog->run;
-	    $dialog->destroy;
-	}
+					'liste'=>absolu($projet{'options'}->{'listeetudiants'}),
+					'liste_key'=>$projet{'options'}->{'liste_key'},
+					'fichier-liens'=>absolu($projet{'options'}->{'association'}),
+					'global'=>0,
+					'assoc-ncols'=>$o{'assoc_ncols'},
+					'encodage_liste'=>bon_encodage('liste'),
+					'encodage_interne'=>$o{'encodage_interne'},
+				       );
+      if($ga->{'erreur'}) {
+	my $dialog = Gtk2::MessageDialog
+	  ->new($w{'main_window'},
+		'destroy-with-parent',
+		'error','ok',
+		$ga->{'erreur'});
+	$dialog->run;
+	$dialog->destroy;
+      }
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
@@ -2662,7 +2662,7 @@ sub associe {
 		  sprintf(__"Before associating names to papers, you must choose a students list file in paragraph \"%s\".",__"Students identification"));
 	$dialog->run;
 	$dialog->destroy;
-	
+
     }
 }
 
@@ -2731,7 +2731,7 @@ sub valide_options_for_domain {
     if($widget) {
 	my $name=$widget->get_name();
 	debug "<$domain> options validation for widget $name";
-	
+
 	if($name =~ /${domain}_[a-z]+_(.*)/) {
 	    reprend_pref($domain,$projet{'options'},'',{$1=>1});
 	}
@@ -2772,7 +2772,7 @@ sub change_liste_key {
       $projet{'_association'}->end_transaction;
 
       debug "Association [$assoc_liste_key] counts: AUTO=$auto MANUAL=$man BOTH=$both";
-	    
+
 	    if($assoc_liste_key ne $projet{'options'}->{'liste_key'}
 		&& $auto+$man>0) {
 		# liste_key has changed and some association has been
@@ -2780,7 +2780,7 @@ sub change_liste_key {
 
 		if($man>0) {
 		    # manual association work has been made
-		    
+
 		    my $dialog=Gtk2::MessageDialog
 			->new_with_markup($w{'main_window'},
 					  'destroy-with-parent',
@@ -2790,7 +2790,7 @@ sub change_liste_key {
 			    );
 		    my $resp=$dialog->run;
 		    $dialog->destroy;
-		    
+
 		    if($resp eq 'no') {
 			# clears association data
 			association_clear();
@@ -2800,7 +2800,7 @@ sub change_liste_key {
 			}
 		    } else {
 			$projet{'options'}->{'liste_key'}=$assoc_liste_key;
-			transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});			
+			transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});
 		    }
 		} else {
 		    if($projet{'options'}->{'assoc_code'}) {
@@ -2834,7 +2834,7 @@ sub voir_notes {
 		  sprintf(__"Papers are not yet corrected: use button \"%s\".",__"Mark"));
 	$dialog->run;
 	$dialog->destroy;
-	
+
     }
 }
 
@@ -2908,7 +2908,7 @@ sub noter_postcorrect {
 	# ask user for a choice
 
 	$g_pcid=read_glade('choix_postcorrect',
-			   qw/postcorrect_student postcorrect_copy 
+			   qw/postcorrect_student postcorrect_copy
 			      postcorrect_photo postcorrect_apply/);
 
 	AMC::Gui::PageArea::add_feuille($w{'postcorrect_photo'});
@@ -3024,14 +3024,14 @@ sub noter_calcul {
 
     debug "Using sheet $postcorrect to get correct answers"
 	if($postcorrect);
-    
+
     # computes marks.
 
     commande('commande'=>["auto-multiple-choice","note",
 			  "--debug",debug_file(),
 			  "--data",absolu($projet{'options'}->{'data'}),
 			  "--seuil",$projet{'options'}->{'seuil'},
-			  
+
 			  "--grain",$projet{'options'}->{'note_grain'},
 			  "--arrondi",$projet{'options'}->{'note_arrondi'},
 			  "--notemax",$projet{'options'}->{'note_max'},
@@ -3039,7 +3039,7 @@ sub noter_calcul {
 			  "--notemin",$projet{'options'}->{'note_min'},
 			  "--postcorrect-student",$postcorrect_student,
 			  "--postcorrect-copy",$postcorrect_copy,
-			  
+
 			  "--encodage-interne",$o{'encodage_interne'},
 			  "--progression-id",'notation',
 			  "--progression",1,
@@ -3069,7 +3069,7 @@ sub noter_resultat {
   debug "Codes : ".join(',',@codes);
 # TRANSLATORS: you can omit the [...] part, just here to explain context
   $cb_stores{'assoc_code'}=cb_model(''=>__p("(none) [No code found in LaTeX file]"),
-				    map { $_=>decode($o{'encodage_latex'},$_) } 
+				    map { $_=>decode($o{'encodage_latex'},$_) }
 				    (@codes));
   transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'assoc_code'=>1});
 }
@@ -3108,9 +3108,9 @@ sub annote_copies {
 				    "--taille-max",$o{'taille_max_correction'},
 				    "--qualite",$o{'qualite_correction'},
 				    "--line-width",$o{'symboles_trait'},
-				    
+
 				    "--indicatives",$o{'symboles_indicatives'},
-				    "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)), 
+				    "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)),
 			            "--position",$projet{'options'}->{'annote_position'},
 			            "--pointsize-nl",$o{'annote_ps_nl'},
 			            "--ecart",$o{'annote_ecart'},
@@ -3210,7 +3210,7 @@ sub activate_doc {
     my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
     push @c,$url if(!$seq);
     @c=map { encode($encodage_systeme,$_); } @c;
-    
+
     commande_parallele(@c);
 }
 
@@ -3389,7 +3389,7 @@ sub reprend_pref {
 	    $h->{$t}=$n;
 	}
 	}}
-    
+
     debug "Changes : $h->{'_modifie'}";
 }
 
@@ -3482,16 +3482,16 @@ sub accepte_preferences {
 			      sprintf(__("You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"),
 				      $label_general,$label_projet,$projet{'nom'}));
 	  my $reponse=$dialog->run;
-	  $dialog->destroy;  
+	  $dialog->destroy;
 
 	  debug "Reponse: $reponse";
-		    
+
 	  if ($reponse eq 'yes') {
 	    # change also project option value
 	    $projet{'options'}->{$kp}=$o{$k};
 	    $projet{'options'}->{'_modifie'}.=",$kp";
-	  } 
-    
+	  }
+
 	}
       }
     }
@@ -3528,7 +3528,7 @@ sub sauve_pref_generales {
 		  __"Error writing to options file %s: %s"
 		  ,$o_file,$!);
 	$dialog->run;
-	$dialog->destroy;      
+	$dialog->destroy;
     } else {
 	$o{'_modifie'}=0;
     }
@@ -3654,7 +3654,7 @@ sub mep_warnings {
 		if(@e) {
 		    $m.="\n<b>".$defect_text{$k}."</b> ".
 			sprintf(__('(Concerns %1$d sheets, see for exemple sheet %2$d)'),1+$#e,$e[0]);
-		    
+
 		}
 	    }
 	}
@@ -3815,7 +3815,7 @@ sub analyse_diagnostic {
 	my $scan=absolu($inconnu_store->get($iter,INCONNU_FILE));
 	my (undef,undef,$scan_n)=splitpath($scan);
 	my $diagnostic_file=absolu('%PROJET/cr/diagnostic')."/".$scan_n.".png";
-	
+
 	if(-f $diagnostic_file) {
 	    affiche_diagnostic($diagnostic_file);
 	} else {
@@ -3948,7 +3948,7 @@ sub path_from_tree {
     return(undef) if(!$f);
 
     my $d='';
-    
+
     for my $pp (split(m:/:,$f)) {
 	my $ipar=$i;
 	$d.='/' if($d);
@@ -3969,7 +3969,7 @@ sub template_add_file {
     my ($store,$view,$f)=@_;
 
     # removes local part
-    
+
     my $p_dir=absolu('%PROJET/');
     if($f =~ s:^\Q$p_dir\E::) {
 	my $i=path_from_tree($store,$view,$f);
@@ -4010,7 +4010,7 @@ sub make_template {
 		      fich_options($projet{'nom'}));
 
     # Waits for action
-    
+
     $resp=$w{'make_template'}->run();
 
     if($resp eq "1") {
@@ -4081,7 +4081,7 @@ sub make_template_add {
     my $resp=$fs->run();
     if($resp eq 'ok') {
 	for my $f ($fs->get_selections()) {
-	    $err++ 
+	    $err++
 		if(!defined(template_add_file($template_files_store,$w{'template_files_tree'},$f)));
 	}
     }
@@ -4142,31 +4142,31 @@ sub source_latex_choisir {
     if($oo{'type'}) {
 	$bouton{$oo{'type'}}=1;
     } else {
-	
+
 	# fenetre de choix du source latex
-	
+
 	my $gap=read_glade('source_latex_dialog');
-	
+
 	my $dialog=$gap->get_object('source_latex_dialog');
-	
+
 	my $reponse=$dialog->run();
-	
+
 	for(qw/new choix vide zip/) {
 	    $bouton{$_}=$gap->get_object('sl_type_'.$_)->get_active();
 	    debug "Bouton $_" if($bouton{$_});
 	}
-	
+
 	$dialog->destroy();
-	
+
 	debug "RESPONSE=$reponse";
-	
+
 	return(0,'') if($reponse!=10);
     }
 
     # actions apres avoir choisi le type de source latex a utiliser
 
     if($bouton{'new'}) {
-	
+
 	# choix d'un modele
 
 	$gap=read_glade('source_latex_modele',
@@ -4175,7 +4175,7 @@ sub source_latex_choisir {
 	$modeles_store = Gtk2::TreeStore->new('Glib::String',
 					      'Glib::String',
 					      'Glib::String');
-	
+
 	charge_modeles($modeles_store,undef,$o{'rep_modeles'}) if($o{'rep_modeles'});
 
 	charge_modeles($modeles_store,undef,amc_specdir('models'));
@@ -4231,7 +4231,7 @@ sub source_latex_choisir {
         $filtre_latex->add_pattern("*.tex");
         $filtre_latex->add_pattern("*.TEX");
 	$w{'source_latex_choix'}->add_filter($filtre_latex);
-	
+
 	$reponse=$w{'source_latex_choix'}->run();
 
 	my $f=$w{'source_latex_choix'}->get_filename();
@@ -4250,13 +4250,13 @@ sub source_latex_choisir {
 	if($oo{'fich'}) {
 	    $fich=$oo{'fich'};
 	} else {
-	    
+
 	    # choisir un fichier ZIP
-	    
-	    $gap=read_glade('source_latex_choix_zip');	    
+
+	    $gap=read_glade('source_latex_choix_zip');
 
 	    $w{'source_latex_choix_zip'}->set_current_folder($home_dir);
-	    
+
 	    my $filtre_zip=Gtk2::FileFilter->new();
 	    $filtre_zip->set_name(__"Archive (zip, tgz)");
 	    $filtre_zip->add_pattern("*.zip");
@@ -4265,13 +4265,13 @@ sub source_latex_choisir {
 	    $filtre_zip->add_pattern("*.TGZ");
 	    $filtre_zip->add_pattern("*.ZIP");
 	    $w{'source_latex_choix_zip'}->add_filter($filtre_zip);
-	    
+
 	    $reponse=$w{'source_latex_choix_zip'}->run();
-	    
+
 	    $fich=$w{'source_latex_choix_zip'}->get_filename();
-	    
+
 	    $w{'source_latex_choix_zip'}->destroy();
-	    
+
 	    return(0,'') if($reponse!=10);
 	}
 
@@ -4327,7 +4327,7 @@ sub source_latex_choisir {
 	    mkdir($hd) if(! -e $hd);
 
 	    my @archive_files;
-	    
+
 	    if(opendir(MVR,$temp_dir)) {
 		@archive_files=grep { ! /^\./ } readdir(MVR);
 		closedir(MVR);
@@ -4364,7 +4364,7 @@ sub source_latex_choisir {
     } elsif($bouton{'vide'}) {
 
 	my $hd=$o{'rep_projets'}."/".$oo{'nom'};
-	
+
 	mkdir($hd) if(! -e $hd);
 
 	$texsrc='source.tex';
@@ -4383,7 +4383,7 @@ sub source_latex_choisir {
     }
 
     return(1,$texsrc);
-    
+
 }
 
 sub source_latex_mmaj {
@@ -4444,11 +4444,11 @@ sub importe_source {
 		  __("File %s already exists in project directory: do you wnant to replace it?")." "
 		  .__("Click yes to replace it and loose pre-existing contents, or No to cancel source file import."),$fb);
 	my $reponse=$dialog->run;
-	$dialog->destroy;      
+	$dialog->destroy;
 
 	if($reponse eq 'no') {
 	    return(0);
-	} 
+	}
     }
 
     if(copy_latex(absolu($projet{'options'}->{'texsrc'}),$dest)) {
@@ -4460,7 +4460,7 @@ sub importe_source {
 		  'info','ok',
 		  __("LaTeX file has been copied to project directory.")." ".sprintf(__"You can now edit it with button \"%s\" or with any editor.",__"Edit LaTeX file"));
 	$dialog->run;
-	$dialog->destroy;   
+	$dialog->destroy;
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
@@ -4468,7 +4468,7 @@ sub importe_source {
 		  'error','ok',
 		  __"Error copying source file: %s",$!);
 	$dialog->run;
-	$dialog->destroy;      
+	$dialog->destroy;
     }
 }
 
@@ -4511,12 +4511,12 @@ sub projet_ouvre {
     my ($proj,$deja)=(@_);
 
     my $new_source=0;
-    
+
     # ouverture du projet $proj. Si $deja==1, alors il faut le creer
 
     if($proj) {
 	my ($ok,$texsrc);
-	
+
 	# choix fichier latex si nouveau projet...
 	if($deja) {
 	    ($ok,$texsrc)=source_latex_choisir('nom'=>$proj);
@@ -4538,12 +4538,12 @@ sub projet_ouvre {
 
 	    if(-f fich_options($proj)) {
 		debug "Reading options for project $proj...";
-		
+
 		$projet{'options'}={pref_xx_lit(fich_options($proj))};
-		
+
 		# pour effacer des trucs en trop venant d'un bug anterieur...
 		for(keys %{$projet{'options'}}) {
-		    delete($projet{'options'}->{$_}) 
+		    delete($projet{'options'}->{$_})
 			if($_ !~ /^ext_/ && !exists($projet_defaut{$_}));
 		}
 		debug "Read options:",
@@ -4552,7 +4552,7 @@ sub projet_ouvre {
 		debug "No options file...";
 	    }
 	}
-	
+
 	$projet{'nom'}=$proj;
 
 	# creation du repertoire et des sous-repertoires de projet
@@ -4566,7 +4566,7 @@ sub projet_ouvre {
 	}
 
 	# recuperation des options par defaut si elles ne sont pas encore definies dans la conf du projet
-    
+
 	for my $k (keys %projet_defaut) {
 	    if(! exists($projet{'options'}->{$k})) {
 		if($o{'defaut_'.$k}) {
@@ -4595,9 +4595,9 @@ sub projet_ouvre {
 
 sub quitte_projet {
     if($projet{'nom'}) {
-	
+
 	valide_options_notation();
-	
+
 	if($projet{'options'}->{'_modifie'}
 	   || $projet{'options'}->{'_modifie_ok'}) {
 	    my $save=1;
@@ -4608,11 +4608,11 @@ sub quitte_projet {
 				      'question','yes-no',
 				      sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
 		my $reponse=$dialog->run;
-		$dialog->destroy;      
-		
+		$dialog->destroy;
+
 		if($reponse ne 'yes') {
 		    $save='';
-		} 
+		}
 	    }
 	    projet_sauve() if($save);
 	}
@@ -4644,16 +4644,16 @@ sub quitter {
 				  'question','yes-no',
 				  __"You did not save main options, which have been modified: do you want to save them before leaving?");
 	    $reponse=$dialog->run;
-	    $dialog->destroy;      
+	    $dialog->destroy;
 	}
-	
+
 	if($reponse eq 'yes' || !$o{'_modifie'}) {
 	    sauve_pref_generales();
-	} 
+	}
     }
 
     Gtk2->main_quit;
-    
+
 }
 
 sub bug_report {
