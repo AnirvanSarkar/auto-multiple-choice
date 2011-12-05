@@ -237,7 +237,7 @@ sub maj_list {
 			       MDIAG_PAGE,$page->[1],
 			       MDIAG_COPY,$page->[2],
 			       MDIAG_ID_BACK,$ps{'color'},
-			       MDIAG_EQM,$ps{'mse'},
+			       MDIAG_EQM,$ps{'mse_string'},
 			       MDIAG_EQM_BACK,$ps{'mse_color'},
 			       MDIAG_DELTA,$ps{'sensitivity'},
 			       MDIAG_DELTA_BACK,$ps{'sensitivity_color'},

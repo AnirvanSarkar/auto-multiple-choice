@@ -356,6 +356,14 @@ sub define_statements {
 		      ." WHERE student=? AND page=?"},
      'pagesChanged'=>{'sql'=>"SELECT student,page,copy FROM ".$self->table("page")
 		      ." WHERE timestamp_auto>? OR timestamp_manual>?"},
+     'pagesSummary'=>{'sql'=>"SELECT student,page,copy,mse,timestamp_auto,timestamp_manual"
+		      .",CASE WHEN timestamp_auto>0 AND mse>? THEN ? ELSE ? END AS mse_color"
+		      .",CASE WHEN timestamp_manual>0 THEN ? WHEN timestamp_auto>0 THEN ? ELSE ? END AS color"
+		      .",CASE WHEN timestamp_manual>0 THEN timestamp_manual ELSE timestamp_auto END AS timestamp"
+		      .",(SELECT MIN(ABS(1.0*black/total-?))"
+		      ." FROM ".$self->table("zone")
+		      ." WHERE capture_zone.student=capture_page.student AND capture_zone.page=capture_page.page AND capture_zone.copy=capture_page.copy AND total>0) AS delta"
+		      ." FROM ".$self->table("page")},
      'pages'=>{'sql'=>"SELECT * FROM ".$self->table("page")
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'studentPageMissing'=>
@@ -444,6 +452,9 @@ sub define_statements {
 		." VALUES (?,?)"},
      'failedList'=>{'sql'=>"SELECT * FROM ".$self->table("failed")},
     };
+  $self->{'statements'}->{'pageSummary'}=
+    {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
+     ." WHERE student=? AND page=? AND copy=?"};
 }
 
 # get_page($student,$page,$copy) returns all columns from the row with
@@ -610,36 +621,53 @@ sub page_sensitivity {
 # $s{'sensitivity'} is 'red' is the sensitivity exceeds
 # $options{'sensitivity_threshold'}, undef otherwise.
 
+# summaries returns a reference to an array containing the summaries
+# of all pages.
+
+sub compute_summaries {
+  my ($self,$r,%oo)=@_;
+  # compute some more variables from the SQL result
+  for my $p (@$r) {
+    $p->{'mse_string'}=($p->{'timestamp_auto'}>0 ?
+			sprintf($p->{'timestamp_manual'}>0 ? "(%.01f)" : "%.01f",
+				$p->{'mse'})
+			: "---");
+    $p->{'sensitivity'}=(defined($p->{'delta'}) 
+			 ? 10*($oo{'darkness_threshold'}-$p->{'delta'})
+			 /$oo{'darkness_threshold'} : undef);
+    $p->{'sensitivity_color'}=(defined($p->{'sensitivity'}) ?
+			       ($p->{'sensitivity'} > $oo{'sensitivity_threshold'}
+				? 'red' : undef) : undef);
+  }
+  return($r);
+}
+
 sub page_summary {
   my ($self,$student,$page,$copy,%oo)=@_;
-  my %s=();
-  my $p=$self->get_page($student,$page,$copy);
-
-  if($p) {
-
-    $s{'mse'}=($p->{'timestamp_auto'}>0 ?
-	       sprintf($p->{'timestamp_manual'}>0 ? "(%.01f)" : "%.01f",
-		       $p->{'mse'})
-	       : "---");
-    $s{'mse_color'}=($p->{'timestamp_auto'}>0 && $p->{'mse'}>$oo{'mse_threshold'} ? 'red' : undef);
-
-    $s{'color'}=($p->{'timestamp_auto'}>0 ? 'lightblue'
-		 : ($p->{'timestamp_manual'}>0 ? 'lightgreen' : undef));
-
-    $s{'update'}=($p->{'timestamp_manual'}>0 ? format_date($p->{'timestamp_manual'})
-		  : ($p->{'timestamp_auto'}>0 ? format_date($p->{'timestamp_auto'}) : '---'));
-
-    my $sens=$self->page_sensitivity($student,$page,$copy,
-				     $oo{'blackness_threshold'});
-    $s{'sensitivity'}=(defined($sens) ? sprintf("%.01f",$sens) : '---');
-
-    $s{'sensitivity_color'}=(defined($sens) ?
-			     ($s{'sensitivity'} > $oo{'sensitivity_threshold'}
-			      ? 'red' : undef) : undef);
+  my $r=$self->dbh->selectall_arrayref($self->statement('pageSummary'),
+				       {Slice=>{}},
+				       $oo{'mse_threshold'},'red',undef,
+				       'lightblue','lightgreen',undef,
+				       $oo{'darkness_threshold'},
+				       $student,$page,$copy,
+				      );
+  if($r && $r->[0]) {
+    $r=$self->compute_summaries($r,%oo);
+    return(%{$r->[0]});
   } else {
-    %s=('mse'=>'---','update'=>'---','sensitivity'=>'---');
+    return();
   }
-  return(%s);
+}
+
+sub summaries {
+  my ($self,%oo)=@_;
+  my $r=$self->dbh->selectall_arrayref($self->statement('pagesSummary'),
+				       {Slice=>{}},
+				       $oo{'mse_threshold'},'red',undef,
+				       'lightblue','lightgreen',undef,
+				       $oo{'darkness_threshold'},
+				      );
+  return($self->compute_summaries($r,%oo));
 }
 
 # zone_drakness($zoneid) return the darkness (from 0 to 1) for a
