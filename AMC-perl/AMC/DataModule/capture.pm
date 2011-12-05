@@ -312,6 +312,8 @@ sub define_statements {
   my $t_zone=$self->table("zone");
   my $t_position=$self->table("position");
   my $t_failed=$self->table("failed");
+  my $t_box=$self->table("box","layout");
+  my $t_namefield=$self->table("namefield","layout");
   $self->{'statements'}=
     {
      'NEWPageAuto'=>{'sql'=>"INSERT INTO $t_page"
@@ -354,6 +356,9 @@ sub define_statements {
      'students'=>{'sql'=>"SELECT student FROM $t_page"
 		 ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		  ." GROUP BY student ORDER BY student"},
+     'nCopies'=>{'sql'=>"SELECT COUNT(*) FROM (SELECT student,copy FROM $t_page"
+		 ." WHERE timestamp_auto>0 OR timestamp_manual>0"
+		 ." GROUP BY student,copy)"},
      'studentCopies'=>{'sql'=>"SELECT student,copy FROM $t_page"
 		       ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		       ." GROUP BY student,copy ORDER BY student,copy"},
@@ -371,14 +376,13 @@ sub define_statements {
 		      ." FROM $t_page"},
      'pages'=>{'sql'=>"SELECT * FROM $t_page"
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
-     'studentPageMissing'=>
-     {'sql'=>"SELECT COUNT(*) FROM ("
-      ."SELECT student,page FROM ".$self->table("box","layout")." UNION "
-      ."SELECT student,page FROM ".$self->table("namefield","layout")
-      .") AS enter"
-      ." WHERE student=? AND page NOT IN ("
-      ." SELECT page FROM $t_page WHERE student=? AND copy=?"
-      ." )"},
+     'missingPages'=>
+     {'sql'=>"SELECT enter.student,enter.page,$t_page.copy"
+      ." FROM (SELECT student,page FROM $t_box"
+      ."       UNION SELECT student,page FROM $t_namefield) AS enter,"
+      ."      $t_page"
+      ." ON enter.student=$t_page.student"
+      ." EXCEPT SELECT student,page,copy FROM $t_page"},
      'pageNearRatio'=>{'sql'=>"SELECT MIN(ABS(1.0*black/total-?))"
 		       ." FROM $t_zone"
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
@@ -542,6 +546,14 @@ sub set_zone_auto {
   my ($self,$student,$page,$copy,$type,$id_a,$id_b,$total,$black,$image)=@_;
   $self->statement('setZoneAuto')->execute($total,$black,$image,
 					   $self->get_zoneid($student,$page,$copy,$type,$id_a,$id_b,1));
+}
+
+# n_pages returns the number of copies for which a data capture (manual
+# or auto) is declared.
+
+sub n_copies {
+  my ($self)=@_;
+  return($self->sql_single($self->statement('nCopies')));
 }
 
 # n_pages returns the number of pages for which a data capture (manual
@@ -849,21 +861,24 @@ sub remove_manual {
 # complete sheets captured, and the %r{'incomplete'} number of student
 # sheets for which one part has been captured (with manual or
 # automated data capture), and one other part needs capturing.
+# Moreover, $r{'missing'} is a reference to an array containing
+# {'student'=>XXX,'page'=>XXX,'copy'=>XXX} for all missing pages.
 
 sub counts {
   my ($self)=@_;
-  my %r=();
+  my %r=('incomplete'=>0,'complete'=>0);
+  my %dup=();
   $self->{'data'}->require_module('layout');
-  my $sth=$self->statement('studentCopies');
-  $sth->execute;
-  while(my $p=$sth->fetchrow_hashref) {
-    if($self->sql_single($self->statement('studentPageMissing'),
-			 $p->{'student'},$p->{'student'},$p->{'copy'})) {
+  $r{'missing'}=$self->dbh
+    ->selectall_arrayref($self->statement('missingPages'),{Slice=>{}});
+  for my $p (@{$r{'missing'}}) {
+    my $k=$p->{'student'}."/".$p->{'copy'};
+    if(!$dup{$k}) {
       $r{'incomplete'}++;
-    } else {
-      $r{'complete'}++;
+      $dup{$k}=1;
     }
   }
+  $r{'complete'}=$self->n_copies()-$r{'incomplete'};
   return(%r);
 }
 
