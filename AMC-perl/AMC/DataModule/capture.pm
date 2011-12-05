@@ -308,63 +308,68 @@ sub populate_from_xml {
 
 sub define_statements {
   my ($self)=@_;
+  my $t_page=$self->table("page");
+  my $t_zone=$self->table("zone");
+  my $t_position=$self->table("position");
+  my $t_failed=$self->table("failed");
   $self->{'statements'}=
     {
-     'NEWPageAuto'=>{'sql'=>"INSERT INTO ".$self->table("page")
+     'NEWPageAuto'=>{'sql'=>"INSERT INTO $t_page"
 		     ." (src,student,page,copy,timestamp_auto,a,b,c,d,e,f,mse)"
 		     ." VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"},
-     'NEWPageManual'=>{'sql'=>"INSERT INTO ".$self->table("page")
+     'NEWPageManual'=>{'sql'=>"INSERT INTO $t_page"
 		       ." (student,page,copy,timestamp_manual)"
 		       ." VALUES (?,?,?,?)"},
-     'SetPageAuto'=>{'sql'=>"UPDATE ".$self->table("page")
+     'SetPageAuto'=>{'sql'=>"UPDATE $t_page"
 		     ." SET src=?, timestamp_auto=?, a=?, b=?, c=?, d=?, e=?, f=?, mse=?"
 		     ." WHERE student=? AND page=? AND copy=?"},
-     'SetPageManual'=>{'sql'=>"UPDATE ".$self->table("page")
+     'SetPageManual'=>{'sql'=>"UPDATE $t_page"
 		       ." SET timestamp_manual=?"
 		       ." WHERE student=? AND page=? AND copy=?"},
-     'NEWZone'=>{'sql'=>"INSERT INTO ".$self->table("zone")
+     'NEWZone'=>{'sql'=>"INSERT INTO $t_zone"
 		 ." (student,page,copy,type,id_a,id_b)"
 		 ." VALUES (?,?,?,?,?,?)"},
-     'getZoneID'=>{'sql'=>"SELECT zoneid FROM ".$self->table("zone")
+     'getZoneID'=>{'sql'=>"SELECT zoneid FROM $t_zone"
 		   ." WHERE student=? AND page=? AND copy=? AND type=? AND id_a=? AND id_b=?"},
-     'zonesCount'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("zone")
+     'zonesCount'=>{'sql'=>"SELECT COUNT(*) FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"},
-     'zone'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("zone")
+     'zone'=>{'sql'=>"SELECT COUNT(*) FROM $t_zone"
 	      ." WHERE student=? AND page=? AND copy=? AND type=?"
 	      ." AND id_a=? AND id_b=?"},
-     'NEWPosition'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("position")
+     'NEWPosition'=>{'sql'=>"INSERT OR REPLACE INTO $t_position"
 		     ." (zoneid,corner,x,y,type)"
 		     ." VALUES (?,?,?,?,?)"},
-     'setPosition'=>{'sql'=>"UPDATE ".$self->table("position")
+     'setPosition'=>{'sql'=>"UPDATE $t_position"
 		     ." SET x=?, y=? WHERE zoneid=? AND corner=? AND type=?"},
-     'getPage'=>{'sql'=>"SELECT * FROM ".$self->table("page")
+     'getPage'=>{'sql'=>"SELECT * FROM $t_page"
 		 ." WHERE student=? AND page=? AND copy=?"},
-     'setZoneManual'=>{'sql'=>"UPDATE ".$self->table("zone")
+     'setZoneManual'=>{'sql'=>"UPDATE $t_zone"
 		       ." SET manual=? WHERE zoneid=?"},
-     'setZoneAuto'=>{'sql'=>"UPDATE ".$self->table("zone")
+     'setZoneAuto'=>{'sql'=>"UPDATE $t_zone"
 		     ." SET total=?, black=?, image=? WHERE zoneid=?"},
-     'nPages'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
+     'nPages'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
 		." WHERE timestamp_auto>0 OR timestamp_manual>0"},
-     'nPagesAuto'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
+     'nPagesAuto'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
 		   ." WHERE timestamp_auto>0"},
-     'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")
-		 ." WHERE timestamp_auto>0 OR timestamp_manual>0 GROUP BY student ORDER BY student"},
-     'studentCopies'=>{'sql'=>"SELECT student,copy FROM ".$self->table("page")
+     'students'=>{'sql'=>"SELECT student FROM $t_page"
+		 ." WHERE timestamp_auto>0 OR timestamp_manual>0"
+		  ." GROUP BY student ORDER BY student"},
+     'studentCopies'=>{'sql'=>"SELECT student,copy FROM $t_page"
 		       ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		       ." GROUP BY student,copy ORDER BY student,copy"},
-     'pageLastCopy'=>{'sql'=>"SELECT MAX(copy) FROM ".$self->table("page")
+     'pageLastCopy'=>{'sql'=>"SELECT MAX(copy) FROM $t_page"
 		      ." WHERE student=? AND page=?"},
-     'pagesChanged'=>{'sql'=>"SELECT student,page,copy FROM ".$self->table("page")
+     'pagesChanged'=>{'sql'=>"SELECT student,page,copy FROM $t_page"
 		      ." WHERE timestamp_auto>? OR timestamp_manual>?"},
      'pagesSummary'=>{'sql'=>"SELECT student,page,copy,mse,timestamp_auto,timestamp_manual"
 		      .",CASE WHEN timestamp_auto>0 AND mse>? THEN ? ELSE ? END AS mse_color"
 		      .",CASE WHEN timestamp_manual>0 THEN ? WHEN timestamp_auto>0 THEN ? ELSE ? END AS color"
 		      .",CASE WHEN timestamp_manual>0 THEN timestamp_manual ELSE timestamp_auto END AS timestamp"
 		      .",(SELECT MIN(ABS(1.0*black/total-?))"
-		      ." FROM ".$self->table("zone")
-		      ." WHERE capture_zone.student=capture_page.student AND capture_zone.page=capture_page.page AND capture_zone.copy=capture_page.copy AND total>0) AS delta"
-		      ." FROM ".$self->table("page")},
-     'pages'=>{'sql'=>"SELECT * FROM ".$self->table("page")
+		      ." FROM $t_zone"
+		      ." WHERE $t_zone.student=$t_page.student AND $t_zone.page=$t_page.page AND $t_zone.copy=$t_page.copy AND total>0) AS delta"
+		      ." FROM $t_page"},
+     'pages'=>{'sql'=>"SELECT * FROM $t_page"
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'studentPageMissing'=>
      {'sql'=>"SELECT COUNT(*) FROM ("
@@ -372,31 +377,31 @@ sub define_statements {
       ."SELECT student,page FROM ".$self->table("namefield","layout")
       .") AS enter"
       ." WHERE student=? AND page NOT IN ("
-      ." SELECT page FROM ".$self->table("page"). " WHERE student=? AND copy=?"
+      ." SELECT page FROM $t_page WHERE student=? AND copy=?"
       ." )"},
      'pageNearRatio'=>{'sql'=>"SELECT MIN(ABS(1.0*black/total-?))"
-		       ." FROM ".$self->table("zone")
+		       ." FROM $t_zone"
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
-     'pageZones'=>{'sql'=>"SELECT * FROM ".$self->table("zone")
+     'pageZones'=>{'sql'=>"SELECT * FROM $t_zone"
 		   ." WHERE student=? AND page=? AND copy=? AND type=?"},
-     'pageZonesAll'=>{'sql'=>"SELECT * FROM ".$self->table("zone")
+     'pageZonesAll'=>{'sql'=>"SELECT * FROM $t_zone"
 		      ." WHERE type=?"},
-     'pageZonesD'=>{'sql'=>"SELECT * FROM ".$self->table("zone")
+     'pageZonesD'=>{'sql'=>"SELECT * FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"
 		    ." AND total>0"
 		    ." ORDER BY 1.0*black/total"},
-     'zoneDarkness'=>{'sql'=>"SELECT 1.0*black/total FROM ".$self->table("zone")
+     'zoneDarkness'=>{'sql'=>"SELECT 1.0*black/total FROM $t_zone"
 		      ." WHERE zoneid=? AND total>0"},
-     'zoneImage'=>{'sql'=>"SELECT image FROM ".$self->table("zone")
+     'zoneImage'=>{'sql'=>"SELECT image FROM $t_zone"
 		      ." WHERE student=? AND copy=? AND type=?"},
-     'setManualPage'=>{'sql'=>"UPDATE ".$self->table("page")
+     'setManualPage'=>{'sql'=>"UPDATE $t_page"
 		       ." SET timestamp_manual=?"
 		       ." WHERE student=? AND page=? AND copy=?"},
-     'setManual'=>{'sql'=>"UPDATE ".$self->table("zone")
+     'setManual'=>{'sql'=>"UPDATE $t_zone"
 		   ." SET manual=?"
 		   ." WHERE student=? AND page=? AND copy=?"
 		   ." AND type=? AND id_a=? AND id_b=?"},
-     'setManualPageZones'=>{'sql'=>"UPDATE ".$self->table("zone")
+     'setManualPageZones'=>{'sql'=>"UPDATE $t_zone"
 			    ." SET manual=?"
 			    ." WHERE student=? AND page=? AND copy=?"},
      'ticked'=>{'sql'=>"SELECT CASE"
@@ -404,14 +409,14 @@ sub define_statements {
 		." WHEN total<=0 THEN -1"
 		." WHEN black >= ? * total THEN 1"
 		." ELSE 0"
-		." END FROM ".$self->table("zone")
+		." END FROM $t_zone"
 		." WHERE student=? AND copy=? AND type=? AND id_a=? AND id_b=?"},
      'tickedList'=>{'sql'=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
 		    ." WHEN total<=0 THEN -1"
 		    ." WHEN black >= ? * total THEN 1"
 		    ." ELSE 0"
-		    ." END FROM ".$self->table("zone")
+		    ." END FROM $t_zone"
 		    ." WHERE student=? AND copy=? AND type=? AND id_a=?"
 		    ." ORDER BY id_b"},
      'tickedPage'=>{'sql'=>"SELECT CASE"
@@ -419,38 +424,38 @@ sub define_statements {
 		    ." WHEN total<=0 THEN -1"
 		    ." WHEN black >= ? * total THEN 1"
 		    ." ELSE 0"
-		    ." END,id_a,id_b FROM ".$self->table("zone")
+		    ." END,id_a,id_b FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"},
-     'zoneCorner'=>{'sql'=>"SELECT x,y FROM ".$self->table("position")
+     'zoneCorner'=>{'sql'=>"SELECT x,y FROM $t_position"
 		    ." WHERE zoneid=? AND type=? AND corner=?"},
-     'zoneCenter'=>{'sql'=>"SELECT AVG(x),AVG(y) FROM ".$self->table("position")
+     'zoneCenter'=>{'sql'=>"SELECT AVG(x),AVG(y) FROM $t_position"
 		    ." WHERE zoneid=? AND type=?"},
      'zoneDist'=>{'sql'=>"SELECT AVG((x-?)*(x-?)+(y-?)*(y-?))"
-		  ." FROM ".$self->table("position")
+		  ." FROM $t_position"
 		  ." WHERE zoneid=? AND TYPE=?"},
      'getAnnotated'=>{'sql'=>"SELECT annotated,timestamp_annotate,student,page,copy"
-		      ." FROM ".$self->table("page")
+		      ." FROM $t_page"
 		      ." WHERE timestamp_annotate>0"
 		      ." ORDER BY student,copy,page"},
      'getAnnotatedPage'=>{'sql'=>"SELECT annotated"
-			  ." FROM ".$self->table("page")
+			  ." FROM $t_page"
 			  ." WHERE timestamp_annotate>0"
 			  ." AND student=? AND page=? AND copy=?"},
-     'setAnnotated'=>{'sql'=>"UPDATE ".$self->table("page")
+     'setAnnotated'=>{'sql'=>"UPDATE $t_page"
 		      ." SET annotated=?, timestamp_annotate=?"
 		      ." WHERE student=? AND page=? AND copy=?"},
-     'setLayout'=>{'sql'=>"UPDATE ".$self->table("page")
+     'setLayout'=>{'sql'=>"UPDATE $t_page"
 		   ." SET layout_image=?"
 		   ." WHERE student=? AND page=? AND copy=?"},
-     'getLayout'=>{'sql'=>"SELECT layout_image FROM ".$self->table("page")
+     'getLayout'=>{'sql'=>"SELECT layout_image FROM $t_page"
 		   ." WHERE student=? AND page=? AND copy=?"},
-     'questionHasZero'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("zone")
+     'questionHasZero'=>{'sql'=>"SELECT COUNT(*) FROM $t_zone"
 			 ." WHERE student=? AND copy=? AND type=? AND id_a=?"
 			 ." AND id_b=0"},
-     'Failed'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("failed")
+     'Failed'=>{'sql'=>"INSERT OR REPLACE INTO $t_failed"
 		." (filename,timestamp)"
 		." VALUES (?,?)"},
-     'failedList'=>{'sql'=>"SELECT * FROM ".$self->table("failed")},
+     'failedList'=>{'sql'=>"SELECT * FROM $t_failed"},
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
