@@ -181,6 +181,8 @@ sub load_boxes {
       my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
       my $fid=$self->{'zooms_dir'}."/".$id.".png";
 
+      print STDERR "F=$fid\n";
+
       if(-f $fid) {
 	$self->{'pb_src'}->{$id}=
 	  Gtk2::Gdk::Pixbuf->new_from_file($fid);
@@ -219,6 +221,8 @@ sub load_boxes {
 	$self->{'position'}->{$id}=$self->{'eff_pos'}->{$id};
 
 	push @ids,$id;
+      } else {
+	debug_and_stderr "Zoom file not found: $fid";
       }
     }
 
