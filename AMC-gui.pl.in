@@ -3719,7 +3719,7 @@ sub detecte_analyse {
     $projet{'_capture'}->begin_read_transaction('ADCP');
 
     my $summary=$projet{'_capture'}
-      ->summaries('blackness_threshold'=>$projet{'options'}->{'seuil'},
+      ->summaries('darkness_threshold'=>$projet{'options'}->{'seuil'},
 		  'sensitivity_threshold'=>$o{'seuil_sens'},
 		  'mse_threshold'=>$o{'seuil_eqm'});
 
@@ -3730,6 +3730,7 @@ sub detecte_analyse {
       $w{'avancement'}->set_text(__"Looking for analysis...");
       Gtk2->main_iteration while ( Gtk2->events_pending );
     }
+    print STDERR Dumper($summary);
     for my $p (@$summary) {
       $iter=$diag_store->append;
       $diag_store->set($iter,
@@ -3741,7 +3742,7 @@ sub detecte_analyse {
 		       DIAG_EQM,$p->{'mse_string'},
 		       DIAG_EQM_BACK,$p->{'mse_color'},
 		       DIAG_MAJ,format_date($p->{'timestamp'}),
-		       DIAG_DELTA,$p->{'sensitivity'},
+		       DIAG_DELTA,$p->{'sensitivity_string'},
 		       DIAG_DELTA_BACK,$p->{'sensitivity_color'},
 		      );
       $i++;

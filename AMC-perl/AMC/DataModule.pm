@@ -76,8 +76,12 @@ sub dbh {
 
 sub table {
     my ($self,$table_subname,$module_name)=@_;
-    $module_name=$self->{'name'} if(!$module_name);
-    return($module_name.".".$module_name."_".$table_subname);
+    if($module_name) {
+      return($module_name."_".$table_subname);
+    } else {
+      $module_name=$self->{'name'};
+      return($module_name.".".$module_name."_".$table_subname);
+    }
 }
 
 

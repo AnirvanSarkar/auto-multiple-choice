@@ -88,10 +88,6 @@ sub new {
 
     $self->{'tmp-image'}=$self->{'temp-dir'}."/page";
 
-    $self->{'layout'}->begin_read_transaction;
-    $self->get_pages;
-    $self->{'layout'}->end_transaction;
-
     $self->{'iid'}=0;
 
     ## GUI
@@ -167,9 +163,7 @@ sub new {
 	$self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
 	Gtk2->main_iteration while ( Gtk2->events_pending );
 
-	for my $i (0..$#{$self->{'page'}}) {
-	    $self->maj_list($self->{'page'}->[$i],$i);
-	}
+	$self->maj_list_all;
 
 	$diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
 	$diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
@@ -192,11 +186,6 @@ sub new {
     return($self);
 }
 
-sub get_pages {
-  my ($self)=@_;
-  $self->{'page'}=$self->{'layout'}->get_pages(0);
-}
-
 ###
 
 sub goto_from_list {
@@ -214,10 +203,62 @@ sub goto_from_list {
     return TRUE;
 }
 
-sub maj_list {
-    my ($self,$page,$i)=(@_);
+sub maj_list_all {
+  my ($self)=@_;
+  return if(!$self->{'editable'});
+
+  $self->{'capture'}->begin_read_transaction;
+  my $summary=$self->{'capture'}
+    ->summaries('darkness_threshold'=>$self->{'seuil'},
+		'sensitivity_threshold'=>$self->{'seuil_sens'},
+		'mse_threshold'=>$self->{'seuil_eqm'});
+  my $capture_free=$self->{'capture'}->no_capture_pages;
+  $self->{'capture'}->end_transaction;
+
+  my $i=0;
+  for my $p (@$summary) {
+    push @{$self->{'page'}},[$p->{'student'},$p->{'page'},$p->{'copy'}];
+    $iter=$self->{'diag_store'}->append;
+    $self->{'diag_store'}
+      ->set($iter,
+	    MDIAG_I,$i,
+	    MDIAG_ID,pageids_string($p->{'student'},$p->{'page'},$p->{'copy'}),
+	    MDIAG_STUDENT,$p->{'student'},
+	    MDIAG_PAGE,$p->{'page'},
+	    MDIAG_COPY,$p->{'copy'},
+	    MDIAG_ID_BACK,$p->{'color'},
+	    MDIAG_EQM,$p->{'mse_string'},
+	    MDIAG_EQM_BACK,$p->{'mse_color'},
+	    MDIAG_DELTA,$p->{'sensitivity_string'},
+	    MDIAG_DELTA_BACK,$p->{'sensitivity_color'},
+	   );
+    $i++;
+  }
+  for my $p (@$capture_free) {
+    push @{$self->{'page'}},[@$p];
+    $iter=$self->{'diag_store'}->append;
+    $self->{'diag_store'}
+      ->set($iter,
+	    MDIAG_I,$i,
+	    MDIAG_ID,pageids_string(@$p),
+	    MDIAG_STUDENT,$p->[0],
+	    MDIAG_PAGE,$p->[1],
+	    MDIAG_COPY,$p->[2],
+	    MDIAG_ID_BACK,undef,
+	    MDIAG_EQM,'',
+	    MDIAG_EQM_BACK,undef,
+	    MDIAG_DELTA,'',
+	    MDIAG_DELTA_BACK,undef,
+	   );
+    $i++;
+  }
+}
+
+sub maj_list_i {
+    my ($self,$i)=(@_);
     return if(!$self->{'editable'});
 
+    my $page=$self->{'page'}->[$i];
     my $iter=model_id_to_iter($self->{'diag_store'},
 			      MDIAG_ID,pageids_string(@$page));
     $iter=$self->{'diag_store'}->append if(!$iter);
@@ -405,7 +446,7 @@ sub synchronise {
 
     $self->{'area'}->sync();
 
-    $self->maj_list($self->{'page'}->[$self->{'iid'}],undef);
+    $self->maj_list_i($self->{'iid'},undef);
 }
 
 sub passe_suivant {

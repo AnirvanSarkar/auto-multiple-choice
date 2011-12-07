@@ -366,14 +366,24 @@ sub define_statements {
 		      ." WHERE student=? AND page=?"},
      'pagesChanged'=>{'sql'=>"SELECT student,page,copy FROM $t_page"
 		      ." WHERE timestamp_auto>? OR timestamp_manual>?"},
-     'pagesSummary'=>{'sql'=>"SELECT student,page,copy,mse,timestamp_auto,timestamp_manual"
-		      .",CASE WHEN timestamp_auto>0 AND mse>? THEN ? ELSE ? END AS mse_color"
-		      .",CASE WHEN timestamp_manual>0 THEN ? WHEN timestamp_auto>0 THEN ? ELSE ? END AS color"
-		      .",CASE WHEN timestamp_manual>0 THEN timestamp_manual ELSE timestamp_auto END AS timestamp"
-		      .",(SELECT MIN(ABS(1.0*black/total-?))"
-		      ." FROM $t_zone"
-		      ." WHERE $t_zone.student=$t_page.student AND $t_zone.page=$t_page.page AND $t_zone.copy=$t_page.copy AND total>0) AS delta"
-		      ." FROM $t_page"},
+     'pagesSummary'=>
+     {'sql'=>"SELECT student,page,copy,mse,timestamp_auto,timestamp_manual"
+      .",CASE WHEN timestamp_auto>0 AND mse>? THEN ?"
+      ."      ELSE ?"
+      ."  END AS mse_color"
+      .",CASE WHEN timestamp_manual>0 THEN ?"
+      ."      WHEN timestamp_auto>0 THEN ?"
+      ."      ELSE ?"
+      ."  END AS color"
+      .",CASE WHEN timestamp_manual>0 THEN timestamp_manual"
+      ."      ELSE timestamp_auto"
+      ."  END AS timestamp"
+      .",(SELECT MIN(ABS(1.0*black/total-?))"
+      ."   FROM $t_zone"
+      ."   WHERE $t_zone.student=$t_page.student"
+      ."     AND $t_zone.page=$t_page.page AND $t_zone.copy=$t_page.copy"
+      ."     AND total>0) AS delta"
+      ." FROM $t_page"},
      'pages'=>{'sql'=>"SELECT * FROM $t_page"
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'missingPages'=>
@@ -383,6 +393,11 @@ sub define_statements {
       ."      $t_page"
       ." ON enter.student=$t_page.student"
       ." EXCEPT SELECT student,page,copy FROM $t_page"},
+     'noCapturePages'=>
+     {'sql'=>"SELECT student,page,0 AS copy FROM $t_box"
+      ." UNION SELECT student,page,0 AS copy FROM $t_namefield"
+      ." EXCEPT SELECT student,page,copy FROM $t_page"
+      ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'pageNearRatio'=>{'sql'=>"SELECT MIN(ABS(1.0*black/total-?))"
 		       ." FROM $t_zone"
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
@@ -649,9 +664,11 @@ sub compute_summaries {
 			sprintf($p->{'timestamp_manual'}>0 ? "(%.01f)" : "%.01f",
 				$p->{'mse'})
 			: "---");
-    $p->{'sensitivity'}=(defined($p->{'delta'}) 
+    $p->{'sensitivity'}=(defined($p->{'delta'})
 			 ? 10*($oo{'darkness_threshold'}-$p->{'delta'})
 			 /$oo{'darkness_threshold'} : undef);
+    $p->{'sensitivity_string'}=(defined($p->{'sensitivity'}) 
+				? sprintf("%.1f",$p->{'sensitivity'}) : "---");
     $p->{'sensitivity_color'}=(defined($p->{'sensitivity'}) ?
 			       ($p->{'sensitivity'} > $oo{'sensitivity_threshold'}
 				? 'red' : undef) : undef);
@@ -889,6 +906,15 @@ sub failed {
   my ($self,$filename,$timestamp)=@_;
   $timestamp=time if(! $timestamp);
   $self->statement('Failed')->execute($filename,$timestamp);
+}
+
+# no_capture_pages returns a reference to an array of elements
+# [student,page,copy] for pages from the question paper that have not
+# been captured (all with copy=0).
+
+sub no_capture_pages {
+  my ($self)=@_;
+  return($self->dbh->selectall_arrayref($self->statement('noCapturePages')));
 }
 
 1;
