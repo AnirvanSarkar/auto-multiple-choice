@@ -174,6 +174,10 @@ sub new {
 				   ]);
 
 	$self->{'general'}->window()->set_cursor(undef);
+    } else {
+	  $self->{'layout'}->begin_read_transaction;
+	  $self->{'page'}=$self->{'layout'}->get_pages(0);
+	  $self->{'layout'}->end_transaction;
     }
 
     $self->{'gui'}->connect_signals(undef,$self);
@@ -317,6 +321,11 @@ sub charge_i {
 			'namefield'=>[],
 			'digit'=>[],
 			};
+    if(!$self->{'page'}->[$self->{'iid'}]) {
+      $self->{'area'}->set_image('NONE');
+      debug_and_stderr "Page $self->{'iid'} not found";
+      return();
+    }
 
     my @spc=@{$self->{'page'}->[$self->{'iid'}]};
 
