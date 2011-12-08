@@ -433,7 +433,7 @@ for my $e (@students) {
 
       debug "Page ".studentids_string(@$e)."/$pp from corrected sheet";
 
-      stk_pdf_add($layout->query('pageAttr','subjectpage',$e->[0],$pp));
+      stk_pdf_add($layout->query('pageSubjectPage',$e->[0],$pp));
     }
   }
 

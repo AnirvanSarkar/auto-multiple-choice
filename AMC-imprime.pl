@@ -117,7 +117,7 @@ for my $e (@es) {
     my $debut=1000000;
     my $fin=0;
     my $elong=sprintf("%04d",$e);
-    for ($layout->query_list('attrForStudent','subjectpage',$e)) {
+    for ($layout->query_list('subjectpageForStudent',$e)) {
 	$debut=$_ if($_<$debut);
 	$fin=$_ if($_>$fin);
     }

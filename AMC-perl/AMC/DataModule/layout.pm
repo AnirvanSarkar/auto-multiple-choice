@@ -268,14 +268,12 @@ sub define_statements {
 	.$self->table("namefield")." GROUP BY student) AS counts WHERE n>1"},
        'pageFilename'=>{'sql'=>"SELECT student || '-' || page || '-' || checksum FROM "
 			.$self->table("page")." WHERE student=? AND page=?"},
-       'pageAttr'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
-		    ." WHERE student=? AND page=?"},
+       'pageSubjectPage'=>{'sql'=>"SELECT subjectpage FROM ".$self->table("page")
+			   ." WHERE student=? AND page=?"},
        'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student"},
-       'attrForStudent'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
-			  ." WHERE student=? ORDER BY page"},
-       'attrForPage'=>{'sql'=>"SELECT ? FROM ".$self->table("page")
-		       ." WHERE student=? AND page=?"},
+       'subjectpageForStudent'=>{'sql'=>"SELECT subjectpage FROM ".$self->table("page")
+				 ." WHERE student=? ORDER BY page"},
        'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
 		       ." LIMIT 1"},
        'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "
