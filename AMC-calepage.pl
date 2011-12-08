@@ -670,8 +670,6 @@ for my $k (keys %case) {
 
 $capture->end_transaction('CRSL');
 
-clear_old('name image file',"$repertoire_cr/$nom_file");
-
 $traitement->ferme_commande();
 
 # traces sur le scan pour localiser les cases et le cadre
@@ -685,11 +683,13 @@ if($out_cadre || $nom_file) {
 }
 
 if($nom_file && $case{'nom'}) {
-    debug "Name zone extraction to $nom_file...";
-    debug "Name box : ".$case{'nom'}->txt();
-    my $e=$page_entiere->Clone();
-    $e->Crop(geometry=>$case{'nom'}->etendue_xy('geometry',$zoom_plus));
-    $e->Write("$repertoire_cr/$nom_file");
+  clear_old('name image file',"$repertoire_cr/$nom_file");
+
+  debug "Name box : ".$case{'nom'}->txt();
+  my $e=$page_entiere->Clone();
+  $e->Crop(geometry=>$case{'nom'}->etendue_xy('geometry',$zoom_plus));
+  debug "Writing to $repertoire_cr/$nom_file...";
+  $e->Write("$repertoire_cr/$nom_file");
 }
 
 if($out_cadre && ($traitement->mode ne 'opencv')) {
