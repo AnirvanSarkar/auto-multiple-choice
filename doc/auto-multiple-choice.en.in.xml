@@ -719,13 +719,22 @@ Durée : 10 minutes.
 
         <itemizedlist>
           <listitem>
+            <para><option>lang=<replaceable>XX</replaceable></option>: sets
+            the subject language to <replaceable>XX</replaceable>. At present,
+            only FR (french) and ES (spain) are available. Several strings
+            added by <package>automultiplechoice</package> will be translated,
+            such as "None of these answers are correct", see option
+            <option>completemulti</option>.</para>
+          </listitem>
+
+          <listitem>
             <para><option>box</option>: puts every question in a block, so
             that it cannot be split by a page break.</para>
           </listitem>
 
           <listitem>
-            <para><option>completemulti</option>: automatically adds a « None
-            of these answers are correct » choice at the end of each multiple
+            <para><option>completemulti</option>: automatically adds a "None
+            of these answers are correct" choice at the end of each multiple
             question. Thus, for these questions, a distinction can be made
             between no answer and the answer consisting in treating none of
             the listed answers as correct.</para>
@@ -1616,11 +1625,14 @@ respective parameters \VQa{} et \VQb{}.
           <listitem>
             <para>If we check the box <guilabel>Update marking
             scale</guilabel>, the scoring strategy will be first extracted
-            from the LaTeX source file. This allow to try many strategies at
-            the end of the correction process. The method to specify the
-            strategy in the LaTeX file will be explained in the section <xref
-            endterm="bareme.title" linkend="bareme" /> (a default scoring
-            strategy is used when no indication is given).</para>
+            from the LaTeX source file. This allows to try many strategies at
+            the end of the correction process. This action also updates which
+            answers are specified as correct or as wrong. Hence, potential
+            mistakes in the answers can be easily fixed after the exam. The
+            method to specify the strategy in the LaTeX file will be explained
+            in the section <xref endterm="bareme.title" linkend="bareme" /> (a
+            default scoring strategy is used when no indication is
+            given).</para>
           </listitem>
         </itemizedlist>
 
@@ -2114,8 +2126,8 @@ Name:
         <para>We must previously supply a list of students. This list can
         obviously be used for many multiple-choices tests. This list is a text
         file containing one student per line. We may also append a few
-        complementary information in the file, as in the following example
-        (in the example above, email will not be used at all by
+        complementary information in the file, as in the following example (in
+        the example above, email will not be used at all by
         AMC):<programlisting># STUDENTS / 1ST YEAR
 surname:name:id:email
 Bienvenüe:Alexis:001:paamc@passoire.fr

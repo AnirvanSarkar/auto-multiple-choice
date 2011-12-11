@@ -304,7 +304,7 @@ tmp_deb:
 	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
 
 debsrc_vok: tmp_deb
-	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S -sn $(BUILDOPTS)
+	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S $(BUILDOPTS)
 
 deb_vok: tmp_deb
 	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -b $(BUILDOPTS)

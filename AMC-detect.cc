@@ -54,6 +54,9 @@
 #define BLEU CV_RGB(38,69,223)
 #define ROSE CV_RGB(223,38,203)
 
+#define SWAP(x,y,tmp) tmp=x;x=y;y=tmp
+#define SGN_ROT (1-2*upside_down)
+
 void agrege_init(double tx,double ty,double* coins_x,double* coins_y) {
   coins_x[0]=tx;coins_y[0]=ty;
   coins_x[1]=0;coins_y[1]=ty;
@@ -504,6 +507,9 @@ int main( int argc, char** argv )
   double prop,xmin,xmax,ymin,ymax;
   double coins_x[4],coins_y[4];
   double coins_x0[4],coins_y0[4];
+  double tmp;
+  int upside_down;
+  int i;
   int student,page,question,answer;
   point box[4];
   linear_transform transfo;
@@ -591,6 +597,7 @@ int main( int argc, char** argv )
 	     tol_plus, tol_moins,
 	     coins_x,coins_y,
 	     &dst,view);
+      upside_down=0;
       
       if(out_image_file != NULL && illustr==NULL) {
 	illustr=dst;
@@ -599,18 +606,52 @@ int main( int argc, char** argv )
       
       cvReleaseImage(&src_calage);
 
-    } else if(sscanf(commande,"optim %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
-		     &coins_x0[0],&coins_y0[0],
-		     &coins_x0[1],&coins_y0[1],
-		     &coins_x0[2],&coins_y0[2],
-		     &coins_x0[3],&coins_y0[3])==8) {
+    } else if((sscanf(commande,"optim %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
+		      &coins_x0[0],&coins_y0[0],
+		      &coins_x0[1],&coins_y0[1],
+		      &coins_x0[2],&coins_y0[2],
+		      &coins_x0[3],&coins_y0[3])==8)
+	      || (strncmp(commande,"reoptim",7)==0) ) {
       /* "optim" and 8 arguments: 4 marks positions (x y,
 	  order: UL UR BR BL)
 	  return: optimal linear transform and MSE */
+      /* "reoptim": optim with the same arguments as for last "optim" call */
       mse=optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
       printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
-	     transfo.a,transfo.b,transfo.c,transfo.d,transfo.e,transfo.f);
+	     transfo.a,transfo.b,
+	     transfo.c,transfo.d,
+	     transfo.e,
+	     transfo.f);
       printf("MSE=%f\n",mse);
+    } else if(strncmp(commande,"rotateOK",8)==0) {
+      /* validates upside down rotation */
+      if(upside_down) {
+	transfo.a=-transfo.a;
+	transfo.b=-transfo.b;
+	transfo.c=-transfo.c;
+	transfo.d=-transfo.d;
+	transfo.e=src->width-transfo.e;
+	transfo.f=src->height-transfo.f;
+	
+	if(src!=NULL) cvFlip(src,NULL,-1);
+	if(illustr!=NULL) cvFlip(illustr,NULL,-1);
+	if(dst!=NULL) cvFlip(dst,NULL,-1);
+
+	upside_down=0;
+
+	printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+	       transfo.a,transfo.b,
+	       transfo.c,transfo.d,
+	       transfo.e,
+	       transfo.f);
+      }
+    } else if(strncmp(commande,"rotate180",9)==0) {
+      for(i=0;i<2;i++) {
+	SWAP(coins_x[i],coins_x[i+2],tmp);
+	SWAP(coins_y[i],coins_y[i+2],tmp);
+      }
+      upside_down=1-upside_down;
+      printf("UpsideDown=%d\n",upside_down);
     } else if(sscanf(commande,"id %d %d %d %d",
 		     &student,&page,&question,&answer)==4) {
       /* box id */
