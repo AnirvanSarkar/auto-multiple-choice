@@ -172,6 +172,9 @@ sub new {
 	}
     }
 
+    $self->{'tableau'}->size_request;
+    $self->{'tableau'}->set_size_request(-1,100);
+
     # vue arborescente
 
     my ($copies_store,$renderer,$column);
