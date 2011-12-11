@@ -109,6 +109,8 @@ sub new {
       my $file=$self->{'cr'}."/".$z->{'image'};
       if(-r $file) {
 	push @images,{'file'=>$file,%$z};
+      } else {
+	debug_and_stderr "Skipping name field image $z->{'image'} (not found)";
       }
     }
 

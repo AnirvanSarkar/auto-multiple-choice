@@ -156,7 +156,7 @@ sub load_positions {
   while (my $z = $sth->fetchrow_hashref) {
     my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
     my $auto_pos=($z->{'black'} > $z->{'total'}*$self->{'seuil'} ? 1 : 0);
-    my $eff_pos=($page->{'timestamp_manual'} ? $z->{'manual'} :
+    my $eff_pos=($page->{'timestamp_manual'} && $z->{'manual'}>=0 ? $z->{'manual'} :
 		 $auto_pos);
     $self->{'eff_pos'}->{$id}=$eff_pos;
     $self->{'auto_pos'}->{$id}=$auto_pos;
@@ -179,11 +179,10 @@ sub load_boxes {
     while (my $z = $sth->fetchrow_hashref) {
 
       my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
-      my $fid=$self->{'zooms_dir'}."/".$id.".png";
-
-      print STDERR "F=$fid\n";
+      my $fid=$self->{'zooms_dir'}."/".$z->{'image'};
 
       if(-f $fid) {
+
 	$self->{'pb_src'}->{$id}=
 	  Gtk2::Gdk::Pixbuf->new_from_file($fid);
 

@@ -1122,8 +1122,7 @@ sub zooms_display {
     my ($student,$page,$copy,$forget_it)=@_;
 
     debug "Zooms view for ".pageids_string($student,$page,$copy)."...";
-    my $zd=absolu('%PROJET/cr/zooms')."/"
-      .pageids_string($student,$page,$copy,'path'=>1);
+    my $zd=absolu('%PROJET/cr/zooms');
     debug "Zooms directory $zd";
     if($w{'zooms_window'} &&
        $w{'zooms_window'}->actif) {
