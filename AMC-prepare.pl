@@ -202,7 +202,7 @@ sub analyse_amclog {
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	    my $rep="R".$1;
-	    if($analyse_data{'q'}->{$rep}) {
+	    if(defined($analyse_data{'q'}->{$rep})) {
 		$a_erreurs++;
 		push @erreurs_msg,"ERR: "
 		    .sprintf(__("Answer number ID used several times for the same question: %s")." [%s]\n",$1,$analyse_data{'titre'});
