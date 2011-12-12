@@ -22,6 +22,7 @@ package AMC::Scoring;
 
 use XML::Simple;
 use AMC::Basic;
+use AMC::DataModule::scoring qw/:question/;
 
 sub new {
     my (%o)=(@_);
@@ -118,24 +119,11 @@ sub degroupe {
     return(%r);
 }
 
-# returns a given parameter from the main scoring strategy, or
-# $default if not present.
-sub main_tag {
-    my ($self,$tag,$default,$etu)=@_;
-    my $r=$default;
-    my %m=($self->degroupe($self->{'_scoring'}->main_strategy(0),{},{}));
-    $r=$m{$tag} if(defined($m{$tag}));
-    if($etu) {
-	%m=($self->degroupe($self->{'_scoring'}->main_strategy($etu),{},{}));
-	$r=$m{$tag} if(defined($m{$tag}));
-    }
-    return($r);
-}
-
 # returns the score for a particular student-sheet/question, applying
 # the given scoring strategy.
 sub score_question {
-    my ($self,$etu,$copy,$question,$correct)=@_;
+    my ($self,$etu,$copy,$question_data,$correct)=@_;
+    my $answers=$question_data->{'answers'};
 
     my $xx='';
     my $raison='';
@@ -144,38 +132,37 @@ sub score_question {
 
     my $n_ok=0;
     my $n_coche=0;
-    my $id_coche=-1;
+    my $ticked_adata='';
     my $n_tous=0;
+    my $n_plain=0;
+    my $ticked_noneof='';
 
-    my @rep=$self->{'_scoring'}->answers($etu,$question);
-    my @rep_pleine=grep { $_ !=0 } @rep; # on enleve " aucune "
+    for my $a (@$answers) {
+	my $c=$a->{'correct'};
+	my $t=($correct ? $c : $a->{'ticked'});
 
-    debug("SCORE : $etu:$copy/$question - "
-	  .$self->{'_scoring'}->question_strategy($etu,$question));
-
-    for my $a (@rep) {
-	my $c=$self->{'_scoring'}->correct_answer($etu,$question,$a);
-	my $t=($correct ? $c :
-	       $self->ticked($etu,$copy,$question,$a));
-
-	debug("[$etu:$copy/$question:$a] $t ($c)\n");
+	debug("[$etu:$copy/".$a->{'question'}.":".$a->{'answer'}."] $t ($c)\n");
 
 	$n_ok+=($c == $t ? 1 : 0);
 	$n_coche+=$t;
-	$id_coche=$a if($t);
+	$ticked_adata=$a if($t);
 	$n_tous++;
 
-	if($a!=0) {
+	if($a->{'answer'}==0) {
+	  $ticked_noneof=$a->{'ticked'};
+	} else {
 	    my $bn=($c ? 'B' : 'M');
 	    my $co=($t ? 'C' : '');
 	    $vars->{'N'.$bn}++;
 	    $vars->{'N'.$bn.$co}++ if($co);
+
+	    $n_plain++;
 	}
     }
 
     # question wide variables
-    $vars->{'N'}=(1+$#rep_pleine);
-    $vars->{'IMULT'}=($self->{'_scoring'}->multiple($etu,$question) ? 1 : 0);
+    $vars->{'N'}=$n_plain;
+    $vars->{'IMULT'}=($question_data->{'type'}==QUESTION_MULT ? 1 : 0);
     $vars->{'IS'}=1-$vars->{'IMULT'};
 
     if($vars->{'IMULT'}) {
@@ -183,15 +170,14 @@ sub score_question {
 
 	$xx=0;
 
-	%b_q=$self->degroupe($self->{'_scoring'}->default_strategy(QUESTION_MULT)
-		      .",".$self->{'_scoring'}->question_strategy($etu,$question),
-		      {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0},
-		      $vars);
+	%b_q=$self->degroupe($question_data->{'default_strategy'}
+			     .",".$question_data->{'strategy'},
+			     {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0},
+			     $vars);
 
 	if($b_q{'haut'}) {
-	    $b_q{'d'}=$b_q{'haut'}-(1+$#rep_pleine);
+	    $b_q{'d'}=$b_q{'haut'}-$n_plain;
 	    $b_q{'p'}=0 if(!defined($b_q{'p'}));
-	    debug "Q=$question REPS=".join(',',@rep)." BQ{".join(" ",map { "$_=$b_q{$_}" } (keys %b_q) )."}";
 	} elsif($b_q{'mz'}) {
 	    $b_q{'d'}=$b_q{'mz'};
 	    $b_q{'p'}=0 if(!defined($b_q{'p'}));
@@ -200,7 +186,7 @@ sub score_question {
 	    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
 	}
 
-	if($n_coche !=1 && (!$correct) && $self->ticked($etu,$question,0)) {
+	if($n_coche !=1 && (!$correct) && $ticked_noneof) {
 	    # incompatible answers: the student has ticked one
 	    # plain answer AND the answer "none of the
 	    # above"...
@@ -212,15 +198,13 @@ sub score_question {
 	    $raison='V';
 	} else {
 	    # standard case: adds the 'b' or 'm' scores for each answer
-	    for my $a (@rep) {
-		if($a != 0) {
-		    $code=($correct ||
-			   $self->answer_is_correct($etu,$copy,$question,$a)
+	    for my $a (@$question_data) {
+		if($a->{'answer'} != 0) {
+		    $code=($correct || ($a->{'ticked'}==$a->{'correct'})
 			   ? "b" : "m");
-		    my %b_qspec=$self->degroupe($self->{'_scoring'}
-						->answer_strategy($etu,$question,$a),
+		    my %b_qspec=$self->degroupe($a->{'strategy'},
 						\%b_q,$vars);
-		    debug("Delta($a|$code)=$b_qspec{$code}");
+		    debug("Delta(".$a->{'answer'}."|$code)=$b_qspec{$code}");
 		    $xx+=$b_qspec{$code};
 		}
 	    }
@@ -228,7 +212,7 @@ sub score_question {
 
 	# adds the 'd' shift value
 	$xx+=$b_q{'d'} if($raison !~ /^[VE]/i);
-	
+
 	# applies the 'p' floor value
 	if($xx<$b_q{'p'} && $raison !~ /^[VE]/i) {
 	    $xx=$b_q{'p'};
@@ -236,17 +220,17 @@ sub score_question {
 	}
     } else {
 	# SIMPLE QUESTION
-	
-	%b_q=$self->degroupe($self->{'_scoring'}->default_strategy(QUESTION_SIMPLE)
-			     .",".$self->{'_scoring'}->question_strategy($etu,$question),
+
+	%b_q=$self->degroupe($question_data->{'default_strategy'}
+			     .",".$question_data->{'strategy'},
 			     {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1},
 			     $vars);
-	
+
 	if(defined($b_q{'mz'})) {
 	    $b_q{'b'}=$b_q{'mz'};
 	    $b_q{'m'}=$b_q{'d'} if(defined($b_q{'d'}));
 	}
-	
+
 	if($n_coche==0) {
 	    # no ticked boxes
 	    $xx=$b_q{'v'};
@@ -258,40 +242,42 @@ sub score_question {
 	    $raison='E';
 	} else {
 	    # standard case
-	    $sb=$self->{'_scoring'}->answer_strategy($etu,$question,$id_coche);
+	    $sb=$ticked_adata->{'strategy'};
 	    if($sb ne '') {
 		# some value is given as a score for the
 		# ticked answer
-		$xx=$sb; 
+		$xx=$sb;
 	    } else {
 		# take into account the scoring strategy for
 		# the question: 'auto', or 'b'/'m'
 		$xx=($b_q{'auto'}>-1
-		     ? $id_coche+$b_q{'auto'}-1
+		     ? $ticked_adata->{'answer'}+$b_q{'auto'}-1
 		     : ($n_ok==$n_tous ? $b_q{'b'} : $b_q{'m'}));
 	    }
 	}
     }
+
+    debug "MARK: score=$xx ($raison)";
 
     return($xx,$raison,\%b_q);
 }
 
 # returns the score associated with correct answers for a question.
 sub score_correct_question {
-    my ($self,$etu,$question)=@_;
-    return($self->score_question($etu,0,$question,1));
+    my ($self,$etu,$question_data)=@_;
+    return($self->score_question($etu,0,$question_data,1));
 }
 
 # returns the maximum score for a question: MAX parameter value, or,
 # if not present, the score_correct_question value.
 sub score_max_question {
-   my ($self,$etu,$question)=@_;
-   my ($x,$raison,$b)=($self->score_question($etu,0,$question,1));
+   my ($self,$etu,$question_data)=@_;
+   my ($x,$raison,$b)=($self->score_question($etu,0,$question_data,1));
    if(defined($b->{'MAX'})) {
        return($b->{'MAX'},'M',$b);
    } else {
        return($x,$raison,$b);
    }
-} 
+}
 
 1;

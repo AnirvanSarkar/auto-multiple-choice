@@ -329,20 +329,25 @@ sub populate_from_xml {
 
 sub define_statements {
   my ($self)=@_;
+  my $t_answer=$self->table("answer");
+  my $t_default=$self->table("default");
+  my $t_zone=$self->table("zone","capture");
   $self->{'statements'}=
     {
-     'NEWdefault'=>{'sql'=>"INSERT INTO ".$self->table("default")
+     'NEWdefault'=>{'sql'=>"INSERT INTO $t_default"
 		    ." (type,strategy) VALUES (?,?)"},
-     'getDefault'=>{'sql'=>"SELECT strategy FROM ".$self->table("default")
+     'getDefault'=>{'sql'=>"SELECT strategy FROM $t_default"
 		    ." WHERE type=?"},
-     'setDefault'=>{'sql'=>"UPDATE ".$self->table("default")
+     'setDefault'=>{'sql'=>"UPDATE $t_default"
 		    ." SET strategy=? WHERE type=?"},
-     'noDefault'=>{'sql'=>"UPDATE ".$self->table("default")
+     'noDefault'=>{'sql'=>"UPDATE $t_default"
 		    ." SET strategy=''"},
      'NEWMain'=>{'sql'=>"INSERT INTO ".$self->table("main")
 		  ." (student,strategy) VALUES (?,?)"},
      'getMain'=>{'sql'=>"SELECT strategy FROM ".$self->table("main")
 		  ." WHERE student=?"},
+     'getAllMain'=>{'sql'=>"SELECT strategy FROM ".$self->table("main")
+		    ." WHERE student=? OR student=-1 OR student=0 ORDER BY student"},
      'setMain'=>{'sql'=>"UPDATE ".$self->table("main")
 		  ." SET strategy=? WHERE student=?"},
      'NEWTitle'=>{'sql'=>"INSERT INTO ".$self->table("title")
@@ -431,6 +436,29 @@ sub define_statements {
 		  ." ELSE '-' END"
 		  ." FROM ".$self->table("score")
 		  ." WHERE question=?"},
+     'studentAnswersBase'=>
+     {'sql'=>"SELECT question,answer"
+      .",correct,strategy"
+      .",(SELECT CASE"
+      ."         WHEN manual >= 0 THEN manual"
+      ."         WHEN total<=0 THEN -1"
+      ."         WHEN black >= ? * total THEN 1"
+      ."         ELSE 0"
+      ."  END FROM $t_zone"
+      ."  WHERE $t_zone.student=? AND $t_zone.copy=? AND $t_zone.type=?"
+      ."        AND $t_zone.id_a=$t_answer.question AND $t_zone.id_b=$t_answer.answer"
+      ." ) AS ticked"
+      ." FROM ".$self->table("answer")
+      ." WHERE student=?"},
+     'studentQuestionsBase'=>
+     {'sql'=>"SELECT q.question,q.type,q.indicative,q.strategy,t.title"
+      .",d.strategy AS default_strategy"
+      ." FROM ".$self->table("question"). " q"
+      ." LEFT OUTER JOIN ".$self->table("default")." d"
+      ." ON q.type=d.type"
+      ." LEFT OUTER JOIN ".$self->table("title")." t"
+      ." ON q.question=t.question"
+      ." WHERE student=?"},
     };
 }
 
@@ -472,6 +500,14 @@ sub main_strategy {
   } else {
     return($self->sql_single($self->statement('getMain'),$student));
   }
+}
+
+# main_strategy_all($student) returns a concatenation of the the main
+# strategies for student=-1, student=0 and student=$student.
+
+sub main_strategy_all {
+  my ($self,$student)=@_;
+  return(join(',',$self->sql_list($self->statement('getAllMain'),$student)));
 }
 
 # question_strategy($student,$question) returns the scoring strategy
@@ -765,6 +801,47 @@ sub student_global {
   my $sth=$self->statement('studentMark');
   $sth->execute($student,$copy);
   return($x=$sth->fetchrow_hashref);
+}
+
+# student_scoring_base($student,$copy,$darkness_threshold) returns
+# usefull data to compute questions scores for a particular student
+# (identified by $student and $copy), as a reference to a hash
+# grouping questions and answers. For exemple :
+#
+# 'main_strategy'=>"",
+# 'questions'=>
+# { 1 =>{ 'question'=>1,
+#         'type'=>1,
+#         'indicative'=>0,
+#         'strategy'=>'',
+#         'answers'=>[ { 'question'=>1, 'answer'=>1,
+#                        'correct'=>1, 'ticked'=>0, 'strategy'=>"b=2" },
+#                      {'question'=>1, 'answer'=>2,
+#                        'correct'=>0, 'ticked'=>0, 'strategy'=>"" },
+#                    ],
+#       },
+#  ...
+# }
+
+sub student_scoring_base {
+  my ($self,$student,$copy,$darkness_threshold)=@_;
+  $self->{'data'}->require_module('capture');
+  my $student_strategy=$self->unalias($student);
+  my $r={'student_alias'=>$student_strategy,
+	 'questions'=>{},
+	 'main_strategy'=>$self->main_strategy_all($student_strategy)};
+  my $sth;
+  $sth=$self->statement('studentQuestionsBase');
+  $sth->execute($student_strategy);
+  while(my $qa=$sth->fetchrow_hashref) {
+    $r->{'questions'}->{$qa->{'question'}}=$qa;
+  }
+  $sth=$self->statement('studentAnswersBase');
+  $sth->execute($darkness_threshold,$student,$copy,ZONE_BOX,$student_strategy);
+  while(my $qa=$sth->fetchrow_hashref) {
+    push @{$r->{'questions'}->{$qa->{'question'}}->{'answers'}},$qa;
+  }
+  return($r);
 }
 
 1;

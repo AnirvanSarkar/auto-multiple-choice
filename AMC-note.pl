@@ -145,7 +145,7 @@ my $n_notes=0;
 my @a_calculer=@{$capture->dbh
 		   ->selectall_arrayref($capture->statement('studentCopies'),{})};
 
-my $delta=0.19;
+my $delta=0.95;
 $delta/=(1+$#a_calculer) if($#a_calculer>=0);
 
 # postcorrect mode?
@@ -154,41 +154,43 @@ if($postcorrect_student) {
 }
 
 for my $sc (@a_calculer) {
-  my $student=$sc->[0];
-  my $student_strategy=$scoring->unalias($student);
-
   debug "MARK: --- SHEET ".studentids_string(@$sc);
 
   my $total=0;
   my $max_i=0;
   my %codes=();
 
-  for my $q ($scoring->student_questions($student_strategy)) {
+  my $ssb=$scoring->student_scoring_base(@$sc,$seuil);
+
+  for my $question (keys %{$ssb->{'questions'}}) {
+    my $q=$ssb->{'questions'}->{$question};
+
+    debug "MARK: QUESTION $question TITLE ".$q->{'title'};
+
+    debug "Unknown question data !" if(!defined($q));
     ($xx,$raison,$keys)=$bar->score_question(@$sc,$q);
-    ($notemax)=$bar->score_max_question($student_strategy,$q);
+    ($notemax)=$bar->score_max_question($sc->[0],$q);
 
-    my $tit=$scoring->question_title($q);
-
-    debug "MARK: QUESTION $q TITLE $tit";
-
-    if ($tit =~ /^(.*)\.([0-9]+)$/) {
+    if ($q->{'title'} =~ /^(.*)\.([0-9]+)$/) {
       $codes{$1}->{$2}=$xx;
     }
 
-    if ($scoring->indicative($student_strategy,$q)) {
+    if ($q->{'indicative'}) {
       $notemax=1;
     } else {
       $total+=$xx;
       $max_i+=$notemax;
     }
 
-    $scoring->new_score(@$sc,$q,$xx,$notemax,$raison);
+    $scoring->new_score(@$sc,$question,$xx,$notemax,$raison);
   }
 
   # Final mark --
 
   # total qui faut pour avoir le max
-  $max_i=$bar->main_tag('SUF',$max_i,$student_strategy);
+  my %m=$bar->degroupe($ssb->{'main_strategy'},{},{});
+  $max_i=$m{'SUF'} if(defined($m{'SUF'}));
+
   if ($max_i<=0) {
     debug "Warning: Nonpositive value for MAX.";
     $max_i=1;
