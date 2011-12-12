@@ -28,10 +28,10 @@ use Module::Load::Conditional qw/check_install/;
 
 use AMC::Basic;
 use AMC::Exec;
-use AMC::MEPList;
+use AMC::Data;
 use AMC::Gui::Avancement;
 
-my $mep_dir="";
+my $data_dir="";
 my $sujet='';
 my $print_cmd='cupsdoprint %f';
 my $progress='';
@@ -44,7 +44,7 @@ my $options='number-up=1';
 my $output_file='';
 
 GetOptions(
-	   "mep=s"=>\$mep_dir,
+	   "data=s"=>\$data_dir,
 	   "sujet=s"=>\$sujet,
 	   "fich-numeros=s"=>\$fich_nums,
 	   "progression=s"=>\$progress,
@@ -62,7 +62,7 @@ set_debug($debug);
 my $commandes=AMC::Exec::new('AMC-imprime');
 $commandes->signalise();
 
-die "Needs layout directory" if(!$mep_dir);
+die "Needs data directory" if(!$data_dir);
 die "Needs subject file" if(!$sujet);
 die "Needs print command" if(!$print_cmd);
 
@@ -70,7 +70,8 @@ die "Needs output file" if($methode =~ /^file/i && !$output_file);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
-my $mep=AMC::MEPList::new($mep_dir);
+my $data=AMC::Data->new($data_dir);
+my $layout=$data->module('layout');
 
 my @es;
 
@@ -81,7 +82,7 @@ if($fich_nums) {
     }
     close(NUMS);
 } else {
-    @es=$mep->etus();
+    @es=$layout->query_list('students');
 }
 
 
@@ -113,10 +114,10 @@ if($methode =~ /^cups/i) {
 }
 
 for my $e (@es) {
-    my $debut=10000;
+    my $debut=1000000;
     my $fin=0;
     my $elong=sprintf("%04d",$e);
-    for ($mep->pages_etudiant($e)) {
+    for ($layout->query_list('subjectpageForStudent',$e)) {
 	$debut=$_ if($_<$debut);
 	$fin=$_ if($_>$fin);
     }

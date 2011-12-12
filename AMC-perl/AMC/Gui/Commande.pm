@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -42,7 +42,7 @@ sub new {
 
 	'erreurs'=>[],
 	'variables'=>{},
-	
+
 	'pid'=>'',
 	'avance'=>'',
 	'fh'=>'',
@@ -57,7 +57,7 @@ sub new {
     $self->{'commande'}=[$self->{'commande'}] if(!ref($self->{'commande'}));
 
     bless $self;
-    
+
     return($self);
 }
 
@@ -85,7 +85,7 @@ sub quitte {
     my ($self)=(@_);
     my $pid=$self->proc_pid();
     debug "Canceling command [".$self->{'signal'}."->".$pid."].";
-    
+
     kill $self->{'signal'},$pid if($pid =~ /^[0-9]+$/);
 }
 
@@ -95,26 +95,26 @@ sub open {
     $self->{'times'}=[times()];
     $self->{'pid'}=open($self->{'fh'},"-|",@{$self->{'commande'}});
     if(defined($self->{'pid'})) {
-	
+
 	$self->{'tag'}=Gtk2::Helper->add_watch( fileno( $self->{'fh'} ),
 						in => sub { $self->get_output() }
 						);
-	
+
 	debug "Command [".$self->{'pid'}."] : ".join(' ',@{$self->{'commande'}});
-	
+
 	if($self->{'avancement'}) {
 	    $self->{'avancement'}->set_text($self->{'texte'});
 	    $self->{'avancement'}->set_fraction(0);
 	    $self->{'avancement'}->set_pulse_step($self->{'progres.pulse'})
 		if($self->{'progres.pulse'});
 	}
-	
+
 	$self->{'avance'}=AMC::Gui::Avancement::new(0);
-	
+
 	$self->{'log'}->get_buffer()->set_text('');
 
     } else {
-	print STDERR "ERROR execing command\n".join(' ',@{$self->{'commande'}})."\n"; 
+	print STDERR "ERROR execing command\n".join(' ',@{$self->{'commande'}})."\n";
     }
 }
 
@@ -125,50 +125,54 @@ sub get_output {
     if( eof($self->{'fh'}) ) {
         Gtk2::Helper->remove_watch( $self->{'tag'} );
 	  close($self->{'fh'});
-	  
+
 	  debug "Command [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
 
 	  my @tb=times();
 	  debug sprintf("Total parent exec times during ".$self->{pid}.": [%7.02f,%7.02f]",$tb[0]+$tb[1]-$self->{'times'}->[0]-$self->{'times'}->[1],$tb[2]+$tb[3]-$self->{'times'}->[2]-$self->{'times'}->[3]);
-	  
+
 	  $self->{'pid'}='';
 	  $self->{'tag'}='';
 	  $self->{'fh'}='';
-	  
+
 	  $self->{'avancement'}->set_text('');
-	  
+
 	  &{$self->{'finw'}}($self) if($self->{'finw'});
 	  &{$self->{'fin'}}($self) if($self->{'fin'});
 
     } else {
 	my $fh=$self->{'fh'};
 	my $line = <$fh>;
-
-	my $log=$self->{'log'};
-	my $logbuff=$log->get_buffer();
-
-	$logbuff->insert($logbuff->get_end_iter(),$line);
-	$logbuff->place_cursor($logbuff->get_end_iter());
-	$log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
-	
-	if($line =~ /^ERR/) {
-	    chomp(my $lc=$line);
-	    $lc =~ s/^ERR[:>]\s*//;
-	    push @{$self->{'erreurs'}},decode("utf-8",$lc);
-	}
-	if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
-	    $self->{'variables'}->{$1}=$2;
-	}
+	my $r='';
 
 	if($self->{'avancement'}) {
 	    if($self->{'progres.pulse'}) {
 		$self->{'avancement'}->pulse;
 	    } else {
-		my $r=$self->{'avance'}->lit($line);
+		$r=$self->{'avance'}->lit($line);
 		$self->{'avancement'}->set_fraction($r) if($r);
 	    }
 	}
-	
+
+	if($r eq '') {
+	  my $log=$self->{'log'};
+	  my $logbuff=$log->get_buffer();
+
+	  $logbuff->insert($logbuff->get_end_iter(),$line);
+	  $logbuff->place_cursor($logbuff->get_end_iter());
+	  $log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
+
+	  if($line =~ /^ERR/) {
+	    chomp(my $lc=$line);
+	    $lc =~ s/^ERR[:>]\s*//;
+	    push @{$self->{'erreurs'}},decode("utf-8",$lc);
+	  }
+	  if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
+	    $self->{'variables'}->{$1}=$2;
+	  }
+	}
+
+
     }
 
     return 1;

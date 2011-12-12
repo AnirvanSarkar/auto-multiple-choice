@@ -20,8 +20,8 @@
 package AMC::Export;
 
 use AMC::Basic;
+use AMC::Data;
 use AMC::NamesFile;
-use AMC::AssocFile;
 
 use Data::Dumper;
 use XML::Simple;
@@ -31,17 +31,10 @@ use_gettext;
 sub new {
     my $class = shift;
     my $self  = {
-	'fich.notes'=>'',
-	'fich.association'=>'',
+	'fich.datadir'=>'',
 	'fich.noms'=>'',
 
-	'notes'=>'',
-	'assoc'=>'',
 	'noms'=>'',
-
-	'assoc.encodage'=>'',
-	'assoc.liste_key'=>'', # ou relu dans fichier
-	'assoc.notes_id'=>'', # ou relu dans fichier
 
 	'noms.encodage'=>'',
 	'noms.separateur'=>'',
@@ -51,10 +44,9 @@ sub new {
 
 	'out.rtl'=>'',
 
-	'sort.keys'=>['s:_NOM_','n:_ID_'],
+	'sort.keys'=>['s:student.name','n:student.line'],
 
-	'c'=>{},
-	'calcul'=>{},
+	'marks'=>[],
     };
     bless ($self, $class);
     return $self;
@@ -86,25 +78,12 @@ sub opts_spec {
 
 sub load {
     my ($self)=@_;
-    if($self->{'fich.notes'} && ! $self->{'notes'}) {
-	$self->{'notes'}=eval { XMLin($self->{'fich.notes'},
-				      'ForceArray'=>1,
-				      'KeyAttr'=>['id'],
-				      ) };
-	if($self->{'notes'}) {
-	    for(qw/seuil notemin notemax plafond arrondi grain/) {
-		$self->{'calcul'}->{$_}=
-		    $self->{'notes'}->{$_};
-	    }
-	} else {
-	    debug "Marks file analysis error: ".$self->{'fich.notes'}."\n";
-	}
-    }
-    if($self->{'fich.association'} && ! $self->{'assoc'}) {
-	$self->{'assoc'}=AMC::AssocFile::new($self->{'fich.association'},
-					     $self->opts_spec('assoc'));
-	$self->{'assoc'}->load();
-    }
+    die "Needs data directory" if(!-d $self->{'fich.datadir'});
+
+    $self->{'_data'}=AMC::Data->new($self->{'fich.datadir'});
+    $self->{'_scoring'}=$self->{'_data'}->module('scoring');
+    $self->{'_assoc'}=$self->{'_data'}->module('association');
+
     if($self->{'fich.noms'} && ! $self->{'noms'}) {
 	$self->{'noms'}=AMC::NamesFile::new($self->{'fich.noms'},
 					    $self->opts_spec('noms'));
@@ -116,130 +95,84 @@ sub pre_process {
 
     $self->load();
 
-    my @copies=(keys %{$self->{'notes'}->{'copie'}});
+    $self->{'_scoring'}->begin_read_transaction('EXPP');
 
-    my @codes=(keys %{$self->{'notes'}->{'code'}});
-    my @keys=();
+    my $lk=$self->{'_assoc'}->variable('key_in_list');
+    my %keys=();
+    my @marks=();
 
-    push @keys,(grep { if(s/\.[0-9]+$//) { !$self->{'notes'}->{'code'}->{$_} } else { 1; } } (keys %{$self->{'notes'}->{'copie'}->{'max'}->{'question'}}));
+    # Get all students from the marks table
 
-    $self->{'indicative'}={};
-    for my $k (@keys) {
-	$self->{'indicative'}->{$k}=1 if($self->{'notes'}->{'copie'}->{'max'}->{'question'}->{$k}->{'indicative'});
+    my $sth=$self->{'_scoring'}->statement('marks');
+    $sth->execute;
+    while(my $m=$sth->fetchrow_hashref) {
+      $m->{'abs'}=0;
+      $m->{'sc'}=studentids_string($m->{'student'},$m->{'copy'});
+
+      # Association key for this sheet
+      $m->{'key'}=$self->{'_assoc'}->get_real($m->{'student'},$m->{'copy'});
+      $keys{$m->{'key'}}=1;
+
+      # find the corresponding name
+      my ($n)=$self->{'noms'}->data($lk,$m->{'key'});
+      if($n) {
+	$m->{'student.name'}=$n->{'_ID_'};
+	$m->{'student.line'}=$n->{'_LINE_'};
+	$m->{'student.all'}={%$n};
+      } else {
+	for(qw/name line/) {
+	  $m->{"student.$_"}='?';
+	}
+      }
+      push @marks,$m;
     }
 
-    @keys=sort { $self->{'indicative'}->{$a} <=> $self->{'indicative'}->{$b}
-		  || $a cmp $b } @keys;
-    @codes=sort { $a cmp $b } @codes;
- 
-    for my $etu (@copies) {
-	$self->{'c'}->{$etu}={'_ID_'=>$etu};
+    # Now, add students with no mark (if requested)
 
-	my $c=$self->{'notes'}->{'copie'}->{$etu};
-      
-	$self->{'c'}->{$etu}->{'_NOTE_'}=$c->{'total'}->[0]->{'note'};
-	$self->{'c'}->{$etu}->{'_TOTAL_'}=$c->{'total'}->[0]->{'total'};
-	$self->{'c'}->{$etu}->{'_MAX_'}=$c->{'total'}->[0]->{'max'};
-	
-	for my $k (@keys) {
-	    $self->{'c'}->{$etu}->{$k}=$c->{'question'}->{$k}->{'note'};
-	    $self->{'c'}->{$etu}->{"TICKED:".$k}=$c->{'question'}->{$k}->{'cochees'};
+    if($self->{'noms.useall'}) {
+      for my $i ($self->{'noms'}->liste($lk)) {
+	if(!$keys{$i}) {
+	  my ($name)=$self->{'noms'}->data($lk,$i);
+	  push @marks,
+	    {'student'=>'',
+	     'copy'=>'',
+	     'abs'=>1,
+	     'mark'=>$self->{'noms.abs'},
+	     'student.name'=>$name->{'_ID_'},
+	     'student.line'=>$name->{'_LINE_'},
+	     'student.all'=>{%$name},
+	    };
 	}
-	for my $k (@codes) {
-	    $self->{'c'}->{$etu}->{$k}=$c->{'code'}->{$k}->{'content'};
-	}
+      }
     }
 
-    if($self->{'assoc'} && $self->{'noms'}) {
-	my $lk=$self->{'assoc'}->get_param('liste_key');
-	my %is=();
-	$self->{'liste_key'}=$lk;
-	for my $etu (@copies) {
-	    if($etu =~ /^(max|moyenne)$/) {
-		$self->{'c'}->{$etu}->{'_NOM_'}='';
-		$self->{'c'}->{$etu}->{'_SPECIAL_'}=1;
-	    } else {
-		my $i=$self->{'assoc'}->effectif($etu);
-		if($i) {
-		    $self->{'c'}->{$etu}->{'_ASSOC_'}=$i;
-		    $is{$i}=1;
-		    my ($n)=$self->{'noms'}->data($lk,$i);
-		    if($n) {
-			$self->{'c'}->{$etu}->{'_NOM_'}=
-			    $n->{'_ID_'};
-			$self->{'c'}->{$etu}->{'_LINE_'}=
-			    $n->{'_LINE_'};
-		    } else {
-			for(qw/NOM LINE/) {
-			    $self->{'c'}->{$etu}->{'_'.$_.'_'}='?';
-			}
-		    }
-		} else {
-		    for(qw/NOM LINE/) {
-			$self->{'c'}->{$etu}->{'_'.$_.'_'}='??';
-		    }
-		}	
-	    }
-	}
-	if($self->{'noms.useall'}) {
-	    my $n=0;
-	    for my $i ($self->{'noms'}->liste($lk)) {
-		if(!$is{$i}) {
-		    $n++;
-		    my $e=sprintf("none.%04d",$n);
-		    my ($name)=$self->{'noms'}->data($lk,$i);
-		    $self->{'c'}->{$e}={
-			'_ID_'=>'','_ASSOC_'=>$i,
-			'_ABS_'=>1,
-			'_NOTE_'=>$self->{'noms.abs'},
-			'_NOM_'=>$name->{'_ID_'},
-			'_LINE_'=>$name->{'_LINE_'},
-		    };
-		}
-	    }
-	}
-    } else {
-	$self->{'liste_key'}='';
-	debug "No association\n";
-    }
-
-    $self->{'keys'}=\@keys;
-    $self->{'codes'}=\@codes;
+    # sorting as requested
 
     debug "Sorting with keys ".join(", ",@{$self->{'sort.keys'}});
-    $self->{'copies'}=[sort { $self->compare($a,$b); }
-		       (keys %{$self->{'c'}})];
+    $self->{'marks'}=[sort { $self->compare($a,$b); } @marks];
+
+    $self->{'_scoring'}->end_transaction('EXPP');
 
 }
 
 sub compare {
-    my ($self,$a,$b)=@_;
+    my ($self,$xa,$xb)=@_;
     my $r=0;
-
-    if($a =~ /[^0-9]$/) {
-	if($b =~ /[^0-9]$/) {
-	    return($a cmp $b);
-	} else {
-	    return(-1);
-	}
-    } elsif($b =~ /[^0-9]$/) {
-	return(1);
-    }
 
     for my $k (@{$self->{'sort.keys'}}) {
 	my $key=$k;
 	my $mode='s';
 
 	if($k =~ /^([ns]):(.*)/) {
-	    $mode=$1;
-	    $key=$2;
-	}
-	if($mode eq 'n') {
-	    $r=$r || ( $self->{'c'}->{$a}->{$key} <=> 
-		       $self->{'c'}->{$b}->{$key} );
-	} else {
-	    $r=$r || ( $self->{'c'}->{$a}->{$key} cmp
-		       $self->{'c'}->{$b}->{$key} );
+	  $mode=$1;
+	  $key=$2;
+	  if($mode eq 'n') {
+	    $r=$r || ( $xa->{$key} <=>
+		       $xb->{$key} );
+	  } else {
+	    $r=$r || ( $xa->{$key} cmp
+		       $xb->{$key} );
+	  }
 	}
     }
     return($r);

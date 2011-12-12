@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008,2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -21,18 +21,18 @@
 use Getopt::Long;
 use AMC::Gui::Association;
 
-my $cr_dir='points-cr';
-my $liste='noms.txt';
-my $assoc_file='';
+my $cr_dir='';
+my $liste='';
+my $data_dir='';
 
 GetOptions("cr=s"=>\$cr_dir,
 	   "liste=s"=>\$liste,
-	   "o=s"=>\$assoc_file,
+	   "data=s"=>\$data_dir,
 	   );
 
 my $g=AMC::Gui::Association::new('cr'=>$cr_dir,
 				 'liste'=>$liste,
-				 'fichier-liens'=>$assoc_file,
+				 'data_dir'=>$data_dir,
 				 'global'=>1,
 				 );
 

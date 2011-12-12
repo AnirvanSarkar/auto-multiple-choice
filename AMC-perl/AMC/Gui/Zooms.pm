@@ -21,7 +21,7 @@
 package AMC::Gui::Zooms;
 
 use AMC::Basic;
-use AMC::ANList;
+use AMC::DataModule::capture ':zone';
 
 use Gtk2 -init;
 
@@ -45,13 +45,13 @@ sub new {
 	'prop_max'=>0.60,
 	'global'=>0,
 	'zooms_dir'=>"",
-	'page_id'=>'',
-	'an-data'=>'',
-	'cr-dir'=>'',
+	'page_id'=>[],
+	'data'=>'',
+	'data-dir'=>'',
 	'size-prefs'=>'',
 	'encodage_interne'=>'UTF-8',
     };
-    
+
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
@@ -68,11 +68,12 @@ sub new {
 
     bless $self;
 
-    if($self->{'an-data'}) {
-	$self->{'an_list'}=$self->{'an-data'};
+    if($self->{'data'}) {
+	$self->{'_capture'}=$self->{'data'};
     } else {
-	debug "Making again ANList...";
-	$self->{'an_list'}=AMC::ANList::new($self->{'cr-dir'});
+	debug "Connecting to database...";
+	$self->{'_capture'}=AMC::Data->new($self->{'data-dir'})
+	  ->module('capture');
 	debug "ok";
     }
 
@@ -85,18 +86,19 @@ sub new {
 
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
-    
+
     $self->{'gui'}=Gtk2::Builder->new();
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
-    
+
     for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info/) {
 	$self->{$_}=$self->{'gui'}->get_object($_);
     }
-    
+
     $self->{'label_0'}->set_markup('<b>'.$self->{'label_0'}->get_text.'</b>');
     $self->{'label_1'}->set_markup('<b>'.$self->{'label_1'}->get_text.'</b>');
-    $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),$self->{'page_id'}).'</b>');
+    $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),
+					      pageids_string(@{$self->{'page_id'}})).'</b>');
 
     $self->{'decoupage'}->child1_resize(1);
     $self->{'decoupage'}->child2_resize(1);
@@ -112,7 +114,7 @@ sub new {
     }
 
     $self->{'gui'}->connect_signals(undef,$self);
-    
+
     if($self->{'size-prefs'}) {
 	my @s=$self->{'main_window'}->get_size();
 	$s[1]=$self->{'size-prefs'}->{'zoom_window_height'};
@@ -137,70 +139,95 @@ sub clear_boxes {
     $self->{'n_ligs'}={};
     $self->{'position'}={};
     $self->{'eb'}={};
+    $self->{'eff_pos'}={};
+    $self->{'auto_pos'}={};
     $self->{'conforme'}=1;
     $self->{'button_apply'}->hide();
 }
 
-sub load_an {
-    my ($self)=@_;
+sub load_positions {
+  my ($self)=@_;
+  $self->{'_capture'}->begin_read_transaction;
 
-    $self->{'ANS'}=$self->{'an_list'}->analyse($self->{'page_id'},'scan'=>1);
-    $self->{'AN'}=$self->{'an_list'}->analyse($self->{'page_id'});
+  my $page=$self->{'_capture'}->get_page(@{$self->{'page_id'}});
+
+  my $sth=$self->{'_capture'}->statement('pageZonesD');
+  $sth->execute(@{$self->{'page_id'}},ZONE_BOX);
+  while (my $z = $sth->fetchrow_hashref) {
+    my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
+    my $auto_pos=($z->{'black'} > $z->{'total'}*$self->{'seuil'} ? 1 : 0);
+    my $eff_pos=($page->{'timestamp_manual'} && $z->{'manual'}>=0 ? $z->{'manual'} :
+		 $auto_pos);
+    $self->{'eff_pos'}->{$id}=$eff_pos;
+    $self->{'auto_pos'}->{$id}=$auto_pos;
+  }
+
+  $self->{'_capture'}->end_transaction;
 }
 
 sub load_boxes {
     my ($self)=@_;
 
-    $self->load_an;
-
     my @ids;
-    
-    for my $id (keys %{$self->{'ANS'}->{'case'}}) {
 
-	my $fid=$id;
-	$fid =~ s/\./-/;
-	$fid=$self->{'zooms_dir'}."/$fid.png";
-	if(-f $fid) {
-	    $self->{'pb_src'}->{$id}=
-		Gtk2::Gdk::Pixbuf->new_from_file($fid);
-	    
-	    $self->{'image'}->{$id}=Gtk2::Image->new();
+    $self->load_positions;
 
-	    $self->{'label'}->{$id}=Gtk2::Label->new(sprintf("%.3f",$self->{'ANS'}->{'case'}->{$id}->{'r'}));
-	    $self->{'label'}->{$id}->set_justify(GTK_JUSTIFY_LEFT);
+    $self->{'_capture'}->begin_read_transaction;
 
-	    my $hb=Gtk2::HBox->new();
-	    $self->{'eb'}->{$id}=Gtk2::EventBox->new();
-	    $self->{'eb'}->{$id}->add($hb);
-	    
-	    $hb->add($self->{'image'}->{$id});
-	    $hb->add($self->{'label'}->{$id});
-	
-	    $self->{'eb'}->{$id}->drag_source_set(GDK_BUTTON1_MASK,
-						  GDK_ACTION_MOVE,
-						  {
-						      target => 'STRING',
-						      flags => [],
-						      info => ID_AMC_BOX,
-						  });
-	    $self->{'eb'}->{$id}->signal_connect(
-		'drag-data-get' => \&source_drag_data_get,
-		$id );
-	    $self->{'eb'}->{$id}->signal_connect(
-		'drag-begin'=>sub {
-		    $self->{'eb'}->{$id}
-		    ->drag_source_set_icon_pixbuf($self->{'image'}->{$id}->get_pixbuf);
-		});
-	    
-	    push @ids,$id;
-	}
+    my $sth=$self->{'_capture'}->statement('pageZonesD');
+    $sth->execute(@{$self->{'page_id'}},ZONE_BOX);
+    while (my $z = $sth->fetchrow_hashref) {
+
+      my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
+      my $fid=$self->{'zooms_dir'}."/".$z->{'image'};
+
+      if(-f $fid) {
+
+	$self->{'pb_src'}->{$id}=
+	  Gtk2::Gdk::Pixbuf->new_from_file($fid);
+
+	$self->{'image'}->{$id}=Gtk2::Image->new();
+
+	$self->{'label'}->{$id}=
+	  Gtk2::Label->new(sprintf("%.3f",
+				   $self->{'_capture'}
+				   ->zone_darkness($z->{'zoneid'})));
+	$self->{'label'}->{$id}->set_justify(GTK_JUSTIFY_LEFT);
+
+	my $hb=Gtk2::HBox->new();
+	$self->{'eb'}->{$id}=Gtk2::EventBox->new();
+	$self->{'eb'}->{$id}->add($hb);
+
+	$hb->add($self->{'image'}->{$id});
+	$hb->add($self->{'label'}->{$id});
+
+	$self->{'eb'}->{$id}->drag_source_set(GDK_BUTTON1_MASK,
+					      GDK_ACTION_MOVE,
+					      {
+					       target => 'STRING',
+					       flags => [],
+					       info => ID_AMC_BOX,
+					      });
+	$self->{'eb'}->{$id}
+	  ->signal_connect('drag-data-get' => \&source_drag_data_get,
+			   $id );
+	$self->{'eb'}->{$id}
+	  ->signal_connect('drag-begin'=>sub {
+			     $self->{'eb'}->{$id}
+			       ->drag_source_set_icon_pixbuf($self->{'image'}->{$id}->get_pixbuf);
+			   });
+
+	$self->{'position'}->{$id}=$self->{'eff_pos'}->{$id};
+
+	push @ids,$id;
+      } else {
+	debug_and_stderr "Zoom file not found: $fid";
+      }
     }
-    
-    $self->{'ids'}=[sort { $self->{'ANS'}->{'case'}->{$a}->{'r'} <=> $self->{'ANS'}->{'case'}->{$b}->{'r'} } (@ids)];
-    
-    for my $id (@{$self->{'ids'}}) {
-	$self->{'position'}->{$id}=$self->category($id,'AN');
-    }
+
+    $self->{'_capture'}->end_transaction;
+
+    $self->{'ids'}=[@ids];
 
     $self->{'conforme'}=1;
 
@@ -214,7 +241,7 @@ sub load_boxes {
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
     $self->ajuste_sep();
-    
+
     my $va=$self->{'view_0'}->get_vadjustment();
     $va->value($va->upper());
 
@@ -241,7 +268,7 @@ sub page {
     my ($self,$id,$zd,$forget_it)=@_;
     if(!$self->{'conforme'}) {
 	return() if($forget_it);
-	
+
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($self->{'main_window'},
 			      'destroy-with-parent',
@@ -249,7 +276,7 @@ sub page {
 			      __("You moved some boxes to correct automatic data query, but this work is not saved yet.")." ".__("Dou you want to save these modifications before looking at another page?")
 	    );
 	my $reponse=$dialog->run;
-	$dialog->destroy;      
+	$dialog->destroy;
 	if($reponse eq 'yes') {
 	    $self->apply;
 	}
@@ -257,13 +284,9 @@ sub page {
     $self->clear_boxes;
     $self->{'page_id'}=$id;
     $self->{'zooms_dir'}=$zd;
-    $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),$self->{'page_id'}).'</b>');
+    $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),
+					      pageids_string(@{$self->{'page_id'}})).'</b>');
     $self->load_boxes;
-}
-
-sub category {
-    my ($self,$id,$antype)=@_;
-    return($self->{$antype}->{'case'}->{$id}->{'r'}>$self->{'seuil'} ? 1 : 0);
 }
 
 sub source_drag_data_get {
@@ -275,7 +298,8 @@ sub target_drag_data_received {
     my ($widget, $context, $x, $y, $data, $info, $time,$args) = @_;
     my ($self,$cat)=@$args;
     my $id=$data->get_text();
-    debug "Page ".$self->{'page_id'}.": move $id to category $cat\n";
+    debug "Page ".pageids_string(@{$self->{'page_id'}})
+      .": move $id to category $cat\n";
     if($self->{'position'}->{$id} != $cat) {
 	$self->{'position'}->{$id}=$cat;
 	$self->refill;
@@ -297,17 +321,17 @@ sub remplit {
     my $n_ligs=ceil((@good_ids ? (1+$#good_ids)/$self->{'n_cols'} : 1));
     $self->{'zooms_table_'.$cat}->resize($n_ligs,$self->{'n_cols'});
     $self->{'n_ligs'}->{$cat}=$n_ligs;
-    
+
     for my $i (0..$#good_ids) {
 	my $id=$good_ids[$i];
 	my $x=$i % $self->{'n_cols'};
 	my $y=int($i/$self->{'n_cols'});
-	
-	if($self->category($id,'AN') != $cat) {
+
+	if($self->{'eff_pos'}->{$id} != $cat) {
 	    $self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,$col_modif);
 	    $self->{'conforme'}=0;
 	} else {
-	    if($self->category($id,'ANS') == $cat) {
+	    if($self->{'auto_pos'}->{$id} == $cat) {
 		$self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,undef);
 	    } else {
 		$self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,$col_manuel);
@@ -363,7 +387,7 @@ sub quit {
 	$self->{'size-prefs'}->{'zoom_window_height'}=$y;
 	$self->{'size-prefs'}->{'_modifie_ok'}=1;
     }
-    
+
     if(!$self->{'conforme'}) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($self->{'main_window'},
@@ -372,7 +396,7 @@ sub quit {
 			      __("You moved some boxes to correct automatic data query, but this work is not saved yet.")." ".__("Dou you really want to close and ignore these modifications?")
 	    );
 	my $reponse=$dialog->run;
-	$dialog->destroy;      
+	$dialog->destroy;
 	return() if($reponse eq 'no');
     }
 
@@ -389,65 +413,46 @@ sub actif {
 	   $self->{'main_window'}->realized);
 }
 
-sub all_keys {
-    my ($self)=@_;
-    my %k=();
-    for(keys %{$self->{'AN'}->{'case'}}) {
-	$k{$_}=1;
-    }
-    for(keys %{$self->{'position'}}) {
-	$k{$_}=1;
-    }
-    return(keys %k);
-}
-
 sub checked {
     my ($self,$id)=@_;
     if(defined($self->{'position'}->{$id})) {
 	return($self->{'position'}->{$id});
     } else {
-	$self->category($id,'AN');
+	$self->{'eff_pos'}->{$id};
     }
 }
 
 sub apply {
     my ($self)=@_;
 
-    # save modifications to a manual analysis file
-    my $file=$self->{'cr-dir'}."/analyse-manuelle-".id2idf($self->{'page_id'}).".xml";
+    # save modifications to manual analysis data
 
-    debug "Saving file $file";
-    if(open(XML,">:encoding(".$self->{'encodage_interne'}.")",$file)) {
-	print XML "<?xml version='1.0' encoding='".$self->{'encodage_interne'}."' standalone='yes'?>\n<analyse src=\""
-	    .$self->{'AN'}->{'src'}."\" manuel=\"1\" id=\""
-	    .$self->{'page_id'}."\"";
-	print XML " nometudiant=\""
-	    .$self->{'AN'}->{'nometudiant'}."\""
-	    if($self->{'AN'}->{'nometudiant'});
-	print XML ">\n";
-	for my $id ($self->all_keys()) {
-	    my ($q,$r)=get_qr($id);
-	    print XML "  <case id=\"$id\" question=\"$q\" reponse=\"$r\" r=\""
-		.$self->checked($id)."\"/>\n";
-	}
-	print XML "</analyse>\n";
-	close(XML);
+    $self->{'_capture'}->begin_transaction;
 
-	$self->{'an_list'}->maj();
-	$self->load_an;
-	$self->refill;
-    } else {
-	# error opening file
-	my $dialog = Gtk2::MessageDialog
-            ->new_with_markup($self->{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      sprintf(__("Error saving to <i>%s</i>: <b>%s</b>"),
-				      $file,$!));
-	$dialog->run;
-	$dialog->destroy;
+    debug "Saving manual data for ".pageids_string(@{$self->{'page_id'}});
+
+    $self->{'_capture'}
+      ->statement('setManualPage')
+	->execute(time(),
+		  @{$self->{'page_id'}});
+
+    my $sth=$self->{'_capture'}->statement('pageZonesD');
+    $sth->execute(@{$self->{'page_id'}},ZONE_BOX);
+    while (my $z = $sth->fetchrow_hashref) {
+
+      my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
+
+      $self->{'_capture'}
+	->statement('setManual')
+	  ->execute($self->checked($id),
+		    @{$self->{'page_id'}},
+		    ZONE_BOX,$z->{'id_a'},$z->{'id_b'});
     }
 
+    $self->{'_capture'}->end_transaction;
+
+    $self->load_positions;
+    $self->refill;
 }
 
 1;

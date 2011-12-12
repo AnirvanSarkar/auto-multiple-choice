@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -21,25 +21,21 @@
 use Getopt::Long;
 use XML::Simple;
 use AMC::Basic;
-use AMC::AssocFile;
 use AMC::NamesFile;
+use AMC::Data;
 use Data::Dumper;
 
-my $notes_file='';
 my $notes_id='';
 my $liste_file='';
 my $liste_key='';
-my $assoc_file='';
-my $assoc_enc='utf-8';
 my $liste_enc='utf-8';
+my $data_dir='';
 my $debug='';
 
-GetOptions("notes=s"=>\$notes_file,
-	   "notes-id=s"=>\$notes_id,
+GetOptions("notes-id=s"=>\$notes_id,
 	   "liste=s"=>\$liste_file,
 	   "liste-key=s"=>\$liste_key,
-	   "assoc=s"=>\$assoc_file,
-	   "encodage-interne=s"=>\$assoc_enc,
+	   "data=s"=>\$data_dir,
 	   "encodage-liste=s"=>\$liste_enc,
 	   "debug=s"=>\$debug,
 	   );
@@ -48,66 +44,56 @@ set_debug($debug);
 
 die "Needs notes-id" if(!$notes_id);
 die "Needs liste-key" if(!$liste_key);
-die "Needs notes_file" if(! -s $notes_file);
 die "Needs liste_file" if(! -s $liste_file);
-die "Needs assoc_file" if(!$assoc_file);
+die "Needs data_dir" if(!-d $data_dir);
 
-my $as=AMC::AssocFile::new($assoc_file,
-			   'encodage'=>$assoc_enc,
-			   'liste_key'=>$liste_key,
-			   'notes_id'=>$notes_id,
-			   );
-$as->load();
-
-my %bon_code;
-
-debug "------------------------------------";
+my $data=AMC::Data->new($data_dir);
+my $scoring=$data->module('scoring');
+my $assoc=$data->module('association');
 
 debug "Automatic association $liste_file [$liste_enc] / $liste_key";
 
-# lecture liste des etudiants (codes disponibles)
+# First read from the students list the possible values for the
+# primary key to be found there (from column named $liste_key).
 
 my $liste_e=AMC::NamesFile::new($liste_file,
 				'encodage'=>$liste_enc);
 
+my %bon_code;
 for my $ii (0..($liste_e->taille()-1)) {
     $bon_code{$liste_e->data_n($ii,$liste_key)}=1;
 }
 
-debug "Student list keys : ".join(',',keys %bon_code);
+debug "Student list keys: ".join(',',keys %bon_code);
 
-# lecture notes (et codes reconnus une fois exactement)
+# Open association database and clear old automatic association
 
-my $notes=eval { XMLin($notes_file,
-		       'ForceArray'=>1,
-		       'KeyAttr'=>['id'],
-		       ) };
+$assoc->begin_transaction('ASSA');
 
-die "Bad syntax in students list file" if(!$notes);
+$assoc->check_keys($liste_key,$notes_id);
+$assoc->clear_auto;
 
-#print Dumper($notes) if($debug);
+# Loop on all codes that can be read on the scans.
 
-for my $i (@{$notes->{'code'}->{$notes_id}->{'valeur'}}) {
-    if($i->{'nombre'} != 1) {
-	debug "Removing ".$i->{'content'}." : ".$i->{'nombre'}." times";
-	$bon_code{$i->{'content'}}='';
+my $sth=$scoring->statement('codesCounts');
+$sth->execute($notes_id);
+while(my $v=$sth->fetchrow_hashref) {
+  if($v->{'nb'}==1) {
+    # nb is the number of scans on which the same code value has been
+    # read. If nb=1, this is OK: we can process association...
+    if($bon_code{$v->{'value'}}) {
+      # ... unless this value is NOT in the students list!
+      debug "Association OK for code value $v->{'value'}";
+      $assoc->set_auto(map { $v->{$_} } (qw/student copy value/));
+    } else {
+      # Association OK
+      debug "Code value $v->{'value'} not found in students list: ignoring";
     }
+  } else {
+    # Code value found on several sheets: do nothing, wait for the
+    # used to make a manual association for these sheets.
+    debug "Incorrect association for code value \"".$v->{'value'}."\": $v->{'nb'} instances";
+  }
 }
 
-# calcul...
-
-$as->clear("auto");
-
-for my $id (keys %{$notes->{'copie'}}) {
-    my $k=$notes->{'copie'}->{$id}->{'code'}->{$notes_id}->{'content'};
-    if($bon_code{$k}) {
-	debug "Sheet $id -> $k";
-	$as->set("auto",$id,$k);
-    }
-}
-
-# ecriture
-
-$as->save();
-
-
+$assoc->end_transaction('ASSA');

@@ -2661,22 +2661,6 @@ student number &amp; class &amp; subject\\
 
           <arg choice="plain">prepare</arg>
 
-          <arg choice="plain">--mode m</arg>
-
-          <arg choice="plain">--mep-dir
-          <replaceable>project-mep-dir</replaceable></arg>
-
-          <arg choice="plain">--calage
-          <replaceable>calage.xy</replaceable></arg>
-
-          <arg choice="plain"><replaceable>mcq.tex</replaceable></arg>
-        </cmdsynopsis>
-
-        <cmdsynopsis>
-          <command>auto-multiple-choice</command>
-
-          <arg choice="plain">prepare</arg>
-
           <arg choice="plain">--mode b</arg>
 
           <arg choice="plain">--bareme
@@ -2749,11 +2733,7 @@ student number &amp; class &amp; subject\\
           </listitem>
 
           <listitem>
-            <para>with "<option>--mode m</option>",
-            <command>AMC-prepare.pl</command> makes the MEP files (XML files
-            with exact positions of the boxes, the marks, the name field on
-            all the pages). In this mode, the following arguments must be
-            used:</para>
+            <para>with "<option>--mode m</option>", </para>
 
             <variablelist>
               <varlistentry>
@@ -2833,6 +2813,49 @@ student number &amp; class &amp; subject\\
       </refsect1>
     </refentry>
 
+    <refentry>
+      <refmeta>
+        <refentrytitle>AMC-meptex</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+
+        <refmiscinfo>Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo>@/PACKAGE_V_DEB/@</refmiscinfo>
+      </refmeta>
+
+      <refnamediv>
+        <refname>AMC-meptex</refname>
+
+        <refpurpose>gets the layout information from the working document to
+        the layout database</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">meptex</arg>
+
+          <arg choice="plain">--src <replaceable>calage.xy</replaceable></arg>
+
+          <arg choice="plain">--data
+          <replaceable>directory</replaceable></arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+        <para>The <command>AMC-prepare.pl</command> command extracts the
+        layout information (exact positions of the boxes, the marks, the name
+        field on all the pages) from a working document
+        <replaceable>calage.xy</replaceable> and fills the layout database (a
+        SQLite file) in the data directory
+        <replaceable>directory</replaceable>.</para>
+      </refsect1>
+    </refentry>
+
     <refentry id="AMC-imprime">
       <refmeta>
         <refentrytitle>AMC-imprime</refentrytitle>
@@ -2863,8 +2886,7 @@ student number &amp; class &amp; subject\\
           <arg choice="plain">--fich-nums
           <replaceable>numbers-file.txt</replaceable></arg>
 
-          <arg choice="plain">--mep
-          <replaceable>project-mep-dir</replaceable></arg>
+          <arg choice="plain">--data <replaceable>data-dir</replaceable></arg>
 
           <arg choice="plain">--methode
           <replaceable>method</replaceable></arg>
@@ -2910,17 +2932,18 @@ student number &amp; class &amp; subject\\
             </varlistentry>
 
             <varlistentry>
-              <term><option>--mep
-              <replaceable>project-mep-dir</replaceable></option></term>
+              <term><option>--data
+              <replaceable>data-dir</replaceable></option></term>
 
               <listitem>
-                <para>gives the directory where MEP files are (see
-                <citerefentry>
-                    <refentrytitle>AMC-prepare</refentrytitle>
+                <para>gives the directory where data files are (see for
+                example <citerefentry>
+                    <refentrytitle>AMC-meptex</refentrytitle>
 
                     <manvolnum>1</manvolnum>
-                  </citerefentry>). The MEP files are used to know at which
-                page of the subject file each copy begins and ends.</para>
+                  </citerefentry>). The layout database in the data directory
+                is used to know at which page of the subject file each copy
+                begins and ends.</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -3068,16 +3091,16 @@ student number &amp; class &amp; subject\\
 
         <variablelist>
           <varlistentry>
-            <term><option>--mep
-            <replaceable>project-mep-dir</replaceable></option></term>
+            <term><option>--data
+            <replaceable>data-dir</replaceable></option></term>
 
             <listitem>
-              <para>gives the directory where MEP files (prepared by
+              <para>gives the directory where data files are (see for example
               <citerefentry>
-                  <refentrytitle>AMC-prepare</refentrytitle>
+                  <refentrytitle>AMC-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
-                </citerefentry>) can be found.</para>
+                </citerefentry>).</para>
             </listitem>
           </varlistentry>
 
@@ -4128,16 +4151,16 @@ student number &amp; class &amp; subject\\
 
         <variablelist>
           <varlistentry>
-            <term><option>--mep
-            <replaceable>project-mep-dir</replaceable></option></term>
+            <term><option>--data
+            <replaceable>data-dir</replaceable></option></term>
 
             <listitem>
-              <para>gives the directory where MEP files (prepared by
+              <para>gives the directory where data files are (see for example
               <citerefentry>
-                  <refentrytitle>AMC-prepare</refentrytitle>
+                  <refentrytitle>AMC-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
-                </citerefentry>) can be found.</para>
+                </citerefentry>).</para>
             </listitem>
           </varlistentry>
 

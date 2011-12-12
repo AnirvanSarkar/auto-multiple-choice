@@ -1,26 +1,28 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 2.6 -->
-  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="general">
     <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Papers data capture</property>
-    <signal handler="quitter" name="delete_event"/>
+    <signal name="delete-event" handler="quitter" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
+        <property name="can_focus">False</property>
         <property name="spacing">4</property>
         <child>
           <object class="GtkVBox" id="navigation_v">
-            <property name="orientation">vertical</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkHButtonBox" id="hbuttonbox4">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="layout_style">center</property>
                 <child>
                   <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Go to:</property>
                   </object>
                   <packing>
@@ -33,9 +35,9 @@
                   <object class="GtkEntry" id="goto_v">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
-                    <property name="invisible_char">&#x2022;</property>
-                    <signal handler="goto_activate_cb" name="activate"/>
+                    <property name="tooltip_text" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
+                    <property name="invisible_char">•</property>
+                    <signal name="activate" handler="goto_activate_cb" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -53,6 +55,7 @@
             <child>
               <object class="GtkHButtonBox" id="hbuttonbox2">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkButton" id="button6">
                     <property name="label">gtk-go-back</property>
@@ -60,9 +63,10 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
-                    <property name="tooltip-text" translatable="yes">Go to the previous page.</property>
+                    <property name="tooltip_text" translatable="yes">Go to the previous page.</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
-                    <signal handler="passe_precedent" name="clicked"/>
+                    <signal name="clicked" handler="passe_precedent" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -77,9 +81,10 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
-                    <property name="tooltip-text" translatable="yes">Quit</property>
+                    <property name="tooltip_text" translatable="yes">Quit</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
-                    <signal handler="ok_quitter" name="clicked"/>
+                    <signal name="clicked" handler="ok_quitter" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -94,9 +99,10 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
-                    <property name="tooltip-text" translatable="yes">Go to next page.</property>
+                    <property name="tooltip_text" translatable="yes">Go to next page.</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
-                    <signal handler="passe_suivant" name="clicked"/>
+                    <signal name="clicked" handler="passe_suivant" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -106,15 +112,19 @@
                 </child>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkHSeparator" id="hseparator1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -128,40 +138,46 @@
         <child>
           <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkDrawingArea" id="area">
                 <property name="width_request">420</property>
                 <property name="height_request">600</property>
                 <property name="visible">True</property>
-                <property name="events">GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
-                <signal handler="choix" name="button_press_event"/>
-                <signal handler="expose_area" name="expose_event"/>
+                <property name="can_focus">False</property>
+                <property name="events">GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+                <signal name="button-press-event" handler="choix" swapped="no"/>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkHBox" id="navigation_h">
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkVSeparator" id="vseparator1">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
+                    <property name="can_focus">False</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkVBox" id="vbox2">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
+                    <property name="can_focus">False</property>
                     <property name="spacing">2</property>
                     <child>
                       <object class="GtkHBox" id="hbox4">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="spacing">2</property>
                         <child>
                           <placeholder/>
@@ -169,6 +185,7 @@
                         <child>
                           <object class="GtkLabel" id="label1">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Go to:</property>
                           </object>
                           <packing>
@@ -181,11 +198,13 @@
                           <object class="GtkEntry" id="goto">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip-text" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
-                            <property name="invisible_char">&#x2022;</property>
-                            <signal handler="goto_activate_cb" name="activate"/>
+                            <property name="tooltip_text" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
+                            <property name="invisible_char">•</property>
+                            <signal name="activate" handler="goto_activate_cb" swapped="no"/>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
@@ -202,7 +221,7 @@
                     <child>
                       <object class="GtkHButtonBox" id="hbuttonbox5">
                         <property name="visible">True</property>
-                        <property name="layout_style">edge</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkButton" id="button1">
                             <property name="label">gtk-go-back</property>
@@ -210,9 +229,10 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip-text" translatable="yes">Save this page modifications, then go to the previous page.</property>
+                            <property name="tooltip_text" translatable="yes">Save this page modifications, then go to the previous page.</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
-                            <signal handler="passe_precedent" name="clicked"/>
+                            <signal name="clicked" handler="passe_precedent" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -227,9 +247,10 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip-text" translatable="yes">Save this page modifications, then go to next page.</property>
+                            <property name="tooltip_text" translatable="yes">Save this page modifications, then go to next page.</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
-                            <signal handler="passe_suivant" name="clicked"/>
+                            <signal name="clicked" handler="passe_suivant" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -245,61 +266,27 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="nom_etudiant">
-                        <property name="visible">True</property>
-                        <property name="spacing">2</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label2">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">Student:</property>
-                            <property name="justify">center</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkComboBoxEntry" id="etudiant_cb">
-                            <property name="visible">True</property>
-                            <property name="has_tooltip">True</property>
-                            <property name="tooltip-text" translatable="yes">Enter the student name written on this page.</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">2</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow1">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="diag_tree">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <signal handler="goto_from_list" name="button_press_event"/>
-                            <signal handler="goto_from_list" name="button_release_event"/>
+                            <signal name="button-press-event" handler="goto_from_list" swapped="no"/>
+                            <signal name="button-release-event" handler="goto_from_list" swapped="no"/>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection1"/>
+                            </child>
                           </object>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">3</property>
                       </packing>
                     </child>
@@ -309,6 +296,7 @@
                     <child>
                       <object class="GtkHButtonBox" id="hbuttonbox1">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="layout_style">start</property>
                         <child>
                           <object class="GtkButton" id="button5">
@@ -317,9 +305,10 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip-text" translatable="yes">Remove manual modifications for this page. Automatic data capture for this page, if any, won' t be changed.</property>
+                            <property name="tooltip_text" translatable="yes">Remove manual modifications for this page. Automatic data capture for this page, if any, won' t be changed.</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
-                            <signal handler="efface_saisie" name="clicked"/>
+                            <signal name="clicked" handler="efface_saisie" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -340,7 +329,7 @@
                     <child>
                       <object class="GtkHButtonBox" id="hbuttonbox3">
                         <property name="visible">True</property>
-                        <property name="layout_style">edge</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkButton" id="button2">
                             <property name="label">gtk-undo</property>
@@ -348,9 +337,10 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip-text" translatable="yes">Cancel modifications for this page</property>
+                            <property name="tooltip_text" translatable="yes">Cancel modifications for this page</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
-                            <signal handler="annule" name="clicked"/>
+                            <signal name="clicked" handler="annule" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -365,9 +355,10 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip-text" translatable="yes">Save and quit</property>
+                            <property name="tooltip_text" translatable="yes">Save and quit</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
-                            <signal handler="ok_quitter" name="clicked"/>
+                            <signal name="clicked" handler="ok_quitter" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -398,6 +389,8 @@
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>

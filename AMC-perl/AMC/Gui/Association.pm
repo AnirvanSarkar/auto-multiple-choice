@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -20,25 +20,10 @@
 
 package AMC::Gui::Association;
 
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
-
 use AMC::Basic;
 use AMC::Gui::PageArea;
-use AMC::AssocFile;
+use AMC::Data;
+use AMC::DataModule::capture ':zone';
 use AMC::NamesFile;
 
 use Getopt::Long;
@@ -51,10 +36,12 @@ use Gtk2 -init;
 
 use constant {
     COPIES_N => 0,
-    COPIES_AUTO => 1,
-    COPIES_MANUEL => 2,
-    COPIES_BG => 3,
-    COPIES_IIMAGE => 4,
+    COPIES_STUDENT => 1,
+    COPIES_COPY => 2,
+    COPIES_AUTO => 3,
+    COPIES_MANUEL => 4,
+    COPIES_BG => 5,
+    COPIES_IIMAGE => 6,
 };
 
 use_gettext;
@@ -63,23 +50,17 @@ my $col_pris = Gtk2::Gdk::Color->new(65353,208*256,169*256);
 my $col_actif = Gtk2::Gdk::Color->new(20*256,147*256,58*256);
 my $col_actif_fond = Gtk2::Gdk::Color->new(95*256,213*256,129*256);
 
-sub reduit {
-    my $s=shift;
-    $s =~ s/^\s+//;
-    $s =~ s/\s+$//;
-    return($s);
-}
-
 sub new {
     my %o=(@_);
     my $self={'assoc-ncols'=>3,
 	      'cr'=>'',
+	      'namefield_dir'=>'',
 	      'liste'=>'',
 	      'liste_key'=>'',
-	      'fichier-liens'=>'',
+	      'data_dir'=>'',
+	      'data'=>'',
 	      'global'=>0,
 	      'encodage_liste'=>'UTF-8',
-	      'encodage_interne'=>'UTF-8',
 	      'separateur'=>"",
 	      'identifiant'=>'',
 	  };
@@ -89,14 +70,22 @@ sub new {
     }
 
     bless $self;
-    
-    $self->{'fichier-liens'}=$self->{'cr'}."/association.xml" if(!$self->{'fichier-liens'});
 
-    $self->{'assoc'}=AMC::AssocFile::new($self->{'fichier-liens'},
-					 'liste_key'=>$self->{'liste_key'},
-					 'encodage'=>$self->{'encodage_interne'},
-					 );
-    $self->{'assoc'}->load();
+    $self->{'namefield_dir'}=$self->{'cr'} if(!$self->{'namefield_dir'});
+
+    # Open databases for association and capture
+
+    $self->{'data'}=AMC::Data->new($self->{'data_dir'})
+      if(!$self->{'data'});
+
+    $self->{'assoc'}=$self->{'data'}->module('association');
+    $self->{'capture'}=$self->{'data'}->module('capture');
+
+    $self->{'assoc'}->begin_transaction('ALSK');
+    $self->{'assoc'}->check_keys($self->{'liste_key'},'---');
+    $self->{'assoc'}->end_transaction('ALSK');
+
+    # Read the names from the students list
 
     $self->{'liste'}=AMC::NamesFile::new($self->{'liste'},
 					 'encodage'=>$self->{'encodage_liste'},
@@ -105,27 +94,38 @@ sub new {
 					 );
 
     debug "".$self->{'liste'}->taille()." names in list\n";
-    
+
     return($self) if(!$self->{'liste'}->taille());
-    
-    # liste des images :
-    my @images;
-    opendir(DIR, $self->{'cr'}) 
-	|| die "Erreur opening directory <$self->{'cr'}> : $!";
-    @images = map {"$self->{'cr'}/$_" } sort { $a cmp $b } grep { /^nom-/ && -f "$self->{'cr'}/$_" } readdir(DIR);
-    closedir DIR;
-    
+
+    # Find all name field images
+
+    my @images=();
+
+    $self->{'capture'}->begin_read_transaction('AIMG');
+
+    my $sth=$self->{'capture'}->statement('pageZonesAll');
+    $sth->execute(@{$self->{'page_id'}},ZONE_NAME);
+    while (my $z = $sth->fetchrow_hashref) {
+      my $file=$self->{'cr'}."/".$z->{'image'};
+      if(-r $file) {
+	push @images,{'file'=>$file,%$z};
+      } else {
+	debug_and_stderr "Skipping name field image $z->{'image'} (not found)";
+      }
+    }
+
+    $self->{'capture'}->end_transaction('AIMG');
+
     my $iimage=-1;
-    my $image_etud='';
-    
+
     if($#images<0) {
-	print "Can't find names images...\n";
+	debug "Can't find names images...\n";
 	$self->{'erreur'}=__("Names images not found... Maybe you did not run automatic data capture yet, or you forgot using \\champnom command in LaTeX source, or you don't have papers' scans ?")."\n"
 	    .__"For both two latest cases, you can use graphical interface for manual data caption.";
 	return($self);
     }
-    
-    ### GUI
+
+    ### Open GUI
 
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
@@ -139,17 +139,17 @@ sub new {
     }
 
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
-    
+
     my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
-   
+
     $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
-    
+
     my @bouton_nom=();
     my @bouton_eb=();
     $self->{'boutons'}=\@bouton_nom;
     $self->{'boutons_eb'}=\@bouton_eb;
 
-    $self->{'lignes'}=[];
+    $self->{'assoc'}->begin_read_transaction('ABUT');
 
     my ($x,$y)=(0,0);
     for my $i (0..($self->{'liste'}->taille()-1)) {
@@ -161,7 +161,6 @@ sub new {
 	push @bouton_eb,$eb;
 	$b->show();
 	$eb->show();
-	push @{$self->{'lignes'}->[$y]},$eb;
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
 	$self->style_bouton($i);
@@ -173,14 +172,18 @@ sub new {
 	}
     }
 
+    $self->{'assoc'}->end_transaction('ABUT');
+
     # vue arborescente
 
     my ($copies_store,$renderer,$column);
     $copies_store = Gtk2::ListStore->new ('Glib::String',
-					  'Glib::String', 
-					  'Glib::String', 
-					  'Glib::String', 
-					  'Glib::String', 
+					  'Glib::String',
+					  'Glib::String',
+					  'Glib::String',
+					  'Glib::String',
+					  'Glib::String',
+					  'Glib::String',
 					  );
 
     $self->{'copies_tree'}->set_model($copies_store);
@@ -214,89 +217,127 @@ sub new {
     $copies_store->set_sort_func(COPIES_AUTO,\&sort_num,COPIES_AUTO);
     $copies_store->set_sort_func(COPIES_MANUEL,\&sort_num,COPIES_MANUEL);
 
-    $self->{'copies_store'}=$copies_store;    
+    $self->{'copies_store'}=$copies_store;
 
     # remplissage de la liste
 
-    for my $i (0..$#images) {
-	my $e=fich2etud($images[$i]);
-	my $iter=$copies_store->append();
-	$copies_store->set($iter,
-			   COPIES_N,$e,
-			   COPIES_AUTO,$self->{'assoc'}->get('auto',$e),
-			   COPIES_MANUEL,$self->{'assoc'}->get('manuel',$e),
-			   COPIES_IIMAGE,$i,
-			   );
+    $self->{'assoc'}->begin_read_transaction('ALST');
+
+    my $ii=0;
+    for my $i (@images) {
+      my @sc=($i->{'student'},$i->{'copy'});
+      my $iter=$copies_store->append();
+      $copies_store->set($iter,
+			 COPIES_N,studentids_string(@sc),
+			 COPIES_STUDENT,$sc[0],
+			 COPIES_COPY,$sc[1],
+			 COPIES_AUTO,$self->{'assoc'}->get_auto(@sc),
+			 COPIES_MANUEL,$self->{'assoc'}->get_manual(@sc),
+			 COPIES_IIMAGE,$ii,
+			);
+      $ii++;
     }
+    $self->{'assoc'}->end_transaction('ALST');
 
     # retenir...
-    
+
     $self->{'images'}=\@images;
 
+    $self->{'photo'}->signal_connect('expose_event'=>\&AMC::Gui::PageArea::expose_drawing);
     $self->{'gui'}->connect_signals(undef,$self);
 
     $self->{'iimage'}=-1;
 
     $self->image_suivante();
+
+    $self->{'assoc'}->begin_read_transaction('ANCL');
     $self->maj_couleurs_liste();
+    $self->{'assoc'}->end_transaction('ANCL');
 
     return($self);
 }
 
+# Updates the content of the sheets list (associations already made)
+# for one give sheet.
+#
+# {IN:}
 sub maj_contenu_liste {
-    my ($self,$etu)=@_;
+    my ($self,$ii,$iter,@sc)=@_;
 
-    my $iter=model_id_to_iter($self->{'copies_store'},COPIES_N,$etu);
     if($iter) {
-	$self->{'copies_store'}->set($iter,
-				     COPIES_AUTO,$self->{'assoc'}->get('auto',$etu),
-				     COPIES_MANUEL,$self->{'assoc'}->get('manuel',$etu),
-				     );
+      $self->{'copies_store'}
+	->set($iter,
+	      COPIES_AUTO,$self->{'assoc'}->get_auto(@sc),
+	      COPIES_MANUEL,$self->{'assoc'}->get_manual(@sc),
+	     );
     } else {
-	print STDERR "*** [content] no iter for sheet $etu ***\n";
+	debug_and_stderr "*** [content] no iter for image $ii, sheet "
+	  .studentids_string(@sc)." ***\n";
     }
 }
 
+# Updates the line $iimage of the sheets list.
+#
+# {X:IN}
+sub maj_contenu_liste_iimage {
+  my ($self,$iimage)=@_;
+  my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$ii);
+  my @sc=map { $self->{'images'}->[$iimage]->{$_} } (qw/student copy/);
+  $self->maj_contenu_liste($iimage,$iter,@sc);
+}
+
+# Updates the line corresponding to @sc=(student,copy) of the sheets
+# list
+#
+# {X:IN}
+sub maj_contenu_liste_sc {
+  my ($self,@sc)=@_;
+  my $iter=model_id_to_iter($self->{'copies_store'},
+			    COPIES_STUDENT,$sc[0],
+			    COPIES_COPY,$sc[1]);
+  my $iimage=$self->{'copies_store'}->get($iter,COPIES_IIMAGE);
+  $self->maj_contenu_liste($iimage,$iter,@sc);
+}
+
+# Updates the colours of the sheets list.
+#
+# {IN:}
 sub maj_couleurs_liste { # mise a jour des couleurs la liste
     my ($self)=@_;
 
-    for my $e (map { fich2etud($_) ; } @{$self->{'images'}}) {
-	my $iter=model_id_to_iter($self->{'copies_store'},COPIES_N,$e);
-	if($iter) {
-	    my $etat=$self->{'assoc'}->etat($e);
-	    my $coul;
-	    if($etat==0) {
-		my $x=$self->{'assoc'}->get('manuel',$e);
-		if(defined($x) && $x eq 'NONE') {
-		    $coul='salmon';
-		} else {
-		    $coul=undef;
-		}
-	    } elsif($etat==1) {
-		if($self->{'assoc'}->get('manuel',$e)) {
-		    $coul='lightgreen';
-		} else {
-		    $coul='lightblue';
-		}
-	    } else {
-		$coul='salmon';
-	    }
-	    $self->{'copies_store'}->set($iter,
-					 COPIES_BG,$coul,
-					 );
+    for my $ii (0..$#{$self->{'images'}}) {
+      my @sc=$self->image_sc($ii);
+      my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$ii);
+      if($iter) {
+	my $etat=$self->{'assoc'}->state(@sc);
+	my $coul;
+	if($etat==0) {
+	  my $x=$self->{'assoc'}->get_manual(@sc);
+	  if(defined($x) && $x eq 'NONE') {
+	    $coul='salmon';
+	  } else {
+	    $coul=undef;
+	  }
+	} elsif($etat==1) {
+	  if($self->{'assoc'}->get_manual(@sc)) {
+	    $coul='lightgreen';
+	  } else {
+	    $coul='lightblue';
+	  }
 	} else {
-	    print STDERR "*** [color] no iter for sheet $e ***\n";
+	  $coul='salmon';
 	}
+	$self->{'copies_store'}->set($iter,
+				     COPIES_BG,$coul,
+				    );
+      } else {
+	debug_and_stderr "*** [color] no iter for image $ii, sheet "
+	  .studentids_string(@sc)." ***\n";
+      }
     }
-    
 }
 
-sub expose_photo {
-    my ($self,$widget,$evenement,@donnees)=@_;
-
-    $widget->expose_drawing($evenement,@donnees);
-}
-
+# Quits.
 sub quitter {
     my ($self)=(@_);
 
@@ -310,106 +351,127 @@ sub quitter {
 sub enregistrer {
     my ($self)=(@_);
 
-    $self->{'assoc'}->save();
-
     $self->quitter();
 }
 
-sub fich2etud {
-    my $f=shift;
-    if($f =~ /nom-([0-9]+)-([0-9]+)-([0-9]+)\.jpg$/) {
-	return($1); 
-    } else {
-	return('');
-    }
-}
-
-sub inom2id {
+# inom2code($i) returns the primary key ID corresponding to student on
+# line $i from the students list file.
+#
+# {X:X}
+sub inom2code {
     my ($self,$inom)=@_;
-    return($self->{'liste'}->data_n($inom,$self->{'assoc'}->{'a'}->{'liste_key'}));
+    return($self->{'liste'}->data_n($inom,$self->{'liste_key'}));
 }
 
-sub id2inom {
-    my ($self,$id)=@_;
-    if($self->{'assoc'}->effectif($id)) {
-	return($self->{'liste'}->data($self->{'assoc'}->{'a'}->{'liste_key'},
-				      $self->{'assoc'}->effectif($id),
-				      'all'=>1,'i'=>1));
+# sc2inom($student,$copy) returns the line number where is the student
+# associated with sheet ($student,$copy) in the students list file.
+#
+# {IN:}
+sub sc2inom {
+    my ($self,$student,$copy)=@_;
+    my $code=$self->{'assoc'}->get_real($student,$copy);
+    if($code) {
+      return($self->{'liste'}->data($self->{'liste_key'},
+				    $code,
+				    'all'=>1,'i'=>1));
     } else {
-	return();
+      return();
     }
 }
 
+# cancels association to the student at line number $inom in the
+# students list file.
+#
+# {IN:}
 sub delie {
-    my ($self,$inom,$etud)=(@_);
+    my ($self,$inom)=(@_);
 
-    my $id=$self->inom2id($inom);
-    # tout lien vers le nom choisi est efface
-    for ($self->{'assoc'}->inverse($id)) {
-	# print STDERR "Efface $_ -> i=$inom\n";
-	$self->{'assoc'}->set('manuel',$_,
-			      ( $self->{'assoc'}->get('auto',$_) eq $id ? 'NONE' : ''));
-	$self->maj_contenu_liste($_);
+    my $code=$self->inom2code($inom);
+
+    # remove associations to $code, and update list
+    for my $sc (@{$self->{'assoc'}->delete_target($code)}) {
+      $self->maj_contenu_liste_sc(@$sc);
     }
 
-    # l'ancien nom ne pointe plus vers rien -> bouton
-    my @r=$self->id2inom($etud);
-    $self->{'assoc'}->set('manuel',$etud,'NONE');
-    $self->maj_contenu_liste($etud);
-    for(@r) {
-	$self->style_bouton($_);
-    }
-
+    # also update buttons that corresponds to that $code
+    $self->style_bouton_code($code);
 }
 
+# Associates sheet ($student,$copy) with student at line number $inom
+# in the students list file.
+#
+# {IN:}
 sub lie {
-    my ($self,$inom,$etud)=(@_);
-    $self->delie($inom,$etud);
-    $self->{'assoc'}->set('manuel',$etud,$self->inom2id($inom));
-    
-    $self->maj_contenu_liste($etud);
+    my ($self,$inom,$student,$copy)=(@_);
+    $self->delie($inom);
+    my $oldcode=$self->{'assoc'}->get_manual($student,$copy);
+    $self->{'assoc'}->set_manual($student,$copy,$self->inom2code($inom));
+
+    # updates list
+    $self->maj_contenu_liste_sc($student,$copy);
     $self->maj_couleurs_liste();
 
-    $self->style_bouton($inom);
+    # updates buttons
+    # - old one
+    $self->style_bouton_code($oldcode);
+    # - new one
+    $self->style_bouton($inom,1);
 }
 
+# Cancels manual association of current sheet.
+#
+# {OUT:}
 sub efface_manuel {
     my ($self)=@_;
     my $i=$self->{'iimage'};
 
     if($i>=0) {
-	my $e=fich2etud($self->{'images'}->[$i]);
+      $self->{'assoc'}->begin_read_transaction('ADEL');
 
-	my @r=$self->id2inom($e);
+      my @sc=$self->image_sc($i);
+      my @r=$self->sc2inom(@sc);
 
-	$self->{'assoc'}->efface('manuel',$e);
+      $self->{'assoc'}->set_manual(@sc,undef);
 
-	for(@r) {
-	    $self->style_bouton($_);
-	}
-	$self->maj_contenu_liste($e);
-	$self->maj_couleurs_liste();
+      for(@r) {
+	$self->style_bouton($_);
+      }
+      $self->maj_contenu_liste_sc(@sc);
+      $self->maj_couleurs_liste();
+
+      $self->{'assoc'}->end_transaction('ADEL');
     }
 }
 
+# Tells that current sheet is not to be associated with any of the
+# students from the list.
+#
+# {OUT:}
 sub inconnu {
     my ($self)=@_;
     my $i=$self->{'iimage'};
 
     if($i>=0) {
-	my $e=fich2etud($self->{'images'}->[$i]);
-	my @r=$self->id2inom($e);
+      $self->{'assoc'}->begin_transaction('AUNK');
 
-	$self->{'assoc'}->set('manuel',$e,'NONE');
+      my @sc=$self->image_sc($i);
+      my @r=$self->sc2inom(@sc);
 
-	for(@r) {
-	    $self->style_bouton($_);
-	}
-	$self->maj_contenu_liste($e);
-	$self->maj_couleurs_liste();
+      $self->{'assoc'}->set_manual(@sc,'NONE');
+
+      for(@r) {
+	$self->style_bouton($_);
+      }
+      $self->maj_contenu_liste_sc(@sc);
+      $self->maj_couleurs_liste();
+
+      $self->{'assoc'}->end_transaction('AUNK');
     }
 }
 
+# Go to the sheet pointed with the mouse in the list.
+#
+# {OUT:}
 sub goto_from_list {
     my ($self,$widget, $event) = @_;
 
@@ -418,16 +480,22 @@ sub goto_from_list {
 	my $iter=$self->{'copies_store'}->get_iter($path);
 	my $etu=$self->{'copies_store'}->get($iter,COPIES_N);
 	my $i=$self->{'copies_store'}->get($iter,COPIES_IIMAGE);
-	#print STDERR "N=$etu I=$i\n";
+
 	if(defined($i)) {
-	    $self->charge_image($i);
+	  $self->{'assoc'}->begin_read_transaction('AGFL');
+	  $self->charge_image($i);
+	  $self->{'assoc'}->end_transaction('AGFL');
 	}
     }
     return TRUE;
 }
 
+# Go to line $i of the list.
+#
+# {OUT:}
 sub goto_image {
     my ($self,$i)=@_;
+    debug "goto_image($i)";
     if($i>=0) {
 	my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$i);
 	my $path=$self->{'copies_store'}->get_path($iter);
@@ -435,10 +503,15 @@ sub goto_image {
     } else {
 	my $sel=$self->{'copies_tree'}->get_selection;
 	$sel->unselect_all();
+	$self->{'assoc'}->begin_read_transaction('ACHI');
 	$self->charge_image($i);
+	$self->{'assoc'}->end_transaction('ACHI');
     }
 }
 
+# Is a sheet selected? Activate buttons or not depending on that.
+#
+# {X:X}
 sub vraie_copie {
     my ($self,$oui)=@_;
     for(qw/bouton_effacer bouton_inconnu/) {
@@ -446,12 +519,48 @@ sub vraie_copie {
     }
 }
 
+# Returns the (student,copy) array corresponding to sheet at line $i
+# in the sheets list.
+#
+# {X:X}
+sub image_sc {
+  my ($self,$i)=@_;
+  return(map { $self->{'images'}->[$i]->{$_} } (qw/student copy/));
+}
+
+# Returns (student,copy) as a single string, corresponding to sheet at
+# line $i in the sheets list.
+#
+# {X:X}
+sub image_sc_string {
+  my ($self,$i)=@_;
+  return(studentids_string($self->image_sc($i)));
+}
+
+# Returns the image file name corresponding to sheet at line $i in the
+# sheets list.
+#
+# {X:X}
+sub image_filename {
+  my ($self,$i)=@_;
+  return('') if ($i<0 || $i>$#{$self->{'images'}});
+  my $f=$self->{'namefield_dir'}.'/'.$self->{'images'}->[$i]->{'image'};
+  return(-r $f ? $f : '');
+}
+
+# Shows name field image corresponding to sheet at line $i in the
+# sheets list.
+#
+# {X:IN}
 sub charge_image {
     my ($self,$i)=(@_);
     $self->style_bouton('IMAGE',0);
-    if($i>=0 && $i<=$#{$self->{'images'}} && -f $self->{'images'}->[$i]) {
-	$self->{'photo'}->set_image($self->{'images'}->[$i]);
-	$self->{'image_etud'} = fich2etud($self->{'images'}->[$i]) || 'xxx';
+    my $file=$self->image_filename($i);
+
+    if($file) {
+	$self->{'photo'}->set_image($file);
+	$self->{'image_sc'}
+	  = [$self->image_sc($i)];
 	$self->vraie_copie(1);
     } else {
 	$i=-1;
@@ -460,9 +569,12 @@ sub charge_image {
     }
     $self->{'iimage'}=$i;
     $self->style_bouton('IMAGE',1);
-    $self->{'titre'}->set_text(($i>=0 ? $self->{'images'}->[$i] : "---"));
+    $self->{'titre'}->set_text(($i>=0 ? $self->image_sc_string($i) : "---"));
 }
 
+# Returns the line number $i from sheets list adding $pas to it.
+#
+# {X:X}
 sub i_suivant {
     my ($self,$i,$pas)=(@_);
     $pas=1 if(!$pas);
@@ -476,13 +588,17 @@ sub i_suivant {
     return($i);
 }
 
+# Move in the sheets list, adding $pas to current position.
+#
+# {OUT:}
 sub image_suivante {
     my ($self,$pas)=(@_);
     $pas=1 if(!$pas);
     my $i=$self->i_suivant($self->{'iimage'},$pas);
 
+    $self->{'assoc'}->begin_read_transaction('ALIS');
     while($i != $self->{'iimage'}
-	  && ($self->{'assoc'}->effectif(fich2etud($self->{'images'}->[$i]))
+	  && ($self->{'assoc'}->get_real($self->image_sc($i))
 	      && ! $self->{'associes_cb'}->get_active()) ) {
 	$i=$self->i_suivant($i,$pas);
 	if($pas==1) {
@@ -492,6 +608,9 @@ sub image_suivante {
 	    $i=-1 if($i==$#{$self->{'images'}} && $self->{'iimage'}==-1);
 	}
     }
+
+    $self->{'assoc'}->end_transaction('ALIS');
+
     if($self->{'iimage'} != $i) {
 	$self->goto_image($i) ;
     } else {
@@ -499,27 +618,36 @@ sub image_suivante {
     }
 }
 
+# Go to next sheet.
+#
+# {X:OUT}
 sub va_suivant {
     my ($self)=(@_);
     $self->image_suivante(1);
 }
 
+# Go to previous sheet.
+#
+# {X:OUT}
 sub va_precedent {
     my ($self)=(@_);
     $self->image_suivante(-1);
 }
 
-#<
-
+# Sets the content and style of a button, according to the association
+# made with the student corresponding to the button.
+#
+# {IN:}
 sub style_bouton {
     my ($self,$i,$actif)=(@_);
+    my @sc;
 
     if($i eq 'IMAGE') {
 	return() if($self->{iimage}<0);
-	my $id=fich2etud($self->{'images'}->[$self->{iimage}]);
+	my @sc=$self->image_sc($self->{iimage});
 
-	if($id) {
-	    ($i)=$self->id2inom($id);
+	if(@sc) {
+	    ($i)=$self->sc2inom(@sc);
 
 	    return() if(!defined($i));
 	} else {
@@ -527,9 +655,7 @@ sub style_bouton {
 	}
     }
 
-    my $pris=join(',',$self->{'assoc'}->inverse($self->inom2id($i)));
-
-    #print STDERR "STYLE($i,".$self->inom2id($i)."):$pris\n";
+    my $pris=studentids_string($self->{'assoc'}->real_back($self->inom2code($i)));
 
     my $b=$self->{'boutons'}->[$i];
     my $eb=$self->{'boutons_eb'}->[$i];
@@ -550,17 +676,35 @@ sub style_bouton {
 		$eb->modify_bg($_,$col);
 	    }
 	} else {
-	    print STDERR "*** no EventBox for $i ***\n";
+	    debug_and_stderr "*** no EventBox for $i ***\n";
 	}
     } else {
-	print STDERR "*** no buttun for $i ***\n";
+	debug_and_stderr "*** no button for $i ***\n";
     }
 }
 
+# Calls style_button for the button of the student whose primary key
+# ID is $code.
+#
+# {X:IN}
+sub style_bouton_code {
+  my ($self,$code,$actif)=@_;
+  for($self->{'liste'}->data($self->{'liste_key'},$code,
+			     'all'=>1,'i'=>1)) {
+    $self->style_bouton($_,$actif);
+  }
+}
+
+# Choose student at line $i in the students list file to be associated
+# with current sheet from the list.
+#
+# {OUT:}
 sub choisit {
     my ($self,$i)=(@_);
 
-    $self->lie($i,$self->{'image_etud'});
+    $self->{'assoc'}->begin_transaction('ASWT');
+    $self->lie($i,@{$self->{'image_sc'}});
+    $self->{'assoc'}->end_transaction('ASWT');
     $self->image_suivante();
 }
 

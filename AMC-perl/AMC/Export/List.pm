@@ -71,7 +71,7 @@ sub dims {
     }
 
     my $dispo=$self->{'page_x'}-2*$self->{'out.margin'}-($self->{'out.ncols'}-1)*$self->{'out.sep'};
-    
+
     $self->{'space'}=2;
     $self->{'cs_mark'}=50;
     $self->{'cs_name'}=$dispo/$self->{'out.ncols'}-$self->{'cs_mark'};
@@ -106,7 +106,7 @@ sub dx_dir {
 
 sub debut_col {
     my ($self)=@_;
- 
+
     $self->{'icol'}++;
     if($self->{'icol'}>=$self->{'out.ncols'}) {
 	$self->{'icol'}=0 ;
@@ -122,7 +122,7 @@ sub debut_col {
 
     $self->{'context'}->move_to($self->{'x'}-$self->dx_dir(0),$self->{'y'});
     $self->{'context'}->line_to($self->{'x'}+$self->dx_dir(1),$self->{'y'});
-}    
+}
 
 sub export {
     my ($self,$fichier)=@_;
@@ -144,20 +144,20 @@ sub export {
 
     $self->debut_col();
 
-    for my $etu (grep { ! /^(max|moyenne)$/ } (@{$self->{'copies'}})) {
+    for my $m (@{$self->{'marks'}}) {
 
 	# strings to write in columns
-	my $nom=$self->{'c'}->{$etu}->{'_NOM_'};
-	my $note=$self->{'c'}->{$etu}->{'_NOTE_'};
+	my $name=$m->{'student.name'};
+	my $mark=$m->{'mark'};
 
 	# prepares writting name
-	$self->{'layout'}->set_text($nom);
+	$self->{'layout'}->set_text($name);
 	($text_x,$text_y)=$self->{'layout'}->get_pixel_size();
 
 	# remove end characters while string is too long
-	while($nom && $text_x > $self->{'cs_name'}-6*$self->{'space'}) {
-	    $nom =~s/.$//;
-	    $self->{'layout'}->set_text($nom);
+	while($name && $text_x > $self->{'cs_name'}-6*$self->{'space'}) {
+	    $name =~s/.$//;
+	    $self->{'layout'}->set_text($name);
 	    ($text_x,$text_y)=$self->{'layout'}->get_pixel_size();
 	}
 
@@ -166,7 +166,7 @@ sub export {
 	   > $self->{'page_y'}) {
 	    $self->debut_col();
 	}
-	
+
 	$y0=$self->{'y'};
 
 	$self->{'y'}+=$self->{'space'};
@@ -183,7 +183,7 @@ sub export {
 
 	# writes grade
 
-	$self->{'layout'}->set_text($self->parse_num($note));
+	$self->{'layout'}->set_text($self->parse_num($mark));
 	($text_x,$text_y)=$self->{'layout'}->get_pixel_size();
 	if($self->{'out.rtl'}) {
 	    $self->{'context'}->move_to($self->{'x'}-($self->{'cs_mark'}+$text_x)/2,
@@ -210,7 +210,7 @@ sub export {
     }
 
     $self->{'context'}->show_page();
-    
+
 }
 
 1;

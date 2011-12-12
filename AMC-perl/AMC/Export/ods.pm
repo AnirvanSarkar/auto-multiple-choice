@@ -68,7 +68,7 @@ sub yx2ooo {
     return(($fx ? '$' : '').x2ooo($x).($fy ? '$' : '').($y+1));
 }
 
-sub one_range {
+sub subcolumn_range {
     my ($column,$a,$b)=@_;
     if($a==$b) {
 	return("[.".$column.($a+1)."]");
@@ -77,8 +77,17 @@ sub one_range {
     }
 }
 
-sub list_condensed {
-    my ($column,@lines)=@_;
+sub subrow_range {
+    my ($row,$a,$b)=@_;
+    if($a==$b) {
+	return("[.".x2ooo($a).($row+1)."]");
+    } else {
+	return("[.".x2ooo($a).($row+1).":".".".x2ooo($b).($row+1)."]");
+    }
+}
+
+sub condensed {
+    my ($range,$column,@lines)=@_;
     my @l=sort { $a <=> $b } @lines;
     my $debut='';
     my $fin='';
@@ -88,7 +97,7 @@ sub list_condensed {
 	    if($i == $fin+1) {
 		$fin=$i;
 	    } else {
-		push @sets,one_range($column,$debut,$fin);
+		push @sets,&$range($column,$debut,$fin);
 		$debut=$i;
 		$fin=$i;
 	    }
@@ -97,8 +106,18 @@ sub list_condensed {
 	    $fin=$i;
 	}
     }
-    push @sets,one_range($column,$debut,$fin);
+    push @sets,&$range($column,$debut,$fin);
     return(join(";",@sets));
+}
+
+sub subcolumn_condensed {
+  my ($column,@rows)=@_;
+  return(condensed(\&subcolumn_range,$column,@rows));
+}
+
+sub subrow_condensed {
+  my ($row,@columns)=@_;
+  return(condensed(\&subrow_range,$row,@columns));
 }
 
 my %largeurs=(qw/ASSOC 4cm
@@ -126,30 +145,53 @@ my %fonction_arrondi=(qw/i ROUNDDOWN
 		      s ROUNDUP
 		      /);
 
+sub set_cell {
+  my ($doc,$feuille,$jj,$ii,$abs,$x,$value,%oo)=@_;
+
+  $value=encode('utf-8',$value) if($oo{'utf8'});
+  $doc->cellValueType($feuille,$jj,$ii,'float')
+    if($oo{'numeric'} && !$abs);
+  $doc->cellStyle($feuille,$jj,$ii,
+		  ($abs && $style_col_abs{$x}
+		   ? $style_col_abs{$x} : $style_col{$x}));
+  if($oo{'formula'}) {
+    $doc->cellFormula($feuille,$jj,$ii,$oo{'formula'});
+  } else {
+    $doc->cellValue($feuille,$jj,$ii,$value);
+  }
+}
+
 sub export {
     my ($self,$fichier)=@_;
 
     $self->pre_process();
 
-    my $grain=$self->{'calcul'}->{'grain'};
+    $self->{'_scoring'}->begin_read_transaction('XODS');
+
+    my $grain=$self->{'_scoring'}->variable('granularity');
     my $ndg=0;
     if($grain =~ /[.,]([0-9]*[1-9])/) {
 	$ndg=length($1);
     }
 
+    my $rd=$self->{'_scoring'}->variable('rounding');
     my $arrondi='';
-    if($self->{'calcul'}->{'arrondi'} =~ /^([ins])/i) {
-	$arrondi=$fonction_arrondi{$1};
+    if($rd =~ /^([ins])/i) {
+      $arrondi=$fonction_arrondi{$1};
+    } else {
+      debug "Unknown rounding type: $rd";
     }
 
-    my $notemin=$self->{'calcul'}->{'notemin'};
-    my $plafond=$self->{'calcul'}->{'plafond'};
+    my $lk=$self->{'_assoc'}->variable('key_in_list');
+
+    my $notemin=$self->{'_scoring'}->variable('mark_floor');
+    my $plafond=$self->{'_scoring'}->variable('ceiling');
 
     $notemin='' if($notemin =~ /[a-z]/i);
 
     my $la_date = odfLocaltime();
 
-    my $archive = odfContainer($fichier, 
+    my $archive = odfContainer($fichier,
 			       create => 'spreadsheet');
 
     my $doc=odfConnector(container	=> $archive,
@@ -163,7 +205,7 @@ sub export {
 		      family=>'table-column',
 		      properties=>{
 			  -area=>'table-column',
-			  'column-width' => "1cm", 
+			  'column-width' => "1cm",
 		      },
 		      );
 
@@ -172,7 +214,7 @@ sub export {
 			  family=>'table-column',
 			  properties=>{
 			      -area=>'table-column',
-			      'column-width' => $largeurs{$_}, 
+			      'column-width' => $largeurs{$_},
 			  },
 			  );
     }
@@ -237,9 +279,9 @@ sub export {
 			     -area => 'paragraph',
 			     'fo:text-align' => "center",
 			 },
-			 'references'=>{'style:data-style-name' => 'Percentage'},		     
+			 'references'=>{'style:data-style-name' => 'Percentage'},
 			 );
-    
+
     # NoteQ : note pour une question
     $styles->createStyle('NoteQ',
 			 parent=>'Tableau',
@@ -248,7 +290,7 @@ sub export {
 			     -area => 'paragraph',
 			     'fo:text-align' => "center",
 			 },
-			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},		     
+			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},
 			 );
 
     # NoteV : note car pas de reponse
@@ -259,7 +301,7 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#f7ffbd",
 			 },
-			 'references'=>{'style:data-style-name' => 'NombreVide'},		     
+			 'references'=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
     # NoteE : note car erreur "de syntaxe"
@@ -270,7 +312,7 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#ffbaba",
 			 },
-			 'references'=>{'style:data-style-name' => 'NombreVide'},		     
+			 'references'=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
     # NoteX : pas de note car la question ne figure pas dans cette copie la
@@ -281,7 +323,7 @@ sub export {
 			     -area => 'paragraph',
 			     'fo:text-align' => "center",
 			 },
-			 'references'=>{'style:data-style-name' => 'NombreVide'},		     
+			 'references'=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
     $styles->updateStyle('NoteX',
@@ -333,7 +375,7 @@ sub export {
 			     -area => 'paragraph',
 			     'fo:text-align' => "right",
 			 },
-			 'references'=>{'style:data-style-name' => 'num.Note'},		     
+			 'references'=>{'style:data-style-name' => 'num.Note'},
 			 );
 
     $styles->updateStyle('NoteF',
@@ -373,14 +415,14 @@ sub export {
 			     'fo:border'=>"0.039cm solid \#000000", # epaisseur trait / solid|double / couleur
 			 },
 			 );
-    
+
     $styles->updateStyle('Entete',
 			 properties=>{
 			     -area => 'text',
 			     'fo:font-weight'=>'bold',
 			 },
 			 );
-    
+
     $styles->updateStyle('Entete',
 			 properties=>{
 			     -area => 'paragraph',
@@ -397,7 +439,7 @@ sub export {
 			     'style:rotation-angle'=>"90",
 			 },
 			 );
-    
+
     # EnteteIndic : en-tete d'une question indicative
     $styles->createStyle('EnteteIndic',
 			 parent=>'EnteteVertical',
@@ -407,17 +449,22 @@ sub export {
 			     'fo:background-color'=>"#e6e6ff",
 			 },
 			 );
-			     
 
-    my @keys=@{$self->{'keys'}};
-    my @codes=@{$self->{'codes'}};
 
-    my $nkeys=$#{$self->{'keys'}}+1;
-    my @keys_compte=grep {!$self->{'indicative'}->{$_}} @keys;
-    my $nkeys_compte=1+$#keys_compte;
+    my @codes=$self->{'_scoring'}->codes;
+    my $codes_re="(".join("|",map { "\Q$_\E" } @codes).")";
+    my @questions=grep { $_->{'title'} !~ /$codes_re\.[0-9]+$/ }
+      $self->{'_scoring'}->questions;
+    my @questions_0=grep { $self->{'_scoring'}->one_indicative($_->{'question'},0); }
+      @questions;
+    my @questions_1=grep { $self->{'_scoring'}->one_indicative($_->{'question'},1); }
+      @questions;
 
-    my $dimx=7+$#keys+$#codes+($self->{'liste_key'} ? 1:0);
-    my $dimy=6+$#{$self->{'copies'}};
+    my $nq=$#questions_0+1+$#questions_1+1;
+    my $nkeys_compte=1+$#questions_0;
+
+    my $dimx=6+$nq+$#codes+($lk ? 1:0);
+    my $dimy=6+$#{$self->{'marks'}};
 
     my $feuille=$doc->getTable(0,$dimy,$dimx);
     $doc->expandTable($feuille, $dimy, $dimx);
@@ -433,20 +480,26 @@ sub export {
     my $x1=0;
     my $y0=2;
     my $y1=0;
-    my $y2=0;
     my $ii;
     my %code_col=();
     my %code_row=();
+    my %col_cells=();
 
-    # first line: titles
-    
+    my $notemax;
+
+    my $jj=$y0;
+
+    ##########################################################################
+    # first row: titles
+    ##########################################################################
+
     $ii=$x0;
-    for(($self->{'liste_key'} ? 'ASSOC' : ()),
+    for(($lk ? 'ASSOC' : ()),
 	qw/nom note copie total max/) {
 	$doc->columnStyle($feuille,$ii,"col.$_");
 	$doc->cellStyle($feuille,$y0,$ii,'Entete');
 	if($_ eq 'ASSOC') {
-	    $doc->cellValue($feuille,$y0,$ii,"A:".encode('utf-8',$self->{'liste_key'}));
+	    $doc->cellValue($feuille,$y0,$ii,"A:".encode('utf-8',$lk));
 	} else {
 	    $doc->cellValue($feuille,$y0,$ii,
 			    encode('utf-8',translate_column_title($_)));
@@ -457,141 +510,197 @@ sub export {
 
     $x1=$ii;
 
-    for(@keys) {
+    for(@questions_0) {
 	$doc->columnStyle($feuille,$ii,'col.notes');
-	$doc->cellStyle($feuille,$y0,$ii,
-			($self->{'indicative'}->{$_} ? 'EnteteIndic' : 'EnteteVertical'));
-	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_));
+	$doc->cellStyle($feuille,$y0,$ii,'EnteteVertical');
+	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_->{'title'}));
+    }
+    for(@questions_1) {
+	$doc->columnStyle($feuille,$ii,'col.notes');
+	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
+	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_->{'title'}));
     }
     for(@codes) {
 	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
 	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_));
     }
 
-    # following lines
+    ##########################################################################
+    # second row: maximum
+    ##########################################################################
 
-    my $notemax;
+    $jj++;
+
+    $doc->cellStyle($feuille,$jj,$code_col{'nom'},'Tableau');
+    $doc->cellValue($feuille,$jj,$code_col{'nom'},translate_id_name('max'));
+
+    $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
+    $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
+    $doc->cellValue($feuille,$jj,$code_col{'note'},
+		    $self->{'_scoring'}->variable('mark_max'));
+    $notemax='[.'.yx2ooo($jj,$code_col{'note'},1,1).']';
+
+    $ii=$x1;
+    for(@questions_0) {
+      $doc->cellStyle($feuille,$jj,$ii,'NoteQ');
+      $doc->cellValueType($feuille,$jj,$ii,'float');
+      $doc->cellValue($feuille,$jj,$ii++,
+		      $self->{'_scoring'}->question_maxmax($_->{'question'}));
+    }
+
+    $code_row{'max'}=$jj;
+
+    ##########################################################################
+    # third row: mean
+    ##########################################################################
+
+    $jj++;
+
+    $doc->cellStyle($feuille,$jj,$code_col{'nom'},'Tableau');
+    $doc->cellValue($feuille,$jj,$code_col{'nom'},translate_id_name('moyenne'));
+    $code_row{'average'}=$jj;
+
+    ##########################################################################
+    # following rows: students sheets
+    ##########################################################################
+
     my @presents=();
-    my %presents_q=();
-    my $jj=$y0;
-    for my $etu (@{$self->{'copies'}}) {
-	my $e=$self->{'c'}->{$etu};
+    my %scores;
+    my @scores_columns;
+
+    my $y1=$jj+1;
+
+    for my $m (@{$self->{'marks'}}) {
 	$jj++;
 
-	$code_row{$e->{'_ID_'}}=$jj;
+	# @presents collects the indices of the rows corresponding to
+	# students that where present at the exam.
+	push @presents,$jj if(!$m->{'abs'});
 
-	if($e->{'_ID_'} !~ /^(max|moyenne)$/) {
-	    $y1=$jj if(!$y1);
-	    $y2=$jj;
-	}
-
-	push @presents,$jj if(!($e->{'_ABS_'} || $e->{'_SPECIAL_'}));
+	# for current student sheet, @score_columns collects the
+	# indices of the columns where questions scores (only those
+	# that are to be summed up to get the total student score, not
+	# those from indicative questions)
+	# are. $scores{$question_number} is set to one when a question
+	# score is added to this list.
+	%scores=();
+	@scores_columns=();
 
 	# first: special columns (association key, name, mark, sheet
 	# number, total score, max score)
-	
+
 	$ii=$x0;
-	for(($self->{'liste_key'} ? 'ASSOC' : ()),
-	    qw/NOM NOTE ID TOTAL MAX/) {
 
-	    if($e->{'_ABS_'}) {
-		$doc->cellStyle($feuille,$jj,$ii,
-				($style_col_abs{$_} 
-				 ? $style_col_abs{$_}
-				 : $style_col{$_}));
-	    } else {
-		$doc->cellStyle($feuille,$jj,$ii,$style_col{$_});
-	    }
-	    $doc->cellValueType($feuille,$jj,$ii,'float')
-		if((/^(TOTAL|MAX)$/ && ! ($e->{'_ABS_'}||$e->{'_SPECIAL_'})) ||
-		   (/^(NOTE)$/ && ! $e->{'_ABS_'}));
-	    if($_ eq 'TOTAL') {
-		$doc->cellFormula($feuille,$jj,$ii,
-				  "oooc:=SUM([.".yx2ooo($jj,$x1).":.".yx2ooo($jj,$x1+$nkeys_compte-1)."])")
-		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
-	    } elsif($_ eq 'NOTE' && ! $e->{'_ABS_'}) {
-		if($e->{_ID_} eq 'max') {
-		    $notemax='[.'.yx2ooo($jj,$ii,1,1).']';
-		    $doc->cellValue($feuille,$jj,$ii,$e->{'_'.$_.'_'});
-		} elsif($e->{_ID_} eq 'moyenne') {
-		} else {
-		    $doc->cellFormula($feuille,$jj,$ii,
-				      "oooc:=IF($notemax>0;"
-				      .($notemin ne '' ? "MAX($notemin;" : "")
-				      .($plafond ? "MIN($notemax;" : "")
-				      ."$arrondi([."
-				      .yx2ooo($jj,$code_col{'total'})
-				      ."]/[."
-				      .yx2ooo($jj,$code_col{'max'})
-				      ."]*$notemax/$grain)*$grain"
-				      .($plafond ? ")" : "")
-				      .($notemin ne '' ? ")" : "")
-				      .";"
-				      .($notemin ne '' ? "MAX($notemin;" : "")
-				      ."$arrondi([."
-				      .yx2ooo($jj,$code_col{'total'})
-				      ."]/$grain)*$grain"
-				      .($notemin ne '' ? ")" : "")
-				      .")"
-			);
-		}
-	    } elsif($_ eq 'MAX') {
-		$doc->cellValue($feuille,$jj,$ii,$e->{'_'.$_.'_'})
-		    if(! ($e->{'_ABS_'}||$e->{'_SPECIAL_'}));
-	    } else {
-		my $c=$e->{'_'.$_.'_'};
-		$c=translate_id_name($e->{'_ID_'}) if($_ eq 'ID');
-		$doc->cellValue($feuille,$jj,$ii,encode('utf-8',$c));
-	    }
-	    $ii++;
-	}
+	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},'ASSOC',$m->{'key'},'utf8'=>1)
+	  if($lk);
+	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},
+		 'NOM',$m->{'student.name'},'utf8'=>1);
 
-	# second: columns for all questions scores 
-	
-	for(@keys) {
-	    if($e->{'_ABS_'}) {
-		$doc->cellStyle($feuille,$jj,$ii,'NoteX');
-	    } else {
-		my $raison=$self->{'notes'}->{'copie'}->{$etu}->{'question'}->{$_}->{'raison'};
-		$doc->cellValueType($feuille,$jj,$ii,
-				    ($e->{'_ID_'} eq 'moyenne' ? 'percentage' : 'float'));
-		$doc->cellStyle($feuille,$jj,$ii,
-				($e->{'_ID_'} eq 'moyenne' ? 'Qpc' :
-				 ($e->{$_} ne '' ? ($raison eq 'V' ? 'NoteV' : ($raison eq 'E' ? 'NoteE' : 'NoteQ')) : 'NoteX')));
-		$doc->cellValue($feuille,$jj,$ii,$e->{$_})
-		    if($e->{'_ID_'} ne 'moyenne');
-		push @{$presents_q{$ii}},$jj if($e->{$_} ne '' &&
-						!($e->{'_ABS_'} || $e->{'_SPECIAL_'}));
-	    }
-	    $ii++;
+	if($m->{'abs'}) {
+	  set_cell($doc,$feuille,$jj,$ii,1,
+		   'NOTE',$m->{'mark'});
+	} else {
+	  set_cell($doc,$feuille,$jj,$ii,0,
+		   'NOTE','','numeric'=>1,
+		   'formula'=>"oooc:=IF($notemax>0;"
+		   .($notemin ne '' ? "MAX($notemin;" : "")
+		   .($plafond ? "MIN($notemax;" : "")
+		   ."$arrondi([."
+		   .yx2ooo($jj,$code_col{'total'})
+		   ."]/[."
+		   .yx2ooo($jj,$code_col{'max'})
+		   ."]*$notemax/$grain)*$grain"
+		   .($plafond ? ")" : "")
+		   .($notemin ne '' ? ")" : "")
+		   .";"
+		   .($notemin ne '' ? "MAX($notemin;" : "")
+		   ."$arrondi([."
+		   .yx2ooo($jj,$code_col{'total'})
+		   ."]/$grain)*$grain"
+		   .($notemin ne '' ? ")" : "")
+		   .")");
 	}
-	for(@codes) {
+	$ii++;
+
+	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},
+		 'ID',$m->{'sc'});
+	$ii++; # see later for SUM column value...
+	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},
+		 'MAX',$m->{'max'},'numeric'=>1);
+
+	# second: columns for all questions scores
+
+	for my $q (@questions_0,@questions_1) {
+	  if($m->{'abs'}) {
+	    $doc->cellStyle($feuille,$jj,$ii,'NoteX');
+	  } else {
+	    my $r=$self->{'_scoring'}
+	      ->question_result($m->{'student'},$m->{'copy'},$q->{'question'});
 	    $doc->cellValueType($feuille,$jj,$ii,'float');
-	    $doc->cellStyle($feuille,$jj,$ii,'CodeV');
-	    $doc->cellValue($feuille,$jj,$ii++,$e->{$_});
+	    if($self->{'_scoring'}->indicative($m->{'student'},$q->{'question'})) {
+	      $doc->cellStyle($feuille,$jj,$ii,'CodeV');
+	    } else {
+	      if(defined($r->{'score'})) {
+		if(!$scores{$q->{'question'}}) {
+		  $scores{$q->{'question'}}=1;
+		  push @scores_columns,$ii;
+		  push @{$col_cells{$ii}},$jj;
+		  if($r->{'why'} =~ /v/i) {
+		    $doc->cellStyle($feuille,$jj,$ii,'NoteV');
+		  } elsif($r->{'why'} =~ /e/i) {
+		    $doc->cellStyle($feuille,$jj,$ii,'NoteE');
+		  } else {
+		    $doc->cellStyle($feuille,$jj,$ii,'NoteQ');
+		  }
+		} else {
+		  $doc->cellStyle($feuille,$jj,$ii,'NoteX');
+		}
+	      } else {
+		$doc->cellStyle($feuille,$jj,$ii,'NoteX');
+	      }
+	    }
+	    $doc->cellValue($feuille,$jj,$ii,$r->{'score'})
+	  }
+	  $ii++;
 	}
+
+	# third: codes values
+
+	for(@codes) {
+	  $doc->cellStyle($feuille,$jj,$ii,'CodeV');
+	  $doc->cellValue($feuille,$jj,$ii++,
+			  $self->{'_scoring'}
+			  ->student_code($m->{'student'},$m->{'copy'},$_));
+	}
+
+	# come back to add sum of the scores
+	set_cell($doc,$feuille,$jj,$code_col{'total'},$m->{'abs'},
+		 'TOTAL','','numeric'=>1,
+		 'formula'=>"oooc:=SUM(".subrow_condensed($jj,@scores_columns).")");
     }
 
-    # back to line for means
+    ##########################################################################
+    # back to row for means
+    ##########################################################################
 
     $ii=$x1;
-    for(@keys) {
-	$doc->cellFormula($feuille,$code_row{'moyenne'},$ii,
-			  "oooc:=AVERAGE("
-			  .list_condensed(x2ooo($ii),@{$presents_q{$ii}})
-			  .")/[.".yx2ooo($code_row{'max'},$ii)."]");
+    for my $q (@questions_0) {
+      $doc->cellStyle($feuille,$code_row{'average'},$ii,'Qpc');
+      $doc->cellFormula($feuille,$code_row{'average'},$ii,
+			"oooc:=AVERAGE("
+			.subcolumn_condensed(x2ooo($ii),@{$col_cells{$ii}})
+			.")/[.".yx2ooo($code_row{'max'},$ii)."]");
 
-	$ii++;
+      $ii++;
     }
 
-    # mean mark cell
-    $doc->cellFormula($feuille,$code_row{'moyenne'},$code_col{'note'},
+    $doc->cellStyle($feuille,$code_row{'average'},$code_col{'note'},'NoteF');
+    $doc->cellFormula($feuille,$code_row{'average'},$code_col{'note'},
 		      "oooc:=AVERAGE("
-		      .list_condensed(x2ooo($code_col{'note'}),@presents).")");
-
+     		      .subcolumn_condensed(x2ooo($code_col{'note'}),@presents).")");
 
     # set meta-data and write to file
-    
+
     my $meta = odfMeta(container => $archive);
 
     $meta->title(encode('utf-8',$self->{'out.nom'}));

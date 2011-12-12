@@ -28,6 +28,8 @@ use IO::File;
 use Fcntl qw(:flock :seek);
 use XML::Writer;
 use XML::Simple;
+use POSIX qw/strftime/;
+use Encode;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 
@@ -36,7 +38,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_specdir &get_sty &id_triable &file2id &id2idf &get_ep &get_epo &get_qr &file_triable &sort_id &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name);
+    @EXPORT      = qw( &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &format_date);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -155,15 +157,6 @@ sub get_sty {
     return(@r);
 }
 
-sub id_triable {
-    my $id=shift;
-    if($id =~ /\+([0-9]+)\/([0-9]+)\/([0-9]+)\+/) {
-	return(sprintf("%50d-%30d-%40d",$1,$2,$3));
-    } else {
-	return($id);
-    }
-}
-
 sub file2id {
     my $f=shift;
     if($f =~ /^[a-z]*-?([0-9]+)-([0-9]+)-([0-9]+)/) {
@@ -193,8 +186,17 @@ sub get_qr {
 
 sub get_epo {
     my $id=shift;
-    if($id =~ /^\+([0-9]+)\/([0-9]+)\/([0-9]+)\+$/) {
+    if($id =~ /^\+?([0-9]+)\/([0-9]+)\/([0-9]+)\+?$/) {
         return($1,$2);
+    } else {
+        return();
+    }
+}
+
+sub get_epc {
+    my $id=shift;
+    if($id =~ /^\+?([0-9]+)\/([0-9]+)\/([0-9]+)\+?$/) {
+        return($1,$2,$3);
     } else {
         return();
     }
@@ -241,13 +243,22 @@ sub sort_string {
     return($a cmp $b);
 }
 
-sub sort_id {
-    my ($liststore, $itera, $iterb, $sortkey) = @_;
-    my $a = $liststore->get ($itera, $sortkey);
-    my $b = $liststore->get ($iterb, $sortkey);
+sub sort_from_columns {
+  my ($liststore, $itera, $iterb, $sortkeys) = @_;
+  my $r=0;
+ SK:for my $c (@$sortkeys) {
+    my $a = $liststore->get ($itera, $c->{'col'});
+    my $b = $liststore->get ($iterb, $c->{'col'});
     $a='' if(!defined($a));
     $b='' if(!defined($b));
-    return id_triable($a) cmp id_triable($b);
+    if($c->{'type'} =~ /^n/) {
+      $r=$a <=> $b;
+    } else {
+      $r=$a cmp $b;
+    }
+    last SK if($r!=0);
+  }
+  return($r);
 }
 
 sub attention {
@@ -270,11 +281,14 @@ sub bon_id {
 
     my ($l,$path,$iter,$data)=@_;
 
-    my ($col,$v,$result)=@$data;
+    my ($result,%constraints)=@$data;
 
-    #print "BON [=$v] ? ".$l->get($iter,$col)."\n";
+    my $ok=1;
+    for my $col (keys %constraints) {
+      $ok=0 if($l->get($iter,$col) ne $constraints{$col})
+    }
 
-    if($l->get($iter,$col) eq $v) {
+    if($ok) {
 	$$result=$iter->copy;
 	return(1);
     } else {
@@ -283,9 +297,9 @@ sub bon_id {
 }
 
 sub model_id_to_iter {
-    my ($cl,$a,$val)=@_;
+    my ($cl,%constraints)=@_;
     my $result=undef;
-    $cl->foreach(\&bon_id,[$a,$val,\$result]);
+    $cl->foreach(\&bon_id,[\$result,%constraints]);
     return($result);
 }
 
@@ -556,6 +570,24 @@ sub translate_column_title {
 sub translate_id_name {
     my ($k)=@_;
     return($id_names{$k} ? $id_names{$k} : $k);
+}
+
+sub format_date {
+  my ($time)=@_;
+  return(decode('UTF-8',strftime("%x %X",localtime($time))));
+}
+
+sub pageids_string {
+  my ($student,$page,$copy,%oo)=@_;
+  my $s=$student.'/'.$page
+    .($copy ? ':'.$copy : '');
+  $s =~ s/[^0-9]/-/g if($oo{'path'});
+  return($s);
+}
+
+sub studentids_string {
+  my ($student,$copy)=@_;
+  return($student.($copy ? ':'.$copy : ''));
 }
 
 sub __($) { return($localisation->get(shift)); }

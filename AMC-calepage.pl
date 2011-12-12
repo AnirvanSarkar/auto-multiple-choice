@@ -26,11 +26,12 @@ use Getopt::Long;
 
 use AMC::Basic;
 use AMC::Exec;
-use AMC::MEPList;
+use AMC::Data;
 use AMC::Calage;
 use AMC::Image;
 use AMC::Boite qw/min max/;
 use AMC::Gui::Avancement;
+use AMC::DataModule::capture qw/:zone :position/;
 
 my $anf_version=1;
 
@@ -84,19 +85,17 @@ my $progress=0;
 my $progress_id='';
 my $progress_debut=0;
 
-my $mep_saved='';
-
 my $debug_image='';
+
+my $multiple='';
 
 my @stud_page;
 
 GetOptions("page=s"=>\$out_cadre,
-	   "mep=s"=>\$xml_layout,
-	   "mep-saved=s"=>\$mep_saved,
+	   "multiple!"=>\$multiple,
+	   "data=s"=>\$data_dir,
 	   "transfo=s"=>\$t_type,
 	   "zooms=s"=>\$zoom_file,
-	   "nom=s"=>\$nom_file,
-	   "analyse=s"=>\$analyse_file,
 	   "id-page=s"=>\$id_page_fourni,
 	   "seuil-coche=s"=>\$seuil_coche,
 	   "dust-size=s"=>\$dust_size,
@@ -134,9 +133,18 @@ $threshold = "60%" if($threshold eq 'defaut');
 
 $scan=$ARGV[0];
 
+my $sf=$scan;
+if($rep_projet) {
+  $sf=abs2proj({'%PROJET',$rep_projet,
+		'%HOME'=>$ENV{'HOME'},
+		''=>'%PROJET',
+	       },
+	       $sf);
+}
+
 sub erreur {
     my ($e,$silent)=shift;
-    if($debug_image && 
+    if($debug_image &&
        $traitement->mode() eq 'opencv') {
 	$traitement->commande("output ".$debug_image);
 	$traitement->ferme_commande;
@@ -174,7 +182,7 @@ if($traitement->mode() eq 'opencv') {
 
     if($blur || $threshold || $scan !~ /\.ppm$/) {
 	print "Converting to ppm...\n";
-	
+
 	my @ca=(magick_module('convert'));
 	push @ca,"-blur",$blur if($blur);
 	push @ca,"-threshold",$threshold if($threshold);
@@ -192,28 +200,22 @@ if($traitement->mode() eq 'opencv') {
 	}
     }
     close(CMD);
-    
+
     erreur("Taille non reconnue") if(!$tiff_x);
-    
+
     debug "IMAGE = $scan ($tiff_x x $tiff_y)\n";
 }
 
 ##########################################################
 # Initiation des utilitaires
 
-my $mep_dispos;
+my $layout=AMC::Data->new($data_dir)->module('layout');
 
-$mep_dispos=AMC::MEPList::new($xml_layout,"saved"=>$mep_saved);
+my $cale;
+my $cadre_general;
+my $cadre_origine;
 
-erreur("No layout") if($mep_dispos->nombre()==0);
-
-debug "".$mep_dispos->nombre()." layouts\n";
-
-my $cale=AMC::Calage::new('type'=>$t_type);
-
-my $cadre_general,$cadre_origine;
-
-my $lay;
+my @epc;
 
 sub commande_transfo {
     my @r=$traitement->commande(@_);
@@ -224,32 +226,41 @@ sub commande_transfo {
 }
 
 sub calage_reperes {
-    my $id=shift;
-    $lay=$mep_dispos->mep($id);
+  my ($id,$dont_create)=@_;
 
-    if($lay) {
-	$cadre_origine=AMC::Boite::new_complete_xml($lay);
-	debug "Origine : ".$cadre_origine->txt()."\n";
-	
-	if($traitement->mode() eq 'opencv') {
+  @epc=get_epc($id) if($id);
 
-	    $cale=AMC::Calage::new('type'=>'lineaire');
-	    commande_transfo(join(' ',"optim",
-				  $cadre_origine->draw_points()));
+  $layout->begin_read_transaction('cREP');
 
-	} else {
-	    
-	    my @cx=map { $cadre_origine->coordonnees($_,'x') } (0..3);
-	    my @cy=map { $cadre_origine->coordonnees($_,'y') } (0..3);
-	    my @cxp=map { $cadre_general->coordonnees($_,'x') } (0..3);
-	    my @cyp=map { $cadre_general->coordonnees($_,'y') } (0..3);
-	    
-	    $cale->calage(\@cx,\@cy,\@cxp,\@cyp);
-	    
-	}
+  @epc=($layout->random_studentPage,-1) if(!@epc && !$dont_create) ;
+  if(!($epc[2]<0 || $layout->exists(@epc))) {
+    $layout->end_transaction('cREP');
+    return;
+  }
 
-	debug "MSE=".$cale->mse();
-    }
+  $cadre_origine=AMC::Boite::new_complete($layout->all_marks(@epc[0,1]));
+  $layout->end_transaction('cREP');
+
+  debug "Origine : ".$cadre_origine->txt()."\n";
+
+  if($traitement->mode() eq 'opencv') {
+
+    $cale=AMC::Calage::new('type'=>'lineaire');
+    commande_transfo(join(' ',"optim",
+			  $cadre_origine->draw_points()));
+
+  } else {
+
+    my @cx=map { $cadre_origine->coordonnees($_,'x') } (0..3);
+    my @cy=map { $cadre_origine->coordonnees($_,'y') } (0..3);
+    my @cxp=map { $cadre_general->coordonnees($_,'x') } (0..3);
+    my @cyp=map { $cadre_general->coordonnees($_,'y') } (0..3);
+
+    $cale->calage(\@cx,\@cy,\@cxp,\@cyp);
+
+  }
+
+  debug "MSE=".$cale->mse();
 }
 
 ##########################################################
@@ -270,18 +281,29 @@ sub decimal {
 
 $avance->progres((1-$progress_debut)/3);
 
-my $diametre_marque;
-
-#####
 # chargement d'une MEP au hasard pour recuperer la taille
 
-my $hmep=$mep_dispos->mep();
+$layout->begin_read_transaction('cDIM');
+
+if($layout->pages_count()==0) {
+  $layout->end_transaction('cDIM');
+  erreur("No layout");
+}
+debug "".$layout->pages_count()." layouts\n";
+
+my @ran=$layout->random_studentPage;
+my ($width,$height,$markdiameter)=
+    $layout->dims(@ran);
+$layout->end_transaction('cDIM');
+
+$cale=AMC::Calage::new('type'=>$t_type);
 
 if($traitement->mode() eq 'opencv') {
 
     my @r;
-    my @args=('-x',$hmep->{'tx'},'-y',$hmep->{'ty'},
-	      '-d',$hmep->{'diametremarque'},
+    my @args=('-x',$width,
+	      '-y',$height,
+	      '-d',$markdiameter,
 	      '-p',$tol_marque_plus,'-m',$tol_marque_moins,
 	      '-o',($debug_image ? $debug_image : 1)
 	);
@@ -297,17 +319,17 @@ if($traitement->mode() eq 'opencv') {
 	    push @c,$2,$3;
 	}
     }
-    $cadre_general=AMC::Boite::new_complete(@c);	    
+    $cadre_general=AMC::Boite::new_complete(@c);
 
 } else {
-    
-    $rx=$tiff_x / $hmep->{'tx'};
-    $ry=$tiff_y / $hmep->{'ty'};
-    
-    $taille=$hmep->{'diametremarque'}*($rx+$ry)/2;
+
+    $rx=$tiff_x / $width;
+    $ry=$tiff_y / $height;
+
+    $taille=$markdiameter*($rx+$ry)/2;
     $taille_max=$taille*(1+$tol_marque_plus);
     $taille_min=$taille*(1-$tol_marque_moins);
-    
+
     debug "rx = $rx   ry = $ry\n";
     debug(sprintf("Target sign size : %.2f (%.2f to %.2f)",
 		  $taille,
@@ -315,44 +337,44 @@ if($traitement->mode() eq 'opencv') {
 
     my $lisse_trous=1+int(($taille_min+$taille_max)/2 /20);
     my $lisse_pouss=1+int(($taille_min+$taille_max)/2 /8);
-    
+
     print "Morphological operations (+$lisse_trous-$lisse_pouss) and signs detection...\n";
-    
+
     $traitement->commande("etend $lisse_trous");
     $traitement->commande("erode ".($lisse_trous+$lisse_pouss));
     $traitement->commande("etend $lisse_pouss");
     $traitement->commande("calccc");
-    
+
     for($traitement->commande("magick")) {
 	if(/\(([0-9]+),([0-9]+)\)-[^\s]*\s+:\s+([0-9]+)\s*x\s*([0-9]+)/) {
 	    push @box,AMC::Boite::new_MD($1,$2,$3,$4);
 	}
     }
-    
+
     $traitement->ferme_commande();
 
     print "".($#box+1)." boxes.\n";
-    
+
     debug join("\n",map { $_->txt(); } @box);
-    
+
     print "Searching signs...\n";
-    
+
     @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
-    
+
     if($#okbox < 3) {
 	erreur("Only ".(1+$#okbox)." signs detected / needs at least 4");
     }
-    
+
     @okbox=AMC::Boite::extremes(@okbox);
-    
+
     if(get_debug()) {
 	for my $c (@okbox) {
 	    my ($dx,$dy)=$c->etendue_xy();
 	    debug(sprintf("Sign size: $dx x $dy (%6.2f | %6.2f %%)",
-			  100*($dx-$taille)/$taille,100*($dy-$taille)/$taille)); 
+			  100*($dx-$taille)/$taille,100*($dy-$taille)/$taille));
 	}
     }
-    
+
     $cadre_general=AMC::Boite::new_complete(map { $_->centre() } (@okbox));
 }
 
@@ -377,21 +399,19 @@ sub valide_id_page {
     }
 
     attention("WARNING: No page ID!") if(!$id_page);
-    
+
     $id_page_f=id2idf($id_page);
     $id_page_f0=id2idf($id_page,'simple'=>1);
-    
+
     if($repertoire_cr) {
-	$out_cadre="$repertoire_cr/page-$id_page_f.jpg";
 	$zoom_file="$repertoire_cr/zoom-$id_page_f.jpg";
 	$zoom_dir="$repertoire_cr/zooms/$id_page_f0";
-	$nom_file="$repertoire_cr/nom-$id_page_f.jpg";
 	$analyse_file="$repertoire_cr/analyse-$id_page_f.xml";
 
 	# clear old analysis results files
 
 	clear_old('analysis result',
-		  $out_cadre,$zoom_file,$nom_file,$zoom_dir);
+		  $out_cadre,$zoom_file,$zoom_dir);
     }
 }
 
@@ -405,7 +425,7 @@ sub une_ligne {
 
 my %case=();
 
-my %score,%score_data,%coins_test;
+my %zoom_file,%score_data,%coins_test;
 
 sub mesure_case {
     my ($k)=(@_);
@@ -418,20 +438,22 @@ sub mesure_case {
 	    $traitement->commande(join(' ',"id",@stud_page,$1,$2))
 	}
     }
-    
+
     for($traitement->commande($case{$k}->commande_mesure($prop))) {
-	
+
 	if(/^COIN\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
 	    $coins_test{$k}->def_point_suivant($1,$2);
 	}
 	if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
 	    $r=($2==0 ? 0 : $1/$2);
 	    debug sprintf("Binary box $k: %d/%d = %.4f\n",$1,$2,$r);
-	    $score{$k}=$r;
-	    $score_data{$k}="pixels=\"$2\" pixelsnoirs=\"$1\" r=\"$r\"";
+	    $score_data{$k}=[$2,$1];
+	}
+	if(/^ZOOM\s+(.*)/) {
+	  $zoom_file{$k}=$1;
 	}
     }
-    
+
     return($r);
 }
 
@@ -467,38 +489,45 @@ sub get_nb_binaire {
 }
 
 sub get_id_binaire {
-    $id_page="+".get_nb_binaire(1)."/".get_nb_binaire(2)."/".get_nb_binaire(3)."+";
+    @epc=map { get_nb_binaire($_) } (1,2,3);
+    $id_page="+".join('/',@epc)."+";
     print "Page : $id_page\n";
     debug("Found binary ID: $id_page");
 }
 
-erreur("No layout instructions...") if(!($mep_saved || -d $xml_layout));
+erreur("No data directory...") if(! -d $data_dir);
 
 sub read_id {
     print "Positionning to read ID...\n";
     debug "Positionning to read ID...\n";
-    
+
     # first, use the layout info from a random page (they should be
     # the same for all pages) to get the transformation layout->scan
 
     calage_reperes();
-    
-    # prepares digit-boxes reading 
 
-    for my $c (@{$lay->{'chiffre'}}) {
-	my $k=code_cb($c->{'n'},$c->{'i'});
-	my $c0=AMC::Boite::new_xml($c);
+    # prepares digit-boxes reading
+
+    my $c;
+    $layout->begin_read_transaction('cDIG');
+    my $sth=$layout->statement('digitInfo');
+    $sth->execute(@epc[0,1]);
+    while($c=$sth->fetchrow_hashref) {
+	my $k=code_cb($c->{'numberid'},$c->{'digitid'});
+	my $c0=AMC::Boite::new_MN(map { $c->{$_} }
+				  (qw/xmin ymin xmax ymax/));
 	$case{$k}=$c0->transforme($cale);
     }
-    
+    $layout->end_transaction('cDIG');
+
     # reads the ID from the binary boxes
 
     get_id_binaire();
 
     # computes again the transformation from the layout info of the
     # right page
-    
-    calage_reperes($id_page);
+
+    calage_reperes($id_page,1);
 }
 
 #####
@@ -506,16 +535,35 @@ sub read_id {
 read_id();
 $upside_down=0;
 
-if(($traitement->mode() eq 'opencv') && !$lay) {
+if($traitement->mode() eq 'opencv') {
+  $layout->begin_read_transaction('cUSD');
+  my $ok=$layout->exists(@epc);
+  $layout->end_transaction('cUSD');
+
+  if(!$ok) {
     # Unknown ID: tries again upside down
 
     $traitement->commande("rotate180");
 
     read_id();
     $upside_down=1;
+  }
 }
 
-erreur("No XML for ID $id_page") if(! $lay);
+$layout->begin_read_transaction('cFLY');
+my $ok=$layout->exists(@epc);
+$layout->end_transaction('cFLY');
+
+if(! $ok) {
+
+  # Page ID has not been found: report it in the database.
+  my $capture=AMC::Data->new($data_dir)->module('capture');
+  $capture->begin_transaction('CFLD');
+  $capture->failed($sf);
+  $capture->end_transaction('CFLD');
+
+  erreur("No layout for ID $id_page") ;
+}
 
 if($traitement->mode() eq 'opencv') {
     commande_transfo("rotateOK");
@@ -532,14 +580,23 @@ if($repertoire_cr && ($traitement->mode() eq 'opencv')) {
 
 ############ recuperation des positions des cases sur le modele
 
-for my $c (@{$lay->{'case'}}) {
-    $case{$c->{'question'}.".".$c->{'reponse'}}=
-	AMC::Boite::new_xml($c)->transforme($cale);
+my $c;
+$layout->begin_read_transaction('cBOX');
+my $sth=$layout->statement('boxInfo');
+$sth->execute(@epc[0,1]);
+while($c=$sth->fetchrow_hashref) {
+    $case{$c->{'question'}.".".$c->{'answer'}}=
+	AMC::Boite::new_MN(map { $c->{$_} }
+			   (qw/xmin ymin xmax ymax/))->transforme($cale);
 }
-for my $c (@{$lay->{'nom'}}) {
+$sth=$layout->statement('namefieldInfo');
+$sth->execute(@epc[0,1]);
+while($c=$sth->fetchrow_hashref) {
     $case{'nom'}=
-	AMC::Boite::new_xml($c)->transforme($cale);
+	AMC::Boite::new_MN(map { $c->{$_} }
+			   (qw/xmin ymin xmax ymax/))->transforme($cale);
 }
+$layout->end_transaction('cBOX');
 
 # on localise les cases recuperees depuis le modele dans le scan, et
 # on mesure la quantite de noir dedans
@@ -554,53 +611,64 @@ if($out_cadre && ($traitement->mode() eq 'opencv')) {
 
 erreur("End of diagnostic",1) if($debug_image);
 
+my $capture=AMC::Data->new($data_dir)->module('capture');
+
+$capture->begin_transaction('CRSL');
+@stid=@epc[0,1];
+if($multiple) {
+  push @stid,$capture->new_page_copy(@epc[0,1]);
+} else {
+  push @stid,0;
+}
+
+$layout_file="page-".pageids_string(@stid,'path'=>1).".jpg";
+$out_cadre="$repertoire_cr/$layout_file"
+  if($repertoire_cr && !$out_cadre);
+
 if($out_cadre && ($traitement->mode() eq 'opencv')) {
     $traitement->commande("output ".$out_cadre);
 }
 
-if($analyse_file) {
-    open(ANF,">$analyse_file");
-    print ANF "<?xml version='1.0' standalone='yes'?>\n";
+$nom_file="name-".studentids_string(@stid[0,2]).".jpg";
 
-    my $sf=$scan;
-    if($rep_projet) {
-	$sf=abs2proj({'%PROJET',$rep_projet,
-		      '%HOME'=>$ENV{'HOME'},
-		      ''=>'%PROJET',
-		     },
-		     $sf);
-    }
+$capture->set_page_auto($sf,@stid,time(),
+			$cale->params);
 
-    print ANF "<analyse version=\"$anf_version\" src=\"".$sf."\" id=\"$id_page\" mode=\"".$traitement->mode()."\">\n";
-    print ANF $cale->xml(2);
-    print ANF "  <cadre>\n";
-    print ANF $cadre_general->xml(4);
-    print ANF "  </cadre>\n";
-    for my $k (keys %case) {
-	my $e="";
-	my $q="";
-	if($k =~ /^([0-9]+)\.([0-9]+)$/) {
-	    $e=$1;$q=$2;
-	    print ANF "  <casetest id=\"$k\">\n";
-	    print ANF $coins_test{$k}->xml(4);
-	    print ANF "  </casetest>\n";
-	    print ANF "  <case id=\"$k\" question=\"$e\" reponse=\"$q\" ";
-	    $close="  </case>\n";
-	} elsif(($n,$i)=detecte_cb($k)) {
-	    print ANF "  <chiffre n=\"$n\" i=\"$i\" ";
-	    $close="  </chiffre>\n";
-	} else {
-	    print ANF "  <$k ";
-	    $close="  </$k>\n";
-	}
-	print ANF $score_data{$k};
-	print ANF ">\n";
-	print ANF $case{$k}->xml(4);
-	print ANF $close;
+$capture->set_layout_image(@stid,$layout_file);
+
+$cadre_general->to_data($capture,
+			$capture->get_zoneid(@stid,ZONE_FRAME,0,0,1),
+			POSITION_BOX);
+
+for my $k (keys %case) {
+  my $zoneid;
+  if($k =~ /^([0-9]+)\.([0-9]+)$/) {
+    my $question=$1;
+    my $answer=$2;
+    $zoneid=$capture->get_zoneid(@stid,ZONE_BOX,$question,$answer,1);
+    $coins_test{$k}->to_data($capture,$zoneid,POSITION_MEASURE);
+  } elsif(($n,$i)=detecte_cb($k)) {
+    $zoneid=$capture->get_zoneid(@stid,ZONE_DIGIT,$n,$i,1);
+  } elsif($k eq 'nom') {
+    $zoneid=$capture->get_zoneid(@stid,ZONE_NAME,0,0,1);
+    $capture->statement('setZoneAuto')
+      ->execute(-1,-1,$nom_file,$zoneid);
+  }
+
+  if($zoneid) {
+    if($k ne 'nom') {
+      if($score_data{$k}) {
+	$capture->statement('setZoneAuto')
+	  ->execute(@{$score_data{$k}},$zoom_file{$k},$zoneid);
+      } else {
+	debug "No darkness data for box $k";
+      }
     }
-    print ANF "</analyse>\n";
-    close(ANF);
+    $case{$k}->to_data($capture,$zoneid,POSITION_BOX);
+  }
 }
+
+$capture->end_transaction('CRSL');
 
 $traitement->ferme_commande();
 
@@ -615,11 +683,13 @@ if($out_cadre || $nom_file) {
 }
 
 if($nom_file && $case{'nom'}) {
-    debug "Name zone extraction to $nom_file...";
-    debug "Name box : ".$case{'nom'}->txt();
-    my $e=$page_entiere->Clone(); 	 
-    $e->Crop(geometry=>$case{'nom'}->etendue_xy('geometry',$zoom_plus));
-    $e->Write($nom_file);
+  clear_old('name image file',"$repertoire_cr/$nom_file");
+
+  debug "Name box : ".$case{'nom'}->txt();
+  my $e=$page_entiere->Clone();
+  $e->Crop(geometry=>$case{'nom'}->etendue_xy('geometry',$zoom_plus));
+  debug "Writing to $repertoire_cr/$nom_file...";
+  $e->Write("$repertoire_cr/$nom_file");
 }
 
 if($out_cadre && ($traitement->mode ne 'opencv')) {
@@ -657,27 +727,15 @@ if($out_cadre && ($traitement->mode ne 'opencv')) {
     $page_entiere->Draw(primitive=>'polygon',
 			fill=>'none',stroke=>'red',strokewidth=>1,
 			points=>$cadre_general->draw_points());
-    
+
     $cadre_origine->transforme($cale);
     $page_entiere->Draw(primitive=>'polygon',
 			fill=>'none',stroke=>'blue',strokewidth=>1,
 			points=>$cadre_origine->draw_points());
-    
+
     $page_entiere->Write($out_cadre);
-    
+
     debug "-> $out_cadre\n";
-}
-
-if($zoom_file && ($traitement->mode ne 'opencv')) {
-
-    print "Making zooms...\n";
-
-    $commandes->execute("auto-multiple-choice","zoom",
-			"--seuil",$seuil_coche,
-			"--analyse",$analyse_file,
-			"--scan",$scan,
-			"--output",$zoom_file,
-			);
 }
 
 if($upside_down) {

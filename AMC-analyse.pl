@@ -22,7 +22,6 @@ use File::Temp;
 use Getopt::Long;
 
 use AMC::Basic;
-use AMC::MEPList;
 use AMC::Queue;
 
 my $pid='';
@@ -38,21 +37,19 @@ sub catch_signal {
 
 $SIG{INT} = \&catch_signal;
 
-my $mep_dir="";
+my $data_dir="";
 my $cr_dir="";
 my $debug='';
 my $debug_image_dir='';
 my $progress=0;
 my $progress_id=0;
 my $liste_f;
-my $mep_file='';
 my $n_procs=0;
 my $seuil_coche='';
 my $rep_projet='';
 my $tol_marque='';
 
-GetOptions("mep=s"=>\$mep_dir,
-	   "mep-saved=s"=>\$mep_file,
+GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
 	   "seuil-coche=s"=>\$seuil_coche,
 	   "tol-marque=s"=>\$tol_marque,
@@ -78,7 +75,7 @@ if($liste_f && open(LISTE,$liste_f)) {
 	    debug "Scan from list : $_";
 	    push @scans,$_;
 	} else {
-	    print STDERR "WARNING. File does not exist : $_\n";
+	    debug_and_stderr "WARNING. File does not exist : $_";
 	}
     }
     close(LISTE);
@@ -95,26 +92,14 @@ sub check_rep {
     die "ERROR: directory does not exist: $r" if(! -d $r);
 }
 
-$mep_dir=$rep_projet."/mep" if($rep_projet && !$mep_dir);
+$data_dir=$rep_projet."/data" if($rep_projet && !$data_dir);
 $cr_dir=$rep_projet."/cr" if($rep_projet && !$cr_dir);
 
-check_rep($mep_dir);
+check_rep($data_dir);
 check_rep($cr_dir,1);
 
 my $delta=$progress/(1+$#scans);
 my $fh;
-
-if(!$mep_file) {
-    debug "Making layouts list...";
-    $fh=File::Temp->new(TEMPLATE => "mep-XXXXXX",
-			TMPDIR => 1,
-			UNLINK=> 1);
-    $mep_file=$fh->filename;
-    my $m=AMC::MEPList::new($mep_dir);
-    $m->save($mep_file);
-    $fh->seek( 0, SEEK_END );
-    debug "OK";
-}
 
 for my $s (@scans) {
     my $sf=$s;
@@ -125,8 +110,7 @@ for my $s (@scans) {
     push @c,"--tol-marque",$tol_marque if($tol_marque);
     push @c,"--progression-id",$progress_id;
     push @c,"--progression",$delta;
-    push @c,"--mep",$mep_dir if($mep_dir);
-    push @c,"--mep-saved",$mep_file;
+    push @c,"--data",$data_dir if($data_dir);
     push @c,"--projet",$rep_projet if($rep_projet);
     push @c,"--debug-image",$debug_image_dir."/$sf.png" if(-d $debug_image_dir);
     push @c,"--cr",$cr_dir,$s;

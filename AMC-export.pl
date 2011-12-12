@@ -30,6 +30,7 @@ use Module::Load;
 my $module='CSV';
 my $output='';
 
+my $data_dir='';
 my $fich_notes='';
 my $fich_assoc='';
 my $fich_noms='';
@@ -47,8 +48,7 @@ my $rtl='';
 GetOptions("module=s"=>\$module,
 	   "sort=s"=>\$sort,
 	   "useall=s"=>\$useall,
-	   "fich-notes=s"=>\$fich_notes,
-	   "fich-assoc=s"=>\$fich_assoc,
+	   "data=s"=>\$data_dir,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "noms-identifiant=s"=>\$noms_identifiant,
@@ -57,7 +57,7 @@ GetOptions("module=s"=>\$module,
 	   "output|o=s"=>\$output,
 	   "debug=s"=>\$debug,
 	   );
-	   
+
 set_debug($debug);
 
 debug "Parameters: ".join(" ",map { "<$_>" } @ARGV_ORIG);
@@ -65,18 +65,17 @@ debug "Parameters: ".join(" ",map { "<$_>" } @ARGV_ORIG);
 load("AMC::Export::$module");
 $ex = "AMC::Export::$module"->new();
 
-my %sorting=('l'=>['n:_LINE_'],
-	     'm'=>['n:_NOTE_','s:_NOM_'],
-	     'i'=>['n:_ID_'],
-	     'n'=>['s:_NOM_','n:_LINE_','n:_ID_'],
+my %sorting=('l'=>['n:student.line'],
+	     'm'=>['n:mark','s:student.name'],
+	     'i'=>['n:student','n:copy','n:student.line'],
+	     'n'=>['s:student.name','n:student.line'],
     );
 
 $ex->set_options("sort",
 		 "keys"=>$sorting{lc($1)}) if($sort =~ /^\s*([lmin])/i);
 
 $ex->set_options("fich",
-		 "notes"=>$fich_notes,
-		 "association"=>$fich_assoc,
+		 "datadir"=>$data_dir,
 		 "noms"=>$fich_noms,
 		 );
 
