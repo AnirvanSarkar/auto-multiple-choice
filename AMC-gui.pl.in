@@ -647,7 +647,7 @@ my $gui=read_glade('main_window',
     onglet_notation onglet_saisie
     log_general commande avancement annulation button_mep_warnings
     liste_filename liste_path liste_edit liste_setfile liste_refresh
-    doc_menu menu_debug menu_outils
+    doc_menu menu_debug
     diag_tree inconnu_tree state_capture
     maj_bareme correc_tree correction_result regroupement_corriges
     options_CSV options_ods options_List
@@ -1140,13 +1140,29 @@ sub zooms_display {
     }
 }
 
-sub zooms_line {
+sub zooms_line_base {
+  my ($forget_it)=@_;
+  my $iter=$w{'diag_tree'}->get_selection->get_selected;
+  my $id=$diag_store->get($iter,DIAG_ID);
+  zooms_display((map { $diag_store->get($iter,$_) } (DIAG_ID_STUDENT,
+						     DIAG_ID_PAGE,
+						     DIAG_ID_COPY)
+		),$forget_it);
+}
+
+sub zooms_line { zooms_line_base(1); }
+sub zooms_line_open { zooms_line_base(0); }
+
+sub layout_line {
     my $iter=$w{'diag_tree'}->get_selection->get_selected;
-    my $id=$diag_store->get($iter,DIAG_ID);
-    zooms_display((map { $diag_store->get($iter,$_) } (DIAG_ID_STUDENT,
-						       DIAG_ID_PAGE,
-						       DIAG_ID_COPY)
-		  ),1);
+    my @id=map { $diag_store->get($iter,$_); } 
+      (DIAG_ID_STUDENT,DIAG_ID_PAGE,DIAG_ID_COPY);
+    $projet{'_capture'}->begin_read_transaction;
+    my $f=absolu($projet{'options'}->{'cr'}).'/'
+      .$projet{'_capture'}->get_layout_image(@id);
+    $projet{'_capture'}->end_transaction;
+
+    commande_parallele($o{'img_viewer'},$f) if(-f $f);
 }
 
 $w{'diag_tree'}->signal_connect('button_release_event' =>
@@ -4620,8 +4636,6 @@ sub projet_ouvre {
 	}
 
 	$w{'onglets_projet'}->set_sensitive(1);
-
-	$w{'menu_outils'}->set_sensitive(1);
 
 	valide_projet();
 
