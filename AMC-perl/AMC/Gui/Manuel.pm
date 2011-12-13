@@ -173,6 +173,8 @@ sub new {
 				    {'type'=>'n','col'=>MDIAG_PAGE},
 				   ]);
 
+	$diag_store->set_sort_column_id(DIAG_ID,GTK_SORT_ASCENDING);
+
 	$self->{'general'}->window()->set_cursor(undef);
     } else {
 	  $self->{'layout'}->begin_read_transaction;

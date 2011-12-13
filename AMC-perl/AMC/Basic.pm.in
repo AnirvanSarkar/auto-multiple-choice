@@ -249,11 +249,13 @@ sub sort_from_columns {
  SK:for my $c (@$sortkeys) {
     my $a = $liststore->get ($itera, $c->{'col'});
     my $b = $liststore->get ($iterb, $c->{'col'});
-    $a='' if(!defined($a));
-    $b='' if(!defined($b));
     if($c->{'type'} =~ /^n/) {
+      $a=0 if(!defined($a));
+      $b=0 if(!defined($b));
       $r=$a <=> $b;
     } else {
+      $a='' if(!defined($a));
+      $b='' if(!defined($b));
       $r=$a cmp $b;
     }
     last SK if($r!=0);
