@@ -608,8 +608,6 @@ Durée : 10 minutes.
 
   No documents allowed. The use of electronic calculators is forbidden.
 
-
-
   Questions using the sign \multiSymbole{} may have
   zero, one or several correct answers.  Other questions have a single correct answer.
 
@@ -646,7 +644,6 @@ Durée : 10 minutes.
 \end{center}
 
 %%% end of the answer sheet header
-
 
 \AMCform    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp" />
 
@@ -1284,22 +1281,25 @@ and write your first and last names below.
     <sect2>
       <title>Mathematical questions with randomized statements</title>
 
-      <para>Thanks to the LaTeX package <package>fp</package>, whose
-      documentation is available at <ulink
-      url="http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp">http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp</ulink>,
-      and which can be downloaded with the command <programlisting>\usepackage{fp}</programlisting>added
-      before that corresponding to <package>automultiplechoice</package>, one
-      can create exercises with randomized numerical data. Let us start with a
-      simple example.</para>
+      <sect3>
+        <title>Using package fp</title>
 
-      <para><programlisting>\begin{question}{addition}
+        <para>Thanks to the LaTeX package <package>fp</package>, whose
+        documentation is available at <ulink
+        url="http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp">http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=fp</ulink>,
+        and which can be downloaded with the command <programlisting>\usepackage{fp}</programlisting>added
+        before that corresponding to <package>automultiplechoice</package>,
+        one can create exercises with randomized numerical data. Let us start
+        with a simple example.</para>
+
+        <para><programlisting>\begin{question}{addition}
   \FPeval\VQa{trunc(1+random*8,0)}  <co id="alea.random"
-            linkends="alea.random.exp" />
+              linkends="alea.random.exp" />
   \FPeval\VQb{trunc(4+random*5,0)}
   \FPeval\VQsomme{clip(VQa+VQb)}  <co id="alea.result"
-            linkends="alea.result.exp" />
+              linkends="alea.result.exp" />
   \FPeval\VQnonA{clip(VQa+VQb-1)}  <co id="alea.fausse"
-            linkends="alea.fausse.exp" />
+              linkends="alea.fausse.exp" />
   \FPeval\VQnonB{clip(VQa*VQb)}
   \FPeval\VQnonC{clip(VQa-VQb)}
 
@@ -1312,32 +1312,32 @@ and write your first and last names below.
   \end{choiceshoriz}
 \end{question}</programlisting></para>
 
-      <para>The <command>\FPeval</command> command is used to perform
-      computations:</para>
+        <para>The <command>\FPeval</command> command is used to perform
+        computations:</para>
 
-      <para><calloutlist>
-          <callout arearefs="alea.random" id="alea.random.exp">
-            <para>Since <command>random</command> returns a real number in the
-            interval [0,1], this command sets VQa to a random integer value
-            between 1 et 8. The next line sets VQb to a random integer value
-            between 4 et 8.</para>
-          </callout>
+        <para><calloutlist>
+            <callout arearefs="alea.random" id="alea.random.exp">
+              <para>Since <command>random</command> returns a real number in
+              the interval [0,1], this command sets VQa to a random integer
+              value between 1 et 8. The next line sets VQb to a random integer
+              value between 4 et 8.</para>
+            </callout>
 
-          <callout arearefs="alea.result" id="alea.result.exp">
-            <para>Putting the correct answer in the variable VQsomme.</para>
-          </callout>
+            <callout arearefs="alea.result" id="alea.result.exp">
+              <para>Putting the correct answer in the variable VQsomme.</para>
+            </callout>
 
-          <callout arearefs="alea.fausse" id="alea.fausse.exp">
-            <para>Putting wrong answers in variables VQnonA, VQnonB et
-            VQnonC...</para>
-          </callout>
-        </calloutlist>Variable names beginning with VQ have been chosen so as
-      to avoid interference with other LaTeX commands.</para>
+            <callout arearefs="alea.fausse" id="alea.fausse.exp">
+              <para>Putting wrong answers in variables VQnonA, VQnonB et
+              VQnonC...</para>
+            </callout>
+          </calloutlist>Variable names beginning with VQ have been chosen so
+        as to avoid interference with other LaTeX commands.</para>
 
-      <para>The automultiplechoice package moreover defines a
-      <command>\choixIntervalle</command> command which makes this kind of
-      construction simpler, as illustrated in the next
-      example:<programlisting>\begin{question}{inf-expo-indep}
+        <para>The automultiplechoice package moreover defines a
+        <command>\choixIntervalle</command> command which makes this kind of
+        construction simpler, as illustrated in the next
+        example:<programlisting>\begin{question}{inf-expo-indep}
   \FPeval\VQa{trunc(2 + random * 4,0)}
   \FPeval\VQb{trunc(6 + random * 5,0)}
   \FPeval\VQr{VQa/(VQa+VQb)}
@@ -1349,38 +1349,208 @@ respective parameters \VQa{} et \VQb{}.
   \begin{multicols}{5}
     \begin{choices}[o]
       \choixIntervalles{\VQr}{0}{1}{0.1}  <co id="choix.intervalles"
-            linkends="choix.intervalles.exp" />
+              linkends="choix.intervalles.exp" />
     \end{choices}
   \end{multicols}
 \end{question}</programlisting></para>
 
-      <para><calloutlist>
-          <callout arearefs="choix.intervalles" id="choix.intervalles.exp">
-            <para>This lines inserts ten answers corresponding to the
-            intervals [0,0.1[ [0.1,0.2[ ... [0.9,1[, while indicating that the
-            correct interval is the one containing VQr. The arguments of the
-            <command>\choixIntervalle</command> command are the
-            following:</para>
+        <para><calloutlist>
+            <callout arearefs="choix.intervalles" id="choix.intervalles.exp">
+              <para>This lines inserts ten answers corresponding to the
+              intervals [0,0.1[ [0.1,0.2[ ... [0.9,1[, while indicating that
+              the correct interval is the one containing VQr. The arguments of
+              the <command>\choixIntervalle</command> command are the
+              following:</para>
 
-            <orderedlist>
-              <listitem>
-                <para>The correct answer,</para>
-              </listitem>
+              <orderedlist>
+                <listitem>
+                  <para>The correct answer,</para>
+                </listitem>
 
-              <listitem>
-                <para>The left point of the first interval,</para>
-              </listitem>
+                <listitem>
+                  <para>The left point of the first interval,</para>
+                </listitem>
 
-              <listitem>
-                <para>The right point of the last interval,</para>
-              </listitem>
+                <listitem>
+                  <para>The right point of the last interval,</para>
+                </listitem>
 
-              <listitem>
-                <para>The length of each interval.</para>
-              </listitem>
-            </orderedlist>
-          </callout>
-        </calloutlist></para>
+                <listitem>
+                  <para>The length of each interval.</para>
+                </listitem>
+              </orderedlist>
+            </callout>
+          </calloutlist></para>
+      </sect3>
+
+      <sect3>
+        <title>Using package pgf/tikz</title>
+
+        <para>LaTeX package <package>pgf/tikz</package> (see <ulink
+        url="http://www.ctan.org/tex-archive/graphics/pgf/base">http://www.ctan.org/tex-archive/graphics/pgf/base</ulink>)
+        provides mathematical functions that can be loaded with
+        <programlisting>\usepackage{tikz}</programlisting></para>
+
+        <para>First of all, you must set the random seed to be sure to get the
+        same result each time latex is run to compile the subject:</para>
+
+        <para><programlisting>\pgfmathsetseed{2056}</programlisting></para>
+
+        <sect4>
+          <title>A simple computation</title>
+
+          <para>Here is an exemple with a simple computation:</para>
+
+          <para><programlisting>\begin{question}{inverse}
+  \pgfmathrandominteger{\x}{1}{50}
+       
+  How much is the reciprocal of $x=\x$?
+
+  \begin{choices}
+    \correctchoice{\pgfmathparse{1/\x}\pgfmathresult }
+    \wrongchoice{\pgfmathparse{1/(\x +1))}\pgfmathresult}
+    \wrongchoice{\pgfmathparse{cos(\x)} \pgfmathresult}
+    \wrongchoice{\pgfmathparse{\x^(-0.5)}\pgfmathresult}
+  \end{choices}
+\end{question}
+</programlisting></para>
+
+          <para>Here, the command <command>\pgfmathparse</command> makes the
+          computation, and <command>\pgfmathresult</command> outputs the
+          result.</para>
+
+          <para>Output formatting is also available with the command
+          <command>\pgfmathprintnumber</command>, as in the following exemple
+          (three digits after decimal point, and use of the comma as a decimal
+          point).</para>
+
+          <para><programlisting>\begin{question}{inverse3}
+  \pgfmathrandominteger{\x}{1}{50}
+  \pgfkeys{/pgf/number format/.cd,fixed,fixed zerofill,precision=3,use comma}
+  How much is the reciprocal of $x=\pgfmathprintnumber{\x}$?
+
+  \begin{choices}
+    \correctchoice{\pgfmathparse{1/\x}\pgfmathprintnumber{\pgfmathresult}} 
+    \wrongchoice{\pgfmathparse{1/(\x +1))} \pgfmathprintnumber{\pgfmathresult}}
+    \wrongchoice{\pgfmathparse{cos(\x)} \pgfmathprintnumber{\pgfmathresult}}
+    \wrongchoice{\pgfmathparse{\x^(-0.5)} \pgfmathprintnumber{\pgfmathresult}}
+  \end{choices}
+\end{question}
+</programlisting></para>
+        </sect4>
+
+        <sect4>
+          <title>Graphics</title>
+
+          <para>The tkiz package also allows to make (random or not)
+          graphs.</para>
+
+          <para><programlisting>\begin{questionmult}{graph}
+  Let us consider the three functions which graphs are plotted below:
+  \pgfmathrandominteger{\a}{2}{4}  
+  \begin{center}
+    \begin{tikzpicture}[domain=0:4]
+      \draw[very thin,color=gray] (-0.1,-4.1) grid (3.9,3.9);
+      \draw[-&gt;] (-0.2,0) -- (4.2,0) node[right] {$x$};
+      \draw[-&gt;] (0,-4.2) -- (0,4.2) node[above] {$f(x)$};
+      \draw[color=red] plot (\x,{(1+\a/4)*\x-\a}) node[right] {$f_{1} (x)$};
+      \draw[color=blue] plot (\x,{\a*sin(\x r)}) node[right] {$f_{2}(x)$};
+      \draw[color=orange] plot (\x,{\a*cos(\x r)}) node[right] {$f_{3}(x)$};
+    \end{tikzpicture}
+  \end{center}
+  Then:
+  \begin{choices}
+    \pgfmathrandominteger{\x0}{2}{4}  
+    \correctchoice{$f_{2}(\x0)$=\pgfmathparse{\a*sin(\x0 r)} \pgfmathprintnumber{\pgfmathresult}.}
+    \correctchoice{$f_{3}(\x0)$=\pgfmathparse{\a*cos(\x0 r)} \pgfmathprintnumber{\pgfmathresult}.}
+    \wrongchoice{La fonction $f_{1}(x)$ est une fonction linéaire.}
+  \end{choices}
+\end{questionmult}
+</programlisting></para>
+
+          <para>To make pretty graphs, package <package>pgfplots</package> can
+          also be useful.</para>
+
+          <para>With pgfmath, precision is limited, so that a "Arithmetic
+          overflow" error can be encountered. Packages <package>tikz</package>
+          and <package>pgfplots</package> allows to overcome this problem,
+          using <command>gnuplot</command> as a backend. You need to install
+          <command>gnuplot</command> on your system, and use LaTeX option
+          <option>--shell-escape</option>. To this purpose, go to AMC
+          preferences window, and set the LaTeX engine for your project to
+          "<option>pdflatex --shell-escape</option>" (without the
+          quotes).</para>
+        </sect4>
+      </sect3>
+
+      <sect3>
+        <title>Using LuaLaTeX</title>
+
+        <para>LUA language can be used inside LaTeX documents thanks to the
+        <command>lualatex</command> command. If you uses it, your document
+        needs to be UTF-8 encoded, and you must not load the
+        <package>inputenc</package> package. See <ulink
+        url="???">http://www.luatex.org/documentation.html</ulink> for some
+        information.</para>
+
+        <para>LUA commands are to be given as a <command>\directlua</command>
+        argument. The most useful LUA function is
+        <command>tex.print</command>, which will output results back to
+        LaTeX.</para>
+
+        <para>Once again, if you use random numbers, allways fix the random
+        seed to get the same results across differents compilations:</para>
+
+        <programlisting>\directlua{math.randomseed (2048)}</programlisting>
+
+        <para>Here is a very simple sample source file:</para>
+
+        <programlisting>\documentclass[a4paper]{article}
+%\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[bloc,completemulti]{automultiplechoice}
+\begin{document}
+
+\onecopy{10}{
+
+%%% head
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf LuaLaTeX sample exam
+\end{minipage}
+\namefield{\fbox{\begin{minipage}{.5\linewidth}
+Name :
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%%
+
+\directlua{math.randomseed (2048)}
+\directlua{a=math.random()}
+
+\begin{question}{square-root}
+  How much is the square root of \directlua{tex.print(a)}?
+
+  \begin{choices}
+    \correctchoice{\directlua{tex.print(math.sqrt(a))}} 
+    \wrongchoice{\directlua{tex.print(math.sqrt(2*a))}} 
+    \wrongchoice{\directlua{tex.print(math.sqrt(a*1.001))}} 
+  \end{choices}
+\end{question}
+
+\clearpage
+}
+
+\end{document}      </programlisting>
+
+        <para>Output formatting can be obtained using lua functions, or with
+        the <package>siunitx</package> package.</para>
+      </sect3>
     </sect2>
   </sect1>
 
@@ -2733,7 +2903,7 @@ student number &amp; class &amp; subject\\
           </listitem>
 
           <listitem>
-            <para>with "<option>--mode m</option>", </para>
+            <para>with "<option>--mode m</option>",</para>
 
             <variablelist>
               <varlistentry>

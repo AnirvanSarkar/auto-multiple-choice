@@ -1466,7 +1466,7 @@ et inscrivez votre nom et prénom ci-dessous.
         documentation se trouve sur <ulink
         url="http://www.ctan.org/tex-archive/graphics/pgf/base">http://www.ctan.org/tex-archive/graphics/pgf/base</ulink>
         possède notamment une bibliothèque mathématique que l'on peut charger
-        grâce à la commande: <programlisting>\usepackage{tikz}</programlisting></para>
+        grâce à la commande : <programlisting>\usepackage{tikz}</programlisting></para>
 
         <para>La première précaution à prendre, pour avoir des sujets
         identiques malgré les recompilations latex est de choisir la base de
@@ -1499,11 +1499,11 @@ et inscrivez votre nom et prénom ci-dessous.
           d'effectuer le calcul et d'afficher son résultat.</para>
 
           <para>Il est possible de choisir la mise en forme des résultats en
-          utilisant la commande<command>\pgfmathprintnumber</command>, par
+          utilisant la commande <command>\pgfmathprintnumber</command>, par
           exemple, ici on choisit une notation avec trois décimales, en
           utilisant une virgule comme séparateur décimal.</para>
 
-          <para><programlisting>\begin{question}{inverse}
+          <para><programlisting>\begin{question}{inverse3}
   \pgfmathrandominteger{\x}{1}{50}
   \pgfkeys{/pgf/number format/.cd,fixed,fixed zerofill,precision=3,use comma}
   Quel est l'inverse de $x=\pgfmathprintnumber{\x}$ ?
@@ -1526,7 +1526,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <para><programlisting>\begin{questionmult}{graphique}
   On considère trois fonctions f(x) dont les tracés sont représentés ci-dessous
-  dans un repère orthonormé:
+  dans un repère orthonormé~:
   \pgfmathrandominteger{\a}{2}{4}  
   \begin{center}
     \begin{tikzpicture}[domain=0:4]
@@ -1552,37 +1552,37 @@ et inscrivez votre nom et prénom ci-dessous.
           l'utilisation du package <package>pgfplots</package>.</para>
 
           <para>La précision des nombres sous pgfmath étant limitée, certains
-          tracé de graphiques ne sont pas possibles avec cette méthode, la
+          tracés de graphiques ne sont pas possibles avec cette méthode, la
           compilation latex adressant alors une erreur du type : "Arithmetic
           overflow". Les packages <package>tikz</package> et
-          <package>pgfplots</package> permettent de palier à ce manque de
+          <package>pgfplots</package> permettent de pallier à ce manque de
           précison en faisant appel au programme <command>gnuplot</command>
           (voir documentation du package) pour obtenir les points de tracé.
-          Dans ce cas, il faut installer au préalable gnuplot sur votre
-          distribution, puis lancer la compilation latex avec l'option
-          <option>--shell-escape</option>. Pour cela, aller dans les
-          préférences de AMC et choisir pour moteur LaTeX par défaut (ou
-          moteur LaTeX du projet en cours) : "<option>pdflatex
-          --shell-escape</option>"</para>
+          Dans ce cas, il faut installer au préalable
+          <command>gnuplot</command> sur votre distribution, puis lancer la
+          compilation latex avec l'option <option>--shell-escape</option>.
+          Pour cela, aller dans les préférences de AMC et choisir pour moteur
+          LaTeX du projet en cours : "<option>pdflatex
+          --shell-escape</option>" (sans les guillemets).</para>
         </sect4>
       </sect3>
 
       <sect3>
-        <title>Utilisation de lualatex</title>
+        <title>Utilisation de LuaLaTeX</title>
 
         <para>Il est possible d'utiliser le langage de programmation LUA au
         sein de documents latex en compilant le sujet grâce à la commande
-        lualatex. Si vous choisissez cette compilation, votre sujet doit être
-        encodé en UTF-8, et il ne faut pas charger le package
-        <package>inputenc</package>. Pour de plus amples informations, lire
-        l'article de Manuel Pégourié-Gonnard présentant le projet à l'adresse
-        suivante : <ulink
+        <command>lualatex</command>. Si vous choisissez cette compilation,
+        votre sujet doit être encodé en UTF-8, et il ne faut pas charger le
+        package <package>inputenc</package>. Pour de plus amples informations,
+        lire l'article de Manuel Pégourié-Gonnard présentant le projet à
+        l'adresse suivante : <ulink
         url="http://dante.ctan.org/tex-archive/info/luatex/lualatex-doc/lualatex-doc.pdf">http://dante.ctan.org/tex-archive/info/luatex/lualatex-doc/lualatex-doc.pdf</ulink></para>
 
         <para>Pour faire appel au langage LUA, il faut utiliser la commande
         <command>\directlua</command>. La fonction la plus utile est de
         pouvoir écrire un résultat calculé par LUA dans le document tex grâce
-        à la commande :<command>tex.print</command></para>
+        à la commande : <command>tex.print</command></para>
 
         <para>Encore une fois, si vous utilisez des nombres aléatoires,
         commencer par choisir la base de génération des nombres
