@@ -851,6 +851,8 @@ $column = Gtk2::TreeViewColumn->new_with_attributes (__"sensitivity",
 $column->set_sort_column_id(DIAG_DELTA);
 $w{'diag_tree'}->append_column ($column);
 
+$w{'diag_tree'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+
 ### modeles combobox
 
 sub cb_model {
@@ -1143,19 +1145,24 @@ sub zooms_display {
 
 sub zooms_line_base {
   my ($forget_it)=@_;
-  my $iter=$w{'diag_tree'}->get_selection->get_selected;
-  my $id=$diag_store->get($iter,DIAG_ID);
-  zooms_display((map { $diag_store->get($iter,$_) } (DIAG_ID_STUDENT,
-						     DIAG_ID_PAGE,
-						     DIAG_ID_COPY)
-		),$forget_it);
+  my @selected=$w{'diag_tree'}->get_selection->get_selected_rows;
+  if(@selected) {
+    my $iter=$diag_store->get_iter($selected[0]);
+    my $id=$diag_store->get($iter,DIAG_ID);
+    zooms_display((map { $diag_store->get($iter,$_) } (DIAG_ID_STUDENT,
+						       DIAG_ID_PAGE,
+						       DIAG_ID_COPY)
+		  ),$forget_it);
+  }
 }
 
 sub zooms_line { zooms_line_base(1); }
 sub zooms_line_open { zooms_line_base(0); }
 
 sub layout_line {
-    my $iter=$w{'diag_tree'}->get_selection->get_selected;
+  my @selected=$w{'diag_tree'}->get_selection->get_selected_rows;
+  for my $s (@selected) {
+    my $iter=$diag_store->get_iter($s);
     my @id=map { $diag_store->get($iter,$_); } 
       (DIAG_ID_STUDENT,DIAG_ID_PAGE,DIAG_ID_COPY);
     $projet{'_capture'}->begin_read_transaction;
@@ -1164,6 +1171,69 @@ sub layout_line {
     $projet{'_capture'}->end_transaction;
 
     commande_parallele($o{'img_viewer'},$f) if(-f $f);
+  }
+}
+
+sub delete_line {
+  my @selected=$w{'diag_tree'}->get_selection->get_selected_rows;
+  my $f;
+  if(@selected) {
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'question','yes-no',
+			sprintf((__"You requested to delete all data capture results for %d page(s)"),1+$#selected)."\n"
+			.'<b>'.(__"All data and image files related to these pages will be deleted.")."</b>\n"
+			.(__"Do you really want to continue?")
+		       );
+    my $reponse=$dialog->run;
+    $dialog->destroy;
+    if($reponse eq 'yes') {
+
+      for my $s (@selected) {
+	my $iter=$diag_store->get_iter($s);
+	my @id=map { $diag_store->get($iter,$_); } 
+	  (DIAG_ID_STUDENT,DIAG_ID_PAGE,DIAG_ID_COPY);
+	debug "Removing data capture for ".pageids_string(@id);
+	$projet{'_capture'}->begin_transaction;
+	#
+	# 1) get image files generated, and remove them
+	#
+	my $crdir=absolu($projet{'options'}->{'cr'});
+	my @files=();
+	#
+	# scan file
+	push @files,absolu($projet{'_capture'}->get_scan_page(@id));
+	#
+	# layout image, in cr directory
+	push @files,$crdir.'/'
+	  .$projet{'_capture'}->get_layout_image(@id);
+	#
+	# annotated scan
+	push @files,$crdir.'/corrections/jpg/'
+	  .$projet{'_capture'}->get_annotated_page(@id);
+	#
+	# zooms
+	push @files,map { $crdir.'/zooms/'.$_ } 
+	  ($projet{'_capture'}->get_zones_images(@id,ZONE_BOX));
+	#
+	for (@files) {
+	  if (-f $_) {
+	    debug "Removing $_";
+	    unlink($_);
+	  }
+	}
+	#
+	# 2) remove data from database
+	#
+	$projet{'_capture'}->delete_page_data(@id);
+
+	$projet{'_capture'}->end_transaction;
+      }
+
+      detecte_analyse();
+    }
+  }
 }
 
 $w{'diag_tree'}->signal_connect('button_release_event' =>
@@ -3694,7 +3764,7 @@ sub mep_warnings {
 }
 
 sub detecte_correc {
-    my $cordir=absolu("cr/corrections/jpg");
+    my $cordir=absolu($projet{'options'}->{'cr'})."/corrections/jpg";
     my $n=0;
 
     $correc_store->clear();

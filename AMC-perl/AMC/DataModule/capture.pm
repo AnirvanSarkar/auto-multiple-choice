@@ -387,7 +387,7 @@ sub define_statements {
      'pages'=>{'sql'=>"SELECT * FROM $t_page"
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'missingPages'=>
-     {'sql'=>"SELECT enter.student,enter.page,$t_page.copy"
+     {'sql'=>"SELECT enter.student AS student,enter.page AS page ,$t_page.copy AS copy"
       ." FROM (SELECT student,page FROM $t_box"
       ."       UNION SELECT student,page FROM $t_namefield) AS enter,"
       ."      $t_page"
@@ -403,6 +403,8 @@ sub define_statements {
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
      'pageZones'=>{'sql'=>"SELECT * FROM $t_zone"
 		   ." WHERE student=? AND page=? AND copy=? AND type=?"},
+     'zonesImages'=>{'sql'=>"SELECT image FROM $t_zone"
+		     ." WHERE student=? AND page=? AND copy=? AND type=?"},
      'pageZonesAll'=>{'sql'=>"SELECT * FROM $t_zone"
 		      ." WHERE type=?"},
      'pageZonesD'=>{'sql'=>"SELECT * FROM $t_zone"
@@ -460,6 +462,9 @@ sub define_statements {
 			  ." FROM $t_page"
 			  ." WHERE timestamp_annotate>0"
 			  ." AND student=? AND page=? AND copy=?"},
+     'getScanPage'=>{'sql'=>"SELECT src"
+			  ." FROM $t_page"
+			  ." WHERE student=? AND page=? AND copy=?"},
      'setAnnotated'=>{'sql'=>"UPDATE $t_page"
 		      ." SET annotated=?, timestamp_annotate=?"
 		      ." WHERE student=? AND page=? AND copy=?"},
@@ -475,6 +480,14 @@ sub define_statements {
 		." (filename,timestamp)"
 		." VALUES (?,?)"},
      'failedList'=>{'sql'=>"SELECT * FROM $t_failed"},
+     'deletePagePositions'=>
+     {'sql'=>"DELETE FROM $t_position"
+      ." WHERE zoneid IN"
+      ." (SELECT zoneid FROM $t_zone WHERE student=? AND page=? AND copy=?)"},
+     'deletePageZones'=>{'sql'=>"DELETE FROM $t_zone"
+			 ." WHERE student=? AND page=? AND copy=?"},
+     'deletePage'=>{'sql'=>"DELETE FROM $t_page"
+			 ." WHERE student=? AND page=? AND copy=?"},
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
@@ -819,6 +832,16 @@ sub get_layout_image {
 			   $student,$page,$copy));
 }
 
+# get_zones_images($student,$page,$copy,$type) returns a list of the image
+# filenames extracted from the scan corresponding to the given page,
+# with the given zone type.
+
+sub get_zones_images {
+  my ($self,$student,$page,$copy,$type)=@_;
+  return($self->sql_list($self->statement('zonesImages'),
+			 $student,$page,$copy,$type));
+}
+
 # set_annotated($student,$page,$copy,$file,$timestamp) sets the name
 # of the annotated image file, and the time when it wad made.
 
@@ -835,6 +858,16 @@ sub set_annotated {
 sub get_annotated_page {
   my ($self,$student,$page,$copy)=@_;
   my $f=$self->sql_single($self->statement('getAnnotatedPage'),
+			  $student,$page,$copy);
+  return($f);
+}
+
+# get_scan_page($student,$page,$copy) returns the scan image
+# filename of a particular page.
+
+sub get_scan_page {
+  my ($self,$student,$page,$copy)=@_;
+  my $f=$self->sql_single($self->statement('getScanPage'),
 			  $student,$page,$copy);
   return($f);
 }
@@ -915,6 +948,16 @@ sub failed {
 sub no_capture_pages {
   my ($self)=@_;
   return($self->dbh->selectall_arrayref($self->statement('noCapturePages')));
+}
+
+# delete_page_data($student,$page,$copy) deletes all data concerning
+# the given page (automatic and manual data capture) from the database.
+
+sub delete_page_data {
+  my ($self,$student,$page,$copy)=@_;
+  $self->statement('deletePagePositions')->execute($student,$page,$copy);
+  $self->statement('deletePageZones')->execute($student,$page,$copy);
+  $self->statement('deletePage')->execute($student,$page,$copy);
 }
 
 1;
