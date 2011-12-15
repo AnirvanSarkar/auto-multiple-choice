@@ -480,6 +480,8 @@ sub define_statements {
 		." (filename,timestamp)"
 		." VALUES (?,?)"},
      'failedList'=>{'sql'=>"SELECT * FROM $t_failed"},
+     'failedNb'=>{'sql'=>"SELECT COUNT(*) FROM $t_failed"},
+     'deleteFailed'=>{'sql'=>"DELETE FROM $t_failed WHERE filename=?"},
      'deletePagePositions'=>
      {'sql'=>"DELETE FROM $t_position"
       ." WHERE zoneid IN"
