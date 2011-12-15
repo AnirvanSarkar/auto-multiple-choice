@@ -198,7 +198,7 @@ sub score_question {
 	    $raison='V';
 	} else {
 	    # standard case: adds the 'b' or 'm' scores for each answer
-	    for my $a (@$question_data) {
+	    for my $a (@$answers) {
 		if($a->{'answer'} != 0) {
 		    $code=($correct || ($a->{'ticked'}==$a->{'correct'})
 			   ? "b" : "m");
