@@ -3923,7 +3923,7 @@ sub update_unrecognized {
 sub open_unrecognized {
 
   my $dialog=read_glade('unrecognized',
-			qw/inconnu_tree scan_area preprocessed_area/);
+			qw/inconnu_tree scan_area preprocessed_area inconnu_vpaned/);
 
   for (qw/scan preprocessed/) {
     AMC::Gui::PageArea::add_feuille($w{$_.'_area'});
@@ -3951,6 +3951,8 @@ sub open_unrecognized {
   $w{'inconnu_tree'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
   $w{'inconnu_tree'}->get_selection->signal_connect("changed",\&unrecognized_line);
   $w{'inconnu_tree'}->get_selection->select_iter($inconnu_store->get_iter_first);
+
+  $w{'inconnu_vpaned'}->child1_shrink(0);
 }
 
 sub unrecognized_line {
