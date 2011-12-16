@@ -2771,7 +2771,9 @@ sub associe_auto {
 sub assoc_resultat {
     my $mesg=1;
 
+    $projet{'_association'}->begin_read_transaction('ARCC');
     my ($auto,$man,$both)=$projet{'_association'}->counts();
+    $projet{'_association'}->end_transaction('ARCC');
 
     my $dialog=Gtk2::MessageDialog
       ->new_with_markup($w{'main_window'},
