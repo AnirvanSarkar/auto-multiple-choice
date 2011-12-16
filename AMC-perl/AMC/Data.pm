@@ -87,22 +87,34 @@ sub dbh {
 # to eventually write to the database.
 
 sub begin_transaction {
-    my ($self)=@_;
+    my ($self,$key)=@_;
+    $key='----' if(!$key);
+    debug_and_stderr "WARNING: opened transaction $self->{'data'}->{'trans'}"
+      if($self->{'trans'});
     $self->sql_do("BEGIN IMMEDIATE");
+    $self->{'trans'}=$key;
 }
 
 # begin_read_transaction begins a transaction for reading data.
 
 sub begin_read_transaction {
-    my ($self)=@_;
+    my ($self,$key)=@_;
+    $key='----' if(!$key);
+    debug_and_stderr "WARNING: opened transaction $self->{'data'}->{'trans'}"
+      if($self->{'trans'});
     $self->sql_do("BEGIN");
+    $self->{'trans'}=$key;
 }
 
 # end_transaction end the transaction.
 
 sub end_transaction {
-    my ($self)=@_;
+    my ($self,$key)=@_;
+    $key='----' if(!$key);
+    debug_and_stderr "WARNING: closing transaction $self->{'trans'} declared as $key"
+      if($self->{'trans'} ne $key);
     $self->sql_do("COMMIT");
+    $self->{'trans'}='';
 }
 
 # sql_quote($string) can be used to quote a string before including it
@@ -118,6 +130,7 @@ sub sql_quote {
 
 sub sql_do {
     my ($self,$sql,@bind)=@_;
+    debug_and_stderr "WARNING: sql_do with no transaction -- $sql" if(!$self->{'trans'});
     $self->{'dbh'}->do($sql,{},@bind);
 }
 

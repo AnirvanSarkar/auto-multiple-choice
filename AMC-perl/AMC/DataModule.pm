@@ -98,7 +98,6 @@ sub sql_quote {
 
 sub sql_do {
     my ($self,$sql)=@_;
-    debug_and_stderr "WARNING: sql_do with no transaction -- $sql" if(!$self->{'data'}->{'trans'});
     $self->{'data'}->sql_do($sql);
 }
 
@@ -216,17 +215,14 @@ sub begin_transaction {
     my ($self,$key)=@_;
     my $time;
     $key='----' if(!defined($key));
-    debug_and_stderr "WARNING: opened transaction $self->{'data'}->{'trans'}"
-      if($self->{'data'}->{'trans'});
     debug "Opening RW transaction for $self->{'name'} [$key]...";
     $time=time;
-    $self->{'data'}->begin_transaction;
+    $self->{'data'}->begin_transaction($key);
     $time=time-$time;
     debug "[$key] <-> $self->{'name'}";
     if($time>1) {
       debug_and_stderr "[$key] Waited for database RW lock $time seconds";
     }
-    $self->{'data'}->{'trans'}=$key;
 }
 
 # begin_read_transaction begins a transaction for reading data.
@@ -235,17 +231,14 @@ sub begin_read_transaction {
     my ($self,$key)=@_;
     my $time;
     $key='----' if(!defined($key));
-    debug_and_stderr "WARNING: opened transaction $self->{'data'}->{'trans'}"
-      if($self->{'data'}->{'trans'});
     debug "Opening RO transaction for $self->{'name'} [$key]...";
     $time=time;
-    $self->{'data'}->begin_read_transaction;
+    $self->{'data'}->begin_read_transaction($key);
     $time=time-$time;
     debug "[$key] <-  $self->{'name'}";
     if($time>1) {
       debug_and_stderr "[$key] Waited for database R lock $time seconds";
     }
-    $self->{'data'}->{'trans'}=$key;
 }
 
 # end_transaction end the transaction.
@@ -253,12 +246,9 @@ sub begin_read_transaction {
 sub end_transaction {
     my ($self,$key)=@_;
     $key='----' if(!defined($key));
-    debug_and_stderr "WARNING: closing transaction $self->{'data'}->{'trans'} declared as $key"
-      if($self->{'data'}->{'trans'} ne $key);
     debug "Closing transaction for $self->{'name'} [$key]...";
-    $self->{'data'}->end_transaction;
+    $self->{'data'}->end_transaction($key);
     debug "[$key]  X  $self->{'name'}";
-    $self->{'data'}->{'trans'}='';
 }
 
 # variable($name) returns the value of variable $name, stored in the
