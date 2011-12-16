@@ -3971,6 +3971,7 @@ sub open_unrecognized {
 sub unrecognized_line {
   my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
   if(@sel) {
+    $w{'inconnu_tree'}->scroll_to_cell($sel[0]);
     my $iter=$inconnu_store->get_iter($sel[0]);
     my $scan=absolu($inconnu_store->get($iter,INCONNU_FILE));
     if(-f $scan) {
