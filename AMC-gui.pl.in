@@ -3923,11 +3923,12 @@ sub update_unrecognized {
 sub open_unrecognized {
 
   my $dialog=read_glade('unrecognized',
-			qw/inconnu_tree scan_area preprocessed_area inconnu_vpaned
-			  main_recog state_scanrecog label_oscan/);
+			qw/inconnu_tree scan_area preprocessed_area
+			   inconnu_hpaned inconnu_vpaned
+			   main_recog state_scanrecog ur_frame_scan/);
 
   # make state entries with same background color as around...
-  my $col=$w{'label_oscan'}->style()->bg('normal');
+  my $col=$w{'ur_frame_scan'}->style()->bg('normal');
   for my $s (qw/normal insensitive/) {
     for my $k (qw/scanrecog/) {
       $w{'state_'.$k}->modify_base($s,$col);
@@ -3962,6 +3963,9 @@ sub open_unrecognized {
   $w{'inconnu_tree'}->get_selection->select_iter($inconnu_store->get_iter_first);
 
   $w{'inconnu_vpaned'}->child1_shrink(0);
+
+  $w{'inconnu_hpaned'}->child1_resize(1);
+  $w{'inconnu_hpaned'}->child2_resize(1);
 }
 
 sub unrecognized_line {
