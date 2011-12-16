@@ -2908,18 +2908,20 @@ sub change_liste_key {
   }
 
 sub voir_notes {
-    if(-f absolu($projet{'options'}->{'notes'})) {
-	my $n=AMC::Gui::Notes::new('scoring'=>$projet{'_scoring'});
-    } else {
-	my $dialog = Gtk2::MessageDialog
-	    ->new($w{'main_window'},
-		  'destroy-with-parent',
-		  'info','ok',
-		  sprintf(__"Papers are not yet corrected: use button \"%s\".",__"Mark"));
-	$dialog->run;
-	$dialog->destroy;
-
-    }
+  $projet{'_scoring'}->begin_read_transaction('smMC');
+  my $c=$projet{'_scoring'}->marks_count;
+  $projet{'_scoring'}->end_transaction('smMC');
+  if($c>0) {
+    my $n=AMC::Gui::Notes::new('scoring'=>$projet{'_scoring'});
+  } else {
+    my $dialog = Gtk2::MessageDialog
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'info','ok',
+	    sprintf(__"Papers are not yet corrected: use button \"%s\".",__"Mark"));
+    $dialog->run;
+    $dialog->destroy;
+  }
 }
 
 sub noter {

@@ -394,6 +394,7 @@ sub define_statements {
      'studentMark'=>{'sql'=>"SELECT * FROM ".$self->table("mark")
 		     ." WHERE student=? AND copy=?"},
      'marks'=>{'sql'=>"SELECT * FROM ".$self->table("mark")},
+     'marksCount'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("mark")},
      'codes'=>{'sql'=>"SELECT code FROM ".$self->table("code")
 	       ." GROUP BY code ORDER BY code"},
      'qStrat'=>{'sql'=>"SELECT strategy FROM ".$self->table("question")
@@ -752,6 +753,13 @@ sub codes {
 sub marks {
   my ($self)=@_;
   return(@{$self->dbh->selectall_arrayref($self->statement('marks'),{Slice=>{}})});
+}
+
+# marks_count returns the nmber of marks computed.
+
+sub marks_count {
+  my ($self)=@_;
+  return($self->sql_single($self->statement('marksCount')));
 }
 
 # question_score($student,$copy,$question) returns the score of a
