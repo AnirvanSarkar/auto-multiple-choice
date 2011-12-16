@@ -3923,7 +3923,16 @@ sub update_unrecognized {
 sub open_unrecognized {
 
   my $dialog=read_glade('unrecognized',
-			qw/inconnu_tree scan_area preprocessed_area inconnu_vpaned/);
+			qw/inconnu_tree scan_area preprocessed_area inconnu_vpaned
+			  main_recog state_scanrecog label_oscan/);
+
+  # make state entries with same background color as around...
+  my $col=$w{'label_oscan'}->style()->bg('normal');
+  for my $s (qw/normal insensitive/) {
+    for my $k (qw/scanrecog/) {
+      $w{'state_'.$k}->modify_base($s,$col);
+    }
+  }
 
   for (qw/scan preprocessed/) {
     AMC::Gui::PageArea::add_feuille($w{$_.'_area'});
@@ -3973,6 +3982,19 @@ sub unrecognized_line {
     } else {
       $w{'preprocessed_area'}->set_image('NONE');
     }
+
+    if($w{'scan_area'}->get_image) {
+      my $scan_n=$scan;
+      $scan_n =~ s:^.*/::;
+      state_image('scanrecog','gtk-dialog-question');
+      $w{'state_scanrecog'}->set_text($scan_n);
+    } else {
+      state_image('scanrecog','gtk-dialog-error');
+      $w{'state_scanrecog'}->set_text(sprintf((__"Error loading scan %s"),$scan));
+    }
+  } else {
+    state_image('scanrecog','gtk-dialog-question');
+    $w{'state_scanrecog'}->set_text(__"No scan selected");
   }
 }
 

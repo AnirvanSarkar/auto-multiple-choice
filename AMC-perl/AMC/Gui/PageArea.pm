@@ -80,6 +80,11 @@ sub set_image {
     $self->window->show;
 }
 
+sub get_image {
+   my ($self)=@_;
+   return($self->{'i-src'});
+ }
+
 sub modifs {
     my $self=shift;
     return($self->{'modifs'});
