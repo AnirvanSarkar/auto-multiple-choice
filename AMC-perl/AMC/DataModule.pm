@@ -98,6 +98,7 @@ sub sql_quote {
 
 sub sql_do {
     my ($self,$sql)=@_;
+    debug_and_stderr "WARNING: sql_do with no transaction -- $sql" if(!$self->{'trans'});
     $self->{'data'}->sql_do($sql);
 }
 
@@ -107,6 +108,7 @@ sub sql_do {
 
 sub sql_single {
     my ($self,$sql,@bind)=@_;
+    debug_and_stderr "WARNING: sql_single with no transaction -- $sql" if(!$self->{'trans'});
     my $x=$self->dbh->selectrow_arrayref($sql,{},@bind);
     if($x) {
 	return($x->[0]);
@@ -121,6 +123,7 @@ sub sql_single {
 
 sub sql_list {
     my ($self,$sql,@bind)=@_;
+    debug_and_stderr "WARNING: sql_list with no transaction -- $sql" if(!$self->{'trans'});
     my $x=$self->dbh->selectcol_arrayref($sql,{},@bind);
     if($x) {
 	return(@$x);
@@ -134,6 +137,7 @@ sub sql_list {
 
 sub sql_row {
     my ($self,$sql,@bind)=@_;
+    debug_and_stderr "WARNING: sql_row with no transaction -- $sql" if(!$self->{'trans'});
     my $x=$self->dbh->selectrow_arrayref($sql,{},@bind);
     if($x) {
 	return(@$x);
@@ -173,6 +177,7 @@ sub define_statements {
 
 sub statement {
     my ($self,$sid)=@_;
+    debug_and_stderr "WARNING: statement request with no transaction -- $sid" if(!$self->{'trans'});
     my $s=$self->{'statements'}->{$sid};
     if($s->{'s'}) {
 	return($s->{'s'});
@@ -211,6 +216,8 @@ sub begin_transaction {
     my ($self,$key)=@_;
     my $time;
     $key='----' if(!defined($key));
+    debug_and_stderr "WARNING: opened transaction $self->{'trans'}"
+      if($self->{'trans'});
     debug "Opening RW transaction for $self->{'name'} [$key]...";
     $time=time;
     $self->{'data'}->begin_transaction;
@@ -219,6 +226,7 @@ sub begin_transaction {
     if($time>1) {
       debug_and_stderr "[$key] Waited for database RW lock $time seconds";
     }
+    $self->{'trans'}=$key;
 }
 
 # begin_read_transaction begins a transaction for reading data.
@@ -227,6 +235,8 @@ sub begin_read_transaction {
     my ($self,$key)=@_;
     my $time;
     $key='----' if(!defined($key));
+    debug_and_stderr "WARNING: opened transaction $self->{'trans'}"
+      if($self->{'trans'});
     debug "Opening RO transaction for $self->{'name'} [$key]...";
     $time=time;
     $self->{'data'}->begin_read_transaction;
@@ -235,6 +245,7 @@ sub begin_read_transaction {
     if($time>1) {
       debug_and_stderr "[$key] Waited for database R lock $time seconds";
     }
+    $self->{'trans'}=$key;
 }
 
 # end_transaction end the transaction.
@@ -242,9 +253,12 @@ sub begin_read_transaction {
 sub end_transaction {
     my ($self,$key)=@_;
     $key='----' if(!defined($key));
+    debug_and_stderr "WARNING: closing transaction $self->{'trans'} declared as $key"
+      if($self->{'trans'} ne $key);
     debug "Closing transaction for $self->{'name'} [$key]...";
     $self->{'data'}->end_transaction;
     debug "[$key]  X  $self->{'name'}";
+    $self->{'trans'}='';
 }
 
 # variable($name) returns the value of variable $name, stored in the
