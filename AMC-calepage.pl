@@ -631,8 +631,11 @@ if($out_cadre && ($traitement->mode() eq 'opencv')) {
 
 $nom_file="name-".studentids_string(@stid[0,2]).".jpg";
 
+# writes data capture result to database
 $capture->set_page_auto($sf,@stid,time(),
 			$cale->params);
+# removes (if exists) old entry in the failed database
+$capture->statement('deleteFailed')->execute($sf);
 
 $capture->set_layout_image(@stid,$layout_file);
 
