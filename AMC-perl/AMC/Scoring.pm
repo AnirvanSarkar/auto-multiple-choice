@@ -182,8 +182,6 @@ sub score_question {
 	    $b_q{'d'}=$b_q{'mz'};
 	    $b_q{'p'}=0 if(!defined($b_q{'p'}));
 	    $b_q{'b'}=0;$b_q{'m'}=-( abs($b_q{'mz'})+abs($b_q{'p'})+1 );
-	} else {
-	    $b_q{'p'}=-100 if(!defined($b_q{'p'}));
 	}
 
 	if($n_coche !=1 && (!$correct) && $ticked_noneof) {
@@ -206,17 +204,28 @@ sub score_question {
 						\%b_q,$vars);
 		    debug("Delta(".$a->{'answer'}."|$code)=$b_qspec{$code}");
 		    $xx+=$b_qspec{$code};
+		    $b_q{'force'}=$b_qspec{$code.'force'}
+		      if(defined($b_qspec{$code.'force'}));
 		}
 	    }
 	}
 
-	# adds the 'd' shift value
-	$xx+=$b_q{'d'} if($raison !~ /^[VE]/i);
+	if($raison !~ /^[VE]/i) {
+	  if(defined($b_q{'force'})) {
+	    $xx=$b_q{'force'};
+	    $raison = 'F';
+	  } else {
+	    # adds the 'd' shift value
+	    $xx+=$b_q{'d'};
 
-	# applies the 'p' floor value
-	if($xx<$b_q{'p'} && $raison !~ /^[VE]/i) {
-	    $xx=$b_q{'p'};
-	    $raison='P';
+	    # applies the 'p' floor value
+	    if(defined($b_q{'p'})) {
+	      if($xx<$b_q{'p'}) {
+		$xx=$b_q{'p'};
+		$raison='P';
+	      }
+	    }
+	  }
 	}
     } else {
 	# SIMPLE QUESTION
