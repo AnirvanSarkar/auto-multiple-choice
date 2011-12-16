@@ -64,7 +64,11 @@ sub set_image {
     my ($self,$image,$layinfo)=@_;
     $self->{'i-file'}=$image;
     if($image && -f $image) {
-	$self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image);
+	eval { $self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image); };
+	if($@) {
+	  # Error loading scan...
+	  $self->{'i-src'}='';
+	}
     } elsif($image eq 'NONE') {
       $self->{'i-src'}='';
     } else {
