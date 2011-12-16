@@ -645,7 +645,7 @@ my $gui=read_glade('main_window',
     but_question but_solution
     prepare_docs prepare_layout prepare_src
     state_layout state_src state_docs state_unrecognized
-    button_unrecognized
+    button_unrecognized button_show_missing
     edition_latex
     onglet_notation onglet_saisie
     log_general commande avancement annulation button_mep_warnings
@@ -3857,13 +3857,16 @@ sub detecte_analyse {
     if($r{'incomplete'}) {
 	$tt=sprintf(__"Data capture from %d complete papers and %d incomplete papers",$r{'complete'},$r{'incomplete'});
 	state_image('capture','gtk-dialog-error');
+	$w{'button_show_missing'}->show();
     } elsif($r{'complete'}) {
 	$tt=sprintf(__("Data capture from %d complete papers"),$r{'complete'});
 	state_image('capture','gtk-yes');
+	$w{'button_show_missing'}->hide();
     } else {
 # TRANSLATORS: this text points out that no data capture has been made yet.
       $tt=sprintf(__"No data");
       state_image('capture','gtk-dialog-error');
+      $w{'button_show_missing'}->hide();
     }
     $w{'state_capture'}->set_text($tt);
 
@@ -3894,6 +3897,34 @@ sub detecte_analyse {
 			       );
     }
 
+}
+
+sub show_missing_pages {
+  $projet{'_capture'}->begin_read_transaction('cSMP');
+  my %r=$projet{'_capture'}->counts;
+  $projet{'_capture'}->end_transaction('cSMP');
+
+  my $l='';
+  my @sc=();
+  for my $p (@{$r{'missing'}}) {
+    if($sc[0] != $p->{'student'} || $sc[1] != $p->{'copy'}) {
+      @sc=($p->{'student'},$p->{'copy'});
+      $l.="\n";
+    }
+    $l.="  ".pageids_string($p->{'student'},
+			   $p->{'page'},$p->{'copy'});
+  }
+
+  my $dialog = Gtk2::MessageDialog
+    ->new_with_markup
+      ($w{'main_window'},
+       'destroy-with-parent',
+       'info','ok',
+       "<b>".(__"Pages that miss data capture to complete students sheets:")."</b>"
+       .$l
+      );
+  $dialog->run;
+  $dialog->destroy;
 }
 
 sub update_unrecognized {

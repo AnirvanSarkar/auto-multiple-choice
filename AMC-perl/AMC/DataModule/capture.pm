@@ -392,7 +392,8 @@ sub define_statements {
       ."       UNION SELECT student,page FROM $t_namefield) AS enter,"
       ."      $t_page"
       ." ON enter.student=$t_page.student"
-      ." EXCEPT SELECT student,page,copy FROM $t_page"},
+      ." EXCEPT SELECT student,page,copy FROM $t_page"
+      ." ORDER BY student,copy,page"},
      'noCapturePages'=>
      {'sql'=>"SELECT student,page,0 AS copy FROM $t_box"
       ." UNION SELECT student,page,0 AS copy FROM $t_namefield"
