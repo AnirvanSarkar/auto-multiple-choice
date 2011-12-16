@@ -130,7 +130,8 @@ sub sql_quote {
 
 sub sql_do {
     my ($self,$sql,@bind)=@_;
-    debug_and_stderr "WARNING: sql_do with no transaction -- $sql" if(!$self->{'trans'});
+    debug_and_stderr "WARNING: sql_do with no transaction -- $sql"
+      if($sql !~ /^\s*(attach|begin)/i && !$self->{'trans'});
     $self->{'dbh'}->do($sql,{},@bind);
 }
 
