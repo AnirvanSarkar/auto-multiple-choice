@@ -659,7 +659,7 @@ sub export {
 		$doc->cellStyle($feuille,$jj,$ii,'NoteX');
 	      }
 	    }
-	    $doc->cellValue($feuille,$jj,$ii,$r->{'score'})
+	    $doc->cellValue($feuille,$jj,$ii,$r->{'score'});
 	  }
 	  $ii++;
 	}
@@ -698,6 +698,8 @@ sub export {
     $doc->cellFormula($feuille,$code_row{'average'},$code_col{'note'},
 		      "oooc:=AVERAGE("
      		      .subcolumn_condensed(x2ooo($code_col{'note'}),@presents).")");
+
+    $self->{'_scoring'}->end_transaction('XODS');
 
     # set meta-data and write to file
 
