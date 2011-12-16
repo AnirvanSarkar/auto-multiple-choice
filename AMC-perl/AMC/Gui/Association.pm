@@ -58,7 +58,7 @@ sub new {
 	      'liste'=>'',
 	      'liste_key'=>'',
 	      'data_dir'=>'',
-	      'data'=>'',
+	      'data'=>'',assoc=>'','capture'=>'',
 	      'global'=>0,
 	      'encodage_liste'=>'UTF-8',
 	      'separateur'=>"",
@@ -78,8 +78,10 @@ sub new {
     $self->{'data'}=AMC::Data->new($self->{'data_dir'})
       if(!$self->{'data'});
 
-    $self->{'assoc'}=$self->{'data'}->module('association');
-    $self->{'capture'}=$self->{'data'}->module('capture');
+    $self->{'assoc'}=$self->{'data'}->module('association')
+      if(!$self->{'assoc'});
+    $self->{'capture'}=$self->{'data'}->module('capture')
+      if(!$self->{'capture'});
 
     $self->{'assoc'}->begin_transaction('ALSK');
     $self->{'assoc'}->check_keys($self->{'liste_key'},'---');
