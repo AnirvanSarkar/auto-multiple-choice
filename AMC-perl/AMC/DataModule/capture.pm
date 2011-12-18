@@ -208,11 +208,15 @@ sub populate_from_xml {
   $cr =~ s/\/[^\/]+\/?$/\/cr/;
   return if(!-d $cr);
 
+  $self->progression('begin',__"Getting capture data from old format XML files...");
+
   my $cordir="$cr/corrections/jpg/";
 
   opendir(DIR, $cr) || die "can't opendir $cr: $!";
   @xmls = grep { /\.xml$/ && -s "$cr/".$_ } readdir(DIR);
   closedir DIR;
+
+  my $frac=0;
 
  XML: for my $f (@xmls) {
     my $anx=XMLin("$cr/".$f,
@@ -301,7 +305,12 @@ sub populate_from_xml {
 	}
       }
     }
+
+    $frac++;
+    $self->progression('fraction',$frac/($#xmls+1));
   }
+
+  $self->progression('end');
 }
 
 # defines all the SQL statements that will be used

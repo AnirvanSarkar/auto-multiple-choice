@@ -155,10 +155,14 @@ sub populate_from_xml {
     my $mep=$self->{'data'}->directory;
     $mep =~ s/\/[^\/]+\/?$/\/mep/;
     if(-d $mep) {
+      $self->progression('begin',__"Getting layout data from old format XML files...");
+
 	opendir(DIR, $mep) || die "can't opendir $mep: $!";
 	@xmls = grep { /\.xml$/ && -s "$mep/".$_ } 
 	readdir(DIR);
 	closedir DIR;
+
+      my $frac=0;
 
 	for my $f (@xmls) {
 	    my $lay=XMLin("$mep/".$f,
@@ -201,7 +205,10 @@ sub populate_from_xml {
 		    }
 		}
 	    }
-	}
+	    $frac++;
+	    $self->progression('fraction',$frac/($#xmls+1));
+	  }
+      $self->progression('end');
     }
 }
 

@@ -248,10 +248,15 @@ sub populate_from_xml {
   $scoring_file =~ s:/[^/]+/?$:/bareme.xml:;
   return if(!-f $scoring_file);
 
+  $self->progression('begin',__"Getting scoring data from old format XML files...");
+
   my $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
   $self->main_strategy(-1,$xml->{'main'});
-  for my $student (keys %{$xml->{'etudiant'}}) {
+  my @s=(keys %{$xml->{'etudiant'}});
+  my $frac=0;
+
+  for my $student (@s) {
     my $s=$xml->{'etudiant'}->{$student};
     if($student eq 'defaut') {
       $self->default_strategy(QUESTION_SIMPLE,
@@ -282,11 +287,15 @@ sub populate_from_xml {
     } else {
       debug "Unknown student id: <$student>";
     }
+    $frac++;
+    $self->progression('fraction',0.5*$frac/($#s+1));
   }
 
   $scoring_file=$self->{'data'}->directory;
   $scoring_file =~ s:/[^/]+/?$:/notes.xml:;
   return if(!-f $scoring_file);
+
+  $frac=0;
 
   $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
@@ -297,7 +306,8 @@ sub populate_from_xml {
   $self->variable('rounding',$xml->{'arrondi'});
   $self->variable('granularity',$xml->{'grain'});
 
-  for my $student (keys %{$xml->{'copie'}}) {
+  @s=(keys %{$xml->{'copie'}});
+  for my $student (@s) {
     my $s=$xml->{'copie'}->{$student};
 
     if($student =~ /^(moyenne|max)$/) {
@@ -322,7 +332,11 @@ sub populate_from_xml {
     } else {
       debug "WARNING: Unknown student <$student> importing XML marks";
     }
+    $frac++;
+    $self->progression('fraction',0.5*(1+$frac/($#s+1)));
   }
+
+  $self->progression('end');
 }
 
 # defines all the SQL statements that will be used

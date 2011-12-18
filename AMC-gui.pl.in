@@ -4741,7 +4741,8 @@ sub edit_src {
 sub valide_projet {
     set_source_tex();
 
-    $projet{'_data'}=AMC::Data->new(absolu($projet{'options'}->{'data'}));
+    $projet{'_data'}=AMC::Data->new(absolu($projet{'options'}->{'data'}),
+				    'progress'=>\%w);
     for (qw/layout capture scoring association/) {
       $projet{'_'.$_}=$projet{'_data'}->module($_);
     }

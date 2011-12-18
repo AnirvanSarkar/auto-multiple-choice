@@ -347,4 +347,12 @@ sub version_upgrade {
     return('');
 }
 
+# see AMC::Data::progression
+
+sub progression {
+  my ($self,@a)=@_;
+  $self->{'data'}->progression(@a);
+}
+
+
 1;

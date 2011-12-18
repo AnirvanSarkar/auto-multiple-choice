@@ -92,6 +92,8 @@ sub populate_from_xml {
   $assoc_file =~ s:/[^/]+/?$:/association.xml:;
   return if(!-f $assoc_file);
 
+  $self->progression('begin',__"Getting association data from old format XML files...");
+
   my $i=IO::File->new($assoc_file,"<:encoding(utf-8)");
   my $a=XMLin($i,'ForceArray'=>1,'KeyAttr'=>['id']);
   $i->close();
@@ -99,11 +101,18 @@ sub populate_from_xml {
   $self->variable('key_in_list',$a->{'liste_key'});
   $self->variable('code',$a->{'notes_id'});
 
-  for my $student (keys %{$a->{'copie'}}) {
+  my @s=(keys %{$a->{'copie'}});
+  my $frac=0;
+
+  for my $student (@s) {
     my $s=$a->{'copie'}->{$student};
     $self->statement('NEWAssoc')
       ->execute($student,0,$s->{'manuel'},$s->{'auto'});
+    $frac++;
+    $self->progression('fraction',$frac/(1+$#s));
   }
+
+  $self->progression('end');
 }
 
 # defines all the SQL statements that will be used

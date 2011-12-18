@@ -31,16 +31,18 @@ use DBI;
 sub new {
     my ($class,$dir,%oo)=@_;
 
-    my $self={
-	'directory'=>$dir,
-	'timeout'=>300000,
-	'dbh'=>DBI->connect("dbi:SQLite:",undef,undef,
-			    {AutoCommit => 0,
-			     RaiseError => 0,
-			    }),
-	'modules'=>{},
-	'on_error'=>'stdout,stderr,die',
-    };
+    my $self=
+      {
+       'directory'=>$dir,
+       'timeout'=>300000,
+       'dbh'=>DBI->connect("dbi:SQLite:",undef,undef,
+			   {AutoCommit => 0,
+			    RaiseError => 0,
+			   }),
+       'modules'=>{},
+       'on_error'=>'stdout,stderr,die',
+       'progress'=>'',
+      };
 
     for(keys %oo) {
 	$self->{$_}=$oo{$_} if(exists($self->{$_}));
@@ -174,6 +176,35 @@ sub module {
     my ($self,$module)=@_;
     $self->require_module($module);
     return($self->{'modules'}->{$module});
+}
+
+# progression is called by DataModule methods when long actions are
+# beeing executed, to show the user the progression of this action.
+
+sub progression {
+  my ($self,$action,$argument)=@_;
+
+  if(ref($self->{'progress'}) eq 'CODE') {
+    &{$self->{'progress'}}($action,$argument);
+  } elsif(ref($self->{'progress'}) eq 'HASH') {
+    if($action eq 'begin') {
+      $self->{'progress.lasttext'}=$self->{'progress'}->{'avancement'}->get_text();
+      $self->{'progress'}->{'avancement'}->set_text($argument);
+      $self->{'progress'}->{'annulation'}->set_sensitive(0)
+	if($self->{'progress'}->{'annulation'});
+      $self->{'progress'}->{'avancement'}->set_fraction(0);
+      $self->{'progress'}->{'commande'}->show();
+      Gtk2->main_iteration while ( Gtk2->events_pending );
+    } elsif($action eq 'end') {
+      $self->{'progress'}->{'avancement'}->set_fraction(1);
+      $self->{'progress'}->{'commande'}->hide();
+      $self->{'progress'}->{'avancement'}->set_text($self->{'progress.lasttext'});
+      Gtk2->main_iteration while ( Gtk2->events_pending );
+    } elsif($action eq 'fraction') {
+      $self->{'progress'}->{'avancement'}->set_fraction($argument);
+      Gtk2->main_iteration while ( Gtk2->events_pending );
+    }
+  }
 }
 
 1;
