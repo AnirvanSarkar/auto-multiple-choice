@@ -3751,27 +3751,36 @@ sub detecte_mep {
     state_image('layout',$ok);
 }
 
-my %defect_text=(
-    'NO_NAME'=>__("The \\namefield command is not used. Writing subjects without name field is not recommended."),
-    'SEVERAL_NAMES'=>__("The \\namefield command is used several times for the same subject. This should not be the case, as each student should write his name only once."),
-    'NO_BOX'=>__("No box to be ticked."),
-    );
+my %defect_text=
+  (
+   'NO_NAME'=>__("The \\namefield command is not used. Writing subjects without name field is not recommended"),
+   'SEVERAL_NAMES'=>__("The \\namefield command is used several times for the same subject. This should not be the case, as each student should write his name only once"),
+   'NO_BOX'=>__("No box to be ticked"),
+   'DIFFERENT_POSITIONS'=>__("The corner marks and binary boxes are not at the same location on all pages"),
+  );
 
 sub mep_warnings {
     my $m='';
     my @def=(keys %{$projet{'_mep_defauts'}});
     if(@def) {
-	$m=__("Some potential defects were detected for this subject. Correct them in the LaTeX source and update the working documents.");
-	for my $k (keys %defect_text) {
-	    if($projet{'_mep_defauts'}->{$k}) {
-		my @e=sort { $a <=> $b } (@{$projet{'_mep_defauts'}->{$k}});
-		if(@e) {
-		    $m.="\n<b>".$defect_text{$k}."</b> ".
-			sprintf(__('(Concerns %1$d sheets, see for exemple sheet %2$d)'),1+$#e,$e[0]);
-
-		}
+      $m=__("Some potential defects were detected for this subject. Correct them in the LaTeX source and update the working documents.");
+      for my $k (keys %defect_text) {
+	my $dd=$projet{'_mep_defauts'}->{$k};
+	if($dd) {
+	  if($k eq 'DIFFERENT_POSITIONS') {
+	    $m.="\n<b>".$defect_text{$k}."</b> ".
+	      sprintf(__('(See for exemple pages %s and %s)'),
+		      pageids_string($dd->{'student_a'},$dd->{'page_a'}),
+		      pageids_string($dd->{'student_b'},$dd->{'page_b'})).'.';
+	  } else {
+	    my @e=sort { $a <=> $b } (@{$dd});
+	    if(@e) {
+	      $m.="\n<b>".$defect_text{$k}."</b> ".
+		sprintf(__('(Concerns %1$d sheets, see for exemple sheet %2$d)'),1+$#e,$e[0]).'.';
 	    }
+	  }
 	}
+      }
     } else {
 	# should not be possible to go there...
 	return();

@@ -38,6 +38,7 @@ sub new {
        'dbh'=>DBI->connect("dbi:SQLite:",undef,undef,
 			   {AutoCommit => 0,
 			    RaiseError => 0,
+			    sqlite_see_if_its_a_number => 1,
 			   }),
        'modules'=>{},
        'on_error'=>'stdout,stderr,die',

@@ -304,6 +304,29 @@ sub define_statements {
 		    ." WHERE src=? AND timestamp=?"},
        'NEWsource'=>{'sql'=>"INSERT INTO ".$self->table("source")
 		     ." (src,timestamp) VALUES(?,?)"},
+       'checkPosDigits'=>
+       {'sql'=>"SELECT a.student AS student_a,b.student AS student_b,"
+	."         a.page AS page_a, b.page AS page_b,* FROM"
+	." (SELECT * FROM"
+	."   (SELECT * FROM ".$self->table("digit")
+	."    ORDER BY student DESC,page DESC)"
+	."  GROUP BY numberid,digitid) AS a,"
+	."  ".$self->table("digit")." AS b"
+	." ON a.digitid=b.digitid AND a.numberid=b.numberid"
+	."    AND (abs(a.xmin-b.xmin)>? OR abs(a.xmax-b.xmax)>?"
+	."         OR abs(a.ymin-b.ymin)>? OR abs(a.ymax-b.ymax)>?)"
+	." LIMIT 1"},
+       'checkPosMarks'=>
+       {'sql'=>"SELECT a.student AS student_a,b.student AS student_b,"
+	."         a.page AS page_a, b.page AS page_b,* FROM"
+	." (SELECT * FROM"
+	."   (SELECT * FROM ".$self->table("mark")
+	."    ORDER BY student DESC,page DESC)"
+	."  GROUP BY corner) AS a,"
+	."  ".$self->table("mark")." AS b"
+	." ON a.corner=b.corner"
+	."    AND (abs(a.x-b.x)>? OR abs(a.y-b.y)>?)"
+	." LIMIT 1"},
       };
 }
 
@@ -409,21 +432,29 @@ sub students {
     return($self->sql_list($self->statement('STUDENTS')));
 }
 
-# defetcs() returns a hash of the defects found in the subject:
+# defects($delta) returns a hash of the defects found in the subject:
+#
 # * {'NO_BOX} is a pointer on an array containing all the student
 #   numbers for which there is no box to be filled in the subject
+#
 # * {'NO_NAME'} is a pointer on an array containing all the student
 #   numbers for which there is no name field
+#
 # * {'SEVERAL_NAMES'} is a pointer on an array containing all the student
 #   numbers for which there is more than one name field
-
+#
+# * {'DIFFERENT_POSITIONS'} is a pointer to a hash returned by
+#   check_positions($delta)
 sub defects {
-    my ($self)=@_;
+    my ($self,$delta)=@_;
+    $delta=0.1 if(!defined($delta));
     my %r=();
     for my $type (qw/NO_BOX NO_NAME SEVERAL_NAMES/) {
 	my @s=$self->sql_list($self->statement('DEFECT_'.$type));
 	$r{$type}=[@s] if(@s);
     }
+    my $pos=$self->check_positions($delta);
+    $r{'DIFFERENT_POSITIONS'}=$pos if($pos);
     return(%r);
 }
 
@@ -476,6 +507,11 @@ sub clear_all {
     }
 }
 
+# get_pages returns a reference to an array like
+# [[student_1,page_1],[student_2,page_2]] listing the pages where
+# something has to be entered by the students (either answers boxes or
+# name field).
+
 sub get_pages {
   my ($self,$add_copy)=@_;
   my $r=$self->dbh
@@ -484,6 +520,24 @@ sub get_pages {
     for(@$r) { push @{$_},0 }
   }
   return $r;
+}
+
+# check_positions($delta) checks if all pages has the same positions
+# for marks and binary digits boxes. If this is the case (this SHOULD
+# allways be the case), check_positions returns undef. If not,
+# check_positions returns a hashref
+# {student_a=>S1,page_a=>P1,student_b=>S2,page_b=>P2} showing an
+# example for which (S1,P1) has not the same positions as (S2,P2)
+# (with difference over $delta for at least one coordinate).
+
+sub check_positions {
+  my ($self,$delta)=@_;
+  my $r=$self->dbh->selectrow_hashref($self->statement('checkPosDigits'),{},
+				      $delta,$delta,$delta,$delta);
+  return($r) if($r);
+  $r=$self->dbh->selectrow_hashref($self->statement('checkPosMarks'),{},
+				   $delta,$delta);
+  return($r);
 }
 
 
