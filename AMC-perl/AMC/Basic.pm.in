@@ -589,6 +589,7 @@ sub pageids_string {
 
 sub studentids_string {
   my ($student,$copy)=@_;
+  $student='' if(!defined($student));
   return($student.($copy ? ':'.$copy : ''));
 }
 
