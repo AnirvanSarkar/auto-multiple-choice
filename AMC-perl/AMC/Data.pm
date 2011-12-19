@@ -188,21 +188,47 @@ sub progression {
     &{$self->{'progress'}}($action,$argument);
   } elsif(ref($self->{'progress'}) eq 'HASH') {
     if($action eq 'begin') {
-      $self->{'progress.lasttext'}=$self->{'progress'}->{'avancement'}->get_text();
+      $self->{'progress.lasttext'}
+	=$self->{'progress'}->{'avancement'}->get_text();
       $self->{'progress'}->{'avancement'}->set_text($argument);
-      $self->{'progress'}->{'annulation'}->set_sensitive(0)
-	if($self->{'progress'}->{'annulation'});
+
+      if($self->{'progress'}->{'annulation'}) {
+	$self->{'progress.lastcancel'}
+	  =$self->{'progress'}->{'annulation'}->sensitive;
+	$self->{'progress'}->{'annulation'}->set_sensitive(0);
+      }
+
+      $self->{'progress.lastfaction'}
+	=$self->{'progress'}->{'avancement'}->get_fraction;
+
       $self->{'progress'}->{'avancement'}->set_fraction(0);
+
+      $self->{'progress.lastvisible'}
+	  =$self->{'progress'}->{'commande'}->visible;
       $self->{'progress'}->{'commande'}->show();
+
+      $self->{'progress.time'}=0;
+
       Gtk2->main_iteration while ( Gtk2->events_pending );
     } elsif($action eq 'end') {
-      $self->{'progress'}->{'avancement'}->set_fraction(1);
-      $self->{'progress'}->{'commande'}->hide();
-      $self->{'progress'}->{'avancement'}->set_text($self->{'progress.lasttext'});
+      $self->{'progress'}->{'avancement'}
+	->set_fraction($self->{'progress.lastfaction'});
+      $self->{'progress'}->{'commande'}
+	->visible($self->{'progress.lastvisible'});
+      $self->{'progress'}->{'avancement'}
+	->set_text($self->{'progress.lasttext'});
+      if($self->{'progress'}->{'annulation'}) {
+	$self->{'progress'}->{'annulation'}
+	  ->set_sensitive($self->{'progress.lastcancel'});
+      }
       Gtk2->main_iteration while ( Gtk2->events_pending );
     } elsif($action eq 'fraction') {
-      $self->{'progress'}->{'avancement'}->set_fraction($argument);
-      Gtk2->main_iteration while ( Gtk2->events_pending );
+      # Don't update progress bar more than once a second.
+      if(time>$self->{'progress.time'}) {
+	$self->{'progress.time'}=time;
+	$self->{'progress'}->{'avancement'}->set_fraction($argument);
+	Gtk2->main_iteration while ( Gtk2->events_pending );
+      }
     }
   }
 }

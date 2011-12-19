@@ -208,7 +208,7 @@ sub populate_from_xml {
   $cr =~ s/\/[^\/]+\/?$/\/cr/;
   return if(!-d $cr);
 
-  $self->progression('begin',__"Getting capture data from old format XML files...");
+  $self->progression('begin',__"Fetching data capture results from old format XML files...");
 
   my $cordir="$cr/corrections/jpg/";
 

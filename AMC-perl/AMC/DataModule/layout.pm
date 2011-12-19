@@ -155,7 +155,7 @@ sub populate_from_xml {
     my $mep=$self->{'data'}->directory;
     $mep =~ s/\/[^\/]+\/?$/\/mep/;
     if(-d $mep) {
-      $self->progression('begin',__"Getting layout data from old format XML files...");
+      $self->progression('begin',__"Fetching layout data from old format XML files...");
 
 	opendir(DIR, $mep) || die "can't opendir $mep: $!";
 	@xmls = grep { /\.xml$/ && -s "$mep/".$_ } 

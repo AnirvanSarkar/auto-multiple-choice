@@ -248,7 +248,7 @@ sub populate_from_xml {
   $scoring_file =~ s:/[^/]+/?$:/bareme.xml:;
   return if(!-f $scoring_file);
 
-  $self->progression('begin',__"Getting scoring data from old format XML files...");
+  $self->progression('begin',__"Fetching scoring data from old format XML files...");
 
   my $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
 

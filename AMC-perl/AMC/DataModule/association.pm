@@ -92,7 +92,7 @@ sub populate_from_xml {
   $assoc_file =~ s:/[^/]+/?$:/association.xml:;
   return if(!-f $assoc_file);
 
-  $self->progression('begin',__"Getting association data from old format XML files...");
+  $self->progression('begin',__"Fetching association results from old format XML files...");
 
   my $i=IO::File->new($assoc_file,"<:encoding(utf-8)");
   my $a=XMLin($i,'ForceArray'=>1,'KeyAttr'=>['id']);
