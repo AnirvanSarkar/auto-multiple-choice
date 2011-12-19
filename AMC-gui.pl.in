@@ -1239,10 +1239,10 @@ sub delete_line {
 	#
 	$projet{'_capture'}->delete_page_data(@id);
 
+	$diag_store->remove($iter);
+
 	$projet{'_capture'}->end_transaction;
       }
-
-      detecte_analyse();
     }
   }
 }
