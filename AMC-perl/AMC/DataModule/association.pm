@@ -120,6 +120,7 @@ sub populate_from_xml {
 sub define_statements {
   my ($self)=@_;
   my $at=$self->table("association");
+  my $t_page=$self->table("page","capture");
   $self->{'statements'}=
     {
      'NEWAssoc'=>{'sql'=>"INSERT INTO $at"
@@ -156,6 +157,10 @@ sub define_statements {
      'unlink'=>{'sql'=>"UPDATE $at SET manual="
 		." ( CASE WHEN manual IS NULL OR auto=? THEN 'NONE' ELSE NULL END )"
 		." WHERE manual=? OR ( auto=? AND manual IS NULL )"},
+     'assocMissingCount'=>{'sql'=>"SELECT COUNT(*) FROM"
+			   ."(SELECT student,copy FROM $t_page"
+			   ." EXCEPT SELECT student,copy FROM $at"
+			   ." WHERE manual IS NOT NULL OR auto IS NOT NULL)"},
     };
 }
 
@@ -296,6 +301,14 @@ sub delete_target {
   my $r=$self->dbh->selectall_arrayref($self->statement('realBack'),{},$code);
   $self->statement('unlink')->execute($code,$code,$code);
   return($r);
+}
+
+# missing_count returns the number of entered sheets without association
+
+sub missing_count {
+  my ($self)=@_;
+  $self->{'data'}->require_module('capture');
+  return($self->sql_single($self->statement('assocMissingCount')));
 }
 
 1;

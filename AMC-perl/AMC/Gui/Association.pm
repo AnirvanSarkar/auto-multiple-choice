@@ -63,6 +63,7 @@ sub new {
 	      'encodage_liste'=>'UTF-8',
 	      'separateur'=>"",
 	      'identifiant'=>'',
+	      'fin'=>'',
 	  };
 
     for (keys %o) {
@@ -347,6 +348,7 @@ sub quitter {
 	Gtk2->main_quit;
     } else {
 	$self->{'general'}->destroy;
+	&{$self->{'fin'}}();
     }
 }
 
