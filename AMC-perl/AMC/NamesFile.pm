@@ -49,7 +49,7 @@ sub new {
     @{$self->{'err'}}=($self->load());
 
     return($self);
-}    
+}
 
 sub reduit {
     my ($s)=@_;
@@ -148,7 +148,7 @@ sub load {
 	    close LISTE;
 	    # entetes et cles
 	    $self->{'heads'}=\@heads;
-	    $self->{'keys'}=[grep { my @lk=(keys %{$data{$_}}); 
+	    $self->{'keys'}=[grep { my @lk=(keys %{$data{$_}});
 				    $#lk==$#{$self->{'noms'}}; } @heads];
 	    # rajout identifiant
 	    $self->calc_identifiants();
@@ -259,7 +259,7 @@ sub substitute {
 	$nom =~ s/^\s+//;
 	$nom =~ s/\s+$//;
 	$nom =~ s/\s+/ /g;
-	
+
 	$s =~ s/$prefix\(ID\)/$nom/g;
     } else {
 	$s =~ s/$prefix\(ID\)/X/g;
@@ -275,9 +275,10 @@ sub substitute {
 
 sub data {
     my ($self,$head,$c,%oo)=@_;
-    my @k=grep { defined($self->{'noms'}->[$_]->{$head}) 
-		     && ($self->{'noms'}->[$_]->{$head} eq $c) }
-    (0..$#{$self->{'noms'}});
+    return() if(!defined($c));
+    my @k=grep { defined($self->{'noms'}->[$_]->{$head})
+		   && ($self->{'noms'}->[$_]->{$head} eq $c) }
+      (0..$#{$self->{'noms'}});
     if(!$oo{'all'}) {
 	if($#k!=0) {
 	    print STDERR "Error: non-unique name (".(1+$#k)." records)\n";
