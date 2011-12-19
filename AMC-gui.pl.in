@@ -644,7 +644,7 @@ my $gui=read_glade('main_window',
 		   qw/onglets_projet onglet_preparation preparation_etats
     but_question but_solution
     prepare_docs prepare_layout prepare_src
-    state_layout state_src state_docs state_unrecognized
+    state_layout state_src state_docs state_unrecognized state_marking
     button_unrecognized button_show_missing
     edition_latex
     onglet_notation onglet_saisie
@@ -652,7 +652,7 @@ my $gui=read_glade('main_window',
     liste_filename liste_path liste_edit liste_setfile liste_refresh
     doc_menu menu_debug
     diag_tree state_capture
-    maj_bareme correc_tree correction_result regroupement_corriges
+    maj_bareme correc_tree regroupement_corriges
     options_CSV options_ods options_List
     groupe_model
     pref_assoc_c_assoc_code pref_assoc_c_liste_key
@@ -738,7 +738,7 @@ $w{'doc_menu'}->set_submenu($docs_menu);
 # make state entries with same background color as around...
 $col=$w{'prepare_src'}->style()->bg('prelight');
 for my $s (qw/normal insensitive/) {
-  for my $k (qw/src docs layout capture unrecognized/) {
+  for my $k (qw/src docs layout capture marking unrecognized/) {
     $w{'state_'.$k}->modify_base($s,$col);
   }
 }
@@ -3144,9 +3144,11 @@ sub noter_resultat {
   my $avg=$projet{'_scoring'}->average_mark;
 
   if($avg) {
-    $w{'correction_result'}->set_markup("<span foreground=\"darkgreen\">".sprintf(__"Mean: %.2f",$avg)."</span>");
+    state_image('marking','gtk-yes');
+    $w{'state_marking'}->set_text(sprintf(__"Mean: %.2f",$avg));
   } else {
-    $w{'correction_result'}->set_markup("<span foreground=\"red\">".__("No marks computed")."</span>");
+    state_image('marking','gtk-dialog-error');
+    $w{'state_marking'}->set_text(__("No marks computed"));
   }
 
   my @codes=$projet{'_scoring'}->codes;
