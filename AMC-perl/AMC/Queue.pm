@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010,2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -48,7 +48,7 @@ sub new {
 	      'queue'=>[],
 	      'max.procs'=>0,
 	  };
-    
+
     for my $k (keys %o) {
 	$self->{$k}=$o{$k} if(defined($self->{$k}));
     }
@@ -59,7 +59,7 @@ sub new {
     }
 
     bless $self;
-    
+
     return($self);
 }
 
@@ -102,7 +102,7 @@ sub run {
 		    debug "Fork : $p";
 		    push @{$self->{'pids'}},$p;
 		} else {
-		    if(ref($cs->[0]) eq 'ARRAY') { 
+		    if(ref($cs->[0]) eq 'ARRAY') {
 			for my $c (@$cs) {
 			    debug "Command [$$] : ".join(' ',@$c);
 			    if(system(@$c)==0) {
@@ -112,6 +112,10 @@ sub run {
 			    }
 			}
 			exit(0);
+		    } elsif(ref($cs->[0]) eq 'CODE') {
+		      my $c=shift @$cs;
+		      &$c(@$cs);
+		      exit(0);
 		    } else {
 			debug "Command [$$] : ".join(' ',@$cs);
 			exec(@$cs);
