@@ -1200,7 +1200,7 @@ sub delete_line {
     my $reponse=$dialog->run;
     $dialog->destroy;
     if($reponse eq 'yes') {
-
+      my @iters=();
       for my $s (@selected) {
 	my $iter=$diag_store->get_iter($s);
 	my @id=map { $diag_store->get($iter,$_); } 
@@ -1239,10 +1239,13 @@ sub delete_line {
 	#
 	$projet{'_capture'}->delete_page_data(@id);
 
-	$diag_store->remove($iter);
-
 	$projet{'_capture'}->end_transaction;
+
+	push @iters,$iter;
       }
+
+      for(@iters) { $diag_store->remove($_); }
+
     }
   }
 }
