@@ -4082,10 +4082,12 @@ sub unrecognized_line {
 }
 
 sub unrecognized_next {
-  my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
+  my (@sel)=@_;
+  @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows
+    if(!@sel);
   my $iter;
   if(@sel) {
-    $iter=$inconnu_store->iter_next($inconnu_store->get_iter($sel[0]));
+    $iter=$inconnu_store->iter_next($inconnu_store->get_iter($sel[$#sel]));
   }
   $iter=$inconnu_store->get_iter_first if(!$iter);
 
@@ -4111,16 +4113,22 @@ sub unrecognized_prev {
 }
 
 sub unrecognized_delete {
-  for my $s ($w{'inconnu_tree'}->get_selection->get_selected_rows) {
+  my @iters;
+  my @sel=($w{'inconnu_tree'}->get_selection->get_selected_rows);
+  return if(!@sel);
+
+  $projet{'_capture'}->begin_transaction('rmUN');
+  for my $s (@sel) {
     my $iter=$inconnu_store->get_iter($s);
     my $file=$inconnu_store->get($iter,INCONNU_FILE);
-    $projet{'_capture'}->begin_transaction;
     $projet{'_capture'}->statement('deleteFailed')->execute($file);
-    $projet{'_capture'}->end_transaction;
     unlink absolu($file);
-    unrecognized_next();
-    $inconnu_store->remove($iter);
+    push @iters,$iter;
   }
+  unrecognized_next(@sel);
+  for(@iters) { $inconnu_store->remove($_); }
+  update_analysis_summary();
+  $projet{'_capture'}->end_transaction('rmUN');
 }
 
 sub analyse_diagnostic {
