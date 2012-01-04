@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -31,7 +31,7 @@ sub new {
     $self->{'out.separateur'}=",";
     $self->{'out.decimal'}=",";
     $self->{'out.entoure'}="\"";
-    $self->{'out.cochees'}="";
+    $self->{'out.ticked'}="";
     bless ($self, $class);
     return $self;
 }
@@ -81,7 +81,7 @@ sub export {
     my @questions=$self->{'_scoring'}->questions;
     my @codes=$self->{'_scoring'}->codes;
 
-    if($self->{'out.cochees'}) {
+    if($self->{'out.ticked'}) {
       push @columns,map { ($_->{'title'},"TICKED:".$_->{'title'}) } @questions;
       $self->{'out.entoure'}="\"" if(!$self->{'out.entoure'});
     } else {
@@ -103,9 +103,26 @@ sub export {
 
       for my $q (@questions) {
 	push @columns,$self->{'_scoring'}->question_score(@sc,$q->{'question'});
-	if($self->{'out.cochees'}) {
-	  push @columns,join(';',$self->{'_capture'}
-			     ->ticked_list_0(@sc,$q->{'question'},$dt));
+	if($self->{'out.ticked'}) {
+	  if($self->{'out.ticked'} eq '01') {
+	    push @columns,join(';',$self->{'_capture'}
+			       ->ticked_list_0(@sc,$q->{'question'},$dt));
+	  } elsif($self->{'out.ticked'} eq 'AB') {
+	    my $t='';
+	    my @tl=$self->{'_capture'}
+	      ->ticked_list(@sc,$q->{'question'},$dt);
+	    if($self->{'_scoring'}->multiple($m->{'student'},$q->{'question'})) {
+	      if(shift @tl) {
+		$t.='0';
+	      }
+	    }
+	    for my $i (0..$#tl) {
+	      $t.=chr(ord('A')+$i) if($tl[$i]);
+	    }
+	    push @columns,"\"$t\"";
+	  } else {
+	    push @columns,'"S?"';
+	  }
 	}
       }
 

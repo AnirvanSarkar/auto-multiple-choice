@@ -132,6 +132,17 @@
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="liststore9">
+    <columns>
+      <!-- column-name item -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">No</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -2103,27 +2114,35 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkCheckButton" id="export_cb_export_csv_cochees">
-                                            <property name="label" translatable="yes">Ticked boxes</property>
-                                            <property name="use_action_appearance">False</property>
+                                          <object class="GtkLabel" id="label14">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="has_tooltip">True</property>
-                                            <property name="tooltip_markup" translatable="yes">Shall AMC include in the marks file details about which boxes are ticked on the completed answer sheets?</property>
-                                            <property name="tooltip_text" translatable="yes">Shall AMC include in the marks file details about which boxes are ticked on the completed answer sheets?</property>
-                                            <property name="use_action_appearance">False</property>
-                                            <property name="xalign">0</property>
-                                            <property name="draw_indicator">True</property>
-                                            <signal name="toggled" handler="maj_export" swapped="no"/>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">Ticked boxes</property>
                                           </object>
                                           <packing>
-                                            <property name="left_attach">2</property>
-                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <placeholder/>
+                                          <object class="GtkComboBox" id="export_c_export_csv_ticked">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="model">liststore9</property>
+                                            <signal name="changed" handler="maj_export" swapped="no"/>
+                                            <child>
+                                              <object class="GtkCellRendererText" id="cellrenderertext9"/>
+                                              <attributes>
+                                                <attribute name="text">0</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
                                         </child>
                                         <child>
                                           <placeholder/>

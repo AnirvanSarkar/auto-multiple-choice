@@ -286,7 +286,7 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'format_export'=>'CSV',
 		   'export_csv_separateur'=>",",
-		   'export_csv_cochees'=>'',
+		   'export_csv_ticked'=>'',
 		   'after_export'=>'file',
 		   'export_include_abs'=>'',
 		   'export_ncols'=>2,
@@ -658,7 +658,7 @@ my $gui=read_glade('main_window',
     pref_assoc_c_assoc_code pref_assoc_c_liste_key
     export_c_format_export
     export_c_export_sort export_cb_export_include_abs
-    export_c_export_csv_separateur export_cb_export_csv_cochees
+    export_c_export_csv_separateur export_c_export_csv_ticked
     export_s_export_ncols export_c_export_pagesize
     notation_c_regroupement_type notation_cb_regroupement_compose
     pref_prep_s_nombre_copies
@@ -968,6 +968,10 @@ my %cb_stores=(
 				"marge"=>__"margin",
 				"case"=>__"near boxes",
     ),
+    'export_csv_ticked'=>cb_model(""=>'No',
+				   "01"=>(__"Yes:")." 0;0;1;0",
+				   "AB"=>(__"Yes:")." AB",
+    ),
     'export_sort'=>cb_model("n"=>__"name",
 			    "i"=>__"sheet number",
 			    "l"=>__"line in students list",
@@ -1035,7 +1039,7 @@ sub exporte {
 	"--option-out","encodage=".bon_encodage('csv'),
 	"--option-out","decimal=".$o{'delimiteur_decimal'},
 	"--option-out","separateur=".$projet{'options'}->{'export_csv_separateur'},
-	"--option-out","cochees=".$projet{'options'}->{'export_csv_cochees'};
+	"--option-out","ticked=".$projet{'options'}->{'export_csv_ticked'};
     }
     if($format eq 'ods') {
 	push @options,
@@ -4862,8 +4866,15 @@ sub projet_ouvre {
 		    delete($projet{'options'}->{$_})
 			if($_ !~ /^ext_/ && !exists($projet_defaut{$_}));
 		}
+
+		# Old style CSV ticked option
+		if($projet{'cochees'} && !$projet{'ticked'}) {
+		  $projet{'ticked'}='01';
+		  delete($projet{'cochees'});
+		}
+
 		debug "Read options:",
-		Dumper(\%projet);
+		  Dumper(\%projet);
 	    } else {
 		debug "No options file...";
 	    }
