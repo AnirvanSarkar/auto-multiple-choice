@@ -84,65 +84,6 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-dialog-warning</property>
   </object>
-  <object class="GtkListStore" id="liststore1">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore2">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore3">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore4">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore5">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore6">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore7">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore8">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore9">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">No</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkWindow" id="main_window">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1640,7 +1581,6 @@
                                   <object class="GtkComboBox" id="pref_assoc_c_assoc_code">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="model">liststore8</property>
                                     <signal name="changed" handler="valide_options_association" swapped="no"/>
                                     <child>
                                       <object class="GtkCellRendererText" id="cellrenderertext8"/>
@@ -1660,7 +1600,6 @@
                                   <object class="GtkComboBox" id="pref_assoc_c_liste_key">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="model">liststore7</property>
                                     <signal name="changed" handler="valide_options_association" swapped="no"/>
                                     <signal name="changed" handler="change_liste_key" swapped="no"/>
                                     <child>
@@ -1909,7 +1848,6 @@
                                   <object class="GtkComboBox" id="export_c_format_export">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="model">liststore6</property>
                                     <signal name="changed" handler="maj_export" swapped="no"/>
                                     <child>
                                       <object class="GtkCellRendererText" id="cellrenderertext6"/>
@@ -1985,7 +1923,6 @@
                                   <object class="GtkComboBox" id="export_c_after_export">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="model">liststore5</property>
                                     <signal name="changed" handler="maj_export" swapped="no"/>
                                     <child>
                                       <object class="GtkCellRendererText" id="cellrenderertext5"/>
@@ -2036,7 +1973,6 @@
                                           <object class="GtkComboBox" id="export_c_export_sort">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="model">liststore4</property>
                                             <signal name="changed" handler="maj_export" swapped="no"/>
                                             <child>
                                               <object class="GtkCellRendererText" id="cellrenderertext4"/>
@@ -2083,7 +2019,6 @@
                                         <property name="can_focus">False</property>
                                         <property name="n_rows">3</property>
                                         <property name="n_columns">3</property>
-                                        <property name="column_spacing">4</property>
                                         <child>
                                           <object class="GtkLabel" id="label92">
                                             <property name="visible">True</property>
@@ -2098,7 +2033,6 @@
                                           <object class="GtkComboBox" id="export_c_export_csv_separateur">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="model">liststore3</property>
                                             <signal name="changed" handler="maj_export" swapped="no"/>
                                             <child>
                                               <object class="GtkCellRendererText" id="cellrenderertext3"/>
@@ -2110,7 +2044,6 @@
                                           <packing>
                                             <property name="left_attach">1</property>
                                             <property name="right_attach">2</property>
-                                            <property name="x_padding">2</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -2128,7 +2061,6 @@
                                           <object class="GtkComboBox" id="export_c_export_csv_ticked">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="model">liststore9</property>
                                             <signal name="changed" handler="maj_export" swapped="no"/>
                                             <child>
                                               <object class="GtkCellRendererText" id="cellrenderertext9"/>
@@ -2162,7 +2094,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -2240,7 +2172,6 @@
                                           <object class="GtkComboBox" id="export_c_export_pagesize">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="model">liststore2</property>
                                             <signal name="changed" handler="maj_export" swapped="no"/>
                                             <child>
                                               <object class="GtkCellRendererText" id="cellrenderertext2"/>
@@ -2479,7 +2410,6 @@
                                   <object class="GtkComboBox" id="notation_c_regroupement_type">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="model">liststore1</property>
                                     <signal name="changed" handler="valide_options_notation" swapped="no"/>
                                     <child>
                                       <object class="GtkCellRendererText" id="cellrenderertext1"/>
