@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -2333,7 +2333,6 @@ sub analyse_call {
     $fh->seek( 0, SEEK_END );
 
     my @args=("--debug",debug_file(),
-	      "--seuil-coche",$projet{'options'}->{'seuil'},
 	      "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
 	      "--progression-id",'analyse',
 	      "--progression",1,

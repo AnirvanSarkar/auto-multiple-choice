@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -49,7 +49,7 @@ sub new {
 
     if(!$self->{'name'} && $class =~ /::([^:]+)$/) {
 	$self->{'name'}=$1;
-    }	
+      }
 
     bless($self,$class);
 
@@ -66,6 +66,13 @@ sub new {
 sub dbh {
     my ($self)=@_;
     return $self->{'data'}->dbh;
+}
+
+# disconnect disconnects from SQLite
+
+sub disconnect {
+  my ($self)=@_;
+  $self->{'data'}->disconnect;
 }
 
 # table($table_subname) gives a table name to use for some particular

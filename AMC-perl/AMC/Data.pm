@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -35,11 +35,7 @@ sub new {
       {
        'directory'=>$dir,
        'timeout'=>300000,
-       'dbh'=>DBI->connect("dbi:SQLite:",undef,undef,
-			   {AutoCommit => 0,
-			    RaiseError => 0,
-			    sqlite_see_if_its_a_number => 1,
-			   }),
+       'dbh'=>'',
        'modules'=>{},
        'on_error'=>'stdout,stderr,die',
        'progress'=>'',
@@ -49,15 +45,42 @@ sub new {
 	$self->{$_}=$oo{$_} if(exists($self->{$_}));
     }
 
-    $self->{'dbh'}->sqlite_busy_timeout($self->{'timeout'});
-    $self->{'dbh'}->{sqlite_unicode}=1;
-
     bless($self,$class);
 
-    $self->{'dbh'}->{HandleError}=sub {
-      $self->sql_error(shift);
-    };
+    $self->connect;
+
     return $self;
+}
+
+# Connects to SQLite (first without any database: this will be done
+# when loading the modules), and renew all modules
+
+sub connect {
+  my ($self)=@_;
+  $self->{'dbh'}=DBI->connect("dbi:SQLite:",undef,undef,
+			      {AutoCommit => 0,
+			       RaiseError => 0,
+			       sqlite_see_if_its_a_number => 1,
+			      });
+  $self->{'dbh'}->sqlite_busy_timeout($self->{'timeout'});
+  $self->{'dbh'}->{sqlite_unicode}=1;
+  $self->{'dbh'}->{HandleError}=sub {
+    $self->sql_error(shift);
+  };
+
+  my @mods=(keys %{$self->{'modules'}});
+  $self->{'modules'}={};
+  for(@mods) { $self->require_module($_); }
+}
+
+# Disconnects...
+
+sub disconnect {
+  my ($self)=@_;
+  if($self->{'dbh'}) {
+    $self->{'dbh'}->disconnect;
+    $self->{'dbh'}='';
+  }
 }
 
 # SQL errors...
