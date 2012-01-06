@@ -2903,30 +2903,6 @@ student number &amp; class &amp; subject\\
           </listitem>
 
           <listitem>
-            <para>with "<option>--mode m</option>",</para>
-
-            <variablelist>
-              <varlistentry>
-                <term><option>--calage
-                <replaceable>calage.xy</replaceable></option></term>
-
-                <listitem>
-                  <para>sets the positions file to be used.</para>
-                </listitem>
-              </varlistentry>
-
-              <varlistentry>
-                <term><option>--mep
-                <replaceable>project-mep-dir</replaceable></option></term>
-
-                <listitem>
-                  <para>sets the directory to store MEP files into.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-
-          <listitem>
             <para>with "<option>--mode b</option>",
             <command>AMC-prepare.pl</command> makes the scoring file
             extracting the scoring strategy defined in the source LaTeX file.
@@ -2934,8 +2910,8 @@ student number &amp; class &amp; subject\\
 
             <variablelist>
               <varlistentry>
-                <term><option>--bareme
-                <replaceable>scoring.xml</replaceable></option></term>
+                <term><option>--data
+                <replaceable>project-data-dir</replaceable></option></term>
 
                 <listitem>
                   <para>sets the scoring file to create.</para>
@@ -2977,6 +2953,15 @@ student number &amp; class &amp; subject\\
 
             <listitem>
               <para>gives a file to fill with debugging information.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--data
+            <replaceable>project-data-dir</replaceable></option></term>
+
+            <listitem>
+              <para>sets the directory to store SQLite data files into.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -3270,7 +3255,8 @@ student number &amp; class &amp; subject\\
                   <refentrytitle>AMC-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
-                </citerefentry>).</para>
+                </citerefentry>). Defaults to
+              <filename><replaceable>project-dir</replaceable>/data</filename>.</para>
             </listitem>
           </varlistentry>
 
@@ -3279,8 +3265,11 @@ student number &amp; class &amp; subject\\
             <replaceable>project-cr-dir</replaceable></option></term>
 
             <listitem>
-              <para>gives a directory where to create reports of the data
-              capture.</para>
+              <para>gives a directory where to create image reports of the
+              data capture (zooms on the boxes in a <filename>zooms</filename>
+              sub-directory, name filed extraction as a
+              <filename>name-*.jpg</filename> file, and layout report as a
+              <filename>page-*.jpg</filename> file).</para>
             </listitem>
           </varlistentry>
 
@@ -3291,10 +3280,7 @@ student number &amp; class &amp; subject\\
             <listitem>
               <para>When using this option, if <option>--cr</option> is not
               used, <replaceable>project-cr-dir</replaceable> will be set to
-              <filename><replaceable>project-dir</replaceable>/cr</filename>,
-              and if <option>--mep</option> is not used,
-              <replaceable>project-mep-dir</replaceable> will be set to
-              <filename><replaceable>project-dir</replaceable>/mep</filename>.</para>
+              <filename><replaceable>project-dir</replaceable>/cr</filename>.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -3403,13 +3389,8 @@ student number &amp; class &amp; subject\\
 
           <arg choice="plain">note</arg>
 
-          <arg choice="plain">--cr
-          <replaceable>project-cr-dir</replaceable></arg>
-
-          <arg choice="plain">--bareme
-          <replaceable>scoring.xml</replaceable></arg>
-
-          <arg choice="plain">-o <replaceable>marks.xml</replaceable></arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
           <arg>--seuil <replaceable>threshold</replaceable></arg>
 
@@ -3447,39 +3428,16 @@ student number &amp; class &amp; subject\\
 
         <variablelist>
           <varlistentry>
-            <term><option>--cr
-            <replaceable>project-cr-dir</replaceable></option></term>
+            <term><option>--data
+            <replaceable>project-data-dir</replaceable></option></term>
 
             <listitem>
-              <para>gives the directory where to find data capture reports
-              (see <citerefentry>
-                  <refentrytitle>AMC-analyse</refentrytitle>
+              <para>gives the directory where data files are (see for example
+              <citerefentry>
+                  <refentrytitle>AMC-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
                 </citerefentry>).</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--bareme
-            <replaceable>scoring.xml</replaceable></option></term>
-
-            <listitem>
-              <para>gives the scoring strategy file (see <citerefentry>
-                  <refentrytitle>AMC-prepare</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry>).</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--o
-            <replaceable>marks.xml</replaceable></option></term>
-
-            <listitem>
-              <para>gives the name of the file to create and fill with
-              students' marks.</para>
             </listitem>
           </varlistentry>
 
@@ -3561,6 +3519,18 @@ student number &amp; class &amp; subject\\
               <para>gives a file to fill with debugging information.</para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term><option>--postcorrect-student <replaceable>s</replaceable>
+            --postcorrect-copy <replaceable>c</replaceable></option></term>
+
+            <listitem>
+              <para>requests port-correction from the completed answer sheet
+              identified by student and copy numbers. In post-correction mode,
+              correct answers are not extracted from the LaTeX source file,
+              but taken from the answers given on this sheet.</para>
+            </listitem>
+          </varlistentry>
         </variablelist>
       </refsect1>
     </refentry>
@@ -3589,8 +3559,8 @@ student number &amp; class &amp; subject\\
 
           <arg choice="plain">association-auto</arg>
 
-          <arg choice="plain">--notes
-          <replaceable>marks.xml</replaceable></arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
           <arg choice="plain">--notes-id <replaceable>id</replaceable></arg>
 
@@ -3600,9 +3570,6 @@ student number &amp; class &amp; subject\\
           <arg>--encodage-liste <replaceable>list-encoding</replaceable></arg>
 
           <arg choice="plain">--liste-key <replaceable>key</replaceable></arg>
-
-          <arg choice="plain">--assoc
-          <replaceable>assoc.xml</replaceable></arg>
         </cmdsynopsis>
       </refsynopsisdiv>
 
@@ -3617,16 +3584,16 @@ student number &amp; class &amp; subject\\
 
         <variablelist>
           <varlistentry>
-            <term><option>--notes
-            <replaceable>marks.xml</replaceable></option></term>
+            <term><option>--data
+            <replaceable>project-data-dir</replaceable></option></term>
 
             <listitem>
-              <para>gives the name of the marks file (also containing read
-              codes as student id numbers) produced by <citerefentry>
-                  <refentrytitle>AMC-note</refentrytitle>
+              <para>gives the directory where data files are (see for example
+              <citerefentry>
+                  <refentrytitle>AMC-prepare</refentrytitle>
 
                   <manvolnum>1</manvolnum>
-                </citerefentry>.</para>
+                </citerefentry>).</para>
             </listitem>
           </varlistentry>
 
@@ -3671,16 +3638,6 @@ student number &amp; class &amp; subject\\
           </varlistentry>
 
           <varlistentry>
-            <term><option>--assoc
-            <replaceable>assoc.xml</replaceable></option></term>
-
-            <listitem>
-              <para>gives the name of the file to create and fill with
-              association report.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><option>--debug
             <replaceable>file.log</replaceable></option></term>
 
@@ -3715,13 +3672,10 @@ student number &amp; class &amp; subject\\
 
           <arg choice="plain">export</arg>
 
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
+
           <arg choice="plain">--module <replaceable>module</replaceable></arg>
-
-          <arg choice="plain">--fich-notes
-          <replaceable>marks.xml</replaceable></arg>
-
-          <arg choice="plain">--fich-assoc
-          <replaceable>assoc.xml</replaceable></arg>
 
           <arg choice="plain">--fich-noms
           <replaceable>students-list.csv</replaceable></arg>
@@ -3740,39 +3694,26 @@ student number &amp; class &amp; subject\\
 
         <variablelist>
           <varlistentry>
+            <term><option>--data
+            <replaceable>project-data-dir</replaceable></option></term>
+
+            <listitem>
+              <para>gives the directory where data files are (see for example
+              <citerefentry>
+                  <refentrytitle>AMC-prepare</refentrytitle>
+
+                  <manvolnum>1</manvolnum>
+                </citerefentry>).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><option>--module
             <replaceable>module</replaceable></option></term>
 
             <listitem>
               <para>selects a module for export. See below for the modules
               included in the AMC standard distribution.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--fich-notes
-            <replaceable>marks.xml</replaceable></option></term>
-
-            <listitem>
-              <para>sets the marks file, generated by <citerefentry>
-                  <refentrytitle>AMC-note</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--fich-assoc
-            <replaceable>assoc.xml</replaceable></option></term>
-
-            <listitem>
-              <para>sets the association file, generated by <citerefentry>
-                  <refentrytitle>AMC-association-auto</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry> and maybe modified for manual
-              association.</para>
             </listitem>
           </varlistentry>
 
@@ -3924,14 +3865,17 @@ student number &amp; class &amp; subject\\
             </varlistentry>
 
             <varlistentry>
-              <term>cochees</term>
+              <term>ticked</term>
 
               <listitem>
-                <para>if true (value <literal>1</literal> for example),
-                additional columns (with "<literal>CHECKED:</literal>" prefix)
-                are included to give all the checked boxes on all the sheets.
-                This can be used by an external program to retrieve all the
-                checked boxes when marks are not sufficient.</para>
+                <para>if not empty, additional columns (with
+                "<literal>CHECKED:</literal>" prefix) are included to give all
+                the checked boxes on all the sheets. This can be used by an
+                external program to retrieve all the checked boxes when marks
+                are not sufficient. Use value <literal>01</literal> to get
+                0;0;1;1;0 if boxes 3 and 4 are checked, and value
+                <literal>AB</literal> to get CD if boxes 3 and 4 are
+                checked.</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -3966,11 +3910,8 @@ student number &amp; class &amp; subject\\
           <arg choice="plain">--projet
           <replaceable>project-dir</replaceable></arg>
 
-          <arg choice="plain">--notes
-          <replaceable>marks.xml</replaceable></arg>
-
-          <arg choice="plain">--bareme
-          <replaceable>scoring.xml</replaceable></arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
           <arg choice="plain">--fich-assoc
           <replaceable>assoc.xml</replaceable></arg>
@@ -3997,6 +3938,20 @@ student number &amp; class &amp; subject\\
           </varlistentry>
 
           <varlistentry>
+            <term><option>--data
+            <replaceable>project-data-dir</replaceable></option></term>
+
+            <listitem>
+              <para>gives the directory where data files are (see for example
+              <citerefentry>
+                  <refentrytitle>AMC-prepare</refentrytitle>
+
+                  <manvolnum>1</manvolnum>
+                </citerefentry>).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><option>--cr
             <replaceable>project-cr-dir</replaceable></option></term>
 
@@ -4009,45 +3964,6 @@ student number &amp; class &amp; subject\\
                 </citerefentry>, and where to output annotated scans. Default
               value is
               <filename><replaceable>project-dir</replaceable>/cr</filename>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--notes
-            <replaceable>marks.xml</replaceable></option></term>
-
-            <listitem>
-              <para>sets the marks file, prepared by <citerefentry>
-                  <refentrytitle>AMC-note</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--bareme
-            <replaceable>scoring.xml</replaceable></option></term>
-
-            <listitem>
-              <para>sets the scoring file, prepared by <citerefentry>
-                  <refentrytitle>AMC-prepare</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--fich-assoc
-            <replaceable>assoc.xml</replaceable></option></term>
-
-            <listitem>
-              <para>sets the association file, prepared by <citerefentry>
-                  <refentrytitle>AMC-association-auto</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry> and/or modified for manual association.</para>
             </listitem>
           </varlistentry>
 
@@ -4300,9 +4216,6 @@ student number &amp; class &amp; subject\\
           <arg choice="plain">--modele
           <replaceable>file-name-model</replaceable></arg>
 
-          <arg choice="plain">--fich-assoc
-          <replaceable>assoc.xml</replaceable></arg>
-
           <arg choice="plain">--fich-noms
           <replaceable>students-list.csv</replaceable></arg>
 
@@ -4374,19 +4287,6 @@ student number &amp; class &amp; subject\\
                   <manvolnum>1</manvolnum>
                 </citerefentry>). This helps in getting the page size for the
               subject to make annotated PDF fit this size.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><option>--fich-assoc
-            <replaceable>assoc.xml</replaceable></option></term>
-
-            <listitem>
-              <para>sets the association file, prepared by <citerefentry>
-                  <refentrytitle>AMC-association-auto</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry> and/or modified for manual association.</para>
             </listitem>
           </varlistentry>
 
