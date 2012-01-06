@@ -32,7 +32,6 @@ use encoding 'utf8';
 
 my $association="-";
 my $seuil=0.1;
-my $annotation_copies='';
 
 my $note_plancher='';
 my $note_parfaite=20;
@@ -54,7 +53,6 @@ my $debug='';
 GetOptions("data=s"=>\$data_dir,
 	   "seuil=s"=>\$seuil,
 	   "debug=s"=>\$debug,
-	   "copies!"=>\$annotation_copies,
 	   "grain=s"=>\$grain,
 	   "arrondi=s"=>\$type_arrondi,
 	   "notemax=s"=>\$note_parfaite,
