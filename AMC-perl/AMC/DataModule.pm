@@ -323,9 +323,13 @@ sub version_check {
       # opens a RW transaction only if necessary
       $self->begin_transaction('tVAR');
       my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
-      debug "Empty database: creating variables table";
-      $self->sql_do("CREATE TABLE $vt (name TEXT UNIQUE, value TEXT)");
-      $self->variable('version','0');
+      if(@vt) {
+	debug "variables table has just been created!";
+      } else {
+	debug "Empty database: creating variables table";
+	$self->sql_do("CREATE TABLE $vt (name TEXT UNIQUE, value TEXT)");
+	$self->variable('version','0');
+      }
       $self->end_transaction('tVAR');
     } else {
       debug "variables table present.";
