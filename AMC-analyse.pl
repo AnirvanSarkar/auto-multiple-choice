@@ -72,6 +72,8 @@ GetOptions("data=s"=>\$data_dir,
 	   "debug-image-dir=s"=>\$debug_image_dir,
 	   );
 
+use_gettext;
+
 set_debug($debug);
 
 $queue=AMC::Queue::new('max.procs',$n_procs);
