@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -82,7 +82,9 @@ if($fich_nums) {
     }
     close(NUMS);
 } else {
-    @es=$layout->query_list('students');
+  $layout->begin_read_transaction('prST');
+  @es=$layout->query_list('students');
+  $layout->end_transaction('prST');
 }
 
 
@@ -117,12 +119,14 @@ for my $e (@es) {
     my $debut=1000000;
     my $fin=0;
     my $elong=sprintf("%04d",$e);
+    $layout->begin_read_transaction('prSP');
     for ($layout->query_list('subjectpageForStudent',$e)) {
 	$debut=$_ if($_<$debut);
 	$fin=$_ if($_>$fin);
     }
+    $layout->end_transaction('prSP');
     $n++;
-    
+
     $tmp = File::Temp->new( DIR=>tmpdir(),UNLINK => 1, SUFFIX => '.pdf' );
     $fn=$tmp->filename();
 
@@ -141,12 +145,12 @@ for my $e (@es) {
 	my $f_dest=$output_file;
 	$f_dest.="-%e.pdf" if($f_dest !~ /[%]e/);
 	$f_dest =~ s/[%]e/$elong/g;
-	
+
 	debug "Moving to $f_dest";
 	move($fn,$f_dest);
     } elsif($methode =~ /^command/i) {
 	my @c=map { s/[%]f/$fn/g; s/[%]e/$elong/g; $_; } split(/\s+/,$print_cmd);
-	
+
 	#print STDERR join(' ',@c)."\n";
 	$commandes->execute(@c);
     } else {
