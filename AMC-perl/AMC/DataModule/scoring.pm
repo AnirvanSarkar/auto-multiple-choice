@@ -199,6 +199,10 @@ use XML::Simple;
 
 @ISA=("AMC::DataModule");
 
+sub version_current {
+  return(1);
+}
+
 sub version_upgrade {
     my ($self,$old_version)=@_;
     if($old_version==0) {
@@ -207,7 +211,6 @@ sub version_upgrade {
 	# creates all the tables.
 
 	debug "Creating scoring tables...";
-	$self->begin_transaction('SvUP');
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("title")
 		      ." (question INTEGER, title TEXT)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("default")
@@ -233,7 +236,6 @@ sub version_upgrade {
 
 	$self->populate_from_xml;
 
-	$self->end_transaction('SvUP');
 	return(1);
     }
     return('');

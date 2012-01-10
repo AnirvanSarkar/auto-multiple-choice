@@ -335,17 +335,41 @@ sub version_check {
       debug "variables table present.";
     }
 
-    my $vu=$self->variable_transaction('version');
-    my $v_before=$vu;
-    my $v;
-    debug "Database version: $vu";
-    do {
-	$v=$vu;
-	$vu=$self->version_upgrade($v);
-	debug("Updated data module ".$self->{'name'}." from version $v to $vu")
-	  if($vu);
-    } while($vu);
-    $self->variable_transaction('version',$v) if($v != $v_before);
+    my $cv=$self->version_current;
+    if($cv) {
+      my $vu=$self->variable_transaction('version');
+
+      if($vu < $cv) {
+	# Database upgrade
+	$self->begin_transaction('dbUG');
+	$vu=$self->variable('version');
+	my $v;
+	debug "Database version: $vu, needs to upgrade (current $cv)";
+	do {
+	  $v=$vu;
+	  $vu=$self->version_upgrade($v);
+	  debug("Upgraded data module ".$self->{'name'}
+		." from version $v to $vu")
+	    if($vu);
+	} while($vu);
+	$self->variable('version',$v);
+	$self->end_transaction('dbUG');
+      } elsif($vu > $cv) {
+	debug "WARNING: Database version ($vu) is higher than module current version ($cv)";
+      }
+    } else {
+      debug "WARNING: No module current version";
+    }
+}
+
+# version_current($v) is to be overloaded by AMC::DataModule::XXX
+# classes. It returns the current version number for the module. If
+# the database version is less than this number, this means that the
+# database has to be upgraded.
+
+sub version_current {
+    my ($self,$old_version)=@_;
+    return('');
 }
 
 # version_upgrade($v) is to be overloaded by AMC::DataModule::XXX

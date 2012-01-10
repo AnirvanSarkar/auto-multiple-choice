@@ -63,6 +63,10 @@ use XML::Simple;
 
 @ISA=("AMC::DataModule");
 
+sub version_current {
+  return(1);
+}
+
 sub version_upgrade {
     my ($self,$old_version)=@_;
     if($old_version==0) {
@@ -71,12 +75,10 @@ sub version_upgrade {
 	# creates all the tables.
 
 	debug "Creating scoring tables...";
-	$self->begin_transaction('AvUP');
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("association")
 		      ." (student INTEGER, copy INTEGER, manual TEXT, auto TEXT, PRIMARY KEY (student,copy))");
 
 	$self->populate_from_xml;
-	$self->end_transaction('AvUP');
 
 	return(1);
     }
