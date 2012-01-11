@@ -686,10 +686,11 @@ sub replicate {
 
 sub unalias {
   my ($self,$student)=@_;
-  my $s;
+  my $s=$student;
   do {
+    $student=$s;
     $s=$self->sql_single($self->statement('getAlias'),$student);
-  } while($s);
+  } while(defined($s));
   return($student);
 }
 
