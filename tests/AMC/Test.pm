@@ -45,7 +45,7 @@ sub new {
        'scans'=>'',
        'seuil'=>0.5,
        'tol_marque'=>0.4,
-       'rounding'=>'',
+       'rounding'=>'i',
        'grain'=>0.01,
        'notemax'=>20,
        'postcorrect_student'=>'',
