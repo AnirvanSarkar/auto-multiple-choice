@@ -229,6 +229,11 @@ endif
 	install    -m 0644 $(USER_GROUP) doc/*.1 $(DESTDIR)/$(MAN1DIR)
 endif
 
+# Test
+
+test:
+	$(MAKE) -C tests test
+
 ##############################################################################
 # Following lines are only helpfull for source tarball and package building
 # These targets run only with source from svn checkout
@@ -321,6 +326,6 @@ re_unstable:
 
 FORCE: ;
 
-.PHONY: all all_precomp install version_files deb deb_vok debsrc debsrc_vok sources sources_vok clean clean_IN global local doc I18N tmp_copy tmp_deb unstable re_unstable FORCE MAJ
+.PHONY: all all_precomp install version_files deb deb_vok debsrc debsrc_vok sources sources_vok clean clean_IN global local doc I18N tmp_copy tmp_deb unstable re_unstable FORCE MAJ test
 
 
