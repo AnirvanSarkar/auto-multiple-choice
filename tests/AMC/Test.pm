@@ -135,6 +135,7 @@ sub command {
 sub amc_command {
   my ($self,$sub,@opts)=@_;
 
+  push @opts,'--debug','%PROJ/debug.log' if($self->{'debug'});
   @opts=map { s:%DATA:$self->{'temp_dir'}/data:g;
 	      s:%PROJ:$self->{'temp_dir'}:g;
 	      $_;
