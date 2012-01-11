@@ -48,6 +48,12 @@ sub new {
        'rounding'=>'',
        'grain'=>0.01,
        'notemax'=>20,
+       'postcorrect_student'=>'',
+       'postcorrect_copy'=>'',
+       'list'=>'',
+       'list_key'=>'id',
+       'code'=>'student',
+       'check_assoc'=>'',
       };
 
     for(keys %oo) {
@@ -64,6 +70,14 @@ sub new {
       my @tex = grep { /\.tex$/ } readdir($dh);
       closedir $dh;
       $self->{'src'}=$tex[0];
+    }
+
+    if(!$self->{'list'}) {
+      opendir(my $dh, $self->{'dir'})
+	|| die "can't opendir $self->{'dir'}: $!";
+      my @l = grep { /\.txt$/ } readdir($dh);
+      closedir $dh;
+      $self->{'list'}=$l[0];
     }
 
     GetOptions("debug!"=>\$self->{'debug'});
@@ -112,7 +126,10 @@ sub command {
   my ($self,@c)=@_;
 
   $self->trace("[*] ".join(' ',@c)) if($self->{'debug'});
-  run \@c,'>>',$self->{'debug_file'},'2>>',$self->{'debug_file'};
+  if(!run(\@c,'>>',$self->{'debug_file'},'2>>',$self->{'debug_file'})) {
+    $self->trace("[E] Command returned with $?");
+    exit 1;
+  }
 }
 
 sub amc_command {
@@ -197,6 +214,21 @@ sub note {
 		     '--grain',$self->{'grain'},
 		     '--arrondi',$self->{'rounding'},
 		     '--notemax',$self->{'notemax'},
+		     '--postcorrect-student',$self->{'postcorrect_student'},
+		     '--postcorrect-copy',$self->{'postcorrect_copy'},
+		     );
+}
+
+sub assoc {
+  my ($self)=@_;
+
+  return if(!$self->{'list'});
+
+  $self->amc_command('association-auto',
+		     '--liste','%PROJ/'.$self->{'list'},
+		     '--liste-key',$self->{'list_key'},
+		     '--notes-id',$self->{'code'},
+		     '--data','%DATA',
 		     );
 }
 
@@ -260,6 +292,46 @@ sub check_marks {
 
 }
 
+sub get_assoc {
+  my ($self)=@_;
+
+  my $sf=$self->{'temp_dir'}."/data/association.sqlite";
+
+  if(-f $sf) {
+    my $dbh = DBI->connect("dbi:SQLite:dbname=$sf","","");
+    $self->{'association'}=$dbh->selectall_arrayref("SELECT * FROM association_association",
+						    { Slice => {} });
+
+    $self->trace("[I] Assoc:");
+    for my $m (@{$self->{'association'}}) {
+      $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy auto manual/)));
+    }
+  }
+}
+
+sub check_assoc {
+  my ($self)=@_;
+  return if(!$self->{'check_assoc'});
+
+  $self->trace("[T] Association test: "
+	       .join(',',keys %{$self->{'check_assoc'}}));
+
+  my %p=(%{$self->{'check_assoc'}});
+
+  for my $m (@{$self->{'association'}}) {
+    delete($p{$m->{'student'}})
+      if($self->{'check_assoc'}->{$m->{'student'}}
+	 eq $m->{'auto'});
+  }
+
+  my @no=(keys %p);
+  if(@no) {
+    $self->trace("[E] Uncorrect association: ".join(',',@no));
+    exit(1);
+  }
+
+}
+
 sub ok {
   my ($self)=@_;
   $self->trace("[0] Test completed succesfully");
@@ -271,9 +343,12 @@ sub default_process {
   $self->prepare;
   $self->analyse;
   $self->note;
+  $self->assoc;
   $self->get_marks;
   $self->check_marks;
   $self->check_perfect;
+  $self->get_assoc;
+  $self->check_assoc;
 
   $self->ok;
 }
