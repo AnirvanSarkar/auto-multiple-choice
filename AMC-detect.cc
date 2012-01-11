@@ -630,6 +630,11 @@ int main( int argc, char** argv )
 	if(illustr!=NULL) cvFlip(illustr,NULL,-1);
 	if(dst!=NULL) cvFlip(dst,NULL,-1);
 
+	for(i=0;i<4;i++) {
+	  coins_x[i]=src->width-coins_x[i];
+	  coins_y[i]=src->height-coins_y[i];
+	}
+
 	upside_down=0;
 
 	printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",

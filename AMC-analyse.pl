@@ -279,7 +279,8 @@ sub measure_box {
 	}
     }
 
-    $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->transforme($ld->{'transf'});
+    $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
+    $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
     for($process->commande($ld->{'boxes.scan'}->{$k}
 			      ->commande_mesure($prop))) {
 
@@ -563,7 +564,7 @@ sub one_scan {
     }
   }
 
-  marks_fit($process,$ld);
+  marks_fit($process,$ld,$cadre_general);
 
   ##########################################
   # Get a free copy number
@@ -755,7 +756,8 @@ sub one_scan {
 	  debug "No darkness data for box $k";
 	}
       }
-      $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->transforme($ld->{'transf'})
+      $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
+      $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'})
 	if($ld->{'boxes'}->{$k} && !$ld->{'boxes.scan'}->{$k});
       $ld->{'boxes.scan'}->{$k}
 	->to_data($capture,$zoneid,POSITION_BOX);

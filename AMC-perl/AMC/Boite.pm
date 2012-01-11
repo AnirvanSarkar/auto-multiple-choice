@@ -51,8 +51,16 @@ sub new {
     $self->{'point.actuel'}=0;
 
     bless $self;
-    
+
     return($self);
+}
+
+sub clone {
+  my ($self)=@_;
+  my $s={'coins'=>[map { [@$_] ; } (@{$self->{'coins'}})],
+	 'droite'=>$self->{'droite'}};
+  bless $s;
+  return($s);
 }
 
 sub def_point_suivant {
@@ -115,7 +123,7 @@ sub un_seul {
     if($t eq '') {
 	return($x);
     } elsif($t eq 'SCALAR') {
-	return($$x); 
+	return($$x);
     } elsif($t eq 'ARRAY') {
 	return($x->[0]);
     } elsif($t eq 'HASH') {
@@ -131,7 +139,7 @@ sub def_complete_xml {
     my ($self,$x)=(@_);
     $x=$x->{'coin'} if($x->{'coin'});
     $self->def_complete(map { (un_seul($x->{$_}->{'x'}),
-			       un_seul($x->{$_}->{'y'})) } 
+			       un_seul($x->{$_}->{'y'})) }
 			(1..4));
 
     return($self);
