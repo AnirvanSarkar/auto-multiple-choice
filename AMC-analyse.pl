@@ -756,9 +756,10 @@ sub one_scan {
 	  debug "No darkness data for box $k";
 	}
       }
-      $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
-      $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'})
-	if($ld->{'boxes'}->{$k} && !$ld->{'boxes.scan'}->{$k});
+      if($ld->{'boxes'}->{$k} && !$ld->{'boxes.scan'}->{$k}) {
+	$ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
+	$ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
+      }
       $ld->{'boxes.scan'}->{$k}
 	->to_data($capture,$zoneid,POSITION_BOX);
     }
