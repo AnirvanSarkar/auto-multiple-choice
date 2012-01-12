@@ -337,14 +337,15 @@ $delta=1/(1+$#pages) if($#pages>=0);
     $sth->execute(@spc,ZONE_BOX);
   BOX: while(my $b=$sth->fetchrow_hashref) {
 
+      my $p_strategy=$scoring->unalias($p->{'student'});
       my $q=$b->{'id_a'};
       my $r=$b->{'id_b'};
-      my $indic=$scoring->indicative($p->{'student'},$q);
+      my $indic=$scoring->indicative($p_strategy,$q);
 
       next BOX if($indic && !$annote_indicatives);
 
       # to be ticked?
-      my $bonne=$scoring->correct_answer($p->{'student'},$q,$r);
+      my $bonne=$scoring->correct_answer($p_strategy,$q,$r);
 
       # ticked on this scan?
       my $cochee=$capture->ticked($p->{'student'},$p->{'copy'},
@@ -383,7 +384,7 @@ $delta=1/(1+$#pages) if($#pages>=0);
 
     if($position ne 'none') {
     QUEST: for my $q (keys %question) {
-	next QUEST if($scoring->indicative($p->{'student'},$q));
+	next QUEST if($scoring->indicative($p_strategy,$q));
 	my $x;
 
 	my $result=$scoring->question_result(@spc[0,2],$q);
