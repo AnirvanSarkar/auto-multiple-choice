@@ -550,12 +550,14 @@ sub one_scan {
   }
 
   ##########################################
-  # Re-run marks fitting with exact page layout
+  # Get all boxes positions from the right page
   ##########################################
 
   $layout->begin_read_transaction('cELY');
   my $ld=get_layout_data(@epc[0,1],1);
   $layout->end_transaction('cELY');
+
+  # But keep all results from binary boxes analysis
 
   for my $cat (qw/boxes boxes.scan corners.test darkness.data zoom.file/) {
     for my $k (%{$random_layout->{$cat}}) {
@@ -564,7 +566,7 @@ sub one_scan {
     }
   }
 
-  marks_fit($process,$ld,$cadre_general);
+  $ld->{'transf'}=$random_layout->{'transf'};
 
   ##########################################
   # Get a free copy number
@@ -630,6 +632,18 @@ sub one_scan {
   }
 
   ##########################################
+  # Rotates scan if it is upside-down
+  ##########################################
+
+  if($upside_down) {
+    # Rotates the scan file
+    print "Rotating...\n";
+
+    $commands->execute(magick_module("convert"),
+			"-rotate","180",$scan,$scan);
+  }
+
+  ##########################################
   # Some more image reports
   ##########################################
 
@@ -646,11 +660,13 @@ sub one_scan {
   # Name field sub-image
 
   if($nom_file && $ld->{'namefield'}) {
+    my $n=$ld->{'namefield'}->clone;
+    $n->transforme($ld->{'transf'});
     clear_old('name image file',"$cr_dir/$nom_file");
 
-    debug "Name box : ".$ld->{'namefield'}->txt();
+    debug "Name box : ".$n->txt();
     my $e=$whole_page->Clone();
-    $e->Crop(geometry=>$ld->{'namefield'}->etendue_xy('geometry',$zoom_plus));
+    $e->Crop(geometry=>$n->etendue_xy('geometry',$zoom_plus));
     debug "Writing to $cr_dir/$nom_file...";
     $e->Write("$cr_dir/$nom_file");
   }
@@ -699,18 +715,6 @@ sub one_scan {
     $whole_page->Write($out_cadre);
 
     debug "-> $out_cadre\n";
-  }
-
-  ##########################################
-  # Rotates scan if it is upside-down
-  ##########################################
-
-  if($upside_down) {
-    # Rotates the scan file
-    print "Rotating...\n";
-
-    $commands->execute(magick_module("convert"),
-			"-rotate","180",$scan,$scan);
   }
 
   ##########################################
