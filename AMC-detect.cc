@@ -91,14 +91,17 @@ void load_image(IplImage** src,char *filename,double threshold=0.6,int view=0) {
 }
 
 void pre_traitement(IplImage* src,int lissage_trous,int lissage_poussieres) {
-  IplConvKernel* kernel=cvCreateStructuringElementEx(3,3,1,1,CV_SHAPE_RECT);
+  IplConvKernel* trous=cvCreateStructuringElementEx(1+2*lissage_trous,1+2*lissage_trous,
+						    lissage_trous,lissage_trous,CV_SHAPE_ELLIPSE);
+  IplConvKernel* poussieres=cvCreateStructuringElementEx(1+2*lissage_poussieres,1+2*lissage_poussieres,
+							 lissage_poussieres,lissage_poussieres,CV_SHAPE_ELLIPSE);
 
   printf("Morph: +%d -%d\n",lissage_trous,lissage_poussieres);
-  cvDilate(src,src,kernel,lissage_trous);
-  cvErode(src,src,kernel,lissage_trous+lissage_poussieres);
-  cvDilate(src,src,kernel,lissage_poussieres);
+  cvMorphologyEx(src,src,NULL,trous,CV_MOP_CLOSE);
+  cvMorphologyEx(src,src,NULL,poussieres,CV_MOP_OPEN);
 
-  cvReleaseStructuringElement(&kernel);
+  cvReleaseStructuringElement(&trous);
+  cvReleaseStructuringElement(&poussieres);
 }
 
 typedef struct {
@@ -527,6 +530,13 @@ int main( int argc, char** argv )
 #endif
 
   // Options
+  // -x tx : gives the width of the original subject
+  // -y ty : gives the height of the opriginal subject
+  // -d d  : gives the diameter of the corner marks on the original subject
+  // -p dp : gives the tolerance above mark diameter (fraction of the diameter)
+  // -m dm : gives the tolerance below mark diameter
+  // -o file : gives output file name for detected layout report image
+  // -v / -P : asks for marks detection debugging image report
 
   char c;
   while ((c = getopt (argc, argv, "x:y:d:i:p:m:o:vP")) != -1) {
@@ -623,16 +633,16 @@ int main( int argc, char** argv )
 	transfo.b=-transfo.b;
 	transfo.c=-transfo.c;
 	transfo.d=-transfo.d;
-	transfo.e=src->width-transfo.e;
-	transfo.f=src->height-transfo.f;
+	transfo.e=(src->width-1)-transfo.e;
+	transfo.f=(src->height-1)-transfo.f;
 	
 	if(src!=NULL) cvFlip(src,NULL,-1);
 	if(illustr!=NULL) cvFlip(illustr,NULL,-1);
 	if(dst!=NULL) cvFlip(dst,NULL,-1);
 
 	for(i=0;i<4;i++) {
-	  coins_x[i]=src->width-coins_x[i];
-	  coins_y[i]=src->height-coins_y[i];
+	  coins_x[i]=(src->width-1)-coins_x[i];
+	  coins_y[i]=(src->height-1)-coins_y[i];
 	}
 
 	upside_down=0;
