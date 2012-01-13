@@ -20,6 +20,8 @@
 
 package AMC::Test;
 
+use AMC::Data;
+
 use File::Spec::Functions qw(tmpdir);
 use File::Temp qw(tempfile tempdir);
 use File::Copy::Recursive qw(rcopy);
@@ -457,10 +459,26 @@ sub ok {
   }
 }
 
+sub defects {
+  my ($self)=@_;
+
+  my $l=AMC::Data->new($self->{'temp_dir'}."/data")->module('layout');
+  $l->begin_read_transaction('test');
+  my $d=$l->defects();
+  $l->end_transaction('test');
+  my @t=(keys %$d);
+  if(@t) {
+    $self->trace("[E] Layout defects: ".join(', ',@t));
+  } else {
+    $self->trace("[T] No layout defects");
+  }
+}
+
 sub default_process {
   my ($self)=@_;
 
   $self->prepare;
+  $self->defects;
   $self->analyse;
   $self->note;
   $self->assoc;
