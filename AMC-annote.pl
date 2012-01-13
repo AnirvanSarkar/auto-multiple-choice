@@ -355,6 +355,13 @@ $delta=1/(1+$#pages) if($#pages>=0);
 
       my $sy=$symboles{"$bonne-$cochee"};
 
+      if($debug) {
+	for my $i (1..4) {
+	  debug(sprintf("Corner $i: (%.2f,%.2f)",
+			$capture->zone_corner($b->{'zoneid'},$i)));
+	}
+      }
+
       if($sy->{type} eq 'circle') {
 	cercle_coors($context,$b->{'zoneid'},$sy->{color});
       } elsif($sy->{type} eq 'mark') {
