@@ -26,6 +26,7 @@ AMC::Test->new('dir'=>__FILE__,
 	       'postcorrect_student'=>2,'postcorrect_copy'=>0,
 	       'check_marks'=>{2=>20,3=>12.5},
 	       'check_assoc'=>{2=>'01012012',3=>'01234567'},
+	       'annote'=>[3],
 	      )
   ->default_process;
 
