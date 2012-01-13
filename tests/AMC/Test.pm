@@ -23,6 +23,8 @@ package AMC::Test;
 use File::Spec::Functions qw(tmpdir);
 use File::Temp qw(tempfile tempdir);
 use File::Copy::Recursive qw(rcopy);
+use File::Copy;
+use Digest::MD5;
 
 use DBI;
 
@@ -31,60 +33,91 @@ use IPC::Run qw(run);
 use Getopt::Long;
 
 sub new {
-    my ($class,%oo)=@_;
+  my ($class,%oo)=@_;
 
-    my $self=
-      {
-       'dir'=>'',
-       'tex_engine'=>'pdflatex',
-       'n_copies'=>5,
-       'check_marks'=>'',
-       'perfect_copy'=>[3],
-       'src'=>'',
-       'debug'=>0,
-       'scans'=>'',
-       'seuil'=>0.5,
-       'tol_marque'=>0.4,
-       'rounding'=>'i',
-       'grain'=>0.01,
-       'notemax'=>20,
-       'postcorrect_student'=>'',
-       'postcorrect_copy'=>'',
-       'list'=>'',
-       'list_key'=>'id',
-       'code'=>'student',
-       'check_assoc'=>'',
-      };
+  my $self=
+    {
+     'dir'=>'',
+     'tex_engine'=>'pdflatex',
+     'n_copies'=>5,
+     'check_marks'=>'',
+     'perfect_copy'=>[3],
+     'src'=>'',
+     'debug'=>0,
+     'scans'=>'',
+     'seuil'=>0.5,
+     'tol_marque'=>0.4,
+     'rounding'=>'i',
+     'grain'=>0.01,
+     'notemax'=>20,
+     'postcorrect_student'=>'',
+     'postcorrect_copy'=>'',
+     'list'=>'',
+     'list_key'=>'id',
+     'code'=>'student',
+     'check_assoc'=>'',
+     'annote'=>'',
+     'verdict'=>'%(id) %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
+     'verdict_question'=>"\"%"."s/%"."m\"",
+     'model'=>'(N).pdf',
+     'ok_checksums'=>{},
+     'ok_checksums_file'=>'',
+     'to_check'=>[],
+    };
 
-    for(keys %oo) {
-	$self->{$_}=$oo{$_} if(exists($self->{$_}));
+  for (keys %oo) {
+    $self->{$_}=$oo{$_} if(exists($self->{$_}));
+  }
+
+  $self->{'dir'} =~ s:/[^/]*$::;
+
+  bless($self,$class);
+
+  if (!$self->{'src'}) {
+    opendir(my $dh, $self->{'dir'})
+      || die "can't opendir $self->{'dir'}: $!";
+    my @tex = grep { /\.tex$/ } readdir($dh);
+    closedir $dh;
+    $self->{'src'}=$tex[0];
+  }
+
+  if (!$self->{'list'}) {
+    opendir(my $dh, $self->{'dir'})
+      || die "can't opendir $self->{'dir'}: $!";
+    my @l = grep { /\.txt$/ } readdir($dh);
+    closedir $dh;
+    $self->{'list'}=$l[0];
+  }
+
+  GetOptions("debug!"=>\$self->{'debug'});
+
+  $self->install;
+
+  $self->{'check_dir'}=tmpdir()."/AMC-VISUAL-TEST";
+  mkdir($self->{'check_dir'}) if(!-d $self->{'check_dir'});
+
+  $self->read_checksums($self->{'ok_checksums_file'});
+  $self->read_checksums($self->{'dir'}.'/ok-checksums');
+
+  return $self;
+}
+
+sub read_checksums {
+  my ($self,$file)=@_;
+
+  if (-f $file) {
+    my $n=0;
+    open CSF,$file or die "Error opening $file: $!";
+    while (<CSF>) {
+      if (/^\s*([a-f0-9]+)\s/) {
+	$self->{'ok_checksums'}->{$1}=1;
+	$n++;
+      }
     }
+    close CSF;
+    $self->trace("[I] $n checksums read from $file");
+  }
 
-    $self->{'dir'} =~ s:/[^/]*$::;
-
-    bless($self,$class);
-
-    if(!$self->{'src'}) {
-      opendir(my $dh, $self->{'dir'})
-	|| die "can't opendir $self->{'dir'}: $!";
-      my @tex = grep { /\.tex$/ } readdir($dh);
-      closedir $dh;
-      $self->{'src'}=$tex[0];
-    }
-
-    if(!$self->{'list'}) {
-      opendir(my $dh, $self->{'dir'})
-	|| die "can't opendir $self->{'dir'}: $!";
-      my @l = grep { /\.txt$/ } readdir($dh);
-      closedir $dh;
-      $self->{'list'}=$l[0];
-    }
-
-    GetOptions("debug!"=>\$self->{'debug'});
-
-    $self->install;
-
-    return $self;
 }
 
 sub install {
@@ -110,8 +143,44 @@ sub install {
     }
   }
 
-  mkdir($self->{'temp_dir'}."/data") if(!-d $self->{'temp_dir'}."/data");
+  for my $d (qw(data cr cr/zooms cr/corrections cr/corrections/jpg cr/corrections/pdf)) {
+    mkdir($self->{'temp_dir'}."/$d") if(!-d $self->{'temp_dir'}."/$d");
+  }
+
   $self->{'debug_file'}=$self->{'temp_dir'}."/debug.log";
+}
+
+sub see_file {
+  my ($self,$file)=@_;
+  my $ext=$file;
+  $ext =~ s/.*\.//;
+  $ext=lc($ext);
+  my $digest=Digest::MD5->new;
+  open(FILE,$file) or die "Can't open '$file': $!";
+  while(<FILE>) {
+    if($ext eq 'pdf') {
+      s:^/Producer \(.*\)::;
+      s:^/CreationDate \(.*\)::;
+      s:^/ModDate \(.*\)::;
+    }
+    $digest->add($_);
+  }
+  close FILE;
+  my $dig=$digest->hexdigest;
+  my $ff=$file;
+  $ff =~ s:.*/::;
+  if($self->{'ok_checksums'}->{$dig}) {
+    $self->trace("[T] File ok: $ff");
+  } else {
+    my $i=0;
+    my $dest;
+    do {
+      $dest=sprintf("%s/%04d-%s",$self->{'check_dir'},$i,$ff);
+      $i++;
+    } while(-f $dest);
+    copy($file,$dest);
+    push @{$self->{'to_check'}},[$dig,$dest];
+  }
 }
 
 sub trace {
@@ -198,6 +267,13 @@ sub analyse {
     push @{$self->{'scans'}},map { $self->{'temp_dir'}."/$_" } @s;
   }
 
+  $self->amc_command('analyse',
+		     '--tol-marque',$self->{'tol_marque'},
+		     '--projet','%PROJ',
+		     '--data','%DATA',
+		     '--debug-image-dir','%PROJ/cr',
+		     @{$self->{'scans'}},
+		     ) if($self->{'debug'});
   $self->amc_command('analyse',
 		     '--tol-marque',$self->{'tol_marque'},
 		     '--projet','%PROJ',
@@ -333,9 +409,52 @@ sub check_assoc {
 
 }
 
+sub annote {
+  my ($self)=@_;
+  return if(!$self->{'annote'});
+
+  $self->amc_command('annote',
+		     '--fich-noms','%PROJ/'.$self->{'list'},
+		     '--verdict',$self->{'verdict'},
+		     '--verdict-question',$self->{'verdict_question'},
+		     '--projet','%PROJ',
+		     '--data','%DATA',
+		     );
+
+  my $nf=$self->{'temp_dir'}."/num-pdf";
+  open(NUMS,">$nf");
+  for (@{$self->{'annote'}}) { print NUMS "$_\n"; }
+  close(NUMS);
+  $self->amc_command('regroupe',
+		     '--projet','%PROJ',
+		     '--n-copies',$self->{'n_copies'},
+		     '--sujet','%PROJ/sujet.pdf',
+		     '--data','%DATA',
+		     '--tex-src','%PROJ/'.$self->{'src'},
+		     '--with',$self->{'tex_engine'},
+		     '--modele',$self->{'model'},
+		     '--id-file','%PROJ/num-pdf',
+		     );
+
+  $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
+  opendir(my $dh, $pdf_dir)
+    || die "can't opendir $pdf_dir: $!";
+  my @pdf = grep { /\.pdf$/ } readdir($dh);
+  closedir $dh;
+  for(@pdf) { $self->see_file($pdf_dir.'/'.$_); }
+}
+
 sub ok {
   my ($self)=@_;
-  $self->trace("[0] Test completed succesfully");
+  if(@{$self->{'to_check'}}) {
+    $self->trace("[?] ".(1+$#{$self->{'to_check'}})." files to check in $self->{'check_dir'}:");
+    for(@{$self->{'to_check'}}) {
+      $self->trace("    ".$_->[0]." ".$_->[1]);
+    }
+    exit(2);
+  } else {
+    $self->trace("[0] Test completed succesfully");
+  }
 }
 
 sub default_process {
@@ -350,6 +469,7 @@ sub default_process {
   $self->check_perfect;
   $self->get_assoc;
   $self->check_assoc;
+  $self->annote;
 
   $self->ok;
 }

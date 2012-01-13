@@ -22,6 +22,9 @@ use AMC::Test;
 
 AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
 	       'grain'=>0.1,
-	       'check_marks'=>{4=>13.3})
+	       'check_marks'=>{4=>13.3},
+	       'verdict'=>'TOTAL : %S/%M => %s/%m',
+	       'annote'=>[3,4],
+	      )
   ->default_process;
 
