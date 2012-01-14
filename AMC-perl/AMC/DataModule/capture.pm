@@ -30,7 +30,10 @@ package AMC::DataModule::capture;
 # page describes how a page scan fits with a question document page.
 #
 # * src is the scan file name (this is a raster image file, like
-#   tiff. Usualy a each scan file contains only one page).
+#   tiff. Usualy a each scan file contains only one page). This
+#   filename is absolute, with some shortcuts for portability: %PROJET
+#   is the project directory, %PROJETS is the directory where all
+#   projects are stored, and %HOME is the user home directory.
 #
 # * student is the student number of the question page corresponding
 #   to the scan
@@ -68,10 +71,13 @@ package AMC::DataModule::capture;
 #   the linear transform defined by (a,b,c,d,e,f).
 #
 # * layout_image is the filename of the scan image with added drawings
-#   showing where boxes are detected.
+#   showing where boxes are detected. This is a relative filename; the
+#   file should be in the %PROJET/cr directory (cr subdirectory of the
+#   project directory).
 #
 # * annotated is the filename of the annotated jpeg of the page, when
-#   available.
+#   available. This is a relative filename; the file should be in the
+#   %PROJET/cr/corrections/jpg directory.
 #
 # * timestamp_annotate is the time the annotated page was produced.
 
@@ -106,7 +112,9 @@ package AMC::DataModule::capture;
 #   capture action, 0 if declared not to be filled, and -1 if no
 #   manual data capture occured for this zone.
 #
-# * image is the name of the zone image file, extracted from the scan.
+# * image is the name of the zone image file, extracted from the
+#   scan. This filename is relative to the %PROJET/cr/zooms directory
+#   (%PROJET is here the project directory).
 
 # position retains the position of the zones corners on the scan
 #
