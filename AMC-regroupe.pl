@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -28,6 +28,7 @@ use AMC::Exec;
 use AMC::Gui::Avancement;
 use AMC::NamesFile;
 use AMC::Data;
+use AMC::DataModule::report ':const';
 
 use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
@@ -166,16 +167,16 @@ sub write_pdf {
     my $d_x=$w/$dest_size_x;
     my $d_y=$h/$dest_size_y;
     my $dens=($d_x > $d_y ? $d_x : $d_y);
-    
+
     debug "GEOMETRY : $w x $h\n";
     debug "DENSITY : $d_x x $d_y --> $dens\n";
     debug "destination: $file";
-    
+
     my $w=$img->Write('filename'=>$file,
 		      'page'=>($dens*$dest_size_x).'x'.($dens*$dest_size_y),
 		      'adjoin'=>'True','units'=>'PixelsPerInch',
 		      'compression'=>'jpeg','density'=>$dens.'x'.$dens);
-    
+
     if($w) {
 	print "Write error: $w\n";
 	debug "Write error: $w\n";
@@ -192,6 +193,7 @@ my $data=AMC::Data->new($data_dir);
 my $layout=$data->module('layout');
 my $capture=$data->module('capture');
 my $assoc=$data->module('association');
+my $report=$data->module('report');
 
 $lk=$assoc->variable_transaction('key_in_list');
 
@@ -366,7 +368,7 @@ sub process_output {
 stk_begin() if($single_output);
 
 for my $e (@students) {
-  $data->begin_read_transaction;
+  $data->begin_read_transaction('rRDT');
 
   print "Pages for ID=".studentids_string(@$e)."...\n";
 
@@ -408,6 +410,8 @@ for my $e (@students) {
   # no whitespaces in filename
   $f =~ s/\s+/_/g;
 
+  my $f0=$f;
+
   $f="$pdfdir/$f";
 
   debug "Dest file: $f";
@@ -419,27 +423,41 @@ for my $e (@students) {
     $ii++;
     my $f_p="$temp_dir/$ii.pdf";
 
-    my $f_j="$jpgdir/".$capture->get_annotated_page($e->[0],$pp,$e->[1]);
+    my $f_j0=$capture->get_annotated_page($e->[0],$pp,$e->[1]);
+    my $f_j="$jpgdir/$f_j0";
 
-    if(-f $f_j) {
-      # correction JPG presente : on transforme en PDF
+    if($f_j0) {
+      if(-f $f_j) {
+	# correction JPG presente : on transforme en PDF
 
-      debug "Page ".studentids_string(@$e)."/$pp annotated ($f_j)";
+	debug "Page ".studentids_string(@$e)."/$pp annotated ($f_j)";
 
-      stk_ppm_add($f_j);
+	stk_ppm_add($f_j);
 
-    } elsif($compose) {
-      # pas de JPG annote : on prend la page corrigee
+      } elsif($compose) {
+	# pas de JPG annote : on prend la page corrigee
 
-      debug "Page ".studentids_string(@$e)."/$pp from corrected sheet";
-
-      stk_pdf_add($layout->query('pageSubjectPage',$e->[0],$pp));
+	debug "Page ".studentids_string(@$e)."/$pp from corrected sheet";
+	stk_pdf_add($layout->query('pageSubjectPage',$e->[0],$pp));
+      } else {
+	print "Annotated page $f_j not found\n";
+	debug("Annotated page $f_j not found");
+      }
+    } else {
+      print "Annotated page $pp not registered\n";
+      debug("Annotated page $pp not registered\n");
     }
   }
 
   process_output($f) if(! $single_output);
 
-  $data->end_transaction;
+  $data->end_transaction('rRDT');
+
+  if(!$single_output) {
+    $data->begin_transaction('rSST');
+    $report->set_student_report(REPORT_ANNOTATED_PDF,@$e,$f0,'now');
+    $data->end_transaction('rSST');
+  }
 
   $avance->progres(1/$n_copies);
 }
