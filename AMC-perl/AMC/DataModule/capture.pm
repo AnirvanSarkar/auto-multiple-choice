@@ -992,6 +992,18 @@ sub delete_page_data {
   $self->statement('deletePage')->execute($student,$page,$copy);
 }
 
+# get_student_pages($student,$copy) returns an arrayref giving some
+# information for all pages from sheet ($student,$copy). For example:
+#
+# [{'page'=>1,'annotated'=>'page-37-1.jpg','subjectpage'=>181},
+#  {'page'=>2,'annotated'=>undef,'subjectpage'=>182},
+# ]
+#
+# For each page, a hashref contains:
+# * page for the page number,
+# * annotated for the filename of the annotated jpg, if present,
+# * subjectpage for the page number from complete subject PDF file
+
 sub get_student_pages {
   my ($self,$student,$copy)=@_;
   $self->{'data'}->require_module('layout');
