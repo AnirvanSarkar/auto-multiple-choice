@@ -43,7 +43,6 @@ $commandes->signalise();
 
 my $projet_dir='';
 my $jpgdir='';
-my $pdfdir='';
 my $modele="";
 my $progress=1;
 my $progress_id='';
@@ -66,7 +65,6 @@ my $dest_size_x=21/2.54;
 my $dest_size_y=29.7/2.54;
 
 GetOptions("projet=s"=>\$projet_dir,
-	   "cr=s"=>\$cr,
 	   "n-copies=s"=>\$nombre_copies,
 	   "sujet=s"=>\$sujet,
 	   "data=s"=>\$data_dir,
@@ -85,18 +83,22 @@ GetOptions("projet=s"=>\$projet_dir,
 
 set_debug($debug);
 
+$projet_dir =~ s:/+$::;
+
 $temp_dir = tempdir( DIR=>tmpdir(),
 		     CLEANUP => (!get_debug()) );
 
 debug "dir = $temp_dir";
 
-$cr=$projet_dir."/cr" if($projet_dir && !$cr);
 $data_dir=$projet_dir."/data" if($projet_dir && !$data_dir);
 
 my $correc_indiv="$temp_dir/correc.pdf";
 
-my $jpgdir="$cr/corrections/jpg";
-my $pdfdir="$cr/corrections/pdf";
+my $type=($single_output ? REPORT_SINGLE_ANNOTATED_PDF
+	  : REPORT_ANNOTATED_PDF );
+
+my $jpgdir=$projet_dir."/cr/corrections/jpg";
+my $pdfdir="";
 
 my $avance=AMC::Gui::Avancement::new($progress * ($single_output ? 0.8 : 1),
 				     'id'=>$progress_id);
@@ -367,11 +369,9 @@ sub process_output {
 
 stk_begin() if($single_output);
 
-my $type=($single_output ? REPORT_SINGLE_ANNOTATED_PDF 
-	  : REPORT_ANNOTATED_PDF );
-
 $data->begin_transaction('rDELS');
 $report->delete_student_type($type);
+$pdfdir=$projet_dir.'/'.$report->get_dir($type);
 $data->end_transaction('rDELS');
 
 for my $e (@students) {
@@ -470,7 +470,7 @@ for my $e (@students) {
 }
 
 if($single_output) {
-  process_output($single_output);
+  process_output($pdfdir.'/'.$single_output);
   $data->begin_transaction('rSST');
   $report->set_student_report($type,0,0,$single_output,'now');
   $data->end_transaction('rSST');

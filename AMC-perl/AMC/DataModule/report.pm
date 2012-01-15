@@ -72,7 +72,7 @@ sub version_upgrade {
 		      ." (type INTEGER PRIMARY KEY, directory TEXT)");
 
 	for(REPORT_ANNOTATED_PDF,REPORT_SINGLE_ANNOTATED_PDF) {
-	  $self->statement('addDirectory')->execute($_,'cr/correction/pdf');
+	  $self->statement('addDirectory')->execute($_,'cr/corrections/pdf');
 	}
 
 	return(1);
@@ -91,6 +91,8 @@ sub define_statements {
      'addDirectory'=>{'sql'=>"INSERT INTO $t_directory"
 		      ." (type,directory)"
 		      ." VALUES(?,?)"},
+     'getDir'=>{'sql'=>"SELECT directory FROM $t_directory"
+		." WHERE type=?"},
      'filesWithType'=>
      {'sql'=>"SELECT file FROM $t_student"
       ." WHERE type IN"
@@ -157,6 +159,13 @@ sub free_student_report {
   return($file);
 }
 
+# get_dir($type) returns subdirectory (in project directory) where
+# files for type $type are stored.
+
+sub get_dir {
+  my ($self,$type)=@_;
+  return($self->sql_single($self->statement('getDir'),$type));
+}
 
 # get_student_report($type,$student,$copy) returns the filename of a
 # given report.

@@ -3259,15 +3259,15 @@ sub regroupement {
     my $single_output='';
 
     if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
-	$single_output=absolu($projet{'options'}->{'cr'})
+	$single_output=
 # TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-	    ."/corrections/pdf/".(__("All_students")).".pdf";
+	    (__("All_students")).".pdf";
     }
 
     commande('commande'=>["auto-multiple-choice","regroupe",
 			  "--debug",debug_file(),
 			  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
-			  "--cr",absolu($projet{'options'}->{'cr'}),
+			  "--projet",absolu('%PROJET'),
 			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
 			  "--data",absolu($projet{'options'}->{'data'}),
 			  "--tex-src",absolu($projet{'options'}->{'texsrc'}),
