@@ -59,6 +59,7 @@ sub new {
      'code'=>'student',
      'check_assoc'=>'',
      'annote'=>'',
+     'annote_files'=>[],
      'verdict'=>'%(id) %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
      'verdict_question'=>"\"%"."s/%"."m\"",
      'model'=>'(N).pdf',
@@ -441,9 +442,20 @@ sub annote {
   $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
   opendir(my $dh, $pdf_dir)
     || die "can't opendir $pdf_dir: $!";
-  my @pdf = grep { /\.pdf$/ } readdir($dh);
+  my @pdf = grep { /\.pdf$/i } readdir($dh);
   closedir $dh;
-  for(@pdf) { $self->see_file($pdf_dir.'/'.$_); }
+  for my $f (@pdf) { $self->see_file($pdf_dir.'/'.$f); }
+
+  if(@{$self->{'annote_files'}}) {
+    my %p=map { $_=>1 } @pdf;
+    for my $f (@{$self->{'annote_files'}}) {
+      if(!$p{$f}) {
+	$self->trace("[E] Annotated file $f has not been generated.");
+	exit(1);
+      }
+    }
+    $self->trace("[T] Annotated file names: ".join(', ',@{$self->{'annote_files'}}));
+  }
 }
 
 sub ok {
