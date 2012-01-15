@@ -367,102 +367,113 @@ sub process_output {
 
 stk_begin() if($single_output);
 
-for my $e (@students) {
-  $data->begin_read_transaction('rRDT');
+my $type=($single_output ? REPORT_SINGLE_ANNOTATED_PDF 
+	  : REPORT_ANNOTATED_PDF );
 
+$data->begin_transaction('rDELS');
+$report->delete_student_type($type);
+$data->end_transaction('rDELS');
+
+for my $e (@students) {
   print "Pages for ID=".studentids_string(@$e)."...\n";
 
   my $f=$modele;
-  $f='(N)-(ID)' if(!$f);
-  $f.='.pdf' if($f !~ /\.pdf$/i);
-
-  my $ex;
-  if($e->[1]) {
-    $ex=sprintf("%04d:%04d",@$e);
-  } else {
-    $ex=sprintf("%04d",$e->[0]);
-  }
-  $f =~ s/\(N\)/$ex/gi;
-
-  if($assoc && $noms) {
-    my $i=$assoc->get_real(@$e);
-    my $nom='XXX';
-    my $n;
-
-    debug "Association -> ID=$i";
-
-    if($i) {
-      debug "Name found";
-      ($n)=$noms->data($lk,$i);
-      if($n) {
-	$f=$noms->substitute($n,$f);
-      }
-    }
-
-  } else {
-    $f =~ s/-?\(ID\)//gi;
-  }
-
-  # no accents and special characters in filename
-  $f=NFKD($f);
-  $f =~ s/\pM//og;
-
-  # no whitespaces in filename
-  $f =~ s/\s+/_/g;
-
-  my $f0=$f;
-
-  $f="$pdfdir/$f";
-
-  debug "Dest file: $f";
-
-  stk_begin() if(! $single_output);
-
-  for my $pp ($layout->pages_for_student($e->[0])) {
-
-    $ii++;
-    my $f_p="$temp_dir/$ii.pdf";
-
-    my $f_j0=$capture->get_annotated_page($e->[0],$pp,$e->[1]);
-    my $f_j="$jpgdir/$f_j0";
-
-    if($f_j0) {
-      if(-f $f_j) {
-	# correction JPG presente : on transforme en PDF
-
-	debug "Page ".studentids_string(@$e)."/$pp annotated ($f_j)";
-
-	stk_ppm_add($f_j);
-
-      } elsif($compose) {
-	# pas de JPG annote : on prend la page corrigee
-
-	debug "Page ".studentids_string(@$e)."/$pp from corrected sheet";
-	stk_pdf_add($layout->query('pageSubjectPage',$e->[0],$pp));
-      } else {
-	print "Annotated page $f_j not found\n";
-	debug("Annotated page $f_j not found");
-      }
-    } else {
-      print "Annotated page $pp not registered\n";
-      debug("Annotated page $pp not registered\n");
-    }
-  }
-
-  process_output($f) if(! $single_output);
-
-  $data->end_transaction('rRDT');
 
   if(!$single_output) {
+    $f='(N)-(ID)' if(!$f);
+    $f.='.pdf' if($f !~ /\.pdf$/i);
+
+    my $ex;
+    if($e->[1]) {
+      $ex=sprintf("%04d:%04d",@$e);
+    } else {
+      $ex=sprintf("%04d",$e->[0]);
+    }
+    $f =~ s/\(N\)/$ex/gi;
+
+    if($assoc && $noms) {
+      $data->begin_read_transaction('rAGN');
+      my $i=$assoc->get_real(@$e);
+      $data->end_transaction('rAGN');
+      my $nom='XXX';
+      my $n;
+
+      debug "Association -> ID=$i";
+
+      if($i) {
+	debug "Name found";
+	($n)=$noms->data($lk,$i);
+	if($n) {
+	  $f=$noms->substitute($n,$f);
+	}
+      }
+
+    } else {
+      $f =~ s/-?\(ID\)//gi;
+    }
+
+    # no accents and special characters in filename
+    $f=NFKD($f);
+    $f =~ s/\pM//og;
+
+    # no whitespaces in filename
+    $f =~ s/\s+/_/g;
+
     $data->begin_transaction('rSST');
-    $report->set_student_report(REPORT_ANNOTATED_PDF,@$e,$f0,'now');
+    $f=$report->free_student_report($type,$f);
+    $report->set_student_report($type,@$e,$f,'now');
     $data->end_transaction('rSST');
+
+    $f="$pdfdir/$f";
+    debug "Dest file: $f";
+
+    stk_begin();
+  }
+
+  $data->begin_read_transaction('rSDP');
+  my $pp=$capture->get_student_pages(@$e);
+  $data->end_transaction('rSDP');
+
+  for my $p (@$pp) {
+
+    my $f_j0=$p->{'annotated'};
+    my $f_j;
+
+    if($f_j0) {
+      $f_j="$jpgdir/$f_j0";
+      if(!-f $f_j) {
+	print "Annotated page $f_j not found\n";
+	debug("Annotated page $f_j not found");
+	$f_j='';
+      }
+    }
+
+    if($f_j) {
+      # correction JPG presente : on transforme en PDF
+
+      debug "Page ".studentids_string(@$e)."/$p->{'page'} annotated ($f_j)";
+      stk_ppm_add($f_j);
+
+    } elsif($compose) {
+      # pas de JPG annote : on prend la page corrigee
+
+      debug "Page ".studentids_string(@$e)."/$p->{'page'} from corrected sheet";
+      stk_pdf_add($p->{'subjectpage'});
+    }
+  }
+
+  if(!$single_output) {
+    process_output($f);
   }
 
   $avance->progres(1/$n_copies);
 }
 
-
-process_output($single_output) if($single_output);
+if($single_output) {
+  process_output($single_output);
+  $data->begin_transaction('rSST');
+  $report->set_student_report($type,0,0,$single_output,'now');
+  $data->end_transaction('rSST');
+}
 
 $avance->fin();

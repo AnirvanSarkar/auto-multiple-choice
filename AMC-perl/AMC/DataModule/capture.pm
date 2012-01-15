@@ -333,6 +333,7 @@ sub define_statements {
   my $t_failed=$self->table("failed");
   my $t_box=$self->table("box","layout");
   my $t_namefield=$self->table("namefield","layout");
+  my $t_layoutpage=$self->table("page","layout");
   $self->{'statements'}=
     {
      'NEWPageAuto'=>{'sql'=>"INSERT INTO $t_page"
@@ -510,6 +511,15 @@ sub define_statements {
 			 ." WHERE student=? AND page=? AND copy=?"},
      'deletePage'=>{'sql'=>"DELETE FROM $t_page"
 			 ." WHERE student=? AND page=? AND copy=?"},
+     'pagesStudent'=>
+     {'sql'=>"SELECT a.page AS page,a.subjectpage AS subjectpage,"
+      ."             b.annotated AS annotated"
+      ." FROM (SELECT * FROM $t_layoutpage WHERE student=?) AS a"
+      ." LEFT JOIN"
+      ."      (SELECT * FROM $t_page"
+      ."        WHERE student=? AND copy=? AND timestamp_annotate>0) AS b"
+      ." ON a.page=b.page ORDER BY a.page"
+     },
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
@@ -980,6 +990,14 @@ sub delete_page_data {
   $self->statement('deletePagePositions')->execute($student,$page,$copy);
   $self->statement('deletePageZones')->execute($student,$page,$copy);
   $self->statement('deletePage')->execute($student,$page,$copy);
+}
+
+sub get_student_pages {
+  my ($self,$student,$copy)=@_;
+  $self->{'data'}->require_module('layout');
+  return($self->dbh->selectall_arrayref($self->statement('pagesStudent'),
+					{ Slice => {} },
+					$student,$student,$copy));
 }
 
 1;

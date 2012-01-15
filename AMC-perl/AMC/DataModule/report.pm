@@ -42,10 +42,11 @@ use Exporter qw(import);
 
 use constant {
   REPORT_ANNOTATED_PDF=>1,
+  REPORT_SINGLE_ANNOTATED_PDF=>2,
 };
 
-our @EXPORT_OK = qw(REPORT_ANNOTATED_PDF);
-our %EXPORT_TAGS = ( 'const' => [ qw/REPORT_ANNOTATED_PDF/ ],
+our @EXPORT_OK = qw(REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF);
+our %EXPORT_TAGS = ( 'const' => [ qw/REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF/ ],
 		   );
 
 use AMC::Basic;
@@ -67,6 +68,12 @@ sub version_upgrade {
 	debug "Creating capture tables...";
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("student")
 		      ." (type INTEGER, file TEXT, student INTEGER, copy INTEGER DEFAULT 0, timestamp INTEGER, PRIMARY KEY (type,student,copy))");
+	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("directory")
+		      ." (type INTEGER PRIMARY KEY, directory TEXT)");
+
+	for(REPORT_ANNOTATED_PDF,REPORT_SINGLE_ANNOTATED_PDF) {
+	  $self->statement('addDirectory')->execute($_,'cr/correction/pdf');
+	}
 
 	return(1);
     }
@@ -78,8 +85,17 @@ sub version_upgrade {
 sub define_statements {
   my ($self)=@_;
   my $t_student=$self->table("student");
+  my $t_directory=$self->table("directory");
   $self->{'statements'}=
     {
+     'addDirectory'=>{'sql'=>"INSERT INTO $t_directory"
+		      ." (type,directory)"
+		      ." VALUES(?,?)"},
+     'filesWithType'=>
+     {'sql'=>"SELECT file FROM $t_student"
+      ." WHERE type IN"
+      ." ( SELECT a.type FROM $t_directory AS a,$t_directory AS b"
+      ."   ON a.directory=b.directory AND b.type=? )"},
      'setStudent'=>{'sql'=>"INSERT OR REPLACE INTO $t_student"
 		    ." (file,timestamp,type,student,copy)"
 		    ." VALUES (?,?,?,?,?)"},
@@ -90,11 +106,21 @@ sub define_statements {
     };
 }
 
+# files_with_type($type) returns all registered files that are located
+# in the same directory as files with type $type does (including files
+# with type $type).
+
+sub files_with_type {
+  my ($self,$type)=@_;
+  return($self->sql_list($self->statement('filesWithType'),
+			 $type));
+}
+
 # delete_student_type($type) deletes all records for specified type.
 
 sub delete_student_type {
   my ($self,$type)=@_;
-  $self->statement('delete')->execute($type);
+  $self->statement('deleteType')->execute($type);
 }
 
 # set_student_type($type,$student,$copy,$file,$timestamp) creates a
@@ -107,6 +133,30 @@ sub set_student_report {
   $self->statement('setStudent')
     ->execute($file,$timestamp,$type,$student,$copy);
 }
+
+# free_student_report($type,$file) returns a filename based on $file
+# that is not yet registered in the same directory as files with type
+# $type.
+
+sub free_student_report {
+  my ($self,$type,$file)=@_;
+
+  my %registered=map { $_=>1 } ($self->files_with_type($type));
+  if($registered{$file}) {
+    my $template=$file;
+    if(!($template =~ s/(\.[a-z0-9]+)$/_%04d$1/i)) {
+      $template.='_%04d';
+    }
+    my $i=0;
+    do {
+      $i++;
+      $file=sprintf($template,$i);
+    } while($registered{$file});
+  }
+
+  return($file);
+}
+
 
 # get_student_report($type,$student,$copy) returns the filename of a
 # given report.
