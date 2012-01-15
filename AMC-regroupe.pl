@@ -105,7 +105,7 @@ my $avance=AMC::Gui::Avancement::new($progress * ($single_output ? 0.8 : 1),
 
 my $noms='';
 
-if($fich_noms) {
+if(-f $fich_noms) {
     $noms=AMC::NamesFile::new($fich_noms,
 			      "encodage"=>$noms_encodage);
 
@@ -391,7 +391,7 @@ for my $e (@students) {
     }
     $f =~ s/\(N\)/$ex/gi;
 
-    if($assoc && $noms) {
+    if($noms) {
       $data->begin_read_transaction('rAGN');
       my $i=$assoc->get_real(@$e);
       $data->end_transaction('rAGN');
@@ -412,12 +412,40 @@ for my $e (@students) {
       $f =~ s/-?\(ID\)//gi;
     }
 
+    ##########################################################################
+    # Tries now to keep only simple characters in the file name...
+
     # no accents and special characters in filename
-    $f=NFKD($f);
-    $f =~ s/\pM//og;
+    $f=~s/\xe4/ae/g;  ##  treat characters ä ñ ö ü ÿ
+    $f=~s/\xf1/ny/g;
+    $f=~s/\xf6/oe/g;
+    $f=~s/\xfc/ue/g;
+    $f=~s/\xff/yu/g;
+
+    $f = NFD( $f );   ##  decompose (Unicode Normalization Form D)
+    $f=~s/\pM//g;         ##  strip combining characters
+
+    # additional normalizations:
+
+    $f=~s/\x{00df}/ss/g;  ##  German beta “ß” -> “ss”
+    $f=~s/\x{00c6}/AE/g;  ##  Æ
+    $f=~s/\x{00e6}/ae/g;  ##  æ
+    $f=~s/\x{0132}/IJ/g;  ##  Ĳ
+    $f=~s/\x{0133}/ij/g;  ##  ĳ
+    $f=~s/\x{0152}/Oe/g;  ##  Œ
+    $f=~s/\x{0153}/oe/g;  ##  œ
+
+    $f=~tr/\x{00d0}\x{0110}\x{00f0}\x{0111}\x{0126}\x{0127}/DDddHh/; # ÐĐðđĦħ
+    $f=~tr/\x{0131}\x{0138}\x{013f}\x{0141}\x{0140}\x{0142}/ikLLll/; # ıĸĿŁŀł
+    $f=~tr/\x{014a}\x{0149}\x{014b}\x{00d8}\x{00f8}\x{017f}/NnnOos/; # ŊŉŋØøſ
+    $f=~tr/\x{00de}\x{0166}\x{00fe}\x{0167}/TTtt/;                   # ÞŦþŧ
+
+    $f=~s/[^\0-\x80]/_/g;  ##  clear everything else; optional
 
     # no whitespaces in filename
-    $f =~ s/\s+/_/g;
+    $f =~ s/[^a-zA-Z0-9+_\.-]+/_/g;
+
+    ##########################################################################
 
     $data->begin_transaction('rSST');
     $f=$report->free_student_report($type,$f);

@@ -437,6 +437,7 @@ sub annote {
 		     '--with',$self->{'tex_engine'},
 		     '--modele',$self->{'model'},
 		     '--id-file','%PROJ/num-pdf',
+		     '--fich-noms','%PROJ/'.$self->{'list'},
 		     );
 
   $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
