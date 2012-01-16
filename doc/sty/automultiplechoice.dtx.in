@@ -462,13 +462,61 @@ along with Auto-Multiple-Choice.  If not, see
 %   all boxes corresponding to wrong choices.
 % \end{itemize}
 %
-% \DescribeEnv{question}\DescribeEnv{questionmult} Simple questions
-% are enclosed in a |{question}|\marg{id} environment, and multiple
-% questions are enclosed in a |{questionmult}|\marg{id}
-% environment. These environments contain the question text, and the
-% proposed choices inside a |choices|-like environment (see next). The
-% \meta{id} argument is a question identifier. Each question must have
-% a unique identifier, different from the other questions identifiers.
+% \DescribeEnv{question}\DescribeEnv{questionmult}
+% Simple questions are enclosed in a |{question}|\marg{id}
+% environment, and multiple questions are enclosed in a
+% |{questionmult}|\marg{id} environment. These environments contain
+% the question text, and the proposed choices inside a |choices|-like
+% environment (see next). The \meta{id} argument is a question
+% identifier. Each question must have a unique identifier, different
+% from the other questions identifiers.
+%
+% \vspace{2ex}
+% \begin{code}
+%   \begin{question}{everest}
+%     What is the elevation of Mount Everest?
+%     \begin{choices}
+%       \correctchoice{8,848\,m}
+%       \wrongchoice{8,253\,m}
+%       \wrongchoice{8,810\,m}
+%     \end{choices}
+%   \end{question}
+%
+%   \begin{questionmult}{americas}
+%     Which contries are in the Americas?
+%     \begin{choices}
+%       \correctchoice{Guatemala}
+%       \correctchoice{Canada}
+%       \wrongchoice{Switzerland}
+%       \wrongchoice{Cambodia}
+%     \end{choices}
+%   \end{questionmult}
+% \end{code}
+% \vspace{2ex}
+%
+% \DescribeMacro{\AMCcompleteMulti}\DescribeMacro{\AMCnoCompleteMulti}
+% For multiple questions, it is sometimes usefull to make the
+% difference between a student who thinks that none of he choices are
+% correct, and a student who did not answer the question. The use of
+% package option |completemulti| can be used in this case: it
+% adds a choice to all multiple questions. Commands |\AMCcompleteMulti| and
+% |\AMCnoCompleteMulti| can also be used to change this behaviour for a
+% single question.
+%
+% \vspace{2ex}
+% \begin{code}
+%   \begin{questionmult}{americas}
+%     \AMCcompleteMulti
+%     Which contries are in the Americas?
+%     \begin{choices}
+%       \correctchoice{Guatemala}
+%       \correctchoice{Canada}
+%       \wrongchoice{Switzerland}
+%       \wrongchoice{Cambodia}
+%     \end{choices}
+%   \end{questionmult}
+% \end{code}
+% \vspace{2ex}
 %
 % \DescribeEnv{choices}\DescribeEnv{choiceshoriz}\DescribeEnv{choicescustom}
 % Depending on the formatting style for answers, one can choose one of
@@ -663,6 +711,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   the |\namefield|\marg{descr} command. The \meta{descr} argument
 %   contains the \LaTeX{} code used to format the name field on the
 %   page. For example:
+% \vspace{2ex}
 %   \begin{code}
 %  \namefield{\fbox{    
 %    \begin{minipage}{15em}
@@ -671,6 +720,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{minipage}
 %  }}
 %   \end{code}
+% \vspace{2ex}
 %   You can see that the |\namefield| command has no effect on the
 %   produced document. In fact, its only purpose is to log in the
 %   |.xy| file information about the position of the name field on the
@@ -682,12 +732,15 @@ Three digits and two letters:\insertgroup{mixed}.
 %   identifier, that can be used to retrieve coded student numbers
 %   from the scans, and \meta{ndigits} is the number of digits for
 %   numbers to be coded.
+% \vspace{2ex}
 %   \begin{code}
-%  \AMCcode{student}{6}  
+%  \AMCcode{student}{6}
+%
 %   \end{code}
 %
 %   For smaller number of digits, the ``horizontal'' form can be preferred: 
 %   {\PexaDefaults{samplewidth=.7\PexaWidth}
+% \vspace{2ex}
 %   \begin{code}
 %  \AMCcodeH{student}{3}  
 %   \end{code}
@@ -1037,6 +1090,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@zoneformulaire
 \newif\ifAMC@pagelayout\AMC@pagelayouttrue
 \newif\ifAMC@postcorrect\AMC@postcorrectfalse
+\let\AMCcompleteMulti=\AMCcomplete@multitrue
+\let\AMCnoCompleteMulti=\AMCcomplete@multifalse
 %    \end{macrocode}
 %
 % \begin{macro}{\AMCid@name}
