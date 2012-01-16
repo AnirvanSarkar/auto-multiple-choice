@@ -148,10 +148,10 @@ sub define_statements {
 		   ." FROM $at"
 		   ." ) WHERE real=?"},
      'realBack'=>{'sql'=>"SELECT student,copy FROM ( SELECT CASE"
-		  ." WHEN manual != '' THEN manual"
+		  ." WHEN manual IS NOT NULL THEN manual"
 		  ." ELSE auto END AS real, student, copy"
 		  ." FROM $at"
-		  ." ) WHERE real=?"},
+		  ." ) WHERE real=?||''"},
      'counts'=>{'sql'=>"SELECT COUNT(auto),COUNT(manual),COUNT(manual and auto)"
 		." FROM $at"},
      'clearAuto'=>{'sql'=>"UPDATE $at SET auto=NULL"},
@@ -267,7 +267,7 @@ sub check_keys {
 
 sub real_back {
   my ($self,$code)=@_;
-  return($self->sql_list($self->statement('realBack'),$code));
+  return($self->sql_row($self->statement('realBack'),$code));
 }
 
 # state($student,$copy) returns:
