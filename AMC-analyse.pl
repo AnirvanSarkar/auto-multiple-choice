@@ -59,6 +59,7 @@ my $tol_mark='';
 my $prop=0.8;
 my $blur='1x1';
 my $threshold='60%';
+my $multiple='';
 
 GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
@@ -70,6 +71,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "projet=s"=>\$project_dir,
 	   "n-procs=s"=>\$n_procs,
 	   "debug-image-dir=s"=>\$debug_image_dir,
+	   "multiple!"=>\$multiple,
 	   );
 
 use_gettext;

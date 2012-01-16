@@ -20,6 +20,7 @@
 
 package AMC::Test;
 
+use AMC::Basic;
 use AMC::Data;
 
 use File::Spec::Functions qw(tmpdir);
@@ -41,6 +42,7 @@ sub new {
     {
      'dir'=>'',
      'tex_engine'=>'pdflatex',
+     'multiple'=>'',
      'n_copies'=>5,
      'check_marks'=>'',
      'perfect_copy'=>[3],
@@ -271,6 +273,7 @@ sub analyse {
   }
 
   $self->amc_command('analyse',
+		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
 		     '--tol-marque',$self->{'tol_marque'},
 		     '--projet','%PROJ',
 		     '--data','%DATA',
@@ -278,6 +281,7 @@ sub analyse {
 		     @{$self->{'scans'}},
 		     ) if($self->{'debug'});
   $self->amc_command('analyse',
+		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
 		     '--tol-marque',$self->{'tol_marque'},
 		     '--projet','%PROJ',
 		     '--data','%DATA',
@@ -359,9 +363,12 @@ sub check_marks {
   my %p=(%{$self->{'check_marks'}});
 
   for my $m (@{$self->{'marks'}}) {
-    delete($p{$m->{'student'}})
-      if($self->{'check_marks'}->{$m->{'student'}}
-	 == $m->{'mark'});
+    my $st=studentids_string($m->{'student'},$m->{'copy'});
+    delete($p{$st})
+      if($p{$st} == $m->{'mark'});
+    $st='/'.$self->find_assoc($m->{'student'},$m->{'copy'});
+    delete($p{$st})
+      if($p{$st} == $m->{'mark'});
   }
 
   my @no=(keys %p);
@@ -389,6 +396,16 @@ sub get_assoc {
   }
 }
 
+sub find_assoc {
+  my ($self,$student,$copy)=@_;
+  my $r='';
+  for my $a (@{$self->{'association'}}) {
+    $r=(defined($a->{'manual'}) ? $a->{'manual'} : $a->{'auto'})
+      if($a->{'student'} == $student && $a->{'copy'} == $copy);
+  }
+  return($r);
+}
+
 sub check_assoc {
   my ($self)=@_;
   return if(!$self->{'check_assoc'});
@@ -399,9 +416,9 @@ sub check_assoc {
   my %p=(%{$self->{'check_assoc'}});
 
   for my $m (@{$self->{'association'}}) {
-    delete($p{$m->{'student'}})
-      if($self->{'check_assoc'}->{$m->{'student'}}
-	 eq $m->{'auto'});
+    my $st=studentids_string($m->{'student'},$m->{'copy'});
+    delete($p{$st})
+      if($self->{'check_assoc'}->{$st} eq $m->{'auto'});
   }
 
   my @no=(keys %p);
@@ -495,10 +512,10 @@ sub default_process {
   $self->analyse;
   $self->note;
   $self->assoc;
+  $self->get_assoc;
   $self->get_marks;
   $self->check_marks;
   $self->check_perfect;
-  $self->get_assoc;
   $self->check_assoc;
   $self->annote;
 
