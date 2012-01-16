@@ -146,7 +146,7 @@ sub define_statements {
 		   ." WHEN manual IS NOT NULL THEN manual"
 		   ." ELSE auto END AS real"
 		   ." FROM $at"
-		   ." ) WHERE real=?"},
+		   ." ) WHERE real=?||''"},
      'realBack'=>{'sql'=>"SELECT student,copy FROM ( SELECT CASE"
 		  ." WHEN manual IS NOT NULL THEN manual"
 		  ." ELSE auto END AS real, student, copy"
@@ -155,10 +155,10 @@ sub define_statements {
      'counts'=>{'sql'=>"SELECT COUNT(auto),COUNT(manual),COUNT(manual and auto)"
 		." FROM $at"},
      'clearAuto'=>{'sql'=>"UPDATE $at SET auto=NULL"},
-     'findManual'=>{'sql'=>"SELECT student,copy FROM $at WHERE manual=?"},
+     'findManual'=>{'sql'=>"SELECT student,copy FROM $at WHERE manual=?||''"},
      'unlink'=>{'sql'=>"UPDATE $at SET manual="
-		." ( CASE WHEN manual IS NULL OR auto=? THEN 'NONE' ELSE NULL END )"
-		." WHERE manual=? OR ( auto=? AND manual IS NULL )"},
+		." ( CASE WHEN manual IS NULL OR auto=?||'' THEN 'NONE' ELSE NULL END )"
+		." WHERE manual=? OR ( auto=?||'' AND manual IS NULL )"},
      'assocMissingCount'=>{'sql'=>"SELECT COUNT(*) FROM"
 			   ."(SELECT student,copy FROM $t_page"
 			   ." EXCEPT SELECT student,copy FROM $at"
