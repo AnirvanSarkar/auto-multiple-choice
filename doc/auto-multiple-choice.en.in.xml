@@ -734,7 +734,11 @@ Durée : 10 minutes.
             of these answers are correct" choice at the end of each multiple
             question. Thus, for these questions, a distinction can be made
             between no answer and the answer consisting in treating none of
-            the listed answers as correct.</para>
+            the listed answers as correct. This behaviour can be forced or
+            cancelled for a particular question using one of the commands
+            <command>\AMCcompleteMulti</command> or
+            <command>\AMCnoCompleteMulti</command> inside the corresponding
+            <command>questionmult</command> environnement.</para>
           </listitem>
 
           <listitem>
@@ -1172,6 +1176,32 @@ and write your first and last names below.
         <para>Note that an horizontal version <command>AMCcodeH</command> is
         also available, specially for the case of small number of
         digits.</para>
+      </sect3>
+
+      <sect3>
+        <title>Open questions</title>
+
+        <para>One can sometimes require some open questions to be added to the
+        subject. One way to do so is to reserve boxes use to the teacher for
+        these questions. After the exam, the teacher reads the completed
+        answer sheets and tick the boxes according to the answers written by
+        the students for open questions. He will then scan the sheets and let
+        AMC correct the multiple choice questions and integrate the open
+        questions scores into the marks.<programlisting>\begin{questionmult}{open}
+  Define \emph{inflation}.
+  \hfill
+  \AMCnoCompleteMulti
+  \def\AMCbeginAnswer{}\def\AMCendAnswer{}
+  \def\AMCanswer#1#2{#1\hspace{2mm}}
+  \fcolorbox{white}{lightgray}{
+    \begin{choicescustom}[o]\bareme{b=.5}
+      \correctchoice{}\correctchoice{}\correctchoice{}\correctchoice{}
+    \end{choicescustom}
+    Reserved
+  }\par\vspace{1ex}
+  \noindent\fbox{\begin{minipage}{\linewidth}~\vspace*{4cm}\end{minipage}}
+\end{questionmult}
+</programlisting></para>
       </sect3>
 
       <sect3>

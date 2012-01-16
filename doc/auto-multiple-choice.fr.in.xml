@@ -761,8 +761,14 @@ Durée : 10 minutes.
             automatique une réponse type « aucune de ces réponses n'est
             correcte » à la fin de chaque question multiple. Ceci permet de
             différencier, pour ces questions, une absence de réponse et la
-            réponse qui consiste à ne choisir aucune des réponses
-            proposées.</para>
+            réponse qui consiste à ne choisir aucune des réponses proposées.
+            Que cette option soit utilisée ou non, on peut demander l'ajout de
+            cette dernière réponse ou l'annuler pour une question particulière
+            en utilisant une des commandes
+            <command>\AMCcompleteMulti</command> et
+            <command>\AMCnoCompleteMulti</command> à l'intérieur de
+            l'environnement <command>questionmult</command>
+            correspondant.</para>
           </listitem>
 
           <listitem>
@@ -1243,6 +1249,36 @@ et inscrivez votre nom et prénom ci-dessous.
         <para>Notons enfin qu'il existe aussi la version horizontale
         <command>AMCcodeH</command> de cette commande, particulièrement utile
         pour un faible nombre de chiffres dans le code à saisir.</para>
+      </sect3>
+
+      <sect3>
+        <title>Questions ouvertes</title>
+
+        <para>On peut ajouter des questions ouvertes (qui ne sont pas à choix
+        multiple) à l'intérieur du sujet.</para>
+
+        <para>Une manière de procéder consiste à présenter des cases à cocher
+        par le correcteur. Après l'examen, le correcteur lit la réponse
+        fournie par l'étudiant et affecte les points qui correspondent en
+        cochant certaines cases qui lui sont réservées. Il peut ensuite
+        scanner les copies et utiliser AMC pour les corriger, tout en
+        intégrant les résultats des questions ouvertes dans la notation (dans
+        l'exemple suivant, chaque case cochée rapporte un demi-point à
+        l'étudiant) : <programlisting>\begin{questionmult}{ouverte}
+  Donnez la d\'efinition de l'inflation.
+  \hfill
+  \AMCnoCompleteMulti
+  \def\AMCbeginAnswer{}\def\AMCendAnswer{}
+  \def\AMCanswer#1#2{#1\hspace{2mm}}
+  \fcolorbox{white}{lightgray}{
+    \begin{reponsesperso}[o]\bareme{b=.5}
+      \bonne{}\bonne{}\bonne{}\bonne{}
+    \end{reponsesperso}
+    Reserv\'e au correcteur
+  }\par\vspace{1ex}
+  \noindent\fbox{\begin{minipage}{\linewidth}~\vspace*{4cm}\end{minipage}}
+\end{questionmult}
+</programlisting></para>
       </sect3>
 
       <sect3>
