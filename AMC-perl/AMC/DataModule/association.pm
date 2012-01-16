@@ -152,7 +152,9 @@ sub define_statements {
 		  ." ELSE auto END AS real, student, copy"
 		  ." FROM $at"
 		  ." ) WHERE real=?||''"},
-     'counts'=>{'sql'=>"SELECT COUNT(auto),COUNT(manual),COUNT(manual and auto)"
+     'counts'=>{'sql'=>"SELECT COUNT(auto),COUNT(manual),"
+		." SUM(CASE WHEN auto IS NOT NULL OR manual IS NOT NULL"
+		."          THEN 1 ELSE 0 END)"
 		." FROM $at"},
      'clearAuto'=>{'sql'=>"UPDATE $at SET auto=NULL"},
      'findManual'=>{'sql'=>"SELECT student,copy FROM $at WHERE manual=?||''"},
