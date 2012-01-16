@@ -198,7 +198,7 @@ sub get_layout_data {
     $sth=$layout->statement('namefieldInfo');
     $sth->execute($student,$page);
     while($c=$sth->fetchrow_hashref) {
-      $r->{'namefield'}=
+      $r->{'boxes'}->{'namefield'}=
 	AMC::Boite::new_MN(map { $c->{$_} }
 			   (qw/xmin ymin xmax ymax/));
     }
@@ -661,8 +661,8 @@ sub one_scan {
 
   # Name field sub-image
 
-  if($nom_file && $ld->{'namefield'}) {
-    my $n=$ld->{'namefield'}->clone;
+  if($nom_file && $ld->{'boxes'}->{'namefield'}) {
+    my $n=$ld->{'boxes'}->{'namefield'}->clone;
     $n->transforme($ld->{'transf'});
     clear_old('name image file',"$cr_dir/$nom_file");
 
@@ -746,14 +746,14 @@ sub one_scan {
       $ld->{'corners.test'}->{$k}->to_data($capture,$zoneid,POSITION_MEASURE);
     } elsif(($n,$i)=detecte_cb($k)) {
       $zoneid=$capture->get_zoneid(@spc,ZONE_DIGIT,$n,$i,1);
-    } elsif($k eq 'nom') {
+    } elsif($k eq 'namefield') {
       $zoneid=$capture->get_zoneid(@spc,ZONE_NAME,0,0,1);
       $capture->statement('setZoneAuto')
 	->execute(-1,-1,$nom_file,$zoneid);
     }
 
     if($zoneid) {
-      if($k ne 'nom') {
+      if($k ne 'namefield') {
 	if($ld->{'darkness.data'}->{$k}) {
 	  $capture->statement('setZoneAuto')
 	    ->execute(@{$ld->{'darkness.data'}->{$k}},
