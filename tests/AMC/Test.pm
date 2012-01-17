@@ -29,6 +29,8 @@ use File::Copy::Recursive qw(rcopy);
 use File::Copy;
 use Digest::MD5;
 
+use Data::Dumper;
+
 use DBI;
 
 use IPC::Run qw(run);
@@ -478,6 +480,7 @@ sub annote {
 
 sub ok {
   my ($self)=@_;
+  $self->end;
   if(@{$self->{'to_check'}}) {
     $self->trace("[?] ".(1+$#{$self->{'to_check'}})." files to check in $self->{'check_dir'}:");
     for(@{$self->{'to_check'}}) {
@@ -501,6 +504,60 @@ sub defects {
     $self->trace("[E] Layout defects: ".join(', ',@t));
   } else {
     $self->trace("[T] No layout defects");
+  }
+}
+
+sub data {
+  my ($self)=@_;
+  return(AMC::Data->new($self->{'temp_dir'}."/data"));
+}
+
+sub begin {
+  my ($self,$title)=@_;
+  $self->end if($self->{'test_title'});
+  $self->{'test_title'}=$title;
+  $self->{'n.subt'}=0;
+}
+
+sub end {
+  my ($self)=@_;
+  $self->trace("[T] ".$self->{'test_title'});
+  $self->{'test_title'}='';
+}
+
+sub datadump {
+  my ($self)=@_;
+  if($self->{'datamodule'} && $self->{'datatable'}) {
+    print Dumper($self->{'datamodule'}->dbh
+		 ->selectall_arrayref("SELECT * FROM $self->{'datatable'}",
+				      { Slice=>{} }));
+  }
+  $self->{'datamodule'}->end_transaction;
+}
+
+sub test {
+  my ($self,$x,$v,$subtest)=@_;
+  $self->{'n.subt'}++ if(!$subtest);
+  if(ref($x) eq 'ARRAY') {
+    for my $i (0..$#$x) {
+      $self->test($x->[$i],$v->[$i],1);
+    }
+  } else {
+    if($x ne $v) {
+      $self->trace("[E] ".$self->{'test_title'}." [$self->{'n.subt'}] : \'$x\' should be \'$v\'");
+      $self->datadump;
+      exit(1);
+    }
+  }
+}
+
+sub test_undef {
+  my ($self,$x)=@_;
+  $self->{'n.subt'}++;
+  if(defined($x)) {
+    $self->trace("[E] ".$self->{'test_title'}." [$self->{'n.subt'}] : \'$x\' should be undef");
+    $self->datadump;
+    exit(1);
   }
 }
 
