@@ -1,10 +1,10 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 2.12 -->
-  <!-- interface-naming-policy project-wide -->
   <object class="GtkFileChooserDialog" id="saisie_auto">
     <property name="visible">True</property>
-    <property name="tooltip-text" translatable="yes">Please select all papers' scans (one file per page)</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Please select all papers' scans (one file per page)</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Automatic data capture</property>
     <property name="role">amc-saisie-auto</property>
@@ -14,54 +14,27 @@
     <property name="startup_id">amc-saisie-auto</property>
     <property name="select_multiple">True</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="vboxsa">
+      <object class="GtkBox" id="vboxsa">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <object class="GtkHBox" id="hbox4">
-            <property name="visible">True</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="copie_scans">
-                <property name="label" translatable="yes">Copy to project directory</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip-text" translatable="yes">Copy all scans to scans sub-directory in project directory</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area1">
+          <object class="GtkButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
-            <property name="tooltip-text" translatable="yes">Proceed to data capture from scans with button Proceed</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Proceed to data capture from scans with button Proceed</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="button6">
                 <property name="label">gtk-cancel</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal handler="saisie_auto_annule" name="clicked"/>
+                <signal name="clicked" handler="saisie_auto_annule" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -71,28 +44,37 @@
             </child>
             <child>
               <object class="GtkButton" id="button7">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal handler="saisie_auto_ok" name="clicked"/>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="saisie_auto_ok" swapped="no"/>
                 <child>
                   <object class="GtkHBox" id="hbox13">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkImage" id="image6">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="stock">gtk-apply</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label73">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Proceed</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -108,11 +90,88 @@
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">1</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkCheckButton" id="copie_scans">
+            <property name="label" translatable="yes">Copy to project directory (recommended)</property>
+            <property name="use_action_appearance">False</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="has_tooltip">True</property>
+            <property name="tooltip_markup" translatable="yes">Copy all scans to scans sub-directory in project directory</property>
+            <property name="tooltip_text" translatable="yes">Copy all scans to scans sub-directory in project directory</property>
+            <property name="use_action_appearance">False</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox4">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkComboBox" id="saisie_auto_c_auto_capture_mode">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="entry_text_column">0</property>
+                <property name="id_column">1</property>
+                <child>
+                  <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="saisie_auto_info">
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="saisie_auto_info" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="image1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-info</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="0">button6</action-widget>
+      <action-widget response="0">button7</action-widget>
+    </action-widgets>
   </object>
 </interface>

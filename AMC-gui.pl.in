@@ -305,6 +305,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'annote_rtl'=>'',
 
 		   'export_sort'=>'n',
+
+		   'auto_capture_mode'=>0,
 		   );
 
 my $an_saved='an.storable';
@@ -992,6 +994,8 @@ my %cb_stores=(
     'regroupement_type'=>cb_model('STUDENTS'=>__"One file per student",
 				  'ALL'=>__"One file for all students",
     ),
+    'auto_capture_mode'=>cb_model(0=>__"Different answer sheets",
+				  1=>__"Some answer sheets were photocopied")
     );
 
 
@@ -2323,12 +2327,30 @@ sub saisie_manuelle {
 }
 
 sub saisie_automatique {
-    my $gsa=read_glade('saisie_auto',qw/copie_scans/);
+    my $gsa=read_glade('saisie_auto',qw/copie_scans saisie_auto_c_auto_capture_mode/);
     $w{'copie_scans'}->set_active(1);
+    transmet_pref($gsa,'saisie_auto',$projet{'options'});
+    # mode can't be changed if data capture has been made already
+    $projet{'_capture'}->begin_read_transaction;
+    my $n=$projet{'_capture'}->n_copies;
+    $projet{'_capture'}->end_transaction;
+    $w{'saisie_auto_c_auto_capture_mode'}->set_sensitive($n==0);
 }
 
 sub saisie_auto_annule {
     $w{'saisie_auto'}->destroy();
+}
+
+sub saisie_auto_info {
+  my $dialog=Gtk2::MessageDialog
+    ->new_with_markup($w{'saisie_auto'},'destroy-with-parent','info','ok',
+		      __("Automatic data capture can be done in two different modes:")."\n"
+		      ."<b>".__("Different answer sheets").".</b> ".__("In the most robust one, you give a different sheet (with a different sheet number) to every student. You must not photocopy subjects before distributing them.")."\n"
+		      ."<b>".__("Some answer sheets were photocopied").".</b> ".__("In the second one (which can be used only if answer sheets to be scanned has one page) you can photocopy answer sheets and give the same subject to different students.")."\n"
+		      .__("After the first automatic capture, you can't switch to the other mode.")
+		      );
+  $dialog->run;
+  $dialog->destroy;
 }
 
 sub analyse_call {
@@ -2342,6 +2364,7 @@ sub analyse_call {
     $fh->seek( 0, SEEK_END );
 
     my @args=("--debug",debug_file(),
+	      ($projet{'options'}->{'auto_capture_mode'} ? "--multiple" : "--no-multiple"),
 	      "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
 	      "--progression-id",'analyse',
 	      "--progression",1,
@@ -2374,6 +2397,7 @@ sub saisie_auto_ok {
     my @f=$w{'saisie_auto'}->get_filenames();
     my $copie=$w{'copie_scans'}->get_active();
 
+    reprend_pref('saisie_auto',$projet{'options'});
     $w{'saisie_auto'}->destroy();
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
