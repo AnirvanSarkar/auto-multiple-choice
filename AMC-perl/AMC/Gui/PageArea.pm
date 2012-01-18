@@ -43,6 +43,8 @@ sub add_feuille {
     $self->{'case'}='';
     $self->{'coches'}='';
 
+    $self->{'font'}=Pango::FontDescription->from_string("128");
+
     for (keys %oo) {
 	$self->{$_}=$oo{$_} if(defined($self->{$_}));
     }
@@ -63,12 +65,25 @@ sub add_feuille {
 sub set_image {
     my ($self,$image,$layinfo)=@_;
     $self->{'i-file'}=$image;
-    if($image && -f $image) {
-	eval { $self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image); };
-	if($@) {
-	  # Error loading scan...
-	  $self->{'i-src'}='';
-	}
+    if($image =~ /text:(.*)/) {
+      my $text=$1;
+
+      my $layout=$self->create_pango_layout($text);
+      my $colormap =$self->get_colormap;
+      $layout->set_font_description($self->{'font'});
+      my ($text_x,$text_y)=$layout->get_pixel_size();
+      my $pixmap=Gtk2::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
+      $pixmap->set_colormap($colormap);
+      $pixmap->draw_rectangle($self->style->bg_gc(GTK_STATE_NORMAL),TRUE,0,0,$text_x,$text_y);
+      $pixmap->draw_layout($self->style->fg_gc(GTK_STATE_NORMAL),0,0,$layout);
+      my $pixbuf=Gtk2::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
+      $self->{'i-src'}=$pixbuf;
+    } elsif($image && -f $image) {
+      eval { $self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image); };
+      if($@) {
+	# Error loading scan...
+	$self->{'i-src'}='';
+      }
     } elsif($image eq 'NONE') {
       $self->{'i-src'}='';
     } else {

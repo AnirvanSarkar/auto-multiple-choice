@@ -113,7 +113,8 @@ sub new {
       if(-r $file) {
 	push @images,{'file'=>$file,%$z};
       } else {
-	debug_and_stderr "Skipping name field image $z->{'image'} (not found)";
+	push @images,{'file'=>'',%$z};
+#	debug_and_stderr "Skipping name field image $z->{'image'} (not found)";
       }
     }
 
@@ -538,7 +539,7 @@ sub image_sc {
 # {X:X}
 sub image_sc_string {
   my ($self,$i)=@_;
-  return(studentids_string($self->image_sc($i)));
+  return((__"Sheet")." ".studentids_string($self->image_sc($i)));
 }
 
 # Returns the image file name corresponding to sheet at line $i in the
@@ -547,7 +548,7 @@ sub image_sc_string {
 # {X:X}
 sub image_filename {
   my ($self,$i)=@_;
-  return('') if ($i<0 || $i>$#{$self->{'images'}});
+  return(undef) if ($i<0 || $i>$#{$self->{'images'}});
   my $f=$self->{'namefield_dir'}.'/'.$self->{'images'}->[$i]->{'image'};
   return(-r $f ? $f : '');
 }
@@ -561,11 +562,16 @@ sub charge_image {
     $self->style_bouton('IMAGE',0);
     my $file=$self->image_filename($i);
 
-    if($file) {
+    if(defined($file)) {
+      if($file) {
 	$self->{'photo'}->set_image($file);
-	$self->{'image_sc'}
-	  = [$self->image_sc($i)];
-	$self->vraie_copie(1);
+      } else {
+	my $text=pageids_string(map { $self->{'images'}->[$i]->{$_} } (qw/student page copy/));
+	$self->{'photo'}->set_image("text:$text");
+      }
+      $self->{'image_sc'}
+	= [$self->image_sc($i)];
+      $self->vraie_copie(1);
     } else {
 	$i=-1;
 	$self->{'photo'}->set_image();
