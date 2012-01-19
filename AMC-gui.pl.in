@@ -2330,6 +2330,7 @@ sub saisie_manuelle {
     $projet{'_layout'}->end_transaction('PGCN');
     if($c>0) {
 	my $gm=AMC::Gui::Manuel::new(
+	    'multiple'=>$projet{'options'}->{'auto_capture_mode'},
 	    'cr-dir'=>absolu($projet{'options'}->{'cr'}),
 	    'data-dir'=>absolu($projet{'options'}->{'data'}),
 	    'sujet'=>absolu($projet{'options'}->{'docs'}->[0]),

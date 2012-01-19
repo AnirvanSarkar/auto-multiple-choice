@@ -65,6 +65,7 @@ sub new {
 	      'encodage_interne'=>'UTF-8',
 	      'image_type'=>'xpm',
 	      'editable'=>1,
+	      'multiple'=>0,
 	  };
 
     for (keys %o) {
@@ -99,9 +100,11 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree/) {
+    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
+
+    $self->{'button_photocopy'}->hide() if(!$self->{'multiple'});
 
     if(!$self->{'editable'}) {
 	$self->{'navigation_v'}->show();
@@ -173,7 +176,7 @@ sub new {
 				    {'type'=>'n','col'=>MDIAG_PAGE},
 				   ]);
 
-	$diag_store->set_sort_column_id(DIAG_ID,GTK_SORT_ASCENDING);
+	$diag_store->set_sort_column_id(MDIAG_ID,GTK_SORT_ASCENDING);
 
 	$self->{'general'}->window()->set_cursor(undef);
     } else {
@@ -184,10 +187,9 @@ sub new {
 
     $self->{'gui'}->connect_signals(undef,$self);
 
-    $self->charge_i();
-
-
     $self->{'area'}->signal_connect('expose_event'=>\&AMC::Gui::Manuel::expose_area);
+
+    $self->charge_i();
 
     return($self);
 }
@@ -220,6 +222,9 @@ sub maj_list_all {
 		'mse_threshold'=>$self->{'seuil_eqm'});
   my $capture_free=$self->{'capture'}->no_capture_pages;
   $self->{'capture'}->end_transaction;
+
+  $self->{'page'}=[];
+  $self->{'diag_store'}->clear();
 
   my $i=0;
   for my $p (@$summary) {
@@ -494,6 +499,33 @@ sub efface_saisie {
 
     $self->synchronise();
     $self->charge_i();
+}
+
+sub duplique_saisie {
+   my ($self)=@_;
+
+   my $p=$self->{'page'}->[$self->{'iid'}];
+   my ($student,$page,$copy)=@$p;
+
+   $self->{'capture'}->begin_transaction;
+   $copy=$self->{'capture'}->new_page_copy($student,$page);
+   $self->{'capture'}->set_page_manual($student,$page,$copy,-1);
+   $self->{'capture'}->end_transaction;
+
+   $self->maj_list_all;
+
+   $self->{'iid'}=0;
+  CHID: for my $i (0..$#{$self->{'page'}}) {
+      my $k=$self->{'page'}->[$i];
+      if($k->[0] == $student &&
+	 $k->[1] == $page &&
+	 $k->[2] == $copy) {
+	  $self->{'iid'}=$i;
+	  last CHID;
+      }
+  }
+
+   $self->charge_i;
 }
 
 sub ok_quitter {
