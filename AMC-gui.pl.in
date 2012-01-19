@@ -2200,7 +2200,7 @@ continue with AMC!</b>")."\n".
 			    'question','yes-no',
 			    __("You selected only a few sheets to print.")."\n".
 			    "<b>".__("Are you going to photocopy some printed subjects before giving them to the students?")."</b>\n".
-			    __("If so, the corresponding option will be set for this project.")." "
+			    __("If so, the corresponding option will be set for this project.")." ".
 			    __("However, you will be able to change this when giving your first scans to AMC.")
 			   );
 	my $reponse=$dialog->run;
@@ -3920,8 +3920,13 @@ sub update_analysis_summary {
   $w{'state_capture'}->set_text($tt);
 
   if ($failed_nb<=0) {
-    $tt=__"All scans were properly recognized.";
-    state_image('unrecognized','gtk-yes');
+    if($r{'complete'}) {
+      $tt=__"All scans were properly recognized.";
+      state_image('unrecognized','gtk-yes');
+    } else {
+      $tt="";
+      state_image('unrecognized',undef);
+    }
     $w{'button_unrecognized'}->hide();
   } else {
     $tt=sprintf(__"%d scans were not recognized.",$failed_nb);
