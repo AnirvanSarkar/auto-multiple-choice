@@ -220,6 +220,12 @@
           have to adapt the LaTeX sources you wrote for older versions to keep
           the same layout.</para>
         </listitem>
+
+        <listitem>
+          <para>From version 1.1.0, all AMC data is stored in SQLite databases
+          instead of lots of XML files. The first time you open a project, old
+          XML files will be converted to the new format.</para>
+        </listitem>
       </itemizedlist>
     </sect2>
 
@@ -1705,11 +1711,32 @@ Name :
     <sect2 id="printing">
       <title id="printing.title">Printing and exam</title>
 
+      <para>Two alternative workflows can be considered:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>For the most robust, create as many exam sheets as necessary
+          for all your students, with different sheets numbers, and print them
+          all. Each page can be identified by its numbers and boxes at the
+          top, so that you can scan several times the same completed answer
+          sheet page carefree.</para>
+        </listitem>
+
+        <listitem>
+          <para>Secondly, you can print a few subjects (or only one if you
+          want), and photocopy them to get one subject for all students.
+          Questions shuffling will be less efficient, and if you give several
+          times a scan of the same page, AMC won't be able to know about it
+          and will create an unwanted duplicate.</para>
+        </listitem>
+      </itemizedlist>
+
       <warning>
-        <para>You must create as many exam sheets as necessary for all your
-        students, with different sheets numbers, and print them all. If you
-        print one or several sheets and photocopy them to have enough for all
-        the students, you won't be able to continue with AMC!</para>
+        <para>To use this second workflow using photocopies, there must be
+        only one page for students to write on (using a separate answer sheet
+        can help you for this). If not, you won't be able to continue with
+        AMC! Indeed, it would be impossible for AMC to make the link between
+        two pages from the same student.</para>
       </warning>
 
       <para>When the preparation is over, we can print the subject, and
@@ -1752,6 +1779,13 @@ Name :
           image files (TIFF, JPG, PNG, etc.). Vector graphics formats (PDF, PS
           or EPS) are also suitable: scans will then be converted into PNG by
           AMC before analysis.</para>
+        </note>
+
+        <note>
+          <para>When giving scans for automated data capture the first time,
+          you will have tell AMC which method you used: either different
+          papers printed, or photocopied papers (see <xref
+          endterm="printing.title" linkend="printing" />).</para>
         </note>
 
         <para>Then we select this set of scan files in the dialog opened by
@@ -2546,11 +2580,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <title>Photocopied subject</title>
 
       <para>As explained in <xref endterm="printing.title"
-      linkend="printing" />, it is not possible to photocopy one answer sheet
-      to give to several students. However, when using a separate answer sheet
-      and when questions and answers are not to be shuffled, you can photocopy
-      the subject, and print all the answer sheets separately. We detail here
-      the proper way to follow.</para>
+      linkend="printing" />, it is not always possible to photocopy one answer
+      sheet to give to several students. However, when using a separate answer
+      sheet and when questions and answers are not to be shuffled, you can
+      photocopy the subject, and print all the answer sheets separately. We
+      detail here the proper way to follow.</para>
 
       <itemizedlist>
         <listitem>

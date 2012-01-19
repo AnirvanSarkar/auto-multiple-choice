@@ -227,6 +227,15 @@
           mieux configurable, mais vous aurez sans doute à adapter légèrement
           votre code LaTeX pour que le résultat reste semblable.</para>
         </listitem>
+
+        <listitem>
+          <para>À partir de la version 1.1.0, le stockage de toutes les
+          informations manipulées par AMC se fait dans des bases de données
+          SQLite, au lieu des multiples fichiers XML utilisés par les versions
+          précédentes. Lors de l'ouverture d'un projet créé par une version
+          antérieure, AMC transforme toutes ces données dans le nouveau
+          format, mais conserve les anciens fichiers XML.</para>
+        </listitem>
       </itemizedlist>
     </sect2>
 
@@ -1807,13 +1816,36 @@ Nom et prénom :
     <sect2 id="impression">
       <title id="impression.titre">Impression du sujet</title>
 
+      <para>Vous pouvez fonctionner de deux manières différentes :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Pour la méthode la plus robuste, il est nécessaire de produire
+          un nombre suffisant de copies ayant chacune un numéro de copie
+          différent, et de les imprimer toutes. Chaque page de chaque copie
+          est différenciée par les codes inscrits en haut de la page. Vous
+          pouvez ainsi scanner plusieurs fois la même page sans risque.</para>
+        </listitem>
+
+        <listitem>
+          <para>La deuxième méthode consiste à produire un petit nombre de
+          copies (éventuellement une seule), à les imprimer, puis à les
+          photocopier en grand nombre pour en avoir une par étudiant. Avec
+          cette méthode, le mélange des questions et réponses pert de son
+          efficacité, et si vous fournissez plusieurs fois la même page
+          scannée à AMC, il ne pourra pas s'en rendre compte et la comptera
+          deux fois.</para>
+        </listitem>
+      </itemizedlist>
+
       <warning>
-        <para>Quelle que soit la méthode d'impression utilisée, il est
-        nécessaire de produire un nombre suffisant de copies ayant chacune un
-        numéro de copie différent, et de les imprimer toutes. Ne cédez pas à
-        la tentation d'imprimer un nombre restreint de copies et les
-        photocopier ensuite en plusieurs exemplaire : vous ne pourriez pas
-        traiter les scans par AMC ensuite !</para>
+        <para>Pour cette deuxième méthode utilisant des photocopies, il est
+        nécessaire que les étudiants n'aient à remplir qu'une seule page (ce
+        résultat peut être obtenu en utilisant une feuille de réponses
+        séparée). Dans le cas contraire, vous ne pourriez pas traiter les
+        scans par AMC ensuite ! En effet, il serait impossible pour AMC de
+        faire le lien entre plusieurs pages correspondant à un même
+        étudiant.</para>
       </warning>
 
       <para>Une fois la préparation effectuée, nous pouvons imprimer le sujet,
@@ -1824,9 +1856,9 @@ Nom et prénom :
         <listitem>
           <para>Il est possible d'imprimer (ou de faire imprimer par un
           service reprographie) directement le fichier
-          <filename>sujet.tex</filename> du répertoire projet, auquel on peut
-          accéder par un double-clic sur la ligne <guilabel>sujet</guilabel>
-          de la liste des <guilabel>documents de travail</guilabel>.</para>
+          <filename>DOC-sujet.pdf</filename> du répertoire projet, auquel on
+          peut accéder par le bouton <guilabel>sujet</guilabel> de la liste
+          des <guilabel>documents de travail</guilabel>.</para>
 
           <para>Cette méthode peut avoir un léger inconvénient : si votre
           sujet comporte certaines copies ayant un nombre impair de pages, une
@@ -1896,6 +1928,13 @@ Nom et prénom :
           plusieurs fichiers images (TIFF, JPG, PNG, etc.) des scans. Les
           formats vectoriels (PDF, PS ou EPS) sont également utilisables ; ils
           seront convertis au format PNG par AMC avant leur analyse.</para>
+        </note>
+
+        <note>
+          <para>Lors de la première saisie automatique, vous aurez à indiquer
+          à AMC quelle méthode vous avez choisie : sujets différents pour tous
+          les étudiants, ou photocopie de certains sujets (voir <xref
+          endterm="impression.titre" linkend="impression" />).</para>
         </note>
 
         <para>On sélectionne alors l'ensemble des fichiers obtenus à partir du
@@ -2725,8 +2764,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <title>Photocopie du sujet</title>
 
       <para>Comme expliqué dans <xref endterm="impression.titre"
-      linkend="impression" />, il n'est pas possible de photocopier une
-      feuille de réponses pour en donner à plusieurs étudiants. Cependant,
+      linkend="impression" />, il n'est pas toujours possible de photocopier
+      une feuille de réponses pour en donner à plusieurs étudiants. Cependant,
       dans le cas de l'utilisation de la feuille de réponses séparée, et quand
       les questions et réponses ne doivent pas être mélangées, il est possible
       de photocopier le sujet et imprimer les feuilles de réponses séparément.
