@@ -58,7 +58,7 @@ sub new {
 	      'liste'=>'',
 	      'liste_key'=>'',
 	      'data_dir'=>'',
-	      'data'=>'',assoc=>'','capture'=>'',
+	      'data'=>'',assoc=>'','capture'=>'','layout'=>'',
 	      'global'=>0,
 	      'encodage_liste'=>'UTF-8',
 	      'separateur'=>"",
@@ -83,6 +83,8 @@ sub new {
       if(!$self->{'assoc'});
     $self->{'capture'}=$self->{'data'}->module('capture')
       if(!$self->{'capture'});
+    $self->{'layout'}=$self->{'data'}->module('layout')
+      if(!$self->{'layout'});
 
     $self->{'assoc'}->begin_transaction('ALSK');
     $self->{'assoc'}->check_keys($self->{'liste_key'},'---');
@@ -105,27 +107,26 @@ sub new {
     my @images=();
 
     $self->{'capture'}->begin_read_transaction('AIMG');
+    my $nfs=$self->{'capture'}->get_namefields;
+    $self->{'capture'}->end_transaction('AIMG');
 
-    my $sth=$self->{'capture'}->statement('pageZonesAll');
-    $sth->execute(@{$self->{'page_id'}},ZONE_NAME);
-    while (my $z = $sth->fetchrow_hashref) {
-      my $file=$self->{'cr'}."/".$z->{'image'};
+    for my $p (@$nfs) {
+      my $file='';
+      if($p->{'image'}) {
+	$file=$self->{'namefield_dir'}."/".$p->{'image'};
+      }
       if(-r $file) {
-	push @images,{'file'=>$file,%$z};
+	push @images,{'file'=>$file,%$p};
       } else {
-	push @images,{'file'=>'',%$z};
-#	debug_and_stderr "Skipping name field image $z->{'image'} (not found)";
+	push @images,{'file'=>'',%$p};
       }
     }
-
-    $self->{'capture'}->end_transaction('AIMG');
 
     my $iimage=-1;
 
     if($#images<0) {
 	debug "Can't find names images...\n";
-	$self->{'erreur'}=__("Names images not found... Maybe you did not run automatic data capture yet, or you forgot using \\champnom command in LaTeX source, or you don't have papers' scans ?")."\n"
-	    .__"For both two latest cases, you can use graphical interface for manual data caption.";
+	$self->{'erreur'}=__("Names images not found... Maybe you forgot using \\namefield command in LaTeX source?");
 	return($self);
     }
 
@@ -549,7 +550,7 @@ sub image_sc_string {
 sub image_filename {
   my ($self,$i)=@_;
   return(undef) if ($i<0 || $i>$#{$self->{'images'}});
-  my $f=$self->{'namefield_dir'}.'/'.$self->{'images'}->[$i]->{'image'};
+  my $f=$self->{'images'}->[$i]->{'file'};
   return(-r $f ? $f : '');
 }
 

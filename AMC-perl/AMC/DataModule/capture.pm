@@ -334,6 +334,7 @@ sub define_statements {
   my $t_box=$self->table("box","layout");
   my $t_namefield=$self->table("namefield","layout");
   my $t_layoutpage=$self->table("page","layout");
+  my $t_lnf=$self->table("namefield","layout");
   $self->{'statements'}=
     {
      'NEWPageAuto'=>{'sql'=>"INSERT INTO $t_page"
@@ -519,6 +520,17 @@ sub define_statements {
       ."      (SELECT * FROM $t_page"
       ."        WHERE student=? AND copy=? AND timestamp_annotate>0) AS b"
       ." ON a.page=b.page ORDER BY a.page"
+     },
+     'nameFields'=>
+     {'sql'=>"SELECT a.student AS student,a.page AS page,a.copy AS copy,"
+      ."             b.image  AS image FROM"
+      ." ( SELECT c.student,c.page,c.copy FROM"
+      ."     (SELECT * FROM $t_page WHERE timestamp_auto>0 OR timestamp_manual>0 )"
+      ."      AS c, $t_lnf AS l"
+      ."     ON c.student=l.student AND c.page=l.page ) AS a"
+      ." LEFT OUTER JOIN"
+      ." ( SELECT * FROM $t_zone WHERE type=? ) AS b"
+      ." ON a.student=b.student AND a.page=b.page AND a.copy=b.copy"
      },
     };
   $self->{'statements'}->{'pageSummary'}=
@@ -1010,6 +1022,23 @@ sub get_student_pages {
   return($self->dbh->selectall_arrayref($self->statement('pagesStudent'),
 					{ Slice => {} },
 					$student,$student,$copy));
+}
+
+# get_namefields() returns an arrayref giving, for each page with a
+# namefield for which a capture has been made, the name of the
+# namefield image if it exists.
+#
+# For example:
+#
+# [{student=>1,page=>3,copy=>1,image=>'name-1.jpg'},
+#  {student=>1,page=>3,copy=>2,image=>undef},
+# ]
+
+sub get_namefields {
+  my ($self)=@_;
+  $self->{'data'}->require_module('layout');
+  return($self->dbh->selectall_arrayref($self->statement('nameFields'),
+					{ Slice => {} },ZONE_NAME));
 }
 
 1;
