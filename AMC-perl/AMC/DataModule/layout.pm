@@ -222,6 +222,9 @@ sub define_statements {
       {
        'CLEARPAGE'=>{'sql'=>"DELETE FROM ? WHERE student=? AND page=?"},
        'COUNT'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")},
+       'StudentsCount'=>{'sql'=>"SELECT COUNT(*) FROM"
+			 ." ( SELECT student FROM ".$self->table("page")
+			 ."   GROUP BY student )"},
        'NEWLayout'=>
        {'sql'=>"INSERT INTO ".$self->table("page")
 	." (student,page,checksum,subjectpage,dpi,width,height,markdiameter,sourceid)"
@@ -262,6 +265,12 @@ sub define_statements {
 	."SELECT student,page FROM ".$self->table("box")." UNION "
 	."SELECT student,page FROM ".$self->table("namefield")
 	.") AS enter GROUP BY student,page ORDER BY student,page"},
+       'MAX_enter'=>
+       {'sql'=>"SELECT MAX(n) FROM"
+	." ( SELECT COUNT(*) AS n FROM"
+	."   ( SELECT student,page FROM ".$self->table("box")
+	."     UNION SELECT student,page FROM ".$self->table("namefield")
+	."   ) GROUP BY student )"},
        'DEFECT_NO_BOX'=>
        {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
@@ -386,6 +395,13 @@ sub all_marks {
 sub pages_count {
     my ($self)=@_;
     return($self->sql_single($self->statement('COUNT')));
+}
+
+# page_count returns the number of different students
+
+sub students_count {
+    my ($self)=@_;
+    return($self->sql_single($self->statement('StudentsCount')));
 }
 
 # ids returns student,page string for all pages
@@ -542,5 +558,13 @@ sub check_positions {
   return($r);
 }
 
+# max_enter() returns the maximum of enter pages (pages where the
+# students are to write something: either boxes to tick either name
+# field) per student.
+
+sub max_enter {
+  my ($self)=@_;
+  return($self->sql_single($self->statement("MAX_enter")));
+}
 
 1;

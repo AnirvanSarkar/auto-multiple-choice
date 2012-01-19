@@ -754,27 +754,30 @@ for my $s (qw/normal insensitive/) {
 ###
 
 sub dialogue_apprentissage {
-    my ($key,$type,$buttons,@oo)=@_;
+    my ($key,$type,$buttons,$force,@oo)=@_;
     my $resp='';
     $type='info' if(!$type);
     $buttons='ok' if(!$buttons);
-    if(!$state{'apprentissage'}->{$key}) {
+    if($force || !$state{'apprentissage'}->{$key}) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      $type,$buttons,
 			      @oo);
 
-	my $garde=Gtk2::CheckButton->new(__"Show this message again next time");
-	$garde->set_active(0);
-	$garde->can_focus(0);
+	if(!$force) {
+	  my $garde=Gtk2::CheckButton->new(__"Show this message again next time");
+	  $garde->set_active(0);
+	  $garde->can_focus(0);
 
-	$dialog->get_content_area()->add($garde);
+	  $dialog->get_content_area()->add($garde);
+	}
+
 	$dialog->show_all();
 
 	$resp=$dialog->run;
 
-	if(!$garde->get_active()) {
+	if(!($force || $garde->get_active())) {
 	    debug "Learning : $key";
 	    $state{'apprentissage'}->{$key}=1;
 	    $state{'_modifie'}=1;
@@ -1866,7 +1869,7 @@ sub doc_maj {
 		     for(0..2) {
 			 $ok=0 if(! -f absolu($projet{'options'}->{'docs'}->[$_]));
 		     }
-		     dialogue_apprentissage('MAJ_DOCS_OK','','',
+		     dialogue_apprentissage('MAJ_DOCS_OK','','',0,
 					    __("Working documents successfully generated.")." "
 					    .__("You can take a look at them double-clicking on the list.")." "
 					    .__("If they are correct, proceed to layouts detection...")) if($ok);
@@ -2169,17 +2172,45 @@ sub sujet_impressions_ok {
 	return();
     }
 
-    if(1+$#e < 10) {
-	# Less than 10 pages selected: is it a mistake?
+    if(1+$#e <= 10) {
+      # Less than 10 pages selected: is it a mistake?
+
+      $projet{'_layout'}->begin_read_transaction('pPFP');
+      my $max_p=$projet{'_layout'}->max_enter();
+      my $students=$projet{'_layout'}->students_count();
+      $projet{'_layout'}->end_transaction('pPFP');
+
+      if($max_p>1) {
+	# Some sheets have more than one enter-page: multiple scans
+	# are not supported...
 	my $resp=dialogue_apprentissage('PRINT_FEW_PAGES',
-					'warning','yes-no',
+					'warning','yes-no',$students<=10,
 					__("You selected only a few sheets to print.")."\n".
-					__("You must create as many exam sheets as necessary for all your students, with different sheets numbers, and print them all.")." ".
+					__("As students are requested to write on more than one page, you must create as many exam sheets as necessary for all your students, with different sheets numbers, and print them all.")." ".
 					__("If you print one or several sheets and photocopy them to have enough for all the students, <b>you won't be able to
 continue with AMC!</b>")."\n".
-					__("Do you want to print the selected sheets anyway?")
-	    );
+					__("Do you want to print the selected sheets anyway?"),
+				       );
 	return() if($resp eq 'no');
+      } elsif($students<=10) {
+	# Is multiple mode requested?
+	my $dialog = Gtk2::MessageDialog
+	  ->new_with_markup($w{'main_window'},
+			    'destroy-with-parent',
+			    'question','yes-no',
+			    __("You selected only a few sheets to print.")."\n".
+			    "<b>".__("Are you going to photocopy some printed subjects before giving them to the students?")."</b>\n".
+			    __("If so, the corresponding option will be set for this project.")." "
+			    __("However, you will be able to change this when giving your first scans to AMC.")
+			   );
+	my $reponse=$dialog->run;
+	$dialog->destroy;
+	my $mult=($reponse eq 'yes' ? 1 : 0);
+	if($mult != $projet{'options'}->{'auto_capture_mode'}) {
+	  $projet{'options'}->{'auto_capture_mode'}=$mult;
+	  $projet{'options'}->{'_modifie_ok'}=1;
+	}
+      }
     }
 
     my $fh=File::Temp->new(TEMPLATE => "nums-XXXXXX",
@@ -2278,7 +2309,7 @@ sub calcule_mep {
 		     $dialog->destroy;
 
 		 } else {
-		     dialogue_apprentissage('MAJ_MEP_OK','','',
+		     dialogue_apprentissage('MAJ_MEP_OK','','',0,
 					    __("Layouts are detected.")." "
 					    .sprintf(__"You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red bozes are weel positioned.",__"Check layouts")." "
 					    .__"Then you can proceed to printing and to examination.");
@@ -2823,7 +2854,7 @@ sub assoc_resultat {
     $dialog->run;
     $dialog->destroy;
 
-    dialogue_apprentissage('ASSOC_AUTO_OK','','',
+    dialogue_apprentissage('ASSOC_AUTO_OK','','',0,
 			   __("Automatic association is now finished. You can ask for manual association to check that all is fine and, if necessary, read manually students names which have not been automatically identified.")) if($auto>0);
 }
 
@@ -3965,7 +3996,7 @@ sub detecte_analyse {
     # dialogue apprentissage :
 
     if($oo{'apprend'}) {
-	dialogue_apprentissage('SAISIE_AUTO','','',
+	dialogue_apprentissage('SAISIE_AUTO','','',0,
 			       __("Automatic data capture now completed.")." "
 			       .($r->{'incomplet'}>0 ? sprintf(__("It is not complete (missing pages from %d papers).")." ",$r->{'incomplet'}) : '')
 			       .__("You can analyse data capture quality with some indicators values in analysis list:")
