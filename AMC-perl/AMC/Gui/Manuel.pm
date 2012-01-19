@@ -324,10 +324,7 @@ sub page_id {
 sub charge_i {
     my ($self)=(@_);
 
-    $self->{'layinfo'}={'box'=>[],
-			'namefield'=>[],
-			'digit'=>[],
-			};
+    $self->{'layinfo'}={};
     if(!$self->{'page'}->[$self->{'iid'}]) {
       $self->{'area'}->set_image('NONE');
       debug_and_stderr "Page $self->{'iid'} not found";
@@ -380,36 +377,41 @@ sub charge_i {
     # synchro variables
     ################################
 
-    debug "Getting layout info";
+    if($spc[2]==0 && $self->{'multiple'}) {
+      $self->{'layinfo'}->{'block_message'}=sprintf(__"This is a template sheet that you cannot edit. To create a new sheet from this one to be edited, use the '%s' button.",__"Add photocopy");
+    } else {
 
-    my $c;
-    my $sth;
+      debug "Getting layout info";
 
-    for my $type (qw/box digit namefield/) {
+      for (qw/box namefield digit/) { $self->{'layinfo'}->{$_}=[]; }
+
+      my $c;
+      my $sth;
+
+      for my $type (qw/box digit namefield/) {
 	my $sth=$self->{'layout'}->statement($type.'Info');
 	$sth->execute(@ep);
 	while($c=$sth->fetchrow_hashref) {
-	    push @{$self->{'layinfo'}->{$type}},{%$c};
+	  push @{$self->{'layinfo'}->{$type}},{%$c};
 	}
+      }
+
+      $self->{'layinfo'}->{'page'}=$self->{'layout'}->page_info(@ep);
+
+      # mise a jour des cases suivant saisies deja presentes
+
+      for my $i (@{$self->{'layinfo'}->{'box'}}) {
+	my $id=$i->{'question'}."."
+	  .$i->{'answer'};
+	my $t=$self->{'capture'}
+	  ->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
+		   $self->{'seuil'});
+	$t='' if(!defined($t));
+	debug "Q=$id R=$t";
+	$i->{'id'}=[@spc];
+	$i->{'ticked'}=$t;
+      }
     }
-
-    $self->{'layinfo'}->{'page'}=$self->{'layout'}->page_info(@ep);
-
-    # mise a jour des cases suivant saisies deja presentes
-
-    for my $i (@{$self->{'layinfo'}->{'box'}}) {
-      my $id=$i->{'question'}."."
-	.$i->{'answer'};
-      my $t=$self->{'capture'}
-	->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
-		 $self->{'seuil'});
-      $t='' if(!defined($t));
-      debug "Q=$id R=$t";
-      $i->{'id'}=[@spc];
-      $i->{'ticked'}=$t;
-    }
-
-    my $p=$self->{'capture'}->get_page(@spc);
 
     $self->{'layout'}->end_transaction;
 

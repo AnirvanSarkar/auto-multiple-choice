@@ -118,6 +118,18 @@ sub modif {
 sub choix {
   my ($self,$event)=(@_);
 
+  if($self->{'layinfo'}->{'block_message'}) {
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup(undef,
+			'destroy-with-parent',
+			'error','ok',
+			$self->{'layinfo'}->{'block_message'});
+    $dialog->run;
+    $dialog->destroy;
+
+    return TRUE;
+  }
+
   if($self->{'layinfo'}->{'box'}) {
 
       if ($event->button == 1) {
