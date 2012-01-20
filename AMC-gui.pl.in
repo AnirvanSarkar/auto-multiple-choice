@@ -306,7 +306,7 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'export_sort'=>'n',
 
-		   'auto_capture_mode'=>0,
+		   'auto_capture_mode'=>-1,
 		   );
 
 my $an_saved='an.storable';
@@ -997,7 +997,8 @@ my %cb_stores=(
     'regroupement_type'=>cb_model('STUDENTS'=>__"One file per student",
 				  'ALL'=>__"One file for all students",
     ),
-    'auto_capture_mode'=>cb_model(0=>__"Different answer sheets",
+    'auto_capture_mode'=>cb_model(-1=>__"Please select...",
+				  0=>__"Different answer sheets",
 				  1=>__"Some answer sheets were photocopied")
     );
 
@@ -1022,7 +1023,7 @@ $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 sub maj_export {
     my $old_format=$projet{'options'}->{'format_export'};
 
-    valide_options_for_domain('export',@_);
+    valide_options_for_domain('export','',@_);
 
     debug "Format : ".$projet{'options'}->{'format_export'};
 
@@ -2193,22 +2194,26 @@ continue with AMC!</b>")."\n".
 				       );
 	return() if($resp eq 'no');
       } elsif($students<=10) {
-	# Is multiple mode requested?
-	my $dialog = Gtk2::MessageDialog
-	  ->new_with_markup($w{'main_window'},
-			    'destroy-with-parent',
-			    'question','yes-no',
-			    __("You selected only a few sheets to print.")."\n".
-			    "<b>".__("Are you going to photocopy some printed subjects before giving them to the students?")."</b>\n".
-			    __("If so, the corresponding option will be set for this project.")." ".
-			    __("However, you will be able to change this when giving your first scans to AMC.")
-			   );
-	my $reponse=$dialog->run;
-	$dialog->destroy;
-	my $mult=($reponse eq 'yes' ? 1 : 0);
-	if($mult != $projet{'options'}->{'auto_capture_mode'}) {
-	  $projet{'options'}->{'auto_capture_mode'}=$mult;
-	  $projet{'options'}->{'_modifie_ok'}=1;
+	if($projet{'options'}->{'auto_capture_mode'} != 1) {
+	  # This looks strange: a few shhets printed, a few sheets
+	  # generated, and photocopy mode not selected yet. Ask the
+	  # user if he wants to select this mode now.
+	  my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'question','yes-no',
+			      __("You selected only a few sheets to print.")."\n".
+			      "<b>".__("Are you going to photocopy some printed subjects before giving them to the students?")."</b>\n".
+			      __("If so, the corresponding option will be set for this project.")." ".
+			      __("However, you will be able to change this when giving your first scans to AMC.")
+			     );
+	  my $reponse=$dialog->run;
+	  $dialog->destroy;
+	  my $mult=($reponse eq 'yes' ? 1 : 0);
+	  if($mult != $projet{'options'}->{'auto_capture_mode'}) {
+	    $projet{'options'}->{'auto_capture_mode'}=$mult;
+	    $projet{'options'}->{'_modifie_ok'}=1;
+	  }
 	}
       }
     }
@@ -2359,14 +2364,36 @@ sub saisie_manuelle {
 }
 
 sub saisie_automatique {
-    my $gsa=read_glade('saisie_auto',qw/copie_scans saisie_auto_c_auto_capture_mode/);
-    $w{'copie_scans'}->set_active(1);
-    transmet_pref($gsa,'saisie_auto',$projet{'options'});
     # mode can't be changed if data capture has been made already
     $projet{'_capture'}->begin_read_transaction;
     my $n=$projet{'_capture'}->n_copies;
+    if($n>0 && $projet{'options'}->{'auto_capture_mode'} <0) {
+      # the auto_capture_mode (sheets photocopied or not) is not set,
+      # but some capture has already been done. This looks weird, but
+      # it can be the case if captures were made with an old AMC
+      # version, or if project parameters have not been saved...
+      # So we try to detect the correct value from the capture data.
+      $projet{'options'}->{'auto_capture_mode'}=
+	($projet{'_capture'}->n_photocopy() > 0 ? 1 : 0);
+    }
     $projet{'_capture'}->end_transaction;
+
+    my $gsa=read_glade('saisie_auto',
+		       qw/copie_scans
+			  saisie_auto_c_auto_capture_mode
+			  button_auto_capture_go/);
+    $w{'copie_scans'}->set_active(1);
+    transmet_pref($gsa,'saisie_auto',$projet{'options'});
+
     $w{'saisie_auto_c_auto_capture_mode'}->set_sensitive($n==0);
+}
+
+sub saisie_auto_mode_update {
+  my %o=('auto_capture_mode'=>undef);
+  # the mode value (auto_capture_mode) has been updated.
+  valide_options_for_domain('saisie_auto',\%o,@_);
+  $o{'auto_capture_mode'}=-1 if(!defined($o{'auto_capture_mode'}));
+  $w{'button_auto_capture_go'}->set_sensitive($o{'auto_capture_mode'}>=0);
 }
 
 sub saisie_auto_annule {
@@ -2881,30 +2908,33 @@ sub valide_options_correction {
 }
 
 sub valide_options_for_domain {
-    my ($domain,$widget,$user_data)=@_;
+    my ($domain,$oo,$widget,$user_data)=@_;
+    $oo=$projet{'options'} if(!$oo);
     if($widget) {
 	my $name=$widget->get_name();
 	debug "<$domain> options validation for widget $name";
 
 	if($name =~ /${domain}_[a-z]+_(.*)/) {
-	    reprend_pref($domain,$projet{'options'},'',{$1=>1});
+	    reprend_pref($domain,$oo,'',{$1=>1});
+	} else {
+	  debug "Widget $name is not in domain <$domain>!";
 	}
     } else {
 	debug "<$domain> options validation: ALL";
-	reprend_pref($domain,$projet{'options'});
+	reprend_pref($domain,$oo);
     }
 }
 
 sub valide_options_association {
-    valide_options_for_domain('pref_assoc',@_);
+    valide_options_for_domain('pref_assoc','',@_);
 }
 
 sub valide_options_preparation {
-    valide_options_for_domain('pref_prep',@_);
+    valide_options_for_domain('pref_prep','',@_);
 }
 
 sub valide_options_notation {
-    valide_options_for_domain('notation',@_);
+    valide_options_for_domain('notation','',@_);
 
     $w{'groupe_model'}->set_sensitive($projet{'options'}->{'regroupement_type'} eq 'STUDENTS');
 }
@@ -3498,10 +3528,13 @@ sub reprend_pref {
     my ($prefixe,$h,$oprefix,$seulement)=@_;
     $h->{'_modifie'}=($h->{'_modifie'} ? 1 : '');
 
+    debug "Restricted search: ".join(',',keys %$seulement)
+      if($seulement);
     for my $t (keys %$h) {
-	if(!$seulement || $seulement->{$t}) {
+      if(!$seulement || $seulement->{$t}) {
 	my $tgui=$t;
 	$tgui =~ s/$oprefix$// if($oprefix);
+	debug "Looking for widget <$tgui> in domain <$prefixe>";
 	my $n;
 	my $wp=$w{$prefixe.'_x_'.$tgui};
 	if($wp) {
@@ -3556,20 +3589,24 @@ sub reprend_pref {
 	}
 	$wp=$w{$prefixe.'_c_'.$tgui};
 	if($wp) {
-	    if($wp->get_model) {
-		if($wp->get_active_iter) {
-		    $n=$wp->get_model->get($wp->get_active_iter,COMBO_ID);
-		} else {
-		    $n='';
-		}
-		#print "[$t] valeur=$n\n";
+	  debug "Found combobox";
+	  if($wp->get_model) {
+	    if($wp->get_active_iter) {
+	      $n=$wp->get_model->get($wp->get_active_iter,COMBO_ID);
 	    } else {
-		$n=$wp->get_active();
+	      debug "No active iter for combobox ".$prefixe.'_c_'.$tgui;
+	      $n='';
 	    }
-	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  } else {
+	    $n=$wp->get_active();
+	  }
+	  $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	  $h->{$t}=$n;
 	}
-	}}
+      } else {
+	debug "Skip widget <$t>";
+      }
+    }
 
     debug "Changes : $h->{'_modifie'}";
 }

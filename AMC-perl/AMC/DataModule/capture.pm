@@ -532,6 +532,7 @@ sub define_statements {
       ." ( SELECT * FROM $t_zone WHERE type=? ) AS b"
       ." ON a.student=b.student AND a.page=b.page AND a.copy=b.copy"
      },
+     'photocopy'=>{'sql'=>"SELECT COUNT(*) FROM $t_page WHERE copy>0"},
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
@@ -1039,6 +1040,15 @@ sub get_namefields {
   $self->{'data'}->require_module('layout');
   return($self->dbh->selectall_arrayref($self->statement('nameFields'),
 					{ Slice => {} },ZONE_NAME));
+}
+
+# n_photocopy() returns the number of captures made on a photocopy of
+# the subject, that is made with mode 'Some sheets were photocopied'
+# (these captures are identified by a positive 'copy' value).
+
+sub n_photocopy {
+  my ($self)=@_;
+  return($self->sql_single($self->statement('photocopy')));
 }
 
 1;
