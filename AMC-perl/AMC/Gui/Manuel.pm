@@ -377,7 +377,7 @@ sub charge_i {
     # synchro variables
     ################################
 
-    if($spc[2]==0 && $self->{'multiple'}) {
+    if($spc[2]==0 && $self->{'multiple'} && $self->{'editable'}) {
       $self->{'layinfo'}->{'block_message'}=sprintf(__"This is a template sheet that you cannot edit. To create a new sheet from this one to be edited, use the '%s' button.",__"Add photocopy");
     } else {
 

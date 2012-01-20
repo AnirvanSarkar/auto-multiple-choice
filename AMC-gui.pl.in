@@ -759,32 +759,33 @@ sub dialogue_apprentissage {
     $type='info' if(!$type);
     $buttons='ok' if(!$buttons);
     if($force || !$state{'apprentissage'}->{$key}) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      $type,$buttons,
-			      @oo);
+      my $garde;
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  $type,$buttons,
+			  @oo);
 
-	if(!$force) {
-	  my $garde=Gtk2::CheckButton->new(__"Show this message again next time");
-	  $garde->set_active(0);
-	  $garde->can_focus(0);
+      if(!$force) {
+	$garde=Gtk2::CheckButton->new(__"Show this message again next time");
+	$garde->set_active(0);
+	$garde->can_focus(0);
 
-	  $dialog->get_content_area()->add($garde);
-	}
+	$dialog->get_content_area()->add($garde);
+      }
 
-	$dialog->show_all();
+      $dialog->show_all();
 
-	$resp=$dialog->run;
+      $resp=$dialog->run;
 
-	if(!($force || $garde->get_active())) {
-	    debug "Learning : $key";
-	    $state{'apprentissage'}->{$key}=1;
-	    $state{'_modifie'}=1;
-	    sauve_state();
-	}
+      if(!($force || $garde->get_active())) {
+	debug "Learning : $key";
+	$state{'apprentissage'}->{$key}=1;
+	$state{'_modifie'}=1;
+	sauve_state();
+      }
 
-	$dialog->destroy;
+      $dialog->destroy;
     }
     return($resp);
 }
