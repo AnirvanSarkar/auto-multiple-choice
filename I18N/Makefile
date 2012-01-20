@@ -54,7 +54,7 @@ po-clean.pl: po-clean.pl.in ../Makefile.versions
 	perl po-clean.pl $< $@
 
 $(DOMAIN).bpot: $(PERL) $(GLADE)
-	xgettext $(XGETTO) --add-comments=TRANSLATORS: $(PERL) -k__ -k__p -k -o $@
+	xgettext $(XGETTO) --from-code=UTF-8 --add-comments=TRANSLATORS: $(PERL) -k__ -k__p -k -o $@
 	xgettext $(XGETTO) -j $(GLADE) -o $@
 
 list:
