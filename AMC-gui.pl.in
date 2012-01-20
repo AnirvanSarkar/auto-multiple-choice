@@ -2336,21 +2336,23 @@ sub saisie_manuelle {
     $projet{'_layout'}->end_transaction('PGCN');
     if($c>0) {
 
-      # if auto_capture_mode is not set, ask the user...
-      my $n=check_auto_capture_mode();
-      if($projet{'options'}->{'auto_capture_mode'}<0) {
-	my $gsa=read_glade('choose-mode',
-		       qw/saisie_auto_c_auto_capture_mode
-			  button_capture_go/);
+      if(!$regarder) {
+	# if auto_capture_mode is not set, ask the user...
+	my $n=check_auto_capture_mode();
+	if($projet{'options'}->{'auto_capture_mode'}<0) {
+	  my $gsa=read_glade('choose-mode',
+			     qw/saisie_auto_c_auto_capture_mode
+				button_capture_go/);
 
-	transmet_pref($gsa,'saisie_auto',$projet{'options'});
-	my $ret=$w{'choose-mode'}->run();
-	if($ret==1) {
-	  reprend_pref('saisie_auto',$projet{'options'});
-	$w{'choose-mode'}->destroy;
-	} else {
-	$w{'choose-mode'}->destroy;
-	  return();
+	  transmet_pref($gsa,'saisie_auto',$projet{'options'});
+	  my $ret=$w{'choose-mode'}->run();
+	  if($ret==1) {
+	    reprend_pref('saisie_auto',$projet{'options'});
+	    $w{'choose-mode'}->destroy;
+	  } else {
+	    $w{'choose-mode'}->destroy;
+	    return();
+	  }
 	}
       }
 
