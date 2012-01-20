@@ -2195,7 +2195,7 @@ continue with AMC!</b>")."\n".
 	return() if($resp eq 'no');
       } elsif($students<=10) {
 	if($projet{'options'}->{'auto_capture_mode'} != 1) {
-	  # This looks strange: a few shhets printed, a few sheets
+	  # This looks strange: a few sheets printed, a few sheets
 	  # generated, and photocopy mode not selected yet. Ask the
 	  # user if he wants to select this mode now.
 	  my $dialog = Gtk2::MessageDialog
@@ -2334,23 +2334,45 @@ sub saisie_manuelle {
     my $c=$projet{'_layout'}->pages_count();
     $projet{'_layout'}->end_transaction('PGCN');
     if($c>0) {
-	my $gm=AMC::Gui::Manuel::new(
-	    'multiple'=>$projet{'options'}->{'auto_capture_mode'},
-	    'cr-dir'=>absolu($projet{'options'}->{'cr'}),
-	    'data-dir'=>absolu($projet{'options'}->{'data'}),
-	    'sujet'=>absolu($projet{'options'}->{'docs'}->[0]),
-	    'etud'=>'',
-	    'dpi'=>$o{'saisie_dpi'},
-	    'seuil'=>$projet{'options'}->{'seuil'},
-	    'seuil_sens'=>$o{'seuil_sens'},
-	    'seuil_eqm'=>$o{'seuil_eqm'},
-	    'global'=>0,
-	    'encodage_interne'=>$o{'encodage_interne'},
-	    'image_type'=>$o{'manuel_image_type'},
-	    'retient_m'=>1,
-	    'editable'=>($regarder ? 0 : 1),
-	    'en_quittant'=>($regarder ? '' : \&detecte_analyse),
-	    );
+
+      # if auto_capture_mode is not set, ask the user...
+      my $n=check_auto_capture_mode();
+      if($projet{'options'}->{'auto_capture_mode'}<0) {
+	my $gsa=read_glade('choose-mode',
+		       qw/saisie_auto_c_auto_capture_mode
+			  button_capture_go/);
+
+	transmet_pref($gsa,'saisie_auto',$projet{'options'});
+	my $ret=$w{'choose-mode'}->run();
+	if($ret==1) {
+	  reprend_pref('saisie_auto',$projet{'options'});
+	$w{'choose-mode'}->destroy;
+	} else {
+	$w{'choose-mode'}->destroy;
+	  return();
+	}
+      }
+
+      # go for capture
+
+      my $gm=AMC::Gui::Manuel::new
+	(
+	 'multiple'=>$projet{'options'}->{'auto_capture_mode'},
+	 'cr-dir'=>absolu($projet{'options'}->{'cr'}),
+	 'data-dir'=>absolu($projet{'options'}->{'data'}),
+	 'sujet'=>absolu($projet{'options'}->{'docs'}->[0]),
+	 'etud'=>'',
+	 'dpi'=>$o{'saisie_dpi'},
+	 'seuil'=>$projet{'options'}->{'seuil'},
+	 'seuil_sens'=>$o{'seuil_sens'},
+	 'seuil_eqm'=>$o{'seuil_eqm'},
+	 'global'=>0,
+	 'encodage_interne'=>$o{'encodage_interne'},
+	 'image_type'=>$o{'manuel_image_type'},
+	 'retient_m'=>1,
+	 'editable'=>($regarder ? 0 : 1),
+	 'en_quittant'=>($regarder ? '' : \&detecte_analyse),
+	);
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
@@ -2363,25 +2385,30 @@ sub saisie_manuelle {
     }
 }
 
+sub check_auto_capture_mode {
+  $projet{'_capture'}->begin_read_transaction;
+  my $n=$projet{'_capture'}->n_copies;
+  if($n>0 && $projet{'options'}->{'auto_capture_mode'} <0) {
+    # the auto_capture_mode (sheets photocopied or not) is not set,
+    # but some capture has already been done. This looks weird, but
+    # it can be the case if captures were made with an old AMC
+    # version, or if project parameters have not been saved...
+    # So we try to detect the correct value from the capture data.
+    $projet{'options'}->{'auto_capture_mode'}=
+      ($projet{'_capture'}->n_photocopy() > 0 ? 1 : 0);
+  }
+  $projet{'_capture'}->end_transaction;
+  return($n);
+}
+
 sub saisie_automatique {
     # mode can't be changed if data capture has been made already
-    $projet{'_capture'}->begin_read_transaction;
-    my $n=$projet{'_capture'}->n_copies;
-    if($n>0 && $projet{'options'}->{'auto_capture_mode'} <0) {
-      # the auto_capture_mode (sheets photocopied or not) is not set,
-      # but some capture has already been done. This looks weird, but
-      # it can be the case if captures were made with an old AMC
-      # version, or if project parameters have not been saved...
-      # So we try to detect the correct value from the capture data.
-      $projet{'options'}->{'auto_capture_mode'}=
-	($projet{'_capture'}->n_photocopy() > 0 ? 1 : 0);
-    }
-    $projet{'_capture'}->end_transaction;
+    my $n=check_auto_capture_mode;
 
     my $gsa=read_glade('saisie_auto',
 		       qw/copie_scans
 			  saisie_auto_c_auto_capture_mode
-			  button_auto_capture_go/);
+			  button_capture_go/);
     $w{'copie_scans'}->set_active(1);
     transmet_pref($gsa,'saisie_auto',$projet{'options'});
 
@@ -2393,7 +2420,7 @@ sub saisie_auto_mode_update {
   # the mode value (auto_capture_mode) has been updated.
   valide_options_for_domain('saisie_auto',\%o,@_);
   $o{'auto_capture_mode'}=-1 if(!defined($o{'auto_capture_mode'}));
-  $w{'button_auto_capture_go'}->set_sensitive($o{'auto_capture_mode'}>=0);
+  $w{'button_capture_go'}->set_sensitive($o{'auto_capture_mode'}>=0);
 }
 
 sub saisie_auto_annule {
