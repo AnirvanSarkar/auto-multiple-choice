@@ -64,6 +64,7 @@ sub new {
 	      'separateur'=>"",
 	      'identifiant'=>'',
 	      'fin'=>'',
+	      'size_prefs'=>'',
 	  };
 
     for (keys %o) {
@@ -266,8 +267,24 @@ sub new {
     $self->maj_couleurs_liste();
     $self->{'assoc'}->end_transaction('ANCL');
 
+    $self->initial_size;
+
     return($self);
 }
+
+# Sets the window size to requested one (saved the last time the
+# window was used)
+#
+# {X:X}
+sub initial_size {
+  my ($self)=@_;
+  if($self->{'size_prefs'} && 
+     $self->{'size_prefs'}->{'assoc_window_size'} =~ /^([0-9]+)x([0-9]+)$/) {
+    Gtk2->main_iteration while ( Gtk2->events_pending );
+    $self->{'general'}->resize($1,$2);
+  }
+}
+
 
 # Updates the content of the sheets list (associations already made)
 # for one give sheet.
@@ -356,8 +373,15 @@ sub quitter {
     if($self->{'global'}) {
 	Gtk2->main_quit;
     } else {
-	$self->{'general'}->destroy;
-	&{$self->{'fin'}}();
+      if($self->{'size_prefs'}) {
+	my $dims=join('x',$self->{'general'}->get_size);
+	if($dims ne $self->{'size_prefs'}->{'assoc_window_size'}) {
+	  $self->{'size_prefs'}->{'assoc_window_size'}=$dims;
+	  $self->{'size_prefs'}->{'_modifie_ok'}=1;
+	}
+      }
+      $self->{'general'}->destroy;
+      &{$self->{'fin'}}();
     }
 }
 

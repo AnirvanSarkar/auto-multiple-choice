@@ -207,6 +207,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'defaut_moteur_latex_b'=>'pdflatex',
 	      'defaut_seuil'=>0.15,
 	      'taille_max_correction'=>'1000x1500',
+	      'assoc_window_size'=>'',
 	      'qualite_correction'=>'150',
 	      'conserve_taille'=>1,
 	      'methode_impression'=>'CUPS',
@@ -2852,6 +2853,7 @@ sub associe {
 					'encodage_liste'=>bon_encodage('liste'),
 					'encodage_interne'=>$o{'encodage_interne'},
 					'fin'=>\&assoc_state,
+					'size_prefs'=>($o{'conserve_taille'} ? \%o : ''),
 				       );
       if($ga->{'erreur'}) {
 	my $dialog = Gtk2::MessageDialog
