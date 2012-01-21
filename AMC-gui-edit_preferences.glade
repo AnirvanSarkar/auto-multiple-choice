@@ -14,6 +14,12 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adjustment11">
+    <property name="lower">25</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="adjustment2">
     <property name="lower">10</property>
     <property name="upper">100</property>
@@ -58,6 +64,23 @@
     <property name="value">30</property>
     <property name="step_increment">10</property>
     <property name="page_increment">100</property>
+  </object>
+  <object class="GtkListStore" id="encodages_principaux">
+    <columns>
+      <!-- column-name item -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">UTF-8</col>
+      </row>
+      <row>
+        <col id="0">ISO-8859-15</col>
+      </row>
+      <row>
+        <col id="0">Windows-1252</col>
+      </row>
+    </data>
   </object>
   <object class="GtkWindow" id="edit_preferences">
     <property name="visible">True</property>
@@ -955,6 +978,7 @@
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="pref_v_conserve_taille">
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
@@ -1249,18 +1273,6 @@
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <object class="GtkEntry" id="pref_x_qualite_correction">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkEntry" id="pref_x_taille_max_correction">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1293,6 +1305,22 @@
                               <packing>
                                 <property name="x_options"></property>
                                 <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="pref_s_qualite_correction">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="invisible_char">●</property>
+                                <property name="adjustment">adjustment11</property>
+                                <property name="snap_to_ticks">True</property>
+                                <property name="numeric">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                           </object>
@@ -1376,6 +1404,7 @@
                             <child>
                               <object class="GtkCheckButton" id="pref_v_defaut_annote_rtl">
                                 <property name="label" translatable="yes">right to left</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
@@ -1846,6 +1875,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkColorButton" id="pref_col_symbole_0_0_color">
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1861,6 +1891,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkColorButton" id="pref_col_symbole_0_1_color">
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1876,6 +1907,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkColorButton" id="pref_col_symbole_1_0_color">
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1891,6 +1923,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkColorButton" id="pref_col_symbole_1_1_color">
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -2040,6 +2073,7 @@
                             <child>
                               <object class="GtkCheckButton" id="pref_cb_symboles_indicatives">
                                 <property name="label" translatable="yes">Also annotate informative questions</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
@@ -2291,6 +2325,7 @@
                             <child>
                               <object class="GtkCheckButton" id="pref_projet_v_note_max_plafond">
                                 <property name="label" translatable="yes">ceil</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
@@ -2419,6 +2454,7 @@
                             <child>
                               <object class="GtkCheckButton" id="pref_projet_v_annote_rtl">
                                 <property name="label" translatable="yes">right to left</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
@@ -2747,6 +2783,7 @@
             <child>
               <object class="GtkButton" id="button11">
                 <property name="label">gtk-undo</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2762,6 +2799,7 @@
             </child>
             <child>
               <object class="GtkButton" id="button12">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2813,23 +2851,6 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="encodages_principaux">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">UTF-8</col>
-      </row>
-      <row>
-        <col id="0">ISO-8859-15</col>
-      </row>
-      <row>
-        <col id="0">Windows-1252</col>
-      </row>
-    </data>
   </object>
   <object class="GtkListStore" id="liststore1">
     <columns>
