@@ -139,7 +139,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu/) {
+    for my $k (qw/general tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu scrolled_tableau viewport_tableau/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
@@ -178,6 +178,8 @@ sub new {
     }
 
     $self->{'assoc'}->end_transaction('ABUT');
+
+    $self->{'scrolled_tableau'}->set_policy(GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
 
     # vue arborescente
 
