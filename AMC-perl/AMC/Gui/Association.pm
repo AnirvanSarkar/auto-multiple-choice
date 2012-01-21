@@ -179,6 +179,11 @@ sub new {
 
     $self->{'assoc'}->end_transaction('ABUT');
 
+    # don't why but this is necessary to make it work in some situations (Ubuntu 11.10 Unity for example)
+    for(qw/tableau viewport_tableau/) {
+      $self->{$_}->size_request;
+      $self->{$_}->set_size_request(-1,150);
+    }
     $self->{'scrolled_tableau'}->set_policy(GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
 
     # vue arborescente
