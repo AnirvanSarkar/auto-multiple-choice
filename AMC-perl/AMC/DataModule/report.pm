@@ -86,6 +86,7 @@ sub define_statements {
   my ($self)=@_;
   my $t_student=$self->table("student");
   my $t_directory=$self->table("directory");
+  my $t_assoc=$self->table("association","association");
   $self->{'statements'}=
     {
      'addDirectory'=>{'sql'=>"INSERT INTO $t_directory"
@@ -105,6 +106,13 @@ sub define_statements {
 		    ." WHERE type=? AND student=? AND copy=?"},
      'deleteType'=>{'sql'=>"DELETE FROM $t_student"
 		    ." WHERE type=?"},
+     'getAssociatedType'=>
+     {'sql'=>"SELECT CASE"
+      ."  WHEN a.manual IS NOT NULL THEN a.manual"
+      ."  ELSE a.auto END AS id,r.file AS file"
+      ." FROM $t_assoc AS a,"
+      ."   (SELECT * FROM $t_student WHERE type=?) AS r"
+      ." ON a.student=r.student AND a.copy=r.copy"},
     };
 }
 
@@ -174,6 +182,21 @@ sub get_student_report {
   my ($self,$type,$student,$copy)=@_;
   return($self->sql_single($self->statement('getStudent'),
 			   $type,$student,$copy));
+}
+
+# get_associated_type($type) returns a list of reports of a particular
+# type $type with the corresponding association IDs (primary key of
+# the student in the students list file), like
+#
+# [{'file'=>'001.pdf','id'=>'001234'},
+#  {'file'=>'002.pdf','id'=>'001538'},
+# ]
+
+sub get_associated_type {
+  my ($self,$type)=@_;
+  $self->{'data'}->require_module('association');
+  return($self->dbh->selectall_arrayref($self->statement('getAssociatedType'),
+					{Slice=>{}},$type));
 }
 
 1;

@@ -4316,12 +4316,7 @@ student number &amp; class &amp; subject\\
             <replaceable>project-dir</replaceable></option></term>
 
             <listitem>
-              <para>When using this option, if <option>--cr</option> is not
-              used, <replaceable>project-cr-dir</replaceable> will be set to
-              <filename><replaceable>project-dir</replaceable>/cr</filename>,
-              and if <option>--mep</option> is not used,
-              <replaceable>project-mep-dir</replaceable> will be set to
-              <filename><replaceable>project-dir</replaceable>/mep</filename>.</para>
+              <para>Gives the project directory.</para>
             </listitem>
           </varlistentry>
 
@@ -4448,6 +4443,222 @@ student number &amp; class &amp; subject\\
             </listitem>
           </varlistentry>
         </variablelist>
+      </refsect1>
+    </refentry>
+
+    <refentry>
+      <refmeta>
+        <refentrytitle>AMC-mailing</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+
+        <refmiscinfo class="source">Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
+      </refmeta>
+
+      <refnamediv>
+        <refname>AMC-mailing</refname>
+
+        <refpurpose>mail PDF annotated completed answer sheets to
+        students</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">mailing</arg>
+
+          <arg>--xmlargs <replaceable>args.xml</replaceable></arg>
+
+          <arg choice="plain">--projet
+          <replaceable>project-dir</replaceable></arg>
+
+          <arg choice="plain">--students-list
+          <replaceable>students-list.csv</replaceable></arg>
+
+          <arg>--list-encoding <replaceable>encoding</replaceable></arg>
+
+          <arg choice="plain">--email-column
+          <replaceable>col</replaceable></arg>
+
+          <arg choice="plain">--sender
+          <replaceable>sender-email</replaceable></arg>
+
+          <arg choice="plain">--subject
+          <replaceable>subject</replaceable></arg>
+
+          <arg choice="plain">--text
+          <replaceable>email-body</replaceable></arg>
+
+          <arg>--debug <replaceable>file.log</replaceable></arg>
+
+          <arg rep="repeat"><replaceable>transport
+          arguments</replaceable></arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+        <para>The command <command>AMC-mailing.pl</command> sends by email the
+        PDF annotated completed answer sheets to the students. Email addresses
+        are taken from the students list file.</para>
+
+        <variablelist>
+          <varlistentry>
+            <term><option>--projet
+            <replaceable>project-dir</replaceable></option></term>
+
+            <listitem>
+              <para>Gives the project directory.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--students-list
+            <replaceable>students-list.csv</replaceable></option></term>
+
+            <listitem>
+              <para>sets the students list file name.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--list-encoding
+            <replaceable>encoding</replaceable></option></term>
+
+            <listitem>
+              <para>selects an encoding for file
+              <replaceable>students-list.csv</replaceable> (default is
+              utf-8).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--email-column
+            <replaceable>col</replaceable></option></term>
+
+            <listitem>
+              <para>sets the name of the column containing the email addresses
+              of the students in the students list file.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--sender
+            <replaceable>sender-email</replaceable></option></term>
+
+            <listitem>
+              <para>sets the sender email.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--subject
+            <replaceable>subject</replaceable></option></term>
+
+            <listitem>
+              <para>sets the subject of the emails to send.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--text
+            <replaceable>email-body</replaceable></option></term>
+
+            <listitem>
+              <para>sets the body text of the emails to send.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--transport
+            <replaceable>transport</replaceable></option></term>
+
+            <listitem>
+              <para>sets the transport to use.
+              <replaceable>transport</replaceable> may be
+              <constant>sendmail</constant> or
+              <constant>SMTP</constant>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--debug
+            <replaceable>file.log</replaceable></option></term>
+
+            <listitem>
+              <para>gives a file to fill with debugging information.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </refsect1>
+
+      <refsect1>
+        <title>Transport arguments</title>
+
+        <para>Depending on the value used for argument
+        <replaceable>transport</replaceable>, the following arguments can be
+        added:</para>
+
+        <refsect2>
+          <title>Transport sendmail</title>
+
+          <variablelist>
+            <varlistentry>
+              <term><option>--sendmail-path
+              <replaceable>path</replaceable></option></term>
+
+              <listitem>
+                <para>sets the path to the <command>sendmail</command> command
+                (defaults to <filename>/usr/sbin/sendmail</filename>).</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </refsect2>
+
+        <refsect2>
+          <title>Transport SMTP</title>
+
+          <variablelist>
+            <varlistentry>
+              <term><option>--smtp-host
+              <replaceable>host</replaceable></option></term>
+
+              <listitem>
+                <para>sets the SMTP hostname (defaults to
+                <constant>smtp</constant>).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><option>--smtp-port
+              <replaceable>port</replaceable></option></term>
+
+              <listitem>
+                <para>sets the port to use (default value is 25).</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </refsect2>
+      </refsect1>
+
+      <refsect1>
+        <title>Arguments in a XML file</title>
+
+        <para>To avoid encoding problems, one can place some arguments in a
+        XML file and use the <option>--xmlargs
+        <replaceable>file.xml</replaceable></option> argument as the first
+        command argument. Here is an exemple of such a file:</para>
+
+        <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;arguments&gt;
+  &lt;arg&gt;--sender&lt;/arg&gt;&lt;arg&gt;Bienvenüe &amp;lt;paamc@passoire.fr&amp;gt;&lt;/arg&gt;
+  &lt;arg&gt;--text&lt;/arg&gt;&lt;arg&gt;Voilà votre copie corrigée&lt;/arg&gt;
+  &lt;arg&gt;--subject&lt;/arg&gt;&lt;arg&gt;QCM&lt;/arg&gt;
+&lt;/arguments&gt;</programlisting>
       </refsect1>
     </refentry>
   </sect1>
