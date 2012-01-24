@@ -274,7 +274,7 @@ sub populate_from_xml {
 	  $self->statement('NEWQuestion')
 	    ->execute($student,$question,
 		      ($q->{'multiple'} ? QUESTION_MULT : QUESTION_SIMPLE),
-		      $q->{'indicative'},$q->{'bareme'});
+		      ($q->{'indicative'} ? 1 : 0),$q->{'bareme'});
 
 	  for my $answer (keys %{$q->{'reponse'}}) {
 	    my $a=$q->{'reponse'}->{$answer};

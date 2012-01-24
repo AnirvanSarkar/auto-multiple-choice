@@ -460,6 +460,10 @@ sub export {
     my @questions_1=grep { $self->{'_scoring'}->one_indicative($_->{'question'},1); }
       @questions;
 
+    debug "Questions: ".join(', ',map { $_->{'question'}.'='.$_->{'title'} } @questions);
+    debug "Questions PLAIN: ".join(', ',map { $_->{'title'} } @questions_0);
+    debug "Questions INDIC: ".join(', ',map { $_->{'title'} } @questions_1);
+
     my $nq=$#questions_0+1+$#questions_1+1;
     my $nkeys_compte=1+$#questions_0;
 
