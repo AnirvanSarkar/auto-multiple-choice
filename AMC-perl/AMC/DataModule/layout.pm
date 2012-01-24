@@ -212,6 +212,20 @@ sub populate_from_xml {
 	  }
       $self->progression('end');
     }
+
+    my $scoring_file=$self->{'data'}->directory;
+    $scoring_file =~ s:/[^/]+/?$:/bareme.xml:;
+    if(-f $scoring_file) {
+      my $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
+      my @s=grep { /^[0-9]+$/ } (keys %{$xml->{'etudiant'}});
+      for my $i (@s) {
+	my $student=$xml->{'etudiant'}->{$i};
+	for my $question (keys %{$student->{'question'}}) {
+	  my $q=$student->{'question'}->{$question};
+	  $self->question_name($question,$q->{'titre'});
+	}
+      }
+    }
 }
 
 # defines all the SQL statements that will be used
