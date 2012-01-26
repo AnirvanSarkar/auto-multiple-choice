@@ -24,14 +24,13 @@ use AMC::Basic;
 use AMC::NamesFile;
 use AMC::Data;
 use AMC::DataModule::report ':const';
+use AMC::Gui::Avancement;
 
 use Module::Load;
 
 use Email::MIME;
 use Email::Sender;
 use Email::Sender::Simple qw(sendmail);
-use Email::Sender::Transport::Sendmail;
-use Email::Sender::Transport::SMTP;
 
 my $project_dir='';
 my $data_dir='';
@@ -64,6 +63,8 @@ GetOptions("project=s"=>\$project_dir,
 	   "smtp-host=s"=>\$smtp_host,
 	   "smtp-port=s"=>\$smtp_port,
 	   "debug=s"=>\$debug,
+	   "progression=s"=>\$progress,
+	   "progression-id=s"=>\$progress_id,
 	   );
 
 set_debug($debug);
@@ -84,6 +85,22 @@ error("students list not found:$students_list") if(!-f $students_list);
 my $students=AMC::NamesFile::new($students_list,'encodage'=>$list_encoding);
 
 error("data directory not found: $data_dir") if(!-d $data_dir);
+
+my %ids=();
+if(-f $ids_file) {
+  debug "provided IDS:";
+  open(IDS,$ids_file);
+  while(<IDS>) {
+    chomp;
+    debug "[$_]";
+    $ids{$_}=1;
+  }
+  close(IDS);
+} else {
+  debug "IDS file $ids_file not found";
+}
+
+my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
 my $report=$data->module('report');
@@ -106,8 +123,10 @@ $data->end_transaction('smMN');
 
 my $t;
 if($transport eq 'sendmail') {
+  load Email::Sender::Transport::Sendmail;
   $t=Email::Sender::Transport::Sendmail->new({ sendmail => $sendmail_path });;
 } elsif($transport eq 'SMTP') {
+  load Email::Sender::Transport::SMTP;
   $t=Email::Sender::Transport::SMTP
     ->new({'host'=>$smtp_host,
 	   'port'=>$smtp_port,
@@ -116,10 +135,21 @@ if($transport eq 'sendmail') {
   error("Unknown transport: $transport");
 }
 
-for my $i (@$r) {
+my $nn=1+$#$r;
+if($ids_file) {
+  my @i=(keys %ids);
+  $nn=1+$#i;
+}
+my $delta=($nn>0 ? 1/$nn : 1);
+
+STUDENT: for my $i (@$r) {
   my ($s)=$students->data($key,$i->{'id'});
   my $dest=$s->{$email_column};
   debug "Loop: ID $i->{'id'} DEST [$dest]";
+  if($ids_file && !$ids{$i->{'id'}}) {
+    debug "Skipped";
+    next STUDENT;
+  }
   if($dest) {
     my $file=$pdf_dir.'/'.$i->{'file'};
     debug "  FILE=$file";
@@ -147,16 +177,20 @@ for my $i (@$r) {
 			    ),
 	);
 
-         my $email = Email::MIME->create(
-             header_str => [ From=>$sender, To=>$s->{_ID_}." <$dest>",
-			     Subject=>$subject ],
-             parts      => [ @parts ],
-         );
+      my $email = Email::MIME
+	->create(header_str => [ From=>$sender, To=>$dest,
+				 Subject=>$subject ],
+		 parts      => [ @parts ],
+		);
       my $b=eval { sendmail($email,{'transport'=>$t}); } || $@;
       if($b) {
-	my $status=($b->isa('Email::Sender::Failure') ? "FAIL" : "OK");
-	my $m=$b->message;
-	$m =~ s/[\n\r]+/ | /g;
+	my $status='OK';
+	my $m='';
+	if($b->isa('Email::Sender::Failure')) {
+	  $status='FAILED';
+	  $m=$b->message;
+	  $m =~ s/[\n\r]+/ | /g;
+	}
 	print "$status [$i->{'id'}] $m\n";
 	debug "$status [$i->{'id'}] $m";
       } else {
@@ -169,4 +203,8 @@ for my $i (@$r) {
   } else {
     debug "No dest";
   }
+  $avance->progres($delta);
 }
+
+$avance->fin();
+

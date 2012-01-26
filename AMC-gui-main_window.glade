@@ -29,6 +29,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-info</property>
   </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">amc-send</property>
+  </object>
   <object class="GtkImage" id="image20">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -2599,6 +2604,35 @@
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
                                 <property name="position">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkHButtonBox" id="buttonbox3">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="layout_style">end</property>
+                                <child>
+                                  <object class="GtkButton" id="button11">
+                                    <property name="label" translatable="yes">Send...</property>
+                                    <property name="use_action_appearance">False</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="use_action_appearance">False</property>
+                                    <property name="image">image2</property>
+                                    <signal name="clicked" handler="send_emails" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">6</property>
                               </packing>
                             </child>
                           </object>

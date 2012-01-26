@@ -170,6 +170,11 @@ sub get_output {
 	  if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
 	    $self->{'variables'}->{$1}=$2;
 	  }
+	  for my $k (qw/OK FAILED/) {
+	    if($line =~ /^$k/) {
+	      $self->{'variables'}->{$k}++;
+	    }
+	  }
 	}
 
 

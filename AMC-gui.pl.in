@@ -44,6 +44,7 @@ use AMC::Basic;
 use AMC::State;
 use AMC::Data;
 use AMC::DataModule::capture ':zone';
+use AMC::DataModule::report ':const';
 use AMC::Scoring;
 use AMC::Gui::Manuel;
 use AMC::Gui::Association;
@@ -96,6 +97,11 @@ use constant {
 
     TEMPLATE_FILES_PATH => 0,
     TEMPLATE_FILES_FILE => 1,
+
+    EMAILS_SC => 0,
+    EMAILS_NAME => 1,
+    EMAILS_EMAIL => 2,
+    EMAILS_ID => 3,
 };
 
 Gtk2::IconTheme->get_default->prepend_search_path(amc_specdir('icons'));
@@ -242,6 +248,16 @@ my %o_defaut=('pdf_viewer'=>['commande',
 
 	      'zoom_window_height'=>400,
 	      'zoom_window_factor'=>1.0,
+
+	      'email_sender'=>'',
+	      'email_transport'=>'sendmail',
+	      'email_sendmail_path'=>['commande',
+				      '/usr/sbin/sendmail','/usr/bin/sendmail',
+				      '/sbin/sendmail','/bin/sendmail'],
+	      'email_smtp_host'=>'smtp',
+	      'email_smtp_port'=>25,
+	      'defaut_email_subject'=>__"Exam result",
+	      'defaut_email_text'=>__"Please find enclosed your annotated completed answer sheet.\nRegards.",
 	      );
 
 # MacOSX universal command to open files or directories : /usr/bin/open
@@ -308,6 +324,10 @@ my %projet_defaut=('texsrc'=>'',
 		   'export_sort'=>'n',
 
 		   'auto_capture_mode'=>-1,
+
+		   'email_col'=>'',
+		   'email_subject'=>"",
+		   'email_text'=>"",
 		   );
 
 my $an_saved='an.storable';
@@ -808,6 +828,14 @@ my $inconnu_store = Gtk2::ListStore->new ('Glib::String','Glib::String',
 
 $inconnu_store->set_sort_column_id(INCONNU_TIME_N,GTK_SORT_ASCENDING);
 
+### modele EMAILS
+
+my $emails_store=Gtk2::ListStore->new ('Glib::String',
+				       'Glib::String',
+				       'Glib::String',
+				       'Glib::String',
+				      );
+
 ### modele CORREC
 
 my $correc_store = Gtk2::ListStore->new ('Glib::String',
@@ -1001,7 +1029,9 @@ my %cb_stores=(
     ),
     'auto_capture_mode'=>cb_model(-1=>__"Please select...",
 				  0=>__"Different answer sheets",
-				  1=>__"Some answer sheets were photocopied")
+				  1=>__"Some answer sheets were photocopied"),
+    'email_transport'=>cb_model('sendmail'=>__"sendmail",
+				'SMTP'=>__"SMTP"),
     );
 
 
@@ -3655,7 +3685,7 @@ sub change_methode_impression {
 
 sub edit_preferences {
     my $gap=read_glade('edit_preferences',
-		       qw/pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree/);
+		       qw/pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree email_group_sendmail email_group_SMTP/);
 
     $w{'edit_preferences_manager'}=$gap;
 
@@ -4938,7 +4968,7 @@ sub valide_projet {
 
     $projet{'_data'}=AMC::Data->new(absolu($projet{'options'}->{'data'}),
 				    'progress'=>\%w);
-    for (qw/layout capture scoring association/) {
+    for (qw/layout capture scoring association report/) {
       $projet{'_'.$_}=$projet{'_data'}->module($_);
     }
 
@@ -5131,11 +5161,260 @@ sub bug_report {
     $dialog->destroy;
 }
 
-if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
-    $w{'main_window'}->resize($o{'taille_x_main'},$o{'taille_y_main'});
+#######################################
+
+sub pref_change_delivery {
+  my %oo=('email_transport'=>'');
+  reprend_pref('pref',\%oo);
+  for my $k (qw/sendmail SMTP/) {
+    $w{'email_group_'.$k}->set_sensitive($k eq $oo{'email_transport'});
+  }
+}
+
+my $email_sl;
+my $email_key;
+my $email_r;
+
+sub send_emails {
+  # First of all: check perl modules availibility
+
+  my @needs_module=(qw/Email::Address Email::MIME
+		       Email::Sender Email::Sender::Simple/);
+  if($o{'email_transport'} eq 'sendmail') {
+    push @needs_module,'Email::Sender::Transport::Sendmail';
+  } elsif($o{'email_transport'} eq 'SMTP') {
+    push @needs_module,'Email::Sender::Transport::SMTP';
+  }
+  my @manque=();
+  for my $m (@needs_module) {
+    if(!check_install(module=>$m)) {
+      push @manque,$m;
+    }
+  }
+  if(@manque) {
+    debug 'Mailing: Needs perl modules '.join(', ',@manque);
+
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'error','ok',
+			sprintf(__("Sending emails requires some perl modules that are not installed: %s. Please install these modules and try again."),
+			'<b>'.join(', ',@manque).'</b>')
+		       );
+    $dialog->run;
+    $dialog->destroy;
+
+    return();
+  }
+
+  load Email::Address;
+
+  # then check a correct sender address has been set
+
+  my @sa=Email::Address->parse($o{'email_sender'});
+
+  if(!@sa) {
+    my $message;
+    if($o{'email_sender'}) {
+      $message.=sprintf(__("The email address you entered (%s) is not correct."),
+			$o{'email_sender'}).
+	"\n".__"Please edit your preferencies to correct your email address.";
+    } else {
+      $message.=__("You did not enter your email address.").
+	"\n".__"Please edit the preferencies to set your email address.";
+    }
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'error','ok',$message);
+    $dialog->run;
+    $dialog->destroy;
+
+    return();
+  }
+
+  # Now check (if applicable) that sendmail path is ok
+
+  if($o{'email_transport'} eq 'sendmail'
+     && $o{'email_sendmail_path'}
+     && !-f $o{'email_sendmail_path'}) {
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'error','ok',sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferencies (%s). Please update your configuration."),$o{'email_sendmail_path'}));
+    $dialog->run;
+    $dialog->destroy;
+
+    return();
+  }
+
+  #
+
+  my $fl=absolu($projet{'options'}->{'listeetudiants'});
+  $email_sl=AMC::NamesFile::new($fl,
+				'encodage'=>bon_encodage('liste'),
+			       );
+  my ($err,$errlig)=$email_sl->errors();
+
+  # find columns with emails in the students list file
+
+  my %cols_email=$email_sl
+    ->heads_count(sub { my @a=Email::Address->parse(@_);return(@a) });
+  my @cols=grep { $cols_email{$_}>0 } (keys %cols_email);
+  $cb_stores{'email_col'}=
+    cb_model(map { $_=>$_ } (@cols));
+
+  if(!@cols) {
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'error','ok',
+		       __"No email addresses has been found in the students list file. You need to write the students addresses in a column of this file.");
+    $dialog->run;
+    $dialog->destroy;
+
+    return();
+  }
+
+  # which is the best column ?
+
+  my $nmax=0;
+  my $col_max='';
+
+  for(@cols) {
+    if($cols_email{$_}>$nmax) {
+      $nmax=$cols_email{$_};
+      $col_max=$_;
+    }
+  }
+
+  $projet{'options'}->{'email_col'}=$col_max
+    if(!$projet{'options'}->{'email_col'});
+
+  # Then, open configuration window...
+  my $gap=read_glade('mailing',
+		     qw/emails_list email_dialog/);
+
+
+  $w{'emails_list'}->set_model($emails_store);
+  $renderer=Gtk2::CellRendererText->new;
+  $column = Gtk2::TreeViewColumn->new_with_attributes (__"copy",
+						       $renderer,
+						       text=> EMAILS_SC);
+  $w{'emails_list'}->append_column ($column);
+  $renderer=Gtk2::CellRendererText->new;
+  $column = Gtk2::TreeViewColumn->new_with_attributes (__"name",
+						       $renderer,
+						       text=> EMAILS_NAME);
+  $w{'emails_list'}->append_column ($column);
+  $renderer=Gtk2::CellRendererText->new;
+  $column = Gtk2::TreeViewColumn->new_with_attributes (__"email",
+						       $renderer,
+						       text=> EMAILS_EMAIL);
+  $w{'emails_list'}->append_column ($column);
+
+  $projet{'_report'}->begin_read_transaction('emCC');
+  $email_key=$projet{'_association'}->variable('key_in_list');
+  $email_r=$projet{'_report'}->get_associated_type(REPORT_ANNOTATED_PDF);
+
+  for my $i (@$email_r) {
+    my ($s)=$email_sl->data($email_key,$i->{'id'});
+    $emails_store->set($emails_store->append,
+		       EMAILS_ID,$i->{'id'},
+		       EMAILS_EMAIL,'',
+		       EMAILS_NAME,$s->{'_ID_'},
+		       EMAILS_SC,pageids_string($projet{'_association'}->real_back($i->{'id'})),
+		       );
+  }
+
+  $projet{'_report'}->end_transaction('emCC');
+
+  $w{'emails_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+  $w{'emails_list'}->get_selection->select_all;
+
+  transmet_pref($gap,'email',$projet{'options'});
+  my $resp=$w{'email_dialog'}->run;
+  my @ids=();
+  if($resp==1) {
+    reprend_pref('email',$projet{'options'});
+    # get selection
+    my @selected=$w{'emails_list'}->get_selection->get_selected_rows;
+    for my $i (@selected) {
+      my $iter=$emails_store->get_iter($i);
+      push @ids,$emails_store->get($iter,EMAILS_ID);
+    }
+  }
+  $w{'email_dialog'}->destroy;
+
+  if($resp==1) {
+    # writes the list of copies to send in a temporary file
+    my $fh=File::Temp->new(TEMPLATE => "ids-XXXXXX",
+			   TMPDIR => 1,
+			   UNLINK=> 1);
+    print $fh join("\n",@ids)."\n";
+    $fh->seek( 0, SEEK_END );
+
+    commande('commande'=>["auto-multiple-choice","mailing",
+			  pack_args("--project",absolu('%PROJET/'),
+				    "--students-list",absolu($projet{'options'}->{'listeetudiants'}),
+				    "--list-encoding",bon_encodage('liste'),
+				    "--ids-file",$fh->filename,
+				    "--email-column",$projet{'options'}->{'email_col'},
+				    "--sender",$o{'email_sender'},
+				    "--subject",$projet{'options'}->{'email_subject'},
+				    "--text",$projet{'options'}->{'email_text'},
+				    "--transport",$o{'email_transport'},
+				    "--sendmail-path",$o{'email_sendmail_path'},
+				    "--smtp-host",$o{'email_smtp_host'},
+				    "--smtp-port",$o{'email_smtp_port'},
+				    "--debug",debug_file(),
+				    "--progression-id",'mailing',
+				    "--progression",1,
+				   ),
+			 ],
+	     'progres.id'=>'mailing',
+	     'texte'=>__"Sending emails...",
+	     'o'=>{'fh'=>$fh},
+	     'fin'=>sub {
+	       my $c=shift;
+	       close($c->{'o'}->{'fh'});
+
+	       my $ok=$c->variable('OK');
+	       my $failed=$c->variable('FAILED');
+	       my @message;
+	       push @message,sprintf(__"%d message(s) has been sent.",$ok);
+	       if($failed>0) {
+		 push @message,"<b>".sprintf("%d message(s) could not be sent.",$failed)."</b>";
+	       }
+	       my $dialog = Gtk2::MessageDialog
+		 ->new_with_markup($w{'main_window'},
+				   'destroy-with-parent',
+				   ($failed>0 ? 'warning' : 'info'),'ok',
+				   join("\n",@message));
+	       $dialog->run;
+	       $dialog->destroy;
+	     },
+	    );
+  }
+}
+
+sub email_change_col {
+  my %oo=('email_col'=>'');
+  reprend_pref('email',\%oo);
+
+  my $i=$emails_store->get_iter_first;
+  while(defined($i)) {
+    my ($s)=$email_sl->data($email_key,$emails_store->get($i,EMAILS_ID));
+    $emails_store->set($i,EMAILS_EMAIL,$s->{$oo{'email_col'}});
+    $i=$emails_store->iter_next($i);
+  }
 }
 
 ###
+
+if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
+    $w{'main_window'}->resize($o{'taille_x_main'},$o{'taille_y_main'});
+}
 
 projet_ouvre($ARGV[0]);
 

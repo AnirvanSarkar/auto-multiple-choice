@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -229,6 +229,17 @@ sub taille {
 sub heads { # entetes
     my ($self)=@_;
     return(@{$self->{'heads'}});
+}
+
+sub heads_count {
+  my ($self,$check)=@_;
+  my %h=map { $_=>0 } ($self->heads());
+  for my $n (@{$self->{'noms'}}) {
+    for my $k (keys %h) {
+      $h{$k}++ if(&$check($n->{$k}));
+    }
+  }
+  return(%h);
 }
 
 sub keys { # entetes qui peuvent servir de cle unique
