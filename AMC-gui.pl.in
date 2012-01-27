@@ -5343,6 +5343,7 @@ sub send_emails {
   $email_key=$projet{'_association'}->variable('key_in_list');
   $email_r=$projet{'_report'}->get_associated_type(REPORT_ANNOTATED_PDF);
 
+  $emails_store->clear;
   for my $i (@$email_r) {
     my ($s)=$email_sl->data($email_key,$i->{'id'});
     $emails_store->set($emails_store->append,
