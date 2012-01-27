@@ -21,7 +21,6 @@
 use Getopt::Long;
 use Encode;
 use Unicode::Normalize;
-use XML::Simple;
 
 use AMC::Basic;
 use AMC::Exec;
