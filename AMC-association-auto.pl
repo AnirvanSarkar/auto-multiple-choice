@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -19,11 +19,9 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
-use XML::Simple;
 use AMC::Basic;
 use AMC::NamesFile;
 use AMC::Data;
-use Data::Dumper;
 
 my $notes_id='';
 my $liste_file='';
