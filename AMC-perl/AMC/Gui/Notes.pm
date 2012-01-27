@@ -23,7 +23,6 @@ package AMC::Gui::Notes;
 use AMC::Basic;
 
 use Encode;
-use XML::Simple;
 
 use Gtk2 -init;
 
