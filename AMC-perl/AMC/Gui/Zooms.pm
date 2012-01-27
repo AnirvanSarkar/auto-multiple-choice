@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -24,8 +24,6 @@ use AMC::Basic;
 use AMC::DataModule::capture ':zone';
 
 use Gtk2 -init;
-
-use XML::Simple;
 
 use POSIX qw(ceil);
 
