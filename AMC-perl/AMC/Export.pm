@@ -23,9 +23,6 @@ use AMC::Basic;
 use AMC::Data;
 use AMC::NamesFile;
 
-use Data::Dumper;
-use XML::Simple;
-
 use_gettext;
 
 sub new {
