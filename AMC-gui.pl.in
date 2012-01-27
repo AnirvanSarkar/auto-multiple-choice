@@ -3120,7 +3120,7 @@ sub noter {
 		 'fin'=>\&noter_postcorrect,
 		 'progres.id'=>'bareme');
     } else {
-	noter_calcul();
+	noter_calcul('','');
     }
 }
 
@@ -3178,7 +3178,7 @@ sub noter_postcorrect {
 	}
 
     } else {
-	noter_calcul();
+	noter_calcul('','');
     }
 }
 
@@ -3272,8 +3272,8 @@ sub noter_calcul {
 
     my ($postcorrect_student,$postcorrect_copy)=@_;
 
-    debug "Using sheet $postcorrect to get correct answers"
-	if($postcorrect);
+    debug "Using sheet $postcorrect_student:$postcorrect_copy to get correct answers"
+	if($postcorrect_student);
 
     # computes marks.
 

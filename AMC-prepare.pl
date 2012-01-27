@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -20,15 +20,11 @@
 
 use encoding "utf-8";
 
-use XML::Simple;
 use File::Copy;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
-use Data::Dumper;
-use Getopt::Long;
 
-use IO::File;
-use XML::Writer;
+use Getopt::Long;
 
 use AMC::Basic;
 use AMC::Gui::Avancement;
