@@ -27,9 +27,6 @@ use AMC::DataModule::capture ':zone';
 use AMC::NamesFile;
 
 use Getopt::Long;
-use XML::Writer;
-use IO::File;
-use Encode;
 
 use POSIX;
 use Gtk2 -init;
