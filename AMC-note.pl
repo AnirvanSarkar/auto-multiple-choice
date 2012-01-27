@@ -18,9 +18,6 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-use XML::Simple;
-use IO::File;
-use XML::Writer;
 use Getopt::Long;
 use POSIX qw(ceil floor);
 use AMC::Basic;
