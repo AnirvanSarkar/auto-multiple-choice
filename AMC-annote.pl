@@ -18,9 +18,7 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-use XML::Simple;
 use Getopt::Long;
-use Data::Dumper;
 
 use Gtk2;
 use Cairo;
