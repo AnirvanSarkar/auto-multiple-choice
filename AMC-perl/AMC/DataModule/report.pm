@@ -94,6 +94,8 @@ sub define_statements {
 		      ." VALUES(?,?)"},
      'getDir'=>{'sql'=>"SELECT directory FROM $t_directory"
 		." WHERE type=?"},
+     'numType'=>{'sql'=>"SELECT COUNT(*) FROM $t_student"
+		 ." WHERE type=?"},
      'filesWithType'=>
      {'sql'=>"SELECT file FROM $t_student"
       ." WHERE type IN"
@@ -197,6 +199,14 @@ sub get_associated_type {
   $self->{'data'}->require_module('association');
   return($self->dbh->selectall_arrayref($self->statement('getAssociatedType'),
 					{Slice=>{}},$type));
+}
+
+# type_count($type) returns the number of recorded reports of type
+# $type.
+
+sub type_count {
+  my ($self,$type)=@_;
+  return($self->sql_single($self->statement('numType'),$type));
 }
 
 1;

@@ -5176,7 +5176,32 @@ my $email_key;
 my $email_r;
 
 sub send_emails {
-  # First of all: check perl modules availibility
+
+  # are there some annotated answer sheets to send?
+
+  $projet{'_report'}->begin_read_transaction('emNU');
+  my $n=$projet{'_report'}->type_count(REPORT_ANNOTATED_PDF);
+  my $n_annotated=$projet{'_capture'}->annotated_count();
+  $projet{'_report'}->end_transaction('emNU');
+
+  if($n==0) {
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'error','ok',
+			__("There are no annotated corrected answer sheets to send.")
+			." "
+			.($n_annotated>0 ?
+			  __("Please group the annotated sheets to PDF files to be able to send them.") :
+			  __("Please annotate answer sheets and group them to PDF files to be able to send them.") )
+		       );
+    $dialog->run;
+    $dialog->destroy;
+
+    return();
+  }
+
+  # check perl modules availibility
 
   my @needs_module=(qw/Email::Address Email::MIME
 		       Email::Sender Email::Sender::Simple/);

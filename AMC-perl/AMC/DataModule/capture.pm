@@ -484,6 +484,8 @@ sub define_statements {
 			  ." FROM $t_page"
 			  ." WHERE timestamp_annotate>0"
 			  ." AND student=? AND page=? AND copy=?"},
+     'annotatedCount'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
+			." WHERE timestamp_annotate>0 AND annotated NOT NULL"},
      'getScanPage'=>{'sql'=>"SELECT src"
 			  ." FROM $t_page"
 			  ." WHERE student=? AND page=? AND copy=?"},
@@ -905,6 +907,13 @@ sub get_annotated_page {
   my $f=$self->sql_single($self->statement('getAnnotatedPage'),
 			  $student,$page,$copy);
   return($f);
+}
+
+# annotated_count() returns the number of annotated sheets.
+
+sub annotated_count {
+  my ($self)=@_;
+  return($self->sql_single($self->statement('annotatedCount')));
 }
 
 # get_scan_page($student,$page,$copy) returns the scan image
