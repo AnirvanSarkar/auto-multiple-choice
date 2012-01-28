@@ -134,6 +134,7 @@ sub pre_process {
 	    {'student'=>'',
 	     'copy'=>'',
 	     'abs'=>1,
+	     'key'=>$name->{$lk},
 	     'mark'=>$self->{'noms.abs'},
 	     'student.name'=>$name->{'_ID_'},
 	     'student.line'=>$name->{'_LINE_'},
