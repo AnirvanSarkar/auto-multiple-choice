@@ -133,6 +133,7 @@ sub pre_process {
 	  push @marks,
 	    {'student'=>'',
 	     'copy'=>'',
+	     'sc'=>'',
 	     'abs'=>1,
 	     'student.key'=>$name->{$lk},
 	     'mark'=>$self->{'noms.abs'},

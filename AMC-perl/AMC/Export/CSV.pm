@@ -34,7 +34,7 @@ sub new {
     $self->{'out.decimal'}=",";
     $self->{'out.entoure'}="\"";
     $self->{'out.ticked'}="";
-    $self->{'out.columns'}='student.key,student.name';
+    $self->{'out.columns'}='sc,student.key,student.name';
     bless ($self, $class);
     return $self;
 }
@@ -86,12 +86,14 @@ sub export {
 	push @columns,"A:".encode('utf-8',$lk);
       } elsif($c eq 'student.name') {
 	push @columns,translate_column_title('nom');
+      } elsif($c eq 'sc') {
+	push @columns,translate_column_title('copie');
       } else {
 	push @columns,encode('utf-8',$c);
       }
     }
 
-    push @columns,map { translate_column_title($_); } ("note","copie");
+    push @columns,map { translate_column_title($_); } ("note");
 
     my @questions=$self->{'_scoring'}->questions;
     my @codes=$self->{'_scoring'}->codes;
@@ -118,7 +120,7 @@ sub export {
 					  $m->{'student.all'}->{$c});
       }
 
-      push @columns,$self->parse_num($m->{'mark'}),$self->parse_string($m->{'sc'});
+      push @columns,$self->parse_num($m->{'mark'});
 
       for my $q (@questions) {
 	push @columns,$self->{'_scoring'}->question_score(@sc,$q->{'question'});

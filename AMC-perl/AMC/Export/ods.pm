@@ -132,7 +132,7 @@ my %largeurs=(qw/ASSOC 4cm
 my %style_col=(qw/student.key CodeA
 	       NOM Tableau
 	       NOTE NoteF
-	       ID NumCopie
+	       sc NumCopie
 	       TOTAL NoteQ
 	       MAX NoteQ
 	       HEAD Tableau
@@ -507,16 +507,18 @@ sub export {
 
     $ii=$x0;
     for(@student_columns,
-	qw/note copie total max/) {
+	qw/note total max/) {
 	$doc->columnStyle($feuille,$ii,"col.".($col_styles{$_} ? $_ : 'heads'));
 	$doc->cellStyle($feuille,$y0,$ii,'Entete');
-	if($_ eq 'student.key') {
-	    $doc->cellValue($feuille,$y0,$ii,"A:".encode('utf-8',$lk));
-	} else {
-	    $doc->cellValue($feuille,$y0,$ii,
-			    encode('utf-8',translate_column_title($_ eq 'student.name' ? 'nom' : $_)));
-	}
+
 	$code_col{$_}=$ii;
+	my $name=$_;
+	$name="A:".encode('utf-8',$lk) if($name eq 'student.key');
+	$name=translate_column_title('nom') if($name eq 'student.name');
+	$name=translate_column_title('copie') if($name eq 'sc');
+	$doc->cellValue($feuille,$y0,$ii,
+			encode('utf-8',$name));
+
 	$ii++;
       }
 
@@ -543,8 +545,9 @@ sub export {
 
     $jj++;
 
-    $doc->cellStyle($feuille,$jj,$code_col{'copie'},'Tableau');
-    $doc->cellValue($feuille,$jj,$code_col{'copie'},translate_id_name('max'));
+    $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
+    $doc->cellStyle($feuille,$jj,$code_col{'total'},'Tableau');
+    $doc->cellValue($feuille,$jj,$code_col{'total'},translate_id_name('max'));
 
     $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
     $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
@@ -568,8 +571,9 @@ sub export {
 
     $jj++;
 
-    $doc->cellStyle($feuille,$jj,$code_col{'copie'},'Tableau');
-    $doc->cellValue($feuille,$jj,$code_col{'copie'},translate_id_name('moyenne'));
+    $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
+    $doc->cellStyle($feuille,$jj,$code_col{'total'},'Tableau');
+    $doc->cellValue($feuille,$jj,$code_col{'total'},translate_id_name('moyenne'));
     $code_row{'average'}=$jj;
 
     ##########################################################################
@@ -635,8 +639,6 @@ sub export {
 	}
 	$ii++;
 
-	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},
-		 'ID',$m->{'sc'});
 	$ii++; # see later for SUM column value...
 	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},
 		 'MAX',$m->{'max'},'numeric'=>1);
