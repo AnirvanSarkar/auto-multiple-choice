@@ -124,7 +124,7 @@ sub subrow_condensed {
 my %largeurs=(qw/ASSOC 4cm
 	      note 1.5cm
 	      nom 5cm
-	      copie 1.75cm
+	      sc 1.75cm
 	      total 1.2cm
 	      max 1cm
 	      heads 3cm/);
