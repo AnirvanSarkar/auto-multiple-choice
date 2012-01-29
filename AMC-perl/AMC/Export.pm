@@ -35,7 +35,6 @@ sub new {
 
 	'noms.encodage'=>'',
 	'noms.separateur'=>'',
-	'noms.identifiant'=>'',
 	'noms.useall'=>1,
 	'noms.abs'=>'ABS',
 

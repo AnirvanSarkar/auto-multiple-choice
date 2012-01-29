@@ -35,7 +35,6 @@ my $fich_notes='';
 my $fich_assoc='';
 my $fich_noms='';
 my $noms_encodage='utf-8';
-my $noms_identifiant='';
 my @o_out=();
 my $debug='';
 my $sort='n';
@@ -51,7 +50,6 @@ GetOptions("module=s"=>\$module,
 	   "data=s"=>\$data_dir,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
-	   "noms-identifiant=s"=>\$noms_identifiant,
 	   "rtl!"=>\$rtl,
 	   "option-out=s"=>\@o_out,
 	   "output|o=s"=>\$output,
@@ -81,7 +79,6 @@ $ex->set_options("fich",
 
 $ex->set_options("noms",
 		 "encodage"=>$noms_encodage,
-		 "identifiant"=>$noms_identifiant,
 		 "useall"=>$useall,
 		 );
 
