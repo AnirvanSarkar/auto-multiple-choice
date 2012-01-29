@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -32,6 +32,7 @@ sub new {
     my $self  = $class->SUPER::new();
     $self->{'out.nom'}="";
     $self->{'out.code'}="";
+    $self->{'out.columns'}='student.key,student.name';
     bless ($self, $class);
     return $self;
 }
@@ -125,14 +126,16 @@ my %largeurs=(qw/ASSOC 4cm
 	      nom 5cm
 	      copie 1.75cm
 	      total 1.2cm
-	      max 1cm/);
+	      max 1cm
+	      heads 3cm/);
 
-my %style_col=(qw/ASSOC CodeA
+my %style_col=(qw/student.key CodeA
 	       NOM Tableau
 	       NOTE NoteF
 	       ID NumCopie
 	       TOTAL NoteQ
 	       MAX NoteQ
+	       HEAD Tableau
 	       /);
 my %style_col_abs=(qw/NOTE Tableau
 	       ID NoteX
@@ -153,7 +156,7 @@ sub set_cell {
     if($oo{'numeric'} && !$abs);
   $doc->cellStyle($feuille,$jj,$ii,
 		  ($abs && $style_col_abs{$x}
-		   ? $style_col_abs{$x} : $style_col{$x}));
+		   ? $style_col_abs{$x} : ($style_col{$x} ? $style_col{$x} : $style_col{'HEAD'})));
   if($oo{'formula'}) {
     $doc->cellFormula($feuille,$jj,$ii,$oo{'formula'});
   } else {
@@ -201,6 +204,8 @@ sub export {
 			    part		=> 'styles',
 			    );
 
+    my %col_styles=();
+
     $doc->createStyle('col.notes',
 		      family=>'table-column',
 		      properties=>{
@@ -208,6 +213,7 @@ sub export {
 			  'column-width' => "1cm",
 		      },
 		      );
+    $col_styles{'notes'}=1;
 
     for(keys %largeurs) {
 	$doc->createStyle('col.'.$_,
@@ -217,6 +223,7 @@ sub export {
 			      'column-width' => $largeurs{$_},
 			  },
 			  );
+	$col_styles{$_}=1;
     }
 
     $styles->createStyle('DeuxDecimales',
@@ -450,6 +457,7 @@ sub export {
 			 },
 			 );
 
+    my @student_columns=split(/,+/,$self->{'out.columns'});
 
     my @codes=$self->{'_scoring'}->codes;
     my $codes_re="(".join("|",map { "\Q$_\E" } @codes).")";
@@ -498,19 +506,19 @@ sub export {
     ##########################################################################
 
     $ii=$x0;
-    for(($lk ? 'ASSOC' : ()),
-	qw/nom note copie total max/) {
-	$doc->columnStyle($feuille,$ii,"col.$_");
+    for(@student_columns,
+	qw/note copie total max/) {
+	$doc->columnStyle($feuille,$ii,"col.".($col_styles{$_} ? $_ : 'heads'));
 	$doc->cellStyle($feuille,$y0,$ii,'Entete');
-	if($_ eq 'ASSOC') {
+	if($_ eq 'student.key') {
 	    $doc->cellValue($feuille,$y0,$ii,"A:".encode('utf-8',$lk));
 	} else {
 	    $doc->cellValue($feuille,$y0,$ii,
-			    encode('utf-8',translate_column_title($_)));
+			    encode('utf-8',translate_column_title($_ eq 'student.name' ? 'nom' : $_)));
 	}
 	$code_col{$_}=$ii;
 	$ii++;
-    }
+      }
 
     $x1=$ii;
 
@@ -535,8 +543,8 @@ sub export {
 
     $jj++;
 
-    $doc->cellStyle($feuille,$jj,$code_col{'nom'},'Tableau');
-    $doc->cellValue($feuille,$jj,$code_col{'nom'},translate_id_name('max'));
+    $doc->cellStyle($feuille,$jj,$code_col{'copie'},'Tableau');
+    $doc->cellValue($feuille,$jj,$code_col{'copie'},translate_id_name('max'));
 
     $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
     $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
@@ -560,8 +568,8 @@ sub export {
 
     $jj++;
 
-    $doc->cellStyle($feuille,$jj,$code_col{'nom'},'Tableau');
-    $doc->cellValue($feuille,$jj,$code_col{'nom'},translate_id_name('moyenne'));
+    $doc->cellStyle($feuille,$jj,$code_col{'copie'},'Tableau');
+    $doc->cellValue($feuille,$jj,$code_col{'copie'},translate_id_name('moyenne'));
     $code_row{'average'}=$jj;
 
     ##########################################################################
@@ -595,10 +603,11 @@ sub export {
 
 	$ii=$x0;
 
-	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},'ASSOC',$m->{'key'},'utf8'=>1)
-	  if($lk);
-	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},
-		 'NOM',$m->{'student.name'},'utf8'=>1);
+	for(@student_columns) {
+	  set_cell($doc,$feuille,$jj,$ii++,
+		   $m->{'abs'},$_,
+		   ($m->{$_} ? $m->{$_} : $m->{'student.all'}->{$_}),'utf8'=>1);
+	}
 
 	if($m->{'abs'}) {
 	  set_cell($doc,$feuille,$jj,$ii,1,

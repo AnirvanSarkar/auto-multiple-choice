@@ -22,6 +22,8 @@ package AMC::Export::CSV;
 use AMC::Basic;
 use AMC::Export;
 
+use Encode;
+
 @ISA=("AMC::Export");
 
 sub new {
@@ -32,6 +34,7 @@ sub new {
     $self->{'out.decimal'}=",";
     $self->{'out.entoure'}="\"";
     $self->{'out.ticked'}="";
+    $self->{'out.columns'}='student.key,student.name';
     bless ($self, $class);
     return $self;
 }
@@ -74,9 +77,21 @@ sub export {
     my $dt=$self->{'_scoring'}->variable('darkness_threshold');
     my $lk=$self->{'_assoc'}->variable('key_in_list');
 
-    my @columns=("A:$lk");
+    my @student_columns=split(/,+/,$self->{'out.columns'});
 
-    push @columns,map { translate_column_title($_); } ("nom","note","copie");
+    my @columns=();
+
+    for my $c (@student_columns) {
+      if($c eq 'student.key') {
+	push @columns,"A:".encode('utf-8',$lk);
+      } elsif($c eq 'student.name') {
+	push @columns,translate_column_title('nom');
+      } else {
+	push @columns,encode('utf-8',$c);
+      }
+    }
+
+    push @columns,map { translate_column_title($_); } ("note","copie");
 
     my @questions=$self->{'_scoring'}->questions;
     my @codes=$self->{'_scoring'}->codes;
@@ -95,11 +110,15 @@ sub export {
     for my $m (@{$self->{'marks'}}) {
       my @sc=($m->{'student'},$m->{'copy'});
 
-      @columns=($self->parse_string($m->{'key'}),
-		$self->parse_string($m->{'student.name'}),
-		$self->parse_num($m->{'mark'}),
-		$self->parse_string($m->{'sc'})
-		);
+      @columns=();
+
+      for my $c (@student_columns) {
+	push @columns,$self->parse_string($m->{$c} ?
+					  $m->{$c} :
+					  $m->{'student.all'}->{$c});
+      }
+
+      push @columns,$self->parse_num($m->{'mark'}),$self->parse_string($m->{'sc'});
 
       for my $q (@questions) {
 	push @columns,$self->{'_scoring'}->question_score(@sc,$q->{'question'});

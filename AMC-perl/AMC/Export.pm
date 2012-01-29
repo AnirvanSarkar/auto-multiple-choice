@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -107,11 +107,11 @@ sub pre_process {
       $m->{'sc'}=studentids_string($m->{'student'},$m->{'copy'});
 
       # Association key for this sheet
-      $m->{'key'}=$self->{'_assoc'}->get_real($m->{'student'},$m->{'copy'});
-      $keys{$m->{'key'}}=1;
+      $m->{'student.key'}=$self->{'_assoc'}->get_real($m->{'student'},$m->{'copy'});
+      $keys{$m->{'student.key'}}=1;
 
       # find the corresponding name
-      my ($n)=$self->{'noms'}->data($lk,$m->{'key'});
+      my ($n)=$self->{'noms'}->data($lk,$m->{'student.key'});
       if($n) {
 	$m->{'student.name'}=$n->{'_ID_'};
 	$m->{'student.line'}=$n->{'_LINE_'};
@@ -134,7 +134,7 @@ sub pre_process {
 	    {'student'=>'',
 	     'copy'=>'',
 	     'abs'=>1,
-	     'key'=>$name->{$lk},
+	     'student.key'=>$name->{$lk},
 	     'mark'=>$self->{'noms.abs'},
 	     'student.name'=>$name->{'_ID_'},
 	     'student.line'=>$name->{'_LINE_'},
