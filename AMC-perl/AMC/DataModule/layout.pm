@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -288,13 +288,15 @@ sub define_statements {
        'DEFECT_NO_BOX'=>
        {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
-	." WHERE NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local"
-	." WHERE local.student=list.student)"},
+	." WHERE student>0 AND"
+	."   NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local"
+	."              WHERE local.student=list.student)"},
        'DEFECT_NO_NAME'=>
        {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
-	." WHERE NOT EXISTS(SELECT * FROM ".$self->table("namefield")." AS local"
-	." WHERE local.student=list.student)"},
+	." WHERE student>0 AND"
+	."   NOT EXISTS(SELECT * FROM ".$self->table("namefield")." AS local"
+	."              WHERE local.student=list.student)"},
        'DEFECT_SEVERAL_NAMES'=>
        {'sql'=>"SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
 	.$self->table("namefield")." GROUP BY student) AS counts WHERE n>1"},
