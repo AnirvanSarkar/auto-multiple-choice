@@ -32,9 +32,7 @@ my $debug='';
 
 my $seuil=0.1;
 
-GetOptions("mep=s"=>\$mep_dir,
-	   "cr=s"=>\$cr_dir,
-	   "sujet=s"=>\$sujet,
+GetOptions("sujet=s"=>\$sujet,
 	   "liste=s"=>\$liste,
 	   "copie=s"=>\$etud,
 	   "dpi=s"=>\$dpi,
@@ -43,9 +41,7 @@ GetOptions("mep=s"=>\$mep_dir,
 
 set_debug($debug);
 
-my $g=AMC::Gui::Manuel::new('cr-dir'=>$cr_dir,
-			    'mep-dir'=>$mep_dir,
-			    'liste'=>$liste,
+my $g=AMC::Gui::Manuel::new('liste'=>$liste,
 			    'sujet'=>$sujet,
 			    'etud'=>$etud,
 			    'dpi'=>$dpi,

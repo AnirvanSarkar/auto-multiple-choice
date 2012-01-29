@@ -50,7 +50,6 @@ use_gettext;
 sub new {
     my %o=(@_);
     my $self={'data-dir'=>'',
-	      'cr-dir'=>'',
 	      'sujet'=>'',
 	      'etud'=>'',
 	      'dpi'=>75,
