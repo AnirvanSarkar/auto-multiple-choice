@@ -472,11 +472,10 @@ sub export {
     debug "Questions PLAIN: ".join(', ',map { $_->{'title'} } @questions_0);
     debug "Questions INDIC: ".join(', ',map { $_->{'title'} } @questions_1);
 
-    my $nq=$#questions_0+1+$#questions_1+1;
-    my $nkeys_compte=1+$#questions_0;
+    my $nq=1+$#student_columns+1+$#questions_0+1+$#questions_1;
 
-    my $dimx=6+$nq+$#codes+($lk ? 1:0);
-    my $dimy=6+$#{$self->{'marks'}};
+    my $dimx=3+$nq+1+$#codes;
+    my $dimy=5+1+$#{$self->{'marks'}};
 
     my $feuille=$doc->getTable(0,$dimy,$dimx);
     $doc->expandTable($feuille, $dimy, $dimx);
