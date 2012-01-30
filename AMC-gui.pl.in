@@ -315,8 +315,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'export_include_abs'=>'',
 		   'export_ncols'=>2,
 		   'export_pagesize'=>'a4',
-		   'export_csv_columns'=>'sc,student.key,student.name',
-		   'export_ods_columns'=>'sc,student.key,student.name',
+		   'export_csv_columns'=>'student.copy,student.key,student.name',
+		   'export_ods_columns'=>'student.copy,student.key,student.name',
 
 		   'annote_position'=>'marge',
 
@@ -5465,7 +5465,7 @@ sub choose_columns {
   my $i=1;
   my %selected=map { $_=>$i++ } (split(/,+/,$l));
   my %order=();
-  @available=('sc','student.key','student.name',$n->heads());
+  @available=('student.copy','student.key','student.name',$n->heads());
   $i=0;
   for(@available) {
      if($selected{$_}) {
@@ -5499,7 +5499,7 @@ sub choose_columns {
     my $name=$c;
     $name=__("<full name>") if($c eq 'student.name');
     $name=__("<student identifier>") if($c eq 'student.key');
-    $name=__("<student copy>") if($c eq 'sc');
+    $name=__("<student copy>") if($c eq 'student.copy');
     my $iter=$columns_store->append;
     $columns_store->set($iter,
 			0,$name,

@@ -515,7 +515,7 @@ sub export {
 	my $name=$_;
 	$name="A:".encode('utf-8',$lk) if($name eq 'student.key');
 	$name=translate_column_title('nom') if($name eq 'student.name');
-	$name=translate_column_title('copie') if($name eq 'sc');
+	$name=translate_column_title('copie') if($name eq 'student.copy');
 	$doc->cellValue($feuille,$y0,$ii,
 			encode('utf-8',$name));
 

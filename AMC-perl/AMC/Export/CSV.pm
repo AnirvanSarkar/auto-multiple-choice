@@ -86,7 +86,7 @@ sub export {
 	push @columns,"A:".encode('utf-8',$lk);
       } elsif($c eq 'student.name') {
 	push @columns,translate_column_title('nom');
-      } elsif($c eq 'sc') {
+      } elsif($c eq 'student.copy') {
 	push @columns,translate_column_title('copie');
       } else {
 	push @columns,encode('utf-8',$c);

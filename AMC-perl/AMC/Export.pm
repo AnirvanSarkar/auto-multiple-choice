@@ -103,7 +103,7 @@ sub pre_process {
     $sth->execute;
     while(my $m=$sth->fetchrow_hashref) {
       $m->{'abs'}=0;
-      $m->{'sc'}=studentids_string($m->{'student'},$m->{'copy'});
+      $m->{'student.copy'}=studentids_string($m->{'student'},$m->{'copy'});
 
       # Association key for this sheet
       $m->{'student.key'}=$self->{'_assoc'}->get_real($m->{'student'},$m->{'copy'});
@@ -132,7 +132,7 @@ sub pre_process {
 	  push @marks,
 	    {'student'=>'',
 	     'copy'=>'',
-	     'sc'=>'',
+	     'student.copy'=>'',
 	     'abs'=>1,
 	     'student.key'=>$name->{$lk},
 	     'mark'=>$self->{'noms.abs'},
