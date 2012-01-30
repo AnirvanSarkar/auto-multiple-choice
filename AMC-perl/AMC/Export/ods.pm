@@ -124,7 +124,7 @@ sub subrow_condensed {
 my %largeurs=(qw/ASSOC 4cm
 	      note 1.5cm
 	      nom 5cm
-	      sc 1.75cm
+	      student.copy 1.75cm
 	      total 1.2cm
 	      max 1cm
 	      heads 3cm/);
@@ -132,7 +132,7 @@ my %largeurs=(qw/ASSOC 4cm
 my %style_col=(qw/student.key CodeA
 	       NOM Tableau
 	       NOTE NoteF
-	       sc NumCopie
+	       student.copy NumCopie
 	       TOTAL NoteQ
 	       MAX NoteQ
 	       HEAD Tableau
