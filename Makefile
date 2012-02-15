@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -151,7 +151,7 @@ sync:
 	convert -density 300 $< $*-%03d.ppm
 
 %.png: %.svg
-	rsvg -w 32 -h 32 $< $@
+	rsvg-convert -w 32 -h 32 $< -o $@
 
 %.xpm: %.png
 	pngtopnm $< | ppmtoxpm > $@
