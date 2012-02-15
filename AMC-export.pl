@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009,2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009,2011-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -89,5 +89,7 @@ for my $oo (@o_out) {
 	$ex->set_options("out",$1=>$2);
     }
 }
+
+debug "Exporting...";
 
 $ex->export($output);

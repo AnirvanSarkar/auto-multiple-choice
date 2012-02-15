@@ -23,6 +23,8 @@ use AMC::Basic;
 use AMC::Export;
 use Encode;
 
+use Module::Load::Conditional qw/can_load/;
+
 use OpenOffice::OODoc;
 
 @ISA=("AMC::Export");
@@ -33,8 +35,53 @@ sub new {
     $self->{'out.nom'}="";
     $self->{'out.code'}="";
     $self->{'out.columns'}='student.key,student.name';
+    $self->{'out.font'}="Arial";
+    $self->{'out.size'}="10";
+    if(can_load(modules=>{'Gtk2'=>undef,'Cairo'=>undef})) {
+      debug "Using Gtk2/Cairo to compute column width";
+      $self->{'calc.Gtk2'}=1;
+    }
     bless ($self, $class);
     return $self;
+}
+
+# returns the column width (in cm) to use when including the given texts.
+
+sub text_width {
+  my ($self,$title,@t)=@_;
+  my $width=0;
+
+  if($self->{'calc.Gtk2'}) {
+
+    my $font=Pango::FontDescription->from_string($self->{'out.font'}." ".(10*$self->{'out.size'}));
+    $font->set_stretch('normal');
+
+    my $surface = Cairo::ImageSurface->create('argb32', 10,10);
+    my $cr      = Cairo::Context->create($surface);
+    my $layout  = Pango::Cairo::create_layout($cr);
+
+    $font->set_weight('bold');
+    $layout->set_font_description($font);
+    $layout->set_text($title);
+    ($width,undef)=$layout->get_pixel_size();
+
+    $font->set_weight('normal');
+    $layout->set_font_description($font);
+    for my $text (@t) {
+      $layout->set_text($text);
+      my ($text_x,$text_y)=$layout->get_pixel_size();
+      $width=$text_x if($text_x>$width);
+    }
+
+    return( 0.002772 * $width + 0.019891 + 0.3 );
+
+  } else {
+    $width=length($title);
+    for my $text (@t) {
+      $width=length($text) if(length($text)>$width);
+    }
+    return(0.22*$width+0.3);
+  }
 }
 
 sub parse_num {
@@ -123,21 +170,19 @@ sub subrow_condensed {
 
 my %largeurs=(qw/ASSOC 4cm
 	      note 1.5cm
-	      nom 5cm
-	      student.copy 1.75cm
 	      total 1.2cm
 	      max 1cm
 	      heads 3cm/);
 
 my %style_col=(qw/student.key CodeA
-	       NOM Tableau
+	       NOM General
 	       NOTE NoteF
 	       student.copy NumCopie
 	       TOTAL NoteQ
 	       MAX NoteQ
-	       HEAD Tableau
+	       HEAD General
 	       /);
-my %style_col_abs=(qw/NOTE Tableau
+my %style_col_abs=(qw/NOTE General
 	       ID NoteX
 	       TOTAL NoteX
 	       MAX NoteX
@@ -278,6 +323,17 @@ sub export {
 			 },
 			 );
 
+    # General
+    $styles->createStyle('General',
+			 parent=>'Tableau',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'paragraph',
+			     'fo:text-align' => "start",
+			     'fo:margin-left' => "0.1cm",
+			 },
+			 'references'=>{'style:data-style-name' => 'Percentage'},
+			 );
     # Qpc : pourcentage de reussite global pour une question
     $styles->createStyle('Qpc',
 			 parent=>'Tableau',
@@ -495,6 +551,7 @@ sub export {
     my %code_col=();
     my %code_row=();
     my %col_cells=();
+    my %col_content=();
 
     my $notemax;
 
@@ -507,7 +564,6 @@ sub export {
     $ii=$x0;
     for(@student_columns,
 	qw/note total max/) {
-	$doc->columnStyle($feuille,$ii,"col.".($col_styles{$_} ? $_ : 'heads'));
 	$doc->cellStyle($feuille,$y0,$ii,'Entete');
 
 	$code_col{$_}=$ii;
@@ -515,6 +571,8 @@ sub export {
 	$name="A:".encode('utf-8',$lk) if($name eq 'student.key');
 	$name=translate_column_title('nom') if($name eq 'student.name');
 	$name=translate_column_title('copie') if($name eq 'student.copy');
+
+	$col_content{$_}=[$name];
 	$doc->cellValue($feuille,$y0,$ii,
 			encode('utf-8',$name));
 
@@ -545,7 +603,7 @@ sub export {
     $jj++;
 
     $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
-    $doc->cellStyle($feuille,$jj,$code_col{'total'},'Tableau');
+    $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
     $doc->cellValue($feuille,$jj,$code_col{'total'},translate_id_name('max'));
 
     $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
@@ -571,7 +629,7 @@ sub export {
     $jj++;
 
     $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
-    $doc->cellStyle($feuille,$jj,$code_col{'total'},'Tableau');
+    $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
     $doc->cellValue($feuille,$jj,$code_col{'total'},translate_id_name('moyenne'));
     $code_row{'average'}=$jj;
 
@@ -607,9 +665,11 @@ sub export {
 	$ii=$x0;
 
 	for(@student_columns) {
+	  my $value=($m->{$_} ? $m->{$_} : $m->{'student.all'}->{$_});
+	  push @{$col_content{$_}},$value;
 	  set_cell($doc,$feuille,$jj,$ii++,
 		   $m->{'abs'},$_,
-		   ($m->{$_} ? $m->{$_} : $m->{'student.all'}->{$_}),'utf8'=>1);
+		   $value,'utf8'=>1);
 	}
 
 	if($m->{'abs'}) {
@@ -715,7 +775,30 @@ sub export {
 
     $self->{'_scoring'}->end_transaction('XODS');
 
+    ##########################################################################
+    # try to set right column width
+    ##########################################################################
+
+    for(@student_columns) {
+      if($col_styles{$_}) {
+	$doc->columnStyle($feuille,$code_col{$_},"col.".$col_styles{$_});
+      } else {
+	my $cm=$self->text_width(@{$col_content{$_}});
+	debug "Column width [$_] = $cm cm";
+	$doc->createStyle("col.X.$_",
+			  family=>'table-column',
+			  properties=>{
+				       -area=>'table-column',
+				       'column-width' => $cm."cm",
+				      },
+			 );
+	$doc->columnStyle($feuille,$code_col{$_},"col.X.$_");
+      }
+    }
+
+    ##########################################################################
     # set meta-data and write to file
+    ##########################################################################
 
     my $meta = odfMeta(container => $archive);
 
