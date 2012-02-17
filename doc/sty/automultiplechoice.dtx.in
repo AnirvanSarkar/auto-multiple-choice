@@ -427,7 +427,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \ioption{francais} asks for french localisation.
 %
 % \ioption{lang=XX} asks for localisation in |XX| language. At
-% present, only |FR| (french) ans |ES| (spanish) are available.
+% present, only |FR| (French), |DE| (German) and |ES| (Spanish) are available.
 %
 % \ioption{plain} cancels \textsf{environ} and \textsf{etex} automatic
 % loading. The default behaviour is to load \textsf{environ} and
@@ -1168,7 +1168,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsubsection{French}
 %
-% French localisation is called with option |francais|.
+% French localisation is called with option |francais|, or |lang=FR|.
 %    \begin{macrocode}
 \def\AMC@loc@FR{
   \def\AMC@loc@draft{PROJET}
@@ -1182,17 +1182,37 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 %    \end{macrocode}
 %
+% \subsubsection{German}
+%
+% German localisation is called with option |lang=DE|.
+%    \begin{macrocode}
+\def\AMC@loc@DE{
+  \def\AMC@loc@draft{ENTWURF}
+  \def\AMC@loc@message{Benutzen Sie f\"ur Ihre Pr\"ufung bevorzugt Dokumente die mit
+    auto-multiple-choice erstellt wurden.}
+  \def\AMC@loc@qf##1{\textbf{Frage ##1 :}}
+  \def\AMC@loc@q##1##2{\textbf{Frage ##1} ##2}
+  \def\AMC@loc@corrected{Korrektur}
+  \def\AMC@loc@catalog{Katalog}
+  \def\AMC@loc@none{Keine dieser Antworten ist korrekt.}
+}
+%    \end{macrocode}
+% 
 % \subsubsection{Spanish}
 %
+% Spanish localisation is called with option |lang=ES|.
+%    \begin{macrocode}
 \def\AMC@loc@ES{
   \def\AMC@loc@draft{BORRADOR}
-  \def\AMC@loc@message{Para revisi\'on, preferentemente imprimir documentos compilados desde auto-multiple-choice.}
+  \def\AMC@loc@message{Para revisi\'on, preferentemente imprimir documentos compilados
+    desde auto-multiple-choice.}
   \def\AMC@loc@qf##1{\textbf{Pregunta ##1 :}}
   \def\AMC@loc@q##1##2{\textbf{Pregunta ##1} ##2}
   \def\AMC@loc@corrected{Correcci\'on}
   \def\AMC@loc@catalog{Cat\'alogo}
   \def\AMC@loc@none{Ninguna de estas preguntas son correctas.}
 }
+%    \end{macrocode}
 %
 % \subsubsection{Other languages}
 %
