@@ -1036,7 +1036,7 @@ my %cb_stores=(
     );
 
 
-my $symbole_type_cb=cb_model("none"=>__"mothing",
+my $symbole_type_cb=cb_model("none"=>__"nothing",
 			     "circle"=>__"circle",
 			     "mark"=>__"mark",
 			     "box"=>__"box",
@@ -1787,7 +1787,7 @@ sub projet_sauve {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
-		  __"Error writing to options file %s : %s",$of,$!);
+		  __"Error writing to options file %s: %s",$of,$!);
 	$dialog->run;
 	$dialog->destroy;
     } else {
