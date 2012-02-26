@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -143,10 +143,6 @@ sub new {
 
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
 
-    my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
-
-    $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
-
     my @bouton_nom=();
     my @bouton_eb=();
     $self->{'boutons'}=\@bouton_nom;
@@ -158,8 +154,9 @@ sub new {
     for my $i (0..($self->{'liste'}->taille()-1)) {
 	my $eb=Gtk2::EventBox->new();
 	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
+	$b->set_size_request(10,-1);
 	$eb->add($b);
-	$self->{'tableau'}->attach($eb,$x,$x+1,$y,$y+1,["expand","fill"],[],1,1);
+
 	push @bouton_nom,$b;
 	push @bouton_eb,$eb;
 	$b->show();
@@ -167,22 +164,11 @@ sub new {
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
 	$self->style_bouton($i);
-
-	$x++;
-	if($x>=$self->{'assoc-ncols'}) {
-	    $y++;
-	    $x=0;
-	}
     }
 
     $self->{'assoc'}->end_transaction('ABUT');
 
-    # don't why but this is necessary to make it work in some situations (Ubuntu 11.10 Unity for example)
-    for(qw/tableau viewport_tableau/) {
-      $self->{$_}->size_request;
-      $self->{$_}->set_size_request(-1,150);
-    }
-    $self->{'scrolled_tableau'}->set_policy(GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
+    $self->set_n_cols();
 
     # vue arborescente
 
@@ -267,6 +253,53 @@ sub new {
     $self->initial_size;
 
     return($self);
+}
+
+# Resize the table with the requested number of columns, and put the
+# buttons where they has to be.
+#
+# {X:X}
+sub set_n_cols {
+  my ($self)=@_;
+  my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
+  $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
+
+  if($self->{'tableau_full'}) {
+    for my $b (@{$self->{'boutons_eb'}}) {
+      $self->{'tableau'}->remove($b);
+    }
+  }
+  my $x=0;
+  my $y=0;
+  for my $b (@{$self->{'boutons_eb'}}) {
+    $self->{'tableau'}->attach($b,$x,$x+1,$y,$y+1,["expand","fill"],[],1,1);
+    $x++;
+    if($x>=$self->{'assoc-ncols'}) {
+      $y++;
+      $x=0;
+    }
+  }
+  $self->{'tableau_full'}=1;
+  $self->{'scrolled_tableau'}->set_policy('never','automatic');
+}
+
+# Add a column to the names table
+#
+# {X:X}
+sub assoc_add_column {
+  my ($self)=@_;
+  $self->{'assoc-ncols'}++;
+  $self->set_n_cols();
+}
+
+# Removes a column from the names table
+#
+# {X:X}
+sub assoc_del_column {
+  my ($self)=@_;
+  $self->{'assoc-ncols'}--;
+  $self->{'assoc-ncols'}=1 if($self->{'assoc-ncols'}<1);
+  $self->set_n_cols();
 }
 
 # Sets the window size to requested one (saved the last time the
@@ -378,7 +411,7 @@ sub quitter {
 	}
       }
       $self->{'general'}->destroy;
-      &{$self->{'fin'}}();
+      &{$self->{'fin'}}($self);
     }
 }
 

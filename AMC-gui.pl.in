@@ -2884,7 +2884,9 @@ sub associe {
 					'assoc-ncols'=>$o{'assoc_ncols'},
 					'encodage_liste'=>bon_encodage('liste'),
 					'encodage_interne'=>$o{'encodage_interne'},
-					'fin'=>\&assoc_state,
+					'fin'=>sub {
+					  assoc_state();
+					},
 					'size_prefs'=>($o{'conserve_taille'} ? \%o : ''),
 				       );
       if($ga->{'erreur'}) {
