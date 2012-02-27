@@ -57,6 +57,7 @@ sub new {
 	      'data_dir'=>'',
 	      'data'=>'',assoc=>'','capture'=>'','layout'=>'',
 	      'global'=>0,
+	      'show_all'=>1,
 	      'encodage_liste'=>'UTF-8',
 	      'separateur'=>"",
 	      'identifiant'=>'',
@@ -137,9 +138,11 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu scrolled_tableau viewport_tableau/) {
+    for my $k (qw/general tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu scrolled_tableau viewport_tableau button_show_all/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
+
+    $self->{'button_show_all'}->set_active($self->{'show_all'});
 
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
 
@@ -147,6 +150,7 @@ sub new {
     my @bouton_eb=();
     $self->{'boutons'}=\@bouton_nom;
     $self->{'boutons_eb'}=\@bouton_eb;
+    $self->{'taken_list'}=[];
 
     $self->{'assoc'}->begin_read_transaction('ABUT');
 
@@ -256,6 +260,14 @@ sub new {
     return($self);
 }
 
+# is "show all" button active?
+#
+# {X:X}
+sub get_show_all {
+  my ($self)=@_;
+  return($self->{'show_all'});
+}
+
 # Resize the table with the requested number of columns, and put the
 # buttons where they has to be.
 #
@@ -265,14 +277,14 @@ sub set_n_cols {
   my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
   $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
 
-  if($self->{'tableau_full'}) {
-    for my $b (@{$self->{'boutons_eb'}}) {
-      $self->{'tableau'}->remove($b);
-    }
-  }
+  $self->{'tableau'}->foreach(sub { $self->{'tableau'}->remove(shift); });
+
   my $x=0;
   my $y=0;
-  for my $b (@{$self->{'boutons_eb'}}) {
+  my $i=-1;
+ NAME: for my $b (@{$self->{'boutons_eb'}}) {
+    $i++;
+    next NAME if(!$self->{'show_all'} && $self->{'taken_list'}->[$i]);
     $self->{'tableau'}->attach($b,$x,$x+1,$y,$y+1,["expand","fill"],[],1,1);
     $x++;
     if($x>=$self->{'assoc-ncols'}) {
@@ -280,7 +292,6 @@ sub set_n_cols {
       $x=0;
     }
   }
-  $self->{'tableau_full'}=1;
   $self->{'scrolled_tableau'}->set_policy('never','automatic');
 }
 
@@ -303,6 +314,15 @@ sub assoc_del_column {
   $self->set_n_cols();
 }
 
+# Gets state of "show all" button and redraw table.
+#
+# {X:X}
+sub set_show_all {
+  my ($self)=@_;
+  $self->{'show_all'}=$self->{'button_show_all'}->get_active();
+  $self->set_n_cols();
+}
+
 # Sets the window size to requested one (saved the last time the
 # window was used)
 #
@@ -315,7 +335,6 @@ sub initial_size {
     $self->{'general'}->resize($1,$2);
   }
 }
-
 
 # Updates the content of the sheets list (associations already made)
 # for one give sheet.
@@ -472,7 +491,7 @@ sub delie {
 sub lie {
     my ($self,$inom,$student,$copy)=(@_);
     $self->delie($inom);
-    my $oldcode=$self->{'assoc'}->get_manual($student,$copy);
+    my $oldcode=$self->{'assoc'}->get_real($student,$copy);
     $self->{'assoc'}->set_manual($student,$copy,$self->inom2code($inom));
 
     # updates list
@@ -501,11 +520,18 @@ sub efface_manuel {
 
       $self->{'assoc'}->set_manual(@sc,undef);
 
+      # update buttons
+      # - old ones
       for(@r) {
 	$self->style_bouton($_);
       }
+      # - new one
+      $self->style_bouton('IMAGE',1);
+
       $self->maj_contenu_liste_sc(@sc);
       $self->maj_couleurs_liste();
+
+      $self->set_n_cols() if(!$self->{'show_all'});
 
       $self->{'assoc'}->end_transaction('ADEL');
     }
@@ -530,8 +556,11 @@ sub inconnu {
       for(@r) {
 	$self->style_bouton($_);
       }
+
       $self->maj_contenu_liste_sc(@sc);
       $self->maj_couleurs_liste();
+
+      $self->set_n_cols() if(!$self->{'show_all'});
 
       $self->{'assoc'}->end_transaction('AUNK');
     }
@@ -729,6 +758,7 @@ sub style_bouton {
     }
 
     my $pris=studentids_string($self->{'assoc'}->real_back($self->inom2code($i)));
+    $self->{'taken_list'}->[$i]=$pris;
 
     my $b=$self->{'boutons'}->[$i];
     my $eb=$self->{'boutons_eb'}->[$i];
@@ -778,6 +808,7 @@ sub choisit {
     $self->{'assoc'}->begin_transaction('ASWT');
     $self->lie($i,@{$self->{'image_sc'}});
     $self->{'assoc'}->end_transaction('ASWT');
+    $self->set_n_cols() if(!$self->{'show_all'});
     $self->image_suivante();
 }
 

@@ -71,7 +71,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="stock">gtk-add</property>
-                                <property name="icon-size">1</property>
                               </object>
                             </child>
                           </object>
@@ -92,11 +91,10 @@
                             <property name="use_action_appearance">False</property>
                             <signal name="clicked" handler="assoc_del_column" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="image4">
+                              <object class="GtkImage" id="image3">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="stock">gtk-remove</property>
-                                <property name="icon-size">1</property>
                               </object>
                             </child>
                           </object>
@@ -108,7 +106,21 @@
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
+                          <object class="GtkToggleButton" id="button_show_all">
+                            <property name="label" translatable="yes">Show all</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="use_action_appearance">False</property>
+                            <signal name="toggled" handler="set_show_all" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">2</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
