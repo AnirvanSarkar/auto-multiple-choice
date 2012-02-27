@@ -154,6 +154,7 @@ sub new {
     for my $i (0..($self->{'liste'}->taille()-1)) {
 	my $eb=Gtk2::EventBox->new();
 	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
+	$b->set_tooltip_text($self->{'liste'}->data_n($i,'_ID_'));
 	$b->set_size_request(10,-1);
 	$eb->add($b);
 
