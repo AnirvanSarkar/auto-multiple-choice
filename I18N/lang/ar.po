@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.479 (svn: 479)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2012-02-27 13:41 +0100\n"
+"POT-Creation-Date: 2012-02-28 21:54 +0100\n"
 "PO-Revision-Date: 2012-02-19 23:49+0300\n"
 "Last-Translator: Hatim <dr.hatim@hotmail.com>\n"
 "Language-Team: red sea\n"
@@ -20,20 +20,23 @@ msgstr ""
 "X-Poedit-Language: Arabic\n"
 "X-Poedit-Country: SAUDI ARABIA\n"
 
-#. TRANSLATORS: directory name for projects. Please use only alphanumeric characters, and - or _. No accentuated characters.
+#. TRANSLATORS: directory name for projects. This directory will be created (if needed) in the home directory of the user. Please use only alphanumeric characters, and - or _. No accentuated characters.
 #: ../AMC-gui.pl:201
 msgid "MC-Projects"
 msgstr "MC-Projects"
 
-#: ../AMC-gui.pl:247
+#. TRANSLATORS: This is the default text to be written on the top of the first page of each paper when annotating. From this string, %s will be replaced with the student final mark, %m with the maximum mark he can obtain, %S with the student total score, and %M with the maximum score the student can obtain.
+#: ../AMC-gui.pl:248
 msgid "Mark: %s/%m (total score: %S/%M)"
 msgstr "النقاط: %s/%m (الدرجة الكلية: %S/%M)"
 
-#: ../AMC-gui.pl:260
+#. TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
+#: ../AMC-gui.pl:262
 msgid "Exam result"
 msgstr "نتيجة الاختبار"
 
-#: ../AMC-gui.pl:261
+#. TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
+#: ../AMC-gui.pl:264
 msgid ""
 "Please find enclosed your annotated completed answer sheet.\n"
 "Regards."
@@ -41,293 +44,331 @@ msgstr ""
 "يسعدنا تزويدكم بنتائج أوراق إجابتكم. \n"
 "احترامي"
 
-#: ../AMC-gui.pl:360
+#. TRANSLATORS: Message (first part) when some of the commands that are given in the preferences cannot be found.
+#: ../AMC-gui.pl:364
 msgid "Some commands allowing to open documents can't be found:"
 msgstr "بعض الأوامر التي تسمح بفتح المستندات غير موجودة:"
 
-#: ../AMC-gui.pl:362
+#. TRANSLATORS: Message (second part) when some of the commands that are given in the preferences cannot be found.
+#: ../AMC-gui.pl:367
 msgid "Please check its correct spelling and install missing software."
 msgstr "فضلا تأكد من صحة الإملاء و ركب البرنامج المفقود."
 
-#: ../AMC-gui.pl:363
+#. TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
+#: ../AMC-gui.pl:369
 #, perl-format
 msgid "You can change used commands following <i>%s</i> from menu <i>%s</i>."
 msgstr "تستطيع تعديل الأوامر التالية <i>%s</i> من قائمة <i>%s</i>."
 
 #. TRANSLATORS: "Preferences" menu
-#: ../AMC-gui.pl:365
+#: ../AMC-gui.pl:371
 msgid "Preferences"
 msgstr "التفضيلات"
 
 #. TRANSLATORS: "Edit" menu
-#: ../AMC-gui.pl:367
+#: ../AMC-gui.pl:373
 msgid "Edit"
 msgstr "تحرير"
 
-#: ../AMC-gui.pl:425
-#, perl-format
-msgid "Error writing state file %s : %s"
+#. TRANSLATORS: Error writing one of the configuration files (global or project). The first %s will be replaced with the path of that file, and the second with the error text.
+#: ../AMC-gui.pl:432
+#, fuzzy, perl-format
+msgid "Error writing state file %s: %s"
 msgstr "خطأ في كتابة خالة الملف %s : %s"
 
-#: ../AMC-gui.pl:443
+#: ../AMC-gui.pl:451
 msgid "Several dialogs try to help you be at ease handling AMC."
 msgstr "عدة نوافذ تساعد على سهولة التعامل مع برنامج أمسي AMC."
 
-#: ../AMC-gui.pl:444
+#: ../AMC-gui.pl:453
 #, perl-format
 msgid "Unless you tick the \"%s\" box, they are shown only once."
 msgstr "إلا اذا وضعت علامة \"%s\" , فإنها تظهر مرة واحدة."
 
-#: ../AMC-gui.pl:444 ../AMC-gui.pl:792
+#: ../AMC-gui.pl:455 ../AMC-gui.pl:808
 msgid "Show this message again next time"
 msgstr "عرض هذه الرسالة مرة أخرى في وقت آخر"
 
-#: ../AMC-gui.pl:445
+#: ../AMC-gui.pl:457
 msgid ""
 "Do you want to forgot which dialogs you have already seen and ask to show "
 "all of them next time they should appear ?"
 msgstr "هل تود عرض هذه النافذة مرة أخرى؟"
 
-#: ../AMC-gui.pl:720
+#. TRANSLATORS: Messahe when switching to debugging mode.
+#: ../AMC-gui.pl:733
 msgid "Debugging mode."
 msgstr "نظام تتبع الاخطاء."
 
-#: ../AMC-gui.pl:721
+#. TRANSLATORS: Messahe when switching to debugging mode. %s will be replaced with the path of the log file.
+#: ../AMC-gui.pl:735
 #, perl-format
 msgid "Debugging informations will be written in file %s."
 msgstr "معلومات تتبع الأخطاء سيتم كتابتها في الملف %s ."
 
-#: ../AMC-gui.pl:743
+#. TRANSLATORS: One of the documentation languages.
+#: ../AMC-gui.pl:758
 msgid "French"
 msgstr "الفرنسية"
 
-#: ../AMC-gui.pl:744
+#. TRANSLATORS: One of the documentation languages.
+#: ../AMC-gui.pl:760
 msgid "English"
 msgstr "الانجليزية"
 
-#: ../AMC-gui.pl:850
+#. TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of papers annotation.
+#: ../AMC-gui.pl:867
 msgid "ID"
 msgstr "المعرف"
 
-#: ../AMC-gui.pl:856
+#. TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of papers annotation.
+#: ../AMC-gui.pl:874
 msgid "Updated"
 msgstr "التحديث"
 
-#: ../AMC-gui.pl:877
+#. TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
+#: ../AMC-gui.pl:896
 msgid "identifier"
 msgstr "المعرف"
 
-#: ../AMC-gui.pl:885
+#. TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of data captures.
+#: ../AMC-gui.pl:905
 msgid "updated"
 msgstr "التحديث"
 
-#. TRANSLATORS: mean square error distance (in short)
-#: ../AMC-gui.pl:892 ../AMC-gui.pl:4113 ../AMC-perl/AMC/Gui/Manuel.pm:148
+#. TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
+#: ../AMC-gui.pl:912 ../AMC-gui.pl:4199 ../AMC-perl/AMC/Gui/Manuel.pm:148
 msgid "MSE"
 msgstr "نسبة الخطأ"
 
-#: ../AMC-gui.pl:900 ../AMC-gui.pl:4115 ../AMC-perl/AMC/Gui/Manuel.pm:156
+#. TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
+#: ../AMC-gui.pl:921 ../AMC-gui.pl:4201 ../AMC-perl/AMC/Gui/Manuel.pm:156
 msgid "sensitivity"
 msgstr "الحساسية"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:926 ../AMC-gui.pl:943
+#: ../AMC-gui.pl:947 ../AMC-gui.pl:965
 msgid "Western Europe"
 msgstr "غرب اوروبا"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:928 ../AMC-gui.pl:944
+#: ../AMC-gui.pl:949 ../AMC-gui.pl:967
 msgid "Central Europe"
 msgstr "وسط اوروبا"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:930
+#: ../AMC-gui.pl:951
 msgid "Southern Europe"
 msgstr "جنوب اوروبا"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:932
+#: ../AMC-gui.pl:953
 msgid "Northern Europe"
 msgstr "شمال اوروبا"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:934
+#: ../AMC-gui.pl:955
 msgid "Cyrillic"
 msgstr "السيريالية"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:936
+#: ../AMC-gui.pl:957
 msgid "Turkish"
 msgstr "التركية"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:938
+#: ../AMC-gui.pl:959
 msgid "Northern"
 msgstr "الشمالية"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:940
+#: ../AMC-gui.pl:961
 msgid "Unicode"
 msgstr "يونيكود"
 
-#: ../AMC-gui.pl:964
+#. TRANSLATORS: List of students with their scores: one of the export formats.
+#: ../AMC-gui.pl:988
 msgid "PDF list"
 msgstr "قائمة PDF"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:968 ../AMC-gui.pl:2832
+#: ../AMC-gui.pl:992 ../AMC-gui.pl:2908
 msgid "(none) [No primary key found in association list]"
 msgstr "(لا شئ) [لا يوجد مفتاح رئيسي في قائمة الربط]"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:970 ../AMC-gui.pl:3326
+#: ../AMC-gui.pl:994 ../AMC-gui.pl:3412
 msgid "(none) [No code found in LaTeX file]"
 msgstr "(لا شئ) [لا يوجد كود في ملف لتيك]"
 
-#: ../AMC-gui.pl:973
+#. TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
+#: ../AMC-gui.pl:998
 msgid ", (comma)"
 msgstr ", (فاصلة)"
 
-#: ../AMC-gui.pl:974
+#. TRANSLATORS: One option for decimal point: use a point. This is a menu entry.
+#: ../AMC-gui.pl:1000
 msgid ". (dot)"
 msgstr ". (نقطة)"
 
-#. TRANSLATORS: rounding method for marks
-#: ../AMC-gui.pl:976
+#. TRANSLATORS: One of the rounding method for marks. This is a menu entry.
+#: ../AMC-gui.pl:1002
 msgid "floor"
 msgstr "للأدنى"
 
-#. TRANSLATORS: rounding method for marks
-#: ../AMC-gui.pl:978
+#. TRANSLATORS: One of the rounding method for marks. This is a menu entry.
+#: ../AMC-gui.pl:1004
 msgid "rounding"
 msgstr "للأقرب"
 
-#. TRANSLATORS: rounding method for marks
-#: ../AMC-gui.pl:980
+#. TRANSLATORS: One of the rounding method for marks. This is a menu entry.
+#: ../AMC-gui.pl:1006
 msgid "ceiling"
 msgstr "للأعلى"
 
-#. TRANSLATORS: printing method
-#: ../AMC-gui.pl:983
+#. TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
+#: ../AMC-gui.pl:1009
 msgid "command"
 msgstr "الامر"
 
-#. TRANSLATORS: printing method
-#: ../AMC-gui.pl:985
+#. TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
+#: ../AMC-gui.pl:1011
 msgid "to files"
 msgstr "إلى ملف"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:987
+#: ../AMC-gui.pl:1013
 msgid "one sided [No two-sided printing]"
 msgstr "وجه واحد"
 
-#. TRANSLATORS: two-side printing type
-#: ../AMC-gui.pl:989
+#. TRANSLATORS: One of the two-side printing types. This is a menu entry.
+#: ../AMC-gui.pl:1015
 msgid "long edge"
 msgstr "حافة طويلة"
 
-#. TRANSLATORS: two-side printing type
-#: ../AMC-gui.pl:991
+#. TRANSLATORS: One of the two-side printing types. This is a menu entry.
+#: ../AMC-gui.pl:1017
 msgid "short edge"
 msgstr "حافة قصيرة"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:995
+#: ../AMC-gui.pl:1021
 msgid "(none) [No transitional image type (direct processing)]"
 msgstr "(لا شئ) [لا يوجد نوع للصورة (المعالجة المباشرة)]"
 
-#: ../AMC-gui.pl:1001
+#. TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
+#: ../AMC-gui.pl:1028
 msgid "that's all"
 msgstr "هذا كل شئ"
 
-#: ../AMC-gui.pl:1002
+#. TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the exported file. This is a menu entry.
+#: ../AMC-gui.pl:1030
 msgid "open the file"
 msgstr "فتح الملف"
 
-#: ../AMC-gui.pl:1003
+#. TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the directory where the file is. This is a menu entry.
+#: ../AMC-gui.pl:1032
 msgid "open the directory"
 msgstr "فتح المسار"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:1009
+#: ../AMC-gui.pl:1038
 msgid "(none) [No annotation position (do not write anything)]"
 msgstr "(لا شئ) [لا يوجد موقع للرصد (لا تكتب شئ)]"
 
-#: ../AMC-gui.pl:1010
+#. TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the margin. This is a menu entry.
+#: ../AMC-gui.pl:1040
 msgid "margin"
 msgstr "الهامش"
 
-#: ../AMC-gui.pl:1011
+#. TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: near the boxes. This is a menu entry.
+#: ../AMC-gui.pl:1042
 msgid "near boxes"
 msgstr "بجوار المربعات"
 
-#: ../AMC-gui.pl:1014 ../AMC-gui.pl:1015
+#: ../AMC-gui.pl:1045 ../AMC-gui.pl:1046
 msgid "Yes:"
 msgstr "نعم:"
 
-#: ../AMC-gui.pl:1017 ../AMC-gui.pl:5335
+#. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
+#. TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
+#: ../AMC-gui.pl:1049 ../AMC-gui.pl:5428
 msgid "name"
 msgstr "الاسم"
 
-#: ../AMC-gui.pl:1018
+#. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student sheet number. This is a menu entry.
+#: ../AMC-gui.pl:1051
 msgid "sheet number"
 msgstr "رقم ورقة الاجابة"
 
-#: ../AMC-gui.pl:1019
+#. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the line where one can find this student in the students list file. This is a menu entry.
+#: ../AMC-gui.pl:1053
 msgid "line in students list"
 msgstr "الخط في قائمة الطلاب"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:1021
+#. One of the possible sorting criteria for students in the exported spreadsheet with scores: the student mark. This is a menu entry.
+#: ../AMC-gui.pl:1056
 msgid "mark [student mark, for sorting]"
 msgstr "الدرجة [درجة الطالب, للفرز]"
 
-#: ../AMC-gui.pl:1028
+#. TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make one PDF file per student, with all his pages. This is a menu entry.
+#: ../AMC-gui.pl:1064
 msgid "One file per student"
 msgstr "ملف لكل طالب"
 
-#: ../AMC-gui.pl:1029
+#. TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make only one PDF with all students sheets. This is a menu entry.
+#: ../AMC-gui.pl:1066
 msgid "One file for all students"
 msgstr "ملف واحد لكل الطلاب"
 
-#: ../AMC-gui.pl:1031
+#: ../AMC-gui.pl:1068
 msgid "Please select..."
 msgstr "فضلا اختر..."
 
-#: ../AMC-gui.pl:1032 ../AMC-gui.pl:2470
+#. TRANSLATORS: One of the ways exam was made: each student has a different answer sheet with a different copy number - no photocopy was made. This is a menu entry.
+#. TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
+#: ../AMC-gui.pl:1070 ../AMC-gui.pl:2536
 msgid "Different answer sheets"
 msgstr "نموذج إجابة مختلف"
 
-#: ../AMC-gui.pl:1033 ../AMC-gui.pl:2471
+#. TRANSLATORS: One of the ways exam was made: some students have the same exam subject, as some photocopies were made before distributing the subjects. This is a menu entry.
+#. TRANSLATORS: This is a title for the AMC mode where some answer sheets have been photocopied before being distributed to the students.
+#: ../AMC-gui.pl:1072 ../AMC-gui.pl:2541
 msgid "Some answer sheets were photocopied"
 msgstr "بعض أوراق الإجابة عبارة عن صور"
 
-#: ../AMC-gui.pl:1034
+#. TRANSLATORS: One of the ways to send mail: use sendmail command. This is a menu entry.
+#: ../AMC-gui.pl:1074
 msgid "sendmail"
 msgstr "خادم البريد"
 
-#: ../AMC-gui.pl:1035
+#. TRANSLATORS: One of the ways to send mail: use a SMTP server. This is a menu entry.
+#: ../AMC-gui.pl:1076
 msgid "SMTP"
 msgstr "SMTP"
 
-#: ../AMC-gui.pl:1039
+#. TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
+#: ../AMC-gui.pl:1080
 msgid "nothing"
 msgstr "لا شئ"
 
-#: ../AMC-gui.pl:1040
+#. TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
+#: ../AMC-gui.pl:1082
 msgid "circle"
 msgstr "دائرة"
 
-#: ../AMC-gui.pl:1041
+#. TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, a cross.
+#: ../AMC-gui.pl:1084
 msgid "mark"
 msgstr "ضرب"
 
-#: ../AMC-gui.pl:1042
+#. TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, the box outline.
+#: ../AMC-gui.pl:1086
 msgid "box"
 msgstr "مربع"
 
-#: ../AMC-gui.pl:1126
+#: ../AMC-gui.pl:1170
 #, perl-format
 msgid ""
 "Exporting to '%s' needs some perl modules that are not installed: %s. Please "
@@ -336,88 +377,93 @@ msgstr ""
 "للتصدير إلى الصيغة '%s' يجب وجود بعض إضافات بيرل غير المركبة: %s. فضلا ركب "
 "هذه الإضافات أو اختر صيغة أخرى."
 
-#: ../AMC-gui.pl:1150
+#: ../AMC-gui.pl:1194
 msgid "Exporting marks..."
 msgstr "تصدير النقاط..."
 
-#: ../AMC-gui.pl:1165
+#: ../AMC-gui.pl:1209
 #, perl-format
 msgid "Export to %s did not work: file not created..."
 msgstr "التصدير إلى الصيغة %s لا يعمل: لم ينشأ الملف..."
 
-#: ../AMC-gui.pl:1184 ../AMC-gui.pl:4117
+#. TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, an image will be opened to see where the corner marks were detected.
+#: ../AMC-gui.pl:1229 ../AMC-gui.pl:4203
 msgid "page adjustment"
 msgstr "تخطيط الصفحة"
 
-#: ../AMC-gui.pl:1185 ../AMC-gui.pl:4117
+#. TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, a window will be opened were the user can see all boxes on the scans and how they were filled by the students, and correct detection of ticked-or-not if needed.
+#: ../AMC-gui.pl:1231 ../AMC-gui.pl:4203
 msgid "boxes zooms"
 msgstr "تكبير المربعات"
 
-#: ../AMC-gui.pl:1249
+#: ../AMC-gui.pl:1295
 #, perl-format
 msgid "You requested to delete all data capture results for %d page(s)"
 msgstr "طلبت حذف جميع نتائج البيانات المقروءة من الأوراق %d"
 
-#: ../AMC-gui.pl:1250
+#: ../AMC-gui.pl:1296
 msgid "All data and image files related to these pages will be deleted."
 msgstr "جميع البيانات والصور المرتبطة بهذه الأوراق تم حذفها."
 
-#: ../AMC-gui.pl:1251
+#: ../AMC-gui.pl:1297
 msgid "Do you really want to continue?"
 msgstr "هل تريد حقيقة الاستمرار؟"
 
-#: ../AMC-gui.pl:1421
+#: ../AMC-gui.pl:1467
 #, perl-format
 msgid ""
 "Following command could not be run: <b>%s</b>, perhaps due to a poor "
 "configuration?"
 msgstr "لم يتم تنفيذ الأمر التالي: <b>%s</b> , ربما لأن إعداداته غير كاملة."
 
-#: ../AMC-gui.pl:1481
+#: ../AMC-gui.pl:1527
 msgid "Existing projects:"
 msgstr "المشروع الحالي:"
 
-#: ../AMC-gui.pl:1486
+#. TRANSLATORS: Window title when creating a new project.
+#: ../AMC-gui.pl:1533
 msgid "New AMC project"
 msgstr "مشروع آمسي جديد"
 
-#: ../AMC-gui.pl:1491
+#: ../AMC-gui.pl:1538
 msgid "Projects management:"
 msgstr "ادارة المشاريع:"
 
-#: ../AMC-gui.pl:1492
+#: ../AMC-gui.pl:1539
 msgid "Change project name:"
 msgstr "تعديل اسم المشروع:"
 
-#: ../AMC-gui.pl:1497
+#: ../AMC-gui.pl:1544
 msgid "Back"
 msgstr "عودة"
 
-#: ../AMC-gui.pl:1499
+#. TRANSLATORS: Window title when managing projects.
+#: ../AMC-gui.pl:1547
 msgid "AMC projects management"
 msgstr "إدارة مشاريع آمسي:"
 
-#: ../AMC-gui.pl:1534
+#: ../AMC-gui.pl:1582
 #, perl-format
 msgid "You don't have any MC project in directory %s!"
 msgstr "لا توجد مشاريع اختبارات في المجلد %s!"
 
-#: ../AMC-gui.pl:1563
+#: ../AMC-gui.pl:1611
 #, perl-format
 msgid "You can't change project %s since it's open."
 msgstr "لا تستطيع تغيير المشروع %s اثناء فتحه."
 
-#: ../AMC-gui.pl:1626
+#. TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
+#: ../AMC-gui.pl:1675
 #, perl-format
 msgid "Directory <i>%s</i> already exists, so you can't choose this name."
 msgstr "المجلد <i>%s</i> موجود مسبقا, فضلا اختر اسم آخر."
 
-#: ../AMC-gui.pl:1663
+#: ../AMC-gui.pl:1712
 #, perl-format
 msgid "You asked to remove project <b>%s</b>."
 msgstr "هل ترغب بحذف المشروع <b>%s</b>."
 
-#: ../AMC-gui.pl:1664
+#: ../AMC-gui.pl:1713
 msgid ""
 "This will permanently erase all the files of this project, including the "
 "LaTeX source as well as all the files you put in the directory of this "
@@ -427,47 +473,47 @@ msgstr ""
 "الملفات التي وضعت في دليل هذا المشروع، الملفات الممسوحة بالسكنر على سبيل "
 "المثال."
 
-#: ../AMC-gui.pl:1665
+#: ../AMC-gui.pl:1714
 msgid "Is this really what you want?"
 msgstr "هل هذا ما تريد؟"
 
-#: ../AMC-gui.pl:1712
+#: ../AMC-gui.pl:1761
 #, perl-format
 msgid "You selected directory <b>%s</b> as a project to open."
 msgstr "اخترت المجلد <b>%s</b> كمشروع."
 
-#: ../AMC-gui.pl:1713
+#: ../AMC-gui.pl:1762
 msgid ""
 "However, this directory does not seem to contain a project. Dou you still "
 "want to try?"
 msgstr ""
 "ومع ذلك، هذا الدليل لا يبدو أنه يحتوي على المشروع. هل ما زلت تريد أن تحاول؟"
 
-#: ../AMC-gui.pl:1757
+#: ../AMC-gui.pl:1806
 #, perl-format
 msgid "The name <b>%s</b> is already used in the projects directory."
 msgstr "الاسم <b>%s</b> مستخدم لمشروع في مجلد الاختبارات."
 
-#: ../AMC-gui.pl:1758
+#: ../AMC-gui.pl:1807
 msgid "You must choose another name to create a project."
 msgstr "يجب عليك اختيار اسم آخر لإنشاء المشروع."
 
-#: ../AMC-gui.pl:1790 ../AMC-gui.pl:3812
+#: ../AMC-gui.pl:1839 ../AMC-gui.pl:3898
 #, perl-format
 msgid "Error writing to options file %s: %s"
 msgstr "تم كتابة الخطأ في الملف %s: %s"
 
-#: ../AMC-gui.pl:1820
+#: ../AMC-gui.pl:1869
 msgid ""
 "Papers analysis was already made on the basis of the current working "
 "documents."
 msgstr "تم تحليل الأوراق على أساس المستند الحالي."
 
-#: ../AMC-gui.pl:1821
+#: ../AMC-gui.pl:1870
 msgid "You already made the examination on the basis of these documents."
 msgstr "لقد قمت بالفعل بإنتاج الاختبار على أساس المستند الحالي."
 
-#: ../AMC-gui.pl:1822
+#: ../AMC-gui.pl:1871
 msgid ""
 "If you modify working documents, you will not be capable any more of "
 "analyzing the papers you have already distributed!"
@@ -475,11 +521,11 @@ msgstr ""
 "إذا قمت بتعديل المستند, فلن تكون قادراً على تحليل أوراق الاختبار التي تم "
 "طبعتها سابقا."
 
-#: ../AMC-gui.pl:1823 ../AMC-gui.pl:1846
+#: ../AMC-gui.pl:1872 ../AMC-gui.pl:1895
 msgid "Do you wish to continue?"
 msgstr "هل ترغب بالاستمرار؟"
 
-#: ../AMC-gui.pl:1824 ../AMC-gui.pl:1847
+#: ../AMC-gui.pl:1873 ../AMC-gui.pl:1896
 msgid ""
 "Click on Validate to erase the former layouts and update working documents, "
 "or on Cancel to cancel this operation."
@@ -487,74 +533,79 @@ msgstr ""
 "انقر على زر Validate لمحو تصميم المستند وإعادة تحديثه, أو على زر إلغاء "
 "لإلغاء هذه العملية."
 
-#: ../AMC-gui.pl:1825 ../AMC-gui.pl:1848
+#: ../AMC-gui.pl:1874 ../AMC-gui.pl:1897
 msgid "To allow the use of an already printed question, cancel!"
 msgstr "والسماح باستخدام أوراق الاختبار التي سبق طباعتها!"
 
-#: ../AMC-gui.pl:1844
+#: ../AMC-gui.pl:1893
 msgid "Layouts are already calculated for the current documents."
 msgstr "تم تنفيذ التصميم للمستند الحالي."
 
-#: ../AMC-gui.pl:1845
+#: ../AMC-gui.pl:1894
 msgid ""
 "Updating working documents, the layouts will become obsolete and will thus "
 "be erased."
 msgstr "لتحديث المستند الحالي, التصميمات القديمة سوف تمحى."
 
-#: ../AMC-gui.pl:1884
+#: ../AMC-gui.pl:1933
 msgid "Documents update..."
 msgstr "تحديث المستندات..."
 
-#: ../AMC-gui.pl:1895
+#: ../AMC-gui.pl:1944
 msgid "Errors while compiling LaTeX source."
 msgstr "خطأ في تصيير كود لتيك"
 
-#: ../AMC-gui.pl:1896
+#: ../AMC-gui.pl:1945
 msgid "You have to correct LaTeX source and re-run documents update."
 msgstr "يجب عليك تصحيح كود لتيك ثم إعادة تحديث المستند."
 
-#: ../AMC-gui.pl:1897
+#. TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+#: ../AMC-gui.pl:1947
 #, perl-format
 msgid "See the LaTeX log in '%s' below."
 msgstr "انظر سجل لتيك في الاسفل '%s' ."
 
-#: ../AMC-gui.pl:1897 ../AMC-gui-main_window.glade:2739
+#. TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+#: ../AMC-gui.pl:1949 ../AMC-gui-main_window.glade:2739
 msgid "Command output details"
 msgstr "أوامر تفاصيل المخرجات"
 
-#: ../AMC-gui.pl:1898
+#: ../AMC-gui.pl:1950
 msgid "Use LaTeX editor or latex command for a precise diagnosis."
 msgstr "استخدام محرر لتيك أو أوامر لتيك للتشخيص الدقيق."
 
-#: ../AMC-gui.pl:1898
+#: ../AMC-gui.pl:1950
 msgid "Only first ten errors written"
 msgstr "كتابة اول عشرة أخطاء فقط"
 
-#: ../AMC-gui.pl:1909
+#: ../AMC-gui.pl:1961
 msgid "Working documents successfully generated."
 msgstr "تم انتاج المستندات."
 
-#: ../AMC-gui.pl:1910
+#. TRANSLATORS: Here, "them" refers to the working documents.
+#: ../AMC-gui.pl:1963
 msgid "You can take a look at them double-clicking on the list."
 msgstr "يمكنك إلقاء نظرة عليها بالنقر المزدوج على القائمة."
 
-#: ../AMC-gui.pl:1911
+#. TRANSLATORS: Here, "they" refers to the working documents.
+#: ../AMC-gui.pl:1965
 msgid "If they are correct, proceed to layouts detection..."
 msgstr "إذا كانت صحيح, انتقل إلى فحص التصميم..."
 
-#: ../AMC-gui.pl:1927
+#: ../AMC-gui.pl:1981
 msgid "Your question has a separate answers page."
 msgstr "إجابات الأسئلة في صفحة منفصلة."
 
-#: ../AMC-gui.pl:1928
+#: ../AMC-gui.pl:1982
 msgid "In this case, letters are shown inside boxes."
 msgstr "في هذه الحالة, سيتم عرض الحروف داخل المربعات."
 
-#: ../AMC-gui.pl:1929
+#: ../AMC-gui.pl:1983
 msgid "Your question is set to present labels inside the boxes to be ticked."
 msgstr "سؤالك معين بحيث تعلّم المربعات عند الإجابة."
 
-#: ../AMC-gui.pl:1931
+#. TRANSLATORS: Here, %s will be replaced with the translation of "darkness threshold".
+#: ../AMC-gui.pl:1986
 #, perl-format
 msgid ""
 "For better ticking detection, ask students to fill out completely boxes, and "
@@ -563,38 +614,42 @@ msgstr ""
 "لأفضل نتيجة اطلب من طلابك تظليل المربعات بالكامل, واجعل قيمة \"%s\" حول 0.5 "
 "لهذا المشروع."
 
-#: ../AMC-gui.pl:1932
+#: ../AMC-gui.pl:1987
 #, perl-format
 msgid "At the moment, this parameter is set to %.02f."
 msgstr "في الوقت الحالي, هذه القيمة تساوي %.02f."
 
-#: ../AMC-gui.pl:1933
+#: ../AMC-gui.pl:1988
 msgid "Would you like to set it to 0.5?"
 msgstr "هل ترغب بجعلها 0.5 ؟"
 
-#: ../AMC-gui.pl:1934
+#. TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
+#: ../AMC-gui.pl:1990
 msgid "darkness threshold"
 msgstr "عتبة الإظلام"
 
-#: ../AMC-gui.pl:1992
+#. TRANSLATORS: There is a menu for choosing stapling or not from the printer. When stapling is not available on the chosen printer, this is the only offered choice.
+#: ../AMC-gui.pl:2050
 msgid "(not supported)"
 msgstr "(غير مدعوم)"
 
-#: ../AMC-gui.pl:2007
+#. TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
+#: ../AMC-gui.pl:2066
 msgid ""
 "You don't have any question to print: please check your LaTeX source and "
 "update working documents first."
 msgstr "لا توجد أسئلة لطباعتها: فضلا افحص ملف لتيك و حدث المستندات أولا."
 
-#: ../AMC-gui.pl:2022
+#. TRANSLATORS: Message when AMC does not know about the subject pages that has been generated. Usualy this means that the layout computation step has not been made.
+#: ../AMC-gui.pl:2082
 msgid "Question's pages are not detected."
 msgstr "لم يتم فحص أوراق الأسئلة."
 
-#: ../AMC-gui.pl:2023
+#: ../AMC-gui.pl:2083
 msgid "Perhaps you forgot to compute layouts?"
 msgstr "ربما نسيت تنفيذ التصميم؟"
 
-#: ../AMC-gui.pl:2052
+#: ../AMC-gui.pl:2112
 #, perl-format
 msgid ""
 "Printing with method '%s' needs some perl modules that are not installed: "
@@ -603,11 +658,11 @@ msgstr ""
 "استخدام هذه الطابعة '%s' يتطلب بعض ملفات بيرل غير المركبة: %s. فضلا قم "
 "بتركيبها أو اختر طابعة أخرى."
 
-#: ../AMC-gui.pl:2053 ../AMC-gui.pl:2072
+#: ../AMC-gui.pl:2113 ../AMC-gui.pl:2132
 msgid "CUPS"
 msgstr "CUPS"
 
-#: ../AMC-gui.pl:2071
+#: ../AMC-gui.pl:2131
 #, perl-format
 msgid ""
 "You chose printing method '%s' but there are no configured printer in CUPS. "
@@ -616,19 +671,20 @@ msgstr ""
 "لقد اخترت جهاز الطباعة '%s' لكنها غير معدّة. فضلا قم بإعدادها أو اختر طابعة "
 "أخرى."
 
-#: ../AMC-gui.pl:2130
+#. TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
+#: ../AMC-gui.pl:2191
 msgid "papers"
 msgstr "الاوراق"
 
-#: ../AMC-gui.pl:2205
+#: ../AMC-gui.pl:2266
 msgid "You did not select any sheet to print..."
 msgstr "لم يتم اختيار ورقة لطباعتها..."
 
-#: ../AMC-gui.pl:2224 ../AMC-gui.pl:2240
+#: ../AMC-gui.pl:2285 ../AMC-gui.pl:2301
 msgid "You selected only a few sheets to print."
 msgstr "تم تحديد عدد قيل من الأوراق لطباعتها."
 
-#: ../AMC-gui.pl:2225
+#: ../AMC-gui.pl:2286
 msgid ""
 "As students are requested to write on more than one page, you must create as "
 "many exam sheets as necessary for all your students, with different sheets "
@@ -637,7 +693,7 @@ msgstr ""
 "عندما نريد من الطلاب أن يجيبوا على أكثر من صفحة واحدة ، يجب أن تكون كل ورقة "
 "برقم معرف مختلف، ثم يتم طباعتها كلها."
 
-#: ../AMC-gui.pl:2226
+#: ../AMC-gui.pl:2287
 msgid ""
 "If you print one or several sheets and photocopy them to have enough for all "
 "the students, <b>you won't be able to\n"
@@ -647,47 +703,47 @@ msgstr ""
 "ولهذا <b>فإن برنامج آمسي لن يتعرف عليها\n"
 "</b>"
 
-#: ../AMC-gui.pl:2228
+#: ../AMC-gui.pl:2289
 msgid "Do you want to print the selected sheets anyway?"
 msgstr "هل ترغب بطباعة الأوراق المحددة على أية حال؟"
 
-#: ../AMC-gui.pl:2241
+#: ../AMC-gui.pl:2302
 msgid ""
 "Are you going to photocopy some printed subjects before giving them to the "
 "students?"
 msgstr "هل ستقوم بتصوير بعض أوراق الأسئلة قبل توزيعها على الطلاب؟"
 
-#: ../AMC-gui.pl:2242
+#: ../AMC-gui.pl:2303
 msgid "If so, the corresponding option will be set for this project."
 msgstr "إذا كان الأمر كذلك، سيتم تعيين الخيار المقابل لهذا المشروع."
 
-#: ../AMC-gui.pl:2243
+#: ../AMC-gui.pl:2304
 msgid ""
 "However, you will be able to change this when giving your first scans to AMC."
 msgstr ""
 "ومع ذلك، سوف تكون قادرة على تغيير هذا عند تنفيذ المسح لأول أوراق في AMC."
 
-#: ../AMC-gui.pl:2276
+#: ../AMC-gui.pl:2337
 msgid "Print papers one by one..."
 msgstr "طباعة الاوراق ورقة ورقة..."
 
-#: ../AMC-gui.pl:2317
+#: ../AMC-gui.pl:2378
 msgid "Working documents are in an old format, which is not supported anymore."
 msgstr "المستند مصمم بهيئة قديمة , والتي لم تعد مدعومة من البرنامج."
 
-#: ../AMC-gui.pl:2318
+#: ../AMC-gui.pl:2379
 msgid "Please generate again the working documents!"
 msgstr "فضلا انتج المستند الحالي مرة أخرى!"
 
-#: ../AMC-gui.pl:2332
+#: ../AMC-gui.pl:2393
 msgid "Detecting layouts..."
 msgstr "فحص التصميم..."
 
-#: ../AMC-gui.pl:2346
+#: ../AMC-gui.pl:2407
 msgid "No layout detected."
 msgstr "لم يتم العثور على تصميم."
 
-#: ../AMC-gui.pl:2347
+#: ../AMC-gui.pl:2408
 msgid ""
 "<b>Don't go through the examination</b> before fixing this problem, "
 "otherwise you won't be able to use AMC for correction."
@@ -695,11 +751,11 @@ msgstr ""
 "<b>لا تستمر في إعداد الاختبار</b> قبل إصلاح المشكلة, لأن المشكلة ستعيق "
 "استخدام البرنامج في التصحيح."
 
-#: ../AMC-gui.pl:2353
+#: ../AMC-gui.pl:2414
 msgid "Layouts are detected."
 msgstr "تم فحص التصميم."
 
-#: ../AMC-gui.pl:2354
+#: ../AMC-gui.pl:2415
 #, perl-format
 msgid ""
 "You can check all is correct clicking on button <i>%s</i> and looking at "
@@ -708,36 +764,37 @@ msgstr ""
 "يمكنك التأكد بأن كل شئ صحيح بالنقر على زر <i>%s</i> ومشاهدة صفحة الأسئلة وهل "
 "المربعات في مكانها المطلوب."
 
-#: ../AMC-gui.pl:2354 ../AMC-gui-main_window.glade:637
+#: ../AMC-gui.pl:2415 ../AMC-gui-main_window.glade:637
 msgid "Check layouts"
 msgstr "مشاهدة التصميم"
 
-#: ../AMC-gui.pl:2355
+#: ../AMC-gui.pl:2416
 msgid "Then you can proceed to printing and to examination."
 msgstr "ثم يمكنك البدء بالطباعة وإجراء الاختبار."
 
-#: ../AMC-gui.pl:2417
+#: ../AMC-gui.pl:2478
 msgid "No layout for this project."
 msgstr "لا يوجد تصميم لهذا المشروع."
 
-#: ../AMC-gui.pl:2418
+#. TRANSLATORS: Here, the first %s will be replaced with "Layout detection" (a button title), and the second %s with "Preparation" (the tab title where one can find this button).
+#: ../AMC-gui.pl:2480
 #, perl-format
 msgid "Please use button <i>%s</i> in <i>%s</i> before manual data capture."
 msgstr "فضلا استخدم هذا الزر <i>%s</i>في <i>%s</i> قبل قراءة البيانات يدويا."
 
-#: ../AMC-gui.pl:2418
-msgid "Compute layouts"
-msgstr "تطبيق التصميم"
+#: ../AMC-gui.pl:2481 ../AMC-gui-main_window.glade:588
+msgid "Layout detection"
+msgstr "فحص التصميم"
 
-#: ../AMC-gui.pl:2418 ../AMC-gui-main_window.glade:734
+#: ../AMC-gui.pl:2482 ../AMC-gui-main_window.glade:734
 msgid "Preparation"
 msgstr "التجهيز"
 
-#: ../AMC-gui.pl:2469
+#: ../AMC-gui.pl:2533
 msgid "Automatic data capture can be done in two different modes:"
 msgstr "يمكن قراءة البيانات آليا بطريقتين مختلفتين:"
 
-#: ../AMC-gui.pl:2470
+#: ../AMC-gui.pl:2538
 msgid ""
 "In the most robust one, you give a different sheet (with a different sheet "
 "number) to every student. You must not photocopy subjects before "
@@ -746,7 +803,7 @@ msgstr ""
 "من المهم, إعطاء ورقة مختلفة (في رقم تسلسلها) لكل طالب. يجب أن لا تقوم بتصوير "
 "أوراق الأسئلة قبل توزيعها."
 
-#: ../AMC-gui.pl:2471
+#: ../AMC-gui.pl:2543
 msgid ""
 "In the second one (which can be used only if answer sheets to be scanned has "
 "one page) you can photocopy answer sheets and give the same subject to "
@@ -755,45 +812,48 @@ msgstr ""
 "النقطة الثانية (في حالة كون نموذج الإجابة من ورقة واحدة) تستطيع تصوير نماذج "
 "الإجابة من ورقة واحدة وتوزيعها على الطلاب."
 
-#: ../AMC-gui.pl:2472
+#: ../AMC-gui.pl:2544
 msgid "After the first automatic capture, you can't switch to the other mode."
 msgstr ""
 "بعد البدء بالقراءة الآلية لأول ورقة, ليس باستطاعتك التغيير للنظام الآخر."
 
-#: ../AMC-gui.pl:2543
+#: ../AMC-gui.pl:2615
 #, perl-format
 msgid "Splitting multi-page PDF file %s..."
 msgstr "تقسيم صفحات بي دي اف %s..."
 
-#: ../AMC-gui.pl:2609
+#. TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
+#: ../AMC-gui.pl:2682
 #, perl-format
 msgid "Converting %s to bitmap..."
 msgstr "تحويل %s إلى صورة رقمية..."
 
-#: ../AMC-gui.pl:2610
+#. TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
+#: ../AMC-gui.pl:2684
 #, perl-format
 msgid "Splitting multi-page image %s..."
 msgstr "تقسيم الصورة المتعددة %s..."
 
-#: ../AMC-gui.pl:2654
+#: ../AMC-gui.pl:2728
 msgid "Copying scans to project directory..."
 msgstr "نسخ الأوراق الممسوحة لمجلد المشروع..."
 
-#: ../AMC-gui.pl:2702
+#: ../AMC-gui.pl:2776
 msgid "Automatic data capture..."
 msgstr "قراءة البيانات آليا..."
 
 #. TRANSLATORS: Names list file : (none)
-#: ../AMC-gui.pl:2773
+#: ../AMC-gui.pl:2847
 msgid "(none)"
 msgstr "(لا شئ)"
 
-#: ../AMC-gui.pl:2790
+#: ../AMC-gui.pl:2864
 #, perl-format
 msgid "Unsuitable names file: %d errors, first on line %d."
 msgstr "ملف الأسماء غير صالح: %d خطأ , بداية من السطر %d ."
 
-#: ../AMC-gui.pl:2805
+#. TRANSLATORS: Here, do not translate 'name' and 'surname' (except in french), as the column names in the students list file has to be named in english in order to be properly detected.
+#: ../AMC-gui.pl:2880
 #, perl-format
 msgid ""
 "Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or "
@@ -802,16 +862,17 @@ msgstr ""
 "تم العثور على %d حقول أسماء فارغة في ملف الأسماء <i>%s</i>. تأكد من العمود "
 "الحالي لـ <b>الاسم</b> أو <b>اللقب</b>, واجعلها ممتلئه دائما."
 
-#: ../AMC-gui.pl:2805 ../AMC-gui.pl:2820
+#: ../AMC-gui.pl:2881 ../AMC-gui.pl:2896
 msgid "Edit the names file to correct it, and re-read."
 msgstr "حرر ملف الأسماء لتصحيحه, ثم أعد قراءته."
 
-#: ../AMC-gui.pl:2820
+#: ../AMC-gui.pl:2896
 #, perl-format
 msgid "Found duplicate names: <i>%s</i>. Check that all names are different."
 msgstr "تم العثور على أسماء مكررة: <i>%s</i>. يجب أن تكون الأسماء مختلفة."
 
-#: ../AMC-gui.pl:2849
+#. TRANSLATORS: Here, %s will be replaced with the name of the tab "Data capture".
+#: ../AMC-gui.pl:2926
 #, perl-format
 msgid ""
 "Before associating names to papers, you must choose a students list file in "
@@ -820,55 +881,57 @@ msgstr ""
 "قبل ربط الأسماء بالأوراق , يجب اختيار ملف قائمة الأسماء من لسان التبويب \"%s"
 "\" ."
 
-#: ../AMC-gui.pl:2849 ../AMC-gui-main_window.glade:1143
+#: ../AMC-gui.pl:2927 ../AMC-gui-main_window.glade:1143
 msgid "Data capture"
 msgstr "قراءة البيانات"
 
-#: ../AMC-gui.pl:2857
+#: ../AMC-gui.pl:2935
 msgid ""
 "Please choose a key from primary keys in students list before association."
 msgstr "فضلا حدد المفتاح الرئيسي في قائمة الطلاب قبل الربط."
 
-#: ../AMC-gui.pl:2865
+#: ../AMC-gui.pl:2943
 msgid ""
 "Please choose a code (made with LaTeX command \\AMCcode) before automatic "
 "association."
 msgstr "فضلا اختر الكود (made with LaTeX command \\AMCcode) قبل الربط الآلي."
 
-#: ../AMC-gui.pl:2906
+#. TRANSLATORS: Here, %s will be replaced with "Students identification", which refers to a paragraph in the tab "Marking" from AMC main window.
+#: ../AMC-gui.pl:2985
 #, perl-format
 msgid ""
 "Before associating names to papers, you must choose a students list file in "
 "paragraph \"%s\"."
 msgstr "قبل ربط الاسماء بالاوراق يجب اختيار ملف قائمة الطلاب في  \"%s\"."
 
-#: ../AMC-gui.pl:2906
+#: ../AMC-gui.pl:2986
 msgid "Students identification"
 msgstr "معرفات الطلاب"
 
-#: ../AMC-gui.pl:2925
+#: ../AMC-gui.pl:3005
 msgid "Automatic association..."
 msgstr "الربط لآلي..."
 
-#: ../AMC-gui.pl:2945
+#: ../AMC-gui.pl:3025
 #, perl-format
 msgid "Automatic association completed: %d students recognized."
 msgstr "انجز الربط الآلي: %d طالب تم التعرف عليه."
 
-#: ../AMC-gui.pl:2946
+#. TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
+#: ../AMC-gui.pl:3027
 #, perl-format
 msgid "Please check \"%s\" and \"%s\" values and try again."
 msgstr "فضلا افحص القيمة \"%s\" و \"%s\" ثم اعد المحاولة."
 
-#: ../AMC-gui.pl:2946
+#: ../AMC-gui.pl:3028
 msgid "Primary key from this list"
 msgstr "المفتاح الأساسي من هذه القائمة:"
 
-#: ../AMC-gui.pl:2946
+#: ../AMC-gui.pl:3029
 msgid "Code name for automatic association"
 msgstr "اسم كود ربط أوراق الإجابة بالطلاب آليا"
 
-#: ../AMC-gui.pl:2952
+#: ../AMC-gui.pl:3035
 msgid ""
 "Automatic association is now finished. You can ask for manual association to "
 "check that all is fine and, if necessary, read manually students names which "
@@ -877,14 +940,14 @@ msgstr ""
 "تم إتمام الربط الآلي. تستطيع استخدام الربط اليدوي للتأكد من صحة الربط, وإذا "
 "كان ذلك ضروريا, اقرأ أسماء الطلاب الذين ليس لهم معرفات."
 
-#: ../AMC-gui.pl:3038 ../AMC-gui.pl:3062
+#: ../AMC-gui.pl:3121 ../AMC-gui.pl:3145
 #, perl-format
 msgid ""
 "The primary key from the students list has been set to \"%s\", which is not "
 "the value from the association data."
 msgstr "المفتاح الاساسي في قائمة الطلاب \"%s\" ، غير موجود في بيانات الربط."
 
-#: ../AMC-gui.pl:3039
+#: ../AMC-gui.pl:3122
 #, perl-format
 msgid ""
 "Some manual association data has be found, which will be lost if the primary "
@@ -894,78 +957,80 @@ msgstr ""
 "بعض بيانات الربط اليدوي سيتم فقدها، اذا تم تغيير المفتاح الاساسي. هل تريد "
 "العودة لمفتاح الربط \"%s\" ثم حفظ؟"
 
-#: ../AMC-gui.pl:3063
+#: ../AMC-gui.pl:3146
 msgid ""
 "Automatic papers/students association will be re-run to update the "
 "association data."
 msgstr "الربط الآلي للاوراق/الطلاب سيعاد لتحديث بيانات الربط."
 
-#: ../AMC-gui.pl:3088
+#: ../AMC-gui.pl:3171
 #, perl-format
 msgid "Papers are not yet corrected: use button \"%s\"."
 msgstr "لم يتم تصحيح الأوراق: استخدم الزر \"%s\"."
 
-#: ../AMC-gui.pl:3088 ../AMC-gui-main_window.glade:1240
+#. TRANSLATORS: This is a button: "Mark" is here an action to be called by the user. When clicking this button, the user requests scores to be computed for all students.
+#: ../AMC-gui.pl:3173 ../AMC-gui-main_window.glade:1240
 msgid "Mark"
 msgstr "التصحيح"
 
-#: ../AMC-gui.pl:3122
+#: ../AMC-gui.pl:3207
 msgid "Extracting marking scale..."
 msgstr "استخراج مقياس الدرجات..."
 
-#: ../AMC-gui.pl:3301
+#: ../AMC-gui.pl:3386
 msgid "Computing marks..."
 msgstr "حساب النقاط..."
 
-#: ../AMC-gui.pl:3315
+#. TRANSLATORS: This is the marks mean for all students.
+#: ../AMC-gui.pl:3401
 #, perl-format
 msgid "Mean: %.2f"
 msgstr "المتوسط: %.2f"
 
-#: ../AMC-gui.pl:3318
+#: ../AMC-gui.pl:3404
 msgid "No marks computed"
 msgstr "لم يتم احتساب نقاط"
 
-#: ../AMC-gui.pl:3336
+#: ../AMC-gui.pl:3422
 msgid "No students list file"
 msgstr "ملف قائمة الطلاب غير موجود"
 
-#: ../AMC-gui.pl:3338
+#: ../AMC-gui.pl:3424
 msgid "No primary key from students list file"
 msgstr "لا يوجد مفتاح الأساسي في ملف قائمة الطلاب"
 
-#: ../AMC-gui.pl:3344
+#: ../AMC-gui.pl:3430
 #, perl-format
 msgid "Missing identification for %d answer sheets"
 msgstr "فقد معرفات أوراق الإجابة %d "
 
-#: ../AMC-gui.pl:3346
+#: ../AMC-gui.pl:3432
 msgid "All completed answer sheets are associated with a student name"
 msgstr "جميع أوراق الإجابة تم ربطها بأسماء الطلاب"
 
-#: ../AMC-gui.pl:3401
+#: ../AMC-gui.pl:3487
 msgid "Annotating papers..."
 msgstr "الرصد على الاوراق..."
 
 #. TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-#: ../AMC-gui.pl:3416
+#: ../AMC-gui.pl:3502
 msgid "All_students"
 msgstr "كل_الطلاب"
 
-#: ../AMC-gui.pl:3437
+#: ../AMC-gui.pl:3523
 msgid "Grouping students annotated pages together..."
 msgstr "تجميع أوراق الطلاب المرصودة..."
 
-#: ../AMC-gui.pl:3707
+#: ../AMC-gui.pl:3793
 #, perl-format
 msgid "Project \"%s\" preferences"
 msgstr "تفضيلات مشروع \"%s\" "
 
-#: ../AMC-gui.pl:3710
+#: ../AMC-gui.pl:3796
 msgid "Project preferences"
 msgstr "تفضيلات المشروع"
 
-#: ../AMC-gui.pl:3766
+#: ../AMC-gui.pl:3852
 #, perl-format
 msgid ""
 "You modified \"<b>%s</b>\" value, which is the default value used when "
@@ -975,38 +1040,38 @@ msgstr ""
 "لقد عدلت \"<b>%s</b>\" , والتي تمثل الخيار الافتراضي لإنشاء مشروع جديد. هل "
 "تريد أيضا تغيير \"<b>%s</b>\" لفتح المشروع <i>%s</i> ؟"
 
-#: ../AMC-gui.pl:3866
+#: ../AMC-gui.pl:3952
 msgid "Working documents are not readable"
 msgstr "المستند الحالي غير قابل للقراءة"
 
-#: ../AMC-gui.pl:3869
+#: ../AMC-gui.pl:3955
 msgid "No working documents"
 msgstr "لا يوجد مستند للعمل"
 
-#: ../AMC-gui.pl:3872
+#: ../AMC-gui.pl:3958
 msgid "Working documents last update:"
 msgstr "آخر تحديث للمستند الحالي:"
 
-#: ../AMC-gui.pl:3908
+#: ../AMC-gui.pl:3994
 msgid "No layout"
 msgstr "لا يوجد تصميم"
 
-#: ../AMC-gui.pl:3911
+#: ../AMC-gui.pl:3997
 #, perl-format
 msgid "Processed %d pages"
 msgstr "الصفحات المعالجة %d"
 
-#: ../AMC-gui.pl:3914
+#: ../AMC-gui.pl:4000
 msgid "but some defects were detected."
 msgstr "تم الكشف عن بعض العيوب."
 
-#: ../AMC-gui.pl:3926
+#: ../AMC-gui.pl:4012
 msgid ""
 "The \\namefield command is not used. Writing subjects without name field is "
 "not recommended"
 msgstr "الأمر \\nغير مستخدم. وكتابة مشروع بدون اسم الحقل غير مفضل."
 
-#: ../AMC-gui.pl:3927
+#: ../AMC-gui.pl:4013
 msgid ""
 "The \\namefield command is used several times for the same subject. This "
 "should not be the case, as each student should write his name only once"
@@ -1014,16 +1079,16 @@ msgstr ""
 "الأمر \\nمستخدم لأكثر من مرة في نفس المشروع. هذا غير مسموح به , كما أن "
 "الطالب لا يسمح له بكتابة اسمه إلا على ورقة إجابة واحدة."
 
-#: ../AMC-gui.pl:3928
+#: ../AMC-gui.pl:4014
 msgid "No box to be ticked"
 msgstr "لا يوجد مربعات لتعليمها"
 
-#: ../AMC-gui.pl:3929
+#: ../AMC-gui.pl:4015
 msgid ""
 "The corner marks and binary boxes are not at the same location on all pages"
 msgstr "علامات الأركان ومربعات المعرف ليست عند نفس المكان في كل الأوراق"
 
-#: ../AMC-gui.pl:3936
+#: ../AMC-gui.pl:4022
 msgid ""
 "Some potential defects were detected for this subject. Correct them in the "
 "LaTeX source and update the working documents."
@@ -1031,54 +1096,54 @@ msgstr ""
 "تم الكشف عن بعض العيوب المحتملة في المشروع. فضلا صححها في كود لتيك ثم حدثّ "
 "وثائق العمل."
 
-#: ../AMC-gui.pl:3942
+#: ../AMC-gui.pl:4028
 #, perl-format
 msgid "(See for exemple pages %s and %s)"
 msgstr "(كمثال أنظر الصفحات %s و %s )"
 
-#: ../AMC-gui.pl:3949
+#: ../AMC-gui.pl:4035
 #, perl-format
 msgid "(Concerns %1$d sheets, see for exemple sheet %2$d)"
 msgstr "(متعلقات الأوراق %1$d ، كمثال أنظر الورقة %2$d)"
 
-#: ../AMC-gui.pl:4011
+#: ../AMC-gui.pl:4097
 #, perl-format
 msgid "Data capture from %d complete papers and %d incomplete papers"
 msgstr "بيانات مستخرجة من %d ورقة مكتملة و %d ورقة غير مكتملة"
 
-#: ../AMC-gui.pl:4015
+#: ../AMC-gui.pl:4101
 #, perl-format
 msgid "Data capture from %d complete papers"
 msgstr "بيانات مقروءة من %d ورقة أجابة كاملة"
 
 #. TRANSLATORS: this text points out that no data capture has been made yet.
-#: ../AMC-gui.pl:4020
+#: ../AMC-gui.pl:4106
 msgid "No data"
 msgstr "لا توجد بيانات"
 
-#: ../AMC-gui.pl:4028
+#: ../AMC-gui.pl:4114
 msgid "All scans were properly recognized."
 msgstr "تم التعرف على جميع الأوراق الممسوحة بشكل صحيح."
 
-#: ../AMC-gui.pl:4036
+#: ../AMC-gui.pl:4122
 #, perl-format
 msgid "%d scans were not recognized."
 msgstr "الأوراق %d لم يتم التعرف عليها."
 
-#: ../AMC-gui.pl:4069
+#: ../AMC-gui.pl:4155
 msgid "Looking for analysis..."
 msgstr "انتظار المعالجة..."
 
-#: ../AMC-gui.pl:4109
+#: ../AMC-gui.pl:4195
 msgid "Automatic data capture now completed."
 msgstr "تمت قراءة البيانات آليا."
 
-#: ../AMC-gui.pl:4110
+#: ../AMC-gui.pl:4196
 #, perl-format
 msgid "It is not complete (missing pages from %d papers)."
 msgstr "إنها غير مكتملة (أوراق مفقودة من  %d )."
 
-#: ../AMC-gui.pl:4111
+#: ../AMC-gui.pl:4197
 msgid ""
 "You can analyse data capture quality with some indicators values in analysis "
 "list:"
@@ -1086,7 +1151,7 @@ msgstr ""
 "تستطيع التحكم في جودة قراءة وتحليل البيانات عن طريق بعض القيم في قائمة "
 "التحليل:"
 
-#: ../AMC-gui.pl:4113
+#: ../AMC-gui.pl:4199
 #, perl-format
 msgid ""
 "- <b>%s</b> represents positioning gap for the four corner marks. Great "
@@ -1095,7 +1160,7 @@ msgstr ""
 "- <b>%s</b> تمثل الفراغ بين مواقع العلامات في أركان الصفحة الأربعة . كلما "
 "كانت القيمة أكبر كلما كانت الصفحة مشوهة."
 
-#: ../AMC-gui.pl:4115
+#: ../AMC-gui.pl:4201
 #, perl-format
 msgid ""
 "- great values of <b>%s</b> are seen when darkness ratio is very close to "
@@ -1103,7 +1168,7 @@ msgid ""
 msgstr ""
 "- أفضل قيمة ل <b>%s</b> تكون عندما قريبة جداً من درجة إظلام أو تعتيم المربعات."
 
-#: ../AMC-gui.pl:4117
+#: ../AMC-gui.pl:4203
 #, perl-format
 msgid ""
 "You can also look at the scan adjustment (<i>%s</i>) and ticked and unticked "
@@ -1112,28 +1177,28 @@ msgstr ""
 "يمكنك أيضا الاستعراض في اداة ضبط المسح (<i>%s</i>) وتعليم أو عدم تعليم "
 "المربعات (<i>%s</i>) بالنقر على زر الفارة الأيمن في الجدول <i>%s</i> ."
 
-#: ../AMC-gui.pl:4117
+#: ../AMC-gui.pl:4203
 msgid "Diagnosis"
 msgstr "الفحص"
 
-#: ../AMC-gui.pl:4144
+#: ../AMC-gui.pl:4230
 msgid "Pages that miss data capture to complete students sheets:"
 msgstr "الأوراق التي تحتوي على بيانات مفقودة لإكمال أوراق الطلاب:"
 
-#: ../AMC-gui.pl:4250
+#: ../AMC-gui.pl:4336
 #, perl-format
 msgid "Error loading scan %s"
 msgstr "فشل تحميل الأوراق الممسوحة %s"
 
-#: ../AMC-gui.pl:4254
+#: ../AMC-gui.pl:4340
 msgid "No scan selected"
 msgstr "لا توجد اوراق ممسوحة"
 
-#: ../AMC-gui.pl:4317
+#: ../AMC-gui.pl:4403
 msgid "Making diagnostic image..."
 msgstr "قراءة الصورة..."
 
-#: ../AMC-gui.pl:4340
+#: ../AMC-gui.pl:4426
 #, perl-format
 msgid ""
 "Names list file for this project is:\n"
@@ -1142,81 +1207,83 @@ msgstr ""
 "ملف قائمة الاسماء لهذا المشروع:\n"
 "%s"
 
-#: ../AMC-gui.pl:4341
+#: ../AMC-gui.pl:4427
 msgid "(no file)"
 msgstr "(لا يوجد ملف)"
 
-#: ../AMC-gui.pl:4407
+#: ../AMC-gui.pl:4493
 msgid "(no description)"
 msgstr "(لا يوجد وصف)"
 
-#: ../AMC-gui.pl:4488 ../AMC-gui-source_latex_dialog.glade:76
+#. TRANSLATORS: This is a column title for the list of files to be included in a template being created.
+#: ../AMC-gui.pl:4575 ../AMC-gui-source_latex_dialog.glade:76
 msgid "file"
 msgstr "ملف"
 
-#: ../AMC-gui.pl:4564
+#: ../AMC-gui.pl:4651
 msgid "Add files to template"
 msgstr "إضافة ملف للنموذج"
 
-#: ../AMC-gui.pl:4584
+#: ../AMC-gui.pl:4671
 msgid ""
 "When making a template, you can only add files that are within the project "
 "directory."
 msgstr "عند عمل نموذج , يمكن إضافة الملفات الموجودة في مجلد المشروع فقط."
 
-#: ../AMC-gui.pl:4674 ../AMC-gui-source_latex_dialog.glade:93
+#. TRANSLATORS: This is a column name for the list of available templates, when creating a new project based on a template.
+#: ../AMC-gui.pl:4762 ../AMC-gui-source_latex_dialog.glade:93
 msgid "template"
 msgstr "نموذج"
 
-#: ../AMC-gui.pl:4719
+#: ../AMC-gui.pl:4807
 msgid "LaTeX file (*.tex)"
 msgstr "ملف لتيك (*.tex)"
 
-#: ../AMC-gui.pl:4750
+#: ../AMC-gui.pl:4838
 msgid "Archive (zip, tgz)"
 msgstr "ارشيف (zip, tgz)"
 
-#: ../AMC-gui.pl:4798
+#: ../AMC-gui.pl:4886
 #, perl-format
 msgid "Nothing extracted from archive %s. Check it."
 msgstr "لم يتم استخراج شئ من الأرشيف %s . فضلا افحص الملف."
 
-#: ../AMC-gui.pl:4933
+#: ../AMC-gui.pl:5021
 #, perl-format
 msgid ""
 "File %s already exists in project directory: do you wnant to replace it?"
 msgstr "الملف %s موجود في مجلد المشروع: هل تريد استبداله؟"
 
-#: ../AMC-gui.pl:4934
+#: ../AMC-gui.pl:5022
 msgid ""
 "Click yes to replace it and loose pre-existing contents, or No to cancel "
 "source file import."
 msgstr "انقر نعم لاستبداله, أو لا لإلغاء استيراد الملف المصدري."
 
-#: ../AMC-gui.pl:4950
+#: ../AMC-gui.pl:5038
 msgid "LaTeX file has been copied to project directory."
 msgstr "تم نسخ ملف لتيك إلى مجلد المشروع."
 
-#: ../AMC-gui.pl:4950
+#: ../AMC-gui.pl:5038
 #, perl-format
 msgid "You can now edit it with button \"%s\" or with any editor."
 msgstr "يمكنك تحريره بالنقر على الزر \"%s\" أو أي محرر آخر."
 
-#: ../AMC-gui.pl:4950 ../AMC-gui-main_window.glade:345
+#: ../AMC-gui.pl:5038 ../AMC-gui-main_window.glade:345
 msgid "Edit LaTeX file"
 msgstr "تحرير ملف لتيك"
 
-#: ../AMC-gui.pl:4958
+#: ../AMC-gui.pl:5046
 #, perl-format
 msgid "Error copying source file: %s"
 msgstr "فشل نسخ الملف المصدري: %s"
 
-#: ../AMC-gui.pl:4988
+#: ../AMC-gui.pl:5076
 #, perl-format
 msgid "project %s"
 msgstr "المشروع  %s"
 
-#: ../AMC-gui.pl:5104
+#: ../AMC-gui.pl:5192
 #, perl-format
 msgid ""
 "You did not save project <i>%s</i> options, which have been modified: do you "
@@ -1225,18 +1292,18 @@ msgstr ""
 "لم تقم بحفظ خيارات المشروع <i>%s</i>, التي قمت بتعديلها: هل ترغب بحفظها قبل "
 "الخروج؟"
 
-#: ../AMC-gui.pl:5140
+#: ../AMC-gui.pl:5228
 msgid ""
 "You did not save main options, which have been modified: do you want to save "
 "them before leaving?"
 msgstr "لم تقم بحفظ الخيارات الرئيسية التي قمت بتعديلها: هل ترغب بحفظها؟"
 
-#: ../AMC-gui.pl:5159
+#: ../AMC-gui.pl:5247
 msgid ""
 "In order to send a useful bug report, please attach the following documents:"
 msgstr "لإرسال تقرير تتبع الأخطاء , فضلا ارفق المستندات التالية:"
 
-#: ../AMC-gui.pl:5160
+#: ../AMC-gui.pl:5248
 msgid ""
 "an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the "
 "<b>project directory</b>, <b>scan files</b> and <b>configuration directory</"
@@ -1246,7 +1313,7 @@ msgstr ""
 "<b>الملفات الممسوحة</b>  و <b>مسار الإعدادات</b> , وذلك للاطلاع على المشكلة "
 "وتحليلها."
 
-#: ../AMC-gui.pl:5161
+#: ../AMC-gui.pl:5249
 msgid ""
 "the <b>log file</b> produced when the debugging mode (in Help menu) is "
 "checked. Please try to reproduce the bug with this mode activated."
@@ -1254,26 +1321,26 @@ msgstr ""
 "<b>ملف السجل</b> سيتم إنتاجه عندما يكون نظام التتبع مفعّل من قائمة المساعدة. "
 "فضلا حاول إعادة إنتاج الملف بعد تفعيل التتبع."
 
-#: ../AMC-gui.pl:5162
+#: ../AMC-gui.pl:5250
 #, perl-format
 msgid "Bug reports can be filled at %s or sent to %s"
 msgstr "تقرير تتبع الأخطاء سيتم حفظه في %s أو إرساله إلى %s"
 
-#: ../AMC-gui.pl:5196
+#: ../AMC-gui.pl:5286
 msgid "There are no annotated corrected answer sheets to send."
 msgstr "لم يتم تصحيح الأوراق: استخدم الزر \"%s\"."
 
-#: ../AMC-gui.pl:5199
+#: ../AMC-gui.pl:5289
 msgid "Please group the annotated sheets to PDF files to be able to send them."
 msgstr "فضلا جمع أوراق الطلاب المرصودة في ملفات pdf لكي تصبح قابلة للإرسال."
 
-#: ../AMC-gui.pl:5200
+#: ../AMC-gui.pl:5290
 msgid ""
 "Please annotate answer sheets and group them to PDF files to be able to send "
 "them."
 msgstr "فضلا قم برصد أوراق الإجابة وصدرها على شكل pdf لكي تصبح قابلة للإرسال."
 
-#: ../AMC-gui.pl:5230
+#: ../AMC-gui.pl:5320
 #, perl-format
 msgid ""
 "Sending emails requires some perl modules that are not installed: %s. Please "
@@ -1282,24 +1349,25 @@ msgstr ""
 "إرسال البريد يتطلب بعض وحدات لغة بيرل والتي لم يتم تركيبها: %s . فضلا قم "
 "بتركيبها ثم أعد المحاولة."
 
-#: ../AMC-gui.pl:5248
+#: ../AMC-gui.pl:5338
 #, perl-format
 msgid "The email address you entered (%s) is not correct."
 msgstr "البريد الإلكتروني الذي أدخلته (%s) غير صحيح."
 
-#: ../AMC-gui.pl:5250
+#: ../AMC-gui.pl:5340
 msgid "Please edit your preferencies to correct your email address."
 msgstr "فضلا حرر الخيارات لتصحيح بريدك الإلكتروني."
 
-#: ../AMC-gui.pl:5252
+#: ../AMC-gui.pl:5342
 msgid "You did not enter your email address."
 msgstr "لم تكتب بريدك الإلكتروني."
 
-#: ../AMC-gui.pl:5253
+#: ../AMC-gui.pl:5343
 msgid "Please edit the preferencies to set your email address."
 msgstr "فضلا حرر الخيارات لتعيين بريدك الإلكتروني."
 
-#: ../AMC-gui.pl:5273
+#. TRANSLATORS: Do not translate the 'sendmail' word.
+#: ../AMC-gui.pl:5364
 #, perl-format
 msgid ""
 "The <i>sendmail</i> program cannot be found at the location you specified in "
@@ -1308,7 +1376,7 @@ msgstr ""
 "برنامج <i>خادم البريد</i>  لم يتم العثور عليه في الموقع الذي حددته في "
 "التفضيلات (%s). فضلا حدث التكوين."
 
-#: ../AMC-gui.pl:5301
+#: ../AMC-gui.pl:5392
 msgid ""
 "No email addresses has been found in the students list file. You need to "
 "write the students addresses in a column of this file."
@@ -1316,49 +1384,53 @@ msgstr ""
 "لا يوجد بريد إلكتروني في ملف قائمة الطلاب. تحتاج إلى كتابة البرد الإلكترونية "
 "للطلاب في عمود داخل هذا الملف."
 
-#: ../AMC-gui.pl:5330
+#. TRANSLATORS: This is the title of a column containing copy numbers in a table showing all annotated answer sheets, when sending them to the students by email.
+#: ../AMC-gui.pl:5422
 msgid "copy"
 msgstr "نسخ"
 
-#: ../AMC-gui.pl:5340
+#. TRANSLATORS: This is the title of a column containing students email addresses in a table showing all annotated answer sheets, when sending them to the students by email.
+#: ../AMC-gui.pl:5434
 msgid "email"
 msgstr "البريد الإلكتروني"
 
-#: ../AMC-gui.pl:5418
+#: ../AMC-gui.pl:5512
 msgid "Sending emails..."
 msgstr "إرسال البرد الإلكترونية..."
 
-#: ../AMC-gui.pl:5427
+#: ../AMC-gui.pl:5521
 #, perl-format
 msgid "%d message(s) has been sent."
 msgstr "تم إرسال الرسالة %d ."
 
-#: ../AMC-gui.pl:5494
+#. TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
+#: ../AMC-gui.pl:5589
 msgid "column"
 msgstr "العمود"
 
-#: ../AMC-gui.pl:5502
+#: ../AMC-gui.pl:5597
 msgid "<full name>"
 msgstr "<الاسم الكامل>"
 
-#: ../AMC-gui.pl:5503
+#: ../AMC-gui.pl:5598
 msgid "<student identifier>"
 msgstr "<معرفات الطلاب>"
 
-#: ../AMC-gui.pl:5504
+#: ../AMC-gui.pl:5599
 msgid "<student copy>"
 msgstr "<ورقة الطالب>"
 
-#: ../AMC-gui.pl:5550
+#: ../AMC-gui.pl:5645
 #, perl-format
 msgid "I don't find the command %s."
 msgstr "لم يتم العثور على الأمر %s."
 
-#: ../AMC-gui.pl:5551
+#: ../AMC-gui.pl:5646
 msgid "Perhaps LaTeX is not installed?"
 msgstr "ربما لم يتم تركيب لتيك؟"
 
-#: ../AMC-gui.pl:5554
+#. TRANSLATORS: Do not translate 'auto-multiple-choice latex-link', which is a command to be typed on MacOsX
+#: ../AMC-gui.pl:5650
 msgid ""
 "The style file automultiplechoice.sty seems to be unreachable. Try to use "
 "command 'auto-multiple-choice latex-link' as root to fix this."
@@ -2313,10 +2385,6 @@ msgstr "السؤال"
 msgid "Solution"
 msgstr "الاجابة"
 
-#: ../AMC-gui-main_window.glade:588
-msgid "Layout detection"
-msgstr "فحص التصميم"
-
 #: ../AMC-gui-main_window.glade:620
 msgid "Warnings"
 msgstr "تحذير"
@@ -2693,31 +2761,31 @@ msgstr "عدد الاعمدة"
 msgid "Show all"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Association.glade:307
+#: ../AMC-perl/AMC/Gui/Association.glade:308
 msgid "associated"
 msgstr "ربط"
 
-#: ../AMC-perl/AMC/Gui/Association.glade:312
+#: ../AMC-perl/AMC/Gui/Association.glade:313
 msgid ""
 "Unticking this box, you see only non-associated papers. Tick it to be able "
 "to check already associated papers."
 msgstr "مسح العلامة, يظهر الأوراق غير المربوطة فقط. ووضع العلامة لتفعيل الربط."
 
-#: ../AMC-perl/AMC/Gui/Association.glade:358
+#: ../AMC-perl/AMC/Gui/Association.glade:359
 msgid "Remove manual association for this paper"
 msgstr "حذف الربط يدويا لهذه الورقة"
 
-#: ../AMC-perl/AMC/Gui/Association.glade:375
+#: ../AMC-perl/AMC/Gui/Association.glade:376
 msgid ""
 "Tell the system that this papers does not correspond to any of the students "
 "from the list."
 msgstr "إخبار النظام بأن هذه الورقة لا تخص أي من الطلاب في القائمة."
 
-#: ../AMC-perl/AMC/Gui/Association.glade:398
+#: ../AMC-perl/AMC/Gui/Association.glade:399
 msgid "Unknown"
 msgstr "مجهول"
 
-#: ../AMC-perl/AMC/Gui/Association.glade:458
+#: ../AMC-perl/AMC/Gui/Association.glade:459
 msgid "Save associations."
 msgstr "حفظ الربط."
 
@@ -2795,6 +2863,9 @@ msgstr "المربعات غير المعلّمة"
 #: ../AMC-perl/AMC/Gui/Zooms.glade:141
 msgid "Checked boxes"
 msgstr "المربعات المعلّمة"
+
+#~ msgid "Compute layouts"
+#~ msgstr "تطبيق التصميم"
 
 #~ msgid "Unreadable marks"
 #~ msgstr "غير قابل للقراءة"

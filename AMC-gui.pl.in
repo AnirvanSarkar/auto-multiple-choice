@@ -197,7 +197,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'print_command_pdf'=>['commande',
 				    'cupsdoprint %f','lpr %f',
 				    ],
-# TRANSLATORS: directory name for projects. Please use only alphanumeric characters, and - or _. No accentuated characters.
+# TRANSLATORS: directory name for projects. This directory will be created (if needed) in the home directory of the user. Please use only alphanumeric characters, and - or _. No accentuated characters.
 	      'rep_projets'=>$home_dir.'/'.__"MC-Projects",
 	      'rep_modeles'=>$o_dir."/Models",
 	      'seuil_eqm'=>3.0,
@@ -244,6 +244,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'annote_chsign'=>4,
 
 	      'defaut_annote_rtl'=>'',
+# TRANSLATORS: This is the default text to be written on the top of the first page of each paper when annotating. From this string, %s will be replaced with the student final mark, %m with the maximum mark he can obtain, %S with the student total score, and %M with the maximum score the student can obtain.
 	      'defaut_verdict'=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
 	      'defaut_verdict_q'=>"\"%"."s/%"."m\"",
 
@@ -257,7 +258,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 				      '/sbin/sendmail','/bin/sendmail'],
 	      'email_smtp_host'=>'smtp',
 	      'email_smtp_port'=>25,
+# TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
 	      'defaut_email_subject'=>__"Exam result",
+# TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
 	      'defaut_email_text'=>__"Please find enclosed your annotated completed answer sheet.\nRegards.",
 	      );
 
@@ -357,9 +360,12 @@ sub test_commandes {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'warning','ok',
+# TRANSLATORS: Message (first part) when some of the commands that are given in the preferences cannot be found.
 			      __("Some commands allowing to open documents can't be found:")
 			      ." ".join(", ",map { "<b>$_</b>"; } @pasbon).". "
+# TRANSLATORS: Message (second part) when some of the commands that are given in the preferences cannot be found.
 			      .__("Please check its correct spelling and install missing software.")." "
+# TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
 			      .sprintf(__"You can change used commands following <i>%s</i> from menu <i>%s</i>.",
 # TRANSLATORS: "Preferences" menu
 				       __"Preferences",
@@ -422,7 +428,8 @@ sub sauve_state {
 		->new($w{'main_window'},
 		      'destroy-with-parent',
 		      'error','ok',
-		      __"Error writing state file %s : %s",
+# TRANSLATORS: Error writing one of the configuration files (global or project). The first %s will be replaced with the path of that file, and the second with the error text.
+		      __"Error writing state file %s: %s",
 		      $state_file,$!);
 	    $dialog->run;
 	    $dialog->destroy;
@@ -440,8 +447,13 @@ sub annule_apprentissage {
 	->new_with_markup($w{'main_window'},
 			  'destroy-with-parent',
 			  'question','yes-no',
+# Explains that some dialogs are shown only to learn AMC, only once by default (first part).
 			  __("Several dialogs try to help you be at ease handling AMC.")." ".
-			  sprintf(__"Unless you tick the \"%s\" box, they are shown only once.",__"Show this message again next time")." ".
+# Explains that some dialogs are shown only to learn AMC, only once by default (second part). %s will be replaced with the text "Show this message again next time" that is written along the checkbox allowing the user to keep these learning message next time.
+			  sprintf(__"Unless you tick the \"%s\" box, they are shown only once.",
+# Explains that some dialogs are shown only to learn AMC, only once by default. This is the message shown along the checkbox allowing the user to keep these learning message next time.
+				  __"Show this message again next time")." ".
+# Explains that some dialogs are shown only to learn AMC, only once by default (third part). If you answer YES here, all these dialogs will be shown again.
 			  __"Do you want to forgot which dialogs you have already seen and ask to show all of them next time they should appear ?"
 			  );
     my $reponse=$dialog->run;
@@ -717,7 +729,9 @@ sub debug_set {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
+# TRANSLATORS: Messahe when switching to debugging mode.
 		  __("Debugging mode.")." "
+# TRANSLATORS: Messahe when switching to debugging mode. %s will be replaced with the path of the log file.
 		  .sprintf(__"Debugging informations will be written in file %s.",AMC::Basic::debug_file()));
 	$dialog->run;
 	$dialog->destroy;
@@ -740,7 +754,9 @@ if(opendir(DOD,$hdocdir)) {
     debug("DOCUMENTATION : Can't open directory $hdocdir: $!");
 }
 
+# TRANSLATORS: One of the documentation languages.
 my %ltext_loc=('French'=>__"French",
+# TRANSLATORS: One of the documentation languages.
 	       'English'=>__"English",
 	       );
 
@@ -847,12 +863,14 @@ my $correc_store = Gtk2::ListStore->new ('Glib::String',
 $w{'correc_tree'}->set_model($correc_store);
 
 $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of papers annotation.
 $column = Gtk2::TreeViewColumn->new_with_attributes (__"ID",
 						     $renderer,
 						     text=> CORREC_ID);
 $w{'correc_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of papers annotation.
 $column = Gtk2::TreeViewColumn->new_with_attributes (__"Updated",
 						     $renderer,
 						     text=> CORREC_MAJ);
@@ -874,6 +892,7 @@ my $diag_store = Gtk2::ListStore->new ('Glib::String',
 $w{'diag_tree'}->set_model($diag_store);
 
 $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
 $column = Gtk2::TreeViewColumn->new_with_attributes (__"identifier",
 						     $renderer,
 						     text=> DIAG_ID,
@@ -882,13 +901,14 @@ $column->set_sort_column_id(DIAG_ID);
 $w{'diag_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of data captures.
 $column = Gtk2::TreeViewColumn->new_with_attributes (__"updated",
 						     $renderer,
 						     text=> DIAG_MAJ);
 $w{'diag_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
-# TRANSLATORS: mean square error distance (in short)
+# TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
 $column = Gtk2::TreeViewColumn->new_with_attributes (__"MSE",
 						     $renderer,
 						     'text'=> DIAG_EQM,
@@ -897,6 +917,7 @@ $column->set_sort_column_id(DIAG_EQM);
 $w{'diag_tree'}->append_column ($column);
 
 $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
 $column = Gtk2::TreeViewColumn->new_with_attributes (__"sensitivity",
 						     $renderer,
 						     'text'=> DIAG_DELTA,
@@ -940,7 +961,9 @@ my $encodages=[{qw/inputenc latin1 iso ISO-8859-1/,'txt'=>'ISO-8859-1 ('.__("Wes
 	       {qw/inputenc utf8x iso UTF-8/,'txt'=>'UTF-8 ('.__("Unicode").')'},
 	       {qw/inputenc cp1252 iso cp1252/,'txt'=>'Windows-1252',
 		alias=>['Windows-1252','Windows']},
+# TRANSLATORS: for encodings
 	       {qw/inputenc applemac iso MacRoman/,'txt'=>'Macintosh '.__"Western Europe"},
+# TRANSLATORS: for encodings
 	       {qw/inputenc macce iso MacCentralEurRoman/,'txt'=>'Macintosh '.__"Central Europe"},
 	       ];
 
@@ -961,6 +984,7 @@ sub get_enc {
 my %formats_noms=(
 		  'CSV'=>'CSV',
 		  'ods'=>'OpenOffice',
+# TRANSLATORS: List of students with their scores: one of the export formats.
 		  'List'=>__("PDF list"),
 		  );
 
@@ -970,24 +994,26 @@ my $cb_model_vide_key=cb_model(''=>__p"(none) [No primary key found in associati
 my $cb_model_vide_code=cb_model(''=>__p"(none) [No code found in LaTeX file]");
 
 my %cb_stores=(
+# TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
     'delimiteur_decimal'=>cb_model(',',__", (comma)",
+# TRANSLATORS: One option for decimal point: use a point. This is a menu entry.
 				   '.',__". (dot)"),
-# TRANSLATORS: rounding method for marks
+# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
     'note_arrondi'=>cb_model('inf',__"floor",
-# TRANSLATORS: rounding method for marks
+# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
 			     'normal',__"rounding",
-# TRANSLATORS: rounding method for marks
+# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
 			     'sup',__"ceiling"),
     'methode_impression'=>cb_model('CUPS','CUPS',
-# TRANSLATORS: printing method
+# TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
 				   'commande',__"command",
-# TRANSLATORS: printing method
+# TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
 				   'file'=>__"to files"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
     'sides'=>cb_model('one-sided',__p("one sided [No two-sided printing]"),
-# TRANSLATORS: two-side printing type
+# TRANSLATORS: One of the two-side printing types. This is a menu entry.
 		      'two-sided-long-edge',__"long edge",
-# TRANSLATORS: two-side printing type
+# TRANSLATORS: One of the two-side printing types. This is a menu entry.
 		      'two-sided-short-edge',__"short edge"),
     'encodage_latex'=>cb_model(map { $_->{'iso'}=>$_->{'txt'} }
 			       (@$encodages)),
@@ -998,8 +1024,11 @@ my %cb_stores=(
     'liste_key'=>$cb_model_vide_key,
     'assoc_code'=>$cb_model_vide_code,
     'format_export'=>cb_model(%formats_noms),
+# TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
     'after_export'=>cb_model(""=>__"that's all",
+# TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the exported file. This is a menu entry.
 			     "file"=>__"open the file",
+# TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the directory where the file is. This is a menu entry.
 			     "dir"=>__"open the directory",
     ),
     'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
@@ -1007,17 +1036,23 @@ my %cb_stores=(
 				      ","=>","),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
     'annote_position'=>cb_model("none"=>__p("(none) [No annotation position (do not write anything)]"),
+# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the margin. This is a menu entry.
 				"marge"=>__"margin",
+# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: near the boxes. This is a menu entry.
 				"case"=>__"near boxes",
     ),
-    'export_csv_ticked'=>cb_model(""=>'No',
-				   "01"=>(__"Yes:")." 0;0;1;0",
-				   "AB"=>(__"Yes:")." AB",
+    'export_csv_ticked'=>cb_model(""=>_"No",
+				  "01"=>(__"Yes:")." 0;0;1;0",
+				  "AB"=>(__"Yes:")." AB",
     ),
+# TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
     'export_sort'=>cb_model("n"=>__"name",
+# TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student sheet number. This is a menu entry.
 			    "i"=>__"sheet number",
+# TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the line where one can find this student in the students list file. This is a menu entry.
 			    "l"=>__"line in students list",
 # TRANSLATORS: you can omit the [...] part, just here to explain context
+# One of the possible sorting criteria for students in the exported spreadsheet with scores: the student mark. This is a menu entry.
 			    "m"=>__p("mark [student mark, for sorting]"),
 			    ),
     'export_pagesize'=>cb_model("a3"=>"A3",
@@ -1025,20 +1060,29 @@ my %cb_stores=(
 				"letter"=>"Letter",
 				"legal"=>"Legal",
     ),
+# TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make one PDF file per student, with all his pages. This is a menu entry.
     'regroupement_type'=>cb_model('STUDENTS'=>__"One file per student",
+# TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make only one PDF with all students sheets. This is a menu entry.
 				  'ALL'=>__"One file for all students",
     ),
     'auto_capture_mode'=>cb_model(-1=>__"Please select...",
+# TRANSLATORS: One of the ways exam was made: each student has a different answer sheet with a different copy number - no photocopy was made. This is a menu entry.
 				  0=>__"Different answer sheets",
+# TRANSLATORS: One of the ways exam was made: some students have the same exam subject, as some photocopies were made before distributing the subjects. This is a menu entry.
 				  1=>__"Some answer sheets were photocopied"),
+# TRANSLATORS: One of the ways to send mail: use sendmail command. This is a menu entry.
     'email_transport'=>cb_model('sendmail'=>__"sendmail",
+# TRANSLATORS: One of the ways to send mail: use a SMTP server. This is a menu entry.
 				'SMTP'=>__"SMTP"),
     );
 
-
+# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
 my $symbole_type_cb=cb_model("none"=>__"nothing",
+# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
 			     "circle"=>__"circle",
+# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, a cross.
 			     "mark"=>__"mark",
+# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, the box outline.
 			     "box"=>__"box",
 			     );
 
@@ -1181,7 +1225,9 @@ $diag_store->set_sort_column_id(DIAG_ID,GTK_SORT_ASCENDING);
 
 ## menu contextuel sur liste diagnostique -> visualisation zoom/page
 
+# TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, an image will be opened to see where the corner marks were detected.
 my %diag_menu=(page=>{text=>__"page adjustment",icon=>'gtk-zoom-fit'},
+# TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, a window will be opened were the user can see all boxes on the scans and how they were filled by the students, and correct detection of ticked-or-not if needed.
 	       zoom=>{text=>__"boxes zooms",icon=>'gtk-zoom-in'},
 	       );
 
@@ -1483,6 +1529,7 @@ sub liste_des_projets {
 	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
 	    $w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;
 
+# TRANSLATORS: Window title when creating a new project.
 	    $w{'choix_projet'}->set_title(__"New AMC project");
 	}
 
@@ -1496,6 +1543,7 @@ sub liste_des_projets {
 	    }
 	    $w{'projet_bouton_annule_label'}->set_text(__"Back");
 
+# TRANSLATORS: Window title when managing projects.
 	    $w{'choix_projet'}->set_title(__"AMC projects management");
 	}
 
@@ -1623,6 +1671,7 @@ sub projet_mv_yes {
 		    ->new_with_markup($w{'main_window'},
 				      'destroy-with-parent',
 				      'error','ok',
+# TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
 				      sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),$dir_nouveau));
 		$dialog->run;
 		$dialog->destroy;
@@ -1894,7 +1943,10 @@ sub doc_maj {
 					   'error','ok',
 					   __("Errors while compiling LaTeX source.")." "
 					   .__("You have to correct LaTeX source and re-run documents update.")." "
-					   .sprintf(__("See the LaTeX log in '%s' below."),__"Command output details")." "
+# TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+					   .sprintf(__("See the LaTeX log in '%s' below."),
+# TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+						    __"Command output details")." "
 					   .__("Use LaTeX editor or latex command for a precise diagnosis.")."\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "") );
 		     $dialog->run;
 		     $dialog->destroy;
@@ -1907,7 +1959,9 @@ sub doc_maj {
 		     }
 		     dialogue_apprentissage('MAJ_DOCS_OK','','',0,
 					    __("Working documents successfully generated.")." "
+# TRANSLATORS: Here, "them" refers to the working documents.
 					    .__("You can take a look at them double-clicking on the list.")." "
+# TRANSLATORS: Here, "they" refers to the working documents.
 					    .__("If they are correct, proceed to layouts detection...")) if($ok);
 		 }
 
@@ -1928,10 +1982,13 @@ sub doc_maj {
 						    .__("In this case, letters are shown inside boxes.") :
 						   __("Your question is set to present labels inside the boxes to be ticked."))
 						   ." "
+# TRANSLATORS: Here, %s will be replaced with the translation of "darkness threshold".
 						   .__("For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project.")." "
 						   .__("At the moment, this parameter is set to %.02f.")." "
 						   .__("Would you like to set it to 0.5?")
-						   ,__"darkness threshold",$projet{'options'}->{'seuil'}) );
+# TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
+						   ,__"darkness threshold",
+						   $projet{'options'}->{'seuil'}) );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
 		     if($reponse eq 'yes') {
@@ -1989,6 +2046,7 @@ sub autre_imprimante {
     if(!$trouve{'agrafe'}) {
 	debug "No possible staple";
 
+# TRANSLATORS: There is a menu for choosing stapling or not from the printer. When stapling is not available on the chosen printer, this is the only offered choice.
 	$cb_stores{'agrafe'}=cb_model(''=>__"(not supported)");
 	$w{'imp_c_agrafe'}->set_model($cb_stores{'agrafe'});
     }
@@ -2004,6 +2062,7 @@ sub sujet_impressions {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
+# TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
 			      __"You don't have any question to print: please check your LaTeX source and update working documents first.");
 	$dialog->run;
 	$dialog->destroy;
@@ -2019,6 +2078,7 @@ sub sujet_impressions {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
+# TRANSLATORS: Message when AMC does not know about the subject pages that has been generated. Usualy this means that the layout computation step has not been made.
 			      __("Question's pages are not detected.")." "
 			      .__"Perhaps you forgot to compute layouts?");
 	$dialog->run;
@@ -2127,6 +2187,7 @@ sub sujet_impressions {
     $w{'arbre_choix_copies'}->set_model($copies_store);
 
     my $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
     my $column = Gtk2::TreeViewColumn->new_with_attributes (__"papers",
 							    $renderer,
 							    text=> COPIE_N );
@@ -2415,7 +2476,10 @@ sub saisie_manuelle {
 			      'destroy-with-parent',
 			      'error','ok',
 			      __("No layout for this project.")." "
-			      .sprintf(__("Please use button <i>%s</i> in <i>%s</i> before manual data capture."),__"Compute layouts",__"Preparation"));
+# TRANSLATORS: Here, the first %s will be replaced with "Layout detection" (a button title), and the second %s with "Preparation" (the tab title where one can find this button).
+			      .sprintf(__("Please use button <i>%s</i> in <i>%s</i> before manual data capture."),
+				       __"Layout detection",
+				       __"Preparation"));
 	$dialog->run;
 	$dialog->destroy;
     }
@@ -2467,8 +2531,16 @@ sub saisie_auto_info {
   my $dialog=Gtk2::MessageDialog
     ->new_with_markup($w{'saisie_auto'},'destroy-with-parent','info','ok',
 		      __("Automatic data capture can be done in two different modes:")."\n"
-		      ."<b>".__("Different answer sheets").".</b> ".__("In the most robust one, you give a different sheet (with a different sheet number) to every student. You must not photocopy subjects before distributing them.")."\n"
-		      ."<b>".__("Some answer sheets were photocopied").".</b> ".__("In the second one (which can be used only if answer sheets to be scanned has one page) you can photocopy answer sheets and give the same subject to different students.")."\n"
+		      ."<b>".
+# TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
+		      __("Different answer sheets").
+		      ".</b> ".
+		      __("In the most robust one, you give a different sheet (with a different sheet number) to every student. You must not photocopy subjects before distributing them.")."\n"
+		      ."<b>".
+# TRANSLATORS: This is a title for the AMC mode where some answer sheets have been photocopied before being distributed to the students.
+		      __("Some answer sheets were photocopied").
+		      ".</b> ".
+		      __("In the second one (which can be used only if answer sheets to be scanned has one page) you can photocopy answer sheets and give the same subject to different students.")."\n"
 		      .__("After the first automatic capture, you can't switch to the other mode.")
 		      );
   $dialog->run;
@@ -2606,7 +2678,9 @@ sub saisie_auto_ok {
 	    $w{'commande'}->show();
 	    $w{'avancement'}->set_text(sprintf(
 					   ($vector
+# TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
 					    ? __("Converting %s to bitmap...")
+# TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
 					    : __("Splitting multi-page image %s...")),
 					   $fich_n));
 	    $w{'avancement'}->set_fraction(0);
@@ -2802,7 +2876,9 @@ sub valide_liste {
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
 				  'warning','ok',
-				  sprintf(__"Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled.",$e,$fl)." ".__"Edit the names file to correct it, and re-read.");
+# TRANSLATORS: Here, do not translate 'name' and 'surname' (except in french), as the column names in the students list file has to be named in english in order to be properly detected.
+				  sprintf(__"Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled.",$e,$fl)." ".
+				  __"Edit the names file to correct it, and re-read.");
 	    $dialog->run;
 	    $dialog->destroy;
 	} else {
@@ -2846,7 +2922,9 @@ sub check_possible_assoc {
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
 			      'error','ok',
-			      sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",__"Data capture"));
+# TRANSLATORS: Here, %s will be replaced with the name of the tab "Data capture".
+			      sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",
+				      __"Data capture"));
 	$dialog->run;
 	$dialog->destroy;
     } elsif(!$projet{'options'}->{'liste_key'}) {
@@ -2903,7 +2981,9 @@ sub associe {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  sprintf(__"Before associating names to papers, you must choose a students list file in paragraph \"%s\".",__"Students identification"));
+# TRANSLATORS: Here, %s will be replaced with "Students identification", which refers to a paragraph in the tab "Marking" from AMC main window.
+		  sprintf(__"Before associating names to papers, you must choose a students list file in paragraph \"%s\".",
+			  __"Students identification"));
 	$dialog->run;
 	$dialog->destroy;
 
@@ -2943,7 +3023,10 @@ sub assoc_resultat {
 			'destroy-with-parent',
 			'info','ok',
 			sprintf(__("Automatic association completed: %d students recognized."),$auto).
-			($auto==0 ? "\n<b>".sprintf(__("Please check \"%s\" and \"%s\" values and try again."),__("Primary key from this list"),__("Code name for automatic association"))."</b>" : "")
+# TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
+			($auto==0 ? "\n<b>".sprintf(__("Please check \"%s\" and \"%s\" values and try again."),
+						    __("Primary key from this list"),
+						    __("Code name for automatic association"))."</b>" : "")
 		       );
     $dialog->run;
     $dialog->destroy;
@@ -3085,7 +3168,9 @@ sub voir_notes {
       ->new($w{'main_window'},
 	    'destroy-with-parent',
 	    'info','ok',
-	    sprintf(__"Papers are not yet corrected: use button \"%s\".",__"Mark"));
+	    sprintf(__"Papers are not yet corrected: use button \"%s\".",
+# TRANSLATORS: This is a button: "Mark" is here an action to be called by the user. When clicking this button, the user requests scores to be computed for all students.
+		    __"Mark"));
     $dialog->run;
     $dialog->destroy;
   }
@@ -3312,6 +3397,7 @@ sub noter_resultat {
 
   if($avg) {
     state_image('marking','gtk-yes');
+# TRANSLATORS: This is the marks mean for all students.
     $w{'state_marking'}->set_text(sprintf(__"Mean: %.2f",$avg));
   } else {
     state_image('marking','gtk-dialog-error');
@@ -4485,6 +4571,7 @@ sub make_template {
 
     $w{'template_files_tree'}->set_model($template_files_store);
 	my $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is a column title for the list of files to be included in a template being created.
 	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"file",
 							       $renderer,
 							       text=> TEMPLATE_FILES_FILE );
@@ -4671,6 +4758,7 @@ sub source_latex_choisir {
 
 	$w{'modeles_liste'}->set_model($modeles_store);
 	my $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is a column name for the list of available templates, when creating a new project based on a template.
 	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"template",
 							       $renderer,
 							       text=> MODEL_NOM );
@@ -5159,7 +5247,9 @@ sub bug_report {
 			  __("In order to send a useful bug report, please attach the following documents:")."\n"
 			  ."- ".__("an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the <b>project directory</b>, <b>scan files</b> and <b>configuration directory</b> (.AMC.d in home directory), so as to reproduce and analyse this problem.")."\n"
 			  ."- ".__("the <b>log file</b> produced when the debugging mode (in Help menu) is checked. Please try to reproduce the bug with this mode activated.")."\n\n"
-			  .sprintf(__("Bug reports can be filled at %s or sent to %s"),"<tt>https://gna.org/support/?group=auto-qcm&amp;func=additem</tt>",'<tt>paamc@passoire.fr</tt>')
+			  .sprintf(__("Bug reports can be filled at %s or sent to %s"),
+				   "<tt>https://gna.org/support/?group=auto-qcm&amp;func=additem</tt>",
+				   '<tt>paamc@passoire.fr</tt>')
 	);
     $dialog->run;
     $dialog->destroy;
@@ -5270,6 +5360,7 @@ sub send_emails {
     my $dialog = Gtk2::MessageDialog
       ->new_with_markup($w{'main_window'},
 			'destroy-with-parent',
+# TRANSLATORS: Do not translate the 'sendmail' word.
 			'error','ok',sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferencies (%s). Please update your configuration."),$o{'email_sendmail_path'}));
     $dialog->run;
     $dialog->destroy;
@@ -5327,16 +5418,19 @@ sub send_emails {
 
   $w{'emails_list'}->set_model($emails_store);
   $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of a column containing copy numbers in a table showing all annotated answer sheets, when sending them to the students by email.
   $column = Gtk2::TreeViewColumn->new_with_attributes (__"copy",
 						       $renderer,
 						       text=> EMAILS_SC);
   $w{'emails_list'}->append_column ($column);
   $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
   $column = Gtk2::TreeViewColumn->new_with_attributes (__"name",
 						       $renderer,
 						       text=> EMAILS_NAME);
   $w{'emails_list'}->append_column ($column);
   $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of a column containing students email addresses in a table showing all annotated answer sheets, when sending them to the students by email.
   $column = Gtk2::TreeViewColumn->new_with_attributes (__"email",
 						       $renderer,
 						       text=> EMAILS_EMAIL);
@@ -5491,6 +5585,7 @@ sub choose_columns {
   my $columns_store=Gtk2::ListStore->new('Glib::String','Glib::String');
   $w{'columns_list'}->set_model($columns_store);
   my $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
   my $column = Gtk2::TreeViewColumn->new_with_attributes (__"column",
 						       $renderer,
 						       text=> 0);
@@ -5551,6 +5646,7 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 	    .__("Perhaps LaTeX is not installed?");
     } else {
 	if(!get_sty()) {
+# TRANSLATORS: Do not translate 'auto-multiple-choice latex-link', which is a command to be typed on MacOsX
 	    $message=__("The style file automultiplechoice.sty seems to be unreachable. Try to use command 'auto-multiple-choice latex-link' as root to fix this.");
 	}
     }
