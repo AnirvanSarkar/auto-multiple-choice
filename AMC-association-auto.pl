@@ -68,7 +68,7 @@ debug "Student list keys: ".join(',',keys %bon_code);
 # Open association database and clear old automatic association
 
 $assoc->begin_transaction('ASSA');
-$capture->variable('annotated_ok',-4);
+$capture->variable('annotated_uptodate',-4);
 
 $assoc->check_keys($liste_key,$notes_id);
 $assoc->clear_auto;
