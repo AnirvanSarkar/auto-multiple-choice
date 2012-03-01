@@ -48,6 +48,7 @@ die "Needs data_dir" if(!-d $data_dir);
 my $data=AMC::Data->new($data_dir);
 my $scoring=$data->module('scoring');
 my $assoc=$data->module('association');
+my $capture=$data->module('capture');
 
 debug "Automatic association $liste_file [$liste_enc] / $liste_key";
 
@@ -67,6 +68,7 @@ debug "Student list keys: ".join(',',keys %bon_code);
 # Open association database and clear old automatic association
 
 $assoc->begin_transaction('ASSA');
+$capture->variable('annotated_ok',-4);
 
 $assoc->check_keys($liste_key,$notes_id);
 $assoc->clear_auto;

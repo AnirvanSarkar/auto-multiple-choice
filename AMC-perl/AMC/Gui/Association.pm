@@ -520,7 +520,8 @@ sub efface_manuel {
     my $i=$self->{'iimage'};
 
     if($i>=0) {
-      $self->{'assoc'}->begin_read_transaction('ADEL');
+      $self->{'assoc'}->begin_transaction('ADEL');
+      $self->{'capture'}->variable('annotated_ok',-4);
 
       my @sc=$self->image_sc($i);
       my @r=$self->sc2inom(@sc);
@@ -554,6 +555,7 @@ sub inconnu {
 
     if($i>=0) {
       $self->{'assoc'}->begin_transaction('AUNK');
+      $self->{'capture'}->variable('annotated_ok',-4);
 
       my @sc=$self->image_sc($i);
       my @r=$self->sc2inom(@sc);
@@ -813,6 +815,7 @@ sub choisit {
     my ($self,$i)=(@_);
 
     $self->{'assoc'}->begin_transaction('ASWT');
+    $self->{'capture'}->variable('annotated_ok',-4);
     $self->lie($i,@{$self->{'image_sc'}});
     $self->{'assoc'}->end_transaction('ASWT');
     $self->set_n_cols() if(!$self->{'show_all'});
