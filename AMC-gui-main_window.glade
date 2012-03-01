@@ -29,6 +29,12 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-info</property>
   </object>
+  <object class="GtkImage" id="image19">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="halign">center</property>
+    <property name="stock">gtk-page-setup</property>
+  </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -83,6 +89,18 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-directory</property>
+  </object>
+  <object class="GtkImage" id="image6">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="halign">center</property>
+    <property name="stock">gtk-clear</property>
+  </object>
+  <object class="GtkImage" id="image7">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="halign">center</property>
+    <property name="stock">gtk-zoom-in</property>
   </object>
   <object class="GtkImage" id="image8">
     <property name="visible">True</property>
@@ -905,6 +923,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="hexpand">True</property>
+                                <property name="spacing">4</property>
                                 <child>
                                   <object class="GtkScrolledWindow" id="scrolledwindow2">
                                     <property name="visible">True</property>
@@ -928,8 +947,8 @@
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
@@ -939,25 +958,22 @@
                                     <property name="can_focus">False</property>
                                     <property name="halign">start</property>
                                     <property name="spacing">5</property>
+                                    <property name="homogeneous">True</property>
                                     <property name="layout_style">center</property>
                                     <child>
                                       <object class="GtkButton" id="button13">
+                                        <property name="label" translatable="yes" comments="Label on the button used to open a window with the images of the boxes taken from the scan. This window can be used th check boxes categorization.">Zooms</property>
                                         <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Show images of the boxes from the scan, and check their categorization.</property>
                                         <property name="halign">center</property>
                                         <property name="use_action_appearance">False</property>
+                                        <property name="image">image7</property>
                                         <property name="focus_on_click">False</property>
+                                        <property name="image_position">top</property>
                                         <signal name="clicked" handler="zooms_line_open" swapped="no"/>
-                                        <child>
-                                          <object class="GtkImage" id="image19">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="halign">center</property>
-                                            <property name="stock">gtk-zoom-in</property>
-                                          </object>
-                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -967,22 +983,18 @@
                                     </child>
                                     <child>
                                       <object class="GtkButton" id="button14">
+                                        <property name="label" translatable="yes" comments="Label of the button used to open a window showing a scan with the place where corner marks have been detected, and the position where the boxes are supposed to be.">Layout</property>
                                         <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Show where corner marks have been detected on the scan, and where boxes are supposed to be.</property>
                                         <property name="halign">center</property>
                                         <property name="use_action_appearance">False</property>
+                                        <property name="image">image19</property>
                                         <property name="focus_on_click">False</property>
+                                        <property name="image_position">top</property>
                                         <signal name="clicked" handler="layout_line" swapped="no"/>
-                                        <child>
-                                          <object class="GtkImage" id="image29">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="halign">center</property>
-                                            <property name="stock">gtk-page-setup</property>
-                                          </object>
-                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -992,20 +1004,17 @@
                                     </child>
                                     <child>
                                       <object class="GtkButton" id="button15">
+                                        <property name="label" translatable="yes" comments="Label of the button used to delete data capture for selected pages.">Remove</property>
                                         <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Remove data capture for selected pages.</property>
                                         <property name="halign">center</property>
                                         <property name="use_action_appearance">False</property>
+                                        <property name="image">image6</property>
+                                        <property name="image_position">top</property>
                                         <signal name="clicked" handler="delete_line" swapped="no"/>
-                                        <child>
-                                          <object class="GtkImage" id="image6">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="stock">gtk-clear</property>
-                                          </object>
-                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
