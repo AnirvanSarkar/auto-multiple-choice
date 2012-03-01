@@ -115,7 +115,7 @@ sub dbh {
 sub begin_transaction {
     my ($self,$key)=@_;
     $key='----' if(!$key);
-    debug_and_stderr "WARNING: opened transaction $self->{'data'}->{'trans'}"
+    debug_and_stderr "WARNING: opened transaction $self->{'trans'}"
       if($self->{'trans'});
     $self->sql_do("BEGIN IMMEDIATE");
     $self->{'trans'}=$key;
@@ -126,7 +126,7 @@ sub begin_transaction {
 sub begin_read_transaction {
     my ($self,$key)=@_;
     $key='----' if(!$key);
-    debug_and_stderr "WARNING: opened transaction $self->{'data'}->{'trans'}"
+    debug_and_stderr "WARNING: opened transaction $self->{'trans'}"
       if($self->{'trans'});
     $self->sql_do("BEGIN");
     $self->{'trans'}=$key;
