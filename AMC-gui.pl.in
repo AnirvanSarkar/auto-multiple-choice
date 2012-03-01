@@ -330,15 +330,16 @@ my %projet_defaut=('texsrc'=>'',
 
 # Add default project options for each export module:
 
-my @export_modules=perl_module_search('AMC::Export');
+my @export_modules=perl_module_search('AMC::Export::register');
 for my $m (@export_modules) {
-  load("AMC::Export::$m");
-  my %d="AMC::Export::$m"->options_default;
+  load("AMC::Export::register::$m");
+  my %d="AMC::Export::register::$m"->options_default;
   for(keys %d) {
     $projet_defaut{$_}=$d{$_};
   }
 }
-@export_modules=sort { "AMC::Export::$a"->weight <=> "AMC::Export::$b"->weight }
+@export_modules=sort { "AMC::Export::register::$a"->weight 
+			 <=> "AMC::Export::register::$b"->weight }
   @export_modules;
 
 my %o=();
@@ -1004,7 +1005,7 @@ my %cb_stores=(
 				  'gif'=>'GIF'),
     'liste_key'=>$cb_model_vide_key,
     'assoc_code'=>$cb_model_vide_code,
-    'format_export'=>cb_model(map { $_=>"AMC::Export::$_"->name() } (@export_modules)),
+    'format_export'=>cb_model(map { $_=>"AMC::Export::register::$_"->name() } (@export_modules)),
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
     'after_export'=>cb_model(""=>__"that's all",
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the exported file. This is a menu entry.
@@ -1067,7 +1068,7 @@ $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 # Add config GUI for export modules...
 
 for my $m (@export_modules) {
-  my $x="AMC::Export::$m"->build_config_gui(\%w,\%cb_stores);
+  my $x="AMC::Export::register::$m"->build_config_gui(\%w,\%cb_stores);
   if($x) {
     $w{'config_export_module_'.$m}=$x;
     $w{'config_export_modules'}->pack_start($x,0,0,0);
@@ -1109,12 +1110,12 @@ sub exporte {
     my $output=absolu('%PROJET/exports/'.$code.'.'.$ext);
     my @needs_module=();
 
-    my %ofc="AMC::Export::$format"
+    my %ofc="AMC::Export::register::$format"
       ->options_from_config($projet{'options'},\%o,\%o_defaut);
     for(keys %ofc) {
       push @options,"--option-out",$_.'='.$ofc{$_};
     }
-    push @needs_module,"AMC::Export::$format"->needs_module();
+    push @needs_module,"AMC::Export::register::$format"->needs_module();
 
     if(@needs_module) {
 	# teste si les modules necessaires sont disponibles
@@ -1135,7 +1136,7 @@ sub exporte {
 		    'destroy-with-parent',
 		    'error','ok',
 		    __("Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."),
-		    "AMC::Export::$format"->name(),join(', ',@manque)
+		    "AMC::Export::register::$format"->name(),join(', ',@manque)
 		   );
 	    $dialog->run;
 	    $dialog->destroy;

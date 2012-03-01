@@ -813,36 +813,4 @@ sub export {
 
 }
 
-sub name {
-  return('OpenOffice');
-}
-
-sub options_from_config {
-  my ($self,$options_project,$options_main,$options_default)=@_;
-  return("columns"=>$options_project->{'export_ods_columns'},
-	 "nom"=>$options_project->{'nom_examen'},
-	 "code"=>$options_project->{'code_examen'},
-	 );
-}
-
-sub options_default {
-  return('export_ods_columns'=>'student.copy,student.key,student.name',
-	 );
-}
-
-sub needs_module {
-  return('OpenOffice::OODoc');
-}
-
-sub build_config_gui {
-  my ($self,$w,$cb)=@_;
-  my $b=Gtk2::Button->new_with_label(__"Choose columns");
-  $b->signal_connect(clicked => \&main::choose_columns_current);
-  return($b);
-}
-
-sub weight {
-  return(.2);
-}
-
 1;

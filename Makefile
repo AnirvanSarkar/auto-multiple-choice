@@ -208,10 +208,12 @@ ifneq ($(PIXDIR),)
 endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Export
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Export/register
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/DataModule
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/*.pm $(DESTDIR)/$(PERLDIR)/AMC
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Export/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Export
+	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Export/register/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Export/register
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/DataModule/*.pm $(DESTDIR)/$(PERLDIR)/AMC/DataModule
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
