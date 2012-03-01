@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -23,6 +23,7 @@ use File::Temp qw/ tempfile tempdir /;
 use Gtk2;
 use Cairo;
 
+use AMC::Basic;
 use AMC::Export;
 
 @ISA=("AMC::Export");
@@ -211,6 +212,62 @@ sub export {
 
     $self->{'context'}->show_page();
 
+}
+
+sub name {
+# TRANSLATORS: List of students with their scores: one of the export formats.
+  return(__("PDF list"));
+}
+
+sub options_from_config {
+  my ($self,$options_project,$options_main,$options_default)=@_;
+  return("nom"=>$options_project->{'nom_examen'},
+	 "code"=>$options_project->{'code_examen'},
+	 "decimal"=>$options_main->{'delimiteur_decimal'},
+	 "pagesize"=>$options_project->{'export_pagesize'},
+	 "ncols"=>$options_project->{'export_ncols'},
+	);
+}
+
+sub options_default {
+  return('export_ncols'=>2,
+	 'export_pagesize'=>'a4');
+}
+
+sub needs_module {
+  return();
+}
+
+sub build_config_gui {
+  my ($self,$w,$cb)=@_;
+  my $t=Gtk2::Table->new(2,2);
+  my $widget;
+  my $y=0;
+  $t->attach(Gtk2::Label->new(__"Number of columns"),
+	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $widget=Gtk2::SpinButton->new(Gtk2::Adjustment->new(1,1,5,1,1,0),0,0);
+  $w->{'export_s_export_ncols'}=$widget;
+  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $y++;
+  $t->attach(Gtk2::Label->new(__"Paper size"),0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $widget=Gtk2::ComboBox->new_with_model();
+  my $renderer = Gtk2::CellRendererText->new();
+  $widget->pack_start($renderer, TRUE);
+  $widget->add_attribute($renderer,'text',COMBO_TEXT);
+  $cb->{'export_pagesize'}=cb_model("a3"=>"A3",
+				    "a4"=>"A4",
+				    "letter"=>"Letter",
+				    "legal"=>"Legal");
+  $w->{'export_c_export_pagesize'}=$widget;
+  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $y++;
+
+  $t->show_all;
+  return($t);
+}
+
+sub weight {
+  return(.5);
 }
 
 1;

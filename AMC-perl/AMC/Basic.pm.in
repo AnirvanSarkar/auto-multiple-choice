@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2008-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -33,12 +33,17 @@ use Encode;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 
+use constant {
+    COMBO_ID => 1,
+    COMBO_TEXT => 0,
+};
+
 BEGIN {
     use Exporter   ();
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &format_date);
+    @EXPORT      = qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &format_date &cb_model &COMBO_ID &COMBO_TEXT );
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -95,6 +100,24 @@ sub amc_specdir {
     } else {
 	die "Unknown class for amc_specdir: $class";
     }
+}
+
+sub perl_module_search {
+  my ($prefix)=@_;
+  $prefix =~ s/::/\//g;
+  my %mods=();
+  for my $r (@INC) {
+    my $loc=$r.'/'.$prefix;
+    if(-d $loc) {
+      opendir(my $dh, $loc);
+      for(grep { /\.pm$/i && -f "$loc/$_" } readdir($dh)) {
+	s/\.pm$//i;
+	$mods{$_}=1;
+      }
+      closedir $dh;
+    }
+  }
+  return(sort { $a cmp $b } keys %mods);
 }
 
 # peut-on acceder a cette commande par exec ?
@@ -600,6 +623,19 @@ sub __p($) {
     return($str); 
 }
 
+### modeles combobox
 
+sub cb_model {
+    my @texte=(@_);
+    my $cs=Gtk2::ListStore->new ('Glib::String','Glib::String');
+    my $k;
+    my $t;
+    while(($k,$t)=splice(@texte,0,2)) {
+	$cs->set($cs->append,
+		 COMBO_ID,$k,
+		 COMBO_TEXT,$t);
+    }
+    return($cs);
+}
 
 1;

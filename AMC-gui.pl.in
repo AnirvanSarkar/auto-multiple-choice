@@ -86,9 +86,6 @@ use constant {
     CORREC_MAJ => 1,
     CORREC_FILE => 2,
 
-    COMBO_ID => 1,
-    COMBO_TEXT => 0,
-
     MODEL_NOM => 0,
     MODEL_PATH => 1,
     MODEL_DESC => 2,
@@ -312,14 +309,9 @@ my %projet_defaut=('texsrc'=>'',
 		   '_modifie_ok'=>0,
 
 		   'format_export'=>'CSV',
-		   'export_csv_separateur'=>",",
-		   'export_csv_ticked'=>'',
+
 		   'after_export'=>'file',
 		   'export_include_abs'=>'',
-		   'export_ncols'=>2,
-		   'export_pagesize'=>'a4',
-		   'export_csv_columns'=>'student.copy,student.key,student.name',
-		   'export_ods_columns'=>'student.copy,student.key,student.name',
 
 		   'annote_position'=>'marge',
 
@@ -335,6 +327,19 @@ my %projet_defaut=('texsrc'=>'',
 		   'email_subject'=>"",
 		   'email_text'=>"",
 		   );
+
+# Add default project options for each export module:
+
+my @export_modules=perl_module_search('AMC::Export');
+for my $m (@export_modules) {
+  load("AMC::Export::$m");
+  my %d="AMC::Export::$m"->options_default;
+  for(keys %d) {
+    $projet_defaut{$_}=$d{$_};
+  }
+}
+@export_modules=sort { "AMC::Export::$a"->weight <=> "AMC::Export::$b"->weight }
+  @export_modules;
 
 my %o=();
 my %state=();
@@ -695,13 +700,11 @@ my $gui=read_glade('main_window',
     doc_menu menu_debug
     diag_tree state_capture
     maj_bareme correc_tree regroupement_corriges
-    options_CSV options_ods options_List
     groupe_model
     pref_assoc_c_assoc_code pref_assoc_c_liste_key
     export_c_format_export
     export_c_export_sort export_cb_export_include_abs
-    export_c_export_csv_separateur export_c_export_csv_ticked
-    export_s_export_ncols export_c_export_pagesize
+    config_export_modules
     notation_c_regroupement_type notation_cb_regroupement_compose
     pref_prep_s_nombre_copies
     /);
@@ -927,21 +930,6 @@ $w{'diag_tree'}->append_column ($column);
 
 $w{'diag_tree'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
 
-### modeles combobox
-
-sub cb_model {
-    my @texte=(@_);
-    my $cs=Gtk2::ListStore->new ('Glib::String','Glib::String');
-    my $k;
-    my $t;
-    while(($k,$t)=splice(@texte,0,2)) {
-	$cs->set($cs->append,
-		 COMBO_ID,$k,
-		 COMBO_TEXT,$t);
-    }
-    return($cs);
-}
-
 # rajouter a partir de Encode::Supported
 # TRANSLATORS: for encodings
 my $encodages=[{qw/inputenc latin1 iso ISO-8859-1/,'txt'=>'ISO-8859-1 ('.__("Western Europe").')'},
@@ -981,13 +969,6 @@ sub get_enc {
     return('');
 }
 
-my %formats_noms=(
-		  'CSV'=>'CSV',
-		  'ods'=>'OpenOffice',
-# TRANSLATORS: List of students with their scores: one of the export formats.
-		  'List'=>__("PDF list"),
-		  );
-
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 my $cb_model_vide_key=cb_model(''=>__p"(none) [No primary key found in association list]");
 # TRANSLATORS: you can omit the [...] part, just here to explain context
@@ -1023,7 +1004,7 @@ my %cb_stores=(
 				  'gif'=>'GIF'),
     'liste_key'=>$cb_model_vide_key,
     'assoc_code'=>$cb_model_vide_code,
-    'format_export'=>cb_model(%formats_noms),
+    'format_export'=>cb_model(map { $_=>"AMC::Export::$_"->name() } (@export_modules)),
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
     'after_export'=>cb_model(""=>__"that's all",
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the exported file. This is a menu entry.
@@ -1031,19 +1012,12 @@ my %cb_stores=(
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the directory where the file is. This is a menu entry.
 			     "dir"=>__"open the directory",
     ),
-    'export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
-				      ";"=>";",
-				      ","=>","),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
     'annote_position'=>cb_model("none"=>__p("(none) [No annotation position (do not write anything)]"),
 # TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the margin. This is a menu entry.
 				"marge"=>__"margin",
 # TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: near the boxes. This is a menu entry.
 				"case"=>__"near boxes",
-    ),
-    'export_csv_ticked'=>cb_model(""=>__"No",
-				  "01"=>(__"Yes:")." 0;0;1;0",
-				  "AB"=>(__"Yes:")." AB",
     ),
 # TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
     'export_sort'=>cb_model("n"=>__"name",
@@ -1055,11 +1029,6 @@ my %cb_stores=(
 # One of the possible sorting criteria for students in the exported spreadsheet with scores: the student mark. This is a menu entry.
 			    "m"=>__p("mark [student mark, for sorting]"),
 			    ),
-    'export_pagesize'=>cb_model("a3"=>"A3",
-				"a4"=>"A4",
-				"letter"=>"Letter",
-				"legal"=>"Legal",
-    ),
 # TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make one PDF file per student, with all his pages. This is a menu entry.
     'regroupement_type'=>cb_model('STUDENTS'=>__"One file per student",
 # TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make only one PDF with all students sheets. This is a menu entry.
@@ -1095,6 +1064,16 @@ my %extension_fichier=('List'=>'pdf');
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
 $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 
+# Add config GUI for export modules...
+
+for my $m (@export_modules) {
+  my $x="AMC::Export::$m"->build_config_gui(\%w,\%cb_stores);
+  if($x) {
+    $w{'config_export_module_'.$m}=$x;
+    $w{'config_export_modules'}->pack_start($x,0,0,0);
+  }
+}
+
 ### export
 
 sub maj_export {
@@ -1104,16 +1083,21 @@ sub maj_export {
 
     debug "Format : ".$projet{'options'}->{'format_export'};
 
-    for(qw/CSV ods List/) {
+    for(@export_modules) {
+      if($w{'config_export_module_'.$_}) {
 	if($projet{'options'}->{'format_export'} eq $_) {
-	    $w{'options_'.$_}->show;
+	  $w{'config_export_module_'.$_}->show;
 	} else {
-	    $w{'options_'.$_}->hide;
+	  $w{'config_export_module_'.$_}->hide;
 	}
+      }
     }
 }
 
 sub exporte {
+
+  maj_export();
+
     my $format=$projet{'options'}->{'format_export'};
     my @options=();
     my $ext=$extension_fichier{$format};
@@ -1125,29 +1109,12 @@ sub exporte {
     my $output=absolu('%PROJET/exports/'.$code.'.'.$ext);
     my @needs_module=();
 
-    if($format eq 'CSV') {
-	push @options,
-	"--option-out","encodage=".bon_encodage('csv'),
-	"--option-out","columns=".$projet{'options'}->{'export_csv_columns'},
-	"--option-out","decimal=".$o{'delimiteur_decimal'},
-	"--option-out","separateur=".$projet{'options'}->{'export_csv_separateur'},
-	"--option-out","ticked=".$projet{'options'}->{'export_csv_ticked'};
+    my %ofc="AMC::Export::$format"
+      ->options_from_config($projet{'options'},\%o,\%o_defaut);
+    for(keys %ofc) {
+      push @options,"--option-out",$_.'='.$ofc{$_};
     }
-    if($format eq 'ods') {
-	push @options,
-	"--option-out","columns=".$projet{'options'}->{'export_ods_columns'},
-	"--option-out","nom=".$projet{'options'}->{'nom_examen'},
-	"--option-out","code=".$projet{'options'}->{'code_examen'};
-	push @needs_module,'OpenOffice::OODoc';
-    }
-    if($format eq 'List') {
-	push @options,
-	"--option-out","nom=".$projet{'options'}->{'nom_examen'},
-	"--option-out","code=".$projet{'options'}->{'code_examen'},
-	"--option-out","decimal=".$o{'delimiteur_decimal'},
-	"--option-out","pagesize=".$projet{'options'}->{'export_pagesize'},
-	"--option-out","ncols=".$projet{'options'}->{'export_ncols'};
-    }
+    push @needs_module,"AMC::Export::$format"->needs_module();
 
     if(@needs_module) {
 	# teste si les modules necessaires sont disponibles
@@ -1164,12 +1131,12 @@ sub exporte {
 	    debug 'Exporting to '.$format.': Needs perl modules '.join(', ',@manque);
 
 	    my $dialog = Gtk2::MessageDialog
-		->new($w{'main_window'},
-		      'destroy-with-parent',
-		      'error','ok',
-		      __("Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."),
-		      $formats_noms{$format},join(', ',@manque)
-		      );
+	      ->new($w{'main_window'},
+		    'destroy-with-parent',
+		    'error','ok',
+		    __("Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."),
+		    "AMC::Export::$format"->name(),join(', ',@manque)
+		   );
 	    $dialog->run;
 	    $dialog->destroy;
 
@@ -3601,17 +3568,17 @@ sub transmet_pref {
 	my $ta=$t;
 	$ta=$alias->{$t} if($alias->{$t});
 
-	my $wp=$gap->get_object($prefixe.'_t_'.$ta);
+	my $wp=$gap->get_object($prefixe.'_t_'.$ta) || $w{$prefixe.'_t_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_t_'.$t}=$wp;
 	    $wp->get_buffer->set_text($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_x_'.$ta);
+	$wp=$gap->get_object($prefixe.'_x_'.$ta) || $w{$prefixe.'_x_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_x_'.$t}=$wp;
 	    $wp->set_text($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_f_'.$ta);
+	$wp=$gap->get_object($prefixe.'_f_'.$ta) || $w{$prefixe.'_f_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_f_'.$t}=$wp;
 	    if($wp->get_action =~ /-folder$/i) {
@@ -3620,44 +3587,44 @@ sub transmet_pref {
 		$wp->set_filename($h->{$t});
 	    }
 	}
-	$wp=$gap->get_object($prefixe.'_v_'.$ta);
+	$wp=$gap->get_object($prefixe.'_v_'.$ta) || $w{$prefixe.'_v_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_v_'.$t}=$wp;
 	    $wp->set_active($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_s_'.$ta);
+	$wp=$gap->get_object($prefixe.'_s_'.$ta) || $w{$prefixe.'_s_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_s_'.$t}=$wp;
 	    $wp->set_value($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_col_'.$ta);
+	$wp=$gap->get_object($prefixe.'_col_'.$ta) || $w{$prefixe.'_col_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_col_'.$t}=$wp;
 	    $wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
 	}
-	$wp=$gap->get_object($prefixe.'_cb_'.$ta);
+	$wp=$gap->get_object($prefixe.'_cb_'.$ta) || $w{$prefixe.'_cb_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_cb_'.$t}=$wp;
 	    $wp->set_active($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_c_'.$ta);
+	$wp=$gap->get_object($prefixe.'_c_'.$ta) || $w{$prefixe.'_c_'.$ta};
 	if($wp) {
-	    $w{$prefixe.'_c_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
-		debug "CB_STORE($t) ALIAS $ta modifie ($t=>$h->{$t})";
-		$wp->set_model($cb_stores{$ta});
-		my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
-		if($i) {
-		    debug("[$t] find $i",
-			  " -> ".$cb_stores{$ta}->get($i,COMBO_TEXT));
-		    $wp->set_active_iter($i);
-		}
+	      $w{$prefixe.'_c_'.$t}=$wp;
+	      debug "CB_STORE($t) ALIAS $ta modifie ($t=>$h->{$t})";
+	      $wp->set_model($cb_stores{$ta});
+	      my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
+	      if($i) {
+		debug("[$t] find $i",
+		      " -> ".$cb_stores{$ta}->get($i,COMBO_TEXT));
+		$wp->set_active_iter($i);
+	      }
 	    } else {
-		debug "no CB_STORE for $ta";
-		$wp->set_active($h->{$t});
+	      debug "no CB_STORE for $ta";
+	      $wp->set_active($h->{$t});
 	    }
 	}
-	$wp=$gap->get_object($prefixe.'_ce_'.$ta);
+	$wp=$gap->get_object($prefixe.'_ce_'.$ta) || $w{$prefixe.'_ce_'.$ta};
 	if($wp) {
 	    $w{$prefixe.'_ce_'.$t}=$wp;
 	    if($cb_stores{$ta}) {
@@ -5180,6 +5147,7 @@ sub projet_ouvre {
 sub quitte_projet {
     if($projet{'nom'}) {
 
+      maj_export();
 	valide_options_notation();
 
 	if($projet{'options'}->{'_modifie'}
@@ -5621,12 +5589,8 @@ sub choose_columns {
   $w{'choose_columns'}->destroy;
 }
 
-sub choose_columns_csv {
-  choose_columns('csv');
-}
-
-sub choose_columns_ods {
-  choose_columns('ods');
+sub choose_columns_current {
+  choose_columns(lc($projet{'options'}->{'format_export'}));
 }
 
 #######################################
