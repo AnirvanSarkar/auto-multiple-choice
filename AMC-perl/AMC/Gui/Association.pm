@@ -63,6 +63,7 @@ sub new {
 	      'identifiant'=>'',
 	      'fin'=>'',
 	      'size_prefs'=>'',
+	      'rtl'=>'',
 	  };
 
     for (keys %o) {
@@ -160,6 +161,9 @@ sub new {
 	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
 	$b->set_tooltip_text($self->{'liste'}->data_n($i,'_ID_'));
 	$b->set_size_request(10,-1);
+	if($self->{'rtl'}) {
+	  #$b->set_alignment(1,.5);
+	}
 	$eb->add($b);
 
 	push @bouton_nom,$b;
