@@ -442,6 +442,7 @@ sub ecrit {
       debug "Saving ".pageids_string(@spc);
 
       $self->{'capture'}->begin_transaction;
+      $self->{'capture'}->variable('annotated_uptodate',-8);
 
       $self->{'capture'}->statement('setManualPage')->execute(time(),@spc);
 
@@ -495,6 +496,7 @@ sub efface_saisie {
 
     my $p=$self->{'page'}->[$self->{'iid'}];
     $self->{'capture'}->begin_transaction;
+    $self->{'capture'}->variable('annotated_uptodate',-8);
     $self->{'capture'}->remove_manual(@$p);
     $self->{'capture'}->end_transaction;
 
@@ -509,6 +511,7 @@ sub duplique_saisie {
    my ($student,$page,$copy)=@$p;
 
    $self->{'capture'}->begin_transaction;
+   $self->{'capture'}->variable('annotated_uptodate',-8);
    $copy=$self->{'capture'}->new_page_copy($student,$page);
    $self->{'capture'}->set_page_manual($student,$page,$copy,-1);
    $self->{'capture'}->end_transaction;

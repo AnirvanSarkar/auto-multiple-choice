@@ -425,9 +425,12 @@ if($mode =~ /b/) {
 
     my $delta=0;
 
-    my $scoring=AMC::Data->new($data_dir)->module('scoring');
+    my $data=AMC::Data->new($data_dir);
+    my $scoring=$data->module('scoring');
+    my $capture=$data->module('capture');
 
-    $scoring->begin_transaction;
+    $scoring->begin_transaction('ScEx');
+    $capture->variable('annotated_uptodate',-6);
     $scoring->clear_strategy;
 
     execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)],
@@ -512,7 +515,7 @@ if($mode =~ /b/) {
     close(AMCLOG);
     $cmd_pid='';
 
-    $scoring->end_transaction;
+    $scoring->end_transaction('ScEx');
 }
 
 $avance->fin();

@@ -469,5 +469,11 @@ $delta=1/(1+$#pages) if($#pages>=0);
   $avance->progres($delta);
 }
 
+# stores state parameter to know all sheets have been annotated
+
+$capture->begin_transaction('Aend');
+$capture->variable('annotated_uptodate',1);
+$capture->end_transaction('Aend');
+
 $avance->fin();
 

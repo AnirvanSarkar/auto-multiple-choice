@@ -49,6 +49,7 @@ my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
 my $layout=$data->module('layout');
+my $capture=$data->module('capture');
 
 my $timestamp=time();
 
@@ -127,6 +128,7 @@ my $delta=(@pages ? 1/(1+$#pages) : 0);
 
 $layout->begin_transaction;
 $layout->clear_all;
+$capture->variable('annotated_uptodate',-10);
 
 for my $p (@pages) {
 
