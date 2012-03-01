@@ -158,17 +158,20 @@ sub new {
     my ($x,$y)=(0,0);
     for my $i (0..($self->{'liste'}->taille()-1)) {
 	my $eb=Gtk2::EventBox->new();
-	my $b=Gtk2::Button->new($self->{'liste'}->data_n($i,'_ID_'));
+	my $b=Gtk2::Button->new();
+	my $l=Gtk2::Label->new($self->{'liste'}->data_n($i,'_ID_'));
+	$b->add($l);
 	$b->set_tooltip_text($self->{'liste'}->data_n($i,'_ID_'));
-	$b->set_size_request(10,-1);
-	if($self->{'rtl'}) {
-	  #$b->set_alignment(1,.5);
+	$l->set_size_request(10,-1);
+	if($self->{'rtl'}
+	   && $self->{'general'}->get_direction() eq 'rtl') {
+	  $l->set_alignment(0,.5);
 	}
 	$eb->add($b);
 
 	push @bouton_nom,$b;
 	push @bouton_eb,$eb;
-	$b->show();
+	$b->show_all();
 	$eb->show();
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
@@ -770,11 +773,11 @@ sub style_bouton {
 	if($pris) {
 	    $b->set_relief(GTK_RELIEF_NONE);
 	    $b->modify_bg('prelight',($actif ? $col_actif : $col_pris));
-	    $b->set_label($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
+	    $b->child->set_text($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
 	} else {
 	    $b->set_relief(GTK_RELIEF_NORMAL);
 	    $b->modify_bg('prelight',undef);
-	    $b->set_label($self->{'liste'}->data_n($i,'_ID_'));
+	    $b->child->set_text($self->{'liste'}->data_n($i,'_ID_'));
 	}
 	if($eb) {
 	    my $col=undef;
