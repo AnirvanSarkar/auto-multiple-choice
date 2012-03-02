@@ -3463,6 +3463,17 @@ sub regroupement {
 
     valide_options_notation();
 
+    $projet{'_capture'}->begin_read_transaction('AnAT');
+    my $jpeg_ok=$projet{'_capture'}->variable('annotated_uptodate')>0
+      && $projet{'_capture'}->annotated_all_there(absolu($projet{'options'}->{'cr'})."/corrections/jpg");
+    $projet{'_capture'}->end_transaction('AnAT');
+
+    if($jpeg_ok) {
+      debug "Annotated JPEG OK";
+    } else {
+      annote_copies();
+    }
+
     my $single_output='';
 
     if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
@@ -3773,14 +3784,16 @@ sub accepte_preferences {
   reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
 
   my %pm;
-  my @gm;
+  my %gm;
+  my @dgm;
   my %labels;
 
   if ($projet{'nom'}) {
     %pm=map { $_=>1 } (split(/,/,$projet{'options'}->{'_modifie'}));
-    @gm=grep { /^defaut_/ } (split(/,/,$o{'_modifie'}));
+    %gm=map { $_=>1 } (split(/,/,$o{'_modifie'}));
+    @dgm=grep { /^defaut_/ } (keys %gm);
 
-    for my $k (@gm) {
+    for my $k (@dgm) {
       my $l=$w{'edit_preferences_manager'}->get_object('label_'.$k);
       $labels{$k}=$l->get_text() if($l);
       my $kp=$k;
@@ -3792,13 +3805,35 @@ sub accepte_preferences {
 
   $w{'edit_preferences'}->destroy();
 
-  # modified default value ?
   if ($projet{'nom'}) {
+
+    # Check if annotations are still valid (same options)
+
+    my $changed=0;
+    for(qw/annote_chsign taille_max_correction qualite_correction symboles_trait
+	   symboles_indicatives annote_ps_nl annote_ecart/) {
+      $changed=1 if($gm{$_});
+    }
+    for my $tag (qw/0_0 0_1 1_0 1_1/) {
+      $changed=1 if($gm{"symbole_".$tag."_type"} || $gm{"symbole_".$tag."_color"});
+    }
+    for(qw/annote_position verdict verdict_q annote_rtl/) {
+      $changed=1 if($pm{$_});
+    }
+
+    if($changed) {
+      $projet{'_capture'}->begin_transaction('APch');
+      $projet{'_capture'}->variable('annotated_uptodate',-3);
+      $projet{'_capture'}->end_transaction('APch');
+    }
+
+    # Look at modified default values...
+
     debug "Modified (general): $o{'_modifie'}";
     debug "Modified (project): ".$projet{'options'}->{'_modifie'};
     debug "Labels: ".join(',',keys %labels);
 
-    for my $k (@gm) {
+    for my $k (@dgm) {
       my $kp=$k;
       $kp =~ s/^defaut_//;
 

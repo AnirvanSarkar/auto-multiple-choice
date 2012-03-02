@@ -480,6 +480,10 @@ sub define_statements {
 		      ." FROM $t_page"
 		      ." WHERE timestamp_annotate>0"
 		      ." ORDER BY student,copy,page"},
+     'getAnnotatedFiles'=>{'sql'=>"SELECT annotated"
+			   ." FROM $t_page"
+			   ." WHERE timestamp_auto>0"
+			   ." ORDER BY student,copy,page"},
      'getAnnotatedPage'=>{'sql'=>"SELECT annotated"
 			  ." FROM $t_page"
 			  ." WHERE timestamp_annotate>0"
@@ -897,6 +901,24 @@ sub set_annotated {
   $timestamp=time() if(!$timestamp);
   $self->statement('setAnnotated')
     ->execute($file,$timestamp,$student,$page,$copy);
+}
+
+# annotated_all_there($directory) returns TRUE if all pages with a
+# automatic data capture have a JPEG annotated scan present in
+# $directory.
+
+sub annotated_all_there {
+  my ($self,$directory)=@_;
+  my @f=$self->sql_list($self->statement('getAnnotatedFiles'));
+  my $ok=1;
+  for(@f) {
+    if($_) {
+      $ok=0 if(!-f "$directory/$_");
+    } else {
+      $ok=0;
+    }
+  }
+  return($ok);
 }
 
 # get_annotated_page($student,$page,$copy) returns the annotated image
