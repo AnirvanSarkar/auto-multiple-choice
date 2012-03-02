@@ -3428,51 +3428,57 @@ sub opt_symbole {
 }
 
 sub annote_copies {
-    commande('commande'=>["auto-multiple-choice","annote",
-			  pack_args("--debug",debug_file(),
-				    "--progression-id",'annote',
-				    "--progression",1,
-				    "--projet",absolu('%PROJET/'),
-				    "--projets",absolu('%PROJETS/'),
-				    "--ch-sign",$o{'annote_chsign'},
-				    "--cr",absolu($projet{'options'}->{'cr'}),
-				    "--data",absolu($projet{'options'}->{'data'}),
-				    "--taille-max",$o{'taille_max_correction'},
-				    "--qualite",$o{'qualite_correction'},
-				    "--line-width",$o{'symboles_trait'},
+  my ($and_regroupe)=@_;
+  commande('commande'=>["auto-multiple-choice","annote",
+			pack_args("--debug",debug_file(),
+				  "--progression-id",'annote',
+				  "--progression",1,
+				  "--projet",absolu('%PROJET/'),
+				  "--projets",absolu('%PROJETS/'),
+				  "--ch-sign",$o{'annote_chsign'},
+				  "--cr",absolu($projet{'options'}->{'cr'}),
+				  "--data",absolu($projet{'options'}->{'data'}),
+				  "--taille-max",$o{'taille_max_correction'},
+				  "--qualite",$o{'qualite_correction'},
+				  "--line-width",$o{'symboles_trait'},
 
-				    "--indicatives",$o{'symboles_indicatives'},
-				    "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)),
-			            "--position",$projet{'options'}->{'annote_position'},
-			            "--pointsize-nl",$o{'annote_ps_nl'},
-			            "--ecart",$o{'annote_ecart'},
-			            "--verdict",$projet{'options'}->{'verdict'},
-			            "--verdict-question",$projet{'options'}->{'verdict_q'},
-			            "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-			            "--noms-encodage",bon_encodage('liste'),
-			  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
-                                   )
-			  ],
-	     'texte'=>__"Annotating papers...",
-	     'progres.id'=>'annote',
-	     'fin'=>sub { detecte_correc(); },
-	     );
+				  "--indicatives",$o{'symboles_indicatives'},
+				  "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)),
+				  "--position",$projet{'options'}->{'annote_position'},
+				  "--pointsize-nl",$o{'annote_ps_nl'},
+				  "--ecart",$o{'annote_ecart'},
+				  "--verdict",$projet{'options'}->{'verdict'},
+				  "--verdict-question",$projet{'options'}->{'verdict_q'},
+				  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
+				  "--noms-encodage",bon_encodage('liste'),
+				  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
+				 )
+		       ],
+	   'texte'=>__"Annotating papers...",
+	   'progres.id'=>'annote',
+	   'fin'=>sub { detecte_correc();regroupement_go() if($and_regroupe); },
+	  );
 }
 
 sub regroupement {
 
-    valide_options_notation();
+  valide_options_notation();
 
-    $projet{'_capture'}->begin_read_transaction('AnAT');
-    my $jpeg_ok=$projet{'_capture'}->variable('annotated_uptodate')>0
-      && $projet{'_capture'}->annotated_all_there(absolu($projet{'options'}->{'cr'})."/corrections/jpg");
-    $projet{'_capture'}->end_transaction('AnAT');
+  $projet{'_capture'}->begin_read_transaction('AnAT');
+  my $jpeg_ok=$projet{'_capture'}->variable('annotated_uptodate')>0
+    && $projet{'_capture'}->annotated_all_there(absolu($projet{'options'}->{'cr'})."/corrections/jpg");
+  $projet{'_capture'}->end_transaction('AnAT');
 
-    if($jpeg_ok) {
-      debug "Annotated JPEG OK";
-    } else {
-      annote_copies();
-    }
+  if($jpeg_ok) {
+    debug "Annotated JPEG OK";
+    regroupement_go();
+  } else {
+    annote_copies(1);
+  }
+
+}
+
+sub regroupement_go {
 
     my $single_output='';
 
