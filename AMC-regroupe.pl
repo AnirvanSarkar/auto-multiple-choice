@@ -543,4 +543,6 @@ if($single_output) {
   $data->end_transaction('rSST');
 }
 
+$report->variable_transaction('last_group_type',$type);
+
 $avance->fin();

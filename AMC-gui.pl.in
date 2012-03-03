@@ -3469,6 +3469,8 @@ sub regroupement_go {
 		($projet{'_report'}->type_count($type)
 		 != $projet{'_capture'}->n_copies() ));
     $group=1 if(!$group && !$projet{'_report'}->all_there($type,absolu('%PROJET/')));
+    $group=1 if(!$group &&
+		$projet{'_report'}->variable('last_group_type') != $type);
     $projet{'_report'}->end_transaction('RgFO');
   }
 
