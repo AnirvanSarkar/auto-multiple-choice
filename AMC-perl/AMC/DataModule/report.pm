@@ -96,6 +96,8 @@ sub define_statements {
 		." WHERE type=?"},
      'numType'=>{'sql'=>"SELECT COUNT(*) FROM $t_student"
 		 ." WHERE type=?"},
+     'allType'=>{'sql'=>"SELECT file FROM $t_student"
+		 ." WHERE type=?"},
      'filesWithType'=>
      {'sql'=>"SELECT file FROM $t_student"
       ." WHERE type IN"
@@ -151,7 +153,7 @@ sub set_student_report {
 # $type.
 
 sub free_student_report {
-  my ($self,$type,$file)=@_;
+  my ($self,$type,$file,$basedir)=@_;
 
   my %registered=map { $_=>1 } ($self->files_with_type($type));
   if($registered{$file}) {
@@ -207,6 +209,29 @@ sub get_associated_type {
 sub type_count {
   my ($self,$type)=@_;
   return($self->sql_single($self->statement('numType'),$type));
+}
+
+# all_type($type) returns all the report filenames for type $type
+
+sub all_type {
+  my ($self,$type)=@_;
+  return($self->sql_list($self->statement('allType'),$type));
+}
+
+# all_there($type,$basedir) returns TRUE if all reports of type $type
+# are distinct present files.
+
+sub all_there {
+  my ($self,$type,$basedir)=@_;
+  my $dir=$basedir.'/'.$self->get_dir($type);
+  my @f=$self->sql_list($self->statement('allType'),$type);
+  my $n=$#f;
+  my %f_here=();
+  for(@f) {
+    $f_here{$_}=1 if( -f $dir.'/'.$_ );
+  }
+  @f=(keys %f_here);
+  return($#f==$n);
 }
 
 1;

@@ -52,6 +52,7 @@ my $data_dir='';
 my $single_output='';
 my $id_file='';
 my $compose='';
+my $rename='';
 
 my $moteur_latex='pdflatex';
 my $tex_src='';
@@ -75,6 +76,7 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "compose!"=>\$compose,
+	   "rename!"=>\$rename,
 	   "id-file=s"=>\$id_file,
 	   "single-output=s"=>\$single_output,
 	   "debug=s"=>\$debug,
@@ -222,10 +224,14 @@ if($id_file) {
 # b) second case: guess from data capture data
 
 else {
-  $capture->begin_read_transaction;
-  @students=@{$capture->dbh
-		->selectall_arrayref($capture->statement('studentCopies'))};
-  $capture->end_transaction;
+  if($rename && $single_output) {
+    @students=([0,0]);
+  } else {
+    $capture->begin_read_transaction;
+    @students=@{$capture->dbh
+		  ->selectall_arrayref($capture->statement('studentCopies'))};
+    $capture->end_transaction;
+  }
 }
 
 my $n_copies=1+$#students;
@@ -364,14 +370,31 @@ sub process_output {
 }
 
 ###################################################################
+
+if($rename) {
+  # In mode rename, move all old files to temp dir
+  $data->begin_transaction('grMV');
+  $pdfdir=$projet_dir.'/'.$report->get_dir($type);
+  for my $e (@students) {
+    my $t=join('_',@$e);
+    my $old_name=$report->get_student_report($type,@$e);
+    debug "Stock $pdfdir/$old_name --> $temp_dir/$t";
+    move($pdfdir.'/'.$old_name,$temp_dir.'/'.$t);
+  }
+  $report->delete_student_type($type);
+  $data->end_transaction('grMV');
+} else {
+  # Else, free database with file names
+  $data->begin_transaction('rDELS');
+  $report->delete_student_type($type);
+  $pdfdir=$projet_dir.'/'.$report->get_dir($type);
+  $data->end_transaction('rDELS');
+}
+
+###################################################################
 # Going through the sheets to process...
 
-stk_begin() if($single_output);
-
-$data->begin_transaction('rDELS');
-$report->delete_student_type($type);
-$pdfdir=$projet_dir.'/'.$report->get_dir($type);
-$data->end_transaction('rDELS');
+stk_begin() if($single_output && !$rename);
 
 for my $e (@students) {
   print "Pages for ID=".studentids_string(@$e)."...\n";
@@ -454,50 +477,67 @@ for my $e (@students) {
     $f="$pdfdir/$f";
     debug "Dest file: $f";
 
-    stk_begin();
+    stk_begin() if(!$rename);
   }
 
-  $data->begin_read_transaction('rSDP');
-  my $pp=$capture->get_student_pages(@$e);
-  $data->end_transaction('rSDP');
+  if($rename) {
 
-  for my $p (@$pp) {
+    if(!$single_output) {
+      my $t=join('_',@$e);
+      debug "Moving back $temp_dir/$t --> $f";
+      move($temp_dir.'/'.$t,$f);
+    }
 
-    my $f_j0=$p->{'annotated'};
-    my $f_j;
+  } else {
 
-    if($f_j0) {
-      $f_j="$jpgdir/$f_j0";
-      if(!-f $f_j) {
-	print "Annotated page $f_j not found\n";
-	debug("Annotated page $f_j not found");
-	$f_j='';
+    $data->begin_read_transaction('rSDP');
+    my $pp=$capture->get_student_pages(@$e);
+    $data->end_transaction('rSDP');
+
+    for my $p (@$pp) {
+
+      my $f_j0=$p->{'annotated'};
+      my $f_j;
+
+      if ($f_j0) {
+	$f_j="$jpgdir/$f_j0";
+	if (!-f $f_j) {
+	  print "Annotated page $f_j not found\n";
+	  debug("Annotated page $f_j not found");
+	  $f_j='';
+	}
+      }
+
+      if ($f_j) {
+	# correction JPG presente : on transforme en PDF
+
+	debug "Page ".studentids_string(@$e)."/$p->{'page'} annotated ($f_j)";
+	stk_ppm_add($f_j);
+
+      } elsif ($compose) {
+	# pas de JPG annote : on prend la page corrigee
+
+	debug "Page ".studentids_string(@$e)."/$p->{'page'} from corrected sheet";
+	stk_pdf_add($p->{'subjectpage'});
       }
     }
 
-    if($f_j) {
-      # correction JPG presente : on transforme en PDF
-
-      debug "Page ".studentids_string(@$e)."/$p->{'page'} annotated ($f_j)";
-      stk_ppm_add($f_j);
-
-    } elsif($compose) {
-      # pas de JPG annote : on prend la page corrigee
-
-      debug "Page ".studentids_string(@$e)."/$p->{'page'} from corrected sheet";
-      stk_pdf_add($p->{'subjectpage'});
+    if (!$single_output) {
+      process_output($f);
     }
-  }
 
-  if(!$single_output) {
-    process_output($f);
   }
 
   $avance->progres(1/$n_copies);
 }
 
 if($single_output) {
-  process_output($pdfdir.'/'.$single_output);
+  if($rename) {
+    debug "Moving back $temp_dir/0_0 --> $pdfdir/$single_output";
+    move($temp_dir.'/0_0',$pdfdir.'/'.$single_output);
+  } else {
+    process_output($pdfdir.'/'.$single_output);
+  }
   $data->begin_transaction('rSST');
   $report->set_student_report($type,0,0,$single_output,'now');
   $data->end_transaction('rSST');

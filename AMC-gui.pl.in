@@ -3456,7 +3456,7 @@ sub annote_copies {
 		       ],
 	   'texte'=>__"Annotating papers...",
 	   'progres.id'=>'annote',
-	   'fin'=>sub { detecte_correc();regroupement_go() if($and_regroupe); },
+	   'fin'=>sub { detecte_correc();regroupement_go(1) if($and_regroupe); },
 	  );
 }
 
@@ -3471,7 +3471,7 @@ sub regroupement {
 
   if($jpeg_ok) {
     debug "Annotated JPEG OK";
-    regroupement_go();
+    regroupement_go(0);
   } else {
     annote_copies(1);
   }
@@ -3479,15 +3479,32 @@ sub regroupement {
 }
 
 sub regroupement_go {
+  my ($from_annotate)=@_;
 
-    my $single_output='';
+  my $single_output='';
 
-    if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
-	$single_output=
+  if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
+    $single_output=
 # TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-	    (__("All_students")).".pdf";
-    }
+      (__("All_students")).".pdf";
+  }
 
+  my $type=($single_output ? REPORT_SINGLE_ANNOTATED_PDF : REPORT_ANNOTATED_PDF);
+
+  # Looks if a rename is sufficient, or if one has to group again JPEG files:
+
+  my $group=$from_annotate;
+  if(!$group) {
+    $projet{'_report'}->begin_read_transaction('RgFO');
+    $group=1 if(!$single_output && 
+		($projet{'_report'}->type_count($type)
+		 != $projet{'_capture'}->n_copies() ));
+    $group=1 if(!$group && !$projet{'_report'}->all_there($type,absolu('%PROJET/')));
+    $projet{'_report'}->end_transaction('RgFO');
+  }
+
+  if($group) {
+    # Group JPG annotated pages.
     commande('commande'=>["auto-multiple-choice","regroupe",
 			  "--debug",debug_file(),
 			  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
@@ -3503,12 +3520,30 @@ sub regroupement_go {
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			  "--noms-encodage",bon_encodage('liste'),
 			  "--single-output",$single_output,
-
-			  ],
+			 ],
 	     'signal'=>2,
 	     'texte'=>__"Grouping students annotated pages together...",
 	     'progres.id'=>'regroupe',
-	     );
+	    );
+  } else {
+    # Only rename correct old files
+    commande('commande'=>["auto-multiple-choice","regroupe",
+			  "--debug",debug_file(),
+			  "--rename",
+			  "--projet",absolu('%PROJET'),
+			  "--data",absolu($projet{'options'}->{'data'}),
+			  "--progression-id",'regroupe',
+			  "--progression",1,
+			  "--modele",$projet{'options'}->{'modele_regroupement'},
+			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
+			  "--noms-encodage",bon_encodage('liste'),
+			  "--single-output",$single_output,
+			 ],
+	     'signal'=>2,
+	     'texte'=>__"Renaming annotated files with new model...",
+	     'progres.id'=>'regroupe',
+	    );
+  }
 }
 
 sub view_dir {
