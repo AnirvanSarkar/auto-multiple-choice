@@ -82,10 +82,6 @@ use constant {
     PROJ_NOM => 0,
     PROJ_ICO => 1,
 
-    CORREC_ID => 0,
-    CORREC_MAJ => 1,
-    CORREC_FILE => 2,
-
     MODEL_NOM => 0,
     MODEL_PATH => 1,
     MODEL_DESC => 2,
@@ -700,7 +696,7 @@ my $gui=read_glade('main_window',
     liste_filename liste_path liste_edit liste_setfile liste_refresh
     doc_menu menu_debug
     diag_tree state_capture
-    maj_bareme correc_tree regroupement_corriges
+    maj_bareme regroupement_corriges
     groupe_model
     pref_assoc_c_assoc_code pref_assoc_c_liste_key
     export_c_format_export
@@ -856,29 +852,6 @@ my $emails_store=Gtk2::ListStore->new ('Glib::String',
 				       'Glib::String',
 				       'Glib::String',
 				      );
-
-### modele CORREC
-
-my $correc_store = Gtk2::ListStore->new ('Glib::String',
-					 'Glib::String',
-					 'Glib::String',
-					 );
-
-$w{'correc_tree'}->set_model($correc_store);
-
-$renderer=Gtk2::CellRendererText->new;
-# TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of papers annotation.
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"ID",
-						     $renderer,
-						     text=> CORREC_ID);
-$w{'correc_tree'}->append_column ($column);
-
-$renderer=Gtk2::CellRendererText->new;
-# TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of papers annotation.
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"Updated",
-						     $renderer,
-						     text=> CORREC_MAJ);
-$w{'correc_tree'}->append_column ($column);
 
 ### modele DIAGNOSTIQUE SAISIE
 
@@ -3406,14 +3379,6 @@ sub assoc_state {
   $w{'state_assoc'}->set_text($t);
 }
 
-sub visualise_correc {
-    my $sel=$w{'correc_tree'}->get_selection()->get_selected_rows();
-    #print "Correc $sel $correc_store\n";
-    my $f=$correc_store->get($correc_store->get_iter($sel),CORREC_FILE);
-    debug "Looking at $f...";
-    commande_parallele($o{'img_viewer'},$f);
-}
-
 sub opt_symbole {
     my ($s)=@_;
     my $k=$s;
@@ -3456,11 +3421,11 @@ sub annote_copies {
 		       ],
 	   'texte'=>__"Annotating papers...",
 	   'progres.id'=>'annote',
-	   'fin'=>sub { detecte_correc();regroupement_go(1) if($and_regroupe); },
+	   'fin'=>sub { regroupement_go(1) if($and_regroupe); },
 	  );
 }
 
-sub regroupement {
+sub annotate_papers {
 
   valide_options_notation();
 
@@ -4097,32 +4062,6 @@ sub mep_warnings {
 
 }
 
-sub detecte_correc {
-    my $cordir=absolu($projet{'options'}->{'cr'})."/corrections/jpg";
-    my $n=0;
-
-    $correc_store->clear();
-
-    $projet{'_capture'}->begin_read_transaction('ANNO');
-    my $sth=$projet{'_capture'}->statement('getAnnotated');
-    $sth->execute();
-    while(my $p=$sth->fetchrow_hashref) {
-      if(-f $cordir.'/'.$p->{'annotated'}) {
-	my $iter=$correc_store->append;
-	$correc_store->set($iter,CORREC_FILE,"$cordir/".$p->{'annotated'},
-			   CORREC_MAJ,format_date($p->{'timestamp_annotate'}),
-			   CORREC_ID,pageids_string(map { $p->{$_} } (qw/student page copy/))
-			  );
-	$n++;
-      } else {
-	debug "Annotated scan is not here: ".$cordir.'/'.$p->{'annotated'};
-      }
-    }
-    $projet{'_capture'}->end_transaction('ANNO');
-
-    $w{'regroupement_corriges'}->set_sensitive($n>0);
-}
-
 sub update_analysis_summary {
   my $n=$projet{'_capture'}->n_pages;
 
@@ -4230,8 +4169,6 @@ sub detecte_analyse {
     my $r=update_analysis_summary();
 
     $projet{'_capture'}->end_transaction('ADCP');
-
-    detecte_correc() if($r->{'npages'}>0);
 
     # dialogue apprentissage :
 

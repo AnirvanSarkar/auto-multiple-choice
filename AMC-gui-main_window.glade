@@ -2150,100 +2150,7 @@
                           <object class="GtkVBox" id="vbox5">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkHButtonBox" id="hbuttonbox3">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="layout_style">end</property>
-                                <child>
-                                  <object class="GtkButton" id="button23">
-                                    <property name="use_action_appearance">False</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Annotate papers&amp;apos; scans with marking details.</property>
-                                    <property name="tooltip_text" translatable="yes">Annotate papers' scans with marking details.</property>
-                                    <property name="use_action_appearance">False</property>
-                                    <signal name="clicked" handler="annote_copies" swapped="no"/>
-                                    <child>
-                                      <object class="GtkHBox" id="hbox23">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <child>
-                                          <object class="GtkImage" id="image16">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="icon_name">amc-annotate</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">True</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel" id="label89">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="label" translatable="yes">Annotate papers</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">True</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                      </object>
-                                    </child>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkScrolledWindow" id="scrolledwindow3">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="hscrollbar_policy">never</property>
-                                <child>
-                                  <object class="GtkTreeView" id="correc_tree">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <signal name="row-activated" handler="visualise_correc" swapped="no"/>
-                                    <child internal-child="selection">
-                                      <object class="GtkTreeSelection" id="treeview-selection"/>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkHSeparator" id="hseparator11">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="padding">2</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
+                            <property name="valign">start</property>
                             <child>
                               <object class="GtkHBox" id="regroupement_corriges">
                                 <property name="visible">True</property>
@@ -2292,7 +2199,7 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="position">3</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
@@ -2331,7 +2238,7 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
-                                <property name="position">4</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
@@ -2346,20 +2253,19 @@
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
                                     <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Group annotated pages to one PDF file by student</property>
-                                    <property name="tooltip_text" translatable="yes">Group annotated pages to one PDF file by student</property>
+                                    <property name="tooltip_markup" translatable="yes">Annotate papers&amp;apos; scans with marking details.</property>
+                                    <property name="tooltip_text" translatable="yes">Annotate papers' scans with marking details.</property>
                                     <property name="use_action_appearance">False</property>
-                                    <signal name="clicked" handler="regroupement" swapped="no"/>
+                                    <signal name="clicked" handler="annotate_papers" swapped="no"/>
                                     <child>
-                                      <object class="GtkHBox" id="hbox24">
+                                      <object class="GtkHBox" id="hbox3">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="spacing">2</property>
                                         <child>
                                           <object class="GtkImage" id="image17">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="icon_name">amc-group</property>
+                                            <property name="icon_name">amc-annotate</property>
                                           </object>
                                           <packing>
                                             <property name="expand">True</property>
@@ -2368,10 +2274,10 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkLabel" id="label90">
+                                          <object class="GtkLabel" id="label14">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="label" translatable="yes">Group</property>
+                                            <property name="label" translatable="yes">Annotate papers</property>
                                           </object>
                                           <packing>
                                             <property name="expand">True</property>
@@ -2441,7 +2347,7 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
-                                <property name="position">5</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                             <child>
@@ -2470,7 +2376,7 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
-                                <property name="position">6</property>
+                                <property name="position">3</property>
                               </packing>
                             </child>
                           </object>
@@ -2487,8 +2393,8 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
