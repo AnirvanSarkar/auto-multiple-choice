@@ -5615,6 +5615,50 @@ sub choose_columns_current {
 
 #######################################
 
+sub cleanup_dialog {
+  my %files;
+
+  my $gap=read_glade('cleanup');
+
+  my $dialog=$gap->get_object('cleanup');
+
+  my $reponse=$dialog->run();
+
+  for(qw/zooms annotated_pages/) {
+    $files{$_}=$gap->get_object('component_'.$_)->get_active();
+  }
+
+  $dialog->destroy();
+
+  debug "RESPONSE=$reponse";
+
+  return() if($reponse!=10);
+
+  my $n=0;
+
+  if($files{'zooms'}) {
+    debug "Removing zooms...";
+    $n+=remove_tree(absolu('%PROJET/cr/zooms'),
+		    {'verbose'=>0,'safe'=>1,'keep_root'=>1});
+  }
+
+  if($files{'annotated_pages'}) {
+    debug "Removing annotated pages...";
+    $n+=remove_tree(absolu('%PROJET/cr/corrections/jpg'),
+		    {'verbose'=>0,'safe'=>1,'keep_root'=>1});
+  }
+
+  my $dialog = Gtk2::MessageDialog
+    ->new($w{'main_window'},
+	  'destroy-with-parent',
+	  'info','ok',
+	  __("%s files were removed."),$n);
+  $dialog->run;
+  $dialog->destroy;
+}
+
+#######################################
+
 if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
     $w{'main_window'}->resize($o{'taille_x_main'},$o{'taille_y_main'});
 }
