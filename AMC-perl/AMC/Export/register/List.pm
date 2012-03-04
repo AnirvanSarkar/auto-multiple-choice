@@ -19,7 +19,17 @@
 
 package AMC::Export::register::List;
 
+use AMC::Export::register;
 use AMC::Basic;
+
+@ISA=("AMC::Export::register");
+
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new();
+    bless ($self, $class);
+    return $self;
+}
 
 sub name {
 # TRANSLATORS: List of students with their scores: one of the export formats.
@@ -39,10 +49,6 @@ sub options_from_config {
 sub options_default {
   return('export_ncols'=>2,
 	 'export_pagesize'=>'a4');
-}
-
-sub needs_module {
-  return();
 }
 
 sub build_config_gui {

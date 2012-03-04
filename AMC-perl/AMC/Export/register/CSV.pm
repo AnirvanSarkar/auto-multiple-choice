@@ -19,7 +19,17 @@
 
 package AMC::Export::register::CSV;
 
+use AMC::Export::register;
 use AMC::Basic;
+
+@ISA=("AMC::Export::register");
+
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new();
+    bless ($self, $class);
+    return $self;
+}
 
 sub name {
   return('CSV');
@@ -46,10 +56,6 @@ sub options_default {
 	 'export_csv_ticked'=>'',
 	 'export_csv_columns'=>'student.copy,student.key,student.name',
 	);
-}
-
-sub needs_module {
-  return();
 }
 
 sub build_config_gui {
