@@ -23,7 +23,7 @@ use AMC::Basic;
 
 sub new {
     my $class = shift;
-    my $self={};
+    my $self={'project_options'=>''};
     bless ($self, $class);
     return $self;
 }
@@ -67,6 +67,18 @@ sub needs_font {
 }
 
 ##############################################################
+
+sub set_oo {
+  my ($self,$o)=@_;
+  $self->{'project_options'}=$o;
+}
+
+sub set_project_option {
+  my ($self,$name,$value)=@_;
+  my $old=$self->{'project_options'}->{$name};
+  $self->{'project_options'}->{$name}=$value;
+  $self->{'project_options'}->{'_modifie'}.=','.$name if($value ne $old);
+}
 
 sub missing_latex_packages {
   my ($self)=@_;

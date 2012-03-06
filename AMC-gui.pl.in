@@ -1913,7 +1913,8 @@ sub doc_maj {
     # set options from filter:
 
     if($projet{'options'}->{'filter'}) {
-      $filter_register->configure($projet{'options'});
+      $filter_register->set_oo($projet{'options'});
+      $filter_register->configure();
     }
 
     #

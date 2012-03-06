@@ -40,9 +40,8 @@ sub weight {
 }
 
 sub configure {
-  my ($self,$options_project)=@_;
-  $options_project->{'moteur_latex_b'}='xelatex';
-  $options_project->{'_modifie'}=1;
+  my ($self)=@_;
+  $self->set_project_option('moteur_latex_b','xelatex');
 }
 
 sub file_patterns {
