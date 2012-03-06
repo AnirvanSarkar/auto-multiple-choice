@@ -1815,6 +1815,11 @@ sub projet_check_and_save {
 
 sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
 
+my %component_name=('latex_packages'=>__("LaTeX packages:"),
+		    'commands'=>__("Commands:"),
+		    'fonts'=>__("Fonts:"),
+		    );
+
 sub doc_maj {
     my $sur=0;
     if($projet{'_capture'}->n_pages_transaction()>0) {
@@ -1873,11 +1878,42 @@ sub doc_maj {
 	$projet{'options'}->{'_modifie'}=1;
     }
 
+    # check for filter dependencies
+
+    my $filter_register=("AMC::Filter::register::".$projet{'options'}->{'filter'})
+      ->new();
+
+    my $check=$filter_register->check_dependencies();
+
+    if(!$check->{'ok'}) {
+      my $message=sprintf(__("To handle properly <i>%s</i> files, AMC needs the following components, that are currently missing:"),$filter_register->name())."\n";
+      for my $k (qw/latex_packages commands fonts/) {
+	if(@{$check->{$k}}) {
+	  $message .= "<b>".$component_name{$k}."</b> ";
+	  if($k eq 'fonts') {
+	    $message.=join(', ',map { @{$_->{'family'}} } @{$check->{$k}});
+	  } else {
+	    $message.=join(', ',@{$check->{$k}});
+	  }
+	  $message.="\n";
+	}
+      }
+      $message.=__("Install these components on your system and try again.");
+
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',$message);
+      $dialog->run;
+      $dialog->destroy;
+
+      return(0);
+    }
+
     # set options from filter:
 
     if($projet{'options'}->{'filter'}) {
-      ("AMC::Filter::register::".$projet{'options'}->{'filter'})
-	->configure($projet{'options'});
+      $filter_register->configure($projet{'options'});
     }
 
     #

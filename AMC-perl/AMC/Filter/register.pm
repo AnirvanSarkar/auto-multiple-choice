@@ -74,7 +74,7 @@ sub missing_latex_packages {
   for my $p ($self->needs_latex_package()) {
     my $ok=0;
     open KW,"-|","kpsewhich","-all","$p.sty";
-    while(<FC>) { chomp();$ok=1 if(/./); }
+    while(<KW>) { chomp();$ok=1 if(/./); }
     close(KW);
     push @mp,$p if(!$ok);
   }
@@ -108,6 +108,20 @@ sub missing_fonts {
     }
   }
   return(@mf);
+}
+
+sub check_dependencies {
+  my ($self)=@_;
+  my %miss=('latex_packages'=>[$self->missing_latex_packages()],
+	    'commands'=>[$self->missing_commands()],
+	    'fonts'=>[$self->missing_fonts()],
+	   );
+  my $ok=1;
+  for my $k (keys %miss) {
+    $ok=0 if(@{$miss{$k}});
+  }
+  $miss{'ok'}=$ok;
+  return(\%miss);
 }
 
 1;
