@@ -43,6 +43,7 @@ sub new {
   my $self=
     {
      'dir'=>'',
+     'filter'=>'',
      'tex_engine'=>'pdflatex',
      'multiple'=>'',
      'n_copies'=>5,
@@ -83,7 +84,7 @@ sub new {
   if (!$self->{'src'}) {
     opendir(my $dh, $self->{'dir'})
       || die "can't opendir $self->{'dir'}: $!";
-    my @tex = grep { /\.tex$/ } readdir($dh);
+    my @tex = grep { /\.(tex|txt)$/ } readdir($dh);
     closedir $dh;
     $self->{'src'}=$tex[0];
   }
@@ -224,6 +225,7 @@ sub prepare {
   my ($self)=@_;
 
   $self->amc_command('prepare',
+		     '--filter',$self->{'filter'},
 		     '--with',$self->{'tex_engine'},
 		     '--mode','s',
 		     '--n-copies',$self->{'n_copies'},
@@ -235,6 +237,7 @@ sub prepare {
 		     '--data','%DATA',
 		     );
   $self->amc_command('prepare',
+		     '--filter',$self->{'filter'},
 		     '--with',$self->{'tex_engine'},
 		     '--mode','b',
 		     '--n-copies',$self->{'n_copies'},
@@ -248,6 +251,7 @@ sub analyse {
 
   if($self->{'perfect_copy'}) {
     $self->amc_command('prepare',
+		       '--filter',$self->{'filter'},
 		       '--with',$self->{'tex_engine'},
 		       '--mode','k',
 		       '--n-copies',$self->{'n_copies'},
