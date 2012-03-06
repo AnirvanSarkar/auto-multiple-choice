@@ -164,6 +164,8 @@ use XML::Simple;
 
 @ISA=("AMC::DataModule");
 
+use_gettext();
+
 sub version_current {
   return(1);
 }
