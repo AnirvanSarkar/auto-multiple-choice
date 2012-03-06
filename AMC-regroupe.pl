@@ -56,6 +56,8 @@ my $rename='';
 
 my $moteur_latex='pdflatex';
 my $tex_src='';
+my $filter='';
+my $filtered_source='';
 
 my $debug='';
 my $nombre_copies=0;
@@ -70,6 +72,8 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "data=s"=>\$data_dir,
 	   "tex-src=s"=>\$tex_src,
 	   "with=s"=>\$moteur_latex,
+	   "filter=s"=>\$filter,
+	   "filtered-source=s"=>\$filtered_source,
 	   "modele=s"=>\$modele,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
@@ -131,6 +135,8 @@ sub check_correc {
 	$commandes->execute("auto-multiple-choice","prepare",
 			    "--n-copies",$nombre_copies,
 			    "--with",$moteur_latex,
+			    "--filter",$filter,
+			    "--filtered-source",$filtered_source,
 			    "--mode","k",
 			    "--out-corrige",$correc_indiv,
 			    "--debug",debug_file(),

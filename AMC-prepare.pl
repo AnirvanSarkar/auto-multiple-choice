@@ -24,6 +24,8 @@ use File::Copy;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 
+use Module::Load;
+
 use Getopt::Long;
 
 use AMC::Basic;
@@ -61,6 +63,8 @@ my $moteur_latex='latex';
 my @moteur_args=();
 my $moteur_topdf='';
 my $prefix='';
+my $filter='';
+my $filtered_source='';
 
 my $debug='';
 
@@ -96,6 +100,8 @@ GetOptions("mode=s"=>\$mode,
 	   "n-procs=s"=>\$n_procs,
 	   "n-copies=s"=>\$nombre_copies,
 	   "raster=s"=>\$moteur_raster,
+	   "filter=s"=>\$filter,
+	   "filtered-source=s"=>\$filtered_source,
 	   );
 
 set_debug($debug);
@@ -116,16 +122,18 @@ $queue=AMC::Queue::new('max.procs',$n_procs);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
-my $tex_source=$ARGV[0];
+my $source=$ARGV[0];
 
-die "Nonexistent LaTeX file: $tex_source" if(! -f $tex_source);
+die "Nonexistent source file: $source" if(! -f $source);
 
-my $base=$tex_source;
-$base =~ s/\.tex$//gi;
+my $base=$source;
+$base =~ s/\.[a-zA-Z0-9]{1,4}$//gi;
+
+$filtered_source=$base.'_filtered.tex' if(!$filtered_source);
 
 $data_dir="$base-data" if(!$data_dir);
 
-for(\$data_dir,\$tex_source) {
+for(\$data_dir,\$source,\$filtered_source) {
     $$_=rel2abs($$_);
 }
 
@@ -299,16 +307,29 @@ sub execute {
 
 }
 
-$temp_loc=tmpdir();
-$temp_dir = tempdir( DIR=>$temp_loc,CLEANUP => 1 );
+my $f_tex;
 
-# on se place dans le repertoire du LaTeX
-($v,$d,$f_tex)=splitpath($tex_source);
-chdir(catpath($v,$d,""));
-$f_base=$f_tex;
-$f_base =~ s/\.tex$//i;
+sub do_filter {
+  my $f_base;
+  my $v;
+  my $d;
 
-$prefix=$f_base."-" if(!$prefix);
+  if($filter) {
+    load("AMC::Filter::$filter");
+    my $filter="AMC::Filter::$filter"->new();
+    $filter->filter($source,$filtered_source);
+  } else {
+    $filtered_source=$source;
+  }
+
+  # on se place dans le repertoire du LaTeX
+  ($v,$d,$f_tex)=splitpath($filtered_source);
+  chdir(catpath($v,$d,""));
+  $f_base=$f_tex;
+  $f_base =~ s/\.tex$//i;
+
+  $prefix=$f_base."-" if(!$prefix);
+}
 
 sub give_latex_errors {
     my ($context)=@_;
@@ -353,10 +374,17 @@ sub check_moteur {
     }
 }
 
+if($mode =~ /f/) {
+  # FILTER
+  do_filter();
+}
+
 if($mode =~ /k/) {
     # CORRECTION INDIVIDUELLE
 
     check_moteur();
+
+    do_filter();
 
     execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
     transfere("$jobname.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
@@ -367,6 +395,8 @@ if($mode =~ /s/) {
     # SUJETS
 
     check_moteur();
+
+    do_filter();
 
     my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
 
@@ -410,6 +440,10 @@ if($mode =~ /b/) {
     # BAREME
 
     print "********** Making marks scale...\n";
+
+    check_moteur();
+
+    do_filter();
 
     # compilation en mode calibration
 
