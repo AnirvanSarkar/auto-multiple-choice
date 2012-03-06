@@ -32,6 +32,10 @@ sub name {
   return("empty");
 }
 
+sub weight {
+  return(1);
+}
+
 sub configure {
   my ($self,$options_project);
 }

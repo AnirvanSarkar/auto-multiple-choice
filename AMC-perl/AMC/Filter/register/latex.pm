@@ -17,10 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-package AMC::Filter::register::plain;
+package AMC::Filter::register::latex;
 
 use AMC::Filter::register;
-use AMC::Basic;
 
 @ISA=("AMC::Filter::register");
 
@@ -32,31 +31,15 @@ sub new {
 }
 
 sub name {
-  return("AMC-TXT");
+  return("LaTeX");
 }
 
 sub weight {
-  return(0.2);
-}
-
-sub configure {
-  my ($self,$options_project)=@_;
-  $options_project->{'moteur_latex_b'}='xelatex';
-  $options_project->{'_modifie'}=1;
+  return(0.1);
 }
 
 sub file_patterns {
-  return("*.txt","*.TXT");
-}
-
-sub needs_latex_package {
-  return("xltxtra","multicol");
-}
-
-sub needs_font {
-  return([{'type'=>'fontconfig',
-	   'family'=>['Linux Libertine O']},
-	 ]);
+  return("*.tex","*.TEX");
 }
 
 1;

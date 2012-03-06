@@ -314,7 +314,7 @@ sub do_filter {
   my $v;
   my $d;
 
-  if($filter) {
+  if($filter && $filter ne 'latex') {
     load("AMC::Filter::$filter");
     my $filter="AMC::Filter::$filter"->new();
     $filter->filter($source,$filtered_source);

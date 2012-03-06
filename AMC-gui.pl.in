@@ -277,7 +277,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'encodage_liste'=>'',
 		   'maj_bareme'=>1,
 		   'docs'=>['DOC-sujet.pdf','DOC-corrige.pdf','DOC-calage.xy'],
-		   'filter'=>'',
+		   'filter'=>'latex',
 		   'filtered_source'=>'DOC-filtered.tex',
 
 		   'modele_regroupement'=>'',
@@ -336,7 +336,7 @@ for my $m (@export_modules) {
     $projet_defaut{$_}=$d{$_};
   }
 }
-@export_modules=sort { "AMC::Export::register::$a"->weight 
+@export_modules=sort { "AMC::Export::register::$a"->weight
 			 <=> "AMC::Export::register::$b"->weight }
   @export_modules;
 
@@ -346,7 +346,7 @@ my @filter_modules=perl_module_search('AMC::Filter::register');
 for my $m (@filter_modules) {
   load("AMC::Filter::register::$m");
 }
-@filter_modules=sort { "AMC::Filter::register::$a"->weight 
+@filter_modules=sort { "AMC::Filter::register::$a"->weight
 			 <=> "AMC::Filter::register::$b"->weight }
   @filter_modules;
 
@@ -993,8 +993,7 @@ my %cb_stores=(
     'liste_key'=>$cb_model_vide_key,
     'assoc_code'=>$cb_model_vide_code,
     'format_export'=>cb_model(map { $_=>"AMC::Export::register::$_"->name() } (@export_modules)),
-    'filter'=>cb_model(''=>'LaTeX',
-		       map { $_=>"AMC::Filter::register::$_"->name() } (@filter_modules)),
+    'filter'=>cb_model(map { $_=>"AMC::Filter::register::$_"->name() } (@filter_modules)),
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
     'after_export'=>cb_model(""=>__"that's all",
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the exported file. This is a menu entry.
@@ -4824,8 +4823,6 @@ sub source_latex_choisir {
 
 	my $filtre_all=Gtk2::FileFilter->new();
 	$filtre_all->set_name(__"All source files");
-        $filtre_all->add_pattern("*.tex");
-        $filtre_all->add_pattern("*.TEX");
 	for my $m (@filter_modules) {
 	  for my $p ("AMC::Filter::register::$m"->file_patterns) {
 	    $filtre_all->add_pattern($p);
@@ -4833,24 +4830,19 @@ sub source_latex_choisir {
 	}
 	$w{'source_latex_choix'}->add_filter($filtre_all);
 
-	# LaTeX filter for LaTeX source files
-
-	my $filtre_latex=Gtk2::FileFilter->new();
-	$filtre_latex->set_name(__"LaTeX file (*.tex)");
-        $filtre_latex->add_pattern("*.tex");
-        $filtre_latex->add_pattern("*.TEX");
-	$w{'source_latex_choix'}->add_filter($filtre_latex);
-
 	# filters for each filter module
 
 	for my $m (@filter_modules) {
 	  my $f=Gtk2::FileFilter->new();
 # TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
-	  $f->set_name(sprintf(__("%s files"),
-			       "AMC::Filter::register::$m"->name()));
+	  my @pat=();
 	  for my $p ("AMC::Filter::register::$m"->file_patterns) {
+	    push @pat,$p;
 	    $f->add_pattern($p);
 	  }
+	  $f->set_name(sprintf(__("%s files"),
+			       "AMC::Filter::register::$m"->name())
+		       .' ('.join(', ',@pat).')');
 	  $w{'source_latex_choix'}->add_filter($f);
 	}
 
