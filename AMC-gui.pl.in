@@ -2003,6 +2003,25 @@ sub doc_maj {
 
 }
 
+sub filter_details {
+  my $gd=read_glade('filter_details',
+		    qw/filter_text/);
+  transmet_pref($gd,'filter_details',$projet{'options'});
+  my $r=$w{'filter_details'}->run();
+  if($r == 10) {
+    reprend_pref('filter_details',$projet{'options'});
+    transmet_pref($gui,'pref_prep',$projet{'options'});
+  }
+  $w{'filter_details'}->destroy;
+}
+
+sub filter_details_update {
+  my %oo=('filter'=>'');
+  reprend_pref('filter_details',\%oo);
+  my $b=$w{'filter_text'}->get_buffer;
+  $b->set_text(("AMC::Filter::register::".$oo{'filter'})->description);
+}
+
 my $cups;
 my $g_imprime;
 

@@ -20,8 +20,11 @@
 package AMC::Filter::register::latex;
 
 use AMC::Filter::register;
+use AMC::Basic;
 
 @ISA=("AMC::Filter::register");
+
+use_gettext;
 
 sub new {
     my $class = shift;
@@ -32,6 +35,10 @@ sub new {
 
 sub name {
   return("LaTeX");
+}
+
+sub description {
+  return(__"This is the native format for AMC. LaTeX is not so easy to use for unexperienced users, but the LaTeX power allows the user to build any multiple choice subject. As an example, the following is possible with LaTeX but not with other formats:\n* any kind of layout,\n* questions with random numerical values,\n* use of figures, mathematical formulas\n* and much more!");
 }
 
 sub weight {

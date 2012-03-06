@@ -35,6 +35,10 @@ sub name {
   return("AMC-TXT");
 }
 
+sub description {
+  return(__"This is a plain text format for easy question writting. See the following minimal example:\n\nTitle: Paper title\n\n* Which is the capital city of Cameroon?\n+ Yaounde\n- Douala\n- Kribi");
+}
+
 sub weight {
   return(0.2);
 }

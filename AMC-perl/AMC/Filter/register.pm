@@ -21,6 +21,8 @@ package AMC::Filter::register;
 
 use AMC::Basic;
 
+use_gettext;
+
 sub new {
     my $class = shift;
     my $self={'project_options'=>''};
@@ -32,6 +34,10 @@ sub name {
   return("empty");
 }
 
+sub description {
+  return("");
+}
+
 sub weight {
   return(1);
 }
@@ -41,7 +47,7 @@ sub configure {
 }
 
 sub description {
-  return("Base class Filter");
+  return(__"No description available.");
 }
 
 sub file_patterns {
