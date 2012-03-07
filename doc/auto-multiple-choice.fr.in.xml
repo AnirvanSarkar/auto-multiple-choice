@@ -11,9 +11,10 @@
 
     <abstract>
       <para>AMC est un ensemble d'utilitaires permettant l'utilisation de QCM
-      rédigés en LaTeX et leur correction automatique à partir des scans des
-      copies des étudiants. Le présent document décrit son utilisation (pour
-      la version @/PACKAGE_V_DEB/@~svn @/PACKAGE_V_SVN/@).</para>
+      rédigés en texte simple ou en LaTeX et leur correction automatique à
+      partir des scans des copies des étudiants. Le présent document décrit
+      son utilisation (pour la version
+      @/PACKAGE_V_DEB/@~svn @/PACKAGE_V_SVN/@).</para>
 
       <para>Le projet AMC est hébergé par <ulink
       url="http://gna.org/">Gna !</ulink> : vous retrouverez son site internet
@@ -142,10 +143,13 @@
     <sect2>
       <title>LaTeX</title>
 
-      <para>Une connaissance de LaTeX est bien utile pour la conception des
-      QCM. Cependant, les modèles fournis permettent à ceux qui ne sont par
-      réfractaires aux formats de documents du type LaTeX/XML/HTML d'écrire
-      assez rapidement leurs premiers formulaires.</para>
+      <para>À parti de la version 1.1.0 d'AMC, il n'est plus nécessaire de
+      rédiger ses sujets de QCM en LaTeX (voir <xref linkend="sec.AMCTXT" />).
+      Cependant, ceci est toujours possible et permet une extraordinaire
+      liberté dans la conception des sujets. Par ailleurs, les modèles fournis
+      permettent à ceux qui ne sont pas réfractaires aux formats de documents
+      du type LaTeX/XML/HTML d'écrire assez rapidement leurs premiers
+      formulaires en LaTeX.</para>
     </sect2>
   </sect1>
 
@@ -275,13 +279,146 @@ sudo make install</screen>
     </sect2>
   </sect1>
 
-  <sect1 id="latex">
-    <title>Préparation du fichier LaTeX</title>
+  <sect1>
+    <title id="sec.AMCTXT">Source au format AMC-TXT</title>
 
-    <para>Avant toute chose, un questionnaire à choix multiples doit être
-    décrit sous la forme d'une fichier LaTeX utilisant le package
-    <package>automultiplechoice</package>. Ce chapitre décrit les commandes
-    LaTeX permettant d'écrire un QCM. Vous pouvez à tout moment tester le
+    <para>Pour les utilisateurs qui ne souhaitent pas se mettre à LaTeX, AMC
+    embarque un filtre qui rédige pour vous le fichier LaTeX à partir d'une
+    représentation en texte simple de votre questionnaire. Ce format est
+    appelé AMC-TXT, et ce chapitre détaille la syntaxe à utiliser. Si vous
+    souhaitez profiter de la puissance de LaTeX pour la rédaction de vos
+    questionnaires, passez au chapitre suivant.</para>
+
+    <para>Commençons par un exemple simple de fichier source utilisable par
+    AMC :</para>
+
+    <programlisting>Lang: FR
+Title: Mon premier questionnaire
+
+Presentation: Veuillez répondre aux questions
+ci-dessous du mieux que vous pouvez.
+
+ShuffleQuestions: 1
+
+* Quelle est la capitale du Cameroun ?
++ Yaoundé
+- Douala
+- Kribi
+
+** Parmi les nombres suivants,
+lesquels sont positifs ?
++ 2
+- -2
++ 10</programlisting>
+
+    <important>
+      <para>Le fichier qui contient la description de votre sujet doit être
+      codé en UTF-8. C'est le codage par défaut de plusieurs éditeurs de
+      texte, dont fait partie <command>gedit</command> par exemple. N'utilisez
+      pas d'éditeur de texte permettant d'appliquer des mise en forme à votre
+      texte, comme OpenOffice/LibreOffice ou abiword : ils n'enregistrent pas
+      seulement votre texte, mais beaucoup d'autres informations de mise en
+      forme qu'AMC ne sait pas lire...</para>
+    </important>
+
+    <para>Vous remarquez dès maintenant la structure du fichier de description
+    du questionnaire : il commence par quelques définitions ou options
+    générales de mise en forme, puis viennent les questions.</para>
+
+    <sect2>
+      <title>Options générales</title>
+
+      <para>Voici les options que vous pouvez utiliser au début de votre
+      fichier (dans n'importe quel ordre) :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>Lang:</term>
+
+          <listitem>
+            <para>donne la langue dans laquelle le questionnaire est écrit.
+            Pour l'instant, les seules langues disponibles sont FR (français),
+            ES (espagnol), DE (allemand). Si vous n'utilisez pas cette option,
+            ce sera l'anglais qui sera choisi.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Title:</term>
+
+          <listitem>
+            <para>Le titre de l'examen, qui sera écrit en haut de la
+            copie.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Presentation:</term>
+
+          <listitem>
+            <para>Un texte introductif pour l'examen, présentant par exemple
+            la durée, les consignes...</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>ShuffleQuestions:</term>
+
+          <listitem>
+            <para>Si cette option est mise à 1, les questions ne seront pas
+            dans le même ordre dans chaque copie. SI vous n'utilisez pas cette
+            option, les questions ne seront pas mélangées.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Code:</term>
+
+          <listitem>
+            <para>Affectez à cette option une valeur entière
+            <replaceable>n</replaceable> (par exemple 8) pour demander la
+            présence de cases à cocher pour que les étudiants codent leur
+            numéro d'étudiant sur <replaceable>n</replaceable>
+            chiffres.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Columns:</term>
+
+          <listitem>
+            <para>Si vous donnez à cette option une valeur
+            <replaceable>n</replaceable> entière supérieure à 1, le
+            questionnaire sera écrit sur <replaceable>n</replaceable>
+            colonnes.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2>
+      <title>Questions</title>
+
+      <para>Les questions simples (qui acceptent une et une seule bonne
+      réponse) commencent par un <code>*</code> en début de ligne, et les
+      questions multiples (celles qui peuvent comporter zéro, une ou
+      plusieures bonnes réponses), commencent par un <code>**</code> en début
+      de ligne. Vient ensuite le texte de la question, puis les réponses,
+      introduites par un <code>+</code> quand la réponse est correcte ou un
+      <code>-</code> quand elle ne l'est pas.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="latex">
+    <title>Source au format LaTeX</title>
+
+    <para>Ce paragraphe détaille la rédaction en LaTeX d'une questionnaire à
+    choix multiples utilisable par AMC. Si vous avez choisi un autre format de
+    fichier source, vous pouvez passer directement au chapitre suivant.</para>
+
+    <para>Un questionnaire à choix multiples peut être décrit sous la forme
+    d'une fichier LaTeX utilisant le package
+    <package>automultiplechoice</package>. Vous pouvez à tout moment tester le
     fichier LaTeX que vous êtes en train de concevoir en le compilant avec la
     commande <command>latex</command> puis en visualisant le fichier dvi qui
     en résulte.</para>
@@ -1720,8 +1857,8 @@ Nom et prénom :
       projet</guilabel>. Nous validons enfin en appuyant sur le bouton
       <guibutton>Créer un projet</guibutton>.</para>
 
-      <para>Nous devons maintenant désigner un fichier LaTeX comme source du
-      QCM. Plusieurs possibilités nous sont proposées :</para>
+      <para>Nous devons maintenant désigner un fichier AMC-TXT ou LaTeX comme
+      source du QCM. Plusieurs possibilités nous sont proposées :</para>
 
       <itemizedlist>
         <listitem>
@@ -1732,9 +1869,9 @@ Nom et prénom :
 
         <listitem>
           <para><guilabel>fichier</guilabel> : ce choix permet de choisir un
-          fichier LaTeX déjà composé pour l'examen. Il est en effet possible
-          de composer son sujet en dehors d'AMC grâce à un éditeur LaTeX
-          classique, puis d'utiliser AMC quand celui-ci est au point.</para>
+          fichier source déjà composé pour l'examen. Il est en effet possible
+          de composer son sujet en dehors d'AMC grâce à un éditeur classique,
+          puis d'utiliser AMC quand celui-ci est au point.</para>
         </listitem>
 
         <listitem>
@@ -1759,15 +1896,15 @@ Nom et prénom :
       <guilabel>Exemple simple</guilabel> dans le groupe <guilabel>[FR]
       Documentation</guilabel>. Une fois le projet créé, nous pouvons modifier
       ce sujet à loisir grâce au bouton <guibutton>Éditer le fichier
-      LaTeX</guibutton> qui lance l'éditeur par défaut.</para>
+      source</guibutton> qui lance l'éditeur par défaut.</para>
     </sect2>
 
     <sect2>
       <title>Préparation du sujet</title>
 
       <para>La préparation du projet se fait en deux étapes. Il faut tout
-      d'abord fabriquer les documents de référence à partir du fichier source
-      LaTeX. Ceci se fait en cliquant sur le bouton <guibutton>Mise à
+      d'abord fabriquer les documents de référence à partir du fichier source.
+      Ceci se fait en cliquant sur le bouton <guibutton>Mise à
       jour</guibutton> de la section <guilabel>Documents de
       travail</guilabel>. Les documents produits sont les suivants :</para>
 
@@ -1783,29 +1920,16 @@ Nom et prénom :
           réponses cochées sont les bonnes. Il est aussi destiné à être
           distribué aux étudiants.</para>
         </listitem>
-
-        <listitem>
-          <para>Le document de <emphasis>calage</emphasis>. Il contient les
-          informations permettant de localiser les marques de calages, les
-          cases à cocher, ainsi que la zone où les étudiants sur toutes les
-          pages.</para>
-        </listitem>
       </itemizedlist>
 
       <para>Une fois produits, ces documents pourront être visualisés (et
-      éventuellement imprimés) par un doucle-clic sur leur nom.</para>
+      éventuellement imprimés) grâce aux boutons correspondants.</para>
 
       <para>Nous pouvons maintenant passer à cette dernière étape de
       préparation : l'analyse du document de calage. Elle se lance à partir du
       bouton <guibutton>Calculer les mises en page</guibutton>. Cette analyse
       détecte, dans chaque page du sujet, la position exacte des différents
-      éléments qui devront être analysés sur les copies des étudiants. Cette
-      analyse peut être un peu longue (surtout quand le nombre de copies est
-      important). On peut voir le résultat dans la liste de droite, qui
-      présente pour chaque page son numéro, son identifiant (un code contenant
-      le numéro de l'étudiant, le numéro de la page pour cet étudiant, puis un
-      code permettant la vérification de l'identification), ainsi que la date
-      de mise à jour de la mise en page.</para>
+      éléments qui devront être analysés sur les copies des étudiants.</para>
 
       <para>Pour vérifier que les mises en page ont été correctement
       détectées, on peut utiliser le bouton <guibutton>Vérifier les mises en
