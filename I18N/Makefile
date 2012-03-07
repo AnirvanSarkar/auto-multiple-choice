@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2010-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2010-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -25,7 +25,7 @@ XGETTO=
 
 AMC=..
 
-PERL=$(AMC)/*.pl $(AMC)/AMC-perl/AMC/*.pm $(AMC)/AMC-perl/AMC/**/*.pm 
+PERL=$(AMC)/*.pl $(AMC)/AMC-perl/AMC/*.pm $(AMC)/AMC-perl/AMC/**/*.pm $(AMC)/AMC-perl/AMC/**/**/*.pm 
 
 GLADE=$(AMC)/AMC-*.glade $(AMC)/AMC-perl/AMC/**/*.glade
 
