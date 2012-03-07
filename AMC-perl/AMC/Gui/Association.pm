@@ -145,6 +145,8 @@ sub new {
 
     $self->{'button_show_all'}->set_active($self->{'show_all'});
 
+    $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
+
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
 
     my @bouton_nom=();
@@ -282,6 +284,10 @@ sub get_show_all {
 sub set_n_cols {
   my ($self)=@_;
   my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
+
+  $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+  Gtk2->main_iteration while ( Gtk2->events_pending );
+
   $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
 
   $self->{'tableau'}->foreach(sub { $self->{'tableau'}->remove(shift); });
@@ -300,6 +306,9 @@ sub set_n_cols {
     }
   }
   $self->{'scrolled_tableau'}->set_policy('never','automatic');
+
+  Gtk2->main_iteration while ( Gtk2->events_pending );
+  $self->{'general'}->window()->set_cursor(undef);
 }
 
 # Add a column to the names table
