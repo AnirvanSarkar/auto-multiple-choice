@@ -66,4 +66,12 @@ sub filetype {
   return("txt");
 }
 
+sub claim {
+  my ($self,$file)=@_;
+  my $h=$self->file_head($file,256);
+  return(.9) if($h =~ /^\s*\#\s*AMC-TXT/);
+  return(.3) if($file =~ /\.txt$/i);
+  return(0.0);
+}
+
 1;

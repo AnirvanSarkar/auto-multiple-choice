@@ -53,4 +53,13 @@ sub filetype {
   return("tex");
 }
 
+sub claim {
+  my ($self,$file)=@_;
+  my $h=$self->file_head($file,256);
+  return(.6) if($h =~ /\\usepackage.*\{automultiplechoice\}/
+	       || $h =~ /\\documentclass\{/);
+  return(.5) if($file =~ /\.tex$/i);
+  return(0.0);
+}
+
 1;

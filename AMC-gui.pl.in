@@ -277,7 +277,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'encodage_liste'=>'',
 		   'maj_bareme'=>1,
 		   'docs'=>['DOC-sujet.pdf','DOC-corrige.pdf','DOC-calage.xy'],
-		   'filter'=>'latex',
+		   'filter'=>'',
 		   'filtered_source'=>'DOC-filtered.tex',
 
 		   'modele_regroupement'=>'',
@@ -349,6 +349,20 @@ for my $m (@filter_modules) {
 @filter_modules=sort { "AMC::Filter::register::$a"->weight
 			 <=> "AMC::Filter::register::$b"->weight }
   @filter_modules;
+
+sub best_filter_for_file {
+  my ($file)=@_;
+  my $mmax='';
+  my $max=-10;
+  for my $m (@filter_modules) {
+    my $c="AMC::Filter::register::$m"->claim($file);
+    if($c>$max) {
+      $max=$c;
+      $mmax=$m;
+    }
+  }
+  return($mmax);
+}
 
 # -----------------
 
@@ -4519,6 +4533,11 @@ sub valide_source_tex {
 	$w{'edition_latex'}->show();
     } else {
 	$w{'edition_latex'}->hide();
+    }
+
+    if(!$projet{'options'}->{'filter'}) {
+      $projet{'options'}->{'filter'}=
+	best_filter_for_file(absolu($projet{'options'}->{'texsrc'}));
     }
 
     detecte_documents();

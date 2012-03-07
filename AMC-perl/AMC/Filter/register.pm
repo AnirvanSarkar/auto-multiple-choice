@@ -23,6 +23,11 @@ use AMC::Basic;
 
 use_gettext;
 
+#####################################################################
+# These methods should be overwritten for derivated classes (that
+# describe file formats that AMC can handle)
+#####################################################################
+
 sub new {
     my $class = shift;
     my $self={'project_options'=>''};
@@ -30,26 +35,31 @@ sub new {
     return $self;
 }
 
+# short name of the file format
 sub name {
   return("empty");
 }
 
-sub description {
-  return("");
-}
-
+# weight in the list of all available formats. 0 is at the top, 1 is
+# at the bottom line
 sub weight {
   return(1);
 }
 
+# function to set some project parameters for this format to work properly.
+# use <set_project_option> method
 sub configure {
   my ($self,$options_project);
 }
 
+# description of the format, that will be display in the window
+# showing details about file formats
 sub description {
   return(__"No description available.");
 }
 
+# list of file patterns (like "*.txt") that corresponds to source
+# files for this format
 sub file_patterns {
   return();
 }
@@ -60,25 +70,41 @@ sub filetype {
   return("");
 }
 
+# returns an URL where to find documentation about the syntax to be
+# used
 sub doc_url {
   return("");
 }
 
+# list of required LaTeX packages
 sub needs_latex_package {
   return();
 }
 
+# list of required commands
 sub needs_command {
   return();
 }
 
+# list of required fonts
 sub needs_font {
   return([{'type'=>'fontconfig',
 	   'family'=>[]}, # <--  needs one of the fonts in the list
 	 ]);
 }
 
-##############################################################
+# returns a number that tells how likely the file is written for this
+# format. 1.0 means "yes, I'm sure this file is written for this
+# format", -1.0 means "I'm sure it is NOT written for this format",
+# and 0.0 means "I don't know".
+sub claim {
+  my ($self,$file)=@_;
+  return(0);
+}
+
+#####################################################################
+# The following methods should NOT be overwritten
+#####################################################################
 
 sub set_oo {
   my ($self,$o)=@_;
@@ -146,6 +172,19 @@ sub check_dependencies {
   }
   $miss{'ok'}=$ok;
   return(\%miss);
+}
+
+sub file_head {
+  my ($self,$file,$size)=@_;
+  my $h;
+  my $n;
+  open(my $fh,"<",$file);
+  $n=read $fh,$h,$size;
+  if(!defined($n)) {
+    debug_and_stderr("Error reading from $file: $!");
+  }
+  close($fh);
+  return($h);
 }
 
 1;
