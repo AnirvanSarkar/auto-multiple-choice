@@ -2376,6 +2376,9 @@ sub save_state_after_printing {
     my @files=(@{$projet{'options'}->{'docs'}},
 	       absolu($projet{'options'}->{'texsrc'}));
 
+    push @files,absolu($projet{'options'}->{'filtered_source'})
+      if(-f absolu($projet{'options'}->{'filtered_source'}));
+
     if(!$st->check_local_md5(@files)) {
 	$st=AMC::State::new('directory'=>absolu('%PROJET/'));
 	$st->add_local_files(@files);
