@@ -54,6 +54,12 @@ sub file_patterns {
   return();
 }
 
+# filetype to choose right editor. Currently, only "tex" and "txt" are
+# available.
+sub filetype {
+  return("");
+}
+
 sub doc_url {
   return("");
 }

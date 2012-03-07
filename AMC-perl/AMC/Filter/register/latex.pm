@@ -49,4 +49,8 @@ sub file_patterns {
   return("*.tex","*.TEX");
 }
 
+sub filetype {
+  return("tex");
+}
+
 1;

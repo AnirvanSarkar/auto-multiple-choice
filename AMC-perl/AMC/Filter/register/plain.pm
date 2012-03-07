@@ -62,4 +62,8 @@ sub needs_font {
 	 ]);
 }
 
+sub filetype {
+  return("txt");
+}
+
 1;

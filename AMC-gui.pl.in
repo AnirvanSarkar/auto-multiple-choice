@@ -5150,7 +5150,13 @@ sub importe_source {
 sub edit_src {
     my $f=absolu($projet{'options'}->{'texsrc'});
     debug "Editing $f...";
-    commande_parallele($o{'tex_editor'},$f);
+    my $editor=$o{'txt_editor'};
+    if($projet{'options'}->{'filter'}) {
+      my $type=("AMC::Filter::register::".$projet{'options'}->{'filter'})
+	->filetype();
+      $editor=$o{$type.'_editor'} if($o{$type.'_editor'});
+    }
+    commande_parallele($editor,$f);
 }
 
 sub valide_projet {
