@@ -33,6 +33,7 @@ sub new {
     my $self  = $class->SUPER::new();
     $self->{'options_names'}=[qw/Title Presentation Code Lang
 				 CompleteMulti
+				 DefaultScoringM DefaultScoringS
 				 L-Question L-None L-Name L-Student L-Complete
 				 TeX ShuffleQuestions Columns QuestionBlocks/];
     $self->{'options_boolean'}=[qw/TeX ShuffleQuestions QuestionBlocks
@@ -117,9 +118,10 @@ sub read_source {
     }
 
     # questions
-    if(/^\s*(\*{1,2})(?:\[([^]]*)\])?\s*(.*)/) {
+    if(/^\s*(\*{1,2})(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
       my $star=$1;
-      my $text=$3;
+      my $text=$4;
+      my $scoring=$3;
       my @opts=split(/,+/,$2);
       my %oo=();
       for (@opts) {
@@ -134,6 +136,7 @@ sub read_source {
       }
       $question=add_object($group->{'questions'},
 			   'multiple'=>length($star)==2,
+			   'scoring'=>$scoring,
 			   'text'=>$text,'answers'=>[],%oo);
       $self->value_cleanup($follow);
       $follow=\$question->{'text'};
@@ -141,8 +144,10 @@ sub read_source {
     }
 
     # answers
-    if(/^\s*(\+|-)\s*(.*)/) {
-      my $a=add_object($question->{'answers'},'text'=>$2,'correct'=>($1 eq '+'));
+    if(/^\s*(\+|-)(?:\{([^\}]*)\})?\s*(.*)/) {
+      my $a=add_object($question->{'answers'},
+		       'text'=>$3,'correct'=>($1 eq '+'),
+		       'scoring'=>$2);
       $self->value_cleanup($follow);
       $follow=\$a->{'text'};
       next LINE;
@@ -174,10 +179,19 @@ sub format_text {
   return($t);
 }
 
+sub scoring_string {
+  my ($self,$obj,$type)=@_;
+  my $s=$obj->{'scoring'}
+    || $self->{'options'}->{'defaultscoring'.$type};
+  return($s ? "\\scoring{$s}" : "");
+}
+
 sub format_answer {
   my ($self,$a)=@_;
   my $t='\\'.($a->{'correct'} ? 'correct' : 'wrong').'choice{'
-    .$self->format_text($a->{'text'})."}\n";
+    .$self->format_text($a->{'text'})."}";
+  $t.=$self->scoring_string($a,'a');
+  $t.="\n";
   return($t);
 }
 
@@ -188,7 +202,9 @@ sub format_question {
   my $mult=($q->{'multiple'} ? 'mult' : '');
   my $ct=($q->{'horiz'} ? 'horiz' : '');
 
-  my $t='\\begin{question'.$mult.'}{'.$qid."}\n";
+  my $t='\\begin{question'.$mult.'}{'.$qid."}";
+  $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
+  $t.="\n";
   $t.=$self->format_text($q->{'text'})."\n";
   $t.="\\begin{multicols}{".$q->{'columns'}."}\n"
     if($q->{'columns'}>1);
