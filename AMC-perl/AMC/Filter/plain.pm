@@ -184,11 +184,11 @@ sub format_answer {
 sub format_question {
   my ($self,$q)=@_;
   my $qid=$q->{'id'};
-  $qid=++$self->{'qid'} if(!$qid);
+  $qid=sprintf("Q%03d",++$self->{'qid'}) if(!$qid);
   my $mult=($q->{'multiple'} ? 'mult' : '');
   my $ct=($q->{'horiz'} ? 'horiz' : '');
 
-  my $t='\\begin{question'.$mult.'}{'.sprintf("Q%03d",$qid)."}\n";
+  my $t='\\begin{question'.$mult.'}{'.$qid."}\n";
   $t.=$self->format_text($q->{'text'})."\n";
   $t.="\\begin{multicols}{".$q->{'columns'}."}\n"
     if($q->{'columns'}>1);
