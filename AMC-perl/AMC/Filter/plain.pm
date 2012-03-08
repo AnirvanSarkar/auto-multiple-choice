@@ -32,12 +32,15 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
     $self->{'options_names'}=[qw/Title Presentation Code Lang
-				 L-Question L-None L-Name L-Student
+				 CompleteMulti
+				 L-Question L-None L-Name L-Student L-Complete
 				 TeX ShuffleQuestions Columns QuestionBlocks/];
-    $self->{'options_boolean'}=[qw/TeX ShuffleQuestions QuestionBlocks/];
+    $self->{'options_boolean'}=[qw/TeX ShuffleQuestions QuestionBlocks
+				   CompleteMulti/];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
     $self->{'options'}={'questionblocks'=>1,'shufflequestions'=>1,
+			'completemulti'=>1,
 			'l-name'=>__("Name and surname"),
 			'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
 		       };
@@ -266,6 +269,7 @@ sub write_latex {
 
   my @package_options=();
   push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
+  push @package_options,"completemulti" if($self->{'options'}->{'completemulti'});
   push @package_options,"lang=".uc($self->{'options'}->{'lang'})
     if($self->{'options'}->{'lang'});
 
@@ -279,6 +283,12 @@ sub write_latex {
   print OUT "\\usepackage{multicol}\n";
   print OUT "\\setmainfont[Mapping=tex-text]{Linux Libertine O}\n";
   print OUT "\\begin{document}\n";
+
+  print OUT "\\AMCrandomseed{1527384}\n";
+
+  print OUT "\\AMCtext{none}{"
+    .$self->format_text($self->{'options'}->{'l-complete'})."}"
+    if($self->{'options'}->{'l-complete'});
 
   if($self->{'options'}->{'shufflequestions'}) {
     for my $group (@{$self->{'groups'}}) {
