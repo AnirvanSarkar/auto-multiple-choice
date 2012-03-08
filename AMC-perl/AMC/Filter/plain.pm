@@ -33,11 +33,11 @@ sub new {
     my $self  = $class->SUPER::new();
     $self->{'options_names'}=[qw/Title Presentation Code Lang
 				 L-Question L-None L-Name L-Student
-				 TeX ShuffleQuestions Columns Block/];
-    $self->{'options_boolean'}=[qw/TeX ShuffleQuestions Block/];
+				 TeX ShuffleQuestions Columns QuestionBlocks/];
+    $self->{'options_boolean'}=[qw/TeX ShuffleQuestions QuestionBlocks/];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
-    $self->{'options'}={'block'=>1,'shufflequestions'=>1,
+    $self->{'options'}={'questionblocks'=>1,'shufflequestions'=>1,
 			'l-name'=>__("Name and surname"),
 			'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
 		       };
@@ -254,7 +254,7 @@ sub write_latex {
   my ($self,$output_file)=@_;
 
   my @package_options=();
-  push @package_options,"bloc" if($self->{'options'}->{'block'});
+  push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
   push @package_options,"lang=".uc($self->{'options'}->{'lang'})
     if($self->{'options'}->{'lang'});
 
