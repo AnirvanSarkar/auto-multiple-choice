@@ -73,6 +73,12 @@ sub add_group {
   add_object($self->{'groups'},%g);
 }
 
+sub value_cleanup {
+  my ($self,$v)=@_;
+  $$v =~ s/^\s+//;
+  $$v =~ s/\s+$//;
+}
+
 sub read_source {
   my ($self,$input_file)=@_;
 
@@ -94,6 +100,7 @@ sub read_source {
     # groups
     if(/^\s*Group:\s*(.*)/) {
       $group=$self->add_group('title'=>$1,'questions'=>[]);
+      $self->value_cleanup($follow);
       $follow=\$group->{'title'};
       next LINE;
     }
@@ -101,6 +108,7 @@ sub read_source {
     # options
     if(/^\s*$opt_re:\s*(.*)/i) {
       $self->{'options'}->{lc($1)}=$2;
+      $self->value_cleanup($follow);
       $follow=\$self->{'options'}->{lc($1)};
       next LINE;
     }
@@ -124,6 +132,7 @@ sub read_source {
       $question=add_object($group->{'questions'},
 			   'multiple'=>length($star)==2,
 			   'text'=>$text,'answers'=>[],%oo);
+      $self->value_cleanup($follow);
       $follow=\$question->{'text'};
       next LINE;
     }
@@ -131,6 +140,7 @@ sub read_source {
     # answers
     if(/^\s*(\+|-)\s*(.*)/) {
       my $a=add_object($question->{'answers'},'text'=>$2,'correct'=>($1 eq '+'));
+      $self->value_cleanup($follow);
       $follow=\$a->{'text'};
       next LINE;
     }
@@ -140,6 +150,7 @@ sub read_source {
       $$follow.="\n".$_;
     }
   }
+  $self->value_cleanup($follow);
   close(IN);
 }
 
