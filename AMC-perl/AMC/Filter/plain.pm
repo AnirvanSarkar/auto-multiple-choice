@@ -32,12 +32,13 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
     $self->{'options_names'}=[qw/Title Presentation Code Lang
-				 CompleteMulti
+				 AnswerSheetTitle AnswerSheetPresentation
+				 CompleteMulti SeparateAnswerSheet
 				 DefaultScoringM DefaultScoringS
 				 L-Question L-None L-Name L-Student L-Complete
 				 TeX ShuffleQuestions Columns QuestionBlocks/];
     $self->{'options_boolean'}=[qw/TeX ShuffleQuestions QuestionBlocks
-				   CompleteMulti/];
+				   CompleteMulti SeparateAnswerSheet/];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
     $self->{'options'}={'questionblocks'=>1,'shufflequestions'=>1,
@@ -233,7 +234,10 @@ sub file_header {
 
   my @package_options=();
   push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
-  push @package_options,"completemulti" if($self->{'options'}->{'completemulti'});
+  for my $on (qw/completemulti separateanswersheet/) {
+    push @package_options,$on if($self->{'options'}->{$on});
+  }
+
   push @package_options,"lang=".uc($self->{'options'}->{'lang'})
     if($self->{'options'}->{'lang'});
 
@@ -263,15 +267,28 @@ sub file_header {
 }
 
 sub page_header {
-  my ($self)=@_;
+  my ($self,$answersheet)=@_;
   my $t="";
 
-  if($self->{'options'}->{'code'}>0) {
-    if($self->{'options'}->{'title'}) {
-      $t.="\\begin{center}\\bf\\large "
-	.$self->format_text($self->{'options'}->{'title'})."\\end{center}\n\n";
+  my $titlekey='';
+
+  if($self->{'options'}->{'separateanswersheet'}) {
+    if($answersheet) {
+      if($self->{'options'}->{'code'}>0) {
+	$titlekey='answersheettitle';
+      }
+    } else {
+      $titlekey='title';
+    }
+  } else {
+    if($self->{'options'}->{'code'}>0) {
+      $titlekey='title';
     }
   }
+  $t.="\\begin{center}\\bf\\large "
+	.$self->format_text($self->{'options'}->{$titlekey})
+	  ."\\end{center}\n\n"
+	    if($titlekey && $self->{'options'}->{$titlekey});
 
   return($t);
 }
@@ -301,9 +318,12 @@ sub student_block {
   } else {
     # header layout without code
     $t.= "\\begin{minipage}{.47\\linewidth}\n";
-    if($self->{'options'}->{'title'}) {
+    my $titlekey=($self->{'options'}->{'separateanswersheet'}
+		  ? 'answersheettitle' : 'title');
+    if($self->{'options'}->{$titlekey}) {
       $t.= "\\begin{center}\\bf\\large "
-	.$self->format_text($self->{'options'}->{'title'})."\\end{center}\n\n";
+	.$self->format_text($self->{'options'}->{$titlekey})
+	  ."\\end{center}\n\n";
     }
     $t.= "\\end{minipage}\\hfill\n";
     $t.= "\\begin{minipage}{.47\\linewidth}\n";
@@ -334,8 +354,9 @@ sub write_latex {
 
   print OUT "\\onecopy{5}{\n";
 
-  print OUT $self->page_header;
-  print OUT $self->student_block;
+  print OUT $self->page_header(0);
+  print OUT $self->student_block
+    if(!$self->{'options'}->{'separateanswersheet'});
 
   if($self->{'options'}->{'presentation'}) {
     print OUT $self->format_text($self->{'options'}->{'presentation'})."\n\n";
@@ -362,6 +383,21 @@ sub write_latex {
     print OUT "\\end{multicols}\n"
       if($self->{'options'}->{'columns'}>1);
   }
+
+  if($self->{'options'}->{'separateanswersheet'}) {
+    print OUT "\\AMCcleardoublepage\n";
+    print OUT "\\AMCformBegin\n";
+
+    print OUT $self->page_header(1);
+    print OUT $self->student_block;
+    if($self->{'options'}->{'answersheetpresentation'}) {
+      print OUT $self->format_text($self->{'options'}->{'answersheetpresentation'})."\n\n";
+    }
+    print OUT "\\vspace{4mm}\\noindent\\hrule\n";
+
+    print OUT "\\AMCform\n";
+  }
+
   print OUT "}\n";
   print OUT "\\end{document}\n";
   close(OUT);
