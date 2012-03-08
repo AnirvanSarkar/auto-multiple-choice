@@ -227,7 +227,42 @@ sub group_name {
   return($group->{'name'});
 }
 
-sub header {
+sub file_header {
+  my ($self)=@_;
+  my $t='';
+
+  my @package_options=();
+  push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
+  push @package_options,"completemulti" if($self->{'options'}->{'completemulti'});
+  push @package_options,"lang=".uc($self->{'options'}->{'lang'})
+    if($self->{'options'}->{'lang'});
+
+  my $po='';
+  $po='['.join(',',@package_options).']' if(@package_options);
+
+  $t .= "\\documentclass{article}\n";
+  $t .= "\\usepackage{xltxtra}\n";
+  $t .= "\\usepackage".$po."{automultiplechoice}\n";
+  $t .= "\\usepackage{multicol}\n";
+  $t .= "\\setmainfont[Mapping=tex-text]{Linux Libertine O}\n";
+  $t .= "\\begin{document}\n";
+
+  $t .= "\\AMCrandomseed{1527384}\n";
+
+  $t .= "\\AMCtext{none}{"
+    .$self->format_text($self->{'options'}->{'l-complete'})."}"
+    if($self->{'options'}->{'l-complete'});
+
+  $t.="\\def\\AMCbeginQuestion#1#2{\\par\\noindent{\\bf "
+    .$self->{'options'}->{'l-question'}." #1} #2\\hspace{1em}}\n"
+      ."\\def\\AMCformQuestion#1{\\vspace{\\AMCformVSpace}\\par{\\bf "
+	.$self->{'options'}->{'l-question'}." #1 :}}"
+    if($self->{'options'}->{'l-question'});
+
+  return($t);
+}
+
+sub page_header {
   my ($self)=@_;
   my $t="";
 
@@ -283,28 +318,9 @@ sub student_block {
 sub write_latex {
   my ($self,$output_file)=@_;
 
-  my @package_options=();
-  push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
-  push @package_options,"completemulti" if($self->{'options'}->{'completemulti'});
-  push @package_options,"lang=".uc($self->{'options'}->{'lang'})
-    if($self->{'options'}->{'lang'});
-
-  my $po='';
-  $po='['.join(',',@package_options).']' if(@package_options);
-
   open(OUT,">:utf8",$output_file);
-  print OUT "\\documentclass{article}\n";
-  print OUT "\\usepackage{xltxtra}\n";
-  print OUT "\\usepackage".$po."{automultiplechoice}\n";
-  print OUT "\\usepackage{multicol}\n";
-  print OUT "\\setmainfont[Mapping=tex-text]{Linux Libertine O}\n";
-  print OUT "\\begin{document}\n";
 
-  print OUT "\\AMCrandomseed{1527384}\n";
-
-  print OUT "\\AMCtext{none}{"
-    .$self->format_text($self->{'options'}->{'l-complete'})."}"
-    if($self->{'options'}->{'l-complete'});
+  print OUT $self->file_header();
 
   if($self->{'options'}->{'shufflequestions'}) {
     for my $group (@{$self->{'groups'}}) {
@@ -318,7 +334,7 @@ sub write_latex {
 
   print OUT "\\onecopy{5}{\n";
 
-  print OUT $self->header;
+  print OUT $self->page_header;
   print OUT $self->student_block;
 
   if($self->{'options'}->{'presentation'}) {
