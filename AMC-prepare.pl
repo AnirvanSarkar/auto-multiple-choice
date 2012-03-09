@@ -259,8 +259,10 @@ sub execute {
 	    $rerun=1 if(/^LaTeX Warning:.*Rerun to get cross-references right/);
 	    $format=$1 if(/^Output written on .*\.([a-z]+) \(/);
 
-	    if(/^\!\s*(.*\.)$/) {
-		push @latex_errors,$1;
+	    if(/^\!\s*(.*)$/) {
+	      my $e=$1;
+	      $e .= "..." if($e !~ /\.$/);
+	      push @latex_errors,$e;
 	    }
 	    print $_ if(/^.+$/);
 	}
