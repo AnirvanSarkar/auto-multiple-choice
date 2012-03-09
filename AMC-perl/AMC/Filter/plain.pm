@@ -36,8 +36,9 @@ sub new {
 				 CompleteMulti SeparateAnswerSheet
 				 DefaultScoringM DefaultScoringS
 				 L-Question L-None L-Name L-Student
-				 TeX ShuffleQuestions Columns QuestionBlocks/];
-    $self->{'options_boolean'}=[qw/TeX ShuffleQuestions QuestionBlocks
+				 LaTeX LaTeX-Preambule LaTeX-BeginDocument
+				 ShuffleQuestions Columns QuestionBlocks/];
+    $self->{'options_boolean'}=[qw/LaTeX ShuffleQuestions QuestionBlocks
 				   CompleteMulti SeparateAnswerSheet/];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
@@ -167,7 +168,7 @@ sub format_text {
   my ($self,$t)=@_;
   $t =~ s/^\s+//;
   $t =~ s/\s+$//;
-  if($self->{'options'}->{'tex'}) {
+  if($self->{'options'}->{'latex'}) {
   } else {
     $t =~ s/\\/\\(\\backslash\\)/g;
     $t =~ s/~/\\(\\sim\\)/g;
@@ -249,8 +250,8 @@ sub file_header {
   $t .= "\\usepackage".$po."{automultiplechoice}\n";
   $t .= "\\usepackage{multicol}\n";
   $t .= "\\setmainfont[Mapping=tex-text]{Linux Libertine O}\n";
+  $t .= $self->{'options'}->{'latex-preambule'};
   $t .= "\\begin{document}\n";
-
   $t .= "\\AMCrandomseed{1527384}\n";
 
   $t .= "\\AMCtext{none}{"
@@ -262,6 +263,8 @@ sub file_header {
       ."\\def\\AMCformQuestion#1{\\vspace{\\AMCformVSpace}\\par{\\bf "
 	.$self->{'options'}->{'l-question'}." #1 :}}"
     if($self->{'options'}->{'l-question'});
+
+  $t .= $self->{'options'}->{'latex-begindocument'};
 
   return($t);
 }
