@@ -35,7 +35,7 @@ sub new {
 				 AnswerSheetTitle AnswerSheetPresentation
 				 CompleteMulti SeparateAnswerSheet
 				 DefaultScoringM DefaultScoringS
-				 L-Question L-None L-Name L-Student L-Complete
+				 L-Question L-None L-Name L-Student
 				 TeX ShuffleQuestions Columns QuestionBlocks/];
     $self->{'options_boolean'}=[qw/TeX ShuffleQuestions QuestionBlocks
 				   CompleteMulti SeparateAnswerSheet/];
@@ -254,8 +254,8 @@ sub file_header {
   $t .= "\\AMCrandomseed{1527384}\n";
 
   $t .= "\\AMCtext{none}{"
-    .$self->format_text($self->{'options'}->{'l-complete'})."}"
-    if($self->{'options'}->{'l-complete'});
+    .$self->format_text($self->{'options'}->{'l-none'})."}"
+    if($self->{'options'}->{'l-none'});
 
   $t.="\\def\\AMCbeginQuestion#1#2{\\par\\noindent{\\bf "
     .$self->{'options'}->{'l-question'}." #1} #2\\hspace{1em}}\n"
