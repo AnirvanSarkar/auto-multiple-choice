@@ -409,10 +409,21 @@ sub write_latex {
   close(OUT);
 }
 
+sub check {
+  my ($self)=@_;
+  if($self->{'options'}->{'font'}) {
+    if(!check_fonts({'type'=>'fontconfig',
+		     'family'=>[$self->{'options'}->{'font'}]})) {
+      $self->error(sprintf(__("The following font does not seem to be installed on the system: <b>%s</b>."),$self->{'options'}->{'font'}));
+    }
+  }
+}
+
 sub filter {
   my ($self,$input_file,$output_file)=@_;
   $self->read_source($input_file);
   $self->parse_options();
+  $self->check();
   $self->write_latex($output_file);
 }
 

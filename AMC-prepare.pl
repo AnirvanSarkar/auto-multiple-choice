@@ -320,6 +320,9 @@ sub do_filter {
     load("AMC::Filter::$filter");
     my $filter="AMC::Filter::$filter"->new();
     $filter->filter($source,$filtered_source);
+    for($filter->errors()) {
+      print "ERR: $_\n";
+    }
   } else {
     $filtered_source=$source;
   }

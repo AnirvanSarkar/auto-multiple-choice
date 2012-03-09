@@ -21,9 +21,24 @@ package AMC::Filter;
 
 sub new {
     my $class = shift;
-    my $self={};
+    my $self={'errors'=>[]};
     bless ($self, $class);
     return $self;
+}
+
+sub clear {
+  my ($self)=@_;
+  $self->{'errors'}=[];
+}
+
+sub error {
+  my ($self,$error_text)=@_;
+  push @{$self->{'errors'}},$error_text;
+}
+
+sub errors {
+  my ($self)=@_;
+  return(@{$self->{'errors'}});
 }
 
 sub filter {
