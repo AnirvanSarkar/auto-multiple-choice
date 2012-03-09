@@ -44,6 +44,7 @@ sub new {
     $self->{'maxhorizcode'}=6;
     $self->{'options'}={'questionblocks'=>1,'shufflequestions'=>1,
 			'completemulti'=>1,
+			'defaultscoringm'=>'haut=2',
 			'l-name'=>__("Name and surname"),
 			'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
 		       };
