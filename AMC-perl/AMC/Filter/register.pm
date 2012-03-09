@@ -145,17 +145,7 @@ sub missing_fonts {
   my @mf=();
   my $fonts=$self->needs_font;
   for my $spec (@$fonts) {
-    if($spec->{'type'} =~ /fontconfig/i && @{$spec->{'family'}}) {
-      if(commande_accessible("fc-list")) {
-	my $ok=0;
-	for my $f (@{$spec->{'family'}}) {
-	  open FC,"-|","fc-list",$f,"family";
-	  while(<FC>) { chomp();$ok=1 if(/./); }
-	  close FC;
-	}
-	push @mf,$spec if(!$ok);
-      }
-    }
+    push @mf,$spec if(!check_fonts($spec));
   }
   return(@mf);
 }

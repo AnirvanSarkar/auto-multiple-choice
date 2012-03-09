@@ -31,7 +31,7 @@ use_gettext;
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    $self->{'options_names'}=[qw/Title Presentation Code Lang
+    $self->{'options_names'}=[qw/Title Presentation Code Lang Font
 				 AnswerSheetTitle AnswerSheetPresentation
 				 CompleteMulti SeparateAnswerSheet
 				 DefaultScoringM DefaultScoringS
@@ -44,6 +44,7 @@ sub new {
     $self->{'maxhorizcode'}=6;
     $self->{'options'}={'questionblocks'=>1,'shufflequestions'=>1,
 			'completemulti'=>1,
+			'font'=>'Linux Libertine O',
 			'defaultscoringm'=>'haut=2',
 			'l-name'=>__("Name and surname"),
 			'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
@@ -250,7 +251,8 @@ sub file_header {
   $t .= "\\usepackage{xltxtra}\n";
   $t .= "\\usepackage".$po."{automultiplechoice}\n";
   $t .= "\\usepackage{multicol}\n";
-  $t .= "\\setmainfont[Mapping=tex-text]{Linux Libertine O}\n";
+  $t .= "\\setmainfont[Mapping=tex-text]{".$self->{'options'}->{'font'}."}\n"
+    if($self->{'options'}->{'font'});
   $t .= $self->{'options'}->{'latex-preambule'};
   $t .= "\\begin{document}\n";
   $t .= "\\AMCrandomseed{1527384}\n";

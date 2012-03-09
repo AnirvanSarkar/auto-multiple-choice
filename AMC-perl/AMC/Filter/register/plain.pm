@@ -56,12 +56,6 @@ sub needs_latex_package {
   return("xltxtra","multicol");
 }
 
-sub needs_font {
-  return([{'type'=>'fontconfig',
-	   'family'=>['Linux Libertine O']},
-	 ]);
-}
-
 sub filetype {
   return("txt");
 }
