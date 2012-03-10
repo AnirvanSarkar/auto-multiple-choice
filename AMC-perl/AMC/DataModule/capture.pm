@@ -1084,4 +1084,13 @@ sub n_photocopy {
   return($self->sql_single($self->statement('photocopy')));
 }
 
+# clear_all clears all the layout data tables.
+
+sub clear_all {
+    my ($self)=@_;
+    for my $t (qw/page zone position failed/) {
+	$self->sql_do("DELETE FROM ".$self->table($t));
+    }
+}
+
 1;

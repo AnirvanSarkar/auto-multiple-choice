@@ -1859,7 +1859,9 @@ sub doc_maj {
 
     # deja des MEP fabriquees ?
     $projet{_layout}->begin_transaction('DMAJ');
-    if($projet{_layout}->pages_count > 0) {
+    my $pc=$projet{_layout}->pages_count;
+    $projet{_layout}->end_transaction('DMAJ');
+    if($pc > 0) {
 	if(!$sur) {
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
@@ -1878,11 +1880,7 @@ sub doc_maj {
 	    }
 	}
 
-	$projet{_layout}->clear_all;
-	$projet{_layout}->end_transaction('DMAJ');
-	detecte_mep();
-    } else {
-	$projet{_layout}->end_transaction('DMAJ');
+	clear_processing('mep:');
     }
 
     # new layout document : XY (from LaTeX)
@@ -3121,6 +3119,44 @@ sub valide_options_preparation {
     valide_options_for_domain('pref_prep','',@_);
 }
 
+sub filter_changed {
+  my (@args)=@_;
+
+  # check it is a different value...
+
+  my %oo=('filter'=>$projet{'options'}->{'filter'});
+  valide_options_for_domain('pref_prep',\%oo,@_);
+  return if(!$oo{'_modifie'});
+
+  if(-f absolu($projet{'options'}->{'docs'}->[0])) {
+    my $text;
+    if($projet{'_capture'}->n_pages_transaction()>0) {
+      $text=_("The working documents are already prepared with the current file format. If you change the file format, working documents and all other data for this project will be ereased.").' '
+	.__("Do you wish to continue?")." "
+	  .__("Click on Ok to erease old working documents and change file format, and on Cancel to get back to the same file format.")
+	    ."\n<b>".__("To allow the use of an already printed question, cancel!")."</b>";
+    } else {
+      $text=__("The working documents are already prepared with the current file format. If you change the file format, working documents will be ereased.").' '
+	.__("Do you wish to continue?")." "
+	  .__("Click on Ok to erease old working documents and change file format, and on Cancel to get back to the same file format.");
+    }
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'question','ok-cancel',$text);
+    my $reponse=$dialog->run;
+    $dialog->destroy;
+
+    if($reponse eq 'cancel') {
+      transmet_pref($gui,'pref_prep',$projet{'options'});
+      return(0);
+    }
+  }
+
+  clear_processing('doc:');
+  valide_options_preparation(@args);
+}
+
 sub valide_options_notation {
     valide_options_for_domain('notation','',@_);
     if($projet{'options'}->{'_modifie'} =~ /\bregroupement_compose\b/) {
@@ -4167,6 +4203,85 @@ sub mep_warnings {
     $dialog->run;
     $dialog->destroy;
 
+}
+
+sub clear_processing {
+  my ($steps)=@_;
+  my $next='';
+  my %s=();
+  for my $k (qw/doc mep capture mark assoc/) {
+    if($steps =~ /\b$k:/) {
+      $next=1;
+      $s{$k}=1;
+    } elsif($next || $steps =~ /\b$k\b/) {
+      $s{$k}=1;
+    }
+  }
+
+  if($s{'doc'}) {
+    for (0,1,2) {
+      my $f=absolu($projet{'options'}->{'docs'}->[$_]);
+      unlink($f) if(-f $f);
+    }
+    detecte_documents();
+  }
+
+  delete($s{'doc'});
+  return() if(!%s);
+
+  # data to remove...
+
+  $projet{'_data'}->begin_transaction('CLPR');
+
+  if($s{'mep'}) {
+    $projet{_layout}->clear_all;
+  }
+
+  if($s{'capture'}) {
+    $projet{_capture}->clear_all;
+  }
+
+  if($s{'mark'}) {
+    $projet{'_scoring'}->clear_strategy;
+    $projet{'_scoring'}->clear_score;
+  }
+
+  if($s{'assoc'}) {
+    $projet{_association}->clear;
+  }
+
+  $projet{'_data'}->end_transaction('CLPR');
+
+  # files to remove...
+
+  if($s{'capture'}) {
+    # remove zooms
+    remove_tree(absolu('%PROJET/cr/zooms'),
+		{'verbose'=>0,'safe'=>1,'keep_root'=>1});
+    # remove namefield extractions and page layout image
+    my $crdir=absolu('%PROJET/cr');
+    opendir(my $dh,$crdir);
+    my @cap_files=grep { /^(name-|page-)/ } readdir($dh);
+    closedir($dh);
+    for(@cap_files) {
+      unlink "$crdir/$_";
+    }
+  }
+
+  # update gui...
+
+  if($s{'mep'}) {
+    detecte_mep();
+  }
+  if($s{'capture'}) {
+    detecte_analyse();
+  }
+  if($s{'mark'}) {
+    noter_resultat();
+  }
+  if($s{'assoc'}) {
+    assoc_state();
+  }
 }
 
 sub update_analysis_summary {
