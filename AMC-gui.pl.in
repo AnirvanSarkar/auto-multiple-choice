@@ -1827,6 +1827,14 @@ sub projet_check_and_save {
 
 ### Actions des boutons de la partie DOCUMENTS
 
+sub format_markup {
+  my ($t)=@_;
+  $t =~ s/\&/\&amp;/g;
+  $t =~ s/</\&lt;/g;
+  $t =~ s/>/\&gt;/g;
+  return($t);
+}
+
 sub mini {($_[0]<$_[1] ? $_[0] : $_[1])}
 
 my %component_name=('latex_packages'=>__("LaTeX packages:"),
@@ -1961,7 +1969,7 @@ sub doc_maj {
 					   .sprintf(__("See the LaTeX log in '%s' below."),
 # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
 						    __"Command output details")." "
-					   .__("Use LaTeX editor or latex command for a precise diagnosis.")."\n\n".join("\n",@err[0..mini(9,$#err)]).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "") );
+					   .__("Use LaTeX editor or latex command for a precise diagnosis.")."\n\n".join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "") );
 		     $dialog->run;
 		     $dialog->destroy;
 		 } else {
