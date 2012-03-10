@@ -40,10 +40,10 @@ clean:
 	rm -f *~
 
 html/images/callouts/%.png: img_src/callouts/%.svg
-	rsvg -w 12 -h 12 $< $@
+	rsvg-convert -w 12 -h 12 $< -o $@
 
 html/images/%.png: img_src/%.svg
-	rsvg -w 24 -h 24 $< $@
+	rsvg-convert -w 24 -h 24 $< -o $@
 
 %.tex: %.xml
 	dblatex -t tex --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
