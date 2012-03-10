@@ -133,7 +133,7 @@ sub new {
 
     $self->{'gui'}=Gtk2::GladeXML->new($glade_xml,undef,'auto-multiple-choice');
 
-    for my $k (qw/tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu/) {
+    for my $k (qw/tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu scrolled_tableau/) {
 	$self->{$k}=$self->{'gui'}->get_widget($k);
     }
 
@@ -171,9 +171,6 @@ sub new {
 	    $x=0;
 	}
     }
-
-    $self->{'tableau'}->size_request;
-    $self->{'tableau'}->set_size_request(-1,100);
 
     # vue arborescente
 
@@ -241,6 +238,8 @@ sub new {
 
     $self->image_suivante();
     $self->maj_couleurs_liste();
+
+    $self->{'scrolled_tableau'}->set_policy('automatic','automatic');
 
     return($self);
 }
