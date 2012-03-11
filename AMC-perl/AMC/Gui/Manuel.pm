@@ -444,7 +444,7 @@ sub ecrit {
       $self->{'capture'}->begin_transaction;
       $self->{'capture'}->variable('annotated_uptodate',-8);
 
-      $self->{'capture'}->statement('setManualPage')->execute(time(),@spc);
+      $self->{'capture'}->set_page_manual(@spc,time());
 
       for my $i (@{$self->{'layinfo'}->{'box'}}) {
 	$self->{'capture'}
