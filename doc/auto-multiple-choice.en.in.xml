@@ -11,9 +11,9 @@
     grading</subtitle>
 
     <abstract>
-      <para>AMC is a set of utilities allowing the use of MCQ written in
-      LaTeX, and their automated correction and grading from scans of the
-      answer sheets. This document describes its use (for the version
+      <para>AMC is a set of utilities allowing the use of MCQ written in plain
+      text or LaTeX, and their automated correction and grading from scans of
+      the answer sheets. This document describes its use (for the version
       @/PACKAGE_V_DEB/@~svn @/PACKAGE_V_SVN/@).</para>
 
       <para>The AMC project is hosted by <ulink
@@ -148,10 +148,13 @@
     <sect2>
       <title>LaTeX</title>
 
-      <para>Some knowledge of LaTeX is useful for the design of MCQs. However,
-      the templates that are provided should allow those who are not deterred
-      by LaTeX/XML/HTML formats to quickly start writing their own
-      MCQs.</para>
+      <para>From version 1.1 of AMC, it is not mandatory anymore to write your
+      questionnaires using LaTeX language (see <xref linkend="AMC-TXT"/> for a
+      plain text alternative syntax). However, LaTeX is still the native AMC
+      language for questionnaires descriptions, and allows the user to design
+      his questionnaires with tremendous freedom. The templates that are
+      provided should allow those who are not deterred by LaTeX format to
+      quickly start writing their own MCQs.</para>
     </sect2>
   </sect1>
 
@@ -264,6 +267,403 @@ sudo make install</screen>
     </sect2>
   </sect1>
 
+  <sect1>
+    <title id="AMC-TXT">AMC-TXT syntax</title>
+
+    <para>For users who are not ready to learn LaTeX (if not already speaking
+    this language), AMC includes a filter to process simple plain text files
+    in a particular format, named AMC-TXT. This section is devoted to detail
+    the syntax of AMC-TXT files. If you prefer use LaTeX to gain a
+    fine-control over your questionnaires, skip to next section.</para>
+
+    <para>Let us begin with a simple exemple:</para>
+
+    <programlisting>Title: My first AMC questionnaire
+
+Presentation: Please answer the following questions
+the best you can.
+
+* What is the capital city of Cameroon?
++ Yaounde
+- Douala
+- Kribi
+
+** From the following numbers, which are positive?
+- -2
++ 2
++ 10</programlisting>
+
+    <important>
+      <para>The file that contains your questionnaire must be a plain text
+      file, UTF-8 encoded. This is the default encoding of several text
+      editors, like <command>gedit</command>. Don't use a text editor that can
+      format your text with bold, images, and so on, like
+      OpenOffice/LibreOffice, or equivalent: these save your text with a lot
+      of other data, and AMC won't be able to read it.</para>
+    </important>
+
+    <note>
+      <para>The default font that will be used is <ulink
+      url="http://www.linuxlibertine.org/">libertine</ulink>, an open source
+      font that contains chracaters for a lot of languages. You have to
+      install this font or choose another one (see options below). If you
+      install AMC with a debian/ubuntu package, this font will be install
+      together as a recommended package.</para>
+    </note>
+
+    <para>You already understand AMC-TXT structure: some general options
+    first, and then questions.</para>
+
+    <sect2>
+      <title>General options</title>
+
+      <para>Here are the options you can use (in any order):</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>Lang:</term>
+
+          <listitem>
+            <para>use it to specify a language the questionnaire is written
+            in. At present, only DE (german), ES (spanish), FR (french) and AR
+            (arabic, see <xref linkend="txt-arabic"/>) are supported. Without
+            this option, english will be selected. You can also define the
+            localized string used for another language (see the
+            <option>L-xxx</option> options).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Title:</term>
+
+          <listitem>
+            <para>The exam title, written on top of the sheet.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Presentation:</term>
+
+          <listitem>
+            <para>A text that presents the exam (length, rules...).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>ShuffleQuestions:</term>
+
+          <listitem>
+            <para>If 1 (default), questions will be shuffled so that their
+            order is different from one sheet to the other. If 0, the
+            questions will allways show with the same order as in your
+            file.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Code:</term>
+
+          <listitem>
+            <para>Give a positive integer value <replaceable>n</replaceable>
+            to add boxes so that students will be able to code their student
+            number on their sheets, with <replaceable>n</replaceable>
+            digits.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Columns:</term>
+
+          <listitem>
+            <para>Give a positive integer value <replaceable>n</replaceable>
+            to get a subject with <replaceable>n</replaceable> columns.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>CompleteMulti:</term>
+
+          <listitem>
+            <para>If 1 (default), for multiple questions (those for which
+            zero, one or several answers are correct), an answer "None of
+            these answers are correct" will be added. Without it, it should be
+            impossible to make a difference between "the student didn't answer
+            for this question" and "the student thinks no answer is correct
+            for this question". If you don't want this answer to be added, set
+            this option to 0.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>L-None:</term>
+
+          <listitem>
+            <para>Give a string to replace <emphasis>None of these answers are
+            correct</emphasis> (see previous option).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>QuestionBlocks:</term>
+
+          <listitem>
+            <para>If 1 (default), all qeustions will be enclosed in a
+            invisible frame that prevents it to be splitted accross several
+            columns or pages. If 0, questions are allowed to be splitted if
+            necessary: that can save pages at the cost of readability.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>L-Question:</term>
+
+          <listitem>
+            <para>Give a translation of <emphasis>Question</emphasis> in your
+            questionnaire, if you need.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>L-Name:</term>
+
+          <listitem>
+            <para>Give a translation of <emphasis>Name and surname</emphasis>,
+            a text written in the box where students are to write their
+            udentity.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>L-Student:</term>
+
+          <listitem>
+            <para>Small text that asks students to code their student numbers
+            and write their name, when <option>Code</option> option is
+            used.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>DefaultScoringS:</term>
+
+          <listitem>
+            <para>Default scoring strategy for simple questions (questions for
+            which one and only one anser is correct). See <xref
+            linkend="bareme"/> for details. The default value gives one point
+            for the right answer, and zero for others.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>DefaultScoringM:</term>
+
+          <listitem>
+            <para>Default scoring strategy for multiple questions (questions
+            for which there can be zero, one or several correct answers). See
+            <xref linkend="bareme"/> for details. The default value is
+            <code>haut=2</code>, so that a perfect answer gives 2 points, and
+            each error (ticking a box that should not be ticked, or leaving a
+            box that should be ticked unticked) takes one point off (keeping
+            the score non-negative).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>LaTeX:</term>
+
+          <listitem>
+            <para>Set this option to 1 if you want to use LaTeX commands in
+            your texts. This allows for exemple to insert mathematical
+            formulas, like <code>$\sqrt{a+b}$</code>. If 0 (default), all your
+            texts will be written unmodified.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>LaTeX-Preambule:</term>
+
+          <listitem>
+            <para>Give commands you want to be added to the LaTeX preambule
+            (for exemple <command>\usepackage</command> commands).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>LaTeX-BeginDocument:</term>
+
+          <listitem>
+            <para>Give commands to be inserted at the beginning of the LaTeX
+            <command>document</command> environment (for exemple macro
+            definitions).</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <sect3>
+        <title>Separate answer sheet</title>
+
+        <para>To use separate answer sheets for your questionnaire, consider
+        the following options:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>SeparateAnswerSheet:</term>
+
+            <listitem>
+              <para>If 1, a separate answer sheet will be added.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>AnswerSheetTitle:</term>
+
+            <listitem>
+              <para>Title of the answer sheet.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>AnswerSheetPresentation:</term>
+
+            <listitem>
+              <para>Presentation of the answer sheet. For exemple, remind the
+              students that the answers are to be given on this sheet
+              <emphasis>only</emphasis>.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>Questions</title>
+
+      <para>Simple questions (questions for which one and only one anser is
+      correct) begin with a <code>*</code> at the beginning of the line, and
+      multiple questions (questions for which there can be zero, one or
+      several correct answers) begin with a <code>**</code>. Insert then the
+      question itself, and the choices, introduced with a <code>+</code> for
+      correct ones and with a <code>-</code> for wrong ones.</para>
+
+      <sect3>
+        <title>Questions options</title>
+
+        <para>Some options are available for questions. They must be separated
+        by commas and enclosed by square brackets just after the leading
+        <code>*</code>'s, as in the following exemple:</para>
+
+        <programlisting>*[ordered,horiz,name=sum] How much are
+one plus one?
+- 0
+- 1
++ 2</programlisting>
+
+        <para>Available options for questions:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>horiz</term>
+
+            <listitem>
+              <para>present choices horizontally, not on separated
+              lines.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>columns=<replaceable>n</replaceable></term>
+
+            <listitem>
+              <para>make <replaceable>n</replaceable> columns for the
+              choices.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ordered</term>
+
+            <listitem>
+              <para>don't shuffle the choices, keep the same order as in the
+              description file.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>name=<replaceable>xxxx</replaceable></term>
+
+            <listitem>
+              <para>Give a name to the question, so as to locate the
+              corresponding results easily in the exported spreadsheets. This
+              name must contain only simple characters, without accents and
+              LaTeX special characters such as <code>_</code>, <code>^</code>,
+              <code>%</code>...</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </sect3>
+
+      <sect3>
+        <title>Scoring strategy</title>
+
+        <para>You can set the scoring strategy for a particular question or
+        choice enclosing it with braces just after the leading characters
+        (<code>*</code>, <code>**</code>, <code>+</code> or <code>-</code>)
+        and the possible options, as in the following exemple. See <xref
+        linkend="bareme"/> for details about the scoring strategy
+        syntax.</para>
+
+        <programlisting>*{b=2,m=-1} What is the capital city of France?
++ Paris
+- Lille
+- Marseille
+- Ouagadougou
+-{-2} New York
+
+**[ordered,horiz,name=positive]{haut=1} From the following numbers, which are positive?
+- -2
++ 2
++ 10
+</programlisting>
+      </sect3>
+    </sect2>
+
+    <sect2 id="txt-arabic">
+      <title>Arabic language</title>
+
+      <para>Writting a questionnaire in arabic is a little special. Use of
+      course option</para>
+
+      <programlisting>Lang: AR</programlisting>
+
+      <para>You can also consider the following global options:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>ArabicFont:</term>
+
+          <listitem>
+            <para>This is the font used for arabic text. Default value is
+            <emphasis>Rasheeq</emphasis>, a font from the project <ulink
+            url="http://arabeyes.org/">ArabEyes</ulink> (you can find it on
+            debian/ubuntu in the ttf-arabeyes package).</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <warning>
+        <para>For better working and portability, give an explicit value for
+        <option>L-Name</option> and <option>L-Student</option> options.</para>
+      </warning>
+
+      <note>
+        <para>To insert texts with non-arabic characters, you must turn on
+        <option>LaTeX</option> option and enclose these texts as a
+        <command>\textLR</command> LaTeX command argument, as in
+        <code>\textLR{xelatex command}</code>. </para>
+      </note>
+    </sect2>
+  </sect1>
+
   <sect1 id="latex">
     <title>Preparation of the LaTeX file</title>
 
@@ -286,24 +686,24 @@ DESC: A simple example (from the documentation) with one simple question and one
       id="modeles-simple.tex" linenumbering="numbered">\documentclass[a4paper]{article}
 
 \usepackage[utf8x]{inputenc}    <co id="simple.latin1"
-            linkends="simple.latin1.exp" />
+            linkends="simple.latin1.exp"/>
 \usepackage[T1]{fontenc}
 
 \usepackage[box,completemulti]{automultiplechoice}    <co id="simple.amc"
-            linkends="simple.amc.exp" />
+            linkends="simple.amc.exp"/>
 \begin{document}
 
-\onecopy{10}{    <co id="simple.exemplaire" linkends="simple.exemplaire.exp" />
+\onecopy{10}{    <co id="simple.exemplaire" linkends="simple.exemplaire.exp"/>
 
 %%% beginning of the test sheet header:    <co id="simple.entete"
-            linkends="simple.entete.exp" />
+            linkends="simple.entete.exp"/>
 
 \noindent{\bf QCM  \hfill TEST}
 
 \vspace*{.5cm}
 \begin{minipage}{.4\linewidth}
 \centering\large\bf Test\\ Examination on Jan., 1st, 2008\end{minipage}
-\namefield{\fbox{    <co id="simple.champnom" linkends="simple.champnom.exp" />
+\namefield{\fbox{    <co id="simple.champnom" linkends="simple.champnom.exp"/>
                 \begin{minipage}{.5\linewidth}
                   Firstname and lastname:
 
@@ -328,7 +728,7 @@ Duration : 10 minutes.
 
 %%% end of the header
 
-\begin{question}{prez}    <co id="simple.qr" linkends="simple.qr.exp" />
+\begin{question}{prez}    <co id="simple.qr" linkends="simple.qr.exp"/>
   Among the following persons, which one has ever been a President of the French Republic?
   \begin{choices}
     \correctchoice{René Coty}
@@ -339,7 +739,7 @@ Duration : 10 minutes.
 \end{question}
 
 \begin{questionmult}{pref}    <co id="simple.qrmult"
-            linkends="simple.qrmult.exp" />
+            linkends="simple.qrmult.exp"/>
   Among the following cities, which ones are french prefectures?
   \begin{choices}
     \correctchoice{Poitiers}
@@ -348,9 +748,9 @@ Duration : 10 minutes.
   \end{choices}
 \end{questionmult}
 
-\clearpage    <co id="simple.clear" linkends="simple.clear.exp" />
+\clearpage    <co id="simple.clear" linkends="simple.clear.exp"/>
 
-}   <co id="simple.fin" linkends="simple.fin.exp" />
+}   <co id="simple.fin" linkends="simple.fin.exp"/>
 
 \end{document}
 </programlisting></para>
@@ -377,8 +777,8 @@ Duration : 10 minutes.
           <callout arearefs="simple.exemplaire" id="simple.exemplaire.exp">
             <para>The <command>onecopy</command> command produces as many
             (distinct) realizations of the MCQ test as desired (here 10).
-            See <xref linkend="sec.unecopie" /> for an alternative syntax
-            using an environment.</para>
+            See <xref linkend="sec.unecopie"/> for an alternative syntax using
+            an environment.</para>
           </callout>
 
           <callout arearefs="simple.entete" id="simple.entete.exp">
@@ -554,13 +954,13 @@ DESC: An example (from the documentation) where all check-boxes are put together
 \usepackage[T1]{fontenc}
 
 \usepackage[box,completemulti,separateanswersheet]{automultiplechoice}    <co
-            id="ensemble.opt" linkends="ensemble.opt.exp" />
+            id="ensemble.opt" linkends="ensemble.opt.exp"/>
 \begin{document}
 
 \AMCrandomseed{1237893}
 
 \def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1:} }    <co
-            id="ensemble.fq" linkends="ensemble.fq.exp" />
+            id="ensemble.fq" linkends="ensemble.fq.exp"/>
 
 \element{general}{
   \begin{question}{prez}    
@@ -628,14 +1028,14 @@ Durée : 10 minutes.
 \shufflegroup{general}
 \insertgroup{general}
 
-\AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp" />
+\AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
 
-\AMCformBegin    <co id="debut.form" linkends="debut.form.exp" />
+\AMCformBegin    <co id="debut.form" linkends="debut.form.exp"/>
 
 %%% beginning of the answer sheet header
 
 {\large\bf Answer sheet:}
-\hfill \namefield{\fbox{    <co id="ensemble.nom" linkends="ensemble.nom.exp" />
+\hfill \namefield{\fbox{    <co id="ensemble.nom" linkends="ensemble.nom.exp"/>
     \begin{minipage}{.5\linewidth}
       Firstname and lastname:
       
@@ -651,7 +1051,7 @@ Durée : 10 minutes.
 
 %%% end of the answer sheet header
 
-\AMCform    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp" />
+\AMCform    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp"/>
 
 \clearpage    
 
@@ -699,7 +1099,7 @@ Durée : 10 minutes.
       <warning>
         <para>When one uses a separate answer sheet, letters (or digits, if
         one uses the option <option>digits</option>, see <xref
-        linkend="sec.package.options" />) are written in the check-boxes. To
+        linkend="sec.package.options"/>) are written in the check-boxes. To
         achieve a correct detection of the checked boxes, one has to ask
         students to completely fill the relevant boxes (checking by simply
         drawing a cross would not suffice). One also has to tune the grey
@@ -762,7 +1162,7 @@ Durée : 10 minutes.
             check-boxes be put together at the end of the test sheet (usually,
             this option is used when one wants to have only one sheet to scan
             per student - see the example in section <xref
-            linkend="secensemble" />).</para>
+            linkend="secensemble"/>).</para>
           </listitem>
 
           <listitem>
@@ -1103,7 +1503,7 @@ Durée : 10 minutes.
 
         <para>It is also possible to modify the layout of the separate answer
         sheet produced with the <option>separateanswersheet</option> option
-        (see section <xref linkend="secensemble" />).</para>
+        (see section <xref linkend="secensemble"/>).</para>
 
         <orderedlist>
           <listitem>
@@ -1330,12 +1730,12 @@ and write your first and last names below.
 
         <para><programlisting>\begin{question}{addition}
   \FPeval\VQa{trunc(1+random*8,0)}  <co id="alea.random"
-              linkends="alea.random.exp" />
+              linkends="alea.random.exp"/>
   \FPeval\VQb{trunc(4+random*5,0)}
   \FPeval\VQsomme{clip(VQa+VQb)}  <co id="alea.result"
-              linkends="alea.result.exp" />
+              linkends="alea.result.exp"/>
   \FPeval\VQnonA{clip(VQa+VQb-1)}  <co id="alea.fausse"
-              linkends="alea.fausse.exp" />
+              linkends="alea.fausse.exp"/>
   \FPeval\VQnonB{clip(VQa*VQb)}
   \FPeval\VQnonC{clip(VQa-VQb)}
 
@@ -1385,7 +1785,7 @@ respective parameters \VQa{} et \VQb{}.
   \begin{multicols}{5}
     \begin{choices}[o]
       \choixIntervalles{\VQr}{0}{1}{0.1}  <co id="choix.intervalles"
-              linkends="choix.intervalles.exp" />
+              linkends="choix.intervalles.exp"/>
     \end{choices}
   \end{multicols}
 \end{question}</programlisting></para>
@@ -1785,7 +2185,7 @@ Name :
           <para>When giving scans for automated data capture the first time,
           you will have tell AMC which method you used: either different
           papers printed, or photocopied papers (see <xref
-          endterm="printing.title" linkend="printing" />).</para>
+          endterm="printing.title" linkend="printing"/>).</para>
         </note>
 
         <para>Then we select this set of scan files in the dialog opened by
@@ -1846,7 +2246,7 @@ Name :
       <para>In the <guilabel>Marking</guilabel> tab of the graphic interface,
       the part <guilabel>Marking</guilabel> allows us to deduce the scores of
       the students from the inputs, but also to read the codes written by the
-      students (see <xref linkend="latex.codes" />).</para>
+      students (see <xref linkend="latex.codes"/>).</para>
 
       <sect3>
         <title>Process</title>
@@ -1864,7 +2264,7 @@ Name :
             answers are specified as correct or as wrong. Hence, potential
             mistakes in the answers can be easily fixed after the exam. The
             method to specify the strategy in the LaTeX file will be explained
-            in the section <xref endterm="bareme.title" linkend="bareme" /> (a
+            in the section <xref endterm="bareme.title" linkend="bareme"/> (a
             default scoring strategy is used when no indication is
             given).</para>
           </listitem>
@@ -1891,21 +2291,21 @@ Name :
 
         <informaltable>
           <tgroup cols="6">
-            <colspec align="center" colname="param" colwidth="3pc" />
+            <colspec align="center" colname="param" colwidth="3pc"/>
 
-            <colspec align="center" colname="q" colwidth="1pc" />
+            <colspec align="center" colname="q" colwidth="1pc"/>
 
-            <colspec align="center" colname="r" colwidth="1pc" />
+            <colspec align="center" colname="r" colwidth="1pc"/>
 
-            <colspec align="center" colname="qm" colwidth="1pc" />
+            <colspec align="center" colname="qm" colwidth="1pc"/>
 
-            <colspec align="center" colname="rm" colwidth="1pc" />
+            <colspec align="center" colname="rm" colwidth="1pc"/>
 
-            <colspec align="left" colname="valeur" />
+            <colspec align="left" colname="valeur"/>
 
-            <spanspec nameend="r" namest="q" spanname="simple" />
+            <spanspec nameend="r" namest="q" spanname="simple"/>
 
-            <spanspec nameend="rm" namest="qm" spanname="multiple" />
+            <spanspec nameend="rm" namest="qm" spanname="multiple"/>
 
             <tbody>
               <row>
@@ -1933,11 +2333,11 @@ Name :
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>The score given when responses are incoherent: many
                 boxes checked for a simple question, or, for a multiple
@@ -1950,11 +2350,11 @@ Name :
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>The score given in case of no response (no box is
                 checked).</entry>
@@ -1963,13 +2363,13 @@ Name :
               <row>
                 <entry>d</entry>
 
-                <entry></entry>
+                <entry/>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>An offset, i.e. a value added to every score not
                 relevant of parameters e and v.</entry>
@@ -1978,13 +2378,13 @@ Name :
               <row>
                 <entry>p</entry>
 
-                <entry></entry>
+                <entry/>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>The bottom score. If the calculation of the score in
                 that question yields a value below the bottom value, the sore
@@ -1996,7 +2396,7 @@ Name :
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
@@ -2010,7 +2410,7 @@ Name :
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
@@ -2020,15 +2420,15 @@ Name :
               </row>
 
               <row>
-                <entry></entry>
+                <entry/>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>Without parameter name (syntax:
                 <code>\scoring{2}</code>), this indicates the score to give if
@@ -2041,18 +2441,18 @@ Name :
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
-                <entry></entry>
+                <entry/>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>With this parameter, the value of the response numbered
                 <replaceable>i</replaceable> will be
                 <replaceable>auto</replaceable>+<replaceable>i</replaceable>-1.
                 This option is mainly used with
                 <code>\QuestionIndicative</code> (see section <xref
-                endterm="latex.qr.title" linkend="latex.qr" />).</entry>
+                endterm="latex.qr.title" linkend="latex.qr"/>).</entry>
               </row>
 
               <row>
@@ -2060,11 +2460,11 @@ Name :
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>This parameter is used for a "maximum or zero" scoring:
                 if all the answers are correct, the score is
@@ -2075,13 +2475,13 @@ Name :
               <row>
                 <entry>haut</entry>
 
-                <entry></entry>
+                <entry/>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>When you give this parameter a value
                 <replaceable>n</replaceable>, the score given for a perfect
@@ -2094,11 +2494,11 @@ Name :
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>●</entry>
 
-                <entry></entry>
+                <entry/>
 
                 <entry>Gives the maximal value given for the question (for a
                 "question scored 5", one can write MAX=5). To be used only
@@ -2338,7 +2738,7 @@ Name:
           <para>It is possible to ask students to identify themselves on their
           copy with their student number, which will be written by checking
           one box per digit. A LaTeX command is designed to use this method on
-          the copy (see the part <xref linkend="latex.codes" />). After the
+          the copy (see the part <xref linkend="latex.codes"/>). After the
           exam, copies will be identified automatically taking into account a
           list matching the students' numbers and their names.</para>
         </listitem>
@@ -2407,7 +2807,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <warning>
             <para>To make an automated association, at least one command
             <command>AMCcode</command> is required (see <xref
-            linkend="latex.codes" />) in the LaTeX source file, as well as a
+            linkend="latex.codes"/>) in the LaTeX source file, as well as a
             list of students with a column containing a reference (generally a
             number of student) which will be identical to the input given in
             the boxes produced by the command
@@ -2568,7 +2968,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       replaced by the contents of the column named
       <code><replaceable>col</replaceable></code> in the file containing the
       list of students (see section <xref endterm="liste.etudiants.title"
-      linkend="liste.etudiants" />). If we let this field empty, a default
+      linkend="liste.etudiants"/>). If we let this field empty, a default
       value is built up based on the student's name and student number.</para>
     </sect2>
   </sect1>
@@ -2580,7 +2980,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <title>Photocopied subject</title>
 
       <para>As explained in <xref endterm="printing.title"
-      linkend="printing" />, it is not always possible to photocopy one answer
+      linkend="printing"/>, it is not always possible to photocopy one answer
       sheet to give to several students. However, when using a separate answer
       sheet and when questions and answers are not to be shuffled, you can
       photocopy the subject, and print all the answer sheets separately. We
@@ -2590,7 +2990,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <listitem>
           <para>Use <option>separateanswersheet</option> package option (see
           <xref endterm="sec.package.options.title"
-          linkend="sec.package.options" />).</para>
+          linkend="sec.package.options"/>).</para>
         </listitem>
 
         <listitem>
@@ -2678,7 +3078,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <para>Use <option>postcorrect</option>, <option>insidebox</option>
           and <option>noshuffle</option> package options (see <xref
           endterm="sec.package.options.title"
-          linkend="sec.package.options" />).</para>
+          linkend="sec.package.options"/>).</para>
         </listitem>
 
         <listitem>
@@ -3643,8 +4043,8 @@ student number &amp; class &amp; subject\\
         <para>The <command>AMC-association-auto.pl</command> command reads
         report from to associate students with their answer sheet (when there
         are no errors from students when coding their student number and no
-        error during data capture). See <xref linkend="sec.students.id" />
-        from english user documentation for details.</para>
+        error during data capture). See <xref linkend="sec.students.id"/> from
+        english user documentation for details.</para>
 
         <variablelist>
           <varlistentry>
