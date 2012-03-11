@@ -3159,9 +3159,10 @@ sub filter_changed {
       transmet_pref($gui,'pref_prep',$projet{'options'});
       return(0);
     }
+
+    clear_processing('doc:');
   }
 
-  clear_processing('doc:');
   valide_options_preparation(@args);
 }
 
