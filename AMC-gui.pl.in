@@ -2026,20 +2026,30 @@ sub doc_maj {
 sub filter_details {
   my $gd=read_glade('filter_details',
 		    qw/filter_text/);
+  debug "Filter details: conf->details GUI";
   transmet_pref($gd,'filter_details',$projet{'options'});
   my $r=$w{'filter_details'}->run();
   if($r == 10) {
-    reprend_pref('filter_details',$projet{'options'});
-    transmet_pref($gui,'pref_prep',$projet{'options'});
+    my %oo=('filter'=>'');
+    debug "Filter details: new value->local";
+    reprend_pref('filter_details',\%oo);
+    $w{'filter_details'}->destroy;
+    debug "Filter details: local->main GUI";
+    transmet_pref($gui,'pref_prep',\%oo);
+  } else {
+    $w{'filter_details'}->destroy;
   }
-  $w{'filter_details'}->destroy;
 }
 
 sub filter_details_update {
   my %oo=('filter'=>'');
   reprend_pref('filter_details',\%oo);
   my $b=$w{'filter_text'}->get_buffer;
-  $b->set_text(("AMC::Filter::register::".$oo{'filter'})->description);
+  if($oo{'filter'}) {
+    $b->set_text(("AMC::Filter::register::".$oo{'filter'})->description);
+  } else {
+    $b->set_text('');
+  }
 }
 
 my $cups;
@@ -3132,11 +3142,16 @@ sub filter_changed {
 
   # check it is a different value...
 
+  debug "Filter changed callback / options=".$projet{'options'}->{'filter'};
+
   my %oo=('filter'=>$projet{'options'}->{'filter'});
   valide_options_for_domain('pref_prep',\%oo,@_);
   return if(!$oo{'_modifie'});
 
+  debug "Filter changed -> ".$oo{'filter'};
+
   if(-f absolu($projet{'options'}->{'docs'}->[0])) {
+    debug "Ask for confirmation";
     my $text;
     if($projet{'_capture'}->n_pages_transaction()>0) {
       $text=_("The working documents are already prepared with the current file format. If you change the file format, working documents and all other data for this project will be ereased.").' '
