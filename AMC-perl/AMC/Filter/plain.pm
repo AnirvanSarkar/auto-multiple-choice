@@ -24,6 +24,8 @@ use AMC::Basic;
 
 use Data::Dumper;
 
+use utf8;
+
 @ISA=("AMC::Filter");
 
 use_gettext;
@@ -37,14 +39,19 @@ sub new {
 				 DefaultScoringM DefaultScoringS
 				 L-Question L-None L-Name L-Student
 				 LaTeX LaTeX-Preambule LaTeX-BeginDocument
-				 ShuffleQuestions Columns QuestionBlocks/];
+				 ShuffleQuestions Columns QuestionBlocks
+				 Arabic ArabicFont
+				/];
     $self->{'options_boolean'}=[qw/LaTeX ShuffleQuestions QuestionBlocks
-				   CompleteMulti SeparateAnswerSheet/];
+				   CompleteMulti SeparateAnswerSheet
+				   Arabic
+				  /];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
     $self->{'options'}={'questionblocks'=>1,'shufflequestions'=>1,
 			'completemulti'=>1,
 			'font'=>'Linux Libertine O',
+			'arabicfont'=>'Rasheeq',
 			'defaultscoringm'=>'haut=2',
 			'l-name'=>__("Name and surname"),
 			'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
@@ -53,6 +60,10 @@ sub new {
     bless ($self, $class);
     return $self;
 }
+
+my %l_arabic=('l-question'=>'السؤال',
+	      'l-none'=>'',
+	      );
 
 sub parse_bool {
   my ($b)=@_;
@@ -67,6 +78,13 @@ sub parse_options {
   my ($self)=@_;
   for my $n (@{$self->{'options_boolean'}}) {
     $self->{'options'}->{lc($n)}=parse_bool($self->{'options'}->{lc($n)});
+  }
+
+  if($self->{'options'}->{'lang'} eq 'AR') {
+    for (keys %l_arabic) {
+      $self->{'options'}->{$_}=$l_arabic{$_}
+	if(!$self->{'options'}->{$_});
+    }
   }
 }
 
@@ -166,6 +184,12 @@ sub read_source {
   close(IN);
 }
 
+sub bf_or {
+  my($self,$replace,$bf)=@_;
+  return($self->{'options'}->{'arabic'}
+	 ? $replace : ($bf ? $bf : "\\bf"));
+}
+
 sub format_text {
   my ($self,$t)=@_;
   $t =~ s/^\s+//;
@@ -206,7 +230,9 @@ sub format_question {
   my $mult=($q->{'multiple'} ? 'mult' : '');
   my $ct=($q->{'horiz'} ? 'horiz' : '');
 
-  my $t='\\begin{question'.$mult.'}{'.$qid."}";
+  my $t='';
+  $t.="\\begin{arab}" if($self->{'options'}->{'arabic'});
+  $t.='\\begin{question'.$mult.'}{'.$qid."}";
   $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
   $t.="\n";
   $t.=$self->format_text($q->{'text'})."\n";
@@ -219,7 +245,9 @@ sub format_question {
   $t.="\\end{choices$ct}\n";
   $t.="\\end{multicols}\n"
     if($q->{'columns'}>1);
-  $t.="\\end{question".$mult."}\n";
+  $t.="\\end{question".$mult."}";
+  $t.="\\end{arab}" if($self->{'options'}->{'arabic'});
+  $t.="\n";
   return($t);
 }
 
@@ -248,25 +276,33 @@ sub file_header {
   $po='['.join(',',@package_options).']' if(@package_options);
 
   $t .= "\\documentclass{article}\n";
+  $t .= "\\usepackage{bidi}\n" if($self->{'options'}->{'arabic'});
   $t .= "\\usepackage{xltxtra}\n";
+  $t .= "\\usepackage{arabxetex}\n" if($self->{'options'}->{'arabic'});
   $t .= "\\usepackage".$po."{automultiplechoice}\n";
-  $t .= "\\usepackage{multicol}\n";
+  $t .= "\\usepackage{"
+    .($self->{'options'}->{'arabic'} ? "fmultico" : "multicol")."}\n";
   $t .= "\\setmainfont[Mapping=tex-text]{".$self->{'options'}->{'font'}."}\n"
     if($self->{'options'}->{'font'});
+  $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
+    if($self->{'options'}->{'arabicfont'});
   $t .= $self->{'options'}->{'latex-preambule'};
   $t .= "\\begin{document}\n";
   $t .= "\\AMCrandomseed{1527384}\n";
 
   $t .= "\\AMCtext{none}{"
-    .$self->format_text($self->{'options'}->{'l-none'})."}"
+    .$self->format_text($self->{'options'}->{'l-none'})."}\n"
     if($self->{'options'}->{'l-none'});
 
-  $t.="\\def\\AMCbeginQuestion#1#2{\\par\\noindent{\\bf "
-    .$self->{'options'}->{'l-question'}." #1} #2\\hspace{1em}}\n"
-      ."\\def\\AMCformQuestion#1{\\vspace{\\AMCformVSpace}\\par{\\bf "
-	.$self->{'options'}->{'l-question'}." #1 :}}"
-    if($self->{'options'}->{'l-question'});
-
+  $t.="\\def\\AMCbeginQuestion#1#2{\\par\\noindent{"
+    .$self->bf_or("\\Large")." "
+      .$self->{'options'}->{'l-question'}." #1} #2\\hspace{1em}}\n"
+	."\\def\\AMCformQuestion#1{\\vspace{\\AMCformVSpace}\\par{"
+	  .$self->bf_or("\\Large")." "
+	    .$self->{'options'}->{'l-question'}." #1 :}}\n"
+	      if($self->{'options'}->{'l-question'});
+  $t.="\\def\\AMCchoiceLabel#1{\\textLR{\\Alph{#1}}}\n"
+    if($self->{'options'}->{'arabic'});
   $t .= $self->{'options'}->{'latex-begindocument'};
 
   return($t);
@@ -291,11 +327,25 @@ sub page_header {
       $titlekey='title';
     }
   }
-  $t.="\\begin{center}\\bf\\large "
-	.$self->format_text($self->{'options'}->{$titlekey})
-	  ."\\end{center}\n\n"
-	    if($titlekey && $self->{'options'}->{$titlekey});
+  if($titlekey && $self->{'options'}->{$titlekey}) {
+    $t.="\\begin{center}".$self->bf_or("\\Large","\\bf\\large")." "
+      .$self->format_text($self->{'options'}->{$titlekey})
+	."\\end{center}";
+    $t.="\n\n";
+  }
+  return($t);
+}
 
+sub full_namefield {
+  my ($self,$n_ligs)=@_;
+  my $t='';
+  $t.="\\namefield{\\fbox{";
+  $t.="\\begin{minipage}{.9\\linewidth}"
+    .$self->{'options'}->{'l-name'}
+	.("\n\n\\vspace*{.5cm}\\dotfill" x $n_ligs)
+	  ."\n\\vspace*{1mm}"
+	    ."\n\\end{minipage}";
+  $t.="\n}}";
   return($t);
 }
 
@@ -309,17 +359,20 @@ sub student_block {
     my $vertical=($self->{'options'}->{'code'}>$self->{'maxhorizcode'});
 
     $t.="{\\setlength{\\parindent}{0pt}\\hspace*{\\fill}";
-    $t.=($vertical?"":"\\hbox{\\vbox{")
-      ."\\AMCcode".($vertical ? "" : "H")."{student.number}{".
-	$self->{'options'}->{'code'}."}".($vertical?"":"}}")."\\hspace*{\\fill}"
-	  ."\\begin{minipage}".($vertical?"[b]":"")."{5.8cm}"
-	    ."\$\\longleftarrow{}\$\\hspace{0pt plus 1cm}"
-	      .$self->{'options'}->{'l-student'}
-		."\\vspace{3ex}\n\n\\hfill\\namefield{\\fbox{\\begin{minipage}{.9\\linewidth}"
-		  .$self->{'options'}->{'l-name'}
-		    ."\n\n\\vspace*{.5cm}\\dotfill\n\n\\vspace*{.5cm}\\dotfill\n\\vspace*{1mm}"
-		      ."\n\\end{minipage}\n}}\\hfill\\vspace{5ex}\\end{minipage}\\hspace*{\\fill}"
-			."\n\n}";
+    $t.=($vertical?"":"\\hbox{\\vbox{");
+    $t.= "\\LR{" if($self->{'options'}->{'arabic'} && $vertical);
+    $t.="\\AMCcode".($vertical ? "" : "H")."{student.number}{".
+	$self->{'options'}->{'code'}."}";
+    $t.= "}" if($self->{'options'}->{'arabic'} && $vertical);
+    $t.=($vertical?"":"}}")."\\hspace*{\\fill}"
+      ."\\begin{minipage}".($vertical?"[b]":"")."{5.8cm}"
+	."\$\\long".($self->{'options'}->{'arabic'} ? "right" : "left")
+	  ."arrow{}\$\\hspace{0pt plus 1cm}"
+	    .$self->{'options'}->{'l-student'}
+	      ."\\vspace{3ex}\n\n\\hfill"
+		.$self->full_namefield(2)
+		  ."\\hfill\\vspace{5ex}\\end{minipage}\\hspace*{\\fill}"
+		    ."\n\n}";
     $t.="\\vspace{4mm}\n";
   } else {
     # header layout without code
@@ -327,15 +380,13 @@ sub student_block {
     my $titlekey=($self->{'options'}->{'separateanswersheet'}
 		  ? 'answersheettitle' : 'title');
     if($self->{'options'}->{$titlekey}) {
-      $t.= "\\begin{center}\\bf\\large "
+      $t.= "\\begin{center}".$self->bf_or("\\Large","\\bf\\large")." "
 	.$self->format_text($self->{'options'}->{$titlekey})
 	  ."\\end{center}\n\n";
     }
     $t.= "\\end{minipage}\\hfill\n";
     $t.= "\\begin{minipage}{.47\\linewidth}\n";
-    $t.= "\\namefield{\\fbox{\\begin{minipage}{.9\\linewidth}";
-    $t.= $self->{'options'}->{'l-name'}."\n\n";
-    $t.= "\\vspace*{.5cm}\\dotfill\\vspace*{1mm}\\end{minipage}}}\n";
+    $t.= $self->full_namefield(1);
     $t.= "\\end{minipage}\\vspace{4mm}\n\n";
   }
   return($t);
@@ -360,6 +411,7 @@ sub write_latex {
 
   print OUT "\\onecopy{5}{\n";
 
+  print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
   print OUT $self->page_header(0);
   print OUT $self->student_block
     if(!$self->{'options'}->{'separateanswersheet'});
@@ -368,11 +420,13 @@ sub write_latex {
     print OUT $self->format_text($self->{'options'}->{'presentation'})."\n\n";
   }
   print OUT "\\vspace{4mm}\\noindent\\hrule\n";
+  print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
 
   for my $group (@{$self->{'groups'}}) {
     if($group->{'title'}) {
-      print OUT "\\begin{center}\\hrule\\vspace{2mm}\\bf\\Large ".
-	$self->format_text($group->{'title'})."\\vspace{1mm}\\hrule\\end{center}\n";
+      print OUT "\\begin{center}\\hrule\\vspace{2mm}"
+	.$self->bf_or("\\Large","\\bf\\Large")." ".
+	  $self->format_text($group->{'title'})."\\vspace{1mm}\\hrule\\end{center}\n";
     }
     print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n"
       if($self->{'options'}->{'columns'}>1);
@@ -394,14 +448,18 @@ sub write_latex {
     print OUT "\\AMCcleardoublepage\n";
     print OUT "\\AMCformBegin\n";
 
+    print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
     print OUT $self->page_header(1);
     print OUT $self->student_block;
     if($self->{'options'}->{'answersheetpresentation'}) {
       print OUT $self->format_text($self->{'options'}->{'answersheetpresentation'})."\n\n";
     }
     print OUT "\\vspace{4mm}\\noindent\\hrule\n";
+    print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
 
+    print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
     print OUT "\\AMCform\n";
+    print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
   }
 
   print OUT "}\n";
@@ -411,12 +469,18 @@ sub write_latex {
 
 sub check {
   my ($self)=@_;
-  if($self->{'options'}->{'font'}) {
-    if(!check_fonts({'type'=>'fontconfig',
-		     'family'=>[$self->{'options'}->{'font'}]})) {
-      $self->error(sprintf(__("The following font does not seem to be installed on the system: <b>%s</b>."),$self->{'options'}->{'font'}));
+  my @cf=('font');
+  my @mf=();
+  push @cf,'arabicfont' if($self->{'options'}->{'arabic'});
+  for my $k (@cf) {
+    if($self->{'options'}->{'font'}) {
+      if(!check_fonts({'type'=>'fontconfig',
+		       'family'=>[$self->{'options'}->{$k}]})) {
+	push @mf,$self->{'options'}->{$k}
+      }
     }
   }
+  $self->error(sprintf(__("The following fonts does not seem to be installed on the system: <b>%s</b>."),join(', ',@mf))) if(@mf);
 }
 
 sub filter {
