@@ -282,7 +282,7 @@ sub file_header {
   $t .= "\\usepackage".$po."{automultiplechoice}\n";
   $t .= "\\usepackage{"
     .($self->{'options'}->{'arabic'} ? "fmultico" : "multicol")."}\n";
-  $t .= "\\setmainfont[Mapping=tex-text]{".$self->{'options'}->{'font'}."}\n"
+  $t .= "\\setmainfont{".$self->{'options'}->{'font'}."}\n"
     if($self->{'options'}->{'font'});
   $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
     if($self->{'options'}->{'arabicfont'});
