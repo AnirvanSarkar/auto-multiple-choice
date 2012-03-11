@@ -3176,12 +3176,6 @@ sub valide_options_notation {
     $w{'groupe_model'}->set_sensitive($projet{'options'}->{'regroupement_type'} eq 'STUDENTS');
 }
 
-sub association_clear {
-  $projet{'_association'}->begin_transaction('AsCL');
-  $projet{'_association'}->clear;
-  $projet{'_association'}->end_transaction('AsCL');
-}
-
 sub change_liste_key {
   debug "New liste_key: ".$projet{'options'}->{'liste_key'};
   if ($projet{'options'}->{'liste_key'}) {
@@ -3214,7 +3208,7 @@ sub change_liste_key {
 
 	if ($resp eq 'no') {
 	  # clears association data
-	  association_clear();
+	  clear_processing('assoc');
 	  # automatic association run
 	  if ($projet{'options'}->{'assoc_code'} && $auto>0) {
 	    associe_auto;
@@ -3236,8 +3230,8 @@ sub change_liste_key {
 	  $dialog->run;
 	  $dialog->destroy;
 
-	  association_clear;
-	  associe_auto;
+	  clear_processing('assoc');
+	  associe_auto();
 	}
       }
     }
