@@ -3494,7 +3494,7 @@ sub noter_resultat {
   $projet{'_scoring'}->begin_read_transaction('MARK');
   my $avg=$projet{'_scoring'}->average_mark;
 
-  if($avg) {
+  if(defined($avg)) {
     state_image('marking','gtk-yes');
 # TRANSLATORS: This is the marks mean for all students.
     $w{'state_marking'}->set_text(sprintf(__"Mean: %.2f",$avg));
