@@ -440,8 +440,11 @@ sub write_latex {
 	.$self->bf_or("\\Large","\\bf\\Large")." ".
 	  $self->format_text($group->{'title'})."\\vspace{1mm}\\hrule\\end{center}\n\n";
     }
-    print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n"
-      if($self->{'options'}->{'columns'}>1);
+    if($self->{'options'}->{'columns'}>1) {
+      print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n";
+    } else {
+      print OUT "\\vspace{2ex}\n\n";
+    }
 
     if($self->{'options'}->{'shufflequestions'}) {
       print OUT "\\shufflegroup{".$self->group_name($group)."}\n";
