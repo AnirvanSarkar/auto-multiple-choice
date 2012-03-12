@@ -62,8 +62,13 @@ sub new {
 }
 
 my %l_arabic=('l-question'=>'السؤال',
-	      'l-none'=>'',
+	      'l-none'=>'لا توجد اجابة صحيحة',
 	      );
+
+my @alphabet_arabic=('أ','ب','ج','د','ه','و','ز','ح','ط','ي','ك','ل',
+		     'م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ',
+		     'ذ','ض','ظ','غ',
+		     );
 
 sub parse_bool {
   my ($b)=@_;
@@ -301,8 +306,14 @@ sub file_header {
 	  .$self->bf_or("\\Large")." "
 	    .$self->{'options'}->{'l-question'}." #1 :}}\n"
 	      if($self->{'options'}->{'l-question'});
-  $t.="\\def\\AMCchoiceLabel#1{\\textLR{\\Alph{#1}}}\n"
-    if($self->{'options'}->{'arabic'});
+  if($self->{'options'}->{'arabic'}) {
+    $t.="\\def\\AMCchoiceLabel#1{\\csname ArabicAlphabet\\Alph{#1}\\endcsname}\n";
+    my $letter="A";
+    for my $c (@alphabet_arabic) {
+      $t.="\\def\\ArabicAlphabet$letter"."{$c}\n";
+      $letter++;
+    }
+  }
   $t .= $self->{'options'}->{'latex-begindocument'};
 
   return($t);
