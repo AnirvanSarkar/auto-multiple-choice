@@ -285,7 +285,7 @@ sub file_header {
   $t .= "\\setmainfont{".$self->{'options'}->{'font'}."}\n"
     if($self->{'options'}->{'font'});
   $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
-    if($self->{'options'}->{'arabicfont'});
+    if($self->{'options'}->{'arabicfont'} && $self->{'options'}->{'arabic'});
   $t .= $self->{'options'}->{'latex-preambule'};
   $t .= "\\begin{document}\n";
   $t .= "\\AMCrandomseed{1527384}\n";
