@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.250 (svn: 250)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2012-03-12 00:02 +0100\n"
-"PO-Revision-Date: 2012-03-12 00:04+0100\n"
+"POT-Creation-Date: 2012-03-12 13:16 +0100\n"
+"PO-Revision-Date: 2012-03-12 13:17+0100\n"
 "Last-Translator: Alexis Bienvenüe <paamc@passoire.fr>\n"
 "Language-Team: AB <paamc@passoire.fr>\n"
 "Language: fr\n"
@@ -449,7 +449,7 @@ msgid "You asked to remove project <b>%s</b>."
 msgstr "Vous avez demandé la suppression du projet <b>%s</b>."
 
 #: ../AMC-gui.pl:1683
-msgid "This will permanently erase all the files of this project, including the LaTeX source as well as all the files you put in the directory of this project, as the scans for example."
+msgid "This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example."
 msgstr "Ceci va effacer définitivement tous les fichiers de ce projet, y compris le sujet ainsi que tous les fichiers que vous avez pu mettre dans le répertoire de ce projet, comme les scans par exemple."
 
 #: ../AMC-gui.pl:1684
@@ -548,8 +548,8 @@ msgid "Errors while compiling LaTeX source."
 msgstr "La compilation de votre source LaTeX a occasionné des erreurs."
 
 #: ../AMC-gui.pl:1965
-msgid "You have to correct LaTeX source and re-run documents update."
-msgstr "Vous devez corriger votre LaTeX pour obtenir une mise à jour des documents."
+msgid "You have to correct the source file and re-run documents update."
+msgstr "Vous devez corriger votre fichier source pour obtenir une mise à jour des documents."
 
 #. TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
 #: ../AMC-gui.pl:1967
@@ -624,8 +624,8 @@ msgstr "(impossible)"
 
 #. TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
 #: ../AMC-gui.pl:2115
-msgid "You don't have any question to print: please check your LaTeX source and update working documents first."
-msgstr "Vous n'avez pas de sujet à imprimer : veuillez vérifier votre source LaTeX et mettre à jour les documents de travail."
+msgid "You don't have any question to print: please check your source file and update working documents first."
+msgstr "Vous n'avez pas de sujet à imprimer : veuillez vérifier votre fichier source et mettre à jour les documents de travail."
 
 #. TRANSLATORS: Message when AMC does not know about the subject pages that has been generated. Usualy this means that the layout computation step has not been made.
 #: ../AMC-gui.pl:2131
@@ -1023,8 +1023,8 @@ msgid "The corner marks and binary boxes are not at the same location on all pag
 msgstr "Les marques de coin ne sont pas au même endroit sur toutes les pages"
 
 #: ../AMC-gui.pl:4191
-msgid "Some potential defects were detected for this subject. Correct them in the LaTeX source and update the working documents."
-msgstr "Des défauts ont été détectés dans ce sujet. Corrigez-les dans le source LaTeX et mettez à jour les documents de travail."
+msgid "Some potential defects were detected for this subject. Correct them in the source and update the working documents."
+msgstr "Des défauts ont été détectés dans ce sujet. Corrigez-les dans le fichier source et mettez à jour les documents de travail."
 
 #: ../AMC-gui.pl:4197
 #, perl-format
@@ -1178,8 +1178,8 @@ msgid "Click yes to replace it and loose pre-existing contents, or No to cancel 
 msgstr "Cliquez sur oui pour remplacer le fichier pré-existant par celui que vous venez de sélectionner, ou sur non pour annuler l'import du fichier source."
 
 #: ../AMC-gui.pl:5286
-msgid "LaTeX file has been copied to project directory."
-msgstr "Le fichier LaTeX a été copié dans le répertoire projet."
+msgid "The source file has been copied to project directory."
+msgstr "Le fichier source a été copié dans le répertoire projet."
 
 #: ../AMC-gui.pl:5286
 #, perl-format
@@ -1187,8 +1187,9 @@ msgid "You can now edit it with button \"%s\" or with any editor."
 msgstr "Vous pouvez maintenant l'éditer soit en utilisant le bouton \"%s\", soit directement grâce au logiciel de votre choix."
 
 #: ../AMC-gui.pl:5286
-msgid "Edit LaTeX file"
-msgstr "Éditer le fichier LaTeX"
+#: ../AMC-gui-main_window.glade:435
+msgid "Edit source file"
+msgstr "Éditer le fichier source"
 
 #: ../AMC-gui.pl:5294
 #, perl-format
@@ -1421,7 +1422,7 @@ msgstr "Nom et prénom"
 msgid "Please code your student number opposite, and write your name in the box below."
 msgstr "Veuillez coder votre numéro d'étudiant ci-contre, et écrire votre nom dans la case ci-dessous."
 
-#: ../AMC-perl/AMC/Filter/plain.pm:483
+#: ../AMC-perl/AMC/Filter/plain.pm:496
 #, perl-format
 msgid "The following fonts does not seem to be installed on the system: <b>%s</b>."
 msgstr "Les polices de caractères suivantes ne semblent pas installées sur votre système : <b>%s</b>."
@@ -2294,10 +2295,6 @@ msgstr "Rapport de bogue"
 msgid "Cancel learning..."
 msgstr "Reprendre l'apprentissage..."
 
-#: ../AMC-gui-main_window.glade:435
-msgid "Edit source file"
-msgstr "Éditer le fichier source"
-
 #: ../AMC-gui-main_window.glade:506
 msgid "Number of papers:"
 msgstr "Nombre de copies :"
@@ -2759,6 +2756,9 @@ msgstr "Cases non cochées"
 #: ../AMC-perl/AMC/Gui/Zooms.glade:141
 msgid "Checked boxes"
 msgstr "Cases cochées"
+
+#~ msgid "Edit LaTeX file"
+#~ msgstr "Éditer le fichier LaTeX"
 
 #~ msgid "ID"
 #~ msgstr "ID"
