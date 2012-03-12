@@ -421,12 +421,13 @@ sub write_latex {
   }
   print OUT "\\vspace{4mm}\\noindent\\hrule\n";
   print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
+  print OUT "\n\n";
 
   for my $group (@{$self->{'groups'}}) {
     if($group->{'title'}) {
       print OUT "\\begin{center}\\hrule\\vspace{2mm}"
 	.$self->bf_or("\\Large","\\bf\\Large")." ".
-	  $self->format_text($group->{'title'})."\\vspace{1mm}\\hrule\\end{center}\n";
+	  $self->format_text($group->{'title'})."\\vspace{1mm}\\hrule\\end{center}\n\n";
     }
     print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n"
       if($self->{'options'}->{'columns'}>1);
@@ -456,6 +457,7 @@ sub write_latex {
     }
     print OUT "\\vspace{4mm}\\noindent\\hrule\n";
     print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
+    print OUT "\n\n";
 
     print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
     print OUT "\\AMCform\n";
