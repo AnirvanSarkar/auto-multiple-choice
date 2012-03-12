@@ -35,6 +35,7 @@ sub new {
     my $self  = $class->SUPER::new();
     $self->{'options_names'}=[qw/Title Presentation Code Lang Font
 				 AnswerSheetTitle AnswerSheetPresentation
+				 AnswerSheetColumns
 				 CompleteMulti SeparateAnswerSheet
 				 DefaultScoringM DefaultScoringS
 				 L-Question L-None L-Name L-Student
@@ -474,7 +475,11 @@ sub write_latex {
     print OUT "\n\n";
 
     print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
+    print OUT "\\begin{multicols}{".$self->{'options'}->{'answersheetcolumns'}."}\n"
+      if($self->{'options'}->{'answersheetcolumns'}>1);
     print OUT "\\AMCform\n";
+    print OUT "\\end{multicols}\n"
+      if($self->{'options'}->{'answersheetcolumns'}>1);
     print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
   }
 
