@@ -1680,7 +1680,7 @@ sub projet_liste_supprime {
 			  'destroy-with-parent',
 			  'warning','ok-cancel',
 			  sprintf(__("You asked to remove project <b>%s</b>.")." "
-				  .__("This will permanently erase all the files of this project, including the LaTeX source as well as all the files you put in the directory of this project, as the scans for example.")." "
+				  .__("This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example.")." "
 				  .__("Is this really what you want?"),$proj));
     my $reponse=$dialog->run;
     $dialog->destroy;
@@ -1962,7 +1962,7 @@ sub doc_maj {
 					   'destroy-with-parent',
 					   'error','ok',
 					   __("Errors while compiling LaTeX source.")." "
-					   .__("You have to correct LaTeX source and re-run documents update.")." "
+					   .__("You have to correct the source file and re-run documents update.")." "
 # TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
 					   .sprintf(__("See the LaTeX log in '%s' below."),
 # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
@@ -2112,7 +2112,7 @@ sub sujet_impressions {
 			      'destroy-with-parent',
 			      'error','ok',
 # TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
-			      __"You don't have any question to print: please check your LaTeX source and update working documents first.");
+			      __"You don't have any question to print: please check your source file and update working documents first.");
 	$dialog->run;
 	$dialog->destroy;
 
@@ -4188,7 +4188,7 @@ sub mep_warnings {
     my $m='';
     my @def=(keys %{$projet{'_mep_defauts'}});
     if(@def) {
-      $m=__("Some potential defects were detected for this subject. Correct them in the LaTeX source and update the working documents.");
+      $m=__("Some potential defects were detected for this subject. Correct them in the source and update the working documents.");
       for my $k (keys %defect_text) {
 	my $dd=$projet{'_mep_defauts'}->{$k};
 	if($dd) {
@@ -5283,7 +5283,7 @@ sub importe_source {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  __("LaTeX file has been copied to project directory.")." ".sprintf(__"You can now edit it with button \"%s\" or with any editor.",__"Edit LaTeX file"));
+		  __("The source file has been copied to project directory.")." ".sprintf(__"You can now edit it with button \"%s\" or with any editor.",__"Edit source file"));
 	$dialog->run;
 	$dialog->destroy;
     } else {
