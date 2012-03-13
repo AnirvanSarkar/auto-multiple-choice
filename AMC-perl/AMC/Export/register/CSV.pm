@@ -52,7 +52,7 @@ sub options_from_config {
 }
 
 sub options_default {
-  return('export_csv_separateur'=>",",
+  return('export_csv_separateur'=>";",
 	 'export_csv_ticked'=>'',
 	 'export_csv_columns'=>'student.copy,student.key,student.name',
 	);

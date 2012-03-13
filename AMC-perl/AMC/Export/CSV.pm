@@ -19,6 +19,7 @@
 
 package AMC::Export::CSV;
 
+use AMC::Basic;
 use AMC::Export;
 
 use Encode;
