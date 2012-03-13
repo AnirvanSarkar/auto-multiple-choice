@@ -362,7 +362,7 @@ sub export {
 			 family=>'table-cell',
 			 properties=>{
 			     -area => 'table-cell',
-			     'fo:background-color'=>"#f7ffbd",
+			     'fo:background-color'=>"#ffff99",
 			 },
 			 'references'=>{'style:data-style-name' => 'NombreVide'},
 			 );
@@ -795,6 +795,40 @@ sub export {
 	$doc->columnStyle($feuille,$code_col{$_},"col.X.$_");
       }
     }
+
+    ##########################################################################
+    # Legend table
+    ##########################################################################
+
+    my $legend=$doc->appendTable(encode('utf-8',__("Legend")),6,2);
+
+    $doc->cellSpan($legend,0,0,2);
+    $doc->cellStyle($legend,0,0,'Titre');
+    $doc->cellValue($legend,0,0,encode('utf-8',__("Legend")));
+
+    $jj=2;
+
+    $doc->cellStyle($legend,$jj,0,'NoteX');
+    $doc->cellValue($legend,$jj,1,__("Non applicable"));
+    $jj++;
+    $doc->cellStyle($legend,$jj,0,'NoteV');
+    $doc->cellValue($legend,$jj,1,__("No answer"));
+    $jj++;
+    $doc->cellStyle($legend,$jj,0,'NoteE');
+    $doc->cellValue($legend,$jj,1,__("Invalid answer"));
+    $jj++;
+    $doc->cellStyle($legend,$jj,0,'CodeV');
+    $doc->cellValue($legend,$jj,1,__("Indicative"));
+    $jj++;
+
+    $doc->createStyle("col.X.legend",
+		      family=>'table-column',
+		      properties=>{
+				   -area=>'table-column',
+				   'column-width' => "6cm",
+				  },
+		     );
+    $doc->columnStyle($legend,1,"col.X.legend");
 
     ##########################################################################
     # set meta-data and write to file
