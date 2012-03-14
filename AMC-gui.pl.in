@@ -721,7 +721,7 @@ my $gui=read_glade('main_window',
     state_layout state_src state_docs state_unrecognized state_marking state_assoc
     button_unrecognized button_show_missing
     edition_latex
-    onglet_notation onglet_saisie
+    onglet_notation onglet_saisie onglet_reports
     log_general commande avancement annulation button_mep_warnings
     liste_filename liste_path liste_edit liste_setfile liste_refresh
     doc_menu menu_debug
@@ -3514,6 +3514,8 @@ sub noter_resultat {
 				    map { $_=>decode($o{'encodage_latex'},$_) }
 				    (@codes));
   transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'assoc_code'=>1});
+
+  $w{'onglet_reports'}->set_sensitive(defined($avg));
 }
 
 sub assoc_state {
