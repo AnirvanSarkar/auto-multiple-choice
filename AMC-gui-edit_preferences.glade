@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.20"/>
+  <object class="GtkAdjustment" id="adjustment11">
+    <property name="lower">25</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="adjustment12">
     <property name="lower">1</property>
     <property name="upper">65535</property>
@@ -20,14 +26,13 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="adjustment11">
-    <property name="lower">25</property>
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkAdjustment" id="adjustment13">
     <property name="lower">0.40000000000000002</property>
+    <property name="upper">1</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment14">
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
@@ -76,6 +81,23 @@
     <property name="value">30</property>
     <property name="step_increment">10</property>
     <property name="page_increment">100</property>
+  </object>
+  <object class="GtkListStore" id="encodages_principaux">
+    <columns>
+      <!-- column-name item -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">UTF-8</col>
+      </row>
+      <row>
+        <col id="0">ISO-8859-15</col>
+      </row>
+      <row>
+        <col id="0">Windows-1252</col>
+      </row>
+    </data>
   </object>
   <object class="GtkWindow" id="edit_preferences">
     <property name="visible">True</property>
@@ -1071,6 +1093,7 @@
                           <object class="GtkTable" id="table26">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkLabel" id="label49">
@@ -1090,6 +1113,33 @@
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label11">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Black&amp;white conversion threshold</property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="pref_s_bw_threshold">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Threshold used when converting scans to black and white. Value 0.0 means all white, value 1.0 means all black.</property>
+                                <property name="invisible_char">●</property>
+                                <property name="adjustment">adjustment14</property>
+                                <property name="digits">2</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
                               </packing>
                             </child>
                           </object>
@@ -3182,23 +3232,6 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="encodages_principaux">
-    <columns>
-      <!-- column-name item -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">UTF-8</col>
-      </row>
-      <row>
-        <col id="0">ISO-8859-15</col>
-      </row>
-      <row>
-        <col id="0">Windows-1252</col>
-      </row>
-    </data>
   </object>
   <object class="GtkListStore" id="liststore1">
     <columns>

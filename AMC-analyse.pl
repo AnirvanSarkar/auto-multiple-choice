@@ -57,6 +57,7 @@ my $n_procs=0;
 my $project_dir='';
 my $tol_mark='';
 my $prop=0.8;
+my $bw_threshold=0.6;
 my $blur='1x1';
 my $threshold='60%';
 my $multiple='';
@@ -65,6 +66,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
 	   "tol-marque=s"=>\$tol_mark,
 	   "prop=s"=>\$prop,
+	   "bw-threshold=s"=>\$bw_threshold,
 	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
@@ -434,6 +436,7 @@ sub one_scan {
 	      '-y',$random_layout->{'height'},
 	      '-d',$random_layout->{'markdiameter'},
 	      '-p',$tol_mark_plus,'-m',$tol_mark_moins,
+	      '-t',$bw_threshold,
 	      '-o',($debug_image ? $debug_image : 1)
 	);
 

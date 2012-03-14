@@ -538,17 +538,19 @@ int main( int argc, char** argv )
   // -d d  : gives the diameter of the corner marks on the original subject
   // -p dp : gives the tolerance above mark diameter (fraction of the diameter)
   // -m dm : gives the tolerance below mark diameter
+  // -t th : gives the threshold to convert to black&white
   // -o file : gives output file name for detected layout report image
   // -v / -P : asks for marks detection debugging image report
 
   char c;
-  while ((c = getopt (argc, argv, "x:y:d:i:p:m:o:vP")) != -1) {
+  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:o:vP")) != -1) {
     switch (c) {
     case 'x': taille_orig_x=atof(optarg);break; 
     case 'y': taille_orig_y=atof(optarg);break; 
     case 'd': dia_orig=atof(optarg);break; 
     case 'p': tol_plus=atof(optarg);break;
     case 'm': tol_moins=atof(optarg);break;
+    case 't': threshold=atof(optarg);break;
     case 'o': out_image_file=strdup(optarg);break;
     case 'v': view=1;break;
     case 'P': post_process_image=1;view=2;break;
