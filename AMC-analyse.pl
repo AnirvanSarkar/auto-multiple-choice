@@ -64,6 +64,7 @@ my $multiple='';
 GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
 	   "tol-marque=s"=>\$tol_mark,
+	   "prop=s"=>\$prop,
 	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
