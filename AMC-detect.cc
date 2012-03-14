@@ -295,9 +295,12 @@ void calage(IplImage* src,IplImage* illustr,
   cvClearMemStorage(storage);
 }
 
+#define CLOSER(pointa,pointb,cn,dist,delta) dist=delta*(pointb.cn-pointa.cn);pointa.cn+=dist;pointb.cn-=dist;
+
 void deplace(int i,int j,double delta,point *coins) {
-  coins[i].x+=delta*(coins[j].x-coins[i].x);
-  coins[i].y+=delta*(coins[j].y-coins[i].y);
+  double d;
+  CLOSER(coins[i],coins[j],x,d,delta);
+  CLOSER(coins[i],coins[j],y,d,delta);
 }
 
 void restreint(int *x,int *y,int tx,int ty) {
@@ -394,8 +397,8 @@ void mesure_case(IplImage *src,IplImage *illustr,
 
   /* box reduction */
   delta=(1-prop)/2;
-  deplace(0,2,delta,coins);deplace(2,0,delta,coins);
-  deplace(1,3,delta,coins);deplace(3,1,delta,coins);
+  deplace(0,2,delta,coins);
+  deplace(1,3,delta,coins);
 
   /* output points used for mesuring */
   for(i=0;i<4;i++) {
