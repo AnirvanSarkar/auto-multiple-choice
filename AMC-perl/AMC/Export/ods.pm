@@ -604,7 +604,8 @@ sub export {
 
     $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
     $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
-    $doc->cellValue($feuille,$jj,$code_col{'total'},translate_id_name('max'));
+    $doc->cellValue($feuille,$jj,$code_col{'total'},
+		    encode('utf-8',translate_id_name('max')));
 
     $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
     $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
@@ -630,7 +631,8 @@ sub export {
 
     $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
     $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
-    $doc->cellValue($feuille,$jj,$code_col{'total'},translate_id_name('moyenne'));
+    $doc->cellValue($feuille,$jj,$code_col{'total'},
+		    encode('utf-8',translate_id_name('moyenne')));
     $code_row{'average'}=$jj;
 
     ##########################################################################
@@ -809,16 +811,16 @@ sub export {
     $jj=2;
 
     $doc->cellStyle($legend,$jj,0,'NoteX');
-    $doc->cellValue($legend,$jj,1,__("Non applicable"));
+    $doc->cellValue($legend,$jj,1,encode('utf-8',__("Non applicable")));
     $jj++;
     $doc->cellStyle($legend,$jj,0,'NoteV');
-    $doc->cellValue($legend,$jj,1,__("No answer"));
+    $doc->cellValue($legend,$jj,1,encode('utf-8',__("No answer")));
     $jj++;
     $doc->cellStyle($legend,$jj,0,'NoteE');
-    $doc->cellValue($legend,$jj,1,__("Invalid answer"));
+    $doc->cellValue($legend,$jj,1,encode('utf-8',__("Invalid answer")));
     $jj++;
     $doc->cellStyle($legend,$jj,0,'CodeV');
-    $doc->cellValue($legend,$jj,1,__("Indicative"));
+    $doc->cellValue($legend,$jj,1,encode('utf-8',__("Indicative")));
     $jj++;
 
     $doc->createStyle("col.X.legend",
