@@ -57,6 +57,7 @@ along with Auto-Multiple-Choice.  If not, see
 %
 %<*driver>
 \documentclass{ltxdoc}
+\usepackage[utf8]{inputenc}
 \usepackage[nopage,calibration]{automultiplechoice}
 \usepackage{verbatim}
 \usepackage{fp}
@@ -69,6 +70,14 @@ along with Auto-Multiple-Choice.  If not, see
 \CodelineIndex
 \RecordChanges
 \begin{document}
+% UTF8 unkonwn characters are replaced by diamonds
+\makeatletter\def\UTFviii@defined#1{%
+  \ifx#1\relax%
+      \(\diamond\)%
+  \else\expandafter
+    #1%
+  \fi
+}\makeatother
 \DocInput{automultiplechoice.dtx}
 \end{document}
 %</driver>
@@ -1213,7 +1222,23 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@none{Ninguna de estas preguntas son correctas.}
 }
 %    \end{macrocode}
+% 
+% \subsubsection{Japanese}
 %
+% Japanese localisation is called with option |lang=JA|. It includes UTF8 encoded
+% Japanese characters which are shown as $\diamond$ here (look at the |.sty| file to see them).
+%    \begin{macrocode}
+\def\AMC@loc@JA{
+  \def\AMC@loc@draft{ドラフト}
+  \def\AMC@loc@message{試験の実施には、auto-mutiple-choiceでコンパイルされた文書を印刷してください。}
+  \def\AMC@loc@qf##1{\textbf{問##1:}}
+  \def\AMC@loc@q##1##2{\textbf{問##1} ##2}
+  \def\AMC@loc@corrected{模範解答}
+  \def\AMC@loc@catalog{問題カタログ}
+  \def\AMC@loc@none{該当なし。}
+}
+%    \end{macrocode}
+% 
 % \subsubsection{Other languages}
 %
 % Other languages can be integrated to \textsf{automultiplechoice}
