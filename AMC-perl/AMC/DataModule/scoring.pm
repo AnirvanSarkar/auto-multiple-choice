@@ -447,12 +447,14 @@ sub define_statements {
 		     ." FROM ".$self->table("code")
 		     ." WHERE code=? GROUP BY value"},
 
-     'avgMark'=>{'sql'=>"SELECT AVG(mark) FROM ".$self->table("mark")},
+     'avgMark'=>{'sql'=>"SELECT AVG(mark) FROM ".$self->table("mark")
+		 ." WHERE NOT (student=? AND copy=?)"},
      'avgQuest'=>{'sql'=>"SELECT CASE"
 		  ." WHEN SUM(max)>0 THEN 100*SUM(score)/SUM(max)"
 		  ." ELSE '-' END"
 		  ." FROM ".$self->table("score")
-		  ." WHERE question=?"},
+		  ." WHERE question=?"
+		  ." AND NOT (student=? AND copy=?)"},
      'studentAnswersBase'=>
      {'sql'=>"SELECT question,answer"
       .",correct,strategy"
@@ -754,7 +756,8 @@ sub questions {
 
 sub average_mark {
   my ($self)=@_;
-  return($self->sql_single($self->statement('avgMark')));
+  my @pc=$self->postcorrect_sc;
+  return($self->sql_single($self->statement('avgMark'),@pc));
 }
 
 # codes returns a list of codes names.
@@ -808,13 +811,24 @@ sub student_code {
 			   $student,$copy,$code));
 }
 
+# postcorrect_sc returns (postcorrect_student,postcorrect_copy), or
+# (0,0) if not in postcorrect mode.
+
+sub postcorrect_sc {
+  my ($self)=@_;
+  return($self->variable('postcorrect_student') || 0,
+	 $self->variable('postcorrect_copy') || 0);
+}
+
 # question_average($question) returns the average (as a percentage of
 # the maximum score, from 0 to 100) of the scores for a particular
 # question.
 
 sub question_average {
   my ($self,$question)=@_;
-  return($self->sql_single($self->statement('avgQuest'),$question));
+  my @pc=$self->postcorrect_sc;
+  return($self->sql_single($self->statement('avgQuest'),$question,
+			   @pc));
 }
 
 # student_global($student,$copy) returns a pointer to a hash
