@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2009-2011 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -29,7 +29,8 @@ use Gtk2 -init;
 use constant {
     TAB_ID => 0,
     TAB_NOTE => 1,
-    TAB_DETAIL => 2,
+    TAB_COLOR => 2,
+    TAB_DETAIL => 3,
 };
 
 sub ajoute_colonne {
@@ -38,7 +39,8 @@ sub ajoute_colonne {
     my $column = Gtk2::TreeViewColumn->new_with_attributes(
 	$titre,
 	$renderer,
-	text=> $i);
+	text=> $i,
+	'background'=>TAB_COLOR );
     $column->set_sort_column_id($i);
     $tree->append_column($column);
     $store->set_sort_func($i,\&sort_num,$i);
@@ -83,12 +85,17 @@ sub new {
 
     $self->{'scoring'}->begin_read_transaction;
 
+    for (qw/student copy/) {
+      $self->{'postcorrect_'.$_}=
+	$self->{'scoring'}->variable('postcorrect_'.$_);
+    }
+
     my @codes=$self->{'scoring'}->codes;
     my @questions=sort { $a->{'title'} cmp $b->{'title'} }
       grep { $_->{'title'} !~ /\.[0-9]+$/ }
       ($self->{'scoring'}->questions);
 
-    my $store = Gtk2::ListStore->new ( map {'Glib::String' } (1..(2+1+$#codes+1+$#questions)) ); 
+    my $store = Gtk2::ListStore->new ( map {'Glib::String' } (1..(3+1+$#codes+1+$#questions)) );
 
     $self->{'tableau'}->set_model($store);
 
@@ -109,6 +116,9 @@ sub new {
       $store->set($it,
 		  TAB_ID,studentids_string(@sc),
 		  TAB_NOTE,formatte($m->{'mark'}),
+		  TAB_COLOR,($sc[0]==$self->{'postcorrect_student'} &&
+			     $sc[1]==$self->{'postcorrect_copy'}
+			     ? '#CAEC87' : undef)
 		  );
 
       $i=TAB_DETAIL ;
