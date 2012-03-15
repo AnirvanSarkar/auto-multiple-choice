@@ -65,6 +65,17 @@ list:
 
 merge: $(addsuffix .merge,$(LANGS)) ;
 
+%.local: FORCE
+	test -d $(LOCALEDIR)/$*/LC_MESSAGES || sudo mkdir -p $(LOCALEDIR)/$*/LC_MESSAGES
+	sudo ln -s $(LOCALDIR)/I18N/lang/$*.mo $(LOCALEDIR)/$*/LC_MESSAGES/auto-multiple-choice.mo
+
+local: $(foreach l,$(LANGS),$(l).local) ;
+
+%.global: FORCE
+	-sudo rm $(LOCALEDIR)/$*/LC_MESSAGES/auto-multiple-choice.mo
+
+global: $(foreach l,$(LANGS),$(l).global) ;
+
 ###############################################################
 
 FORCE: ;
