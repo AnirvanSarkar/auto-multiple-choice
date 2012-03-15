@@ -96,12 +96,16 @@ sub pre_process {
     my $lk=$self->{'_assoc'}->variable('key_in_list');
     my %keys=();
     my @marks=();
+    my @post_correct=$self->{'_scoring'}->postcorrect_sc;
 
     # Get all students from the marks table
 
     my $sth=$self->{'_scoring'}->statement('marks');
     $sth->execute;
-    while(my $m=$sth->fetchrow_hashref) {
+  STUDENT: while(my $m=$sth->fetchrow_hashref) {
+      next STUDENT if($m->{student}==$post_correct[0] &&
+		      $m->{'copy'}==$post_correct[1]);
+
       $m->{'abs'}=0;
       $m->{'student.copy'}=studentids_string($m->{'student'},$m->{'copy'});
 
