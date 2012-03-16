@@ -28,6 +28,7 @@ use AMC::Gui::Avancement;
 use AMC::NamesFile;
 use AMC::Data;
 use AMC::DataModule::report ':const';
+use AMC::Export;
 
 use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
@@ -53,6 +54,7 @@ my $single_output='';
 my $id_file='';
 my $compose='';
 my $rename='';
+my $sort='l';
 
 my $moteur_latex='pdflatex';
 my $tex_src='';
@@ -84,6 +86,7 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "id-file=s"=>\$id_file,
 	   "single-output=s"=>\$single_output,
 	   "debug=s"=>\$debug,
+	   "sort=s"=>\$sort,
 	   );
 
 set_debug($debug);
@@ -233,10 +236,22 @@ else {
   if($rename && $single_output) {
     @students=([0,0]);
   } else {
-    $capture->begin_read_transaction;
-    @students=@{$capture->dbh
-		  ->selectall_arrayref($capture->statement('studentCopies'))};
-    $capture->end_transaction;
+    if($single_output) {
+      # one single output file: students must be in the right order
+      my $ex=AMC::Export->new();
+      $ex->set_options('fich','datadir'=>$data_dir,'noms'=>$fich_noms);
+      $ex->set_options('noms','encodage'=>$noms_encodage,'useall'=>0);
+      $ex->set_options('sort','keys'=>$sort);
+      $ex->pre_process();
+      @students=map { [ $_->{'student'},$_->{'copy'} ] }
+	(@{$ex->{'marks'}});
+    } else {
+      # one output file per student: order is not important.
+      $capture->begin_read_transaction;
+      @students=@{$capture->dbh
+		    ->selectall_arrayref($capture->statement('studentCopies'))};
+      $capture->end_transaction;
+    }
   }
 }
 

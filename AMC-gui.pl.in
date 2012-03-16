@@ -1086,6 +1086,12 @@ sub maj_export {
 
     valide_options_for_domain('export','',@_);
 
+    if($projet{'options'}->{'_modifie'} =~ /\bexport_sort\b/) {
+      $projet{'_report'}->begin_transaction('SMch');
+      $projet{'_report'}->variable('grouped_uptodate',-3);
+      $projet{'_report'}->end_transaction('SMch');
+    }
+
     debug "Format : ".$projet{'options'}->{'format_export'};
 
     for(@export_modules) {
@@ -3619,6 +3625,8 @@ sub regroupement_go {
 
   # Looks if a rename is sufficient, or if one has to group again JPEG files:
 
+  maj_export();
+
   my $group=$from_annotate;
   if(!$group) {
     $projet{'_report'}->begin_read_transaction('RgFO');
@@ -3652,6 +3660,7 @@ sub regroupement_go {
 			  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			  "--noms-encodage",bon_encodage('liste'),
 			  "--single-output",$single_output,
+			  "--sort",$projet{'options'}->{'export_sort'},
 			 ],
 	     'signal'=>2,
 	     'texte'=>__"Grouping students annotated pages together...",
