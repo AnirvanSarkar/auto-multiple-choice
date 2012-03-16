@@ -5519,10 +5519,18 @@ sub bug_report {
 			  __("In order to send a useful bug report, please attach the following documents:")."\n"
 			  ."- ".__("an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the <b>project directory</b>, <b>scan files</b> and <b>configuration directory</b> (.AMC.d in home directory), so as to reproduce and analyse this problem.")."\n"
 			  ."- ".__("the <b>log file</b> produced when the debugging mode (in Help menu) is checked. Please try to reproduce the bug with this mode activated.")."\n\n"
-			  .sprintf(__("Bug reports can be filled at %s or sent to %s"),
-				   "<tt>http://project.auto-multiple-choice.net/projects/auto-multiple-choice/issues</tt>",
-				   '<tt>paamc@passoire.fr</tt>')
+			  .sprintf(__("Bug reports can be filled at %s or sent to the address below."),
+				   "<i>".__("AMC community site")."</i>",
+				   )
 	);
+    my $ma=$dialog->get_message_area;
+    my $web=Gtk2::LinkButton->new_with_label("http://project.auto-multiple-choice.net/projects/auto-multiple-choice/issues",__("AMC community site"));
+    $ma->add($web);
+    my $mail=Gtk2::LinkButton->new_with_label('mailto:paamc@passoire.fr',
+					      'paamc@passoire.fr');
+    $ma->add($mail);
+    $ma->show_all();
+
     $dialog->run;
     $dialog->destroy;
 }
