@@ -186,31 +186,5 @@ sub export {
     debug "WARNING: Base class export to $fichier\n";
 }
 
-sub name {
-  return('BASE');
-}
-
-sub options_from_config {
-  my ($self,$options_project,$options_main,$options_default)=@_;
-  return();
-}
-
-sub options_default {
-  return();
-}
-
-sub needs_module {
-  return();
-}
-
-sub build_config_gui {
-  my ($self,$w,$cb)=@_;
-  return();
-}
-
-sub weight {
-  return(1);
-}
-
 1;
 
