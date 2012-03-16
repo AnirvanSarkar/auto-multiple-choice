@@ -3186,9 +3186,9 @@ sub filter_changed {
 sub valide_options_notation {
     valide_options_for_domain('notation','',@_);
     if($projet{'options'}->{'_modifie'} =~ /\bregroupement_compose\b/) {
-      $projet{'_capture'}->begin_transaction('RCch');
-      $projet{'_capture'}->variable('annotated_uptodate',-3);
-      $projet{'_capture'}->end_transaction('RCch');
+      $projet{'_report'}->begin_transaction('RCch');
+      $projet{'_report'}->variable('grouped_uptodate',-3);
+      $projet{'_report'}->end_transaction('RCch');
     }
     $w{'groupe_model'}->set_sensitive($projet{'options'}->{'regroupement_type'} eq 'STUDENTS');
 }
@@ -3628,6 +3628,8 @@ sub regroupement_go {
     $group=1 if(!$group && !$projet{'_report'}->all_there($type,absolu('%PROJET/')));
     $group=1 if(!$group &&
 		$projet{'_report'}->variable('last_group_type') != $type);
+    $group=1 if(!$group &&
+		$projet{'_report'}->variable('grouped_uptodate')<=0);
     $projet{'_report'}->end_transaction('RgFO');
   }
 

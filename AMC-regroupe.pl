@@ -549,6 +549,9 @@ if($single_output) {
   $data->end_transaction('rSST');
 }
 
-$report->variable_transaction('last_group_type',$type);
+$report->begin_transaction('Ereg');
+$report->variable('last_group_type',$type);
+$report->variable('grouped_uptodate',1);
+$report->end_transaction('Ereg');
 
 $avance->fin();
