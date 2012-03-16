@@ -25,6 +25,12 @@ use AMC::NamesFile;
 
 use_gettext;
 
+my %sorting=('l'=>['n:student.line'],
+	     'm'=>['n:mark','s:student.name','n:student.line'],
+	     'i'=>['n:student','n:copy','n:student.line'],
+	     'n'=>['s:student.name','n:student.line'],
+	    );
+
 sub new {
     my $class = shift;
     my $self  = {
@@ -88,6 +94,9 @@ sub load {
 
 sub pre_process {
     my ($self)=@_;
+
+    $self->{'sort.keys'}=$sorting{lc($1)}
+      if($self->{'sort.keys'} =~ /^\s*([lmin])/i);
 
     $self->load();
 

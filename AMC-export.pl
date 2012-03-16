@@ -63,14 +63,8 @@ debug "Parameters: ".join(" ",map { "<$_>" } @ARGV_ORIG);
 load("AMC::Export::$module");
 $ex = "AMC::Export::$module"->new();
 
-my %sorting=('l'=>['n:student.line'],
-	     'm'=>['n:mark','s:student.name'],
-	     'i'=>['n:student','n:copy','n:student.line'],
-	     'n'=>['s:student.name','n:student.line'],
-    );
-
 $ex->set_options("sort",
-		 "keys"=>$sorting{lc($1)}) if($sort =~ /^\s*([lmin])/i);
+		 "keys"=>$sort);
 
 $ex->set_options("fich",
 		 "datadir"=>$data_dir,
