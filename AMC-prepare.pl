@@ -264,7 +264,7 @@ sub execute {
 	      $e .= "..." if($e !~ /\.$/);
 	      push @latex_errors,$e;
 	    }
-	    print $_ if(/^.+$/);
+	    print STDERR $_ if(/^.+$/);
 	}
 	close(EXEC);
 	$cmd_pid='';
@@ -469,7 +469,7 @@ if($mode =~ /b/) {
     my $capture=$data->module('capture');
 
     $scoring->begin_transaction('ScEx');
-    $capture->variable('annotated_uptodate',-6);
+    $capture->variable('annotate_source_change',time());
     $scoring->clear_strategy;
 
     execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)],

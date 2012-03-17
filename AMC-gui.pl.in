@@ -3584,11 +3584,16 @@ sub annote_copies {
 				  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 				  "--noms-encodage",bon_encodage('liste'),
 				  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
+				  "--changes-only",
 				 )
 		       ],
 	   'texte'=>__"Annotating papers...",
 	   'progres.id'=>'annote',
-	   'fin'=>sub { regroupement_go(1) if($and_regroupe); },
+	   'fin'=>sub {
+	     my $c=shift;
+	     my $n=$c->variable('n_processed');
+	     regroupement_go($n>0) if($and_regroupe);
+	   },
 	  );
 }
 
@@ -3596,18 +3601,7 @@ sub annotate_papers {
 
   valide_options_notation();
 
-  $projet{'_capture'}->begin_read_transaction('AnAT');
-  my $jpeg_ok=$projet{'_capture'}->variable('annotated_uptodate')>0
-    && $projet{'_capture'}->annotated_all_there(absolu($projet{'options'}->{'cr'})."/corrections/jpg");
-  $projet{'_capture'}->end_transaction('AnAT');
-
-  if($jpeg_ok) {
-    debug "Annotated JPEG OK";
-    regroupement_go(0);
-  } else {
-    annote_copies(1);
-  }
-
+  annote_copies(1);
 }
 
 sub regroupement_go {
@@ -3666,6 +3660,7 @@ sub regroupement_go {
 		       )
 	     ],
 	     'signal'=>2,
+	     'clear'=>'',
 	     'texte'=>__"Grouping students annotated pages together...",
 	     'progres.id'=>'regroupe',
 	    );
@@ -3687,6 +3682,7 @@ sub regroupement_go {
 		       )
 	     ],
 	     'signal'=>2,
+	     'clear'=>'',
 	     'texte'=>__"Renaming annotated files with new model...",
 	     'progres.id'=>'regroupe',
 	    );
@@ -4011,7 +4007,7 @@ sub accepte_preferences {
 
     if($changed) {
       $projet{'_capture'}->begin_transaction('APch');
-      $projet{'_capture'}->variable('annotated_uptodate',-3);
+      $projet{'_capture'}->variable('annotate_source_change',time());
       $projet{'_capture'}->end_transaction('APch');
     }
 

@@ -128,7 +128,7 @@ my $delta=(@pages ? 1/(1+$#pages) : 0);
 
 $layout->begin_transaction;
 $layout->clear_all;
-$capture->variable('annotated_uptodate',-10);
+$capture->variable('annotate_source_change',time());
 
 for my $p (@pages) {
 

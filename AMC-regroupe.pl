@@ -135,7 +135,8 @@ sub check_correc {
     if(!$correc_indiv_ok) {
 	$correc_indiv_ok=1;
 
-	debug "Making individual corrected sheet...";
+	debug "Building individual corrected sheet...";
+	print "Building individual corrected sheet...\n";
 
 	$commandes->execute("auto-multiple-choice","prepare",
 			    "--n-copies",$nombre_copies,
@@ -396,6 +397,7 @@ sub process_output {
 
 if($rename) {
   # In mode rename, move all old files to temp dir
+  print "* Rename already built PDF files...\n";
   $data->begin_transaction('grMV');
   $pdfdir=$projet_dir.'/'.$report->get_dir($type);
   for my $e (@students) {
@@ -408,6 +410,7 @@ if($rename) {
   $data->end_transaction('grMV');
 } else {
   # Else, free database with file names
+  print "* Group annotated pages...\n";
   $data->begin_transaction('rDELS');
   $report->delete_student_type($type);
   $pdfdir=$projet_dir.'/'.$report->get_dir($type);

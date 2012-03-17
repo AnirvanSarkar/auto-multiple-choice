@@ -728,7 +728,7 @@ sub one_scan {
   ##########################################
 
   $capture->begin_transaction('CRSL');
-  $capture->variable('annotated_uptodate',-9);
+  $capture->variable('annotate_source_change',time());
 
   $capture->set_page_auto($sf,@spc,time(),
 			  $ld->{'transf'}->params);

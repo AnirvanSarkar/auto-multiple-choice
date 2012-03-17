@@ -124,7 +124,7 @@ $avance->progres(0.05);
 
 $data->begin_transaction;
 
-$capture->variable('annotated_uptodate',-5);
+$capture->variable('annotate_source_change',time());
 $scoring->clear_score;
 $scoring->variable('darkness_threshold',$seuil);
 $scoring->variable('mark_floor',$note_plancher);

@@ -39,6 +39,7 @@ sub new {
 	'finw'=>'',
 	'signal'=>9,
 	'o'=>{},
+	'clear'=>1,
 
 	'erreurs'=>[],
 	'variables'=>{},
@@ -111,7 +112,7 @@ sub open {
 
 	$self->{'avance'}=AMC::Gui::Avancement::new(0);
 
-	$self->{'log'}->get_buffer()->set_text('');
+	$self->{'log'}->get_buffer()->set_text('') if($self->{'clear'});
 
     } else {
 	print STDERR "ERROR execing command\n".join(' ',@{$self->{'commande'}})."\n";

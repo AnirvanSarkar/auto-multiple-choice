@@ -498,6 +498,12 @@ sub define_statements {
      'setAnnotated'=>{'sql'=>"UPDATE $t_page"
 		      ." SET annotated=?, timestamp_annotate=?"
 		      ." WHERE student=? AND page=? AND copy=?"},
+     'setAnnotatedPageOutdated'=>{'sql'=>"UPDATE $t_page"
+				  ." SET timestamp_annotate=0"
+				  ." WHERE student=? AND page=? AND copy=?"},
+     'setAnnotatedCopyOutdated'=>{'sql'=>"UPDATE $t_page"
+				  ." SET timestamp_annotate=0"
+				  ." WHERE student=? AND copy=?"},
      'setLayout'=>{'sql'=>"UPDATE $t_page"
 		   ." SET layout_image=?"
 		   ." WHERE student=? AND page=? AND copy=?"},
@@ -903,6 +909,26 @@ sub set_annotated {
   $timestamp=time() if(!$timestamp);
   $self->statement('setAnnotated')
     ->execute($file,$timestamp,$student,$page,$copy);
+}
+
+# outdate_annotated_page($student,$page,$copy) sets the corresponding
+# annotated page as outdated (can be used for example if ticked data
+# has changed for this page).
+
+sub outdate_annotated_page {
+  my ($self,$student,$page,$copy)=@_;
+  $self->statement('setAnnotatedPageOutdated')
+    ->execute($student,$page,$copy);
+}
+
+# outdate_annotated_copy($student,$copy) sets the corresponding
+# annotated copy as outdated (can be used for example if ticked data
+# has changed for this page).
+
+sub outdate_annotated_copy {
+  my ($self,$student,$copy)=@_;
+  $self->statement('setAnnotatedCopyOutdated')
+    ->execute($student,$copy);
 }
 
 # annotated_all_there($directory) returns TRUE if all pages with a

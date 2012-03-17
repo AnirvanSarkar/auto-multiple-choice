@@ -69,6 +69,8 @@ my $test_font_size=100;
 my $fich_noms='';
 my $noms_encodage='utf-8';
 
+my $changes_only=1;
+
 # cle : "a_cocher-cochee"
 my %symboles=(
     '0-0'=>{qw/type none/},
@@ -102,6 +104,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "font=s"=>\$font_name,
 	   "rtl!"=>\$rtl,
+	   "changes-only!"=>\$changes_only,
 	   );
 
 set_debug($debug);
@@ -205,6 +208,8 @@ my $delta=1;
 
 $capture->begin_read_transaction('PAGE');
 
+my $annotate_source_change=$capture->variable('annotate_source_change');
+
 my @pages=@{$capture->dbh
 	      ->selectall_arrayref($capture->statement('pages'),
 				   {Slice => {}})};
@@ -212,9 +217,21 @@ my @pages=@{$capture->dbh
 $capture->end_transaction('PAGE');
 
 $delta=1/(1+$#pages) if($#pages>=0);
+$n_processed_pages=0;
+
+print "* Annotation\n";
 
  PAGE: for my $p (@pages) {
   my @spc=map { $p->{$_} } (qw/student page copy/);
+
+  if($changes_only && $p->{'timestamp_annotate'}>$annotate_source_change) {
+    my $f=$p->{'annotated'};
+    if(-f "$cr_dir/corrections/jpg/$f") {
+      print "Skipping page ".pageids_string(@spc). " (up to date)\n";
+      debug "Skipping page ".pageids_string(@spc). " (up to date)";
+      next PAGE;
+    }
+  }
 
   debug "Analyzing ".pageids_string(@spc);
 
@@ -461,8 +478,10 @@ $delta=1/(1+$#pages) if($#pages>=0);
     $capture->set_annotated(@spc,$out_file);
     $capture->end_transaction('ANNf');
 
+    $n_processed_pages++;
+
   } else {
-    print "*** no scan $scan_f ***\n";
+    print "No scan for page ".pageids_string(@spc).":$scan_f\n";
     debug "No scan: $scan_f";
   }
 
@@ -472,8 +491,10 @@ $delta=1/(1+$#pages) if($#pages>=0);
 # stores state parameter to know all sheets have been annotated
 
 $capture->begin_transaction('Aend');
-$capture->variable('annotated_uptodate',1);
+$capture->variable('annotate_source_change',0);
 $capture->end_transaction('Aend');
+
+print "VAR: n_processed=$n_processed_pages\n";
 
 $avance->fin();
 

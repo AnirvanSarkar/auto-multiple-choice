@@ -426,7 +426,7 @@ sub apply {
     # save modifications to manual analysis data
 
     $self->{'_capture'}->begin_transaction;
-    $self->{'_capture'}->variable('annotated_uptodate',-7);
+    $self->{'_capture'}->outdate_annotated_page(@{$self->{'page_id'}});
 
     debug "Saving manual data for ".pageids_string(@{$self->{'page_id'}});
 
