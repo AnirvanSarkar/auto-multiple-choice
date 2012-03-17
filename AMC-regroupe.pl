@@ -34,6 +34,8 @@ use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 
+@ARGV=unpack_args(@ARGV);
+
 my $debug='';
 
 my $commandes=AMC::Exec::new('AMC-regroupe');
