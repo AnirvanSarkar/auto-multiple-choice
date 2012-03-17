@@ -36,6 +36,7 @@ my $rep_projet='';
 my $rep_projets='';
 my $fichnotes='';
 my $fich_bareme='';
+my $id_file='';
 
 my $seuil=0.1;
 
@@ -85,6 +86,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "projet=s",\$rep_projet,
 	   "projets=s",\$rep_projets,
 	   "data=s"=>\$data_dir,
+	   "id-file=s"=>\$id_file,
 	   "debug=s"=>\$debug,
 	   "taille-max=s"=>\$taille_max,
 	   "qualite=s"=>\$qualite_jpg,
@@ -219,10 +221,32 @@ $capture->end_transaction('PAGE');
 $delta=1/(1+$#pages) if($#pages>=0);
 $n_processed_pages=0;
 
+my %ok_students=();
+
+# a) first case: these numbers are given by --id-file option
+
+if($id_file) {
+
+  open(NUMS,$id_file);
+  while(<NUMS>) {
+    chomp;
+    if(/^[0-9]+(:[0-9]+)?$/) {
+      $ok_students{$_}=1;
+    }
+  }
+  close(NUMS);
+
+}
+
+
 print "* Annotation\n";
 
  PAGE: for my $p (@pages) {
   my @spc=map { $p->{$_} } (qw/student page copy/);
+
+  if($id_file && !$ok_students{studentids_string($spc[0],$spc[2])}) {
+    next PAGE;
+  }
 
   if($changes_only && $p->{'timestamp_annotate'}>$annotate_source_change) {
     my $f=$p->{'annotated'};

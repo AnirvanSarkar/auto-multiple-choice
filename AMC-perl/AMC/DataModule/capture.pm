@@ -669,6 +669,14 @@ sub students {
   return($self->sql_list($self->statement('students')));
 }
 
+# student_copies returns a list of [student,copy] for which a data
+# capture is declared.
+
+sub student_copies {
+  my ($self)=@_;
+  return(@{$self->dbh->selectall_arrayref($self->statement('studentCopies'))});
+}
+
 # students_transaction calls students inside a SQLite transaction.
 
 sub students_transaction {

@@ -387,6 +387,7 @@ sub process_output {
 	debug "Move $stk_pages[0] to $file";
 	move($stk_pages[0],$file);
     } elsif($#stk_pages>0) {
+      debug "Join with gs to $file";
 	$commandes->execute("gs","-dBATCH","-dNOPAUSE","-q",
 			    "-sDEVICE=pdfwrite",
 			    "-sOutputFile=$file",@stk_pages);
@@ -549,6 +550,7 @@ for my $e (@students) {
     }
 
     if (!$single_output) {
+      print "  -> $f\n";
       process_output($f);
     }
 
