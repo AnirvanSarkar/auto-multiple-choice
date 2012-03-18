@@ -3164,6 +3164,8 @@ sub filter_changed {
 
   debug "Filter changed -> ".$oo{'filter'};
 
+  # working document already built: ask for confirmation
+
   if(-f absolu($projet{'options'}->{'docs'}->[0])) {
     debug "Ask for confirmation";
     my $text;
@@ -3190,9 +3192,20 @@ sub filter_changed {
     }
 
     clear_processing('doc:');
+
   }
 
   valide_options_preparation(@args);
+
+  # No source created: change source filename
+
+  if(!-f absolu($projet{'options'}->{'texsrc'})) {
+    $projet{'options'}->{'texsrc'}='%PROJET/'.
+      ("AMC::Filter::register::".$projet{'options'}->{'filter'})
+	->default_filename();
+    $w{'state_src'}->set_text(absolu($projet{'options'}->{'texsrc'}));
+  }
+
 }
 
 sub valide_options_notation {
@@ -4775,17 +4788,6 @@ sub valide_source_tex {
 
     $w{'state_src'}->set_text(absolu($projet{'options'}->{'texsrc'}));
 
-    my $ok=-f absolu($projet{'options'}->{'texsrc'});
-    for (qw/docs layout/) {
-      $w{'prepare_'.$_}->set_sensitive($ok);
-    }
-
-    if(is_local($projet{'options'}->{'texsrc'})) {
-	$w{'edition_latex'}->show();
-    } else {
-	$w{'edition_latex'}->hide();
-    }
-
     if(!$projet{'options'}->{'filter'}) {
       $projet{'options'}->{'filter'}=
 	best_filter_for_file(absolu($projet{'options'}->{'texsrc'}));
@@ -5308,23 +5310,15 @@ sub source_latex_choisir {
 
     } elsif($bouton{'vide'}) {
 
-	my $hd=$o{'rep_projets'}."/".$oo{'nom'};
+      my $hd=$o{'rep_projets'}."/".$oo{'nom'};
 
-	mkdir($hd) if(! -e $hd);
+      mkdir($hd) if(! -e $hd);
 
-	$texsrc='source.tex';
-	my $sl="$hd/$texsrc";
-
-	# creation fichier vide
-
-	if(! open(FV,">$sl")) {
-	    debug "Error opening $sl : $!";
-	    return(0,'');
-	}
-	close(FV);
+      $texsrc='source.tex';
+      my $sl="$hd/$texsrc";
 
     } else {
-	return(0,'');
+      return(0,'');
     }
 
     return(1,$texsrc);
@@ -5419,6 +5413,17 @@ sub importe_source {
 
 sub edit_src {
     my $f=absolu($projet{'options'}->{'texsrc'});
+
+    # create new one if necessary
+
+    if(!-f $f) {
+      debug "Creating new empty source file...";
+      ("AMC::Filter::register::".$projet{'options'}->{'filter'})
+	->default_content($f);
+    }
+
+    #
+
     debug "Editing $f...";
     my $editor=$o{'txt_editor'};
     if($projet{'options'}->{'filter'}) {

@@ -35,6 +35,18 @@ sub name {
   return("AMC-TXT");
 }
 
+sub default_filename {
+  return("source.txt");
+}
+
+sub default_content {
+  my ($self,$file)=@_;
+  open(EMPTY,">",$file);
+  print EMPTY "# AMC-TXT file\n";
+  print EMPTY "Title:\nPresentation:\n";
+  close(EMPTY);
+}
+
 sub description {
   return(__"This is a plain text format for easy question writting. See the following minimal example:\n\nTitle: Paper title\n\n* Which is the capital city of Cameroon?\n+ Yaounde\n- Douala\n- Kribi");
 }
@@ -63,7 +75,7 @@ sub filetype {
 sub claim {
   my ($self,$file)=@_;
   my $h=$self->file_head($file,256);
-  return(.9) if($h =~ /^\s*\#\s*AMC-TXT/);
+  return(.9) if($h && $h =~ /^\s*\#\s*AMC-TXT/);
   return(.3) if($file =~ /\.txt$/i);
   return(0.0);
 }

@@ -37,6 +37,19 @@ sub name {
   return("LaTeX");
 }
 
+sub default_filename {
+  return("source.tex");
+}
+
+sub default_content {
+  my ($self,$file)=@_;
+  open(EMPTY,">",$file);
+  print EMPTY "\\documentclass{article}\n";
+  print EMPTY "\\usepackage{automultiplechoice}\n";
+  print EMPTY "\\begin{document}\n\n\\end{document}\n";
+  close(EMPTY);
+}
+
 sub description {
   return(__"This is the native format for AMC. LaTeX is not so easy to use for unexperienced users, but the LaTeX power allows the user to build any multiple choice subject. As an example, the following is possible with LaTeX but not with other formats:\n* any kind of layout,\n* questions with random numerical values,\n* use of figures, mathematical formulas\n* and much more!");
 }
@@ -56,8 +69,9 @@ sub filetype {
 sub claim {
   my ($self,$file)=@_;
   my $h=$self->file_head($file,256);
-  return(.6) if($h =~ /\\usepackage.*\{automultiplechoice\}/
-	       || $h =~ /\\documentclass\{/);
+  return(.8) if($h && ($h =~ /\\usepackage.*\{automultiplechoice\}/
+		       || $h =~ /\\documentclass\{/));
+  return(.6) if($self->file_mimetype($file) eq 'text/x-tex');
   return(.5) if($file =~ /\.tex$/i);
   return(0.0);
 }

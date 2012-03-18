@@ -19,6 +19,9 @@
 
 package AMC::Filter::register;
 
+use Module::Load;
+use Module::Load::Conditional qw/check_install/;
+
 use AMC::Basic;
 
 use_gettext;
@@ -38,6 +41,16 @@ sub new {
 # short name of the file format
 sub name {
   return("empty");
+}
+
+# default filename when creating a new one inside project directory
+sub default_filename {
+  return("source");
+}
+
+# create new empty file
+sub default_content {
+  my ($self,$file)=@_;
 }
 
 # weight in the list of all available formats. 0 is at the top, 1 is
@@ -168,13 +181,23 @@ sub file_head {
   my ($self,$file,$size)=@_;
   my $h;
   my $n;
-  open(my $fh,"<",$file);
-  $n=read $fh,$h,$size;
+  return if(!-f $file);
+  if(open(my $fh,"<",$file)) {
+    $n=read $fh,$h,$size;
+  }
   if(!defined($n)) {
     debug_and_stderr("Error reading from $file: $!");
   }
   close($fh);
   return($h);
+}
+
+sub file_mimetype {
+  my ($self,$file)=@_;
+  if(check_install(module=>"File::MimeInfo::Magic")) {
+    load("File::MimeInfo::Magic");
+    return("File::MimeInfo::Magic"->mimetype($file));
+  }
 }
 
 1;
