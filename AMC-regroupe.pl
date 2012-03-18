@@ -584,9 +584,11 @@ if($single_output) {
   } else {
     process_output($pdfdir.'/'.$single_output);
   }
-  $data->begin_transaction('rSST');
-  $report->set_student_report($type,0,0,$single_output,'now');
-  $data->end_transaction('rSST');
+  if($register) {
+    $data->begin_transaction('rSST');
+    $report->set_student_report($type,0,0,$single_output,'now');
+    $data->end_transaction('rSST');
+  }
 }
 
 if($register) {

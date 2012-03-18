@@ -3719,10 +3719,10 @@ sub regroupement_go {
 
   if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
     $single_output=($id_file ?
-# TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-		    (__("All_students")).".pdf" :
 # TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
-		    (__("Selected_students")).".pdf" );
+		    (__("Selected_students")).".pdf" :
+# TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
+		    (__("All_students")).".pdf" );
   }
 
   my $type=($single_output ? REPORT_SINGLE_ANNOTATED_PDF : REPORT_ANNOTATED_PDF);
@@ -3736,6 +3736,8 @@ sub regroupement_go {
       if(!$single_output &&
 	 ($projet{'_report'}->type_count($type)
 	  != $projet{'_capture'}->n_copies() ));
+    $group='no report'
+      if(!$group && $single_output && $projet{'_report'}->type_count($type)<1);
     $group='reports not found'
       if(!$group && !$projet{'_report'}->all_there($type,absolu('%PROJET/')));
     $group='type changed'
