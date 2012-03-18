@@ -143,6 +143,13 @@ sub clear_boxes {
     $self->{'button_apply'}->hide();
 }
 
+sub scrolled_update {
+  my ($self)=@_;
+  for my $cat (0,1) {
+    $self->{'scrolled_'.$cat}->set_policy('never','automatic');
+  }
+}
+
 sub load_positions {
   my ($self)=@_;
   $self->{'_capture'}->begin_read_transaction;
@@ -240,14 +247,18 @@ sub load_boxes {
 
     $self->ajuste_sep();
 
+    $self->scrolled_update;
+
     my $va=$self->{'view_0'}->get_vadjustment();
-    $va->value($va->upper());
+    $va->value($va->upper()-$va->page_size);
+    $va->changed;
 
     if($self->{'conforme'}) {
 	$self->{'button_apply'}->hide();
     } else {
 	$self->{'button_apply'}->show();
     }
+
 }
 
 sub refill {
@@ -260,6 +271,7 @@ sub refill {
     } else {
 	$self->{'button_apply'}->show();
     }
+    $self->scrolled_update;
 }
 
 sub page {
