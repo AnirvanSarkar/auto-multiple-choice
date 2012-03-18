@@ -97,6 +97,7 @@ sub pre_process {
 
     $self->{'sort.keys'}=$sorting{lc($1)}
       if($self->{'sort.keys'} =~ /^\s*([lmin])/i);
+    $self->{'sort.keys'}=[] if(!$self->{'sort.keys'});
 
     $self->load();
 

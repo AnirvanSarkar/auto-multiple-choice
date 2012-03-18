@@ -3713,19 +3713,21 @@ sub annotate_papers {
 sub regroupement_go {
   my ($from_annotate,$id_file)=@_;
 
+  maj_export();
+
   my $single_output='';
 
   if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
-    $single_output=
+    $single_output=($id_file ?
 # TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-      (__("All_students")).".pdf";
+		    (__("All_students")).".pdf" :
+# TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
+		    (__("Selected_students")).".pdf" );
   }
 
   my $type=($single_output ? REPORT_SINGLE_ANNOTATED_PDF : REPORT_ANNOTATED_PDF);
 
   # Looks if a rename is sufficient, or if one has to group again JPEG files:
-
-  maj_export();
 
   my $group=($from_annotate ? 'some annotated pages were rebuilt' : '');
   if(!$group) {
@@ -3742,6 +3744,8 @@ sub regroupement_go {
     $group='not up to date'
       if(!$group &&
 	 $projet{'_report'}->variable('grouped_uptodate')<=0);
+    $group='selected only'
+      if(!$group && $id_file);
     $projet{'_report'}->end_transaction('RgFO');
   }
 
@@ -3770,6 +3774,7 @@ sub regroupement_go {
 			"--noms-encodage",bon_encodage('liste'),
 			"--single-output",$single_output,
 			"--sort",$projet{'options'}->{'export_sort'},
+			($id_file ? "--no-register" : "--register"),
 		       )
 	     ],
 	     'signal'=>2,

@@ -56,7 +56,8 @@ my $single_output='';
 my $id_file='';
 my $compose='';
 my $rename='';
-my $sort='l';
+my $sort='';
+my $register=1;
 
 my $moteur_latex='pdflatex';
 my $tex_src='';
@@ -89,6 +90,7 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "single-output=s"=>\$single_output,
 	   "debug=s"=>\$debug,
 	   "sort=s"=>\$sort,
+	   "register!"=>\$register,
 	   );
 
 set_debug($debug);
@@ -217,19 +219,39 @@ $lk=$assoc->variable_transaction('key_in_list');
 
 my @students=();
 
+my $sorted_students='';
+
+if($single_output) {
+  # one single output file: students must be in the right order
+  $sorted_students=AMC::Export->new();
+  $sorted_students->set_options('fich','datadir'=>$data_dir,'noms'=>$fich_noms);
+  $sorted_students->set_options('noms','encodage'=>$noms_encodage,'useall'=>0);
+  $sorted_students->set_options('sort','keys'=>$sort);
+  $sorted_students->pre_process();
+}
+
 # a) first case: these numbers are given by --id-file option
 
 if($id_file) {
 
-    open(NUMS,$id_file);
-    while(<NUMS>) {
-        if(/^([0-9]+):([0-9]+)$/) {
-	  push @students,[$1,$2];
-	} elsif(/^([0-9]+)$/) {
-	  push @students,[$1,0];
-	}
+  open(NUMS,$id_file);
+  while(<NUMS>) {
+    if(/^([0-9]+):([0-9]+)$/) {
+      push @students,[$1,$2];
+    } elsif(/^([0-9]+)$/) {
+      push @students,[$1,0];
     }
-    close(NUMS);
+  }
+  close(NUMS);
+
+  if($single_output && $sort) {
+    # sort students
+    my %include=map { studentids_string(@$_)=>1 } (@students);
+    @students=
+      map { [ $_->{'student'},$_->{'copy'} ] }
+	grep { $include{studentids_string($_->{'student'},$_->{'copy'})} }
+	  (@{$sorted_students->{'marks'}});
+  }
 
 }
 
@@ -241,13 +263,8 @@ else {
   } else {
     if($single_output) {
       # one single output file: students must be in the right order
-      my $ex=AMC::Export->new();
-      $ex->set_options('fich','datadir'=>$data_dir,'noms'=>$fich_noms);
-      $ex->set_options('noms','encodage'=>$noms_encodage,'useall'=>0);
-      $ex->set_options('sort','keys'=>$sort);
-      $ex->pre_process();
       @students=map { [ $_->{'student'},$_->{'copy'} ] }
-	(@{$ex->{'marks'}});
+	(@{$sorted_students->{'marks'}});
     } else {
       # one output file per student: order is not important.
       $capture->begin_read_transaction;
@@ -262,6 +279,7 @@ my $n_copies=1+$#students;
 
 if($n_copies<=0) {
     debug "No sheets to group.";
+    print "* No sheets to group...\n";
     exit 0;
 }
 
@@ -571,9 +589,11 @@ if($single_output) {
   $data->end_transaction('rSST');
 }
 
-$report->begin_transaction('Ereg');
-$report->variable('last_group_type',$type);
-$report->variable('grouped_uptodate',1);
-$report->end_transaction('Ereg');
+if($register) {
+  $report->begin_transaction('Ereg');
+  $report->variable('last_group_type',$type);
+  $report->variable('grouped_uptodate',1);
+  $report->end_transaction('Ereg');
+}
 
 $avance->fin();
