@@ -67,6 +67,7 @@ my $filter='';
 my $filtered_source='';
 
 my $debug='';
+my $latex_stdout='';
 
 my $n_procs=0;
 my $nombre_copies=0;
@@ -94,6 +95,7 @@ GetOptions("mode=s"=>\$mode,
 	   "dpi=s"=>\$dpi,
 	   "convert-opts=s"=>\$convert_opts,
 	   "debug=s"=>\$debug,
+	   "latex-stdout!"=>\$latex_stdout,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "prefix=s"=>\$prefix,
@@ -265,6 +267,7 @@ sub execute {
 	      push @latex_errors,$e;
 	    }
 	    print STDERR $_ if(/^.+$/);
+	    print $_ if($latex_stdout && /^.+$/);
 	}
 	close(EXEC);
 	$cmd_pid='';
