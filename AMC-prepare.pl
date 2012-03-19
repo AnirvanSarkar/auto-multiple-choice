@@ -110,15 +110,23 @@ set_debug($debug);
 
 debug("AMC-prepare / DEBUG") if($debug);
 
-if($moteur_latex =~ /([^ ]+)\s+(.*)/) {
+sub split_latex_engine {
+  my ($engine)=@_;
+
+  $moteur_latex=$engine if($engine);
+
+  if($moteur_latex =~ /([^ ]+)\s+(.*)/) {
     $moteur_latex=$1;
     @moteur_args=split(/ +/,$2);
-}
+  }
 
-if($moteur_latex =~ /(.*)\+(.*)/) {
+  if($moteur_latex =~ /(.*)\+(.*)/) {
     $moteur_latex=$1;
     $moteur_topdf=$2;
+  }
 }
+
+split_latex_engine();
 
 $queue=AMC::Queue::new('max.procs',$n_procs);
 
@@ -326,6 +334,8 @@ sub do_filter {
     for($filter->errors()) {
       print "ERR: $_\n";
     }
+    split_latex_engine($filter->{'project_options'}->{'moteur_latex_b'})
+      if($filter->{'project_options'}->{'moteur_latex_b'});
   } else {
     $filtered_source=$source;
   }
@@ -390,9 +400,9 @@ if($mode =~ /f/) {
 if($mode =~ /k/) {
     # CORRECTION INDIVIDUELLE
 
-    check_moteur();
-
     do_filter();
+
+    check_moteur();
 
     execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
     transfere("$jobname.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
@@ -402,9 +412,9 @@ if($mode =~ /k/) {
 if($mode =~ /s/) {
     # SUJETS
 
-    check_moteur();
-
     do_filter();
+
+    check_moteur();
 
     my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
 
@@ -449,9 +459,9 @@ if($mode =~ /b/) {
 
     print "********** Making marks scale...\n";
 
-    check_moteur();
-
     do_filter();
+
+    check_moteur();
 
     # compilation en mode calibration
 

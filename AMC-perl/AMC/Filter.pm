@@ -21,7 +21,9 @@ package AMC::Filter;
 
 sub new {
     my $class = shift;
-    my $self={'errors'=>[]};
+    my $self={'errors'=>[],
+	     'project_options'=>{},
+	     };
     bless ($self, $class);
     return $self;
 }
@@ -43,6 +45,16 @@ sub errors {
 
 sub filter {
   my ($self,$input_file,$output_file)=@_;
+}
+
+#####################################################################
+# The following methods should NOT be overwritten
+#####################################################################
+
+sub set_project_option {
+  my ($self,$name,$value)=@_;
+  $self->{'project_options'}->{$name}=$value;
+  print "VAR: project:$name=$value\n";
 }
 
 1;

@@ -1854,6 +1854,14 @@ my %component_name=('latex_packages'=>__("LaTeX packages:"),
 		    'fonts'=>__("Fonts:"),
 		    );
 
+sub set_project_option {
+  my ($name,$value)=@_;
+  my $old=$projet{'options'}->{$name};
+  $projet{'options'}->{$name}=$value;
+  $projet{'options'}->{'_modifie'}.=','.$name if($value ne $old);
+}
+
+
 sub doc_maj {
     my $sur=0;
     if($projet{'_capture'}->n_pages_transaction()>0) {
@@ -1992,12 +2000,26 @@ sub doc_maj {
 		     for(0..2) {
 			 $ok=0 if(! -f absolu($projet{'options'}->{'docs'}->[$_]));
 		     }
-		     dialogue_apprentissage('MAJ_DOCS_OK','','',0,
-					    __("Working documents successfully generated.")." "
+		     if($ok) {
+
+		       # set project option from filter requests
+
+		       my %vars=$c->variables;
+		       for my $k (keys %vars) {
+			 if($k =~ /^project:(.*)/) {
+			   set_project_option($1,$vars{$k});
+			 }
+		       }
+
+		       # success message
+
+		       dialogue_apprentissage('MAJ_DOCS_OK','','',0,
+					      __("Working documents successfully generated.")." "
 # TRANSLATORS: Here, "them" refers to the working documents.
-					    .__("You can take a look at them double-clicking on the list.")." "
+					      .__("You can take a look at them double-clicking on the list.")." "
 # TRANSLATORS: Here, "they" refers to the working documents.
-					    .__("If they are correct, proceed to layouts detection...")) if($ok);
+					      .__("If they are correct, proceed to layouts detection..."));
+		     }
 		 }
 
 		 my $ap=($c->variable('ensemble') ? 'case' : 'marge');

@@ -40,23 +40,28 @@ sub new {
 				 DefaultScoringM DefaultScoringS
 				 L-Question L-None L-Name L-Student
 				 LaTeX LaTeX-Preambule LaTeX-BeginDocument
+				 LaTeXEngine xltxtra
 				 ShuffleQuestions Columns QuestionBlocks
 				 Arabic ArabicFont
 				/];
-    $self->{'options_boolean'}=[qw/LaTeX ShuffleQuestions QuestionBlocks
+    $self->{'options_boolean'}=[qw/LaTeX xltxtra
+				   ShuffleQuestions QuestionBlocks
 				   CompleteMulti SeparateAnswerSheet
 				   Arabic
 				  /];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
-    $self->{'options'}={'questionblocks'=>1,'shufflequestions'=>1,
-			'completemulti'=>1,
-			'font'=>'Linux Libertine O',
-			'arabicfont'=>'Rasheeq',
-			'defaultscoringm'=>'haut=2',
-			'l-name'=>__("Name and surname"),
-			'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
-		       };
+    $self->{'options'}={};
+    $self->{'default_options'}=
+      {'latexengine'=>'xelatex','xltxtra'=>1,
+       'questionblocks'=>1,'shufflequestions'=>1,
+       'completemulti'=>1,
+       'font'=>'Linux Libertine O',
+       'arabicfont'=>'Rasheeq',
+       'defaultscoringm'=>'haut=2',
+       'l-name'=>__("Name and surname"),
+       'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
+      };
     $self->{'qid'}=0;
     bless ($self, $class);
     return $self;
@@ -92,6 +97,20 @@ sub parse_options {
 	if(!$self->{'options'}->{$_});
     }
   }
+
+  if($self->{'options'}->{'lang'} eq 'JA') {
+    $self->{'default_options'}->{'latexengine'}='platex+dvipdfmx';
+    $self->{'default_options'}->{'font'}='';
+    $self->{'default_options'}->{'xltxtra'}='';
+  }
+
+  for my $k (keys %{$self->{'default_options'}}) {
+    $self->{'options'}->{$k}=$self->{'default_options'}->{$k}
+      if(!defined($self->{'options'}->{$k}));
+  }
+
+  $self->set_project_option('moteur_latex_b',
+			    $self->{'options'}->{'latexengine'});
 }
 
 sub add_object {
@@ -283,7 +302,7 @@ sub file_header {
 
   $t .= "\\documentclass{article}\n";
   $t .= "\\usepackage{bidi}\n" if($self->{'options'}->{'arabic'});
-  $t .= "\\usepackage{xltxtra}\n";
+  $t .= "\\usepackage{xltxtra}\n" if($self->{'options'}->{'xltxtra'});
   $t .= "\\usepackage{arabxetex}\n" if($self->{'options'}->{'arabic'});
   $t .= "\\usepackage".$po."{automultiplechoice}\n";
   $t .= "\\usepackage{"
