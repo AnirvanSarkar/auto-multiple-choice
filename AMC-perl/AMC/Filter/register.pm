@@ -133,6 +133,7 @@ sub set_project_option {
 
 sub missing_latex_packages {
   my ($self)=@_;
+  return() if(!commande_accessible("kpsewhich"));
   my @mp=();
   for my $p ($self->needs_latex_package()) {
     my $ok=0;
