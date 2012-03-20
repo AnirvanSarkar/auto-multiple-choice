@@ -55,8 +55,8 @@ sub weight {
   return(0.2);
 }
 
-sub configure {
-  my ($self)=@_;
+sub forced_options {
+  return('moteur_latex_b');
 }
 
 sub file_patterns {

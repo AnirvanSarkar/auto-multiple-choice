@@ -65,6 +65,13 @@ sub configure {
   my ($self,$options_project);
 }
 
+# this function returns a list of project options that are set
+# automatically by the filter. These options will be greyed out in the
+# Edit/Preferences window so that the user can not modify them.
+sub forced_options {
+  return();
+}
+
 # description of the format, that will be display in the window
 # showing details about file formats
 sub description {
