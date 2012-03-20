@@ -66,6 +66,7 @@ my $filtered_source='';
 
 my $debug='';
 my $nombre_copies=0;
+my $force_ascii=0;
 
 my $sujet='';
 my $dest_size_x=21/2.54;
@@ -91,6 +92,7 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "debug=s"=>\$debug,
 	   "sort=s"=>\$sort,
 	   "register!"=>\$register,
+	   "force-ascii!"=>\$force_ascii,
 	   );
 
 set_debug($debug);
@@ -479,40 +481,44 @@ for my $e (@students) {
       $f =~ s/-?\(ID\)//gi;
     }
 
-    ##########################################################################
-    # Tries now to keep only simple characters in the file name...
+    if($force_ascii) {
 
-    # no accents and special characters in filename
-    $f=~s/\xe4/ae/g;  ##  treat characters ä ñ ö ü ÿ
-    $f=~s/\xf1/ny/g;
-    $f=~s/\xf6/oe/g;
-    $f=~s/\xfc/ue/g;
-    $f=~s/\xff/yu/g;
+      ##########################################################################
+      # Tries now to keep only simple characters in the file name...
 
-    $f = NFD( $f );   ##  decompose (Unicode Normalization Form D)
-    $f=~s/\pM//g;         ##  strip combining characters
+      # no accents and special characters in filename
+      $f=~s/\xe4/ae/g;		##  treat characters ä ñ ö ü ÿ
+      $f=~s/\xf1/ny/g;
+      $f=~s/\xf6/oe/g;
+      $f=~s/\xfc/ue/g;
+      $f=~s/\xff/yu/g;
 
-    # additional normalizations:
+      $f = NFD( $f );	  ##  decompose (Unicode Normalization Form D)
+      $f=~s/\pM//g;	  ##  strip combining characters
 
-    $f=~s/\x{00df}/ss/g;  ##  German beta “ß” -> “ss”
-    $f=~s/\x{00c6}/AE/g;  ##  Æ
-    $f=~s/\x{00e6}/ae/g;  ##  æ
-    $f=~s/\x{0132}/IJ/g;  ##  Ĳ
-    $f=~s/\x{0133}/ij/g;  ##  ĳ
-    $f=~s/\x{0152}/Oe/g;  ##  Œ
-    $f=~s/\x{0153}/oe/g;  ##  œ
+      # additional normalizations:
 
-    $f=~tr/\x{00d0}\x{0110}\x{00f0}\x{0111}\x{0126}\x{0127}/DDddHh/; # ÐĐðđĦħ
-    $f=~tr/\x{0131}\x{0138}\x{013f}\x{0141}\x{0140}\x{0142}/ikLLll/; # ıĸĿŁŀł
-    $f=~tr/\x{014a}\x{0149}\x{014b}\x{00d8}\x{00f8}\x{017f}/NnnOos/; # ŊŉŋØøſ
-    $f=~tr/\x{00de}\x{0166}\x{00fe}\x{0167}/TTtt/;                   # ÞŦþŧ
+      $f=~s/\x{00df}/ss/g;	##  German beta “ß” -> “ss”
+      $f=~s/\x{00c6}/AE/g;	##  Æ
+      $f=~s/\x{00e6}/ae/g;	##  æ
+      $f=~s/\x{0132}/IJ/g;	##  Ĳ
+      $f=~s/\x{0133}/ij/g;	##  ĳ
+      $f=~s/\x{0152}/Oe/g;	##  Œ
+      $f=~s/\x{0153}/oe/g;	##  œ
 
-    $f=~s/[^\0-\x80]/_/g;  ##  clear everything else; optional
+      $f=~tr/\x{00d0}\x{0110}\x{00f0}\x{0111}\x{0126}\x{0127}/DDddHh/; # ÐĐðđĦħ
+      $f=~tr/\x{0131}\x{0138}\x{013f}\x{0141}\x{0140}\x{0142}/ikLLll/; # ıĸĿŁŀł
+      $f=~tr/\x{014a}\x{0149}\x{014b}\x{00d8}\x{00f8}\x{017f}/NnnOos/; # ŊŉŋØøſ
+      $f=~tr/\x{00de}\x{0166}\x{00fe}\x{0167}/TTtt/; # ÞŦþŧ
 
-    # no whitespaces in filename
-    $f =~ s/[^a-zA-Z0-9+_\.-]+/_/g;
+      $f=~s/[^\0-\x80]/_/g;	##  clear everything else; optional
 
-    ##########################################################################
+      # no whitespaces in filename
+      $f =~ s/[^a-zA-Z0-9+_\.-]+/_/g;
+
+      ##########################################################################
+
+    }
 
     $data->begin_transaction('rSST');
     $f=$report->free_student_report($type,$f);
