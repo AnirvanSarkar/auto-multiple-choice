@@ -3802,6 +3802,7 @@ sub regroupement_go {
 			"--single-output",$single_output,
 			"--sort",$projet{'options'}->{'export_sort'},
 			($id_file ? "--no-register" : "--register"),
+			($o{'ascii_filenames'} ? "--force-ascii" : "--no-force-ascii"),
 		       )
 	     ],
 	     'signal'=>2,
@@ -3825,6 +3826,7 @@ sub regroupement_go {
 			"--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			"--noms-encodage",bon_encodage('liste'),
 			"--single-output",$single_output,
+			($o{'ascii_filenames'} ? "--force-ascii" : "--no-force-ascii"),
 		       )
 	     ],
 	     'signal'=>2,
