@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2010 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2010,2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -38,7 +38,7 @@ for my $f (@fichiers) {
 
     my $parser = XML::LibXML->new();
     my $xp=$parser->parse_file($f);
-    
+
     my $lang='';
     my @articles= $xp->findnodes('/article')->get_nodelist;
     if($articles[0] && $articles[0]->findvalue('@lang')) {
@@ -54,12 +54,12 @@ for my $f (@fichiers) {
 	my $id=$node->findvalue('@id');
 	my $ex=$node->textContent();
 
-	if($id =~ /^(modeles)-(.*\.tex)$/) {
+	if($id =~ /^(modeles)-(.*)\.(tex|txt)$/) {
 
 	    my $rep=$1;
 	    $rep.="/$lang" if($lang);
 	    my $name=$2;
-	    $name =~ s/\.tex$//;
+	    my $ext=$3;
 	    my $code_name=$name;
 
 	    print "  * extracting $rep/$code_name\n";
@@ -80,7 +80,7 @@ for my $f (@fichiers) {
 
 	    my $tar = Archive::Tar->new;
 
-	    $tar->add_data("$code_name.tex",encode_utf8($ex));
+	    $tar->add_data("$code_name.$ext",encode_utf8($ex));
 	    $tar->add_data("description.xml",
 			   encode_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <description>
@@ -89,13 +89,21 @@ for my $f (@fichiers) {
 </description>
 ')
 			   );
-	    $tar->add_data("options.xml",
-			   encode_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+	    my $opts='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <projetAMC>
-  <texsrc>%PROJET/'.$code_name.'.tex</texsrc>
-  <moteur_latex_b>pdflatex</moteur_latex_b>
-</projetAMC>
-'));
+  <texsrc>%PROJET/'.$code_name.'.'.$ext.'</texsrc>
+';
+	    if($ext eq 'tex') {
+	      $opts .= '  <moteur_latex_b>pdflatex</moteur_latex_b>
+';
+	    } else {
+	      $opts .= '  <filter>plain</filter>
+';
+	    }
+	    $opts .= '</projetAMC>
+';
+	    $tar->add_data("options.xml",
+			   encode_utf8($opts));
 
 	    $tar->write("$rep/$code_name.tgz", COMPRESS_GZIP);
 
@@ -103,7 +111,7 @@ for my $f (@fichiers) {
 
 	}
     }
-    
+
 }
 
 close(LOG) if($liste);
