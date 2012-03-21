@@ -3604,6 +3604,162 @@ sub opt_symbole {
     return("$s:$type/$color");
 }
 
+sub select_students {
+  my ($id_file)=@_;
+
+  # restore last setting
+  my %ids=();
+  if (open(IDS,$id_file)) {
+    while (<IDS>) {
+      chomp;
+      $ids{$_}=1 if(/^[0-9]+(:[0-9]+)?$/);
+    }
+    close(IDS);
+  }
+  # dialog to let the user choose...
+  my $gstud=read_glade('choose_students',
+		       qw/choose_students_area students_instructions
+			  students_select_list students_list_search/);
+  my $lk=$projet{'options'}->{'liste_key'};
+
+  $col=$w{'choose_students'}->style()->bg('prelight');
+  for my $s (qw/normal insensitive/) {
+    for my $k (qw/students_instructions/) {
+      $w{$k}->modify_base($s,$col);
+    }
+  }
+  my $students_store=Gtk2::ListStore
+    ->new('Glib::String','Glib::String','Glib::String',
+	  'Glib::String','Glib::String',
+	  'Glib::Boolean','Glib::Boolean');
+  my $filter=Gtk2::TreeModelFilter->new($students_store);
+  $filter->set_visible_column(5);
+  $w{'students_list_store'}=$students_store;
+  $w{'students_list_filter'}=$filter;
+
+  $w{'students_select_list'}->set_model($filter);
+  my $renderer=Gtk2::CellRendererText->new;
+  my $column = Gtk2::TreeViewColumn->new_with_attributes (__"sheet ID",
+							  $renderer,
+							  text=> 0);
+  $column->set_sort_column_id(0);
+  $w{'students_select_list'}->append_column ($column);
+
+  if($lk) {
+    $column = Gtk2::TreeViewColumn->new_with_attributes ($lk,
+							 $renderer,
+							 text=> 4);
+    $column->set_sort_column_id(4);
+    $w{'students_select_list'}->append_column ($column);
+  }
+
+  $column = Gtk2::TreeViewColumn->new_with_attributes (__"student",
+						       $renderer,
+						       text=> 1);
+  $column->set_sort_column_id(1);
+  $w{'students_select_list'}->append_column ($column);
+
+  my $fl=absolu($projet{'options'}->{'listeetudiants'});
+  my $l=AMC::NamesFile::new($fl,
+			    'encodage'=>bon_encodage('liste'),
+			   );
+  $projet{'_capture'}->begin_read_transaction('gSLi');
+  my $key=$projet{'_association'}->variable('key_in_list');
+  my @selected_iters=();
+  for my $sc ($projet{'_capture'}->student_copies) {
+    my $id=$projet{'_association'}->get_real(@$sc);
+    my $iter=$students_store->append;
+    my ($name)=$l->data($key,$id);
+    $students_store->set($iter,
+			 0=>studentids_string(@$sc),
+			 1=>$name->{'_ID_'},
+			 2=>$sc->[0],3=>$sc->[1],
+			 5=>1,
+			);
+    $students_store->set($iter,4=>$name->{$lk}) if($lk);
+    push @selected_iters,$iter if($ids{studentids_string(@$sc)});
+  }
+  $projet{'_capture'}->end_transaction('gSLi');
+
+  $w{'students_select_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+  for (@selected_iters) {
+    $w{'students_select_list'}->get_selection->select_iter($filter->convert_child_iter_to_iter($_));
+  }
+
+  my $resp=$w{'choose_students'}->run;
+
+  select_students_save_selected_state();
+
+  my @k=();
+
+  if($resp==1) {
+    $students_store->foreach(sub {
+			       my ($model,$path,$iter,$user)=@_;
+			       push @k,[$students_store->get($iter,2,3)]
+				 if($students_store->get($iter,6));
+			     });
+  }
+
+  $w{'choose_students'}->destroy;
+
+  if ($resp==1) {
+    open(IDS,">$id_file");
+    for (@k) {
+      print IDS studentids_string(@$_)."\n";
+    }
+    close(IDS);
+  } else {
+    return();
+  }
+
+  return(1);
+}
+
+sub select_students_save_selected_state {
+  my $sel=$w{'students_select_list'}->get_selection;
+  my $f=$w{'students_list_filter'};
+  my $s=$w{'students_list_store'};
+  $f->foreach(sub {
+		my ($model,$path,$iter,$user)=@_;
+		$s->set($f->convert_iter_to_child_iter($iter),
+			6=>$sel->iter_is_selected($iter));
+	      });
+}
+
+sub select_students_recover_selected_state {
+  my $sel=$w{'students_select_list'}->get_selection;
+  my $f=$w{'students_list_filter'};
+  my $s=$w{'students_list_store'};
+  $f->foreach(sub {
+		my ($model,$path,$iter,$user)=@_;
+		if($s->get($f->convert_iter_to_child_iter($iter),6)) {
+		  $sel->select_iter($iter);
+		} else {
+		  $sel->unselect_iter($iter);
+		}
+	      });
+}
+
+sub select_students_search {
+  select_students_save_selected_state();
+  my $pattern=$w{'students_list_search'}->get_text;
+  my $s=$w{'students_list_store'};
+  $s->foreach(sub {
+		my ($model,$path,$iter,$user)=@_;
+		my ($id,$n,$nb)=$s->get($iter,0,1,4);
+		$s->set($iter,5=>
+			((!$pattern)
+			 || $id =~ /$pattern/i || $n =~ /$pattern/i
+			 || $nb =~ /$pattern/i ? 1 : 0));
+		return(0);
+	      });
+  select_students_recover_selected_state();
+}
+
+sub select_students_all {
+  $w{'students_list_search'}->set_text('');
+}
+
 sub annote_copies {
   my ($and_regroupe)=@_;
   my $id_file='';
@@ -3612,84 +3768,7 @@ sub annote_copies {
     # use a file in project directory to store students ids for which
     # sheets will be annotated
     $id_file=absolu('%PROJET/selected-ids');
-    # restore last setting
-    my %ids=();
-    if(open(IDS,$id_file)) {
-      while(<IDS>) {
-	chomp;
-	$ids{$_}=1 if(/^[0-9]+(:[0-9]+)?$/);
-      }
-      close(IDS);
-    }
-    # dialog to let the user choose...
-    my $gstud=read_glade('choose_students',
-			 qw/choose_students_area students_instructions students_select_list/);
-
-    $col=$w{'choose_students'}->style()->bg('prelight');
-    for my $s (qw/normal insensitive/) {
-      for my $k (qw/students_instructions/) {
-	$w{$k}->modify_base($s,$col);
-      }
-    }
-    my $students_store=Gtk2::ListStore
-      ->new('Glib::String','Glib::String','Glib::String','Glib::String');
-    $w{'students_select_list'}->set_model($students_store);
-    my $renderer=Gtk2::CellRendererText->new;
-    my $column = Gtk2::TreeViewColumn->new_with_attributes (__"sheet ID",
-							    $renderer,
-							    text=> 0);
-    $column->set_sort_column_id(0);
-    $w{'students_select_list'}->append_column ($column);
-    $column = Gtk2::TreeViewColumn->new_with_attributes (__"student",
-							 $renderer,
-							 text=> 1);
-    $column->set_sort_column_id(1);
-    $w{'students_select_list'}->append_column ($column);
-
-    my $fl=absolu($projet{'options'}->{'listeetudiants'});
-    my $l=AMC::NamesFile::new($fl,
-			      'encodage'=>bon_encodage('liste'),
-			     );
-    $projet{'_capture'}->begin_read_transaction('gSLi');
-    my $key=$projet{'_association'}->variable('key_in_list');
-    my @selected_iters=();
-    for my $sc ($projet{'_capture'}->student_copies) {
-      my $id=$projet{'_association'}->get_real(@$sc);
-      my $iter=$students_store->append;
-      my ($name)=$l->data($key,$id);
-      $students_store->set($iter,
-			   0=>studentids_string(@$sc),
-			   1=>$name->{'_ID_'},
-			   2=>$sc->[0],3=>$sc->[1],
-			   );
-      push @selected_iters,$iter if($ids{studentids_string(@$sc)});
-    }
-    $projet{'_capture'}->end_transaction('gSLi');
-
-    $w{'students_select_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
-    for(@selected_iters) { $w{'students_select_list'}->get_selection->select_iter($_); }
-
-    my $resp=$w{'choose_students'}->run;
-
-    my @k=();
-    if($resp==1) {
-      my @sel=$w{'students_select_list'}->get_selection->get_selected_rows;
-      for my $i (@sel) {
-	push @k,[$students_store->get($students_store->get_iter($i),2,3)];
-      }
-    }
-
-    $w{'choose_students'}->destroy;
-
-    if($resp==1) {
-      open(IDS,">$id_file");
-      for(@k) {
-	print IDS studentids_string(@$_)."\n";
-      }
-      close(IDS);
-    } else {
-      return();
-    }
+    return() if(!select_students($id_file));
   }
 
   commande('commande'=>["auto-multiple-choice","annote",
