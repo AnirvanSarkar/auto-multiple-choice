@@ -2732,6 +2732,42 @@ Name:
           </listitem>
         </itemizedlist>
       </sect3>
+
+      <sect3 id="scoring-result">
+        <title>From scoring strategy to students marks</title>
+
+        <para>Here is how students' marks are computed: for every
+        student,</para>
+
+        <orderedlist>
+          <listitem>
+            <para>The scoring strategy is applied for each question in turn,
+            to get the <emphasis>questions scores</emphasis>.</para>
+          </listitem>
+
+          <listitem>
+            <para>All questions (except indicative ones) scores are added to
+            get the student <emphasis>total score</emphasis>.</para>
+          </listitem>
+
+          <listitem>
+            <para>If a positive <emphasis>maximal mark</emphasis> is given as
+            a parameter (in the <guilabel>Project</guilabel> tab of the
+            <menuchoice>
+                <guimenu>Edit</guimenu>
+
+                <guimenuitem>Preferences</guimenuitem>
+              </menuchoice> window), the total score of the student is divided
+            by the <emphasis>maximum total score</emphasis> (which is the
+            total score for a perfect copy), and multiplied by the
+            <emphasis>maximum mark</emphasis>, to get the student's
+            <emphasis>mark</emphasis>. This way, if the student answered
+            perfectly to all questions, his mark will be the maximum mark. If
+            you set the maximum mark to 100, the student's mark can be seen as
+            a percentage of good answers.</para>
+          </listitem>
+        </orderedlist>
+      </sect3>
     </sect2>
 
     <sect2 id="sec.students.id">
@@ -2955,15 +2991,17 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <guimenuitem>Papers annotation</guimenuitem>
 
           <guimenuitem>Header text</guimenuitem>
-        </menuchoice>). Substitutions will be made within the provided
-      text:</para>
+        </menuchoice>). Substitutions will be made within the provided text
+      (please have a look at <xref linkend="scoring-result" /> for some
+      details on the meaning of those values):</para>
 
       <variablelist>
         <varlistentry>
           <term><literal>%S</literal></term>
 
           <listitem>
-            <para>is replaced by the student total score.</para>
+            <para>is replaced by the student's <emphasis>total
+            score</emphasis>.</para>
           </listitem>
         </varlistentry>
 
@@ -2971,7 +3009,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%M</literal></term>
 
           <listitem>
-            <para>is replaced by the maximum total score.</para>
+            <para>is replaced by the <emphasis>maximum total
+            score</emphasis>.</para>
           </listitem>
         </varlistentry>
 
@@ -2979,7 +3018,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%s</literal></term>
 
           <listitem>
-            <para>is replaced by the student mark.</para>
+            <para>is replaced by the student's
+            <emphasis>mark</emphasis>.</para>
           </listitem>
         </varlistentry>
 
@@ -2987,7 +3027,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%m</literal></term>
 
           <listitem>
-            <para>is replaced by the maximum mark.</para>
+            <para>is replaced by the <emphasis>maximum mark</emphasis>.</para>
           </listitem>
         </varlistentry>
 
