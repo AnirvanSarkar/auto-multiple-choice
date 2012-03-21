@@ -65,6 +65,7 @@ sub new {
      'check_assoc'=>'',
      'annote'=>'',
      'annote_files'=>[],
+     'annote_ascii'=>0,
      'verdict'=>'%(id) %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
      'verdict_question'=>"\"%"."s/%"."m\"",
      'model'=>'(N).pdf',
@@ -452,6 +453,7 @@ sub annote {
   for (@{$self->{'annote'}}) { print NUMS "$_\n"; }
   close(NUMS);
   $self->amc_command('regroupe',
+		     ($self->{'annote_ascii'} ? "--force-ascii" : "--no-force-ascii"),
 		     '--projet','%PROJ',
 		     '--n-copies',$self->{'n_copies'},
 		     '--sujet','%PROJ/sujet.pdf',

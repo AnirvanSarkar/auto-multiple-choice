@@ -26,7 +26,7 @@ AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
 	       'check_marks'=>{'/000'=>20,'/007'=>10,'/132'=>16.7},
 	       'verdict'=>'%(id) / %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
 	       'model'=>'(id)_(ID)',
-	       'annote'=>['2:1','2:2','2:3'],
+	       'annote'=>['2:1','2:2','2:3'],'annote_ascii'=>1,
 	       'annote_files'=>['007_Jojo.pdf','132_Globis.pdf','000_Perfect.pdf'],
 	      )
   ->default_process;
