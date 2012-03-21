@@ -59,6 +59,7 @@ sub build_config_gui {
   $t->attach(Gtk2::Label->new(__"Number of columns"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
   $widget=Gtk2::SpinButton->new(Gtk2::Adjustment->new(1,1,5,1,1,0),0,0);
+  $widget->set_tooltip_text(__"Long list is divided into this number of columns on each page.");
   $w->{'export_s_export_ncols'}=$widget;
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;

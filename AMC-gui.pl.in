@@ -218,6 +218,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 				     },
 	      'manuel_image_type'=>'xpm',
 	      'assoc_ncols'=>4,
+	      'zooms_ncols'=>4,
 	      'tolerance_marque_inf'=>0.2,
 	      'tolerance_marque_sup'=>0.2,
 	      'box_size_proportion'=>0.8,
@@ -1228,7 +1229,7 @@ sub zooms_display {
 	$w{'zooms_window'}->page([$student,$page,$copy],$zd,$forget_it);
     } elsif(!$forget_it) {
 	$w{'zooms_window'}=AMC::Gui::Zooms::new('seuil'=>$projet{'options'}->{'seuil'},
-						'n_cols'=>$o{'assoc_ncols'},
+						'n_cols'=>$o{'zooms_ncols'},
 						'zooms_dir'=>$zd,
 						'page_id'=>[$student,$page,$copy],
 						'size-prefs',\%o,

@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.20"/>
-  <object class="GtkAdjustment" id="adjustment12">
-    <property name="lower">1</property>
-    <property name="upper">65535</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">1</property>
     <property name="value">0.10000000000000001</property>
@@ -26,6 +20,12 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adjustment12">
+    <property name="lower">1</property>
+    <property name="upper">65535</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="adjustment13">
     <property name="lower">0.40000000000000002</property>
     <property name="upper">1</property>
@@ -36,6 +36,13 @@
     <property name="upper">1</property>
     <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment15">
+    <property name="lower">1</property>
+    <property name="upper">30</property>
+    <property name="value">1</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">5</property>
   </object>
   <object class="GtkAdjustment" id="adjustment2">
     <property name="lower">10</property>
@@ -955,14 +962,17 @@
                           <object class="GtkTable" id="table8">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="n_rows">4</property>
+                            <property name="n_rows">5</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkSpinButton" id="pref_s_assoc_ncols">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Starting number of columns for names in the manual association window.</property>
                                 <property name="invisible_char">•</property>
                                 <property name="adjustment">adjustment10</property>
+                                <property name="snap_to_ticks">True</property>
+                                <property name="numeric">True</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -975,7 +985,7 @@
                               <object class="GtkLabel" id="label84">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Number of columns for names</property>
+                                <property name="label" translatable="yes" comments="Label in the preferences window, corresponding to &quot;Starting number of columns for names in the manual association window&quot;.">Number of columns for names</property>
                               </object>
                               <packing>
                                 <property name="top_attach">3</property>
@@ -1019,6 +1029,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Do you want to keep the same window size each time you start AMC?</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                               </object>
@@ -1057,6 +1068,34 @@
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label13">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes" comments="Label in the preferences window, corresponding to the &quot;Number of columns for zoomed boxes in the zooms window (opened from the Diagnosis list in the Data capture tab)&quot;.">Number of columns for zoomes boxes</property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="pref_s_zooms_ncols">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Number of columns for zoomed boxes in the zooms window (opened from the Diagnosis list in the Data capture tab).</property>
+                                <property name="invisible_char">●</property>
+                                <property name="adjustment">adjustment15</property>
+                                <property name="snap_to_ticks">True</property>
+                                <property name="numeric">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
                               </packing>
                             </child>
                           </object>
