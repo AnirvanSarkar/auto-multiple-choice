@@ -223,6 +223,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'tolerance_marque_sup'=>0.2,
 	      'box_size_proportion'=>0.8,
 	      'bw_threshold'=>0.6,
+	      'ignore_red'=>0,
 
 	      'symboles_trait'=>2,
 	      'symboles_indicatives'=>'',
@@ -2661,6 +2662,7 @@ sub analyse_call {
 	      "--projet",absolu('%PROJET/'),
 	      "--cr",absolu($projet{'options'}->{'cr'}),
 	      "--liste-fichiers",$fh->filename,
+	      ($o{'ignore_red'} ? "--ignore-red" : "--no-ignore-red"),
 	);
 
     # Diagnostic image file ?

@@ -45,6 +45,9 @@
     #if CV_MINOR_VERSION >= 1
        #define OPENCV_21 1
     #endif
+    #if CV_MINOR_VERSION >= 3
+       #define OPENCV_23 1
+    #endif
   #endif
 #endif
 
@@ -73,20 +76,50 @@ void agrege(double x,double y,double* coins_x,double* coins_y) {
   AGREGE_POINT(-,<,3)
 }
 
-void load_image(IplImage** src,char *filename,double threshold=0.6,int view=0) {
-  if((*src=cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE))!= 0) {
-    double max;
-    cvMinMaxLoc(*src,NULL,&max);
-    cvSmooth(*src,*src,CV_GAUSSIAN,3,3,1);
-    cvThreshold(*src,*src, max*threshold, 255, CV_THRESH_BINARY_INV );
+void load_image(IplImage** src,char *filename,
+		int ignore_red,double threshold=0.6,int view=0) {
+  IplImage* color;
+  double max;
 
-    if((*src)->origin==1) {
-      printf(": Image flip\n");
-      cvFlip(*src,NULL,0);
+  if(ignore_red) {
+    if((color=cvLoadImage(filename,
+#ifdef OPENCV_23
+			  CV_LOAD_IMAGE_ANYCOLOR
+#else
+			  CV_LOAD_IMAGE_UNCHANGED
+#endif
+			  ))!= NULL) {
+      printf("loaded\n");
+      if(color->nChannels>=3) {
+	/* keeps only red channel */
+	cvSetImageCOI(color,3);
+	*src=cvCreateImage( cvGetSize(color), color->depth, 1 );
+	cvCopy(color,*src);
+	cvReleaseImage(&color);
+      } else if(color->nChannels!=1) {
+	printf("! LOAD : Scan file with 2 channels [%s]\n",filename);
+	return;
+      } else {
+	*src=color;
+      }
+    } else {
+      printf("! LOAD : Error loading scan file in ANYCOLOR [%s]\n",filename);
+      return;
     }
-
   } else {
-    printf("! LOAD : Error loading scan file [%s]\n",filename);
+    if((*src=cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE))==NULL) {
+      printf("! LOAD : Error loading scan file in GRAYSCALE [%s]\n",filename);
+      return;
+    }
+  }
+
+  cvMinMaxLoc(*src,NULL,&max);
+  cvSmooth(*src,*src,CV_GAUSSIAN,3,3,1);
+  cvThreshold(*src,*src, max*threshold, 255, CV_THRESH_BINARY_INV );
+  
+  if((*src)->origin==1) {
+    printf(": Image flip\n");
+    cvFlip(*src,NULL,0);
   }
 }
 
@@ -211,7 +244,7 @@ void calage(IplImage* src,IplImage* illustr,
 		 1+(int)((target_min+target_max)/2 /8));
 
   if(view==2) {
-    *dst=cvCreateImage( cvGetSize(src), 8, 3 );
+    *dst=cvCreateImage( cvGetSize(src), IPL_DEPTH_8U, 3 );
     cvConvertImage(src,*dst);
     cvNot(*dst,*dst);
   }
@@ -527,6 +560,7 @@ int main( int argc, char** argv )
   char *zooms_dir=NULL;
   int view=0;
   int post_process_image=0;
+  int ignore_red=0;
 
 #if OPENCV_20
   int save_options[3]={CV_IMWRITE_JPEG_QUALITY,75,0};
@@ -543,7 +577,7 @@ int main( int argc, char** argv )
   // -v / -P : asks for marks detection debugging image report
 
   char c;
-  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:o:vP")) != -1) {
+  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:o:vPr")) != -1) {
     switch (c) {
     case 'x': taille_orig_x=atof(optarg);break; 
     case 'y': taille_orig_y=atof(optarg);break; 
@@ -553,6 +587,7 @@ int main( int argc, char** argv )
     case 't': threshold=atof(optarg);break;
     case 'o': out_image_file=strdup(optarg);break;
     case 'v': view=1;break;
+    case 'r': ignore_red=1;break;
     case 'P': post_process_image=1;view=2;break;
     }
   }
@@ -596,7 +631,7 @@ int main( int argc, char** argv )
 	}
       }
 
-      load_image(&src,scan_file,threshold,view);
+      load_image(&src,scan_file,ignore_red,threshold,view);
 
       src_calage=cvCloneImage(src);
       calage(src_calage,illustr,

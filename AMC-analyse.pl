@@ -61,6 +61,7 @@ my $bw_threshold=0.6;
 my $blur='1x1';
 my $threshold='60%';
 my $multiple='';
+my $ignore_red=1;
 
 GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
@@ -75,6 +76,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "n-procs=s"=>\$n_procs,
 	   "debug-image-dir=s"=>\$debug_image_dir,
 	   "multiple!"=>\$multiple,
+	   "ignore-red!"=>\$ignore_red,
 	   );
 
 use_gettext;
@@ -441,6 +443,7 @@ sub one_scan {
 	);
 
     push @args,'-P' if($debug_image);
+    push @args,'-r' if($ignore_red);
 
     $process->set('args',\@args);
 
