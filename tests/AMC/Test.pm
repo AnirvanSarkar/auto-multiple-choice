@@ -23,6 +23,7 @@ package AMC::Test;
 use AMC::Basic;
 use AMC::Data;
 
+use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
 use File::Temp qw(tempfile tempdir);
 use File::Copy::Recursive qw(rcopy);
@@ -72,6 +73,7 @@ sub new {
      'ok_checksums'=>{},
      'ok_checksums_file'=>'',
      'to_check'=>[],
+     'export_full_csv'=>[],
     };
 
   for (keys %oo) {
@@ -259,6 +261,7 @@ sub analyse {
 		       '--prefix','%PROJ/',
 		       '%PROJ/'.$self->{'src'},
 		      );
+
     my $nf=$self->{'temp_dir'}."/num";
     open(NUMS,">$nf");
     for (@{$self->{'perfect_copy'}}) { print NUMS "$_\n"; }
@@ -513,6 +516,38 @@ sub defects {
   }
 }
 
+sub check_export {
+  my ($self)=@_;
+  my @csv=@{$self->{'export_full_csv'}};
+  if(@csv) {
+    $self->begin("CSV full export test");
+    $self->amc_command('export',
+		       '--data','%DATA',
+		       '--module','CSV',
+		       '--fich-noms','%PROJ/'.$self->{'list'},
+		       '--option-out','columns=student.copy',
+		       '--option-out','ticked=AB',
+		       '-o','%PROJ/export.csv',
+		      );
+    my $c=Text::CSV->new();
+    open my $fh,"<:encoding(utf-8)",$self->{'temp_dir'}.'/export.csv';
+    my $i=0;
+    my %heads=map { $_ => $i++ } (@{$c->getline($fh)});
+    my $copy=$heads{'student.copy'};
+    while(my $row=$c->getline($fh)) {
+      for my $t (@csv) {
+	if($t->{-copy} eq $row->[$copy]
+	  && $t->{-question} && $t->{-abc} ) {
+	  $self->test($row->[$heads{"TICKED:".$t->{-question}}],
+		      $t->{-abc},"ABC for Q=".$t->{-question});
+	}
+      }
+    }
+    close $fh;
+    $self->end;
+  }
+}
+
 sub data {
   my ($self)=@_;
   return(AMC::Data->new($self->{'temp_dir'}."/data"));
@@ -538,19 +573,22 @@ sub datadump {
 		 ->selectall_arrayref("SELECT * FROM $self->{'datatable'}",
 				      { Slice=>{} }));
   }
-  $self->{'datamodule'}->end_transaction;
+  $self->{'datamodule'}->end_transaction
+    if($self->{'datamodule'});
 }
 
 sub test {
   my ($self,$x,$v,$subtest)=@_;
-  $self->{'n.subt'}++ if(!$subtest);
+  if(!defined($subtest)) {
+    $subtest=$self->{'n.subt'}++;
+  }
   if(ref($x) eq 'ARRAY') {
     for my $i (0..$#$x) {
       $self->test($x->[$i],$v->[$i],1);
     }
   } else {
     if($x ne $v) {
-      $self->trace("[E] ".$self->{'test_title'}." [$self->{'n.subt'}] : \'$x\' should be \'$v\'");
+      $self->trace("[E] ".$self->{'test_title'}." [$subtest] : \'$x\' should be \'$v\'");
       $self->datadump;
       exit(1);
     }
@@ -581,6 +619,7 @@ sub default_process {
   $self->check_perfect;
   $self->check_assoc;
   $self->annote;
+  $self->check_export;
 
   $self->ok;
 }
