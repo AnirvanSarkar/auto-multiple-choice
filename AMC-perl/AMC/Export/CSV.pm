@@ -34,7 +34,7 @@ sub new {
     $self->{'out.decimal'}=",";
     $self->{'out.entoure'}="\"";
     $self->{'out.ticked'}="";
-    $self->{'out.columns'}='sc,student.key,student.name';
+    $self->{'out.columns'}='student.copy,student.key,student.name';
     bless ($self, $class);
     return $self;
 }
