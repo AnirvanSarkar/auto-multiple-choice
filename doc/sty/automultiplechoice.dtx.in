@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2008-2011 Alexis Bienvenue
+% Copyright (C) 2008-2012 Alexis Bienvenue
 %
 % This file is part of Auto-Multiple-Choice
 %
@@ -31,7 +31,7 @@
 \keepsilent
 \preamble
 
-Copyright (C) 2008-2011 Alexis Bienvenue
+Copyright (C) 2008-2012 Alexis Bienvenue
 
 This file is part of Auto-Multiple-Choice
 
@@ -939,6 +939,22 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{itemize}
 % Default values are |\AMCboxDimensions{size=2.5ex,down=.4ex,rule=.5pt}|
 %
+% \DescribeMacro{\AMCboxColor} Also note that you can set the color
+% used for the boxes (only the box that are to be filled by the
+% students and will be used for data capture) with the
+% |\AMCboxColor|\marg{color} command. This allows to print the boxes
+% with some color that won't disturb too much the data capture (for
+% example red, but some light grey can also be considered). The
+% \meta{color} parameter must be a color recognized by the |xcolor|
+% package.\amccode
+% \begin{code}
+%   \AMCboxColor{red}
+%   \begin{question}{sum}$2+2={}$
+%   \begin{choiceshoriz}[o]
+%     \wrongchoice{1}\correctchoice{4}\wrongchoice{10}
+%   \end{choiceshoriz}
+%   \end{question}
+% \end{code}
 %
 % \subsubsection{Codes}
 % One may adapt the codes rendering from |\AMCcode| to one's needs
@@ -1446,7 +1462,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsubsection{Boxes to be checked by students}
 %
-% \begin{macro}{\AMC@boxedchar}
+% \begin{macro}{\AMC@boxedchar}\begin{macro}{\AMCboxColor}
 %   There are two styles for boxes to be checked by the students. The
 %   first one is an empty box, printed beside the answer. The sencond
 %   is a box with a character in it. It is mainly used when answers
@@ -1459,6 +1475,15 @@ Three digits and two letters:\insertgroup{mixed}.
 % \meta{key} is the box identification, and \meta{filled} is non-empty
 % for filling the box.
 %
+% The color of the boxes and of the characters drawn in them can be
+% set using the command |\AMCboxColor|\marg{color}, where \meta{color}
+% is a color that should be defined for the |xcolor| package. This
+% color is used only in the case the box will be used for data
+% capture: it is not used on the corrected answer sheet (|answers| or
+% |indivanswers| package option), and not used on the subject part of
+% an exam with a separate answer sheet (|separateanswersheet| package
+% option).
+%
 % \begin{amcxyfile}{automultiplechoice.xy1}
 % For example, |\AMC@boxedchar{K}{1}{test}{}| produce the box
 % \makeatletter\AMC@boxedchar{K}{1}{test}{}\makeatother, writing the
@@ -1466,14 +1491,19 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{amcxyfile}
 %
 %    \begin{macrocode}
+\def\AMC@boxcolor{black}
+\newcommand\AMCboxColor[1]{%
+  \def\AMC@boxcolor{#1}}
 \newcommand\AMC@boxedchar[4]{\AMC@LR{\hspace{0pt}%
-  {\fboxsep=\z@\fboxrule=\AMC@boxedrule%
-    \lower\AMC@boxeddown\hbox{\fcolorbox{black}%
-      {\ifx\@empty#4\@empty white\else black\fi}%
+  {\ifx\@empty#2\@empty \def\AMC@boxcolor{black}\fi%
+   \ifAMC@correc\def\AMC@boxcolor{black}\fi%
+   \fboxsep=\z@\fboxrule=\AMC@boxedrule%
+    \lower\AMC@boxeddown\hbox{\fcolorbox{\AMC@boxcolor}%
+      {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}%
       {\vbox to \AMC@boxeddim{\AMC@tracepos{#2}{#3}\vfill %
-          \hbox to \AMC@boxeddim{\hfill{#1}\hfill}\vfill}%
+          \hbox to \AMC@boxeddim{\hfill{\textcolor{\AMC@boxcolor}{#1}}\hfill}\vfill}%
         \AMC@tracepos{#2}{#3}}}}}}
-%    \end{macrocode}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMC@caselettre}\begin{macro}{\AMCchoiceLabel}
 % Command |\AMC@caselettre| is the same as |\AMC@boxedchar|, but if
@@ -2281,7 +2311,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}
     \fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}
     \fancyhead[C]{\AMC@LR{\he@dhaut{%
-        \begin{minipage}[b]{\AMC@CBtaille}
+        \begin{minipage}[b]{\AMC@CBtaille}\AMCboxColor{black}
           \AMCbin@begin{1}\noindent%
           \AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}\\
           \AMCbin@begin{2}\noindent%

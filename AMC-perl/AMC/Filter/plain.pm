@@ -34,6 +34,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
     $self->{'options_names'}=[qw/Title Presentation Code Lang Font
+				 BoxColor
 				 AnswerSheetTitle AnswerSheetPresentation
 				 AnswerSheetColumns
 				 CompleteMulti SeparateAnswerSheet
@@ -145,8 +146,7 @@ sub read_source {
     chomp;
 
     # comments
-    s/(?<!\\)\#.*//;
-    s/\\\#/\#/g;
+    s/^\s*\#.*//;
 
     # groups
     if(/^\s*Group:\s*(.*)/) {
@@ -314,7 +314,20 @@ sub file_header {
   $t .= $self->{'options'}->{'latex-preambule'};
   $t .= "\\begin{document}\n";
   $t .= "\\AMCrandomseed{1527384}\n";
-
+  if($self->{'options'}->{'boxcolor'}) {
+    if($self->{'options'}->{'boxcolor'}
+       =~ /^\\definecolor\{amcboxcolor\}/) {
+      $t .= $self->{'options'}->{'boxcolor'};
+    } elsif($self->{'options'}->{'boxcolor'}
+       =~ /^\#([a-f0-9]{2})([a-f0-9]{2})([a-f0-9]{2})$/i) {
+      $t .= "\\definecolor{amcboxcolor}{rgb}{"
+	.sprintf("%0.2f,%0.2f,%0.2f",map { hex($_)/256.0 } ($1,$2,$3))."}\n";
+    } else {
+      $t .= "\\definecolor{amcboxcolor}{named}{"
+	.$self->{'options'}->{'boxcolor'}."}\n";
+    }
+    $t .= "\\AMCboxColor{amcboxcolor}\n";
+  }
   $t .= "\\AMCtext{none}{"
     .$self->format_text($self->{'options'}->{'l-none'})."}\n"
     if($self->{'options'}->{'l-none'});
