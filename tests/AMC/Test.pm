@@ -562,7 +562,7 @@ sub begin {
 
 sub end {
   my ($self)=@_;
-  $self->trace("[T] ".$self->{'test_title'});
+  $self->trace("[T] ".$self->{'test_title'}) if($self->{'test_title'});
   $self->{'test_title'}='';
 }
 
