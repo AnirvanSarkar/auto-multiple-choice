@@ -4191,12 +4191,14 @@ sub edit_preferences {
     }
 
     # anavailable options, managed by the filter:
-    for my $k (("AMC::Filter::register::".$projet{'options'}->{'filter'})
-	       ->forced_options()) {
-    TYPES: for my $t (qw/c cb ce col f s t v x/) {
-	if(my $w=$gap->get_object("pref_projet_".$t."_".$k)) {
-	  $w->set_sensitive(0);
-	  last TYPES;
+    if($projet{'options'}->{'filter'}) {
+      for my $k (("AMC::Filter::register::".$projet{'options'}->{'filter'})
+		 ->forced_options()) {
+      TYPES: for my $t (qw/c cb ce col f s t v x/) {
+	  if(my $w=$gap->get_object("pref_projet_".$t."_".$k)) {
+	    $w->set_sensitive(0);
+	    last TYPES;
+	  }
 	}
       }
     }
