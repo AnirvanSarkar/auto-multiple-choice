@@ -2725,7 +2725,7 @@ sub saisie_auto_ok {
 		opendir(my $dh, $temp_dir)
 		    || debug "can't opendir $temp_dir: $!";
 		push @fs, map { "$temp_dir/$_" }
-		grep { /^page/ } readdir($dh);
+		sort { $a cmp $b } grep { /^page/ } readdir($dh);
 		closedir $dh;
 
 	    } else {
@@ -2796,7 +2796,8 @@ sub saisie_auto_ok {
 
 	    system(magick_module("convert"),@pre_options,$fich,"+adjoin","$temp_dir/$fb");
 	    opendir(my $dh, $temp_dir) || debug "can't opendir $temp_dir: $!";
-	    my @split = grep { -f "$temp_dir/$_" } readdir($dh);
+	    my @split = grep { -f "$temp_dir/$_" } 
+	      sort { $a cmp $b } readdir($dh);
 	    closedir $dh;
 
 	    # if not to be copied in project dir, put them in the
