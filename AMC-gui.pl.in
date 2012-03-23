@@ -2684,7 +2684,7 @@ sub analyse_call {
 }
 
 sub saisie_auto_ok {
-    my @f=$w{'saisie_auto'}->get_filenames();
+    my @f=sort { $a cmp $b } ($w{'saisie_auto'}->get_filenames());
     my $copie=$w{'copie_scans'}->get_active();
 
     reprend_pref('saisie_auto',$projet{'options'});
