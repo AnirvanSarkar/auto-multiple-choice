@@ -34,7 +34,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
     $self->{'options_names'}=[qw/Title Presentation Code Lang Font
-				 BoxColor
+				 BoxColor PaperSize
 				 AnswerSheetTitle AnswerSheetPresentation
 				 AnswerSheetColumns
 				 CompleteMulti SeparateAnswerSheet
@@ -311,6 +311,8 @@ sub file_header {
     if($self->{'options'}->{'font'});
   $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
     if($self->{'options'}->{'arabicfont'} && $self->{'options'}->{'arabic'});
+  $t .= "\\geometry{paper=".lc($self->{'options'}->{'papersize'})."paper}\n"
+    if($self->{'options'}->{'papersize'});
   $t .= $self->{'options'}->{'latex-preambule'};
   $t .= "\\begin{document}\n";
   $t .= "\\AMCrandomseed{1527384}\n";
