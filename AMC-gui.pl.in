@@ -1984,17 +1984,21 @@ sub doc_maj {
 		 my $c=shift;
 		 my @err=$c->erreurs();
 		 if(@err) {
+		   my $message=__("Errors while processing the source file.")
+		     ." "
+		       .__("You have to correct the source file and re-run documents update.")." "
+# TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+			 .sprintf(__("See the processing log in '%s' below."),
+# TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+				  __"Command output details");
+		   $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($projet{'options'}->{'filter'} eq 'latex');
+		   $message.="\n\n".join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
+
 		     my $dialog = Gtk2::MessageDialog
 			 ->new_with_markup($w{'main_window'},
 					   'destroy-with-parent',
 					   'error','ok',
-					   __("Errors while compiling LaTeX source.")." "
-					   .__("You have to correct the source file and re-run documents update.")." "
-# TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-					   .sprintf(__("See the LaTeX log in '%s' below."),
-# TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-						    __"Command output details")." "
-					   .__("Use LaTeX editor or latex command for a precise diagnosis.")."\n\n".join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "") );
+					   $message);
 		     $dialog->run;
 		     $dialog->destroy;
 		 } else {

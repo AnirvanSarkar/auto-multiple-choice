@@ -131,6 +131,11 @@ sub value_cleanup {
   $$v =~ s/\s+$//;
 }
 
+sub parse_error {
+  my ($self,$text)=@_;
+  $self->error("<i>AMC-TXT(".sprintf(__('Line %d'),$.).")</i> ".$text);
+}
+
 sub read_source {
   my ($self,$input_file)=@_;
 
@@ -150,9 +155,14 @@ sub read_source {
 
     # groups
     if(/^\s*Group:\s*(.*)/) {
+      if($group && !@{$group->{'questions'}}) {
+# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new group whereas the previous group is empty
+ 	$self->parse_error(__"Previous group was empty");
+      }
       $group=$self->add_group('title'=>$1,'questions'=>[]);
       $self->value_cleanup($follow);
       $follow=\$group->{'title'};
+      $question='';
       next LINE;
     }
 
@@ -161,11 +171,21 @@ sub read_source {
       $self->{'options'}->{lc($1)}=$2;
       $self->value_cleanup($follow);
       $follow=\$self->{'options'}->{lc($1)};
+      $question='';
       next LINE;
+    }
+
+    if(/\s*([a-z0-9-]+):/i) {
+# TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option is given a value
+      $self->parse_error(sprintf(__("Unknown option: %s"),$1));
     }
 
     # questions
     if(/^\s*(\*{1,2})(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
+      if($question && $#{$question->{'answers'}}<1) {
+# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
+	$self->parse_error(__"Previous question has less than two choices");
+      }
       my $star=$1;
       my $text=$4;
       my $scoring=$3;
@@ -192,11 +212,16 @@ sub read_source {
 
     # answers
     if(/^\s*(\+|-)(?:\{([^\}]*)\})?\s*(.*)/) {
-      my $a=add_object($question->{'answers'},
-		       'text'=>$3,'correct'=>($1 eq '+'),
-		       'scoring'=>$2);
-      $self->value_cleanup($follow);
-      $follow=\$a->{'text'};
+      if($question) {
+	my $a=add_object($question->{'answers'},
+			 'text'=>$3,'correct'=>($1 eq '+'),
+			 'scoring'=>$2);
+	$self->value_cleanup($follow);
+	$follow=\$a->{'text'};
+      } else {
+# TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
+	$self->parse_error(__"Choice outside question");
+      }
       next LINE;
     }
 
