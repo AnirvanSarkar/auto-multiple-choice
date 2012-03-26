@@ -62,6 +62,7 @@ my $blur='1x1';
 my $threshold='60%';
 my $multiple='';
 my $ignore_red=1;
+my $pre_allocate=0;
 
 GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
@@ -77,6 +78,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "debug-image-dir=s"=>\$debug_image_dir,
 	   "multiple!"=>\$multiple,
 	   "ignore-red!"=>\$ignore_red,
+	   "pre-allocate=s"=>\$pre_allocate,
 	   );
 
 use_gettext;
@@ -353,7 +355,7 @@ my $temp_dir;
 my $commands;
 
 sub one_scan {
-  my ($scan)=@_;
+  my ($scan,$allocate)=@_;
   my $sf=$scan;
   if($project_dir) {
     $sf=abs2proj({'%PROJET',$project_dir,
@@ -587,7 +589,9 @@ sub one_scan {
   if(!$debug_image) {
     if($multiple) {
       $capture->begin_transaction('cFCN');
-      push @spc,$capture->new_page_copy(@epc[0,1]);
+      push @spc,$capture->new_page_copy(@epc[0,1],$allocate);
+      debug "WARNING: pre-allocation failed. $allocate -> "
+	.pageids_string(@spc) if($pre_allocate && $allocate != $spc[2]);
       $capture->set_page_auto($sf,@spc,-1,
 			      $ld->{'transf'}->params);
       $capture->end_transaction('cFCN');
@@ -785,8 +789,13 @@ sub one_scan {
   $progress_h->progres($delta);
 }
 
+my $scan_i=0;
+
 for my $s (@scans) {
-  $queue->add_process(\&one_scan,$s);
+  my $a=($pre_allocate ? $pre_allocate+$scan_i : 0);
+  debug "Pre-allocate ID=$a for scan $s\n" if($pre_allocate);
+  $queue->add_process(\&one_scan,$s,$a);
+  $scan_i++;
 }
 
 $queue->run();

@@ -385,6 +385,10 @@ sub define_statements {
      'studentCopies'=>{'sql'=>"SELECT student,copy FROM $t_page"
 		       ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		       ." GROUP BY student,copy ORDER BY student,copy"},
+     'maxCopy'=>{'sql'=>"SELECT MAX(copy) FROM $t_page"},
+     'pageCopies'=>{'sql'=>"SELECT copy FROM $t_page"
+		    ." WHERE student=? AND page=? AND copy>=?"
+		    ." ORDER BY copy"},
      'pageLastCopy'=>{'sql'=>"SELECT MAX(copy) FROM $t_page"
 		      ." WHERE student=? AND page=?"},
      'pagesChanged'=>{'sql'=>"SELECT student,page,copy FROM $t_page"
@@ -984,17 +988,36 @@ sub get_scan_page {
   return($f);
 }
 
-# new_page_copy($student,$page) creates a new (unused) copy number for
-# a given question page.
+# max_copy_number returns the maximum copy number for all pages
+
+sub max_copy_number {
+  my ($self)=@_;
+  return($self->sql_single($self->statement('maxCopy')) || 0);
+}
+
+# new_page_copy($student,$page,$allocate) creates a new (unused) copy
+# number for a given question page. If $allocate is positive, returns
+# $allocate if it is unused for this page, or the next unused number.
 
 sub new_page_copy {
-  my ($self,$student,$page)=@_;
-  my $c=$self->sql_single($self->statement('pageLastCopy'),
-			  $student,$page);
-  if($c) {
-    return($c+1);
+  my ($self,$student,$page,$allocate)=@_;
+  if($allocate) {
+    my $a=$allocate;
+    my @used=$self->sql_list($self->statement('pageCopies'),
+			     $student,$page,$allocate);
+    while(@used && $a==$used[0]) {
+      $a++;
+      shift @used;
+    }
+    return($a);
   } else {
-    return(1);
+    my $c=$self->sql_single($self->statement('pageLastCopy'),
+			    $student,$page);
+    if($c) {
+      return($c+1);
+    } else {
+      return(1);
+    }
   }
 }
 

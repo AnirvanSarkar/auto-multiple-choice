@@ -327,6 +327,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'export_sort'=>'n',
 
 		   'auto_capture_mode'=>-1,
+		   'allocate_ids'=>0,
 
 		   'email_col'=>'',
 		   'email_subject'=>"",
@@ -2601,13 +2602,19 @@ sub check_auto_capture_mode {
 sub saisie_automatique {
     # mode can't be changed if data capture has been made already
     my $n=check_auto_capture_mode;
+    $projet{'_capture'}->begin_read_transaction('adcM');
+    my $mcopy=$projet{'_capture'}->max_copy_number()+1;
+    $w{'saisie_auto_allocate_start'}=$mcopy;
+    $projet{'_capture'}->end_transaction('adcM');
 
     my $gsa=read_glade('saisie_auto',
 		       qw/copie_scans
 			  saisie_auto_c_auto_capture_mode
+			  saisie_auto_cb_allocate_ids
 			  button_capture_go/);
     $w{'copie_scans'}->set_active(1);
     transmet_pref($gsa,'saisie_auto',$projet{'options'});
+    $w{'saisie_auto_cb_allocate_ids'}->set_label(sprintf(__"Pre-allocate sheet ids from the page numbers, starting at %d",$mcopy));
 
     $w{'saisie_auto_c_auto_capture_mode'}->set_sensitive($n==0);
 }
@@ -2618,6 +2625,11 @@ sub saisie_auto_mode_update {
   valide_options_for_domain('saisie_auto',\%o,@_);
   $o{'auto_capture_mode'}=-1 if(!defined($o{'auto_capture_mode'}));
   $w{'button_capture_go'}->set_sensitive($o{'auto_capture_mode'}>=0);
+  if($o{'auto_capture_mode'}==1) {
+    $w{'saisie_auto_cb_allocate_ids'}->show();
+  } else {
+    $w{'saisie_auto_cb_allocate_ids'}->hide();
+  }
 }
 
 sub saisie_auto_annule {
@@ -2668,6 +2680,8 @@ sub analyse_call {
 	      "--liste-fichiers",$fh->filename,
 	      ($o{'ignore_red'} ? "--ignore-red" : "--no-ignore-red"),
 	);
+
+    push @args,"--pre-allocate",$oo{'allocate'} if($oo{'allocate'});
 
     # Diagnostic image file ?
 
@@ -2876,6 +2890,8 @@ sub saisie_auto_ok {
     analyse_call('f'=>\@f,
 		 'text'=>__("Automatic data capture..."),
 		 'progres'=>'analyse',
+		 'allocate'=>($projet{'options'}->{'allocate_ids'} ?
+			      $w{'saisie_auto_allocate_start'} : 0),
 		 'fin'=>sub {
 		     my $c=shift;
 		     close($c->{'o'}->{'fh'});
