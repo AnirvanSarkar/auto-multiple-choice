@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.250 (svn: 250)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2012-03-25 21:56 +0200\n"
-"PO-Revision-Date: 2012-03-25 21:58+0100\n"
+"POT-Creation-Date: 2012-03-26 10:54 +0200\n"
+"PO-Revision-Date: 2012-03-26 10:55+0100\n"
 "Last-Translator: Alexis Bienvenüe <paamc@passoire.fr>\n"
 "Language-Team: AB <paamc@passoire.fr>\n"
 "Language: fr\n"
@@ -1474,28 +1474,34 @@ msgstr "Veuillez coder votre numéro d'étudiant ci-contre, et écrire votre nom
 msgid "Line %d"
 msgstr "Ligne %d"
 
+#. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
+#: ../AMC-perl/AMC/Filter/plain.pm:144
+msgid "Previous question has less than two choices"
+msgstr "La question précédente a moins de deux réponses"
+
+#. TRANSLATORS: Error text for AMC-TXT parsing
+#: ../AMC-perl/AMC/Filter/plain.pm:153
+#, perl-format
+msgid "Previous question is a simple question but has %d correct choice(s)"
+msgstr "La question précédente est une question simple mais a %d réponses correctes"
+
 #. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new group whereas the previous group is empty
-#: ../AMC-perl/AMC/Filter/plain.pm:160
+#: ../AMC-perl/AMC/Filter/plain.pm:181
 msgid "Previous group was empty"
 msgstr "Le groupe précédent est vide"
 
 #. TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option is given a value
-#: ../AMC-perl/AMC/Filter/plain.pm:180
+#: ../AMC-perl/AMC/Filter/plain.pm:203
 #, perl-format
 msgid "Unknown option: %s"
 msgstr "Option inconnue : %s"
 
-#. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
-#: ../AMC-perl/AMC/Filter/plain.pm:187
-msgid "Previous question has less than two choices"
-msgstr "La question précédente a moins de deux réponses"
-
 #. TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
-#: ../AMC-perl/AMC/Filter/plain.pm:223
+#: ../AMC-perl/AMC/Filter/plain.pm:243
 msgid "Choice outside question"
 msgstr "Une réponse est donnée en-dehors d'une question"
 
-#: ../AMC-perl/AMC/Filter/plain.pm:563
+#: ../AMC-perl/AMC/Filter/plain.pm:584
 #, perl-format
 msgid "The following fonts does not seem to be installed on the system: <b>%s</b>."
 msgstr "Les polices de caractères suivantes ne semblent pas installées sur votre système : <b>%s</b>."

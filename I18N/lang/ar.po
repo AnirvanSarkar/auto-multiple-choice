@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.479 (svn: 479)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2012-03-25 21:56 +0200\n"
+"POT-Creation-Date: 2012-03-26 10:54 +0200\n"
 "PO-Revision-Date: 2012-03-13 23:26+0300\n"
 "Last-Translator: Hatim <dr.hatim@hotmail.com>\n"
 "Language-Team: red sea\n"
@@ -1631,28 +1631,34 @@ msgstr "فضلا ظلل رقم الطالب, واكتب اسمك في الصند
 msgid "Line %d"
 msgstr "عرض الخط"
 
+#. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
+#: ../AMC-perl/AMC/Filter/plain.pm:144
+msgid "Previous question has less than two choices"
+msgstr ""
+
+#. TRANSLATORS: Error text for AMC-TXT parsing
+#: ../AMC-perl/AMC/Filter/plain.pm:153
+#, perl-format
+msgid "Previous question is a simple question but has %d correct choice(s)"
+msgstr ""
+
 #. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new group whereas the previous group is empty
-#: ../AMC-perl/AMC/Filter/plain.pm:160
+#: ../AMC-perl/AMC/Filter/plain.pm:181
 msgid "Previous group was empty"
 msgstr ""
 
 #. TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option is given a value
-#: ../AMC-perl/AMC/Filter/plain.pm:180
+#: ../AMC-perl/AMC/Filter/plain.pm:203
 #, perl-format
 msgid "Unknown option: %s"
 msgstr ""
 
-#. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
-#: ../AMC-perl/AMC/Filter/plain.pm:187
-msgid "Previous question has less than two choices"
-msgstr ""
-
 #. TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
-#: ../AMC-perl/AMC/Filter/plain.pm:223
+#: ../AMC-perl/AMC/Filter/plain.pm:243
 msgid "Choice outside question"
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:563
+#: ../AMC-perl/AMC/Filter/plain.pm:584
 #, perl-format
 msgid ""
 "The following fonts does not seem to be installed on the system: <b>%s</b>."

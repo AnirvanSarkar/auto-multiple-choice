@@ -136,6 +136,27 @@ sub parse_error {
   $self->error("<i>AMC-TXT(".sprintf(__('Line %d'),$.).")</i> ".$text);
 }
 
+sub check_answers {
+  my ($self,$question)=@_;
+  if($question) {
+    if($#{$question->{'answers'}}<1) {
+# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
+      $self->parse_error(__"Previous question has less than two choices");
+    } else {
+      my $n_correct=0;
+      for my $a (@{$question->{'answers'}}) {
+	$n_correct++ if($a->{'correct'});
+      }
+      if(!$question->{'multiple'}) {
+	if($n_correct!=1) {
+# TRANSLATORS: Error text for AMC-TXT parsing
+	  $self->parse_error(sprintf(__("Previous question is a simple question but has %d correct choice(s)"),$n_correct));
+	}
+      }
+    }
+  }
+}
+
 sub read_source {
   my ($self,$input_file)=@_;
 
@@ -162,6 +183,7 @@ sub read_source {
       $group=$self->add_group('title'=>$1,'questions'=>[]);
       $self->value_cleanup($follow);
       $follow=\$group->{'title'};
+      $self->check_answers($question);
       $question='';
       next LINE;
     }
@@ -171,6 +193,7 @@ sub read_source {
       $self->{'options'}->{lc($1)}=$2;
       $self->value_cleanup($follow);
       $follow=\$self->{'options'}->{lc($1)};
+      $self->check_answers($question);
       $question='';
       next LINE;
     }
@@ -182,10 +205,7 @@ sub read_source {
 
     # questions
     if(/^\s*(\*{1,2})(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
-      if($question && $#{$question->{'answers'}}<1) {
-# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
-	$self->parse_error(__"Previous question has less than two choices");
-      }
+      $self->check_answers($question);
       my $star=$1;
       my $text=$4;
       my $scoring=$3;
@@ -231,6 +251,7 @@ sub read_source {
     }
   }
   $self->value_cleanup($follow);
+  $self->check_answers($question);
   close(IN);
 }
 
