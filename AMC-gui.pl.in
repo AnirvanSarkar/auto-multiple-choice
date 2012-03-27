@@ -3219,7 +3219,7 @@ sub filter_changed {
     debug "Ask for confirmation";
     my $text;
     if($projet{'_capture'}->n_pages_transaction()>0) {
-      $text=_("The working documents are already prepared with the current file format. If you change the file format, working documents and all other data for this project will be ereased.").' '
+      $text=__("The working documents are already prepared with the current file format. If you change the file format, working documents and all other data for this project will be ereased.").' '
 	.__("Do you wish to continue?")." "
 	  .__("Click on Ok to erease old working documents and change file format, and on Cancel to get back to the same file format.")
 	    ."\n<b>".__("To allow the use of an already printed question, cancel!")."</b>";
