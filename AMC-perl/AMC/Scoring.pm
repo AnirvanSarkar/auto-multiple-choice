@@ -29,6 +29,7 @@ sub new {
     my $self={'onerror'=>'stderr',
 	      'seuil'=>0,
 	      'data'=>'',
+	      'default_strategy'=>{},
 	      '_capture'=>'',
 	      '_scoring'=>'',
 	  };
@@ -43,6 +44,8 @@ sub new {
       $self->{'_capture'}=$self->{'data'}->module('capture');
       $self->{'_scoring'}=$self->{'data'}->module('scoring');
     }
+
+    $self->set_default_strategy();
 
     return($self);
 }
@@ -118,6 +121,13 @@ sub degroupe {
     return(%r);
 }
 
+sub set_default_strategy {
+  my ($self,$strategy_string)=@_;
+  $self->{'default_strategy'}=
+    {$self->degroupe($strategy_string,
+		     {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0,'auto'=>-1},{})};
+}
+
 # returns the score for a particular student-sheet/question, applying
 # the given scoring strategy.
 sub score_question {
@@ -171,7 +181,7 @@ sub score_question {
 
 	%b_q=$self->degroupe($question_data->{'default_strategy'}
 			     .",".$question_data->{'strategy'},
-			     {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0},
+			     $self->{'default_strategy'},
 			     $vars);
 
 	if($b_q{'haut'}) {
@@ -231,7 +241,7 @@ sub score_question {
 
 	%b_q=$self->degroupe($question_data->{'default_strategy'}
 			     .",".$question_data->{'strategy'},
-			     {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'auto'=>-1},
+			     $self->{'default_strategy'},
 			     $vars);
 
 	if(defined($b_q{'mz'})) {

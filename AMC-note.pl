@@ -158,6 +158,8 @@ for my $sc (@a_calculer) {
 
   my $ssb=$scoring->student_scoring_base(@$sc,$seuil);
 
+  $bar->set_default_strategy($ssb->{'main_strategy'});
+
   for my $question (keys %{$ssb->{'questions'}}) {
     my $q=$ssb->{'questions'}->{$question};
 
