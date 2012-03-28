@@ -47,6 +47,7 @@ sub new {
      'filter'=>'',
      'tex_engine'=>'pdflatex',
      'multiple'=>'',
+     'pre_allocate'=>0,
      'n_copies'=>5,
      'check_marks'=>'',
      'perfect_copy'=>[3],
@@ -150,7 +151,7 @@ sub install {
 
     if(@s) {
       $self->trace("[I] Provided scans: ".(1+$#s));
-      $self->{'scans'}=[map { $self->{'temp_dir'}."/scans/$_" } @s];
+      $self->{'scans'}=[map { $self->{'temp_dir'}."/scans/$_" } sort { $a cmp $b } @s];
     }
   }
 
@@ -284,6 +285,7 @@ sub analyse {
 
   $self->amc_command('analyse',
 		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
+		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
 		     '--projet','%PROJ',
 		     '--data','%DATA',
@@ -292,6 +294,7 @@ sub analyse {
 		     ) if($self->{'debug'});
   $self->amc_command('analyse',
 		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
+		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
 		     '--projet','%PROJ',
 		     '--data','%DATA',
