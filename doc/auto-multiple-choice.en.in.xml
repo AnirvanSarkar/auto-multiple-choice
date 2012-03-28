@@ -1532,6 +1532,65 @@ Durée : 10 minutes.
       </sect3>
 
       <sect3>
+        <title>Page size, margins</title>
+
+        <para>The <command>automultiplechoice</command> LaTeX package uses
+        <command>geometry</command> to set the margins and page layout. You
+        can overwrite its settings using the <command>\geometry</command>
+        command just before the <code>\begin{document}</code> - see the
+        geometry package documentation for details. The values initially set
+        by AMC are:</para>
+
+        <programlisting>\geometry{hmargin=3cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=3.5cm,bottom=2.5cm}</programlisting>
+
+        <para>When reducing the margins to gain some space, keep in mind
+        that:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>The four corner marks must be printed entirely (they could
+            disappear due to the printer margins).</para>
+          </listitem>
+
+          <listitem>
+            <para>The four corner marks must be entirely visible on the scans
+            (if they are too close from the border and the paper moved a
+            little or turned a little during scanning, this could not be the
+            case).</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>It is also possible to set the paper size as an option to add to
+        the list given as argument to the <command>\geometry</command>
+        command. Available values include <code>a4paper</code>,
+        <code>a5paper</code>, <code>a6paper</code>, <code>b4paper</code>,
+        <code>b5paper</code>, <code>ansibpaper</code>,
+        <code>ansicpaper</code>, <code>ansidpaper</code>,
+        <code>letterpaper</code>, <code>executivepaper</code>,
+        <code>legalpaper</code>. </para>
+
+        <para>For small paper sizes, it may also be interesting to change the
+        position of the human readable sheet IDs (like <code>+1/1/53+</code>)
+        in the header. This can be done using the
+        <command>\AMCidsPosition</command> command, in the form</para>
+
+        <programlisting>\AMCidsPosition{pos=<replaceable>p</replaceable>,width=<replaceable>w</replaceable>,height=<replaceable>h</replaceable>}</programlisting>
+
+        <para>where <replaceable>p</replaceable> can be <code>none</code>,
+        <code>top</code> or <code>side</code>, and the dimensions
+        <replaceable>w</replaceable> and <replaceable>h</replaceable> refers
+        to the (invisible) box containing the ID. The default values
+        are</para>
+
+        <programlisting>\AMCidsPosition{pos=side,width=4cm,height=3ex}</programlisting>
+
+        <para>Let us end with an example for A5 paper sheets:</para>
+
+        <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
+\AMCidsPosition{pos=top}</programlisting>
+      </sect3>
+
+      <sect3>
         <title>Check-box presentation style</title>
 
         <para>The <command>\AMCboxDimensions</command> command allows one to

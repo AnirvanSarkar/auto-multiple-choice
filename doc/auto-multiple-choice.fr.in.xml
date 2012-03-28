@@ -1621,6 +1621,71 @@ Durée : 10 minutes.
       </sect3>
 
       <sect3>
+        <title>Papier, marges</title>
+
+        <para>Le paquet LaTeX <command>automultiplechoice</command> utilise
+        <command>geometry</command> pour gérer les marges et la mise en page.
+        Vous pouvez modifier ses réglages grâce à l'utilisation de la commande
+        <command>\geometry</command> juste avant le
+        <code>\begin{document}</code> - voir la documentation du paquet
+        <command>geometry</command> pour plus de détails. Les valeurs
+        initialisées par AMC sont les suivantes :</para>
+
+        <programlisting>\geometry{hmargin=3cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=3.5cm,bottom=2.5cm}</programlisting>
+
+        <para>Si vous réduisez les marges pour gagner de la place, gardez à
+        l'esprit que :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Les quatre marques de coin doivent être imprimées
+            entièrement (elles pourraient disparaître à cause des marges
+            d'impression).</para>
+          </listitem>
+
+          <listitem>
+            <para>Les quatre marques de coin doivent apparaître complètement
+            sur les scans des copies remplies par les étudiants (si elles sont
+            trop près des bords, elles pourraient disparaître lors du scan à
+            la suite d'un décalage ou d'une rotation des feuilles de
+            papier).</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Vous pouvez également préciser la taille de papier à utiliser en
+        ajoutant l'option correspondante à la liste donnée en argument à
+        <command>\geometry</command>. Parmi les valeurs possibles, on trouvera
+        <code>a4paper</code>, <code>a5paper</code>, <code>a6paper</code>,
+        <code>b4paper</code>, <code>b5paper</code>, <code>ansibpaper</code>,
+        <code>ansicpaper</code>, <code>ansidpaper</code>,
+        <code>letterpaper</code>, <code>executivepaper</code>,
+        <code>legalpaper</code>.</para>
+
+        <para>Pour des petites tailles de papier, il peut aussi être
+        intéressant de modifier la position de l'identifiant de copie (de la
+        forme <code>+1/1/53+</code>) à côté de son équivalent en cases
+        blanches et noires, en haut de chaque page. Ceci est rendu possible
+        par la commande <command>\AMCidsPosition</command>, sous la
+        forme</para>
+
+        <programlisting>\AMCidsPosition{pos=<replaceable>p</replaceable>,width=<replaceable>w</replaceable>,height=<replaceable>h</replaceable>}</programlisting>
+
+        <para>où <replaceable>p</replaceable> peut valoir <code>none</code>
+        (ne pas écrire cet identifiant), <code>top</code> (l'écrire au-dessus)
+        et <code>side</code> (à côté), et <replaceable>w</replaceable> et
+        <replaceable>h</replaceable> sont les dimensions de la boîte
+        (invisible) qui entoure l'identifiant. Les valeurs par défaut sont les
+        suivantes :</para>
+
+        <programlisting>\AMCidsPosition{pos=side,width=4cm,height=3ex}</programlisting>
+
+        <para>Concluons par un exemple raisonnable au format A5 :</para>
+
+        <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
+\AMCidsPosition{pos=top}</programlisting>
+      </sect3>
+
+      <sect3>
         <title>Style des cases à cocher</title>
 
         <para>La commande <command>\AMCboxDimensions</command> permet de
