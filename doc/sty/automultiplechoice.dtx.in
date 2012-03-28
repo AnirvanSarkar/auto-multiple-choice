@@ -1149,6 +1149,37 @@ Three digits and two letters:\insertgroup{mixed}.
 \newdimen\AMCinterBrep\AMCinterBrep=.5ex
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
+% \subsection{Human readable sheet ID position}
+%
+% \begin{macro}{\AMCidsPosition}
+% The position of the human readable sheet ID, near the corresponding
+% binary boxes, is set with the |\AMCidsPosition| command, in the form
+% |\AMCidsPosition{pos=|\meta{position}|,width=|\meta{width}|,height=|\meta{height}|}|,
+% where \meta{position} is one of |side| (default), |top| and |none|,
+% \meta{width} is the width of the box enclosing the ID (default value is
+% |4cm|), and \meta{height} is the height of the box enclosing the ID
+% (default value is |3ex|).
+%
+%    \begin{macrocode}
+\newif\ifAMCids@top
+\newif\ifAMCids@side
+\newdimen\AMCids@width
+\newdimen\AMCids@height
+\define@choicekey*{AMCids}{pos}[\var\nr]{none,top,side}{%
+  \ifcase\nr\relax
+    \AMCids@topfalse\AMCids@sidefalse
+  \or
+    \AMCids@toptrue\AMCids@sidefalse
+  \or
+    \AMCids@topfalse\AMCids@sidetrue
+  \fi
+}
+\define@key{AMCids}{width}{\AMCids@width=#1}
+\define@key{AMCids}{height}{\AMCids@height=#1}
+\def\AMCidsPosition#1{\setkeys{AMCids}{#1}}
+\AMCidsPosition{pos=side,width=4cm,height=3ex}
+%    \end{macrocode}\end{macro}
+% 
 % \subsection{Localisation}
 %
 % In this section, some localised strings or commands are defined, for
@@ -2311,15 +2342,16 @@ Three digits and two letters:\insertgroup{mixed}.
     \fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}
     \fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}
     \fancyhead[C]{\AMC@LR{\he@dhaut{%
-        \begin{minipage}[b]{\AMC@CBtaille}\AMCboxColor{black}
+        \begin{minipage}[b]{\AMC@CBtaille}\AMCboxColor{black}%
+          \ifAMCids@top\vbox to \AMCids@height{\texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}\fi%
           \AMCbin@begin{1}\noindent%
           \AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}\\
           \AMCbin@begin{2}\noindent%
           \AMC@binaryBoxes[\AMC@NCBpage]{\thepage}\ignorespaces%
           \AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{\the\AMCid@check}%
-        \end{minipage}
-        \hbox to 4cm{\hspace*{\fill}%
-          \texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}%
+        \end{minipage}%
+        \ifAMCids@side\hbox to \AMCids@width{\hspace*{\fill}%
+          \texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}\fi%
       }}}
     \fancyhfoffset[EOLR]{5mm}
   \fi
