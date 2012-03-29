@@ -30,6 +30,17 @@ sub name {
   return("empty");
 }
 
+sub extension {
+  return('.xxx');
+}
+
+sub type {
+  my ($self)=@_;
+  my $ext=$self->extension();
+  $ext =~ s/^.*\.//;
+  return($ext);
+}
+
 sub options_from_config {
   my ($self,$options_project,$options_main,$options_default)=@_;
   return();

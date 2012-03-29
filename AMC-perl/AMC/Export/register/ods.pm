@@ -35,6 +35,10 @@ sub name {
   return('OpenOffice');
 }
 
+sub extension {
+  return('.ods');
+}
+
 sub options_from_config {
   my ($self,$options_project,$options_main,$options_default)=@_;
   return("columns"=>$options_project->{'export_ods_columns'},

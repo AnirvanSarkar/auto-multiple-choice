@@ -35,6 +35,10 @@ sub name {
   return('CSV');
 }
 
+sub extension {
+  return('.csv');
+}
+
 sub options_from_config {
   my ($self,$options_project,$options_main,$options_default)=@_;
   my $enc=$options_project->{"encodage_csv"}

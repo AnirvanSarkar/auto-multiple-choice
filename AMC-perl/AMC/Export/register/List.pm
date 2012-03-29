@@ -36,6 +36,10 @@ sub name {
   return(__("PDF list"));
 }
 
+sub extension {
+  return('.pdf');
+}
+
 sub options_from_config {
   my ($self,$options_project,$options_main,$options_default)=@_;
   return("nom"=>$options_project->{'nom_examen'},

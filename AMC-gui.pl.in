@@ -1076,8 +1076,6 @@ for my $k (qw/0_0 0_1 1_0 1_1/) {
     $cb_stores{"symbole_".$k."_type"}=$symbole_type_cb;
 }
 
-my %extension_fichier=('List'=>'pdf');
-
 $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
 $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
 
@@ -1123,13 +1121,14 @@ sub exporte {
 
     my $format=$projet{'options'}->{'format_export'};
     my @options=();
-    my $ext=$extension_fichier{$format};
+    my $ext="AMC::Export::register::$format"->extension();
     if(!$ext) {
 	$ext=lc($format);
     }
+    my $type="AMC::Export::register::$format"->type();
     my $code=$projet{'options'}->{'code_examen'};
     $code=$projet{'nom'} if(!$code);
-    my $output=absolu('%PROJET/exports/'.$code.'.'.$ext);
+    my $output=absolu('%PROJET/exports/'.$code.$ext);
     my @needs_module=();
 
     my %ofc="AMC::Export::register::$format"
@@ -1187,7 +1186,8 @@ sub exporte {
 	     'fin'=>sub {
 		 if(-f $output) {
 		     if($projet{'options'}->{'after_export'} eq 'file') {
-			 commande_parallele($o{$ext.'_viewer'},$output);
+			 commande_parallele($o{$type.'_viewer'},$output)
+			   if($o{$type.'_viewer'});
 		     } elsif($projet{'options'}->{'after_export'} eq 'dir') {
 			 view_dir(absolu('%PROJET/exports/'));
 		     }
