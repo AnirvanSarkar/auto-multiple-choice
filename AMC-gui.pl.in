@@ -6267,7 +6267,7 @@ sub plugins_add {
 
     # already installed?
 
-    if(-e "$o_dir/plugins/$name") {
+    if($name=~/[^.]/ && -e "$o_dir/plugins/$name") {
       my $dialog = Gtk2::MessageDialog
 	->new_with_markup($w{'main_window'},
 			  'destroy-with-parent',
@@ -6277,13 +6277,15 @@ sub plugins_add {
       my $r=$dialog->run;
       $dialog->destroy;
       return if($r ne 'yes');
+
+      remove_tree("$o_dir/plugins/$name",{'verbose'=>0,'safe'=>1,'keep_root'=>0});
     }
 
     # go!
 
     debug "Installing plugin $name to $o_dir/plugins";
-    print "$main->$o_dir/plugins\n";
-    if(system('mv',$main,"$o_dir/plugins/$name")!=0) {
+
+    if(system('mv',$main,"$o_dir/plugins")!=0) {
       my $dialog = Gtk2::MessageDialog
 	->new_with_markup($w{'main_window'},
 			  'destroy-with-parent',
