@@ -742,7 +742,7 @@ my $gui=read_glade('main_window',
     pref_assoc_c_assoc_code pref_assoc_c_liste_key
     export_c_format_export
     export_c_export_sort export_cb_export_include_abs
-    config_export_modules
+    config_export_modules standard_export_options
     notation_c_regroupement_type notation_cb_regroupement_compose
     pref_prep_s_nombre_copies pref_prep_c_filter
     /);
@@ -1115,6 +1115,16 @@ sub maj_export {
 	} else {
 	  $w{'config_export_module_'.$_}->hide;
 	}
+      }
+    }
+
+    my %hide=("AMC::Export::register::".$projet{'options'}->{'format_export'})
+      ->hide();
+    for (qw/standard_export_options/) {
+      if($hide{$_}) {
+	$w{$_}->hide();
+      } else {
+	$w{$_}->show();
       }
     }
 }

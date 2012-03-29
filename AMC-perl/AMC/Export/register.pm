@@ -58,6 +58,10 @@ sub build_config_gui {
   my ($self,$w,$cb)=@_;
 }
 
+sub hide {
+  return('standard_export_options'=>0);
+}
+
 sub weight {
   return(1);
 }
