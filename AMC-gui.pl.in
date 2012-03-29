@@ -430,6 +430,10 @@ if(! -d $o_dir) {
     }
 }
 
+for my $o_sub (qw/plugins/) {
+  mkdir("$o_dir/$o_sub") if(! -d "$o_dir/$o_sub");
+}
+
 # Read/write options XML files
 
 sub pref_xx_lit {
@@ -3966,6 +3970,10 @@ sub regarde_regroupements {
     view_dir(absolu($projet{'options'}->{'cr'})."/corrections/pdf");
 }
 
+sub plugins_browse {
+  view_dir("$o_dir/plugins");
+}
+
 ###
 
 sub activate_apropos {
@@ -5196,6 +5204,35 @@ sub n_fich {
     }
 }
 
+sub unzip_to_temp {
+  my ($file)=@_;
+
+  my $temp_dir = tempdir( DIR=>tmpdir(),CLEANUP => 1 );
+  my $error=0;
+
+  my @cmd;
+
+  if($file =~ /\.zip$/i) {
+    @cmd=("unzip","-d",$temp_dir,$file);
+  } else {
+    @cmd=("tar","-x","-v","-z","-f",$file,"-C",$temp_dir);
+  }
+
+  debug "Extracting archive files\nFROM: $file\nWITH: ".join(' ',@cmd);
+  if(open(UNZIP,"-|",@cmd) ) {
+    while(<UNZIP>) {
+      debug $_;
+    }
+    close(UNZIP);
+  } else {
+    $error=$!;
+  }
+
+  return($temp_dir,$error);
+}
+
+
+
 sub source_latex_choisir {
 
     my %oo=@_;
@@ -5375,27 +5412,7 @@ sub source_latex_choisir {
 
 	# cree un repertoire temporaire pour dezipper
 
-	my $temp_dir = tempdir( DIR=>tmpdir(),CLEANUP => 1 );
-
-	my $rv=0;
-
-	my @cmd;
-
-	if($fich =~ /\.zip$/i) {
-	    @cmd=("unzip","-d",$temp_dir,$fich);
-	} else {
-	    @cmd=("tar","-x","-v","-z","-f",$fich,"-C",$temp_dir);
-	}
-
-	debug "Extracting archive files\nFROM: $fich\nWITH: ".join(' ',@cmd);
-	if(open(UNZIP,"-|",@cmd) ) {
-	    while(<UNZIP>) {
-		debug $_;
-	    }
-	    close(UNZIP);
-	} else {
-	    $rv=1;
-	}
+	my ($temp_dir,$rv)=unzip_to_temp($fich);
 
 	my ($n,$suivant)=n_fich($temp_dir);
 
@@ -6161,6 +6178,123 @@ sub choose_columns {
 
 sub choose_columns_current {
   choose_columns(lc($projet{'options'}->{'format_export'}));
+}
+
+#######################################
+
+# PLUGINS
+
+sub plugins_add {
+  my $d=Gtk2::FileChooserDialog
+    ->new(__("Install an AMC plugin"),
+	  $w{'main_window'},'open',
+	  'gtk-cancel'=>'cancel',
+	  'gtk-ok'=>'ok');
+  my $filter=Gtk2::FileFilter->new();
+  $filter->set_name(__"Plugins (zip, tgz)");
+  for my $ext (qw/ZIP zip TGZ tgz tar.gz TAR.GZ/) {
+    $filter->add_pattern("*.$ext");
+  }
+  $d->add_filter($filter);
+
+  my $r=$d->run;
+  if($r eq 'ok') {
+    my $plugin=$d->get_filename;
+    $d->destroy;
+
+    # unzip in a temporary directory
+
+    my ($temp_dir,$error)=unzip_to_temp($plugin);
+
+    if($error) {
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',
+			  sprintf(__("An error occured while trying to extract files from the plugin archive: %s."),$err));
+      $dialog->run;
+      $dialog->destroy;
+      return();
+    }
+
+    # checks validity
+
+    my ($nf,$main)=n_fich($temp_dir);
+    if($nf<1) {
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',
+			  __"Nothing extracted from the plugin archive. Check it.");
+      $dialog->run;
+      $dialog->destroy;
+      return();
+    }
+    if($nf>1 || !-d $main) {
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',
+			  __"This is not a valid plugin, as it contains more than one directory at the first level.");
+      $dialog->run;
+      $dialog->destroy;
+      return();
+    }
+
+    if(!-d "$main/perl/AMC") {
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',
+			  __"This is not a valid plugin, as it does not contain a perl/AMC subdirectory.");
+      $dialog->run;
+      $dialog->destroy;
+      return();
+    }
+
+    my $name=$main;
+    $name =~ s/.*\///;
+
+    # already installed?
+
+    if(-e "$o_dir/plugins/$name") {
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'question','yes-no',
+			  sprintf(__("A plugin is already installed with the same name (%s). Do you want to delete the old one and overwrite?"),
+				  "<b>$name</b>"));
+      my $r=$dialog->run;
+      $dialog->destroy;
+      return if($r ne 'yes');
+    }
+
+    # go!
+
+    debug "Installing plugin $name to $o_dir/plugins";
+    print "$main->$o_dir/plugins\n";
+    if(system('mv',$main,"$o_dir/plugins/$name")!=0) {
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',
+			  sprintf(__("Error while moving the plugin to the user plugin directory: %s"),$!));
+      my $r=$dialog->run;
+      $dialog->destroy;
+      return();
+    }
+
+    my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'info','ok',
+			  __"Please restart AMC before using the new plugin...");
+      my $r=$dialog->run;
+      $dialog->destroy;
+
+  } else {
+    $d->destroy;
+  }
 }
 
 #######################################

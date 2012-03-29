@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.20"/>
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkAccelGroup" id="accelgroup1"/>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="lower">1</property>
@@ -79,6 +79,11 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-edit</property>
+  </object>
+  <object class="GtkImage" id="image30">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-directory</property>
   </object>
   <object class="GtkImage" id="image32">
     <property name="visible">True</property>
@@ -286,6 +291,45 @@
                         <property name="image">image16</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="cleanup_dialog" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitem8">
+                        <property name="use_action_appearance">False</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Plugins</property>
+                        <property name="use_underline">True</property>
+                        <child type="submenu">
+                          <object class="GtkMenu" id="menu5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkImageMenuItem" id="browse_plugins_menuitem">
+                                <property name="label" translatable="yes" comments="Menu item from the Plugins menu. When selected, open the installed plugins directory.">Installed plugins</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes" comments="Tooltip for the Plugins-&gt;Browse menu item.">Open the installed plugins directory.</property>
+                                <property name="image">image30</property>
+                                <property name="use_stock">False</property>
+                                <signal name="activate" handler="plugins_browse" swapped="no"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkImageMenuItem" id="add_plugin_menuitem">
+                                <property name="label">gtk-add</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes" comments="Tooltip for the Plugin-&gt;Add (install) menuitem.">Install a plugin.</property>
+                                <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
+                                <signal name="activate" handler="plugins_add" swapped="no"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1256,6 +1300,15 @@
                                 <property name="n_rows">2</property>
                                 <property name="n_columns">2</property>
                                 <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
                                   <object class="GtkCheckButton" id="maj_bareme">
                                     <property name="label" translatable="yes">Update marking scale</property>
                                     <property name="use_action_appearance">False</property>
@@ -1267,15 +1320,6 @@
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="valide_options_correction" swapped="no"/>
                                   </object>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
