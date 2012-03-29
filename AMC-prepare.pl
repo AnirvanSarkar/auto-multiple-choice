@@ -35,6 +35,7 @@ use AMC::DataModule::scoring ':question';
 use AMC::Queue;
 
 use_gettext;
+use_amc_plugins();
 
 $VERSION_BAREME=2;
 

@@ -25,7 +25,7 @@ use AMC::Gui::Avancement;
 
 use Module::Load;
 
-#use encoding 'utf8';
+use_amc_plugins();
 
 my $module='CSV';
 my $output='';

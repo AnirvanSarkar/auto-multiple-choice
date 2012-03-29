@@ -101,6 +101,7 @@ Gtk2::IconTheme->get_default->prepend_search_path(amc_specdir('icons'));
 Gtk2::Window->set_default_icon_list(map { Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$_,"force-svg") } (8,16,32,48,64,128));
 
 use_gettext;
+use_amc_plugins();
 
 my $debug=0;
 my $debug_file='';
@@ -134,7 +135,7 @@ $glade_base =~ s/\.p[ml]$/-/i;
 my $home_dir=Glib::get_home_dir();
 
 my $o_file='';
-my $o_dir=$home_dir.'/.AMC.d';
+my $o_dir=amc_user_confdir();
 my $state_file="$o_dir/state.xml";
 
 # Gets system encoding
