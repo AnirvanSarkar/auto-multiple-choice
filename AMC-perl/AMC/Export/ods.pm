@@ -37,12 +37,20 @@ sub new {
     $self->{'out.columns'}='student.key,student.name';
     $self->{'out.font'}="Arial";
     $self->{'out.size'}="10";
+    $self->{'out.stats'}='';
+    $self->{'out.statsindic'}='';
     if(can_load(modules=>{'Gtk2'=>undef,'Cairo'=>undef})) {
       debug "Using Gtk2/Cairo to compute column width";
       $self->{'calc.Gtk2'}=1;
     }
     bless ($self, $class);
     return $self;
+}
+
+sub load {
+  my ($self)=@_;
+  $self->SUPER::load();
+  $self->{'_capture'}=$self->{'_data'}->module('capture');
 }
 
 # returns the column width (in cm) to use when including the given texts.
@@ -209,6 +217,101 @@ sub set_cell {
   }
 }
 
+sub build_stats_table {
+  my ($self,$cts,$doc,$stats,@q)=@_;
+
+  my %xbase=();
+
+  my $ybase=0;
+  my $x=0;
+  for my $q (@q) {
+    $doc->cellSpan($stats,$ybase,$x,4);
+    $doc->cellStyle($stats,$ybase,$x,'StatsQName');
+    $doc->cellValue($stats,$ybase,$x,encode('utf-8',$q->{'title'}));
+
+    $doc->cellStyle($stats,$ybase+1,$x,'General');
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the reference of the boxes. Please let this name short.
+    $doc->cellValue($stats,$ybase+1,$x,encode('utf-8',__("Box")));
+    $doc->cellStyle($stats,$ybase+1,$x+1,'General');
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
+    $doc->cellValue($stats,$ybase+1,$x+1,encode('utf-8',__("Nb")));
+    $doc->cellStyle($stats,$ybase+1,$x+2,'General');
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
+    $doc->cellValue($stats,$ybase+1,$x+2,encode('utf-8',__("/all")));
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
+    $doc->cellStyle($stats,$ybase+1,$x+3,'General');
+    $doc->cellValue($stats,$ybase+1,$x+3,encode('utf-8',__("/expr")));
+
+    $xbase{$q->{'question'}}=$x;
+    $x+=5;
+  }
+
+  my %y_item=('all'=>2,'empty'=>3,'invalid'=>4);
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
+  my %y_name=('all'=>__"ALL",
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question did not get an answer. Please let this label short.
+	      'empty'=>__"NA",
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got an invalid answer. Please let this label short.
+	      'invalid'=>__"INVALID");
+  my %q_amax=();
+
+  for my $counts (sort { $a->{'answer'} eq "0" ? 1
+			   : $b->{'answer'} eq "0" ? -1 : 0 } @$cts) {
+    my $x=$xbase{$counts->{'question'}};
+      if(defined($x)) {
+	my $y=$y_item{$counts->{'answer'}};
+	my $name=$y_name{$counts->{'answer'}};
+	if(!$y) {
+	  if($counts->{'answer'}>0) {
+	    $q_amax{$counts->{'question'}}=$counts->{'answer'}
+	      if($counts->{'answer'}>$q_amax{$counts->{'question'}});
+	    $y=4+$counts->{'answer'};
+	    $name=chr(ord("A")+$counts->{'answer'}-1);
+	  } else {
+	    $q_amax{$counts->{'question'}}++;
+	    $y=4+$q_amax{$counts->{'question'}};
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got the "none of the above are correct" answer. Please let this label short.
+	    $name=__"NONE";
+	  }
+	}
+	$doc->cellStyle($stats,$ybase+$y,$x+1,'NumCopie');
+	$doc->cellValueType($stats,$ybase+$y,$x+1,'float');
+	$doc->cellValue($stats,$ybase+$y,$x+1,$counts->{'nb'});
+	$doc->cellStyle($stats,$ybase+$y,$x,'General');
+	$doc->cellValue($stats,$ybase+$y,$x,$name);
+      }
+    }
+
+  for my $q (@q) {
+    my $xb=$xbase{$q->{'question'}};
+
+    for my $y (3,4) {
+      $doc->cellStyle($stats,$ybase+$y,$xb+2,'Qpc');
+      $doc->cellValueType($stats,$ybase+$y,$xb+2,'float');
+      $doc->cellFormula($stats,$ybase+$y,$xb+2,
+			"oooc:=[.".yx2ooo($ybase+$y,$xb+1)."]/[."
+			.yx2ooo($ybase+2,$xb+1)."]");
+    }
+
+    for my $i (1..$q_amax{$q->{'question'}}) {
+      my $y=$ybase+4+$i;
+      $doc->cellStyle($stats,$y,$xb+2,'Qpc');
+      $doc->cellValueType($stats,$y,$xb+2,'float');
+      $doc->cellFormula($stats,$y,$xb+2,
+			"oooc:=[.".yx2ooo($y,$xb+1)."]/[."
+			.yx2ooo($ybase+2,$xb+1)."]");
+
+      $doc->cellStyle($stats,$y,$xb+3,'Qpc');
+      $doc->cellValueType($stats,$y,$xb+3,'float');
+      $doc->cellFormula($stats,$y,$xb+3,
+			"oooc:=[.".yx2ooo($y,$xb+1)."]/([."
+			.yx2ooo($ybase+2,$xb+1)."]-[."
+			.yx2ooo($ybase+3,$xb+1)."]-[."
+			.yx2ooo($ybase+4,$xb+1)."])");
+    }
+  }
+}
+
 sub export {
     my ($self,$fichier)=@_;
 
@@ -343,6 +446,23 @@ sub export {
 			     'fo:text-align' => "center",
 			 },
 			 'references'=>{'style:data-style-name' => 'Percentage'},
+			 );
+
+    # StatsQName : nom de question
+    $styles->createStyle('StatsQName',
+			 parent=>'Tableau',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'paragraph',
+			     'fo:text-align' => "center",
+			 },
+			 );
+    $styles->updateStyle('StatsQName',
+			 properties=>{
+				      -area=>'text',
+				      'fo:font-weight'=>'bold',
+				      'fo:font-size'=>"14pt",
+			 },
 			 );
 
     # NoteQ : note pour une question
@@ -799,9 +919,38 @@ sub export {
     }
 
     ##########################################################################
+    # tables for questions basic statistics
+    ##########################################################################
+
+    my ($dt,$cts,$man);
+
+    if($self->{'out.stats'} || $self->{'out.statsindic'}) {
+      $self->{'_scoring'}->begin_read_transaction('XsLO');
+      $dt=$self->{'_scoring'}->variable('darkness_threshold');
+      $cts=$self->{'_capture'}->ticked_sums($dt);
+      $man=$self->{'_capture'}->max_answer_number();
+      $self->{'_scoring'}->end_transaction('XsLO');
+    }
+
+    if($self->{'out.stats'}) {
+# TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
+      my $stats_0=$doc->appendTable(encode('utf-8',__("Questions statistics")),6+$man,5*(1+$#questions_0));
+
+      $self->build_stats_table($cts,$doc,$stats_0,@questions_0);
+    }
+
+    if($self->{'out.statsindic'}) {
+# TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
+      my $stats_1=$doc->appendTable(encode('utf-8',__("Indicative questions statistics")),6+$man,5*(1+$#questions_1));
+
+      $self->build_stats_table($cts,$doc,$stats_1,@questions_1);
+    }
+
+    ##########################################################################
     # Legend table
     ##########################################################################
 
+# TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
     my $legend=$doc->appendTable(encode('utf-8',__("Legend")),6,2);
 
     $doc->cellSpan($legend,0,0,2);
@@ -811,15 +960,19 @@ sub export {
     $jj=2;
 
     $doc->cellStyle($legend,$jj,0,'NoteX');
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been asked to some students.
     $doc->cellValue($legend,$jj,1,encode('utf-8',__("Non applicable")));
     $jj++;
     $doc->cellStyle($legend,$jj,0,'NoteV');
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered.
     $doc->cellValue($legend,$jj,1,encode('utf-8',__("No answer")));
     $jj++;
     $doc->cellStyle($legend,$jj,0,'NoteE');
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
     $doc->cellValue($legend,$jj,1,encode('utf-8',__("Invalid answer")));
     $jj++;
     $doc->cellStyle($legend,$jj,0,'CodeV');
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the indicative questions.
     $doc->cellValue($legend,$jj,1,encode('utf-8',__("Indicative")));
     $jj++;
 

@@ -44,11 +44,15 @@ sub options_from_config {
   return("columns"=>$options_project->{'export_ods_columns'},
 	 "nom"=>$options_project->{'nom_examen'},
 	 "code"=>$options_project->{'code_examen'},
+	 "stats"=>$options_project->{'export_ods_stats'},
+	 "statsindic"=>$options_project->{'export_ods_statsindic'},
 	 );
 }
 
 sub options_default {
   return('export_ods_columns'=>'student.copy,student.key,student.name',
+	 'export_ods_stats'=>0,
+	 'export_ods_statsindic'=>1,
 	 );
 }
 
@@ -58,9 +62,35 @@ sub needs_module {
 
 sub build_config_gui {
   my ($self,$w,$cb)=@_;
+  my $t=Gtk2::Table->new(3,2);
+  my $widget;
+  my $y=0;
+
+# TRANSLATORS: Check button label in the exports tab. If checked, a table with questions basic statistics will be added to the ODS exported spreadsheet.
+  $t->attach(Gtk2::Label->new(__"Stats table"),
+	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $widget=Gtk2::CheckButton->new();
+  $w->{'export_cb_export_ods_stats'}=$widget;
+  $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each question?");
+  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $y++;
+
+# TRANSLATORS: Check button label in the exports tab. If checked, a table with indicative questions basic statistics will be added to the ODS exported spreadsheet.
+  $t->attach(Gtk2::Label->new(__"Indicative stats table"),
+	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $widget=Gtk2::CheckButton->new();
+  $w->{'export_cb_export_ods_statsindic'}=$widget;
+  $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each indicative question?");
+  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $y++;
+
   my $b=Gtk2::Button->new_with_label(__"Choose columns");
   $b->signal_connect(clicked => \&main::choose_columns_current);
-  return($b);
+  $t->attach($b,0,2,$y,$y+1,["expand","fill"],[],0,0);
+  $y++;
+
+  $t->show_all;
+  return($t);
 }
 
 sub weight {

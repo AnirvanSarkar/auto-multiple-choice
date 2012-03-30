@@ -386,6 +386,7 @@ sub define_statements {
 		       ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		       ." GROUP BY student,copy ORDER BY student,copy"},
      'maxCopy'=>{'sql'=>"SELECT MAX(copy) FROM $t_page"},
+     'maxAnswer'=>{'sql'=>"SELECT MAX(id_b) FROM $t_zone WHERE type=?"},
      'pageCopies'=>{'sql'=>"SELECT copy FROM $t_page"
 		    ." WHERE student=? AND page=? AND copy>=?"
 		    ." ORDER BY copy"},
@@ -460,6 +461,33 @@ sub define_statements {
 		." ELSE 0"
 		." END FROM $t_zone"
 		." WHERE student=? AND copy=? AND type=? AND id_a=? AND id_b=?"},
+     'tickedSums'=>{'sql'=>
+		    "SELECT * FROM (SELECT zone.id_a AS question,zone.id_b AS answer,SUM(CASE"
+		    ." WHEN why=\"V\" THEN 0"
+		    ." WHEN why=\"E\" THEN 0"
+		    ." WHEN zone.manual >= 0 THEN zone.manual"
+		    ." WHEN zone.total<=0 THEN -1"
+		    ." WHEN zone.black >= ? * zone.total THEN 1"
+		    ." ELSE 0"
+		    ." END) AS nb"
+		    ." FROM $t_zone AS zone, scoring.scoring_score AS score"
+		    ." ON zone.student=score.student AND zone.copy=score.copy AND zone.id_a=score.question"
+		    ." WHERE zone.type=? GROUP BY zone.id_a,zone.id_b)"
+		    ." UNION"
+		    ." SELECT * FROM (SELECT question,\"invalid\" AS answer,"
+		    ." COUNT(*)-COUNT(NULLIF(why,\"E\")) AS nb"
+		    ." FROM scoring.scoring_score"
+		    ." GROUP BY question)"
+		    ." UNION"
+		    ." SELECT * FROM (SELECT question,\"empty\" AS answer,"
+		    ." COUNT(*)-COUNT(NULLIF(why,\"V\")) AS nb"
+		    ." FROM scoring.scoring_score"
+		    ." GROUP BY question)"
+		    ." UNION"
+		    ." SELECT * FROM (SELECT question,\"all\" AS answer,COUNT(*) AS nb"
+		    ." FROM scoring.scoring_score"
+		    ." GROUP BY question)"
+		   },
      'tickedList'=>{'sql'=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
 		    ." WHEN total<=0 THEN -1"
@@ -809,6 +837,26 @@ sub ticked {
 			   $student,$copy,ZONE_BOX,$question,$answer));
 }
 
+# ticked_sums($darkness_threshold) returns a ref to a list of hashrefs
+# like
+#
+# [{'question=>1,'answer'=>1,nb=>4},
+#  {'question=>1,'answer'=>'invalid',nb=>1},
+#  {'question=>1,'answer'=>'empty',nb=>2},
+# ]
+#
+# that gives, for each question, the number of times each answer was
+# ticked, and the number of sheets where this question was not
+# replied, and where this question got invalid answers.
+
+sub ticked_sums {
+  my ($self,$darkness_threshold)=@_;
+  return($self->dbh->selectall_arrayref($self->statement('tickedSums'),
+					{ Slice=>{} },
+					$darkness_threshold,ZONE_BOX)
+	 );
+}
+
 # ticked_list($student,$copy,$question,$darkness_threshold) returns a
 # list with the ticked results for all the answers boxes from a
 # particular question. Answers are ordered with the answer number, so
@@ -993,6 +1041,13 @@ sub get_scan_page {
 sub max_copy_number {
   my ($self)=@_;
   return($self->sql_single($self->statement('maxCopy')) || 0);
+}
+
+# max_answer_number returns the maximum answer number for all questions
+
+sub max_answer_number {
+  my ($self)=@_;
+  return($self->sql_single($self->statement('maxAnswer'),ZONE_BOX) || 0);
 }
 
 # new_page_copy($student,$page,$allocate) creates a new (unused) copy
