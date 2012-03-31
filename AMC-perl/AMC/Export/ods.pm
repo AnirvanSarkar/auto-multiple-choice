@@ -218,7 +218,7 @@ sub set_cell {
 }
 
 sub build_stats_table {
-  my ($self,$cts,$doc,$stats,@q)=@_;
+  my ($self,$cts,$correct_data,$doc,$stats,@q)=@_;
 
   my %xbase=();
 
@@ -226,21 +226,24 @@ sub build_stats_table {
   my $x=0;
   for my $q (@q) {
     $doc->cellSpan($stats,$ybase,$x,4);
-    $doc->cellStyle($stats,$ybase,$x,'StatsQName');
+    $doc->cellStyle($stats,$ybase,$x,
+		    'StatsQName'.(!$correct_data ? 'I' :'S'));
     $doc->cellValue($stats,$ybase,$x,encode('utf-8',$q->{'title'}));
 
-    $doc->cellStyle($stats,$ybase+1,$x,'General');
+    $doc->cellStyle($stats,$ybase+1,$x,'statCol');
 # TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the reference of the boxes. Please let this name short.
     $doc->cellValue($stats,$ybase+1,$x,encode('utf-8',__("Box")));
-    $doc->cellStyle($stats,$ybase+1,$x+1,'General');
+    $doc->cellStyle($stats,$ybase+1,$x+1,'statCol');
 # TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
     $doc->cellValue($stats,$ybase+1,$x+1,encode('utf-8',__("Nb")));
-    $doc->cellStyle($stats,$ybase+1,$x+2,'General');
+    $doc->cellStyle($stats,$ybase+1,$x+2,'statCol');
 # TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
     $doc->cellValue($stats,$ybase+1,$x+2,encode('utf-8',__("/all")));
 # TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
-    $doc->cellStyle($stats,$ybase+1,$x+3,'General');
+    $doc->cellStyle($stats,$ybase+1,$x+3,'statCol');
     $doc->cellValue($stats,$ybase+1,$x+3,encode('utf-8',__("/expr")));
+
+    $doc->columnStyle($stats,$x+4,"col.Space");
 
     $xbase{$q->{'question'}}=$x;
     $x+=5;
@@ -253,6 +256,7 @@ sub build_stats_table {
 	      'empty'=>__"NA",
 # TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got an invalid answer. Please let this label short.
 	      'invalid'=>__"INVALID");
+  my %y_style=('empty'=>'qidE','invalid'=>'qidI');
   my %q_amax=();
 
   for my $counts (sort { $a->{'answer'} eq "0" ? 1
@@ -261,6 +265,7 @@ sub build_stats_table {
       if(defined($x)) {
 	my $y=$y_item{$counts->{'answer'}};
 	my $name=$y_name{$counts->{'answer'}};
+	my $style=$y_style{$counts->{'answer'}};
 	if(!$y) {
 	  if($counts->{'answer'}>0) {
 	    $q_amax{$counts->{'question'}}=$counts->{'answer'}
@@ -277,7 +282,7 @@ sub build_stats_table {
 	$doc->cellStyle($stats,$ybase+$y,$x+1,'NumCopie');
 	$doc->cellValueType($stats,$ybase+$y,$x+1,'float');
 	$doc->cellValue($stats,$ybase+$y,$x+1,$counts->{'nb'});
-	$doc->cellStyle($stats,$ybase+$y,$x,'General');
+	$doc->cellStyle($stats,$ybase+$y,$x,($style ? $style : 'General'));
 	$doc->cellValue($stats,$ybase+$y,$x,$name);
       }
     }
@@ -310,6 +315,19 @@ sub build_stats_table {
 			.yx2ooo($ybase+4,$xb+1)."])");
     }
   }
+
+  for my $c (@$correct_data) {
+    my $x=$xbase{$c->{'question'}};
+    if(defined($x)) {
+      my $y=4+$c->{'answer'};
+      $y=4+$q_amax{$c->{'question'}} if($c->{'answer'}==0);
+      $doc->cellStyle($stats,$ybase+$y,$x,
+		      $c->{'correct_max'}==0 ? 'qidW' :
+		      $c->{'correct_min'}==1 ? 'qidC' :
+		      'qidX');
+    }
+  }
+
 }
 
 sub export {
@@ -464,6 +482,94 @@ sub export {
 				      'fo:font-size'=>"14pt",
 			 },
 			 );
+    $styles->createStyle('StatsQNameS',
+			 'parent'=>'StatsQName',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#c4ddff",
+				     },
+			);
+    $styles->createStyle('StatsQNameM',
+			 'parent'=>'StatsQName',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#f5c4ff",
+				     },
+			);
+    $styles->createStyle('StatsQNameI',
+			 'parent'=>'StatsQName',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#e6e6ff",
+				     },
+			);
+
+    $styles->createStyle('statCol',
+			 parent=>'Tableau',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'paragraph',
+			     'fo:text-align' => "center",
+			 },
+			 );
+    $styles->updateStyle('statCol',
+			 properties=>{
+				      -area=>'text',
+				      'fo:font-weight'=>'bold',
+			 },
+			 );
+
+    $styles->createStyle('qidW',
+			 'parent'=>'General',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#ffc8a0",
+				     },
+			);
+    $styles->createStyle('qidC',
+			 'parent'=>'General',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#c9ffd1",
+				     },
+			);
+    $styles->createStyle('qidX',
+			 'parent'=>'General',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#e2e2e2",
+				     },
+			);
+    $styles->createStyle('qidI',
+			 'parent'=>'General',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#ffbaba",
+				     },
+			);
+    $styles->createStyle('qidE',
+			 'parent'=>'General',
+			 family=>'table-cell',
+			 properties=>{
+				      -area => 'table-cell',
+				      'fo:background-color'=>"#ffff99",
+				     },
+			);
+
+    $doc->createStyle("col.Space",
+		      family=>'table-column',
+		      properties=>{
+				   -area=>'table-column',
+				   'column-width' => "4mm",
+				  },
+		     );
 
     # NoteQ : note pour une question
     $styles->createStyle('NoteQ',
@@ -655,8 +761,11 @@ sub export {
 
     my $feuille=$doc->getTable(0,$dimy,$dimx);
     $doc->expandTable($feuille, $dimy, $dimx);
-    $doc->renameTable($feuille,encode('utf-8',$self->{'out.code'}))
-	if($self->{'out.code'});
+    $doc->renameTable($feuille,encode('utf-8',($self->{'out.code'} ?
+					       $self->{'out.code'} :
+# TRANSLATORS: table name in the exported ODS spreadsheet for the table that contains the marks.
+					       __("Marks")
+					      )));
 
     if($self->{'out.nom'}) {
 	$doc->cellStyle($feuille,0,0,'Titre');
@@ -922,13 +1031,15 @@ sub export {
     # tables for questions basic statistics
     ##########################################################################
 
-    my ($dt,$cts,$man);
+    my ($dt,$cts,$man,$correct_data);
 
     if($self->{'out.stats'} || $self->{'out.statsindic'}) {
       $self->{'_scoring'}->begin_read_transaction('XsLO');
       $dt=$self->{'_scoring'}->variable('darkness_threshold');
       $cts=$self->{'_capture'}->ticked_sums($dt);
       $man=$self->{'_capture'}->max_answer_number();
+      $correct_data=$self->{'_scoring'}->correct_for_all
+	if($self->{'out.stats'});
       $self->{'_scoring'}->end_transaction('XsLO');
     }
 
@@ -936,14 +1047,14 @@ sub export {
 # TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
       my $stats_0=$doc->appendTable(encode('utf-8',__("Questions statistics")),6+$man,5*(1+$#questions_0));
 
-      $self->build_stats_table($cts,$doc,$stats_0,@questions_0);
+      $self->build_stats_table($cts,$correct_data,$doc,$stats_0,@questions_0);
     }
 
     if($self->{'out.statsindic'}) {
 # TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
       my $stats_1=$doc->appendTable(encode('utf-8',__("Indicative questions statistics")),6+$man,5*(1+$#questions_1));
 
-      $self->build_stats_table($cts,$doc,$stats_1,@questions_1);
+      $self->build_stats_table($cts,0,$doc,$stats_1,@questions_1);
     }
 
     ##########################################################################
@@ -951,7 +1062,7 @@ sub export {
     ##########################################################################
 
 # TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
-    my $legend=$doc->appendTable(encode('utf-8',__("Legend")),6,2);
+    my $legend=$doc->appendTable(encode('utf-8',__("Legend")),8,2);
 
     $doc->cellSpan($legend,0,0,2);
     $doc->cellStyle($legend,0,0,'Titre');
@@ -971,6 +1082,16 @@ sub export {
 # TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
     $doc->cellValue($legend,$jj,1,encode('utf-8',__("Invalid answer")));
     $jj++;
+    if($self->{'out.stats'}) {
+      $doc->cellStyle($legend,$jj,0,'qidC');
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
+      $doc->cellValue($legend,$jj,1,encode('utf-8',__("Correct answer")));
+      $jj++;
+      $doc->cellStyle($legend,$jj,0,'qidW');
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
+      $doc->cellValue($legend,$jj,1,encode('utf-8',__("Wrong answer")));
+      $jj++;
+    }
     $doc->cellStyle($legend,$jj,0,'CodeV');
 # TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the indicative questions.
     $doc->cellValue($legend,$jj,1,encode('utf-8',__("Indicative")));

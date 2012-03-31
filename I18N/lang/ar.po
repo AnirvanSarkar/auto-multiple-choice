@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.479 (svn: 479)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2012-03-31 00:49 +0200\n"
+"POT-Creation-Date: 2012-03-31 22:25 +0200\n"
 "PO-Revision-Date: 2012-03-26 22:05+0300\n"
 "Last-Translator: Hatim <dr.hatim@hotmail.com>\n"
 "Language-Team: red sea\n"
@@ -1653,78 +1653,95 @@ msgid "Fetching scoring data from old format XML files..."
 msgstr "جلب بيانات التصحيح من ملف XML بهيئة قديمة..."
 
 #. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the reference of the boxes. Please let this name short.
-#: ../AMC-perl/AMC/Export/ods.pm:234
+#: ../AMC-perl/AMC/Export/ods.pm:235
 #, fuzzy
 msgid "Box"
 msgstr "مربع"
 
 #. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
-#: ../AMC-perl/AMC/Export/ods.pm:237
+#: ../AMC-perl/AMC/Export/ods.pm:238
 msgid "Nb"
 msgstr ""
 
 #. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
-#: ../AMC-perl/AMC/Export/ods.pm:240
+#: ../AMC-perl/AMC/Export/ods.pm:241
 msgid "/all"
 msgstr ""
 
-#: ../AMC-perl/AMC/Export/ods.pm:243
+#: ../AMC-perl/AMC/Export/ods.pm:244
 msgid "/expr"
 msgstr ""
 
 #. TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
-#: ../AMC-perl/AMC/Export/ods.pm:251
+#: ../AMC-perl/AMC/Export/ods.pm:254
 msgid "ALL"
 msgstr ""
 
 #. TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question did not get an answer. Please let this label short.
-#: ../AMC-perl/AMC/Export/ods.pm:253
+#: ../AMC-perl/AMC/Export/ods.pm:256
 msgid "NA"
 msgstr ""
 
 #. TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got an invalid answer. Please let this label short.
-#: ../AMC-perl/AMC/Export/ods.pm:255
+#: ../AMC-perl/AMC/Export/ods.pm:258
 msgid "INVALID"
 msgstr ""
 
 #. TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got the "none of the above are correct" answer. Please let this label short.
-#: ../AMC-perl/AMC/Export/ods.pm:274
+#: ../AMC-perl/AMC/Export/ods.pm:279
 msgid "NONE"
 msgstr ""
 
+#. TRANSLATORS: table name in the exported ODS spreadsheet for the table that contains the marks.
+#: ../AMC-perl/AMC/Export/ods.pm:767 ../AMC-perl/AMC/Gui/Notes.glade:7
+msgid "Marks"
+msgstr "التقييم"
+
 #. TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
-#: ../AMC-perl/AMC/Export/ods.pm:937
+#: ../AMC-perl/AMC/Export/ods.pm:1048
 #, fuzzy
 msgid "Questions statistics"
 msgstr "موقع درجات الاسئلة"
 
 #. TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
-#: ../AMC-perl/AMC/Export/ods.pm:944
+#: ../AMC-perl/AMC/Export/ods.pm:1055
 msgid "Indicative questions statistics"
 msgstr ""
 
 #. TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
-#: ../AMC-perl/AMC/Export/ods.pm:954 ../AMC-perl/AMC/Export/ods.pm:958
+#: ../AMC-perl/AMC/Export/ods.pm:1065 ../AMC-perl/AMC/Export/ods.pm:1069
 msgid "Legend"
 msgstr "النقش"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been asked to some students.
-#: ../AMC-perl/AMC/Export/ods.pm:964
+#: ../AMC-perl/AMC/Export/ods.pm:1075
 msgid "Non applicable"
 msgstr "غير سارية"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered.
-#: ../AMC-perl/AMC/Export/ods.pm:968
+#: ../AMC-perl/AMC/Export/ods.pm:1079
 msgid "No answer"
 msgstr "لا اجابة"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
-#: ../AMC-perl/AMC/Export/ods.pm:972
+#: ../AMC-perl/AMC/Export/ods.pm:1083
 msgid "Invalid answer"
 msgstr "إجابة غير صالحة"
 
+#. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
+#: ../AMC-perl/AMC/Export/ods.pm:1088
+#, fuzzy
+msgid "Correct answer"
+msgstr "لا اجابة"
+
+#. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
+#: ../AMC-perl/AMC/Export/ods.pm:1092
+#, fuzzy
+msgid "Wrong answer"
+msgstr "لا اجابة"
+
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the indicative questions.
-#: ../AMC-perl/AMC/Export/ods.pm:976
+#: ../AMC-perl/AMC/Export/ods.pm:1097
 msgid "Indicative"
 msgstr "ارشادي"
 
@@ -3369,10 +3386,6 @@ msgstr "إلغاء التعديلات على هذه الصفحة"
 #: ../AMC-perl/AMC/Gui/Manuel.glade:380
 msgid "Save and quit"
 msgstr "حفظ ثم اغلاق"
-
-#: ../AMC-perl/AMC/Gui/Notes.glade:7
-msgid "Marks"
-msgstr "التقييم"
 
 #: ../AMC-perl/AMC/Gui/Zooms.glade:77
 msgid "Unchecked boxes"

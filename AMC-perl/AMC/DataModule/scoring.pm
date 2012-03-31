@@ -428,6 +428,11 @@ sub define_statements {
 		 ." WHERE question=?"},
      'correct'=>{'sql'=>"SELECT correct FROM ".$self->table("answer")
 		 ." WHERE student=? AND question=? AND answer=?"},
+     'correctForAll'=>{'sql'=>"SELECT question,answer,"
+		       ." MIN(correct) AS correct_min,"
+		       ." MAX(correct) AS correct_max "
+		       ." FROM ".$self->table("answer")
+		       ." GROUP BY question,answer"},
      'multiple'=>{'sql'=>"SELECT type FROM ".$self->table("question")
 		 ." WHERE student=? AND question=?"},
      'indicative'=>{'sql'=>"SELECT indicative FROM ".$self->table("question")
@@ -572,7 +577,27 @@ sub correct_answer {
 			   $student,$question,$answer));
 }
 
-# correct_answer($student,$question) returns 1 if the corresponding
+# correct_for_all() returns a reference to an array like
+#
+# [{question=>1,answer=>1,correct_min=>0,correct_max=>0},
+#  {question=>1,answer=>2,correct_min=>1,correct_max=>1},
+# ]
+#
+# This gives, for each question/answer, the minumum and maximum of the
+# <correct> column for all students. Usualy, minimum and maximum are
+# equal because the answer is either correct for all students either
+# not correct for all students, but one can also encounter
+# correct_min=0 and correct_max=1, in situations where the answers are
+# not the same for all students (for example for questions with random
+# numerical values).
+
+sub correct_for_all {
+  my ($self,$question,$answer)=@_;
+  return($self->dbh->selectall_arrayref($self->statement('correctForAll'),
+					{Slice=>{}}));
+}
+
+# multiple($student,$question) returns 1 if the corresponding
 # question is multiple (type=QUESTION_MULT), and 0 if not.
 
 sub multiple {
