@@ -1041,6 +1041,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %   current question.
 % \item |\AMCid@quest| current question ID number (see section~\ref{s:keyid}).
 % \item |\AMCid@etud| current student sheet number.
+% \item |\AMCid@etudstart| starting student sheet number of the
+%   current |onecopy| bloc.
 % \item |\AMCid@check| current page checking number.
 % \item |\AMCid@etudfin| last student sheet number for the exam.
 % \item |\AMCnum@copies| number of exam sheets to produce.
@@ -1092,6 +1094,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcount\AMCid@quest\AMCid@quest=-1
 \newcount\AMCid@check
 \newcount\AMCid@etud\AMCid@etud=0
+\newcount\AMCid@etudstart\AMCid@etudstart=0
 \newcount\AMCid@etudfin
 \newcount\AMCnum@copies
 %    \end{macrocode}
@@ -2390,15 +2393,17 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1%
   \else\AMCnum@copies=\AMCNombreCopies\fi%
   \AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
-  \AMCid@etud=\AMC@premierecopie%
+  \AMCid@etud=\AMCid@etudstart%
+  \ifnum\AMCid@etud=0\AMCid@etud=\AMC@premierecopie\fi%
   \AMCid@etudfin=\AMCnum@copies%
-  \advance\AMCid@etudfin by \AMC@premierecopie\relax%
+  \advance\AMCid@etudfin by \AMCid@etud\relax%
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
   \loop%
     \AMC@zoneformulairefalse\setcounter{page}{1}%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
     #2\clearpage\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+  \global\AMCid@etudstart=\AMCid@etud%
 }
 %    \end{macrocode}\end{macro}
 %
