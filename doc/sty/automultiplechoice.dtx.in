@@ -436,7 +436,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \ioption{francais} asks for french localisation.
 %
 % \ioption{lang=XX} asks for localisation in |XX| language. At
-% present, only |FR| (French), |DE| (German) and |ES| (Spanish) are available.
+% present, only |NL| (Dutch), |FR| (French), |DE| (German), |ES|
+% (Spanish) and |JA| (Japanese) are available.
 %
 % \ioption{plain} cancels \textsf{environ} and \textsf{etex} automatic
 % loading. The default behaviour is to load \textsf{environ} and
@@ -1220,6 +1221,22 @@ Three digits and two letters:\insertgroup{mixed}.
 % |completemulti| is used:
 %    \begin{macrocode}
 \def\AMC@loc@none{None of these answers are correct.}
+%    \end{macrocode}
+%
+% \subsubsection{Dutch}
+%
+% Dutch localisation is called with option |lang=NL|.
+%    \begin{macrocode}
+\def\AMC@loc@NL{
+  \def\AMC@loc@draft{Ontwerp}
+  \def\AMC@loc@message{Gebruik bij uw proefwerk bij voorkeur die
+    documenten welke door auto-multiple-choice zijn aangemaakt.}
+  \def\AMC@loc@qf##1{\textbf{Vraag ##1 :}}
+  \def\AMC@loc@q##1##2{\textbf{Vraag ##1} ##2}
+  \def\AMC@loc@corrected{Correctie}
+  \def\AMC@loc@catalog{Catalogus}
+  \def\AMC@loc@none{Geen van de antwoorden is juist.}
+}
 %    \end{macrocode}
 %
 % \subsubsection{French}
