@@ -283,7 +283,7 @@ sub build_stats_table {
 	$doc->cellValueType($stats,$ybase+$y,$x+1,'float');
 	$doc->cellValue($stats,$ybase+$y,$x+1,$counts->{'nb'});
 	$doc->cellStyle($stats,$ybase+$y,$x,($style ? $style : 'General'));
-	$doc->cellValue($stats,$ybase+$y,$x,$name);
+	$doc->cellValue($stats,$ybase+$y,$x,encode('utf-8',$name));
       }
     }
 
