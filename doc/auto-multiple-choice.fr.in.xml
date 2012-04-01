@@ -1942,14 +1942,15 @@ et inscrivez votre nom et prénom ci-dessous.
         <title>Références à l'intérieur des copies</title>
 
         <para>Dans la description du sujet, les commandes LaTeX
-        <command>\label</command> et <command>\ref</command> posent problème
-        car elles seront appelées avec les mêmes arguments pour chaque copie
-        produite, ce qui perturbera la numérotation des références. Pour
-        résoudre ce problème, les commandes <command>\AMClabel</command> et
-        <command>\AMCref</command> peuvent leur être substituées : elles
+        <command>\label</command>, <command>\ref</command> et
+        <command>\pageref</command> posent problème car elles seront appelées
+        avec les mêmes arguments pour chaque copie produite, ce qui perturbera
+        la numérotation des références. Pour résoudre ce problème, les
+        commandes <command>\AMClabel</command>, <command>\AMCref</command> et
+        <command>\AMCpageref</command> peuvent leur être substituées : elles
         ajoutent le numéro de la copie avant leur argument avant de le
-        transmettre à <command>\label</command> et
-        <command>\ref</command>.</para>
+        transmettre à <command>\label</command>, <command>\ref</command> et
+        <command>\pageref</command>.</para>
 
         <para>Il faudra en outre penser à remettre les compteurs utilisés à
         zéro au début de chaque copie. Par exemple, si on veut inclure des
@@ -1965,7 +1966,7 @@ et inscrivez votre nom et prénom ci-dessous.
   \end{figure}
     
   \begin{question}{tigre}
-    Quel est l'animal sur la photographie de la figure~\AMCref{tigre}~?
+    Quel est l'animal sur la photographie de la figure~\AMCref{tigre} en page \AMCpageref{tigre}~?
     \begin{reponses}
       \bonne{Un tigre}
       \mauvaise{Une girafe}

@@ -1815,14 +1815,15 @@ and write your first and last names below.
       <sect3>
         <title>Using references inside the test sheets</title>
 
-        <para>Using LaTeX commands <command>\label</command> and
-        <command>\ref</command> within questions or answers is problematic
-        since they will be called with the same arguments for every
-        realization of the test, which will alter the numbering of references.
-        To solve this problem, one should use instead the
-        commands<command>\AMClabel</command> and <command>\AMCref</command>:
-        they add the realization number to their argument before transmitting
-        it to <command>\label</command> et <command>\ref</command>.</para>
+        <para>Using LaTeX commands <command>\label</command>,
+        <command>\ref</command> and <command>\pageref</command> within
+        questions or answers is problematic since they will be called with the
+        same arguments for every realization of the test, which will alter the
+        numbering of references. To solve this problem, one should use instead
+        the commands<command>\AMClabel</command>, <command>\AMCref</command>
+        and <command>\AMCpageref</command>: they add the realization number to
+        their argument before transmitting it to <command>\label</command>,
+        <command>\ref</command> and <command>\pageref</command>.</para>
 
         <para>One also has to reset counters to zero at the beginning of each
         realization. For instance, if one wants to include references to
@@ -1838,7 +1839,7 @@ and write your first and last names below.
   \end{figure}
     
   \begin{question}{tiger}
-    Which is the animal on figure~\AMCref{tiger}?
+    Which is the animal on figure~\AMCref{tiger} page~\AMCpageref{tiger}?
     \begin{choices}
       \correctchoice{A tiger}
       \wrongchoice{A giraffe}

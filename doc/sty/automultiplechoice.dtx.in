@@ -2426,15 +2426,16 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\exemplairepair{\ifodd\AMCid@etud}
 %    \end{macrocode}\end{macro}
 %
-% \begin{macro}{\AMClabel}\begin{macro}{\AMCref}
-%     Commands |\AMCref| and |\AMClabel| replaces \LaTeX's |\label|
-%     and |\ref| to be able to use different labels for different
-%     sheets.
+% \begin{macro}{\AMClabel}\begin{macro}{\AMCref}\begin{macro}{\AMCref}
+%       Commands |\AMClabel|, |\AMCref| and |\AMCpageref| replaces
+%       \LaTeX's |\label|, |\ref| and |\pageref| to be able to use different
+%       labels for different sheets.
 %
 %    \begin{macrocode}
 \def\AMClabel#1{\expandafter\label{\the\AMCid@etud-#1}}
 \def\AMCref#1{\expandafter\ref{\the\AMCid@etud-#1}}
-%    \end{macrocode}\end{macro}\end{macro}
+\def\AMCpageref#1{\expandafter\pageref{\the\AMCid@etud-#1}}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
 % \subsection{Package options}
 %
