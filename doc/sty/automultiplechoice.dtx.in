@@ -2242,7 +2242,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   The command |\AMCIntervals|\marg{x}\marg{x0}\marg{x1}\marg{delta}
 %   can be used to present answers as intervals $[x_i,x_i+\delta[$
 %   covering $[\meta{x0},\meta{x1}[$, such that the only interval
-%   containing \meta{x} is declared as |\wrightchoice|, and the other
+%   containing \meta{x} is declared as |\correctchoice|, and the other
 %   as |\wrongchoice|.
 %
 %   For this command to work, one has to load package \textsf{fp}.
@@ -2275,8 +2275,15 @@ Three digits and two letters:\insertgroup{mixed}.
 %      \end{multicols}
 %    \end{question}
 %
+%    Note that the interval formatting can be changed redefining the
+%    |\AMCintervalFormat| command, which is originally defined as
 %    \begin{macrocode}
-\def\AMC@intervx#1#2{\AMC@CI@cas{[#1,\,#2[}}
+\def\AMCIntervalFormat#1#2{[#1,\,#2[}
+%    \end{macrocode}
+% to follow local conventions (writting $[a,b)$ instead of $[a,b[$ is
+% for example a common usage).
+%    \begin{macrocode}
+\def\AMC@intervx#1#2{\AMC@CI@cas{\AMCIntervalFormat{#1}{#2}}}
 \def\AMCIntervals#1#2#3#4{%
 \FPeval\AMC@CI@a{clip(#2)}%
 \let\AMC@CI@cas=\wrongchoice%
