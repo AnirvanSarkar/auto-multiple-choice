@@ -27,7 +27,7 @@ IMAGES=$(addprefix html/images/,$(notdir $(wildcard img_src/*.svg))) $(addprefix
 
 MODELS=$(wildcard modeles/*/*.d)
 
-all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz); 
+all: $(filter-out %.ja.pdf,$(DOCBOOKS:.xml=.pdf)) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz);
 
 images: $(IMAGES:.svg=.png)
 
@@ -50,7 +50,10 @@ html/images/%.png: img_src/%.svg
 	perl addlink.pl $@
 
 %.pdf: %.tex
-	pdflatex $< ; pdflatex $<
+	case $< in \
+	  *.ja.tex) platex $<; platex $<; dvipdf $*.dvi ;; \
+	  *.tex) pdflatex $<; pdflatex $< ;; \
+	esac
 	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
