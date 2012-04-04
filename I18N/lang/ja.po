@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.0.964 (svn: 964)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
 "POT-Creation-Date: 2012-03-31 22:25 +0200\n"
-"PO-Revision-Date: 2012-04-01 16:50+0900\n"
+"PO-Revision-Date: 2012-04-04 15:53+0900\n"
 "Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language: \n"
@@ -122,7 +122,7 @@ msgstr "英語"
 #. TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
 #: ../AMC-gui.pl:914
 msgid "identifier"
-msgstr "試験問題番号"
+msgstr "用紙ID"
 
 #. TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of data captures.
 #: ../AMC-gui.pl:923
@@ -542,7 +542,7 @@ msgstr ""
 
 #: ../AMC-gui.pl:1897 ../AMC-gui.pl:1922 ../AMC-gui.pl:3240
 msgid "To allow the use of an already printed question, cancel!"
-msgstr "既に印刷した問題を使用する場合は、キャンセルしてください！"
+msgstr "既に印刷した試験問題を使用する場合は、キャンセルしてください！"
 
 #: ../AMC-gui.pl:1918
 msgid "Layouts are already calculated for the current documents."
@@ -813,7 +813,7 @@ msgstr "レイアウト検出"
 
 #: ../AMC-gui.pl:2595 ../AMC-gui-main_window.glade:868
 msgid "Preparation"
-msgstr "問題作成"
+msgstr "試験問題作成"
 
 #: ../AMC-gui.pl:2632
 #, perl-format
@@ -1604,12 +1604,12 @@ msgstr "単一選択問題に %d/%d 個の正解があります。"
 #: ../AMC-prepare.pl:199
 #, perl-format
 msgid "question ID used several times for the same paper: \"%s\""
-msgstr "試験問題内で同一の問題IDが複数回使われています: \"%s\""
+msgstr "試験問題内で同一の設問IDが複数回使われています: \"%s\""
 
 #: ../AMC-prepare.pl:223
 #, perl-format
 msgid "Answer number ID used several times for the same question: %s"
-msgstr "問題内で同一の解答番号IDが複数回使われています: %s"
+msgstr "設問内で同一の選択肢番号IDが複数回使われています: %s"
 
 #: ../AMC-prepare.pl:357
 #, perl-format
@@ -1735,12 +1735,12 @@ msgstr "得点"
 #. TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
 #: ../AMC-perl/AMC/Export/ods.pm:1048
 msgid "Questions statistics"
-msgstr "問題の統計"
+msgstr "設問ごとの統計"
 
 #. TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
 #: ../AMC-perl/AMC/Export/ods.pm:1055
 msgid "Indicative questions statistics"
-msgstr "採点対象外問題の統計"
+msgstr "採点対象外設問の統計"
 
 #. TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
 #: ../AMC-perl/AMC/Export/ods.pm:1065 ../AMC-perl/AMC/Export/ods.pm:1069
@@ -1801,7 +1801,7 @@ msgstr "前問には選択肢が2個以上ありません。"
 #: ../AMC-perl/AMC/Filter/plain.pm:153
 #, perl-format
 msgid "Previous question is a simple question but has %d correct choice(s)"
-msgstr "前問は単一選択問題なのに正解が%d個あります。"
+msgstr "この設問は単一選択問題なのに正解が%d個あります。"
 
 #. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new group whereas the previous group is empty
 #: ../AMC-perl/AMC/Filter/plain.pm:181
@@ -1817,7 +1817,7 @@ msgstr "不明なオプション: %s"
 #. TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
 #: ../AMC-perl/AMC/Filter/plain.pm:243
 msgid "Choice outside question"
-msgstr "問題文の外に選択肢があります。"
+msgstr "問題文の前に選択肢があります。"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:584
 #, perl-format
@@ -1926,18 +1926,18 @@ msgstr "統計表"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:74
 msgid "Create a table with basic statistics about answers for each question?"
-msgstr "各問題の解答に関する基本統計表を作成しますか？"
+msgstr "各設問の解答に関する基本統計表を作成しますか？"
 
 #. TRANSLATORS: Check button label in the exports tab. If checked, a table with indicative questions basic statistics will be added to the ODS exported spreadsheet.
 #: ../AMC-perl/AMC/Export/register/ods.pm:79
 msgid "Indicative stats table"
-msgstr "採点対象外問題の統計表"
+msgstr "採点対象外設問の統計表"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:83
 msgid ""
 "Create a table with basic statistics about answers for each indicative "
 "question?"
-msgstr "各採点対象外問題の解答に関する基本統計表を作成しますか？"
+msgstr "各採点対象外設問の解答に関する基本統計表を作成しますか？"
 
 #: ../AMC-perl/AMC/Filter/register/latex.pm:54
 msgid ""
@@ -1954,7 +1954,7 @@ msgstr ""
 "せんが、LaTeXの能力を使えば任意の選択式課題が作成できます。例えばLaTeXなら次"
 "のようなことができますが、他の形式ではできません:\n"
 "* 任意のレイアウト、\n"
-"* 乱数値を用いた問題、\n"
+"* 乱数値を用いた設問、\n"
 "* 図や数式の使用、\n"
 "* などなど！"
 
@@ -1970,7 +1970,7 @@ msgid ""
 "- Douala\n"
 "- Kribi"
 msgstr ""
-"これは簡単な質問用のプレーンテキスト形式です。次の最小限の例を参考にしてくだ"
+"これは簡単な設問用のプレーンテキスト形式です。次の最小限の例を参考にしてくだ"
 "さい:\n"
 "\n"
 "Title: 試験問題タイトル\n"
@@ -1986,7 +1986,7 @@ msgstr "AMCについて"
 
 #: ../AMC-gui-apropos.glade:18
 msgid "Automatic multiple choice questionnaires management"
-msgstr "自動選択式問題管理"
+msgstr "自動選択式試験問題管理"
 
 #: ../AMC-gui-choix_pages_impression.glade:9
 msgid "Papers printing"
@@ -1998,8 +1998,7 @@ msgstr "印刷したい試験問題を選択してください:"
 
 #: ../AMC-gui-choix_pages_impression.glade:91
 msgid "Select papers you wish to print (ctrl-a for all), then confirm..."
-msgstr ""
-"印刷したい試験問題用紙を選択し（Ctrl-aですべて選択）、確認してください..."
+msgstr "印刷したい試験問題を選択し（Ctrl-aですべて選択）、確認してください..."
 
 #: ../AMC-gui-choix_pages_impression.glade:120
 msgid "Printer:"
@@ -2515,7 +2514,7 @@ msgstr "<b>採点記入済答案のJPEG品質</b>"
 
 #: ../AMC-gui-edit_preferences.glade:1538
 msgid "Default header text"
-msgstr "デフォルトヘッダテキスト"
+msgstr "デフォルトヘッダーテキスト"
 
 #: ../AMC-gui-edit_preferences.glade:1553
 #: ../AMC-gui-edit_preferences.glade:2932
@@ -2524,9 +2523,9 @@ msgid ""
 "score, %s for grade, %m for max grade, and %(col) for content of the column "
 "col in the students list file."
 msgstr ""
-"採点記入済答案のヘッダに記入されるテキスト。%Sは素点、%Mは素点の満点、%sは換"
-"算した得点、%mは換算した得点の満点、%(col)は受験者名簿のcolカラムの内容に置換"
-"されます。"
+"採点記入済答案のヘッダーに記入されるテキスト。%Sは素点、%Mは素点の満点、%sは"
+"換算した得点、%mは換算した得点の満点、%(col)は受験者名簿のcolカラムの内容に置"
+"換されます。"
 
 #: ../AMC-gui-edit_preferences.glade:1567
 msgid "Default writing direction"
@@ -2539,11 +2538,11 @@ msgstr "右から左"
 
 #: ../AMC-gui-edit_preferences.glade:1595
 msgid "Default questions annotation"
-msgstr "問題ごとのデフォルトの採点表記"
+msgstr "設問ごとのデフォルトの採点表記"
 
 #: ../AMC-gui-edit_preferences.glade:1623
 msgid "<b>Header</b>"
-msgstr "<b>ヘッダ</b>"
+msgstr "<b>ヘッダー</b>"
 
 #: ../AMC-gui-edit_preferences.glade:1654
 msgid "significant digits"
@@ -2618,7 +2617,7 @@ msgstr "はい"
 
 #: ../AMC-gui-edit_preferences.glade:2245
 msgid "Also annotate informative questions"
-msgstr "採点対象外の問題にも採点を記入する"
+msgstr "採点対象外の設問にも採点を記入する"
 
 #: ../AMC-gui-edit_preferences.glade:2267
 msgid "<b>Symbols</b>"
@@ -2737,11 +2736,11 @@ msgstr "<b>全体採点基準</b>"
 
 #: ../AMC-gui-edit_preferences.glade:2891
 msgid "Questions marks position"
-msgstr "問題ごとの得点表記位置"
+msgstr "設問ごとの得点表記位置"
 
 #: ../AMC-gui-edit_preferences.glade:2921
 msgid "Header text"
-msgstr "ヘッダテキスト"
+msgstr "ヘッダーテキスト"
 
 #: ../AMC-gui-edit_preferences.glade:2946
 msgid "Writing direction"
@@ -2749,7 +2748,7 @@ msgstr "文字方向"
 
 #: ../AMC-gui-edit_preferences.glade:2974
 msgid "Questions annotation text"
-msgstr "問題ごとの採点表記"
+msgstr "設問ごとの採点表記"
 
 #: ../AMC-gui-edit_preferences.glade:2985
 msgid ""
@@ -2758,9 +2757,9 @@ msgid ""
 "and %m for these values truncated to the requested number of significant "
 "digits."
 msgstr ""
-"各問題に記入されるテキスト。これはperlによって評価されるので、単一の文字列と"
-"するには引用符を使ってください。%S は素点に、%M は素点の満点に置換され、%s "
-"と %m はそれぞれを指定した有効桁数に丸めた値に置換されます。"
+"各設問に記入される採点テキスト。これはperlによって評価されるので、単一の文字"
+"列とするには引用符を使ってください。%S は素点に、%M は素点の満点に置換さ"
+"れ、%s と %m はそれぞれを指定した有効桁数に丸めた値に置換されます。"
 
 #: ../AMC-gui-edit_preferences.glade:3003
 msgid "<b>Papers annotation</b>"
@@ -3168,7 +3167,7 @@ msgstr "スキャンした答案に採点の詳細を記入する。"
 
 #: ../AMC-gui-main_window.glade:2413
 msgid "Annotate papers"
-msgstr "答案に採点を記入する"
+msgstr "採点記入"
 
 #: ../AMC-gui-main_window.glade:2437 ../AMC-gui-main_window.glade:2438
 msgid "Look at grouped files"
@@ -3279,7 +3278,7 @@ msgid ""
 "the questionnaire.\n"
 "<b>Please choose your situation:</b>"
 msgstr ""
-"選択式問題のプロジェクトは主に質問事項を記述したソースファイルで作られま"
+"選択式試験問題のプロジェクトは主に質問事項を記述したソースファイルで作られま"
 "す。\n"
 "<b>シチュエーションを選択してください:</b>"
 
@@ -3295,7 +3294,7 @@ msgstr "アーカイブ"
 msgid ""
 "You did not write any description of the questionnaire, and want to start "
 "from a template."
-msgstr "問題をまだ何も作成しておらず、テンプレートから開始したい。"
+msgstr "試験問題をまだ何も作成しておらず、テンプレートから開始したい。"
 
 #: ../AMC-gui-source_latex_dialog.glade:142
 msgid ""
@@ -3312,7 +3311,7 @@ msgid ""
 "You have a tgz or zip file containing the questionnaire and other related "
 "stuff, commimg from a third party software or a backup."
 msgstr ""
-"第三者あるいはバックアップ由来で、問題と関連するファイルを含んだtgzあるいは"
+"第三者あるいはバックアップ由来で、試験問題と必要なファイルを含んだtgzあるいは"
 "zipファイルを持っている。"
 
 #: ../AMC-gui-source_latex_modele.glade:8
