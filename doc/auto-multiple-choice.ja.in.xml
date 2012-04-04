@@ -242,7 +242,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Lang:</term>
 
           <listitem>
-            <para>試験問題が記述されている言語を指定するのに用います。現時点では、DE（ドイツ語）、ES（スペイン語）、FR（フランス語）、NL（オランダ語）、JA（日本語、<xref linkend="txt-japanese"/>参照）、AR（アラビア語、<xref linkend="txt-arabic"/>参照）のみがサポートされています。オプションを指定しないと、英語が選択されます。他の言語用にローカライズ文字列を定義することもできます（<option>L-xxx</option>形式のオプション参照）。</para>
+            <para>試験問題が記述されている言語を指定するのに用います。現時点では、DE（ドイツ語）、ES（スペイン語）、FR（フランス語）、IT（イタリア語）、NL（オランダ語）、JA（日本語、<xref linkend="txt-japanese"/>参照）、AR（アラビア語、<xref linkend="txt-arabic"/>参照）のみがサポートされています。オプションを指定しないと、英語が選択されます。他の言語用にローカライズ文字列を定義することもできます（<option>L-xxx</option>形式のオプション参照）。</para>
           </listitem>
         </varlistentry>
 
@@ -972,7 +972,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
         <itemizedlist>
           <listitem>
-            <para><option>lang=<replaceable>XX</replaceable></option>: 課題の言語を<replaceable>XX</replaceable>に設定します。現時点では、DE（ドイツ語）、ES（スペイン語）、FR（フランス語）、JA（日本語）、NL（オランダ語）のみ指定可能です。<package>automultiplechoice</package>が<option>completemulti</option>オプションで挿入する「該当なし」のような数種類の文字列も翻訳されます。</para>
+            <para><option>lang=<replaceable>XX</replaceable></option>: 課題の言語を<replaceable>XX</replaceable>に設定します。現時点では、DE（ドイツ語）、ES（スペイン語）、FR（フランス語）、IT（イタリア語）、JA（日本語）、NL（オランダ語）のみ指定可能です。<package>automultiplechoice</package>が<option>completemulti</option>オプションで挿入する「該当なし」のような数種類の文字列も翻訳されます。</para>
           </listitem>
 
           <listitem>
@@ -1305,7 +1305,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
 \vspace{3ex}
 
-\hfill\champnom{\fbox{    
+\hfill\namefield{\fbox{    
     \begin{minipage}{.9\linewidth}
       氏名:
       
@@ -1467,7 +1467,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
             </callout>
           </calloutlist>変数名のVQは他のLaTeXコマンドと干渉しないように選んであります。</para>
 
-        <para>automultiplechoiceパッケージは、さらに、この種の選択肢の構築が次の例のように容易になるように<command>\choixIntervalle</command>コマンドを定義しています:<programlisting>\begin{question}{inf-expo-indep}
+        <para>automultiplechoiceパッケージは、さらに、この種の選択肢の構築が次の例のように容易になるように<command>\AMCIntervals</command>コマンドを定義しています:<programlisting>\begin{question}{inf-expo-indep}
   \FPeval\VQa{trunc(2 + random * 4,0)}
   \FPeval\VQb{trunc(6 + random * 5,0)}
   \FPeval\VQr{VQa/(VQa+VQb)}
@@ -1476,35 +1476,41 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
   \begin{multicols}{5}
     \begin{choices}[o]
-      \choixIntervalles{\VQr}{0}{1}{0.1}  <co id="choix.intervalles"
+      \AMCIntervals{\VQr}{0}{1}{0.1}  <co id="choix.intervalles"
               linkends="choix.intervalles.exp"/>
     \end{choices}
   \end{multicols}
 \end{question}</programlisting>（訳注: \mathbbにamsfontsが必要）</para>
 
-        <para><calloutlist>
-            <callout arearefs="choix.intervalles" id="choix.intervalles.exp">
-              <para>この行は、各区間 [0,0.1[ [0.1,0.2[ ... [0.9,1[ に対応した10個の選択肢を挿入し、正解の選択肢は VQr を含んだ区間であることを指示します。<command>\choixIntervalle</command>の引数は次のとおりです:</para>
+        <calloutlist>
+	  <callout arearefs="choix.intervalles" id="choix.intervalles.exp">
+	    <para>この行は、各区間 [0,0.1[ [0.1,0.2[ ... [0.9,1[ に対応した10個の選択肢を挿入し、正解の選択肢は VQr を含んだ区間であることを指示します。<command>\AMCIntervals</command>の引数は次のとおりです:</para>
 
-              <orderedlist>
-                <listitem>
-                  <para>正解の値</para>
-                </listitem>
+	    <orderedlist>
+	      <listitem>
+		<para>正解の値</para>
+	      </listitem>
 
-                <listitem>
-                  <para>最初の区間の左端の値</para>
-                </listitem>
+	      <listitem>
+		<para>最初の区間の左端の値</para>
+	      </listitem>
 
-                <listitem>
-                  <para>最後の区間の右端の値</para>
-                </listitem>
+	      <listitem>
+		<para>最後の区間の右端の値</para>
+	      </listitem>
 
-                <listitem>
-                  <para>各区間の長さ</para>
-                </listitem>
-              </orderedlist>
-            </callout>
-          </calloutlist></para>
+	      <listitem>
+		<para>各区間の長さ</para>
+	      </listitem>
+	    </orderedlist>
+	  </callout>
+	</calloutlist>
+
+        <para>区間の書式は、ローカルな（例えば、よくあるのは [a,b[ ではなく [a,b) と書くなどの）慣行に合わせて、<command>\AMCIntervalFormat</command>コマンドを再定義して変更できます。オリジナルは</para>
+
+        <programlisting>\def\AMCIntervalFormat#1#2{[#1,\,#2[}</programlisting>
+
+        <para>と定義されています。</para>
       </sect3>
 
       <sect3>
@@ -1720,92 +1726,52 @@ Name :
     <sect2 id="printing">
       <title id="printing.title">印刷と試験実施</title>
 
-      <para>Two alternative workflows can be considered:</para>
+      <para>2種類のワークフローが検討可能です:</para>
 
       <itemizedlist>
         <listitem>
-          <para>For the most robust, create as many exam sheets as necessary
-          for all your students, with different sheets numbers, and print them
-          all. Each page can be identified by its numbers and boxes at the
-          top, so that you can scan several times the same completed answer
-          sheet page carefree.</para>
+          <para>最も堅牢なモードでは、受験者全員分の試験問題用紙を別々試験問題番号で作成し、全部印刷します。各ページはその番号と上部にあるボックスで完全に識別でき、同じ答案用紙を特に注意せず何度もマーク認識させてかまいません。</para>
         </listitem>
 
         <listitem>
-          <para>Secondly, you can print a few subjects (or only one if you
-          want), and photocopy them to get one subject for all students.
-          Questions shuffling will be less efficient, and if you give several
-          times a scan of the same page, AMC won't be able to know about it
-          and will create an unwanted duplicate.</para>
+          <para>2番目のモードでは、少数の課題（あるいは希望なら1部のみ）印刷し、受験者全員分をコピーで作成することができます。設問のシャフル効果は若干薄れます。もし、同じページを何度かマーク認識させてしまうと、AMCはそれを知らずに望まない重複を作成してしまいます。</para>
         </listitem>
       </itemizedlist>
 
       <warning>
-        <para>To use this second workflow using photocopies, there must be
-        only one page for students to write on (using a separate answer sheet
-        can help you for this). If not, you won't be able to continue with
-        AMC! Indeed, it would be impossible for AMC to make the link between
-        two pages from the same student.</para>
+        <para>2番目のコピーを用いたワークフローを使うには、受験者が記入するページは1枚だけでなければなりません（場合によっては別紙答案方式が役に立ちます）。でなければ、AMCでこの先を続けることはできません！AMCは、同じ受験生が記入した二つのページをリンクすることができないのです。</para>
       </warning>
 
-      <para>When the preparation is over, we can print the subject, and
-      distribute it to the students... In simple cases, we can directly print
-      from the viewer (after clicking the line <guilabel>Subject</guilabel> in
-      the list of work documents). When it is better to print the copies
-      separately (for example if copies contain multiple pages and when the
-      printer allows to staple them together), we shall rather use the button
-      <guibutton>Print copies</guibutton> after calculating the layout.</para>
+      <para>試験問題の作成が完了すれば、課題を印刷して受験者に配布することができます... 単純な場合には、（作業文書の<guilabel>課題</guilabel>ボタンをクリックしたあと）ビューアから直接印刷できます。用紙を別々に（それぞれ複数ページからなり、それらをステープルできるようなプリンタを使う場合など）印刷する場合、レイアウト検出後に<guibutton>試験問題印刷</guibutton>ボタンを使うといいでしょう。</para>
 
       <important>
-        <para>When the subject is printed and distributed, we may no more
-        modify the <emphasis>work documents</emphasis> because they must
-        remain identical to distributed copies.</para>
+        <para>課題を印刷し配布したら、それらと完全に同一にしておく必要があるので<emphasis>作業文書</emphasis>を修正してはいけません。</para>
       </important>
     </sect2>
 
     <sect2>
       <title>答案のスキャン</title>
 
-      <para>Now we shall describe the input from students' copies, which can
-      be done automatically and/or manually.</para>
+      <para>ここでは、受験者の答案からの入力を説明します。これは、自動あるいは手動で行うことができます。</para>
 
-      <para>Let's move to the <guilabel>Data capture</guilabel> tab of the
-      graphical interface.</para>
+      <para>GUIの<guilabel>マーク認識</guilabel>タブに行きます。</para>
 
       <sect3>
         <title>自動入力</title>
 
-        <para>For automatic recognition of the checked boxes in the students'
-        pages, they must be previously digitalized. I use a copier/scanner
-        which does it automatically (all the pages in a bundle without
-        interaction with me), with the following settings: 300 dpi, OCR mode
-        (for the characters' recognition, black and white without greyscale -
-        but the scanner does not process any character recognition), each scan
-        delivered as a single TIFF file per page.</para>
+        <para>受験者の答案にあるマークの自動認識には、事前に答案をデジタル化しておかなければなりません。私の場合は、その作業を（私の操作なしに束にした全ページに対して）自動でやってくれるコピー機/スキャナを使い、300dpi、OCRモード（文字認識向き、グレースケールでないモノクロモードのことで、文字認識をしてくれるわけではありません）の設定で行って、各ページが一つのTIFFファイルとしてスキャンデータが得られます。</para>
 
         <note>
-          <para>To analyze the scans, we must have them in one or several
-          image files (TIFF, JPG, PNG, etc.). Vector graphics formats (PDF, PS
-          or EPS) are also suitable: scans will then be converted into PNG by
-          AMC before analysis.</para>
+          <para>スキャンデータを解析するには、それらを一つあるいは複数の画像ファイル（TIFF、JPG、PNG等）として持つ必要があります。ベクターグラフィックス形式（PDF、PS、EPS）でもかまいません。この場合はスキャンデータは解析前にPNGに変換されます。</para>
         </note>
 
         <note>
-          <para>When giving scans for automated data capture the first time,
-          you will have tell AMC which method you used: either different
-          papers printed, or photocopied papers (see&nbsp;<xref
-          endterm="printing.title" linkend="printing"/>).</para>
+          <para>スキャンデータを使って最初に自動マーク認識を行う際、個別答案用紙かコピー答案用紙のどちらの方法を使うかAMCに通知します（<xref endterm="printing.title" linkend="printing"/>参照）。</para>
         </note>
 
-        <para>Then we select this set of scan files in the dialog opened by
-        the button <guibutton>Automated</guibutton> of the section
-        <guilabel>Data capture after examination</guilabel>, then we validate
-        with the button <guibutton>Use</guibutton> of this dialog. It's now
-        time to drink a coffee because the analysis of copies can be very long
-        (and can be done quietly because it requires no interaction).</para>
+        <para><guilabel>そして、試験実施後のマーク認識</guilabel>セクションの<guilabel>自動</guilabel>ボタンで開いたダイアログから、スキャンデータファイルをすべて選択したのち、このダイアログの<guibutton>続行</guibutton>（訳注: Useとかない）ボタンで開始します。ここでコーヒーブレークです。答案の解析には非常に時間がかかるためです（インタラクションは不要なので、無言で実行されます）。</para>
 
-        <para>The result of the analysis of each page is indicated in the
-        lists of the section <guilabel>Diagnosis</guilabel>:</para>
+        <para>各ページの解析結果は<guilabel>診断</guilabel>セクションのリストに表示されます:</para>
 
         <itemizedlist>
           <listitem>
@@ -1830,38 +1796,22 @@ Name :
     </sect2>
 
     <sect2>
-      <title>採点Correction</title>
+      <title>採点</title>
 
-      <para>In the <guilabel>Marking</guilabel> tab of the graphic interface,
-      the part <guilabel>Marking</guilabel> allows us to deduce the scores of
-      the students from the inputs, but also to read the codes written by the
-      students (see&nbsp;<xref linkend="latex.codes"/>).</para>
+      <para>GUIの<guilabel>採点</guilabel>タブでは、<guilabel>採点</guilabel>セクションでスキャンデータから受験者の得点を計算するとともに、受験者が記入したコードを読み取ります（<xref linkend="latex.codes"/>参照）。</para>
 
       <sect3>
         <title>採点処理</title>
 
-        <para>The computation of the scores is launched with the button
-        <guibutton>Mark</guibutton>, but we must previously make the following
-        choice:</para>
+        <para>得点の計算は<guibutton>Mark</guibutton>ボタンで起動しますが、以下の選択をしておく必要があります:</para>
 
         <itemizedlist>
           <listitem>
-            <para>If we check the box <guilabel>Update marking
-            scale</guilabel>, the scoring strategy will be first extracted
-            from the LaTeX source file. This allows to try many strategies at
-            the end of the correction process. This action also updates which
-            answers are specified as correct or as wrong. Hence, potential
-            mistakes in the answers can be easily fixed after the exam. The
-            method to specify the strategy in the LaTeX file will be explained
-            in the section&nbsp;<xref endterm="bareme.title" linkend="bareme"/> (a
-            default scoring strategy is used when no indication is
-            given).</para>
+            <para><guilabel>採点基準を更新</guilabel>のボックスにチェックすると、採点基準は最初にLaTeXソースファイルから取り出されます。これにより、採点処理において、いろいろな採点基準を試してみることができます。これにより、どの解答が正解でどれが誤りかも更新されます。したがって、試験実施後でも、問題作成時の正解の誤りを修正することができます。LaTeXファイルで採点基準を設定する方法は<xref endterm="bareme.title" linkend="bareme"/>の節で説明されます（何も指示しなければデフォルトの採点基準が使用されます）。</para>
           </listitem>
         </itemizedlist>
 
-        <para>When we click the button <guibutton>Mark</guibutton>, the
-        correction is made (this can take some time if we also asked for the
-        reading of the scale).</para>
+        <para><guibutton>Mark</guibutton>ボタンをクリックすると、採点が実行されます（基準の読み取りもさせる場合は少し時間がかかります）。</para>
       </sect3>
 
       <sect3 id="bareme">
@@ -2272,62 +2222,32 @@ Name:
 
       <orderedlist>
         <listitem>
-          <para>It is possible to ask students to identify themselves on their
-          copy with their student number, which will be written by checking
-          one box per digit. A LaTeX command is designed to use this method on
-          the copy (see the part&nbsp;<xref linkend="latex.codes"/>). After the
-          exam, copies will be identified automatically taking into account a
-          list matching the students' numbers and their names.</para>
+          <para>受験番号を一桁ごとにボックスにマークする方式で、受験者自身に答案用紙に記入してもらうことが可能です。答案用紙にこの方式を用いるためのLaTeXのコマンドが用意されています（<xref linkend="latex.codes"/>参照）。試験の実施後、受験番号と受験者名を対応づけるリストを用いて、自動的に答案の識別が行われます。</para>
         </listitem>
 
         <listitem>
-          <para>With no input of the students' numbers, or in the case when
-          the automated identification has not succeeded perfectly (for
-          example when a student made a wrong input), the graphical interface
-          allows an assisted manual association.</para>
+          <para>受験番号を記入させない場合や、自動識別が（記入ミスなどで）完全にはうまくいかなかった場合には、GUIの補助により手動で受験番号と氏名をリンクすることができます。</para>
         </listitem>
       </orderedlist>
 
-      <para>Let's first move to the <guilabel>Marking</guilabel> tab of the
-      graphical interface.</para>
+      <para>まず、GUIの<guilabel>採点</guilabel>タブに移ります。</para>
 
       <sect3 id="liste.etudiants">
         <title id="liste.etudiants.title">受験者名簿</title>
 
-        <para>We must previously supply a list of students. This list can
-        obviously be used for many multiple-choices tests. This list is a text
-        file containing one student per line. We may also append a few
-        complementary information in the file, as in the following example (in
-        the example above, email will not be used at all by
-        AMC):<programlisting># STUDENTS / 1ST YEAR
+        <para>事前に受験者名簿を準備しておかなければなりません。この名簿は、いくつもの選択式試験問題で使いまわすことができます。このリストは各行に受験者1名を含んだテキストファイルです。次の例に示すように（例えば受験者に結果をメールで知らせたい場合などのために）、付加的な情報をファイルに追加しておいてもかまいません:<programlisting># STUDENTS / 1ST YEAR
 surname:name:id:email
 Bienvenüe:Alexis:001:paamc@passoire.fr
 Boulix:Jojo:002:jojo.boulix@rien.xx
 Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
-        <para>The lines of the file which begin with the character
-        `<code>#'</code> are comments. The first of the other lines contains
-        (separated by the character <code>`:'</code>) the column titles. Then,
-        with one line per student, we write the corresponding information.
-        There must be at least one column named <code>name</code> or
-        <code>surname</code>.</para>
+        <para><code>`#'</code> で始まる行はコメントです。それ以外の、最初の行は（<code>`:'</code> で区切った）カラム名を格納します。それ以降、受験者1名につき1行で、対応する情報を記入します。必ず<code>name</code>あるいは<code>surname</code>という名前のカラムに受験者名を格納しないと、下で説明する手動リンクでボタン表示ができなくなります。<!--英文・仏文にない表現で必要性の理由を説明--></para>
 
         <note>
-           <para>One can replace the separator <code>`:'</code> by a comma, a
-          semicolon or a tabulation. However the same separator must be used
-          everywhere in the file which contains the list of students. The used
-          separator is detected by taking the character (out of the four
-          possible characters) which appears most frequently in the first line
-          which is not a comment.</para>
+           <para>セパレータの <code>`:'</code> は、カンマ、セミコロン、タブのいずれかに置き換えることができます。しかし、名簿ファイルのすべての箇所で同じセパレータを使わなければなりません。どの文字をセパレータとして（この4種から）選ぶかは、コメントでない最初の行において、どれが最も多く出現するかで決定されます。</para>
         </note>
 
-        <para>The prepared list of students (either a simple list or with more
-        information) will then be selected with the button <guilabel>List of
-        the students</guilabel>. We must also choose one of the columns as a
-        unique key which will identify the students (generally, one chooses
-        the column containing the student's number). Last, to prepare an
-        automated association, we must choose the name of the relevant code
-        used in the LaTeX command <command>AMCcode</command> (if used).</para>
+        <para>準備した受験者名簿は（他の情報を含んでも含まなくても）<guilabel>受験者名簿</guilabel>ボタンにより選択します。そして受験者名簿の中でユニークなキーとなるカラム（一般には、受験番号を格納するカラム）を一つ選ばなければなりません。最後に、自動リンクの準備として、（使用した場合には）LaTeXの<command>AMCcode</command>コマンドで使用した関連するコード名を選びます。</para>
       </sect3>
 
       <sect3>
@@ -2336,39 +2256,17 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <sect4>
           <title>自動リンク</title>
 
-          <para>When we push the button <guibutton>Automatic</guibutton> in
-          the part <guilabel>Students identification</guilabel>, matching of
-          the codes given by the students begins. We can watch or improve the
-          result later with a (partial) manual association.</para>
+          <para><guilabel>受験者識別</guilabel>セクションの<guibutton>自動</guibutton>ボタンを押すと、受験者が記入したコードの対応づけが開始します。結果は、後から、（半）手動リンクにより確認したり改善したりできます。</para>
 
           <warning>
-            <para>To make an automated association, at least one command
-            <command>AMCcode</command> is required (see&nbsp;<xref
-            linkend="latex.codes"/>) in the LaTeX source file, as well as a
-            list of students with a column containing a reference (generally a
-            number of student) which will be identical to the input given in
-            the boxes produced by the command
-            <command>AMCcode</command>.</para>
+            <para>自動リンクを行うためには、LaTeXソースファイル中に<command>AMCcode</command>コマンド（<xref linkend="latex.codes"/>参照）が少なくとも一つ必要です。また、受験者名簿には、<command>AMCcode</command>が生成したボックスに記入されるはずの参照（一般には受験番号）を格納したカラムが必要です。</para>
           </warning>
         </sect4>
 
         <sect4>
           <title>手動リンク</title>
 
-          <para>To open the window allowing recognition of the students'
-          names, let's click on <guibutton>Manual</guibutton> button in the
-          part <guilabel>Students identification</guilabel>. This window is
-          made of an upper part which presents in sequence images of the names
-          written by the students, a lower part containing a button for each
-          student from the list we supplied, and a right part allowing to
-          browse easily the copies to be identified. Let's click the button
-          matching the name written in the upper part for each presented page
-          (by default, only the copies not or badly identified are presented -
-          this can be changed by checking the box
-          <guilabel>associated</guilabel>). When every page is read, a blue
-          background appears instead of the names, and we just need to click
-          the <guibutton>Save</guibutton> button to end with
-          association.</para>
+          <para>受験者の氏名を読み取るためのウィンドウを開くには、<guibutton>受験者識別</guibutton>セクションの<guibutton>手動</guibutton>ボタンをクリックします。このウィンドウは、上部に受験者が記入した氏名の画像が順番に表示され、下部に名簿にある受験者ごとにボタンが並び、さらに右側には答案用紙の一覧で区別できるようになっています。各ページについて、上部に提示された氏名に対応したボタンをクリックします（デフォルトでは、識別できなかった答案だけが表示されますが、<guilabel>リンク済</guilabel>ボックスにチェックして変更できます）。すべてのページを読み取れたら、氏名のかわりに青い背景が表示され、あとは<guibutton>保存</guibutton>ボタンをクリックしてリンクを終了するだけです。</para>
         </sect4>
       </sect3>
     </sect2>
@@ -2376,54 +2274,43 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
     <sect2>
       <title>採点表のエクスポート</title>
 
-      <para>At this stage, we can get the list of scores under various formats
-      (currently CSV and OpenOffice), with the button
-      <guibutton>Export</guibutton>. This export will be followed by the
-      opening of the produced file by the appropriate software (if
-      available).</para>
+      <para>このステージでは、<guibutton>エクスポート</guibutton>ボタンを使って、採点表をさまざまな形式（現在のところ、CSVとOpenOffice）で取り出せます。エクスポートすると、（可能なら）引き続いて適切なソフトウェアで生成されたファイルが開かれます。</para>
 
       <sect3>
         <title>ODS（OpenOffice、LibreOffice）へのエクスポート</title>
 
-        <para>In the exported file, the following colors are used:</para>
+        <para>エクスポートされたファイルでは、以下の色が使われています:</para>
 
         <variablelist>
           <varlistentry>
-            <term>grey</term>
+            <term>灰色</term>
 
             <listitem>
-              <para>is used for <emphasis>non applicable</emphasis>. This may
-              be for example scores for absentees, or scores corresponding to
-              a question that was not shown to the corresponding
-              student.</para>
+              <para>は、<emphasis>適用外</emphasis>に使われます。これは例えば、欠席者の得点や、その受験者には表示されなかった設問の素点です。</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>yellow</term>
+            <term>黄色</term>
 
             <listitem>
-              <para>is used for questions that has not been answered by the
-              student.</para>
+              <para>は、受験者が無回答のままにした設問に使われます。</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>red</term>
+            <term>赤色</term>
 
             <listitem>
-              <para>is used for questions with an <emphasis>invalid</emphasis>
-              answer: the student ticked several boxes in a simple question,
-              or he ticked some boxes <emphasis>and</emphasis> the box
-              <emphasis>None of these answers are correct</emphasis>.</para>
+              <para>は、選択が<emphasis>無効</emphasis>だった設問に使われます。単一選択問題に複数のマークをした場合や、<emphasis>該当なし</emphasis>ボックス<emphasis>と</emphasis>それ以外のボックスをマークした場合です。</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term>purple</term>
+            <term>紫色</term>
 
             <listitem>
-              <para>used for indicative questions.</para>
+              <para>は、採点対象外の設問に使われます。</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -2433,68 +2320,56 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
     <sect2>
       <title>採点記入</title>
 
-      <para>When we push the button <guibutton>Annotate papers</guibutton>,
-      copies annotation will begin: on every scan, the following annotations
-      will be made (these are the default annotations, they can be
-      configured):</para>
+      <para><guibutton>採点記入</guibutton>ボタンを押すと、答案への採点記入が始まります。各スキャンデータに、次のように記入されます（これらはデフォルトの記入書式で、設定で変更できます）:</para>
 
       <itemizedlist>
         <listitem>
-          <para>The boxes wrongly checked by the student will be circled in
-          red;</para>
+          <para>受験者が誤ってマークしたボックスには、赤い円が記入されます。</para>
         </listitem>
 
         <listitem>
-          <para>the non-checked boxes which should have been are checked in
-          red;</para>
+          <para>マークすべきボックスにマークされていない場合は、赤いチェック印が記入されます。</para>
         </listitem>
 
         <listitem>
-          <para>the checked boxes which had to be checked are checked in
-          blue;</para>
+          <para>マークすべきボックスにマークされている場合は、青いチェック印が記入されます。</para>
         </listitem>
 
         <listitem>
-          <para>for each question, obtained and maximal scores are
-          indicated;</para>
+          <para>各設問について、取得した素点と満点が記入されます。</para>
         </listitem>
 
         <listitem>
-          <para>the global score of the copy is indicated on the first page of
-          the copy.</para>
+          <para>答案全体の得点が答案の最初のページに記入されます。</para>
         </listitem>
       </itemizedlist>
 
-      <para>The text written on the first page of the copies can be configured
-      (<menuchoice>
-          <guimenu>Edit</guimenu>
+      <para>答案の最初のページに記入されるテキストは設定で変更かのうです（<menuchoice>
+          <guimenu>編集</guimenu>
 
-          <guimenuitem>Preferences</guimenuitem>
+          <guimenuitem>設定</guimenuitem>
 
-          <guimenuitem>Annotation</guimenuitem>
+          <guimenuitem>採点記入</guimenuitem>
 
-          <guimenuitem>Header</guimenuitem>
-        </menuchoice> or <menuchoice>
-          <guimenu>Edit</guimenu>
+          <guimenuitem>ヘッダー</guimenuitem>
+        </menuchoice>または<menuchoice>
+          <guimenu>編集</guimenu>
 
-          <guimenuitem>Preferences</guimenuitem>
+          <guimenuitem>設定</guimenuitem>
 
-          <guimenuitem>Project</guimenuitem>
+          <guimenuitem>プロジェクト</guimenuitem>
 
-          <guimenuitem>Papers annotation</guimenuitem>
+          <guimenuitem>答案の採点記入</guimenuitem>
 
-          <guimenuitem>Header text</guimenuitem>
-        </menuchoice>). Substitutions will be made within the provided text
-      (please have a look at <xref linkend="scoring-result"/> for some details
-      on the meaning of those values):</para>
+          <guimenuitem>ヘッダーテキスト</guimenuitem>
+        </menuchoice>）。設定されたテキストに対して、次のように置換が行われます（これらの値の意味については<xref linkend="scoring-result"/>をご覧ください）:</para>
 
       <variablelist>
         <varlistentry>
           <term><literal>%S</literal></term>
 
           <listitem>
-            <para>is replaced by the student's <emphasis>total
-            score</emphasis>.</para>
+            <para>は受験者の<emphasis>素点の合計</emphasis>に置換されます。</para>
           </listitem>
         </varlistentry>
 
@@ -2502,8 +2377,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%M</literal></term>
 
           <listitem>
-            <para>is replaced by the <emphasis>maximum total
-            score</emphasis>.</para>
+            <para>は<emphasis>素点合計の満点</emphasis>に置換されます。</para>
           </listitem>
         </varlistentry>
 
@@ -2511,8 +2385,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%s</literal></term>
 
           <listitem>
-            <para>is replaced by the student's
-            <emphasis>mark</emphasis>.</para>
+            <para>は受験者の<emphasis>得点</emphasis>に置換されます。</para>
           </listitem>
         </varlistentry>
 
@@ -2520,7 +2393,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%m</literal></term>
 
           <listitem>
-            <para>is replaced by the <emphasis>maximum mark</emphasis>.</para>
+            <para>は<emphasis>満点</emphasis>に置換されます。</para>
           </listitem>
         </varlistentry>
 
@@ -2528,7 +2401,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%(ID)</literal></term>
 
           <listitem>
-            <para>is replaced by the student's name.</para>
+            <para>は受験者名に置換されます。</para>
           </listitem>
         </varlistentry>
 
@@ -2536,64 +2409,40 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <term><literal>%(<replaceable>COL</replaceable>)</literal></term>
 
           <listitem>
-            <para>is replaced by the value of column
-            <replaceable>COL</replaceable> in the students list for the curent
-            student.</para>
+            <para>は受験者名簿内の<replaceable>COL</replaceable>の値に置換されます。</para>
           </listitem>
         </varlistentry>
       </variablelist>
 
-      <para>This operation is made for each page, giving as a result JPG
-      format annotated pages.</para>
+      <para>この処理は各ページに行われ、JPG形式の採点記入済のページが得られます。</para>
 
-      <para>If we wish to distribute the annotated/corrected copies to
-      students in electronic format, it is useful to make a PDF file for each
-      student, from his/her JPG annotated pages. This is made by pushing the
-      button <guibutton>Group</guibutton>. The name of the PDF file which will
-      contain the corrected copy of a student is based on the template
-      indicated in the field <guilabel>File name model</guilabel>. In that
-      template, every substring as &laquo;(<replaceable>col</replaceable>)&raquo; is
-      replaced by the contents of the column named
-      <code><replaceable>col</replaceable></code> in the file containing the
-      list of students (see section&nbsp;<xref endterm="liste.etudiants.title"
-      linkend="liste.etudiants"/>). If we let this field empty, a default
-      value is built up based on the student's name and student number.</para>
+      <para>採点記入済の答案を電子的な形式で受験者に配布したい場合は、各受験者ごとに、JPGの採点記入済ページからPDFファイルを作成すると便利です。これは、<guibutton>グループ化</guibutton>（訳注: 古い）ボタンお押すことで行います。受験者の答案を格納するPDFファイル名は、<guilabel>ファイル名テンプレート</guilabel>フィールドで指示したテンプレートによって決められます。テンプレートでは、&laquo;(<replaceable>col</replaceable>)&raquo; は受験者名簿内の<replaceable>COL</replaceable>の値に置換されます（<xref endterm="liste.etudiants.title" linkend="liste.etudiants"/>参照）。このフィールドを空にすると、試験問題番号と受験者名からなるデフォルト値が使用されます。</para>
     </sect2>
   </sect1>
 
   <sect1>
-    <title>非標準の使用方法Alternative usages</title>
+    <title>非標準の使用方法</title>
 
     <sect2>
-      <title>Photocopied subject</title>
+      <title>コピー課題方式</title>
 
-      <para>As explained in <xref endterm="printing.title"
-      linkend="printing"/>, it is not always possible to photocopy one answer
-      sheet to give to several students. However, when using a separate answer
-      sheet and when questions and answers are not to be shuffled, you can
-      photocopy the subject, and print all the answer sheets separately. We
-      detail here the proper way to follow.</para>
+      <para><xref endterm="printing.title" linkend="printing"/>で説明したように、複数の受験者に同一の答案用紙をコピーして配るのは常に可能とは限りません。しかし、別紙答案用紙方式で、設問と選択肢がシャフルされていなければ、問題用紙はコピーで用意して、答案用紙だけ全員分個別に印刷することができます。ここではその方法を詳しく説明します。</para>
 
       <itemizedlist>
         <listitem>
-          <para>Use <option>separateanswersheet</option> package option (see
-          <xref endterm="sec.package.options.title"
-          linkend="sec.package.options"/>).</para>
+          <para><option>separateanswersheet</option>オプションを使用します（<xref endterm="sec.package.options.title" linkend="sec.package.options"/>参照）。</para>
         </listitem>
 
         <listitem>
-          <para>Write the subject before calling <command>onecopy</command>
-          command or outside <command>examcopy</command> environment.</para>
+          <para><command>onecopy</command>コマンドを呼ぶ前か、<command>examcopy</command>環境の外側に課題を記述します。</para>
         </listitem>
 
         <listitem>
-          <para>Use <command>\AMCformS</command> to output answer boxes in
-          each answer sheet, insine
-          <command>onecopy</command>/<command>examcopy</command>.</para>
+          <para><command>onecopy</command>/<command>examcopy</command>の内側で<command>\AMCformS</command>コマンドを用いて、マーク用のボックスを各答案用紙に出力します。</para>
         </listitem>
       </itemizedlist>
 
-      <para>Here is a minimal exemple:</para>
+      <para>最小限の例を示します:</para>
 
       <programlisting>\documentclass[a4paper]{article}
 \usepackage[separateanswersheet,lang=JA]{automultiplechoice}    
@@ -2601,8 +2450,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
 \noindent{\bf Subject}
 
-\begin{question}{sum}
-  How much are one plus one?
+\begin{question}{和}
+  1足す1はいくつですか？
   \begin{choices}
     \wrongchoice{1}
     \correctchoice{2}
@@ -2611,11 +2460,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 \end{question}
 
 \begin{question}{k2}
-  How high is the K2?
+  K2の標高はいくらですか？
   \begin{choices}
-    \wrongchoice{around 8000m}
-    \correctchoice{around 8600m}
-    \wrongchoice{around 9000m}
+    \wrongchoice{約8000m}
+    \correctchoice{約8600m}
+    \wrongchoice{約9000m}
   \end{choices}
 \end{question}
 
@@ -2623,12 +2472,12 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
 \onecopy{5}{    
 
-\AMCdebutFormulaire    
+\AMCformBegin
 
-{\large\bf Answer sheet:}
-\hfill \champnom{\fbox{    
+{\large\bf 答案用紙:}
+\hfill \namefield{\fbox{    
     \begin{minipage}{.5\linewidth}
-      Name:
+      氏名:
       
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
@@ -2642,40 +2491,27 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 \end{document}
 </programlisting>
 
-      <para>You will get from this LaTeX file one subject (sheet numbered 0)
-      to print and photocopy to all students, and several answer sheets to
-      print (one for each student).</para>
+      <para>このLaTeXファイルから、印刷してから受験生全員分をコピーする（試験問題番号0の）試験問題用紙1部と、（各受験生に1部の）複数の答案用紙が得られます。</para>
     </sect2>
 
     <sect2>
       <title>Post correcting</title>
 
-      <para>Suppose you want to use a single generic answer sheet for all your
-      exams. You simply print answer boxes on it (say 5 for each questions,
-      and 40 questions), and give the students a subject that you wrote
-      somewhere else. The point here is that the correct choices are not
-      pointed out in the LaTeX file, so that AMC does not know about them. The
-      solution is to give one answer sheet to the teacher to fill correct
-      choices. Then, after scanning and AMC analysis, you simply have to tell
-      AMC which is the teacher completed answer sheet.</para>
+      <para>単一の汎用答案用紙を毎回の試験で使いたい場合を想定します。答案用紙には単純にマーク用ボックスだけを（例えば40問、各設問に5個）印刷し、問題は別のどこかに書いて受験者に提示します。ここでのポイントは、正しい選択肢はLaTeXファイルに明示されておらず、そのためAMCはそれがどれかわかりません。この解決方法は、出題者に答案用紙を渡して正しい選択肢をマークしてもらうことです。そうすれば、スキャンをしてAMCでマーク認識をしたあと、AMCにどれが出題者の記入した答案用紙かを教えるだけです。</para>
 
-      <para>To implement this idea, follow these rules:</para>
+      <para>このアイデアを実施するには、次のルールに従ってください:</para>
 
       <itemizedlist>
         <listitem>
-          <para>Use <option>postcorrect</option>, <option>insidebox</option>
-          and <option>noshuffle</option> package options (see <xref
-          endterm="sec.package.options.title"
-          linkend="sec.package.options"/>).</para>
+          <para><option>postcorrect</option>、<option>insidebox</option>、<option>noshuffle</option>オプションを使用します（<xref endterm="sec.package.options.title" linkend="sec.package.options"/>参照）。</para>
         </listitem>
 
         <listitem>
-          <para>Only use <command>\wrongchoice</command> for all your choices
-          (never <command>\correctchoice</command>).</para>
+          <para>選択肢には<command>\wrongchoice</command>のみを使ってください（<command>\correctchoice</command>は一切使わないでください）。</para>
         </listitem>
       </itemizedlist>
 
-      <para>Here is a minimal exemple:</para>
+      <para>最小限の例を示します:</para>
 
       <programlisting>\documentclass[a4paper]{article}
 \usepackage{multicol}
@@ -2688,7 +2524,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 \noindent
 \begin{tabular}{|l|l|l|}
 \hline
-student number &amp; class &amp; subject\\
+受験番号 &amp; クラス &amp; 科目\\
 \hline
  \vspace{-0.25cm}
  &amp; &amp;\\
@@ -2700,7 +2536,7 @@ student number &amp; class &amp; subject\\
 \end{tabular}
 \hfill\namefield{\fbox{    
     \begin{minipage}{.25\linewidth}
-      Name:
+      氏名:
       
       \vspace*{.5cm}\dotfill
       
@@ -2735,7 +2571,7 @@ student number &amp; class &amp; subject\\
 \end{choicescustom}
 \end{question}
 
-% continue here to get as many questions as needed...
+% これを必要な設問数の分だけ続ける...
 
 \end{multicols}  
 
@@ -2744,12 +2580,7 @@ student number &amp; class &amp; subject\\
 \end{document}
 </programlisting>
 
-      <para>You can then process the LaTeX file in AMC, print the sheets, scan
-      them after the exam, and start AMC automatic data capture (including the
-      teacher sheet). When you click on <guibutton>Mark</guibutton> in the
-      <guilabel>Marking</guilabel> tab, letting <guilabel>Update marking
-      scale</guilabel> ticked, you will be prompted for the teacher answer
-      sheet number. You can then continue as usual.</para>
+      <para>そしてこのLaTeXファイルをAMCで処理し、用紙を印刷し、試験実施後に（模範解答の用紙も含めて）スキャンして、AMCの自動マーク認識を開始させます。<guilabel>採点</guilabel>タブで<guilabel>採点基準を更新</guilabel>にチェックを入れて<guilabel>採点</guilabel>ボタンをクリックすると、出題者が記入した答案用紙の番号を入力するよう求められます。そのあとは通常どおりに続けることができます。</para>
     </sect2>
   </sect1>
 
@@ -3913,7 +3744,7 @@ student number &amp; class &amp; subject\\
                   <term><literal>%S</literal></term>
 
                   <listitem>
-                    <para>は受験者の素点に置換されます。</para>
+                    <para>は受験者の素点の合計に置換されます。</para>
                   </listitem>
                 </varlistentry>
 
@@ -3921,7 +3752,7 @@ student number &amp; class &amp; subject\\
                   <term><literal>%M</literal></term>
 
                   <listitem>
-                    <para>は素点の満点に置換されます。</para>
+                    <para>は素点合計の満点に置換されます。</para>
                   </listitem>
                 </varlistentry>
 
