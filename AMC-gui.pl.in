@@ -6221,7 +6221,7 @@ sub plugins_add {
 	->new_with_markup($w{'main_window'},
 			  'destroy-with-parent',
 			  'error','ok',
-			  sprintf(__("An error occured while trying to extract files from the plugin archive: %s."),$err));
+			  sprintf(__("An error occured while trying to extract files from the plugin archive: %s."),$error));
       $dialog->run;
       $dialog->destroy;
       return();
