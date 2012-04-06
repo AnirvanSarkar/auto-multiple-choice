@@ -5079,7 +5079,8 @@ sub make_template {
     }
 
     my $gt=read_glade('make_template',
-		      qw/template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok/);
+		      qw/template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok
+			template_description_scroll template_files_scroll/);
 
     $w{'template_file_name_style'} = $w{'template_file_name'}->get_modifier_style->copy;
 
@@ -5100,6 +5101,10 @@ sub make_template {
 		      absolu($projet{'options'}->{'texsrc'}));
     template_add_file($template_files_store,$w{'template_files_tree'},
 		      fich_options($projet{'nom'}));
+
+    for (qw/description files/) {
+      $w{'template_'.$_.'_scroll'}->set_policy('automatic','automatic');
+    }
 
     # Waits for action
 

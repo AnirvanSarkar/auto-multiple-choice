@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <!-- interface-requires gtk+ 2.12 -->
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkDialog" id="make_template">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -114,7 +114,7 @@
             <child>
               <object class="GtkLabel" id="template_file_name_warning">
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Note:&lt;/b&gt; please use only alphanumeric characters and characters from "-_+" for the project file name.</property>
+                <property name="label" translatable="yes">&lt;b&gt;Note:&lt;/b&gt; please use only alphanumeric characters and characters from "-_+" for the template file name.</property>
                 <property name="use_markup">True</property>
                 <property name="wrap">True</property>
               </object>
@@ -179,7 +179,7 @@
                 <property name="can_focus">False</property>
                 <property name="left_padding">12</property>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow12">
+                  <object class="GtkScrolledWindow" id="template_description_scroll">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <child>
@@ -203,7 +203,7 @@
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">4</property>
           </packing>
@@ -270,7 +270,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkScrolledWindow" id="scrolledwindow11">
+                      <object class="GtkScrolledWindow" id="template_files_scroll">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <child>
@@ -304,7 +304,7 @@
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">5</property>
           </packing>
