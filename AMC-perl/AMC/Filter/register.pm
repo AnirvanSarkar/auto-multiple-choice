@@ -189,14 +189,15 @@ sub file_head {
   my ($self,$file,$size)=@_;
   my $h;
   my $n;
+  my $fh;
   return if(!-f $file);
-  if(open(my $fh,"<",$file)) {
+  if(open($fh,"<",$file)) {
     $n=read $fh,$h,$size;
+    close($fh);
   }
   if(!defined($n)) {
     debug_and_stderr("Error reading from $file: $!");
   }
-  close($fh);
   return($h);
 }
 
