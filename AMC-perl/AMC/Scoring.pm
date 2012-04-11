@@ -114,7 +114,7 @@ sub degroupe {
 	$self->error("Syntax error (unknown variable): $v") if($v =~ /[a-z]/i);
 	my $calc=eval($v);
 	$self->error("Syntax error (operation) : $v") if(!defined($calc));
-	debug "Evaluation : $r{$k} => $calc" if($r{$k} ne $calc);
+	debug "Evaluation : $r{$k} => $v => $calc" if($r{$k} ne $calc);
 	$r{$k}=$calc;
     }
     #
@@ -169,20 +169,48 @@ sub score_question {
 	}
     }
 
+    # set variables from ticked answers set.VAR=VALUE
+    for my $an (@$answers) {
+	my $c=$an->{'correct'};
+	my $t=($correct ? $c : $an->{'ticked'});
+	if($t) {
+	    my %as=$self->degroupe($an->{'strategy'},{},$vars);
+	    for my $k (map { s/^set\.//; $_; }
+		       grep { /^set\./ } (keys %as)) {
+		debug("[A] Variable $k set to ".$as{'set.'.$k});
+		$vars->{$k}=$as{'set.'.$k};
+	    }
+	}
+    }
+
     # question wide variables
     $vars->{'N'}=$n_plain;
     $vars->{'IMULT'}=($question_data->{'type'}==QUESTION_MULT ? 1 : 0);
     $vars->{'IS'}=1-$vars->{'IMULT'};
 
+    # question wise variables set by scoring set.VAR=VALUE
+
+    my %qs_var=$self->degroupe($question_data->{'default_strategy'}
+			       .",".$question_data->{'strategy'},
+			       $self->{'default_strategy'},
+			       $vars);
+    for my $k (map { s/^set\.//; $_; }
+	       grep { /^set\./ } (keys %qs_var)) {
+	debug("[Q] Variable $k set to ".$qs_var{'set.'.$k});
+	$vars->{$k}=$qs_var{'set.'.$k};
+    }
+
+    # get scoring strategy
+
+    %b_q=$self->degroupe($question_data->{'default_strategy'}
+			 .",".$question_data->{'strategy'},
+			 $self->{'default_strategy'},
+			 $vars);
+
     if($vars->{'IMULT'}) {
 	# MULTIPLE QUESTION
 
 	$xx=0;
-
-	%b_q=$self->degroupe($question_data->{'default_strategy'}
-			     .",".$question_data->{'strategy'},
-			     $self->{'default_strategy'},
-			     $vars);
 
 	if($b_q{'haut'}) {
 	    $b_q{'d'}=$b_q{'haut'}-$n_plain;
@@ -238,11 +266,6 @@ sub score_question {
 	}
     } else {
 	# SIMPLE QUESTION
-
-	%b_q=$self->degroupe($question_data->{'default_strategy'}
-			     .",".$question_data->{'strategy'},
-			     $self->{'default_strategy'},
-			     $vars);
 
 	if(defined($b_q{'mz'})) {
 	    $b_q{'b'}=$b_q{'mz'};
