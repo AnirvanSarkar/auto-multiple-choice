@@ -177,8 +177,13 @@ sub score_question {
 	    my %as=$self->degroupe($an->{'strategy'},{},$vars);
 	    for my $k (map { s/^set\.//; $_; }
 		       grep { /^set\./ } (keys %as)) {
-		debug("[A] Variable $k set to ".$as{'set.'.$k});
-		$vars->{$k}=$as{'set.'.$k};
+		if(defined($vars->{$k})) {
+		    debug("[A] Variable $k set twice!");
+		    $raison='E';
+		} else {
+		    debug("[A] Variable $k set to ".$as{'set.'.$k});
+		    $vars->{$k}=$as{'set.'.$k};
+		}
 	    }
 	}
     }
@@ -188,7 +193,7 @@ sub score_question {
     $vars->{'IMULT'}=($question_data->{'type'}==QUESTION_MULT ? 1 : 0);
     $vars->{'IS'}=1-$vars->{'IMULT'};
 
-    # question wise variables set by scoring set.VAR=VALUE
+    # question wide variables set by scoring set.VAR=VALUE
 
     my %qs_var=$self->degroupe($question_data->{'default_strategy'}
 			       .",".$question_data->{'strategy'},
@@ -200,6 +205,16 @@ sub score_question {
 	$vars->{$k}=$qs_var{'set.'.$k};
     }
 
+    # default values for some variables
+
+    for my $k (map { s/^default\.//; $_; }
+	       grep { /^default\./ } (keys %qs_var)) {
+	if(!defined($vars->{$k})) {
+	    debug("[Q] Variable $k set to default value ".$qs_var{'default.'.$k});
+	    $vars->{$k}=$qs_var{'default.'.$k};
+	}
+    }
+
     # get scoring strategy
 
     %b_q=$self->degroupe($question_data->{'default_strategy'}
@@ -207,7 +222,31 @@ sub score_question {
 			 $self->{'default_strategy'},
 			 $vars);
 
-    if($vars->{'IMULT'}) {
+    if($raison eq 'E') {
+	$xx=$b_q{'e'};
+    }
+
+    if($n_coche==0) {
+	# no ticked boxes
+	$xx=$b_q{'v'};
+	$raison='V';
+    }
+
+    # required values for some variables
+
+    if(!$raison) {
+	for my $k (map { s/^requires\.//; $_; }
+		   grep { /^requires\./ && $qs_var{$_} } (keys %qs_var)) {
+	    if(!defined($vars->{$k})) {
+		debug("[Q] Variable $k is required but unset!");
+		$xx=$b_q{'e'};
+		$raison='E';
+	    }
+	}
+    }
+
+    if(!$raison) {
+      if($vars->{'IMULT'}) {
 	# MULTIPLE QUESTION
 
 	$xx=0;
@@ -227,10 +266,6 @@ sub score_question {
 	    # above"...
 	    $xx=$b_q{'e'};
 	    $raison='E';
-	} elsif($n_coche==0) {
-	    # no ticked boxes
-	    $xx=$b_q{'v'};
-	    $raison='V';
 	} else {
 	    # standard case: adds the 'b' or 'm' scores for each answer
 	    for my $a (@$answers) {
@@ -272,11 +307,7 @@ sub score_question {
 	    $b_q{'m'}=$b_q{'d'} if(defined($b_q{'d'}));
 	}
 
-	if($n_coche==0) {
-	    # no ticked boxes
-	    $xx=$b_q{'v'};
-	    $raison='V';
-	} elsif($n_coche>1) {
+	if($n_coche>1) {
 	    # incompatible answers: there are more than one
 	    # ticked boxes
 	    $xx=$b_q{'e'};
@@ -296,6 +327,7 @@ sub score_question {
 		     : ($n_ok==$n_tous ? $b_q{'b'} : $b_q{'m'}));
 	    }
 	}
+      }
     }
 
     debug "MARK: score=$xx ($raison)";
