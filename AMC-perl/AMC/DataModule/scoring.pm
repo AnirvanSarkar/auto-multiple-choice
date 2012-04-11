@@ -382,6 +382,8 @@ sub define_statements {
 		   ." VALUES (?,?,?,?,?)"},
      'setAnswerStrat'=>{'sql'=>"UPDATE ".$self->table("answer")
 		       ." SET strategy=? WHERE student=? AND question=? AND answer=?"},
+     'addAnswerStrat'=>{'sql'=>"UPDATE ".$self->table("answer")
+			    ." SET strategy=strategy||? WHERE student=? AND question=? AND answer=?"},
      'NEWAlias'=>{'sql'=>"INSERT INTO ".$self->table("alias")
 		  ." (student,see) VALUES (?,?)"},
      'getAlias'=>{'sql'=>"SELECT see FROM ".$self->table("alias")
@@ -523,6 +525,20 @@ sub main_strategy {
     }
   } else {
     return($self->sql_single($self->statement('getMain'),$student));
+  }
+}
+
+#add_main_strategy($student,$strategy) adds the strategy string at the
+#end of the student's main strategy string.
+
+sub add_main_strategy {
+  my ($self,$student,$strategy)=@_;
+  $student=-1 if($student<=0);
+  my $old=$self->main_strategy($student);
+  if(defined($old)) {
+      $self->statement('setMain')->execute($old.','.$strategy,$student);
+  } else {
+      $self->statement('NEWMain')->execute($student,$strategy);
   }
 }
 
@@ -694,6 +710,15 @@ sub clear_score {
 sub set_answer_strategy {
   my ($self,$student,$question,$answer,$strategy)=@_;
   $self->statement('setAnswerStrat')->execute($strategy,$student,$question,$answer);
+}
+
+# add_answer_strategy($student,$question,$answer,$strategy) adds the
+# scoring strategy string to a particular answer's one.
+
+sub add_answer_strategy {
+  my ($self,$student,$question,$answer,$strategy)=@_;
+  $self->statement('addAnswerStrat')->execute(",".$strategy,
+					      $student,$question,$answer);
 }
 
 # replicate($see,$student) tells that the scoring strategy used for

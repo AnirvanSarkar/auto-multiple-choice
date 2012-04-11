@@ -546,12 +546,12 @@ if($mode =~ /b/) {
 	if(/AUTOQCM\[B=([^\]]+)\]/) {
 	  if($quest) {
 	    if($rep) {
-	      $scoring->set_answer_strategy($etu,$quest,$rep,$1);
+	      $scoring->add_answer_strategy($etu,$quest,$rep,$1);
 	    } else {
-	      $strategy=$1;
+	      $strategy=($strategy ? $strategy.',' : '').$1;
 	    }
 	  } else {
-	    $scoring->main_strategy($etu,$1);
+	    $scoring->add_main_strategy($etu,$1);
 	  }
 	}
 	if(/AUTOQCM\[BD(S|M)=([^\]]+)\]/) {
