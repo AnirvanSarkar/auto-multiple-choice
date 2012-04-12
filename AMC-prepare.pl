@@ -159,7 +159,7 @@ sub verifie_q {
     return() if($info_vars{'postcorrect'});
 
     if($q) {
-	if(! $q->{'mult'}) {
+	if(!($q->{'mult'} || $q->{'partial'})) {
 	    my $oui=0;
 	    my $tot=0;
 	    for my $i (grep { /^R/ } (keys %$q)) {
@@ -194,12 +194,20 @@ sub analyse_amclog {
 	    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
 	    $analyse_data{'q'}={};
 	    if($analyse_data{'qs'}->{$1}) {
-		$a_erreurs++;
-		push @erreurs_msg,"ERR: "
-		    .sprintf(__("question ID used several times for the same paper: \"%s\"")." [%s]\n",$titres{$1},$analyse_data{'etu'});
+		if($analyse_data{'qs'}->{$1}->{'partial'}) {
+		    $analyse_data{'q'}=$analyse_data{'qs'}->{$1};
+		    delete($analyse_data{'q'}->{'partial'});
+		} else {
+		    $a_erreurs++;
+		    push @erreurs_msg,"ERR: "
+			.sprintf(__("question ID used several times for the same paper: \"%s\"")." [%s]\n",$titres{$1},$analyse_data{'etu'});
+		}
 	    }
 	    $analyse_data{'titre'}=$titres{$1};
-	    $analyse_data{'qs'}->{$1}=1;
+	    $analyse_data{'qs'}->{$1}=$analyse_data{'q'};
+	}
+	if(/AUTOQCM\[QPART\]/) {
+	    $analyse_data{'q'}->{'partial'}=1;
 	}
 	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
 	    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
@@ -472,15 +480,15 @@ if($mode =~ /b/) {
     my $quest='';
     my $rep='';
     my $etu=0;
-    my $multiple;
-    my $indicative;
-    my $strategy;
 
     my $delta=0;
 
     my $data=AMC::Data->new($data_dir);
     my $scoring=$data->module('scoring');
     my $capture=$data->module('capture');
+
+    my $qs={};
+    my $current_q={};
 
     $scoring->begin_transaction('ScEx');
     $capture->variable('annotate_source_change',time());
@@ -501,10 +509,14 @@ if($mode =~ /b/) {
 	    }
 	}
 	if(/AUTOQCM\[FQ\]/) {
-	  # end of question: register it
+	  # end of question: register it (or update it)
 	  $scoring->statement('NEWQuestion')
-	    ->execute($etu,$quest,($multiple ? QUESTION_MULT : QUESTION_SIMPLE),
-		      $indicative,$strategy);
+	    ->execute($etu,$quest,
+		      ($current_q->{'multiple'} 
+		       ? QUESTION_MULT : QUESTION_SIMPLE),
+		      $current_q->{'indicative'},
+		      $current_q->{'strategy'});
+	  $qs->{$quest}=$current_q;
 	  $quest='';
 	  $rep='';
 	}
@@ -512,9 +524,14 @@ if($mode =~ /b/) {
 	  # beginning of question
 	  $quest=$1;
 	  $rep='';
-	  $multiple=0;
-	  $indicative=0;
-	  $strategy='';
+	  if($qs->{$quest}) {
+	      $current_q=$qs->{$quest};
+	  } else {
+	      $current_q={'multiple'=>0,
+			  'indicative'=>0,
+			  'strategy'=>'',
+	      };
+	  }
 	}
 	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
 	  # beginning of student sheet
@@ -522,6 +539,7 @@ if($mode =~ /b/) {
 	  $etu=$1;
 	  print "Sheet $etu...\n";
 	  debug "Sheet $etu...\n";
+	  $qs={};
 	}
 	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
 	  # association question-number<->question-title
@@ -529,11 +547,11 @@ if($mode =~ /b/) {
 	}
 	if(/AUTOQCM\[MULT\]/) {
 	  # this question is a multiple-style one
-	  $multiple=1;
+	  $current_q->{'multiple'}=1;
 	}
 	if(/AUTOQCM\[INDIC\]/) {
 	  # this question is an indicative one
-	  $indicative=1;
+	  $current_q->{'indicative'}=1;
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	  $rep=$1;
@@ -548,7 +566,9 @@ if($mode =~ /b/) {
 	    if($rep) {
 	      $scoring->add_answer_strategy($etu,$quest,$rep,$1);
 	    } else {
-	      $strategy=($strategy ? $strategy.',' : '').$1;
+	      $current_q->{'strategy'}=
+		  ($current_q->{'strategy'} 
+		   ? $current_q->{'strategy'}.',' : '').$1;
 	    }
 	  } else {
 	    $scoring->add_main_strategy($etu,$1);

@@ -374,7 +374,7 @@ sub define_statements {
 		    ." WHERE title=?"},
      'setTitle'=>{'sql'=>"UPDATE ".$self->table("title")
 		  ." SET title=? WHERE question=?"},
-     'NEWQuestion'=>{'sql'=>"INSERT INTO ".$self->table("question")
+     'NEWQuestion'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("question")
 		     ." (student,question,type,indicative,strategy)"
 		     ." VALUES (?,?,?,?,?)"},
      'NEWAnswer'=>{'sql'=>"INSERT INTO ".$self->table("answer")
