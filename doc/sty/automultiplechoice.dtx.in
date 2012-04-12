@@ -1424,7 +1424,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \global\advance\AMC@numerotation\@ne%
   \expandafter\AMC@definitnumero\expandafter{\the\AMC@numerotation}{#1}\fi}
 \def\AMC@unnumero#1{\AMC@prepare{#1}\csname AMC@numtab@#1\endcsname}
-\def\AMC@affecte#1#2{\AMC@prepare{#1}#2=\csname AMC@numtab@#1\endcsname}
+\def\AMC@affecte#1#2{\AMC@prepare{#1}\global#2=\csname AMC@numtab@#1\endcsname}
 %    \end{macrocode}\end{macro}\end{macro}
 %
 % \subsection{Boxes}
@@ -2421,11 +2421,11 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCid@etudfin=\AMCnum@copies%
   \advance\AMCid@etudfin by \AMCid@etud\relax%
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
-  \loop%
+  \loop{%
     \AMC@zoneformulairefalse\setcounter{page}{1}%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
-    #2\clearpage\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+    #2\clearpage}\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
   \global\AMCid@etudstart=\AMCid@etud%
 }
 %    \end{macrocode}\end{macro}
