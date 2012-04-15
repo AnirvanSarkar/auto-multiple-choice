@@ -2560,8 +2560,7 @@ Three digits and two letters:\insertgroup{mixed}.
   {\setkeys{AMCNumeric}{digits,decimals,sign,strict,scoring,scoreexact,scoreapprox,approx}%
   \setkeys{AMCNumeric}{#2}%
 %    \end{macrocode}
-% The option |sign=true| asks to draw two boxes for the student to
-% choose between positive ($+$) and negative ($-$).
+% When |decimal| is positive, convert the real correct value to integer.
 %    \begin{macrocode}
   \ifnum\AMC@numeric@decd>\z@%
     \FPeval\AMC@numeric@eval{round(#1 * 10^\the\AMC@numeric@decd,0)}

@@ -38,6 +38,8 @@ use IPC::Run qw(run);
 
 use Getopt::Long;
 
+use_gettext;
+
 sub new {
   my ($class,%oo)=@_;
 
@@ -536,17 +538,39 @@ sub check_export {
     open my $fh,"<:encoding(utf-8)",$self->{'temp_dir'}.'/export.csv';
     my $i=0;
     my %heads=map { $_ => $i++ } (@{$c->getline($fh)});
-    my $copy=$heads{'student.copy'};
+    my $copy=$heads{translate_column_title('copie')};
+    if(!defined($copy)) {
+      $self->trace("[E] CSV: ".translate_column_title('copie')
+		   ." column not found");
+      exit(1);
+    }
     while(my $row=$c->getline($fh)) {
       for my $t (@csv) {
 	if($t->{-copy} eq $row->[$copy]
-	  && $t->{-question} && $t->{-abc} ) {
+	   && $t->{-question} && defined($heads{$t->{-question}})
+	   && $t->{-abc} ) {
 	  $self->test($row->[$heads{"TICKED:".$t->{-question}}],
-		      $t->{-abc},"ABC for Q=".$t->{-question});
+		      $t->{-abc},"ABC for copy ".$t->{-copy}
+		      ." Q=".$t->{-question});
+	  $t->{'checked'}=1;
+	}
+	if($t->{-copy} eq $row->[$copy]
+	   && $t->{-question} && defined($heads{$t->{-question}})
+	   && defined($t->{-score}) ) {
+	  $self->test($row->[$heads{$t->{-question}}],
+		      $t->{-score},"score for copy ".$t->{-copy}
+		      ." Q=".$t->{-question});
+	  $t->{'checked'}=1;
 	}
       }
     }
     close $fh;
+    for my $t (@csv) {
+      if(!$t->{'checked'}) {
+	$self->trace("[E] CSV: line not found. ".join(', ',map { $_.'='.$t->{$_} } (keys %$t)));
+	exit(1);
+      }
+    }
     $self->end;
   }
 }
