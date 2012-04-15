@@ -2580,14 +2580,14 @@ Three digits and two letters:\insertgroup{mixed}.
         (abs((intV)-(intX))<=\the\AMC@numeric@approx?\AMC@numeric@scoreapprox:0)%
       \else%
         0%
-      \fi)]}%
+      \fi)]^^J}%
   \fi%
   \def\AMC@numeric@compute{}%
   \AMC@numeric@x=\AMC@numeric@digits\loop{%
     \ifKV@AMCNumeric@strict%
-      \AMC@amclog{AUTOQCM[B=requires.int\@Alph\AMC@numeric@x=1]}%
+      \AMC@amclog{AUTOQCM[B=requires.int\@Alph\AMC@numeric@x=1]^^J}%
     \else%
-      \AMC@amclog{AUTOQCM[B=default.int\@Alph\AMC@numeric@x=0]}%
+      \AMC@amclog{AUTOQCM[B=default.int\@Alph\AMC@numeric@x=0]^^J}%
     \fi%
     \global\edef\AMC@numeric@compute{%
       \ifnum\AMC@numeric@x=\AMC@numeric@digits\else%
@@ -2596,9 +2596,9 @@ Three digits and two letters:\insertgroup{mixed}.
   }\advance\AMC@numeric@x\m@ne\ifnum\AMC@numeric@x>0\repeat%
   \ifKV@AMCNumeric@sign%
     \ifKV@AMCNumeric@strict%
-      \AMC@amclog{AUTOQCM[B=requires.intS=1]}%
+      \AMC@amclog{AUTOQCM[B=requires.intS=1]^^J}%
     \else%
-      \AMC@amclog{AUTOQCM[B=default.intS=1]}%
+      \AMC@amclog{AUTOQCM[B=default.intS=1]^^J}%
     \fi%
     \global\edef\AMC@numeric@compute{(\AMC@numeric@compute)*(intS)}%
   \fi%
