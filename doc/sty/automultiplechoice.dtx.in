@@ -858,6 +858,103 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{minipage}
 % }}
 %
+%   \DescribeMacro{\AMCnumericChoices}One can also use the
+%   |\AMCnumericChoices| command to ask the student to enter a
+%   numerical value as his answer, as in the following example:
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+  \begin{questionmultx}{sqrt}
+    \FPeval\VQa{trunc(5+random*15,0)}
+    \FPeval\VQs{VQa^0.5}
+
+    Compute $\sqrt{\VQa}$ and round it with two digits after period.
+
+    \AMCnumericChoices{\VQs}{digits=3,decimals=2,sign=true,
+      borderwidth=0pt,backgroundcol=lightgray,approx=5}
+  \end{questionmultx}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+% \begin{center}
+% {\makeatletter\AMC@correctrue\makeatother
+% \fbox{
+%  \begin{minipage}{.7\linewidth}
+%  \begin{questionmultx}{sqrt}
+%    \FPeval\VQa{trunc(5+random*15,0)}
+%    \FPeval\VQs{VQa^0.5}
+%
+%    Compute $\sqrt{\VQa}$ and round it up to two digits after period.
+%
+%    \AMCnumericChoices{\VQs}{digits=3,decimals=2,sign=true,
+%      borderwidth=0pt,backgroundcol=lightgray,approx=5}
+%  \end{questionmultx}
+%  \end{minipage}
+% }}
+% \end{center}
+%
+% Note the use of |questionmultx| environment: we need this question
+% to be \emph{multiple} as several boxes has to be ticked, but we
+% can't say that \emph{several answers are correct}, so we don't show
+% the \multiSymbole.
+% 
+%   Available options that can be used in the second argument of the
+%   |\AMCnumericChoices| command are the following (\meta{bool} can
+%   be |true| or |false|, and \meta{color} must be a color known by the |xcolor| package):
+%   \begin{itemize}\setlength{\itemindent}{5em}
+%   \item[|digits=|\meta{num}] to give the number of significant digits to request (defaults to 3).
+%   \item[|decimals=|\meta{num}] to give the number of digits after
+%     period to request (defaults to 0). Note that when |decimals| is
+%     positive, the LaTeX package |fp| must be loaded.
+%   \item[|sign=|\meta{bool}] to request or not a signed value (default to true).
+%   \item[|strict=|\meta{bool}] if true, a box has to be ticked for
+%     every digit and for the sign. If false, if some digits has no
+%     ticked box, they will be set to zero. Defaults to |false|.
+%   \item[|hspace=|\meta{space}] sets the horizontal space between
+%     boxes (defaults to |.5em|).
+%   \item[|vspace=|\meta{space}] sets the certical space between
+%     boxes (defaults to |1ex|).
+%   \item[|borderwidth=|\meta{space}] sets the width of the frame
+%     around all the boxes (defaults to |1mm|.
+%   \item[|bordercol=|\meta{color}] sets the color of the frame
+%     (defaults to |lightgray|).
+%   \item[|backgroundcol=|\meta{color}] sets the background color
+%     (defaults to |white|).
+%   \item[|Tsign=|\meta{text}] is the text to print at the top of the
+%     boxes to set the sign (Can also be redefined by
+%     |\def\AMCntextSign|\marg{text}, and defaults to be empty).
+%   \item[|Tpoint=|\meta{text}] is the text for the period. Can also
+%     be redefined by |\def\AMCdecimalPoint|\marg{text}, and defaults
+%     to |\raisebox{1ex}{\bf .}|.
+%   \item[|scoring=|\meta{bool}] if true, a scoring strategy is given
+%     to AMC for this question. Defaults to |true|.
+%   \item[|scoreexact=|\meta{num}] gives the score for an exact answer (defaults to 2).
+%   \item[|scoreapprox=|\meta{num}] gives the score for an approximative answer (defaults to 1).
+%   \item[|approx=|\meta{num}] sets the maximal distance to the
+%     correct integer value (value without the decimal point) for an
+%     answer to be said \emph{approximative} and be rewarded to
+%     |scoreapprox| points (defaults to 0).
+%   \end{itemize}
+%
+%   The text added at the end of the questions using
+%   |\AMCnumericChoices| when not in the separate answer sheet (and
+%   when a separate answer sheet is requested by the
+%   |separateanswersheet| package option) can also be set redefining
+%   the |\AMCntextGoto| command, as:
+%
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\def\AMCntextGoto{\par{\bf\emph{Please code the answer on
+                           the separate answer sheet.}}}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+%   
 % \subsection{French command names}\label{d:french}
 % For backward compatibility, some of \textsf{automultiplechoice}
 % commands, environments and package option have their French
@@ -2102,6 +2199,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %         multiple questions (with none, one or several correct
 %         choices).
 %
+%         Environment |{questionmultx}|\marg{key} is the same as
+%         |questionmult|, but with no use of |\multiSymbole|.
+%
 %         Environment |{questionouverte}|\oarg{width} is used for open
 %         questions (that won't be marked automatically!), with width
 %         given as an optional argument (defaults to 3\,cm).
@@ -2123,6 +2223,9 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCtype@multitrue\ifAMC@calibration%
   \AMC@amclog{AUTOQCM[MULT]^^J}\fi}%
 {\end{question}}
+\newenvironment{questionmultx}[1]{%
+  \begingroup\def\multiSymbole{}\begin{questionmult}{#1}}%
+{\end{questionmult}\endgroup}
 \newdimen\ouverte@vs
 \newenvironment{questionouverte}[1][3cm]{%
   \AMCtype@multifalse\ouverte@vs=#1%
@@ -2151,7 +2254,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\QuestionIndicative{\ifAMC@calibration\AMC@amclog{AUTOQCM[INDIC]^^J}\fi}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
-% \subsection{Codes}
+% \subsection{Numerical data}
+%
+% \subsubsection{Codes}
 %
 % \begin{macro}{\AMCcode}\begin{macro}{\AMCcodeH}
 % \noindent\begin{minipage}[t]{.45\linewidth}
@@ -2251,6 +2356,324 @@ Three digits and two letters:\insertgroup{mixed}.
  \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
 }}
 %    \end{macrocode}\end{macro}\end{macro}
+%
+% \subsubsection{Numerical questions}
+%
+% \begin{macro}{\AMCnumericChoices}
+%   The command |\AMCnumericChoices|\marg{correct}{options} can be
+%   used as a replacement for the |choices| environment when the
+%   questions asks for a numeric value to code on the answer sheet.
+%
+%   As an example, 
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\begin{question}{product}
+  What is the value of $7\times 5$?
+  \AMCnumericChoices{35}{digits=2,sign=false}
+\end{question}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+% produces (in correction mode):
+%
+% \begin{center}
+% {\makeatletter\AMC@correctrue\makeatother
+% \fbox{
+% \begin{minipage}{.7\linewidth}
+%   \begin{question}{product}
+%     What is the value of $7\times 5$?
+%     \AMCnumericChoices{35}{digits=2,sign=false}
+%   \end{question}
+% \end{minipage}}}
+% \end{center}
+%
+% \noindent and these boxes are only shown on the separate answer sheet if the
+% |separateanswersheet| option is used.
+%
+% This command uses the
+% |\AMCformatChoices|\marg{showcommand}\marg{hidecommand}\marg{qname}\marg{qid}
+% command, that calls either \meta{hidecommand} if the
+% |separateanswersheet| option is used and if we are currently in the
+% question part (not in the answer sheet), or \meta{showcommand} when
+% all the boxes are to be produced.
+% 
+%    \begin{macrocode}
+\newcommand\AMCformatChoices[4]{%
+  \global\AMCrep@count=\z@%
+  \AMCmem@ireAJ{\global\AMCrep@count=\z@%
+    \protect #1{#3}{#4}{\AMCid@name}{\the\AMCid@quest}}%
+  \ifAMC@ensemble%
+    #2{#3}{#4}{\AMCid@name}{\the\AMCid@quest}%
+    \AMC@amclog{AUTOQCM[QPART]^^J}%
+  \else%
+    #1{#3}{#4}{\AMCid@name}{\the\AMCid@quest}%
+  \fi%
+}
+%    \end{macrocode}
+%
+% The |\AMCnumeric@char|\marg{inside}\marg{correct} draw a box with
+% content \meta{inside} (only if needed), where \meta{correct} is |1|
+% if the corresponding choice is correct and empty if not.
+%
+%    \begin{macrocode}
+\newcommand{\AMCnumeric@char}[2]{%
+  \global\advance\AMCrep@count\@ne\relax%
+  \AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:\ifx#2\@empty\@empty M\else B\fi]^^J}%
+  \ifAMC@correc\AMC@marque{#1}{#2}\else\AMC@marque{#1}{}\fi%
+  \ifAMC@inside@box\else\ifAMC@ensemble\else%
+    \hspace{\AMCcodeBoxSep}\textbf{#1}\fi\fi%
+}
+%    \end{macrocode}
+% 
+% The command |\AMCnumeric@digit|\marg{correct}\marg{maxdigit} draws a
+% box for current digit value |\AMC@chiffres|, if \meta{correct} is
+% the correct digit value, and \meta{maxdigit} is the maximal digit
+% value. The command |\AMCsignV|\marg{valuecount} draws two boxes for
+% the students to code the sign of the counter \meta{valuecount}
+% (which will be set to the absolute value). The command
+% |\AMCnumericH|\marg{varname}\marg{correct}\marg{maxdigit} draws a
+% serie of boxes for all possible values of a digit (from 0 to
+% \meta{maxdigit}), where the correct value is \meta{correct},
+% transmitting scoring data to AMC so that the vaiable \meta{varname}
+% will be set to the value chosen by the student.
+%
+%    \begin{macrocode}
+\newdimen\AMCnumeric@Hspace\AMCnumeric@Hspace=.5em
+\newdimen\AMCnumeric@Vspace\AMCnumeric@Vspace=1ex
+\newcommand{\AMCnumeric@digit}[2]{%
+  \ifnum\AMC@chiffres=#1%
+    \AMCnumeric@char{\the\AMC@chiffres}{1}%
+  \else%
+    \AMCnumeric@char{\the\AMC@chiffres}{}%
+  \fi%
+  \ifnum\AMC@chiffres<#2\relax\hspace{\AMCnumeric@Hspace}\fi%
+}
+\newcommand{\AMCsignV}[1]{%
+  \ifnum#1<\z@%
+    \hbox{\AMCnumeric@char{$+$}{}}\vspace{\AMCnumeric@Vspace}
+    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}%
+    \hbox{\AMCnumeric@char{$-$}{1}}
+    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}%
+    \global\multiply#1\m@ne%
+  \else%
+    \hbox{\AMCnumeric@char{$+$}{1}}\vspace{\AMCnumeric@Vspace}
+    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}%
+    \hbox{\AMCnumeric@char{$-$}{}}
+    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}%
+  \fi%
+}
+\newcommand{\AMCnumericH}[3]{%
+ \AMC@chiffres=0\loop%
+   \AMCnumeric@digit{#2}{#3}%
+   \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
+ \advance\AMC@chiffres\@ne\ifnum\AMC@chiffres>#3\relax\else\repeat%
+}
+%    \end{macrocode}
+%
+% Some computation commands are now
+% defined. |\AMC@calcmodulo|\marg{integer}\marg{counter} sets the
+% counter \meta{counter} value to \meta{integer} modulo
+% 10. |\AMC@calcdigit|\marg{integer}\marg{digit}\marg{counter} sets
+% the value of the counter \meta{counter} to the digit number
+% \meta{digit} of \meta{integer} (digit number 1 of 567 is 7, number 2
+% is 6...)
+%
+%    \begin{macrocode}
+\newcount\AMC@integer@modulo
+\newcommand\AMC@calcmodulo[2]{%
+  \AMC@integer@modulo=#1\divide\AMC@integer@modulo by 10%
+  \multiply\AMC@integer@modulo by 10%
+  \multiply\AMC@integer@modulo\m@ne\advance\AMC@integer@modulo by #1\relax%
+  #2=\AMC@integer@modulo%
+}
+\newcount\AMC@numeric@integer
+\newcount\AMC@numeric@calcdigit
+\newcommand\AMC@calcdigit[3]{%
+  \AMC@numeric@integer=#1%
+  \AMC@numeric@calcdigit=#2%
+  \ifnum#2>\@ne\loop{%
+    \global\divide\AMC@numeric@integer by 10}%
+    \advance\AMC@numeric@calcdigit\m@ne%
+  \ifnum\AMC@numeric@calcdigit>\@ne\repeat%
+  \fi%
+  \AMC@calcmodulo{\the\AMC@numeric@integer}{#3}%
+}
+%    \end{macrocode}
+%
+% The command
+% |\AMCnumericShow|\marg{value}\marg{opts}\marg{qname}\marg{qid} is
+% called to draw all necessary boxes to code a numerical value
+% \meta{value} with options given as a comma separated list
+% \meta{opts}. |\AMCnumericOpts|\marg{opts} can be used to set some
+% default values for these options.
+%
+% Begin with the available options:
+%    \begin{macrocode}
+\def\AMCdecimalPoint{\raisebox{1ex}{\bf .}}
+\def\AMCntextSign{}
+\def\AMCntextGoto{}
+\def\AMCncol@Border{lightgray}
+\def\AMCncol@Background{white}
+\def\AMCncol@BorderWidth{1mm}
+\newcount\AMC@numeric@digits
+\newcount\AMC@numeric@decd
+\newcount\AMC@numeric@value
+\newcount\AMC@numeric@x
+\define@key{AMCNumeric}{Tsign}{\def\AMCntextSign{#1}}
+\define@key{AMCNumeric}{Tpoint}{\def\AMCdecimalPoint{#1}}
+\define@key{AMCNumeric}{vspace}{\AMCnumeric@Vspace=#1}
+\define@key{AMCNumeric}{hspace}{\AMCnumeric@Hspace=#1}
+\define@key{AMCNumeric}{bordercol}{\def\AMCncol@Border{#1}}
+\define@key{AMCNumeric}{borderwidth}{\def\AMCncol@BorderWidth{#1}}
+\define@key{AMCNumeric}{backgroundcol}{\def\AMCncol@Background{#1}}
+\define@key{AMCNumeric}{digits}[3]{\AMC@numeric@digits=#1}
+\define@key{AMCNumeric}{decimals}[0]{\AMC@numeric@decd=#1}
+\define@boolkey{AMCNumeric}{sign}[true]{}
+\define@boolkey{AMCNumeric}{strict}[false]{}
+\define@boolkey{AMCNumeric}{scoring}[true]{}
+\define@key{AMCNumeric}{scoreexact}[2]{\def\AMC@numeric@scoreexact{#1}}
+\define@key{AMCNumeric}{scoreapprox}[1]{\def\AMC@numeric@scoreapprox{#1}}
+\newcount\AMC@numeric@approx
+\define@key{AMCNumeric}{approx}[0]{\AMC@numeric@approx=#1}
+\newcommand\AMCnumericOpts[1]{\setkeys{AMCNumeric}{#1}}
+%    \end{macrocode}
+% Then the command |\AMCnumericShow| itself:
+%    \begin{macrocode}
+\newcommand\AMCnumericShow[4]{%
+%    \end{macrocode}
+% The first line allows to keep the question ID number and name
+% accurate even in the separate answer sheet.
+%    \begin{macrocode}
+  \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
+%    \end{macrocode}
+% We have to tell AMC that the scoring we will give concerns this question:
+%    \begin{macrocode}
+  \ifAMC@ensemble\ifAMCformulaire@dedans%
+    \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}
+  \fi\fi%
+%    \end{macrocode}
+% Then we parse the options from \meta{opts}:
+%    \begin{macrocode}
+  {\setkeys{AMCNumeric}{digits,decimals,sign,strict,scoring,scoreexact,scoreapprox,approx}%
+  \setkeys{AMCNumeric}{#2}%
+%    \end{macrocode}
+% The option |sign=true| asks to draw two boxes for the student to
+% choose between positive ($+$) and negative ($-$).
+%    \begin{macrocode}
+  \ifnum\AMC@numeric@decd>\z@%
+    \FPeval\AMC@numeric@eval{round(#1 * 10^\the\AMC@numeric@decd,0)}
+    \AMC@numeric@value=\AMC@numeric@eval%
+  \else%  
+    \AMC@numeric@value=#1%
+  \fi%
+%    \end{macrocode}
+% The question scoring is given to AMC (if requested by the
+% |scoring=true| option). Note that the variable |intV| refers to the
+% correct value, and |intX| to the value entered by the student.
+%    \begin{macrocode}
+  \ifKV@AMCNumeric@scoring%
+    \AMC@amclog{AUTOQCM[B=force=(intV==intX?%
+      \AMC@numeric@scoreexact:%
+      \ifnum\AMC@numeric@approx>\z@%
+        (abs((intV)-(intX))<=\the\AMC@numeric@approx?\AMC@numeric@scoreapprox:0)%
+      \else%
+        0%
+      \fi)]}%
+  \fi%
+  \def\AMC@numeric@compute{}%
+  \AMC@numeric@x=\AMC@numeric@digits\loop{%
+    \ifKV@AMCNumeric@strict%
+      \AMC@amclog{AUTOQCM[B=requires.int\@Alph\AMC@numeric@x=1]}%
+    \else%
+      \AMC@amclog{AUTOQCM[B=default.int\@Alph\AMC@numeric@x=0]}%
+    \fi%
+    \global\edef\AMC@numeric@compute{%
+      \ifnum\AMC@numeric@x=\AMC@numeric@digits\else%
+        (\AMC@numeric@compute)*10+\fi%
+      int\@Alph\AMC@numeric@x}%
+  }\advance\AMC@numeric@x\m@ne\ifnum\AMC@numeric@x>0\repeat%
+  \ifKV@AMCNumeric@sign%
+    \ifKV@AMCNumeric@strict%
+      \AMC@amclog{AUTOQCM[B=requires.intS=1]}%
+    \else%
+      \AMC@amclog{AUTOQCM[B=default.intS=1]}%
+    \fi%
+    \global\edef\AMC@numeric@compute{(\AMC@numeric@compute)*(intS)}%
+  \fi%
+  \AMC@amclog{AUTOQCM[B=set.intV=\the\AMC@numeric@value,%
+    set.intX=\AMC@numeric@compute]^^J}%
+%    \end{macrocode}
+% Begin now with the frame around all the boxes:
+%    \begin{macrocode}
+  \vspace{1.5ex}\par{%
+    \fboxrule=\AMCncol@BorderWidth%
+    \fcolorbox{\AMCncol@Border}{\AMCncol@Background}{%
+%    \end{macrocode}
+% Place the boxes to choose the sign, if requested.
+%    \begin{macrocode}
+      \ifKV@AMCNumeric@sign%
+        \vbox{%
+          \ifx\AMCntextSign\@empty\@empty\else%
+            \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi%
+          \AMCsignV{\AMC@numeric@value}}\hspace{.5em}%
+        \vrule%
+        \hspace{.5em}%
+      \fi%
+%    \end{macrocode}
+% Begin a loop for all digits
+%    \begin{macrocode}
+      \hbox{\vbox{%
+          \loop{%
+%    \end{macrocode}
+% and for every digit, draw the boxes (and a decimal point if
+% requested by the |decimals| option).
+%    \begin{macrocode}
+            \ifnum\AMC@numeric@digits=\AMC@numeric@decd\relax%
+              \hbox{\AMCdecimalPoint}%
+            \fi%
+            \AMC@calcdigit{\the\AMC@numeric@value}%
+              {\the\AMC@numeric@digits}{\AMC@numeric@x}%
+            \hbox{%
+              \AMCnumericH{int\@Alph\AMC@numeric@digits}%
+                {\the\AMC@numeric@x}{9}%
+            }%
+            \ifnum\AMC@numeric@digits>1\vspace{\AMCnumeric@Vspace}\par\fi%
+%    \end{macrocode}
+% End the loop:
+%    \begin{macrocode}
+          }\ifnum\AMC@numeric@digits>\@ne%
+             \advance\AMC@numeric@digits\m@ne\repeat%
+        }}%
+    }%
+  }%
+%    \end{macrocode}
+% And tell AMC that we finished with this question:
+%    \begin{macrocode}
+  \ifAMC@ensemble\else\vspace{1.5ex}\par\fi%
+  \ifAMC@ensemble\ifAMCformulaire@dedans%
+    \AMC@amclog{AUTOQCM[FQ]^^J}%
+  \fi\fi%
+  }%
+}
+%    \end{macrocode}
+%
+% |\AMCnumericHide| is called when the boxes are not to be drawn (in
+% the question sheets for separate answer sheet layout), and
+% |\AMCnumericChoices|\marg{value}\marg{options} is the function to be
+% used in the LaTeX source code of the exam.
+%
+%    \begin{macrocode}
+\newcommand\AMCnumericHide[4]{%
+  \setkeys{AMCNumeric}{#2}%
+  \AMCntextGoto%
+  \vspace{1.5ex}\par%
+}
+\def\AMCnumericChoices{\AMCformatChoices{\AMCnumericShow}{\AMCnumericHide}}
+%    \end{macrocode}
+% \end{macro}
 %
 % \subsubsection{Intervals}
 %
