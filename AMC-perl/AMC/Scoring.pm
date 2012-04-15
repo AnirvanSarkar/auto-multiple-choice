@@ -193,19 +193,12 @@ sub score_question {
     $vars->{'IMULT'}=($question_data->{'type'}==QUESTION_MULT ? 1 : 0);
     $vars->{'IS'}=1-$vars->{'IMULT'};
 
-    # question wide variables set by scoring set.VAR=VALUE
+    # question wide default values for some variables
 
     my %qs_var=$self->degroupe($question_data->{'default_strategy'}
 			       .",".$question_data->{'strategy'},
 			       $self->{'default_strategy'},
 			       $vars);
-    for my $k (map { s/^set\.//; $_; }
-	       grep { /^set\./ } (keys %qs_var)) {
-	debug("[Q] Variable $k set to ".$qs_var{'set.'.$k});
-	$vars->{$k}=$qs_var{'set.'.$k};
-    }
-
-    # default values for some variables
 
     for my $k (map { s/^default\.//; $_; }
 	       grep { /^default\./ } (keys %qs_var)) {
@@ -213,6 +206,19 @@ sub score_question {
 	    debug("[Q] Variable $k set to default value ".$qs_var{'default.'.$k});
 	    $vars->{$k}=$qs_var{'default.'.$k};
 	}
+    }
+
+    # question wide variables set by scoring set.VAR=VALUE
+
+    %qs_var=$self->degroupe($question_data->{'default_strategy'}
+			    .",".$question_data->{'strategy'},
+			    $self->{'default_strategy'},
+			    $vars);
+
+    for my $k (map { s/^set\.//; $_; }
+	       grep { /^set\./ } (keys %qs_var)) {
+	debug("[Q] Variable $k set to ".$qs_var{'set.'.$k});
+	$vars->{$k}=$qs_var{'set.'.$k};
     }
 
     # get scoring strategy
