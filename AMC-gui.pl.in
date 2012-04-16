@@ -262,6 +262,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'defaut_email_subject'=>__"Exam result",
 # TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
 	      'defaut_email_text'=>__"Please find enclosed your annotated completed answer sheet.\nRegards.",
+
+	      'csv_surname_headers'=>'',
+	      'csv_name_headers'=>'',
 	      );
 
 # MacOSX universal command to open files or directories : /usr/bin/open
@@ -648,6 +651,18 @@ sub bon_encodage {
 	   || $o_defaut{"defaut_encodage_$type"}
 	   || $o_defaut{"encodage_$type"}
 	   || "UTF-8");
+}
+
+sub csv_build_0 {
+  my ($k,@default)=@_;
+  push @default,grep { $_ } map { s/^\s+//;s/\s+$//;$_; }
+    split(/,+/,$o{'csv_'.$k.'_headers'});
+  return("(".join("|",@default).")");
+}
+
+sub csv_build_name {
+  return(csv_build_0('surname','nom','surname').' '
+	 .csv_build_0('name','prenom','name'));
 }
 
 sub raccourcis {
@@ -1189,6 +1204,7 @@ sub exporte {
 				    "--sort",$projet{'options'}->{'export_sort'},
 				    "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 				    "--noms-encodage",bon_encodage('liste'),
+				    "--csv-build-name",csv_build_name(),
 				    ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
 				    "--output",$output,
 				    @options
@@ -2983,6 +2999,7 @@ sub valide_liste {
 
     my $l=AMC::NamesFile::new($fl,
 			      'encodage'=>bon_encodage('liste'),
+			      'identifiant'=>csv_build_name(),
 			      );
     my ($err,$errlig)=$l->errors();
 
@@ -3088,6 +3105,8 @@ sub associe {
 					'data_dir'=>absolu($projet{'options'}->{'data'}),
 					'liste'=>absolu($projet{'options'}->{'listeetudiants'}),
 					'liste_key'=>$projet{'options'}->{'liste_key'},
+					'identifiant'=>csv_build_name(),
+
 					'fichier-liens'=>absolu($projet{'options'}->{'association'}),
 					'global'=>0,
 					'assoc-ncols'=>$o{'assoc_ncols'},
@@ -3127,12 +3146,14 @@ sub associe_auto {
     return() if(!check_possible_assoc(1));
 
     commande('commande'=>["auto-multiple-choice","association-auto",
-			  "--data",absolu($projet{'options'}->{'data'}),
-			  "--notes-id",$projet{'options'}->{'assoc_code'},
-			  "--liste",absolu($projet{'options'}->{'listeetudiants'}),
-			  "--liste-key",$projet{'options'}->{'liste_key'},
-			  "--encodage-liste",bon_encodage('liste'),
-			  "--debug",debug_file(),
+			  pack_args("--data",absolu($projet{'options'}->{'data'}),
+				    "--notes-id",$projet{'options'}->{'assoc_code'},
+				    "--liste",absolu($projet{'options'}->{'listeetudiants'}),
+				    "--liste-key",$projet{'options'}->{'liste_key'},
+				    "--csv-build-name",csv_build_name(),
+				    "--encodage-liste",bon_encodage('liste'),
+				    "--debug",debug_file(),
+				   ),
 	     ],
 	     'texte'=>__"Automatic association...",
 	     'fin'=>sub {
@@ -3699,6 +3720,7 @@ sub select_students {
   my $fl=absolu($projet{'options'}->{'listeetudiants'});
   my $l=AMC::NamesFile::new($fl,
 			    'encodage'=>bon_encodage('liste'),
+			    'identifiant'=>csv_build_name(),
 			   );
   $projet{'_capture'}->begin_read_transaction('gSLi');
   my $key=$projet{'_association'}->variable('key_in_list');
@@ -3831,6 +3853,7 @@ sub annote_copies {
 				  "--verdict-question",$projet{'options'}->{'verdict_q'},
 				  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 				  "--noms-encodage",bon_encodage('liste'),
+				  "--csv-build-name",csv_build_name(),
 				  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
 				  "--changes-only",
 				 )
@@ -3916,6 +3939,7 @@ sub regroupement_go {
 			"--modele",$projet{'options'}->{'modele_regroupement'},
 			"--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			"--noms-encodage",bon_encodage('liste'),
+			"--csv-build-name",csv_build_name(),
 			"--single-output",$single_output,
 			"--sort",$projet{'options'}->{'export_sort'},
 			($id_file ? "--no-register" : "--register"),
@@ -3942,6 +3966,7 @@ sub regroupement_go {
 			"--modele",$projet{'options'}->{'modele_regroupement'},
 			"--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
 			"--noms-encodage",bon_encodage('liste'),
+			"--csv-build-name",csv_build_name(),
 			"--single-output",$single_output,
 			($o{'ascii_filenames'} ? "--force-ascii" : "--no-force-ascii"),
 		       )
@@ -5943,6 +5968,7 @@ sub send_emails {
   my $fl=absolu($projet{'options'}->{'listeetudiants'});
   $email_sl=AMC::NamesFile::new($fl,
 				'encodage'=>bon_encodage('liste'),
+				'identifiant'=>csv_build_name(),
 			       );
   my ($err,$errlig)=$email_sl->errors();
 
@@ -6064,6 +6090,7 @@ sub send_emails {
 			  pack_args("--project",absolu('%PROJET/'),
 				    "--students-list",absolu($projet{'options'}->{'listeetudiants'}),
 				    "--list-encoding",bon_encodage('liste'),
+				    "--csv-build-name",csv_build_name(),
 				    "--ids-file",$fh->filename,
 				    "--email-column",$projet{'options'}->{'email_col'},
 				    "--sender",$o{'email_sender'},
@@ -6126,6 +6153,7 @@ sub choose_columns {
   my $fl=absolu($projet{'options'}->{'listeetudiants'});
   my $n=AMC::NamesFile::new($fl,
 			    'encodage'=>bon_encodage('liste'),
+			    'identifiant'=>csv_build_name(),
 			   );
 
   my $i=1;

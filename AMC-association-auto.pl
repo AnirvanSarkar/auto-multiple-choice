@@ -27,12 +27,16 @@ my $notes_id='';
 my $liste_file='';
 my $liste_key='';
 my $liste_enc='utf-8';
+my $csv_build_name='';
 my $data_dir='';
 my $debug='';
+
+@ARGV=unpack_args(@ARGV);
 
 GetOptions("notes-id=s"=>\$notes_id,
 	   "liste=s"=>\$liste_file,
 	   "liste-key=s"=>\$liste_key,
+	   "csv-build-name=s"=>\$csv_build_name,
 	   "data=s"=>\$data_dir,
 	   "encodage-liste=s"=>\$liste_enc,
 	   "debug=s"=>\$debug,
@@ -56,7 +60,8 @@ debug "Automatic association $liste_file [$liste_enc] / $liste_key";
 # primary key to be found there (from column named $liste_key).
 
 my $liste_e=AMC::NamesFile::new($liste_file,
-				'encodage'=>$liste_enc);
+				'encodage'=>$liste_enc,
+				"identifiant"=>$csv_build_name);
 
 my %bon_code;
 for my $ii (0..($liste_e->taille()-1)) {

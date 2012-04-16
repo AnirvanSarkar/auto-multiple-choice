@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkAdjustment" id="adjustment12">
+    <property name="lower">1</property>
+    <property name="upper">65535</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">1</property>
     <property name="value">0.10000000000000001</property>
@@ -17,12 +23,6 @@
   <object class="GtkAdjustment" id="adjustment11">
     <property name="lower">25</property>
     <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment12">
-    <property name="lower">1</property>
-    <property name="upper">65535</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -532,7 +532,7 @@
                                   <object class="GtkTable" id="table6">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="n_rows">5</property>
+                                    <property name="n_rows">7</property>
                                     <property name="n_columns">2</property>
                                     <child>
                                       <object class="GtkLabel" id="label_defaut_encodage_csv">
@@ -553,8 +553,8 @@
                                         <property name="label" translatable="yes">Decimal delimiter</property>
                                       </object>
                                       <packing>
-                                        <property name="top_attach">4</property>
-                                        <property name="bottom_attach">5</property>
+                                        <property name="top_attach">6</property>
+                                        <property name="bottom_attach">7</property>
                                         <property name="y_options"></property>
                                       </packing>
                                     </child>
@@ -584,8 +584,8 @@
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="right_attach">2</property>
-                                        <property name="top_attach">4</property>
-                                        <property name="bottom_attach">5</property>
+                                        <property name="top_attach">6</property>
+                                        <property name="bottom_attach">7</property>
                                         <property name="y_options"></property>
                                       </packing>
                                     </child>
@@ -596,8 +596,8 @@
                                         <property name="label" translatable="yes">LaTeX files charset</property>
                                       </object>
                                       <packing>
-                                        <property name="top_attach">2</property>
-                                        <property name="bottom_attach">3</property>
+                                        <property name="top_attach">4</property>
+                                        <property name="bottom_attach">5</property>
                                         <property name="y_options"></property>
                                       </packing>
                                     </child>
@@ -617,8 +617,8 @@
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="right_attach">2</property>
-                                        <property name="top_attach">2</property>
-                                        <property name="bottom_attach">3</property>
+                                        <property name="top_attach">4</property>
+                                        <property name="bottom_attach">5</property>
                                         <property name="y_options"></property>
                                       </packing>
                                     </child>
@@ -671,8 +671,8 @@
                                         <property name="label" translatable="yes">ASCII filenames</property>
                                       </object>
                                       <packing>
-                                        <property name="top_attach">3</property>
-                                        <property name="bottom_attach">4</property>
+                                        <property name="top_attach">5</property>
+                                        <property name="bottom_attach">6</property>
                                         <property name="y_options"></property>
                                       </packing>
                                     </child>
@@ -686,6 +686,59 @@
                                         <property name="use_action_appearance">False</property>
                                         <property name="xalign">0</property>
                                         <property name="draw_indicator">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="right_attach">2</property>
+                                        <property name="top_attach">5</property>
+                                        <property name="bottom_attach">6</property>
+                                        <property name="y_options"></property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label16">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes" context="option name. Refers to a list of headers that may contain surnames in the CSV names list">CSV surname headers</property>
+                                      </object>
+                                      <packing>
+                                        <property name="top_attach">2</property>
+                                        <property name="bottom_attach">3</property>
+                                        <property name="y_options"></property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label17">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes" context="option name. Refers to a list of headers that may contain names in the CSV names list.">CSV name headers</property>
+                                      </object>
+                                      <packing>
+                                        <property name="top_attach">3</property>
+                                        <property name="bottom_attach">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkEntry" id="pref_x_csv_surname_headers">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip_text" translatable="yes">Comma separated list of CSV headers of columns that may contain the surnames of the students in the names list file.</property>
+                                        <property name="invisible_char">●</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="right_attach">2</property>
+                                        <property name="top_attach">2</property>
+                                        <property name="bottom_attach">3</property>
+                                        <property name="y_options"></property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkEntry" id="pref_x_csv_name_headers">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip_text" translatable="yes">Comma separated list of CSV headers of columns that may contain the names of the students in the names list file.</property>
+                                        <property name="invisible_char">●</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>

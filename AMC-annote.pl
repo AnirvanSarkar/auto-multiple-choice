@@ -69,6 +69,7 @@ my $test_font_size=100;
 
 my $fich_noms='';
 my $noms_encodage='utf-8';
+my $csv_build_name='';
 
 my $changes_only=1;
 
@@ -104,6 +105,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "verdict-question=s"=>\$verdict_question,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
+	   "csv-build-name=s"=>\$csv_build_name,
 	   "font=s"=>\$font_name,
 	   "rtl!"=>\$rtl,
 	   "changes-only!"=>\$changes_only,
@@ -133,7 +135,8 @@ my $noms='';
 
 if($fich_noms) {
     $noms=AMC::NamesFile::new($fich_noms,
-			      "encodage"=>$noms_encodage);
+			      "encodage"=>$noms_encodage,
+			      "identifiant"=>$csv_build_name);
 
     debug "Keys in names file: ".join(", ",$noms->heads());
 }

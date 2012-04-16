@@ -35,6 +35,7 @@ my $fich_notes='';
 my $fich_assoc='';
 my $fich_noms='';
 my $noms_encodage='utf-8';
+my $csv_build_name='';
 my @o_out=();
 my $debug='';
 my $sort='n';
@@ -49,6 +50,7 @@ GetOptions("module=s"=>\$module,
 	   "useall=s"=>\$useall,
 	   "data=s"=>\$data_dir,
 	   "fich-noms=s"=>\$fich_noms,
+	   "csv-build-name=s"=>\$csv_build_name,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "rtl!"=>\$rtl,
 	   "option-out=s"=>\@o_out,
@@ -74,6 +76,7 @@ $ex->set_options("fich",
 $ex->set_options("noms",
 		 "encodage"=>$noms_encodage,
 		 "useall"=>$useall,
+		 "identifiant"=>$csv_build_name,
 		 );
 
 $ex->set_options("out","rtl"=>$rtl);

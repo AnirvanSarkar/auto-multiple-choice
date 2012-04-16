@@ -43,6 +43,7 @@ sub new {
 	'noms.separateur'=>'',
 	'noms.useall'=>1,
 	'noms.abs'=>'ABS',
+	'noms.identifiant'=>'',
 
 	'out.rtl'=>'',
 
@@ -88,7 +89,8 @@ sub load {
 
     if($self->{'fich.noms'} && ! $self->{'noms'}) {
 	$self->{'noms'}=AMC::NamesFile::new($self->{'fich.noms'},
-					    $self->opts_spec('noms'));
+					    $self->opts_spec('noms'),
+					   );
     }
 }
 

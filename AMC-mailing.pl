@@ -36,6 +36,7 @@ my $project_dir='';
 my $data_dir='';
 my $students_list='';
 my $list_encoding='UTF-8';
+my $csv_build_name='';
 my $ids_file='';
 my $email_column='';
 my $sender='';
@@ -53,6 +54,7 @@ GetOptions("project=s"=>\$project_dir,
 	   "data=s"=>\$data_dir,
 	   "students-list=s"=>\$students_list,
 	   "list-encoding=s"=>\$list_encoding,
+	   "csv-build-name=s"=>\$csv_build_name,
 	   "ids-file=s"=>\$ids_file,
 	   "email-column=s"=>\$email_column,
 	   "sender=s"=>\$sender,
@@ -82,7 +84,9 @@ $data_dir="$project_dir/data" if($project_dir && !$data_dir);
 
 error("students list not found:$students_list") if(!-f $students_list);
 
-my $students=AMC::NamesFile::new($students_list,'encodage'=>$list_encoding);
+my $students=AMC::NamesFile::new($students_list,
+				 'encodage'=>$list_encoding,
+				 "identifiant"=>$csv_build_name);
 
 error("data directory not found: $data_dir") if(!-d $data_dir);
 

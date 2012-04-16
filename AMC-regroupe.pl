@@ -50,6 +50,7 @@ my $progress=1;
 my $progress_id='';
 my $fich_noms='';
 my $noms_encodage='utf-8';
+my $csv_build_name='';
 my $an_saved='';
 my $data_dir='';
 my $single_output='';
@@ -83,6 +84,7 @@ GetOptions("projet=s"=>\$projet_dir,
 	   "modele=s"=>\$modele,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
+	   "csv-build-name=s"=>\$csv_build_name,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "compose!"=>\$compose,
@@ -121,7 +123,8 @@ my $noms='';
 
 if(-f $fich_noms) {
     $noms=AMC::NamesFile::new($fich_noms,
-			      "encodage"=>$noms_encodage);
+			      "encodage"=>$noms_encodage,
+			      "identifiant"=>$csv_build_name);
 
     debug "Keys in names file: ".join(", ",$noms->heads());
 }
