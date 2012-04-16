@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.20"/>
-  <object class="GtkAdjustment" id="adjustment12">
-    <property name="lower">1</property>
-    <property name="upper">65535</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">1</property>
     <property name="value">0.10000000000000001</property>
@@ -23,6 +17,12 @@
   <object class="GtkAdjustment" id="adjustment11">
     <property name="lower">25</property>
     <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment12">
+    <property name="lower">1</property>
+    <property name="upper">65535</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -463,11 +463,20 @@
                                     <property name="n_rows">2</property>
                                     <property name="n_columns">2</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="label_defaut_moteur_latex_b">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Default LaTeX engine</property>
                                       </object>
+                                      <packing>
+                                        <property name="y_options"></property>
+                                      </packing>
                                     </child>
                                     <child>
                                       <object class="GtkComboBox" id="pref_ce_defaut_moteur_latex_b">
@@ -486,13 +495,8 @@
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="right_attach">2</property>
+                                        <property name="y_options"></property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
@@ -508,7 +512,7 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">2</property>
                           </packing>
@@ -539,6 +543,7 @@
                                       <packing>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                     <child>
@@ -593,6 +598,7 @@
                                       <packing>
                                         <property name="top_attach">2</property>
                                         <property name="bottom_attach">3</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                     <child>
@@ -613,6 +619,7 @@
                                         <property name="right_attach">2</property>
                                         <property name="top_attach">2</property>
                                         <property name="bottom_attach">3</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                     <child>
@@ -632,6 +639,7 @@
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="right_attach">2</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                     <child>
@@ -653,6 +661,7 @@
                                         <property name="right_attach">2</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                     <child>
@@ -664,6 +673,7 @@
                                       <packing>
                                         <property name="top_attach">3</property>
                                         <property name="bottom_attach">4</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                     <child>
@@ -682,6 +692,7 @@
                                         <property name="right_attach">2</property>
                                         <property name="top_attach">3</property>
                                         <property name="bottom_attach">4</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                   </object>
@@ -698,7 +709,7 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">3</property>
                           </packing>
@@ -745,6 +756,9 @@
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Printing method</property>
                                       </object>
+                                      <packing>
+                                        <property name="y_options"></property>
+                                      </packing>
                                     </child>
                                     <child>
                                       <object class="GtkLabel" id="label44">
@@ -755,6 +769,7 @@
                                       <packing>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                     <child>
@@ -768,6 +783,7 @@
                                         <property name="right_attach">2</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                   </object>
@@ -784,7 +800,7 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">4</property>
                           </packing>
@@ -811,6 +827,9 @@
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Number of processes</property>
                                       </object>
+                                      <packing>
+                                        <property name="y_options"></property>
+                                      </packing>
                                     </child>
                                     <child>
                                       <object class="GtkEntry" id="pref_x_n_procs">
@@ -821,6 +840,7 @@
                                       <packing>
                                         <property name="left_attach">1</property>
                                         <property name="right_attach">2</property>
+                                        <property name="y_options"></property>
                                       </packing>
                                     </child>
                                   </object>
@@ -837,7 +857,7 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">5</property>
                           </packing>
@@ -1808,6 +1828,21 @@
                                         <property name="n_rows">11</property>
                                         <property name="n_columns">9</property>
                                         <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
                                           <object class="GtkLabel" id="label113">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
@@ -2217,21 +2252,6 @@
                                             <property name="x_options">GTK_FILL</property>
                                           </packing>
                                         </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -2334,6 +2354,12 @@
                                         <property name="n_rows">2</property>
                                         <property name="n_columns">2</property>
                                         <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
                                           <object class="GtkLabel" id="label7">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
@@ -2349,12 +2375,6 @@
                                           <packing>
                                             <property name="left_attach">1</property>
                                           </packing>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
                                         </child>
                                       </object>
                                       <packing>
@@ -2412,6 +2432,12 @@
                                         <property name="n_rows">2</property>
                                         <property name="n_columns">2</property>
                                         <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
                                           <object class="GtkLabel" id="label4">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
@@ -2428,12 +2454,6 @@
                                             <property name="left_attach">1</property>
                                           </packing>
                                         </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -2447,6 +2467,12 @@
                                         <property name="can_focus">False</property>
                                         <property name="n_rows">3</property>
                                         <property name="n_columns">2</property>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
                                         <child>
                                           <object class="GtkLabel" id="label5">
                                             <property name="visible">True</property>
@@ -2487,12 +2513,6 @@
                                             <property name="left_attach">1</property>
                                             <property name="top_attach">1</property>
                                           </packing>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
                                         </child>
                                       </object>
                                       <packing>
@@ -2716,6 +2736,12 @@
                                     <property name="n_rows">4</property>
                                     <property name="n_columns">3</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkComboBox" id="pref_projet_c_note_arrondi">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -2838,12 +2864,6 @@
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <placeholder/>
@@ -3029,6 +3049,12 @@
                                     <property name="n_rows">3</property>
                                     <property name="n_columns">2</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkEntry" id="pref_projet_x_code_examen">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -3069,12 +3095,6 @@
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Examination name</property>
                                       </object>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
