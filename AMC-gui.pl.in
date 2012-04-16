@@ -5838,7 +5838,7 @@ sub bug_report {
 				   "<i>".__("AMC community site")."</i>",
 				   )
 	);
-    my $ma=$dialog->get_message_area;
+    my $ma=$dialog->get('message-area');
     my $web=Gtk2::LinkButton->new_with_label("http://project.auto-multiple-choice.net/projects/auto-multiple-choice/issues",__("AMC community site"));
     $ma->add($web);
     my $mail=Gtk2::LinkButton->new_with_label('mailto:paamc@passoire.fr',
