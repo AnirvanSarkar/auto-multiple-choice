@@ -21,6 +21,7 @@ package AMC::NamesFile;
 
 use AMC::Basic;
 use Encode;
+use Text::CSV;
 
 sub new {
     my ($f,%o)=@_;
@@ -51,16 +52,6 @@ sub new {
     return($self);
 }
 
-sub reduit {
-    my ($s)=@_;
-    $s =~ s/^\s+//;
-    $s =~ s/\s+$//;
-    $s=$1 if($s =~ /^\"(.*)\"$/);
-    $s=$1 if($s =~ /^\'(.*)\'$/);
-
-    return($s);
-}
-
 sub errors {
     my ($self)=@_;
     return(@{$self->{'err'}});
@@ -81,83 +72,121 @@ sub load {
 
     if(-f $self->{'fichier'} && ! -z $self->{'fichier'}) {
 
-	if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",$self->{'fichier'})) {
-	    $line=0;
-	  NOM: while(<LISTE>) {
-	      $line++;
-	      chomp;
-	      s/\#.*//;
-	      next NOM if(/^\s*$/);
-	      if(!@heads) {
-		  my $keep=0;
-		  if($sep) {
+      # First pass: detect the number of comment lines, and the
+      # separator
 
-		      my $entetes=$_;
+      my $comment_lines=0;
 
-		      if(length($self->{'separateur'})>1) {
-			  my $nn=-1;
-			  for my $s (split(//,$self->{'separateur'})) {
-			      my $k=0;
-			      while($entetes =~ /$s/g) { $k++; }
-			      if($k>$nn) {
-				  $nn=$k;
-				  $sep=$s;
-			      }
-			  }
-			  debug "Detected separator: ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
-		      }
-
-		      @heads=map { reduit($_) } split(/$sep/,$entetes,-1);
-		  } else {
-		      @heads='nom';
-		      $keep=1;
-		  }
-		  for(@heads) {
-		      $self->{'numeric.content'}->{$_}=0;
-		      $self->{'simple.content'}->{$_}=0;
-		  }
-		  debug "KEYS: ".join(", ",@heads);
-		  next NOM if(!$keep);
-	      }
-	      s/^\s+//;
-	      s/\s+$//;
-	      my @l=();
-	      if($#heads>0) {
-		  @l=map { reduit($_) } split(/$sep/,$_,-1);
-	      } else {
-		  @l=(reduit($_));
-	      }
-	      if($#l!=$#heads) {
-		  print STDERR "Bad number of fields (".(1+$#l)." instead of ".(1+$#heads).") file ".$self->{'fichier'}." line $.\n";
-		  $errlig=$. if(!$errlig);
-		  $err++;
-	      } else {
-		  my $nom={};
-		  for(0..$#l) {
-		      $nom->{$heads[$_]}=$l[$_];
-		      $data{$heads[$_]}->{$l[$_]}++;
-		      $self->{'numeric.content'}->{$heads[$_]} ++
-			  if($l[$_] =~ /^[ 0-9.+-]*$/i);
-		      $self->{'simple.content'}->{$heads[$_]} ++
-			  if($l[$_] =~ /^[ a-z0-9.+-]*$/i);
-		  }
-		  $nom->{'_LINE_'}=$line;
-		  push @{$self->{'noms'}},$nom;
-	      }
+      if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",
+	      $self->{'fichier'})) {
+      LINE: while(<LISTE>) {
+	  if(/^\#/) {
+	    $comment_lines++;
+	    next LINE;
 	  }
-	    close LISTE;
-	    # entetes et cles
-	    $self->{'heads'}=\@heads;
-	    $self->{'keys'}=[grep { my @lk=(keys %{$data{$_}});
-				    $#lk==$#{$self->{'noms'}}; } @heads];
-	    # rajout identifiant
-	    $self->calc_identifiants();
-	    $self->tri('_ID_');
-
-	    return($err,$errlig);
-	} else {
-	    return(-1,0);
+	  my $entetes=$_;
+	  if(length($self->{'separateur'})>1) {
+	    my $nn=-1;
+	    for my $s (split(//,$self->{'separateur'})) {
+	      my $k=0;
+	      while($entetes =~ /$s/g) { $k++; }
+	      if($k>$nn) {
+		$nn=$k;
+		$sep=$s;
+	      }
+	    }
+	    debug "Detected separator: ".($sep eq "\t" ? "<TAB>" : "<".$sep.">");
+	  }
+	  last LINE;
 	}
+	close LISTE;
+      }
+
+      debug "NamesFile $self->{'fichier'}: $comment_lines comments lines";
+
+      # Second pass: read the file with Text::CSV
+
+      my $io;
+      if(open($io,"<:encoding(".$self->{'encodage'}.")",
+	      $self->{'fichier'})) {
+
+	# skip comments lines
+
+	if($comment_lines>0) {
+	  for (1..$comment_lines) { $_=<$io> }
+	}
+
+	my $csv=Text::CSV->new({binary => 1,
+				sep_char=>$sep,
+				allow_whitespace=>1,
+			       });
+
+	# first line: header
+
+	$self->{'heads'}=$csv->getline ($io);
+	if(!$self->{'heads'}) {
+	  debug("CSV [SEP=$sep]: Can't read headers");
+	  return(1,$.);
+	}
+	$csv->column_names ($self->{'heads'});
+
+	# following lines
+
+	$self->{'numeric.content'}={};
+	$self->{'simple.content'}={};
+
+	my $csv_line=0;
+
+	while (my $row = $csv->getline_hr ($io)) {
+	  if($row) {
+	    # ignore blank lines
+	    my $ok='';
+	  KEY:for my $k (keys %$row) {
+	      if(defined($row->{$k}) && $row->{$k} ne '') {
+		$ok=1;
+		last KEY;
+	      }
+	    }
+	    if($ok) {
+	      $csv_line++;
+	      for my $k (keys %$row) {
+		$data{$k}->{$row->{$k}}++;
+		$self->{'numeric.content'}->{$k} ++
+		  if($row->{$k} =~ /^[ 0-9.+-]*$/i);
+		$self->{'simple.content'}->{$k} ++
+		  if($row->{$k} =~ /^[ a-z0-9.+-]*$/i);
+	      }
+	      $row->{'_LINE_'}=$csv_line;
+	      push @{$self->{'noms'}},$row;
+	    } else {
+	      debug "Blank line $. detected";
+	    }
+	  }
+	}
+	if(!$csv->eof) {
+	  if($csv->error_diag()) {
+	    debug "CSV: ".$csv->error_diag();
+	    $errlig=$. if(!$errlig);
+	    $err++;
+	  }
+	}
+
+	close $io;
+
+	# find unique identifiers
+
+	$self->{'keys'}=[grep { my @lk=(keys %{$data{$_}});
+				$#lk==$#{$self->{'noms'}}; }
+			 @{$self->{'heads'}}];
+
+	# rajout identifiant
+	$self->calc_identifiants();
+	$self->tri('_ID_');
+
+	return($err,$errlig);
+      } else {
+	return(-1,0);
+      }
     } else {
 	debug("Inexistant or empty names list file");
 	$self->{'heads'}=[];
