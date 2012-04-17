@@ -2574,7 +2574,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % correct value, and |intX| to the value entered by the student.
 %    \begin{macrocode}
   \ifKV@AMCNumeric@scoring%
-    \AMC@amclog{AUTOQCM[B=force=(intV==intX?%
+    \AMC@amclog{AUTOQCM[B=formula=(intV==intX?%
       \AMC@numeric@scoreexact:%
       \ifnum\AMC@numeric@approx>\z@%
         (abs((intV)-(intX))<=\the\AMC@numeric@approx?\AMC@numeric@scoreapprox:0)%

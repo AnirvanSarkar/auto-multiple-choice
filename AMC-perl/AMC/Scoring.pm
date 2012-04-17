@@ -272,20 +272,24 @@ sub score_question {
 	    # above"...
 	    $xx=$b_q{'e'};
 	    $raison='E';
+	} elsif(defined($b_q{'formula'})) {
+	  # a formula is given to compute the score directly
+
+	  $xx=$b_q{'formula'};
 	} else {
-	    # standard case: adds the 'b' or 'm' scores for each answer
-	    for my $a (@$answers) {
-		if($a->{'answer'} != 0) {
-		    $code=($correct || ($a->{'ticked'}==$a->{'correct'})
-			   ? "b" : "m");
-		    my %b_qspec=$self->degroupe($a->{'strategy'},
-						\%b_q,$vars);
-		    debug("Delta(".$a->{'answer'}."|$code)=$b_qspec{$code}");
-		    $xx+=$b_qspec{$code};
-		    $b_q{'force'}=$b_qspec{$code.'force'}
-		      if(defined($b_qspec{$code.'force'}));
-		}
+	  # standard case: adds the 'b' or 'm' scores for each answer
+	  for my $a (@$answers) {
+	    if($a->{'answer'} != 0) {
+	      $code=($correct || ($a->{'ticked'}==$a->{'correct'})
+		     ? "b" : "m");
+	      my %b_qspec=$self->degroupe($a->{'strategy'},
+					  \%b_q,$vars);
+	      debug("Delta(".$a->{'answer'}."|$code)=$b_qspec{$code}");
+	      $xx+=$b_qspec{$code};
+	      $b_q{'force'}=$b_qspec{$code.'force'}
+		if(defined($b_qspec{$code.'force'}));
 	    }
+	  }
 	}
 
 	if($raison !~ /^[VE]/i) {
@@ -318,6 +322,10 @@ sub score_question {
 	    # ticked boxes
 	    $xx=$b_q{'e'};
 	    $raison='E';
+	} elsif(defined($b_q{'formula'})) {
+	  # a formula is given to compute the score directly
+
+	  $xx=$b_q{'formula'};
 	} else {
 	    # standard case
 	    $sb=$ticked_adata->{'strategy'};
