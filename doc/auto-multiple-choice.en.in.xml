@@ -2908,6 +2908,73 @@ Name :
                 when it is not the same value as when one replies every good
                 response.</entry>
               </row>
+
+              <row>
+                <entry>formula</entry>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>Gives the score to be given for the question, often
+                using a formula that uses some variables (see <xref
+                linkend="scoring.global"/>), without taking <code>b</code> and
+                <code>m</code> values into account.</entry>
+              </row>
+
+              <row>
+                <entry>set.<replaceable>XXX</replaceable></entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>Gives a particular value to the variable named
+                <replaceable>XXX</replaceable>, that will be available in a
+                <code>formula</code>. In an answer context, the value is
+                associated to the variable only if the box is ticked.</entry>
+              </row>
+
+              <row>
+                <entry>default.<replaceable>XXX</replaceable></entry>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>Gives a value to the variable
+                <replaceable>XXX</replaceable> in the case when no ticked
+                boxes gave a value to <replaceable>XXX</replaceable>.</entry>
+              </row>
+
+              <row>
+                <entry>requires.<replaceable>XXX</replaceable></entry>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>Tells that the variable <replaceable>XXX</replaceable>
+                has to be defined, unless the data is told
+                <emphasis>incoherent</emphasis> and the question scored with
+                the value of <code>e</code>.</entry>
+              </row>
             </tbody>
           </tgroup>
         </informaltable>
@@ -3052,7 +3119,7 @@ Name:
 \end{document}</programlisting></para>
       </sect3>
 
-      <sect3>
+      <sect3 id="scoring.global">
         <title>Global scoring strategy</title>
 
         <para>To use a strategy globally for a set of questions, one can
@@ -3082,8 +3149,8 @@ Name:
         every response is false, i.e. the wrong boxes have been checked and
         the right boxes are not). Operations allowed in those formulas are the
         four simple operations (<code>+</code> <code>-</code> <code>*</code>
-        <code>/</code>), cases operator <code>( ? : )</code> and
-        parenthesis.</para>
+        <code>/</code>), cases operator <code>( ? : )</code>, parenthesis and
+        all perl operators.</para>
 
         <para>Other variables can also be used:</para>
 

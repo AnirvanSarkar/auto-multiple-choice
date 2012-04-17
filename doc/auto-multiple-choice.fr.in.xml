@@ -3109,6 +3109,75 @@ Nom et prénom :
                 renseigner uniquement si elle ne correspond pas à la note
                 obtenue en mettant toutes les bonnes réponses.</entry>
               </row>
+
+              <row>
+                <entry>formula</entry>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>Donne directement le score de la question, souvent par
+                le biais d'une formule faisant intervenir des variables (voir
+                <xref linkend="scoring.global"/>), sans tenir compte des
+                valeurs de <code>b</code> et <code>m</code>.</entry>
+              </row>
+
+              <row>
+                <entry>set.<replaceable>XXX</replaceable></entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>●</entry>
+
+                <entry>Donne une valeur particulière à la variable nommée
+                <replaceable>XXX</replaceable>, qui pourra être utilisée par
+                la suite par <code>formula</code>. Dans le contexte d'une
+                réponse, la valeur est attribuée uniquement dans le cas où la
+                case est cochée.</entry>
+              </row>
+
+              <row>
+                <entry>default.<replaceable>XXX</replaceable></entry>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>Donne une valeur à la variable
+                <replaceable>XXX</replaceable> si aucune case cochée n'en a
+                déjà donnée une par le biais de
+                <code>set.<replaceable>XXX</replaceable></code>.</entry>
+              </row>
+
+              <row>
+                <entry>requires.<replaceable>XXX</replaceable></entry>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>Signale une saisie <emphasis>incohérente</emphasis>
+                (donc l'application du score donné par la valeur de
+                <code>e</code>) dans la cas où aucune valeur n'a été donnée à
+                la variable <replaceable>XXX</replaceable>.</entry>
+              </row>
             </tbody>
           </tgroup>
         </informaltable>
@@ -3265,7 +3334,7 @@ Durée : 10 minutes.
 \end{document}</programlisting></para>
       </sect3>
 
-      <sect3>
+      <sect3 id="scoring.global">
         <title>Barèmes généraux</title>
 
         <para>Pour utiliser un barème de manière générale pour tout un
@@ -3298,8 +3367,9 @@ Durée : 10 minutes.
         toutes les réponses sont fausses, c'est-à-dire si on a coché les cases
         qu'il ne fallait pas cocher et si on n'a pas coché les cases qu'il
         fallait cocher). Les opérations acceptées dans ces formules sont les
-        quatre opérations simples (<code>+</code> <code>-</code>
-        <code>*</code> <code>/</code>), et le parenthésage.</para>
+        quatre opérations simples (+ - * /), l'opérateur de test <code>( ? :
+        )</code>, les paranthèses et plus généralement toutes celles reconnues
+        par perl.</para>
 
         <para>D'autres variables sont aussi utilisables :</para>
 
