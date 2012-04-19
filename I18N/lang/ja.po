@@ -1,12 +1,12 @@
 # Auto Multiple Choice
-# Copyright 2008-2011 Alexis Bienvenüe
+# Copyright 2008-2012 Alexis Bienvenüe
 # This file is distributed under the same license as the AMC software
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0.964 (svn: 964)\n"
+"Project-Id-Version: 1.0.981 (svn: 981)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
 "POT-Creation-Date: 2012-04-16 15:49 +0200\n"
-"PO-Revision-Date: 2012-04-04 15:53+0900\n"
+"PO-Revision-Date: 2012-04-19 10:25+0900\n"
 "Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language: \n"
@@ -717,13 +717,12 @@ msgstr ""
 "る試験問題番号で作成し、それを全部印刷しなければなりません。"
 
 #: ../AMC-gui.pl:2413
-#, fuzzy
 msgid ""
 "If you print one or several sheets and photocopy them to have enough for all "
 "the students, <b>you won't be able to continue with AMC!</b>"
 msgstr ""
-"1部あるいは数部を印刷して残りの全受験者分をコピーで作成した場合、<b>AMCで処理"
-"することができません！</b>"
+"少数の部数だけ印刷して残りの全受験者分をコピーで作成した場合、<b>AMCで処理す"
+"ることができません！</b>"
 
 #: ../AMC-gui.pl:2414
 msgid "Do you want to print the selected sheets anyway?"
@@ -733,7 +732,7 @@ msgstr "それでも選択した試験問題を印刷しますか？"
 msgid ""
 "Are you going to photocopy some printed subjects before giving them to the "
 "students?"
-msgstr "印刷した課題をコピーしてそれを受験者に配りますか？"
+msgstr "印刷した試験問題をコピーして受験者に配りますか？"
 
 #: ../AMC-gui.pl:2428
 msgid "If so, the corresponding option will be set for this project."
@@ -779,13 +778,13 @@ msgid "Layouts are detected."
 msgstr "レイアウトが検出されました。"
 
 #: ../AMC-gui.pl:2543
-#, fuzzy, perl-format
+#, perl-format
 msgid ""
 "You can check all is correct clicking on button <i>%s</i> and looking at "
 "question pages to see if red boxes are well positioned."
 msgstr ""
-"<i>%s</i> ボタンをクリックし、試験問題ページのページで赤いボックスが正しい位"
-"置にあるか見ることで、確認することができます。"
+"<i>%s</i> ボタンをクリックし、試験問題ページ上で赤いボックスが正しい位置にあ"
+"るか見ることで、確認することができます。"
 
 #: ../AMC-gui.pl:2543 ../AMC-gui-main_window.glade:771
 msgid "Check layouts"
@@ -831,7 +830,7 @@ msgid ""
 "distributing them."
 msgstr ""
 "最も堅牢なモードで、各受験者に別々の（試験問題番号の異なる）答案用紙を配る方"
-"法です。配る前に課題をコピーしてはいけません。"
+"法です。配る前に試験問題をコピーしてはいけません。"
 
 #: ../AMC-gui.pl:2682
 msgid ""
@@ -840,8 +839,8 @@ msgid ""
 "different students."
 msgstr ""
 "二つ目のモードで、1受験者あたり答案用紙を1ページしかスキャンしないときだけ使"
-"え、答案用紙を数種類だけ用意して同じ課題のコピーを複数の受験者に配ることがで"
-"きます。"
+"え、答案用紙を数種類だけ用意して同じ試験問題のコピーを複数の受験者に配ること"
+"ができます。"
 
 #: ../AMC-gui.pl:2683
 msgid "After the first automatic capture, you can't switch to the other mode."
@@ -894,7 +893,7 @@ msgstr ""
 
 #: ../AMC-gui.pl:3029 ../AMC-gui.pl:3044
 msgid "Edit the names file to correct it, and re-read."
-msgstr "この修正のために氏名ファイルを編集し、再読込み。"
+msgstr "名簿ファイルを編集してこれを修正し、再読込みをしてください。"
 
 #: ../AMC-gui.pl:3044
 #, perl-format
@@ -1154,16 +1153,16 @@ msgid ""
 "The \\namefield command is not used. Writing subjects without name field is "
 "not recommended"
 msgstr ""
-"\\namefield コマンドが使用されていません。氏名欄のない課題の作成は推奨されま"
-"せん。"
+"\\namefield コマンドが使用されていません。氏名欄のない試験問題の作成は推奨さ"
+"れません。"
 
 #: ../AMC-gui.pl:4508
 msgid ""
 "The \\namefield command is used several times for the same subject. This "
 "should not be the case, as each student should write his name only once"
 msgstr ""
-"\\namefield コマンドが同じ課題内で複数回使用されています。各受験者は氏名を1回"
-"だけ記入すべきなので、何かのミスと思われます。"
+"\\namefield コマンドが同じ試験問題内で複数回使用されています。各受験者は氏名"
+"を1回だけ記入すべきなので、何かのミスと思われます。"
 
 #: ../AMC-gui.pl:4509
 msgid "No box to be ticked"
@@ -1179,8 +1178,8 @@ msgid ""
 "Some potential defects were detected for this subject. Correct them in the "
 "source and update the working documents."
 msgstr ""
-"この課題で潜在的な問題点がみつかりました。ソースを修正して作業文書を更新して"
-"ください。"
+"この試験問題に潜在的な問題点がみつかりました。ソースを修正して作業文書を更新"
+"してください。"
 
 #: ../AMC-gui.pl:4523
 #, perl-format
@@ -1191,7 +1190,8 @@ msgstr "（例えば、ページ %s と %s を見てください）"
 #, perl-format
 msgid "(Concerns %1$d sheets, see for exemple sheet %2$d)"
 msgstr ""
-"（%1$d 件の課題が関連しています。例として試験問題番号 %2$d を見てください）"
+"（%1$d 件の試験問題が関連しています。例として試験問題番号 %2$d を見てくださ"
+"い）"
 
 #: ../AMC-gui.pl:4645
 #, perl-format
@@ -1364,7 +1364,7 @@ msgstr "ソースファイルがプロジェクトディレクトリにコピー
 #: ../AMC-gui.pl:5607
 #, perl-format
 msgid "You can now edit it with button \"%s\" or with any editor."
-msgstr "\"%s\" ボタンか、好きなエディタで編集することができます。"
+msgstr "\"%s\" ボタンか、お気に入りのエディタで編集することができます。"
 
 #: ../AMC-gui.pl:5607 ../AMC-gui-main_window.glade:479
 msgid "Edit source file"
@@ -1696,7 +1696,7 @@ msgstr "ボックス"
 #. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
 #: ../AMC-perl/AMC/Export/ods.pm:238
 msgid "Nb"
-msgstr "個数"
+msgstr "件数"
 
 #. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
 #: ../AMC-perl/AMC/Export/ods.pm:241
@@ -1951,8 +1951,8 @@ msgid ""
 "* and much more!"
 msgstr ""
 "これはAMCのネイティブ形式です。LaTeXは未経験のユーザが使うのは容易ではありま"
-"せんが、LaTeXの能力を使えば任意の選択式課題が作成できます。例えばLaTeXなら次"
-"のようなことができますが、他の形式ではできません:\n"
+"せんが、LaTeXの能力を使えば任意の選択式試験問題が作成できます。例えばLaTeXな"
+"ら次のようなことができますが、他の形式ではできません:\n"
 "* 任意のレイアウト、\n"
 "* 乱数値を用いた設問、\n"
 "* 図や数式の使用、\n"
@@ -2026,7 +2026,7 @@ msgstr "印刷可能なファイルの書込み先ディレクトリを選んで
 
 #: ../AMC-gui-choix_postcorrect.glade:20
 msgid "Post-correction"
-msgstr "試験後の正解入力"
+msgstr "採点時正解提示"
 
 #: ../AMC-gui-choix_postcorrect.glade:97
 msgid ""
@@ -2289,24 +2289,23 @@ msgstr ""
 
 #: ../AMC-gui-edit_preferences.glade:702
 msgid "CSV surname headers"
-msgstr ""
+msgstr "CSV姓ヘッダー"
 
 #: ../AMC-gui-edit_preferences.glade:714
-#, fuzzy
 msgid "CSV name headers"
-msgstr "CSVファイルエンコーディング"
+msgstr "CSV名ヘッダー"
 
 #: ../AMC-gui-edit_preferences.glade:725
 msgid ""
 "Comma separated list of CSV headers of columns that may contain the surnames "
 "of the students in the names list file."
-msgstr ""
+msgstr "名簿CSVファイル中の受験者の姓を格納したカラムヘッダー"
 
 #: ../AMC-gui-edit_preferences.glade:740
 msgid ""
 "Comma separated list of CSV headers of columns that may contain the names of "
 "the students in the names list file."
-msgstr ""
+msgstr "名簿CSVファイル中の受験者の名を格納したカラムヘッダー"
 
 #: ../AMC-gui-edit_preferences.glade:759
 msgid "<b>Internationalization</b>"
@@ -2984,7 +2983,7 @@ msgstr "文書更新"
 
 #: ../AMC-gui-main_window.glade:628
 msgid "Question"
-msgstr "問題"
+msgstr "試験問題"
 
 #: ../AMC-gui-main_window.glade:645
 msgid "Solution"
@@ -3224,7 +3223,6 @@ msgid "File name:"
 msgstr "ファイル名:"
 
 #: ../AMC-gui-make_template.glade:115
-#, fuzzy
 msgid ""
 "<b>Note:</b> please use only alphanumeric characters and characters from \"-_"
 "+\" for the template file name."
@@ -3378,7 +3376,7 @@ msgstr "全て表示"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:308
 msgid "associated"
-msgstr "リンク済みも表示"
+msgstr "リンク済も表示"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:313
 msgid ""
@@ -3396,7 +3394,7 @@ msgstr "この答案の手動リンクを削除"
 msgid ""
 "Tell the system that this papers does not correspond to any of the students "
 "from the list."
-msgstr "この答案が名簿のどの受験者とも対応しないことをシステムに通知します。"
+msgstr "この答案の受験者が名簿になく無視してよいことをシステムに通知します。"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:399
 msgid "Unknown"
@@ -3404,7 +3402,7 @@ msgstr "不明"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:459
 msgid "Save associations."
-msgstr "リンクを保存する。"
+msgstr "手動リンク結果を保存する。"
 
 #: ../AMC-perl/AMC/Gui/Manuel.glade:7
 msgid "Papers data capture"
