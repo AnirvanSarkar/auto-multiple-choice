@@ -56,6 +56,7 @@ sub new {
 
     $self->{'ids'}=[];
     $self->{'pb_src'}={};
+    $self->{'real_src'}={};
     $self->{'pb'}={};
     $self->{'image'}={};
     $self->{'label'}={};
@@ -131,6 +132,7 @@ sub clear_boxes {
     for(0,1) { $self->vide($_); }
     $self->{'ids'}=[];
     $self->{'pb_src'}={};
+    $self->{'real_src'}={};
     $self->{'pb'}={};
     $self->{'image'}={};
     $self->{'label'}={};
@@ -170,6 +172,44 @@ sub load_positions {
   $self->{'_capture'}->end_transaction;
 }
 
+sub safe_pixbuf {
+  my ($self,$file)=@_;
+  my $p='';
+  if(-f $file) {
+    # Try to load PNG file. This can fail in case of problem (for
+    # example if mimetype was not detected correctly due to special
+    # file content matching other mime types).
+    eval { $p=Gtk2::Gdk::Pixbuf->new_from_file($file); };
+    return($p,1) if($p);
+    # Try using Graphics::Magick to convert PNG->XPM
+    my $i=magick_perl_module()->new;
+    $i->Read($file);
+    my @b=$i->ImageToBlob("magick"=>'xpm');
+    if($b[0]) {
+      $b[0] =~ s:/\*.*\*/::g;
+      $b[0] =~ s:static char.*::;
+      $b[0] =~ s:};::;
+      my @xpm=grep { $_ ne '' }
+	map { s/^\"//;s/\",?$//;$_; }
+	  split(/\n+/,$b[0]);
+      eval { $p=Gtk2::Gdk::Pixbuf->new_from_xpm_data(@xpm); };
+      return($p,1) if($p);
+    }
+  }
+  # No success at all: replace the zoom image by a question mark
+  my $g=$self->{'main_window'};
+  my $layout=$g->create_pango_layout("?");
+  my $colormap =$g->get_colormap;
+  $layout->set_font_description(Pango::FontDescription->from_string("128"));
+  my ($text_x,$text_y)=$layout->get_pixel_size();
+  my $pixmap=Gtk2::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
+  $pixmap->set_colormap($colormap);
+  $pixmap->draw_rectangle($g->style->bg_gc(GTK_STATE_NORMAL),TRUE,0,0,$text_x,$text_y);
+  $pixmap->draw_layout($g->style->fg_gc(GTK_STATE_NORMAL),0,0,$layout);
+  $p=Gtk2::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
+  return($p,0);
+}
+
 sub load_boxes {
     my ($self)=@_;
 
@@ -188,8 +228,8 @@ sub load_boxes {
 
       if(-f $fid) {
 
-	$self->{'pb_src'}->{$id}=
-	  Gtk2::Gdk::Pixbuf->new_from_file($fid);
+	($self->{'pb_src'}->{$id},$self->{'real_src'}->{$id})
+	  =$self->safe_pixbuf($fid);
 
 	$self->{'image'}->{$id}=Gtk2::Image->new();
 
@@ -364,10 +404,47 @@ sub ajuste_sep {
 
 sub zoom_it {
     my ($self)=@_;
-    for my $id (@{$self->{'ids'}}) {
-	$self->{'pb'}->{$id}=$self->{'pb_src'}->{$id}->scale_simple(int($self->{'pb_src'}->{$id}->get_width * $self->{'factor'}),int($self->{'pb_src'}->{$id}->get_height * $self->{'factor'}),GDK_INTERP_BILINEAR);
-	$self->{'image'}->{$id}->set_from_pixbuf($self->{'pb'}->{$id});
+    my $x=0;
+    my $y=0;
+    my $n=0;
+
+    # show all boxes with scale factor $self->{'factor'}
+
+    for my $id (grep { $self->{'real_src'}->{$_} }
+      (@{$self->{'ids'}})) {
+      my $tx=int($self->{'pb_src'}->{$id}->get_width * $self->{'factor'});
+      my $ty=int($self->{'pb_src'}->{$id}->get_height * $self->{'factor'});
+      $x+=$tx;$y+=$ty;$n++;
+      $self->{'pb'}->{$id}=$self->{'pb_src'}->{$id}
+	->scale_simple($tx,$ty,GDK_INTERP_BILINEAR);
+      $self->{'image'}->{$id}->set_from_pixbuf($self->{'pb'}->{$id});
     }
+
+    # compute average size of the images
+
+    if($n>0) {
+      $x=int($x/$n);$y=int($y/$n);
+    } else {
+      $x=32;$y=32;
+    }
+
+    # show false zooms (question mark replacing the zooms when the
+    # zoom file couldn't be loaded) at this average size
+
+    for my $id (grep { ! $self->{'real_src'}->{$_} }
+      (@{$self->{'ids'}})) {
+      my $fx=$x/$self->{'pb_src'}->{$id}->get_width;
+      my $fy=$y/$self->{'pb_src'}->{$id}->get_height;
+      $fx=$fy if($fy<$fx);
+      my $tx=int($self->{'pb_src'}->{$id}->get_width * $fx);
+      my $ty=int($self->{'pb_src'}->{$id}->get_height * $fx);
+      $self->{'pb'}->{$id}=$self->{'pb_src'}->{$id}
+	->scale_simple($tx,$ty,GDK_INTERP_BILINEAR);
+      $self->{'image'}->{$id}->set_from_pixbuf($self->{'pb'}->{$id});
+    }
+
+    # resize window
+
     $self->{'event_0'}->queue_resize();
     $self->{'event_1'}->queue_resize();
 
