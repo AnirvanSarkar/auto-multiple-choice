@@ -2069,10 +2069,19 @@ respective parameters \VQa{} et \VQb{}.
             </varlistentry>
 
             <varlistentry>
+              <term>base=<replaceable>num</replaceable></term>
+
+              <listitem>
+                <para>gives the base for <code>digits</code> and
+                <code>decimals</code> (defaults to 10).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
               <term>sign=<replaceable>bool</replaceable></term>
 
               <listitem>
-                <para>requests (or not) a signed value (default to
+                <para>requests (or not) a signed value (defaults to
                 true).</para>
               </listitem>
             </varlistentry>
@@ -2085,6 +2094,42 @@ respective parameters \VQa{} et \VQb{}.
                 digit and for the sign. If <code>false</code>, if some digits
                 has no ticked box, they will be set to zero. Defaults to
                 <code>false</code>.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>vertical=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>if true, each digit is represented on one raw. If false
+                (default), each digit is represented on one line.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>reverse=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>if true, place higher values of the digits on the top in
+                <code>vertical</code> mode (defaults to true).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>vhead=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>if true, in <code>vertical</code> mode, a header is
+                placed over all digits rows, made using the command
+                <command>\AMCntextVHead</command> that is originally defined
+                as</para>
+
+                <programlisting>\def\AMCntextVHead#1{\emph{b#1}}</programlisting>
+
+                <para>This default value is usefull to number the binary
+                digits.</para>
+
+                <para>Default value is <code>false</code>.</para>
               </listitem>
             </varlistentry>
 
@@ -2194,8 +2239,9 @@ respective parameters \VQa{} et \VQb{}.
             </varlistentry>
           </variablelist>
 
-          <para>You can set other default values for all these parameters
-          using the command <command>\AMCnumericOpts</command>, like</para>
+          <para>You can set other default values (for the whole exam) for all
+          these parameters using the command
+          <command>\AMCnumericOpts</command>, like</para>
 
           <programlisting>\AMCnumericOpts{scoreexact=3,borderwidth=2pt}</programlisting>
 

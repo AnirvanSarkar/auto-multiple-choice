@@ -2200,6 +2200,15 @@ et inscrivez votre nom et prénom ci-dessous.
             </varlistentry>
 
             <varlistentry>
+              <term>base=<replaceable>num</replaceable></term>
+
+              <listitem>
+                <para>donne la base dans laquelle sera écrit le nombre à coder
+                (la valeur par défaut est 10).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
               <term>sign=<replaceable>bool</replaceable></term>
 
               <listitem>
@@ -2217,6 +2226,47 @@ et inscrivez votre nom et prénom ci-dessous.
                 Avec la valeur <code>false</code> (valeur par défaut), si pour
                 certains chiffres aucune case n'est cochée, ces chiffres
                 seront fixés à la valeur 0.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>vertical=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>avec la valeur <code>true</code>, chaque chiffre sera
+                représenté par une colonne. Avec la valeur <code>false</code>
+                (valeur par défaut), chaque chiffre sera représenté par une
+                ligne.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>reverse=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>avec la valeur <code>true</code> (valeur par défaut), en
+                mode <code>vertical</code>, les grandes valeurs des chiffres
+                seront placées en haut plutôt qu'en bas.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>vhead=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>avec la valeur <code>true</code>, en mode
+                <code>vertical</code>, un en-tête sera placé au-dessus de
+                chaque colonne correspondant à un chiffre. Le texte de cet
+                en-tête est donné par la commande
+                <command>\AMCntextVHead</command>, qui est originellement
+                définie par</para>
+
+                <programlisting>\def\AMCntextVHead#1{\emph{b#1}}</programlisting>
+
+                <para>Cette définition permet de numéroter les chiffres
+                binaires.</para>
+
+                <para>La valeur par défaut est <code>false</code>.</para>
               </listitem>
             </varlistentry>
 
@@ -2329,9 +2379,9 @@ et inscrivez votre nom et prénom ci-dessous.
             </varlistentry>
           </variablelist>
 
-          <para>Vous pouvez modifier la valeur par défaut de toutes ces
-          options grâce à la commande <command>\AMCnumericOpts</command>,
-          comme</para>
+          <para>Vous pouvez modifier la valeur par défaut (pour tout votre
+          questionnaire) de toutes ces options grâce à la commande
+          <command>\AMCnumericOpts</command>, comme</para>
 
           <programlisting>\AMCnumericOpts{scoreexact=3,borderwidth=2pt}</programlisting>
 

@@ -108,7 +108,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\',\\,\`,\,,\@empty,\@expandtwoargs}
 % \DoNotIndex{\bgroup,\egroup,\clearpage,\closeout,\PackageInfo,\parindent}
 % \DoNotIndex{\@ifpackageloaded,\z@,\@ne,\tw@,\m@ne,\@undefined}
-% \DoNotIndex{\@unexpandable@protect,\@whilenum,\addtocounter,\advance,\Alph}
+% \DoNotIndex{\@unexpandable@protect,\@whilenum,\addtocounter,\advance,\Alph,\@Alph}
 % \DoNotIndex{\arabic,\AtBeginDocument,\IfFileExists}
 % \DoNotIndex{\AtBeginPage,\begin,\end,\begingroup,\endgroup,\textbf,\BODY}
 % \DoNotIndex{\box,\circle,\clubsuit,\csname,\DeclareFontShape}
@@ -908,10 +908,21 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \item[|decimals=|\meta{num}] gives the number of digits after
 %     period to request (defaults to 0). Note that when |decimals| is
 %     positive, the LaTeX package |fp| must be loaded.
+%   \item[|base=|\meta{num}] gives the base for digits and decimals (defaults to 10).
 %   \item[|sign=|\meta{bool}] requests (or not) a signed value (default to true).
-%   \item[|strict=|\meta{bool}] if true, a box has to be ticked for
-%     every digit and for the sign. If false, if some digits has no
+%   \item[|strict=|\meta{bool}] if |true|, a box has to be ticked for
+%     every digit and for the sign. If |false|, if some digits has no
 %     ticked box, they will be set to zero. Defaults to |false|.
+%   \item[|vertical=|\meta{bool}] if |true|, each digit is represented
+%     on one raw. If |false| (default), each digit is represented on one
+%     line.
+%   \item[|reverse=|\meta{bool}] if |true|, place higher values of the
+%     digits on the top in vertical mode (defaults to |true|).
+%   \item[|vhead=|\meta{bool}] if |true|, in vertical mode, a header
+%     is placed over all digits rows, made using the command
+%     |\AMCntextVHead| that is originally defined as
+%     |\def\AMCntextVHead#1{\emph{b#1}}|. This default value is
+%     usefull to number the binary digits. Default value is |false|.
 %   \item[|hspace=|\meta{space}] sets the horizontal space between
 %     boxes (defaults to |.5em|).
 %   \item[|vspace=|\meta{space}] sets the certical space between
@@ -928,7 +939,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \item[|Tpoint=|\meta{text}] sets the text for the period. Can also
 %     be redefined by |\def\AMCdecimalPoint|\marg{text}, and defaults
 %     to |\raisebox{1ex}{\bf .}|.
-%   \item[|scoring=|\meta{bool}] if true, a scoring strategy is given
+%   \item[|scoring=|\meta{bool}] if |true|, a scoring strategy is given
 %     to AMC for this question. Defaults to |true|.
 %   \item[|scoreexact=|\meta{num}] gives the score for an exact answer (defaults to 2).
 %   \item[|scoreapprox=|\meta{num}] gives the score for an approximative answer (defaults to 1).
@@ -2449,7 +2460,6 @@ Three digits and two letters:\insertgroup{mixed}.
   \else%
     \AMCnumeric@char{\the\AMC@chiffres}{}%
   \fi%
-  \ifnum\AMC@chiffres<#2\relax\hspace{\AMCnumeric@Hspace}\fi%
 }
 \newcommand{\AMCsignV}[1]{%
   \ifnum#1<\z@%
@@ -2469,23 +2479,40 @@ Three digits and two letters:\insertgroup{mixed}.
  \AMC@chiffres=0\loop%
    \AMCnumeric@digit{#2}{#3}%
    \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
- \advance\AMC@chiffres\@ne\ifnum\AMC@chiffres>#3\relax\else\repeat%
+ \advance\AMC@chiffres\@ne%
+ \ifnum\AMC@chiffres<#3\relax\hspace{\AMCnumeric@Hspace}\repeat%
+}
+\newcommand{\AMCnumericV}[3]{%
+ \AMC@chiffres=0\loop%
+   \vbox{\hbox{\AMCnumeric@digit{#2}{#3}}}%
+   \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
+ \advance\AMC@chiffres\@ne%
+ \ifnum\AMC@chiffres<#3\relax\vspace{\AMCnumeric@Vspace}\repeat%
+}
+\newcommand{\AMCnumericVR}[3]{%
+ \AMC@chiffres=#3\advance\AMC@chiffres\m@ne\loop%
+   \vbox{\hbox{\AMCnumeric@digit{#2}{#3}}}%
+   \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
+ \ifnum\AMC@chiffres>0%
+   \advance\AMC@chiffres\m@ne%
+ \vspace{\AMCnumeric@Vspace}\repeat%
 }
 %    \end{macrocode}
 %
 % Some computation commands are now
 % defined. |\AMC@calcmodulo|\marg{integer}\marg{counter} sets the
-% counter \meta{counter} value to \meta{integer} modulo
-% 10. |\AMC@calcdigit|\marg{integer}\marg{digit}\marg{counter} sets
-% the value of the counter \meta{counter} to the digit number
-% \meta{digit} of \meta{integer} (digit number 1 of 567 is 7, number 2
+% counter \meta{counter} value to the last digit of \meta{integer}
+% (using base
+% |\AMC@numeric@base|). |\AMC@calcdigit|\marg{integer}\marg{digit}\marg{counter}
+% sets the value of the counter \meta{counter} to the digit number
+% \meta{digit} of \meta{integer} (digit number 0 of 567 is 7, number 1
 % is 6...)
 %
 %    \begin{macrocode}
 \newcount\AMC@integer@modulo
 \newcommand\AMC@calcmodulo[2]{%
-  \AMC@integer@modulo=#1\divide\AMC@integer@modulo by 10%
-  \multiply\AMC@integer@modulo by 10%
+  \AMC@integer@modulo=#1\divide\AMC@integer@modulo\AMC@numeric@base%
+  \multiply\AMC@integer@modulo\AMC@numeric@base%
   \multiply\AMC@integer@modulo\m@ne\advance\AMC@integer@modulo by #1\relax%
   #2=\AMC@integer@modulo%
 }
@@ -2494,10 +2521,10 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMC@calcdigit[3]{%
   \AMC@numeric@integer=#1%
   \AMC@numeric@calcdigit=#2%
-  \ifnum#2>\@ne\loop{%
-    \global\divide\AMC@numeric@integer by 10}%
+  \ifnum#2>\z@\loop{%
+    \global\divide\AMC@numeric@integer\AMC@numeric@base}%
     \advance\AMC@numeric@calcdigit\m@ne%
-  \ifnum\AMC@numeric@calcdigit>\@ne\repeat%
+  \ifnum\AMC@numeric@calcdigit>\z@\repeat%
   \fi%
   \AMC@calcmodulo{\the\AMC@numeric@integer}{#3}%
 }
@@ -2515,6 +2542,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCdecimalPoint{\raisebox{1ex}{\bf .}}
 \def\AMCntextSign{}
 \def\AMCntextGoto{}
+\def\AMCntextVHead#1{\emph{b#1}}
 \def\AMCncol@Border{lightgray}
 \def\AMCncol@Background{white}
 \def\AMCncol@BorderWidth{1mm}
@@ -2522,6 +2550,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcount\AMC@numeric@decd
 \newcount\AMC@numeric@value
 \newcount\AMC@numeric@x
+\newcount\AMC@numeric@base
 \define@key{AMCNumeric}{Tsign}{\def\AMCntextSign{#1}}
 \define@key{AMCNumeric}{Tpoint}{\def\AMCdecimalPoint{#1}}
 \define@key{AMCNumeric}{vspace}{\AMCnumeric@Vspace=#1}
@@ -2531,13 +2560,18 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCNumeric}{backgroundcol}{\def\AMCncol@Background{#1}}
 \define@key{AMCNumeric}{digits}[3]{\AMC@numeric@digits=#1}
 \define@key{AMCNumeric}{decimals}[0]{\AMC@numeric@decd=#1}
+\define@key{AMCNumeric}{base}[10]{\AMC@numeric@base=#1}
 \define@boolkey{AMCNumeric}{sign}[true]{}
 \define@boolkey{AMCNumeric}{strict}[false]{}
 \define@boolkey{AMCNumeric}{scoring}[true]{}
+\define@boolkey{AMCNumeric}{vertical}[false]{}
+\define@boolkey{AMCNumeric}{reverse}[true]{}
+\define@boolkey{AMCNumeric}{vhead}[false]{}
 \define@key{AMCNumeric}{scoreexact}[2]{\def\AMC@numeric@scoreexact{#1}}
 \define@key{AMCNumeric}{scoreapprox}[1]{\def\AMC@numeric@scoreapprox{#1}}
 \newcount\AMC@numeric@approx
 \define@key{AMCNumeric}{approx}[0]{\AMC@numeric@approx=#1}
+\setkeys{AMCNumeric}{digits,decimals,base,sign,strict,scoring,vertical,reverse,vhead,scoreexact,scoreapprox,approx}
 \newcommand\AMCnumericOpts[1]{\setkeys{AMCNumeric}{#1}}
 %    \end{macrocode}
 % Then the command |\AMCnumericShow| itself:
@@ -2557,13 +2591,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % Then we parse the options from \meta{opts}:
 %    \begin{macrocode}
-  {\setkeys{AMCNumeric}{digits,decimals,sign,strict,scoring,scoreexact,scoreapprox,approx}%
-  \setkeys{AMCNumeric}{#2}%
+  {\setkeys{AMCNumeric}{#2}%
 %    \end{macrocode}
 % When |decimal| is positive, convert the real correct value to integer.
 %    \begin{macrocode}
   \ifnum\AMC@numeric@decd>\z@%
-    \FPeval\AMC@numeric@eval{round(#1 * 10^\the\AMC@numeric@decd,0)}
+    \FPeval\AMC@numeric@eval{round(#1 * \the\AMC@numeric@base^\the\AMC@numeric@decd,0)}
     \AMC@numeric@value=\AMC@numeric@eval%
   \else%  
     \AMC@numeric@value=#1%
@@ -2591,7 +2624,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \fi%
     \global\edef\AMC@numeric@compute{%
       \ifnum\AMC@numeric@x=\AMC@numeric@digits\else%
-        (\AMC@numeric@compute)*10+\fi%
+        (\AMC@numeric@compute)*\the\AMC@numeric@base+\fi%
       int\@Alph\AMC@numeric@x}%
   }\advance\AMC@numeric@x\m@ne\ifnum\AMC@numeric@x>0\repeat%
   \ifKV@AMCNumeric@sign%
@@ -2622,30 +2655,80 @@ Three digits and two letters:\insertgroup{mixed}.
         \hspace{.5em}%
       \fi%
 %    \end{macrocode}
-% Begin a loop for all digits
+% We shift |\AMC@numeric@digits| and |\AMC@numeric@decd| counters so
+% that digit number 0 is the digit just before decimal point.
 %    \begin{macrocode}
-      \hbox{\vbox{%
+\advance\AMC@numeric@digits\m@ne%
+\advance\AMC@numeric@decd\m@ne%
+%    \end{macrocode}
+% For vertical mode (boxes for a single digit are on a same row;
+% usually used for binary numbers),
+%    \begin{macrocode}
+      \ifKV@AMCNumeric@vertical%
+        \hbox{%
+%    \end{macrocode}
+% begin a loop over all digits,
+%    \begin{macrocode}
           \loop{%
 %    \end{macrocode}
-% and for every digit, draw the boxes (and a decimal point if
-% requested by the |decimals| option).
+% place the decimal point if necessary,
 %    \begin{macrocode}
             \ifnum\AMC@numeric@digits=\AMC@numeric@decd\relax%
               \hbox{\AMCdecimalPoint}%
             \fi%
+%    \end{macrocode}
+% compute the digit value,
+%    \begin{macrocode}
             \AMC@calcdigit{\the\AMC@numeric@value}%
               {\the\AMC@numeric@digits}{\AMC@numeric@x}%
-            \hbox{%
-              \AMCnumericH{int\@Alph\AMC@numeric@digits}%
-                {\the\AMC@numeric@x}{9}%
-            }%
-            \ifnum\AMC@numeric@digits>1\vspace{\AMCnumeric@Vspace}\par\fi%
 %    \end{macrocode}
-% End the loop:
+% draw the box for this digit,
 %    \begin{macrocode}
-          }\ifnum\AMC@numeric@digits>\@ne%
-             \advance\AMC@numeric@digits\m@ne\repeat%
-        }}%
+            \hbox{\vbox{%
+              \ifKV@AMCNumeric@vhead%
+                \vbox{\hbox{\AMCntextVHead{\the\AMC@numeric@digits}}}%
+                \vspace{\AMCnumeric@Vspace}%
+              \fi%
+              {\advance\AMC@numeric@digits\@ne%
+               \ifKV@AMCNumeric@reverse%
+                 \AMCnumericVR{int\@Alph\AMC@numeric@digits}%
+                   {\the\AMC@numeric@x}{\AMC@numeric@base}%
+               \else%
+                 \AMCnumericV{int\@Alph\AMC@numeric@digits}%
+                   {\the\AMC@numeric@x}{\AMC@numeric@base}%
+               \fi}%
+            }}%
+%    \end{macrocode}
+% and end the loop over digits, adding space if this is not the last one.
+%    \begin{macrocode}
+           }\ifnum\AMC@numeric@digits>\z@%
+             \hspace{\AMCnumeric@Hspace}%
+          \advance\AMC@numeric@digits\m@ne\repeat%
+        }%
+%    \end{macrocode}
+% Now, do the same for horizontal mode.
+%    \begin{macrocode}
+       \else%
+         \hbox{\vbox{%
+           \loop{%
+             \ifnum\AMC@numeric@digits=\AMC@numeric@decd\relax%
+               \hbox{\AMCdecimalPoint}%
+             \fi%
+             \AMC@calcdigit{\the\AMC@numeric@value}%
+               {\the\AMC@numeric@digits}{\AMC@numeric@x}%
+             \hbox{%
+               {\advance\AMC@numeric@digits\@ne%
+                \AMCnumericH{int\@Alph\AMC@numeric@digits}%
+                  {\the\AMC@numeric@x}{\AMC@numeric@base}%
+             }}%
+           }\ifnum\AMC@numeric@digits>\z@%
+             \vspace{\AMCnumeric@Vspace}\par%
+           \advance\AMC@numeric@digits\m@ne\repeat%
+          }}%
+      \fi%
+%    \end{macrocode}
+% Close the frame around all the boxes.
+%    \begin{macrocode}
     }%
   }%
 %    \end{macrocode}
@@ -2841,7 +2924,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCid@etud=\AMCid@etudstart%
   \ifnum\AMCid@etud=0\AMCid@etud=\AMC@premierecopie\fi%
   \AMCid@etudfin=\AMCnum@copies%
-  \advance\AMCid@etudfin by \AMCid@etud\relax%
+  \advance\AMCid@etudfin\AMCid@etud\relax%
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
   \loop{%
     \AMC@zoneformulairefalse\setcounter{page}{1}%
