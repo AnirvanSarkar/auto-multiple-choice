@@ -329,6 +329,8 @@ sub score_question {
 	} else {
 	    # standard case
 	    $sb=$ticked_adata->{'strategy'};
+	    $sb =~ s/^\s*,+//;
+	    $sb =~ s/,+\s*$//;
 	    if($sb ne '') {
 		# some value is given as a score for the
 		# ticked answer
