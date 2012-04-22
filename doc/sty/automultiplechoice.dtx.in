@@ -2571,7 +2571,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCNumeric}{scoreapprox}[1]{\def\AMC@numeric@scoreapprox{#1}}
 \newcount\AMC@numeric@approx
 \define@key{AMCNumeric}{approx}[0]{\AMC@numeric@approx=#1}
-\setkeys{AMCNumeric}{digits,decimals,base,sign,strict,scoring,vertical,reverse,vhead,scoreexact,scoreapprox,approx}
+\setkeys{AMCNumeric}{digits,decimals,base,sign,strict,scoring,vertical,
+                     reverse,vhead,scoreexact,scoreapprox,approx}
 \newcommand\AMCnumericOpts[1]{\setkeys{AMCNumeric}{#1}}
 %    \end{macrocode}
 % Then the command |\AMCnumericShow| itself:
@@ -2817,6 +2818,113 @@ Three digits and two letters:\insertgroup{mixed}.
   \FPset\AMC@CI@a{\AMC@CI@b}%
 \repeat}
 %    \end{macrocode}\end{macro}
+%
+% \subsection{Open questions}
+%
+% \begin{macro}{\AMCOpen}
+%   The command |\AMCOpen|\marg{options}\marg{choices} can be
+%   used as a replacement for the |choices| environment when asking
+%   the student to write some answer by hand. The teacher will correct
+%   and mark this answer either on the paper before scanning, or with
+%   manual data capture, thanks to the scoring boxes.
+%
+%   As an example,
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\begin{question}{Linux}
+  What is the first name of the person who started working on the Linux kernel?
+  \AMCOpen{}{\wrongchoice[w]{w}\scoring{0}\correctchoice[c]{c}\scoring{2}}
+\end{question}
+\end{verbatim}
+% \iffalse
+%</doc>
+%\fi
+% shows:
+%
+% \begin{center}
+% {\makeatletter\AMC@inside@boxfalse\AMC@ensemblefalse\makeatother
+% \fbox{
+% \begin{minipage}{.7\linewidth}
+% \begin{question}{Linux}
+%   What is the first name of the person who started working on the Linux kernel?
+%   \AMCOpen{}{\wrongchoice[w]{w}\scoring{0}\correctchoice[c]{c}\scoring{2}}%
+% \end{question}%
+% \end{minipage}}}
+% \end{center}
+% The teacher will have to tick the `w' box for wrong answers, and the
+% `c' box for correct answers.
+%
+% Begin with the options definitions:
+%    \begin{macrocode}
+\def\AMCotextGoto{}
+\def\AMCotextReserved{}
+\def\AMCocol@Background{lightgray}
+\def\AMCocol@Foreground{}
+\define@key{AMCOpen}{backgroundcol}{\def\AMCocol@Background{#1}}
+\define@key{AMCOpen}{foregroundcol}{\def\AMCocol@Foreground{#1}}
+\define@key{AMCOpen}{Treserved}{\def\AMCotextReserved{#1}}
+\newdimen\AMCopen@Hspace\AMCopen@Hspace=.5em
+\define@key{AMCOpen}{hspace}{\AMCopen@Hspace=#1}
+\newdimen\AMCopen@LineHeight\AMCopen@LineHeight=1cm
+\define@key{AMCOpen}{lineheight}{\AMCopen@LineHeight=#1}
+\newcount\AMCopen@Lines\AMCopen@Lines=1
+\define@key{AMCOpen}{lines}{\AMCopen@Lines=#1}
+\define@boolkey{AMCOpen}{dots}[true]{}
+\setkeys{AMCOpen}{dots}
+\newcommand\AMCopenOpts[1]{\setkeys{AMCOpen}{#1}}
+%    \end{macrocode}
+% 
+% The command |\AMCOpen| is similar to |\AMCnumericChoices|,
+% calling either |\AMCopenShow| or |\AMCopenHide|.
+%    \begin{macrocode}
+\newcommand\AMCopenShow[4]{
+  \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
+  \ifAMC@ensemble\ifAMCformulaire@dedans%
+    \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}%
+  \fi\fi%
+  {\setkeys{AMCOpen}{#1}%
+    \linebreak[1]\hspace*{\fill}%
+    {\AMCnoCompleteMulti%
+      \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
+      \def\AMCanswer##1##2{##1\ifAMC@ensemble\else%
+          \ifAMC@inside@box\else{\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi%
+        \hspace{\AMCopen@Hspace}}%
+      \fcolorbox{white}{\AMCocol@Background}{%
+        \begin{choicescustom}[o]%
+          \ifx\AMCocol@Foreground\@empty\@empty\else%
+            \def\AMC@boxcolor{\AMCocol@Foreground}%
+          \fi%
+          #2%
+        \end{choicescustom}%
+        \ifx\AMCocol@Foreground\@empty\@empty%
+          \AMCotextReserved%
+        \else%
+          \textcolor{\AMCocol@Foreground}{\AMCotextReserved}%
+        \fi%
+      }}%
+    \par\noindent%
+    \hspace*{\fill}\fbox{\begin{minipage}{.95\linewidth}%
+        \loop\vspace{\AMCopen@LineHeight}
+          \ifKV@AMCOpen@dots%
+            ~\dotfill~
+          \else~\fi
+        \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
+      \end{minipage}}%
+    \vspace{7mm}\par%
+  }%
+  \ifAMC@ensemble\ifAMCformulaire@dedans%
+  \AMC@amclog{AUTOQCM[FQ]^^J}%
+  \fi\fi%
+}
+\newcommand\AMCopenHide[4]{
+  \AMCotextGoto%
+  \vspace{1.5ex}\par%
+}
+\def\AMCOpen{\AMCformatChoices{\AMCopenShow}{\AMCopenHide}}
+%    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Page formatting}
 %

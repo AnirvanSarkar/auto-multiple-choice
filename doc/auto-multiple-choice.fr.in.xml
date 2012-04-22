@@ -1906,19 +1906,87 @@ et inscrivez votre nom et prénom ci-dessous.
         l'exemple suivant, chaque case cochée rapporte un demi-point à
         l'étudiant) : <programlisting>\begin{questionmult}{ouverte}
   Donnez la d\'efinition de l'inflation.
-  \hfill
-  \AMCnoCompleteMulti
-  \def\AMCbeginAnswer{}\def\AMCendAnswer{}
-  \def\AMCanswer#1#2{#1\hspace{2mm}}
-  \fcolorbox{white}{lightgray}{
-    \begin{reponsesperso}[o]\bareme{b=.5}
-      \bonne{}\bonne{}\bonne{}\bonne{}
-    \end{reponsesperso}
-    Reserv\'e au correcteur
-  }\par\vspace{1ex}
-  \noindent\fbox{\begin{minipage}{\linewidth}~\vspace*{4cm}\end{minipage}}
+  \AMCOpen{lines=5}{\wrongchoice[F]{f}\scoring{0}\wrongchoice[P]{p}\scoring{1}\correctchoice[J]{j}\scoring{2}}
 \end{questionmult}
 </programlisting></para>
+
+        <para>Dans cet exemple, l'enseignant disposera de trois cases. En
+        cochant la première (nommée F pour faux), l'étudiant n'aura aucun
+        point. En cochant la deuxième (appelée P pour partielle), l'étudiant
+        aura 1 point. En cochant la dernière (nommée J pour juste), l'étudiant
+        optiendra 2 points.</para>
+
+        <para>Le premier argument de la commande <command>\AMCOpen</command>
+        est une liste d'options séparées par des virgules. Les options
+        disponibles sont les suivantes :</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>lines=<replaceable>num</replaceable></term>
+
+            <listitem>
+              <para>fixe le nombre de lignes allouées à la réponse (la valeur
+              par défaut est <code>1)</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>lineheight=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>fixe la hauteur de chaque ligne (la valeur par défaut est
+              <code>1cm</code>).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>dots=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>avec la valeur <code>true</code> (par défaut), chaque
+              ligne sera matérialisée par des pointillés. Donner la valeur
+              <code>false</code> pour les supprimer.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>hspace=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>fixe l'espace à ajouter entre les cases de la zone de
+              notation.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>backgroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>fixe la couleur de fond de la zone de notation.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>foregroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>fixe la couleur utilisée dans la zone de notation.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>De plus, on peut ajouter un petit texte dans la zone de notation
+        pour signifier aux étudiants de ne pas cocher ces cases-là en
+        redéfinissant la commande <command>\AMCotextReserved</command> comme
+        suit :</para>
+
+        <programlisting>\def\AMCotextReserved{\emph{Reservé}}</programlisting>
+
+        <para>Dans le cas de l'utilisation d'une feuille de réponse séparée,
+        on peut également ajouter un petit texte à chaque question ouverte
+        comme suit :</para>
+
+        <programlisting>\def\AMCotextGoto{\par{\bf\emph{Répondez sur la feuille de réponses.}}}</programlisting>
       </sect3>
 
       <sect3>

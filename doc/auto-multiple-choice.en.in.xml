@@ -1780,21 +1780,84 @@ and write your first and last names below.
         answer sheets and tick the boxes according to the answers written by
         the students for open questions. He will then scan the sheets and let
         AMC correct the multiple choice questions and integrate the open
-        questions scores into the marks.<programlisting>\begin{questionmult}{open}
+        questions scores into the marks.<programlisting>\begin{question}{open}
   Define \emph{inflation}.
-  \hfill
-  \AMCnoCompleteMulti
-  \def\AMCbeginAnswer{}\def\AMCendAnswer{}
-  \def\AMCanswer#1#2{#1\hspace{2mm}}
-  \fcolorbox{white}{lightgray}{
-    \begin{choicescustom}[o]\bareme{b=.5}
-      \correctchoice{}\correctchoice{}\correctchoice{}\correctchoice{}
-    \end{choicescustom}
-    Reserved
-  }\par\vspace{1ex}
-  \noindent\fbox{\begin{minipage}{\linewidth}~\vspace*{4cm}\end{minipage}}
-\end{questionmult}
+  \AMCOpen{lines=5}{\wrongchoice[W]{w}\scoring{0}\wrongchoice[P]{p}\scoring{1}\correctchoice[C]{c}\scoring{2}}
+\end{question}
 </programlisting></para>
+
+        <para>In this example, the teacher will get three boxes. If the first
+        (labelled W for wrong) is ticked, the student will get 0 points. If
+        the second (labelled P for partial) is ticked, the student will get 1
+        point. If the third (labelled C for correct) is ticked, the student
+        will get 2 points.</para>
+
+        <para>The first argument to <command>\AMCOpen</command> is a comma
+        separated list of options. The available options are:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>lines=<replaceable>num</replaceable></term>
+
+            <listitem>
+              <para>sets the number of lines for the answer. Default value is
+              <code>1</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>lineheight=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the height of each line. Default value is
+              <code>1cm</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>dots=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>if <code>true</code> (defaut), each line will be realized
+              by a line of dots.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>hspace=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the space between boxes in the marking area.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>backgroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>sets the background color of the marking area.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>foregroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>sets the foreground color of the marking area.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>Moreover, a little text can be written in the marking area to
+        tell the students not to tick these boxes, redefining the
+        <command>\AMCotextReserved</command> command, as:</para>
+
+        <programlisting>\def\AMCotextReserved{\emph{Reserved}}</programlisting>
+
+        <para>When using separate answer sheets, the text added to each open
+        question can also be defined, as:</para>
+
+        <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
       </sect3>
 
       <sect3>
