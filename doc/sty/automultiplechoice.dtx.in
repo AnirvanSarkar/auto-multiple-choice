@@ -1584,6 +1584,16 @@ Three digits and two letters:\insertgroup{mixed}.
     {\the\paperwidth}{\the\paperheight}}\fi}
 %    \end{macrocode}\end{macro}\end{macro}
 %
+% \begin{macro}{\AMCdontScan}\begin{macro}{\AMCdontAnnotate}
+%     The commands |\AMCdontScan| and |\AMCdontAnnotate| write
+%     into the |xy| file instructions related to the current question.
+%    \begin{macrocode}
+\newcommand{\AMCdontScan}{\ifAMC@calibration\immediate\write\AMC@XYFILE{\string\dontscan{\the\AMCid@etud,\the\AMCid@quest}}\fi}
+\newcommand{\AMCdontAnnotate}{\ifAMC@calibration\immediate\write\AMC@XYFILE{\string\dontannotate{\the\AMCid@etud,\the\AMCid@quest}}\fi}
+%%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% 
 % \begin{environment}{amcxyfile}
 %   The following lines defines an environment to use a particular file
 %   for positions outputs. This is used mainly for documentation or testing.
@@ -1677,7 +1687,8 @@ Three digits and two letters:\insertgroup{mixed}.
       {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}%
       {\vbox to \AMC@boxeddim{\AMC@tracepos{#2}{#3}\vfill %
           \hbox to \AMC@boxeddim{\hfill{\textcolor{\AMC@boxcolor}{#1}}\hfill}\vfill}%
-        \AMC@tracepos{#2}{#3}}}}}}
+        \AMC@tracepos{#2}{#3}}}}}%
+}
 %    \end{macrocode}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMC@caselettre}\begin{macro}{\AMCchoiceLabel}
@@ -2872,7 +2883,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcount\AMCopen@Lines\AMCopen@Lines=1
 \define@key{AMCOpen}{lines}{\AMCopen@Lines=#1}
 \define@boolkey{AMCOpen}{dots}[true]{}
-\setkeys{AMCOpen}{dots}
+\define@boolkey{AMCOpen}{scan}[true]{}
+\define@boolkey{AMCOpen}{annotate}[false]{}
+\setkeys{AMCOpen}{dots,scan,annotate}
 \newcommand\AMCopenOpts[1]{\setkeys{AMCOpen}{#1}}
 %    \end{macrocode}
 % 
@@ -2897,6 +2910,8 @@ Three digits and two letters:\insertgroup{mixed}.
             \def\AMC@boxcolor{\AMCocol@Foreground}%
           \fi%
           #2%
+          \ifKV@AMCOpen@scan\else\AMCdontScan\fi%
+          \ifKV@AMCOpen@annotate\else\AMCdontAnnotate\fi%
         \end{choicescustom}%
         \ifx\AMCocol@Foreground\@empty\@empty%
           \AMCotextReserved%

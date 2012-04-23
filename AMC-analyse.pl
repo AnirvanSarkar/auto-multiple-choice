@@ -30,6 +30,7 @@ use AMC::Image;
 use AMC::Boite qw/min max/;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone :position/;
+use AMC::DataModule::layout qw/:flags/;
 use AMC::Gui::Avancement;
 
 my $pid='';
@@ -178,13 +179,12 @@ sub detecte_cb {
 
 sub get_layout_data {
   my ($student,$page,$all)=@_;
-  my $r={'corners.test'=>{},'zoom.file'=>{},'darkness.data'=>{}};
+  my $r={'corners.test'=>{},'zoom.file'=>{},'darkness.data'=>{},
+	'boxes'=>{},'flags'=>{}};
 
   ($r->{'width'},$r->{'height'},$r->{'markdiameter'})
     =$layout->dims($student,$page);
   $r->{'frame'}=AMC::Boite::new_complete($layout->all_marks($student,$page));
-
-  $r->{'boxes'}={};
 
   my $sth=$layout->statement('digitInfo');
   $sth->execute($student,$page);
@@ -201,6 +201,8 @@ sub get_layout_data {
       $r->{'boxes'}->{$c->{'question'}.".".$c->{'answer'}}=
 	AMC::Boite::new_MN(map { $c->{$_} }
 			   (qw/xmin ymin xmax ymax/));
+      $r->{'flags'}->{$c->{'question'}.".".$c->{'answer'}}=
+	$c->{'flags'};
     }
     $sth=$layout->statement('namefieldInfo');
     $sth->execute($student,$page);
@@ -290,20 +292,23 @@ sub measure_box {
 
     $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
     $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
-    for($process->commande($ld->{'boxes.scan'}->{$k}
-			      ->commande_mesure($prop))) {
+
+    if(!($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
+      for($process->commande($ld->{'boxes.scan'}->{$k}
+			     ->commande_mesure($prop))) {
 
 	if(/^COIN\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
-	    $ld->{'corners.test'}->{$k}->def_point_suivant($1,$2);
+	  $ld->{'corners.test'}->{$k}->def_point_suivant($1,$2);
 	}
 	if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
-	    $r=($2==0 ? 0 : $1/$2);
-	    debug sprintf("Binary box $k: %d/%d = %.4f\n",$1,$2,$r);
-	    $ld->{'darkness.data'}->{$k}=[$2,$1];
+	  $r=($2==0 ? 0 : $1/$2);
+	  debug sprintf("Binary box $k: %d/%d = %.4f\n",$1,$2,$r);
+	  $ld->{'darkness.data'}->{$k}=[$2,$1];
 	}
 	if(/^ZOOM\s+(.*)/) {
 	  $ld->{'zoom.file'}->{$k}=$1;
 	}
+      }
     }
 
     return($r);
@@ -755,7 +760,8 @@ sub one_scan {
       my $question=$1;
       my $answer=$2;
       $zoneid=$capture->get_zoneid(@spc,ZONE_BOX,$question,$answer,1);
-      $ld->{'corners.test'}->{$k}->to_data($capture,$zoneid,POSITION_MEASURE);
+      $ld->{'corners.test'}->{$k}->to_data($capture,$zoneid,POSITION_MEASURE)
+	if($ld->{'corners.test'}->{$k});
     } elsif(($n,$i)=detecte_cb($k)) {
       $zoneid=$capture->get_zoneid(@spc,ZONE_DIGIT,$n,$i,1);
     } elsif($k eq 'namefield') {
@@ -766,7 +772,9 @@ sub one_scan {
 
     if($zoneid) {
       if($k ne 'namefield') {
-	if($ld->{'darkness.data'}->{$k}) {
+	if($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN) {
+	  debug "Box $k is DONT_SCAN";
+	} elsif($ld->{'darkness.data'}->{$k}) {
 	  $capture->statement('setZoneAuto')
 	    ->execute(@{$ld->{'darkness.data'}->{$k}},
 		      $zoom_subdir."/".$ld->{'zoom.file'}->{$k},$zoneid);

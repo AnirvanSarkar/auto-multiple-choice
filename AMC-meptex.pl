@@ -25,6 +25,8 @@ use AMC::Basic;
 use AMC::Gui::Avancement;
 use AMC::Data;
 
+use AMC::DataModule::layout ':flags';
+
 my $src;
 my $data_dir;
 my $dpi=300;
@@ -86,8 +88,28 @@ sub ajoute {
 }
 
 my @pages=();
+my @flags=();
 my $cases;
 my $page_number=0;
+my $i='';
+
+sub add_flag {
+  my ($x,$flag)=@_;
+  if($x =~ /^([0-9]+),([0-9]+)$/) {
+    my ($student,$question)=($1,$2);
+    my $f;
+    if(@flags) {
+      my $lf=$flags[$#flags];
+      if($lf->{'student'}==$student && $lf->{'question'}==$question) {
+	$lf->{'flags'} |= $flag;
+	return;
+      }
+    }
+    push @flags,{'student'=>$student,'question'=>$question,'flags'=>$flag};
+  } else {
+    debug "ERROR: flag which question? <$x>";
+  }
+}
 
 open(SRC,$src) or die "Unable to open $src : $!";
 while(<SRC>) {
@@ -102,13 +124,19 @@ while(<SRC>) {
 		     -cases=>$cases};
     }
     if(/\\tracepos\{([^\}]+)\}\{([^\}]*)\}\{([^\}]*)\}/) {
-	my $i=$1;
+	$i=$1;
 	my $x=read_inches($2);
 	my $y=read_inches($3);
 	$i =~ s/^[0-9]+\/[0-9]+://;
-	$cases->{$i}={'bx'=>[],'by'=>[]} if(!$cases->{$i});
+	$cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0} if(!$cases->{$i});
 	ajoute($cases->{$i}->{'bx'},$x);
 	ajoute($cases->{$i}->{'by'},$y);
+    }
+    if(/\\dontscan\{(.*)\}/) {
+      add_flag($1,BOX_FLAGS_DONTSCAN);
+    }
+    if(/\\dontannotate\{(.*)\}/) {
+      add_flag($1,BOX_FLAGS_DONTANNOTATE);
     }
 }
 close(SRC);
@@ -126,7 +154,7 @@ sub center {
 
 my $delta=(@pages ? 1/(1+$#pages) : 0);
 
-$layout->begin_transaction;
+$layout->begin_transaction('MeTe');
 $layout->clear_all;
 $capture->variable('annotate_source_change',time());
 
@@ -140,7 +168,7 @@ for my $p (@pages) {
 	  $p->{-cases}->{$k}->{'bx'}->[$_] *= $dpi;
 	  $p->{-cases}->{$k}->{'by'}->[$_] = $dpi*($p->{-dim_y} - $p->{-cases}->{$k}->{'by'}->[$_]);
       }
-      
+
       if($k =~ /position[HB][GD]$/) {
 	  for my $dir ('bx','by') {
 	      $diametre_marque+=abs($p->{-cases}->{$k}->{$dir}->[1]-$p->{-cases}->{$k}->{$dir}->[0]);
@@ -188,13 +216,17 @@ for my $p (@pages) {
 	my ($name,$q,$a)=($1,$2,$3);
 	$layout->question_name($q,$name);
 	$layout->statement('NEWBox')
-	  ->execute(@ep,$q,$a,bbox($c->{$k}));
+	  ->execute(@ep,$q,$a,bbox($c->{$k}),0);
       }
     }
 
     $avance->progres($delta);
 }
 
-$layout->end_transaction;
+for my $f (@flags) {
+  $layout->add_question_flag($f->{'student'},$f->{'question'},$f->{'flags'});
+}
+
+$layout->end_transaction('MeTe');
 
 $avance->fin();

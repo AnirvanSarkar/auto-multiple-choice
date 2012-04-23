@@ -81,6 +81,9 @@ package AMC::DataModule::layout;
 #
 # * xmin,xmax,ymin,ymax give the box coordinates
 #
+# * flags is an integer that contains the flags from BOX_FLAGS_* (see
+#   below)
+#
 # layout_digit lists all the binary boxes to read student/page number
 # and checksum from the scans (boxes white for digit 0, black for
 # digit 1):
@@ -110,6 +113,17 @@ package AMC::DataModule::layout;
 #
 # * name is the question identifier from the LaTeX file
 
+use Exporter qw(import);
+
+use constant {
+  BOX_FLAGS_DONTSCAN => 0x1,
+  BOX_FLAGS_DONTANNOTATE => 0x2,
+};
+
+our @EXPORT_OK = qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE);
+our %EXPORT_TAGS = ( 'flags' => [ qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE/ ],
+		     );
+
 use AMC::Basic;
 use AMC::DataModule;
 use XML::Simple;
@@ -117,14 +131,14 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(1);
+  return(2);
 }
 
 sub version_upgrade {
     my ($self,$old_version)=@_;
     if($old_version==0) {
 
-	# Upgrading from version 0 (empty database) to version 1 :
+	# Upgrading from version 0 (empty database) to version 2 :
 	# creates all the tables.
 
 	debug "Creating layout tables...";
@@ -135,7 +149,7 @@ sub version_upgrade {
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("namefield")
 		      ." (student INTEGER, page INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("box")
-		      ." (student INTEGER, page INTEGER, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)");
+		      ." (student INTEGER, page INTEGER, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("digit")
 		      ." (student INTEGER, page INTEGER, numberid INTEGER, digitid INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("source")
@@ -144,7 +158,12 @@ sub version_upgrade {
 		      ." (question INTEGER PRIMARY KEY, name TEXT)");
 	$self->populate_from_xml;
 
-	return(1);
+	return(2);
+    }
+    if($old_version==1) {
+      $self->sql_do("ALTER TABLE ".$self->table("box")
+		   ." ADD COLUMN flags DEFAULT 0");
+      return(2);
     }
     return('');
 }
@@ -191,7 +210,7 @@ sub populate_from_xml {
 		    }
 		    for my $c (@{$l->{'case'}}) {
 			$self->statement('NEWBox')->execute(
-			    @lid,map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)
+			    @lid,(map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)),0
 			    );
 		    }
 		    for my $d (@{$l->{'chiffre'}}) {
@@ -247,8 +266,8 @@ sub define_statements {
        'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
 		   ." (student,page,corner,x,y) VALUES (?,?,?,?,?)"},
        'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
-		  ." (student,page,question,answer,xmin,xmax,ymin,ymax)"
-		  ." VALUES (?,?,?,?,?,?,?,?)"},
+		  ." (student,page,question,answer,xmin,xmax,ymin,ymax,flags)"
+		  ." VALUES (?,?,?,?,?,?,?,?,?)"},
        'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
 		    ." (student,page,numberid,digitid,xmin,xmax,ymin,ymax)"
 		    ." VALUES (?,?,?,?,?,?,?,?)"},
@@ -265,6 +284,8 @@ sub define_statements {
 			     ." WHERE student=? ORDER BY page"},
        'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student ORDER BY student"},
+       'Q_Flag'=>{'sql'=>"UPDATE ".$self->table("box")
+		  ." SET flags=flags|? WHERE student=? AND question=?"},
        'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM ".$self->table("box")
 			     ." WHERE student=? GROUP BY student,page"},
        'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
@@ -581,6 +602,14 @@ sub check_positions {
 sub max_enter {
   my ($self)=@_;
   return($self->sql_single($self->statement("MAX_enter")));
+}
+
+# add_question_flag($student,$question,$flag) adds the flag to all
+# answers boxes for a particular student and question.
+
+sub add_question_flag {
+  my ($self,$student,$question,$flag)=@_;
+  $self->statement('Q_Flag')->execute($flag,$student,$question);
 }
 
 1;
