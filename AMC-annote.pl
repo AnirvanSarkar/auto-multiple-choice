@@ -29,6 +29,7 @@ use AMC::Gui::Avancement;
 use AMC::NamesFile;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone :position/;
+use AMC::DataModule::layout qw/:flags/;
 use encoding 'utf8';
 
 my $cr_dir="";
@@ -163,6 +164,7 @@ my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
 my $scoring=$data->module('scoring');
 my $assoc=$data->module('association');
+my $layout=$data->module('layout');
 
 $seuil=$scoring->variable_transaction('darkness_threshold');
 $lk=$assoc->variable_transaction('key_in_list');
@@ -297,7 +299,7 @@ print "* Annotation\n";
     my $context = Cairo::Context->create ($surface);
     $context->set_line_width($line_width);
 
-    my $layout=Pango::Cairo::create_layout($context);
+    my $lay=Pango::Cairo::create_layout($context);
 
     # adjusts text size...
     my $l0=Pango::Cairo::create_layout($context);
@@ -312,9 +314,9 @@ print "* Annotation\n";
     my $font_size=int($test_font_size*$target_y/$text_y);
     debug "Font size: $font_size";
 
-    $layout->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$font_size));
-    $layout->set_text('H');
-    ($text_x,$text_y)=$layout->get_pixel_size();
+    $lay->set_font_description (Pango::FontDescription->from_string ($font_name.' '.$font_size));
+    $lay->set_text('H');
+    ($text_x,$text_y)=$lay->get_pixel_size();
 
     my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
 
@@ -361,15 +363,15 @@ print "* Annotation\n";
 	debug "No association/names";
       }
 
-      $layout->set_text($text);
+      $lay->set_text($text);
       $context->set_source_rgb(color_rgb('red'));
       if($rtl) {
-	my ($tx,$ty)=$layout->get_pixel_size;
+	my ($tx,$ty)=$lay->get_pixel_size;
 	$context->move_to($page_width-$text_x-$tx,$text_y*.7);
       } else {
 	$context->move_to($text_x,$text_y*.7);
       }
-      Pango::Cairo::show_layout($context,$layout);
+      Pango::Cairo::show_layout($context,$lay);
     }
 
     #########################################
@@ -385,6 +387,9 @@ print "* Annotation\n";
       my $indic=$scoring->indicative($p_strategy,$q);
 
       next BOX if($indic && !$annote_indicatives);
+
+      next BOX if($layout->get_box_flags($p->{'student'},$q,$r)
+		  & BOX_FLAGS_DONTANNOTATE);
 
       # to be ticked?
       my $bonne=$scoring->correct_answer($p_strategy,$q,$r);
@@ -453,8 +458,8 @@ print "* Annotation\n";
 	  $text=$te;
 	}
 
-	$layout->set_text($text);
-	my ($tx,$ty)=$layout->get_pixel_size;
+	$lay->set_text($text);
+	my ($tx,$ty)=$lay->get_pixel_size;
 	if($position eq 'marge') {
 	  if($rtl) {
 	    $x=$page_width-$ecart_marge*$text_x-$tx;
@@ -477,7 +482,7 @@ print "* Annotation\n";
 
 	$context->set_source_rgb(color_rgb('red'));
 	$context->move_to($x,$y);
-	Pango::Cairo::show_layout($context,$layout);
+	Pango::Cairo::show_layout($context,$lay);
       }
     }
 

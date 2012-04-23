@@ -286,6 +286,8 @@ sub define_statements {
 		    ." GROUP BY student ORDER BY student"},
        'Q_Flag'=>{'sql'=>"UPDATE ".$self->table("box")
 		  ." SET flags=flags|? WHERE student=? AND question=?"},
+       'A_Flags'=>{'sql'=>"SELECT flags FROM ".$self->table("box")
+		  ." WHERE student=? AND question=? AND answer=?"},
        'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM ".$self->table("box")
 			     ." WHERE student=? GROUP BY student,page"},
        'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
@@ -610,6 +612,15 @@ sub max_enter {
 sub add_question_flag {
   my ($self,$student,$question,$flag)=@_;
   $self->statement('Q_Flag')->execute($flag,$student,$question);
+}
+
+# get_box_glags($student,$question,$answer) returns the flags for the
+# corresponding box.
+
+sub get_box_flags {
+  my ($self,$student,$question,$answer)=@_;
+  return($self->sql_single($self->statement('A_Flags'),
+			   $student,$question,$answer));
 }
 
 1;
