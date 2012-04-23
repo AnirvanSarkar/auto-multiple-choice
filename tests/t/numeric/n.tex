@@ -1,11 +1,33 @@
 \documentclass[a4paper]{article}
 \usepackage{fp}
 \usepackage{multicol}
-\usepackage[ensemble]{automultiplechoice}
+\usepackage[separateanswersheet,calibration]{automultiplechoice}
 \begin{document}
 
-
+\def\AMCotextReserved{\emph{Reserved}}
 \def\AMCntextGoto{\par{\bf\emph{Please code the result on the separate answer sheet.}}}
+\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}
+
+\def\quatrequards{\bareme{b=.5}
+      \correctchoice[~]{}\correctchoice[~]{}\correctchoice[~]{}\correctchoice[~]{}
+}
+\def\jfm{\wrongchoice[F]{}\scoring{0}%
+\wrongchoice[P]{}\scoring{1}%
+\correctchoice[C]{}\scoring{2}}
+
+\element{grq}{
+  \begin{question}{capital}
+    What is the capital city of Ethiopia?
+    \AMCOpen{dots=false}{\jfm}
+  \end{question}
+}
+
+\element{grq}{
+  \begin{questionmult}{cities}
+    What are the two main cities of Cameroon?
+    \AMCOpen{foregroundcol=red,backgroundcol=white,lines=2,scan=false}{\quatrequards}
+  \end{questionmult}
+}
 
 \element{grq}{
 \begin{question}{inf-expo-indep}

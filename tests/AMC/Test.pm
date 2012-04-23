@@ -525,7 +525,7 @@ sub check_export {
   my ($self)=@_;
   my @csv=@{$self->{'export_full_csv'}};
   if(@csv) {
-    $self->begin("CSV full export test");
+    $self->begin("CSV full export test (".(1+$#csv)." scores)");
     $self->amc_command('export',
 		       '--data','%DATA',
 		       '--module','CSV',
