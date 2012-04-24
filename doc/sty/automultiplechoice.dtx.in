@@ -2873,9 +2873,11 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCotextReserved{}
 \def\AMCocol@Background{lightgray}
 \def\AMCocol@Foreground{}
+\def\AMCopen@answer{}
 \define@key{AMCOpen}{backgroundcol}{\def\AMCocol@Background{#1}}
 \define@key{AMCOpen}{foregroundcol}{\def\AMCocol@Foreground{#1}}
 \define@key{AMCOpen}{Treserved}{\def\AMCotextReserved{#1}}
+\define@key{AMCOpen}{answer}{\def\AMCopen@answer{#1}}
 \newdimen\AMCopen@Hspace\AMCopen@Hspace=.5em
 \define@key{AMCOpen}{hspace}{\AMCopen@Hspace=#1}
 \def\AMCopen@Width{.95\linewidth}
@@ -2903,7 +2905,7 @@ Three digits and two letters:\insertgroup{mixed}.
   {\setkeys{AMCOpen}{#1}%
     \ifKV@AMCOpen@lineup%
       \ifAMC@ensemble\else\par\fi%
-      \dotfill%
+      \ifAMC@correc\smash{\AMCopen@answer}\fi\dotfill%
     \else%
       \linebreak[1]\hspace*{\fill}%
     \fi%
@@ -2931,9 +2933,10 @@ Three digits and two letters:\insertgroup{mixed}.
       \par\noindent%
       \hspace*{\fill}\fbox{\begin{minipage}{\AMCopen@Width}%
           \loop\vspace{\AMCopen@LineHeight}
+            ~\ifAMC@correc\smash{\AMCopen@answer}\def\AMCopen@answer{}\fi%
             \ifKV@AMCOpen@dots%
-              ~\dotfill~
-            \else~\fi
+              \dotfill~
+            \fi
           \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
         \end{minipage}}%
       \vspace{7mm}\par%
