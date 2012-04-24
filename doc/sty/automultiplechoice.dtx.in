@@ -2878,6 +2878,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCOpen}{Treserved}{\def\AMCotextReserved{#1}}
 \newdimen\AMCopen@Hspace\AMCopen@Hspace=.5em
 \define@key{AMCOpen}{hspace}{\AMCopen@Hspace=#1}
+\def\AMCopen@Width{.95\linewidth}
+\define@key{AMCOpen}{width}{\def\AMCopen@Width{#1}}
 \newdimen\AMCopen@LineHeight\AMCopen@LineHeight=1cm
 \define@key{AMCOpen}{lineheight}{\AMCopen@LineHeight=#1}
 \newcount\AMCopen@Lines\AMCopen@Lines=1
@@ -2885,6 +2887,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@boolkey{AMCOpen}{dots}[true]{}
 \define@boolkey{AMCOpen}{scan}[true]{}
 \define@boolkey{AMCOpen}{annotate}[false]{}
+\define@boolkey{AMCOpen}{lineup}[false]{}
 \setkeys{AMCOpen}{dots,scan,annotate}
 \newcommand\AMCopenOpts[1]{\setkeys{AMCOpen}{#1}}
 %    \end{macrocode}
@@ -2898,7 +2901,12 @@ Three digits and two letters:\insertgroup{mixed}.
     \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}%
   \fi\fi%
   {\setkeys{AMCOpen}{#1}%
-    \linebreak[1]\hspace*{\fill}%
+    \ifKV@AMCOpen@lineup%
+      \ifAMC@ensemble\else\par\fi%
+      \dotfill%
+    \else%
+      \linebreak[1]\hspace*{\fill}%
+    \fi%
     {\AMCnoCompleteMulti%
       \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
       \def\AMCanswer##1##2{##1\ifAMC@ensemble\else%
@@ -2919,15 +2927,17 @@ Three digits and two letters:\insertgroup{mixed}.
           \textcolor{\AMCocol@Foreground}{\AMCotextReserved}%
         \fi%
       }}%
-    \par\noindent%
-    \hspace*{\fill}\fbox{\begin{minipage}{.95\linewidth}%
-        \loop\vspace{\AMCopen@LineHeight}
-          \ifKV@AMCOpen@dots%
-            ~\dotfill~
-          \else~\fi
-        \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
-      \end{minipage}}%
-    \vspace{7mm}\par%
+    \ifKV@AMCOpen@lineup\else%
+      \par\noindent%
+      \hspace*{\fill}\fbox{\begin{minipage}{\AMCopen@Width}%
+          \loop\vspace{\AMCopen@LineHeight}
+            \ifKV@AMCOpen@dots%
+              ~\dotfill~
+            \else~\fi
+          \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
+        \end{minipage}}%
+      \vspace{7mm}\par%
+    \fi%
   }%
   \ifAMC@ensemble\ifAMCformulaire@dedans%
   \AMC@amclog{AUTOQCM[FQ]^^J}%
