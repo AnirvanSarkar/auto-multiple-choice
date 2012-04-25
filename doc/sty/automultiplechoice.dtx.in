@@ -2886,6 +2886,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCOpen}{lineheight}{\AMCopen@LineHeight=#1}
 \newcount\AMCopen@Lines\AMCopen@Lines=1
 \define@key{AMCOpen}{lines}{\AMCopen@Lines=#1}
+\newdimen\AMCopen@boxmargin\AMCopen@boxmargin=3pt
+\define@key{AMCOpen}{boxmargin}{\AMCopen@boxmargin=#1}
 \define@boolkey{AMCOpen}{dots}[true]{}
 \define@boolkey{AMCOpen}{scan}[true]{}
 \define@boolkey{AMCOpen}{annotate}[false]{}
@@ -2914,6 +2916,8 @@ Three digits and two letters:\insertgroup{mixed}.
       \def\AMCanswer##1##2{##1\ifAMC@ensemble\else%
           \ifAMC@inside@box\else{\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi%
         \hspace{\AMCopen@Hspace}}%
+      \fboxsep=\AMCopen@boxmargin%
+      \fboxrule=0pt%
       \fcolorbox{white}{\AMCocol@Background}{%
         \begin{choicescustom}[o]%
           \ifx\AMCocol@Foreground\@empty\@empty\else%
