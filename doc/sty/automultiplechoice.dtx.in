@@ -2872,11 +2872,15 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCotextGoto{}
 \def\AMCotextReserved{}
 \def\AMCocol@Background{lightgray}
+\def\AMCocol@BoxFrameRule{white}
+\def\AMCocol@FrameRule{black}
 \def\AMCocol@Foreground{}
 \def\AMCopen@answer{}
+\def\AMCopen@question{}
 \define@key{AMCOpen}{backgroundcol}{\def\AMCocol@Background{#1}}
 \define@key{AMCOpen}{foregroundcol}{\def\AMCocol@Foreground{#1}}
 \define@key{AMCOpen}{Treserved}{\def\AMCotextReserved{#1}}
+\define@key{AMCOpen}{question}{\def\AMCopen@question{#1}}
 \define@key{AMCOpen}{answer}{\def\AMCopen@answer{#1}}
 \newdimen\AMCopen@Hspace\AMCopen@Hspace=.5em
 \define@key{AMCOpen}{hspace}{\AMCopen@Hspace=#1}
@@ -2888,11 +2892,17 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCOpen}{lines}{\AMCopen@Lines=#1}
 \newdimen\AMCopen@boxmargin\AMCopen@boxmargin=3pt
 \define@key{AMCOpen}{boxmargin}{\AMCopen@boxmargin=#1}
+\newdimen\AMCopen@boxframerule\AMCopen@boxframerule=1pt
+\define@key{AMCOpen}{boxframerule}{\AMCopen@boxframerule=#1}
+\define@key{AMCOpen}{boxframerulecol}{\def\AMCocol@BoxFrameRule{#1}}
+\define@key{AMCOpen}{framerulecol}{\def\AMCocol@FrameRule{#1}}
+\newdimen\AMCopen@framerule\AMCopen@framerule=1pt
+\define@key{AMCOpen}{framerule}{\AMCopen@framerule=#1}
 \define@boolkey{AMCOpen}{dots}[true]{}
 \define@boolkey{AMCOpen}{scan}[true]{}
 \define@boolkey{AMCOpen}{annotate}[false]{}
 \define@boolkey{AMCOpen}{lineup}[false]{}
-\setkeys{AMCOpen}{dots,scan,annotate}
+\setkeys{AMCOpen}{dots,scan,annotate,lineup}
 \newcommand\AMCopenOpts[1]{\setkeys{AMCOpen}{#1}}
 %    \end{macrocode}
 % 
@@ -2917,8 +2927,11 @@ Three digits and two letters:\insertgroup{mixed}.
           \ifAMC@inside@box\else{\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi%
         \hspace{\AMCopen@Hspace}}%
       \fboxsep=\AMCopen@boxmargin%
-      \fboxrule=0pt%
-      \fcolorbox{white}{\AMCocol@Background}{%
+      \fboxrule=\AMCopen@boxframerule%
+      \fcolorbox{\AMCocol@BoxFrameRule}{\AMCocol@Background}{%
+        \ifAMC@ensemble\AMCopen@question%
+          \ifx\@empty\AMCopen@question\@empty\else\hspace{\AMCopen@Hspace}\fi%
+        \fi%
         \begin{choicescustom}[o]%
           \ifx\AMCocol@Foreground\@empty\@empty\else%
             \def\AMC@boxcolor{\AMCocol@Foreground}%
@@ -2927,22 +2940,29 @@ Three digits and two letters:\insertgroup{mixed}.
           \ifKV@AMCOpen@scan\else\AMCdontScan\fi%
           \ifKV@AMCOpen@annotate\else\AMCdontAnnotate\fi%
         \end{choicescustom}%
-        \ifx\AMCocol@Foreground\@empty\@empty%
-          \AMCotextReserved%
+        \ifx\@empty\AMCotextReserved\@empty%
+          \hspace{-\AMCopen@Hspace}%
         \else%
-          \textcolor{\AMCocol@Foreground}{\AMCotextReserved}%
+          \ifx\AMCocol@Foreground\@empty\@empty%
+            \AMCotextReserved%
+          \else%
+            \textcolor{\AMCocol@Foreground}{\AMCotextReserved}%
+          \fi%
         \fi%
       }}%
     \ifKV@AMCOpen@lineup\else%
       \par\noindent%
-      \hspace*{\fill}\fbox{\begin{minipage}{\AMCopen@Width}%
-          \loop\vspace{\AMCopen@LineHeight}
-            ~\ifAMC@correc\smash{\AMCopen@answer}\def\AMCopen@answer{}\fi%
-            \ifKV@AMCOpen@dots%
-              \dotfill~
-            \fi
-          \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
-        \end{minipage}}%
+      \hspace*{\fill}{%
+        \fboxrule=\AMCopen@framerule%
+        \fcolorbox{\AMCocol@FrameRule}{white}{%
+          \begin{minipage}{\AMCopen@Width}%
+            \loop\vspace{\AMCopen@LineHeight}
+              ~\ifAMC@correc\smash{\AMCopen@answer}\def\AMCopen@answer{}\fi%
+              \ifKV@AMCOpen@dots%
+                \dotfill~
+              \fi
+            \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
+          \end{minipage}}}%
       \vspace{7mm}\par%
     \fi%
   }%
