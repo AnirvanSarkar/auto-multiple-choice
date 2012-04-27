@@ -13,7 +13,8 @@
     <abstract>
       <para>AMC is a set of utilities allowing the use of MCQ written in plain
       text or LaTeX, and their automated correction and grading from scans of
-      the answer sheets. This document describes its use (for the version
+      the answer sheets using Optical Mark Recognition (OMR). This document
+      describes its use (for the version
       @/PACKAGE_V_DEB/@~svn @/PACKAGE_V_SVN/@).</para>
 
       <para>The AMC project is hosted by <ulink
@@ -2807,9 +2808,10 @@ Name :
         <para>Then we select this set of scan files in the dialog opened by
         the button <guibutton>Automated</guibutton> of the section
         <guilabel>Data capture after examination</guilabel>, then we validate
-        with the button <guibutton>Use</guibutton> of this dialog. It's now
-        time to drink a coffee because the analysis of copies can be very long
-        (and can be done quietly because it requires no interaction).</para>
+        with the button <guibutton>Use</guibutton> of this dialog. AMC begins
+        with Optical Mark Recognition to detect the position of the four
+        circle corner marks on the scans, position the boxes, and detects the
+        amount of black pixels in each box.</para>
 
         <para>The result of the analysis of each page is indicated in the
         lists of the section <guilabel>Diagnosis</guilabel>:</para>
