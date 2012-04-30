@@ -29,10 +29,11 @@ $mods_dir="@/MODSDIR/@";
 
 sub mod_path {
     my ($action)=@_;
-    for my $ext ('.pl','') {
-	my $f=catfile($mods_dir,"AMC-$action".$ext);
-	return($f) if(-f $f);
-    }
+    my $f;
+    $f=catfile($mods_dir,"perl","AMC-$action.pl");
+    return($f) if(-f $f);
+    $f=catfile($mods_dir,"exec","AMC-$action");
+    return($f) if(-f $f);
     return('');
 }
 

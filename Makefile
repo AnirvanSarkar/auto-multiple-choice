@@ -68,7 +68,7 @@ DESTDIR=
 
 BINARIES ?= AMC-traitement-image AMC-detect
 
-MODS=AMC-*.pl $(BINARIES)
+MODS=AMC-*.pl
 GLADE_FROMIN:=$(basename $(wildcard AMC-gui-*.glade.in))
 GLADE_SIMPLE:=$(filter-out $(GLADE_FROMIN),$(wildcard AMC-gui-*.glade))
 GLADE=$(GLADE_FROMIN) $(GLADE_SIMPLE)
@@ -190,8 +190,11 @@ install: install_lang install_models FORCE
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR)
 	install    -m 0644 $(USER_GROUP) interfaces/amc-txt.lang $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)
-	install    -m 0755 $(USER_GROUP) $(MODS) $(DESTDIR)/$(MODSDIR)
-	install    -m 0644 $(USER_GROUP) $(GLADE) $(DESTDIR)/$(MODSDIR)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)/perl
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)/exec
+	install    -m 0755 $(USER_GROUP) $(MODS) $(DESTDIR)/$(MODSDIR)/perl
+	install    -m 0755 $(USER_GROUP) $(BINARIES) $(DESTDIR)/$(MODSDIR)/exec
+	install    -m 0644 $(USER_GROUP) $(GLADE) $(DESTDIR)/$(MODSDIR)/perl
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDIR)
 	install    -m 0644 $(USER_GROUP) $(STY) $(DESTDIR)/$(TEXDIR)
 ifneq ($(TEXDOCDIR),)
@@ -255,16 +258,19 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/perl5/AMC /usr/lib/AMC/AMC-traitement-image /usr/lib/AMC/AMC-detect /usr/lib/AMC/AMC-mepdirect $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/lib/AMC/*.pl /usr/lib/AMC/*.glade /usr/bin/auto-multiple-choice
+	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice
+	-sudo rm -r /usr/lib/AMC
 
 local: global
 	$(MAKE) -C I18N local LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
 	test -d /usr/lib/AMC || sudo mkdir -p /usr/lib/AMC
+	test -d /usr/lib/AMC/perl || sudo mkdir -p /usr/lib/AMC/perl
+	test -d /usr/lib/AMC/exec || sudo mkdir -p /usr/lib/AMC/exec
 	test -d /usr/share/auto-multiple-choice  || sudo mkdir -p /usr/share/auto-multiple-choice
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
-	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/AMC-traitement-image
-	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/AMC-detect
-	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC
+	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/exec/AMC-traitement-image
+	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/exec/AMC-detect
+	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC/perl
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
