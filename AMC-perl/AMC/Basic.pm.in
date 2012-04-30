@@ -74,7 +74,7 @@ sub amc_adapt_path {
     push @p,map { "$amc_base_path/$_" } (@{$oo{'locals'}}) if($oo{'locals'});
     push @p,@{$oo{'alt'}} if($oo{'alt'});
     if($oo{'file'}) {
-      TFILE: for(@p) { if( -f "$_/$oo{'file'}" ) 
+      TFILE: for(@p) { if( -f "$_/$oo{'file'}" )
 		       { $r="$_/$oo{'file'}";last TFILE; } }
     } else {
       TDIR: for(@p) { if( -d ) { $r=$_;last TDIR; } }
@@ -344,12 +344,13 @@ sub set_debug_file {
 	$amc_debug_filename=$amc_debug_fh->filename;
 	$amc_debug_fh->autoflush(1);
 	open(STDERR,">&",$amc_debug_fh);
- 
+
  	# versions diverses...
 
-	print $amc_debug_fh "This is AutoMultipleChoice, version @/PACKAGE_V_DEB/@ (svn:@/PACKAGE_V_SVN/@)\n\n";
- 
- 	print $amc_debug_fh ("=" x 40)."\n\n";
+	print $amc_debug_fh "This is AutoMultipleChoice, version @/PACKAGE_V_DEB/@ (svn:@/PACKAGE_V_SVN/@)\n";
+	print $amc_debug_fh "Perl : $^X\n";
+
+ 	print $amc_debug_fh "\n".("=" x 40)."\n\n";
  	if(commande_accessible('convert')) {
  	    open(VERS,"-|",'convert','-version');
  	    while(<VERS>) { chomp; print $amc_debug_fh "$_\n"; }
@@ -357,8 +358,7 @@ sub set_debug_file {
  	} else {
  	    print $amc_debug_fh "ImageMagick: not found\n";
  	}
- 	print $amc_debug_fh ("=" x 40)."\n\n";
- 	    
+
  	print $amc_debug_fh ("=" x 40)."\n\n";
  	if(commande_accessible('gm')) {
  	    open(VERS,"-|",'gm','-version');
@@ -368,7 +368,7 @@ sub set_debug_file {
  	    print $amc_debug_fh "GraphicsMagick: not found\n";
  	}
  	print $amc_debug_fh ("=" x 40)."\n\n";
- 	    
+
     }
 }
 
@@ -406,11 +406,11 @@ sub debug_and_stderr {
 sub debug_pm_version {
      my ($module)=@_;
      my $version;
-     if (defined($version = $module->VERSION())) { 
+     if (defined($version = $module->VERSION())) {
          debug "[VERSION] $module: $version";
      }
 }
- 
+
 sub set_debug {
     my ($debug)=@_;
     if($debug =~ /\// && -f $debug) {
@@ -618,10 +618,10 @@ sub studentids_string {
 }
 
 sub __($) { return($localisation->get(shift)); }
-sub __p($) { 
+sub __p($) {
     my $str=$localisation->get(shift);
     $str =~ s/\s+\[.*\]\s*$//;
-    return($str); 
+    return($str);
 }
 
 ### modeles combobox
