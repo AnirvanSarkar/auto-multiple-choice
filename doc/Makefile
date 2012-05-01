@@ -27,7 +27,7 @@ IMAGES=$(addprefix html/images/,$(notdir $(wildcard img_src/*.svg))) $(addprefix
 
 MODELS=$(wildcard modeles/*/*.d)
 
-all: $(filter-out %.ja.pdf,$(DOCBOOKS:.xml=.pdf)) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz);
+all: $(filter-out %.ja.pdf,$(DOCBOOKS:.xml=.pdf)) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz) html/index.html;
 
 images: $(IMAGES:.svg=.png)
 
@@ -44,6 +44,9 @@ html/images/callouts/%.png: img_src/callouts/%.svg
 
 html/images/%.png: img_src/%.svg
 	rsvg-convert -w 24 -h 24 $< -o $@
+
+html/index.html: FORCE
+	./index.pl $(DOCBOOKS:.xml=) > $@
 
 %.tex: %.xml
 	dblatex -t tex --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
@@ -74,4 +77,6 @@ html/images/%.png: img_src/%.svg
 %.tgz: %.d
 	tar czf $@ -C $< .
 
-.PHONY: all images clean
+FORCE: ;
+
+.PHONY: FORCE all images clean
