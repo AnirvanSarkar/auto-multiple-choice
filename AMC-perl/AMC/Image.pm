@@ -38,20 +38,22 @@ sub new {
     }
 
     if(! $self->{'traitement'}) {
-	if($self->{'mode'} eq 'auto') {
-	    if(-f amc_specdir('lib').'/AMC-detect') {
-		$self->{'mode'}='opencv';
-	    } else {
-		$self->{'mode'}='manual';
-	    }
-	}
-	if($self->{'mode'} eq 'opencv') {
-	    $self->{'traitement'}=amc_specdir('lib').'/AMC-detect';
-	} elsif($self->{'mode'} eq 'manual') {
-	    $self->{'traitement'}=amc_specdir('lib').'/AMC-traitement-image';
+      if($self->{'mode'} eq 'auto') {
+	if(-f amc_specdir('libexec').'/AMC-detect') {
+	  $self->{'mode'}='opencv';
 	} else {
-	    die "AMC::Image: No program to execute";
+	  $self->{'mode'}='manual';
 	}
+      }
+      if($self->{'mode'} eq 'opencv') {
+	$self->{'traitement'}=amc_specdir('libexec').'/AMC-detect';
+      } elsif($self->{'mode'} eq 'manual') {
+	$self->{'traitement'}=amc_specdir('libexec').'/AMC-traitement-image';
+      }
+    }
+
+    if(! -f $self->{'traitement'}) {
+      die "AMC::Image: No program to execute";
     }
 
     bless $self;
