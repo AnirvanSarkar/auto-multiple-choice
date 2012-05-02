@@ -21,6 +21,8 @@
 use AMC::Test;
 
 AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
+	       'bw_threshold'=>0.4,
+	       'seuil'=>0.5,
 	       'grain'=>0.6,
 	       'perfect_copy'=>'',
 	       'export_full_csv'=>

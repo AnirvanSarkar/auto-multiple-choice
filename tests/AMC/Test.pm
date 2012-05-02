@@ -57,6 +57,7 @@ sub new {
      'debug'=>0,
      'scans'=>'',
      'seuil'=>0.5,
+     'bw_threshold'=>0.6,
      'tol_marque'=>0.4,
      'rounding'=>'i',
      'grain'=>0.01,
@@ -287,6 +288,7 @@ sub analyse {
 
   $self->amc_command('analyse',
 		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
+		     '--bw-threshold',$self->{'bw_threshold'},
 		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
 		     '--projet','%PROJ',
@@ -296,6 +298,7 @@ sub analyse {
 		     ) if($self->{'debug'});
   $self->amc_command('analyse',
 		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
+		     '--bw-threshold',$self->{'bw_threshold'},
 		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
 		     '--projet','%PROJ',
