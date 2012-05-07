@@ -61,7 +61,7 @@ list:
 	grep -lr __ $(AMC) |grep '\.\(pl\|pm\)$$' | grep -v 'debian' ; ls $(GLADE)
 
 %.merge: $(DOMAIN).pot
-	msgmerge -U lang/$*.po $(DOMAIN).pot
+	msgmerge --no-wrap -U lang/$*.po $(DOMAIN).pot
 
 merge: $(addsuffix .merge,$(LANGS)) ;
 
