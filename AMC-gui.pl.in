@@ -5658,10 +5658,8 @@ sub valide_projet {
 
     transmet_pref($gui,'notation',$projet{'options'});
 
-    my $t=$w{'main_window'}->get_title();
-    $t.= ' - '.sprintf(__('project %s'),$projet{'nom'})
-        if(!($t =~ s/-.*/- projet $projet{'nom'}/));
-    $w{'main_window'}->set_title($t);
+    $w{'main_window'}->set_title($projet{'nom'}.' - '.
+				 'Auto Multiple Choice');
 
     noter_resultat();
 
