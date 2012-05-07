@@ -258,7 +258,7 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice
+	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty
 	-sudo rm -r /usr/lib/AMC
 
 local: global
@@ -267,6 +267,7 @@ local: global
 	test -d /usr/lib/AMC/perl || sudo mkdir -p /usr/lib/AMC/perl
 	test -d /usr/lib/AMC/exec || sudo mkdir -p /usr/lib/AMC/exec
 	test -d /usr/share/auto-multiple-choice  || sudo mkdir -p /usr/share/auto-multiple-choice
+	test -d $(TEXDIR) || sudo mkdir $(TEXDIR)
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/exec/AMC-traitement-image
 	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/exec/AMC-detect
@@ -276,6 +277,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice.desktop $(DESKTOPDIR)/auto-multiple-choice.desktop
 	sudo ln -s $(LOCALDIR)/doc/modeles $(MODELSDIR)
+	sudo ln -s $(LOCALDIR)/$(STY) $(TEXDIR)/automultiplechoice.sty
 
 ifdef DEBSIGN_KEY
 DEBSIGN=-k$(DEBSIGN_KEY)
