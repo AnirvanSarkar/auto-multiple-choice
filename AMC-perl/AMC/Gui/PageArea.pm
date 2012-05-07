@@ -42,6 +42,7 @@ sub add_feuille {
 
     $self->{'case'}='';
     $self->{'coches'}='';
+    $self->{'editable'}=1;
 
     $self->{'font'}=Pango::FontDescription->from_string("128");
 
@@ -117,6 +118,10 @@ sub modif {
 
 sub choix {
   my ($self,$event)=(@_);
+
+  if(!$self->{'editable'}) {
+    return TRUE;
+  }
 
   if($self->{'layinfo'}->{'block_message'}) {
     my $dialog = Gtk2::MessageDialog

@@ -103,6 +103,9 @@ sub new {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
+    $self->{'general'}->set_title(__"Page layout")
+      if(!$self->{'editable'});
+
     $self->{'button_photocopy'}->hide() if(!$self->{'multiple'});
 
     if(!$self->{'editable'}) {
@@ -113,8 +116,10 @@ sub new {
 
     $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
 
-    AMC::Gui::PageArea::add_feuille($self->{'area'},'',
-	'marks'=>($self->{'editable'} ? '' : 'blue'));
+    AMC::Gui::PageArea::add_feuille
+	($self->{'area'},'',
+	 'editable'=>$self->{'editable'},
+	 'marks'=>($self->{'editable'} ? '' : 'blue'));
 
     ### modele DIAGNOSTIQUE SAISIE
 
