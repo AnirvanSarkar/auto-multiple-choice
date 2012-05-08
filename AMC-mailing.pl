@@ -168,12 +168,12 @@ STUDENT: for my $i (@$r) {
 			      content_type => "application/pdf",
 			      encoding     => "base64",
 			      name         => "corrected.pdf",
+			      disposition  => "attachment",
 			     },
 			     body => $body,
 			    ),
 	 Email::MIME->create(attributes=>
 			     {content_type => "text/plain",
-			      disposition  => "attachment",
 			      encoding     => "base64",
 			      charset      => "UTF-8",
 			     },
