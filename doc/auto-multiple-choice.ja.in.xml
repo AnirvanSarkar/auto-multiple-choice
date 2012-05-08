@@ -10,7 +10,7 @@
     <subtitle>自動採点と評定の可能な選択式試験問題のデザイン</subtitle>
 
     <abstract>
-      <para>AMCは、プレーンテキストあるいはLaTeXで記述された選択式試験問題を使用して、答案用紙のスキャンデータから自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@）</para>
+      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1054）</para>
 
       <para>AMCプロジェクトは<ulink
       url="http://gna.org/">Gna!</ulink>によってホスティングされています。AMCウェブサイトは<ulink url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>にあり、プロジェクトがホスティングされているサイトは<ulink url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>です。</para>
@@ -48,6 +48,14 @@
       <firstname>Georges</firstname>
 
       <contrib>フランス語版から英語版への翻訳</contrib>
+    </othercredit>
+
+    <othercredit class="translator">
+      <surname>Kagotani</surname>
+
+      <firstname>Hiroto</firstname>
+
+      <contrib>英語版から日本語版への翻訳</contrib>
     </othercredit>
 
     <legalnotice>
@@ -291,8 +299,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Columns:</term>
 
           <listitem>
-            <para>正の整数値<replaceable>n</replaceable>を与えると、設問の選択肢が<replaceable>n</replaceable>カラムで作成されます。<!--訳注: 英文ではsubjectがnカラムになっている-->
-            </para>
+            <para>正の整数値<replaceable>n</replaceable>を与えると、試験問題全体が<replaceable>n</replaceable>カラムで作成されます。</para>
           </listitem>
         </varlistentry>
 
@@ -540,6 +547,19 @@ Presentation: 以下の設問に最も適切な解答を
 + 1898年
 - 1892年
 - 1902年</programlisting>
+
+      <para>空行があると改行が挿入されます:</para>
+
+      <programlisting>Presentation: タイトル
+
+試験の説明。
+
+** 難問です。
+
+空には星が何個ありますか？
+- 1個
+- 2個
+- 何千万個も</programlisting>
     </sect2>
 
     <sect2 id="txt-arabic">
@@ -643,7 +663,7 @@ DESC: 単一選択問題1件と複数選択問題1件からなる単純な例（
 %%% ヘッダー終了
 
 \begin{question}{総理大臣}    <co id="simple.qr" linkends="simple.qr.exp"/>
-  次のうち、日本の総理大臣をしたことがある人を一人選びなさい。
+  次のうち、日本の総理大臣になったことがある人を一人選びなさい。
   \begin{choices}
     \correctchoice{大隈重信}
     \wrongchoice{湯川秀樹}
@@ -673,7 +693,7 @@ DESC: 単一選択問題1件と複数選択問題1件からなる単純な例（
 
       <para><calloutlist>
           <callout arearefs="simple.latin1" id="simple.latin1.exp">
-            <para><package>inputenc</package>および<package>fontenc</package>パッケージにより、試験問題の文章にUTF-8エンコーディングを用いることができます（訳注: 英文、仏文ともISO-8859-1となっているが、おそらく誤り）。当然、利用したいエンコーディングに合わせて修正することができます。（訳注: 後述する最近の<command>platex</command>を使用する場合は、なくてもUTF-8で動作します。）</para>
+            <para><package>inputenc</package>および<package>fontenc</package>パッケージにより、試験問題の文章にUTF-8エンコーディングを用いることができます。当然、利用したいエンコーディングに合わせて修正することができます。（訳注: 日本語の試験問題において、後述する最近の<command>platex</command>を使用する場合は、なくてもUTF-8で動作します。）</para>
           </callout>
 
           <callout arearefs="simple.amc" id="simple.amc.exp">
@@ -701,7 +721,7 @@ DESC: 単一選択問題1件と複数選択問題1件からなる単純な例（
           </callout>
 
           <callout arearefs="simple.clear" id="simple.clear.exp">
-            <para><command>clearpage</command>は試験問題の次の実体を（両面印刷の場合でも（???訳注: 要確認））次の用紙から開始させるのに用います。
+            <para><command>clearpage</command>は試験問題の次の実体を次のページから開始させるのに用います。
             </para>
           </callout>
 
@@ -838,7 +858,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
 \element{general}{
   \begin{question}{総理大臣}
-    次のうち、日本の総理大臣をしたことがある人を一人選びなさい。
+    次のうち、日本の総理大臣になったことがある人を一人選びなさい。
     \begin{choices}
       \correctchoice{大隈重信}
       \wrongchoice{湯川秀樹}
@@ -1010,11 +1030,11 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
           </listitem>
 
           <listitem>
-            <para><option>catalog</option>: 将来の試験で組み合わせて使えるように設問のカタログを作成します。設問は番号ではなく識別名で区別されます（訳注: 仏文にしかない）。このレイアウトには<command>\onecopy</command>を使用する必要はありません。</para>
+            <para><option>catalog</option>: 将来の試験で組み合わせて使えるように設問のカタログを作成します。設問は番号ではなく識別名で区別されます<!-- 訳注: 仏文にしかない記述 -->。このレイアウトには<command>\onecopy</command>を使用する必要はありません。</para>
           </listitem>
 
           <listitem>
-            <para><option>postcorrect</option>: スキャンデータの解析を終えてから（採点時）、出題者が作成した答案用紙を正解として与えたい場合にこのオプションを用います。詳細は???（訳注: 原文ヌケ）を参照してください。</para>
+            <para><option>postcorrect</option>: スキャンデータの解析を終えてから（採点時）、出題者が作成した答案用紙を正解として与えたい場合にこのオプションを用います。詳細は<xref linkend="postcorrect"/>を参照してください。</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -1059,7 +1079,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
         <para>特定の設問について選択肢をシャフルせず順序を保つには、<option>choices</option>環境の<option>o</option>オプションを利用することができます。3行目を次のようにしてください:<programlisting>\begin{choices}[o]</programlisting></para>
 
-        <para>選択肢を2カラムに配置するには、<package>multicol</package>パッケージを使用できます。<programlisting>\usepackage{multicol}</programlisting>という行をプリアンブル部（<package>automultiplechoice</package>への参照の直後など）に置き、以下に示すようにchoices環境をmulticols環境の中に入れてください（訳注: 英文むちゃくちゃ。仏文より翻訳）:<programlisting>  \begin{multicols}{2}
+        <para>選択肢を2カラムに配置するには、<package>multicol</package>パッケージを使用できます。<programlisting>\usepackage{multicol}</programlisting>を用いてプリアンブル部（<package>automultiplechoice</package>への参照の直後など）でロードし、以下に示すようにmulticols環境の中にchoices環境を入れてください:<programlisting>  \begin{multicols}{2}
     \begin{choices}
       \correctchoice{正しい選択肢}
       \wrongchoice{誤った選択肢}
@@ -1334,21 +1354,165 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
       <sect3>
         <title>記述式設問</title>
 
-        <para>試験問題に記述式設問を加えたい場合があるかもしれません。一つの方法は、そういった設問のマーク用ボックスを採点者用に予約しておくことです。試験実施後、記入された答案を読んで、採点者が評価に該当するボックスにマークをつけます。そして答案をスキャンしてAMCで採点すれば、その点数を得点に組み入れることができます。<programlisting>\begin{questionmult}{記述}
-  \emph{インフレーション}について説明せよ。
-  \hfill
-  \AMCnoCompleteMulti
-  \def\AMCbeginAnswer{}\def\AMCendAnswer{}
-  \def\AMCanswer#1#2{#1\hspace{2mm}} % （訳注: この記述は \element 内でないと使えない。\onecopy に直接入れるとなぜかエラー。）
-  \fcolorbox{white}{lightgray}{
-    \begin{choicescustom}[o]\scoring{b=.5}
-      \correctchoice{}\correctchoice{}\correctchoice{}\correctchoice{}
-    \end{choicescustom}
-    ここには何も記入しないこと
-  }\par\vspace{1ex}
-  \noindent\fbox{\begin{minipage}{\linewidth}~\vspace*{4cm}\end{minipage}}
-\end{questionmult}
-</programlisting><!--\bareme使ってた--></para>
+        <para>試験問題に記述式設問を加えたい場合があるかもしれません。一つの方法は、そういった設問のマーク用ボックスを採点者用に予約しておくことです。試験実施後、記入された答案を読んで、採点者が評価に該当するボックスにマークをつけます。そして答案をスキャンしてAMCで採点すれば、その点数を得点に組み入れることができます。<programlisting>\begin{question}{記述}
+  \emph{インフレーション}の定義を述べよ。
+  \AMCOpen{lines=5}{\wrongchoice[W]{誤}\scoring{0}\wrongchoice[P]{部}\scoring{1}\correctchoice[C]{正}\scoring{2}}
+\end{question}
+</programlisting></para>
+
+        <para>この例では、採点用にボックスが3個作成されます。最初の（誤りの「誤」のラベルのついた）ボックスをマークすると、受験者は0点を獲得します。2番目の（部分点の「部」のラベルのついた）ボックスをマークすると、受験者は1点を獲得します。3番目の（正解の「正」のラベルのついた）ボックスをマークすると、受験者は2点を獲得します。</para>
+
+        <para><command>\AMCOpen</command>の最初の引数はカンマで区切ったオプションです。使用できるオプションは次のとおりです:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>lineup=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para><code>true</code>なら、解答欄と採点用ボックスを同じ行に並べます。<code>false</code>（デフォルト）なら、解答欄を枠で囲み、採点用ボックスの下に配置します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>lines=<replaceable>num</replaceable></term>
+
+            <listitem>
+              <para>解答の行数を設定します。デフォルト値は<code>1</code>です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>lineheight=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>各行の高さを設定します。デフォルト値は<code>1cm</code>です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>dots=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para><code>true</code>（デフォルト）なら、各行に点線を引きます。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>hspace=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>採点用ボックスの間隔を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>backgroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>採点領域の背景色を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>foregroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>採点用ボックスの枠の色を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>scan=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para><code>false</code>なら、採点用ボックスをスキャンしません（これは、この設問のみ手動マーク認識して、受験者がボックスに何を記入しても無視したい場合に便利です）。デフォルトは<code>true</code>です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>annotate=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para><code>false</code>（デフォルト）なら、答案に採点記入する際、ボックスに記号をつけません（素点のみ記入されます）。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>question=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para>採点者が設問を識別しやすくするための短いテキストを設定します。このテキストは、別紙答案用紙を用いる場合のみ、採点用ボックスの前に記載されます。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>answer=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para>模範解答用紙の解答欄に記入される短いテキストを設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>width=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para><code>lineup=false</code>のときの、解答欄を囲む枠の幅を設定します。デフォルト値は<code>.95\linewidth</code>です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>framerule=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>解答欄を囲む枠の線幅を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>framerulecol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>解答欄を囲む枠の色を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>boxmargin=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>採点用ボックスの周囲の余白を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>boxframerule=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>採点用ボックスの周囲枠の線幅を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>boxframerulecol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>採点用ボックスの周囲枠の色を設定します。</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>これらのパラメータの（試験全体での）デフォルト値は、次のようにして<command>\AMCopenOpts</command>コマンドで設定できます</para>
+
+        <programlisting>\AMCopenOpts{boxframerule=2pt,boxframerulecol=red}</programlisting>
+
+        <para>さらに、<command>\AMCotextReserved</command>コマンドを次のように再定義すると、受験者にマークしないように指示するテキストを採点領域に書くことができます:</para>
+
+        <programlisting>\def\AMCotextReserved{\emph{この欄には記入しないこと}}</programlisting>
+
+        <para>別紙答案用紙を用いている場合は、各設問に付け加えるテキストを次のように定義できます:</para>
+
+        <programlisting>\def\AMCotextGoto{\par{\bf\emph{解答は別紙答案用紙に記入してください。}}}</programlisting>
       </sect3>
 
       <sect3>
@@ -1391,7 +1555,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
         <programlisting>\setcounter{figure}{0}</programlisting>
 
-        <para>を挿入して、図の番号がどの実体でも1から始まるようにすることです。これを行わないと、実体ごとに番号が増加してしまい、それは目的の動作ではありません。</para>
+        <para>を挿入して、図の番号がどの実体でも1から始まるようにすることです。これを行わないと、実体ごとに番号が増加してしまい、意図した動作ではなくなってしまいます。</para>
       </sect3>
 
       <sect3>
@@ -1401,15 +1565,15 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
         <itemizedlist>
           <listitem>
-            <para><code>\AMCtext{none}{<replaceable>sentence</replaceable>}</code> は、<option>completemulti</option>オプションを使用した場合の&laquo;該当なし。&raquo;（日本語でのデフォルトテキスト）を、与えられた<replaceable>sentence</replaceable>に置換します。</para>
+            <para><code>\AMCtext{none}{<replaceable>sentence</replaceable>}</code> は、<option>completemulti</option>オプションを使用した場合の「該当なし。」（日本語でのデフォルトテキスト）を、与えられた<replaceable>sentence</replaceable>に置換します。</para>
           </listitem>
 
           <listitem>
-            <para><code>\AMCtext{corrected}{<replaceable>title</replaceable>}</code> は、模範解答用紙に表示される&laquo;模範解答&raquo;（日本語でのデフォルトテキスト）を、与えられた<replaceable>title</replaceable>に置換します。</para>
+            <para><code>\AMCtext{corrected}{<replaceable>title</replaceable>}</code> は、模範解答用紙に表示される「模範解答」（日本語でのデフォルトテキスト）を、与えられた<replaceable>title</replaceable>に置換します。</para>
           </listitem>
 
           <listitem>
-            <para><code>\AMCtext{catalog}{<replaceable>title</replaceable>}</code> は、<option>catalog</option>オプションで生成される設問カタログに表示される&laquo;設問カタログ&raquo;（日本語でのデフォルトテキスト）を、与えられた<replaceable>title</replaceable>に置換します。</para>
+            <para><code>\AMCtext{catalog}{<replaceable>title</replaceable>}</code> は、<option>catalog</option>オプションで生成される設問カタログに表示される「設問カタログ」（日本語でのデフォルトテキスト）を、与えられた<replaceable>title</replaceable>に置換します。</para>
           </listitem>
 
           <listitem>
@@ -1467,9 +1631,9 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
           </calloutlist>変数名のVQは他のLaTeXコマンドと干渉しないように選んであります。</para>
 
         <sect4 id="latex.intervals">
-          <title>Choosing an interval</title>
+          <title>区間の選択</title>
 
-          <para><command>automultiplechoice</command>パッケージは、さらに、この種の選択肢の構築が次の例のように容易になるように<command>\AMCIntervals</command>コマンドを定義しています:<programlisting>\begin{question}{inf-expo-indep}
+          <para><command>automultiplechoice</command>パッケージは、さらに、この種の設問の作成が容易になるように<command>\AMCIntervals</command>コマンドを定義しています。以下に例を示します:<programlisting>\begin{question}{inf-expo-indep}
   \FPeval\VQa{trunc(2 + random * 4,0)}
   \FPeval\VQb{trunc(6 + random * 5,0)}
   \FPeval\VQr{VQa/(VQa+VQb)}
@@ -1482,7 +1646,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
               linkends="choix.intervalles.exp"/>
     \end{choices}
   \end{multicols}
-\end{question}</programlisting>（訳注: \mathbbにamsfontsが必要）</para>
+\end{question}</programlisting>（訳注: \mathbbを使用するにはamsfontsパッケージが必要です。）</para>
 
           <calloutlist>
 	    <callout arearefs="choix.intervalles" id="choix.intervalles.exp">
@@ -1523,7 +1687,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 	  <programlisting>\begin{questionmultx}{sqrt}
   \FPeval\VQa{trunc(5+random*15,0)}
   \FPeval\VQs{VQa^0.5}
-  $\sqrt{\VQa}$ 計算して、小数点以下2桁で丸めよ。
+  $\sqrt{\VQa}$ を計算して、小数点以下2桁で丸めよ。
 
   \AMCnumericChoices{\VQs}{digits=3,decimals=2,sign=true,
                  borderwidth=0pt,backgroundcol=lightgray,approx=5}
@@ -1551,6 +1715,14 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
             </varlistentry>
 
             <varlistentry>
+              <term>base=<replaceable>num</replaceable></term>
+
+              <listitem>
+                <para>は、数字の基数（進法）（デフォルトは10）を指定します。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
               <term>sign=<replaceable>bool</replaceable></term>
 
               <listitem>
@@ -1563,6 +1735,36 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
               <listitem>
                 <para>が<code>true</code>なら、符号とすべての桁のボックスがマークされなければなりません。<code>false</code>なら、マークしていない桁は0として扱います。デフォルトは<code>false</code>です。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>vertical=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>が<code>true</code>なら、1桁分のボックスを縦に配置します。<code>false</code>（デフォルト）なら、1桁分のボックスを横に配置します。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>reverse=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>が<code>true</code>なら、<code>vertical</code>モードにおいて、大きい数字を上に配置します（デフォルトは<code>true</code>）。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>vhead=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>が<code>true</code>なら、<code>vertical</code>モードにおいて、各桁の上部に<command>\AMCntextVHead</command>コマンドを使用して作成されるヘッダーを置きます。<command>\AMCntextVHead</command>はもともと次のように定義されています。</para>
+
+                <programlisting>\def\AMCntextVHead#1{\emph{b#1}}</programlisting>
+
+                <para>このデフォルト値は、2進数の桁に番号をつけるのに便利です。</para>
+
+                <para>デフォルト値は<code>false</code>です。</para>
               </listitem>
             </varlistentry>
 
@@ -1655,7 +1857,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
             </varlistentry>
           </variablelist>
 
-          <para><command>\AMCnumericOpts</command>コマンドを使えば、これらのパラメータに対して、他のデフォルト値を設定することができます:</para>
+          <para><command>\AMCnumericOpts</command>コマンドを使えば、これらのパラメータに対して、（試験全体用の）デフォルト値を別の値に設定することができます:</para>
 
           <programlisting>\AMCnumericOpts{scoreexact=3,borderwidth=2pt}</programlisting>
 
@@ -1754,7 +1956,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
       <sect3>
         <title>LuaLaTeXの使用</title>
 
-        <para><command>lualatex</command>コマンドを用いれば、LaTeX文書内でLUA言語を使用できます。これを用いる場合は、文書はUTF-8でエンコードされている必要があり、<package>inputenc</package>パッケージはロードできません。これに関する情報は <ulink url="???">http://www.luatex.org/documentation.html</ulink> を参照してください。（訳注: 英文もurl="???"。仏文はctanのpdfを指している）</para>
+        <para><command>lualatex</command>コマンドを用いれば、LaTeX文書内でLUA言語を使用できます。これを用いる場合は、文書はUTF-8でエンコードされている必要があり、<package>inputenc</package>パッケージはロードできません。これに関する情報は <ulink url="http://www.luatex.org/documentation.html">http://www.luatex.org/documentation.html</ulink> を参照してください。</para>
 
         <para>LUAのコマンドは、<command>\directlua</command>の引数として与えます。最も便利なLUA関数は<command>tex.print</command>で、結果をLaTeXに戻して出力します。</para>
 
@@ -1830,7 +2032,7 @@ Name :
           <guimenu>プロジェクト</guimenu>
 
           <guimenuitem>新規</guimenuitem>
-        </menuchoice>を選んで、プロジェクトを作成しましょう。ウィンドウが開いて、既存のプロジェクトがあればその一覧が表示され、これから作成するプロジェクトの名前（単純な文字で。今回のテスト用に &laquo;test&raquo; でもOKです）を<guilabel>プロジェクト名</guilabel>欄に記入することができます。そして、<guibutton>新規プロジェクト</guibutton>ボタンを押します。</para>
+        </menuchoice>を選んで、プロジェクトを作成しましょう。ウィンドウが開いて、既存のプロジェクトがあればその一覧が表示され、これから作成するプロジェクトの名前（単純な文字で。今回のテスト用に「test」でもOKです）を<guilabel>プロジェクト名</guilabel>欄に記入することができます。そして、<guibutton>新規プロジェクト</guibutton>ボタンを押します。</para>
 
       <para>ここで、選択式試験問題用のAMC-TXTファイルあるいはLaTeXソースファイルを選ばなければなりません。オプションがいくつか示されます:</para>
 
@@ -1862,23 +2064,17 @@ Name :
 
       <itemizedlist>
         <listitem>
-          <para><emphasis>問題</emphasis>: このファイルはそのまま印刷して受験者に配布することができます（下記参照）。</para>
+          <para><emphasis>試験問題</emphasis>: このファイルはそのまま印刷して受験者に配布することができます（下記参照）。</para>
         </listitem>
 
         <listitem>
           <para><emphasis>解答</emphasis>: 試験問題に間違いがないかどうかチェックすることができます。受験者に配布することもできます。</para>
         </listitem>
-
-        <listitem>
-          <para>The <emphasis>adjustment</emphasis> document. It contains
-          information to locate framing marks, checkboxes, and also the area
-          where students write their names are drawn on all the pages. （訳注: GUI的にはobsolete）</para>
-        </listitem>
       </itemizedlist>
 
-      <para>これらが作成されると、これらの文書は対応するボタンをクリックして表示（そして必要なら印刷）することができます。（訳注: 英文double-clockはobsolete）</para>
+      <para>これらの文書が作成されると、対応するボタンをクリックして表示（そして必要なら印刷）することができます。</para>
 
-      <para>以上で、試験問題作成の最後のステップを始められます。レイアウト文書の解析です。これは、（訳注: Layout検出「セクション」はなくなった）<guibutton>レイアウト検出</guibutton>ボタンをクリックすることにより起動されます。この解析処理は、試験問題の各ページにおいて、受験者の答案用紙で解析しなければならない全要素の正確な位置を検出します。</para>
+      <para>以上で、試験問題作成の最後のステップを始められます。レイアウトの解析です。これは、<guibutton>レイアウト検出</guibutton>ボタンをクリックすることにより起動されます。この解析処理は、試験問題の各ページにおいて、受験者の答案用紙で解析しなければならない全要素の正確な位置を検出します。</para>
 
     <para>レイアウトが正しく検出されているか検証するには、<guibutton>レイアウト確認</guibutton>ボタンを使います。結果をさっと見て、試験問題の各ボックス上に赤いチェックボックスが正しく乗っているかを調べます。</para>
     </sect2>
@@ -1929,7 +2125,7 @@ Name :
           <para>スキャンデータを使って最初に自動マーク認識を行う際は、個別答案用紙かコピー答案用紙のどちらの方法を使うかAMCに通知します（<xref endterm="printing.title" linkend="printing"/>参照）。</para>
         </note>
 
-        <para>そして、「<guilabel>試験実施後のマーク認識</guilabel>」セクションの<guilabel>自動</guilabel>ボタンで開いたダイアログから、スキャンデータファイルをすべて選択したのち、このダイアログの<guibutton>続行</guibutton>（訳注: Useとかない）ボタンで開始します。ここでコーヒーブレークです。答案の解析には非常に時間がかかるためです（インタラクションは不要なので、無言で実行されます）。</para>
+        <para>そして、「<guilabel>試験実施後のマーク認識</guilabel>」セクションの<guilabel>自動</guilabel>ボタンで開いたダイアログから、スキャンデータファイルをすべて選択したのち、このダイアログの<guibutton>OK</guibutton>ボタンで開始します。AMCは光学マーク認識を開始して、四隅のマーカー位置を検出し、ボックスの位置を決定して、各ボックスの黒ピクセルの量を検出します。</para>
 
         <para>各ページの解析結果は<guilabel>診断</guilabel>セクションのリストに表示されます:</para>
 
@@ -2231,8 +2427,7 @@ Name :
           </tgroup>
         </informaltable>
 
-        <para>単一選択問題でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0</code>で、正解には1点、そうでなければ0点を与えます。複数選択問題
-でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0,p=-100,d=0</code>で、マーク有無の正しい選択肢ごとに1点を与えます（正しいボックスをマークした場合と、誤ったボックスをマークしなかった場合）。</para>
+        <para>単一選択問題でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0</code>で、正解には1点、そうでなければ0点を与えます。複数選択問題でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0,p=-100,d=0</code>で、マーク有無の正しい選択肢ごとに1点を与えます（正しいボックスをマークした場合と、誤ったボックスをマークしなかった場合）。</para>
 
         <para>LaTeXの<command>\scoring</command>コマンドは、設問定義の外側で用いて、試験全体のパラメータを変更することもできます。</para>
 
@@ -2465,7 +2660,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 	   <para>CSVファイルであれば適合するはずです。</para>
         </note>
 
-        <para>準備した受験者名簿は<guibutton>受験者名簿</guibutton><!--（訳注: 英文はguilabel）-->ボタンにより選択します。そして受験者名簿の中でユニークなキーとなるカラム（一般には、受験番号を格納するカラム）を一つ選ばなければなりません。最後に、自動リンクの準備として、（使用した場合には）LaTeXの<command>AMCcode</command>コマンドで使用した関連するコード名を選びます。</para>
+        <para>準備した受験者名簿は<guilabel>受験者識別</guilabel>セクションの<guibutton>ファイル登録</guibutton>ボタンにより選択します。そして受験者名簿の中でユニークなキーとなるカラム（一般には、受験番号を格納するカラム）を一つ選ばなければなりません。最後に、自動リンクの準備として、（使用した場合には）LaTeXの<command>AMCcode</command>コマンドで使用した関連するコード名を選びます。</para>
       </sect3>
 
       <sect3>
@@ -2632,9 +2827,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         </varlistentry>
       </variablelist>
 
-      <para>この処理は各ページに行われ、JPG形式の採点記入済のページが得られます。</para>
-
-      <para>採点記入済の答案を電子的な形式で受験者に配布したい場合は、各受験者ごとに、JPGの採点記入済ページからPDFファイルを作成すると便利です。これは、<guibutton>グループ化</guibutton><!--（訳注: 英文もGroupボタンで古いまま。どう変更すればいい？）-->ボタンを押すことで行います。受験者の答案を格納するPDFファイル名は、<guilabel>ファイル名テンプレート</guilabel>フィールドで指示したテンプレートによって決められます。テンプレートでは、&laquo;(<replaceable>col</replaceable>)&raquo; は受験者名簿内の<replaceable>COL</replaceable>の値に置換されます（<xref endterm="liste.etudiants.title" linkend="liste.etudiants"/>参照）。このフィールドを空にすると、試験問題番号と受験者名からなるデフォルト値が使用されます。</para>
+      <para>この処理は各ページに行われ、PDF形式の採点記入済の答案用紙が得られます。受験者の答案を格納するPDFファイル名は、<guilabel>ファイル名テンプレート</guilabel>フィールドで指示したテンプレートによって決められます。テンプレートでは、「(<replaceable>col</replaceable>)」は受験者名簿内の<replaceable>COL</replaceable>の値に置換されます（<xref endterm="liste.etudiants.title" linkend="liste.etudiants"/>参照）。このフィールドを空にすると、試験問題番号と受験者名<!-- 訳注: 英文は student's name and student number -->からなるデフォルト値が使用されます。</para>
     </sect2>
   </sect1>
 
@@ -2712,7 +2905,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <para>このLaTeXファイルから、印刷してから受験生全員分をコピーする（試験問題番号0の）試験問題用紙1部と、（各受験生に1部の）複数の答案用紙が得られます。</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="postcorrect">
       <title>採点時正解提示</title>
 
       <para>単一の汎用答案用紙を毎回の試験で使いたい場合を想定します。答案用紙には単純にマーク用ボックスだけを（例えば40問、各設問に5個）印刷し、問題は別のどこかに書いて受験者に提示します。ここでのポイントは、正しい選択肢はLaTeXファイルに明示されておらず、そのためAMCはそれがどれかわかりません。この解決方法は、出題者に答案用紙を渡して正しい選択肢をマークしてもらうことです。そうすれば、スキャンをしてAMCでマーク認識をしたあと、AMCにどれが出題者の記入した答案用紙かを教えるだけです。</para>
@@ -2925,11 +3118,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <arg choice="plain">--mode b</arg>
 
-          <arg choice="plain">--bareme
-          <replaceable>scoring.xml</replaceable></arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
           <arg choice="plain"><replaceable>mcq-source-file</replaceable></arg>
-        </cmdsynopsis><para>訳注: 後者の --bareme 付近はおそらく誤り</para>
+        </cmdsynopsis>
       </refsynopsisdiv>
 
       <refsect1>
@@ -2981,18 +3174,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </listitem>
 
           <listitem>
-            <para>"<option>--mode b</option>" を用いると、<command>AMC-prepare.pl</command>は、LaTeXファイルに定義された採点基準を抽出して採点基準ファイルを作成します。このモードでは以下の引数を使用する必要があります:</para>
-
-            <variablelist>
-              <varlistentry>
-                <term><option>--data
-                <replaceable>project-data-dir</replaceable></option></term>
-
-                <listitem>
-                  <para>作成する採点基準ファイル名を設定します。（訳注: 本文おそらく誤り）</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
+            <para>"<option>--mode b</option>" を用いると、<command>AMC-prepare.pl</command>は、ソースファイルから採点基準を抽出します。このモードでは、<option>--data</option>オプション（下記参照）を使用しなければなりません。</para>
           </listitem>
         </itemizedlist>
 
@@ -3013,7 +3195,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <replaceable>filter</replaceable></option></term>
 
             <listitem>
-              <para>選択式試験問題のソースファイルをLaTeXファイルに変換するフィルター名を設定します。組込みのフィルターは<replaceable>latex</replaceable>（何も変換しない）と<replaceable>plain</replaceable>（AMC-TXTソース）です。（訳注: latex, plainが変数書体になっている）</para>
+              <para>選択式試験問題のソースファイルをLaTeXファイルに変換するフィルター名を設定します。組込みのフィルターは<code>latex</code>（何も変換しない）と<code>plain</code>（AMC-TXTソース）です。</para>
             </listitem>
           </varlistentry>
 
@@ -3291,7 +3473,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <refentrytitle>AMC-prepare</refentrytitle>
 
             <manvolnum>1</manvolnum>
-          </citerefentry>を呼び出して、作業文書（<option>--mode s</option>）とMEPファイル（<option>--mode m</option>）を作成しておかなければなりません。（訳注: --mode m は存在しない。AMC-meptex.plのことか？）</para>
+          </citerefentry>を呼び出して、作業文書（<option>--mode s</option>）とMEPファイル（<option>--mode m</option>）を作成し、<citerefentry>
+            <refentrytitle>AMC-meptex</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>を用いてレイアウトを処理しておかなければなりません。</para>
 
         <variablelist>
           <varlistentry>
@@ -3342,6 +3528,15 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
         <variablelist>
           <varlistentry>
+            <term><option>--prop
+            <replaceable>proportion</replaceable></option></term>
+
+            <listitem>
+              <para>各ボックスのマーク有無を判定する領域の比率を設定します。デフォルト値は0.8です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><option>--seuil-coche
             <replaceable>threshold</replaceable></option></term>
 
@@ -3351,12 +3546,45 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </varlistentry>
 
           <varlistentry>
+            <term><option>--bw-threshold
+            <replaceable>threshold</replaceable></option></term>
+
+            <listitem>
+              <para>このパラメータはグレースケールのスキャンデータを白黒に変換する際に使用されます。多くのピクセルを黒とするには、大きな値を使用します。多くのピクセルを白とするには、小さな値を使用します。閾値は0と1の間でなければなりません。デフォルト値は0.6です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--ignore-red</option></term>
+
+            <listitem>
+              <para>このオプションを用いると、カラースキャンデータの赤チャネルのみ使用されます。これにより、スキャンデータ上の赤色で記入されたものはすべて無視されます。ボックスが赤で印刷されている場合に有用です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><option>--tol-marque
             <replaceable>tol</replaceable></option></term>
 
             <listitem>
-              <para>スキャンデータの四隅にあるマーカーを検出する際の許容度を定義します。マーカーは、
-目標サイズ<replaceable>target</replaceable>（印刷とスキャンが完璧であった場合のマーカーの正確なサイズ）に<emphasis>近い</emphasis>サイズの、黒い連結領域を探すことで検出されます。<replaceable>tol</replaceable>が単純な実数の場合、サイズが近いと判断されるのは(1-<replaceable>tol</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tol</replaceable>)*<replaceable>target</replaceable> までの範囲です。<replaceable>tol</replaceable>が "<replaceable>tinf</replaceable>,<replaceable>tsup</replaceable>" の形式（<replaceable>tinf</replaceable>と<replaceable>tsup</replaceable>は実数）の場合は(1-<replaceable>tinf</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tsup</replaceable>)*<replaceable>target</replaceable> までの範囲です。標準値は0.2です。</para>
+              <para>スキャンデータの四隅にあるマーカーを検出する際の許容度を定義します。マーカーの検出には、目標サイズ<replaceable>target</replaceable>（印刷とスキャンが完璧であった場合のマーカーの正確なサイズ）に<emphasis>近い</emphasis>サイズの、黒い連結領域を探します。<replaceable>tol</replaceable>が単純な実数の場合、サイズが近いと判断されるのは(1-<replaceable>tol</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tol</replaceable>)*<replaceable>target</replaceable> までの範囲です。<replaceable>tol</replaceable>が "<replaceable>tinf</replaceable>,<replaceable>tsup</replaceable>" の形式（<replaceable>tinf</replaceable>と<replaceable>tsup</replaceable>は実数）の場合は(1-<replaceable>tinf</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tsup</replaceable>)*<replaceable>target</replaceable> までの範囲です。標準値は0.2です。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--multiple</option></term>
+
+            <listitem>
+              <para>このオプションは、試験問題をコピーした（つまり複数の受験者が同じ試験問題に解答しうる）場合に使用します。この場合、同じ試験問題番号をもつ答案用紙が区別できるように、答案用紙に<emphasis>複製</emphasis>番号が割り当てられます。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--pre-allocate
+            <replaceable>copy_id</replaceable></option></term>
+
+            <listitem>
+              <para>このオプションは<option>--multiple</option>と共に使用されます。スキャンごとの複製番号が<replaceable>copy_id</replaceable>から開始し、引数で与えたスキャンデータと同じ順序で割り当てられます。</para>
             </listitem>
           </varlistentry>
 
@@ -3560,10 +3788,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <refsect1>
         <title>解説</title>
 
-        <para>The <command>AMC-association-auto.pl</command> command reads
-        report from to associate students with their answer sheet (when there
-        are no errors from students when coding their student number and no
-        error during data capture). （訳注: 訳せない）。詳細はユーザードキュメントの<xref linkend="sec.students.id"/>を参照してください。</para>
+        <para><command>AMC-association-auto.pl</command> コマンドは、受験者と答案用紙をリンクします（受験者が受験番号を正しく記入し、マーク認識に誤りがない場合）。詳細はユーザードキュメントの<xref linkend="sec.students.id"/>を参照してください。</para>
 
         <variablelist>
           <varlistentry>
@@ -3602,7 +3827,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <replaceable>list-encoding</replaceable></option></term>
 
             <listitem>
-              <para>受験者名簿ファイルのエンコーディングを指定します（デフォルトはutf-8）。</para>
+              <para>受験者名簿ファイルのエンコーディング（デフォルトはutf-8）を指定します。</para>
             </listitem>
           </varlistentry>
 
@@ -3706,7 +3931,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <replaceable>list-encoding</replaceable></option></term>
 
             <listitem>
-              <para><replaceable>students-list.csv</replaceable>のエンコーディングを選択します（デフォルトはutf-8）。</para>
+              <para><replaceable>students-list.csv</replaceable>のエンコーディング（デフォルトはutf-8）を選択します。</para>
             </listitem>
           </varlistentry>
 
@@ -3772,6 +3997,30 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
                 <para>タブ名に使用される試験の略称を指定します。</para>
               </listitem>
             </varlistentry>
+
+            <varlistentry>
+              <term>columns</term>
+
+              <listitem>
+                <para>受験者ごとに追加するカラムのリストを設定します。デフォルト値は <code>student.key,student.name</code> です。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>stats</term>
+
+              <listitem>
+                <para>trueなら、設問の統計表が追加されます。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>statsindic</term>
+
+              <listitem>
+                <para>trueなら、採点対象外設問の統計表が追加されます。</para>
+              </listitem>
+            </varlistentry>
           </variablelist>
         </refsect2>
 
@@ -3782,10 +4031,18 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <variablelist>
             <varlistentry>
+              <term>columns</term>
+
+              <listitem>
+                <para>受験者ごとに追加するカラムのリストを設定します。デフォルト値は <code>student.copy,student.key,student.name</code> です。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
               <term>decimal</term>
 
               <listitem>
-                <para>小数点を設定します（デフォルトはピリオド）。</para>
+                <para>小数点（デフォルトはピリオド）を設定します。</para>
               </listitem>
             </varlistentry>
 
@@ -3793,7 +4050,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
               <term>encodage</term>
 
               <listitem>
-                <para>出力に用いるエンコーディングを設定します（デフォルトはutf-8）。</para>
+                <para>出力に用いるエンコーディング（デフォルトはutf-8）を設定します。</para>
               </listitem>
             </varlistentry>
 
@@ -3801,7 +4058,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
               <term>separateur</term>
 
               <listitem>
-                <para>カラム間の区切文字を設定します（デフォルトはカンマ）。</para>
+                <para>カラム間の区切文字（デフォルトはカンマ）を設定します。</para>
               </listitem>
             </varlistentry>
 
@@ -3809,7 +4066,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
               <term>entoure</term>
 
               <listitem>
-                <para>文字列を囲む文字を指定します（デフォルトは二重引用符）。</para>
+                <para>文字列を囲む文字（デフォルトは二重引用符）を指定します。</para>
               </listitem>
             </varlistentry>
 
@@ -3818,6 +4075,48 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
               <listitem>
                 <para>空でなければ、カラム（名前が "<literal>CHECKED:</literal>" で始まる）が追加され、各答案でどのボックスがマークされているか表示されます。これは、採点をもっと柔軟に行いたい場合に、外部プログラムがマークされたボックスの情報を得るのに使うことができます。ボックス3と4がマークされている場合、<literal>01</literal>という値を与えれば0;0;1;1;0となり、<literal>AB</literal>という値を与えればCDとなります。</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </refsect2>
+
+        <refsect2>
+          <title>List</title>
+
+          <para>With "<option>--module List</option>", a PDF file is produced
+          with a list of marks for all students. The following options are
+          recognized:</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>pagesize</term>
+
+              <listitem>
+                <para>ページサイズです。デフォルト値は <code>a4</code> です。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>nom</term>
+
+              <listitem>
+                <para>ページの先頭に表示する試験の名称を指定します。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>ncols</term>
+
+              <listitem>
+                <para>カラム数です。デフォルト値は2です。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>decimal</term>
+
+              <listitem>
+                <para>小数点（デフォルトはピリオド）を設定します。</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -3916,7 +4215,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <replaceable>encoding</replaceable></option></term>
 
             <listitem>
-              <para><replaceable>students-list.csv</replaceable>のエンコーディングを選択します（デフォルトはutf-8）。</para>
+              <para><replaceable>students-list.csv</replaceable>のエンコーディング（デフォルトはutf-8）を選択します。</para>
             </listitem>
           </varlistentry>
 
@@ -4178,7 +4477,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <replaceable>encoding</replaceable></option></term>
 
             <listitem>
-              <para><replaceable>students-list.csv</replaceable>のエンコーディングを選択します（デフォルトはutf-8）。</para>
+              <para><replaceable>students-list.csv</replaceable>のエンコーディング（デフォルトはutf-8）を選択します。</para>
             </listitem>
           </varlistentry>
 
@@ -4366,7 +4665,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <replaceable>encoding</replaceable></option></term>
 
             <listitem>
-              <para><replaceable>students-list.csv</replaceable>のエンコーディングを選択します（デフォルトはutf-8）。</para>
+              <para><replaceable>students-list.csv</replaceable>のエンコーディング（デフォルトはutf-8）を選択します。</para>
             </listitem>
           </varlistentry>
 
@@ -4411,7 +4710,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <replaceable>transport</replaceable></option></term>
 
             <listitem>
-              <para>転送方法を設定します。有効な<replaceable>transport</replaceable>は<constant>sendmail</constant>か<constant>SMTP</constant>です。</para>
+              <para>転送方法を設定します。有効な<replaceable>transport</replaceable>は<constant>sendmail</constant>と<constant>SMTP</constant>のいずれかです。</para>
             </listitem>
           </varlistentry>
 
@@ -4440,7 +4739,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
               <replaceable>path</replaceable></option></term>
 
               <listitem>
-                <para><command>sendmail</command>コマンドのパスを設定します（デフォルトは<filename>/usr/sbin/sendmail</filename>）。</para>
+                <para><command>sendmail</command>コマンドのパス（デフォルトは<filename>/usr/sbin/sendmail</filename>）を設定します。</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -4455,7 +4754,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
               <replaceable>host</replaceable></option></term>
 
               <listitem>
-                <para>SMTPホスト名を設定します（デフォルトは<constant>smtp</constant>）。</para>
+                <para>SMTPホスト名（デフォルトは<constant>smtp</constant>）を設定します。</para>
               </listitem>
             </varlistentry>
 
@@ -4464,7 +4763,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
               <replaceable>port</replaceable></option></term>
 
               <listitem>
-                <para>使用するポートを設定します（デフォルト値は25）。</para>
+                <para>使用するポート（デフォルト値は25）を設定します。</para>
               </listitem>
             </varlistentry>
           </variablelist>
