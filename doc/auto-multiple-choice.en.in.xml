@@ -4143,20 +4143,9 @@ student number &amp; class &amp; subject\\
 
           <listitem>
             <para>with "<option>--mode b</option>",
-            <command>AMC-prepare.pl</command> makes the scoring file
-            extracting the scoring strategy defined in the source LaTeX file.
-            In this mode, the following arguments must be used:</para>
-
-            <variablelist>
-              <varlistentry>
-                <term><option>--data
-                <replaceable>project-data-dir</replaceable></option></term>
-
-                <listitem>
-                  <para>sets the scoring file to create.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
+            <command>AMC-prepare.pl</command> extracts scoring data from the
+            source file. In this mode, the <option>--data</option> argument
+            must be used (see below).</para>
           </listitem>
         </itemizedlist>
 
@@ -4574,6 +4563,16 @@ student number &amp; class &amp; subject\\
 
         <variablelist>
           <varlistentry>
+            <term><option>--prop
+            <replaceable>proportion</replaceable></option></term>
+
+            <listitem>
+              <para>sets the proportion of each box that will be measured to
+              decide if the box is ticked or not. Default value is 0.8.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><option>--seuil-coche
             <replaceable>threshold</replaceable></option></term>
 
@@ -4590,6 +4589,30 @@ student number &amp; class &amp; subject\\
               in the data capture reports, so that this threshold value can be
               refined later without calling <command>AMC-analyse.pl</command>
               again.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--bw-threshold
+            <replaceable>threshold</replaceable></option></term>
+
+            <listitem>
+              <para>This parameter is used when converting the grayscale scan
+              file to black and white. To get more black pixels, use a greater
+              value. To get more white pixels, use a smaller value. The
+              threshold must be between 0 and 1. The default value is
+              0.6.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--ignore-red</option></term>
+
+            <listitem>
+              <para>With this option, only red channel will be used from color
+              scans. This way, all that is written in red will be ignored in
+              the scan. This can be usefull when the boxes are printed in
+              red.</para>
             </listitem>
           </varlistentry>
 
@@ -4618,6 +4641,30 @@ student number &amp; class &amp; subject\\
               and
               (1+<replaceable>tsup</replaceable>)*<replaceable>target</replaceable>.
               A standard value is 0.2.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--multiple</option></term>
+
+            <listitem>
+              <para>This option is to be used when the scans are photocopies
+              from some subjects (different students can have the same
+              subject). In thie case, <emphasis>copy</emphasis> numbers are
+              allocated to students so that their answer sheets, with the same
+              subject number, can be differenciated.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--pre-allocate
+            <replaceable>copy_id</replaceable></option></term>
+
+            <listitem>
+              <para>This option can be used in conjonction with
+              <option>--multiple</option>. The copy numbers used for the scans
+              will start from <replaceable>copy_id</replaceable>, in the same
+              order than the scans given as arguments.</para>
             </listitem>
           </varlistentry>
 
@@ -5087,6 +5134,34 @@ student number &amp; class &amp; subject\\
                 name.</para>
               </listitem>
             </varlistentry>
+
+            <varlistentry>
+              <term>columns</term>
+
+              <listitem>
+                <para>sets the list of columns that are to be added to each
+                student. Default value is
+                <code>student.key,student.name</code>.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>stats</term>
+
+              <listitem>
+                <para>with a true value, a table will be added with statistics
+                for all questions.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>statsindic</term>
+
+              <listitem>
+                <para>with a true value, a table will be added with statistics
+                for all indicative questions.</para>
+              </listitem>
+            </varlistentry>
           </variablelist>
         </refsect2>
 
@@ -5097,6 +5172,16 @@ student number &amp; class &amp; subject\\
           The following options are recognized:</para>
 
           <variablelist>
+            <varlistentry>
+              <term>columns</term>
+
+              <listitem>
+                <para>sets the list of columns that are to be added to each
+                student. Default value is
+                <code>student.copy,student.key,student.name</code>.</para>
+              </listitem>
+            </varlistentry>
+
             <varlistentry>
               <term>decimal</term>
 
@@ -5144,6 +5229,49 @@ student number &amp; class &amp; subject\\
                 0;0;1;1;0 if boxes 3 and 4 are checked, and value
                 <literal>AB</literal> to get CD if boxes 3 and 4 are
                 checked.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </refsect2>
+
+        <refsect2>
+          <title>List</title>
+
+          <para>With "<option>--module List</option>", a PDF file is produced
+          with a list of marks for all students. The following options are
+          recognized:</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>pagesize</term>
+
+              <listitem>
+                <para>The page size. Default value is <code>a4</code>.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>nom</term>
+
+              <listitem>
+                <para>gives the name of the exam, to be printed at the top of
+                the page.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>ncols</term>
+
+              <listitem>
+                <para>The number of columns. Default value is 2.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>decimal</term>
+
+              <listitem>
+                <para>sets the decimal point (default is a dot).</para>
               </listitem>
             </varlistentry>
           </variablelist>
