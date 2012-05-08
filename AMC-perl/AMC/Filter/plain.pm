@@ -302,7 +302,8 @@ sub format_question {
   my $ct=($q->{'horiz'} ? 'horiz' : '');
 
   my $t='';
-  $t.="\\begin{arab}" if($self->{'options'}->{'arabic'});
+  $t.="\\begin{arab}"
+    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
   $t.='\\begin{question'.$mult.'}{'.$qid."}";
   $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
   $t.="\n";
@@ -317,7 +318,8 @@ sub format_question {
   $t.="\\end{multicols}\n"
     if($q->{'columns'}>1);
   $t.="\\end{question".$mult."}";
-  $t.="\\end{arab}" if($self->{'options'}->{'arabic'});
+  $t.="\\end{arab}"
+    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
   $t.="\n";
   return($t);
 }
@@ -328,6 +330,24 @@ sub group_name {
     $group->{'name'}="group".chr(ord("A")+($self->{'group_number'}++));
   }
   return($group->{'name'});
+}
+
+sub bidi_year {
+  my ($self)=@_;
+  if(!$self->{'bidiyear'}) {
+    my $f=find_latex_file("bidi.sty");
+    if(-f $f) {
+      open(BIDI,$f);
+    BIDLIG: while(<BIDI>) {
+	if(/\\bididate\{([0-9]+)\//) {
+	  $self->{'bidiyear'}=$1;
+	  last BIDLIG;
+	}
+      }
+      close(BIDI);
+    }
+  }
+  return($self->{'bidiyear'});
 }
 
 sub file_header {
@@ -346,13 +366,20 @@ sub file_header {
   my $po='';
   $po='['.join(',',@package_options).']' if(@package_options);
 
+  if($self->{'options'}->{'arabic'}) {
+    $t.="% bidi YEAR ".$self->bidi_year()."\n";
+  }
+
   $t .= "\\documentclass{article}\n";
-  $t .= "\\usepackage{bidi}\n" if($self->{'options'}->{'arabic'});
+  $t .= "\\usepackage{bidi}\n"
+    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
   $t .= "\\usepackage{xltxtra}\n" if($self->{'options'}->{'xltxtra'});
-  $t .= "\\usepackage{arabxetex}\n" if($self->{'options'}->{'arabic'});
+  $t .= "\\usepackage{arabxetex}\n"
+    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
   $t .= "\\usepackage".$po."{automultiplechoice}\n";
   $t .= "\\usepackage{"
-    .($self->{'options'}->{'arabic'} ? "fmultico" : "multicol")."}\n";
+    .($self->{'options'}->{'arabic'} && $self->bidi_year()<2011
+      ? "fmultico" : "multicol")."}\n";
   $t .= "\\setmainfont{".$self->{'options'}->{'font'}."}\n"
     if($self->{'options'}->{'font'});
   $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
@@ -360,6 +387,8 @@ sub file_header {
   $t .= "\\geometry{paper=".lc($self->{'options'}->{'papersize'})."paper}\n"
     if($self->{'options'}->{'papersize'});
   $t .= $self->{'options'}->{'latex-preambule'};
+  $t .= "\\usepackage{arabxetex}\n"
+    if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
   $t .= "\\begin{document}\n";
   $t .= "\\AMCrandomseed{1527384}\n";
   if($self->{'options'}->{'boxcolor'}) {
@@ -521,6 +550,8 @@ sub write_latex {
 	.$self->bf_or("\\Large","\\bf\\Large")." ".
 	  $self->format_text($group->{'title'})."\\vspace{1mm}\\hrule\\end{center}\n\n";
     }
+    print OUT "\\begin{arab}"
+      if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
     if($self->{'options'}->{'columns'}>1) {
       print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n";
     } else {
@@ -536,8 +567,11 @@ sub write_latex {
       }
     }
 
-    print OUT "\\end{multicols}\n"
-      if($self->{'options'}->{'columns'}>1);
+    if($self->{'options'}->{'columns'}>1) {
+      print OUT "\\end{multicols}\n";
+    }
+    print OUT "\\end{arab}"
+      if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
   }
 
   if($self->{'options'}->{'separateanswersheet'}) {
