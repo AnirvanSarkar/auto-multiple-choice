@@ -78,6 +78,7 @@ sub new {
      'ok_checksums_file'=>'',
      'to_check'=>[],
      'export_full_csv'=>[],
+     'blind'=>0,
     };
 
   for (keys %oo) {
@@ -104,7 +105,7 @@ sub new {
     $self->{'list'}=$l[0];
   }
 
-  GetOptions("debug!"=>\$self->{'debug'});
+  GetOptions("debug!"=>\$self->{'debug'},"blind!"=>\$self->{'blind'});
 
   $self->install;
 
@@ -503,7 +504,7 @@ sub ok {
     for(@{$self->{'to_check'}}) {
       $self->trace("    ".$_->[0]." ".$_->[1]);
     }
-    exit(2);
+    exit(2) if(!$self->{'blind'});
   } else {
     $self->trace("[0] Test completed succesfully");
   }
