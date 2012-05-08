@@ -319,6 +319,7 @@ sources_vok:
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean_IN
 	$(MAKE) -C $(TMP_SOURCE_DIR) auto-multiple-choice.spec
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
+	test -d ../precomp_external && cp -r ../precomp_external/* $(TMP_SOURCE_DIR)
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 
 tmp_deb:
