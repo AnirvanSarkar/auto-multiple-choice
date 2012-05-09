@@ -132,7 +132,7 @@ if(-f $fich_noms) {
 # check_correc prepares the corrected answer sheet for all
 # students. This file is used when option --compose is on, to take
 # sheets when the scaned sheet is not present (for example if there
-# are sheets with no answer boxes on it). This can be very usefull to
+# are sheets with no answer boxes on it). This can be very useful to
 # produce a complete annotated answer sheet with subject *and* answers
 # when separate answer sheet layout is used.
 

@@ -174,7 +174,7 @@ package AMC::DataModule::scoring;
 # sheet.
 #
 # ceiling is true if AMC should put a ceiling on the students marks
-# (this can be usefull if the SUF global scoring strategy is used).
+# (this can be useful if the SUF global scoring strategy is used).
 #
 # rounding is the rounding type to be used for the marks.
 #
@@ -893,7 +893,7 @@ sub student_global {
 }
 
 # student_scoring_base($student,$copy,$darkness_threshold) returns
-# usefull data to compute questions scores for a particular student
+# useful data to compute questions scores for a particular student
 # (identified by $student and $copy), as a reference to a hash
 # grouping questions and answers. For exemple :
 #
