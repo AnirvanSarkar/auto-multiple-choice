@@ -258,7 +258,7 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty
+	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty
 	-sudo rm -r /usr/lib/AMC
 
 local: global
@@ -274,7 +274,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC/perl
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
-	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice
+	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice-doc
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice.desktop $(DESKTOPDIR)/auto-multiple-choice.desktop
 	sudo ln -s $(LOCALDIR)/doc/modeles $(MODELSDIR)
 	sudo ln -s $(LOCALDIR)/$(STY) $(TEXDIR)/automultiplechoice.sty
