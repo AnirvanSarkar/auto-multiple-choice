@@ -209,6 +209,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'taille_max_correction'=>'1000x1500',
 	      'assoc_window_size'=>'',
 	      'mailing_window_size'=>'',
+	      'preferences_window_size'=>'',
 	      'qualite_correction'=>'150',
 	      'conserve_taille'=>1,
 	      'methode_impression'=>'CUPS',
@@ -4253,6 +4254,13 @@ sub edit_preferences {
 
     $w{'edit_preferences_manager'}=$gap;
 
+    if($o{'conserve_taille'}) {
+      if($o{'preferences_window_size'} &&
+	 $o{'preferences_window_size'} =~ /^([0-9]+)x([0-9]+)$/) {
+	$w{'edit_preferences'}->resize($1,$2);
+      }
+    }
+
     # tableau type/couleurs pour correction
 
     for my $t (grep { /^pref(_projet)?_[xfcv]_/ } (keys %w)) {
@@ -4286,6 +4294,17 @@ sub edit_preferences {
     change_methode_impression();
 }
 
+sub closes_preferences {
+  if($o{'conserve_taille'}) {
+    my $dims=join('x',$w{'edit_preferences'}->get_size);
+    if($dims ne $o{'preferences_window_size'}) {
+      $o{'preferences_window_size'}=$dims;
+      $o{'_modifie_ok'}=1;
+    }
+  }
+  $w{'edit_preferences'}->destroy();
+}
+
 sub accepte_preferences {
   reprend_pref('pref',\%o);
   reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
@@ -4310,7 +4329,7 @@ sub accepte_preferences {
     }
   }
 
-  $w{'edit_preferences'}->destroy();
+  closes_preferences();
 
   if ($projet{'nom'}) {
 
@@ -4417,7 +4436,7 @@ sub sauve_pref_generales {
 
 sub annule_preferences {
     debug "Canceling preferences modification";
-    $w{'edit_preferences'}->destroy();
+    closes_preferences();
 }
 
 sub file_maj {
@@ -6068,9 +6087,11 @@ sub send_emails {
   $w{'emails_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
   $w{'emails_list'}->get_selection->select_all;
 
-  if($o{'mailing_window_size'} &&
-     $o{'mailing_window_size'} =~ /^([0-9]+)x([0-9]+)$/) {
-    $w{'email_dialog'}->resize($1,$2);
+  if($o{'conserve_taille'}) {
+    if($o{'mailing_window_size'} &&
+       $o{'mailing_window_size'} =~ /^([0-9]+)x([0-9]+)$/) {
+      $w{'email_dialog'}->resize($1,$2);
+    }
   }
 
   transmet_pref($gap,'email',$projet{'options'});
