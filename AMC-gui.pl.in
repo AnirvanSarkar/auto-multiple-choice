@@ -437,6 +437,20 @@ for my $o_sub (qw/plugins/) {
   mkdir("$o_dir/$o_sub") if(! -d "$o_dir/$o_sub");
 }
 
+#
+
+sub sub_modif {
+  my ($opts)=@_;
+  my ($m,$mo)=($opts->{'_modifie'},$opts->{'_modifie_ok'});
+  for my $k (keys %$opts) {
+    if(ref($opts->{$k}) eq 'HASH') {
+      $m.=','.$opts->{$k}->{'_modifie'} if($opts->{$k}->{'_modifie'});
+      $mo=1 if($opts->{$k}->{'_modifie_ok'});
+    }
+  }
+  return($m,$mo);
+}
+
 # Read/write options XML files
 
 sub pref_xx_lit {
@@ -1870,8 +1884,8 @@ sub projet_sauve {
 sub projet_check_and_save {
     if($projet{'nom'}) {
 	valide_options_notation();
-	if($projet{'options'}->{'_modifie_ok'}
-	   || $projet{'options'}->{'_modifie'}) {
+	my ($m,$mo)=sub_modif($projet{'options'});
+	if($m || $mo) {
 	    projet_sauve();
 	}
     }
@@ -5768,10 +5782,11 @@ sub quitte_projet {
       maj_export();
 	valide_options_notation();
 
-	if($projet{'options'}->{'_modifie'}
-	   || $projet{'options'}->{'_modifie_ok'}) {
+	my ($m,$mo)=sub_modif($projet{'options'});
+
+	if($m || $mo) {
 	    my $save=1;
-	    if($projet{'options'}->{'_modifie'}) {
+	    if($m) {
 		my $dialog = Gtk2::MessageDialog
 		    ->new_with_markup($w{'main_window'},
 				      'destroy-with-parent',
@@ -5792,8 +5807,6 @@ sub quitte_projet {
 }
 
 sub quitter {
-    my $reponse='';
-
     quitte_projet();
 
     if($o{'conserve_taille'}) {
@@ -5806,24 +5819,27 @@ sub quitter {
 	}
     }
 
-    if($o{'_modifie'} || $o{'_modifie_ok'}) {
-	if($o{'_modifie'}) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'question','yes-no',
-				  __"You did not save main options, which have been modified: do you want to save them before leaving?");
-	    $reponse=$dialog->run;
-	    $dialog->destroy;
-	}
+    my ($m,$mo)=sub_modif(\%o);
 
-	if($reponse eq 'yes' || !$o{'_modifie'}) {
-	    sauve_pref_generales();
-	}
+    if($m || $mo) {
+      my $save=1;
+      if($m) {
+	my $dialog = Gtk2::MessageDialog
+	  ->new_with_markup($w{'main_window'},
+			    'destroy-with-parent',
+			    'question','yes-no',
+			    __"You did not save main options, which have been modified: do you want to save them before leaving?");
+	my $reponse=$dialog->run;
+	$dialog->destroy;
+	$save=0 if($reponse ne 'yes');
+      }
+
+      if($save) {
+	sauve_pref_generales();
+      }
     }
 
     Gtk2->main_quit;
-
 }
 
 sub bug_report {
