@@ -2427,7 +2427,7 @@ Name :
           </tgroup>
         </informaltable>
 
-        <para>単一選択問題でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0</code>で、正解には1点、そうでなければ0点を与えます。複数選択問題でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0,p=-100,d=0</code>で、マーク有無の正しい選択肢ごとに1点を与えます（正しいボックスをマークした場合と、誤ったボックスをマークしなかった場合）。</para>
+        <para>単一選択問題でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0</code>で、正解には1点、そうでなければ0点を与えます。複数選択問題でのデフォルトの採点基準は<code>e=0,v=0,b=1,m=0,p=-100,d=0</code>で、マーク有無の正しい（マークすべきボックスをマークして、マークすべきでないボックスをマークしなかった）選択肢ごとに1点を与えます。</para>
 
         <para>LaTeXの<command>\scoring</command>コマンドは、設問定義の外側で用いて、試験全体のパラメータを変更することもできます。</para>
 
@@ -2580,19 +2580,19 @@ Name:
           </listitem>
 
           <listitem>
-            <para><varname>NB</varname> は正答の（マークしたかどうかに関わらず）選択肢の個数です。</para>
+            <para><varname>NB</varname> はマークすべき選択肢の個数です。</para>
           </listitem>
 
           <listitem>
-            <para><varname>NBC</varname> はマークした正答の選択肢の個数です。</para>
+            <para><varname>NBC</varname> は正しくマークした選択肢の個数です。</para>
           </listitem>
 
           <listitem>
-            <para><varname>NM</varname> は誤答の（マークしたかどうかに関わらず）選択肢の個数です。</para>
+            <para><varname>NM</varname> はマークすべきでない選択肢の個数です。</para>
           </listitem>
 
           <listitem>
-            <para><varname>NMC</varname> はマークした誤答の選択肢の個数です。</para>
+            <para><varname>NMC</varname> は誤ってマークした選択肢の個数です。</para>
           </listitem>
 
           <listitem>
