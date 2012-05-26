@@ -6,10 +6,10 @@ HVERSION=htdocs/version.shtml
 
 TMPDIR:=$(shell mktemp -d)
 
-STABLEVERSION=1.0
+STABLEVERSION=1.1.0
 STABLESRC=../download_area/files/auto-multiple-choice_$(STABLEVERSION)_sources.tar.gz
 
-DOCVERSION=1.0
+DOCVERSION=1.1.0
 SRC=/tmp/auto-multiple-choice_$(DOCVERSION)_sources.tar.gz
 
 BASEDIR=$(TMPDIR)/auto-multiple-choice-$(DOCVERSION)
@@ -34,10 +34,11 @@ xml: FORCE
 	perl $(DOCDIR)/addlink.pl $(XML).$*.tex
 	cd $(DOCDIR); pdflatex `basename $(XML)`.$* ; pdflatex `basename $(XML)`.$*
 
+%.html: xml
+	xsltproc --nonet --stringparam base.dir $(SITEDOC).$*/ $(DOCDIR)/doc-xhtml-site.$*.xsl $(XML).$*.xml
+
 # doc a partir de la derniere version dans testing
-doc: FORCE fr.pdf en.pdf
-	xsltproc --nonet --stringparam base.dir $(SITEDOC).fr/ $(DOCDIR)/doc-xhtml-site.fr.xsl $(XML).fr.xml
-	xsltproc --nonet --stringparam base.dir $(SITEDOC).en/ $(DOCDIR)/doc-xhtml-site.en.xsl $(XML).en.xml
+doc: FORCE fr.pdf en.pdf fr.html en.html ja.html
 	cp $(XML).fr.pdf  ../download_area/files/auto-multiple-choice.fr.pdf
 	cp $(XML).en.pdf  ../download_area/files/auto-multiple-choice.en.pdf
 
