@@ -30,6 +30,8 @@ use AMC::NamesFile;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone :position/;
 use AMC::DataModule::layout qw/:flags/;
+use AMC::Substitute;
+
 use encoding 'utf8';
 
 my $cr_dir="";
@@ -150,14 +152,6 @@ sub color_rgb {
     return($col->red/65535,$col->green/65535,$col->blue/65535);
 }
 
-sub format_note {
-    my $x=shift;
-    if($chiffres_significatifs>0) {
-	$x=sprintf("%.*g",$chiffres_significatifs,$x);
-    }
-    return($x);
-}
-
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
@@ -167,7 +161,6 @@ my $assoc=$data->module('association');
 my $layout=$data->module('layout');
 
 $seuil=$scoring->variable_transaction('darkness_threshold');
-$lk=$assoc->variable_transaction('key_in_list');
 
 #################################
 
@@ -243,6 +236,12 @@ if($id_file) {
 
 }
 
+my $subst=AMC::Substitute::new('names'=>$noms,
+			       'scoring'=>$scoring,
+			       'assoc'=>$assoc,
+			       'name'=>'',
+			       'chsign'=>$chiffres_significatifs,
+			       );
 
 print "* Annotation\n";
 
@@ -328,40 +327,10 @@ print "* Annotation\n";
 
     $capture->begin_read_transaction('xSTD');
 
-    my $student_mark=$scoring->student_global(@spc[0,2]);
-
-    if(!$student_mark) {
-      print "*** no marks for copy ".studentids_string(@spc[0,2])." ***\n";
-      debug "No marks found ! Copy=".studentids_string(@spc[0,2]);
-      next PAGE;
-    }
-
     # print global mark and name on the page
 
     if($p->{'page'}==1 || $capture->zones_count(@spc,ZONE_NAME)) {
-      my $text=$verdict;
-
-      $text =~ s/\%[S]/format_note($student_mark->{'total'})/ge;
-      $text =~ s/\%[M]/format_note($student_mark->{'max'})/ge;
-      $text =~ s/\%[s]/format_note($student_mark->{'mark'})/ge;
-      $text =~ s/\%[m]/format_note($scoring->variable('mark_max'))/ge;
-
-      if($assoc && $noms) {
-	my $i=$assoc->get_real(@spc[0,2]);
-	my $n;
-
-	debug "Association -> ID=$i";
-
-	if($i) {
-	  debug "Name found";
-	  ($n)=$noms->data($lk,$i);
-	  if($n) {
-	    $text=$noms->substitute($n,$text,'prefix'=>'%');
-	  }
-	}
-      } else {
-	debug "No association/names";
-      }
+      my $text=$subst->substitute($verdict,@spc[0,2]);
 
       $lay->set_text($text);
       $context->set_source_rgb(color_rgb('red'));
@@ -447,8 +416,8 @@ print "* Annotation\n";
 
 	$text =~ s/\%[S]/$result->{'score'}/g;
 	$text =~ s/\%[M]/$result->{'max'}/g;
-	$text =~ s/\%[s]/format_note($result->{'score'})/ge;
-	$text =~ s/\%[m]/format_note($result->{'max'})/ge;
+	$text =~ s/\%[s]/$subst->format_note($result->{'score'})/ge;
+	$text =~ s/\%[m]/$subst->format_note($result->{'max'})/ge;
 
 	my $te=eval($text);
 	if($@) {
