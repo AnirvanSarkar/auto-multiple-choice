@@ -6125,6 +6125,7 @@ sub send_emails {
 
     commande('commande'=>["auto-multiple-choice","mailing",
 			  pack_args("--project",absolu('%PROJET/'),
+				    "--project-name",($projet{'options'}->{'nom_examen'} || $projet{'options'}->{'code_examen'} || $projet{'nom'}),
 				    "--students-list",absolu($projet{'options'}->{'listeetudiants'}),
 				    "--list-encoding",bon_encodage('liste'),
 				    "--csv-build-name",csv_build_name(),

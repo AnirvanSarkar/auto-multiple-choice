@@ -25,6 +25,7 @@ use AMC::NamesFile;
 use AMC::Data;
 use AMC::DataModule::report ':const';
 use AMC::Gui::Avancement;
+use AMC::Substitute;
 
 use Module::Load;
 
@@ -46,11 +47,13 @@ my $smtp_host='smtp';
 my $smtp_port=25;
 my $text='';
 my $subject='';
+my $project_name='';
 
 @ARGV=unpack_args(@ARGV);
 @ARGV_ORIG=@ARGV;
 
 GetOptions("project=s"=>\$project_dir,
+	   "project-name=s"=>\$project_name,
 	   "data=s"=>\$data_dir,
 	   "students-list=s"=>\$students_list,
 	   "list-encoding=s"=>\$list_encoding,
@@ -109,21 +112,21 @@ my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 my $data=AMC::Data->new($data_dir);
 my $report=$data->module('report');
 my $assoc=$data->module('association');
+my $scoring=$data->module('scoring');
 
-$data->begin_read_transaction('smGD');
+my $subst=AMC::Substitute::new('assoc'=>$assoc,'scoring'=>$scoring,
+			       'names'=>$students,
+			       'name'=>$project_name);
+
+$data->begin_read_transaction('Mail');
 my $subdir=$report->get_dir(REPORT_ANNOTATED_PDF);
-$data->end_transaction('smGD');
 
 my $pdf_dir="$project_dir/$subdir";
 
 error("PDF directory not found: $pdf_dir") if(!-d $pdf_dir);
 
-$data->begin_read_transaction('smMN');
-
 my $key=$assoc->variable('key_in_list');
 my $r=$report->get_associated_type(REPORT_ANNOTATED_PDF);
-
-$data->end_transaction('smMN');
 
 my $t;
 if($transport eq 'sendmail') {
@@ -162,6 +165,8 @@ STUDENT: for my $i (@$r) {
       open(PDF,$file);
       while(<PDF>) { $body.=$_; }
       close(PDF);
+
+      my @sc=$assoc->real_back($i->{'id'});
       my @parts=
 	(Email::MIME->create(attributes=>
 			     {filename     => "corrected.pdf",
@@ -177,15 +182,16 @@ STUDENT: for my $i (@$r) {
 			      encoding     => "base64",
 			      charset      => "UTF-8",
 			     },
-			     body_str => $text,
+			     body_str => $subst->substitute($text,@sc),
 			    ),
 	);
 
       my $email = Email::MIME
 	->create(header_str => [ From=>$sender, To=>$dest,
-				 Subject=>$subject ],
+				 Subject=>$subst->substitute($subject,@sc) ],
 		 parts      => [ @parts ],
 		);
+
       my $b=eval { sendmail($email,{'transport'=>$t}); } || $@;
       if($b) {
 	my $status='OK';
@@ -209,6 +215,8 @@ STUDENT: for my $i (@$r) {
   }
   $avance->progres($delta);
 }
+
+$data->end_transaction('Mail');
 
 $avance->fin();
 
