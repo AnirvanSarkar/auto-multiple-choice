@@ -823,12 +823,14 @@ sub style_bouton_code {
 sub choisit {
     my ($self,$i)=(@_);
 
-    $self->{'assoc'}->begin_transaction('ASWT');
-    $self->{'capture'}->outdate_annotated_copy(@{$self->{'image_sc'}});
-    $self->lie($i,@{$self->{'image_sc'}});
-    $self->{'assoc'}->end_transaction('ASWT');
-    $self->set_n_cols() if(!$self->{'show_all'});
-    $self->image_suivante();
+    if($self->{'iimage'}>=0) {
+      $self->{'assoc'}->begin_transaction('ASWT');
+      $self->{'capture'}->outdate_annotated_copy(@{$self->{'image_sc'}});
+      $self->lie($i,@{$self->{'image_sc'}});
+      $self->{'assoc'}->end_transaction('ASWT');
+      $self->set_n_cols() if(!$self->{'show_all'});
+      $self->image_suivante();
+    }
 }
 
 1;
