@@ -217,6 +217,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'options_impression'=>{'sides'=>'two-sided-long-edge',
 				     'number-up'=>1,
 				     'repertoire'=>'/tmp',
+				     'split'=>'',
 				     },
 	      'manuel_image_type'=>'xpm',
 	      'assoc_ncols'=>4,
@@ -2284,6 +2285,8 @@ sub sujet_impressions {
     $g_imprime=read_glade('choix_pages_impression',
 			  qw/arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe bloc_fichier/);
 
+    transmet_pref($g_imprime,'impall',$o{'options_impression'});
+
     if($o{'methode_impression'} eq 'CUPS') {
 	$w{'bloc_imprimante'}->show();
 
@@ -2357,6 +2360,8 @@ sub sujet_impressions_ok {
     for my $i ($w{'arbre_choix_copies'}->get_selection()->get_selected_rows() ) {
 	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N);
     }
+
+    reprend_pref('impall',$o{'options_impression'});
 
     if($o{'methode_impression'} eq 'CUPS') {
 	my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
@@ -2466,7 +2471,8 @@ sub sujet_impressions_ok {
 			  "--methode",$o{'methode_impression'},
 			  "--imprimante",$o{'imprimante'},
 			  "--options",$os,
-			  "--output",$o{'options_impression'}->{'repertoire'}."/copie-%e.pdf",
+			  "--output",$o{'options_impression'}->{'repertoire'}."/sheet-%e.pdf",
+			  ($o{'options_impression'}->{'split'} ? "--split" : "--no-split"),
 			  "--print-command",$o{'print_command_pdf'},
 			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
 			  "--data",absolu($projet{'options'}->{'data'}),

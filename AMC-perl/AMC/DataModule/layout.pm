@@ -329,8 +329,17 @@ sub define_statements {
 			   ." WHERE student=? AND page=?"},
        'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student"},
-       'subjectpageForStudent'=>{'sql'=>"SELECT subjectpage FROM ".$self->table("page")
-				 ." WHERE student=? ORDER BY page"},
+       'subjectpageForStudent'=>
+       {'sql'=>"SELECT MIN(subjectpage),MAX(subjectpage) FROM ".$self->table("page")
+	." WHERE student=?"},
+       'subjectpageForStudentA'=>
+       {'sql'=>"SELECT MIN(p.subjectpage),MAX(p.subjectpage) FROM "
+	.$self->table("page")." AS p"
+	." ,( SELECT student,page FROM ".$self->table("box")
+	."    UNION"
+	."    SELECT student,page FROM ".$self->table("namefield")." ) AS a"
+	." ON p.student=a.student AND p.page=a.page"
+	." WHERE p.student=?"},
        'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
 		       ." LIMIT 1"},
        'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "

@@ -215,6 +215,14 @@ sub query_list {
     return($self->sql_list($self->statement($query),@bind));
 }
 
+# same as query, but returns an array with all the values of the first
+# row of the result.
+
+sub query_row {
+    my ($self,$query,@bind)=@_;
+    return($self->sql_row($self->statement($query),@bind));
+}
+
 # begin_transaction begins a transaction in immediate mode, to be used
 # to eventually write to the database.
 

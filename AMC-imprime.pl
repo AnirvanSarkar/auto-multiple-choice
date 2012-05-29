@@ -42,6 +42,8 @@ my $methode='CUPS';
 my $imprimante='';
 my $options='number-up=1';
 my $output_file='';
+my $output_answers_file='';
+my $split='';
 
 GetOptions(
 	   "data=s"=>\$data_dir,
@@ -53,6 +55,7 @@ GetOptions(
 	   "methode=s"=>\$methode,
 	   "imprimante=s"=>\$imprimante,
 	   "output=s"=>\$output_file,
+	   "split!"=>\$split,
 	   "options=s"=>\$options,
 	   "debug=s"=>\$debug,
 	   );
@@ -87,8 +90,6 @@ if($fich_nums) {
   $layout->end_transaction('prST');
 }
 
-
-my $n=0;
 my $cups;
 my $dest;
 
@@ -115,51 +116,61 @@ if($methode =~ /^cups/i) {
     }
 }
 
+sub process_pages {
+  my ($first,$last,$f_dest,$elong)=@_;
+
+  my $tmp = File::Temp->new( DIR=>tmpdir(),UNLINK => 1, SUFFIX => '.pdf' );
+  $fn=$tmp->filename();
+
+  print "Student $elong : pages $first-$last in file $fn...\n";
+
+  $commandes->execute("gs","-dBATCH","-dNOPAUSE","-q","-sDEVICE=pdfwrite",
+		      "-sOutputFile=$fn",
+		      "-dFirstPage=$first","-dLastPage=$last",
+		      $sujet);
+
+  if($methode =~ /^cups/i) {
+    $dest->printFile($fn,"QCM : sheet $elong");
+  } elsif($methode =~ /^file/i) {
+    $f_dest.="-%e.pdf" if($f_dest !~ /[%]e/);
+    $f_dest =~ s/[%]e/$elong/g;
+
+    debug "Moving to $f_dest";
+    move($fn,$f_dest);
+  } elsif($methode =~ /^command/i) {
+    my @c=map { s/[%]f/$fn/g; s/[%]e/$elong/g; $_; } split(/\s+/,$print_cmd);
+
+    #print STDERR join(' ',@c)."\n";
+    $commandes->execute(@c);
+  } else {
+    die "Unknown method: $methode";
+  }
+
+  close($tmp);
+}
+
 for my $e (@es) {
-    my $debut=1000000;
-    my $fin=0;
-    my $elong=sprintf("%04d",$e);
-    $layout->begin_read_transaction('prSP');
-    for ($layout->query_list('subjectpageForStudent',$e)) {
-	$debut=$_ if($_<$debut);
-	$fin=$_ if($_>$fin);
+  my $elong=sprintf("%04d",$e);
+  my ($debut,$fin,$debutA,$finA);
+  $layout->begin_read_transaction('prSP');
+  ($debut,$fin)=$layout->query_row('subjectpageForStudent',$e);
+  ($debutA,$finA)=$layout->query_row('subjectpageForStudentA',$e)
+    if($split);
+  $layout->end_transaction('prSP');
+
+  if($split) {
+    if($debut<$debutA) {
+      process_pages($debut,$debutA-1,$output_file,$elong."-0S");
     }
-    $layout->end_transaction('prSP');
-    $n++;
-
-    $tmp = File::Temp->new( DIR=>tmpdir(),UNLINK => 1, SUFFIX => '.pdf' );
-    $fn=$tmp->filename();
-
-    print "Student $e : pages $debut-$fin in file $fn...\n";
-
-    $commandes->execute("gs","-dBATCH","-dNOPAUSE","-q","-sDEVICE=pdfwrite",
-			"-sOutputFile=$fn",
-			"-dFirstPage=$debut","-dLastPage=$fin",
-			$sujet);
-
-    $avance->progres(1/(2*(1+$#es)));
-
-    if($methode =~ /^cups/i) {
-	$dest->printFile($fn,"QCM : sheet $e");
-    } elsif($methode =~ /^file/i) {
-	my $f_dest=$output_file;
-	$f_dest.="-%e.pdf" if($f_dest !~ /[%]e/);
-	$f_dest =~ s/[%]e/$elong/g;
-
-	debug "Moving to $f_dest";
-	move($fn,$f_dest);
-    } elsif($methode =~ /^command/i) {
-	my @c=map { s/[%]f/$fn/g; s/[%]e/$elong/g; $_; } split(/\s+/,$print_cmd);
-
-	#print STDERR join(' ',@c)."\n";
-	$commandes->execute(@c);
-    } else {
-	die "Unknown method: $methode";
+    process_pages($debutA,$finA,$output_file,$elong."-1A");
+    if($fin>$finA) {
+      process_pages($finA+1,$fin,$output_file,$elong."-2S");
     }
+  } else {
+    process_pages($debut,$fin,$output_file,$elong);
+  }
 
-    close($tmp);
-
-    $avance->progres(1/(2*(1+$#es)));
+  $avance->progres(1/(1+$#es));
 }
 
 $avance->fin();
