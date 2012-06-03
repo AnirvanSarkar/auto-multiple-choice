@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2010-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2010-2011 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -24,7 +24,7 @@ use utf8;
 
 my ($from,$to)=@ARGV;
 
-$v="1.0.1065 (svn: 1065)";
+$v="1.1.0 (svn: 1075)";
 
 chomp($date=`date "+%Y-%m-%d %H:%M %z"`);
 
@@ -32,7 +32,7 @@ my $aref = Locale::PO->load_file_asarray($from);
 
 my @ok=grep { $_->msgid() !~ /^\"?gtk-/ } @$aref;
 
-$ok[0]->comment(encode_utf8("Auto Multiple Choice\nCopyright 2008-2012 Alexis Bienvenüe\nThis file is distributed under the same license as the AMC software"));
+$ok[0]->comment(encode_utf8("Auto Multiple Choice\nCopyright 2008-2011 Alexis Bienvenüe\nThis file is distributed under the same license as the AMC software"));
 $ok[0]->msgstr("Project-Id-Version: $v\\n" .
 	       "Report-Msgid-Bugs-To: paamc\@passoire.fr\\n" .
 	       "POT-Creation-Date: $date\\n" .

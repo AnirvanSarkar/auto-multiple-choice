@@ -4062,6 +4062,18 @@ sub activate_doc {
 
 ###
 
+sub find_object {
+  my ($gap,$prefix,$type,$ta,$t,$keep)=@_;
+  if(!$keep) {
+    my $ww=$gap->get_object($prefix.$type.$ta);
+    if($ww) {
+      $w{$prefix.$type.$ta}=$ww;
+      $w{$prefix.$type.$t}=$ww;
+    }
+  }
+  return($w{$prefix.$type.$ta});
+}
+
 # transmet les preferences vers les widgets correspondants
 # _c_ combo box (menu)
 # _cb_ check button
@@ -4074,56 +4086,40 @@ sub activate_doc {
 # _x_ one line text
 
 sub transmet_pref {
-    my ($gap,$prefixe,$h,$alias,$seulement)=@_;
+    my ($gap,$prefixe,$h,$alias,$seulement,$update)=@_;
 
     for my $t (keys %$h) {
 	if(!$seulement || $seulement->{$t}) {
 	my $ta=$t;
 	$ta=$alias->{$t} if($alias->{$t});
 
-	my $wp=$gap->get_object($prefixe.'_t_'.$ta) || $w{$prefixe.'_t_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_t_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_t_',$ta,$t,$update)) {
 	    $wp->get_buffer->set_text($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_x_'.$ta) || $w{$prefixe.'_x_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_x_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_x_',$ta,$t,$update)) {
 	    $wp->set_text($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_f_'.$ta) || $w{$prefixe.'_f_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_f_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_f_',$ta,$t,$update)) {
 	    if($wp->get_action =~ /-folder$/i) {
 		$wp->set_current_folder($h->{$t});
 	    } else {
 		$wp->set_filename($h->{$t});
 	    }
 	}
-	$wp=$gap->get_object($prefixe.'_v_'.$ta) || $w{$prefixe.'_v_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_v_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_v_',$ta,$t,$update)) {
 	    $wp->set_active($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_s_'.$ta) || $w{$prefixe.'_s_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_s_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_s_',$ta,$t,$update)) {
 	    $wp->set_value($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_col_'.$ta) || $w{$prefixe.'_col_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_col_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
 	    $wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
 	}
-	$wp=$gap->get_object($prefixe.'_cb_'.$ta) || $w{$prefixe.'_cb_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_cb_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
 	    $wp->set_active($h->{$t});
 	}
-	$wp=$gap->get_object($prefixe.'_c_'.$ta) || $w{$prefixe.'_c_'.$ta};
-	if($wp) {
+	if($wp=find_object($gap,$prefixe,'_c_',$ta,$t,$update)) {
 	    if($cb_stores{$ta}) {
-	      $w{$prefixe.'_c_'.$t}=$wp;
 	      debug "CB_STORE($t) ALIAS $ta modifie ($t=>$h->{$t})";
 	      $wp->set_model($cb_stores{$ta});
 	      my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
@@ -4133,13 +4129,12 @@ sub transmet_pref {
 		$wp->set_active_iter($i);
 	      }
 	    } else {
+	      $w{$prefixe.'_c_'.$t}='';
 	      debug "no CB_STORE for $ta";
 	      $wp->set_active($h->{$t});
 	    }
 	}
-	$wp=$gap->get_object($prefixe.'_ce_'.$ta) || $w{$prefixe.'_ce_'.$ta};
-	if($wp) {
-	    $w{$prefixe.'_ce_'.$t}=$wp;
+	if($wp=find_object($gap,$prefixe,'_ce_',$ta,$t,$update)) {
 	    if($cb_stores{$ta}) {
 		debug "CB_STORE($t) ALIAS $ta changed";
 		$wp->set_model($cb_stores{$ta});
@@ -5905,6 +5900,18 @@ my $email_sl;
 my $email_key;
 my $email_r;
 
+sub project_email_name {
+  my ($markup)=@_;
+  my $pn=($projet{'options'}->{'nom_examen'}
+	  || $projet{'options'}->{'code_examen'}
+	  || $projet{'nom'});
+  if($markup) {
+    return($pn eq $projet{'nom'} ? "<b>$pn</b>" : $pn);
+  } else {
+    return($pn);
+  }
+}
+
 sub send_emails {
 
   # are there some annotated answer sheets to send?
@@ -6050,8 +6057,9 @@ sub send_emails {
 
   # Then, open configuration window...
   my $gap=read_glade('mailing',
-		     qw/emails_list email_dialog/);
+		     qw/emails_list email_dialog label_name/);
 
+  $w{'label_name'}->set_text(project_email_name());
 
   $w{'emails_list'}->set_model($emails_store);
   $renderer=Gtk2::CellRendererText->new;
@@ -6131,7 +6139,7 @@ sub send_emails {
 
     commande('commande'=>["auto-multiple-choice","mailing",
 			  pack_args("--project",absolu('%PROJET/'),
-				    "--project-name",($projet{'options'}->{'nom_examen'} || $projet{'options'}->{'code_examen'} || $projet{'nom'}),
+				    "--project-name",project_email_name(),
 				    "--students-list",absolu($projet{'options'}->{'listeetudiants'}),
 				    "--list-encoding",bon_encodage('liste'),
 				    "--csv-build-name",csv_build_name(),
@@ -6185,6 +6193,42 @@ sub email_change_col {
     $emails_store->set($i,EMAILS_EMAIL,$s->{$oo{'email_col'}});
     $i=$emails_store->iter_next($i);
   }
+}
+
+sub mailing_set_project_name {
+  my $dialog=Gtk2::Dialog
+    ->new(__("Set exam name"),$w{''},
+	  ['destroy-with-parent'],'gtk-cancel'=>'cancel','gtk-ok'=>'ok',
+	  );
+  $dialog->set_default_response ('ok');
+
+  my $t=Gtk2::Table->new(2,2);
+  my $widget;
+  $t->attach(Gtk2::Label->new(__"Examination name"),0,1,0,1,
+	     [],[],2,2);
+  $widget=Gtk2::Entry->new();
+  $w{'set_name_x_nom_examen'}=$widget;
+  $t->attach($widget,1,2,0,1,['expand','fill'],[],2,2);
+  $t->attach(Gtk2::Label->new(__"Code (short name) for examination"),0,1,1,2,
+	     [],[],2,2);
+  $widget=Gtk2::Entry->new();
+  $w{'set_name_x_code_examen'}=$widget;
+  $t->attach($widget,1,2,1,2,['expand','fill'],[],2,2);
+
+  $t->show_all;
+  $dialog->get_content_area()->add ($t);
+
+  transmet_pref('','set_name',$projet{'options'},{},'',1);
+
+  my $response = $dialog->run;
+
+  if($response eq 'ok') {
+    reprend_pref('set_name',$projet{'options'},'',
+		 {'nom_examen'=>1,'code_examen'=>1});
+    $w{'label_name'}->set_text(project_email_name());
+  }
+
+  $dialog->destroy;
 }
 
 #######################################
