@@ -89,6 +89,7 @@ sub ajoute {
 
 my @pages=();
 my @flags=();
+my @pre_assoc=();
 my $cases;
 my $page_number=0;
 my $i='';
@@ -138,6 +139,9 @@ while(<SRC>) {
     if(/\\dontannotate\{(.*)\}/) {
       add_flag($1,BOX_FLAGS_DONTANNOTATE);
     }
+    if(/\\association\{([0-9]+)\}\{(.*)\}/) {
+      push @pre_assoc,[$1,$2];
+    }
 }
 close(SRC);
 
@@ -157,6 +161,10 @@ my $delta=(@pages ? 1/(1+$#pages) : 0);
 $layout->begin_transaction('MeTe');
 $layout->clear_all;
 $capture->variable('annotate_source_change',time());
+
+for my $pa (@pre_assoc) {
+  $layout->new_association(@$pa);
+}
 
 for my $p (@pages) {
 

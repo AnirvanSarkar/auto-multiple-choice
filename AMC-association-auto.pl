@@ -30,10 +30,12 @@ my $liste_enc='utf-8';
 my $csv_build_name='';
 my $data_dir='';
 my $debug='';
+my $preassoc='';
 
 @ARGV=unpack_args(@ARGV);
 
 GetOptions("notes-id=s"=>\$notes_id,
+	   "pre-association!"=>\$preassoc,
 	   "liste=s"=>\$liste_file,
 	   "liste-key=s"=>\$liste_key,
 	   "csv-build-name=s"=>\$csv_build_name,
@@ -44,7 +46,7 @@ GetOptions("notes-id=s"=>\$notes_id,
 
 set_debug($debug);
 
-die "Needs notes-id" if(!$notes_id);
+die "Needs notes-id" if(!$notes_id && !$preassoc);
 die "Needs liste-key" if(!$liste_key);
 die "Needs liste_file" if(! -s $liste_file);
 die "Needs data_dir" if(!-d $data_dir);
@@ -53,6 +55,10 @@ my $data=AMC::Data->new($data_dir);
 my $scoring=$data->module('scoring');
 my $assoc=$data->module('association');
 my $capture=$data->module('capture');
+my $layout;
+
+$layout=$data->module('layout')
+  if($preassoc);
 
 debug "Automatic association $liste_file [$liste_enc] / $liste_key";
 
@@ -80,8 +86,12 @@ $assoc->clear_auto;
 
 # Loop on all codes that can be read on the scans.
 
-my $sth=$scoring->statement('codesCounts');
-$sth->execute($notes_id);
+my $sth=$scoring->statement($preassoc ? 'preAssocCounts' : 'codesCounts');
+if($preassoc) {
+  $sth->execute();
+} else {
+  $sth->execute($notes_id);
+}
 while(my $v=$sth->fetchrow_hashref) {
   if($v->{'nb'}==1) {
     # nb is the number of scans on which the same code value has been
@@ -96,7 +106,7 @@ while(my $v=$sth->fetchrow_hashref) {
     }
   } else {
     # Code value found on several sheets: do nothing, wait for the
-    # used to make a manual association for these sheets.
+    # user to make a manual association for these sheets.
     debug "Incorrect association for code value \"".$v->{'value'}."\": $v->{'nb'} instances";
   }
 }

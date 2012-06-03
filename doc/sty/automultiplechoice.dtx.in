@@ -3125,6 +3125,20 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCpageref#1{\expandafter\pageref{\the\AMCid@etud-#1}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
+% \subsection{Pre-association}
+%
+% \begin{macro}{\AMCassociation}
+%   Association between sheets and students can be made before the
+%   exam with the |\AMCassociation|\marg{id} command.
+%    \begin{macrocode}
+\newcommand{\AMCassociation}[1]{%
+  \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
+    \string\association{\the\AMCid@etud}{#1}%
+  }\fi%
+}
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Package options}
 %
 % See section~\ref{d:options} for the options descriptions.

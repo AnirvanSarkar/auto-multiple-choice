@@ -3176,6 +3176,8 @@ sub associe_auto {
 				    "--csv-build-name",csv_build_name(),
 				    "--encodage-liste",bon_encodage('liste'),
 				    "--debug",debug_file(),
+				    ($projet{'options'}->{'assoc_code'} eq '<preassoc>' ?
+				     "--pre-association" : "--no-pre-association"),
 				   ),
 	     ],
 	     'texte'=>__"Automatic association...",
@@ -3638,13 +3640,18 @@ sub noter_resultat {
   }
 
   my @codes=$projet{'_scoring'}->codes;
+  my $pre_assoc=$projet{'_layout'}->pre_association();
+
   $projet{'_scoring'}->end_transaction('MARK');
 
   debug "Codes : ".join(',',@codes);
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-  $cb_stores{'assoc_code'}=cb_model(''=>__p("(none) [No code found in LaTeX file]"),
-				    map { $_=>decode($o{'encodage_latex'},$_) }
-				    (@codes));
+  my @cbs=(''=>__p("(none) [No code found in LaTeX file]"),
+	   map { $_=>decode($o{'encodage_latex'},$_) }
+	   (@codes));
+  push @cbs,'<preassoc>',__"Pre-association"
+    if($pre_assoc);
+  $cb_stores{'assoc_code'}=cb_model(@cbs);
   transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'assoc_code'=>1});
 
   $w{'onglet_reports'}->set_sensitive(defined($avg));

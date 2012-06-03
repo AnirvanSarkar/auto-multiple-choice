@@ -453,6 +453,12 @@ sub define_statements {
      'codesCounts'=>{'sql'=>"SELECT student,copy,value,COUNT(*) as nb"
 		     ." FROM ".$self->table("code")
 		     ." WHERE code=? GROUP BY value"},
+     'preAssocCounts'=>
+     {'sql'=>"SELECT m.student,m.copy,l.id AS value,COUNT(*) AS nb"
+      ." FROM ".$self->table("mark")." AS m"
+      ."      , ".$self->table("association","layout")." AS l"
+      ." ON m.student=l.student AND m.copy=0"
+      ." GROUP BY l.id"},
 
      'avgMark'=>{'sql'=>"SELECT AVG(mark) FROM ".$self->table("mark")
 		 ." WHERE NOT (student=? AND copy=?)"},

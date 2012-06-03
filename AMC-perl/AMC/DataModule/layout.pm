@@ -112,6 +112,13 @@ package AMC::DataModule::layout;
 # * question is the question ID (see explanation in layout_box)
 #
 # * name is the question identifier from the LaTeX file
+#
+# layout_association contains the pre-association data
+#
+# * student is the student sheet number
+#
+# * id is the association value (student id from the students list)
+#   for the corresponding student sheet
 
 use Exporter qw(import);
 
@@ -131,7 +138,7 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(2);
+  return(3);
 }
 
 sub version_upgrade {
@@ -164,6 +171,11 @@ sub version_upgrade {
       $self->sql_do("ALTER TABLE ".$self->table("box")
 		   ." ADD COLUMN flags DEFAULT 0");
       return(2);
+    }
+    if($old_version==2) {
+      $self->sql_do("CREATE TABLE ".$self->table("association")
+		    ." (student INTEGER, id TEXT)");
+      return(3);
     }
     return('');
 }
@@ -275,6 +287,8 @@ sub define_statements {
 			." (student,page,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?)"},
        'NEWQuestion'=>{'sql'=>"INSERT INTO ".$self->table("question")
 		       ." (question,name) VALUES (?,?)"},
+       'NEWAssociation'=>{'sql'=>"INSERT INTO ".$self->table("association")
+			  ." (student,id) VALUES (?,?)"},
        'IDS'=>{'sql'=>"SELECT student || ',' || page FROM ".$self->table("page")
 	       ." ORDER BY student,page"},
        'FULLIDS'=>{'sql'=>"SELECT '+' || student || '/' || page || '/' || checksum || '+' FROM "
@@ -386,6 +400,7 @@ sub define_statements {
 	." ON a.corner=b.corner"
 	."    AND (abs(a.x-b.x)>? OR abs(a.y-b.y)>?)"
 	." LIMIT 1"},
+       'AssocNumber'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("association")},
       };
 }
 
@@ -568,7 +583,7 @@ sub question_name {
 
 sub clear_all {
     my ($self)=@_;
-    for my $t (qw/page mark namefield box digit source/) {
+    for my $t (qw/page mark namefield box digit source association/) {
 	$self->sql_do("DELETE FROM ".$self->table($t));
     }
 }
@@ -630,6 +645,21 @@ sub get_box_flags {
   my ($self,$student,$question,$answer)=@_;
   return($self->sql_single($self->statement('A_Flags'),
 			   $student,$question,$answer));
+}
+
+# new_association($student,$id) adds an association to the
+# pre-association data (associations made before the exam)
+
+sub new_association {
+  my ($self,$student,$id)=@_;
+  $self->statement('NEWAssociation')->execute($student,$id);
+}
+
+# pre_association() returns the number of pre-asociations
+
+sub pre_association {
+  my ($self)=@_;
+  return($self->sql_single($self->statement("AssocNumber")));
 }
 
 1;
