@@ -2833,10 +2833,10 @@ Three digits and two letters:\insertgroup{mixed}.
 % \subsection{Open questions}
 %
 % \begin{macro}{\AMCOpen}
-%   The command |\AMCOpen|\marg{options}\marg{choices} can be
-%   used as a replacement for the |choices| environment when asking
-%   the student to write some answer by hand. The teacher will correct
-%   and mark this answer either on the paper before scanning, or with
+%   The command |\AMCOpen|\marg{options}\marg{choices} can be used as
+%   a replacement for the |choices| environment when asking the
+%   student to write some answer by hand. The teacher will correct and
+%   mark this answer either on the paper before scanning, or with
 %   manual data capture, thanks to the scoring boxes.
 %
 %   As an example,
@@ -2882,6 +2882,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCOpen}{Treserved}{\def\AMCotextReserved{#1}}
 \define@key{AMCOpen}{question}{\def\AMCopen@question{#1}}
 \define@key{AMCOpen}{answer}{\def\AMCopen@answer{#1}}
+\define@key{AMCOpen}{contentcommand}[AMCopen@lines]{\def\AMCopen@contentcommand{#1}}
 \newdimen\AMCopen@Hspace\AMCopen@Hspace=.5em
 \define@key{AMCOpen}{hspace}{\AMCopen@Hspace=#1}
 \def\AMCopen@Width{.95\linewidth}
@@ -2902,13 +2903,23 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@boolkey{AMCOpen}{scan}[true]{}
 \define@boolkey{AMCOpen}{annotate}[false]{}
 \define@boolkey{AMCOpen}{lineup}[false]{}
-\setkeys{AMCOpen}{dots,scan,annotate,lineup}
+\setkeys{AMCOpen}{dots,scan,annotate,lineup,contentcommand}
 \newcommand\AMCopenOpts[1]{\setkeys{AMCOpen}{#1}}
 %    \end{macrocode}
 % 
 % The command |\AMCOpen| is similar to |\AMCnumericChoices|,
 % calling either |\AMCopenShow| or |\AMCopenHide|.
 %    \begin{macrocode}
+\newcommand\AMCopen@lines{%
+  \begin{minipage}{\AMCopen@Width}%
+    \loop\vspace{\AMCopen@LineHeight}
+    ~\ifAMC@correc\smash{\AMCopen@answer}\def\AMCopen@answer{}\fi%
+    \ifKV@AMCOpen@dots%
+    \dotfill~
+    \fi
+    \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
+  \end{minipage}
+}
 \newcommand\AMCopenShow[4]{
   \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
   \ifAMC@ensemble\ifAMCformulaire@dedans%
@@ -2955,14 +2966,8 @@ Three digits and two letters:\insertgroup{mixed}.
       \hspace*{\fill}{%
         \fboxrule=\AMCopen@framerule%
         \fcolorbox{\AMCocol@FrameRule}{white}{%
-          \begin{minipage}{\AMCopen@Width}%
-            \loop\vspace{\AMCopen@LineHeight}
-              ~\ifAMC@correc\smash{\AMCopen@answer}\def\AMCopen@answer{}\fi%
-              \ifKV@AMCOpen@dots%
-                \dotfill~
-              \fi
-            \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
-          \end{minipage}}}%
+          \csname\AMCopen@contentcommand\endcsname
+        }}%
       \vspace{7mm}\par%
     \fi%
   }%
