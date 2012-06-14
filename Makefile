@@ -185,9 +185,11 @@ install_models_%: FORCE
 install_models: $(addprefix install_models_,$(SUBMODS)) ;
 
 install: install_lang install_models FORCE
+ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_installmime
 ifneq ($(SHARED_MIMEINFO_DIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(SHARED_MIMEINFO_DIR)
 	install    -m 0644 $(USER_GROUP) interfaces/auto-multiple-choice.xml $(DESTDIR)/$(SHARED_MIMEINFO_DIR)
+endif
 endif
 ifneq ($(LANG_GTKSOURCEVIEW_DIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR)
