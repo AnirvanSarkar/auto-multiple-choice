@@ -117,10 +117,10 @@ MAJ: $(FROM_IN) ;
 # Binaries
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
-	$(GCC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
+	$(GCC) -o $@ $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
 
 AMC-detect: AMC-detect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
+	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
 # substitution in *.in files
 
