@@ -117,10 +117,10 @@ MAJ: $(FROM_IN) ;
 # Binaries
 
 AMC-traitement-image: AMC-traitement-image.c Makefile
-	$(GCC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
+	$(GCC) -o $@ $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
 
 AMC-detect: AMC-detect.cc Makefile
-	$(GCC_PP) -o $@ $< $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
+	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
 # substitution in *.in files
 
@@ -185,10 +185,16 @@ install_models_%: FORCE
 install_models: $(addprefix install_models_,$(SUBMODS)) ;
 
 install: install_lang install_models FORCE
+ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_installmime
+ifneq ($(SHARED_MIMEINFO_DIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(SHARED_MIMEINFO_DIR)
 	install    -m 0644 $(USER_GROUP) interfaces/auto-multiple-choice.xml $(DESTDIR)/$(SHARED_MIMEINFO_DIR)
+endif
+endif
+ifneq ($(LANG_GTKSOURCEVIEW_DIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR)
 	install    -m 0644 $(USER_GROUP) interfaces/amc-txt.lang $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR)
+endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)/perl
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)/exec

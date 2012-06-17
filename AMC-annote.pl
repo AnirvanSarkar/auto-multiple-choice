@@ -388,9 +388,6 @@ print "* Annotation\n";
 
       next BOX if($indic && !$annote_indicatives);
 
-      next BOX if($layout->get_box_flags($p->{'student'},$q,$r)
-		  & BOX_FLAGS_DONTANNOTATE);
-
       # to be ticked?
       my $bonne=$scoring->correct_answer($p_strategy,$q,$r);
 
@@ -409,15 +406,18 @@ print "* Annotation\n";
 	}
       }
 
-      if($sy->{type} eq 'circle') {
-	cercle_coors($context,$b->{'zoneid'},$sy->{color});
-      } elsif($sy->{type} eq 'mark') {
-	croix_coors($context,$b->{'zoneid'},$sy->{color});
-      } elsif($sy->{type} eq 'box') {
-	boite_coors($context,$b->{'zoneid'},$sy->{color});
-      } elsif($sy->{type} eq 'none') {
-      } else {
-	debug "Unknown symbol type ($bonne-$cochee): $sy->{type}";
+      if(!($layout->get_box_flags($p->{'student'},$q,$r)
+		  & BOX_FLAGS_DONTANNOTATE)) {
+	if($sy->{type} eq 'circle') {
+	  cercle_coors($context,$b->{'zoneid'},$sy->{color});
+	} elsif($sy->{type} eq 'mark') {
+	  croix_coors($context,$b->{'zoneid'},$sy->{color});
+	} elsif($sy->{type} eq 'box') {
+	  boite_coors($context,$b->{'zoneid'},$sy->{color});
+	} elsif($sy->{type} eq 'none') {
+	} else {
+	  debug "Unknown symbol type ($bonne-$cochee): $sy->{type}";
+	}
       }
 
       # pour avoir la moyenne des coors pour marquer la note de
