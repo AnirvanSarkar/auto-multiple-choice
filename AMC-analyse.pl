@@ -115,11 +115,13 @@ if($scans_list && open(LISTE,$scans_list)) {
 exit(0) if($#scans <0);
 
 sub error {
-    my ($e,$silent)=shift;
-    if($debug_image &&
-       $process->mode() eq 'opencv') {
+    my ($process,$e,$silent)=@_;
+    if($process) {
+      if($debug_image &&
+	 $process->mode() eq 'opencv') {
 	$process->commande("output ".$debug_image);
 	$process->ferme_commande;
+      }
     }
     if($silent) {
 	debug $e;
@@ -226,7 +228,7 @@ $layout->begin_read_transaction('cRLY');
 
 if($layout->pages_count()==0) {
   $layout->end_transaction('cRLY');
-  error("No layout");
+  error('',"No layout");
 }
 debug "".$layout->pages_count()." layouts\n";
 
@@ -427,7 +429,7 @@ sub one_scan {
     }
     close(CMD);
 
-    error("Unknown size") if(!$tiff_x);
+    error('',"Unknown size") if(!$tiff_x);
 
     debug "IMAGE = $scan ($tiff_x x $tiff_y)\n";
   }
@@ -504,7 +506,8 @@ sub one_scan {
     @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
 
     if($#okbox < 3) {
-	error("Only ".(1+$#okbox)." signs detected / needs at least 4");
+	error($process,
+	      "Only ".(1+$#okbox)." signs detected / needs at least 4");
     }
 
     @okbox=AMC::Boite::extremes(@okbox);
@@ -558,7 +561,7 @@ sub one_scan {
     $capture->failed($sf);
     $capture->end_transaction('CFLD');
 
-    error(sprintf("No layout for ID +%d/%d/%d+",@epc)) ;
+    error($process,sprintf("No layout for ID +%d/%d/%d+",@epc)) ;
   }
 
   if($process->mode() eq 'opencv') {
@@ -635,7 +638,7 @@ sub one_scan {
     $process->commande("annote ".pageids_string(@spc));
   }
 
-  error("End of diagnostic",1) if($debug_image);
+  error($process,"End of diagnostic",1) if($debug_image);
 
   ##########################################
   # Creates layout image report
