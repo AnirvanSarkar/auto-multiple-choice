@@ -354,6 +354,7 @@ sub score_question {
 # returns the score associated with correct answers for a question.
 sub score_correct_question {
     my ($self,$etu,$question_data)=@_;
+    debug "MARK: scoring correct answers";
     return($self->score_question($etu,0,$question_data,1));
 }
 
@@ -361,6 +362,7 @@ sub score_correct_question {
 # if not present, the score_correct_question value.
 sub score_max_question {
    my ($self,$etu,$question_data)=@_;
+   debug "MARK: scoring correct answers for MAX";
    my ($x,$raison,$b)=($self->score_question($etu,0,$question_data,1));
    if(defined($b->{'MAX'})) {
        return($b->{'MAX'},'M',$b);
