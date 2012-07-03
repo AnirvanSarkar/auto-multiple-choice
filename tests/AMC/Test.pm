@@ -278,11 +278,11 @@ sub analyse {
 		       '--fich-numeros',$nf,
 		       '--data','%DATA',
 		      );
-    system("cd $self->{'temp_dir'} ; gm convert xx-*.pdf yy-scan.png");
+    system("cd $self->{'temp_dir'} ; ".q[gm convert +adjoin xx-*.pdf yy-scan-%d.png]);
 
     opendir(my $dh, $self->{'temp_dir'})
       || die "can't opendir $self->{'temp_dir'}: $!";
-    my @s = grep { /^yy-scan\./ } readdir($dh);
+    my @s = grep { /^yy-scan-/ } readdir($dh);
     closedir $dh;
     push @{$self->{'scans'}},map { $self->{'temp_dir'}."/$_" } @s;
   }
