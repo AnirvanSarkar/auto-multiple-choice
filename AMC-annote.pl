@@ -64,6 +64,7 @@ my $pointsize_rel=60;
 my $chiffres_significatifs=4;
 
 my $verdict='TOTAL : %S/%M => %s/%m';
+my $verdict_question_cancelled='"X"';
 my $verdict_question='';
 
 my $font_name='FreeSans';
@@ -106,6 +107,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "ch-sign=s"=>\$chiffres_significatifs,
 	   "verdict=s"=>\$verdict,
 	   "verdict-question=s"=>\$verdict_question,
+	   "verdict-question-cancelled=s"=>\$verdict_question_cancelled,
 	   "fich-noms=s"=>\$fich_noms,
 	   "noms-encodage=s"=>\$noms_encodage,
 	   "csv-build-name=s"=>\$csv_build_name,
@@ -412,7 +414,13 @@ print "* Annotation\n";
 
 	my $result=$scoring->question_result(@spc[0,2],$q);
 
-	my $text=$verdict_question;
+	my $text;
+
+	if($result->{'why'} =~ /c/i) {
+	  $text=$verdict_question_cancelled;
+	} else {
+	  $text=$verdict_question;
+	}
 
 	$text =~ s/\%[S]/$result->{'score'}/g;
 	$text =~ s/\%[M]/$result->{'max'}/g;

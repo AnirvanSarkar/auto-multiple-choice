@@ -152,13 +152,13 @@ if($postcorrect_student) {
 for my $sc (@a_calculer) {
   debug "MARK: --- SHEET ".studentids_string(@$sc);
 
-  my $total=0;
-  my $max_i=0;
   my %codes=();
 
   my $ssb=$scoring->student_scoring_base(@$sc,$seuil);
 
   $bar->set_default_strategy($ssb->{'main_strategy'});
+
+  my @question_scores=();
 
   for my $question (keys %{$ssb->{'questions'}}) {
     my $q=$ssb->{'questions'}->{$question};
@@ -176,8 +176,12 @@ for my $sc (@a_calculer) {
     if ($q->{'indicative'}) {
       $notemax=1;
     } else {
-      $total+=$xx;
-      $max_i+=$notemax;
+      push @question_scores,{'score'=>$xx,
+			     'raison'=>$raison,
+			     'notemax'=>$notemax,
+			     'sc'=>[@$sc],
+			     'question'=>$question,
+			     };
     }
 
     $scoring->new_score(@$sc,$question,$xx,$notemax,$raison);
@@ -185,14 +189,7 @@ for my $sc (@a_calculer) {
 
   # Final mark --
 
-  # total qui faut pour avoir le max
-  my %m=$bar->degroupe($ssb->{'main_strategy'},{},{});
-  $max_i=$m{'SUF'} if(defined($m{'SUF'}));
-
-  if ($max_i<=0) {
-    debug "Warning: Nonpositive value for MAX.";
-    $max_i=1;
-  }
+  my ($total,$max_i)=$bar->global_score($scoring,@question_scores);
 
   # application du grain et de la note max
   my $x;

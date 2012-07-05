@@ -593,6 +593,17 @@ sub export {
 			 'references'=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
+    # NoteC : question annulee (par un allowempty)
+    $styles->createStyle('NoteC',
+			 parent=>'NoteQ',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#b1e3e9",
+			 },
+			 'references'=>{'style:data-style-name' => 'NombreVide'},
+			 );
+
     # NoteE : note car erreur "de syntaxe"
     $styles->createStyle('NoteE',
 			 parent=>'NoteQ',
@@ -950,7 +961,9 @@ sub export {
 		  $scores{$q->{'question'}}=1;
 		  push @scores_columns,$ii;
 		  push @{$col_cells{$ii}},$jj;
-		  if($r->{'why'} =~ /v/i) {
+		  if($r->{'why'} =~ /c/i) {
+		    $doc->cellStyle($feuille,$jj,$ii,'NoteC');
+		  } elsif($r->{'why'} =~ /v/i) {
 		    $doc->cellStyle($feuille,$jj,$ii,'NoteV');
 		  } elsif($r->{'why'} =~ /e/i) {
 		    $doc->cellStyle($feuille,$jj,$ii,'NoteE');
@@ -1062,7 +1075,7 @@ sub export {
     ##########################################################################
 
 # TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
-    my $legend=$doc->appendTable(encode('utf-8',__("Legend")),8,2);
+    my $legend=$doc->appendTable(encode('utf-8',__("Legend")),9,2);
 
     $doc->cellSpan($legend,0,0,2);
     $doc->cellStyle($legend,0,0,'Titre');
@@ -1077,6 +1090,10 @@ sub export {
     $doc->cellStyle($legend,$jj,0,'NoteV');
 # TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered.
     $doc->cellValue($legend,$jj,1,encode('utf-8',__("No answer")));
+    $jj++;
+    $doc->cellStyle($legend,$jj,0,'NoteC');
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered, but are cancelled by the use of allowempty scoring strategy.
+    $doc->cellValue($legend,$jj,1,encode('utf-8',__("Cancelled")));
     $jj++;
     $doc->cellStyle($legend,$jj,0,'NoteE');
 # TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.

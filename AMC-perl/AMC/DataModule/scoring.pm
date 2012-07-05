@@ -402,6 +402,8 @@ sub define_statements {
      'NEWScore'=>{'sql'=>"INSERT INTO ".$self->table("score")
 		  ." (student,copy,question,score,max,why)"
 		  ." VALUES (?,?,?,?,?,?)"},
+     'cancelScore'=>{'sql'=>"UPDATE ".$self->table("score")
+		     ." SET why=? WHERE student=? AND copy=? AND question=?"},
      'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
 		  ." (student,copy,total,max,mark)"
 		  ." VALUES (?,?,?,?,?)"},
@@ -773,6 +775,15 @@ sub new_score {
   my ($self,$student,$copy,$question,$score,$score_max,$why)=@_;
   $self->statement('NEWScore')
     ->execute($student,$copy,$question,$score,$score_max,$why);
+}
+
+# cancel_score($student,$copy,$question) cancels scoring (sets the
+# score and maximum score to zero) for this question.
+
+sub cancel_score {
+  my ($self,$student,$copy,$question)=@_;
+  $self->statement('cancelScore')
+    ->execute('C',$student,$copy,$question);
 }
 
 # new_mark($student,$copy,$total,$max,$mark) adds a mark row.

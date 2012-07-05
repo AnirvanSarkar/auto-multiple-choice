@@ -30,6 +30,7 @@ sub new {
 	      'seuil'=>0,
 	      'data'=>'',
 	      'default_strategy'=>{},
+	      'default_strategy_plain'=>{},
 	      '_capture'=>'',
 	      '_scoring'=>'',
 	  };
@@ -123,6 +124,8 @@ sub degroupe {
 
 sub set_default_strategy {
   my ($self,$strategy_string)=@_;
+  $self->{'default_strategy_plain'}=
+    {$self->degroupe($strategy_string,{},{})};
   $self->{'default_strategy'}=
     {$self->degroupe($strategy_string,
 		     {'e'=>0,'b'=>1,'m'=>0,'v'=>0,'d'=>0,'auto'=>-1},{})};
@@ -298,7 +301,10 @@ sub score_question {
 	    $raison = 'F';
 	  } else {
 	    # adds the 'd' shift value
-	    $xx+=$b_q{'d'};
+	    if($b_q{'d'}) {
+	      debug "Shift: $b_q{'d'}";
+	      $xx+=$b_q{'d'};
+	    }
 
 	    # applies the 'p' floor value
 	    if(defined($b_q{'p'})) {
@@ -369,6 +375,51 @@ sub score_max_question {
    } else {
        return($x,$raison,$b);
    }
+}
+
+# sums up the questions scores and return the global score and max
+# score, handling global scoring parameters like SUF and allowempty.
+#
+# $scoring is the AMC::DataModule::scoring object to write to the
+# database.
+#
+# @questions is an array of elements like
+# {'score'=>xx,'raison'=>rr,'notemax'=>xxmax} for each question.
+
+sub global_score {
+  my ($self,$scoring,@questions)=@_;
+  my $total=0;
+  my $max=0;
+
+  my $skip=$self->{'default_strategy_plain'}->{'allowempty'};
+  if($skip>0) {
+    @questions=sort { ($a->{'raison'} eq 'V' ? 0 : 1) <=>
+			($b->{'raison'} eq 'V' ? 0 : 1)
+		      || $b->{'notemax'} <=> $a->{'notemax'} } @questions;
+    while($skip>0 && @questions
+	  && $questions[0]->{'raison'} eq 'V') {
+      $skip--;
+      $scoring->cancel_score(@{$questions[0]->{'sc'}},
+			     $questions[0]->{'question'})
+	if($scoring);
+      shift @questions;
+    }
+  }
+
+  for my $q (@questions) {
+    $total+=$q->{'score'};
+    $max+=$q->{'notemax'};
+  }
+
+  $max=$self->{'default_strategy_plain'}->{'SUF'}
+    if(defined($self->{'default_strategy_plain'}->{'SUF'}));
+
+  if ($max<=0) {
+    debug "Warning: Nonpositive value for MAX.";
+    $max=1;
+  }
+
+  return($total,$max);
 }
 
 1;
