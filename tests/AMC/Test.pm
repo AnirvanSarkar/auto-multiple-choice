@@ -71,6 +71,7 @@ sub new {
      'annote'=>'',
      'annote_files'=>[],
      'annote_ascii'=>0,
+     'annote_position'=>'marge',
      'verdict'=>'%(id) %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
      'verdict_question'=>"\"%"."s/%"."m\"",
      'model'=>'(N).pdf',
@@ -456,6 +457,7 @@ sub annote {
 		     '--fich-noms','%PROJ/'.$self->{'list'},
 		     '--verdict',$self->{'verdict'},
 		     '--verdict-question',$self->{'verdict_question'},
+		     '--position',$self->{'annote_position'},
 		     '--projet','%PROJ',
 		     '--data','%DATA',
 		     );
