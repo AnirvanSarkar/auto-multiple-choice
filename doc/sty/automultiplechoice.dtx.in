@@ -1685,8 +1685,8 @@ Three digits and two letters:\insertgroup{mixed}.
    \fboxsep=\z@\fboxrule=\AMC@boxedrule%
     \lower\AMC@boxeddown\hbox{\fcolorbox{\AMC@boxcolor}%
       {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}%
-      {\vbox to \AMC@boxeddim{\AMC@tracepos{#2}{#3}\vfill %
-          \hbox to \AMC@boxeddim{\hfill{\textcolor{\AMC@boxcolor}{#1}}\hfill}\vfill}%
+      {\vbox to \AMC@boxedheight{\AMC@tracepos{#2}{#3}\vfill %
+          \hbox to \AMC@boxedwidth{\hfill{\textcolor{\AMC@boxcolor}{#1}}\hfill}\vfill}%
         \AMC@tracepos{#2}{#3}}}}}%
 }
 %    \end{macrocode}\end{macro}\end{macro}
@@ -1723,8 +1723,11 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newlength\AMC@boxedrule
 \newlength\AMC@boxeddown
-\newlength\AMC@boxeddim
-\define@key{AMCdim}{size}{\AMC@boxeddim=#1}
+\newlength\AMC@boxedwidth
+\newlength\AMC@boxedheight
+\define@key{AMCdim}{size}{\AMC@boxedwidth=#1\AMC@boxedheight=#1}
+\define@key{AMCdim}{height}{\AMC@boxedheight=#1}
+\define@key{AMCdim}{width}{\AMC@boxedwidth=#1}
 \define@key{AMCdim}{rule}{\AMC@boxedrule=#1}
 \define@key{AMCdim}{down}{\AMC@boxeddown=#1}
 \def\AMCboxDimensions#1{\setkeys{AMCdim}{#1}}
