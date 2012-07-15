@@ -1037,11 +1037,14 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsubsection{Boxes}
 % \DescribeMacro{\AMCboxDimensions} The command
-% |\AMCboxDimensions|\marg{dims} can be used to specify the dimensions
-% of the boxes to be ticked. The argument \meta{dims} is a
+% |\AMCboxDimensions|\marg{dims} can be used to specify the shape and
+% dimensions of the boxes to be ticked. The argument \meta{dims} is a
 % coma-separated list of \meta{key}|=|\meta{value} pairs, with the
 % following possible \meta{key}s:
 % \begin{itemize}
+% \item[|shape|] for the shape to be used: either |square| or
+%   |oval|. Note that if |oval| is used, the \LaTeX{} package |tikz|
+%   must be loaded.
 % \item[|size|] for the size of the edges of the boxes.
 % \item[|down|] for the length the boxes are to be moved down.
 % \item[|rule|] for the rule width.
@@ -1555,7 +1558,8 @@ Three digits and two letters:\insertgroup{mixed}.
     \string\tracepos%
     {\the\AMCid@etud/\thepage:#2}%
     {\noexpand\number\pdflastxpos sp}%
-    {\noexpand\number\pdflastypos sp}}%
+    {\noexpand\number\pdflastypos sp}%
+    {\AMC@shapename}}%
   \fi\fi}
 \def\AMC@traceposx#1#2{%
   \ifAMC@calibration\ifx\@empty#1\@empty\else%
@@ -1563,7 +1567,8 @@ Three digits and two letters:\insertgroup{mixed}.
     \string\tracepos%
     {\the\AMCid@etud/\thepage:#2}%
     {\noexpand\number\pdflastxpos sp}%
-    {0sp}}%
+    {0sp}%
+    {\AMC@shapename}}%
   \fi\fi}
 \def\AMC@traceposy#1#2{%
   \ifAMC@calibration\ifx\@empty#1\@empty\else%
@@ -1571,7 +1576,8 @@ Three digits and two letters:\insertgroup{mixed}.
     \string\tracepos%
     {\the\AMCid@etud/\thepage:#2}%
     {0sp}%
-    {\noexpand\number\pdflastypos sp}}%
+    {\noexpand\number\pdflastypos sp}%
+    {\AMC@shapename}}%
 \fi\fi}
 \newcommand\AMC@tracebox[3]{%
   \vbox{\AMC@traceposy{#1}{#2}%
@@ -1660,6 +1666,10 @@ Three digits and two letters:\insertgroup{mixed}.
 % \meta{key} is the box identification, and \meta{filled} is non-empty
 % for filling the box.
 %
+% Depending onthe required shape for the boxes, the corresponding
+% |\AMC@shape@xxx|\marg{color}\marg{background-color}\marg{trace}\marg{key}\marg{char}
+% command is used.
+%
 % The color of the boxes and of the characters drawn in them can be
 % set using the command |\AMCboxColor|\marg{color}, where \meta{color}
 % is a color that should be defined for the |xcolor| package. This
@@ -1682,12 +1692,32 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMC@boxedchar[4]{\AMC@LR{\hspace{0pt}%
   {\ifx\@empty#2\@empty \def\AMC@boxcolor{black}\fi%
    \ifAMC@correc\def\AMC@boxcolor{black}\fi%
-   \fboxsep=\z@\fboxrule=\AMC@boxedrule%
-    \lower\AMC@boxeddown\hbox{\fcolorbox{\AMC@boxcolor}%
-      {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}%
-      {\vbox to \AMC@boxedheight{\AMC@tracepos{#2}{#3}\vfill %
-          \hbox to \AMC@boxedwidth{\hfill{\textcolor{\AMC@boxcolor}{#1}}\hfill}\vfill}%
-        \AMC@tracepos{#2}{#3}}}}}%
+   \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename\endcsname%
+     {\AMC@boxcolor}%
+     {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}{#2}{#3}{#1}}}}%
+}
+\newcommand\AMC@shape@square[5]{%
+  \fboxsep=\z@\fboxrule=\AMC@boxedrule%
+  \fcolorbox{#1}{#2}%
+  {\vbox to \AMC@boxedheight{\AMC@tracepos{#3}{#4}\vfill %
+      \hbox to \AMC@boxedwidth{\hfill{\textcolor{#1}{#5}}\hfill}\vfill}%
+    \AMC@tracepos{#3}{#4}}}
+\newcommand\AMC@shape@oval[5]{%
+\AMC@tracebox{#3}{#4}{\begin{tikzpicture}%
+\draw[#1,fill=#2,line width=\AMC@boxedrule]
+  ({\AMC@oval@radius+0.5*\AMC@oval@interx},0.5\AMC@oval@intery)
+  arc (0:90:\AMC@oval@radius)
+  -- ++(-\AMC@oval@interx,0)
+  arc (90:180:\AMC@oval@radius)
+  -- ++(0,-\AMC@oval@intery)
+  arc (180:270:\AMC@oval@radius)
+  -- ++(\AMC@oval@interx,0)
+  arc (270:360:\AMC@oval@radius)
+  -- cycle;
+\clip (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
+  rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+\draw[#1] (0,0) node {#5};
+\end{tikzpicture}}%
 }
 %    \end{macrocode}\end{macro}\end{macro}
 %
@@ -1725,13 +1755,28 @@ Three digits and two letters:\insertgroup{mixed}.
 \newlength\AMC@boxeddown
 \newlength\AMC@boxedwidth
 \newlength\AMC@boxedheight
+\newlength\AMC@oval@radius
+\newlength\AMC@oval@interx
+\newlength\AMC@oval@intery
+\define@choicekey{AMCdim}{shape}{square,oval}{\def\AMC@shapename{#1}}
 \define@key{AMCdim}{size}{\AMC@boxedwidth=#1\AMC@boxedheight=#1}
 \define@key{AMCdim}{height}{\AMC@boxedheight=#1}
 \define@key{AMCdim}{width}{\AMC@boxedwidth=#1}
 \define@key{AMCdim}{rule}{\AMC@boxedrule=#1}
 \define@key{AMCdim}{down}{\AMC@boxeddown=#1}
-\def\AMCboxDimensions#1{\setkeys{AMCdim}{#1}}
-\AMCboxDimensions{size=2.5ex,down=.4ex,rule=.5pt}
+\def\AMCboxDimensions#1{%
+  \setkeys{AMCdim}{#1}%
+  \ifnum\AMC@boxedwidth<\AMC@boxedheight%
+    \AMC@oval@radius=\AMC@boxedwidth\divide\AMC@oval@radius\tw@%
+    \AMC@oval@interx=0pt%
+    \AMC@oval@intery=\AMC@boxedheight\advance\AMC@oval@intery by -\AMC@boxedwidth%
+  \else%
+    \AMC@oval@radius=\AMC@boxedheight\divide\AMC@oval@radius\tw@%
+    \AMC@oval@interx=\AMC@boxedwidth\advance\AMC@oval@interx by -\AMC@boxedheight%
+    \AMC@oval@intery=0pt%
+  \fi%
+}
+\AMCboxDimensions{shape=square,size=2.5ex,down=.4ex,rule=.5pt}
 %    \end{macrocode}\end{macro}
 %
 % \begin{macro}{\AMC@marque}\begin{macro}{\AMCformBox}\begin{macro}{\AMC@formBox}
@@ -1830,7 +1875,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@boxedchar{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}{}}
 \def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=\z@}
 \newcommand{\AMC@binaryBoxes}[2][1]{%
-{\AMCboxDimensions{size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2\relax%
+{\AMCboxDimensions{shape=square,size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2\relax%
 \AMCbin@ndigits=\z@%
 \loop%
 \ifnum\AMCbin@number>\z@%
