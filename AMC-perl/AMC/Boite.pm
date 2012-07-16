@@ -257,6 +257,13 @@ sub commande_mesure {
     return($c);
 }
 
+sub commande_mesure0 {
+    my ($self,$prop,$shape)=(@_);
+    my $c="mesure0 $prop $shape "
+      .join(' ',$self->etendue_xy('xy'));
+    return($c);
+}
+
 # renvoie les coordonnees du centre de la boite.
 
 sub centre {
@@ -378,6 +385,8 @@ sub etendue_xy {
 		   $xmin-$marge,$ymin-$marge);
     } elsif($mode eq '4') {
 	@r=($xmin,$ymin,$xmax,$ymax);
+    } elsif($mode eq 'xy') {
+	@r=($xmin,$xmax,$ymin,$ymax);
     } elsif($mode eq 'xmin') {
 	@r=$xmin;
     } elsif($mode eq 'xmax') {

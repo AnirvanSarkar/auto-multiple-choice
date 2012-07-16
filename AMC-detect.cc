@@ -59,6 +59,15 @@
 
 #define SWAP(x,y,tmp) tmp=x;x=y;y=tmp
 #define SGN_ROT (1-2*upside_down)
+#define SUM_SQUARE(x,y) (x)*(x)+(y)*(y)
+#define SHAPE_SQUARE 0
+#define SHAPE_OVAL 1
+
+#define DIR_X 1
+#define DIR_Y 2
+
+#define ILLUSTR_BOX 1
+#define ILLUSTR_PIXELS 2
 
 void agrege_init(double tx,double ty,double* coins_x,double* coins_y) {
   coins_x[0]=tx;coins_y[0]=ty;
@@ -195,6 +204,28 @@ void sys_22(double a,double b,double c,double d,double e,double f,
 
 double sqr(double x) { return(x*x); }
 
+void revert_transform(linear_transform *direct,
+		      linear_transform *back) {
+  double delta=direct->a*direct->d-direct->b*direct->c;
+  if(delta==0) {
+    printf("! NONINV : Non-invertible system.\n");
+    return;
+  }
+  back->a=direct->d/delta;
+  back->b=-direct->b/delta;
+  back->e=(direct->b*direct->f-direct->e*direct->d)/delta;
+
+  back->c=-direct->c/delta;
+  back->d=direct->a/delta;
+  back->f=(direct->e*direct->c-direct->a*direct->f)/delta;
+
+  printf("Back:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+	 back->a,back->b,
+	 back->c,back->d,
+	 back->e,
+	 back->f);
+}
+
 double optim(double* points_x,double* points_y,
 	     double* points_xp,double* points_yp,
 	     int n,
@@ -273,7 +304,7 @@ void calage(IplImage* src,IplImage* illustr,
     CvRect rect=cvBoundingRect(contour);
     if(rect.width<=target_max && rect.width>=target_min &&
        rect.height<=target_max && rect.height>=target_min) {
-      agrege(rect.x+rect.width/2.0,rect.y+rect.height/2.0,coins_x,coins_y);
+      agrege(rect.x+(rect.width-1)/2.0,rect.y+(rect.height-1)/2.0,coins_x,coins_y);
       
       printf("(%d;%d)+(%d;%d)\n",
 	     rect.x,rect.y,rect.width,rect.height);
@@ -336,6 +367,12 @@ void deplace(int i,int j,double delta,point *coins) {
   CLOSER(coins[i],coins[j],y,d,delta);
 }
 
+void deplace_xy(double *m1,double *m2,double delta) {
+  double d=(*m2-*m1)*delta;
+  *m1+=d;
+  *m2-=d;
+}
+
 void restreint(int *x,int *y,int tx,int ty) {
   if(*x<0) *x=0;
   if(*y<0) *y=0;
@@ -375,15 +412,22 @@ int check_zooms_dir(int student, char *zooms_dir=NULL,int log=0) {
   return(ok);
 }
 
-void mesure_case(IplImage *src,IplImage *illustr,
+void mesure_case(IplImage *src,IplImage *illustr,int illustr_mode,
 		 int student,int page,int question, int answer,
-		 double prop,point *coins,IplImage *dst=NULL,
+		 double prop,int shape_id,
+		 double o_xmin,double o_xmax,double o_ymin,double o_ymax,
+		 linear_transform *transfo_back,
+		 point *coins,IplImage *dst=NULL,
 		 char *zooms_dir=NULL,int view=0) {
   int npix,npixnoir,xmin,xmax,ymin,ymax,x,y;
   int z_xmin,z_xmax,z_ymin,z_ymax;
   ligne lignes[4];
   int i,ok;
   double delta;
+  double o_x,o_y;
+  CvScalar pixel;
+
+  double ov_r,ov_r2,ov_dir,ov_center,ov_x0,ov_x1,ov_y0,ov_y1;
 
   int tx=src->width;
   int ty=src->height;
@@ -404,8 +448,12 @@ void mesure_case(IplImage *src,IplImage *illustr,
       coins_int[i].x=(int)coins[i].x;
       coins_int[i].y=(int)coins[i].y;
     }
-    for(int i=0;i<4;i++) {
-      cvLine(illustr,coins_int[i],coins_int[(i+1)%4],BLEU,1,CV_AA);
+
+    if(illustr_mode==ILLUSTR_BOX) {
+      /* draws the box on the illustrated image (for zoom) */
+      for(int i=0;i<4;i++) {
+	cvLine(illustr,coins_int[i],coins_int[(i+1)%4],BLEU,1,CV_AA);
+      }
     }
 
     /* bounding box for zoom */
@@ -433,11 +481,112 @@ void mesure_case(IplImage *src,IplImage *illustr,
   deplace(0,2,delta,coins);
   deplace(1,3,delta,coins);
 
+  deplace_xy(&o_xmin,&o_xmax,delta);
+  deplace_xy(&o_ymin,&o_ymax,delta);
+
   /* output points used for mesuring */
   for(i=0;i<4;i++) {
     printf("COIN %.3f,%.3f\n",coins[i].x,coins[i].y);
   }
 
+  /* bounding box */
+  xmin=tx-1;
+  xmax=0;
+  ymin=ty-1;
+  ymax=0;
+  for(i=0;i<4;i++) {
+    if(coins[i].x<xmin) xmin=(int)coins[i].x;
+    if(coins[i].x>xmax) xmax=(int)coins[i].x;
+    if(coins[i].y<ymin) ymin=(int)coins[i].y;
+    if(coins[i].y>ymax) ymax=(int)coins[i].y;
+  }
+
+  restreint(&xmin,&ymin,tx,ty);
+  restreint(&xmax,&ymax,tx,ty);
+
+  if(o_xmin<0) {
+    /* computes half planes equations */
+    calcule_demi_plan(&coins[0],&coins[1],&lignes[0]);
+    calcule_demi_plan(&coins[1],&coins[2],&lignes[1]);
+    calcule_demi_plan(&coins[2],&coins[3],&lignes[2]);
+    calcule_demi_plan(&coins[3],&coins[0],&lignes[3]);
+  } else {
+    if(shape_id == SHAPE_OVAL) {
+      if(o_xmax-o_xmin < o_ymax-o_ymin) {
+	/* vertical oval */
+	ov_dir=DIR_Y;
+	ov_r=(o_xmax-o_xmin)/2;
+	ov_x0=o_xmin;
+	ov_x1=o_xmax;
+	ov_y0=o_ymin+ov_r;
+	ov_y1=o_ymax-ov_r;
+	ov_center=(o_xmin+o_xmax)/2;
+      } else {
+	/* horizontal oval */
+	ov_dir=DIR_X;
+	ov_r=(o_ymax-o_ymin)/2;
+	ov_x0=o_xmin+ov_r;
+	ov_x1=o_xmax-ov_r;
+	ov_y0=o_ymin;
+	ov_y1=o_ymax;
+	ov_center=(o_ymin+o_ymax)/2;
+      }
+      ov_r2=ov_r*ov_r;
+    }
+  }
+
+  for(x=xmin;x<=xmax;x++) {
+    for(y=ymin;y<=ymax;y++) {
+      if(o_xmin<0) {
+	/* With "mesure" command, checks if this point is in the box
+	   or not from the scan coordinates (x,y) */
+	ok=1;
+	for(i=0;i<4;i++) {
+	  if(evalue_demi_plan(&lignes[i],(double)x,(double)y)==0) ok=0;
+	}
+      } else {
+	/* With "mesure0" command, computes the coordinates in the
+	   original image with transfo_back, and then check if the
+	   point is in the box (this is easier since this box has
+	   edges parallel to coordinate axis) */
+	transforme(transfo_back,(double)x,(double)y,&o_x,&o_y);
+	if(shape_id == SHAPE_OVAL) {
+	  if(ov_dir==DIR_X) {
+	    if(o_x<=ov_x0) {
+	      ok=( SUM_SQUARE(o_x-ov_x0,o_y-ov_center) <= ov_r2);
+	    } else if(o_x>=ov_x1) {
+	      ok=( SUM_SQUARE(o_x-ov_x1,o_y-ov_center) <= ov_r2);
+	    } else {
+	      ok=( o_y>=ov_y0 && o_y<=ov_y1 );
+	    }
+	  } else {
+	    if(o_y<=ov_y0) {
+	      ok=( SUM_SQUARE(o_y-ov_y0,o_x-ov_center) <= ov_r2);
+	    } else if(o_y>=ov_y1) {
+	      ok=( SUM_SQUARE(o_y-ov_y1,o_x-ov_center) <= ov_r2);
+	    } else {
+	      ok=( o_x>=ov_x0 && o_x<=ov_x1 );
+	    }
+	  }
+	} else {
+	  ok=!(o_x<o_xmin || o_x>o_xmax || o_y<o_ymin || o_y>o_ymax);
+	}
+      }
+      if(ok==1) {
+	npix++;
+	if(PIXEL(src,x,y)) npixnoir++;
+	if(illustr!=NULL && illustr_mode==ILLUSTR_PIXELS) {
+	  /* with option -k, colors (on the zooms) pixels that are
+	     taken into account while computing the darkness ratio of
+	     the boxes */
+	  CV_IMAGE_ELEM(illustr,uchar,y,x*3)=(PIXEL(src,x,y) ? 0 : 255);
+	  CV_IMAGE_ELEM(illustr,uchar,y,x*3+1)=128;
+	  CV_IMAGE_ELEM(illustr,uchar,y,x*3+2)=0;
+	}
+      }
+    }
+  }
+      
   if(view==1 || illustr!=NULL) {
     for(int i=0;i<4;i++) {
       coins_int[i].x=(int)coins[i].x;
@@ -452,10 +601,14 @@ void mesure_case(IplImage *src,IplImage *illustr,
   }
 #endif
   if(illustr!=NULL) {
-    for(int i=0;i<4;i++) {
-      cvLine(illustr,coins_int[i],coins_int[(i+1)%4],ROSE,1,CV_AA);
-    }
 
+    if(illustr_mode==ILLUSTR_BOX) {
+      /* draws the measuring box on the illustrated image (for zoom) */
+      for(int i=0;i<4;i++) {
+	cvLine(illustr,coins_int[i],coins_int[(i+1)%4],ROSE,1,CV_AA);
+      }
+    }
+    
     /* making zoom */
 
     if(zooms_dir!=NULL && student>=0) {
@@ -489,40 +642,6 @@ void mesure_case(IplImage *src,IplImage *illustr,
     }
   }
 
-  /* bounding box */
-  xmin=tx-1;
-  xmax=0;
-  ymin=ty-1;
-  ymax=0;
-  for(i=0;i<4;i++) {
-    if(coins[i].x<xmin) xmin=(int)coins[i].x;
-    if(coins[i].x>xmax) xmax=(int)coins[i].x;
-    if(coins[i].y<ymin) ymin=(int)coins[i].y;
-    if(coins[i].y>ymax) ymax=(int)coins[i].y;
-  }
-
-  /* half planes equations */
-  calcule_demi_plan(&coins[0],&coins[1],&lignes[0]);
-  calcule_demi_plan(&coins[1],&coins[2],&lignes[1]);
-  calcule_demi_plan(&coins[2],&coins[3],&lignes[2]);
-  calcule_demi_plan(&coins[3],&coins[0],&lignes[3]);
-      
-  restreint(&xmin,&ymin,tx,ty);
-  restreint(&xmax,&ymax,tx,ty);
-
-  for(x=xmin;x<=xmax;x++) {
-    for(y=ymin;y<=ymax;y++) {
-      ok=1;
-      for(i=0;i<4;i++) {
-	if(evalue_demi_plan(&lignes[i],(double)x,(double)y)==0) ok=0;
-      }
-      if(ok==1) {
-	npix++;
-	if(PIXEL(src,x,y)) npixnoir++;
-      }
-    }
-  }
-      
   printf("PIX %d %d\n",npixnoir,npix);
 }
 
@@ -547,13 +666,15 @@ int main( int argc, char** argv )
   int i;
   int student,page,question,answer;
   point box[4];
-  linear_transform transfo;
+  linear_transform transfo,transfo_back;
   double mse;
 
   IplImage* src=NULL;
   IplImage* dst=NULL;
   IplImage* illustr=NULL;
   IplImage* src_calage=NULL;
+
+  int illustr_mode=ILLUSTR_BOX;
 
   char *scan_file=NULL;
   char *out_image_file=NULL;
@@ -577,7 +698,7 @@ int main( int argc, char** argv )
   // -v / -P : asks for marks detection debugging image report
 
   char c;
-  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:o:vPr")) != -1) {
+  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:o:vPrk")) != -1) {
     switch (c) {
     case 'x': taille_orig_x=atof(optarg);break; 
     case 'y': taille_orig_y=atof(optarg);break; 
@@ -589,6 +710,7 @@ int main( int argc, char** argv )
     case 'v': view=1;break;
     case 'r': ignore_red=1;break;
     case 'P': post_process_image=1;view=2;break;
+    case 'k': illustr_mode=ILLUSTR_PIXELS;break;
     }
   }
 
@@ -598,6 +720,8 @@ int main( int argc, char** argv )
   char* commande=NULL;
   char* endline;
   char text[128];
+  char shape_name[32];
+  int shape_id;
 
   CvPoint textpos;
   CvFont font;
@@ -666,6 +790,8 @@ int main( int argc, char** argv )
 	     transfo.e,
 	     transfo.f);
       printf("MSE=%f\n",mse);
+      
+      revert_transform(&transfo,&transfo_back);
     } else if(strncmp(commande,"rotateOK",8)==0) {
       /* validates upside down rotation */
       if(upside_down) {
@@ -692,6 +818,8 @@ int main( int argc, char** argv )
 	       transfo.c,transfo.d,
 	       transfo.e,
 	       transfo.f);
+
+	revert_transform(&transfo,&transfo_back);
       }
     } else if(strncmp(commande,"rotate180",9)==0) {
       for(i=0;i<2;i++) {
@@ -703,18 +831,32 @@ int main( int argc, char** argv )
     } else if(sscanf(commande,"id %d %d %d %d",
 		     &student,&page,&question,&answer)==4) {
       /* box id */
-    } else if(sscanf(commande,"mesure0 %lf %lf %lf %lf %lf",
-		     &prop,
-		     &xmin,&xmax,&ymin,&ymax)==5) {
-      /* "mesure0" and 5 arguments: proportion, xmin, xmax, ymin, ymax
+    } else if(sscanf(commande,"mesure0 %lf %s %lf %lf %lf %lf",
+		     &prop,shape_name,
+		     &xmin,&xmax,&ymin,&ymax)==6) {
+      /* "mesure0" and 6 arguments: proportion, shape, xmin, xmax, ymin, ymax
 	 return: number of black pixels and total number of pixels */
       transforme(&transfo,xmin,ymin,&box[0].x,&box[0].y);
       transforme(&transfo,xmax,ymin,&box[1].x,&box[1].y);
       transforme(&transfo,xmax,ymax,&box[2].x,&box[2].y);
       transforme(&transfo,xmin,ymax,&box[3].x,&box[3].y);
-      mesure_case(src,illustr,
+
+      if(strcmp(shape_name,"oval")==0) {
+	shape_id=SHAPE_OVAL;
+      } else {
+	shape_id=SHAPE_SQUARE;
+      }
+
+      /* output transformed points */
+      for(i=0;i<4;i++) {
+	printf("TCORNER %.3f,%.3f\n",box[i].x,box[i].y);
+      }
+
+      mesure_case(src,illustr,illustr_mode,
 		  student,page,question,answer,
-		  prop,box,dst,zooms_dir,view);
+		  prop,shape_id,
+		  xmin,xmax,ymin,ymax,&transfo_back,
+		  box,dst,zooms_dir,view);
       student=-1;
     } else if(sscanf(commande,"mesure %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 		     &prop,
@@ -725,9 +867,11 @@ int main( int argc, char** argv )
       /* "mesure" and 9 arguments: proportion, and 4 vertices
 	 (x y, order: UL UR BR BL)
 	 returns: number of black pixels and total number of pixels */
-      mesure_case(src,illustr,
+      mesure_case(src,illustr,illustr_mode,
 		  student,page,question,answer,
-		  prop,box,dst,zooms_dir,view);
+		  prop,SHAPE_SQUARE,
+		  -1,-1,-1,-1,NULL,
+		  box,dst,zooms_dir,view);
       student=-1;
     } else if(strlen(commande)<100 && 
 	      sscanf(commande,"annote %s",text)==1) {

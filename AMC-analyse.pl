@@ -51,6 +51,7 @@ my $cr_dir="";
 my $debug='';
 my $debug_image_dir='';
 my $debug_image='';
+my $debug_pixels=0;
 my $progress=0;
 my $progress_id=0;
 my $scans_list;
@@ -71,6 +72,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "prop=s"=>\$prop,
 	   "bw-threshold=s"=>\$bw_threshold,
 	   "debug=s"=>\$debug,
+	   "debug-pixels!"=>\$debug_pixels,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "liste-fichiers=s"=>\$scans_list,
@@ -277,6 +279,14 @@ sub marks_fit {
   $ld->{'transf'}=$cale;
 }
 
+sub get_shape {
+  my ($flags)=@_;
+  if($flags & BOX_FLAGS_SHAPE_OVAL) {
+    return('oval');
+  }
+  return('square');
+}
+
 ##################################################
 # Reads darkness of a particular box
 
@@ -292,13 +302,27 @@ sub measure_box {
 	}
     }
 
-    $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
-    $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
+    if($process->mode() eq 'opencv' &&
+       !($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
+      $ld->{'boxes.scan'}->{$k}=AMC::Boite::new();
+    } else {
+      $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
+      $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
+    }
 
     if(!($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
-      for($process->commande($ld->{'boxes.scan'}->{$k}
-			     ->commande_mesure($prop))) {
-
+      my $pc;
+      if($process->mode() eq 'opencv') {
+	$pc=$ld->{'boxes'}->{$k}
+	  ->commande_mesure0($prop,get_shape($ld->{'flags'}->{$k}));
+      } else {
+	$pc=$ld->{'boxes.scan'}->{$k}
+	  ->commande_mesure($prop);
+      }
+      for($process->commande($pc)) {
+	if(/^TCORNER\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
+	  $ld->{'boxes.scan'}->{$k}->def_point_suivant($1,$2);
+	}
 	if(/^COIN\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
 	  $ld->{'corners.test'}->{$k}->def_point_suivant($1,$2);
 	}
@@ -453,6 +477,7 @@ sub one_scan {
 
     push @args,'-P' if($debug_image);
     push @args,'-r' if($ignore_red);
+    push @args,'-k' if($debug_pixels);
 
     $process->set('args',\@args);
 

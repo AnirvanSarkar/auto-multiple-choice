@@ -303,6 +303,7 @@ sub analyse {
 		     '--bw-threshold',$self->{'bw_threshold'},
 		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
+		     ($self->{'debug'} ? '--debug-pixels' : '--no-debug-pixels'),
 		     '--projet','%PROJ',
 		     '--data','%DATA',
 		     @{$self->{'scans'}},
