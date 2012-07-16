@@ -124,14 +124,24 @@ while(<SRC>) {
 		     -dim_x=>read_inches($dx),-dim_y=>read_inches($dy),
 		     -cases=>$cases};
     }
-    if(/\\tracepos\{([^\}]+)\}\{([^\}]*)\}\{([^\}]*)\}/) {
+    if(/\\tracepos\{([^\}]+)\}\{([^\}]*)\}\{([^\}]*)\}(?:\{([^\}]*)\})?/) {
 	$i=$1;
 	my $x=read_inches($2);
 	my $y=read_inches($3);
+	my $shape=$4;
 	$i =~ s/^[0-9]+\/[0-9]+://;
-	$cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0} if(!$cases->{$i});
+	$cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0,'shape'=>''}
+	  if(!$cases->{$i});
 	ajoute($cases->{$i}->{'bx'},$x);
 	ajoute($cases->{$i}->{'by'},$y);
+	if($cases->{$i}->{'shape'}) {
+	  debug "WARNING: different shapes for a single box ($i)";
+	} else {
+	  $cases->{$i}->{'shape'}=$shape;
+	  if($shape eq 'oval') {
+	    $cases->{$i}->{'flags'} |= BOX_FLAGS_SHAPE_OVAL;
+	  }
+	}
     }
     if(/\\dontscan\{(.*)\}/) {
       add_flag($1,BOX_FLAGS_DONTSCAN);
@@ -224,7 +234,7 @@ for my $p (@pages) {
 	my ($name,$q,$a)=($1,$2,$3);
 	$layout->question_name($q,$name);
 	$layout->statement('NEWBox')
-	  ->execute(@ep,$q,$a,bbox($c->{$k}),0);
+	  ->execute(@ep,$q,$a,bbox($c->{$k}),$c->{$k}->{'flags'});
       }
     }
 
