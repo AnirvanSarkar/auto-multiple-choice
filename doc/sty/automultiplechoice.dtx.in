@@ -1704,6 +1704,8 @@ Three digits and two letters:\insertgroup{mixed}.
     \AMC@tracepos{#3}{#4}}}
 \newcommand\AMC@shape@oval[5]{%
 \AMC@tracebox{#3}{#4}{\begin{tikzpicture}%
+\useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
+  rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
 \draw[#1,fill=#2,line width=\AMC@boxedrule]
   ({\AMC@oval@radius+0.5*\AMC@oval@interx},0.5\AMC@oval@intery)
   arc (0:90:\AMC@oval@radius)
@@ -1714,8 +1716,6 @@ Three digits and two letters:\insertgroup{mixed}.
   -- ++(\AMC@oval@interx,0)
   arc (270:360:\AMC@oval@radius)
   -- cycle;
-\clip (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
-  rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
 \draw[#1] (0,0) node {#5};
 \end{tikzpicture}}%
 }
