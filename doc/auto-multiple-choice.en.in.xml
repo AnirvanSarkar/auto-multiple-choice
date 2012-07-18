@@ -3974,6 +3974,93 @@ student number &amp; class &amp; subject\\
       scale</guilabel> ticked, you will be prompted for the teacher answer
       sheet number. You can then continue as usual.</para>
     </sect2>
+
+    <sect2>
+      <title>Nominative sheets</title>
+
+      <para>In some situations, it can be useful to prepare nominative sheets
+      for all students, from a list of students. Let us see how this can be
+      done.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>The students list has to be a CSV list. Suppose in the
+          following that the file students.csv, in the project directory, is
+          UTF8 encoded and that its content is like the following:</para>
+
+          <programlisting>name,surname,id
+Boulix,Jojo,001
+Golin,André,002
+Moniuszko,Stanisław,003</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>The LaTeX source file has to load csvsimple package,
+          with:</para>
+
+          <programlisting>\usepackage{csvsimple}</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>In the LaTeX source file, define the subject as a command that
+          produce a single subject. This command will be called once for each
+          student by <command>\csvreader</command> (suppose here that the
+          questions has already be defined and included in a group named
+          <code>general</code>):</para>
+
+          <programlisting>\newcommand{\subject}{
+  \onecopy{1}{    
+
+    \noindent{\bf AutoMultipleChoice  \hfill TEST}
+
+    \vspace*{.5cm}
+
+    \begin{center}\em
+      Pre-filled test.
+    \end{center}
+
+    \hfill \namefield{\fbox{    
+        \begin{minipage}{.5\linewidth}
+          Name:
+      
+          \Large\bf \name{} \surname{}
+
+          \vspace*{1mm}
+        \end{minipage}
+      }}
+
+    \noindent\hrulefill
+
+    \vspace{1ex}
+
+    \shufflegroup{general}
+    \insertgroup{general}
+
+    \AMCassociation{\id}
+  }
+}
+
+\csvreader[head to column names]{students.csv}{}{\subject}
+</programlisting>
+
+          <para>The head to column names option for
+          <command>\csvreader</command> defines commands
+          <command>\name</command>, <command>\surname</command> and
+          <command>\id</command> (named from the CSV headers), that can be
+          used inside <command>\subject</command>. The
+          <command>\AMCassociation</command> call tells AMC to associate the
+          current sheet to student with id <command>\id</command>.</para>
+        </listitem>
+
+        <listitem>
+          <para>After printing, scanning, data capture and marking, when
+          associating copies with students, choose value
+          "<emphasis>pre-association</emphasis>" for field "code-name for
+          automatic association", and "<emphasis>id</emphasis>" for field
+          "Primary key".</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
   </sect1>
 
   <sect1 id="commands">

@@ -4244,6 +4244,93 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
       copie remplie par l'enseignant. La suite des opérations est la même que
       dans le cas standard.</para>
     </sect2>
+
+    <sect2>
+      <title>Copies préremplies</title>
+
+      <para>Dans certaines situations, il peut être souhaitable de préparer
+      des copies nominatives pour tous les étudiants, à partir d'une liste
+      d'étudiants. La démarche suivante, basée sur l'utilisation du paquet
+      LaTeX csvsimple, permet d'obtenir ce résultat.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>La liste des étudiants doit être au format CSV. On suppose
+          dans la suite que le fichier <filename>liste.csv</filename>, placé
+          dans le répertoire du projet, utilise l'encodage UTF8 et est sous la
+          forme suivante :<programlisting>nom,prenom,id
+Boulix,Jojo,001
+Golin,André,002
+Moniuszko,Stanisław,003</programlisting></para>
+        </listitem>
+
+        <listitem>
+          <para>Le sujet LaTeX doit charger le paquet csvsimple, grâce à une
+          ligne<programlisting>\usepackage{csvsimple}</programlisting></para>
+        </listitem>
+
+        <listitem>
+          <para>Dans le fichier source, le sujet doit être défini sous la
+          forme d'une commande LaTeX produisant un seul sujet, qui sera
+          appelée (autant de fois qu'il y a d'étudiants) par la commande
+          <command>\csvreader</command> de la façon suivante (on suppose que
+          les questions ont été préalablement insérées dans un groupe appelé
+          <code>general</code>) :</para>
+
+          <programlisting>\newcommand{\sujet}{
+  \onecopy{1}{    
+
+    \noindent{\bf AutoMultipleChoice  \hfill TEST}
+
+    \vspace*{.5cm}
+
+    \begin{center}\em
+      Test des copies pr\'e-remplies.
+    \end{center}
+
+    \hfill \champnom{\fbox{    
+        \begin{minipage}{.5\linewidth}
+          Nom:
+      
+          \Large\bf \prenom{} \non{}
+
+          \vspace*{1mm}
+        \end{minipage}
+      }}
+
+    \noindent\hrulefill
+
+    \vspace{1ex}
+
+    \melangegroupe{general}
+    \restituegroupe{general}
+
+    \AMCassociation{\id}
+  }
+}
+
+\csvreader[head to column names]{liste.csv}{}{\sujet}
+</programlisting>
+
+          <para>Notez l'utilisation de l'option <code>head to column
+          names</code> de <command>\csvreader</command> qui définit des
+          commandes basées sur les en-tête du fichier CSV (ici
+          <command>\nom</command>, <command>\prenom</command> et
+          <command>\id</command>) utilisables dans la production du sujet
+          personnalisé, et l'appel de <command>\AMCassociation</command> qui
+          indique à AMC que la copie produite doit être associée à
+          l'identifiant d'étudiant <command>\id</command>.</para>
+        </listitem>
+
+        <listitem>
+          <para>Après l'impression, le scan, la saisie automatique et la
+          notation des copies, au moment de l'association des copies avec les
+          étudiants, utiliser la valeur "<emphasis>pré-association</emphasis>"
+          pour le champ "Titre du code pour association automatique", et
+          "<emphasis>id</emphasis>" pour le champ "Identifiant unique".</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
   </sect1>
 
   <sect1 id="commandes">
