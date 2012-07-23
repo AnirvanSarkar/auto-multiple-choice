@@ -10,7 +10,7 @@
     <subtitle>自動採点と評定の可能な選択式試験問題のデザイン</subtitle>
 
     <abstract>
-      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1054）</para>
+      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1119）</para>
 
       <para>AMCプロジェクトは<ulink
       url="http://gna.org/">Gna!</ulink>によってホスティングされています。AMCウェブサイトは<ulink url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>にあり、プロジェクトがホスティングされているサイトは<ulink url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>です。</para>
@@ -1228,7 +1228,19 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
         <itemizedlist>
           <listitem>
-            <para><option>size</option> はボックスのサイズです。</para>
+            <para><option>shape</option> はボックスの形状です。<replaceable>square</replaceable>とすれば四角形になり、<replaceable>oval</replaceable>とすれば円または楕円になります。<replaceable>oval</replaceable>を使用するにはLaTeXのtikzパッケージをロードする必要があることに注意してください。</para>
+          </listitem>
+
+          <listitem>
+            <para><option>width</option> はボックスの幅です。</para>
+          </listitem>
+
+          <listitem>
+            <para><option>height</option> はボックスの高さです。</para>
+          </listitem>
+
+          <listitem>
+            <para><option>size</option> はボックスのサイズ（<option>width</option>と<option>height</option>）です。</para>
           </listitem>
 
           <listitem>
@@ -1394,6 +1406,14 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
             <listitem>
               <para><code>true</code>（デフォルト）なら、各行に点線を引きます。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>contentcommand=<replaceable>cmdname</replaceable></term>
+
+            <listitem>
+              <para>解答領域の内容をカスタマイズするにはこのオプションを使用してください。内容を生成するための<command>\<replaceable>cmdname</replaceable></command>コマンドを定義する必要があります。</para>
             </listitem>
           </varlistentry>
 
@@ -2435,6 +2455,11 @@ Name :
           <listitem>
             <para><code>SUF=</code><replaceable>x</replaceable>は、満点を得るのに十分な素点を定めます。例えば満点を10点とし、<code>SUF=8</code>と設定すると、完答での素点合計にかかわらず、素点合計が6点の受験生は得点として6/8*10=7.5点を得ます。</para>
           </listitem>
+
+          <listitem>
+            <para><code>allowempty=<replaceable>x</replaceable></code>は、
+<replaceable>x</replaceable>個の設問に解答する必要がないことを示します。素点を加算する際、<replaceable>x</replaceable>個の無回答設問はキャンセルされます。</para>
+          </listitem>
         </itemizedlist>
 
         <para>これらのパラメータを組み合わせれば、以下の例のように、様々な種類の採点基準を定義することができます:、</para>
@@ -2993,6 +3018,74 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
       <para>そしてこのLaTeXファイルをAMCで処理し、用紙を印刷し、試験実施後に（模範解答の用紙も含めて）スキャンして、AMCの自動マーク認識を開始させます。<guilabel>採点</guilabel>タブで<guilabel>採点基準を更新</guilabel>にチェックを入れて<guilabel>採点</guilabel>ボタンをクリックすると、出題者が記入した模範解答用紙の番号を入力するよう求められます。そのあとは通常どおりに続けることができます。</para>
     </sect2>
+
+    <sect2>
+      <title>指名試験問題用紙</title>
+
+      <para>状況によっては、受験者名簿をもとに各受験者別に指名した試験問題用紙を準備すると有用かもしれません。これをどのように行うか見てみます。</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>受験者名簿はCSVリストでなければなりません。以下では、students.csvファイルが、プロジェクトディレクトリにあり、UTF8でエンコードされ、中身が次のようになっているものとします:</para>
+
+          <programlisting>name,surname,id
+Boulix,Jojo,001
+Golin,André,002
+Moniuszko,Stanisław,003</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>LaTeXソースファイルで、次のようにcsvsimpleパッケージをロードします:</para>
+
+          <programlisting>\usepackage{csvsimple}</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>LaTeXソースファイルで、試験問題を生成するコマンドを定義します。このコマンドは、各受験生ごとに一回、<command>\csvreader</command>が呼び出します（ここでは、設問が定義されていて<code>general</code>というグループに含まれているものとします）:</para>
+
+          <programlisting>\newcommand{\subject}{
+  \onecopy{1}{    
+
+    \noindent{\bf AutoMultipleChoice  \hfill TEST}
+
+    \vspace*{.5cm}
+
+    \begin{center}\em
+      Pre-filled test.
+    \end{center}
+
+    \hfill \namefield{\fbox{    
+        \begin{minipage}{.5\linewidth}
+          Name:
+      
+          \Large\bf \name{} \surname{}
+
+          \vspace*{1mm}
+        \end{minipage}
+      }}
+
+    \noindent\hrulefill
+
+    \vspace{1ex}
+
+    \shufflegroup{general}
+    \insertgroup{general}
+
+    \AMCassociation{\id}
+  }
+}
+
+\csvreader[head to column names]{students.csv}{}{\subject}
+</programlisting>
+
+          <para><command>\csvreader</command>の<option>head to column names</option>オプションは、<command>\subject</command>内で使えるように（CSVのヘッダーから）<command>\name</command>、<command>\surname</command>、<command>\id</command>コマンドを定義します。<command>\AMCassociation</command>の呼出しにより、AMCは現在の試験問題用紙を<command>\id</command>というidをもつ受験者にリンクします。</para>
+        </listitem>
+
+        <listitem>
+          <para>印刷、スキャン、マーク認識、採点が終わった後、用紙と受験者をリンクする際、「答案内のリンク用コード名」フィールドに「<emphasis>印刷時リンク済</emphasis>」、「名簿内のリンク用主キー」フィールドに「<emphasis>id</emphasis>」を選択してください。</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
   </sect1>
 
   <sect1 id="commands">
@@ -3356,6 +3449,14 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
                     <manvolnum>1</manvolnum>
                   </citerefentry>などを参照してください）。データディレクトリのレイアウトデータベースは一つの試験問題が何ページ目から何ページ目まであるかを知るのに使われます。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><option>--split</option></term>
+
+              <listitem>
+                <para>別紙答案用紙を別に印刷します。</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -3810,6 +3911,14 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
             <listitem>
               <para>受験番号マーク欄の（LaTeXソースファイルで<command>\AMCcode</command>に与えられた）識別名を指定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--pre-association</option></term>
+
+            <listitem>
+              <para>使用された場合、<option>--notes-id</option>オプションを無視し、印刷時リンクデータ（LaTeXソースファイルの<command>\AMCassociation</command>コマンド）から自動リンクを行います。</para>
             </listitem>
           </varlistentry>
 
