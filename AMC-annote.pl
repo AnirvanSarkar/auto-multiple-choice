@@ -23,6 +23,8 @@ use Getopt::Long;
 use Gtk2;
 use Cairo;
 
+use List::Util qw(min max sum);
+
 use AMC::Basic;
 use AMC::Exec;
 use AMC::Gui::Avancement;
@@ -396,12 +398,8 @@ print "* Annotation\n";
 
       $question{$q}={} if(!$question{$q});
       my @mil=milieu_cercle($b->{'zoneid'});
-      $question{$q}->{'n'}++;
-      $question{$q}->{'x'}=$mil[0]
-	if((!$question{$q}->{'x'}) || ($mil[0]<$question{$q}->{'x'}));
-      $question{$q}->{'xmax'}=$mil[0]
-	if((!$question{$q}->{'xmax'}) || ($mil[0]>$question{$q}->{'xmax'}));
-      $question{$q}->{'y'}+=$mil[1];
+      push @{$question{$q}->{'x'}},$mil[0];
+      push @{$question{$q}->{'y'}},$mil[1];
     }
 
     #########################################
@@ -437,25 +435,51 @@ print "* Annotation\n";
 
 	$lay->set_text($text);
 	my ($tx,$ty)=$lay->get_pixel_size;
+
+	# mean of the y coordinate of all boxes
+	my $y=sum(@{$question{$q}->{'y'}})/(1+$#{$question{$q}->{'y'}})-$ty/2;
+
 	if($position eq 'marge') {
+	  # scores written in one margin
 	  if($rtl) {
 	    $x=$page_width-$ecart_marge*$text_x-$tx;
 	  } else {
 	    $x=$ecart_marge*$text_x;
 	  }
 	} elsif($position eq 'case') {
+	  # scores written at the left of the boxes
 	  if($rtl) {
-	    $x=$question{$q}->{'xmax'} + $ecart*$text_x ;
+	    $x=max(@{$question{$q}->{'x'}}) + $ecart*$text_x ;
 	  } else {
-	    $x=$question{$q}->{'x'} - $ecart*$text_x - $tx;
+	    $x=min(@{$question{$q}->{'x'}}) - $ecart*$text_x - $tx;
 	  }
+	} elsif($position eq 'marges') {
+	  # scores written in one of the margins (left or right),
+	  # depending on the position of the boxes. This mode is often
+	  # used when the subject is in a 2-column layout.
+
+	  # fist extract the y coordinates of the boxes in the left column
+	  my $left=1;
+	  my @y=map { $question{$q}->{'y'}->[$_] } grep { $rtl xor ( $question{$q}->{'x'}->[$_] <= $page_width/2 ) } (0..$#{$question{$q}->{'x'}} );
+	  if(!@y) {
+	    # if empty, use the right column
+	    $left=0;
+	    @y=map { $question{$q}->{'y'}->[$_] } grep { $rtl xor ( $question{$q}->{'x'}->[$_] > $page_width/2 ) } (0..$#{$question{$q}->{'x'}} );
+	  }
+
+	  # set the x-position to the right margin
+	  if($left xor $rtl) {
+	    $x=$ecart_marge*$text_x;
+	  } else {
+	    $x=$page_width-$ecart_marge*$text_x-$tx;
+	  }
+	  # set the y-position to the mean of y coordinates of the
+	  # boxes in the corresponding column
+	  $y=sum(@y)/(1+$#y)-$ty/2;
 	} else {
 	  debug "Annotation : position invalide : $position";
-	  $x=$text_x;
+	  $x=$ecart_marge*$text_x;
 	}
-
-	# moyenne des y des cases de la question
-	my $y=$question{$q}->{'y'}/$question{$q}->{'n'}-$ty/2;
 
 	$context->set_source_rgb(color_rgb('red'));
 	$context->move_to($x,$y);

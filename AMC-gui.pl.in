@@ -324,7 +324,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'after_export'=>'file',
 		   'export_include_abs'=>'',
 
-		   'annote_position'=>'marge',
+		   'annote_position'=>'marges',
 
 		   'verdict'=>'',
 		   'verdict_q'=>'',
@@ -1063,8 +1063,10 @@ my %cb_stores=(
     ),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
     'annote_position'=>cb_model("none"=>__p("(none) [No annotation position (do not write anything)]"),
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the margin. This is a menu entry.
-				"marge"=>__"margin",
+# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in one margin. This is a menu entry.
+				"marge"=>__"in one margin",
+# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in one of the two margins. This is a menu entry.
+				"marges"=>__"in the margins",
 # TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: near the boxes. This is a menu entry.
 				"case"=>__"near boxes",
     ),
@@ -2080,7 +2082,7 @@ sub doc_maj {
 		     }
 		 }
 
-		 my $ap=($c->variable('ensemble') ? 'case' : 'marge');
+		 my $ap=($c->variable('ensemble') ? 'case' : 'marges');
 		 $projet{'options'}->{'_modifie'}=1
 		     if($projet{'options'}->{'annote_position'} ne $ap);
 		 $projet{'options'}->{'annote_position'}=$ap;
