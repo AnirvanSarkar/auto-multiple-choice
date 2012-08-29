@@ -80,6 +80,7 @@ sub new {
      'to_check'=>[],
      'export_full_csv'=>[],
      'blind'=>0,
+     'check_zooms'=>{},
     };
 
   for (keys %oo) {
@@ -582,6 +583,29 @@ sub check_export {
   }
 }
 
+sub check_zooms {
+  my ($self)=@_;
+  my $cz=$self->{'check_zooms'};
+  for my $p (keys %{$cz}) {
+    $self->trace("[T] Zooms check : $p");
+    my $dir=$self->{'temp_dir'}."/cr/zooms/$p";
+    if(!-d $dir) {
+      $self->trace("[E] Zooms dir $p does not exist.");
+      exit(1);
+    }
+    opendir(ZD,$dir);
+    my @zf=grep { /\.png$/ } readdir(ZD);
+    closedir(ZD);
+
+    if(1+$#zf == $cz->{$p}) {
+      for(@zf) { $self->see_file("$dir/$_"); }
+    } else {
+      $self->trace("[E] Zooms dir $p contains ".(1+$#zf)." elements, but needs ".$cz->{$p});
+      exit(1);
+    }
+  }
+}
+
 sub data {
   my ($self)=@_;
   return(AMC::Data->new($self->{'temp_dir'}."/data"));
@@ -645,6 +669,7 @@ sub default_process {
   $self->prepare;
   $self->defects;
   $self->analyse;
+  $self->check_zooms;
   $self->note;
   $self->assoc;
   $self->get_assoc;
