@@ -497,8 +497,26 @@ print "* Annotation\n";
 
     debug "Saving annotated scan to $cr_dir/corrections/jpg/$out_file";
 
+    my @args=();
+
+    if($qualite_jpg) {
+      if($qualite_jpg =~ /^[0-9]+$/) {
+	push @args,"-quality",$qualite_jpg;
+      } else {
+	debug "WARNING: non-numeric --qualite argument, ignored ($qualite_jpg)";
+      }
+    }
+
+    if($taille_max) {
+      if($taille_max =~ /^[0-9]*x?[0-9]*$/) {
+	push @args,"-geometry",$taille_max;
+      } else {
+	debug "WARNING: malformed --taille-max argument, ignored ($taille_max)";
+      }
+    }
+
     open(CONV,"|-",magick_module("convert"),"png:-",
-	 "-quality",$qualite_jpg,"-geometry",$taille_max,
+	 @args,
 	 "$cr_dir/corrections/jpg/$out_file");
     $surface->write_to_png_stream(
 				  sub {
