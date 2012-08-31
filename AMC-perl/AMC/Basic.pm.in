@@ -419,6 +419,12 @@ sub debug_pm_version {
      }
 }
 
+my @debug_memory=();
+
+sub next_debug {
+  push @debug_memory,@_;
+}
+
 sub set_debug {
     my ($debug)=@_;
     if($debug =~ /\// && -f $debug) {
@@ -434,6 +440,9 @@ sub set_debug {
     }
     $amc_debug=$debug;
     set_debug_file() if($amc_debug && !$amc_debug_fh);
+
+    debug(@debug_memory);
+    @debug_memory=();
 }
 
 sub get_debug {
@@ -554,6 +563,7 @@ sub unpack_args {
 	my $file=shift(@args);
 	my $xa=XMLin($file,'ForceArray'=>1,'SuppressEmpty'=>'')->{'arg'};
 	unshift(@args,@$xa);
+	next_debug("Unpacked args: ".join(' ',@args));
     }
     return(@args);
 }
