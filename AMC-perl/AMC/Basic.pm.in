@@ -161,6 +161,12 @@ sub magick_perl_module {
 	      last TEST;
 	  }
       }
+	if(!$magick_pmodule) {
+	  debug(("*" x 85),
+		"ERROR: none of the perl modules Graphics::Magick and Image::Magick are available!",
+		"AMC won't work properly.",
+		("*" x 85));
+	}
 	if($magick_pmodule && !$dont_load_it) {
 	    load($magick_pmodule);
 	    debug_pm_version($magick_pmodule);
