@@ -652,8 +652,14 @@ if($o{'encodage_interne'} ne 'UTF-8') {
 # creates projets and models directories if needed (if not present,
 # Edit/Parameters can be disrupted)
 
-mkdir($o{'rep_projets'}) if(! -d $o{'rep_projets'});
-mkdir($o{'rep_modeles'}) if(! -d $o{'rep_modeles'});
+for my $k (qw/rep_projets rep_modeles/) {
+  my $path=$o{$k};
+  if(-e $path) {
+    debug "WARNING: $path ($k) is not a directory!" if(!-d $path);
+  } else {
+    mkdir($path);
+  }
+}
 
 #############################################################################
 
@@ -2398,8 +2404,8 @@ sub sujet_impressions_ok {
 	    debug "Print to file : no destionation...";
 	    $o{'options_impression'}->{'repertoire'}='';
 	} else {
-	    mkdir($o{'options_impression'}->{'repertoire'})
-		if(! -e $o{'options_impression'}->{'repertoire'});
+	  my $path=absolu($o{'options_impression'}->{'repertoire'});
+	  mkdir($path) if(! -e $path);
 	}
     }
 
@@ -2473,7 +2479,7 @@ sub sujet_impressions_ok {
 			  "--methode",$o{'methode_impression'},
 			  "--imprimante",$o{'imprimante'},
 			  "--options",$os,
-			  "--output",$o{'options_impression'}->{'repertoire'}."/sheet-%e.pdf",
+			  "--output",absolu($o{'options_impression'}->{'repertoire'})."/sheet-%e.pdf",
 			  ($o{'options_impression'}->{'split'} ? "--split" : "--no-split"),
 			  "--print-command",$o{'print_command_pdf'},
 			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
@@ -4109,11 +4115,14 @@ sub transmet_pref {
 	    $wp->set_text($h->{$t});
 	}
 	if($wp=find_object($gap,$prefixe,'_f_',$ta,$t,$update)) {
-	    if($wp->get_action =~ /-folder$/i) {
-		$wp->set_current_folder($h->{$t});
-	    } else {
-		$wp->set_filename($h->{$t});
-	    }
+	  my $path=$h->{$t};
+	  $path=absolu($path) if($t !~ /rep_/);
+	  if($wp->get_action =~ /-folder$/i) {
+	    mkdir($path) if(!-e $path);
+	    $wp->set_current_folder($path);
+	  } else {
+	    $wp->set_filename($path);
+	  }
 	}
 	if($wp=find_object($gap,$prefixe,'_v_',$ta,$t,$update)) {
 	    $wp->set_active($h->{$t});
@@ -4197,6 +4206,7 @@ sub reprend_pref {
 	    } else {
 		$n=$wp->get_filename();
 	    }
+	    $n=relatif($n) if($tgui !~ /rep_/);
 	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
