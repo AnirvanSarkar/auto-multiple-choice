@@ -261,21 +261,84 @@ sub bf_or {
 	 ? $replace : ($bf ? $bf : "\\bf"));
 }
 
+sub parse_images {
+  my ($self,@components)=@_;
+  my @o=();
+  for my $c (@components) {
+    if($c->{'type'} eq 'txt') {
+      my $s=$c->{'string'};
+      while($s =~ /!(?:\{([^!\s]+)\})?(?:\[([^!\s]+)\])?([^!\s]+)!/p) {
+	my $options=$1;
+	my $ig_options=$2;
+	my $path=$3;
+	my $before=${^PREMATCH};
+	my $after=${^POSTMATCH};
+	push @o,{'type'=>'txt','string'=>$before};
+	my $l="\\includegraphics".($ig_options ? '['.$ig_options.']' : '')
+	  .'{'.$path.'}';
+	if($options =~ /\bcenter\b/) {
+	  $l="\\begin{center}$l\\end{center}";
+	}
+	push @o,{'type'=>'latex','string'=>$l};
+	$s=$after;
+      }
+      push @o,{'type'=>'txt','string'=>$s};
+    } else {
+      push @o,$c;
+    }
+  }
+  return(@o);
+}
+
+sub parse_text {
+  my ($self,@components)=@_;
+  my @o=();
+  for my $c (@components) {
+    if($c->{'type'} eq 'txt') {
+      my $s=$c->{'string'};
+      if(! $self->{'options'}->{'latex'}) {
+	$s =~ s/\\/\\(\\backslash\\)/g;
+	$s =~ s/~/\\(\\sim\\)/g;
+	$s =~ s/\*/\\(\\ast\\)/g;
+	$s =~ s/([&{}\#_%])/\\\1/g;
+	$s =~ s/-/-{}/g;
+	$s =~ s/\$/\\textdollar{}/g;
+	$s =~ s/\^/\\textasciicircum{}/g;
+      }
+      push @o,{'type'=>'latex','string'=>$s};
+    } else {
+      push @o,$c;
+    }
+  }
+  return(@o);
+}
+
+sub parse_all {
+  my ($self,@components)=@_;
+  @components=$self->parse_images(@components);
+  @components=$self->parse_text(@components);
+  return(@components);
+}
+
+sub check_latex {
+  my ($self,@components)=@_;
+  my @s=();
+  for my $c (@components) {
+    if($c->{'type'} ne 'latex') {
+      debug_and_stderr "ERR(FILTER): non-latex resulting component (".
+	$c->{'type'}."): ".$c->{'string'};
+    }
+    push @s,$c->{'string'};
+  }
+  return(@s);
+}
+
 sub format_text {
   my ($self,$t)=@_;
   $t =~ s/^\s+//;
   $t =~ s/\s+$//;
-  if($self->{'options'}->{'latex'}) {
-  } else {
-    $t =~ s/\\/\\(\\backslash\\)/g;
-    $t =~ s/~/\\(\\sim\\)/g;
-    $t =~ s/\*/\\(\\ast\\)/g;
-    $t =~ s/([&{}\#_%])/\\\1/g;
-    $t =~ s/-/-{}/g;
-    $t =~ s/\$/\\textdollar{}/g;
-    $t =~ s/\^/\\textasciicircum{}/g;
-  }
-  return($t);
+
+  return(join('',$self->check_latex($self->parse_all({'type'=>'txt','string'=>$t}))));
 }
 
 sub scoring_string {
