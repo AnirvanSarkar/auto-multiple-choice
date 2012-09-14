@@ -44,7 +44,7 @@ sub new {
 				 LaTeXEngine xltxtra
 				 ShuffleQuestions Columns QuestionBlocks
 				 Arabic ArabicFont
-				 Skip
+				 Disable
 				/];
     $self->{'options_boolean'}=[qw/LaTeX xltxtra
 				   ShuffleQuestions QuestionBlocks
@@ -63,7 +63,7 @@ sub new {
        'defaultscoringm'=>'haut=2',
        'l-name'=>__("Name and surname"),
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
-       'skip'=>'',
+       'disable'=>'',
       };
     $self->{'parse_modules'}=['local_latex','images','text'];
     $self->{'qid'}=0;
@@ -343,7 +343,7 @@ sub parse_all {
   for my $m (@{$self->{'parse_modules'}}) {
     my $mm='parse_'.$m;
     @components=$self->$mm(@components)
-      if($self->{'options'}->{'skip'} !~ /\b$m\b/);
+      if($self->{'options'}->{'disable'} !~ /\b$m\b/);
   }
   return(@components);
 }
