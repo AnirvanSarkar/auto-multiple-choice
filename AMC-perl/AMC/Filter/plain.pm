@@ -65,7 +65,7 @@ sub new {
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
        'skip'=>'',
       };
-    $self->{'parse_modules'}=['images','text'];
+    $self->{'parse_modules'}=['local_latex','images','text'];
     $self->{'qid'}=0;
     bless ($self, $class);
     return $self;
@@ -283,6 +283,28 @@ sub parse_images {
 	  $l="\\begin{center}$l\\end{center}";
 	}
 	push @o,{'type'=>'latex','string'=>$l};
+	$s=$after;
+      }
+      push @o,{'type'=>'txt','string'=>$s};
+    } else {
+      push @o,$c;
+    }
+  }
+  return(@o);
+}
+
+sub parse_local_latex {
+  my ($self,@components)=@_;
+  my @o=();
+  for my $c (@components) {
+    if($c->{'type'} eq 'txt') {
+      my $s=$c->{'string'};
+      while($s =~ /\[\[(((?!\]\]).)+)\]\]/p) {
+	my $latex=$1;
+	my $before=${^PREMATCH};
+	my $after=${^POSTMATCH};
+	push @o,{'type'=>'txt','string'=>$before};
+	push @o,{'type'=>'latex','string'=>$latex};
 	$s=$after;
       }
       push @o,{'type'=>'txt','string'=>$s};
