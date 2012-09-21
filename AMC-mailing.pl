@@ -48,6 +48,7 @@ my $smtp_port=25;
 my $text='';
 my $subject='';
 my $project_name='';
+my @attach_files=();
 
 @ARGV=unpack_args(@ARGV);
 @ARGV_ORIG=@ARGV;
@@ -70,6 +71,7 @@ GetOptions("project=s"=>\$project_dir,
 	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
+	   "attach=s"=>\@attach_files,
 	   );
 
 set_debug($debug);
@@ -149,6 +151,30 @@ if($ids_file) {
 }
 my $delta=($nn>0 ? 1/$nn : 1);
 
+my @attachments=();
+
+for my $f (@attach_files) {
+  if(-f $f) {
+    my $name=$f =~ s/.*\///r;
+    my $body='';
+    open(ATT,$f);
+    while(<ATT>) { $body.=$_; }
+    close(ATT);
+    push @attachments,
+      Email::MIME->create(attributes=>
+			  {filename     => $name,
+			   content_type => file_mimetype($f),
+			   encoding     => "base64",
+			   name         => $name,
+			   disposition  => "attachment",
+			  },
+			  body => $body,
+			    );
+  } else {
+    debug "ERROR: Cannot attach inexistant file $f";
+  }
+}
+
 STUDENT: for my $i (@$r) {
   my ($s)=$students->data($key,$i->{'id'});
   my $dest=$s->{$email_column};
@@ -189,7 +215,7 @@ STUDENT: for my $i (@$r) {
       my $email = Email::MIME
 	->create(header_str => [ From=>$sender, To=>$dest,
 				 Subject=>$subst->substitute($subject,@sc) ],
-		 parts      => [ @parts ],
+		 parts      => [ @parts,@attachments ],
 		);
 
       my $b=eval { sendmail($email,{'transport'=>$t}); } || $@;

@@ -203,11 +203,7 @@ sub file_head {
 
 sub file_mimetype {
   my ($self,$file)=@_;
-  if(defined($file) && -f $file
-     && check_install(module=>"File::MimeInfo::Magic")) {
-    load("File::MimeInfo::Magic");
-    return("File::MimeInfo::Magic"->mimetype($file));
-  }
+  return(AMC::Basic::file_mimetype($file));
 }
 
 1;
