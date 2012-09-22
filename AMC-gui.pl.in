@@ -6225,6 +6225,22 @@ sub send_emails {
   }
   $w{'email_dialog'}->destroy;
 
+  # are all attachments present?
+  if($resp==1) {
+    my @missing=grep { ! -f $_ } (@{$projet{'options'}->{'email_attachment'}});
+    if(@missing) {
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',
+			  __("Some files you asked to be attached to the emails are missing:")."\n".join("\n",@missing)."\n".
+			  __("Please create them or remove them from the list of attached files."));
+      $dialog->run();
+      $dialog->destroy();
+      $resp=0;
+    }
+  }
+
   if($resp==1) {
     # writes the list of copies to send in a temporary file
     my $fh=File::Temp->new(TEMPLATE => "ids-XXXXXX",
