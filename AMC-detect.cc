@@ -219,7 +219,7 @@ void revert_transform(linear_transform *direct,
   back->d=direct->a/delta;
   back->f=(direct->e*direct->c-direct->a*direct->f)/delta;
 
-  printf("Back:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+  printf("Back:\na'=%f\nb'=%f\nc'=%f\nd'=%f\ne'=%f\nf'=%f\n",
 	 back->a,back->b,
 	 back->c,back->d,
 	 back->e,
