@@ -48,6 +48,7 @@ sub new {
 	'data-dir'=>'',
 	'size-prefs'=>'',
 	'encodage_interne'=>'UTF-8',
+	'list_view'=>'',
     };
 
     for (keys %o) {
@@ -90,7 +91,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info/) {
+    for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info button_previous button_next/) {
 	$self->{$_}=$self->{'gui'}->get_object($_);
     }
 
@@ -463,6 +464,29 @@ sub zoom_arriere {
     my ($self)=@_;
     $self->{'factor'} /= 1.25;
     $self->zoom_it();
+}
+
+sub zoom_list_previous {
+  my ($self)=@_;
+  my ($path)=$self->{'list_view'}->get_cursor();
+  if($path) {
+    if($path->prev) {
+      $self->{'list_view'}->set_cursor($path);
+    }
+  }
+}
+
+sub zoom_list_next {
+  my ($self)=@_;
+  my ($path)=$self->{'list_view'}->get_cursor();
+  if($path) {
+    my $path_next=Gtk2::TreePath->new ($path->to_string);
+    $path_next->next();
+    $self->{'list_view'}->set_cursor($path_next);
+    ($path_next)=$self->{'list_view'}->get_cursor();
+    $self->{'list_view'}->set_cursor($path)
+      if(!$path_next);
+  }
 }
 
 sub quit {
