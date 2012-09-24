@@ -5662,6 +5662,66 @@ Moniuszko,Stanisław,003</programlisting>
           </varlistentry>
 
           <varlistentry>
+            <term>--verdict-question
+            <replaceable>perl-expression</replaceable></term>
+
+            <listitem>
+              <para>sets the text to be printed next to all questions, through
+              a perl expression to be evaluated (if you need a simple text,
+              simply quote it with <code>"</code>). Some sequences are
+              substituted in it before evaluation:</para>
+
+              <variablelist>
+                <varlistentry>
+                  <term><literal>%S</literal></term>
+
+                  <listitem>
+                    <para>is replaced by the student score for this
+                    question.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term><literal>%M</literal></term>
+
+                  <listitem>
+                    <para>is replaced by the maximum score for this
+                    question.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term><literal>%s</literal></term>
+
+                  <listitem>
+                    <para>is the same as <code>%S</code>, but rounded to
+                    <replaceable>nc</replaceable> significant digits (see
+                    option <option>--ch-sign</option>).</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term><literal>%m</literal></term>
+
+                  <listitem>
+                    <para>is the same as <code>%M</code>, but rounded to
+                    <replaceable>nc</replaceable> significant digits (see
+                    option <option>--ch-sign</option>).</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+
+              <para>A standard value for this option is
+              <code>"\"%s/%m\""</code>. You can also use tests (with the perl
+              syntax <code>( TEST ? IF-YES : IF-NO )</code>) to write
+              <emphasis>Valid</emphasis> if the score is the maximal score, or
+              <emphasis>Failed</emphasis> if not, using</para>
+
+              <programlisting>--verdict-question "(%S==%M ? \"Valid\" : \"Failed\")"</programlisting>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><option>--ch-sign
             <replaceable>nc</replaceable></option></term>
 
