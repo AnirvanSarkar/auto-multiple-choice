@@ -4922,9 +4922,12 @@ sub open_unrecognized {
 
 sub unrecognized_line {
   my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
-  if(@sel) {
+  my $iter='';
+  if(@sel && defined($sel[0])) {
+    $iter=$inconnu_store->get_iter($sel[0]);
+  }
+  if($iter) {
     $w{'inconnu_tree'}->scroll_to_cell($sel[0]);
-    my $iter=$inconnu_store->get_iter($sel[0]);
     my $scan=absolu($inconnu_store->get($iter,INCONNU_FILE));
     if(-f $scan) {
       $w{'scan_area'}->set_image($scan);
@@ -4950,6 +4953,8 @@ sub unrecognized_line {
       $w{'state_scanrecog'}->set_text(sprintf((__"Error loading scan %s"),$scan));
     }
   } else {
+    $w{'scan_area'}->set_image('NONE');
+    $w{'preprocessed_area'}->set_image('NONE');
     state_image('scanrecog','gtk-dialog-question');
     $w{'state_scanrecog'}->set_text(__"No scan selected");
   }
@@ -4960,19 +4965,19 @@ sub unrecognized_next {
   @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows
     if(!@sel);
   my $iter;
-  if(@sel) {
+  if(@sel && defined($sel[$#sel])) {
     $iter=$inconnu_store->iter_next($inconnu_store->get_iter($sel[$#sel]));
   }
   $iter=$inconnu_store->get_iter_first if(!$iter);
 
   $w{'inconnu_tree'}->get_selection->unselect_all;
-  $w{'inconnu_tree'}->get_selection->select_iter($iter);
+  $w{'inconnu_tree'}->get_selection->select_iter($iter) if($iter);
 }
 
 sub unrecognized_prev {
   my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
   my $iter;
-  if(@sel) {
+  if(@sel && defined($sel[0])) {
     my $p=$inconnu_store->get_path($inconnu_store->get_iter($sel[0]));
     if($p->prev) {
       $iter=$inconnu_store->get_iter($p);
@@ -4983,7 +4988,7 @@ sub unrecognized_prev {
   $iter=$inconnu_store->get_iter_first if(!$iter);
 
   $w{'inconnu_tree'}->get_selection->unselect_all;
-  $w{'inconnu_tree'}->get_selection->select_iter($iter);
+  $w{'inconnu_tree'}->get_selection->select_iter($iter) if($iter);
 }
 
 sub unrecognized_delete {
