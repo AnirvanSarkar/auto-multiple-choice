@@ -5951,7 +5951,8 @@ sub project_email_name {
 
 sub email_attachment_addtolist {
   for my $f (@_) {
-    my $name=$f =~ s/.*\///r;
+    my $name=$f;
+    $name =~ s/.*\///;
     $attachments_store->set($attachments_store->append,
 			    ATTACHMENTS_FILE,absolu($f),
 			    ATTACHMENTS_NAME,$name,

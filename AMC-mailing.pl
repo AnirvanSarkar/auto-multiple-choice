@@ -155,7 +155,8 @@ my @attachments=();
 
 for my $f (@attach_files) {
   if(-f $f) {
-    my $name=$f =~ s/.*\///r;
+    my $name=$f;
+    $name =~ s/.*\///;
     my $body='';
     open(ATT,$f);
     while(<ATT>) { $body.=$_; }
