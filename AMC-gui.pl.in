@@ -2640,7 +2640,8 @@ sub saisie_manuelle {
 	 'image_type'=>$o{'manuel_image_type'},
 	 'retient_m'=>1,
 	 'editable'=>($regarder ? 0 : 1),
-	 'en_quittant'=>($regarder ? '' : \&detecte_analyse),
+	 'en_quittant'=>($regarder ? '' : 
+			 sub { detecte_analyse(); assoc_state(); }),
 	);
     } else {
 	my $dialog = Gtk2::MessageDialog
@@ -2970,6 +2971,7 @@ sub saisie_auto_ok {
 		     my $c=shift;
 		     close($c->{'o'}->{'fh'});
 		     detecte_analyse('apprend'=>1);
+		     assoc_state();
 		 },
 	);
 
