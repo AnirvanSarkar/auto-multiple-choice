@@ -1383,7 +1383,7 @@ sub delete_line {
 	  .$projet{'_capture'}->get_annotated_page(@id);
 	#
 	# zooms
-	push @files,map { $crdir.'/zooms/'.$_ } 
+	push @files,map { $crdir.'/zooms/'.$_ } grep { defined($_) }
 	  ($projet{'_capture'}->get_zones_images(@id,ZONE_BOX));
 	#
 	for (@files) {
