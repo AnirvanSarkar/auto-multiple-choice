@@ -62,6 +62,15 @@ $layout=$data->module('layout')
 
 debug "Automatic association $liste_file [$liste_enc] / $liste_key";
 
+# function that "cleans" IDs, removing leading zeros (so that 0001234
+# will be the same as 1234)
+
+sub clean_id {
+  my ($i)=@_;
+  $i =~ s/^0+//;
+  return($i);
+}
+
 # First read from the students list the possible values for the
 # primary key to be found there (from column named $liste_key).
 
@@ -71,10 +80,11 @@ my $liste_e=AMC::NamesFile::new($liste_file,
 
 my %bon_code;
 for my $ii (0..($liste_e->taille()-1)) {
-    $bon_code{$liste_e->data_n($ii,$liste_key)}=1;
+  my $id=$liste_e->data_n($ii,$liste_key);
+  $bon_code{clean_id($id)}=$id;
 }
 
-debug "Student list keys: ".join(',',keys %bon_code);
+debug "Cleaned student list keys: ".join(',',keys %bon_code);
 
 # Open association database and clear old automatic association
 
@@ -96,12 +106,14 @@ while(my $v=$sth->fetchrow_hashref) {
   if($v->{'nb'}==1) {
     # nb is the number of scans on which the same code value has been
     # read. If nb=1, this is OK: we can process association...
-    if($bon_code{$v->{'value'}}) {
-      # ... unless this value is NOT in the students list!
-      debug "Association OK for code value $v->{'value'}";
-      $assoc->set_auto(map { $v->{$_} } (qw/student copy value/));
-    } else {
+
+    my $id_in_list=$bon_code{clean_id($v->{'value'})};
+    if(defined($id_in_list)) {
       # Association OK
+      debug "Association OK for code value $v->{'value'} ($id_in_list)";
+      $assoc->set_auto((map { $v->{$_} } (qw/student copy/)),$id_in_list);
+    } else {
+      # ... unless this value is NOT in the students list!
       debug "Code value $v->{'value'} not found in students list: ignoring";
     }
   } else {
