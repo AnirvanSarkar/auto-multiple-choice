@@ -165,6 +165,8 @@ sub define_statements {
 			   ."(SELECT student,copy FROM $t_page"
 			   ." EXCEPT SELECT student,copy FROM $at"
 			   ." WHERE manual IS NOT NULL OR auto IS NOT NULL)"},
+     'deleteAssociations'=>{'sql'=>"DELETE FROM $at"
+			    ." WHERE student=? AND copy=?"},
     };
 }
 
@@ -314,5 +316,16 @@ sub missing_count {
   $self->{'data'}->require_module('capture');
   return($self->sql_single($self->statement('assocMissingCount')));
 }
+
+# delete_association_data($student,$copy) deletes all association data
+# for this answer sheet.
+
+sub delete_association_data {
+  my ($self,$student,$copy)=@_;
+  for my $part (qw/Associations/) {
+    $self->statement('delete'.$part)->execute($student,$copy);
+  }
+}
+
 
 1;

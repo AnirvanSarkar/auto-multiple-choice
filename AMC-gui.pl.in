@@ -1397,6 +1397,11 @@ sub delete_line {
 	#
 	$projet{'_capture'}->delete_page_data(@id);
 
+	if($projet{'options'}->{'auto_capture_mode'} == 1) {
+	  $projet{'_scoring'}->delete_scoring_data(@id[0,2]);
+	  $projet{'_association'}->delete_association_data(@id[0,2]);
+	}
+
 	push @iters,$iter;
       }
 

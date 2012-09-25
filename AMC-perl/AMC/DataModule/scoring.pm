@@ -493,6 +493,12 @@ sub define_statements {
       ." LEFT OUTER JOIN ".$self->table("title")." t"
       ." ON q.question=t.question"
       ." WHERE student=?"},
+     'deleteScores'=>{'sql'=>"DELETE FROM ".$self->table('score')
+		     ." WHERE student=? AND copy=?"},
+     'deleteMarks'=>{'sql'=>"DELETE FROM ".$self->table('mark')
+		    ." WHERE student=? AND copy=?"},
+     'deleteCodes'=>{'sql'=>"DELETE FROM ".$self->table('code')
+		    ." WHERE student=? AND copy=?"},
     };
 }
 
@@ -948,6 +954,16 @@ sub student_scoring_base {
     push @{$r->{'questions'}->{$qa->{'question'}}->{'answers'}},$qa;
   }
   return($r);
+}
+
+# delete_scoring_data($student,$copy) deletes all scoring data
+# relative to a particular answer sheet.
+
+sub delete_scoring_data {
+  my ($self,$student,$copy)=@_;
+  for my $part (qw/Scores Marks Codes/) {
+    $self->statement('delete'.$part)->execute($student,$copy);
+  }
 }
 
 1;
