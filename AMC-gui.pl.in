@@ -1408,6 +1408,8 @@ sub delete_line {
       for(@iters) { $diag_store->remove($_); }
       update_analysis_summary();
       $projet{'_capture'}->end_transaction('rmAN');
+
+      assoc_state();
     }
   }
 }
