@@ -195,7 +195,15 @@ STUDENT: for my $i (@$r) {
 
       my @sc=$assoc->real_back($i->{'id'});
       my @parts=
-	(Email::MIME->create(attributes=>
+	(
+	 Email::MIME->create(attributes=>
+			     {content_type => "text/plain",
+			      encoding     => "base64",
+			      charset      => "UTF-8",
+			     },
+			     body_str => $subst->substitute($text,@sc),
+			    ),
+	 Email::MIME->create(attributes=>
 			     {filename     => "corrected.pdf",
 			      content_type => "application/pdf",
 			      encoding     => "base64",
@@ -203,13 +211,6 @@ STUDENT: for my $i (@$r) {
 			      disposition  => "attachment",
 			     },
 			     body => $body,
-			    ),
-	 Email::MIME->create(attributes=>
-			     {content_type => "text/plain",
-			      encoding     => "base64",
-			      charset      => "UTF-8",
-			     },
-			     body_str => $subst->substitute($text,@sc),
 			    ),
 	);
 
