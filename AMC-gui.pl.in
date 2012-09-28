@@ -5965,7 +5965,10 @@ sub email_attachment_addtolist {
     $attachments_store->set($attachments_store->append,
 			    ATTACHMENTS_FILE,absolu($f),
 			    ATTACHMENTS_NAME,$name,
-			    ATTACHMENTS_FOREGROUND,(-f $f ? hex_color('black') : hex_color('red')),
+			    ATTACHMENTS_FOREGROUND,
+			    (-f absolu($f) ?
+			     hex_color('black') :
+			     hex_color('red')),
 			   );
   }
 }
@@ -6243,7 +6246,7 @@ sub send_emails {
 
   # are all attachments present?
   if($resp==1) {
-    my @missing=grep { ! -f $_ } (@{$projet{'options'}->{'email_attachment'}});
+    my @missing=grep { ! -f absolu($_) } (@{$projet{'options'}->{'email_attachment'}});
     if(@missing) {
       my $dialog = Gtk2::MessageDialog
 	->new_with_markup($w{'main_window'},
