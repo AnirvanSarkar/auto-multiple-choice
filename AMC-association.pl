@@ -19,22 +19,67 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
-use AMC::Gui::Association;
 
 my $cr_dir='';
 my $liste='';
 my $data_dir='';
+my $list='';
+my $set='';
+my $student='';
+my $copy=0;
+my $id=undef;
 
 GetOptions("cr=s"=>\$cr_dir,
 	   "liste=s"=>\$liste,
 	   "data=s"=>\$data_dir,
+	   "list!"=>\$list,
+	   "set!"=>\$set,
+	   "student=s"=>\$student,
+	   "copy=s"=>\$copy,
+	   "id=s"=>\$id,
 	   );
 
-my $g=AMC::Gui::Association::new('cr'=>$cr_dir,
-				 'liste'=>$liste,
-				 'data_dir'=>$data_dir,
-				 'global'=>1,
-				 );
+if($list) {
+  use AMC::Data;
+  use AMC::Basic;
+  my $data=AMC::Data->new($data_dir);
+  my $assoc=$data->module('association');
+  $data->begin_read_transaction('ALST');
+  my $list=$assoc->list();
+  $data->end_transaction('ALST');
+  print "Student\tID\n";
+  for my $c (@$list) {
+    print studentids_string($c->{'student'},$c->{'copy'})."\t";
+    if(defined($c->{'manual'})) {
+      print $c->{'manual'};
+      print " (manual";
+      if(defined($c->{'auto'})) {
+	print ", auto=".$c->{'auto'};
+      }
+      print ")\n";
+    } elsif(defined($c->{'auto'})) {
+      print $c->{'auto'}." (auto)\n";
+    } else {
+      print "(none)\n";
+    }
+  }
+} elsif($set) {
+  use AMC::Data;
+  use AMC::Basic;
+  my $data=AMC::Data->new($data_dir);
+  my $assoc=$data->module('association');
+  $data->begin_transaction('ASET');
+  $assoc->set_manual($student,$copy,$id);
+  $data->end_transaction('ASET');
+} else {
+  use AMC::Gui::Association;
+  my $g=AMC::Gui::Association::new('cr'=>$cr_dir,
+				   'liste'=>$liste,
+				   'data_dir'=>$data_dir,
+				   'global'=>1,
+				  );
 
-Gtk2->main;
+  Gtk2->main;
+}
+
 

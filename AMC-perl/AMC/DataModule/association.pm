@@ -167,6 +167,7 @@ sub define_statements {
 			   ." WHERE manual IS NOT NULL OR auto IS NOT NULL)"},
      'deleteAssociations'=>{'sql'=>"DELETE FROM $at"
 			    ." WHERE student=? AND copy=?"},
+     'list'=>{'sql'=>"SELECT * FROM $at ORDER BY student,copy"},
     };
 }
 
@@ -327,5 +328,11 @@ sub delete_association_data {
   }
 }
 
+# list() returns all association data
+
+sub list {
+  my ($self)=@_;
+  return($self->dbh->selectall_arrayref($self->statement('list'),{Slice=>{}}));
+}
 
 1;
