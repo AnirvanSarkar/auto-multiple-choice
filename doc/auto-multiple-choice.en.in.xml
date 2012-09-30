@@ -5145,6 +5145,85 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
+    <refentry id="AMC-association-auto">
+      <refmeta>
+        <refentrytitle>AMC-association</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+
+        <refmiscinfo class="source">Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
+      </refmeta>
+
+      <refnamediv>
+        <refname>AMC-association</refname>
+
+        <refpurpose>manual association between students and answer sheets for
+        AMC multiple choice exams.</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">association-auto</arg>
+
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
+
+          <arg choice="plain">--list</arg>
+        </cmdsynopsis>
+
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">association-auto</arg>
+
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
+
+          <arg choice="plain">--set</arg>
+
+          <arg choice="plain">--student
+          <replaceable>student-sheet-number</replaceable></arg>
+
+          <arg>--copy <replaceable>copy-number</replaceable></arg>
+
+          <arg choice="plain">--id <replaceable>student-id</replaceable></arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+        <para>The <command>AMC-association.pl</command> command handles
+        association data between students and their answer sheet.</para>
+
+        <variablelist>
+          <varlistentry>
+            <term><option>--data
+            <replaceable>project-data-dir</replaceable></option></term>
+
+            <listitem>
+              <para>gives the directory where data files are (see for example
+              <citerefentry>
+                  <refentrytitle>AMC-prepare</refentrytitle>
+
+                  <manvolnum>1</manvolnum>
+                </citerefentry>).</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>With option <option>--list</option>, all association data is
+        output.</para>
+
+        <para>With option <option>--set</option>, a manual association is
+        updated.</para>
+      </refsect1>
+    </refentry>
+
     <refentry id="AMC-export">
       <refmeta>
         <refentrytitle>AMC-export</refentrytitle>
