@@ -197,6 +197,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 				    ],
 # TRANSLATORS: directory name for projects. This directory will be created (if needed) in the home directory of the user. Please use only alphanumeric characters, and - or _. No accentuated characters.
 	      'rep_projets'=>$home_dir.'/'.__"MC-Projects",
+	      'projects_home'=>$home_dir.'/'.__"MC-Projects",
 	      'rep_modeles'=>$o_dir."/Models",
 	      'seuil_eqm'=>3.0,
 	      'seuil_sens'=>8.0,
@@ -1553,24 +1554,52 @@ sub projet_gestion {
     liste_des_projets('gestion'=>1);
 }
 
+sub projects_list {
+  # construit la liste des projets existants
+  if(-d $o{'rep_projets'}) {
+    opendir(DIR, $o{'rep_projets'})
+      || die "Error opening directory ".$o{'rep_projets'}." : $!";
+    my @f=map { decode("utf-8",$_); } readdir(DIR);
+    debug "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f);
+
+    my @projs = grep { ! /^\./ && -d $o{'rep_projets'}."/".$_ } @f;
+    closedir DIR;
+    debug "[".$o{'rep_projets'}."] P:".join(',',@projs);
+    return(@projs);
+  }
+}
+
+sub projects_show {
+  my ($p)=@_;
+  $p=[projects_list()] if(!$p);
+
+  $w{'projet_bouton_choose_directory'}
+    ->set_tooltip_text(sprintf(__("Current directory: %s"),$o{'rep_projets'}));
+
+  if(!$w{'icon_project'}) {
+    my ($taille,undef)=Gtk2::IconSize->lookup('menu');
+    $w{'icon_project'} = Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$taille ,"force-svg");
+    $w{'icon_project_dir'} = Gtk2::IconTheme->get_default->load_icon("gtk-no",$taille ,"force-svg");
+    $w{'icon_project'}=$w{'main_window'}->render_icon ('gtk-open', 'menu')
+      if(!$w{'icon_project'});
+  }
+
+  $proj_store->clear;
+  for (sort { $a cmp $b } @$p) {
+    $proj_store->set($proj_store->append,
+		     PROJ_NOM,$_,
+		     PROJ_ICO,
+		     (-f fich_options($_) ?
+		      $w{'icon_project'} : $w{'icon_project_dir'} ));
+  }
+}
+
 sub liste_des_projets {
     my %oo=(@_);
-    my @projs;
 
     mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
 
-    # construit la liste des projets existants
-
-    if(-d $o{'rep_projets'}) {
-	opendir(DIR, $o{'rep_projets'})
-	    || die "Error opening directory ".$o{'rep_projets'}." : $!";
-	my @f=map { decode("utf-8",$_); } readdir(DIR);
-	debug "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f);
-
-	@projs = grep { ! /^\./ && -d $o{'rep_projets'}."/".$_ } @f;
-	closedir DIR;
-	debug "[".$o{'rep_projets'}."] P:".join(',',@projs);
-    }
+    my @projs=projects_list();
 
     if($#projs>=0 || $oo{'cree'}) {
 
@@ -1583,6 +1612,7 @@ sub liste_des_projets {
 	    projet_bouton_supprime projet_bouton_annule
 	    projet_bouton_annule_label projet_bouton_renomme
 	    projet_bouton_mv_yes projet_bouton_mv_no
+	    projet_bouton_choose_directory
 	    projet_nom projet_nouveau_syntaxe projet_nouveau/);
 
 	if($oo{'cree'}) {
@@ -1623,18 +1653,7 @@ sub liste_des_projets {
 	$w{'choix_projets_liste'}->set_text_column(PROJ_NOM);
 	$w{'choix_projets_liste'}->set_pixbuf_column(PROJ_ICO);
 
-	my ($taille,undef)=Gtk2::IconSize->lookup('menu');
-        my $pb = Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$taille ,"force-svg");
-	my $pb_rep = Gtk2::IconTheme->get_default->load_icon("gtk-no",$taille ,"force-svg");
-	$pb=$w{'main_window'}->render_icon ('gtk-open', 'menu') if(!$pb);
-
-	for (sort { $a cmp $b } @projs) {
-	    $proj_store->set($proj_store->append,
-			     PROJ_NOM,$_,
-			     PROJ_ICO,
-			     (-f fich_options($_) ?
-			       $pb : $pb_rep ));
-	}
+	projects_show(\@projs);
 
 	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
 
@@ -1650,6 +1669,28 @@ sub liste_des_projets {
 	$dialog->destroy;
 
     }
+}
+
+sub project_choose_directory {
+  my $d=Gtk2::FileChooserDialog
+    ->new(__("Choose directory"),
+	  $w{'choix_projet'},'select-folder',
+	  'gtk-cancel'=>'cancel',
+	  'gtk-ok'=>'ok');
+  $d->set_current_folder($o{'rep_projets'});
+  my $r=$d->run;
+  if($r eq 'ok') {
+    my $rep=$d->get_filename || $d->get_current_directory;
+    if(-d $rep) {
+      $o{'rep_projets'}=$rep;
+      $o{'_modifie'}=1;
+    }
+  }
+  $d->destroy();
+
+  if($r eq 'ok') {
+    projects_show();
+  }
 }
 
 sub projet_gestion_check {
