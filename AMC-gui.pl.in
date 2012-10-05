@@ -655,6 +655,10 @@ if($o{'encodage_interne'} ne 'UTF-8') {
     $o{'_modifie'}=1;
 }
 
+# Reset projects directory to standard one
+
+$o{'rep_projets'}=$o{'projects_home'};
+
 # creates projets and models directories if needed (if not present,
 # Edit/Parameters can be disrupted)
 
@@ -1683,7 +1687,6 @@ sub project_choose_directory {
     my $rep=$d->get_filename || $d->get_current_directory;
     if(-d $rep) {
       $o{'rep_projets'}=$rep;
-      $o{'_modifie'}=1;
     }
   }
   $d->destroy();
