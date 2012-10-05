@@ -744,8 +744,9 @@ sub is_local {
 }
 
 sub fich_options {
-    my $nom=shift;
-    return $o{'rep_projets'}."/$nom/options.xml";
+    my ($nom,$rp)=@_;
+    $rp=$o{'rep_projets'} if(!$rp);
+    return "$rp/$nom/options.xml";
 }
 
 sub moteur_latex {
@@ -1560,15 +1561,15 @@ sub projet_gestion {
 
 sub projects_list {
   # construit la liste des projets existants
-  if(-d $o{'rep_projets'}) {
-    opendir(DIR, $o{'rep_projets'})
-      || die "Error opening directory ".$o{'rep_projets'}." : $!";
+  if(-d $w{'local_rep_projets'}) {
+    opendir(DIR, $w{'local_rep_projets'})
+      || die "Error opening directory ".$w{'local_rep_projets'}." : $!";
     my @f=map { decode("utf-8",$_); } readdir(DIR);
-    debug "F:".join(',',map { $_.":".(-d $o{'rep_projets'}."/".$_) } @f);
+    debug "F:".join(',',map { $_.":".(-d $w{'local_rep_projets'}."/".$_) } @f);
 
-    my @projs = grep { ! /^\./ && -d $o{'rep_projets'}."/".$_ } @f;
+    my @projs = grep { ! /^\./ && -d $w{'local_rep_projets'}."/".$_ } @f;
     closedir DIR;
-    debug "[".$o{'rep_projets'}."] P:".join(',',@projs);
+    debug "[".$w{'local_rep_projets'}."] P:".join(',',@projs);
     return(@projs);
   }
 }
@@ -1578,7 +1579,7 @@ sub projects_show {
   $p=[projects_list()] if(!$p);
 
   $w{'projet_bouton_choose_directory'}
-    ->set_tooltip_text(sprintf(__("Current directory: %s"),$o{'rep_projets'}));
+    ->set_tooltip_text(sprintf(__("Current directory: %s"),$w{'local_rep_projets'}));
 
   if(!$w{'icon_project'}) {
     my ($taille,undef)=Gtk2::IconSize->lookup('menu');
@@ -1593,7 +1594,7 @@ sub projects_show {
     $proj_store->set($proj_store->append,
 		     PROJ_NOM,$_,
 		     PROJ_ICO,
-		     (-f fich_options($_) ?
+		     (-f fich_options($_,$w{'local_rep_projets'}) ?
 		      $w{'icon_project'} : $w{'icon_project_dir'} ));
   }
 }
@@ -1602,6 +1603,8 @@ sub liste_des_projets {
     my %oo=(@_);
 
     mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
+
+    $w{'local_rep_projets'}=$o{'rep_projets'};
 
     my @projs=projects_list();
 
@@ -1681,12 +1684,12 @@ sub project_choose_directory {
 	  $w{'choix_projet'},'select-folder',
 	  'gtk-cancel'=>'cancel',
 	  'gtk-ok'=>'ok');
-  $d->set_current_folder($o{'rep_projets'});
+  $d->set_current_folder($w{'local_rep_projets'});
   my $r=$d->run;
   if($r eq 'ok') {
     my $rep=$d->get_filename || $d->get_current_directory;
     if(-d $rep) {
-      $o{'rep_projets'}=$rep;
+      $w{'local_rep_projets'}=$rep;
     }
   }
   $d->destroy();
@@ -1771,10 +1774,10 @@ sub projet_mv_yes {
 
     return if($nom_nouveau eq $nom_original || !$nom_nouveau);
 
-    if($o{'rep_projets'}) {
-	my $dir_original=$o{'rep_projets'}."/".$nom_original;
+    if($w{'local_rep_projets'}) {
+	my $dir_original=$w{'local_rep_projets'}."/".$nom_original;
 	if(-d $dir_original) {
-	    my $dir_nouveau=$o{'rep_projets'}."/".$nom_nouveau;
+	    my $dir_nouveau=$w{'local_rep_projets'}."/".$nom_nouveau;
 	    if(-d $dir_nouveau) {
 		$w{'choix_projet'}->set_keep_above(0);
 		my $dialog = Gtk2::MessageDialog
@@ -1836,8 +1839,8 @@ sub projet_liste_supprime {
 
     # suppression effective des fichiers...
 
-    if($o{'rep_projets'}) {
-	my $dir=$o{'rep_projets'}."/".$proj;
+    if($w{'local_rep_projets'}) {
+	my $dir=$w{'local_rep_projets'}."/".$proj;
 	if(-d $dir) {
 	    remove_tree($dir,{'verbose'=>0,'safe'=>1,'keep_root'=>0});
 	} else {
@@ -1863,7 +1866,7 @@ sub projet_charge_ok {
 
     if($proj) {
 	my $reponse='yes';
-	if(! -f fich_options($proj)) {
+	if(! -f fich_options($proj,$w{'local_rep_projets'})) {
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
@@ -1873,7 +1876,10 @@ sub projet_charge_ok {
 	    $reponse=$dialog->run;
 	    $dialog->destroy;
 	}
-	projet_ouvre($proj) if($reponse eq 'yes');
+	if($reponse eq 'yes') {
+	  $o{'rep_projets'}=$w{'local_rep_projets'};
+	  projet_ouvre($proj) ;
+	}
     }
 }
 
@@ -1907,7 +1913,7 @@ sub projet_charge_nouveau {
 
     # existe deja ?
 
-    if(-e $o{'rep_projets'}."/$proj") {
+    if(-e $w{'local_rep_projets'}."/$proj") {
 
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
@@ -1921,9 +1927,10 @@ sub projet_charge_nouveau {
 
     } else {
 
-	if(projet_ouvre($proj,1)) {
-	    projet_sauve();
-	}
+      $o{'rep_projets'}=$w{'local_rep_projets'};
+      if(projet_ouvre($proj,1)) {
+	projet_sauve();
+      }
 
     }
 }
