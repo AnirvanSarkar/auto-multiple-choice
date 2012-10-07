@@ -4362,9 +4362,8 @@ sub edit_preferences {
     transmet_pref($gap,'pref',\%o);
     transmet_pref($gap,'pref_projet',$projet{'options'}) if($projet{'nom'});
 
-    # projet ouvert -> ne pas changer localisation
+    # projet ouvert ?
     if($projet{'nom'}) {
-	$w{'pref_f_rep_projets'}->set_sensitive(0);
 	$w{'pref_projet_annonce'}->set_label('<i>'.sprintf(__"Project \"%s\" preferences",$projet{'nom'}).'</i>.');
     } else {
 	$w{'pref_projet_tous'}->set_sensitive(0);
