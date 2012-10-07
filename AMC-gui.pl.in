@@ -699,14 +699,19 @@ sub csv_build_name {
 
 sub raccourcis {
     my ($proj)=@_;
-    my %pathes=('%PROJETS'=>$o{'rep_projets'},
-		'%HOME',$home_dir,
-		''=>'%PROJETS',
-	);
-    $proj=$projet{'nom'} if(!$proj);
-    if($proj) {
+    my %pathes;
+    $proj=$projet{'nom'} if(!defined($proj));
+    if($proj eq '<HOME>') {
+      %pathes=('%HOME',$home_dir);
+    } else {
+      %pathes=('%PROJETS'=>$o{'rep_projets'},
+	       '%HOME',$home_dir,
+	       ''=>'%PROJETS',
+	      );
+      if($proj) {
 	$pathes{'%PROJET'}=$o{'rep_projets'}."/".$proj;
 	$pathes{''}='%PROJET';
+      }
     }
     return(\%pathes);
 }
@@ -4189,7 +4194,11 @@ sub transmet_pref {
 	}
 	if($wp=find_object($gap,$prefixe,'_f_',$ta,$t,$update)) {
 	  my $path=$h->{$t};
-	  $path=absolu($path) if($t !~ /rep_/);
+	  if($t =~ /^projects_/) {
+	    $path=absolu($path,'<HOME>');
+	  } elsif($t !~ /^rep_/) {
+	    $path=absolu($path);
+	  }
 	  if($wp->get_action =~ /-folder$/i) {
 	    mkdir($path) if(!-e $path);
 	    $wp->set_current_folder($path);
@@ -4279,7 +4288,11 @@ sub reprend_pref {
 	    } else {
 		$n=$wp->get_filename();
 	    }
-	    $n=relatif($n) if($tgui !~ /rep_/);
+	    if($tgui =~ /^projects_/) {
+	      $n=relatif($n,'<HOME>');
+	    } elsif($tgui !~ /^rep_/) {
+	      $n=relatif($n);
+	    }
 	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	    $h->{$t}=$n;
 	}
