@@ -657,7 +657,7 @@ if($o{'encodage_interne'} ne 'UTF-8') {
 
 # Reset projects directory to standard one
 
-$o{'rep_projets'}=$o{'projects_home'};
+$o{'rep_projets'}=absolu($o{'projects_home'});
 
 # creates projets and models directories if needed (if not present,
 # Edit/Parameters can be disrupted)
