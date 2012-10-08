@@ -701,6 +701,7 @@ sub raccourcis {
     my ($proj)=@_;
     my %pathes;
     $proj=$projet{'nom'} if(!defined($proj));
+    $proj='' if(!defined($proj));
     if($proj eq '<HOME>') {
       %pathes=('%HOME',$home_dir);
     } else {
