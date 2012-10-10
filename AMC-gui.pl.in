@@ -2247,7 +2247,7 @@ sub autre_imprimante {
     my %alias=();
     my %trouve=();
 
-    debug "Looking for staple opton...";
+    debug "Looking for staple option...";
 
   CHOIX: for my $i (qw/StapleLocation/) {
       my $oi=$ppd->getOption($i);
@@ -2263,8 +2263,12 @@ sub autre_imprimante {
 			    (@{$oi->{'choices'}}));
 	  my %ph=(@possibilites);
 	  $cb_stores{'agrafe'}=cb_model(@possibilites);
-	  $o{'options_impression'}->{$k}=nonnul($oi->{'defchoice'})
-	      if(!$ok || !$ph{$ok});
+	  if(!$ok || !$ph{$ok}) {
+	    debug "Unknown stapling option $ok" if(!$ok);
+	    debug "Setting stapling option to default: "
+	      .nonnul($oi->{'defchoice'});
+	    $o{'options_impression'}->{$k}=nonnul($oi->{'defchoice'});
+	  }
 
 	  $alias{$k}='agrafe';
 	  $trouve{'agrafe'}=$k;
