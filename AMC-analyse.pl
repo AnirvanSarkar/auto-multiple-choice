@@ -802,6 +802,8 @@ sub one_scan {
       if($k ne 'namefield') {
 	if($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN) {
 	  debug "Box $k is DONT_SCAN";
+	  $capture->statement('setZoneAuto')
+	    ->execute(1,0,undef,$zoneid);
 	} elsif($ld->{'darkness.data'}->{$k}) {
 	  $capture->statement('setZoneAuto')
 	    ->execute(@{$ld->{'darkness.data'}->{$k}},
