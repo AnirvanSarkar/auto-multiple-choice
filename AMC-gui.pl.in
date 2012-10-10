@@ -2393,12 +2393,13 @@ sub sujet_impressions {
 	}
 	my $i=model_id_to_iter($p_model,COMBO_ID,$o{'imprimante'});
 	if($i) {
-	    $w{'imprimante'}->set_active_iter($i);
+	  $w{'imprimante'}->set_active_iter($i);
+	  # (this will call autre_imprimante and transmet_pref with
+	  # the right options)
+	} else {
+	  # updates the values in the GUI from the general options
+	  transmet_pref($g_imprime,'imp',$o{'options_impression'});
 	}
-
-	# transmission
-
-	transmet_pref($g_imprime,'imp',$o{'options_impression'});
     }
 
     if($o{'methode_impression'} eq 'file') {
