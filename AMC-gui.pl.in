@@ -2264,7 +2264,7 @@ sub autre_imprimante {
 	  my %ph=(@possibilites);
 	  $cb_stores{'agrafe'}=cb_model(@possibilites);
 	  if(!$ok || !$ph{$ok}) {
-	    debug "Unknown stapling option $ok" if(!$ok);
+	    debug "Unknown stapling option $ok" if($ok);
 	    debug "Setting stapling option to default: "
 	      .nonnul($oi->{'defchoice'});
 	    $o{'options_impression'}->{$k}=nonnul($oi->{'defchoice'});
