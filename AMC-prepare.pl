@@ -479,6 +479,7 @@ if($mode =~ /b/) {
 
     my $quest='';
     my $rep='';
+    my $outside_quest='';
     my $etu=0;
 
     my $delta=0;
@@ -517,6 +518,7 @@ if($mode =~ /b/) {
 		      $current_q->{'indicative'},
 		      $current_q->{'strategy'});
 	  $qs->{$quest}=$current_q;
+	  $outside_quest=$quest;
 	  $quest='';
 	  $rep='';
 	}
@@ -555,8 +557,13 @@ if($mode =~ /b/) {
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	  $rep=$1;
+	  my $qq=$quest;
+	  if($outside_quest && !$qq) {
+	    $qq=$outside_quest;
+	    debug_and_stderr "WARNING: answer outside questions for student $etu (after question $qq)";
+	  }
 	  $scoring->statement('NEWAnswer')
-	    ->execute($etu,$quest,$rep,($2 eq 'B' ? 1 : 0),'');
+	      ->execute($etu,$qq,$rep,($2 eq 'B' ? 1 : 0),'');
 	}
 	if(/AUTOQCM\[BR=([0-9]+)\]/) {
 	  $scoring->replicate($1,$etu);
