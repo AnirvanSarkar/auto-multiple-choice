@@ -196,7 +196,9 @@ sub analyse_amclog {
 	    if($analyse_data{'qs'}->{$1}) {
 		if($analyse_data{'qs'}->{$1}->{'partial'}) {
 		    $analyse_data{'q'}=$analyse_data{'qs'}->{$1};
-		    delete($analyse_data{'q'}->{'partial'});
+		    for my $flag (qw/partial closed/) {
+		      delete($analyse_data{'q'}->{$flag});
+		    }
 		} else {
 		    $a_erreurs++;
 		    push @erreurs_msg,"ERR: "
@@ -208,6 +210,9 @@ sub analyse_amclog {
 	}
 	if(/AUTOQCM\[QPART\]/) {
 	    $analyse_data{'q'}->{'partial'}=1;
+	}
+	if(/AUTOQCM\[FQ\]/) {
+	  $analyse_data{'q'}->{'closed'}=1;
 	}
 	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
 	    verifie_q($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
@@ -224,13 +229,18 @@ sub analyse_amclog {
 	    $analyse_data{'q'}->{'indicative'}=1;
 	}
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
-	    my $rep="R".$1;
-	    if(defined($analyse_data{'q'}->{$rep})) {
-		$a_erreurs++;
-		push @erreurs_msg,"ERR: "
-		    .sprintf(__("Answer number ID used several times for the same question: %s")." [%s]\n",$1,$analyse_data{'titre'});
-	    }
-	    $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
+	  my $rep="R".$1;
+	  if($analyse_data{'q'}->{'closed'}) {
+	    push @erreurs_msg,"ERR: "
+	      .sprintf(__("An answer appears to be given outside a question environment, after question \"%s\"")." [%s]\n",
+		       $analyse_data{'titre'},$analyse_data{'etu'});
+	  }
+	  if(defined($analyse_data{'q'}->{$rep})) {
+	    $a_erreurs++;
+	    push @erreurs_msg,"ERR: "
+	      .sprintf(__("Answer number ID used several times for the same question: %s")." [%s]\n",$1,$analyse_data{'titre'});
+	  }
+	  $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
 	}
 	if(/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
 	    $info_vars{$1}=$2;
