@@ -231,6 +231,7 @@ sub analyse_amclog {
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
 	  my $rep="R".$1;
 	  if($analyse_data{'q'}->{'closed'}) {
+	    $a_erreurs++;
 	    push @erreurs_msg,"ERR: "
 	      .sprintf(__("An answer appears to be given outside a question environment, after question \"%s\"")." [%s]\n",
 		       $analyse_data{'titre'},$analyse_data{'etu'});
@@ -452,11 +453,11 @@ if($mode =~ /s/) {
 
     execute('command'=>[latex_cmd(%opts,'SujetExterne'=>1)]);
     analyse_amclog("$jobname.amc");
-    transfere("$jobname.pdf",$out_sujet);
     give_latex_errors(__"question sheet");
 
     exit(1) if($a_erreurs>0);
 
+    transfere("$jobname.pdf",$out_sujet);
     transfere("$jobname.xy",$out_calage);
 
     # transmission des variables
