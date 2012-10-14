@@ -1962,7 +1962,8 @@ sub projet_charge_ok {
 	  # If the project to open lies on a removable media, suggest
 	  # to copy it first to the user standard projects directory:
 
-	  if($w{'local_rep_projets'} =~ /^\/media\//) {
+	  if($w{'local_rep_projets'} =~ /^\/media\//
+	    && absolu($o{'projects_home'}) !~ /^\/media\//) {
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
