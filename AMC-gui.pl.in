@@ -30,6 +30,7 @@ use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs t
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 use File::Path qw/remove_tree/;
+use File::Find;
 use Archive::Tar;
 use Archive::Tar::File;
 use Encode;
@@ -1818,6 +1819,81 @@ sub projet_mv_no {
     projet_renomme_fin();
 }
 
+my @find_results=();
+
+sub add_to_results {
+  push @find_results,$File::Find::name;
+}
+
+sub project_copy {
+  my ($src,$dest)=@_;
+  my $err='';
+  if(!$err && -e $dest) {
+    $err=__("Destination project directory already exists");
+  }
+  if(!$err) {
+    @find_results=();
+    find({wanted=>\&add_to_results,no_chdir=>1},
+	 $src);
+    my $total=1+$#find_results;
+    if($total>0) {
+      my $done=0;
+      my $i=0;
+      my $last_fraction=0;
+      my $old_text=$w{'avancement'}->get_text();
+      $w{'avancement'}->set_text(__"Copying project...");
+      $w{'avancement'}->set_fraction(0);
+      $w{'commande'}->show();
+      for my $s (@find_results) {
+	my $d=$s;
+	$d =~ s:^$src:$dest:;
+	if(-l $s) {
+	  $done+=symlink readlink($s),$d;
+	} elsif(-d $s) {
+	  $done++ if(mkdir($d));
+	} else {
+	  $done++ if(copy($s,$d));
+	}
+	$i++;
+	if($i/$total-$last_fraction>1/40) {
+	  $last_fraction=$i/$total;
+	  $w{'avancement'}->set_fraction($last_fraction);
+	  Gtk2->main_iteration while ( Gtk2->events_pending );
+	}
+      }
+      $w{'avancement'}->set_text($old_text);
+      $w{'commande'}->hide();
+
+      my $dialog = Gtk2::MessageDialog
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'info','ok',
+	      __("Your project has been copied").
+	      ($done!=$total ? " ".sprintf(__("(%d files out of %d)"),
+					   $done,$total) : "")
+	      ."."
+	     );
+      $dialog->run;
+      $dialog->destroy;
+    } else {
+      $err=__("Source project directory not found");
+    }
+  }
+  if($err) {
+    my $dialog = Gtk2::MessageDialog
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'error','ok',
+	    __("An error occuried during project copy: %s."),
+	    $err
+	   );
+    $dialog->run;
+    $dialog->destroy;
+    return(0);
+  }
+  return(1);
+}
+
 sub projet_liste_supprime {
     my ($proj,$iter)=projet_gestion_check();
     return if(!$proj);
@@ -1883,6 +1959,32 @@ sub projet_charge_ok {
 	    $dialog->destroy;
 	}
 	if($reponse eq 'yes') {
+	  # If the project to open lies on a removable media, suggest
+	  # to copy it first to the user standard projects directory:
+
+	  if($w{'local_rep_projets'} =~ /^\/media\//) {
+	    my $dialog = Gtk2::MessageDialog
+		->new_with_markup($w{'main_window'},
+				  'destroy-with-parent',
+				  'warning','yes-no',
+				  sprintf(__("You selected project <b>%s</b> from directory <i>%s</i>.")." "
+					  .__("Do you want to copy this project to your projects directory before opening it?"),
+					  $proj,$w{'local_rep_projets'}));
+	    my $r=$dialog->run;
+	    $dialog->destroy;
+	    if($r eq 'yes') {
+	      my $proj_dest=new_filename(absolu($o{'projects_home'}).'/'.$proj);
+	      if(project_copy($w{'local_rep_projets'}.'/'.$proj,
+			      $proj_dest)) {
+		(undef,undef,$proj_dest) = splitpath($proj_dest);
+		$w{'local_rep_projets'}=absolu($o{'projects_home'});
+		$proj=$proj_dest;
+	      }
+	    }
+	  }
+
+	  # OK, now, open the project!
+
 	  $o{'rep_projets'}=$w{'local_rep_projets'};
 	  projet_ouvre($proj) ;
 	}
