@@ -6741,17 +6741,64 @@ sub plugins_add {
 
 #######################################
 
+my @cleanup_components
+  =(
+    {id=>'zooms',
+     short=>__("zooms"),
+     text=>__("boxes images are extracted from the scans while processing automatic data capture. They can be removed if you don't plan to use the zooms dialog to check and correct boxes categorization. They can be recovered processing again automatic data capture from the same scans."),
+     action=>sub {
+       return(remove_tree(absolu('%PROJET/cr/zooms'),
+			  {'verbose'=>0,'safe'=>1,'keep_root'=>1}));
+     },
+    },
+    {id=>'annotated_pages',
+     short=>__("annotated pages"),
+     text=>__("jpeg annotated pages are made before beeing assembled to PDF annotated files. They can safely be removed, and will be recovered automatically the next time annotation will be requested."),
+     action=>sub {
+       return(remove_tree(absolu('%PROJET/cr/corrections/jpg'),
+			  {'verbose'=>0,'safe'=>1,'keep_root'=>1}));
+     },
+    },
+   );
+
+sub table_sep {
+  my ($t,$y,$x)=@_;
+  my $sep=Gtk2::HSeparator->new();
+  $t->attach($sep,0,$x,$y,$y+1,["expand","fill"],[],0,0);
+}
+
 sub cleanup_dialog {
   my %files;
+  my %cb;
 
   my $gap=read_glade('cleanup');
 
   my $dialog=$gap->get_object('cleanup');
+  my $table=$gap->get_object('components');
+  $table->resize(2*(1+$#cleanup_components)+1,2);
+  my $y=0;
+  for my $c (@cleanup_components) {
+    table_sep($table,$y,2);
+    $y++;
+    my $label=Gtk2::Label->new($c->{text});
+    $label->set_justify('left');
+    $label->set_line_wrap(1);
+    $label->set_line_wrap_mode('word');
+    $table->attach($label,
+		   1,2,$y,$y+1,["expand","fill"],[],0,0);
+    my $check=Gtk2::CheckButton->new_with_label($c->{short});
+    $c->{check}=$check;
+    $table->attach($check,
+		   0,1,$y,$y+1,["expand","fill"],[],0,0);
+    $y++;
+  }
+  table_sep($table,$y,2);
+  $table->show_all;
 
   my $reponse=$dialog->run();
 
-  for(qw/zooms annotated_pages/) {
-    $files{$_}=$gap->get_object('component_'.$_)->get_active();
+  for my $c (@cleanup_components) {
+    $c->{active}=$c->{check}->get_active();
   }
 
   $dialog->destroy();
@@ -6762,16 +6809,11 @@ sub cleanup_dialog {
 
   my $n=0;
 
-  if($files{'zooms'}) {
-    debug "Removing zooms...";
-    $n+=remove_tree(absolu('%PROJET/cr/zooms'),
-		    {'verbose'=>0,'safe'=>1,'keep_root'=>1});
-  }
-
-  if($files{'annotated_pages'}) {
-    debug "Removing annotated pages...";
-    $n+=remove_tree(absolu('%PROJET/cr/corrections/jpg'),
-		    {'verbose'=>0,'safe'=>1,'keep_root'=>1});
+  for my $c (@cleanup_components) {
+    if($c->{active}) {
+      debug "Removing ".$c->{id}." ...";
+      $n+=&{$c->{action}};
+    }
   }
 
   $dialog = Gtk2::MessageDialog
