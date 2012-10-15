@@ -1728,9 +1728,8 @@ sub projet_gestion_check {
     # est-ce le projet en cours ?
 
     if($projet{'nom'} && $proj eq $projet{'nom'}) {
-	$w{'choix_projet'}->set_keep_above(0);
 	my $dialog = Gtk2::MessageDialog
-	    ->new($w{'main_window'},
+	    ->new($w{'choix_projet'},
 		  'destroy-with-parent',
 		  'error','ok',
 		  __"You can't change project %s since it's open.",$proj);
