@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.14"/>
+  <requires lib="gtk+" version="2.18"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkDialog" id="choix_projet">
     <property name="visible">True</property>
@@ -169,6 +169,21 @@
               </packing>
             </child>
             <child>
+              <object class="GtkButton" id="projet_bouton_clone">
+                <property name="label" translatable="yes">Clone</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="image">image2</property>
+                <signal name="clicked" handler="projet_liste_clone" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="projet_bouton_supprime">
                 <property name="label">gtk-delete</property>
                 <property name="can_focus">True</property>
@@ -180,7 +195,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -195,7 +210,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">5</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -210,7 +225,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">6</property>
+                <property name="position">7</property>
               </packing>
             </child>
           </object>
@@ -397,6 +412,7 @@
       <action-widget response="0">projet_bouton_creation</action-widget>
       <action-widget response="0">projet_bouton_ouverture</action-widget>
       <action-widget response="0">projet_bouton_renomme</action-widget>
+      <action-widget response="0">projet_bouton_clone</action-widget>
       <action-widget response="0">projet_bouton_supprime</action-widget>
       <action-widget response="0">projet_bouton_mv_no</action-widget>
       <action-widget response="0">projet_bouton_mv_yes</action-widget>
@@ -406,5 +422,10 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-directory</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-copy</property>
   </object>
 </interface>

@@ -1625,6 +1625,7 @@ sub liste_des_projets {
 	    projet_bouton_ouverture projet_bouton_creation
 	    projet_bouton_supprime projet_bouton_annule
 	    projet_bouton_annule_label projet_bouton_renomme
+	    projet_bouton_clone
 	    projet_bouton_mv_yes projet_bouton_mv_no
 	    projet_bouton_choose_directory
 	    projet_nom projet_nouveau_syntaxe projet_nouveau/);
@@ -1648,7 +1649,7 @@ sub liste_des_projets {
 	    $w{'label_etat'}->set_text(__"Projects management:");
 	    $w{'label_action'}->set_markup(__"Change project name:");
 	    $w{'projet_bouton_ouverture'}->hide();
-	    for (qw/supprime renomme/) {
+	    for (qw/supprime clone renomme/) {
 		$w{'projet_bouton_'.$_}->show();
 	    }
 	    $w{'projet_bouton_annule_label'}->set_text(__"Back");
@@ -1707,6 +1708,8 @@ sub project_choose_directory {
 }
 
 sub projet_gestion_check {
+  my ($open_ok)=@_;
+
     # lequel ?
 
     my $sel=$w{'choix_projets_liste'}->get_selected_items();
@@ -1719,6 +1722,8 @@ sub projet_gestion_check {
     }
 
     return('','') if(!$proj);
+
+  return($proj,$iter) if($open_ok);
 
     # est-ce le projet en cours ?
 
@@ -1736,6 +1741,28 @@ sub projet_gestion_check {
     }
 
     return($proj,$iter);
+}
+
+sub projet_liste_clone {
+  my ($proj,$iter)=projet_gestion_check(1);
+  return if(!$proj);
+
+  my $proj_clone=new_filename(absolu($w{'local_rep_projets'}).'/'.$proj);
+  my (undef,undef,$proj_c) = splitpath($proj_clone);
+
+  my $dialog = Gtk2::MessageDialog
+    ->new_with_markup($w{'choix_projet'},
+		      'destroy-with-parent',
+		      'warning','ok-cancel',
+		      sprintf(__("This will clone project <b>%s</b> to a new project <i>%s</i>."),
+			      $proj,$proj_c));
+  my $r=$dialog->run;
+  $dialog->destroy;
+  if($r eq 'ok') {
+    project_copy($w{'local_rep_projets'}.'/'.$proj,
+		 $proj_clone,$w{'choix_projet'});
+    projects_show();
+  }
 }
 
 my $nom_original='';
@@ -1826,7 +1853,8 @@ sub add_to_results {
 }
 
 sub project_copy {
-  my ($src,$dest)=@_;
+  my ($src,$dest,$parent_window)=@_;
+  $parent_window=$w{'main_window'} if(!$parent_window);
   my $err='';
   if(!$err && -e $dest) {
     $err=__("Destination project directory already exists");
@@ -1865,7 +1893,7 @@ sub project_copy {
       $w{'commande'}->hide();
 
       my $dialog = Gtk2::MessageDialog
-	->new($w{'main_window'},
+	->new($parent_window,
 	      'destroy-with-parent',
 	      'info','ok',
 	      __("Your project has been copied").
@@ -1881,7 +1909,7 @@ sub project_copy {
   }
   if($err) {
     my $dialog = Gtk2::MessageDialog
-      ->new($w{'main_window'},
+      ->new($parent_window,
 	    'destroy-with-parent',
 	    'error','ok',
 	    __("An error occuried during project copy: %s."),
