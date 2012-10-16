@@ -6801,26 +6801,25 @@ sub cleanup_dialog {
   my $gap=read_glade('cleanup');
 
   my $dialog=$gap->get_object('cleanup');
-  my $table=$gap->get_object('components');
-  $table->resize(2*(1+$#cleanup_components)+1,2);
-  my $y=0;
+  my $notebook=$gap->get_object('components');
   for my $c (@cleanup_components) {
-    table_sep($table,$y,2);
-    $y++;
     my $label=Gtk2::Label->new($c->{text});
     $label->set_justify('left');
     $label->set_line_wrap(1);
     $label->set_line_wrap_mode('word');
-    $table->attach($label,
-		   1,2,$y,$y+1,["expand","fill"],[],0,0);
-    my $check=Gtk2::CheckButton->new_with_label($c->{short});
+
+    my $check=Gtk2::CheckButton->new;
     $c->{check}=$check;
-    $table->attach($check,
-		   0,1,$y,$y+1,["expand","fill"],[],0,0);
-    $y++;
+    my $short_label=Gtk2::Label->new($c->{short});
+    $short_label->set_justify('center');
+    my $hb=Gtk2::HBox->new();
+    $hb->pack_start($check,FALSE,FALSE,0);
+    $hb->pack_start($short_label,TRUE,TRUE,0);
+    $hb->show_all;
+
+    $notebook->append_page_menu($label,$hb,undef);
   }
-  table_sep($table,$y,2);
-  $table->show_all;
+  $notebook->show_all;
 
   my $reponse=$dialog->run();
 
