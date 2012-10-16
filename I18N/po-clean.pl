@@ -24,7 +24,7 @@ use utf8;
 
 my ($from,$to)=@ARGV;
 
-$v="1.1.1122 (svn: 1122)";
+$v="1.1.1161 (svn: 1161)";
 
 chomp($date=`date "+%Y-%m-%d %H:%M %z"`);
 
