@@ -10,7 +10,7 @@
     <subtitle>自動採点と評定の可能な選択式試験問題のデザイン</subtitle>
 
     <abstract>
-      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1119）</para>
+      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1154）</para>
 
       <para>AMCプロジェクトは<ulink
       url="http://gna.org/">Gna!</ulink>によってホスティングされています。AMCウェブサイトは<ulink url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>にあり、プロジェクトがホスティングされているサイトは<ulink url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>です。</para>
@@ -401,6 +401,14 @@ Presentation: 以下の設問に最も適切な解答を
             <para>LaTeXの<command>document</command>環境の先頭に挿入したいコマンド（例えばマクロ定義など）を設定します。</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry>
+          <term>Disable:</term>
+
+          <listitem>
+            <para>無効にする機能のリストをコンマで区切って与えます。現在実装されている機能は<code>images</code>（<xref linkend="parse_images"/>参照）と<code>local_latex</code>（<xref linkend="parse_local_latex"/>参照）です。</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
 
       <sect3>
@@ -562,6 +570,26 @@ Presentation: 以下の設問に最も適切な解答を
 - 何千万個も</programlisting>
     </sect2>
 
+    <sect2 id="parse_images">
+      <title>画像</title>
+
+      <para>次の構文を用いて文書に画像を追加することができます:</para>
+
+      <programlisting>![height=2cm]images/bird.png!</programlisting>
+
+      <para>これにより、プロジェクトディレクトリにある画像<filename>images/bird.png</filename>が、2cmの高さで追加されます。角括弧内で使用できるオプションはLaTeXコマンド<command>\includegraphics</command>のオプションと同じです（例えば<parameter>width=3cm</parameter>や<parameter>keepaspectratio</parameter>）。横幅の3/4の幅で画像をセンタリングしたい場合は、次のようにします。</para>
+
+      <programlisting>!{center}[width=.75\linewidth]images/map.pdf!</programlisting>
+    </sect2>
+
+    <sect2 id="parse_local_latex">
+      <title>LaTeXコードの断片</title>
+
+      <para>文書内に小さなLaTeXコード片を置くには、次のように二重の角括弧内にそれを入れます:</para>
+
+      <programlisting>[[\multiSymbole{}]]の記号のある設問の正解は1個とは限りません。0個の場合や複数の場合があります。</programlisting>
+    </sect2>
+
     <sect2 id="txt-arabic">
       <title>アラビア語</title>
 
@@ -652,7 +680,7 @@ DESC: 単一選択問題1件と複数選択問題1件からなる単純な例（
   資料の持込みと電子計算機の使用は禁じます。
 
   \multiSymbole{}の記号のある設問の正解は1個とは限りません。
-  0個の場合と複数の場合もあります。
+  0個の場合や複数の場合があります。
 
   それ以外の設問には正解が1個だけあります。
 
@@ -909,7 +937,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
   資料の持込みと電子計算機の使用は禁じます。
 
   \multiSymbole{}の記号のある設問の正解は1個とは限りません。
-  0個の場合と複数の場合もあります。
+  0個の場合や複数の場合があります。
 
   それ以外の設問には正解が1個だけあります。
 
@@ -3961,6 +3989,80 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
+    <refentry id="AMC-association">
+      <refmeta>
+        <refentrytitle>AMC-association</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+
+        <refmiscinfo class="source">Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
+      </refmeta>
+
+      <refnamediv>
+        <refname>AMC-association</refname>
+
+        <refpurpose>AMC選択式試験問題の受験者と答案用紙を手動リンクする。</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">association-auto</arg>
+
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
+
+          <arg choice="plain">--list</arg>
+        </cmdsynopsis>
+
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">association-auto</arg>
+
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
+
+          <arg choice="plain">--set</arg>
+
+          <arg choice="plain">--student
+          <replaceable>student-sheet-number</replaceable></arg>
+
+          <arg>--copy <replaceable>copy-number</replaceable></arg>
+
+          <arg choice="plain">--id <replaceable>student-id</replaceable></arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>解説</title>
+
+        <para><command>AMC-association.pl</command>コマンドは、受験者と答案用紙のリンク用データを扱います。</para>
+
+        <variablelist>
+          <varlistentry>
+            <term><option>--data
+            <replaceable>project-data-dir</replaceable></option></term>
+
+            <listitem>
+              <para>データファイルがあるディレクトリを指定します（<citerefentry>
+                  <refentrytitle>AMC-prepare</refentrytitle>
+
+                  <manvolnum>1</manvolnum>
+                </citerefentry>などを参照してください）。</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para><option>--list</option>オプションは、リンク用データをすべて出力します。</para>
+
+        <para><option>--set</option>オプションは、手動リンクを更新します。</para>
+      </refsect1>
+    </refentry>
+
     <refentry id="AMC-export">
       <refmeta>
         <refentrytitle>AMC-export</refentrytitle>
@@ -4192,9 +4294,7 @@ Moniuszko,Stanisław,003</programlisting>
         <refsect2>
           <title>List</title>
 
-          <para>With "<option>--module List</option>", a PDF file is produced
-          with a list of marks for all students. The following options are
-          recognized:</para>
+          <para>"<option>--module List</option>" とすると、受験者ごとの得点の一覧がPDFファイルで生成されます。以下のオプションが認識されます:</para>
 
           <variablelist>
             <varlistentry>
@@ -4411,6 +4511,53 @@ Moniuszko,Stanisław,003</programlisting>
                   </listitem>
                 </varlistentry>
               </variablelist>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>--verdict-question
+            <replaceable>perl-expression</replaceable></term>
+
+            <listitem>
+              <para>各設問の隣に印刷されるテキストをperlで評価される式として設定します（単純なテキストが必要なら<code>"</code>で囲んでください）。いくつかのシーケンスは評価の前に置換されます:</para>
+
+              <variablelist>
+                <varlistentry>
+                  <term><literal>%S</literal></term>
+
+                  <listitem>
+                    <para>はこの設問の素点合計に置換されます。</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term><literal>%M</literal></term>
+
+                  <listitem>
+                    <para>はこの設問の満点に置換されます。</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term><literal>%s</literal></term>
+
+                  <listitem>
+                    <para>は<code>%S</code>と同じですが、<replaceable>nc</replaceable>桁（<option>--ch-sign</option>オプション参照）に丸められます。</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term><literal>%m</literal></term>
+
+                  <listitem>
+                    <para>は<code>%M</code>と同じですが、<replaceable>nc</replaceable>桁（<option>--ch-sign</option>オプション参照）に丸められます。</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+
+              <para>このオプションの標準値は<code>"\"%s/%m\""</code>です。条件式を書くこともできます（<code>( TEST ? IF-YES : IF-NO )</code>というperlの構文を用いて）。満点なら<emphasis>合格</emphasis>、そうでなければ<emphasis>不合格</emphasis>と書くには、次のようにします。</para>
+
+              <programlisting>--verdict-question "(%S==%M ? \"合格\" : \"不合格\")"</programlisting>
             </listitem>
           </varlistentry>
 
@@ -4811,6 +4958,14 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>送付するメールの本文を設定します。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>--attach <replaceable>filename</replaceable></term>
+
+            <listitem>
+              <para>送付する各メールにファイル<replaceable>filename</replaceable>を添付します。このオプションを複数回使用すれば、複数のファイルを添付できます。</para>
             </listitem>
           </varlistentry>
 
