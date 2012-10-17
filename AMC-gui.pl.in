@@ -6773,11 +6773,52 @@ sub plugins_add {
 
 #######################################
 
+sub file_size {
+  my ($oo,@files)=@_;
+  my $s=0;
+  $oo->{recursive}--;
+ FILE: for my $f (@files) {
+    if(-f $f) {
+      $s += -s $f;
+    } elsif(-d $f) {
+      if($oo->{recursive}>=0) {
+	if(opendir(SDIR,$f)) {
+	  my @dir_files=map { "$f/$_"; } 
+	    grep { !$oo->{pattern} || /$oo->{pattern}/ }
+	    grep { ! /^\.{1,2}$/ } readdir(SDIR);
+	  closedir(SDIR);
+	  $s += file_size({%$oo},@dir_files);
+	}
+      }
+    }
+  }
+  return($s);
+}
+
+my @size_units=('k','M','G','T','P');
+
+sub human_readable_size {
+  my ($s)=@_;
+  my $i=0;
+  while($s>=1024) {
+    $s /= 1024;
+    $i++;
+  }
+  if($i==0) {
+    return($s);
+  } else {
+    return(sprintf('%.3g%s',$s,$size_units[$i-1]));
+  }
+}
+
 my @cleanup_components
   =(
     {id=>'zooms',
      short=>__("zooms"),
      text=>__("boxes images are extracted from the scans while processing automatic data capture. They can be removed if you don't plan to use the zooms dialog to check and correct boxes categorization. They can be recovered processing again automatic data capture from the same scans."),
+     size=>sub {
+       return(file_size({recursive=>5},absolu('%PROJET/cr/zooms')));
+     },
      action=>sub {
        return(remove_tree(absolu('%PROJET/cr/zooms'),
 			  {'verbose'=>0,'safe'=>1,'keep_root'=>1}));
@@ -6786,6 +6827,10 @@ my @cleanup_components
     {id=>'matching_reports',
      short=>__("layout reports"),
      text=>__("these images are intended to show how the corner marks have been recognized and positioned on the scans. They can be safely removed once the scans are known to be well-recognized. They can be recovered processing again automatic data capture from the same scans."),
+     size=>sub {
+       return(file_size({pattern=>'^page-',recursive=>1},
+			absolu('%PROJET/cr/')));
+     },
      action=>sub {
        my $dir=absolu('%PROJET/cr/');
        if(opendir(CRDIR,$dir)) {
@@ -6798,6 +6843,9 @@ my @cleanup_components
     {id=>'annotated_pages',
      short=>__("annotated pages"),
      text=>__("jpeg annotated pages are made before beeing assembled to PDF annotated files. They can safely be removed, and will be recovered automatically the next time annotation will be requested."),
+     size=>sub {
+       return(file_size({recursive=>5},absolu('%PROJET/cr/corrections/jpg')));
+     },
      action=>sub {
        return(remove_tree(absolu('%PROJET/cr/corrections/jpg'),
 			  {'verbose'=>0,'safe'=>1,'keep_root'=>1}));
@@ -6820,7 +6868,14 @@ sub cleanup_dialog {
   my $dialog=$gap->get_object('cleanup');
   my $notebook=$gap->get_object('components');
   for my $c (@cleanup_components) {
-    my $label=Gtk2::Label->new($c->{text});
+    my $t=$c->{text};
+    my $s=undef;
+    if($c->{size}) {
+      $s=&{$c->{size}}();
+      $t.= "\n".__("Total size of concerned files:")." ".
+	human_readable_size($s);
+    }
+    my $label=Gtk2::Label->new($t);
     $label->set_justify('left');
     $label->set_line_wrap(1);
     $label->set_line_wrap_mode('word');
@@ -6829,6 +6884,7 @@ sub cleanup_dialog {
     $c->{check}=$check;
     my $short_label=Gtk2::Label->new($c->{short});
     $short_label->set_justify('center');
+    $short_label->set_sensitive(!( defined($s) && $s==0));
     my $hb=Gtk2::HBox->new();
     $hb->pack_start($check,FALSE,FALSE,0);
     $hb->pack_start($short_label,TRUE,TRUE,0);
