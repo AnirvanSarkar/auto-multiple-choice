@@ -6778,6 +6778,18 @@ my @cleanup_components
 			  {'verbose'=>0,'safe'=>1,'keep_root'=>1}));
      },
     },
+    {id=>'matching_reports',
+     short=>__("layout reports"),
+     text=>__("these images are intended to show how the corner marks have been recognized and positioned on the scans. They can be safely removed once the scans are known to be well-recognized. They can be recovered processing again automatic data capture from the same scans."),
+     action=>sub {
+       my $dir=absolu('%PROJET/cr/');
+       if(opendir(CRDIR,$dir)) {
+	 my @files=map { "$dir/$_" } grep { /^page-/ } readdir(CRDIR);
+	 closedir(CRDIR);
+	 return(unlink(@files));
+       } else { return(0); }
+     },
+    },
     {id=>'annotated_pages',
      short=>__("annotated pages"),
      text=>__("jpeg annotated pages are made before beeing assembled to PDF annotated files. They can safely be removed, and will be recovered automatically the next time annotation will be requested."),
