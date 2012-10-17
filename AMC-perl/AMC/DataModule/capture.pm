@@ -158,6 +158,8 @@ our %EXPORT_TAGS = ( 'zone' => [ qw/ZONE_FRAME ZONE_NAME ZONE_DIGIT ZONE_BOX/ ],
 		     'position'=> [ qw/POSITION_BOX POSITION_MEASURE/ ],
 		   );
 
+use DBI qw(:sql_types);
+
 use AMC::Basic;
 use AMC::DataModule;
 use XML::Simple;
@@ -167,28 +169,58 @@ use XML::Simple;
 use_gettext();
 
 sub version_current {
-  return(1);
+  return(2);
 }
 
 sub version_upgrade {
     my ($self,$old_version)=@_;
     if($old_version==0) {
 
-	# Upgrading from version 0 (empty database) to version 1 :
-	# creates all the tables.
+      # Upgrading from version 0 (empty database) to version 1 :
+      # creates all the tables.
 
-	debug "Creating capture tables...";
-	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("page")
-		      ." (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, PRIMARY KEY (student,page,copy))");
-	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("zone")
-		      ." (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT)");
-	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("position")
-		      ." (zoneid INTEGER, corner INTEGER, x REAL, y REAL, type INTEGER, PRIMARY KEY (zoneid,corner,type))");
-	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("failed")
-		      ." (filename TEXT UNIQUE, timestamp INTEGER)");
-	$self->populate_from_xml;
+      debug "Creating capture tables...";
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("page")
+		    ." (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, PRIMARY KEY (student,page,copy))");
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("zone")
+		    ." (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT)");
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("position")
+		    ." (zoneid INTEGER, corner INTEGER, x REAL, y REAL, type INTEGER, PRIMARY KEY (zoneid,corner,type))");
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("failed")
+		    ." (filename TEXT UNIQUE, timestamp INTEGER)");
+      $self->populate_from_xml;
 
-	return(1);
+      return(1);
+    } elsif($old_version==1) {
+
+      # Includes zoom files in the database
+
+      debug "Including zoom files in the database...";
+      $self->sql_do("ALTER TABLE ".$self->table("zone")
+		    ." ADD COLUMN imagedata BLOB");
+
+      my $list=$self->get_image_paths(ZONE_BOX);
+      my $nn=1+$#{$list};
+
+      if($nn>0) {
+	$self->progression('begin',__"Including zooms in the database...");
+
+	my $ii=0;
+	for my $i (@{$list}) {
+	  if($i->{image}) {
+	    my $f=$self->{'data'}->{'directory'}."/../cr/zooms/".$i->{image};
+	    if(defined($f) && -f $f) {
+	      $self->set_image($i->{zoneid},file_content($f));
+	    }
+	  }
+	  $ii++;
+	  $self->progression('fraction',$ii/$nn);
+	}
+
+	$self->progression('end');
+      }
+
+      return(2)
     }
     return('');
 }
@@ -280,8 +312,7 @@ sub populate_from_xml {
 	  # Look if the namefield image is present...
 	  my $nf="nom-".id2idf($id).".jpg";
 	  if(-f "$cr/$nf") {
-	    $self->statement('setZoneAuto')
-	      ->execute(-1,-1,$nf,$zoneid);
+	    $self->set_zone_auto_id($zoneid,-1,-1,$nf,undef);
 	  }
 	}
 
@@ -295,9 +326,9 @@ sub populate_from_xml {
 			 $case->{'question'},$case->{'reponse'});
 	  $zf='' if(!-f "$cr/zooms/$zf");
 
-	  $self->statement('setZoneAuto')
-	    ->execute($case->{'pixels'},$case->{'pixelsnoirs'},$zf,
-		      $zoneid);
+	  $self->set_zone_auto_id($zoneid,
+				  $case->{'pixels'},$case->{'pixelsnoirs'},
+				  $zf,undef);
 
 	  $self->populate_position($case->{'coin'},$zoneid,POSITION_BOX);
 	  $self->populate_position($an->{'casetest'}->{$c}->{'coin'},
@@ -371,7 +402,7 @@ sub define_statements {
      'setZoneManual'=>{'sql'=>"UPDATE $t_zone"
 		       ." SET manual=? WHERE zoneid=?"},
      'setZoneAuto'=>{'sql'=>"UPDATE $t_zone"
-		     ." SET total=?, black=?, image=? WHERE zoneid=?"},
+		     ." SET total=?, black=?, image=?, imagedata=? WHERE zoneid=?"},
      'nPages'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
 		." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'nPagesAuto'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
@@ -430,13 +461,21 @@ sub define_statements {
      'pageNearRatio'=>{'sql'=>"SELECT MIN(ABS(1.0*black/total-?))"
 		       ." FROM $t_zone"
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
-     'pageZones'=>{'sql'=>"SELECT * FROM $t_zone"
+     'pageZones'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual FROM $t_zone"
 		   ." WHERE student=? AND page=? AND copy=? AND type=?"},
      'zonesImages'=>{'sql'=>"SELECT image FROM $t_zone"
 		     ." WHERE student=? AND page=? AND copy=? AND type=?"},
+     'imagePaths'=>{'sql'=>"SELECT zoneid,image FROM $t_zone WHERE type=?"},
+     'setImage'=>{'sql'=>"UPDATE $t_zone SET image='',imagedata=? WHERE zoneid=?"},
      'pageZonesAll'=>{'sql'=>"SELECT * FROM $t_zone"
 		      ." WHERE type=?"},
-     'pageZonesD'=>{'sql'=>"SELECT * FROM $t_zone"
+     'pageZonesD'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual"
+		    ." FROM $t_zone"
+		    ." WHERE student=? AND page=? AND copy=? AND type=?"
+		    ." AND total>0"
+		    ." ORDER BY 1.0*black/total"},
+     'pageZonesDI'=>{'sql'=>"SELECT *"
+		    ." FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"
 		    ." AND total>0"
 		    ." ORDER BY 1.0*black/total"},
@@ -509,7 +548,7 @@ sub define_statements {
 		    ." WHERE zoneid=? AND type=?"},
      'zoneDist'=>{'sql'=>"SELECT AVG((x-?)*(x-?)+(y-?)*(y-?))"
 		  ." FROM $t_position"
-		  ." WHERE zoneid=? AND TYPE=?"},
+		  ." WHERE zoneid=? AND type=?"},
      'getAnnotated'=>{'sql'=>"SELECT annotated,timestamp_annotate,student,page,copy"
 		      ." FROM $t_page"
 		      ." WHERE timestamp_annotate>0"
@@ -575,7 +614,7 @@ sub define_statements {
       ."      AS c, $t_lnf AS l"
       ."     ON c.student=l.student AND c.page=l.page ) AS a"
       ." LEFT OUTER JOIN"
-      ." ( SELECT * FROM $t_zone WHERE type=? ) AS b"
+      ." ( SELECT student,page,copy,image FROM $t_zone WHERE type=? ) AS b"
       ." ON a.student=b.student AND a.page=b.page AND a.copy=b.copy"
      },
      'photocopy'=>{'sql'=>"SELECT COUNT(*) FROM $t_page WHERE copy>0"},
@@ -658,13 +697,24 @@ sub set_zone_manual {
   $self->statement('setZoneManual')->execute($manual,$zoneid);
 }
 
-# set_zone_auto(...,$total,$black,$image) sets automated data capture
-# results for a particular zone.
+# set_zone_auto(...,$total,$black,$image,$image_data) sets automated
+# data capture results for a particular zone.
 
 sub set_zone_auto {
-  my ($self,$student,$page,$copy,$type,$id_a,$id_b,$total,$black,$image)=@_;
-  $self->statement('setZoneAuto')->execute($total,$black,$image,
-					   $self->get_zoneid($student,$page,$copy,$type,$id_a,$id_b,1));
+  my ($self,$student,$page,$copy,$type,$id_a,$id_b,$total,$black,$image,$image_data)=@_;
+  $self->set_zone_auto_id($self->get_zoneid($student,$page,$copy,$type,$id_a,$id_b,1),
+			  $total,$black,$image,$image_data);
+}
+
+sub set_zone_auto_id {
+  my ($self,$zoneid,$total,$black,$image,$image_data)=@_;
+  my $sth=$self->statement('setZoneAuto');
+  $sth->bind_param(1,$total);
+  $sth->bind_param(2,$black);
+  $sth->bind_param(3,$image);
+  $sth->bind_param(4,$image_data,SQL_BLOB);
+  $sth->bind_param(5,$zoneid);
+  $self->statement('setZoneAuto')->execute();
 }
 
 # n_pages returns the number of copies for which a data capture (manual
@@ -1196,13 +1246,27 @@ sub n_photocopy {
   return($self->sql_single($self->statement('photocopy')));
 }
 
-# clear_all clears all the layout data tables.
+# clear_all() clears all the layout data tables.
 
 sub clear_all {
     my ($self)=@_;
     for my $t (qw/page zone position failed/) {
 	$self->sql_do("DELETE FROM ".$self->table($t));
     }
+}
+
+sub get_image_paths {
+  my ($self,$type)=@_;
+  return($self->dbh->selectall_arrayref($self->statement('imagePaths'),
+					{ Slice => {} },$type));
+}
+
+sub set_image {
+  my ($self,$zoneid,$imagedata)=@_;
+  my $sth=$self->statement('setImage');
+  $sth->bind_param(1,$imagedata,SQL_BLOB);
+  $sth->bind_param(2,$zoneid);
+  $sth->execute();
 }
 
 1;

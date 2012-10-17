@@ -20,6 +20,8 @@
 
 package AMC::Gui::Zooms;
 
+use File::Spec::Functions qw/tmpdir/;
+
 use AMC::Basic;
 use AMC::DataModule::capture ':zone';
 
@@ -174,17 +176,24 @@ sub load_positions {
 }
 
 sub safe_pixbuf {
-  my ($self,$file)=@_;
+  my ($self,$image)=@_;
   my $p='';
-  if(-f $file) {
+  if($image) {
     # Try to load PNG file. This can fail in case of problem (for
     # example if mimetype was not detected correctly due to special
     # file content matching other mime types).
-    eval { $p=Gtk2::Gdk::Pixbuf->new_from_file($file); };
-    return($p,1) if($p);
-    # Try using Graphics::Magick to convert PNG->XPM
-    my $i=magick_perl_module()->new;
-    $i->Read($file);
+    # eval { $p=Gtk2::Gdk::Pixbuf->new_from_data($image); };
+    # return($p,1) if($p);
+
+    # Try using Graphics::Magick to convert to XPM
+    my $i=magick_perl_module()->new();
+    $i->BlobToImage($image);
+    if( ! $i[0]) {
+      # Try using temporary file to do the same
+      my $tf=tmpdir()."/AMC-tempzoom";
+      open TZ,">$tf";binmode TZ;print TZ $image;close TZ;
+      $i->Read($tf);
+    }
     my @b=$i->ImageToBlob("magick"=>'xpm');
     if($b[0]) {
       $b[0] =~ s:/\*.*\*/::g;
@@ -220,17 +229,16 @@ sub load_boxes {
 
     $self->{'_capture'}->begin_read_transaction;
 
-    my $sth=$self->{'_capture'}->statement('pageZonesD');
+    my $sth=$self->{'_capture'}->statement('pageZonesDI');
     $sth->execute(@{$self->{'page_id'}},ZONE_BOX);
     while (my $z = $sth->fetchrow_hashref) {
 
       my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
-      my $fid=$self->{'zooms_dir'}."/".$z->{'image'};
 
-      if(-f $fid) {
+      if($z->{imagedata}) {
 
 	($self->{'pb_src'}->{$id},$self->{'real_src'}->{$id})
-	  =$self->safe_pixbuf($fid);
+	  =$self->safe_pixbuf($z->{imagedata});
 
 	$self->{'image'}->{$id}=Gtk2::Image->new();
 
@@ -267,7 +275,7 @@ sub load_boxes {
 
 	push @ids,$id;
       } else {
-	debug_and_stderr "Zoom file not found: $fid";
+	debug_and_stderr "No zoom image: $id";
       }
     }
 

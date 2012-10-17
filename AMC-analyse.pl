@@ -634,12 +634,10 @@ sub one_scan {
   }
 
   my $zoom_dir;
-  my $zoom_subdir;
 
   if($cr_dir) {
 
-    $zoom_subdir=pageids_string(@spc,'path'=>1);
-    $zoom_dir="$cr_dir/zooms/".$zoom_subdir;
+    $zoom_dir=tmpdir()."/AMC-zooms";
 
     # clear old analysis results files
 
@@ -794,20 +792,19 @@ sub one_scan {
       $zoneid=$capture->get_zoneid(@spc,ZONE_DIGIT,$n,$i,1);
     } elsif($k eq 'namefield') {
       $zoneid=$capture->get_zoneid(@spc,ZONE_NAME,0,0,1);
-      $capture->statement('setZoneAuto')
-	->execute(-1,-1,$nom_file,$zoneid);
+      $capture->set_zone_auto_id($zoneid,-1,-1,$nom_file,undef);
     }
 
     if($zoneid) {
       if($k ne 'namefield') {
 	if($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN) {
 	  debug "Box $k is DONT_SCAN";
-	  $capture->statement('setZoneAuto')
-	    ->execute(1,0,undef,$zoneid);
+	  $capture->set_zone_auto_id($zoneid,1,0,undef,undef);
 	} elsif($ld->{'darkness.data'}->{$k}) {
-	  $capture->statement('setZoneAuto')
-	    ->execute(@{$ld->{'darkness.data'}->{$k}},
-		      $zoom_subdir."/".$ld->{'zoom.file'}->{$k},$zoneid);
+	  $capture->set_zone_auto_id($zoneid,
+			   @{$ld->{'darkness.data'}->{$k}},
+			   undef,
+			   file_content($zoom_dir."/".$ld->{'zoom.file'}->{$k}));
 	} else {
 	  debug "No darkness data for box $k";
 	}
