@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkAccelGroup" id="accelgroup1"/>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="lower">1</property>
@@ -37,7 +38,6 @@
   <object class="GtkImage" id="image19">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="halign">center</property>
     <property name="stock">gtk-page-setup</property>
   </object>
   <object class="GtkImage" id="image2">
@@ -103,13 +103,11 @@
   <object class="GtkImage" id="image6">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="halign">center</property>
     <property name="stock">gtk-clear</property>
   </object>
   <object class="GtkImage" id="image7">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="halign">center</property>
     <property name="stock">gtk-zoom-in</property>
   </object>
   <object class="GtkImage" id="image8">
@@ -137,9 +135,9 @@
             <property name="can_focus">False</property>
             <child>
               <object class="GtkMenuItem" id="menuitem1">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Project</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -149,9 +147,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menu_projet_nouveau">
                         <property name="label">gtk-new</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
@@ -161,9 +159,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menu_projet_ouvrir">
                         <property name="label">gtk-open</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
@@ -173,9 +171,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menu_projet_enreg">
                         <property name="label">gtk-save</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
@@ -191,9 +189,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menu_projet_modele">
                         <property name="label" translatable="yes">Export as template</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="image">image36</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="make_template" swapped="no"/>
@@ -202,10 +200,10 @@
                     <child>
                       <object class="GtkImageMenuItem" id="open_templates_dir">
                         <property name="label" translatable="yes">User templates</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Open personal templates directory</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="image">image37</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="open_templates_dir" swapped="no"/>
@@ -220,9 +218,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menuitem2">
                         <property name="label" translatable="yes">Manage</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="image">image22</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="projet_gestion" swapped="no"/>
@@ -231,9 +229,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menu_quitter">
                         <property name="label">gtk-quit</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
@@ -246,9 +244,9 @@
             </child>
             <child>
               <object class="GtkMenuItem" id="menuitem3">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Edit</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -258,9 +256,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem6">
                         <property name="label">gtk-preferences</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
@@ -273,9 +271,9 @@
             </child>
             <child>
               <object class="GtkMenuItem" id="menuitem7">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Tools</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -283,11 +281,12 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="cleanup">
+                      <object class="GtkImageMenuItem" id="cleanup_menu">
                         <property name="label" translatable="yes">Cleanup...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="image">image16</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="cleanup_dialog" swapped="no"/>
@@ -295,9 +294,9 @@
                     </child>
                     <child>
                       <object class="GtkMenuItem" id="menuitem8">
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Plugins</property>
                         <property name="use_underline">True</property>
                         <child type="submenu">
@@ -307,10 +306,10 @@
                             <child>
                               <object class="GtkImageMenuItem" id="browse_plugins_menuitem">
                                 <property name="label" translatable="yes" comments="Menu item from the Plugins menu. When selected, open the installed plugins directory.">Installed plugins</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes" comments="Tooltip for the Plugins-&gt;Browse menu item.">Open the installed plugins directory.</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="image">image30</property>
                                 <property name="use_stock">False</property>
                                 <signal name="activate" handler="plugins_browse" swapped="no"/>
@@ -319,10 +318,10 @@
                             <child>
                               <object class="GtkImageMenuItem" id="add_plugin_menuitem">
                                 <property name="label">gtk-add</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes" comments="Tooltip for the Plugin-&gt;Add (install) menuitem.">Install a plugin.</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="use_underline">True</property>
                                 <property name="use_stock">True</property>
                                 <signal name="activate" handler="plugins_add" swapped="no"/>
@@ -338,9 +337,9 @@
             </child>
             <child>
               <object class="GtkMenuItem" id="menuitem4">
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Help</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -350,9 +349,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem10">
                         <property name="label">gtk-about</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
@@ -362,19 +361,19 @@
                     <child>
                       <object class="GtkImageMenuItem" id="doc_menu">
                         <property name="label" translatable="yes" comments="One menu entry in menu &quot;Help&quot; from main window.">Documentation</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="image">image20</property>
                         <property name="use_stock">False</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkCheckMenuItem" id="menu_debug">
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Get debugging information in a file</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Debugging</property>
                         <property name="use_underline">True</property>
                         <signal name="toggled" handler="debug_set" swapped="no"/>
@@ -383,9 +382,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menu_bugreport">
                         <property name="label" translatable="yes">Bug report</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="image">image32</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="bug_report" swapped="no"/>
@@ -394,9 +393,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menuitem5">
                         <property name="label" translatable="yes">Cancel learning...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="image">image25</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="annule_apprentissage" swapped="no"/>
@@ -434,11 +433,9 @@
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkButton" id="button12">
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="halign">center</property>
                             <property name="use_action_appearance">False</property>
                             <signal name="clicked" handler="filter_details" swapped="no"/>
                             <child>
@@ -459,7 +456,6 @@
                           <object class="GtkComboBox" id="pref_prep_c_filter">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">center</property>
                             <signal name="changed" handler="filter_changed" swapped="no"/>
                             <child>
                               <object class="GtkCellRendererText" id="cellrenderertext2"/>
@@ -477,12 +473,9 @@
                         <child>
                           <object class="GtkButton" id="button9">
                             <property name="label" translatable="yes">Edit source file</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
                             <property name="use_action_appearance">False</property>
                             <property name="image">image3</property>
                             <signal name="pressed" handler="edit_src" swapped="no"/>
@@ -509,6 +502,10 @@
                         <property name="invisible_char">●</property>
                         <property name="shadow_type">none</property>
                         <property name="primary_icon_stock">gtk-info</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -560,10 +557,14 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip_markup" translatable="yes">Number of papers to produce. Zero means taking into account the number written in the LaTeX source file.</property>
+                            <property name="tooltip_markup">Number of papers to produce. Zero means taking into account the number written in the LaTeX source file.</property>
                             <property name="tooltip_text" translatable="yes">Number of papers to produce. Zero means taking into account the number written in the LaTeX source file.</property>
                             <property name="max_length">4</property>
                             <property name="invisible_char">●</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">adjustment2</property>
                             <property name="snap_to_ticks">True</property>
                             <property name="numeric">True</property>
@@ -587,7 +588,6 @@
                       <object class="GtkHBox" id="Hbox4">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="valign">start</property>
                         <child>
                           <object class="GtkVButtonBox" id="Vbuttonbox30">
                             <property name="visible">True</property>
@@ -596,12 +596,9 @@
                             <child>
                               <object class="GtkButton" id="button3">
                                 <property name="label" translatable="yes">Update documents</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <property name="halign">start</property>
-                                <property name="valign">start</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="image">image1</property>
                                 <signal name="pressed" handler="doc_maj" swapped="no"/>
@@ -626,7 +623,6 @@
                             <child>
                               <object class="GtkButton" id="but_question">
                                 <property name="label" translatable="yes">Question</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
@@ -643,7 +639,6 @@
                             <child>
                               <object class="GtkButton" id="but_solution">
                                 <property name="label" translatable="yes">Solution</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
@@ -680,6 +675,10 @@
                         <property name="has_frame">False</property>
                         <property name="invisible_char">●</property>
                         <property name="primary_icon_stock">gtk-dialog-question</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -720,12 +719,9 @@
                         <child>
                           <object class="GtkButton" id="button6">
                             <property name="label" translatable="yes">Layout detection</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
                             <property name="use_action_appearance">False</property>
                             <property name="image">image12</property>
                             <signal name="pressed" handler="calcule_mep" swapped="no"/>
@@ -752,7 +748,6 @@
                         <child>
                           <object class="GtkButton" id="button_mep_warnings">
                             <property name="label" translatable="yes">Warnings</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -769,7 +764,6 @@
                         <child>
                           <object class="GtkButton" id="button4">
                             <property name="label" translatable="yes">Check layouts</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -799,6 +793,10 @@
                         <property name="invisible_char">●</property>
                         <property name="invisible_char_set">True</property>
                         <property name="primary_icon_stock">gtk-dialog-question</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -835,7 +833,6 @@
                     <child>
                       <object class="GtkButton" id="button7">
                         <property name="label" translatable="yes">Print papers</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -895,7 +892,6 @@
                             <property name="layout_style">spread</property>
                             <child>
                               <object class="GtkButton" id="button5">
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
@@ -941,7 +937,6 @@
                             </child>
                             <child>
                               <object class="GtkButton" id="button1">
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
@@ -1038,27 +1033,20 @@
                               <object class="GtkHBox" id="Hbox1">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="hexpand">True</property>
                                 <property name="spacing">4</property>
                                 <child>
                                   <object class="GtkScrolledWindow" id="scrolledwindow2">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="hexpand">True</property>
                                     <property name="hscrollbar_policy">never</property>
                                     <child>
                                       <object class="GtkTreeView" id="diag_tree">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="halign">start</property>
-                                        <property name="hexpand">True</property>
                                         <property name="enable_search">False</property>
                                         <property name="show_expanders">False</property>
                                         <property name="enable_grid_lines">both</property>
                                         <signal name="cursor-changed" handler="zooms_line" swapped="no"/>
-                                        <child internal-child="selection">
-                                          <object class="GtkTreeSelection" id="treeview-selection1"/>
-                                        </child>
                                       </object>
                                     </child>
                                   </object>
@@ -1072,19 +1060,16 @@
                                   <object class="GtkVButtonBox" id="Vbuttonbox3">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="halign">start</property>
                                     <property name="spacing">5</property>
                                     <property name="homogeneous">True</property>
                                     <property name="layout_style">center</property>
                                     <child>
                                       <object class="GtkButton" id="button13">
                                         <property name="label" translatable="yes" comments="Label on the button used to open a window with the images of the boxes taken from the scan. This window can be used th check boxes categorization.">Zooms</property>
-                                        <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">Show images of the boxes from the scan, and check their categorization.</property>
-                                        <property name="halign">center</property>
                                         <property name="use_action_appearance">False</property>
                                         <property name="image">image7</property>
                                         <property name="focus_on_click">False</property>
@@ -1100,12 +1085,10 @@
                                     <child>
                                       <object class="GtkButton" id="button14">
                                         <property name="label" translatable="yes" comments="Label of the button used to open a window showing a scan with the place where corner marks have been detected, and the position where the boxes are supposed to be.">Layout</property>
-                                        <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">Show where corner marks have been detected on the scan, and where boxes are supposed to be.</property>
-                                        <property name="halign">center</property>
                                         <property name="use_action_appearance">False</property>
                                         <property name="image">image19</property>
                                         <property name="focus_on_click">False</property>
@@ -1121,12 +1104,10 @@
                                     <child>
                                       <object class="GtkButton" id="button15">
                                         <property name="label" translatable="yes" comments="Label of the button used to delete data capture for selected pages.">Remove</property>
-                                        <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">Remove data capture for selected pages.</property>
-                                        <property name="halign">center</property>
                                         <property name="use_action_appearance">False</property>
                                         <property name="image">image6</property>
                                         <property name="image_position">top</property>
@@ -1163,6 +1144,10 @@
                                     <property name="editable">False</property>
                                     <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                    <property name="secondary_icon_activatable">False</property>
+                                    <property name="primary_icon_sensitive">True</property>
+                                    <property name="secondary_icon_sensitive">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">True</property>
@@ -1173,7 +1158,6 @@
                                 <child>
                                   <object class="GtkButton" id="button_show_missing">
                                     <property name="label" translatable="yes">Missing pages</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1207,6 +1191,10 @@
                                     <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
                                     <property name="caps_lock_warning">False</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                    <property name="secondary_icon_activatable">False</property>
+                                    <property name="primary_icon_sensitive">True</property>
+                                    <property name="secondary_icon_sensitive">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">True</property>
@@ -1217,7 +1205,6 @@
                                 <child>
                                   <object class="GtkButton" id="button_unrecognized">
                                     <property name="label" translatable="yes">Look at scans</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1300,27 +1287,8 @@
                                 <property name="n_rows">2</property>
                                 <property name="n_columns">2</property>
                                 <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
                                   <object class="GtkCheckButton" id="maj_bareme">
                                     <property name="label" translatable="yes">Update marking scale</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
@@ -1329,6 +1297,15 @@
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="valide_options_correction" swapped="no"/>
                                   </object>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
@@ -1344,7 +1321,6 @@
                                 <property name="layout_style">end</property>
                                 <child>
                                   <object class="GtkButton" id="noter">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1390,7 +1366,6 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="voir_notes">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1448,6 +1423,10 @@
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
                                 <property name="caps_lock_warning">False</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="secondary_icon_activatable">False</property>
+                                <property name="primary_icon_sensitive">True</property>
+                                <property name="secondary_icon_sensitive">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1521,7 +1500,6 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="liste_setfile">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1567,7 +1545,6 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="liste_path">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
@@ -1614,7 +1591,6 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="liste_edit">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
@@ -1661,7 +1637,6 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="liste_refresh">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
                                     <property name="use_action_appearance">False</property>
@@ -1801,7 +1776,6 @@
                                     <property name="can_focus">False</property>
                                     <child>
                                       <object class="GtkButton" id="button24">
-                                        <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -1846,7 +1820,6 @@
                                     </child>
                                     <child>
                                       <object class="GtkButton" id="button2">
-                                        <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -1911,6 +1884,10 @@
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
                                 <property name="caps_lock_warning">False</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="secondary_icon_activatable">False</property>
+                                <property name="primary_icon_sensitive">True</property>
+                                <property name="secondary_icon_sensitive">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2003,7 +1980,6 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button25">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -2128,12 +2104,11 @@
                                         <child>
                                           <object class="GtkCheckButton" id="export_cb_export_include_abs">
                                             <property name="label" translatable="yes">include absentees</property>
-                                            <property name="use_action_appearance">False</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="has_tooltip">True</property>
-                                            <property name="tooltip_markup" translatable="yes">Should exported data include absentees?</property>
+                                            <property name="tooltip_markup">Should exported data include absentees?</property>
                                             <property name="tooltip_text" translatable="yes">Should exported data include absentees?</property>
                                             <property name="use_action_appearance">False</property>
                                             <property name="xalign">0</property>
@@ -2191,7 +2166,6 @@
                                 <property name="layout_style">end</property>
                                 <child>
                                   <object class="GtkButton" id="button30">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -2275,7 +2249,6 @@
                           <object class="GtkVBox" id="vbox5">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="valign">start</property>
                             <child>
                               <object class="GtkHBox" id="regroupement_corriges">
                                 <property name="visible">True</property>
@@ -2302,12 +2275,11 @@
                                 <child>
                                   <object class="GtkCheckButton" id="notation_cb_regroupement_compose">
                                     <property name="label" translatable="yes">compose</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Find pages in solution if scan is not present? Useful with question with separated answers page.</property>
+                                    <property name="tooltip_markup">Find pages in solution if scan is not present? Useful with question with separated answers page.</property>
                                     <property name="tooltip_text" translatable="yes">Find pages in solution if scan is not present? Useful with question with separated answers page.</property>
                                     <property name="use_action_appearance">False</property>
                                     <property name="xalign">0</property>
@@ -2348,10 +2320,14 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">File name model used to make file names for PDF annotated papers, one by student. Keep empty in order to use student name.</property>
+                                    <property name="tooltip_markup">File name model used to make file names for PDF annotated papers, one by student. Keep empty in order to use student name.</property>
                                     <property name="tooltip_text" translatable="yes">File name model used to make file names for PDF annotated papers, one by student. Keep empty in order to use student name.</property>
                                     <property name="invisible_char">●</property>
                                     <property name="invisible_char_set">True</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                    <property name="secondary_icon_activatable">False</property>
+                                    <property name="primary_icon_sensitive">True</property>
+                                    <property name="secondary_icon_sensitive">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">True</property>
@@ -2370,7 +2346,6 @@
                               <object class="GtkHBox" id="Hbox2">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="halign">end</property>
                                 <child>
                                   <object class="GtkComboBox" id="notation_c_regroupement_copies">
                                     <property name="visible">True</property>
@@ -2390,12 +2365,11 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button10">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
                                     <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Annotate papers&amp;apos; scans with marking details.</property>
+                                    <property name="tooltip_markup">Annotate papers&amp;apos; scans with marking details.</property>
                                     <property name="tooltip_text" translatable="yes">Annotate papers' scans with marking details.</property>
                                     <property name="use_action_appearance">False</property>
                                     <signal name="clicked" handler="annotate_papers" swapped="no"/>
@@ -2438,12 +2412,11 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button8">
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
                                     <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Look at grouped files</property>
+                                    <property name="tooltip_markup">Look at grouped files</property>
                                     <property name="tooltip_text" translatable="yes">Look at grouped files</property>
                                     <property name="use_action_appearance">False</property>
                                     <signal name="clicked" handler="regarde_regroupements" swapped="no"/>
@@ -2500,7 +2473,6 @@
                                 <child>
                                   <object class="GtkButton" id="button11">
                                     <property name="label" translatable="yes">Send...</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -2614,7 +2586,6 @@
             <child>
               <object class="GtkButton" id="annulation">
                 <property name="label">gtk-cancel</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

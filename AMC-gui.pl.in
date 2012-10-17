@@ -800,6 +800,7 @@ my $gui=read_glade('main_window',
     config_export_modules standard_export_options
     notation_c_regroupement_type notation_cb_regroupement_compose
     pref_prep_s_nombre_copies pref_prep_c_filter
+    cleanup_menu
     /);
 
 # Grid lines are not well-positioned in RTL environments, I don't know
@@ -5948,6 +5949,8 @@ sub valide_projet {
 
     transmet_pref($gui,'export',$projet{'options'});
     transmet_pref($gui,'pref_prep',$projet{'options'});
+
+    $w{'cleanup_menu'}->set_sensitive(1);
 }
 
 sub projet_ouvre {
@@ -6068,6 +6071,8 @@ sub quitte_projet {
 	}
 
 	%projet=();
+
+      $w{'cleanup_menu'}->set_sensitive(0);
     }
 }
 
