@@ -65,7 +65,7 @@ sub new {
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
        'disable'=>'',
       };
-    $self->{'parse_modules'}=['local_latex','images','text'];
+    $self->{'parse_modules'}=['local_latex','images','embf','text'];
     $self->{'qid'}=0;
     bless ($self, $class);
     return $self;
@@ -305,6 +305,37 @@ sub parse_local_latex {
 	my $after=${^POSTMATCH};
 	push @o,{'type'=>'txt','string'=>$before};
 	push @o,{'type'=>'latex','string'=>$latex};
+	$s=$after;
+      }
+      push @o,{'type'=>'txt','string'=>$s};
+    } else {
+      push @o,$c;
+    }
+  }
+  return(@o);
+}
+
+sub parse_embf {
+  my ($self,@components)=@_;
+  my @o=();
+  for my $c (@components) {
+    if($c->{'type'} eq 'txt') {
+      my $s=$c->{'string'};
+      while($s =~ /\[([_\*])(((?!\]\]).)+?)\1\]/p) {
+	my $modif=$1;
+	my $modif_latex;
+	my $text=$2;
+	my $before=${^PREMATCH};
+	my $after=${^POSTMATCH};
+	if($modif eq '_') {
+	  $modif_latex='it';
+	} else {
+	  $modif_latex='bf';
+	}
+	push @o,{'type'=>'txt','string'=>$before};
+	push @o,{'type'=>'latex','string'=>"\\text".$modif_latex."{"};
+	push @o,$self->parse_embf({'type'=>'txt','string'=>$text});
+	push @o,{'type'=>'latex','string'=>"}"};
 	$s=$after;
       }
       push @o,{'type'=>'txt','string'=>$s};

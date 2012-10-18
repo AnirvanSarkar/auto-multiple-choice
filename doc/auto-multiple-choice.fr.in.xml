@@ -585,7 +585,8 @@ lesquels sont positifs ?
           <listitem>
             <para>Donne une liste de convertisseurs à désactiver, séparés par
             des virgules. Les convertisseurs disponibles sont
-            <code>images</code> (voir <xref linkend="parse_images"/>), et
+            <code>images</code> (voir <xref linkend="parse_images"/>),
+            <code>embf</code> (voir <xref linkend="parse_embf"/>) et
             <code>local_latex</code> (voir <xref
             linkend="parse_local_latex"/>).</para>
           </listitem>
@@ -785,6 +786,20 @@ Combien y a-t-il d'étoiles dans le ciel ?
 - une
 - deux
 - dix millions</programlisting>
+    </sect2>
+
+    <sect2 id="parse_embf">
+      <title>Gras, italique</title>
+
+      <para>Les parties du textes à écrire en gras devront être entourées de
+      <code>[*</code> et <code>*]</code>. Les parties à mettre en italique
+      devront être entourées de <code>[_</code> et <code>_]</code>.</para>
+
+      <programlisting>** Choisissez parmi les expressions suivantes celles
+   où le mot en italique est [*un adjectif*].
++ Une balle [_bleue_]
+- Un [_livre_] rose
++ Quelle [_belle_] histoire !</programlisting>
     </sect2>
 
     <sect2 id="parse_images">

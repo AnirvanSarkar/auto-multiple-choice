@@ -549,7 +549,8 @@ the best you can.
           <listitem>
             <para>Gives a comma-separated list of features to disable. Current
             implemented features are <code>images</code> (see <xref
-            linkend="parse_images"/>) and <code>local_latex</code> (see <xref
+            linkend="parse_images"/>), <code>embf</code> (see <xref
+            linkend="parse_embf"/>) and <code>local_latex</code> (see <xref
             linkend="parse_local_latex"/>).</para>
           </listitem>
         </varlistentry>
@@ -743,6 +744,19 @@ How many stars in the sky?
 - one
 - two
 - ten millions</programlisting>
+    </sect2>
+
+    <sect2 id="parse_embf">
+      <title>Bold, italic</title>
+
+      <para>To get <emphasis>bold</emphasis> text, enclose it between
+      <code>[*</code> and <code>*]</code>. To get <emphasis>italic</emphasis>
+      text, enclose it between <code>[_</code> and <code>_]</code>.</para>
+
+      <programlisting>* What is the [*capital city*] of [_France_]?
++ Paris
+- Lille
+- Marseille</programlisting>
     </sect2>
 
     <sect2 id="parse_images">
