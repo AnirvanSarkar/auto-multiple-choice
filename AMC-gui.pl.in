@@ -6817,11 +6817,13 @@ my @cleanup_components
      short=>__("zooms"),
      text=>__("boxes images are extracted from the scans while processing automatic data capture. They can be removed if you don't plan to use the zooms dialog to check and correct boxes categorization. They can be recovered processing again automatic data capture from the same scans."),
      size=>sub {
-       return(file_size({recursive=>5},absolu('%PROJET/cr/zooms')));
+       return(file_size({recursive=>5},absolu('%PROJET/cr/zooms'))
+	     + $projet{'_capture'}->zooms_total_size_transaction());
      },
      action=>sub {
        return(remove_tree(absolu('%PROJET/cr/zooms'),
-			  {'verbose'=>0,'safe'=>1,'keep_root'=>1}));
+			  {'verbose'=>0,'safe'=>1,'keep_root'=>1})
+	     + $projet{'_capture'}->zooms_cleanup_transaction());
      },
     },
     {id=>'matching_reports',

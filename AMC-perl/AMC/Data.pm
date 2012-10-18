@@ -37,6 +37,7 @@ sub new {
        'timeout'=>300000,
        'dbh'=>'',
        'modules'=>{},
+       'files'=>{},
        'on_error'=>'stdout,stderr,die',
        'progress'=>'',
       };
@@ -188,6 +189,7 @@ sub require_module {
 	debug "Loading perl module $module...";
 	load("AMC::DataModule::$module");
 	$self->{'modules'}->{$module}="AMC::DataModule::$module"->new($self);
+	$self->{'files'}->{$module}=$filename;
 
 	debug "Module $module loaded.";
     }
@@ -201,6 +203,16 @@ sub module {
     $self->require_module($module);
     return($self->{'modules'}->{$module});
 }
+
+# module_path($module) returns the path of the SQLite database
+# associated with this module, or undef if the module has not been
+# loaded.
+
+sub module_path {
+    my ($self,$module)=@_;
+    return($self->{'files'}->{$module});
+}
+
 
 # progression is called by DataModule methods when long actions are
 # beeing executed, to show the user the progression of this action.

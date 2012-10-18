@@ -467,6 +467,9 @@ sub define_statements {
 		     ." WHERE student=? AND page=? AND copy=? AND type=?"},
      'imagePaths'=>{'sql'=>"SELECT zoneid,image FROM $t_zone WHERE type=?"},
      'setImage'=>{'sql'=>"UPDATE $t_zone SET image='',imagedata=? WHERE zoneid=?"},
+     'zoomsTotalSize'=>{'sql'=>"SELECT SUM(LENGTH(imagedata)) FROM $t_zone"
+			." WHERE type=?"},
+     'zoomsCleanup'=>{'sql'=>"UPDATE $t_zone SET imagedata=NULL WHERE type=?"},
      'pageZonesAll'=>{'sql'=>"SELECT * FROM $t_zone"
 		      ." WHERE type=?"},
      'pageZonesD'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual"
@@ -1267,6 +1270,23 @@ sub set_image {
   $sth->bind_param(1,$imagedata,SQL_BLOB);
   $sth->bind_param(2,$zoneid);
   $sth->execute();
+}
+
+sub zooms_total_size_transaction {
+  my ($self)=@_;
+  $self->begin_read_transaction('ztsz');
+  my $s=$self->sql_single($self->statement('zoomsTotalSize'),ZONE_BOX);
+  $self->end_transaction('ztsz');
+  return($s);
+}
+
+sub zooms_cleanup_transaction {
+  my ($self)=@_;
+  $self->begin_transaction('zcln');
+  my $n=$self->statement('zoomsCleanup')->execute(ZONE_BOX);
+  $self->end_transaction('zcln');
+  $self->vacuum();
+  return($n);
 }
 
 1;

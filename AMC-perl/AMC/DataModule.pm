@@ -68,6 +68,30 @@ sub dbh {
     return $self->{'data'}->dbh;
 }
 
+# path() returns the path of the SQLite database associated with the
+# module.
+
+sub path {
+  my ($self)=@_;
+  return($self->{'data'}->module_path($self->{'name'}));
+}
+
+# vacuum() loads the SQLite database separately, and asks for VACUUM
+# on it.
+
+sub vacuum {
+  my ($self)=@_;
+  my $dbh=DBI->connect("dbi:SQLite:dbname=".$self->path(),undef,undef,
+		       {AutoCommit => 1,
+			RaiseError => 0,
+		       });
+  $dbh->{HandleError}=sub {
+    debug "VACUUM statement: ".shift;
+  };
+  $dbh->do("VACUUM");
+  $dbh->disconnect;
+}
+
 # disconnect disconnects from SQLite
 
 sub disconnect {
