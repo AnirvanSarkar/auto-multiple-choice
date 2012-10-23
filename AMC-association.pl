@@ -19,6 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use Getopt::Long;
+use AMC::Basic;
 
 my $cr_dir='';
 my $liste='';
@@ -40,8 +41,8 @@ GetOptions("cr=s"=>\$cr_dir,
 	   );
 
 if($list) {
-  use AMC::Data;
-  use AMC::Basic;
+  require AMC::Data;
+
   my $data=AMC::Data->new($data_dir);
   my $assoc=$data->module('association');
   $data->begin_read_transaction('ALST');
@@ -64,15 +65,16 @@ if($list) {
     }
   }
 } elsif($set) {
-  use AMC::Data;
-  use AMC::Basic;
+  require AMC::Data;
+
   my $data=AMC::Data->new($data_dir);
   my $assoc=$data->module('association');
   $data->begin_transaction('ASET');
   $assoc->set_manual($student,$copy,$id);
   $data->end_transaction('ASET');
 } else {
-  use AMC::Gui::Association;
+  require AMC::Gui::Association;
+
   my $g=AMC::Gui::Association::new('cr'=>$cr_dir,
 				   'liste'=>$liste,
 				   'data_dir'=>$data_dir,
