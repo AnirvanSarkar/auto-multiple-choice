@@ -179,13 +179,15 @@ sub safe_pixbuf {
   my ($self,$image)=@_;
   my $p='';
   if($image) {
-    # Try to load PNG file. This can fail in case of problem (for
-    # example if mimetype was not detected correctly due to special
-    # file content matching other mime types).
-    # eval { $p=Gtk2::Gdk::Pixbuf->new_from_data($image); };
-    # return($p,1) if($p);
+    # first try with a PixbufLoader
 
-    # Try using Graphics::Magick to convert to XPM
+    my $pxl=Gtk2::Gdk::PixbufLoader->new;
+    $pxl->write($image);
+    $pxl->close();
+    $p=$pxl->get_pixbuf();
+    return($p,1) if($p);
+
+    # Then try using Graphics::Magick to convert to XPM
     my $i=magick_perl_module()->new();
     $i->BlobToImage($image);
     if( ! $i[0]) {
