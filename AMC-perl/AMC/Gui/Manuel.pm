@@ -50,6 +50,7 @@ use_gettext;
 sub new {
     my %o=(@_);
     my $self={'data-dir'=>'',
+	      'project-dir'=>'',
 	      'sujet'=>'',
 	      'etud'=>'',
 	      'dpi'=>75,
@@ -65,6 +66,7 @@ sub new {
 	      'image_type'=>'xpm',
 	      'editable'=>1,
 	      'multiple'=>0,
+	      'onscan'=>'',
 	  };
 
     for (keys %o) {
@@ -99,7 +101,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy/) {
+    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
@@ -111,7 +113,10 @@ sub new {
     if(!$self->{'editable'}) {
 	$self->{'navigation_v'}->show();
     } else {
-	$self->{'navigation_h'}->show();
+      $self->{'scan_view_model'}=cb_model(0,'Subject',
+					  1,'Scan');
+      $self->{'scan_view'}->set_model($self->{'scan_view_model'});
+      $self->{'navigation_h'}->show();
     }
 
     $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
@@ -199,6 +204,14 @@ sub new {
 }
 
 ###
+
+sub scan_view_change {
+  my ($self)=@_;
+  $self->{'onscan'}=$self->{'scan_view'}->get_active();
+  $self->ecrit();
+  $self->{'area'}->{'onscan'}=$self->{'onscan'};
+  $self->charge_i();
+}
 
 sub goto_from_list {
     my ($self,$widget, $event) = @_;
@@ -348,33 +361,50 @@ sub charge_i {
     $self->{'info'}=$self->{'layout'}->page_info(@ep);
     my $page=$self->{'info'}->{'subjectpage'};
 
+    my $scan_file=proj2abs({'%PROJET'=>$self->{'project-dir'}},
+			   $self->{'capture'}->get_scan_page(@spc));
+
     debug "PAGE $page";
 
     ################################
     # fabrication du xpm
     ################################
 
+    my $display_image='';
+    my $tmp_image='';
+    my $tmp_ppm='';
+
     debug "Making XPM";
 
-    $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    if($self->{'onscan'} && -f $scan_file) {
 
-    system("pdftoppm","-f",$page,"-l",$page,
-	   "-r",$self->{'dpi'},
-	   $self->{'sujet'},
-	   $self->{'temp-dir'}."/page");
-    # recherche de ce qui a ete fabrique...
-    opendir(TDIR,$self->{'temp-dir'}) || die "can't opendir $self->{'temp-dir'} : $!";
-    my @candidats = grep { /^page-.*\.ppm$/ && -f $self->{'temp-dir'}."/$_" } readdir(TDIR);
-    closedir TDIR;
-    debug "Candidates : ".join(' ',@candidats);
-    my $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
-    my $tmp_image=$tmp_ppm;
+      $display_image=$scan_file;
 
-    if($self->{'image_type'} && $self->{'image_type'} ne 'ppm') {
+    } else {
+
+      $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+      Gtk2->main_iteration while ( Gtk2->events_pending );
+
+      system("pdftoppm","-f",$page,"-l",$page,
+	     "-r",$self->{'dpi'},
+	     $self->{'sujet'},
+	     $self->{'temp-dir'}."/page");
+      # recherche de ce qui a ete fabrique...
+      opendir(TDIR,$self->{'temp-dir'}) || die "can't opendir $self->{'temp-dir'} : $!";
+      my @candidats = grep { /^page-.*\.ppm$/ && -f $self->{'temp-dir'}."/$_" } readdir(TDIR);
+      closedir TDIR;
+      debug "Candidates : ".join(' ',@candidats);
+      $tmp_ppm=$self->{'temp-dir'}."/".$candidats[0];
+      $tmp_image=$tmp_ppm;
+
+      if($self->{'image_type'} && $self->{'image_type'} ne 'ppm') {
 	$tmp_image=$self->{'tmp-image'}.".".$self->{'image_type'};
 	debug "ppmto".$self->{'image_type'}." : $tmp_ppm -> $tmp_image";
 	system("ppmto".$self->{'image_type'}." \"$tmp_ppm\" > \"$tmp_image\"");
+      }
+
+      $display_image=$tmp_image;
+
     }
 
     ################################
@@ -389,18 +419,34 @@ sub charge_i {
 
       for (qw/box namefield digit/) { $self->{'layinfo'}->{$_}=[]; }
 
-      my $c;
-      my $sth;
-
-      for my $type (qw/box digit namefield/) {
-	my $sth=$self->{'layout'}->statement($type.'Info');
-	$sth->execute(@ep);
-	while($c=$sth->fetchrow_hashref) {
-	  push @{$self->{'layinfo'}->{$type}},{%$c};
+      if($self->{'onscan'}) {
+	my %ci=();
+	for my $c (@{$self->{'capture'}->get_zones_corners(@spc)}) {
+	  %ci=(%$c,'xy'=>[],
+	       'xmin'=>$c->{'x'},'xmax'=>$c->{'x'},
+	       'ymin'=>$c->{'y'},'ymax'=>$c->{'y'},
+	      ) if($c->{'corner'}==1);
+	  push @{$ci{xy}},$c->{'x'},$c->{'y'};
+	  $ci{'xmax'}=$c->{'x'} if($c->{'x'}>$ci{'xmax'});
+	  $ci{'ymax'}=$c->{'y'} if($c->{'y'}>$ci{'ymax'});
+	  $ci{'xmin'}=$c->{'x'} if($c->{'x'}<$ci{'xmin'});
+	  $ci{'ymin'}=$c->{'y'} if($c->{'y'}<$ci{'ymin'});
+	  push @{$self->{'layinfo'}->{'box'}},{%ci} if($c->{'corner'}==4);
 	}
-      }
+      } else {
+	my $c;
+	my $sth;
 
-      $self->{'layinfo'}->{'page'}=$self->{'layout'}->page_info(@ep);
+	for my $type (qw/box digit namefield/) {
+	  my $sth=$self->{'layout'}->statement($type.'Info');
+	  $sth->execute(@ep);
+	  while($c=$sth->fetchrow_hashref) {
+	    push @{$self->{'layinfo'}->{$type}},{%$c};
+	  }
+	}
+
+	$self->{'layinfo'}->{'page'}=$self->{'layout'}->page_info(@ep);
+      }
 
       # mise a jour des cases suivant saisies deja presentes
 
@@ -421,11 +467,11 @@ sub charge_i {
 
     # utilisation
 
-    $self->{'area'}->set_image($tmp_image,
+    $self->{'area'}->set_image($display_image,
 			       $self->{'layinfo'});
 
-    unlink($tmp_ppm);
-    unlink($tmp_image) if($tmp_ppm ne $tmp_image && !get_debug());
+    unlink($tmp_ppm) if($tmp_ppm);
+    unlink($tmp_image) if($tmp_image && ($tmp_ppm ne $tmp_image) && !get_debug());
 
     # dans la liste
 

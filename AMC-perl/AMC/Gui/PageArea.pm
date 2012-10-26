@@ -44,6 +44,9 @@ sub add_feuille {
     $self->{'coches'}='';
     $self->{'editable'}=1;
 
+    $self->{'onscan'}='';
+    $self->{'unticked_color_name'}="blue";
+
     $self->{'font'}=Pango::FontDescription->from_string("128");
 
     for (keys %oo) {
@@ -53,6 +56,8 @@ sub add_feuille {
     $self->{'gc'} = Gtk2::Gdk::GC->new($self->window);
 
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
+    $self->{'unticked_color'}=
+      Gtk2::Gdk::Color->parse($self->{'unticked_color_name'});
     $self->window->get_colormap->alloc_color($self->{'color'},TRUE,TRUE);
 
     if($self->{'marks'}) {
@@ -84,6 +89,11 @@ sub set_image {
       if($@) {
 	# Error loading scan...
 	$self->{'i-src'}='';
+      } else {
+	$layinfo->{'page'}->{'width'}=$self->{'i-src'}->get_width
+	  if(!$layinfo->{'page'}->{'width'});
+	$layinfo->{'page'}->{'height'}=$self->{'i-src'}->get_height
+	  if(!$layinfo->{'page'}->{'height'});
       }
     } elsif($image eq 'NONE') {
       $self->{'i-src'}='';
@@ -158,6 +168,25 @@ sub choix {
   return TRUE;
 }
 
+sub draw_box {
+  my ($self,$box,$fill)=@_;
+  if($box->{'xy'}) {
+    $self->window->draw_polygon
+      ($self->{'gc'},
+       $fill,map { ($box->{'xy'}->[$_*2]*$self->{'rx'},
+		    $box->{'xy'}->[$_*2+1]*$self->{'ry'}) } (0..3) );
+  } else {
+    $self->window->draw_rectangle
+      ($self->{'gc'},
+       $fill,
+       $box->{'xmin'}*$self->{'rx'},
+       $box->{'ymin'}*$self->{'ry'},
+       ($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'},
+       ($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}
+      );
+  }
+}
+
 sub expose_drawing {
     my ($self,$evenement,@donnees)=@_;
     my $r=$self->allocation();
@@ -201,7 +230,8 @@ sub expose_drawing {
 
     debug "Done with rendering";
 
-    if($self->{'layinfo'}->{'box'} || $self->{'layinfo'}->{'namefield'}) {
+    if(($self->{'layinfo'}->{'box'} || $self->{'layinfo'}->{'namefield'})
+      && ($self->{'layinfo'}->{'page'}->{'width'})) {
 	my $box;
 
 	debug "Layout drawings...";
@@ -215,14 +245,7 @@ sub expose_drawing {
 	    $self->{'gc'}->set_foreground($self->{'colormark'});
 
 	    for $box (@{$self->{'layinfo'}->{'namefield'}}) {
-		$self->window->draw_rectangle(
-		    $self->{'gc'},
-		    '',
-		    $box->{'xmin'}*$self->{'rx'},
-		    $box->{'ymin'}*$self->{'ry'},
-		    ($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'},
-		    ($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}
-		    );
+		$self->draw_box($box,'');
 	    }
 
 	    $box=$self->{'layinfo'}->{'mark'};
@@ -240,15 +263,7 @@ sub expose_drawing {
 	    }
 
 	    for my $box (@{$self->{'layinfo'}->{'digit'}}) {
-		$self->window->draw_rectangle(
-		    $self->{'gc'},
-		    '',
-		    $box->{'xmin'}*$self->{'rx'},
-		    $box->{'ymin'}*$self->{'ry'},
-		    ($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'},
-		    ($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}
-		    );
-
+		$self->draw_box($box,'');
 	    }
 
 	}
@@ -257,18 +272,23 @@ sub expose_drawing {
 
 	$self->{'gc'}->set_foreground($self->{'color'});
 
-	for $box (@{$self->{'layinfo'}->{'box'}}) {
-	    $self->window->draw_rectangle(
-		$self->{'gc'},
-		$box->{'ticked'},
-		$box->{'xmin'}*$self->{'rx'},
-		$box->{'ymin'}*$self->{'ry'},
-		($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'},
-		($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}
-		);
-
-	    debug "Done.";
+	if($self->{'onscan'}) {
+	  for $box (grep { $_->{'ticked'} }
+		    @{$self->{'layinfo'}->{'box'}}) {
+	    $self->draw_box($box,'');
+	  }
+	  $self->{'gc'}->set_foreground($self->{'unticked_color'});
+	  for $box (grep { ! $_->{'ticked'} }
+		    @{$self->{'layinfo'}->{'box'}}) {
+	    $self->draw_box($box,'');
+	  }
+	} else {
+	  for $box (@{$self->{'layinfo'}->{'box'}}) {
+	    $self->draw_box($box,$box->{'ticked'});
+	  }
 	}
+
+	debug "Done.";
     }
 }
 

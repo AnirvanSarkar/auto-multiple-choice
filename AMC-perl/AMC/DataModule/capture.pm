@@ -621,6 +621,21 @@ sub define_statements {
       ." ON a.student=b.student AND a.page=b.page AND a.copy=b.copy"
      },
      'photocopy'=>{'sql'=>"SELECT COUNT(*) FROM $t_page WHERE copy>0"},
+     'zonesBBox'=>{'sql'=>"SELECT z.id_a AS question,z.id_b AS answer,"
+		   ."   min(p.x) AS xmin,max(p.x) AS xmax,"
+		   ."   min(p.y) AS ymin,max(p.y) AS ymax"
+		   ." FROM $t_zone AS z,$t_position as p"
+		   ." ON z.zoneid=p.zoneid"
+		   ." WHERE z.student=? AND z.page=? AND z.copy=?"
+		   ."   AND z.type=? AND p.type=?"
+		   ." GROUP BY z.zoneid"},
+     'zonesCorners'=>{'sql'=>"SELECT z.id_a AS question,z.id_b AS answer,"
+		      ."   p.x AS x,p.y AS y,p.corner AS corner"
+		      ." FROM $t_zone AS z,$t_position as p"
+		      ." ON z.zoneid=p.zoneid"
+		      ." WHERE z.student=? AND z.page=? AND z.copy=?"
+		      ."   AND z.type=? AND p.type=?"
+		      ." ORDER BY z.zoneid,p.corner"},
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
@@ -1238,6 +1253,48 @@ sub get_namefields {
   $self->{'data'}->require_module('layout');
   return($self->dbh->selectall_arrayref($self->statement('nameFields'),
 					{ Slice => {} },ZONE_NAME));
+}
+
+# get_zones_bbox($student,$page,$copy,$zone_type) returns an arrayref
+# giving, for each zone with type $zone_type (defaulting to ZONE_BOX)
+# on scanned page ($student,$page,$copy), the bounding box on the scan.
+#
+# For example:
+#
+# [{question=>1,answer=>1,
+#   xmin=>1646.92,xmax=>1684.57,ymin=>1608.12,ymax=>1645.38},
+#  {question=>1,answer=>2,
+#   xmin=>1591.68,xmax=>1629.33,ymin=>1517.17,ymax=>1554.43},
+# ]
+
+sub get_zones_bbox {
+  my ($self,$student,$page,$copy,$zone_type)=@_;
+  $zone_type=ZONE_BOX if(!defined($zone_type));
+  return($self->dbh->selectall_arrayref($self->statement('zonesBBox'),
+					{ Slice => {} },
+					$student,$page,$copy,
+					$zone_type,POSITION_BOX));
+}
+
+# get_zones_corners($student,$page,$copy,$zone_type) returns an
+# arrayref giving, for each zone with type $zone_type (defaulting to
+# ZONE_BOX) on scanned page ($student,$page,$copy), the corners on the
+# scan. In the resulting array, corners are ordered.
+#
+# For example:
+#
+# [{zoneid=>156,question=>1,answer=>1,x=>1646.92,y=>1608.12,corner=>1},
+#  {zoneid=>156,question=>1,answer=>1,x=>1667.12,y=>1610.43,corner=>2},
+#  ...
+# ]
+
+sub get_zones_corners {
+  my ($self,$student,$page,$copy,$zone_type)=@_;
+  $zone_type=ZONE_BOX if(!defined($zone_type));
+  return($self->dbh->selectall_arrayref($self->statement('zonesCorners'),
+					{ Slice => {} },
+					$student,$page,$copy,
+					$zone_type,POSITION_BOX));
 }
 
 # n_photocopy() returns the number of captures made on a photocopy of

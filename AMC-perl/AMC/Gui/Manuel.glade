@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <!-- interface-requires gtk+ 2.6 -->
+  <requires lib="gtk+" version="2.24"/>
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="general">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -37,6 +38,10 @@
                     <property name="can_focus">True</property>
                     <property name="tooltip_text" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
                     <property name="invisible_char">•</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="secondary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
                     <signal name="activate" handler="goto_activate_cb" swapped="no"/>
                   </object>
                   <packing>
@@ -59,7 +64,6 @@
                 <child>
                   <object class="GtkButton" id="button6">
                     <property name="label">gtk-go-back</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -78,7 +82,6 @@
                 <child>
                   <object class="GtkButton" id="button8">
                     <property name="label">gtk-quit</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -97,7 +100,6 @@
                 <child>
                   <object class="GtkButton" id="button7">
                     <property name="label">gtk-go-forward</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -183,7 +185,23 @@
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
                         <child>
-                          <placeholder/>
+                          <object class="GtkComboBox" id="scan_view">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="active">0</property>
+                            <signal name="changed" handler="scan_view_change" swapped="no"/>
+                            <child>
+                              <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label1">
@@ -203,6 +221,10 @@
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter.</property>
                             <property name="invisible_char">•</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                             <signal name="activate" handler="goto_activate_cb" swapped="no"/>
                           </object>
                           <packing>
@@ -228,7 +250,6 @@
                         <child>
                           <object class="GtkButton" id="button1">
                             <property name="label">gtk-go-back</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -247,7 +268,6 @@
                         <child>
                           <object class="GtkButton" id="button3">
                             <property name="label">gtk-go-forward</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -283,9 +303,6 @@
                             <property name="can_focus">True</property>
                             <signal name="button-press-event" handler="goto_from_list" swapped="no"/>
                             <signal name="button-release-event" handler="goto_from_list" swapped="no"/>
-                            <child internal-child="selection">
-                              <object class="GtkTreeSelection" id="treeview-selection1"/>
-                            </child>
                           </object>
                         </child>
                       </object>
@@ -305,7 +322,6 @@
                         <child>
                           <object class="GtkButton" id="button_photocopy">
                             <property name="label" translatable="yes">Add photocopy</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -322,12 +338,11 @@
                         <child>
                           <object class="GtkButton" id="button5">
                             <property name="label">gtk-clear</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip_markup" translatable="yes">Remove manual modifications for this page. Automatic data capture for this page, if any, won&amp;apos; t be changed.</property>
+                            <property name="tooltip_markup">Remove manual modifications for this page. Automatic data capture for this page, if any, won&amp;apos; t be changed.</property>
                             <property name="tooltip_text" translatable="yes">Remove manual modifications for this page. Automatic data capture for this page, if any, won' t be changed.</property>
                             <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
@@ -353,7 +368,6 @@
                         <child>
                           <object class="GtkButton" id="button2">
                             <property name="label">gtk-undo</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -372,7 +386,6 @@
                         <child>
                           <object class="GtkButton" id="button4">
                             <property name="label">gtk-quit</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
