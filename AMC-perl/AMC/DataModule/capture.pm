@@ -1315,11 +1315,21 @@ sub clear_all {
     }
 }
 
+# get_image_paths($type) returns an arrayref with image paths of all
+# zones of type $type, like
+#
+# [{zoneid=>153,image=>"zone-image-001.png"},
+#  ...
+# ]
+
 sub get_image_paths {
   my ($self,$type)=@_;
   return($self->dbh->selectall_arrayref($self->statement('imagePaths'),
 					{ Slice => {} },$type));
 }
+
+# set_image($zoneid,$imagedata) sets the imagedata (the image content
+# as a blob) for zone $zoneid.
 
 sub set_image {
   my ($self,$zoneid,$imagedata)=@_;
@@ -1329,6 +1339,9 @@ sub set_image {
   $sth->execute();
 }
 
+# zooms_total_size_transaction() returns the sum of all zooms
+# images stored in the database, in bytes.
+
 sub zooms_total_size_transaction {
   my ($self)=@_;
   $self->begin_read_transaction('ztsz');
@@ -1336,6 +1349,9 @@ sub zooms_total_size_transaction {
   $self->end_transaction('ztsz');
   return($s);
 }
+
+# zooms_cleanup_transaction() deletes all zooms images from the
+# database.
 
 sub zooms_cleanup_transaction {
   my ($self)=@_;
