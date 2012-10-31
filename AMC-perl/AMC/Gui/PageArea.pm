@@ -106,6 +106,7 @@ sub set_image {
     }
     $self->{'layinfo'}=$layinfo;
     $self->{'modifs'}=0;
+    $self->allocate_drawing();
     $self->window->show;
 }
 
