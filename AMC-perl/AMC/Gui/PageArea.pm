@@ -46,7 +46,7 @@ sub add_feuille {
     $self->{'editable'}=1;
 
     $self->{'onscan'}='';
-    $self->{'unticked_color_name'}="blue";
+    $self->{'unticked_color_name'}="#429DE5";
 
     $self->{'font'}=Pango::FontDescription->from_string("128");
 
@@ -59,7 +59,9 @@ sub add_feuille {
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
     $self->{'unticked_color'}=
       Gtk2::Gdk::Color->parse($self->{'unticked_color_name'});
-    $self->window->get_colormap->alloc_color($self->{'color'},TRUE,TRUE);
+    for my $ck (qw/color unticked_color/) {
+      $self->window->get_colormap->alloc_color($self->{$ck},TRUE,TRUE);
+    }
 
     if($self->{'marks'}) {
 	$self->{'colormark'}= Gtk2::Gdk::Color->parse($self->{'marks'});
