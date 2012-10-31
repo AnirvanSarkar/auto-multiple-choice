@@ -37,6 +37,7 @@ sub add_feuille {
     $self->{'i-src'}='';
     $self->{'tx'}=1;
     $self->{'ty'}=1;
+    $self->{'yfactor'}=1;
 
     $self->{'min_render_size'}=10;
 
@@ -64,6 +65,8 @@ sub add_feuille {
 	$self->{'colormark'}= Gtk2::Gdk::Color->parse($self->{'marks'});
 	$self->window->get_colormap->alloc_color($self->{'colormark'},TRUE,TRUE);
     }
+
+    $self->signal_connect('size-allocate'=>\&allocate_drawing);
 
     return($self);
 }
@@ -187,31 +190,47 @@ sub draw_box {
   }
 }
 
+sub allocate_drawing {
+  my ($self,$evenement,@donnees)=@_;
+  my $r=$self->allocation();
+
+  return() if(!$self->{'i-src'});
+
+  $self->{'tx'}=$r->width;
+  $self->{'ty'}=$r->height;
+
+  debug("Rendering target size: ".$self->{'tx'}."x".$self->{'ty'});
+
+  my $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
+  my $sy=$self->{'yfactor'}*$self->{'ty'}/$self->{'i-src'}->get_height;
+
+  if($sx<$sy) {
+    $self->{'ty'}=int($self->{'i-src'}->get_height*$sx);
+    $sy=$self->{'ty'}/$self->{'i-src'}->get_height;
+  }
+  if($sx>$sy) {
+    $self->{'tx'}=int($self->{'i-src'}->get_width*$sy);
+    $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
+  }
+
+  $self->{'sx'}=$sx;
+  $self->{'sy'}=$sy;
+
+  $self->set_size_request(-1,$self->{'ty'});
+}
+
 sub expose_drawing {
     my ($self,$evenement,@donnees)=@_;
-    my $r=$self->allocation();
 
     return() if(!$self->{'i-src'});
 
-    $self->{'tx'}=$r->width;
-    $self->{'ty'}=$r->height;
-
-    debug("Rendering target size: ".$self->{'tx'}."x".$self->{'ty'});
-
-    my $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
-    my $sy=$self->{'ty'}/$self->{'i-src'}->get_height;
-
-    if($sx<$sy) {
-	$self->{'ty'}=int($self->{'i-src'}->get_height*$sx);
-	$sy=$self->{'ty'}/$self->{'i-src'}->get_height;
-    }
-    if($sx>$sy) {
-	$self->{'tx'}=int($self->{'i-src'}->get_width*$sy);
-	$sx=$self->{'tx'}/$self->{'i-src'}->get_width;
-    }
+    $self->allocate_drawing() if(!$self->{'sx'} || !$self->{'sy'});
 
     return() if($self->{'tx'}<$self->{'min_render_size'}
 		|| $self->{'ty'}<$self->{'min_render_size'});
+
+    my $sx=$self->{'sx'};
+    my $sy=$self->{'sy'};
 
     debug("Rendering with SX=$sx SY=$sy");
 

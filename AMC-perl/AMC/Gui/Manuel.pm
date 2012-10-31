@@ -123,6 +123,7 @@ sub new {
 
     AMC::Gui::PageArea::add_feuille
 	($self->{'area'},'',
+	 'yfactor'=>2,
 	 'editable'=>$self->{'editable'},
 	 'marks'=>($self->{'editable'} ? '' : 'blue'));
 
