@@ -113,8 +113,8 @@ sub new {
     if(!$self->{'editable'}) {
 	$self->{'navigation_v'}->show();
     } else {
-      $self->{'scan_view_model'}=cb_model(0,'Subject',
-					  1,'Scan');
+      $self->{'scan_view_model'}=cb_model(0,__("Original"),
+					  1,__("Scan"));
       $self->{'scan_view'}->set_model($self->{'scan_view_model'});
       $self->{'navigation_h'}->show();
     }
