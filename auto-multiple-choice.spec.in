@@ -74,9 +74,9 @@ Requires: /usr/bin/ppmtoxpm
 Requires: /usr/bin/dvipdfm
 
 %if 0%{?suse_version} > 1000
-Suggests: perl(Email::Simple), perl(Email::MIME), perl(Email::Sender), perl(Email::Sender::Simple), perl(Email::Date::Format)
+Suggests: perl(Email::Simple), perl(Email::MIME), perl(Email::Address), perl(Email::Sender), perl(Email::Sender::Simple), perl(Email::Date::Format)
 %else
-Requires: perl(Email::Simple), perl(Email::MIME), perl(Email::Sender), perl(Email::Sender::Simple), perl(Email::Date::Format)
+Requires: perl(Email::Simple), perl(Email::MIME), perl(Email::Address), perl(Email::Sender), perl(Email::Sender::Simple), perl(Email::Date::Format)
 %endif
 
 Requires: perl(DBI), perl(DBD::SQLite)

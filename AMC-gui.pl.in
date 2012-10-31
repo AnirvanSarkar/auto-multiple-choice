@@ -260,6 +260,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'zoom_window_factor'=>1.0,
 
 	      'email_sender'=>'',
+	      'email_cc'=>'',
+	      'email_bcc'=>'',
 	      'email_transport'=>'sendmail',
 	      'email_sendmail_path'=>['commande',
 				      '/usr/sbin/sendmail','/usr/bin/sendmail',
@@ -6487,6 +6489,8 @@ sub send_emails {
 		      "--sendmail-path",$o{'email_sendmail_path'},
 		      "--smtp-host",$o{'email_smtp_host'},
 		      "--smtp-port",$o{'email_smtp_port'},
+		      "--cc",$o{'email_cc'},
+		      "--bcc",$o{'email_bcc'},
 		     );
 
     for(@{$projet{'options'}->{'email_attachment'}}) {

@@ -30,6 +30,7 @@ use AMC::Substitute;
 use Module::Load;
 
 use Email::MIME;
+use Email::Address;
 use Email::Sender;
 use Email::Sender::Simple qw(sendmail);
 
@@ -48,6 +49,8 @@ my $smtp_port=25;
 my $text='';
 my $subject='';
 my $project_name='';
+my $cc='';
+my $bcc='';
 my @attach_files=();
 
 @ARGV=unpack_args(@ARGV);
@@ -72,6 +75,8 @@ GetOptions("project=s"=>\$project_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "attach=s"=>\@attach_files,
+	   "cc=s"=>\$cc,
+	   "bcc=s"=>\$bcc,
 	   );
 
 set_debug($debug);
@@ -83,6 +88,12 @@ sub error {
   debug "AMC-sendmail ERROR: $text";
   print "ERROR: $text\n";
   exit(1);
+}
+
+sub parse_add {
+  my ($s)=@_;
+  return(map { $_->address(); }
+	 (Email::Address->parse($s)));
 }
 
 $data_dir="$project_dir/data" if($project_dir && !$data_dir);
@@ -219,8 +230,14 @@ STUDENT: for my $i (@$r) {
 				 Subject=>$subst->substitute($subject,@sc) ],
 		 parts      => [ @parts,@attachments ],
 		);
+      $email->header_str_set(Cc=>$cc) if($cc);
 
-      my $b=eval { sendmail($email,{'transport'=>$t}); } || $@;
+      my @all_dests=($dest);
+      push @all_dests,parse_add($cc) if($cc);
+      push @all_dests,parse_add($bcc) if($bcc);
+      my $b=eval {
+	sendmail($email,{'transport'=>$t,to=>\@all_dests}) if($bcc);
+      } || $@;
       if($b) {
 	my $status='OK';
 	my $m='';
