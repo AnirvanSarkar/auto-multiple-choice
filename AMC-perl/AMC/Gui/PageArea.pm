@@ -219,7 +219,8 @@ sub allocate_drawing {
   $self->{'sx'}=$sx;
   $self->{'sy'}=$sy;
 
-  $self->set_size_request(-1,$self->{'ty'});
+  $self->set_size_request(-1,$self->{'ty'})
+    if($self->{'yfactor'}>1);
 }
 
 sub expose_drawing {
