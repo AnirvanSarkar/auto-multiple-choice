@@ -22,7 +22,7 @@ package AMC::Filter::register;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 
-use AMC::Basic;
+use AMC::Basic qw(!file_mimetype);
 
 use_gettext;
 
