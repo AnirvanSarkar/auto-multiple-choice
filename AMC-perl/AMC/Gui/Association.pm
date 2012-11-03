@@ -684,7 +684,7 @@ sub charge_image {
       $self->vraie_copie(1);
     } else {
 	$i=-1;
-	$self->{'photo'}->set_image();
+	$self->{'photo'}->set_image('');
 	$self->vraie_copie(0);
     }
     $self->{'iimage'}=$i;
