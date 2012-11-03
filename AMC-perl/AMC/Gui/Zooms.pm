@@ -155,21 +155,35 @@ sub scrolled_update {
   }
 }
 
+sub get_page_info {
+  my ($self)=@_;
+
+  $self->{'page_info'}
+    =$self->{'_capture'}->get_page(@{$self->{'page_id'}});
+}
+
+sub affect_box {
+  my ($self,$z)=@_;
+
+  my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
+  my $auto_pos=($z->{'black'} > $z->{'total'}*$self->{'seuil'} ? 1 : 0);
+  my $eff_pos=($self->{'page_info'}->{'timestamp_manual'}
+	       && $z->{'manual'}>=0 ? $z->{'manual'} :
+	       $auto_pos);
+  $self->{'eff_pos'}->{$id}=$eff_pos;
+  $self->{'auto_pos'}->{$id}=$auto_pos;
+}
+
 sub load_positions {
   my ($self)=@_;
   $self->{'_capture'}->begin_read_transaction;
 
-  my $page=$self->{'_capture'}->get_page(@{$self->{'page_id'}});
+  $self->get_page_info();
 
   my $sth=$self->{'_capture'}->statement('pageZonesD');
   $sth->execute(@{$self->{'page_id'}},ZONE_BOX);
   while (my $z = $sth->fetchrow_hashref) {
-    my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
-    my $auto_pos=($z->{'black'} > $z->{'total'}*$self->{'seuil'} ? 1 : 0);
-    my $eff_pos=($page->{'timestamp_manual'} && $z->{'manual'}>=0 ? $z->{'manual'} :
-		 $auto_pos);
-    $self->{'eff_pos'}->{$id}=$eff_pos;
-    $self->{'auto_pos'}->{$id}=$auto_pos;
+    $self->affect_box($z);
   }
 
   $self->{'_capture'}->end_transaction;
@@ -227,13 +241,15 @@ sub load_boxes {
 
     my @ids;
 
-    $self->load_positions;
-
     $self->{'_capture'}->begin_read_transaction;
+
+    $self->get_page_info();
 
     my $sth=$self->{'_capture'}->statement('pageZonesDI');
     $sth->execute(@{$self->{'page_id'}},ZONE_BOX);
     while (my $z = $sth->fetchrow_hashref) {
+
+      $self->affect_box($z);
 
       my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
 
