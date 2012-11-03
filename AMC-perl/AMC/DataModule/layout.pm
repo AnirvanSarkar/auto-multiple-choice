@@ -491,6 +491,18 @@ sub page_info {
 	       $self->statement('pageInfo'),{},$student,$page));
 }
 
+# type_info($type,$student,$page) returns an array of HASH references
+# containing all fiels in the $type table ($type may equal digit, box
+# or namefield) corresponding to the $student,$page page.
+
+sub type_info {
+  my ($self,$type,$student,$page)=@_;
+  return(@{$self->dbh
+	     ->selectall_arrayref($self->statement($type.'Info'),
+				  {Slice=>{}},
+				  $student,$page)});
+}
+
 # pages_for_student($student,[%options]) returns a list of the page
 # numbers on the subject (starting from 1 for each student) for this
 # student. With 'select'=>'box' as an option, restricts to the pages

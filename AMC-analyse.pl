@@ -190,27 +190,21 @@ sub get_layout_data {
     =$layout->dims($student,$page);
   $r->{'frame'}=AMC::Boite::new_complete($layout->all_marks($student,$page));
 
-  my $sth=$layout->statement('digitInfo');
-  $sth->execute($student,$page);
-  while(my $c=$sth->fetchrow_hashref) {
+  for my $c ($layout->type_info('digit',$student,$page)) {
     my $k=code_cb($c->{'numberid'},$c->{'digitid'});
     $r->{'boxes'}->{$k}=AMC::Boite::new_MN(map { $c->{$_} }
 					   (qw/xmin ymin xmax ymax/));
   }
 
   if($all) {
-    $sth=$layout->statement('boxInfo');
-    $sth->execute($student,$page);
-    while($c=$sth->fetchrow_hashref) {
+    for my $c ($layout->type_info('box',$student,$page)) {
       $r->{'boxes'}->{$c->{'question'}.".".$c->{'answer'}}=
 	AMC::Boite::new_MN(map { $c->{$_} }
 			   (qw/xmin ymin xmax ymax/));
       $r->{'flags'}->{$c->{'question'}.".".$c->{'answer'}}=
 	$c->{'flags'};
     }
-    $sth=$layout->statement('namefieldInfo');
-    $sth->execute($student,$page);
-    while($c=$sth->fetchrow_hashref) {
+    for my $c ($layout->type_info('namefield',$student,$page)) {
       $r->{'boxes'}->{'namefield'}=
 	AMC::Boite::new_MN(map { $c->{$_} }
 			   (qw/xmin ymin xmax ymax/));

@@ -439,9 +439,7 @@ sub charge_i {
 	my $sth;
 
 	for my $type (qw/box digit namefield/) {
-	  my $sth=$self->{'layout'}->statement($type.'Info');
-	  $sth->execute(@ep);
-	  while($c=$sth->fetchrow_hashref) {
+	  for my $c ($self->{'layout'}->type_info($type,@ep)) {
 	    push @{$self->{'layinfo'}->{$type}},{%$c};
 	  }
 	}
