@@ -22,6 +22,7 @@ package AMC::Test;
 
 use AMC::Basic;
 use AMC::Data;
+use AMC::DataModule::capture qw(:zone);
 
 use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
@@ -161,11 +162,21 @@ sub install {
     }
   }
 
-  for my $d (qw(data cr cr/zooms cr/corrections cr/corrections/jpg cr/corrections/pdf)) {
+  for my $d (qw(data cr cr/corrections cr/corrections/jpg cr/corrections/pdf)) {
     mkdir($self->{'temp_dir'}."/$d") if(!-d $self->{'temp_dir'}."/$d");
   }
 
   $self->{'debug_file'}=$self->{'temp_dir'}."/debug.log";
+}
+
+sub see_blob {
+  my ($self,$name,$blob)=@_;
+  my $path=$self->{'temp_dir'}.'/'.$name;
+  open FILE,">$path";
+  binmode(FILE);
+  print FILE $blob;
+  close FILE;
+  $self->see_file($path);
 }
 
 sub see_file {
@@ -586,24 +597,42 @@ sub check_export {
 sub check_zooms {
   my ($self)=@_;
   my $cz=$self->{'check_zooms'};
+  my @zk=keys %$cz;
+  return if(!@zk);
+
+  my $capture=AMC::Data->new($self->{'temp_dir'}."/data")->module('capture');
+  $capture->begin_read_transaction('cZOO');
+
   for my $p (keys %{$cz}) {
     $self->trace("[T] Zooms check : $p");
-    my $dir=$self->{'temp_dir'}."/cr/zooms/$p";
-    if(!-d $dir) {
-      $self->trace("[E] Zooms dir $p does not exist.");
-      exit(1);
-    }
-    opendir(ZD,$dir);
-    my @zf=grep { /\.png$/ } readdir(ZD);
-    closedir(ZD);
 
-    if(1+$#zf == $cz->{$p}) {
-      for(@zf) { $self->see_file("$dir/$_"); }
+    my ($student,$page,$copy);
+    if($p =~ /^([0-9]+)-([0-9]+):([0-9]+)$/) {
+      $student=$1;$page=$2;$copy=$3;
+    } elsif($p =~ /^([0-9]+)-([0-9]+)$/) {
+      $student=$1;$page=$2;$copy=0;
+    }
+
+    my @zooms=grep { $_->{imagedata} }
+      (@{$capture->dbh
+	   ->selectall_arrayref($capture->statement('pageZonesDI'),
+				{Slice=>{}},
+				$student,$page,$copy,ZONE_BOX)
+	 });
+
+    if(1+$#zooms == $cz->{$p}) {
+      for(@zooms) {
+	$self->see_blob("zoom-".$student."-".$page.":".$copy."--"
+			.$_->{id_a}."-".$_->{id_b}.".png",$_->{imagedata});
+      }
     } else {
-      $self->trace("[E] Zooms dir $p contains ".(1+$#zf)." elements, but needs ".$cz->{$p});
+      $self->trace("[E] Zooms dir $p contains ".(1+$#zooms)." elements, but needs ".$cz->{$p});
       exit(1);
     }
   }
+
+  $capture->end_transaction('cZOO');
+
 }
 
 sub data {
