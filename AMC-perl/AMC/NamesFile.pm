@@ -106,6 +106,9 @@ sub load {
 
       # Second pass: read the file with Text::CSV
 
+      $self->{'numeric.content'}={};
+      $self->{'simple.content'}={};
+
       my $io;
       if(open($io,"<:encoding(".$self->{'encodage'}.")",
 	      $self->{'fichier'})) {
@@ -124,16 +127,18 @@ sub load {
 	# first line: header
 
 	$self->{'heads'}=$csv->getline ($io);
-	if(!$self->{'heads'}) {
+	if($self->{'heads'}) {
+	  for my $h (@{$self->{'heads'}}) {
+	    $self->{'numeric.content'}->{$h}=0;
+	    $self->{'simple.content'}->{$h}=0;
+	  }
+	} else {
 	  debug("CSV [SEP=$sep]: Can't read headers");
 	  return(1,$.);
 	}
 	$csv->column_names ($self->{'heads'});
 
 	# following lines
-
-	$self->{'numeric.content'}={};
-	$self->{'simple.content'}={};
 
 	my $csv_line=0;
 
