@@ -1708,16 +1708,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \AMC@tracebox{#3}{#4}{\begin{tikzpicture}%
 \useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
   rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
-\draw[#1,fill=#2,line width=\AMC@boxedrule]
-  ({\AMC@oval@radius+0.5*\AMC@oval@interx},0.5\AMC@oval@intery)
-  arc (0:90:\AMC@oval@radius)
-  -- ++(-\AMC@oval@interx,0)
-  arc (90:180:\AMC@oval@radius)
-  -- ++(0,-\AMC@oval@intery)
-  arc (180:270:\AMC@oval@radius)
-  -- ++(\AMC@oval@interx,0)
-  arc (270:360:\AMC@oval@radius)
-  -- cycle;
+\draw[#1,fill=#2,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
+  (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
+  rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
 \draw[#1] (0,0) node {#5};
 \end{tikzpicture}}%
 }
@@ -1758,8 +1751,6 @@ Three digits and two letters:\insertgroup{mixed}.
 \newlength\AMC@boxedwidth
 \newlength\AMC@boxedheight
 \newlength\AMC@oval@radius
-\newlength\AMC@oval@interx
-\newlength\AMC@oval@intery
 \define@choicekey{AMCdim}{shape}{square,oval}{\def\AMC@shapename{#1}}
 \define@key{AMCdim}{size}{\AMC@boxedwidth=#1\AMC@boxedheight=#1}
 \define@key{AMCdim}{height}{\AMC@boxedheight=#1}
@@ -1770,12 +1761,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \setkeys{AMCdim}{#1}%
   \ifnum\AMC@boxedwidth<\AMC@boxedheight%
     \AMC@oval@radius=\AMC@boxedwidth\divide\AMC@oval@radius\tw@%
-    \AMC@oval@interx=0pt%
-    \AMC@oval@intery=\AMC@boxedheight\advance\AMC@oval@intery by -\AMC@boxedwidth%
   \else%
     \AMC@oval@radius=\AMC@boxedheight\divide\AMC@oval@radius\tw@%
-    \AMC@oval@interx=\AMC@boxedwidth\advance\AMC@oval@interx by -\AMC@boxedheight%
-    \AMC@oval@intery=0pt%
   \fi%
 }
 \AMCboxDimensions{shape=square,size=2.5ex,down=.4ex,rule=.5pt}
