@@ -26,6 +26,10 @@ use Encode;
 use AMC::Basic;
 use AMC::Gui::Avancement;
 
+use AMC::Messages;
+
+@ISA=("AMC::Messages");
+
 sub new {
     my %o=(@_);
     my $self={
@@ -41,7 +45,7 @@ sub new {
 	'o'=>{},
 	'clear'=>1,
 
-	'erreurs'=>[],
+	'messages'=>[],
 	'variables'=>{},
 
 	'pid'=>'',
@@ -69,7 +73,7 @@ sub proc_pid {
 
 sub erreurs {
     my ($self)=(@_);
-    return(@{$self->{'erreurs'}});
+    return($self->get_messages('ERR'));
 }
 
 sub variables {
@@ -127,7 +131,7 @@ sub get_output {
         Gtk2::Helper->remove_watch( $self->{'tag'} );
 	  close($self->{'fh'});
 
-	  debug "Command [".$self->{'pid'}."] : OK - ".(1+$#{$self->{'erreurs'}})." erreur(s)\n";
+	  debug "Command [".$self->{'pid'}."] : OK - ".($self->n_messages('ERR'))." erreur(s)\n";
 
 	  my @tb=times();
 	  debug sprintf("Total parent exec times during ".$self->{pid}.": [%7.02f,%7.02f]",$tb[0]+$tb[1]-$self->{'times'}->[0]-$self->{'times'}->[1],$tb[2]+$tb[3]-$self->{'times'}->[2]-$self->{'times'}->[3]);
@@ -163,10 +167,10 @@ sub get_output {
 	  $logbuff->place_cursor($logbuff->get_end_iter());
 	  $log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
 
-	  if($line =~ /^ERR/) {
+	  if($line =~ /^(ERR|INFO|WARN)/) {
 	    chomp(my $lc=$line);
-	    $lc =~ s/^ERR[:>]\s*//;
-	    push @{$self->{'erreurs'}},decode("utf-8",$lc);
+	    $lc =~ s/^(ERR|INFO|WARN)[:>]\s*//;
+	    $self->add_message($1,decode("utf-8",$lc));
 	  }
 	  if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
 	    $self->{'variables'}->{$1}=$2;

@@ -90,3 +90,5 @@ for my $oo (@o_out) {
 debug "Exporting...";
 
 $ex->export($output);
+
+print $ex->messages_as_string();

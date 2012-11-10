@@ -330,6 +330,12 @@ sub build_stats_table {
 
 }
 
+sub ods_locked_file {
+  my ($self,$fichier)=@_;
+  $fichier =~ s:([^/]+)$:.~lock.$1\#:;
+  return(-e $fichier);
+}
+
 sub export {
     my ($self,$fichier)=@_;
 
@@ -1137,6 +1143,10 @@ sub export {
     $meta->date($la_date);
 
     $archive->save;
+
+    if($self->ods_locked_file($fichier)) {
+      $self->add_message('INFO',__("An old state of the exported file seems to be already opened. Use File/Reload from OpenOffice/LibreOffice to refresh."));
+    }
 
 }
 

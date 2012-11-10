@@ -22,6 +22,9 @@ package AMC::Export;
 use AMC::Basic;
 use AMC::Data;
 use AMC::NamesFile;
+use AMC::Messages;
+
+@ISA=("AMC::Messages");
 
 use_gettext;
 
@@ -50,6 +53,8 @@ sub new {
 	'sort.keys'=>['s:student.name','n:student.line'],
 
 	'marks'=>[],
+
+	'messages'=>[],
     };
     bless ($self, $class);
     return $self;
