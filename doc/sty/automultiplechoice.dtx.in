@@ -909,6 +909,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %     period to request (defaults to 0). Note that when |decimals| is
 %     positive, the LaTeX package |fp| must be loaded.
 %   \item[|base=|\meta{num}] gives the base for digits and decimals (defaults to 10).
+%   \item[|nozero=|\meta{bool}] if |true|, the choice 0 is removed for
+%     all digits. May be useful when |\AMCnumericChoices| is used to
+%     get a small (<10) positive value.
 %   \item[|sign=|\meta{bool}] requests (or not) a signed value (default to true).
 %   \item[|strict=|\meta{bool}] if |true|, a box has to be ticked for
 %     every digit and for the sign. If |false|, if some digits has no
@@ -2524,24 +2527,29 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
 }
 \newcommand{\AMCnumericH}[3]{%
- \AMC@chiffres=0\loop%
+ \ifKV@AMCNumeric@nozero\AMC@chiffres=1\else\AMC@chiffres=0\fi%
+ \loop%
    \AMCnumeric@digit{#2}{#3}%
    \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
  \advance\AMC@chiffres\@ne%
  \ifnum\AMC@chiffres<#3\relax\hspace{\AMCnumeric@Hspace}\repeat%
 }
 \newcommand{\AMCnumericV}[3]{%
- \AMC@chiffres=0\loop%
+ \ifKV@AMCNumeric@nozero\AMC@chiffres=1\else\AMC@chiffres=0\fi%
+ \loop%
    \vbox{\hbox{\AMCnumeric@digit{#2}{#3}}}%
    \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
  \advance\AMC@chiffres\@ne%
  \ifnum\AMC@chiffres<#3\relax\vspace{\AMCnumeric@Vspace}\repeat%
 }
+\newcount\AMC@numeric@lastdigit%
 \newcommand{\AMCnumericVR}[3]{%
+ \ifKV@AMCNumeric@nozero\AMC@numeric@lastdigit=1%
+   \else\AMC@numeric@lastdigit=0\fi%
  \AMC@chiffres=#3\advance\AMC@chiffres\m@ne\loop%
    \vbox{\hbox{\AMCnumeric@digit{#2}{#3}}}%
    \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
- \ifnum\AMC@chiffres>0%
+ \ifnum\AMC@chiffres>\AMC@numeric@lastdigit%
    \advance\AMC@chiffres\m@ne%
  \vspace{\AMCnumeric@Vspace}\repeat%
 }
@@ -2615,12 +2623,13 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@boolkey{AMCNumeric}{vertical}[false]{}
 \define@boolkey{AMCNumeric}{reverse}[true]{}
 \define@boolkey{AMCNumeric}{vhead}[false]{}
+\define@boolkey{AMCNumeric}{nozero}[false]{}
 \define@key{AMCNumeric}{scoreexact}[2]{\def\AMC@numeric@scoreexact{#1}}
 \define@key{AMCNumeric}{scoreapprox}[1]{\def\AMC@numeric@scoreapprox{#1}}
 \newcount\AMC@numeric@approx
 \define@key{AMCNumeric}{approx}[0]{\AMC@numeric@approx=#1}
 \setkeys{AMCNumeric}{digits,decimals,base,sign,strict,scoring,vertical,
-                     reverse,vhead,scoreexact,scoreapprox,approx}
+                     reverse,vhead,scoreexact,scoreapprox,approx,nozero}
 \newcommand\AMCnumericOpts[1]{\setkeys{AMCNumeric}{#1}}
 %    \end{macrocode}
 % Then the command |\AMCnumericShow| itself:
