@@ -4664,6 +4664,12 @@ sub accepte_preferences {
     }
   }
 
+  if(defined($o{'_modifie'})
+     && $o{'_modifie'} =~ /\bprojects_home\b/
+     && !$projet{'nom'}) {
+    $o{'rep_projets'}=absolu($o{'projects_home'});
+  }
+
   sauve_pref_generales();
 
   test_commandes();
