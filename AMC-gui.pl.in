@@ -2951,48 +2951,70 @@ sub saisie_auto_info {
 }
 
 sub analyse_call {
-    my (%oo)=@_;
-    # make temporary file with the list of images to analyse
+  my (%oo)=@_;
+  # make temporary file with the list of images to analyse
 
-    my $fh=File::Temp->new(TEMPLATE => "liste-XXXXXX",
-			   TMPDIR => 1,
-			   UNLINK=> 1);
-    print $fh join("\n",@{$oo{'f'}})."\n";
-    $fh->seek( 0, SEEK_END );
+  my $fh=File::Temp->new(TEMPLATE => "liste-XXXXXX",
+			 TMPDIR => 1,
+			 UNLINK=> 1);
+  print $fh join("\n",@{$oo{'f'}})."\n";
+  $fh->seek( 0, SEEK_END );
 
-    my @args=("--debug",debug_file(),
-	      ($projet{'options'}->{'auto_capture_mode'} ? "--multiple" : "--no-multiple"),
-	      "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
-	      "--prop",$o{'box_size_proportion'},
-	      "--bw-threshold",$o{'bw_threshold'},
-	      "--progression-id",'analyse',
-	      "--progression",1,
-	      "--n-procs",$o{'n_procs'},
-	      "--data",absolu($projet{'options'}->{'data'}),
-	      "--projet",absolu('%PROJET/'),
-	      "--cr",absolu($projet{'options'}->{'cr'}),
-	      "--liste-fichiers",$fh->filename,
-	      ($o{'ignore_red'} ? "--ignore-red" : "--no-ignore-red"),
-	);
-
-    push @args,"--pre-allocate",$oo{'allocate'} if($oo{'allocate'});
-
-    # Diagnostic image file ?
-
-    if($oo{'diagnostic'}) {
-	push @args,"--debug-image-dir",absolu('%PROJET/cr/diagnostic');
-    }
-
-    # call AMC-analyse
-
-    commande('commande'=>["auto-multiple-choice","analyse",
-	     @args],
-	     'signal'=>2,
-	     'texte'=>$oo{'text'},
-	     'progres.id'=>$oo{'progres'},
-	     'o'=>{'fh'=>$fh},
-	     'fin'=>$oo{'fin'},
+  if($oo{'getimages'}) {
+    my @args=("--progression-id",'analyse',
+	      "--list",$fh->filename,
+	      "--debug",debug_file(),
+	      "--vector-density",$o{'vector_scan_density'},
 	     );
+    push @args,"--copy-to",$oo{'copy'} if($oo{'copy'});
+    commande('commande'=>["auto-multiple-choice","getimages",
+			  @args],
+	     'signal'=>2,
+	     'progres.id'=>$oo{'progres'},
+	     'fin'=>sub {
+	       analyse_call_go('liste'=>$fh->filename,'fh'=>$fh,%oo);
+	     },
+	    );
+  } else {
+    analyse_call_go('liste'=>$fh->filename,'fh'=>$fh,%oo);
+  }
+}
+
+sub analyse_call_go {
+  my (%oo)=@_;
+  my @args=("--debug",debug_file(),
+	    ($projet{'options'}->{'auto_capture_mode'} ? "--multiple" : "--no-multiple"),
+	    "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
+	    "--prop",$o{'box_size_proportion'},
+	    "--bw-threshold",$o{'bw_threshold'},
+	    "--progression-id",'analyse',
+	    "--progression",1,
+	    "--n-procs",$o{'n_procs'},
+	    "--data",absolu($projet{'options'}->{'data'}),
+	    "--projet",absolu('%PROJET/'),
+	    "--cr",absolu($projet{'options'}->{'cr'}),
+	    "--liste-fichiers",$oo{'liste'},
+	    ($o{'ignore_red'} ? "--ignore-red" : "--no-ignore-red"),
+	   );
+
+  push @args,"--pre-allocate",$oo{'allocate'} if($oo{'allocate'});
+
+  # Diagnostic image file ?
+
+  if($oo{'diagnostic'}) {
+    push @args,"--debug-image-dir",absolu('%PROJET/cr/diagnostic');
+  }
+
+  # call AMC-analyse
+
+  commande('commande'=>["auto-multiple-choice","analyse",
+			@args],
+	   'signal'=>2,
+	   'texte'=>$oo{'text'},
+	   'progres.id'=>$oo{'progres'},
+	   'o'=>{'fh'=>$oo{'fh'}},
+	   'fin'=>$oo{'fin'},
+	  );
 }
 
 sub saisie_auto_ok {
@@ -3003,185 +3025,14 @@ sub saisie_auto_ok {
     $w{'saisie_auto'}->destroy();
     Gtk2->main_iteration while ( Gtk2->events_pending );
 
-    # Begin scans pre-processing before sending them for analysis
-
-    my @fs=();
-
-    my $splitinfo=$w{'avancement'}->get_text();
-    $w{'onglets_projet'}->set_sensitive(0);
-    $w{'commande'}->show();
-    $w{'annulation'}->set_sensitive(0);
-    Gtk2->main_iteration while ( Gtk2->events_pending );
-
-    # first pass: split multi-page PDF with pdftk, which uses less
-    # memory than ImageMagick
-    if(commande_accessible('pdftk')) {
-	for my $file (@f) {
-	    if($file =~ /\.pdf$/i) {
-
-	    $w{'avancement'}->set_text(sprintf(
-					   __("Splitting multi-page PDF file %s..."),
-					   $file));
-	    $w{'avancement'}->set_fraction(0);
-
-	    Gtk2->main_iteration while ( Gtk2->events_pending );
-		my $temp_loc=tmpdir();
-		my $temp_dir = tempdir( DIR=>$temp_loc,
-					CLEANUP => (!get_debug()) );
-
-		debug "PDF split tmp dir: $temp_dir";
-
-		system("pdftk",$file,"burst","output",
-		       $temp_dir.'/page-%04d.pdf');
-
-		opendir(my $dh, $temp_dir)
-		    || debug "can't opendir $temp_dir: $!";
-		push @fs, map { "$temp_dir/$_" }
-		sort { $a cmp $b } grep { /^page/ } readdir($dh);
-		closedir $dh;
-
-	    } else {
-		push @fs,$file;
-	    }
-	}
-	@f=@fs;
-    }
-
-    # second pass: split other multi-page images (such as TIFF) with
-    # ImageMagick, and convert vector to bitmap
-    @fs=();
-    for my $fich (@f) {
-	my (undef,undef,$fich_n)=splitpath($fich);
-	my $suffix_change='';
-	my @pre_options=();
-
-	# number of pages :
-	my $np=0;
-	# any scene with number > 0 ? This should cause problems with OpenCV
-	my $scene=0;
-	open(NP,"-|",magick_module("identify"),"-format","%s\n",$fich);
-	while(<NP>) {
-	    chomp();
-	    if(/[^\s]/) {
-		$np++;
-		$scene=1 if($_ > 0);
-	    }
-	}
-	close(NP);
-	# Is this a vector format file? If so, we have to convert it
-	# to bitmap
-	my $vector='';
-	if($fich_n =~ /\.(pdf|eps|ps)$/i) {
-	    $vector=1;
-	    $suffix_change='.png';
-	    @pre_options=('-density',$o{'vector_scan_density'})
-		if($o{'vector_scan_density'});
-	}
-
-	debug "> Scan $fich: $np page(s)".($scene ? " [has scene>0]" : "");
-	if($np>1 || $scene || $vector) {
-	    # split multipage image into 1-page images, and/or convert
-	    # to bitmap format
-
-	    $w{'commande'}->show();
-	    $w{'avancement'}->set_text(sprintf(
-					   ($vector
-# TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
-					    ? __("Converting %s to bitmap...")
-# TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
-					    : __("Splitting multi-page image %s...")),
-					   $fich_n));
-	    $w{'avancement'}->set_fraction(0);
-	    Gtk2->main_iteration while ( Gtk2->events_pending );
-
-	    my $temp_loc=tmpdir();
-	    my $temp_dir = tempdir( DIR=>$temp_loc,
-				    CLEANUP => (!get_debug()) );
-
-	    debug "Image split tmp dir: $temp_dir";
-
-	    my ($fxa,$fxb,$fb) = splitpath($fich);
-	    if(! ($fb =~ s/\.([^.]+)$/_%04d.$1/)) {
-		$fb .= '_%04d';
-	    }
-	    $fb.=$suffix_change;
-
-	    system(magick_module("convert"),@pre_options,$fich,"+adjoin","$temp_dir/$fb");
-	    opendir(my $dh, $temp_dir) || debug "can't opendir $temp_dir: $!";
-	    my @split = grep { -f "$temp_dir/$_" } 
-	      sort { $a cmp $b } readdir($dh);
-	    closedir $dh;
-
-	    # if not to be copied in project dir, put them in the
-	    # same directory as original image
-
-	    if($copie) {
-		push @fs,map { "$temp_dir/$_" } @split;
-	    } else {
-		for(@split) {
-		    my $dest=catpath($fxa,$fxb,$_);
-		    debug "Moving one page to $dest";
-		    move("$temp_dir/$_",$dest);
-		    push @fs,$dest;
-		}
-	    }
-	} else {
-	    push @fs,$fich;
-	}
-    }
-
-    @f=@fs;
-
-    # if requested, copy files to project directory
-
-    $w{'avancement'}->set_text(__"Copying scans to project directory...");
-    Gtk2->main_iteration while ( Gtk2->events_pending );
-
-    if($copie) {
-	my @fl=();
-	my $c=0;
-	for my $fich (@f) {
-	    my ($fxa,$fxb,$fb) = splitpath($fich);
-
-	    # no accentuated or special characters in filename, please!
-	    # this could break the process somewere...
-	    $fb=NFKD($fb);
-	    $fb =~ s/\pM//og;
-	    $fb =~ s/[^a-zA-Z0-9.-_+]+/_/g;
-	    $fb =~ s/^[^a-zA-Z0-9]/scan_/;
-
-	    my $dest=absolu("scans/".$fb);
-	    my $deplace=0;
-
-	    if($fich ne $dest) {
-	      if(-e $dest) {
-		# dest file already exists: change name
-		debug "File $dest already exists";
-		$dest=new_filename($dest);
-		debug "--> $dest";
-	      }
-	      if(copy($fich,$dest)) {
-		push @fl,$dest;
-		$deplace=1;
-	      } else {
-		debug "$fich --> $dest";
-		debug "Copy error: $!";
-	      }
-	    }
-	    $c+=$deplace;
-	    push @fl,$fich if(!$deplace);
-	}
-	debug "Copying scan files: ".$c."/".(1+$#f);
-	@f=@fl;
-    }
-
     clear_old('diagnostic',
 	      absolu('%PROJET/cr/diagnostic'));
 
-    $w{'avancement'}->set_text($splitinfo);
     $w{'annulation'}->set_sensitive(1);
 
     analyse_call('f'=>\@f,
+		 'getimages'=>1,
+		 'copy'=>($copie ? absolu('scans/') : ''),
 		 'text'=>__("Automatic data capture..."),
 		 'progres'=>'analyse',
 		 'allocate'=>($projet{'options'}->{'allocate_ids'} ?

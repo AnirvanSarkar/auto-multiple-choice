@@ -4636,6 +4636,112 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
+    <refentry>
+      <refmeta>
+        <refentrytitle>AMC-getimages</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+
+        <refmiscinfo class="source">Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
+      </refmeta>
+
+      <refnamediv>
+        <refname>AMC-getimages</refname>
+
+        <refpurpose>prepares scan images before sending them to <citerefentry>
+            <refentrytitle>AMC-analyse</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry> for analysis</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">getimages</arg>
+
+          <arg choice="opt">--copy-to
+          <replaceable>project-scans-dir</replaceable></arg>
+
+          <arg>--vector-density <replaceable>density</replaceable></arg>
+
+          <arg choice="plain">--list
+          <replaceable>list-file</replaceable></arg>
+
+          <group>
+            <arg choice="plain"
+            rep="repeat"><replaceable>scan-files</replaceable></arg>
+          </group>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+        <para>The <command>AMC-getimages.pl</command> command prepares scan
+        files before sending them to <citerefentry>
+            <refentrytitle>AMC-analyse</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>multipage image files are split to get one file per
+            page.</para>
+          </listitem>
+
+          <listitem>
+            <para>vector images (such as PDF, EPS) are converted to bitmap
+            images.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The input images can be given either as arguments to
+        AMC-getimages.pl, either as the name of a file which contains all the
+        pathes of the scan files.</para>
+
+        <variablelist>
+          <varlistentry>
+            <term><option>--list
+            <replaceable>list-file</replaceable></option></term>
+
+            <listitem>
+              <para>gives the name of the file that optionnaly contains (one
+              per line) the pathes of the scan files. This file will be
+              cleared and filled with the pathes of the scan files after
+              processing, so that the same path can be passed to
+              <command>AMC-analyse.pl</command> as the
+              <option>--list-fichiers</option> option value.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--copy-to
+            <replaceable>project-scans-dir</replaceable></option></term>
+
+            <listitem>
+              <para>gives a directory where to copy all the scans
+              files.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--vector-density
+            <replaceable>density</replaceable></option></term>
+
+            <listitem>
+              <para>sets the density used to convert vector graphics scans to
+              bitmap files. Defaults to 300.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </refsect1>
+    </refentry>
+
     <refentry id="AMC-analyse">
       <refmeta>
         <refentrytitle>AMC-analyse</refentrytitle>

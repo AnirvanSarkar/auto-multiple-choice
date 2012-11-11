@@ -114,7 +114,8 @@ sub open {
 		if($self->{'progres.pulse'});
 	}
 
-	$self->{'avance'}=AMC::Gui::Avancement::new(0);
+	$self->{'avance'}=AMC::Gui::Avancement::new
+	  (0,'bar'=>$self->{'avancement'});
 
 	$self->{'log'}->get_buffer()->set_text('') if($self->{'clear'});
 
@@ -154,8 +155,8 @@ sub get_output {
 	    if($self->{'progres.pulse'}) {
 		$self->{'avancement'}->pulse;
 	    } else {
-		$r=$self->{'avance'}->lit($line);
-		$self->{'avancement'}->set_fraction($r) if($r);
+	      $self->{'avance'}->lit($line,
+				     {'bar'=>$self->{'avancement'}});
 	    }
 	}
 

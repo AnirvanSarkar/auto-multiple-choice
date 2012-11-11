@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008,2012 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -40,9 +40,12 @@ sub new {
     my $self={'entier'=>$entier,
 	      'progres'=>0,
 	      'debug'=>0,
+	      'epsilon'=>0.02,
+	      'lastshown'=>0,
 	      'id'=>'',
+	      'bar'=>'',
 	  };
- 
+
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
@@ -63,6 +66,11 @@ sub progres {
     print "===<".$self->{'id'}.">=+$suite\n" if($self->{'id'});
 }
 
+sub text {
+  my ($self,$text)=(@_);
+  print "===<".$self->{'id'}.">=T($text)\n" if($self->{'id'});
+}
+
 sub progres_abs {
     my ($self,$suite)=(@_);
     $self->progres($suite-$self->{'progres'});
@@ -71,7 +79,7 @@ sub progres_abs {
 sub fin {
     my ($self,$suite)=(@_);
     $self->progres_abs(1);
-}   
+}
 
 sub etat {
     my ($self)=@_;
@@ -79,8 +87,8 @@ sub etat {
 }
 
 sub lit {
-    my ($self,$s)=(@_);
-    my $r='';
+    my ($self,$s,$oo)=(@_);
+    my $r=-1;
     if($s =~ /===<(.*)>=\+([0-9.]+)/) {
 	my $id=$1;
 	my $suite=$2;
@@ -96,6 +104,20 @@ sub lit {
 	}
 
 	$r=$self->{'progres'};
+    }
+    if($s =~ /===<(.*)>=T\((.*)\)$/) {
+      if($oo->{'bar'}) {
+	$oo->{'bar'}->set_text($2);
+      }
+      $self->{'progres'}=0;
+      $r=0;
+    }
+    if($r>=0 && $oo->{'bar'}) {
+      $oo->{'bar'}->set_fraction($r);
+      if($r==0 || $r>=$self->{'lastshown'}+$self->{'epsilon'}) {
+	Gtk2->main_iteration while ( Gtk2->events_pending );
+	$self->{'lastshown'}=$r;
+      }
     }
     return($r);
 }
