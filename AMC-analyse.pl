@@ -627,20 +627,11 @@ sub one_scan {
     }
   }
 
-  my $zoom_dir;
+  my $zoom_dir = tempdir( DIR=>tmpdir(),
+			  CLEANUP => (!get_debug()) );
 
-  if($cr_dir) {
-
-    $zoom_dir=tmpdir()."/AMC-zooms";
-
-    # clear old analysis results files
-
-    clear_old('analysis result',
-	      $zoom_dir);
-
-    if($process->mode() eq 'opencv') {
-      $process->commande("zooms $zoom_dir");
-    }
+  if($process->mode() eq 'opencv') {
+    $process->commande("zooms $zoom_dir");
   }
 
   ##########################################
