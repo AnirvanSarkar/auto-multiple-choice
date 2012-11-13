@@ -347,7 +347,7 @@ sub do_filter {
   my $v;
   my $d;
 
-  if($filter && $filter ne 'latex') {
+  if($filter) {
     load("AMC::Filter::$filter");
     my $filter="AMC::Filter::$filter"->new();
     $filter->filter($source,$filtered_source);
@@ -356,6 +356,8 @@ sub do_filter {
     }
     split_latex_engine($filter->{'project_options'}->{'moteur_latex_b'})
       if($filter->{'project_options'}->{'moteur_latex_b'});
+    $filtered_source=$source
+      if($filter->unchanged);
   } else {
     $filtered_source=$source;
   }

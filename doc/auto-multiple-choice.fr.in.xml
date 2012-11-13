@@ -2328,6 +2328,40 @@ et inscrivez votre nom et prénom ci-dessous.
     </sect2>
 
     <sect2>
+      <title>Options pour AMC</title>
+
+      <para>Certaines options indiquées dans l'en-tête du fichier source au
+      format LaTeX (c'est-à-dire les premières lignes qui commenecnt par
+      un'%') peuvent être transmises à AMC :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term><code>%%AMC:preprocess_command=<replaceable>commandname</replaceable></code></term>
+
+          <listitem>
+            <para>demande à AMC d'exécuter la commande
+            <replaceable>commandname</replaceable> avant de compiler le
+            fichier LaTeX. Cette commande sera appelée à l'intérieur du
+            répertoire projet, avec comme argument le nom de la copie du
+            fichier source à traiter. Comme il s'agit d'une copie du fichier
+            source, la commande <replaceable>commandname</replaceable> peut en
+            modifier le contenu.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><code>%%AMC:latex_engine=<replaceable>engine</replaceable></code></term>
+
+          <listitem>
+            <para>demande à AMC d'utiliser le moteur LaTeX
+            <replaceable>engine</replaceable>, sans tenir compte de la valeur
+            fournie par l'utilisateur dans les préférences du projet.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2>
       <title>Des questions mathématiques à énoncés aléatoires</title>
 
       <sect3>

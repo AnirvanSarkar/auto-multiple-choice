@@ -22,7 +22,8 @@ package AMC::Filter;
 sub new {
     my $class = shift;
     my $self={'errors'=>[],
-	     'project_options'=>{},
+	      'project_options'=>{},
+	      'filter_results'=>{},
 	     };
     bless ($self, $class);
     return $self;
@@ -55,6 +56,16 @@ sub set_project_option {
   my ($self,$name,$value)=@_;
   $self->{'project_options'}->{$name}=$value;
   print "VAR: project:$name=$value\n";
+}
+
+sub set_filter_result {
+  my ($self,$name,$value)=@_;
+  $self->{'filter_results'}->{$name}=$value;
+}
+
+sub unchanged {
+  my ($self)=@_;
+  return($self->{'filter_results'}->{'unchanged'});
 }
 
 1;

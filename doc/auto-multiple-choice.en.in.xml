@@ -2171,6 +2171,37 @@ and write your first and last names below.
     </sect2>
 
     <sect2>
+      <title>Options for AMC</title>
+
+      <para>You can add in the source file header (the first lines that begin
+      with a '%') some options to be passed to AMC:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term><code>%%AMC:preprocess_command=<replaceable>commandname</replaceable></code></term>
+
+          <listitem>
+            <para>tells AMC to run the <replaceable>commandname</replaceable>
+            command before calling LaTeX to process the source file. This
+            command will be run inside the project directory, and the name of
+            a source file copy will be passed as an argument. There is no
+            problem for <replaceable>commandname</replaceable> to change this
+            file content, because this is only a copy. </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><code>%%AMC:latex_engine=<replaceable>engine</replaceable></code></term>
+
+          <listitem>
+            <para>tells AMC to set the LaTeX engine to use for this file,
+            regardless to the one entered as a preference by the user.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2>
       <title>Mathematical questions with randomized statements</title>
 
       <sect3>
