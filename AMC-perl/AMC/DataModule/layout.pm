@@ -402,6 +402,13 @@ sub define_statements {
 	."    AND (abs(a.x-b.x)>? OR abs(a.y-b.y)>?)"
 	." LIMIT 1"},
        'AssocNumber'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("association")},
+       'orientation'=>{'sql'=>"SELECT MIN(ratio) AS minratio,"
+		       ."             MAX(ratio) AS maxratio FROM "
+		       ." (SELECT CASE WHEN ABS(width)<1 THEN 1"
+		       ."              ELSE height/width END"
+		       ."         AS ratio"
+		       ."  FROM ".$self->table("page")
+		       ." )"},
       };
 }
 
@@ -673,6 +680,27 @@ sub new_association {
 sub pre_association {
   my ($self)=@_;
   return($self->sql_single($self->statement("AssocNumber")));
+}
+
+# orientation() returns "portrait" or "landscape" if all pages have
+# the same orientation, and "" otherwise. In array context,
+# orientation() returns the min and max height/width ratio for all
+# pages.
+
+sub orientation {
+  my ($self)=@_;
+  my @ors=$self->sql_row($self->statement("orientation"));
+  if(wantarray) {
+    return(@ors);
+  } else {
+    if($ors[0] > 1.1) {
+      return("portrait");
+    } elsif($ors[1] < 0.9) {
+      return("landscape");
+    } else {
+      return("");
+    }
+  }
 }
 
 1;
