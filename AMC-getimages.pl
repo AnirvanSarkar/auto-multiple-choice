@@ -37,6 +37,7 @@ my $debug='';
 my $vector_density=300;
 my $orientation="";
 my $rotate_direction="90";
+my %use=(pdfimages=>1,pdftk=>1);
 
 GetOptions("list=s"=>\$list_file,
 	   "progression-id=s"=>\$progress_id,
@@ -45,9 +46,18 @@ GetOptions("list=s"=>\$list_file,
 	   "vector-density=s"=>\$vector_density,
 	   "orientation=s"=>\$orientation,
 	   "rotate-direction=s"=>\$rotate_direction,
+	   "use-pdfimages!"=>\$use{pdfimages},
+	   "use-pdftk!"=>\$use{pdftk},
 	  );
 
 set_debug($debug);
+
+for my $cmd (qw/pdfimages pdftk/) {
+  if($use{$cmd} && !commande_accessible($cmd)) {
+    debug "WARNING: command $cmd not found";
+    $use{$cmd}=0;
+  }
+}
 
 $copie =~ s:(?<=.)/+$::;
 
@@ -127,10 +137,10 @@ sub replace_by {
   return(@fd);
 }
 
-# first pass: split multi-page PDF with pdftk, which uses less
-# memory than ImageMagick
+# split multi-page PDF with pdfimages or pdftk, which uses less memory
+# than ImageMagick
 
-if(commande_accessible('pdftk')) {
+if($use{pdfimages} || $use{pdftk}) {
 
   my @pdfs=grep { $_->{path} =~ /\.pdf$/i } @f;
   @fs=grep { $_->{path} !~ /\.pdf$/i } @f;
@@ -139,7 +149,9 @@ if(commande_accessible('pdftk')) {
     $dp=1/(1+$#pdfs);
     $p->text(__("Splitting multi-page PDF files..."));
 
-    for my $file (@pdfs) {
+  PDF:for my $file (@pdfs) {
+
+      $p->progres($dp);
 
       my $temp_loc=tmpdir();
       my $temp_dir = tempdir( DIR=>$temp_loc,
@@ -148,17 +160,77 @@ if(commande_accessible('pdftk')) {
       debug "PDF split tmp dir: $temp_dir";
 
       check_split_path($file);
-      system("pdftk",$file->{path},"burst","output",
-	     $temp_dir.'/'.$file->{file}.'-page-%04d.pdf');
 
-      opendir(my $dh, $temp_dir)
-	|| debug "can't opendir $temp_dir: $!";
-      push @fs,replace_by($file,
-			  map { "$temp_dir/$_" }
-			  sort { $a cmp $b } grep { /-page-/ } readdir($dh));
-      closedir $dh;
+      # First try pdfimages, which is much more judicious
 
-      $p->progres($dp);
+      if($use{pdfimages}) {
+	if(system("pdfimages","-p",$file->{path},
+		  $temp_dir.'/'.$file->{file}.'-page')==0) {
+
+	  opendir(my $dh, $temp_dir)
+	    || debug "can't opendir $temp_dir: $!";
+	  my @images=map { "$temp_dir/$_" }
+	    sort { $a cmp $b } grep { /-page-/ } readdir($dh);
+	  closedir $dh;
+
+	  if(@images) {
+	    # pdfimages produced some files. Check that the page
+	    # numbers follow each other starting from 1
+
+	    my $ok=1;
+	  PDFIM: for my $i (0..$#images) {
+	      if($images[$i] =~ /-page-([0-9]+)/) {
+		my $pp=$1;
+		if($pp != $i+1) {
+		  debug "INFO: missing page ".($i+1)." from pdfimages";
+		  $ok=0;
+		  last PDFIM;
+		}
+	      }
+	    }
+	    if($ok) {
+	      debug "pdfimages ok for $file->{file}";
+	      push @fs,replace_by($file,@images);
+	      next PDF;
+	    }
+	  } else {
+	    debug "INFO: pdfimages produced no file";
+	  }
+
+	} else {
+	  debug "ERROR while trying pdfimages: [$?] $!";
+	}
+      }
+
+      # If not possible, use pdftk
+
+      if($use{pdftk}) {
+	if(system("pdftk",$file->{path},"burst","output",
+		  $temp_dir.'/'.$file->{file}.'-page-%04d.pdf')==0) {
+
+	  opendir(my $dh, $temp_dir)
+	    || debug "can't opendir $temp_dir: $!";
+	  my @burst=replace_by($file,
+			       map { "$temp_dir/$_" }
+			       sort { $a cmp $b } grep { /-page-/ } readdir($dh));
+	  closedir $dh;
+
+	  if(@burst) {
+	    push @fs,@burst;
+	    next PDF;
+	  } else {
+	    debug "WARNING: pdftk produced no file";
+	  }
+
+	} else {
+	  debug "ERROR while trying pdftk burst: [$?] $!";
+	}
+      }
+
+      # no success... keep it to be processed by magick
+
+      push @fs,$file;
+
     }
 
     $p->text('');
@@ -167,8 +239,8 @@ if(commande_accessible('pdftk')) {
   @f=@fs;
 }
 
-# second pass: split other multi-page images (such as TIFF) with
-# ImageMagick, and convert vector to bitmap
+# split other multi-page images (such as TIFF) with ImageMagick, and
+# convert vector to bitmap
 
 @fs=();
 for my $fich (@f) {
@@ -293,7 +365,7 @@ if($copie && @f) {
     # this could break the process somewere...
     $fb=NFKD($fb);
     $fb =~ s/\pM//og;
-    $fb =~ s/[^a-zA-Z0-9.-_+]+/_/g;
+    $fb =~ s/[^a-zA-Z0-9._+-]+/_/g;
     $fb =~ s/^[^a-zA-Z0-9]/scan_/;
 
     my $dest=$copie."/".$fb;
