@@ -147,11 +147,11 @@ if($use{pdfimages} || $use{pdftk}) {
 
   if(@pdfs) {
     $dp=1/(1+$#pdfs);
-    $p->text(__("Splitting multi-page PDF files..."));
+    $p->text(__("Splitting multi-page PDF files...")) if($p);
 
   PDF:for my $file (@pdfs) {
 
-      $p->progres($dp);
+      $p->progres($dp) if($p);
 
       my $temp_loc=tmpdir();
       my $temp_dir = tempdir( DIR=>$temp_loc,
@@ -233,7 +233,7 @@ if($use{pdfimages} || $use{pdftk}) {
 
     }
 
-    $p->text('');
+    $p->text('') if($p);
   }
 
   @f=@fs;
@@ -283,7 +283,7 @@ for my $fich (@f) {
 		      ? __("Converting %s to bitmap...")
 # TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
 		      : __("Splitting multi-page image %s...")),
-		     $fich->{file}));
+		     $fich->{file})) if($p);
 
     my $temp_loc=tmpdir();
     my $temp_dir = tempdir( DIR=>$temp_loc,
@@ -305,7 +305,7 @@ for my $fich (@f) {
 			sort { $a cmp $b } readdir($dh));
     closedir $dh;
 
-    $p->text('');
+    $p->text('') if($p);
   } else {
     push @fs,$fich;
   }
@@ -351,7 +351,7 @@ if($orientation) {
 # if requested, copy files to project directory
 
 if($copie && @f) {
-  $p->text(__"Copying scans to project directory...");
+  $p->text(__"Copying scans to project directory...") if($p);
 
   $dp=1/(1+$#f);
 
@@ -390,12 +390,12 @@ if($copie && @f) {
     push @fl,derivative_file($fich->{path})
       if(!$deplace);
 
-    $p->progres($dp);
+    $p->progres($dp) if($p);
   }
   debug "Copied scan files: ".$c."/".(1+$#f);
   @f=@fl;
 
-  $p->text('');
+  $p->text('') if($p);
 }
 
 open(LIST,">",$list_file);
