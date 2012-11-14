@@ -162,7 +162,7 @@ sub install {
     }
   }
 
-  for my $d (qw(data cr cr/corrections cr/corrections/jpg cr/corrections/pdf)) {
+  for my $d (qw(data cr cr/corrections cr/corrections/jpg cr/corrections/pdf scans)) {
     mkdir($self->{'temp_dir'}."/$d") if(!-d $self->{'temp_dir'}."/$d");
   }
 
@@ -291,14 +291,28 @@ sub analyse {
 		       '--fich-numeros',$nf,
 		       '--data','%DATA',
 		      );
-    system("cd $self->{'temp_dir'} ; ".q[gm convert +adjoin xx-*.pdf yy-scan-%d.png]);
 
     opendir(my $dh, $self->{'temp_dir'})
       || die "can't opendir $self->{'temp_dir'}: $!";
-    my @s = grep { /^yy-scan-/ } readdir($dh);
+    my @s = grep { /^xx-copie-/ } readdir($dh);
     closedir $dh;
     push @{$self->{'scans'}},map { $self->{'temp_dir'}."/$_" } @s;
   }
+
+  # prepares a file with the scans list
+
+  my $scans_list=$self->{'temp_dir'}."/scans-list.txt";
+  open(SL,">",$scans_list) or die "Open $scans_list: $!";
+  for(@{$self->{'scans'}}) { print SL "$_\n"; }
+  close(SL);
+
+  #
+
+  $self->amc_command('getimages',
+		     '--list',$scans_list,
+		     '--copy-to',$self->{'temp_dir'}."/scans",
+		     '--orientation',$self->get_orientation(),
+		     );
 
   $self->amc_command('analyse',
 		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
@@ -308,7 +322,7 @@ sub analyse {
 		     '--projet','%PROJ',
 		     '--data','%DATA',
 		     '--debug-image-dir','%PROJ/cr',
-		     @{$self->{'scans'}},
+		     '--liste-fichiers',$scans_list,
 		     ) if($self->{'debug'});
   $self->amc_command('analyse',
 		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
@@ -318,7 +332,7 @@ sub analyse {
 		     ($self->{'debug'} ? '--debug-pixels' : '--no-debug-pixels'),
 		     '--projet','%PROJ',
 		     '--data','%DATA',
-		     @{$self->{'scans'}},
+		     '--liste-fichiers',$scans_list,
 		     );
 }
 
@@ -361,6 +375,16 @@ sub get_marks {
   for my $m (@{$self->{'marks'}}) {
     $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy total max mark/)));
   }
+}
+
+sub get_orientation {
+  my ($self)=@_;
+
+  my $l=AMC::Data->new($self->{'temp_dir'}."/data")->module('layout');
+  $l->begin_read_transaction('tgor');
+  my $o=$l->orientation();
+  $l->end_transaction('tgor');
+  return($o);
 }
 
 sub check_perfect {
