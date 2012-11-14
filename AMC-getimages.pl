@@ -35,26 +35,46 @@ my $progress_id='';
 my $copie='';
 my $debug='';
 my $vector_density=300;
+my $orientation="";
 
 GetOptions("list=s"=>\$list_file,
 	   "progression-id=s"=>\$progress_id,
 	   "copy-to=s"=>\$copie,
 	   "debug=s"=>\$debug,
 	   "vector-density=s"=>\$vector_density,
+	   "orientation=s"=>\$orientation,
 	  );
 
 set_debug($debug);
 
 $copie =~ s:(?<=.)/+$::;
 
-my @f=(@ARGV);
-my @fs;
+sub original_file {
+  my ($file_path)=@_;
+  return({ path=>$file_path,orig=>1 });
+}
+
+sub derivative_file {
+  my ($file_path)=@_;
+  return({ path=>$file_path });
+}
+
+sub check_split_path {
+  my ($f,$force)=@_;
+  if($f->{path} && ($force || ! $f->{file})) {
+    my ($fxa,$fxb,$file)=splitpath($f->{path});
+    $f->{file}=$file;
+    $f->{dir}=catpath($fxa,$fxb,'');
+  }
+}
+
+my @f=map { original_file($_) } (@ARGV);
 
 if(-f $list_file) {
   open(LIST,$list_file);
   while(<LIST>) {
     chomp;
-    push @f,$_;
+    push @f,original_file($_);
   }
   close(LIST);
 }
@@ -64,13 +84,48 @@ my $p;
 $p=AMC::Gui::Avancement::new(1,'id'=>$progress_id)
   if($progress_id);
 
+sub image_size {
+  my ($file)=@_;
+  my @r=();
+  open(IDF,"-|",magick_module("identify"),"-format","%w,%h\n",$file);
+  while(<IDF>) {
+    chomp();
+    @r=($1,$2) if(/([^,]+),(.*)/);
+  }
+  close(IDF);
+  return(@r);
+}
+
+sub move_derivative {
+  my ($origin,$derivative)=@_;
+  if(!$copie) {
+    check_split_path($origin);
+    check_split_path($derivative);
+    my $dest=new_filename($origin->{dir}."/".$derivative->{file});
+    debug "Moving $derivative->{path} to $dest";
+    move($derivative->{path},$dest);
+    $derivative->{path}=$dest;
+    check_split_path($derivative,1);
+  }
+  return($derivative);
+}
+
+sub replace_by {
+  my ($origin,@derivative_paths)=@_;
+  my @fd=map { move_derivative($origin,derivative_file($_)) }
+    @derivative_paths;
+  unlink $origin->{path}
+    if(!$origin->{orig});
+  return(@fd);
+}
+
 # first pass: split multi-page PDF with pdftk, which uses less
 # memory than ImageMagick
 
 if(commande_accessible('pdftk')) {
 
-  my @pdfs=grep { /\.pdf$/i } @f;
-  @fs=grep { ! /\.pdf$/i } @f;
+  my @pdfs=grep { $_->{path} =~ /\.pdf$/i } @f;
+  @fs=grep { $_->{path} !~ /\.pdf$/i } @f;
 
   if(@pdfs) {
     $dp=1/(1+$#pdfs);
@@ -84,13 +139,15 @@ if(commande_accessible('pdftk')) {
 
       debug "PDF split tmp dir: $temp_dir";
 
-      system("pdftk",$file,"burst","output",
-	     $temp_dir.'/page-%04d.pdf');
+      check_split_path($file);
+      system("pdftk",$file->{path},"burst","output",
+	     $temp_dir.'/'.$file->{file}.'-page-%04d.pdf');
 
       opendir(my $dh, $temp_dir)
 	|| debug "can't opendir $temp_dir: $!";
-      push @fs, map { "$temp_dir/$_" }
-	sort { $a cmp $b } grep { /^page/ } readdir($dh);
+      push @fs,replace_by($file,
+			  map { "$temp_dir/$_" }
+			  sort { $a cmp $b } grep { /-page-/ } readdir($dh));
       closedir $dh;
 
       $p->progres($dp);
@@ -107,7 +164,8 @@ if(commande_accessible('pdftk')) {
 
 @fs=();
 for my $fich (@f) {
-  my (undef,undef,$fich_n)=splitpath($fich);
+  check_split_path($fich);
+
   my $suffix_change='';
   my @pre_options=();
 
@@ -115,7 +173,7 @@ for my $fich (@f) {
   my $np=0;
   # any scene with number > 0 ? This may cause problems with OpenCV
   my $scene=0;
-  open(NP,"-|",magick_module("identify"),"-format","%s\n",$fich);
+  open(NP,"-|",magick_module("identify"),"-format","%s\n",$fich->{path});
   while(<NP>) {
     chomp();
     if(/[^\s]/) {
@@ -127,14 +185,14 @@ for my $fich (@f) {
   # Is this a vector format file? If so, we have to convert it
   # to bitmap
   my $vector='';
-  if($fich_n =~ /\.(pdf|eps|ps)$/i) {
+  if($fich->{file} =~ /\.(pdf|eps|ps)$/i) {
     $vector=1;
     $suffix_change='.png';
     @pre_options=('-density',$vector_density)
       if($vector_density);
   }
 
-  debug "> Scan $fich: $np page(s)".($scene ? " [has scene>0]" : "");
+  debug "> Scan $fich->{path}: $np page(s)".($scene ? " [has scene>0]" : "");
   if($np>1 || $scene || $vector) {
     # split multipage image into 1-page images, and/or convert
     # to bitmap format
@@ -145,7 +203,7 @@ for my $fich (@f) {
 		      ? __("Converting %s to bitmap...")
 # TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
 		      : __("Splitting multi-page image %s...")),
-		     $fich_n));
+		     $fich->{file}));
 
     my $temp_loc=tmpdir();
     my $temp_dir = tempdir( DIR=>$temp_loc,
@@ -153,32 +211,19 @@ for my $fich (@f) {
 
     debug "Image split tmp dir: $temp_dir";
 
-    my ($fxa,$fxb,$fb) = splitpath($fich);
+    my $fb = $fich->{file};
     if(! ($fb =~ s/\.([^.]+)$/_%04d.$1/)) {
       $fb .= '_%04d';
     }
     $fb.=$suffix_change;
 
     system(magick_module("convert"),
-	   @pre_options,$fich,"+adjoin","$temp_dir/$fb");
+	   @pre_options,$fich->{path},"+adjoin","$temp_dir/$fb");
     opendir(my $dh, $temp_dir) || debug "can't opendir $temp_dir: $!";
-    my @split = grep { -f "$temp_dir/$_" }
-      sort { $a cmp $b } readdir($dh);
+    push @fs,replace_by($fich,
+			grep { -f "$_" } map { "$temp_dir/$_" }
+			sort { $a cmp $b } readdir($dh));
     closedir $dh;
-
-    # if not to be copied in project dir, put them in the
-    # same directory as original image
-
-    if($copie) {
-      push @fs,map { "$temp_dir/$_" } @split;
-    } else {
-      for(@split) {
-	my $dest=catpath($fxa,$fxb,$_);
-	debug "Moving one page to $dest";
-	move("$temp_dir/$_",$dest);
-	push @fs,$dest;
-      }
-    }
 
     $p->text('');
   } else {
@@ -187,6 +232,9 @@ for my $fich (@f) {
 }
 
 @f=@fs;
+
+# next, check files orientation and rotate them 90° if needed.
+
 
 # if requested, copy files to project directory
 
@@ -198,7 +246,8 @@ if($copie && @f) {
   my @fl=();
   my $c=0;
   for my $fich (@f) {
-    my ($fxa,$fxb,$fb) = splitpath($fich);
+    check_split_path($fich);
+    my $fb=$fich->{file};
 
     # no accentuated or special characters in filename, please!
     # this could break the process somewere...
@@ -210,23 +259,24 @@ if($copie && @f) {
     my $dest=$copie."/".$fb;
     my $deplace=0;
 
-    if($fich ne $dest) {
+    if($fich->{path} ne $dest) {
       if(-e $dest) {
 	# dest file already exists: change name
 	debug "File $dest already exists";
 	$dest=new_filename($dest);
 	debug "--> $dest";
       }
-      if(copy($fich,$dest)) {
-	push @fl,$dest;
+      if(copy($fich->{path},$dest)) {
+	push @fl,derivative_file($dest);
 	$deplace=1;
       } else {
-	debug "$fich --> $dest";
+	debug "$fich->{path} --> $dest";
 	debug "COPY ERROR: $!";
       }
     }
     $c+=$deplace;
-    push @fl,$fich if(!$deplace);
+    push @fl,derivative_file($fich->{path})
+      if(!$deplace);
 
     $p->progres($dp);
   }
@@ -238,6 +288,6 @@ if($copie && @f) {
 
 open(LIST,">",$list_file);
 for(@f) {
-  print LIST "$_\n";
+  print LIST $_->{path}."\n";
 }
 close(LIST);
