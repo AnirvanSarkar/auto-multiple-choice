@@ -36,6 +36,7 @@ my $copie='';
 my $debug='';
 my $vector_density=300;
 my $orientation="";
+my $rotate_direction="90";
 
 GetOptions("list=s"=>\$list_file,
 	   "progression-id=s"=>\$progress_id,
@@ -43,6 +44,7 @@ GetOptions("list=s"=>\$list_file,
 	   "debug=s"=>\$debug,
 	   "vector-density=s"=>\$vector_density,
 	   "orientation=s"=>\$orientation,
+	   "rotate-direction=s"=>\$rotate_direction,
 	  );
 
 set_debug($debug);
@@ -94,6 +96,12 @@ sub image_size {
   }
   close(IDF);
   return(@r);
+}
+
+sub image_orientation {
+  my ($file)=@_;
+  my ($w,$h)=image_size($file);
+  return( $h>1.1*$w ? "portrait" : $w>1.1*$h ? "landscape" : "");
 }
 
 sub move_derivative {
@@ -235,6 +243,38 @@ for my $fich (@f) {
 
 # next, check files orientation and rotate them 90° if needed.
 
+if($orientation) {
+
+  my $temp_dir = tempdir( DIR=>tmpdir(),
+			  CLEANUP => (!get_debug()) );
+
+  @fs=();
+  for my $fich (@f) {
+    my $o=image_orientation($fich->{path});
+    if($o && $o ne $orientation) {
+      check_split_path($fich);
+
+      debug "Rotate scan file $fich->{path} to orientation $orientation";
+      my $dest=new_filename($temp_dir.'/rotated-'.$fich->{file});
+      my @cmd=(magick_module("convert"),
+	       $fich->{path},
+	       "-rotate",$rotate_direction,
+	       $dest);
+      debug "CMD: ".join(' ',@cmd);
+
+      if(system(@cmd)==0) {
+	push @fs,replace_by($fich,$dest);
+      } else {
+	debug "Error while rotating $fich->{path}: $?";
+	push @fs,$fich;
+      }
+    } else {
+      push @fs,$fich;
+    }
+  }
+  @f=@fs;
+
+}
 
 # if requested, copy files to project directory
 

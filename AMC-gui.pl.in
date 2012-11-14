@@ -2972,6 +2972,8 @@ sub analyse_call {
     $projet{_layout}->end_transaction('Orie');
     push @args,"--orientation",$orientation if($orientation);
 
+    debug "Target orientation: $orientation";
+
     commande('commande'=>["auto-multiple-choice","getimages",
 			  @args],
 	     'signal'=>2,
