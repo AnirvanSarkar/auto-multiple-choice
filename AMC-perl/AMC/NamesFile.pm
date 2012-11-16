@@ -70,7 +70,8 @@ sub load {
 
     debug "Reading names file $self->{'fichier'}";
 
-    if(-f $self->{'fichier'} && ! -z $self->{'fichier'}) {
+    if($self->{'fichier'} && 
+       -f $self->{'fichier'} && ! -z $self->{'fichier'}) {
 
       # First pass: detect the number of comment lines, and the
       # separator
@@ -108,6 +109,7 @@ sub load {
 
       $self->{'numeric.content'}={};
       $self->{'simple.content'}={};
+      $self->{duplicates}={};
 
       my $io;
       if(open($io,"<:encoding(".$self->{'encodage'}.")",
@@ -155,6 +157,12 @@ sub load {
 	    if($ok) {
 	      $csv_line++;
 	      for my $k (keys %$row) {
+		if(defined($data{$k}->{$row->{$k}})
+		   && $data{$k}->{$row->{$k}}==1
+		   && !$self->{duplicates}->{$k} ) {
+		  $self->{duplicates}->{$k}=
+		    {content=>$row->{$k},line=>$csv_line};
+		}
 		$data{$k}->{$row->{$k}}++;
 		$self->{'numeric.content'}->{$k} ++
 		  if($row->{$k} =~ /^[ 0-9.+-]*$/i);
@@ -180,8 +188,12 @@ sub load {
 
 	# find unique identifiers
 
-	$self->{'keys'}=[grep { my @lk=(keys %{$data{$_}});
-				$#lk==$#{$self->{'noms'}}; }
+	for my $h (@{$self->{'heads'}}) {
+	  my @lk=(keys %{$data{$h}});
+	  $self->{duplicates}->{$h}->{n}=$#{$self->{'noms'}}-$#lk;
+	}
+
+	$self->{'keys'}=[grep { $self->{duplicates}->{$_}->{n} == 0 }
 			 @{$self->{'heads'}}];
 
 	# rajout identifiant
@@ -199,6 +211,16 @@ sub load {
 	$self->{'problems'}={'ID.dup'=>[],'ID.empty'=>0};
 	return(0,0);
     }
+}
+
+sub head_first_duplicate {
+  my ($self,$key)=@_;
+  return($self->{'duplicates'}->{$key}->{content});
+}
+
+sub head_n_duplicates {
+  my ($self,$key)=@_;
+  return($self->{duplicates}->{$key}->{n});
 }
 
 sub get_value {
@@ -284,6 +306,18 @@ sub keys { # entetes qui peuvent servir de cle unique
 		      $self->{'numeric.content'}->{$a}
 		  || $a cmp $b }
 		  @{$self->{'keys'}});
+}
+
+sub heads_for_keys { # entetes qui peuvent servir de cle unique
+    my ($self)=@_;
+    return(sort { $self->{duplicates}->{$a}->{n} <=>
+		    $self->{duplicates}->{$b}->{n}
+		  || $self->{'simple.content'}->{$b} <=>
+		      $self->{'simple.content'}->{$a}
+		  || $self->{'numeric.content'}->{$b} <=>
+		      $self->{'numeric.content'}->{$a}
+		  || $a cmp $b }
+		  @{$self->{'heads'}});
 }
 
 sub liste {
