@@ -99,6 +99,18 @@ sub load {
     }
 }
 
+sub codes_questions {
+  my ($self,$codes,$questions,$plain)=@_;
+  @$codes=$self->{'_scoring'}->codes();
+  if($plain) {
+    my $codes_re="(".join("|",map { "\Q$_\E" } @$codes).")";
+    @$questions=grep { $_->{'title'} !~ /$codes_re\.[0-9]+$/ }
+      $self->{'_scoring'}->questions;
+  } else {
+    @$questions=$self->{'_scoring'}->questions;
+  }
+}
+
 sub pre_process {
     my ($self)=@_;
 

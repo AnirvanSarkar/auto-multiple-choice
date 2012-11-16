@@ -95,8 +95,9 @@ sub export {
 
     push @columns,map { translate_column_title($_); } ("note");
 
-    my @questions=$self->{'_scoring'}->questions;
-    my @codes=$self->{'_scoring'}->codes;
+    my @codes;
+    my @questions;
+    $self->codes_questions(\@codes,\@questions,!$self->{'out.ticked'});
 
     if($self->{'out.ticked'}) {
       push @columns,map { ($_->{'title'},"TICKED:".$_->{'title'}) } @questions;

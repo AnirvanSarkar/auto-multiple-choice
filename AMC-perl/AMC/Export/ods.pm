@@ -758,10 +758,10 @@ sub export {
 
     my @student_columns=split(/,+/,$self->{'out.columns'});
 
-    my @codes=$self->{'_scoring'}->codes;
-    my $codes_re="(".join("|",map { "\Q$_\E" } @codes).")";
-    my @questions=grep { $_->{'title'} !~ /$codes_re\.[0-9]+$/ }
-      $self->{'_scoring'}->questions;
+    my @codes;
+    my @questions;
+    $self->codes_questions(\@codes,\@questions,1);
+
     my @questions_0=grep { $self->{'_scoring'}->one_indicative($_->{'question'},0); }
       @questions;
     my @questions_1=grep { $self->{'_scoring'}->one_indicative($_->{'question'},1); }
