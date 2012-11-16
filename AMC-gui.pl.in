@@ -52,6 +52,7 @@ use AMC::Gui::Association;
 use AMC::Gui::Commande;
 use AMC::Gui::Notes;
 use AMC::Gui::Zooms;
+use AMC::FileMonitor;
 
 use Data::Dumper;
 
@@ -142,6 +143,8 @@ my $home_dir=Glib::get_home_dir();
 my $o_file='';
 my $o_dir=amc_user_confdir();
 my $state_file="$o_dir/state.xml";
+
+my $monitor=AMC::FileMonitor->new();
 
 # Gets system encoding
 my $encodage_systeme=langinfo(CODESET());
@@ -3092,6 +3095,20 @@ sub edite_liste {
     commande_parallele($o{'txt_editor'},$f);
 }
 
+sub students_list_show {
+  $w{'liste_refresh'}->show();
+  $monitor->remove_key('type','StudentsList');
+}
+
+sub students_list_hide {
+  $w{'liste_refresh'}->hide();
+  $monitor->remove_key('type','StudentsList');
+  $monitor->add_file(absolu($projet{'options'}->{'listeetudiants'}),
+		     \&students_list_show,
+		     type=>'StudentsList')
+    if($projet{'options'}->{'listeetudiants'});
+}
+
 sub valide_liste {
     my %oo=@_;
     debug "* valide_liste";
@@ -3127,6 +3144,7 @@ sub valide_liste {
     my ($err,$errlig)=$l->errors();
 
     if($err) {
+      students_list_show();
 	if(!$oo{'noinfo'}) {
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
@@ -3142,7 +3160,7 @@ sub valide_liste {
 	my $e=$l->problem('ID.empty');
 	if($e>0) {
 	    debug "NamesFile: $e empty IDs";
-	    $w{'liste_refresh'}->show();
+	    students_list_show();
 	    my $dialog = Gtk2::MessageDialog
 		->new_with_markup($w{'main_window'},
 				  'destroy-with-parent',
@@ -3159,7 +3177,7 @@ sub valide_liste {
 		if($#{$d}>8) {
 		    @$d=(@{$d}[0..8],'(and more)');
 		}
-		$w{'liste_refresh'}->show();
+		students_list_show();
 		my $dialog = Gtk2::MessageDialog
 		    ->new_with_markup($w{'main_window'},
 				      'destroy-with-parent',
@@ -3169,7 +3187,7 @@ sub valide_liste {
 		$dialog->destroy;
 	    } else {
 		# OK, no need to refresh
-		$w{'liste_refresh'}->hide();
+		students_list_hide();
 	    }
 	}
 	# transmission liste des en-tetes
