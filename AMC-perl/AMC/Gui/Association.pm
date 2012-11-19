@@ -25,6 +25,7 @@ use AMC::Gui::PageArea;
 use AMC::Data;
 use AMC::DataModule::capture ':zone';
 use AMC::NamesFile;
+use AMC::Gui::WindowSize;
 
 use Getopt::Long;
 
@@ -345,10 +346,10 @@ sub set_show_all {
 # {X:X}
 sub initial_size {
   my ($self)=@_;
-  if($self->{'size_prefs'} && 
-     $self->{'size_prefs'}->{'assoc_window_size'} =~ /^([0-9]+)x([0-9]+)$/) {
-    Gtk2->main_iteration while ( Gtk2->events_pending );
-    $self->{'general'}->resize($1,$2);
+  if($self->{'size_prefs'}) {
+    AMC::Gui::WindowSize::size_monitor
+	($self->{'general'},{env=>$self->{'size_prefs'},
+			     key=>'assoc_window_size'});
   }
 }
 
@@ -439,13 +440,6 @@ sub quitter {
     if($self->{'global'}) {
 	Gtk2->main_quit;
     } else {
-      if($self->{'size_prefs'}) {
-	my $dims=join('x',$self->{'general'}->get_size);
-	if($dims ne $self->{'size_prefs'}->{'assoc_window_size'}) {
-	  $self->{'size_prefs'}->{'assoc_window_size'}=$dims;
-	  $self->{'size_prefs'}->{'_modifie_ok'}=1;
-	}
-      }
       $self->{'general'}->destroy;
       &{$self->{'fin'}}($self);
     }

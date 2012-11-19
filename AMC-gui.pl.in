@@ -220,6 +220,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'assoc_window_size'=>'',
 	      'mailing_window_size'=>'',
 	      'preferences_window_size'=>'',
+	      'checklayout_window_size'=>'',
+	      'manual_window_size'=>'',
 	      'qualite_correction'=>'150',
 	      'conserve_taille'=>1,
 	      'methode_impression'=>'CUPS',
@@ -4415,10 +4417,9 @@ sub edit_preferences {
     $w{'edit_preferences_manager'}=$gap;
 
     if($o{'conserve_taille'}) {
-      if($o{'preferences_window_size'} &&
-	 $o{'preferences_window_size'} =~ /^([0-9]+)x([0-9]+)$/) {
-	$w{'edit_preferences'}->resize($1,$2);
-      }
+      AMC::Gui::WindowSize::size_monitor
+	  ($w{'edit_preferences'},{env=>\%o,
+				   key=>'preferences_window_size'});
     }
 
     # tableau type/couleurs pour correction
@@ -4454,13 +4455,6 @@ sub edit_preferences {
 }
 
 sub closes_preferences {
-  if($o{'conserve_taille'}) {
-    my $dims=join('x',$w{'edit_preferences'}->get_size);
-    if($dims ne $o{'preferences_window_size'}) {
-      $o{'preferences_window_size'}=$dims;
-      $o{'_modifie_ok'}=1;
-    }
-  }
   $w{'edit_preferences'}->destroy();
 }
 
@@ -6325,10 +6319,9 @@ sub send_emails {
   $w{'attachments_expander'}->set_expanded(@{$projet{'options'}->{'email_attachment'}} ? 1 : 0);
 
   if($o{'conserve_taille'}) {
-    if($o{'mailing_window_size'} &&
-       $o{'mailing_window_size'} =~ /^([0-9]+)x([0-9]+)$/) {
-      $w{'email_dialog'}->resize($1,$2);
-    }
+    AMC::Gui::WindowSize::size_monitor
+	($w{'email_dialog'},{env=>\%o,
+			     key=>'mailing_window_size'});
   }
 
   transmet_pref($gap,'email',$projet{'options'});
@@ -6353,13 +6346,6 @@ sub send_emails {
       $projet{'options'}->{'email_attachment'}=[@f];
     } else {
       delete($projet{'options'}->{'email_attachment'});
-    }
-  }
-  if($o{'conserve_taille'}) {
-    my $dims=join('x',$w{'email_dialog'}->get_size);
-    if($dims ne $o{'mailing_window_size'}) {
-      $o{'mailing_window_size'}=$dims;
-      $o{'_modifie_ok'}=1;
     }
   }
   $w{'email_dialog'}->destroy;
