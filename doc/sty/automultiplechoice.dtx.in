@@ -437,7 +437,7 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \ioption{lang=XX} asks for localisation in |XX| language. At
 % present, only |DE| (German), |ES| (Spanish), |FR| (French), |IT|
-% (Italian), |JA| (Japanese) and |NL| (Dutch) are available.
+% (Italian), |JA| (Japanese), |NO| (Norwegian) and |NL| (Dutch) are available.
 %
 % \ioption{plain} cancels \textsf{environ} and \textsf{etex} automatic
 % loading. The default behaviour is to load \textsf{environ} and
@@ -1403,6 +1403,22 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@corrected{Correzione}
   \def\AMC@loc@catalog{Catalogo}
   \def\AMC@loc@none{Nessuna risposta \`e giusta.}
+}
+%    \end{macrocode}
+% 
+% \subsubsection{Norwegian}
+%
+% Norwegian localisation is called with option |lang=NO|.
+%    \begin{macrocode}
+\def\AMC@loc@NO{
+  \def\AMC@loc@draft{UTKAST}
+  \def\AMC@loc@message{Det anbefales {\aa} skrive ut dokumentet
+  for gjennomgang \\direkte fra auto-multiple-choice.}
+  \def\AMC@loc@qf##1{\textbf{Oppgave ##1 :}}
+  \def\AMC@loc@q##1##2{\textbf{Oppgave ##1} ##2}
+  \def\AMC@loc@corrected{Rettet}
+  \def\AMC@loc@catalog{Katalog}
+  \def\AMC@loc@none{Ingen svar er riktige.}
 }
 %    \end{macrocode}
 % 
