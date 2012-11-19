@@ -200,12 +200,12 @@ sub allocate_drawing {
   return() if(!$self->{'i-src'});
 
   $self->{'tx'}=$r->width;
-  $self->{'ty'}=$r->height;
+  $self->{'ty'}=$self->{'yfactor'}*$r->height;
 
   debug("Rendering target size: ".$self->{'tx'}."x".$self->{'ty'});
 
   my $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
-  my $sy=$self->{'yfactor'}*$self->{'ty'}/$self->{'i-src'}->get_height;
+  my $sy=$self->{'ty'}/$self->{'i-src'}->get_height;
 
   if($sx<$sy) {
     $self->{'ty'}=int($self->{'i-src'}->get_height*$sx);
@@ -221,6 +221,8 @@ sub allocate_drawing {
 
   $self->set_size_request(-1,$self->{'ty'})
     if($self->{'yfactor'}>1);
+
+  0;
 }
 
 sub expose_drawing {
