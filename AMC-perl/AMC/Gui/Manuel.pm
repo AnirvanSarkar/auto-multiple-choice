@@ -204,6 +204,11 @@ sub new {
     return($self);
 }
 
+sub window {
+  my ($self)=@_;
+  return($self->{'general'});
+}
+
 ###
 
 sub scan_view_change {

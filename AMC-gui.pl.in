@@ -53,6 +53,7 @@ use AMC::Gui::Commande;
 use AMC::Gui::Notes;
 use AMC::Gui::Zooms;
 use AMC::FileMonitor;
+use AMC::Gui::WindowSize;
 
 use Data::Dumper;
 
@@ -2865,6 +2866,10 @@ sub saisie_manuelle {
 	 'en_quittant'=>($regarder ? '' : 
 			 sub { detecte_analyse(); assoc_state(); }),
 	);
+      AMC::Gui::WindowSize::size_monitor
+	  ($gm->window,{env=>\%o,
+			key=>($regarder?'checklayout':'manual')
+			.'_window_size'});
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
