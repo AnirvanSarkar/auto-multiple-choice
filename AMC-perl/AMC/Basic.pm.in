@@ -425,6 +425,8 @@ sub next_debug {
   push @debug_memory,@_;
 }
 
+local *AMC_STDERR_BACKUP;
+
 sub set_debug {
     my ($debug)=@_;
     if($debug =~ /\// && -f $debug) {
@@ -434,9 +436,13 @@ sub set_debug {
 	$amc_debug_fh->autoflush(1);
 	$amc_debug_filename=$debug;
 	$debug=1;
-	open(STDERR,">>&",$amc_debug_fh);
+	*AMC_STDERR_BACKUP=*STDERR;
+	*STDERR=$amc_debug_fh;
 	$amc_debug=1;
 	debug("[".$$."]>>");
+    }
+    if($debug eq '') {
+      *STDERR=*AMC_STDERR_BACKUP;
     }
     $amc_debug=$debug;
     set_debug_file() if($amc_debug && !$amc_debug_fh);
