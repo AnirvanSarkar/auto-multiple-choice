@@ -23,6 +23,8 @@ package AMC::Test;
 use AMC::Basic;
 use AMC::Data;
 use AMC::DataModule::capture qw(:zone);
+use AMC::DataModule::scoring qw(:question);
+use AMC::Scoring;
 
 use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
@@ -167,6 +169,9 @@ sub install {
   }
 
   $self->{'debug_file'}=$self->{'temp_dir'}."/debug.log";
+  open(DB,">",$self->{'debug_file'});
+  print DB "Test\n";
+  close(DB);
 }
 
 sub see_blob {
@@ -714,6 +719,54 @@ sub test_undef {
     $self->datadump;
     exit(1);
   }
+}
+
+sub test_scoring {
+  my ($self,$question,$answers,$target_score)=@_;
+
+  my $data=AMC::Data->new($self->{'temp_dir'}."/data");
+  my $s=$data->module('scoring');
+  my $c=$data->module('capture');
+
+  $s->begin_transaction('tSCO');
+
+  $s->clear_strategy;
+  $s->clear_score;
+  $s->new_question(1,1,
+		   ($question->{multiple} ?
+		    QUESTION_MULT : QUESTION_SIMPLE),
+		   0,$question->{strategy});
+  my $i=0;
+  my $none=1;
+  my $none_t=1;
+  for my $a (@$answers) {
+    $i++ if(!$a->{noneof});
+    $none=0 if($a->{correct});
+    $s->new_answer(1,1,$i,$a->{correct},$a->{strategy});
+    $none_t=0 if($a->{ticked});
+    $c->set_zone_manual(1,1,0,
+			ZONE_BOX,1,$i,$a->{ticked});
+  }
+  if($question->{noneof_auto}) {
+    $s->new_answer(1,1,0,$none,'');
+    $c->set_zone_manual(1,1,0,
+			ZONE_BOX,1,0,$none_t);
+  }
+
+  my $qdata=$s->student_scoring_base(1,0,0.5);
+
+  $s->end_transaction('tSCO');
+
+  my $scoring=AMC::Scoring->new(data=>$self->{'temp_dir'}."/data");
+
+  set_debug($self->{debug_file});
+
+  $scoring->prepare_question($qdata->{questions}->{1});
+  my ($score,$why)=$scoring->score_question(1,0,$qdata->{questions}->{1},0);
+
+  set_debug('');
+
+  $self->test($score,$target_score);
 }
 
 sub default_process {
