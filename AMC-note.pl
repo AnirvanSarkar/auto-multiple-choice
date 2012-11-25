@@ -166,7 +166,8 @@ for my $sc (@a_calculer) {
     debug "MARK: QUESTION $question TITLE ".$q->{'title'};
 
     debug "Unknown question data !" if(!defined($q));
-    ($xx,$raison,$keys)=$bar->score_question(@$sc,$q);
+    $bar->prepare_question($q);
+    ($xx,$raison,$keys)=$bar->score_question(@$sc,$q,0);
     ($notemax)=$bar->score_max_question($sc->[0],$q);
 
     if ($q->{'title'} =~ /^(.*)\.([0-9]+)$/) {
