@@ -271,16 +271,15 @@ sub populate_from_xml {
 	if($question =~ /^[0-9]+$/) {
 	  my $q=$s->{'question'}->{$question};
 	  $self->question_title($question,$q->{'titre'});
-	  $self->statement('NEWQuestion')
-	    ->execute($student,$question,
-		      ($q->{'multiple'} ? QUESTION_MULT : QUESTION_SIMPLE),
-		      ($q->{'indicative'} ? 1 : 0),$q->{'bareme'});
+	  $self->new_question
+	    ($student,$question,
+	     ($q->{'multiple'} ? QUESTION_MULT : QUESTION_SIMPLE),
+	     ($q->{'indicative'} ? 1 : 0),$q->{'bareme'});
 
 	  for my $answer (keys %{$q->{'reponse'}}) {
 	    my $a=$q->{'reponse'}->{$answer};
-	    $self->statement('NEWAnswer')
-	      ->execute($student,$question,$answer,
-			$a->{'bonne'},$a->{'bareme'});
+	    $self->new_answer($student,$question,$answer,
+			      $a->{'bonne'},$a->{'bareme'});
 	  }
 	} else {
 	  debug "Unknown question id: <$question>";
@@ -564,6 +563,15 @@ sub main_strategy_all {
   return(join(',',$self->sql_list($self->statement('getAllMain'),$student)));
 }
 
+# new_question($student,$question,$type,$indicative,$strategy) adds a
+# question in the database, giving its characteristics
+
+sub new_question {
+  my ($self,$student,$question,$type,$indicative,$strategy)=@_;
+  $self->statement('NEWQuestion')->execute
+    ($student,$question,$type,$indicative,$strategy);
+}
+
 # question_strategy($student,$question) returns the scoring strategy
 # string for a particlar question: argument of the \scoring command
 # used inside a question/questionmult environment, before the
@@ -572,6 +580,15 @@ sub main_strategy_all {
 sub question_strategy {
   my ($self,$student,$question)=@_;
   return($self->sql_single($self->statement('qStrat'),$student,$question));
+}
+
+# new_answer($student,$question,$answer,$correct,$strategy) adds an
+# answer in the database, giving its characteristics
+
+sub new_answer {
+  my ($self,$student,$question,$answer,$correct,$strategy)=@_;
+  $self->statement('NEWAnswer')->execute
+    ($student,$question,$answer,$correct,$strategy);
 }
 
 # answer_strategy($student,$question,$answer) returns the scoring

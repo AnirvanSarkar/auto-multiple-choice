@@ -524,12 +524,11 @@ if($mode =~ /b/) {
 	}
 	if(/AUTOQCM\[FQ\]/) {
 	  # end of question: register it (or update it)
-	  $scoring->statement('NEWQuestion')
-	    ->execute($etu,$quest,
-		      ($current_q->{'multiple'} 
-		       ? QUESTION_MULT : QUESTION_SIMPLE),
-		      $current_q->{'indicative'},
-		      $current_q->{'strategy'});
+	  $scoring->new_question($etu,$quest,
+				 ($current_q->{'multiple'}
+				  ? QUESTION_MULT : QUESTION_SIMPLE),
+				 $current_q->{'indicative'},
+				 $current_q->{'strategy'});
 	  $qs->{$quest}=$current_q;
 	  $outside_quest=$quest;
 	  $quest='';
@@ -575,8 +574,8 @@ if($mode =~ /b/) {
 	    $qq=$outside_quest;
 	    debug_and_stderr "WARNING: answer outside questions for student $etu (after question $qq)";
 	  }
-	  $scoring->statement('NEWAnswer')
-	      ->execute($etu,$qq,$rep,($2 eq 'B' ? 1 : 0),'');
+	  $scoring->new_answer
+	    ($etu,$qq,$rep,($2 eq 'B' ? 1 : 0),'');
 	}
 	if(/AUTOQCM\[BR=([0-9]+)\]/) {
 	  $scoring->replicate($1,$etu);
