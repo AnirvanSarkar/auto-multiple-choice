@@ -788,6 +788,8 @@ sub read_glade {
     return($g);
 }
 
+my @widgets_only_when_opened=(qw/cleanup_menu menu_projet_enreg menu_projet_modele/);
+
 my $gui=read_glade('main_window',
 		   qw/onglets_projet onglet_preparation preparation_etats
     but_question but_solution
@@ -808,8 +810,7 @@ my $gui=read_glade('main_window',
     config_export_modules standard_export_options
     notation_c_regroupement_type notation_cb_regroupement_compose
     pref_prep_s_nombre_copies pref_prep_c_filter
-    cleanup_menu
-    /);
+    /,@widgets_only_when_opened);
 
 # Grid lines are not well-positioned in RTL environments, I don't know
 # why... so I remove them.
@@ -5877,7 +5878,9 @@ sub valide_projet {
     transmet_pref($gui,'export',$projet{'options'});
     transmet_pref($gui,'pref_prep',$projet{'options'});
 
-    $w{'cleanup_menu'}->set_sensitive(1);
+    for my $k (@widgets_only_when_opened) {
+      $w{$k}->set_sensitive(1);
+    }
 }
 
 sub projet_ouvre {
@@ -5999,7 +6002,9 @@ sub quitte_projet {
 
 	%projet=();
 
-      $w{'cleanup_menu'}->set_sensitive(0);
+      for my $k (@widgets_only_when_opened) {
+	$w{$k}->set_sensitive(0);
+      }
     }
 }
 
