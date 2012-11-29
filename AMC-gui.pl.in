@@ -4452,6 +4452,14 @@ sub edit_preferences {
     }
 
     change_methode_impression();
+
+    my $resp=$w{'edit_preferences'}->run();
+
+    if($resp) {
+      accepte_preferences();
+    } else {
+      closes_preferences();
+    }
 }
 
 sub closes_preferences {
