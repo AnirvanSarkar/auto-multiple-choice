@@ -187,6 +187,7 @@ sub check_dependencies {
 
 sub file_head {
   my ($self,$file,$size)=@_;
+  return('') if(!$file);
   my $h;
   my $n;
   my $fh;
