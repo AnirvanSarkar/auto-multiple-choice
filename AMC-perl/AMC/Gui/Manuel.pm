@@ -29,6 +29,7 @@ use File::Temp qw/ tempfile tempdir /;
 
 use AMC::Basic;
 use AMC::Gui::PageArea;
+use AMC::Gui::WindowSize;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone/;
 
@@ -67,6 +68,7 @@ sub new {
 	      'editable'=>1,
 	      'multiple'=>0,
 	      'onscan'=>'',
+	      'size_monitor'=>'',
 	  };
 
     for (keys %o) {
@@ -121,11 +123,19 @@ sub new {
 
     $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
 
+    Gtk2->main_iteration while ( Gtk2->events_pending );
+
     AMC::Gui::PageArea::add_feuille
 	($self->{'area'},'',
 	 'yfactor'=>2,
 	 'editable'=>$self->{'editable'},
 	 'marks'=>($self->{'editable'} ? '' : 'blue'));
+
+    AMC::Gui::WindowSize::size_monitor
+	($self->window,$self->{'size_monitor'})
+	  if($self->{'size_monitor'});
+
+    Gtk2->main_iteration while ( Gtk2->events_pending );
 
     ### modele DIAGNOSTIQUE SAISIE
 

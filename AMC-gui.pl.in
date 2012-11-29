@@ -2868,11 +2868,10 @@ sub saisie_manuelle {
 	 'editable'=>($regarder ? 0 : 1),
 	 'en_quittant'=>($regarder ? '' : 
 			 sub { detecte_analyse(); assoc_state(); }),
+	 'size_monitor'=>{env=>\%o,
+			  key=>($regarder?'checklayout':'manual')
+			  .'_window_size'},
 	);
-      AMC::Gui::WindowSize::size_monitor
-	  ($gm->window,{env=>\%o,
-			key=>($regarder?'checklayout':'manual')
-			.'_window_size'});
     } else {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
