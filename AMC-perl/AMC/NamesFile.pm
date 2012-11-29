@@ -68,10 +68,10 @@ sub load {
 
     $self->{'noms'}=[];
 
-    debug "Reading names file $self->{'fichier'}";
-
-    if($self->{'fichier'} && 
+    if($self->{'fichier'} &&
        -f $self->{'fichier'} && ! -z $self->{'fichier'}) {
+
+      debug "Reading names file $self->{'fichier'}";
 
       # First pass: detect the number of comment lines, and the
       # separator
@@ -206,6 +206,8 @@ sub load {
       }
     } else {
 	debug("Inexistant or empty names list file");
+	debug("(file=".$self->{'fichier'}.")")
+	  if(defined($self->{'fichier'}));
 	$self->{'heads'}=[];
 	$self->{'keys'}=[];
 	$self->{'problems'}={'ID.dup'=>[],'ID.empty'=>0};
