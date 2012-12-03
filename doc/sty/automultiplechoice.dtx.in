@@ -2153,7 +2153,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCmem@ireAJRep[1]{%
   \addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformAnswerA{#1}}}
 \newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\AMCformQuestionA{#1}}}
-\def\AMCformBegin{\AMC@zoneformulairetrue}
+\def\AMCformBegin{\AMC@zoneformulairetrue\setcounter{section}{0}}
 \newcommand\AMCform{%
   \ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData%
   \global\def\AMCmem@ireData{}\fi}
@@ -2162,6 +2162,17 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@amclog{AUTOQCM[BR=0]^^J}\AMCmem@ireData%
   \fi}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
+%
+% \begin{macro}{\AMCsection}\begin{macro}{\AMCsubsection}
+%     The |\AMCsection| and |\AMCsubsection| commands issue their
+%     standard counterparts (|\section| and |\subsection| with the
+%     same argument, both in the subject \emph{and} in the separate
+%     answer sheet.
+%    \begin{macrocode}
+\newcommand{\AMCsection}[1]{\section{#1}\AMCmem@ireAJ{\protect\section{#1}}}
+\newcommand{\AMCsubsection}[1]{\subsection{#1}\AMCmem@ireAJ{\protect\subsection{#1}}}
+%    \end{macrocode}
+% \end{macro}\end{macro}
 %
 % \subsubsection{Formatting answers}
 %
@@ -3154,7 +3165,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \advance\AMCid@etudfin\AMCid@etud\relax%
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
   \loop{%
-    \AMC@zoneformulairefalse\setcounter{page}{1}%
+    \AMC@zoneformulairefalse\setcounter{page}{1}\setcounter{section}{0}%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
     #2\clearpage}\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
