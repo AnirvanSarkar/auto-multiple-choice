@@ -104,7 +104,7 @@ sub question_group {
   if($question->{title} =~ /^([^:]+):/) {
     return($1);
   } else {
-    return('');
+    return(undef);
   }
 }
 
@@ -121,7 +121,7 @@ sub insert_groups_sum_headers {
     my @r=();
     for my $q (@questions) {
       my $g=$self->question_group($q);
-      $q->{group}=$g if($g);
+      $q->{group}=$g if(defined($g));
 
       if(defined($g) && $g eq $group{group_sum}) {
 	$group{indic0}=1 if($q->{indic0});
