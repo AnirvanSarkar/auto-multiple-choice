@@ -99,6 +99,56 @@ sub load {
     }
 }
 
+sub question_group {
+  my ($self,$question)=@_;
+  if($question->{title} =~ /^([^:]+):/) {
+    return($1);
+  } else {
+    return('');
+  }
+}
+
+sub group_sum_q {
+  my ($self,%g)=@_;
+  return({question=>-1,%g,
+	  title=>"<".$g{group_sum}.">"});
+}
+
+sub insert_groups_sum_headers {
+  my ($self,@questions)=@_;
+  if($self->{'out.groupsums'}) {
+    my %group=();
+    my @r=();
+    for my $q (@questions) {
+      my $g=$self->question_group($q);
+      $q->{group}=$g if($g);
+
+      if(defined($g) && $g eq $group{group_sum}) {
+	$group{indic0}=1 if($q->{indic0});
+	$group{indic1}=1 if($q->{indic1});
+	$group{n}++;
+      } else {
+	push @r,$self->group_sum_q(%group) if(defined($group{group_sum}));
+	%group=(group_sum=>$g,n=>1,
+		indic0=>$q->{indic0},indic1=>$q->{indic1});
+      }
+      push @r,$q;
+    }
+    push @r,$self->group_sum_q(%group) if(defined($group{group_sum}));
+    return(@r);
+  } else {
+    return(@questions);
+  }
+}
+
+sub test_indicative {
+  my ($self,$question)=@_;
+  for my $state (0,1) {
+    $question->{'indic'.$state}=1
+      if($self->{'_scoring'}->one_indicative($question->{question},$state));
+  }
+}
+
 sub codes_questions {
   my ($self,$codes,$questions,$plain)=@_;
   @$codes=$self->{'_scoring'}->codes();
@@ -109,6 +159,8 @@ sub codes_questions {
   } else {
     @$questions=$self->{'_scoring'}->questions;
   }
+  for(@$questions) { $self->test_indicative($_); }
+  @$questions=$self->insert_groups_sum_headers(@$questions);
 }
 
 sub pre_process {

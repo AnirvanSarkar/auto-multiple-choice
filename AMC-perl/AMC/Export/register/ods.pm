@@ -46,6 +46,7 @@ sub options_from_config {
 	 "code"=>$options_project->{'code_examen'},
 	 "stats"=>$options_project->{'export_ods_stats'},
 	 "statsindic"=>$options_project->{'export_ods_statsindic'},
+	 "groupsums"=>$options_project->{'export_ods_groupsums'},
 	 );
 }
 
@@ -53,6 +54,7 @@ sub options_default {
   return('export_ods_columns'=>'student.copy,student.key,student.name',
 	 'export_ods_stats'=>0,
 	 'export_ods_statsindic'=>1,
+	 'export_ods_groupsums'=>0,
 	 );
 }
 
@@ -81,6 +83,15 @@ sub build_config_gui {
   $widget=Gtk2::CheckButton->new();
   $w->{'export_cb_export_ods_statsindic'}=$widget;
   $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each indicative question?");
+  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $y++;
+
+# TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.
+  $t->attach(Gtk2::Label->new(__"Score groups"),
+	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $widget=Gtk2::CheckButton->new();
+  $w->{'export_cb_export_ods_groupsums'}=$widget;
+  $widget->set_tooltip_text(__"Add sums of the scores for each question group? To define groups, use question ids in the form \"group:question\".");
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;
 

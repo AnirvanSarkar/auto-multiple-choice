@@ -39,6 +39,7 @@ sub new {
     $self->{'out.size'}="10";
     $self->{'out.stats'}='';
     $self->{'out.statsindic'}='';
+    $self->{'out.groupsums'}='';
     if(can_load(modules=>{'Gtk2'=>undef,'Cairo'=>undef})) {
       debug "Using Gtk2/Cairo to compute column width";
       $self->{'calc.Gtk2'}=1;
@@ -187,6 +188,7 @@ my %style_col=(qw/student.key CodeA
 	       NOTE NoteF
 	       student.copy NumCopie
 	       TOTAL NoteQ
+	       GS NoteGS
 	       MAX NoteQ
 	       HEAD General
 	       /);
@@ -471,6 +473,15 @@ sub export {
 			 },
 			 'references'=>{'style:data-style-name' => 'Percentage'},
 			 );
+    # QpcGS : pourcentage de reussite global pour un groupe
+    $styles->createStyle('QpcGS',
+			 parent=>'Qpc',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#c4eeba",
+			 },
+			 );
 
     # StatsQName : nom de question
     $styles->createStyle('StatsQName',
@@ -621,6 +632,17 @@ sub export {
 			 'references'=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
+    # NoteGS : score total pour un groupe
+    $styles->createStyle('NoteGS',
+			 parent=>'NoteQ',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#c4eeba",
+			 },
+			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},
+			 );
+
     # NoteX : pas de note car la question ne figure pas dans cette copie la
     $styles->createStyle('NoteX',
 			 parent=>'Tableau',
@@ -756,16 +778,24 @@ sub export {
 			 },
 			 );
 
+    # EnteteGS : en-tete pour les groupes
+    $styles->createStyle('EnteteGS',
+			 parent=>'EnteteVertical',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#c4eeba",
+			 },
+			 );
+
     my @student_columns=split(/,+/,$self->{'out.columns'});
 
     my @codes;
     my @questions;
     $self->codes_questions(\@codes,\@questions,1);
 
-    my @questions_0=grep { $self->{'_scoring'}->one_indicative($_->{'question'},0); }
-      @questions;
-    my @questions_1=grep { $self->{'_scoring'}->one_indicative($_->{'question'},1); }
-      @questions;
+    my @questions_0=grep { $_->{indic0} } @questions;
+    my @questions_1=grep { $_->{indic1} } @questions;
 
     debug "Questions: ".join(', ',map { $_->{'question'}.'='.$_->{'title'} } @questions);
     debug "Questions PLAIN: ".join(', ',map { $_->{'title'} } @questions_0);
@@ -829,7 +859,8 @@ sub export {
 
     for(@questions_0) {
 	$doc->columnStyle($feuille,$ii,'col.notes');
-	$doc->cellStyle($feuille,$y0,$ii,'EnteteVertical');
+	$doc->cellStyle($feuille,$y0,$ii,
+			($_->{group_sum} ? 'EnteteGS' : 'EnteteVertical'));
 	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_->{'title'}));
     }
     for(@questions_1) {
@@ -861,10 +892,14 @@ sub export {
 
     $ii=$x1;
     for(@questions_0) {
-      $doc->cellStyle($feuille,$jj,$ii,'NoteQ');
-      $doc->cellValueType($feuille,$jj,$ii,'float');
-      $doc->cellValue($feuille,$jj,$ii++,
-		      $self->{'_scoring'}->question_maxmax($_->{'question'}));
+      if(defined($_->{group_sum})) {
+	$ii++;
+      } else {
+	$doc->cellStyle($feuille,$jj,$ii,'NoteQ');
+	$doc->cellValueType($feuille,$jj,$ii,'float');
+	$doc->cellValue($feuille,$jj,$ii++,
+			$self->{'_scoring'}->question_maxmax($_->{'question'}));
+      }
     }
 
     $code_row{'max'}=$jj;
@@ -888,6 +923,7 @@ sub export {
     my @presents=();
     my %scores;
     my @scores_columns;
+    my %group_single=();
 
     my $y1=$jj+1;
 
@@ -952,38 +988,65 @@ sub export {
 
 	# second: columns for all questions scores
 
+	my @group_columns=();
+	my $group_maxsum=0;
+
 	for my $q (@questions_0,@questions_1) {
 	  if($m->{'abs'}) {
 	    $doc->cellStyle($feuille,$jj,$ii,'NoteX');
 	  } else {
-	    my $r=$self->{'_scoring'}
-	      ->question_result($m->{'student'},$m->{'copy'},$q->{'question'});
-	    $doc->cellValueType($feuille,$jj,$ii,'float');
-	    if($self->{'_scoring'}->indicative($m->{'student'},$q->{'question'})) {
-	      $doc->cellStyle($feuille,$jj,$ii,'CodeV');
+	    if(defined($q->{group_sum})) {
+	      if(@group_columns) {
+		if(defined($group_single{$q->{group_sum}})) {
+		  $group_single{$q->{group_sum}}->{ok}=0
+		    if($group_maxsum != $group_single{$q->{group_sum}}->{maxsum});
+		} else {
+		  $group_single{$q->{group_sum}}=
+		    {ii=>$ii,maxsum=>$group_maxsum,ok=>1};
+		}
+		set_cell($doc,$feuille,$jj,$ii,$m->{'abs'},
+			 'GS','','numeric'=>1,
+			 'formula'=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")");
+		push @{$col_cells{$ii}},$jj;
+	      } else {
+		$doc->cellStyle($feuille,$jj,$ii,'NoteX');
+	      }
+	      @group_columns=();
+	      $group_maxsum=0;
 	    } else {
-	      if(defined($r->{'score'})) {
-		if(!$scores{$q->{'question'}}) {
-		  $scores{$q->{'question'}}=1;
-		  push @scores_columns,$ii;
-		  push @{$col_cells{$ii}},$jj;
-		  if($r->{'why'} =~ /c/i) {
-		    $doc->cellStyle($feuille,$jj,$ii,'NoteC');
-		  } elsif($r->{'why'} =~ /v/i) {
-		    $doc->cellStyle($feuille,$jj,$ii,'NoteV');
-		  } elsif($r->{'why'} =~ /e/i) {
-		    $doc->cellStyle($feuille,$jj,$ii,'NoteE');
+	      my $r=$self->{'_scoring'}
+		->question_result($m->{'student'},$m->{'copy'},$q->{'question'});
+	      $doc->cellValueType($feuille,$jj,$ii,'float');
+	      if($self->{'_scoring'}->indicative($m->{'student'},$q->{'question'})) {
+		$doc->cellStyle($feuille,$jj,$ii,'CodeV');
+	      } else {
+		if(defined($r->{'score'})) {
+		  if(!$scores{$q->{'question'}}) {
+		    $scores{$q->{'question'}}=1;
+		    push @scores_columns,$ii;
+		    push @{$col_cells{$ii}},$jj;
+		    if($q->{group}) {
+		      push @group_columns,$ii;
+		      $group_maxsum+=$r->{max};
+		    }
+		    if($r->{'why'} =~ /c/i) {
+		      $doc->cellStyle($feuille,$jj,$ii,'NoteC');
+		    } elsif($r->{'why'} =~ /v/i) {
+		      $doc->cellStyle($feuille,$jj,$ii,'NoteV');
+		    } elsif($r->{'why'} =~ /e/i) {
+		      $doc->cellStyle($feuille,$jj,$ii,'NoteE');
+		    } else {
+		      $doc->cellStyle($feuille,$jj,$ii,'NoteQ');
+		    }
 		  } else {
-		    $doc->cellStyle($feuille,$jj,$ii,'NoteQ');
+		    $doc->cellStyle($feuille,$jj,$ii,'NoteX');
 		  }
 		} else {
 		  $doc->cellStyle($feuille,$jj,$ii,'NoteX');
 		}
-	      } else {
-		$doc->cellStyle($feuille,$jj,$ii,'NoteX');
 	      }
+	      $doc->cellValue($feuille,$jj,$ii,$r->{'score'});
 	    }
-	    $doc->cellValue($feuille,$jj,$ii,$r->{'score'});
 	  }
 	  $ii++;
 	}
@@ -1024,6 +1087,24 @@ sub export {
      		      .subcolumn_condensed(x2ooo($code_col{'note'}),@presents).")");
 
     $self->{'_scoring'}->end_transaction('XODS');
+
+    ##########################################################################
+    # back to row for groups max
+    ##########################################################################
+
+    for my $g (keys %group_single) {
+      my $j0=$code_row{'max'};
+      my $i0=$group_single{$g}->{ii};
+      if($group_single{$g}->{ok}) {
+	$doc->cellStyle($feuille,$j0,$i0,'NoteGS');
+	$doc->cellValueType($feuille,$j0,$i0,'float');
+	$doc->cellValue($feuille,$j0,$i0,$group_single{$g}->{maxsum});
+	$doc->cellStyle($feuille,$code_row{'average'},$i0,'QpcGS');
+      } else {
+	$doc->cellStyle($feuille,$j0,$i0,'NoteX');
+	$doc->cellStyle($feuille,$code_row{'average'},$i0,'NoteX');
+      }
+    }
 
     ##########################################################################
     # try to set right column width
