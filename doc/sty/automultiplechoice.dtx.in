@@ -2589,7 +2589,11 @@ Three digits and two letters:\insertgroup{mixed}.
 % |\AMC@numeric@base|). |\AMC@calcdigit|\marg{integer}\marg{digit}\marg{counter}
 % sets the value of the counter \meta{counter} to the digit number
 % \meta{digit} of \meta{integer} (digit number 0 of 567 is 7, number 1
-% is 6...)
+% is
+% 6...). |\AMCsignificantDigits|\oarg{base}\marg{nDigits}\marg{number}\marg{counter}
+% sets the value of the counter \marg{counter} to the first
+% \marg{nDigits} significant digits from real number \marg{number},
+% so that for example |\AMCsignificantDigits{2}{0.05467}| returns 54.
 %
 %    \begin{macrocode}
 \newcount\AMC@integer@modulo
@@ -2610,6 +2614,27 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifnum\AMC@numeric@calcdigit>\z@\repeat%
   \fi%
   \AMC@calcmodulo{\the\AMC@numeric@integer}{#3}%
+}
+\newcommand\AMCsignificantDigits[4][10]{
+  \FPifzero{#3}%
+    #4\z@%
+  \else%
+    \AMCsignificantDigits@nonnull[#1]{#2}{#3}{#4}
+  \fi%
+}
+\newcommand\AMCsignificantDigits@nonnull[4][10]{
+  \def\AMC@FP@x{#3}%
+  \AMC@numeric@calcdigit=#2%
+  \AMC@numeric@integer=1%
+  \loop\multiply\AMC@numeric@integer by #1\advance\AMC@numeric@calcdigit\m@ne%
+    \ifnum\AMC@numeric@calcdigit>\z@\repeat%
+  \loop\FPiflt\AMC@FP@x{\the\AMC@numeric@integer}\else%
+    \FPeval\AMC@FP@x{AMC@FP@x / #1}\repeat%
+  \divide\AMC@numeric@integer by #1\relax%
+  \loop\FPiflt\AMC@FP@x{\the\AMC@numeric@integer}%
+    \FPeval\AMC@FP@x{AMC@FP@x * #1}\repeat%
+  \FPtrunc\AMC@FP@x\AMC@FP@x0\relax%
+  #4=\AMC@FP@x%
 }
 %    \end{macrocode}
 %
