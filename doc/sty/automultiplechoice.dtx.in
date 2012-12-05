@@ -2597,7 +2597,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % 6...). |\AMCsignificantDigits|\oarg{base}\marg{nDigits}\marg{number}\marg{counter}
 % sets the value of the counter \marg{counter} to the first
 % \marg{nDigits} significant digits from real number \marg{number},
-% so that for example |\AMCsignificantDigits{2}{0.05467}| returns 54.
+% so that for example |\AMCsignificantDigits{2}{0.05367}| returns 54.
 %
 %    \begin{macrocode}
 \newcount\AMC@integer@modulo
@@ -2637,7 +2637,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \divide\AMC@numeric@integer by #1\relax%
   \loop\FPiflt\AMC@FP@x{\the\AMC@numeric@integer}%
     \FPeval\AMC@FP@x{AMC@FP@x * #1}\repeat%
-  \FPtrunc\AMC@FP@x\AMC@FP@x0\relax%
+  \FPround\AMC@FP@x\AMC@FP@x0\relax%
   #4=\AMC@FP@x%
 }
 %    \end{macrocode}
