@@ -945,6 +945,10 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \item[|scoring=|\meta{bool}] if |true|, a scoring strategy is given
 %     to AMC for this question. Defaults to |true|.
 %   \item[|scoreexact=|\meta{num}] gives the score for an exact answer (defaults to 2).
+%   \item[|exact=|\meta{num}] sets the maximal distance to the
+%     correct integer value (value without the decimal point) for an
+%     answer to be said \emph{exact} and be rewarded to
+%     |scoreexact| points (defaults to 0).
 %   \item[|scoreapprox=|\meta{num}] gives the score for an approximative answer (defaults to 1).
 %   \item[|approx=|\meta{num}] sets the maximal distance to the
 %     correct integer value (value without the decimal point) for an
@@ -2678,10 +2682,13 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@boolkey{AMCNumeric}{nozero}[false]{}
 \define@key{AMCNumeric}{scoreexact}[2]{\def\AMC@numeric@scoreexact{#1}}
 \define@key{AMCNumeric}{scoreapprox}[1]{\def\AMC@numeric@scoreapprox{#1}}
+\newcount\AMC@numeric@exact
 \newcount\AMC@numeric@approx
+\define@key{AMCNumeric}{exact}[0]{\AMC@numeric@exact=#1}
 \define@key{AMCNumeric}{approx}[0]{\AMC@numeric@approx=#1}
 \setkeys{AMCNumeric}{digits,decimals,base,sign,strict,scoring,vertical,
-                     reverse,vhead,scoreexact,scoreapprox,approx,nozero}
+                     reverse,vhead,scoreexact,scoreapprox,exact,approx,
+                     nozero}
 \newcommand\AMCnumericOpts[1]{\setkeys{AMCNumeric}{#1}}
 %    \end{macrocode}
 % Then the command |\AMCnumericShow| itself:
@@ -2717,10 +2724,10 @@ Three digits and two letters:\insertgroup{mixed}.
 % correct value, and |intX| to the value entered by the student.
 %    \begin{macrocode}
   \ifKV@AMCNumeric@scoring%
-    \AMC@amclog{AUTOQCM[B=formula=(intV==intX?%
+    \AMC@amclog{AUTOQCM[B=formula=(Vdifference<=\the\AMC@numeric@exact?%
       \AMC@numeric@scoreexact:%
       \ifnum\AMC@numeric@approx>\z@%
-        (abs((intV)-(intX))<=\the\AMC@numeric@approx?\AMC@numeric@scoreapprox:0)%
+        (Vdifference<=\the\AMC@numeric@approx?\AMC@numeric@scoreapprox:0)%
       \else%
         0%
       \fi)]^^J}%
@@ -2747,6 +2754,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \AMC@amclog{AUTOQCM[B=set.intV=\the\AMC@numeric@value,%
     set.intX=\AMC@numeric@compute]^^J}%
+  \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}%
 %    \end{macrocode}
 % Begin now with the frame around all the boxes:
 %    \begin{macrocode}

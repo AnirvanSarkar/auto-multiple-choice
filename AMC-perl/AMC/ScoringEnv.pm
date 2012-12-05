@@ -199,8 +199,9 @@ sub action_variable {
 }
 
 sub action_variables_from_directives {
-  my ($self,$action)=@_;
-  for my $key (keys %{$self->{directives}}) {
+  my ($self,$action,$keys)=@_;
+  $keys=[$self->sorted_directives_keys] if(!$keys);
+  for my $key (@$keys) {
     if($key =~ /^$action\.(.*)/) {
       $self->action_variable($action,$1,
 			     $self->{directives}->{$key}->{def});
@@ -211,8 +212,9 @@ sub action_variables_from_directives {
 sub variables_from_directives {
   my ($self,%oo)=@_;
   debug "Variables from internal directives";
+  my @keys=$self->sorted_directives_keys;
   for my $a (qw/default set requires/) {
-    $self->action_variables_from_directives($a)
+    $self->action_variables_from_directives($a,\@keys)
       if($oo{$a});
   }
 }
@@ -257,16 +259,35 @@ sub unevaluate_directives {
   }
 }
 
+sub max_rank {
+  my ($self)=@_;
+  my $r=0;
+  for(keys %{$self->{directives}}) {
+    $r=$self->{directives}->{$_}->{rank}
+      if($self->{directives}->{$_}->{rank}>$r);
+  }
+  return($r);
+}
+
+sub sorted_directives_keys {
+  my ($self)=@_;
+  return(sort { $self->{directives}->{$a}->{rank}
+		  <=> $self->{directives}->{$b}->{rank} }
+	 (keys %{$self->{directives}}));
+}
+
 sub set_directive {
-  my ($self,$key,$value)=@_;
-  debug "Setting directive $key = $value";
-  $self->{directives}->{$key}={def=>$value};
+  my ($self,$key,$value,$rank)=@_;
+  $rank=$self->max_rank()+1 if(!defined($rank));
+  debug "Setting directive {$rank} $key = $value";
+  $self->{directives}->{$key}={def=>$value,rank=>$rank};
 }
 
 sub directives_from_parse {
   my ($self,$parsed)=@_;
+  my $rank=$self->max_rank()+1;
   for my $d (@$parsed) {
-    $self->set_directive($d->{key},$d->{value});
+    $self->set_directive($d->{key},$d->{value},$rank++);
   }
 }
 
