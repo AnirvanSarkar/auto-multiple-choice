@@ -904,14 +904,19 @@ Three digits and two letters:\insertgroup{mixed}.
 %   |\AMCnumericChoices| command are the following (\meta{bool} can
 %   be |true| or |false|, and \meta{color} must be a color known by the |xcolor| package):
 %   \begin{itemize}\setlength{\itemindent}{5em}
-%   \item[|digits=|\meta{num}] gives the number of significant digits to request (defaults to 3).
+%   \item[|digits=|\meta{num}] gives the number of digits to request
+%     (defaults to 3).
 %   \item[|decimals=|\meta{num}] gives the number of digits after
 %     period to request (defaults to 0). Note that when |decimals| is
 %     positive, the LaTeX package |fp| must be loaded.
 %   \item[|base=|\meta{num}] gives the base for digits and decimals (defaults to 10).
+%   \item[|significant=|\meta{bool}] if |true|, the numbers to code
+%     are the first \emph{significant} digits from the first argument of
+%     |\AMCnumericChoices|. For example, the right answer to
+%     |\AMCnumericChoices|\linebreak[2]|{56945.23}|\linebreak[2]|{digits=2,significant=true}| is 57.
 %   \item[|nozero=|\meta{bool}] if |true|, the choice 0 is removed for
 %     all digits. May be useful when |\AMCnumericChoices| is used to
-%     get a small (<10) positive value.
+%     get a small ($<10$) positive value.
 %   \item[|sign=|\meta{bool}] requests (or not) a signed value (default to true).
 %   \item[|strict=|\meta{bool}] if |true|, a box has to be ticked for
 %     every digit and for the sign. If |false|, if some digits has no
@@ -2619,15 +2624,19 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \AMC@calcmodulo{\the\AMC@numeric@integer}{#3}%
 }
-\newcommand\AMCsignificantDigits[4][10]{
+\newcommand\AMCsignificantDigits[4][10]{%
   \FPifzero{#3}%
     #4\z@%
   \else%
     \AMCsignificantDigits@nonnull[#1]{#2}{#3}{#4}
+    \AMC@givesign{#3}{#4}%
   \fi%
 }
-\newcommand\AMCsignificantDigits@nonnull[4][10]{
-  \def\AMC@FP@x{#3}%
+\newcommand\AMC@givesign[2]{%
+  \FPifpos{#1}\else\multiply#2\m@ne\fi%
+}
+\newcommand\AMCsignificantDigits@nonnull[4][10]{%
+  \FPabs\AMC@FP@x{#3}%
   \AMC@numeric@calcdigit=#2%
   \AMC@numeric@integer=1%
   \loop\multiply\AMC@numeric@integer by #1\advance\AMC@numeric@calcdigit\m@ne%
@@ -2680,6 +2689,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@boolkey{AMCNumeric}{reverse}[true]{}
 \define@boolkey{AMCNumeric}{vhead}[false]{}
 \define@boolkey{AMCNumeric}{nozero}[false]{}
+\define@boolkey{AMCNumeric}{significant}[false]{}
 \define@key{AMCNumeric}{scoreexact}[2]{\def\AMC@numeric@scoreexact{#1}}
 \define@key{AMCNumeric}{scoreapprox}[1]{\def\AMC@numeric@scoreapprox{#1}}
 \newcount\AMC@numeric@exact
@@ -2688,7 +2698,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCNumeric}{approx}[0]{\AMC@numeric@approx=#1}
 \setkeys{AMCNumeric}{digits,decimals,base,sign,strict,scoring,vertical,
                      reverse,vhead,scoreexact,scoreapprox,exact,approx,
-                     nozero}
+                     nozero,significant}
 \newcommand\AMCnumericOpts[1]{\setkeys{AMCNumeric}{#1}}
 %    \end{macrocode}
 % Then the command |\AMCnumericShow| itself:
@@ -2716,7 +2726,11 @@ Three digits and two letters:\insertgroup{mixed}.
     \FPeval\AMC@numeric@eval{round(#1 * \the\AMC@numeric@base^\the\AMC@numeric@decd,0)}
     \AMC@numeric@value=\AMC@numeric@eval%
   \else%  
-    \AMC@numeric@value=#1%
+    \ifKV@AMCNumeric@significant%
+      \AMCsignificantDigits[\the\AMC@numeric@base]{\AMC@numeric@digits}{#1}{\AMC@numeric@value}%
+    \else%
+      \AMC@numeric@value=#1%
+    \fi%
   \fi%
 %    \end{macrocode}
 % The question scoring is given to AMC (if requested by the
@@ -2754,7 +2768,11 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \AMC@amclog{AUTOQCM[B=set.intV=\the\AMC@numeric@value,%
     set.intX=\AMC@numeric@compute]^^J}%
-  \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}%
+  \ifKV@AMCNumeric@significant%
+    \AMC@amclog{AUTOQCM[B=set.Vdifference="min( abs((intV)-(intX)) , abs(10*(intV)-(intX)) , abs((intV)-10*(intX)) )"]^^J}%
+  \else%
+    \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}%
+  \fi%
 %    \end{macrocode}
 % Begin now with the frame around all the boxes:
 %    \begin{macrocode}

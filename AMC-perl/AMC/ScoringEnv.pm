@@ -29,6 +29,23 @@ package AMC::ScoringEnv;
 use AMC::Basic;
 use Text::ParseWords;
 
+# The functions min and max will sometimes be used to evaluate the
+# formulas: don't cut them off
+
+sub min {
+  my (@values)=@_;
+  my $r=$values[0];
+  for(@values) { $r=$_ if($_<$r); }
+  return($r);
+}
+
+sub max {
+  my (@values)=@_;
+  my $r=$values[0];
+  for(@values) { $r=$_ if($_>$r); }
+  return($r);
+}
+
 sub new {
   my ($class,@objects)=(@_);
 

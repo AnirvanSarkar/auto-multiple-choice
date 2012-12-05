@@ -2523,8 +2523,8 @@ et inscrivez votre nom et prénom ci-dessous.
               <term>digits=<replaceable>num</replaceable></term>
 
               <listitem>
-                <para>donne le nombre de chiffres significatifs à coder (la
-                valeur par défaut est 3).</para>
+                <para>donne le nombre de chiffres à coder (la valeur par
+                défaut est 3).</para>
               </listitem>
             </varlistentry>
 
@@ -2545,6 +2545,19 @@ et inscrivez votre nom et prénom ci-dessous.
               <listitem>
                 <para>donne la base dans laquelle sera écrit le nombre à coder
                 (la valeur par défaut est 10).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>significant=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>avec la valeur <code>true</code>, les chiffres à
+                renseigner sont les premiers chiffres significatifs du premier
+                argument de <command>\AMCnumericChoices</command>. Par
+                exemple, la bonne réponse à
+                <code>\AMCnumericChoices{56945.23}{digits=2,significant=true}</code>
+                est 57.</para>
               </listitem>
             </varlistentry>
 

@@ -2360,8 +2360,8 @@ respective parameters \VQa{} et \VQb{}.
               <term>digits=<replaceable>num</replaceable></term>
 
               <listitem>
-                <para>gives the number of significant digits to request
-                (defaults to 3).</para>
+                <para>gives the number of digits to request (defaults to
+                3).</para>
               </listitem>
             </varlistentry>
 
@@ -2382,6 +2382,19 @@ respective parameters \VQa{} et \VQb{}.
               <listitem>
                 <para>gives the base for <code>digits</code> and
                 <code>decimals</code> (defaults to 10).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>significant=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>if <code>true</code>, the numbers to code are the first
+                significant digits from the first argument of
+                <command>\AMCnumericChoices</command>. For example, the right
+                answer to
+                <code>\AMCnumericChoices{56945.23}{digits=2,significant=true}</code>
+                is 57.</para>
               </listitem>
             </varlistentry>
 
