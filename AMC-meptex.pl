@@ -112,6 +112,8 @@ sub add_flag {
   }
 }
 
+debug "Reading $src...";
+
 open(SRC,$src) or die "Unable to open $src : $!";
 while(<SRC>) {
     if(/\\page{([^\}]+)}{([^\}]+)}{([^\}]+)}/) {
@@ -134,7 +136,8 @@ while(<SRC>) {
 	  if(!$cases->{$i});
 	ajoute($cases->{$i}->{'bx'},$x);
 	ajoute($cases->{$i}->{'by'},$y);
-	if($cases->{$i}->{'shape'}) {
+	if($cases->{$i}->{'shape'} &&
+	   $cases->{$i}->{'shape'} ne $shape) {
 	  debug "WARNING: different shapes for a single box ($i)";
 	} else {
 	  $cases->{$i}->{'shape'}=$shape;
@@ -241,9 +244,13 @@ for my $p (@pages) {
     $avance->progres($delta);
 }
 
+debug "Flagging questions...";
+
 for my $f (@flags) {
   $layout->add_question_flag($f->{'student'},$f->{'question'},$f->{'flags'});
 }
+
+debug "Ending transaction...";
 
 $layout->end_transaction('MeTe');
 
