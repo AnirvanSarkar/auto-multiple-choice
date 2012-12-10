@@ -970,18 +970,40 @@ my $attachments_store=Gtk2::ListStore->new ('Glib::String',
 
 ### modele DIAGNOSTIQUE SAISIE
 
-my $diag_store = Gtk2::ListStore->new ('Glib::String',
-				       'Glib::String',
-				       'Glib::String',
-				       'Glib::String',
-				       'Glib::String',
-				       'Glib::String',
-				       'Glib::String',
-				       'Glib::String',
-				       'Glib::String',
-				       'Glib::String');
+my $diag_store;
 
-$w{'diag_tree'}->set_model($diag_store);
+sub new_diagstore {
+  $diag_store
+    = Gtk2::ListStore->new ('Glib::String',
+			    'Glib::String',
+			    'Glib::String',
+			    'Glib::String',
+			    'Glib::String',
+			    'Glib::String',
+			    'Glib::String',
+			    'Glib::String',
+			    'Glib::String',
+			    'Glib::String');
+  $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
+  $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
+  $diag_store->set_sort_func(DIAG_ID,\&sort_from_columns,
+			     [{'type'=>'n','col'=>DIAG_ID_STUDENT},
+			      {'type'=>'n','col'=>DIAG_ID_COPY},
+			      {'type'=>'n','col'=>DIAG_ID_PAGE},
+			     ]);
+}
+
+sub sort_diagstore {
+  $diag_store->set_sort_column_id(DIAG_ID,GTK_SORT_ASCENDING);
+}
+
+sub show_diagstore {
+  $w{'diag_tree'}->set_model($diag_store);
+}
+
+new_diagstore();
+sort_diagstore();
+show_diagstore();
 
 $renderer=Gtk2::CellRendererText->new;
 # TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
@@ -1156,9 +1178,6 @@ for my $k (qw/0_0 0_1 1_0 1_1/) {
     $cb_stores{"symbole_".$k."_type"}=$symbole_type_cb;
 }
 
-$diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
-$diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
-
 # Add config GUI for export modules...
 
 for my $m (@export_modules) {
@@ -1310,15 +1329,6 @@ sub exporte {
 	     }
 	     );
 }
-
-## tri pour IDS
-
-$diag_store->set_sort_func(DIAG_ID,\&sort_from_columns,
-			   [{'type'=>'n','col'=>DIAG_ID_STUDENT},
-			    {'type'=>'n','col'=>DIAG_ID_COPY},
-			    {'type'=>'n','col'=>DIAG_ID_PAGE},
-			   ]);
-$diag_store->set_sort_column_id(DIAG_ID,GTK_SORT_ASCENDING);
 
 ## menu contextuel sur liste diagnostique -> visualisation zoom/page
 
@@ -4883,7 +4893,7 @@ sub detecte_analyse {
     my $iter;
     my $row;
 
-    $diag_store->clear;
+    new_diagstore();
 
     $w{'commande'}->show();
     my $av_text=$w{'avancement'}->get_text();
@@ -4906,26 +4916,28 @@ sub detecte_analyse {
       Gtk2->main_iteration while ( Gtk2->events_pending );
     }
     for my $p (@$summary) {
-      $iter=$diag_store->append;
-      $diag_store->set($iter,
-		       DIAG_ID,pageids_string($p->{'student'},$p->{'page'},$p->{'copy'}),
-		       DIAG_ID_STUDENT,$p->{'student'},
-		       DIAG_ID_PAGE,$p->{'page'},
-		       DIAG_ID_COPY,$p->{'copy'},
-		       DIAG_ID_BACK,$p->{'color'},
-		       DIAG_EQM,$p->{'mse_string'},
-		       DIAG_EQM_BACK,$p->{'mse_color'},
-		       DIAG_MAJ,format_date($p->{'timestamp'}),
-		       DIAG_DELTA,$p->{'sensitivity_string'},
-		       DIAG_DELTA_BACK,$p->{'sensitivity_color'},
-		      );
-      $i++;
+      $diag_store->insert_with_values
+	($i,
+	 DIAG_ID,pageids_string($p->{'student'},$p->{'page'},$p->{'copy'}),
+	 DIAG_ID_STUDENT,$p->{'student'},
+	 DIAG_ID_PAGE,$p->{'page'},
+	 DIAG_ID_COPY,$p->{'copy'},
+	 DIAG_ID_BACK,$p->{'color'},
+	 DIAG_EQM,$p->{'mse_string'},
+	 DIAG_EQM_BACK,$p->{'mse_color'},
+	 DIAG_MAJ,format_date($p->{'timestamp'}),
+	 DIAG_DELTA,$p->{'sensitivity_string'},
+	 DIAG_DELTA_BACK,$p->{'sensitivity_color'},
+	);
       if($i/$total>=$frac+.05) {
 	$frac=$i/$total;
 	$w{'avancement'}->set_fraction($frac);
 	Gtk2->main_iteration while ( Gtk2->events_pending );
       }
     }
+
+    sort_diagstore();
+    show_diagstore();
 
     $w{'avancement'}->set_text($av_text);
     $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
