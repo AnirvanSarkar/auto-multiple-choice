@@ -141,21 +141,7 @@ sub new {
 
     if($self->{'editable'}) {
 
-	my ($diag_store,$renderer,$column);
-
-	$diag_store = Gtk2::ListStore->new ('Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    'Glib::String',
-					    );
-
-	$self->{'diag_tree'}->set_model($diag_store);
+	my ($renderer,$column);
 
 	$renderer=Gtk2::CellRendererText->new;
 	$column = Gtk2::TreeViewColumn->new_with_attributes (__"page",
@@ -181,22 +167,10 @@ sub new {
 	$column->set_sort_column_id(MDIAG_DELTA);
 	$self->{'diag_tree'}->append_column ($column);
 
-	$self->{'diag_store'}=$diag_store;
-
 	$self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
 	Gtk2->main_iteration while ( Gtk2->events_pending );
 
 	$self->maj_list_all;
-
-	$diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
-	$diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
-	$diag_store->set_sort_func(MDIAG_ID,\&sort_from_columns,
-				   [{'type'=>'n','col'=>MDIAG_STUDENT},
-				    {'type'=>'n','col'=>MDIAG_COPY},
-				    {'type'=>'n','col'=>MDIAG_PAGE},
-				   ]);
-
-	$diag_store->set_sort_column_id(MDIAG_ID,GTK_SORT_ASCENDING);
 
 	$self->{'general'}->window()->set_cursor(undef);
     } else {
@@ -212,6 +186,40 @@ sub new {
     $self->charge_i();
 
     return($self);
+}
+
+sub new_diagstore {
+  my ($self)=@_;
+  $diag_store = Gtk2::ListStore->new ('Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				      'Glib::String',
+				     );
+  $diag_store->set_sort_func(MDIAG_EQM,\&sort_num,MDIAG_EQM);
+  $diag_store->set_sort_func(MDIAG_DELTA,\&sort_num,MDIAG_DELTA);
+  $diag_store->set_sort_func(MDIAG_ID,\&sort_from_columns,
+			     [{'type'=>'n','col'=>MDIAG_STUDENT},
+			      {'type'=>'n','col'=>MDIAG_COPY},
+			      {'type'=>'n','col'=>MDIAG_PAGE},
+			     ]);
+  $self->{'diag_store'}=$diag_store;
+  return($diag_store);
+}
+
+sub sort_diagstore {
+  my ($self)=@_;
+  $self->{'diag_store'}->set_sort_column_id(MDIAG_ID,GTK_SORT_ASCENDING);
+}
+
+sub show_diagstore {
+  my ($self)=@_;
+  $self->{'diag_tree'}->set_model($self->{'diag_store'});
 }
 
 sub window {
@@ -257,14 +265,15 @@ sub maj_list_all {
   $self->{'capture'}->end_transaction;
 
   $self->{'page'}=[];
-  $self->{'diag_store'}->clear();
 
+  $diag_store = $self->new_diagstore;
+
+  debug "Adding ".(1+$#$summary)." summaries to list...";
   my $i=0;
   for my $p (@$summary) {
     push @{$self->{'page'}},[$p->{'student'},$p->{'page'},$p->{'copy'}];
-    $iter=$self->{'diag_store'}->append;
-    $self->{'diag_store'}
-      ->set($iter,
+    $diag_store
+      ->insert_with_values($i,
 	    MDIAG_I,$i,
 	    MDIAG_ID,pageids_string($p->{'student'},$p->{'page'},$p->{'copy'}),
 	    MDIAG_STUDENT,$p->{'student'},
@@ -278,11 +287,12 @@ sub maj_list_all {
 	   );
     $i++;
   }
+  debug "Adding ".(1+$#$capture_free)." free captures...";
   for my $p (@$capture_free) {
     push @{$self->{'page'}},[@$p];
-    $iter=$self->{'diag_store'}->append;
-    $self->{'diag_store'}
-      ->set($iter,
+    #$iter=$self->{'diag_store'}->append;
+    $diag_store
+      ->insert_with_values($i,
 	    MDIAG_I,$i,
 	    MDIAG_ID,pageids_string(@$p),
 	    MDIAG_STUDENT,$p->[0],
@@ -296,6 +306,10 @@ sub maj_list_all {
 	   );
     $i++;
   }
+  debug "Sorting...";
+  $self->sort_diagstore;
+  debug "List complete.";
+  $self->show_diagstore;
 }
 
 sub maj_list_i {
