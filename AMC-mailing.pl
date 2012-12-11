@@ -236,7 +236,7 @@ STUDENT: for my $i (@$r) {
       push @all_dests,parse_add($cc) if($cc);
       push @all_dests,parse_add($bcc) if($bcc);
       my $b=eval {
-	sendmail($email,{'transport'=>$t,to=>\@all_dests}) if($bcc);
+	sendmail($email,{'transport'=>$t,to=>\@all_dests});
       } || $@;
       if($b) {
 	my $status='OK';
