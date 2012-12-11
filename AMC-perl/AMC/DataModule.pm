@@ -108,6 +108,7 @@ sub disconnect {
 sub table {
     my ($self,$table_subname,$module_name)=@_;
     if($module_name) {
+      $module_name=$self->{'name'} if($module_name eq 'self');
       return($module_name."_".$table_subname);
     } else {
       $module_name=$self->{'name'};
@@ -115,6 +116,10 @@ sub table {
     }
 }
 
+sub index {
+  my ($self,@args)=@_;
+  return($self->table(@args));
+}
 
 # sql_quote($string) can be used to quote a string before including it
 # in a SQL query.

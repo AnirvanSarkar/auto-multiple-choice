@@ -139,34 +139,40 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(3);
+  return(4);
 }
 
 sub version_upgrade {
     my ($self,$old_version)=@_;
     if($old_version==0) {
 
-	# Upgrading from version 0 (empty database) to version 2 :
+	# Upgrading from version 0 (empty database) to version 4 :
 	# creates all the tables.
 
 	debug "Creating layout tables...";
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("page")
 		      ." (student INTEGER, page INTEGER, checksum INTEGER, sourceid INTEGER, subjectpage INTEGER, dpi REAL, width REAL, height REAL, markdiameter REAL, PRIMARY KEY (student,page))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("mark")
-		      ." (student INTEGER, page INTEGER, corner INTEGER, x REAL, y REAL)");
+		      ." (student INTEGER, page INTEGER, corner INTEGER, x REAL, y REAL, PRIMARY KEY (student,page,corner))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("namefield")
 		      ." (student INTEGER, page INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)");
+	$self->sql_do("CREATE INDEX ".$self->index("index_namefield")." ON "
+		      .$self->table("namefield","self")." (student,page)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("box")
-		      ." (student INTEGER, page INTEGER, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0)");
+		      ." (student INTEGER, page INTEGER, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0, PRIMARY KEY (student,question,answer))");
+	$self->sql_do("CREATE INDEX ".$self->index("index_box_studentpage")." ON "
+		      .$self->table("box","self")." (student,page)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("digit")
-		      ." (student INTEGER, page INTEGER, numberid INTEGER, digitid INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)");
+		      ." (student INTEGER, page INTEGER, numberid INTEGER, digitid INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, PRIMARY KEY(student,page,numberid,digitid))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("source")
 		      ." (sourceid INTEGER PRIMARY KEY, src TEXT, timestamp INTEGER)");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("question")
 		      ." (question INTEGER PRIMARY KEY, name TEXT)");
+	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("association")
+		      ." (student INTEGER PRIMARY KEY, id TEXT)");
 	$self->populate_from_xml;
 
-	return(2);
+	return(4);
     }
     if($old_version==1) {
       $self->sql_do("ALTER TABLE ".$self->table("box")
@@ -174,9 +180,38 @@ sub version_upgrade {
       return(2);
     }
     if($old_version==2) {
-      $self->sql_do("CREATE TABLE ".$self->table("association")
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("association")
 		    ." (student INTEGER, id TEXT)");
       return(3);
+    }
+    if($old_version==3) {
+      $self->progression('begin',__"Adding databases indexes...");
+      # replaces missing PRIMARY KEYS with INDEXs
+      $self->sql_do("CREATE UNIQUE INDEX IF NOT EXISTS "
+		    .$self->index("index_box")." ON "
+		    .$self->table("box","self")." (student,question,answer)");
+      $self->progression('fraction',1/6);
+      $self->sql_do("CREATE INDEX IF NOT EXISTS "
+		    .$self->index("index_box_studentpage")." ON "
+		    .$self->table("box","self")." (student,page)");
+      $self->progression('fraction',1/6);
+      $self->sql_do("CREATE INDEX IF NOT EXISTS "
+		    .$self->index("index_namefield")." ON "
+		    .$self->table("namefield","self")." (student,page)");
+      $self->progression('fraction',1/6);
+      $self->sql_do("CREATE UNIQUE INDEX IF NOT EXISTS "
+		    .$self->index("index_digit")." ON "
+		    .$self->table("digit","self")." (student,page,numberid,digitid)");
+      $self->progression('fraction',1/6);
+      $self->sql_do("CREATE UNIQUE INDEX IF NOT EXISTS "
+		    .$self->index("index_mark")." ON "
+		    .$self->table("mark","self")." (student,page,corner)");
+      $self->progression('fraction',1/6);
+      $self->sql_do("CREATE INDEX IF NOT EXISTS "
+		    .$self->index("index_association")." ON "
+		    .$self->table("association","self")." (student)");
+      $self->progression('end');
+      return(4);
     }
     return('');
 }
