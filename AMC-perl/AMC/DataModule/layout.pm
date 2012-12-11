@@ -185,7 +185,8 @@ sub version_upgrade {
       return(3);
     }
     if($old_version==3) {
-      $self->progression('begin',__"Adding databases indexes...");
+      $self->progression('begin',sprintf(__("Building %s database indexes..."),
+					 "layout"));
       # replaces missing PRIMARY KEYS with INDEXs
       $self->sql_do("CREATE UNIQUE INDEX IF NOT EXISTS "
 		    .$self->index("index_box")." ON "
