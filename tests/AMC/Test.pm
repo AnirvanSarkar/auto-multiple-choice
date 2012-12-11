@@ -673,9 +673,10 @@ sub check_textest {
     closedir $dh;
     $tex_file=$tex[0] if(@tex);
   }
-  chdir($self->{'dir'});
+  $tex_file=$self->{'temp_dir'}."/".$tex_file;
   if(-f $tex_file) {
-    open(TEX,"-|",$self->{'tex_engine'},$tex_file);
+    open(TEX,"-|",$self->{'tex_engine'},
+	 $tex_file);
     while(<TEX>) {
       if(/^\!/) {
 	$self->trace("[E] latex error: $_");
