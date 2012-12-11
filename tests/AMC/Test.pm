@@ -664,6 +664,39 @@ sub check_zooms {
 
 }
 
+sub check_textest {
+  my ($self,$tex_file)=@_;
+  if(!$tex_file) {
+    opendir(my $dh, $self->{'dir'})
+      || die "can't opendir $self->{'dir'}: $!";
+    my @tex = grep { /\.tex$/ } readdir($dh);
+    closedir $dh;
+    $tex_file=$tex[0] if(@tex);
+  }
+  chdir($self->{'dir'});
+  if(-f $tex_file) {
+    open(TEX,"-|",$self->{'tex_engine'},$tex_file);
+    while(<TEX>) {
+      if(/^\!/) {
+	$self->trace("[E] latex error: $_");
+	exit(1);
+      }
+      if(/^SECTION\((.*)\)/) {
+	$self->end();
+	$self->begin($1);
+      }
+      if(/^TEST\(([^,]*),([^,]*)\)/) {
+	$self->test($1,$2);
+      }
+    }
+    close(TEX);
+    $self->end();
+  } else {
+    $self->trace("[X] TeX file not found: $tex_file");
+    exit(1);
+  }
+}
+
 sub data {
   my ($self)=@_;
   return(AMC::Data->new($self->{'temp_dir'}."/data"));
@@ -678,7 +711,9 @@ sub begin {
 
 sub end {
   my ($self)=@_;
-  $self->trace("[T] ".$self->{'test_title'}) if($self->{'test_title'});
+  $self->trace("[T] ".
+	       ($self->{'n.subt'} ? "(".$self->{'n.subt'}.") " : "")
+	       .$self->{'test_title'}) if($self->{'test_title'});
   $self->{'test_title'}='';
 }
 
