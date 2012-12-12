@@ -732,7 +732,7 @@ sub datadump {
 sub test {
   my ($self,$x,$v,$subtest)=@_;
   if(!defined($subtest)) {
-    $subtest=$self->{'n.subt'}++;
+    $subtest=++$self->{'n.subt'};
   }
   if(ref($x) eq 'ARRAY') {
     for my $i (0..$#$x) {

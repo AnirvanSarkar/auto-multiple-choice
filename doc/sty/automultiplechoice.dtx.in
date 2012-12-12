@@ -2647,7 +2647,11 @@ Three digits and two letters:\insertgroup{mixed}.
   \loop\FPiflt\AMC@FP@x{\the\AMC@numeric@integer}%
     \FPeval\AMC@FP@x{AMC@FP@x * #1}\repeat%
   \FPround\AMC@FP@x\AMC@FP@x0\relax%
-  #4=\AMC@FP@x%
+  \AMC@numeric@calcdigit=\AMC@FP@x%
+  \multiply\AMC@numeric@integer by #1\relax%
+  \ifnum\AMC@numeric@calcdigit<\AMC@numeric@integer\else%
+    \divide\AMC@numeric@calcdigit by #1\relax\fi%
+  #4=\AMC@numeric@calcdigit%
 }
 %    \end{macrocode}
 %
