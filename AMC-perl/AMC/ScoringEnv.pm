@@ -138,9 +138,10 @@ sub set_type {
 # set variable value.
 
 sub set_variable {
-  my ($self,$vv,$value,$rw)=@_;
+  my ($self,$vv,$value,$rw,$unlock)=@_;
   $self->{variables}->{$vv}=[] if(!$self->{variables}->{$vv});
-  if($self->{variables}->{$vv}->[$self->{type}]
+  if((!$unlock)
+     && $self->{variables}->{$vv}->[$self->{type}]
      && !$self->{variables}->{$vv}->[$self->{type}]->{rw}) {
     $self->error("Trying to set read-only variable $vv");
   } else {
@@ -209,6 +210,11 @@ sub action_variable {
     $self->set_variable($key,
 			$self->evaluate($value),
 			0);
+  } elsif($action eq 'setx') {
+    debug "Setting variable $key = $value";
+    $self->set_variable($key,
+			$self->evaluate($value),
+			0,1);
   } elsif($action eq 'requires') {
     $self->error("Variable $key required")
       if(!$self->defined_variable($key));
@@ -230,7 +236,7 @@ sub variables_from_directives {
   my ($self,%oo)=@_;
   debug "Variables from internal directives";
   my @keys=$self->sorted_directives_keys;
-  for my $a (qw/default set requires/) {
+  for my $a (qw/default set setx requires/) {
     $self->action_variables_from_directives($a,\@keys)
       if($oo{$a});
   }
@@ -251,7 +257,7 @@ sub action_variables_from_parse {
 
 sub variables_from_parsed_directives {
   my ($self,$parsed,%oo)=@_;
-  for my $a (qw/default set requires/) {
+  for my $a (qw/default set setx requires/) {
     $self->action_variables_from_parse($parsed,$a)
       if($oo{$a});
   }
