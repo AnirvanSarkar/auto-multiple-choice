@@ -358,7 +358,7 @@ sub score_question {
 
   $self->set_number_variables($question_data,$correct);
   $self->process_ticked_answers_setx($question_data,$correct);
-  $self->{env}->variables_from_directives(default=>1,set=>1,requires=>1);
+  $self->{env}->variables_from_directives(default=>1,set=>1,setx=>1,requires=>1);
 
   if($self->{env}->n_errors()) {
     $raison="E";

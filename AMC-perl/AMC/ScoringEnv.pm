@@ -201,17 +201,21 @@ sub parse_defs {
 sub action_variable {
   my ($self,$action,$key,$value)=@_;
   if($action eq 'default') {
-    $self->set_variable($key,
-			$self->evaluate($value),
-			1)
-      if(!$self->defined_variable($key));
+    if(!$self->defined_variable($key)) {
+      debug "Default value for variable $key = $value";
+      $self->set_variable($key,
+			  $self->evaluate($value),
+			  1);
+    } else {
+      debug "Variable $key already set";
+    }
   } elsif($action eq 'set') {
     debug "Setting variable $key = $value";
     $self->set_variable($key,
 			$self->evaluate($value),
 			0);
   } elsif($action eq 'setx') {
-    debug "Setting variable $key = $value";
+    debug "Overwriting variable $key = $value";
     $self->set_variable($key,
 			$self->evaluate($value),
 			0,1);
