@@ -648,6 +648,7 @@ sub define_statements {
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
      ." WHERE student=? AND page=? AND copy=?"};
+  $self->{'statements'}->{'pagesSummary'}->{'sql'}.=" ORDER BY student,page,copy";
 }
 
 # get_page($student,$page,$copy) returns all columns from the row with

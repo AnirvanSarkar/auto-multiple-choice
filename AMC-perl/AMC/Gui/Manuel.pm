@@ -59,8 +59,8 @@ sub new {
 	      'seuil_sens'=>8.0,
 	      'seuil_eqm'=>3.0,
 	      'fact'=>1/4,
-	      'page'=>[],
 	      'iid'=>0,
+	      'displayed_iid'=>-1,
 	      'global'=>0,
 	      'en_quittant'=>'',
 	      'encodage_interne'=>'UTF-8',
@@ -91,8 +91,6 @@ sub new {
 				   CLEANUP => (!get_debug()) );
 
     $self->{'tmp-image'}=$self->{'temp-dir'}."/page";
-
-    $self->{'iid'}=0;
 
     ## GUI
 
@@ -140,7 +138,6 @@ sub new {
     ### modele DIAGNOSTIQUE SAISIE
 
     if($self->{'editable'}) {
-
 	my ($renderer,$column);
 
 	$renderer=Gtk2::CellRendererText->new;
@@ -166,24 +163,20 @@ sub new {
 							     'background'=> MDIAG_DELTA_BACK);
 	$column->set_sort_column_id(MDIAG_DELTA);
 	$self->{'diag_tree'}->append_column ($column);
-
-	$self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
-	Gtk2->main_iteration while ( Gtk2->events_pending );
-
-	$self->maj_list_all;
-
-	$self->{'general'}->window()->set_cursor(undef);
-    } else {
-	  $self->{'layout'}->begin_read_transaction;
-	  $self->{'page'}=$self->{'layout'}->get_pages(0);
-	  $self->{'layout'}->end_transaction;
     }
+
+    $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+    Gtk2->main_iteration while ( Gtk2->events_pending );
+
+    $self->maj_list_all;
+
+    $self->{'general'}->window()->set_cursor(undef);
 
     $self->{'gui'}->connect_signals(undef,$self);
 
     $self->{'area'}->signal_connect('expose_event'=>\&AMC::Gui::Manuel::expose_area);
 
-    $self->charge_i();
+    $self->select_page(0);
 
     return($self);
 }
@@ -237,24 +230,64 @@ sub scan_view_change {
   $self->charge_i();
 }
 
-sub goto_from_list {
-    my ($self,$widget, $event) = @_;
-    return FALSE unless $event->button == 1;
-    return TRUE unless $event->type eq 'button-release';
-    my ($path, $column, $cell_x, $cell_y) =
-	$self->{'diag_tree'}->get_path_at_pos ($event->x, $event->y);
-    if($path) {
-	$self->ecrit();
-	$self->{'iid'}=$self->{'diag_store'}->get($self->{'diag_store'}->get_iter($path),
-						  MDIAG_I);
-	$self->charge_i();
-    }
-    return TRUE;
+sub current_iter {
+  my ($self)=@_;
+  my @sel=$self->{'diag_tree'}->get_selection->get_selected_rows();
+  if(@sel) {
+    return( $self->{'diag_store'}->get_iter($sel[0]) );
+  } else {
+    return();
+  }
+}
+
+sub iter_to_spc {
+  my ($self,$iter)=@_;
+  if($iter) {
+    return($self->{'diag_store'}->get($iter,
+				      MDIAG_STUDENT,MDIAG_PAGE,MDIAG_COPY));
+  } else {
+    return();
+  }
+}
+
+sub current_spc {
+  my ($self)=@_;
+  return($self->iter_to_spc($self->current_iter));
+}
+
+sub displayed_iter {
+  my ($self)=@_;
+  if(defined($self->{'displayed_iid'}) &&
+     $self->{'displayed_iid'}>=0) {
+    return(model_id_to_iter($self->{'diag_store'},MDIAG_I,$self->{'displayed_iid'}));
+  }
+}
+
+sub displayed_spc {
+  my ($self)=@_;
+  return($self->iter_to_spc($self->displayed_iter));
+}
+
+sub page_selected {
+  my ($self)=@_;
+  my $current=$self->current_iter;
+  if($current) {
+    $self->ecrit();
+    $self->{'iid'}=$self->{'diag_store'}->get($current,MDIAG_I);
+    $self->charge_i();
+  }
+  return TRUE;
+}
+
+sub select_page {
+  my ($self,$iid)=@_;
+  my $iter=model_id_to_iter($self->{'diag_store'},MDIAG_I,$iid);
+  $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path($iter))
+    if($iter);
 }
 
 sub maj_list_all {
-  my ($self)=@_;
-  return if(!$self->{'editable'});
+  my ($self,$select_spc)=@_;
 
   $self->{'capture'}->begin_read_transaction;
   my $summary=$self->{'capture'}
@@ -264,14 +297,12 @@ sub maj_list_all {
   my $capture_free=$self->{'capture'}->no_capture_pages;
   $self->{'capture'}->end_transaction;
 
-  $self->{'page'}=[];
-
   $diag_store = $self->new_diagstore;
 
   debug "Adding ".(1+$#$summary)." summaries to list...";
+  my $select_iid=-1;
   my $i=0;
   for my $p (@$summary) {
-    push @{$self->{'page'}},[$p->{'student'},$p->{'page'},$p->{'copy'}];
     $diag_store
       ->insert_with_values($i,
 	    MDIAG_I,$i,
@@ -285,12 +316,14 @@ sub maj_list_all {
 	    MDIAG_DELTA,$p->{'sensitivity_string'},
 	    MDIAG_DELTA_BACK,$p->{'sensitivity_color'},
 	   );
+    $select_iid=$i if($select_spc &&
+		      $select_spc->[0]==$p->{'student'} &&
+		      $select_spc->[1]==$p->{'page'} &&
+		      $select_spc->[2]==$p->{'copy'});
     $i++;
   }
   debug "Adding ".(1+$#$capture_free)." free captures...";
   for my $p (@$capture_free) {
-    push @{$self->{'page'}},[@$p];
-    #$iter=$self->{'diag_store'}->append;
     $diag_store
       ->insert_with_values($i,
 	    MDIAG_I,$i,
@@ -304,47 +337,50 @@ sub maj_list_all {
 	    MDIAG_DELTA,'',
 	    MDIAG_DELTA_BACK,undef,
 	   );
+    $select_iid=$i if($select_spc &&
+		      $select_spc->[0]==$p->[0] &&
+		      $select_spc->[1]==$p->[1] &&
+		      $select_spc->[2]==$p->[2]);
     $i++;
   }
   debug "Sorting...";
   $self->sort_diagstore;
   debug "List complete.";
   $self->show_diagstore;
+
+  $self->select_page($select_iid) if($select_iid);
 }
 
 sub maj_list_i {
-    my ($self,$i)=(@_);
+    my ($self)=@_;
     return if(!$self->{'editable'});
 
-    my $page=$self->{'page'}->[$i];
-    my $iter=model_id_to_iter($self->{'diag_store'},
-			      MDIAG_ID,pageids_string(@$page));
-    $iter=$self->{'diag_store'}->append if(!$iter);
+    my $iter=$self->displayed_iter;
+    return if(!$iter);
+    my @spc=$self->iter_to_spc($iter);
+    return if(!@spc);
 
-    $self->{'capture'}->begin_read_transaction;
+    debug "List update for SPC=".join(',',@spc);
+
+    $self->{'capture'}->begin_read_transaction('lUPD');
     my %ps=$self->{'capture'}
-      ->page_summary(@$page,
+      ->page_summary(@spc,
 		     'mse_threshold'=>$self->{'seuil_eqm'},
 		     'blackness_threshold'=>$self->{'seuil'},
 		     'sensitivity_threshold'=>$self->{'seuil_sens'},
 		    );
-    $self->{'capture'}->end_transaction;
+    $self->{'capture'}->end_transaction('lUPD');
+    for my $k (keys %ps) {
+      debug(" - $k = ".(defined($ps{$k}) ? $ps{$k} : '<undef>'));
+    }
 
     $self->{'diag_store'}->set($iter,
-			       MDIAG_ID,pageids_string(@$page),
-			       MDIAG_STUDENT,$page->[0],
-			       MDIAG_PAGE,$page->[1],
-			       MDIAG_COPY,$page->[2],
 			       MDIAG_ID_BACK,$ps{'color'},
 			       MDIAG_EQM,$ps{'mse_string'},
 			       MDIAG_EQM_BACK,$ps{'mse_color'},
-			       MDIAG_DELTA,$ps{'sensitivity'},
+			       MDIAG_DELTA,$ps{'sensitivity_string'},
 			       MDIAG_DELTA_BACK,$ps{'sensitivity_color'},
 			       );
-    if(defined($i)) {
-	$self->{'diag_store'}->set($iter,
-				   MDIAG_I,$i);
-    }
 }
 
 sub choix {
@@ -369,16 +405,20 @@ sub page_id {
 }
 
 sub charge_i {
-    my ($self)=(@_);
+    my ($self)=@_;
 
     $self->{'layinfo'}={};
-    if(!$self->{'page'}->[$self->{'iid'}]) {
+
+    my $current_iter=$self->current_iter;
+    my @spc=$self->iter_to_spc($current_iter);
+
+    if(!@spc) {
       $self->{'area'}->set_image('NONE');
-      debug_and_stderr "Page $self->{'iid'} not found";
+      $self->{'displayed_iid'}=-1;
       return();
     }
 
-    my @spc=@{$self->{'page'}->[$self->{'iid'}]};
+    $self->{'displayed_iid'}=$self->{'diag_store'}->get($current_iter,MDIAG_I);
 
     debug "ID ".pageids_string(@spc);
 
@@ -501,10 +541,6 @@ sub charge_i {
     unlink($tmp_ppm) if($tmp_ppm);
     unlink($tmp_image) if($tmp_image && ($tmp_ppm ne $tmp_image) && !get_debug());
 
-    # dans la liste
-
-    $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path(model_id_to_iter($self->{'diag_store'},MDIAG_I,$self->{'iid'}))) if($self->{'editable'});
-
     # fin du traitement...
 
     $self->{'general'}->window()->set_cursor(undef);
@@ -515,12 +551,13 @@ sub ecrit {
 
     return if(!$self->{'editable'});
 
-    my @spc=@{$self->{'page'}->[$self->{'iid'}]};
+    my @spc=$self->displayed_spc;
+    return if(!@spc);
 
     if($self->{'area'}->modifs()) {
       debug "Saving ".pageids_string(@spc);
 
-      $self->{'capture'}->begin_transaction;
+      $self->{'capture'}->begin_transaction('manw');
       $self->{'capture'}->outdate_annotated_page(@spc);
 
       $self->{'capture'}->set_page_manual(@spc,time());
@@ -532,7 +569,7 @@ sub ecrit {
 		       ($i->{'ticked'} ? 1 : 0));
       }
 
-      $self->{'capture'}->end_transaction;
+      $self->{'capture'}->end_transaction('manw');
 
       $self->synchronise();
     }
@@ -543,25 +580,30 @@ sub synchronise {
 
     $self->{'area'}->sync();
 
-    $self->maj_list_i($self->{'iid'},undef);
-}
-
-sub passe_suivant {
-    my ($self)=(@_);
-
-    $self->ecrit();
-    $self->{'iid'}++;
-    $self->{'iid'}=0 if($self->{'iid'}>$#{$self->{'page'}});
-    $self->charge_i();
+    $self->maj_list_i;
 }
 
 sub passe_precedent {
-    my ($self)=(@_);
+  my ($self)=@_;
+  my ($path)=$self->{'diag_tree'}->get_cursor();
+  if($path) {
+    if($path->prev) {
+      $self->{'diag_tree'}->set_cursor($path);
+    }
+  }
+}
 
-    $self->ecrit();
-    $self->{'iid'}--;
-    $self->{'iid'}=$#{$self->{'page'}} if($self->{'iid'}<0);
-    $self->charge_i();
+sub passe_suivant {
+  my ($self)=@_;
+  my ($path)=$self->{'diag_tree'}->get_cursor();
+  if($path) {
+    my $path_next=Gtk2::TreePath->new ($path->to_string);
+    $path_next->next();
+    $self->{'diag_tree'}->set_cursor($path_next);
+    ($path_next)=$self->{'diag_tree'}->get_cursor();
+    $self->{'diag_tree'}->set_cursor($path)
+      if(!$path_next);
+  }
 }
 
 sub annule {
@@ -573,11 +615,15 @@ sub annule {
 sub efface_saisie {
     my ($self)=(@_);
 
-    my $p=$self->{'page'}->[$self->{'iid'}];
-    $self->{'capture'}->begin_transaction;
-    $self->{'capture'}->outdate_annotated_page(@$p);
-    $self->{'capture'}->remove_manual(@$p);
-    $self->{'capture'}->end_transaction;
+    my @spc=$self->displayed_spc;
+    return if(!@spc);
+
+    debug "Ereasing manual data for SPC=".join(',',@spc);
+
+    $self->{'capture'}->begin_transaction('manx');
+    $self->{'capture'}->outdate_annotated_page(@spc);
+    $self->{'capture'}->remove_manual(@spc);
+    $self->{'capture'}->end_transaction('manx');
 
     $self->synchronise();
     $self->charge_i();
@@ -586,8 +632,8 @@ sub efface_saisie {
 sub duplique_saisie {
    my ($self)=@_;
 
-   my $p=$self->{'page'}->[$self->{'iid'}];
-   my ($student,$page,$copy)=@$p;
+   my ($student,$page,$copy)=$self->displayed_spc;
+   return if(!defined($student));
 
    $self->{'capture'}->begin_transaction;
    $copy=$self->{'capture'}->new_page_copy($student,$page);
@@ -595,20 +641,7 @@ sub duplique_saisie {
    $self->{'capture'}->set_page_manual($student,$page,$copy,-1);
    $self->{'capture'}->end_transaction;
 
-   $self->maj_list_all;
-
-   $self->{'iid'}=0;
-  CHID: for my $i (0..$#{$self->{'page'}}) {
-      my $k=$self->{'page'}->[$i];
-      if($k->[0] == $student &&
-	 $k->[1] == $page &&
-	 $k->[2] == $copy) {
-	  $self->{'iid'}=$i;
-	  last CHID;
-      }
-  }
-
-   $self->charge_i;
+   $self->maj_list_all([$student,$page,$copy]);
 }
 
 sub ok_quitter {
@@ -634,6 +667,7 @@ sub goto_activate_cb {
     my ($self)=(@_);
 
     my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->get_text();
+    my $iid=-1;
 
     $self->ecrit();
 
@@ -645,12 +679,12 @@ sub goto_activate_cb {
   CHID: for my $i (0..$#{$self->{'page'}}) {
       my $k=pageids_string(@{$self->{'page'}->[$i]});
       if($k =~ /^$dest/) {
-	  $self->{'iid'}=$i;
+	  $iid=$i;
 	  last CHID;
       }
   }
 
-    $self->charge_i();
+    $self->select_page($iid) if($iid>=0);
 }
 
 1;
