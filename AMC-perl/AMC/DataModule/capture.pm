@@ -222,8 +222,7 @@ sub version_upgrade {
 
       return(2)
     } elsif($old_version==2) {
-      $self->progression('begin',sprintf(__("Building %s database indexes..."),
-					 "capture"));
+      $self->progression('begin',__("Building capture database indexes..."));
       $self->sql_do("CREATE UNIQUE INDEX IF NOT EXISTS "
 		    .$self->index("index_zone")." ON "
 		    .$self->table("zone","self")." (student,page,copy,type,id_a,id_b)");
