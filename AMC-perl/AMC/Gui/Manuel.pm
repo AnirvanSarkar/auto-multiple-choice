@@ -366,7 +366,7 @@ sub maj_list_i {
     my %ps=$self->{'capture'}
       ->page_summary(@spc,
 		     'mse_threshold'=>$self->{'seuil_eqm'},
-		     'blackness_threshold'=>$self->{'seuil'},
+		     'darkness_threshold'=>$self->{'seuil'},
 		     'sensitivity_threshold'=>$self->{'seuil_sens'},
 		    );
     $self->{'capture'}->end_transaction('lUPD');
