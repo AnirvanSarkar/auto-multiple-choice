@@ -2129,7 +2129,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \def\AMCmem@ireData{}
 \def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\AMC@loc@qf{#1}}}
-\def\AMCformQuestionA#1{\setcounter{AMC@ncase}{0}\AMCformQuestion{#1}}
+\def\AMCformQuestionA#1{\setcounter{AMCquestionaff}{#1}%
+  \setcounter{AMC@ncase}{0}\AMCformQuestion{#1}}
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 \def\AMCformAnswerA#1{\addtocounter{AMC@ncase}{1}\AMCformAnswer{#1}}
 %    \end{macrocode}\end{macro}\end{macro}\
