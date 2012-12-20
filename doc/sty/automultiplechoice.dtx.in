@@ -1724,7 +1724,7 @@ Three digits and two letters:\insertgroup{mixed}.
    \ifAMC@correc\def\AMC@boxcolor{black}\fi%
    \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename\endcsname%
      {\AMC@boxcolor}%
-     {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}{#2}{#3}{#1}}}}%
+     {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}{#2}{#3}{\AMCchoiceLabelFormat{#1}}}}}%
 }
 \newcommand\AMC@shape@square[5]{%
   \fboxsep=\z@\fboxrule=\AMC@boxedrule%
@@ -1744,7 +1744,7 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 %    \end{macrocode}\end{macro}\end{macro}
 %
-% \begin{macro}{\AMC@caselettre}\begin{macro}{\AMCchoiceLabel}
+% \begin{macro}{\AMC@caselettre}\begin{macro}{\AMCchoiceLabel}\begin{macro}{\AMCchoiceLabelFormat}
 % Command |\AMC@caselettre| is the same as |\AMC@boxedchar|, but if
 % \meta{char} is empty, it is replaced by an arabic or alphabetical
 % counter, depending on the use of the |digits| package option.
@@ -1754,18 +1754,23 @@ Three digits and two letters:\insertgroup{mixed}.
 % counter used to number the choices. One can for example use
 % |\def\AMCchoiceLabel#1{\alph{#1}}| to ask for lowercase letters.
 %
+% To write these labels with another font, size, or so, the user can
+% redefine the |\AMCchoiceLabelFormat| macro, which takes as argument
+% the label. One can for example get sans serif bold labels with
+% |\def\AMCchoiceLabelFormat#1{{\textsf{\textsf{#1}}}}|.
 %    \begin{macrocode}
 \def\AMCchoiceLabel#1{%
   \ifAMC@inside@digit\arabic{#1}%
   \else\Alph{#1}\fi%
 }
+\def\AMCchoiceLabelFormat#1{#1}
 \newcounter{AMC@ncase}
 \setcounter{AMC@ncase}{0}
 \newcommand\AMC@caselettre[4]{%
   \AMC@boxedchar{\ifx\@empty#1\@empty%
     \AMCchoiceLabel{AMC@ncase}%
     \else #1\fi}{#2}{#3}{#4}}
-%    \end{macrocode}\end{macro}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
 % \begin{macro}{\AMCboxDimensions}
 %   The dimensions of these box are managed by
