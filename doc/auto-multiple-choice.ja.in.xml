@@ -10,7 +10,7 @@
     <subtitle>自動採点と評定の可能な選択式試験問題のデザイン</subtitle>
 
     <abstract>
-      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1154）</para>
+      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1267）</para>
 
       <para>AMCプロジェクトは<ulink
       url="http://gna.org/">Gna!</ulink>によってホスティングされています。AMCウェブサイトは<ulink url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>にあり、プロジェクトがホスティングされているサイトは<ulink url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>です。</para>
@@ -251,7 +251,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Lang:</term>
 
           <listitem>
-            <para>試験問題が記述されている言語を指定するのに用います。現時点では、DE（ドイツ語）、ES（スペイン語）、FR（フランス語）、IT（イタリア語）、NL（オランダ語）、JA（日本語、<xref linkend="txt-japanese"/>参照）、AR（アラビア語、<xref linkend="txt-arabic"/>参照）のみがサポートされています。オプションを指定しないと、英語が選択されます。他の言語用にローカライズ文字列を定義することもできます（<option>L-xxx</option>形式のオプション参照）。</para>
+            <para>試験問題が記述されている言語を指定するのに用います。現時点では、DE（ドイツ語）、ES（スペイン語）、FR（フランス語）、IT（イタリア語）、NL（オランダ語）、NO（ノルウェー語）、JA（日本語、<xref linkend="txt-japanese"/>参照）、AR（アラビア語、<xref linkend="txt-arabic"/>参照）のみがサポートされています。オプションを指定しないと、英語が選択されます。他の言語用にローカライズ文字列を定義することもできます（<option>L-xxx</option>形式のオプション参照）。</para>
           </listitem>
         </varlistentry>
 
@@ -406,7 +406,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Disable:</term>
 
           <listitem>
-            <para>無効にする機能のリストをコンマで区切って与えます。現在実装されている機能は<code>images</code>（<xref linkend="parse_images"/>参照）と<code>local_latex</code>（<xref linkend="parse_local_latex"/>参照）です。</para>
+            <para>無効にする機能のリストをコンマで区切って与えます。現在実装されている機能は<code>images</code>（<xref linkend="parse_images"/>参照）、<code>embf</code>（<xref linkend="parse_embf"/>参照）、<code>local_latex</code>（<xref linkend="parse_local_latex"/>参照）です。</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -570,6 +570,17 @@ Presentation: 以下の設問に最も適切な解答を
 - 何千万個も</programlisting>
     </sect2>
 
+    <sect2 id="parse_embf">
+      <title>太字、斜体</title>
+
+      <para><emphasis>太字</emphasis>のテキストを出力するには、それを<code>[*</code>と<code>*]</code>で囲みます。<emphasis>斜体</emphasis>のテキストを出力するには、それを<code>[_</code>と<code>_]</code>で囲みます。</para>
+
+      <programlisting>* [_フランス_]の[*首都*]はどこですか？
++ パリ
+- リール
+- マルセイユ</programlisting>
+    </sect2>
+
     <sect2 id="parse_images">
       <title>画像</title>
 
@@ -628,7 +639,7 @@ Presentation: 以下の設問に最も適切な解答を
       <para>AMCは、生成されるLaTeXソースにいくらか調整を行い、日本語テキストが処理できるようにします。</para>
 
       <warning>
-        <para>この場合、AMCはAMC-TXTソースファイルから作られたLaTeXファイルを処理するのに<command>platex</command>コマンドを用います。これには、<emphasis>最近</emphasis>のバージョンの<command>platex</command>が必要です。debianベースのディストリビューションで現在使用可能なtexlive 2009に付属する<command>platex</command>のバージョンは、AMCに対応して<emphasis>いません</emphasis>。純粋なtexlive 2011のディストリビューションをインストールする必要があります。</para>
+        <para>この場合、AMCはAMC-TXTソースファイルから作られたLaTeXファイルを処理するのに<command>platex</command>コマンドを用います。これには、<emphasis>最近</emphasis>のバージョンの<command>platex</command>が必要です。いくつかの旧版linuxディストリビューションに含まれているtexlive 2009に付属の<command>platex</command>は、AMCに対応して<emphasis>いません</emphasis>。</para>
       </warning>
     </sect2>
   </sect1>
@@ -1292,6 +1303,10 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
         <programlisting>\def\AMCchoiceLabel#1{\textLR{\Alph{#1}}}</programlisting>
 
+        <para>ボックスのラベルのスタイルも、次の例のように<command>\AMCchoiceLabelFormat</command>コマンドを再定義して変更することができます（ラベルを太字にしたいとします）:</para>
+
+        <programlisting>\def\AMCchoiceLabelFormat#1{\textbf{#1}}</programlisting>
+
         <para>さらに、受験者がマークするボックスの色も、次のように設定することもできます:</para>
 
         <programlisting>\AMCboxColor{red}</programlisting>
@@ -1574,6 +1589,12 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
       </sect3>
 
       <sect3>
+        <title>セクション分けと別紙答案用紙</title>
+
+        <para>別紙答案用紙上にもセクション分けが見えるようにするには、<command>\section</command>と<command>\subsection</command>の代わりに、<command>\AMCsection</command>と<command>\AMCsubsection</command>を使用してください。</para>
+      </sect3>
+
+      <sect3>
         <title>試験問題内での参照</title>
 
         <para>LaTeXのコマンド<command>\label</command>、<command>\ref</command>、<command>\pageref</command>コマンドを設問や選択肢で用いると、試験問題の実体化ごとに同じ引数で呼び出され、毎回参照する番号が変わるので、問題を起こします。これを解決するには、それぞれ<command>\AMClabel</command>、<command>\AMCref</command>、<command>\AMCpageref</command>を用いてください。これらは、<command>\label</command>、<command>\ref</command>、<command>\pageref</command>を呼び出す前に、引数に実体の番号を付加します。</para>
@@ -1632,6 +1653,30 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
           </listitem>
         </itemizedlist>
       </sect3>
+    </sect2>
+
+    <sect2>
+      <title>AMCへのオプション</title>
+
+      <para>ソースファイルのヘッダ（'%'で始まる先頭行）に、AMCに渡すオプションをいくつか付加することができます:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term><code>%%AMC:preprocess_command=<replaceable>commandname</replaceable></code></term>
+
+          <listitem>
+            <para>ソースファイルを処理するLaTeXを呼ぶ前に、<replaceable>commandname</replaceable>コマンドを実行させます。このコマンドはプロジェクトディレクトリ内で実行され、ソースファイルのコピーの名前が引数として渡されます。これは単なるコピーなので、<replaceable>commandname</replaceable>がファイルの内容を変更しても問題ありません。</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><code>%%AMC:latex_engine=<replaceable>engine</replaceable></code></term>
+
+          <listitem>
+            <para>ユーザ設定されたLaTeXエンジンにかかわらず、このファイルに用いるエンジンを指定します。</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </sect2>
 
     <sect2>
@@ -1750,7 +1795,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
               <term>digits=<replaceable>num</replaceable></term>
 
               <listitem>
-                <para>は、必要な有効桁数（デフォルトは3）を指定します。</para>
+                <para>は、必要な桁数（デフォルトは3）を指定します。</para>
               </listitem>
             </varlistentry>
 
@@ -1767,6 +1812,22 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
               <listitem>
                 <para>は、数字の基数（進法）（デフォルトは10）を指定します。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>significant=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para><code>true</code>なら、<command>\AMCnumericChoices</command>の最初の引数のうち上位桁のみ解答させます。例えば、<code>\AMCnumericChoices{56945.23}{digits=2,significant=true}</code>の正解は 57 となります。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>nozero=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>全桁から選択肢0を除去します。<command>\AMCnumericChoices</command>を用いて小さい正の値（&lt;10）を記入するのに便利かもしれません。</para>
               </listitem>
             </varlistentry>
 
@@ -1889,6 +1950,14 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
             </varlistentry>
 
             <varlistentry>
+              <term>exact=<replaceable>num</replaceable></term>
+
+              <listitem>
+                <para>は、<emphasis>正解</emphasis>として認めて<code>scoreexact</code>の得点を与える誤差（正解の整数値（小数点を除いた値）との差）（デフォルトは0）を設定します。</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
               <term>scoreapprox=<replaceable>num</replaceable></term>
 
               <listitem>
@@ -1900,7 +1969,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
               <term>approx=<replaceable>num</replaceable></term>
 
               <listitem>
-                <para>は、<emphasis>近似解</emphasis>として認めて<code>scoreapprox</code>を与える誤差（正解の整数値（小数点を除いた値）との差）を設定します。</para>
+                <para>は、<emphasis>近似解</emphasis>として認めて<code>scoreapprox</code>の得点を与える誤差（正解の整数値（小数点を除いた値）との差）（デフォルトは0）を設定します。</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -3045,12 +3114,27 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 </programlisting>
 
       <para>そしてこのLaTeXファイルをAMCで処理し、用紙を印刷し、試験実施後に（模範解答の用紙も含めて）スキャンして、AMCの自動マーク認識を開始させます。<guilabel>採点</guilabel>タブで<guilabel>採点基準を更新</guilabel>にチェックを入れて<guilabel>採点</guilabel>ボタンをクリックすると、出題者が記入した模範解答用紙の番号を入力するよう求められます。そのあとは通常どおりに続けることができます。</para>
+
+      <note>
+        <para>アルファベット（あるいは数字）をボックスの外に印刷することもできます。<option>insidebox</option>オプションを<option>outsidebox</option>に置き換え、次のように設問を記述してください:</para>
+
+        <programlisting>\begin{question}{01}
+\begin{choicescustom}
+\wrongchoice{A }%
+\wrongchoice{B }%
+\wrongchoice{C }%
+\wrongchoice{D }%
+\wrongchoice{E }%
+\end{choicescustom}
+\end{question}
+</programlisting>
+      </note>
     </sect2>
 
     <sect2>
       <title>指名試験問題用紙</title>
 
-      <para>状況によっては、受験者名簿をもとに各受験者別に指名した試験問題用紙を準備すると有用かもしれません。これをどのように行うか見てみます。</para>
+      <para>状況によっては、受験者名簿をもとに各受験者を個別に指名した試験問題用紙を準備すると有用かもしれません。これをどのように行うか見てみます。</para>
 
       <itemizedlist>
         <listitem>
@@ -3552,6 +3636,100 @@ Moniuszko,Stanisław,003</programlisting>
             </listitem>
           </itemizedlist>
         </refsect2>
+      </refsect1>
+    </refentry>
+
+    <refentry>
+      <refmeta>
+        <refentrytitle>AMC-getimages</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+
+        <refmiscinfo class="source">Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
+      </refmeta>
+
+      <refnamediv>
+        <refname>AMC-getimages</refname>
+
+        <refpurpose>自動マーク認識用に<citerefentry>
+            <refentrytitle>AMC-analyse</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>に送るためのスキャン画像を用意する。</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">getimages</arg>
+
+          <arg choice="opt">--copy-to
+          <replaceable>project-scans-dir</replaceable></arg>
+
+          <arg>--vector-density <replaceable>density</replaceable></arg>
+
+          <arg choice="plain">--list
+          <replaceable>list-file</replaceable></arg>
+
+          <group>
+            <arg choice="plain"
+            rep="repeat"><replaceable>scan-files</replaceable></arg>
+          </group>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>解説</title>
+
+        <para><command>AMC-getimages.pl</command>コマンドは<citerefentry>
+            <refentrytitle>AMC-analyse</refentrytitle>
+
+            <manvolnum>1</manvolnum>
+          </citerefentry>に送る前にスキャン画像を用意します:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>複数画像からなるファイルはページごとのファイルに分割されます。</para>
+          </listitem>
+
+          <listitem>
+            <para>ベクター画像（PDF、EPSなど）はビットマップ画像に変換されます。</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>入力画像は、AMC-getimages.plへの引数としても、スキャンファイルのパスをすべて含むファイル名としても与えることができます。</para>
+
+        <variablelist>
+          <varlistentry>
+            <term><option>--list
+            <replaceable>list-file</replaceable></option></term>
+
+            <listitem>
+              <para>スキャンファイルのパスを（1行に一つ）含むファイルの名前を指定します。処理後にこのファイル内容は消去され、同じパスを<command>AMC-analyse.pl</command>の<option>--list-fichiers</option>オプションに渡せるように、スキャンファイルのパスが書き込まれます。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--copy-to
+            <replaceable>project-scans-dir</replaceable></option></term>
+
+            <listitem>
+              <para>スキャンファイルを指定したディレクトリにすべてコピーします。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><option>--vector-density
+            <replaceable>density</replaceable></option></term>
+
+            <listitem>
+              <para>ベクター画像をビットマップ画像に変換する際の解像度を設定します。デフォルトは300です。</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
       </refsect1>
     </refentry>
 
