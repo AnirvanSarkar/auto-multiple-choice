@@ -120,17 +120,24 @@ GetOptions("debug!"=>\$debug,
 	   "profile=s"=>\$profile,
 	   );
 
-if($debug_file) {
+sub set_debug_mode {
+  my ($debug)=@_;
+  set_debug($debug);
+  if($debug) {
     my $date=strftime("%c",localtime());
-    open(DBG,">>",$debug_file);
-    print DBG "\n\n".('#' x 40)."\n# DEBUG - $date\n".('#' x 40)."\n\n";
-    close(DBG);
+    debug ('#' x 40);
+    debug "# DEBUG - $date";
+    debug ('#' x 40);
+    debug "GUI module is located at ".__FILE__;
+  }
+}
+
+if($debug_file) {
     $debug=$debug_file;
 }
 
 if($debug) {
-    set_debug($debug);
-    debug "DEBUG MODE";
+    set_debug_mode($debug);
     print "DEBUG ==> ".AMC::Basic::debug_file()."\n";
 }
 
@@ -774,8 +781,10 @@ sub moteur_latex {
 sub read_glade {
     my ($main_widget,@widgets)=@_;
     my $g=Gtk2::Builder->new();
+    my $glade_file=$glade_base.$main_widget.".glade";
+    debug "Reading glade file ".$glade_file;
     $g->set_translation_domain('auto-multiple-choice');
-    $g->add_from_file($glade_base.$main_widget.".glade");
+    $g->add_from_file($glade_file);
     for ($main_widget,@widgets) {
 	$w{$_}=$g->get_object($_);
 	if($w{$_}) {
@@ -827,7 +836,7 @@ $w{'commande'}->hide();
 sub debug_set {
     $debug=$w{'menu_debug'}->get_active;
     debug "DEBUG MODE : OFF" if(!$debug);
-    set_debug($debug);
+    set_debug_mode($debug);
     if($debug) {
 	debug "DEBUG MODE : ON";
 
