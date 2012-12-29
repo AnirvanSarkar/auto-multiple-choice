@@ -118,9 +118,9 @@ sub set_number_variables {
   $self->{env}->set_type($correct);
 
   my $n_ok=0;
-  my $n_coche=0;
+  my $n_ticked=0;
   my $ticked_adata='';
-  my $n_tous=0;
+  my $n_all=0;
   my $n_plain=0;
   my $ticked_noneof='';
 
@@ -131,9 +131,9 @@ sub set_number_variables {
     debug("[ Q ".$a->{'question'}." A ".$a->{'answer'}." ] ticked $t (correct $c) TYPE=$correct\n");
 
     $n_ok+=($c == $t ? 1 : 0);
-    $n_coche+=$t;
+    $n_ticked+=$t;
     $ticked_adata=$a if($t);
-    $n_tous++;
+    $n_all++;
 
     if($a->{'answer'}==0) {
       $ticked_noneof=$a->{'ticked'};
@@ -149,9 +149,9 @@ sub set_number_variables {
 
   $self->{env}->set_variables_from_hashref($vars,0);
   $self->{env}->set_variable("N",$n_plain,0);
-  $self->{env}->set_variable("N_ALL",$n_tous,0);
+  $self->{env}->set_variable("N_ALL",$n_all,0);
   $self->{env}->set_variable("N_RIGHT",$n_ok,0);
-  $self->{env}->set_variable("N_TICKED",$n_coche,0);
+  $self->{env}->set_variable("N_TICKED",$n_ticked,0);
   $self->{env}->set_variable("NONEOF_TICKED",$ticked_noneof,0);
   $self->{env}->set_variable("IMULT",
 			     $question_data->{'type'}==QUESTION_MULT ? 1 : 0);
@@ -352,7 +352,7 @@ sub score_question {
   my $answers=$question_data->{'answers'};
 
   my $xx='';
-  my $raison='';
+  my $why='';
 
   $self->{env}->clear_errors;
 
@@ -361,20 +361,20 @@ sub score_question {
   $self->{env}->variables_from_directives(default=>1,set=>1,setx=>1,requires=>1);
 
   if($self->{env}->n_errors()) {
-    $raison="E";
+    $why="E";
     $xx=$self->directive("e");
     debug "Scoring errors: ".join(', ',$self->{env}->errors);
   } elsif($self->variable("N_TICKED")==0) {
     # no ticked boxes at all
     $xx=$self->directive("v");
-    $raison='V';
+    $why='V';
   } elsif(my $err=$self->syntax_error($correct)) {
     debug "Scoring syntax error: $err";
     $xx=$self->directive("e");
-    $raison='E';
+    $why='E';
   }
 
-  if(!$raison) {
+  if(!$why) {
     if($self->variable("IMULT")) {
       # MULTIPLE QUESTION
 
@@ -382,26 +382,26 @@ sub score_question {
 
       $self->expand_multiple_strategies();
 
-      if(!$self->use_formula(\$xx,\$raison)) {
-	$self->multiple_standard_score($answers,$correct,\$xx,\$raison);
+      if(!$self->use_formula(\$xx,\$why)) {
+	$self->multiple_standard_score($answers,$correct,\$xx,\$why);
       }
 
-      $self->post_process(\$xx,\$raison);
+      $self->post_process(\$xx,\$why);
 
     } else {
       # SIMPLE QUESTION
 
       $self->expand_simple_strategies();
 
-      if(!$self->use_formula(\$xx,\$raison)) {
-	$self->simple_standard_score(\$xx,\$raison);
+      if(!$self->use_formula(\$xx,\$why)) {
+	$self->simple_standard_score(\$xx,\$why);
       }
     }
   }
 
-  debug "MARK: score=$xx ($raison)";
+  debug "MARK: score=$xx ($why)";
 
-  return($xx,$raison);
+  return($xx,$why);
 }
 
 # returns the score associated with correct answers for a question.
@@ -416,11 +416,11 @@ sub score_correct_question {
 sub score_max_question {
    my ($self,$etu,$question_data)=@_;
    debug "MARK: scoring correct answers for MAX";
-   my ($x,$raison)=($self->score_question($etu,0,$question_data,1));
+   my ($x,$why)=($self->score_question($etu,0,$question_data,1));
    if($self->defined_directive("MAX")) {
      return($self->directive("MAX"),'M');
    } else {
-     return($x,$raison);
+     return($x,$why);
    }
 }
 
