@@ -422,6 +422,7 @@ print "* Annotation\n";
 
 	$text =~ s/\%[S]/$result->{'score'}/g;
 	$text =~ s/\%[M]/$result->{'max'}/g;
+	$text =~ s/\%[W]/$result->{'why'}/g;
 	$text =~ s/\%[s]/$subst->format_note($result->{'score'})/ge;
 	$text =~ s/\%[m]/$subst->format_note($result->{'max'})/ge;
 
