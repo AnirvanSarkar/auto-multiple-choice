@@ -27,37 +27,33 @@ use AMC::Data;
 
 use encoding 'utf8';
 
-my $association="-";
-my $seuil=0.1;
+my $darkness_threshold=0.1;
 
-my $note_plancher='';
-my $note_parfaite=20;
-my $grain='0.5';
-my $arrondi='';
-my $delimiteur=',';
-my $encodage_interne='UTF-8';
+my $floor_mark='';
+my $perfect_mark=20;
+my $ceiling=1;
+my $granularity='0.5';
+my $rounding='';
 my $data_dir='';
 
 my $postcorrect_student='';
 my $postcorrect_copy='';
 
 my $progres=1;
-my $plafond=1;
 my $progres_id='';
 
 my $debug='';
 
 GetOptions("data=s"=>\$data_dir,
-	   "seuil=s"=>\$seuil,
+	   "seuil=s"=>\$darkness_threshold,
 	   "debug=s"=>\$debug,
-	   "grain=s"=>\$grain,
-	   "arrondi=s"=>\$type_arrondi,
-	   "notemax=s"=>\$note_parfaite,
-	   "plafond!"=>\$plafond,
-	   "notemin=s"=>\$note_plancher,
+	   "grain=s"=>\$granularity,
+	   "arrondi=s"=>\$rounding_scheme,
+	   "notemax=s"=>\$perfect_mark,
+	   "plafond!"=>\$ceiling,
+	   "notemin=s"=>\$floor_mark,
 	   "postcorrect-student=s"=>\$postcorrect_student,
 	   "postcorrect-copy=s"=>\$postcorrect_copy,
-	   "encodage-interne=s"=>\$encodage_interne,
 	   "progression-id=s"=>\$progres_id,
 	   "progression=s"=>\$progres,
 	   );
@@ -66,157 +62,227 @@ set_debug($debug);
 
 # fixes decimal separator ',' potential problem, replacing it with a
 # dot.
-for my $x (\$grain,\$note_plancher,\$note_parfaite) {
+for my $x (\$granularity,\$floor_mark,\$perfect_mark) {
     $$x =~ s/,/./;
     $$x =~ s/\s+//;
 }
 
 # Implements the different possible rounding schemes.
 
-sub arrondi_inf {
+sub rounding_inf {
     my $x=shift;
     return(floor($x));
 }
 
-sub arrondi_central {
+sub rounding_central {
     my $x=shift;
     return(floor($x+0.5));
 }
 
-sub arrondi_sup {
+sub rounding_sup {
     my $x=shift;
     return(ceil($x));
 }
 
-my %fonction_arrondi=('i'=>\&arrondi_inf,'n'=>\&arrondi_central,'s'=>\&arrondi_sup);
+my %rounding_function=('i'=>\&rounding_inf,'n'=>\&rounding_central,'s'=>\&rounding_sup);
 
-if($type_arrondi) {
-    for my $k (keys %fonction_arrondi) {
-	if($type_arrondi =~ /^$k/i) {
-	    $arrondi=$fonction_arrondi{$k};
+# sets the rounding scheme to use to compute students marks, from
+# parameter $rounding_scheme
+
+if($rounding_scheme) {
+    for my $k (keys %rounding_function) {
+	if($rounding_scheme =~ /^$k/i) {
+	    $rounding=$rounding_function{$k};
 	}
     }
 }
+
+# Parameter $data_dir is needed!
 
 if(! -d $data_dir) {
     attention("No DATA directory: $data_dir");
     die "No DATA directory: $data_dir";
 }
 
-if($grain<=0) {
-    $grain=1;
-    $arrondi='';
-    $type_arrondi='';
+# Parameter $granularity must be positive. If not, marks rounding is
+# cancelled.
+
+if($granularity<=0) {
+    $granularity=1;
+    $rounding='';
+    $rounding_scheme='';
     debug("Nonpositive grain: rounding off");
 }
 
+# Uses an AMC::Gui::Avancement object to tell regularly the calling
+# program how much work we have done so far.
+
 my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
+
+# Connects to the databases capture (to get the students sheets and to
+# know which boxes have been ticked) and scoring (to write the
+# computed scores!).
 
 my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
 my $scoring=$data->module('scoring');
 
+# Uses an AMC::Scoring object to actually compute the questions
+# scores.
+
 my $bar=AMC::Scoring::new('onerror'=>'die',
 			  'data'=>$data,
-			  'seuil'=>$seuil);
+			  'seuil'=>$darkness_threshold);
 
 $avance->progres(0.05);
 
-$data->begin_transaction;
+# One only transaction for all the work:
+
+$data->begin_transaction('MARK');
+
+# Write the variables values in the database, so that they can be
+# retrieved later, and clears all the scores that could have been
+# already computed.
 
 $capture->variable('annotate_source_change',time());
 $scoring->clear_score;
-$scoring->variable('darkness_threshold',$seuil);
-$scoring->variable('mark_floor',$note_plancher);
-$scoring->variable('mark_max',$note_parfaite);
-$scoring->variable('ceiling',$plafond);
-$scoring->variable('rounding',$type_arrondi);
-$scoring->variable('granularity',$grain);
+$scoring->variable('darkness_threshold',$darkness_threshold);
+$scoring->variable('mark_floor',$floor_mark);
+$scoring->variable('mark_max',$perfect_mark);
+$scoring->variable('ceiling',$ceiling);
+$scoring->variable('rounding',$rounding_scheme);
+$scoring->variable('granularity',$granularity);
 $scoring->variable('postcorrect_student',$postcorrect_student);
 $scoring->variable('postcorrect_copy',$postcorrect_copy);
 
-my $somme_notes=0;
-my $n_notes=0;
+# Gets the student/copy pairs that has been captured. Each element
+# from the array @captured_studentcopy is an arrayref containing a different
+# (student,copy) pair.
 
-my @a_calculer=@{$capture->dbh
-		   ->selectall_arrayref($capture->statement('studentCopies'),{})};
+my @captured_studentcopy=$capture->student_copies();
+
+# We already said that 0.05 of the work has been made, so the
+# remaining ratio $delta per student/copy is:
 
 my $delta=0.95;
-$delta/=(1+$#a_calculer) if($#a_calculer>=0);
+$delta/=(1+$#captured_studentcopy) if($#captured_studentcopy>=0);
 
-# postcorrect mode?
+# If postcorrect mode is requested, sets the correct answers from the
+# teacher's copy.
+
 if($postcorrect_student) {
-    $scoring->postcorrect($postcorrect_student,$postcorrect_copy,$seuil);
+    $scoring->postcorrect($postcorrect_student,$postcorrect_copy,
+			  $darkness_threshold);
 }
 
-for my $sc (@a_calculer) {
+# Processes each student/copy in turn
+
+for my $sc (@captured_studentcopy) {
   debug "MARK: --- SHEET ".studentids_string(@$sc);
+
+  # The hash %codes collects the values of the AMCcodes.
 
   my %codes=();
 
-  my $ssb=$scoring->student_scoring_base(@$sc,$seuil);
+  # Gets the scoring strategy for current student/copy, including
+  # which answers are correct, from the scoring database.
+
+  my $ssb=$scoring->student_scoring_base(@$sc,$darkness_threshold);
+
+  # transmits the main strategy (default strategy options values for
+  # all questions) to the scoring engine.
 
   $bar->set_default_strategy($ssb->{'main_strategy'});
 
+  # The @question_scores collects scores for all questions
+
   my @question_scores=();
 
+  # Process each question in turn
+
   for my $question (keys %{$ssb->{'questions'}}) {
+
+    # $question is the question numerical ID, and
+    # $q is the question scoring data (see AMC::DataModule::scoring)
+
     my $q=$ssb->{'questions'}->{$question};
 
     debug "MARK: QUESTION $question TITLE ".$q->{'title'};
-
     debug "Unknown question data !" if(!defined($q));
+
+    # Uses the scoring engine to score the question...
+    #
+    # $xx is the student score for this question,
+    #
+    # $why will give the reason for this score ("V" means no box
+    # were ticked, for exemple).
+    #
+    # $max_score is the maximum score (score for perfect answers)
+
     $bar->prepare_question($q);
-    ($xx,$raison,$keys)=$bar->score_question(@$sc,$q,0);
-    ($notemax)=$bar->score_max_question($sc->[0],$q);
+    ($xx,$why)=$bar->score_question(@$sc,$q,0);
+    ($max_score)=$bar->score_max_question($sc->[0],$q);
+
+    # If the title of the question is 'codename.N' (with a numerical
+    # N), then thhis question represents a digit from a AMCcode, so we
+    # collect the value in the %codes hash.
 
     if ($q->{'title'} =~ /^(.*)\.([0-9]+)$/) {
       $codes{$1}->{$2}=$xx;
     }
 
     if ($q->{'indicative'}) {
-      $notemax=1;
+      # If the question is indicative, we don't collect the value in
+      # the @question_scores array
+      $max_score=1;
     } else {
+      # Otherwise, we collect all scoring results to compute later the
+      # overall aggregated score for the student.
       push @question_scores,{'score'=>$xx,
-			     'raison'=>$raison,
-			     'notemax'=>$notemax,
+			     'raison'=>$why,
+			     'notemax'=>$max_score,
 			     'sc'=>[@$sc],
 			     'question'=>$question,
 			     };
     }
 
-    $scoring->new_score(@$sc,$question,$xx,$notemax,$raison);
+    # Write the scoring results in the scoring database.
+
+    $scoring->new_score(@$sc,$question,$xx,$max_score,$why);
   }
 
-  # Final mark --
+  # Compute the final total score aggregating questions scores
 
   my ($total,$max_i)=$bar->global_score($scoring,@question_scores);
 
-  # application du grain et de la note max
+  # Now apply rounding scheme
+
   my $x;
 
-  if ($note_parfaite>0) {
-    $x=$note_parfaite/$grain*$total/$max_i;
+  if ($perfect_mark>0) {
+    $x=$perfect_mark/$granularity*$total/$max_i;
   } else {
-    $x=$total/$grain;
+    $x=$total/$granularity;
   }
-  $x=&$arrondi($x) if($arrondi);
-  $x*=$grain;
+  $x=&$rounding($x) if($rounding);
+  $x*=$granularity;
 
-  $x=$note_parfaite if($note_parfaite>0 && $plafond && $x>$note_parfaite);
+  # Apply ceiling
 
-  # plancher
+  $x=$perfect_mark if($perfect_mark>0 && $ceiling && $x>$perfect_mark);
 
-  if ($note_plancher ne '' && $note_plancher !~ /[a-z]/i) {
-    $x=$note_plancher if($x<$note_plancher);
+  # Apply floor
+
+  if ($floor_mark ne '' && $floor_mark !~ /[a-z]/i) {
+    $x=$floor_mark if($x<$floor_mark);
   }
 
-  #--
-
-  $n_notes++;
-  $somme_notes+=$x;
+  # Writes the student's final mark in the scoring database
 
   $scoring->new_mark(@$sc,$total,$max_i,$x);
+
+  # Build the AMCcodes values from their digits, are store them in the
+  # scoring database
 
   for my $k (keys %codes) {
     my @i=(keys %{$codes{$k}});
@@ -227,9 +293,11 @@ for my $sc (@a_calculer) {
     }
   }
 
+  # Tell the calling program that we have finished scoring a student
+
   $avance->progres($delta);
 }
 
-$data->end_transaction;
+$data->end_transaction('MARK');
 
 $avance->fin();
