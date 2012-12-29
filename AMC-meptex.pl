@@ -175,9 +175,13 @@ $layout->begin_transaction('MeTe');
 $layout->clear_all;
 $capture->variable('annotate_source_change',time());
 
+debug "Pre-association...";
+
 for my $pa (@pre_assoc) {
   $layout->new_association(@$pa);
 }
+
+debug "Writing to database...";
 
 for my $p (@pages) {
 

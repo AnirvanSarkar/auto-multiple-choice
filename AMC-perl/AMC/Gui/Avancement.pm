@@ -89,17 +89,17 @@ sub etat {
 sub lit {
     my ($self,$s,$oo)=(@_);
     my $r=-1;
-    if($s =~ /===<(.*)>=\+([0-9.]+)/) {
+    if($s =~ /===<(.*)>=\+([0-9.]+(?:e[+-]?[0-9]+)?)/) {
 	my $id=$1;
 	my $suite=$2;
 	$self->{'progres'}+=$suite;
 
 	if($self->{'progres'}<0) {
-	    print STDERR "progres($self->{'id'})=$self->{'progres'}\n";
+	    debug("progres($id)=$self->{'progres'}");
 	    $self->{'progres'}=0;
 	}
 	if($self->{'progres'}>1) {
-	    print STDERR "progres($self->{'id'})=$self->{'progres'}\n";
+	    debug("progres($id)=$self->{'progres'}");
 	    $self->{'progres'}=1;
 	}
 
