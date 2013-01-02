@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -387,6 +387,21 @@ sub define_statements {
 		  ." (student,see) VALUES (?,?)"},
      'getAlias'=>{'sql'=>"SELECT see FROM ".$self->table("alias")
 		  ." WHERE student=?"},
+     'postCorrectNew'=>{'sql'=>"CREATE TEMPORARY TABLE IF NOT EXISTS"
+		       ." pc_temp (q INTEGER, a INTEGER, c REAL, PRIMARY KEY(q,a))"},
+     'postCorrectClr'=>{'sql'=>"DELETE FROM pc_temp"},
+     'postCorrectPop'=>{'sql'=>"INSERT INTO pc_temp (q,a,c) "
+			." SELECT id_a,id_b,CASE"
+			."   WHEN manual >= 0 THEN manual"
+			."   WHEN total<=0 THEN -1"
+			."   WHEN black >= ? * total THEN 1"
+			."   ELSE 0"
+			." END"
+			." FROM ".$self->table("zone","capture")
+			." WHERE capture_zone.student=? AND capture_zone.copy=? AND capture_zone.type=?"},
+     'postCorrectSet'=>{'sql'=>"UPDATE ".$self->table("answer")
+			." SET correct=(SELECT c FROM pc_temp"
+			."     WHERE q=question AND a=answer)"},
      'postCorrect'=>{'sql'=>"UPDATE ".$self->table("answer")
 		     ." SET correct="
 		     ."(SELECT CASE"
@@ -783,12 +798,34 @@ sub unalias {
 # only when the questions/answers are not different from a sheet to
 # another (contrary to the use of random numerical values for
 # exemple).
+#
+# Here are two SQL implementations for postcorrect: postcorrect_a acts
+# with a single SQL request, whereas postcorrect_b builds a temporary
+# table and requires several SQL requests. postcorrect_b is usualy the
+# fastest, so that postcorrect is only a relay to postcorrect_b. Note
+# that an UPDATE request on a JOINture should be a good idea, but this
+# is not allowed by SQLite.
 
-sub postcorrect {
+sub postcorrect_a {
   my ($self,$student,$copy,$darkness_threshold)=@_;
   $self->{'data'}->require_module('capture');
   $self->statement('postCorrect')
     ->execute($darkness_threshold,$student,$copy,ZONE_BOX);
+}
+
+sub postcorrect_b {
+  my ($self,$student,$copy,$darkness_threshold)=@_;
+  $self->{'data'}->require_module('capture');
+  $self->statement('postCorrectNew')->execute();
+  $self->statement('postCorrectClr')->execute();
+  $self->statement('postCorrectPop')
+    ->execute($darkness_threshold,$student,$copy,ZONE_BOX);
+  $self->statement('postCorrectSet')->execute();
+}
+
+sub postcorrect {
+  my ($self,@args)=@_;
+  $self->postcorrect_b(@args);
 }
 
 # new_score($student,$copy,$question,$score,$score_max,$why) adds a
