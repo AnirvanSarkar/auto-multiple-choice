@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008,2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008,2012-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -19,21 +19,7 @@
 
 package AMC::Gui::Avancement;
 
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-
-    # set the version for version checking
-    $VERSION     = 0.1.1;
-
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw();
-    %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
-
-    # your exported package globals go here,
-    # as well as any optionally exported functions
-    @EXPORT_OK   = qw();
-}
+use AMC::Basic;
 
 sub new {
     my ($entier,%o)=(@_);
