@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -154,7 +154,7 @@ sub codes_questions {
   @$codes=$self->{'_scoring'}->codes();
   if($plain) {
     my $codes_re="(".join("|",map { "\Q$_\E" } @$codes).")";
-    @$questions=grep { $_->{'title'} !~ /$codes_re\.[0-9]+$/ }
+    @$questions=grep { $_->{'title'} !~ /^$codes_re\.[0-9]+$/ }
       $self->{'_scoring'}->questions;
   } else {
     @$questions=$self->{'_scoring'}->questions;
