@@ -75,9 +75,10 @@ sub etat {
 sub lit {
     my ($self,$s,$oo)=(@_);
     my $r=-1;
-    if($s =~ /===<(.*)>=\+([0-9.]+(?:e[+-]?[0-9]+)?)/) {
+    if($s =~ /===<(.*)>=\+([0-9,.]+(?:e[+-]?[0-9]+)?)/) {
 	my $id=$1;
 	my $suite=$2;
+	$suite =~ s/,/./;
 	$self->{'progres'}+=$suite;
 
 	if($self->{'progres'}<0) {
