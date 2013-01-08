@@ -919,16 +919,20 @@ sub student_scoring_base {
   my $r={'student_alias'=>$student_strategy,
 	 'questions'=>{},
 	 'main_strategy'=>$self->main_strategy_all($student_strategy)};
-  my $sth;
-  $sth=$self->statement('studentQuestionsBase');
-  $sth->execute($student_strategy);
-  while(my $qa=$sth->fetchrow_hashref) {
-    $r->{'questions'}->{$qa->{'question'}}=$qa;
-  }
-  $sth=$self->statement('studentAnswersBase');
-  $sth->execute($darkness_threshold,$student,$copy,ZONE_BOX,$student_strategy);
-  while(my $qa=$sth->fetchrow_hashref) {
-    push @{$r->{'questions'}->{$qa->{'question'}}->{'answers'}},$qa;
+  my @sid=($student);
+  push @sid,$student_strategy if($student != $student_strategy);
+  for my $s (@sid) {
+    my $sth;
+    $sth=$self->statement('studentQuestionsBase');
+    $sth->execute($s);
+    while(my $qa=$sth->fetchrow_hashref) {
+      $r->{'questions'}->{$qa->{'question'}}=$qa;
+    }
+    $sth=$self->statement('studentAnswersBase');
+    $sth->execute($darkness_threshold,$student,$copy,ZONE_BOX,$s);
+    while(my $qa=$sth->fetchrow_hashref) {
+      push @{$r->{'questions'}->{$qa->{'question'}}->{'answers'}},$qa;
+    }
   }
   return($r);
 }
