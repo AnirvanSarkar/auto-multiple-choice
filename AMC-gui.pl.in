@@ -110,6 +110,8 @@ Gtk2::Window->set_default_icon_list(map { Gtk2::IconTheme->get_default->load_ico
 use_gettext;
 use_amc_plugins();
 
+POSIX::setlocale(&POSIX::LC_NUMERIC,"C");
+
 my $debug=0;
 my $debug_file='';
 
