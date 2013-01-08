@@ -26,6 +26,7 @@ use File::Spec::Functions qw/catfile catpath splitpath updir/;
 use Cwd;
 
 $mods_dir="@/MODSDIR/@";
+$ENV{'LC_NUMERIC'}="C";
 
 sub mod_path {
     my ($action)=@_;
