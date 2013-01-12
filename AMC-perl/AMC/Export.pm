@@ -45,6 +45,7 @@ sub new {
 	'noms.encodage'=>'',
 	'noms.separateur'=>'',
 	'noms.useall'=>1,
+	'noms.postcorrect'=>'',
 	'noms.abs'=>'ABS',
 	'noms.identifiant'=>'',
 
@@ -184,7 +185,8 @@ sub pre_process {
     my $sth=$self->{'_scoring'}->statement('marks');
     $sth->execute;
   STUDENT: while(my $m=$sth->fetchrow_hashref) {
-      next STUDENT if($m->{student}==$post_correct[0] &&
+      next STUDENT if((!$self->{'noms.postcorrect'}) &&
+		      $m->{student}==$post_correct[0] &&
 		      $m->{'copy'}==$post_correct[1]);
 
       $m->{'abs'}=0;

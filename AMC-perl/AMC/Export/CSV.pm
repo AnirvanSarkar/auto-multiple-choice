@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -67,6 +67,8 @@ sub export {
     my $sep=$self->{'out.separateur'};
 
     $sep="\t" if($sep =~ /^tab$/i);
+
+    $self->{'noms.postcorrect'}=($self->{'out.ticked'} ne '');
 
     $self->pre_process();
 
