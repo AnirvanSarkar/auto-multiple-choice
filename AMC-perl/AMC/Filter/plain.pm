@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -45,11 +45,13 @@ sub new {
 				 ShuffleQuestions Columns QuestionBlocks
 				 Arabic ArabicFont
 				 Disable
+				 ManualDuplex
 				/];
     $self->{'options_boolean'}=[qw/LaTeX xltxtra
 				   ShuffleQuestions QuestionBlocks
 				   CompleteMulti SeparateAnswerSheet
 				   Arabic
+				   ManualDuplex
 				  /];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
@@ -64,6 +66,7 @@ sub new {
        'l-name'=>__("Name and surname"),
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
        'disable'=>'',
+       'manualduplex'=>'',
       };
     $self->{'parse_modules'}=['local_latex','images','embf','text'];
     $self->{'qid'}=0;
@@ -718,6 +721,8 @@ sub write_latex {
       if($self->{'options'}->{'answersheetcolumns'}>1);
     print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
   }
+
+  print OUT "\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
 
   print OUT "}\n";
   print OUT "\\end{document}\n";
