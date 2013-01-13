@@ -445,6 +445,37 @@ sub test_commandes {
     return(@missing);
 }
 
+# tests if debian package auto-multiple-choice-common is installed but
+# not auto-multiple-choice...
+
+sub deb_is_installed {
+  my ($package_name)=@_;
+  my $v='';
+  open(QUERY,"-|","dpkg-query","-W",'--showformat=${Version}\n',$package_name);
+  while(<QUERY>) {
+    $v=$1 if(/^\s*([^\s]+)\s*$/);
+  }
+  close(QUERY);
+  return($v);
+}
+
+sub test_debian_amc {
+  if(commande_accessible("dpkg-query")) {
+    if(deb_is_installed("auto-multiple-choice-common") &&
+       !deb_is_installed("auto-multiple-choice")) {
+      debug "ERROR: auto-multiple-choice package not installed!";
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok',
+			  __"The package <i>auto-multiple-choice-common</i> is installed, but not <i>auto-multiple-choice</i>.\n<b>AMC won't work properly until you install auto-multiple-choice package!</b>"
+			  );
+      $dialog->run;
+      $dialog->destroy;
+    }
+  }
+}
+
 # Creates general options directory if not present
 
 if(! -d $o_dir) {
@@ -6896,6 +6927,7 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 #######################################
 
 test_commandes();
+test_debian_amc();
 
 Gtk2->main();
 
