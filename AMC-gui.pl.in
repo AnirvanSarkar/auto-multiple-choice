@@ -290,6 +290,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 
 	      'csv_surname_headers'=>'',
 	      'csv_name_headers'=>'',
+	      'notify'=>1,
 	      );
 
 # MacOSX universal command to open files or directories : /usr/bin/open
@@ -406,6 +407,28 @@ sub best_filter_for_file {
 
 my %o=();
 my %state=();
+
+## Notifications
+
+my $notify='';
+
+if(check_install(module=>"Gtk2::Notify")) {
+  load("Gtk2::Notify");
+  Gtk2::Notify->init('Auto Multiple Choice');
+  $notify=1;
+  debug "Gtk2::Notify loaded";
+} else {
+  debug "Gtk2::Notify not installed";
+}
+
+sub notify_end_of_work {
+  my ($message)=@_;
+  if($notify && $o{'notify'}) {
+    my $notification=Gtk2::Notify->new('Auto Multiple Choice',$message,
+				       '@/ICONSDIR/@/auto-multiple-choice.svg');
+    $notification->show;
+  }
+}
 
 # Test whether all commands defined to open/view files are
 # reachable. If not, the user is warned...
@@ -3111,6 +3134,7 @@ sub saisie_auto_ok {
 		     close($c->{'o'}->{'fh'});
 		     detecte_analyse('apprend'=>1);
 		     assoc_state();
+		     notify_end_of_work(__"Automatic data capture has been completed");
 		 },
 	);
 
@@ -4109,6 +4133,7 @@ sub annote_copies {
 	     my $c=shift;
 	     my $n=$c->variable('n_processed');
 	     regroupement_go($n>0,$id_file) if($and_regroupe);
+	     notify_end_of_work(__"Annotations have been completed");
 	   },
 	  );
 }
