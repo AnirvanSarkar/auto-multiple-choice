@@ -52,6 +52,12 @@
   #endif
 #endif
 
+/*
+  Note:
+
+  IMAGE COORDINATES: (0,0) is upper-left corner
+*/
+
 #define GET_PIXEL(src,x,y) *((uchar*)(src->imageData+src->widthStep*(y)+src->nChannels*(x)))
 #define PIXEL(src,x,y) GET_PIXEL(src,x,y)>100
 
@@ -70,6 +76,28 @@
 #define ILLUSTR_BOX 1
 #define ILLUSTR_PIXELS 2
 
+/* 
+
+   the following functions select, from a points sequence, four
+   extreme points:
+
+   - the most NW one with coordinates (corner_x[0],corner_y[0]),
+   - the most NE one with coordinates (corner_x[1],corner_y[1]),
+   - the most SE one with coordinates (corner_x[2],corner_y[2]),
+   - the most SW one with coordinates (corner_x[3],corner_y[3]),
+
+   First call
+   
+   agrege_init(image_width,image_height,corners_x,corners_y)
+
+   which will initialize the extreme points coordinates, and then
+   
+   agrege(x,y)
+   
+   for all points (x,y) from the sequence.
+
+ */
+
 void agrege_init(double tx,double ty,double* coins_x,double* coins_y) {
   coins_x[0]=tx;coins_y[0]=ty;
   coins_x[1]=0;coins_y[1]=ty;
@@ -85,6 +113,27 @@ void agrege(double x,double y,double* coins_x,double* coins_y) {
   AGREGE_POINT(-,>,1)
   AGREGE_POINT(-,<,3)
 }
+
+/*
+
+  load_image(...) loads the scan image, with some pre-processings:
+
+  - if ignore_red is true, the red color is discarder from the scan:
+    only the red channel is kept from the scan.
+
+  - the image is (a little) smoothed with a Gaussian kernel, and a
+    threshold is applied to convert the image from greyscale to
+    black&white only. The threshold value is MAX*threshold, where MAX
+    is the maximum value for all pixels (that is the grey value for
+    the lighter pixel), and threshold is given to load_image as a
+    parameter.
+
+  - the image is flipped if necessary to get the upper-left pixel at
+    coordinates (0,0)
+
+  The result image is *src.
+
+*/
 
 void load_image(IplImage** src,char *filename,
 		int ignore_red,double threshold=0.6,int view=0) {
@@ -133,6 +182,16 @@ void load_image(IplImage** src,char *filename,
   }
 }
 
+/*
+
+  pre_traitement(...) tries to remove scan artefacts (dust and holes)
+  from image *src, using morphological closure and opening.
+
+  - lissage_trous is the radius of the holes to remove (in pixels)
+  - lissage_poussieres is the radius of the dusts to remove (in pixels)
+
+*/
+
 void pre_traitement(IplImage* src,int lissage_trous,int lissage_poussieres) {
   IplConvKernel* trous=cvCreateStructuringElementEx(1+2*lissage_trous,1+2*lissage_trous,
 						    lissage_trous,lissage_trous,CV_SHAPE_ELLIPSE);
@@ -147,22 +206,43 @@ void pre_traitement(IplImage* src,int lissage_trous,int lissage_poussieres) {
   cvReleaseStructuringElement(&poussieres);
 }
 
+/* LINEAR TRANSFORMS */
+
+/* the linear_transform  structure contains a linear transform
+   x'=ax+by+e
+   y'=cx+dy+f
+*/ 
+
 typedef struct {
   double a,b,c,d,e,f;
 } linear_transform;
+
+/* transforme(t,x,y,&xp,&yp) applies the linear transform t to the
+   point (x,y) to give (xp,yp)
+*/
 
 void transforme(linear_transform* t,double x,double y,double* xp,double* yp) {
   *xp=t->a*x+t->b*y+t->e;
   *yp=t->c*x+t->d*y+t->f;
 }
 
+/* POINTS AND LINES */
+
+/* point structure */
+
 typedef struct {
   double x,y;
 } point;
 
+/* line structure (through its equation ax+by+c=0) */
+
 typedef struct {
   double a,b,c;
 } ligne;
+
+/* calcule_demi_plan(...) computes the equation of line (AB) from the
+   coordinates *a of A and *b of B, and stores it to *l.
+*/
 
 void calcule_demi_plan(point *a,point *b,ligne *l) {
   double vx,vy;
@@ -173,15 +253,28 @@ void calcule_demi_plan(point *a,point *b,ligne *l) {
   l->c=- a->x*vx - a->y*vy;
 }
 
+/* evalue_demi_plan(...) computes the sign of ax+by+c from line
+   *equation l, giving which side of l the point at (x,y) is.
+*/
+
 int evalue_demi_plan(ligne *l,double x,double y) {
   return(l->a*x+l->b*y+l->c <= 0 ? 1 : 0);
 }
+
+/* VECTOR ARITHMETIC */
+
+/* moyenne(x[],n) returns the mean of the n values from vector x[]
+*/
 
 double moyenne(double *x, int n) {
   double s=0;
   for(int i=0;i<n;i++) s+=x[i];
   return(s/n);
 }
+
+/* scalar_product(x[],y[],n) returns the scalar product of vectors x[]
+   and y[] (both of size n), that is the sum over i of x[i]*y[i].
+*/
 
 double scalar_product(double *x,double *y,int n) {
   double sx,sy,sxy;
@@ -191,6 +284,16 @@ double scalar_product(double *x,double *y,int n) {
   }
   return(sxy/n-sx/n*sy/n);
 }
+
+/* sys_22(...) solves the 2x2 linear system
+
+   ax+by+e=0
+   cx+dy+f=0
+
+   and sets *x and *y with the solution. If the system is
+   not-invertible, *x and *y are left unchanged and a warning is
+   printed out.
+*/
 
 void sys_22(double a,double b,double c,double d,double e,double f,
 	      double *x,double *y) {
@@ -203,7 +306,15 @@ void sys_22(double a,double b,double c,double d,double e,double f,
   *y=(a*f-c*e)/delta;
 }
 
+/* square of x */
+
 double sqr(double x) { return(x*x); }
+
+/* LINEAR TRANSFORM OPTIMIZATION */
+
+/* revert_transform(...) computes the inverse transform of *direct,
+   and stores it to *back.
+*/
 
 void revert_transform(linear_transform *direct,
 		      linear_transform *back) {
@@ -226,6 +337,17 @@ void revert_transform(linear_transform *direct,
 	 back->e,
 	 back->f);
 }
+
+/* optim(...) computes the linear transform T such that the sum S of
+   square distances from T(M[i]) to MP[i] is minimal, where M[] and
+   MP[] are sequences of n points.
+
+   points_x[] and points_y[] are the coordinates of the points M[],
+   and points_xp[] and points_yp[] are the coordinates of the points
+   M[].
+
+   The return value is the mean square error (square root of S/n).
+*/
 
 double optim(double* points_x,double* points_y,
 	     double* points_xp,double* points_yp,
@@ -254,6 +376,44 @@ double optim(double* points_x,double* points_y,
   return(mse);
 }
 
+/* calage(...) tries to detect the position of a page on a scan.
+
+ - *src is the scan image (comming from load_image).
+
+ - if illustr is not NULL, a rectangle is drawn on image *illustr to
+   show where the corner marks (circles) has been detected.
+
+ - taille_orig_x and taille_orig_y are the width and height of the
+   model page.
+
+ - dia_orig is the diameter of the corner marks (circles) on the model
+   page.
+
+ - tol_plus and tol_moins are tolerence ratios for corner marks:
+   calage will look for marks with diameter between
+   dia_orig*(1-tol_moins) and dia_orig*(1+tol_plus) (scaled to scan
+   size).
+
+ - coins_x[] and coins_y[] will be filled with the coordinates of the
+   4 corner marks detected on the scan.
+
+ - if view==1, a report image *dst will be created to show all
+   connected components from source image that has correct diameter.
+
+ - if view==2, a report image *dst will be created from the source
+   image with over-printed connected components with correct diameter.
+
+ 1) pre_traitement is called to remove dusts and holes.
+
+ 2) cvFindContours find the connected components from the image. All
+ connected components with diameter too far from target diameter (see
+ tol_plus and tol_moins parameters) are discarded.
+
+ 3) the centers of the extreme connected components with correct
+ diameter are returned.
+
+*/
+
 void calage(IplImage* src,IplImage* illustr,
 	    double taille_orig_x,double taille_orig_y,
 	    double dia_orig,
@@ -263,7 +423,7 @@ void calage(IplImage* src,IplImage* illustr,
   CvPoint coins_int[4];
   int n_cc;
 
-  /* target min and max size */
+  /* computes target min and max size */
   
   double rx=src->width/taille_orig_x;
   double ry=src->height/taille_orig_y;
@@ -271,17 +431,25 @@ void calage(IplImage* src,IplImage* illustr,
   double target_max=target*(1+tol_plus);
   double target_min=target*(1-tol_moins);
 
+  /* 1) remove holes that are smaller than 1/8 times the target mark
+     diameter, and dusts that are smaller than 1/20 times the target
+     mark diameter.
+  */
+
   pre_traitement(src,
 		 1+(int)((target_min+target_max)/2 /20),
 		 1+(int)((target_min+target_max)/2 /8));
 
   if(view==2) {
+    /* prepares *dst from a copy of the scan (after pre-processing). */
     *dst=cvCreateImage( cvGetSize(src), IPL_DEPTH_8U, 3 );
     cvConvertImage(src,*dst);
     cvNot(*dst,*dst);
   }
 
   printf("Target size: %.1f ; %.1f\n",target_min,target_max);
+
+  /* 2) find connected components */
 
   static CvMemStorage* storage = cvCreateMemStorage(0);
   CvSeq* contour = 0;
@@ -291,10 +459,13 @@ void calage(IplImage* src,IplImage* illustr,
 
 #ifdef OPENCV_21
   if(view==1) {
+    /* prepares *dst as a white image with same size as the scan. */
     *dst=cvCreateImage( cvGetSize(src), 8, 3 );
     cvZero( *dst );
   }
 #endif
+
+  /* 3) returns the result, and draws reports */
 
   agrege_init(src->width,src->height,coins_x,coins_y);
   n_cc=0;
@@ -303,22 +474,30 @@ void calage(IplImage* src,IplImage* illustr,
 
   for( ; contour != 0; contour = contour->h_next ) {
     CvRect rect=cvBoundingRect(contour);
+    /* discard the connected components that are too large or too small */
     if(rect.width<=target_max && rect.width>=target_min &&
        rect.height<=target_max && rect.height>=target_min) {
+      /* updates the extreme points coordinates from the coordinates
+	 of the center of the connected component. */
       agrege(rect.x+(rect.width-1)/2.0,rect.y+(rect.height-1)/2.0,coins_x,coins_y);
       
+      /* outputs connected component center and size. */
       printf("(%d;%d)+(%d;%d)\n",
 	     rect.x,rect.y,rect.width,rect.height);
       n_cc++;
 	
 #ifdef OPENCV_21
      if(view==1) {
+       /* draws the connected component, and the enclosing rectangle,
+	  with a random color. */
 	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
 	cvRectangle(*dst,cvPoint(rect.x,rect.y),cvPoint(rect.x+rect.width,rect.y+rect.height),color);
 	cvDrawContours( *dst, contour, color, color, -1, CV_FILLED, 8 );
       }
 #endif
      if(view==2) {
+       /* draws the connected component, and the enclosing rectangle,
+	  in green. */
        CvScalar color = CV_RGB( 60,198,127 );
 	cvRectangle(*dst,cvPoint(rect.x,rect.y),cvPoint(rect.x+rect.width,rect.y+rect.height),color);
 	cvDrawContours( *dst, contour, color, color, -1, CV_FILLED, 8 );
@@ -328,39 +507,57 @@ void calage(IplImage* src,IplImage* illustr,
 
   if(n_cc>=4) {
     for(int i=0;i<4;i++) {
+      /* computes integer coordinates of the extreme coordinates, for
+	 later drawings */
       if(view>0 || illustr!=NULL) {
 	coins_int[i].x=(int)coins_x[i];
 	coins_int[i].y=(int)coins_y[i];
       }
+      /* outputs extreme points coordinates: the (supposed)
+	 coordinates of the marks on the scan. */
       printf("Frame[%d]: %.1f ; %.1f\n",i,coins_x[i],coins_y[i]);
     }
     
     if(view==1) {
 #ifdef OPENCV_21
+      /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i=0;i<4;i++) {
 	cvLine(*dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(255,255,255),1,CV_AA);
       }
 #endif
     }
     if(view==2) {
+      /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i=0;i<4;i++) {
 	cvLine(*dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(193,29,27),1,CV_AA);
       }
     }
 
     if(illustr!=NULL) {
+      /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i=0;i<4;i++) {
 	cvLine(illustr,coins_int[i],coins_int[(i+1)%4],BLEU,1,CV_AA);
       }
     }
   } else {
+    /* There are less than 4 correct connected components: can't know
+       where are the marks on the scan! */
     printf("! NMARKS=%d : Not enought marks detected.\n",n_cc);
   }
 
   cvClearMemStorage(storage);
 }
 
+/* moves A and B to each other, proportion delta of the distance
+   between A and B -- here only one coordinate is processed: cn is 'x'
+   or 'y'.
+
+   d is a temporary variable.
+*/
+
 #define CLOSER(pointa,pointb,cn,dist,delta) dist=delta*(pointb.cn-pointa.cn);pointa.cn+=dist;pointb.cn-=dist;
+
+/* deplace(...) moves coins[i] and coins[j] to each other */
 
 void deplace(int i,int j,double delta,point *coins) {
   double d;
@@ -368,11 +565,21 @@ void deplace(int i,int j,double delta,point *coins) {
   CLOSER(coins[i],coins[j],y,d,delta);
 }
 
+/* deplace_xy(...) moves two real numbers *m1 and *m2 to each other,
+   proportion delta of the distance between them.
+*/
+
 void deplace_xy(double *m1,double *m2,double delta) {
   double d=(*m2-*m1)*delta;
   *m1+=d;
   *m2-=d;
 }
+
+/* restreint(...) ensures that the point (*x,*y) is inside the image,
+   moving it inside if necessary.
+
+   tx and ty are the width and height of the image.
+*/
 
 void restreint(int *x,int *y,int tx,int ty) {
   if(*x<0) *x=0;
@@ -380,6 +587,15 @@ void restreint(int *x,int *y,int tx,int ty) {
   if(*x>=tx) *x=tx-1;
   if(*y>=ty) *y=ty-1;
 }
+
+/* if student>=0, check_zooms_dir(...) checks that the zoom directory
+   zooms_dir (for student number given as a parameter) exists, or
+   tries to create it.
+
+   In case of problem, error message is printer to STDOUT.
+
+   if log is true, some more messages are printed.
+*/
 
 int check_zooms_dir(int student, char *zooms_dir=NULL,int log=0) {
   int ok=1;
@@ -412,6 +628,67 @@ int check_zooms_dir(int student, char *zooms_dir=NULL,int log=0) {
   }
   return(ok);
 }
+
+/* mesure_case(...) computes the darkness value (number of black
+   pixels, and total number of pixels) of a particular box on the
+   scan. A "zoom" (small image with the box on the scan only) can be
+   extracted in order to have a closer look at the scaned box later.
+
+   - *src is the source black&white image.
+
+   - *illustr is an image on which drawings will be made:
+    
+     with illustr_mode==ILLUSTR_BOX, a blue rectangle shows the box
+     position, and a pink rectangle shows the measuring box (a box a
+     little smaller than the box itself).
+
+     with illustr_mode==ILLUSTR_PIXELS, all measured pixels will be
+     coloured (black pixels in green, and white pixels in blue)
+
+   - student is the student number. student<0 means that the student
+     number is not yet known (we are measuring the ID binary boxes to
+     detect the page and student numbers), so that zooms are extracted
+     only when student>=0
+
+   - page is the page number (unused)
+
+   - question,answer are the question and answer numbers for the box
+     beeing measured. These are used to build a zoom file name from
+     the template zooms_dir/question-answer.png
+
+   - prop is a ratio that is used to reduce the box before measuring
+     how many pixels are black (the goal here is to try to avoid
+     measuring the border of the box, that are always dark...). It
+     should be small (0.1 seems to be reasonable), otherwise only a
+     small part in the center of the box will be considered -- but not
+     too small, otherwise the border of the box could be taken into
+     account, so that the measures are less reliable to determine if a
+     box is ticked or not.
+
+   - shape_id is the shape id of the box: SHAPE_OVAL or SHAPE_SQUARE.
+
+   - o_xmin,o_xmax,o_ymin,o_ymax are the box coordinates on the
+     original subject. NOTE: if o_xmin<0, the box coordinates on the
+     scan are not given through these variables values, but directly
+     in the coins[] variables.
+
+   - transfo_back is the optimal linear transform that gets
+     coordinates on the scan to coordinates on the original
+     subject. NOTE: only used if o_xmin>=0.
+
+   - coins[] will be filled with the coordinates of the 4 corners of
+     the measuring box on the scan. NOTE: if o_xmin<0, coins[]
+     contains as an input the coordinates of 4 corners of the box on
+     the scan.
+
+   - some reports will be drawn on *dst:
+
+     if view==1, the measuring boxes will be drawn.
+
+   - zooms_dir is the directory path where to store zooms extracted
+     from the *src image.
+
+*/
 
 void mesure_case(IplImage *src,IplImage *illustr,int illustr_mode,
 		 int student,int page,int question, int answer,
@@ -645,6 +922,13 @@ void mesure_case(IplImage *src,IplImage *illustr,int illustr_mode,
 
   printf("PIX %d %d\n",npixnoir,npix);
 }
+
+/* MAIN
+
+   Processes command-line parameters, and then reads commands from
+   standard input, and answers them on standard output.
+
+*/
 
 int main( int argc, char** argv )
 {
