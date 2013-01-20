@@ -37,6 +37,7 @@
 #endif
 
 #if CV_MAJOR_VERSION > 2
+  #define OPENCV_23 1
   #define OPENCV_21 1
   #define OPENCV_20 1
 #else
