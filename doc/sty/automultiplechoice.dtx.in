@@ -3154,7 +3154,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % so as to be able to recognize the position of the boxes on the
 % scans. Four circles \makeatletter\m@rqueCalage\makeatother{} are
 % printed on the corners (see |\m@rqueCalage|), and binary boxes show
-% the student sheet number, the page and a checking number.
+% the student sheet number (see |\AMCIDBoxesA|), the page (see
+% |\AMCIDBoxesB|) and a checking number (see |\AMCIDBoxesC|).
 %
 % |\AMC@intituleHead| is the title to be printed at the beginning
 % (used for corrected sheet, and empty on subject). |\AMC@note| is
@@ -3171,6 +3172,14 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}
 \def\AMC@intituleHead{\AMC@loc@corrected}
 \def\AMC@note{}
+\newcommand\AMCStudentNumber{\the\AMC@etud}
+\newcommand\AMCIDBoxesA{\AMCbin@begin{1}\AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}}
+\newcommand\AMCIDBoxesB{\AMCbin@begin{2}\AMC@binaryBoxes[\AMC@NCBpage]{\thepage}}
+\newcommand\AMCIDBoxesC{\AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{\the\AMCid@check}}
+\newcommand\AMCIDBoxesABC{%
+  \hbox{\vbox{\noindent\AMCIDBoxesA\\
+    \noindent\AMCIDBoxesB\AMCIDBoxesC}}%
+}
 \AtBeginPage{\ifAMC@pagelayout\global\advance\AMCid@check\m@ne%
   \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
   \AMC@pagepos%
@@ -3191,11 +3200,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \fancyhead[C]{\AMC@LR{\he@dhaut{%
         \begin{minipage}[b]{\AMC@CBtaille}\AMCboxColor{black}%
           \ifAMCids@top\vbox to \AMCids@height{\texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}\fi%
-          \AMCbin@begin{1}\noindent%
-          \AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}\\
-          \AMCbin@begin{2}\noindent%
-          \AMC@binaryBoxes[\AMC@NCBpage]{\thepage}\ignorespaces%
-          \AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{\the\AMCid@check}%
+          \AMCIDBoxesABC
         \end{minipage}%
         \ifAMCids@side\hbox to \AMCids@width{\hspace*{\fill}%
           \texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}\fi%
