@@ -88,6 +88,7 @@ sub new {
     for (qw/student copy/) {
       $self->{'postcorrect_'.$_}=
 	$self->{'scoring'}->variable('postcorrect_'.$_);
+      $self->{'postcorrect_'.$_}=-1 if(!defined($self->{'postcorrect_'.$_}));
     }
 
     my @codes=$self->{'scoring'}->codes;
@@ -109,26 +110,25 @@ sub new {
 	ajoute_colonne($self->{'tableau'},$store,decode('utf-8',$_),$i++);
     }
 
+    my $row=0;
   COPIE:for my $m ($self->{'scoring'}->marks) {
-      $it=$store->append();
       my @sc=($m->{'student'},$m->{'copy'});
-
-      $store->set($it,
-		  TAB_ID,studentids_string(@sc),
-		  TAB_NOTE,formatte($m->{'mark'}),
-		  TAB_COLOR,($sc[0]==$self->{'postcorrect_student'} &&
-			     $sc[1]==$self->{'postcorrect_copy'}
-			     ? '#CAEC87' : undef)
-		  );
-
+      my @vv=(TAB_ID,studentids_string(@sc),
+	      TAB_NOTE,formatte($m->{'mark'}),
+	      TAB_COLOR,($sc[0]==$self->{'postcorrect_student'} &&
+			 $sc[1]==$self->{'postcorrect_copy'}
+			 ? '#CAEC87' : undef)
+	      );
       $i=TAB_DETAIL ;
       for(@questions) {
-	  $store->set($it,$i++,
-		      formatte($self->{'scoring'}->question_score(@sc,$_->{'question'})));
+	push @vv,$i++,
+	  formatte($self->{'scoring'}->question_score(@sc,$_->{'question'}));
       }
       for(@codes) {
-	  $store->set($it,$i++,$self->{'scoring'}->student_code(@sc,$_));
+	push @vv,$i++,$self->{'scoring'}->student_code(@sc,$_);
       }
+
+      $store->insert_with_values($row++,@vv);
   }
 
     # Average row
