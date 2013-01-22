@@ -3831,12 +3831,11 @@ sub noter_calcul {
 			  "--grain",$projet{'options'}->{'note_grain'},
 			  "--arrondi",$projet{'options'}->{'note_arrondi'},
 			  "--notemax",$projet{'options'}->{'note_max'},
-			  "--plafond",$projet{'options'}->{'note_max_plafond'},
+			  ($projet{'options'}->{'note_max_plafond'} ? "--plafond" : "--no-plafond"),
 			  "--notemin",$projet{'options'}->{'note_min'},
 			  "--postcorrect-student",$postcorrect_student,
 			  "--postcorrect-copy",$postcorrect_copy,
 
-			  "--encodage-interne",$o{'encodage_interne'},
 			  "--progression-id",'notation',
 			  "--progression",1,
 			  ],
