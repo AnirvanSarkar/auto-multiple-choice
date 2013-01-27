@@ -103,6 +103,7 @@ sub parse_options {
       $self->{'options'}->{$_}=$l_arabic{$_}
 	if(!$self->{'options'}->{$_});
     }
+    $self->{'options'}->{'arabic'}=1;
   }
 
   if($self->{'options'}->{'lang'} eq 'JA') {
