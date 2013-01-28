@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2008-2012 Alexis Bienvenue
+% Copyright (C) 2008-2013 Alexis Bienvenue
 %
 % This file is part of Auto-Multiple-Choice
 %
@@ -31,7 +31,7 @@
 \keepsilent
 \preamble
 
-Copyright (C) 2008-2012 Alexis Bienvenue
+Copyright (C) 2008-2013 Alexis Bienvenue
 
 This file is part of Auto-Multiple-Choice
 
@@ -141,6 +141,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@correcheadtrue}
 % \DoNotIndex{\AMC@ensemblefalse}
 % \DoNotIndex{\AMC@ensembletrue}
+% \DoNotIndex{\AMX@fullGroupsfalse}
+% \DoNotIndex{\AMX@fullGroupstrue}
 % \DoNotIndex{\AMC@inside@boxfalse}
 % \DoNotIndex{\AMC@inside@boxtrue}
 % \DoNotIndex{\AMC@inside@digitfalse}
@@ -159,6 +161,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@qbloctrue}
 % \DoNotIndex{\AMC@rblocfalse}
 % \DoNotIndex{\AMC@rbloctrue}
+% \DoNotIndex{\AMC@shuffleGfalse}
+% \DoNotIndex{\AMC@shuffleGtrue}
 % \DoNotIndex{\AMC@watermarkfalse}
 % \DoNotIndex{\AMC@watermarktrue}
 % \DoNotIndex{\AMC@zoneformulairefalse}
@@ -355,6 +359,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \begin{itemize}
 % \ioption{noshuffle} cancels answers shuffling for all questions.
 %
+% \ioption{noshufflegroups} cancels groups shuffling.
+%
 % \ioption{answers} produces a common corrected answers sheet.
 %
 % \ioption{indivanswers} shows the boxes that corresponds to correct
@@ -416,6 +422,9 @@ along with Auto-Multiple-Choice.  If not, see
 % the LaTeX source. The teacher will fill one answer sheet for AMC to
 % analyse the scan and set correct answers from it.
 %
+% \ioption{fullgroups} cancels the use of the optional parameter of
+% |\insertgroup| and |\copygroup|, so that each group is always fully
+% inserted and fully copied.
 % \end{itemize}
 %
 % See also section~\ref{d:french} for a french version of some of
@@ -1141,6 +1150,10 @@ Three digits and two letters:\insertgroup{mixed}.
 % It also defines the following switches:
 % \begin{description}
 % \item |\ifAMC@ordre| if choices are never to be shuffled. 
+% \item |\ifAMC@shuffleG| if groups shuffling is allowed.
+% \item |\ifAMC@fullGroups| if groups are always fully inserted by
+%   |\insertgroup| and fully copied by |\copygroup|, irrespective to
+%   the optional parameter.
 % \item |\ifAMC@correchead| if some correction header is to be printed
 %   at the beginning.
 % \item |\ifAMC@affichekeys| if questions keys are to be printed.
@@ -1190,6 +1203,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 %    \begin{macrocode}
 \newif\ifAMC@ordre\AMC@ordrefalse
+\newif\ifAMC@shuffleG\AMC@shuffleGtrue
+\newif\ifAMC@fullGroups\AMC@fullGroupsfalse
 \newif\ifAMC@correchead\AMC@correcheadfalse
 \newif\ifAMC@affichekeys\AMC@affichekeysfalse
 \newif\ifAMC@correc\AMC@correcfalse
@@ -1923,11 +1938,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %     first \meta{n} elements if \meta{n} is given.
 %    \begin{macrocode}
 \newcommand{\shufflegroup}[1]{%
-  {\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}%
+  \ifAMC@shuffleG{\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}\fi%
 }
 \newcount\AMCtok@ik
 \newcommand{\insertgroup}[2][0]{%
   \AMCtok@max=#1\relax%
+  \ifAMC@fullGroups\AMCtok@max=\z@\fi%
   \ifnum\the\AMCtok@max<1%
     \AMCtok@max=\csname #2@k\endcsname%
   \fi%
@@ -1963,6 +1979,7 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 \newcommand{\copygroup}[3][0]{%
   \AMCtok@max=#1\relax%
+  \ifAMC@fullGroups\AMCtok@max=\z@\fi%
   \ifnum\the\AMCtok@max<1%
     \AMCtok@max=\csname #2@k\endcsname%
   \fi%
@@ -3254,6 +3271,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %    \begin{macrocode}
 \DeclareOptionX{noshuffle}{\AMC@ordretrue}
+\DeclareOptionX{noshufflegroups}{\AMC@shuffleGfalse}
+\DeclareOptionX{fullgroups}{\AMC@fullGroupstrue}
 \DeclareOptionX{answers}{\AMC@correcheadtrue\AMC@correctrue}
 \DeclareOptionX{indivanswers}{\AMC@correctrue}
 \DeclareOptionX{box}{\AMC@qbloctrue}
@@ -3272,9 +3291,12 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{outsidebox}{\AMC@outside@boxtrue}
 \DeclareOptionX{calibration}{\AMC@calibrationtrue}
 \DeclareOptionX{nowatermark}{\AMC@watermarkfalse}
-\DeclareOptionX{catalog}{\AMC@watermarkfalse\AMC@correcheadtrue%
-  \AMC@correctrue\AMC@ordretrue%
+\newcommand\AMC@catalogMode{%
+  \AMC@watermarkfalse\AMC@correcheadtrue%
+  \AMC@correctrue\AMC@ordretrue\AMC@shuffleGfalse%
+  \AMC@fullGroupstrue%
   \def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue}
+\DeclareOptionX{catalog}{\AMC@catalogMode}
 \DeclareOptionX{francais}{\AMC@loc@FR}
 \DeclareOptionX{lang}{\csname AMC@loc@#1\endcsname}
 \DeclareOptionX{versionA}{%
@@ -3359,6 +3381,10 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \ifx\CorrigeIndivExterne\undefined\else
 \message{***CORRIGE***^^J}
 \AMC@calibrationfalse\AMC@correcheadfalse\AMC@correctrue\AMC@watermarkfalse
+\fi
+\ifx\CatalogExterne\undefined\else
+\message{***CATALOG***^^J}
+\AMC@catalogMode
 \fi
 \ifx\NoWatermarkExterne\undefined\else
 \AMC@watermarkfalse
