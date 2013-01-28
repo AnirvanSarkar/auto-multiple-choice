@@ -101,8 +101,12 @@ Requires: perl(Graphics::Magick)
 %endif
 
 %if 0%{?fedora}
-Requires: texlive-latex, texlive-texmf-latex, perl(Net::CUPS), perl(Net::CUPS::PPD), perl(Gtk2::Notify)
-BuildRequires: texlive-latex, texlive-texmf-latex
+Requires: texlive-latex, perl(Net::CUPS), perl(Net::CUPS::PPD), perl(Gtk2::Notify)
+BuildRequires: texlive-latex
+%if 0%{?fedora} < 18
+Requires: texlive-texmf-latex
+BuildRequires: texlive-texmf-latex
+%endif
 %endif
 %if 0%{?mandriva_version}
 Requires: tetex, tetex-latex, perl(Net::CUPS), perl(Net::CUPS::PPD), perl(Gtk2::Notify)
