@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -37,6 +37,7 @@ use Encode;
 use Unicode::Normalize;
 use I18N::Langinfo qw(langinfo CODESET);
 use Locale::Language;
+use Text::ParseWords;
 
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
@@ -290,7 +291,12 @@ my %o_defaut=('pdf_viewer'=>['commande',
 
 	      'csv_surname_headers'=>'',
 	      'csv_name_headers'=>'',
-	      'notify'=>1,
+	      'notify_documents'=>0,
+	      'notify_capture'=>1,
+	      'notify_grading'=>1,
+	      'notify_annotation'=>1,
+	      'notify_desktop'=>1,
+	      'notify_command'=>'',
 	      );
 
 # MacOSX universal command to open files or directories : /usr/bin/open
@@ -422,11 +428,22 @@ if(check_install(module=>"Gtk2::Notify")) {
 }
 
 sub notify_end_of_work {
-  my ($message)=@_;
-  if($notify && $o{'notify'}) {
-    my $notification=Gtk2::Notify->new('Auto Multiple Choice',$message,
-				       '@/ICONSDIR/@/auto-multiple-choice.svg');
-    $notification->show;
+  my ($action,$message)=@_;
+  if($o{'notify_'.$action}) {
+    if($notify && $o{'notify_desktop'}) {
+      my $notification=Gtk2::Notify->new('Auto Multiple Choice',$message,
+					 '@/ICONSDIR/@/auto-multiple-choice.svg');
+      $notification->show;
+    }
+    if($o{'notify_command'}) {
+      my @cmd=map { s/[%]m/$message/g;s/[%]a/$action/g;$_; }
+	quotewords('\s+',0,$o{'notify_command'});
+      if(commande_accessible($cmd[0])) {
+	commande_parallele(@cmd);
+      } else {
+	debug "ERROR: command '$cmd[0]' not found when trying to notify";
+      }
+    }
   }
 }
 
@@ -2350,6 +2367,9 @@ sub doc_maj {
 		 my $c=shift;
 		 my @err=$c->erreurs();
 		 if(@err) {
+		   notify_end_of_work('documents',
+				      __"Error while preparing documents");
+
 		   my $message=__("Errors while processing the source file.")
 		     ." "
 		       .__("You have to correct the source file and re-run documents update.")." "
@@ -2368,6 +2388,9 @@ sub doc_maj {
 		     $dialog->run;
 		     $dialog->destroy;
 		 } else {
+		   notify_end_of_work('documents',
+				      __"Documents have been prepared");
+
 		     # verif que tout y est
 
 		     my $ok=1;
@@ -3134,7 +3157,7 @@ sub saisie_auto_ok {
 		     close($c->{'o'}->{'fh'});
 		     detecte_analyse('apprend'=>1);
 		     assoc_state();
-		     notify_end_of_work(__"Automatic data capture has been completed");
+		     notify_end_of_work('capture',__"Automatic data capture has been completed");
 		 },
 	);
 
@@ -3843,7 +3866,9 @@ sub noter_calcul {
 	     'texte'=>__"Computing marks...",
 	     'progres.id'=>'notation',
 	     'fin'=>sub {
-		 noter_resultat();
+	       notify_end_of_work('grading',
+				  __"Grading has been completed");
+	       noter_resultat();
 	     },
 	     );
 }
@@ -4132,7 +4157,7 @@ sub annote_copies {
 	     my $c=shift;
 	     my $n=$c->variable('n_processed');
 	     regroupement_go($n>0,$id_file) if($and_regroupe);
-	     notify_end_of_work(__"Annotations have been completed");
+	     notify_end_of_work('annotation',__"Annotations have been completed");
 	   },
 	  );
 }
@@ -4533,6 +4558,12 @@ sub edit_preferences {
     } else {
 	$w{'pref_projet_tous'}->set_sensitive(0);
 	$w{'pref_projet_annonce'}->set_label('<i>'.__("Project preferences").'</i>');
+    }
+
+    # Desktop notifications available?
+    if(!$notify) {
+      $w{'pref_v_notify_desktop'}->set_sensitive(0);
+      $w{'pref_v_notify_desktop'}->set_tooltip_markup(__"Please install <b>Gtk2::Notify</b> perl package to make desktop notifications available.");
     }
 
     # anavailable options, managed by the filter:
