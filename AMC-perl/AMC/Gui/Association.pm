@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -40,6 +40,9 @@ use constant {
     COPIES_MANUEL => 4,
     COPIES_BG => 5,
     COPIES_IIMAGE => 6,
+
+    NAMES_NAME => 0,
+    NAMES_I => 1,
 };
 
 use_gettext;
@@ -59,6 +62,7 @@ sub new {
 	      'data'=>'',assoc=>'','capture'=>'','layout'=>'',
 	      'global'=>0,
 	      'show_all'=>1,
+	      'complete_beginning'=>1,
 	      'encodage_liste'=>'UTF-8',
 	      'separateur'=>"",
 	      'identifiant'=>'',
@@ -140,7 +144,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu scrolled_tableau viewport_tableau button_show_all/) {
+    for my $k (qw/general tableau titre photo associes_cb copies_tree bouton_effacer bouton_inconnu scrolled_tableau viewport_tableau button_show_all student_typein v_complete_beginning/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
@@ -149,6 +153,10 @@ sub new {
     $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
 
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
+
+    $self->{'names_model'}=Gtk2::ListStore->new ('Glib::String',
+						 'Glib::String',
+						 );
 
     my @bouton_nom=();
     my @bouton_eb=();
@@ -162,9 +170,13 @@ sub new {
     for my $i (0..($self->{'liste'}->taille()-1)) {
 	my $eb=Gtk2::EventBox->new();
 	my $b=Gtk2::Button->new();
-	my $l=Gtk2::Label->new($self->{'liste'}->data_n($i,'_ID_'));
+	my $name=$self->{'liste'}->data_n($i,'_ID_');
+	my $l=Gtk2::Label->new($name);
+	$self->{'names_model'}->insert_with_values($i,
+						   NAMES_NAME,$name,
+						   NAMES_I,$i);
 	$b->add($l);
-	$b->set_tooltip_text($self->{'liste'}->data_n($i,'_ID_'));
+	$b->set_tooltip_text($name);
 	$l->set_size_request(10,-1);
 	if($self->{'rtl'}
 	   && $self->{'general'}->get_direction() eq 'rtl') {
@@ -250,6 +262,16 @@ sub new {
     }
     $self->{'assoc'}->end_transaction('ALST');
 
+    # auto-completion
+
+    $self->{'completion'}=Gtk2::EntryCompletion->new();
+    $self->{'completion'}->set_model($self->{'names_model'});
+    $self->{'completion'}->set_text_column(NAMES_NAME);
+    $self->{'completion'}->set_minimum_key_length(2);
+    $self->{'completion'}->set_match_func(\&compare_names,$self);
+    $self->{'completion'}->signal_connect("match-selected",\&select_from_entry,$self);
+    $self->{'student_typein'}->set_completion($self->{'completion'});
+
     # retenir...
 
     $self->{'images'}=\@images;
@@ -268,6 +290,33 @@ sub new {
     $self->initial_size;
 
     return($self);
+}
+
+# function used to look at a key from the names, for auto-completion
+#
+# {X:X}
+sub compare_names {
+  my ($widget,$key,$iter,$self)=@_;
+  my $name=$self->{'names_model'}->get($iter,NAMES_NAME);
+
+  if($self->{'complete_beginning'}) {
+    return($name =~ /^$key/i);
+  } else {
+    return($name =~ /$key/i);
+  }
+}
+
+# callback when selecting a completion match from the entry
+#
+# {X:X}
+sub select_from_entry {
+  my ($widget,$model,$iter,$self)=@_;
+  my $i=$model->get($iter,NAMES_I);
+  my $name=$model->get($iter,NAMES_NAME);
+  debug "Selecting from entry auto-completion: I=$i NAME=$name";
+  $self->choisit($i);
+  $self->{'student_typein'}->set_text('');
+  return(1);
 }
 
 # is "show all" button active?
@@ -338,6 +387,14 @@ sub set_show_all {
   my ($self)=@_;
   $self->{'show_all'}=$self->{'button_show_all'}->get_active();
   $self->set_n_cols();
+}
+
+# Gets state of "Beggining" checkbox
+#
+# {X:X}
+sub set_complete_beginning {
+  my ($self)=@_;
+  $self->{'complete_beginning'}=$self->{'v_complete_beginning'}->get_active();
 }
 
 # Sets the window size to requested one (saved the last time the
