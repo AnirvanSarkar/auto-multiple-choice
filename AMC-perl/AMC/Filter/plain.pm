@@ -701,7 +701,7 @@ sub write_latex {
   }
 
   if($self->{'options'}->{'separateanswersheet'}) {
-    print OUT "\\AMCcleardoublepage\n";
+    print OUT "\n\\AMCcleardoublepage\n\n";
     print OUT "\\AMCformBegin\n";
 
     print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
