@@ -45,13 +45,13 @@ sub new {
 				 ShuffleQuestions Columns QuestionBlocks
 				 Arabic ArabicFont
 				 Disable
-				 ManualDuplex
+				 ManualDuplex SingleSided
 				/];
     $self->{'options_boolean'}=[qw/LaTeX xltxtra
 				   ShuffleQuestions QuestionBlocks
 				   CompleteMulti SeparateAnswerSheet
 				   Arabic
-				   ManualDuplex
+				   ManualDuplex SingleSided
 				  /];
     $self->{'groups'}=[];
     $self->{'maxhorizcode'}=6;
@@ -67,6 +67,7 @@ sub new {
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
        'disable'=>'',
        'manualduplex'=>'',
+       'singlesided'=>'',
       };
     $self->{'parse_modules'}=['local_latex','images','embf','text'];
     $self->{'qid'}=0;
@@ -701,7 +702,11 @@ sub write_latex {
   }
 
   if($self->{'options'}->{'separateanswersheet'}) {
-    print OUT "\n\\AMCcleardoublepage\n\n";
+    if($self->{'options'}->{'singlesided'}) {
+      print OUT "\n\\clearpage\n\n";
+    } else {
+      print OUT "\n\\AMCcleardoublepage\n\n";
+    }
     print OUT "\\AMCformBegin\n";
 
     print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
