@@ -3744,6 +3744,8 @@ sub noter_postcorrect {
 	  }
 	} else {
 	  $w{'postcorrect_student'}->set_value($postcorrect_student_min);
+	  my @c=sort { $a <=> $b } (keys %{$postcorrect_ids{$postcorrect_student_min}});
+	  $w{'postcorrect_copy'}->set_value($c[0]);
 	}
 
     } else {
@@ -3786,13 +3788,21 @@ sub postcorrect_change {
   postcorrect_change_copy;
 }
 
+sub postcorrect_student_exists {
+  my ($student)=@_;
+  my @c=();
+  @c=(keys %{$postcorrect_ids{$student}}) if($postcorrect_ids{$student});
+  return($#c>=0 ? 1 : 0);
+}
+
 sub postcorrect_previous {
     my $student=$w{'postcorrect_student'}->get_value();
     my $copy=$w{'postcorrect_copy'}->get_value();
 
     $copy--;
     if($copy<$postcorrect_copy_0) {
-      $student--;
+      do { $student-- } while($student>=$postcorrect_student_min
+			      && !postcorrect_student_exists($student));
       if($student>=$postcorrect_student_min) {
 	$w{'postcorrect_student'}->set_value($student);
 	$w{'postcorrect_copy'}->set_value(10000);
@@ -3808,7 +3818,8 @@ sub postcorrect_next {
 
     $copy++;
     if($copy>$postcorrect_copy_1) {
-      $student++;
+      do { $student++ } while($student<=$postcorrect_student_max
+			      && !postcorrect_student_exists($student));
       if($student<=$postcorrect_student_max) {
 	$w{'postcorrect_student'}->set_value($student);
 	$w{'postcorrect_copy'}->set_value(0);
