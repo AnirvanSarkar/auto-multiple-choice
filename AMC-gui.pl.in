@@ -3132,8 +3132,19 @@ sub analyse_call_go {
 	  );
 }
 
+sub clean_gtk2_filenames {
+  my @f=@_;
+  return( 
+	 map { 
+	   if (utf8::is_utf8($_)) {
+	     $_= Glib->filename_from_unicode ($_);
+	   } $_; 
+	 } @f);
+}
+
 sub saisie_auto_ok {
-    my @f=sort { $a cmp $b } ($w{'saisie_auto'}->get_filenames());
+  my @f=clean_gtk2_filenames(sort { $a cmp $b } 
+			     ($w{'saisie_auto'}->get_filenames()));
     my $copie=$w{'copie_scans'}->get_active();
 
     reprend_pref('saisie_auto',$projet{'options'});
@@ -6258,7 +6269,7 @@ sub email_attachment_add {
   $d->set_select_multiple(1);
   my $r=$d->run;
   if($r eq 'ok') {
-    email_attachment_addtolist($d->get_filenames);
+    email_attachment_addtolist(clean_gtk2_filenames($d->get_filenames));
   }
   $d->destroy();
 }
