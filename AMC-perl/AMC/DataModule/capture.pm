@@ -320,7 +320,7 @@ sub populate_from_xml {
 	  # Look if the namefield image is present...
 	  my $nf="nom-".id2idf($id).".jpg";
 	  if(-f "$cr/$nf") {
-	    $self->set_zone_auto_id($zoneid,-1,-1,$nf,undef);
+	    $self->set_zone_auto_id_without_imagedata($zoneid,-1,-1,$nf);
 	  }
 	}
 
@@ -334,9 +334,10 @@ sub populate_from_xml {
 			 $case->{'question'},$case->{'reponse'});
 	  $zf='' if(!-f "$cr/zooms/$zf");
 
-	  $self->set_zone_auto_id($zoneid,
-				  $case->{'pixels'},$case->{'pixelsnoirs'},
-				  $zf,undef);
+	  $self->set_zone_auto_id_without_imagedata
+	    ($zoneid,
+	     $case->{'pixels'},$case->{'pixelsnoirs'},
+	     $zf);
 
 	  $self->populate_position($case->{'coin'},$zoneid,POSITION_BOX);
 	  $self->populate_position($an->{'casetest'}->{$c}->{'coin'},
@@ -411,6 +412,8 @@ sub define_statements {
 		       ." SET manual=? WHERE zoneid=?"},
      'setZoneAuto'=>{'sql'=>"UPDATE $t_zone"
 		     ." SET total=?, black=?, image=?, imagedata=? WHERE zoneid=?"},
+     'setZoneAutoPrim'=>{'sql'=>"UPDATE $t_zone"
+			 ." SET total=?, black=?, image=? WHERE zoneid=?"},
      'nPages'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
 		." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'nPagesAuto'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
@@ -741,7 +744,17 @@ sub set_zone_auto_id {
   $sth->bind_param(3,$image);
   $sth->bind_param(4,$image_data,SQL_BLOB);
   $sth->bind_param(5,$zoneid);
-  $self->statement('setZoneAuto')->execute();
+  $sth->execute();
+}
+
+sub set_zone_auto_id_without_imagedata {
+  my ($self,$zoneid,$total,$black,$image)=@_;
+  my $sth=$self->statement('setZoneAutoPrim');
+  $sth->bind_param(1,$total);
+  $sth->bind_param(2,$black);
+  $sth->bind_param(3,$image);
+  $sth->bind_param(4,$zoneid);
+  $sth->execute();
 }
 
 # n_pages returns the number of copies for which a data capture (manual
