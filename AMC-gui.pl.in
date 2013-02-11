@@ -2104,6 +2104,8 @@ sub projet_charge_ok {
 	    $dialog->destroy;
 	}
 	if($reponse eq 'yes') {
+	  quitte_projet();
+
 	  # If the project to open lies on a removable media, suggest
 	  # to copy it first to the user standard projects directory:
 
@@ -2180,6 +2182,7 @@ sub projet_charge_nouveau {
 
 
     } else {
+      quitte_projet();
 
       $o{'rep_projets'}=$w{'local_rep_projets'};
       if(projet_ouvre($proj,1)) {
