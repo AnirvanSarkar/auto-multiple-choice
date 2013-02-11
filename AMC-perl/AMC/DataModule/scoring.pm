@@ -276,10 +276,16 @@ sub populate_from_xml {
 	     ($q->{'multiple'} ? QUESTION_MULT : QUESTION_SIMPLE),
 	     ($q->{'indicative'} ? 1 : 0),$q->{'bareme'});
 
-	  for my $answer (keys %{$q->{'reponse'}}) {
-	    my $a=$q->{'reponse'}->{$answer};
-	    $self->new_answer($student,$question,$answer,
-			      $a->{'bonne'},$a->{'bareme'});
+	  if($q->{'reponse'}) {
+	    if(ref($q->{'reponse'}) eq 'HASH') {
+	      for my $answer (keys %{$q->{'reponse'}}) {
+		my $a=$q->{'reponse'}->{$answer};
+		$self->new_answer($student,$question,$answer,
+				  $a->{'bonne'},$a->{'bareme'});
+	      }
+	    } else {
+	      debug "WARNING: reponse is not a HASHREF for S=$student Q=$question";
+	    }
 	  }
 	} else {
 	  debug "Unknown question id: <$question>";
