@@ -6269,7 +6269,7 @@ sub email_attachment_add {
   $d->set_select_multiple(1);
   my $r=$d->run;
   if($r eq 'ok') {
-    email_attachment_addtolist(clean_gtk2_filenames($d->get_filenames));
+    email_attachment_addtolist($d->get_filenames);
   }
   $d->destroy();
 }
