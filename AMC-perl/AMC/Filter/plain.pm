@@ -33,6 +33,9 @@ use_gettext;
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
+
+    # list of available global options:
+
     $self->{'options_names'}=[qw/Title Presentation Code Lang Font
 				 BoxColor PaperSize
 				 AnswerSheetTitle AnswerSheetPresentation
@@ -47,15 +50,25 @@ sub new {
 				 Disable
 				 ManualDuplex SingleSided
 				/];
+
+    # from these options, which ones are boolean valued?
+
     $self->{'options_boolean'}=[qw/LaTeX xltxtra
 				   ShuffleQuestions QuestionBlocks
 				   CompleteMulti SeparateAnswerSheet
 				   Arabic
 				   ManualDuplex SingleSided
 				  /];
+
+    # current groups list
     $self->{'groups'}=[];
+    # maximum of digits that a hrizontal code can handle
     $self->{'maxhorizcode'}=6;
+    # options values
     $self->{'options'}={};
+
+    # default values for options:
+
     $self->{'default_options'}=
       {'latexengine'=>'xelatex','xltxtra'=>1,
        'questionblocks'=>1,'shufflequestions'=>1,
@@ -69,21 +82,34 @@ sub new {
        'manualduplex'=>'',
        'singlesided'=>'',
       };
+
+    # List of modules to be used when parsing (see parse_*
+    # corresponding methods for implementation). Modules in the
+    # Disable global option won't be used.
+
     $self->{'parse_modules'}=['local_latex','images','embf','text'];
+
+    # current question number among questions for which no ID is given
+    # in the source
     $self->{'qid'}=0;
+
     bless ($self, $class);
     return $self;
 }
 
+# arabic default localisation texts
 my %l_arabic=('l-question'=>'السؤال',
 	      'l-none'=>'لا توجد اجابة صحيحة',
 	      );
 
+# arabic alphabet to replace letters ABCDEF... in the boxes
 my @alphabet_arabic=('أ','ب','ج','د','ه','و','ز','ح','ط','ي','ك','ل',
 		     'م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ',
 		     'ذ','ض','ظ','غ',
 		     );
 
+# parse boolean options to get 0 (from empty value, "NO" or " FALSE")
+# or 1 (from other values).
 sub parse_bool {
   my ($b)=@_;
   if($b =~ /^\s*(no|false|0)\s*$/i) {
@@ -93,12 +119,17 @@ sub parse_bool {
   }
 }
 
+# transforms the list of current options values to make it coherent
 sub parse_options {
   my ($self)=@_;
+
+  # boolean options are parsed to get 0 or 1
   for my $n (@{$self->{'options_boolean'}}) {
     $self->{'options'}->{lc($n)}=parse_bool($self->{'options'}->{lc($n)});
   }
 
+  # if AR language is selected, apply default arabic localisation
+  # options and set 'arabic' option to 1
   if($self->{'options'}->{'lang'} eq 'AR') {
     for (keys %l_arabic) {
       $self->{'options'}->{$_}=$l_arabic{$_}
@@ -107,43 +138,55 @@ sub parse_options {
     $self->{'options'}->{'arabic'}=1;
   }
 
+  # if JA language is selected, switch to 'platex+dvipdfmx' LaTeX
+  # engine, remove default font and don't use xltxtra LaTeX package
   if($self->{'options'}->{'lang'} eq 'JA') {
     $self->{'default_options'}->{'latexengine'}='platex+dvipdfmx';
     $self->{'default_options'}->{'font'}='';
     $self->{'default_options'}->{'xltxtra'}='';
   }
 
+  # set options values to default if not defined in the source
   for my $k (keys %{$self->{'default_options'}}) {
     $self->{'options'}->{$k}=$self->{'default_options'}->{$k}
       if(!defined($self->{'options'}->{$k}));
   }
 
+  # relay LaTeX engine option to the project itself
   $self->set_project_option('moteur_latex_b',
 			    $self->{'options'}->{'latexengine'});
 }
 
+# adds an object (hash) to a container (list) and returns the
+# corresponding new hashref
 sub add_object {
   my ($container,%object)=@_;
   push @$container,{%object};
   return($container->[$#$container]);
 }
 
+# adds a group to current state
 sub add_group {
   my ($self,%g)=@_;
   add_object($self->{'groups'},%g);
 }
 
+# cleanup for text: removes leading and trailing spaces
 sub value_cleanup {
   my ($self,$v)=@_;
   $$v =~ s/^\s+//;
   $$v =~ s/\s+$//;
 }
 
+# issue an AMC-TXT (syntax) error to be shown by the GUI
 sub parse_error {
   my ($self,$text)=@_;
   $self->error("<i>AMC-TXT(".sprintf(__('Line %d'),$.).")</i> ".$text);
 }
 
+# check that a set of answers for a given question is coherent: one
+# need more than one answer, and a simple question needs one and only
+# one correct answer.
 sub check_answers {
   my ($self,$question)=@_;
   if($question) {
@@ -165,21 +208,24 @@ sub check_answers {
   }
 }
 
+# parse the whole source file to a data tree ($self->{'groups'})
 sub read_source {
   my ($self,$input_file)=@_;
 
   my %opts=();
-  my $follow='';
-  my $group='';
-  my $question='';
+  my $follow=''; # variable where to add content comming from
+                 # following lines
+  my $group='';  # current group
+  my $question=''; # current question
 
+  # regexp that matches an option name:
   my $opt_re='('.join('|',@{$self->{'options_names'}}).')';
 
   open(IN,"<:utf8",$input_file);
  LINE: while(<IN>) {
     chomp;
 
-    # comments
+    # removes comments
     s/^\s*\#.*//;
 
     # groups
@@ -263,12 +309,33 @@ sub read_source {
   close(IN);
 }
 
+# bold font LaTeX command, not used in arabic language because there
+# is often no bold font arabic font.
 sub bf_or {
   my($self,$replace,$bf)=@_;
   return($self->{'options'}->{'arabic'}
 	 ? $replace : ($bf ? $bf : "\\bf"));
 }
 
+####################################################################
+# PARSING METHODS
+#
+# ARGUMENT: list of components
+# RETURN VALUE: list of parsed components
+#
+# A component is a {type=>TYPE,string=>STRING} hashref, where
+# * TYPE is the component type: 'txt' for AMC-TXT text, 'latex' for
+#   LaTeX code.
+# * STRING is the component string
+#
+# When all parsing methods has been applied, the result must be a list
+# of 'latex' components, that will be concatenated to get the LaTeX
+# code corresponding to the source file.
+
+# parse_images extracts an image specification (like '!image.jpg!')
+# from 'txt' components, and replaces the component with 3 components:
+# the preceding text, the LaTeX code that inserts the image, and the
+# following text
 sub parse_images {
   my ($self,@components)=@_;
   my @o=();
@@ -298,6 +365,8 @@ sub parse_images {
   return(@o);
 }
 
+# parse_local_latex extracts a local LaTeX specification (like
+# '[[$f(x)$]]') from 'txt' components
 sub parse_local_latex {
   my ($self,@components)=@_;
   my @o=();
@@ -320,6 +389,8 @@ sub parse_local_latex {
   return(@o);
 }
 
+# parse_embf inserts LaTeX commands to switch to italic or bold font
+# when '[_ ... _]' or '[* ... *]' constructs are used in AMC-TXT.
 sub parse_embf {
   my ($self,@components)=@_;
   my @o=();
@@ -351,6 +422,9 @@ sub parse_embf {
   return(@o);
 }
 
+# parse_text transforms plain text (with no special constructs) to
+# LaTeX code, escaping some characters that have special meaning for
+# LaTeX.
 sub parse_text {
   my ($self,@components)=@_;
   my @o=();
@@ -374,6 +448,8 @@ sub parse_text {
   return(@o);
 }
 
+# parse_all calls all requested parse_* methods in turn (when they are
+# not disabled by the Disable global option).
 sub parse_all {
   my ($self,@components)=@_;
   for my $m (@{$self->{'parse_modules'}}) {
@@ -384,6 +460,7 @@ sub parse_all {
   return(@components);
 }
 
+# Checks that the resulting components list has only 'latex' components
 sub check_latex {
   my ($self,@components)=@_;
   my @s=();
@@ -397,6 +474,9 @@ sub check_latex {
   return(@s);
 }
 
+# converts AMC-TXT string to a LaTeX string: make a single 'txt'
+# component, apply parse_all and check_latex, and then concatenates
+# the components
 sub format_text {
   my ($self,$t)=@_;
   $t =~ s/^\s+//;
@@ -405,6 +485,8 @@ sub format_text {
   return(join('',$self->check_latex($self->parse_all({'type'=>'txt','string'=>$t}))));
 }
 
+# builds the LaTeX scoring command from the question's scoring
+# strategy (or the default scoring strategy)
 sub scoring_string {
   my ($self,$obj,$type)=@_;
   my $s=$obj->{'scoring'}
@@ -412,6 +494,8 @@ sub scoring_string {
   return($s ? "\\scoring{$s}" : "");
 }
 
+# builds the LaTeX code for an answer: \correctchoice or \wrongchoice,
+# followed by the scoring command
 sub format_answer {
   my ($self,$a)=@_;
   my $t='\\'.($a->{'correct'} ? 'correct' : 'wrong').'choice{'
@@ -421,6 +505,7 @@ sub format_answer {
   return($t);
 }
 
+# builds the LaTeX code for the question (including answers)
 sub format_question {
   my ($self,$q)=@_;
   my $qid=$q->{'id'};
@@ -451,6 +536,8 @@ sub format_question {
   return($t);
 }
 
+# returns the group name, defaulting to 'groupX' (where X is a letter
+# beginnig at A)
 sub group_name {
   my ($self,$group)=@_;
   if(!$group->{'name'}) {
@@ -459,6 +546,8 @@ sub group_name {
   return($group->{'name'});
 }
 
+# gets the Year for the version of installed bidi.sty. This will be
+# used to adapt the LaTeX code to version before or after 2011
 sub bidi_year {
   my ($self)=@_;
   if(!$self->{'bidiyear'}) {
@@ -477,6 +566,7 @@ sub bidi_year {
   return($self->{'bidiyear'});
 }
 
+# builds and returns the LaTeX header
 sub file_header {
   my ($self)=@_;
   my $t='';
@@ -556,6 +646,8 @@ sub file_header {
   return($t);
 }
 
+# Builds and returns the question sheet head (or the answer sheet head
+# if $answersheet is true)
 sub page_header {
   my ($self,$answersheet)=@_;
   my $t="";
@@ -584,6 +676,7 @@ sub page_header {
   return($t);
 }
 
+# Builds and returns the name field LaTeX code
 sub full_namefield {
   my ($self,$n_ligs)=@_;
   my $t='';
@@ -597,6 +690,8 @@ sub full_namefield {
   return($t);
 }
 
+# Builds and returns the student identification block LaTeX code (with
+# name field and AMCcode if requested)
 sub student_block {
   my ($self)=@_;
   my $t='';
@@ -640,6 +735,7 @@ sub student_block {
   return($t);
 }
 
+# writes the LaTeX output file
 sub write_latex {
   my ($self,$output_file)=@_;
 
@@ -735,6 +831,8 @@ sub write_latex {
   close(OUT);
 }
 
+# Checks that the requested prerequisites (in fact, fonts) are
+# installed on the system
 sub check {
   my ($self)=@_;
   my @cf=('font');
@@ -751,6 +849,7 @@ sub check {
   $self->error(sprintf(__("The following fonts does not seem to be installed on the system: <b>%s</b>."),join(', ',@mf))) if(@mf);
 }
 
+# Whole filter processing
 sub filter {
   my ($self,$input_file,$output_file)=@_;
   $self->read_source($input_file);
