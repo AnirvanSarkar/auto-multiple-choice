@@ -3251,6 +3251,17 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCpageref#1{\expandafter\pageref{\the\AMCid@etud-#1}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
+% \begin{macro}{\AMCqlabel}
+%   A label can be created for current question with
+%   |\AMCqlabel|\marg{label}. This label can be used with |\AMCref|
+%   and |\AMCpageref|.
+%    \begin{macrocode}
+\newcommand{\AMCqlabel}[1]{%
+  \protected@write\@auxout{}{\string\newlabel{\the\AMCid@etud-#1}{{\arabic{AMCquestionaff}}{\thepage}}}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Pre-association}
 %
 % \begin{macro}{\AMCassociation}
