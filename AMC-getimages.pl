@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -32,7 +32,7 @@ use_gettext;
 
 my $list_file='';
 my $progress_id='';
-my $copie='';
+my $copy_to='';
 my $debug='';
 my $vector_density=300;
 my $orientation="";
@@ -41,7 +41,7 @@ my %use=(pdfimages=>1,pdftk=>1);
 
 GetOptions("list=s"=>\$list_file,
 	   "progression-id=s"=>\$progress_id,
-	   "copy-to=s"=>\$copie,
+	   "copy-to=s"=>\$copy_to,
 	   "debug=s"=>\$debug,
 	   "vector-density=s"=>\$vector_density,
 	   "orientation=s"=>\$orientation,
@@ -52,6 +52,9 @@ GetOptions("list=s"=>\$list_file,
 
 set_debug($debug);
 
+# cancels use of pdfimages/pdftk if these commands are not available
+# on the system
+
 for my $cmd (qw/pdfimages pdftk/) {
   if($use{$cmd} && !commande_accessible($cmd)) {
     debug "WARNING: command $cmd not found";
@@ -59,17 +62,36 @@ for my $cmd (qw/pdfimages pdftk/) {
   }
 }
 
-$copie =~ s:(?<=.)/+$::;
+# delete trailing / in the --copy-to directory option
+
+$copy_to =~ s:(?<=.)/+$::;
+
+# filenames of scan files are handled by a hashref that reminds if the
+# file has already been processed: in this hash,
+#
+# * path is the whole path of the scan,
+# * dir is the directory part of the path
+# * file is the file part of the path
+# * orig is 1 if the file is the original scan
+
+# original_file builds a hashref for a original scan file (not yet
+# processed or split or moved)
 
 sub original_file {
   my ($file_path)=@_;
   return({ path=>$file_path,orig=>1 });
 }
 
+# derivative_file builds a hashref for a file that has already been
+# processed in some way by AMC-getimages
+
 sub derivative_file {
   my ($file_path)=@_;
   return({ path=>$file_path });
 }
+
+# check_split_path($f,$force) computes (if $force is set, or if not
+# yet already done) the dir and file parts of the path
 
 sub check_split_path {
   my ($f,$force)=@_;
@@ -80,21 +102,15 @@ sub check_split_path {
   }
 }
 
-my @f=map { original_file($_) } (@ARGV);
-
-if(-f $list_file) {
-  open(LIST,$list_file);
-  while(<LIST>) {
-    chomp;
-    push @f,original_file($_);
-  }
-  close(LIST);
-}
+# variables to show progress
 
 my $dp;
 my $p;
 $p=AMC::Gui::Avancement::new(1,'id'=>$progress_id)
   if($progress_id);
+
+# image_size computes the image size (width,height) using 'identify'
+# from ImageMagick/GraphicsMagick
 
 sub image_size {
   my ($file)=@_;
@@ -108,15 +124,23 @@ sub image_size {
   return(@r);
 }
 
+# image_orientation returns "portrait", "landscape" or "" (in
+# indetermined cases) depending on the image orientation.
+
 sub image_orientation {
   my ($file)=@_;
   my ($w,$h)=image_size($file);
   return( $h>1.1*$w ? "portrait" : $w>1.1*$h ? "landscape" : "");
 }
 
+# move_derivative($origin,$derivative) moves the file descried by
+# $derivative to the same directory as $origin (changing its name if a
+# file with this name already exists), and then updates $derivative to
+# point to the new location, and returns it.
+
 sub move_derivative {
   my ($origin,$derivative)=@_;
-  if(!$copie) {
+  if(!$copy_to) {
     check_split_path($origin);
     check_split_path($derivative);
     my $dest=new_filename($origin->{dir}."/".$derivative->{file});
@@ -128,6 +152,13 @@ sub move_derivative {
   return($derivative);
 }
 
+# replace_by($origin,@derivative_paths) is called after a scan file
+# described by $origin has been split in several files. It moves the
+# derivative files to the same directory has the origin, deletes the
+# $origin file if it is not an original scan file (has already been
+# processed in some way), and returns the derivatives files
+# descriptions array.
+
 sub replace_by {
   my ($origin,@derivative_paths)=@_;
   my @fd=map { move_derivative($origin,derivative_file($_)) }
@@ -137,13 +168,37 @@ sub replace_by {
   return(@fd);
 }
 
-# split multi-page PDF with pdfimages or pdftk, which uses less memory
-# than ImageMagick
+###################################################################
+# STEP 0: collects all original scan provided as arguments of the
+# command, or in a file
+
+my @f=map { original_file($_) } (@ARGV);
+
+if(-f $list_file) {
+  open(LIST,$list_file);
+  while(<LIST>) {
+    chomp;
+    push @f,original_file($_);
+  }
+  close(LIST);
+}
+
+###################################################################
+# STEP 1: split multi-page PDF with pdfimages or pdftk, which uses
+# less memory than ImageMagick
 
 if($use{pdfimages} || $use{pdftk}) {
 
+  # @pdfs is the list of PDF files
+
   my @pdfs=grep { $_->{path} =~ /\.pdf$/i } @f;
+
+  # @fs will collect all split pages from PDF files. It is initialized
+  # with the list of non-PDF files.
+
   @fs=grep { $_->{path} !~ /\.pdf$/i } @f;
+
+  # starts PDFs processing...
 
   if(@pdfs) {
     $dp=1/(1+$#pdfs);
@@ -152,6 +207,8 @@ if($use{pdfimages} || $use{pdftk}) {
   PDF:for my $file (@pdfs) {
 
       $p->progres($dp) if($p);
+
+      # makes a temporary directory to extract images from the PDF
 
       my $temp_loc=tmpdir();
       my $temp_dir = tempdir( DIR=>$temp_loc,
@@ -202,7 +259,7 @@ if($use{pdfimages} || $use{pdftk}) {
 	}
       }
 
-      # If not possible, use pdftk
+      # If not successful with pdfimages, use pdftk
 
       if($use{pdftk}) {
 	if(system("pdftk",$file->{path},"burst","output",
@@ -227,7 +284,7 @@ if($use{pdfimages} || $use{pdftk}) {
 	}
       }
 
-      # no success... keep it to be processed by magick
+      # no success... keep the PDF to be processed by magick
 
       push @fs,$file;
 
@@ -236,11 +293,14 @@ if($use{pdfimages} || $use{pdftk}) {
     $p->text('') if($p);
   }
 
+  # To end, replaces the file list
+
   @f=@fs;
 }
 
-# split other multi-page images (such as TIFF) with ImageMagick, and
-# convert vector to bitmap
+###################################################################
+# STEP 2: split other multi-page images (such as TIFF) with
+# ImageMagick, and convert vector to bitmap
 
 @fs=();
 for my $fich (@f) {
@@ -313,7 +373,9 @@ for my $fich (@f) {
 
 @f=@fs;
 
-# next, check files orientation and rotate them 90° if needed.
+###################################################################
+# STEP 3: check files orientation (if requested) and rotate them 90°
+# if needed.
 
 if($orientation) {
 
@@ -348,9 +410,10 @@ if($orientation) {
 
 }
 
-# if requested, copy files to project directory
+###################################################################
+# STEP 4: if requested, copy files to project directory
 
-if($copie && @f) {
+if($copy_to && @f) {
   $p->text(__"Copying scans to project directory...") if($p);
 
   $dp=1/(1+$#f);
@@ -368,7 +431,7 @@ if($copie && @f) {
     $fb =~ s/[^a-zA-Z0-9._+-]+/_/g;
     $fb =~ s/^[^a-zA-Z0-9]/scan_/;
 
-    my $dest=$copie."/".$fb;
+    my $dest=$copy_to."/".$fb;
     my $deplace=0;
 
     if($fich->{path} ne $dest) {
@@ -398,8 +461,15 @@ if($copie && @f) {
   $p->text('') if($p);
 }
 
-open(LIST,">",$list_file);
-for(@f) {
-  print LIST $_->{path}."\n";
+###################################################################
+# STEP 5: updates the files list with processed files names
+
+if($list_file) {
+  open(LIST,">",$list_file);
+  for(@f) {
+    print LIST $_->{path}."\n";
+  }
+  close(LIST);
+} else {
+  debug "WARNING: no output list file requested";
 }
-close(LIST);
