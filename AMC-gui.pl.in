@@ -1715,11 +1715,16 @@ sub projects_show {
   }
 
   $proj_store->clear;
-  for (sort { $a cmp $b } @$p) {
+  # $prefix is the <LTR> UTF8 character in RTL environments.
+  my $prefix=($w{'main_window'}->get_direction() eq 'rtl' ?
+	      decode("utf-8","\xe2\x80\x8e"): '');
+  for my $proj_name (sort { $a cmp $b } @$p) {
+    my $label=$proj_name;
+    $label=$prefix.$proj_name if($proj_name =~ /^[0-9]*$/);
     $proj_store->set($proj_store->append,
-		     PROJ_NOM,$_,
+		     PROJ_NOM,$label,
 		     PROJ_ICO,
-		     (-f fich_options($_,$w{'local_rep_projets'}) ?
+		     (-f fich_options($proj_name,$w{'local_rep_projets'}) ?
 		      $w{'icon_project'} : $w{'icon_project_dir'} ));
   }
 }
