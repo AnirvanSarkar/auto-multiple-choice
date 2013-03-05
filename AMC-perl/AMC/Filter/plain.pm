@@ -258,12 +258,13 @@ sub read_source {
     }
 
     # questions
-    if(/^\s*(\*{1,2})(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
+    if(/^\s*(\*{1,2})(?:<([^>]*)>)?(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
       $self->check_answers($question);
       my $star=$1;
-      my $text=$4;
-      my $scoring=$3;
-      my @opts=split(/,+/,$2);
+      my $angles=$2;
+      my @opts=split(/,+/,$3);
+      my $scoring=$4;
+      my $text=$5;
       my %oo=();
       for (@opts) {
 	if(/^([^=]+)=(.*)/) {
@@ -277,6 +278,7 @@ sub read_source {
       }
       $question=add_object($group->{'questions'},
 			   'multiple'=>length($star)==2,
+			   'open'=>$angles,
 			   'scoring'=>$scoring,
 			   'text'=>$text,'answers'=>[],%oo);
       $self->value_cleanup($follow);
@@ -520,15 +522,23 @@ sub format_question {
   $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
   $t.="\n";
   $t.=$self->format_text($q->{'text'})."\n";
-  $t.="\\begin{multicols}{".$q->{'columns'}."}\n"
-    if($q->{'columns'}>1);
-  $t.="\\begin{choices$ct}".($q->{'ordered'} ? "[o]" : "")."\n";
+  if($q->{open} ne '') {
+    $t.="\\AMCOpen{".$q->{open}."}{";
+  } else {
+    $t.="\\begin{multicols}{".$q->{'columns'}."}\n"
+      if($q->{'columns'}>1);
+    $t.="\\begin{choices$ct}".($q->{'ordered'} ? "[o]" : "")."\n";
+  }
   for my $a (@{$q->{'answers'}}) {
     $t.=$self->format_answer($a);
   }
-  $t.="\\end{choices$ct}\n";
-  $t.="\\end{multicols}\n"
-    if($q->{'columns'}>1);
+  if($q->{open} ne '') {
+    $t.="}\n";
+  } else {
+    $t.="\\end{choices$ct}\n";
+    $t.="\\end{multicols}\n"
+      if($q->{'columns'}>1);
+  }
   $t.="\\end{question".$mult."}";
   $t.="\\end{arab}"
     if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
