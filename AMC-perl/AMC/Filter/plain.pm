@@ -49,7 +49,7 @@ sub new {
 				 Arabic ArabicFont
 				 Disable
 				 ManualDuplex SingleSided
-				 L-OpenText
+				 L-OpenText L-OpenReserved
 				/];
 
     # from these options, which ones are boolean valued?
@@ -643,8 +643,10 @@ sub file_header {
   $t .= "\\AMCtext{none}{"
     .$self->format_text($self->{'options'}->{'l-none'})."}\n"
     if($self->{'options'}->{'l-none'});
-  $t .= "\\def\\AMCotextGoto{\\par ".$self->format_text($self->{'options'}->{'l-opentext'})."}"
+  $t .= "\\def\\AMCotextGoto{\\par ".$self->format_text($self->{'options'}->{'l-opentext'})."}\n"
     if($self->{'options'}->{'l-opentext'});
+  $t .= "\\def\\AMCotextReserved{".$self->format_text($self->{'options'}->{'l-openreserved'})."}\n"
+    if($self->{'options'}->{'l-openreserved'});
 
   $t.="\\def\\AMCbeginQuestion#1#2{\\par\\noindent{"
     .$self->bf_or("\\Large")." "
