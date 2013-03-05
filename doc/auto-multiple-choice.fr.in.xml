@@ -756,6 +756,45 @@ lesquels sont positifs ?
 + 2
 + 10</programlisting>
       </sect3>
+
+      <sect3>
+        <title>Questions ouvertes</title>
+
+        <para>Les questions peuvent être transformées en questions ouvertes en
+        indiquant des options (voir <xref linkend="questionsouvertes"/>) entre
+        <code>&lt;</code> et <code>&gt;</code>, comme dans l'exemple
+        suivant :</para>
+
+        <programlisting>*&lt;lines=4&gt; Décrivez la lune.
+-[O]{0} O
+-[P]{1} P
++[V]{2} V</programlisting>
+
+        <para>Lors de l'utilisation de questions ouvertes, les options
+        générales suivantes peuvent être intéressantes :</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>L-OpenText:</term>
+
+            <listitem>
+              <para>Texte à ajouter après les questions pour demander aux
+              étudiants d'écrire la résponse sur la feuille de réponses
+              séparée (dans le cas où celle-ci est utilisée).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>L-OpenReserved:</term>
+
+            <listitem>
+              <para>Texte (court) à ajouter à côté des cases à cocher des
+              questions ouvertes, indiquant aux étudiants que ces cases sont
+              réservées aux correcteurs.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </sect3>
     </sect2>
 
     <sect2>
@@ -2022,7 +2061,7 @@ et inscrivez votre nom et prénom ci-dessous.
         pour un faible nombre de chiffres dans le code à saisir.</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="questionsouvertes">
         <title>Questions ouvertes</title>
 
         <para>On peut ajouter des questions ouvertes (qui ne sont pas à choix
