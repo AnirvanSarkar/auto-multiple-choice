@@ -7,9 +7,11 @@
     <style id="comment" _name="Comment" map-to="def:comment"/>
     <style id="keyword" _name="Keyword" map-to="def:keyword"/>
     <style id="opener" _name="Open symbol" map-to="def:bold"/>
+    <style id="letter" _name="Letter" map-to="def:string"/>
     <style id="questiontext" _name="Question" map-to="diff:location"/>
     <style id="correct" _name="Correct choice" map-to="diff:added-line"/>
     <style id="wrong" _name="Wrong choice" map-to="diff:removed-line"/>
+    <style id="ooptions" _name="Open question options" map-to="def:string"/>
     <style id="qoptions" _name="Question options" map-to="def:string"/>
     <style id="scoring" _name="Scoring" map-to="def:preprocessor"/>
   </styles>
@@ -66,30 +68,33 @@
 	</context>
 
 	<context id="questions" end-parent="true" style-ref="questiontext">
-	  <start>^(\*{1,2})(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
+	  <start>^(\*{1,2})(?:&lt;([^>]+)>)?(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
 	  <end>\%{endgroup}</end>
 	  <include>
 	    <context style-ref="opener" where="start" sub-pattern="1"/>
-	    <context style-ref="qoptions" where="start" sub-pattern="2"/>
-	    <context style-ref="scoring" where="start" sub-pattern="3"/>
+	    <context style-ref="ooptions" where="start" sub-pattern="2"/>
+	    <context style-ref="qoptions" where="start" sub-pattern="3"/>
+	    <context style-ref="scoring" where="start" sub-pattern="4"/>
 	  </include>
 	</context>
 
 	<context id="correctanswer" end-parent="true" style-ref="correct">
-	  <start>^(\+)(?:\{([^\}]+)\})?</start>
+	  <start>^(\+)(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
 	  <end>\%{endgroup}</end>
 	  <include>
 	    <context style-ref="opener" where="start" sub-pattern="1"/>
-	    <context style-ref="scoring" where="start" sub-pattern="2"/>
+	    <context style-ref="letter" where="start" sub-pattern="2"/>
+	    <context style-ref="scoring" where="start" sub-pattern="3"/>
 	  </include>
 	</context>
 
 	<context id="wronganswer" end-parent="true" style-ref="wrong">
-	  <start>^(-)(?:\{([^\}]+)\})?</start>
+	  <start>^(-)(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
 	  <end>\%{endgroup}</end>
 	  <include>
 	    <context style-ref="opener" where="start" sub-pattern="1"/>
-	    <context style-ref="scoring" where="start" sub-pattern="2"/>
+	    <context style-ref="letter" where="start" sub-pattern="2"/>
+	    <context style-ref="scoring" where="start" sub-pattern="3"/>
 	  </include>
 	</context>
 
