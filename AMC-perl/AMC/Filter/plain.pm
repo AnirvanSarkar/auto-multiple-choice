@@ -293,7 +293,7 @@ sub read_source {
 	my $sign=$1;
 	my $letter=$2;
 	my $scoring=$3;
-	my $text=4;
+	my $text=$4;
 	my $a=add_object($question->{'answers'},
 			 'text'=>$text,'correct'=>($sign eq '+'),
 			 'letter'=>$letter,
@@ -507,7 +507,7 @@ sub scoring_string {
 sub format_answer {
   my ($self,$a)=@_;
   my $t='\\'.($a->{'correct'} ? 'correct' : 'wrong').'choice';
-  $t.='['.$a->{letter}.']' if($a->{letter});
+  $t.='['.$a->{letter}.']' if($a->{letter} ne '');
   $t.='{'
     .$self->format_text($a->{'text'})."}";
   $t.=$self->scoring_string($a,'a');
