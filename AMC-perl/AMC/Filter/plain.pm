@@ -49,6 +49,7 @@ sub new {
 				 Arabic ArabicFont
 				 Disable
 				 ManualDuplex SingleSided
+				 L-OpenText
 				/];
 
     # from these options, which ones are boolean valued?
@@ -287,11 +288,16 @@ sub read_source {
     }
 
     # answers
-    if(/^\s*(\+|-)(?:\{([^\}]*)\})?\s*(.*)/) {
+    if(/^\s*(\+|-)(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
       if($question) {
+	my $sign=$1;
+	my $letter=$2;
+	my $scoring=$3;
+	my $text=4;
 	my $a=add_object($question->{'answers'},
-			 'text'=>$3,'correct'=>($1 eq '+'),
-			 'scoring'=>$2);
+			 'text'=>$text,'correct'=>($sign eq '+'),
+			 'letter'=>$letter,
+			 'scoring'=>$scoring);
 	$self->value_cleanup($follow);
 	$follow=\$a->{'text'};
       } else {
@@ -500,7 +506,9 @@ sub scoring_string {
 # followed by the scoring command
 sub format_answer {
   my ($self,$a)=@_;
-  my $t='\\'.($a->{'correct'} ? 'correct' : 'wrong').'choice{'
+  my $t='\\'.($a->{'correct'} ? 'correct' : 'wrong').'choice';
+  $t.='['.$a->{letter}.']' if($a->{letter});
+  $t.='{'
     .$self->format_text($a->{'text'})."}";
   $t.=$self->scoring_string($a,'a');
   $t.="\n";
@@ -635,6 +643,8 @@ sub file_header {
   $t .= "\\AMCtext{none}{"
     .$self->format_text($self->{'options'}->{'l-none'})."}\n"
     if($self->{'options'}->{'l-none'});
+  $t .= "\\def\\AMCotextGoto{\\par ".$self->format_text($self->{'options'}->{'l-opentext'})."}"
+    if($self->{'options'}->{'l-opentext'});
 
   $t.="\\def\\AMCbeginQuestion#1#2{\\par\\noindent{"
     .$self->bf_or("\\Large")." "
