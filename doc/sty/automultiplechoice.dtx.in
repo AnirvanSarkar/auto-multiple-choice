@@ -1191,6 +1191,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %   for scan analysis, is to be used.
 % \item |\ifAMC@postcorrect| corresponds to the use of the
 %   |postcorrect| package option.
+% \item |\ifAMC@automarks| corresponds to the use of the
+%   |automarks| package option.
 % \end{description}
 %    \begin{macrocode}
 \newcount\AMCload@counter
@@ -1224,6 +1226,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@zoneformulaire
 \newif\ifAMC@pagelayout\AMC@pagelayouttrue
 \newif\ifAMC@postcorrect\AMC@postcorrectfalse
+\newif\ifAMC@automarks\AMC@automarksfalse
 \let\AMCcompleteMulti=\AMCcomplete@multitrue
 \let\AMCnoCompleteMulti=\AMCcomplete@multifalse
 %    \end{macrocode}
@@ -2150,7 +2153,10 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCmem@ireAJRep[1]{%
   \addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformAnswerA{#1}}}
 \newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\AMCformQuestionA{#1}}}
-\def\AMCformBegin{\AMC@zoneformulairetrue\setcounter{section}{0}}
+\def\AMCformBegin{%
+  \AMC@zoneformulairetrue\setcounter{section}{0}%
+  \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageFull}\fi\fi%
+}
 \newcommand\AMCform{%
   \ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData%
   \global\def\AMCmem@ireData{}\fi}
@@ -3167,29 +3173,47 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@pagepos%
   \ifAMC@watermark\ifAMC@correchead\else\AMCw@terprint{\AMCw@termark}%
   \fi\fi\fi}
-\AtBeginDocument{%
-  \ifAMC@pagelayout%
-  \pagestyle{fancy}
-  \renewcommand{\headrulewidth}{0pt}
-  \ifAMC@correchead
-    \fancyhf{}\fancyhead[C]{\textsc{\AMC@intituleHead}}
-  \else
-    \fancyhf{}
-    \fancyhead[L]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHG}}}}
-    \fancyhead[R]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHD}}}}
-    \fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}
-    \fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}
-    \fancyhead[C]{\AMC@LR{\he@dhaut{%
+\fancypagestyle{AMCpageHeadOnly}{%
+  \fancyhf{}\fancyhead[C]{\textsc{\AMC@intituleHead}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+\fancypagestyle{AMCpageFull}{%
+  \fancyhf{}%
+  \fancyhead[L]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHG}}}}%
+  \fancyhead[R]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHD}}}}%
+  \fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}%
+  \fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}%
+  \fancyhead[C]{\AMC@LR{\he@dhaut{%
         \begin{minipage}[b]{\AMC@CBtaille}\AMCboxColor{black}%
           \ifAMCids@top\vbox to \AMCids@height{\texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}\fi%
           \AMCIDBoxesABC
         \end{minipage}%
         \ifAMCids@side\hbox to \AMCids@width{\hspace*{\fill}%
           \texttt{+\the\AMCid@etud/\thepage/\the\AMCid@check+}}\fi%
-      }}}
-    \fancyhfoffset[EOLR]{5mm}
-  \fi
-  \fancyfoot[C]{\AMC@note}
+      }}}%
+  \fancyhfoffset[EOLR]{5mm}%
+  \fancyfoot[C]{\AMC@note}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+\newcommand\AMCsubjectPageTag{%
+  \fbox{\texttt{\the\AMCid@etud:\thepage}}%
+}
+\fancypagestyle{AMCpageNoMarks}{%
+  \fancyhf{}%
+  \fancyhead[R]{\AMCsubjectPageTag}%
+  \fancyfoot[C]{\AMC@note}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+\AtBeginDocument{%
+  \ifAMC@pagelayout%
+    \ifAMC@correchead
+      \pagestyle{AMCpageHeadOnly}
+    \else
+      \pagestyle{AMCpageFull}
+    \fi
   \fi
 }
 %    \end{macrocode}
@@ -3214,6 +3238,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
   \loop{%
     \AMC@zoneformulairefalse\setcounter{page}{1}\setcounter{section}{0}%
+    \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageNoMarks}\fi\fi%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
     #2\clearpage}\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
@@ -3317,6 +3342,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{plain}{\AMC@plaintrue}
 \DeclareOptionX{nopage}{\AMC@pagelayoutfalse}
 \DeclareOptionX{postcorrect}{\AMC@postcorrecttrue}
+\DeclareOptionX{automarks}{\AMC@automarkstrue}
 \ProcessOptionsX
 %    \end{macrocode}
 %

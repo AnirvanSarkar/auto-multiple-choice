@@ -183,7 +183,7 @@ for my $pa (@pre_assoc) {
 
 debug "Writing to database...";
 
-for my $p (@pages) {
+PAGE: for my $p (@pages) {
 
     my $diametre_marque=0;
     my $dmn=0;
@@ -201,11 +201,8 @@ for my $p (@pages) {
 	  }
       }
   }
-    $diametre_marque/=$dmn;
 
-    for my $pos ('HG','HD','BD','BG') {
-	die "Needs position$pos from page $p->{-id}" if(!$p->{-cases}->{'position'.$pos});
-    }
+    $diametre_marque/=$dmn if($dmn);
 
     my @epc=get_epc($p->{-id});
     my @ep=@epc[0,1];
@@ -216,6 +213,12 @@ for my $p (@pages) {
 	$dpi,$dpi*$p->{-dim_x},$dpi*$p->{-dim_y},
 	$diametre_marque,
 	$layout->source_id($src,$timestamp));
+
+    next PAGE if(!$dmn);
+
+    for my $pos ('HG','HD','BD','BG') {
+	die "Needs position$pos from page $p->{-id}" if(!$p->{-cases}->{'position'.$pos});
+    }
 
     my $c=$p->{-cases};
 

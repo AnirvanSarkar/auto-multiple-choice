@@ -391,6 +391,7 @@ sub define_statements {
 	." ON p.student=a.student AND p.page=a.page"
 	." WHERE p.student=?"},
        'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
+		       ." WHERE markdiameter>0"
 		       ." LIMIT 1"},
        'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "
 		.$self->table("page")
