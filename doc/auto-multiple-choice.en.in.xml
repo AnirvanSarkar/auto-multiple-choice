@@ -1442,6 +1442,25 @@ Durée : 10 minutes.
             completed answer sheet - see <xref linkend="postcorrect"/> for
             details.</para>
           </listitem>
+
+          <listitem>
+            <para><option>automarks</option>: in
+            <option>separateanswersheet</option> mode, use this option if you
+            want to cancel marks printing on the subject pages. They will only
+            be print on the answer sheet pages. To change the way pages
+            numbers are print on the subject pages, redefine the
+            <command>\AMCsubjectPageTag</command> command:</para>
+
+            <programlisting>\renewcommand\AMCsubjectPageTag{%
+  \fbox{\texttt{\the\AMCid@etud:\thepage}}%
+}</programlisting>
+
+            <warning>
+              <para>Only use <option>automarks</option> option if no data are
+              to be collected on the subjects pages, as AMC won't be able to
+              process these pages.</para>
+            </warning>
+          </listitem>
         </itemizedlist>
       </sect3>
 

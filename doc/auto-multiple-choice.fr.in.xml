@@ -1523,6 +1523,27 @@ Durée : 10 minutes.
             copie remplie par l'enseignant - voir <xref
             linkend="postcorrect"/>.</para>
           </listitem>
+
+          <listitem>
+            <para><option>automarks</option> : en mode
+            <option>ensemble</option>, utilisez cette option si vous voulez
+            que les marques de calage ne soient pas imprimées sur les pages de
+            sujet, mais uniquement sur les pages de réponse. Vous pouvez alors
+            personnaliser la façon d'imprimer les numéros de page sur le sujet
+            en redéfinissant la commande
+            <command>\AMCsubjectPageTag</command> :</para>
+
+            <programlisting>\renewcommand\AMCsubjectPageTag{%
+  \fbox{\texttt{\the\AMCid@etud:\thepage}}%
+}</programlisting>
+
+            <warning>
+              <para>L'option <option>automarks</option> ne doit pas être
+              utilisée dans le cas ou une quelconque information doit être
+              collectée depuis les pages de sujet, car AMC ne pourra pas
+              traiter ces pages.</para>
+            </warning>
+          </listitem>
         </itemizedlist>
       </sect3>
 
