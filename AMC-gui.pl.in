@@ -318,7 +318,10 @@ my %projet_defaut=('texsrc'=>'',
 		   'encodage_csv'=>'',
 		   'encodage_liste'=>'',
 		   'maj_bareme'=>1,
-		   'docs'=>['DOC-sujet.pdf','DOC-corrige.pdf','DOC-calage.xy'],
+		   'doc_question'=>'DOC-sujet.pdf',
+		   'doc_solution'=>'DOC-corrige.pdf',
+		   'doc_setting'=>'DOC-calage.xy',
+		   'doc_catalog'=>'DOC-catalog.pdf',
 		   'filter'=>'',
 		   'filtered_source'=>'DOC-filtered.tex',
 
@@ -874,7 +877,7 @@ my @widgets_only_when_opened=(qw/cleanup_menu menu_projet_enreg menu_projet_mode
 
 my $gui=read_glade('main_window',
 		   qw/onglets_projet onglet_preparation preparation_etats
-    but_question but_solution
+    but_question but_solution but_catalog doc_line1
     prepare_docs prepare_layout prepare_src
     state_layout state_src state_docs state_unrecognized state_marking state_assoc
     button_unrecognized button_show_missing
@@ -2308,8 +2311,8 @@ sub doc_maj {
 
     # new layout document : XY (from LaTeX)
 
-    if($projet{'options'}->{'docs'}->[2] =~ /\.pdf$/) {
-	$projet{'options'}->{'docs'}->[2]=$projet_defaut{'docs'}->[2];
+    if($projet{'options'}->{'doc_setting'} =~ /\.pdf$/) {
+	$projet{'options'}->{'doc_setting'}=$projet_defaut{'doc_setting'};
 	$projet{'options'}->{'_modifie'}=1;
     }
 
@@ -2358,9 +2361,9 @@ sub doc_maj {
 			  "--filter",$projet{'options'}->{'filter'},
 			  "--filtered-source",absolu($projet{'options'}->{'filtered_source'}),
 			  "--debug",debug_file(),
-			  "--out-sujet",absolu($projet{'options'}->{'docs'}->[0]),
-			  "--out-corrige",absolu($projet{'options'}->{'docs'}->[1]),
-			  "--out-calage",absolu($projet{'options'}->{'docs'}->[2]),
+			  "--out-sujet",absolu($projet{'options'}->{'doc_question'}),
+			  "--out-corrige",absolu($projet{'options'}->{'doc_solution'}),
+			  "--out-calage",absolu($projet{'options'}->{'doc_setting'}),
 			  "--mode","s",
 			  "--n-copies",$projet{'options'}->{'nombre_copies'},
 			  absolu($projet{'options'}->{'texsrc'}),
@@ -2402,8 +2405,8 @@ sub doc_maj {
 		     # verif que tout y est
 
 		     my $ok=1;
-		     for(0..2) {
-			 $ok=0 if(! -f absolu($projet{'options'}->{'docs'}->[$_]));
+		     for(qw/question solution setting/) {
+			 $ok=0 if(! -f absolu($projet{'options'}->{'doc_'.$_}));
 		     }
 		     if($ok) {
 
@@ -2552,7 +2555,7 @@ sub autre_imprimante {
 
 sub sujet_impressions {
 
-    if(! -f absolu($projet{'options'}->{'docs'}->[0])) {
+    if(! -f absolu($projet{'options'}->{'doc_question'})) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
 			      'destroy-with-parent',
@@ -2826,7 +2829,7 @@ sub sujet_impressions_ok {
 			  "--output",absolu($o{'options_impression'}->{'repertoire'})."/sheet-%e.pdf",
 			  ($o{'options_impression'}->{'split'} ? "--split" : "--no-split"),
 			  "--print-command",$o{'print_command_pdf'},
-			  "--sujet",absolu($projet{'options'}->{'docs'}->[0]),
+			  "--sujet",absolu($projet{'options'}->{'doc_question'}),
 			  "--data",absolu($projet{'options'}->{'data'}),
 			  "--progression-id",'impression',
 			  "--progression",1,
@@ -2852,8 +2855,10 @@ sub save_state_after_printing {
 
     $st->read();
 
-    my @files=(@{$projet{'options'}->{'docs'}},
-	       absolu($projet{'options'}->{'texsrc'}));
+    my @files=grep { -f absolu($_) }
+      map { $projet{'options'}->{'doc_'.$_} }
+      (qw/question solution setting catalog/);
+    push @files,absolu($projet{'options'}->{'texsrc'});
 
     push @files,absolu($projet{'options'}->{'filtered_source'})
       if(-f absolu($projet{'options'}->{'filtered_source'}));
@@ -2871,7 +2876,7 @@ sub save_state_after_printing {
 }
 
 sub calcule_mep {
-    if($projet{'options'}->{'docs'}->[2] !~ /\.xy$/) {
+    if($projet{'options'}->{'doc_setting'} !~ /\.xy$/) {
 	# OLD STYLE WORKING DOCUMENTS... Not supported anymore: update!
 	my $dialog = Gtk2::MessageDialog
 	    ->new_with_markup($w{'main_window'},
@@ -2888,7 +2893,7 @@ sub calcule_mep {
 
     commande('commande'=>["auto-multiple-choice","meptex",
 			  "--debug",debug_file(),
-			  "--src",absolu($projet{'options'}->{'docs'}->[2]),
+			  "--src",absolu($projet{'options'}->{'doc_setting'}),
 			  "--progression-id",'MEP',
 			  "--progression",1,
 			  "--data",absolu($projet{'options'}->{'data'}),
@@ -2961,7 +2966,7 @@ sub saisie_manuelle {
 	 'multiple'=>$projet{'options'}->{'auto_capture_mode'},
 	 'data-dir'=>absolu($projet{'options'}->{'data'}),
 	 'project-dir'=>absolu('%PROJET'),
-	 'sujet'=>absolu($projet{'options'}->{'docs'}->[0]),
+	 'sujet'=>absolu($projet{'options'}->{'doc_question'}),
 	 'etud'=>'',
 	 'dpi'=>$o{'saisie_dpi'},
 	 'seuil'=>$projet{'options'}->{'seuil'},
@@ -3519,7 +3524,7 @@ sub filter_changed {
 
   # working document already built: ask for confirmation
 
-  if(-f absolu($projet{'options'}->{'docs'}->[0])) {
+  if(-f absolu($projet{'options'}->{'doc_question'})) {
     debug "Ask for confirmation";
     my $text;
     if($projet{'_capture'}->n_pages_transaction()>0) {
@@ -4251,7 +4256,7 @@ sub regroupement_go {
 			"--id-file",$id_file,
 			($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
 			"--projet",absolu('%PROJET'),
-			"--sujet",absolu($projet{'options'}->{'docs'}->[0]),
+			"--sujet",absolu($projet{'options'}->{'doc_question'}),
 			"--data",absolu($projet{'options'}->{'data'}),
 			"--tex-src",absolu($projet{'options'}->{'texsrc'}),
 			"--with",moteur_latex(),
@@ -4798,10 +4803,11 @@ sub state_image {
 }
 
 sub detecte_documents {
-    check_document(absolu($projet{'options'}->{'docs'}->[0]),'question');
-    check_document(absolu($projet{'options'}->{'docs'}->[1]),'solution');
-    my $s=file_maj(map { absolu($projet{'options'}->{'docs'}->[$_])
-		   } (0..2));
+    check_document(absolu($projet{'options'}->{'doc_question'}),'question');
+    check_document(absolu($projet{'options'}->{'doc_solution'}),'solution');
+    check_document(absolu($projet{'options'}->{'doc_catalog'}),'catalog');
+    my $s=file_maj(map { absolu($projet{'options'}->{'doc_'.$_})
+		   } (qw/question setting/));
     my $ok='gtk-yes';
     if($s eq 'UNREADABLE') {
 	$s=__("Working documents are not readable");
@@ -4818,17 +4824,21 @@ sub detecte_documents {
 
 sub show_document {
     my ($sel)=@_;
-    my $f=absolu($projet{'options'}->{'docs'}->[$sel]);
+    my $f=absolu($projet{'options'}->{'doc_'.$sel});
     debug "Looking at $f...";
-    commande_parallele($o{'pdf_viewer'},absolu($projet{'options'}->{'docs'}->[$sel]));
+    commande_parallele($o{'pdf_viewer'},$f);
 }
 
 sub show_question {
-    show_document(0);
+    show_document('question');
 }
 
 sub show_solution {
-    show_document(1);
+    show_document('solution');
+}
+
+sub show_catalog {
+    show_document('catalog');
 }
 
 sub detecte_mep {
@@ -4921,8 +4931,8 @@ sub clear_processing {
   }
 
   if($s{'doc'}) {
-    for (0,1,2) {
-      my $f=absolu($projet{'options'}->{'docs'}->[$_]);
+    for (qw/question solution setting catalog/) {
+      my $f=absolu($projet{'options'}->{'doc_'.$_});
       unlink($f) if(-f $f);
     }
     detecte_documents();
@@ -6075,6 +6085,13 @@ sub projet_ouvre {
 		debug "Reading options for project $proj...";
 
 		$projet{'options'}={pref_xx_lit(fich_options($proj))};
+
+		# Get old style working documents names
+		if(ref($projet{'options'}->{docs}) eq 'ARRAY') {
+		  $projet{'options'}->{doc_question}=$projet{'options'}->{docs}->[0];
+		  $projet{'options'}->{doc_solution}=$projet{'options'}->{docs}->[1];
+		  $projet{'options'}->{doc_setting}=$projet{'options'}->{docs}->[2];
+		}
 
 		# pour effacer des trucs en trop venant d'un bug anterieur...
 		for(keys %{$projet{'options'}}) {

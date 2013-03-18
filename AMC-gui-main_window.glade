@@ -100,6 +100,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-directory</property>
   </object>
+  <object class="GtkImage" id="image41">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">gnome-mime-application-pdf</property>
+  </object>
   <object class="GtkImage" id="image6">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -587,14 +592,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="Hbox4">
+                      <object class="GtkVBox" id="vbox4">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkVButtonBox" id="Vbuttonbox30">
+                          <object class="GtkHBox" id="doc_line1">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="layout_style">start</property>
                             <child>
                               <object class="GtkButton" id="button3">
                                 <property name="label" translatable="yes">Update documents</property>
@@ -611,17 +615,6 @@
                                 <property name="position">0</property>
                               </packing>
                             </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkVBox" id="Vbox5">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkButton" id="but_question">
                                 <property name="label" translatable="yes">Question</property>
@@ -631,6 +624,37 @@
                                 <property name="use_action_appearance">False</property>
                                 <property name="image">image23</property>
                                 <signal name="pressed" handler="show_question" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHButtonBox" id="doc_line2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="spacing">2</property>
+                            <property name="homogeneous">True</property>
+                            <property name="layout_style">end</property>
+                            <child>
+                              <object class="GtkButton" id="but_catalog">
+                                <property name="label" translatable="yes">Catalog</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="image">image41</property>
+                                <signal name="pressed" handler="show_catalog" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -656,16 +680,15 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="pack_type">end</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
