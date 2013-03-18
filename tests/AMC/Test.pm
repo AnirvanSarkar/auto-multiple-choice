@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -84,6 +84,8 @@ sub new {
      'export_full_csv'=>[],
      'blind'=>0,
      'check_zooms'=>{},
+     'skip_prepare'=>0,
+     'skip_scans'=>0,
     };
 
   for (keys %oo) {
@@ -257,11 +259,11 @@ sub prepare {
 		     '--n-copies',$self->{'n_copies'},
 		     '--prefix',$self->{'temp_dir'}.'/',
 		     '%PROJ/'.$self->{'src'},
-		     );
+		    );
   $self->amc_command('meptex',
 		     '--src','%PROJ/calage.xy',
 		     '--data','%DATA',
-		     );
+		    );
   $self->amc_command('prepare',
 		     '--filter',$self->{'filter'},
 		     '--with',$self->{'tex_engine'},
@@ -269,7 +271,7 @@ sub prepare {
 		     '--n-copies',$self->{'n_copies'},
 		     '--data','%DATA',
 		     '%PROJ/'.$self->{'src'},
-		     );
+		    );
 }
 
 sub analyse {
@@ -468,6 +470,12 @@ sub find_assoc {
   return($r);
 }
 
+sub compare {
+  my ($a,$b)=@_;
+  return( (($a eq 'x') && (!defined($b)))
+	  || ( $a eq $b ));
+}
+
 sub check_assoc {
   my ($self)=@_;
   return if(!$self->{'check_assoc'});
@@ -480,7 +488,9 @@ sub check_assoc {
   for my $m (@{$self->{'association'}}) {
     my $st=studentids_string($m->{'student'},$m->{'copy'});
     delete($p{$st})
-      if($self->{'check_assoc'}->{$st} eq $m->{'auto'});
+      if(compare($self->{'check_assoc'}->{$st},$m->{'auto'}));
+    delete($p{'m:'.$st})
+      if(compare($self->{'check_assoc'}->{'m:'.$st},$m->{'manual'}));
   }
 
   my @no=(keys %p);
@@ -805,12 +815,21 @@ sub test_scoring {
   $self->test($score,$target_score);
 }
 
+sub update_sqlite {
+  my ($self)=@_;
+  my $d=AMC::Data->new($self->{'temp_dir'}."/data");
+  for my $m (qw/layout capture scoring association report/) {
+    $d->module($m);
+  }
+  return($self);
+}
+
 sub default_process {
   my ($self)=@_;
 
-  $self->prepare;
+  $self->prepare if(!$self->{skip_prepare});
   $self->defects;
-  $self->analyse;
+  $self->analyse if(!$self->{skip_scans});
   $self->check_zooms;
   $self->note;
   $self->assoc;
