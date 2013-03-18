@@ -61,6 +61,7 @@ my $progress_id='';
 my $out_calage='';
 my $out_sujet='';
 my $out_corrige='';
+my $out_catalog='';
 
 my $jobname="amc-compiled";
 
@@ -73,6 +74,7 @@ GetOptions("mode=s"=>\$mode,
 	   "out-calage=s"=>\$out_calage,
 	   "out-sujet=s"=>\$out_sujet,
 	   "out-corrige=s"=>\$out_corrige,
+	   "out-catalog=s"=>\$out_catalog,
 	   "convert-opts=s"=>\$convert_opts,
 	   "debug=s"=>\$debug,
 	   "latex-stdout!"=>\$latex_stdout,
@@ -598,11 +600,16 @@ sub check_engine {
 # the $mode option passed to AMC-prepare contains characters that
 # explains what is to be prepared...
 
+my %to_do=();
+while($mode =~ s/^[^a-z]*([a-z])(\[[a-z]*\])?//i) {
+  $to_do{$1}=(defined($2) ? $2 : 1);
+}
+
 ############################################################################
 # MODE f: filter source file to LaTeX format
 ############################################################################
 
-if($mode =~ /f/) {
+if($to_do{f}) {
   # FILTER
   do_filter();
 }
@@ -612,7 +619,7 @@ if($mode =~ /f/) {
 # sheets as for the students, but with correct answers ticked).
 ############################################################################
 
-if($mode =~ /k/) {
+if($to_do{k}) {
 
     do_filter();
 
@@ -628,7 +635,8 @@ if($mode =~ /k/) {
 # questions, but with a different layout)
 ############################################################################
 
-if($mode =~ /s/) {
+if($to_do{s}) {
+  $to_do{s}='[sc]' if($to_do{s} eq '1');
 
     do_filter();
 
@@ -638,6 +646,7 @@ if($mode =~ /s/) {
 
     $out_calage=$prefix."calage.xy" if(!$out_calage);
     $out_corrige=$prefix."corrige.pdf" if(!$out_corrige);
+    $out_catalog=$prefix."catalog.pdf" if(!$out_catalog);
     $out_sujet=$prefix."sujet.pdf" if(!$out_sujet);
 
     for my $f ($out_calage,$out_corrige,$out_sujet) {
@@ -667,9 +676,19 @@ if($mode =~ /s/) {
 
     # 2) SOLUTION
 
+  if($to_do{s}=~/s/) {
     execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
     transfer("$jobname.pdf",$out_corrige);
     give_latex_errors(__"solution");
+  }
+
+    # 3) CATALOG
+
+  if($to_do{s}=~/c/) {
+    execute('command'=>[latex_cmd(%opts,'CatalogExterne'=>1)]);
+    transfer("$jobname.pdf",$out_catalog);
+    give_latex_errors(__"catalog");
+  }
 }
 
 ############################################################################
@@ -677,7 +696,7 @@ if($mode =~ /s/) {
 # parsing the AUTOQCM[...] messages from the LaTeX output.
 ############################################################################
 
-if($mode =~ /b/) {
+if($to_do{b}) {
 
     print "********** Making marks scale...\n";
 
