@@ -2312,7 +2312,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi%
   \AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
   \ifAMC@affichekeys\index{\texttt{#2}}\fi%
-  \AMCbeginQuestion{\ifAMC@affichekeys[\texttt{#2}]\else\AMC@qaff\fi}{#1}%
+  \AMCbeginQuestion{\ifAMC@affichekeys\ifAMC@ensemble\AMC@qaff\ \fi[\texttt{#2}]\else\AMC@qaff\fi}{#1}%
   \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
   \AMCmem@ireQ{\arabic{AMCquestionaff}}}%
 {\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi\AMCmessage{FQ}}
