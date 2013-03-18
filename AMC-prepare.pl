@@ -680,6 +680,9 @@ if($to_do{s}) {
     execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
     transfer("$jobname.pdf",$out_corrige);
     give_latex_errors(__"solution");
+  } else {
+    debug "Solution not requested: removing $out_corrige";
+    unlink($out_corrige);
   }
 
     # 3) CATALOG
@@ -688,6 +691,9 @@ if($to_do{s}) {
     execute('command'=>[latex_cmd(%opts,'CatalogExterne'=>1)]);
     transfer("$jobname.pdf",$out_catalog);
     give_latex_errors(__"catalog");
+  } else {
+    debug "Catalog not requested: removing $out_catalog";
+    unlink($out_catalog);
   }
 }
 

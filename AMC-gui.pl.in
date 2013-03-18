@@ -250,6 +250,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'bw_threshold'=>0.6,
 	      'ignore_red'=>0,
 
+	      'prepare_solution'=>1,
+	      'prepare_catalog'=>1,
+
 	      'symboles_trait'=>2,
 	      'symboles_indicatives'=>'',
 	      'symbole_0_0_type'=>'none',
@@ -2356,6 +2359,10 @@ sub doc_maj {
     }
 
     #
+    my $mode_s='s[';
+    $mode_s.='s' if($o{'prepare_solution'});
+    $mode_s.='c' if($o{'prepare_catalog'});
+    $mode_s.=']';
     commande('commande'=>["auto-multiple-choice","prepare",
 			  "--with",moteur_latex(),
 			  "--filter",$projet{'options'}->{'filter'},
@@ -2365,7 +2372,7 @@ sub doc_maj {
 			  "--out-corrige",absolu($projet{'options'}->{'doc_solution'}),
 			  "--out-catalog",absolu($projet{'options'}->{'doc_catalog'}),
 			  "--out-calage",absolu($projet{'options'}->{'doc_setting'}),
-			  "--mode","s",
+			  "--mode",$mode_s,
 			  "--n-copies",$projet{'options'}->{'nombre_copies'},
 			  absolu($projet{'options'}->{'texsrc'}),
 			  "--prefix",absolu('%PROJET/'),
