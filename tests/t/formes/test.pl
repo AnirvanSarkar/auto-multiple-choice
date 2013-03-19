@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -21,7 +21,7 @@
 use AMC::Test;
 
 AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       'perfect_copy'=>'','seuil'=>0.2,
+	       'perfect_copy'=>'','seuil'=>0.2,'debug_pixels'=>1,
 	       'check_marks'=>{2=>20},
 	       'check_zooms'=>{'2-1'=>4},
 	      )->default_process;

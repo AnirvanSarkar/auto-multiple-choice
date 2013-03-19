@@ -58,6 +58,7 @@ sub new {
      'perfect_copy'=>[3],
      'src'=>'',
      'debug'=>0,
+     'debug_pixels'=>0,
      'scans'=>'',
      'seuil'=>0.5,
      'bw_threshold'=>0.6,
@@ -336,7 +337,8 @@ sub analyse {
 		     '--bw-threshold',$self->{'bw_threshold'},
 		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
-		     ($self->{'debug'} ? '--debug-pixels' : '--no-debug-pixels'),
+		     ($self->{'debug'} || $self->{debug_pixels}
+		      ? '--debug-pixels' : '--no-debug-pixels'),
 		     '--projet','%PROJ',
 		     '--data','%DATA',
 		     '--liste-fichiers',$scans_list,

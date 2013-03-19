@@ -46,3 +46,5 @@ $t->analyse();
 $t->note();
 $t->get_marks();
 $t->check_perfect();
+
+$t->ok();
