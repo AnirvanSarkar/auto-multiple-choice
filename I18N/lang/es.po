@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.1.0 (svn: 1075)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2013-03-18 11:33 +0100\n"
+"POT-Creation-Date: 2013-03-21 23:23 +0100\n"
 "PO-Revision-Date: 2012-08-12 19:01-0300\n"
 "Last-Translator: Andrés Alvarado <aalvarado@linkerbirds.com>\n"
 "Language-Team: www.linkerbirds.com - Enriched Communications\n"
@@ -312,8 +312,8 @@ msgstr "nombre"
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student sheet number. This is a menu entry.
 #: ../AMC-gui.pl:1227
-msgid "sheet number"
-msgstr "número de página"
+msgid "exam copy number"
+msgstr ""
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the line where one can find this student in the students list file. This is a menu entry.
 #: ../AMC-gui.pl:1229
@@ -671,7 +671,8 @@ msgid "If they are correct, proceed to layouts detection..."
 msgstr "Si están correctos, siga con la detección de layouts..."
 
 #: ../AMC-gui.pl:2454
-msgid "Your question has a separate answers page."
+#, fuzzy
+msgid "Your question has a separate answers sheet."
 msgstr "Su pregunta tiene una página de respuestas independiente."
 
 #: ../AMC-gui.pl:2455
@@ -741,7 +742,8 @@ msgid "papers"
 msgstr "páginas"
 
 #: ../AMC-gui.pl:2777
-msgid "You did not select any sheet to print..."
+#, fuzzy
+msgid "You did not select any exam to print..."
 msgstr "Usted no seleccionó una página para imprimir..."
 
 #: ../AMC-gui.pl:2796 ../AMC-gui.pl:2811
@@ -841,7 +843,8 @@ msgid "Automatic data capture can be done in two different modes:"
 msgstr "La captura automática de datos puede hacerse en dos modos distintos:"
 
 #: ../AMC-gui.pl:3070
-msgid "In the most robust one, you give a different sheet (with a different sheet number) to every student. You must not photocopy subjects before distributing them."
+#, fuzzy
+msgid "In the most robust one, you give a different exam (with a different exam number) to every student. You must not photocopy subjects before distributing them."
 msgstr "En el modo más robusto, uno entrega una página (con número único) a cada alumno. No debe fotocopiar las páginas antes de distribuirlas."
 
 #: ../AMC-gui.pl:3075
@@ -1029,8 +1032,8 @@ msgid "All completed answer sheets are associated with a student name"
 msgstr "Todas las hojas de respuesta completadas están asociadas a un alumno."
 
 #: ../AMC-gui.pl:4027
-msgid "sheet ID"
-msgstr "Identificación de hoja"
+msgid "exam ID"
+msgstr ""
 
 #: ../AMC-gui.pl:4042
 msgid "student"
@@ -1131,8 +1134,8 @@ msgid "(See for exemple pages %s and %s)"
 msgstr "(Vea, por ejemplo, página %s y %s)"
 
 #: ../AMC-gui.pl:4908
-#, perl-format
-msgid "(Concerns %1$d sheets, see for exemple sheet %2$d)"
+#, fuzzy, perl-format
+msgid "(Concerns %1$d exams, see for exemple sheet %2$d)"
 msgstr "(Relacionado a páginas %1$d, vea por ejemplo página %2$d)"
 
 #: ../AMC-gui.pl:5023
@@ -1567,8 +1570,9 @@ msgstr "Nota"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:601
-msgid "Sheet [sheet number column title in exported spreadsheet]"
-msgstr "Hoja"
+#, fuzzy
+msgid "Exam [exam number column title in exported spreadsheet]"
+msgstr "Nombre"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:603
@@ -1791,8 +1795,8 @@ msgid "page"
 msgstr "página"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:485
-#, perl-format
-msgid "This is a template sheet that you cannot edit. To create a new sheet from this one to be edited, use the '%s' button."
+#, fuzzy, perl-format
+msgid "This is a template exam that you cannot edit. To create a new exam from this one to be edited, use the '%s' button."
 msgstr "Esta es una plantilla que usted no puede editar. Para crear una nueva hoja a partir de esta planitilla, use el botón '%s'."
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:485 ../AMC-perl/AMC/Gui/Manuel.glade:336
@@ -1969,6 +1973,7 @@ msgid "Post-correction"
 msgstr "Post-corrección"
 
 #: ../AMC-gui-choix_postcorrect.glade:97
+#, fuzzy
 msgid "Please enter the teacher score sheet number and copy number to get the correct answers from:"
 msgstr "Por favor ingrese el número de la hoja del profesor y el número de la copia para obtener las respuestas correctas de:"
 
@@ -3084,7 +3089,8 @@ msgid "Copy all scans to scans sub-directory in project directory"
 msgstr "Copiar todos los escaneos al sub-directorio de escaneos en el directorio del proyecto"
 
 #: ../AMC-gui-saisie_auto.glade:158
-msgid "Use this setting to be sure that the sheet IDs allocated to the pages of the scans you selected will be consecutive numbers, <b>in the same order</b> as the pages."
+#, fuzzy
+msgid "Use this setting to be sure that the exam copy IDs allocated to the pages of the scans you selected will be consecutive numbers, <b>in the same order</b> as the pages."
 msgstr "Usar esta opción para asegurarse de que el ID de la hoja asignada a la página escaneada va a tener números consecutivos, <b>en el mismo order</b> que las páginas."
 
 #: ../AMC-gui-saisie_auto.glade:175
@@ -3249,6 +3255,15 @@ msgstr "Casillas sin marcar"
 #: ../AMC-perl/AMC/Gui/Zooms.glade:201
 msgid "Checked boxes"
 msgstr "Casillas marcadas"
+
+#~ msgid "sheet number"
+#~ msgstr "número de página"
+
+#~ msgid "sheet ID"
+#~ msgstr "Identificación de hoja"
+
+#~ msgid "Sheet [sheet number column title in exported spreadsheet]"
+#~ msgstr "Hoja"
 
 #~ msgid "solution"
 #~ msgstr "solución"

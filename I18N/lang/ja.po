@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.1.0 (svn: 1075)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2013-03-18 11:33 +0100\n"
+"POT-Creation-Date: 2013-03-21 23:23 +0100\n"
 "PO-Revision-Date: 2012-10-17 17:43+0900\n"
 "Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
@@ -311,8 +311,8 @@ msgstr "氏名"
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student sheet number. This is a menu entry.
 #: ../AMC-gui.pl:1227
-msgid "sheet number"
-msgstr "試験問題番号"
+msgid "exam copy number"
+msgstr ""
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the line where one can find this student in the students list file. This is a menu entry.
 #: ../AMC-gui.pl:1229
@@ -666,7 +666,8 @@ msgid "If they are correct, proceed to layouts detection..."
 msgstr "これが正しければ、レイアウト検出に進んでください..."
 
 #: ../AMC-gui.pl:2454
-msgid "Your question has a separate answers page."
+#, fuzzy
+msgid "Your question has a separate answers sheet."
 msgstr "別紙答案用紙のある試験問題です。"
 
 #: ../AMC-gui.pl:2455
@@ -736,7 +737,8 @@ msgid "papers"
 msgstr "試験問題"
 
 #: ../AMC-gui.pl:2777
-msgid "You did not select any sheet to print..."
+#, fuzzy
+msgid "You did not select any exam to print..."
 msgstr "印刷する試験問題を選んでいません..."
 
 #: ../AMC-gui.pl:2796 ../AMC-gui.pl:2811
@@ -836,7 +838,8 @@ msgid "Automatic data capture can be done in two different modes:"
 msgstr "自動マーク認識には2種類のモードがあります:"
 
 #: ../AMC-gui.pl:3070
-msgid "In the most robust one, you give a different sheet (with a different sheet number) to every student. You must not photocopy subjects before distributing them."
+#, fuzzy
+msgid "In the most robust one, you give a different exam (with a different exam number) to every student. You must not photocopy subjects before distributing them."
 msgstr "最も堅牢なモードで、各受験者に別々の（試験問題番号の異なる）答案用紙を配る方法です。配る前に試験問題をコピーしてはいけません。"
 
 #: ../AMC-gui.pl:3075
@@ -1024,8 +1027,8 @@ msgid "All completed answer sheets are associated with a student name"
 msgstr "答案はすべて受験者氏名とリンクされています"
 
 #: ../AMC-gui.pl:4027
-msgid "sheet ID"
-msgstr "試験問題ID"
+msgid "exam ID"
+msgstr ""
 
 #: ../AMC-gui.pl:4042
 msgid "student"
@@ -1126,8 +1129,8 @@ msgid "(See for exemple pages %s and %s)"
 msgstr "（例えば、ページ %s と %s を見てください）"
 
 #: ../AMC-gui.pl:4908
-#, perl-format
-msgid "(Concerns %1$d sheets, see for exemple sheet %2$d)"
+#, fuzzy, perl-format
+msgid "(Concerns %1$d exams, see for exemple sheet %2$d)"
 msgstr "（%1$d 件の試験問題が関連しています。例として試験問題番号 %2$d を見てください）"
 
 #: ../AMC-gui.pl:5023
@@ -1561,8 +1564,9 @@ msgstr "得点"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:601
-msgid "Sheet [sheet number column title in exported spreadsheet]"
-msgstr "試験問題番号"
+#, fuzzy
+msgid "Exam [exam number column title in exported spreadsheet]"
+msgstr "氏名"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:603
@@ -1784,8 +1788,8 @@ msgid "page"
 msgstr "ページ"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:485
-#, perl-format
-msgid "This is a template sheet that you cannot edit. To create a new sheet from this one to be edited, use the '%s' button."
+#, fuzzy, perl-format
+msgid "This is a template exam that you cannot edit. To create a new exam from this one to be edited, use the '%s' button."
 msgstr "これはテンプレート試験問題なので編集できません。これをもとに新しい試験問題を作って編集するには、'%s' ボタンを使ってください。"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:485 ../AMC-perl/AMC/Gui/Manuel.glade:336
@@ -1962,6 +1966,7 @@ msgid "Post-correction"
 msgstr "採点時正解提示"
 
 #: ../AMC-gui-choix_postcorrect.glade:97
+#, fuzzy
 msgid "Please enter the teacher score sheet number and copy number to get the correct answers from:"
 msgstr "正解が記入されている模範解答の試験問題番号とページ番号を入力してください:"
 
@@ -3076,7 +3081,8 @@ msgid "Copy all scans to scans sub-directory in project directory"
 msgstr "スキャンデータをすべてプロジェクト内のscansサブディレクトリにコピーします"
 
 #: ../AMC-gui-saisie_auto.glade:158
-msgid "Use this setting to be sure that the sheet IDs allocated to the pages of the scans you selected will be consecutive numbers, <b>in the same order</b> as the pages."
+#, fuzzy
+msgid "Use this setting to be sure that the exam copy IDs allocated to the pages of the scans you selected will be consecutive numbers, <b>in the same order</b> as the pages."
 msgstr "選択したスキャンデータの各ページの用紙番号がページ順序と同じになるように連続した番号を割り当てるには、この設定を使用してください。"
 
 #: ../AMC-gui-saisie_auto.glade:175
@@ -3243,6 +3249,15 @@ msgstr "マークされていないボックス"
 #: ../AMC-perl/AMC/Gui/Zooms.glade:201
 msgid "Checked boxes"
 msgstr "マークされているボックス"
+
+#~ msgid "sheet number"
+#~ msgstr "試験問題番号"
+
+#~ msgid "sheet ID"
+#~ msgstr "試験問題ID"
+
+#~ msgid "Sheet [sheet number column title in exported spreadsheet]"
+#~ msgstr "試験問題番号"
 
 #~ msgid "solution"
 #~ msgstr "正解"
