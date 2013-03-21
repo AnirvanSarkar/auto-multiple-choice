@@ -482,7 +482,7 @@ sub charge_i {
     ################################
 
     if($spc[2]==0 && $self->{'multiple'} && $self->{'editable'}) {
-      $self->{'layinfo'}->{'block_message'}=sprintf(__"This is a template sheet that you cannot edit. To create a new sheet from this one to be edited, use the '%s' button.",__"Add photocopy");
+      $self->{'layinfo'}->{'block_message'}=sprintf(__"This is a template exam that you cannot edit. To create a new exam from this one to be edited, use the '%s' button.",__"Add photocopy");
     } else {
 
       debug "Getting layout info";

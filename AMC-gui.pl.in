@@ -1224,7 +1224,7 @@ my %cb_stores=(
 # TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
     'export_sort'=>cb_model("n"=>__"name",
 # TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student sheet number. This is a menu entry.
-			    "i"=>__"sheet number",
+			    "i"=>__"exam copy number",
 # TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the line where one can find this student in the students list file. This is a menu entry.
 			    "l"=>__"line in students list",
 # TRANSLATORS: you can omit the [...] part, just here to explain context
@@ -2451,7 +2451,7 @@ sub doc_maj {
 					   'destroy-with-parent',
 					   'question','yes-no',
 					   sprintf(($ensemble ?
-						    __("Your question has a separate answers page.")." "
+						    __("Your question has a separate answers sheet.")." "
 						    .__("In this case, letters are shown inside boxes.") :
 						   __("Your question is set to present labels inside the boxes to be ticked."))
 						   ." "
@@ -2774,7 +2774,7 @@ sub sujet_impressions_ok {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  __("You did not select any sheet to print..."));
+		  __("You did not select any exam to print..."));
 	$dialog->run;
 	$dialog->destroy;
 	return();
@@ -3067,12 +3067,12 @@ sub saisie_auto_info {
 # TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
 		      __("Different answer sheets").
 		      ".</b> ".
-		      __("In the most robust one, you give a different sheet (with a different sheet number) to every student. You must not photocopy subjects before distributing them.")."\n"
+		      __("In the most robust one, you give a different exam (with a different exam number) to every student. You must not photocopy subjects before distributing them.")."\n"
 		      ."<b>".
 # TRANSLATORS: This is a title for the AMC mode where some answer sheets have been photocopied before being distributed to the students.
 		      __("Some answer sheets were photocopied").
 		      ".</b> ".
-		      __("In the second one (which can be used only if answer sheets to be scanned has one page) you can photocopy answer sheets and give the same subject to different students.")."\n"
+		      __("In the second one (which can be used only if answer sheets to be scanned have one page per candidate) you can photocopy answer sheets and give the same subject to different students.")."\n"
 		      .__("After the first automatic capture, you can't switch to the other mode.")
 		      );
   $dialog->run;
@@ -4024,7 +4024,7 @@ sub select_students {
 
   $w{'students_select_list'}->set_model($filtered_sorted);
   my $renderer=Gtk2::CellRendererText->new;
-  my $column = Gtk2::TreeViewColumn->new_with_attributes (__"sheet ID",
+  my $column = Gtk2::TreeViewColumn->new_with_attributes (__"exam ID",
 							  $renderer,
 							  text=> 0);
   $column->set_sort_column_id(0);
@@ -4905,7 +4905,7 @@ sub mep_warnings {
 	    my @e=sort { $a <=> $b } (@{$dd});
 	    if(@e) {
 	      $m.="\n<b>".$defect_text{$k}."</b> ".
-		sprintf(__('(Concerns %1$d sheets, see for exemple sheet %2$d)'),1+$#e,$e[0]).'.';
+		sprintf(__('(Concerns %1$d exams, see for exemple sheet %2$d)'),1+$#e,$e[0]).'.';
 	    }
 	  }
 	}

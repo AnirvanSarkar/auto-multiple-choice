@@ -350,7 +350,7 @@ sub page {
 	    ->new_with_markup($self->{'main_window'},
 			      'destroy-with-parent',
 			      'warning','yes-no',
-			      __("You moved some boxes to correct automatic data query, but this work is not saved yet.")." ".__("Dou you want to save these modifications before looking at another page?")
+			      __("You moved some boxes to correct automatic data query, but this work is not saved yet.")." ".__("Do you want to save these modifications before looking at another page?")
 	    );
 	my $reponse=$dialog->run;
 	$dialog->destroy;
