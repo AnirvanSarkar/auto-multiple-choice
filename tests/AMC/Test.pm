@@ -364,10 +364,17 @@ sub assoc {
 
   return if(!$self->{'list'});
 
+  my @code=();
+  if($self->{'code'} eq '<preassoc>') {
+    push @code,'--pre-association';
+  } else {
+    push @code,'--notes-id',$self->{'code'};
+  }
+
   $self->amc_command('association-auto',
 		     '--liste','%PROJ/'.$self->{'list'},
 		     '--liste-key',$self->{'list_key'},
-		     '--notes-id',$self->{'code'},
+		     @code,
 		     '--data','%DATA',
 		     );
 }
