@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.1.0 (svn: 1075)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
 "POT-Creation-Date: 2013-03-21 23:23 +0100\n"
-"PO-Revision-Date: 2012-10-17 17:43+0900\n"
+"PO-Revision-Date: 2013-03-25 19:58+0900\n"
 "Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language: \n"
@@ -18,7 +18,6 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 
 #: ../AMC-getimages.pl:205
-#, fuzzy
 msgid "Splitting multi-page PDF files..."
 msgstr "複数ページPDFファイル %s を分割しています..."
 
@@ -39,7 +38,8 @@ msgid "Copying scans to project directory..."
 msgstr "スキャンデータをプロジェクトディレクトリにコピーしています..."
 
 #. TRANSLATORS: directory name for projects. This directory will be created (if needed) in the home directory of the user. Please use only alphanumeric characters, and - or _. No accentuated characters.
-#: ../AMC-gui.pl:214 ../AMC-gui.pl:215
+#: ../AMC-gui.pl:214
+#: ../AMC-gui.pl:215
 msgid "MC-Projects"
 msgstr "MC-Projects"
 
@@ -93,6 +93,8 @@ msgid ""
 "The package <i>auto-multiple-choice-common</i> is installed, but not <i>auto-multiple-choice</i>.\n"
 "<b>AMC won't work properly until you install auto-multiple-choice package!</b>"
 msgstr ""
+"<i>auto-multiple-choice-common</i>パッケージはインストールされましたが、<i>auto-multiple-choice</i>がインストールされていません。\n"
+"<b>AMCは、auto-multiple-choiceパッケージをインストールしないと、正しく動作しません!</b>"
 
 #. TRANSLATORS: Error writing one of the configuration files (global or project). The first %s will be replaced with the path of that file, and the second with the error text.
 #: ../AMC-gui.pl:595
@@ -109,7 +111,8 @@ msgstr "いくつかのダイアログはAMCの取扱いを容易にします。
 msgid "Unless you tick the \"%s\" box, they are shown only once."
 msgstr "\"%s\" ボックスにチェックをしない限り、それらは一度しか表示されません。"
 
-#: ../AMC-gui.pl:618 ../AMC-gui.pl:1004
+#: ../AMC-gui.pl:618
+#: ../AMC-gui.pl:1004
 msgid "Show this message again next time"
 msgstr "次回もこのメッセージを表示する"
 
@@ -154,22 +157,28 @@ msgid "updated"
 msgstr "更新日時"
 
 #. TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
-#: ../AMC-gui.pl:1114 ../AMC-gui.pl:5125 ../AMC-perl/AMC/Gui/Manuel.pm:152
+#: ../AMC-gui.pl:1114
+#: ../AMC-gui.pl:5125
+#: ../AMC-perl/AMC/Gui/Manuel.pm:152
 msgid "MSE"
 msgstr "用紙ゆがみ"
 
 #. TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
-#: ../AMC-gui.pl:1123 ../AMC-gui.pl:5127 ../AMC-perl/AMC/Gui/Manuel.pm:160
+#: ../AMC-gui.pl:1123
+#: ../AMC-gui.pl:5127
+#: ../AMC-perl/AMC/Gui/Manuel.pm:160
 msgid "sensitivity"
 msgstr "不確かさ"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:1134 ../AMC-gui.pl:1152
+#: ../AMC-gui.pl:1134
+#: ../AMC-gui.pl:1152
 msgid "Western Europe"
 msgstr "西欧"
 
 #. TRANSLATORS: for encodings
-#: ../AMC-gui.pl:1136 ../AMC-gui.pl:1154
+#: ../AMC-gui.pl:1136
+#: ../AMC-gui.pl:1154
 msgid "Central Europe"
 msgstr "中欧"
 
@@ -204,12 +213,14 @@ msgid "Unicode"
 msgstr "Unicode"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:1172 ../AMC-gui.pl:3335
+#: ../AMC-gui.pl:1172
+#: ../AMC-gui.pl:3335
 msgid "(none) [No primary key found in association list]"
 msgstr "(なし)"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:1174 ../AMC-gui.pl:3939
+#: ../AMC-gui.pl:1174
+#: ../AMC-gui.pl:3939
 msgid "(none) [No code found in LaTeX file]"
 msgstr "(なし)"
 
@@ -305,14 +316,15 @@ msgstr "ボックス付近"
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
 #. TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:1225 ../AMC-gui.pl:6483
+#: ../AMC-gui.pl:1225
+#: ../AMC-gui.pl:6483
 msgid "name"
 msgstr "氏名"
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student sheet number. This is a menu entry.
 #: ../AMC-gui.pl:1227
 msgid "exam copy number"
-msgstr ""
+msgstr "試験問題番号"
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the line where one can find this student in the students list file. This is a menu entry.
 #: ../AMC-gui.pl:1229
@@ -349,13 +361,15 @@ msgstr "モードを選択してください..."
 
 #. TRANSLATORS: One of the ways exam was made: each student has a different answer sheet with a different copy number - no photocopy was made. This is a menu entry.
 #. TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
-#: ../AMC-gui.pl:1246 ../AMC-gui.pl:3068
+#: ../AMC-gui.pl:1246
+#: ../AMC-gui.pl:3068
 msgid "Different answer sheets"
 msgstr "個別答案用紙モード"
 
 #. TRANSLATORS: One of the ways exam was made: some students have the same exam subject, as some photocopies were made before distributing the subjects. This is a menu entry.
 #. TRANSLATORS: This is a title for the AMC mode where some answer sheets have been photocopied before being distributed to the students.
-#: ../AMC-gui.pl:1248 ../AMC-gui.pl:3073
+#: ../AMC-gui.pl:1248
+#: ../AMC-gui.pl:3073
 msgid "Some answer sheets were photocopied"
 msgstr "コピー答案用紙モード"
 
@@ -404,12 +418,14 @@ msgid "Export to %s did not work: file not created..."
 msgstr "%s へのエクスポートができません。ファイルは作成されませんでした..."
 
 #. TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, an image will be opened to see where the corner marks were detected.
-#: ../AMC-gui.pl:1424 ../AMC-gui.pl:5129
+#: ../AMC-gui.pl:1424
+#: ../AMC-gui.pl:5129
 msgid "page adjustment"
 msgstr "四隅マーカー確認"
 
 #. TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, a window will be opened were the user can see all boxes on the scans and how they were filled by the students, and correct detection of ticked-or-not if needed.
-#: ../AMC-gui.pl:1426 ../AMC-gui.pl:5129
+#: ../AMC-gui.pl:1426
+#: ../AMC-gui.pl:5129
 msgid "boxes zooms"
 msgstr "ボックス拡大"
 
@@ -467,7 +483,8 @@ msgstr "AMCプロジェクト管理"
 msgid "You don't have any MC project in directory %s!"
 msgstr "このディレクトリにはAMCプロジェクトがありません: %s!"
 
-#: ../AMC-gui.pl:1820 ../AMC-gui-choix_projet.glade:250
+#: ../AMC-gui.pl:1820
+#: ../AMC-gui-choix_projet.glade:250
 msgid "Choose directory"
 msgstr "ディレクトリ選択"
 
@@ -477,9 +494,9 @@ msgid "You can't change project %s since it's open."
 msgstr "開いているプロジェクト %s は変更できません。"
 
 #: ../AMC-gui.pl:1885
-#, fuzzy, perl-format
+#, perl-format
 msgid "This will clone project <b>%s</b> to a new project <i>%s</i>."
-msgstr "ディレクトリ <i>%2$s</i> にあるプロジェクト <b>%1$s</b> を選択しました。"
+msgstr "これは、プロジェクト <b>%s</b> を新しいプロジェクト <i>%s</i> にクローンします。"
 
 #. TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
 #: ../AMC-gui.pl:1950
@@ -553,7 +570,8 @@ msgstr "プロジェクトディレクトリ内で <b>%s</b> という名前は�
 msgid "You must choose another name to create a project."
 msgstr "プロジェクトを作成するには別の名前をつける必要があります。"
 
-#: ../AMC-gui.pl:2224 ../AMC-gui.pl:4766
+#: ../AMC-gui.pl:2224
+#: ../AMC-gui.pl:4766
 #, perl-format
 msgid "Error writing to options file %s: %s"
 msgstr "オプションファイル %s への書込みエラー: %s"
@@ -582,15 +600,21 @@ msgstr "これらの文書に基づいて試験が作成されています。"
 msgid "If you modify working documents, you will not be capable any more of analyzing the papers you have already distributed!"
 msgstr "作業文書を修正すると、それ以降、既に配布した試験問題の解析ができなくなります！"
 
-#: ../AMC-gui.pl:2276 ../AMC-gui.pl:2301 ../AMC-gui.pl:3540 ../AMC-gui.pl:3545
+#: ../AMC-gui.pl:2276
+#: ../AMC-gui.pl:2301
+#: ../AMC-gui.pl:3540
+#: ../AMC-gui.pl:3545
 msgid "Do you wish to continue?"
 msgstr "続けますか？"
 
-#: ../AMC-gui.pl:2277 ../AMC-gui.pl:2302
+#: ../AMC-gui.pl:2277
+#: ../AMC-gui.pl:2302
 msgid "Click on Validate to erase the former layouts and update working documents, or on Cancel to cancel this operation."
 msgstr "古いレイアウトを消去して作業文書を更新するにはOKを、この操作を取り消すにはキャンセルをクリックしてください。"
 
-#: ../AMC-gui.pl:2278 ../AMC-gui.pl:2303 ../AMC-gui.pl:3542
+#: ../AMC-gui.pl:2278
+#: ../AMC-gui.pl:2303
+#: ../AMC-gui.pl:3542
 msgid "To allow the use of an already printed question, cancel!"
 msgstr "既に印刷した試験問題を使用する場合は、キャンセルしてください！"
 
@@ -616,9 +640,8 @@ msgid "Documents update..."
 msgstr "文書更新..."
 
 #: ../AMC-gui.pl:2390
-#, fuzzy
 msgid "Error while preparing documents"
-msgstr "作業文書なし"
+msgstr "文書準備中のエラー"
 
 #: ../AMC-gui.pl:2392
 msgid "Errors while processing the source file."
@@ -635,7 +658,8 @@ msgid "See the processing log in '%s' below."
 msgstr "以下の '%s' にある処理ログ参照。"
 
 #. TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-#: ../AMC-gui.pl:2398 ../AMC-gui-main_window.glade:2586
+#: ../AMC-gui.pl:2398
+#: ../AMC-gui-main_window.glade:2586
 msgid "Command output details"
 msgstr "コマンド出力の詳細"
 
@@ -649,7 +673,7 @@ msgstr "エラーのうち先頭の10個だけ表示"
 
 #: ../AMC-gui.pl:2411
 msgid "Documents have been prepared"
-msgstr ""
+msgstr "文書が準備できました"
 
 #: ../AMC-gui.pl:2433
 msgid "Working documents successfully generated."
@@ -666,7 +690,6 @@ msgid "If they are correct, proceed to layouts detection..."
 msgstr "これが正しければ、レイアウト検出に進んでください..."
 
 #: ../AMC-gui.pl:2454
-#, fuzzy
 msgid "Your question has a separate answers sheet."
 msgstr "別紙答案用紙のある試験問題です。"
 
@@ -722,7 +745,8 @@ msgstr "レイアウト検出を忘れていませんか？"
 msgid "Printing with method '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another printing method."
 msgstr "印刷方法 '%s' に必要なperlモジュール %s がインストールされていません。これらのモジュールをインストールするか、他の印刷方法に切り替えてください。"
 
-#: ../AMC-gui.pl:2619 ../AMC-gui.pl:2638
+#: ../AMC-gui.pl:2619
+#: ../AMC-gui.pl:2638
 msgid "CUPS"
 msgstr "CUPS"
 
@@ -737,11 +761,11 @@ msgid "papers"
 msgstr "試験問題"
 
 #: ../AMC-gui.pl:2777
-#, fuzzy
 msgid "You did not select any exam to print..."
 msgstr "印刷する試験問題を選んでいません..."
 
-#: ../AMC-gui.pl:2796 ../AMC-gui.pl:2811
+#: ../AMC-gui.pl:2796
+#: ../AMC-gui.pl:2811
 msgid "You selected only a few sheets to print."
 msgstr "わずかの試験問題しか選択していません。"
 
@@ -802,7 +826,8 @@ msgstr "レイアウトが検出されました。"
 msgid "You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red boxes are well positioned."
 msgstr "<i>%s</i> ボタンをクリックし、試験問題ページ上で赤いボックスが正しい位置にあるか見ることで、確認することができます。"
 
-#: ../AMC-gui.pl:2931 ../AMC-gui-main_window.glade:791
+#: ../AMC-gui.pl:2931
+#: ../AMC-gui-main_window.glade:791
 msgid "Check layouts"
 msgstr "レイアウト確認"
 
@@ -820,11 +845,13 @@ msgstr "このプロジェクト用のレイアウトがありません。"
 msgid "Please use button <i>%s</i> in <i>%s</i> before manual data capture."
 msgstr "手動マーク認識の前に、「<i>%2$s</i>」タブ内の「<i>%1$s</i>」ボタンを使用してください。"
 
-#: ../AMC-gui.pl:3002 ../AMC-gui-main_window.glade:746
+#: ../AMC-gui.pl:3002
+#: ../AMC-gui-main_window.glade:746
 msgid "Layout detection"
 msgstr "レイアウト検出"
 
-#: ../AMC-gui.pl:3003 ../AMC-gui-main_window.glade:890
+#: ../AMC-gui.pl:3003
+#: ../AMC-gui-main_window.glade:890
 msgid "Preparation"
 msgstr "試験問題作成"
 
@@ -838,9 +865,8 @@ msgid "Automatic data capture can be done in two different modes:"
 msgstr "自動マーク認識には2種類のモードがあります:"
 
 #: ../AMC-gui.pl:3070
-#, fuzzy
 msgid "In the most robust one, you give a different exam (with a different exam number) to every student. You must not photocopy subjects before distributing them."
-msgstr "最も堅牢なモードで、各受験者に別々の（試験問題番号の異なる）答案用紙を配る方法です。配る前に試験問題をコピーしてはいけません。"
+msgstr "最も堅牢なモードで、各受験者に別々の（試験問題番号の異なる）答案用紙を配る方法です。コピーした試験問題を配ってはいけません。"
 
 #: ../AMC-gui.pl:3075
 msgid "In the second one (which can be used only if answer sheets to be scanned have one page per candidate) you can photocopy answer sheets and give the same subject to different students."
@@ -855,7 +881,6 @@ msgid "Automatic data capture..."
 msgstr "自動マーク認識..."
 
 #: ../AMC-gui.pl:3192
-#, fuzzy
 msgid "Automatic data capture has been completed"
 msgstr "自動マーク認識が完了しました。"
 
@@ -875,7 +900,8 @@ msgstr "名簿ファイルが不適切です: エラーが%d個あり、最初�
 msgid "Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled."
 msgstr "%d件の氏名が名簿ファイル<i>%s</i>中で空欄です。<b>name</b>あるいは<b>surname</b>欄があり、すべての行で記入されているか確認してください。"
 
-#: ../AMC-gui.pl:3308 ../AMC-gui.pl:3323
+#: ../AMC-gui.pl:3308
+#: ../AMC-gui.pl:3323
 msgid "Edit the names file to correct it, and re-read."
 msgstr "名簿ファイルを編集してこれを修正し、再読込みをしてください。"
 
@@ -891,7 +917,8 @@ msgid "Before associating names to papers, you must choose a students list file 
 msgstr "答案と氏名をリンクする前に、\"%s\" タブで、受験者名簿ファイルを選ばなければなりません。"
 
 #. One of the "notify the user at the end of the following actions" checkbox: for automatic data capture.
-#: ../AMC-gui.pl:3354 ../AMC-gui-edit_preferences.glade:1392
+#: ../AMC-gui.pl:3354
+#: ../AMC-gui-edit_preferences.glade:1392
 #: ../AMC-gui-main_window.glade:1280
 msgid "Data capture"
 msgstr "マーク認識"
@@ -945,7 +972,8 @@ msgstr "自動リンクが終了しました。すべて成功しているかど
 msgid "The working documents are already prepared with the current file format. If you change the file format, working documents and all other data for this project will be ereased."
 msgstr "現在のファイル形式で作業文書が既に用意されています。ファイル形式を変更すると作業文書とこのプロジェクトの他のデータがすべて消去されます。"
 
-#: ../AMC-gui.pl:3541 ../AMC-gui.pl:3546
+#: ../AMC-gui.pl:3541
+#: ../AMC-gui.pl:3546
 msgid "Click on Ok to erease old working documents and change file format, and on Cancel to get back to the same file format."
 msgstr "古い作業文書を消去してファイル形式を変更するにはOKを、ファイル形式を元に戻すにはキャンセルをクリックしてください。"
 
@@ -956,9 +984,10 @@ msgstr "現在のファイル形式で作業文書が既に用意されていま
 #: ../AMC-gui.pl:3596
 #, perl-format
 msgid "You can't choose column '%s' as a key in the students list, as it contains duplicates (value '%s')"
-msgstr ""
+msgstr "受験者名簿の '%s' カラムには重複（'%s'）が含まれているので、キーとして選択できません。"
 
-#: ../AMC-gui.pl:3632 ../AMC-gui.pl:3656
+#: ../AMC-gui.pl:3632
+#: ../AMC-gui.pl:3656
 #, perl-format
 msgid "The primary key from the students list has been set to \"%s\", which is not the value from the association data."
 msgstr "受験者名簿のリンク用主キーが \"%s\" に設定されました。これは現在のリンクデータの値とは異なります。"
@@ -978,7 +1007,8 @@ msgid "Papers are not yet corrected: use button \"%s\"."
 msgstr "答案がまだ採点されていません: \"%s\" ボタンを使用してください。"
 
 #. TRANSLATORS: This is a button: "Mark" is here an action to be called by the user. When clicking this button, the user requests scores to be computed for all students.
-#: ../AMC-gui.pl:3684 ../AMC-gui-main_window.glade:1375
+#: ../AMC-gui.pl:3684
+#: ../AMC-gui-main_window.glade:1375
 msgid "Mark"
 msgstr "採点"
 
@@ -991,9 +1021,8 @@ msgid "Computing marks..."
 msgstr "得点を計算しています..."
 
 #: ../AMC-gui.pl:3913
-#, fuzzy
 msgid "Grading has been completed"
-msgstr "自動マーク認識が完了しました。"
+msgstr "採点が完了しました。"
 
 #. TRANSLATORS: This is the marks mean for all students.
 #: ../AMC-gui.pl:3926
@@ -1028,7 +1057,7 @@ msgstr "答案はすべて受験者氏名とリンクされています"
 
 #: ../AMC-gui.pl:4027
 msgid "exam ID"
-msgstr ""
+msgstr "試験ID"
 
 #: ../AMC-gui.pl:4042
 msgid "student"
@@ -1040,7 +1069,7 @@ msgstr "答案に採点を記入しています..."
 
 #: ../AMC-gui.pl:4203
 msgid "Annotations have been completed"
-msgstr ""
+msgstr "採点記入が完了しました"
 
 #. TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
 #: ../AMC-gui.pl:4225
@@ -1071,7 +1100,7 @@ msgstr "プロジェクト設定"
 
 #: ../AMC-gui.pl:4609
 msgid "Please install <b>Gtk2::Notify</b> perl package to make desktop notifications available."
-msgstr ""
+msgstr "デスクトップ通知を有効にするには、perlの<b>Gtk2::Notify</b>パッケージをインストールしてください。"
 
 #: ../AMC-gui.pl:4714
 #, perl-format
@@ -1104,12 +1133,20 @@ msgid "but some defects were detected."
 msgstr "しかし問題点がいくつかみつかりました。"
 
 #: ../AMC-gui.pl:4885
-msgid "The \\namefield command is not used. Writing subjects without name field is not recommended"
-msgstr "\\namefield コマンドが使用されていません。氏名欄のない試験問題の作成は推奨されません。"
+msgid ""
+"The \\n"
+"amefield command is not used. Writing subjects without name field is not recommended"
+msgstr ""
+"\\n"
+"amefield コマンドが使用されていません。氏名欄のない試験問題の作成は推奨されません。"
 
 #: ../AMC-gui.pl:4886
-msgid "The \\namefield command is used several times for the same subject. This should not be the case, as each student should write his name only once"
-msgstr "\\namefield コマンドが同じ試験問題内で複数回使用されています。各受験者は氏名を1回だけ記入すべきなので、何かのミスと思われます。"
+msgid ""
+"The \\n"
+"amefield command is used several times for the same subject. This should not be the case, as each student should write his name only once"
+msgstr ""
+"\\n"
+"amefield コマンドが同じ試験問題内で複数回使用されています。各受験者は氏名を1回だけ記入すべきなので、何かのミスと思われます。"
 
 #: ../AMC-gui.pl:4887
 msgid "No box to be ticked"
@@ -1129,7 +1166,7 @@ msgid "(See for exemple pages %s and %s)"
 msgstr "（例えば、ページ %s と %s を見てください）"
 
 #: ../AMC-gui.pl:4908
-#, fuzzy, perl-format
+#, perl-format
 msgid "(Concerns %1$d exams, see for exemple sheet %2$d)"
 msgstr "（%1$d 件の試験問題が関連しています。例として試験問題番号 %2$d を見てください）"
 
@@ -1229,7 +1266,8 @@ msgstr "(説明なし)"
 
 #. TRANSLATORS: This is a column title for the list of files to be included in a template being created.
 #. TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
-#: ../AMC-gui.pl:5501 ../AMC-gui.pl:6462
+#: ../AMC-gui.pl:5501
+#: ../AMC-gui.pl:6462
 #: ../AMC-gui-source_latex_dialog.glade:76
 msgid "file"
 msgstr "ファイル"
@@ -1243,7 +1281,8 @@ msgid "When making a template, you can only add files that are within the projec
 msgstr "テンプレートを作成する際は、プロジェクトディレクトリ内のファイルしか追加できません。"
 
 #. TRANSLATORS: This is a column name for the list of available templates, when creating a new project based on a template.
-#: ../AMC-gui.pl:5721 ../AMC-gui-source_latex_dialog.glade:93
+#: ../AMC-gui.pl:5721
+#: ../AMC-gui-source_latex_dialog.glade:93
 msgid "template"
 msgstr "テンプレート"
 
@@ -1283,7 +1322,8 @@ msgstr "ソースファイルがプロジェクトディレクトリにコピー
 msgid "You can now edit it with button \"%s\" or with any editor."
 msgstr "\"%s\" ボタンか、お気に入りのエディタで編集することができます。"
 
-#: ../AMC-gui.pl:5992 ../AMC-gui-main_window.glade:482
+#: ../AMC-gui.pl:5992
+#: ../AMC-gui-main_window.glade:482
 msgid "Edit source file"
 msgstr "ソースファイル編集"
 
@@ -1318,7 +1358,8 @@ msgstr "ヘルプメニュー内の「デバッグ」にチェックを入れて
 msgid "Bug reports can be filled at %s or sent to the address below."
 msgstr "バグレポートは %s に記入するか、以下のアドレスに送付することができます。"
 
-#: ../AMC-gui.pl:6241 ../AMC-gui.pl:6245
+#: ../AMC-gui.pl:6241
+#: ../AMC-gui.pl:6245
 msgid "AMC community site"
 msgstr "AMCコミュニティサイト"
 
@@ -1401,11 +1442,13 @@ msgstr "%d 件のメッセージが送信されました。"
 msgid "Set exam name"
 msgstr "試験名称を設定"
 
-#: ../AMC-gui.pl:6651 ../AMC-gui-edit_preferences.glade:3638
+#: ../AMC-gui.pl:6651
+#: ../AMC-gui-edit_preferences.glade:3638
 msgid "Examination name"
 msgstr "試験名称"
 
-#: ../AMC-gui.pl:6656 ../AMC-gui-edit_preferences.glade:3627
+#: ../AMC-gui.pl:6656
+#: ../AMC-gui-edit_preferences.glade:3627
 msgid "Code (short name) for examination"
 msgstr "試験コード（短縮名）"
 
@@ -1474,14 +1517,12 @@ msgid "boxes images are extracted from the scans while processing automatic data
 msgstr "自動マーク認識の処理中にスキャンデータからボックス画像が抽出されます。拡大ダイアログを使ってボックス内のマーク有無の判定をチェックや訂正する必要がなければ、削除してかまいません。同じスキャンデータから自動マーク認識を再実行すれば元に戻すことができます。"
 
 #: ../AMC-gui.pl:6927
-#, fuzzy
 msgid "layout reports"
-msgstr "バグレポート"
+msgstr "レイアウトレポート"
 
 #: ../AMC-gui.pl:6928
-#, fuzzy
 msgid "these images are intended to show how the corner marks have been recognized and positioned on the scans. They can be safely removed once the scans are known to be well-recognized. They can be recovered processing again automatic data capture from the same scans."
-msgstr "自動マーク認識の処理中にスキャンデータからボックス画像が抽出されます。拡大ダイアログを使ってボックス内のマーク有無の判定をチェックや訂正する必要がなければ、削除してかまいません。同じスキャンデータから自動マーク認識を再実行すれば元に戻すことができます。"
+msgstr "これらの画像はどのように四隅マークが認識されスキャンデータ中に位置づけられたかを示すためのものです。スキャンデータがうまく認識できたことが確認できれば、削除してかまいません。同じスキャンデータから自動マーク認識を再実行すれば元に戻すことができます。"
 
 #: ../AMC-gui.pl:6943
 msgid "annotated pages"
@@ -1493,7 +1534,7 @@ msgstr "PDFの採点記入済答案ファイルを作成する前にJPEGの採�
 
 #: ../AMC-gui.pl:6974
 msgid "Total size of concerned files:"
-msgstr ""
+msgstr "関連するファイルの合計サイズ:"
 
 #: ../AMC-gui.pl:7022
 #, perl-format
@@ -1564,9 +1605,8 @@ msgstr "得点"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:601
-#, fuzzy
 msgid "Exam [exam number column title in exported spreadsheet]"
-msgstr "氏名"
+msgstr "試験"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:603
@@ -1594,11 +1634,11 @@ msgstr "旧形式のXMLファイルからリンク結果を取り出していま
 
 #: ../AMC-perl/AMC/DataModule/capture.pm:206
 msgid "Including zooms in the database..."
-msgstr ""
+msgstr "データベース内に拡大画像を格納中..."
 
 #: ../AMC-perl/AMC/DataModule/capture.pm:225
 msgid "Building capture database indexes..."
-msgstr ""
+msgstr "マーク認識データベースの索引を作成中..."
 
 #: ../AMC-perl/AMC/DataModule/capture.pm:263
 msgid "Fetching data capture results from old format XML files..."
@@ -1606,7 +1646,7 @@ msgstr "旧形式のXMLファイルからマーク認識結果を取り出して
 
 #: ../AMC-perl/AMC/DataModule/layout.pm:188
 msgid "Building layout database indexes..."
-msgstr ""
+msgstr "レイアウトデータベースの索引を作成中"
 
 #: ../AMC-perl/AMC/DataModule/layout.pm:227
 msgid "Fetching layout data from old format XML files..."
@@ -1656,7 +1696,8 @@ msgid "NONE"
 msgstr "該当なし"
 
 #. TRANSLATORS: table name in the exported ODS spreadsheet for the table that contains the marks.
-#: ../AMC-perl/AMC/Export/ods.pm:814 ../AMC-perl/AMC/Gui/Notes.glade:7
+#: ../AMC-perl/AMC/Export/ods.pm:814
+#: ../AMC-perl/AMC/Gui/Notes.glade:7
 msgid "Marks"
 msgstr "得点"
 
@@ -1671,7 +1712,8 @@ msgid "Indicative questions statistics"
 msgstr "採点対象外設問の統計"
 
 #. TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
-#: ../AMC-perl/AMC/Export/ods.pm:1165 ../AMC-perl/AMC/Export/ods.pm:1169
+#: ../AMC-perl/AMC/Export/ods.pm:1165
+#: ../AMC-perl/AMC/Export/ods.pm:1169
 msgid "Legend"
 msgstr "凡例"
 
@@ -1712,7 +1754,7 @@ msgstr "採点対象外"
 
 #: ../AMC-perl/AMC/Export/ods.pm:1229
 msgid "An old state of the exported file seems to be already opened. Use File/Reload from OpenOffice/LibreOffice to refresh."
-msgstr ""
+msgstr "エクスポートしたファイルの古い版が既に開かれているようです。OpenOffice/LibreOfficeでファイル/再読み込みを使用してリフレッシュしてください。"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:80
 msgid "Name and surname"
@@ -1764,8 +1806,12 @@ msgid "No description available."
 msgstr "説明がありません。"
 
 #: ../AMC-perl/AMC/Gui/Association.pm:134
-msgid "Names images not found... Maybe you forgot using \\namefield command in LaTeX source?"
-msgstr "氏名画像がみつかりません... LaTeXソースで \\namefield コマンドを使用し忘れていませんか？"
+msgid ""
+"Names images not found... Maybe you forgot using \\n"
+"amefield command in LaTeX source?"
+msgstr ""
+"氏名画像がみつかりません... LaTeXソースで \\n"
+"amefield コマンドを使用し忘れていませんか？"
 
 #: ../AMC-perl/AMC/Gui/Association.pm:703
 msgid "Sheet"
@@ -1777,9 +1823,10 @@ msgstr "ページレイアウト"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:116
 msgid "Original"
-msgstr ""
+msgstr "オリジナル"
 
-#: ../AMC-perl/AMC/Gui/Manuel.pm:117 ../AMC-gui-edit_preferences.glade:1861
+#: ../AMC-perl/AMC/Gui/Manuel.pm:117
+#: ../AMC-gui-edit_preferences.glade:1861
 msgid "Scan"
 msgstr "スキャン"
 
@@ -1788,20 +1835,23 @@ msgid "page"
 msgstr "ページ"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:485
-#, fuzzy, perl-format
+#, perl-format
 msgid "This is a template exam that you cannot edit. To create a new exam from this one to be edited, use the '%s' button."
 msgstr "これはテンプレート試験問題なので編集できません。これをもとに新しい試験問題を作って編集するには、'%s' ボタンを使ってください。"
 
-#: ../AMC-perl/AMC/Gui/Manuel.pm:485 ../AMC-perl/AMC/Gui/Manuel.glade:336
+#: ../AMC-perl/AMC/Gui/Manuel.pm:485
+#: ../AMC-perl/AMC/Gui/Manuel.glade:336
 msgid "Add photocopy"
 msgstr "複製を追加"
 
-#: ../AMC-perl/AMC/Gui/Zooms.pm:102 ../AMC-perl/AMC/Gui/Zooms.pm:364
+#: ../AMC-perl/AMC/Gui/Zooms.pm:102
+#: ../AMC-perl/AMC/Gui/Zooms.pm:364
 #, perl-format
 msgid "Boxes zooms for page %s"
 msgstr "用紙番号 %s のボックス拡大"
 
-#: ../AMC-perl/AMC/Gui/Zooms.pm:353 ../AMC-perl/AMC/Gui/Zooms.pm:533
+#: ../AMC-perl/AMC/Gui/Zooms.pm:353
+#: ../AMC-perl/AMC/Gui/Zooms.pm:533
 msgid "You moved some boxes to correct automatic data query, but this work is not saved yet."
 msgstr "自動マーク認識の結果を補正するためにボックスが移動されていますが、まだ保存されていません。"
 
@@ -1873,11 +1923,11 @@ msgstr "各採点対象外設問の解答に関する基本統計表を作成し
 #. TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.
 #: ../AMC-perl/AMC/Export/register/ods.pm:90
 msgid "Score groups"
-msgstr ""
+msgstr "素点グループ"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:94
 msgid "Add sums of the scores for each question group? To define groups, use question ids in the form \"group:question\"."
-msgstr ""
+msgstr "設問グループごとに素点を合計しますか？グループを定義するには、\"group:question\"という形式の設問IDを使用してください。"
 
 #: ../AMC-perl/AMC/Filter/register/latex.pm:54
 msgid ""
@@ -1966,7 +2016,6 @@ msgid "Post-correction"
 msgstr "採点時正解提示"
 
 #: ../AMC-gui-choix_postcorrect.glade:97
-#, fuzzy
 msgid "Please enter the teacher score sheet number and copy number to get the correct answers from:"
 msgstr "正解が記入されている模範解答の試験問題番号とページ番号を入力してください:"
 
@@ -1974,7 +2023,8 @@ msgstr "正解が記入されている模範解答の試験問題番号とペー
 msgid "Open a MC project"
 msgstr "AMCプロジェクトを開く"
 
-#: ../AMC-gui-choix_projet.glade:52 ../AMC-gui-liste_dialog.glade:92
+#: ../AMC-gui-choix_projet.glade:52
+#: ../AMC-gui-liste_dialog.glade:92
 msgid "Cancel"
 msgstr "キャンセル"
 
@@ -1988,7 +2038,7 @@ msgstr "名前を変更"
 
 #: ../AMC-gui-choix_projet.glade:173
 msgid "Clone"
-msgstr ""
+msgstr "クローン"
 
 #: ../AMC-gui-choix_projet.glade:268
 msgid "Open an existing MC project:"
@@ -2046,7 +2096,8 @@ msgstr "ディスク容量を節約するために、プロジェクトディレ
 msgid "AMC Preferences"
 msgstr "AMC設定"
 
-#: ../AMC-gui-edit_preferences.glade:143 ../AMC-gui-edit_preferences.glade:158
+#: ../AMC-gui-edit_preferences.glade:143
+#: ../AMC-gui-edit_preferences.glade:158
 msgid "LaTeX models directory"
 msgstr "LaTeXモデルディレクトリ"
 
@@ -2219,23 +2270,23 @@ msgstr "<b>システム</b>"
 msgid "Main"
 msgstr "メイン"
 
-#: ../AMC-gui-edit_preferences.glade:990 ../AMC-gui-main_window.glade:667
+#: ../AMC-gui-edit_preferences.glade:990
+#: ../AMC-gui-main_window.glade:667
 msgid "Solution"
 msgstr "解答"
 
-#: ../AMC-gui-edit_preferences.glade:1005 ../AMC-gui-main_window.glade:651
+#: ../AMC-gui-edit_preferences.glade:1005
+#: ../AMC-gui-main_window.glade:651
 msgid "Catalog"
-msgstr ""
+msgstr "カタログ"
 
 #: ../AMC-gui-edit_preferences.glade:1029
-#, fuzzy
 msgid "<b>Optional working documents to build</b>"
-msgstr "作業文書なし"
+msgstr "<b>作成する任意作業文書</b>"
 
 #: ../AMC-gui-edit_preferences.glade:1052
-#, fuzzy
 msgid "Documents"
-msgstr "ドキュメント"
+msgstr "文書"
 
 #: ../AMC-gui-edit_preferences.glade:1121
 msgid "Limit sensitivity"
@@ -2297,19 +2348,17 @@ msgstr "<b>その他</b>"
 
 #: ../AMC-gui-edit_preferences.glade:1362
 msgid "Notify the user at the end of the following actions:"
-msgstr ""
+msgstr "以下の動作の後、ユーザに通知する:"
 
 #. One of the "notify the user at the end of the following actions" checkbox: for documents update.
 #: ../AMC-gui-edit_preferences.glade:1377
-#, fuzzy
 msgid "Documents update"
-msgstr "文書更新..."
+msgstr "文書更新"
 
 #. One of the "notify the user at the end of the following actions" checkbox: for computing marks.
 #: ../AMC-gui-edit_preferences.glade:1407
-#, fuzzy
 msgid "Grading"
-msgstr "丸め"
+msgstr "採点"
 
 #. One of the "notify the user at the end of the following actions" checkbox: for completed answer sheets annotation.
 #: ../AMC-gui-edit_preferences.glade:1422
@@ -2319,26 +2368,23 @@ msgstr "採点記入"
 
 #: ../AMC-gui-edit_preferences.glade:1447
 msgid "Notify using:"
-msgstr ""
+msgstr "通知方法:"
 
 #: ../AMC-gui-edit_preferences.glade:1462
-#, fuzzy
 msgid "Desktop notifications"
-msgstr "採点記入"
+msgstr "デスクトップ通知"
 
 #: ../AMC-gui-edit_preferences.glade:1497
-#, fuzzy
 msgid "Command:"
 msgstr " コマンド:"
 
 #: ../AMC-gui-edit_preferences.glade:1509
 msgid "Command that will be called as a user notification. %m will be replaced by AMC's message, and %a by AMC completed action."
-msgstr ""
+msgstr "ユーザ通知として起動されるコマンド。%m はAMCのメッセージに、%a は完了した動作に置換されます。"
 
 #: ../AMC-gui-edit_preferences.glade:1540
-#, fuzzy
 msgid "<b>Notifications</b>"
-msgstr "採点記入"
+msgstr "<b>通知</b>"
 
 #: ../AMC-gui-edit_preferences.glade:1560
 msgid "Display"
@@ -2531,11 +2577,11 @@ msgstr "差出人アドレス"
 
 #: ../AMC-gui-edit_preferences.glade:2833
 msgid "Carbon copy address"
-msgstr ""
+msgstr "Cc: アドレス"
 
 #: ../AMC-gui-edit_preferences.glade:2844
 msgid "Blind Carbon copy address"
-msgstr ""
+msgstr "Bcc: アドレス"
 
 #: ../AMC-gui-edit_preferences.glade:2903
 msgid "Mail delivery method:"
@@ -2841,7 +2887,8 @@ msgstr "試験問題印刷"
 msgid "From papers' scans"
 msgstr "答案用紙のスキャンデータを利用"
 
-#: ../AMC-gui-main_window.glade:946 ../AMC-gui-main_window.glade:1829
+#: ../AMC-gui-main_window.glade:946
+#: ../AMC-gui-main_window.glade:1829
 msgid "Automatic"
 msgstr "自動"
 
@@ -2849,7 +2896,8 @@ msgstr "自動"
 msgid "On screen with mouse"
 msgstr "マウスを用い、画面上で入力"
 
-#: ../AMC-gui-main_window.glade:991 ../AMC-gui-main_window.glade:1873
+#: ../AMC-gui-main_window.glade:991
+#: ../AMC-gui-main_window.glade:1873
 msgid "Manual"
 msgstr "手動"
 
@@ -2862,7 +2910,8 @@ msgid "Pages:"
 msgstr "ページ:"
 
 #. Label on the button used to open a window with the images of the boxes taken from the scan. This window can be used th check boxes categorization.
-#: ../AMC-gui-main_window.glade:1093 ../AMC-perl/AMC/Gui/Zooms.glade:7
+#: ../AMC-gui-main_window.glade:1093
+#: ../AMC-perl/AMC/Gui/Zooms.glade:7
 msgid "Zooms"
 msgstr "拡大"
 
@@ -3076,12 +3125,12 @@ msgstr "OKボタンを押すとスキャンファイルからのマーク認識�
 msgid "Copy to project directory (recommended)"
 msgstr "プロジェクトディレクトリにコピーする（推奨）"
 
-#: ../AMC-gui-saisie_auto.glade:88 ../AMC-gui-saisie_auto.glade:89
+#: ../AMC-gui-saisie_auto.glade:88
+#: ../AMC-gui-saisie_auto.glade:89
 msgid "Copy all scans to scans sub-directory in project directory"
 msgstr "スキャンデータをすべてプロジェクト内のscansサブディレクトリにコピーします"
 
 #: ../AMC-gui-saisie_auto.glade:158
-#, fuzzy
 msgid "Use this setting to be sure that the exam copy IDs allocated to the pages of the scans you selected will be consecutive numbers, <b>in the same order</b> as the pages."
 msgstr "選択したスキャンデータの各ページの用紙番号がページ順序と同じになるように連続した番号を割り当てるには、この設定を使用してください。"
 
@@ -3164,11 +3213,11 @@ msgstr "手動リンク"
 #. This is the label of the check button that controls wheter the auto-completion for students names will be made looking at the beginnig of the names or at the whole names.
 #: ../AMC-perl/AMC/Gui/Association.glade:84
 msgid "beginning"
-msgstr ""
+msgstr "先頭一致"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:88
 msgid "Is auto-completion looking at the beginning of the names only?"
-msgstr ""
+msgstr "自動補完では氏名の先頭一致のみを用いますか？"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:156
 msgid "Show all"
@@ -3202,11 +3251,13 @@ msgstr "手動リンク結果を保存する。"
 msgid "Papers data capture"
 msgstr "答案用紙マーク認識"
 
-#: ../AMC-perl/AMC/Gui/Manuel.glade:27 ../AMC-perl/AMC/Gui/Manuel.glade:223
+#: ../AMC-perl/AMC/Gui/Manuel.glade:27
+#: ../AMC-perl/AMC/Gui/Manuel.glade:223
 msgid "Go to:"
 msgstr "直接ジャンプ:"
 
-#: ../AMC-perl/AMC/Gui/Manuel.glade:39 ../AMC-perl/AMC/Gui/Manuel.glade:235
+#: ../AMC-perl/AMC/Gui/Manuel.glade:39
+#: ../AMC-perl/AMC/Gui/Manuel.glade:235
 msgid "Enter paper number, or page number like 102/4 (page 4 from paper 102), then press enter."
 msgstr "試験問題番号あるいは102/4（試験問題102の4ページ目）のような用紙番号を入力し、Enterを押してください。"
 
@@ -3250,32 +3301,3 @@ msgstr "マークされていないボックス"
 msgid "Checked boxes"
 msgstr "マークされているボックス"
 
-#~ msgid "sheet number"
-#~ msgstr "試験問題番号"
-
-#~ msgid "sheet ID"
-#~ msgstr "試験問題ID"
-
-#~ msgid "Sheet [sheet number column title in exported spreadsheet]"
-#~ msgstr "試験問題番号"
-
-#~ msgid "solution"
-#~ msgstr "正解"
-
-#~ msgid "Add a column"
-#~ msgstr "カラム追加"
-
-#~ msgid "Remove a column"
-#~ msgstr "カラム削除"
-
-#~ msgid "Annotate papers&apos; scans with marking details."
-#~ msgstr "スキャンした答案に採点の詳細を記入する。"
-
-#~ msgid "Remove manual modifications for this page. Automatic data capture for this page, if any, won&apos;t be changed."
-#~ msgstr "このページの手動修正を削除します。このページの自動マーク認識結果は、変更されません。"
-
-#~ msgid "Confirm changes"
-#~ msgstr "変更を確認"
-
-#~ msgid "Process"
-#~ msgstr "実行"
