@@ -249,15 +249,15 @@ sub new {
     my $ii=0;
     for my $i (@images) {
       my @sc=($i->{'student'},$i->{'copy'});
-      my $iter=$copies_store->append();
-      $copies_store->set($iter,
-			 COPIES_N,studentids_string(@sc),
-			 COPIES_STUDENT,$sc[0],
-			 COPIES_COPY,$sc[1],
-			 COPIES_AUTO,$self->{'assoc'}->get_auto(@sc),
-			 COPIES_MANUEL,$self->{'assoc'}->get_manual(@sc),
-			 COPIES_IIMAGE,$ii,
-			);
+      $copies_store->insert_with_values
+	($ii,
+	 COPIES_N,studentids_string(@sc),
+	 COPIES_STUDENT,$sc[0],
+	 COPIES_COPY,$sc[1],
+	 COPIES_AUTO,$self->{'assoc'}->get_auto(@sc),
+	 COPIES_MANUEL,$self->{'assoc'}->get_manual(@sc),
+	 COPIES_IIMAGE,$ii,
+	);
       $ii++;
     }
     $self->{'assoc'}->end_transaction('ALST');

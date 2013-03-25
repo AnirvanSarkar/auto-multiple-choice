@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -111,9 +111,11 @@ sub new {
     }
 
     my $row=0;
+    my @vv;
+
   COPIE:for my $m ($self->{'scoring'}->marks) {
       my @sc=($m->{'student'},$m->{'copy'});
-      my @vv=(TAB_ID,studentids_string(@sc),
+      @vv=(TAB_ID,studentids_string(@sc),
 	      TAB_NOTE,formatte($m->{'mark'}),
 	      TAB_COLOR,($sc[0]==$self->{'postcorrect_student'} &&
 			 $sc[1]==$self->{'postcorrect_copy'}
@@ -133,11 +135,9 @@ sub new {
 
     # Average row
 
-    $it=$store->append();
-    $store->set($it,
-		TAB_ID,translate_id_name('moyenne'),
-		TAB_NOTE,formatte($self->{'scoring'}->average_mark),
-	       );
+    @vv=(TAB_ID,translate_id_name('moyenne'),
+	 TAB_NOTE,formatte($self->{'scoring'}->average_mark),
+	);
 
     $i=TAB_DETAIL ;
     for(@questions) {
@@ -152,11 +152,13 @@ sub new {
 	  $p='?';
 	}
       }
-      $store->set($it,$i++,$p);
+      push @vv,$i++,$p;
     }
     for(@codes) {
-      $store->set($it,$i++,'---');
+      push @vv,$i++,'---';
     }
+
+    $store->insert_with_values($row++,@vv);
 
     $self->{'scoring'}->end_transaction;
     return($self);

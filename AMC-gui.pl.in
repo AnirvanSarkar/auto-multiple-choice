@@ -2688,8 +2688,9 @@ sub sujet_impressions {
 
     $copies_store->clear();
     $projet{'_layout'}->begin_read_transaction('PRNT');
+    my $row=0;
     for my $c ($projet{'_layout'}->students()) {
-	$copies_store->set($copies_store->append(),COPIE_N,$c);
+      $copies_store->insert_with_values($row++,COPIE_N,$c);
     }
     $projet{'_layout'}->end_transaction('PRNT');
 
