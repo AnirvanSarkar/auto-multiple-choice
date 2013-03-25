@@ -10,7 +10,7 @@
     <subtitle>自動採点と評定の可能な選択式試験問題のデザイン</subtitle>
 
     <abstract>
-      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1267）</para>
+      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1328）</para>
 
       <para>AMCプロジェクトは<ulink
       url="http://gna.org/">Gna!</ulink>によってホスティングされています。AMCウェブサイトは<ulink url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>にあり、プロジェクトがホスティングされているサイトは<ulink url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>です。</para>
@@ -29,7 +29,7 @@
     </author>
 
     <copyright>
-      <year>2008-2012</year>
+      <year>2008-2013</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -353,6 +353,22 @@ Presentation: 以下の設問に最も適切な解答を
         </varlistentry>
 
         <varlistentry>
+          <term>ManualDuplex:</term>
+
+          <listitem>
+            <para>1にすると（これはデフォルト値ではありません）、各試験問題用紙のページ数が偶数になり、PDFの試験問題用紙を手動で印刷する際、両面印刷モードで一度に行うことができます。</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>SingleSided:</term>
+
+          <listitem>
+            <para>1にすると（これはデフォルト値ではありません）、設問のページ数が奇数の場合でも、設問と別紙答案用紙の間に空ページが追加されません。このモードは試験問題用紙を片面印刷するときや、設問と答案用紙を分ける必要がないときに有用です。</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term>BoxColor:</term>
 
           <listitem>
@@ -522,6 +538,37 @@ Presentation: 以下の設問に最も適切な解答を
 + 2
 + 10
 </programlisting>
+      </sect3>
+
+      <sect3>
+        <title>記述式設問</title>
+
+        <para>次の例のように<code>&lt;</code>と<code>&gt;</code>で囲むことにより、記述式の設問（<xref linkend="openquestions"/> 参照）を定義することができます:</para>
+
+        <programlisting>*&lt;lines=4&gt; 月について述べよ。
+-[O]{0} 誤り
+-[P]{1} 微妙
++[V]{2} 正解</programlisting>
+
+        <para>以下のグローバルオプションを使用することも検討すべきです:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>L-OpenText:</term>
+
+            <listitem>
+              <para>別紙答案用紙に記入するよう指示するテキスト（関連する場合のみ）。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>L-OpenReserved:</term>
+
+            <listitem>
+              <para>採点用ボックスに記入しないようボックス脇に表示するテキスト。</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
       </sect3>
     </sect2>
 
@@ -1075,6 +1122,18 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
           <listitem>
             <para><option>postcorrect</option>: スキャンデータの解析を終えてから（採点時）、出題者が作成した答案用紙を正解として与えたい場合にこのオプションを用います。詳細は<xref linkend="postcorrect"/>を参照してください。</para>
           </listitem>
+
+          <listitem>
+            <para><option>automarks</option>: <option>separateanswersheet</option>（別紙答案用紙）モードにおいて、試験問題のページに四隅のマーカーを印刷したくない場合に使用してください。マーカーは別紙答案用紙にのみ印刷されます。この場合に試験問題ページ上のページ番号の書式を変更するには、<command>\AMCsubjectPageTag</command>コマンドを次のように再定義してください:</para>
+
+            <programlisting>\renewcommand\AMCsubjectPageTag{%
+  \fbox{\texttt{\the\AMCid@etud:\thepage}}%
+}</programlisting>
+
+            <warning>
+              <para><option>automarks</option>オプションは、AMCが試験問題ページ上のデータを処理できなくなりますので、これを読み取る必要がない場合にのみ使用してください。</para>
+            </warning>
+          </listitem>
         </itemizedlist>
       </sect3>
 
@@ -1406,7 +1465,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         <para>水平バージョン<command>AMCcodeH</command>も使用することができ、桁数が少ない場合に便利です。</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="openquestions">
         <title>記述式設問</title>
 
         <para>試験問題に記述式設問を加えたい場合があるかもしれません。一つの方法は、そういった設問のマーク用ボックスを採点者用に予約しておくことです。試験実施後、記入された答案を読んで、採点者が評価に該当するボックスにマークをつけます。そして答案をスキャンしてAMCで採点すれば、その点数を得点に組み入れることができます。<programlisting>\begin{question}{記述}
