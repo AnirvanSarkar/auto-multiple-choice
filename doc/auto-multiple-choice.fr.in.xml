@@ -1972,10 +1972,23 @@ Durée : 10 minutes.
         lieu de <option>reponses</option> ou <option>reponseshoriz</option>,
         en redéfinissant les trois macros LaTeX suivantes :</para>
 
-        <para><programlisting>\def\AMCbeginAnswer{}
+        <programlisting>\def\AMCbeginAnswer{}
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}
-</programlisting></para>
+</programlisting>
+
+        <para>Certains espacements peuvent également être modifiés :</para>
+
+        <programlisting>\AMCinterIrep=0pt
+\AMCinterBrep=.5ex
+\AMCinterIquest=0pt
+\AMCinterBquest=3ex</programlisting>
+
+        <para>Ces dimensions correspondent aux espaces verticaux ajoutés entre
+        les questions (<code>quest</code>) ou les réponses (<code>rep</code>),
+        en mode boîte (<code>B</code>, obtenu avec
+        <command>\AMCBoxedAnswers</command> ou l'option de package
+        <option>bloc</option>) ou standard (<code>I</code>).</para>
       </sect3>
 
       <sect3>

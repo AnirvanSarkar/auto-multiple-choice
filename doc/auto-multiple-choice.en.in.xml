@@ -1847,10 +1847,24 @@ Durée : 10 minutes.
         <option>choices</option> or <option>choiceshoriz</option>, redefining
         the three following LaTeX macros:</para>
 
-        <para><programlisting>\def\AMCbeginAnswer{}
+        <programlisting>\def\AMCbeginAnswer{}
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}
-</programlisting></para>
+</programlisting>
+
+        <para>One can also change spacing redefining the following dimensions
+        (here are the default values):</para>
+
+        <programlisting>\AMCinterIrep=0pt
+\AMCinterBrep=.5ex
+\AMCinterIquest=0pt
+\AMCinterBquest=3ex</programlisting>
+
+        <para>These dimensions are the vertical space between questions
+        (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
+        (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
+        <option>box</option> package option) or standard mode
+        (<code>I</code>). </para>
       </sect3>
 
       <sect3>
