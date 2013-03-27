@@ -947,6 +947,15 @@ sub ticked_sums {
 	 );
 }
 
+# has_answer_zero($student,$copy,$question) returns true if the
+# requested question has an answer "none of the above are correct".
+
+sub has_answer_zero {
+  my ($self,$student,$copy,$question)=@_;
+  return($self->sql_single($self->statement('questionHasZero'),
+			   $student,$copy,ZONE_BOX,$question));
+}
+
 # ticked_list($student,$copy,$question,$darkness_threshold) returns a
 # list with the ticked results for all the answers boxes from a
 # particular question. Answers are ordered with the answer number, so
@@ -966,8 +975,7 @@ sub ticked_list {
 sub ticked_list_0 {
   my ($self,$student,$copy,$question,$darkness_threshold)=@_;
   my @tl=$self->ticked_list($student,$copy,$question,$darkness_threshold);
-  if($self->sql_single($self->statement('questionHasZero'),
-		       $student,$copy,ZONE_BOX,$question)) {
+  if($self->has_answer_zero($student,$copy,$question)) {
     my $zero=shift @tl;
     push @tl,$zero;
   }

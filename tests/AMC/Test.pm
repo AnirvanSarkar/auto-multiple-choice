@@ -83,6 +83,7 @@ sub new {
      'ok_checksums_file'=>'',
      'to_check'=>[],
      'export_full_csv'=>[],
+     'export_csv_ticked'=>'AB',
      'blind'=>0,
      'check_zooms'=>{},
      'skip_prepare'=>0,
@@ -598,7 +599,7 @@ sub check_export {
 		       '--module','CSV',
 		       '--fich-noms','%PROJ/'.$self->{'list'},
 		       '--option-out','columns=student.copy',
-		       '--option-out','ticked=AB',
+		       '--option-out','ticked='.$self->{export_csv_ticked},
 		       '-o','%PROJ/export.csv',
 		      );
     my $c=Text::CSV->new();

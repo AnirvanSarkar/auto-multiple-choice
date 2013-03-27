@@ -135,7 +135,7 @@ sub export {
 	    my $t='';
 	    my @tl=$self->{'_capture'}
 	      ->ticked_list(@sc,$q->{'question'},$dt);
-	    if($self->{'_scoring'}->multiple($m->{'student'},$q->{'question'})) {
+	    if($self->{_capture}->has_answer_zero(@sc,$q->{'question'})) {
 	      if(shift @tl) {
 		$t.='0';
 	      }
