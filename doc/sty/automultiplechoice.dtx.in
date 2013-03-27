@@ -1259,12 +1259,18 @@ Three digits and two letters:\insertgroup{mixed}.
 %   between two answers.
 % \item |\AMCinterBrep| is the amount of vertical space between two
 %   boxed answers (see |\AMCBoxedAnswers| and |\ifAMC@rbloc|).
+% \item |\AMCinterIquest| is the amount of vertical space left after a
+%   question, in standard mode (without package option |box|).
+% \item |\AMCinterBquest| is the amount of vertical space left after a
+%   question, in 'boxed' mode (with package option |box|).
 % \end{description}
 %    \begin{macrocode}
 \newdimen\AMCformVSpace\AMCformVSpace=1.2ex
 \newdimen\AMCformHSpace\AMCformHSpace=.3em
 \newdimen\AMCinterIrep\AMCinterIrep=\z@
 \newdimen\AMCinterBrep\AMCinterBrep=.5ex
+\newdimen\AMCinterIquest\AMCinterIquest=\z@
+\newdimen\AMCinterBquest\AMCinterBquest=3ex
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
 % \subsection{Human readable sheet ID position}
@@ -2315,7 +2321,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCbeginQuestion{\ifAMC@affichekeys\ifAMC@ensemble\AMC@qaff\ \fi[\texttt{#2}]\else\AMC@qaff\fi}{#1}%
   \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
   \AMCmem@ireQ{\arabic{AMCquestionaff}}}%
-{\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi\AMCmessage{FQ}}
+{\ifAMC@qbloc\end{minipage}\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}}
 \newenvironment{questionmult}[1]{%
   \AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}%
   \AMCtype@multitrue\ifAMC@calibration%
@@ -2891,7 +2897,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCnumericHide[4]{%
   \setkeys{AMCNumeric}{#2}%
   \AMCntextGoto%
-  \vspace{1.5ex}\par%
+  \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
 \def\AMCnumericChoices{\AMCformatChoices{\AMCnumericShow}{\AMCnumericHide}}
 %    \end{macrocode}
@@ -3103,9 +3109,9 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@amclog{AUTOQCM[FQ]^^J}%
   \fi\fi%
 }
-\newcommand\AMCopenHide[4]{
+\newcommand\AMCopenHide[4]{%
   \AMCotextGoto%
-  \vspace{1.5ex}\par%
+  \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
 \def\AMCOpen{\AMCformatChoices{\AMCopenShow}{\AMCopenHide}}
 %    \end{macrocode}
