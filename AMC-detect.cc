@@ -1,6 +1,6 @@
 /*
 
- Copyright (C) 2011-2012 Alexis Bienvenue <paamc@passoire.fr>
+ Copyright (C) 2011-2013 Alexis Bienvenue <paamc@passoire.fr>
 
  This file is part of Auto-Multiple-Choice
 
@@ -51,6 +51,8 @@
     #endif
   #endif
 #endif
+
+int processing_error=0;
 
 /*
   Note:
@@ -157,17 +159,22 @@ void load_image(IplImage** src,char *filename,
 	cvReleaseImage(&color);
       } else if(color->nChannels!=1) {
 	printf("! LOAD : Scan file with 2 channels [%s]\n",filename);
+	processing_error=2;
 	return;
       } else {
 	*src=color;
       }
     } else {
       printf("! LOAD : Error loading scan file in ANYCOLOR [%s]\n",filename);
+      printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
+      processing_error=3;
       return;
     }
   } else {
     if((*src=cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE))==NULL) {
       printf("! LOAD : Error loading scan file in GRAYSCALE [%s]\n",filename);
+      printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
+      processing_error=3;
       return;
     }
   }
@@ -1017,156 +1024,168 @@ int main( int argc, char** argv )
 
     if((endline=strchr(commande,'\r'))) *endline='\0';
     if((endline=strchr(commande,'\n'))) *endline='\0';
-    if(strncmp(commande,"output ",7)==0) {
-      free(out_image_file);
-      out_image_file=strdup(commande+7);
-    } else if(strncmp(commande,"zooms ",6)==0) {
-      free(zooms_dir);
-      zooms_dir=strdup(commande+6);
-    } else if(strncmp(commande,"load ",5)==0) {
-      free(scan_file);
-      scan_file=strdup(commande+5);
 
-      if(out_image_file != NULL &&
-	 !post_process_image) {
-	illustr=cvLoadImage(scan_file, CV_LOAD_IMAGE_COLOR);
-	if(illustr==NULL) {
-	  printf("! LOAD : Error loading scan file with color mode [%s]\n",scan_file);
-	} else {
-	  if(illustr->origin==1) {
-	    printf(": Image flip\n");
-	    cvFlip(illustr,NULL,0);
+    if(processing_error==0) {
+
+      if(strncmp(commande,"output ",7)==0) {
+	free(out_image_file);
+	out_image_file=strdup(commande+7);
+      } else if(strncmp(commande,"zooms ",6)==0) {
+	free(zooms_dir);
+	zooms_dir=strdup(commande+6);
+      } else if(strncmp(commande,"load ",5)==0) {
+	free(scan_file);
+	scan_file=strdup(commande+5);
+
+	if(out_image_file != NULL &&
+	   !post_process_image) {
+	  illustr=cvLoadImage(scan_file, CV_LOAD_IMAGE_COLOR);
+	  if(illustr==NULL) {
+	    printf("! LOAD : Error loading scan file with color mode [%s]\n",scan_file);
+	    printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
+
+	    processing_error=4;
+	  } else {
+	    if(illustr->origin==1) {
+	      printf(": Image flip\n");
+	      cvFlip(illustr,NULL,0);
+	    }
 	  }
 	}
-      }
 
-      load_image(&src,scan_file,ignore_red,threshold,view);
+	load_image(&src,scan_file,ignore_red,threshold,view);
 
-      src_calage=cvCloneImage(src);
-      calage(src_calage,illustr,
-	     taille_orig_x,taille_orig_y,
-	     dia_orig,
-	     tol_plus, tol_moins,
-	     coins_x,coins_y,
-	     &dst,view);
-      upside_down=0;
-      
-      if(out_image_file != NULL && illustr==NULL) {
-	illustr=dst;
-	dst=NULL;
-      }
-      
-      cvReleaseImage(&src_calage);
-
-    } else if((sscanf(commande,"optim %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
-		      &coins_x0[0],&coins_y0[0],
-		      &coins_x0[1],&coins_y0[1],
-		      &coins_x0[2],&coins_y0[2],
-		      &coins_x0[3],&coins_y0[3])==8)
-	      || (strncmp(commande,"reoptim",7)==0) ) {
-      /* "optim" and 8 arguments: 4 marks positions (x y,
-	  order: UL UR BR BL)
-	  return: optimal linear transform and MSE */
-      /* "reoptim": optim with the same arguments as for last "optim" call */
-      mse=optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
-      printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
-	     transfo.a,transfo.b,
-	     transfo.c,transfo.d,
-	     transfo.e,
-	     transfo.f);
-      printf("MSE=%f\n",mse);
-      
-      revert_transform(&transfo,&transfo_back);
-    } else if(strncmp(commande,"rotateOK",8)==0) {
-      /* validates upside down rotation */
-      if(upside_down) {
-	transfo.a=-transfo.a;
-	transfo.b=-transfo.b;
-	transfo.c=-transfo.c;
-	transfo.d=-transfo.d;
-	transfo.e=(src->width-1)-transfo.e;
-	transfo.f=(src->height-1)-transfo.f;
-	
-	if(src!=NULL) cvFlip(src,NULL,-1);
-	if(illustr!=NULL) cvFlip(illustr,NULL,-1);
-	if(dst!=NULL) cvFlip(dst,NULL,-1);
-
-	for(i=0;i<4;i++) {
-	  coins_x[i]=(src->width-1)-coins_x[i];
-	  coins_y[i]=(src->height-1)-coins_y[i];
+	if(processing_error==0) {
+	  src_calage=cvCloneImage(src);
+	  calage(src_calage,illustr,
+		 taille_orig_x,taille_orig_y,
+		 dia_orig,
+		 tol_plus, tol_moins,
+		 coins_x,coins_y,
+		 &dst,view);
+	  upside_down=0;
 	}
+      
+	if(out_image_file != NULL && illustr==NULL) {
+	  illustr=dst;
+	  dst=NULL;
+	}
+      
+	cvReleaseImage(&src_calage);
 
-	upside_down=0;
-
+      } else if((sscanf(commande,"optim %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
+			&coins_x0[0],&coins_y0[0],
+			&coins_x0[1],&coins_y0[1],
+			&coins_x0[2],&coins_y0[2],
+			&coins_x0[3],&coins_y0[3])==8)
+		|| (strncmp(commande,"reoptim",7)==0) ) {
+	/* "optim" and 8 arguments: 4 marks positions (x y,
+	   order: UL UR BR BL)
+	   return: optimal linear transform and MSE */
+	/* "reoptim": optim with the same arguments as for last "optim" call */
+	mse=optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
 	printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
 	       transfo.a,transfo.b,
 	       transfo.c,transfo.d,
 	       transfo.e,
 	       transfo.f);
-
+	printf("MSE=%f\n",mse);
+      
 	revert_transform(&transfo,&transfo_back);
-      }
-    } else if(strncmp(commande,"rotate180",9)==0) {
-      for(i=0;i<2;i++) {
-	SWAP(coins_x[i],coins_x[i+2],tmp);
-	SWAP(coins_y[i],coins_y[i+2],tmp);
-      }
-      upside_down=1-upside_down;
-      printf("UpsideDown=%d\n",upside_down);
-    } else if(sscanf(commande,"id %d %d %d %d",
-		     &student,&page,&question,&answer)==4) {
-      /* box id */
-    } else if(sscanf(commande,"mesure0 %lf %s %lf %lf %lf %lf",
-		     &prop,shape_name,
-		     &xmin,&xmax,&ymin,&ymax)==6) {
-      /* "mesure0" and 6 arguments: proportion, shape, xmin, xmax, ymin, ymax
-	 return: number of black pixels and total number of pixels */
-      transforme(&transfo,xmin,ymin,&box[0].x,&box[0].y);
-      transforme(&transfo,xmax,ymin,&box[1].x,&box[1].y);
-      transforme(&transfo,xmax,ymax,&box[2].x,&box[2].y);
-      transforme(&transfo,xmin,ymax,&box[3].x,&box[3].y);
+      } else if(strncmp(commande,"rotateOK",8)==0) {
+	/* validates upside down rotation */
+	if(upside_down) {
+	  transfo.a=-transfo.a;
+	  transfo.b=-transfo.b;
+	  transfo.c=-transfo.c;
+	  transfo.d=-transfo.d;
+	  transfo.e=(src->width-1)-transfo.e;
+	  transfo.f=(src->height-1)-transfo.f;
+	
+	  if(src!=NULL) cvFlip(src,NULL,-1);
+	  if(illustr!=NULL) cvFlip(illustr,NULL,-1);
+	  if(dst!=NULL) cvFlip(dst,NULL,-1);
 
-      if(strcmp(shape_name,"oval")==0) {
-	shape_id=SHAPE_OVAL;
+	  for(i=0;i<4;i++) {
+	    coins_x[i]=(src->width-1)-coins_x[i];
+	    coins_y[i]=(src->height-1)-coins_y[i];
+	  }
+
+	  upside_down=0;
+
+	  printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+		 transfo.a,transfo.b,
+		 transfo.c,transfo.d,
+		 transfo.e,
+		 transfo.f);
+
+	  revert_transform(&transfo,&transfo_back);
+	}
+      } else if(strncmp(commande,"rotate180",9)==0) {
+	for(i=0;i<2;i++) {
+	  SWAP(coins_x[i],coins_x[i+2],tmp);
+	  SWAP(coins_y[i],coins_y[i+2],tmp);
+	}
+	upside_down=1-upside_down;
+	printf("UpsideDown=%d\n",upside_down);
+      } else if(sscanf(commande,"id %d %d %d %d",
+		       &student,&page,&question,&answer)==4) {
+	/* box id */
+      } else if(sscanf(commande,"mesure0 %lf %s %lf %lf %lf %lf",
+		       &prop,shape_name,
+		       &xmin,&xmax,&ymin,&ymax)==6) {
+	/* "mesure0" and 6 arguments: proportion, shape, xmin, xmax, ymin, ymax
+	   return: number of black pixels and total number of pixels */
+	transforme(&transfo,xmin,ymin,&box[0].x,&box[0].y);
+	transforme(&transfo,xmax,ymin,&box[1].x,&box[1].y);
+	transforme(&transfo,xmax,ymax,&box[2].x,&box[2].y);
+	transforme(&transfo,xmin,ymax,&box[3].x,&box[3].y);
+
+	if(strcmp(shape_name,"oval")==0) {
+	  shape_id=SHAPE_OVAL;
+	} else {
+	  shape_id=SHAPE_SQUARE;
+	}
+
+	/* output transformed points */
+	for(i=0;i<4;i++) {
+	  printf("TCORNER %.3f,%.3f\n",box[i].x,box[i].y);
+	}
+
+	mesure_case(src,illustr,illustr_mode,
+		    student,page,question,answer,
+		    prop,shape_id,
+		    xmin,xmax,ymin,ymax,&transfo_back,
+		    box,dst,zooms_dir,view);
+	student=-1;
+      } else if(sscanf(commande,"mesure %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+		       &prop,
+		       &box[0].x,&box[0].y,
+		       &box[1].x,&box[1].y,
+		       &box[2].x,&box[2].y,
+		       &box[3].x,&box[3].y)==9) {
+	/* "mesure" and 9 arguments: proportion, and 4 vertices
+	   (x y, order: UL UR BR BL)
+	   returns: number of black pixels and total number of pixels */
+	mesure_case(src,illustr,illustr_mode,
+		    student,page,question,answer,
+		    prop,SHAPE_SQUARE,
+		    -1,-1,-1,-1,NULL,
+		    box,dst,zooms_dir,view);
+	student=-1;
+      } else if(strlen(commande)<100 && 
+		sscanf(commande,"annote %s",text)==1) {
+	fh=src->height/50.0;
+	cvInitFont(&font,CV_FONT_HERSHEY_PLAIN,fh/14,fh/14,0.0,1+(int)(fh/20),CV_AA);
+	textpos.y=(int)(1.6*fh);textpos.x=10;
+	cvPutText(illustr,text,textpos,&font,BLEU);
       } else {
-	shape_id=SHAPE_SQUARE;
+	printf(": %s\n",commande);
+	printf("! SYNERR : Syntax error\n");
       }
 
-      /* output transformed points */
-      for(i=0;i<4;i++) {
-	printf("TCORNER %.3f,%.3f\n",box[i].x,box[i].y);
-      }
-
-      mesure_case(src,illustr,illustr_mode,
-		  student,page,question,answer,
-		  prop,shape_id,
-		  xmin,xmax,ymin,ymax,&transfo_back,
-		  box,dst,zooms_dir,view);
-      student=-1;
-    } else if(sscanf(commande,"mesure %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-		     &prop,
-		     &box[0].x,&box[0].y,
-		     &box[1].x,&box[1].y,
-		     &box[2].x,&box[2].y,
-		     &box[3].x,&box[3].y)==9) {
-      /* "mesure" and 9 arguments: proportion, and 4 vertices
-	 (x y, order: UL UR BR BL)
-	 returns: number of black pixels and total number of pixels */
-      mesure_case(src,illustr,illustr_mode,
-		  student,page,question,answer,
-		  prop,SHAPE_SQUARE,
-		  -1,-1,-1,-1,NULL,
-		  box,dst,zooms_dir,view);
-      student=-1;
-    } else if(strlen(commande)<100 && 
-	      sscanf(commande,"annote %s",text)==1) {
-      fh=src->height/50.0;
-      cvInitFont(&font,CV_FONT_HERSHEY_PLAIN,fh/14,fh/14,0.0,1+(int)(fh/20),CV_AA);
-      textpos.y=(int)(1.6*fh);textpos.x=10;
-      cvPutText(illustr,text,textpos,&font,BLEU);
     } else {
-      printf(": %s\n",commande);
-      printf("! SYNERR : Syntax error\n");
+      printf("! ERROR : not responding due to previous error.\n");
     }
 
     printf("__END__\n");
