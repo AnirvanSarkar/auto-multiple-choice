@@ -37,6 +37,7 @@ my $debug='';
 my $vector_density=300;
 my $orientation="";
 my $rotate_direction="90";
+my $force_convert=0;
 my %use=(pdfimages=>1,pdftk=>1);
 
 GetOptions("list=s"=>\$list_file,
@@ -48,6 +49,7 @@ GetOptions("list=s"=>\$list_file,
 	   "rotate-direction=s"=>\$rotate_direction,
 	   "use-pdfimages!"=>\$use{pdfimages},
 	   "use-pdftk!"=>\$use{pdftk},
+	   "force-convert!"=>\$force_convert,
 	  );
 
 set_debug($debug);
@@ -333,17 +335,22 @@ for my $fich (@f) {
   }
 
   debug "> Scan $fich->{path}: $np page(s)".($scene ? " [has scene>0]" : "");
-  if($np>1 || $scene || $vector) {
+  if($np>1 || $scene || $vector || $force_convert) {
     # split multipage image into 1-page images, and/or convert
     # to bitmap format
 
-    $p->text(sprintf(
-		     ($vector
-# TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
-		      ? __("Converting %s to bitmap...")
+    if($p) {
+      if($vector) {
+    # TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
+	$p->text(sprintf(__("Converting %s to bitmap..."),$fich->{file}));
+      } elsif($np>1) {
 # TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
-		      : __("Splitting multi-page image %s...")),
-		     $fich->{file})) if($p);
+	$p->text(sprintf(__("Splitting multi-page image %s..."),$fich->{file}));
+      } elsif($scene || $force_convert) {
+# TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
+	$p->text(sprintf(__("Processing image %s..."),$fich->{file}));
+      }
+    }
 
     my $temp_loc=tmpdir();
     my $temp_dir = tempdir( DIR=>$temp_loc,

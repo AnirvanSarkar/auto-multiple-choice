@@ -218,6 +218,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'seuil_sens'=>8.0,
 	      'saisie_dpi'=>150,
 	      'vector_scan_density'=>250,
+	      'force_convert'=>'',
 	      'n_procs'=>0,
 	      'delimiteur_decimal'=>',',
 	      'defaut_encodage_liste'=>'UTF-8',
@@ -3097,6 +3098,7 @@ sub analyse_call {
 	      "--vector-density",$o{'vector_scan_density'},
 	     );
     push @args,"--copy-to",$oo{'copy'} if($oo{'copy'});
+    push @args,"--force-convert" if($o{force_convert});
     $projet{_layout}->begin_transaction('Orie');
     my $orientation=$projet{_layout}->orientation();
     $projet{_layout}->end_transaction('Orie');
