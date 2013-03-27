@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -67,8 +67,8 @@ $commandes->signalise();
 
 die "Needs data directory" if(!$data_dir);
 die "Needs subject file" if(!$sujet);
-die "Needs print command" if(!$print_cmd);
 
+die "Needs print command" if($methode =~ /^command/i && !$print_cmd);
 die "Needs output file" if($methode =~ /^file/i && !$output_file);
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
