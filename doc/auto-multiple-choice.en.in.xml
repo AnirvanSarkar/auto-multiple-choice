@@ -1864,7 +1864,7 @@ Durée : 10 minutes.
         (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
         (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
         <option>box</option> package option) or standard mode
-        (<code>I</code>). </para>
+        (<code>I</code>).</para>
       </sect3>
 
       <sect3>
@@ -5052,26 +5052,6 @@ Moniuszko,Stanisław,003</programlisting>
           </varlistentry>
 
           <varlistentry>
-            <term><option>--seuil-coche
-            <replaceable>threshold</replaceable></option></term>
-
-            <listitem>
-              <para>When deciding whether a box is checked or not,
-              <command>AMC-analyse.pl</command> compares the black ratio
-              (number of black pixels over total number of pixels) to
-              <replaceable>threshold</replaceable>. If the black ratio is
-              greater then <replaceable>threshold</replaceable>, the box is
-              declared to be checked. Standard values can be 0.15 in the
-              standard layout, or 0.5 for separate answer sheet layout (in
-              this last case, letters are drawn in the boxes, and the students
-              are told to fill the boxes entirely). The black ratio is written
-              in the data capture reports, so that this threshold value can be
-              refined later without calling <command>AMC-analyse.pl</command>
-              again.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><option>--bw-threshold
             <replaceable>threshold</replaceable></option></term>
 
@@ -5240,12 +5220,16 @@ Moniuszko,Stanisław,003</programlisting>
             <replaceable>threshold</replaceable></option></term>
 
             <listitem>
-              <para>gives the black ratio threshold (see <citerefentry>
-                  <refentrytitle>AMC-analyse</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry>) for deciding whether a box is ticked or
-              not.</para>
+              <para>gives the black ratio threshold for deciding whether a box
+              is ticked or not. When deciding whether a box is checked or not,
+              <command>AMC-note.pl</command> compares the black ratio (number
+              of black pixels over total number of pixels) to
+              <replaceable>threshold</replaceable>. If the black ratio is
+              greater then <replaceable>threshold</replaceable>, the box is
+              declared to be checked. Standard values can be 0.15 in the
+              standard layout, or 0.5 for separate answer sheet layout (in
+              this last case, letters are drawn in the boxes, and the students
+              are told to fill the boxes entirely).</para>
             </listitem>
           </varlistentry>
 
