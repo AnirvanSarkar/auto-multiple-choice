@@ -105,7 +105,9 @@ sub open {
 						in => sub { $self->get_output() }
 						);
 
-	debug "Command [".$self->{'pid'}."] : ".join(' ',@{$self->{'commande'}});
+	debug "Command [".$self->{'pid'}."] : "
+	  .join(' ',map { /\s/ || ! $_ ? "\"$_\"" : $_ }
+		@{$self->{'commande'}});
 
 	if($self->{'avancement'}) {
 	    $self->{'avancement'}->set_text($self->{'texte'});
