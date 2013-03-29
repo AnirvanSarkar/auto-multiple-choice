@@ -10,7 +10,7 @@
     <subtitle>自動採点と評定の可能な選択式試験問題のデザイン</subtitle>
 
     <abstract>
-      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1328）</para>
+      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~svn&nbsp;@/PACKAGE_V_SVN/@~en1358）</para>
 
       <para>AMCプロジェクトは<ulink
       url="http://gna.org/">Gna!</ulink>によってホスティングされています。AMCウェブサイトは<ulink url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>にあり、プロジェクトがホスティングされているサイトは<ulink url="https://gna.org/projects/auto-qcm/">https://gna.org/projects/auto-qcm/</ulink>です。</para>
@@ -1083,7 +1083,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
           </listitem>
 
           <listitem>
-            <para><option>box</option>: 各設問をブロックに入れ、改ページで分割されないようにします。</para>
+            <para><option>box</option>: 各設問をボックスに入れ、改ページで分割されないようにします。</para>
           </listitem>
 
           <listitem>
@@ -1223,7 +1223,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
   \end{multicols}
 \end{question}</programlisting></para>
 
-        <para>選択肢ブロック間の垂直スペースはパラメータになっており、寸法<parameter>AMCinterBrep</parameter>により変更することができます:</para>
+        <para>選択肢ブロック間の垂直間隔はパラメータになっており、寸法<parameter>AMCinterBrep</parameter>により変更することができます:</para>
 
         <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
       </sect3>
@@ -1395,10 +1395,19 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
         <para>選択肢の外見も、<option>choices</option>や<option>choiceshoriz</option>のかわりに<option>choicescustom</option>を用いれば、次の三つのLaTeXマクロを再定義して同様に変更できます:</para>
 
-        <para><programlisting>\def\AMCbeginAnswer{}
+        <programlisting>\def\AMCbeginAnswer{}
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}
-</programlisting></para>
+</programlisting>
+
+        <para>以下の寸法を再定義すれば間隔を変更することもできます（これはデフォルト値です）:</para>
+
+        <programlisting>\AMCinterIrep=0pt
+\AMCinterBrep=.5ex
+\AMCinterIquest=0pt
+\AMCinterBquest=3ex</programlisting>
+
+        <para>これらの寸法は、設問間（<code>quest</code>）あるいは選択肢間（<code>rep</code>）の垂直間隔で、またボックスモード（<code>B</code>。<command>\AMCBoxedAnswers</command>の使用時や<option>box</option>パッケージオプション使用時）と標準モード（<code>I</code>）用があります。</para>
       </sect3>
 
       <sect3>
@@ -3903,15 +3912,6 @@ Moniuszko,Stanisław,003</programlisting>
           </varlistentry>
 
           <varlistentry>
-            <term><option>--seuil-coche
-            <replaceable>threshold</replaceable></option></term>
-
-            <listitem>
-              <para>ボックスがマークされているかどうか判定する際、<command>AMC-analyse.pl</command>は黒ピクセル比率（全ピクセル数に対する黒ピクセル数の割合）を<replaceable>threshold</replaceable>（閾値）と比較します。黒ピクセル比率が<replaceable>threshold</replaceable>よりも大きい場合、このボックスはマークされていると宣言されます。標準的な値は通常レイアウトで0.15、別紙答案用紙レイアウト（ボックス内に文字が記入されており、受験者にはボックスを完全に塗りつぶすよう指示する）で0.5程度です。<command>AMC-analyse.pl</command>を再実行しなくても閾値を調整できるように、黒ピクセル比率はマーク認識データに記録されます。</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><option>--bw-threshold
             <replaceable>threshold</replaceable></option></term>
 
@@ -4042,11 +4042,7 @@ Moniuszko,Stanisław,003</programlisting>
             <replaceable>threshold</replaceable></option></term>
 
             <listitem>
-              <para>ボックスがマークされているかどうかを判定するための黒ピクセル比率の閾値（<citerefentry>
-                  <refentrytitle>AMC-analyse</refentrytitle>
-
-                  <manvolnum>1</manvolnum>
-                </citerefentry>を参照してください）を指定します。</para>
+              <para>ボックスがマークされているかどうかを判定するための黒ピクセル比率の閾値を指定します。ボックスがマークされているかどうか判定する際、<command>AMC-note.pl</command>は黒ピクセル比率（全ピクセル数に対する黒ピクセル数の割合）を<replaceable>threshold</replaceable>（閾値）と比較します。黒ピクセル比率が<replaceable>threshold</replaceable>よりも大きい場合、このボックスはマークされていると宣言されます。標準的な値は通常レイアウトで0.15、別紙答案用紙レイアウト（ボックス内に文字が記入されており、受験者にはボックスを完全に塗りつぶすよう指示する）で0.5程度です。</para>
             </listitem>
           </varlistentry>
 
