@@ -199,7 +199,7 @@ sub check_answers {
       for my $a (@{$question->{'answers'}}) {
 	$n_correct++ if($a->{'correct'});
       }
-      if(!$question->{'multiple'}) {
+      if(!($question->{'multiple'} || $question->{'indicative'})) {
 	if($n_correct!=1) {
 # TRANSLATORS: Error text for AMC-TXT parsing
 	  $self->parse_error(sprintf(__("Previous question is a simple question but has %d correct choice(s)"),$n_correct));
@@ -530,6 +530,7 @@ sub format_question {
   $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
   $t.="\n";
   $t.=$self->format_text($q->{'text'})."\n";
+  $t.="\\QuestionIndicative\n" if($q->{'indicative'});
   if($q->{open} ne '') {
     $t.="\\AMCOpen{".$q->{open}."}{";
   } else {
