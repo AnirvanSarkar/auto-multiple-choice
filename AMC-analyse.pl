@@ -26,7 +26,7 @@ use AMC::Basic;
 use AMC::Exec;
 use AMC::Queue;
 use AMC::Calage;
-use AMC::Image;
+use AMC::Subprocess;
 use AMC::Boite qw/min max/;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone :position/;
@@ -385,7 +385,7 @@ sub one_scan {
   $commands=AMC::Exec::new('AMC-analyse');
   $commands->signalise();
 
-  $process=AMC::Image::new();
+  $process=AMC::Subprocess::new();
 
   ##########################################
   # Marks detection

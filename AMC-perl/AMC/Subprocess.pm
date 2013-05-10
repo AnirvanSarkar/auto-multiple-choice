@@ -17,7 +17,7 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-package AMC::Image;
+package AMC::Subprocess;
 
 use AMC::Basic;
 use IPC::Open2;
@@ -44,7 +44,7 @@ sub new {
     }
 
     if(! -f $self->{'exec_file'}) {
-      die "AMC::Image: No program to execute";
+      die "AMC::Subprocess: No program to execute";
     }
 
     bless $self;
