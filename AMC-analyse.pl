@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -119,8 +119,7 @@ exit(0) if($#scans <0);
 sub error {
     my ($process,$e,$silent)=@_;
     if($process) {
-      if($debug_image &&
-	 $process->mode() eq 'opencv') {
+      if($debug_image) {
 	$process->commande("output ".$debug_image);
 	$process->ferme_commande;
       }
@@ -250,23 +249,11 @@ sub command_transf {
 
 sub marks_fit {
   my ($process,$ld,$scan_frame)=@_;
-  if($process->mode() eq 'opencv') {
 
-    $cale=AMC::Calage::new('type'=>'lineaire');
-    command_transf($process,$cale,
-		   join(' ',"optim",
-			$ld->{'frame'}->draw_points()));
-
-  } else {
-
-    my @cx=map { $ld->{'frame'}->coordonnees($_,'x') } (0..3);
-    my @cy=map { $ld->{'frame'}->coordonnees($_,'y') } (0..3);
-    my @cxp=map { $scan_frame->coordonnees($_,'x') } (0..3);
-    my @cyp=map { $scan_frame->coordonnees($_,'y') } (0..3);
-
-    $cale->calage(\@cx,\@cy,\@cxp,\@cyp);
-
-  }
+  $cale=AMC::Calage::new('type'=>'lineaire');
+  command_transf($process,$cale,
+		 join(' ',"optim",
+		      $ld->{'frame'}->draw_points()));
 
   debug "MSE=".$cale->mse();
 
@@ -290,14 +277,13 @@ sub measure_box {
 
     $ld->{'corners.test'}->{$k}=AMC::Boite::new();
 
-    if($process->mode() eq 'opencv' && @spc) {
+    if(@spc) {
 	if($k =~ /^([0-9]+)\.([0-9]+)$/) {
 	    $process->commande(join(' ',"id",@spc[0,1],$1,$2))
 	}
     }
 
-    if($process->mode() eq 'opencv' &&
-       !($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
+    if(!($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
       $ld->{'boxes.scan'}->{$k}=AMC::Boite::new();
     } else {
       $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
@@ -306,13 +292,10 @@ sub measure_box {
 
     if(!($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
       my $pc;
-      if($process->mode() eq 'opencv') {
-	$pc=$ld->{'boxes'}->{$k}
-	  ->commande_mesure0($prop,get_shape($ld->{'flags'}->{$k}));
-      } else {
-	$pc=$ld->{'boxes.scan'}->{$k}
-	  ->commande_mesure($prop);
-      }
+
+      $pc=$ld->{'boxes'}->{$k}
+	->commande_mesure0($prop,get_shape($ld->{'flags'}->{$k}));
+
       for($process->commande($pc)) {
 	if(/^TCORNER\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
 	  $ld->{'boxes.scan'}->{$k}->def_point_suivant($1,$2);
@@ -402,145 +385,36 @@ sub one_scan {
   $commands=AMC::Exec::new('AMC-analyse');
   $commands->signalise();
 
-  $process=AMC::Image::new('');
-
-  debug "Mode: ".$process->mode();
-
-  ##########################################
-  # Converts the scan to PPM if necessary
-  ##########################################
-
-  if($process->mode() eq 'opencv') {
-    # Using OpenCV: current image types are OK, don't convert to PPM.
-    $ppm=$scan;
-  } else{
-    # Using custom (slow) image processing command: needs PPM for input
-    # 1) converting to PPM
-
-    if($blur || $threshold || $scan !~ /\.ppm$/) {
-	print "Converting to ppm...\n";
-
-	$temp_loc=tmpdir();
-	$temp_dir = tempdir( DIR=>$temp_loc,
-			     CLEANUP => (!get_debug()) );
-	debug "dir = $temp_dir";
-	$ppm="$temp_dir/image.ppm";
-
-
-	my @ca=(magick_module('convert'));
-	push @ca,"-blur",$blur if($blur);
-	push @ca,"-threshold",$threshold if($threshold);
-	push @ca,$scan,$ppm;
-	$commands->execute(@ca);
-    } else {
-	$ppm=$scan;
-    }
-
-    # 2) Reading image size
-
-    open(CMD,"identify $ppm|");
-    while(<CMD>) {
-	if(/\sP[NBP]M\s+([0-9]+)x([0-9]+)/) {
-	    $tiff_x=$1;
-	    $tiff_y=$2;
-	}
-    }
-    close(CMD);
-
-    error('',"Unknown size") if(!$tiff_x);
-
-    debug "IMAGE = $scan ($tiff_x x $tiff_y)\n";
-  }
-
-  $process->set('fichier',$ppm);
+  $process=AMC::Image::new();
 
   ##########################################
   # Marks detection
   ##########################################
 
-  if($process->mode() eq 'opencv') {
+  my @r;
+  my @args=('-x',$random_layout->{'width'},
+	    '-y',$random_layout->{'height'},
+	    '-d',$random_layout->{'markdiameter'},
+	    '-p',$tol_mark_plus,'-m',$tol_mark_moins,
+	    '-t',$bw_threshold,
+	    '-o',($debug_image ? $debug_image : 1)
+	   );
 
-    my @r;
-    my @args=('-x',$random_layout->{'width'},
-	      '-y',$random_layout->{'height'},
-	      '-d',$random_layout->{'markdiameter'},
-	      '-p',$tol_mark_plus,'-m',$tol_mark_moins,
-	      '-t',$bw_threshold,
-	      '-o',($debug_image ? $debug_image : 1)
-	);
+  push @args,'-P' if($debug_image);
+  push @args,'-r' if($ignore_red);
+  push @args,'-k' if($debug_pixels);
 
-    push @args,'-P' if($debug_image);
-    push @args,'-r' if($ignore_red);
-    push @args,'-k' if($debug_pixels);
+  $process->set('args',\@args);
 
-    $process->set('args',\@args);
-
-    @r=$process->commande("load ".$ppm);
-    my @c=();
-    for(@r) {
-	if(/Frame\[([0-9]+)\]:\s*(-?[0-9.]+)\s*[,;]\s*(-?[0-9.]+)/) {
-	    push @c,$2,$3;
-	}
+  @r=$process->commande("load ".$scan);
+  my @c=();
+  for(@r) {
+    if(/Frame\[([0-9]+)\]:\s*(-?[0-9.]+)\s*[,;]\s*(-?[0-9.]+)/) {
+      push @c,$2,$3;
     }
-    $cadre_general=AMC::Boite::new_complete(@c);
-
-  } else {
-
-    $rx=$tiff_x / $width;
-    $ry=$tiff_y / $height;
-
-    $taille=$markdiameter*($rx+$ry)/2;
-    $taille_max=$taille*(1+$tol_mark_plus);
-    $taille_min=$taille*(1-$tol_mark_moins);
-
-    debug "rx = $rx   ry = $ry\n";
-    debug(sprintf("Target sign size : %.2f (%.2f to %.2f)",
-		  $taille,
-		  $taille_min,$taille_max));
-
-    my $lisse_trous=1+int(($taille_min+$taille_max)/2 /20);
-    my $lisse_pouss=1+int(($taille_min+$taille_max)/2 /8);
-
-    print "Morphological operations (+$lisse_trous-$lisse_pouss) and signs detection...\n";
-
-    $process->commande("etend $lisse_trous");
-    $process->commande("erode ".($lisse_trous+$lisse_pouss));
-    $process->commande("etend $lisse_pouss");
-    $process->commande("calccc");
-
-    for($process->commande("magick")) {
-	if(/\(([0-9]+),([0-9]+)\)-[^\s]*\s+:\s+([0-9]+)\s*x\s*([0-9]+)/) {
-	    push @box,AMC::Boite::new_MD($1,$2,$3,$4);
-	}
-    }
-
-    $process->ferme_commande();
-
-    print "".($#box+1)." boxes.\n";
-
-    debug join("\n",map { $_->txt(); } @box);
-
-    print "Searching signs...\n";
-
-    @okbox=grep { $_->bonne_etendue($taille_min,$taille_max) } @box;
-
-    if($#okbox < 3) {
-	error($process,
-	      "Only ".(1+$#okbox)." signs detected / needs at least 4");
-    }
-
-    @okbox=AMC::Boite::extremes(@okbox);
-
-    if(get_debug()) {
-	for my $c (@okbox) {
-	    my ($dx,$dy)=$c->etendue_xy();
-	    debug(sprintf("Sign size: $dx x $dy (%6.2f | %6.2f %%)",
-			  100*($dx-$taille)/$taille,100*($dy-$taille)/$taille));
-	}
-    }
-
-    $cadre_general=AMC::Boite::new_complete(map { $_->centre() } (@okbox));
   }
+
+  $cadre_general=AMC::Boite::new_complete(@c);
 
   debug "Global frame:",
     $cadre_general->txt();
@@ -560,7 +434,7 @@ sub one_scan {
   $ok=$layout->exists(@epc);
   $layout->end_transaction('cFLY');
 
-  if($process->mode() eq 'opencv' && !$ok) {
+  if(!$ok) {
     # Unknown ID: tries again upside down
     $process->commande("rotate180");
     marks_fit($process,$random_layout);
@@ -583,9 +457,7 @@ sub one_scan {
     error($process,sprintf("No layout for ID +%d/%d/%d+",@epc)) ;
   }
 
-  if($process->mode() eq 'opencv') {
-    command_transf($process,$random_layout->{'transf'},"rotateOK");
-  }
+  command_transf($process,$random_layout->{'transf'},"rotateOK");
 
   ##########################################
   # Get all boxes positions from the right page
@@ -630,9 +502,7 @@ sub one_scan {
   my $zoom_dir = tempdir( DIR=>tmpdir(),
 			  CLEANUP => (!get_debug()) );
 
-  if($process->mode() eq 'opencv') {
-    $process->commande("zooms $zoom_dir");
-  }
+  $process->commande("zooms $zoom_dir");
 
   ##########################################
   # Read darkness data from all boxes
@@ -642,7 +512,7 @@ sub one_scan {
     measure_box($process,$ld,$k,@spc) if($k =~ /^[0-9]+\.[0-9]+$/);
   }
 
-  if($out_cadre && ($process->mode() eq 'opencv')) {
+  if($out_cadre) {
     $process->commande("annote ".pageids_string(@spc));
   }
 
@@ -656,7 +526,7 @@ sub one_scan {
   $out_cadre="$cr_dir/$layout_file"
     if($cr_dir && !$out_cadre);
 
-  if($out_cadre && ($process->mode() eq 'opencv')) {
+  if($out_cadre) {
     $process->commande("output ".$out_cadre);
   }
 
@@ -698,52 +568,6 @@ sub one_scan {
     $e->Crop(geometry=>$n->etendue_xy('geometry',$zoom_plus));
     debug "Writing to $cr_dir/$nom_file...";
     $e->Write("$cr_dir/$nom_file");
-  }
-
-  # layout image report
-
-  if($out_cadre && ($process->mode ne 'opencv')) {
-
-    print "Annotating image...\n";
-    debug "Annotating image...\n";
-
-    # transcription de l'identifiant lu
-
-    $whole_page->Annotate(text=>pageids_string(@spc),
-			    geometry=>"+0+96",
-			    pointsize=>96,
-			    font=>"Courier",
-			    fill=>"blue",stroke=>'blue');
-
-    ###############################################
-    # cases du modele $cale->transformees, avec annotation
-    for my $k (keys %{$ld->{'corners.test'}}) {
-	# case
-	$whole_page->Draw(primitive=>'polygon',
-			    fill=>'none',stroke=>'blue',strokewidth=>1,
-			    points=>$ld->{'boxes.scan'}->{$k}->draw_points());
-
-	# part de la case testee
-	$whole_page->Draw(primitive=>'polygon',
-			    fill=>'none',stroke=>'magenta',strokewidth=>1,
-			    points=>$ld->{'corners.test'}->{$k}->draw_points());
-      }
-
-    ###############################################
-    # trace des cadres
-
-    $whole_page->Draw(primitive=>'polygon',
-			fill=>'none',stroke=>'red',strokewidth=>1,
-			points=>$cadre_general->draw_points());
-
-    $cadre_origine->transforme($cale);
-    $whole_page->Draw(primitive=>'polygon',
-			fill=>'none',stroke=>'blue',strokewidth=>1,
-			points=>$cadre_origine->draw_points());
-
-    $whole_page->Write($out_cadre);
-
-    debug "-> $out_cadre\n";
   }
 
   ##########################################

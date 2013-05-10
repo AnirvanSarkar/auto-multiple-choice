@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -23,36 +23,27 @@ use AMC::Basic;
 use IPC::Open2;
 
 sub new {
-    my ($fichier,%o)=(@_);
-    my $self={'fichier'=>$fichier,
+    my (%o)=(@_);
+    my $self={'file'=>'',
 	      'ipc_in'=>'',
 	      'ipc_out'=>'',
 	      'ipc'=>'',
 	      'args'=>['%f'],
-	      'mode'=>'auto',
-	      'traitement'=>'',
+	      'mode'=>'detect',
+	      'exec_file'=>'',
 	  };
 
     for my $k (keys %o) {
 	$self->{$k}=$o{$k} if(defined($self->{$k}));
     }
 
-    if(! $self->{'traitement'}) {
-      if($self->{'mode'} eq 'auto') {
-	if(-f amc_specdir('libexec').'/AMC-detect') {
-	  $self->{'mode'}='opencv';
-	} else {
-	  $self->{'mode'}='manual';
-	}
-      }
-      if($self->{'mode'} eq 'opencv') {
-	$self->{'traitement'}=amc_specdir('libexec').'/AMC-detect';
-      } elsif($self->{'mode'} eq 'manual') {
-	$self->{'traitement'}=amc_specdir('libexec').'/AMC-traitement-image';
+    if(! $self->{'exec_file'}) {
+      if($self->{'mode'}) {
+	$self->{'exec_file'}=amc_specdir('libexec').'/AMC-'.$self->{'mode'};
       }
     }
 
-    if(! -f $self->{'traitement'}) {
+    if(! -f $self->{'exec_file'}) {
       die "AMC::Image: No program to execute";
     }
 
@@ -68,23 +59,18 @@ sub set {
     }
 }
 
-sub mode {
-    my ($self)=(@_);
-    return($self->{'mode'});
-}
-
 sub commande {
     my ($self,@cmd)=(@_);
     my @r=();
 
     if(!$self->{'ipc'}) {
-	debug "Exec traitement-image..."; 
-	my @a=map { ( $_ eq '%f' ? $self->{'fichier'} : $_ ) }
+	debug "Exec subprocess..."; 
+	my @a=map { ( $_ eq '%f' ? $self->{'file'} : $_ ) }
 	(@{$self->{'args'}});
-	debug join(' ',$self->{'traitement'},@a);
+	debug join(' ',$self->{'exec_file'},@a);
 	$self->{'times'}=[times()];
 	$self->{'ipc'}=open2($self->{'ipc_out'},$self->{'ipc_in'},
-			     $self->{'traitement'},@a);
+			     $self->{'exec_file'},@a);
 	debug "PID=".$self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'};
     }
 

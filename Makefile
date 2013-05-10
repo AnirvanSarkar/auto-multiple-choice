@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -66,7 +66,7 @@ DESTDIR=
 
 # AMC components to build
 
-BINARIES ?= AMC-traitement-image AMC-detect
+BINARIES ?= AMC-detect
 
 MODS=AMC-*.pl
 GLADE_FROMIN:=$(basename $(wildcard AMC-gui-*.glade.in))
@@ -115,9 +115,6 @@ all_precomp: $(FROM_IN) $(BINARIES) ;
 MAJ: $(FROM_IN) ;
 
 # Binaries
-
-AMC-traitement-image: AMC-traitement-image.c Makefile
-	$(GCC) -o $@ $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(GCC_NETPBM)
 
 AMC-detect: AMC-detect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
@@ -275,7 +272,6 @@ local: global
 	test -d /usr/share/auto-multiple-choice  || sudo mkdir -p /usr/share/auto-multiple-choice
 	test -d $(TEXDIR) || sudo mkdir $(TEXDIR)
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
-	sudo ln -s $(LOCALDIR)/AMC-traitement-image /usr/lib/AMC/exec/AMC-traitement-image
 	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/exec/AMC-detect
 	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC/perl
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
