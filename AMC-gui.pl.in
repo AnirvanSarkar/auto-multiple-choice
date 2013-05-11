@@ -4204,8 +4204,11 @@ sub annote_copies {
 	   'fin'=>sub {
 	     my $c=shift;
 	     my $n=$c->variable('n_processed');
-	     regroupement_go($n>0,$id_file) if($and_regroupe);
-	     notify_end_of_work('annotation',__"Annotations have been completed");
+	     if($and_regroupe) {
+	       regroupement_go($n>0,$id_file);
+	     } else {
+	       notify_end_of_work('annotation',__"Annotations have been completed");
+	     }
 	   },
 	  );
 }
@@ -4292,6 +4295,10 @@ sub regroupement_go {
 	     'clear'=>'',
 	     'texte'=>__"Grouping students annotated pages together...",
 	     'progres.id'=>'regroupe',
+	     'fin'=>sub {
+	       notify_end_of_work('annotation',__"Annotations have been completed")
+		 if($from_annotate);
+	     }
 	    );
   } else {
     # Only rename correct old files
@@ -4317,6 +4324,10 @@ sub regroupement_go {
 	     'clear'=>'',
 	     'texte'=>__"Renaming annotated files with new model...",
 	     'progres.id'=>'regroupe',
+	     'fin'=>sub {
+	       notify_end_of_work('annotation',__"Annotations have been completed")
+		 if($from_annotate);
+	     }
 	    );
   }
 }
