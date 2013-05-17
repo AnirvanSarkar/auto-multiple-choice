@@ -139,10 +139,10 @@ sub parse_options {
     $self->{'options'}->{'arabic'}=1;
   }
 
-  # if JA language is selected, switch to 'platex+dvipdfmx' LaTeX
+  # if JA language is selected, switch to 'platex+dvipdf' LaTeX
   # engine, remove default font and don't use xltxtra LaTeX package
   if($self->{'options'}->{'lang'} eq 'JA') {
-    $self->{'default_options'}->{'latexengine'}='platex+dvipdfmx';
+    $self->{'default_options'}->{'latexengine'}='platex+dvipdf';
     $self->{'default_options'}->{'font'}='';
     $self->{'default_options'}->{'xltxtra'}='';
   }
