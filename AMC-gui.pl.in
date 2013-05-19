@@ -2116,7 +2116,7 @@ sub projet_charge_ok {
 	    $dialog->destroy;
 	}
 	if($reponse eq 'yes') {
-	  quitte_projet();
+	  quitte_projet() or return();
 
 	  # If the project to open lies on a removable media, suggest
 	  # to copy it first to the user standard projects directory:
@@ -2194,7 +2194,7 @@ sub projet_charge_nouveau {
 
 
     } else {
-      quitte_projet();
+      quitte_projet() or return();
 
       $o{'rep_projets'}=$w{'local_rep_projets'};
       if(projet_ouvre($proj,1)) {
@@ -6100,6 +6100,7 @@ sub projet_ouvre {
 	}
 
 	quitte_projet();
+
 	$projet{'nom'}=$proj;
 	$projet{'options'}->{'texsrc'}=$texsrc;
 
@@ -6176,41 +6177,47 @@ sub projet_ouvre {
 }
 
 sub quitte_projet {
-    if($projet{'nom'}) {
+  if ($projet{'nom'}) {
 
-      maj_export();
-	valide_options_notation();
+    maj_export();
+    valide_options_notation();
 
-	my ($m,$mo)=sub_modif($projet{'options'});
+    my ($m,$mo)=sub_modif($projet{'options'});
 
-	if($m || $mo) {
-	    my $save=1;
-	    if($m) {
-		my $dialog = Gtk2::MessageDialog
-		    ->new_with_markup($w{'main_window'},
-				      'destroy-with-parent',
-				      'question','yes-no',
-				      sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
-		my $reponse=$dialog->run;
-		$dialog->destroy;
+    if ($m || $mo) {
+      my $save=1;
+      if ($m) {
+	my $dialog = Gtk2::MessageDialog
+	  ->new_with_markup($w{'main_window'},
+			    'destroy-with-parent',
+			    'question','yes-no',
+			    sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
+	my $reponse=$dialog->run;
+	$dialog->destroy;
 
-		if($reponse ne 'yes') {
-		    $save='';
-		}
-	    }
-	    projet_sauve() if($save);
+	if ($reponse eq 'yes') {
+	  $save=1;
+	} elsif ($reponse eq 'no') {
+	  $save=0;
+	} else {
+	  return(0);
 	}
-
-	%projet=();
-
-      for my $k (@widgets_only_when_opened) {
-	$w{$k}->set_sensitive(0);
       }
+      projet_sauve() if($save);
     }
+
+    %projet=();
+
+    for my $k (@widgets_only_when_opened) {
+      $w{$k}->set_sensitive(0);
+    }
+  }
+
+  return(1);
 }
 
 sub quitter {
-    quitte_projet();
+    quitte_projet() or return();
 
     if($o{'conserve_taille'}) {
 	my ($x,$y)=$w{'main_window'}->get_size();
@@ -6225,7 +6232,7 @@ sub quitter {
     my ($m,$mo)=sub_modif(\%o);
 
     if($m || $mo) {
-      my $save=1;
+      my $save;
       if($m) {
 	my $dialog = Gtk2::MessageDialog
 	  ->new_with_markup($w{'main_window'},
@@ -6234,7 +6241,13 @@ sub quitter {
 			    __"You did not save main options, which have been modified: do you want to save them before leaving?");
 	my $reponse=$dialog->run;
 	$dialog->destroy;
-	$save=0 if($reponse ne 'yes');
+	if($response eq 'yes') {
+	  $save=1;
+	} elsif($response eq 'no') {
+	  $save=0;
+	} else {
+	  return();
+	}
       }
 
       if($save) {
