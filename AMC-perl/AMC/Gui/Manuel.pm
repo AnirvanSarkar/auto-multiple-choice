@@ -279,11 +279,15 @@ sub page_selected {
   return TRUE;
 }
 
-sub select_page {
-  my ($self,$iid)=@_;
-  my $iter=model_id_to_iter($self->{'diag_store'},MDIAG_I,$iid);
+sub select_page_from_iter {
+  my ($self,$iter)=@_;
   $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path($iter))
     if($iter);
+}
+
+sub select_page {
+  my ($self,$iid)=@_;
+  $self->select_page_from_iter(model_id_to_iter($self->{'diag_store'},MDIAG_I,$iid));
 }
 
 sub maj_list_all {
@@ -675,16 +679,9 @@ sub goto_activate_cb {
 
     # recherche d'un ID correspondant
     $dest.='/' if($dest !~ m:/:);
-    my $did='';
-  CHID: for my $i (0..$#{$self->{'page'}}) {
-      my $k=pageids_string(@{$self->{'page'}->[$i]});
-      if($k =~ /^$dest/) {
-	  $iid=$i;
-	  last CHID;
-      }
-  }
 
-    $self->select_page($iid) if($iid>=0);
+    $self->select_page_from_iter(model_id_to_iter($self->{'diag_store'},
+						  're:'.MDIAG_ID,$dest));
 }
 
 1;

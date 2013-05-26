@@ -319,7 +319,12 @@ sub bon_id {
 
     my $ok=1;
     for my $col (keys %constraints) {
-      $ok=0 if($l->get($iter,$col) ne $constraints{$col})
+      if($col =~ /^re:(.*)$/) {
+	my $k=$1;
+	$ok=0 if($l->get($iter,$k) !~ /$constraints{$col}/);
+      } else {
+	$ok=0 if($l->get($iter,$col) ne $constraints{$col});
+      }
     }
 
     if($ok) {
