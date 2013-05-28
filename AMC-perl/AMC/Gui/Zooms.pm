@@ -93,7 +93,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for(qw/main_window zooms_table_0 zooms_table_1 decoupage view_0 view_1 scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info button_previous button_next/) {
+    for(qw/main_window zooms_table_0 zooms_table_1 decoupage scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info button_previous button_next/) {
 	$self->{$_}=$self->{'gui'}->get_object($_);
     }
 
@@ -314,11 +314,10 @@ sub load_boxes {
 
     $self->ajuste_sep();
 
-    $self->scrolled_update;
-
-    my $va=$self->{'view_0'}->get_vadjustment();
-    $va->value($va->upper()-$va->page_size);
-    $va->changed;
+    my $va=$self->{'scrolled_0'}->get_vadjustment();
+    $va->clamp_page($va->upper(),$va->upper());
+    $va=$self->{'scrolled_1'}->get_vadjustment();
+    $va->clamp_page($va->lower(),$va->lower());
 
     if($self->{'conforme'}) {
 	$self->{'button_apply'}->hide();
