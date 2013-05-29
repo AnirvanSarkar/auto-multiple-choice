@@ -6217,7 +6217,7 @@ sub quitte_projet {
 }
 
 sub quitter {
-    quitte_projet() or return();
+    quitte_projet() or return(1);
 
     if($o{'conserve_taille'}) {
 	my ($x,$y)=$w{'main_window'}->get_size();
