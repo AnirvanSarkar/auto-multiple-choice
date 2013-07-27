@@ -50,6 +50,7 @@ sub new {
 				 Disable
 				 ManualDuplex SingleSided
 				 L-OpenText L-OpenReserved
+				 CodeDigitsDirection
 				/];
 
     # from these options, which ones are boolean valued?
@@ -82,6 +83,7 @@ sub new {
        'disable'=>'',
        'manualduplex'=>'',
        'singlesided'=>'',
+       'codedigitsdirection'=>'',
       };
 
     # List of modules to be used when parsing (see parse_*
@@ -723,6 +725,8 @@ sub student_block {
     # Header layout with a code (student number)
 
     my $vertical=($self->{'options'}->{'code'}>$self->{'maxhorizcode'});
+    $vertical=1 if($self->{options}->{codedigitsdirection} =~ /^v/i);
+    $vertical=0 if($self->{options}->{codedigitsdirection} =~ /^h/i);
 
     $t.="{\\setlength{\\parindent}{0pt}\\hspace*{\\fill}";
     $t.=($vertical?"":"\\hbox{\\vbox{");
