@@ -521,6 +521,7 @@ sub format_answer {
 sub format_question {
   my ($self,$q)=@_;
   my $qid=$q->{'id'};
+  $qid=$q->{'name'} if(!$qid);
   $qid=sprintf("Q%03d",++$self->{'qid'}) if(!$qid);
   my $mult=($q->{'multiple'} ? 'mult' : '');
   my $ct=($q->{'horiz'} ? 'horiz' : '');
