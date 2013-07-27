@@ -40,7 +40,7 @@ sub new {
 				 BoxColor PaperSize
 				 AnswerSheetTitle AnswerSheetPresentation
 				 AnswerSheetColumns
-				 CompleteMulti SeparateAnswerSheet
+				 CompleteMulti SeparateAnswerSheet AutoMarks
 				 DefaultScoringM DefaultScoringS
 				 L-Question L-None L-Name L-Student
 				 LaTeX LaTeX-Preambule LaTeX-BeginDocument
@@ -57,7 +57,7 @@ sub new {
 
     $self->{'options_boolean'}=[qw/LaTeX xltxtra
 				   ShuffleQuestions QuestionBlocks
-				   CompleteMulti SeparateAnswerSheet
+				   CompleteMulti SeparateAnswerSheet AutoMarks
 				   Arabic
 				   ManualDuplex SingleSided
 				  /];
@@ -595,7 +595,7 @@ sub file_header {
 
   my @package_options=();
   push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
-  for my $on (qw/completemulti separateanswersheet/) {
+  for my $on (qw/completemulti separateanswersheet automarks/) {
     push @package_options,$on if($self->{'options'}->{$on});
   }
 
