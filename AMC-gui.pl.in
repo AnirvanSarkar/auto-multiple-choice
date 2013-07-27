@@ -26,6 +26,7 @@ use IO::File;
 use IO::Select;
 use POSIX qw/strftime/;
 use Time::Local;
+use Cwd;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
@@ -117,11 +118,15 @@ my $debug=0;
 my $debug_file='';
 
 my $profile='';
+my $project_dir='';
 
 GetOptions("debug!"=>\$debug,
 	   "debug-file=s"=>\$debug_file,
 	   "profile=s"=>\$profile,
+	   "p=s"=>\$project_dir,
 	   );
+
+$project_dir=Cwd::realpath($project_dir) if($project_dir);
 
 sub set_debug_mode {
   my ($debug)=@_;
@@ -754,6 +759,20 @@ if($o{'encodage_interne'} ne 'UTF-8') {
 # Reset projects directory to standard one
 
 $o{'rep_projets'}=absolu($o{'projects_home'});
+
+# goes to a specific directory if the project directory is given as a
+# command-line option
+
+if(-f $project_dir) {
+  $project_dir =~ s/\/?options\.xml$//;
+}
+$project_dir =~ s/\/+$//;
+if(-d $project_dir) {
+  my ($v,$d,$f)=splitpath($project_dir);
+  $o{'rep_projets'}=catpath($v,$d,'');
+  $o{'rep_projets'} =~ s/\/+$//;
+  @ARGV=$f;
+}
 
 # creates projets and models directories if needed (if not present,
 # Edit/Parameters can be disrupted)
