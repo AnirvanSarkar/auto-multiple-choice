@@ -150,7 +150,7 @@ sub get_output {
 
     } else {
 	my $fh=$self->{'fh'};
-	my $line = <$fh>;
+	my $line = decode("utf8",<$fh>);
 	my $r='';
 
 	if($self->{'avancement'}) {
@@ -173,7 +173,7 @@ sub get_output {
 	  if($line =~ /^(ERR|INFO|WARN)/) {
 	    chomp(my $lc=$line);
 	    $lc =~ s/^(ERR|INFO|WARN)[:>]\s*//;
-	    $self->add_message($1,decode("utf-8",$lc));
+	    $self->add_message($1,$lc);
 	  }
 	  if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
 	    $self->{'variables'}->{$1}=$2;

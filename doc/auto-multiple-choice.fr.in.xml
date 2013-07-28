@@ -722,7 +722,7 @@ un plus un ?
           </varlistentry>
 
           <varlistentry>
-            <term>name=<replaceable>xxxx</replaceable></term>
+            <term>id=<replaceable>xxxx</replaceable></term>
 
             <listitem>
               <para>Avec cette option, le nom <replaceable>xxxx</replaceable>
@@ -730,6 +730,20 @@ un plus un ?
               notes exportés par AMC pour identifier la question plus
               facilement. Il ne doit comporter que des caractères simples non
               accentués.</para>
+
+              <para><option>name</option> a le même rôle que l'option
+              <option>id</option>. Cette option est présente pour assurer la
+              compatibilité avec d'anciennes versions, préférez l'utilisation
+              de <option>id</option>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>indicative</term>
+
+            <listitem>
+              <para>Indique que le score affecté à cette question ne sera pas
+              pris en compte pour le score final de l'étudiant.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -4550,7 +4564,7 @@ Moniuszko,Stanisław,003</programlisting></para>
         \begin{minipage}{.5\linewidth}
           Nom:
       
-          \Large\bf \prenom{} \non{}
+          \Large\bf \prenom{} \nom{}
 
           \vspace*{1mm}
         \end{minipage}

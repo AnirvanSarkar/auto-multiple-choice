@@ -169,7 +169,7 @@ use XML::Simple;
 use_gettext();
 
 sub version_current {
-  return(3);
+  return(4);
 }
 
 sub version_upgrade {
@@ -229,6 +229,14 @@ sub version_upgrade {
 
       $self->progression('end');
       return(3);
+    } elsif($old_version==3) {
+      $self->progression('begin',__("Building capture database indexes..."));
+      $self->sql_do("CREATE INDEX IF NOT EXISTS "
+		    .$self->index("index_zone_nopage")." ON "
+		    .$self->table("zone","self")." (student,copy,type,id_a,id_b)");
+
+      $self->progression('end');
+      return(4);
     }
     return('');
 }

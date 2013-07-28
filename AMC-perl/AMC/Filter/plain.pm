@@ -139,10 +139,10 @@ sub parse_options {
     $self->{'options'}->{'arabic'}=1;
   }
 
-  # if JA language is selected, switch to 'platex+dvipdfmx' LaTeX
+  # if JA language is selected, switch to 'platex+dvipdf' LaTeX
   # engine, remove default font and don't use xltxtra LaTeX package
   if($self->{'options'}->{'lang'} eq 'JA') {
-    $self->{'default_options'}->{'latexengine'}='platex+dvipdfmx';
+    $self->{'default_options'}->{'latexengine'}='platex+dvipdf';
     $self->{'default_options'}->{'font'}='';
     $self->{'default_options'}->{'xltxtra'}='';
   }
@@ -199,7 +199,7 @@ sub check_answers {
       for my $a (@{$question->{'answers'}}) {
 	$n_correct++ if($a->{'correct'});
       }
-      if(!$question->{'multiple'}) {
+      if(!($question->{'multiple'} || $question->{'indicative'})) {
 	if($n_correct!=1) {
 # TRANSLATORS: Error text for AMC-TXT parsing
 	  $self->parse_error(sprintf(__("Previous question is a simple question but has %d correct choice(s)"),$n_correct));
@@ -519,6 +519,7 @@ sub format_answer {
 sub format_question {
   my ($self,$q)=@_;
   my $qid=$q->{'id'};
+  $qid=$q->{'name'} if(!$qid);
   $qid=sprintf("Q%03d",++$self->{'qid'}) if(!$qid);
   my $mult=($q->{'multiple'} ? 'mult' : '');
   my $ct=($q->{'horiz'} ? 'horiz' : '');
@@ -530,6 +531,7 @@ sub format_question {
   $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
   $t.="\n";
   $t.=$self->format_text($q->{'text'})."\n";
+  $t.="\\QuestionIndicative\n" if($q->{'indicative'});
   if($q->{open} ne '') {
     $t.="\\AMCOpen{".$q->{open}."}{";
   } else {
