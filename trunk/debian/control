@@ -1,0 +1,38 @@
+Source: auto-multiple-choice
+Section: x11
+Priority: optional
+Maintainer: Alexis Bienvenüe <pado@passoire.fr>
+Build-Depends: debhelper (>= 7), gettext, libnetpbm10-dev,
+  libcv-dev, libhighgui-dev,
+  libxml-libxml-perl, dblatex, xsltproc, docbook-xml, docbook-xsl,
+  texlive-latex-base, latex-xcolor, texlive-generic-recommended,
+  texlive-latex-extra, texlive-fonts-extra, texlive-lang-french,
+  librsvg2-bin, netpbm
+Standards-Version: 3.8.4
+Homepage: http://home.gna.org/auto-qcm/
+Vcs-Browser: http://svn.gna.org/viewcvs/auto-qcm/
+Vcs-Svn: svn://svn.gna.org/svn/auto-qcm/trunk
+
+Package: auto-multiple-choice
+Architecture: any
+Breaks: auto-multiple-choice-common, auto-multiple-choice-doc, auto-multiple-choice-doc-pdf
+Replaces: auto-multiple-choice-common, auto-multiple-choice-doc, auto-multiple-choice-doc-pdf
+Depends: ${misc:Depends}, ${shlibs:Depends}, liblocale-gettext-perl,
+  ${perl:Depends}, libfile-spec-perl,
+  libgtk2-perl, libgtk2-notify-perl, librsvg2-common,
+  libdbd-sqlite3-perl, libdbi-perl,
+  libxml-simple-perl, libxml-writer-perl,
+  libgraphics-magick-perl, libarchive-zip-perl,
+  libfile-mimeinfo-perl, libtext-csv-perl,
+  texlive-latex-base, latex-xcolor, texlive-generic-recommended,
+  texlive-latex-extra, texlive-fonts-extra,
+  imagemagick (>= 7:6.5.5) | graphicsmagick-imagemagick-compat,
+  netpbm, ghostscript, poppler-utils,
+  unzip
+Recommends: libsys-cpu-perl, libnet-cups-perl (>= 0.60), libopenoffice-oodoc-perl, libemail-mime-perl, libemail-sender-perl, fonts-linuxlibertine | ttf-linux-libertine, texlive-xetex
+Suggests: texmaker | kile, libreoffice-calc | openoffice.org-calc
+Description: Auto Multiple Choice - multiple choice papers management
+ Utility to manage multiple choice questionnaires, with optionally
+ mixed questions and answers. AMC provides automatic marking from papers'
+ scans. Annotated papers are produced. Marks can be exported as a
+ OpenOffice.org sheet file.
