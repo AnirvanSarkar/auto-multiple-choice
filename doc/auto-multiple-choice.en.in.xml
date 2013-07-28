@@ -407,7 +407,7 @@ the best you can.
             <code>vertical</code> or <code>horizontal</code>). If unset, AMC
             will choose the direction from the number of digits (horizontal
             for small number of digits, and vertical for high number of
-            digits). </para>
+            digits).</para>
           </listitem>
         </varlistentry>
 
@@ -1530,7 +1530,7 @@ Durée : 10 minutes.
         <title id="latex.qr.title">Questions and answers</title>
 
         <para>For simple questions (a single correct answer), one uses the
-        following model: <programlisting linenumbering="unnumbered">\begin{question}{identifiant}
+        following model: <programlisting linenumbering="unnumbered">\begin{question}{identifier}
   Here is the question...
   \begin{choices}
     \correctchoice{The correct answer}
@@ -1542,9 +1542,10 @@ Durée : 10 minutes.
         <important>
           <para>One must use a different identifier for every question. An
           identifier can be made of digits, letters, and simple characters
-          (but do not use e.g. braces or brackets). Don't end your question
-          identifier with a dot followed by digits, as this syntax is reserved
-          to codes input.</para>
+          (but do not use e.g. underscores, braces or brackets, that have a
+          special meaning in LaTeX files). Don't end your question identifier
+          with a dot followed by digits, as this syntax is reserved to codes
+          input.</para>
         </important>
 
         <note>
