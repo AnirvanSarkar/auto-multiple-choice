@@ -773,9 +773,15 @@ sub write_latex {
 
   if($self->{'options'}->{'shufflequestions'}) {
     for my $group (@{$self->{'groups'}}) {
-      for my $question (@{$group->{'questions'}}) {
+      my @questions=@{$group->{'questions'}};
+      my $q;
+      while($q=shift @questions) {
 	print OUT "\\element{".$self->group_name($group)."}{\n";
-	print OUT $self->format_question($question);
+	print OUT $self->format_question($q);
+	while(@questions && $questions[0]->{'next'}) {
+	  print OUT "\n";
+	  print OUT $self->format_question(shift @questions);
+	}
 	print OUT "}\n";
       }
     }
