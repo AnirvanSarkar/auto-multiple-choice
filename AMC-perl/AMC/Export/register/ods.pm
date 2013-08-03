@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -52,8 +52,8 @@ sub options_from_config {
 
 sub options_default {
   return('export_ods_columns'=>'student.copy,student.key,student.name',
-	 'export_ods_stats'=>0,
-	 'export_ods_statsindic'=>1,
+	 'export_ods_stats'=>'',
+	 'export_ods_statsindic'=>'',
 	 'export_ods_groupsums'=>0,
 	 );
 }
@@ -66,24 +66,39 @@ sub build_config_gui {
   my ($self,$w,$cb)=@_;
   my $t=Gtk2::Table->new(3,2);
   my $widget;
+  my $renderer;
   my $y=0;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, a table with questions basic statistics will be added to the ODS exported spreadsheet.
   $t->attach(Gtk2::Label->new(__"Stats table"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::CheckButton->new();
-  $w->{'export_cb_export_ods_stats'}=$widget;
-  $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each question?");
+  $widget=Gtk2::ComboBox->new_with_model();
+  $renderer = Gtk2::CellRendererText->new();
+  $widget->pack_start($renderer, TRUE);
+  $widget->add_attribute($renderer,'text',COMBO_TEXT);
+# TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
+  $cb->{'export_ods_stats'}=cb_model(""=>__p("None [no stats table to export]"),
+# TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a horizontal flow' in the exported ODS file.
+				     "h"=>__("Horizontal flow"),
+# TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a vertical flow' in the exported ODS file.
+				     "v"=>__("Vertical flow"));
+  $w->{'export_c_export_ods_stats'}=$widget;
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, a table with indicative questions basic statistics will be added to the ODS exported spreadsheet.
   $t->attach(Gtk2::Label->new(__"Indicative stats table"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::CheckButton->new();
-  $w->{'export_cb_export_ods_statsindic'}=$widget;
-  $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each indicative question?");
+  $widget=Gtk2::ComboBox->new_with_model();
+  $renderer = Gtk2::CellRendererText->new();
+  $widget->pack_start($renderer, TRUE);
+  $widget->add_attribute($renderer,'text',COMBO_TEXT);
+  $cb->{'export_ods_statsindic'}=cb_model(""=>__"None",
+					  "h"=>__"Horizontal flow",
+					  "v"=>__"Vertical flow");
+  $w->{'export_c_export_ods_statsindic'}=$widget;
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each indicative question?");
   $y++;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.

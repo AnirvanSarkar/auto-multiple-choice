@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -220,13 +220,35 @@ sub set_cell {
 }
 
 sub build_stats_table {
-  my ($self,$cts,$correct_data,$doc,$stats,@q)=@_;
+  my ($self,$direction,$cts,$correct_data,$doc,$stats,@q)=@_;
 
-  my %xbase=();
+  my $vertical_flow=$direction =~ /^v/i;
+
+  my %y_item=('all'=>2,'empty'=>3,'invalid'=>4);
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
+  my %y_name=('all'=>__"ALL",
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question did not get an answer. Please let this label short.
+	      'empty'=>__"NA",
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got an invalid answer. Please let this label short.
+	      'invalid'=>__"INVALID");
+  my %y_style=('empty'=>'qidE','invalid'=>'qidI');
+
+  my $n_answers=1+$#{$cts};
+  my $n_questions=1+$#q;
+
+  if($vertical_flow) {
+    $doc->expandTable($stats,6*$n_questions+$n_answers,5);
+  } else {
+    $doc->expandTable($stats,50,5*$n_questions);
+  }
 
   my $ybase=0;
   my $x=0;
+
   for my $q (@q) {
+
+    # QUESTION HEADERS
+
     $doc->cellSpan($stats,$ybase,$x,4);
     $doc->cellStyle($stats,$ybase,$x,
 		    'StatsQName'.(!$correct_data ? 'I' :'S'));
@@ -247,87 +269,87 @@ sub build_stats_table {
 
     $doc->columnStyle($stats,$x+4,"col.Space");
 
-    $xbase{$q->{'question'}}=$x;
-    $x+=5;
-  }
+    # ANSWERS DATA
 
-  my %y_item=('all'=>2,'empty'=>3,'invalid'=>4);
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
-  my %y_name=('all'=>__"ALL",
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question did not get an answer. Please let this label short.
-	      'empty'=>__"NA",
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got an invalid answer. Please let this label short.
-	      'invalid'=>__"INVALID");
-  my %y_style=('empty'=>'qidE','invalid'=>'qidI');
-  my %q_amax=();
+    my $amax=0;
 
-  for my $counts (sort { $a->{'answer'} eq "0" ? 1
-			   : $b->{'answer'} eq "0" ? -1 : 0 } @$cts) {
-    my $x=$xbase{$counts->{'question'}};
-      if(defined($x)) {
-	my $y=$y_item{$counts->{'answer'}};
-	my $name=$y_name{$counts->{'answer'}};
-	my $style=$y_style{$counts->{'answer'}};
-	if(!$y) {
-	  if($counts->{'answer'}>0) {
-	    $q_amax{$counts->{'question'}}=$counts->{'answer'}
-	      if($counts->{'answer'}>$q_amax{$counts->{'question'}});
-	    $y=4+$counts->{'answer'};
-	    $name=chr(ord("A")+$counts->{'answer'}-1);
-	  } else {
-	    $q_amax{$counts->{'question'}}++;
-	    $y=4+$q_amax{$counts->{'question'}};
+    for my $counts (sort { $a->{'answer'} eq "0" ? 1
+			     : $b->{'answer'} eq "0" ? -1 : 0 }
+		    grep { $_->{question} eq $q->{question} } @$cts) {
+
+      my $ya=$y_item{$counts->{'answer'}};
+      my $name=$y_name{$counts->{'answer'}};
+      my $style=$y_style{$counts->{'answer'}};
+
+      if(!$ya) {
+	if($counts->{'answer'}>0) {
+	  $amax=$counts->{'answer'}
+	    if($counts->{'answer'}>$amax);
+	  $ya=4+$counts->{'answer'};
+	  $name=chr(ord("A")+$counts->{'answer'}-1);
+	} else {
+	  $amax++;
+	  $ya=4+$amax;
 # TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got the "none of the above are correct" answer. Please let this label short.
-	    $name=__"NONE";
-	  }
+	  $name=__"NONE";
 	}
-	$doc->cellStyle($stats,$ybase+$y,$x+1,'NumCopie');
-	$doc->cellValueType($stats,$ybase+$y,$x+1,'float');
-	$doc->cellValue($stats,$ybase+$y,$x+1,$counts->{'nb'});
-	$doc->cellStyle($stats,$ybase+$y,$x,($style ? $style : 'General'));
-	$doc->cellValue($stats,$ybase+$y,$x,encode('utf-8',$name));
       }
+
+      $doc->cellStyle($stats,$ybase+$ya,$x+1,'NumCopie');
+      $doc->cellValueType($stats,$ybase+$ya,$x+1,'float');
+      $doc->cellValue($stats,$ybase+$ya,$x+1,$counts->{'nb'});
+      $doc->cellStyle($stats,$ybase+$ya,$x,($style ? $style : 'General'));
+      $doc->cellValue($stats,$ybase+$ya,$x,encode('utf-8',$name));
     }
 
-  for my $q (@q) {
-    my $xb=$xbase{$q->{'question'}};
+    # FORMULAS FOR EMPTY/INVALID
 
-    for my $y (3,4) {
-      $doc->cellStyle($stats,$ybase+$y,$xb+2,'Qpc');
-      $doc->cellValueType($stats,$ybase+$y,$xb+2,'float');
-      $doc->cellFormula($stats,$ybase+$y,$xb+2,
-			"oooc:=[.".yx2ooo($ybase+$y,$xb+1)."]/[."
-			.yx2ooo($ybase+2,$xb+1)."]");
+    for my $ya (3,4) {
+      $doc->cellStyle($stats,$ybase+$ya,$x+2,'Qpc');
+      $doc->cellValueType($stats,$ybase+$ya,$x+2,'float');
+      $doc->cellFormula($stats,$ybase+$ya,$x+2,
+			"oooc:=[.".yx2ooo($ybase+$ya,$x+1)."]/[."
+			.yx2ooo($ybase+2,$x+1)."]");
     }
 
-    for my $i (1..$q_amax{$q->{'question'}}) {
-      my $y=$ybase+4+$i;
-      $doc->cellStyle($stats,$y,$xb+2,'Qpc');
-      $doc->cellValueType($stats,$y,$xb+2,'float');
-      $doc->cellFormula($stats,$y,$xb+2,
-			"oooc:=[.".yx2ooo($y,$xb+1)."]/[."
-			.yx2ooo($ybase+2,$xb+1)."]");
+    # FORMULAS FOR STANDARD ANSWERS
 
-      $doc->cellStyle($stats,$y,$xb+3,'Qpc');
-      $doc->cellValueType($stats,$y,$xb+3,'float');
-      $doc->cellFormula($stats,$y,$xb+3,
-			"oooc:=[.".yx2ooo($y,$xb+1)."]/([."
-			.yx2ooo($ybase+2,$xb+1)."]-[."
-			.yx2ooo($ybase+3,$xb+1)."]-[."
-			.yx2ooo($ybase+4,$xb+1)."])");
+    for my $i (1..$amax) {
+      my $yy=$ybase+4+$i;
+      $doc->cellValueType($stats,$yy,$x+2,'float');
+      $doc->cellFormula($stats,$yy,$x+2,
+			"oooc:=[.".yx2ooo($yy,$x+1)."]/[."
+			.yx2ooo($ybase+2,$x+1)."]");
+      $doc->cellStyle($stats,$yy,$x+2,'Qpc');
+
+      $doc->cellValueType($stats,$yy,$x+3,'float');
+      $doc->cellFormula($stats,$yy,$x+3,
+			"oooc:=[.".yx2ooo($yy,$x+1)."]/([."
+			.yx2ooo($ybase+2,$x+1)."]-[."
+			.yx2ooo($ybase+3,$x+1)."]-[."
+			.yx2ooo($ybase+4,$x+1)."])");
+      $doc->cellStyle($stats,$yy,$x+3,'Qpc');
     }
-  }
 
-  for my $c (@$correct_data) {
-    my $x=$xbase{$c->{'question'}};
-    if(defined($x)) {
-      my $y=4+$c->{'answer'};
-      $y=4+$q_amax{$c->{'question'}} if($c->{'answer'}==0);
-      $doc->cellStyle($stats,$ybase+$y,$x,
+    # SETS COLOR FOR CORRECT OR NOT ANSWERS
+
+    for my $c (grep { $_->{question} eq $q->{question} } @$correct_data) {
+      my $ya=4+$c->{'answer'};
+      $ya=4+$amax if($c->{'answer'}==0);
+      $doc->cellStyle($stats,$ybase+$ya,$x,
 		      $c->{'correct_max'}==0 ? 'qidW' :
 		      $c->{'correct_min'}==1 ? 'qidC' :
 		      'qidX');
     }
+
+    # TRANSLATION...
+
+    if($vertical_flow) {
+      $ybase+=4+$amax+2;
+    } else {
+      $x+=5;
+    }
+
   }
 
 }
@@ -473,6 +495,7 @@ sub export {
 			 },
 			 'references'=>{'style:data-style-name' => 'Percentage'},
 			 );
+
     # QpcGS : pourcentage de reussite global pour un groupe
     $styles->createStyle('QpcGS',
 			 parent=>'Qpc',
@@ -1145,16 +1168,16 @@ sub export {
 
     if($self->{'out.stats'}) {
 # TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
-      my $stats_0=$doc->appendTable(encode('utf-8',__("Questions statistics")),6+$man,5*(1+$#questions_0));
+      my $stats_0=$doc->appendTable(encode('utf-8',__("Questions statistics")));
 
-      $self->build_stats_table($cts,$correct_data,$doc,$stats_0,@questions_0);
+      $self->build_stats_table($self->{'out.stats'},$cts,$correct_data,$doc,$stats_0,@questions_0);
     }
 
     if($self->{'out.statsindic'}) {
 # TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
-      my $stats_1=$doc->appendTable(encode('utf-8',__("Indicative questions statistics")),6+$man,5*(1+$#questions_1));
+      my $stats_1=$doc->appendTable(encode('utf-8',__("Indicative questions statistics")));
 
-      $self->build_stats_table($cts,0,$doc,$stats_1,@questions_1);
+      $self->build_stats_table($self->{'out.statsindic'},$cts,0,$doc,$stats_1,@questions_1);
     }
 
     ##########################################################################
