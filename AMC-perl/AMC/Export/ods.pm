@@ -306,7 +306,7 @@ sub build_stats_table {
 
     for my $ya (3,4) {
       $doc->cellStyle($stats,$ybase+$ya,$x+2,'Qpc');
-      $doc->cellValueType($stats,$ybase+$ya,$x+2,'float');
+      $doc->cellValueType($stats,$ybase+$ya,$x+2,'percentage');
       $doc->cellFormula($stats,$ybase+$ya,$x+2,
 			"oooc:=[.".yx2ooo($ybase+$ya,$x+1)."]/[."
 			.yx2ooo($ybase+2,$x+1)."]");
@@ -316,13 +316,13 @@ sub build_stats_table {
 
     for my $i (1..$amax) {
       my $yy=$ybase+4+$i;
-      $doc->cellValueType($stats,$yy,$x+2,'float');
+      $doc->cellValueType($stats,$yy,$x+2,'percentage');
       $doc->cellFormula($stats,$yy,$x+2,
 			"oooc:=[.".yx2ooo($yy,$x+1)."]/[."
 			.yx2ooo($ybase+2,$x+1)."]");
       $doc->cellStyle($stats,$yy,$x+2,'Qpc');
 
-      $doc->cellValueType($stats,$yy,$x+3,'float');
+      $doc->cellValueType($stats,$yy,$x+3,'percentage');
       $doc->cellFormula($stats,$yy,$x+3,
 			"oooc:=[.".yx2ooo($yy,$x+1)."]/([."
 			.yx2ooo($ybase+2,$x+1)."]-[."
