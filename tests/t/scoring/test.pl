@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -67,6 +67,30 @@ $t->test_scoring({multiple=>1,strategy=>"e=-10,b=3,m=-2,p=-2"},
 		  {correct=>1,strategy=>'',ticked=>1},
 		  {correct=>1,strategy=>'',ticked=>0},
 		  {correct=>0,strategy=>'',ticked=>0},
+		 ],-10);
+$t->test_scoring({multiple=>1,strategy=>"e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"},
+		 [{correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>0,strategy=>'',ticked=>0},
+		 ],-10);
+$t->test_scoring({multiple=>1,strategy=>"e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"},
+		 [{correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>0},
+		  {correct=>1,strategy=>'',ticked=>0},
+		  {correct=>0,strategy=>'',ticked=>0},
+		 ],3);
+$t->test_scoring({multiple=>1,strategy=>"e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"},
+		 [{correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>0},
+		  {correct=>1,strategy=>'',ticked=>0},
+		  {correct=>0,strategy=>'',ticked=>1},
 		 ],-10);
 
 $t->ok;

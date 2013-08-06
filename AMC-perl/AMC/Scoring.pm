@@ -372,6 +372,10 @@ sub score_question {
     debug "Scoring syntax error: $err";
     $xx=$self->directive("e");
     $why='E';
+  } elsif($self->variable("INVALID")) {
+    debug "INVALID variable is set";
+    $xx=$self->directive("e");
+    $why='E';
   }
 
   if(!$why) {
