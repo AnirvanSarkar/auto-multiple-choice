@@ -122,6 +122,10 @@ sub parse_bool {
   }
 }
 
+sub first_defined {
+  for(@_) { return($_) if(defined($_)); }
+}
+
 # transforms the list of current options values to make it coherent
 sub parse_options {
   my ($self)=@_;
@@ -211,6 +215,52 @@ sub check_answers {
   }
 }
 
+sub group_by_id {
+  my ($self,$id,%oo)=@_;
+  my $group='';
+
+  if($id) {
+
+  GROUPS: for(@{$self->{groups}}) {
+      if($_->{id} eq $id) { $group=$_ ; last GROUPS; }
+    }
+
+  } else {
+    $id='unnamed'.$self->unused_letter();
+  }
+
+  if(!$group) {
+    $group=$self->add_group('id'=>$id,'questions'=>[],%oo);
+
+    if($id ne '_main_') {
+      # calls newly created group from the 'main' one
+
+      my $main=$self->group_by_id('_main_');
+
+      add_object($main->{'questions'},
+		 textonly=>1,
+		 text=>{type=>'latex',
+			string=>$self->group_insert_command_name($group)});
+    }
+  }
+
+  return($group);
+}
+
+sub read_options {
+  my ($self,$options_string)=@_;
+  my %oo=();
+  my @opts=split(/,+/,$options_string);
+  for (@opts) {
+    if(/^([^=]+)=(.*)/) {
+      $oo{$1}=$2;
+    } else {
+      $oo{$_}=1;
+    }
+  }
+  return(%oo);
+}
+
 # parse the whole source file to a data tree ($self->{'groups'})
 sub read_source {
   my ($self,$input_file)=@_;
@@ -218,7 +268,7 @@ sub read_source {
   my %opts=();
   my $follow=''; # variable where to add content comming from
                  # following lines
-  my $group='';  # current group
+  my $group=$self->group_by_id('_main_');  # current group
   my $question=''; # current question
 
   # regexp that matches an option name:
@@ -230,20 +280,6 @@ sub read_source {
 
     # removes comments
     s/^\s*\#.*//;
-
-    # groups
-    if(/^\s*Group:\s*(.*)/) {
-      if($group && !@{$group->{'questions'}}) {
-# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new group whereas the previous group is empty
- 	$self->parse_error(__"Previous group was empty");
-      }
-      $group=$self->add_group('title'=>$1,'questions'=>[]);
-      $self->value_cleanup($follow);
-      $follow=\$group->{'title'};
-      $self->check_answers($question);
-      $question='';
-      next LINE;
-    }
 
     # options
     if(/^\s*$opt_re:\s*(.*)/i) {
@@ -260,26 +296,39 @@ sub read_source {
       $self->parse_error(sprintf(__("Unknown option: %s"),$1));
     }
 
+    # groups
+    if(/^\s*\*([\(\)])(?:\[([^]]*)\])?\s*(.*)/) {
+      my $action=$1;
+      my $options=$2;
+      my $text=$3;
+      my %oo=$self->read_options($options);
+      if($action eq '(') {
+	$group=$self->group_by_id($oo{group},parent=>$group,header=>$text,%oo);
+	$follow=\$group->{header};
+      } else {
+	$group->{footer}=$text;
+	$follow=\$group->{footer};
+	$group=$group->{parent};
+      }
+      next LINE;
+    }
+
     # questions
     if(/^\s*(\*{1,2})(?:<([^>]*)>)?(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
       $self->check_answers($question);
       my $star=$1;
       my $angles=$2;
-      my @opts=split(/,+/,$3);
+      my $options=$3;
       my $scoring=$4;
       my $text=$5;
-      my %oo=();
-      for (@opts) {
-	if(/^([^=]+)=(.*)/) {
-	  $oo{$1}=$2;
-	} else {
-	  $oo{$_}=1;
-	}
+      my %oo=$self->read_options($options);
+      my $q_group=$group;
+
+      if($oo{group}) {
+	$q_group=$self->group_by_id($oo{group});
       }
-      if(!$group) {
-	$group=$self->add_group('title'=>'','questions'=>[]);
-      }
-      $question=add_object($group->{'questions'},
+
+      $question=add_object($q_group->{'questions'},
 			   'multiple'=>length($star)==2,
 			   'open'=>$angles,
 			   'scoring'=>$scoring,
@@ -489,10 +538,16 @@ sub check_latex {
 # the components
 sub format_text {
   my ($self,$t)=@_;
-  $t =~ s/^\s+//;
-  $t =~ s/\s+$//;
+  my $src;
+  if(ref($t) eq 'HASH') {
+    $src=$t;
+  } else {
+    $t =~ s/^\s+//;
+    $t =~ s/\s+$//;
+    $src={'type'=>'txt','string'=>$t};
+  }
 
-  return(join('',$self->check_latex($self->parse_all({'type'=>'txt','string'=>$t}))));
+  return(join('',$self->check_latex($self->parse_all($src))));
 }
 
 # builds the LaTeX scoring command from the question's scoring
@@ -517,55 +572,88 @@ sub format_answer {
   return($t);
 }
 
+sub arabic_env {
+  my ($self,$action)=@_;
+  if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011) {
+    return("\\".$action."{arab}");
+  } else {
+    return("");
+  }
+}
+
 # builds the LaTeX code for the question (including answers)
 sub format_question {
   my ($self,$q)=@_;
-  my $qid=$q->{'id'};
-  $qid=$q->{'name'} if(!$qid);
-  $qid=sprintf("Q%03d",++$self->{'qid'}) if(!$qid);
-  my $mult=($q->{'multiple'} ? 'mult' : '');
-  my $ct=($q->{'horiz'} ? 'horiz' : '');
-
   my $t='';
-  $t.="\\begin{arab}"
-    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
-  $t.='\\begin{question'.$mult.'}{'.$qid."}";
-  $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
-  $t.="\n";
-  $t.=$self->format_text($q->{'text'})."\n";
-  $t.="\\QuestionIndicative\n" if($q->{'indicative'});
-  if($q->{open} ne '') {
-    $t.="\\AMCOpen{".$q->{open}."}{";
+
+  if($q->{textonly}) {
+
+    $t.=$self->arabic_env('begin');
+    $t.=$self->format_text($q->{'text'})."\n";
+    $t.=$self->arabic_env('end');
+
   } else {
-    $t.="\\begin{multicols}{".$q->{'columns'}."}\n"
-      if($q->{'columns'}>1);
-    $t.="\\begin{choices$ct}".($q->{'ordered'} ? "[o]" : "")."\n";
+
+    my $qid=$q->{'id'};
+    $qid=$q->{'name'} if(!$qid);
+    $qid=sprintf("Q%03d",++$self->{'qid'}) if(!$qid);
+    my $mult=($q->{'multiple'} ? 'mult' : '');
+    my $ct=($q->{'horiz'} ? 'horiz' : '');
+
+    $t.=$self->arabic_env('begin');
+    $t.='\\begin{question'.$mult.'}{'.$qid."}";
+    $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
+    $t.="\n";
+    $t.=$self->format_text($q->{'text'})."\n";
+    $t.="\\QuestionIndicative\n" if($q->{'indicative'});
+    if ($q->{open} ne '') {
+      $t.="\\AMCOpen{".$q->{open}."}{";
+    } else {
+      $t.="\\begin{multicols}{".$q->{'columns'}."}\n"
+	if ($q->{'columns'}>1);
+      $t.="\\begin{choices$ct}".($q->{'ordered'} ? "[o]" : "")."\n";
+    }
+    for my $a (@{$q->{'answers'}}) {
+      $t.=$self->format_answer($a);
+    }
+    if ($q->{open} ne '') {
+      $t.="}\n";
+    } else {
+      $t.="\\end{choices$ct}\n";
+      $t.="\\end{multicols}\n"
+	if ($q->{'columns'}>1);
+    }
+    $t.="\\end{question".$mult."}";
+    $t.=$self->arabic_env('end');
+    $t.="\n";
   }
-  for my $a (@{$q->{'answers'}}) {
-    $t.=$self->format_answer($a);
-  }
-  if($q->{open} ne '') {
-    $t.="}\n";
-  } else {
-    $t.="\\end{choices$ct}\n";
-    $t.="\\end{multicols}\n"
-      if($q->{'columns'}>1);
-  }
-  $t.="\\end{question".$mult."}";
-  $t.="\\end{arab}"
-    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
-  $t.="\n";
+
   return($t);
 }
 
-# returns the group name, defaulting to 'groupX' (where X is a letter
-# beginnig at A)
+sub unused_letter {
+  my ($self)=@_;
+  return(chr(ord("A")+($self->{'letter_i'}++)));
+}
+
+# returns a new group name 'groupX' (where X is a letter beginnig at
+# A)
+sub create_group_name {
+  my ($self)=@_;
+  return( "gr".$self->unused_letter() );
+}
+
+# returns the group name (creating one if necessary)
 sub group_name {
   my ($self,$group)=@_;
-  if(!$group->{'name'}) {
-    $group->{'name'}="group".chr(ord("A")+($self->{'group_number'}++));
+  if(!$group->{name}) {
+    if($group->{id} =~ /^[a-z]+$/i) {
+      $group->{name}=$group->{id};
+    } else {
+      $group->{name}=$self->create_group_name();
+    }
   }
-  return($group->{'name'});
+  return($group->{name});
 }
 
 # gets the Year for the version of installed bidi.sty. This will be
@@ -763,6 +851,32 @@ sub student_block {
   return($t);
 }
 
+sub group_insert_command_name {
+  my ($self,$group)=@_;
+  return("\\insertPlainGroup".$self->group_name($group));
+}
+
+sub group_insert_command_def {
+  my ($self,$group)=@_;
+  my $t="\\def".$self->group_insert_command_name($group)."{";
+  if($group->{header}) {
+    $t.=$self->format_text($group->{header});
+    $t.="\\\\[1.5ex]\n" if(!$group->{custom}
+			  && $group->{columns}<=1);
+  }
+  $t.="\\begin{multicols}{".$group->{columns}."}"
+    if($group->{columns}>1);
+  $t.="\\insertgroup{".$self->group_name($group)."}";
+  $t.="\\end{multicols}"
+    if($group->{columns}>1);
+  if($group->{footer}) {
+    $t.=$self->format_text($group->{footer});
+    $t.="\\\\[1.5ex]\n" if(!$group->{custom} && !$group->{cut});
+  }
+  $t.="}\n";
+  return($t);
+}
+
 # writes the LaTeX output file
 sub write_latex {
   my ($self,$output_file)=@_;
@@ -771,20 +885,25 @@ sub write_latex {
 
   print OUT $self->file_header();
 
-  if($self->{'options'}->{'shufflequestions'}) {
-    for my $group (@{$self->{'groups'}}) {
-      my @questions=@{$group->{'questions'}};
-      my $q;
-      while($q=shift @questions) {
-	print OUT "\\element{".$self->group_name($group)."}{\n";
-	print OUT $self->format_question($q);
-	while(@questions && $questions[0]->{'next'}) {
-	  print OUT "\n";
-	  print OUT $self->format_question(shift @questions);
-	}
-	print OUT "}\n";
+  for my $group (@{$self->{'groups'}}) {
+
+    # create group elements from the questions
+
+    my @questions=@{$group->{'questions'}};
+    my $q;
+    while($q=shift @questions) {
+      print OUT "\\element{".$self->group_name($group)."}{\n";
+      print OUT $self->format_question($q);
+      while(@questions && $questions[0]->{'next'}) {
+	print OUT "\n";
+	print OUT $self->format_question(shift @questions);
       }
+      print OUT "}\n";
     }
+
+    # command to print the group
+
+    print OUT $self->group_insert_command_def($group);
   }
 
   print OUT "\\onecopy{5}{\n";
@@ -801,36 +920,30 @@ sub write_latex {
   print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
   print OUT "\n\n";
 
-  for my $group (@{$self->{'groups'}}) {
-    if($group->{'title'}) {
-      print OUT "\\begin{center}\\hrule\\vspace{2mm}"
-	.$self->bf_or("\\Large","\\bf\\Large")." ".
-	  $self->format_text($group->{'title'})."\\vspace{1mm}\\hrule\\end{center}\n\n";
-    }
-    print OUT "\\begin{arab}"
-      if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
-    if($self->{'options'}->{'columns'}>1) {
-      print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n";
-    } else {
-      print OUT "\\vspace{2ex}\n\n";
-    }
-
-    if($self->{'options'}->{'shufflequestions'}) {
-      print OUT "\\shufflegroup{".$self->group_name($group)."}\n";
-      print OUT "\\insertgroup{".$self->group_name($group)."}\n";
-    } else {
-      for my $question (@{$group->{'questions'}}) {
-	print OUT $self->format_question($question);
-      }
-    }
-
-    if($self->{'options'}->{'columns'}>1) {
-      print OUT "\\end{multicols}\n";
-    }
-    print OUT "\\end{arab}"
-      if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
+  # shuffle groups...
+  for my $g (@{$self->{groups}}) {
+    print OUT "\\shufflegroup{".$self->group_name($g)."}\n"
+      if(parse_bool(first_defined($g->{shuffle},$self->{'options'}->{'shufflequestions'})));
   }
 
+  # print groups
+  print OUT "\\begin{arab}"
+    if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
+  if($self->{'options'}->{'columns'}>1) {
+    print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n";
+  } else {
+    print OUT "\\vspace{2ex}\n\n";
+  }
+
+  print OUT $self->group_insert_command_name($self->group_by_id('_main_'))."\n";
+
+  if($self->{'options'}->{'columns'}>1) {
+    print OUT "\\end{multicols}\n";
+  }
+  print OUT "\\end{arab}"
+    if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
+
+  # separate answer sheet
   if($self->{'options'}->{'separateanswersheet'}) {
     if($self->{'options'}->{'singlesided'}) {
       print OUT "\n\\clearpage\n\n";
