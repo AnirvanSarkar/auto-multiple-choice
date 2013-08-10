@@ -7,12 +7,15 @@
     <style id="comment" _name="Comment" map-to="def:comment"/>
     <style id="keyword" _name="Keyword" map-to="def:keyword"/>
     <style id="opener" _name="Open symbol" map-to="def:bold"/>
+    <style id="gopener" _name="Open group symbols" map-to="def:shebang"/>
     <style id="letter" _name="Letter" map-to="def:string"/>
+    <style id="grouptext" _name="Group" map-to="def:underlined"/>
     <style id="questiontext" _name="Question" map-to="diff:location"/>
     <style id="correct" _name="Correct choice" map-to="diff:added-line"/>
     <style id="wrong" _name="Wrong choice" map-to="diff:removed-line"/>
     <style id="ooptions" _name="Open question options" map-to="def:string"/>
     <style id="qoptions" _name="Question options" map-to="def:string"/>
+    <style id="goptions" _name="Group options" map-to="def:string"/>
     <style id="scoring" _name="Scoring" map-to="def:preprocessor"/>
   </styles>
   <definitions>
@@ -67,6 +70,15 @@
 	  <keyword>SingleSided</keyword>
 	  <keyword>ManualDuplex</keyword>
 	  <keyword>AutoMarks</keyword>
+	</context>
+
+	<context id="groups" end-parent="true" style-ref="grouptext">
+	  <start>^(\*[\(\)])(?:\[([^\]]+)\])?</start>
+	  <end>\%{endgroup}</end>
+	  <include>
+	    <context style-ref="gopener" where="start" sub-pattern="1"/>
+	    <context style-ref="goptions" where="start" sub-pattern="2"/>
+	  </include>
 	</context>
 
 	<context id="questions" end-parent="true" style-ref="questiontext">
