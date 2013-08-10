@@ -944,6 +944,74 @@ Combien y a-t-il d'étoiles dans le ciel ?
       <programlisting>Les questions marquées d'un [[\multiSymbole{}]] peuvent avoir zéro, une ou plusieurs bonnes réponses.</programlisting>
     </sect2>
 
+    <sect2>
+      <title>Groupes de questions</title>
+
+      <para>Vous pouvez demander à ce que certaines questions restent groupées
+      lors du mélange des questions, et ajouter un texte introductif avant ce
+      groupe de questions (et un autre texte après), en utilisant la syntaxe
+      suivante :</para>
+
+      <programlisting>*( Les trois questions suivantes concernent Martin Luther King.
+
+* En quelle année est-il né ?
+- 1901
++ 1929
+- 1968
+
+* En quelle année est-il mort ?
+- 1945
+- 1515
++ 1968
+- 1999
+
+* Dans quelle ville est-il né ?
++ Atlanta
+- Memphis
+- New York
+
+*) Fin des questions sur Martin Luther King. </programlisting>
+
+      <para>Vous pouvez ajouter des options à l'ouverture du groupe, comme
+      suit :</para>
+
+      <programlisting>*([shuffle=false,columns=2] Les trois questions suivantes concernent Martin Luther King.</programlisting>
+
+      <para>Les options suivantes sont acceptées :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>shuffle=<replaceable>xxx</replaceable></term>
+
+          <listitem>
+            <para>En donnant la valeur <replaceable>true</replaceable> ou
+            <replaceable>false</replaceable>, on demande à mélanger ou non les
+            questions de ce groupe. La valeur par défaut est celle utilisée
+            globalement par l'option <option>ShuffleQuestions</option>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>columns=<replaceable>n</replaceable></term>
+
+          <listitem>
+            <para>Donne le nombre de colonnes dans lesquelles seront mises en
+            forme les questions.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>group=<replaceable>nom</replaceable></term>
+
+          <listitem>
+            <para>Donne un nom au groupe (celui-ci ne sera pas visible sur le
+            sujet, mais uniquement dans le fichier LaTeX généré à partir du
+            fichier source AMC-TXT).</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
     <sect2 id="txt-arabic">
       <title>En langue arabe</title>
 

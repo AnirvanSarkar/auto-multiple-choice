@@ -890,6 +890,68 @@ How many stars in the sky?
       <programlisting>Questions with a [[\multiSymbole{}]] may have zero, one or more right answers.</programlisting>
     </sect2>
 
+    <sect2>
+      <title>Questions groups</title>
+
+      <para>You can group some question so that they stay together even when
+      shuffling, with the following syntax:</para>
+
+      <programlisting>*( Questions about Martin Luther King.
+
+* When was he born?
+- in 1901
++ in 1929
+- in 1968
+
+* When did he die?
+- in 1945
+- in 1515
++ in 1968
+- in 1999
+
+* Where was he born?
++ Atlanta
+- Memphis
+- New York
+
+*) End of questions on Martin Luther King. </programlisting>
+
+      <para>You can specify some options on groups, like:</para>
+
+      <programlisting>*([shuffle=false,columns=2] Questions about Martin Luther King.</programlisting>
+
+      <para>The following options are available:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>shuffle=<replaceable>xxx</replaceable></term>
+
+          <listitem>
+            <para>Give <replaceable>true</replaceable> or
+            <replaceable>false</replaceable> to tell if you want to shuffle
+            the questions inside the group. The default value if the global
+            one, from the <option>ShuffleQuestions</option> option.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>columns=<replaceable>n</replaceable></term>
+
+          <listitem>
+            <para>Number of columns for the group's questions.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>group=<replaceable>nom</replaceable></term>
+
+          <listitem>
+            <para>Give a name for the group (for internal matter).</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
     <sect2 id="txt-arabic">
       <title>Arabic language</title>
 
