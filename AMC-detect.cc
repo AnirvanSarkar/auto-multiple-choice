@@ -554,7 +554,7 @@ void calage(IplImage* src,IplImage* illustr,
     }
   }
 
-  if(n_cc>=4) {
+  if(n_cc>=3) {
     for(int i=0;i<4;i++) {
       /* computes integer coordinates of the extreme coordinates, for
 	 later drawings */
@@ -589,7 +589,7 @@ void calage(IplImage* src,IplImage* illustr,
       }
     }
   } else {
-    /* There are less than 4 correct connected components: can't know
+    /* There are less than 3 correct connected components: can't know
        where are the marks on the scan! */
     printf("! NMARKS=%d : Not enought marks detected.\n",n_cc);
   }
