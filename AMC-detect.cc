@@ -68,7 +68,7 @@ int processing_error=0;
 
 #define SWAP(x,y,tmp) tmp=x;x=y;y=tmp
 #define SGN_ROT (1-2*upside_down)
-#define SUM_SQUARE(x,y) (x)*(x)+(y)*(y)
+#define SUM_SQUARE(x,y) ((x)*(x)+(y)*(y))
 #define SHAPE_SQUARE 0
 #define SHAPE_OVAL 1
 
@@ -273,22 +273,27 @@ int evalue_demi_plan(ligne *l,double x,double y) {
 /* moyenne(x[],n) returns the mean of the n values from vector x[]
 */
 
-double moyenne(double *x, int n) {
+double moyenne(double *x, int n, int omit=-1) {
   double s=0;
-  for(int i=0;i<n;i++) s+=x[i];
-  return(s/n);
+  for(int i=0;i<n;i++) {
+    if(i!=omit) s+=x[i];
+  }
+  return(s/(n-(omit>=0 ? 1 : 0)));
 }
 
 /* scalar_product(x[],y[],n) returns the scalar product of vectors x[]
    and y[] (both of size n), that is the sum over i of x[i]*y[i].
 */
 
-double scalar_product(double *x,double *y,int n) {
+double scalar_product(double *x,double *y,int n, int omit=-1) {
   double sx,sy,sxy;
   sx=0;sy=0;sxy=0;
   for(int i=0;i<n;i++) {
-    sx+=x[i];sy+=y[i];sxy+=x[i]*y[i];
+    if(i!=omit) {
+      sx+=x[i];sy+=y[i];sxy+=x[i]*y[i];
+    }
   }
+  if(omit>=0) n--;
   return(sxy/n-sx/n*sy/n);
 }
 
@@ -359,28 +364,65 @@ void revert_transform(linear_transform *direct,
 double optim(double* points_x,double* points_y,
 	     double* points_xp,double* points_yp,
 	     int n,
-	     linear_transform* t) {
-  double sxx=scalar_product(points_x,points_x,n);
-  double sxy=scalar_product(points_x,points_y,n);
-  double syy=scalar_product(points_y,points_y,n);
+	     linear_transform* t,
+	     int omit=-1) {
+  double sxx=scalar_product(points_x,points_x,n,omit);
+  double sxy=scalar_product(points_x,points_y,n,omit);
+  double syy=scalar_product(points_y,points_y,n,omit);
   
-  double sxxp=scalar_product(points_x,points_xp,n);
-  double syxp=scalar_product(points_y,points_xp,n);
-  double sxyp=scalar_product(points_x,points_yp,n);
-  double syyp=scalar_product(points_y,points_yp,n);
+  double sxxp=scalar_product(points_x,points_xp,n,omit);
+  double syxp=scalar_product(points_y,points_xp,n,omit);
+  double sxyp=scalar_product(points_x,points_yp,n,omit);
+  double syyp=scalar_product(points_y,points_yp,n,omit);
 
   sys_22(sxx,sxy,sxy,syy,sxxp,syxp,&(t->a),&(t->b));
   sys_22(sxx,sxy,sxy,syy,sxyp,syyp,&(t->c),&(t->d));
-  t->e=moyenne(points_xp,n)-(t->a*moyenne(points_x,n)+t->b*moyenne(points_y,n));
-  t->f=moyenne(points_yp,n)-(t->c*moyenne(points_x,n)+t->d*moyenne(points_y,n));
+  t->e=moyenne(points_xp,n,omit)
+    -(t->a*moyenne(points_x,n,omit)+t->b*moyenne(points_y,n,omit));
+  t->f=moyenne(points_yp,n,omit)
+    -(t->c*moyenne(points_x,n,omit)+t->d*moyenne(points_y,n,omit));
 
   double mse=0;
   for(int i=0;i<n;i++) {
-    mse+=sqr(points_xp[i]-(t->a*points_x[i]+t->b*points_y[i]+t->e));
-    mse+=sqr(points_yp[i]-(t->c*points_x[i]+t->d*points_y[i]+t->f));
+    if(i!=omit) {
+      mse+=sqr(points_xp[i]-(t->a*points_x[i]+t->b*points_y[i]+t->e));
+      mse+=sqr(points_yp[i]-(t->c*points_x[i]+t->d*points_y[i]+t->f));
+    }
   }
-  mse=sqrt(mse/n);
+  mse=sqrt(mse/(n-(omit<=0 ? 1 : 0)));
   return(mse);
+}
+
+/* transform_quality(&t) returns a "square distance" from the
+   transform t to an exact orthonormal transform.
+*/
+double transform_quality_2(linear_transform* t) {
+  return( SUM_SQUARE(t->c+t->b,t->d-t->a) / SUM_SQUARE(t->a,t->b) );
+}
+
+/* omit_optim(...) tries an optim() call omitting in turn one of the
+   points, and returns the best transform (the more "orthonormal"
+   one).
+*/
+double omit_optim(double* points_x,double* points_y,
+		  double* points_xp,double* points_yp,
+		  int n,
+		  linear_transform* t) {
+  linear_transform t_best;
+  double q,q_best;
+  int i_best=-1;
+  for(int i=0;i<n;i++) {
+    optim(points_x,points_y,points_xp,points_yp,n,t,i);
+    q=transform_quality_2(t);
+    printf("OMIT_CORNER=%d Q2=%lf\n",i,q);
+    if(i_best<0 || q<q_best) {
+      i_best=i;
+      q_best=q;
+      memcpy((void*)&t_best,(void*)t,sizeof(linear_transform));
+    }
+  }
+  memcpy((void*)t,(void*)&t_best,sizeof(linear_transform));
+  return(sqrt(q_best));
 }
 
 /* calage(...) tries to detect the position of a page on a scan.
@@ -1073,6 +1115,28 @@ int main( int argc, char** argv )
       
 	cvReleaseImage(&src_calage);
 
+      } else if((sscanf(commande,"optim3 %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
+			&coins_x0[0],&coins_y0[0],
+			&coins_x0[1],&coins_y0[1],
+			&coins_x0[2],&coins_y0[2],
+			&coins_x0[3],&coins_y0[3])==8)
+		|| (strncmp(commande,"reoptim3",8)==0) ) {
+	/* TRYING TO OMIT EACH CORNER IN TURN */
+	/* "optim3" and 8 arguments: 4 marks positions (x y,
+	   order: UL UR BR BL)
+	   return: optimal linear transform and MSE */
+	/* "reoptim3": optim with the same arguments as for last "optim" call */
+	mse=omit_optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
+	printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+	       transfo.a,transfo.b,
+	       transfo.c,transfo.d,
+	       transfo.e,
+	       transfo.f);
+	printf("MSE=0.0\n");
+	printf("QUALITY=%f\n",mse);
+      
+	revert_transform(&transfo,&transfo_back);
+
       } else if((sscanf(commande,"optim %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
 			&coins_x0[0],&coins_y0[0],
 			&coins_x0[1],&coins_y0[1],
@@ -1092,6 +1156,7 @@ int main( int argc, char** argv )
 	printf("MSE=%f\n",mse);
       
 	revert_transform(&transfo,&transfo_back);
+
       } else if(strncmp(commande,"rotateOK",8)==0) {
 	/* validates upside down rotation */
 	if(upside_down) {

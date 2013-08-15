@@ -65,6 +65,7 @@ my $threshold='60%';
 my $multiple='';
 my $ignore_red=1;
 my $pre_allocate=0;
+my $try_three=1;
 
 GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
@@ -82,6 +83,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "multiple!"=>\$multiple,
 	   "ignore-red!"=>\$ignore_red,
 	   "pre-allocate=s"=>\$pre_allocate,
+	   "try-three!"=>\$try_three,
 	   );
 
 use_gettext;
@@ -248,11 +250,11 @@ sub command_transf {
 }
 
 sub marks_fit {
-  my ($process,$ld,$scan_frame)=@_;
+  my ($process,$ld,$three)=@_;
 
   $cale=AMC::Calage::new('type'=>'lineaire');
   command_transf($process,$cale,
-		 join(' ',"optim",
+		 join(' ',"optim".($three? "3":""),
 		      $ld->{'frame'}->draw_points()));
 
   debug "MSE=".$cale->mse();
@@ -348,13 +350,24 @@ sub get_binary_number {
 }
 
 sub get_id_from_boxes {
-  my ($process,$ld)=@_;
+  my ($process,$ld,$data_layout)=@_;
 
   @epc=map { get_binary_number($process,$ld,$_) } (1,2,3);
   my $id_page="+".join('/',@epc)."+";
   print "Page : $id_page\n";
   debug("Found binary ID: $id_page");
-  return(@epc);
+
+  $data_layout->begin_read_transaction('cFLY');
+  my $ok=$data_layout->exists(@epc);
+  $data_layout->end_transaction('cFLY');
+
+  return($ok,@epc);
+}
+
+sub marks_fit_and_id {
+  my ($process,$ld,$data_layout,$three)=@_;
+  marks_fit($process,$ld,$three);
+  return(get_id_from_boxes($process,$ld,$data_layout));
 }
 
 my $process;
@@ -427,23 +440,24 @@ sub one_scan {
   my $upside_down=0;
   my $ok;
 
-  marks_fit($process,$random_layout,$cadre_general);
-  @epc=get_id_from_boxes($process,$random_layout);
+  ($ok,@epc)=marks_fit_and_id($process,$random_layout,$layout);
 
-  $layout->begin_read_transaction('cFLY');
-  $ok=$layout->exists(@epc);
-  $layout->end_transaction('cFLY');
+  if($try_three && !$ok) {
+    # now tries with only 3 corner marks:
+    ($ok,@epc)=marks_fit_and_id($process,$random_layout,$layout,1);
+  }
 
   if(!$ok) {
     # Unknown ID: tries again upside down
     $process->commande("rotate180");
-    marks_fit($process,$random_layout);
-    @epc=get_id_from_boxes($process,$random_layout);
-    $upside_down=1;
+    ($ok,@epc)=marks_fit_and_id($process,$random_layout,$layout);
 
-    $layout->begin_read_transaction('cFLY');
-    $ok=$layout->exists(@epc);
-    $layout->end_transaction('cFLY');
+    if($try_three && !$ok) {
+      # now tries with only 3 corner marks:
+      ($ok,@epc)=marks_fit_and_id($process,$random_layout,$layout,1);
+    }
+
+    $upside_down=1;
   }
 
   if(!$ok) {
