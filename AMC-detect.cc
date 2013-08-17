@@ -467,6 +467,7 @@ void calage(IplImage* src,IplImage* illustr,
 	    double taille_orig_x,double taille_orig_y,
 	    double dia_orig,
 	    double tol_plus,double tol_moins,
+	    int n_min_cc,
 	    double* coins_x,double *coins_y,
 	    IplImage** dst,int view=0) {
   CvPoint coins_int[4];
@@ -554,7 +555,7 @@ void calage(IplImage* src,IplImage* illustr,
     }
   }
 
-  if(n_cc>=3) {
+  if(n_cc>=n_min_cc) {
     for(int i=0;i<4;i++) {
       /* computes integer coordinates of the extreme coordinates, for
 	 later drawings */
@@ -991,6 +992,7 @@ int main( int argc, char** argv )
   double dia_orig=0;
   double tol_plus=0;
   double tol_moins=0;
+  int n_min_cc=3;
 
   double prop,xmin,xmax,ymin,ymax;
   double coins_x[4],coins_y[4];
@@ -1027,12 +1029,13 @@ int main( int argc, char** argv )
   // -d d  : gives the diameter of the corner marks on the original subject
   // -p dp : gives the tolerance above mark diameter (fraction of the diameter)
   // -m dm : gives the tolerance below mark diameter
+  // -c n  : gives the minimum requested number of corner marks
   // -t th : gives the threshold to convert to black&white
   // -o file : gives output file name for detected layout report image
   // -v / -P : asks for marks detection debugging image report
 
   char c;
-  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:o:vPrk")) != -1) {
+  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:c:o:vPrk")) != -1) {
     switch (c) {
     case 'x': taille_orig_x=atof(optarg);break; 
     case 'y': taille_orig_y=atof(optarg);break; 
@@ -1040,6 +1043,7 @@ int main( int argc, char** argv )
     case 'p': tol_plus=atof(optarg);break;
     case 'm': tol_moins=atof(optarg);break;
     case 't': threshold=atof(optarg);break;
+    case 'c': n_min_cc=atoi(optarg);break;
     case 'o': out_image_file=strdup(optarg);break;
     case 'v': view=1;break;
     case 'r': ignore_red=1;break;
@@ -1103,6 +1107,7 @@ int main( int argc, char** argv )
 		 taille_orig_x,taille_orig_y,
 		 dia_orig,
 		 tol_plus, tol_moins,
+		 n_min_cc,
 		 coins_x,coins_y,
 		 &dst,view);
 	  upside_down=0;

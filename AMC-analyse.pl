@@ -409,6 +409,7 @@ sub one_scan {
 	    '-y',$random_layout->{'height'},
 	    '-d',$random_layout->{'markdiameter'},
 	    '-p',$tol_mark_plus,'-m',$tol_mark_moins,
+	    '-c',($try_three ? 3 : 4),
 	    '-t',$bw_threshold,
 	    '-o',($debug_image ? $debug_image : 1)
 	   );
