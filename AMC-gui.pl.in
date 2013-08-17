@@ -255,6 +255,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'box_size_proportion'=>0.8,
 	      'bw_threshold'=>0.6,
 	      'ignore_red'=>0,
+	      'try_three'=>1,
 
 	      'prepare_solution'=>1,
 	      'prepare_catalog'=>1,
@@ -3153,6 +3154,7 @@ sub analyse_call_go {
 	    "--cr",absolu($projet{'options'}->{'cr'}),
 	    "--liste-fichiers",$oo{'liste'},
 	    ($o{'ignore_red'} ? "--ignore-red" : "--no-ignore-red"),
+	    ($o{'try_three'} ? "--try-three" : "--no-try-three"),
 	   );
 
   push @args,"--pre-allocate",$oo{'allocate'} if($oo{'allocate'});
