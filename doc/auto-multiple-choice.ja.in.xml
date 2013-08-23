@@ -291,6 +291,14 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Code:</term>
 
           <listitem>
+            <para>正の整数値<replaceable>n</replaceable>を与えると、<replaceable>n</replaceable>桁文の受験番号をマークする欄が試験問題用紙に追加されます。</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>CodeDigitsDirection:</term>
+
+          <listitem>
             <para>正の整数値<replaceable>n</replaceable>を与えると、<replaceable>n</replaceable>桁の受験番号をマークする欄が試験問題用紙に追加されます。</para>
           </listitem>
         </varlistentry>
@@ -299,7 +307,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Columns:</term>
 
           <listitem>
-            <para>正の整数値<replaceable>n</replaceable>を与えると、試験問題全体が<replaceable>n</replaceable>カラムで作成されます。</para>
+            <para>受験番号欄の方向を（<code>virtical</code>または<code>horizontal</code>で）設定します。設定しない場合は桁数により（桁数が少なければ水平、多ければ垂直に）自動選択されます。</para>
           </listitem>
         </varlistentry>
 
@@ -464,6 +472,14 @@ Presentation: 以下の設問に最も適切な解答を
               <para>別紙答案用紙のカラム数です。</para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term>AutoMarks:</term>
+
+            <listitem>
+              <para>1にすると、<option>automarks</option>オプション（<xref linkend="sec.package.options"/>参照）を使用します。</para>
+            </listitem>
+          </varlistentry>
         </variablelist>
       </sect3>
     </sect2>
@@ -512,10 +528,28 @@ Presentation: 以下の設問に最も適切な解答を
           </varlistentry>
 
           <varlistentry>
-            <term>name=<replaceable>xxxx</replaceable></term>
+            <term>id=<replaceable>xxxx</replaceable></term>
 
             <listitem>
               <para>設問に名前をつけ、出力した採点表の得点がどの設問のものかわかりやすくします。この名前にはアクセントなどを含まずLaTeXの特殊文字（<code>_</code>、<code>^</code>、<code>%</code>など）でない単純な文字しか使用できません。</para>
+
+              <para>旧版との互換性のため<option>id</option>のかわりに<option>name</option>も使用できますが、<option>id</option>を使用してください。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>indicative</term>
+
+            <listitem>
+              <para>この設問の採点結果を、受験生の最終得点に加えません。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>next</term>
+
+            <listitem>
+              <para><option>ShuffleQuestions</option>オプションで設問をシャフルする場合でも、直前の設問の次にこの設問が配置されるようにします。</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -646,6 +680,64 @@ Presentation: 以下の設問に最も適切な解答を
       <para>文書内に小さなLaTeXコード片を置くには、次のように二重の角括弧内にそれを入れます:</para>
 
       <programlisting>[[\multiSymbole{}]]の記号のある設問の正解は1個とは限りません。0個の場合や複数の場合があります。</programlisting>
+    </sect2>
+
+    <sect2>
+      <title>設問グループ</title>
+
+      <para>次の構文により、複数の設問をグループに入れ、シャフルしても離ればなれにならないようにできます:</para>
+
+      <programlisting>*( マーチン・ルーサー・キングに関する問題
+
+* 生年はいつですか？
+- 1901年
++ 1929年
+- 1968年
+
+* 没年はいつですか？
+- 1945年
+- 1515年
++ 1968年
+- 1999年
+
+* どこで生まれましたか？
++ アトランタ
+- メンフィス
+- ニューヨーク
+
+*) マーチン・ルーサー・キングに関する問題はここまで </programlisting>
+
+      <para>次のように、グループにオプションを指定することができます:</para>
+
+      <programlisting>*([shuffle=false,columns=2] マーチン・ルーサー・キングに関する問題</programlisting>
+
+      <para>以下のオプションが使用できます:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>shuffle=<replaceable>xxx</replaceable></term>
+
+          <listitem>
+            <para>グループ内の設問をシャフルするかどうかを、<replaceable>true</replaceable>か<replaceable>false</replaceable>で示します。デフォルト値はグローバルな<option>ShuffleQuestions</option>オプションから得ます。</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>columns=<replaceable>n</replaceable></term>
+
+          <listitem>
+            <para>グループの設問のカラム数。</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>group=<replaceable>nom</replaceable></term>
+
+          <listitem>
+            <para>グループに名前をつけます（内部的な事情）。</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </sect2>
 
     <sect2 id="txt-arabic">
@@ -2578,7 +2670,7 @@ Name :
 
                 <entry>●</entry>
 
-                <entry><replaceable>XXX</replaceable>という変数に特定の値を指定し、<code>formula</code>で使用できるようにします。選択肢に指定すると、そのボックスがマークされたときだけ値が設定されます。</entry>
+                <entry><replaceable>XXX</replaceable>という変数に特定の値を指定し、<code>formula</code>で使用できるようにします。選択肢に指定すると、そのボックスがマークされたときだけ値が設定されます。特殊な場合として、<varname>INVALID</varname>という変数にnullでない値を設定すると、解答に矛盾があることを示すことができ、<code>e</code>変数で指定した値が素点になります。</entry>
               </row>
 
               <row>
@@ -3951,6 +4043,14 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>このオプションは<option>--multiple</option>と共に使用されます。スキャンごとの複製番号が<replaceable>copy_id</replaceable>から開始し、引数で与えたスキャンデータと同じ順序で割り当てられます。</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>--try-three | --no-try-three</term>
+
+            <listitem>
+              <para>四隅のマーカーのうち三つしか認識できない場合も処理をするかどうかを示します。</para>
             </listitem>
           </varlistentry>
 
