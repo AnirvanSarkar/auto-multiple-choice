@@ -187,7 +187,7 @@ sub get_layout_data {
   my $r={'corners.test'=>{},'zoom.file'=>{},'darkness.data'=>{},
 	'boxes'=>{},'flags'=>{}};
 
-  ($r->{'width'},$r->{'height'},$r->{'markdiameter'})
+  ($r->{'width'},$r->{'height'},$r->{'markdiameter'},undef)
     =$layout->dims($student,$page);
   $r->{'frame'}=AMC::Boite::new_complete($layout->all_marks($student,$page));
 

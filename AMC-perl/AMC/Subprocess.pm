@@ -71,6 +71,9 @@ sub commande {
 	$self->{'times'}=[times()];
 	$self->{'ipc'}=open2($self->{'ipc_out'},$self->{'ipc_in'},
 			     $self->{'exec_file'},@a);
+
+	binmode $self->{'ipc_out'},':utf8';
+	binmode $self->{'ipc_in'},':utf8';
 	debug "PID=".$self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'};
     }
 

@@ -232,13 +232,11 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'encodage_latex'=>'',
 	      'defaut_moteur_latex_b'=>'pdflatex',
 	      'defaut_seuil'=>0.15,
-	      'taille_max_correction'=>'1000x1500',
 	      'assoc_window_size'=>'',
 	      'mailing_window_size'=>'',
 	      'preferences_window_size'=>'',
 	      'checklayout_window_size'=>'',
 	      'manual_window_size'=>'',
-	      'qualite_correction'=>'150',
 	      'conserve_taille'=>1,
 	      'methode_impression'=>'CUPS',
 	      'imprimante'=>'',
@@ -271,7 +269,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'symbole_1_1_type'=>'mark',
 	      'symbole_1_1_color'=>hex_color('blue'),
 
-	      'annote_ps_nl'=>60,
+	      'annote_font_size'=>12,
 	      'annote_ecart'=>5.5,
 	      'annote_chsign'=>4,
 
@@ -281,6 +279,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 # TRANSLATORS: This is the default text to be written on the top of the first page of each paper when annotating. From this string, %s will be replaced with the student final mark, %m with the maximum mark he can obtain, %S with the student total score, and %M with the maximum score the student can obtain.
 	      'defaut_verdict'=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
 	      'defaut_verdict_q'=>"\"%"."s/%"."m\"",
+	      'defaut_verdict_qc'=>"\"X\"",
 
 	      'zoom_window_height'=>400,
 	      'zoom_window_factor'=>1.0,
@@ -371,6 +370,7 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'verdict'=>'',
 		   'verdict_q'=>'',
+		   'verdict_qc'=>'',
 		   'annote_rtl'=>'',
 
 		   'export_sort'=>'n',
@@ -1305,9 +1305,9 @@ sub maj_export {
     valide_options_for_domain('export','',@_);
 
     if($projet{'options'}->{'_modifie'} =~ /\bexport_sort\b/) {
-      $projet{'_report'}->begin_transaction('SMch');
-      $projet{'_report'}->variable('grouped_uptodate',-3);
-      $projet{'_report'}->end_transaction('SMch');
+      $projet{'_capture'}->begin_transaction('SMch');
+      $projet{'_capture'}->variable('annotate_source_change',time());
+      $projet{'_capture'}->end_transaction('SMch');
     }
 
     debug "Format : ".$projet{'options'}->{'format_export'};
@@ -3601,9 +3601,9 @@ sub filter_changed {
 sub valide_options_notation {
     valide_options_for_domain('notation','',@_);
     if($projet{'options'}->{'_modifie'} =~ /\bregroupement_compose\b/) {
-      $projet{'_report'}->begin_transaction('RCch');
-      $projet{'_report'}->variable('grouped_uptodate',-3);
-      $projet{'_report'}->end_transaction('RCch');
+      $projet{'_capture'}->begin_transaction('RCch');
+      $projet{'_capture'}->variable('annotate_source_change',time());
+      $projet{'_capture'}->end_transaction('RCch');
     }
     $w{'groupe_model'}->set_sensitive($projet{'options'}->{'regroupement_type'} eq 'STUDENTS');
 }
@@ -4182,7 +4182,6 @@ sub select_students_all {
 }
 
 sub annote_copies {
-  my ($and_regroupe)=@_;
   my $id_file='';
 
   if($projet{'options'}->{'regroupement_copies'} eq 'SELECTED') {
@@ -4192,44 +4191,59 @@ sub annote_copies {
     return() if(!select_students($id_file));
   }
 
-  commande('commande'=>["auto-multiple-choice","annote",
-			pack_args("--debug",debug_file(),
-				  "--progression-id",'annote',
-				  "--progression",1,
-				  "--projet",absolu('%PROJET/'),
-				  "--projets",absolu('%PROJETS/'),
-				  "--ch-sign",$o{'annote_chsign'},
-				  "--cr",absolu($projet{'options'}->{'cr'}),
-				  "--data",absolu($projet{'options'}->{'data'}),
-				  "--id-file",$id_file,
-				  "--taille-max",$o{'taille_max_correction'},
-				  "--qualite",$o{'qualite_correction'},
-				  "--line-width",$o{'symboles_trait'},
+  my $single_output='';
 
-				  "--indicatives",$o{'symboles_indicatives'},
-				  "--symbols",join(',',map { opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/)),
+  if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
+    $single_output=($id_file ?
+# TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
+                   (__("Selected_students")).".pdf" :
+# TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
+                   (__("All_students")).".pdf" );
+  }
+
+  commande('commande'=>["auto-multiple-choice","annotate",
+			pack_args("--cr",absolu($projet{'options'}->{'cr'}),
+				  "--project",absolu('%PROJET/'),
+				  "--projects",absolu('%PROJETS/'),
+				  "--data",absolu($projet{'options'}->{'data'}),
+				  "--subject",absolu($projet{'options'}->{'doc_question'}),
+				  "--filename-model",$projet{'options'}->{'modele_regroupement'},
+				  ($o{'ascii_filenames'}?"--force-ascii":"--no-force-ascii"),
+				  "--single-output",$single_output,
+				  "--sort",$projet{'options'}->{'export_sort'},
+				  "--id-file",$id_file,
+				  "--debug",debug_file(),
+				  "--progression-id",'annotate',
+				  "--progression",1,
+				  "--line-width",$o{'symboles_trait'},
+				  "--font-size",$o{'annote_font_size'},
+				  "--symbols",join(',',map { opt_symbole($_); } 
+						   (qw/0-0 0-1 1-0 1-1/)),
+				  ($o{'symboles_indicatives'}?"--indicatives":"--no-indicatives"),
 				  "--position",$projet{'options'}->{'annote_position'},
-				  "--pointsize-nl",$o{'annote_ps_nl'},
-				  "--ecart",$o{'annote_ecart'},
+				  "--dist-to-box",$o{'annote_ecart'},
+				  "--ch-sign",$o{'annote_chsign'},
 				  "--verdict",$projet{'options'}->{'verdict'},
 				  "--verdict-question",$projet{'options'}->{'verdict_q'},
-				  "--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-				  "--noms-encodage",bon_encodage('liste'),
+				  "--verdict-question-cancelled",$projet{'options'}->{'verdict_qc'},
+				  "--names-file",absolu($projet{'options'}->{'listeetudiants'}),
+				  "--names-encoding",bon_encodage('liste'),
 				  "--csv-build-name",csv_build_name(),
 				  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
-				  "--changes-only",
+				  "--changes-only",1,
+				  "--sort",$projet{'options'}->{'export_sort'},
+				  ($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
+				  "--n-copies",$projet{'options'}->{'nombre_copies'},
+				  "--tex-src",absolu($projet{'options'}->{'texsrc'}),
+				  "--with",moteur_latex(),
+				  "--filter",$projet{'options'}->{'filter'},
+				  "--filtered-source",absolu($projet{'options'}->{'filtered_source'}),
 				 )
 		       ],
 	   'texte'=>__"Annotating papers...",
-	   'progres.id'=>'annote',
+	   'progres.id'=>'annotate',
 	   'fin'=>sub {
-	     my $c=shift;
-	     my $n=$c->variable('n_processed');
-	     if($and_regroupe) {
-	       regroupement_go($n>0,$id_file);
-	     } else {
-	       notify_end_of_work('annotation',__"Annotations have been completed");
-	     }
+	     notify_end_of_work('annotation',__"Annotations have been completed");
 	   },
 	  );
 }
@@ -4237,120 +4251,9 @@ sub annote_copies {
 sub annotate_papers {
 
   valide_options_notation();
-
-  annote_copies(1);
-}
-
-sub regroupement_go {
-  my ($from_annotate,$id_file)=@_;
-
   maj_export();
 
-  my $single_output='';
-
-  if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
-    $single_output=($id_file ?
-# TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
-		    (__("Selected_students")).".pdf" :
-# TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-		    (__("All_students")).".pdf" );
-  }
-
-  my $type=($single_output ? REPORT_SINGLE_ANNOTATED_PDF : REPORT_ANNOTATED_PDF);
-
-  # Looks if a rename is sufficient, or if one has to group again JPEG files:
-
-  my $group=($from_annotate ? 'some annotated pages were rebuilt' : '');
-  if(!$group) {
-    $projet{'_report'}->begin_read_transaction('RgFO');
-    $group='reports missing'
-      if(!$single_output &&
-	 ($projet{'_report'}->type_count($type)
-	  != $projet{'_capture'}->n_copies() ));
-    $group='no report'
-      if(!$group && $single_output && $projet{'_report'}->type_count($type)<1);
-    $group='reports not found'
-      if(!$group && !$projet{'_report'}->all_there($type,absolu('%PROJET/')));
-    $group='type changed'
-      if(!$group &&
-	 $projet{'_report'}->variable('last_group_type') != $type);
-    $group='not up to date'
-      if(!$group &&
-	 $projet{'_report'}->variable('grouped_uptodate')<=0);
-    $group='selected only'
-      if(!$group && $id_file);
-    $projet{'_report'}->end_transaction('RgFO');
-  }
-
-  debug "Group? $group\n";
-
-  if($group) {
-    # Group JPG annotated pages.
-    commande('commande'=>
-	     ["auto-multiple-choice","regroupe",
-	      pack_args(
-			"--debug",debug_file(),
-			"--id-file",$id_file,
-			($projet{'options'}->{'regroupement_compose'} ? "--compose" : "--no-compose"),
-			"--projet",absolu('%PROJET'),
-			"--sujet",absolu($projet{'options'}->{'doc_question'}),
-			"--data",absolu($projet{'options'}->{'data'}),
-			"--tex-src",absolu($projet{'options'}->{'texsrc'}),
-			"--with",moteur_latex(),
-			"--filter",$projet{'options'}->{'filter'},
-			"--filtered-source",absolu($projet{'options'}->{'filtered_source'}),
-			"--n-copies",$projet{'options'}->{'nombre_copies'},
-			"--progression-id",'regroupe',
-			"--progression",1,
-			"--modele",$projet{'options'}->{'modele_regroupement'},
-			"--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-			"--noms-encodage",bon_encodage('liste'),
-			"--csv-build-name",csv_build_name(),
-			"--single-output",$single_output,
-			"--sort",$projet{'options'}->{'export_sort'},
-			($id_file ? "--no-register" : "--register"),
-			($o{'ascii_filenames'} ? "--force-ascii" : "--no-force-ascii"),
-		       )
-	     ],
-	     'signal'=>2,
-	     'clear'=>'',
-	     'texte'=>__"Grouping students annotated pages together...",
-	     'progres.id'=>'regroupe',
-	     'fin'=>sub {
-	       notify_end_of_work('annotation',__"Annotations have been completed")
-		 if($from_annotate);
-	     }
-	    );
-  } else {
-    # Only rename correct old files
-    commande('commande'=>
-	     ["auto-multiple-choice","regroupe",
-	      pack_args(
-			"--debug",debug_file(),
-			"--id-file",$id_file,
-			"--rename",
-			"--projet",absolu('%PROJET'),
-			"--data",absolu($projet{'options'}->{'data'}),
-			"--progression-id",'regroupe',
-			"--progression",1,
-			"--modele",$projet{'options'}->{'modele_regroupement'},
-			"--fich-noms",absolu($projet{'options'}->{'listeetudiants'}),
-			"--noms-encodage",bon_encodage('liste'),
-			"--csv-build-name",csv_build_name(),
-			"--single-output",$single_output,
-			($o{'ascii_filenames'} ? "--force-ascii" : "--no-force-ascii"),
-		       )
-	     ],
-	     'signal'=>2,
-	     'clear'=>'',
-	     'texte'=>__"Renaming annotated files with new model...",
-	     'progres.id'=>'regroupe',
-	     'fin'=>sub {
-	       notify_end_of_work('annotation',__"Annotations have been completed")
-		 if($from_annotate);
-	     }
-	    );
-  }
+  annote_copies;
 }
 
 sub view_dir {
@@ -4705,8 +4608,8 @@ sub accepte_preferences {
     # Check if annotations are still valid (same options)
 
     my $changed=0;
-    for(qw/annote_chsign taille_max_correction qualite_correction symboles_trait
-	   symboles_indicatives annote_ps_nl annote_ecart/) {
+    for(qw/annote_chsign symboles_trait
+	   symboles_indicatives annote_font_size annote_ecart/) {
       $changed=1 if($gm{$_});
     }
     for my $tag (qw/0_0 0_1 1_0 1_1/) {

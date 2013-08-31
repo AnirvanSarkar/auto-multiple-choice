@@ -338,6 +338,8 @@ sub define_statements {
 		  ." SET flags=flags|? WHERE student=? AND question=?"},
        'A_Flags'=>{'sql'=>"SELECT flags FROM ".$self->table("box")
 		  ." WHERE student=? AND question=? AND answer=?"},
+       'A_All'=>{'sql'=>"SELECT * FROM ".$self->table("box")
+		 ." WHERE student=? AND question=? AND answer=?"},
        'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM ".$self->table("box")
 			     ." WHERE student=? GROUP BY student,page"},
        'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
@@ -393,13 +395,15 @@ sub define_statements {
        'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
 		       ." WHERE markdiameter>0"
 		       ." LIMIT 1"},
-       'dims'=>{'sql'=>"SELECT width,height,markdiameter FROM "
+       'dims'=>{'sql'=>"SELECT width,height,markdiameter,dpi FROM "
 		.$self->table("page")
 		." WHERE student=? AND page=?"},
        'mark'=>{'sql'=>"SELECT x,y FROM ".$self->table("mark")
 		." WHERE student=? AND page=? AND corner=?"},
        'pageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
 		    ." WHERE student=? AND page=?"},
+       'studentPageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
+			   ." WHERE student=? ORDER BY page"},
        'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
 		     ." WHERE student=? AND page=?"},
        'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
@@ -562,6 +566,27 @@ sub pages_for_student {
 			   $student));
 }
 
+# pages_info_for_student($student,[%options]) returns a list of
+# hashrefs with all data from the table page for each page concerning
+# student $student.  With option enter_tag=>1, adds enter=>1 for each
+# page where something has to be entered by the student (boxes or
+# namefield).
+
+sub pages_info_for_student {
+  my ($self,$student,%oo)=@_;
+  my $r=$self->dbh
+    ->selectall_arrayref($self->statement('studentPageInfo'),
+			 {Slice=>{}},
+			 $student);
+  if($oo{enter_tag}) {
+    my %enter_pages=map { $_=>1 } ($self->pages_for_student($student,select=>'enter'));
+    for my $p (@$r) {
+      $p->{enter}=1 if($enter_pages{$p->{page}});
+    }
+  }
+  return(@$r);
+}
+
 # students returns the list of the students numbers.
 
 sub students {
@@ -694,13 +719,22 @@ sub add_question_flag {
   $self->statement('Q_Flag')->execute($flag,$student,$question);
 }
 
-# get_box_glags($student,$question,$answer) returns the flags for the
+# get_box_flags($student,$question,$answer) returns the flags for the
 # corresponding box.
 
 sub get_box_flags {
   my ($self,$student,$question,$answer)=@_;
   return($self->sql_single($self->statement('A_Flags'),
 			   $student,$question,$answer));
+}
+
+# get_box_info($student,$question,$answer) returns all data from table
+# box for the corresponding box.
+
+sub get_box_info {
+  my ($self,$student,$question,$answer)=@_;
+  return($self->dbh->selectrow_hashref($self->statement('A_All'),{},
+				       $student,$question,$answer));
 }
 
 # new_association($student,$id) adds an association to the

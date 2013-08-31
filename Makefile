@@ -66,7 +66,7 @@ DESTDIR=
 
 # AMC components to build
 
-BINARIES ?= AMC-detect
+BINARIES ?= AMC-detect AMC-buildpdf
 
 MODS=AMC-*.pl
 GLADE_FROMIN:=$(basename $(wildcard AMC-gui-*.glade.in))
@@ -118,6 +118,9 @@ MAJ: $(FROM_IN) ;
 
 AMC-detect: AMC-detect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
+
+AMC-buildpdf: AMC-buildpdf.cc Makefile
+	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lm $(GCC_PDF) $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
 # substitution in *.in files
 
@@ -273,6 +276,7 @@ local: global
 	test -d $(TEXDIR) || sudo mkdir $(TEXDIR)
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/exec/AMC-detect
+	sudo ln -s $(LOCALDIR)/AMC-buildpdf /usr/lib/AMC/exec/AMC-buildpdf
 	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC/perl
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)

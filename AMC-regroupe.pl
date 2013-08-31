@@ -99,6 +99,10 @@ GetOptions("projet=s"=>\$projet_dir,
 
 set_debug($debug);
 
+print (("*"x60)."\n");
+print "* WARNING: AMC-annote is now obsolete\n* Please move to AMC-annotate\n";
+print (("*"x60)."\n");
+
 $projet_dir =~ s:/+$::;
 
 $temp_dir = tempdir( DIR=>tmpdir(),

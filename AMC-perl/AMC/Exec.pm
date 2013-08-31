@@ -48,13 +48,13 @@ sub execute {
     my ($self,@c)=@_;
 
     my $prg=$c[0];
-    
+
     if($prg) {
 
 	if(!commande_accessible($prg)) {
 	    debug "*** WARNING: program \"$prg\" not found in PATH!";
 	}
-	
+
 	my $cmd_pid=fork();
 	my @t=times();
 	if($cmd_pid) {

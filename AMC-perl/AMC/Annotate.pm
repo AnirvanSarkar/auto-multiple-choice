@@ -1,0 +1,905 @@
+#! /usr/bin/perl
+#
+# Copyright (C) 2013 Alexis Bienvenue <paamc@passoire.fr>
+#
+# This file is part of Auto-Multiple-Choice
+#
+# Auto-Multiple-Choice is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# Auto-Multiple-Choice is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Auto-Multiple-Choice.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+package AMC::Annotate;
+
+use Gtk2 -init;
+use List::Util qw(min max sum);
+use File::Copy;
+
+use AMC::Basic;
+use AMC::Export;
+use AMC::Subprocess;
+use AMC::NamesFile;
+use AMC::Substitute;
+use AMC::DataModule::report ':const';
+use AMC::DataModule::capture qw/:zone :position/;
+use AMC::DataModule::layout qw/:flags/;
+use AMC::Gui::Avancement;
+
+use encoding 'utf8';
+
+sub new {
+    my (%o)=(@_);
+
+    my $self={
+	      data_dir=>'',
+	      project_dir=>'',
+	      projects_dir=>'',
+	      pdf_dir=>'',
+	      single_output=>'',
+	      filename_model=>'(N)-(ID)',
+	      force_ascii=>'',
+	      pdf_subject=>'',
+	      names_file=>'',
+	      names_encoding=>'utf8',
+	      csv_build_name=>'',
+	      significant_digits=>1,
+	      darkness_threshold=>'',
+	      id_file=>'',
+	      sort=>'',
+	      annotate_indicatives=>'',
+	      position=>'marges',
+	      text_color=>'red',
+	      line_width=>1,
+	      font_size=>12,
+	      dist_to_box=>'1cm',
+	      dist_margin=>'5mm',
+	      dist_margin_globaltext=>'3mm',
+	      symbols=>{'0-0'=>{qw/type none/},
+			'0-1'=>{qw/type circle color red/},
+			'1-0'=>{qw/type mark color red/},
+			'1-1'=>{qw/type mark color blue/},
+		       },
+	      verdict=>'',
+	      verdict_question=>'',
+	      verdict_question_cancelled=>'',
+	      progress=>'',
+	      progress_id=>'',
+	      compose=>'',
+	      pdf_corrected=>'',
+	      changes_only=>'',
+	  };
+
+    for my $k (keys %o) {
+	$self->{$k}=$o{$k} if(defined($self->{$k}));
+    }
+
+    $self->{type}=($self->{single_output} ? REPORT_SINGLE_ANNOTATED_PDF
+		   : REPORT_ANNOTATED_PDF );
+
+    # checks that th position option is available
+    $self->{position}=lc($self->{position});
+    if($self->{position} !~ /^(marges?|case|none)$/i) {
+      debug "ERROR: invalid \<position>: $self->{position}";
+      $self->{position}='none';
+    }
+
+    # checks that the pdf files exist
+    for my $k (qw/subject corrected/) {
+      if($self->{'pdf_'.$k} && ! -f $self->{'pdf_'.$k}) {
+	debug "WARNING: PDF $k file not found: ".$self->{'pdf_'.$k};
+	$self->{'pdf_'.$k}='';
+      }
+    }
+    $self->{pdf_corrected}=$self->{pdf_subject} if(!$self->{pdf_corrected});
+
+    $self->{avance}=AMC::Gui::Avancement::new($self->{progress},'id'=>$self->{progress_id})
+      if($self->{progress});
+
+    bless $self;
+    return($self);
+}
+
+# units conversion
+
+my %units=(
+	   in=>1,
+	   ft=>12,
+	   yd=>36,
+	   pt=>1/72,
+	   cm=>1/2.54,
+	   mm=>1/25.4,
+	   m=>1000/25.4,
+	  );
+
+sub dim2in {
+  my ($d)=@_;
+ UNITS: for my $u (keys %units) {
+    if($d =~ /^(.*)(?<![a-zA-Z])$u$/) {
+      $d=$1*$units{$u};
+    }
+  }
+  return($d);
+}
+
+sub absolute_path {
+  my ($self,$path)=@_;
+  if($self->{project_dir}) {
+    $path=proj2abs({'%PROJET',$self->{project_dir},
+		    '%PROJETS',$self->{projects_dir},
+		    '%HOME'=>$ENV{'HOME'},
+		   },
+		   $path);
+  }
+  return($path);
+}
+
+# converts a filename to a string with only ascii characters and no
+# spaces...
+
+sub ascii_version {
+  my ($f)=@_;
+
+  # no accents and special characters in filename
+  $f=~s/\xe4/ae/g;		##  treat characters ä ñ ö ü ÿ
+  $f=~s/\xf1/ny/g;
+  $f=~s/\xf6/oe/g;
+  $f=~s/\xfc/ue/g;
+  $f=~s/\xff/yu/g;
+
+  $f = NFD( $f );	  ##  decompose (Unicode Normalization Form D)
+  $f=~s/\pM//g;		  ##  strip combining characters
+
+  # additional normalizations:
+
+  $f=~s/\x{00df}/ss/g;		##  German beta “ß” -> “ss”
+  $f=~s/\x{00c6}/AE/g;		##  Æ
+  $f=~s/\x{00e6}/ae/g;		##  æ
+  $f=~s/\x{0132}/IJ/g;		##  Ĳ
+  $f=~s/\x{0133}/ij/g;		##  ĳ
+  $f=~s/\x{0152}/Oe/g;		##  Œ
+  $f=~s/\x{0153}/oe/g;		##  œ
+
+  $f=~tr/\x{00d0}\x{0110}\x{00f0}\x{0111}\x{0126}\x{0127}/DDddHh/; # ÐĐðđĦħ
+  $f=~tr/\x{0131}\x{0138}\x{013f}\x{0141}\x{0140}\x{0142}/ikLLll/; # ıĸĿŁŀł
+  $f=~tr/\x{014a}\x{0149}\x{014b}\x{00d8}\x{00f8}\x{017f}/NnnOos/; # ŊŉŋØøſ
+  $f=~tr/\x{00de}\x{0166}\x{00fe}\x{0167}/TTtt/; # ÞŦþŧ
+
+  $f=~s/[^\0-\x80]/_/g;		##  clear everything else
+
+  # no whitespaces in filename
+  $f =~ s/[^a-zA-Z0-9+_\.-]+/_/g;
+
+  return($f);
+}
+
+# Tests if the report that has already been made is still present and
+# up to date. If up-to-date, returns the filename. Otherwise, returns
+# the empty string.
+
+sub student_uptodate {
+  my ($self,$student)=@_;
+
+  my ($filename,$timestamp)
+    =$self->{report}->get_student_report_time(REPORT_ANNOTATED_PDF,@$student);
+
+  if($filename) {
+    my $source_change=$self->{capture}->variable('annotate_source_change');
+
+    return($filename)
+      if(-f "$self->{pdf_dir}/$filename" && $timestamp>$source_change);
+  }
+  return('');
+}
+
+# Computes the filename to be used for the student annotated answer
+# sheet. Returns this filename, and, if there is already a up-to-date
+# annotated answer sheet, also returns the name of this one.
+
+sub pdf_output_filename {
+  my ($self,$student)=@_;
+
+  $self->needs_data;
+  $self->needs_names;
+
+  my $f=$self->{filename_model};
+
+  # adds pdf extension if not present
+  $f.='.pdf' if($f !~ /\.pdf$/i);
+
+  # computes student/copy four digits ID and substitutes (N) with it
+  my $ex;
+  if($student->[1]) {
+    $ex=sprintf("%04d:%04d",@$student);
+  } else {
+    $ex=sprintf("%04d",$student->[0]);
+  }
+  $f =~ s/\(N\)/$ex/gi;
+
+  # get student data from the students list file, and substitutes
+  # into filename
+  if($self->{names}) {
+    $self->{data}->begin_read_transaction('rAGN');
+    my $i=$self->{association}->get_real(@$student);
+    $self->{data}->end_transaction('rAGN');
+
+    my $name='XXX';
+    my $n;
+
+    debug "Association -> ID=$i";
+
+    if($i) {
+      debug "Name found";
+      ($n)=$self->{names}->data($self->{lk},$i);
+      if($n) {
+	$f=$self->{names}->substitute($n,$f);
+      }
+    }
+
+  } else {
+    $f =~ s/-?\(ID\)//gi;
+  }
+
+  if($self->{force_ascii}) {
+    $f=ascii_version($f);
+  }
+
+  # The filename we would like to use id $f, but now we have to check
+  # it is not already used for another annotated file... and register
+  # it.
+
+  $self->{data}->begin_transaction('rSST');
+
+  my $uptodate_filename='';
+  if($self->{changes_only}) {
+    $uptodate_filename=$self->student_uptodate($student);
+  }
+
+  $self->{report}->delete_student_report($self->{type},@$student);
+  $f=$self->{report}->free_student_report($self->{type},$f);
+  $self->{report}->set_student_report($self->{type},@$student,$f,'now');
+
+  $self->{data}->end_transaction('rSST');
+
+  return($f,$uptodate_filename);
+}
+
+sub connects_to_database {
+  my ($self)=@_;
+
+  $self->{data}=AMC::Data->new($self->{data_dir});
+  for my $m (qw/layout capture association scoring report/) {
+    $self->{$m}=$self->{data}->module($m);
+  }
+
+  $self->{lk}=$self->{association}->variable_transaction('key_in_list');
+  $self->{darkness_threshold}=$self->{scoring}
+    ->variable_transaction('darkness_threshold') if(!$self->{darkness_threshold});
+}
+
+sub error {
+  my ($self,$message)=@_;
+
+  debug_and_stderr("**ERROR** $message");
+}
+
+sub needs_data {
+  my ($self)=@_;
+
+  if(!$self->{data}) {
+    $self->connects_to_database;
+  }
+}
+
+sub connects_students_list {
+  my ($self)=@_;
+
+  $self->needs_data();
+
+  if(-f $self->{names_file}) {
+    $self->{names}=AMC::NamesFile::new($self->{names_file},
+				       "encodage"=>$self->{names_encoding},
+				       "identifiant"=>$self->{csv_build_name});
+
+    debug "Keys in names file: ".join(", ",$self->{names}->heads());
+  } else {
+    debug "Names file not found: $self->{names_file}";
+  }
+
+  $self->{subst}=AMC::Substitute::new('names'=>$self->{names},
+				      'scoring'=>$self->{scoring},
+				      'assoc'=>$self->{association},
+				      'name'=>'',
+				      'chsign'=>$self->{significant_digits},
+				     );
+}
+
+sub needs_names {
+  my ($self)=@_;
+
+  if(!$self->{subst}) {
+    $self->connects_students_list;
+  }
+}
+
+# gets a sorted list of all students, using AMC::Export
+
+sub compute_sorted_students_list {
+  my ($self)=@_;
+
+  if(!$self->{sorted_students}) {
+    my $sorted_students=AMC::Export->new();
+    $sorted_students->set_options('fich',
+				  'datadir'=>$self->{data_dir},
+				  'noms'=>$self->{names_file});
+    $sorted_students->set_options('noms',
+				  'encodage'=>$self->{names_encoding},
+				  'useall'=>0);
+    $sorted_students->set_options('sort',
+				  'keys'=>$self->{sort});
+    $sorted_students->pre_process();
+
+    $self->{sorted_students}=$sorted_students;
+  }
+}
+
+# sort the students so that they are ordered as in the sorted_students
+# list
+
+sub sort_students {
+  my ($self)=@_;
+
+  $self->compute_sorted_students_list();
+  my %include=map { studentids_string(@$_)=>1 } (@{$self->{students}});
+  $self->{students}=[
+		     map { [ $_->{'student'},$_->{'copy'} ] }
+		     grep { $include{studentids_string($_->{'student'},$_->{'copy'})} }
+		     (@{$self->{sorted_students}->{'marks'}})
+		    ];
+
+}
+
+# get the students to process from a file
+
+sub get_students_from_file {
+  my ($self)=@_;
+  my @students;
+
+  # loads a list of students from a plain text file (one per line)
+  if(-f $self->{id_file}) {
+    my @students;
+    open(NUMS,$self->{id_file});
+    while(<NUMS>) {
+      if(/^([0-9]+):([0-9]+)$/) {
+	push @students,[$1,$2];
+      } elsif(/^([0-9]+)$/) {
+	push @students,[$1,0];
+      }
+    }
+    close(NUMS);
+
+    $self->{students}=\@students;
+    return(1+$#students);
+  } else {
+    return(0);
+  }
+}
+
+# gets the students to process from capture data (all students that
+# have some data capture -- scan or manual -- on at least one page)
+
+sub get_students_from_data {
+  my ($self)=@_;
+
+  $self->needs_data;
+
+  $self->{capture}->begin_read_transaction('gast');
+  $self->{students}=$self->{capture}->dbh
+    ->selectall_arrayref($self->{capture}->statement('studentCopies'));
+  $self->{capture}->end_transaction('gast');
+
+  return(1+$#{$self->{students}});
+}
+
+# gets the students to process
+
+sub get_students {
+  my ($self)=@_;
+
+  my $n=$self->get_students_from_file ||
+    $self->get_students_from_data;
+
+  # sorts this list if we are going to make an unique annotated
+  # file with all the students' copies, and if a sort key is given
+  if($n>1 && $self->{single_output} && $self->{sort}) {
+    $self->sort_students();
+  }
+
+  debug "Number of students to process: $n";
+
+  return($n);
+}
+
+# get dimensions of a subject page
+
+sub get_dimensions {
+  my ($self)=@_;
+
+  $self->needs_data;
+
+  $self->{data}->begin_read_transaction("aDIM");
+
+  ($self->{width},$self->{height},undef,$self->{dpi})
+    =$self->{layout}->dims($self->{layout}->random_studentPage);
+
+  $self->{data}->end_transaction("aDIM");
+
+  if(!$self->{unit_pixels}) {
+    for my $dd (map { \$self->{'dist_'.$_} } (qw/to_box margin margin_globaltext/)) {
+      $$dd=dim2in($$dd)*$self->{dpi};
+    }
+    $self->{unit_pixels}=1;
+  }
+}
+
+sub needs_dims {
+  my ($self)=@_;
+
+  if(!$self->{dpi}) {
+    $self->get_dimensions;
+  }
+}
+
+# subprocess (call to AMC-buildpdf) initialisation
+
+sub process_start {
+  my ($self)=@_;
+
+  $self->needs_dims;
+
+  $self->{process}=AMC::Subprocess::new(mode=>'buildpdf');
+  $self->{process}->set('args',
+			['-d',$self->{dpi},
+			 '-w',$self->{width},
+			 '-h',$self->{height}]);
+
+}
+
+# send a command to the subprocess
+
+sub command {
+  my ($self,@command)=@_;
+  $self->{process}->commande(@command);
+}
+
+sub stext {
+  my ($self,$text)=@_;
+  $self->command("stext begin\n$text\n__END__");
+}
+
+# gets RGB values (from 0.0 to 1.0) from color text description
+
+sub color_rgb {
+  my ($s)=@_;
+  my $col=Gtk2::Gdk::Color->parse($s);
+  if($col) {
+    return($col->red/65535,$col->green/65535,$col->blue/65535);
+  } else {
+    debug "Color parse error: $col";
+    return(.5,.5,.5);
+  }
+}
+
+# set color for drawing
+
+sub set_color {
+  my ($self,$color_string)=@_;
+  $self->command(join(' ',
+		      "color",
+		      color_rgb($color_string)));
+}
+
+# inserts a page from a pdf file
+
+sub insert_pdf_page {
+  my ($self,$pdf_path,$page)=@_;
+
+  if($pdf_path ne $self->{loaded_pdf}) {
+    $self->command("load pdf $pdf_path");
+    $self->{loaded_pdf}=$pdf_path;
+  }
+  $self->command("page pdf $page");
+}
+
+# get a list of pages for a particular student
+
+sub student_pages {
+  my ($self,$student)=@_;
+  return($self->{layout}->pages_info_for_student($student->[0],enter_tag=>1));
+}
+
+# insert the background for an annotated page
+
+sub page_background {
+  my ($self,$student,$page)=@_;
+
+  # First get the scan, if available...
+
+  my $page_capture=$self->{capture}->get_page($student->[0],$page->{page},$student->[1])
+    || {};
+  my $scan='';
+
+  $scan=$self->absolute_path($page_capture->{src})
+    if($page_capture->{src});
+
+  if(-f $scan) {
+    my $img_type='img';
+    if(AMC::Basic::file_mimetype($scan) eq 'image/png') {
+      $img_type='png';
+    }
+    $self->command("page $img_type $scan");
+    $self->command(join(' ',
+			"matrix",map { $page_capture->{$_} } (qw/a b c d e f/)));
+
+    return(1);
+  } else {
+    if($scan) {
+      debug "WARNING: Registered scan \"$scan\" was not found.";
+    }
+    if($page->{enter} && -f $self->{pdf_subject}) {
+      debug "Using subject page.";
+      $self->insert_pdf_page($self->{pdf_subject},$page->{subjectpage});
+      $self->command("matrix identity");
+
+      return(2);
+    } else {
+      if(!$page->{enter}) {
+	debug "Page without fields.";
+      }
+      if($self->{compose} && $self->{pdf_corrected}) {
+	$self->insert_pdf_page($self->{pdf_corrected},$page->{subjectpage});
+	return(0);
+      }
+    }
+    return(0);
+  }
+}
+
+# draws one symbol
+
+sub draw_symbol {
+  my ($self,$student,$b,$tick)=@_;
+
+  my $p_strategy=$self->{scoring}->unalias($student->[0]);
+  my $q=$b->{'id_a'}; # question number
+  my $r=$b->{'id_b'}; # answer number
+  my $indic=$self->{scoring}->indicative($p_strategy,$q); # is it an indicative question?
+
+  return if($indic && !$self->{annotate_indicatives});
+
+  # to be ticked?
+  my $bonne=$self->{scoring}->correct_answer($p_strategy,$q,$r);
+
+  # ticked on this scan?
+  my $cochee=$self->{capture}->ticked(@$student,
+				      $q,$r,$self->{darkness_threshold});
+
+  debug "Q=$q R=$r $bonne-$cochee";
+
+  # get symbol to draw
+  my $sy=$self->{symbols}->{"$bonne-$cochee"};
+
+  # get box position on subject
+  my $box=$self->{layout}->get_box_info($student->[0],$q,$r);
+
+  # when the subject background is used instead of the scan, darken
+  # boxes that have been ticked by the student
+  if($tick && $cochee) {
+    debug "Tick.";
+    $self->set_color('black');
+    $self->command(join(' ','mark',
+			map { $box->{$_} } (qw/xmin xmax ymin ymax/)
+		       ));
+  }
+
+  if ($box->{flags}
+      & BOX_FLAGS_DONTANNOTATE) {
+    debug "This box is flagged \"don't annotate\": skipping";
+  } else {
+    if ($sy->{type} =~ /^(circle|mark|box)$/) {
+      # tells AMC-buildpdf to draw the symbol with the right color
+      $self->set_color($sy->{color});
+      $self->command(join(' ',$sy->{type},
+			  map { $box->{$_} } (qw/xmin xmax ymin ymax/)
+			 ));
+    } elsif ($sy->{type} eq 'none') {
+    } else {
+      debug "Unknown symbol type ($bonne-$cochee): $sy->{type}";
+    }
+  }
+
+  # records box position so that question scores can be
+  # well-positioned
+
+  $self->{question}->{$q}={} if(!$self->{question}->{$q});
+  push @{$self->{question}->{$q}->{'x'}},($box->{xmin}+$box->{xmax})/2;
+  push @{$self->{question}->{$q}->{'y'}},($box->{ymin}+$box->{ymax})/2;
+}
+
+# draws symbols on one page
+
+sub page_symbols {
+  my ($self,$student,$page,$tick)=@_;
+
+  # clears boxes positions data for the page
+
+  $self->{question}={};
+
+  # goes through all the boxes on the page
+
+  my $sth=$self->{capture}->statement('pageZones');
+  $sth->execute($student->[0],$page->{page},$student->[1],ZONE_BOX);
+  while(my $box=$sth->fetchrow_hashref) {
+    $self->draw_symbol($student,$box,$tick);
+  }
+}
+
+# computes the score text for a particular question
+
+sub qtext {
+  my ($self,$student,$question)=@_;
+
+  my $result=$self->{scoring}->question_result(@$student,$question);
+
+  my $text;
+
+  # begins with the right verdict version depending on if the question
+  # result was cancelled or not.
+
+  if ($result->{'why'} =~ /c/i) {
+    $text=$self->{verdict_question_cancelled};
+  } else {
+    $text=$self->{verdict_question};
+  }
+
+  # substitute scores values
+
+  $text =~ s/\%[S]/$result->{'score'}/g;
+  $text =~ s/\%[M]/$result->{'max'}/g;
+  $text =~ s/\%[W]/$result->{'why'}/g;
+  $text =~ s/\%[s]/$self->{subst}->format_note($result->{'score'})/ge;
+  $text =~ s/\%[m]/$self->{subst}->format_note($result->{'max'})/ge;
+
+  # evaluates the result
+
+  my $te=eval($text);
+  if ($@) {
+    debug "Annotation: $text";
+    debug "Evaluation error $@";
+  } else {
+    $text=$te;
+  }
+
+  return($text);
+}
+
+# mean of the y positions of the boxes for one question
+
+sub q_ymean {
+  my ($self,$q)=@_;
+
+  return(sum(@{$self->{question}->{$q}->{'y'}})/(1+$#{$self->{question}->{$q}->{'y'}}));
+}
+
+
+# where to write question status?
+
+# scores written in the left margin
+sub qtext_position_marge {
+  my ($self,$question)=@_;
+
+  my $y=$self->q_ymean($question);
+
+  if ($self->{rtl}) {
+    return($self->{width}-$self->{dist_margin},1,$y,0.5);
+  } else {
+    return($self->{dist_margin},0,$y,0.5);
+  }
+}
+
+# scores written in one of the margins (left or right), depending on
+# the position of the boxes. This mode is often used when the subject
+# is in a 2-column layout.
+sub qtext_position_marges {
+  my ($self,$q)=@_;
+
+  my $x;
+  my $jx=0;
+
+  # fist extract the y coordinates of the boxes in the left column
+  my $left=1;
+  my @y=map { $self->{question}->{$q}->{'y'}->[$_] }
+    grep { $self->{rtl} xor ( $self->{question}->{$q}->{'x'}->[$_] <= $self->{width}/2 ) }
+      (0..$#{$self->{question}->{$q}->{'x'}} );
+  if (!@y) {
+    # if empty, use the right column
+    $left=0;
+    @y=map { $self->{question}->{$q}->{'y'}->[$_] } 
+      grep { $self->{rtl} xor ( $self->{question}->{$q}->{'x'}->[$_] > $self->{width}/2 ) }
+	(0..$#{$self->{question}->{$q}->{'x'}} );
+  }
+
+  # set the x-position to the left or right margin
+  if ($left xor $self->{rtl}) {
+    $x=$self->{dist_margin};
+  } else {
+    $x=$self->{width}-$self->{dist_margin};
+    $jx=1;
+  }
+  # set the y-position to the mean of y coordinates of the
+  # boxes in the corresponding column
+  my $y=sum(@y)/(1+$#y);
+
+  return($x,$jx,$y,0.5);
+}
+
+#scores written at the side of all the boxes
+sub qtext_position_case {
+  my ($self,$q)=@_;
+
+  return(max(@{$self->{question}->{$q}->{'x'}}) 
+	 + ($self->{rtl} ? 1: -1)*$self->{dist_to_box},0,
+	 $self->q_ymean($q),0.5);
+}
+
+# writes one question score
+
+sub write_qscore {
+  my ($self,$student,$question)=@_;
+
+  return if($self->{position} eq 'none');
+
+  # no score to write for indicative questions
+  if($self->{scoring}->indicative($p_strategy,$q)) {
+    debug "Indicative question: no score to write";
+    return;
+  }
+
+  my $text=$self->qtext($student,$question);
+  my $xy="qtext_position_".$self->{position};
+  my ($x,$jx,$y,$jy)=$self->$xy($question);
+  $self->stext($text);
+  $self->command("stext $x $y $jx $jy");
+}
+
+# writes question scores on one page
+
+sub page_qscores {
+  my ($self,$student,$page)=@_;
+
+  if ($self->{position} ne 'none') {
+
+    $self->needs_names;
+
+    $self->set_color($self->{text_color});
+    $self->command("matrix identity");
+
+    # go through all questions present on the page (recorded while
+    # drawing symbols)
+    for my $q (keys %{$self->{question}}) {
+      $self->write_qscore($student,$q);
+    }
+
+  }
+}
+
+# draws the page header
+
+sub page_header {
+  my ($self,$student)=@_;
+
+  if(!$self->{header_drawn}) {
+
+    $self->needs_names;
+
+    $self->set_color($self->{text_color});
+    $self->command("matrix identity");
+    $self->stext($self->{subst}->substitute($self->{verdict},@$student));
+    $self->command("stext "
+		   .($self->{rtl} ? 
+		     $self->{width}-$self->{dist_margin_globaltext}
+		     :$self->{dist_margin_globaltext})
+		   ." $self->{dist_margin_globaltext} "
+		   .($self->{rtl}?"1.0":"0.0")." 0.0");
+
+    $self->{header_drawn}=1;
+
+  }
+}
+
+# annotate a single page
+
+sub student_draw_page {
+  my ($self,$student,$page)=@_;
+
+  debug "Processing page $student->[0]:$student->[1] page $page->{page} ...";
+
+  my $draw;
+  if($draw=$self->page_background($student,$page)) {
+    $self->command("line width $self->{line_width}");
+    $self->command("font size $self->{font_size}");
+    $self->page_symbols($student,$page,$draw>1);
+    $self->page_qscores($student,$page);
+    $self->page_header($student);
+  } else {
+    debug "Nothing to draw for this page";
+  }
+}
+
+# process a student copy
+
+sub process_student {
+  my ($self,$student)=@_;
+
+  if(!$self->{single_output}) {
+    my ($f,$f_ok)=$self->pdf_output_filename($student);
+    if($f_ok ne '') {
+      # we only need to move the file!
+      debug "The file is up-to-date: $f_ok --> $f";
+      if($f ne $f_ok) {
+	move("$self->{pdf_dir}/$f_ok","$self->{pdf_dir}/$f")
+	  || debug "ERROR: moving the annotated file in directory $self->{pdf_dir} from $f_ok to $f";
+	return();
+      }
+    }
+    $self->command("output ".$self->{pdf_dir}."/$f");
+  }
+
+  $self->{data}->begin_read_transaction('aOST');
+
+  $self->{header_drawn}=0;
+  for my $page ($self->student_pages($student)) {
+    $self->student_draw_page($student,$page);
+  }
+
+  $self->{data}->end_transaction('aOST');
+}
+
+# All processing
+
+sub go {
+  my ($self)=@_;
+
+  my $n=$self->get_students();
+
+  if($n>0) {
+    $self->process_start;
+
+    $self->command("output ".$self->{pdf_dir}."/".$self->{single_output})
+      if($self->{single_output});
+
+    for my $student (@{$self->{students}}) {
+      $self->process_student($student);
+      $self->{avance}->progres(1/$n) if($self->{avance});
+    }
+  }
+}
+
+# quit!
+
+sub quit {
+  my ($self)=@_;
+
+  $self->{process}->ferme_commande if($self->{process});
+  $self->{avance}->fin() if($self->{avance});
+}
+
+1;

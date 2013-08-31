@@ -108,8 +108,12 @@ sub define_statements {
 		    ." VALUES (?,?,?,?,?)"},
      'getStudent'=>{'sql'=>"SELECT file FROM $t_student"
 		    ." WHERE type=? AND student=? AND copy=?"},
+     'getStudentTime'=>{'sql'=>"SELECT file,timestamp FROM $t_student"
+			." WHERE type=? AND student=? AND copy=?"},
      'deleteType'=>{'sql'=>"DELETE FROM $t_student"
 		    ." WHERE type=?"},
+     'deleteReport'=>{'sql'=>"DELETE FROM $t_student"
+		      ." WHERE type=? AND student=? AND copy=?"},
      'getAssociatedType'=>
      {'sql'=>"SELECT CASE"
       ."  WHEN a.manual IS NOT NULL THEN a.manual"
@@ -135,6 +139,13 @@ sub files_with_type {
 sub delete_student_type {
   my ($self,$type)=@_;
   $self->statement('deleteType')->execute($type);
+}
+
+# delete_student_report() deletes a student report record.
+
+sub delete_student_report {
+  my ($self,$type,$student,$copy)=@_;
+  $self->statement('deleteReport')->execute($type,$student,$copy);
 }
 
 # set_student_type($type,$student,$copy,$file,$timestamp) creates a
@@ -186,6 +197,15 @@ sub get_student_report {
   my ($self,$type,$student,$copy)=@_;
   return($self->sql_single($self->statement('getStudent'),
 			   $type,$student,$copy));
+}
+
+# get_student_report_time($type,$student,$copy) returns the filename of a
+# given report, and the corresponding timestamp.
+
+sub get_student_report_time {
+  my ($self,$type,$student,$copy)=@_;
+  return($self->sql_row($self->statement('getStudentTime'),
+			$type,$student,$copy));
 }
 
 # get_associated_type($type) returns a list of reports of a particular
