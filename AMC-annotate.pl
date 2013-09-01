@@ -67,6 +67,7 @@ my $rtl='';
 
 my $names_file='';
 my $names_encoding='utf-8';
+my $association_key='',
 my $csv_build_name='';
 
 my $changes_only='';
@@ -118,6 +119,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "verdict-question-cancelled=s"=>\$verdict_question_cancelled,
 	   "names-file=s"=>\$names_file,
 	   "names-encoding=s"=>\$names_encoding,
+	   "association-key=s"=>\$association_key,
 	   "csv-build-name=s"=>\$csv_build_name,
 	   "rtl!"=>\$rtl,
 	   "changes-only!"=>\$changes_only,
@@ -204,6 +206,7 @@ my $annotate
 		      pdf_subject=>$pdf_subject,
 		      names_file=>$names_file,
 		      names_encoding=>$names_encoding,
+		      association_key=>$association_key,
 		      csv_build_name=>$csv_buildname,
 		      significant_digits=>$chiffres_significatifs,
 		      darkness_threshold=>$darkness_threshold,

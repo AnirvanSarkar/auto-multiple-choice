@@ -50,6 +50,7 @@ sub new {
 	      pdf_subject=>'',
 	      names_file=>'',
 	      names_encoding=>'utf8',
+	      association_key=>'',
 	      csv_build_name=>'',
 	      significant_digits=>1,
 	      darkness_threshold=>'',
@@ -255,7 +256,7 @@ sub pdf_output_filename {
 
     if($i) {
       debug "Name found";
-      ($n)=$self->{names}->data($self->{lk},$i);
+      ($n)=$self->{names}->data($self->{association_key},$i);
       if($n) {
 	$f=$self->{names}->substitute($n,$f);
       }
@@ -310,10 +311,10 @@ sub connects_to_database {
     $self->{$m}=$self->{data}->module($m);
   }
 
-  # If they are not already given by the user, read lk (association
-  # key) and darkness_threshold from the variables in the database.
+  # If they are not already given by the user, read association_key
+  # and darkness_threshold from the variables in the database.
 
-  $self->{lk}=$self->{association}->variable_transaction('key_in_list');
+  $self->{association_key}=$self->{association}->variable_transaction('key_in_list');
   $self->{darkness_threshold}=$self->{scoring}
     ->variable_transaction('darkness_threshold') if(!$self->{darkness_threshold});
 }
