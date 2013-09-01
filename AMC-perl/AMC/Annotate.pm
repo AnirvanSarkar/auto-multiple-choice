@@ -99,9 +99,13 @@ sub new {
 	$self->{'pdf_'.$k}='';
       }
     }
+    # if the corrected answer sheet is not given, use the subject
+    # instead.
     $self->{pdf_corrected}=$self->{pdf_subject} if(!$self->{pdf_corrected});
 
-    $self->{avance}=AMC::Gui::Avancement::new($self->{progress},'id'=>$self->{progress_id})
+    # set up the object to send progress to calling program
+    $self->{avance}=AMC::Gui::Avancement::new($self->{progress},
+					      'id'=>$self->{progress_id})
       if($self->{progress});
 
     bless $self;
@@ -129,6 +133,10 @@ sub dim2in {
   }
   return($d);
 }
+
+# get absolute path from a path that can contain %PROJECT or %PROJECTS
+# strings, that refer to the project directory and the projetcs
+# directory.
 
 sub absolute_path {
   my ($self,$path)=@_;
@@ -195,6 +203,9 @@ sub student_uptodate {
     my $source_change=$self->{capture}->variable('annotate_source_change');
     debug "Registered answer sheet: updated at $timestamp, source change at $source_change";
 
+    # we say there is an up-to-date annotated answer sheet if the file
+    # exists and has been built after the last time some result or
+    # configuration variable were changed.
     if(-f "$self->{pdf_dir}/$filename" && $timestamp>$source_change) {
       return($filename);
     } else {
@@ -254,6 +265,9 @@ sub pdf_output_filename {
     $f =~ s/-?\(ID\)//gi;
   }
 
+  # Substitute all spaces and non-ascii characters from the file name
+  # if the user asked so.
+
   if($self->{force_ascii}) {
     $f=ascii_version($f);
   }
@@ -264,10 +278,18 @@ sub pdf_output_filename {
 
   $self->{data}->begin_transaction('rSST');
 
+  # check if there is already an up-to-date annotated answer sheet for
+  # this student BEFORE removing the entry from the database (and
+  # recall this filename).
+
   my $uptodate_filename='';
   if($self->{changes_only}) {
     $uptodate_filename=$self->student_uptodate($student);
   }
+
+  # delete the entry from the database, and build a filename that is
+  # not already registered for another student (the same or similar to
+  # $f).
 
   $self->{report}->delete_student_report($self->{type},@$student);
   $f=$self->{report}->free_student_report($self->{type},$f);
@@ -281,10 +303,15 @@ sub pdf_output_filename {
 sub connects_to_database {
   my ($self)=@_;
 
+  # Open connections to the SQLite databases that we will use.
+
   $self->{data}=AMC::Data->new($self->{data_dir});
   for my $m (qw/layout capture association scoring report/) {
     $self->{$m}=$self->{data}->module($m);
   }
+
+  # If they are not already given by the user, read lk (association
+  # key) and darkness_threshold from the variables in the database.
 
   $self->{lk}=$self->{association}->variable_transaction('key_in_list');
   $self->{darkness_threshold}=$self->{scoring}
@@ -310,6 +337,8 @@ sub connects_students_list {
 
   $self->needs_data();
 
+  # If given, opens the students list and read it.
+
   if(-f $self->{names_file}) {
     $self->{names}=AMC::NamesFile::new($self->{names_file},
 				       "encodage"=>$self->{names_encoding},
@@ -319,6 +348,10 @@ sub connects_students_list {
   } else {
     debug "Names file not found: $self->{names_file}";
   }
+
+  # Set up a AMC::Substitute object that will be used to substitute
+  # marks, student name, and so on in the verdict strings for question
+  # scores and global header.
 
   $self->{subst}=AMC::Substitute::new('names'=>$self->{names},
 				      'scoring'=>$self->{scoring},
@@ -336,12 +369,14 @@ sub needs_names {
   }
 }
 
-# gets a sorted list of all students, using AMC::Export
+# get a sorted list of all students, using AMC::Export
 
 sub compute_sorted_students_list {
   my ($self)=@_;
 
   if(!$self->{sorted_students}) {
+    # Use AMC::Export that can do the work for us...
+
     my $sorted_students=AMC::Export->new();
     $sorted_students->set_options('fich',
 				  'datadir'=>$self->{data_dir},
@@ -373,7 +408,8 @@ sub sort_students {
 
 }
 
-# get the students to process from a file
+# get the students to process from a file and return the number of
+# students
 
 sub get_students_from_file {
   my ($self)=@_;
@@ -399,7 +435,7 @@ sub get_students_from_file {
   }
 }
 
-# gets the students to process from capture data (all students that
+# get the students to process from capture data (all students that
 # have some data capture -- scan or manual -- on at least one page)
 
 sub get_students_from_data {
@@ -415,7 +451,7 @@ sub get_students_from_data {
   return(1+$#{$self->{students}});
 }
 
-# gets the students to process
+# get the students to process
 
 sub get_students {
   my ($self)=@_;
@@ -423,8 +459,8 @@ sub get_students {
   my $n=$self->get_students_from_file ||
     $self->get_students_from_data;
 
-  # sorts this list if we are going to make an unique annotated
-  # file with all the students' copies, and if a sort key is given
+  # sort this list if we are going to make an unique annotated
+  # file with all the students' copies (and if a sort key is given)
   if($n>1 && $self->{single_output} && $self->{sort}) {
     $self->sort_students();
   }
@@ -441,6 +477,9 @@ sub get_dimensions {
 
   $self->needs_data;
 
+  # get width, height and DPI from a subject page (these values should
+  # be the same for all pages).
+
   $self->{data}->begin_read_transaction("aDIM");
 
   ($self->{width},$self->{height},undef,$self->{dpi})
@@ -448,8 +487,12 @@ sub get_dimensions {
 
   $self->{data}->end_transaction("aDIM");
 
+  # Now, use the DPI value to convert all dist_* lenghts to a number
+  # of pixels.
+
   if(!$self->{unit_pixels}) {
-    for my $dd (map { \$self->{'dist_'.$_} } (qw/to_box margin margin_globaltext/)) {
+    for my $dd (map { \$self->{'dist_'.$_} }
+		(qw/to_box margin margin_globaltext/)) {
       $$dd=dim2in($$dd)*$self->{dpi};
     }
     $self->{unit_pixels}=1;
@@ -486,6 +529,9 @@ sub command {
   $self->{process}->commande(@command);
 }
 
+# Sends a (maybe multi-line) text to AMC-buildpdf to be used in the
+# following command.
+
 sub stext {
   my ($self,$text)=@_;
   $self->command("stext begin\n$text\n__END__");
@@ -519,6 +565,7 @@ sub insert_pdf_page {
   my ($self,$pdf_path,$page)=@_;
 
   if($pdf_path ne $self->{loaded_pdf}) {
+    # If this PDF file is not already loaded by AMC-buildpdf, load it.
     $self->command("load pdf $pdf_path");
     $self->{loaded_pdf}=$pdf_path;
   }
@@ -547,6 +594,12 @@ sub page_background {
     if($page_capture->{src});
 
   if(-f $scan) {
+    # If the scan is available, use it (with AMC-buildpdf "page png"
+    # or "page img" command, depending on the file type). The matrix
+    # that transforms coordinates from subject to scan has been
+    # computed when automatic data capture was made. It is sent to
+    # AMC-buildpdf.
+
     my $img_type='img';
     if(AMC::Basic::file_mimetype($scan) eq 'image/png') {
       $img_type='png';
@@ -560,7 +613,14 @@ sub page_background {
     if($scan) {
       debug "WARNING: Registered scan \"$scan\" was not found.";
     }
+    # If there is no scan,
     if($page->{enter} && -f $self->{pdf_subject}) {
+
+      # If the page contains something to be filled by the student
+      # (either name field or boxes), inserts the page from the PDF
+      # subject. We return 2 to tell that ticked boxes should be shown
+      # on the subject (that is initially empty).
+
       debug "Using subject page.";
       $self->insert_pdf_page($self->{pdf_subject},$page->{subjectpage});
       $self->command("matrix identity");
@@ -570,6 +630,12 @@ sub page_background {
       if(!$page->{enter}) {
 	debug "Page without fields.";
       }
+
+      # With <compose> option, pages without anything to be filled
+      # (only subject) are added, from the corrected PDF if available
+      # (then the student will see the correct answers easily on the
+      # annotated answer sheet).
+
       if($self->{compose} && $self->{pdf_corrected}) {
 	$self->insert_pdf_page($self->{pdf_corrected},$page->{subjectpage});
 	return(0);
@@ -708,7 +774,7 @@ sub q_ymean {
 
 # where to write question status?
 
-# scores written in the left margin
+# 1) scores written in the left margin
 sub qtext_position_marge {
   my ($self,$question)=@_;
 
@@ -721,9 +787,9 @@ sub qtext_position_marge {
   }
 }
 
-# scores written in one of the margins (left or right), depending on
-# the position of the boxes. This mode is often used when the subject
-# is in a 2-column layout.
+# 2) scores written in one of the margins (left or right), depending
+# on the position of the boxes. This mode is often used when the
+# subject is in a 2-column layout.
 sub qtext_position_marges {
   my ($self,$q)=@_;
 
@@ -757,7 +823,7 @@ sub qtext_position_marges {
   return($x,$jx,$y,0.5);
 }
 
-#scores written at the side of all the boxes
+# 3) scores written at the side of all the boxes
 sub qtext_position_case {
   my ($self,$q)=@_;
 
@@ -807,7 +873,7 @@ sub page_qscores {
   }
 }
 
-# draws the page header
+# draws the page header (only on the first page)
 
 sub page_header {
   my ($self,$student)=@_;
@@ -857,6 +923,10 @@ sub process_student {
 
   debug "Processing student $student->[0]:$student->[1]";
 
+  # Computes the filename to use, and check that there is no
+  # up-to-date version of the annotated answer sheet (if so, simply
+  # keep or rename the file).
+
   if(!$self->{single_output}) {
     my ($f,$f_ok)=$self->pdf_output_filename($student);
     if($f_ok ne '') {
@@ -870,6 +940,8 @@ sub process_student {
     }
     $self->command("output ".$self->{pdf_dir}."/$f");
   }
+
+  # Go through all the pages for the student.
 
   $self->{data}->begin_read_transaction('aOST');
 
@@ -888,11 +960,18 @@ sub go {
 
   my $n=$self->get_students();
 
+  debug "STUDENTS TO PROCESS: $n\n";
+
   if($n>0) {
     $self->process_start;
 
+    # With option <single_output>, all annotated answer sheets are
+    # made in a single PDF file. We open this file.
+
     $self->command("output ".$self->{pdf_dir}."/".$self->{single_output})
       if($self->{single_output});
+
+    # Loop over students...
 
     for my $student (@{$self->{students}}) {
       $self->process_student($student);
