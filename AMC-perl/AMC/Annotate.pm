@@ -210,7 +210,7 @@ sub student_uptodate {
     if(-f "$self->{pdf_dir}/$filename" && $timestamp>$source_change) {
       return($filename);
     } else {
-      return "NOT up-to-date.";
+      debug "NOT up-to-date.";
     }
   } else {
     debug "No registered annotated answer sheet.";
