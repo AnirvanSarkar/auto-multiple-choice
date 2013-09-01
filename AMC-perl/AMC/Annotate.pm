@@ -193,9 +193,15 @@ sub student_uptodate {
 
   if($filename) {
     my $source_change=$self->{capture}->variable('annotate_source_change');
+    debug "Registered answer sheet: updated at $timestamp, source change at $source_change";
 
-    return($filename)
-      if(-f "$self->{pdf_dir}/$filename" && $timestamp>$source_change);
+    if(-f "$self->{pdf_dir}/$filename" && $timestamp>$source_change) {
+      return($filename);
+    } else {
+      return "NOT up-to-date.";
+    }
+  } else {
+    debug "No registered annotated answer sheet.";
   }
   return('');
 }
@@ -849,6 +855,8 @@ sub student_draw_page {
 sub process_student {
   my ($self,$student)=@_;
 
+  debug "Processing student $student->[0]:$student->[1]";
+
   if(!$self->{single_output}) {
     my ($f,$f_ok)=$self->pdf_output_filename($student);
     if($f_ok ne '') {
@@ -857,8 +865,8 @@ sub process_student {
       if($f ne $f_ok) {
 	move("$self->{pdf_dir}/$f_ok","$self->{pdf_dir}/$f")
 	  || debug "ERROR: moving the annotated file in directory $self->{pdf_dir} from $f_ok to $f";
-	return();
       }
+      return();
     }
     $self->command("output ".$self->{pdf_dir}."/$f");
   }
