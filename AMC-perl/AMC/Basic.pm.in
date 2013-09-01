@@ -44,7 +44,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &format_date &cb_model &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &amc_component);
+    @EXPORT      = qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &format_date &cb_model &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &amc_component &annotate_source_change);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -644,6 +644,15 @@ sub studentids_string {
   my ($student,$copy)=@_;
   $student='' if(!defined($student));
   return($student.($copy ? ':'.$copy : ''));
+}
+
+sub annotate_source_change {
+  my ($capture,$transaction)=@_;
+  my $t=time();
+  debug "Annotate source has changed! Time=$t";
+  $capture->begin_transaction('asCh') if($transaction);
+  $capture->variable('annotate_source_change',$t);
+  $capture->end_transaction('asCh') if($transaction);
 }
 
 sub __($) { return($localisation->get(shift)); }

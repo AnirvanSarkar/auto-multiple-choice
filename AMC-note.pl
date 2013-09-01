@@ -144,7 +144,7 @@ $data->begin_transaction('MARK');
 # retrieved later, and clears all the scores that could have been
 # already computed.
 
-$capture->variable('annotate_source_change',time());
+annotate_source_change($capture);
 $scoring->clear_score;
 $scoring->variable('darkness_threshold',$darkness_threshold);
 $scoring->variable('mark_floor',$floor_mark);

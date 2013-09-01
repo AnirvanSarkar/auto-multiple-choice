@@ -730,7 +730,7 @@ if($to_do{b}) {
     my $current_q={};
 
     $scoring->begin_transaction('ScEx');
-    $capture->variable('annotate_source_change',time());
+    annotate_source_change($capture);
     $scoring->clear_strategy;
 
     # Launches the LaTeX engine

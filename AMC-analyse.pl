@@ -590,7 +590,7 @@ sub one_scan {
   ##########################################
 
   $capture->begin_transaction('CRSL');
-  $capture->variable('annotate_source_change',time());
+  annotate_source_change($capture);
 
   $capture->set_page_auto($sf,@spc,time(),
 			  $ld->{'transf'}->params);

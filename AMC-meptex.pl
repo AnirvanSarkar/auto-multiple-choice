@@ -173,7 +173,7 @@ my $delta=(@pages ? 1/(1+$#pages) : 0);
 
 $layout->begin_transaction('MeTe');
 $layout->clear_all;
-$capture->variable('annotate_source_change',time());
+annotate_source_change($capture);
 
 debug "Pre-association...";
 

@@ -641,7 +641,7 @@ sub duplique_saisie {
 
    $self->{'capture'}->begin_transaction;
    $copy=$self->{'capture'}->new_page_copy($student,$page);
-   $self->{'capture'}->variable('annotate_source_change',time());
+   annotate_source_change($self->{'capture'});
    $self->{'capture'}->set_page_manual($student,$page,$copy,-1);
    $self->{'capture'}->end_transaction;
 

@@ -1305,9 +1305,7 @@ sub maj_export {
     valide_options_for_domain('export','',@_);
 
     if($projet{'options'}->{'_modifie'} =~ /\bexport_sort\b/) {
-      $projet{'_capture'}->begin_transaction('SMch');
-      $projet{'_capture'}->variable('annotate_source_change',time());
-      $projet{'_capture'}->end_transaction('SMch');
+      annotate_source_change($projet{'_capture'},1);
     }
 
     debug "Format : ".$projet{'options'}->{'format_export'};
@@ -3601,9 +3599,7 @@ sub filter_changed {
 sub valide_options_notation {
     valide_options_for_domain('notation','',@_);
     if($projet{'options'}->{'_modifie'} =~ /\bregroupement_compose\b/) {
-      $projet{'_capture'}->begin_transaction('RCch');
-      $projet{'_capture'}->variable('annotate_source_change',time());
-      $projet{'_capture'}->end_transaction('RCch');
+      annotate_source_change($projet{'_capture'},1);
     }
     $w{'groupe_model'}->set_sensitive($projet{'options'}->{'regroupement_type'} eq 'STUDENTS');
 }
@@ -4620,9 +4616,7 @@ sub accepte_preferences {
     }
 
     if($changed) {
-      $projet{'_capture'}->begin_transaction('APch');
-      $projet{'_capture'}->variable('annotate_source_change',time());
-      $projet{'_capture'}->end_transaction('APch');
+      annotate_source_change($projet{'_capture'},1);
     }
 
     # Look at modified default values...
