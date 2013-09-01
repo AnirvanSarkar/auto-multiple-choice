@@ -4423,59 +4423,66 @@ sub reprend_pref {
 	my $n;
 	my $wp=$w{$prefixe.'_x_'.$tgui};
 	if($wp) {
-	    $n=$wp->get_text();
-	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  debug "Found string entry";
+	  $n=$wp->get_text();
+	  $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	  $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_t_'.$tgui};
 	if($wp) {
-	    my $buf=$wp->get_buffer;
-	    $n=$buf->get_text($buf->get_start_iter,$buf->get_end_iter,1);
-	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  debug "Found text entry";
+	  my $buf=$wp->get_buffer;
+	  $n=$buf->get_text($buf->get_start_iter,$buf->get_end_iter,1);
+	  $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	  $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_f_'.$tgui};
 	if($wp) {
-	    if($wp->get_action =~ /-folder$/i) {
-		if(-d $wp->get_filename()) {
-		    $n=$wp->get_filename();
-		} else {
-		    $n=$wp->get_current_folder();
-		}
+	  debug "Found file chooser";
+	  if($wp->get_action =~ /-folder$/i) {
+	    if(-d $wp->get_filename()) {
+	      $n=$wp->get_filename();
 	    } else {
-		$n=$wp->get_filename();
+	      $n=$wp->get_current_folder();
 	    }
-	    if($tgui =~ /^projects_/) {
-	      $n=relatif($n,'<HOME>');
-	    } elsif($tgui !~ /^rep_/) {
-	      $n=relatif($n);
-	    }
+	  } else {
+	    $n=$wp->get_filename();
+	  }
+	  if($tgui =~ /^projects_/) {
+	    $n=relatif($n,'<HOME>');
+	  } elsif($tgui !~ /^rep_/) {
+	    $n=relatif($n);
+	  }
 	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_v_'.$tgui};
 	if($wp) {
-	    $n=$wp->get_active();
-	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  debug "Found (v) check button";
+	  $n=$wp->get_active();
+	  $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	  $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_s_'.$tgui};
 	if($wp) {
-	    $n=$wp->get_value();
-	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  debug "Found spin button";
+	  $n=$wp->get_value();
+	  $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	  $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_col_'.$tgui};
 	if($wp) {
-	    $n=$wp->get_color()->to_string();
-	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  debug "Found color chooser";
+	  $n=$wp->get_color()->to_string();
+	  $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	  $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_cb_'.$tgui};
 	if($wp) {
-	    $n=$wp->get_active();
-	    $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	    $h->{$t}=$n;
+	  debug "Found checkbox";
+	  $n=$wp->get_active();
+	  $h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	  $h->{$t}=$n;
 	}
 	$wp=$w{$prefixe.'_c_'.$tgui};
 	if($wp) {
