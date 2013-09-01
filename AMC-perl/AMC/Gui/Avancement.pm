@@ -36,6 +36,9 @@ sub new {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
+    debug "Create progression pipe for <".$self->{id}."> up to $entier".
+      ($self->{bar}?" (progress bar side)":"");
+
     bless $self;
     $|++ if($self->{'id'});
     return($self);

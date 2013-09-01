@@ -225,7 +225,7 @@ my $annotate
 		      verdict_question=>$verdict_question,
 		      verdict_question_cancelled=>$verdict_question_cancelled,
 		      progress=>$progress,
-		      progress_id=>$pogress_id,
+		      progress_id=>$progress_id,
 		      compose=>$compose,
 		      pdf_corrected=>$pdf_corrected,
 		      changes_only=>$changes_only,
