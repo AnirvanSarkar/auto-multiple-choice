@@ -29,6 +29,10 @@
 
 #include <string>
 
+#ifdef NEEDS_GETLINE
+  #include<minimal-getline.c>
+#endif
+
 void strip_endline(char *line) {
   char *endline;
   if((endline=strchr(line,'\r'))) *endline='\0';
