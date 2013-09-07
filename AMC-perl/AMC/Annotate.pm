@@ -110,6 +110,15 @@ sub new {
 	$self->{'pdf_'.$k}='';
       }
     }
+
+    # force to default value when filename model is empty
+    $self->{filename_model}='(N)-(ID)'
+      if($self->{filename_model} eq '');
+
+    # adds pdf extension if not already there
+    $self->{filename_model}.='.pdf'
+      if(self->{filename_model} !~ /\.pdf$/i);
+
     # if the corrected answer sheet is not given, use the subject
     # instead.
     $self->{pdf_corrected}=$self->{pdf_subject} if(!$self->{pdf_corrected});
@@ -239,9 +248,6 @@ sub pdf_output_filename {
   $self->needs_names;
 
   my $f=$self->{filename_model};
-
-  # adds pdf extension if not present
-  $f.='.pdf' if($f !~ /\.pdf$/i);
 
   # computes student/copy four digits ID and substitutes (N) with it
   my $ex;
