@@ -70,6 +70,10 @@ my $names_encoding='utf-8';
 my $association_key='',
 my $csv_build_name='';
 
+my $embedded_max_size="";
+my $embedded_jpeg_quality=80;
+my $embedded_format="jpeg";
+
 my $changes_only='';
 
 my $compose='';
@@ -131,6 +135,9 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "with=s"=>\$latex_engine,
 	   "filter=s"=>\$filter,
 	   "filtered-source=s"=>\$filtered_source,
+	   "embedded-max-size=s"=>\$embedded_max_size,
+	   "embedded-format=s"=>\$embedded_format,
+	   "embedded-jpeg-quality=s"=>\$embedded_jpeg_quality,
 	   );
 
 set_debug($debug);
@@ -229,6 +236,9 @@ my $annotate
 		      compose=>$compose,
 		      pdf_corrected=>$pdf_corrected,
 		      changes_only=>$changes_only,
+		      embedded_max_size=>$embedded_max_size,
+		      embedded_format=>$embedded_format,
+		      embedded_jpeg_quality=>$embedded_jpeg_quality,
 		     );
 
 $annotate->go();

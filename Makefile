@@ -119,7 +119,7 @@ MAJ: $(FROM_IN) ;
 AMC-detect: AMC-detect.cc Makefile
 	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
-AMC-buildpdf: AMC-buildpdf.cc Makefile
+AMC-buildpdf: AMC-buildpdf.cc buildpdf.cc Makefile
 	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_PDF) $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
 # substitution in *.in files

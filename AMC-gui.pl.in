@@ -280,6 +280,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'defaut_verdict'=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
 	      'defaut_verdict_q'=>"\"%"."s/%"."m\"",
 	      'defaut_verdict_qc'=>"\"X\"",
+	      'embedded_max_size'=>'1000x1500',
+	      'embedded_format'=>'jpeg',
+	      'embedded_jpeg_quality'=>75,
 
 	      'zoom_window_height'=>400,
 	      'zoom_window_factor'=>1.0,
@@ -1252,6 +1255,8 @@ my %cb_stores=(
 # One of the possible sorting criteria for students in the exported spreadsheet with scores: the student mark. This is a menu entry.
 			    "m"=>__p("mark [student mark, for sorting]"),
 			    ),
+    'embedded_format'=>cb_model('png'=>'PNG',
+				'jpeg'=>'JPEG'),
 # TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make one PDF file per student, with all his pages. This is a menu entry.
     'regroupement_type'=>cb_model('STUDENTS'=>__"One file per student",
 # TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make only one PDF with all students sheets. This is a menu entry.
@@ -4234,6 +4239,9 @@ sub annote_copies {
 				  "--with",moteur_latex(),
 				  "--filter",$projet{'options'}->{'filter'},
 				  "--filtered-source",absolu($projet{'options'}->{'filtered_source'}),
+				  "--embedded-max-size",$o{'embedded_max_size'},
+				  "--embedded-format",$o{'embedded_format'},
+				  "--embedded-jpeg-quality",$o{'embedded_jpeg_quality'},
 				 )
 		       ],
 	   'texte'=>__"Annotating papers...",
@@ -4612,6 +4620,7 @@ sub accepte_preferences {
 
     my $changed=0;
     for(qw/annote_chsign symboles_trait
+	   embedded_format embedded_max_size embedded_jpeg_quality
 	   symboles_indicatives annote_font_size annote_ecart/) {
       $changed=1 if($gm{$_});
     }

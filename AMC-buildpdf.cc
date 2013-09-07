@@ -115,6 +115,19 @@ int main( int argc, char** argv )
       } else if(sscanf(command,"font size %lf",
 		       &a)==1) {
 	PDF.set_font_size(a);
+      } else if(sscanf(command,"max width %ld",
+		       &i)==1) {
+	PDF.set_scan_max_width(i);
+      } else if(sscanf(command,"max height %ld",
+		       &i)==1) {
+	PDF.set_scan_max_height(i);
+      } else if(strcmp(command,"embedded png")==0) {
+	PDF.set_embedded_png();
+      } else if(strcmp(command,"embedded jpeg")==0) {
+	PDF.set_embedded_jpeg();
+      } else if(sscanf(command,"jpeg quality %ld",
+		       &i)==1) {
+	PDF.set_jpeg_quality(i);
       } else if(sscanf(command,"text rectangle %lf %lf %lf %lf %ln",
 		       &a,&b,&c,&d,&i)>=4) {
 	processing_error=PDF.draw_text_rectangle(a,b,c,d,command+i);

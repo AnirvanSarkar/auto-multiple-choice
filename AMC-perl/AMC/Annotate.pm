@@ -77,6 +77,9 @@ sub new {
 	      compose=>'',
 	      pdf_corrected=>'',
 	      changes_only=>'',
+	      embedded_max_size=>'',
+	      embedded_format=>'jpeg',
+	      embedded_jpeg_quality=>80,
 	  };
 
     for my $k (keys %o) {
@@ -86,11 +89,18 @@ sub new {
     $self->{type}=($self->{single_output} ? REPORT_SINGLE_ANNOTATED_PDF
 		   : REPORT_ANNOTATED_PDF );
 
-    # checks that th position option is available
+    # checks that the position option is available
     $self->{position}=lc($self->{position});
     if($self->{position} !~ /^(marges?|case|none)$/i) {
       debug "ERROR: invalid \<position>: $self->{position}";
       $self->{position}='none';
+    }
+
+    # chacks that the embedded_format is ok
+    $self->{embedded_format}=lc($self->{embedded_format});
+    if($self->{embedded_format} !~ /^(jpeg|png)$/i) {
+      debug "ERROR: invalid <embedded_format>: $self->{embedded_format}";
+      $self->{embedded_format}='jpeg';
     }
 
     # checks that the pdf files exist
@@ -520,7 +530,14 @@ sub process_start {
 			['-d',$self->{dpi},
 			 '-w',$self->{width},
 			 '-h',$self->{height}]);
-
+  $self->command("embedded ".$self->{embedded_format});
+  if($self->{embedded_max_size} =~ /([0-9]*)x([0-9]*)/i) {
+    my $width=$1;
+    my $height=$2;
+    $self->command("max width ".($width ? $width : 0));
+    $self->command("max height ".($height ? $height : 0));
+  }
+  $self->command("jpeg quality ".$self->{embedded_jpeg_quality});
 }
 
 # send a command to the subprocess
