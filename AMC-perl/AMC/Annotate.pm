@@ -832,7 +832,8 @@ sub qtext_position_marges {
   }
 
   # set the x-position to the left or right margin
-  my $jx=($left xor $self->{rtl} ? 0 : 1);
+  my $jx=1;
+  $jx=0 if($left xor $self->{rtl});
 
   # set the y-position to the mean of y coordinates of the
   # boxes in the corresponding column
