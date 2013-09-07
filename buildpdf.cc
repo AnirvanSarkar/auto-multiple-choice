@@ -108,7 +108,7 @@ public:
   */
   BuildPdf(double w,double h,double d):
     width_in_pixels(w), height_in_pixels(h), dppt(d), n_pages(-1),
-    user_one_point(0),
+    user_one_point(0), margin(0),
     document(NULL), layout(NULL), surface(NULL), cr(NULL),
     image_cr(NULL), image_surface(NULL), fake_image_buffer(NULL),
     font_description(NULL),
@@ -129,6 +129,7 @@ public:
   void set_png_compression_level(int l) { png_compression_level=l; }
   void set_scan_max_height(int mh) { scan_max_height=mh; }
   void set_scan_max_width(int mw) { scan_max_width=mw; }
+  void set_margin(double m) { margin=m; }
 
   /* start_output strats to build a PDF into file output_filename. */
   int start_output(char* output_filename);
@@ -182,14 +183,22 @@ public:
   /* set_matrix sets the matrix that transforms layout coordinates to
      scan coordinates (as recorded in the layout AMC database). */
   void set_matrix(double a, double b, double c ,double d, double e, double f);
+
   /* identity_matrix sets the matrix to identity (to be used when the
      background is the question page, not a scan). */
   void identity_matrix();
 
+  /* keep_on_scan moves the (x,y) point (in subject coordinates) so
+     that the corresponding point stays on the scan */
+  void keep_on_scan(double *x, double *y);
+
   /* drawing methods : */
   void draw_rectangle(double xmin, double xmax, double ymin, double ymax);
   void draw_mark(double xmin, double xmax, double ymin, double ymax);
-  void draw_text(double x, double y,double xpos,double ypos,const char *text);
+  void draw_text(double x, double y,
+		 double xpos,double ypos,const char *text);
+  void draw_text_margin(int xside, double y,
+			double xpos, double ypos,const char *text);
   int draw_text_rectangle(double xmin, double xmax,
 			  double ymin, double ymax,
 			  const char *text);
@@ -210,6 +219,7 @@ private:
   std::vector<uchar> image_buffer;
   cairo_matrix_t matrix;
   double user_one_point;
+  double margin;
   double line_width;
   double font_size;
   int debug;
@@ -739,7 +749,19 @@ void BuildPdf::set_matrix(double a, double b, double c ,double d, double e, doub
 
 void BuildPdf::identity_matrix() {
   set_matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-} 
+}
+
+#define FIXX(xp) ((xp)-matrix.xy**y-matrix.x0)/matrix.xx
+void BuildPdf::keep_on_scan(double *x, double *y) {
+  double xp=*x;
+  double yp=*y;
+  cairo_matrix_transform_point(&matrix,&xp,&yp);
+  if(xp<margin) {
+    *x=FIXX(margin);
+  } else if(xp>width_in_pixels/dppt-margin) {
+    *x=FIXX(width_in_pixels/dppt-margin);
+  }
+}
 
 void BuildPdf::draw_rectangle(double xmin, double xmax, double ymin, double ymax) {
 #ifdef DEBUG
@@ -788,6 +810,19 @@ void BuildPdf::draw_text(double x, double y,
 			 double xpos, double ypos,
 			 const char *text) {
   draw_text(layout,x,y,xpos,ypos,text);
+}
+
+void BuildPdf::draw_text_margin(int xside, double y,
+				double xpos, double ypos,
+				const char *text) {
+  double x;
+  if(xside==1) {
+    x=width_in_pixels/dppt-margin;
+  } else {
+    x=margin;
+  }
+  keep_on_scan(&x,&y);
+  draw_text(x,y,xpos,ypos,text);
 }
 
 int BuildPdf::draw_text_rectangle(double xmin, double xmax,

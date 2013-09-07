@@ -115,6 +115,9 @@ int main( int argc, char** argv )
       } else if(sscanf(command,"font size %lf",
 		       &a)==1) {
 	PDF.set_font_size(a);
+      } else if(sscanf(command,"margin %lf",
+		       &a)==1) {
+	PDF.set_margin(a);
       } else if(sscanf(command,"max width %ld",
 		       &i)==1) {
 	PDF.set_scan_max_width(i);
@@ -134,6 +137,12 @@ int main( int argc, char** argv )
       } else if(sscanf(command,"text %lf %lf %lf %lf %ln",
 		       &a,&b,&c,&d,&i)>=4) {
 	PDF.draw_text(a,b,c,d,command+i);
+      } else if(sscanf(command,"text margin %ld %lf %lf %lf %ln",
+		       &n,&b,&c,&d,&i)>=4) {
+	PDF.draw_text_margin(n,b,c,d,command+i);
+      } else if(sscanf(command,"stext margin %ld %lf %lf %lf",
+		       &n,&b,&c,&d)==4) {
+	PDF.draw_text_margin(n,b,c,d,saved_text.c_str());
       } else if(sscanf(command,"stext rectangle %lf %lf %lf %lf",
 		       &a,&b,&c,&d)==4) {
 	processing_error=PDF.draw_text_rectangle(a,b,c,d,saved_text.c_str());

@@ -62,7 +62,7 @@ sub new {
 	      line_width=>1,
 	      font_size=>12,
 	      dist_to_box=>'1cm',
-	      dist_margin=>'5mm',
+	      dist_margin=>'3mm',
 	      dist_margin_globaltext=>'3mm',
 	      symbols=>{'0-0'=>{qw/type none/},
 			'0-1'=>{qw/type circle color red/},
@@ -544,6 +544,7 @@ sub process_start {
     $self->command("max height ".($height ? $height : 0));
   }
   $self->command("jpeg quality ".$self->{embedded_jpeg_quality});
+  $self->command("margin ".$self->{dist_margin});
 }
 
 # send a command to the subprocess
@@ -805,9 +806,9 @@ sub qtext_position_marge {
   my $y=$self->q_ymean($question);
 
   if ($self->{rtl}) {
-    return($self->{width}-$self->{dist_margin},1,$y,0.5);
+    return("stext margin 1 $y 1 0.5");
   } else {
-    return($self->{dist_margin},0,$y,0.5);
+    return("stext margin 0 $y 0 0.5");
   }
 }
 
@@ -816,9 +817,6 @@ sub qtext_position_marge {
 # subject is in a 2-column layout.
 sub qtext_position_marges {
   my ($self,$q)=@_;
-
-  my $x;
-  my $jx=0;
 
   # fist extract the y coordinates of the boxes in the left column
   my $left=1;
@@ -834,26 +832,23 @@ sub qtext_position_marges {
   }
 
   # set the x-position to the left or right margin
-  if ($left xor $self->{rtl}) {
-    $x=$self->{dist_margin};
-  } else {
-    $x=$self->{width}-$self->{dist_margin};
-    $jx=1;
-  }
+  my $jx=($left xor $self->{rtl} ? 0 : 1);
+
   # set the y-position to the mean of y coordinates of the
   # boxes in the corresponding column
   my $y=sum(@y)/(1+$#y);
 
-  return($x,$jx,$y,0.5);
+  return("stext margin $jx $y $jx 0.5");
 }
 
 # 3) scores written at the side of all the boxes
 sub qtext_position_case {
   my ($self,$q)=@_;
 
-  return(max(@{$self->{question}->{$q}->{'x'}}) 
-	 + ($self->{rtl} ? 1: -1)*$self->{dist_to_box},0,
-	 $self->q_ymean($q),0.5);
+  my $x=max(@{$self->{question}->{$q}->{'x'}})
+    + ($self->{rtl} ? 1: -1)*$self->{dist_to_box};
+  my $y=$self->q_ymean($q);
+  return("stext $x $y 0 0.5");
 }
 
 # writes one question score
@@ -871,9 +866,9 @@ sub write_qscore {
 
   my $text=$self->qtext($student,$question);
   my $xy="qtext_position_".$self->{position};
-  my ($x,$jx,$y,$jy)=$self->$xy($question);
+  my $command=$self->$xy($question);
   $self->stext($text);
-  $self->command("stext $x $y $jx $jy");
+  $self->command($command);
 }
 
 # writes question scores on one page
@@ -886,7 +881,6 @@ sub page_qscores {
     $self->needs_names;
 
     $self->set_color($self->{text_color});
-    $self->command("matrix identity");
 
     # go through all questions present on the page (recorded while
     # drawing symbols)
@@ -934,6 +928,7 @@ sub student_draw_page {
     $self->command("font size $self->{font_size}");
     $self->page_symbols($student,$page,$draw>1);
     $self->page_qscores($student,$page);
+    $self->command("matrix identity");
     $self->page_header($student);
   } else {
     debug "Nothing to draw for this page";
