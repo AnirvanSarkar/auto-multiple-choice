@@ -886,7 +886,7 @@ void BuildPdf::draw_text(PangoLayout* local_layout,
 
   pango_layout_set_text(local_layout,text,-1);
   pango_layout_get_pixel_extents(local_layout,&extents,NULL);
-  printf("TEXT=\"%s\" X=%ld Y=%ld W=%ld H=%ld\n",
+  printf("TEXT=\"%s\" X=%d Y=%d W=%d H=%d\n",
 	 text,
 	 extents.x,extents.y,
 	 extents.width,extents.height);
