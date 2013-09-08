@@ -811,6 +811,9 @@ void BuildPdf::set_matrix(cairo_matrix_t *m) {
   cairo_set_matrix(cr,m);
   cairo_scale_after(cr,1/dppt);
 
+  user_one_point=normalize_distance();
+  set_line_width(line_width);
+
 #ifdef DEBUG
   cairo_matrix_t ctm;
   cairo_get_matrix(cr,&ctm);
@@ -819,13 +822,11 @@ void BuildPdf::set_matrix(cairo_matrix_t *m) {
   printf(";   dppt=%g\n",dppt);
   test_matrix(m,width_in_pixels,height_in_pixels);
   printf("; cr matrix:\n");
+  printf(";   user 1pt=%g\n",user_one_point);
   test_matrix(&ctm,width_in_pixels,height_in_pixels);
   color(0.0,0.5,0.2,0.5);
   draw_rectangle(0,width_in_pixels,0,height_in_pixels);
 #endif
-
-  user_one_point=normalize_distance();
-  set_line_width(line_width);
 
   pango_cairo_context_set_resolution(pango_layout_get_context(layout),
 				     user_one_point * 72.);
