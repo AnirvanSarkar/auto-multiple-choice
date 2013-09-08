@@ -24,8 +24,6 @@
 
 #define __BUILDPDF__ 1
 
-#define DEBUG 1
-
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -113,9 +111,13 @@ public:
     image_cr(NULL), image_surface(NULL), fake_image_buffer(NULL),
     font_description(NULL),
     line_width(1.0), font_size(12.0), debug(0),
+    scan_expansion(1.0), scan_resize_factor(1.0),
     embedded_image_format(FORMAT_JPEG),
     image_buffer(), scan_max_width(0), scan_max_height(0),
-    png_compression_level(9), jpeg_quality(75) { };
+    png_compression_level(9), jpeg_quality(75) { 
+    printf(": w_pix=%g h_pix=%g dppt=%g\n",
+	   width_in_pixels,height_in_pixels,dppt);
+  };
 
   ~BuildPdf();
 
@@ -183,6 +185,10 @@ public:
   /* set_matrix sets the matrix that transforms layout coordinates to
      scan coordinates (as recorded in the layout AMC database). */
   void set_matrix(double a, double b, double c ,double d, double e, double f);
+  void set_matrix_to_scan(double a, double b, double c ,double d, double e, double f);
+  void set_matrix(cairo_matrix_t *m);
+
+  void normalize_matrix();
 
   /* identity_matrix sets the matrix to identity (to be used when the
      background is the question page, not a scan). */
@@ -219,6 +225,8 @@ private:
   std::vector<uchar> image_buffer;
   cairo_matrix_t matrix;
   double user_one_point;
+  double scan_expansion;
+  double scan_resize_factor;
   double margin;
   double line_width;
   double font_size;
@@ -230,6 +238,7 @@ private:
   int scan_max_width;
 
   double normalize_distance();
+  double normalize_matrix_distance(cairo_matrix_t *m);
   PangoLayout* r_font_size_layout(double ratio);
   PangoFontDescription *font_description;
   int new_page_from_image_surface(cairo_surface_t *is);
@@ -351,6 +360,8 @@ int BuildPdf::next_page() {
       free_buffer();
       fake_image_buffer=NULL;
     }
+    scan_resize_factor=1.0;
+    scan_expansion=1.0;
   }
 
   n_pages++;
@@ -492,12 +503,13 @@ void BuildPdf::resize_scan(cv::Mat &image) {
   }
   printf(": fx=%g fy=%g.\n",fx,fy);
   if(fx<fy) {
-    fy=fx;
+    scan_resize_factor=fx;
   } else {
-    fx=fy;
+    scan_resize_factor=fy;
   }
   if(fx<1.0) {
-    cv::resize(image,image,cv::Size(),fx,fy,cv::INTER_AREA);
+    cv::resize(image,image,cv::Size(),
+	       scan_resize_factor,scan_resize_factor,cv::INTER_AREA);
   } else {
     printf(": No need to resize.\n");
   }
@@ -588,16 +600,16 @@ int BuildPdf::new_page_from_image_surface(cairo_surface_t *is) {
     cairo_surface_destroy(image_surface);
     return(1);
   }
-  double rx=width_in_pixels/dppt/cairo_image_surface_get_width(image_surface);
-  double ry=height_in_pixels/dppt/cairo_image_surface_get_height(image_surface);
+  double rx=width_in_pixels/dppt/w;
+  double ry=height_in_pixels/dppt/h;
 
   if(rx<ry) {
-    ry=rx;
+    scan_expansion=rx;
   } else {
-    rx=ry;
+    scan_expansion=ry;
   }
 
-  printf(": R=%g\n",rx);
+  printf(": R=%g (%g,%g)\n",scan_expansion,rx,ry);
 
 #ifdef DEBUG
     printf("; Create and scale image_cr\n");
@@ -605,7 +617,7 @@ int BuildPdf::new_page_from_image_surface(cairo_surface_t *is) {
   image_cr=cairo_create(surface);
 
   cairo_identity_matrix(image_cr);
-  cairo_scale(image_cr,rx,rx);
+  cairo_scale(image_cr,scan_expansion,scan_expansion);
 
 #ifdef DEBUG
   printf("; set_source_surface\n");
@@ -674,6 +686,14 @@ double BuildPdf::normalize_distance() {
   return( sqrt((dx*dx+dy*dy)/2.0) );
 }
 
+double BuildPdf::normalize_matrix_distance(cairo_matrix_t *m) {
+  double dx,dy;
+  dx=1.0;
+  dy=1.0;
+  cairo_matrix_transform_distance(m,&dx,&dy);
+  return( sqrt((dx*dx+dy*dy)/2.0) );
+}
+
 void BuildPdf::set_line_width(double lw) {
   if(lw>=0) {
     line_width=lw;
@@ -727,15 +747,82 @@ PangoLayout* BuildPdf::r_font_size_layout(double ratio) {
   return(local_layout);
 }
 
+void cairo_matrix_scale_after(cairo_matrix_t *m, double r) {
+  m->xx*=r;
+  m->xy*=r;
+  m->yx*=r;
+  m->yy*=r;
+  m->x0*=r;
+  m->y0*=r;
+}
+
+void cairo_scale_after(cairo_t *cr, double r) {
+  cairo_matrix_t m;
+  cairo_get_matrix(cr,&m);
+  cairo_matrix_scale_after(&m,r);
+  cairo_set_matrix(cr,&m);
+}
+
 void BuildPdf::set_matrix(double a, double b, double c ,double d, double e, double f) {
 #ifdef DEBUG
   printf("; Set matrix\n");
 #endif    
 
   cairo_matrix_init(&matrix,a,c,b,d,e,f);
-  cairo_identity_matrix(cr);
-  cairo_scale(cr,1/dppt,1/dppt);
-  cairo_transform(cr,&matrix);
+  set_matrix(&matrix);
+}
+
+void BuildPdf::normalize_matrix() {
+  double r=1; ///normalize_matrix_distance();
+  cairo_matrix_scale(&matrix,r,r);
+}
+
+void BuildPdf::set_matrix_to_scan(double a, double b, double c ,double d, double e, double f) {
+#ifdef DEBUG
+  printf("; Set matrix to scan coordinates\n;   resize_factor=%g expansion=%g\n",
+	 scan_resize_factor,scan_expansion);
+#endif    
+
+  cairo_matrix_init(&matrix,a,c,b,d,e,f);
+  cairo_matrix_scale_after(&matrix,dppt*scan_resize_factor*scan_expansion);
+  set_matrix(&matrix);
+}
+
+#ifdef DEBUG
+void test_point(cairo_matrix_t *m,double x,double y) {
+  double tx=x;
+  double ty=y;
+  printf(";   (%g,%g) ->",tx,ty);
+  cairo_matrix_transform_point(m,&tx,&ty);
+  printf(" (%g,%g)\n",tx,ty);
+}
+
+void test_matrix(cairo_matrix_t *m,double xmax,double ymax) {
+  printf(";   x'=%7.3f x + %7.3f y + %6.3f\n",m->xx,m->xy,m->x0);
+  printf(";   y'=%7.3f x + %7.3f y + %6.3f\n",m->yx,m->yy,m->y0);
+  test_point(m,0,0);
+  test_point(m,xmax,0);
+  test_point(m,0,ymax);
+  test_point(m,xmax,ymax);
+}
+#endif
+
+void BuildPdf::set_matrix(cairo_matrix_t *m) {
+  cairo_set_matrix(cr,m);
+  cairo_scale_after(cr,1/dppt);
+
+#ifdef DEBUG
+  cairo_matrix_t ctm;
+  cairo_get_matrix(cr,&ctm);
+  double tx,ty;
+  printf("; subject to scan matrix:\n");
+  printf(";   dppt=%g\n",dppt);
+  test_matrix(m,width_in_pixels,height_in_pixels);
+  printf("; cr matrix:\n");
+  test_matrix(&ctm,width_in_pixels,height_in_pixels);
+  color(0.0,0.5,0.2,0.5);
+  draw_rectangle(0,width_in_pixels,0,height_in_pixels);
+#endif
 
   user_one_point=normalize_distance();
   set_line_width(line_width);

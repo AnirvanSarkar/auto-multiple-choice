@@ -91,7 +91,7 @@ int main( int argc, char** argv )
 	PDF.identity_matrix();
       } else if(sscanf(command,"matrix %lf %lf %lf %lf %lf %lf",
 		       &a,&b,&c,&d,&e,&f)==6) {
-	PDF.set_matrix(a,b,c,d,e,f);
+	PDF.set_matrix_to_scan(a,b,c,d,e,f);
       } else if(sscanf(command,"color %lf %lf %lf %lf",
 		       &a,&b,&c,&d)==4) {
 	PDF.color(a,b,c,d);
