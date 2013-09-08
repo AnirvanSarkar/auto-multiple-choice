@@ -80,6 +80,7 @@ sub new {
 	      embedded_max_size=>'',
 	      embedded_format=>'jpeg',
 	      embedded_jpeg_quality=>80,
+	      debug=>(get_debug() ? 1 : 0),
 	  };
 
     for my $k (keys %o) {
@@ -545,6 +546,7 @@ sub process_start {
   }
   $self->command("jpeg quality ".$self->{embedded_jpeg_quality});
   $self->command("margin ".$self->{dist_margin});
+  $self->command("debug") if($self->{debug});
 }
 
 # send a command to the subprocess

@@ -79,6 +79,8 @@ int main( int argc, char** argv )
 
       if(strncmp(command,"output ",7)==0) {
 	processing_error=PDF.start_output(command+7);
+      } else if(strcmp(command,"debug")==0) {
+	PDF.set_debug(1);
       } else if(strncmp(command,"page png ",9)==0) {
 	processing_error=PDF.new_page_from_png(command+9);
       } else if(strncmp(command,"page img ",9)==0) {
