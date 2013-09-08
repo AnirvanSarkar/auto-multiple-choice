@@ -462,11 +462,13 @@ int BuildPdf::new_page_from_image(unsigned char *data,unsigned int size,
   printf("; Attach mime %s to image_surface\n",mime_type);
 #endif    
 
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
   if(!cairo_surface_supports_mime_type(surface,mime_type)) {
     printf("! ERROR: surface does not handle %s\n",
 	   mime_type);
     return(1);
   }
+#endif
 
   cairo_status_t status=
     cairo_surface_set_mime_data (is, mime_type,
