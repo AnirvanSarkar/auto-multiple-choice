@@ -294,6 +294,7 @@ sub read_file {
     # Insert other file...
     if(/^\s*IncludeFile:\s*(.*)/i) {
       my $filename=$1;
+      $filename =~ s/\s+$//;
       my ($volume,$directories,$file) =
 	File::Spec->splitpath( $input_file );
       my $dir=File::Spec->catpath($volume,$directories,'');
