@@ -1046,6 +1046,27 @@ How many stars in the sky?
         compatible.</para>
       </warning>
     </sect2>
+
+    <sect2>
+      <title>Including other files</title>
+
+      <para>You can include other files with:</para>
+
+      <programlisting>IncludeFile: <replaceable>file-to-include.txt</replaceable></programlisting>
+
+      <warning>
+        <para>Be very careful when including a single file from different
+        projects! Suppose for example that
+        <filename>/home/alexis/questions-a.txt</filename> is included from
+        projects A and B. You already processed project A, and you are
+        currently working on project B. You update the scoring strategy of a
+        question in <filename>/home/alexis/questions-a.txt</filename>, and
+        also add another question. If you need to update the marks in project
+        A with this new scoring strategy, AMC will also see a new question for
+        which no data capture has been made, and this will spoil all your
+        marks in A...</para>
+      </warning>
+    </sect2>
   </sect1>
 
   <sect1 id="latex">

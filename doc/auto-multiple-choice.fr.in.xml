@@ -1109,6 +1109,29 @@ Combien y a-t-il d'étoiles dans le ciel ?
         distributions linux, n'est <emphasis>pas</emphasis> suffisante.</para>
       </warning>
     </sect2>
+
+    <sect2>
+      <title>Inclusion de fichiers annexes</title>
+
+      <para>Vous pouvez inclure le contenu d'autres fichiers à tout moment
+      comme suit :</para>
+
+      <programlisting>IncludeFile: <replaceable>fichier-a-inclure.txt</replaceable></programlisting>
+
+      <warning>
+        <para>Faites très attention si le fichier à inclure est utilisé par
+        plusieurs projets ! Supposons par exemple que
+        <filename>/home/alexis/questions-a.txt</filename> est inclus à la fois
+        dans le projet A et le projet B. Vous avez déjà traité le projet A, et
+        êtes en train de vous occuper du projet B. Vous ajoutez une questions
+        dans le fichier <filename>/home/alexis/questions-a.txt</filename>, et
+        vous modifier le barème d'une question qui existait déjà. Si vous
+        relancez l'extraction du barème et la notation sur le sujet A, AMC
+        verra apparaître une nouvelle question pour laquelle aucune saisie n'a
+        été effectuée, ce qui posera des problèmes dans toute la
+        notation !</para>
+      </warning>
+    </sect2>
   </sect1>
 
   <sect1 id="latex">

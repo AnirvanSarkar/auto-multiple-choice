@@ -22,6 +22,7 @@ package AMC::Filter::plain;
 use AMC::Filter;
 use AMC::Basic;
 
+use File::Spec;
 use Data::Dumper;
 
 use utf8;
@@ -265,29 +266,52 @@ sub read_options {
 sub read_source {
   my ($self,$input_file)=@_;
 
-  my %opts=();
-  my $follow=''; # variable where to add content comming from
+  $self->{reader_state}=
+    {
+     follow=>'', # variable where to add content comming from
                  # following lines
-  my $group=$self->group_by_id('_main_');  # current group
-  my $question=''; # current question
+     group=>$self->group_by_id('_main_'),  # current group
+     question=>'', # current question
+    };
+
+  $self->read_file($input_file);
+  $self->check_answers($self->{reader_state}->{question});
+}
+
+sub read_file {
+  my ($self,$input_file)=@_;
 
   # regexp that matches an option name:
   my $opt_re='('.join('|',@{$self->{'options_names'}}).')';
 
-  open(IN,"<:utf8",$input_file);
- LINE: while(<IN>) {
+  open(my $infile,"<:utf8",$input_file);
+ LINE: while(<$infile>) {
     chomp;
 
     # removes comments
     s/^\s*\#.*//;
 
+    # Insert other file...
+    if(/^\s*IncludeFile:\s*(.*)/i) {
+      my $filename=$1;
+      my ($volume,$directories,$file) =
+	File::Spec->splitpath( $input_file );
+      my $dir=File::Spec->catpath($volume,$directories,'');
+      my $f=File::Spec->rel2abs($filename,$dir);
+      if(-f $f) {
+	$self->read_file(File::Spec->rel2abs($filename,$dir));
+      } else {
+	$self->parse_error(sprintf(__("File not found: %s"),$f));
+      }
+    }
+
     # options
     if(/^\s*$opt_re:\s*(.*)/i) {
-      $self->{'options'}->{lc($1)}=$2;
-      $self->value_cleanup($follow);
-      $follow=\$self->{'options'}->{lc($1)};
-      $self->check_answers($question);
-      $question='';
+      $self->{options}->{lc($1)}=$2;
+      $self->value_cleanup($self->{reader_state}->{follow});
+      $self->{reader_state}->{follow}=\$self->{'options'}->{lc($1)};
+      $self->check_answers($self->{reader_state}->{question});
+      $self->{reader_state}->{question}='';
       next LINE;
     }
 
@@ -303,53 +327,58 @@ sub read_source {
       my $text=$3;
       my %oo=$self->read_options($options);
       if($action eq '(') {
-	$group=$self->group_by_id($oo{group},parent=>$group,header=>$text,%oo);
-	$follow=\$group->{header};
+	$self->{reader_state}->{group}=
+	  $self->group_by_id($oo{group},
+			     parent=>$self->{reader_state}->{group},
+			     header=>$text,
+			     %oo);
+	$self->{reader_state}->{follow}=\$self->{reader_state}->{group}->{header};
       } else {
-	$group->{footer}=$text;
-	$follow=\$group->{footer};
-	$group=$group->{parent};
+	$self->{reader_state}->{group}->{footer}=$text;
+	$self->{reader_state}->{follow}=\$self->{reader_state}->{group}->{footer};
+	$self->{reader_state}->{group}=$self->{reader_state}->{group}->{parent};
       }
       next LINE;
     }
 
     # questions
     if(/^\s*(\*{1,2})(?:<([^>]*)>)?(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
-      $self->check_answers($question);
+      $self->check_answers($self->{reader_state}->{question});
       my $star=$1;
       my $angles=$2;
       my $options=$3;
       my $scoring=$4;
       my $text=$5;
       my %oo=$self->read_options($options);
-      my $q_group=$group;
+      my $q_group=$self->{reader_state}->{group};
 
       if($oo{group}) {
 	$q_group=$self->group_by_id($oo{group});
       }
 
-      $question=add_object($q_group->{'questions'},
-			   'multiple'=>length($star)==2,
-			   'open'=>$angles,
-			   'scoring'=>$scoring,
-			   'text'=>$text,'answers'=>[],%oo);
-      $self->value_cleanup($follow);
-      $follow=\$question->{'text'};
+      $self->{reader_state}->{question}=
+	add_object($q_group->{'questions'},
+		   'multiple'=>length($star)==2,
+		   'open'=>$angles,
+		   'scoring'=>$scoring,
+		   'text'=>$text,'answers'=>[],%oo);
+      $self->value_cleanup($self->{reader_state}->{follow});
+      $self->{reader_state}->{follow}=\$self->{reader_state}->{question}->{'text'};
       next LINE;
     }
 
     # answers
     if(/^\s*(\+|-)(?:\[([^]]*)\])?(?:\{([^\}]*)\})?\s*(.*)/) {
-      if($question) {
+      if($self->{reader_state}->{question}) {
 	my $sign=$1;
 	my $letter=$2;
 	my $scoring=$3;
 	my $text=$4;
-	my $a=add_object($question->{'answers'},
+	my $a=add_object($self->{reader_state}->{question}->{answers},
 			 'text'=>$text,'correct'=>($sign eq '+'),
 			 'letter'=>$letter,
 			 'scoring'=>$scoring);
-	$self->value_cleanup($follow);
+	$self->value_cleanup($self->{reader_state}->{follow});
 	$follow=\$a->{'text'};
       } else {
 # TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
@@ -359,13 +388,12 @@ sub read_source {
     }
 
     # text following last line
-    if($follow) {
-      $$follow.="\n".$_;
+    if($self->{reader_state}->{follow}) {
+      ${$self->{reader_state}->{follow}}.="\n".$_;
     }
   }
-  $self->value_cleanup($follow);
-  $self->check_answers($question);
-  close(IN);
+  $self->value_cleanup($self->{reader_state}->{follow});
+  close($infile);
 }
 
 # bold font LaTeX command, not used in arabic language because there
