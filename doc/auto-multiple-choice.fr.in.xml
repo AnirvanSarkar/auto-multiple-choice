@@ -785,7 +785,7 @@ un plus un ?
 
             <listitem>
               <para>Avec cette option, la question sera toujours insérée en
-              début de groupe.</para>
+              début de groupe (voir <xref linkend="sec.txt-groups"/>).</para>
             </listitem>
           </varlistentry>
 
@@ -794,7 +794,7 @@ un plus un ?
 
             <listitem>
               <para>Avec cette option, la question sera toujours insérée en
-              fin de groupe.</para>
+              fin de groupe (voir <xref linkend="sec.txt-groups"/>).</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -962,7 +962,7 @@ Combien y a-t-il d'étoiles dans le ciel ?
       <programlisting>Les questions marquées d'un [[\multiSymbole{}]] peuvent avoir zéro, une ou plusieurs bonnes réponses.</programlisting>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.txt-groups">
       <title>Groupes de questions</title>
 
       <para>Vous pouvez demander à ce que certaines questions restent groupées
@@ -1025,6 +1025,25 @@ Combien y a-t-il d'étoiles dans le ciel ?
             <para>Donne un nom au groupe (celui-ci ne sera pas visible sur le
             sujet, mais uniquement dans le fichier LaTeX généré à partir du
             fichier source AMC-TXT).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>numquestions=<replaceable>n</replaceable></term>
+
+          <listitem>
+            <para>Avec cette option, les <replaceable>n</replaceable>
+            premières questions du groupes seront utilisées. Si les questions
+            sont mélangées, cela permettra de sélectionner
+            <replaceable>n</replaceable> questions au hasard.</para>
+
+            <warning>
+              <para>Les questions utilisant l'option <option>first</option> ou
+              <option>last</option> ne sont pas concernées (et sont toujours
+              insérées). Par ailleurs, les suites de questions regroupées en
+              utilisant l'option <option>next</option> ne comptent que pour
+              une seule question.</para>
+            </warning>
           </listitem>
         </varlistentry>
       </variablelist>

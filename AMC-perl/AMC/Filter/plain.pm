@@ -869,7 +869,9 @@ sub group_insert_command_def {
   for my $q (grep { $_->{first} } (@{$group->{questions}})) {
     $t.=$self->format_question($q)."\n";
   }
-  $t.="\\insertgroup{".$self->group_name($group)."}";
+  $t.="\\insertgroup";
+  $t.="[".$group->{numquestions}."]" if($group->{numquestions});
+  $t.="{".$self->group_name($group)."}";
   for my $q (grep { $_->{last} } (@{$group->{questions}})) {
     $t.="\n".$self->format_question($q);
   }

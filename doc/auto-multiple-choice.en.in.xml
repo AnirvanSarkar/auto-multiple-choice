@@ -737,7 +737,8 @@ one plus one?
 
             <listitem>
               <para>Use this option to place the question always at the
-              beginning of the group.</para>
+              beginning of the group (see <xref
+              linkend="sec.txt-groups"/>).</para>
             </listitem>
           </varlistentry>
 
@@ -746,7 +747,7 @@ one plus one?
 
             <listitem>
               <para>Use this option to place the question always at the end of
-              the group.</para>
+              the group (see <xref linkend="sec.txt-groups"/>).</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -908,7 +909,7 @@ How many stars in the sky?
       <programlisting>Questions with a [[\multiSymbole{}]] may have zero, one or more right answers.</programlisting>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.txt-groups">
       <title>Questions groups</title>
 
       <para>You can group some question so that they stay together even when
@@ -965,6 +966,25 @@ How many stars in the sky?
 
           <listitem>
             <para>Give a name for the group (for internal matter).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>numquestions=<replaceable>n</replaceable></term>
+
+          <listitem>
+            <para>With this option, only the first
+            <replaceable>n</replaceable> questions of the group will be used.
+            If the questions are shuffled, this allows to get
+            <replaceable>n</replaceable> questions choosen at random from the
+            group.</para>
+
+            <warning>
+              <para>Question with option <option>first</option> or
+              <option>last</option> are not affected (they are always
+              inserted). Moreover, questions stuck together with option
+              <option>next</option> count as one single question.</para>
+            </warning>
           </listitem>
         </varlistentry>
       </variablelist>
