@@ -866,7 +866,13 @@ sub group_insert_command_def {
   }
   $t.="\\begin{multicols}{".$group->{columns}."}"
     if($group->{columns}>1);
+  for my $q (grep { $_->{first} } (@{$group->{questions}})) {
+    $t.=$self->format_question($q)."\n";
+  }
   $t.="\\insertgroup{".$self->group_name($group)."}";
+  for my $q (grep { $_->{last} } (@{$group->{questions}})) {
+    $t.="\n".$self->format_question($q);
+  }
   $t.="\\end{multicols}"
     if($group->{columns}>1);
   if($group->{footer}) {
@@ -889,7 +895,8 @@ sub write_latex {
 
     # create group elements from the questions
 
-    my @questions=@{$group->{'questions'}};
+    my @questions=grep { !($_->{first} || $_->{last}) }
+      @{$group->{'questions'}};
     my $q;
     while($q=shift @questions) {
       print OUT "\\element{".$self->group_name($group)."}{\n";
