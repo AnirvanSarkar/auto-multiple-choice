@@ -91,7 +91,7 @@ sub new {
     # corresponding methods for implementation). Modules in the
     # Disable global option won't be used.
 
-    $self->{'parse_modules'}=['local_latex','images','embf','text'];
+    $self->{'parse_modules'}=['local_latex','images','embf','title','text'];
 
     # current question number among questions for which no ID is given
     # in the source
@@ -477,29 +477,28 @@ sub parse_local_latex {
   return(@o);
 }
 
-# parse_embf inserts LaTeX commands to switch to italic or bold font
-# when '[_ ... _]' or '[* ... *]' constructs are used in AMC-TXT.
-sub parse_embf {
-  my ($self,@components)=@_;
+# generic code to parse '[xxx ... xxx]' constructs
+sub parse_brackets {
+  my ($self,$modifier,$tex_open,$tex_close,@components)=@_;
   my @o=();
+  my $levels=0;
+  my $tex;
   for my $c (@components) {
     if($c->{'type'} eq 'txt') {
       my $s=$c->{'string'};
-      while($s =~ /\[([_\*])(((?!\]\]).)+?)\1\]/p) {
-	my $modif=$1;
-	my $modif_latex;
-	my $text=$2;
+      while($s =~ /(\[\Q$modifier\E|\Q$modifier\E\])/p) {
+	my $sep=$1;
 	my $before=${^PREMATCH};
 	my $after=${^POSTMATCH};
-	if($modif eq '_') {
-	  $modif_latex='it';
+	if($sep=~/^\[/) {
+	  $tex=$tex_open;
+	  $levels++;
 	} else {
-	  $modif_latex='bf';
+	  $tex=$tex_close;
+	  $levels--;
 	}
 	push @o,{'type'=>'txt','string'=>$before};
-	push @o,{'type'=>'latex','string'=>"\\text".$modif_latex."{"};
-	push @o,$self->parse_embf({'type'=>'txt','string'=>$text});
-	push @o,{'type'=>'latex','string'=>"}"};
+	push @o,{'type'=>'latex','string'=>$tex};
 	$s=$after;
       }
       push @o,{'type'=>'txt','string'=>$s};
@@ -508,6 +507,22 @@ sub parse_embf {
     }
   }
   return(@o);
+}
+
+# parse_embf inserts LaTeX commands to switch to italic or bold font
+# when '[_ ... _]' or '[* ... *]' constructs are used in AMC-TXT.
+sub parse_embf {
+  my ($self,@components)=@_;
+  my @c=$self->parse_brackets('_',"\\textit{","}",@components);
+  @c=$self->parse_brackets('*',"\\textbf{","}",@c);
+  return(@c);
+}
+
+# parse_title inserts LaTeX commands to build a title line from '[==
+# ... ==]' constructs.
+sub parse_title {
+  my ($self,@components)=@_;
+  return($self->parse_brackets('==',"\\AMCmakeTitle{","}",@components));
 }
 
 # parse_text transforms plain text (with no special constructs) to
@@ -746,6 +761,7 @@ sub file_header {
   $t .= "\\usepackage{arabxetex}\n"
     if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
   $t .= "\\begin{document}\n";
+  $t .= "\\def\\AMCmakeTitle#1{\\par\\noindent\\hrule\\vspace{1ex}{\\hspace*{\\fill}\\Large\\bf #1\\hspace*{\\fill}}\\vspace{1ex}\\par\\noindent\\hrule\\par\\vspace{1ex}}\n";
   $t .= "\\AMCrandomseed{1527384}\n";
   if($self->{'options'}->{'boxcolor'}) {
     if($self->{'options'}->{'boxcolor'}
