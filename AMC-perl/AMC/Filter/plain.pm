@@ -905,9 +905,9 @@ sub group_insert_command_def {
   my ($self,$group)=@_;
   my $t="\\def".$self->group_insert_command_name($group)."{";
   if($group->{header}) {
-    $t.=$self->format_text($group->{header});
+    $t.="\\noindent ".$self->format_text($group->{header});
     $t.="\\\\[1.5ex]\n" if(!$group->{custom}
-			  && $group->{columns}<=1);
+			   && $group->{columns}<=1);
   }
   $t.="\\begin{multicols}{".$group->{columns}."}"
     if($group->{columns}>1);
