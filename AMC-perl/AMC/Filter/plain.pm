@@ -906,7 +906,7 @@ sub group_insert_command_def {
   my $t="\\def".$self->group_insert_command_name($group)."{";
   if($group->{header}) {
     $t.="\\noindent ".$self->format_text($group->{header});
-    $t.="\\\\[1.5ex]\n" if(!$group->{custom}
+    $t.="\\vspace{1.5ex}\\par\n" if(!$group->{custom}
 			   && $group->{columns}<=1);
   }
   $t.="\\begin{multicols}{".$group->{columns}."}"
@@ -924,7 +924,7 @@ sub group_insert_command_def {
     if($group->{columns}>1);
   if($group->{footer}) {
     $t.=$self->format_text($group->{footer});
-    $t.="\\\\[1.5ex]\n" if(!$group->{custom} && !$group->{cut});
+    $t.="\\vspace{1.5ex}\\par\n" if(!$group->{custom} && !$group->{cut});
   }
   $t.="}\n";
   return($t);
