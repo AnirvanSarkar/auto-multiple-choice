@@ -58,6 +58,10 @@ else
 endif
 endif
 
+GCC_OPENCV ?= $(shell pkg-config --cflags opencv)
+GCC_OPENCV_LIBS ?= $(shell pkg-config --libs opencv)
+GCC_PDF ?= $(shell pkg-config --cflags --libs cairo pangocairo poppler-glib)
+
 #
 
 SHELL=/bin/sh
