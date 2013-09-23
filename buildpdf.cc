@@ -662,8 +662,8 @@ int BuildPdf::new_page_from_image(unsigned char *data,unsigned int size,
 int BuildPdf::new_page_from_image(std::vector<uchar> &image_data,
 				  const char* mime_type,
 				  int width, int height) {
-  new_page_from_image(image_data.data(),image_data.size(),
-		      mime_type,width,height);
+  return(new_page_from_image(image_data.data(),image_data.size(),
+			     mime_type,width,height));
 }
 
 void BuildPdf::resize_scan(cv::Mat &image) {
