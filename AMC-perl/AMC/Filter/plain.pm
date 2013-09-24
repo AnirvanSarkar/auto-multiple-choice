@@ -241,7 +241,9 @@ sub group_by_id {
       add_object($main->{'questions'},
 		 textonly=>1,
 		 text=>{type=>'latex',
-			string=>$self->group_insert_command_name($group)});
+			string=>$self->group_insert_command_name($group)},
+		 %oo,
+		);
     }
   }
 
