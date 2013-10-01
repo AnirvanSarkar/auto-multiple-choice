@@ -691,10 +691,11 @@ void BuildPdf::resize_scan(cv::Mat &image) {
 
   // resize the image if needed
 
-  if(fx<1.0) {
+  if(scan_resize_factor<1.0) {
     cv::resize(image,image,cv::Size(),
 	       scan_resize_factor,scan_resize_factor,cv::INTER_AREA);
   } else {
+    scan_resize_factor=1.0;
     if(debug) {
       printf(": No need to resize.\n");
     }
