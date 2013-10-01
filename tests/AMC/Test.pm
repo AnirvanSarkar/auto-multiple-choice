@@ -515,30 +515,26 @@ sub annote {
   my ($self)=@_;
   return if(!$self->{'annote'});
 
-  $self->amc_command('annote',
-		     '--fich-noms','%PROJ/'.$self->{'list'},
-		     '--verdict',$self->{'verdict'},
-		     '--verdict-question',$self->{'verdict_question'},
-		     '--position',$self->{'annote_position'},
-		     '--projet','%PROJ',
-		     '--data','%DATA',
-		     );
-
   my $nf=$self->{'temp_dir'}."/num-pdf";
   open(NUMS,">$nf");
   for (@{$self->{'annote'}}) { print NUMS "$_\n"; }
   close(NUMS);
-  $self->amc_command('regroupe',
-		     ($self->{'annote_ascii'} ? "--force-ascii" : "--no-force-ascii"),
-		     '--projet','%PROJ',
-		     '--n-copies',$self->{'n_copies'},
-		     '--sujet','%PROJ/sujet.pdf',
+
+  $self->amc_command('annotate',
+		     '--names-file','%PROJ/'.$self->{'list'},
+		     '--verdict',$self->{'verdict'},
+		     '--verdict-question',$self->{'verdict_question'},
+		     '--position',$self->{'annote_position'},
+		     '--project','%PROJ',
 		     '--data','%DATA',
+		     ($self->{'annote_ascii'}
+		      ? "--force-ascii" : "--no-force-ascii"),
+		     '--n-copies',$self->{'n_copies'},
+		     '--subject','%PROJ/sujet.pdf',
 		     '--tex-src','%PROJ/'.$self->{'src'},
 		     '--with',$self->{'tex_engine'},
-		     '--modele',$self->{'model'},
+		     '--filename-model',$self->{'model'},
 		     '--id-file','%PROJ/num-pdf',
-		     '--fich-noms','%PROJ/'.$self->{'list'},
 		     );
 
   $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
