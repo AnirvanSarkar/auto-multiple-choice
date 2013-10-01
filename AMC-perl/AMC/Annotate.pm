@@ -117,8 +117,10 @@ sub new {
       if($self->{filename_model} eq '');
 
     # adds pdf extension if not already there
-    $self->{filename_model}.='.pdf'
-      if(self->{filename_model} !~ /\.pdf$/i);
+    if($self->{filename_model} !~ /\.pdf$/i) {
+      debug "Adding pdf extension to $self->{filename_model}";
+      $self->{filename_model}.='.pdf';
+    }
 
     # if the corrected answer sheet is not given, use the subject
     # instead.
@@ -250,6 +252,8 @@ sub pdf_output_filename {
 
   my $f=$self->{filename_model};
 
+  debug "F[0]=$f";
+
   # computes student/copy four digits ID and substitutes (N) with it
   my $ex;
   if($student->[1]) {
@@ -258,6 +262,8 @@ sub pdf_output_filename {
     $ex=sprintf("%04d",$student->[0]);
   }
   $f =~ s/\(N\)/$ex/gi;
+
+  debug "F[N]=$f";
 
   # get student data from the students list file, and substitutes
   # into filename
@@ -279,6 +285,8 @@ sub pdf_output_filename {
       }
     }
 
+    debug "F[n]=$f";
+
   } else {
     $f =~ s/-?\(ID\)//gi;
   }
@@ -288,6 +296,7 @@ sub pdf_output_filename {
 
   if($self->{force_ascii}) {
     $f=ascii_version($f);
+    debug "F[a]=$f";
   }
 
   # The filename we would like to use id $f, but now we have to check
@@ -314,6 +323,8 @@ sub pdf_output_filename {
   $self->{report}->set_student_report($self->{type},@$student,$f,'now');
 
   $self->{data}->end_transaction('rSST');
+
+  debug "F[R]=$f";
 
   return($f,$uptodate_filename);
 }
