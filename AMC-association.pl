@@ -29,11 +29,13 @@ my $set='';
 my $student='';
 my $copy=0;
 my $id=undef;
+my $raw='';
 
 GetOptions("cr=s"=>\$cr_dir,
 	   "liste=s"=>\$liste,
 	   "data=s"=>\$data_dir,
 	   "list!"=>\$list,
+	   "raw!"=>\$raw,
 	   "set!"=>\$set,
 	   "student=s"=>\$student,
 	   "copy=s"=>\$copy,
@@ -45,25 +47,33 @@ if($list) {
 
   my $data=AMC::Data->new($data_dir);
   my $assoc=$data->module('association');
+  my $capture=$data->module('capture');
   $data->begin_read_transaction('ALST');
-  my $list=$assoc->list();
-  $data->end_transaction('ALST');
+  my @list;
+  if($raw) {
+    @list=map { [$_->{student},$_->{copy}] } (@{$assoc->list()});
+  } else {
+    @list=$capture->student_copies();
+  }
   print "Student\tID\n";
-  for my $c (@$list) {
-    print studentids_string($c->{'student'},$c->{'copy'})."\t";
-    if(defined($c->{'manual'})) {
-      print $c->{'manual'};
+  for my $c (@list) {
+    print studentids_string(@$c)."\t";
+    my $manual=$assoc->get_manual(@$c);
+    my $auto=$assoc->get_auto(@$c);
+    if(defined($manual)) {
+      print $manual;
       print " (manual";
-      if(defined($c->{'auto'})) {
-	print ", auto=".$c->{'auto'};
+      if(defined($auto)) {
+	print ", auto=".$auto;
       }
       print ")\n";
-    } elsif(defined($c->{'auto'})) {
-      print $c->{'auto'}." (auto)\n";
+    } elsif(defined($auto)) {
+      print $auto." (auto)\n";
     } else {
       print "(none)\n";
     }
   }
+  $data->end_transaction('ALST');
 } elsif($set) {
   require AMC::Data;
 
