@@ -1813,7 +1813,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcommand\AMCformBox[4]{%
   \ifAMC@outside@box% letter to be written outside the box
-    \AMC@boxedchar{}{#3}{#4}{#2}\hspace{.1em}{\textbf{#1}}%
+    \AMC@boxedchar{}{#3}{#4}{#2}\nobreak\hspace{.1em}{\textbf{#1}}%
   \else%
     \AMC@boxedchar{#1}{#3}{#4}{#2}%
   \fi%
