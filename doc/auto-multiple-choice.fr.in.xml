@@ -2505,6 +2505,37 @@ et inscrivez votre nom et prénom ci-dessous.
       </sect3>
 
       <sect3>
+        <title>Réponses en une lettre</title>
+
+        <para>Dans certains cas, une lettre suffit pour décrire la réponse
+        proposée. Dessiner les cases à cocher à la fois sur le sujet et sur la
+        feuille de réponse séparée est alors redondant. L'utilisation de
+        <command>\AMCBoxOnly</command> à la place d'un environnement
+        <code>reponses</code> peut alors s'avérer judicieuse :</para>
+
+        <programlisting>\begin{question}{bras}
+  Quelle lettre désigne le \textit{bras} sur le diagramme ?
+  \AMCBoxOnly{}{\wrongchoice[A]{}\correctchoice[B]{}%
+    \wrongchoice[C]{}\wrongchoice[D]{}}
+\end{question}</programlisting>
+
+        <para>Le premier argument de <command>\AMCBoxOnly</command> est une
+        liste d'options séparées par des virgules. Les options disponibles
+        sont les suivantes :</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>help=<replaceable>texte</replaceable></term>
+
+            <listitem>
+              <para>écrit un petit texte de rappel juste avant les cases sur
+              la feuille de réponse séparée.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </sect3>
+
+      <sect3>
         <title>Choix du mélange</title>
 
         <para>Si le mélange des question et des réponses ne nous convient pas,

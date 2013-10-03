@@ -872,7 +872,7 @@ How many stars in the sky?
       <title>Title</title>
 
       <para>To get a title, enclose it between <code>[==</code> and
-      <code>==]</code>. </para>
+      <code>==]</code>.</para>
     </sect2>
 
     <sect2 id="parse_embf">
@@ -2334,6 +2334,37 @@ and write your first and last names below.
         question can also be defined, as:</para>
 
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
+      </sect3>
+
+      <sect3>
+        <title>One-letter answers</title>
+
+        <para>Sometimes this is not necessary to write some long text to
+        describe answers, and one letter or symbol is enough. When using a
+        separate answer sheet, it is quite annoying to print the boxes both on
+        the question and on the answer sheet. In such cases, use
+        <command>\AMCBoxOnly</command> instead of the <code>choices</code>
+        environment:</para>
+
+        <programlisting>\begin{question}{arm}
+  Which letter shows the \textit{arm} on the diagram?
+  \AMCBoxOnly{}{\wrongchoice[A]{}\correctchoice[B]{}%
+    \wrongchoice[C]{}\wrongchoice[D]{}}
+\end{question}</programlisting>
+
+        <para>The first argument to <command>\AMCBoxOnly</command> is a comma
+        separated list of options. The available options are:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>help=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para>prints some reminder text before the boxes on the separate
+              answer sheet.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
       </sect3>
 
       <sect3>

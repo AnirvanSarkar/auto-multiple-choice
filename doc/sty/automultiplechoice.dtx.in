@@ -3069,7 +3069,7 @@ Three digits and two letters:\insertgroup{mixed}.
     {\AMCnoCompleteMulti%
       \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
       \def\AMCanswer##1##2{##1\ifAMC@ensemble\else%
-          \ifAMC@inside@box\else{\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi%
+          \ifAMC@inside@box\else{\nobreak\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi%
         \hspace{\AMCopen@Hspace}}%
       \fboxsep=\AMCopen@boxmargin%
       \fboxrule=\AMCopen@boxframerule%
@@ -3114,6 +3114,59 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
 \def\AMCOpen{\AMCformatChoices{\AMCopenShow}{\AMCopenHide}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Boxes with letters only}
+%
+% \begin{macro}{\AMCBoxOnly}
+%   Sometimes the letters printed in the boxes (or just after them)
+%   are enough to describe the answers. In such cases, printing the
+%   boxes both on the question and on the answer sheet is not
+%   necessary. The |\AMCBoxOnly| can be used as a replacement for
+%   the |choices| environment:
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\begin{question}{arm}
+  Which letter shows the \textit{arm} on the diagram?
+  \AMCBoxOnly{}{\wrongchoice[A]{}\correctchoice[B]{}%
+    \wrongchoice[C]{}\wrongchoice[D]{}}
+\end{question}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
+%    \begin{macrocode}
+\def\AMCbotextGoto{}
+\def\AMCbo@help{}
+\define@key{AMCBoxOnly}{help}{\def\AMCbo@help{#1}}
+\newcommand\AMCboOpts[1]{\setkeys{AMCBoxOnly}{#1}}
+\newcommand\AMCboShow[4]{%
+  \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
+  \ifAMC@ensemble\ifAMCformulaire@dedans%
+    \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}%
+  \fi\fi%
+  {\setkeys{AMCBoxOnly}{#1}%
+    \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
+    \def\AMCanswer##1##2{\hspace{\AMCformHSpace} ##1\ifAMC@ensemble\else%
+      \ifAMC@inside@box\else{\nobreak\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi%
+      }%
+    \ifAMC@ensemble\AMCbo@help\fi%
+    \begin{choicescustom}[o]%
+      #2
+    \end{choicescustom}%
+  }%
+  \ifAMC@ensemble\ifAMCformulaire@dedans%
+  \AMC@amclog{AUTOQCM[FQ]^^J}%
+  \fi\fi%
+}
+\newcommand\AMCboHide[4]{
+  \AMCbotextGoto%
+  \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
+}
+\def\AMCBoxOnly{\AMCformatChoices{\AMCboShow}{\AMCboHide}}
 %    \end{macrocode}
 % \end{macro}
 %
