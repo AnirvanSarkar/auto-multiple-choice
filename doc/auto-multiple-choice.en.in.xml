@@ -2348,7 +2348,7 @@ and write your first and last names below.
 
         <programlisting>\begin{question}{arm}
   Which letter shows the \textit{arm} on the diagram?
-  \AMCBoxOnly{}{\wrongchoice[A]{}\correctchoice[B]{}%
+  \AMCBoxOnly{ordered=true}{\wrongchoice[A]{}\correctchoice[B]{}%
     \wrongchoice[C]{}\wrongchoice[D]{}}
 \end{question}</programlisting>
 
@@ -2362,6 +2362,15 @@ and write your first and last names below.
             <listitem>
               <para>prints some reminder text before the boxes on the separate
               answer sheet.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ordered=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>if true (the default value is false), the answers won't be
+              shuffled.</para>
             </listitem>
           </varlistentry>
         </variablelist>

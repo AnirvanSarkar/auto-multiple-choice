@@ -3131,7 +3131,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \begin{verbatim}
 \begin{question}{arm}
   Which letter shows the \textit{arm} on the diagram?
-  \AMCBoxOnly{}{\wrongchoice[A]{}\correctchoice[B]{}%
+  \AMCBoxOnly{ordered=true}{\wrongchoice[A]{}\correctchoice[B]{}%
     \wrongchoice[C]{}\wrongchoice[D]{}}
 \end{question}
 \end{verbatim}
@@ -3142,6 +3142,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCbotextGoto{}
 \def\AMCbo@help{}
 \define@key{AMCBoxOnly}{help}{\def\AMCbo@help{#1}}
+\define@boolkey{AMCBoxOnly}{ordered}[false]{}
+\setkeys{AMCBoxOnly}{ordered}
 \newcommand\AMCboOpts[1]{\setkeys{AMCBoxOnly}{#1}}
 \newcommand\AMCboShow[4]{%
   \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
@@ -3154,7 +3156,11 @@ Three digits and two letters:\insertgroup{mixed}.
       \ifAMC@inside@box\else{\nobreak\hspace{\AMCcodeBoxSep}\textbf{##2}}\fi\fi%
       }%
     \ifAMC@ensemble\AMCbo@help\fi%
-    \begin{choicescustom}[o]%
+    \ifKV@AMCBoxOnly@ordered%
+      \begin{choicescustom}[o]%
+    \else%
+      \begin{choicescustom}%
+    \fi%
       #2
     \end{choicescustom}%
   }%
