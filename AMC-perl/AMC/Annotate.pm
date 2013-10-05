@@ -898,7 +898,7 @@ sub page_qscores {
 
     # go through all questions present on the page (recorded while
     # drawing symbols)
-    for my $q (keys %{$self->{question}}) {
+    for my $q (sort { $a cmp $b } (keys %{$self->{question}})) {
       $self->write_qscore($student,$q);
     }
 
