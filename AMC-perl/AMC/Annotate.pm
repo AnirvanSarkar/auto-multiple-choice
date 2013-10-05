@@ -23,6 +23,7 @@ package AMC::Annotate;
 use Gtk2 -init;
 use List::Util qw(min max sum);
 use File::Copy;
+use Unicode::Normalize;
 
 use AMC::Basic;
 use AMC::Export;
