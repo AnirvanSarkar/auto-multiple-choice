@@ -531,7 +531,7 @@ sub annote {
 		      ? "--force-ascii" : "--no-force-ascii"),
 		     '--n-copies',$self->{'n_copies'},
 		     '--subject','%PROJ/sujet.pdf',
-		     '--tex-src','%PROJ/'.$self->{'src'},
+		     '--src','%PROJ/'.$self->{'src'},
 		     '--with',$self->{'tex_engine'},
 		     '--filename-model',$self->{'model'},
 		     '--id-file','%PROJ/num-pdf',

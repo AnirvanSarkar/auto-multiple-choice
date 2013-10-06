@@ -78,7 +78,7 @@ my $changes_only='';
 
 my $compose='';
 my $moteur_latex='pdflatex';
-my $tex_src='';
+my $src_file='';
 my $filter='';
 my $filtered_source='';
 my $n_copies=0;
@@ -131,7 +131,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "compose!"=>\$compose,
 	   "corrected=s"=>\$pdf_corrected,
 	   "n-copies=s"=>\$n_copies,
-	   "tex-src=s"=>\$tex_src,
+	   "src=s"=>\$src_file,
 	   "with=s"=>\$latex_engine,
 	   "filter=s"=>\$filter,
 	   "filtered-source=s"=>\$filtered_source,
@@ -198,7 +198,7 @@ if($compose) {
 				  "--mode","k",
 				  "--out-corrige",$pdf_corrected,
 				  "--debug",debug_file(),
-				  $tex_src));
+				  $src_file));
   }
 }
 
