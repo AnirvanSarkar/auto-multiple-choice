@@ -63,7 +63,7 @@ sub new {
 	      line_width=>1,
 	      font_size=>12,
 	      dist_to_box=>'1cm',
-	      dist_margin=>'3mm',
+	      dist_margin=>'5mm',
 	      dist_margin_globaltext=>'3mm',
 	      symbols=>{'0-0'=>{qw/type none/},
 			'0-1'=>{qw/type circle color red/},
