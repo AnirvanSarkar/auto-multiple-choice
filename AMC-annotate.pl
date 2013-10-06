@@ -57,7 +57,7 @@ my $dist_to_box='1cm';
 my $dist_margin='5mm';
 my $dist_margin_globaltext='3mm';
 
-my $chiffres_significatifs=4;
+my $significant_digits=4;
 
 my $verdict='TOTAL : %S/%M => %s/%m';
 my $verdict_question_cancelled='"X"';
@@ -117,7 +117,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "dist-to-box=s"=>\$dist_to_box,
 	   "dist-margin=s"=>\$dist_margin,
 	   "dist-margin-global=s"=>\$dist_margin_globaltext,
-	   "ch-sign=s"=>\$chiffres_significatifs,
+	   "n-digits=s"=>\$significant_digits,
 	   "verdict=s"=>\$verdict,
 	   "verdict-question=s"=>\$verdict_question,
 	   "verdict-question-cancelled=s"=>\$verdict_question_cancelled,
@@ -215,7 +215,7 @@ my $annotate
 		      names_encoding=>$names_encoding,
 		      association_key=>$association_key,
 		      csv_build_name=>$csv_buildname,
-		      significant_digits=>$chiffres_significatifs,
+		      significant_digits=>$significant_digits,
 		      darkness_threshold=>$darkness_threshold,
 		      id_file=>$id_file,
 		      sort=>$sort,
