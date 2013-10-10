@@ -1690,7 +1690,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % for filling the box.
 %
 % Depending onthe required shape for the boxes, the corresponding
-% |\AMC@shape@xxx|\marg{color}\marg{background-color}\marg{trace}\marg{key}\marg{char}
+% |\AMC@shape@xxx|\marg{trace}\marg{filled}\marg{key}\marg{char}
 % command is used.
 %
 % \begin{amcxyfile}{automultiplechoice.xy1}
@@ -1700,27 +1700,33 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{amcxyfile}
 %
 %    \begin{macrocode}
-\newcommand\AMC@boxedchar[4]{\AMC@LR{\hspace{0pt}%
-  {\ifx\@empty#2\@empty \def\AMC@boxcolor{black}\fi%
-   \ifAMC@correc\def\AMC@boxcolor{black}\fi%
-   \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename\endcsname%
-     {\AMC@boxcolor}%
-     {\ifx\@empty#4\@empty white\else\AMC@boxcolor\fi}{#2}{#3}{\AMCchoiceLabelFormat{#1}}}}}%
+\newcommand\AMC@setcolors@[2]{%
+  \def\AMC@boxcolor@{\AMC@boxcolor}%
+  \ifx\@empty#1\@empty \def\AMC@boxcolor@{black}\fi%
+  \ifAMC@correc\def\AMC@boxcolor@{black}\fi%
+  \def\AMC@fillcolor@{\ifx\@empty#2\@empty white\else\AMC@boxcolor\fi}%
 }
-\newcommand\AMC@shape@square[5]{%
+\newcommand\AMC@boxedchar[4]{%
+  \AMC@LR{\hspace{0pt}%
+    \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename\endcsname%
+      {#2}{#4}{#3}{\AMCchoiceLabelFormat{#1}}}}%
+}
+\newcommand\AMC@shape@square[4]{%
   \fboxsep=\z@\fboxrule=\AMC@boxedrule%
-  \fcolorbox{#1}{#2}%
-  {\vbox to \AMC@boxedheight{\AMC@tracepos{#3}{#4}\vfill %
-      \hbox to \AMC@boxedwidth{\hfill{\textcolor{#1}{#5}}\hfill}\vfill}%
-    \AMC@tracepos{#3}{#4}}}
-\newcommand\AMC@shape@oval[5]{%
-\AMC@tracebox{#3}{#4}{\begin{tikzpicture}%
+  \AMC@setcolors@{#1}{#2}%
+  \fcolorbox{\AMC@boxcolor@}{\AMC@fillcolor@}%
+  {\vbox to \AMC@boxedheight{\AMC@tracepos{#1}{#3}\vfill %
+      \hbox to \AMC@boxedwidth{\hfill{\textcolor{\AMC@boxcolor@}{#4}}\hfill}\vfill}%
+    \AMC@tracepos{#1}{#3}}}
+\newcommand\AMC@shape@oval[4]{%
+\AMC@setcolors@{#1}{#2}%
+\AMC@tracebox{#1}{#3}{\begin{tikzpicture}%
 \useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
   rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
-\draw[#1,fill=#2,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
+\draw[\AMC@boxcolor@,fill=\AMC@fillcolor@,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
   (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
   rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
-\draw[#1] (0,0) node {#5};
+\draw[\AMC@boxcolor@] (0,0) node {#4};
 \end{tikzpicture}}%
 }
 %    \end{macrocode}\end{macro}
