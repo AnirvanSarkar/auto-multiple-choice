@@ -58,6 +58,7 @@ along with Auto-Multiple-Choice.  If not, see
 %<*driver>
 \documentclass{ltxdoc}
 \usepackage[utf8]{inputenc}
+\usepackage{tikz}
 \usepackage[nopage,calibration]{automultiplechoice}
 \usepackage{verbatim}
 \usepackage{fp}
@@ -1052,7 +1053,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % won't disturb too much the data capture (for example red, but some
 % light grey can also be considered).\amccode
 % \begin{code}
-%   \AMCboxStyle{color=red}
+%   \AMCboxStyle{shape=oval,color=red}
 %   \begin{question}{sum}$2+2={}$
 %   \begin{choiceshoriz}[o]
 %     \wrongchoice{1}\correctchoice{4}\wrongchoice{10}
@@ -1104,6 +1105,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{bophook} % \AtBeginPage
 \RequirePackage{xkeyval} % \setkeys
 \RequirePackage{rotating} % \rotatebox
+\RequirePackage{fancybox} % \boxput
 %    \end{macrocode}
 % It defines a version string:
 %    \begin{macrocode}
@@ -1704,13 +1706,14 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@boxcolor@{\AMC@boxcolor}%
   \ifx\@empty#1\@empty \def\AMC@boxcolor@{black}\fi%
   \ifAMC@correc\def\AMC@boxcolor@{black}\fi%
-  \def\AMC@fillcolor@{\ifx\@empty#2\@empty white\else\AMC@boxcolor\fi}%
+  \def\AMC@fillcolor@{\ifx\@empty#2\@empty white\else\AMC@boxcolor@\fi}%
 }
 \newcommand\AMC@boxedchar[4]{%
   \AMC@LR{\hspace{0pt}%
     \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename\endcsname%
       {#2}{#4}{#3}{\AMCchoiceLabelFormat{#1}}}}%
 }
+\newcommand\AMC@shapeprepare@square{}
 \newcommand\AMC@shape@square[4]{%
   \fboxsep=\z@\fboxrule=\AMC@boxedrule%
   \AMC@setcolors@{#1}{#2}%
@@ -1718,16 +1721,44 @@ Three digits and two letters:\insertgroup{mixed}.
   {\vbox to \AMC@boxedheight{\AMC@tracepos{#1}{#3}\vfill %
       \hbox to \AMC@boxedwidth{\hfill{\textcolor{\AMC@boxcolor@}{#4}}\hfill}\vfill}%
     \AMC@tracepos{#1}{#3}}}
+\newsavebox{\AMC@ovalbox@R}
+\newsavebox{\AMC@ovalbox@RF}
+\newsavebox{\AMC@ovalbox@}
+\newsavebox{\AMC@ovalbox@F}
+\newcommand\AMC@makeovalbox[3]{%
+  \AMC@setcolors@{#1}{#2}%
+  \savebox{#3}{%
+    \begin{tikzpicture}%
+      \useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
+      rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+      \draw[\AMC@boxcolor@,fill=\AMC@fillcolor@,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
+      (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
+      rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+    \end{tikzpicture}}%
+}
+\newcommand\AMC@shapeprepare@oval{%
+  \AMC@makeovalbox{1}{}{\AMC@ovalbox@R}%
+  \AMC@makeovalbox{1}{1}{\AMC@ovalbox@RF}%
+  \AMC@makeovalbox{}{}{\AMC@ovalbox@}%
+  \AMC@makeovalbox{}{1}{\AMC@ovalbox@F}%
+}
 \newcommand\AMC@shape@oval[4]{%
-\AMC@setcolors@{#1}{#2}%
-\AMC@tracebox{#1}{#3}{\begin{tikzpicture}%
-\useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
-  rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
-\draw[\AMC@boxcolor@,fill=\AMC@fillcolor@,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
-  (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
-  rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
-\draw[\AMC@boxcolor@] (0,0) node {#4};
-\end{tikzpicture}}%
+  \AMC@setcolors@{#1}{#2}%
+  \AMC@tracebox{#1}{#3}{\boxput*(0,0){\textcolor{\AMC@boxcolor@}{#4}}{%
+      \ifx\@empty#1\@empty%
+        \ifx\@empty#2\@empty%
+          \usebox{\AMC@ovalbox@}%
+        \else%
+          \usebox{\AMC@ovalbox@F}%
+        \fi%
+      \else%
+        \ifx\@empty#2\@empty%
+          \usebox{\AMC@ovalbox@R}%
+        \else%
+          \usebox{\AMC@ovalbox@RF}%
+        \fi%
+      \fi%
+    }}%
 }
 %    \end{macrocode}\end{macro}
 %
@@ -1798,6 +1829,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \else%
     \AMC@oval@radius=\AMC@boxedheight\divide\AMC@oval@radius\tw@%
   \fi%
+  \csname AMC@shapeprepare@\AMC@shapename \endcsname%
 }
 \AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,color=black}
 \newcommand\AMCboxColor[1]{\AMCboxStyle{color=#1}}
