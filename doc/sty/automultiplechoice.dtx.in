@@ -1028,11 +1028,11 @@ Three digits and two letters:\insertgroup{mixed}.
 % \subsection{Customisation}
 %
 % \subsubsection{Boxes}
-% \DescribeMacro{\AMCboxDimensions} The command
-% |\AMCboxDimensions|\marg{dims} can be used to specify the shape and
-% dimensions of the boxes to be ticked. The argument \meta{dims} is a
-% coma-separated list of \meta{key}|=|\meta{value} pairs, with the
-% following possible \meta{key}s:
+% \DescribeMacro{\AMCboxStyle} The command |\AMCboxStyle|\marg{style}
+% can be used to specify the shape, color and dimensions of the boxes
+% to be ticked. The argument \meta{style} is a coma-separated list of
+% \meta{key}|=|\meta{value} pairs, with the following possible
+% \meta{key}s:
 % \begin{itemize}
 % \item[|shape|] for the shape to be used: either |square| or
 %   |oval|. Note that if |oval| is used, the \LaTeX{} package |tikz|
@@ -1042,19 +1042,17 @@ Three digits and two letters:\insertgroup{mixed}.
 % \item[|size|] for the size of the boxes (sets |width| and |height|).
 % \item[|down|] for the length the boxes are to be moved down.
 % \item[|rule|] for the rule width.
+% \item[|color|] for the color (only the box that are to be filled by
+%   the students and will be used for data capture). Use something
+%   that will be understood by the |xcolor| package.
 % \end{itemize}
-% Default values are |\AMCboxDimensions{shape=square,size=2.5ex,down=.4ex,rule=.5pt}|
+% Default values are |\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,color=black}|
 %
-% \DescribeMacro{\AMCboxColor} Also note that you can set the color
-% used for the boxes (only the box that are to be filled by the
-% students and will be used for data capture) with the
-% |\AMCboxColor|\marg{color} command. This allows to print the boxes
-% with some color that won't disturb too much the data capture (for
-% example red, but some light grey can also be considered). The
-% \meta{color} parameter must be a color recognized by the |xcolor|
-% package.\amccode
+% Setting the box color allows to print the boxes with some color that
+% won't disturb too much the data capture (for example red, but some
+% light grey can also be considered).\amccode
 % \begin{code}
-%   \AMCboxColor{red}
+%   \AMCboxStyle{color=red}
 %   \begin{question}{sum}$2+2={}$
 %   \begin{choiceshoriz}[o]
 %     \wrongchoice{1}\correctchoice{4}\wrongchoice{10}
@@ -1678,7 +1676,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsubsection{Boxes to be checked by students}
 %
-% \begin{macro}{\AMC@boxedchar}\begin{macro}{\AMCboxColor}
+% \begin{macro}{\AMC@boxedchar}
 %   There are two styles for boxes to be checked by the students. The
 %   first one is an empty box, printed beside the answer. The sencond
 %   is a box with a character in it. It is mainly used when answers
@@ -1695,15 +1693,6 @@ Three digits and two letters:\insertgroup{mixed}.
 % |\AMC@shape@xxx|\marg{color}\marg{background-color}\marg{trace}\marg{key}\marg{char}
 % command is used.
 %
-% The color of the boxes and of the characters drawn in them can be
-% set using the command |\AMCboxColor|\marg{color}, where \meta{color}
-% is a color that should be defined for the |xcolor| package. This
-% color is used only in the case the box will be used for data
-% capture: it is not used on the corrected answer sheet (|answers| or
-% |indivanswers| package option), and not used on the subject part of
-% an exam with a separate answer sheet (|separateanswersheet| package
-% option).
-%
 % \begin{amcxyfile}{automultiplechoice.xy1}
 % For example, |\AMC@boxedchar{K}{1}{test}{}| produce the box
 % \makeatletter\AMC@boxedchar{K}{1}{test}{}\makeatother, writing the
@@ -1711,9 +1700,6 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{amcxyfile}
 %
 %    \begin{macrocode}
-\def\AMC@boxcolor{black}
-\newcommand\AMCboxColor[1]{%
-  \def\AMC@boxcolor{#1}}
 \newcommand\AMC@boxedchar[4]{\AMC@LR{\hspace{0pt}%
   {\ifx\@empty#2\@empty \def\AMC@boxcolor{black}\fi%
    \ifAMC@correc\def\AMC@boxcolor{black}\fi%
@@ -1737,7 +1723,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \draw[#1] (0,0) node {#5};
 \end{tikzpicture}}%
 }
-%    \end{macrocode}\end{macro}\end{macro}
+%    \end{macrocode}\end{macro}
 %
 % \begin{macro}{\AMC@caselettre}\begin{macro}{\AMCchoiceLabel}\begin{macro}{\AMCchoiceLabelFormat}
 % Command |\AMC@caselettre| is the same as |\AMC@boxedchar|, but if
@@ -1767,12 +1753,25 @@ Three digits and two letters:\insertgroup{mixed}.
     \else #1\fi}{#2}{#3}{#4}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
-% \begin{macro}{\AMCboxDimensions}
+% \begin{macro}{\AMCboxStyle}
 %   The dimensions of these box are managed by
 %   |\AMCboxDimensions|\marg{sizes}, where \meta{sizes} is a coma
 %   separated list of \meta{name}|=|\meta{dimension} constructs. Here,
-%   \meta{name} can be |size| for the box size, |rule| for the box rule
-%   width and |down| for moving the box down.
+%   \meta{name} can be |size| for the box size, |rule| for the box
+%   rule width, |down| for moving the box down and |color| for the box
+%   color.
+%
+%   The \meta{color} value given to |color| is a color that should be
+%   defined for the |xcolor| package. This color is used only in the
+%   case the box will be used for data capture: it is not used on the
+%   corrected answer sheet (|answers| or |indivanswers| package
+%   option), and not used on the subject part of an exam with a
+%   separate answer sheet (|separateanswersheet| package option).
+%
+%   The |\AMCboxColor|\marg{color} command is defined as an alias to
+%   |\AMCboxStyle{color=|\meta{color}|}|, and |\AMCboxDimensions| as
+%   an alias to |\AMCboxStyle|, for backward compatibility.
+%
 %    \begin{macrocode}
 \newlength\AMC@boxedrule
 \newlength\AMC@boxeddown
@@ -1785,7 +1784,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCdim}{width}{\AMC@boxedwidth=#1}
 \define@key{AMCdim}{rule}{\AMC@boxedrule=#1}
 \define@key{AMCdim}{down}{\AMC@boxeddown=#1}
-\def\AMCboxDimensions#1{%
+\define@key{AMCdim}{color}{\def\AMC@boxcolor{#1}}
+\def\AMCboxStyle#1{%
   \setkeys{AMCdim}{#1}%
   \ifnum\AMC@boxedwidth<\AMC@boxedheight%
     \AMC@oval@radius=\AMC@boxedwidth\divide\AMC@oval@radius\tw@%
@@ -1793,7 +1793,9 @@ Three digits and two letters:\insertgroup{mixed}.
     \AMC@oval@radius=\AMC@boxedheight\divide\AMC@oval@radius\tw@%
   \fi%
 }
-\AMCboxDimensions{shape=square,size=2.5ex,down=.4ex,rule=.5pt}
+\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,color=black}
+\newcommand\AMCboxColor[1]{\AMCboxStyle{color=#1}}
+\let\AMCboxDimensions=\AMCboxStyle
 %    \end{macrocode}\end{macro}
 %
 % \begin{macro}{\AMC@marque}\begin{macro}{\AMCformBox}\begin{macro}{\AMC@formBox}
