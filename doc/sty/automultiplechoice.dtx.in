@@ -1760,6 +1760,8 @@ Three digits and two letters:\insertgroup{mixed}.
       \fi%
     }}%
 }
+\newcommand\AMC@shapeprepare@none{}
+\newcommand\AMC@shape@none[4]{ #4 }
 %    \end{macrocode}\end{macro}
 %
 % \begin{macro}{\AMC@caselettre}\begin{macro}{\AMCchoiceLabel}\begin{macro}{\AMCchoiceLabelFormat}
@@ -1815,7 +1817,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newlength\AMC@boxedwidth
 \newlength\AMC@boxedheight
 \newlength\AMC@oval@radius
-\define@choicekey{AMCdim}{shape}{square,oval}{\def\AMC@shapename{#1}}
+\define@choicekey{AMCdim}{shape}{square,oval,none}{\def\AMC@shapename{#1}}
 \define@key{AMCdim}{size}{\AMC@boxedwidth=#1\AMC@boxedheight=#1}
 \define@key{AMCdim}{height}{\AMC@boxedheight=#1}
 \define@key{AMCdim}{width}{\AMC@boxedwidth=#1}
