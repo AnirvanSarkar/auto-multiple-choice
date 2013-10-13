@@ -735,7 +735,7 @@ if($to_do{b}) {
 
     # Launches the LaTeX engine
 
-    execute('command'=>[latex_cmd(qw/CalibrationExterne 1 NoHyperRef 1/)],
+    execute('command'=>[latex_cmd(qw/ScoringExterne 1 NoHyperRef 1/)],
 	    'once'=>1);
     open(AMCLOG,"$jobname.amc") or die "Unable to open $jobname.amc : $!";
 

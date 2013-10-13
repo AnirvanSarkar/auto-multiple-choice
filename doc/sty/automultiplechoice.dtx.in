@@ -148,6 +148,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@inside@boxtrue}
 % \DoNotIndex{\AMC@inside@digitfalse}
 % \DoNotIndex{\AMC@inside@digittrue}
+% \DoNotIndex{\AMC@invisiblefalse}
+% \DoNotIndex{\AMC@invisibletrue}
 % \DoNotIndex{\AMC@ordrefalse}
 % \DoNotIndex{\AMC@ordretrue}
 % \DoNotIndex{\AMC@outside@boxfalse}
@@ -1199,6 +1201,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %   |postcorrect| package option.
 % \item |\ifAMC@automarks| corresponds to the use of the
 %   |automarks| package option.
+% \item |\ifAMC@invisible| is true is the DVI/PDF output is not
+%   important (used for example for scoring strategy extraction).
 % \end{description}
 %    \begin{macrocode}
 \newcount\AMCload@counter
@@ -1233,6 +1237,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@pagelayout\AMC@pagelayouttrue
 \newif\ifAMC@postcorrect\AMC@postcorrectfalse
 \newif\ifAMC@automarks\AMC@automarksfalse
+\newif\ifAMC@invisible\AMC@invisiblefalse
 \let\AMCcompleteMulti=\AMCcomplete@multitrue
 \let\AMCnoCompleteMulti=\AMCcomplete@multifalse
 %    \end{macrocode}
@@ -1577,6 +1582,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   beginning of each page.
 %
 %    \begin{macrocode}
+\def\AMC@shapename@{\ifAMC@invisible none\else\AMC@shapename\fi}
 \def\AMC@tracepos#1#2{%
   \ifAMC@calibration\ifx\@empty#1\@empty\else%
   \pdfsavepos\protected@write\AMC@XYFILE{}{%
@@ -1710,7 +1716,7 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 \newcommand\AMC@boxedchar[4]{%
   \AMC@LR{\hspace{0pt}%
-    \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename\endcsname%
+    \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename@\endcsname%
       {#2}{#4}{#3}{\AMCchoiceLabelFormat{#1}}}}%
 }
 \newcommand\AMC@shapeprepare@square{}
@@ -1831,7 +1837,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \else%
     \AMC@oval@radius=\AMC@boxedheight\divide\AMC@oval@radius\tw@%
   \fi%
-  \csname AMC@shapeprepare@\AMC@shapename \endcsname%
+  \csname AMC@shapeprepare@\AMC@shapename@ \endcsname%
 }
 \AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,color=black}
 \newcommand\AMCboxColor[1]{\AMCboxStyle{color=#1}}
@@ -3498,7 +3504,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{External control}
 %
-% \begin{macro}{\SujetExterne}\begin{macro}{\CalibrationExterne}
+% \begin{macro}{\SujetExterne}\begin{macro}{\ScoringExterne}
 % \begin{macro}{\CorrigeExterne}\begin{macro}{\CorrigeIndivExterne}
 % \begin{macro}{\NoWatermarkExterne}
 %   Some of the package options can be controlled defining
@@ -3520,9 +3526,9 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \message{***SUJET***^^J}
 \AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
 \fi
-\ifx\CalibrationExterne\undefined\else
-\message{***CALIBRATION***^^J}
-\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
+\ifx\ScoringExterne\undefined\else
+\message{***SCORING***^^J}
+\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse\AMC@invisibletrue
 \fi
 \ifx\CorrigeExterne\undefined\else
 \message{***CORRIGE***^^J}
