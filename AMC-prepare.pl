@@ -36,6 +36,17 @@ use AMC::DataModule::scoring ':question';
 use_gettext;
 use_amc_plugins();
 
+my $cmd_pid='';
+
+sub catch_signal {
+    my $signame = shift;
+    debug "*** AMC-prepare : signal $signame, transfered to $cmd_pid...";
+    kill 2,$cmd_pid if($cmd_pid);
+    die "Killed";
+}
+
+$SIG{INT} = \&catch_signal;
+
 # PARAMETERS
 
 my $mode="mbs";
@@ -865,7 +876,6 @@ if($to_do{b}) {
 	}
     }
     close(AMCLOG);
-    $cmd_pid='';
 
     $scoring->end_transaction('ScEx');
 }
