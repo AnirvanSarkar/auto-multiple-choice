@@ -517,13 +517,12 @@ sub get_dimensions {
 
   $self->{data}->end_transaction("aDIM");
 
-  # Now, use the DPI value to convert all dist_* lenghts to a number
-  # of pixels.
+  # Now, convert all dist_* lenghts to a number of points.
 
   if(!$self->{unit_pixels}) {
     for my $dd (map { \$self->{'dist_'.$_} }
 		(qw/to_box margin margin_globaltext/)) {
-      $$dd=dim2in($$dd)*$self->{dpi};
+      $$dd=dim2in($$dd);
     }
     $self->{unit_pixels}=1;
   }
@@ -861,7 +860,7 @@ sub qtext_position_case {
   my ($self,$q)=@_;
 
   my $x=max(@{$self->{question}->{$q}->{'x'}})
-    + ($self->{rtl} ? 1: -1)*$self->{dist_to_box};
+    + ($self->{rtl} ? 1: -1)*$self->{dist_to_box}*$self->{dpi};
   my $y=$self->q_ymean($q);
   return("stext $x $y 0 0.5");
 }
@@ -919,10 +918,10 @@ sub page_header {
     $self->command("matrix identity");
     $self->stext($self->{subst}->substitute($self->{verdict},@$student));
     $self->command("stext "
-		   .($self->{rtl} ? 
-		     $self->{width}-$self->{dist_margin_globaltext}
-		     :$self->{dist_margin_globaltext})
-		   ." $self->{dist_margin_globaltext} "
+		   .($self->{rtl} ?
+		     $self->{width}-$self->{dist_margin_globaltext}*$self->{dpi}
+		     :$self->{dist_margin_globaltext}*$self->{dpi})
+		   ." ".($self->{dist_margin_globaltext}*$self->{dpi})." "
 		   .($self->{rtl}?"1.0":"0.0")." 0.0");
 
     $self->{header_drawn}=1;

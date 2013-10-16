@@ -1097,11 +1097,12 @@ void BuildPdf::identity_matrix() {
 void BuildPdf::keep_on_scan(double *x, double *y) {
   double xp=*x;
   double yp=*y;
+  double margin_in_pixels=margin*dppt*72.;
   cairo_matrix_transform_point(&matrix,&xp,&yp);
-  if(xp<margin) {
-    *x=FIXX(margin);
-  } else if(xp>width_in_pixels/dppt-margin) {
-    *x=FIXX(width_in_pixels/dppt-margin);
+  if(xp<margin_in_pixels) {
+    *x=FIXX(margin_in_pixels);
+  } else if(xp>width_in_pixels-margin_in_pixels) {
+    *x=FIXX(width_in_pixels-margin_in_pixels);
   }
 }
 
@@ -1161,9 +1162,9 @@ void BuildPdf::draw_text_margin(int xside, double y,
 				const char *text) {
   double x;
   if(xside==1) {
-    x=width_in_pixels/dppt-margin;
+    x=width_in_pixels;
   } else {
-    x=margin;
+    x=0;
   }
   keep_on_scan(&x,&y);
   draw_text(x,y,xpos,ypos,text);
