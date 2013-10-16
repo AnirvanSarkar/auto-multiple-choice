@@ -1406,7 +1406,7 @@ sub exporte {
 	     'progres.id'=>'export',
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
-	       my $c=shift;
+	       my ($c,%data)=@_;
 	       if(-f $output) {
 		 # shows export messages
 
@@ -2407,46 +2407,47 @@ sub doc_maj {
 	     'progres.id'=>'MAJ',
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
-		 my $c=shift;
-		 my @err=$c->erreurs();
-		 if(@err) {
-		   notify_end_of_work('documents',
-				      __"Error while preparing documents");
+		 my ($c,%data)=@_;
+		 if(!$data{cancelled}) {
+		   my @err=$c->erreurs();
+		   if (@err) {
+		     notify_end_of_work('documents',
+					__"Error while preparing documents");
 
-		   my $message=__("Errors while processing the source file.")
-		     ." "
-		       .__("You have to correct the source file and re-run documents update.")." "
-# TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-			 .sprintf(__("See the processing log in '%s' below."),
-# TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-				  __"Command output details");
-		   $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($projet{'options'}->{'filter'} eq 'latex');
-		   $message.="\n\n".join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
+		     my $message=__("Errors while processing the source file.")
+		       ." "
+			 .__("You have to correct the source file and re-run documents update.")." "
+			   # TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+			   .sprintf(__("See the processing log in '%s' below."),
+				    # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+				    __"Command output details");
+		     $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($projet{'options'}->{'filter'} eq 'latex');
+		     $message.="\n\n".join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
 
 		     my $dialog = Gtk2::MessageDialog
-			 ->new_with_markup($w{'main_window'},
-					   'destroy-with-parent',
-					   'error','ok',
-					   $message);
+		       ->new_with_markup($w{'main_window'},
+					 'destroy-with-parent',
+					 'error','ok',
+					 $message);
 		     $dialog->run;
 		     $dialog->destroy;
-		 } else {
-		   notify_end_of_work('documents',
-				      __"Documents have been prepared");
+		   } else {
+		     notify_end_of_work('documents',
+					__"Documents have been prepared");
 
 		     # verif que tout y est
 
 		     my $ok=1;
-		     for(qw/question solution setting/) {
-			 $ok=0 if(! -f absolu($projet{'options'}->{'doc_'.$_}));
+		     for (qw/question solution setting/) {
+		       $ok=0 if(! -f absolu($projet{'options'}->{'doc_'.$_}));
 		     }
-		     if($ok) {
+		     if ($ok) {
 
 		       # set project option from filter requests
 
 		       my %vars=$c->variables;
 		       for my $k (keys %vars) {
-			 if($k =~ /^project:(.*)/) {
+			 if ($k =~ /^project:(.*)/) {
 			   set_project_option($1,$vars{$k});
 			 }
 		       }
@@ -2455,43 +2456,44 @@ sub doc_maj {
 
 		       dialogue_apprentissage('MAJ_DOCS_OK','','',0,
 					      __("Working documents successfully generated.")." "
-# TRANSLATORS: Here, "them" refers to the working documents.
+					      # TRANSLATORS: Here, "them" refers to the working documents.
 					      .__("You can take a look at them double-clicking on the list.")." "
-# TRANSLATORS: Here, "they" refers to the working documents.
+					      # TRANSLATORS: Here, "they" refers to the working documents.
 					      .__("If they are correct, proceed to layouts detection..."));
 		     }
-		 }
+		   }
 
-		 my $ap=($c->variable('ensemble') ? 'case' : 'marges');
-		 $projet{'options'}->{'_modifie'}=1
-		     if($projet{'options'}->{'annote_position'} ne $ap);
-		 $projet{'options'}->{'annote_position'}=$ap;
+		   my $ap=($c->variable('ensemble') ? 'case' : 'marges');
+		   $projet{'options'}->{'_modifie'}=1
+		     if ($projet{'options'}->{'annote_position'} ne $ap);
+		   $projet{'options'}->{'annote_position'}=$ap;
 
-		 my $ensemble=$c->variable('ensemble') && !$c->variable('outsidebox');
-		 if(($ensemble  || $c->variable('insidebox'))
-		    && $projet{'options'}->{'seuil'}<0.4) {
+		   my $ensemble=$c->variable('ensemble') && !$c->variable('outsidebox');
+		   if (($ensemble  || $c->variable('insidebox'))
+		       && $projet{'options'}->{'seuil'}<0.4) {
 		     my $dialog = Gtk2::MessageDialog
-			 ->new_with_markup($w{'main_window'},
-					   'destroy-with-parent',
-					   'question','yes-no',
-					   sprintf(($ensemble ?
-						    __("Your question has a separate answers sheet.")." "
-						    .__("In this case, letters are shown inside boxes.") :
-						   __("Your question is set to present labels inside the boxes to be ticked."))
-						   ." "
-# TRANSLATORS: Here, %s will be replaced with the translation of "darkness threshold".
-						   .__("For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project.")." "
-						   .__("At the moment, this parameter is set to %.02f.")." "
-						   .__("Would you like to set it to 0.5?")
-# TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
-						   ,__"darkness threshold",
-						   $projet{'options'}->{'seuil'}) );
+		       ->new_with_markup($w{'main_window'},
+					 'destroy-with-parent',
+					 'question','yes-no',
+					 sprintf(($ensemble ?
+						  __("Your question has a separate answers sheet.")." "
+						  .__("In this case, letters are shown inside boxes.") :
+						  __("Your question is set to present labels inside the boxes to be ticked."))
+						 ." "
+						 # TRANSLATORS: Here, %s will be replaced with the translation of "darkness threshold".
+						 .__("For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project.")." "
+						 .__("At the moment, this parameter is set to %.02f.")." "
+						 .__("Would you like to set it to 0.5?")
+						 # TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
+						 ,__"darkness threshold",
+						 $projet{'options'}->{'seuil'}) );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
-		     if($reponse eq 'yes') {
-			 $projet{'options'}->{'seuil'}=0.5;
-			 $projet{'options'}->{'_modifie'}=1;
+		     if ($reponse eq 'yes') {
+		       $projet{'options'}->{'seuil'}=0.5;
+		       $projet{'options'}->{'_modifie'}=1;
 		     }
+		   }
 		 }
 		 detecte_documents();
 	     });
@@ -2934,28 +2936,31 @@ sub calcule_mep {
 	     'texte'=>__"Detecting layouts...",
 	     'progres.id'=>'MEP',
 	     'fin'=>sub {
-		 detecte_mep();
+	       my ($c,%data)=@_;
+	       detecte_mep();
+	       if(!$data{cancelled}) {
 		 $projet{'_layout'}->begin_read_transaction('PGCN');
 		 my $c=$projet{'_layout'}->pages_count();
 		 $projet{'_layout'}->end_transaction('PGCN');
 		 if($c<1) {
-		     # avertissement...
-		     my $dialog = Gtk2::MessageDialog
-			 ->new_with_markup($w{'main_window'},
-					   'destroy-with-parent',
-					   'error', # message type
-					   'ok', # which set of buttons?
-					   __("No layout detected.")." "
-					   .__("<b>Don't go through the examination</b> before fixing this problem, otherwise you won't be able to use AMC for correction."));
-		     $dialog->run;
-		     $dialog->destroy;
+		   # avertissement...
+		   my $dialog = Gtk2::MessageDialog
+		     ->new_with_markup($w{'main_window'},
+				       'destroy-with-parent',
+				       'error', # message type
+				       'ok', # which set of buttons?
+				       __("No layout detected.")." "
+				       .__("<b>Don't go through the examination</b> before fixing this problem, otherwise you won't be able to use AMC for correction."));
+		   $dialog->run;
+		   $dialog->destroy;
 
 		 } else {
-		     dialogue_apprentissage('MAJ_MEP_OK','','',0,
-					    __("Layouts are detected.")." "
-					    .sprintf(__"You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red boxes are well positioned.",__"Check layouts")." "
-					    .__"Then you can proceed to printing and to examination.");
+		   dialogue_apprentissage('MAJ_MEP_OK','','',0,
+					  __("Layouts are detected.")." "
+					  .sprintf(__"You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red boxes are well positioned.",__"Check layouts")." "
+					  .__"Then you can proceed to printing and to examination.");
 		 }
+	       }
 	     });
 }
 
@@ -3134,7 +3139,10 @@ sub analyse_call {
 	     'signal'=>2,
 	     'progres.id'=>$oo{'progres'},
 	     'fin'=>sub {
-	       analyse_call_go('liste'=>$fh->filename,'fh'=>$fh,%oo);
+	       my ($c,%data)=@_;
+	       if(!$data{cancelled}) {
+		 analyse_call_go('liste'=>$fh->filename,'fh'=>$fh,%oo);
+	       }
 	     },
 	    );
   } else {
@@ -3212,11 +3220,13 @@ sub saisie_auto_ok {
 		 'allocate'=>($projet{'options'}->{'allocate_ids'} ?
 			      $w{'saisie_auto_allocate_start'} : 0),
 		 'fin'=>sub {
-		     my $c=shift;
+		     my ($c,%data)=@_;
 		     close($c->{'o'}->{'fh'});
 		     detecte_analyse('apprend'=>1);
 		     assoc_state();
-		     notify_end_of_work('capture',__"Automatic data capture has been completed");
+		     if(!$data{cancelled}) {
+		       notify_end_of_work('capture',__"Automatic data capture has been completed");
+		     }
 		 },
 	);
 
@@ -3465,8 +3475,9 @@ sub associe_auto {
 	     ],
 	     'texte'=>__"Automatic association...",
 	     'fin'=>sub {
-		 assoc_state();
-		 assoc_resultat();
+	       my ($c,%data)=@_;
+	       assoc_state();
+	       assoc_resultat() if(!$data{cancelled});
 	     },
 	);
 }
@@ -3760,6 +3771,9 @@ my $postcorrect_student_max;
 
 sub noter_postcorrect {
 
+  my ($c,%data)=@_;
+  return if($data{cancelled});
+
     # check marking scale data: in PostCorrect mode, ask for a sheet
     # number to get right answers from...
 
@@ -3934,8 +3948,10 @@ sub noter_calcul {
 	     'texte'=>__"Computing marks...",
 	     'progres.id'=>'notation',
 	     'fin'=>sub {
+	       my ($c,%data)=@_;
 	       notify_end_of_work('grading',
-				  __"Grading has been completed");
+				  __"Grading has been completed")
+		 if(!$data{cancelled});
 	       noter_resultat();
 	     },
 	     );
@@ -4247,7 +4263,9 @@ sub annote_copies {
 	   'texte'=>__"Annotating papers...",
 	   'progres.id'=>'annotate',
 	   'fin'=>sub {
-	     notify_end_of_work('annotation',__"Annotations have been completed");
+	     my ($c,%data);
+	     notify_end_of_work('annotation',__"Annotations have been completed")
+	       if(!$data{cancelled});
 	   },
 	  );
 }
@@ -6568,12 +6586,14 @@ sub send_emails {
 	     'texte'=>__"Sending emails...",
 	     'o'=>{'fh'=>$fh},
 	     'fin'=>sub {
-	       my $c=shift;
+	       my ($c,%data)=@_;
 	       close($c->{'o'}->{'fh'});
 
 	       my $ok=$c->variable('OK') || 0;
 	       my $failed=$c->variable('FAILED') || 0;
 	       my @message;
+	       push @message,"<b>".(__"Cancelled.")."</b>"
+		 if($data{cancelled});
 	       push @message,sprintf(__"%d message(s) has been sent.",$ok);
 	       if($failed>0) {
 		 push @message,"<b>".sprintf("%d message(s) could not be sent.",$failed)."</b>";

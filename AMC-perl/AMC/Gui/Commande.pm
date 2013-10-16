@@ -97,7 +97,7 @@ sub quitte {
 
     kill $self->{'signal'},$pid if($pid =~ /^[0-9]+$/);
 
-    $self->close();
+    $self->close(cancelled=>1);
 }
 
 sub open {
@@ -142,7 +142,7 @@ sub stop_watch {
 }
 
 sub close {
-  my ($self)=@_;
+  my ($self,%data)=@_;
 
   $self->stop_watch();
 
@@ -159,8 +159,8 @@ sub close {
 
   $self->{'avancement'}->set_text('');
 
-  &{$self->{'finw'}}($self) if($self->{'finw'});
-  &{$self->{'fin'}}($self) if($self->{'fin'});
+  &{$self->{'finw'}}($self,%data) if($self->{'finw'});
+  &{$self->{'fin'}}($self,%data) if($self->{'fin'});
 }
 
 sub get_output {
