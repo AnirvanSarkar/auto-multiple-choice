@@ -37,11 +37,16 @@ use_gettext;
 use_amc_plugins();
 
 my $cmd_pid='';
+my @output_files=();
 
 sub catch_signal {
     my $signame = shift;
     debug "*** AMC-prepare : signal $signame, transfered to $cmd_pid...";
     kill 2,$cmd_pid if($cmd_pid);
+    if(@output_files) {
+      debug "Removing files that are beeing built: ".join(" ",@output_files);
+      unlink(@output_files);
+    }
     die "Killed";
 }
 
@@ -632,13 +637,15 @@ if($to_do{f}) {
 
 if($to_do{k}) {
 
-    do_filter();
+  @output_files=($out_corrige ? $out_corrige : $prefix."corrige.pdf");
 
-    check_engine();
+  do_filter();
 
-    execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
-    transfer("$jobname.pdf",($out_corrige ? $out_corrige : $prefix."corrige.pdf"));
-    give_latex_errors(__"individual solution");
+  check_engine();
+
+  execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
+  transfer("$jobname.pdf",$output_files[0]);
+  give_latex_errors(__"individual solution");
 }
 
 ############################################################################
@@ -648,6 +655,8 @@ if($to_do{k}) {
 
 if($to_do{s}) {
   $to_do{s}='[sc]' if($to_do{s} eq '1');
+
+  @output_files=($out_sujet,$out_calage,$out_corrige,$out_catalog);
 
     do_filter();
 
