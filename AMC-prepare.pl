@@ -42,7 +42,7 @@ my @output_files=();
 sub catch_signal {
     my $signame = shift;
     debug "*** AMC-prepare : signal $signame, transfered to $cmd_pid...";
-    kill 2,$cmd_pid if($cmd_pid);
+    kill 9,$cmd_pid if($cmd_pid);
     if(@output_files) {
       debug "Removing files that are beeing built: ".join(" ",@output_files);
       unlink(@output_files);

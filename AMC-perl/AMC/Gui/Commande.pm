@@ -88,6 +88,10 @@ sub variable {
 
 sub quitte {
     my ($self)=(@_);
+
+    $self->{closing}=1;
+    $self->stop_watch();
+
     my $pid=$self->proc_pid();
     debug "Canceling command [".$self->{'signal'}."->".$pid."].";
 
@@ -128,12 +132,21 @@ sub open {
     }
 }
 
+sub stop_watch {
+  my ($self)=@_;
+
+  if($self->{tag}) {
+    Gtk2::Helper->remove_watch( $self->{tag} );
+    $self->{tag}='';
+  }
+}
 
 sub close {
   my ($self)=@_;
 
-  Gtk2::Helper->remove_watch( $self->{'tag'} ) if($self->{tag});
-  close($self->{'fh'}) if($self->{fh});
+  $self->stop_watch();
+
+  close($self->{'fh'});
 
   debug "Command [".$self->{'pid'}."] : OK - ".($self->n_messages('ERR'))." erreur(s)\n";
 
@@ -152,6 +165,8 @@ sub close {
 
 sub get_output {
     my ($self)=@_;
+
+    return if($self->{closing});
 
     if( eof($self->{'fh'}) ) {
       $self->close();
