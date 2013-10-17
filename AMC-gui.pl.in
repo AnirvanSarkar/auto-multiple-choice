@@ -2984,7 +2984,7 @@ sub saisie_manuelle {
 	  my $gsa=read_glade('choose-mode',
 			     qw/saisie_auto_c_auto_capture_mode
 				button_capture_go/);
-
+	  $w{saisie_auto_cb_allocate_ids}='';
 	  transmet_pref($gsa,'saisie_auto',$projet{'options'});
 	  my $ret=$w{'choose-mode'}->run();
 	  if($ret==1) {
@@ -3078,10 +3078,12 @@ sub saisie_auto_mode_update {
   valide_options_for_domain('saisie_auto',\%o,@_);
   $o{'auto_capture_mode'}=-1 if(!defined($o{'auto_capture_mode'}));
   $w{'button_capture_go'}->set_sensitive($o{'auto_capture_mode'}>=0);
-  if($o{'auto_capture_mode'}==1) {
-    $w{'saisie_auto_cb_allocate_ids'}->show();
-  } else {
-    $w{'saisie_auto_cb_allocate_ids'}->hide();
+  if($w{saisie_auto_cb_allocate_ids}) {
+    if($o{'auto_capture_mode'}==1) {
+      $w{'saisie_auto_cb_allocate_ids'}->show();
+    } else {
+      $w{'saisie_auto_cb_allocate_ids'}->hide();
+    }
   }
 }
 
