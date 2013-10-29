@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.20"/>
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkAdjustment" id="adjustment1">
     <property name="lower">1</property>
     <property name="upper">100</property>
@@ -21,10 +22,9 @@
     <property name="modal">True</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox19">
+      <object class="GtkVBox" id="dialog-vbox19">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <object class="GtkDrawingArea" id="postcorrect_photo">
@@ -40,14 +40,13 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area19">
+          <object class="GtkHButtonBox" id="dialog-action_area19">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="button22">
                 <property name="label">gtk-cancel</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -64,7 +63,6 @@
             <child>
               <object class="GtkButton" id="postcorrect_apply">
                 <property name="label">gtk-apply</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -107,11 +105,9 @@
               <object class="GtkHBox" id="Hbox1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">center</property>
                 <child>
                   <object class="GtkButton" id="button1">
                     <property name="label">gtk-go-back</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -129,9 +125,12 @@
                   <object class="GtkSpinButton" id="postcorrect_student">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="halign">center</property>
                     <property name="invisible_char">●</property>
                     <property name="width_chars">6</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="secondary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
                     <property name="adjustment">adjustment1</property>
                     <property name="snap_to_ticks">True</property>
                     <property name="numeric">True</property>
@@ -149,10 +148,13 @@
                   <object class="GtkSpinButton" id="postcorrect_copy">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="halign">center</property>
                     <property name="invisible_char">●</property>
                     <property name="width_chars">6</property>
                     <property name="invisible_char_set">True</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="secondary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
                     <property name="adjustment">adjustment2</property>
                     <property name="snap_to_ticks">True</property>
                     <property name="numeric">True</property>
@@ -167,7 +169,6 @@
                 <child>
                   <object class="GtkButton" id="button2">
                     <property name="label">gtk-go-forward</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -186,6 +187,22 @@
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="postcorrect_set_multiple">
+                <property name="label" translatable="yes">Guess simple/multiple status</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Sets type of all questions for which 2 or more answers are ticked on the teacher answer sheet to multiple</property>
+                <property name="use_action_appearance">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -38,6 +38,7 @@ my $data_dir='';
 
 my $postcorrect_student='';
 my $postcorrect_copy='';
+my $postcorrect_set_multiple='';
 
 my $progres=1;
 my $progres_id='';
@@ -54,6 +55,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "notemin=s"=>\$floor_mark,
 	   "postcorrect-student=s"=>\$postcorrect_student,
 	   "postcorrect-copy=s"=>\$postcorrect_copy,
+	   "postcorrect-set-multiple!"=>\$postcorrect_set_multiple,
 	   "progression-id=s"=>\$progres_id,
 	   "progression=s"=>\$progres,
 	   );
@@ -154,6 +156,7 @@ $scoring->variable('rounding',$rounding_scheme);
 $scoring->variable('granularity',$granularity);
 $scoring->variable('postcorrect_student',$postcorrect_student);
 $scoring->variable('postcorrect_copy',$postcorrect_copy);
+$scoring->variable('postcorrect_set_multiple',$postcorrect_set_multiple);
 
 # Gets the student/copy pairs that has been captured. Each element
 # from the array @captured_studentcopy is an arrayref containing a different
@@ -172,7 +175,7 @@ $delta/=(1+$#captured_studentcopy) if($#captured_studentcopy>=0);
 
 if($postcorrect_student) {
     $scoring->postcorrect($postcorrect_student,$postcorrect_copy,
-			  $darkness_threshold);
+			  $darkness_threshold,$postcorrect_set_multiple);
 }
 
 # Processes each student/copy in turn

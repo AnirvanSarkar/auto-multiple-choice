@@ -85,7 +85,7 @@ package AMC::DataModule::scoring;
 # * question is the question number.
 #
 # * type is the question type, either QUESTION_SIMPLE or
-#   QUESTION_MULTIPLE
+#   QUESTION_MULT
 #
 # * indicative is 1 if the question is indicative (the score is not
 #   taken into account when computing the student mark).
@@ -162,6 +162,8 @@ package AMC::DataModule::scoring;
 #
 # postcorrect_student
 # postcorrect_copy    identify the sheet completed by the teacher.
+#
+# postcorrect_set_multiple (see postcorrect function)
 #
 # --- the folleing values are supplied in the Preferences window
 #
@@ -405,20 +407,17 @@ sub define_statements {
 			." END"
 			." FROM ".$self->table("zone","capture")
 			." WHERE capture_zone.student=? AND capture_zone.copy=? AND capture_zone.type=?"},
+     'postCorrectMul'=>{'sql'=>"UPDATE ".$self->table("question")
+			." SET type=CASE"
+			."   WHEN (SELECT sum(c) FROM pc_temp"
+			."          WHERE q=question)>1"
+			."   THEN ?"
+			."   ELSE ?"
+			." END"
+		       },
      'postCorrectSet'=>{'sql'=>"UPDATE ".$self->table("answer")
 			." SET correct=(SELECT c FROM pc_temp"
 			."     WHERE q=question AND a=answer)"},
-     'postCorrect'=>{'sql'=>"UPDATE ".$self->table("answer")
-		     ." SET correct="
-		     ."(SELECT CASE"
-		     ." WHEN manual >= 0 THEN manual"
-		     ." WHEN total<=0 THEN -1"
-		     ." WHEN black >= ? * total THEN 1"
-		     ." ELSE 0"
-		     ." END AS ticked FROM ".$self->table("zone","capture")
-		     ." WHERE capture_zone.id_a=scoring_answer.question AND capture_zone.id_b=scoring_answer.answer"
-		     ." AND capture_zone.student=? AND capture_zone.copy=? AND capture_zone.type=?)"},
-
      'NEWScore'=>{'sql'=>"INSERT INTO ".$self->table("score")
 		  ." (student,copy,question,score,max,why)"
 		  ." VALUES (?,?,?,?,?,?)"},
@@ -798,40 +797,28 @@ sub unalias {
   return($student);
 }
 
-# postcorrect($student,$copy,$darkness_threshold) uses the ticked
-# values from the copy ($student,$copy) (filled by a teacher) to
-# determine which answers are correct for all sheets. This can be used
-# only when the questions/answers are not different from a sheet to
-# another (contrary to the use of random numerical values for
+# postcorrect($student,$copy,$darkness_threshold,$set_multiple) uses
+# the ticked values from the copy ($student,$copy) (filled by a
+# teacher) to determine which answers are correct for all sheets. This
+# can be used only when the questions/answers are not different from a
+# sheet to another (contrary to the use of random numerical values for
 # exemple).
 #
-# Here are two SQL implementations for postcorrect: postcorrect_a acts
-# with a single SQL request, whereas postcorrect_b builds a temporary
-# table and requires several SQL requests. postcorrect_b is usualy the
-# fastest, so that postcorrect is only a relay to postcorrect_b. Note
-# that an UPDATE request on a JOINture should be a good idea, but this
-# is not allowed by SQLite.
+# If $set_multiple is true, postcorrect also sets the type of all
+# questions for which 2 or more answers are ticked on the
+# ($student,$copy) answer sheet to be QUESTION_MULT, ans the type of
+# all other questions to QUESTION_SIMPLE.
 
-sub postcorrect_a {
-  my ($self,$student,$copy,$darkness_threshold)=@_;
-  $self->{'data'}->require_module('capture');
-  $self->statement('postCorrect')
-    ->execute($darkness_threshold,$student,$copy,ZONE_BOX);
-}
-
-sub postcorrect_b {
-  my ($self,$student,$copy,$darkness_threshold)=@_;
+sub postcorrect {
+  my ($self,$student,$copy,$darkness_threshold,$set_multiple)=@_;
   $self->{'data'}->require_module('capture');
   $self->statement('postCorrectNew')->execute();
   $self->statement('postCorrectClr')->execute();
   $self->statement('postCorrectPop')
     ->execute($darkness_threshold,$student,$copy,ZONE_BOX);
+  $self->statement('postCorrectMul')->execute(QUESTION_MULT,QUESTION_SIMPLE)
+    if($set_multiple);
   $self->statement('postCorrectSet')->execute();
-}
-
-sub postcorrect {
-  my ($self,@args)=@_;
-  $self->postcorrect_b(@args);
 }
 
 # new_score($student,$copy,$question,$score,$score_max,$why) adds a

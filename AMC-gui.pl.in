@@ -360,6 +360,7 @@ my %projet_defaut=('texsrc'=>'',
 
 		   'postcorrect_student'=>0,
 		   'postcorrect_copy'=>0,
+		   'postcorrect_set_multiple'=>'',
 
 		   '_modifie'=>1,
 		   '_modifie_ok'=>0,
@@ -3801,6 +3802,7 @@ sub noter_postcorrect {
 
 	$g_pcid=read_glade('choix_postcorrect',
 			   qw/postcorrect_student postcorrect_copy
+			      postcorrect_set_multiple
 			      postcorrect_photo postcorrect_apply/);
 
 	AMC::Gui::PageArea::add_feuille($w{'postcorrect_photo'});
@@ -3820,6 +3822,8 @@ sub noter_postcorrect {
 	  my @c=sort { $a <=> $b } (keys %{$postcorrect_ids{$postcorrect_student_min}});
 	  $w{'postcorrect_copy'}->set_value($c[0]);
 	}
+
+	$w{postcorrect_set_multiple}->set_active($projet{'options'}->{postcorrect_set_multiple});
 
     } else {
 	noter_calcul('','');
@@ -3909,21 +3913,24 @@ sub choix_postcorrect_cancel {
 sub choix_postcorrect_ok {
     my $student=$w{'postcorrect_student'}->get_value();
     my $copy=$w{'postcorrect_copy'}->get_value();
+    my $mult=$w{postcorrect_set_multiple}->get_active();
     $w{'choix_postcorrect'}->destroy();
 
     if( $student != $projet{'options'}->{'postcorrect_student'}
-      || $copy !=$projet{'options'}->{'postcorrect_copy'} ) {
+      || $copy != $projet{'options'}->{'postcorrect_copy'}
+      || $mult != $projet{'options'}->{'postcorrect_set_multiple'}) {
 	$projet{'options'}->{'postcorrect_student'}=$student;
 	$projet{'options'}->{'postcorrect_copy'}=$copy;
+	$projet{'options'}->{'postcorrect_set_multiple'}=$mult;
 	$projet{'options'}->{'_modifie_ok'}=1;
     }
 
-    noter_calcul($student,$copy);
+    noter_calcul($student,$copy,$mult);
 }
 
 sub noter_calcul {
 
-    my ($postcorrect_student,$postcorrect_copy)=@_;
+    my ($postcorrect_student,$postcorrect_copy,$postcorrect_set_multiple)=@_;
 
     debug "Using sheet $postcorrect_student:$postcorrect_copy to get correct answers"
 	if($postcorrect_student);
@@ -3942,6 +3949,9 @@ sub noter_calcul {
 			  "--notemin",$projet{'options'}->{'note_min'},
 			  "--postcorrect-student",$postcorrect_student,
 			  "--postcorrect-copy",$postcorrect_copy,
+			  ($postcorrect_set_multiple ?
+			   "--postcorrect-set-multiple" :
+			   "--no-postcorrect-set-multiple"),
 
 			  "--progression-id",'notation',
 			  "--progression",1,
