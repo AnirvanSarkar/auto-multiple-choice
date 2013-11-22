@@ -810,6 +810,8 @@ sub test_scoring {
   $s->end_transaction('tSCO');
 
   my $scoring=AMC::Scoring->new(data=>$self->{'temp_dir'}."/data");
+  $scoring->set_default_strategy($question->{default_strategy})
+    if($question->{default_strategy});
 
   set_debug($self->{debug_file});
 

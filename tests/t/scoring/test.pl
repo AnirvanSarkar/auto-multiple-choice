@@ -92,6 +92,22 @@ $t->test_scoring({multiple=>1,strategy=>"e=-10,formula=NBC,set.INVALID=NMC>0 || 
 		  {correct=>1,strategy=>'',ticked=>0},
 		  {correct=>0,strategy=>'',ticked=>1},
 		 ],-10);
+$t->test_scoring({multiple=>1,default_strategy=>"formula=NBC-NMC",
+		  strategy=>"b=1,m=0"},
+		 [{correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>0},
+		  {correct=>0,strategy=>'',ticked=>1},
+		  {correct=>0,strategy=>'',ticked=>0},
+		 ],1);
+$t->test_scoring({multiple=>1,default_strategy=>"formula=NBC-NMC",
+		  strategy=>"formula=,b=1,m=0"},
+		 [{correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>1},
+		  {correct=>1,strategy=>'',ticked=>0},
+		  {correct=>0,strategy=>'',ticked=>1},
+		  {correct=>0,strategy=>'',ticked=>0},
+		 ],3);
 
 $t->ok;
 

@@ -254,7 +254,8 @@ sub syntax_error {
 # computed from this formula
 sub use_formula {
   my ($self,$score,$why)=@_;
-  if($self->defined_directive("formula")) {
+  if($self->defined_directive("formula")
+    && $self->directive("formula") =~ /[^\s]/) {
     # a formula is given to compute the score directly
     debug "Using formula";
     $$score=$self->directive("formula");
