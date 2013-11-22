@@ -286,12 +286,19 @@ sub read_file {
   # regexp that matches an option name:
   my $opt_re='('.join('|',@{$self->{'options_names'}}).')';
 
+  debug "Parsing $input_file";
+
   open(my $infile,"<:utf8",$input_file);
  LINE: while(<$infile>) {
     chomp;
 
+    debug ":> $_";
+
     # removes comments
-    s/^\s*\#.*//;
+    if(/^\s*\#/) {
+      debug "Comment";
+      next LINE;
+    }
 
     # Insert other file...
     if(/^\s*IncludeFile:\s*(.*)/i) {
@@ -301,8 +308,9 @@ sub read_file {
 	File::Spec->splitpath( $input_file );
       my $dir=File::Spec->catpath($volume,$directories,'');
       my $f=File::Spec->rel2abs($filename,$dir);
+      debug "Include $f";
       if(-f $f) {
-	$self->read_file(File::Spec->rel2abs($filename,$dir));
+	$self->read_file($f);
       } else {
 	$self->parse_error(sprintf(__("File not found: %s"),$f));
       }
@@ -310,6 +318,7 @@ sub read_file {
 
     # options
     if(/^\s*$opt_re:\s*(.*)/i) {
+      debug "Option line ($1)";
       $self->{options}->{lc($1)}=$2;
       $self->value_cleanup($self->{reader_state}->{follow});
       $self->{reader_state}->{follow}=\$self->{'options'}->{lc($1)};
@@ -318,7 +327,8 @@ sub read_file {
       next LINE;
     }
 
-    if(/\s*([a-z0-9-]+):/i) {
+    if(/^([a-z0-9-]+):/i) {
+      debug "Unknown option";
 # TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option is given a value
       $self->parse_error(sprintf(__("Unknown option: %s"),$1));
     }
@@ -328,6 +338,7 @@ sub read_file {
       my $action=$1;
       my $options=$2;
       my $text=$3;
+      debug "Group A=$action O=$options";
       my %oo=$self->read_options($options);
       if($action eq '(') {
 	$self->{reader_state}->{group}=
@@ -352,6 +363,7 @@ sub read_file {
       my $options=$3;
       my $scoring=$4;
       my $text=$5;
+      debug "Question S=$star A=$angles O=$options S=$scoring";
       my %oo=$self->read_options($options);
       my $q_group=$self->{reader_state}->{group};
 
@@ -377,6 +389,7 @@ sub read_file {
 	my $letter=$2;
 	my $scoring=$3;
 	my $text=$4;
+	debug "Choice G=$sign L=$letter S=$scoring";
 	my $a=add_object($self->{reader_state}->{question}->{answers},
 			 'text'=>$text,'correct'=>($sign eq '+'),
 			 'letter'=>$letter,
@@ -384,6 +397,7 @@ sub read_file {
 	$self->value_cleanup($self->{reader_state}->{follow});
 	$follow=\$a->{'text'};
       } else {
+	debug "Choice outside question";
 # TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
 	$self->parse_error(__"Choice outside question");
       }
@@ -392,9 +406,11 @@ sub read_file {
 
     # text following last line
     if($self->{reader_state}->{follow}) {
+      debug "Follow...";
       ${$self->{reader_state}->{follow}}.="\n".$_;
     }
   }
+  debug "Cleanup...";
   $self->value_cleanup($self->{reader_state}->{follow});
   close($infile);
 }
