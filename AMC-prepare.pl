@@ -83,6 +83,8 @@ my $jobname="amc-compiled";
 
 my $f_tex;
 
+@ARGV=unpack_args(@ARGV);
+
 GetOptions("mode=s"=>\$mode,
 	   "with=s"=>\$latex_engine,
 	   "data=s"=>\$data_dir,
