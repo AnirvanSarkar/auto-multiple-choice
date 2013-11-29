@@ -147,6 +147,23 @@ sub split_latex_engine {
 
 split_latex_engine();
 
+sub set_filtered_source {
+  my ($filtered_source)=@_;
+
+  # change directory where the $filtered_source is, and set $f_base to
+  # the $filtered_source without path and without extension
+
+  ($v,$d,$f_tex)=splitpath($filtered_source);
+  chdir(catpath($v,$d,""));
+  $f_base=$f_tex;
+  $f_base =~ s/\.tex$//i;
+
+  # AMC usualy sets $prefix to "DOC-", but if $prefix is empty, uses
+  # the base name
+
+  $prefix=$f_base."-" if(!$prefix);
+}
+
 # Uses an AMC::Gui::Avancement object to tell regularly the calling
 # program how much work we have done so far.
 
@@ -178,6 +195,8 @@ $data_dir="$base-data" if(!$data_dir);
 for(\$data_dir,\$source,\$filtered_source) {
     $$_=rel2abs($$_);
 }
+
+set_filtered_source($filtered_source);
 
 # These variables are used to track errors from LaTeX compiling
 
@@ -384,11 +403,28 @@ sub analyse_amclog {
 # again if needed (for exemple when a second run is necessary to get
 # references right), and then produces a PDF file from LaTeX output.
 #
-# $oo{command} should be the LaTeX command to run, with all necessary
-# arguments
+# $oo{command} should be the options to be passed to latex_cmd, to
+# build the LaTeX command to run, with all necessary arguments
+
+my $filter_engine;
 
 sub execute {
     my %oo=(@_);
+
+    prepare_filter();
+
+    $oo{command}=[latex_cmd(@{$oo{command}})];
+
+    $ENV{AMC_CMD}=join(' ',@{$oo{command}});
+
+    if($filter) {
+      if(!$filter_engine->get_filter_result('done')
+	 || $filter_engine->get_filter_result('jobspecific')) {
+	do_filter();
+	$filter_engine->set_filter_result('done',1);
+      }
+    }
+    check_engine();
 
     my $n_run=0; # number of runs so far
     my $rerun=0; # has to re-run?
@@ -507,6 +543,25 @@ sub execute {
 # do_filter() converts the source file to LaTeX format, using the
 # right AMC::Filter::* module
 
+sub prepare_filter {
+  if($filter) {
+    if(!$filter_engine) {
+      load("AMC::Filter::$filter");
+      $filter_engine="AMC::Filter::$filter"->new(jobname=>$jobname);
+      $filter_engine->pre_filter($source);
+
+      # sometimes the filter says that the source file don't need to
+      # be changed
+
+      set_filtered_source($source)
+	if($filter_engine->unchanged);
+    }
+  } else {
+    # Empty filter: the source is already a LaTeX file
+    set_filtered_source($source);
+  }
+}
+
 sub do_filter {
   my $f_base;
   my $v;
@@ -516,43 +571,21 @@ sub do_filter {
     # Loads and call appropriate filter to convert $source to
     # $filtered_source
 
-    load("AMC::Filter::$filter");
-    my $filter="AMC::Filter::$filter"->new();
-    $filter->filter($source,$filtered_source);
+    prepare_filter();
+    $filter_engine->filter($source,$filtered_source);
 
     # show conversion errors
 
-    for($filter->errors()) {
+    for($filter_engine->errors()) {
       print "ERR: $_\n";
     }
 
     # sometimes the filter asks to override the LaTeX engine
 
-    split_latex_engine($filter->{'project_options'}->{'moteur_latex_b'})
-      if($filter->{'project_options'}->{'moteur_latex_b'});
+    split_latex_engine($filter_engine->{'project_options'}->{'moteur_latex_b'})
+      if($filter_engine->{'project_options'}->{'moteur_latex_b'});
 
-    # and sometimes the filter says that the source file don't need to
-    # be changed
-
-    $filtered_source=$source
-      if($filter->unchanged);
-  } else {
-    # Empty filter: the source is already a LaTeX file
-    $filtered_source=$source;
   }
-
-  # change directory where the $filtered_source is, and set $f_base to
-  # the $filtered_source without path and without extension
-
-  ($v,$d,$f_tex)=splitpath($filtered_source);
-  chdir(catpath($v,$d,""));
-  $f_base=$f_tex;
-  $f_base =~ s/\.tex$//i;
-
-  # AMC usualy sets $prefix to "DOC-", but if $prefix is empty, uses
-  # the base name
-
-  $prefix=$f_base."-" if(!$prefix);
 }
 
 # give_latex_errors($context) Relay suitably formatted LaTeX errors to
@@ -641,11 +674,7 @@ if($to_do{k}) {
 
   @output_files=($out_corrige ? $out_corrige : $prefix."corrige.pdf");
 
-  do_filter();
-
-  check_engine();
-
-  execute('command'=>[latex_cmd(qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/)]);
+  execute('command'=>[qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/]);
   transfer("$jobname.pdf",$output_files[0]);
   give_latex_errors(__"individual solution");
 }
@@ -659,10 +688,6 @@ if($to_do{s}) {
   $to_do{s}='[sc]' if($to_do{s} eq '1');
 
   @output_files=($out_sujet,$out_calage,$out_corrige,$out_catalog);
-
-    do_filter();
-
-    check_engine();
 
     my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
 
@@ -680,7 +705,7 @@ if($to_do{s}) {
 
     # 1) SUBJECT
 
-    execute('command'=>[latex_cmd(%opts,'SujetExterne'=>1)]);
+    execute('command'=>[%opts,'SujetExterne'=>1]);
     analyse_amclog("$jobname.amc");
     give_latex_errors(__"question sheet");
 
@@ -699,7 +724,7 @@ if($to_do{s}) {
     # 2) SOLUTION
 
   if($to_do{s}=~/s/) {
-    execute('command'=>[latex_cmd(%opts,'CorrigeExterne'=>1)]);
+    execute('command'=>[%opts,'CorrigeExterne'=>1]);
     transfer("$jobname.pdf",$out_corrige);
     give_latex_errors(__"solution");
   } else {
@@ -710,7 +735,7 @@ if($to_do{s}) {
     # 3) CATALOG
 
   if($to_do{s}=~/c/) {
-    execute('command'=>[latex_cmd(%opts,'CatalogExterne'=>1)]);
+    execute('command'=>[%opts,'CatalogExterne'=>1]);
     transfer("$jobname.pdf",$out_catalog);
     give_latex_errors(__"catalog");
   } else {
@@ -728,10 +753,6 @@ if($to_do{b}) {
 
     print "********** Making marks scale...\n";
 
-    do_filter();
-
-    check_engine();
-
     my %bs=();
     my %titres=();
 
@@ -742,6 +763,13 @@ if($to_do{b}) {
 
     my $delta=0;
 
+    # Launches the LaTeX engine
+
+    execute('command'=>[qw/ScoringExterne 1 NoHyperRef 1/],
+	    'once'=>1);
+
+    open(AMCLOG,"$jobname.amc") or die "Unable to open $jobname.amc : $!";
+
     # Opens a connection with the database
 
     my $data=AMC::Data->new($data_dir);
@@ -751,17 +779,11 @@ if($to_do{b}) {
     my $qs={};
     my $current_q={};
 
+    # and parse the log...
+
     $scoring->begin_transaction('ScEx');
     annotate_source_change($capture);
     $scoring->clear_strategy;
-
-    # Launches the LaTeX engine
-
-    execute('command'=>[latex_cmd(qw/ScoringExterne 1 NoHyperRef 1/)],
-	    'once'=>1);
-    open(AMCLOG,"$jobname.amc") or die "Unable to open $jobname.amc : $!";
-
-    # and parse the log...
 
     while(<AMCLOG>) {
 	debug($_) if($_);

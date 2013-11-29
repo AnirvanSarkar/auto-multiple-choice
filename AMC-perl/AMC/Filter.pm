@@ -20,11 +20,18 @@
 package AMC::Filter;
 
 sub new {
-    my $class = shift;
+    my ($class,%o) = @_;
     my $self={'errors'=>[],
 	      'project_options'=>{},
 	      'filter_results'=>{},
+	      'jobname'=>'',
+	      'jobspecific'=>'',
 	     };
+
+    for my $k (keys %o) {
+	$self->{$k}=$o{$k} if(defined($self->{$k}));
+    }
+
     bless ($self, $class);
     return $self;
 }
@@ -42,6 +49,10 @@ sub error {
 sub errors {
   my ($self)=@_;
   return(@{$self->{'errors'}});
+}
+
+sub pre_filter {
+  my ($self,$input_file)=@_;
 }
 
 sub filter {
@@ -63,9 +74,14 @@ sub set_filter_result {
   $self->{'filter_results'}->{$name}=$value;
 }
 
+sub get_filter_result {
+  my ($self,$name)=@_;
+  return($self->{'filter_results'}->{$name});
+}
+
 sub unchanged {
   my ($self)=@_;
-  return($self->{'filter_results'}->{'unchanged'});
+  return($self->get_filter_result('unchanged'));
 }
 
 1;

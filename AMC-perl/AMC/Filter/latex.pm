@@ -31,38 +31,47 @@ use Text::ParseWords;
 
 sub new {
     my $class = shift;
-    my $self  = $class->SUPER::new();
+    my $self  = $class->SUPER::new(@_);
     bless ($self, $class);
     return $self;
 }
 
-sub filter {
-  my ($self,$input_file,$output_file)=@_;
+sub pre_filter {
+  my ($self,$input_file)=@_;
 
   # first of all, look in the source file header if there are some
   # AMC options
 
-  my %options=();
+  $self->{options}={};
 
   open(INPUT,$input_file);
  LINE: while(<INPUT>) {
     if(/^[%]{2}AMC:\s*([a-zA-Z0-9_-]+)\s*=\s*(.*)/) {
-      $options{$1}=$2;
+      $self->{options}->{$1}=$2;
     }
     last LINE if(!/^%/);
   }
   close(INPUT);
 
-  print STDERR "Options : ".join(' ',keys %options)."\n";
+  print STDERR "Options : ".join(' ',keys %{$self->{options}})."\n";
 
   # pass some of these options to AMC project configuration
 
-  $self->set_project_option('moteur_latex_b',$options{'latex_engine'})
-    if($options{'latex_engine'});
+  $self->set_project_option('moteur_latex_b',$self->{options}->{'latex_engine'})
+    if($self->{options}->{'latex_engine'});
+
+  $self->set_filter_result('jobspecific',1) if($self->{options}->{jobspecific});
+
+  $self->set_filter_result('unchanged',1)
+    if(!$self->{options}->{'preprocess_command'});
+}
+
+sub filter {
+  my ($self,$input_file,$output_file)=@_;
 
   # exec preprocess command if needed
 
-  if($options{'preprocess_command'}) {
+  if($self->{options}->{'preprocess_command'}) {
 
     # copy the file, unchanged
 
@@ -71,7 +80,7 @@ sub filter {
     # exec preprocess command, that may modify this file
 
     my ($fxa,$fxb,$f) = splitpath($output_file);
-    my @cmd=quotewords('\s+',0,$options{'preprocess_command'});
+    my @cmd=quotewords('\s+',0,$self->{options}->{'preprocess_command'});
     $cmd[0]="./".$cmd[0] if($cmd[0] && $cmd[0] !~ m:/:);
     push @cmd,$f;
 
@@ -79,13 +88,12 @@ sub filter {
     chdir(catpath($fxa,$fxb,''));
     debug_and_stderr "Working directory: ".getcwd;
     debug_and_stderr "Calling preprocess command: ".join(' ',@cmd);
+    $ENV{AMC_JOBNAME}=$self->{jobname};
     if(system(@cmd)!=0) {
       debug_and_stderr("Preprocess command call failed: [$?] $!");
     }
     chdir($cwd);
 
-  } else {
-    $self->set_filter_result('unchanged',1);
   }
 }
 
