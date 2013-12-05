@@ -827,7 +827,7 @@ sub export {
     my $nq=1+$#student_columns+1+$#questions_0+1+$#questions_1;
 
     my $dimx=3+$nq+1+$#codes;
-    my $dimy=5+1+$#{$self->{'marks'}};
+    my $dimy=6+1+$#{$self->{'marks'}};
 
     my $feuille=$doc->getTable(0,$dimy,$dimx);
     $doc->expandTable($feuille, $dimy, $dimx);
@@ -853,6 +853,7 @@ sub export {
     my %col_content=();
 
     my $notemax;
+    my $notenull;
 
     my $jj=$y0;
 
@@ -894,6 +895,29 @@ sub export {
     for(@codes) {
 	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
 	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_));
+    }
+
+    ##########################################################################
+    # optional row: null score
+    ##########################################################################
+
+    if($self->{'_scoring'}->variable('mark_null')!=0) {
+      $jj++;
+
+      $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
+      $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
+      $doc->cellValue($feuille,$jj,$code_col{'total'},
+		      encode('utf-8',translate_id_name('null')));
+
+      $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
+      $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
+      $doc->cellValue($feuille,$jj,$code_col{'note'},
+		      $self->{'_scoring'}->variable('mark_null'));
+      $notenull='[.'.yx2ooo($jj,$code_col{'note'},1,1).']';
+
+      $code_row{'null'}=$jj;
+    } else {
+      $notenull='';
     }
 
     ##########################################################################
@@ -988,15 +1012,17 @@ sub export {
 		   'formula'=>"oooc:=IF($notemax>0;"
 		   .($notemin ne '' ? "MAX($notemin;" : "")
 		   .($plafond ? "MIN($notemax;" : "")
+		   .($notenull ? $notenull."+" : "")
 		   ."$arrondi([."
 		   .yx2ooo($jj,$code_col{'total'})
 		   ."]/[."
 		   .yx2ooo($jj,$code_col{'max'})
-		   ."]*$notemax/$grain)*$grain"
+		   ."]*".($notenull ? "(".$notemax."-".$notenull.")" : $notemax)."/$grain)*$grain"
 		   .($plafond ? ")" : "")
 		   .($notemin ne '' ? ")" : "")
 		   .";"
 		   .($notemin ne '' ? "MAX($notemin;" : "")
+		   .($notenull ? $notenull."+" : "")
 		   ."$arrondi([."
 		   .yx2ooo($jj,$code_col{'total'})
 		   ."]/$grain)*$grain"

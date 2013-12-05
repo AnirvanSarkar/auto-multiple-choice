@@ -30,6 +30,7 @@ use encoding 'utf8';
 my $darkness_threshold=0.1;
 
 my $floor_mark='';
+my $null_mark=0;
 my $perfect_mark=20;
 my $ceiling=1;
 my $granularity='0.5';
@@ -53,6 +54,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "notemax=s"=>\$perfect_mark,
 	   "plafond!"=>\$ceiling,
 	   "notemin=s"=>\$floor_mark,
+	   "notenull=s"=>\$null_mark,
 	   "postcorrect-student=s"=>\$postcorrect_student,
 	   "postcorrect-copy=s"=>\$postcorrect_copy,
 	   "postcorrect-set-multiple!"=>\$postcorrect_set_multiple,
@@ -64,7 +66,7 @@ set_debug($debug);
 
 # fixes decimal separator ',' potential problem, replacing it with a
 # dot.
-for my $x (\$granularity,\$floor_mark,\$perfect_mark) {
+for my $x (\$granularity,\$null_mark,\$floor_mark,\$perfect_mark) {
     $$x =~ s/,/./;
     $$x =~ s/\s+//;
 }
@@ -149,6 +151,7 @@ $data->begin_transaction('MARK');
 annotate_source_change($capture);
 $scoring->clear_score;
 $scoring->variable('darkness_threshold',$darkness_threshold);
+$scoring->variable('mark_null',$null_mark);
 $scoring->variable('mark_floor',$floor_mark);
 $scoring->variable('mark_max',$perfect_mark);
 $scoring->variable('ceiling',$ceiling);
@@ -263,12 +266,13 @@ for my $sc (@captured_studentcopy) {
   my $x;
 
   if ($perfect_mark>0) {
-    $x=$perfect_mark/$granularity*$total/$max_i;
+    $x=($perfect_mark-$null_mark)/$granularity*$total/$max_i;
   } else {
     $x=$total/$granularity;
   }
   $x=&$rounding($x) if($rounding);
   $x*=$granularity;
+  $x+=$null_mark;
 
   # Apply ceiling
 

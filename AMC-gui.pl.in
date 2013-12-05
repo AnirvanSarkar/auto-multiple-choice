@@ -342,6 +342,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'regroupement_type'=>'STUDENTS',
 		   'regroupement_copies'=>'ALL',
 
+		   'note_null'=>0,
 		   'note_min'=>'',
 		   'note_max'=>20,
 		   'note_max_plafond'=>1,
@@ -3946,6 +3947,7 @@ sub noter_calcul {
 			  "--arrondi",$projet{'options'}->{'note_arrondi'},
 			  "--notemax",$projet{'options'}->{'note_max'},
 			  ($projet{'options'}->{'note_max_plafond'} ? "--plafond" : "--no-plafond"),
+			  "--notenull",$projet{'options'}->{'note_null'},
 			  "--notemin",$projet{'options'}->{'note_min'},
 			  "--postcorrect-student",$postcorrect_student,
 			  "--postcorrect-copy",$postcorrect_copy,
@@ -4710,7 +4712,7 @@ sub accepte_preferences {
   }
 
   if ($projet{'nom'}) {
-    for my $k (qw/note_min note_max note_grain/) {
+    for my $k (qw/note_null note_min note_max note_grain/) {
       $projet{'options'}->{$k} =~ s/\s+//g;
     }
   }
