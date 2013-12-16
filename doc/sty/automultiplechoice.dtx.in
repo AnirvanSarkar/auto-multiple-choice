@@ -1345,6 +1345,10 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMC@loc@corrected{Corrected}
 \def\AMC@loc@catalog{Catalog}
 %    \end{macrocode}
+% Localization text for Explanation
+%    \begin{macrocode}
+\def\AMC@loc@explain{\textit{\textbf{Explanation: }}}
+%    \end{macrocode}
 % Last choice added at the end for multiple questions when option
 % |completemulti| is used:
 %    \begin{macrocode}
@@ -1963,6 +1967,28 @@ Three digits and two letters:\insertgroup{mixed}.
 }}
 %    \end{macrocode}\end{macro}
 %
+% \subsection{Checking Environment}
+%
+% \begin{macro}{\AMCcurrentenv}
+%     Sets the current environment as document.
+%    \begin{macrocode}
+\def\AMCcurrentenv{document}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ifenv}
+%     Checks for the current environment.
+%    \begin{macrocode}
+\def\ifenv#1{
+    \def\AMC@tempenv{#1}%
+    \ifx\AMC@tempenv\AMCcurrentenv
+        \expandafter\@firstoftwo
+    \else
+        \expandafter\@secondoftwo
+    \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Handling groups of questions}
 %
 % The package allows to handle groups of questions, so as to be able
@@ -2369,6 +2395,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCnobloc{\AMC@qblocfalse}
 \def\AMCbloc{\AMC@qbloctrue}
 \newenvironment{question}[2][]{%
+  \def\AMCcurrentenv{question}%
   \global\def\AMCid@name{#2}\AMC@affecte{#2}{\AMCid@quest}%
   \ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi%
   \AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
@@ -2392,6 +2419,21 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCbeginQuestion{\AMC@qaff}{}}%
 {\vspace*{\ouverte@vs}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
 %    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}
+%
+% \subsubsection{Explanations}
+%
+% \begin{macro}{\explain}
+%   The command |\explain| is used inside |question|-like environments
+%   to give the explanation for the answers of a question.
+%    \begin{macrocode}
+\newcommand{\explain}[1]{
+\ifAMC@correchead
+	\ifenv{question}{\par\noindent{\AMC@loc@explain #1}}{\AMC@error@explain}\vspace{1ex}
+\else \ifenv{question}{}{\AMC@error@explain}
+\fi
+}
+%    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Scoring}
 %
@@ -3472,6 +3514,17 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{automarks}{\AMC@automarkstrue}
 \ProcessOptionsX
 %    \end{macrocode}
+%
+% \subsection{Package Errors}
+%
+%  \begin{macro}{\AMC@error@explain}
+%   Error to display if |\explain| command is used outside question like environments
+%    \begin{macrocode}
+\def\AMC@error@explain{\PackageError{automultiplechoice}{
+    Command \protect\explain\space can only be used inside\MessageBreak question like environments}{Something's gone wrong.\MessageBreak \space \space Try typing \space <return>\space to proceed, ignoring \protect\explain.
+}}
+%    \end{macrocode}
+%  \end{macro}
 %
 % \subsection{Optional features}
 %
