@@ -88,7 +88,7 @@
       <title>Operating system</title>
 
       <para>The AMC utilities have been written for Linux. They might be
-      adapted to MAC OS X or Windows without too many difficulties, but I won
+      adapted to MAC OS X or Windows without too many difficulties, but I won't
       do that in the near future. Please contact me if you are interested to
       do it : I can help you a little, and I will include changes in AMC if
       necessary.</para>
@@ -271,13 +271,13 @@ sudo make install</screen>
   <sect1 id="AMC-TXT">
     <title>AMC-TXT syntax</title>
 
-    <para>For users who are not ready to learn LaTeX (if not already speaking
-    this language), AMC includes a filter to process simple plain text files
-    in a particular format, named AMC-TXT. This section is devoted to detail
-    the syntax of AMC-TXT files. If you prefer use LaTeX to gain a
+    <para>For users who are not ready to learn LaTeX (if not already familiar
+    with this language), AMC includes a filter to process simple plain text 
+    files in a particular format, named AMC-TXT. This section is devoted to 
+    detail the syntax of AMC-TXT files. If you prefer use LaTeX to gain a
     fine-control over your questionnaires, skip to next section.</para>
 
-    <para>Let us begin with a simple exemple:</para>
+    <para>Let us begin with a simple example:</para>
 
     <!--NAME: AMC-TXT format simple example
 DESC: A very simple example (from the documentation) using the AMC-TXT format. This is a very simple plain text format to write your questionnaires without any LaTeX knowledge.-->
@@ -469,7 +469,7 @@ the best you can.
           <listitem>
             <para>Give a translation of <emphasis>Name and surname</emphasis>,
             a text written in the box where students are to write their
-            udentity.</para>
+            identity.</para>
           </listitem>
         </varlistentry>
 
@@ -553,7 +553,7 @@ the best you can.
 
           <listitem>
             <para>Set this option to 1 if you want to use LaTeX commands in
-            your texts. This allows for exemple to insert mathematical
+            your texts. This allows for example to insert mathematical
             formulas, like <code>$\sqrt{a+b}$</code>. If 0 (default), all your
             texts will be written unmodified.</para>
           </listitem>
@@ -564,7 +564,7 @@ the best you can.
 
           <listitem>
             <para>Give commands you want to be added to the LaTeX preambule
-            (for exemple <command>\usepackage</command> commands).</para>
+            (for example <command>\usepackage</command> commands).</para>
           </listitem>
         </varlistentry>
 
@@ -573,7 +573,7 @@ the best you can.
 
           <listitem>
             <para>Give commands to be inserted at the beginning of the LaTeX
-            <command>document</command> environment (for exemple macro
+            <command>document</command> environment (for example macro
             definitions).</para>
           </listitem>
         </varlistentry>
@@ -618,7 +618,7 @@ the best you can.
             <term>AnswerSheetPresentation:</term>
 
             <listitem>
-              <para>Presentation of the answer sheet. For exemple, remind the
+              <para>Presentation of the answer sheet. For example, remind the
               students that the answers are to be given on this sheet
               <emphasis>only</emphasis>.</para>
             </listitem>
@@ -659,7 +659,7 @@ the best you can.
 
         <para>Some options are available for questions. They must be separated
         by commas and enclosed by square brackets just after the leading
-        <code>*</code>'s, as in the following exemple:</para>
+        <code>*</code>'s, as in the following example:</para>
 
         <programlisting>*[ordered,horiz,name=sum] How much are
 one plus one?
@@ -759,7 +759,7 @@ one plus one?
         <para>You can set the scoring strategy for a particular question or
         choice enclosing it with braces just after the leading characters
         (<code>*</code>, <code>**</code>, <code>+</code> or <code>-</code>)
-        and the possible options, as in the following exemple. See <xref
+        and the possible options, as in the following example. See <xref
         linkend="bareme"/> for details about the scoring strategy
         syntax.</para>
 
@@ -1838,7 +1838,7 @@ Durée : 10 minutes.
           </listitem>
         </itemizedlist>
 
-        <para>With these commands, you can for exemple make a exam taking 4
+        <para>With these commands, you can for example make a exam taking 4
         questions from group GA at random, 5 questions from group GB at
         random, and all the questions from group GO, shuffling all these
         questions, with the following code (to be used inside the argument of
@@ -2925,7 +2925,7 @@ respective parameters \VQa{} et \VQb{}.
         <sect4>
           <title>A simple computation</title>
 
-          <para>Here is an exemple with a simple computation:</para>
+          <para>Here is an example with a simple computation:</para>
 
           <para><programlisting>\begin{question}{inverse}
   \pgfmathrandominteger{\x}{1}{50}
@@ -2946,7 +2946,7 @@ respective parameters \VQa{} et \VQb{}.
           result.</para>
 
           <para>Output formatting is also available with the command
-          <command>\pgfmathprintnumber</command>, as in the following exemple
+          <command>\pgfmathprintnumber</command>, as in the following example
           (three digits after decimal point, and use of the comma as a decimal
           point).</para>
 
@@ -3704,7 +3704,7 @@ Name :
         many kinds of scoring strategies, as in the following example:</para>
 
         <para><!--NAME: Scoring strategy
-DESC: Exemple (from the documentation) with different scoring strategies.--><programlisting
+DESC: Example (from the documentation) with different scoring strategies.--><programlisting
         id="modeles-scoring.tex" linenumbering="numbered">\documentclass{article}
 
 \usepackage[utf8x]{inputenc}
@@ -4258,7 +4258,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         </listitem>
       </itemizedlist>
 
-      <para>Here is a minimal exemple:</para>
+      <para>Here is a minimal example:</para>
 
       <programlisting>\documentclass[a4paper]{article}
 \usepackage[separateanswersheet]{automultiplechoice}    
@@ -4340,7 +4340,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         </listitem>
       </itemizedlist>
 
-      <para>Here is a minimal exemple:</para>
+      <para>Here is a minimal example:</para>
 
       <programlisting>\documentclass[a4paper]{article}
 \usepackage{multicol}
@@ -4742,7 +4742,7 @@ Moniuszko,Stanisław,003</programlisting>
               <para>gives the LaTeX engine (command) to be used.
               <replaceable>latex-engine</replaceable> can be
               <command>pdflatex</command> or <command>xelatex</command> for
-              exemple.</para>
+              example.</para>
             </listitem>
           </varlistentry>
 
@@ -4956,7 +4956,7 @@ Moniuszko,Stanisław,003</programlisting>
             <listitem>
               <para>with "<option>--methode CUPS</option>",
               <command>AMC-imprime.pl</command> prints to a CUPS printer. One
-              print job is sent for each copy, allowing for exemple to use
+              print job is sent for each copy, allowing for example to use
               stapling. Use the following options with this method:</para>
 
               <variablelist>
@@ -6939,7 +6939,7 @@ Moniuszko,Stanisław,003</programlisting>
         <para>To avoid encoding problems, one can place some arguments in a
         XML file and use the <option>--xmlargs
         <replaceable>file.xml</replaceable></option> argument as the first
-        command argument. Here is an exemple of such a file:</para>
+        command argument. Here is an example of such a file:</para>
 
         <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;arguments&gt;
