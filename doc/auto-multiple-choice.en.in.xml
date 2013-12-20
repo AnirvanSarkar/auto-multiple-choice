@@ -1737,6 +1737,101 @@ Durée : 10 minutes.
 \end{question}</programlisting></para>
       </sect3>
 
+      <sect3 id="latex.explain">
+        <title id="latex.explain.title">Explanation for the answers of a question</title>
+
+        <para>
+        To provide explanation for the answers of a question, one can use the 
+        <command>\explain</command> command. The explanations are optional and are only 
+        displayed in the Solution and Catalog file.
+        </para>
+
+        <para>
+        Here is a simple example:
+        </para>
+
+        <para>
+        <programlisting>
+\begin{question}{explanation}
+  Which has the highest elevation among the following?
+  \begin{choices}
+      \correctchoice{Sagarmatha}
+      \wrongchoice{K2}
+      \wrongchoice{Mont Blanc}
+      \wrongchoice{Aconcagua}
+  \end{choices}
+  \explain{Sagarmatha which literally means `Head of sky' is the native name of
+           Mount Everest, the highest mountain in the world.}
+\end{question}</programlisting>
+        </para>
+
+        <note>
+          <para>
+          The <command>explain</command> command can be used inside
+          <option>question</option> like environments only. This includes
+          <option>question</option>, <option>questionmult</option> and
+          <option>questionmultx</option> environments.
+          </para>
+        </note>
+        
+        <para>
+        By default this command prints <emphasis>Explanation: </emphasis>
+        before each explanations. This behaviour can be changed using the
+        <command>\AMCtext</command> command (see section <xref linkend="AMCtext"/>).
+        </para>
+        
+        <para>
+        If you want to change this default behaviour only for some questions
+        and not for all just use the <command>\AMCtext</command> command before the
+        <command>\explain</command> command as in the following example:
+        </para>
+
+        <para>
+        <programlisting>
+\begin{question}{elevation}
+  Which has the highest elevation among the following?
+  \begin{choices}
+      \correctchoice{Sagarmatha}
+      \wrongchoice{K2}
+      \wrongchoice{Mont Blanc}
+      \wrongchoice{Aconcagua}
+  \end{choices}
+  \explain{Sagarmatha which literally means `Head of sky' is the native name of
+         Mount Everest, the highest mountain in the world.}
+\end{question}
+
+\begin{question}{odd}
+  Pick the odd one out.
+  \begin{choices}
+      \correctchoice{Kilimanjaro}
+      \wrongchoice{Himalayas}
+      \wrongchoice{Alps}
+      \wrongchoice{Andes}
+  \end{choices}
+  \AMCtext{explain}{\textit{\textbf{Reason: }}}
+  \explain{Kilimanjaro is a mountain while the rest are mountain ranges.}
+\end{question}
+
+\begin{questionmultx}{himalaya}
+  Among the following which is in the Himalayas?
+  \begin{choices}
+      \correctchoice{Mount Everest}
+      \correctchoice{K2}
+      \wrongchoice{Mont Blanc}
+      \wrongchoice{Aconcagua}
+  \end{choices}
+  \explain{Aconcagua is located in the Andes mountain range while Mont Blanc
+                 is located in the Alps.}
+\end{questionmultx}</programlisting>
+        </para>
+        
+        <para>
+        This will now print <emphasis>Explanation: </emphasis> before the explanations
+        of first and third question but <emphasis>Reason: </emphasis> before the
+        explanation of second question.
+        </para>
+      </sect3>
+
       <sect3>
         <title>Putting answers on multiple columns</title>
 
@@ -2449,7 +2544,7 @@ and write your first and last names below.
         desirable.</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="AMCtext">
         <title>Customizing some texts inserted by AMC</title>
 
         <para>Use <command>\AMCtext</command> for the following
@@ -2475,6 +2570,21 @@ and write your first and last names below.
             replaces « Catalog » (the English default text) with the given
             <replaceable>title</replaceable> on the questions catalog produced
             thanks to option <option>catalog</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para>
+            <code>\AMCtext{explain}{<replaceable>title</replaceable>}</code>
+            replaces « <emphasis>Explanation</emphasis> » (the English default text)
+            with the given <replaceable>title</replaceable> before the explanations
+            produced due to the <command>explain</command> command.
+            </para>
+
+            <para>
+            The default option for this command is:
+            </para>
+
+            <programlisting>\AMCtext{explain}{\textit{\textbf{Explanation: }}}</programlisting>
           </listitem>
 
           <listitem>
