@@ -2305,7 +2305,7 @@ sub doc_maj {
 	my $reponse=$dialog->run;
 	$dialog->destroy;
 
-	if($reponse eq 'cancel') {
+	if($reponse ne 'ok') {
 	    return(0);
 	}
 
@@ -2330,7 +2330,7 @@ sub doc_maj {
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;
 
-	    if($reponse eq 'cancel') {
+	    if($reponse ne 'ok') {
 		return(0);
 	    }
 	}
