@@ -1294,8 +1294,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMCids@side
 \newdimen\AMCids@width
 \newdimen\AMCids@height
-\define@choicekey*{AMCids}{pos}[\var\nr]{none,top,side}{%
-  \ifcase\nr\relax
+\define@choicekey*{AMCids}{pos}[\AMCidsVar\AMCidsVarN]{none,top,side}{%
+  \ifcase\AMCidsVarN\relax
     \AMCids@topfalse\AMCids@sidefalse
   \or
     \AMCids@toptrue\AMCids@sidefalse
