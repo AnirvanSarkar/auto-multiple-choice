@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -24,12 +24,18 @@ use File::Spec::Functions qw/tmpdir/;
 
 use AMC::Basic;
 use AMC::DataModule::capture ':zone';
+use AMC::Gui::Prefs;
 
 use Gtk2 -init;
 
 use POSIX qw(ceil);
 
-use constant ID_AMC_BOX => 100;
+use constant {
+  ID_AMC_BOX => 100,
+
+  ZOOMS_EDIT_DND => 0,
+  ZOOMS_EDIT_CLICK => 1,
+};
 
 my $col_manuel = Gtk2::Gdk::Color->new(223*256,224*256,133*256);
 my $col_modif = Gtk2::Gdk::Color->new(226*256,184*256,178*256);
@@ -51,11 +57,25 @@ sub new {
 	'size-prefs'=>'',
 	'encodage_interne'=>'UTF-8',
 	'list_view'=>'',
+	'zooms_edit_mode'=>ZOOMS_EDIT_DND,
+	'global_options'=>'',
+	'prefs'=>'',
     };
 
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
+
+    if($self->{global_options}) {
+      $self->{zooms_edit_mode}=$self->{global_options}->{zooms_edit_mode};
+    }
+
+    $self->{prefs}->store_register(
+# TRANSLATORS: One of the ways to change a box's ticked state in the zooms window
+				   'zooms_edit_mode'=>cb_model(ZOOMS_EDIT_DND,__"drag and drop",
+# TRANSLATORS: One of the ways to change a box's ticked state in the zooms window
+							       ZOOMS_EDIT_CLICK,__"click"),
+				  );
 
     $self->{'ids'}=[];
     $self->{'pb_src'}={};
@@ -93,9 +113,11 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for(qw/main_window zooms_table_0 zooms_table_1 decoupage scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info button_previous button_next/) {
+    for(qw/main_window zooms_table_0 zooms_table_1 decoupage scrolled_0 scrolled_1 label_0 label_1 event_0 event_1 button_apply button_close info button_previous button_next /) {
 	$self->{$_}=$self->{'gui'}->get_object($_);
     }
+
+    $self->{prefs}->transmet_pref($self->{'gui'},'','zooms',$self);
 
     $self->{'label_0'}->set_markup('<b>'.$self->{'label_0'}->get_text.'</b>');
     $self->{'label_1'}->set_markup('<b>'.$self->{'label_1'}->get_text.'</b>');
@@ -127,6 +149,24 @@ sub new {
     $self->load_boxes();
 
     return($self);
+}
+
+sub edit_mode_update {
+  my ($self)=@_;
+
+  $self->{prefs}->reprend_pref('','zooms',$self);
+  if($self->{global_options}) {
+    if($self->{global_options}->{zooms_edit_mode} != $self->{zooms_edit_mode}) {
+      $self->{global_options}->{_modifie_ok}=1;
+      $self->{global_options}->{zooms_edit_mode}=$self->{zooms_edit_mode};
+    }
+  }
+}
+
+sub dnd_mode { # drag and drop
+  my ($self)=@_;
+
+  return($self->{zooms_edit_mode} == ZOOMS_EDIT_DND);
 }
 
 sub clear_boxes {
@@ -285,9 +325,22 @@ sub load_boxes {
 			   $id );
 	$self->{'eb'}->{$id}
 	  ->signal_connect('drag-begin'=>sub {
-			     $self->{'eb'}->{$id}
-			       ->drag_source_set_icon_pixbuf($self->{'image'}->{$id}->get_pixbuf);
+			     if($self->dnd_mode) {
+			       $self->{'eb'}->{$id}
+				 ->drag_source_set_icon_pixbuf($self->{'image'}->{$id}->get_pixbuf);
+			     }
 			   });
+
+	$self->{'eb'}->{$id}
+	  ->signal_connect('button_press_event'=>sub {
+			     $self->{'button_event'}=$id; });
+	$self->{'eb'}->{$id}
+	  ->signal_connect('leave_notify_event'=>sub {
+			     $self->{'button_event'}=''; });
+	$self->{'eb'}->{$id}
+	  ->signal_connect('button_release_event'=>sub {
+			     my ($w,$event)=@_;
+			     $self->click_action($id,$event); });
 
 	$self->{'position'}->{$id}=$self->{'eff_pos'}->{$id};
 
@@ -365,6 +418,36 @@ sub page {
     $self->load_boxes;
 }
 
+sub click_action {
+  my ($self,$id,$event)=@_;
+  if((!$self->dnd_mode) && ($self->{'button_event'} eq $id)) {
+    if($event->button==1) {
+      $self->toggle($id);
+    } elsif($event->button==3) {
+      my $cat=$self->{'position'}->{$id};
+      my @toggle_ids=();
+      my $t=$cat;
+      for my $i (@{$self->{'ids'}}) {
+	$t=1 if($cat==0 && $id eq $i);
+	if($t && $self->{'position'}->{$i} == $cat) {
+	  push @toggle_ids,$i;
+	}
+	$t=0 if($cat==1 && $id eq $i);
+      }
+      for my $i (@toggle_ids) {
+	$self->{'position'}->{$i}=1-$cat;
+      }
+      $self->refill;
+    }
+  }
+}
+
+sub toggle {
+  my ($self,$id)=@_;
+  $self->{'position'}->{$id}=1-$self->{'position'}->{$id};
+  $self->refill;
+}
+
 sub source_drag_data_get {
     my ($widget, $context, $data, $info, $time,$string) = @_;
     $data->set_text($string,-1);
@@ -374,11 +457,15 @@ sub target_drag_data_received {
     my ($widget, $context, $x, $y, $data, $info, $time,$args) = @_;
     my ($self,$cat)=@$args;
     my $id=$data->get_text();
-    debug "Page ".pageids_string(@{$self->{'page_id'}})
-      .": move $id to category $cat\n";
-    if($self->{'position'}->{$id} != $cat) {
+    if($self->dnd_mode()) {
+      debug "Page ".pageids_string(@{$self->{'page_id'}})
+	.": move $id to category $cat\n";
+      if($self->{'position'}->{$id} != $cat) {
 	$self->{'position'}->{$id}=$cat;
 	$self->refill;
+      }
+    } else {
+      debug "Drang and drop cancelled: CLICK mode";
     }
 }
 

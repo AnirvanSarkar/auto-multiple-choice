@@ -44,7 +44,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &abs2proj &proj2abs &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &format_date &cb_model &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &amc_component &annotate_source_change);
+    @EXPORT      = qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &format_date &cb_model &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &amc_component &annotate_source_change);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -461,51 +461,6 @@ sub get_debug {
 }
 
 # noms de fichiers absolus ou relatifs
-
-sub abs2proj {
-    my ($surnoms,$fich)=@_;
-    if(defined($fich) && $fich) {
-
-	$fich =~ s/\/{2,}/\//g;
-
-      CLES:for my $s (sort { length($surnoms->{$b}) <=> length($surnoms->{$a}) } grep { $_ && $surnoms->{$_} } (keys %$surnoms)) {
-	  my $rep=$surnoms->{$s};
-	  $rep.="/" if($rep !~ /\/$/);
-	  $rep =~ s/\/{2,}/\//g;
-	  if($fich =~ s/^\Q$rep\E\/*//) {
-	      $fich="$s/$fich";
-	      last CLES;
-	  }
-      }
-
-	return($fich);
-    } else {
-	return('');
-    }
-}
-
-sub proj2abs {
-    my ($surnoms,$fich)=@_;
-    if(defined($fich)) {
-	if($fich =~ /^\//) {
-	    return($fich);
-	} else {
-	    $fich =~ s/^([^\/]*)//;
-	    my $code=$1;
-	    if(!$surnoms->{$code}) {
-		$fich=$code.$fich;
-		$code=$surnoms->{''};
-	    }
-	    my $rep=$surnoms->{$code};
-	    $rep.="/" if($rep !~ /\/$/);
-	    $rep.=$fich;
-	    $rep =~ s/\/{2,}/\//g;
-	    return($rep);
-	}
-    } else {
-	return('');
-    }
-}
 
 sub clear_old {
     my ($type,@f)=@_;

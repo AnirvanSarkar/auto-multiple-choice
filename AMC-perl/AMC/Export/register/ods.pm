@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -21,6 +21,7 @@ package AMC::Export::register::ods;
 
 use AMC::Export::register;
 use AMC::Basic;
+use AMC::Gui::Prefs;
 
 @ISA=("AMC::Export::register");
 
@@ -63,7 +64,7 @@ sub needs_module {
 }
 
 sub build_config_gui {
-  my ($self,$w,$cb)=@_;
+  my ($self,$w,$prefs)=@_;
   my $t=Gtk2::Table->new(3,2);
   my $widget;
   my $renderer;
@@ -77,11 +78,11 @@ sub build_config_gui {
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
 # TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
-  $cb->{'export_ods_stats'}=cb_model(""=>__p("None [no stats table to export]"),
+  $prefs->store_register('export_ods_stats'=>cb_model(""=>__p("None [no stats table to export]"),
 # TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a horizontal flow' in the exported ODS file.
-				     "h"=>__("Horizontal flow"),
+					      "h"=>__("Horizontal flow"),
 # TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a vertical flow' in the exported ODS file.
-				     "v"=>__("Vertical flow"));
+					      "v"=>__("Vertical flow")));
   $w->{'export_c_export_ods_stats'}=$widget;
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;
@@ -93,9 +94,9 @@ sub build_config_gui {
   $renderer = Gtk2::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
-  $cb->{'export_ods_statsindic'}=cb_model(""=>__"None",
-					  "h"=>__"Horizontal flow",
-					  "v"=>__"Vertical flow");
+  $prefs->store_register('export_ods_statsindic'=>cb_model(""=>__"None",
+						   "h"=>__"Horizontal flow",
+						   "v"=>__"Vertical flow"));
   $w->{'export_c_export_ods_statsindic'}=$widget;
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each indicative question?");

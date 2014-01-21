@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -27,6 +27,7 @@ use XML::Simple;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 
+use AMC::Path;
 use AMC::Basic;
 use AMC::Gui::PageArea;
 use AMC::Gui::WindowSize;

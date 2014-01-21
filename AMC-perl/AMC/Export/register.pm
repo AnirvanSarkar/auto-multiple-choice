@@ -55,7 +55,7 @@ sub needs_module {
 }
 
 sub build_config_gui {
-  my ($self,$w,$cb)=@_;
+  my ($self,$w,$prefs)=@_;
 }
 
 sub hide {

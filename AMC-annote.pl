@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -25,6 +25,7 @@ use Cairo;
 
 use List::Util qw(min max sum);
 
+use AMC::Path;
 use AMC::Basic;
 use AMC::Exec;
 use AMC::Gui::Avancement;

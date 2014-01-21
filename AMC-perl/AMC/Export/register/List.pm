@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012,2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -21,6 +21,7 @@ package AMC::Export::register::List;
 
 use AMC::Export::register;
 use AMC::Basic;
+use AMC::Gui::Prefs;
 
 @ISA=("AMC::Export::register");
 
@@ -56,7 +57,7 @@ sub options_default {
 }
 
 sub build_config_gui {
-  my ($self,$w,$cb)=@_;
+  my ($self,$w,$prefs)=@_;
   my $t=Gtk2::Table->new(2,2);
   my $widget;
   my $y=0;
@@ -72,10 +73,10 @@ sub build_config_gui {
   my $renderer = Gtk2::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
-  $cb->{'export_pagesize'}=cb_model("a3"=>"A3",
-				    "a4"=>"A4",
-				    "letter"=>"Letter",
-				    "legal"=>"Legal");
+  $prefs->store_register('export_pagesize'=>cb_model("a3"=>"A3",
+						     "a4"=>"A4",
+						     "letter"=>"Letter",
+						     "legal"=>"Legal"));
   $w->{'export_c_export_pagesize'}=$widget;
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;

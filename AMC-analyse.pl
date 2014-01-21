@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -22,6 +22,7 @@ use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use Getopt::Long;
 
+use AMC::Path;
 use AMC::Basic;
 use AMC::Exec;
 use AMC::Queue;
