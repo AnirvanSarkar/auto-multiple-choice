@@ -302,6 +302,7 @@ BUILDOPTS=-I.svn -Idownload_area -Ilocal $(DEBSIGN)
 TMP_DIR=/tmp
 SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
+ORIG_SOURCES=/tmp/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 
 SRC_EXCL=--exclude debian '--exclude=*~' 
 
@@ -323,6 +324,10 @@ portable_vok:
 	cd $(TMP_PORTABLE) ; tar cvzf /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_portable.tar.gz $(SRC_EXCL) AMC
 	rm -rf $(TMP_PORTABLE)
 
+ssources_vok:
+	$(MAKE) tmp_copy
+	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
+
 sources_vok:
 	$(MAKE) tmp_copy
 	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
@@ -339,7 +344,8 @@ tmp_deb:
 	$(MAKE) tmp_copy
 	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
 
-debsrc_vok: tmp_deb
+debsrc_vok: ssources tmp_deb
+	cp /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz /tmp/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S $(BUILDOPTS)
 
 deb_vok: tmp_deb
@@ -347,7 +353,7 @@ deb_vok: tmp_deb
 
 # % : make sure version_files are rebuilt before calling target %_vok
 
-$(foreach key,deb debsrc sources portable,$(eval $(key): clean version_files ; $$(MAKE) $(key)_vok))
+$(foreach key,deb debsrc sources ssources portable,$(eval $(key): clean version_files ; $$(MAKE) $(key)_vok))
 
 # debian repository
 

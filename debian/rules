@@ -2,4 +2,7 @@
 # -*- makefile -*-
 
 %:
-	SYSTEM_TYPE=deb MAKEFLAGS="DOCDIR=/usr/share/doc/auto-multiple-choice" dh $@
+	SYSTEM_TYPE=deb dh $@ --with tex
+
+override_dh_installtex:
+	dh_installtex -pauto-multiple-choice-common
