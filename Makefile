@@ -345,7 +345,7 @@ tmp_deb:
 	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
 
 debsrc_vok: ssources tmp_deb
-	cp /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz /tmp/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
+	test -f $(ORIG_SOURCES) || cp /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(ORIG_SOURCES)
 	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S $(BUILDOPTS)
 
 deb_vok: tmp_deb
