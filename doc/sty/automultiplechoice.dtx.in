@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2008-2013 Alexis Bienvenue
+% Copyright (C) 2008-2014 Alexis Bienvenue
 %
 % This file is part of Auto-Multiple-Choice
 %
@@ -31,7 +31,7 @@
 \keepsilent
 \preamble
 
-Copyright (C) 2008-2013 Alexis Bienvenue
+Copyright (C) 2008-2014 Alexis Bienvenue
 
 This file is part of Auto-Multiple-Choice
 
@@ -1530,21 +1530,28 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %     After defining $n$ token registers |\foo@i|, |\foo@ii|,
 %     |\foo@iii|, |\foo@iv| and so on, you can shuffle them using
-%     |\AMC@shuffletoks{|$n$|}{foo@}|.
+%     |\AMC@shuffletoks|\oarg{a}\marg{n}\marg{foo}. With optional
+%     argument \meta{a}, registers are shuffled from number \meta{a}
+%     to \meta{n} (default value for \meta{a} is 1).
 %    \begin{macrocode}
 \newcount\AMC@sti
+\newcount\AMC@stil
 \newtoks\AMCsw@p@
 \newcommand\AMCsw@p[2]{%
   \global\AMCsw@p@=#1%
   \global#1=#2%
   \global#2=\AMCsw@p@}
-\newcommand\AMC@shuffletoks[2]{%
-  \AMC@sti=#1\relax%
-  \@whilenum\AMC@sti>\@ne\do{%
-    \AMC@SRmax{\AMC@sti}\advance\AMC@SRnum\@ne\relax%
-    \AMCsw@p{\csname #2\romannumeral\AMC@SRnum\endcsname}%
-            {\csname #2\romannumeral\AMC@sti\endcsname}%
+\newcommand{\AMC@shuffletoks}[3][\@ne]{%
+  \AMC@sti=#2\relax%
+  \AMC@stil=#2\relax%
+  \advance\AMC@stil\@ne%
+  \advance\AMC@stil -#1\relax%
+  \@whilenum\AMC@sti>#1\do{%
+    \AMC@SRmax{\AMC@stil}\advance\AMC@SRnum #1\relax%
+    \AMCsw@p{\csname #3\romannumeral\AMC@SRnum\endcsname}%
+            {\csname #3\romannumeral\AMC@sti\endcsname}%
     \advance\AMC@sti\m@ne\relax%
+    \advance\AMC@stil\m@ne\relax%
   }}
 %    \end{macrocode}\end{macro}\end{macro}
 %
@@ -1975,10 +1982,10 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCcurrentenv{document}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\ifenv}
+% \begin{macro}{\AMCif@env}
 %     Checks for the current environment.
 %    \begin{macrocode}
-\def\ifenv#1{
+\def\AMCif@env#1{
     \def\AMC@tempenv{#1}%
     \ifx\AMC@tempenv\AMCcurrentenv
         \expandafter\@firstoftwo
@@ -2007,10 +2014,14 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcount\AMCtok@k
 \newcount\AMCtok@max
+\newcount\AMCtok@size
 \newcommand{\nouveaugroupe}[2]{%
-  \expandafter\ifx\csname #1@k\endcsname\relax
+  \expandafter\ifx\csname #1@k\endcsname\relax%
     \expandafter\newcount\csname #1@k\endcsname%
-    \csname #1@k\endcsname=\z@%
+    \expandafter\newcount\csname AMC#1@j\endcsname%
+    \csname #1@k\endcsname=\z@\relax%
+    \csname AMC#1@j\endcsname=\z@\relax%
+    \setgroupmode{#1}{fixed}%
   \fi%
 }
 \newcommand\AMC@prepare@element[1]{%
@@ -2025,29 +2036,135 @@ Three digits and two letters:\insertgroup{mixed}.
   \csname #1@\romannumeral\AMCtok@k\endcsname={#2}%
 }
 %    \end{macrocode}\end{macro}\end{macro}
+% \begin{macro}{\setgroupmode}
+%   Command |\setgroupmode|\marg{group-name}\marg{mode} sets the group
+%   mode to \meta{mode} for group \meta{group-name}. This mode setup
+%   the behaviour of |\insertgroup| and |\copygroup| for this group:
+%   \begin{enumerate}
+%   \item With mode |fixed| (this is the default mode), group's
+%     elements will be taken from the beginning.
+%   \item With mode |cyclic|, the elements will be taken from the
+%     group following the last call group's use, recycling if
+%     necessary.
+%   \item Mode |withreplacement| is the same as |fixed|, but the group
+%     is shuffled before each use.
+%   \item Mode |withoutreplacement| is like |cyclic|, adding some
+%     shuffling when comming back to the beginning of the group.
+%   \end{enumerate}
+%    \begin{macrocode}
+\newcommand{\setgroupmode}[2]{%
+  \expandafter\ifx\csname AMCgrouppre@#2\endcsname\relax%
+    \PackageError{automultiplechoice}{Unknown group mode for #1 : #2}%
+       {You asked to set group '#1' mode to '#2',
+         but '#2' is not a valid group mode}%
+  \else%
+    \expandafter\global\expandafter\def\csname AMC#1@mode\endcsname{#2}%
+  \fi%
+}
+%    \end{macrocode}
+% The functions |\AMCgrouppre@|xxx\marg{group-name}\marg{n} are called before
+% using \meta{n} elements from group \meta{group-name}, either with
+% |\insertgroup| or |\copygroup|.
+%
+% For mode \textbf{fixed}, the group index is set to 0 (take elements
+% from the beginning).
+%    \begin{macrocode}
+\newcommand{\AMCgrouppre@fixed}[2]{%
+  \csname AMC#1@j\endcsname=\z@%
+}
+%    \end{macrocode}
+% For mode \textbf{withreplacement}, the group is shuffled and the
+% group index is set to 0 (take elements from the beginning).
+%    \begin{macrocode}
+\newcommand{\AMCgrouppre@withreplacement}[2]{%
+  \csname AMC#1@j\endcsname=\z@%
+  \shufflegroup{#1}%
+}
+%    \end{macrocode}
+% For mode \textbf{withoutreplacement}, the group index is left
+% unchanged. If there is not enough elements left in the group, the
+% elements before the index and the elements after the index are
+% shuffled.
+%    \begin{macrocode}
+\newcount\AMC@imax
+\newcommand{\AMCgrouppre@withoutreplacement}[2]{%
+  \ifnum\AMCtok@ik=\AMCloop@k%
+    \AMCtok@ik=\z@%
+  \fi%
+  \ifnum\AMCtok@ik=\z@%
+    \shufflegroup{#1}%
+  \else%
+    \AMC@imax=\AMCloop@k%
+    \advance\AMC@imax -#2\relax%
+    \ifnum\AMCtok@ik>\AMC@imax%
+      \shufflegroupslice{#1}{\@ne}{\AMCtok@ik}%
+      \ifnum\AMCtok@ik<\AMCloop@k%
+        \advance\AMCtok@ik\@ne%
+        \shufflegroupslice{#1}{\AMCtok@ik}{\AMCloop@k}%
+      \fi%
+    \fi%
+  \fi%
+}
+%    \end{macrocode}
+% For mode \textbf{cyclic}, nothing has to be done.
+%    \begin{macrocode}
+\newcommand{\AMCgrouppre@cyclic}[2]{}
+%    \end{macrocode}
+% The function |\AMCgroup@pre|\marg{mode}\marg{group-name}\marg{n}
+% calls the right |\AMCgrouppre@|xxx command.
+%    \begin{macrocode}
+\newcommand{\AMCgroup@pre}[3]{%
+  \csname AMCgrouppre@#1\endcsname{#2}{#3}%
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\shufflegroup}\begin{macro}{\insertgroup}
 %     Command |\shufflegroup|\marg{group-name} shuffles the elements
-%     of group \meta{group-name}. It can be called at each student
-%     sheet in order to get different student sheets and avoid
-%     cheating.  Command |\insertgroup|\oarg{n}\marg{groupname}
-%     inserts all the elements of group \meta{groupname}, or only the
-%     first \meta{n} elements if \meta{n} is given.
+%     of group \meta{group-name}, and
+%     |\shufflegroupslice|\marg{group-name}\marg{a}\marg{b} shuffles
+%     elements \meta{a} to \meta{b} from group \meta{group-name}. It
+%     can be called at each student sheet in order to get different
+%     student sheets and avoid cheating.  Command
+%     |\insertgroup|\oarg{n}\marg{groupname} inserts all the elements
+%     of group \meta{groupname}, or only the first \meta{n} elements
+%     if \meta{n} is given.
 %    \begin{macrocode}
 \newcommand{\shufflegroup}[1]{%
   \ifAMC@shuffleG{\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}\fi%
 }
+\newcommand{\shufflegroupslice}[3]{%
+  \ifAMC@shuffleG{\AMC@shuffletoks[#2]{#3}{#1@}}\fi%
+}
 \newcount\AMCtok@ik
-\newcommand{\insertgroup}[2][0]{%
-  \AMCtok@max=#1\relax%
-  \ifAMC@fullGroups\AMCtok@max=\z@\fi%
-  \ifnum\the\AMCtok@max<1%
-    \AMCtok@max=\csname #2@k\endcsname%
+\newcount\AMCloop@k
+\newcommand{\AMCgrouploop@prep}[2]{%
+  \AMCtok@size=#1\relax%
+  \ifAMC@fullGroups\AMCtok@size=\z@\fi%
+  \ifnum\AMCtok@size<\@ne%
+    \AMCtok@size=\csname #2@k\endcsname%
   \fi%
-  \AMCtok@ik=\z@%
+  \AMCtok@ik=\csname AMC#2@j\endcsname%
+  \AMCloop@k=\csname #2@k\endcsname%
+  \expandafter\ifx\csname AMC#2@mode\endcsname\relax%
+    \PackageError{automultiplechoice}{No group mode for #2}%
+       {No mode has been defined for group '#2'. This should not occur...}%
+  \fi%
+  \AMCgroup@pre{\csname AMC#2@mode\endcsname}{#2}{\the\AMCtok@size}%
+}
+\newcommand{\AMCgrouploop@next}[1]{%
+  \global\advance\csname AMC#1@j\endcsname\@ne\relax%
+  \expandafter\ifnum\csname AMC#1@j\endcsname>\AMCloop@k\relax%
+    \global\csname AMC#1@j\endcsname=\@ne%
+  \fi%
+  \AMCtok@ik=\csname AMC#1@j\endcsname%
+  \advance\AMCtok@size\m@ne%
+}
+\newcommand{\insertgroup}[2][0]{%
+  \AMCgrouploop@prep{#1}{#2}%
   {\loop%
-    \advance\AMCtok@ik\@ne\relax%
+    \AMCgrouploop@next{#2}%
     {\the\csname #2@\romannumeral\AMCtok@ik\endcsname}%
-  \ifnum\AMCtok@ik<\AMCtok@max\repeat}%
+  \ifnum\AMCtok@size>\z@\repeat}%
 }
 %    \end{macrocode}\end{macro}\end{macro}
 % 
@@ -2074,17 +2191,12 @@ Three digits and two letters:\insertgroup{mixed}.
   \csname #1@k\endcsname=\z@%
 }
 \newcommand{\copygroup}[3][0]{%
-  \AMCtok@max=#1\relax%
-  \ifAMC@fullGroups\AMCtok@max=\z@\fi%
-  \ifnum\the\AMCtok@max<1%
-    \AMCtok@max=\csname #2@k\endcsname%
-  \fi%
-  \AMCtok@ik=\z@%
+  \AMCgrouploop@prep{#1}{#2}%
   {\loop%
-    \advance\AMCtok@ik\@ne\relax%
+    \AMCgrouploop@next{#2}%
     \AMC@prepare@element{#3}%    
     \global\csname #3@\romannumeral\AMCtok@k\endcsname=\csname #2@\romannumeral\AMCtok@ik\endcsname%
-  \ifnum\AMCtok@ik<\AMCtok@max\repeat}%
+  \ifnum\AMCtok@size>\z@\repeat}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -2426,11 +2538,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %   The command |\explain| is used inside |question|-like environments
 %   to give the explanation for the answers of a question.
 %    \begin{macrocode}
-\newcommand{\explain}[1]{
-\ifAMC@correchead
-	\ifenv{question}{\par\noindent{\AMC@loc@explain #1}}{\AMC@error@explain}\vspace{1ex}
-\else \ifenv{question}{}{\AMC@error@explain}
-\fi
+\newcommand{\explain}[1]{%
+\ifAMC@correchead%
+  \AMCif@env{question}{\par\noindent{\AMC@loc@explain #1}}{\AMC@error@explain}\vspace{1ex}%
+\else%
+  \AMCif@env{question}{}{\AMC@error@explain}%
+\fi%
 }
 %    \end{macrocode}
 % \end{macro}
