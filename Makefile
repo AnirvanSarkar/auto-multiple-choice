@@ -35,7 +35,7 @@ PERLPATH ?= /usr/bin/perl
 # DATE/TIME to be substituted
 
 DATE_RPMCHL:=$(shell LC_TIME=en_US date +"%a %b %e %Y")
-DATE_DEBCHL:=$(shell LANG=C date "+%a, %d %b %Y %H:%M:%S %z")
+DATE_DEBCHL:=$(shell LANG=en_US date "+%a, %d %b %Y %H:%M:%S %z")
 
 # list variables to be substituted in *.in files
 
