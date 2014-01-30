@@ -3715,21 +3715,6 @@ sub voir_notes {
 sub noter {
     if($projet{'options'}->{'maj_bareme'}) {
 	my $n_copies=$projet{'options'}->{'nombre_copies'};
-	$projet{'_layout'}->begin_read_transaction('STUD');
-	my @mep_etus=$projet{'_layout'}->students();
-	$projet{'_layout'}->end_transaction('STUD');
-	my $n_mep=$mep_etus[$#mep_etus];
-	if($n_copies<$n_mep) {
-	    # number of requested copies is less than the number of
-	    # prepared copies: check that it is sufficient (look at
-	    # greater copy number within scans), and use a larger
-	    # one if not.
-	    debug "Requested $n_copies copies for scoring strategy, but has $n_mep layouts";
-	    my @students=($projet{'_capture'}->students_transaction());
-	    my $n_an=$students[$#students];
-	    debug "Max used copy number: $n_an";
-	    $n_copies=$n_an if($n_an>$n_copies);
-	}
 	commande('commande'=>["auto-multiple-choice","prepare",
 			      "--n-copies",$n_copies,
 			      "--with",moteur_latex(),
