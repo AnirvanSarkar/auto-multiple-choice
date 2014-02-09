@@ -403,7 +403,7 @@ sub analyse_amclog {
 # again if needed (for exemple when a second run is necessary to get
 # references right), and then produces a PDF file from LaTeX output.
 #
-# $oo{command} should be the options to be passed to latex_cmd, to
+# $oo{command_opts} should be the options to be passed to latex_cmd, to
 # build the LaTeX command to run, with all necessary arguments
 
 my $filter_engine;
@@ -414,7 +414,7 @@ sub execute {
     prepare_filter();
 
     # gives the processing command to the filter
-    $oo{command}=[latex_cmd(@{$oo{command}})];
+    $oo{command}=[latex_cmd(@{$oo{command_opts}})];
     $ENV{AMC_CMD}=join(' ',@{$oo{command}});
 
     if($filter) {
@@ -426,7 +426,7 @@ sub execute {
     }
 
     # the filter could have changed the latex engine, so update it
-    $oo{command}=[latex_cmd(@{$oo{command}})];
+    $oo{command}=[latex_cmd(@{$oo{command_opts}})];
     $ENV{AMC_CMD}=join(' ',@{$oo{command}});
 
     check_engine();
@@ -679,7 +679,7 @@ if($to_do{k}) {
 
   @output_files=($out_corrige ? $out_corrige : $prefix."corrige.pdf");
 
-  execute('command'=>[qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/]);
+  execute('command_opts'=>[qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/]);
   transfer("$jobname.pdf",$output_files[0]);
   give_latex_errors(__"individual solution");
 }
@@ -710,7 +710,7 @@ if($to_do{s}) {
 
     # 1) SUBJECT
 
-    execute('command'=>[%opts,'SujetExterne'=>1]);
+    execute('command_opts'=>[%opts,'SujetExterne'=>1]);
     analyse_amclog("$jobname.amc");
     give_latex_errors(__"question sheet");
 
@@ -729,7 +729,7 @@ if($to_do{s}) {
     # 2) SOLUTION
 
   if($to_do{s}=~/s/) {
-    execute('command'=>[%opts,'CorrigeExterne'=>1]);
+    execute('command_opts'=>[%opts,'CorrigeExterne'=>1]);
     transfer("$jobname.pdf",$out_corrige);
     give_latex_errors(__"solution");
   } else {
@@ -740,7 +740,7 @@ if($to_do{s}) {
     # 3) CATALOG
 
   if($to_do{s}=~/c/) {
-    execute('command'=>[%opts,'CatalogExterne'=>1]);
+    execute('command_opts'=>[%opts,'CatalogExterne'=>1]);
     transfer("$jobname.pdf",$out_catalog);
     give_latex_errors(__"catalog");
   } else {
@@ -770,7 +770,7 @@ if($to_do{b}) {
 
     # Launches the LaTeX engine
 
-    execute('command'=>[qw/ScoringExterne 1 NoHyperRef 1/],
+    execute('command_opts'=>[qw/ScoringExterne 1 NoHyperRef 1/],
 	    'once'=>1);
 
     open(AMCLOG,"$jobname.amc") or die "Unable to open $jobname.amc : $!";
