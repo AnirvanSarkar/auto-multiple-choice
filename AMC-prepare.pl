@@ -413,8 +413,8 @@ sub execute {
 
     prepare_filter();
 
+    # gives the processing command to the filter
     $oo{command}=[latex_cmd(@{$oo{command}})];
-
     $ENV{AMC_CMD}=join(' ',@{$oo{command}});
 
     if($filter) {
@@ -424,6 +424,11 @@ sub execute {
 	$filter_engine->set_filter_result('done',1);
       }
     }
+
+    # the filter could have changed the latex engine, so update it
+    $oo{command}=[latex_cmd(@{$oo{command}})];
+    $ENV{AMC_CMD}=join(' ',@{$oo{command}});
+
     check_engine();
 
     my $n_run=0; # number of runs so far
