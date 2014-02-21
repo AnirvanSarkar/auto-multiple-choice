@@ -885,6 +885,12 @@ sub read_glade {
     return($g);
 }
 
+# As a workaround for Bug #93 these widgets are disabled when Preferences window is opened.
+# Since Bug #93 only affects Ubuntu 12.04 LTS, this workaround can be safely removed when
+# Ubuntu 12.04 LTS reaches its end of life date i.e. April 2017
+
+my @widgets_disabled_when_preferences_opened=(qw/menu_project menu_edit menu_tools menu_help/);
+
 my @widgets_only_when_opened=(qw/cleanup_menu menu_projet_enreg menu_projet_modele/);
 
 my $gui=read_glade('main_window',
@@ -907,7 +913,7 @@ my $gui=read_glade('main_window',
     config_export_modules standard_export_options
     notation_c_regroupement_type notation_cb_regroupement_compose
     pref_prep_s_nombre_copies pref_prep_c_filter
-    /,@widgets_only_when_opened);
+    /,@widgets_only_when_opened,@widgets_disabled_when_preferences_opened);
 
 # Grid lines are not well-positioned in RTL environments, I don't know
 # why... so I remove them.
@@ -4333,6 +4339,9 @@ sub change_methode_impression {
 }
 
 sub edit_preferences {
+    for my $k (@widgets_disabled_when_preferences_opened) {
+      $w{$k}->set_sensitive(0);
+    }
     my $gap=read_glade('edit_preferences',
 		       qw/pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree email_group_sendmail email_group_SMTP/);
 
@@ -4392,6 +4401,9 @@ sub edit_preferences {
 
 sub closes_preferences {
   $w{'edit_preferences'}->destroy();
+  for my $k (@widgets_disabled_when_preferences_opened) {
+      $w{$k}->set_sensitive(1);
+    }
 }
 
 sub accepte_preferences {
