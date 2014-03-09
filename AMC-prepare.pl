@@ -873,7 +873,9 @@ if($to_do{b}) {
 	# AUTOQCM[BR=N] tells that this student is a replicate of student N
 
 	if(/AUTOQCM\[BR=([0-9]+)\]/) {
-	  $scoring->replicate($1,$etu);
+	  my $alias=$1;
+	  $scoring->replicate($alias,$etu);
+	  $etu=$alias;
 	}
 
 	if(/AUTOQCM\[B=([^\]]+)\]/) {

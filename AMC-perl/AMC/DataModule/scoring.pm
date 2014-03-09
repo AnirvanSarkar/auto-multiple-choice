@@ -384,7 +384,7 @@ sub define_statements {
      'NEWQuestion'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("question")
 		     ." (student,question,type,indicative,strategy)"
 		     ." VALUES (?,?,?,?,?)"},
-     'NEWAnswer'=>{'sql'=>"INSERT INTO ".$self->table("answer")
+     'NEWAnswer'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("answer")
 		   ." (student,question,answer,correct,strategy)"
 		   ." VALUES (?,?,?,?,?)"},
      'setAnswerStrat'=>{'sql'=>"UPDATE ".$self->table("answer")
@@ -584,7 +584,8 @@ sub main_strategy_all {
 }
 
 # new_question($student,$question,$type,$indicative,$strategy) adds a
-# question in the database, giving its characteristics
+# question in the database, giving its characteristics. If the
+# question already exists, it is updated with no error.
 
 sub new_question {
   my ($self,$student,$question,$type,$indicative,$strategy)=@_;
@@ -603,7 +604,8 @@ sub question_strategy {
 }
 
 # new_answer($student,$question,$answer,$correct,$strategy) adds an
-# answer in the database, giving its characteristics
+# answer in the database, giving its characteristics. If the answer
+# already exists, it is updated with no error.
 
 sub new_answer {
   my ($self,$student,$question,$answer,$correct,$strategy)=@_;
