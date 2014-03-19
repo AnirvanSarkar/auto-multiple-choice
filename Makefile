@@ -188,7 +188,7 @@ install_models_%: FORCE
 
 install_models: $(addprefix install_models_,$(SUBMODS)) ;
 
-install: install_lang install_models FORCE
+install_nodoc: install_lang install_models FORCE
 ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_installmime
 ifneq ($(SHARED_MIMEINFO_DIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(SHARED_MIMEINFO_DIR)
@@ -207,10 +207,6 @@ endif
 	install    -m 0644 $(USER_GROUP) $(GLADE) $(DESTDIR)/$(MODSDIR)/perl
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDIR)
 	install    -m 0644 $(USER_GROUP) $(STY) $(DESTDIR)/$(TEXDIR)
-ifneq ($(TEXDOCDIR),)
-	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDOCDIR)
-	install    -m 0644 $(USER_GROUP) doc/sty/*.pdf doc/sty/*.tex $(DESTDIR)/$(TEXDOCDIR)
-endif
 ifneq ($(DESKTOPDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DESKTOPDIR)
 	install    -m 0644 $(USER_GROUP) -T auto-multiple-choice.desktop $(DESTDIR)/$(DESKTOPDIR)/auto-multiple-choice.desktop
@@ -238,6 +234,13 @@ endif
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/DataModule/*.pm $(DESTDIR)/$(PERLDIR)/AMC/DataModule
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
+
+install_doc: FORCE
+	@echo "Installing doc..."
+ifneq ($(TEXDOCDIR),)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDOCDIR)
+	install    -m 0644 $(USER_GROUP) doc/sty/*.pdf doc/sty/*.tex $(DESTDIR)/$(TEXDOCDIR)
+endif
 ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DOCDIR)
 	install    -m 0644 $(USER_GROUP) $(wildcard doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf) $(DESTDIR)/$(DOCDIR)
@@ -253,6 +256,8 @@ endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MAN1DIR)
 	install    -m 0644 $(USER_GROUP) doc/*.1 $(DESTDIR)/$(MAN1DIR)
 endif
+
+install: install_nodoc install_doc ;
 
 # Test
 
