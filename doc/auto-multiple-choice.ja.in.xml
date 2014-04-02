@@ -2543,7 +2543,7 @@ Name :
       </itemizedlist>
 
       <warning>
-        <para>2番目のコピーを用いたワークフローを使うには、受験者が記入するページは1枚だけでなければなりません（場合によっては別紙答案方式が役に立ちます）。でなければ、AMCでこの先を続けることはできません！AMCは、同じ受験生が記入した二つのページをリンクすることができないのです。</para>
+        <para>2番目のコピーを用いたワークフローを使うには、受験者が記入するページは1枚だけでなければなりません（場合によっては別紙答案方式が役に立ちます）。でなければ、AMCでこの先を続けることはできません！AMCは、同じ受験生が記入した二つのページを結びつけることができないのです。</para>
       </warning>
 
       <para>試験問題の作成が完了すれば、試験問題を印刷して受験者に配布することができます... 単純な場合には、（作業文書の<guilabel>問題</guilabel>ボタンをクリックしたあと）ビューアから直接印刷できます。用紙を別々に（それぞれ複数ページからなり、それらをステープルできるようなプリンタを使う場合など）印刷する場合、レイアウト検出後に<guibutton>試験問題印刷</guibutton>ボタンを使うといいでしょう。</para>
@@ -3082,7 +3082,7 @@ Name:
     <sect2 id="sec.students.id">
       <title>受験者の識別</title>
 
-      <para>このステージは必須ではありません。ここでは、各答案と受験者の結び付け（リンク）をします。受験者の氏名は自動的には読み込まれませんが、現実的な策が2通りあります:</para>
+      <para>このステージは必須ではありません。ここでは、各答案の受験者を識別します。受験者の氏名は自動的には読み込まれませんが、現実的な策が2通りあります:</para>
 
       <orderedlist>
         <listitem>
@@ -3090,7 +3090,7 @@ Name:
         </listitem>
 
         <listitem>
-          <para>受験番号を記入させない場合や、自動識別が（記入ミスなどで）完全にはうまくいかなかった場合には、GUIの補助により手動で受験番号と氏名をリンクすることができます。</para>
+          <para>受験番号を記入させない場合や、自動識別が（記入ミスなどで）完全にはうまくいかなかった場合には、GUIの補助により手動で答案の受験者を識別することができます。</para>
         </listitem>
       </orderedlist>
 
@@ -3105,7 +3105,7 @@ Bienvenüe:Alexis:001:paamc@passoire.fr
 Boulix:Jojo:002:jojo.boulix@rien.xx
 Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
-        <para>ファイルの冒頭にある `<code>#</code>' で始まる行はコメントです。コメントでない最初の行は（<code>`:'</code> で区切った）カラム名を格納します。その行以降は、受験者1名につき1行で、対応する情報を記入します。必ず<code>name</code>あるいは<code>surname</code>という名前のカラムに受験者名を格納しないと、下で説明する手動リンクでボタン表示ができなくなります。<!--英文・仏文にない表現で必要性の理由を説明--></para>
+        <para>ファイルの冒頭にある `<code>#</code>' で始まる行はコメントです。コメントでない最初の行は（<code>`:'</code> で区切った）カラム名を格納します。その行以降は、受験者1名につき1行で、対応する情報を記入します。必ず<code>name</code>あるいは<code>surname</code>という名前のカラムに受験者名を格納しないと、下で説明する手動識別でボタン表示ができなくなります。<!--英文・仏文にない表現で必要性の理由を説明--></para>
 
         <note>
            <para>セパレータの <code>`:'</code> は、カンマ、セミコロン、タブのいずれかに置き換えることができます。しかし、名簿ファイルのすべての箇所で同じセパレータを使わなければなりません。どの文字をセパレータとして（この4種から）選ぶかは、コメントでない最初の行において、どれが最も多く出現するかで決定されます。</para>
@@ -3113,26 +3113,26 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 	   <para>CSVファイルであれば適合するはずです。</para>
         </note>
 
-        <para>準備した受験者名簿は<guilabel>受験者識別</guilabel>セクションの<guibutton>ファイル登録</guibutton>ボタンにより選択します。そして受験者名簿の中でユニークなキーとなるカラム（一般には、受験番号を格納するカラム）を一つ選ばなければなりません。最後に、自動リンクの準備として、（使用した場合には）LaTeXの<command>AMCcode</command>コマンドで使用した関連するコード名を選びます。</para>
+        <para>準備した受験者名簿は<guilabel>受験者識別</guilabel>セクションの<guibutton>ファイル登録</guibutton>ボタンにより選択します。そして受験者名簿の中でユニークなカラム（一般には、受験番号を格納するカラム）を一つ選ばなければなりません。最後に、自動識別の準備として、（使用した場合には）LaTeXの<command>AMCcode</command>コマンドで使用した関連するコード名を選びます。</para>
       </sect3>
 
       <sect3>
-        <title>リンク</title>
+        <title>受験者識別</title>
 
         <sect4>
-          <title>自動リンク</title>
+          <title>自動識別</title>
 
-          <para><guilabel>受験者識別</guilabel>セクションの<guibutton>自動</guibutton>ボタンを押すと、受験者が記入したコードの対応づけが開始します。その結果は、後から（半）手動リンクにより確認したり改善したりできます。</para>
+          <para><guilabel>受験者識別</guilabel>セクションの<guibutton>自動</guibutton>ボタンを押すと、受験者が記入したコードの対応づけが開始します。その結果は、後から（半）手動識別により確認したり改善したりできます。</para>
 
           <warning>
-            <para>自動リンクを行うためには、LaTeXソースファイル中に<command>AMCcode</command>コマンド（<xref linkend="latex.codes"/>参照）が少なくとも一つ必要です。また、受験者名簿には、<command>AMCcode</command>が生成したボックスに記入されるはずの参照（一般には受験番号）を格納したカラムが必要です。</para>
+            <para>自動識別を行うためには、LaTeXソースファイル中に<command>AMCcode</command>コマンド（<xref linkend="latex.codes"/>参照）が少なくとも一つ必要です。また、受験者名簿には、<command>AMCcode</command>が生成したボックスに記入されるはずの参照（一般には受験番号）を格納したカラムが必要です。</para>
           </warning>
         </sect4>
 
         <sect4>
-          <title>手動リンク</title>
+          <title>手動識別</title>
 
-          <para>受験者の氏名を読み取るためのウィンドウを開くには、<guilabel>受験者識別</guilabel>セクションの<guibutton>手動</guibutton>ボタンをクリックします。このウィンドウは、上部に受験者が記入した氏名の画像が順番に表示され、下部に名簿にある受験者ごとにボタンが並び、さらに右側には答案用紙の一覧で区別できるようになっています。各ページについて、上部に提示された氏名に対応したボタンをクリックします（デフォルトでは識別できなかった答案だけが表示されますが、「<guilabel>リンク済も表示</guilabel>」ボックスにチェックすれば変更できます）。すべてのページを読み取れたら、氏名の画像のかわりに青い背景が表示され、最後に<guibutton>保存</guibutton>ボタンをクリックしてリンクを終了するだけです。</para>
+          <para>受験者の氏名を読み取るためのウィンドウを開くには、<guilabel>受験者識別</guilabel>セクションの<guibutton>手動</guibutton>ボタンをクリックします。このウィンドウは、上部に受験者が記入した氏名の画像が順番に表示され、下部に名簿にある受験者ごとにボタンが並び、さらに右側には答案用紙の一覧で区別できるようになっています。各ページについて、上部に提示された氏名に対応したボタンをクリックします（デフォルトでは識別できなかった答案だけが表示されますが、「<guilabel>識別済も表示</guilabel>」ボックスにチェックすれば変更できます）。すべてのページを読み取れたら、氏名の画像のかわりに青い背景が表示されるので、最後に<guibutton>保存</guibutton>ボタンをクリックして受験者識別を終了するだけです。</para>
         </sect4>
       </sect3>
     </sect2>
@@ -3521,11 +3521,11 @@ Moniuszko,Stanisław,003</programlisting>
 \csvreader[head to column names]{students.csv}{}{\subject}
 </programlisting>
 
-          <para><command>\csvreader</command>の<option>head to column names</option>オプションは、<command>\subject</command>内で使えるように（CSVのヘッダーから）<command>\name</command>、<command>\surname</command>、<command>\id</command>コマンドを定義します。<command>\AMCassociation</command>の呼出しにより、AMCは現在の試験問題用紙を<command>\id</command>というidをもつ受験者にリンクします。</para>
+          <para><command>\csvreader</command>の<option>head to column names</option>オプションは、<command>\subject</command>内で使えるように（CSVのヘッダーから）<command>\name</command>、<command>\surname</command>、<command>\id</command>コマンドを定義します。<command>\AMCassociation</command>の呼出しにより、AMCは現在の試験問題用紙を<command>\id</command>というidをもつ受験者のものとして識別します。</para>
         </listitem>
 
         <listitem>
-          <para>印刷、スキャン、マーク認識、採点が終わった後、用紙と受験者をリンクする際、「答案内のリンク用コード名」フィールドに「<emphasis>印刷時リンク済</emphasis>」、「名簿内のリンク用主キー」フィールドに「<emphasis>id</emphasis>」を選択してください。</para>
+          <para>印刷、スキャン、マーク認識、採点が終わった後、答案用紙の受験者を識別する際、「答案内の受験者識別用コード名」フィールドに「<emphasis>印刷時識別済</emphasis>」、「名簿内の受験者識別用カラム名」フィールドに「<emphasis>id</emphasis>」を選択してください。</para>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -4395,7 +4395,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refnamediv>
         <refname>AMC-association-auto</refname>
 
-        <refpurpose>AMC選択式試験問題の受験者と答案を自動リンクする</refpurpose>
+        <refpurpose>AMC選択式試験問題の受験者と答案を自動識別する</refpurpose>
       </refnamediv>
 
       <refsynopsisdiv>
@@ -4421,7 +4421,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-association-auto.pl</command> コマンドは、受験者と答案用紙をリンクします（受験者が受験番号を正しく記入し、マーク認識に誤りがない場合）。詳細はユーザードキュメントの<xref linkend="sec.students.id"/>を参照してください。</para>
+        <para><command>AMC-association-auto.pl</command> コマンドは、答案用紙の受験者を識別します（受験者が受験番号を正しく記入し、マーク認識に誤りがない場合）。詳細はユーザードキュメントの<xref linkend="sec.students.id"/>を参照してください。</para>
 
         <variablelist>
           <varlistentry>
@@ -4450,7 +4450,7 @@ Moniuszko,Stanisław,003</programlisting>
             <term><option>--pre-association</option></term>
 
             <listitem>
-              <para>使用された場合、<option>--notes-id</option>オプションを無視し、印刷時リンクデータ（LaTeXソースファイルの<command>\AMCassociation</command>コマンド）から自動リンクを行います。</para>
+              <para>使用された場合、<option>--notes-id</option>オプションを無視し、印刷時識別データ（LaTeXソースファイルの<command>\AMCassociation</command>コマンド）から自動識別を行います。</para>
             </listitem>
           </varlistentry>
 
@@ -4507,7 +4507,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refnamediv>
         <refname>AMC-association</refname>
 
-        <refpurpose>AMC選択式試験問題の受験者と答案用紙を手動リンクする。</refpurpose>
+        <refpurpose>AMC選択式試験問題の受験者と答案用紙を手動識別する。</refpurpose>
       </refnamediv>
 
       <refsynopsisdiv>
@@ -4544,7 +4544,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-association.pl</command>コマンドは、受験者と答案用紙のリンク用データを扱います。</para>
+        <para><command>AMC-association.pl</command>コマンドは、答案用紙の受験者識別データを扱います。</para>
 
         <variablelist>
           <varlistentry>
@@ -4561,9 +4561,9 @@ Moniuszko,Stanisław,003</programlisting>
           </varlistentry>
         </variablelist>
 
-        <para><option>--list</option>オプションは、リンク用データをすべて出力します。</para>
+        <para><option>--list</option>オプションは、受験者識別データをすべて出力します。</para>
 
-        <para><option>--set</option>オプションは、手動リンクを更新します。</para>
+        <para><option>--set</option>オプションは、手動識別を更新します。</para>
       </refsect1>
     </refentry>
 
@@ -4929,7 +4929,7 @@ Moniuszko,Stanisław,003</programlisting>
               <replaceable>key</replaceable></option></term>
 
               <listitem>
-                <para>リンクに使用するキー（受験者名簿ファイル内のカラム名）を設定します。リンク時に実際に使用した値がデータベースに格納され、これがデフォルト値となるので、このオプションは使用すべきでありません。</para>
+                <para>受験者識別に使用するカラム（受験者名簿ファイル内のカラム名）を設定します。識別時に実際に使用した値がデータベースに格納され、これがデフォルト値となるので、このオプションは使用すべきでありません。</para>
               </listitem>
             </varlistentry>
 
