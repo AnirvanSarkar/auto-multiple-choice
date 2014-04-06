@@ -33,7 +33,12 @@ my %k=();
 
 $s=`svnversion`;
 if($s =~ /([0-9]+)[SM]*$/) {
-    $k{'svn'}=$1;
+    $k{'vc'}="svn:$1";
+}
+
+$s=`hg id`;
+if($s =~ /^([0-9a-f]+\+?)/) {
+  $k{'vc'}="r:$1";
 }
 
 open(CHL,"ChangeLog");
@@ -47,6 +52,6 @@ LINES: while(<CHL>) {
 open(VMK,">Makefile.versions");
 print VMK $lic_head;
 print VMK "PACKAGE_V_DEB=$k{'deb'}\n";
-print VMK "PACKAGE_V_SVN=$k{'svn'}\n";
+print VMK "PACKAGE_V_VC=$k{'vc'}\n";
 close(VMK);
 
