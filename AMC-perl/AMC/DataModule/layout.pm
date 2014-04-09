@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -368,6 +368,10 @@ sub define_statements {
 			     ." WHERE student=? ORDER BY page"},
        'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student ORDER BY student"},
+       'pageQuestionBoxes'=>
+       {'sql'=>"SELECT question AS id_a,answer AS id_b,role"
+	." FROM ".$self->table("box")
+	." WHERE role=2 AND student=? AND page=?"},
        'Q_Flag'=>{'sql'=>"UPDATE ".$self->table("box")
 		  ." SET flags=flags|? WHERE student=? AND question=? AND role=?"},
        'A_Flags'=>{'sql'=>"SELECT flags FROM ".$self->table("box")

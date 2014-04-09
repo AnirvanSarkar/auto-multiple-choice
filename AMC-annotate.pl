@@ -128,7 +128,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "rtl!"=>\$rtl,
 	   "changes-only!"=>\$changes_only,
 	   "sort=s"=>\$sort,
-	   "compose!"=>\$compose,
+	   "compose=s"=>\$compose,
 	   "corrected=s"=>\$pdf_corrected,
 	   "n-copies=s"=>\$n_copies,
 	   "src=s"=>\$src_file,
@@ -179,12 +179,12 @@ my $commandes=AMC::Exec::new('AMC-annotate');
 $commandes->signalise();
 
 # prepare the corrected answer sheet for all students. This file is
-# used when option --compose is on, to take sheets when there are no
+# used when option --compose is 2, to take sheets when there are no
 # answer boxes on it. This can be very useful to produce a complete
 # annotated answer sheet with subject *and* answers when separate
 # answer sheet layout is used.
 
-if($compose) {
+if($compose==2) {
   if(! -f $pdf_corrected) {
 
     debug "Building individual corrected sheet...";

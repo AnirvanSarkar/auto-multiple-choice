@@ -1,6 +1,6 @@
 /*
 
- Copyright (C) 2013 Alexis Bienvenue <paamc@passoire.fr>
+ Copyright (C) 2013-2014 Alexis Bienvenue <paamc@passoire.fr>
 
  This file is part of Auto-Multiple-Choice
 
@@ -111,6 +111,9 @@ int main( int argc, char** argv )
       } else if(sscanf(command,"mark %lf %lf %lf %lf",
 		       &a,&b,&c,&d)==4) {
 	PDF.draw_mark(a,b,c,d);
+      } else if(sscanf(command,"fill %lf %lf %lf %lf",
+		       &a,&b,&c,&d)==4) {
+	PDF.fill_rectangle(a,b,c,d);
       } else if(sscanf(command,"line width %lf",
 		       &a)==1) {
 	PDF.set_line_width(a);

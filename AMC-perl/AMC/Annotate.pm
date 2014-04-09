@@ -76,7 +76,7 @@ sub new {
 	      verdict_question_cancelled=>'',
 	      progress=>'',
 	      progress_id=>'',
-	      compose=>'',
+	      compose=>0,
 	      pdf_corrected=>'',
 	      changes_only=>'',
 	      embedded_max_size=>'',
@@ -126,7 +126,17 @@ sub new {
 
     # if the corrected answer sheet is not given, use the subject
     # instead.
-    $self->{pdf_corrected}=$self->{pdf_subject} if(!$self->{pdf_corrected});
+    if($self->{compose}==2 && ! -f $self->{pdf_corrected}) {
+      $self->{compose}=1;
+    }
+
+    # which pdf file will be used as a background when scans are not
+    # available?
+    if($self->{compose}==1) {
+      $self->{pdf_background}=$self->{pdf_subject};
+    } elsif($self->{compose}==2) {
+      $self->{pdf_background}=$self->{pdf_corrected};
+    }
 
     # set up the object to send progress to calling program
     $self->{avance}=AMC::Gui::Avancement::new($self->{progress},
@@ -618,7 +628,16 @@ sub student_pages {
   return($self->{layout}->pages_info_for_student($student->[0],enter_tag=>1));
 }
 
-# insert the background for an annotated page
+# Inserts the background for an annotated page. Returns:
+#
+# -1 if no page were inserted (without compose option, or when the
+# page from the subject is not available)
+#
+# 0 if a scan is used
+#
+# 1 if a subject page with no answer boxes is used
+#
+# 2 if a subject page with answer boxes is used
 
 sub page_background {
   my ($self,$student,$page)=@_;
@@ -647,7 +666,7 @@ sub page_background {
     $self->command(join(' ',
 			"matrix",map { $page_capture->{$_} } (qw/a b c d e f/)));
 
-    return(1);
+    return(0);
   } else {
     if($scan) {
       debug "WARNING: Registered scan \"$scan\" was not found.";
@@ -657,8 +676,7 @@ sub page_background {
 
       # If the page contains something to be filled by the student
       # (either name field or boxes), inserts the page from the PDF
-      # subject. We return 2 to tell that ticked boxes should be shown
-      # on the subject (that is initially empty).
+      # subject.
 
       debug "Using subject page.";
       $self->insert_pdf_page($self->{pdf_subject},$page->{subjectpage});
@@ -675,16 +693,21 @@ sub page_background {
       # (then the student will see the correct answers easily on the
       # annotated answer sheet).
 
-      if($self->{compose} && $self->{pdf_corrected}) {
-	$self->insert_pdf_page($self->{pdf_corrected},$page->{subjectpage});
-	return(0);
+      if(-f $self->{pdf_background}) {
+	$self->insert_pdf_page($self->{pdf_background},$page->{subjectpage});
+	return(1);
       }
     }
-    return(0);
+    return(-1);
   }
 }
 
-# draws one symbol
+# draws one symbol. $b is one row from the capture:pageZones SQL query
+# (from which we use only the id_a=question, id_b=answer and role
+# attributes). When $tick is true, boxes are tickedas the student did
+# (this can be usefull for manual data capture for example, when the
+# background is not the scan but the PDF subject, and we want to
+# illustrate which boxes has been ticked by the student).
 
 sub draw_symbol {
   my ($self,$student,$b,$tick)=@_;
@@ -709,14 +732,14 @@ sub draw_symbol {
   my $sy=$self->{symbols}->{"$bonne-$cochee"};
 
   # get box position on subject
-  my $box=$self->{layout}->get_box_info($student->[0],$q,$r,BOX_ROLE_ANSWER);
+  my $box=$self->{layout}->get_box_info($student->[0],$q,$r,$b->{role});
 
   # when the subject background is used instead of the scan, darken
   # boxes that have been ticked by the student
   if($tick && $cochee) {
     debug "Tick.";
     $self->set_color('black');
-    $self->command(join(' ','mark',
+    $self->command(join(' ','fill',
 			map { $box->{$_} } (qw/xmin xmax ymin ymax/)
 		       ));
   }
@@ -756,6 +779,16 @@ sub page_symbols {
 
   # goes through all the boxes on the page
 
+  # the question boxes (in separate answer sheet mode)
+  if($self->{compose}==1) {
+    my $sth=$self->{layout}->statement('pageQuestionBoxes');
+    $sth->execute($student->[0],$page->{page});
+    while(my $box=$sth->fetchrow_hashref) {
+      $self->draw_symbol($student,$box,1);
+    }
+  }
+
+  # the answer boxes that were captured
   my $sth=$self->{capture}->statement('pageZones');
   $sth->execute($student->[0],$page->{page},$student->[1],ZONE_BOX);
   while(my $box=$sth->fetchrow_hashref) {
@@ -941,7 +974,7 @@ sub student_draw_page {
   if($draw=$self->page_background($student,$page)) {
     $self->command("line width $self->{line_width}");
     $self->command("font size $self->{font_size}");
-    $self->page_symbols($student,$page,$draw>1);
+    $self->page_symbols($student,$page,$draw>0);
     $self->page_qscores($student,$page);
     $self->command("matrix identity");
     $self->page_header($student);

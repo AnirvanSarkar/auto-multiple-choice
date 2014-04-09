@@ -1,6 +1,6 @@
 /*
 
- Copyright (C) 2013 Alexis Bienvenue <paamc@passoire.fr>
+ Copyright (C) 2013-2014 Alexis Bienvenue <paamc@passoire.fr>
 
  This file is part of Auto-Multiple-Choice
 
@@ -293,6 +293,7 @@ public:
      based is given): */
 
   void draw_rectangle(double xmin, double xmax, double ymin, double ymax);
+  void fill_rectangle(double xmin, double xmax, double ymin, double ymax);
   void draw_mark(double xmin, double xmax, double ymin, double ymax);
   void draw_circle(double xmin, double xmax, double ymin, double ymax);
 
@@ -1112,6 +1113,14 @@ void BuildPdf::draw_rectangle(double xmin, double xmax, double ymin, double ymax
   }
   cairo_rectangle(cr,xmin,ymin,xmax-xmin,ymax-ymin);
   cairo_stroke(cr);
+}
+
+void BuildPdf::fill_rectangle(double xmin, double xmax, double ymin, double ymax) {
+  if(debug) {
+    printf("; fill rectangle\n");
+  }
+  cairo_rectangle(cr,xmin,ymin,xmax-xmin,ymax-ymin);
+  cairo_fill(cr);
 }
 
 void BuildPdf::draw_mark(double xmin, double xmax, double ymin, double ymax) {

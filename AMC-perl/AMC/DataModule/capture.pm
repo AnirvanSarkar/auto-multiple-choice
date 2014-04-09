@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -483,7 +483,7 @@ sub define_statements {
      'pageNearRatio'=>{'sql'=>"SELECT MIN(ABS(1.0*black/total-?))"
 		       ." FROM $t_zone"
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
-     'pageZones'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual FROM $t_zone"
+     'pageZones'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual,1 AS role FROM $t_zone"
 		   ." WHERE student=? AND page=? AND copy=? AND type=?"},
      'zonesImages'=>{'sql'=>"SELECT image FROM $t_zone"
 		     ." WHERE student=? AND page=? AND copy=? AND type=?"},

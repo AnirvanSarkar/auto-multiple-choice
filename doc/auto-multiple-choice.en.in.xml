@@ -88,10 +88,10 @@
       <title>Operating system</title>
 
       <para>The AMC utilities have been written for Linux. They might be
-      adapted to MAC OS X or Windows without too many difficulties, but I won't
-      do that in the near future. Please contact me if you are interested to
-      do it : I can help you a little, and I will include changes in AMC if
-      necessary.</para>
+      adapted to MAC OS X or Windows without too many difficulties, but I
+      won't do that in the near future. Please contact me if you are
+      interested to do it : I can help you a little, and I will include
+      changes in AMC if necessary.</para>
     </sect2>
 
     <sect2>
@@ -272,8 +272,8 @@ sudo make install</screen>
     <title>AMC-TXT syntax</title>
 
     <para>For users who are not ready to learn LaTeX (if not already familiar
-    with this language), AMC includes a filter to process simple plain text 
-    files in a particular format, named AMC-TXT. This section is devoted to 
+    with this language), AMC includes a filter to process simple plain text
+    files in a particular format, named AMC-TXT. This section is devoted to
     detail the syntax of AMC-TXT files. If you prefer use LaTeX to gain a
     fine-control over your questionnaires, skip to next section.</para>
 
@@ -1738,20 +1738,17 @@ Durée : 10 minutes.
       </sect3>
 
       <sect3 id="latex.explain">
-        <title id="latex.explain.title">Explanation for the answers of a question</title>
+        <title id="latex.explain.title">Explanation for the answers of a
+        question</title>
 
-        <para>
-        To provide explanation for the answers of a question, one can use the 
-        <command>\explain</command> command. The explanations are optional and are only 
-        displayed in the Solution and Catalog file.
-        </para>
+        <para>To provide explanation for the answers of a question, one can
+        use the <command>\explain</command> command. The explanations are
+        optional and are only displayed in the Solution and Catalog
+        file.</para>
 
-        <para>
-        Here is a simple example:
-        </para>
+        <para>Here is a simple example:</para>
 
-        <para>
-        <programlisting>
+        <para><programlisting>
 \begin{question}{explanation}
   Which has the highest elevation among the following?
   \begin{choices}
@@ -1762,32 +1759,26 @@ Durée : 10 minutes.
   \end{choices}
   \explain{Sagarmatha which literally means `Head of sky' is the native name of
            Mount Everest, the highest mountain in the world.}
-\end{question}</programlisting>
-        </para>
+\end{question}</programlisting></para>
 
         <note>
-          <para>
-          The <command>explain</command> command can be used inside
+          <para>The <command>explain</command> command can be used inside
           <option>question</option> like environments only. This includes
           <option>question</option>, <option>questionmult</option> and
-          <option>questionmultx</option> environments.
-          </para>
+          <option>questionmultx</option> environments.</para>
         </note>
-        
-        <para>
-        By default this command prints <emphasis>Explanation: </emphasis>
-        before each explanations. This behaviour can be changed using the
-        <command>\AMCtext</command> command (see section <xref linkend="AMCtext"/>).
-        </para>
-        
-        <para>
-        If you want to change this default behaviour only for some questions
-        and not for all just use the <command>\AMCtext</command> command before the
-        <command>\explain</command> command as in the following example:
-        </para>
 
-        <para>
-        <programlisting>
+        <para>By default this command prints <emphasis>Explanation:
+        </emphasis> before each explanations. This behaviour can be changed
+        using the <command>\AMCtext</command> command (see section <xref
+        linkend="AMCtext"/>).</para>
+
+        <para>If you want to change this default behaviour only for some
+        questions and not for all just use the <command>\AMCtext</command>
+        command before the <command>\explain</command> command as in the
+        following example:</para>
+
+        <para><programlisting>
 \begin{question}{elevation}
   Which has the highest elevation among the following?
   \begin{choices}
@@ -1822,14 +1813,11 @@ Durée : 10 minutes.
   \end{choices}
   \explain{Aconcagua is located in the Andes mountain range while Mont Blanc
                  is located in the Alps.}
-\end{questionmultx}</programlisting>
-        </para>
-        
-        <para>
-        This will now print <emphasis>Explanation: </emphasis> before the explanations
-        of first and third question but <emphasis>Reason: </emphasis> before the
-        explanation of second question.
-        </para>
+\end{questionmultx}</programlisting></para>
+
+        <para>This will now print <emphasis>Explanation: </emphasis> before
+        the explanations of first and third question but <emphasis>Reason:
+        </emphasis> before the explanation of second question.</para>
       </sect3>
 
       <sect3>
@@ -2573,16 +2561,13 @@ and write your first and last names below.
           </listitem>
 
           <listitem>
-            <para>
-            <code>\AMCtext{explain}{<replaceable>title</replaceable>}</code>
-            replaces « <emphasis>Explanation</emphasis> » (the English default text)
-            with the given <replaceable>title</replaceable> before the explanations
-            produced due to the <command>explain</command> command.
-            </para>
+            <para><code>\AMCtext{explain}{<replaceable>title</replaceable>}</code>
+            replaces « <emphasis>Explanation</emphasis> » (the English default
+            text) with the given <replaceable>title</replaceable> before the
+            explanations produced due to the <command>explain</command>
+            command.</para>
 
-            <para>
-            The default option for this command is:
-            </para>
+            <para>The default option for this command is:</para>
 
             <programlisting>\AMCtext{explain}{\textit{\textbf{Explanation: }}}</programlisting>
           </listitem>
@@ -6287,13 +6272,20 @@ Moniuszko,Stanisław,003</programlisting>
             </varlistentry>
 
             <varlistentry>
-              <term><option>--compose</option></term>
+              <term><option>--compose
+              <replaceable>mode</replaceable></option></term>
 
               <listitem>
                 <para>use this option if you want to take pages from the
-                corrected subject when there is no boxes to be filled on them
-                (for example, question pages before the anotated answer
-                sheet).</para>
+                subject when there is no boxes to be filled on them (for
+                example, question pages before the anotated answer sheet).
+                When <replaceable>mode</replaceable> equals 1, the pages are
+                taken from the subject, are filled or not according to the
+                student's answers (the same as on the naswer sheet), and the
+                same correction marks are drawn as on the answer sheet. When
+                mode equals 2, the pages are taken from the corrected answer
+                sheet (so the ticked answers are the correct ones), and no
+                correction marks are drawn.</para>
               </listitem>
             </varlistentry>
 
