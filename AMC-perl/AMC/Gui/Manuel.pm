@@ -299,7 +299,9 @@ sub maj_list_all {
     ->summaries('darkness_threshold'=>$self->{'seuil'},
 		'sensitivity_threshold'=>$self->{'seuil_sens'},
 		'mse_threshold'=>$self->{'seuil_eqm'});
-  my $capture_free=$self->{'capture'}->no_capture_pages;
+  my $capture_free=[];
+  push @$capture_free,@{$self->{'capture'}->question_only_pages} if(!$self->{editable});
+  push @$capture_free,@{$self->{'capture'}->no_capture_pages};
   $self->{'capture'}->end_transaction;
 
   $diag_store = $self->new_diagstore;
@@ -512,7 +514,7 @@ sub charge_i {
 	my $c;
 	my $sth;
 
-	for my $type (qw/box digit namefield/) {
+	for my $type (qw/box questionbox digit namefield/) {
 	  for my $c ($self->{'layout'}->type_info($type,@ep)) {
 	    push @{$self->{'layinfo'}->{$type}},{%$c};
 	  }

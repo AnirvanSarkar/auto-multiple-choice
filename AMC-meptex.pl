@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2011-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -240,11 +240,12 @@ PAGE: for my $p (@pages) {
 	$layout->statement('NEWDigit')
 	  ->execute(@ep,$1,$2,bbox($c->{$k}));
       }
-      if($k=~/case:(.*):([0-9]+),([0-9]+)$/) {
-	my ($name,$q,$a)=($1,$2,$3);
+      if($k=~/case(question)?:(.*):([0-9]+),([0-9]+)$/) {
+	my ($question_only,$name,$q,$a)=($1,$2,$3,$4);
 	$layout->question_name($q,$name);
 	$layout->statement('NEWBox')
-	  ->execute(@ep,$q,$a,bbox($c->{$k}),$c->{$k}->{'flags'});
+	  ->execute(@ep,($question_only ? BOX_ROLE_QUESTIONONLY : BOX_ROLE_ANSWER),
+		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'});
       }
     }
 
@@ -254,7 +255,7 @@ PAGE: for my $p (@pages) {
 debug "Flagging questions...";
 
 for my $f (@flags) {
-  $layout->add_question_flag($f->{'student'},$f->{'question'},$f->{'flags'});
+  $layout->add_question_flag($f->{'student'},$f->{'question'},BOX_ROLE_ANSWER,$f->{'flags'});
 }
 
 debug "Ending transaction...";

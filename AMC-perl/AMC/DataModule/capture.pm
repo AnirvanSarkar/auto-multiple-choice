@@ -466,14 +466,17 @@ sub define_statements {
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
      'missingPages'=>
      {'sql'=>"SELECT enter.student AS student,enter.page AS page ,$t_page.copy AS copy"
-      ." FROM (SELECT student,page FROM $t_box"
+      ." FROM (SELECT student,page FROM $t_box WHERE role=1"
       ."       UNION SELECT student,page FROM $t_namefield) AS enter,"
       ."      $t_page"
       ." ON enter.student=$t_page.student"
       ." EXCEPT SELECT student,page,copy FROM $t_page"
       ." ORDER BY student,copy,page"},
+     'questionOnlyPages'=>
+     {'sql'=>"SELECT student,page,0 AS copy FROM $t_box WHERE role=2"
+      ." EXCEPT SELECT student,page,0 AS copy FROM $t_box WHERE role=1"},
      'noCapturePages'=>
-     {'sql'=>"SELECT student,page,0 AS copy FROM $t_box"
+     {'sql'=>"SELECT student,page,0 AS copy FROM $t_box WHERE role=1"
       ." UNION SELECT student,page,0 AS copy FROM $t_namefield"
       ." EXCEPT SELECT student,page,copy FROM $t_page"
       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
@@ -1244,6 +1247,16 @@ sub failed {
 sub no_capture_pages {
   my ($self)=@_;
   return($self->dbh->selectall_arrayref($self->statement('noCapturePages')));
+}
+
+# no_capture_pages returns a reference to an array of elements
+# [student,page,copy] for pages from the question paper that has boxes
+# from the question but no boxes from the answer sheet (all with
+# copy=0). The result is empty if not in separate answer sheet mode.
+
+sub question_only_pages {
+  my ($self)=@_;
+  return($self->dbh->selectall_arrayref($self->statement('questionOnlyPages')));
 }
 
 # delete_page_data($student,$page,$copy) deletes all data concerning

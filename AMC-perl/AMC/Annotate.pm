@@ -709,7 +709,7 @@ sub draw_symbol {
   my $sy=$self->{symbols}->{"$bonne-$cochee"};
 
   # get box position on subject
-  my $box=$self->{layout}->get_box_info($student->[0],$q,$r);
+  my $box=$self->{layout}->get_box_info($student->[0],$q,$r,BOX_ROLE_ANSWER);
 
   # when the subject background is used instead of the scan, darken
   # boxes that have been ticked by the student

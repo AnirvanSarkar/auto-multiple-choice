@@ -384,7 +384,7 @@ print "* Annotation\n";
 	}
       }
 
-      if(!($layout->get_box_flags($p->{'student'},$q,$r)
+      if(!($layout->get_box_flags($p->{'student'},$q,$r,BOX_ROLE_ANSWER)
 		  & BOX_FLAGS_DONTANNOTATE)) {
 	if($sy->{type} eq 'circle') {
 	  cercle_coors($context,$b->{'zoneid'},$sy->{color});

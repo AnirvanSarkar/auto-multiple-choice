@@ -1898,7 +1898,7 @@ Three digits and two letters:\insertgroup{mixed}.
       \ifAMCformulaire@dedans% for answer boxes inside form sheet
         \protect\AMC@formBox{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
       \else% outside form sheet: not to be read during data capture
-        \AMC@answerBox{#1}{#2}{}{}%
+        \AMC@answerBox{#1}{#2}{1}{casequestion:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
     \fi\fi%
   \else% no separate sheet for answers: always read
     \ifAMC@inside@box%

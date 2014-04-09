@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2012 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -47,6 +47,7 @@ sub add_feuille {
 
     $self->{'onscan'}='';
     $self->{'unticked_color_name'}="#429DE5";
+    $self->{question_color_name}="#47D265";
 
     $self->{'font'}=Pango::FontDescription->from_string("128");
 
@@ -57,9 +58,11 @@ sub add_feuille {
     $self->{'gc'} = Gtk2::Gdk::GC->new($self->window);
 
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
+    $self->{'question_color'}= 
+      Gtk2::Gdk::Color->parse($self->{question_color_name});
     $self->{'unticked_color'}=
       Gtk2::Gdk::Color->parse($self->{'unticked_color_name'});
-    for my $ck (qw/color unticked_color/) {
+    for my $ck (qw/color unticked_color question_color/) {
       $self->window->get_colormap->alloc_color($self->{$ck},TRUE,TRUE);
     }
 
@@ -295,9 +298,8 @@ sub expose_drawing {
 
 	## boxes drawings
 
-	$self->{'gc'}->set_foreground($self->{'color'});
-
 	if($self->{'onscan'}) {
+	  $self->{'gc'}->set_foreground($self->{'color'});
 	  for $box (grep { $_->{'ticked'} }
 		    @{$self->{'layinfo'}->{'box'}}) {
 	    $self->draw_box($box,'');
@@ -308,8 +310,13 @@ sub expose_drawing {
 	    $self->draw_box($box,'');
 	  }
 	} else {
+	  $self->{'gc'}->set_foreground($self->{'color'});
 	  for $box (@{$self->{'layinfo'}->{'box'}}) {
 	    $self->draw_box($box,$box->{'ticked'});
+	  }
+	  $self->{'gc'}->set_foreground($self->{'question_color'});
+	  for $box (@{$self->{'layinfo'}->{'questionbox'}}) {
+	    $self->draw_box($box,'');
 	  }
 	}
 

@@ -70,6 +70,8 @@ package AMC::DataModule::layout;
 #
 # * student,page identifies the page
 #
+# * role determines the role of this box (see BOX_ROLE_* constants below)
+#
 # * question is the question number. This is NOT the question number
 #   that is printed on the question paper, but an internal question
 #   number associated with question identifier from the LaTeX file
@@ -126,10 +128,14 @@ use constant {
   BOX_FLAGS_DONTSCAN => 0x1,
   BOX_FLAGS_DONTANNOTATE => 0x2,
   BOX_FLAGS_SHAPE_OVAL => 0x10,
+
+  # Do not change these values as they are hard-coded elsewhere
+  BOX_ROLE_ANSWER => 1, # Boxes to be ticked by the student
+  BOX_ROLE_QUESTIONONLY => 2, # In separate answer sheet mode, boxes in the question section
 };
 
-our @EXPORT_OK = qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL);
-our %EXPORT_TAGS = ( 'flags' => [ qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL/ ],
+our @EXPORT_OK = qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY);
+our %EXPORT_TAGS = ( 'flags' => [ qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY/ ],
 		     );
 
 use AMC::Basic;
@@ -139,7 +145,24 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(4);
+  return(5);
+}
+
+sub drop_box_table {
+  my ($self)=@_;
+  $self->sql_do("DROP INDEX ".$self->index("index_box_studentpage"));
+  $self->sql_do("DROP TABLE ".$self->table("box"));
+}
+
+sub create_box_table {
+  my ($self,$tmp)=@_;
+  $self->sql_do("CREATE ".($tmp ? "TEMPORARY ":"")
+		."TABLE IF NOT EXISTS ".$self->table("box".($tmp ? "_tmp":""))
+		." (student INTEGER, page INTEGER, role INTEGER DEFAULT 1, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0, PRIMARY KEY (student,role,question,answer))");
+  if(!$tmp) {
+    $self->sql_do("CREATE INDEX ".$self->index("index_box_studentpage")." ON "
+		  .$self->table("box","self")." (student,page,role)");
+  }
 }
 
 sub version_upgrade {
@@ -158,10 +181,7 @@ sub version_upgrade {
 		      ." (student INTEGER, page INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)");
 	$self->sql_do("CREATE INDEX ".$self->index("index_namefield")." ON "
 		      .$self->table("namefield","self")." (student,page)");
-	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("box")
-		      ." (student INTEGER, page INTEGER, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0, PRIMARY KEY (student,question,answer))");
-	$self->sql_do("CREATE INDEX ".$self->index("index_box_studentpage")." ON "
-		      .$self->table("box","self")." (student,page)");
+	$self->create_box_table;
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("digit")
 		      ." (student INTEGER, page INTEGER, numberid INTEGER, digitid INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, PRIMARY KEY(student,page,numberid,digitid))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("source")
@@ -172,7 +192,7 @@ sub version_upgrade {
 		      ." (student INTEGER PRIMARY KEY, id TEXT)");
 	$self->populate_from_xml;
 
-	return(4);
+	return(5);
     }
     if($old_version==1) {
       $self->sql_do("ALTER TABLE ".$self->table("box")
@@ -212,6 +232,20 @@ sub version_upgrade {
 		    .$self->table("association","self")." (student)");
       $self->progression('end');
       return(4);
+    }
+    if($old_version==4) {
+      # To change the box table columns, primary key and index, use a
+      # temporary table to transfer all rows
+      $self->create_box_table(1);
+      $self->sql_do("INSERT INTO ".$self->table("box_tmp")." (student,page,question,answer,xmin,xmax,ymin,ymax,flags)"
+		   ." SELECT student,page,question,answer,xmin,xmax,ymin,ymax,flags FROM"
+		   .$self->table("box"));
+      $self->drop_box_table;
+      $self->create_box_table;
+      $self->sql_do("INSERT INTO ".$self->table("box")
+		    ." SELECT * FROM ".$self->table("box_tmp"));
+      $self->sql_do("DROP TABLE ".$self->table("box_tmp"));
+      return(5);
     }
     return('');
 }
@@ -258,7 +292,7 @@ sub populate_from_xml {
 		    }
 		    for my $c (@{$l->{'case'}}) {
 			$self->statement('NEWBox')->execute(
-			    @lid,(map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)),0
+			    @lid,BOX_ROLE_ANSWER,(map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)),0
 			    );
 		    }
 		    for my $d (@{$l->{'chiffre'}}) {
@@ -314,8 +348,8 @@ sub define_statements {
        'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
 		   ." (student,page,corner,x,y) VALUES (?,?,?,?,?)"},
        'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
-		  ." (student,page,question,answer,xmin,xmax,ymin,ymax,flags)"
-		  ." VALUES (?,?,?,?,?,?,?,?,?)"},
+		  ." (student,page,role,question,answer,xmin,xmax,ymin,ymax,flags)"
+		  ." VALUES (?,?,?,?,?,?,?,?,?,?)"},
        'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
 		    ." (student,page,numberid,digitid,xmin,xmax,ymin,ymax)"
 		    ." VALUES (?,?,?,?,?,?,?,?)"},
@@ -335,37 +369,37 @@ sub define_statements {
        'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student ORDER BY student"},
        'Q_Flag'=>{'sql'=>"UPDATE ".$self->table("box")
-		  ." SET flags=flags|? WHERE student=? AND question=?"},
+		  ." SET flags=flags|? WHERE student=? AND question=? AND role=?"},
        'A_Flags'=>{'sql'=>"SELECT flags FROM ".$self->table("box")
-		  ." WHERE student=? AND question=? AND answer=?"},
+		  ." WHERE student=? AND question=? AND answer=? AND role=?"},
        'A_All'=>{'sql'=>"SELECT * FROM ".$self->table("box")
-		 ." WHERE student=? AND question=? AND answer=?"},
+		 ." WHERE student=? AND question=? AND answer=? AND role=?"},
        'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM ".$self->table("box")
-			     ." WHERE student=? GROUP BY student,page"},
+			     ." WHERE student=? AND role=? GROUP BY student,page"},
        'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
 				   ." WHERE student=? GROUP BY student,page"},
        'PAGES_STUDENT_enter'=>
        {'sql'=>"SELECT page FROM ("
-	."SELECT student,page FROM ".$self->table("box")." UNION "
+	."SELECT student,page FROM ".$self->table("box")." WHERE role=1 UNION "
 	."SELECT student,page FROM ".$self->table("namefield")
 	.") AS enter WHERE student=? GROUP BY student,page"},
        'PAGES_enter'=>
        {'sql'=>"SELECT student,page FROM ("
-	."SELECT student,page FROM ".$self->table("box")." UNION "
+	."SELECT student,page FROM ".$self->table("box")." WHERE role=1 UNION "
 	."SELECT student,page FROM ".$self->table("namefield")
 	.") AS enter GROUP BY student,page ORDER BY student,page"},
        'MAX_enter'=>
        {'sql'=>"SELECT MAX(n) FROM"
 	." ( SELECT COUNT(*) AS n FROM"
-	."   ( SELECT student,page FROM ".$self->table("box")
+	."   ( SELECT student,page FROM ".$self->table("box")." WHERE role=1"
 	."     UNION SELECT student,page FROM ".$self->table("namefield")
 	."   ) GROUP BY student )"},
        'DEFECT_NO_BOX'=>
        {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
 	." WHERE student>0 AND"
-	."   NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local"
-	."              WHERE local.student=list.student)"},
+	."   NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local WHERE role=1 AND"
+	."              local.student=list.student)"},
        'DEFECT_NO_NAME'=>
        {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
@@ -387,7 +421,7 @@ sub define_statements {
        'subjectpageForStudentA'=>
        {'sql'=>"SELECT MIN(p.subjectpage),MAX(p.subjectpage) FROM "
 	.$self->table("page")." AS p"
-	." ,( SELECT student,page FROM ".$self->table("box")
+	." ,( SELECT student,page FROM ".$self->table("box")." WHERE role=1"
 	."    UNION"
 	."    SELECT student,page FROM ".$self->table("namefield")." ) AS a"
 	." ON p.student=a.student AND p.page=a.page"
@@ -407,7 +441,7 @@ sub define_statements {
        'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
 		     ." WHERE student=? AND page=?"},
        'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
-		   ." WHERE student=? AND page=?"},
+		   ." WHERE student=? AND page=? AND role=?"},
        'namefieldInfo'=>{'sql'=>"SELECT * FROM ".$self->table("namefield")
 			 ." WHERE student=? AND page=?"},
        'exists'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
@@ -538,16 +572,27 @@ sub page_info {
 	       $self->statement('pageInfo'),{},$student,$page));
 }
 
-# type_info($type,$student,$page) returns an array of HASH references
-# containing all fiels in the $type table ($type may equal digit, box
-# or namefield) corresponding to the $student,$page page.
+# type_info($type,$student,$page,$role) returns an array of HASH
+# references containing all fiels in the $type table ($type may equal
+# digit, box or namefield) corresponding to the $student,$page
+# page. The $role argument (which defaults to BOX_ROLE_ANSWER) is only
+# needed when $type is 'box' (or you can use $type='questionbox' with
+# no $role).
 
 sub type_info {
-  my ($self,$type,$student,$page)=@_;
+  my ($self,$type,$student,$page,$role)=@_;
+  my @args=($student,$page);
+  if($type eq 'questionbox') {
+    $type='box';
+    $role=BOX_ROLE_QUESTIONONLY;
+  }
+  if($type eq 'box') {
+    push @args,($role || BOX_ROLE_ANSWER);
+  }
   return(@{$self->dbh
 	     ->selectall_arrayref($self->statement($type.'Info'),
 				  {Slice=>{}},
-				  $student,$page)});
+				  @args)});
 }
 
 # pages_for_student($student,[%options]) returns a list of the page
@@ -562,8 +607,13 @@ sub type_info {
 sub pages_for_student {
     my ($self,$student,%oo)=@_;
     $oo{'select'}='all' if(!$oo{'select'});
+    @args=($student);
+    if($oo{select} eq 'box') {
+      $oo{role}=BOX_ROLE_ANSWER if(!$oo{role});
+      push @args,$oo{role};
+    }
     return($self->sql_list($self->statement('PAGES_STUDENT_'.$oo{'select'}),
-			   $student));
+			   @args));
 }
 
 # pages_info_for_student($student,[%options]) returns a list of
@@ -579,7 +629,7 @@ sub pages_info_for_student {
 			 {Slice=>{}},
 			 $student);
   if($oo{enter_tag}) {
-    my %enter_pages=map { $_=>1 } ($self->pages_for_student($student,select=>'enter'));
+    my %enter_pages=map { $_=>1 } ($self->pages_for_student($student,select=>'enter',role=>$oo{role}));
     for my $p (@$r) {
       $p->{enter}=1 if($enter_pages{$p->{page}});
     }
@@ -715,26 +765,26 @@ sub max_enter {
 # answers boxes for a particular student and question.
 
 sub add_question_flag {
-  my ($self,$student,$question,$flag)=@_;
-  $self->statement('Q_Flag')->execute($flag,$student,$question);
+  my ($self,$student,$question,$role,$flag)=@_;
+  $self->statement('Q_Flag')->execute($flag,$student,$question,$role);
 }
 
 # get_box_flags($student,$question,$answer) returns the flags for the
 # corresponding box.
 
 sub get_box_flags {
-  my ($self,$student,$question,$answer)=@_;
+  my ($self,$student,$question,$answer,$role)=@_;
   return($self->sql_single($self->statement('A_Flags'),
-			   $student,$question,$answer));
+			   $student,$question,$answer,$role));
 }
 
 # get_box_info($student,$question,$answer) returns all data from table
 # box for the corresponding box.
 
 sub get_box_info {
-  my ($self,$student,$question,$answer)=@_;
+  my ($self,$student,$question,$answer,$role)=@_;
   return($self->dbh->selectrow_hashref($self->statement('A_All'),{},
-				       $student,$question,$answer));
+				       $student,$question,$answer,$role));
 }
 
 # new_association($student,$id) adds an association to the
