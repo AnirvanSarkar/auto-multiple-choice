@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -109,9 +109,11 @@ endif
 # Target switch (precomp archive or not)
 
 ifeq ($(PRECOMP_ARCHIVE),)
-all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm doc I18N ;
+all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm doc I18N
+	chmod a+x auto-multiple-choice
 else
-all: all_precomp ;
+all: all_precomp
+	chmod a+x auto-multiple-choice
 endif
 
 all_precomp: $(FROM_IN) $(BINARIES) ;
