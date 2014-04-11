@@ -160,7 +160,7 @@ sub drop_box_table {
 sub create_box_table {
   my ($self,$tmp)=@_;
   $self->sql_do("CREATE ".($tmp ? "TEMPORARY ":"")
-		."TABLE IF NOT EXISTS ".$self->table("box".($tmp ? "_tmp":""))
+		."TABLE IF NOT EXISTS ".($tmp ? "box_tmp" :$self->table("box"))
 		." (student INTEGER, page INTEGER, role INTEGER DEFAULT 1, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0, PRIMARY KEY (student,role,question,answer))");
   if(!$tmp) {
     $self->sql_do("CREATE INDEX ".$self->index("index_box_studentpage")." ON "
@@ -240,14 +240,14 @@ sub version_upgrade {
       # To change the box table columns, primary key and index, use a
       # temporary table to transfer all rows
       $self->create_box_table(1);
-      $self->sql_do("INSERT INTO ".$self->table("box_tmp")." (student,page,question,answer,xmin,xmax,ymin,ymax,flags)"
-		   ." SELECT student,page,question,answer,xmin,xmax,ymin,ymax,flags FROM"
+      $self->sql_do("INSERT INTO box_tmp (student,page,question,answer,xmin,xmax,ymin,ymax,flags)"
+		   ." SELECT student,page,question,answer,xmin,xmax,ymin,ymax,flags FROM "
 		   .$self->table("box"));
       $self->drop_box_table;
       $self->create_box_table;
       $self->sql_do("INSERT INTO ".$self->table("box")
-		    ." SELECT * FROM ".$self->table("box_tmp"));
-      $self->sql_do("DROP TABLE ".$self->table("box_tmp"));
+		    ." SELECT * FROM box_tmp");
+      $self->sql_do("DROP TABLE box_tmp");
       return(5);
     }
     return('');
