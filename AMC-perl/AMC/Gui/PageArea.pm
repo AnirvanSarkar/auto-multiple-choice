@@ -48,6 +48,7 @@ sub add_feuille {
     $self->{'onscan'}='';
     $self->{'unticked_color_name'}="#429DE5";
     $self->{question_color_name}="#47D265";
+    $self->{scorezone_color_name}="#DE61E2";
 
     $self->{'font'}=Pango::FontDescription->from_string("128");
 
@@ -58,11 +59,13 @@ sub add_feuille {
     $self->{'gc'} = Gtk2::Gdk::GC->new($self->window);
 
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
-    $self->{'question_color'}= 
+    $self->{'scorezone_color'}=
+      Gtk2::Gdk::Color->parse($self->{scorezone_color_name});
+    $self->{'question_color'}=
       Gtk2::Gdk::Color->parse($self->{question_color_name});
     $self->{'unticked_color'}=
       Gtk2::Gdk::Color->parse($self->{'unticked_color_name'});
-    for my $ck (qw/color unticked_color question_color/) {
+    for my $ck (qw/color unticked_color question_color scorezone_color/) {
       $self->window->get_colormap->alloc_color($self->{$ck},TRUE,TRUE);
     }
 
@@ -318,6 +321,10 @@ sub expose_drawing {
 	  for $box (@{$self->{'layinfo'}->{'questionbox'}}) {
 	    $self->draw_box($box,'');
 	  }
+	}
+	$self->{'gc'}->set_foreground($self->{'scorezone_color'});
+	for $box (@{$self->{'layinfo'}->{'scorezone'}}) {
+	  $self->draw_box($box,'');
 	}
 
 	debug "Done.";

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -431,6 +431,8 @@ sub execute {
 
     check_engine();
 
+    my $min_runs=1; # minimum number of runs
+    my $max_runs=2; # maximum number of runs
     my $n_run=0; # number of runs so far
     my $rerun=0; # has to re-run?
     my $format=''; # output format
@@ -466,7 +468,10 @@ sub execute {
 	    # LaTeX Warning: Label(s) may have changed. Rerun to get
 	    # cross-references right. -> has to re-run
 
-	    $rerun=1 if(/^LaTeX Warning:.*Rerun to get cross-references right/);
+	    $rerun=1
+	      if(/^LaTeX Warning:.*Rerun to get cross-references right/);
+	    $min_runs=2
+	      if(/Warning: .*run twice/);
 
 	    # Output written on jobname.pdf (10 pages) -> output
 	    # format is pdf
@@ -489,7 +494,7 @@ sub execute {
 	close(EXEC);
 	$cmd_pid='';
 
-    } while($rerun && $n_run<=1 && ! $oo{'once'});
+    } while( (($n_run<$min_runs) || ($rerun && $n_run<$max_runs)) && ! $oo{'once'});
 
     # For these engines, we already know what is the output format:
     # override detected one

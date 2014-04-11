@@ -494,7 +494,7 @@ sub charge_i {
 
       debug "Getting layout info";
 
-      for (qw/box namefield digit/) { $self->{'layinfo'}->{$_}=[]; }
+      for (qw/box questionbox namefield digit scorezone/) { $self->{'layinfo'}->{$_}=[]; }
 
       if($self->{'onscan'}) {
 	my %ci=();
@@ -514,7 +514,7 @@ sub charge_i {
 	my $c;
 	my $sth;
 
-	for my $type (qw/box questionbox digit namefield/) {
+	for my $type (qw/box questionbox scorezone digit namefield/) {
 	  for my $c ($self->{'layout'}->type_info($type,@ep)) {
 	    push @{$self->{'layinfo'}->{$type}},{%$c};
 	  }

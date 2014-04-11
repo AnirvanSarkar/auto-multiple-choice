@@ -94,7 +94,7 @@ sub new {
 
     # checks that the position option is available
     $self->{position}=lc($self->{position});
-    if($self->{position} !~ /^(marges?|case|none)$/i) {
+    if($self->{position} !~ /^(marges?|case|zones|none)$/i) {
       debug "ERROR: invalid \<position>: $self->{position}";
       $self->{position}='none';
     }
@@ -782,7 +782,7 @@ sub page_symbols {
   # the question boxes (in separate answer sheet mode)
   if($self->{compose}==1) {
     my $sth=$self->{layout}->statement('pageQuestionBoxes');
-    $sth->execute($student->[0],$page->{page});
+    $sth->execute($student->[0],$page);
     while(my $box=$sth->fetchrow_hashref) {
       $self->draw_symbol($student,$box,1);
     }
@@ -790,7 +790,7 @@ sub page_symbols {
 
   # the answer boxes that were captured
   my $sth=$self->{capture}->statement('pageZones');
-  $sth->execute($student->[0],$page->{page},$student->[1],ZONE_BOX);
+  $sth->execute($student->[0],$page,$student->[1],ZONE_BOX);
   while(my $box=$sth->fetchrow_hashref) {
     $self->draw_symbol($student,$box,$tick);
   }
@@ -848,7 +848,7 @@ sub q_ymean {
 
 # 1) scores written in the left margin
 sub qtext_position_marge {
-  my ($self,$question)=@_;
+  my ($self,$student,$page,$question)=@_;
 
   my $y=$self->q_ymean($question);
 
@@ -863,7 +863,7 @@ sub qtext_position_marge {
 # on the position of the boxes. This mode is often used when the
 # subject is in a 2-column layout.
 sub qtext_position_marges {
-  my ($self,$q)=@_;
+  my ($self,$student,$page,$q)=@_;
 
   # fist extract the y coordinates of the boxes in the left column
   my $left=1;
@@ -891,7 +891,7 @@ sub qtext_position_marges {
 
 # 3) scores written at the side of all the boxes
 sub qtext_position_case {
-  my ($self,$q)=@_;
+  my ($self,$student,$page,$q)=@_;
 
   my $x=max(@{$self->{question}->{$q}->{'x'}})
     + ($self->{rtl} ? 1: -1)*$self->{dist_to_box}*$self->{dpi};
@@ -899,10 +899,21 @@ sub qtext_position_case {
   return("stext $x $y 0 0.5");
 }
 
+# 4) scores written in the zone defined by the source file
+sub qtext_position_zones {
+  my ($self,$student,$page,$q)=@_;
+  my @c=();
+  for my $b ($self->{layout}->score_zones($student->[0],$page,$q)) {
+    push @c,"stext rectangle ".
+      join(" ",map { $b->{$_} } (qw/xmin xmax ymin ymax/));
+  }
+  return(\@c);
+}
+
 # writes one question score
 
 sub write_qscore {
-  my ($self,$student,$question)=@_;
+  my ($self,$student,$page,$question)=@_;
 
   return if($self->{position} eq 'none');
 
@@ -914,9 +925,18 @@ sub write_qscore {
 
   my $text=$self->qtext($student,$question);
   my $xy="qtext_position_".$self->{position};
-  my $command=$self->$xy($question);
-  $self->stext($text);
-  $self->command($command);
+  my $command=$self->$xy($student,$page,$question);
+  if(ref($command) eq 'ARRAY') {
+    if($#$command>=0) {
+      $self->stext($text);
+      for my $c (@$command) {
+	$self->command($c) if($c);
+      }
+    }
+  } elsif($command) {
+    $self->stext($text);
+    $self->command($command);
+  }
 }
 
 # writes question scores on one page
@@ -933,7 +953,7 @@ sub page_qscores {
     # go through all questions present on the page (recorded while
     # drawing symbols)
     for my $q (sort { $a cmp $b } (keys %{$self->{question}})) {
-      $self->write_qscore($student,$q);
+      $self->write_qscore($student,$page,$q);
     }
 
   }
@@ -974,8 +994,8 @@ sub student_draw_page {
   if($draw=$self->page_background($student,$page)) {
     $self->command("line width $self->{line_width}");
     $self->command("font size $self->{font_size}");
-    $self->page_symbols($student,$page,$draw>0);
-    $self->page_qscores($student,$page);
+    $self->page_symbols($student,$page->{page},$draw>0);
+    $self->page_qscores($student,$page->{page});
     $self->command("matrix identity");
     $self->page_header($student);
   } else {

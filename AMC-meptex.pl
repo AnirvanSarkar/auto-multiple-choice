@@ -63,6 +63,14 @@ my $timestamp=time();
 		'sp'=>65536*72.27,
     );
 
+# association code_in_amc_file => BOX_ROLE_*
+my %role=(
+	  'case'=>BOX_ROLE_ANSWER,
+	  'casequestion'=>BOX_ROLE_QUESTIONONLY,
+	  'score'=>BOX_ROLE_SCORE,
+	  'scorequestion'=>BOX_ROLE_SCOREQUESTION,
+	 );
+
 sub read_inches {
     my ($dim)=@_;
     if($dim =~ /^\s*([0-9]*\.?[0-9]*)\s*([a-zA-Z]+)\s*$/) {
@@ -240,11 +248,11 @@ PAGE: for my $p (@pages) {
 	$layout->statement('NEWDigit')
 	  ->execute(@ep,$1,$2,bbox($c->{$k}));
       }
-      if($k=~/case(question)?:(.*):([0-9]+),([0-9]+)$/) {
-	my ($question_only,$name,$q,$a)=($1,$2,$3,$4);
-	$layout->question_name($q,$name);
+      if($k=~/(case|casequestion|score|scorequestion):(.*):([0-9]+),(-?[0-9]+)$/) {
+	my ($type,$name,$q,$a)=($1,$2,$3,$4);
+	$layout->question_name($q,$name) if($name);
 	$layout->statement('NEWBox')
-	  ->execute(@ep,($question_only ? BOX_ROLE_QUESTIONONLY : BOX_ROLE_ANSWER),
+	  ->execute(@ep,$role{$type},
 		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'});
       }
     }

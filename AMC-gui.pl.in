@@ -1235,6 +1235,8 @@ $prefs->store_register(
 				"marges"=>__"in the margins",
 # TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: near the boxes. This is a menu entry.
 				"case"=>__"near boxes",
+# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the zones defined in the source file
+				"zones"=>__"where defined in the source",
     ),
 # TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
     'export_sort'=>cb_model("n"=>__"name",
@@ -2463,7 +2465,15 @@ sub doc_maj {
 		     }
 		   }
 
-		   my $ap=($c->variable('ensemble') ? 'case' : 'marges');
+		   # Try to guess the best place to write question
+		   # scores when annotating. This option can be
+		   # changed later in the Edit/Preferences window.
+		   my $ap='marges';
+		   if($c->variable('scorezones')) {
+		     $ap='zones';
+		   } elsif($c->variable('ensemble')) {
+		     $ap='cases';
+		   }
 		   $projet{'options'}->{'_modifie'}=1
 		     if ($projet{'options'}->{'annote_position'} ne $ap);
 		   $projet{'options'}->{'annote_position'}=$ap;

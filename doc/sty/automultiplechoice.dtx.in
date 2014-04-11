@@ -1909,7 +1909,33 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
 }
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
-% 
+%
+% \subsubsection{Scoring zones}
+%
+% \begin{macro}{\AMCscoreZone}
+%   The source file can define zones that will be used to print scores
+%   when annotating the completed answer sheets. The command
+%   |\AMCscoreZone|\marg{zone} logs these zones positions on the page.
+%    \begin{macrocode}
+\newif\ifAMCsz@logged\AMCsz@loggedfalse
+\newcommand{\AMCscoreZone}[1]{%
+  \ifAMC@ensemble%
+    \ifAMCformulaire@dedans%
+      \AMC@tracebox{1}{score::\the\AMCid@quest,-1}{#1}%
+    \else%
+      \AMC@tracebox{1}{scorequestion::\the\AMCid@quest,-1}{#1}%
+    \fi%
+  \else%
+    \AMC@tracebox{1}{score::\the\AMCid@quest,-1}{#1}%
+  \fi%
+  \ifAMCsz@logged\else%
+    \AMC@amclog{AUTOQCM[VAR:scorezones=1]^^J}%
+    \global\AMCsz@loggedtrue%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsubsection{Binary boxes}
 % 
 % The package prints on each page some boxes that code (like binary
@@ -2324,19 +2350,31 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %    \begin{macrocode}
 \def\AMCmem@ireData{}
-\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\AMC@loc@qf{#1}}}
-\def\AMCformQuestionA#1{\setcounter{AMCquestionaff}{#1}%
-  \setcounter{AMC@ncase}{0}\AMCformQuestion{#1}}
+\def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
+\def\AMCformQuestion#1{{\AMC@loc@qf{#1}}}
+\def\AMCformQuestionA#1#2{\setcounter{AMCquestionaff}{#1}%
+  \AMCid@quest=#2%
+  \setcounter{AMC@ncase}{0}%
+  \AMCformBeforeQuestion%
+  \ifx\@empty\AMC@sza@callout\@empty\else%
+    \csname\AMC@sza@callout\endcsname%
+  \fi%
+  \AMCformQuestion{#1}%
+  \ifx\@empty\AMC@sza@callin\@empty\else%
+    \csname\AMC@sza@callin\endcsname%
+  \fi%
+}
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 \def\AMCformAnswerA#1{\addtocounter{AMC@ncase}{1}\AMCformAnswer{#1}}
 %    \end{macrocode}\end{macro}\end{macro}\
 %
 % \begin{macro}{\AMCmem@ireAJ}\begin{macro}{\AMCformBegin}\begin{macro}{\AMCform}\begin{macro}{\AMCformS}
-%       These are commands to manage memory for separate answer
-%       sheet. |\AMCmem@ireAJ|\marg{code} adds \meta{code} to this
-%       memory. |\AMCmem@ireAJRep|\marg{code} adds to memory answer
-%       code \meta{code}, and |\AMCmem@ireQ|\marg{n} adds to memory
-%       question code to announce question number \meta{n}.
+%         These are commands to manage memory for separate answer
+%         sheet. |\AMCmem@ireAJ|\marg{code} adds \meta{code} to this
+%         memory. |\AMCmem@ireAJRep|\marg{code} adds to memory answer
+%         code \meta{code}, and |\AMCmem@ireQ|\marg{n}\marg{id} adds
+%         to memory question code to announce question numbered
+%         \meta{n} with id \meta{id}.
 %
 %       The command |\AMCformBegin| defines the beginning of the
 %       separate answer sheet for the current student sheet, and
@@ -2358,7 +2396,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \endgroup\fi\fi}
 \newcommand\AMCmem@ireAJRep[1]{%
   \addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformAnswerA{#1}}}
-\newcommand\AMCmem@ireQ[1]{\AMCmem@ireAJ{\protect\AMCformQuestionA{#1}}}
+\newcommand\AMCmem@ireQ[2]{\AMCmem@ireAJ{\protect\AMCformQuestionA{#1}{#2}}}
 \def\AMCformBegin{%
   \AMC@zoneformulairetrue\setcounter{section}{0}%
   \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageFull}\fi\fi%
@@ -2461,6 +2499,155 @@ Three digits and two letters:\insertgroup{mixed}.
   \ignorespaces}
 %    \end{macrocode}\end{macro}\end{macro}
 %
+% \subsubsection{Score zones}
+% \begin{macro}{\AMCscoreZone}\begin{macro}{\AMCscoreZoneAnswerSheet}
+% The position of the scores on the annotated answer sheets can be
+% defined in the \LaTeX{} source file using
+% |\AMCsetScoreZone|\marg{options} (or
+% |\AMCsetScoreZoneAnswerSheet|\marg{options} for the answer sheets when
+% the separate answer sheet option is used).
+%
+% First begin with some helpers:
+% |\AMCemptybox|\marg{width}\marg{height}\marg{depth} draws an empty
+% box with specified dimensions, and |\AMCmarginNote|\marg{note} (code
+% from one of |sgmoye|'s comments on |tex.stackexchange.com|) prints a
+% marginal note in the left or right margin, depending on current the
+% position (usefull in |multicols| environment).
+%
+%    \begin{macrocode}
+\newcommand{\AMCemptybox}[3]{{%
+    \sbox0{}\wd0=#1\ht0=#2\dp0=#3\relax\box0}}
+\newlength\AMC@mn@test
+\newlength\AMC@mn@sep\AMC@mn@sep=4mm
+\newlength\AMC@mn@leftmargin
+\newlength\AMC@mn@rightmargin
+\newcommand\AMCmarginNote[1]{%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \coordinate (here) at (0,0);%
+    \pgfextractx{\AMC@mn@test}{\pgfpointdiff{\pgfpointorigin}%
+      {\pgfpointanchor{current page}{center}}}%
+    \ifodd\thepage%
+      \AMC@mn@leftmargin=\oddsidemargin%
+      \AMC@mn@rightmargin=\evensidemargin%
+    \else
+      \AMC@mn@leftmargin=\evensidemargin%
+      \AMC@mn@rightmargin=\oddsidemargin%
+    \fi
+    \ifdim\AMC@mn@test < 1cm%
+      \draw (current page.east |- here)+(-\AMC@mn@rightmargin-1in+\AMC@mn@sep,0pt) node[anchor=text,align=left,text width=\AMC@mn@rightmargin+1in-\AMC@mn@sep]{\strut #1};%
+    \else%
+      \draw (current page.west |- here)+(0cm,0pt) node[anchor=text,align=right,text width=\AMC@mn@leftmargin+1in-\AMC@mn@sep]{\strut #1};%
+    \fi%
+  \end{tikzpicture}%
+}
+%    \end{macrocode}
+%
+% Define now different ways to place the score zone:
+% \begin{itemize}
+% \item[|none|] nowhere
+% \item[|question|] right after the question heading
+% \item[|margin|] in the margin, using |marginpar| (this does not work
+%   with |multicols| environment)
+% \item[|margins|] in the left or right margin, depending on the
+%   current position (needs |tikz| package)
+% \end{itemize}
+%
+%    \begin{macrocode}
+\newcommand{\AMC@sz@box}{\AMCemptybox{\AMC@sz@width}{\AMC@sz@height}{\AMC@sz@depth}}
+%
+\newcommand{\AMC@sz@callin@question}{\AMCscoreZone{\AMC@sz@box}}
+%
+\newcommand{\AMC@sz@callout@margin}{\hspace{0pt}\marginpar{\AMCscoreZone{\AMC@sz@box}}}
+%
+\newcommand{\AMC@sz@init@margins}{\PackageWarning{automultiplechoice}{Please run twice to get proper margin notes position.}}
+\newcommand{\AMC@sz@callout@margins}{\hspace{0pt}\AMCmarginNote{\AMCscoreZone{\AMC@sz@box}}}
+%    \end{macrocode}
+%
+% Let us now set up options handling.
+%
+%    \begin{macrocode}
+\newlength\AMC@sz@width
+\newlength\AMC@sz@height
+\newlength\AMC@sz@depth
+\def\AMC@sz@callout{}
+\def\AMC@sz@callin{}
+\define@key{AMCsz}{width}{\AMC@sz@width=#1}
+\define@key{AMCsz}{height}{\AMC@sz@height=#1}
+\define@key{AMCsz}{depth}{\AMC@sz@depth=#1}
+\define@key{AMCsz}{calloutside}{\def\AMC@sz@callout{#1}}
+\define@key{AMCsz}{callinside}{\def\AMC@sz@callin{#1}}
+\define@choicekey{AMCsz}{position}{none,question,margin,margins}{%
+  \ifcsname AMC@sz@callout@#1\endcsname%
+    \def\AMC@sz@callout{AMC@sz@callout@#1}%
+  \else%
+    \def\AMC@sz@callout{}%
+  \fi%
+  \ifcsname AMC@sz@callin@#1\endcsname%
+    \def\AMC@sz@callin{AMC@sz@callin@#1}%
+  \else%
+    \def\AMC@sz@callin{}%
+  \fi%
+  \ifcsname AMC@sz@init@#1\endcsname%
+    \csname AMC@sz@init@#1\endcsname%
+  \fi%
+}
+\newcommand{\AMCsetScoreZone}[1]{\setkeys{AMCsz}{#1}}
+\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=none}
+%    \end{macrocode}
+%
+% And do the same for |\AMCsetScoreZoneAnswerSheet|...
+%
+%    \begin{macrocode}
+\newcommand{\AMC@sza@box}{\AMCemptybox{\AMC@sza@width}{\AMC@sza@height}{\AMC@sza@depth}}
+%
+\newcommand{\AMC@sza@init@none}{}
+\newcommand{\AMC@sza@callout@none}{}
+\newcommand{\AMC@sza@callin@none}{}
+%
+\newcommand{\AMC@sza@init@question}{}
+\newcommand{\AMC@sza@callout@question}{}
+\newcommand{\AMC@sza@callin@question}{\AMCscoreZone{\AMC@sza@box}}
+%
+\newcommand{\AMC@sza@init@margin}{}
+\newcommand{\AMC@sza@callout@margin}{\hspace{0pt}\marginpar{\AMCscoreZone{\AMC@sza@box}}}
+\newcommand{\AMC@sza@callin@margin}{}
+%
+\newcommand{\AMC@sza@init@margins}{\PackageWarning{automultiplechoice}{Please run twice to get proper margin notes position.}}
+\newcommand{\AMC@sza@callout@margins}{\hspace{0pt}\AMCmarginNote{\AMCscoreZone{\AMC@sz@box}}}
+\newcommand{\AMC@sza@callin@margins}{}
+%
+\newlength\AMC@sza@width
+\newlength\AMC@sza@height
+\newlength\AMC@sza@depth
+\def\AMC@sza@callout{}
+\def\AMC@sza@callin{}
+\define@key{AMCsza}{width}{\AMC@sza@width=#1}
+\define@key{AMCsza}{height}{\AMC@sza@height=#1}
+\define@key{AMCsza}{depth}{\AMC@sza@depth=#1}
+\define@key{AMCsza}{calloutside}{\def\AMC@sza@callout{#1}}
+\define@key{AMCsza}{callinside}{\def\AMC@sza@callin{#1}}
+\define@choicekey{AMCsza}{position}{none,question,margin,margins}{%
+  \ifcsname AMC@sza@callout@#1\endcsname%
+    \def\AMC@sza@callout{AMC@sza@callout@#1}%
+  \else%
+    \def\AMC@sza@callout{}%
+  \fi%
+  \ifcsname AMC@sza@callin@#1\endcsname%
+    \def\AMC@sza@callin{AMC@sza@callin@#1}%
+  \else%
+    \def\AMC@sza@callin{}%
+  \fi%
+  \ifcsname AMC@sza@init@#1\endcsname%
+    \csname AMC@sza@init@#1\endcsname%
+  \fi%
+}
+\newcommand{\AMCsetScoreZoneAnswerSheet}[1]{\setkeys{AMCsza}{#1}}
+\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=none}
+\newcommand{\AMCnoScoreZone}{\AMCsetScoreZone{position=none}\AMCsetScoreZoneAnswerSheet{position=none}}
+%    \end{macrocode}
+%
+% \end{macro}\end{macro}
+% 
 % \subsubsection{Formatting questions}
 %
 % \begin{macro}{\AMCquestionaff}\begin{macro}{\AMC@qaff}
@@ -2477,17 +2664,23 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
 %    \end{macrocode}\end{macro}\end{macro}
 %
+% \begin{macro}{\AMCbeforeQuestion}
 % \begin{macro}{\AMCbeginQuestion}\begin{macro}{\multiSymbole}
-%   The command |\AMCbeginQuestion|\marg{n}\marg{sign} will format the
-%   question header, where \meta{n} is the question number and
-%   \meta{sign} beeing |\multiSymbole| in case of a multiple question,
-%   and empty in case of a simple one. |\AMCbeginQuestion| and
-%   |\multiSymbole| can be user-redifined.
+%     The command |\AMCbeforeQuestion| opens a new question. The
+%     command |\AMCbeginQuestion|\marg{n}\marg{sign} will format the
+%     question header, where \meta{n} is the question number and
+%     \meta{sign} beeing |\multiSymbole| in case of a multiple
+%     question, and empty in case of a simple
+%     one. |\AMCbeforeQuestion|, |\AMCbeginQuestion| and
+%     |\multiSymbole| can be user-redifined.
 %    \begin{macrocode}
-\def\AMCbeginQuestion#1#2{\par\noindent\AMC@loc@q{#1}{#2}\hspace*{1em}}
+\def\AMCbeforeQuestion{\ifAMC@qbloc\else\par\noindent\fi}
+\def\AMCbeginQuestion#1#2{\noindent\AMC@loc@q{#1}{#2}%
+  \ifx\@empty\AMC@sz@callin\@empty\hspace*{1em}\fi%
+}
 \def\multiSymbole{$\clubsuit$}
-%    \end{macrocode}\end{macro}\end{macro}
-%
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
+% 
 % \begin{environment}{question}\begin{environment}{questionmult}\begin{environment}{questionouverte}\begin{macro}{\ouverte@vs}
 %         Environment |{question}|\marg{key} encloses a simple question
 %         (with one and only one correct choice) with associated
@@ -2511,11 +2704,18 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMCcurrentenv{question}%
   \global\def\AMCid@name{#2}\AMC@affecte{#2}{\AMCid@quest}%
   \ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi%
+  \AMCbeforeQuestion%
+  \ifx\@empty\AMC@sz@callout\@empty\else%
+    \csname\AMC@sz@callout\endcsname%
+  \fi%
   \AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
   \ifAMC@affichekeys\index{\texttt{#2}}\fi%
   \AMCbeginQuestion{\ifAMC@affichekeys\ifAMC@ensemble\AMC@qaff\ \fi[\texttt{#2}]\else\AMC@qaff\fi}{#1}%
+  \ifx\@empty\AMC@sz@callin\@empty\else%
+    \csname\AMC@sz@callin\endcsname%
+  \fi%
   \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
-  \AMCmem@ireQ{\arabic{AMCquestionaff}}}%
+  \AMCmem@ireQ{\arabic{AMCquestionaff}}{\the\AMCid@quest}}%
 {\ifAMC@qbloc\end{minipage}\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}}
 \newenvironment{questionmult}[1]{%
   \AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}%
@@ -2615,7 +2815,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newdimen\AMCcodeHspace\AMCcodeHspace=.5em
 \newdimen\AMCcodeVspace\AMCcodeVspace=.5em
 \newcommand{\AMCcode}[2]{%
-{\def\AMCbeginQuestion##1##2{}%
+{\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
  \setlength{\parindent}{0pt}%
  \def\AMCbeginAnswer{\hspace{0pt}%
     \vbox\bgroup}%
@@ -2644,7 +2844,7 @@ Three digits and two letters:\insertgroup{mixed}.
  \hspace{-\AMCcodeHspace}%
 }}
 \newcommand{\AMCcodeH}[2]{%
-{\def\AMCbeginQuestion##1##2{}%
+{\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
  \setlength{\parindent}{0pt}%
  \def\AMCbeginAnswer{\hbox\bgroup}%
  \def\AMCendAnswer{\egroup\vspace{\AMCcodeVspace}\par}%

@@ -66,7 +66,8 @@ package AMC::DataModule::layout;
 #
 # * xmin,xmax,ymin,ymax give the box around the name field
 #
-# layout_box lists all the boxes to be ticked on all the pages:
+# layout_box lists all the boxes to be ticked (and other
+# question/answer-related zones in the subject) on all the pages:
 #
 # * student,page identifies the page
 #
@@ -132,10 +133,12 @@ use constant {
   # Do not change these values as they are hard-coded elsewhere
   BOX_ROLE_ANSWER => 1, # Boxes to be ticked by the student
   BOX_ROLE_QUESTIONONLY => 2, # In separate answer sheet mode, boxes in the question section
+  BOX_ROLE_SCORE => 100, # Zones to write scores when annotating answer sheets
+  BOX_ROLE_SCOREQUESTION => 101, # The same but for question (in separate answer sheet mode)
 };
 
-our @EXPORT_OK = qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY);
-our %EXPORT_TAGS = ( 'flags' => [ qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY/ ],
+our @EXPORT_OK = qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION);
+our %EXPORT_TAGS = ( 'flags' => [ qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION/ ],
 		     );
 
 use AMC::Basic;
@@ -445,9 +448,12 @@ sub define_statements {
        'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
 		     ." WHERE student=? AND page=?"},
        'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
-		   ." WHERE student=? AND page=? AND role=?"},
+		   ." WHERE student=? AND page=? AND role>=? AND role<=?"},
        'namefieldInfo'=>{'sql'=>"SELECT * FROM ".$self->table("namefield")
 			 ." WHERE student=? AND page=?"},
+       'scoreZones'=>{'sql'=>"SELECT * FROM ".$self->table("box")
+		      ." WHERE student=? AND page=? AND question=?"
+		      ." AND role>=? AND role<=?"},
        'exists'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
 		  ." WHERE student=? AND page=? AND checksum=?"},
        'questionName'=>{'sql'=>"SELECT name FROM ".$self->table("question")
@@ -584,19 +590,39 @@ sub page_info {
 # no $role).
 
 sub type_info {
-  my ($self,$type,$student,$page,$role)=@_;
+  my ($self,$type,$student,$page,$role,$rolemax)=@_;
   my @args=($student,$page);
   if($type eq 'questionbox') {
     $type='box';
     $role=BOX_ROLE_QUESTIONONLY;
   }
+  if($type eq 'scorezone') {
+    $type='box';
+    $role=BOX_ROLE_SCORE;
+    $rolemax=BOX_ROLE_SCOREQUESTION;
+  }
   if($type eq 'box') {
-    push @args,($role || BOX_ROLE_ANSWER);
+    $role=BOX_ROLE_ANSWER if(!$role);
+    $rolemax=$role if(!$rolemax);
+    push @args,$role,$rolemax;
   }
   return(@{$self->dbh
 	     ->selectall_arrayref($self->statement($type.'Info'),
 				  {Slice=>{}},
 				  @args)});
+}
+
+# score_zones($student,$page,$question) returns an array of HASH
+# references containing all the rows in the box table corresponding to
+# the given parameters.
+
+sub score_zones {
+  my ($self,$student,$page,$question)=@_;
+  return(@{$self->dbh
+	     ->selectall_arrayref($self->statement('scoreZones'),
+				  {Slice=>{}},
+				  $student,$page,$question,
+				  BOX_ROLE_SCORE,BOX_ROLE_SCOREQUESTION)});
 }
 
 # pages_for_student($student,[%options]) returns a list of the page
