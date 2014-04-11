@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2014 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -53,6 +53,8 @@ GetOptions("list=s"=>\$list_file,
 	  );
 
 set_debug($debug);
+
+$use{pdfimages}=0 if($force_convert);
 
 # cancels use of pdfimages/pdftk if these commands are not available
 # on the system
