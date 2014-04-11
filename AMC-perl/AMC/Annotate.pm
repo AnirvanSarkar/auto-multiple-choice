@@ -991,7 +991,7 @@ sub student_draw_page {
   debug "Processing page $student->[0]:$student->[1] page $page->{page} ...";
 
   my $draw;
-  if($draw=$self->page_background($student,$page)) {
+  if($draw=$self->page_background($student,$page) >= 0) {
     $self->command("line width $self->{line_width}");
     $self->command("font size $self->{font_size}");
     $self->page_symbols($student,$page->{page},$draw>0);
