@@ -803,10 +803,10 @@ sub file_header {
   $t .= "\\def\\AMCotextReserved{".$self->format_text($self->{'options'}->{'l-openreserved'})."}\n"
     if($self->{'options'}->{'l-openreserved'});
 
-  $t.="\\def\\AMCbeginQuestion#1#2{\\par\\noindent{"
+  $t.="\\def\\AMCbeginQuestion#1#2{\\noindent{"
     .$self->bf_or("\\Large")." "
       .$self->{'options'}->{'l-question'}." #1} #2\\hspace{1em}}\n"
-	."\\def\\AMCformQuestion#1{\\vspace{\\AMCformVSpace}\\par{"
+	."\\def\\AMCformQuestion#1{{"
 	  .$self->bf_or("\\Large")." "
 	    .$self->{'options'}->{'l-question'}." #1 :}}\n"
 	      if($self->{'options'}->{'l-question'});
