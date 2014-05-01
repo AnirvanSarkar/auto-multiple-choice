@@ -218,24 +218,25 @@ void comp_connexes(pixel **img,int tx,int ty,pixval maxval) {
   printf("CC %d %d\n",n,imax);
 }
 
+void deplace(int i,int j, point *coins, double delta) {
+  coins[i].x+=delta*(coins[j].x-coins[i].x);
+  coins[i].y+=delta*(coins[j].y-coins[i].y);
+}
+
+
+void restreint(int *x,int *y, int tx, int ty) {
+  if(*x<0) *x=0;
+  if(*y<0) *y=0;
+  if(*x>=tx) *x=tx-1;
+  if(*y>=ty) *y=ty-1;
+}
+
 void mesure_case(pixel **img,int tx,int ty,pixval maxval,
 		 double prop,point *coins) {
   int npix,npixnoir,xmin,xmax,ymin,ymax,x,y;
   ligne lignes[4];
   int i,ok;
   double delta;
-
-  void deplace(int i,int j) {
-    coins[i].x+=delta*(coins[j].x-coins[i].x);
-    coins[i].y+=delta*(coins[j].y-coins[i].y);
-  }
-
-  void restreint(int *x,int *y) {
-    if(*x<0) *x=0;
-    if(*y<0) *y=0;
-    if(*x>=tx) *x=tx-1;
-    if(*y>=ty) *y=ty-1;
-  }
 
   npix=0;
   npixnoir=0;
@@ -246,8 +247,8 @@ void mesure_case(pixel **img,int tx,int ty,pixval maxval,
 
   /* reduction de la case */
   delta=(1-prop)/2;
-  deplace(0,2);deplace(2,0);
-  deplace(1,3);deplace(3,1);
+  deplace(0,2, coins, delta);deplace(2,0, coins, delta);
+  deplace(1,3, coins, delta);deplace(3,1, coins, delta);
 
   /* sortie des points utilises pour la mesure */
   for(i=0;i<4;i++) {
@@ -268,8 +269,8 @@ void mesure_case(pixel **img,int tx,int ty,pixval maxval,
   calcule_demi_plan(&coins[2],&coins[3],&lignes[2]);
   calcule_demi_plan(&coins[3],&coins[0],&lignes[3]);
       
-  restreint(&xmin,&ymin);
-  restreint(&xmax,&ymax);
+  restreint(&xmin,&ymin, tx, ty);
+  restreint(&xmax,&ymax, tx, ty);
 
   for(x=xmin;x<=xmax;x++) {
     for(y=ymin;y<=ymax;y++) {
@@ -292,47 +293,46 @@ typedef struct {
   int xmin,xmax,ymin,ymax;
 } infocol;
 
+int trouve_id(int magick,int exo,int quest,int ninfo,int ninfo_alloc,infocol *infos) {
+  int i,ii;
+  ii=-1;
+  for(i=0;i<ninfo;i++) {
+    if(infos[i].magick==magick 
+	 && infos[i].exo==exo && infos[i].quest==quest) ii=i;
+  }
+  if(ii<0) {
+    ii=ninfo;
+
+    if(ninfo_alloc<ii+1) {
+	ninfo_alloc+=INFO_BLOC;
+	infos=(infocol*)realloc(infos,ninfo_alloc*sizeof(infocol));
+    }
+
+    infos[ii].magick=magick;
+    infos[ii].exo=exo;
+    infos[ii].quest=quest;
+    infos[ii].xmin=100000;
+    infos[ii].ymin=100000;
+    infos[ii].xmax=-1;
+    infos[ii].ymax=-1;
+    ninfo++;
+  }
+  return(ii);
+}
+
+void ajoute(int id,int x,int y, infocol *infos) {
+  if(x > infos[id].xmax) infos[id].xmax=x;
+  if(x < infos[id].xmin) infos[id].xmin=x;
+  if(y > infos[id].ymax) infos[id].ymax=y;
+  if(y < infos[id].ymin) infos[id].ymin=y;
+}
+
 void repere_magick(pixel **img,int tx,int ty,pixval maxval) {
   infocol *infos;
 
   int ninfo,ninfo_alloc;
   int i,x,y,red;
   int en_couleur;
-
-  int trouve_id(int magick,int exo,int quest) {
-    int i,ii;
-    ii=-1;
-    for(i=0;i<ninfo;i++) {
-      if(infos[i].magick==magick 
-	 && infos[i].exo==exo && infos[i].quest==quest) ii=i;
-    }
-    if(ii<0) {
-      ii=ninfo;
-
-      if(ninfo_alloc<ii+1) {
-	ninfo_alloc+=INFO_BLOC;
-	infos=(infocol*)realloc(infos,ninfo_alloc*sizeof(infocol));
-      }
-
-      infos[ii].magick=magick;
-      infos[ii].exo=exo;
-      infos[ii].quest=quest;
-      infos[ii].xmin=100000;
-      infos[ii].ymin=100000;
-      infos[ii].xmax=-1;
-      infos[ii].ymax=-1;
-      ninfo++;
-    }
-    return(ii);
-  }
-
-  void ajoute(int id,int x,int y) {
-    if(x > infos[id].xmax) infos[id].xmax=x;
-    if(x < infos[id].xmin) infos[id].xmin=x;
-    if(y > infos[id].ymax) infos[id].ymax=y;
-    if(y < infos[id].ymin) infos[id].ymin=y;
-  }
-
 
   infos=NULL;
   ninfo_alloc=0;
@@ -347,7 +347,7 @@ void repere_magick(pixel **img,int tx,int ty,pixval maxval) {
 	if(red!=PPM_GETG(img[y][x])) en_couleur=1;
 	if(red!=PPM_GETB(img[y][x])) en_couleur=1;
 	if(en_couleur)
-	  ajoute(trouve_id(red,PPM_GETG(img[y][x]),PPM_GETB(img[y][x])),x,y);
+	  ajoute(trouve_id(red,PPM_GETG(img[y][x]),PPM_GETB(img[y][x]),ninfo,ninfo_alloc,infos),x,y,infos);
       }
     }
   }
