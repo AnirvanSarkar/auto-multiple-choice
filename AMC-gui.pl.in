@@ -4387,9 +4387,9 @@ sub edit_preferences {
     }
 
     # Desktop notifications available?
-    if(!$notify) {
-      $w{'pref_v_notify_desktop'}->set_sensitive(0);
-      $w{'pref_v_notify_desktop'}->set_tooltip_markup(__"Please install <b>Gtk2::Notify</b> perl package to make desktop notifications available.");
+    if(!$notify && (my $w=$gap->get_object('pref_v_notify_desktop'))) {
+      $w->set_sensitive(0);
+      $w->set_tooltip_markup(__"Please install <b>Gtk2::Notify</b> perl package to make desktop notifications available.");
     }
 
     # anavailable options, managed by the filter:
