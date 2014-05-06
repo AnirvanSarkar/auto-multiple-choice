@@ -3983,10 +3983,14 @@ sub noter_resultat {
   $projet{'_scoring'}->end_transaction('MARK');
 
   debug "Codes : ".join(',',@codes);
+
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-  my @cbs=(''=>__p("(none) [No code found in LaTeX file]"),
-	   map { $_=>decode($o{'encodage_latex'},$_) }
-	   (@codes));
+  my @cbs=(''=>__p("(none) [No code found in LaTeX file]"));
+  if(my $el=get_enc($o{'encodage_latex'})) {
+    push @cbs,map { $_=>decode($el->{iso},$_) } (@codes);
+  } else {
+    push @cbs,map { $_=>$_ } (@codes);
+  }
   if($pre_assoc) {
     push @cbs,'<preassoc>',__"Pre-association";
     debug "Adding pre-association item";
