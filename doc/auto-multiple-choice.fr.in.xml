@@ -4020,6 +4020,29 @@ Nom et prénom :
           </tgroup>
         </informaltable>
 
+<important>
+ Avec le paramètre default, il faut déclarer la valeur de la variable <replaceable>XXX</replaceable> dans le barème de la question
+<programlisting>
+\begin{questionmult}{03}\bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
+Cite un gaz  important de l'air et son pourcentage.
+\begin{multicols}{4}
+\begin{reponses}
+\mauvaise{vapeur d’eau}
+\mauvaise{gaz}
+\bonne{diazote}\bareme{set.COMP=1}
+\bonne{dioxygène}\bareme{set.COMP=2}
+\mauvaise{dioxyde de carbone}
+\bonne{20\%}\bareme{set.PROP=2}
+\mauvaise{40\%}\bareme{set.PROP=1}
+\mauvaise{60\%}
+\bonne{80\%}
+\end{reponses}
+\end{multicols}
+\end{questionmult}
+</programlisting>
+</important>
+
+
         <para>Le barème par défaut pour une question simple est
         <code>e=0,v=0,b=1,m=0</code>, ce qui donne un point pour une bonne
         réponse et aucun point dans tous les autres cas. Le barème par défaut
@@ -4218,7 +4241,8 @@ Durée : 10 minutes.
         )</code>, les parenthèses et plus généralement toutes celles reconnues
         par perl.</para>
         
-        <note>Les opérateurs sont :
+             <note>
+      Les opérateurs sont :
          &gt;  supérieur à, 
          &gt;= supérieur ou égal, 
          &lt; inférieur à, 
