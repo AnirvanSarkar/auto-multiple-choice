@@ -5044,7 +5044,7 @@ aléatoire : \x peut prendre \time, \the\day, \the\month, \the\year
 <listitem>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a chiffres après la
 virgule à la variable \y.
 <note>
-On peut cumuler les fonctions \FPeval et \FPtrunc.
+On peut cumuler les fonctions \FPeval (avec toutes les fonctions de calcul) et \FPtrunc.
 <programlisting>
 \FPeval{\x}{trunc(a+random*b,c)}
 </programlisting>
@@ -5054,8 +5054,32 @@ On peut cumuler les fonctions \FPeval et \FPtrunc.
 <listitem>c : nombre de chiffre après la virgule</listitem>
 </itemizedlist>
 </note>
-
 </listitem>
+
+<listitem>La fonction \FPround{\y}{\x}{a} transfère le nombre \x avec a chiffres après la
+virgule à la variable \y et arrondi.</listitem>
+
+<listitem>La fonction \FPclip{\y}{\x} transfère le nombre \x , sans les zéros après la virgule,
+à la variable \y.</listitem>
+
+<listitem>Les fonctions \FPadd{\x}{a}{b}, \FPdiv{\x}{a}{b}, \FPmul{\x}{a}{b},
+\FPsub{\x}{a}{b} attribue à la variable \x la somme de a+b, le quotient de a/b,
+le produit de a*b, et le reste de a-b</listitem>
+
+<listitem>La fonction FPset{\x}{\y} attribue à la variable \x (macro ou chaîne) la valeur \y</listitem>
+
+<listitem>\FPabs{\x}{a} renvoie la valeur absolue de a, \FPneg{\y}{a} renvoie l'opposé de a	</listitem>
+
+<listitem><para>La commande \FPiflt{\x}{\y} {instruction 1} \else {instruction 2} \fi 
+vérifie si \x est inérieur à \y dans ce cas l'instruction 1 est lancée sinon c'est
+l'instruction 2. </para>
+
+<para> Même principe les fonctions \FPifeq{\x}{\y}, \FPifgt{\x}{\y}, \FPifneg{\x}, \FPifpos{\x}, \FPifzero{\x},
+ \FPifint{\x} qui sont respctivement des test d'égalité, de supériorité, de négativité, de positivité, de nullité
+ou d'entier</para>
+</listitem>
+
+
 
 
 </itemizedlist>
