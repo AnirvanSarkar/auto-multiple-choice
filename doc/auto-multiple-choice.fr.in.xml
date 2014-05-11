@@ -5001,7 +5001,7 @@ Moniuszko,Stanisław,003</programlisting></para>
   </sect1>
   
 <sect1 id="Divers">
-<title id="Divers">Divers</title>
+<title >Divers</title>
 
 <para>Cette section n'est pas liée à AMC.</para>
 
@@ -5017,22 +5017,34 @@ La documentation du paquet <command>fp</command>  n'est pas très détaillée et
 </sect2>
 
 <itemizedlist>
+
 <listitem>
-La commande <command>\numprint{...}</command> du paquet <command>
-\usepackage[autolanguage]{numprint}</command> affiche
+La commande  <command>\FPprint{\x}</command> permet d'afficher la valeur de x. Cependant,
+la commande <command>\numprint{...}</command> du paquet <command>
+\usepackage[autolanguage]{numprint}</command> est préférable car elle affiche
 une virgule pour les nombres décimaux au lieu d'un point et groupe par trois les
 chiffres.
 </listitem>
+
+<listitem>La fonction \FPrandom{\x} calcul un nombre aléatoire.</listitem>
+
 <listitem>
 La fonction \FPseed\x permet de modifier le système de génération de nombre
 aléatoire : \x peut prendre \time, \the\day, \the\month, \the\year
 
 <programlisting>
 \FPeval{\compteur}{clip(\the\month*\the\time*1.1)}
-
 \FPseed\time
 </programlisting>
 </listitem>
+
+<listitem>La fonction \FPeval{\x}{...} permet de faire des calculs et d’affecter le résultat
+à la variable \x.</listitem>
+
+<listitem>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a chiffres après la
+virgule à la variable \y.</listitem>
+
+
 </itemizedlist>
 
 
