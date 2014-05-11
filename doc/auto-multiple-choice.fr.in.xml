@@ -5042,7 +5042,20 @@ aléatoire : \x peut prendre \time, \the\day, \the\month, \the\year
 à la variable \x.</listitem>
 
 <listitem>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a chiffres après la
-virgule à la variable \y.</listitem>
+virgule à la variable \y.
+<note>
+On peut cumuler les fonctions \FPeval et \FPtrunc.
+<programlisting>
+\FPeval{\x}{trunc(a+random*b,c)}
+</programlisting>
+<itemizedlist>
+<listitem>\x sera compris entre a et b</listitem>
+<listitem>, séparateur</listitem>
+<listitem>c : nombre de chiffre après la virgule</listitem>
+</itemizedlist>
+</note>
+
+</listitem>
 
 
 </itemizedlist>
