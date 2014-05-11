@@ -1632,7 +1632,25 @@ Durée : 10 minutes.
             <para><option>bloc</option> : place chaque question dans un bloc,
             de telle sorte qu'elle ne puisse pas être coupée par un saut de
             page.</para>
-          </listitem>
+            <note>Vous pouvez, ponctuellement, pour une meilleure mise en page, annuler, pour une question, cette option avec la commande <command>\AMCnobloc</command> .
+            
+           <programlisting>
+           <para>
+{\AMCnobloc%
+\begin{question}{prez}
+Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
+\begin{reponses}
+\bonne{René Coty}
+\mauvaise{Alain Prost}
+\mauvaise{Marcel Proust}
+\mauvaise{Claude Monet}
+\end{reponses}
+\end{question}%
+}%
+  </para>
+           </programlisting>
+           </note>
+            </listitem>
 
           <listitem>
             <para><option>completemulti</option> : ajoute de manière
