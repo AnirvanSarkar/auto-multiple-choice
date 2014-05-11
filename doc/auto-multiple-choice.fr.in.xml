@@ -5076,11 +5076,61 @@ l'instruction 2. </para>
 
 <para> Même principe les fonctions \FPifeq{\x}{\y}, \FPifgt{\x}{\y}, \FPifneg{\x}, \FPifpos{\x}, \FPifzero{\x},
  \FPifint{\x} qui sont respctivement des test d'égalité, de supériorité, de négativité, de positivité, de nullité
-ou d'entier</para>
+ou d'entier.</para>
 </listitem>
 
+<listitem>
+<para>La commande \FPlsolve{\x}{a}{b} cherche la valeur réelle \x pour résoudre
+l'équation<programlisting>  a*\x+b=0.</programlisting></para>
 
+<para>La commande \FPqsolve{\x}{\y}{a}{b}{c} cherche les valeurs réelles \x et \y pour
+résoudre l'équation <programlisting> a*x^2+b*x+c=0</programlisting></para>
 
+<para>La commande \FPcsolve{\x}{\y}{\z}{a}{b}{c}{d} cherche les valeurs réelles \x, \y
+et \z pour résoudre l'équation<programlisting> a*x^3+b*x^2+c*x+d=0</programlisting>
+</para>
+
+<para>La commande \FPqqsolve{\w}{\x}{\y}{\z}{a}{b}{c}{d}{e} cherche les valeurs réelles
+\w, \x, \y et \z pour résoudre l'équation <programlisting> a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
+</listitem>
+
+<listitem>La commande \FPe affiche la valeur de e=2.71828182845904523,
+la commande \FPpi affich la valeur de pi.</listitem>
+
+<listitem>La commande \FPexp{\x}{a} attribue à la variable \x la valeur e^a, la commande \FPln{\x}{a} attribue à la variable \x la valeur ln(a)</listitem>
+
+<listitem><para>La commande \FPpow{\x}{a}{b} attribue à la variable \x la valeur a^b, La commande \FProot{\x}{a}{b} attribue à la variable \x la valeur a^(1/b).</para>
+<para>On peut écrire \FPeval{\x}{root(b,a)}</para></listitem>
+
+<listitem>La commande \FPpascal{\x}{a} attribe à \x la ligne a du triangle de pascal.</listitem>
+
+<listitem>La commande \FPsin{\x}{a} attribue à \x la valeur du sinus de a qui est exprimé
+en radians.
+<programlisting>\FPeval{\x}{sin(30*\FPpi/180)}\FPprint{\x}</programlisting>
+<para> La commande est identique pour les autres fonctions trigonométriques Il faut remplacer sin par le terme entre parenthèse.</para>
+
+<itemizedlist>
+
+<listitem> cosinus (cos), tangente (tan), cotangente (cot)</listitem>
+
+<listitem>La commande  \FPsincos{\x}{\y}{a} attribue à \x la valeur du sinus de a qui est
+exprimé en radians et \y la valeur du cosinus de a qui est exprimé en radians.</listitem>
+
+<listitem>La commande \FPtancot{\x}{\y}{a} attribue à \x la valeur de la tangente de a qui
+est exprimé en radians et \y la valeur de la cotangente de a.</listitem>
+
+<listitem>arcsinus (arcsin), arccos(arccos), arctangent (arctan), arccot(arc cotangente)</listitem>
+
+<listitem>La commande \FParcsincos{\x}{\y}{a} attribue à \x la valeur de l’arc sinus(a),
+\x sera exprimé en radians, à \y la valeur de l’arc cosinus(a), \y sera exprimé
+en radians.</listitem>
+
+<listitem>La commande \FParctancot{\x}{\y}{a} attribue à \x la valeur de l’arc tangente(a),
+\x sera exprimé en radians, à \y la valeur de l’arc cotangente(a), \y sera exprimé
+en radians.</listitem>
+</itemizedlist>
+
+</listitem>
 
 </itemizedlist>
 
