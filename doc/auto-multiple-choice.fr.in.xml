@@ -5023,7 +5023,16 @@ La commande <command>\numprint{...}</command> du paquet <command>
 une virgule pour les nombres décimaux au lieu d'un point et groupe par trois les
 chiffres.
 </listitem>
+<listitem>
+La fonction \FPseed\x permet de modifier le système de génération de nombre
+aléatoire : \x peut prendre \time, \the\day, \the\month, \the\year
 
+<programlisting>
+\FPeval{\compteur}{clip(\the\month*\the\time*1.1)}
+
+\FPseed\time
+</programlisting>
+</listitem>
 </itemizedlist>
 
 
