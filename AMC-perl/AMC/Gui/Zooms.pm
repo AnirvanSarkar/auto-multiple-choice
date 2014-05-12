@@ -26,7 +26,7 @@ use AMC::Basic;
 use AMC::DataModule::capture ':zone';
 use AMC::Gui::Prefs;
 
-use Gtk2 -init;
+use Gtk3 -init;
 
 use POSIX qw(ceil);
 
@@ -37,8 +37,8 @@ use constant {
   ZOOMS_EDIT_CLICK => 1,
 };
 
-my $col_manuel = Gtk2::Gdk::Color->new(223*256,224*256,133*256);
-my $col_modif = Gtk2::Gdk::Color->new(226*256,184*256,178*256);
+my $col_manuel = Gtk3::Gdk::Color::parse("#DFE085");
+my $col_modif = Gtk3::Gdk::Color::parse("#E2B8B2");
 
 sub new {
     my %o=(@_);
@@ -109,7 +109,7 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}=Gtk3::Builder->new();
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
@@ -235,7 +235,7 @@ sub safe_pixbuf {
   if($image) {
     # first try with a PixbufLoader
 
-    my $pxl=Gtk2::Gdk::PixbufLoader->new;
+    my $pxl=Gtk3::Gdk::PixbufLoader->new;
     $pxl->write($image);
     $pxl->close();
     $p=$pxl->get_pixbuf();
@@ -258,7 +258,7 @@ sub safe_pixbuf {
       my @xpm=grep { $_ ne '' }
 	map { s/^\"//;s/\",?$//;$_; }
 	  split(/\n+/,$b[0]);
-      eval { $p=Gtk2::Gdk::Pixbuf->new_from_xpm_data(@xpm); };
+      eval { $p=Gtk3::Gdk::Pixbuf->new_from_xpm_data(@xpm); };
       return($p,1) if($p);
     }
   }
@@ -268,11 +268,11 @@ sub safe_pixbuf {
   my $colormap =$g->get_colormap;
   $layout->set_font_description(Pango::FontDescription->from_string("128"));
   my ($text_x,$text_y)=$layout->get_pixel_size();
-  my $pixmap=Gtk2::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
+  my $pixmap=Gtk3::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
   $pixmap->set_colormap($colormap);
   $pixmap->draw_rectangle($g->style->bg_gc(GTK_STATE_NORMAL),TRUE,0,0,$text_x,$text_y);
   $pixmap->draw_layout($g->style->fg_gc(GTK_STATE_NORMAL),0,0,$layout);
-  $p=Gtk2::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
+  $p=Gtk3::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
   return($p,0);
 }
 
@@ -298,16 +298,16 @@ sub load_boxes {
 	($self->{'pb_src'}->{$id},$self->{'real_src'}->{$id})
 	  =$self->safe_pixbuf($z->{imagedata});
 
-	$self->{'image'}->{$id}=Gtk2::Image->new();
+	$self->{'image'}->{$id}=Gtk3::Image->new();
 
 	$self->{'label'}->{$id}=
-	  Gtk2::Label->new(sprintf("%.3f",
+	  Gtk3::Label->new(sprintf("%.3f",
 				   $self->{'_capture'}
 				   ->zone_darkness($z->{'zoneid'})));
 	$self->{'label'}->{$id}->set_justify(GTK_JUSTIFY_LEFT);
 
-	my $hb=Gtk2::HBox->new();
-	$self->{'eb'}->{$id}=Gtk2::EventBox->new();
+	my $hb=Gtk3::HBox->new();
+	$self->{'eb'}->{$id}=Gtk3::EventBox->new();
 	$self->{'eb'}->{$id}->add($hb);
 
 	$hb->add($self->{'image'}->{$id});
@@ -363,7 +363,7 @@ sub load_boxes {
     $self->{'main_window'}->show_all();
     $self->{'button_apply'}->hide();
 
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    Gtk3::main_iteration while ( Gtk3::events_pending );
 
     $self->ajuste_sep();
 
@@ -398,7 +398,7 @@ sub page {
     if(!$self->{'conforme'}) {
 	return() if($forget_it);
 
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new_with_markup($self->{'main_window'},
 			      'destroy-with-parent',
 			      'warning','yes-no',
@@ -491,13 +491,13 @@ sub remplit {
 	my $y=int($i/$self->{'n_cols'});
 
 	if($self->{'eff_pos'}->{$id} != $cat) {
-	    $self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,$col_modif);
+	    $self->{'eb'}->{$id}->override_background_color(GTK_STATE_NORMAL,$col_modif);
 	    $self->{'conforme'}=0;
 	} else {
 	    if($self->{'auto_pos'}->{$id} == $cat) {
-		$self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,undef);
+		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_NORMAL,undef);
 	    } else {
-		$self->{'eb'}->{$id}->modify_bg(GTK_STATE_NORMAL,$col_manuel);
+		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_NORMAL,$col_manuel);
 	    }
 	}
 
@@ -592,7 +592,7 @@ sub zoom_list_next {
   my ($self)=@_;
   my ($path)=$self->{'list_view'}->get_cursor();
   if($path) {
-    my $path_next=Gtk2::TreePath->new ($path->to_string);
+    my $path_next=Gtk3::TreePath->new ($path->to_string);
     $path_next->next();
     $self->{'list_view'}->set_cursor($path_next);
     ($path_next)=$self->{'list_view'}->get_cursor();
@@ -612,7 +612,7 @@ sub quit {
     }
 
     if(!$self->{'conforme'}) {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new_with_markup($self->{'main_window'},
 			      'destroy-with-parent',
 			      'warning','yes-no',
@@ -624,7 +624,7 @@ sub quit {
     }
 
     if($self->{'global'}) {
-        Gtk2->main_quit;
+        Gtk3->main_quit;
     } else {
         $self->{'main_window'}->destroy;
     }

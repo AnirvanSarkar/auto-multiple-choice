@@ -20,10 +20,10 @@
 
 package AMC::Gui::PageArea;
 
-use Gtk2;
+use Gtk3;
 use AMC::Basic;
 
-@ISA=("Gtk2::DrawingArea");
+@ISA=("Gtk3::DrawingArea");
 
 sub add_feuille {
     my ($self,$coul,%oo)=@_;
@@ -50,28 +50,28 @@ sub add_feuille {
     $self->{question_color_name}="#47D265";
     $self->{scorezone_color_name}="#DE61E2";
 
-    $self->{'font'}=Pango::FontDescription->from_string("128");
+    $self->{'font'}=Pango::FontDescription::from_string("128");
 
     for (keys %oo) {
 	$self->{$_}=$oo{$_} if(defined($self->{$_}));
     }
 
-    $self->{'gc'} = Gtk2::Gdk::GC->new($self->window);
+    $self->{'gc'} = Gtk3::Gdk::GC->new($self->get_window);
 
-    $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
+    $self->{'color'}= Gtk3::Gdk::Color->parse($coul);
     $self->{'scorezone_color'}=
-      Gtk2::Gdk::Color->parse($self->{scorezone_color_name});
+      Gtk3::Gdk::Color->parse($self->{scorezone_color_name});
     $self->{'question_color'}=
-      Gtk2::Gdk::Color->parse($self->{question_color_name});
+      Gtk3::Gdk::Color->parse($self->{question_color_name});
     $self->{'unticked_color'}=
-      Gtk2::Gdk::Color->parse($self->{'unticked_color_name'});
+      Gtk3::Gdk::Color->parse($self->{'unticked_color_name'});
     for my $ck (qw/color unticked_color question_color scorezone_color/) {
-      $self->window->get_colormap->alloc_color($self->{$ck},TRUE,TRUE);
+      $self->get_window->get_colormap->alloc_color($self->{$ck},TRUE,TRUE);
     }
 
     if($self->{'marks'}) {
-	$self->{'colormark'}= Gtk2::Gdk::Color->parse($self->{'marks'});
-	$self->window->get_colormap->alloc_color($self->{'colormark'},TRUE,TRUE);
+	$self->{'colormark'}= Gtk3::Gdk::Color->parse($self->{'marks'});
+	$self->get_window->get_colormap->alloc_color($self->{'colormark'},TRUE,TRUE);
     }
 
     $self->signal_connect('size-allocate'=>\&allocate_drawing);
@@ -89,14 +89,14 @@ sub set_image {
       my $colormap =$self->get_colormap;
       $layout->set_font_description($self->{'font'});
       my ($text_x,$text_y)=$layout->get_pixel_size();
-      my $pixmap=Gtk2::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
+      my $pixmap=Gtk3::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
       $pixmap->set_colormap($colormap);
       $pixmap->draw_rectangle($self->style->bg_gc(GTK_STATE_NORMAL),TRUE,0,0,$text_x,$text_y);
       $pixmap->draw_layout($self->style->fg_gc(GTK_STATE_NORMAL),0,0,$layout);
-      my $pixbuf=Gtk2::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
+      my $pixbuf=Gtk3::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
       $self->{'i-src'}=$pixbuf;
     } elsif($image && -f $image) {
-      eval { $self->{'i-src'}=Gtk2::Gdk::Pixbuf->new_from_file($image); };
+      eval { $self->{'i-src'}=Gtk3::Gdk::Pixbuf->new_from_file($image); };
       if($@) {
 	# Error loading scan...
 	$self->{'i-src'}='';
@@ -109,13 +109,13 @@ sub set_image {
     } elsif($image eq 'NONE') {
       $self->{'i-src'}='';
     } else {
-	$self->{'i-src'}=Gtk2::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,0,8,40,10);
+	$self->{'i-src'}=Gtk3::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,0,8,40,10);
 	$self->{'i-src'}->fill(0x48B6FF);
     }
     $self->{'layinfo'}=$layinfo;
     $self->{'modifs'}=0;
     $self->allocate_drawing();
-    $self->window->show;
+    $self->get_window->show;
 }
 
 sub get_image {
@@ -146,7 +146,7 @@ sub choix {
   }
 
   if($self->{'layinfo'}->{'block_message'}) {
-    my $dialog = Gtk2::MessageDialog
+    my $dialog = Gtk3::MessageDialog
       ->new_with_markup(undef,
 			'destroy-with-parent',
 			'error','ok',
@@ -171,7 +171,7 @@ sub choix {
 		  debug " -> box $i\n";
 		  $i->{'ticked'}=!$i->{'ticked'};
 
-		  $self->window->show;
+		  $self->get_window->show;
 	      }
 	  }
       }
@@ -183,12 +183,12 @@ sub choix {
 sub draw_box {
   my ($self,$box,$fill)=@_;
   if($box->{'xy'}) {
-    $self->window->draw_polygon
+    $self->get_window->draw_polygon
       ($self->{'gc'},
        $fill,map { ($box->{'xy'}->[$_*2]*$self->{'rx'},
 		    $box->{'xy'}->[$_*2+1]*$self->{'ry'}) } (0..3) );
   } else {
-    $self->window->draw_rectangle
+    $self->get_window->draw_rectangle
       ($self->{'gc'},
        $fill,
        $box->{'xmin'}*$self->{'rx'},
@@ -246,13 +246,13 @@ sub expose_drawing {
 
     debug("Rendering with SX=$sx SY=$sy");
 
-    my $i=Gtk2::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,1,8,$self->{'tx'},$self->{'ty'});
+    my $i=Gtk3::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,1,8,$self->{'tx'},$self->{'ty'});
 
     $self->{'i-src'}->scale($i,0,0,$self->{'tx'},$self->{'ty'},0,0,
 			    $sx,$sy,
 			    GDK_INTERP_BILINEAR);
 
-    $i->render_to_drawable($self->window,
+    $i->render_to_drawable($self->get_window,
 			   $self->{'gc'},
 			   0,0,0,0,
 			   $self->{'tx'},
@@ -284,7 +284,7 @@ sub expose_drawing {
 	    if($box) {
 		for my $i (0..3) {
 		    my $j=(($i+1) % 4);
-		    $self->window->draw_line($self->{'gc'},
+		    $self->get_window->draw_line($self->{'gc'},
 					     $box->[$i]->{'x'}*$self->{'rx'},
 					     $box->[$i]->{'y'}*$self->{'ry'},
 					     $box->[$j]->{'x'}*$self->{'rx'},

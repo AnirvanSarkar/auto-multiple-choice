@@ -230,7 +230,7 @@ sub progression {
 
       if($self->{'progress'}->{'annulation'}) {
 	$self->{'progress.lastcancel'}
-	  =$self->{'progress'}->{'annulation'}->sensitive;
+	  =$self->{'progress'}->{'annulation'}->get_sensitive;
 	$self->{'progress'}->{'annulation'}->set_sensitive(0);
       }
 
@@ -240,12 +240,12 @@ sub progression {
       $self->{'progress'}->{'avancement'}->set_fraction(0);
 
       $self->{'progress.lastvisible'}
-	  =$self->{'progress'}->{'commande'}->visible;
+	  =$self->{'progress'}->{'commande'}->get_visible;
       $self->{'progress'}->{'commande'}->show();
 
       $self->{'progress.time'}=0;
 
-      Gtk2->main_iteration while ( Gtk2->events_pending );
+      Gtk3::main_iteration while ( Gtk3::events_pending );
     } elsif($action eq 'end') {
       $self->{'progress'}->{'avancement'}
 	->set_fraction($self->{'progress.lastfaction'});
@@ -257,13 +257,13 @@ sub progression {
 	$self->{'progress'}->{'annulation'}
 	  ->set_sensitive($self->{'progress.lastcancel'});
       }
-      Gtk2->main_iteration while ( Gtk2->events_pending );
+      Gtk3::main_iteration while ( Gtk3::events_pending );
     } elsif($action eq 'fraction') {
       # Don't update progress bar more than once a second.
       if(time>$self->{'progress.time'}) {
 	$self->{'progress.time'}=time;
 	$self->{'progress'}->{'avancement'}->set_fraction($argument);
-	Gtk2->main_iteration while ( Gtk2->events_pending );
+	Gtk3::main_iteration while ( Gtk3::events_pending );
       }
     }
   }

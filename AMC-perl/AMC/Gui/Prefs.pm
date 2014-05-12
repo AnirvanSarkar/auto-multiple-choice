@@ -117,7 +117,7 @@ sub transmet_pref {
 	$wp->set_value($h->{$t});
       }
       if ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
-	$wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
+	$wp->set_color(Gtk3::Gdk::Color->parse($h->{$t}));
       }
       if ($wp=$self->find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
 	$wp->set_active($h->{$t});
@@ -239,9 +239,10 @@ sub reprend_pref {
       $wp=$self->{w}->{$prefixe.'_c_'.$tgui};
       if ($wp) {
 	debug "Found combobox";
-	if ($wp->get_model) {
-	  if ($wp->get_active_iter) {
-	    $n=$wp->get_model->get($wp->get_active_iter,COMBO_ID);
+	if (my $model=$wp->get_model) {
+	  my ($ok,$iter)=$wp->get_active_iter;
+	  if ($ok && $iter) {
+	    $n=$model->get_value($iter,COMBO_ID);
 	  } else {
 	    debug "No active iter for combobox ".$prefixe.'_c_'.$tgui;
 	    $n='';

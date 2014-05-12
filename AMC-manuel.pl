@@ -49,5 +49,5 @@ my $g=AMC::Gui::Manuel::new('liste'=>$liste,
 			    'global'=>1,
 			    );
 
-Gtk2->main;
+Gtk3->main;
 

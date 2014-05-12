@@ -20,7 +20,7 @@
 
 package AMC::Annotate;
 
-use Gtk2 -init;
+use Gtk3 -init;
 use List::Util qw(min max sum);
 use File::Copy;
 use Unicode::Normalize;
@@ -590,7 +590,7 @@ sub stext {
 
 sub color_rgb {
   my ($s)=@_;
-  my $col=Gtk2::Gdk::Color->parse($s);
+  my $col=Gtk3::Gdk::Color->parse($s);
   if($col) {
     return($col->red/65535,$col->green/65535,$col->blue/65535);
   } else {

@@ -621,7 +621,7 @@ sub __p($) {
 
 sub cb_model {
     my @texte=(@_);
-    my $cs=Gtk2::ListStore->new ('Glib::String','Glib::String');
+    my $cs=Gtk3::ListStore->new ('Glib::String','Glib::String');
     my $k;
     my $t;
     while(($k,$t)=splice(@texte,0,2)) {

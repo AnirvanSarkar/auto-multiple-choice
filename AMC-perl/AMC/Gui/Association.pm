@@ -30,7 +30,7 @@ use AMC::Gui::WindowSize;
 use Getopt::Long;
 
 use POSIX;
-use Gtk2 -init;
+use Gtk3 -init;
 
 use constant {
     COPIES_N => 0,
@@ -47,9 +47,9 @@ use constant {
 
 use_gettext;
 
-my $col_pris = Gtk2::Gdk::Color->new(65353,208*256,169*256);
-my $col_actif = Gtk2::Gdk::Color->new(20*256,147*256,58*256);
-my $col_actif_fond = Gtk2::Gdk::Color->new(95*256,213*256,129*256);
+my $col_pris = Gtk3::Gdk::Color::parse("#FFD0A9");
+my $col_actif = Gtk3::Gdk::Color::parse("#14933A");
+my $col_actif_fond = Gtk3::Gdk::Color::parse("#5FD581");
 
 sub new {
     my %o=(@_);
@@ -140,7 +140,7 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}=Gtk3::Builder->new();
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
@@ -150,11 +150,11 @@ sub new {
 
     $self->{'button_show_all'}->set_active($self->{'show_all'});
 
-    $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
+    $self->{'cursor_watch'}=Gtk3::Gdk::Cursor->new('GDK_WATCH');
 
     AMC::Gui::PageArea::add_feuille($self->{'photo'});
 
-    $self->{'names_model'}=Gtk2::ListStore->new ('Glib::String',
+    $self->{'names_model'}=Gtk3::ListStore->new ('Glib::String',
 						 'Glib::String',
 						 );
 
@@ -168,10 +168,10 @@ sub new {
 
     my ($x,$y)=(0,0);
     for my $i (0..($self->{'liste'}->taille()-1)) {
-	my $eb=Gtk2::EventBox->new();
-	my $b=Gtk2::Button->new();
+	my $eb=Gtk3::EventBox->new();
+	my $b=Gtk3::Button->new();
 	my $name=$self->{'liste'}->data_n($i,'_ID_');
-	my $l=Gtk2::Label->new($name);
+	my $l=Gtk3::Label->new($name);
 	$self->{'names_model'}->insert_with_values($i,
 						   NAMES_NAME,$name,
 						   NAMES_I,$i);
@@ -200,7 +200,7 @@ sub new {
     # vue arborescente
 
     my ($copies_store,$renderer,$column);
-    $copies_store = Gtk2::ListStore->new ('Glib::String',
+    $copies_store = Gtk3::ListStore->new ('Glib::String',
 					  'Glib::String',
 					  'Glib::String',
 					  'Glib::String',
@@ -211,8 +211,8 @@ sub new {
 
     $self->{'copies_tree'}->set_model($copies_store);
 
-    $renderer=Gtk2::CellRendererText->new;
-    $column = Gtk2::TreeViewColumn->new_with_attributes ("copie",
+    $renderer=Gtk3::CellRendererText->new;
+    $column = Gtk3::TreeViewColumn->new_with_attributes ("copie",
 							 $renderer,
 							 text=> COPIES_N,
 							 'background'=> COPIES_BG);
@@ -220,16 +220,16 @@ sub new {
 
     $self->{'copies_tree'}->append_column ($column);
 
-    $renderer=Gtk2::CellRendererText->new;
-    $column = Gtk2::TreeViewColumn->new_with_attributes ("auto",
+    $renderer=Gtk3::CellRendererText->new;
+    $column = Gtk3::TreeViewColumn->new_with_attributes ("auto",
 							 $renderer,
 							 text=> COPIES_AUTO,
 							 'background'=> COPIES_BG);
     $column->set_sort_column_id(COPIES_AUTO);
     $self->{'copies_tree'}->append_column ($column);
 
-    $renderer=Gtk2::CellRendererText->new;
-    $column = Gtk2::TreeViewColumn->new_with_attributes ("manuel",
+    $renderer=Gtk3::CellRendererText->new;
+    $column = Gtk3::TreeViewColumn->new_with_attributes ("manuel",
 							 $renderer,
 							 text=> COPIES_MANUEL,
 							 'background'=> COPIES_BG);
@@ -264,7 +264,7 @@ sub new {
 
     # auto-completion
 
-    $self->{'completion'}=Gtk2::EntryCompletion->new();
+    $self->{'completion'}=Gtk3::EntryCompletion->new();
     $self->{'completion'}->set_model($self->{'names_model'});
     $self->{'completion'}->set_text_column(NAMES_NAME);
     $self->{'completion'}->set_minimum_key_length(2);
@@ -336,7 +336,7 @@ sub set_n_cols {
   my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
 
   $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
-  Gtk2->main_iteration while ( Gtk2->events_pending );
+  Gtk3::main_iteration while ( Gtk3::events_pending );
 
   $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
 
@@ -357,7 +357,7 @@ sub set_n_cols {
   }
   $self->{'scrolled_tableau'}->set_policy('never','automatic');
 
-  Gtk2->main_iteration while ( Gtk2->events_pending );
+  Gtk3::main_iteration while ( Gtk3::events_pending );
   $self->{'general'}->window()->set_cursor(undef);
 }
 
@@ -495,7 +495,7 @@ sub quitter {
     my ($self)=(@_);
 
     if($self->{'global'}) {
-	Gtk2->main_quit;
+	Gtk3->main_quit;
     } else {
       $self->{'general'}->destroy;
       &{$self->{'fin'}}($self);
@@ -834,18 +834,18 @@ sub style_bouton {
     if($b) {
 	if($pris) {
 	    $b->set_relief(GTK_RELIEF_NONE);
-	    $b->modify_bg('prelight',($actif ? $col_actif : $col_pris));
+	    $b->override_background_color('prelight',($actif ? $col_actif : $col_pris));
 	    $b->child->set_text($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
 	} else {
 	    $b->set_relief(GTK_RELIEF_NORMAL);
-	    $b->modify_bg('prelight',undef);
+	    $b->override_background_color('prelight',undef);
 	    $b->child->set_text($self->{'liste'}->data_n($i,'_ID_'));
 	}
 	if($eb) {
 	    my $col=undef;
 	    $col=$col_actif_fond if($actif);
 	    for(qw/normal active selected/) {
-		$eb->modify_bg($_,$col);
+		$eb->override_background_color($_,$col);
 	    }
 	} else {
 	    debug_and_stderr "*** no EventBox for $i ***\n";

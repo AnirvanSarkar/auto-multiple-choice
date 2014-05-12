@@ -21,7 +21,7 @@
 package AMC::Gui::Manuel;
 
 use Getopt::Long;
-use Gtk2 -init;
+use Gtk3 -init;
 
 use XML::Simple;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
@@ -98,7 +98,7 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}=Gtk3::Builder->new();
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
@@ -120,9 +120,9 @@ sub new {
       $self->{'navigation_h'}->show();
     }
 
-    $self->{'cursor_watch'}=Gtk2::Gdk::Cursor->new('GDK_WATCH');
+    $self->{'cursor_watch'}=Gtk3::Gdk::Cursor->new('GDK_WATCH');
 
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    Gtk3::main_iteration while ( Gtk3::events_pending );
 
     AMC::Gui::PageArea::add_feuille
 	($self->{'area'},'',
@@ -134,31 +134,31 @@ sub new {
 	($self->window,$self->{'size_monitor'})
 	  if($self->{'size_monitor'});
 
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    Gtk3::main_iteration while ( Gtk3::events_pending );
 
     ### modele DIAGNOSTIQUE SAISIE
 
     if($self->{'editable'}) {
 	my ($renderer,$column);
 
-	$renderer=Gtk2::CellRendererText->new;
-	$column = Gtk2::TreeViewColumn->new_with_attributes (__"page",
+	$renderer=Gtk3::CellRendererText->new;
+	$column = Gtk3::TreeViewColumn->new_with_attributes (__"page",
 							     $renderer,
 							     text=> MDIAG_ID,
 							     'background'=> MDIAG_ID_BACK);
 	$column->set_sort_column_id(MDIAG_ID);
 	$self->{'diag_tree'}->append_column ($column);
 
-	$renderer=Gtk2::CellRendererText->new;
-	$column = Gtk2::TreeViewColumn->new_with_attributes (__"MSE",
+	$renderer=Gtk3::CellRendererText->new;
+	$column = Gtk3::TreeViewColumn->new_with_attributes (__"MSE",
 							     $renderer,
 							     'text'=> MDIAG_EQM,
 							     'background'=> MDIAG_EQM_BACK);
 	$column->set_sort_column_id(MDIAG_EQM);
 	$self->{'diag_tree'}->append_column ($column);
 
-	$renderer=Gtk2::CellRendererText->new;
-	$column = Gtk2::TreeViewColumn->new_with_attributes (__"sensitivity",
+	$renderer=Gtk3::CellRendererText->new;
+	$column = Gtk3::TreeViewColumn->new_with_attributes (__"sensitivity",
 							     $renderer,
 							     'text'=> MDIAG_DELTA,
 							     'background'=> MDIAG_DELTA_BACK);
@@ -167,7 +167,7 @@ sub new {
     }
 
     $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    Gtk3::main_iteration while ( Gtk3::events_pending );
 
     $self->maj_list_all;
 
@@ -184,7 +184,7 @@ sub new {
 
 sub new_diagstore {
   my ($self)=@_;
-  $diag_store = Gtk2::ListStore->new ('Glib::String',
+  $diag_store = Gtk3::ListStore->new ('Glib::String',
 				      'Glib::String',
 				      'Glib::String',
 				      'Glib::String',
@@ -234,8 +234,9 @@ sub scan_view_change {
 sub current_iter {
   my ($self)=@_;
   my @sel=$self->{'diag_tree'}->get_selection->get_selected_rows();
-  if(@sel) {
-    return( $self->{'diag_store'}->get_iter($sel[0]) );
+  my $first_selected=$sel[0]->[0];
+  if($first_selected) {
+    return( $self->{'diag_store'}->get_iter($first_selected) );
   } else {
     return();
   }
@@ -460,7 +461,7 @@ sub charge_i {
     } else {
 
       $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
-      Gtk2->main_iteration while ( Gtk2->events_pending );
+      Gtk3::main_iteration while ( Gtk3::events_pending );
 
       system("pdftoppm","-f",$page,"-l",$page,
 	     "-r",$self->{'dpi'},
@@ -604,7 +605,7 @@ sub passe_suivant {
   my ($self)=@_;
   my ($path)=$self->{'diag_tree'}->get_cursor();
   if($path) {
-    my $path_next=Gtk2::TreePath->new ($path->to_string);
+    my $path_next=Gtk3::TreePath->new ($path->to_string);
     $path_next->next();
     $self->{'diag_tree'}->set_cursor($path_next);
     ($path_next)=$self->{'diag_tree'}->get_cursor();
@@ -661,7 +662,7 @@ sub ok_quitter {
 sub quitter {
     my ($self)=(@_);
     if($self->{'global'}) {
-	Gtk2->main_quit;
+	Gtk3->main_quit;
     } else {
 	$self->{'general'}->destroy;
 	if($self->{'en_quittant'}) {

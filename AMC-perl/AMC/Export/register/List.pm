@@ -58,19 +58,19 @@ sub options_default {
 
 sub build_config_gui {
   my ($self,$w,$prefs)=@_;
-  my $t=Gtk2::Table->new(2,2);
+  my $t=Gtk3::Table->new(2,2,0);
   my $widget;
   my $y=0;
-  $t->attach(Gtk2::Label->new(__"Number of columns"),
+  $t->attach(Gtk3::Label->new(__"Number of columns"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::SpinButton->new(Gtk2::Adjustment->new(1,1,5,1,1,0),0,0);
+  $widget=Gtk3::SpinButton->new(Gtk3::Adjustment->new(1,1,5,1,1,0),0,0);
   $widget->set_tooltip_text(__"Long list is divided into this number of columns on each page.");
   $w->{'export_s_export_ncols'}=$widget;
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;
-  $t->attach(Gtk2::Label->new(__"Paper size"),0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::ComboBox->new_with_model();
-  my $renderer = Gtk2::CellRendererText->new();
+  $t->attach(Gtk3::Label->new(__"Paper size"),0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $widget=Gtk3::ComboBox->new();
+  my $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
   $prefs->store_register('export_pagesize'=>cb_model("a3"=>"A3",
