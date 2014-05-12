@@ -157,7 +157,7 @@ if($fich_noms) {
 
 sub color_rgb {
     my ($s)=@_;
-    my $col=Gtk3::Gdk::Color->parse($s);
+    my $col=Gtk3::Gdk::Color::parse($s);
     return($col->red/65535,$col->green/65535,$col->blue/65535);
 }
 

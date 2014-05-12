@@ -58,19 +58,19 @@ sub add_feuille {
 
     $self->{'gc'} = Gtk3::Gdk::GC->new($self->get_window);
 
-    $self->{'color'}= Gtk3::Gdk::Color->parse($coul);
+    $self->{'color'}= Gtk3::Gdk::Color::parse($coul);
     $self->{'scorezone_color'}=
-      Gtk3::Gdk::Color->parse($self->{scorezone_color_name});
+      Gtk3::Gdk::Color::parse($self->{scorezone_color_name});
     $self->{'question_color'}=
-      Gtk3::Gdk::Color->parse($self->{question_color_name});
+      Gtk3::Gdk::Color::parse($self->{question_color_name});
     $self->{'unticked_color'}=
-      Gtk3::Gdk::Color->parse($self->{'unticked_color_name'});
+      Gtk3::Gdk::Color::parse($self->{'unticked_color_name'});
     for my $ck (qw/color unticked_color question_color scorezone_color/) {
       $self->get_window->get_colormap->alloc_color($self->{$ck},TRUE,TRUE);
     }
 
     if($self->{'marks'}) {
-	$self->{'colormark'}= Gtk3::Gdk::Color->parse($self->{'marks'});
+	$self->{'colormark'}= Gtk3::Gdk::Color::parse($self->{'marks'});
 	$self->get_window->get_colormap->alloc_color($self->{'colormark'},TRUE,TRUE);
     }
 

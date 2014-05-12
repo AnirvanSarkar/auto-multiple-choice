@@ -117,7 +117,8 @@ sub transmet_pref {
 	$wp->set_value($h->{$t});
       }
       if ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
-	$wp->set_color(Gtk3::Gdk::Color->parse($h->{$t}));
+	my $c=Gtk3::Gdk::Color::parse($h->{$t});
+	$wp->set_color($c);
       }
       if ($wp=$self->find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
 	$wp->set_active($h->{$t});
