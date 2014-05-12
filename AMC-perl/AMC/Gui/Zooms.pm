@@ -37,8 +37,8 @@ use constant {
   ZOOMS_EDIT_CLICK => 1,
 };
 
-my $col_manuel = Gtk3::Gdk::Color::parse("#DFE085");
-my $col_modif = Gtk3::Gdk::Color::parse("#E2B8B2");
+my $col_manuel = Gtk3::Gdk::RGBA::parse("#DFE085");
+my $col_modif = Gtk3::Gdk::RGBA::parse("#E2B8B2");
 
 sub new {
     my %o=(@_);
@@ -124,14 +124,13 @@ sub new {
     $self->{'info'}->set_markup('<b>'.sprintf(__("Boxes zooms for page %s"),
 					      pageids_string(@{$self->{'page_id'}})).'</b>');
 
-    $self->{'decoupage'}->child1_resize(1);
-    $self->{'decoupage'}->child2_resize(1);
+#    $self->{'decoupage'}->set_property('resize',1);
+#    $self->{'decoupage'}->child2_resize(1);
 
     for(0,1) {
-	$self->{'event_'.$_}->drag_dest_set('all', [GDK_ACTION_MOVE],
-					    {'target' => 'STRING',
-					      'flags' => [],
-					      'info' => ID_AMC_BOX },
+	$self->{'event_'.$_}->drag_dest_set('all',
+					    [Gtk3::TargetEntry->new('STRING',0,ID_AMC_BOX)],
+					    [GDK_ACTION_MOVE],
 					    );
 	$self->{'event_'.$_}->signal_connect(
 	    'drag-data-received' => \&target_drag_data_received,[$self,$_]);
@@ -236,7 +235,7 @@ sub safe_pixbuf {
     # first try with a PixbufLoader
 
     my $pxl=Gtk3::Gdk::PixbufLoader->new;
-    $pxl->write($image);
+    $pxl->write([unpack 'C*', $image]);
     $pxl->close();
     $p=$pxl->get_pixbuf();
     return($p,1) if($p);
@@ -314,12 +313,9 @@ sub load_boxes {
 	$hb->add($self->{'label'}->{$id});
 
 	$self->{'eb'}->{$id}->drag_source_set(GDK_BUTTON1_MASK,
-					      GDK_ACTION_MOVE,
-					      {
-					       target => 'STRING',
-					       flags => [],
-					       info => ID_AMC_BOX,
-					      });
+					      [Gtk3::TargetEntry->new('STRING',0,ID_AMC_BOX)],
+					      [GDK_ACTION_MOVE],
+					     );
 	$self->{'eb'}->{$id}
 	  ->signal_connect('drag-data-get' => \&source_drag_data_get,
 			   $id );
@@ -368,9 +364,9 @@ sub load_boxes {
     $self->ajuste_sep();
 
     my $va=$self->{'scrolled_0'}->get_vadjustment();
-    $va->clamp_page($va->upper(),$va->upper());
+    $va->clamp_page($va->get_upper(),$va->get_upper());
     $va=$self->{'scrolled_1'}->get_vadjustment();
-    $va->clamp_page($va->lower(),$va->lower());
+    $va->clamp_page($va->get_lower(),$va->get_lower());
 
     if($self->{'conforme'}) {
 	$self->{'button_apply'}->hide();
@@ -491,13 +487,13 @@ sub remplit {
 	my $y=int($i/$self->{'n_cols'});
 
 	if($self->{'eff_pos'}->{$id} != $cat) {
-	    $self->{'eb'}->{$id}->override_background_color(GTK_STATE_NORMAL,$col_modif);
+	    $self->{'eb'}->{$id}->override_background_color(GTK_STATE_FLAG_NORMAL,$col_modif);
 	    $self->{'conforme'}=0;
 	} else {
 	    if($self->{'auto_pos'}->{$id} == $cat) {
-		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_NORMAL,undef);
+		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_FLAG_NORMAL,undef);
 	    } else {
-		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_NORMAL,$col_manuel);
+		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_FLAG_NORMAL,$col_manuel);
 	    }
 	}
 
@@ -633,7 +629,7 @@ sub quit {
 sub actif {
     my ($self)=@_;
     return($self->{'main_window'} &&
-	   $self->{'main_window'}->realized);
+	   $self->{'main_window'}->get_realized);
 }
 
 sub checked {
