@@ -2187,8 +2187,9 @@ sub restricted_check {
 	$text->set_text($nom);
 	$warning->show();
 
+	my $col=Gtk3::Gdk::Color::parse('#FFC0C0');
 	for(qw/normal active/) {
-	    $text->modify_base($_,Gtk3::Gdk::Color::parse('#FFC0C0'));
+	    $text->modify_base($_,$col);
 	}
 	Glib::Timeout->add (500, sub {
 	    $text->modify_style($style);
