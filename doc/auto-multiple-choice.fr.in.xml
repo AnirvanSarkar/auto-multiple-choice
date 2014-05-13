@@ -3949,10 +3949,12 @@ Nom et prénom :
 
                 <entry/>
 
-                <entry>Donne la valeur maximale attribuée à la question (pour
+                <entry><para>Donne la valeur maximale attribuée à la question (pour
                 une « question notée sur 5 », on peut mettre MAX=5). À
                 renseigner uniquement si elle ne correspond pas à la note
-                obtenue en mettant toutes les bonnes réponses.</entry>
+                obtenue en mettant toutes les bonnes réponses.</para>para>
+<para>Si vous indiquez MAX=3 pour une question pouvant rapporter 4 points, un étudiant pourra avoir un score de 4/3 à cette question (et, si il donne des réponses parfaites aux autres questions, il pourra éventuellement obtenir une note globale supérieure à 20/20).</para> 
+</entry>
               </row>
 
               <row>
@@ -4031,7 +4033,10 @@ Nom et prénom :
         </informaltable>
 
 <important>
- Avec le paramètre default, il faut déclarer la valeur de la variable <replaceable>XXX</replaceable> dans le barème de la question
+ <para>Avec le paramètre default, il faut déclarer la valeur de la variable <replaceable>XXX</replaceable> dans le barème de la question, voir l'exemple ci-dessous.</para>
+</important>
+
+<example>
 <programlisting>
 \begin{questionmult}{03}\bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
 Cite un gaz  important de l'air et son pourcentage.
@@ -4050,8 +4055,7 @@ Cite un gaz  important de l'air et son pourcentage.
 \end{multicols}
 \end{questionmult}
 </programlisting>
-</important>
-
+</example>
 
         <para>Le barème par défaut pour une question simple est
         <code>e=0,v=0,b=1,m=0</code>, ce qui donne un point pour une bonne
