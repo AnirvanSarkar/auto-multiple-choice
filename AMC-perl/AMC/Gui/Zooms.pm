@@ -578,7 +578,7 @@ sub zoom_list_previous {
   my ($path)=$self->{'list_view'}->get_cursor();
   if($path) {
     if($path->prev) {
-      $self->{'list_view'}->set_cursor($path);
+      $self->{'list_view'}->set_cursor($path,undef,FALSE);
     }
   }
 }
@@ -589,9 +589,9 @@ sub zoom_list_next {
   if($path) {
     my $path_next=Gtk3::TreePath->new ($path->to_string);
     $path_next->next();
-    $self->{'list_view'}->set_cursor($path_next);
+    $self->{'list_view'}->set_cursor($path_next,undef,FALSE);
     ($path_next)=$self->{'list_view'}->get_cursor();
-    $self->{'list_view'}->set_cursor($path)
+    $self->{'list_view'}->set_cursor($path,undef,FALSE)
       if(!$path_next);
   }
 }

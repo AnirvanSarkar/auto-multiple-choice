@@ -665,7 +665,7 @@ sub goto_image {
     if($i>=0) {
 	my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$i);
 	my $path=$self->{'copies_store'}->get_path($iter);
-	$self->{'copies_tree'}->set_cursor($path);
+	$self->{'copies_tree'}->set_cursor($path,undef,FALSE);
     } else {
 	my $sel=$self->{'copies_tree'}->get_selection;
 	$sel->unselect_all();

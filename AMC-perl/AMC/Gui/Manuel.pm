@@ -283,7 +283,7 @@ sub page_selected {
 
 sub select_page_from_iter {
   my ($self,$iter)=@_;
-  $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path($iter))
+  $self->{'diag_tree'}->set_cursor($self->{'diag_store'}->get_path($iter),undef,FALSE)
     if($iter);
 }
 
@@ -596,7 +596,7 @@ sub passe_precedent {
   my ($path)=$self->{'diag_tree'}->get_cursor();
   if($path) {
     if($path->prev) {
-      $self->{'diag_tree'}->set_cursor($path);
+      $self->{'diag_tree'}->set_cursor($path,undef,FALSE);
     }
   }
 }
@@ -607,9 +607,9 @@ sub passe_suivant {
   if($path) {
     my $path_next=Gtk3::TreePath->new ($path->to_string);
     $path_next->next();
-    $self->{'diag_tree'}->set_cursor($path_next);
+    $self->{'diag_tree'}->set_cursor($path_next,undef,FALSE);
     ($path_next)=$self->{'diag_tree'}->get_cursor();
-    $self->{'diag_tree'}->set_cursor($path)
+    $self->{'diag_tree'}->set_cursor($path,undef,FALSE)
       if(!$path_next);
   }
 }
