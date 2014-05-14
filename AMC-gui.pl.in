@@ -4100,12 +4100,13 @@ sub select_students {
 			  students_select_list students_list_search/);
   my $lk=$projet{'options'}->{'liste_key'};
 
-  $col=$w{'choose_students'}->get_style_context()->get_background_color('prelight');
-  for my $s (qw/normal insensitive/) {
-    for my $k (qw/students_instructions/) {
-      $w{$k}->modify_base($s,$col);
-    }
-  }
+  # $col=$w{'choose_students'}->get_style_context()->get_background_color('prelight');
+  # for my $s (qw/normal insensitive/) {
+  #   for my $k (qw/students_instructions/) {
+  #     $w{$k}->modify_base($s,$col);
+  #   }
+  # }
+
   my $students_store=Gtk3::ListStore
     ->new('Glib::String','Glib::String','Glib::String',
 	  'Glib::String','Glib::String',
@@ -5029,13 +5030,13 @@ sub open_unrecognized {
 			   inconnu_hpaned inconnu_vpaned
 			   main_recog state_scanrecog ur_frame_scan/);
 
-  # make state entries with same background color as around...
-  my $col=$w{'ur_frame_scan'}->get_style_context()->get_background_color('normal');
-  for my $s (qw/normal insensitive/) {
-    for my $k (qw/scanrecog/) {
-      $w{'state_'.$k}->modify_base($s,$col);
-    }
-  }
+  # # make state entries with same background color as around...
+  # my $col=$w{'ur_frame_scan'}->get_style_context()->get_background_color('normal');
+  # for my $s (qw/normal insensitive/) {
+  #   for my $k (qw/scanrecog/) {
+  #     $w{'state_'.$k}->modify_base($s,$col);
+  #   }
+  # }
 
   for (qw/scan preprocessed/) {
     AMC::Gui::PageArea::add_feuille($w{$_.'_area'});
@@ -6571,12 +6572,13 @@ sub choose_columns {
   my $gcol=read_glade('choose_columns',
 		      qw/columns_list columns_instructions/);
 
-  $col=$w{'choose_columns'}->get_style_context()->get_background_color('prelight');
-  for my $s (qw/normal insensitive/) {
-    for my $k (qw/columns_instructions/) {
-      $w{$k}->modify_base($s,$col);
-    }
-  }
+  # $col=$w{'choose_columns'}->get_style_context()->get_background_color('prelight');
+  # for my $s (qw/normal insensitive/) {
+  #   for my $k (qw/columns_instructions/) {
+  #     $w{$k}->modify_base($s,$col);
+  #   }
+  # }
+
   my $columns_store=Gtk3::ListStore->new('Glib::String','Glib::String');
   $w{'columns_list'}->set_model($columns_store);
   my $renderer=Gtk3::CellRendererText->new;
