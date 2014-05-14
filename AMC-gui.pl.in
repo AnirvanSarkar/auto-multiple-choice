@@ -494,20 +494,21 @@ sub test_commandes {
     }
     if(@pasbon && !$dont_warn) {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'warning','ok',
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'warning','ok','');
+	$dialog->set_markup(
 # TRANSLATORS: Message (first part) when some of the commands that are given in the preferences cannot be found.
-			      __("Some commands allowing to open documents can't be found:")
-			      ." ".join(", ",map { "<b>$_</b>"; } @pasbon).". "
+			    __("Some commands allowing to open documents can't be found:")
+			    ." ".join(", ",map { "<b>$_</b>"; } @pasbon).". "
 # TRANSLATORS: Message (second part) when some of the commands that are given in the preferences cannot be found.
-			      .__("Please check its correct spelling and install missing software.")." "
+			    .__("Please check its correct spelling and install missing software.")." "
 # TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
-			      .sprintf(__"You can change used commands following <i>%s</i> from menu <i>%s</i>.",
+			    .sprintf(__"You can change used commands following <i>%s</i> from menu <i>%s</i>.",
 # TRANSLATORS: "Preferences" menu
-				       __"Preferences",
+				     __"Preferences",
 # TRANSLATORS: "Edit" menu
-				       __"Edit"));
+				     __"Edit"));
 	$dialog->run;
 	$dialog->destroy;
     }
@@ -534,9 +535,10 @@ sub test_debian_amc {
        !deb_is_installed("auto-multiple-choice")) {
       debug "ERROR: auto-multiple-choice package not installed!";
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup(
 			  __"The package <i>auto-multiple-choice-common</i> is installed, but not <i>auto-multiple-choice</i>.\n<b>AMC won't work properly until you install auto-multiple-choice package!</b>"
 			  );
       $dialog->run;
@@ -630,9 +632,10 @@ sub sauve_state {
 
 sub annule_apprentissage {
     my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'question','yes-no',
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'question','yes-no','');
+    $dialog->set_markup(
 # Explains that some dialogs are shown only to learn AMC, only once by default (first part).
 			  __("Several dialogs try to help you be at ease handling AMC.")." ".
 # Explains that some dialogs are shown only to learn AMC, only once by default (second part). %s will be replaced with the text "Show this message again next time" that is written along the checkbox allowing the user to keep these learning message next time.
@@ -1014,10 +1017,10 @@ sub dialogue_apprentissage {
     if($force || !$state{'apprentissage'}->{$key}) {
       my $garde;
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  $type,$buttons,
-			  @oo);
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      $type,$buttons,'');
+      $dialog->set_markup(@oo);
 
       if(!$force) {
 	$garde=Gtk3::CheckButton->new(__"Show this message again next time");
@@ -1516,13 +1519,14 @@ sub delete_line {
   my $f;
   if(@{$selected[0]}) {
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'question','yes-no',
-			sprintf((__"You requested to delete all data capture results for %d page(s)"),1+$#{$selected[0]})."\n"
-			.'<b>'.(__"All data and image files related to these pages will be deleted.")."</b>\n"
-			.(__"Do you really want to continue?")
-		       );
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'question','yes-no','');
+      $dialog->set_markup(
+			  sprintf((__"You requested to delete all data capture results for %d page(s)"),1+$#{$selected[0]})."\n"
+			  .'<b>'.(__"All data and image files related to these pages will be deleted.")."</b>\n"
+			  .(__"Do you really want to continue?")
+			 );
     my $reponse=$dialog->run;
     $dialog->destroy;
     if($reponse eq 'yes') {
@@ -1695,10 +1699,10 @@ sub commande_parallele {
 	}
     } else {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      sprintf(__"Following command could not be run: <b>%s</b>, perhaps due to a poor configuration?",$c[0]));
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(sprintf(__"Following command could not be run: <b>%s</b>, perhaps due to a poor configuration?",$c[0]));
 	$dialog->run;
 	$dialog->destroy;
 
@@ -1909,10 +1913,10 @@ sub projet_liste_clone {
   my (undef,undef,$proj_c) = splitpath($proj_clone);
 
   my $dialog = Gtk3::MessageDialog
-    ->new_with_markup($w{'choix_projet'},
-		      'destroy-with-parent',
-		      'warning','ok-cancel',
-		      sprintf(__("This will clone project <b>%s</b> to a new project <i>%s</i>."),
+    ->new($w{'choix_projet'},
+	  'destroy-with-parent',
+	  'warning','ok-cancel','');
+  $dialog->set_markup(sprintf(__("This will clone project <b>%s</b> to a new project <i>%s</i>."),
 			      $proj,$proj_c));
   my $r=$dialog->run;
   $dialog->destroy;
@@ -1973,11 +1977,12 @@ sub projet_mv_yes {
 	    if(-d $dir_nouveau) {
 		$w{'choix_projet'}->set_keep_above(0);
 		my $dialog = Gtk3::MessageDialog
-		    ->new_with_markup($w{'main_window'},
-				      'destroy-with-parent',
-				      'error','ok',
+		    ->new($w{'main_window'},
+			  'destroy-with-parent',
+			  'error','ok','');
+		$dialog->set_markup(
 # TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
-				      sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),$dir_nouveau));
+				    sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),$dir_nouveau));
 		$dialog->run;
 		$dialog->destroy;
 		$w{'choix_projet'}->set_keep_above(1);
@@ -2087,12 +2092,13 @@ sub projet_liste_supprime {
     # on demande confirmation...
     $w{'choix_projet'}->set_keep_above(0);
     my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'warning','ok-cancel',
-			  sprintf(__("You asked to remove project <b>%s</b>.")." "
-				  .__("This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example.")." "
-				  .__("Is this really what you want?"),$proj));
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'warning','ok-cancel','');
+    $dialog->set_markup(
+			sprintf(__("You asked to remove project <b>%s</b>.")." "
+				.__("This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example.")." "
+				.__("Is this really what you want?"),$proj));
     my $reponse=$dialog->run;
     $dialog->destroy;
     $w{'choix_projet'}->set_keep_above(1);
@@ -2136,11 +2142,12 @@ sub projet_charge_ok {
 	my $reponse='yes';
 	if(! -f fich_options($proj,$w{'local_rep_projets'})) {
 	    my $dialog = Gtk3::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'warning','yes-no',
-				  sprintf(__("You selected directory <b>%s</b> as a project to open.")." "
-					  .__("However, this directory does not seem to contain a project. Do you still want to try?"),$proj));
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'warning','yes-no','');
+	    $dialog->set_markup(
+				sprintf(__("You selected directory <b>%s</b> as a project to open.")." "
+					.__("However, this directory does not seem to contain a project. Do you still want to try?"),$proj));
 	    $reponse=$dialog->run;
 	    $dialog->destroy;
 	}
@@ -2153,12 +2160,13 @@ sub projet_charge_ok {
 	  if($w{'local_rep_projets'} =~ /^\/media\//
 	    && $shortcuts->absolu($o{'projects_home'}) !~ /^\/media\//) {
 	    my $dialog = Gtk3::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'warning','yes-no',
-				  sprintf(__("You selected project <b>%s</b> from directory <i>%s</i>.")." "
-					  .__("Do you want to copy this project to your projects directory before opening it?"),
-					  $proj,$w{'local_rep_projets'}));
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'warning','yes-no','');
+	    $dialog->set_markup(
+				sprintf(__("You selected project <b>%s</b> from directory <i>%s</i>.")." "
+					.__("Do you want to copy this project to your projects directory before opening it?"),
+					$proj,$w{'local_rep_projets'}));
 	    my $r=$dialog->run;
 	    $dialog->destroy;
 	    if($r eq 'yes') {
@@ -2214,11 +2222,12 @@ sub projet_charge_nouveau {
     if(-e $w{'local_rep_projets'}."/$proj") {
 
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      sprintf(__("The name <b>%s</b> is already used in the projects directory.")." "
-				      .__"You must choose another name to create a project.",$proj));
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(
+			    sprintf(__("The name <b>%s</b> is already used in the projects directory.")." "
+				    .__"You must choose another name to create a project.",$proj));
 	$dialog->run;
 	$dialog->destroy;
 
@@ -2298,15 +2307,16 @@ sub doc_maj {
     my $sur=0;
     if($projet{'_capture'}->n_pages_transaction()>0) {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'warning','ok-cancel',
-			      __("Papers analysis was already made on the basis of the current working documents.")." "
-			      .__("You already made the examination on the basis of these documents.")." "
-			      .__("If you modify working documents, you will not be capable any more of analyzing the papers you have already distributed!")." "
-			      .__("Do you wish to continue?")." "
-			      .__("Click on OK to erase the former layouts and update working documents, or on Cancel to cancel this operation.")." "
-			      ."<b>".__("To allow the use of an already printed question, cancel!")."</b>");
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'warning','ok-cancel','');
+	$dialog->set_markup(
+			    __("Papers analysis was already made on the basis of the current working documents.")." "
+			    .__("You already made the examination on the basis of these documents.")." "
+			    .__("If you modify working documents, you will not be capable any more of analyzing the papers you have already distributed!")." "
+			    .__("Do you wish to continue?")." "
+			    .__("Click on OK to erase the former layouts and update working documents, or on Cancel to cancel this operation.")." "
+			    ."<b>".__("To allow the use of an already printed question, cancel!")."</b>");
 	my $reponse=$dialog->run;
 	$dialog->destroy;
 
@@ -2324,14 +2334,15 @@ sub doc_maj {
     if($pc > 0) {
 	if(!$sur) {
 	    my $dialog = Gtk3::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'question','ok-cancel',
-				  __("Layouts are already calculated for the current documents.")." "
-				  .__("Updating working documents, the layouts will become obsolete and will thus be erased.")." "
-				  .__("Do you wish to continue?")." "
-				  .__("Click on OK to erase the former layouts and update working documents, or on Cancel to cancel this operation.")
-				  ." <b>".__("To allow the use of an already printed question, cancel!")."</b>");
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'question','ok-cancel','');
+	    $dialog->set_markup(
+				__("Layouts are already calculated for the current documents.")." "
+				.__("Updating working documents, the layouts will become obsolete and will thus be erased.")." "
+				.__("Do you wish to continue?")." "
+				.__("Click on OK to erase the former layouts and update working documents, or on Cancel to cancel this operation.")
+				." <b>".__("To allow the use of an already printed question, cancel!")."</b>");
 	    my $reponse=$dialog->run;
 	    $dialog->destroy;
 
@@ -2373,9 +2384,10 @@ sub doc_maj {
       $message.=__("Install these components on your system and try again.");
 
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',$message);
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup($message);
       $dialog->run;
       $dialog->destroy;
 
@@ -2432,10 +2444,10 @@ sub doc_maj {
 		     $message.="\n\n".join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
 
 		     my $dialog = Gtk3::MessageDialog
-		       ->new_with_markup($w{'main_window'},
-					 'destroy-with-parent',
-					 'error','ok',
-					 $message);
+		       ->new($w{'main_window'},
+			     'destroy-with-parent',
+			     'error','ok','');
+		     $dialog->set_markup($message);
 		     $dialog->run;
 		     $dialog->destroy;
 		   } else {
@@ -2487,9 +2499,10 @@ sub doc_maj {
 		   if (($ensemble  || $c->variable('insidebox'))
 		       && $projet{'options'}->{'seuil'}<0.4) {
 		     my $dialog = Gtk3::MessageDialog
-		       ->new_with_markup($w{'main_window'},
-					 'destroy-with-parent',
-					 'question','yes-no',
+		       ->new($w{'main_window'},
+			     'destroy-with-parent',
+			     'question','yes-no','');
+		     $dialog->set_markup(
 					 sprintf(($ensemble ?
 						  __("Your question has a separate answers sheet.")." "
 						  .__("In this case, letters are shown inside boxes.") :
@@ -2610,11 +2623,12 @@ sub sujet_impressions {
 
     if(! -f $shortcuts->absolu($projet{'options'}->{'doc_question'})) {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(
 # TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
-			      __"You don't have any question to print: please check your source file and update working documents first.");
+			    __"You don't have any question to print: please check your source file and update working documents first.");
 	$dialog->run;
 	$dialog->destroy;
 
@@ -2626,12 +2640,13 @@ sub sujet_impressions {
     $projet{'_layout'}->end_transaction('PGCN');
     if($c==0) {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(
 # TRANSLATORS: Message when AMC does not know about the subject pages that has been generated. Usualy this means that the layout computation step has not been made.
-			      __("Question's pages are not detected.")." "
-			      .__"Perhaps you forgot to compute layouts?");
+			    __("Question's pages are not detected.")." "
+			    .__"Perhaps you forgot to compute layouts?");
 	$dialog->run;
 	$dialog->destroy;
 
@@ -2858,9 +2873,10 @@ sub sujet_impressions_ok {
 	  # generated, and photocopy mode not selected yet. Ask the
 	  # user if he wants to select this mode now.
 	  my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'question','yes-no',
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'question','yes-no','');
+	  $dialog->set_markup(
 			      __("You selected only a few sheets to print.")."\n".
 			      "<b>".__("Are you going to photocopy some printed subjects before giving them to the students?")."</b>\n".
 			      __("If so, the corresponding option will be set for this project.")." ".
@@ -2940,12 +2956,13 @@ sub calcule_mep {
     if($projet{'options'}->{'doc_setting'} !~ /\.xy$/) {
 	# OLD STYLE WORKING DOCUMENTS... Not supported anymore: update!
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error', # message type
-			      'ok', # which set of buttons?
-			      __("Working documents are in an old format, which is not supported anymore.")." <b>"
-			      .__("Please generate again the working documents!")."</b>");
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error',
+		  'ok','');
+	$dialog->set_markup(
+			    __("Working documents are in an old format, which is not supported anymore.")." <b>"
+			    .__("Please generate again the working documents!")."</b>");
 	$dialog->run;
 	$dialog->destroy;
 
@@ -2971,10 +2988,11 @@ sub calcule_mep {
 		 if($c<1) {
 		   # avertissement...
 		   my $dialog = Gtk3::MessageDialog
-		     ->new_with_markup($w{'main_window'},
-				       'destroy-with-parent',
-				       'error', # message type
-				       'ok', # which set of buttons?
+		     ->new($w{'main_window'},
+			   'destroy-with-parent',
+			   'error',
+			   'ok','');
+		   $dialog->set_markup(
 				       __("No layout detected.")." "
 				       .__("<b>Don't go through the examination</b> before fixing this problem, otherwise you won't be able to use AMC for correction."));
 		   $dialog->run;
@@ -3049,14 +3067,15 @@ sub saisie_manuelle {
 	);
     } else {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      __("No layout for this project.")." "
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(
+			    __("No layout for this project.")." "
 # TRANSLATORS: Here, the first %s will be replaced with "Layout detection" (a button title), and the second %s with "Preparation" (the tab title where one can find this button).
-			      .sprintf(__("Please use button <i>%s</i> in <i>%s</i> before manual data capture."),
-				       __"Layout detection",
-				       __"Preparation"));
+			    .sprintf(__("Please use button <i>%s</i> in <i>%s</i> before manual data capture."),
+				     __"Layout detection",
+				     __"Preparation"));
 	$dialog->run;
 	$dialog->destroy;
     }
@@ -3119,7 +3138,8 @@ sub saisie_auto_annule {
 
 sub saisie_auto_info {
   my $dialog=Gtk3::MessageDialog
-    ->new_with_markup($w{'saisie_auto'},'destroy-with-parent','info','ok',
+    ->new($w{'saisie_auto'},'destroy-with-parent','info','ok','');
+  $dialog->set_markup(
 		      __("Automatic data capture can be done in two different modes:")."\n"
 		      ."<b>".
 # TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
@@ -3350,10 +3370,11 @@ sub valide_liste {
       students_list_show();
 	if(!$oo{'noinfo'}) {
 	    my $dialog = Gtk3::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'error','ok',
-				  sprintf(__"Unsuitable names file: %d errors, first on line %d.",$err,$errlig));
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'error','ok','');
+	    $dialog->set_markup(
+				sprintf(__"Unsuitable names file: %d errors, first on line %d.",$err,$errlig));
 	    $dialog->run;
 	    $dialog->destroy;
 	}
@@ -3365,12 +3386,13 @@ sub valide_liste {
 	    debug "NamesFile: $e empty IDs";
 	    students_list_show();
 	    my $dialog = Gtk3::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'warning','ok',
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'warning','ok','');
+	    $dialog->set_markup(
 # TRANSLATORS: Here, do not translate 'name' and 'surname' (except in french), as the column names in the students list file has to be named in english in order to be properly detected.
-				  sprintf(__"Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled.",$e,$fl)." ".
-				  __"Edit the names file to correct it, and re-read.");
+				sprintf(__"Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled.",$e,$fl)." ".
+				__"Edit the names file to correct it, and re-read.");
 	    $dialog->run;
 	    $dialog->destroy;
 	} else {
@@ -3382,10 +3404,11 @@ sub valide_liste {
 		}
 		students_list_show();
 		my $dialog = Gtk3::MessageDialog
-		    ->new_with_markup($w{'main_window'},
-				      'destroy-with-parent',
-				      'warning','ok',
-				      sprintf(__"Found duplicate names: <i>%s</i>. Check that all names are different.",join(', ',@$d))." ".__"Edit the names file to correct it, and re-read.");
+		    ->new($w{'main_window'},
+			  'destroy-with-parent',
+			  'warning','ok','');
+		$dialog->set_markup(
+				    sprintf(__"Found duplicate names: <i>%s</i>. Check that all names are different.",join(', ',@$d))." ".__"Edit the names file to correct it, and re-read.");
 		$dialog->run;
 		$dialog->destroy;
 	    } else {
@@ -3411,28 +3434,31 @@ sub check_possible_assoc {
     my ($code)=@_;
     if(! -s $shortcuts->absolu($projet{'options'}->{'listeetudiants'})) {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(
 # TRANSLATORS: Here, %s will be replaced with the name of the tab "Data capture".
-			      sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",
+			    sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",
 				      __"Data capture"));
 	$dialog->run;
 	$dialog->destroy;
     } elsif(!$projet{'options'}->{'liste_key'}) {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      __("Please choose a key from primary keys in students list before association."));
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(
+			    __("Please choose a key from primary keys in students list before association."));
 	$dialog->run;
 	$dialog->destroy;
     } elsif($code && ! $projet{'options'}->{'assoc_code'}) {
 	my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      __("Please choose a code (made with LaTeX command \\AMCcode) before automatic association."));
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(
+			    __("Please choose a code (made with LaTeX command \\AMCcode) before automatic association."));
 	$dialog->run;
 	$dialog->destroy;
     } else {
@@ -3519,9 +3545,10 @@ sub assoc_resultat {
     $projet{'_association'}->end_transaction('ARCC');
 
     my $dialog=Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'info','ok',
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'info','ok','');
+    $dialog->set_markup(
 			sprintf(__("Automatic association completed: %d students recognized."),$auto).
 # TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
 			($auto==0 ? "\n<b>".sprintf(__("Please check \"%s\" and \"%s\" values and try again."),
@@ -3612,9 +3639,10 @@ sub filter_changed {
 	  .__("Click on Ok to erease old working documents and change file format, and on Cancel to get back to the same file format.");
     }
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'question','ok-cancel',$text);
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'question','ok-cancel','');
+    $dialog->set_markup($text);
     my $reponse=$dialog->run;
     $dialog->destroy;
 
@@ -3690,9 +3718,10 @@ sub change_liste_key {
 	# manual association work has been made
 
 	my $dialog=Gtk3::MessageDialog
-	  ->new_with_markup($w{'main_window'},
-			    'destroy-with-parent',
-			    'warning','yes-no',
+	  ->new($w{'main_window'},
+		'destroy-with-parent',
+		'warning','yes-no','');
+	$dialog->set_markup(
 			    sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
 			    sprintf(__("Some manual association data has be found, which will be lost if the primary key is changed. Do you want to switch back to the primary key \"%s\" and keep association data?"),$assoc_liste_key)
 			   );
@@ -3714,9 +3743,10 @@ sub change_liste_key {
 	if ($projet{'options'}->{'assoc_code'}) {
 	  # only automated association, easy to re-run
 	  my $dialog=Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'info','ok',
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'info','ok','');
+	  $dialog->set_markup(
 			      sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
 			      __("Automatic papers/students association will be re-run to update the association data.")
 			     );
@@ -4514,9 +4544,10 @@ sub accepte_preferences {
 
 	if ($label_projet && $label_general) {
 	  my $dialog = Gtk3::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'question','yes-no',
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'question','yes-no','');
+	  $dialog->set_markup(
 			      sprintf(__("You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"),
 				      $label_general,$label_projet,$projet{'nom'}));
 	  my $reponse=$dialog->run;
@@ -4722,11 +4753,10 @@ sub mep_warnings {
 	return();
     }
     my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'warning','ok',
-			  $m
-	);
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'warning','ok','');
+    $dialog->set_markup($m);
     $dialog->run;
     $dialog->destroy;
 
@@ -4956,13 +4986,14 @@ sub show_missing_pages {
   }
 
   my $dialog = Gtk3::MessageDialog
-    ->new_with_markup
+    ->new
       ($w{'main_window'},
        'destroy-with-parent',
-       'info','ok',
-       "<b>".(__"Pages that miss data capture to complete students sheets:")."</b>"
-       .$l
-      );
+       'info','ok','');
+  $dialog->set_markup(
+		      "<b>".(__"Pages that miss data capture to complete students sheets:")."</b>"
+		      .$l
+		     );
   $dialog->run;
   $dialog->destroy;
 }
@@ -5408,10 +5439,10 @@ sub make_template_add {
 
     if($err) {
 	my $dialog=Gtk3::MessageDialog
-	    ->new_with_markup($w{'make_template'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      __("When making a template, you can only add files that are within the project directory."));
+	    ->new($w{'make_template'},
+		  'destroy-with-parent',
+		  'error','ok','');
+	$dialog->set_markup(__("When making a template, you can only add files that are within the project directory."));
 	$dialog->run();
 	$dialog->destroy();
     }
@@ -5656,10 +5687,10 @@ sub source_latex_choisir {
 
 	if($rv || $n==0) {
 	    my $dialog = Gtk3::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'error','ok',
-				  sprintf(__"Nothing extracted from archive %s. Check it.",$fich));
+		->new($w{'main_window'},
+		      'destroy-with-parent',
+		      'error','ok','');
+	    $dialog->set_markup(sprintf(__"Nothing extracted from archive %s. Check it.",$fich));
 	    $dialog->run;
 	    $dialog->destroy;
 	    return(0,'');
@@ -5988,10 +6019,10 @@ sub quitte_projet {
       my $save=1;
       if ($m) {
 	my $dialog = Gtk3::MessageDialog
-	  ->new_with_markup($w{'main_window'},
-			    'destroy-with-parent',
-			    'question','yes-no',
-			    sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
+	  ->new($w{'main_window'},
+		'destroy-with-parent',
+		'question','yes-no','');
+	$dialog->set_markup(sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
 	my $reponse=$dialog->run;
 	$dialog->destroy;
 
@@ -6035,10 +6066,10 @@ sub quitter {
       my $save;
       if($m) {
 	my $dialog = Gtk3::MessageDialog
-	  ->new_with_markup($w{'main_window'},
-			    'destroy-with-parent',
-			    'question','yes-no',
-			    __"You did not save main options, which have been modified: do you want to save them before leaving?");
+	  ->new($w{'main_window'},
+		'destroy-with-parent',
+		'question','yes-no','');
+	$dialog->set_markup(__"You did not save main options, which have been modified: do you want to save them before leaving?");
 	my $reponse=$dialog->run;
 	$dialog->destroy;
 	if($response eq 'yes') {
@@ -6060,16 +6091,17 @@ sub quitter {
 
 sub bug_report {
     my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'info','ok',
-			  __("In order to send a useful bug report, please attach the following documents:")."\n"
-			  ."- ".__("an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the <b>project directory</b>, <b>scan files</b> and <b>configuration directory</b> (.AMC.d in home directory), so as to reproduce and analyse this problem.")."\n"
-			  ."- ".__("the <b>log file</b> produced when the debugging mode (in Help menu) is checked. Please try to reproduce the bug with this mode activated.")."\n\n"
-			  .sprintf(__("Bug reports can be filled at %s or sent to the address below."),
-				   "<i>".__("AMC community site")."</i>",
-				   )
-	);
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'info','ok','');
+    $dialog->set_markup(
+			__("In order to send a useful bug report, please attach the following documents:")."\n"
+			."- ".__("an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the <b>project directory</b>, <b>scan files</b> and <b>configuration directory</b> (.AMC.d in home directory), so as to reproduce and analyse this problem.")."\n"
+			."- ".__("the <b>log file</b> produced when the debugging mode (in Help menu) is checked. Please try to reproduce the bug with this mode activated.")."\n\n"
+			.sprintf(__("Bug reports can be filled at %s or sent to the address below."),
+				 "<i>".__("AMC community site")."</i>",
+				)
+		       );
     my $ma=$dialog->get('message-area');
     my $web=Gtk3::LinkButton->new_with_label("http://project.auto-multiple-choice.net/projects/auto-multiple-choice/issues",__("AMC community site"));
     $ma->add($web);
@@ -6156,9 +6188,10 @@ sub send_emails {
 
   if($n==0) {
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'error','ok','');
+    $dialog->set_markup(
 			__("There are no annotated corrected answer sheets to send.")
 			." "
 			.($n_annotated>0 ?
@@ -6190,9 +6223,10 @@ sub send_emails {
     debug 'Mailing: Needs perl modules '.join(', ',@manque);
 
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'error','ok','');
+    $dialog->set_markup(
 			sprintf(__("Sending emails requires some perl modules that are not installed: %s. Please install these modules and try again."),
 			'<b>'.join(', ',@manque).'</b>')
 		       );
@@ -6219,9 +6253,10 @@ sub send_emails {
 	"\n".__"Please edit the preferencies to set your email address.";
     }
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',$message);
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'error','ok','');
+    $dialog->set_markup($message);
     $dialog->run;
     $dialog->destroy;
 
@@ -6234,10 +6269,11 @@ sub send_emails {
      && $o{'email_sendmail_path'}
      && !-f $o{'email_sendmail_path'}) {
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'error','ok','');
 # TRANSLATORS: Do not translate the 'sendmail' word.
-			'error','ok',sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferencies (%s). Please update your configuration."),$o{'email_sendmail_path'}));
+    $dialog->set_markup(sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferencies (%s). Please update your configuration."),$o{'email_sendmail_path'}));
     $dialog->run;
     $dialog->destroy;
 
@@ -6254,10 +6290,10 @@ sub send_emails {
 
   if(!@cols) {
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',
-		       __"No email addresses has been found in the students list file. You need to write the students addresses in a column of this file.");
+      ->new($w{'main_window'},
+	    'destroy-with-parent',
+	    'error','ok','');
+    $dialog->set_markup(__"No email addresses has been found in the students list file. You need to write the students addresses in a column of this file.");
     $dialog->run;
     $dialog->destroy;
 
@@ -6384,9 +6420,10 @@ sub send_emails {
     my @missing=grep { ! -f $shortcuts->absolu($_) } (@{$projet{'options'}->{'email_attachment'}});
     if(@missing) {
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup(
 			  __("Some files you asked to be attached to the emails are missing:")."\n".join("\n",@missing)."\n".
 			  __("Please create them or remove them from the list of attached files."));
       $dialog->run();
@@ -6449,10 +6486,10 @@ sub send_emails {
 		 push @message,"<b>".sprintf("%d message(s) could not be sent.",$failed)."</b>";
 	       }
 	       my $dialog = Gtk3::MessageDialog
-		 ->new_with_markup($w{'main_window'},
-				   'destroy-with-parent',
-				   ($failed>0 ? 'warning' : 'info'),'ok',
-				   join("\n",@message));
+		 ->new($w{'main_window'},
+		       'destroy-with-parent',
+		       ($failed>0 ? 'warning' : 'info'),'ok','');
+	       $dialog->set_markup(join("\n",@message));
 	       $dialog->run;
 	       $dialog->destroy;
 	     },
@@ -6610,10 +6647,10 @@ sub plugins_add {
 
     if($error) {
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  sprintf(__("An error occured while trying to extract files from the plugin archive: %s."),$error));
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup(sprintf(__("An error occured while trying to extract files from the plugin archive: %s."),$error));
       $dialog->run;
       $dialog->destroy;
       return();
@@ -6624,20 +6661,20 @@ sub plugins_add {
     my ($nf,$main)=n_fich($temp_dir);
     if($nf<1) {
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  __"Nothing extracted from the plugin archive. Check it.");
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup(__"Nothing extracted from the plugin archive. Check it.");
       $dialog->run;
       $dialog->destroy;
       return();
     }
     if($nf>1 || !-d $main) {
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  __"This is not a valid plugin, as it contains more than one directory at the first level.");
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup(__"This is not a valid plugin, as it contains more than one directory at the first level.");
       $dialog->run;
       $dialog->destroy;
       return();
@@ -6645,10 +6682,10 @@ sub plugins_add {
 
     if(!-d "$main/perl/AMC") {
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  __"This is not a valid plugin, as it does not contain a perl/AMC subdirectory.");
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup(__"This is not a valid plugin, as it does not contain a perl/AMC subdirectory.");
       $dialog->run;
       $dialog->destroy;
       return();
@@ -6661,10 +6698,10 @@ sub plugins_add {
 
     if($name=~/[^.]/ && -e "$o_dir/plugins/$name") {
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'question','yes-no',
-			  sprintf(__("A plugin is already installed with the same name (%s). Do you want to delete the old one and overwrite?"),
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'question','yes-no','');
+      $dialog->set_markup(sprintf(__("A plugin is already installed with the same name (%s). Do you want to delete the old one and overwrite?"),
 				  "<b>$name</b>"));
       my $r=$dialog->run;
       $dialog->destroy;
@@ -6679,22 +6716,22 @@ sub plugins_add {
 
     if(system('mv',$main,"$o_dir/plugins")!=0) {
       my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  sprintf(__("Error while moving the plugin to the user plugin directory: %s"),$!));
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'error','ok','');
+      $dialog->set_markup(sprintf(__("Error while moving the plugin to the user plugin directory: %s"),$!));
       my $r=$dialog->run;
       $dialog->destroy;
       return();
     }
 
     my $dialog = Gtk3::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'info','ok',
-			  __"Please restart AMC before using the new plugin...");
-      my $r=$dialog->run;
-      $dialog->destroy;
+	->new($w{'main_window'},
+	      'destroy-with-parent',
+	      'info','ok','');
+    $dialog->set_markup(__"Please restart AMC before using the new plugin...");
+    my $r=$dialog->run;
+    $dialog->destroy;
 
   } else {
     $d->destroy;

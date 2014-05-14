@@ -147,10 +147,10 @@ sub choix {
 
   if($self->{'layinfo'}->{'block_message'}) {
     my $dialog = Gtk3::MessageDialog
-      ->new_with_markup(undef,
-			'destroy-with-parent',
-			'error','ok',
-			$self->{'layinfo'}->{'block_message'});
+      ->new(undef,
+	    'destroy-with-parent',
+	    'error','ok','');
+    $dialog->set_markup($self->{'layinfo'}->{'block_message'});
     $dialog->run;
     $dialog->destroy;
 
