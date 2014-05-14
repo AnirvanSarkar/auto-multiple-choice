@@ -1938,8 +1938,14 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
       
       <sect3>
       <title>Définir la zone de notation</title>
-      En mode <emphasis>ensemble</emphasis>, vous pouvez ajouter une option suplémentaire de zone de notation (voir   <xref linkend="position.note"/>).
-      
+      <para>En mode <emphasis>ensemble</emphasis>, vous pouvez ajouter une option suplémentaire de zone de notation (voir   <xref linkend="position.note"/>).</para>
+      <para>On peut aussi utiliser les zones prédéfinies toutes faites, avec par exemple : </para>
+<programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
+<par>Les grandeurs width, height, depth définissent les dimensions de la case de notation ainsi que son emplacement sur la feuille du sujet.</par>
+      <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+      <par>Les grandeurs width, height, depth définissent les dimensions de la case de notation ainsi que son emplacement sur la feuille de réponse.</par>
+
+<par>position peut prendre les valeurs : none, question, margin, margins</par>
       </sect3>
 
       <sect3>
@@ -3956,12 +3962,10 @@ Nom et prénom :
 
                 <entry/>
 
-                <entry><para>Donne la valeur maximale attribuée à la question (pour
+                <entry>Donne la valeur maximale attribuée à la question (pour
                 une « question notée sur 5 », on peut mettre MAX=5). À
                 renseigner uniquement si elle ne correspond pas à la note
-                obtenue en mettant toutes les bonnes réponses.</para>para>
-<para>Si vous indiquez MAX=3 pour une question pouvant rapporter 4 points, un étudiant pourra avoir un score de 4/3 à cette question (et, si il donne des réponses parfaites aux autres questions, il pourra éventuellement obtenir une note globale supérieure à 20/20).</para> 
-</entry>
+                obtenue en mettant toutes les bonnes réponses.</entry>
               </row>
 
               <row>
@@ -4684,7 +4688,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
      <title>Position de la note</title> 
      
      <para>
-Vous pouvez choisir la position de la note à l'aide du menu 
+Vous pouvez choisir la position sur la copie où la note sera inscrite à l'aide du menu 
      <menuchoice>
      <guimenu>Édition</guimenu>
  <guimenuitem>Préférences</guimenuitem>
@@ -5244,15 +5248,6 @@ en radians.</listitem>
 </listitem>
 
 </itemizedlist>
-
-<sect2 id="impression.a5">
-<title>Imprimer en A5</title>
-
-
-
-</sect2>
-
-
 
 </sect1>
 </article>
