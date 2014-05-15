@@ -5121,6 +5121,38 @@ Moniuszko,Stanisław,003</programlisting></para>
 
 <para>Cette section n'est pas liée à AMC.</para>
 
+<sect2>
+<title>Paramétrer AMC pour l'utilisation de GMAIL</title>
+
+<programlisting> sudo apt-get install msmtp </programlisting>
+<para>Dans les préférences de AMC </para>
+
+  <menuchoice>
+<guimenuitem> Edition</guimenuitem>
+<guimenuitem>Préférences</guimenuitem>
+<guimenuitem>Courriel</guimenuitem>
+<guimenuitem>Méthode d'envoi</guimenuitem>
+  </menuchoice>
+  
+<para>choisir</para> <guibutton>sendmail</guibutton> <para>et mettre le chemin :</para>
+<programlisting>/usr/bin/msmtp </programlisting>
+
+<para>Ouvrir le fichier </para>
+<programlisting>sudo gedit /etc/msmtprc  </programlisting>
+ <para>et copier </para>
+ <programlisting>
+account gmail 
+host smtp.gmail.com 
+tls on 
+tls_certcheck off 
+port 587 
+auth login 
+from <emphasis>votre nom ou adresse mail du compte gmail</emphasis> 
+user <emphasis>votre adresse mail du compte gmail</emphasis> 
+password <emphasis>votre mot de passe du compte gmail</emphasis> 
+</programlisting>
+</sect2>
+
   <sect2 id="Texmaker">
   
   <title id="Personnaliser.Texmaker.pour.AMC">Personnaliser Texmaker pour AMC</title>
@@ -5251,8 +5283,9 @@ en radians.</listitem>
 </itemizedlist>
 
 </listitem>
-
 </itemizedlist>
+
+
 
 </sect1>
 </article>
