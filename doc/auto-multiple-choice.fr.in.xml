@@ -1636,7 +1636,6 @@ Durée : 10 minutes.
             option avec la commande <command>\AMCnobloc</command>.
             
            <programlisting>
-           <para>
 {\AMCnobloc%
 \begin{question}{prez}
 Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
@@ -1648,8 +1647,7 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 \end{reponses}
 \end{question}%
 }%
-  </para>
-           </programlisting>
+            </programlisting>
            </note>
             </listitem>
 
@@ -2715,12 +2713,12 @@ et inscrivez votre nom et prénom ci-dessous.
 </programlisting>
 <para>\AMCsubjectPageTag peut être remplacé par une autre variable (exemple : Nsujet dans le code suivant)</para>
 
-<para>Insérez, dans le document latex, juste avant la commande <command>\clearpage</command>, la commande <command>\AMClabel{lastpage}</command>.</para>
+<para>Insérez, dans le document latex, juste avant la commande <command>\clearpage</command>, la commande <command>\AMClabel{\lastpage}</command>.</para>
 
 <para>Après \begin{document} mais avant \begin{exemplaire}, tapez : </para>
 
 <programlisting>\fancyfoot[C]{\large{\hfill{}sujet N°\Nsujet %
-\hfill{}PAGE~\thepage{}\AMCpageref{lastpage}\hfill{}}}</programlisting>
+\hfill{}PAGE~\thepage{}\AMCpageref{\lastpage}\hfill{}}}</programlisting>
    </example>
 
       <sect3>
