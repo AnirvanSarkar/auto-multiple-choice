@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -1739,11 +1739,11 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 
 <para> Il faut d'abord inscrire dans le préambule :</para>
 <programlisting>\makeatletter
-\def\AMCsubjectPageTag{\the\AMCid@etud}
+\def\Nsujet{\the\AMCid@etud}
 \makeatother</programlisting>
 <para>puis</para>
   <programlisting>\renewcommand\AMCsubjectPageTag{%
-  \fbox{\texttt{\the\AMCid@etud:\thepage}}%
+  \fbox{\texttt{\Nsujet:\thepage}}%
 }</programlisting>
 
             <warning>
