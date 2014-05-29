@@ -460,7 +460,7 @@ sub define_statements {
       ."   FROM $t_zone"
       ."   WHERE $t_zone.student=$t_page.student"
       ."     AND $t_zone.page=$t_page.page AND $t_zone.copy=$t_page.copy"
-      ."     AND total>0) AS delta"
+      ."     AND $t_zone.type=? AND total>0) AS delta"
       ." FROM $t_page"},
      'pages'=>{'sql'=>"SELECT * FROM $t_page"
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
@@ -912,7 +912,7 @@ sub summaries {
 				       {Slice=>{}},
 				       $oo{'mse_threshold'},'red',undef,
 				       'lightblue','lightgreen',undef,
-				       $oo{'darkness_threshold'},
+				       $oo{'darkness_threshold'},ZONE_BOX,
 				      );
   return($self->compute_summaries($r,%oo));
 }
