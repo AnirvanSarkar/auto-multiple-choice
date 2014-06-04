@@ -291,7 +291,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Code:</term>
 
           <listitem>
-            <para>正の整数値<replaceable>n</replaceable>を指定すると、<replaceable>n</replaceable>桁文の受験番号をマークする欄が試験問題用紙に追加されます。</para>
+            <para>正の整数値<replaceable>n</replaceable>を指定すると、<replaceable>n</replaceable>桁分の受験番号をマークする欄が試験問題用紙に追加されます。</para>
           </listitem>
         </varlistentry>
 
@@ -299,7 +299,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>CodeDigitsDirection:</term>
 
           <listitem>
-            <para>正の整数値<replaceable>n</replaceable>を指定すると、<replaceable>n</replaceable>桁の受験番号をマークする欄が試験問題用紙に追加されます。</para>
+            <para>受験番号欄の方向を（<code>virtical</code>または<code>horizontal</code>で）設定します。設定しない場合は桁数により（桁数が少なければ水平、多ければ垂直に）自動選択されます。</para>
           </listitem>
         </varlistentry>
 
@@ -307,7 +307,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>Columns:</term>
 
           <listitem>
-            <para>受験番号欄の方向を（<code>virtical</code>または<code>horizontal</code>で）設定します。設定しない場合は桁数により（桁数が少なければ水平、多ければ垂直に）自動選択されます。</para>
+            <para>正の整数値<replaceable>n</replaceable>を指定すると、問題用紙を<replaceable>n</replaceable>カラムで生成します。</para>
           </listitem>
         </varlistentry>
 
@@ -1346,16 +1346,11 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
       <sect3 id="latex.explain">
         <title id="latex.explain.title">設問の模範解答解説</title>
 
-        <para>
-        設問に対する解答に解説を加えるには、<command>\explain</command>コマンドを使うことができます。解説はオプションであり、模範解答とカタログファイルにのみ表示されます。
-        </para>
+        <para>設問に対する解答に解説を加えるには、<command>\explain</command>コマンドを使うことができます。解説はオプションであり、模範解答とカタログファイルにのみ表示されます。</para>
 
-        <para>
-        単純な例を示します:
-        </para>
+        <para>単純な例を示します:</para>
 
-        <para>
-        <programlisting>
+        <para><programlisting>
 \begin{question}{解説}
   次の中で標高が一番高いのはどれですか？
   \begin{choices}
@@ -1365,25 +1360,17 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
       \wrongchoice{アコンカグア}
   \end{choices}
   \explain{サガルマータは文字どおり「世界の頂上」という意味で、世界一の標高をもつエベレスト山の地元名です。}
-\end{question}</programlisting>
-        </para>
+\end{question}</programlisting></para>
 
         <note>
-          <para>
-          <command>explain</command>コマンドは<option>question</option>系の環境内でのみ使用できます。これには<option>question</option>、<option>questionmult</option>、<option>questionmultx</option>環境があります。
-          </para>
+          <para><command>explain</command>コマンドは<option>question</option>系の環境内でのみ使用できます。これには<option>question</option>、<option>questionmult</option>、<option>questionmultx</option>環境があります。</para>
         </note>
         
-        <para>
-        デフォルトではこのコマンドは解説の前に<emphasis>解説: </emphasis>と表示します。この動作は<command>\AMCtext</command>コマンドで変更できます（<xref linkend="AMCtext"/> 参照）。
-        </para>
+        <para>デフォルトではこのコマンドは解説の前に<emphasis>解説: </emphasis>と表示します。この動作は<command>\AMCtext</command>コマンドで変更できます（<xref linkend="AMCtext"/> 参照）。</para>
         
-        <para>
-        このデフォルト動作を特定の設問でのみ変更したい場合は、<command>\AMCtext</command>コマンドを次の例のように<command>\explain</command>の前に使用してください:
-        </para>
+        <para>このデフォルト動作を特定の設問でのみ変更したい場合は、<command>\AMCtext</command>コマンドを次の例のように<command>\explain</command>の前に使用してください:</para>
 
-        <para>
-        <programlisting>
+        <para><programlisting>
 \begin{question}{解説}
   次の中で標高が一番高いのはどれですか？
   \begin{choices}
@@ -1416,12 +1403,9 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
       \wrongchoice{アコンカグア}
   \end{choices}
   \explain{アコンカグアはアンデス山脈にあり、モンブランはアルプスにあります。}
-\end{questionmultx}</programlisting>
-        </para>
+\end{questionmultx}</programlisting></para>
         
-        <para>
-        このようにすると、最初と三つめの設問では解説の前に<emphasis>解説: </emphasis>と表示しますが、二つ目の設問の解説の前には<emphasis>理由: </emphasis>と表示されます。
-        </para>
+        <para>このようにすると、最初と三つめの設問では解説の前に<emphasis>解説: </emphasis>と表示しますが、二つ目の設問の解説の前には<emphasis>理由: </emphasis>と表示されます。</para>
       </sect3>
 
       <sect3>
@@ -1965,13 +1949,9 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
           </listitem>
 
           <listitem>
-            <para>
-            <code>\AMCtext{explain}{<replaceable>title</replaceable>}</code> は、<command>explain</command>コマンドのために生成される解説の前に表示する「<emphasis>解説</emphasis>」（日本語でのデフォルトテキスト）を、指定した<replaceable>title</replaceable>に置換します。
-            </para>
+            <para><code>\AMCtext{explain}{<replaceable>title</replaceable>}</code> は、<command>explain</command>コマンドのために生成される解説の前に表示する「<emphasis>解説</emphasis>」（日本語でのデフォルトテキスト）を、指定した<replaceable>title</replaceable>に置換します。</para>
 
-            <para>
-            このコマンドのデフォルトオプションは次のとおりです:
-            </para>
+            <para>このコマンドのデフォルトオプションは次のとおりです:</para>
 
             <programlisting>\AMCtext{explain}{\textit{\textbf{解説: }}}</programlisting>
           </listitem>
@@ -4943,10 +4923,11 @@ Moniuszko,Stanisław,003</programlisting>
             </varlistentry>
 
             <varlistentry>
-              <term><option>--compose</option></term>
+              <term><option>--compose
+              <replaceable>mode</replaceable></option></term>
 
               <listitem>
-                <para>マークするボックスがないとき（例えば採点した答案用紙の前の問題用紙など）に模範解答から該当ページをもってくる場合にこのオプションを使用します。</para>
+                <para>マークするボックスのないページ（例えば答案用紙より前にある問題のみのページなど）を問題用紙からもってくる場合にこのオプションを使用します。<replaceable>mode</replaceable>が1のときは、問題用紙からページを取得し、受験者の答案と同じようにマークを記入し、同じ採点記号を答案用紙に記入します。<replaceable>mode</replaceable>が2のときは、採点済の答案用紙からページを取得し、（重複するので）採点記号は記入しません。</para>
               </listitem>
             </varlistentry>
 
