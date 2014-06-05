@@ -310,7 +310,7 @@ the best you can.
     <note>
       <para>The default font that will be used is <ulink
       url="http://www.linuxlibertine.org/">libertine</ulink>, an open source
-      font that contains chracaters for a lot of languages. You have to
+      font that contains characters for a lot of languages. You have to
       install this font or choose another one (see options below). If you
       install AMC with a debian/ubuntu package, this font will be install
       together as a recommended package.</para>
@@ -338,11 +338,11 @@ the best you can.
 
           <listitem>
             <para>use it to specify a language the questionnaire is written
-            in. At present, only DE (german), ES (spanish), FR (french), IT
+            in. At present, only DE (German), ES (Spanish), FR (French), IT
             (Italian), NL (Dutch), NO (Norwegian), JA (Japanese, see <xref
-            linkend="txt-japanese"/>) and AR (arabic, see <xref
+            linkend="txt-japanese"/>) and AR (Arabic, see <xref
             linkend="txt-arabic"/>) are supported. Without this option,
-            english will be selected. You can also define the localized string
+            English will be selected. You can also define the localized string
             used for another language (see the <option>L-xxx</option>
             options).</para>
           </listitem>
@@ -383,7 +383,7 @@ the best you can.
           <listitem>
             <para>If 1 (default), questions will be shuffled so that their
             order is different from one sheet to the other. If 0, the
-            questions will allways show with the same order as in your
+            questions will always show with the same order as in your
             file.</para>
           </listitem>
         </varlistentry>
@@ -447,9 +447,9 @@ the best you can.
           <term>QuestionBlocks:</term>
 
           <listitem>
-            <para>If 1 (default), all qeustions will be enclosed in a
-            invisible frame that prevents it to be splitted accross several
-            columns or pages. If 0, questions are allowed to be splitted if
+            <para>If 1 (default), all questions will be enclosed in a
+            invisible frame that prevents it to be split across several
+            columns or pages. If 0, questions are allowed to be split if
             necessary: that can save pages at the cost of readability.</para>
           </listitem>
         </varlistentry>
@@ -513,7 +513,7 @@ the best you can.
             <para>Color of the boxes to be filled by the students. This allows
             to print the boxes with some color that won't disturb too much the
             data capture (for example <emphasis>red</emphasis>, but some light
-            grey can also be considered). The color has to be given as a valid
+            gray can also be considered). The color has to be given as a valid
             <command>xcolor</command> color (see <command>xcolor</command>
             LaTeX package documentation for details), such as
             <emphasis>red</emphasis>, <emphasis>magenta</emphasis>,
@@ -528,7 +528,7 @@ the best you can.
 
           <listitem>
             <para>Default scoring strategy for simple questions (questions for
-            which one and only one anser is correct). See <xref
+            which one and only one answer is correct). See <xref
             linkend="bareme"/> for details. The default value gives one point
             for the right answer, and zero for others.</para>
           </listitem>
@@ -647,7 +647,7 @@ the best you can.
     <sect2>
       <title>Questions</title>
 
-      <para>Simple questions (questions for which one and only one anser is
+      <para>Simple questions (questions for which one and only one answer is
       correct) begin with a <code>*</code> at the beginning of the line, and
       multiple questions (questions for which there can be zero, one or
       several correct answers) begin with a <code>**</code>. Insert then the
@@ -819,7 +819,7 @@ one plus one?
 
       <para>You can always continue some text on the next lines (even if some
       of them are empty), provided that these following lines cannot be
-      considered as the beginnig of an option definition, of a question or of
+      considered as the beginning of an option definition, of a question or of
       a choice. As an example, consider the following question:</para>
 
       <programlisting>* How much are 2
@@ -897,7 +897,7 @@ How many stars in the sky?
       <programlisting>![height=2cm]images/bird.png!</programlisting>
 
       <para>Here, the image <filename>images/bird.png</filename> that is
-      located in the project directory will be appened with 2cm height.
+      located in the project directory will be appended with 2cm height.
       Options that can be used inside the square brackets are those from the
       <command>\includegraphics</command> LaTeX command
       (<parameter>width=3cm</parameter> or
@@ -983,7 +983,7 @@ How many stars in the sky?
             <para>With this option, only the first
             <replaceable>n</replaceable> questions of the group will be used.
             If the questions are shuffled, this allows to get
-            <replaceable>n</replaceable> questions choosen at random from the
+            <replaceable>n</replaceable> questions chosen at random from the
             group.</para>
 
             <note>
@@ -1000,7 +1000,7 @@ How many stars in the sky?
     <sect2 id="txt-arabic">
       <title>Arabic language</title>
 
-      <para>Writting a questionnaire in arabic is a little special. Use of
+      <para>Writing a questionnaire in Arabic is a little special. Use of
       course option</para>
 
       <programlisting>Lang: AR</programlisting>
@@ -1012,7 +1012,7 @@ How many stars in the sky?
           <term>ArabicFont:</term>
 
           <listitem>
-            <para>This is the font used for arabic text. Default value is
+            <para>This is the font used for Arabic text. Default value is
             <emphasis>Rasheeq</emphasis>, a font from the project <ulink
             url="http://arabeyes.org/">ArabEyes</ulink> (you can find it on
             debian/ubuntu in the ttf-arabeyes package).</para>
@@ -1026,7 +1026,7 @@ How many stars in the sky?
       </warning>
 
       <note>
-        <para>To insert texts with non-arabic characters, you must turn on
+        <para>To insert texts with non-Arabic characters, you must turn on
         <option>LaTeX</option> option and enclose these texts as a
         <command>\textLR</command> LaTeX command argument, as in
         <code>\textLR{xelatex command}</code>.</para>
@@ -1080,7 +1080,7 @@ How many stars in the sky?
     <title>LaTeX source file</title>
 
     <para>This section describes the LaTeX commands that allows you to design
-    your exam answer sheets from a LaTeX souce file. If you chose another
+    your exam answer sheets from a LaTeX source file. If you chose another
     format for your source file, you can skip this section. The MCQ can be
     described as a LaTeX file using the <package>automultiplechoice</package>
     package. You can check the LaTeX file you are designing at any moment by
@@ -1154,7 +1154,7 @@ Duration : 10 minutes.
 
 \begin{questionmult}{pref}    <co id="simple.qrmult"
             linkends="simple.qrmult.exp"/>
-  Among the following cities, which ones are french prefectures?
+  Among the following cities, which ones are French prefectures?
   \begin{choices}
     \correctchoice{Poitiers}
     \wrongchoice{Sainte-Menehould}
@@ -1390,7 +1390,7 @@ DESC: An example (from the documentation) where all check-boxes are put together
 
 \element{general}{
   \begin{questionmult}{pref}    
-    Among the following cities, which ones are french prefectures?
+    Among the following cities, which ones are French prefectures?
     \begin{choices}
       \correctchoice{Poitiers}
       \wrongchoice{Sainte-Menehould}
@@ -1516,7 +1516,7 @@ Durée : 10 minutes.
         linkend="sec.package.options"/>) are written in the check-boxes. To
         achieve a correct detection of the checked boxes, one has to ask
         students to completely fill the relevant boxes (checking by simply
-        drawing a cross would not suffice). One also has to tune the grey
+        drawing a cross would not suffice). One also has to tune the gray
         level threshold (defining the proportion of black dots in a box above
         which that box is considered to be checked) to a value of order
         0.5.</para>
@@ -1555,11 +1555,11 @@ Durée : 10 minutes.
             of these answers are correct" choice at the end of each multiple
             question. Thus, for these questions, a distinction can be made
             between no answer and the answer consisting in treating none of
-            the listed answers as correct. This behaviour can be forced or
-            cancelled for a particular question using one of the commands
+            the listed answers as correct. This behavior can be forced or
+            canceled for a particular question using one of the commands
             <command>\AMCcompleteMulti</command> or
             <command>\AMCnoCompleteMulti</command> inside the corresponding
-            <command>questionmult</command> environnement.</para>
+            <command>questionmult</command> environment.</para>
           </listitem>
 
           <listitem>
@@ -1769,11 +1769,11 @@ Durée : 10 minutes.
         </note>
 
         <para>By default this command prints <emphasis>Explanation:
-        </emphasis> before each explanations. This behaviour can be changed
+        </emphasis> before each explanations. This behavior can be changed
         using the <command>\AMCtext</command> command (see section <xref
         linkend="AMCtext"/>).</para>
 
-        <para>If you want to change this default behaviour only for some
+        <para>If you want to change this default behavior only for some
         questions and not for all just use the <command>\AMCtext</command>
         command before the <command>\explain</command> command as in the
         following example:</para>
@@ -1846,7 +1846,7 @@ Durée : 10 minutes.
   \end{multicols}
 \end{question}</programlisting></para>
 
-        <para>Let us note that it is also possible to parametrize the vertical
+        <para>Let us note that it is also possible to parameterize the vertical
         space between two answer blocks, thanks to the dimension
         <parameter>AMCinterBrep</parameter>:</para>
 
@@ -1903,7 +1903,7 @@ Durée : 10 minutes.
         <itemizedlist>
           <listitem>
             <para><code>\insertgroup[n]{mygroup}</code> (using optional
-            parameterl <replaceable>n</replaceable>) only inserts the
+            parameter <replaceable>n</replaceable>) only inserts the
             <replaceable>n</replaceable> first elements from the group.</para>
           </listitem>
 
@@ -2038,10 +2038,10 @@ Durée : 10 minutes.
         <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
 
         <para>When using <option>separateanswersheet</option> package option,
-        you can also customize the boxes labelling. The default behaviour is
-        to use uppercase alphabetical labelling, or arabic numbering if the
+        you can also customize the boxes labeling. The default behavior is
+        to use uppercase alphabetical labeling, or arabic numbering if the
         <option>digits</option> package option is used. To use your own
-        labelling, one has to redefine the <command>\AMCchoiceLabel</command>
+        labeling, one has to redefine the <command>\AMCchoiceLabel</command>
         command which takes as argument the name of the counter used to number
         the choices. For example, the following code will ask for lowercase
         letters to label the boxes:</para>
@@ -2193,12 +2193,12 @@ and write your first and last names below.
         <command>AMCformBegin</command> command.</para>
 
         <para>Note that the codes rendering from <command>\AMCcode</command>
-        can be adapted modifying the lenghts
+        can be adapted modifying the lengths
         <command>\AMCcodeHspace</command>, <command>\AMCcodeVspace</command>
         and <command>\AMCcodeBoxSep</command>, representing the horizontal and
         vertical amount of space between boxes, and the amount of space
         between boxes and labels (when the labels are written outside the
-        boxes). Defaut values are set with the following commands:</para>
+        boxes). Default values are set with the following commands:</para>
 
         <programlisting>\AMCcodeHspace=.5em
 \AMCcodeVspace=.5em
@@ -2225,9 +2225,9 @@ and write your first and last names below.
 </programlisting></para>
 
         <para>In this example, the teacher will get three boxes. If the first
-        (labelled W for wrong) is ticked, the student will get 0 points. If
-        the second (labelled P for partial) is ticked, the student will get 1
-        point. If the third (labelled C for correct) is ticked, the student
+        (labeled W for wrong) is ticked, the student will get 0 points. If
+        the second (labeled P for partial) is ticked, the student will get 1
+        point. If the third (labeled C for correct) is ticked, the student
         will get 2 points.</para>
 
         <para>The first argument to <command>\AMCOpen</command> is a comma
@@ -2267,7 +2267,7 @@ and write your first and last names below.
             <term>dots=<replaceable>bool</replaceable></term>
 
             <listitem>
-              <para>if <code>true</code> (defaut), each line will be realized
+              <para>if <code>true</code> (Default), each line will be realized
               by a line of dots.</para>
             </listitem>
           </varlistentry>
@@ -2641,7 +2641,7 @@ and write your first and last names below.
   \FPeval\VQnonB{clip(VQa*VQb)}
   \FPeval\VQnonC{clip(VQa-VQb)}
 
-  What is the sum of \VQa{} et \VQb{} ?
+  What is the sum of \VQa{} and \VQb{} ?
   \begin{choiceshoriz}
     \correctchoice{\VQsomme}
     \wrongchoice{\VQnonA}
@@ -2657,8 +2657,8 @@ and write your first and last names below.
             <callout arearefs="alea.random" id="alea.random.exp">
               <para>Since <command>random</command> returns a real number in
               the interval [0,1], this command sets VQa to a random integer
-              value between 1 et 8. The next line sets VQb to a random integer
-              value between 4 et 8.</para>
+              value between 1 and 8. The next line sets VQb to a random integer
+              value between 4 and 8.</para>
             </callout>
 
             <callout arearefs="alea.result" id="alea.result.exp">
@@ -2666,7 +2666,7 @@ and write your first and last names below.
             </callout>
 
             <callout arearefs="alea.fausse" id="alea.fausse.exp">
-              <para>Putting wrong answers in variables VQnonA, VQnonB et
+              <para>Putting wrong answers in variables VQnonA, VQnonB and
               VQnonC...</para>
             </callout>
           </calloutlist>Variable names beginning with VQ have been chosen so
@@ -2684,7 +2684,7 @@ and write your first and last names below.
   \FPeval\VQr{VQa/(VQa+VQb)}
   
   Let $X$ and $Y$ be two independent random variables, following the exponential distribution with
-respective parameters \VQa{} et \VQb{}.
+respective parameters \VQa{} and \VQb{}.
   To which interval does the probability $\mathbb{P}[X&lt;Y]$ belong ?
 
   \begin{multicols}{5}
@@ -2729,7 +2729,7 @@ respective parameters \VQa{} et \VQb{}.
 
           <programlisting>\def\AMCIntervalFormat#1#2{[#1,\,#2[}</programlisting>
 
-          <para>to follow local conventions (writting [a,b) instead of [a,b[
+          <para>to follow local conventions (writing [a,b) instead of [a,b[
           is for example a common usage).</para>
         </sect4>
 
@@ -3124,8 +3124,8 @@ respective parameters \VQa{} et \VQb{}.
         <command>tex.print</command>, which will output results back to
         LaTeX.</para>
 
-        <para>Once again, if you use random numbers, allways fix the random
-        seed to get the same results across differents compilations:</para>
+        <para>Once again, if you use random numbers, always fix the random
+        seed to get the same results across different compilations:</para>
 
         <programlisting>\directlua{math.randomseed (2048)}</programlisting>
 
@@ -3355,7 +3355,7 @@ Name :
         pages, they must be previously digitalized. I use a copier/scanner
         which does it automatically (all the pages in a bundle without
         interaction with me), with the following settings: 300 dpi, OCR mode
-        (for the characters' recognition, black and white without greyscale -
+        (for the characters' recognition, black and white without grayscale -
         but the scanner does not process any character recognition), each scan
         delivered as a single TIFF file per page.</para>
 
@@ -3376,7 +3376,7 @@ Name :
         <para>Then we select this set of scan files in the dialog opened by
         the button <guibutton>Automated</guibutton> of the section
         <guilabel>Data capture after examination</guilabel>, then we validate
-        with the <guibutton>OK</guibutton> buton. AMC begins with Optical Mark
+        with the <guibutton>OK</guibutton> button. AMC begins with Optical Mark
         Recognition to detect the position of the four circle corner marks on
         the scans, position the boxes, and detects the amount of black pixels
         in each box.</para>
@@ -3791,7 +3791,7 @@ Name :
             the student to leave <replaceable>x</replaceable> questions
             unanswered. When summing up questions scores,
             <replaceable>x</replaceable> unanswered questions will be
-            cancelled.</para>
+            canceled.</para>
           </listitem>
         </itemizedlist>
 
@@ -4154,7 +4154,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
         <variablelist>
           <varlistentry>
-            <term>grey</term>
+            <term>gray</term>
 
             <listitem>
               <para>is used for <emphasis>non applicable</emphasis>. This may
@@ -4302,7 +4302,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <listitem>
             <para>is replaced by the value of column
-            <replaceable>COL</replaceable> in the students list for the curent
+            <replaceable>COL</replaceable> in the students list for the current
             student.</para>
           </listitem>
         </varlistentry>
@@ -4348,7 +4348,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
         <listitem>
           <para>Use <command>\AMCformS</command> to output answer boxes in
-          each answer sheet, insine
+          each answer sheet, inside
           <command>onecopy</command>/<command>examcopy</command>.</para>
         </listitem>
       </itemizedlist>
@@ -4621,7 +4621,7 @@ Moniuszko,Stanisław,003</programlisting>
     <title>Commands manual</title>
 
     <para>You may skip this part if you want to use only the graphical user
-    interface (and that should usualy be the case). However, every action
+    interface (and that should usually be the case). However, every action
     carried out with the graphical interface can also be performed using the
     various commands whose syntax is described here.</para>
 
@@ -5193,7 +5193,7 @@ Moniuszko,Stanisław,003</programlisting>
 
         <para>The input images can be given either as arguments to
         AMC-getimages.pl, either as the name of a file which contains all the
-        pathes of the scan files.</para>
+        paths of the scan files.</para>
 
         <variablelist>
           <varlistentry>
@@ -5201,9 +5201,9 @@ Moniuszko,Stanisław,003</programlisting>
             <replaceable>list-file</replaceable></option></term>
 
             <listitem>
-              <para>gives the name of the file that optionnaly contains (one
-              per line) the pathes of the scan files. This file will be
-              cleared and filled with the pathes of the scan files after
+              <para>gives the name of the file that optionally contains (one
+              per line) the paths of the scan files. This file will be
+              cleared and filled with the paths of the scan files after
               processing, so that the same path can be passed to
               <command>AMC-analyse.pl</command> as the
               <option>--list-fichiers</option> option value.</para>
@@ -5397,7 +5397,7 @@ Moniuszko,Stanisław,003</programlisting>
               connected components which dimensions are
               <emphasis>closed</emphasis> to the target dimension
               <replaceable>target</replaceable> (exact dimensions of the marks
-              if printing/scanning process where perfectly acurate). If
+              if printing/scanning process where perfectly accurate). If
               <replaceable>tol</replaceable> is a real number, accepted
               dimensions are those between
               (1-<replaceable>tol</replaceable>)*<replaceable>target</replaceable>
@@ -5421,9 +5421,9 @@ Moniuszko,Stanisław,003</programlisting>
             <listitem>
               <para>This option is to be used when the scans are photocopies
               from some subjects (different students can have the same
-              subject). In thie case, <emphasis>copy</emphasis> numbers are
+              subject). In this case, <emphasis>copy</emphasis> numbers are
               allocated to students so that their answer sheets, with the same
-              subject number, can be differenciated.</para>
+              subject number, can be differentiated.</para>
             </listitem>
           </varlistentry>
 
@@ -5432,7 +5432,7 @@ Moniuszko,Stanisław,003</programlisting>
             <replaceable>copy_id</replaceable></option></term>
 
             <listitem>
-              <para>This option can be used in conjonction with
+              <para>This option can be used in conjunction with
               <option>--multiple</option>. The copy numbers used for the scans
               will start from <replaceable>copy_id</replaceable>, in the same
               order than the scans given as arguments.</para>
@@ -5678,7 +5678,7 @@ Moniuszko,Stanisław,003</programlisting>
         <para>The <command>AMC-association-auto.pl</command> command
         associates students with their answer sheet (when there are no errors
         from students when coding their student number and no error during
-        data capture). See <xref linkend="sec.students.id"/> from english user
+        data capture). See <xref linkend="sec.students.id"/> from English user
         documentation for details.</para>
 
         <variablelist>
@@ -5971,7 +5971,7 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>if <replaceable>all</replaceable> is <literal>0</literal>
-              or empty, only students with a scaned answer sheet appears in
+              or empty, only students with a scanned answer sheet appears in
               the output. If <replaceable>all</replaceable> is
               <literal>1</literal>, all students in the students list appears
               in the output.</para>
@@ -6326,7 +6326,7 @@ Moniuszko,Stanisław,003</programlisting>
                 column if the <code>nom</code> column does not exist),
                 followed by the content of the <code>prenom</code> column (or
                 the <code>name</code> column), so that the result should be OK
-                for french or english simple CSV files.</para>
+                for French or English simple CSV files.</para>
               </listitem>
             </varlistentry>
 
@@ -6364,8 +6364,8 @@ Moniuszko,Stanisław,003</programlisting>
 
               <listitem>
                 <para>use this option if you need all annotated copies in a
-                single PDF file. Default behaviour is to build one PDF file
-                perstudent.</para>
+                single PDF file. Default behavior is to build one PDF file
+                per student.</para>
               </listitem>
             </varlistentry>
 
@@ -6446,7 +6446,7 @@ Moniuszko,Stanisław,003</programlisting>
                     <listitem>
                       <para>is replaced by the value of column
                       <replaceable>COL</replaceable> in the students list for
-                      the curent student.</para>
+                      the current student.</para>
                     </listitem>
                   </varlistentry>
                 </variablelist>
@@ -6521,7 +6521,7 @@ Moniuszko,Stanisław,003</programlisting>
               <replaceable>quality</replaceable></option></term>
 
               <listitem>
-                <para>setes the JPEG quality (from 1 to 100) for jpeg embedded
+                <para>sets the JPEG quality (from 1 to 100) for jpeg embedded
                 scans.</para>
               </listitem>
             </varlistentry>
@@ -6531,7 +6531,7 @@ Moniuszko,Stanisław,003</programlisting>
         <refsect2>
           <title>Annotation options</title>
 
-          <para>These options controls what kind ofannotations are being to be
+          <para>These options controls what kind of annotations are being to be
           drawn.</para>
 
           <variablelist>
@@ -6611,7 +6611,7 @@ Moniuszko,Stanisław,003</programlisting>
                     <listitem>
                       <para>is replaced by the value of column
                       <replaceable>COL</replaceable> in the students list for
-                      the curent student.</para>
+                      the current student.</para>
                     </listitem>
                   </varlistentry>
                 </variablelist>
@@ -6765,16 +6765,16 @@ Moniuszko,Stanisław,003</programlisting>
               <listitem>
                 <para>defines how boxes will be annotated. symbols-definition
                 is a comma separated list of
-                <literal><replaceable>H</replaceable>-<replaceable>A</replaceable>:<replaceable>shape</replaceable>:<replaceable>colour</replaceable></literal>
+                <literal><replaceable>H</replaceable>-<replaceable>A</replaceable>:<replaceable>shape</replaceable>:<replaceable>color</replaceable></literal>
                 constructs, where <replaceable>H</replaceable> is
                 <literal>0</literal> or <literal>1</literal> depending on
-                wether the box has to be checked or not,
+                whether the box has to be checked or not,
                 <replaceable>A</replaceable> is <literal>0</literal> or
-                <literal>1</literal> depending on wether the box is actually
+                <literal>1</literal> depending on whether the box is actually
                 checked or not, <replaceable>shape</replaceable> is one of
                 <literal>none</literal>, <literal>circle</literal>,
                 <literal>mark</literal>, <literal>box</literal> and
-                <replaceable>coulour</replaceable> is a colour (name or #RGB,
+                <replaceable>color</replaceable> is a color (name or #RGB,
                 see ImageMagick or GraphicsMagick documentation for details).
                 Default value is
                 "<code>0-0:none,0-1:circle:red,1-0:mark:red,1-1:mark:blue</code>".</para>
@@ -6786,7 +6786,7 @@ Moniuszko,Stanisław,003</programlisting>
         <refsect2>
           <title>Lengths</title>
 
-          <para>The following lenght can be given with a unit
+          <para>The following length can be given with a unit
           (<code>in</code>, <code>ft</code>, <code>pt</code>, <code>cm</code>
           or <code>mm</code>).</para>
 
