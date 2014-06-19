@@ -24,4 +24,4 @@ Even if a default scoring strategy is defined, very fine customisation is availa
 [GPLv2+]:http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 [LaTeX]:http://en.wikipedia.org/wiki/LaTeX
 [LibreOffice.org]:http://libreoffice.org/
-[OpenOffice.org]:http://openoffhice.org/
+[OpenOffice.org]:http://openoffice.org/
