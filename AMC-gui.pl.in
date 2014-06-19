@@ -273,7 +273,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'symbole_1_1_type'=>'mark',
 	      'symbole_1_1_color'=>hex_color('blue'),
 
-	      'annote_font_size'=>12,
+	      'annote_font_name'=>'Linux Libertine O 12',
 	      'annote_ecart'=>5.5,
 	      'annote_chsign'=>4,
 
@@ -4244,7 +4244,7 @@ sub annote_copies {
 				  "--progression-id",'annotate',
 				  "--progression",1,
 				  "--line-width",$o{'symboles_trait'},
-				  "--font-size",$o{'annote_font_size'},
+				  "--font-name",$o{'annote_font_name'},
 				  "--symbols",join(',',map { opt_symbole($_); } 
 						   (qw/0-0 0-1 1-0 1-1/)),
 				  ($o{'symboles_indicatives'}?"--indicatives":"--no-indicatives"),
@@ -4460,7 +4460,7 @@ sub accepte_preferences {
     my $changed=0;
     for(qw/annote_chsign symboles_trait
 	   embedded_format embedded_max_size embedded_jpeg_quality
-	   symboles_indicatives annote_font_size annote_ecart/) {
+	   symboles_indicatives annote_font_name annote_ecart/) {
       $changed=1 if($gm{$_});
     }
     for my $tag (qw/0_0 0_1 1_0 1_1/) {

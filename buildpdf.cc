@@ -32,6 +32,8 @@
 #include <poppler.h>
 #include <pango/pangocairo.h>
 
+#include <string>
+
 #ifdef DEBUG
 #include <fstream>
 #include <iostream>
@@ -130,7 +132,7 @@ public:
     document(NULL), layout(NULL), surface(NULL), cr(NULL),
     image_cr(NULL), image_surface(NULL), fake_image_buffer(NULL),
     font_description(NULL),
-    line_width(1.0), font_size(12.0), debug(0),
+    line_width(1.0), font("Linux Libertine O 12"), debug(0),
     scan_expansion(1.0), scan_resize_factor(1.0),
     embedded_image_format(FORMAT_JPEG),
     image_buffer(), scan_max_width(0), scan_max_height(0),
@@ -254,13 +256,13 @@ public:
 
   void set_line_width(double lw);
 
-  /* set_font_size sets the font size (in points) for next
-     drawings. It then calls valide_font_size, which updates the font
-     description with this new font size. */
+  /* set_font sets the font for next drawings.
+     It then calls validate_font, which updates the font
+     description with this new font. */
 
-  int set_font_size(double font_size);
-  int validate_font_size();
-
+  int set_font(const char* font);
+  int validate_font();
+  
   /* color sets the color for next drawings, either with RBG or
      RGBA. Color values must be between 0.0 and 1.0. */
 
@@ -364,7 +366,7 @@ private:
   // drawing parameters
   double margin;
   double line_width;
-  double font_size;
+  std::string font;
   // debuging?
   int debug;
   // image parameters
@@ -452,13 +454,12 @@ int BuildPdf::start_output(char* output_filename) {
     return(1);
   }
 
-  // Updates the font description with the right font size and uses it
+  // Updates the font description with the right font and uses it
   // for the new layout
 
-  if(validate_font_size()) {
+  if(validate_font()) {
     return(2);
   }
-  pango_layout_set_font_description(layout,font_description);
 
   // initialization. user_one_point will be set when using set_matrix
 
@@ -929,20 +930,19 @@ void BuildPdf::set_line_width(double lw) {
   }
 }
 
-int BuildPdf::set_font_size(double fs) {
-  font_size=fs;
-  return(validate_font_size());
+int BuildPdf::set_font(const char* f) {
+  font="";
+  font.append(f);
+  return(validate_font());
 }
 
-int BuildPdf::validate_font_size() {
+int BuildPdf::validate_font() {
+  font_description=pango_font_description_from_string(font.c_str());
   if(font_description==NULL) {
-    font_description=pango_font_description_new();
-    if(font_description==NULL) {
-      printf("! ERROR : font description creation\n");
-      return(1);
-    }
-    pango_font_description_set_size(font_description,font_size*PANGO_SCALE);
+    printf("! ERROR : font description creation\n");
+    return(1);
   }
+  pango_layout_set_font_description(layout,font_description);
   return(0);
 }
 
@@ -1082,12 +1082,10 @@ void BuildPdf::set_matrix(cairo_matrix_t *m) {
 #endif
 
   // updates Pango layout with new scaling factors
-
   pango_cairo_context_set_resolution(pango_layout_get_context(layout),
 				     user_one_point * 72.);
   pango_cairo_update_layout(cr,layout);
-  validate_font_size();
-  pango_layout_set_font_description(layout,font_description);
+  validate_font();
 }
 
 void BuildPdf::identity_matrix() {

@@ -117,9 +117,8 @@ int main( int argc, char** argv )
       } else if(sscanf(command,"line width %lf",
 		       &a)==1) {
 	PDF.set_line_width(a);
-      } else if(sscanf(command,"font size %lf",
-		       &a)==1) {
-	PDF.set_font_size(a);
+      } else if(strncmp(command,"font name ",10)==0) {
+    PDF.set_font(command+10);
       } else if(sscanf(command,"margin %lf",
 		       &a)==1) {
 	PDF.set_margin(a);

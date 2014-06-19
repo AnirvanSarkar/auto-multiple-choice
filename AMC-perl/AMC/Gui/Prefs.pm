@@ -77,6 +77,7 @@ sub find_object {
 # _t_ text
 # _v_ check button
 # _x_ one line text
+# _fb_ font button
 
 sub transmet_pref {
   my ($self,$gap,$prefixe,$h,$alias,$seulement,$update)=@_;
@@ -115,6 +116,9 @@ sub transmet_pref {
       }
       if ($wp=$self->find_object($gap,$prefixe,'_s_',$ta,$t,$update)) {
 	$wp->set_value($h->{$t});
+      }
+      if ($wp=$self->find_object($gap,$prefixe,'_fb_',$ta,$t,$update)) {
+	$wp->set_font_name($h->{$t});
       }
       if ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
 	$wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
@@ -219,6 +223,13 @@ sub reprend_pref {
       if ($wp) {
 	debug "Found spin button";
 	$n=$wp->get_value();
+	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
+	$h->{$t}=$n;
+      }
+      $wp=$self->{w}->{$prefixe.'_fb_'.$tgui};
+      if ($wp) {
+	debug "Found font button";
+	$n=$wp->get_font_name();
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
       }

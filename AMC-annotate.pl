@@ -49,7 +49,7 @@ my $progress_id='';
 
 my $text_color='red';
 my $line_width=2;
-my $font_size=12;
+my $font_name='Linux Libertine O 12';
 my @o_symbols=();
 my $annotate_indicatives='';
 my $position='marges';
@@ -109,7 +109,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "line-width=s"=>\$line_width,
-	   "font-size=s"=>\$font_size,
+	   "font-name=s"=>\$font_name,
 	   "text-color=s"=>\$text_color,
 	   "symbols=s"=>\@o_symbols,
 	   "indicatives!"=>\$annotate_indicatives,
@@ -223,7 +223,7 @@ my $annotate
 		      position=>$position,
 		      text_color=>$text_color,
 		      line_width=>$line_width,
-		      font_size=>$font_size,
+		      font_name=>$font_name,
 		      dist_to_box=>$dist_to_box,
 		      dist_margin=>$dist_margin,
 		      dist_margin_globaltext=>$dist_margin_globaltext,

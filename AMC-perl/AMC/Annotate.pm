@@ -62,7 +62,7 @@ sub new {
 	      position=>'marges',
 	      text_color=>'red',
 	      line_width=>1,
-	      font_size=>12,
+	      font_name=>'Linux Libertine O 12',
 	      dist_to_box=>'1cm',
 	      dist_margin=>'5mm',
 	      dist_margin_globaltext=>'3mm',
@@ -993,7 +993,7 @@ sub student_draw_page {
   my $draw;
   if($draw=$self->page_background($student,$page) >= 0) {
     $self->command("line width $self->{line_width}");
-    $self->command("font size $self->{font_size}");
+    $self->command("font name $self->{font_name}");
     $self->page_symbols($student,$page->{page},$draw>0);
     $self->page_qscores($student,$page->{page});
     $self->command("matrix identity");
