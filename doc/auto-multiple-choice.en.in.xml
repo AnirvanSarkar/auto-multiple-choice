@@ -339,9 +339,9 @@ the best you can.
           <listitem>
             <para>use it to specify a language the questionnaire is written
             in. At present, only DE (German), ES (Spanish), FR (French), IT
-            (Italian), NL (Dutch), NO (Norwegian), JA (Japanese, see <xref
-            linkend="txt-japanese"/>) and AR (Arabic, see <xref
-            linkend="txt-arabic"/>) are supported. Without this option,
+            (Italian), NL (Dutch), NO (Norwegian), PT (portuguese), JA
+            (Japanese, see <xref linkend="txt-japanese"/>) and AR (Arabic, see
+            <xref linkend="txt-arabic"/>) are supported. Without this option,
             English will be selected. You can also define the localized string
             used for another language (see the <option>L-xxx</option>
             options).</para>
@@ -1846,8 +1846,8 @@ Durée : 10 minutes.
   \end{multicols}
 \end{question}</programlisting></para>
 
-        <para>Let us note that it is also possible to parameterize the vertical
-        space between two answer blocks, thanks to the dimension
+        <para>Let us note that it is also possible to parameterize the
+        vertical space between two answer blocks, thanks to the dimension
         <parameter>AMCinterBrep</parameter>:</para>
 
         <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
@@ -2038,8 +2038,8 @@ Durée : 10 minutes.
         <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
 
         <para>When using <option>separateanswersheet</option> package option,
-        you can also customize the boxes labeling. The default behavior is
-        to use uppercase alphabetical labeling, or arabic numbering if the
+        you can also customize the boxes labeling. The default behavior is to
+        use uppercase alphabetical labeling, or arabic numbering if the
         <option>digits</option> package option is used. To use your own
         labeling, one has to redefine the <command>\AMCchoiceLabel</command>
         command which takes as argument the name of the counter used to number
@@ -2225,8 +2225,8 @@ and write your first and last names below.
 </programlisting></para>
 
         <para>In this example, the teacher will get three boxes. If the first
-        (labeled W for wrong) is ticked, the student will get 0 points. If
-        the second (labeled P for partial) is ticked, the student will get 1
+        (labeled W for wrong) is ticked, the student will get 0 points. If the
+        second (labeled P for partial) is ticked, the student will get 1
         point. If the third (labeled C for correct) is ticked, the student
         will get 2 points.</para>
 
@@ -2657,8 +2657,8 @@ and write your first and last names below.
             <callout arearefs="alea.random" id="alea.random.exp">
               <para>Since <command>random</command> returns a real number in
               the interval [0,1], this command sets VQa to a random integer
-              value between 1 and 8. The next line sets VQb to a random integer
-              value between 4 and 8.</para>
+              value between 1 and 8. The next line sets VQb to a random
+              integer value between 4 and 8.</para>
             </callout>
 
             <callout arearefs="alea.result" id="alea.result.exp">
@@ -2729,8 +2729,8 @@ respective parameters \VQa{} and \VQb{}.
 
           <programlisting>\def\AMCIntervalFormat#1#2{[#1,\,#2[}</programlisting>
 
-          <para>to follow local conventions (writing [a,b) instead of [a,b[
-          is for example a common usage).</para>
+          <para>to follow local conventions (writing [a,b) instead of [a,b[ is
+          for example a common usage).</para>
         </sect4>
 
         <sect4 id="latex.numeric">
@@ -3376,10 +3376,10 @@ Name :
         <para>Then we select this set of scan files in the dialog opened by
         the button <guibutton>Automated</guibutton> of the section
         <guilabel>Data capture after examination</guilabel>, then we validate
-        with the <guibutton>OK</guibutton> button. AMC begins with Optical Mark
-        Recognition to detect the position of the four circle corner marks on
-        the scans, position the boxes, and detects the amount of black pixels
-        in each box.</para>
+        with the <guibutton>OK</guibutton> button. AMC begins with Optical
+        Mark Recognition to detect the position of the four circle corner
+        marks on the scans, position the boxes, and detects the amount of
+        black pixels in each box.</para>
 
         <para>The result of the analysis of each page is indicated in the
         lists of the section <guilabel>Diagnosis</guilabel>:</para>
@@ -4302,8 +4302,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <listitem>
             <para>is replaced by the value of column
-            <replaceable>COL</replaceable> in the students list for the current
-            student.</para>
+            <replaceable>COL</replaceable> in the students list for the
+            current student.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -5202,9 +5202,9 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>gives the name of the file that optionally contains (one
-              per line) the paths of the scan files. This file will be
-              cleared and filled with the paths of the scan files after
-              processing, so that the same path can be passed to
+              per line) the paths of the scan files. This file will be cleared
+              and filled with the paths of the scan files after processing, so
+              that the same path can be passed to
               <command>AMC-analyse.pl</command> as the
               <option>--list-fichiers</option> option value.</para>
             </listitem>
@@ -6364,8 +6364,8 @@ Moniuszko,Stanisław,003</programlisting>
 
               <listitem>
                 <para>use this option if you need all annotated copies in a
-                single PDF file. Default behavior is to build one PDF file
-                per student.</para>
+                single PDF file. Default behavior is to build one PDF file per
+                student.</para>
               </listitem>
             </varlistentry>
 
@@ -6531,8 +6531,8 @@ Moniuszko,Stanisław,003</programlisting>
         <refsect2>
           <title>Annotation options</title>
 
-          <para>These options controls what kind of annotations are being to be
-          drawn.</para>
+          <para>These options controls what kind of annotations are being to
+          be drawn.</para>
 
           <variablelist>
             <varlistentry>
@@ -6774,8 +6774,8 @@ Moniuszko,Stanisław,003</programlisting>
                 checked or not, <replaceable>shape</replaceable> is one of
                 <literal>none</literal>, <literal>circle</literal>,
                 <literal>mark</literal>, <literal>box</literal> and
-                <replaceable>color</replaceable> is a color (name or #RGB,
-                see ImageMagick or GraphicsMagick documentation for details).
+                <replaceable>color</replaceable> is a color (name or #RGB, see
+                ImageMagick or GraphicsMagick documentation for details).
                 Default value is
                 "<code>0-0:none,0-1:circle:red,1-0:mark:red,1-1:mark:blue</code>".</para>
               </listitem>
