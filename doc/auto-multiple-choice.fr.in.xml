@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -1163,9 +1163,11 @@ Combien y a-t-il d'étoiles dans le ciel ?
     <sect2>
       <title>Un exemple simple</title>
 
-      <para><!--NAME: Exemple simple
-DESC: Un exemple simple (issu de la documentation) avec une question simple et une question multiple.--><programlisting
-      id="modeles-simple.tex" linenumbering="numbered">\documentclass[a4paper]{article}
+      <para>
+        <!--NAME: Exemple simple
+DESC: Un exemple simple (issu de la documentation) avec une question simple et une question multiple.-->
+
+        <programlisting id="modeles-simple.tex" linenumbering="numbered">\documentclass[a4paper]{article}
 
 \usepackage[utf8x]{inputenc}    <co id="simple.latin1"
             linkends="simple.latin1.exp"/>
@@ -1237,11 +1239,13 @@ Durée : 10 minutes.
 }   <co id="simple.fin" linkends="simple.fin.exp"/>
 
 \end{document}
-</programlisting></para>
+</programlisting>
+      </para>
 
       <para>Quelques précisions sur cet exemple :</para>
 
-      <para><calloutlist>
+      <para>
+        <calloutlist>
           <callout arearefs="simple.latin1" id="simple.latin1.exp">
             <para>Les deux paquets <package>inputenc</package> et
             <package>fontenc</package> permettent d'écrire le texte du
@@ -1305,7 +1309,8 @@ Durée : 10 minutes.
             <para>Cette fermeture d'accolade marque la fin de la commande
             <command>exemplaire</command> (débutée à la ligne 9).</para>
           </callout>
-        </calloutlist></para>
+        </calloutlist>
+      </para>
     </sect2>
 
     <sect2>
@@ -1632,10 +1637,10 @@ Durée : 10 minutes.
             <para><option>bloc</option> : place chaque question dans un bloc,
             de telle sorte qu'elle ne puisse pas être coupée par un saut de
             page.</para>
-            <note>Vous pouvez, ponctuellement, pour une meilleure mise en page, annuler, pour une question, cette 
-            option avec la commande <command>\AMCnobloc</command>.
-            
-           <programlisting>
+
+            <note>Vous pouvez, ponctuellement, pour une meilleure mise en
+            page, annuler, pour une question, cette option avec la commande
+            <command>\AMCnobloc</command>. <programlisting>
 {\AMCnobloc%
 \begin{question}{prez}
 Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
@@ -1647,9 +1652,8 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 \end{reponses}
 \end{question}%
 }%
-            </programlisting>
-           </note>
-            </listitem>
+            </programlisting></note>
+          </listitem>
 
           <listitem>
             <para><option>completemulti</option> : ajoute de manière
@@ -1677,9 +1681,10 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           </listitem>
 
           <listitem>
-            <para><option>correcindiv</option> : produit la correction de tous les sujets. Très utile si vous utilisez
-            des nombres aléatoires.</para>
-          </listitem> 
+            <para><option>correcindiv</option> : produit la correction de tous
+            les sujets. Très utile si vous utilisez des nombres
+            aléatoires.</para>
+          </listitem>
 
           <listitem>
             <para><option>ensemble</option> : demande à ce que les cases à
@@ -1737,12 +1742,15 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
             en redéfinissant la commande
             <command>\AMCsubjectPageTag</command> :</para>
 
-<para> Il faut d'abord inscrire dans le préambule :</para>
-<programlisting>\makeatletter
+            <para>Il faut d'abord inscrire dans le préambule :</para>
+
+            <programlisting>\makeatletter
 \def\Nsujet{\the\AMCid@etud}
 \makeatother</programlisting>
-<para>puis</para>
-  <programlisting>\renewcommand\AMCsubjectPageTag{%
+
+            <para>puis</para>
+
+            <programlisting>\renewcommand\AMCsubjectPageTag{%
   \fbox{\texttt{\Nsujet:\thepage}}%
 }</programlisting>
 
@@ -1816,9 +1824,10 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           limité à 20.</para>
         </note>
 
-<important>
-        <para> Il ne faut pas imbriquer deux questions sinon l'export des notes sera incomplet (voir <xref endterm="sec.export.notes.titre" linkend="sec.export.notes"/>).
-        </para>
+        <important>
+          <para>Il ne faut pas imbriquer deux questions sinon l'export des
+          notes sera incomplet (voir <xref endterm="sec.export.notes.titre"
+          linkend="sec.export.notes"/>).</para>
         </important>
 
         <para>Pour demander à garder l'ordre des réponses pour cette
@@ -1854,7 +1863,8 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
         <code>\QuestionIndicative</code>, comme dans l'exemple
         suivant :</para>
 
-        <para><programlisting>\begin{question}{facilite}\QuestionIndicative
+        <para>
+          <programlisting>\begin{question}{facilite}\QuestionIndicative
   \bareme{auto=0,v=-1,e=-2}
   Vous êtes-vous sentis à l'aise ou en difficulté dans cet enseignement ?
   Répondez sur une échelle de 0 (grandes difficultés) à 5 (très à l'aise).
@@ -1866,14 +1876,19 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
     \bonne{4}
     \bonne{5}
   \end{reponseshoriz}
-\end{question}</programlisting></para>
+\end{question}</programlisting>
+        </para>
       </sect3>
 
-<sect3>
-<title>Approfondir la réponse</title>
+      <sect3>
+        <title>Approfondir la réponse</title>
 
-<para>Lors de l'impression du corrigé, vous pouvez apporter des précisions grâce à la commande <command>\explain</command>. Cette commande, à insérer dans un environnement question, affichera le texte écrit.</para>
-<programlisting>
+        <para>Lors de l'impression du corrigé, vous pouvez apporter des
+        précisions grâce à la commande <command>\explain</command>. Cette
+        commande, à insérer dans un environnement question, affichera le texte
+        écrit.</para>
+
+        <programlisting>
 \begin{question}{combustion}
 Quel gaz apparaît lors de la combustion incomplète du butane~?
 \begin{reponses}
@@ -1884,7 +1899,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 \explain{Le monoxyde de carbone est un gaz incolore, inodore et toxique.}
 \end{question}
 </programlisting>
-</sect3>
+      </sect3>
 
       <sect3>
         <title>Réponses sur plusieurs colonnes</title>
@@ -1902,7 +1917,8 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         phénomène, en enveloppant chaque réponse dans une boite. On pourra
         l'utiliser comme dans l'exemple suivant :</para>
 
-        <para><programlisting>\begin{question}{deux colonnes}
+        <para>
+          <programlisting>\begin{question}{deux colonnes}
   Qu'est-ce qu'un oiseau ?
   \begin{multicols}{2}\AMCBoxedAnswers
     \begin{reponses}
@@ -1914,13 +1930,16 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         les boîtes de conserve à grande vitesse}
     \end{reponses}
   \end{multicols}
-\end{question}</programlisting></para>
+\end{question}</programlisting>
+        </para>
 
         <para>On notera qu'il est aussi possible de paramétrer l'espace
         vertical séparant deux blocs de réponse grâce à la dimension
         <parameter>AMCinterBrep</parameter> :</para>
 
-        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
+        <para>
+          <programlisting>\AMCinterBrep=.5ex</programlisting>
+        </para>
       </sect3>
 
       <sect3>
@@ -1932,20 +1951,20 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <programlisting>\AMCinterIrep=.75ex</programlisting>
       </sect3>
-      
-      
-     <sect3>
-      <title>Définir la zone de notation</title>
-      <para>En mode <emphasis>ensemble</emphasis>, vous pouvez ajouter une option supplémentaire de zone de notation (voir   <xref linkend="position.note"/>).</para>
-      <para>On peut aussi utiliser les zones prédéfinies toutes faites, avec par exemple : </para>
-<programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
-<para>Les grandeurs width, height, depth définissent les dimensions de la case de notation ainsi que son emplacement sur la feuille du sujet.</para>
-      <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
-      <para>Les grandeurs width, height, depth définissent les dimensions de la case de notation ainsi que son emplacement sur la feuille de réponse.</para>
 
-<para> La variable position peut prendre les valeurs : none, question, margin, margins</para>.
-      </sect3>
-
+      <sect3><title>Définir la zone de notation</title> <para>En mode
+      <emphasis>ensemble</emphasis>, vous pouvez ajouter une option
+      supplémentaire de zone de notation (voir <xref
+      linkend="position.note"/>).</para> <para>On peut aussi utiliser les
+      zones prédéfinies toutes faites, avec par exemple : </para>
+      <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
+      <para>Les grandeurs width, height, depth définissent les dimensions de
+      la case de notation ainsi que son emplacement sur la feuille du
+      sujet.</para> <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+      <para>Les grandeurs width, height, depth définissent les dimensions de
+      la case de notation ainsi que son emplacement sur la feuille de
+      réponse.</para> <para> La variable position peut prendre les valeurs :
+      none, question, margin, margins</para>.</sect3>
 
       <sect3>
         <title>Groupes de questions</title>
@@ -2095,11 +2114,11 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 \AMCidsPosition{pos=top}</programlisting>
       </sect3>
 
-<warning>
-<para>
-N'utilisez pas le paquet <command>pdfpages</command> ou toutes autres commandes de mise en page modifiant l'impression du nombre de pages par feuille.
-</para>
-</warning>
+      <warning>
+        <para>N'utilisez pas le paquet <command>pdfpages</command> ou toutes
+        autres commandes de mise en page modifiant l'impression du nombre de
+        pages par feuille.</para>
+      </warning>
 
       <sect3>
         <title>Style des cases à cocher</title>
@@ -2198,7 +2217,9 @@ N'utilisez pas le paquet <command>pdfpages</command> ou toutes autres commandes 
         <command>AMCbeginQuestion</command>, dont la définition par défaut est
         la suivante :</para>
 
-        <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
+        <para>
+          <programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting>
+        </para>
 
         <para>Le premier paramètre transmis à cette commande est le numéro de
         question à afficher. Le second paramètre contient
@@ -2208,13 +2229,17 @@ N'utilisez pas le paquet <command>pdfpages</command> ou toutes autres commandes 
         charge de différentier les questions à réponses multiples des autres.
         Par défaut, elle affiche un trèfle :</para>
 
-        <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
+        <para>
+          <programlisting>\def\multiSymbole{$\clubsuit$}</programlisting>
+        </para>
 
         <para>Enfin, on peut modifier le numéro de la prochaine question à
         laide de la commande <code>\AMCnumero</code>. Au début de chaque
         copie, un appel à</para>
 
-        <para><programlisting>\AMCnumero{1}</programlisting></para>
+        <para>
+          <programlisting>\AMCnumero{1}</programlisting>
+        </para>
 
         <para>est effectué, mais cette commande peut être utilisée à tout
         moment.</para>
@@ -2229,9 +2254,9 @@ N'utilisez pas le paquet <command>pdfpages</command> ou toutes autres commandes 
 \def\AMCanswer#1#2{#1 #2}
 </programlisting>
 
-<important><para>Lorsque vous êtes à l'intérieur de la commande <command>\exemplaire</command>, il faut doubler les <code>#</code></para>.
-<programlisting>\def\AMCanswer##1##2{##1  ##2}</programlisting>
-</important>
+        <important><para>Lorsque vous êtes à l'intérieur de la commande
+        <command>\exemplaire</command>, il faut doubler les
+        <code>#</code></para>. <programlisting>\def\AMCanswer##1##2{##1  ##2}</programlisting></important>
 
         <para>Certains espacements peuvent également être modifiés :</para>
 
@@ -2306,7 +2331,8 @@ N'utilisez pas le paquet <command>pdfpages</command> ou toutes autres commandes 
         chiffres du codage désiré. On pourra par exemple utiliser l'entête de
         copie suivant :</para>
 
-        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+        <para>
+          <programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
 \begin{minipage}[b]{6.5cm}
 $\longleftarrow{}$\hspace{0pt plus 1cm} codez votre numéro d'étu\-diant ci-contre,
 et inscrivez votre nom et prénom ci-dessous.
@@ -2325,7 +2351,8 @@ et inscrivez votre nom et prénom ci-dessous.
   }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
 
 }
-</programlisting></para>
+</programlisting>
+        </para>
 
         <para>Dans le cas de l'utilisation de l'option
         <option>ensemble</option>, la commande <command>AMCcode</command>
@@ -2380,10 +2407,10 @@ et inscrivez votre nom et prénom ci-dessous.
         est une liste d'options séparées par des virgules. Les options
         disponibles sont les suivantes :</para>
 
-<warning>
-<para>Le premier argument doit toujours être complété par au moins une option pour éviter une erreur de compilation.
-</para>
-</warning>
+        <warning>
+          <para>Le premier argument doit toujours être complété par au moins
+          une option pour éviter une erreur de compilation.</para>
+        </warning>
 
         <variablelist>
           <varlistentry>
@@ -2632,7 +2659,9 @@ et inscrivez votre nom et prénom ci-dessous.
         utiliser juste au début du document, et en tous cas en-dehors de la
         commande <command>exemplaire</command>) :</para>
 
-        <para><programlisting>\AMCrandomseed{1527384}</programlisting></para>
+        <para>
+          <programlisting>\AMCrandomseed{1527384}</programlisting>
+        </para>
 
         <para>Si la valeur fournie (à choisir entre 1 et 4194303) est
         modifiée, alors le mélange sera différent. Bien entendu, une fois les
@@ -2663,8 +2692,9 @@ et inscrivez votre nom et prénom ci-dessous.
         ajoutent le numéro de la copie avant leur argument avant de le
         transmettre à <command>\label</command>, <command>\ref</command> et
         <command>\pageref</command>.</para>
-<para>La commande <command>\AMCqlabel</command> doit être utilisée pour une 
-        question à référencer.</para>
+
+        <para>La commande <command>\AMCqlabel</command> doit être utilisée
+        pour une question à référencer.</para>
 
         <para>Il faudra en outre penser à remettre les compteurs utilisés à
         zéro au début de chaque copie. Par exemple, si on veut inclure des
@@ -2702,10 +2732,13 @@ et inscrivez votre nom et prénom ci-dessous.
         souhaitable.</para>
       </sect3>
 
-  <example>
-     <para> Un exemple d'utilisation des références pour numéroter les pages de la façon x/y dans le pied de page.</para>
-     <para>Dans le préambule, tapez :</para>
-  <programlisting>
+      <example>
+        <para>Un exemple d'utilisation des références pour numéroter les pages
+        de la façon x/y dans le pied de page.</para>
+
+        <para>Dans le préambule, tapez :</para>
+
+        <programlisting>
 \makeatletter
 \def\Nsujet{\the\AMCid@etud}
 \makeatother
@@ -2714,17 +2747,25 @@ et inscrivez votre nom et prénom ci-dessous.
 \pagestyle{fancy}
 </programlisting>
 
-<note><para><command>\AMCsubjectPageTag </command>est la commande qui définit le numéro des pages (voir<xref linkend="sec.package.options"/>).</para>
-<para><command>\the\AMCid@etud</command> est le compteur qui gère le numéro de chaque sujet généré par AMC.</para>
-</note>
+        <note>
+          <para><command>\AMCsubjectPageTag </command>est la commande qui
+          définit le numéro des pages (voir<xref
+          linkend="sec.package.options"/>).</para>
 
-<para>Insérez, dans le document latex, juste avant la commande <command>\clearpage</command>, la commande <command>\AMClabel{lastpage}</command>.</para>
+          <para><command>\the\AMCid@etud</command> est le compteur qui gère le
+          numéro de chaque sujet généré par AMC.</para>
+        </note>
 
-<para>Après <command>\begin{document} </command>mais avant <command>\exemplaire{}</command>, tapez : </para>
+        <para>Insérez, dans le document latex, juste avant la commande
+        <command>\clearpage</command>, la commande
+        <command>\AMClabel{lastpage}</command>.</para>
 
-<programlisting>\fancyfoot[C]{\hfill{}sujet N\degre{}\AMCsubjectPageTag \hfill{}PAGE~\thepage{}
+        <para>Après <command>\begin{document} </command>mais avant
+        <command>\exemplaire{}</command>, tapez :</para>
+
+        <programlisting>\fancyfoot[C]{\hfill{}sujet N\degre{}\AMCsubjectPageTag \hfill{}PAGE~\thepage{}
  sur \AMCpageref{lastpage}\hfill{}}</programlisting>
-   </example>
+      </example>
 
       <sect3>
         <title>Personnalisation des textes insérés par AMC</title>
@@ -2769,9 +2810,12 @@ et inscrivez votre nom et prénom ci-dessous.
       </sect3>
     </sect2>
 
-<note>
-        <para>Utilisez <command> \onecopy </command> au lieu de <command>\exemplaire </command>car <command>\exemplaire</command> remet les messages français par défaut (à part cela, les deux commandes font la même chose).</para>
-        </note>
+    <note>
+      <para>Utilisez <command> \onecopy </command> au lieu de
+      <command>\exemplaire </command>car <command>\exemplaire</command> remet
+      les messages français par défaut (à part cela, les deux commandes font
+      la même chose).</para>
+    </note>
 
     <sect2>
       <title>Options pour AMC</title>
@@ -2782,7 +2826,9 @@ et inscrivez votre nom et prénom ci-dessous.
 
       <variablelist>
         <varlistentry>
-          <term><code>%%AMC:preprocess_command=<replaceable>commandname</replaceable></code></term>
+          <term>
+            <code>%%AMC:preprocess_command=<replaceable>commandname</replaceable></code>
+          </term>
 
           <listitem>
             <para>demande à AMC d'exécuter la commande
@@ -2796,7 +2842,9 @@ et inscrivez votre nom et prénom ci-dessous.
         </varlistentry>
 
         <varlistentry>
-          <term><code>%%AMC:latex_engine=<replaceable>engine</replaceable></code></term>
+          <term>
+            <code>%%AMC:latex_engine=<replaceable>engine</replaceable></code>
+          </term>
 
           <listitem>
             <para>demande à AMC d'utiliser le moteur LaTeX
@@ -2821,7 +2869,8 @@ et inscrivez votre nom et prénom ci-dessous.
         peut créer des exercices dont les données sont aléatoires. Commençons
         par un petit exemple :</para>
 
-        <para><programlisting>\begin{question}{addition}
+        <para>
+          <programlisting>\begin{question}{addition}
   \FPeval\VQa{trunc(1+random*8,0)}  <co id="alea.random"
               linkends="alea.random.exp"/>
   \FPeval\VQb{trunc(4+random*5,0)}
@@ -2839,7 +2888,8 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{\VQnonB}
     \mauvaise{\VQnonC}
   \end{reponseshoriz}
-\end{question}</programlisting></para>
+\end{question}</programlisting>
+        </para>
 
         <para>La commande <command>\FPeval</command> sert à faire des
         calculs :</para>
@@ -3220,15 +3270,18 @@ et inscrivez votre nom et prénom ci-dessous.
         identiques malgré les recompilations latex est de choisir la base de
         génération des nombres pseudo-aléatoires.</para>
 
-        <para><programlisting>\pgfmathsetseed{2056}
-</programlisting></para>
+        <para>
+          <programlisting>\pgfmathsetseed{2056}
+</programlisting>
+        </para>
 
         <sect4>
           <title>Réaliser un calcul simple</title>
 
           <para>Voici un exemple d'utilisation avec un calcul simple :</para>
 
-          <para><programlisting>\begin{question}{inverse}
+          <para>
+            <programlisting>\begin{question}{inverse}
   \pgfmathrandominteger{\x}{1}{50}
        
   Quel est l'inverse de $x=\x$ ?
@@ -3240,7 +3293,8 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{\pgfmathparse{\x^(-0.5)}\pgfmathresult}
   \end{reponses}
 \end{question}
-</programlisting></para>
+</programlisting>
+          </para>
 
           <para>Les commandes <command>\pgfmathparse</command> et
           <command>\pgfmathresult</command> permettent respectivement
@@ -3251,7 +3305,8 @@ et inscrivez votre nom et prénom ci-dessous.
           exemple, ici on choisit une notation avec trois décimales, en
           utilisant une virgule comme séparateur décimal.</para>
 
-          <para><programlisting>\begin{question}{inverse3}
+          <para>
+            <programlisting>\begin{question}{inverse3}
   \pgfmathrandominteger{\x}{1}{50}
   \pgfkeys{/pgf/number format/.cd,fixed,fixed zerofill,precision=3,use comma}
   Quel est l'inverse de $x=\pgfmathprintnumber{\x}$ ?
@@ -3263,13 +3318,16 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{\pgfmathparse{\x^(-0.5)} \pgfmathprintnumber{\pgfmathresult}}
   \end{reponses}
 \end{question}
-</programlisting><note>
+</programlisting>
+
+            <note>
               <para>Les commandes <command>\AMCIntervals</command> et
               <command>\AMCnumericChoices</command> peuvent aussi être
               utilisées dans ce contexte (voir <xref
               linkend="latex.intervals"/> et <xref
               linkend="latex.numeric"/>)</para>
-            </note></para>
+            </note>
+          </para>
         </sect4>
 
         <sect4>
@@ -3278,7 +3336,8 @@ et inscrivez votre nom et prénom ci-dessous.
           <para>Il est aussi possible de générer des graphiques aléatoires(ou
           non),et de poser des questions de lecture graphique.</para>
 
-          <para><programlisting>\begin{questionmult}{graphique}
+          <para>
+            <programlisting>\begin{questionmult}{graphique}
   On considère trois fonctions f(x) dont les tracés sont représentés ci-dessous
   dans un repère orthonormé~:
   \pgfmathrandominteger{\a}{2}{4}  
@@ -3300,7 +3359,8 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{La fonction $f_{1}(x)$ est une fonction linéaire.}
   \end{reponses}
 \end{questionmult}
-</programlisting></para>
+</programlisting>
+          </para>
 
           <para>La mise en forme des graphiques peut être facilitée par
           l'utilisation du package <package>pgfplots</package>.</para>
@@ -3400,30 +3460,40 @@ Nom et prénom :
           linkend="latex.numeric"/>)</para>
         </note>
       </sect3>
-      <sect3 id ="Utilisation de PSTricks">
-    <title> Utilisation de PSTricks</title>  
-    <para>Pour utiliser <command>PSTricks</command>, vous devez configurer AMC :
-<menuchoice>
-     <guimenu>Édition</guimenu>
- <guimenuitem>Préférences</guimenuitem>
- <guimenuitem>Général</guimenuitem>
-<guimenuitem>Moteur Latex par défaut</guimenuitem>
-<guimenuitem>latex+dvipdf</guimenuitem>
-</menuchoice>
-<note><para>Si vous utilisez Texmaker pour préparer vos documents, il faut également le configurer :</para>
-<para>
-<menuchoice>
-     <guimenu>Options</guimenu>
- <guimenuitem>Configurer Texmaker</guimenuitem>
- <guimenuitem>Compil rapide</guimenuitem>
-<guimenuitem>Latex + dvips + ps2pdf + voir PDF</guimenuitem>
-</menuchoice>
-</para>
-</note>
-</para>
+
+      <sect3 id="Utilisation de PSTricks">
+        <title>Utilisation de PSTricks</title>
+
+        <para>Pour utiliser <command>PSTricks</command>, vous devez configurer
+        AMC : <menuchoice>
+            <guimenu>Édition</guimenu>
+
+            <guimenuitem>Préférences</guimenuitem>
+
+            <guimenuitem>Général</guimenuitem>
+
+            <guimenuitem>Moteur Latex par défaut</guimenuitem>
+
+            <guimenuitem>latex+dvipdf</guimenuitem>
+          </menuchoice> <note>
+            <para>Si vous utilisez Texmaker pour préparer vos documents, il
+            faut également le configurer :</para>
+
+            <para>
+              <menuchoice>
+                <guimenu>Options</guimenu>
+
+                <guimenuitem>Configurer Texmaker</guimenuitem>
+
+                <guimenuitem>Compil rapide</guimenuitem>
+
+                <guimenuitem>Latex + dvips + ps2pdf + voir PDF</guimenuitem>
+              </menuchoice>
+            </para>
+          </note></para>
       </sect3>
-      </sect2>
-    </sect1>
+    </sect2>
+  </sect1>
 
   <sect1 id="interface-graphique">
     <title>Mise en œuvre - interface graphique</title>
@@ -4069,12 +4139,14 @@ Nom et prénom :
           </tgroup>
         </informaltable>
 
-<important>
- <para>Avec le paramètre default, il faut déclarer la valeur de la variable <replaceable>XXX</replaceable> dans le barème de la question, voir l'exemple ci-dessous.</para>
-</important>
+        <important>
+          <para>Avec le paramètre default, il faut déclarer la valeur de la
+          variable <replaceable>XXX</replaceable> dans le barème de la
+          question, voir l'exemple ci-dessous.</para>
+        </important>
 
-<example>
-<programlisting>
+        <example>
+          <programlisting>
 \begin{questionmult}{03}\bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
 Cite un gaz  important de l'air et son pourcentage.
 \begin{multicols}{4}
@@ -4092,9 +4164,15 @@ Cite un gaz  important de l'air et son pourcentage.
 \end{multicols}
 \end{questionmult}
 </programlisting>
-</example>
+        </example>
 
-<note><para> Si vous indiquez MAX=3 pour une question pouvant rapporter 4 points, un étudiant pourra avoir un score de 4/3 à cette question (et, si il donne des réponses parfaites aux autres questions, il pourra éventuellement obtenir une note globale supérieure à 20/20).</para></note>
+        <note>
+          <para>Si vous indiquez MAX=3 pour une question pouvant rapporter 4
+          points, un étudiant pourra avoir un score de 4/3 à cette question
+          (et, si il donne des réponses parfaites aux autres questions, il
+          pourra éventuellement obtenir une note globale supérieure à
+          20/20).</para>
+        </note>
 
         <para>Le barème par défaut pour une question simple est
         <code>e=0,v=0,b=1,m=0</code>, ce qui donne un point pour une bonne
@@ -4293,20 +4371,19 @@ Durée : 10 minutes.
         quatre opérations simples (+ - * /), l'opérateur de test <code>( ? :
         )</code>, les parenthèses et plus généralement toutes celles reconnues
         par perl.</para>
-        
-             <note>
-      Les opérateurs sont :
-         &gt;  supérieur à, 
-         &gt;= supérieur ou égal, 
-         &lt; inférieur à, 
-         &lt;= inférieur ou égal, 
-        == égalité, 
-         != différent.
+
+        <note>
+           Les opérateurs sont : &gt; supérieur à, &gt;= supérieur ou égal, &lt; inférieur à, &lt;= inférieur ou égal, == égalité, != différent. 
         </note>
 
-<note>La fonction test s'écrit
-<programlisting> ( TEST ? INSTRUCTION SI VRAI : INSTRUCTION SI FAUX)</programlisting>
-</note>
+        <note>
+          La fonction test s'écrit 
+
+          <programlisting> ( TEST ? INSTRUCTION SI VRAI : INSTRUCTION SI FAUX)</programlisting>
+
+           
+        </note>
+
         <para>D'autres variables sont aussi utilisables :</para>
 
         <itemizedlist>
@@ -4346,7 +4423,10 @@ Durée : 10 minutes.
             et 0 sinon.</para>
           </listitem>
         </itemizedlist>
-<note>haut=x est réécrit en d=x-N, p=0</note>
+
+        <note>
+          haut=x est réécrit en d=x-N, p=0
+        </note>
       </sect3>
 
       <sect3 id="note-finale">
@@ -4369,46 +4449,82 @@ Durée : 10 minutes.
 
           <listitem>
             <para>Si une <emphasis>note maximale</emphasis> non-nulle est
-            donnée en paramètre (dans l'onglet Projet de la fenêtre ), le
-            <emphasis>score total</emphasis> est divisé par le <emphasis>score
-            maximal</emphasis> (c'est-à-dire le <emphasis>score
-            total</emphasis> calculé pour une copie parfaite), puis multiplié
-            par la <emphasis>note maximale</emphasis>, pour obtenir la
-            <emphasis>note</emphasis> de l'étudiant. De cette façon, un
-            étudiant ayant répondu de manière parfaite se verra attribuer la
-            <emphasis>note maximale</emphasis>. Avec une <emphasis>note
-            maximale</emphasis> fixée à 100, la <emphasis>note</emphasis> de
-            l'étudiant pourra être vue comme un pourcentage de bonnes
-            réponses. En France, on utilise souvent une <emphasis>note
-            maximale</emphasis> égale à 20.</para>
+            donnée en paramètre (dans l'onglet Projet de la fenêtre
+            <menuchoice>
+                <guimenu>Édition</guimenu>
+
+                <guimenuitem>Préférences</guimenuitem>
+              </menuchoice>), le <emphasis>score total</emphasis> est divisé
+            par le <emphasis>score maximal</emphasis> (c'est-à-dire le
+            <emphasis>score total</emphasis> calculé pour une copie parfaite),
+            puis multiplié par la <emphasis>note maximale</emphasis>, pour
+            obtenir la <emphasis>note</emphasis> de l'étudiant. De cette
+            façon, un étudiant ayant répondu de manière parfaite se verra
+            attribuer la <emphasis>note maximale</emphasis>. Avec une
+            <emphasis>note maximale</emphasis> fixée à 100, la
+            <emphasis>note</emphasis> de l'étudiant pourra être vue comme un
+            pourcentage de bonnes réponses. En France, on utilise souvent une
+            <emphasis>note maximale</emphasis> égale à 20.</para>
           </listitem>
         </orderedlist>
       </sect3>
-      
-    <sect3 id="correction.sujet">
-    <title>Corriger des erreurs de barème</title>
-    <para>Vous pouvez, même après le passage de l'examen, modifier votre barème. Cependant, vous ne devez <emphasis>jamais</emphasis> mettre à jour le document. Il est préférable d'ouvrir le fichier avec votre éditeur de texte, de faire les modifications et d'enregistrer.</para>
 
-<para>Vous pouvez :</para>
-<itemizedlist>
-<listitem> Transformer des bonnes réponses en mauvaises réponses.</listitem>
-<listitem> Transformer des mauvaises réponses en bonnes réponses.</listitem>
-<listitem> Modifier le barème d'une ou plusieurs questions, le barème par défaut.</listitem>
-</itemizedlist>
+      <sect3 id="correction.sujet">
+        <title>Corriger des erreurs de barème</title>
 
-<para>Vous ne pouvez pas :</para>
-<itemizedlist>
-<listitem> Transformer une question simple en question multiple.</listitem>
-<listitem> Transformer une question multiple en question simple.</listitem>
-<listitem> Ajouter des réponses, des questions.</listitem>
-<listitem> Enlever des réponses, des questions.</listitem>
-<listitem> Modifier l'ordre des questions et/ou des réponses.</listitem>
-</itemizedlist>
-<note>Si vous estimez qu'une question doit être annulée, modifiez le barème comme ceci <command>\bareme{b=0,m=0,e=0,v=0}</command>
-</note>
-    </sect3>  
-      
-      
+        <para>Vous pouvez, même après le passage de l'examen, modifier votre
+        barème. Cependant, vous ne devez <emphasis>jamais</emphasis> mettre à
+        jour le document. Il est préférable d'ouvrir le fichier avec votre
+        éditeur de texte, de faire les modifications et d'enregistrer.</para>
+
+        <para>Vous pouvez :</para>
+
+        <itemizedlist>
+          <listitem>
+             Transformer des bonnes réponses en mauvaises réponses.
+          </listitem>
+
+          <listitem>
+             Transformer des mauvaises réponses en bonnes réponses.
+          </listitem>
+
+          <listitem>
+             Modifier le barème d'une ou plusieurs questions, le barème par défaut.
+          </listitem>
+        </itemizedlist>
+
+        <para>Vous ne pouvez pas :</para>
+
+        <itemizedlist>
+          <listitem>
+             Transformer une question simple en question multiple.
+          </listitem>
+
+          <listitem>
+             Transformer une question multiple en question simple.
+          </listitem>
+
+          <listitem>
+             Ajouter des réponses, des questions.
+          </listitem>
+
+          <listitem>
+             Enlever des réponses, des questions.
+          </listitem>
+
+          <listitem>
+             Modifier l'ordre des questions et/ou des réponses.
+          </listitem>
+        </itemizedlist>
+
+        <note>
+          Si vous estimez qu'une question doit être annulée, modifiez le barème comme ceci 
+
+          <command>\bareme{b=0,m=0,e=0,v=0}</command>
+
+           
+        </note>
+      </sect3>
     </sect2>
 
     <sect2>
@@ -4711,35 +4827,50 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       endterm="liste.etudiants.title" linkend="liste.etudiants"/>). Si on
       laisse ce champ vide, une valeur par défaut formée du nom et du numéro
       d'étudiant de l'étudiant sera utilisée.</para>
-      
+
       <sect3 id="position.note">
-     <title>Position de la note</title> 
-     
-     <para>
-Vous pouvez choisir la position de la note à l'aide du menu 
-     <menuchoice>
-     <guimenu>Édition</guimenu>
- <guimenuitem>Préférences</guimenuitem>
- <guimenuitem>Projet</guimenuitem>
-<guimenuitem>Position de la note</guimenuitem>
-</menuchoice>
-</para>
- <para>Les choix par défaut sont :</para> 
-    <itemizedlist>
-   <listitem>(aucune).</listitem> 
-     <listitem>Dans la marge.</listitem> 
-      <listitem>Dans les deux marges.</listitem> 
-       <listitem>A côté des cases.</listitem> 
-        <listitem>Where defined in the source (réservé au mode <emphasis>ensemble</emphasis>).</listitem> 
-    </itemizedlist>
-      
-      
+        <title>Position de la note</title>
+
+        <para>Vous pouvez choisir la position de la note à l'aide du menu
+        <menuchoice>
+            <guimenu>Édition</guimenu>
+
+            <guimenuitem>Préférences</guimenuitem>
+
+            <guimenuitem>Projet</guimenuitem>
+
+            <guimenuitem>Position de la note</guimenuitem>
+          </menuchoice></para>
+
+        <para>Les choix par défaut sont :</para>
+
+        <itemizedlist>
+          <listitem>
+            (aucune).
+          </listitem>
+
+          <listitem>
+            Dans la marge.
+          </listitem>
+
+          <listitem>
+            Dans les deux marges.
+          </listitem>
+
+          <listitem>
+            A côté des cases.
+          </listitem>
+
+          <listitem>
+            Where defined in the source (réservé au mode 
+
+            <emphasis>ensemble</emphasis>
+
+            ).
+          </listitem>
+        </itemizedlist>
       </sect3>
-      
-      
     </sect2>
-       
-    
   </sect1>
 
   <sect1>
@@ -4972,9 +5103,11 @@ Boulix,Jojo,001
 Golin,André,002
 Moniuszko,Stanisław,003</programlisting></para>
 
-<warning> 
-<para>Ne pas utiliser le symbole _ (underscore) dans le nom ou prénom des étudiants. Une erreur de complitation sera affichée.</para>
-</warning>
+          <warning>
+            <para>Ne pas utiliser le symbole _ (underscore) dans le nom ou
+            prénom des étudiants. Une erreur de complitation sera
+            affichée.</para>
+          </warning>
         </listitem>
 
         <listitem>
@@ -4990,8 +5123,10 @@ Moniuszko,Stanisław,003</programlisting></para>
           les questions ont été préalablement insérées dans un groupe appelé
           <code>general</code>) :</para>
 
-<important>
-         <para>Les différents groupes doivent être créés aprè le <command>\begin{document}</command> et non dans la commande <command>\sujet.</command> </para>
+          <important>
+            <para>Les différents groupes doivent être créés aprè le
+            <command>\begin{document}</command> et non dans la commande
+            <command>\sujet.</command></para>
           </important>
 
           <programlisting>\newcommand{\sujet}{
@@ -5142,32 +5277,44 @@ Moniuszko,Stanisław,003</programlisting></para>
       </refsect1>
     </refentry>
   </sect1>
-  
-<sect1 id="Divers">
-<title >Divers</title>
 
-<para>Cette section n'est pas liée à AMC.</para>
+  <sect1 id="Divers">
+    <title>Divers</title>
 
-<sect2>
-<title>Paramétrer AMC pour l'utilisation de GMAIL</title>
+    <para>Cette section n'est pas liée à AMC.</para>
 
-<programlisting> sudo apt-get install msmtp </programlisting>
-<para>Dans les préférences de AMC </para>
+    <sect2>
+      <title>Paramétrer AMC pour l'utilisation de GMAIL</title>
 
-  <menuchoice>
-<guimenuitem> Edition</guimenuitem>
-<guimenuitem>Préférences</guimenuitem>
-<guimenuitem>Courriel</guimenuitem>
-<guimenuitem>Méthode d'envoi</guimenuitem>
-  </menuchoice>
-  
-<para>choisir</para> <guibutton>sendmail</guibutton> <para>et mettre le chemin :</para>
-<programlisting>/usr/bin/msmtp </programlisting>
+      <programlisting> sudo apt-get install msmtp </programlisting>
 
-<para>Ouvrir le fichier </para>
-<programlisting>sudo gedit /etc/msmtprc  </programlisting>
- <para>et copier </para>
- <programlisting>
+      <para>Dans les préférences de AMC</para>
+
+      <menuchoice>
+        <guimenuitem>Edition</guimenuitem>
+
+        <guimenuitem>Préférences</guimenuitem>
+
+        <guimenuitem>Courriel</guimenuitem>
+
+        <guimenuitem>Méthode d'envoi</guimenuitem>
+      </menuchoice>
+
+      <para>choisir</para>
+
+      <guibutton>sendmail</guibutton>
+
+      <para>et mettre le chemin :</para>
+
+      <programlisting>/usr/bin/msmtp </programlisting>
+
+      <para>Ouvrir le fichier</para>
+
+      <programlisting>sudo gedit /etc/msmtprc  </programlisting>
+
+      <para>et copier</para>
+
+      <programlisting>
 account gmail 
 host smtp.gmail.com 
 tls on 
@@ -5178,141 +5325,145 @@ from <emphasis>votre nom ou adresse mail du compte gmail</emphasis>
 user <emphasis>votre adresse mail du compte gmail</emphasis> 
 password <emphasis>votre mot de passe du compte gmail</emphasis> 
 </programlisting>
-</sect2>
+    </sect2>
 
-  <sect2 id="Texmaker">
-  
-  <title id="Personnaliser.Texmaker.pour.AMC">Personnaliser Texmaker pour AMC</title>
-  Si vous utilisez Texmaker, vous pouvez ajouter les raccourcis  des environnements question et réponses en allant dans le  Menu 
-  <menuchoice>
-  <guimenuitem>Utilisateur</guimenuitem>
-  <guimenuitem>Personnaliser complétion</guimenuitem>
-  </menuchoice>   puis entrez  <command>\begin{question}{}</command> puis cliquez sur ajouter. Faîtes de même avec <command>reponses</command> et <command>reponseshoriz</command>.
-</sect2>
+    <sect2 id="Texmaker"><title
+    id="Personnaliser.Texmaker.pour.AMC">Personnaliser Texmaker pour
+    AMC</title> Si vous utilisez Texmaker, vous pouvez ajouter les raccourcis
+    des environnements question et réponses en allant dans le Menu <menuchoice>
+        <guimenuitem>Utilisateur</guimenuitem>
 
-<sect2>
-<title>Le paquet <command>fp</command> par l'exemple </title>
-La documentation du paquet <command>fp</command>  n'est pas très détaillée et compréhensible pour un grand débutant au langage latex.  Voici les commandes expliquées par un exemple.
-</sect2>
+        <guimenuitem>Personnaliser complétion</guimenuitem>
+      </menuchoice> puis entrez <command>\begin{question}{}</command> puis
+    cliquez sur ajouter. Faîtes de même avec <command>reponses</command> et
+    <command>reponseshoriz</command>.</sect2>
 
-<itemizedlist>
+    <sect2><title>Le paquet <command>fp</command> par l'exemple </title> La
+    documentation du paquet <command>fp</command> n'est pas très détaillée et
+    compréhensible pour un grand débutant au langage latex. Voici les
+    commandes expliquées par un exemple.</sect2>
 
-<listitem>
-La commande  <command>\FPprint{\x}</command> permet d'afficher la valeur de x. Cependant,
-la commande <command>\numprint{...}</command> du paquet <command>
-\usepackage[autolanguage]{numprint}</command> est préférable car elle affiche
-une virgule pour les nombres décimaux au lieu d'un point et groupe par trois les
-chiffres.
-</listitem>
+    <itemizedlist>
+      <listitem>La commande <command>\FPprint{\x}</command> permet d'afficher
+      la valeur de x. Cependant, la commande <command>\numprint{...}</command>
+      du paquet <command> \usepackage[autolanguage]{numprint}</command> est
+      préférable car elle affiche une virgule pour les nombres décimaux au
+      lieu d'un point et groupe par trois les chiffres.</listitem>
 
-<listitem>La fonction \FPrandom{\x} calcul un nombre aléatoire.</listitem>
+      <listitem>La fonction \FPrandom{\x} calcul un nombre
+      aléatoire.</listitem>
 
-<listitem>
-La fonction \FPseed\x permet de modifier le système de génération de nombre
-aléatoire : \x peut prendre \time, \the\day, \the\month, \the\year
-
-<programlisting>
+      <listitem>La fonction \FPseed\x permet de modifier le système de
+      génération de nombre aléatoire : \x peut prendre \time, \the\day,
+      \the\month, \the\year <programlisting>
 \FPeval{\compteur}{clip(\the\month*\the\time*1.1)}
 \FPseed\time
-</programlisting>
-</listitem>
+</programlisting></listitem>
 
-<listitem>La fonction \FPeval{\x}{...} permet de faire des calculs et d’affecter le résultat
-à la variable \x.</listitem>
+      <listitem>La fonction \FPeval{\x}{...} permet de faire des calculs et
+      d’affecter le résultat à la variable \x.</listitem>
 
-<listitem>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a chiffres après la
-virgule à la variable \y.
-<note>
-On peut cumuler les fonctions \FPeval (avec toutes les fonctions de calcul) et \FPtrunc.
-<programlisting>
+      <listitem>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a
+      chiffres après la virgule à la variable \y. <note> On peut cumuler les
+      fonctions \FPeval (avec toutes les fonctions de calcul) et \FPtrunc.
+      <programlisting>
 \FPeval{\x}{trunc(a+random*b,c)}
-</programlisting>
-<itemizedlist>
-<listitem>\x sera compris entre a et b</listitem>
-<listitem>, séparateur</listitem>
-<listitem>c : nombre de chiffre après la virgule</listitem>
-</itemizedlist>
-</note>
-</listitem>
+</programlisting> <itemizedlist>
+          <listitem>\x sera compris entre a et b</listitem>
 
-<listitem>La fonction \FPround{\y}{\x}{a} transfère le nombre \x avec a chiffres après la
-virgule à la variable \y et arrondi.</listitem>
+          <listitem>, séparateur</listitem>
 
-<listitem>La fonction \FPclip{\y}{\x} transfère le nombre \x , sans les zéros après la virgule,
-à la variable \y.</listitem>
+          <listitem>c : nombre de chiffre après la virgule</listitem>
+        </itemizedlist> </note></listitem>
 
-<listitem>Les fonctions \FPadd{\x}{a}{b}, \FPdiv{\x}{a}{b}, \FPmul{\x}{a}{b},
-\FPsub{\x}{a}{b} attribue à la variable \x la somme de a+b, le quotient de a/b,
-le produit de a*b, et le reste de a-b</listitem>
+      <listitem>La fonction \FPround{\y}{\x}{a} transfère le nombre \x avec a
+      chiffres après la virgule à la variable \y et arrondi.</listitem>
 
-<listitem>La fonction FPset{\x}{\y} attribue à la variable \x (macro ou chaîne) la valeur \y</listitem>
+      <listitem>La fonction \FPclip{\y}{\x} transfère le nombre \x , sans les
+      zéros après la virgule, à la variable \y.</listitem>
 
-<listitem>\FPabs{\x}{a} renvoie la valeur absolue de a, \FPneg{\y}{a} renvoie l'opposé de a	</listitem>
+      <listitem>Les fonctions \FPadd{\x}{a}{b}, \FPdiv{\x}{a}{b},
+      \FPmul{\x}{a}{b}, \FPsub{\x}{a}{b} attribue à la variable \x la somme de
+      a+b, le quotient de a/b, le produit de a*b, et le reste de
+      a-b</listitem>
 
-<listitem><para>La commande \FPiflt{\x}{\y} {instruction 1} \else {instruction 2} \fi 
-vérifie si \x est inérieur à \y dans ce cas l'instruction 1 est lancée sinon c'est
-l'instruction 2. </para>
+      <listitem>La fonction FPset{\x}{\y} attribue à la variable \x (macro ou
+      chaîne) la valeur \y</listitem>
 
-<para> Même principe les fonctions \FPifeq{\x}{\y}, \FPifgt{\x}{\y}, \FPifneg{\x}, \FPifpos{\x}, \FPifzero{\x},
- \FPifint{\x} qui sont respctivement des tests d'égalité, de supériorité, de négativité, de positivité, de nullité
-ou d'entier.</para>
-</listitem>
+      <listitem>\FPabs{\x}{a} renvoie la valeur absolue de a, \FPneg{\y}{a}
+      renvoie l'opposé de a</listitem>
 
-<listitem>
-<para>La commande \FPlsolve{\x}{a}{b} cherche la valeur réelle \x pour résoudre
-l'équation<programlisting>  a*\x+b=0.</programlisting></para>
+      <listitem>
+        <para>La commande \FPiflt{\x}{\y} {instruction 1} \else {instruction
+        2} \fi vérifie si \x est inérieur à \y dans ce cas l'instruction 1 est
+        lancée sinon c'est l'instruction 2.</para>
 
-<para>La commande \FPqsolve{\x}{\y}{a}{b}{c} cherche les valeurs réelles \x et \y pour
-résoudre l'équation <programlisting> a*x^2+b*x+c=0</programlisting></para>
+        <para>Même principe les fonctions \FPifeq{\x}{\y}, \FPifgt{\x}{\y},
+        \FPifneg{\x}, \FPifpos{\x}, \FPifzero{\x}, \FPifint{\x} qui sont
+        respctivement des tests d'égalité, de supériorité, de négativité, de
+        positivité, de nullité ou d'entier.</para>
+      </listitem>
 
-<para>La commande \FPcsolve{\x}{\y}{\z}{a}{b}{c}{d} cherche les valeurs réelles \x, \y
-et \z pour résoudre l'équation<programlisting> a*x^3+b*x^2+c*x+d=0</programlisting>
-</para>
+      <listitem>
+        <para>La commande \FPlsolve{\x}{a}{b} cherche la valeur réelle \x pour
+        résoudre l'équation<programlisting>  a*\x+b=0.</programlisting></para>
 
-<para>La commande \FPqqsolve{\w}{\x}{\y}{\z}{a}{b}{c}{d}{e} cherche les valeurs réelles
-\w, \x, \y et \z pour résoudre l'équation <programlisting> a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
-</listitem>
+        <para>La commande \FPqsolve{\x}{\y}{a}{b}{c} cherche les valeurs
+        réelles \x et \y pour résoudre l'équation <programlisting> a*x^2+b*x+c=0</programlisting></para>
 
-<listitem>La commande \FPe affiche la valeur de e=2.71828182845904523,
-la commande \FPpi affich la valeur de pi.</listitem>
+        <para>La commande \FPcsolve{\x}{\y}{\z}{a}{b}{c}{d} cherche les
+        valeurs réelles \x, \y et \z pour résoudre l'équation<programlisting> a*x^3+b*x^2+c*x+d=0</programlisting></para>
 
-<listitem>La commande \FPexp{\x}{a} attribue à la variable \x la valeur e^a, la commande \FPln{\x}{a} attribue à la variable \x la valeur ln(a)</listitem>
+        <para>La commande \FPqqsolve{\w}{\x}{\y}{\z}{a}{b}{c}{d}{e} cherche
+        les valeurs réelles \w, \x, \y et \z pour résoudre l'équation
+        <programlisting> a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
+      </listitem>
 
-<listitem><para>La commande \FPpow{\x}{a}{b} attribue à la variable \x la valeur a^b, La commande \FProot{\x}{a}{b} attribue à la variable \x la valeur a^(1/b).</para>
-<para>On peut écrire \FPeval{\x}{root(b,a)}</para></listitem>
+      <listitem>La commande \FPe affiche la valeur de e=2.71828182845904523,
+      la commande \FPpi affich la valeur de pi.</listitem>
 
-<listitem>La commande \FPpascal{\x}{a} attribe à \x la ligne a du triangle de pascal.</listitem>
+      <listitem>La commande \FPexp{\x}{a} attribue à la variable \x la valeur
+      e^a, la commande \FPln{\x}{a} attribue à la variable \x la valeur
+      ln(a)</listitem>
 
-<listitem>La commande \FPsin{\x}{a} attribue à \x la valeur du sinus de a qui est exprimé
-en radians.
-<programlisting>\FPeval{\x}{sin(30*\FPpi/180)}\FPprint{\x}</programlisting>
-<para> La commande est identique pour les autres fonctions trigonométriques Il faut remplacer sin par le terme entre parenthèse.</para>
+      <listitem>
+        <para>La commande \FPpow{\x}{a}{b} attribue à la variable \x la valeur
+        a^b, La commande \FProot{\x}{a}{b} attribue à la variable \x la valeur
+        a^(1/b).</para>
 
-<itemizedlist>
+        <para>On peut écrire \FPeval{\x}{root(b,a)}</para>
+      </listitem>
 
-<listitem> cosinus (cos), tangente (tan), cotangente (cot)</listitem>
+      <listitem>La commande \FPpascal{\x}{a} attribe à \x la ligne a du
+      triangle de pascal.</listitem>
 
-<listitem>La commande  \FPsincos{\x}{\y}{a} attribue à \x la valeur du sinus de a qui est
-exprimé en radians et \y la valeur du cosinus de a qui est exprimé en radians.</listitem>
+      <listitem>La commande \FPsin{\x}{a} attribue à \x la valeur du sinus de
+      a qui est exprimé en radians. <programlisting>\FPeval{\x}{sin(30*\FPpi/180)}\FPprint{\x}</programlisting>
+      <para> La commande est identique pour les autres fonctions
+      trigonométriques Il faut remplacer sin par le terme entre
+      parenthèse.</para> <itemizedlist>
+          <listitem>cosinus (cos), tangente (tan), cotangente (cot)</listitem>
 
-<listitem>La commande \FPtancot{\x}{\y}{a} attribue à \x la valeur de la tangente de a qui
-est exprimé en radians et \y la valeur de la cotangente de a.</listitem>
+          <listitem>La commande \FPsincos{\x}{\y}{a} attribue à \x la valeur
+          du sinus de a qui est exprimé en radians et \y la valeur du cosinus
+          de a qui est exprimé en radians.</listitem>
 
-<listitem>arcsinus (arcsin), arccos(arccos), arctangent (arctan), arccot(arc cotangente)</listitem>
+          <listitem>La commande \FPtancot{\x}{\y}{a} attribue à \x la valeur
+          de la tangente de a qui est exprimé en radians et \y la valeur de la
+          cotangente de a.</listitem>
 
-<listitem>La commande \FParcsincos{\x}{\y}{a} attribue à \x la valeur de l’arc sinus(a),
-\x sera exprimé en radians, à \y la valeur de l’arc cosinus(a), \y sera exprimé
-en radians.</listitem>
+          <listitem>arcsinus (arcsin), arccos(arccos), arctangent (arctan),
+          arccot(arc cotangente)</listitem>
 
-<listitem>La commande \FParctancot{\x}{\y}{a} attribue à \x la valeur de l’arc tangente(a),
-\x sera exprimé en radians, à \y la valeur de l’arc cotangente(a), \y sera exprimé
-en radians.</listitem>
-</itemizedlist>
+          <listitem>La commande \FParcsincos{\x}{\y}{a} attribue à \x la
+          valeur de l’arc sinus(a), \x sera exprimé en radians, à \y la valeur
+          de l’arc cosinus(a), \y sera exprimé en radians.</listitem>
 
-</listitem>
-</itemizedlist>
-
-
-
-</sect1>
+          <listitem>La commande \FParctancot{\x}{\y}{a} attribue à \x la
+          valeur de l’arc tangente(a), \x sera exprimé en radians, à \y la
+          valeur de l’arc cotangente(a), \y sera exprimé en
+          radians.</listitem>
+        </itemizedlist></listitem>
+    </itemizedlist>
+  </sect1>
 </article>
