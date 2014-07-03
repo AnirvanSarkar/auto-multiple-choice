@@ -300,9 +300,9 @@ sub compare_names {
   my $name=$self->{'names_model'}->get($iter,NAMES_NAME);
 
   if($self->{'complete_beginning'}) {
-    return($name =~ /^$key/i);
+    return($name =~ /^\Q$key\E/i);
   } else {
-    return($name =~ /$key/i);
+    return($name =~ /\Q$key\E/i);
   }
 }
 
