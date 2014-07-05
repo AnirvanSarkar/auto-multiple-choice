@@ -47,6 +47,7 @@ my $sendmail_path='/usr/sbin/sendmail';
 my $smtp_host='smtp';
 my $smtp_port=25;
 my $text='';
+my $text_content_type='text/plain';
 my $subject='';
 my $project_name='';
 my $cc='';
@@ -66,6 +67,7 @@ GetOptions("project=s"=>\$project_dir,
 	   "email-column=s"=>\$email_column,
 	   "sender=s"=>\$sender,
 	   "text=s"=>\$text,
+	   "text-content-type:s"=>\$text_content_type,
 	   "subject=s"=>\$subject,
 	   "transport=s"=>\$transport,
 	   "sendmail-path=s"=>\$sendmail_path,
@@ -208,7 +210,7 @@ STUDENT: for my $i (@$r) {
       my @parts=
 	(
 	 Email::MIME->create(attributes=>
-			     {content_type => "text/plain",
+			     {content_type => $text_content_type,
 			      encoding     => "base64",
 			      charset      => "UTF-8",
 			     },
