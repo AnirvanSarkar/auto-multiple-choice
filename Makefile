@@ -166,6 +166,7 @@ sync:
 
 clean_IN: FORCE
 	rm -rf debian/auto-multiple-choice
+	rm -f local/deb-auto-changelog
 	rm -f $(FROM_IN)
 
 clean: clean_IN FORCE
