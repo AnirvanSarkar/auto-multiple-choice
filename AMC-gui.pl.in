@@ -393,6 +393,8 @@ my %projet_defaut=('texsrc'=>'',
 		   'email_subject'=>"",
 		   'email_text'=>"",
 		   'email_attachment'=>[],
+		   
+		   'email_use_html'=>'',
 		   );
 
 # Add default project options for each export module:
@@ -6257,7 +6259,8 @@ sub send_emails {
   # Then, open configuration window...
   my $gap=read_glade('mailing',
 		     qw/emails_list email_dialog label_name
-			attachments_list attachments_expander/);
+			attachments_list attachments_expander
+			email_cb_email_use_html/);
 
   $w{'label_name'}->set_text(project_email_name());
 
@@ -6320,7 +6323,7 @@ sub send_emails {
   email_attachment_addtolist(@{$projet{'options'}->{'email_attachment'}});
 
   $w{'attachments_expander'}->set_expanded(@{$projet{'options'}->{'email_attachment'}} ? 1 : 0);
-
+  
   if($o{'conserve_taille'}) {
     AMC::Gui::WindowSize::size_monitor
 	($w{'email_dialog'},{env=>\%o,
@@ -6387,6 +6390,7 @@ sub send_emails {
 		      "--sender",$o{'email_sender'},
 		      "--subject",$projet{'options'}->{'email_subject'},
 		      "--text",$projet{'options'}->{'email_text'},
+		      "--text-content-type",($projet{'options'}->{'email_use_html'} ? 'text/html' : 'text/plain'),
 		      "--transport",$o{'email_transport'},
 		      "--sendmail-path",$o{'email_sendmail_path'},
 		      "--smtp-host",$o{'email_smtp_host'},
