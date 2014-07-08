@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -954,7 +954,7 @@ Combien y a-t-il d'étoiles dans le ciel ?
       de la commande LaTeX <command>\includegraphics</command> (par exemple,
       <parameter>width=1cm</parameter>, ou
       <parameter>keepaspectratio</parameter>). Pour obtenir une image centrée
-      sur une ligne et ayant pour largeur les trois quards de la ligne, on
+      sur une ligne et ayant pour largeur les trois quarts de la ligne, on
       utilisera de même :</para>
 
       <programlisting>!{center}[width=.75\linewidth]images/carte.pdf!</programlisting>
@@ -2390,9 +2390,8 @@ et inscrivez votre nom et prénom ci-dessous.
         fournie par l'étudiant et affecte les points qui correspondent en
         cochant certaines cases qui lui sont réservées. Il peut ensuite
         scanner les copies et utiliser AMC pour les corriger, tout en
-        intégrant les résultats des questions ouvertes dans la notation (dans
-        l'exemple suivant, chaque case cochée rapporte un demi-point à
-        l'étudiant) : <programlisting>\begin{question}{ouverte}
+        intégrant les résultats des questions ouvertes dans la notation  :
+         <programlisting>\begin{question}{ouverte}
   Donnez la d\'efinition de l'inflation.
   \AMCOpen{lines=5}{\wrongchoice[F]{f}\scoring{0}\wrongchoice[P]{p}\scoring{1}\correctchoice[J]{j}\scoring{2}}
 \end{question}
@@ -3755,7 +3754,39 @@ Nom et prénom :
             <guimenuitem>page</guimenuitem> permet de visualiser la page
             scannée et le cadre et les cases tels qu'ils sont
             détectés).</para>
+      
+          
+<note>
+            <itemizedlist>
+            <listitem>
+            <para>
+            AMC dispose, depuis la version 1.2.1419, d'une option permettant de caler les feuilles avec seulement trois marques. Vous devez configurer AMC :
+             <menuchoice>
+            <guimenu>Édition</guimenu>
+
+            <guimenuitem>Préférences</guimenuitem>
+
+            <guimenuitem>Scan</guimenuitem>
+            
+            <guimenuitem>Process scan with 3 corner marks</guimenuitem>
+            </menuchoice>
+            </para>
+            </listitem>
+            <listitem>
+            <para>
+            AMC ne dispose d'aucune fonction de traitement d'image. Pour corriger le calage, vous pouvez redessiner les marques à l'aide d'un éditeur d'image.
+            <itemizedlist>
+            <listitem> Notez les scans non reconnus, <emphasis>ne les effacez pas !</emphasis></listitem>
+            <listitem>Ouvrez-les avec l'éditeur d'image (les fichiers se trouvent dans le dossier scan du projet).</listitem>
+            <listitem>Sauvegardez-les (Ctrl+S).</listitem>
+            <listitem>Reprenez la correction en ne choisissant que les derniers fichiers modifiés.</listitem>
+</itemizedlist>
+           </para>
+            </listitem> 
+            </itemizedlist>
+            </note>
           </listitem>
+          
 
           <listitem>
             <para>La valeur <emphasis>sensibilité</emphasis> est un indicateur
