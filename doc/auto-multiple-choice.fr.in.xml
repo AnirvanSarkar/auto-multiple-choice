@@ -1886,10 +1886,10 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 
         <para>Lors de l'impression du corrigé, vous pouvez apporter des
         précisions grâce à la commande <command>\explain</command>. Cette
-        commande, à insérer dans un environnement question, affichera le texte
+        commande, à insérer dans un environnement <option>question</option> (ce qui inclut les environnements <option>questionmult</option>, <option>questionmultx</option>), affichera le texte
         écrit.</para>
 
-        <programlisting>
+             <programlisting>
 \begin{question}{combustion}
 Quel gaz apparaît lors de la combustion incomplète du butane~?
 \begin{reponses}
@@ -1901,6 +1901,53 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 \end{question}
 </programlisting>
       </sect3>
+
+        <note>
+        <para>Par défaut, le mot <emphasis>Explication</emphasis> sera affiché. Vous pouvez modifiez ce texte pour une ou quelques questions mais pas toutes avec la commande <command>\AMCtext</command> (Voir <xref linkend="AMCtext"/>).
+        </para>
+        </note>
+
+        <para>Un exemple issu de la documentation anglaise.</para>
+
+
+
+       <para><programlisting>
+\begin{question}{elevation}
+  Parmi les montagnes suivantes, laquelle est la plus haute ?
+      \begin{reponses}
+      \bonne{Sagarmatha}
+      \mauvaise{K2}
+      \mauvaise{Mont Blanc}
+      \mauvaise{Aconcagua}
+  \end{reponses}
+  \explain{Sagarmatha qui signifie littéralement `la tête du ciel' est le nom indigène du mont Everest, la montagne la plus haute du monde.}
+\end{question}
+
+\begin{question}{odd}
+  Cochez l'intrus.
+  \begin{reponses}
+      \bonne{Kilimanjaro}
+      \mauvaise{Himalayas}
+      \mauvaise{Alpes}
+      \mauvaise{Andes}
+  \end{reponses}
+  \AMCtext{explain}{\textit{\textbf{Raison :}}}
+  \explain{Le Kilimanjaro est une montagne tandis que les autres sont des chaînes de montagnes.}
+\end{question}
+
+\begin{questionmult}{himalaya}
+  Parmi les montagnes suivantes, lesquelles se trouvent dans l'Himalaya ?
+  \begin{reponses}
+      \bonne{Mount Everest}
+      \bonne{K2}
+      \mauvaise{Mont Blanc}
+      \mauvaise{Aconcagua}
+  \end{reponses}
+  \explain{L'Aconcagua est situé dans la cordillère des Andes tandis que le Mont Blanc se trouve dans les Alpes.}
+\end{questionmult}</programlisting></para>
+
+        <para><emphasis>Explication :</emphasis> sera affiché avant les explications de la première et troisième réponse, <emphasis>Raison :</emphasis> avant les explications de la deuxième question.</para>
+
 
       <sect3>
         <title>Réponses sur plusieurs colonnes</title>
@@ -2767,7 +2814,7 @@ et inscrivez votre nom et prénom ci-dessous.
  sur \AMCpageref{lastpage}\hfill{}}</programlisting>
       </example>
 
-      <sect3>
+      <sect3 id="AMCtext">
         <title>Personnalisation des textes insérés par AMC</title>
 
         <para>Il est possible de personnaliser certain textes insérés par le
@@ -2795,6 +2842,13 @@ et inscrivez votre nom et prénom ci-dessous.
             remplace « Catalogue » (en français) par le
             <replaceable>titre</replaceable> fourni sur le catalogue de
             questions fourni avec l'option <option>catalog</option>.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\AMCtext{explain}{<replaceable>titre</replaceable>}</code>
+            remplace « Explication » (en français) par le
+            <replaceable>titre</replaceable> avant le texte explicatif
+            fourni avec l'option <option>explain</option>.</para>
           </listitem>
 
           <listitem>
@@ -4552,7 +4606,7 @@ Durée : 10 minutes.
         <note>
            Si vous estimez qu'une question doit être annulée, modifiez le barème comme ceci 
 
-          <command>\bareme{b=0,m=0,e=0,v=0}</command>
+          <command>\bareme{b=0,m=0,e=0,v=0}</command> ou notez la question comme indicative <command>\QuestionIndicative</command>.
 
            
         </note>
