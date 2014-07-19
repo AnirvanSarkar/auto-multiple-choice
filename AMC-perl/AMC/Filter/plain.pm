@@ -76,7 +76,7 @@ sub new {
       {'latexengine'=>'xelatex','xltxtra'=>1,
        'questionblocks'=>1,'shufflequestions'=>1,
        'completemulti'=>1,
-       'font'=>'Linux Libertine O',
+       'font'=>'LinLibertine_R.otf',
        'arabicfont'=>'Rasheeq',
        'defaultscoringm'=>'haut=2',
        'l-name'=>__("Name and surname"),

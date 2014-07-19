@@ -642,6 +642,18 @@ sub check_fonts {
 	while(<FC>) { chomp();$ok=1 if(/./); }
 	close FC;
       }
+      if(!$ok) {
+	my $re='('.join("|",map { "\Q$_\E" } (@{$spec->{'family'}})).')';
+	print "$re\n";
+	open FC,"-|","fc-list",":","file";
+      FCL: while(<FC>) {
+	  if(/$re:\s*$/) {
+	    $ok=1;
+	    last FCL;
+	  }
+	}
+	close FC;
+      }
       return(0) if(!$ok);
     }
   }
