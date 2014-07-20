@@ -643,8 +643,7 @@ sub check_fonts {
 	close FC;
       }
       if(!$ok) {
-	my $re='('.join("|",map { "\Q$_\E" } (@{$spec->{'family'}})).')';
-	print "$re\n";
+	my $re='('.join("|",map { quotemeta($_) } (@{$spec->{'family'}})).')';
 	open FC,"-|","fc-list",":","file";
       FCL: while(<FC>) {
 	  if(/$re:\s*$/) {
