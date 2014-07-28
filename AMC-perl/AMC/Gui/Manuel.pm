@@ -166,16 +166,14 @@ sub new {
 	$self->{'diag_tree'}->append_column ($column);
     }
 
-    $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+    $self->{'general'}->get_window()->set_cursor($self->{'cursor_watch'});
     Gtk3::main_iteration while ( Gtk3::events_pending );
 
     $self->maj_list_all;
 
-    $self->{'general'}->window()->set_cursor(undef);
+    $self->{'general'}->get_window()->set_cursor(undef);
 
     $self->{'gui'}->connect_signals(undef,$self);
-
-    $self->{'area'}->signal_connect('expose_event'=>\&AMC::Gui::Manuel::expose_area);
 
     $self->select_page(0);
 
@@ -460,7 +458,7 @@ sub charge_i {
 
     } else {
 
-      $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+      $self->{'general'}->get_window()->set_cursor($self->{'cursor_watch'});
       Gtk3::main_iteration while ( Gtk3::events_pending );
 
       system("pdftoppm","-f",$page,"-l",$page,
@@ -551,7 +549,7 @@ sub charge_i {
 
     # fin du traitement...
 
-    $self->{'general'}->window()->set_cursor(undef);
+    $self->{'general'}->get_window()->set_cursor(undef);
 }
 
 sub ecrit {

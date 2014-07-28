@@ -3846,8 +3846,6 @@ sub noter_postcorrect {
 			      postcorrect_photo postcorrect_apply/);
 
 	AMC::Gui::PageArea::add_feuille($w{'postcorrect_photo'});
-	$w{'postcorrect_photo'}
-	  ->signal_connect('expose_event'=>\&AMC::Gui::PageArea::expose_drawing);
 
 	debug "Student range: $postcorrect_student_min,$postcorrect_student_max\n";
 	$w{'postcorrect_student'}->set_range($postcorrect_student_min,$postcorrect_student_max);
@@ -5040,7 +5038,6 @@ sub open_unrecognized {
 
   for (qw/scan preprocessed/) {
     AMC::Gui::PageArea::add_feuille($w{$_.'_area'});
-    $w{$_.'_area'}->signal_connect('expose_event'=>\&AMC::Gui::PageArea::expose_drawing);
   }
 
   $w{'inconnu_tree'}->set_model($inconnu_store);
