@@ -3312,7 +3312,11 @@ sub valide_liste {
 
     my $fn=$fl;
     $fn =~ s/.*\///;
-
+    
+    # For proper markup rendering escape '<', '>' and '&' characters
+    # in filename with \<, \gt;, and \&
+    $fn=Glib::Markup::escape_text($fn);
+    
     if($fl) {
 	$w{'liste_filename'}->set_markup("<b>$fn</b>");
 	for(qw/liste_path liste_edit/) {
