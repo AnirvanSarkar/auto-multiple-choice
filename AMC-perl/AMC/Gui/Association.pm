@@ -47,9 +47,9 @@ use constant {
 
 use_gettext;
 
-my $col_pris = Gtk3::Gdk::Color::parse("#FFD0A9");
-my $col_actif = Gtk3::Gdk::Color::parse("#14933A");
-my $col_actif_fond = Gtk3::Gdk::Color::parse("#5FD581");
+my $col_pris = Gtk3::Gdk::RGBA::parse("#FFD0A9");
+my $col_actif = Gtk3::Gdk::RGBA::parse("#14933A");
+my $col_actif_fond = Gtk3::Gdk::RGBA::parse("#5FD581");
 
 sub new {
     my %o=(@_);
@@ -276,7 +276,6 @@ sub new {
 
     $self->{'images'}=\@images;
 
-    $self->{'photo'}->signal_connect('expose_event'=>\&AMC::Gui::PageArea::expose_drawing);
     $self->{'gui'}->connect_signals(undef,$self);
 
     $self->{'iimage'}=-1;
@@ -335,7 +334,7 @@ sub set_n_cols {
   my ($self)=@_;
   my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
 
-  $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
+  $self->{'general'}->get_window()->set_cursor($self->{'cursor_watch'});
   Gtk3::main_iteration while ( Gtk3::events_pending );
 
   $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
@@ -358,7 +357,7 @@ sub set_n_cols {
   $self->{'scrolled_tableau'}->set_policy('never','automatic');
 
   Gtk3::main_iteration while ( Gtk3::events_pending );
-  $self->{'general'}->window()->set_cursor(undef);
+  $self->{'general'}->get_window()->set_cursor(undef);
 }
 
 # Add a column to the names table
@@ -725,17 +724,17 @@ sub charge_image {
 
     if(defined($file)) {
       if($file) {
-	$self->{'photo'}->set_image($file);
+	$self->{'photo'}->set_content(image=>$file);
       } else {
 	my $text=pageids_string(map { $self->{'images'}->[$i]->{$_} } (qw/student page copy/));
-	$self->{'photo'}->set_image("text:$text");
+	$self->{'photo'}->set_content(text=>$text);
       }
       $self->{'image_sc'}
 	= [$self->image_sc($i)];
       $self->vraie_copie(1);
     } else {
 	$i=-1;
-	$self->{'photo'}->set_image('');
+	$self->{'photo'}->set_content(background_color=>'#6CB9ED',text=>__"End");
 	$self->vraie_copie(0);
     }
     $self->{'iimage'}=$i;
@@ -835,11 +834,11 @@ sub style_bouton {
 	if($pris) {
 	    $b->set_relief(GTK_RELIEF_NONE);
 	    $b->override_background_color('prelight',($actif ? $col_actif : $col_pris));
-	    $b->child->set_text($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
+	    $b->set_label($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
 	} else {
 	    $b->set_relief(GTK_RELIEF_NORMAL);
 	    $b->override_background_color('prelight',undef);
-	    $b->child->set_text($self->{'liste'}->data_n($i,'_ID_'));
+	    $b->set_label($self->{'liste'}->data_n($i,'_ID_'));
 	}
 	if($eb) {
 	    my $col=undef;

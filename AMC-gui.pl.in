@@ -3884,9 +3884,9 @@ sub postcorrect_change_copy {
     }
     debug "Postcorrect name field image: $f";
     if(-f $f) {
-      $w{'postcorrect_photo'}->set_image($f);
+      $w{'postcorrect_photo'}->set_content(image=>$f);
     } else {
-      $w{'postcorrect_photo'}->set_image('NONE');
+      $w{'postcorrect_photo'}->set_content();
     }
 }
 
@@ -5079,17 +5079,17 @@ sub unrecognized_line {
     $w{'inconnu_tree'}->scroll_to_cell($first_selected);
     my $scan=$shortcuts->absolu($inconnu_store->get($iter,INCONNU_FILE));
     if(-f $scan) {
-      $w{'scan_area'}->set_image($scan);
+      $w{'scan_area'}->set_content(image=>$scan);
     } else {
       debug_and_stderr "Scan not found: $scan";
-      $w{'scan_area'}->set_image('NONE');
+      $w{'scan_area'}->set_content();
     }
 
     my $preproc=$inconnu_store->get($iter,INCONNU_PREPROC);
     if(-f $preproc) {
-      $w{'preprocessed_area'}->set_image($preproc);
+      $w{'preprocessed_area'}->set_content(image=>$preproc);
     } else {
-      $w{'preprocessed_area'}->set_image('NONE');
+      $w{'preprocessed_area'}->set_content();
     }
 
     if($w{'scan_area'}->get_image) {
@@ -5102,8 +5102,8 @@ sub unrecognized_line {
       $w{'state_scanrecog'}->set_text(sprintf((__"Error loading scan %s"),$scan));
     }
   } else {
-    $w{'scan_area'}->set_image('NONE');
-    $w{'preprocessed_area'}->set_image('NONE');
+    $w{'scan_area'}->set_content();
+    $w{'preprocessed_area'}->set_content();
     state_image('scanrecog','gtk-dialog-question');
     $w{'state_scanrecog'}->set_text(__"No scan selected");
   }

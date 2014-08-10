@@ -419,7 +419,7 @@ sub charge_i {
     my @spc=$self->iter_to_spc($current_iter);
 
     if(!@spc) {
-      $self->{'area'}->set_image('NONE');
+      $self->{'area'}->set_content();
       $self->{'displayed_iid'}=-1;
       return();
     }
@@ -541,8 +541,8 @@ sub charge_i {
 
     # utilisation
 
-    $self->{'area'}->set_image($display_image,
-			       $self->{'layinfo'});
+    $self->{'area'}->set_content(image=>$display_image,
+				 layout_info=>$self->{'layinfo'});
 
     unlink($tmp_ppm) if($tmp_ppm);
     unlink($tmp_image) if($tmp_image && ($tmp_ppm ne $tmp_image) && !get_debug());

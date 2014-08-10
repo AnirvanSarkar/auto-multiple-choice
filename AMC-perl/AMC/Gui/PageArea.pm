@@ -26,14 +26,15 @@ use AMC::Basic;
 @ISA=("Gtk3::DrawingArea");
 
 sub add_feuille {
-    my ($self,$coul,%oo)=@_;
+    my ($self,%oo)=@_;
     bless($self,"AMC::Gui::PageArea");
 
-    $coul='red' if(!$coul);
+    $self->{image_file}='';
+    $self->{text}='';
+    $self->{background_color}='';
 
     $self->{'marks'}='';
 
-    $self->{'i-file'}='';
     $self->{'i-src'}='';
     $self->{'tx'}=1;
     $self->{'ty'}=1;
@@ -49,6 +50,7 @@ sub add_feuille {
     $self->{'unticked_color_name'}="#429DE5";
     $self->{question_color_name}="#47D265";
     $self->{scorezone_color_name}="#DE61E2";
+    $self->{drawings_color_name}="red";
 
     $self->{'font'}=Pango::FontDescription::from_string("128");
 
@@ -56,13 +58,15 @@ sub add_feuille {
 	$self->{$_}=$oo{$_} if(defined($self->{$_}));
     }
 
-    $self->{'color'}= Gtk3::Gdk::RGBA::parse($coul);
+    $self->{'text_color'}=Gtk3::Gdk::RGBA::parse('black');
     $self->{'scorezone_color'}=
       Gtk3::Gdk::RGBA::parse($self->{scorezone_color_name});
     $self->{'question_color'}=
       Gtk3::Gdk::RGBA::parse($self->{question_color_name});
     $self->{'unticked_color'}=
       Gtk3::Gdk::RGBA::parse($self->{'unticked_color_name'});
+    $self->{'drawings_color'}=
+      Gtk3::Gdk::RGBA::parse($self->{'drawings_color_name'});
 
     if($self->{'marks'}) {
 	$self->{'colormark'}= Gtk3::Gdk::RGBA::parse($self->{'marks'});
@@ -74,23 +78,24 @@ sub add_feuille {
     return($self);
 }
 
+sub set_background {
+  my ($self,$color)=@_;
+  if($color) {
+    $self->{background_color}=Gtk3::Gdk::RGBA::parse($color);
+  } else {
+    $self->{background_color}='';
+  }
+}
+
+sub set_text {
+  my ($self,$text)=@_;
+  $self->{text}=$text;
+}
+
 sub set_image {
     my ($self,$image,$layinfo)=@_;
-    $self->{'i-file'}=$image;
-    if($image =~ /text:(.*)/) {
-      my $text=$1;
-
-      my $layout=$self->create_pango_layout($text);
-      # my $colormap=$self->get_colormap;
-      # $layout->set_font_description($self->{'font'});
-      # my ($text_x,$text_y)=$layout->get_pixel_size();
-      # my $pixmap=Gtk3::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
-      # $pixmap->set_colormap($colormap);
-      # $pixmap->draw_rectangle($self->style->bg_gc(GTK_STATE_NORMAL),TRUE,0,0,$text_x,$text_y);
-      # $pixmap->draw_layout($self->style->fg_gc(GTK_STATE_NORMAL),0,0,$layout);
-      # my $pixbuf=Gtk3::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
-      # $self->{'i-src'}=$pixbuf;
-    } elsif($image && -f $image) {
+    $self->{image_file}=$image;
+    if($image && -f $image) {
       eval { $self->{'i-src'}=Gtk3::Gdk::Pixbuf->new_from_file($image); };
       if($@) {
 	# Error loading scan...
@@ -101,16 +106,20 @@ sub set_image {
 	$layinfo->{'page'}->{'height'}=$self->{'i-src'}->get_height
 	  if(!$layinfo->{'page'}->{'height'});
       }
-    } elsif($image eq 'NONE') {
-      $self->{'i-src'}='';
     } else {
-	$self->{'i-src'}=Gtk3::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,0,8,40,10);
-	$self->{'i-src'}->fill(0x48B6FF);
+      $self->{'i-src'}='';
     }
     $self->{'layinfo'}=$layinfo;
     $self->{'modifs'}=0;
     $self->allocate_drawing();
     $self->get_window->show;
+}
+
+sub set_content {
+  my ($self,%o)=@_;
+  $self->set_background($o{background_color});
+  $self->set_text($o{text});
+  $self->set_image($o{image},$o{layout_info});
 }
 
 sub get_image {
@@ -207,30 +216,34 @@ sub allocate_drawing {
   my ($self,$evenement,@donnees)=@_;
   my $r=$self->get_allocation;
 
-  return() if(!$self->{'i-src'});
+  if($self->{'i-src'}) {
 
-  $self->{'tx'}=$r->{width};
-  $self->{'ty'}=$self->{'yfactor'}*$r->{height};
+    $self->{'tx'}=$r->{width};
+    $self->{'ty'}=$self->{'yfactor'}*$r->{height};
 
-  debug("Rendering target size: ".$self->{'tx'}."x".$self->{'ty'});
+    debug("Rendering target size: ".$self->{'tx'}."x".$self->{'ty'});
 
-  my $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
-  my $sy=$self->{'ty'}/$self->{'i-src'}->get_height;
+    my $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
+    my $sy=$self->{'ty'}/$self->{'i-src'}->get_height;
 
-  if($sx<$sy) {
-    $self->{'ty'}=int($self->{'i-src'}->get_height*$sx);
-    $sy=$self->{'ty'}/$self->{'i-src'}->get_height;
+    if($sx<$sy) {
+      $self->{'ty'}=int($self->{'i-src'}->get_height*$sx);
+      $sy=$self->{'ty'}/$self->{'i-src'}->get_height;
+    }
+    if($sx>$sy) {
+      $self->{'tx'}=int($self->{'i-src'}->get_width*$sy);
+      $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
+    }
+
+    $self->{'sx'}=$sx;
+    $self->{'sy'}=$sy;
+
+    $self->set_size_request(-1,$self->{'ty'})
+      if($self->{'yfactor'}>1);
+  } else {
+    $self->{tx}=$r->{width};
+    $self->{ty}=$r->{height};
   }
-  if($sx>$sy) {
-    $self->{'tx'}=int($self->{'i-src'}->get_width*$sy);
-    $sx=$self->{'tx'}/$self->{'i-src'}->get_width;
-  }
-
-  $self->{'sx'}=$sx;
-  $self->{'sy'}=$sy;
-
-  $self->set_size_request(-1,$self->{'ty'})
-    if($self->{'yfactor'}>1);
 
   0;
 }
@@ -238,28 +251,49 @@ sub allocate_drawing {
 sub draw {
     my ($self,$context)=@_;
 
-    return() if(!$self->{'i-src'});
-
     $self->allocate_drawing() if(!$self->{'sx'} || !$self->{'sy'});
 
     return() if($self->{'tx'}<$self->{'min_render_size'}
 		|| $self->{'ty'}<$self->{'min_render_size'});
 
-    my $sx=$self->{'sx'};
-    my $sy=$self->{'sy'};
+    if($self->{background_color}) {
+      debug("Background color");
+      Gtk3::Gdk::cairo_set_source_rgba($context,$self->{background_color});
+      $context->paint();
+    }
 
-    debug("Rendering with SX=$sx SY=$sy");
+    if($self->{text}) {
+      Gtk3::Gdk::cairo_set_source_rgba($context,$self->{text_color});
+      $context->set_font_size(20);
+      my $ext=$context->text_extents($self->{text});
+      my $r=$self->{'tx'}/$ext->{width};
+      my $ry=$self->{'ty'}/$ext->{height};
+      $r=$ry if($ry<$r);
+      $context->set_font_size(20*$r);
+      $ext=$context->text_extents($self->{text});
+      $context->move_to(-$ext->{x_bearing}+int(($self->{tx}-$ext->{width})/2),
+			-$ext->{y_bearing});
+      $context->show_text($self->{text});
+      $context->stroke();
+    }
 
-    my $i=Gtk3::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,1,8,$self->{'tx'},$self->{'ty'});
+    if($self->{'i-src'}) {
+      my $sx=$self->{'sx'};
+      my $sy=$self->{'sy'};
 
-    $self->{'i-src'}->scale($i,0,0,$self->{'tx'},$self->{'ty'},0,0,
-			    $sx,$sy,
-			    GDK_INTERP_BILINEAR);
+      debug("Rendering with SX=$sx SY=$sy");
 
-    Gtk3::Gdk::cairo_set_source_pixbuf($context,$i,0,0);
-    $context->paint();
+      my $i=Gtk3::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,1,8,$self->{'tx'},$self->{'ty'});
 
-    debug "Done with rendering";
+      $self->{'i-src'}->scale($i,0,0,$self->{'tx'},$self->{'ty'},0,0,
+			      $sx,$sy,
+			      GDK_INTERP_BILINEAR);
+
+      Gtk3::Gdk::cairo_set_source_pixbuf($context,$i,0,0);
+      $context->paint();
+
+      debug "Done with rendering";
+    }
 
     if(($self->{'layinfo'}->{'box'} || $self->{'layinfo'}->{'namefield'})
       && ($self->{'layinfo'}->{'page'}->{'width'})) {
@@ -302,7 +336,7 @@ sub draw {
 	## boxes drawings
 
 	if($self->{'onscan'}) {
-	  Gtk3::Gdk::cairo_set_source_rgba($context,$self->{'color'});
+	  Gtk3::Gdk::cairo_set_source_rgba($context,$self->{'drawings_color'});
 	  for $box (grep { $_->{'ticked'} }
 		    @{$self->{'layinfo'}->{'box'}}) {
 	    $self->draw_box($context,$box,'');
@@ -313,7 +347,7 @@ sub draw {
 	    $self->draw_box($context,$box,'');
 	  }
 	} else {
-	  Gtk3::Gdk::cairo_set_source_rgba($context,$self->{'color'});
+	  Gtk3::Gdk::cairo_set_source_rgba($context,$self->{'drawings_color'});
 	  for $box (@{$self->{'layinfo'}->{'box'}}) {
 	    $self->draw_box($context,$box,$box->{'ticked'});
 	  }
