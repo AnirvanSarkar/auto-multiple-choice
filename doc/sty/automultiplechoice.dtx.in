@@ -2650,20 +2650,21 @@ Three digits and two letters:\insertgroup{mixed}.
 % 
 % \subsubsection{Formatting questions}
 %
-% \begin{macro}{\AMCquestionaff}\begin{macro}{\AMC@qaff}
+% \begin{macro}{\AMCquestionaff}\begin{macro}{\AMC@stepQuestion}\begin{macro}{\AMC@qaff}
 %   The counter |\AMCquestionaff| keeps track of the current question
 %   number. It can be redefined by the user, for example to print
 %   several questions without a number, and then print questions with a
 %   number starting at one.
 %   
-%   |\AMC@qaff| will increase this counter and format the question
-%   number out.
+%   |\AMC@stepQuestion| will increase this counter and |\AMC@qaff|will
+%   format the question number out.
 %    \begin{macrocode}
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
-\newcommand\AMC@qaff{\addtocounter{AMCquestionaff}{1}\arabic{AMCquestionaff}}
-%    \end{macrocode}\end{macro}\end{macro}
-%
+\newcommand\AMC@stepQuestion{\refstepcounter{AMCquestionaff}}
+\newcommand\AMC@qaff{\arabic{AMCquestionaff}}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
+% 
 % \begin{macro}{\AMCbeforeQuestion}
 % \begin{macro}{\AMCbeginQuestion}\begin{macro}{\multiSymbole}
 %     The command |\AMCbeforeQuestion| opens a new question. The
@@ -2702,6 +2703,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCbloc{\AMC@qbloctrue}
 \newenvironment{question}[2][]{%
   \def\AMCcurrentenv{question}%
+  \AMC@stepQuestion%
   \global\def\AMCid@name{#2}\AMC@affecte{#2}{\AMCid@quest}%
   \ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi%
   \AMCbeforeQuestion%
@@ -2727,6 +2729,7 @@ Three digits and two letters:\insertgroup{mixed}.
 {\end{questionmult}\endgroup}
 \newdimen\ouverte@vs
 \newenvironment{questionouverte}[1][3cm]{%
+  \AMC@stepQuestion%
   \AMCtype@multifalse\ouverte@vs=#1%
   \ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
   \AMCbeginQuestion{\AMC@qaff}{}}%
@@ -3754,18 +3757,20 @@ Three digits and two letters:\insertgroup{mixed}.
 %       labels for different sheets.
 %
 %    \begin{macrocode}
-\def\AMClabel#1{\expandafter\label{\the\AMCid@etud-#1}}
-\def\AMCref#1{\expandafter\ref{\the\AMCid@etud-#1}}
-\def\AMCpageref#1{\expandafter\pageref{\the\AMCid@etud-#1}}
+\newcommand\AMCstudentlabel[1]{\the\AMCid@etud-#1}
+\def\AMClabel#1{\expandafter\label{\AMCstudentlabel{#1}}}
+\def\AMCref#1{\expandafter\ref{\AMCstudentlabel{#1}}}
+\def\AMCpageref#1{\expandafter\pageref{\AMCstudentlabel{#1}}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMCqlabel}
 %   A label can be created for current question with
 %   |\AMCqlabel|\marg{label}. This label can be used with |\AMCref|
-%   and |\AMCpageref|.
+%   and |\AMCpageref|. This command is defined for backward
+%   compatibility only, since |\AMClabel| can also be used.
 %    \begin{macrocode}
 \newcommand{\AMCqlabel}[1]{%
-  \protected@write\@auxout{}{\string\newlabel{\the\AMCid@etud-#1}{{\arabic{AMCquestionaff}}{\thepage}}}%
+  \AMClabel{#1}%
 }
 %    \end{macrocode}
 % \end{macro}
