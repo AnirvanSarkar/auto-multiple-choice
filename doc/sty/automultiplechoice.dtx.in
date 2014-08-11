@@ -1354,6 +1354,11 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \def\AMC@loc@none{None of these answers are correct.}
 %    \end{macrocode}
+% Word for 'question', singular and plural forms:
+%    \begin{macrocode}
+\def\AMC@loc@question{question}
+\def\AMC@loc@questions{questions}
+%    \end{macrocode}
 %
 % \subsubsection{Dutch}
 %
@@ -1368,6 +1373,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@corrected{Correctie}
   \def\AMC@loc@catalog{Catalogus}
   \def\AMC@loc@none{Geen van de antwoorden is juist.}
+  \def\AMC@loc@question{vraag}
+  \def\AMC@loc@questions{vragen}
 }
 %    \end{macrocode}
 %
@@ -1384,6 +1391,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@corrected{Correction}
   \def\AMC@loc@catalog{Catalogue}
   \def\AMC@loc@none{Aucune de ces r\'eponses n'est correcte.}
+  \def\AMC@loc@question{question}
+  \def\AMC@loc@questions{questions}
 }
 %    \end{macrocode}
 %
@@ -1400,6 +1409,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@corrected{Korrektur}
   \def\AMC@loc@catalog{Katalog}
   \def\AMC@loc@none{Keine dieser Antworten ist korrekt.}
+  \def\AMC@loc@question{Frage}
+  \def\AMC@loc@questions{Fragen}
 }
 %    \end{macrocode}
 % 
@@ -1416,6 +1427,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@corrected{Correzione}
   \def\AMC@loc@catalog{Catalogo}
   \def\AMC@loc@none{Nessuna risposta \`e giusta.}
+  \def\AMC@loc@question{domanda}
+  \def\AMC@loc@questions{domande}
 }
 %    \end{macrocode}
 % 
@@ -1432,6 +1445,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@corrected{Rettet}
   \def\AMC@loc@catalog{Katalog}
   \def\AMC@loc@none{Ingen svar er riktige.}
+  \def\AMC@loc@question{oppgave}
+  \def\AMC@loc@questions{oppgave}
 }
 %    \end{macrocode}
 % 
@@ -1448,6 +1463,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@corrected{Correcci\'on}
   \def\AMC@loc@catalog{Cat\'alogo}
   \def\AMC@loc@none{Ninguna de estas preguntas son correctas.}
+  \def\AMC@loc@question{pregunta}
+  \def\AMC@loc@questions{preguntas}
 }
 %    \end{macrocode}
 % 
@@ -1465,6 +1482,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@catalog{問題カタログ}
   \def\AMC@loc@explain{\textit{\textbf{解説: }}}
   \def\AMC@loc@none{該当なし。}
+  \def\AMC@loc@question{問}
+  \def\AMC@loc@questions{問}
 }
 %    \end{macrocode}
 % 
@@ -1473,6 +1492,17 @@ Three digits and two letters:\insertgroup{mixed}.
 % Other languages can be integrated to \textsf{automultiplechoice}
 % package upon request to the author.
 %
+% \subsection{Interaction with other packages}
+% \subsubsection{cleveref}
+%
+% For references to questions:
+%    \begin{macrocode}
+\AtBeginDocument{\@ifpackageloaded{cleveref}{%
+    \crefalias{AMCquestionaff}{question}%
+    \crefname{question}{\AMC@loc@question}{\AMC@loc@questions}%
+}{}}%
+%    \end{macrocode}
+% 
 % \subsection{Random}
 % \subsubsection{Random pseudo-generator}
 % The package uses the pseudo-random bit generator from
