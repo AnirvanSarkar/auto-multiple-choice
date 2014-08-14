@@ -1175,6 +1175,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % \item |\ifAMCcomplete@multi| if a choice
 %   ``\makeatletter\AMC@loc@none\makeatother'' is to be added to every
 %   multiple question.
+% \item |\ifAMCquestionNumber| if AMC should step up the question
+%   number for each new question.
 % \item |\ifAMC@calibration| if this \LaTeX{} run is used to get page layouts.
 % \item |\ifAMC@plain| if \textsf{automultiplechoice} won't try to load
 %   useful packages (\textsf{etex}, \textsf{environ}) that extend
@@ -1223,6 +1225,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@qbloc\AMC@qblocfalse
 \newif\ifAMC@rbloc\AMC@rblocfalse
 \newif\ifAMCcomplete@multi\AMCcomplete@multifalse
+\newif\ifAMCquestionNumber\AMCquestionNumbertrue
 \newif\ifAMC@calibration\AMC@calibrationfalse
 \newif\ifAMC@plain\AMC@plainfalse
 \newif\ifAMCune@bonne
@@ -2707,7 +2710,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
-\newcommand\AMC@stepQuestion{\refstepcounter{AMCquestionaff}}
+\newcommand\AMC@stepQuestion{\ifAMCquestionNumber\refstepcounter{AMCquestionaff}\fi}
 \newcommand\AMC@qaff{\arabic{AMCquestionaff}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
@@ -2865,6 +2868,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newdimen\AMCcodeVspace\AMCcodeVspace=.5em
 \newcommand{\AMCcode}[2]{%
 {\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
+  \AMCquestionNumberfalse%
  \setlength{\parindent}{0pt}%
  \def\AMCbeginAnswer{\hspace{0pt}%
     \vbox\bgroup}%
@@ -2894,6 +2898,7 @@ Three digits and two letters:\insertgroup{mixed}.
 }}
 \newcommand{\AMCcodeH}[2]{%
 {\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
+  \AMCquestionNumberfalse%
  \setlength{\parindent}{0pt}%
  \def\AMCbeginAnswer{\hbox\bgroup}%
  \def\AMCendAnswer{\egroup\vspace{\AMCcodeVspace}\par}%
