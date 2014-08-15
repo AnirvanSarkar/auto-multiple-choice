@@ -2738,11 +2738,10 @@ et inscrivez votre nom et prénom ci-dessous.
         ajoutent le numéro de la copie avant leur argument avant de le
         transmettre à <command>\label</command>, <command>\ref</command> et
         <command>\pageref</command>.</para>
-
-        <para>La commande <command>\AMCqlabel</command> doit être utilisée
-        pour une question à référencer.</para>
-
-        <para>Il faudra en outre penser à remettre les compteurs utilisés à
+        
+        <note><para>Depuis la version XXX, la commande <command>\AMCqlabel</command> n' a plus d'utilité. Les questions doivent simplement être référencées avec la commande <command>\AMClabel</command>. Cependant, elle a été conservée pour maintenir la compatibilté avec les anciennes versions.</para></note>
+        
+          <para>Il faudra en outre penser à remettre les compteurs utilisés à
         zéro au début de chaque copie. Par exemple, si on veut inclure des
         références à des images regroupées dans une page à part dans certaines
         questions, on pourra écrire quelque chose comme</para>
@@ -2825,11 +2824,8 @@ et inscrivez votre nom et prénom ci-dessous.
       
       <para>L'utilisation de ce paquet nécessite l'introduction d'une nouvelle commande <command>\AMCstudentlabel</command>{référence de la question}.</para>
       <para><programlisting>\cref{\AMCstudentlabel{dipole},\AMCstudentlabel{cours},\AMCstudentlabel{raisonnement}}</programlisting></para>
-      <para>Avec <emphasis>dipole</emphasis>, <emphasis>cours</emphasis> et <emphasis>raisonnement</emphasis> les références des questions, respectivement, indexées avec \AMCqlabel{dipole}, \AMCqlabel{cours}, \AMCqlabel{raisonnement}. Les numéros de ces trois questions seront automatiquement classés lors de la compilation.</para>
-      
-      
-      <para></para>
-      </sect4>
+      <para>Avec <emphasis>dipole</emphasis>, <emphasis>cours</emphasis> et <emphasis>raisonnement</emphasis> les références des questions, respectivement, indexées avec \AMClabel{dipole}, \AMClabel{cours}, \AMClabel{raisonnement}. Les numéros de ces trois questions seront automatiquement classés lors de la compilation.</para>
+             </sect4>
 
       <sect3 id="AMCtext">
         <title>Personnalisation des textes insérés par AMC</title>
