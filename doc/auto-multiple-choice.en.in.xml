@@ -2550,6 +2550,14 @@ and write your first and last names below.
       
       <sect4 id="cleveref">
       <title>Using the package cleveref</title>
+      <para>This package sort in an ascending order the questions' numbers, the questions' pages or the labels' pages  (the documentation <ulink url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>).</para>
+         <warning>
+      <para>This package must be declare <emphasis>after</emphasis> the package <package>automultiplechoice</package>.</para>
+          </warning>
+      
+      To use this package, a new command was created: <command>\AMCstudentlabel</command>.
+      <para><programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{motor}}</programlisting></para>
+      <para><emphasis>led</emphasis>,<emphasis>lamp</emphasis>,<emphasis>motor</emphasis> are the created labels to reference the questions with the command \AMClabel{}.</para>
       </sect4>
 
       <sect3 id="AMCtext">
