@@ -1559,11 +1559,28 @@ Durée : 10 minutes.
             <package>automultiplechoice</package> will be translated, such as
             "None of these answers are correct", see option
             <option>completemulti</option>.</para>
-          </listitem>
+           </listitem>
 
           <listitem>
             <para><option>box</option>: puts every question in a block, so
             that it cannot be split by a page break.</para>
+             <note>
+                <para>You may occasionally cancel this option for each question with the command     <command>\AMCnobloc</command>.
+<programlisting>
+{\AMCnobloc%
+  \begin{question}{nb-ue}
+    How many different states were members of the European Union in Jan. 2009?
+    \begin{choiceshoriz}[o]
+      \wrongchoice{15}
+      \wrongchoice{21}
+      \wrongchoice{25}
+      \correctchoice{27}
+      \wrongchoice{31}
+    \end{choiceshoriz}
+  \end{question}
+}% </programlisting>
+                </para>
+                </note>
           </listitem>
 
           <listitem>
@@ -1586,6 +1603,11 @@ Durée : 10 minutes.
           <listitem>
             <para><option>answers</option>: produces the corrected version of
             the MCQ test, not the test sheet itself.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>indivanswers</option> : produces the corrected version of
+            each MCQ test. So useful with randomized numbers.</para>
           </listitem>
 
           <listitem>
@@ -2248,6 +2270,10 @@ and write your first and last names below.
 
         <para>The first argument to <command>\AMCOpen</command> is a comma
         separated list of options. The available options are:</para>
+  
+        <warning>
+          <para>At least one option is requiered to correctly compile the file.</para>
+        </warning>
 
         <variablelist>
           <varlistentry>
