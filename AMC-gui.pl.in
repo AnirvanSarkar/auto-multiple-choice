@@ -5052,10 +5052,6 @@ sub open_unrecognized {
   $w{'inconnu_tree'}->get_selection->signal_connect("changed",\&unrecognized_line);
   $w{'inconnu_tree'}->get_selection->select_iter($inconnu_store->get_iter_first);
 
-  $w{'inconnu_vpaned'}->child1_shrink(0);
-
-  $w{'inconnu_hpaned'}->child1_resize(1);
-  $w{'inconnu_hpaned'}->child2_resize(1);
 }
 
 sub unrecognized_line {
@@ -5558,8 +5554,6 @@ sub source_latex_choisir {
 	$w{'modeles_liste'}->get_selection->signal_connect("changed",\&source_latex_mmaj);
 
 	$w{'mlist_separation'}->set_position(.5*$w{'mlist_separation'}->get_property('max-position'));
-	$w{'mlist_separation'}->child1_resize(1);
-	$w{'mlist_separation'}->child2_resize(1);
 
 	$reponse=$w{'source_latex_modele'}->run();
 
