@@ -23,12 +23,12 @@ $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 
 use Getopt::Long;
 
-use Gtk3 -init;
-
 use Glib::Object::Introspection;
 
+Glib::Object::Introspection->setup(basename => 'Gtk', version => '3.0', package => 'Gtk3');
 Glib::Object::Introspection->setup(basename => 'Notify', version => '0.7', package => 'Notify');
 
+Gtk3->init;
 Notify->init;
 
 use XML::Simple;
