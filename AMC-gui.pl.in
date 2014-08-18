@@ -24,6 +24,13 @@ $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 use Getopt::Long;
 
 use Gtk3 -init;
+
+use Glib::Object::Introspection;
+
+Glib::Object::Introspection->setup(basename => 'Notify', version => '0.7', package => 'Notify');
+
+Notify->init;
+
 use XML::Simple;
 use IO::File;
 use IO::Select;
@@ -445,22 +452,11 @@ my %state=();
 
 ## Notifications
 
-my $notify='';
-
-if(check_install(module=>"Gtk3::Notify")) {
-  load("Gtk3::Notify");
-  Gtk3::Notify->init('Auto Multiple Choice');
-  $notify=1;
-  debug "Gtk3::Notify loaded";
-} else {
-  debug "Gtk3::Notify not installed";
-}
-
 sub notify_end_of_work {
   my ($action,$message)=@_;
   if($o{'notify_'.$action}) {
-    if($notify && $o{'notify_desktop'}) {
-      my $notification=Gtk3::Notify->new('Auto Multiple Choice',$message,
+    if($o{'notify_desktop'}) {
+      my $notification=Notify::Notification->new('Auto Multiple Choice',$message,
 					 '@/ICONSDIR/@/auto-multiple-choice.svg');
       $notification->show;
     }
@@ -4434,12 +4430,6 @@ sub edit_preferences {
     } else {
 	$w{'pref_projet_tous'}->set_sensitive(0);
 	$w{'pref_projet_annonce'}->set_label('<i>'.__("Project preferences").'</i>');
-    }
-
-    # Desktop notifications available?
-    if(!$notify && (my $w=$gap->get_object('pref_v_notify_desktop'))) {
-      $w->set_sensitive(0);
-      $w->set_tooltip_markup(__"Please install <b>Gtk3::Notify</b> perl package to make desktop notifications available.");
     }
 
     # anavailable options, managed by the filter:
