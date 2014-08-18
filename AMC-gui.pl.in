@@ -5066,7 +5066,7 @@ sub unrecognized_line {
     $iter=$inconnu_store->get_iter($first_selected);
   }
   if($iter) {
-    $w{'inconnu_tree'}->scroll_to_cell($first_selected);
+    $w{'inconnu_tree'}->scroll_to_cell($first_selected,undef,0,0,0);
     my $scan=$shortcuts->absolu($inconnu_store->get($iter,INCONNU_FILE));
     if(-f $scan) {
       $w{'scan_area'}->set_content(image=>$scan);
