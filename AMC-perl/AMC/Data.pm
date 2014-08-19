@@ -250,7 +250,7 @@ sub progression {
       $self->{'progress'}->{'avancement'}
 	->set_fraction($self->{'progress.lastfaction'});
       $self->{'progress'}->{'commande'}
-	->visible($self->{'progress.lastvisible'});
+	->set_visible($self->{'progress.lastvisible'});
       $self->{'progress'}->{'avancement'}
 	->set_text($self->{'progress.lasttext'});
       if($self->{'progress'}->{'annulation'}) {
