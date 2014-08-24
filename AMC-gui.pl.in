@@ -2608,7 +2608,7 @@ sub autre_imprimante {
 
     # TRANSLATORS: There is a menu for choosing stapling or not from the printer. When stapling is not available on the chosen printer, this is the only offered choice.
     $prefs->store_register('agrafe'=>cb_model(''=>__"(not supported)"));
-    $w{'imp_c_agrafe'}->set_model(store_get('agrafe'));
+    $w{'imp_c_agrafe'}->set_model($prefs->store_get('agrafe'));
   }
 
   $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'},
