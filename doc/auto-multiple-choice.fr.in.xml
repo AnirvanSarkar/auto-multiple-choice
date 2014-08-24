@@ -2163,7 +2163,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
       </sect3>
 
       <warning>
-        <para>N'utilisez pas le paquet <command>pdfpages</command> ou toutes
+        <para>N'utilisez pas le paquet <command>pgfpages</command> ou toutes
         autres commandes de mise en page modifiant l'impression du nombre de
         pages par feuille.</para>
       </warning>
@@ -2292,6 +2292,8 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <para>est effectué, mais cette commande peut être utilisée à tout
         moment.</para>
 
+        <note><para>La compatibilité avec le paquet Cleveref ( voir <xref linkend="Cleveref"/>) oblige chaque question à posséder un numéro même si celui-ci ne s'affiche pas. Pour afficher dans le sujet une continuité des numéros, ajouter la commande <command>\AMCquestionNumberfalse</command> juste après <command>\AMCbeginQuestion</command> ou utiliser la commande ci-dessus.</para></note>
+
         <para>La présentation des réponses peut être modifiée de la même
         façon, si on utilise l'environnement <option>reponsesperso</option> au
         lieu de <option>reponses</option> ou <option>reponseshoriz</option>,
@@ -2299,12 +2301,13 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <programlisting>\def\AMCbeginAnswer{}
 \def\AMCendAnswer{}
-\def\AMCanswer#1#2{#1 #2}
-</programlisting>
+\def\AMCanswer#1#2{#1 #2}</programlisting>
 
         <important><para>Lorsque vous êtes à l'intérieur de la commande
-        <command>\exemplaire</command>, il faut doubler les
-        <code>#</code>.</para> <programlisting>\def\AMCanswer##1##2{##1  ##2}</programlisting></important>
+        <command>\exemplaire</command>, il faut doubler les  <code>#</code>.
+        </para> <programlisting>
+        \def\AMCanswer##1##2{##1  ##2}
+        \def\AMCbeginQuestion##1##2{}</programlisting></important>
 
         <para>Certains espacements peuvent également être modifiés :</para>
 
@@ -2740,7 +2743,7 @@ et inscrivez votre nom et prénom ci-dessous.
         transmettre à <command>\label</command>, <command>\ref</command> et
         <command>\pageref</command>.</para>
         
-        <note><para>Si vous avez mis à jour la version test (1.2.2014.041103) vers la version actuelle (1.3.0) ou supérieure, la commande <command>\AMCqlabel</command> n'a plus d'utilité. Les questions doivent simplement être référencées avec la commande <command>\AMClabel</command>. Cependant, elle a été conservée pour maintenir la compatibilté avec vos anciens sujets/fichiers tex.</para></note>
+        <note><para>Si vous avez mis à jour la version test (1.2.2014.041103) vers la version actuelle (1.2.2014.082401) ou supérieure, la commande <command>\AMCqlabel</command> n'a plus d'utilité. Les questions doivent simplement être référencées avec la commande <command>\AMClabel</command>. Cependant, elle a été conservée pour maintenir la compatibilté avec vos anciens sujets/fichiers tex.</para></note>
         
           <para>Il faudra en outre penser à remettre les compteurs utilisés à
         zéro au début de chaque copie. Par exemple, si on veut inclure des
