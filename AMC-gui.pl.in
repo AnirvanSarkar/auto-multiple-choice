@@ -4108,7 +4108,7 @@ sub select_students {
 
   my $filtered=Gtk3::TreeModelFilter->new($students_store);
   $filtered->set_visible_column(5);
-  my $filtered_sorted=Gtk3::TreeModelSort->new($filtered);
+  my $filtered_sorted=Gtk3::TreeModelSort->new_with_model($filtered);
 
   $filtered_sorted->set_sort_func(0,\&sort_num,0);
   $filtered_sorted->set_sort_func(1,\&sort_string,1);
