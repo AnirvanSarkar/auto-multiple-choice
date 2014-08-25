@@ -29,7 +29,8 @@ use Glib::Object::Introspection;
 
 Glib::Object::Introspection->setup(basename => 'Notify', version => '0.7', package => 'Notify');
 
-Notify->init;
+# Set application name for notifications
+Notify::init('Auto Multiple Choice');
 
 use XML::Simple;
 use IO::File;
