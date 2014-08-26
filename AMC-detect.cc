@@ -1103,6 +1103,14 @@ int main( int argc, char** argv )
 
 	if(processing_error==0) {
 	  src_calage=cvCloneImage(src);
+	  if(src_calage==NULL) {
+	    printf("! LOAD : Error cloning image\n");
+	    printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
+
+	    processing_error=5;
+	  }
+	}
+	if(processing_error==0) {
 	  calage(src_calage,illustr,
 		 taille_orig_x,taille_orig_y,
 		 dia_orig,
