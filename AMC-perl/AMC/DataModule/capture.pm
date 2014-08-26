@@ -895,7 +895,7 @@ sub page_summary {
 				       {Slice=>{}},
 				       $oo{'mse_threshold'},'red',undef,
 				       'lightblue','lightgreen',undef,
-				       $oo{'darkness_threshold'},
+				       $oo{'darkness_threshold'},ZONE_BOX,
 				       $student,$page,$copy,
 				      );
   if($r && $r->[0]) {
