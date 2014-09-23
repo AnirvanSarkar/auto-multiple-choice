@@ -2000,19 +2000,32 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <programlisting>\AMCinterIrep=.75ex</programlisting>
       </sect3>
 
-      <sect3><title>Définir la zone de notation</title> <para>En mode
-      <emphasis>ensemble</emphasis>, vous pouvez ajouter une option
-      supplémentaire de zone de notation (voir <xref
-      linkend="position.note"/>).</para> <para>On peut aussi utiliser les
-      zones prédéfinies toutes faites, avec par exemple : </para>
+      <sect3 id="definir.zone.notation">
+      <title id="definir.zone.notation.titre">Définir la zone de notation</title> 
+      <para> Vous pouvez ajouter une option supplémentaire de zone de notation (voir <xref endterm="position.note.titre"
+      linkend="position.note"/>).</para> 
+      <sect4><title>En mode normal</title>
+      <para>Dans ce mode, le sujet et les réponses sont sur la(es) même(s) feuilles.</para>
+      <para>Taper cette commande, après le <command>\begin{document}</command> et avant la commande <command>\exemplaire</command> :</para>
       <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
-      <para>Les grandeurs width, height, depth définissent les dimensions de
-      la case de notation ainsi que son emplacement sur la feuille du
-      sujet.</para> <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
-      <para>Les grandeurs width, height, depth définissent les dimensions de
-      la case de notation ainsi que son emplacement sur la feuille de
-      réponse.</para> <para> La variable position peut prendre les valeurs :
-      none, question, margin, margins.</para></sect3>
+    <para>Les grandeurs <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> définissent les dimensions de  la case de notation ainsi que son emplacement sur la feuille de réponses.</para> 
+      <para> La variable <parameter>position</parameter> peut prendre les valeurs :
+      none, question, margin, margins.</para>
+      </sect4>
+   
+      <sect4><title>En mode ensemble</title>
+     <para> Dans ce mode, la feuille de réponses est séparée du sujet.</para>
+     <para>Taper cette commande, après le <command>\begin{document}</command> et avant la commande <command>\exemplaire</command> :</para>
+     <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+      </sect4>
+      
+      <para>Les grandeurs <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> définissent les dimensions de  la case de notation ainsi que son emplacement sur la feuille de réponses.</para> 
+      <para> La variable <parameter>position</parameter> peut prendre les valeurs :
+      none, question, margin, margins.</para>
+      
+      <warning>
+      <para>Vous ne pouvez pas modifier votre sujet<emphasis> a posteriori</emphasis> en rajoutant l'une de ces fonctions après l'impression du sujet.</para></warning>
+      </sect3>
 
       <sect3>
         <title>Groupes de questions</title>
@@ -3873,7 +3886,7 @@ Nom et prénom :
             <guimenuitem>zoom</guimenuitem> permet de visualiser l'ensemble
             des cases de la copie, de voir si la détection s'est bien
             déroulée, et éventuellement de la corriger par
-            glisser-déposer).</para>
+            glisser-déposer (drag and drop) ou par un clic (click)).</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -4946,7 +4959,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       d'étudiant de l'étudiant sera utilisée.</para>
 
       <sect3 id="position.note">
-        <title>Position de la note</title>
+        <title id="position.note.titre">Position de la note</title>
 
         <para>Vous pouvez choisir la position de la note à l'aide du menu
         <menuchoice>
@@ -4979,11 +4992,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </listitem>
 
           <listitem>
-             Where defined in the source (réservé au mode 
-
-            <emphasis>ensemble</emphasis>
-
-             ). 
+              Where defined in the source (voir <xref endterm="definir.zone.notation.titre" linkend="definir.zone.notation" />).
           </listitem>
         </itemizedlist>
       </sect3>
