@@ -1890,6 +1890,38 @@ Durée : 10 minutes.
 
         <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
       </sect3>
+      
+      <sect3>
+      <title>Space between answers</title>
+      <para>Let us note that it is also possible to parameterize the
+        vertical space between many answer blocks, thanks to the dimension
+        <parameter>AMCinterIrep</parameter>:</para>
+
+        <para><programlisting>\AMCinterIrep=.75ex</programlisting></para>
+</sect3>
+
+     <sect3 id="marks.display.area">
+      <title id="marks.display.area.title">Describe the marks' display area</title> 
+      <para> You may add an additional option of marking area (see <xref endterm="marks.position.title"
+      linkend="marks.position"/>).</para> 
+      <sect4><title>Without the <option>separateanswersheet</option> option</title>
+      <para>Type this command after  <command>\begin{document}</command> and before the command <command>\onecopy</command> :</para>
+      <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
+    <para>The variables <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> describe the dimensions of the box marking and its location on the sheet.</para> 
+      <para> The <parameter>position</parameter>  value may be equal to : none, question, margin, margins.</para>
+      </sect4>
+   
+      <sect4><title>With the <option>separateanswersheet</option>option</title>
+       <para>Type this command after  <command>\begin{document}</command> and before the command <command>\onecopy</command> :</para>
+     <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+      </sect4>
+      
+       <para>The variables <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> describe the dimensions of the box marking and its location on the sheet.</para> 
+      <para> The <parameter>position</parameter>  value may be equal to : none, question, margin, margins.</para>
+      
+      <warning>
+      <para>Don't type one of those commands <emphasis> after</emphasis> printing.</para></warning>
+      </sect3>
 
       <sect3>
         <title>Groups of questions</title>
@@ -4378,6 +4410,44 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       endterm="liste.etudiants.title" linkend="liste.etudiants"/>). If we let
       this field empty, a default value is built up based on the student's
       name and student number.</para>
+      
+      <sect3 id="marks.position">
+      <title id="marks.position.title">Marks' position</title>
+            <para>You may choose marks's position with the menu
+        <menuchoice>
+            <guimenu>Edition</guimenu>
+
+            <guimenuitem>Preference</guimenuitem>
+
+            <guimenuitem>Project</guimenuitem>
+
+            <guimenuitem>Marks position</guimenuitem>
+          </menuchoice></para>
+
+        <para>Default choices</para>
+
+        <itemizedlist>
+          <listitem>
+             (none) 
+          </listitem>
+
+          <listitem>
+             In the margin.
+          </listitem>
+
+          <listitem>
+             In the both margins 
+          </listitem>
+
+          <listitem>
+             Beside the boxes. 
+          </listitem>
+
+          <listitem>
+              Where defined in the source (see <xref endterm="marks.display.area.title" linkend="marks.display.area" />).
+          </listitem>
+        </itemizedlist>
+      </sect3>
     </sect2>
   </sect1>
 
