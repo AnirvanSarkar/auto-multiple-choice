@@ -208,16 +208,27 @@ sub see_file {
   my $ff=$file;
   $ff =~ s:.*/::;
   if($self->{'ok_checksums'}->{$dig}) {
-    $self->trace("[T] File ok: $ff");
+    $self->trace("[T] File ok (checksum): $ff");
   } else {
-    my $i=0;
-    my $dest;
-    do {
-      $dest=sprintf("%s/%04d-%s",$self->{'check_dir'},$i,$ff);
-      $i++;
-    } while(-f $dest);
-    copy($file,$dest);
-    push @{$self->{'to_check'}},[$dig,$dest];
+    # compares with already validated file
+    my $validated=$self->{'temp_dir'}."/checked/$ff";
+    if(-f $validated && $ff =~ /\.pdf$/i) {
+      if(run('comparepdf','-ca','-v0',$validated,$file)) {
+	$self->trace("[T] File ok (compare): $ff");
+      } else {
+	$self->trace("[E] File different (compare): $ff");
+	exit(1);
+      }
+    } else {
+      my $i=0;
+      my $dest;
+      do {
+	$dest=sprintf("%s/%04d-%s",$self->{'check_dir'},$i,$ff);
+	$i++;
+      } while(-f $dest);
+      copy($file,$dest);
+      push @{$self->{'to_check'}},[$dig,$dest];
+    }
   }
 }
 
