@@ -702,6 +702,8 @@ sub check_textest {
   }
   $tex_file=$self->{'temp_dir'}."/".$tex_file;
   if(-f $tex_file) {
+    chomp(my $cwd = `pwd`);
+    chdir($self->{'temp_dir'});
     open(TEX,"-|",$self->{'tex_engine'},
 	 $tex_file);
     while(<TEX>) {
@@ -718,6 +720,7 @@ sub check_textest {
       }
     }
     close(TEX);
+    chdir($cwd);
     $self->end();
   } else {
     $self->trace("[X] TeX file not found: $tex_file");
