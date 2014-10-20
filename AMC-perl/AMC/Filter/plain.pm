@@ -80,7 +80,7 @@ sub new {
        'font'=>'LinLibertine_R.otf',
        'arabicfont'=>'Rasheeq',
        'defaultscoringm'=>'haut=2',
-       'l-name'=>__("Name and surname"),
+       'l-name'=>'',
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
        'disable'=>'',
        'manualduplex'=>'',
@@ -870,10 +870,12 @@ sub full_namefield {
   my $t='';
   $t.="\\namefield{\\fbox{";
   $t.="\\begin{minipage}{.9\\linewidth}"
-    .$self->{'options'}->{'l-name'}
-	.("\n\n\\vspace*{.5cm}\\dotfill" x $n_ligs)
-	  ."\n\\vspace*{1mm}"
-	    ."\n\\end{minipage}";
+    .($self->{'options'}->{'l-name'}
+      ? $self->{'options'}->{'l-name'}
+      : '\\AMClocalized{namesurname}')
+      .("\n\n\\vspace*{.5cm}\\dotfill" x $n_ligs)
+	."\n\\vspace*{1mm}"
+	  ."\n\\end{minipage}";
   $t.="\n}}";
   return($t);
 }

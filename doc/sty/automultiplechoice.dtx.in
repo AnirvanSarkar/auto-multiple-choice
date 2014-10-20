@@ -1322,6 +1322,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   behind each page of a draft exam.
 %    \begin{macrocode}
 \def\AMCtext#1#2{\expandafter\def\csname AMC@loc@#1\endcsname{#2}}
+\def\AMClocalized#1{\csname AMC@loc@#1\endcsname}
 %    \end{macrocode}\end{macro}
 % \subsubsection{English}
 % Text indicating draft exams:
@@ -1362,6 +1363,10 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMC@loc@question{question}
 \def\AMC@loc@questions{questions}
 %    \end{macrocode}
+% Default text to write in the students' name box:
+%    \begin{macrocode}
+\def\AMC@loc@namesurname{Name and surname:}
+%    \end{macrocode}
 %
 % \subsubsection{Dutch}
 %
@@ -1397,6 +1402,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMC@loc@none{Aucune de ces r\'eponses n'est correcte.}
   \def\AMC@loc@question{question}
   \def\AMC@loc@questions{questions}
+  \def\AMC@loc@namesurname{Nom et pr\'enom :}
 }
 %    \end{macrocode}
 %
