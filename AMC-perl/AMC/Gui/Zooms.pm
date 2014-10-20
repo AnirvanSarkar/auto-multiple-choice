@@ -377,7 +377,8 @@ sub load_boxes {
     } else {
 	$self->{'button_apply'}->show();
     }
-
+    $self->{'button_previous'}->set_sensitive($self->list_prev ? 1 : 0);
+    $self->{'button_next'}->set_sensitive($self->list_next ? 1 : 0);
 }
 
 sub refill {
@@ -578,26 +579,41 @@ sub zoom_arriere {
     $self->zoom_it();
 }
 
-sub zoom_list_previous {
+sub list_prev {
   my ($self)=@_;
   my ($path)=$self->{'list_view'}->get_cursor();
   if($path) {
     if($path->prev) {
-      $self->{'list_view'}->set_cursor($path);
+      return($path);
     }
+  }
+}
+
+sub list_next {
+  my ($self)=@_;
+  my ($path)=$self->{'list_view'}->get_cursor();
+  if($path) {
+    $path->next;
+    my $next_iter=$self->{'list_view'}->get_model->get_iter($path);
+    if($next_iter) {
+      return($self->{'list_view'}->get_model->get_path($next_iter));
+    }
+  }
+}
+
+sub zoom_list_previous {
+  my ($self)=@_;
+  my $path_prev=$self->list_prev;
+  if($path_prev) {
+    $self->{'list_view'}->set_cursor($path_prev);
   }
 }
 
 sub zoom_list_next {
   my ($self)=@_;
-  my ($path)=$self->{'list_view'}->get_cursor();
-  if($path) {
-    my $path_next=Gtk2::TreePath->new ($path->to_string);
-    $path_next->next();
+  my $path_next=$self->list_next;
+  if($path_next) {
     $self->{'list_view'}->set_cursor($path_next);
-    ($path_next)=$self->{'list_view'}->get_cursor();
-    $self->{'list_view'}->set_cursor($path)
-      if(!$path_next);
   }
 }
 
