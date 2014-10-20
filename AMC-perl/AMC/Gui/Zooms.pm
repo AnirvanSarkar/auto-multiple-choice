@@ -276,6 +276,19 @@ sub safe_pixbuf {
   return($p,0);
 }
 
+sub buttons_availability {
+  my ($self)=@_;
+  if($self->{'conforme'}) {
+    $self->{'button_apply'}->hide();
+    $self->{'button_previous'}->set_sensitive($self->list_prev ? 1 : 0);
+    $self->{'button_next'}->set_sensitive($self->list_next ? 1 : 0);
+  } else {
+    $self->{'button_apply'}->show();
+    $self->{'button_previous'}->set_sensitive(0);
+    $self->{'button_next'}->set_sensitive(0);
+  }
+}
+
 sub load_boxes {
     my ($self)=@_;
 
@@ -372,13 +385,7 @@ sub load_boxes {
     $va=$self->{'scrolled_1'}->get_vadjustment();
     $va->clamp_page($va->lower(),$va->lower());
 
-    if($self->{'conforme'}) {
-	$self->{'button_apply'}->hide();
-    } else {
-	$self->{'button_apply'}->show();
-    }
-    $self->{'button_previous'}->set_sensitive($self->list_prev ? 1 : 0);
-    $self->{'button_next'}->set_sensitive($self->list_next ? 1 : 0);
+    $self->buttons_availability;
 }
 
 sub refill {
@@ -386,11 +393,7 @@ sub refill {
     $self->{'conforme'}=1;
     for(0,1) { $self->vide($_); }
     for(0,1) { $self->remplit($_); }
-    if($self->{'conforme'}) {
-	$self->{'button_apply'}->hide();
-    } else {
-	$self->{'button_apply'}->show();
-    }
+    $self->buttons_availability;
     $self->scrolled_update;
 }
 
