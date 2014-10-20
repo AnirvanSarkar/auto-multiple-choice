@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -603,6 +603,15 @@ the best you can.
             linkend="parse_images"/>), <code>embf</code> (see <xref
             linkend="parse_embf"/>) and <code>local_latex</code> (see <xref
             linkend="parse_local_latex"/>).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>PackageOptions:</term>
+
+          <listitem>
+            <para>Gives some more options to pass to the automultiplechoice
+            LaTeX package (see <xref linkend="sec.package.options"/>.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -1559,14 +1568,15 @@ Durée : 10 minutes.
             <package>automultiplechoice</package> will be translated, such as
             "None of these answers are correct", see option
             <option>completemulti</option>.</para>
-           </listitem>
+          </listitem>
 
           <listitem>
             <para><option>box</option>: puts every question in a block, so
             that it cannot be split by a page break.</para>
-             <note>
-                <para>You may occasionally cancel this option for each question with the command     <command>\AMCnobloc</command>.
-<programlisting>
+
+            <note>
+              <para>You may occasionally cancel this option for each question
+              with the command <command>\AMCnobloc</command>. <programlisting>
 {\AMCnobloc%
   \begin{question}{nb-ue}
     How many different states were members of the European Union in Jan. 2009?
@@ -1578,9 +1588,8 @@ Durée : 10 minutes.
       \wrongchoice{31}
     \end{choiceshoriz}
   \end{question}
-}% </programlisting>
-                </para>
-                </note>
+}% </programlisting></para>
+            </note>
           </listitem>
 
           <listitem>
@@ -1606,8 +1615,9 @@ Durée : 10 minutes.
           </listitem>
 
           <listitem>
-            <para><option>indivanswers</option> : produces the corrected version of
-            each MCQ test. So useful with randomized numbers.</para>
+            <para><option>indivanswers</option> : produces the corrected
+            version of each MCQ test. So useful with randomized
+            numbers.</para>
           </listitem>
 
           <listitem>
@@ -1760,7 +1770,8 @@ Durée : 10 minutes.
         account in the grading, one uses the <code>\QuestionIndicative</code>
         command, as in the following example:</para>
 
-        <para><programlisting>\begin{question}{difficulty}\QuestionIndicative
+        <para>
+          <programlisting>\begin{question}{difficulty}\QuestionIndicative
   \scoring{auto=0,v=-1,e=-2}
   Did you find this class easy or difficult? Please answer on a scale from 0 (very difficult) to 5 
 (very easy).
@@ -1772,7 +1783,8 @@ Durée : 10 minutes.
     \correctchoice{4}
     \correctchoice{5}
   \end{choiceshoriz}
-\end{question}</programlisting></para>
+\end{question}</programlisting>
+        </para>
       </sect3>
 
       <sect3 id="latex.explain">
@@ -1786,7 +1798,8 @@ Durée : 10 minutes.
 
         <para>Here is a simple example:</para>
 
-        <para><programlisting>
+        <para>
+          <programlisting>
 \begin{question}{explanation}
   Which has the highest elevation among the following?
   \begin{choices}
@@ -1797,7 +1810,8 @@ Durée : 10 minutes.
   \end{choices}
   \explain{Sagarmatha which literally means `Head of sky' is the native name of
            Mount Everest, the highest mountain in the world.}
-\end{question}</programlisting></para>
+\end{question}</programlisting>
+        </para>
 
         <note>
           <para>The <command>explain</command> command can be used inside
@@ -1816,7 +1830,8 @@ Durée : 10 minutes.
         command before the <command>\explain</command> command as in the
         following example:</para>
 
-        <para><programlisting>
+        <para>
+          <programlisting>
 \begin{question}{elevation}
   Which has the highest elevation among the following?
   \begin{choices}
@@ -1851,7 +1866,8 @@ Durée : 10 minutes.
   \end{choices}
   \explain{Aconcagua is located in the Andes mountain range while Mont Blanc
                  is located in the Alps.}
-\end{questionmultx}</programlisting></para>
+\end{questionmultx}</programlisting>
+        </para>
 
         <para>This will now print <emphasis>Explanation: </emphasis> before
         the explanations of first and third question but <emphasis>Reason:
@@ -1872,7 +1888,8 @@ Durée : 10 minutes.
         command was defined in order to prevent this phenomenon, by embedding
         each answer into a box. Here is an example of use:</para>
 
-        <para><programlisting>\begin{question}{two columns}
+        <para>
+          <programlisting>\begin{question}{two columns}
   What is a bird ?
   \begin{multicols}{2}\AMCBoxedAnswers
     \begin{choices}
@@ -1882,45 +1899,76 @@ Durée : 10 minutes.
       \wrongchoice{It is a steam machine devised to seal cans at high speed.}
     \end{choices}
   \end{multicols}
-\end{question}</programlisting></para>
+\end{question}</programlisting>
+        </para>
 
         <para>Let us note that it is also possible to parameterize the
         vertical space between two answer blocks, thanks to the dimension
         <parameter>AMCinterBrep</parameter>:</para>
 
-        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
+        <para>
+          <programlisting>\AMCinterBrep=.5ex</programlisting>
+        </para>
       </sect3>
-      
+
       <sect3>
-      <title>Space between answers</title>
-      <para>Let us note that it is also possible to parameterize the
+        <title>Space between answers</title>
+
+        <para>Let us note that it is also possible to parameterize the
         vertical space between many answer blocks, thanks to the dimension
         <parameter>AMCinterIrep</parameter>:</para>
 
-        <para><programlisting>\AMCinterIrep=.75ex</programlisting></para>
-</sect3>
+        <para>
+          <programlisting>\AMCinterIrep=.75ex</programlisting>
+        </para>
+      </sect3>
 
-     <sect3 id="marks.display.area">
-      <title id="marks.display.area.title">Describe the marks' display area</title> 
-      <para> You may add an additional option of marking area (see <xref endterm="marks.position.title"
-      linkend="marks.position"/>).</para> 
-      <sect4><title>Without the <option>separateanswersheet</option> option</title>
-      <para>Type this command after  <command>\begin{document}</command> and before the command <command>\onecopy</command> :</para>
-      <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
-    <para>The variables <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> describe the dimensions of the box marking and its location on the sheet.</para> 
-      <para> The <parameter>position</parameter>  value may be equal to : none, question, margin, margins.</para>
-      </sect4>
-   
-      <sect4><title>With the <option>separateanswersheet</option>option</title>
-       <para>Type this command after  <command>\begin{document}</command> and before the command <command>\onecopy</command> :</para>
-     <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
-      </sect4>
-      
-       <para>The variables <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> describe the dimensions of the box marking and its location on the sheet.</para> 
-      <para> The <parameter>position</parameter>  value may be equal to : none, question, margin, margins.</para>
-      
-      <warning>
-      <para>Don't type one of those commands <emphasis> after</emphasis> printing.</para></warning>
+      <sect3 id="marks.display.area">
+        <title id="marks.display.area.title">Describe the marks' display
+        area</title>
+
+        <para>You may add an additional option of marking area (see <xref
+        endterm="marks.position.title" linkend="marks.position"/>).</para>
+
+        <sect4>
+          <title>Without the <option>separateanswersheet</option>
+          option</title>
+
+          <para>Type this command after <command>\begin{document}</command>
+          and before the command <command>\onecopy</command> :</para>
+
+          <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
+
+          <para>The variables <parameter>width</parameter>,
+          <parameter>height</parameter>, <parameter>depth</parameter> describe
+          the dimensions of the box marking and its location on the
+          sheet.</para>
+
+          <para>The <parameter>position</parameter> value may be equal to :
+          none, question, margin, margins.</para>
+        </sect4>
+
+        <sect4>
+          <title>With the <option>separateanswersheet</option>option</title>
+
+          <para>Type this command after <command>\begin{document}</command>
+          and before the command <command>\onecopy</command> :</para>
+
+          <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+        </sect4>
+
+        <para>The variables <parameter>width</parameter>,
+        <parameter>height</parameter>, <parameter>depth</parameter> describe
+        the dimensions of the box marking and its location on the
+        sheet.</para>
+
+        <para>The <parameter>position</parameter> value may be equal to :
+        none, question, margin, margins.</para>
+
+        <warning>
+          <para>Don't type one of those commands <emphasis> after</emphasis>
+          printing.</para>
+        </warning>
       </sect3>
 
       <sect3>
@@ -1934,7 +1982,8 @@ Durée : 10 minutes.
         <para>One can put questions in a group one by one, as in the following
         example.</para>
 
-        <para><programlisting>\element{mygroup}{
+        <para>
+          <programlisting>\element{mygroup}{
   \begin{question}{easy}
     So, how much is one plus one?
     \begin{choiceshoriz}
@@ -1943,7 +1992,8 @@ Durée : 10 minutes.
       \wrongchoice{three}
     \end{choiceshoriz}
   \end{question}
-}</programlisting></para>
+}</programlisting>
+        </para>
 
         <important>
           <para>The formation of the group, using the
@@ -2149,7 +2199,9 @@ Durée : 10 minutes.
         the LaTeX command <command>AMCbeginQuestion</command>, whose default
         definition is the following:</para>
 
-        <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
+        <para>
+          <programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting>
+        </para>
 
         <para>The first parameter transmitted to this command is the number of
         the question to be displayed. The second parameter contains
@@ -2158,17 +2210,27 @@ Durée : 10 minutes.
         can be modified: its goal is to distinguish multiple questions from
         the others. By default, it displays a club.</para>
 
-        <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
+        <para>
+          <programlisting>\def\multiSymbole{$\clubsuit$}</programlisting>
+        </para>
 
         <para>Finally, one can modify the number of the next question with the
         <code>\AMCnumero command</code>. At the beginning of each realization
         of the test, a call to</para>
 
-        <para><programlisting>\AMCnumero{1}</programlisting></para>
+        <para>
+          <programlisting>\AMCnumero{1}</programlisting>
+        </para>
 
         <para>is performed, but this command can be used at any place.</para>
 
-        <note><para>Each question must have a number, even it is not displayed, to make sure of package cleveref's compatibility. Type <command>\AMCquestionNumberfalse</command> command just after <command>\AMCbeginQuestion</command> to have following numbers or use the above command.</para></note>
+        <note>
+          <para>Each question must have a number, even it is not displayed, to
+          make sure of package cleveref's compatibility. Type
+          <command>\AMCquestionNumberfalse</command> command just after
+          <command>\AMCbeginQuestion</command> to have following numbers or
+          use the above command.</para>
+        </note>
 
         <para>The display of answers can be modified in the same fashion, if
         one uses the <option>choicescustom</option> environment instead of
@@ -2239,7 +2301,8 @@ Durée : 10 minutes.
         identifier, and the number of digits to be used by the code. One can
         e.g. use the following header</para>
 
-        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+        <para>
+          <programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
 \begin{minipage}[b]{6.5cm}
 $\longleftarrow{}$\hspace{0pt plus 1cm} please encode your student number below,
 and write your first and last names below.
@@ -2258,7 +2321,8 @@ and write your first and last names below.
   }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
 
 }
-</programlisting></para>
+</programlisting>
+        </para>
 
         <para>If the <option>separateanswersheet</option> option is used, the
         <command>AMCcode</command> command has to be placed after the
@@ -2304,9 +2368,10 @@ and write your first and last names below.
 
         <para>The first argument to <command>\AMCOpen</command> is a comma
         separated list of options. The available options are:</para>
-  
+
         <warning>
-          <para>At least one option is requiered to correctly compile the file.</para>
+          <para>At least one option is requiered to correctly compile the
+          file.</para>
         </warning>
 
         <variablelist>
@@ -2543,7 +2608,9 @@ and write your first and last names below.
         at the beginning of the document, and in any case outside the
         <command>onecopy</command> command):</para>
 
-        <para><programlisting>\AMCrandomseed{1527384}</programlisting></para>
+        <para>
+          <programlisting>\AMCrandomseed{1527384}</programlisting>
+        </para>
 
         <para>If the value that is assigned (to be chosen between 1 and
         4194303) is modified, then the shuffling will differ. Of course, one
@@ -2572,9 +2639,15 @@ and write your first and last names below.
         and <command>\AMCpageref</command>: they add the realization number to
         their argument before transmitting it to <command>\label</command>,
         <command>\ref</command> and <command>\pageref</command>.</para>
-        
-            <note><para>If you updated the test version (1.2.2014.041103) to the current version (1.2.2014.082401) or greater, you don't have to type the command <command>\AMCqlabel</command> to label a question but type <command>\AMClabel</command>. The old command remain compatible with your previous tex files/exams.</para></note>
-        
+
+        <note>
+          <para>If you updated the test version (1.2.2014.041103) to the
+          current version (1.2.2014.082401) or greater, you don't have to type
+          the command <command>\AMCqlabel</command> to label a question but
+          type <command>\AMClabel</command>. The old command remain compatible
+          with your previous tex files/exams.</para>
+        </note>
+
         <para>One also has to reset counters to zero at the beginning of each
         realization. For instance, if one wants to include references to
         pictures that are put together in a separate page, one might write
@@ -2609,18 +2682,21 @@ and write your first and last names below.
         go on from one realization to the next one, which is clearly not
         desirable.</para>
       </sect3>
-      
-      <sect4 id="cleveref">
-      <title>Using the package cleveref</title>
-      <para>This package sort in an ascending order the questions' numbers, the questions' pages or the labels' pages  (the documentation <ulink url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>).</para>
-         <warning>
-      <para>This package must be declare <emphasis>after</emphasis> the package <package>automultiplechoice</package>.</para>
-          </warning>
-      
-      To use this package, a new command was created: <command>\AMCstudentlabel</command>.
-      <para><programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{motor}}</programlisting></para>
-      <para><emphasis>led</emphasis>,<emphasis>lamp</emphasis>,<emphasis>motor</emphasis> are the created labels to reference the questions with the command \AMClabel{}.</para>
-      </sect4>
+
+      <sect4 id="cleveref"><title>Using the package cleveref</title>
+      <para>This package sort in an ascending order the questions' numbers,
+      the questions' pages or the labels' pages (the documentation <ulink
+      url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>).</para>
+      <warning>
+          <para>This package must be declare <emphasis>after</emphasis> the
+          package <package>automultiplechoice</package>.</para>
+        </warning> To use this package, a new command was created:
+      <command>\AMCstudentlabel</command>. <para>
+          <programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{motor}}</programlisting>
+        </para>
+      <para><emphasis>led</emphasis>,<emphasis>lamp</emphasis>,<emphasis>motor</emphasis>
+      are the created labels to reference the questions with the command
+      \AMClabel{}.</para></sect4>
 
       <sect3 id="AMCtext">
         <title>Customizing some texts inserted by AMC</title>
@@ -3097,7 +3173,8 @@ respective parameters \VQa{} and \VQb{}.
       <sect3>
         <title>Using package pgf/tikz</title>
 
-        <para>This package must be declare <emphasis>after</emphasis> the package <package>automultiplechoice</package>.</para>
+        <para>This package must be declare <emphasis>after</emphasis> the
+        package <package>automultiplechoice</package>.</para>
 
         <para>LaTeX package <package>pgf/tikz</package> (see <ulink
         url="http://www.ctan.org/tex-archive/graphics/pgf/base">http://www.ctan.org/tex-archive/graphics/pgf/base</ulink>)
@@ -4410,11 +4487,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       endterm="liste.etudiants.title" linkend="liste.etudiants"/>). If we let
       this field empty, a default value is built up based on the student's
       name and student number.</para>
-      
+
       <sect3 id="marks.position">
-      <title id="marks.position.title">Marks' position</title>
-            <para>You may choose marks's position with the menu
-        <menuchoice>
+        <title id="marks.position.title">Marks' position</title>
+
+        <para>You may choose marks's position with the menu <menuchoice>
             <guimenu>Edition</guimenu>
 
             <guimenuitem>Preference</guimenuitem>
@@ -4432,7 +4509,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </listitem>
 
           <listitem>
-             In the margin.
+             In the margin. 
           </listitem>
 
           <listitem>
@@ -4444,7 +4521,12 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </listitem>
 
           <listitem>
-              Where defined in the source (see <xref endterm="marks.display.area.title" linkend="marks.display.area" />).
+             Where defined in the source (see 
+
+            <xref endterm="marks.display.area.title"
+                  linkend="marks.display.area"/>
+
+            ). 
           </listitem>
         </itemizedlist>
       </sect3>
@@ -4862,14 +4944,12 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">prepare
-          </arg>
+          <arg choice="plain">prepare</arg>
 
-          <arg choice="plain">--mode s
-          </arg>
+          <arg choice="plain">--mode s</arg>
 
-          <arg choice="plain">--prefix <replaceable>project-dir</replaceable>
-          </arg>
+          <arg choice="plain">--prefix
+          <replaceable>project-dir</replaceable></arg>
 
           <arg choice="plain"><replaceable>mcq-source-file</replaceable></arg>
         </cmdsynopsis>
@@ -4877,14 +4957,12 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">prepare
-          </arg>
+          <arg choice="plain">prepare</arg>
 
-          <arg choice="plain">--mode b
-          </arg>
+          <arg choice="plain">--mode b</arg>
 
-          <arg choice="plain">--data <replaceable>project-data-dir</replaceable>
-          </arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
           <arg choice="plain"><replaceable>mcq-source-file</replaceable></arg>
         </cmdsynopsis>
@@ -5058,7 +5136,8 @@ Moniuszko,Stanisław,003</programlisting>
 
           <arg choice="plain">--src <replaceable>calage.xy</replaceable></arg>
 
-          <arg choice="plain">--data <replaceable>directory</replaceable></arg>
+          <arg choice="plain">--data
+          <replaceable>directory</replaceable></arg>
         </cmdsynopsis>
       </refsynopsisdiv>
 
@@ -5096,20 +5175,18 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">imprime
-          </arg>
+          <arg choice="plain">imprime</arg>
 
-          <arg choice="plain">--sujet <replaceable>subject.pdf</replaceable>
-          </arg>
+          <arg choice="plain">--sujet
+          <replaceable>subject.pdf</replaceable></arg>
 
-          <arg choice="plain">--fich-nums <replaceable>numbers-file.txt</replaceable>
-          </arg>
+          <arg choice="plain">--fich-nums
+          <replaceable>numbers-file.txt</replaceable></arg>
 
-          <arg choice="plain">--data <replaceable>data-dir</replaceable>
-          </arg>
+          <arg choice="plain">--data <replaceable>data-dir</replaceable></arg>
 
-          <arg choice="plain">--methode <replaceable>method</replaceable>
-          </arg>
+          <arg choice="plain">--methode
+          <replaceable>method</replaceable></arg>
 
           <arg rep="repeat">where-to-print-arguments</arg>
         </cmdsynopsis>
@@ -5287,15 +5364,15 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">getimages
-          </arg>
+          <arg choice="plain">getimages</arg>
 
-          <arg choice="opt">--copy-to <replaceable>project-scans-dir</replaceable></arg>
+          <arg choice="opt">--copy-to
+          <replaceable>project-scans-dir</replaceable></arg>
 
           <arg>--vector-density <replaceable>density</replaceable></arg>
 
-          <arg choice="plain">--list <replaceable>list-file</replaceable>
-          </arg>
+          <arg choice="plain">--list
+          <replaceable>list-file</replaceable></arg>
 
           <group>
             <arg choice="plain"
@@ -5390,18 +5467,18 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">analyse
-          </arg>
+          <arg choice="plain">analyse</arg>
 
-          <arg choice="plain">--projet <replaceable>project-dir</replaceable>
-          </arg>
+          <arg choice="plain">--projet
+          <replaceable>project-dir</replaceable></arg>
 
           <arg>--seuil-coche <replaceable>threshold</replaceable></arg>
 
           <arg>--tol-marque <replaceable>tol</replaceable></arg>
 
           <group>
-            <arg choice="plain">--list-fichiers <replaceable>files-list.txt</replaceable></arg>
+            <arg choice="plain">--list-fichiers
+            <replaceable>files-list.txt</replaceable></arg>
 
             <arg choice="plain"
             rep="repeat"><replaceable>scan-files</replaceable></arg>
@@ -5617,21 +5694,21 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">note
-          </arg>
+          <arg choice="plain">note</arg>
 
-          <arg choice="plain">--data <replaceable>project-data-dir</replaceable></arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
           <arg>--seuil <replaceable>threshold</replaceable></arg>
-          
+
           <arg>--grain <replaceable>granularity</replaceable></arg>
-          
+
           <arg>--arrondi <replaceable>rounding</replaceable></arg>
-          
+
           <arg>--notemin <replaceable>min</replaceable></arg>
-          
+
           <arg>--notemax <replaceable>max</replaceable></arg>
-          
+
           <group>
             <arg choice="plain">--no-plafond</arg>
 
@@ -5791,17 +5868,15 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">association-auto
-          </arg>
+          <arg choice="plain">association-auto</arg>
 
-          <arg choice="plain">--data <replaceable>project-data-dir</replaceable>
-          </arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
-          <arg choice="plain">--notes-id <replaceable>id</replaceable>
-          </arg>
+          <arg choice="plain">--notes-id <replaceable>id</replaceable></arg>
 
-          <arg choice="plain">--liste <replaceable>students-list.csv</replaceable>
-          </arg>
+          <arg choice="plain">--liste
+          <replaceable>students-list.csv</replaceable></arg>
 
           <arg>--encodage-liste <replaceable>list-encoding</replaceable></arg>
 
@@ -5918,11 +5993,10 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">association
-          </arg>
+          <arg choice="plain">association</arg>
 
-          <arg choice="plain">--data <replaceable>project-data-dir</replaceable>
-          </arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
           <arg choice="plain">--list</arg>
         </cmdsynopsis>
@@ -5930,17 +6004,15 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">association
-          </arg>
+          <arg choice="plain">association</arg>
 
-          <arg choice="plain">--data <replaceable>project-data-dir</replaceable>
-          </arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
-          <arg choice="plain">--set
-          </arg>
+          <arg choice="plain">--set</arg>
 
-          <arg choice="plain">--student <replaceable>student-sheet-number</replaceable>
-          </arg>
+          <arg choice="plain">--student
+          <replaceable>student-sheet-number</replaceable></arg>
 
           <arg>--copy <replaceable>copy-number</replaceable></arg>
 
@@ -5999,17 +6071,15 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">export
-          </arg>
+          <arg choice="plain">export</arg>
 
-          <arg choice="plain">--data <replaceable>project-data-dir</replaceable>
-          </arg>
+          <arg choice="plain">--data
+          <replaceable>project-data-dir</replaceable></arg>
 
-          <arg choice="plain">--module <replaceable>module</replaceable>
-          </arg>
+          <arg choice="plain">--module <replaceable>module</replaceable></arg>
 
-          <arg choice="plain">--fich-noms <replaceable>students-list.csv</replaceable>
-          </arg>
+          <arg choice="plain">--fich-noms
+          <replaceable>students-list.csv</replaceable></arg>
 
           <arg>--noms-encodage <replaceable>list-encoding</replaceable></arg>
 
@@ -6317,12 +6387,13 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">annotate
-          </arg>
+          <arg choice="plain">annotate</arg>
 
-          <arg choice="plain">--projet <replaceable>project-dir</replaceable></arg>
+          <arg choice="plain">--projet
+          <replaceable>project-dir</replaceable></arg>
 
-          <arg choice="plain">--names-file <replaceable>students.csv</replaceable></arg>
+          <arg choice="plain">--names-file
+          <replaceable>students.csv</replaceable></arg>
 
           <arg rep="repeat">annotation options</arg>
         </cmdsynopsis>
@@ -6989,36 +7060,37 @@ Moniuszko,Stanisław,003</programlisting>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
 
-          <arg choice="plain">mailing
-          </arg>
+          <arg choice="plain">mailing</arg>
 
           <arg>--xmlargs <replaceable>args.xml</replaceable></arg>
 
-          <arg choice="plain">--project <replaceable>project-dir</replaceable>
-          </arg>
+          <arg choice="plain">--project
+          <replaceable>project-dir</replaceable></arg>
 
-          <arg choice="plain">--students-list <replaceable>students-list.csv</replaceable>
-          </arg>
+          <arg choice="plain">--students-list
+          <replaceable>students-list.csv</replaceable></arg>
 
           <arg>--list-encoding <replaceable>encoding</replaceable></arg>
 
-          <arg choice="plain">--email-column <replaceable>col</replaceable>
-          </arg>
+          <arg choice="plain">--email-column
+          <replaceable>col</replaceable></arg>
 
-          <arg choice="plain">--sender <replaceable>sender-email</replaceable>
-          </arg>
+          <arg choice="plain">--sender
+          <replaceable>sender-email</replaceable></arg>
 
-          <arg choice="plain">--subject <replaceable>subject</replaceable>
-          </arg>
+          <arg choice="plain">--subject
+          <replaceable>subject</replaceable></arg>
 
-          <arg choice="plain">--text <replaceable>email-body</replaceable>
-          </arg>
+          <arg choice="plain">--text
+          <replaceable>email-body</replaceable></arg>
 
-          <arg>--text-content-type <replaceable>content-type</replaceable></arg>
-          
+          <arg>--text-content-type
+          <replaceable>content-type</replaceable></arg>
+
           <arg>--debug <replaceable>file.log</replaceable></arg>
 
-          <arg rep="repeat"><replaceable>transport arguments</replaceable></arg>
+          <arg rep="repeat"><replaceable>transport
+          arguments</replaceable></arg>
         </cmdsynopsis>
       </refsynopsisdiv>
 
@@ -7127,7 +7199,8 @@ Moniuszko,Stanisław,003</programlisting>
           </varlistentry>
 
           <varlistentry>
-            <term><option>--attach <replaceable>filename</replaceable></option></term>
+            <term><option>--attach
+            <replaceable>filename</replaceable></option></term>
 
             <listitem>
               <para>adds file <replaceable>filename</replaceable> as an

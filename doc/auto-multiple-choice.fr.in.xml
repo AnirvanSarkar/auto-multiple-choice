@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -629,6 +629,16 @@ lesquels sont positifs ?
             <code>embf</code> (voir <xref linkend="parse_embf"/>) et
             <code>local_latex</code> (voir <xref
             linkend="parse_local_latex"/>).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>PackageOptions:</term>
+
+          <listitem>
+            <para>Donne des options supplémentaires à transmettre au paquet
+            LaTeX automultiplechoice (voir <xref
+            linkend="sec.package.options"/>).</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -1639,10 +1649,12 @@ Durée : 10 minutes.
             de telle sorte qu'elle ne puisse pas être coupée par un saut de
             page.</para>
 
-            <note><para>Vous pouvez, ponctuellement, pour une meilleure mise en
-            page, annuler, pour une question, cette option avec la commande
-            <command>\AMCnobloc</command>. </para>
-<programlisting>
+            <note>
+              <para>Vous pouvez, ponctuellement, pour une meilleure mise en
+              page, annuler, pour une question, cette option avec la commande
+              <command>\AMCnobloc</command>.</para>
+
+              <programlisting>
 {\AMCnobloc%
 \begin{question}{prez}
 Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
@@ -1654,7 +1666,7 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 \end{reponses}
 \end{question}%
 }% </programlisting>
-          </note>
+            </note>
           </listitem>
 
           <listitem>
@@ -1684,7 +1696,8 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 
           <listitem>
             <para><option>correcindiv</option> : produit la correction de tous
-            les sujets. Très utile si vous utilisez des nombres aléatoires.</para>
+            les sujets. Très utile si vous utilisez des nombres
+            aléatoires.</para>
           </listitem>
 
           <listitem>
@@ -1886,10 +1899,11 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 
         <para>Lors de l'impression du corrigé, vous pouvez apporter des
         précisions grâce à la commande <command>\explain</command>. Cette
-        commande, à insérer dans un environnement <option>question</option> (ce qui inclut les environnements <option>questionmult</option>, <option>questionmultx</option>), affichera le texte
-        écrit.</para>
+        commande, à insérer dans un environnement <option>question</option>
+        (ce qui inclut les environnements <option>questionmult</option>,
+        <option>questionmultx</option>), affichera le texte écrit.</para>
 
-             <programlisting>
+        <programlisting>
 \begin{question}{combustion}
 Quel gaz apparaît lors de la combustion incomplète du butane~?
 \begin{reponses}
@@ -1902,16 +1916,17 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 </programlisting>
       </sect3>
 
-        <note>
-        <para>Par défaut, le mot <emphasis>Explication</emphasis> sera affiché. Vous pouvez modifiez ce texte pour une ou quelques questions mais pas toutes avec la commande <command>\AMCtext</command> (Voir <xref linkend="AMCtext"/>).
-        </para>
-        </note>
+      <note>
+        <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
+        affiché. Vous pouvez modifiez ce texte pour une ou quelques questions
+        mais pas toutes avec la commande <command>\AMCtext</command> (Voir
+        <xref linkend="AMCtext"/>).</para>
+      </note>
 
-        <para>Un exemple issu de la documentation anglaise.</para>
+      <para>Un exemple issu de la documentation anglaise.</para>
 
-
-
-       <para><programlisting>
+      <para>
+        <programlisting>
 \begin{question}{elevation}
   Parmi les montagnes suivantes, laquelle est la plus haute ?
       \begin{reponses}
@@ -1944,10 +1959,12 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
       \mauvaise{Aconcagua}
   \end{reponses}
   \explain{L'Aconcagua est situé dans la cordillère des Andes tandis que le Mont Blanc se trouve dans les Alpes.}
-\end{questionmult}</programlisting></para>
+\end{questionmult}</programlisting>
+      </para>
 
-        <para><emphasis>Explication :</emphasis> sera affiché avant les explications de la première et troisième réponse, <emphasis>Raison :</emphasis> avant les explications de la deuxième question.</para>
-
+      <para><emphasis>Explication :</emphasis> sera affiché avant les
+      explications de la première et troisième réponse, <emphasis>Raison
+      :</emphasis> avant les explications de la deuxième question.</para>
 
       <sect3>
         <title>Réponses sur plusieurs colonnes</title>
@@ -2001,30 +2018,60 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
       </sect3>
 
       <sect3 id="definir.zone.notation">
-      <title id="definir.zone.notation.titre">Définir la zone de notation</title> 
-      <para> Vous pouvez ajouter une option supplémentaire de zone de notation (voir <xref endterm="position.note.titre"
-      linkend="position.note"/>).</para> 
-      <sect4><title>Sans l'option <option>ensemble</option></title>
-      <para>Dans ce mode, le sujet et les réponses sont sur la(es) même(s) feuilles.</para>
-      <para>Taper cette commande, après le <command>\begin{document}</command> et avant la commande <command>\exemplaire</command> :</para>
-      <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
-    <para>Les grandeurs <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> définissent les dimensions de  la case de notation ainsi que son emplacement sur la feuille de réponses.</para> 
-      <para> La variable <parameter>position</parameter> peut prendre les valeurs :
-      none, question, margin, margins.</para>
-      </sect4>
-   
-      <sect4><title>Avec l'option<option> ensemble</option></title>
-     <para> Dans ce mode, la feuille de réponses est séparée du sujet.</para>
-     <para>Taper cette commande, après le <command>\begin{document}</command> et avant la commande <command>\exemplaire</command> :</para>
-     <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
-      </sect4>
-      
-      <para>Les grandeurs <parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter> définissent les dimensions de  la case de notation ainsi que son emplacement sur la feuille de réponses.</para> 
-      <para> La variable <parameter>position</parameter> peut prendre les valeurs :
-      none, question, margin, margins.</para>
-      
-      <warning>
-      <para>Vous ne pouvez pas modifier votre sujet<emphasis> a posteriori</emphasis> en rajoutant l'une de ces fonctions après l'impression du sujet.</para></warning>
+        <title id="definir.zone.notation.titre">Définir la zone de
+        notation</title>
+
+        <para>Vous pouvez ajouter une option supplémentaire de zone de
+        notation (voir <xref endterm="position.note.titre"
+        linkend="position.note"/>).</para>
+
+        <sect4>
+          <title>Sans l'option <option>ensemble</option></title>
+
+          <para>Dans ce mode, le sujet et les réponses sont sur la(es) même(s)
+          feuilles.</para>
+
+          <para>Taper cette commande, après le
+          <command>\begin{document}</command> et avant la commande
+          <command>\exemplaire</command> :</para>
+
+          <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
+
+          <para>Les grandeurs <parameter>width</parameter>,
+          <parameter>height</parameter>, <parameter>depth</parameter>
+          définissent les dimensions de la case de notation ainsi que son
+          emplacement sur la feuille de réponses.</para>
+
+          <para>La variable <parameter>position</parameter> peut prendre les
+          valeurs : none, question, margin, margins.</para>
+        </sect4>
+
+        <sect4>
+          <title>Avec l'option<option> ensemble</option></title>
+
+          <para>Dans ce mode, la feuille de réponses est séparée du
+          sujet.</para>
+
+          <para>Taper cette commande, après le
+          <command>\begin{document}</command> et avant la commande
+          <command>\exemplaire</command> :</para>
+
+          <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+        </sect4>
+
+        <para>Les grandeurs <parameter>width</parameter>,
+        <parameter>height</parameter>, <parameter>depth</parameter>
+        définissent les dimensions de la case de notation ainsi que son
+        emplacement sur la feuille de réponses.</para>
+
+        <para>La variable <parameter>position</parameter> peut prendre les
+        valeurs : none, question, margin, margins.</para>
+
+        <warning>
+          <para>Vous ne pouvez pas modifier votre sujet<emphasis> a
+          posteriori</emphasis> en rajoutant l'une de ces fonctions après
+          l'impression du sujet.</para>
+        </warning>
       </sect3>
 
       <sect3>
@@ -2305,7 +2352,15 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <para>est effectué, mais cette commande peut être utilisée à tout
         moment.</para>
 
-        <note><para>La compatibilité avec le paquet Cleveref ( voir <xref linkend="Cleveref"/>) oblige chaque question à posséder un numéro même si celui-ci ne s'affiche pas. Pour afficher dans le sujet une continuité des numéros, ajouter la commande <command>\AMCquestionNumberfalse</command> juste après <command>\AMCbeginQuestion</command> ou utiliser la commande ci-dessus.</para></note>
+        <note>
+          <para>La compatibilité avec le paquet Cleveref ( voir <xref
+          linkend="Cleveref"/>) oblige chaque question à posséder un numéro
+          même si celui-ci ne s'affiche pas. Pour afficher dans le sujet une
+          continuité des numéros, ajouter la commande
+          <command>\AMCquestionNumberfalse</command> juste après
+          <command>\AMCbeginQuestion</command> ou utiliser la commande
+          ci-dessus.</para>
+        </note>
 
         <para>La présentation des réponses peut être modifiée de la même
         façon, si on utilise l'environnement <option>reponsesperso</option> au
@@ -2316,11 +2371,15 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}</programlisting>
 
-        <important><para>Lorsque vous êtes à l'intérieur de la commande
-        <command>\exemplaire</command>, il faut doubler les  <code>#</code>.
-        </para> <programlisting>
+        <important>
+          <para>Lorsque vous êtes à l'intérieur de la commande
+          <command>\exemplaire</command>, il faut doubler les
+          <code>#</code>.</para>
+
+          <programlisting>
         \def\AMCanswer##1##2{##1  ##2}
-        \def\AMCbeginQuestion##1##2{}</programlisting></important>
+        \def\AMCbeginQuestion##1##2{}</programlisting>
+        </important>
 
         <para>Certains espacements peuvent également être modifiés :</para>
 
@@ -2454,7 +2513,7 @@ et inscrivez votre nom et prénom ci-dessous.
         cochant certaines cases qui lui sont réservées. Il peut ensuite
         scanner les copies et utiliser AMC pour les corriger, tout en
         intégrant les résultats des questions ouvertes dans la notation  :
-         <programlisting>\begin{question}{ouverte}
+        <programlisting>\begin{question}{ouverte}
   Donnez la d\'efinition de l'inflation.
   \AMCOpen{lines=5}{\wrongchoice[F]{f}\scoring{0}\wrongchoice[P]{p}\scoring{1}\correctchoice[J]{j}\scoring{2}}
 \end{question}
@@ -2755,10 +2814,18 @@ et inscrivez votre nom et prénom ci-dessous.
         ajoutent le numéro de la copie avant leur argument avant de le
         transmettre à <command>\label</command>, <command>\ref</command> et
         <command>\pageref</command>.</para>
-        
-        <note><para>Si vous avez mis à jour la version test (1.2.2014.041103) vers la version actuelle (1.2.2014.082401) ou supérieure, la commande <command>\AMCqlabel</command> n'a plus d'utilité. Les questions doivent simplement être référencées avec la commande <command>\AMClabel</command>. Cependant, elle a été conservée pour maintenir la compatibilté avec vos anciens sujets/fichiers tex.</para></note>
-        
-          <para>Il faudra en outre penser à remettre les compteurs utilisés à
+
+        <note>
+          <para>Si vous avez mis à jour la version test (1.2.2014.041103) vers
+          la version actuelle (1.2.2014.082401) ou supérieure, la commande
+          <command>\AMCqlabel</command> n'a plus d'utilité. Les questions
+          doivent simplement être référencées avec la commande
+          <command>\AMClabel</command>. Cependant, elle a été conservée pour
+          maintenir la compatibilté avec vos anciens sujets/fichiers
+          tex.</para>
+        </note>
+
+        <para>Il faudra en outre penser à remettre les compteurs utilisés à
         zéro au début de chaque copie. Par exemple, si on veut inclure des
         références à des images regroupées dans une page à part dans certaines
         questions, on pourra écrire quelque chose comme</para>
@@ -2795,8 +2862,8 @@ et inscrivez votre nom et prénom ci-dessous.
       </sect3>
 
       <sect4 id="exemple">
-        <title>Un exemple d'utilisation des références pour numéroter les pages
-        de la façon x/y dans le pied de page.</title>
+        <title>Un exemple d'utilisation des références pour numéroter les
+        pages de la façon x/y dans le pied de page.</title>
 
         <para>Dans le préambule, tapez :</para>
 
@@ -2828,21 +2895,38 @@ et inscrivez votre nom et prénom ci-dessous.
         <programlisting>\fancyfoot[C]{\hfill{}sujet N\degre{}\AMCsubjectPageTag \hfill{}PAGE~\thepage{}
  sur \AMCpageref{lastpage}\hfill{}}</programlisting>
       </sect4>
-      
+
       <sect4 id="Cleveref">
-      <title>Utilisation du paquet <package>Cleveref</package>.</title>
-      
-      <para>Ce paquet permet d'ordonner les numéros des questions, les pages des questions ou les pages des références par ordre croissant (la documentation <ulink url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>)</para>
-      
-      <warning>
-      <para>Le paquet doit être déclaré <emphasis>après</emphasis> le paquet <package>automuliplechoice</package>.</para>
-      <para><programlisting>\usepackage[french]{cleveref}</programlisting> </para>
-      </warning>
-      
-      <para>L'utilisation de ce paquet nécessite l'introduction d'une nouvelle commande <command>\AMCstudentlabel</command>{référence de la question}.</para>
-      <para><programlisting>\cref{\AMCstudentlabel{dipole},\AMCstudentlabel{cours},\AMCstudentlabel{raisonnement}}</programlisting></para>
-      <para>Avec <emphasis>dipole</emphasis>, <emphasis>cours</emphasis> et <emphasis>raisonnement</emphasis> les références des questions sont indexées, respectivement, avec \AMClabel{dipole}, \AMClabel{cours}, \AMClabel{raisonnement}. Les numéros de ces trois questions seront automatiquement classés lors de la compilation.</para>
-             </sect4>
+        <title>Utilisation du paquet <package>Cleveref</package>.</title>
+
+        <para>Ce paquet permet d'ordonner les numéros des questions, les pages
+        des questions ou les pages des références par ordre croissant (la
+        documentation <ulink
+        url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>)</para>
+
+        <warning>
+          <para>Le paquet doit être déclaré <emphasis>après</emphasis> le
+          paquet <package>automuliplechoice</package>.</para>
+
+          <para>
+            <programlisting>\usepackage[french]{cleveref}</programlisting>
+          </para>
+        </warning>
+
+        <para>L'utilisation de ce paquet nécessite l'introduction d'une
+        nouvelle commande <command>\AMCstudentlabel</command>{référence de la
+        question}.</para>
+
+        <para>
+          <programlisting>\cref{\AMCstudentlabel{dipole},\AMCstudentlabel{cours},\AMCstudentlabel{raisonnement}}</programlisting>
+        </para>
+
+        <para>Avec <emphasis>dipole</emphasis>, <emphasis>cours</emphasis> et
+        <emphasis>raisonnement</emphasis> les références des questions sont
+        indexées, respectivement, avec \AMClabel{dipole}, \AMClabel{cours},
+        \AMClabel{raisonnement}. Les numéros de ces trois questions seront
+        automatiquement classés lors de la compilation.</para>
+      </sect4>
 
       <sect3 id="AMCtext">
         <title>Personnalisation des textes insérés par AMC</title>
@@ -2877,8 +2961,8 @@ et inscrivez votre nom et prénom ci-dessous.
           <listitem>
             <para><code>\AMCtext{explain}{<replaceable>titre</replaceable>}</code>
             remplace « Explication » (en français) par le
-            <replaceable>titre</replaceable> avant le texte explicatif
-            fourni avec l'option <option>explain</option>.</para>
+            <replaceable>titre</replaceable> avant le texte explicatif fourni
+            avec l'option <option>explain</option>.</para>
           </listitem>
 
           <listitem>
@@ -3343,8 +3427,10 @@ et inscrivez votre nom et prénom ci-dessous.
 
       <sect3>
         <title>Utilisation du package pgf/tikz</title>
-        
-        <para>Vous devez déclarer ce paquet, ainsi que les librairies, <package>\usetikzlibrary{arrows,patterns}</package><emphasis>, après</emphasis> <package>automuliplechoice</package>.</para>
+
+        <para>Vous devez déclarer ce paquet, ainsi que les librairies,
+        <package>\usetikzlibrary{arrows,patterns}</package><emphasis>,
+        après</emphasis> <package>automuliplechoice</package>.</para>
 
         <para>Le paquet LaTeX <package>pgf/tikz</package>, dont la
         documentation se trouve sur <ulink
@@ -3549,7 +3635,10 @@ Nom et prénom :
 
       <sect3 id="Utilisation de PSTricks">
         <title>Utilisation de PSTricks</title>
-        <para>Vous devez déclarer ce paquet <emphasis>après</emphasis> <package>automuliplechoice</package>.</para>
+
+        <para>Vous devez déclarer ce paquet <emphasis>après</emphasis>
+        <package>automuliplechoice</package>.</para>
+
         <para>Pour utiliser <command>PSTricks</command>, vous devez configurer
         AMC : <menuchoice>
             <guimenu>Édition</guimenu>
@@ -3840,41 +3929,52 @@ Nom et prénom :
             <guimenuitem>page</guimenuitem> permet de visualiser la page
             scannée et le cadre et les cases tels qu'ils sont
             détectés).</para>
-      
-          
-<note>
-            <itemizedlist>
-            <listitem>
-            <para>
-            AMC dispose, depuis la version 1.2.1419, d'une option permettant de caler les feuilles avec seulement trois marques. Vous devez configurer AMC :
-            </para>
-            <para>
-             <menuchoice>
-            <guimenu>Édition</guimenu>
 
-            <guimenuitem>Préférences</guimenuitem>
+            <note>
+              <itemizedlist>
+                <listitem>
+                  <para>AMC dispose, depuis la version 1.2.1419, d'une option
+                  permettant de caler les feuilles avec seulement trois
+                  marques. Vous devez configurer AMC :</para>
 
-            <guimenuitem>Scan</guimenuitem>
-            
-            <guimenuitem>Process scan with 3 corner marks</guimenuitem>
-            </menuchoice>
-            </para>
-            </listitem>
-            <listitem>
-            <para>
-            AMC ne dispose d'aucune fonction de traitement d'image. Pour corriger le calage, vous pouvez redessiner les marques à l'aide d'un éditeur d'image.
-            <itemizedlist>
-            <listitem> Notez les scans non reconnus, <emphasis>ne les effacez pas !</emphasis></listitem>
-            <listitem>Ouvrez-les avec l'éditeur d'image (les fichiers se trouvent dans le dossier scan du projet).</listitem>
-            <listitem>Sauvegardez-les (Ctrl+S).</listitem>
-            <listitem>Reprenez la correction en ne choisissant que les derniers fichiers modifiés.</listitem>
-</itemizedlist>
-           </para>
-            </listitem> 
-            </itemizedlist>
+                  <para><menuchoice>
+                      <guimenu>Édition</guimenu>
+
+                      <guimenuitem>Préférences</guimenuitem>
+
+                      <guimenuitem>Scan</guimenuitem>
+
+                      <guimenuitem>Process scan with 3 corner
+                      marks</guimenuitem>
+                    </menuchoice></para>
+                </listitem>
+
+                <listitem>
+                  <para>AMC ne dispose d'aucune fonction de traitement
+                  d'image. Pour corriger le calage, vous pouvez redessiner les
+                  marques à l'aide d'un éditeur d'image. <itemizedlist>
+                      <listitem>
+                         Notez les scans non reconnus, 
+
+                        <emphasis>ne les effacez pas !</emphasis>
+                      </listitem>
+
+                      <listitem>
+                        Ouvrez-les avec l'éditeur d'image (les fichiers se trouvent dans le dossier scan du projet).
+                      </listitem>
+
+                      <listitem>
+                        Sauvegardez-les (Ctrl+S).
+                      </listitem>
+
+                      <listitem>
+                        Reprenez la correction en ne choisissant que les derniers fichiers modifiés.
+                      </listitem>
+                    </itemizedlist></para>
+                </listitem>
+              </itemizedlist>
             </note>
           </listitem>
-          
 
           <listitem>
             <para>La valeur <emphasis>sensibilité</emphasis> est un indicateur
@@ -3885,8 +3985,8 @@ Nom et prénom :
             correspondant à la page puis le choix
             <guimenuitem>zoom</guimenuitem> permet de visualiser l'ensemble
             des cases de la copie, de voir si la détection s'est bien
-            déroulée, et éventuellement de la corriger par
-            glisser-déposer (drag and drop) ou par un clic (click)).</para>
+            déroulée, et éventuellement de la corriger par glisser-déposer
+            (drag and drop) ou par un clic (click)).</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -4264,8 +4364,8 @@ Nom et prénom :
           variable <replaceable>XXX</replaceable> dans le barème de la
           question, voir l'exemple ci-dessous.</para>
         </important>
-        
-         <example>
+
+        <example>
           <programlisting>
 \begin{questionmult}{03}\bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
 Cite un gaz  important de l'air et son pourcentage.
@@ -4287,11 +4387,11 @@ Cite un gaz  important de l'air et son pourcentage.
         </example>
 
         <note>
-          <para>Si vous indiquez <code>MAX=3</code> pour une question pouvant rapporter 4
-          points, un étudiant pourra avoir un score de 4/3 à cette question
-          (et, si il donne des réponses parfaites aux autres questions, il
-          pourra éventuellement obtenir une note globale supérieure à
-          20/20).</para>
+          <para>Si vous indiquez <code>MAX=3</code> pour une question pouvant
+          rapporter 4 points, un étudiant pourra avoir un score de 4/3 à cette
+          question (et, si il donne des réponses parfaites aux autres
+          questions, il pourra éventuellement obtenir une note globale
+          supérieure à 20/20).</para>
         </note>
 
         <para>Le barème par défaut pour une question simple est
@@ -4301,17 +4401,16 @@ Cite un gaz  important de l'air et son pourcentage.
         <code>e=0,v=0,b=1,m=0,p=-100,d=0</code>, ce qui donne un point pour
         chaque case qui est cochée ou non à bon escient (case d'une bonne
         réponse cochée, ou case d'une mauvaise réponse non cochée).</para>
-        
-        <note><para>
-        Vous pouvez affecter à b et m les valeurs de la variable déclarée avec <code>set.XXX</code>.
-        </para> 
+
+        <note>
+          <para>Vous pouvez affecter à b et m les valeurs de la variable
+          déclarée avec <code>set.XXX</code>.</para>
 
           <programlisting>
 \begin{questionmult}{Q1}\bareme{default.CONF=1,m=-CONF,b=CONF}
         </programlisting>
-       </note> 
-        
-        
+        </note>
+
         <para>La commande LaTeX <command>\bareme</command> peut aussi être
         utilisée hors des définitions des questions, avec les paramètres
         suivants :</para>
@@ -4650,9 +4749,13 @@ Durée : 10 minutes.
         <note>
            Si vous estimez qu'une question doit être annulée, modifiez le barème comme ceci 
 
-          <command>\bareme{b=0,m=0,e=0,v=0}</command> ou notez la question comme indicative <command>\QuestionIndicative</command>.
+          <command>\bareme{b=0,m=0,e=0,v=0}</command>
 
-           
+           ou notez la question comme indicative 
+
+          <command>\QuestionIndicative</command>
+
+          . 
         </note>
       </sect3>
     </sect2>
@@ -4992,7 +5095,12 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </listitem>
 
           <listitem>
-              Where defined in the source (voir <xref endterm="definir.zone.notation.titre" linkend="definir.zone.notation" />).
+             Where defined in the source (voir 
+
+            <xref endterm="definir.zone.notation.titre"
+                  linkend="definir.zone.notation"/>
+
+            ). 
           </listitem>
         </itemizedlist>
       </sect3>

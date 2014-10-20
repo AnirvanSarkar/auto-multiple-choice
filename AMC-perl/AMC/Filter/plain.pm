@@ -52,6 +52,7 @@ sub new {
 				 ManualDuplex SingleSided
 				 L-OpenText L-OpenReserved
 				 CodeDigitsDirection
+				 PackageOptions
 				/];
 
     # from these options, which ones are boolean valued?
@@ -744,6 +745,16 @@ sub file_header {
   my $t='';
 
   my @package_options=();
+
+  my $o=$self->{'options'}->{packageoptions};
+  $o =~ s/^\s+//;
+  $o =~ s/\s+$//;
+  if($o) {
+    for my $oo (split(/,+/,$o)) {
+      push @package_options,$oo;
+    }
+  }
+
   push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
   for my $on (qw/completemulti separateanswersheet automarks/) {
     push @package_options,$on if($self->{'options'}->{$on});
