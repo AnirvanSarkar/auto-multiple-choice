@@ -4359,8 +4359,12 @@ Nom et prénom :
           </tgroup>
         </informaltable>
 
+        <note>
+           haut=x est réécrit en d=x-N, p=0 
+        </note>
+
         <important>
-          <para>Avec le paramètre default, il faut déclarer la valeur de la
+          <para>Avec le paramètre <code>default</code>, il faut déclarer la valeur de la
           variable <replaceable>XXX</replaceable> dans le barème de la
           question, voir l'exemple ci-dessous.</para>
         </important>
@@ -4407,8 +4411,8 @@ Cite un gaz  important de l'air et son pourcentage.
           déclarée avec <code>set.XXX</code>.</para>
 
           <programlisting>
-\begin{questionmult}{Q1}\bareme{default.CONF=1,m=-CONF,b=CONF}
-        </programlisting>
+  \begin{questionmult}{Q1}\bareme{default.CONF=1,m=-CONF,b=CONF}
+          </programlisting>
         </note>
 
         <para>La commande LaTeX <command>\bareme</command> peut aussi être
@@ -4585,6 +4589,13 @@ Durée : 10 minutes.
         simples et des questions multiples :</para>
 
         <programlisting>\baremeDefautM{haut=3,p=-1}</programlisting>
+  
+       <para>Si vous utilisez <command>formula</command> avec <command>\baremeDefautM</command> ou <command>\baremeDefautS</command>, il faudra l'annuler si vous utilisez un barème particulier pour différentes questions.</para>
+
+        <programlisting>
+\begin{questionmult}\bareme{b=1,m=-0.5,formula=}
+[...]
+\end{questionmult}</programlisting>
 
         <para>Dans certains cas de figure, il peut être intéressant de définir
         un barème de manière générale <emphasis>en fonction du nombre de
@@ -4652,10 +4663,6 @@ Durée : 10 minutes.
             et 0 sinon.</para>
           </listitem>
         </itemizedlist>
-
-        <note>
-           haut=x est réécrit en d=x-N, p=0 
-        </note>
       </sect3>
 
       <sect3 id="note-finale">
