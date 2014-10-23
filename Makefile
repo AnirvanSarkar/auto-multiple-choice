@@ -19,13 +19,11 @@
 
 # Loads separate configuration file
 
-ifeq ($(AMCCONF),)
-AMCCONFFILE ?= Makefile.conf
-else
+ifneq ($(AMCCONF),)
 AMCCONFFILE = Makefile-$(AMCCONF).conf
 endif
 
-SUB_MAKEFILES=$(wildcard Makefile.versions $(AMCCONFFILE))
+SUB_MAKEFILES=$(wildcard Makefile.versions Makefile.conf $(AMCCONFFILE))
 
 include $(SUB_MAKEFILES)
 
