@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -2476,6 +2476,7 @@ and write your first and last names below.
               <para>sets a short text that helps the examiner to identify the
               question. This text will be written before the scoring boxes,
               only if a separate answer sheet is used.</para>
+              <para>The question's identifier will be displayed if you type question in the options list.</para>
             </listitem>
           </varlistentry>
 
@@ -4103,6 +4104,14 @@ Name:
         multiple questions:</para>
 
         <programlisting>\scoringDefaultM{haut=3,p=-1}</programlisting>
+
+       <para>If you use <command>formula</command> with <command>\scoringDefautM</command> or <command>\scoringDefautS</command>, you must cancel it to score different questions with a specific scoring.</para>
+
+        <programlisting>
+\begin{questionmult}\scoring{b=1,m=-0.5,formula=}
+[...]
+\end{questionmult}</programlisting>
+
 
         <para>In some cases, defining a global strategy can be interesting
         <emphasis>depending of the number of proposed responses</emphasis>. To
