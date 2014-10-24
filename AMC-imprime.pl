@@ -44,6 +44,7 @@ my $options='number-up=1';
 my $output_file='';
 my $output_answers_file='';
 my $split='';
+my $extract_with='pdftk';
 
 GetOptions(
 	   "data=s"=>\$data_dir,
@@ -58,6 +59,7 @@ GetOptions(
 	   "split!"=>\$split,
 	   "options=s"=>\$options,
 	   "debug=s"=>\$debug,
+	   "extract-with=s"=>\$extract_with,
 	   );
 
 set_debug($debug);
@@ -70,6 +72,21 @@ die "Needs subject file" if(!$sujet);
 
 die "Needs print command" if($methode =~ /^command/i && !$print_cmd);
 die "Needs output file" if($methode =~ /^file/i && !$output_file);
+
+my @available_extracts=(qw/pdftk gs/);
+
+die "Invalid value for extract_with"
+  if(!grep(/^$extract_with$/,@available_extracts));
+
+@available_extracts=grep { commande_accessible($_) }
+  @available_extracts;
+
+die "No available extract engine" if(!@available_extracts);
+
+if(grep(/^$extract_with$/,@available_extracts)) {
+  $extract_with=$available_extracts[0];
+  debug("Switching to extract engine $extract_with");
+}
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
 
@@ -124,10 +141,14 @@ sub process_pages {
 
   print "Student $elong : pages $first-$last in file $fn...\n";
 
-  $commandes->execute("gs","-dBATCH","-dNOPAUSE","-q","-sDEVICE=pdfwrite",
-		      "-sOutputFile=$fn",
-		      "-dFirstPage=$first","-dLastPage=$last",
-		      $sujet);
+  if($extract_with eq 'gs') {
+    $commandes->execute("gs","-dBATCH","-dNOPAUSE","-q","-sDEVICE=pdfwrite",
+			"-sOutputFile=$fn",
+			"-dFirstPage=$first","-dLastPage=$last",
+			$sujet);
+  } elsif($extract_with eq 'pdftk') {
+    $commandes->execute("pdftk",$sujet,"cat","$first-$last","output",$fn);
+  }
 
   if($methode =~ /^cups/i) {
     $dest->printFile($fn,"QCM : sheet $elong");
