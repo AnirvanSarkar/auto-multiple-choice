@@ -83,7 +83,7 @@ die "Invalid value for extract_with"
 
 die "No available extract engine" if(!@available_extracts);
 
-if(grep(/^$extract_with$/,@available_extracts)) {
+if(!grep(/^$extract_with$/,@available_extracts)) {
   $extract_with=$available_extracts[0];
   debug("Switching to extract engine $extract_with");
 }
