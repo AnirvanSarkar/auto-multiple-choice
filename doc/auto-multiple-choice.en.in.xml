@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -1281,6 +1281,8 @@ DESC: An example (from the documentation) in which questions are shuffled inside
 
 %%% preparation of the groups
 
+\setdefaultgroupmode{withoutreplacement}
+
 \element{geographie}{
   \begin{question}{Paris}
     In which continent is Paris?
@@ -1353,7 +1355,6 @@ Firstname and lastname:
   \vspace{1mm}\hrule
 \end{center}
 
-\shufflegroup{geographie}
 \insertgroup{geographie}
 
 \begin{center}
@@ -1362,7 +1363,6 @@ Firstname and lastname:
   \vspace{2mm}\hrule
 \end{center}
 
-\shufflegroup{histoire}
 \insertgroup{histoire}
 
 \clearpage
@@ -1400,6 +1400,8 @@ DESC: An example (from the documentation) where all check-boxes are put together
 
 \def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1:} }    <co
             id="ensemble.fq" linkends="ensemble.fq.exp"/>
+
+\setdefaultgroupmode{withoutreplacement}
 
 \element{general}{
   \begin{question}{prez}    
@@ -1464,7 +1466,6 @@ Durée : 10 minutes.
 
 %%% end of the header
 
-\shufflegroup{general}
 \insertgroup{general}
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
@@ -2003,19 +2004,70 @@ Durée : 10 minutes.
           every realization.</para>
         </important>
 
+        <para>Finally, the group content can be output to the test sheet using
+        command <command>insertgroup</command>, as in<programlisting>\insertgroup{mygroup}</programlisting></para>
+
+        <para>Group insertion can be controlled by the group mode, that can be
+        set by the <command>setgroupmode</command> command (called after group
+        creation, once for all, before <command>onecopy</command>):</para>
+
+        <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
+
+        <para>where <code>XXX</code> can be one of the following:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>fixed</term>
+
+            <listitem>
+              <para>with this mode, group's elements are taken from the
+              beginnig at each insertion.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>cyclic</term>
+
+            <listitem>
+              <para>the elements will be taken from the group following the
+              last call group’s use, recycling if necessary.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>withreplacement</term>
+
+            <listitem>
+              <para>the same as <code>fixed</code>, but the group is shuffled
+              before each use.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>withoutreplacement</term>
+
+            <listitem>
+              <para>like <code>cyclic</code>, adding some shuffling when
+              comming back to the beginning of the group.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>Note that a default group mode can be set for all groups that
+        will be created next (a group is created at the first
+        <command>element</command> call), using the command</para>
+
+        <programlisting>\setdefaultgroupmode{XXX}</programlisting>
+
+        <para>Without any mode definition, the <code>fixed</code> mode is
+        used.</para>
+
         <para>Once a group is formed, it is possible to shuffle questions
         inside this group using the <command>shufflegroup</command> command.
         For instance<programlisting>\shufflegroup{mygroup}</programlisting></para>
 
-        <para>Finally, the group content can be output to the test sheet using
-        command <command>insertgroup</command>, as in<programlisting>\insertgroup{mygroup}</programlisting></para>
-
-        <note>
-          <para>These last two commands (<command>shufflegroup</command> and
-          <command>insertgroup</command>) are to be used inside the argument
-          of the command <command>onecopy</command>, so that shuffling is
-          performed before each realization.</para>
-        </note>
+        <para>However, the command <command>shufflegroup</command> can always
+        be replaced by a proper use of group modes.</para>
 
         <para>Groups of questions can be manipulated more precisely thanks to
         the following commands:</para>
@@ -2045,13 +2097,15 @@ Durée : 10 minutes.
         questions from group GA at random, 5 questions from group GB at
         random, and all the questions from group GO, shuffling all these
         questions, with the following code (to be used inside the argument of
-        the command <command>onecopy</command>):</para>
+        the command <command>onecopy</command>, and supposing that the group
+        mode of groups <code>GA</code>, <code>GB</code> and <code>all</code>
+        is <code>withoutreplacement</code> or
+        <code>withreplacement</code>):</para>
 
         <programlisting>\cleargroup{all}
-\shufflegroup{GA}\copygroup[4]{GA}{all}
-\shufflegroup{GB}\copygroup[5]{GB}{all}
+\copygroup[4]{GA}{all}
+\copygroup[5]{GB}{all}
 \copygroup{GO}{all}
-\shufflegroupe{all}
 \insertgroup{all}</programlisting>
       </sect3>
 
@@ -2476,7 +2530,9 @@ and write your first and last names below.
               <para>sets a short text that helps the examiner to identify the
               question. This text will be written before the scoring boxes,
               only if a separate answer sheet is used.</para>
-              <para>The question's identifier will be displayed if you type question in the options list.</para>
+
+              <para>The question's identifier will be displayed if you type
+              question in the options list.</para>
             </listitem>
           </varlistentry>
 
@@ -4105,13 +4161,15 @@ Name:
 
         <programlisting>\scoringDefaultM{haut=3,p=-1}</programlisting>
 
-       <para>If you use <command>formula</command> with <command>\scoringDefautM</command> or <command>\scoringDefautS</command>, you must cancel it to score different questions with a specific scoring.</para>
+        <para>If you use <command>formula</command> with
+        <command>\scoringDefautM</command> or
+        <command>\scoringDefautS</command>, you must cancel it to score
+        different questions with a specific scoring.</para>
 
         <programlisting>
 \begin{questionmult}\scoring{b=1,m=-0.5,formula=}
 [...]
 \end{questionmult}</programlisting>
-
 
         <para>In some cases, defining a global strategy can be interesting
         <emphasis>depending of the number of proposed responses</emphasis>. To
