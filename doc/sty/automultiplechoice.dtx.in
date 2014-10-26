@@ -2273,7 +2273,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcommand{\cleargroup}[1]{%
   \nouveaugroupe{#1}{}%
-  \csname #1@k\endcsname=\z@%
+  \csname #1@k\endcsname=\z@\relax%
+  \csname AMC#1@j\endcsname=\z@\relax%
 }
 \newcommand{\copygroup}[3][0]{%
   \AMCgrouploop@prep{#1}{#2}%
