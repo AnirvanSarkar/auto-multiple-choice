@@ -2106,7 +2106,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \expandafter\newcount\csname AMC#1@j\endcsname%
     \csname #1@k\endcsname=\z@\relax%
     \csname AMC#1@j\endcsname=\z@\relax%
-    \setgroupmode{#1}{fixed}%
+    \setgroupmode{#1}{\AMCdefault@groupmode}%
   \fi%
 }
 \newcommand\AMC@prepare@element[1]{%
@@ -2121,12 +2121,12 @@ Three digits and two letters:\insertgroup{mixed}.
   \csname #1@\romannumeral\AMCtok@k\endcsname={#2}%
 }
 %    \end{macrocode}\end{macro}\end{macro}
-% \begin{macro}{\setgroupmode}
+% \begin{macro}{\setgroupmode}\begin{macro}{\setdefaultgroupmode}
 %   Command |\setgroupmode|\marg{group-name}\marg{mode} sets the group
 %   mode to \meta{mode} for group \meta{group-name}. This mode setup
 %   the behaviour of |\insertgroup| and |\copygroup| for this group:
 %   \begin{enumerate}
-%   \item With mode |fixed| (this is the default mode), group's
+%   \item With mode |fixed|, group's
 %     elements will be taken from the beginning.
 %   \item With mode |cyclic|, the elements will be taken from the
 %     group following the last call group's use, recycling if
@@ -2136,7 +2136,13 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \item Mode |withoutreplacement| is like |cyclic|, adding some
 %     shuffling when comming back to the beginning of the group.
 %   \end{enumerate}
+%   The command |\setdefaultgroupmode|\marg{mode} sets the group mode
+%   to be used for the following created groups (a group is created at
+%   the first |\element|\marg{group} call). When no
+%   |\setdefaultgroupmode| is used, |fixed| is the default mode.
 %    \begin{macrocode}
+\def\AMCdefault@groupmode{fixed}
+\newcommand{\setdefaultgroupmode}[1]{\def\AMCdefault@groupmode{#1}}
 \newcommand{\setgroupmode}[2]{%
   \expandafter\ifx\csname AMCgrouppre@#2\endcsname\relax%
     \PackageError{automultiplechoice}{Unknown group mode for #1 : #2}%
@@ -2202,7 +2208,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \csname AMCgrouppre@#1\endcsname{#2}{#3}%
 }
 %    \end{macrocode}
-% \end{macro}
+% \end{macro}\end{macro}
 % \begin{macro}{\shufflegroup}\begin{macro}{\insertgroup}
 %     Command |\shufflegroup|\marg{group-name} shuffles the elements
 %     of group \meta{group-name}, and
@@ -2273,7 +2279,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcommand{\cleargroup}[1]{%
   \nouveaugroupe{#1}{}%
-  \csname #1@k\endcsname=\z@%
+  \csname #1@k\endcsname=\z@\relax%
+  \csname AMC#1@j\endcsname=\z@\relax%
 }
 \newcommand{\copygroup}[3][0]{%
   \AMCgrouploop@prep{#1}{#2}%

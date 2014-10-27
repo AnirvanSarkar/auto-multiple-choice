@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -1343,6 +1343,8 @@ DESC: Un exemple (issu de la documentation) où les questions sont mélangées �
 
 %%% préparation des groupes
 
+\setdefaultgroupmode{withoutreplacement}
+
 \element{geographie}{
   \begin{question}{Paris}
     Dans quel continent se situe Paris~?
@@ -1415,7 +1417,6 @@ Nom et prénom :
   \vspace{1mm}\hrule
 \end{center}
 
-\melangegroupe{geographie}
 \restituegroupe{geographie}
 
 \begin{center}
@@ -1424,7 +1425,6 @@ Nom et prénom :
   \vspace{2mm}\hrule
 \end{center}
 
-\melangegroupe{histoire}
 \restituegroupe{histoire}
 
 \clearpage
@@ -1463,6 +1463,8 @@ DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont 
 
 \def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1 :} }    <co
             id="ensemble.fq" linkends="ensemble.fq.exp"/>
+
+\setdefaultgroupmode{withoutreplacement}
 
 \element{general}{
   \begin{question}{prez}    
@@ -1528,7 +1530,6 @@ Durée : 10 minutes.
 
 %%% fin de l'en-tête
 
-\melangegroupe{general}
 \restituegroupe{general}
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
@@ -2146,20 +2147,70 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           actions pour chaque copie.</para>
         </important>
 
+        <para>Enfin, on restitue les questions du groupe par la commande
+        <command>restituegroupe</command>, comme dans <programlisting>\restituegroupe{ungroupe}</programlisting></para>
+
+        <para>La manière dont le groupe est restitué peut être contrôlée par
+        le mode du groupe, défini grâce à la commande
+        <command>setgroupmode</command> :</para>
+
+        <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
+
+        <para>où <code>XXX</code> peut prendre les valeurs suivantes :</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>fixed</term>
+
+            <listitem>
+              <para>avec ce mode, les éléments du groupe sont pris à partir du
+              début du groupe à chaque restitution.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>cyclic</term>
+
+            <listitem>
+              <para>les éléments sont pris à la suite les uns des autres à
+              chaque restitution, en repartant du début si nécessaire.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>withreplacement</term>
+
+            <listitem>
+              <para>même chose que pour <code>fixed</code>, mais le groupe est
+              mélangé à chaque fois.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>withoutreplacement</term>
+
+            <listitem>
+              <para>comme <code>cyclic</code>, en ajoutant un mélange à chaque
+              fois que l'on reprend au début.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>Un mode par défaut peut être choisi pour tous les groupes qui
+        seront créés ensuite (un groupe est créé à la première utilisation de
+        <command>element</command>) :</para>
+
+        <programlisting>\setdefaultgroupmode{XXX}</programlisting>
+
         <para>Une fois un groupe constitué, on peut mélanger les questions qui
         le composent par la commande <command>melangegroupe</command> : par
         exemple, <programlisting>\melangegroupe{ungroupe}</programlisting></para>
 
-        <para>Enfin, on restitue les questions du groupe par la commande
-        <command>restituegroupe</command>, comme dans <programlisting>\restituegroupe{ungroupe}</programlisting></para>
+        <para>Cependant, cette commande n'a pas à être utilisée si on utilise
+        les modes de groupes comme il faut.</para>
 
-        <note>
-          <para>Ces deux dernières commandes (<command>melangegroupe</command>
-          et <command>restituegroupe</command>) seront quand à elles
-          normalement utilisées à l'intérieur du texte en argument de la
-          commande <command>exemplaire</command>, pour que le mélange soit
-          effectué avant chaque copie.</para>
-        </note>
+        <para>Si cette commande n'est pas utilisée, c'est le mode
+        <code>fixed</code> qui sera utilisé.</para>
 
         <para>On peut manipuler les groupes de questions de manière plus
         précise grâce aux commandes suivantes :</para>
@@ -2191,13 +2242,15 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         hasard dans le groupe GB, toutes les questions du groupe GO, puis en
         mélangeant le tout, grâce aux commandes suivantes (à mettre à
         l'intérieur du texte en argument de la commande
-        <command>exemplaire</command>) :</para>
+        <command>exemplaire</command>, et en supposant que les groupes
+        <code>GA</code>, <code>GB</code> et <code>tout</code> sont de mode
+        <code>withreplacement</code> ou
+        <code>withoutreplacement</code>) :</para>
 
         <programlisting>\cleargroup{tout}
-\melangegroupe{GA}\copygroup[4]{GA}{tout}
-\melangegroupe{GB}\copygroup[5]{GB}{tout}
+\copygroup[4]{GA}{tout}
+\copygroup[5]{GB}{tout}
 \copygroup{GO}{tout}
-\melangegroupe{tout}
 \restituegroupe{tout}</programlisting>
       </sect3>
 
@@ -2687,7 +2740,9 @@ et inscrivez votre nom et prénom ci-dessous.
               facilement la question posée. Ce texte sera écrit juste avant
               les cases de notation, uniquement dans le cas de l'utilisation
               d'une feuille de réponses séparée.</para>
-              <para>L'identifiant de la question sera affiché par défaut en inscrivant question dans les options.</para>
+
+              <para>L'identifiant de la question sera affiché par défaut en
+              inscrivant question dans les options.</para>
             </listitem>
           </varlistentry>
 
@@ -4002,18 +4057,20 @@ Nom et prénom :
                          Notez les scans non reconnus, 
 
                         <emphasis>ne les effacez pas !</emphasis>
+
+                         
                       </listitem>
 
                       <listitem>
-                        Ouvrez-les avec l'éditeur d'image (les fichiers se trouvent dans le dossier scan du projet).
+                         Ouvrez-les avec l'éditeur d'image (les fichiers se trouvent dans le dossier scan du projet). 
                       </listitem>
 
                       <listitem>
-                        Sauvegardez-les (Ctrl+S).
+                         Sauvegardez-les (Ctrl+S). 
                       </listitem>
 
                       <listitem>
-                        Reprenez la correction en ne choisissant que les derniers fichiers modifiés.
+                         Reprenez la correction en ne choisissant que les derniers fichiers modifiés. 
                       </listitem>
                     </itemizedlist></para>
                 </listitem>
@@ -4290,8 +4347,9 @@ Nom et prénom :
                 <entry/>
 
                 <entry>Ce paramètre impose un barème du type "maximum ou
-                zéro" : l'élève doit cocher toutes les bonnes réponses pour avoir la note <replaceable>mz</replaceable>
-                sinon, elle sera nulle.</entry>
+                zéro" : l'élève doit cocher toutes les bonnes réponses pour
+                avoir la note <replaceable>mz</replaceable> sinon, elle sera
+                nulle.</entry>
               </row>
 
               <row>
@@ -4408,9 +4466,9 @@ Nom et prénom :
         </note>
 
         <important>
-          <para>Avec le paramètre <code>default</code>, il faut déclarer la valeur de la
-          variable <replaceable>XXX</replaceable> dans le barème de la
-          question, voir l'exemple ci-dessous.</para>
+          <para>Avec le paramètre <code>default</code>, il faut déclarer la
+          valeur de la variable <replaceable>XXX</replaceable> dans le barème
+          de la question, voir l'exemple ci-dessous.</para>
         </important>
 
         <example>
@@ -4633,8 +4691,11 @@ Durée : 10 minutes.
         simples et des questions multiples :</para>
 
         <programlisting>\baremeDefautM{haut=3,p=-1}</programlisting>
-  
-       <para>Si vous utilisez <command>formula</command> avec <command>\baremeDefautM</command> ou <command>\baremeDefautS</command>, il faudra l'annuler si vous utilisez un barème particulier pour différentes questions.</para>
+
+        <para>Si vous utilisez <command>formula</command> avec
+        <command>\baremeDefautM</command> ou
+        <command>\baremeDefautS</command>, il faudra l'annuler si vous
+        utilisez un barème particulier pour différentes questions.</para>
 
         <programlisting>
 \begin{questionmult}\bareme{b=1,m=-0.5,formula=}
@@ -4806,7 +4867,7 @@ Durée : 10 minutes.
 
           <command>\QuestionIndicative</command>
 
-          . 
+           . 
         </note>
       </sect3>
     </sect2>
@@ -5113,18 +5174,32 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       d'étudiant de l'étudiant sera utilisée.</para>
 
       <sect3 id="Options.annotation.ensemble">
-      <title id="Options.annotation.ensemble.title"> Options proposées en mode <option>ensemble</option></title>
-      <itemizedlist>
-      <listitem><para><command>Only pages with answers</command> : les feuilles de réponses seront annotées.</para></listitem>
-      </itemizedlist>
-           <itemizedlist>
-      <listitem><para><command>Questions pages from subject</command> : le sujet et les feuilles de réponses seront annotées.</para></listitem>
-      </itemizedlist>
-           <itemizedlist>
-      <listitem><para><command>Questions pages from correction</command> : les feuilles de réponses seront annotées et le sujet corrigé sera inclus.</para></listitem>
-      </itemizedlist>
+        <title id="Options.annotation.ensemble.title">Options proposées en
+        mode <option>ensemble</option></title>
+
+        <itemizedlist>
+          <listitem>
+            <para><command>Only pages with answers</command> : les feuilles de
+            réponses seront annotées.</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para><command>Questions pages from subject</command> : le sujet
+            et les feuilles de réponses seront annotées.</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para><command>Questions pages from correction</command> : les
+            feuilles de réponses seront annotées et le sujet corrigé sera
+            inclus.</para>
+          </listitem>
+        </itemizedlist>
       </sect3>
-      
+
       <sect3 id="position.note">
         <title id="position.note.titre">Position de la note</title>
 
@@ -5164,7 +5239,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <xref endterm="definir.zone.notation.titre"
                   linkend="definir.zone.notation"/>
 
-            ). 
+             ). 
           </listitem>
         </itemizedlist>
       </sect3>
