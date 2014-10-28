@@ -7,82 +7,34 @@
 
 \begin{document}
 
+\def\simpleq{
+  Is it true?
+  \begin{choices}
+    \wrongchoice{no}
+    \correctchoice{yes}
+  \end{choices}
+}
+
 \element{qqs}{
 \begin{question}{déjà ça}
-  Combien de points voulez-vous à cette question~?
-  \begin{reponses}
-    \bonne{Le maximun : 10}\bareme{10}
-    \mauvaise{Seulement 5}\bareme{5}
-    \mauvaise{Deux me suffiront}\bareme{2}
-    \mauvaise{Aucun, merci}\bareme{0}
-  \end{reponses}
+  \simpleq
 \end{question}
 }
 
 \element{qqs}{
-\begin{questionmult}{engrangé}
-  Engrangez des points gratuitement en cochant les cases ci-dessous~:
-  \begin{reponses}
-    \bonne{2 points}\bareme{b=2}
-    \mauvaise{Un point négatif}\bareme{b=0,m=-1}
-    \bonne{3 points}\bareme{b=3}
-    \bonne{1 point}
-    \bonne{Un demi point}\bareme{b=0.5}
-  \end{reponses}
+\begin{questionmult}{où ô ?}
+  \simpleq
 \end{questionmult}
 }
 
 \element{qqs}{
-\begin{questionmult}{tout où rien}\bareme{mz=3}
-  Il faut cocher exactement comme il faut pour avoir trois points, sinon vous n'en
-  aurez aucun.
-  \begin{reponses}
-    \mauvaise{Fausse}
-    \mauvaise{Fausse}
-    \bonne{Juste}
-    \bonne{Juste}
-  \end{reponses}
-\end{questionmult}
-}
-
-\element{qqs}{
-\begin{questionmult}{2 ô plus}\bareme{haut=2}
-  Deux points pour tout juste, et un point pour chaque erreur...
-  \begin{reponses}
-    \bonne{Bonne réponse}
-    \bonne{Ceci est juste}
-    \bonne{Exact}
-    \mauvaise{Faux~!}
-    \mauvaise{Ne pas cocher~!}
-  \end{reponses}
-\end{questionmult}
-}
-
-\element{qqs}{
-\begin{question}{attentîon}\bareme{b=2}
-  Alors là, la réponse très fausse mérite sanction (-2 points), mais
-  viser juste rapporte 2 points.
-  \begin{reponses}
-    \bonne{C'est bon !}
-    \mauvaise{Pas bon}
-    \mauvaise{Pas bon}
-    \mauvaise{Pas bon}
-    \mauvaise{Très faux !}\bareme{-2}
-  \end{reponses}
+\begin{question}{hî hô}
+  \AMCdontScan
+  \simpleq
 \end{question}
 }
 
-\element{qqs}{
-  \begin{questionmult}{àu choix}
-  Choisissez vos points :
-  \begin{reponses}
-    \bonne{J'en veux 2}\bareme{b=2}
-    \mauvaise{J'en donne trois}\bareme{b=0,m=3}
-    \bonne{J'en veux un (et sinon j'en perds un)}\bareme{m=-1}
-  \end{reponses}
-\end{questionmult}
-}
-
+\scoring{SUF=3} % dontscan cancels 1 point from last question
 \setgroupmode{qqs}{withreplacement}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
