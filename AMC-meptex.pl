@@ -134,7 +134,7 @@ while(<SRC>) {
 		     -dim_x=>read_inches($dx),-dim_y=>read_inches($dy),
 		     -cases=>$cases};
     }
-    if(/\\tracepos\{([^\}]+)\}\{([^\}]*)\}\{([^\}]*)\}(?:\{([^\}]*)\})?/) {
+    if(/\\tracepos\{(.+)\}\{([+-]?[0-9.]+[a-z]*)\}\{([+-]?[0-9.]+[a-z]*)\}(?:\{([a-zA-Z]*)\})?$/) {
 	$i=$1;
 	my $x=read_inches($2);
 	my $y=read_inches($3);
