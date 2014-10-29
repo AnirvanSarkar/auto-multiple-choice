@@ -160,11 +160,11 @@
       <title>Limitations numériques</title>
 
       <para>Dans la version actuelle (à partir de la version 0.156), le nombre
-      de copies est limité à 4095 et le nombre de pages par copies est limité
-      à 63.</para>
+      de copies est limité à 4 095 et le nombre de pages par copies est limité
+      à 63. ( Valeurs par défaut mais modifiables voir <xref endterm="code.binaire.titre"  linkend="code.binaire"/> ).</para>
 
       <para>Le nombre de réponses proposées pour une même question est limité
-      à 199.</para>
+      à 199 (valeur par défaut non modifiable).</para>
 
       <para>Par ailleurs, les limitations de LaTeX pourront bloquer la
       compilation avant ces limites (erreur du type « <errortext>No room for a
@@ -1781,50 +1781,7 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
       <sect3 id="sec.unecopie">
         <title>Description d'une copie</title>
 
-        <sect4>
-          <title>Le code binaire</title>
-          
-          <itemizedlist>
-          <listitem> 
-          <para>Première ligne : 12 cases (valeur par défaut) : nombre maximal de sujets = 2^12-1 = 4095.</para>
-          </listitem>
-         </itemizedlist>
-  
-          <programlisting>
-\makeatletter
-\AMC@NCBetud=12
-\makeatother
-          </programlisting>  
-  
-         <itemizedlist>
-          <listitem> <para>Seconde ligne : 6 premières cases (valeur par défaut) : nombre maximal de pages par sujet= 2^6-1 = 63.</para></listitem>
-          </itemizedlist>
-
-          <programlisting>
-\makeatletter
-\AMC@NCBcheck=6
-\makeatother
-          </programlisting>
-
-         <itemizedlist>
-          <listitem> <para>Seconde ligne : 6 dernières cases (valeur par défaut) : code de contrôle.</para></listitem>
-          </itemizedlist>
-
-          <programlisting>
-\makeatletter
-\AMC@NCBpage=6
-\makeatother
-          </programlisting>
-  
-         <para>
-        Pour augmenter le  nombre de sujets de pages par sujet, modifiez les valeurs par défaut. Ne pas oublier de modifier le code de contrôle. 
-        </para>
-        </sect4>
-  
-        <sect4>
-        <title> La commande <command>\exemplaire</command></title>
-          
-        <para>Le code LaTeX décrivant le contenu de chaque copie doit être
+           <para>Le code LaTeX décrivant le contenu de chaque copie doit être
         inclus dans un appel à la commande <command>\exemplaire</command>,
         avec pour premier argument le nombre de copies et pour deuxième
         argument le code utilisé pour générer une copie.</para>
@@ -1846,7 +1803,6 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           la distribution TeX Live 2007, encore utilisée dans des
           distributions Ubuntu jusqu'à la version 9.10 (Karmic Koala).</para>
         </note>
-        </sect4>
       </sect3>
 
       <sect3 id="latex.qr">
@@ -1879,7 +1835,7 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
 
         <note>
           <para>Le nombre de réponses pour une question est actuellement
-          limité à 20.</para>
+          limité à 199.</para>
         </note>
 
         <important>
@@ -3021,7 +2977,7 @@ et inscrivez votre nom et prénom ci-dessous.
           </listitem>
         </itemizedlist>
       </sect3>
-    </sect2>
+ 
 
     <note>
       <para>Utilisez <command> \onecopy </command> au lieu de
@@ -3030,6 +2986,45 @@ et inscrivez votre nom et prénom ci-dessous.
       la même chose).</para>
     </note>
 
+     <sect3 id="code.binaire">
+          <title id="code.binaire.titre">Le code binaire</title>
+
+          <para>Le code binaire permet à AMC de reconnaître le numéro du sujet et le numéro de la page du sujet.</para>
+  
+          <itemizedlist>
+          <listitem> 
+          <para>Première ligne : 12 cases (valeur par défaut) : nombre maximal de sujets = 2^12-1 = 4 095.</para>
+          </listitem>
+            <listitem> <para>Seconde ligne : 6 premières cases (valeur par défaut) : nombre maximal de pages par sujet = 2^6-1 = 63.</para>
+          </listitem>
+          <listitem> <para>Seconde ligne : 6 dernières cases (valeur par défaut) : code de contrôle.</para>
+          </listitem>
+          </itemizedlist>
+
+          <para>
+          Pour augmenter le  nombre de sujets ou/et de pages par sujet, modifiez les valeurs par défaut des commandes <command>\AMC@NCBetud</command>, <command>\AMC@NCBpage</command> et <command>\AMC@NCBcheck</command>.
+          </para> 
+
+          <para> 
+          Dans le préambule, déclarez les commandes ci-dessous (ici avec les valeurs par défaut).
+          </para> 
+
+          <programlisting>
+\makeatletter
+\AMC@NCBetud=12
+\AMC@NCBpage=6
+\AMC@NCBcheck=6
+\makeatother
+          </programlisting>
+          
+          <note>
+          <para>
+          Les valeurs de <command>\AMC@NCBpage</command> et <command>\AMC@NCBcheck</command> doivent être identiques.
+          </para>
+          </note>
+          </sect3>
+   </sect2>
+   
     <sect2>
       <title>Options pour AMC</title>
 

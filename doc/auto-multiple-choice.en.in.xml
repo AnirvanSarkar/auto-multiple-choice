@@ -182,11 +182,11 @@
       <title>Numerical limitations</title>
 
       <para>In the present version (starting with version 0.156), the maximum
-      number of students per test is limited to 4095, and the maximum number
-      of pages per test is limited to 63.</para>
+      number of students per test is limited to 4,095, and the maximum number
+      of pages per test is limited to 63 ( Modifiable default values, see <xref endterm="binary.code.title"  linkend="binary.code"/> ).</para>
 
       <para>The maximum number of answers for a given question is limited to
-      199.</para>
+      199 (Unmodifiable default value).</para>
 
       <para>LaTeX's own limitations may make compilation impossible, producing
       e.g. a « <errortext>No room for a new \toks</errortext> » error. In that
@@ -1687,44 +1687,7 @@ Durée : 10 minutes.
       <sect3 id="sec.unecopie">
         <title>Description of a copy</title>
 
-        <sect4>
-          <title>Binary code</title>
-          
-          <itemizedlist>
-          <listitem> <para>First row : 12 boxes (default value) : maximum number of subjects.= 2^12-1 = 4095.</para></listitem>
-          </itemizedlist>
 
-          <programlisting>
-\makeatletter
-\AMC@NCBetud=12
-\makeatother
-          </programlisting>
-
-          <itemizedlist>
-          <listitem> <para>Second row : 6 first boxes (default value) : maximum number of sheets per  subjects= 2^6-1 = 63.</para></listitem>
-          </itemizedlist>
-
-          <programlisting>
-\makeatletter
-\AMC@NCBpage=6
-\makeatother
-          </programlisting>
-  
-            <itemizedlist>
-          <listitem> <para>Second row : 6 last boxes (default value) : check code.</para></listitem>
-          </itemizedlist>
-
-          <programlisting>
-\makeatletter
-\AMC@NCBcheck=6
-\makeatother
-          </programlisting>
-
-        <para>
-        To raise the number of subjects, sheets per  subject modify the default values. Do not forget to raise up in the same time the check code.
-        </para>
-         </sect4>
-  
         <sect4>
         <title> Commande <command>\onecopy</command></title>
         
@@ -2793,6 +2756,42 @@ and write your first and last names below.
           </listitem>
         </itemizedlist>
       </sect3>
+      
+      <sect3 id="binary.code">
+          <title id="binary.code.title">Binary code</title>
+
+          <para>AMC identifies each test and the page number of test with the binary code.</para>
+
+          <itemizedlist>
+          <listitem> <para>First row : 12 boxes (default value) : maximum number of tests = 2^12-1 = 4,095.</para></listitem>
+          <listitem> <para>Second row : 6 first boxes (default value) : maximum number of pages per tests = 2^6-1 = 63.</para></listitem>
+          <listitem> <para>Second row : 6 last boxes (default value) : check code.</para></listitem>
+          </itemizedlist>
+
+        <para>
+       To raise the number of tests and/or pages per test modify the commands' default values <command>\AMC@NCBetud</command>, <command>\AMC@NCBpage</command> et <command>\AMC@NCBcheck</command>.
+        </para>
+
+          <para> 
+          Load those commands below in the preambule (here with the default values).
+          </para> 
+
+          <programlisting>
+\makeatletter
+\AMC@NCBetud=12
+\AMC@NCBpage=6
+\AMC@NCBcheck=6
+\makeatother
+          </programlisting>
+
+         <note>
+          <para>
+          The values <command>\AMC@NCBpage</command> and <command>\AMC@NCBcheck</command> must be equal.
+          </para>
+          </note>
+
+      </sect3>
+      
     </sect2>
 
     <sect2>
