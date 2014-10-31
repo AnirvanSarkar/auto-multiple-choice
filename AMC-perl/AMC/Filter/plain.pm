@@ -289,8 +289,15 @@ sub read_file {
 
   debug "Parsing $input_file";
 
-  open(my $infile,"<:utf8",$input_file);
+  open(my $infile,"<",$input_file);
+  binmode($infile);
+
  LINE: while(<$infile>) {
+    if(!utf8::decode($_)) {
+      $self->parse_error(__"Invalid encoding: you must use UTF-8, but your source file was saved using another encoding");
+      last LINE;
+    }
+
     chomp;
 
     debug ":> $_";
