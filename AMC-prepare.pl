@@ -410,6 +410,7 @@ my $filter_engine;
 
 sub execute {
     my %oo=(@_);
+    my $errs=0;
 
     prepare_filter();
 
@@ -420,10 +421,21 @@ sub execute {
     if($filter) {
       if(!$filter_engine->get_filter_result('done')
 	 || $filter_engine->get_filter_result('jobspecific')) {
-	do_filter();
-	$filter_engine->set_filter_result('done',1);
+	$errs=do_filter();
+	$filter_engine->set_filter_result('done',1) if(!$errs);
       }
     }
+
+    # first removes previous run's outputs
+
+    for my $ext (qw/pdf dvi ps/) {
+	if(-f "$jobname.$ext") {
+	    debug "Removing old $ext";
+	    unlink("$jobname.$ext");
+	}
+    }
+
+    exit 1 if($errs);
 
     # the filter could have changed the latex engine, so update it
     $oo{command}=[latex_cmd(@{$oo{command_opts}})];
@@ -436,15 +448,6 @@ sub execute {
     my $n_run=0; # number of runs so far
     my $rerun=0; # has to re-run?
     my $format=''; # output format
-
-    # first removes previous run's outputs
-
-    for my $ext (qw/pdf dvi ps/) {
-	if(-f "$jobname.$ext") {
-	    debug "Removing old $ext";
-	    unlink("$jobname.$ext");
-	}
-    }
 
     do {
 
@@ -576,6 +579,7 @@ sub do_filter {
   my $f_base;
   my $v;
   my $d;
+  my $n_err=0;
 
   if($filter) {
     # Loads and call appropriate filter to convert $source to
@@ -588,6 +592,7 @@ sub do_filter {
 
     for($filter_engine->errors()) {
       print "ERR: $_\n";
+      $n_err++;
     }
 
     # sometimes the filter asks to override the LaTeX engine
@@ -596,6 +601,8 @@ sub do_filter {
       if($filter_engine->{'project_options'}->{'moteur_latex_b'});
 
   }
+
+  return($n_err);
 }
 
 # give_latex_errors($context) Relay suitably formatted LaTeX errors to
