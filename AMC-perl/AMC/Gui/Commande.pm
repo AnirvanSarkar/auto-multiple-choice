@@ -76,6 +76,11 @@ sub erreurs {
     return($self->get_messages('ERR'));
 }
 
+sub warnings {
+    my ($self)=(@_);
+    return($self->get_messages('WARN'));
+}
+
 sub variables {
     my ($self)=(@_);
     return(%{$self->{'variables'}});

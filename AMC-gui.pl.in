@@ -2416,19 +2416,32 @@ sub doc_maj {
 		 my ($c,%data)=@_;
 		 if(!$data{cancelled}) {
 		   my @err=$c->erreurs();
-		   if (@err) {
+		   my @warn=$c->warnings();
+		   if (@err || @warn) {
 		     notify_end_of_work('documents',
-					__"Error while preparing documents");
+					__"Problems while preparing documents");
 
-		     my $message=__("Errors while processing the source file.")
+		     my $message=__("Problems while processing the source file.")
 		       ." "
-			 .__("You have to correct the source file and re-run documents update.")." "
+			 .__("You have to correct the source file and re-run documents update.");
+
+		     if(@err) {
+		       $message.="\n\n".__("<b>Errors</b>")."\n"
+			 .join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
+
+		     }
+		     if(@warn) {
+		       $message.="\n\n".__("<b>Warnings</b>")."\n"
+			 .join("\n",map { format_markup($_) } (@warn[0..mini(9,$#warn)])).($#warn>9 ? "\n\n<i>(".__("Only first ten warnings written").")</i>": "");
+
+		     }
+
+		     $message.="\n\n".
 			   # TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-			   .sprintf(__("See the processing log in '%s' below."),
-				    # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-				    __"Command output details");
+		       sprintf(__("See also the processing log in '%s' below."),
+			       # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+			       __"Command output details");
 		     $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($projet{'options'}->{'filter'} eq 'latex');
-		     $message.="\n\n".join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
 
 		     my $dialog = Gtk2::MessageDialog
 		       ->new_with_markup($w{'main_window'},
