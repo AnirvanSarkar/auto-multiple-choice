@@ -234,7 +234,7 @@ STUDENT: for my $i (@$r) {
 		);
       $email->header_str_set(Cc=>$cc) if($cc);
 
-      my @all_dests=($dest);
+      my @all_dests=(parse_add($dest));
       push @all_dests,parse_add($cc) if($cc);
       push @all_dests,parse_add($bcc) if($bcc);
       my $b=eval {
