@@ -1822,8 +1822,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifKV@AMCdim@cross\def\AMC@fillcolor@{white}\fi%
   \AMC@save@box{#3}{%
     \begin{tikzpicture}%
-      \useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
-      rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+      \useasboundingbox (-0.5\AMC@boxedwidth-0.5\AMC@boxedrule,0.5\AMC@boxedheight+0.5\AMC@boxedrule)
+      rectangle (0.5\AMC@boxedwidth+0.5\AMC@boxedrule,-0.5\AMC@boxedheight-0.5\AMC@boxedrule);
       \draw[\AMC@boxcolor@,fill=\AMC@fillcolor@,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
       (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
       rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
