@@ -434,6 +434,10 @@ along with Auto-Multiple-Choice.  If not, see
 % \ioption{fullgroups} cancels the use of the optional parameter of
 % |\insertgroup| and |\copygroup|, so that each group is always fully
 % inserted and fully copied.
+%
+% \ioption{storebox} asks to use |\storebox| instead of |\savebox| to
+% handle ovals (when using oval shape). The package |storebox| will be
+% loaded.
 % \end{itemize}
 %
 % See also section~\ref{d:french} for a french version of some of
@@ -1778,6 +1782,9 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{amcxyfile}
 %
 %    \begin{macrocode}
+\let\AMC@new@savebox=\newsavebox
+\let\AMC@save@box=\savebox
+\let\AMC@use@box=\usebox
 \newif\ifAMC@draw@cross
 \newcommand\AMC@setcolors@[2]{%
   \def\AMC@boxcolor@{\AMC@boxcolor}%
@@ -1810,14 +1817,10 @@ Three digits and two letters:\insertgroup{mixed}.
         \hfill}\vfill}}%
     \AMC@tracepos{#3}{#4}}%
 }
-\newsavebox{\AMC@ovalbox@R}
-\newsavebox{\AMC@ovalbox@RF}
-\newsavebox{\AMC@ovalbox@}
-\newsavebox{\AMC@ovalbox@F}
 \newcommand\AMC@makeovalbox[3]{%
   \AMC@setcolors@{#1}{#2}%
   \ifKV@AMCdim@cross\def\AMC@fillcolor@{white}\fi%
-  \savebox{#3}{%
+  \AMC@save@box{#3}{%
     \begin{tikzpicture}%
       \useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
       rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
@@ -1842,15 +1845,15 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@tracebox{#3}{#4}{\boxput*(0,0){\textcolor{\AMC@boxcolor@}{#1}}{%
       \ifx\@empty#3\@empty%
         \ifx\@empty#2\@empty%
-          \usebox{\AMC@ovalbox@}%
+          \AMC@use@box{\AMC@ovalbox@}%
         \else%
-          \usebox{\AMC@ovalbox@F}%
+          \AMC@use@box{\AMC@ovalbox@F}%
         \fi%
       \else%
         \ifx\@empty#2\@empty%
-          \usebox{\AMC@ovalbox@R}%
+          \AMC@use@box{\AMC@ovalbox@R}%
         \else%
-          \usebox{\AMC@ovalbox@RF}%
+          \AMC@use@box{\AMC@ovalbox@RF}%
         \fi%
       \fi%
     }}%
@@ -3928,7 +3931,24 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{nopage}{\AMC@pagelayoutfalse}
 \DeclareOptionX{postcorrect}{\AMC@postcorrecttrue}
 \DeclareOptionX{automarks}{\AMC@automarkstrue}
+\newif\ifAMCneeds@storebox\AMCneeds@storeboxfalse
+\DeclareOptionX{storebox}{\AMCneeds@storeboxtrue}
 \ProcessOptionsX
+
+\ifAMCneeds@storebox
+  \RequirePackage{storebox}\AtBeginDocument{{}}%
+\fi
+\AtBeginDocument{
+  \ifAMCneeds@storebox
+    \let\AMC@new@savebox=\newstorebox%
+    \let\AMC@save@box=\storebox%
+    \let\AMC@use@box=\usestorebox%
+  \fi
+  \AMC@new@savebox{\AMC@ovalbox@R}
+  \AMC@new@savebox{\AMC@ovalbox@RF}
+  \AMC@new@savebox{\AMC@ovalbox@}
+  \AMC@new@savebox{\AMC@ovalbox@F}
+}
 %    \end{macrocode}
 %
 % \subsection{Package Errors}
