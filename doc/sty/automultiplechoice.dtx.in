@@ -1816,6 +1816,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newsavebox{\AMC@ovalbox@F}
 \newcommand\AMC@makeovalbox[3]{%
   \AMC@setcolors@{#1}{#2}%
+  \ifKV@AMCdim@cross\def\AMC@fillcolor@{white}\fi%
   \savebox{#3}{%
     \begin{tikzpicture}%
       \useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
@@ -1823,6 +1824,11 @@ Three digits and two letters:\insertgroup{mixed}.
       \draw[\AMC@boxcolor@,fill=\AMC@fillcolor@,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
       (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
       rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+      \ifAMC@draw@cross
+        \draw[\AMC@boxcolor@,line width=\AMC@crossrule]
+        (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight) -- (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight)
+        (0.5\AMC@boxedwidth,0.5\AMC@boxedheight) -- (-0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+      \fi
     \end{tikzpicture}}%
 }
 \newcommand\AMC@shapeprepare@oval{%
@@ -1903,6 +1909,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %    \begin{macrocode}
 \newlength\AMC@boxedrule
+\newlength\AMC@crossrule
 \newlength\AMC@boxeddown
 \newlength\AMC@boxedwidth
 \newlength\AMC@boxedheight
@@ -1918,6 +1925,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCdim}{color}{\def\AMC@boxcolor{#1}}
 \define@boolkey{AMCdim}{cross}[false]{}
 \define@key{AMCdim}{crosschar}[\textbf{\textsf{X}}]{\def\AMC@crosschar{#1}}
+\define@key{AMCdim}{crossrule}[1.5pt]{\AMC@crossrule=#1}
 \def\AMCboxStyle#1{%
   \setkeys{AMCdim}{#1}%
   \ifnum\AMC@boxedwidth<\AMC@boxedheight%
@@ -1927,7 +1935,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \csname AMC@shapeprepare@\AMC@shapename@ \endcsname%
 }
-\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black,cross,crosschar}
+\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black,cross,crosschar,crossrule}
 \newcommand\AMCboxColor[1]{\AMCboxStyle{color=#1}}
 \let\AMCboxDimensions=\AMCboxStyle
 %    \end{macrocode}\end{macro}
