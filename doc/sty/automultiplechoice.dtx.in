@@ -1778,11 +1778,14 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{amcxyfile}
 %
 %    \begin{macrocode}
+\newif\ifAMC@draw@cross
 \newcommand\AMC@setcolors@[2]{%
   \def\AMC@boxcolor@{\AMC@boxcolor}%
   \ifx\@empty#1\@empty \def\AMC@boxcolor@{black}\fi%
   \ifAMC@correc\def\AMC@boxcolor@{black}\fi%
   \def\AMC@fillcolor@{\ifx\@empty#2\@empty white\else\AMC@boxcolor@\fi}%
+  \AMC@draw@crossfalse%
+  \ifKV@AMCdim@cross\ifx\@empty#2\@empty\else\AMC@draw@crosstrue\fi\fi%
 }
 \newcommand\AMC@answerBox@[4]{%
   \AMC@LR{\hspace{0pt}%
@@ -1793,10 +1796,20 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMC@shape@square[4]{%
   \fboxsep=\z@\fboxrule=\AMC@boxedrule%
   \AMC@setcolors@{#3}{#2}%
+  \ifKV@AMCdim@cross\def\AMC@fillcolor@{white}\fi%
   \fcolorbox{\AMC@boxcolor@}{\AMC@fillcolor@}%
-  {\vbox to \AMC@boxedheight{\AMC@tracepos{#3}{#4}\vfill %
-      \hbox to \AMC@boxedwidth{\hfill{\textcolor{\AMC@boxcolor@}{#1}}\hfill}\vfill}%
-    \AMC@tracepos{#3}{#4}}}
+  {%
+    \boxput*(0,0){%
+      \ifAMC@draw@cross\AMC@crosschar\fi%
+    }{%
+    \vbox to \AMC@boxedheight{%
+      \AMC@tracepos{#3}{#4}%
+      \vfill%
+      \hbox to \AMC@boxedwidth{\hfill%
+          \textcolor{\AMC@boxcolor@}{#1}%
+        \hfill}\vfill}}%
+    \AMC@tracepos{#3}{#4}}%
+}
 \newsavebox{\AMC@ovalbox@R}
 \newsavebox{\AMC@ovalbox@RF}
 \newsavebox{\AMC@ovalbox@}
@@ -1903,6 +1916,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCdim}{outsidesep}{\AMC@outside@sep=#1}
 \define@key{AMCdim}{down}{\AMC@boxeddown=#1}
 \define@key{AMCdim}{color}{\def\AMC@boxcolor{#1}}
+\define@boolkey{AMCdim}{cross}[false]{}
+\define@key{AMCdim}{crosschar}[\textbf{\textsf{X}}]{\def\AMC@crosschar{#1}}
 \def\AMCboxStyle#1{%
   \setkeys{AMCdim}{#1}%
   \ifnum\AMC@boxedwidth<\AMC@boxedheight%
@@ -1912,7 +1927,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \csname AMC@shapeprepare@\AMC@shapename@ \endcsname%
 }
-\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}
+\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black,cross,crosschar}
 \newcommand\AMCboxColor[1]{\AMCboxStyle{color=#1}}
 \let\AMCboxDimensions=\AMCboxStyle
 %    \end{macrocode}\end{macro}
@@ -2043,7 +2058,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@answerBox@{}{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}}
 \def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=\z@}
 \newcommand{\AMC@binaryBoxes}[2][1]{%
-{\AMCboxDimensions{shape=square,size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2\relax%
+{\AMCboxDimensions{shape=square,size=.32cm,down=0pt,rule=.2pt,cross=false}\AMCbin@sequence={}\AMCbin@number=#2\relax%
 \AMCbin@ndigits=\z@%
 \loop%
 \ifnum\AMCbin@number>\z@%
