@@ -1188,6 +1188,24 @@ my $cb_model_vide_key=cb_model(''=>__p"(none) [No primary key found in associati
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 my $cb_model_vide_code=cb_model(''=>__p"(none) [No code found in LaTeX file]");
 
+my $cups_module_available=check_install(module=>"Net::CUPS");
+my @printing_methods=();
+if($cups_module_available) {
+  push @printing_methods,'CUPS','CUPS';
+} else {
+  if($o{methode_impression} eq 'CUPS') {
+    $o{methode_impression}='commande';
+    $o{'_modifie_ok'}=1;
+    debug "Net::CUPS not available: switching from CUPS to commande";
+  }
+}
+push @printing_methods,
+# TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
+  'commande',__"command",
+# TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
+  'file',__"to files"
+  ;
+
 $prefs->store_register(
 # TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
     'delimiteur_decimal'=>cb_model(',',__", (comma)",
@@ -1199,11 +1217,7 @@ $prefs->store_register(
 			     'normal',__"rounding",
 # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
 			     'sup',__"ceiling"),
-    'methode_impression'=>cb_model('CUPS','CUPS',
-# TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
-				   'commande',__"command",
-# TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
-				   'file'=>__"to files"),
+    'methode_impression'=>cb_model(@printing_methods),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
     'sides'=>cb_model('one-sided',__p("one sided [No two-sided printing]"),
 # TRANSLATORS: One of the two-side printing types. This is a menu entry.
