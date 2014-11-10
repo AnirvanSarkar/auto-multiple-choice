@@ -24,6 +24,8 @@ AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
 	       'export_full_csv'=>[
 				  {-copy=>3,-question=>'deuxdeux',-score=>1},
 				  {-copy=>3,-question=>'fusion',-score=>2},
+				  {-copy=>3,-question=>'france',-score=>3},
+				  {-copy=>3,-question=>'oceans',-score=>4},
 				  ],
 	      )->default_process;
 

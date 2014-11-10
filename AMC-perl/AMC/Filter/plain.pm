@@ -624,8 +624,17 @@ sub format_text {
 # strategy (or the default scoring strategy)
 sub scoring_string {
   my ($self,$obj,$type)=@_;
-  my $s=$obj->{'scoring'}
-    || $self->{'options'}->{'defaultscoring'.$type};
+  # manual scoring if some scoring was used, either for the question
+  # or for one of the answers
+  my $manual_scoring=$obj->{'scoring'};
+  if($obj->{answers}) {
+    for my $a (@{$obj->{answers}}) {
+      $manual_scoring=1 if($a->{scoring});
+    }
+  }
+  my $s=$obj->{'scoring'};
+  # set to default only if no manual scoring:
+  $s=$self->{'options'}->{'defaultscoring'.$type} if(!$manual_scoring);
   return($s ? "\\scoring{$s}" : "");
 }
 
