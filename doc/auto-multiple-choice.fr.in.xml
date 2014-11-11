@@ -4928,6 +4928,20 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <para>Tout fichier au format CSV devrait convenir.</para>
         </note>
 
+        <warning>
+        <para>
+        L'envoi d'une même copie à plusieurs adresses nécessite quelques précautions dans la création du fichier CSV.
+        </para>
+        <itemizedlist>
+        <listitem>point-virgule ou deux-points ou tabulation pour séparer les champs et virgule pour séparer les emails.</listitem>
+        <listitem>virgule pour séparer les champs et les emails entre guillemets et séparés par une virgule.</listitem>
+        </itemizedlist>
+        <programlisting>
+        nom,prenom,email
+        Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com" 
+        </programlisting>
+        </warning>
+
         <para>La liste des étudiants préparée (que se soit une liste simple ou
         comprenant plus d'informations), nous la désignons maintenant en la
         sélectionnant à partir du bouton <guibutton>Choisir</guibutton> de la
@@ -5471,9 +5485,26 @@ Boulix,Jojo,001
 Golin,André,002
 Moniuszko,Stanisław,003</programlisting></para>
 
+        <warning>
+        <para>
+        L'envoi d'une même copie à plusieurs adresses nécessite quelques précautions dans la création du fichier CSV.
+        </para>
+        <itemizedlist>
+        <listitem>point-virgule pour les champs et virgule pour séparer les emails.</listitem>
+        </itemizedlist>
+  
+        <programlisting>
+nom;prenom;id;email
+Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
+Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
+Moniuszko;Stanisław;003</programlisting>
+        </warning>
+
+
+
           <warning>
             <para>Ne pas utiliser le symbole _ (underscore) dans le nom ou
-            prénom des étudiants. Une erreur de complitation sera
+            prénom des étudiants. Une erreur de compilation sera
             affichée.</para>
           </warning>
         </listitem>
@@ -5481,6 +5512,7 @@ Moniuszko,Stanisław,003</programlisting></para>
         <listitem>
           <para>Le sujet LaTeX doit charger le paquet csvsimple, grâce à une
           ligne<programlisting>\usepackage{csvsimple}</programlisting></para>
+        
         </listitem>
 
         <listitem>
@@ -5529,7 +5561,8 @@ Moniuszko,Stanisław,003</programlisting></para>
   }
 }
 
-\csvreader[head to column names]{liste.csv}{}{\sujet}
+\csvreader[head to column names]{liste.csv}{}{\sujet} <co id="separateur.virgule" linkends="separateur.virgule.exp"/>
+%\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\sujet}<co id="separateur.pointvirgule" linkends="separateur.pointvirgule.exp"/>
 </programlisting>
 
           <para>Notez l'utilisation de l'option <code>head to column
@@ -5540,6 +5573,21 @@ Moniuszko,Stanisław,003</programlisting></para>
           personnalisé, et l'appel de <command>\AMCassociation</command> qui
           indique à AMC que la copie produite doit être associée à
           l'identifiant d'étudiant <command>\id</command>.</para>
+          <para>
+          <calloutlist>
+          <callout arearefs="separateur.virgule" id="separateur.virgule.exp">
+          <para>
+          Utilisez cette commande si le fichier CSV ne contient qu'une adresse mail par étudiant.
+          </para>
+          </callout>
+ 
+            <callout arearefs="separateur.pointvirgule" id="separateur.pointvirgule.exp">
+          <para>
+          Utilisez cette commande si le fichier CSV  contient plusieurs adresses mail par étudiant.
+          </para>
+          </callout>
+          </calloutlist>
+          </para>
         </listitem>
 
         <listitem>
