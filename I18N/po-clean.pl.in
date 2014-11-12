@@ -40,15 +40,15 @@ my @ok=grep { $_->msgid() !~ /^\"?gtk-/ } @$aref;
 $ok[0]->comment(encode_utf8("Auto Multiple Choice\nCopyright 2008-2013 Alexis Bienvenüe\nThis file is distributed under the same license as the AMC software"));
 
 if(!$comment_only) {
-  $ok[0]->msgstr("Project-Id-Version: $v\\n" .
-		 "Report-Msgid-Bugs-To: paamc\@passoire.fr\\n" .
-		 "POT-Creation-Date: $date\\n" .
-		 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\\n" .
-		 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n" .
-		 "Language-Team: LANGUAGE <LL@li.org>\\n" .
-		 "MIME-Version: 1.0\\n" .
-		 "Content-Type: text/plain; charset=UTF-8\\n" .
-		 "Content-Transfer-Encoding: 8bit\\n");
+  $ok[0]->msgstr("Project-Id-Version: $v\n" .
+		 "Report-Msgid-Bugs-To: paamc\@passoire.fr\n" .
+		 "POT-Creation-Date: $date\n" .
+		 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n" .
+		 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n" .
+		 "Language-Team: LANGUAGE <LL@li.org>\n" .
+		 "MIME-Version: 1.0\n" .
+		 "Content-Type: text/plain; charset=CHARSET\n" .
+		 "Content-Transfer-Encoding: 8bit");
 }
 
 Locale::PO->save_file_fromarray($to,\@ok);
