@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -161,7 +161,8 @@
 
       <para>Dans la version actuelle (à partir de la version 0.156), le nombre
       de copies est limité à 4 095 et le nombre de pages par copies est limité
-      à 63 ( Valeurs par défaut mais modifiables voir <xref endterm="code.binaire.titre"  linkend="code.binaire"/>).</para>
+      à 63 ( Valeurs par défaut mais modifiables voir <xref
+      endterm="code.binaire.titre" linkend="code.binaire"/>).</para>
 
       <para>Le nombre de réponses proposées pour une même question est limité
       à 199 (valeur par défaut non modifiable).</para>
@@ -513,6 +514,48 @@ lesquels sont positifs ?
             <para>Cette option sert à remplacer le petit texte qui demande de
             coder son numéro d'étudiant et d'inscrire son nom sur les copies
             (quand l'option <option>Code</option> a été utilisée).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>TitleWidth:</term>
+
+          <listitem>
+            <para>Largeur de la zone prévue pour le titre, dans le cas où on
+            n'utilise pas <option>Code:</option>. La valeur par défaut est
+            <code>.47\linewidth</code>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>NameFieldWidth:</term>
+
+          <listitem>
+            <para>Largeur de la zone destinée à l'écriture du nom et prénom de
+            l'étudiant. On peut utiliser les unités usuelles en LaTeX. La
+            valeur par défaut est <code>5.8cm</code> si on utilise
+            <option>Code:</option>, et <code>.47\linewidth</code>
+            sinon.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>NameFieldLines:</term>
+
+          <listitem>
+            <para>Nombre de lignes prévues pour l'écriture du nom et prénom de
+            l'étudiant. La valeur par défaut est <code>2</code> si on utilise
+            <option>Code:</option>, et <code>1</code> sinon.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>NameFieldLinespace:</term>
+
+          <listitem>
+            <para>Interligne dans la zone destinée à l'écriture du nom et
+            prénom de l'étudiant. La valeur par défaut est
+            <code>.5em</code>.</para>
           </listitem>
         </varlistentry>
 
@@ -1174,11 +1217,9 @@ Combien y a-t-il d'étoiles dans le ciel ?
     <sect2>
       <title>Un exemple simple</title>
 
-      <para>
-        <!--NAME: Exemple simple
+      <para><!--NAME: Exemple simple
 DESC: Un exemple simple (issu de la documentation) avec une question simple et une question multiple.-->
-
-        <programlisting id="modeles-simple.tex" linenumbering="numbered">\documentclass[a4paper]{article}
+      <programlisting id="modeles-simple.tex" linenumbering="numbered">\documentclass[a4paper]{article}
 
 \usepackage[utf8x]{inputenc}    <co id="simple.latin1"
             linkends="simple.latin1.exp"/>
@@ -1250,13 +1291,11 @@ Durée : 10 minutes.
 }   <co id="simple.fin" linkends="simple.fin.exp"/>
 
 \end{document}
-</programlisting>
-      </para>
+</programlisting></para>
 
       <para>Quelques précisions sur cet exemple :</para>
 
-      <para>
-        <calloutlist>
+      <para><calloutlist>
           <callout arearefs="simple.latin1" id="simple.latin1.exp">
             <para>Les deux paquets <package>inputenc</package> et
             <package>fontenc</package> permettent d'écrire le texte du
@@ -1320,8 +1359,7 @@ Durée : 10 minutes.
             <para>Cette fermeture d'accolade marque la fin de la commande
             <command>exemplaire</command> (débutée à la ligne 9).</para>
           </callout>
-        </calloutlist>
-      </para>
+        </calloutlist></para>
     </sect2>
 
     <sect2>
@@ -1804,7 +1842,7 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           la distribution TeX Live 2007, encore utilisée dans des
           distributions Ubuntu jusqu'à la version 9.10 (Karmic Koala).</para>
         </note>
-       </sect3>
+      </sect3>
 
       <sect3 id="latex.qr">
         <title id="latex.qr.title">Questions et réponses</title>
@@ -3032,53 +3070,59 @@ et inscrivez votre nom et prénom ci-dessous.
           </listitem>
         </itemizedlist>
       </sect3>
- 
-    <note>
-      <para>Utilisez <command> \onecopy </command> au lieu de
-      <command>\exemplaire </command>car <command>\exemplaire</command> remet
-      les messages français par défaut (à part cela, les deux commandes font
-      la même chose).</para>
-    </note>
 
-<sect3 id="code.binaire">
-          <title id="code.binaire.titre">Le code binaire</title>
+      <note>
+        <para>Utilisez <command> \onecopy </command> au lieu de
+        <command>\exemplaire </command>car <command>\exemplaire</command>
+        remet les messages français par défaut (à part cela, les deux
+        commandes font la même chose).</para>
+      </note>
 
-          <para>Le code binaire permet à AMC de reconnaître le numéro du sujet et le numéro de la page du sujet.</para>
-  
-          <itemizedlist>
-          <listitem> 
-          <para>Première ligne : 12 cases (valeur par défaut) : nombre maximal de sujets = 2^12-1 = 4 095.</para>
+      <sect3 id="code.binaire">
+        <title id="code.binaire.titre">Le code binaire</title>
+
+        <para>Le code binaire permet à AMC de reconnaître le numéro du sujet
+        et le numéro de la page du sujet.</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Première ligne : 12 cases (valeur par défaut) : nombre
+            maximal de sujets = 2^12-1 = 4 095.</para>
           </listitem>
-            <listitem> <para>Seconde ligne : 6 premières cases (valeur par défaut) : nombre maximal de pages par sujet = 2^6-1 = 63.</para>
+
+          <listitem>
+            <para>Seconde ligne : 6 premières cases (valeur par défaut) :
+            nombre maximal de pages par sujet = 2^6-1 = 63.</para>
           </listitem>
-          <listitem> <para>Seconde ligne : 6 dernières cases (valeur par défaut) : code de contrôle.</para>
+
+          <listitem>
+            <para>Seconde ligne : 6 dernières cases (valeur par défaut) : code
+            de contrôle.</para>
           </listitem>
-          </itemizedlist>
+        </itemizedlist>
 
-          <para>
-          Pour augmenter le  nombre de sujets ou/et de pages par sujet, modifiez les valeurs par défaut des commandes <command>\AMC@NCBetud</command>, <command>\AMC@NCBpage</command> et <command>\AMC@NCBcheck</command>.
-          </para> 
+        <para>Pour augmenter le nombre de sujets ou/et de pages par sujet,
+        modifiez les valeurs par défaut des commandes
+        <command>\AMC@NCBetud</command>, <command>\AMC@NCBpage</command> et
+        <command>\AMC@NCBcheck</command>.</para>
 
-          <para> 
-          Dans le préambule, déclarez les commandes ci-dessous (ici avec les valeurs par défaut).
-          </para> 
+        <para>Dans le préambule, déclarez les commandes ci-dessous (ici avec
+        les valeurs par défaut).</para>
 
-          <programlisting>
+        <programlisting>
 \makeatletter
 \AMC@NCBetud=12
 \AMC@NCBpage=6
 \AMC@NCBcheck=6
 \makeatother
           </programlisting>
-          
-          <note>
-          <para>
-          Les valeurs de <command>\AMC@NCBpage</command> et <command>\AMC@NCBcheck</command> doivent être identiques.
-          </para>
-          </note>
-          </sect3>
-   </sect2>
 
+        <note>
+          <para>Les valeurs de <command>\AMC@NCBpage</command> et
+          <command>\AMC@NCBcheck</command> doivent être identiques.</para>
+        </note>
+      </sect3>
+    </sect2>
 
     <sect2>
       <title>Options pour AMC</title>
@@ -3089,9 +3133,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
       <variablelist>
         <varlistentry>
-          <term>
-            <code>%%AMC:preprocess_command=<replaceable>commandname</replaceable></code>
-          </term>
+          <term><code>%%AMC:preprocess_command=<replaceable>commandname</replaceable></code></term>
 
           <listitem>
             <para>demande à AMC d'exécuter la commande
@@ -3105,9 +3147,7 @@ et inscrivez votre nom et prénom ci-dessous.
         </varlistentry>
 
         <varlistentry>
-          <term>
-            <code>%%AMC:latex_engine=<replaceable>engine</replaceable></code>
-          </term>
+          <term><code>%%AMC:latex_engine=<replaceable>engine</replaceable></code></term>
 
           <listitem>
             <para>demande à AMC d'utiliser le moteur LaTeX
@@ -3132,8 +3172,7 @@ et inscrivez votre nom et prénom ci-dessous.
         peut créer des exercices dont les données sont aléatoires. Commençons
         par un petit exemple :</para>
 
-        <para>
-          <programlisting>\begin{question}{addition}
+        <para><programlisting>\begin{question}{addition}
   \FPeval\VQa{trunc(1+random*8,0)}  <co id="alea.random"
               linkends="alea.random.exp"/>
   \FPeval\VQb{trunc(4+random*5,0)}
@@ -3151,8 +3190,7 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{\VQnonB}
     \mauvaise{\VQnonC}
   \end{reponseshoriz}
-\end{question}</programlisting>
-        </para>
+\end{question}</programlisting></para>
 
         <para>La commande <command>\FPeval</command> sert à faire des
         calculs :</para>
@@ -3537,18 +3575,15 @@ et inscrivez votre nom et prénom ci-dessous.
         identiques malgré les recompilations latex est de choisir la base de
         génération des nombres pseudo-aléatoires.</para>
 
-        <para>
-          <programlisting>\pgfmathsetseed{2056}
-</programlisting>
-        </para>
+        <para><programlisting>\pgfmathsetseed{2056}
+</programlisting></para>
 
         <sect4>
           <title>Réaliser un calcul simple</title>
 
           <para>Voici un exemple d'utilisation avec un calcul simple :</para>
 
-          <para>
-            <programlisting>\begin{question}{inverse}
+          <para><programlisting>\begin{question}{inverse}
   \pgfmathrandominteger{\x}{1}{50}
        
   Quel est l'inverse de $x=\x$ ?
@@ -3560,8 +3595,7 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{\pgfmathparse{\x^(-0.5)}\pgfmathresult}
   \end{reponses}
 \end{question}
-</programlisting>
-          </para>
+</programlisting></para>
 
           <para>Les commandes <command>\pgfmathparse</command> et
           <command>\pgfmathresult</command> permettent respectivement
@@ -3572,8 +3606,7 @@ et inscrivez votre nom et prénom ci-dessous.
           exemple, ici on choisit une notation avec trois décimales, en
           utilisant une virgule comme séparateur décimal.</para>
 
-          <para>
-            <programlisting>\begin{question}{inverse3}
+          <para><programlisting>\begin{question}{inverse3}
   \pgfmathrandominteger{\x}{1}{50}
   \pgfkeys{/pgf/number format/.cd,fixed,fixed zerofill,precision=3,use comma}
   Quel est l'inverse de $x=\pgfmathprintnumber{\x}$ ?
@@ -3585,16 +3618,13 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{\pgfmathparse{\x^(-0.5)} \pgfmathprintnumber{\pgfmathresult}}
   \end{reponses}
 \end{question}
-</programlisting>
-
-            <note>
+</programlisting> <note>
               <para>Les commandes <command>\AMCIntervals</command> et
               <command>\AMCnumericChoices</command> peuvent aussi être
               utilisées dans ce contexte (voir <xref
               linkend="latex.intervals"/> et <xref
               linkend="latex.numeric"/>)</para>
-            </note>
-          </para>
+            </note></para>
         </sect4>
 
         <sect4>
@@ -3603,8 +3633,7 @@ et inscrivez votre nom et prénom ci-dessous.
           <para>Il est aussi possible de générer des graphiques aléatoires(ou
           non),et de poser des questions de lecture graphique.</para>
 
-          <para>
-            <programlisting>\begin{questionmult}{graphique}
+          <para><programlisting>\begin{questionmult}{graphique}
   On considère trois fonctions f(x) dont les tracés sont représentés ci-dessous
   dans un repère orthonormé~:
   \pgfmathrandominteger{\a}{2}{4}  
@@ -3626,8 +3655,7 @@ et inscrivez votre nom et prénom ci-dessous.
     \mauvaise{La fonction $f_{1}(x)$ est une fonction linéaire.}
   \end{reponses}
 \end{questionmult}
-</programlisting>
-          </para>
+</programlisting></para>
 
           <para>La mise en forme des graphiques peut être facilitée par
           l'utilisation du package <package>pgfplots</package>.</para>
@@ -3749,8 +3777,7 @@ Nom et prénom :
             <para>Si vous utilisez Texmaker pour préparer vos documents, il
             faut également le configurer :</para>
 
-            <para>
-              <menuchoice>
+            <para><menuchoice>
                 <guimenu>Options</guimenu>
 
                 <guimenuitem>Configurer Texmaker</guimenuitem>
@@ -3758,8 +3785,7 @@ Nom et prénom :
                 <guimenuitem>Compil rapide</guimenuitem>
 
                 <guimenuitem>Latex + dvips + ps2pdf + voir PDF</guimenuitem>
-              </menuchoice>
-            </para>
+              </menuchoice></para>
           </note></para>
       </sect3>
     </sect2>

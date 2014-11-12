@@ -53,6 +53,8 @@ sub new {
 				 L-OpenText L-OpenReserved
 				 CodeDigitsDirection
 				 PackageOptions
+				 NameFieldWidth NameFieldLines NameFieldLinespace
+				 TitleWidth
 				/];
 
     # from these options, which ones are boolean valued?
@@ -86,6 +88,10 @@ sub new {
        'manualduplex'=>'',
        'singlesided'=>'',
        'codedigitsdirection'=>'',
+       'namefieldwidth'=>'',
+       'namefieldlines'=>'',
+       'namefieldlinespace'=>'.5em',
+       'titlewidth'=>".47\\linewidth",
       };
 
     # List of modules to be used when parsing (see parse_*
@@ -882,14 +888,20 @@ sub page_header {
 
 # Builds and returns the name field LaTeX code
 sub full_namefield {
-  my ($self,$n_ligs)=@_;
+  my ($self,$with_code)=@_;
+  my $n_ligs;
+  if($self->{'options'}->{'namefieldlines'}) {
+    $n_ligs=$self->{'options'}->{'namefieldlines'};
+  } else {
+    $n_ligs=($with_code ? 2 : 1);
+  }
   my $t='';
   $t.="\\namefield{\\fbox{";
   $t.="\\begin{minipage}{.9\\linewidth}"
     .($self->{'options'}->{'l-name'}
       ? $self->{'options'}->{'l-name'}
       : '\\AMClocalized{namesurname}')
-      .("\n\n\\vspace*{.5cm}\\dotfill" x $n_ligs)
+      .(("\n\n\\vspace*{".$self->{'options'}->{'namefieldlinespace'}."}\\dotfill") x $n_ligs)
 	."\n\\vspace*{1mm}"
 	  ."\n\\end{minipage}";
   $t.="\n}}";
@@ -916,18 +928,23 @@ sub student_block {
 	$self->{'options'}->{'code'}."}";
     $t.= "}" if($self->{'options'}->{'arabic'} && $vertical);
     $t.=($vertical?"":"}}")."\\hspace*{\\fill}"
-      ."\\begin{minipage}".($vertical?"[b]":"")."{5.8cm}"
+      ."\\begin{minipage}".($vertical?"[b]":"")."{"
+      .($self->{'options'}->{'namefieldwidth'} ?
+	$self->{'options'}->{'namefieldwidth'} : '5.8cm')
+	."}"
 	."\$\\long".($self->{'options'}->{'arabic'} ? "right" : "left")
 	  ."arrow{}\$\\hspace{0pt plus 1cm}"
 	    .$self->{'options'}->{'l-student'}
 	      ."\\vspace{3ex}\n\n\\hfill"
-		.$self->full_namefield(2)
+		.$self->full_namefield(1)
 		  ."\\hfill\\vspace{5ex}\\end{minipage}\\hspace*{\\fill}"
 		    ."\n\n}";
     $t.="\\vspace{4mm}\n";
   } else {
     # header layout without code
-    $t.= "\\begin{minipage}{.47\\linewidth}\n";
+    $t.= "\\begin{minipage}{"
+      .$self->{'options'}->{'titlewidth'}
+      ."}\n";
     my $titlekey=($self->{'options'}->{'separateanswersheet'}
 		  ? 'answersheettitle' : 'title');
     if($self->{'options'}->{$titlekey}) {
@@ -936,8 +953,11 @@ sub student_block {
 	  ."\\end{center}\n\n";
     }
     $t.= "\\end{minipage}\\hfill\n";
-    $t.= "\\begin{minipage}{.47\\linewidth}\n";
-    $t.= $self->full_namefield(1);
+    $t.= "\\begin{minipage}{".
+      ($self->{'options'}->{'namefieldwidth'} ?
+	$self->{'options'}->{'namefieldwidth'} : ".47\\linewidth")
+      ."}\n";
+    $t.= $self->full_namefield(0);
     $t.= "\\end{minipage}\\vspace{4mm}\n\n";
   }
   return($t);
