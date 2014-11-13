@@ -4406,6 +4406,20 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <para>Any CSV file should be suitable.</para>
         </note>
 
+     <warning>
+        <para>
+       Type carefully the CSV file to send the same test to multiple recipients.
+        </para>
+        <itemizedlist>
+        <listitem>A semi-colon or colon or tabulation to separate the headers and a comma to separate the email adresses.</listitem>
+        <listitem>A comma to separate the headers and email adresses between inverted comma/quotation marks.</listitem>
+        </itemizedlist>
+        <programlisting>
+        name,forenama,email
+        Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com" 
+        </programlisting>
+        </warning>
+
         <para>The prepared list of students will then be selected with the
         button <guibutton>Set file</guibutton> in the <guilabel>Students
         identification</guilabel> section. We must also choose one of the
@@ -4906,11 +4920,27 @@ student number &amp; class &amp; subject\\
           following that the file students.csv, in the project directory, is
           UTF8 encoded and that its content is like the following:</para>
 
-          <programlisting>name,surname,id
+          <programlisting>name,forename,id
 Boulix,Jojo,001
 Golin,André,002
 Moniuszko,Stanisław,003</programlisting>
+
+         <warning><para>
+        Type carefully the CSV file to send the same test to multiple recipients.
+        </para>
+        <itemizedlist><listitem>Headers separated by a semi-colon and email adresses by a comma.</listitem></itemizedlist>
+        <programlisting>
+name;surname;id;email
+Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
+Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
+Moniuszko;Stanisław;003</programlisting>
+        </warning>
+
         </listitem>
+
+         <warning>
+            <para>Do not use _ (underscore) with the student's name or forename. A compilation error will be display.</para>
+          </warning>
 
         <listitem>
           <para>The LaTeX source file has to load csvsimple package,
@@ -4958,7 +4988,9 @@ Moniuszko,Stanisław,003</programlisting>
   }
 }
 
-\csvreader[head to column names]{students.csv}{}{\subject}
+\csvreader[head to column names]{students.csv}{}{\subject}<co id="separator.comma" linkends="separator.comma.exp"/>
+%\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\subject}<co id="separator.semicolon" linkends="separator.semicolon.exp"/>
+
 </programlisting>
 
           <para>The head to column names option for
@@ -4968,6 +5000,21 @@ Moniuszko,Stanisław,003</programlisting>
           used inside <command>\subject</command>. The
           <command>\AMCassociation</command> call tells AMC to associate the
           current sheet to student with id <command>\id</command>.</para>
+          <para>
+          <calloutlist>
+          <callout arearefs="separator.comma" id="separator.comma.exp">
+          <para>
+          Use this command if the CSV file contains only one email address per student.
+          </para>
+          </callout>
+ 
+            <callout arearefs="separator.semicolon" id="separator.semicolon.exp">
+          <para>
+          Use this command if the CSV file contains multiple email addresses per student.
+          </para>
+          </callout>
+          </calloutlist>
+          </para>
         </listitem>
 
         <listitem>
