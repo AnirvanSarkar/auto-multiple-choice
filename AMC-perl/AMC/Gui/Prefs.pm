@@ -54,16 +54,17 @@ sub store_get {
 
 sub find_object {
   my ($self,$gap,$prefix,$type,$ta,$t,$keep)=@_;
-  if (!$keep) {
-    my $ww=$gap->get_object($prefix.$type.$ta);
-    if(!$ww && $self->{alternate_w}) {
-      $ww=$self->{alternate_w}->{$prefix.$type.$ta};
-    }
-    if ($ww) {
-      $self->{w}->{$prefix.$type.$ta}=$ww;
-      $self->{w}->{$prefix.$type.$t}=$ww;
-    }
+  my $ww;
+
+  $ww=$gap->get_object($prefix.$type.$ta) if(!$keep);
+  if(!$ww && $self->{alternate_w}) {
+    $ww=$self->{alternate_w}->{$prefix.$type.$ta};
   }
+  if ($ww) {
+    $self->{w}->{$prefix.$type.$ta}=$ww;
+    $self->{w}->{$prefix.$type.$t}=$ww;
+  }
+
   return($self->{w}->{$prefix.$type.$ta});
 }
 

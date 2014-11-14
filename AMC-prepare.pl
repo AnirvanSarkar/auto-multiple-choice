@@ -204,6 +204,13 @@ my $a_errors; # the number of errors
 my @errors_msg=(); # errors messages (questions specifications problems)
 my @latex_errors=(); # LaTeX compilation errors
 
+sub flush_errors {
+  debug(@errors_msg);
+  print join('',@errors_msg);
+  @errors_msg=();
+}
+
+
 # %info_vars collects the variables values that LaTeX wants to give us
 
 my %info_vars=();
@@ -393,8 +400,7 @@ sub analyse_amclog {
 
   # Send error messages to the calling program through STDOUT
 
-  debug(@errors_msg);
-  print join('',@errors_msg);
+  flush_errors();
 
   debug("AMC log $amclog_file : $a_errors errors.");
 }
@@ -730,6 +736,31 @@ if($to_do{s}) {
 
     transfer("$jobname.pdf",$out_sujet);
     transfer("$jobname.xy",$out_calage);
+
+  # Looks for accents problems in question IDs...
+
+  my %qids=();
+  my $unknown_qid=0;
+  if(open(XYFILE,$out_calage)) {
+    binmode(XYFILE);
+    while(<XYFILE>) {
+      if(!utf8::decode($_) || /\\IeC/) {
+	if(/\\tracepos\{[^:]*:[^:]*:(.+):[^:]*\}\{([+-]?[0-9.]+[a-z]*)\}\{([+-]?[0-9.]+[a-z]*)\}(?:\{([a-zA-Z]*)\})?$/) {
+	  $qids{$1}=1;
+	} else {
+	  $unknown_qid=1;
+	}
+      }
+    }
+    close(XYFILE);
+    if(%qids) {
+      push @errors_msg,
+	map { "WARN: ".sprintf(__("please remove accentuated or non-standard characters from the following question ID: \"%s\""),$_)."\n" } (sort { $a cmp $b } (keys %qids));
+    } elsif($unknown_qid) {
+      push @errors_msg,"WARN: ".__("some question IDs seems to have accentuated or non-standard characters. This may break future processings.")."\n";
+    }
+  }
+  flush_errors();
 
     # Relays variables to calling process
 
