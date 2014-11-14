@@ -434,6 +434,10 @@ along with Auto-Multiple-Choice.  If not, see
 % \ioption{fullgroups} cancels the use of the optional parameter of
 % |\insertgroup| and |\copygroup|, so that each group is always fully
 % inserted and fully copied.
+%
+% \ioption{storebox} asks to use |\storebox| instead of |\savebox| to
+% handle ovals (when using oval shape). The package |storebox| will be
+% loaded.
 % \end{itemize}
 %
 % See also section~\ref{d:french} for a french version of some of
@@ -1779,11 +1783,17 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{amcxyfile}
 %
 %    \begin{macrocode}
+\let\AMC@new@savebox=\newsavebox
+\let\AMC@save@box=\savebox
+\let\AMC@use@box=\usebox
+\newif\ifAMC@draw@cross
 \newcommand\AMC@setcolors@[2]{%
   \def\AMC@boxcolor@{\AMC@boxcolor}%
   \ifx\@empty#1\@empty \def\AMC@boxcolor@{black}\fi%
   \ifAMC@correc\def\AMC@boxcolor@{black}\fi%
   \def\AMC@fillcolor@{\ifx\@empty#2\@empty white\else\AMC@boxcolor@\fi}%
+  \AMC@draw@crossfalse%
+  \ifKV@AMCdim@cross\ifx\@empty#2\@empty\else\AMC@draw@crosstrue\fi\fi%
 }
 \newcommand\AMC@answerBox@[4]{%
   \AMC@LR{\hspace{0pt}%
@@ -1794,23 +1804,35 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMC@shape@square[4]{%
   \fboxsep=\z@\fboxrule=\AMC@boxedrule%
   \AMC@setcolors@{#3}{#2}%
+  \ifKV@AMCdim@cross\def\AMC@fillcolor@{white}\fi%
   \fcolorbox{\AMC@boxcolor@}{\AMC@fillcolor@}%
-  {\vbox to \AMC@boxedheight{\AMC@tracepos{#3}{#4}\vfill %
-      \hbox to \AMC@boxedwidth{\hfill{\textcolor{\AMC@boxcolor@}{#1}}\hfill}\vfill}%
-    \AMC@tracepos{#3}{#4}}}
-\newsavebox{\AMC@ovalbox@R}
-\newsavebox{\AMC@ovalbox@RF}
-\newsavebox{\AMC@ovalbox@}
-\newsavebox{\AMC@ovalbox@F}
+  {%
+    \boxput*(0,0){%
+      \ifAMC@draw@cross\AMC@crosschar\fi%
+    }{%
+    \vbox to \AMC@boxedheight{%
+      \AMC@tracepos{#3}{#4}%
+      \vfill%
+      \hbox to \AMC@boxedwidth{\hfill%
+          \textcolor{\AMC@boxcolor@}{#1}%
+        \hfill}\vfill}}%
+    \AMC@tracepos{#3}{#4}}%
+}
 \newcommand\AMC@makeovalbox[3]{%
   \AMC@setcolors@{#1}{#2}%
-  \savebox{#3}{%
+  \ifKV@AMCdim@cross\def\AMC@fillcolor@{white}\fi%
+  \AMC@save@box{#3}{%
     \begin{tikzpicture}%
-      \useasboundingbox (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
-      rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+      \useasboundingbox (-0.5\AMC@boxedwidth-0.5\AMC@boxedrule,0.5\AMC@boxedheight+0.5\AMC@boxedrule)
+      rectangle (0.5\AMC@boxedwidth+0.5\AMC@boxedrule,-0.5\AMC@boxedheight-0.5\AMC@boxedrule);
       \draw[\AMC@boxcolor@,fill=\AMC@fillcolor@,line width=\AMC@boxedrule,rounded corners=\AMC@oval@radius]
       (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight)
       rectangle (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+      \ifAMC@draw@cross
+        \draw[\AMC@boxcolor@,line width=\AMC@crossrule]
+        (-0.5\AMC@boxedwidth,0.5\AMC@boxedheight) -- (0.5\AMC@boxedwidth,-0.5\AMC@boxedheight)
+        (0.5\AMC@boxedwidth,0.5\AMC@boxedheight) -- (-0.5\AMC@boxedwidth,-0.5\AMC@boxedheight);
+      \fi
     \end{tikzpicture}}%
 }
 \newcommand\AMC@shapeprepare@oval{%
@@ -1824,15 +1846,15 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@tracebox{#3}{#4}{\boxput*(0,0){\textcolor{\AMC@boxcolor@}{#1}}{%
       \ifx\@empty#3\@empty%
         \ifx\@empty#2\@empty%
-          \usebox{\AMC@ovalbox@}%
+          \AMC@use@box{\AMC@ovalbox@}%
         \else%
-          \usebox{\AMC@ovalbox@F}%
+          \AMC@use@box{\AMC@ovalbox@F}%
         \fi%
       \else%
         \ifx\@empty#2\@empty%
-          \usebox{\AMC@ovalbox@R}%
+          \AMC@use@box{\AMC@ovalbox@R}%
         \else%
-          \usebox{\AMC@ovalbox@RF}%
+          \AMC@use@box{\AMC@ovalbox@RF}%
         \fi%
       \fi%
     }}%
@@ -1891,6 +1913,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %    \begin{macrocode}
 \newlength\AMC@boxedrule
+\newlength\AMC@crossrule
 \newlength\AMC@boxeddown
 \newlength\AMC@boxedwidth
 \newlength\AMC@boxedheight
@@ -1904,6 +1927,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCdim}{outsidesep}{\AMC@outside@sep=#1}
 \define@key{AMCdim}{down}{\AMC@boxeddown=#1}
 \define@key{AMCdim}{color}{\def\AMC@boxcolor{#1}}
+\define@boolkey{AMCdim}{cross}[false]{}
+\define@key{AMCdim}{crosschar}[\textbf{\textsf{X}}]{\def\AMC@crosschar{#1}}
+\define@key{AMCdim}{crossrule}[1.5pt]{\AMC@crossrule=#1}
 \def\AMCboxStyle#1{%
   \setkeys{AMCdim}{#1}%
   \ifnum\AMC@boxedwidth<\AMC@boxedheight%
@@ -1913,7 +1939,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \csname AMC@shapeprepare@\AMC@shapename@ \endcsname%
 }
-\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}
+\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black,cross,crosschar,crossrule}
 \newcommand\AMCboxColor[1]{\AMCboxStyle{color=#1}}
 \let\AMCboxDimensions=\AMCboxStyle
 %    \end{macrocode}\end{macro}
@@ -2044,7 +2070,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@answerBox@{}{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}}
 \def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=\z@}
 \newcommand{\AMC@binaryBoxes}[2][1]{%
-{\AMCboxDimensions{shape=square,size=.32cm,down=0pt,rule=.2pt}\AMCbin@sequence={}\AMCbin@number=#2\relax%
+{\AMCboxDimensions{shape=square,size=.32cm,down=0pt,rule=.2pt,cross=false}\AMCbin@sequence={}\AMCbin@number=#2\relax%
 \AMCbin@ndigits=\z@%
 \loop%
 \ifnum\AMCbin@number>\z@%
@@ -3906,7 +3932,24 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{nopage}{\AMC@pagelayoutfalse}
 \DeclareOptionX{postcorrect}{\AMC@postcorrecttrue}
 \DeclareOptionX{automarks}{\AMC@automarkstrue}
+\newif\ifAMCneeds@storebox\AMCneeds@storeboxfalse
+\DeclareOptionX{storebox}{\AMCneeds@storeboxtrue}
 \ProcessOptionsX
+
+\ifAMCneeds@storebox
+  \RequirePackage{storebox}\AtBeginDocument{{}}%
+\fi
+\AtBeginDocument{
+  \ifAMCneeds@storebox
+    \let\AMC@new@savebox=\newstorebox%
+    \let\AMC@save@box=\storebox%
+    \let\AMC@use@box=\usestorebox%
+  \fi
+  \AMC@new@savebox{\AMC@ovalbox@R}
+  \AMC@new@savebox{\AMC@ovalbox@RF}
+  \AMC@new@savebox{\AMC@ovalbox@}
+  \AMC@new@savebox{\AMC@ovalbox@F}
+}
 %    \end{macrocode}
 %
 % \subsection{Package Errors}
