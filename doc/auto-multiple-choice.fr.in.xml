@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -2196,12 +2196,17 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <programlisting>\setdefaultgroupmode{XXX}</programlisting>
 
+ 
         <para>Une fois un groupe constitué, on peut mélanger les questions qui
         le composent par la commande <command>melangegroupe</command> : par
         exemple, <programlisting>\melangegroupe{ungroupe}</programlisting></para>
 
         <para>Cependant, cette commande n'a pas à être utilisée si on utilise
         les modes de groupes comme il faut.</para>
+        
+        <warning>
+        Si vous réutilisez des sujets mis en page avec une version antérieure à AMC 1.2.2014.111201 supprimez la commande <command>\melangegroupe</command>.
+        </warning>
 
         <para>Si cette commande n'est pas utilisée, c'est le mode
         <code>fixed</code> qui sera utilisé.</para>
@@ -2911,7 +2916,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
         <note>
           <para>Si vous avez mis à jour la version test (1.2.2014.041103) vers
-          la version actuelle (1.2.2014.082401) ou supérieure, la commande
+          la version actuelle (1.2.2014.111201) ou supérieure, la commande
           <command>\AMCqlabel</command> n'a plus d'utilité. Les questions
           doivent simplement être référencées avec la commande
           <command>\AMClabel</command>. Cependant, elle a été conservée pour
