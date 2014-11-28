@@ -472,6 +472,21 @@ sub notify_end_of_work {
   }
 }
 
+# Test whether the magick perl package is installed
+
+sub test_magick {
+  if(!magick_perl_module(1)) {
+    my $dialog = Gtk2::MessageDialog
+      ->new_with_markup($w{'main_window'},
+			'destroy-with-parent',
+			'error','ok',
+			__"None of the perl modules <b>Graphics::Magick</b> and <b>Image::Magick</b> are installed: AMC won't work properly!"
+		       );
+    $dialog->run;
+    $dialog->destroy;
+  }
+}
+
 # Test whether all commands defined to open/view files are
 # reachable. If not, the user is warned...
 
@@ -6947,6 +6962,7 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 test_commandes();
 test_debian_amc();
 test_libnotify();
+test_magick();
 
 Gtk2->main();
 
