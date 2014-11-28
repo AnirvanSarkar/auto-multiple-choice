@@ -24,11 +24,6 @@ use Gtk2 -init;
 
 use Glib::Object::Introspection;
 
-Glib::Object::Introspection->setup(basename => 'Notify', version => '0.7', package => 'Notify');
-
-# Set application name for notifications
-Notify::init('Auto Multiple Choice');
-
 use XML::Simple;
 use IO::File;
 use IO::Select;
@@ -114,7 +109,9 @@ use constant {
     ATTACHMENTS_FILE => 0,
     ATTACHMENTS_NAME => 1,
     ATTACHMENTS_FOREGROUND => 2,
-};
+  };
+
+my $libnotify_error='';
 
 Gtk2::IconTheme->get_default->prepend_search_path(amc_specdir('icons'));
 Gtk2::Window->set_default_icon_list(map { Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$_,"force-svg") } (8,16,32,48,64,128));
@@ -455,9 +452,13 @@ sub notify_end_of_work {
   my ($action,$message)=@_;
   if($o{'notify_'.$action}) {
     if($o{'notify_desktop'}) {
-      my $notification=Notify::Notification->new('Auto Multiple Choice',$message,
-					 '@/ICONSDIR/@/auto-multiple-choice.svg');
-      $notification->show;
+      if($libnotify_error) {
+	debug "Notification ignored: $libnotify_error";
+      } else {
+	my $notification=Notify::Notification->new('Auto Multiple Choice',$message,
+						   '@/ICONSDIR/@/auto-multiple-choice.svg');
+	$notification->show;
+      }
     }
     if($o{'notify_command'}) {
       my @cmd=map { s/[%]m/$message/g;s/[%]a/$action/g;$_; }
@@ -771,6 +772,33 @@ if($o{'encodage_interne'} ne 'UTF-8') {
 # Reset projects directory to standard one
 
 $o{'rep_projets'}=$shortcuts->absolu($o{'projects_home'});
+
+# Warn if Notify is not available
+sub test_libnotify {
+  my $initted=eval { Notify::is_initted() };
+  if(!$initted) {
+    eval {
+      Glib::Object::Introspection->setup(basename => 'Notify', version => '0.7', package => 'Notify') if(!defined($initted));
+      # Set application name for notifications
+      Notify::init('Auto Multiple Choice');
+    };
+    $libnotify_error=$@;
+
+    if($libnotify_error && $o{'notify_desktop'}) {
+      debug "libnotify loading error: $libnotify_error";
+      my $dialog = Gtk2::MessageDialog
+	->new_with_markup($w{'main_window'},
+			  'destroy-with-parent',
+			  'warning','ok',
+			  "Please install <b>libnotify</b> to make desktop notifications available."
+			 );
+      $dialog->run;
+      $dialog->destroy;
+      $o{'notify_desktop'}='';
+      $o{'_modifie'}=1;
+    }
+  }
+}
 
 # goes to a specific directory if the project directory is given as a
 # command-line option
@@ -4563,6 +4591,7 @@ sub accepte_preferences {
   sauve_pref_generales();
 
   test_commandes();
+  test_libnotify();
 
   if (defined($projet{'options'}->{'_modifie'})
       && $projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
@@ -6063,7 +6092,7 @@ sub quitter {
 			    'destroy-with-parent',
 			    'question','yes-no',
 			    __"You did not save main options, which have been modified: do you want to save them before leaving?");
-	my $reponse=$dialog->run;
+	my $response=$dialog->run;
 	$dialog->destroy;
 	if($response eq 'yes') {
 	  $save=1;
@@ -6917,6 +6946,7 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 
 test_commandes();
 test_debian_amc();
+test_libnotify();
 
 Gtk2->main();
 
