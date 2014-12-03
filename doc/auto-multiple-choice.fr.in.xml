@@ -3226,7 +3226,7 @@ et inscrivez votre nom et prénom ci-dessous.
           <title>Choix parmi une suite d'intervalles</title>
 
           <para>La paquet automultiplechoice définit en outre une commande
-          <command>\choixIntervalle</command> qui simplifie ce genre de
+          <command>\choixIntervalles</command> qui simplifie ce genre de
           constructions, comme illustré dans l'exemple
           suivant :<programlisting>\begin{question}{inf-expo-indep}
   \FPeval\VQa{trunc(2 + random * 4,0)}
@@ -3282,6 +3282,13 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <para>pour suivre une convention différente (on rencontra par
           exemple souvent l'utilisation de [a,b) à la place de [a,b[).</para>
+          
+         <note>
+         <para>
+         Si vous préférez la virgule comme séparateur décimal, il faut utiliser la commande <command>\numprint</command> du paquet <package>numprint</package> ( voir <xref endterm="Divers.titre" linkend="Divers"/>).
+         </para>
+          <programlisting>\def\AMCIntervalFormat#1#2{[\numprint{#1}-\,\numprint{#2}[}</programlisting>
+         </note> 
         </sect4>
 
         <sect4 id="latex.numeric">
@@ -5726,7 +5733,7 @@ Moniuszko;Stanisław;003</programlisting>
   </sect1>
 
   <sect1 id="Divers">
-    <title>Divers</title>
+    <title id="Divers.titre">Divers</title>
 
     <para>Cette section n'est pas liée à AMC.</para>
 
