@@ -5137,7 +5137,8 @@ sub unrecognized_line {
 }
 
 sub unrecognized_next {
-  my (@sel)=@_;
+  my ($widget,@sel)=@_;
+  @sel=() if(!defined($sel[0]));
   @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows
     if(!@sel);
   my $iter;
@@ -5180,7 +5181,7 @@ sub unrecognized_delete {
     unlink $shortcuts->absolu($file);
     push @iters,$iter;
   }
-  unrecognized_next(@sel);
+  unrecognized_next('',@sel);
   for(@iters) { $inconnu_store->remove($_); }
   update_analysis_summary();
   $projet{'_capture'}->end_transaction('rmUN');
