@@ -44,7 +44,7 @@
     </othercredit>
 
     <copyright>
-      <year>2008-2014</year>
+      <year>2008-2015</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -716,7 +716,7 @@ lesquels sont positifs ?
 
             <listitem>
               <para>Donne le texte de présentation de la feuille de réponse.
-              On pourra par exemple y préciser que les réponses doivent
+              On pourra, par exemple, y préciser que les réponses doivent
               uniquement être données sur cette feuille.</para>
             </listitem>
           </varlistentry>
@@ -1957,8 +1957,8 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
       <note>
         <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
-        affiché. Vous pouvez modifiez ce texte pour une ou quelques questions
-        mais pas toutes avec la commande <command>\AMCtext</command> (Voir
+        affiché. Vous pouvez modifier ce texte pour une ou plusieurs questions
+        avec la commande <command>\AMCtext</command> (Voir
         <xref linkend="AMCtext"/>).</para>
       </note>
 
@@ -2371,7 +2371,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           </listitem>
         </itemizedlist>
 
-        <para>Pour obtenir des cases plus petites, on pourra par exemple
+        <para>Pour obtenir des cases plus petites, on pourra, par exemple,
         utiliser la commande</para>
 
         <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
@@ -2408,7 +2408,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <para>en remplaçant <code>red</code> par la couleur désirée (qui doit
         être reconnue par le paquet LaTeX <command>xcolor</command>). Pour
-        obtenir un vert clair par exemple, on pourra par exemple
+        obtenir un vert clair par exemple, on pourra, par exemple,
         utiliser</para>
 
         <programlisting>\definecolor{amcboxcolor}{rgb}{0.67,0.88,0.5}
@@ -2545,12 +2545,10 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <title>Saisie de codes</title>
 
         <para>L'entrée de codes peut être aisément effectuée à l'aide de la
-        commande LaTeX <command>AMCcode</command>, par exemple pour que chaque
+        commande LaTeX <command>\AMCcode{identifiant}{nombre}</command>, par exemple pour que chaque
         étudiant codifie son numéro d'étudiant lui-même sur sa copie. Les deux
-        arguments de cette commande sont un identifiant de question, auquel
-        sera ajouté le numéro du chiffre dans le code, ainsi que le nombre de
-        chiffres du codage désiré. On pourra par exemple utiliser l'entête de
-        copie suivant :</para>
+        arguments de cette commande sont un identifiant de question que vous choississez ainsi que le nombre de
+        chiffres du codage désiré. On pourra, par exemple, utiliser l'en-tête de  copie suivant :</para>
 
         <para>
           <programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
@@ -2574,6 +2572,12 @@ et inscrivez votre nom et prénom ci-dessous.
 }
 </programlisting>
         </para>
+
+        <note><para>
+        Ici l'identifiant est <emphasis>etu</emphasis> qui servira à AMC pour attribuer chaque copie à un étudiant et 8 est le nombre de cases pour le code.
+        </para>
+        <para>Vous devrez sélectionner cet identifiant dans le menu déroulant  <guilabel>Titre du code pour association automatique</guilabel>de l'onglet <guibutton>notation</guibutton> lors de l'association automatique des copies (voir <xref linkend="Association"/>).</para></note>
+
 
         <para>Dans le cas de l'utilisation de l'option
         <option>ensemble</option>, la commande <command>AMCcode</command>
@@ -3225,7 +3229,7 @@ et inscrivez votre nom et prénom ci-dessous.
         <sect4 id="latex.intervals">
           <title>Choix parmi une suite d'intervalles</title>
 
-          <para>La paquet automultiplechoice définit en outre une commande
+          <para>Le paquet automultiplechoice définit en outre une commande
           <command>\choixIntervalles</command> qui simplifie ce genre de
           constructions, comme illustré dans l'exemple
           suivant :<programlisting>\begin{question}{inf-expo-indep}
@@ -4950,6 +4954,10 @@ Bienvenüe:Alexis:001:paamc@passoire.fr
 Boulix:Jojo:002:jojo.boulix@rien.xx
 Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
+        <note><para>
+       Dans cet exemple, le numéro d'identification de l'étudiant est contenu dans la colonne d'en-tête <emphasis>no</emphasis>.</para>
+       <para>C'est ce nom de colonne qui devra être sélectionné dans le menu déroulant <guilabel>Identifiant unique dans cette liste</guilabel> de l'onglet <guibutton>Notation</guibutton> lors de l'association automatique des copies (voir <xref linkend="Association"/>).</para></note>
+
         <para>Les lignes du fichier qui commencent par le caractère
         `<code>#'</code> sont des commentaires. La première des autres lignes
         contient, séparés par le caractère <code>`:'</code>, les titres des
@@ -4993,27 +5001,43 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <command>AMCcode</command>.</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="Association">
         <title>Association</title>
 
         <sect4>
-          <title>Association automatique</title>
+          <title> Association automatique</title>
 
+           <warning>
+            <para>Pour effectuer une association automatique, il est
+            nécessaire d'avoir  choisi un critère numérique (en général un numéro d'étudiant),
+            d'avoir inclus au moins une commande <command>AMCcode</command> (voir <xref linkend="latex.codes"/>)
+            dans le fichier source LaTeX pour que les étudiants puissent coder ce critère numérique et d'avoir une colonne
+            dans le fichier des étudiants qui contient le critère numérique.</para>
+          </warning>
+
+        <para>Pour réaliser l'association automatique des copies aux étudiants, complétez les deux menus déroulants de l'onglet <guibutton>Notation</guibutton>:</para>
+
+        <itemizedlist>
+       <listitem><para>
+       <guilabel>Identifiant unique dans cette liste :</guilabel>
+      il s’agit du nom de la colonne qui, dans le ﬁchier csv des étudiants, contient le numéro d’étudiants (voir <xref linkend="liste.etudiants"/>).
+       </para>
+       </listitem> 
+       
+       <listitem><para>
+       <guilabel>Titre du code pour association automatique :</guilabel>
+       il s'agit de l'identifiant choisi dans le fichier source LaTeX pour le code <command>\AMCcode</command> (voir <xref linkend="latex.codes"/>).</para></listitem>
+       
+       <listitem>
           <para>En appuyant sur le bouton <guibutton>Automatique</guibutton>
           de la partie <guilabel>Identification des étudiants</guilabel>, la
           recherche parmi la liste des codes renseignés par les étudiants
           s'opère. On peut ensuite observer ou peaufiner le résultat grâce à
           une association manuelle.</para>
+       </listitem>
+        
+        </itemizedlist>
 
-          <warning>
-            <para>Pour effectuer une association automatique, il est
-            nécessaire d'avoir utilisé au moins une fois la commande
-            <command>AMCcode</command> (voir <xref linkend="latex.codes"/>)
-            dans le fichier source LaTeX, et d'avoir une liste d'étudiants
-            avec une colonne qui contient une référence (en général un numéro
-            d'étudiant) qui sera identique à la saisie effectuée au niveau des
-            cases produites par <command>AMCcode</command>.</para>
-          </warning>
         </sect4>
 
         <sect4>
@@ -5632,8 +5656,8 @@ Moniuszko;Stanisław;003</programlisting>
           <para>Après l'impression, le scan, la saisie automatique et la
           notation des copies, au moment de l'association des copies avec les
           étudiants, utiliser la valeur "<emphasis>pré-association</emphasis>"
-          pour le champ "Titre du code pour association automatique", et
-          "<emphasis>id</emphasis>" pour le champ "Identifiant unique".</para>
+          pour le champ <guilabel>Titre du code pour association automatique</guilabel>, et
+          "<emphasis>id</emphasis>" pour le champ <guilabel>Identifiant unique dans cette liste</guilabel>.</para>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -5789,7 +5813,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
 
         <guimenuitem>Personnaliser complétion</guimenuitem>
       </menuchoice> puis entrez <command>\begin{question}{}</command> puis
-    cliquez sur ajouter. Faîtes de même avec <command>reponses</command> et
+    cliquez sur ajouter. Faites de même avec <command>reponses</command> et
     <command>reponseshoriz</command>.</sect2>
 
     <sect2><title>Le paquet <command>fp</command> par l'exemple </title> La
