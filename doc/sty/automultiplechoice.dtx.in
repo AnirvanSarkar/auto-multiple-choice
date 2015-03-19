@@ -3556,9 +3556,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCopen@lines{%
   \begin{minipage}{\AMCopen@Width}%
     \loop\vspace{\AMCopen@LineHeight}
-    ~\ifAMC@correc\smash{\AMCopen@answer}\def\AMCopen@answer{}\fi%
+    \hspace*{.5em}\ifAMC@correc\smash{\AMCopen@answer}\def\AMCopen@answer{}\fi%
     \ifKV@AMCOpen@dots%
-    \dotfill~
+    \dotfill\hspace*{.5em}
     \fi
     \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
   \end{minipage}
@@ -3573,7 +3573,7 @@ Three digits and two letters:\insertgroup{mixed}.
       \ifAMC@ensemble\else\par\fi%
       \ifAMC@correc\smash{\AMCopen@answer}\fi\dotfill%
     \else%
-      ~\linebreak[1]\hspace*{\fill}%
+      \hspace*{.5em}\linebreak[1]\hspace*{\fill}%
     \fi%
     {\AMCnoCompleteMulti%
       \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
