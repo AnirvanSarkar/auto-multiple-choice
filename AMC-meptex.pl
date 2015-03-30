@@ -250,7 +250,7 @@ PAGE: for my $p (@pages) {
       }
       if($k=~/(case|casequestion|score|scorequestion):(.*):([0-9]+),(-?[0-9]+)$/) {
 	my ($type,$name,$q,$a)=($1,$2,$3,$4);
-	$layout->question_name($q,$name) if($name);
+	$layout->question_name($q,$name) if($name ne '');
 	$layout->statement('NEWBox')
 	  ->execute(@ep,$role{$type},
 		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'});
