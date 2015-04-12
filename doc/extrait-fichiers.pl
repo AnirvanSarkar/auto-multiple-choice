@@ -26,7 +26,9 @@ use Archive::Tar;
 my $liste='';
 
 GetOptions("liste=s"=>\$liste,
-	   );
+	  );
+
+my $tar_opts={uid=>0,gid=>0,uname=>'root',gname=>'root',mtime=>1420066800};
 
 my @fichiers=@ARGV;
 
@@ -80,14 +82,14 @@ for my $f (@fichiers) {
 
 	    my $tar = Archive::Tar->new;
 
-	    $tar->add_data("$code_name.$ext",encode_utf8($ex));
+	    $tar->add_data("$code_name.$ext",encode_utf8($ex),$tar_opts);
 	    $tar->add_data("description.xml",
 			   encode_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <description>
   <title>'.$name.'</title>
   <text>'.$desc.'</text>
 </description>
-')
+'),$tar_opts
 			   );
 	    my $opts='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <projetAMC>
@@ -103,7 +105,7 @@ for my $f (@fichiers) {
 	    $opts .= '</projetAMC>
 ';
 	    $tar->add_data("options.xml",
-			   encode_utf8($opts));
+			   encode_utf8($opts),$tar_opts);
 
 	    $tar->write("$rep/$code_name.tgz", COMPRESS_GZIP);
 
