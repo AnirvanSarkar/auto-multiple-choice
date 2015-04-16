@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -461,6 +461,11 @@ sub define_statements {
       ."   WHERE $t_zone.student=$t_page.student"
       ."     AND $t_zone.page=$t_page.page AND $t_zone.copy=$t_page.copy"
       ."     AND $t_zone.type=? AND total>0) AS delta"
+      .",(SELECT MIN(ABS(1.0*black/total-?))"
+      ."   FROM $t_zone"
+      ."   WHERE $t_zone.student=$t_page.student"
+      ."     AND $t_zone.page=$t_page.page AND $t_zone.copy=$t_page.copy"
+      ."     AND $t_zone.type=? AND total>0) AS delta_up"
       ." FROM $t_page"},
      'pages'=>{'sql'=>"SELECT * FROM $t_page"
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
@@ -521,7 +526,7 @@ sub define_statements {
      'ticked'=>{'sql'=>"SELECT CASE"
 		." WHEN manual >= 0 THEN manual"
 		." WHEN total<=0 THEN -1"
-		." WHEN black >= ? * total THEN 1"
+		." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		." ELSE 0"
 		." END FROM $t_zone"
 		." WHERE student=? AND copy=? AND type=? AND id_a=? AND id_b=?"},
@@ -531,7 +536,7 @@ sub define_statements {
 		    ." WHEN why=\"E\" THEN 0"
 		    ." WHEN zone.manual >= 0 THEN zone.manual"
 		    ." WHEN zone.total<=0 THEN -1"
-		    ." WHEN zone.black >= ? * zone.total THEN 1"
+		    ." WHEN zone.black >= ? * zone.total AND zone.black <= ? * zone.total THEN 1"
 		    ." ELSE 0"
 		    ." END) AS nb"
 		    ." FROM $t_zone AS zone, scoring.scoring_score AS score"
@@ -555,7 +560,7 @@ sub define_statements {
      'tickedList'=>{'sql'=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
 		    ." WHEN total<=0 THEN -1"
-		    ." WHEN black >= ? * total THEN 1"
+		    ." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		    ." ELSE 0"
 		    ." END FROM $t_zone"
 		    ." WHERE student=? AND copy=? AND type=? AND id_a=?"
@@ -563,7 +568,7 @@ sub define_statements {
      'tickedPage'=>{'sql'=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
 		    ." WHEN total<=0 THEN -1"
-		    ." WHEN black >= ? * total THEN 1"
+		    ." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		    ." ELSE 0"
 		    ." END,id_a,id_b FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"},
@@ -828,20 +833,46 @@ sub n_pages_auto {
   return($self->sql_list($self->statement('nPagesAuto')));
 }
 
-# page_sensitivity($student,$page,$copy,$threshold) returns a
-# sensitivity value for the page automated data capture. When this
-# value is low (near 0), black and white boxes have darkness values
-# far away from the threshold, and thus one can think that it is well
-# recognized if the boxes are ticked or not. With high values of the
-# sensitivity (the maximal value is 10), ticked boxes are not robustly
-# detected: if one changes a little the darkness threshold, boxes can
-# pass from the ticked to not-ticked state or vice versa.
+# page_sensitivity($student,$page,$copy,$darkness_threshold,$darkness_threshold_up)
+# returns a sensitivity value for the page automated data
+# capture. When this value is low (near 0), black and white boxes have
+# darkness values far away from the threshold, and thus one can think
+# that it is well recognized if the boxes are ticked or not. With high
+# values of the sensitivity (the maximal value is 10), ticked boxes
+# are not robustly detected: if one changes a little the darkness
+# threshold, boxes can pass from the ticked to not-ticked state or
+# vice versa.
+
+sub sensitivity_down {
+  my ($delta,$threshold)=@_;
+  return(defined($delta) ? 10*($threshold-$delta)/$threshold : undef);
+}
+
+sub sensitivity_up {
+  my ($delta,$threshold)=@_;
+  return(defined($delta) ? sensitivity($delta,1-$threshold) : undef);
+}
+
+sub sensitivity {
+  my ($delta,$threshold,$delta_up,$threshold_up)=@_;
+  my $s=sensitivity_down($delta,$threshold);
+  my $s_up=sensitivity_up($delta_up,$threshold_up);
+  return(defined($s_up) && (!defined($s) || $s_up>$s) ?
+	 $s_up : $s);
+}
 
 sub page_sensitivity {
-  my ($self,$student,$page,$copy,$threshold)=@_;
+  my ($self,$student,$page,$copy,$darkness_threshold,$darkness_threshold_up)=@_;
+  die "Missing parameters in pqge_sensitivity call"
+    if(!defined($darkness_threshold_up));
   my $delta=$self->sql_single($self->statement('pageNearRatio'),
-			      $threshold,$student,$page,$copy);
-  return(defined($delta) ? 10*($threshold-$delta)/$threshold : undef);
+			      $darkness_threshold,
+			      $student,$page,$copy);
+  my $delta_up=$self->sql_single($self->statement('pageNearRatio'),
+				 $darkness_threshold_up,
+				 $student,$page,$copy);
+  return(sensitivity($delta,$darkness-threshold,
+		     $delta_up,$darkness_threshold_up));
 }
 
 # page_summary($student,$page,$copy,%options) returns a hash %s giving
@@ -877,9 +908,8 @@ sub compute_summaries {
 			sprintf($p->{'timestamp_manual'}>0 ? "(%.01f)" : "%.01f",
 				$p->{'mse'})
 			: "---");
-    $p->{'sensitivity'}=(defined($p->{'delta'})
-			 ? 10*($oo{'darkness_threshold'}-$p->{'delta'})
-			 /$oo{'darkness_threshold'} : undef);
+    $p->{'sensitivity'}=sensitivity($p->{'delta'},$oo{'darkness_threshold'},
+				    $p->{'delta_up'},$oo{'darkness_threshold_up'});
     $p->{'sensitivity_string'}=(defined($p->{'sensitivity'}) 
 				? sprintf("%.1f",$p->{'sensitivity'}) : "---");
     $p->{'sensitivity_color'}=(defined($p->{'sensitivity'}) ?
@@ -896,6 +926,7 @@ sub page_summary {
 				       $oo{'mse_threshold'},'red',undef,
 				       'lightblue','lightgreen',undef,
 				       $oo{'darkness_threshold'},ZONE_BOX,
+				       $oo{'darkness_threshold_up'},ZONE_BOX,
 				       $student,$page,$copy,
 				      );
   if($r && $r->[0]) {
@@ -913,6 +944,7 @@ sub summaries {
 				       $oo{'mse_threshold'},'red',undef,
 				       'lightblue','lightgreen',undef,
 				       $oo{'darkness_threshold'},ZONE_BOX,
+				       $oo{'darkness_threshold_up'},ZONE_BOX,
 				      );
   return($self->compute_summaries($r,%oo));
 }
@@ -927,19 +959,24 @@ sub zone_darkness {
 			   $zoneid));
 }
 
-# ticked($student,$copy,$question,$answer,$darkness_threshold) returns
-# 1 if the darkness of a particular zone exceeds $darkness_threshold,
-# and 0 otherwise. If a manual data capture occured for this zone, the
+# ticked($student,$copy,$question,$answer,$darkness_threshold,$darkness_threshold_up)
+# returns 1 if the darkness of a particular zone exceeds
+# $darkness_threshold and is less than $darkness_threshold_up, and 0
+# otherwise. If a manual data capture occured for this zone, the
 # darkness is not considered and the manual result is given instead.
 
 sub ticked {
-  my ($self,$student,$copy,$question,$answer,$darkness_threshold)=@_;
-  return($self->sql_single($self->statement('ticked'),$darkness_threshold,
+  my ($self,$student,$copy,$question,$answer,
+      $darkness_threshold,$darkness_threshold_up)=@_;
+  die "Missing parameters in ticked call"
+    if(!defined($darkness_threshold_up));
+  return($self->sql_single($self->statement('ticked'),
+			   $darkness_threshold,$darkness_threshold_up,
 			   $student,$copy,ZONE_BOX,$question,$answer));
 }
 
-# ticked_sums($darkness_threshold) returns a ref to a list of hashrefs
-# like
+# ticked_sums($darkness_threshold,$darkness_threshold_up) returns a
+# ref to a list of hashrefs like
 #
 # [{'question=>1,'answer'=>1,nb=>4},
 #  {'question=>1,'answer'=>'invalid',nb=>1},
@@ -951,10 +988,12 @@ sub ticked {
 # replied, and where this question got invalid answers.
 
 sub ticked_sums {
-  my ($self,$darkness_threshold)=@_;
+  my ($self,$darkness_threshold,$darkness_threshold_up)=@_;
+  die "Missing parameters in ticked_sums call"
+    if(!defined($darkness_threshold_up));
   return($self->dbh->selectall_arrayref($self->statement('tickedSums'),
 					{ Slice=>{} },
-					$darkness_threshold,ZONE_BOX)
+					$darkness_threshold,$darkness_threshold_up,ZONE_BOX)
 	 );
 }
 
@@ -967,15 +1006,18 @@ sub has_answer_zero {
 			   $student,$copy,ZONE_BOX,$question));
 }
 
-# ticked_list($student,$copy,$question,$darkness_threshold) returns a
-# list with the ticked results for all the answers boxes from a
-# particular question. Answers are ordered with the answer number, so
-# that the answer "None of the above" (if present), with answer number
-# 0, is placed at the beginning.
+# ticked_list($student,$copy,$question,$darkness_threshold,$darkness_threshold_up)
+# returns a list with the ticked results for all the answers boxes
+# from a particular question. Answers are ordered with the answer
+# number, so that the answer "None of the above" (if present), with
+# answer number 0, is placed at the beginning.
 
 sub ticked_list {
-  my ($self,$student,$copy,$question,$darkness_threshold)=@_;
-  return($self->sql_list($self->statement('tickedList'),$darkness_threshold,
+  my ($self,$student,$copy,$question,$darkness_threshold,$darkness_threshold_up)=@_;
+  die "Missing parameters in ticked_list call"
+    if(!defined($darkness_threshold_up));
+  return($self->sql_list($self->statement('tickedList'),
+			 $darkness_threshold,$darkness_threshold_up,
 			 $student,$copy,ZONE_BOX,$question));
 }
 
@@ -984,8 +1026,10 @@ sub ticked_list {
 # list.
 
 sub ticked_list_0 {
-  my ($self,$student,$copy,$question,$darkness_threshold)=@_;
-  my @tl=$self->ticked_list($student,$copy,$question,$darkness_threshold);
+  my ($self,$student,$copy,$question,$darkness_threshold,$darkness_threshold_up)=@_;
+  die "Missing parameters in ticked_list_0 call"
+    if(!defined($darkness_threshold_up));
+  my @tl=$self->ticked_list($student,$copy,$question,$darkness_threshold,$darkness_threshold_up);
   if($self->has_answer_zero($student,$copy,$question)) {
     my $zero=shift @tl;
     push @tl,$zero;

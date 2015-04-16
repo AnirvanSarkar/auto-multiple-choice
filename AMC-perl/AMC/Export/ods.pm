@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -1185,7 +1185,8 @@ sub export {
     if($self->{'out.stats'} || $self->{'out.statsindic'}) {
       $self->{'_scoring'}->begin_read_transaction('XsLO');
       $dt=$self->{'_scoring'}->variable('darkness_threshold');
-      $cts=$self->{'_capture'}->ticked_sums($dt);
+      $dtu=$self->{'_scoring'}->variable('darkness_threshold');
+      $cts=$self->{'_capture'}->ticked_sums($dt,$dtu);
       $man=$self->{'_capture'}->max_answer_number();
       $correct_data=$self->{'_scoring'}->correct_for_all
 	if($self->{'out.stats'});

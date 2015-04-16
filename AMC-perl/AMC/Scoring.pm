@@ -29,6 +29,7 @@ sub new {
 
     my $self={'onerror'=>'stderr',
 	      'seuil'=>0,
+	      'seuil_up'=>1.0,
 	      'data'=>'',
 	      'default_strategy'=>'',
 	      'default_strategy_plain'=>'',
@@ -70,7 +71,8 @@ sub error {
 sub ticked {
   my ($self,$student,$copy,$question,$answer)=@_;
   return($self->{'_capture'}
-	 ->ticked($student,$copy,$question,$answer,$self->{'seuil'}));
+	 ->ticked($student,$copy,$question,$answer,
+		  $self->{'seuil'},$self->{'seuil_up'}));
 }
 
 # tells if the answer given by the student is the correct one (ticked

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -28,6 +28,7 @@ use AMC::Data;
 use encoding 'utf8';
 
 my $darkness_threshold=0.1;
+my $darkness_threshold_up=1.0;
 
 my $floor_mark='';
 my $null_mark=0;
@@ -48,6 +49,7 @@ my $debug='';
 
 GetOptions("data=s"=>\$data_dir,
 	   "seuil=s"=>\$darkness_threshold,
+	   "seuil-up=s"=>\$darkness_threshold_up,
 	   "debug=s"=>\$debug,
 	   "grain=s"=>\$granularity,
 	   "arrondi=s"=>\$rounding_scheme,
@@ -136,7 +138,9 @@ my $scoring=$data->module('scoring');
 
 my $bar=AMC::Scoring::new('onerror'=>'die',
 			  'data'=>$data,
-			  'seuil'=>$darkness_threshold);
+			  'seuil'=>$darkness_threshold,
+			  'seuil_up'=>$darkness_threshold_up,
+			 );
 
 $avance->progres(0.05);
 
@@ -151,6 +155,7 @@ $data->begin_transaction('MARK');
 annotate_source_change($capture);
 $scoring->clear_score;
 $scoring->variable('darkness_threshold',$darkness_threshold);
+$scoring->variable('darkness_threshold_up',$darkness_threshold_up);
 $scoring->variable('mark_null',$null_mark);
 $scoring->variable('mark_floor',$floor_mark);
 $scoring->variable('mark_max',$perfect_mark);
@@ -178,7 +183,8 @@ $delta/=(1+$#captured_studentcopy) if($#captured_studentcopy>=0);
 
 if($postcorrect_student) {
     $scoring->postcorrect($postcorrect_student,$postcorrect_copy,
-			  $darkness_threshold,$postcorrect_set_multiple);
+			  $darkness_threshold,$darkness_threshold_up,
+			  $postcorrect_set_multiple);
 }
 
 # Processes each student/copy in turn
@@ -193,7 +199,7 @@ for my $sc (@captured_studentcopy) {
   # Gets the scoring strategy for current student/copy, including
   # which answers are correct, from the scoring database.
 
-  my $ssb=$scoring->student_scoring_base(@$sc,$darkness_threshold);
+  my $ssb=$scoring->student_scoring_base(@$sc,$darkness_threshold,$darkness_threshold_up);
 
   # transmits the main strategy (default strategy options values for
   # all questions) to the scoring engine.

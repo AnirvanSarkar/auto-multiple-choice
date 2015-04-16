@@ -22,8 +22,8 @@ use AMC::Test;
 
 AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
 	       'multiple'=>1,'perfect_copy'=>[2],
-	       'grain'=>0.1,'rounding'=>'s','seuil'=>0.15,
-	       'check_marks'=>{'/000'=>20,'/007'=>10,'/132'=>16.7},
+	       'grain'=>0.1,'rounding'=>'s','seuil'=>0.15,seuil_up=>0.7,
+	       'check_marks'=>{'/000'=>20,'/007'=>10,'/132'=>16.7,'/101'=>13.4},
 	       'verdict'=>'%(id) / %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
 	       'model'=>'(id)_(ID)',
 	       'annote'=>['2:1','2:2','2:3'],'annote_ascii'=>1,

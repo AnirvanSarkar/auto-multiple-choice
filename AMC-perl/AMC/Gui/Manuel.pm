@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -57,6 +57,7 @@ sub new {
 	      'etud'=>'',
 	      'dpi'=>75,
 	      'seuil'=>0.1,
+	      'seuil_up'=>1.0,
 	      'seuil_sens'=>8.0,
 	      'seuil_eqm'=>3.0,
 	      'fact'=>1/4,
@@ -297,6 +298,7 @@ sub maj_list_all {
   $self->{'capture'}->begin_read_transaction;
   my $summary=$self->{'capture'}
     ->summaries('darkness_threshold'=>$self->{'seuil'},
+		'darkness_threshold_up'=>$self->{'seuil_up'},
 		'sensitivity_threshold'=>$self->{'seuil_sens'},
 		'mse_threshold'=>$self->{'seuil_eqm'});
   my $capture_free=[];
@@ -374,6 +376,7 @@ sub maj_list_i {
       ->page_summary(@spc,
 		     'mse_threshold'=>$self->{'seuil_eqm'},
 		     'darkness_threshold'=>$self->{'seuil'},
+		     'darkness_threshold_up'=>$self->{'seuil_up'},
 		     'sensitivity_threshold'=>$self->{'seuil_sens'},
 		    );
     $self->{'capture'}->end_transaction('lUPD');
@@ -530,7 +533,7 @@ sub charge_i {
 	  .$i->{'answer'};
 	my $t=$self->{'capture'}
 	  ->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
-		   $self->{'seuil'});
+		   $self->{'seuil'},$self->{'seuil_up'});
 	$t='' if(!defined($t));
 	debug "Q=$id R=$t";
 	$i->{'id'}=[@spc];

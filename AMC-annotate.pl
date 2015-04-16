@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2013-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -39,6 +39,7 @@ my $projects_dir='';
 my $id_file='';
 
 my $darkness_threshold='';
+my $darkness_threshold_up='';
 
 my $data_dir='';
 
@@ -100,6 +101,7 @@ GetOptions("cr=s"=>\$cr_dir,
 	   "subject=s"=>\$pdf_subject,
 	   "pdf-dir=s"=>\$pdf_dir,
 	   "darkness-threshold=s"=>\$darkness_threshold,
+	   "darkness-threshold-up=s"=>\$darkness_threshold_up,
 	   "filename-model=s"=>\$filename_model,
 	   "force-ascii!"=>\$force_ascii,
 	   "single-output=s"=>\$single_output,
@@ -217,6 +219,7 @@ my $annotate
 		      csv_build_name=>$csv_buildname,
 		      significant_digits=>$significant_digits,
 		      darkness_threshold=>$darkness_threshold,
+		      darkness_threshold_up=>$darkness_threshold_up,
 		      id_file=>$id_file,
 		      sort=>$sort,
 		      annotate_indicatives=>$annotate_indicatives,

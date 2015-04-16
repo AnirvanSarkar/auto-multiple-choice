@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2012-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -47,6 +47,7 @@ sub new {
 	'n_cols'=>4,
 	'factor'=>0.75,
 	'seuil'=>0.15,
+	'seuil_up'=>1.0,
 	'prop_min'=>0.30,
 	'prop_max'=>0.60,
 	'global'=>0,
@@ -206,7 +207,8 @@ sub affect_box {
   my ($self,$z)=@_;
 
   my $id=$z->{'id_a'}.'-'.$z->{'id_b'};
-  my $auto_pos=($z->{'black'} > $z->{'total'}*$self->{'seuil'} ? 1 : 0);
+  my $auto_pos=($z->{'black'} >= $z->{'total'}*$self->{'seuil'} &&
+		$z->{'black'} <= $z->{'total'}*$self->{'seuil_up'} ? 1 : 0);
   my $eff_pos=($self->{'page_info'}->{'timestamp_manual'}
 	       && $z->{'manual'}>=0 ? $z->{'manual'} :
 	       $auto_pos);

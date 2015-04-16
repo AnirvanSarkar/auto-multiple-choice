@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -243,6 +243,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'encodage_latex'=>'',
 	      'defaut_moteur_latex_b'=>'pdflatex',
 	      'defaut_seuil'=>0.15,
+	      'defaut_seuil_up'=>1.0,
 	      'assoc_window_size'=>'',
 	      'mailing_window_size'=>'',
 	      'preferences_window_size'=>'',
@@ -339,6 +340,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'listeetudiants'=>'',
 		   'notes'=>'notes.xml',
 		   'seuil'=>'',
+		   'seuil_up'=>'',
 		   'encodage_csv'=>'',
 		   'encodage_liste'=>'',
 		   'maj_bareme'=>1,
@@ -1521,6 +1523,7 @@ sub zooms_display {
 	$w{'zooms_window'}->page([$student,$page,$copy],$zd,$forget_it);
     } elsif(!$forget_it) {
 	$w{'zooms_window'}=AMC::Gui::Zooms::new('seuil'=>$projet{'options'}->{'seuil'},
+						'seuil_up'=>$projet{'options'}->{'seuil_up'},
 						'n_cols'=>$o{'zooms_ncols'},
 						'zooms_dir'=>$zd,
 						'page_id'=>[$student,$page,$copy],
@@ -2575,6 +2578,7 @@ sub doc_maj {
 		     $dialog->destroy;
 		     if ($reponse eq 'yes') {
 		       $projet{'options'}->{'seuil'}=0.5;
+		       $projet{'options'}->{'seuil_up'}=1.0;
 		       $projet{'options'}->{'_modifie'}=1;
 		     }
 		   }
@@ -3093,6 +3097,7 @@ sub saisie_manuelle {
 	 'etud'=>'',
 	 'dpi'=>$o{'saisie_dpi'},
 	 'seuil'=>$projet{'options'}->{'seuil'},
+	 'seuil_up'=>$projet{'options'}->{'seuil_up'},
 	 'seuil_sens'=>$o{'seuil_sens'},
 	 'seuil_eqm'=>$o{'seuil_eqm'},
 	 'global'=>0,
@@ -4014,6 +4019,7 @@ sub noter_calcul {
 			  "--debug",debug_file(),
 			  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
 			  "--seuil",$projet{'options'}->{'seuil'},
+			  "--seuil-up",$projet{'options'}->{'seuil_up'},
 
 			  "--grain",$projet{'options'}->{'note_grain'},
 			  "--arrondi",$projet{'options'}->{'note_arrondi'},
@@ -4609,7 +4615,7 @@ sub accepte_preferences {
   test_libnotify();
 
   if (defined($projet{'options'}->{'_modifie'})
-      && $projet{'options'}->{'_modifie'} =~ /\bseuil\b/) {
+      && $projet{'options'}->{'_modifie'} =~ /\bseuil(_up)?\b/) {
     if ($projet{'_capture'}->n_pages_transaction()>0) {
       # mise a jour de la liste diagnostic
       detecte_analyse();
@@ -4935,6 +4941,7 @@ sub detecte_analyse {
 
     my $summary=$projet{'_capture'}
       ->summaries('darkness_threshold'=>$projet{'options'}->{'seuil'},
+		  'darkness_threshold_up'=>$projet{'options'}->{'seuil_up'},
 		  'sensitivity_threshold'=>$o{'seuil_sens'},
 		  'mse_threshold'=>$o{'seuil_eqm'});
 

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -77,6 +77,7 @@ sub export {
     $self->{'_scoring'}->begin_read_transaction('XCSV');
 
     my $dt=$self->{'_scoring'}->variable('darkness_threshold');
+    my $dtu=$self->{'_scoring'}->variable('darkness_threshold_up');
     my $lk=$self->{'_assoc'}->variable('key_in_list');
 
     my @student_columns=split(/,+/,$self->{'out.columns'});
@@ -130,11 +131,11 @@ sub export {
 	if($self->{'out.ticked'}) {
 	  if($self->{'out.ticked'} eq '01') {
 	    push @columns,join(';',$self->{'_capture'}
-			       ->ticked_list_0(@sc,$q->{'question'},$dt));
+			       ->ticked_list_0(@sc,$q->{'question'},$dt,$dtu));
 	  } elsif($self->{'out.ticked'} eq 'AB') {
 	    my $t='';
 	    my @tl=$self->{'_capture'}
-	      ->ticked_list(@sc,$q->{'question'},$dt);
+	      ->ticked_list(@sc,$q->{'question'},$dt,$dtu);
 	    if($self->{_capture}->has_answer_zero(@sc,$q->{'question'})) {
 	      if(shift @tl) {
 		$t.='0';

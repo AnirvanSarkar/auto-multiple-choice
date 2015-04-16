@@ -61,6 +61,7 @@ sub new {
      'debug_pixels'=>0,
      'scans'=>'',
      'seuil'=>0.5,
+     'seuil_up'=>1.0,
      'bw_threshold'=>0.6,
      'tol_marque'=>0.4,
      'rounding'=>'i',
@@ -363,6 +364,7 @@ sub note {
   $self->amc_command('note',
 		     '--data','%DATA',
 		     '--seuil',$self->{'seuil'},
+		     '--seuil-up',$self->{'seuil_up'},
 		     '--grain',$self->{'grain'},
 		     '--arrondi',$self->{'rounding'},
 		     '--notemax',$self->{'notemax'},
@@ -546,6 +548,8 @@ sub annote {
 		     '--with',$self->{'tex_engine'},
 		     '--filename-model',$self->{'model'},
 		     '--id-file','%PROJ/num-pdf',
+		     '--darkness-threshold',$self->{'seuil'},
+		     '--darkness-threshold-up',$self->{'seuil_up'},
 		     );
 
   $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
@@ -819,7 +823,7 @@ sub test_scoring {
 			ZONE_BOX,1,0,$none_t);
   }
 
-  my $qdata=$s->student_scoring_base(1,0,0.5);
+  my $qdata=$s->student_scoring_base(1,0,0.5,1.0);
 
   $s->end_transaction('tSCO');
 

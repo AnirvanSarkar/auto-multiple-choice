@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -45,6 +45,7 @@ my $fich_bareme='';
 my $id_file='';
 
 my $seuil=0.1;
+my $seuil_up=1.0;
 
 my $data_dir='';
 
@@ -170,6 +171,7 @@ my $assoc=$data->module('association');
 my $layout=$data->module('layout');
 
 $seuil=$scoring->variable_transaction('darkness_threshold');
+$seuil_up=$scoring->variable_transaction('darkness_threshold_up');
 
 #################################
 
@@ -371,7 +373,7 @@ print "* Annotation\n";
 
       # ticked on this scan?
       my $cochee=$capture->ticked($p->{'student'},$p->{'copy'},
-				  $q,$r,$seuil);
+				  $q,$r,$seuil,$seuil_up);
 
       debug "Q=$q R=$r $bonne-$cochee";
 

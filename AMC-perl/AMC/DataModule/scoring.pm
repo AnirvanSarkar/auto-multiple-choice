@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -165,10 +165,10 @@ package AMC::DataModule::scoring;
 #
 # postcorrect_set_multiple (see postcorrect function)
 #
-# --- the folleing values are supplied in the Preferences window
+# --- the following values are supplied in the Preferences window
 #
-# darkness_threshold is the parameter used for determining wether a
-# box is ticked or not.
+# darkness_threshold and darkness_threshold_up are the parameters used
+# for determining wether a box is ticked or not.
 #
 # mark_floor is the minimum mark to be given to a student.
 #
@@ -309,6 +309,7 @@ sub populate_from_xml {
   $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
   $self->variable('darkness_threshold',$xml->{'seuil'});
+  $self->variable('darkness_threshold_up',1.0);
   $self->variable('mark_floor',$xml->{'notemin'});
   $self->variable('mark_max',$xml->{'notemax'});
   $self->variable('ceiling',$xml->{'plafond'});
@@ -402,7 +403,7 @@ sub define_statements {
 			." SELECT id_a,id_b,CASE"
 			."   WHEN manual >= 0 THEN manual"
 			."   WHEN total<=0 THEN -1"
-			."   WHEN black >= ? * total THEN 1"
+			."   WHEN black >= ? * total AND black <= ? * total THEN 1"
 			."   ELSE 0"
 			." END"
 			." FROM ".$self->table("zone","capture")
@@ -495,7 +496,7 @@ sub define_statements {
       .",(SELECT CASE"
       ."         WHEN manual >= 0 THEN manual"
       ."         WHEN total<=0 THEN -1"
-      ."         WHEN black >= ? * total THEN 1"
+      ."         WHEN black >= ? * total AND black <= ? * total THEN 1"
       ."         ELSE 0"
       ."  END FROM $t_zone"
       ."  WHERE $t_zone.student=? AND $t_zone.copy=? AND $t_zone.type=?"
@@ -799,8 +800,8 @@ sub unalias {
   return($student);
 }
 
-# postcorrect($student,$copy,$darkness_threshold,$set_multiple) uses
-# the ticked values from the copy ($student,$copy) (filled by a
+# postcorrect($student,$copy,$darkness_threshold,$darkness_threshold_up,$set_multiple)
+# uses the ticked values from the copy ($student,$copy) (filled by a
 # teacher) to determine which answers are correct for all sheets. This
 # can be used only when the questions/answers are not different from a
 # sheet to another (contrary to the use of random numerical values for
@@ -812,12 +813,15 @@ sub unalias {
 # all other questions to QUESTION_SIMPLE.
 
 sub postcorrect {
-  my ($self,$student,$copy,$darkness_threshold,$set_multiple)=@_;
+  my ($self,$student,$copy,
+      $darkness_threshold,$darkness_threshold_up,$set_multiple)=@_;
+  die "Missing parameters in postcorrect call"
+    if(!defined($darkness_threshold_up));
   $self->{'data'}->require_module('capture');
   $self->statement('postCorrectNew')->execute();
   $self->statement('postCorrectClr')->execute();
   $self->statement('postCorrectPop')
-    ->execute($darkness_threshold,$student,$copy,ZONE_BOX);
+    ->execute($darkness_threshold,$darkness_threshold_up,$student,$copy,ZONE_BOX);
   $self->statement('postCorrectMul')->execute(QUESTION_MULT,QUESTION_SIMPLE)
     if($set_multiple);
   $self->statement('postCorrectSet')->execute();
@@ -964,9 +968,9 @@ sub student_global {
   return($x=$sth->fetchrow_hashref);
 }
 
-# student_scoring_base($student,$copy,$darkness_threshold) returns
-# useful data to compute questions scores for a particular student
-# (identified by $student and $copy), as a reference to a hash
+# student_scoring_base($student,$copy,$darkness_threshold,$darkness_threshold_up)
+# returns useful data to compute questions scores for a particular
+# student (identified by $student and $copy), as a reference to a hash
 # grouping questions and answers. For exemple :
 #
 # 'main_strategy'=>"",
@@ -985,7 +989,9 @@ sub student_global {
 # }
 
 sub student_scoring_base {
-  my ($self,$student,$copy,$darkness_threshold)=@_;
+  my ($self,$student,$copy,$darkness_threshold,$darkness_threshold_up)=@_;
+  die "Missing parameters in student_scoring_base call"
+    if(!defined($darkness_threshold_up));
   $self->{'data'}->require_module('capture');
   my $student_strategy=$self->unalias($student);
   my $r={'student_alias'=>$student_strategy,
@@ -1001,7 +1007,8 @@ sub student_scoring_base {
       $r->{'questions'}->{$qa->{'question'}}=$qa;
     }
     $sth=$self->statement('studentAnswersBase');
-    $sth->execute($darkness_threshold,$student,$copy,ZONE_BOX,$s);
+    $sth->execute($darkness_threshold,$darkness_threshold_up,
+		  $student,$copy,ZONE_BOX,$s);
     while(my $qa=$sth->fetchrow_hashref) {
       push @{$r->{'questions'}->{$qa->{'question'}}->{'answers'}},$qa;
     }

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2013-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2013-2015 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -56,6 +56,7 @@ sub new {
 	      csv_build_name=>'',
 	      significant_digits=>1,
 	      darkness_threshold=>'',
+	      darkness_threshold_up=>'',
 	      id_file=>'',
 	      sort=>'',
 	      annotate_indicatives=>'',
@@ -357,6 +358,8 @@ sub connects_to_database {
   $self->{association_key}=$self->{association}->variable_transaction('key_in_list');
   $self->{darkness_threshold}=$self->{scoring}
     ->variable_transaction('darkness_threshold') if(!$self->{darkness_threshold});
+  $self->{darkness_threshold_up}=$self->{scoring}
+    ->variable_transaction('darkness_threshold_up') if(!$self->{darkness_threshold_up});
 }
 
 sub error {
@@ -724,7 +727,9 @@ sub draw_symbol {
 
   # ticked on this scan?
   my $cochee=$self->{capture}->ticked(@$student,
-				      $q,$r,$self->{darkness_threshold});
+				      $q,$r,
+				      $self->{darkness_threshold},
+				      $self->{darkness_threshold_up});
 
   debug "Q=$q R=$r $bonne-$cochee";
 
