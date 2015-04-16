@@ -744,7 +744,7 @@ sub draw_symbol {
   if($tick && $cochee) {
     debug "Tick.";
     $self->set_color('black');
-    $self->command(join(' ','fill',
+    $self->command(join(' ',($self->{darkness_threshold_up}<1 ? 'mark' : 'fill'),
 			map { $box->{$_} } (qw/xmin xmax ymin ymax/)
 		       ));
   }
