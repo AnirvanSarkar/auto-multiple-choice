@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -2110,9 +2110,9 @@ Durée : 10 minutes.
         be replaced by a proper use of group modes.</para>
 
         <warning>
-        <para>
-        Delete the command <command>\shufflegroup</command> if you rerun created tests with a  AMC version  lower to 1.2.2014.111201 and if you change the default mode (<code>fixed</code>).
-        </para>
+          <para>Delete the command <command>\shufflegroup</command> if you
+          rerun created tests with a AMC version lower to 1.2.2014.111201 and
+          if you change the default mode (<code>fixed</code>).</para>
         </warning>
 
         <para>Groups of questions can be manipulated more precisely thanks to
@@ -4412,15 +4412,21 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <para>Any CSV file should be suitable.</para>
         </note>
 
-     <warning>
-        <para>
-       Type carefully the CSV file to send the same test to multiple recipients.
-        </para>
-        <itemizedlist>
-        <listitem>A semi-colon or colon or tabulation to separate the headers and a comma to separate the email adresses.</listitem>
-        <listitem>A comma to separate the headers and email adresses between inverted comma/quotation marks.</listitem>
-        </itemizedlist>
-        <programlisting>
+        <warning>
+          <para>Type carefully the CSV file to send the same test to multiple
+          recipients.</para>
+
+          <itemizedlist>
+            <listitem>
+              A semi-colon or colon or tabulation to separate the headers and a comma to separate the email adresses.
+            </listitem>
+
+            <listitem>
+              A comma to separate the headers and email adresses between inverted comma/quotation marks.
+            </listitem>
+          </itemizedlist>
+
+          <programlisting>
         name,forenama,email
         Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com" 
         </programlisting>
@@ -4931,22 +4937,27 @@ Boulix,Jojo,001
 Golin,André,002
 Moniuszko,Stanisław,003</programlisting>
 
-         <warning><para>
-        Type carefully the CSV file to send the same test to multiple recipients.
-        </para>
-        <itemizedlist><listitem>Headers separated by a semi-colon and email adresses by a comma.</listitem></itemizedlist>
-        <programlisting>
+          <warning>
+            <para>Type carefully the CSV file to send the same test to
+            multiple recipients.</para>
+
+            <itemizedlist>
+              <listitem>Headers separated by a semi-colon and email adresses
+              by a comma.</listitem>
+            </itemizedlist>
+
+            <programlisting>
 name;surname;id;email
 Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
 Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
 Moniuszko;Stanisław;003</programlisting>
-        </warning>
-
+          </warning>
         </listitem>
 
-         <warning>
-            <para>Do not use _ (underscore) with the student's name or forename. A compilation error will be display.</para>
-          </warning>
+        <warning>
+          <para>Do not use _ (underscore) with the student's name or forename.
+          A compilation error will be display.</para>
+        </warning>
 
         <listitem>
           <para>The LaTeX source file has to load csvsimple package,
@@ -4994,8 +5005,10 @@ Moniuszko;Stanisław;003</programlisting>
   }
 }
 
-\csvreader[head to column names]{students.csv}{}{\subject}<co id="separator.comma" linkends="separator.comma.exp"/>
-%\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\subject}<co id="separator.semicolon" linkends="separator.semicolon.exp"/>
+\csvreader[head to column names]{students.csv}{}{\subject}<co
+              id="separator.comma" linkends="separator.comma.exp"/>
+%\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\subject}<co
+              id="separator.semicolon" linkends="separator.semicolon.exp"/>
 
 </programlisting>
 
@@ -5006,20 +5019,20 @@ Moniuszko;Stanisław;003</programlisting>
           used inside <command>\subject</command>. The
           <command>\AMCassociation</command> call tells AMC to associate the
           current sheet to student with id <command>\id</command>.</para>
+
           <para>
-          <calloutlist>
-          <callout arearefs="separator.comma" id="separator.comma.exp">
-          <para>
-          Use this command if the CSV file contains only one email address per student.
-          </para>
-          </callout>
- 
-            <callout arearefs="separator.semicolon" id="separator.semicolon.exp">
-          <para>
-          Use this command if the CSV file contains multiple email addresses per student.
-          </para>
-          </callout>
-          </calloutlist>
+            <calloutlist>
+              <callout arearefs="separator.comma" id="separator.comma.exp">
+                <para>Use this command if the CSV file contains only one email
+                address per student.</para>
+              </callout>
+
+              <callout arearefs="separator.semicolon"
+                       id="separator.semicolon.exp">
+                <para>Use this command if the CSV file contains multiple email
+                addresses per student.</para>
+              </callout>
+            </calloutlist>
           </para>
         </listitem>
 
@@ -5993,6 +6006,25 @@ Moniuszko;Stanisław;003</programlisting>
           </varlistentry>
 
           <varlistentry>
+            <term><option>--seuil-up
+            <replaceable>upper_threshold</replaceable></option></term>
+
+            <listitem>
+              <para>gives the black ratio threshold over which a box is
+              considered as not beeing ticked. You can set this value to (for
+              example) 0.6 to allow students to cancel a ticked box filling it
+              completely: if the black ratio is between
+              <replaceable>threshold</replaceable> and
+              <replaceable>upper_threshold</replaceable>, the box is
+              considered as beeing ticked, but if the black ratio is greater
+              than <replaceable>upper_threshold</replaceable> (for example
+              when the box is filled), the box is considered as not beeing
+              ticked. The default value is 1.0, so that this feature is
+              disabled.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><option>--grain <replaceable>granularity</replaceable>
             --arrondi <replaceable>rounding</replaceable></option></term>
 
@@ -6749,6 +6781,17 @@ Moniuszko;Stanisław;003</programlisting>
                 <para>sets the darkness threshold. Default value is stored in
                 the database from value actually used for scoring, so this
                 option should not be used.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><option>--darkness-threshold-up
+              <replaceable>upper_t</replaceable></option></term>
+
+              <listitem>
+                <para>sets the upper darkness threshold. Default value is
+                stored in the database from value actually used for scoring,
+                so this option should not be used.</para>
               </listitem>
             </varlistentry>
 
