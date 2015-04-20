@@ -82,6 +82,7 @@ sub find_object {
 
 sub transmet_pref {
   my ($self,$gap,$prefixe,$h,$alias,$seulement,$update)=@_;
+  my $wp;
 
   debug "Updating GUI for <$prefixe>";
 
@@ -92,11 +93,9 @@ sub transmet_pref {
 
       if ($wp=$self->find_object($gap,$prefixe,'_t_',$ta,$t,$update)) {
 	$wp->get_buffer->set_text($h->{$t});
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_x_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_x_',$ta,$t,$update)) {
 	$wp->set_text($h->{$t});
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_f_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_f_',$ta,$t,$update)) {
 	my $path=$h->{$t};
 	if ($self->{shortcuts}) {
 	  if ($t =~ /^projects_/) {
@@ -111,23 +110,17 @@ sub transmet_pref {
 	} else {
 	  $wp->set_filename($path);
 	}
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_v_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_v_',$ta,$t,$update)) {
 	$wp->set_active($h->{$t});
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_s_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_s_',$ta,$t,$update)) {
 	$wp->set_value($h->{$t});
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_fb_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_fb_',$ta,$t,$update)) {
 	$wp->set_font_name($h->{$t});
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
 	$wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
 	$wp->set_active($h->{$t});
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_c_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_c_',$ta,$t,$update)) {
 	if ($self->store_get($ta)) {
 	  debug "CB_STORE($t) ALIAS $ta modifie ($t=>$h->{$t})";
 	  $wp->set_model($self->store_get($ta));
@@ -142,8 +135,7 @@ sub transmet_pref {
 	  debug "no CB_STORE for $ta";
 	  $wp->set_active($h->{$t});
 	}
-      }
-      if ($wp=$self->find_object($gap,$prefixe,'_ce_',$ta,$t,$update)) {
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_ce_',$ta,$t,$update)) {
 	if ($self->store_get($ta)) {
 	  debug "CB_STORE($t) ALIAS $ta changed";
 	  $wp->set_model($self->store_get($ta));
@@ -176,23 +168,19 @@ sub reprend_pref {
       $tgui =~ s/$oprefix$// if($oprefix);
       debug "Looking for widget <$tgui> in domain <$prefixe>";
       my $n;
-      my $wp=$self->{w}->{$prefixe.'_x_'.$tgui};
-      if ($wp) {
+      my $wp;
+      if ($wp=$self->{w}->{$prefixe.'_x_'.$tgui}) {
 	debug "Found string entry";
 	$n=$wp->get_text();
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_t_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_t_'.$tgui}) {
 	debug "Found text entry";
 	my $buf=$wp->get_buffer;
 	$n=$buf->get_text($buf->get_start_iter,$buf->get_end_iter,1);
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_f_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_f_'.$tgui}) {
 	debug "Found file chooser";
 	if ($wp->get_action =~ /-folder$/i) {
 	  if (-d $wp->get_filename()) {
@@ -212,44 +200,32 @@ sub reprend_pref {
 	}
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_v_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_v_'.$tgui}) {
 	debug "Found (v) check button";
 	$n=$wp->get_active();
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_s_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_s_'.$tgui}) {
 	debug "Found spin button";
 	$n=$wp->get_value();
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_fb_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_fb_'.$tgui}) {
 	debug "Found font button";
 	$n=$wp->get_font_name();
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_col_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_col_'.$tgui}) {
 	debug "Found color chooser";
 	$n=$wp->get_color()->to_string();
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_cb_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_cb_'.$tgui}) {
 	debug "Found checkbox";
 	$n=$wp->get_active();
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
-      }
-      $wp=$self->{w}->{$prefixe.'_c_'.$tgui};
-      if ($wp) {
+      } elsif($wp=$self->{w}->{$prefixe.'_c_'.$tgui}) {
 	debug "Found combobox";
 	if ($wp->get_model) {
 	  if ($wp->get_active_iter) {
