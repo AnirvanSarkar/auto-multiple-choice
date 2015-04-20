@@ -40,6 +40,7 @@ sub new {
     $self->{'out.stats'}='';
     $self->{'out.statsindic'}='';
     $self->{'out.groupsums'}='';
+    $self->{'out.groupsep'}=':';
     if(can_load(modules=>{'Gtk2'=>undef,'Cairo'=>undef})) {
       debug "Using Gtk2/Cairo to compute column width";
       $self->{'calc.Gtk2'}=1;
