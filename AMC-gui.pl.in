@@ -2097,9 +2097,7 @@ sub project_copy {
       for my $s (@find_results) {
 	my $d=$s;
 	$d =~ s:^$src:$dest:;
-	if(-l $s) {
-	  $done+=symlink readlink($s),$d;
-	} elsif(-d $s) {
+	if(-d $s) {
 	  $done++ if(mkdir($d));
 	} else {
 	  $done++ if(copy($s,$d));
