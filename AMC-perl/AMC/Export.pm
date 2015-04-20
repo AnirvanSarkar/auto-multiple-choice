@@ -102,7 +102,7 @@ sub load {
 
 sub question_group {
   my ($self,$question)=@_;
-  if($question->{title} =~ /^([^:]+):/) {
+  if($question->{title} =~ /^(.+?)\Q$self->{"out.groupsep"}\E/) {
     return($1);
   } else {
     return(undef);

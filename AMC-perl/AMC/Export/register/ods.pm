@@ -47,7 +47,8 @@ sub options_from_config {
 	 "code"=>$options_project->{'code_examen'},
 	 "stats"=>$options_project->{'export_ods_stats'},
 	 "statsindic"=>$options_project->{'export_ods_statsindic'},
-	 "groupsums"=>$options_project->{'export_ods_groupsums'},
+	 "groupsums"=>($options_project->{'export_ods_groupsep'} ne ''),
+	 "groupsep"=>$options_project->{'export_ods_groupsep'},
 	 );
 }
 
@@ -55,7 +56,7 @@ sub options_default {
   return('export_ods_columns'=>'student.copy,student.key,student.name',
 	 'export_ods_stats'=>'',
 	 'export_ods_statsindic'=>'',
-	 'export_ods_groupsums'=>0,
+	 'export_ods_groupsep'=>'',
 	 );
 }
 
@@ -105,9 +106,16 @@ sub build_config_gui {
 # TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.
   $t->attach(Gtk2::Label->new(__"Score groups"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::CheckButton->new();
-  $w->{'export_cb_export_ods_groupsums'}=$widget;
-  $widget->set_tooltip_text(__"Add sums of the scores for each question group? To define groups, use question ids in the form \"group:question\".");
+  $widget=Gtk2::ComboBox->new_with_model();
+  $renderer = Gtk2::CellRendererText->new();
+  $widget->pack_start($renderer, TRUE);
+  $widget->add_attribute($renderer,'text',COMBO_TEXT);
+  $prefs->store_register('export_ods_groupsep'=>cb_model(""=>__"No",
+							 ":"=>__"Yes, with scope separator ':'",
+							 "."=>__"Yes, with scope separator '.'"));
+  $w->{'export_c_export_ods_groupsep'}=$widget;
+
+  $widget->set_tooltip_text(__"Add sums of the scores for each question group? To define groups, use question ids in the form \"group:question\" or \"group.question\", depending on the scope separator.");
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;
 
