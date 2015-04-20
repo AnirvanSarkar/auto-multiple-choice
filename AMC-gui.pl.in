@@ -255,7 +255,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'options_impression'=>{'sides'=>'two-sided-long-edge',
 				     'number-up'=>1,
 				     'repertoire'=>'/tmp',
-				     'split'=>'',
+				     'print_answersheet'=>'',
 				     },
 	      'manuel_image_type'=>'xpm',
 	      'assoc_ncols'=>4,
@@ -401,7 +401,6 @@ my %projet_defaut=('texsrc'=>'',
 		   'email_subject'=>"",
 		   'email_text'=>"",
 		   'email_attachment'=>[],
-		   
 		   'email_use_html'=>'',
 		   );
 
@@ -1338,7 +1337,13 @@ $prefs->store_register(
     'print_extract_with'=>cb_model('pdftk'=>'pdftk',
 				   'gs'=>'gs (ghostscript)'
 				   ),
-    );
+		       'print_answersheet'=>cb_model(''=>__"Standard",
+# TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
+						     'split'=>__"Separate answer sheet",
+# TRANLATORS: One of the way to handle separate answer sheet when printing: print separately answer sheet and question. This is a menu entry.
+						     'first'=>__"Answer sheet first"),
+# TRANLATORS: One of the way to handle separate answer sheet when printing: print the answr sheet first. This is a menu entry.
+		      );
 
 # TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
 my $symbole_type_cb=cb_model("none"=>__"nothing",
@@ -2759,7 +2764,7 @@ sub sujet_impressions {
     }
 
     $g_imprime=read_glade('choix_pages_impression',
-			  qw/arbre_choix_copies bloc_imprimante imprimante imp_c_agrafe bloc_fichier/);
+			  qw/arbre_choix_copies bloc_imprimante answersheet_box imprimante imp_c_agrafe bloc_fichier/);
 
     $prefs->transmet_pref($g_imprime,'impall',$o{'options_impression'});
 
@@ -2945,12 +2950,19 @@ sub sujet_impressions_ok {
     print $fh join("\n",@e)."\n";
     $fh->seek( 0, SEEK_END );
 
+    my @o_answer=('--no-split','--no-answer-first');
+    if($o{'options_impression'}->{'print_answersheet'} eq 'split') {
+      @o_answer=('--split','--no-answer-first');
+    } elsif($o{'options_impression'}->{'print_answersheet'} eq 'first') {
+      @o_answer=('--answer-first','--no-split');
+    }
+
     commande('commande'=>["auto-multiple-choice","imprime",
 			  "--methode",$o{'methode_impression'},
 			  "--imprimante",$o{'imprimante'},
 			  "--options",$os,
 			  "--output",$shortcuts->absolu($o{'options_impression'}->{'repertoire'})."/sheet-%e.pdf",
-			  ($o{'options_impression'}->{'split'} ? "--split" : "--no-split"),
+			  @o_answer,
 			  "--print-command",$o{'print_command_pdf'},
 			  "--sujet",$shortcuts->absolu($projet{'options'}->{'doc_question'}),
 			  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),

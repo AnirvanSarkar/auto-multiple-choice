@@ -44,6 +44,7 @@ my $options='number-up=1';
 my $output_file='';
 my $output_answers_file='';
 my $split='';
+my $answer_first='';
 my $extract_with='pdftk';
 
 GetOptions(
@@ -57,6 +58,7 @@ GetOptions(
 	   "imprimante=s"=>\$imprimante,
 	   "output=s"=>\$output_file,
 	   "split!"=>\$split,
+	   "answer-first!"=>\$answer_first,
 	   "options=s"=>\$options,
 	   "debug=s"=>\$debug,
 	   "extract-with=s"=>\$extract_with,
@@ -134,20 +136,27 @@ if($methode =~ /^cups/i) {
 }
 
 sub process_pages {
-  my ($first,$last,$f_dest,$elong)=@_;
+  my ($slices,$f_dest,$elong)=@_;
 
   my $tmp = File::Temp->new( DIR=>tmpdir(),UNLINK => 1, SUFFIX => '.pdf' );
   $fn=$tmp->filename();
+  my $n_slices=1+$#{$slices};
 
-  print "Student $elong : pages $first-$last in file $fn...\n";
+  print "Student $elong : $n_slices slices to file $fn...\n";
+  return() if($n_slices==0);
 
   if($extract_with eq 'gs') {
+    die "Can't use <gs> to build multiple-slices PDF file. Please switch to <pdftk>."
+      if($n_slices>1);
     $commandes->execute("gs","-dBATCH","-dNOPAUSE","-q","-sDEVICE=pdfwrite",
 			"-sOutputFile=$fn",
-			"-dFirstPage=$first","-dLastPage=$last",
+			"-dFirstPage=".$slices->[0]->{first},
+			"-dLastPage=".$slices->[0]->{last},
 			$sujet);
   } elsif($extract_with eq 'pdftk') {
-    $commandes->execute("pdftk",$sujet,"cat","$first-$last","output",$fn);
+    $commandes->execute("pdftk",$sujet,"cat",
+			(map { $_->{first}."-".$_->{last} } @$slices),
+			"output",$fn);
   }
 
   if($methode =~ /^cups/i) {
@@ -176,19 +185,39 @@ for my $e (@es) {
   $layout->begin_read_transaction('prSP');
   ($debut,$fin)=$layout->query_row('subjectpageForStudent',$e);
   ($debutA,$finA)=$layout->query_row('subjectpageForStudentA',$e)
-    if($split);
+    if($split||$answer_first);
   $layout->end_transaction('prSP');
 
+  my @sl_all=();
+  if($debut && $fin) {
+    push @sl_all,{first=>$debut,last=>$fin};
+  }
+
+  my @sl_answer=();
+  if($debutA && $finA) {
+    push @sl_answer,{first=>$debutA,last=>$finA};
+  }
+  my @sl_preanswer=();
+  if($debut && $debutA && $debut<$debutA) {
+    push @sl_preanswer,{first=>$debut,last=>$debutA-1};
+  }
+  my @sl_postanswer=();
+  if($fin && $finA && $fin>$finA) {
+    push @sl_postanswer,{first=>$finA+1,last=>$fin};
+  }
+
   if($split) {
-    if($debut<$debutA) {
-      process_pages($debut,$debutA-1,$output_file,$elong."-0S");
-    }
-    process_pages($debutA,$finA,$output_file,$elong."-1A");
-    if($fin>$finA) {
-      process_pages($finA+1,$fin,$output_file,$elong."-2S");
-    }
+    process_pages(\@sl_preanswer,$output_file,$elong."-0S");
+    process_pages(\@sl_answer,$output_file,$elong."-1A");
+    process_pages(\@sl_postanswer,$output_file,$elong."-2S");
   } else {
-    process_pages($debut,$fin,$output_file,$elong);
+    if($answer_first) {
+      process_pages([@sl_answer,@sl_postanswer,@sl_preanswer],
+		    $output_file,$elong);
+    } else {
+      process_pages(\@sl_all,
+		    $output_file,$elong);
+    }
   }
 
   $avance->progres(1/(1+$#es));
