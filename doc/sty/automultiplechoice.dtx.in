@@ -1115,7 +1115,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % It defines a version string:
 %    \begin{macrocode}
-\def\AMC@VERSION{AMC @/PACKAGE_V_DEB/@ @/PACKAGE_V_VC/@ with style $Revision: 431 $}
+\def\AMC@VERSION{AMC @/PACKAGE_V_DEB/@ @/PACKAGE_V_VC/@}
 %    \end{macrocode}
 % \begin{macro}{\AMC@amclog}\begin{macro}{\AMCmessage}
 %   Informations about questions and choices will be logged to a file
@@ -3895,6 +3895,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % See section~\ref{d:options} for the options descriptions.
 %
 %    \begin{macrocode}
+\def\AMC@lang@code{}
 \DeclareOptionX{noshuffle}{\AMC@ordretrue}
 \DeclareOptionX{noshufflegroups}{\AMC@shuffleGfalse}
 \DeclareOptionX{fullgroups}{\AMC@fullGroupstrue}
@@ -3922,8 +3923,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@fullGroupstrue%
   \def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue}
 \DeclareOptionX{catalog}{\AMC@catalogMode}
-\DeclareOptionX{francais}{\AMC@loc@FR}
-\DeclareOptionX{lang}{\csname AMC@loc@#1\endcsname}
+\DeclareOptionX{francais}{\def\AMC@lang@code{FR}\AMC@loc@FR}
+\DeclareOptionX{lang}{\def\AMC@lang@code{#1}\csname AMC@loc@#1\endcsname}
 \DeclareOptionX{versionA}{%
   \def\AMCid@checkmax{31}\def\AMC@NCBetud{9}\def\AMC@NCBpage{4}%
   \def\AMC@NCBcheck{5}\setlength{\AMC@CBtaille}{4cm}%
@@ -4090,6 +4091,12 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \newwrite\AMC@XYFILE%
 \immediate\openout\AMC@XYFILE\jobname.xy%
 \immediate\write\AMC@XYFILE{\string\version{\AMC@VERSION}}
+\immediate\write\AMC@XYFILE{\string\with{version=\AMC@VERSION}}
+\immediate\write\AMC@XYFILE{\string\with{ensemble=\ifAMC@ensemble yes\else no\fi}}
+\immediate\write\AMC@XYFILE{\string\with{insidebox=\ifAMC@inside@box yes\else no\fi}}
+\immediate\write\AMC@XYFILE{\string\with{ousidebox=\ifAMC@outside@box yes\else no\fi}}
+\immediate\write\AMC@XYFILE{\string\with{postcorrect=\ifAMC@postcorrect yes\else no\fi}}
+\immediate\write\AMC@XYFILE{\string\with{lang=\AMC@lang@code}}
 \fi
 %    \end{macrocode}
 %
