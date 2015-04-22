@@ -2875,13 +2875,13 @@ Three digits and two letters:\insertgroup{mixed}.
 % with the command |\AMCcode|\marg{key}\marg{ndigits}, where
 % \meta{key} is a key prefix and \meta{ndigits} is the number of
 % required digits. The digits entered by the student will be available
-% through the questions \meta{key}|.1|$,\ldots,$\meta{key}|.|\meta{ndigits}.
+% through the questions \meta{key}|[1]|$,\ldots,$\meta{key}|[|\meta{ndigits}|]|.
 %
 % As an example, |\AMCcode{code}{6}| produces the opposite boxes (two
 % results are show here: without or with |separateanswersheet|
 % option), and trace positions of all the boxes in the |.xy| file with
 % the |code| identifier: the first digit is represented by question
-% with key |code.6|, the second by question with key |code.5|, and so on.
+% with key |code[6]|, the second by question with key |code[5]|, and so on.
 %
 % Positions of the boxes are logged in the |.xy| file, as shown in
 % section~\ref{a:code} for the first set of boxes (without
@@ -2922,7 +2922,7 @@ Three digits and two letters:\insertgroup{mixed}.
    \vspace{\AMCcodeVspace}}%
  \AMCnobloc%
  \AMC@chiffres=#2\loop%
- \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative%
+ \begin{question}{#1[\the\AMC@chiffres]}\QuestionIndicative%
    \begin{choicescustom}[o]\scoring{auto=0}%
      \wrongchoice[0]{0}%
      \wrongchoice[1]{1}%
@@ -2950,7 +2950,7 @@ Three digits and two letters:\insertgroup{mixed}.
    \hspace{\AMCcodeHspace}}%
  \AMCnobloc%
  \AMC@chiffres=#2\loop%
- \begin{question}{#1.\the\AMC@chiffres}\QuestionIndicative%
+ \begin{question}{#1[\the\AMC@chiffres]}\QuestionIndicative%
    \begin{choicescustom}[o]\scoring{auto=0}%
      \wrongchoice[0]{0}%
      \wrongchoice[1]{1}%
@@ -4091,6 +4091,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \newwrite\AMC@XYFILE%
 \immediate\openout\AMC@XYFILE\jobname.xy%
 \immediate\write\AMC@XYFILE{\string\version{\AMC@VERSION}}
+\immediate\write\AMC@XYFILE{\string\with{codedigit=squarebrackets}}
 \immediate\write\AMC@XYFILE{\string\with{version=\AMC@VERSION}}
 \immediate\write\AMC@XYFILE{\string\with{ensemble=\ifAMC@ensemble yes\else no\fi}}
 \immediate\write\AMC@XYFILE{\string\with{insidebox=\ifAMC@inside@box yes\else no\fi}}

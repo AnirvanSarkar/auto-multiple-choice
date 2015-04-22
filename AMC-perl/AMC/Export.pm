@@ -91,6 +91,7 @@ sub load {
 
     $self->{'_data'}=AMC::Data->new($self->{'fich.datadir'});
     $self->{'_scoring'}=$self->{'_data'}->module('scoring');
+    $self->{'_layout'}=$self->{'_data'}->module('layout');
     $self->{'_assoc'}=$self->{'_data'}->module('association');
 
     if($self->{'fich.noms'} && ! $self->{'noms'}) {
@@ -153,9 +154,10 @@ sub test_indicative {
 sub codes_questions {
   my ($self,$codes,$questions,$plain)=@_;
   @$codes=$self->{'_scoring'}->codes();
+  my $code_digit_pattern=$self->{_layout}->code_digit_pattern();
   if($plain) {
     my $codes_re="(".join("|",map { "\Q$_\E" } @$codes).")";
-    @$questions=grep { $_->{'title'} !~ /^$codes_re\.[0-9]+$/ }
+    @$questions=grep { $_->{'title'} !~ /^$codes_re$code_digit_pattern$/ }
       $self->{'_scoring'}->questions;
   } else {
     @$questions=$self->{'_scoring'}->questions;

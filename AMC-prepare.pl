@@ -338,7 +338,7 @@ sub analyse_amclog {
     # refers to ID (question name, string given as an argument to
     # question environment)
 
-    if (/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
+    if (/AUTOQCM\[NUM=([0-9]+)=(.+)\]/) {
       # stores this association (two-way)
 
       $titres{$1}=$2;
@@ -886,7 +886,7 @@ if($to_do{b}) {
 	  $qs={};
 	}
 
-	if(/AUTOQCM\[NUM=([0-9]+)=([^\]]+)\]/) {
+	if(/AUTOQCM\[NUM=([0-9]+)=(.+)\]/) {
 	  # association question-number<->question-title
 	  $scoring->question_title($1,$2);
 	}
