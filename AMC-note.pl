@@ -287,7 +287,7 @@ for my $sc (@captured_studentcopy) {
 
   # Apply ceiling
 
-  $x=$perfect_mark if($perfect_mark>0 && $ceiling && $x>$perfect_mark);
+  $x=$perfect_mark if($perfect_mark>0 && $ceiling && ($x-$perfect_mark)*($perfect_mark-$null_mark)>0);
 
   # Apply floor
 
