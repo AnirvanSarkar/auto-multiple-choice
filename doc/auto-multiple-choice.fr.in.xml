@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -1864,9 +1864,9 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           de chiffres, lettres et caractères simples (ne pas utiliser le
           caractère souligné <code>_</code>, les accolades, crochets, par
           exemple !). Il ne faut pas utiliser d'identifiants se terminant par
-          un point suivi d'un ou plusieurs chiffres (comme
-          <parameter>marine-marchande.2</parameter> ou
-          <parameter>123.27</parameter>), car cette forme d'identifiants est
+          un nombre entier entre crochets (comme
+          <parameter>marine-marchande[2]</parameter> ou
+          <parameter>123[27</parameter>]), car cette forme d'identifiants est
           réservée à la saisie de longs codes (par exemple grâce à
           <command>\AMCcode</command> - voir <xref
           linkend="latex.codes"/>).</para>
@@ -1958,8 +1958,8 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
       <note>
         <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
         affiché. Vous pouvez modifier ce texte pour une ou plusieurs questions
-        avec la commande <command>\AMCtext</command> (Voir
-        <xref linkend="AMCtext"/>).</para>
+        avec la commande <command>\AMCtext</command> (Voir <xref
+        linkend="AMCtext"/>).</para>
       </note>
 
       <para>Un exemple issu de la documentation anglaise.</para>
@@ -2167,7 +2167,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
             <listitem>
               <para>les éléments sont pris à la suite les uns des autres à
-              chaque restitution, en repartant du début si nécessaire. </para>
+              chaque restitution, en repartant du début si nécessaire.</para>
             </listitem>
           </varlistentry>
 
@@ -2176,7 +2176,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
             <listitem>
               <para>même chose que pour <code>fixed</code>, mais le groupe est
-              mélangé à chaque fois. </para>
+              mélangé à chaque fois.</para>
             </listitem>
           </varlistentry>
 
@@ -2185,7 +2185,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
             <listitem>
               <para>comme <code>cyclic</code>, en ajoutant un mélange à chaque
-              fois que l'on reprend au début. </para>
+              fois que l'on reprend au début.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -2196,18 +2196,18 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <programlisting>\setdefaultgroupmode{XXX}</programlisting>
 
- 
         <para>Une fois un groupe constitué, on peut mélanger les questions qui
         le composent par la commande <command>melangegroupe</command> : par
         exemple, <programlisting>\melangegroupe{ungroupe}</programlisting></para>
 
         <para>Cependant, cette commande n'a pas à être utilisée si on utilise
         les modes de groupes comme il faut.</para>
-        
+
         <warning>
-        <para>
-        Si vous réutilisez des sujets mis en page avec une version antérieure à AMC 1.2.2014.111201 et choisissez un des trois autres modes que celui par défaut (<code>fixed</code>), supprimez la commande <command>\melangegroupe</command>.
-        </para>
+          <para>Si vous réutilisez des sujets mis en page avec une version
+          antérieure à AMC 1.2.2014.111201 et choisissez un des trois autres
+          modes que celui par défaut (<code>fixed</code>), supprimez la
+          commande <command>\melangegroupe</command>.</para>
         </warning>
 
         <para>Si cette commande n'est pas utilisée, c'est le mode
@@ -2545,10 +2545,12 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <title>Saisie de codes</title>
 
         <para>L'entrée de codes peut être aisément effectuée à l'aide de la
-        commande LaTeX <command>\AMCcode{identifiant}{nombre}</command>, par exemple pour que chaque
-        étudiant codifie son numéro d'étudiant lui-même sur sa copie. Les deux
-        arguments de cette commande sont un identifiant de question que vous choississez ainsi que le nombre de
-        chiffres du codage désiré. On pourra, par exemple, utiliser l'en-tête de  copie suivant :</para>
+        commande LaTeX <command>\AMCcode{identifiant}{nombre}</command>, par
+        exemple pour que chaque étudiant codifie son numéro d'étudiant
+        lui-même sur sa copie. Les deux arguments de cette commande sont un
+        identifiant de question que vous choississez ainsi que le nombre de
+        chiffres du codage désiré. On pourra, par exemple, utiliser l'en-tête
+        de copie suivant :</para>
 
         <para>
           <programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
@@ -2573,11 +2575,17 @@ et inscrivez votre nom et prénom ci-dessous.
 </programlisting>
         </para>
 
-        <note><para>
-        Ici l'identifiant est <emphasis>etu</emphasis> qui servira à AMC pour attribuer chaque copie à un étudiant et 8 est le nombre de cases pour le code.
-        </para>
-        <para>Vous devrez sélectionner cet identifiant dans le menu déroulant  <guilabel>Titre du code pour association automatique</guilabel>de l'onglet <guibutton>notation</guibutton> lors de l'association automatique des copies (voir <xref linkend="Association"/>).</para></note>
+        <note>
+          <para>Ici l'identifiant est <emphasis>etu</emphasis> qui servira à
+          AMC pour attribuer chaque copie à un étudiant et 8 est le nombre de
+          cases pour le code.</para>
 
+          <para>Vous devrez sélectionner cet identifiant dans le menu
+          déroulant <guilabel>Titre du code pour association
+          automatique</guilabel>de l'onglet <guibutton>notation</guibutton>
+          lors de l'association automatique des copies (voir <xref
+          linkend="Association"/>).</para>
+        </note>
 
         <para>Dans le cas de l'utilisation de l'option
         <option>ensemble</option>, la commande <command>AMCcode</command>
@@ -3286,13 +3294,15 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <para>pour suivre une convention différente (on rencontra par
           exemple souvent l'utilisation de [a,b) à la place de [a,b[).</para>
-          
-         <note>
-         <para>
-         Si vous préférez la virgule comme séparateur décimal, il faut utiliser la commande <command>\numprint</command> du paquet <package>numprint</package> ( voir <xref endterm="Divers.titre" linkend="Divers"/>).
-         </para>
-          <programlisting>\def\AMCIntervalFormat#1#2{[\numprint{#1}-\,\numprint{#2}[}</programlisting>
-         </note> 
+
+          <note>
+            <para>Si vous préférez la virgule comme séparateur décimal, il
+            faut utiliser la commande <command>\numprint</command> du paquet
+            <package>numprint</package> ( voir <xref endterm="Divers.titre"
+            linkend="Divers"/>).</para>
+
+            <programlisting>\def\AMCIntervalFormat#1#2{[\numprint{#1}-\,\numprint{#2}[}</programlisting>
+          </note>
         </sect4>
 
         <sect4 id="latex.numeric">
@@ -4954,9 +4964,16 @@ Bienvenüe:Alexis:001:paamc@passoire.fr
 Boulix:Jojo:002:jojo.boulix@rien.xx
 Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
-        <note><para>
-       Dans cet exemple, le numéro d'identification de l'étudiant est contenu dans la colonne d'en-tête <emphasis>no</emphasis>.</para>
-       <para>C'est ce nom de colonne qui devra être sélectionné dans le menu déroulant <guilabel>Identifiant unique dans cette liste</guilabel> de l'onglet <guibutton>Notation</guibutton> lors de l'association automatique des copies (voir <xref linkend="Association"/>).</para></note>
+        <note>
+          <para>Dans cet exemple, le numéro d'identification de l'étudiant est
+          contenu dans la colonne d'en-tête <emphasis>no</emphasis>.</para>
+
+          <para>C'est ce nom de colonne qui devra être sélectionné dans le
+          menu déroulant <guilabel>Identifiant unique dans cette
+          liste</guilabel> de l'onglet <guibutton>Notation</guibutton> lors de
+          l'association automatique des copies (voir <xref
+          linkend="Association"/>).</para>
+        </note>
 
         <para>Les lignes du fichier qui commencent par le caractère
         `<code>#'</code> sont des commentaires. La première des autres lignes
@@ -4977,14 +4994,20 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         </note>
 
         <warning>
-        <para>
-        L'envoi d'une même copie à plusieurs adresses nécessite quelques précautions dans la création du fichier CSV.
-        </para>
-        <itemizedlist>
-        <listitem>point-virgule ou deux-points ou tabulation pour séparer les champs et virgule pour séparer les emails.</listitem>
-        <listitem>virgule pour séparer les champs et les emails entre guillemets et séparés par une virgule.</listitem>
-        </itemizedlist>
-        <programlisting>
+          <para>L'envoi d'une même copie à plusieurs adresses nécessite
+          quelques précautions dans la création du fichier CSV.</para>
+
+          <itemizedlist>
+            <listitem>
+              point-virgule ou deux-points ou tabulation pour séparer les champs et virgule pour séparer les emails.
+            </listitem>
+
+            <listitem>
+              virgule pour séparer les champs et les emails entre guillemets et séparés par une virgule.
+            </listitem>
+          </itemizedlist>
+
+          <programlisting>
         nom,prenom,email
         Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com" 
         </programlisting>
@@ -5005,39 +5028,46 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <title>Association</title>
 
         <sect4>
-          <title> Association automatique</title>
+          <title>Association automatique</title>
 
-           <warning>
+          <warning>
             <para>Pour effectuer une association automatique, il est
-            nécessaire d'avoir  choisi un critère numérique (en général un numéro d'étudiant),
-            d'avoir inclus au moins une commande <command>AMCcode</command> (voir <xref linkend="latex.codes"/>)
-            dans le fichier source LaTeX pour que les étudiants puissent coder ce critère numérique et d'avoir une colonne
-            dans le fichier des étudiants qui contient le critère numérique.</para>
+            nécessaire d'avoir choisi un critère numérique (en général un
+            numéro d'étudiant), d'avoir inclus au moins une commande
+            <command>AMCcode</command> (voir <xref linkend="latex.codes"/>)
+            dans le fichier source LaTeX pour que les étudiants puissent coder
+            ce critère numérique et d'avoir une colonne dans le fichier des
+            étudiants qui contient le critère numérique.</para>
           </warning>
 
-        <para>Pour réaliser l'association automatique des copies aux étudiants, complétez les deux menus déroulants de l'onglet <guibutton>Notation</guibutton>:</para>
+          <para>Pour réaliser l'association automatique des copies aux
+          étudiants, complétez les deux menus déroulants de l'onglet
+          <guibutton>Notation</guibutton>:</para>
 
-        <itemizedlist>
-       <listitem><para>
-       <guilabel>Identifiant unique dans cette liste :</guilabel>
-      il s’agit du nom de la colonne qui, dans le ﬁchier csv des étudiants, contient le numéro d’étudiants (voir <xref linkend="liste.etudiants"/>).
-       </para>
-       </listitem> 
-       
-       <listitem><para>
-       <guilabel>Titre du code pour association automatique :</guilabel>
-       il s'agit de l'identifiant choisi dans le fichier source LaTeX pour le code <command>\AMCcode</command> (voir <xref linkend="latex.codes"/>).</para></listitem>
-       
-       <listitem>
-          <para>En appuyant sur le bouton <guibutton>Automatique</guibutton>
-          de la partie <guilabel>Identification des étudiants</guilabel>, la
-          recherche parmi la liste des codes renseignés par les étudiants
-          s'opère. On peut ensuite observer ou peaufiner le résultat grâce à
-          une association manuelle.</para>
-       </listitem>
-        
-        </itemizedlist>
+          <itemizedlist>
+            <listitem>
+              <para><guilabel>Identifiant unique dans cette liste :</guilabel>
+              il s’agit du nom de la colonne qui, dans le ﬁchier csv des
+              étudiants, contient le numéro d’étudiants (voir <xref
+              linkend="liste.etudiants"/>).</para>
+            </listitem>
 
+            <listitem>
+              <para><guilabel>Titre du code pour association automatique
+              :</guilabel> il s'agit de l'identifiant choisi dans le fichier
+              source LaTeX pour le code <command>\AMCcode</command> (voir
+              <xref linkend="latex.codes"/>).</para>
+            </listitem>
+
+            <listitem>
+              <para>En appuyant sur le bouton
+              <guibutton>Automatique</guibutton> de la partie
+              <guilabel>Identification des étudiants</guilabel>, la recherche
+              parmi la liste des codes renseignés par les étudiants s'opère.
+              On peut ensuite observer ou peaufiner le résultat grâce à une
+              association manuelle.</para>
+            </listitem>
+          </itemizedlist>
         </sect4>
 
         <sect4>
@@ -5549,20 +5579,22 @@ Boulix,Jojo,001
 Golin,André,002
 Moniuszko,Stanisław,003</programlisting></para>
 
-        <warning>
-        <para>
-        L'envoi d'une même copie à plusieurs adresses nécessite quelques précautions dans la création du fichier CSV.
-        </para>
-        <itemizedlist>
-        <listitem>point-virgule pour les champs et virgule pour séparer les emails.</listitem>
-        </itemizedlist>
-  
-        <programlisting>
+          <warning>
+            <para>L'envoi d'une même copie à plusieurs adresses nécessite
+            quelques précautions dans la création du fichier CSV.</para>
+
+            <itemizedlist>
+              <listitem>
+                point-virgule pour les champs et virgule pour séparer les emails.
+              </listitem>
+            </itemizedlist>
+
+            <programlisting>
 nom;prenom;id;email
 Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
 Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
 Moniuszko;Stanisław;003</programlisting>
-        </warning>
+          </warning>
 
           <warning>
             <para>Ne pas utiliser le symbole _ (underscore) dans le nom ou
@@ -5574,7 +5606,6 @@ Moniuszko;Stanisław;003</programlisting>
         <listitem>
           <para>Le sujet LaTeX doit charger le paquet csvsimple, grâce à une
           ligne<programlisting>\usepackage{csvsimple}</programlisting></para>
-        
         </listitem>
 
         <listitem>
@@ -5623,8 +5654,11 @@ Moniuszko;Stanisław;003</programlisting>
   }
 }
 
-\csvreader[head to column names]{liste.csv}{}{\sujet} <co id="separateur.virgule" linkends="separateur.virgule.exp"/>
-%\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\sujet}<co id="separateur.pointvirgule" linkends="separateur.pointvirgule.exp"/>
+\csvreader[head to column names]{liste.csv}{}{\sujet} <co
+              id="separateur.virgule" linkends="separateur.virgule.exp"/>
+%\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\sujet}<co
+              id="separateur.pointvirgule"
+              linkends="separateur.pointvirgule.exp"/>
 </programlisting>
 
           <para>Notez l'utilisation de l'option <code>head to column
@@ -5635,29 +5669,29 @@ Moniuszko;Stanisław;003</programlisting>
           personnalisé, et l'appel de <command>\AMCassociation</command> qui
           indique à AMC que la copie produite doit être associée à
           l'identifiant d'étudiant <command>\id</command>.</para>
-          <para>
-          <calloutlist>
-          <callout arearefs="separateur.virgule" id="separateur.virgule.exp">
-          <para>
-          Utilisez cette commande si le fichier CSV ne contient qu'une adresse mail par étudiant.
-          </para>
-          </callout>
- 
-            <callout arearefs="separateur.pointvirgule" id="separateur.pointvirgule.exp">
-          <para>
-          Utilisez cette commande si le fichier CSV  contient plusieurs adresses mail par étudiant.
-          </para>
-          </callout>
-          </calloutlist>
-          </para>
+
+          <para><calloutlist>
+              <callout arearefs="separateur.virgule"
+                       id="separateur.virgule.exp">
+                <para>Utilisez cette commande si le fichier CSV ne contient
+                qu'une adresse mail par étudiant.</para>
+              </callout>
+
+              <callout arearefs="separateur.pointvirgule"
+                       id="separateur.pointvirgule.exp">
+                <para>Utilisez cette commande si le fichier CSV contient
+                plusieurs adresses mail par étudiant.</para>
+              </callout>
+            </calloutlist></para>
         </listitem>
 
         <listitem>
           <para>Après l'impression, le scan, la saisie automatique et la
           notation des copies, au moment de l'association des copies avec les
           étudiants, utiliser la valeur "<emphasis>pré-association</emphasis>"
-          pour le champ <guilabel>Titre du code pour association automatique</guilabel>, et
-          "<emphasis>id</emphasis>" pour le champ <guilabel>Identifiant unique dans cette liste</guilabel>.</para>
+          pour le champ <guilabel>Titre du code pour association
+          automatique</guilabel>, et "<emphasis>id</emphasis>" pour le champ
+          <guilabel>Identifiant unique dans cette liste</guilabel>.</para>
         </listitem>
       </itemizedlist>
     </sect2>
