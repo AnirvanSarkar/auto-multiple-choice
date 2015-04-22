@@ -292,7 +292,9 @@ for my $sc (@captured_studentcopy) {
   # Apply floor
 
   if ($floor_mark ne '' && $floor_mark !~ /[a-z]/i) {
-    $x=$floor_mark if($x<$floor_mark);
+    $x=$floor_mark
+      if(($perfect_mark==0 && $x<$floor_mark) ||
+	 ($x-$floor_mark)*($perfect_mark-$null_mark)<0);
   }
 
   # Writes the student's final mark in the scoring database
