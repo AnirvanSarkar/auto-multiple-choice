@@ -132,6 +132,7 @@ my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
 my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
 my $scoring=$data->module('scoring');
+my $layout=$data->module('layout');
 
 # Uses an AMC::Scoring object to actually compute the questions
 # scores.
@@ -147,6 +148,10 @@ $avance->progres(0.05);
 # One only transaction for all the work:
 
 $data->begin_transaction('MARK');
+
+# get some useful build variables
+
+my $code_digit_pattern=$layout->code_digit_pattern();
 
 # Write the variables values in the database, so that they can be
 # retrieved later, and clears all the scores that could have been
@@ -235,11 +240,11 @@ for my $sc (@captured_studentcopy) {
     ($xx,$why)=$bar->score_question(@$sc,$q,0);
     ($max_score)=$bar->score_max_question($sc->[0],$q);
 
-    # If the title of the question is 'codename.N' (with a numerical
-    # N), then thhis question represents a digit from a AMCcode, so we
+    # If the title of the question is 'codename[N]' (with a numerical
+    # N), then this question represents a digit from a AMCcode, so we
     # collect the value in the %codes hash.
 
-    if ($q->{'title'} =~ /^(.*)\.([0-9]+)$/) {
+    if ($q->{'title'} =~ /^(.*)$code_digit_pattern$/) {
       $codes{$1}->{$2}=$xx;
     }
 
@@ -282,12 +287,14 @@ for my $sc (@captured_studentcopy) {
 
   # Apply ceiling
 
-  $x=$perfect_mark if($perfect_mark>0 && $ceiling && $x>$perfect_mark);
+  $x=$perfect_mark if($perfect_mark>0 && $ceiling && ($x-$perfect_mark)*($perfect_mark-$null_mark)>0);
 
   # Apply floor
 
   if ($floor_mark ne '' && $floor_mark !~ /[a-z]/i) {
-    $x=$floor_mark if($x<$floor_mark);
+    $x=$floor_mark
+      if(($perfect_mark==0 && $x<$floor_mark) ||
+	 ($x-$floor_mark)*($perfect_mark-$null_mark)<0);
   }
 
   # Writes the student's final mark in the scoring database

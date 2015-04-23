@@ -150,7 +150,6 @@ void load_image(IplImage** src,char *filename,
 			  CV_LOAD_IMAGE_UNCHANGED
 #endif
 			  ))!= NULL) {
-      printf("loaded\n");
       if(color->nChannels>=3) {
 	/* keeps only red channel */
 	cvSetImageCOI(color,3);
@@ -180,6 +179,7 @@ void load_image(IplImage** src,char *filename,
   }
 
   cvMinMaxLoc(*src,NULL,&max);
+  printf(": Image max = %.3f\n",max);
   cvSmooth(*src,*src,CV_GAUSSIAN,3,3,1);
   cvThreshold(*src,*src, max*threshold, 255, CV_THRESH_BINARY_INV );
   
@@ -200,12 +200,12 @@ void load_image(IplImage** src,char *filename,
 */
 
 void pre_traitement(IplImage* src,int lissage_trous,int lissage_poussieres) {
+  printf("Morph: +%d -%d\n",lissage_trous,lissage_poussieres);
   IplConvKernel* trous=cvCreateStructuringElementEx(1+2*lissage_trous,1+2*lissage_trous,
 						    lissage_trous,lissage_trous,CV_SHAPE_ELLIPSE);
   IplConvKernel* poussieres=cvCreateStructuringElementEx(1+2*lissage_poussieres,1+2*lissage_poussieres,
 							 lissage_poussieres,lissage_poussieres,CV_SHAPE_ELLIPSE);
 
-  printf("Morph: +%d -%d\n",lissage_trous,lissage_poussieres);
   cvMorphologyEx(src,src,NULL,trous,CV_MOP_CLOSE);
   cvMorphologyEx(src,src,NULL,poussieres,CV_MOP_OPEN);
 
@@ -1096,10 +1096,12 @@ int main( int argc, char** argv )
 	      printf(": Image flip\n");
 	      cvFlip(illustr,NULL,0);
 	    }
+	    printf(": Image background loaded\n");
 	  }
 	}
 
 	load_image(&src,scan_file,ignore_red,threshold,view);
+	printf(": Image loaded\n");
 
 	if(processing_error==0) {
 	  src_calage=cvCloneImage(src);

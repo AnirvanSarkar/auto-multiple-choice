@@ -133,8 +133,8 @@ sub sql_quote {
 # elements of @bind.
 
 sub sql_do {
-    my ($self,$sql)=@_;
-    $self->{'data'}->sql_do($sql);
+    my ($self,$sql,@bind)=@_;
+    $self->{'data'}->sql_do($sql,@bind);
 }
 
 # sql_single($sql,@bind) calls the SQL query $sql (SQL string or
@@ -336,13 +336,18 @@ sub variable_transaction {
     }
 }
 
-# clear_variables clear all variables values that are not used
-# internally by the module (keeps the 'version' variable, for
-# exemple).
+# clear_variables($pattern) clear all variables values that are not
+# used internally by the module (keeps the 'version' variable, for
+# exemple). If $pattern is given, only delete variables LIKE $pattern.
 
 sub clear_variables {
-  my ($self)=@_;
-  $self->sql_do("DELETE FROM ".$self->table("variables")." WHERE name != 'version'");
+  my ($self,$pattern)=@_;
+  if($pattern) {
+    $self->sql_do("DELETE FROM ".$self->table("variables")." WHERE name != 'version'"
+		  ." AND name LIKE ?",$pattern);
+  } else {
+    $self->sql_do("DELETE FROM ".$self->table("variables")." WHERE name != 'version'");
+  }
 }
 
 # version_check upgrades the module database to the last version.

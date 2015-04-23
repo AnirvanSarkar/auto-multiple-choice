@@ -853,4 +853,20 @@ sub orientation {
   }
 }
 
+# code_digit_pattern() return the regular expression that can be used to
+# detect a code digit.
+
+sub code_digit_pattern {
+  my ($self)=@_;
+  my $type=$self->variable("build:codedigit");
+  if($type eq 'squarebrackets') {
+    # 'codename[N]'
+    return("\\[(\\d+)\\]");
+  } else {
+    # with older AMC version, look for 'codename.N' instead of
+    # 'codename[N]'
+    return("\\.(\\d+)");
+  }
+}
+
 1;

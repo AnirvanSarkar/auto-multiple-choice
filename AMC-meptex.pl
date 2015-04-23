@@ -101,6 +101,7 @@ my @pre_assoc=();
 my $cases;
 my $page_number=0;
 my $i='';
+my %with_vars=();
 
 sub add_flag {
   my ($x,$flag)=@_;
@@ -134,7 +135,7 @@ while(<SRC>) {
 		     -dim_x=>read_inches($dx),-dim_y=>read_inches($dy),
 		     -cases=>$cases};
     }
-    if(/\\tracepos\{(.+)\}\{([+-]?[0-9.]+[a-z]*)\}\{([+-]?[0-9.]+[a-z]*)\}(?:\{([a-zA-Z]*)\})?$/) {
+    if(/\\tracepos\{(.+?)\}\{([+-]?[0-9.]+[a-z]*)\}\{([+-]?[0-9.]+[a-z]*)\}(?:\{([a-zA-Z]*)\})?$/) {
 	$i=$1;
 	my $x=read_inches($2);
 	my $y=read_inches($3);
@@ -163,6 +164,9 @@ while(<SRC>) {
     if(/\\association\{([0-9]+)\}\{(.*)\}/) {
       push @pre_assoc,[$1,$2];
     }
+    if(/\\with\{(.+?)=(.*)\}/) {
+      $build_vars{$1}=$2;
+    }
 }
 close(SRC);
 
@@ -181,6 +185,10 @@ my $delta=(@pages ? 1/(1+$#pages) : 0);
 
 $layout->begin_transaction('MeTe');
 $layout->clear_all;
+$layout->clear_variables('build:%');
+for my $k (keys %build_vars) {
+  $layout->variable("build:$k",$build_vars{$k});
+}
 annotate_source_change($capture);
 
 debug "Pre-association...";
