@@ -2992,6 +2992,38 @@ sub sujet_impressions_ok {
       }
     }
 
+    if($o{'options_impression'}->{'print_answersheet'} eq 'first') {
+      # This options needs pdftk!
+      if($o{print_extract_with} ne 'pdftk') {
+	if(commande_accessible('pdftk')) {
+	  my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'info','ok',
+# TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
+			      sprintf(__("You selected the '%s' option, that uses 'pdftk', so the %s has been set to 'pdftk' for you."),
+				      __("Answer sheet first"),__("Extracting method"))
+			     );
+	  $dialog->run;
+	  $dialog->destroy;
+
+	  $o{print_extract_with}='pdftk';
+	  $o{_modifie}.=',print_extract_with';$o{_modifie_ok}=1;
+	} else {
+	  my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      sprintf(__("You selected the '%s' option, but this option needs 'pdftk' to be installed on your system. Please install it and try again."),
+				      __"Answer sheet first")
+			     );
+	  $dialog->run;
+	  $dialog->destroy;
+	  return();
+	}
+      }
+    }
+
     my $fh=File::Temp->new(TEMPLATE => "nums-XXXXXX",
 			   TMPDIR => 1,
 			   UNLINK=> 1);
