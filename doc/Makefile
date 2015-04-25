@@ -75,7 +75,7 @@ html/index.html: FORCE
 	date > $@
 
 %.tgz: %.d
-	tar cznf $@ -C $< --owner=root --group=root --numeric-owner --mtime=2015-01-01 .
+	tar cznf $@ -C $< $(TAR_REPRODUCIBLE_ARGS) .
 
 FORCE: ;
 

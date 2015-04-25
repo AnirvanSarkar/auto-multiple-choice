@@ -252,6 +252,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'conserve_taille'=>1,
 	      'methode_impression'=>'CUPS',
 	      'imprimante'=>'',
+	      'printer_useful_options'=>'Staple StapleLocation StapleSet StapleOption',
 	      'options_impression'=>{'sides'=>'two-sided-long-edge',
 				     'number-up'=>1,
 				     'repertoire'=>'/tmp',
@@ -582,22 +583,36 @@ sub sub_modif {
   my ($m,$mo)=($opts->{'_modifie'},$opts->{'_modifie_ok'});
   for my $k (keys %$opts) {
     if(ref($opts->{$k}) eq 'HASH') {
-      $m.=','.$opts->{$k}->{'_modifie'} if($opts->{$k}->{'_modifie'});
-      $mo=1 if($opts->{$k}->{'_modifie_ok'});
+      ($m_sub,$mo_sub)=sub_modif($opts->{$k});
+      $m=join_nonempty(',',$m,$m_sub);
+      $mo=1 if($mo_sub);
     }
   }
   return($m,$mo);
 }
 
+sub clear_sub_modif {
+  my ($data)=@_;
+  delete($data->{_modifie});
+  delete($data->{_modifie_ok});
+  for my $k (grep { ref($data->{$_}) eq 'HASH' } (keys %$data)) {
+    clear_sub_modif($data->{$k});
+  }
+}
+
 # Read/write options XML files
 
 sub pref_xx_lit {
-    my ($fichier)=@_;
-    if((! -f $fichier) || -z $fichier) {
-	return();
-    } else {
-	return(%{XMLin($fichier,SuppressEmpty => '',ForceArray=>['docs','email_attachment'])});
-    }
+  my ($fichier)=@_;
+  if((! -f $fichier) || -z $fichier) {
+    return();
+  } else {
+    debug("Reading XML config file $fichier ...");
+    my $data=XMLin($fichier,SuppressEmpty => '',
+		   ForceArray=>['docs','email_attachment','printer']);
+    clear_sub_modif($data);
+    return(%$data);
+  }
 }
 
 sub pref_xx_ecrit {
@@ -609,6 +624,7 @@ sub pref_xx_ecrit {
 	       "OutputFile" => $fh,
 	       );
 	close $fh;
+	clear_sub_modif($data);
 	return(0);
     } else {
 	return(1);
@@ -2317,9 +2333,6 @@ sub projet_sauve {
 		  __"Error writing to options file %s: %s",$of,$!);
 	$dialog->run;
 	$dialog->destroy;
-    } else {
-	$projet{'options'}->{'_modifie'}=0;
-	$projet{'options'}->{'_modifie_ok'}=0;
     }
 }
 
@@ -2634,48 +2647,71 @@ sub autre_imprimante {
     debug "Choix imprimante $i";
     my $ppd=$cups->getPPD($i);
 
-    my %alias=();
-    my %trouve=();
+    $o{options_impression}->{printer}={}
+      if(!$o{options_impression}->{printer});
+    $o{options_impression}->{printer}->{$i}={}
+      if(!$o{options_impression}->{printer}->{$i});
 
-    debug "Looking for staple option...";
+    debug "Looking for useful printer options...";
 
-  CHOIX: for my $i (qw/StapleLocation/) {
-      my $oi=$ppd->getOption($i);
+    my $option;
+    my %options=();
 
-      $alias{$i}='agrafe';
+    my @useful_options=split(/\s+/,$o{printer_useful_options});
 
-      if(%$oi) {
-	  my $k=nonnul($oi->{'keyword'});
-	  debug "$i -> KEYWORD $k";
-	  my $ok=$o{'options_impression'}->{$k};
-	  my @possibilites=(map { (nonnul($_->{'choice'}),
-				   nonnul($_->{'text'})) }
-			    (@{$oi->{'choices'}}));
+    for my $k (@useful_options) {
+      $option=$ppd->getOption($k);
+      if(%$option) {
+	  my $ok=$o{options_impression}->{printer}->{$i}->{$k};
+	  my @possibilites=(map { (nonnul($_->{choice}),
+				   nonnul($_->{text})) }
+			    (@{$option->{choices}}));
 	  my %ph=(@possibilites);
-	  $prefs->store_register('agrafe'=>cb_model(@possibilites));
+
+	  debug "Option $k: ".(1+$#possibilites)." choices";
+
+	  $prefs->store_register($k => cb_model(@possibilites));
 	  if(!$ok || !$ph{$ok}) {
-	    debug "Unknown stapling option $ok" if($ok);
-	    debug "Setting stapling option to default: "
-	      .nonnul($oi->{'defchoice'});
-	    $o{'options_impression'}->{$k}=nonnul($oi->{'defchoice'});
+	    debug "Unknown option value $ok for $k" if($ok);
+	    debug "Setting option to default: "
+	      .nonnul($option->{'defchoice'});
+	    $o{options_impression}->{printer}->{$i}->{$k}=nonnul($option->{'defchoice'});
 	  }
 
-	  $alias{$k}='agrafe';
-	  $trouve{'agrafe'}=$k;
-
-	  last CHOIX;
-      }
-  }
-    if(!$trouve{'agrafe'}) {
-	debug "No possible staple";
-
-# TRANSLATORS: There is a menu for choosing stapling or not from the printer. When stapling is not available on the chosen printer, this is the only offered choice.
-	$prefs->store_register('agrafe'=>cb_model(''=>__"(not supported)"));
-    $w{'imp_c_agrafe'}->set_model($prefs->store_get('agrafe'));
+	  $options{$k}=nonnul($option->{'text'});
+	} else {
+	  debug "Option $k <skipped>";
+	}
     }
 
-    $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'},
-		  \%alias);
+    # Clears printer options table in the dialog
+
+    for($w{printing_options_table}->get_children) {
+      $_->destroy();
+    }
+
+    # ... and creates the combo boxes for new printer options
+
+    my @ko=(sort { $a cmp $b } (keys %options));
+    $w{printing_options_table}->resize(@ko ? 1+$#ko : 1,2);
+    my $y=0;
+    my $widget;
+    my $renderer;
+    for my $k (@ko) {
+      $w{printing_options_table}->attach(Gtk2::Label->new($options{$k}),
+					 0,1,$y,$y+1,["expand","fill"],[],0,0);
+      $widget=Gtk2::ComboBox->new_with_model();
+      $renderer = Gtk2::CellRendererText->new();
+      $widget->pack_start($renderer, TRUE);
+      $widget->add_attribute($renderer,'text',COMBO_TEXT);
+      $w{'printer_c_'.$k}=$widget;
+      $w{printing_options_table}->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+      $y++;
+    }
+    $w{printing_options_table}->show_all();
+
+    $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
+    $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printer}->{$i});
 }
 
 sub sujet_impressions {
@@ -2743,6 +2779,8 @@ sub sujet_impressions {
 
 	# verifie aussi qu'il y a au moins une imprimante configuree
 
+	debug "Checking for at least one CUPS printer...";
+
 	my $sc=Net::CUPS->new();
 	my @pl = $sc->getDestinations();
 
@@ -2759,12 +2797,16 @@ sub sujet_impressions {
 
 	    return();
 	}
-    }
+      }
+
+    debug "Printing dialog...";
 
     $g_imprime=read_glade('choix_pages_impression',
-			  qw/arbre_choix_copies bloc_imprimante answersheet_box imprimante imp_c_agrafe bloc_fichier/);
+			  qw/arbre_choix_copies bloc_imprimante answersheet_box imprimante printing_options_table bloc_fichier/);
 
     $prefs->transmet_pref($g_imprime,'impall',$o{'options_impression'});
+
+    debug "Printing method: $o{'methode_impression'}";
 
     if($o{'methode_impression'} eq 'CUPS') {
 	$w{'bloc_imprimante'}->show();
@@ -2826,12 +2868,25 @@ sub sujet_impressions {
 
 sub sujet_impressions_cancel {
 
-    if(get_debug()) {
-	$prefs->reprend_pref('imp',$o{'options_impression'});
-	debug(Dumper($o{'options_impression'}));
-    }
+  if(get_debug()) {
+    $prefs->reprend_pref('imp',$o{'options_impression'});
+    debug(Dumper($o{'options_impression'}));
+  }
 
-    $w{'choix_pages_impression'}->destroy;
+  $w{'choix_pages_impression'}->destroy;
+}
+
+sub options_strings {
+  my ($o)=@_;
+  return(map { $_."=".$o->{$_} }
+	 grep { ! /^_/ && !/^(repertoire|print_answersheet)$/
+		  && exists($o->{$_}) && $o->{$_} && !ref($o->{$_}) }
+	 (keys %$o));
+}
+
+sub options_string {
+  my (@oos)=@_;
+  return(join(',',map { options_strings($_) } (@oos)));
 }
 
 sub sujet_impressions_ok {
@@ -2852,15 +2907,10 @@ sub sujet_impressions_ok {
 	}
 
 	$prefs->reprend_pref('imp',$o{'options_impression'});
+	$prefs->reprend_pref('printer',$o{options_impression}->{printer}->{$i});
 
-	if($o{'options_impression'}->{'_modifie'}) {
-	    $o{'_modifie'}=1;
-	    delete $o{'options_impression'}->{'_modifie'};
-	}
-
-	$os=join(',',map { $_."=".$o{'options_impression'}->{$_} }
-		 grep { $o{'options_impression'}->{$_} }
-		 (keys %{$o{'options_impression'}}) );
+	$os=options_string($o{options_impression},
+			   $o{options_impression}->{printer}->{$i});
 
 	debug("Printing options : $os");
     }
@@ -2938,6 +2988,38 @@ sub sujet_impressions_ok {
 	    $projet{'options'}->{'auto_capture_mode'}=$mult;
 	    $projet{'options'}->{'_modifie_ok'}=1;
 	  }
+	}
+      }
+    }
+
+    if($o{'options_impression'}->{'print_answersheet'} eq 'first') {
+      # This options needs pdftk!
+      if($o{print_extract_with} ne 'pdftk') {
+	if(commande_accessible('pdftk')) {
+	  my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'info','ok',
+# TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
+			      sprintf(__("You selected the '%s' option, that uses 'pdftk', so the %s has been set to 'pdftk' for you."),
+				      __("Answer sheet first"),__("Extracting method"))
+			     );
+	  $dialog->run;
+	  $dialog->destroy;
+
+	  $o{print_extract_with}='pdftk';
+	  $o{_modifie}.=',print_extract_with';$o{_modifie_ok}=1;
+	} else {
+	  my $dialog = Gtk2::MessageDialog
+	    ->new_with_markup($w{'main_window'},
+			      'destroy-with-parent',
+			      'error','ok',
+			      sprintf(__("You selected the '%s' option, but this option needs 'pdftk' to be installed on your system. Please install it and try again."),
+				      __"Answer sheet first")
+			     );
+	  $dialog->run;
+	  $dialog->destroy;
+	  return();
 	}
       }
     }
@@ -4646,9 +4728,6 @@ sub sauve_pref_generales {
 		  ,$o_file,$!);
 	$dialog->run;
 	$dialog->destroy;
-    } else {
-	$o{'_modifie'}='';
-	$o{'_modifie_ok'}=0;
     }
 }
 

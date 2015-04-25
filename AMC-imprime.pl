@@ -123,15 +123,23 @@ if($methode =~ /^cups/i) {
     $cups=Net::CUPS->new();
     $dest=$cups->getDestination($imprimante);
     die "Can't access printer: $imprimante" if(!$dest);
+
+    # record options (so that if given multiple times, the last value
+    # is considered)
+    my %opts=();
     for my $o (split(/\s*,+\s*/,$options)) {
-	my $on=$o;
-	my $ov=1;
-	if($o =~ /([^=]+)=(.*)/) {
-	    $on=$1;
-	    $ov=$2;
-	}
-	debug "Option : $on=$ov";
-	$dest->addOption($on,$ov);
+      my $on=$o;
+      my $ov=1;
+      if($o =~ /([^=]+)=(.*)/) {
+	$on=$1;
+	$ov=$2;
+      }
+      $opts{$on}=$ov;
+    }
+
+    for my $o (keys %opts) {
+      debug "Option : $o=$opts{$o}";
+      $dest->addOption($o,$opts{$o});
     }
 }
 

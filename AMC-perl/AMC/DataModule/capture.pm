@@ -845,12 +845,12 @@ sub n_pages_auto {
 
 sub sensitivity_down {
   my ($delta,$threshold)=@_;
-  return(defined($delta) ? 10*($threshold-$delta)/$threshold : undef);
+  return(defined($delta) && $threshold>0 ? 10*($threshold-$delta)/$threshold : undef);
 }
 
 sub sensitivity_up {
   my ($delta,$threshold)=@_;
-  return(defined($delta) ? sensitivity($delta,1-$threshold) : undef);
+  return(defined($delta) && $threshold<1 ? sensitivity($delta,1-$threshold) : undef);
 }
 
 sub sensitivity {
