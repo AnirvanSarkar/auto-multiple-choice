@@ -1944,7 +1944,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \let\AMCboxDimensions=\AMCboxStyle
 %    \end{macrocode}\end{macro}
 %
-% \begin{macro}{\AMCboxOutsideLetter}\begin{macro}{\AMC@box}\begin{macro}{\AMC@formBox@}\begin{macro}{\AMC@formBox}
+% \begin{macro}{\AMCboxOutsideLetter}\begin{macro}{\AMC@box}\begin{macro}{\AMC@formBox@}\begin{macro}{\AMC@formBox}\begin{macro}{\AMCoutsideLabelFormat}
 %   Command |\AMC@box|\marg{char}\marg{filled} prints a box with
 %   character \meta{char} inside, and filled if \meta{filled} is
 %   non-empty, using global variables to identify the box (question
@@ -1957,15 +1957,18 @@ Three digits and two letters:\insertgroup{mixed}.
 %   Command |\AMC@formBox| simply sets the first argument when empty
 %   before calling |\AMC@formBox@|.
 %
-%   The command |\AMCboxOutsideLetter|\marg{box}\marg{char} is called to
-%   print the box \textit{and} the character \meta{char} outside (and
-%   next to) it.
+%   The command |\AMCboxOutsideLetter|\marg{box}\marg{char} is called
+%   to print the box \textit{and} the character \meta{char} outside
+%   (and next to) it. The character is formatted using
+%   |\AMCoutsideLabelFormat| first: if you need bold characters,
+%   redifine it with |\def\AMCoutsideLabelFormat#1{\textbf{#1}}|
 %
 %    \begin{macrocode}
-\newcommand\AMCboxOutsideLetter[2]{#1\nobreak\hspace{.1em}#2}
+\def\AMCoutsideLabelFormat#1{#1}
+\newcommand\AMCboxOutsideLetter[2]{#1\nobreak\hspace{.1em}\AMCoutsideLabelFormat{#2}}
 \newcommand\AMC@formBox@[4]{%
   \ifAMC@outside@box% letter to be written outside the box
-    \AMCboxOutsideLetter{\AMC@answerBox@{}{#2}{#3}{#4}}{\textbf{#1}}%
+    \AMCboxOutsideLetter{\AMC@answerBox@{}{#2}{#3}{#4}}{#1}%
   \else%
     \AMC@answerBox@{#1}{#2}{#3}{#4}%
   \fi%
@@ -1993,7 +1996,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \fi%
   \fi%
 }
-%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}\end{macro}
 %
 % \subsubsection{Scoring zones}
 %
