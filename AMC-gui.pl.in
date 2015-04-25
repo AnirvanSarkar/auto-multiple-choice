@@ -609,7 +609,7 @@ sub pref_xx_lit {
   } else {
     debug("Reading XML config file $fichier ...");
     my $data=XMLin($fichier,SuppressEmpty => '',
-		   ForceArray=>['docs','email_attachment']);
+		   ForceArray=>['docs','email_attachment','printer']);
     clear_sub_modif($data);
     return(%$data);
   }
@@ -620,7 +620,7 @@ sub pref_xx_ecrit {
     if(open my $fh,">:encoding(utf-8)",$fichier) {
 	XMLout($data,
 	       "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-	       "RootName"=>$key,'NoAttr'=>1,KeyAttr=>{},
+	       "RootName"=>$key,'NoAttr'=>1,
 	       "OutputFile" => $fh,
 	       );
 	close $fh;
@@ -2647,10 +2647,10 @@ sub autre_imprimante {
     debug "Choix imprimante $i";
     my $ppd=$cups->getPPD($i);
 
-    $o{options_impression}->{printers}={}
-      if(!$o{options_impression}->{printers});
-    $o{options_impression}->{printers}->{$i}={}
-      if(!$o{options_impression}->{printers}->{$i});
+    $o{options_impression}->{printer}={}
+      if(!$o{options_impression}->{printer});
+    $o{options_impression}->{printer}->{$i}={}
+      if(!$o{options_impression}->{printer}->{$i});
 
     debug "Looking for useful printer options...";
 
@@ -2662,7 +2662,7 @@ sub autre_imprimante {
     for my $k (@useful_options) {
       $option=$ppd->getOption($k);
       if(%$option) {
-	  my $ok=$o{options_impression}->{printers}->{$i}->{$k};
+	  my $ok=$o{options_impression}->{printer}->{$i}->{$k};
 	  my @possibilites=(map { (nonnul($_->{choice}),
 				   nonnul($_->{text})) }
 			    (@{$option->{choices}}));
@@ -2675,7 +2675,7 @@ sub autre_imprimante {
 	    debug "Unknown option value $ok for $k" if($ok);
 	    debug "Setting option to default: "
 	      .nonnul($option->{'defchoice'});
-	    $o{options_impression}->{printers}->{$i}->{$k}=nonnul($option->{'defchoice'});
+	    $o{options_impression}->{printer}->{$i}->{$k}=nonnul($option->{'defchoice'});
 	  }
 
 	  $options{$k}=nonnul($option->{'text'});
@@ -2711,7 +2711,7 @@ sub autre_imprimante {
     $w{printing_options_table}->show_all();
 
     $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
-    $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printers}->{$i});
+    $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printer}->{$i});
 }
 
 sub sujet_impressions {
@@ -2907,10 +2907,10 @@ sub sujet_impressions_ok {
 	}
 
 	$prefs->reprend_pref('imp',$o{'options_impression'});
-	$prefs->reprend_pref('printer',$o{options_impression}->{printers}->{$i});
+	$prefs->reprend_pref('printer',$o{options_impression}->{printer}->{$i});
 
 	$os=options_string($o{options_impression},
-			   $o{options_impression}->{printers}->{$i});
+			   $o{options_impression}->{printer}->{$i});
 
 	debug("Printing options : $os");
     }
