@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -2384,7 +2384,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         faut redéfinir la commande <command>\AMCchoiceLabel</command>, qui
         prend comme unique argument le nom du compteur utilisé pour la
         numérotation des cases. Ainsi, pour obtenir des lettres minuscules, on
-        utilisera</para>
+        utilisera :</para>
 
         <programlisting>\def\AMCchoiceLabel#1{\alph{#1}}</programlisting>
 
@@ -2397,12 +2397,19 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <para>Pour changer le style des lettres inscrites dans les cases, on
         pourra également redéfinir la commande
         <command>\AMCchoiceLabelFormat</command>. Par exemple, pour obtenir
-        des lettres grasses, on utilisera</para>
+        des lettres grasses, on utilisera :</para>
 
         <programlisting>\def\AMCchoiceLabelFormat#1{\textbf{#1}}</programlisting>
 
+        <para>Pour changer le style des lettres inscrites à l'exterieur des cases, on
+        pourra également redéfinir la commande
+        <command>\AMCoutsideLabelFormat</command>. Par exemple, pour obtenir
+        des lettres grasses, on utilisera :</para>
+
+        <programlisting>\def\AMCoutsideLabelFormat#1{\textbf{#1}}</programlisting>
+
         <para>Notons enfin que la couleur des cases à cocher par les étudiants
-        peut être modifiée grâce à la commande</para>
+        peut être modifiée grâce à la commande :</para>
 
         <programlisting>\AMCboxColor{red}</programlisting>
 
@@ -5378,21 +5385,21 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
        
        <para><command>Conversion des scans</command></para>
         <itemizedlist>
-        <listitem><para>Densité des scans vectoriel (DPI) : 250</para></listitem>
-        <listitem><para>Seuil de conversion : 0.60</para></listitem>
-        <listitem><para>Effacer le rouge des scans : décoché</para></listitem>
-        <listitem><para>Forcer la conversion : décoché</para></listitem>
+        <listitem>Densité des scans vectoriel (DPI) : 250</listitem>
+        <listitem>Seuil de conversion : 0.60</listitem>
+        <listitem>Effacer le rouge des scans : décoché</listitem>
+        <listitem>Forcer la conversion : décoché</listitem>
         </itemizedlist>
        
         <para><command>Paramètres de détection</command></para>
        <itemizedlist>
-        <listitem><para>Majoration de la taille des marques : 0.20</para></listitem>
-        <listitem><para>Minoration de la taille des marques : 0.20</para></listitem>
-        <listitem><para>Seuil de noirceur par défaut : 0.15</para></listitem>
-        <listitem><para>Default upper darkness threshold : 1</para></listitem>
-        <listitem><para>Process scans with 3 corner marks : décoché</para></listitem>
+        <listitem>Majoration de la taille des marques : 0.20</listitem>
+        <listitem>Minoration de la taille des marques : 0.20</listitem>
+        <listitem>Seuil de noirceur par défaut : 0.15 </listitem> 
+        <listitem>Default upper darkness threshold : 1</listitem>
+        <listitem>Process scans with 3 corner marks : décoché</listitem>
         </itemizedlist>
-    </sect2>
+       </sect2>
   </sect1>
 
   <sect1>
