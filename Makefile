@@ -19,13 +19,7 @@
 
 # Loads separate configuration file
 
-ifneq ($(AMCCONF),)
-AMCCONFFILE = Makefile-$(AMCCONF).conf
-endif
-
-SUB_MAKEFILES=$(wildcard Makefile.versions Makefile.conf $(AMCCONFFILE))
-
-include $(SUB_MAKEFILES)
+include Makefile-all.conf
 
 PACKAGE_DEB_DV=1
 PERLPATH ?= /usr/bin/perl

@@ -19,7 +19,7 @@
 
 SHELL=/bin/sh
 
-include ../Makefile.conf
+include ../Makefile-all.conf
 
 DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard *.xml))
 
