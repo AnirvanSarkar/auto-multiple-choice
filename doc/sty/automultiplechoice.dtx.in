@@ -18,8 +18,6 @@
 % along with Auto-Multiple-Choice.  If not, see
 % <http://www.gnu.org/licenses/>.
 %
-% $Revision: 431 $
-%
 % \fi
 % \iffalse
 %<package>\NeedsTeXFormat{LaTeX2e}
@@ -66,11 +64,21 @@ along with Auto-Multiple-Choice.  If not, see
 \usepackage[linenumberformat={{}}]{examplep}
 \usepackage{codep}
 \usepackage[hyperindex=false]{hyperref}
+\usepackage{ifpdf}
 \usepackage{pdfpages}
+\usepackage[USenglish]{isodate}
 \EnableCrossrefs
 \CodelineIndex
 \RecordChanges
 \begin{document}
+% PDF
+\ifpdf\pdfinfo{
+   /Title  (automultiplechoice.sty)
+   /CreationDate (D:@/PACKAGE_V_PDFDATE/@)
+   /ModDate (D:@/PACKAGE_V_PDFDATE/@)
+   /Subject (AMC automultiplechoice LaTeX style file)
+   /Keywords (AMC;Auto Multiple Choice;automultiplechoice)
+}\fi
 % UTF8 unkonwn characters are replaced by diamonds
 \makeatletter\def\UTFviii@defined#1{%
   \ifx#1\relax%
@@ -192,7 +200,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \begingroup\catcode`\|=11\gdef\Vbar{|}\endgroup
 %
 % \title{The \textsf{automultiplechoice} package\thanks{This document
-% corresponds to version $Revision: 431 $ from AMC @/PACKAGE_V_DEB/@}}
+% corresponds to version revision: @/PACKAGE_V_VC/@ from AMC @/PACKAGE_V_DEB/@}}
+% \date{\printdate{@/PACKAGE_V_ISODATE/@}}
 % \author{Alexis Bienven\"ue \\ \texttt{paamc@passoire.fr}}
 %
 % \maketitle

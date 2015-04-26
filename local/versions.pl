@@ -29,29 +29,34 @@ open(THIS,__FILE__);
 close(THIS);
 $lic_head.="\n";
 
-my %k=();
+my %k=(deb=>"XX",vc=>"",year=>"2015",month=>"01",day=>"01");
 
 $s=`svnversion`;
 if($s =~ /([0-9]+)[SM]*$/) {
-    $k{'vc'}="svn:$1";
+    $k{vc}="svn:$1";
 }
 
 $s=`hg id`;
 if($s =~ /^([0-9a-f]+\+?)/) {
-  $k{'vc'}="r:$1";
+  $k{vc}="r:$1";
 }
 
 open(CHL,"ChangeLog");
 LINES: while(<CHL>) {
-    if(/^([0-9:.-svn]+)/) {
-	$k{'deb'}=$1;
-	last LINES;
-    }
+  if(/^([0-9:.a-z-]+)\s+\((\d{4})-(\d{2})-(\d{2})\)/) {
+    $k{deb}=$1;
+    $k{year}=$2;
+    $k{month}=$3;
+    $k{day}=$4;
+    last LINES;
+  }
 }
 
 open(VMK,">Makefile.versions");
 print VMK $lic_head;
 print VMK "PACKAGE_V_DEB=$k{'deb'}\n";
 print VMK "PACKAGE_V_VC=$k{'vc'}\n";
+print VMK "PACKAGE_V_PDFDATE=$k{year}$k{month}$k{day}000000\n";
+print VMK "PACKAGE_V_ISODATE=$k{year}-$k{month}-$k{day}\n";
 close(VMK);
 
