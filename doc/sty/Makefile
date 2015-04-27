@@ -23,8 +23,9 @@ PACK=automultiplechoice
 
 SAMPLES=$(wildcard sample-*.tex)
 
-all: FORCE $(SAMPLES:.tex=.pdf)
+all: FORCE
 	pdflatex $(PACK).dtx
+	$(MAKE) $(SAMPLES:.tex=.pdf)
 	makeindex -s gglo.ist -o $(PACK).gls $(PACK).glo
 	makeindex -s gind.ist -o $(PACK).ind $(PACK).idx
 	pdflatex $(PACK).dtx
