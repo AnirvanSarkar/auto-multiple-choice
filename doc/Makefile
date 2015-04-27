@@ -48,15 +48,15 @@ html/images/%.png: img_src/%.svg
 html/index.html: FORCE
 	./index.pl $(DOCBOOKS:.xml=) > $@
 
-%.tex: %.xml
-	dblatex -t tex --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
-	perl addlink.pl $@
+%.tex: %.xml amcdocstyle.sty
+	dblatex -t tex --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
 
 %.pdf: %.tex
 	case $< in \
 	  *.ja.tex) platex $<; platex $<; dvipdf $*.dvi ;; \
 	  *.tex) pdflatex $<; pdflatex $< ;; \
 	esac
+	perl -pi -e 's:/ID \[<[A-F0-9]+> <[A-F0-9]+>\]:/ID [<00> <00>]:i' $@
 	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
