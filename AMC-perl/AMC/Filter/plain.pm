@@ -79,7 +79,7 @@ sub new {
       {'latexengine'=>'xelatex','xltxtra'=>1,
        'questionblocks'=>1,'shufflequestions'=>1,
        'completemulti'=>1,
-       'font'=>'LinLibertine_R.otf',
+       'font'=>'Linux Libertine O',
        'arabicfont'=>'Rasheeq',
        'defaultscoringm'=>'haut=2',
        'l-name'=>'',
