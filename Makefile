@@ -60,6 +60,11 @@ SHELL=/bin/sh
 
 DESTDIR=
 
+# debug...
+
+print-%: FORCE
+	@echo "$*=$($*)"
+
 # AMC components to build
 
 BINARIES ?= AMC-detect AMC-buildpdf
@@ -122,11 +127,16 @@ AMC-buildpdf: AMC-buildpdf.cc buildpdf.cc Makefile
 
 # substitution in *.in files
 
-%.xml: %.in.xml
-	perl -p $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) -e 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' $< > $@
+vars-subs.pl: $(SUB_MAKEFILES) 
+	@echo "# Variables:" > $@
+	@$(foreach varname,$(SUBST_VARS), echo 's|@/$(varname)/@|$($(varname))|g;' >> $@ ; )
+	@echo 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' >> $@
 
-%: %.in $(SUB_MAKEFILES)
-	perl -p $(foreach varname,$(SUBST_VARS), -e 's|@/$(varname)/@|$($(varname))|g;' ) $< > $@
+%.xml: %.in.xml vars-subs.pl 
+	perl -p vars-subs.pl $< > $@
+
+%: %.in vars-subs.pl
+	perl -p vars-subs.pl $< > $@
 
 # some components
 
@@ -162,8 +172,9 @@ clean_IN: FORCE
 	rm -f $(FROM_IN)
 
 clean: clean_IN FORCE
-	rm -f $(BINARIES) $(MAIN_LOGO).xpm
-	rm -f auto-multiple-choice.spec
+	-rm -f $(BINARIES) $(MAIN_LOGO).xpm
+	-rm -f auto-multiple-choice.spec
+	-rm vars-subs.pl
 	$(MAKE) -C doc/sty clean
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
