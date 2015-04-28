@@ -1248,22 +1248,38 @@ my $cb_model_vide_key=cb_model(''=>__p"(none) [No primary key found in associati
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 my $cb_model_vide_code=cb_model(''=>__p"(none) [No code found in LaTeX file]");
 
-my $cups_module_available=check_install(module=>"Net::CUPS");
 my @printing_methods=();
-if($cups_module_available) {
-  push @printing_methods,'CUPS','CUPS';
-} else {
-  if($o{methode_impression} eq 'CUPS') {
-    $o{methode_impression}='commande';
-    $o{'_modifie_ok'}=1;
-    debug "Net::CUPS not available: switching from CUPS to commande";
+for my $m ({name=>"CUPS",description=>"CUPS"},
+	   {name=>"CUPSlp",description=>"CUPS (via lp)"},
+	  ) {
+  my $mod="AMC::Print::".lc($m->{name});
+  load($mod);
+  my $error=$mod->check_available();
+  if(! $error) {
+    push @printing_methods,$m->{name},$m->{description};
+    if(!$o{methode_impression}) {
+      $o{methode_impression}=$m->{name};
+      $o{_modifie_ok}=1;
+      debug "Switching to printing method <$m->{name}>.";
+    }
+  } else {
+    if($o{methode_impression} eq $m->{name}) {
+      $o{methode_impression}='';
+      debug "Printing method <$m->{name}> is not available: $error";
+    }
   }
 }
+if(!$o{methode_impression}) {
+  $o{methode_impression}='commande';
+  $o{_modifie_ok}=1;
+  debug "Switching to printing method <commande>.";
+}
+
 push @printing_methods,
 # TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
-  'commande',__"command",
+  'commande',__("command"),
 # TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
-  'file',__"to files"
+  'file',__("to files")
   ;
 
 $prefs->store_register(
@@ -2645,70 +2661,15 @@ sub nonnul {
 sub autre_imprimante {
     my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
     debug "Choix imprimante $i";
-    my $ppd=$cups->getPPD($i);
 
     $o{options_impression}->{printer}={}
       if(!$o{options_impression}->{printer});
     $o{options_impression}->{printer}->{$i}={}
       if(!$o{options_impression}->{printer}->{$i});
 
-    debug "Looking for useful printer options...";
-
-    my $option;
-    my %options=();
-
-    my @useful_options=split(/\s+/,$o{printer_useful_options});
-
-    for my $k (@useful_options) {
-      $option=$ppd->getOption($k);
-      if(%$option) {
-	  my $ok=$o{options_impression}->{printer}->{$i}->{$k};
-	  my @possibilites=(map { (nonnul($_->{choice}),
-				   nonnul($_->{text})) }
-			    (@{$option->{choices}}));
-	  my %ph=(@possibilites);
-
-	  debug "Option $k: ".(1+$#possibilites)." choices";
-
-	  $prefs->store_register($k => cb_model(@possibilites));
-	  if(!$ok || !$ph{$ok}) {
-	    debug "Unknown option value $ok for $k" if($ok);
-	    debug "Setting option to default: "
-	      .nonnul($option->{'defchoice'});
-	    $o{options_impression}->{printer}->{$i}->{$k}=nonnul($option->{'defchoice'});
-	  }
-
-	  $options{$k}=nonnul($option->{'text'});
-	} else {
-	  debug "Option $k <skipped>";
-	}
-    }
-
-    # Clears printer options table in the dialog
-
-    for($w{printing_options_table}->get_children) {
-      $_->destroy();
-    }
-
-    # ... and creates the combo boxes for new printer options
-
-    my @ko=(sort { $a cmp $b } (keys %options));
-    $w{printing_options_table}->resize(@ko ? 1+$#ko : 1,2);
-    my $y=0;
-    my $widget;
-    my $renderer;
-    for my $k (@ko) {
-      $w{printing_options_table}->attach(Gtk2::Label->new($options{$k}),
-					 0,1,$y,$y+1,["expand","fill"],[],0,0);
-      $widget=Gtk2::ComboBox->new_with_model();
-      $renderer = Gtk2::CellRendererText->new();
-      $widget->pack_start($renderer, TRUE);
-      $widget->add_attribute($renderer,'text',COMBO_TEXT);
-      $w{'printer_c_'.$k}=$widget;
-      $w{printing_options_table}->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
-      $y++;
-    }
-    $w{printing_options_table}->show_all();
+    $w{print_object}->printer_options_table($w{printing_options_table},
+					   \%w,$prefs,
+					   $i,$o{options_impression}->{printer}->{$i});
 
     $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
     $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printer}->{$i});
@@ -2748,50 +2709,41 @@ sub sujet_impressions {
 
     debug "Choosing pages to print...";
 
-    if($o{'methode_impression'} eq 'CUPS') {
-	# teste si le paquet Net::CUPS est disponible
+    if($o{'methode_impression'} =~ /^CUPS/) {
 
-	my @manque=();
+      	my $print_module="AMC::Print::".lc($o{methode_impression});
+	load($print_module);
 
-	for my $m ("Net::CUPS","Net::CUPS::PPD") {
-	    if(check_install(module=>$m)) {
-		load($m);
-	    } else {
-		push @manque,$m;
-	    }
-	}
+	# checks for availibility
 
-	if(@manque) {
-	    debug 'Printing with CUPS: Needs perl modules '.join(', ',@manque);
-
-	    my $dialog = Gtk2::MessageDialog
-		->new($w{'main_window'},
-		      'destroy-with-parent',
-		      'error','ok',
-		      __("Printing with method '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another printing method."),
-		      __"CUPS",join(', ',@manque)
-		      );
+	my $error=$print_module->check_available();
+	if($error) {
+	  my $dialog = Gtk2::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'error','ok',
+		  sprintf(__("You chose the printing method '%s' but it is not available (%s). Please install the missing dependencies or switch to another printing method."),$o{'methode_impression'},$error));
 	    $dialog->run;
 	    $dialog->destroy;
 
 	    return();
 	}
 
-	# verifie aussi qu'il y a au moins une imprimante configuree
+	$w{print_object}=$print_module->
+	  new(useful_options=>$o{printer_useful_options});
+
+	# check for a installed printer
 
 	debug "Checking for at least one CUPS printer...";
 
-	my $sc=Net::CUPS->new();
-	my @pl = $sc->getDestinations();
+	my $default_printer=$w{print_object}->default_printer();
 
-	if(!@pl) {
+	if(!$default_printer) {
 	    my $dialog = Gtk2::MessageDialog
 		->new($w{'main_window'},
 		      'destroy-with-parent',
 		      'error','ok',
-		      __("You chose printing method '%s' but there are no configured printer in CUPS. Please configure some printer or switch to another printing method."),
-		      __"CUPS"
-		      );
+		      __("You chose a printing method using CUPS but there are no configured printer in CUPS. Please configure some printer or switch to another printing method."));
 	    $dialog->run;
 	    $dialog->destroy;
 
@@ -2808,23 +2760,21 @@ sub sujet_impressions {
 
     debug "Printing method: $o{'methode_impression'}";
 
-    if($o{'methode_impression'} eq 'CUPS') {
+    if($o{'methode_impression'} =~ /^CUPS/) {
 	$w{'bloc_imprimante'}->show();
-
-	$cups=Net::CUPS->new();
 
 	# les imprimantes :
 
-	my @printers = $cups->getDestinations();
-	debug "Printers : ".join(' ',map { $_->getName() } @printers);
-	my $p_model=cb_model(map { ($_->getName(),$_->getDescription() || $_->getName()) } @printers);
+	my @printers = $w{print_object}->printers_list();
+	debug "Printers : ".join(' ',map { $_->{name} } @printers);
+	my $p_model=cb_model(map { $_->{name}=>$_->{description} } @printers);
 	$w{'imprimante'}->set_model($p_model);
 	if(! $o{'imprimante'}) {
-	    my $defaut=$cups->getDestination();
+	    my $defaut=$w{print_object}->default_printer;
 	    if($defaut) {
-		$o{'imprimante'}=$defaut->getName();
+		$o{'imprimante'}=$defaut;
 	    } else {
-		$o{'imprimante'}=$printers[0]->getName();
+		$o{'imprimante'}=$printers[0]->{name};
 	    }
 	}
 	my $i=model_id_to_iter($p_model,COMBO_ID,$o{'imprimante'});
@@ -2899,7 +2849,7 @@ sub sujet_impressions_ok {
 
     $prefs->reprend_pref('impall',$o{'options_impression'});
 
-    if($o{'methode_impression'} eq 'CUPS') {
+    if($o{'methode_impression'} =~ /^CUPS/) {
 	my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
 	if($i ne $o{'imprimante'}) {
 	    $o{'imprimante'}=$i;

@@ -110,37 +110,35 @@ if($fich_nums) {
 }
 
 my $cups;
-my $dest;
 
 if($methode =~ /^cups/i) {
-    if(check_install(module=>"Net::CUPS")) {
-	load("Net::CUPS");
-	debug_pm_version("Net::CUPS");
-    } else {
-	die "Needs Net::CUPS perl module for CUPS printing";
-    }
+  my $mod="AMC::Print::".lc($methode);
+  load($mod);
+  my $error=$mod->check_available();
+  if($error) {
+    die $error;
+  }
 
-    $cups=Net::CUPS->new();
-    $dest=$cups->getDestination($imprimante);
-    die "Can't access printer: $imprimante" if(!$dest);
+  $cups=$mod->new();
+  $cups->select_printer($imprimante);
 
-    # record options (so that if given multiple times, the last value
-    # is considered)
-    my %opts=();
-    for my $o (split(/\s*,+\s*/,$options)) {
-      my $on=$o;
-      my $ov=1;
-      if($o =~ /([^=]+)=(.*)/) {
-	$on=$1;
-	$ov=$2;
-      }
-      $opts{$on}=$ov;
+  # record options (so that if given multiple times, the last value
+  # is considered)
+  my %opts=();
+  for my $o (split(/\s*,+\s*/,$options)) {
+    my $on=$o;
+    my $ov=1;
+    if($o =~ /([^=]+)=(.*)/) {
+      $on=$1;
+      $ov=$2;
     }
+    $opts{$on}=$ov;
+  }
 
-    for my $o (keys %opts) {
-      debug "Option : $o=$opts{$o}";
-      $dest->addOption($o,$opts{$o});
-    }
+  for my $o (keys %opts) {
+    debug "Option : $o=$opts{$o}";
+    $cups->set_option($o,$opts{$o});
+  }
 }
 
 sub process_pages {
@@ -168,7 +166,7 @@ sub process_pages {
   }
 
   if($methode =~ /^cups/i) {
-    $dest->printFile($fn,"QCM : sheet $elong");
+    $cups->print_file($fn,"QCM : sheet $elong");
   } elsif($methode =~ /^file/i) {
     $f_dest.="-%e.pdf" if($f_dest !~ /[%]e/);
     $f_dest =~ s/[%]e/$elong/g;
