@@ -127,7 +127,8 @@ AMC-buildpdf: AMC-buildpdf.cc buildpdf.cc Makefile
 
 # substitution in *.in files
 
-vars-subs.pl: $(SUB_MAKEFILES) 
+vars-subs.pl: $(SUB_MAKEFILES)
+	@echo "Recording substitution variables from $(SUB_MAKEFILES)"
 	@echo "# Variables:" > $@
 	@$(foreach varname,$(SUBST_VARS), echo 's|@/$(varname)/@|$($(varname))|g;' >> $@ ; )
 	@echo 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' >> $@
