@@ -31,7 +31,7 @@ DATE_DEBCHL:=$(shell LANG=en_US date "+%a, %d %b %Y %H:%M:%S %z")
 
 # list variables to be substituted in *.in files
 
-SUBST_VARS:=$(shell grep -h '=' $(SUB_MAKEFILES) | perl -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PERLPATH DATE_DEBCHL DATE_RPMCHL
+SUBST_VARS:=$(sort $(shell grep -h '=' $(SUB_MAKEFILES) | perl -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PERLPATH DATE_DEBCHL DATE_RPMCHL)
 
 # Some default values
 
