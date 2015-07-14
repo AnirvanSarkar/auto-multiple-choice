@@ -127,7 +127,7 @@ sub export {
       push @columns,$self->parse_num($m->{'mark'});
 
       for my $q (@questions) {
-	push @columns,$self->{'_scoring'}->question_score(@sc,$q->{'question'});
+	push @columns,$self->parse_num($self->{'_scoring'}->question_score(@sc,$q->{'question'}));
 	if($self->{'out.ticked'}) {
 	  if($self->{'out.ticked'} eq '01') {
 	    push @columns,join(';',$self->{'_capture'}
