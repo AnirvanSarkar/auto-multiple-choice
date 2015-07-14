@@ -23,7 +23,7 @@ use AMC::Test;
 AMC::Test->new('dir'=>__FILE__,
 	       list=>'names.csv',n_copies=>1,
 	       list_key=>'id',code=>'<preassoc>',
-	       check_assoc=>{2=>'002'},
+	       check_assoc=>{2=>'2'},
 	       perfect_copy=>[],
 	       export_full_csv=>[
 				 {-copy=>2,-question=>'bq1',-abc=>'B'},
