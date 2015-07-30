@@ -719,7 +719,7 @@ if($to_do{s}) {
     $out_catalog=$prefix."catalog.pdf" if(!$out_catalog);
     $out_sujet=$prefix."sujet.pdf" if(!$out_sujet);
 
-    for my $f ($out_calage,$out_corrige,$out_sujet) {
+    for my $f ($out_calage,$out_corrige,$out_sujet,$out_catalog) {
 	if(-f $f) {
 	    debug "Removing already existing file: $f";
 	    unlink($f);

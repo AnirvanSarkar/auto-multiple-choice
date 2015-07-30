@@ -2480,6 +2480,13 @@ sub doc_maj {
       $filter_register->configure();
     }
 
+    # remove pre-existing DOC-corrected.pdf (built by AMC-annotate)
+    my $pdf_corrected=$shortcuts->absolu("DOC-corrected.pdf");
+    if(-f $pdf_corrected) {
+      debug "Removing pre-existing $pdf_corrected";
+      unlink($pdf_corrected);
+    }
+
     #
     my $mode_s='s[';
     $mode_s.='s' if($o{'prepare_solution'});
