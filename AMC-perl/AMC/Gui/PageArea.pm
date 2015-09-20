@@ -46,9 +46,17 @@ sub add_feuille {
     $self->{'editable'}=1;
 
     $self->{'onscan'}='';
-    $self->{'unticked_color_name'}="#429DE5";
+    $self->{unticked_color_name}="#429DE5";
     $self->{question_color_name}="#47D265";
     $self->{scorezone_color_name}="#DE61E2";
+    $self->{empty_color_name}="#78FFED";
+    $self->{invalid_color_name}="#FFEF3B";
+
+    $self->{linewidth_zone}=1;
+    $self->{linewidth_box}=1;
+    $self->{linewidth_box_scan}=2;
+    $self->{box_external}=4;
+    $self->{linewidth_special}=4;
 
     $self->{'font'}=Pango::FontDescription->from_string("128");
 
@@ -59,14 +67,10 @@ sub add_feuille {
     $self->{'gc'} = Gtk2::Gdk::GC->new($self->window);
 
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
-    $self->{'scorezone_color'}=
-      Gtk2::Gdk::Color->parse($self->{scorezone_color_name});
-    $self->{'question_color'}=
-      Gtk2::Gdk::Color->parse($self->{question_color_name});
-    $self->{'unticked_color'}=
-      Gtk2::Gdk::Color->parse($self->{'unticked_color_name'});
-    for my $ck (qw/color unticked_color question_color scorezone_color/) {
-      $self->window->get_colormap->alloc_color($self->{$ck},TRUE,TRUE);
+    for my $type ('',qw/scorezone_ question_ unticked_ empty_ invalid_/) {
+      $self->{$type.'color'}=
+	Gtk2::Gdk::Color->parse($self->{$type.'color_name'}) if($type);
+      $self->window->get_colormap->alloc_color($self->{$type.'color'},TRUE,TRUE);
     }
 
     if($self->{'marks'}) {
@@ -180,21 +184,46 @@ sub choix {
   return TRUE;
 }
 
+sub extend {
+  my ($external,@xy)=@_;
+  return(@xy) if($external==0);
+  # computes x and y means
+  my $mx=0;
+  my $my=0;
+  for(my $ix = 0; $ix <= $#xy; $ix += 2) {
+    $mx+=$xy[$ix];
+    $my+=$xy[$ix+1];
+  }
+  my @centroid=($mx / ((1+$#xy)/2) , $my / ((1+$#xy)/2));
+  # extend from the centroid
+  for(my $ix = 0; $ix <= $#xy; $ix += 2) {
+    my $l=sqrt( ($xy[$ix]-$centroid[0])**2 +
+		($xy[$ix+1]-$centroid[1])**2 );
+    my $alpha=($l+$external)/$l;
+    for my $i (0,1) {
+      $xy[$ix+$i]=$centroid[$i]+$alpha*($xy[$ix+$i]-$centroid[$i])
+    }
+  }
+  return(@xy);
+}
+
 sub draw_box {
-  my ($self,$box,$fill)=@_;
+  my ($self,$box,$fill,$external)=@_;
+  $external=0 if(!$external);
   if($box->{'xy'}) {
     $self->window->draw_polygon
       ($self->{'gc'},
-       $fill,map { ($box->{'xy'}->[$_*2]*$self->{'rx'},
-		    $box->{'xy'}->[$_*2+1]*$self->{'ry'}) } (0..3) );
+       $fill,extend($external,
+		    map { ($box->{'xy'}->[$_*2]*$self->{'rx'},
+		    $box->{'xy'}->[$_*2+1]*$self->{'ry'}) } (0..3)) );
   } else {
     $self->window->draw_rectangle
       ($self->{'gc'},
        $fill,
-       $box->{'xmin'}*$self->{'rx'},
-       $box->{'ymin'}*$self->{'ry'},
-       ($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'},
-       ($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}
+       $box->{'xmin'}*$self->{'rx'}-$external,
+       $box->{'ymin'}*$self->{'ry'}-$external,
+       ($box->{'xmax'}-$box->{'xmin'})*$self->{'rx'}+2*$external,
+       ($box->{'ymax'}-$box->{'ymin'})*$self->{'ry'}+2*$external
       );
   }
 }
@@ -302,6 +331,20 @@ sub expose_drawing {
 	## boxes drawings
 
 	if($self->{'onscan'}) {
+	  $self->{'gc'}->set_line_attributes($self->{linewidth_special},
+					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
+	  $self->{'gc'}->set_foreground($self->{'invalid_color'});
+	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /E/ }
+		    @{$self->{'layinfo'}->{'box'}}) {
+	    $self->draw_box($box,'',$self->{box_external});
+	  }
+	  $self->{'gc'}->set_foreground($self->{'empty_color'});
+	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /V/ }
+		    @{$self->{'layinfo'}->{'box'}}) {
+	    $self->draw_box($box,'',$self->{box_external});
+	  }
+	  $self->{'gc'}->set_line_attributes($self->{linewidth_box_scan},
+					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
 	  $self->{'gc'}->set_foreground($self->{'color'});
 	  for $box (grep { $_->{'ticked'} }
 		    @{$self->{'layinfo'}->{'box'}}) {
@@ -313,15 +356,33 @@ sub expose_drawing {
 	    $self->draw_box($box,'');
 	  }
 	} else {
+	  $self->{'gc'}->set_line_attributes($self->{linewidth_special},
+					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
+	  $self->{'gc'}->set_foreground($self->{'invalid_color'});
+	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /E/ }
+		    @{$self->{'layinfo'}->{'box'}}) {
+	    $self->draw_box($box,'',$self->{box_external});
+	  }
+	  $self->{'gc'}->set_foreground($self->{'empty_color'});
+	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /V/ }
+		    @{$self->{'layinfo'}->{'box'}}) {
+	    $self->draw_box($box,'',$self->{box_external});
+	  }
+	  $self->{'gc'}->set_line_attributes($self->{linewidth_box},
+					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
 	  $self->{'gc'}->set_foreground($self->{'color'});
 	  for $box (@{$self->{'layinfo'}->{'box'}}) {
 	    $self->draw_box($box,$box->{'ticked'});
 	  }
+	  $self->{'gc'}->set_line_attributes($self->{linewidth_zone},
+					   GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
 	  $self->{'gc'}->set_foreground($self->{'question_color'});
 	  for $box (@{$self->{'layinfo'}->{'questionbox'}}) {
 	    $self->draw_box($box,'');
 	  }
 	}
+	$self->{'gc'}->set_line_attributes($self->{linewidth_zone},
+					   GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
 	$self->{'gc'}->set_foreground($self->{'scorezone_color'});
 	for $box (@{$self->{'layinfo'}->{'scorezone'}}) {
 	  $self->draw_box($box,'');

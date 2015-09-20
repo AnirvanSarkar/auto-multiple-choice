@@ -84,6 +84,7 @@ sub new {
     $self->{'data'}=AMC::Data->new($self->{'data-dir'});
     $self->{'layout'}=$self->{'data'}->module('layout');
     $self->{'capture'}=$self->{'data'}->module('capture');
+    $self->{'scoring'}=$self->{'data'}->module('scoring');
 
     die "No PDF subject file" if(! $self->{'sujet'});
     die "Subject file ".$self->{'sujet'}." not found" if(! -f $self->{'sujet'});
@@ -526,18 +527,26 @@ sub charge_i {
 	$self->{'layinfo'}->{'page'}=$self->{'layout'}->page_info(@ep);
       }
 
-      # mise a jour des cases suivant saisies deja presentes
+      if($self->{editable}) {
+	# gets scoring results to highlight empty and invalid answers
 
-      for my $i (@{$self->{'layinfo'}->{'box'}}) {
-	my $id=$i->{'question'}."."
-	  .$i->{'answer'};
-	my $t=$self->{'capture'}
-	  ->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
-		   $self->{'seuil'},$self->{'seuil_up'});
-	$t='' if(!defined($t));
-	debug "Q=$id R=$t";
-	$i->{'id'}=[@spc];
-	$i->{'ticked'}=$t;
+	for my $a (@{$self->{layinfo}->{box}}) {
+	  $a->{scoring}=$self->{scoring}->question_result(@spc[0,2],$a->{question});
+	}
+
+	# mise a jour des cases suivant saisies deja presentes
+
+	for my $i (@{$self->{'layinfo'}->{'box'}}) {
+	  my $id=$i->{'question'}."."
+	    .$i->{'answer'};
+	  my $t=$self->{'capture'}
+	    ->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
+		     $self->{'seuil'},$self->{'seuil_up'});
+	  $t='' if(!defined($t));
+	  debug "Q=$id R=$t";
+	  $i->{'id'}=[@spc];
+	  $i->{'ticked'}=$t;
+	}
       }
     }
 
