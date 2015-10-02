@@ -616,7 +616,7 @@ sub pref_xx_lit {
 }
 
 sub pref_xx_ecrit {
-    my ($data,$key,$fichier)=@_;
+    my ($data,$key,$fichier,$data_orig)=@_;
     if(open my $fh,">:encoding(utf-8)",$fichier) {
 	XMLout($data,
 	       "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
@@ -624,7 +624,7 @@ sub pref_xx_ecrit {
 	       "OutputFile" => $fh,
 	       );
 	close $fh;
-	clear_sub_modif($data);
+	clear_sub_modif($data_orig || $data);
 	return(0);
     } else {
 	return(1);
@@ -2341,7 +2341,7 @@ sub projet_sauve {
 	$po->{$_}=$shortcuts->relatif($po->{$_});
     }
 
-    if(pref_xx_ecrit($po,'projetAMC',$of)) {
+    if(pref_xx_ecrit($po,'projetAMC',$of,$projet{'options'})) {
 	my $dialog = Gtk2::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
