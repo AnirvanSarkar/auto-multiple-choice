@@ -744,7 +744,7 @@ sub question_name {
 
 sub clear_all {
     my ($self)=@_;
-    for my $t (qw/page mark namefield box digit source association/) {
+    for my $t (qw/page mark namefield box digit source question association/) {
 	$self->sql_do("DELETE FROM ".$self->table($t));
     }
 }
