@@ -519,8 +519,19 @@ sub define_statements {
 		    ." WHERE student=? AND copy=?"},
      'deleteCodes'=>{'sql'=>"DELETE FROM ".$self->table('code')
 		    ." WHERE student=? AND copy=?"},
+     'conflicts'=>
+     {'sql'=>"SELECT student, copy, question" 
+	  ." FROM ".$self->table('score')." WHERE (why = 'E') OR (why = 'V')" },
     };
 }
+
+sub get_conflicts{
+    my ($self)=@_;
+    my @list = @{$self->dbh
+		     ->selectall_arrayref($self->statement('conflicts'))};
+    return(@list);
+}
+
 
 # default_strategy($type) returns the default scoring strategy string
 # to be used for questions with type $type (QUESTION_SIMPLE or

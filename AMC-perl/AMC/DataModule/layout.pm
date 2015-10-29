@@ -493,6 +493,10 @@ sub define_statements {
 		       ."         AS ratio"
 		       ."  FROM ".$self->table("page")
 		       ." )"},
+       'MapQuestionPage'=>
+       {'sql'=>"SELECT student, page, question "
+	." FROM ".$self->table("box")." WHERE answer=1"
+       },
       };
 }
 
@@ -571,6 +575,14 @@ sub ids {
 sub full_ids {
     my ($self)=@_;
     return($self->sql_list($self->statement('FULLIDS')));
+}
+
+#Return list of student, page, question
+sub student_question_page{
+    my ($self)=@_;
+    my @list = @{$self->dbh
+		     ->selectall_arrayref($self->statement('MapQuestionPage'))};
+    return(@list);
 }
 
 # page_info returns a HASH reference containing all fields in the

@@ -34,6 +34,12 @@ use AMC::Gui::WindowSize;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone/;
 
+
+my $conflict_num=-1; # which conflict is currently being viewed
+my $num_conflicts=0; # how man conflicts in the list
+my @hconflicts=(); # holds id=student,page,copy and question
+#conflicts should be an array of hashes
+    
 use constant {
     MDIAG_ID => 0,
     MDIAG_ID_BACK => 1,
@@ -85,6 +91,7 @@ sub new {
     $self->{'layout'}=$self->{'data'}->module('layout');
     $self->{'capture'}=$self->{'data'}->module('capture');
     $self->{'scoring'}=$self->{'data'}->module('scoring');
+    $self->{'scoring'}=$self->{'data'}->module('scoring');
 
     die "No PDF subject file" if(! $self->{'sujet'});
     die "Subject file ".$self->{'sujet'}." not found" if(! -f $self->{'sujet'});
@@ -104,7 +111,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view/) {
+    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view con_label/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
@@ -181,6 +188,50 @@ sub new {
 
     $self->select_page(0);
 
+    
+## Build list of marking conflicts (duplicate or blanks)
+    $conflict_num=-1; # which conflict is currently being viewed
+    $num_conflicts=0; # how many conflicts in the list
+    @hconflicts=(); # holds id=student,page,copy and question
+    $self->{'layout'}->begin_read_transaction;
+    my @con_table=$self->{'layout'}->student_question_page;
+    $self->{'layout'}->end_transaction;
+
+# print the elements:
+    my $lent = @con_table;
+#    for (my $i=0;$i<$lent;$i++){
+#	print $con_table[$i][0]." "; #student
+#	print $con_table[$i][1]." "; #page
+#	print $con_table[$i][2]."\n"; #question #
+#    }
+
+    # ok, got student, page, question.
+    # now need student question, why, questionID, copy
+    $self->{'scoring'}->begin_read_transaction;
+    my @score_table=$self->{'scoring'}->get_conflicts;
+    $self->{'scoring'}->end_transaction;
+    $lens = @score_table;
+#    for (my $i=0;$i<$lens;$i++){
+#	print $score_table[$i][0]." "; # student
+#	print $score_table[$i][1]." "; #copy #
+#	print $score_table[$i][2]."\n"; #question #
+#     }
+    #now match student & question#'s to build student/page list
+    for (my $i=0 ; $i < $lens ; $i++){
+	for (my $j=0 ; $j < $lent ; $j++){
+	    if (($score_table[$i][0] eq $con_table[$j][0]) and ($score_table[$i][2] eq $con_table[$j][2])){
+		my @id=[$con_table[$j][0], $con_table[$j][1], $score_table[$i][1]];
+		push @hconflicts, { id => @id, question => $con_table[$j][2] };
+#		print "$i $j added $con_table[$j][0]/$con_table[$j][1] question $con_table[$j][2]\n";
+		last;
+	    }
+	}
+
+    }
+    $num_conflicts=@hconflicts;
+    my $lnum = $conflict_num+1;
+    $self->{'con_label'}->set_text("Errs: $lnum/$num_conflicts");
+    debug "number of conflicts: $num_conflicts\n";
     return($self);
 }
 
@@ -535,6 +586,10 @@ sub charge_i {
 	}
 
 	# mise a jour des cases suivant saisies deja presentes
+	my @con_id=();
+	if ($conflict_num ge 0){
+	    @con_id=@{$hconflicts[$conflict_num]->{'id'}};
+	}
 
 	for my $i (@{$self->{'layinfo'}->{'box'}}) {
 	  my $id=$i->{'question'}."."
@@ -546,6 +601,16 @@ sub charge_i {
 	  debug "Q=$id R=$t";
 	  $i->{'id'}=[@spc];
 	  $i->{'ticked'}=$t;
+	  $i->{'cur_conflict'}=0;
+	  if ($conflict_num ge 0){
+	      if ( $con_id[0] eq ${$i->{'id'}}[0] and
+		   $con_id[1] eq ${$i->{'id'}}[1] and
+		   $con_id[2] eq ${$i->{'id'}}[2] and
+		   $hconflicts[$conflict_num]->{'question'} eq $i->{'question'}){
+		  $i->{'cur_conflict'} = 1;
+		  debug "marked current_conflict: stud, page: ${$i->{'id'}}[0], ${$i->{'id'}}[1]\n";
+	      }
+	  }
 	}
       }
     }
@@ -600,6 +665,42 @@ sub synchronise {
     $self->{'area'}->sync();
 
     $self->maj_list_i;
+}
+
+sub next_error{
+    my ($self)=@_;
+    return if ($num_conflicts <= 0);
+    if ($conflict_num < $num_conflicts-1){
+	$conflict_num += 1;
+    }
+    if (${$hconflicts[$conflict_num]->{'id'}}[2] eq '0'){
+	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]");
+    }
+    else{
+	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]:${$hconflicts[$conflict_num]->{'id'}}[2]");
+    }
+    my $lnum = $conflict_num+1;
+    $self->{'con_label'}->set_text("Errs: $lnum/$num_conflicts");
+    $self->goto_activate_cb();
+
+}
+
+sub previous_error{
+    my ($self)=(@_);
+    return if ($num_conflicts <= 0);
+    if ( $conflict_num >0 ){
+	$conflict_num -= 1;
+    }
+    if (${$hconflicts[$conflict_num]->{'id'}}[2] eq '0'){
+	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]");
+    }
+    else{
+	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]:${$hconflicts[$conflict_num]->{'id'}}[2]");
+    }
+    my $lnum = $conflict_num+1;
+    $self->{'con_label'}->set_text("Errs: $lnum/$num_conflicts");
+    $self->goto_activate_cb();
+
 }
 
 sub passe_precedent {
