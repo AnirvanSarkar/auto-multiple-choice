@@ -159,7 +159,7 @@ $projects_dir=$ENV{'HOME'}.'/'.__("MC-Projects") if(!$projects_dir);
 $project_dir=$projects_dir.'/'.$project_dir if($project_dir !~ /\//);
 $pdf_subject="DOC-sujet.pdf" if(!$pdf_subject);
 $pdf_subject=$project_dir.'/'.$pdf_subject if($pdf_subject !~ /\//);
-$pdf_corrected="DOC-corrected.pdf" if(!$pdf_corrected);
+$pdf_corrected="DOC-indiv-solution.pdf" if(!$pdf_corrected);
 $pdf_corrected=$project_dir.'/'.$pdf_corrected if($pdf_corrected !~ /\//);
 
 $cr_dir=$project_dir."/cr" if(! $cr_dir);
@@ -198,7 +198,7 @@ if($compose==2) {
 				  "--filter",$filter,
 				  "--filtered-source",$filtered_source,
 				  "--mode","k",
-				  "--out-corrige",$pdf_corrected,
+				  "--out-corrige-indiv",$pdf_corrected,
 				  "--debug",debug_file(),
 				  $src_file));
   }

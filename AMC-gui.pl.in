@@ -268,6 +268,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'try_three'=>1,
 
 	      'prepare_solution'=>1,
+	      'prepare_indiv_solution'=>1,
 	      'prepare_catalog'=>1,
 
 	      'symboles_trait'=>2,
@@ -347,6 +348,7 @@ my %projet_defaut=('texsrc'=>'',
 		   'maj_bareme'=>1,
 		   'doc_question'=>'DOC-sujet.pdf',
 		   'doc_solution'=>'DOC-corrige.pdf',
+		   'doc_indiv_solution'=>'DOC-indiv-solution.pdf',
 		   'doc_setting'=>'DOC-calage.xy',
 		   'doc_catalog'=>'DOC-catalog.pdf',
 		   'filter'=>'',
@@ -955,7 +957,7 @@ my @widgets_only_when_opened=(qw/cleanup_menu menu_projet_enreg menu_projet_mode
 
 my $gui=read_glade('main_window',
 		   qw/onglets_projet onglet_preparation preparation_etats
-    but_question but_solution but_catalog doc_line1
+    but_question but_solution but_indiv_solution but_catalog doc_line1
     prepare_docs prepare_layout prepare_src
     state_layout state_src state_docs state_unrecognized state_marking state_assoc
     button_unrecognized button_show_missing
@@ -2492,6 +2494,7 @@ sub doc_maj {
     $mode_s.='s' if($o{'prepare_solution'});
     $mode_s.='c' if($o{'prepare_catalog'});
     $mode_s.=']';
+    $mode_s.='k' if($o{'prepare_indiv_solution'});
     commande('commande'=>["auto-multiple-choice","prepare",
 			  "--with",moteur_latex(),
 			  "--filter",$projet{'options'}->{'filter'},
@@ -2499,6 +2502,7 @@ sub doc_maj {
 			  "--debug",debug_file(),
 			  "--out-sujet",$shortcuts->absolu($projet{'options'}->{'doc_question'}),
 			  "--out-corrige",$shortcuts->absolu($projet{'options'}->{'doc_solution'}),
+			  "--out-corrige-indiv",$shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'}),
 			  "--out-catalog",$shortcuts->absolu($projet{'options'}->{'doc_catalog'}),
 			  "--out-calage",$shortcuts->absolu($projet{'options'}->{'doc_setting'}),
 			  "--mode",$mode_s,
@@ -3869,26 +3873,35 @@ sub voir_notes {
 }
 
 sub noter {
-    if($projet{'options'}->{'maj_bareme'}) {
-	my $n_copies=$projet{'options'}->{'nombre_copies'};
-	commande('commande'=>["auto-multiple-choice","prepare",
-			      "--n-copies",$n_copies,
-			      "--with",moteur_latex(),
-			      "--filter",$projet{'options'}->{'filter'},
-			      "--filtered-source",$shortcuts->absolu($projet{'options'}->{'filtered_source'}),
-			      "--debug",debug_file(),
-			      "--progression-id",'bareme',
-			      "--progression",1,
-			      "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
-			      "--mode","b",
-			      $shortcuts->absolu($projet{'options'}->{'texsrc'}),
-			      ],
-		 'texte'=>__"Extracting marking scale...",
-		 'fin'=>\&noter_postcorrect,
-		 'progres.id'=>'bareme');
-    } else {
-	noter_calcul('','');
+  if($projet{'options'}->{'maj_bareme'}) {
+    my $mode="b";
+    my $pdf_corrected=$shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'});
+    if(-f $pdf_corrected) {
+      debug "Removing pre-existing $pdf_corrected";
+      unlink($pdf_corrected);
     }
+    $mode.='k' if($o{'prepare_indiv_solution'});
+
+    my $n_copies=$projet{'options'}->{'nombre_copies'};
+    commande('commande'=>["auto-multiple-choice","prepare",
+			  "--out-corrige-indiv",$pdf_corrected,
+			  "--n-copies",$n_copies,
+			  "--with",moteur_latex(),
+			  "--filter",$projet{'options'}->{'filter'},
+			  "--filtered-source",$shortcuts->absolu($projet{'options'}->{'filtered_source'}),
+			  "--debug",debug_file(),
+			  "--progression-id",'bareme',
+			  "--progression",1,
+			  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
+			  "--mode",$mode,
+			  $shortcuts->absolu($projet{'options'}->{'texsrc'}),
+			 ],
+	     'texte'=>__"Extracting marking scale...",
+	     'fin'=>\&noter_postcorrect,
+	     'progres.id'=>'bareme');
+  } else {
+    noter_calcul('','');
+  }
 }
 
 my $g_pcid;
@@ -3900,8 +3913,10 @@ my $postcorrect_student_max;
 
 
 sub noter_postcorrect {
-
   my ($c,%data)=@_;
+
+  detecte_documents();
+
   return if($data{cancelled});
 
     # check marking scale data: in PostCorrect mode, ask for a sheet
@@ -4369,6 +4384,7 @@ sub annote_copies {
 				  "--projects",$shortcuts->absolu('%PROJETS/'),
 				  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
 				  "--subject",$shortcuts->absolu($projet{'options'}->{'doc_question'}),
+				  "--corrected",$shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'}),
 				  "--filename-model",$projet{'options'}->{'modele_regroupement'},
 				  ($o{'ascii_filenames'}?"--force-ascii":"--no-force-ascii"),
 				  "--single-output",$single_output,
@@ -4729,6 +4745,7 @@ sub state_image {
 sub detecte_documents {
     check_document($shortcuts->absolu($projet{'options'}->{'doc_question'}),'question');
     check_document($shortcuts->absolu($projet{'options'}->{'doc_solution'}),'solution');
+    check_document($shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'}),'indiv_solution');
     check_document($shortcuts->absolu($projet{'options'}->{'doc_catalog'}),'catalog');
     my $s=file_maj(map { $shortcuts->absolu($projet{'options'}->{'doc_'.$_})
 		   } (qw/question setting/));
@@ -4759,6 +4776,10 @@ sub show_question {
 
 sub show_solution {
     show_document('solution');
+}
+
+sub show_indiv_solution {
+    show_document('indiv_solution');
 }
 
 sub show_catalog {

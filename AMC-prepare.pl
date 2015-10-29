@@ -77,6 +77,7 @@ my $progress_id='';
 my $out_calage='';
 my $out_sujet='';
 my $out_corrige='';
+my $out_corrige_indiv='';
 my $out_catalog='';
 
 my $jobname="amc-compiled";
@@ -92,6 +93,7 @@ GetOptions("mode=s"=>\$mode,
 	   "out-calage=s"=>\$out_calage,
 	   "out-sujet=s"=>\$out_sujet,
 	   "out-corrige=s"=>\$out_corrige,
+	   "out-corrige-indiv=s"=>\$out_corrige_indiv,
 	   "out-catalog=s"=>\$out_catalog,
 	   "convert-opts=s"=>\$convert_opts,
 	   "debug=s"=>\$debug,
@@ -689,20 +691,6 @@ if($to_do{f}) {
 }
 
 ############################################################################
-# MODE k: builds individual corrected answer sheets (exactly the same
-# sheets as for the students, but with correct answers ticked).
-############################################################################
-
-if($to_do{k}) {
-
-  @output_files=($out_corrige ? $out_corrige : $prefix."corrige.pdf");
-
-  execute('command_opts'=>[qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/]);
-  transfer("$jobname.pdf",$output_files[0]);
-  give_latex_errors(__"individual solution");
-}
-
-############################################################################
 # MODE s: builds the subject and a solution (with all the answers for
 # questions, but with a different layout)
 ############################################################################
@@ -719,7 +707,7 @@ if($to_do{s}) {
     $out_catalog=$prefix."catalog.pdf" if(!$out_catalog);
     $out_sujet=$prefix."sujet.pdf" if(!$out_sujet);
 
-    for my $f ($out_calage,$out_corrige,$out_sujet,$out_catalog) {
+    for my $f ($out_calage,$out_corrige,$out_corrige_indiv,$out_sujet,$out_catalog) {
 	if(-f $f) {
 	    debug "Removing already existing file: $f";
 	    unlink($f);
@@ -790,6 +778,29 @@ if($to_do{s}) {
     debug "Catalog not requested: removing $out_catalog";
     unlink($out_catalog);
   }
+}
+
+############################################################################
+# MODE k: builds individual corrected answer sheets (exactly the same
+# sheets as for the students, but with correct answers ticked).
+############################################################################
+
+if($to_do{k}) {
+
+  my $of=$out_corrige_indiv;
+  $of=$out_corrige if(!$of && !$to_do{s});
+  $of=$prefix."corrige.pdf" if(!$of);
+
+  if(-f $of) {
+    debug "Removing already existing file: $of";
+    unlink($of);
+  }
+
+  @output_files=($of);
+
+  execute('command_opts'=>[qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/]);
+  transfer("$jobname.pdf",$of);
+  give_latex_errors(__"individual solution");
 }
 
 ############################################################################
