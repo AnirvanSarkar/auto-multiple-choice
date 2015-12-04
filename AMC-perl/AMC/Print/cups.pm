@@ -87,24 +87,29 @@ sub printers_list {
 
 sub default_printer {
   my ($self)=@_;
-  return($self->{cups}->getDestination()->getName());
+  my $d=$self->{cups}->getDestination();
+  return($d ? $d->getName() : "");
 }
 
 sub printer_selected_options {
   my ($self,$printer)=@_;
   my @o=();
   my $ppd=$self->{cups}->getPPD($printer);
-  for my $k (split(/\s+/,$self->{useful_options})) {
-    my $option=$ppd->getOption($k);
-    if(%$option) {
-      push @o,{name=>$k,
-	       description=>nonnul($option->{'text'}),
-	       default=>nonnul($option->{'defchoice'}),
-	       values=>[map { {name=>nonnul($_->{choice}),
-				 description=>nonnul($_->{text}) } }
-			(@{$option->{choices}})],
-	      }
+  if($ppd) {
+    for my $k (split(/\s+/,$self->{useful_options})) {
+      my $option=$ppd->getOption($k);
+      if(%$option) {
+	push @o,{name=>$k,
+		 description=>nonnul($option->{'text'}),
+		 default=>nonnul($option->{'defchoice'}),
+		 values=>[map { {name=>nonnul($_->{choice}),
+				   description=>nonnul($_->{text}) } }
+			  (@{$option->{choices}})],
+		}
+      }
     }
+  } else {
+    debug "WARNING: getPPD failed for printer $printer";
   }
   return(@o);
 }
@@ -118,12 +123,20 @@ sub select_printer {
 
 sub set_option {
   my ($self,$option,$value)=@_;
-  $self->{dest}->addOption($option,$value);
+  if($self->{dest}) {
+    $self->{dest}->addOption($option,$value);
+  } else {
+    debug "WARNING: set_option with no DEST";
+  }
 }
 
 sub print_file {
   my ($self,$filename,$label)=@_;
-  $self->{dest}->printFile($filename,$label);
+  if($self->{dest}) {
+    $self->{dest}->printFile($filename,$label);
+  } else {
+    debug "ERROR: print_file with no DEST";
+  }
 }
 
 1;
