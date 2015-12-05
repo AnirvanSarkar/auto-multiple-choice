@@ -922,13 +922,13 @@ sub student_block {
     $vertical=0 if($self->{options}->{codedigitsdirection} =~ /^h/i);
 
     $t.="{\\setlength{\\parindent}{0pt}\\hspace*{\\fill}";
-    $t.=($vertical?"":"\\hbox{\\vbox{");
+    $t.=($vertical?"":"\\hbox{\\vtop{");
     $t.= "\\LR{" if($self->{'options'}->{'arabic'} && $vertical);
     $t.="\\AMCcode".($vertical ? "" : "H")."{student.number}{".
 	$self->{'options'}->{'code'}."}";
     $t.= "}" if($self->{'options'}->{'arabic'} && $vertical);
     $t.=($vertical?"":"}}")."\\hspace*{\\fill}"
-      ."\\begin{minipage}".($vertical?"[b]":"")."{"
+      ."\\begin{minipage}".($vertical?"[b]":"[t]")."{"
       .($self->{'options'}->{'namefieldwidth'} ?
 	$self->{'options'}->{'namefieldwidth'} : '5.8cm')
 	."}"
