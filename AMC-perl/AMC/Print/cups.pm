@@ -87,8 +87,20 @@ sub printers_list {
 
 sub default_printer {
   my ($self)=@_;
+  # get default printer
   my $d=$self->{cups}->getDestination();
-  return($d ? $d->getName() : "");
+  if($d) {
+    return($d->getName());
+  } else {
+    # if no default printer found, get printers list...
+    my @d=$self->{cups}->getDestinations();
+    if(@d) {
+      # ... and return the first one
+      return($d[0]->getName());
+    } else {
+      return("");
+    }
+  }
 }
 
 sub printer_selected_options {
