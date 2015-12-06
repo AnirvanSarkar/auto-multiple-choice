@@ -24,6 +24,7 @@ include ../Makefile-all.conf
 DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard *.xml))
 
 IMAGES=$(addprefix html/images/,$(notdir $(wildcard img_src/*.svg))) $(addprefix html/images/callouts/,$(notdir $(wildcard img_src/callouts/*.svg)))
+BLOCK_IMAGES=$(addprefix img_pdf/,$(notdir $(wildcard img_src/*.svg)))
 
 MODELS=$(wildcard modeles/*/*.d)
 
@@ -36,7 +37,7 @@ clean:
 	rm -f modeles/*.tgz
 	rm -f modeles/**/*.tgz
 	rm -f html/auto-multiple-choice.**/*.html
-	rm -f html/images/callouts/*.png html/images/*.png
+	rm -f html/images/callouts/*.png html/images/*.png img_pdf/*.pdf
 	rm -f *~
 
 html/images/callouts/%.png: img_src/callouts/%.svg
@@ -45,14 +46,17 @@ html/images/callouts/%.png: img_src/callouts/%.svg
 html/images/%.png: img_src/%.svg
 	rsvg-convert -w 24 -h 24 $< -o $@
 
+img_pdf/%.pdf: img_src/%.svg
+	rsvg-convert -f pdf $< -o $@
+
 html/index.html: FORCE
 	./index.pl $(DOCBOOKS:.xml=) > $@
 
 %.tex: %.xml amcdocstyle.sty
 	dblatex -t tex --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
 
-%.pdf: %.tex
-	case $< in \
+%.pdf: %.tex $(BLOCK_IMAGES:.svg=.pdf)
+	export TEXINPUTS=./img_pdf/: ; case $< in \
 	  *.ja.tex) platex $<; platex $<; dvipdf $*.dvi ;; \
 	  *.tex) pdflatex $<; pdflatex $< ;; \
 	esac
