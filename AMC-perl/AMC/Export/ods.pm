@@ -1186,7 +1186,7 @@ sub export {
     if($self->{'out.stats'} || $self->{'out.statsindic'}) {
       $self->{'_scoring'}->begin_read_transaction('XsLO');
       $dt=$self->{'_scoring'}->variable('darkness_threshold');
-      $dtu=$self->{'_scoring'}->variable('darkness_threshold');
+      $dtu=$self->{'_scoring'}->variable('darkness_threshold_up');
       $cts=$self->{'_capture'}->ticked_sums($dt,$dtu);
       $man=$self->{'_capture'}->max_answer_number();
       $correct_data=$self->{'_scoring'}->correct_for_all

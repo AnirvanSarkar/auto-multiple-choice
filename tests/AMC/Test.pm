@@ -33,6 +33,8 @@ use File::Copy::Recursive qw(rcopy);
 use File::Copy;
 use Digest::MD5;
 
+use OpenOffice::OODoc;
+
 use Data::Dumper;
 
 use DBI;
@@ -85,6 +87,7 @@ sub new {
      'to_check'=>[],
      'export_full_csv'=>[],
      'export_csv_ticked'=>'AB',
+     'export_ods'=>'',
      'blind'=>0,
      'check_zooms'=>{},
      'skip_prepare'=>0,
@@ -648,6 +651,41 @@ sub check_export {
       if(!$t->{'checked'}) {
 	$self->trace("[E] CSV: line not found. ".join(', ',map { $_.'='.$t->{$_} } (keys %$t)));
 	exit(1);
+      }
+    }
+    $self->end;
+  }
+
+  if($self->{'export_ods'}) {
+    $self->begin("ODS full export test");
+    $self->amc_command('export',
+		       '--data','%DATA',
+		       '--module','ods',
+		       '--fich-noms','%PROJ/'.$self->{'list'},
+		       '--option-out','columns=student.copy',
+		       '--option-out','stats=h',
+		       '-o','%PROJ/export.ods',
+		      );
+    my $doc = odfDocument(file=>$self->{'temp_dir'}.'/export.ods');
+    my %iq=();
+    my $i=0;
+    while(my $id=$doc->getCellValue(1,0,$i)) {
+      $iq{$id}=$i;
+      $i+=5;
+    }
+  ONEQ: for my $q (@{$self->{'export_ods'}->{stats}}) {
+      my $i=$iq{$q->{id}};
+      if(defined($i)) {
+        $self->test($doc->getCellValue(1,2,$i+1),$q->{total},'total');
+        $self->test($doc->getCellValue(1,3,$i+1),$q->{empty},'empty');
+        $self->test($doc->getCellValue(1,4,$i+1),$q->{invalid},'invalid');
+        for my $a (@{$q->{answers}}) {
+          $self->test($doc->getCellValue(1,4+$a->{i},$i+1),$a->{ticked},
+                      'stats:'.$q->{id}.':'.$a->{i});
+        }
+      } else {
+        $self->trace("[E] Stats: question not found in stats table: $q->{id}");
+        exit 1;
       }
     }
     $self->end;
