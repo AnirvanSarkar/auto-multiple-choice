@@ -272,7 +272,11 @@ sub check_keys {
 
 sub real_back {
   my ($self,$code)=@_;
-  return($self->sql_row($self->statement('realBack'),$code));
+  $c=$self->dbh->{sqlite_see_if_its_a_number};
+  $self->dbh->{sqlite_see_if_its_a_number} = 0;
+  my @r=$self->sql_row($self->statement('realBack'),$code);
+  $self->dbh->{sqlite_see_if_its_a_number} = $c;
+  return(@r);
 }
 
 # state($student,$copy) returns:

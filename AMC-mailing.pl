@@ -264,6 +264,9 @@ STUDENT: for my $i (@$r) {
       print "$status [$i->{'id'}] $m\n";
       debug "$status [$i->{'id'}] $m";
       print LOGF "$status [$i->{'id'} -> $dest] $m\n" if($log_file);
+      $report->report_mailing(@sc,
+                              ($status eq 'OK' ? REPORT_MAIL_OK : REPORT_MAIL_FAILED),
+                              $m,'now');
     } else {
       debug "No file: $file";
     }

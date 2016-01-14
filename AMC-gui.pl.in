@@ -105,6 +105,7 @@ use constant {
     EMAILS_NAME => 1,
     EMAILS_EMAIL => 2,
     EMAILS_ID => 3,
+    EMAILS_STATUS => 4,
 
     ATTACHMENTS_FILE => 0,
     ATTACHMENTS_NAME => 1,
@@ -1121,6 +1122,7 @@ $inconnu_store->set_sort_column_id(INCONNU_TIME_N,GTK_SORT_ASCENDING);
 ### modele EMAILS
 
 my $emails_store=Gtk2::ListStore->new ('Glib::String',
+				       'Glib::String',
 				       'Glib::String',
 				       'Glib::String',
 				       'Glib::String',
@@ -6463,6 +6465,12 @@ sub send_emails {
 						       $renderer,
 						       text=> EMAILS_EMAIL);
   $w{'emails_list'}->append_column ($column);
+  $renderer=Gtk2::CellRendererText->new;
+# TRANSLATORS: This is the title of a column containing mailing status (not sent, already sent, failed) in a table showing all annotated answer sheets, when sending them to the students by email.
+  $column = Gtk2::TreeViewColumn->new_with_attributes (__"status",
+						       $renderer,
+						       text=> EMAILS_STATUS);
+  $w{'emails_list'}->append_column ($column);
 
   $projet{'_report'}->begin_read_transaction('emCC');
   $email_key=$projet{'_association'}->variable('key_in_list');
@@ -6470,12 +6478,16 @@ sub send_emails {
 
   $emails_store->clear;
   for my $i (@$email_r) {
-    my ($s)=$projet{_students_list}->data($email_key,$i->{'id'});
+    my ($s)=$projet{_students_list}->data($email_key,$i->{id});
+    my @sc=$projet{'_association'}->real_back($i->{id});
     $emails_store->set($emails_store->append,
-		       EMAILS_ID,$i->{'id'},
+		       EMAILS_ID,$i->{id},
 		       EMAILS_EMAIL,'',
 		       EMAILS_NAME,$s->{'_ID_'},
-		       EMAILS_SC,pageids_string($projet{'_association'}->real_back($i->{'id'})),
+		       EMAILS_SC,(defined($sc[0]) ? pageids_string(@sc) : "[".$i->{id}."]"),
+                       EMAILS_STATUS,($i->{mail_status}==REPORT_MAIL_OK ? __("done") :
+                                      $i->{mail_status}==REPORT_MAIL_FAILED ? __("failed") :
+                                      ""),
 		       );
   }
 

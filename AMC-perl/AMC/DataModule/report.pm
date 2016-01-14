@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2012-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -37,16 +37,24 @@ package AMC::DataModule::report;
 # * copy identify the student sheet.
 #
 # * timestamp is the time when the report were generated.
+#
+# * mail_status, mail_timestamp, mail_message reports mailing feadback
 
 use Exporter qw(import);
 
 use constant {
   REPORT_ANNOTATED_PDF=>1,
   REPORT_SINGLE_ANNOTATED_PDF=>2,
+
+  REPORT_MAIL_NO=>0,
+  REPORT_MAIL_OK=>1,
+  REPORT_MAIL_FAILED=>100,
 };
 
-our @EXPORT_OK = qw(REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF);
-our %EXPORT_TAGS = ( 'const' => [ qw/REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF/ ],
+our @EXPORT_OK = qw(REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
+                    REPORT_MAIL_OK REPORT_MAIL_FAILED);
+our %EXPORT_TAGS = ( 'const' => [ qw/REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
+                                     REPORT_MAIL_OK REPORT_MAIL_FAILED/ ],
 		   );
 
 use AMC::Basic;
@@ -55,27 +63,39 @@ use AMC::DataModule;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(1);
+  return(2);
 }
 
 sub version_upgrade {
     my ($self,$old_version)=@_;
     if($old_version==0) {
 
-	# Upgrading from version 0 (empty database) to version 1 :
-	# creates all the tables.
+      # Upgrading from version 0 (empty database) to version 1 :
+      # creates all the tables.
 
-	debug "Creating capture tables...";
-	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("student")
-		      ." (type INTEGER, file TEXT, student INTEGER, copy INTEGER DEFAULT 0, timestamp INTEGER, PRIMARY KEY (type,student,copy))");
-	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("directory")
-		      ." (type INTEGER PRIMARY KEY, directory TEXT)");
+      debug "Creating capture tables...";
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("student")
+                    ." (type INTEGER, file TEXT, student INTEGER, copy INTEGER DEFAULT 0, timestamp INTEGER, PRIMARY KEY (type,student,copy))");
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("directory")
+                    ." (type INTEGER PRIMARY KEY, directory TEXT)");
 
-	for(REPORT_ANNOTATED_PDF,REPORT_SINGLE_ANNOTATED_PDF) {
-	  $self->statement('addDirectory')->execute($_,'cr/corrections/pdf');
-	}
+      for(REPORT_ANNOTATED_PDF,REPORT_SINGLE_ANNOTATED_PDF) {
+        $self->statement('addDirectory')->execute($_,'cr/corrections/pdf');
+      }
 
-	return(1);
+      return(1);
+    } elsif($old_version==1) {
+      # version 2 includes mail_* columns
+
+      debug "Adding mailing data...";
+      $self->sql_do("ALTER TABLE ".$self->table("student")
+                    ." ADD COLUMN mail_status INTEGER DEFAULT 0");
+      $self->sql_do("ALTER TABLE ".$self->table("student")
+                    ." ADD COLUMN mail_timestamp INTEGER DEFAULT 0");
+      $self->sql_do("ALTER TABLE ".$self->table("student")
+                    ." ADD COLUMN mail_message TEXT");
+
+      return(2);
     }
     return('');
 }
@@ -104,8 +124,12 @@ sub define_statements {
       ." ( SELECT a.type FROM $t_directory AS a,$t_directory AS b"
       ."   ON a.directory=b.directory AND b.type=? )"},
      'setStudent'=>{'sql'=>"INSERT OR REPLACE INTO $t_student"
-		    ." (file,timestamp,type,student,copy)"
-		    ." VALUES (?,?,?,?,?)"},
+		    ." (file,timestamp,type,student,copy,"
+                    ."  mail_status,mail_message,mail_timestamp)"
+		    ." VALUES (?,?,?,?,?,?,?,?)"},
+     'setMailing'=>{'sql'=>"UPDATE $t_student SET "
+		    ." mail_status=?, mail_message=?, mail_timestamp=?"
+		    ." WHERE type=? AND student=? AND copy=?"},
      'getStudent'=>{'sql'=>"SELECT file FROM $t_student"
 		    ." WHERE type=? AND student=? AND copy=?"},
      'getStudentTime'=>{'sql'=>"SELECT file,timestamp FROM $t_student"
@@ -117,7 +141,7 @@ sub define_statements {
      'getAssociatedType'=>
      {'sql'=>"SELECT CASE"
       ."  WHEN a.manual IS NOT NULL THEN a.manual"
-      ."  ELSE a.auto END AS id,r.file AS file"
+      ."  ELSE a.auto END AS id,r.file AS file,r.mail_status AS mail_status"
       ." FROM $t_assoc AS a,"
       ."   (SELECT * FROM $t_student WHERE type=?) AS r"
       ." ON a.student=r.student AND a.copy=r.copy"},
@@ -149,14 +173,24 @@ sub delete_student_report {
 }
 
 # set_student_type($type,$student,$copy,$file,$timestamp) creates a
-# new record for a stduent report file, or replace data if this report
+# new record for a student report file, or replace data if this report
 # is already in the table.
 
 sub set_student_report {
   my ($self,$type,$student,$copy,$file,$timestamp)=@_;
   $timestamp=time() if($timestamp eq 'now');
   $self->statement('setStudent')
-    ->execute($file,$timestamp,$type,$student,$copy);
+    ->execute($file,$timestamp,$type,$student,$copy,0,"",0);
+}
+
+# report_mailing($student,$copy,$status,$message,$timestamp) records
+# mailing status for the report
+
+sub report_mailing {
+  my ($self,$student,$copy,$status,$message,$timestamp)=@_;
+  $timestamp=time() if($timestamp eq 'now');
+  $self->statement('setMailing')
+    ->execute($status,$message,$timestamp,REPORT_ANNOTATED_PDF,$student,$copy);
 }
 
 # free_student_report($type,$file) returns a filename based on $file
@@ -212,8 +246,8 @@ sub get_student_report_time {
 # type $type with the corresponding association IDs (primary key of
 # the student in the students list file), like
 #
-# [{'file'=>'001.pdf','id'=>'001234'},
-#  {'file'=>'002.pdf','id'=>'001538'},
+# [{'file'=>'001.pdf','id'=>'001234','mail_status'=>0,
+#  {'file'=>'002.pdf','id'=>'001538','mail_status'=>1,
 # ]
 
 sub get_associated_type {
