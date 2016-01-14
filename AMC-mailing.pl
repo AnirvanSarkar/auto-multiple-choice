@@ -52,6 +52,7 @@ my $subject='';
 my $project_name='';
 my $cc='';
 my $bcc='';
+my $log_file='';
 my @attach_files=();
 
 @ARGV=unpack_args(@ARGV);
@@ -77,6 +78,7 @@ GetOptions("project=s"=>\$project_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "attach=s"=>\@attach_files,
+           "log=s"=>\$log_file,
 	   "cc=s"=>\$cc,
 	   "bcc=s"=>\$bcc,
 	   );
@@ -120,6 +122,12 @@ if(-f $ids_file) {
   close(IDS);
 } else {
   debug "IDS file $ids_file not found";
+}
+
+if($log_file) {
+  open(LOGF,">>",$log_file) or
+    debug "Error opening log file $log_file: $!";
+  print LOGF localtime." Starting mailing...\n";
 }
 
 my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
@@ -240,20 +248,22 @@ STUDENT: for my $i (@$r) {
       my $b=eval {
 	sendmail($email,{'transport'=>$t,to=>\@all_dests});
       } || $@;
+
+      my $status='OK';
+      my $m='';
       if($b) {
-	my $status='OK';
-	my $m='';
 	if($b->isa('Email::Sender::Failure')) {
 	  $status='FAILED';
 	  $m=$b->message;
 	  $m =~ s/[\n\r]+/ | /g;
 	}
-	print "$status [$i->{'id'}] $m\n";
-	debug "$status [$i->{'id'}] $m";
       } else {
-	debug "sendmail failed";
-	print "FAIL [$i->{'id'}] Email::Sender error\n";
+        $status='FAILED';
+        $m='Email::Sender error';
       }
+      print "$status [$i->{'id'}] $m\n";
+      debug "$status [$i->{'id'}] $m";
+      print LOGF "$status [$i->{'id'} -> $dest] $m\n" if($log_file);
     } else {
       debug "No file: $file";
     }
@@ -267,3 +277,6 @@ $data->end_transaction('Mail');
 
 $avance->fin();
 
+if($log_file) {
+  close(LOGF);
+}
