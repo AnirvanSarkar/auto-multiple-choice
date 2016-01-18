@@ -6490,6 +6490,7 @@ sub send_emails {
                                       ""),
 		       );
   }
+  $w{emails_failed}=[map { $_->{id} } grep {  $_->{mail_status}==REPORT_MAIL_FAILED } (@$email_r)];
 
   $projet{'_report'}->end_transaction('emCC');
 
@@ -6625,6 +6626,15 @@ sub email_change_col {
     my ($s)=$projet{_students_list}->data($email_key,$emails_store->get($i,EMAILS_ID));
     $emails_store->set($i,EMAILS_EMAIL,$s->{$oo{'email_col'}});
     $i=$emails_store->iter_next($i);
+  }
+}
+
+sub mailing_select_failed {
+  my $select=$w{'emails_list'}->get_selection;
+  my $model=$w{'emails_list'}->get_model();
+  $select->unselect_all();
+  for my $id (@{$w{emails_failed}}) {
+    $select->select_iter(model_id_to_iter($model,EMAILS_ID,$id));
   }
 }
 
