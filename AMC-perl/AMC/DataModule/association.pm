@@ -46,6 +46,11 @@ package AMC::DataModule::association;
 #   file) associated with the answer sheet by manual association,
 #   or NULL if no automatic association were made for this sheet.
 
+# IMPORTANT !
+#
+# When ID are numerical values, leading zeros are removed in the
+# database by perl calls to the AMC::DataModule::association object.
+
 # VARIABLES:
 #
 # key_in_list is the column name from students list file where to find
@@ -272,10 +277,7 @@ sub check_keys {
 
 sub real_back {
   my ($self,$code)=@_;
-  $c=$self->dbh->{sqlite_see_if_its_a_number};
-  $self->dbh->{sqlite_see_if_its_a_number} = 0;
   my @r=$self->sql_row($self->statement('realBack'),$code);
-  $self->dbh->{sqlite_see_if_its_a_number} = $c;
   return(@r);
 }
 

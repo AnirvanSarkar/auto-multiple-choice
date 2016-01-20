@@ -354,11 +354,24 @@ sub substitute {
     return($s);
 }
 
+sub simple_numeric {
+  my ($a)=@_;
+  $a =~ s/^0+// if($a =~ /^\d+$/);
+  return($a);
+}
+
+sub same_values {
+  my ($a,$b,$test_numeric)=@_;
+  return(1) if($a eq $b);
+  return(1) if($test_numeric && (simple_numeric($a) eq simple_numeric($b)));
+  return(0);
+}
+
 sub data {
     my ($self,$head,$c,%oo)=@_;
     return() if(!defined($c));
     my @k=grep { defined($self->{'noms'}->[$_]->{$head})
-		   && ($self->{'noms'}->[$_]->{$head} eq $c) }
+		   && same_values($self->{'noms'}->[$_]->{$head},$c,$oo{test_numeric}) }
       (0..$#{$self->{'noms'}});
     if(!$oo{'all'}) {
 	if($#k!=0) {

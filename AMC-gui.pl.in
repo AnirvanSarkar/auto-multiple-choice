@@ -4256,7 +4256,7 @@ sub select_students {
   my $i=0;
   for my $sc ($projet{'_capture'}->student_copies) {
     my $id=$projet{'_association'}->get_real(@$sc);
-    my ($name)=$projet{_students_list}->data($key,$id);
+    my ($name)=$projet{_students_list}->data($key,$id,test_numeric=>1);
     my $iter=$students_store->insert_with_values($i++,
 						 0=>studentids_string(@$sc),
 						 1=>$name->{'_ID_'},

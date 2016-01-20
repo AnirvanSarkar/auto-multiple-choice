@@ -527,6 +527,7 @@ sub sc2inom {
     if($code) {
       return($self->{'liste'}->data($self->{'liste_key'},
 				    $code,
+                                    test_numeric=>1,
 				    'all'=>1,'i'=>1));
     } else {
       return();
@@ -769,7 +770,7 @@ sub image_suivante {
 
     $self->{'assoc'}->begin_read_transaction('ALIS');
     while($i != $self->{'iimage'}
-	  && ($self->{'assoc'}->get_real($self->image_sc($i))
+	  && ($self->{'assoc'}->get_real($self->image_sc($i)) ne ''
 	      && ! $self->{'associes_cb'}->get_active()) ) {
 	$i=$self->i_suivant($i,$pas);
 	if($pas==1) {
@@ -862,7 +863,7 @@ sub style_bouton {
 sub style_bouton_code {
   my ($self,$code,$actif)=@_;
   for($self->{'liste'}->data($self->{'liste_key'},$code,
-			     'all'=>1,'i'=>1)) {
+			     test_numeric=>1,'all'=>1,'i'=>1)) {
     $self->style_bouton($_,$actif);
   }
 }

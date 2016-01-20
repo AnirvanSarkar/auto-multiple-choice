@@ -33,6 +33,22 @@ $d->begin_transaction;
 $t->{'datamodule'}=$a;
 $t->{'datatable'}='association_association';
 
+$t->begin('AMC::DataModule::association::get/set');
+
+$a->set_manual(1,2,"001");
+$t->test($a->get_manual(1,2),1);
+$a->set_manual(1,2,"001A");
+$t->test($a->get_manual(1,2),"001A");
+
+$a->set_auto(1,2,"001");
+$t->test($a->get_auto(1,2),1);
+$a->set_auto(1,2,"001A");
+$t->test($a->get_auto(1,2),"001A");
+
+##
+
+$a->clear();
+
 $a->statement('NEWAssoc')->execute(10,0,100,"a100");
 $a->statement('NEWAssoc')->execute(11,0,"m110",110);
 $a->statement('NEWAssoc')->execute(11,1,111,"a111");
@@ -65,26 +81,38 @@ $t->begin('AMC::DataModule::association::counts');
 @c=$a->counts;
 $t->test(\@c,[2,2,3]);
 
-$t->begin('AMC::DataModule::association::real_back');
-
-$a->statement('NEWAssoc')->execute(2,3,undef,"a100");
-
-@c=$a->real_back("a100");
-$t->test(\@c,[2,3]);
-
 $t->begin('AMC::DataModule::association::state');
 
-$a->statement('NEWAssoc')->execute(2,4,undef,"a100");
+$a->statement('NEWAssoc')->execute(2,10,undef,"a100");
 
+$a->set_auto(2,3,"a100");
 $t->test($a->state(5,5),0);
 $t->test($a->state(10,0),1);
-$t->test($a->state(2,4),2);
+$t->test($a->state(2,10),2);
 
 $t->begin('AMC::DataModule::association::clear_auto');
 
 $a->clear_auto;
 my @c=$a->counts;
 $t->test(\@c,[0,2,2]);
+
+$t->begin('AMC::DataModule::association::real_back');
+
+$a->set_auto(2,4,"001");
+$a->set_auto(2,5,"001");
+$a->set_manual(2,5,"023");
+$a->set_manual(2,6,"024");
+
+@c=$a->real_back("m110");
+$t->test(\@c,[11,0]);
+@c=$a->real_back("001");
+$t->test(\@c,[2,4]);
+@c=$a->real_back(1);
+$t->test(\@c,[2,4]);
+@c=$a->real_back("023");
+$t->test(\@c,[2,5]);
+@c=$a->real_back("024");
+$t->test(\@c,[2,6]);
 
 $t->begin('AMC::DataModule::association::real_count');
 

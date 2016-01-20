@@ -292,7 +292,7 @@ sub pdf_output_filename {
 
     if($i) {
       debug "Name found";
-      ($n)=$self->{names}->data($self->{association_key},$i);
+      ($n)=$self->{names}->data($self->{association_key},$i,test_numeric=>1);
       if($n) {
 	$f=$self->{names}->substitute($n,$f);
       }

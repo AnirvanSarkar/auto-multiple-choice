@@ -478,7 +478,7 @@ for my $e (@students) {
 
       if($i) {
 	debug "Name found";
-	($n)=$noms->data($lk,$i);
+	($n)=$noms->data($lk,$i,test_numeric=>1);
 	if($n) {
 	  $f=$noms->substitute($n,$f);
 	}

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -21,14 +21,17 @@
 use AMC::Test;
 
 AMC::Test->new('dir'=>__FILE__,
-	       list=>'names.csv',n_copies=>1,
-	       list_key=>'id',code=>'<preassoc>',
-	       check_assoc=>{2=>'002'},
-	       perfect_copy=>[],
-	       export_full_csv=>[
-				 {-copy=>2,-question=>'bq1',-abc=>'B'},
-				 {-copy=>2,-question=>'bq2',-abc=>'0B'},
-				],
+	       'tex_engine'=>'pdflatex',
+	       'perfect_copy'=>'','seuil'=>0.15,
+               association_manual=>
+               [
+                {id=>'01X',student=>4,copy=>0},
+                {id=>'01Y',student=>5,copy=>0},
+               ],
+	       'check_marks'=>{map { $_=>$_ } (1..5)},
+	       'check_assoc'=>{1=>'1',2=>'02',3=>'0003',
+                               4=>'x',5=>'x',
+                               'm:4'=>'01X','m:5'=>'01Y'},
 	      )
   ->default_process;
 

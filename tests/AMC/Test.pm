@@ -25,6 +25,7 @@ use AMC::Data;
 use AMC::DataModule::capture qw(:zone);
 use AMC::DataModule::scoring qw(:question);
 use AMC::Scoring;
+use AMC::NamesFile;
 
 use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
@@ -75,6 +76,7 @@ sub new {
      'list_key'=>'id',
      'code'=>'student',
      'check_assoc'=>'',
+     'association_manual'=>'',
      'annote'=>'',
      'annote_files'=>[],
      'annote_ascii'=>0,
@@ -117,6 +119,8 @@ sub new {
     closedir $dh;
     $self->{'list'}=$l[0];
   }
+  $self->{names}=AMC::NamesFile::new($self->{'dir'}.'/'.$self->{list},'utf8','id')
+    if(-f $self->{'dir'}.'/'.$self->{list});
 
   GetOptions("debug!"=>\$self->{'debug'},"blind!"=>\$self->{'blind'});
 
@@ -393,7 +397,20 @@ sub assoc {
 		     '--liste-key',$self->{'list_key'},
 		     @code,
 		     '--data','%DATA',
-		     );
+                    );
+
+  if($self->{association_manual}) {
+    for my $a (@{$self->{association_manual}}) {
+      $self->amc_command('association',
+                         '--liste','%PROJ/'.$self->{'list'},
+                         '--data','%DATA',
+                         '--set',
+                         '--student',$a->{student},
+                         '--copy',$a->{copy},
+                         '--id',$a->{id},
+                         );
+    }
+  }
 }
 
 sub get_marks {
@@ -481,7 +498,14 @@ sub get_assoc {
 
     $self->trace("[I] Assoc:");
     for my $m (@{$self->{'association'}}) {
-      $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy auto manual/)));
+      for my $t (qw/auto manual/) {
+        my ($n)=$self->{names}->data('id',$m->{$t},test_numeric=>1);
+        if($n) {
+          $m->{$t}=$n->{id};
+          $m->{name}=$n->{_ID_};
+        }
+      }
+      $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy auto manual name/)));
     }
   }
 }

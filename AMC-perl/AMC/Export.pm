@@ -199,7 +199,7 @@ sub pre_process {
       $keys{$m->{'student.key'}}=1;
 
       # find the corresponding name
-      my ($n)=$self->{'noms'}->data($lk,$m->{'student.key'});
+      my ($n)=$self->{'noms'}->data($lk,$m->{'student.key'},test_numeric=>1);
       if($n) {
 	$m->{'student.name'}=$n->{'_ID_'};
 	$m->{'student.line'}=$n->{'_LINE_'};
@@ -217,7 +217,7 @@ sub pre_process {
     if($self->{'noms.useall'}) {
       for my $i ($self->{'noms'}->liste($lk)) {
 	if(!$keys{$i}) {
-	  my ($name)=$self->{'noms'}->data($lk,$i);
+	  my ($name)=$self->{'noms'}->data($lk,$i,test_numeric=>1);
 	  push @marks,
 	    {'student'=>'',
 	     'copy'=>'',
