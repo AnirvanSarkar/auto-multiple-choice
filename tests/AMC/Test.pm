@@ -107,7 +107,7 @@ sub new {
   if (!$self->{'src'}) {
     opendir(my $dh, $self->{'dir'})
       || die "can't opendir $self->{'dir'}: $!";
-    my @tex = grep { /\.(tex|txt)$/ } readdir($dh);
+    my @tex = grep { /\.(tex|txt)$/ } sort { $a cmp $b } readdir($dh);
     closedir $dh;
     $self->{'src'}=$tex[0];
   }
