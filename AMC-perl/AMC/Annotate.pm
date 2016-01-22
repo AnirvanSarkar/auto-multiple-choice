@@ -290,7 +290,7 @@ sub pdf_output_filename {
 
     debug "Association -> ID=$i";
 
-    if($i) {
+    if(defined($i)) {
       debug "Name found";
       ($n)=$self->{names}->data($self->{association_key},$i,test_numeric=>1);
       if($n) {

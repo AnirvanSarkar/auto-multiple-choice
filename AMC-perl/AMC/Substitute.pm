@@ -75,7 +75,7 @@ sub substitute {
 
     debug "Association -> ID=$i";
 
-    if($i) {
+    if(defined($i)) {
       ($n)=$self->{'names'}->data($self->{'lk'},$i,test_numeric=>1);
       if($n) {
 	$text=$self->{'names'}->substitute($n,$text,'prefix'=>'%');
