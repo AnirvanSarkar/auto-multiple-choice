@@ -768,6 +768,7 @@ sub check_textest {
   }
   $tex_file=$self->{'temp_dir'}."/".$tex_file;
   if(-f $tex_file) {
+    my @value_is,@value_shouldbe;
     chomp(my $cwd = `pwd`);
     chdir($self->{'temp_dir'});
     open(TEX,"-|",$self->{'tex_engine'},
@@ -784,9 +785,20 @@ sub check_textest {
       if(/^TEST\(([^,]*),([^,]*)\)/) {
 	$self->test($1,$2);
       }
+      if(/^VALUEIS\((.*)\)/) {
+        push @value_is,$1;
+      }
+      if(/^VALUESHOULDBE\((.*)\)/) {
+        push @value_shouldbe,$1;
+      }
     }
     close(TEX);
     chdir($cwd);
+    if(@value_shouldbe) {
+      for my $i (0..$#value_shouldbe) {
+        $self->test($value_is[$i],$value_shouldbe[$i]);
+      }
+    }
     $self->end();
   } else {
     $self->trace("[X] TeX file not found: $tex_file");

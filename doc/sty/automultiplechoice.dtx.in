@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2008-2015 Alexis Bienvenue
+% Copyright (C) 2008-2016 Alexis Bienvenue
 %
 % This file is part of Auto-Multiple-Choice
 %
@@ -592,7 +592,7 @@ along with Auto-Multiple-Choice.  If not, see
 % each question sheet. They handle groups of questions.  These groups
 % will usualy contain questions, but can be made of any \LaTeX{} content.
 % 
-% \DescribeMacro{\element}\DescribeMacro{\shufflegroup}\DescribeMacro{\insertgroup}
+% \DescribeMacro{\element}\DescribeMacro{\shufflegroup}\DescribeMacro{\insertgroup}\DescribeMacro{\insertgroupfrom}
 % The command |\element|\marg{groupname}\marg{content} adds element
 % with content \meta{content} to the group named \meta{groupname}.
 % The command |\shufflegroup|\marg{groupname} shuffles elements of
@@ -600,7 +600,10 @@ along with Auto-Multiple-Choice.  If not, see
 % |\insertgroup|\oarg{n}\marg{groupname} inserts elements of group
 % \meta{groupname} one after one. If optional parameter \meta{n} is
 % given, only the first \meta{n} elements of the group are inserted in
-% the document.
+% the document. The command
+% |\insertgroup|\oarg{n}\marg{groupname}\marg{i} does the same,
+% starting from element at index \meta{i} (the first element has index
+% 0).
 %
 % As an example without questions in groups elements, consider the
 % following code:
@@ -615,6 +618,8 @@ along with Auto-Multiple-Choice.  If not, see
 \element{serie}{ four}
 \element{serie}{ five}
 Numbers:\insertgroup{serie}.
+
+Three numbers from the second (index=1) one:\insertgroupfrom[3]{serie}{1}.
 
 \shufflegroup{serie}
 Two of them:\insertgroup[2]{serie}.
@@ -631,17 +636,22 @@ Two of them:\insertgroup[2]{serie}.
 %   \element{serie}{ five}
 %   \begin{center}\fbox{\begin{minipage}{.7\linewidth}
 %       Numbers:\insertgroup{serie}.
-%       
+%
+%       Three numbers from the second (index=1) one:\insertgroupfrom[3]{serie}{1}.
+%
 %       \shufflegroup{serie}
 %       Two of them:\insertgroup[2]{serie}.
 %   \end{minipage}}\end{center}
 %
-% \DescribeMacro{\cleargroup}\DescribeMacro{\copygroup} The command
-% |\cleargroup|\marg{groupname} clears all the elements of group
-% \meta{groupname}, making an empty group. The command
+% \DescribeMacro{\cleargroup}\DescribeMacro{\copygroup}\DescribeMacro{\copygroupfrom}
+% The command |\cleargroup|\marg{groupname} clears all the elements of
+% group \meta{groupname}, making an empty group. The command
 % |\copygroup|\oarg{n}\marg{from}\marg{to} copies the elements of
 % group \meta{from} to grou \meta{to} -- if optional parameter
-% \meta{n} is given, only the \meta{n} first elements are copied.
+% \meta{n} is given, only the \meta{n} first elements are copied. The
+% command |\copygroup|\oarg{n}\marg{from}\marg{to}\marg{i} does the
+% same, starting from element at index \meta{i} (the first element has
+% index 0).
 %
 % As an example again without questions, consider the following
 % code:
@@ -654,6 +664,12 @@ Two of them:\insertgroup[2]{serie}.
 \element{digits}{ 7}\element{digits}{ 8}\element{digits}{ 9}
 \element{letters}{ A}\element{letters}{ B}\element{letters}{ C}
 \element{letters}{ D}\element{letters}{ E}\element{letters}{ F}
+
+\shufflegroup{letters}
+\cleargroup{mixed}
+\copygroupfrom[3]{digits}{mixed}{1}\copygroup[2]{letters}{mixed}
+\shufflegroup{mixed}
+Three digits from 2 to 4 and two letters:\insertgroup{mixed}.
 
 \shufflegroup{digits}\shufflegroup{letters}
 \cleargroup{mixed}
@@ -688,6 +704,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %     \element{letters}{ E}
 %     \element{letters}{ F}
 %     \begin{center}\fbox{\begin{minipage}{.7\linewidth}
+%         \shufflegroup{letters}
+%         \cleargroup{mixed}
+%         \copygroupfrom[3]{digits}{mixed}{1}\copygroup[2]{letters}{mixed}
+%         \shufflegroup{mixed}
+%         Three digits from 2 to 4 and two letters:\insertgroup{mixed}.
+%
 %         \shufflegroup{digits}\shufflegroup{letters}
 %         \cleargroup{mixed}
 %         \copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
@@ -2192,32 +2214,47 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
 }
 %    \end{macrocode}
-% The functions |\AMCgrouppre@|xxx\marg{group-name}\marg{n} are called before
-% using \meta{n} elements from group \meta{group-name}, either with
-% |\insertgroup| or |\copygroup|.
+% The functions |\AMCgrouppre@|xxx\marg{group-name}\marg{n}\marg{i}
+% are called before using \meta{n} elements from group
+% \meta{group-name} starting from index \meta{i} (negative value for
+% \meta{i} stands for the current value of the group index), either
+% with |\insertgroup| or |\copygroup|.
 %
-% For mode \textbf{fixed}, the group index is set to 0 (take elements
-% from the beginning).
+% For mode \textbf{fixed}, the group index is set to \meta{i}, or 0 if
+% \meta{i} is negative (take elements from the beginning).
 %    \begin{macrocode}
-\newcommand{\AMCgrouppre@fixed}[2]{%
-  \csname AMC#1@j\endcsname=\z@%
+\newcommand{\AMCgrouppre@fixed}[3]{%
+  \ifnum#3<\z@%
+    \csname AMC#1@j\endcsname=\z@%
+  \else%
+    \csname AMC#1@j\endcsname=#3%
+  \fi%
 }
 %    \end{macrocode}
 % For mode \textbf{withreplacement}, the group is shuffled and the
-% group index is set to 0 (take elements from the beginning).
+% group index is set to \meta{i} or 0 (take elements from the
+% beginning) if negative.
 %    \begin{macrocode}
-\newcommand{\AMCgrouppre@withreplacement}[2]{%
-  \csname AMC#1@j\endcsname=\z@%
+\newcommand{\AMCgrouppre@withreplacement}[3]{%
+  \ifnum#3<\z@%
+    \csname AMC#1@j\endcsname=\z@%
+  \else%
+    \csname AMC#1@j\endcsname=#3%
+  \fi%
   \shufflegroup{#1}%
 }
 %    \end{macrocode}
-% For mode \textbf{withoutreplacement}, the group index is left
-% unchanged. If there is not enough elements left in the group, the
-% elements before the index and the elements after the index are
-% shuffled.
+% For mode \textbf{withoutreplacement}, the group index is set to
+% \meta{i}, or left unchanged if \meta{i} is negative. If there is not
+% enough elements left in the group, the elements before the index and
+% the elements after the index are shuffled.
 %    \begin{macrocode}
 \newcount\AMC@imax
-\newcommand{\AMCgrouppre@withoutreplacement}[2]{%
+\newcommand{\AMCgrouppre@withoutreplacement}[3]{%
+  \ifnum#3<\z@%
+  \else%
+    \csname AMC#1@j\endcsname=#3%
+  \fi%
   \ifnum\AMCtok@ik=\AMCloop@k%
     \AMCtok@ik=\z@%
   \fi%
@@ -2236,28 +2273,41 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
 }
 %    \end{macrocode}
-% For mode \textbf{cyclic}, nothing has to be done.
+% For mode \textbf{cyclic}, nothing has to be done, except setting the
+% group index if non-negative.
 %    \begin{macrocode}
-\newcommand{\AMCgrouppre@cyclic}[2]{}
+\newcommand{\AMCgrouppre@cyclic}[3]{%
+  \ifnum#3<\z@%
+  \else%
+    \csname AMC#1@j\endcsname=#3%
+  \fi%
+}
 %    \end{macrocode}
-% The function |\AMCgroup@pre|\marg{mode}\marg{group-name}\marg{n}
-% calls the right |\AMCgrouppre@|xxx command.
+% The function
+% |\AMCgroup@pre|\marg{mode}\marg{group-name}\marg{n}\marg{i} calls
+% the right |\AMCgrouppre@|xxx command.
 %    \begin{macrocode}
-\newcommand{\AMCgroup@pre}[3]{%
-  \csname AMCgrouppre@#1\endcsname{#2}{#3}%
+\newcommand{\AMCgroup@pre}[4]{%
+  \csname AMCgrouppre@#1\endcsname{#2}{#3}{#4}%
 }
 %    \end{macrocode}
 % \end{macro}\end{macro}
-% \begin{macro}{\shufflegroup}\begin{macro}{\insertgroup}
+% \begin{macro}{\shufflegroup}\begin{macro}{\insertgroup}\begin{macro}{\insertgroupfrom}
 %     Command |\shufflegroup|\marg{group-name} shuffles the elements
 %     of group \meta{group-name}, and
 %     |\shufflegroupslice|\marg{group-name}\marg{a}\marg{b} shuffles
 %     elements \meta{a} to \meta{b} from group \meta{group-name}. It
 %     can be called at each student sheet in order to get different
-%     student sheets and avoid cheating.  Command
+%     student sheets and avoid cheating.
+%
+%     Command
 %     |\insertgroup|\oarg{n}\marg{groupname} inserts all the elements
 %     of group \meta{groupname}, or only the first \meta{n} elements
 %     if \meta{n} is given.
+%     |\insertgroupfrom|\oarg{n}\marg{groupname}\marg{i} inserts all
+%     the elements of group \meta{groupname} starting from index
+%     \meta{i} (the index of the first element is 0), or only the
+%     first \meta{n} elements if \meta{n} is given.
 %    \begin{macrocode}
 \newcommand{\shufflegroup}[1]{%
   \ifAMC@shuffleG{\AMC@shuffletoks{\number\csname #1@k\endcsname}{#1@}}\fi%
@@ -2267,7 +2317,7 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 \newcount\AMCtok@ik
 \newcount\AMCloop@k
-\newcommand{\AMCgrouploop@prep}[2]{%
+\newcommand{\AMCgrouploop@prep}[3]{%
   \AMCtok@size=#1\relax%
   \ifAMC@fullGroups\AMCtok@size=\z@\fi%
   \ifnum\AMCtok@size<\@ne%
@@ -2279,7 +2329,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \PackageError{automultiplechoice}{No group mode for #2}%
        {No mode has been defined for group '#2'. This should not occur...}%
   \fi%
-  \AMCgroup@pre{\csname AMC#2@mode\endcsname}{#2}{\the\AMCtok@size}%
+  \AMCgroup@pre{\csname AMC#2@mode\endcsname}{#2}{\the\AMCtok@size}{#3}%
 }
 \newcommand{\AMCgrouploop@next}[1]{%
   \global\advance\csname AMC#1@j\endcsname\@ne\relax%
@@ -2289,16 +2339,19 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCtok@ik=\csname AMC#1@j\endcsname%
   \advance\AMCtok@size\m@ne%
 }
-\newcommand{\insertgroup}[2][0]{%
-  \AMCgrouploop@prep{#1}{#2}%
+\newcommand{\insertgroupfrom}[3][0]{%
+  \AMCgrouploop@prep{#1}{#2}{#3}%
   {\loop%
     \AMCgrouploop@next{#2}%
     {\the\csname #2@\romannumeral\AMCtok@ik\endcsname}%
   \ifnum\AMCtok@size>\z@\repeat}%
 }
-%    \end{macrocode}\end{macro}\end{macro}
+\newcommand{\insertgroup}[2][0]{%
+  \insertgroupfrom[#1]{#2}{-1}%
+}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
-% \begin{macro}{\cleargroup}\begin{macro}{\copygroup}
+% \begin{macro}{\cleargroup}\begin{macro}{\copygroup}\begin{macro}{\copygroupfrom}
 %     The commands |\cleargroup| and |\copygroup| can also be used to
 %     make more complex questions combinations in the exams, allowing
 %     for example to ask the package to shuffle 3 questions taken at
@@ -2312,6 +2365,11 @@ Three digits and two letters:\insertgroup{mixed}.
 %     elements from group \meta{from} to group \meta{to}. If optional
 %     parameter \meta{n} is not given, all the questions from group
 %     \meta{from} are copied.
+%     |\copygroupfrom|\oarg{n}\marg{from}\marg{to}\marg{i} copies
+%     \meta{n} elements from group \meta{from} to group \meta{to},
+%     starting from element at index \meta{i} (the index of the first
+%     element is 0). If optional parameter \meta{n} is not given, all
+%     the questions from group \meta{from} are copied.
 %
 %     See section~\ref{d:groups} for an illustration for these commands.
 %
@@ -2321,15 +2379,19 @@ Three digits and two letters:\insertgroup{mixed}.
   \csname #1@k\endcsname=\z@\relax%
   \csname AMC#1@j\endcsname=\z@\relax%
 }
-\newcommand{\copygroup}[3][0]{%
-  \AMCgrouploop@prep{#1}{#2}%
+\newcommand{\copygroupfrom}[4][0]{%
+  \AMCgrouploop@prep{#1}{#2}{#4}%
   {\loop%
     \AMCgrouploop@next{#2}%
     \AMC@prepare@element{#3}%    
     \global\csname #3@\romannumeral\AMCtok@k\endcsname=\csname #2@\romannumeral\AMCtok@ik\endcsname%
   \ifnum\AMCtok@size>\z@\repeat}%
 }
+\newcommand{\copygroup}[3][0]{%
+  \copygroupfrom[#1]{#2}{#3}{-1}%
+}
 %    \end{macrocode}
+% \end{macro}
 % \end{macro}
 % \end{macro}
 % 
