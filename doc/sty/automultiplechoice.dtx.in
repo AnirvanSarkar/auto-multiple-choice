@@ -3918,6 +3918,22 @@ Three digits and two letters:\insertgroup{mixed}.
   ~\fi\clearpage}
 %    \end{macrocode}\end{macro}
 %
+% \begin{macro}{\AMCaddpagesto}
+%   In some situations, one needs all question sheets to have the same
+%   number of pages. The command |\AMCaddpagesto|\marg{n} adds enough
+%   (white) pages to get at least \meta{n} pages in the current
+%   question sheet.
+%    \begin{macrocode}
+\newcommand{\AMCaddpagesto}[1]{%
+  \@whilenum\thepage<#1\do{%
+    \clearpage~%
+    \ifnum\thepage<#1%
+      \ifAMC@automarks\pagestyle{AMCpageEmpty}\fi%
+    \fi%
+  }%
+}
+%    \end{macrocode}\end{macro}
+%
 % \begin{macro}{\exemplairepair}
 %   To make some differences in the copies, checking if the student
 %   sheet number is odd, with |\exemplairepair| construct, can be
