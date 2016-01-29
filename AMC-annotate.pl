@@ -145,7 +145,7 @@ GetOptions("cr=s"=>\$cr_dir,
 set_debug($debug);
 
 for(split(/,/,join(',',@o_symbols))) {
-    if(/^([01]-[01]):(none|circle|mark|box)(?:\/([\#a-z0-9]+))?$/) {
+    if(/^([01]-[01]):(none|circle|mark|box)(?:[\/:]([\#a-z0-9]+))?$/) {
 	$symboles{$1}={type=>$2,color=>$3};
     } else {
 	die "Bad symbol syntax: $_";
