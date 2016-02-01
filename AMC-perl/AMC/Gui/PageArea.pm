@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -51,8 +51,8 @@ sub add_feuille {
     $self->{scorezone_color_name}="#DE61E2";
     $self->{empty_color_name}="#78FFED";
     $self->{invalid_color_name}="#FFEF3B";
-    $self->{'conflict_color_name'}="#00FF00";
-   
+    $self->{conflict_color_name}="#00FF00";
+
     $self->{linewidth_zone}=1;
     $self->{linewidth_box}=1;
     $self->{linewidth_box_scan}=2;

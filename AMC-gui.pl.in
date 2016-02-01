@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2015 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -325,6 +325,9 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'notify_annotation'=>1,
 	      'notify_desktop'=>1,
 	      'notify_command'=>'',
+
+              view_invalid_color=>"#FFEF3B",
+              view_empty_color=>"#78FFED",
 	      );
 
 # MacOSX universal command to open files or directories : /usr/bin/open
@@ -3165,6 +3168,8 @@ sub saisie_manuelle {
 	 'size_monitor'=>{env=>\%o,
 			  key=>($regarder?'checklayout':'manual')
 			  .'_window_size'},
+         invalid_color_name=>$o{view_invalid_color},
+         empty_color_name=>$o{view_empty_color},
 	);
     } else {
 	my $dialog = Gtk2::MessageDialog

@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2015 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -39,7 +39,7 @@ my $conflict_num=-1; # which conflict is currently being viewed
 my $num_conflicts=0; # how man conflicts in the list
 my @hconflicts=(); # holds id=student,page,copy and question
 #conflicts should be an array of hashes
-    
+
 use constant {
     MDIAG_ID => 0,
     MDIAG_ID_BACK => 1,
@@ -77,6 +77,8 @@ sub new {
 	      'multiple'=>0,
 	      'onscan'=>'',
 	      'size_monitor'=>'',
+              'invalid_color_name'=>"#FFEF3B",
+              'empty_color_name'=>"#78FFED",
 	  };
 
     for (keys %o) {
@@ -136,6 +138,8 @@ sub new {
     AMC::Gui::PageArea::add_feuille
 	($self->{'area'},'',
 	 'yfactor'=>2,
+         invalid_color_name=>$self->{invalid_color_name},
+         empty_color_name=>$self->{empty_color_name},
 	 'editable'=>$self->{'editable'},
 	 'marks'=>($self->{'editable'} ? '' : 'blue'));
 
@@ -188,7 +192,7 @@ sub new {
 
     $self->select_page(0);
 
-    
+
 ## Build list of marking conflicts (duplicate or blanks)
     $conflict_num=-1; # which conflict is currently being viewed
     $num_conflicts=0; # how many conflicts in the list
@@ -803,4 +807,3 @@ sub goto_activate_cb {
 1;
 
 __END__
-
