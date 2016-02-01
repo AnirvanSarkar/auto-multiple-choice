@@ -896,6 +896,9 @@ sub page_sensitivity {
 #
 # $s{'sensitivity'} is 'red' is the sensitivity exceeds
 # $options{'sensitivity_threshold'}, undef otherwise.
+#
+# $s{'why'} (only available if $options{'why'} is true) collects all
+# 'why' attributes from all qeustions on the page (from the scoring table)
 
 # summaries returns a reference to an array containing the summaries
 # of all pages.
@@ -915,6 +918,16 @@ sub compute_summaries {
     $p->{'sensitivity_color'}=(defined($p->{'sensitivity'}) ?
 			       ($p->{'sensitivity'} > $oo{'sensitivity_threshold'}
 				? 'red' : undef) : undef);
+  }
+  if($oo{why}) {
+    $self->require_module("layout");
+    my %why=();
+    for my $w ($self->module("scoring")->pages_why()) {
+      $why{pageids_string($w->{student},$w->{page},$w->{copy})}=$w->{why};
+    }
+    for my $p (@$r) {
+      $p->{why}=$why{pageids_string($p->{student},$p->{page},$p->{copy})};
+    }
   }
   return($r);
 }

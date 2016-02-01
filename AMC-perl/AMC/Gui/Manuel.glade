@@ -2,6 +2,11 @@
 <interface>
   <requires lib="gtk+" version="2.24"/>
   <!-- interface-naming-policy toplevel-contextual -->
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-copy</property>
+  </object>
   <object class="GtkWindow" id="general">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -69,7 +74,6 @@
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
                     <property name="tooltip_text" translatable="yes">Go to the previous page.</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="passe_precedent" swapped="no"/>
                   </object>
@@ -87,7 +91,6 @@
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
                     <property name="tooltip_text" translatable="yes">Quit</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="ok_quitter" swapped="no"/>
                   </object>
@@ -105,7 +108,6 @@
                     <property name="receives_default">True</property>
                     <property name="has_tooltip">True</property>
                     <property name="tooltip_text" translatable="yes">Go to next page.</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="passe_suivant" swapped="no"/>
                   </object>
@@ -268,7 +270,6 @@
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
                             <property name="tooltip_text" translatable="yes">Save this page modifications, then go to the previous page.</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="passe_precedent" swapped="no"/>
                           </object>
@@ -279,6 +280,26 @@
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkComboBox" id="navigate">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Choose if you want to navigate through all pages, through pages with invalid answers, or through pages with invalid or empty answers.</property>
+                            <property name="active">0</property>
+                            <property name="entry_text_column">0</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="button3">
                             <property name="label">gtk-go-forward</property>
                             <property name="visible">True</property>
@@ -286,64 +307,8 @@
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
                             <property name="tooltip_text" translatable="yes">Save this page modifications, then go to next page.</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="passe_suivant" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHButtonBox" id="hbuttonbox6">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkButton" id="button9">
-                            <property name="label">Previous Error</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="has_tooltip">True</property>
-                            <property name="tooltip_text" translatable="yes">Save this page modifications, then go to the previous page.</property>
-                            <signal name="clicked" handler="previous_error" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="con_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">label</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="button10">
-                            <property name="label">Next Error</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="has_tooltip">True</property>
-                            <property name="tooltip_text" translatable="yes">Save this page modifications, then go to next page.</property>
-                            <signal name="clicked" handler="next_error" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -355,8 +320,11 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow1">
@@ -389,7 +357,6 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="image">image1</property>
                             <signal name="clicked" handler="duplique_saisie" swapped="no"/>
                           </object>
@@ -408,7 +375,6 @@
                             <property name="has_tooltip">True</property>
                             <property name="tooltip_markup">Remove manual modifications for this page. Automatic data capture for this page, if any, won&amp;apos; t be changed.</property>
                             <property name="tooltip_text" translatable="yes">Remove manual modifications for this page. Automatic data capture for this page, if any, won't be changed.</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="efface_saisie" swapped="no"/>
                           </object>
@@ -437,7 +403,6 @@
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
                             <property name="tooltip_text" translatable="yes">Cancel modifications for this page</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="annule" swapped="no"/>
                           </object>
@@ -455,7 +420,6 @@
                             <property name="receives_default">True</property>
                             <property name="has_tooltip">True</property>
                             <property name="tooltip_text" translatable="yes">Save and quit</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="ok_quitter" swapped="no"/>
                           </object>
@@ -495,10 +459,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-copy</property>
   </object>
 </interface>

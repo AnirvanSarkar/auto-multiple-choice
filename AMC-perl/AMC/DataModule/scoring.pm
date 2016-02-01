@@ -196,6 +196,7 @@ our %EXPORT_TAGS = ( 'question' => [ qw/QUESTION_SIMPLE QUESTION_MULT/ ],
 use AMC::Basic;
 use AMC::DataModule;
 use AMC::DataModule::capture ':zone';
+use AMC::DataModule::layout ':flags';
 
 use XML::Simple;
 
@@ -519,17 +520,28 @@ sub define_statements {
 		    ." WHERE student=? AND copy=?"},
      'deleteCodes'=>{'sql'=>"DELETE FROM ".$self->table('code')
 		    ." WHERE student=? AND copy=?"},
-     'conflicts'=>
-     {'sql'=>"SELECT student, copy, question" 
-	  ." FROM ".$self->table('score')." WHERE (why = 'E') OR (why = 'V')" },
+     'pagesWhy'=>{'sql'=>"SELECT s.student,s.copy,GROUP_CONCAT(s.why) as why,b.page FROM "
+                  .$self->table('score')." s"
+                  ." JOIN "
+                  ." ( SELECT student,page,question FROM ".$self->table("box","layout")
+                  ."   WHERE role=?"
+                  ."   GROUP BY student,page,question )"
+                  . " b"
+                  ." ON s.student=b.student AND s.question=b.question"
+                  ." GROUP BY s.student,b.page,s.copy"},
     };
 }
 
-sub get_conflicts{
-    my ($self)=@_;
-    my @list = @{$self->dbh
-		     ->selectall_arrayref($self->statement('conflicts'))};
-    return(@list);
+# page_why() returns a list of items like
+# {student=>1,copy=>0,page=>1,why=>',V,E,,'}
+# that collects all 'why' attributes for questions that are on each page.
+
+sub pages_why {
+  my ($self)=@_;
+  return(@{$self->dbh->selectall_arrayref($self->statement('pagesWhy'),
+                                          {Slice=>{}},
+                                          BOX_ROLE_ANSWER
+                                         )});
 }
 
 

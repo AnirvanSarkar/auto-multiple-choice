@@ -76,6 +76,20 @@ sub path {
   return($self->{'data'}->module_path($self->{'name'}));
 }
 
+# module(name) returns another module from same data
+
+sub module {
+  my ($self,$name)=@_;
+  return($self->{data}->module($name));
+}
+
+# require_module(name) loads the module for the same data
+
+sub require_module {
+  my ($self,$name)=@_;
+  return($self->{data}->require_module($name));
+}
+
 # vacuum() loads the SQLite database separately, and asks for VACUUM
 # on it.
 

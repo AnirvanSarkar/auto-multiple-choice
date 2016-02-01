@@ -34,12 +34,6 @@ use AMC::Gui::WindowSize;
 use AMC::Data;
 use AMC::DataModule::capture qw/:zone/;
 
-
-my $conflict_num=-1; # which conflict is currently being viewed
-my $num_conflicts=0; # how man conflicts in the list
-my @hconflicts=(); # holds id=student,page,copy and question
-#conflicts should be an array of hashes
-
 use constant {
     MDIAG_ID => 0,
     MDIAG_ID_BACK => 1,
@@ -51,6 +45,7 @@ use constant {
     MDIAG_STUDENT => 7,
     MDIAG_PAGE => 8,
     MDIAG_COPY => 9,
+    MDIAG_WHY => 10,
 };
 
 use_gettext;
@@ -113,7 +108,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view con_label/) {
+    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view navigate/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
@@ -128,6 +123,15 @@ sub new {
       $self->{'scan_view_model'}=cb_model(0,__("Original"),
 					  1,__("Scan"));
       $self->{'scan_view'}->set_model($self->{'scan_view_model'});
+
+# TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through all pages. Please keep this text very short (say less than 5 letters) so that the window is not too large
+      $self->{navigate_model}=cb_model(0,__("all"),
+ # TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through pages with some invalid answers. Please keep this text very short (say less than 5 letters) so that the window is not too large
+                                       1,__("inv"),
+# TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through pages with empty or invalid answers. Please keep this text very short (say less than 5 letters) so that the window is not too large
+                                       2,__("i&e"));
+      $self->{navigate}->set_model($self->{navigate_model});
+
       $self->{'navigation_h'}->show();
     }
 
@@ -192,56 +196,13 @@ sub new {
 
     $self->select_page(0);
 
-
-## Build list of marking conflicts (duplicate or blanks)
-    $conflict_num=-1; # which conflict is currently being viewed
-    $num_conflicts=0; # how many conflicts in the list
-    @hconflicts=(); # holds id=student,page,copy and question
-    $self->{'layout'}->begin_read_transaction;
-    my @con_table=$self->{'layout'}->student_question_page;
-    $self->{'layout'}->end_transaction;
-
-# print the elements:
-    my $lent = @con_table;
-#    for (my $i=0;$i<$lent;$i++){
-#	print $con_table[$i][0]." "; #student
-#	print $con_table[$i][1]." "; #page
-#	print $con_table[$i][2]."\n"; #question #
-#    }
-
-    # ok, got student, page, question.
-    # now need student question, why, questionID, copy
-    $self->{'scoring'}->begin_read_transaction;
-    my @score_table=$self->{'scoring'}->get_conflicts;
-    $self->{'scoring'}->end_transaction;
-    $lens = @score_table;
-#    for (my $i=0;$i<$lens;$i++){
-#	print $score_table[$i][0]." "; # student
-#	print $score_table[$i][1]." "; #copy #
-#	print $score_table[$i][2]."\n"; #question #
-#     }
-    #now match student & question#'s to build student/page list
-    for (my $i=0 ; $i < $lens ; $i++){
-	for (my $j=0 ; $j < $lent ; $j++){
-	    if (($score_table[$i][0] eq $con_table[$j][0]) and ($score_table[$i][2] eq $con_table[$j][2])){
-		my @id=[$con_table[$j][0], $con_table[$j][1], $score_table[$i][1]];
-		push @hconflicts, { id => @id, question => $con_table[$j][2] };
-#		print "$i $j added $con_table[$j][0]/$con_table[$j][1] question $con_table[$j][2]\n";
-		last;
-	    }
-	}
-
-    }
-    $num_conflicts=@hconflicts;
-    my $lnum = $conflict_num+1;
-    $self->{'con_label'}->set_text("Errs: $lnum/$num_conflicts");
-    debug "number of conflicts: $num_conflicts\n";
     return($self);
 }
 
 sub new_diagstore {
   my ($self)=@_;
   $diag_store = Gtk2::ListStore->new ('Glib::String',
+				      'Glib::String',
 				      'Glib::String',
 				      'Glib::String',
 				      'Glib::String',
@@ -356,7 +317,8 @@ sub maj_list_all {
     ->summaries('darkness_threshold'=>$self->{'seuil'},
 		'darkness_threshold_up'=>$self->{'seuil_up'},
 		'sensitivity_threshold'=>$self->{'seuil_sens'},
-		'mse_threshold'=>$self->{'seuil_eqm'});
+		'mse_threshold'=>$self->{'seuil_eqm'},
+                'why'=>1);
   my $capture_free=[];
   push @$capture_free,@{$self->{'capture'}->question_only_pages} if(!$self->{editable});
   push @$capture_free,@{$self->{'capture'}->no_capture_pages};
@@ -379,8 +341,9 @@ sub maj_list_all {
 	    MDIAG_EQM,$p->{'mse_string'},
 	    MDIAG_EQM_BACK,$p->{'mse_color'},
 	    MDIAG_DELTA,$p->{'sensitivity_string'},
-	    MDIAG_DELTA_BACK,$p->{'sensitivity_color'},
-	   );
+            MDIAG_DELTA_BACK,$p->{'sensitivity_color'},
+            MDIAG_WHY,$p->{why},
+           );
     $select_iid=$i if($select_spc &&
 		      $select_spc->[0]==$p->{'student'} &&
 		      $select_spc->[1]==$p->{'page'} &&
@@ -400,7 +363,8 @@ sub maj_list_all {
 	    MDIAG_EQM,'',
 	    MDIAG_EQM_BACK,undef,
 	    MDIAG_DELTA,'',
-	    MDIAG_DELTA_BACK,undef,
+            MDIAG_DELTA_BACK,undef,
+            MDIAG_WHY,'',
 	   );
     $select_iid=$i if($select_spc &&
 		      $select_spc->[0]==$p->[0] &&
@@ -590,10 +554,6 @@ sub charge_i {
 	}
 
 	# mise a jour des cases suivant saisies deja presentes
-	my @con_id=();
-	if ($conflict_num ge 0){
-	    @con_id=@{$hconflicts[$conflict_num]->{'id'}};
-	}
 
 	for my $i (@{$self->{'layinfo'}->{'box'}}) {
 	  my $id=$i->{'question'}."."
@@ -605,16 +565,6 @@ sub charge_i {
 	  debug "Q=$id R=$t";
 	  $i->{'id'}=[@spc];
 	  $i->{'ticked'}=$t;
-	  $i->{'cur_conflict'}=0;
-	  if ($conflict_num ge 0){
-	      if ( $con_id[0] eq ${$i->{'id'}}[0] and
-		   $con_id[1] eq ${$i->{'id'}}[1] and
-		   $con_id[2] eq ${$i->{'id'}}[2] and
-		   $hconflicts[$conflict_num]->{'question'} eq $i->{'question'}){
-		  $i->{'cur_conflict'} = 1;
-		  debug "marked current_conflict: stud, page: ${$i->{'id'}}[0], ${$i->{'id'}}[1]\n";
-	      }
-	  }
 	}
       }
     }
@@ -669,64 +619,41 @@ sub synchronise {
     $self->{'area'}->sync();
 
     $self->maj_list_i;
-}
+  }
 
-sub next_error{
-    my ($self)=@_;
-    return if ($num_conflicts <= 0);
-    if ($conflict_num < $num_conflicts-1){
-	$conflict_num += 1;
-    }
-    if (${$hconflicts[$conflict_num]->{'id'}}[2] eq '0'){
-	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]");
-    }
-    else{
-	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]:${$hconflicts[$conflict_num]->{'id'}}[2]");
-    }
-    my $lnum = $conflict_num+1;
-    $self->{'con_label'}->set_text("Errs: $lnum/$num_conflicts");
-    $self->goto_activate_cb();
-
-}
-
-sub previous_error{
-    my ($self)=(@_);
-    return if ($num_conflicts <= 0);
-    if ( $conflict_num >0 ){
-	$conflict_num -= 1;
-    }
-    if (${$hconflicts[$conflict_num]->{'id'}}[2] eq '0'){
-	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]");
-    }
-    else{
-	my $dest=$self->{($self->{'editable'} ? 'goto' : 'goto_v')}->set_text("${$hconflicts[$conflict_num]->{'id'}}[0]/${$hconflicts[$conflict_num]->{'id'}}[1]:${$hconflicts[$conflict_num]->{'id'}}[2]");
-    }
-    my $lnum = $conflict_num+1;
-    $self->{'con_label'}->set_text("Errs: $lnum/$num_conflicts");
-    $self->goto_activate_cb();
-
+sub navigate_ok {
+  my ($self,$nav_mode,$path)=@_;
+  return(1) if($nav_mode==0);
+  my $iter=$self->{diag_store}->get_iter($path);
+  my $why=$self->{diag_store}->get($iter,MDIAG_WHY);
+  return(0) if($nav_mode==1 && $why !~ /E/);
+  return(0) if($nav_mode==2 && $why !~ /[EV]/);
+  return(1);
 }
 
 sub passe_precedent {
   my ($self)=@_;
+  my $nav=$self->{navigate}->get_active();
   my ($path)=$self->{'diag_tree'}->get_cursor();
   if($path) {
-    if($path->prev) {
-      $self->{'diag_tree'}->set_cursor($path);
-    }
+    my $ok;
+    do {
+      $ok=$path->prev();
+    } while($ok && !$self->navigate_ok($nav,$path));
+    $self->{'diag_tree'}->set_cursor($path) if($ok);
   }
 }
 
 sub passe_suivant {
   my ($self)=@_;
+  my $nav=$self->{navigate}->get_active();
   my ($path)=$self->{'diag_tree'}->get_cursor();
+  my $n=$self->{diag_store}->iter_n_children(undef);
   if($path) {
-    my $path_next=Gtk2::TreePath->new ($path->to_string);
-    $path_next->next();
-    $self->{'diag_tree'}->set_cursor($path_next);
-    ($path_next)=$self->{'diag_tree'}->get_cursor();
-    $self->{'diag_tree'}->set_cursor($path)
-      if(!$path_next);
+    do {
+      $path->next();
+    } while($path->to_string<$n && !$self->navigate_ok($nav,$path));
+    $self->{'diag_tree'}->set_cursor($path) if($path->to_string<$n);
   }
 }
 

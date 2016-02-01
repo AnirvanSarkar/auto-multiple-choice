@@ -51,7 +51,6 @@ sub add_feuille {
     $self->{scorezone_color_name}="#DE61E2";
     $self->{empty_color_name}="#78FFED";
     $self->{invalid_color_name}="#FFEF3B";
-    $self->{conflict_color_name}="#00FF00";
 
     $self->{linewidth_zone}=1;
     $self->{linewidth_box}=1;
@@ -68,7 +67,7 @@ sub add_feuille {
     $self->{'gc'} = Gtk2::Gdk::GC->new($self->window);
 
     $self->{'color'}= Gtk2::Gdk::Color->parse($coul);
-    for my $type ('',qw/scorezone_ question_ unticked_ empty_ invalid_ conflict_/) {
+    for my $type ('',qw/scorezone_ question_ unticked_ empty_ invalid_/) {
       $self->{$type.'color'}=
 	Gtk2::Gdk::Color->parse($self->{$type.'color_name'}) if($type);
       $self->window->get_colormap->alloc_color($self->{$type.'color'},TRUE,TRUE);
@@ -356,11 +355,6 @@ sub expose_drawing {
 		    @{$self->{'layinfo'}->{'box'}}) {
 	    $self->draw_box($box,'');
 	  }
-	  $self->{'gc'}->set_foreground($self->{'conflict_color'});
-	  for $box (grep { $_->{'cur_conflict'} }
-		    @{$self->{'layinfo'}->{'box'}}) {
-	      $self->draw_box($box,'',$self->{box_external});
- 	  }
 	} else {
 	  $self->{'gc'}->set_line_attributes($self->{linewidth_special},
 					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
@@ -385,11 +379,6 @@ sub expose_drawing {
 	  $self->{'gc'}->set_foreground($self->{'question_color'});
 	  for $box (@{$self->{'layinfo'}->{'questionbox'}}) {
 	    $self->draw_box($box,'');
-	  }
-	  $self->{'gc'}->set_foreground($self->{'conflict_color'});
-	  for $box (grep { $_->{'cur_conflict'} }
-		    @{$self->{'layinfo'}->{'box'}}) {
-	      $self->draw_box($box,'',$self->{box_external});
 	  }
 	}
 	$self->{'gc'}->set_line_attributes($self->{linewidth_zone},
