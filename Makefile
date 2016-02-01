@@ -318,7 +318,7 @@ SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
 ORIG_SOURCES=/tmp/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 
-SRC_EXCL=--exclude debian '--exclude=*~' 
+SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags
 
 version_files:
 	perl local/versions.pl
