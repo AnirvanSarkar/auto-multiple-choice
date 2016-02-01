@@ -175,7 +175,7 @@ clean_IN: FORCE
 clean: clean_IN FORCE
 	-rm -f $(BINARIES) $(MAIN_LOGO).xpm
 	-rm -f auto-multiple-choice.spec
-	-rm vars-subs.pl
+	-rm -f vars-subs.pl
 	$(MAKE) -C doc/sty clean
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
