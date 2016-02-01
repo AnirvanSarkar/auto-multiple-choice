@@ -43,7 +43,7 @@ CXXFLAGS ?= -O2
 # try to find right names for OpenCV libs 
 
 ifeq ($(GCC_OPENCV_LIBS),auto)
-ifeq ($(shell echo 'int main(){}' | gcc -xc -lopencv_core - && echo "OK"),OK)
+ifeq ($(shell echo 'int main(){}' | gcc -xc -lopencv_core - && ( rm -f a.out ; echo "OK")),OK)
   GCC_OPENCV_LIBS:=-lopencv_core -lopencv_highgui -lopencv_imgproc
 else
   GCC_OPENCV_LIBS:=-lcv -lhighgui -lcxcore
