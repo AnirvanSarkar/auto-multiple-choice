@@ -26,6 +26,7 @@ SAMPLES=$(wildcard sample-*.tex)
 all: FORCE
 	pdflatex $(PACK).dtx
 	$(MAKE) $(SAMPLES:.tex=.pdf)
+	pdflatex $(PACK).dtx
 	makeindex -s gglo.ist -o $(PACK).gls $(PACK).glo
 	makeindex -s gind.ist -o $(PACK).ind $(PACK).idx
 	pdflatex $(PACK).dtx
