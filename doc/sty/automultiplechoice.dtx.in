@@ -172,6 +172,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@postcorrecttrue}
 % \DoNotIndex{\AMC@qblocfalse}
 % \DoNotIndex{\AMC@qbloctrue}
+% \DoNotIndex{\AMC@asqblocfalse}
+% \DoNotIndex{\AMC@asqbloctrue}
 % \DoNotIndex{\AMC@rblocfalse}
 % \DoNotIndex{\AMC@rbloctrue}
 % \DoNotIndex{\AMC@shuffleGfalse}
@@ -382,6 +384,8 @@ along with Auto-Multiple-Choice.  If not, see
 %
 % \ioption{box} includes every question in a \LaTeX{} box, so that
 % they can't be cutted on two different pages.
+%
+% \ioption{asbox} does the same for questions in the separate answer sheet.
 %
 % \ioption{separateanswersheet} asks for a separate answer sheet (see
 % section~\ref{s:separate} for an example). Commands |\AMCformBegin|
@@ -1204,6 +1208,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %   produced document.
 % \item |\ifAMC@qbloc| if questions are to be included in \LaTeX{}
 %   boxes (so that they can't be splitted on two different pages).
+% \item |\ifAMC@asqbloc| if questions are to be included in \LaTeX{}
+%   boxes in the answer sheet (so that they can't be splitted on two
+%   different pages).
 % \item |\ifAMC@rbloc| if answers are to be included in \LaTeX{} boxes
 %   (so that they can't be splitted on two different columns for
 %   example).
@@ -1258,6 +1265,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@affichekeys\AMC@affichekeysfalse
 \newif\ifAMC@correc\AMC@correcfalse
 \newif\ifAMC@qbloc\AMC@qblocfalse
+\newif\ifAMC@asqbloc\AMC@asqblocfalse
 \newif\ifAMC@rbloc\AMC@rblocfalse
 \newif\ifAMCcomplete@multi\AMCcomplete@multifalse
 \newif\ifAMCquestionNumber\AMCquestionNumbertrue
@@ -2517,11 +2525,13 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \def\AMCmem@ireData{}
 \def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
+\def\AMCformAfterQuestion{\ifAMC@asqbloc\egroup\fi}
 \def\AMCformQuestion#1{{\AMC@loc@qf{#1}}}
 \def\AMCformQuestionA#1#2{\setcounter{AMCquestionaff}{#1}%
   \AMCid@quest=#2%
   \setcounter{AMC@ncase}{0}%
   \AMCformBeforeQuestion%
+  \ifAMC@asqbloc\vbox\bgroup\fi%
   \ifx\@empty\AMC@sza@callout\@empty\else%
     \csname\AMC@sza@callout\endcsname%
   \fi%
@@ -2884,7 +2894,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
   \AMCmem@ireQ{\arabic{AMCquestionaff}}{\the\AMCid@quest}}%
-{\ifAMC@qbloc\end{minipage}\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}}
+{\ifAMC@qbloc\end{minipage}\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}\AMCmem@ireAJ{\AMCformAfterQuestion}}
 \newenvironment{questionmult}[1]{%
   \AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}%
   \AMCtype@multitrue\ifAMC@calibration%
@@ -3992,6 +4002,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{answers}{\AMC@correcheadtrue\AMC@correctrue}
 \DeclareOptionX{indivanswers}{\AMC@correctrue}
 \DeclareOptionX{box}{\AMC@qbloctrue}
+\DeclareOptionX{asbox}{\AMC@asqbloctrue}
 \DeclareOptionX{separateanswersheet}{\AMC@ensembletrue}
 \DeclareOptionX{digits}{\AMC@inside@digittrue}
 \DeclareOptionX{ordre}{\AMC@ordretrue}
