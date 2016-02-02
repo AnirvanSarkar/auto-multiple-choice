@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2013 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -100,7 +100,7 @@ GetOptions("projet=s"=>\$projet_dir,
 set_debug($debug);
 
 print (("*"x60)."\n");
-print "* WARNING: AMC-annote is now obsolete\n* Please move to AMC-annotate\n";
+print "* WARNING: AMC-regroupe is now obsolete\n* Please move to AMC-annotate\n";
 print (("*"x60)."\n");
 
 $projet_dir =~ s:/+$::;

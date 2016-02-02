@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2014 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -29,7 +29,7 @@ open(THIS,__FILE__);
 close(THIS);
 $lic_head.="\n";
 
-my %k=(deb=>"XX",vc=>"",year=>"2015",month=>"01",day=>"01");
+my %k=(deb=>"XX",vc=>"",year=>"2016",month=>"01",day=>"01");
 
 $s=`svnversion`;
 if($s =~ /([0-9]+)[SM]*$/) {

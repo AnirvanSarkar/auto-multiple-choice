@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2012-2015 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
