@@ -78,6 +78,7 @@ sub export {
 
     my $dt=$self->{'_scoring'}->variable('darkness_threshold');
     my $dtu=$self->{'_scoring'}->variable('darkness_threshold_up');
+    $dtu=1 if(!defined($dtu));
     my $lk=$self->{'_assoc'}->variable('key_in_list');
 
     my @student_columns=split(/,+/,$self->{'out.columns'});
