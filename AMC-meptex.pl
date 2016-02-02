@@ -125,7 +125,7 @@ debug "Reading $src...";
 
 open(SRC,$src) or die "Unable to open $src : $!";
 while(<SRC>) {
-    if(/\\page{([^\}]+)}{([^\}]+)}{([^\}]+)}/) {
+    if(/\\page\{([^\}]+)\}\{([^\}]+)\}\{([^\}]+)\}/) {
 	my $id=$1;
 	my $dx=$2;
 	my $dy=$3;
