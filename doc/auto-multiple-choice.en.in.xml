@@ -1681,8 +1681,7 @@ Durée : 10 minutes.
             <option>separateanswersheet</option> option, the
             <option>digits</option> option requires the question to be
             identified with digits rather than with letters (which corresponds
-            to the default setting). With this option, one has to take care
-            that the number of answers does not exceed 9.</para>
+            to the default setting).</para>
           </listitem>
 
           <listitem>
@@ -1833,6 +1832,38 @@ Durée : 10 minutes.
   \end{choiceshoriz}
 \end{question}</programlisting>
         </para>
+
+ <sect4>
+      <title>Last choice</title>
+
+      <para> You may force AMC to let  one or more answers as last choices with the command <command>\lastchoices</command>.</para>
+        <programlisting>
+        \begin{question}{color}
+        Which color?
+        \begin{choiceshoriz}
+        \wrongchoice{red}
+        \wrongchoice{blue}
+        \wrongchoice{yellow}
+        \lastchoices
+        \correctchoice{transparent}
+        \wrongchoice{can't say}
+      \end{choiceshoriz}
+        \end{question}
+
+        \begin{questionmult}{number}
+        How many?
+        \begin{choiceshoriz}
+        \wrongchoice{none}
+        \correctchoice{one}
+        \wrongchoice{two}
+        \wrongchoice{three}
+        \lastchoices
+        \correctchoice{not so much}
+        \wrongchoice{a lot}
+        \end{choiceshoriz}
+        \end{questionmult}
+        </programlisting>
+      </sect4>
       </sect3>
 
       <sect3 id="latex.explain">
@@ -2258,6 +2289,17 @@ Durée : 10 minutes.
             <para><option>down</option> controls by how much boxes are pushed
             down.</para>
           </listitem>
+  
+         <listitem>
+            <para><option>cross=true</option> only displayed on the answer sheet, shows
+            the good answer with a cross instead of filling in black the box</para>
+         </listitem> 
+
+        <listitem>
+          <para><option>crossrule=1.5pt</option> only displayed on the answer sheet, is the thickness of the cross.
+          </para>
+        </listitem>  
+  
         </itemizedlist>
 
         <para>To obtain smaller boxes, one can e.g. use the command</para>
@@ -2303,6 +2345,25 @@ Durée : 10 minutes.
 
         <programlisting>\definecolor{amcboxcolor}{rgb}{0.67,0.88,0.5}
 \AMCboxColor{amcboxcolor}</programlisting>
+
+        <note>
+        <para>
+        The switch used to tick or not correct answers is <command>\AMC@correc</command>.
+        You can define a command to set it to true, just after the \begin{document}.
+        </para>
+       <programlisting>
+        \makeatletter
+        \def\AMCforcecorrect{\AMC@correctrue}
+        \makeatother</programlisting>
+        <para>and then use it for a particular question (enclose in braces to limit its effect to one question):</para>
+        <programlisting>
+        {\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
+         .....
+          \end{questionmult}
+        }
+        </programlisting>
+        <para>You should tell AMC not to count points for this question (with a 0-point scoring, or using <command>\QuestionIndicative</command>).</para>
+        </note>
       </sect3>
 
       <sect3>
@@ -2399,6 +2460,12 @@ Durée : 10 minutes.
 </programlisting>
           </listitem>
         </orderedlist>
+  
+        <note>
+       <para>Question number and answers do not have to be separated with a page break, change the command like this :  </para> 
+        <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}\nopagebreak} 
+        </programlisting>
+        </note>
 
         <para>These definitions have to be inserted just after
         <code>\begin{document}</code> in the LaTeX file.</para>
@@ -2758,7 +2825,7 @@ and write your first and last names below.
 
         <note>
           <para>If you updated the test version (1.2.2014.041103) to the
-          current version (1.2.2014.111201) or greater, you don't have to type
+          current version (1.2.2015.102901) or greater, you don't have to type
           the command <command>\AMCqlabel</command> to label a question but
           type <command>\AMClabel</command>. The old command remain compatible
           with your previous tex files/exams.</para>
@@ -2853,6 +2920,13 @@ and write your first and last names below.
 
             <programlisting>\AMCtext{explain}{\textit{\textbf{Explanation: }}}</programlisting>
           </listitem>
+  
+          <listitem>
+            <para><code>\AMCtext{footnote}{<replaceable>title</replaceable>}</code>
+            replaces the page number (\thepage code tex) with the given
+            <replaceable>title</replaceable> on the foote note produced
+            thanks to option <option>catalog</option>.</para>
+          </listitem> 
 
           <listitem>
             <para>You can also consider using commands like the following ones
@@ -3158,6 +3232,8 @@ respective parameters \VQa{} and \VQb{}.
                 digit and for the sign. If <code>false</code>, if some digits
                 has no ticked box, they will be set to zero. Defaults to
                 <code>false</code>.</para>
+                <warning><para>If one box, at least, is not ticked, the answer
+                will be considered as false.</para></warning>
               </listitem>
             </varlistentry>
 
@@ -3310,9 +3386,12 @@ respective parameters \VQa{} and \VQb{}.
                 (value without the decimal point) for an answer to be said
                 <emphasis>approximative</emphasis> and be rewarded to
                 <code>scoreapprox</code> points (defaults to 0).</para>
+                <warning> <para>AMC handle all numbers (decimals included)
+               as integers before subtract and  compare with  <code>approx</code>
+               .</para></warning>
               </listitem>
             </varlistentry>
-          </variablelist>
+            </variablelist>
 
           <para>You can set other default values (for the whole exam) for all
           these parameters using the command

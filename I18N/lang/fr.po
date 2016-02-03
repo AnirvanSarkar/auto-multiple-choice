@@ -1,8 +1,8 @@
 # translation of fr.po to Français
 # Auto Multiple Choice
-# Copyright 2008-2012 Alexis Bienvenüe
+# Copyright 2008-2015 Alexis Bienvenüe
 # This file is distributed under the same license as the AMC software
-# Alexis Bienvenüe <paamc@passoire.fr>, 2010, 2011, 2012.
+# Alexis Bienvenüe <paamc@passoire.fr>, 2010, 2011, 2012, 2013, 2014, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.250 (svn: 250)\n"
@@ -214,12 +214,12 @@ msgstr "Unicode"
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-gui.pl:1187 ../AMC-gui.pl:3420
 msgid "(none) [No primary key found in association list]"
-msgstr "(aucune)"
+msgstr "(aucune) [Aucun identifiant trouvé dans la liste d'étudiants]"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-gui.pl:1189 ../AMC-gui.pl:4024
 msgid "(none) [No code found in LaTeX file]"
-msgstr "(aucun)"
+msgstr "(aucun) [Aucun code trouvé dans le fichier LaTex]"
 
 #. TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
 #: ../AMC-gui.pl:1204
@@ -259,7 +259,7 @@ msgstr "supérieur"
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-gui.pl:1222
 msgid "one sided [No two-sided printing]"
-msgstr "Non"
+msgstr "recto seulement [Pas d'impression recto-verso]"
 
 #. TRANSLATORS: One of the two-side printing types. This is a menu entry.
 #: ../AMC-gui.pl:1224
@@ -314,7 +314,7 @@ msgstr "A côté des cases"
 #. TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the zones defined in the source file
 #: ../AMC-gui.pl:1253
 msgid "where defined in the source"
-msgstr ""
+msgstr "indiqué dans le fichier source"
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
 #. TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
@@ -351,19 +351,19 @@ msgstr "Un seul fichier pour tous les étudiants"
 #. TRANSLATORS: One of the possible way to annotate answer sheets: here we only select pages where the student has written something (in separate answer sheet mode, these are the pages from the answer sheet and not the pages from the subject).
 #: ../AMC-gui.pl:1273
 msgid "Only pages with answers"
-msgstr ""
+msgstr "Seulement la feuille de réponses"
 
 #. TRANSLATORS: One of the possible way to annotate answer sheets: here we take the pages were the students has nothing to write (often question pages from a subject with separate answer sheet option) from the subject.
 #: ../AMC-gui.pl:1275
 #, fuzzy
 msgid "Question pages from subject"
-msgstr "Aucune copie n'a été détectée sur le document de calage."
+msgstr "Sujet avec feuille de réponses."
 
 #. TRANSLATORS: One of the possible way to annotate answer sheets: here we take the pages were the students has nothing to write (often question pages from a subject with separate answer sheet option) from the correction.
 #: ../AMC-gui.pl:1277
 #, fuzzy
 msgid "Question pages from correction"
-msgstr "Aucune copie n'a été détectée sur le document de calage."
+msgstr "Sujet et feuille de réponses."
 
 #: ../AMC-gui.pl:1280
 msgid "All students"
@@ -418,6 +418,21 @@ msgstr "croix"
 #: ../AMC-gui.pl:1305
 msgid "box"
 msgstr "carré"
+
+# TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
+#: ../AMC-gui.pl:1373
+msgid "Standard"
+msgstr "Feuille réponses à la fin"
+
+# TRANLATORS: One of the way to handle separate answer sheet when printing: print separately answer sheet and question. This is a menu entry.
+#: ../AMC-gui.pl:1375
+msgid "Separate answer sheet"
+msgstr "Feuille réponses séparée"
+
+# TRANLATORS: One of the way to handle separate answer sheet when printing: print the answr sheet first. This is a menu entry.
+#: ../AMC-gui.pl:1377
+msgid "Answer sheet first"
+msgstr "Feuille réponses au début"
 
 #: ../AMC-gui.pl:1397
 #, perl-format
@@ -1589,11 +1604,11 @@ msgstr "sujet"
 #: ../AMC-prepare.pl:758
 #, perl-format
 msgid "please remove accentuated or non-standard characters from the following question ID: \"%s\""
-msgstr ""
+msgstr "effacez les caractères accentués ou non standards des identifiants des questions suivantes : \"%s\""
 
 #: ../AMC-prepare.pl:760
 msgid "some question IDs seems to have accentuated or non-standard characters. This may break future processings."
-msgstr ""
+msgstr "certains identifiants de questions ont des caractères accentués ou non standards. Cela peut gêner la compilation."
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:557
@@ -1779,7 +1794,7 @@ msgstr "La question précédente est une question simple mais a %d réponses cor
 
 #: ../AMC-perl/AMC/Filter/plain.pm:297
 msgid "Invalid encoding: you must use UTF-8, but your source file was saved using another encoding"
-msgstr ""
+msgstr "Encodage invalide : vous devez utiliser UTF-8 mais votre fichier source a été enregistré avec un autre encodage"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:323
 #, fuzzy, perl-format
@@ -1842,12 +1857,12 @@ msgstr "Ajouter une photocopie"
 #. TRANSLATORS: One of the ways to change a box's ticked state in the zooms window
 #: ../AMC-perl/AMC/Gui/Zooms.pm:75
 msgid "drag and drop"
-msgstr ""
+msgstr "cliquer-glisser"
 
 #. TRANSLATORS: One of the ways to change a box's ticked state in the zooms window
 #: ../AMC-perl/AMC/Gui/Zooms.pm:77
 msgid "click"
-msgstr ""
+msgstr "clic"
 
 #: ../AMC-perl/AMC/Gui/Zooms.pm:124 ../AMC-perl/AMC/Gui/Zooms.pm:420
 #, perl-format
@@ -1913,19 +1928,19 @@ msgstr "Table de statistiques"
 #. TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
 #: ../AMC-perl/AMC/Export/register/ods.pm:81
 msgid "None [no stats table to export]"
-msgstr ""
+msgstr "Aucune table de statistiques à exporter"
 
 #. TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a horizontal flow' in the exported ODS file.
 #: ../AMC-perl/AMC/Export/register/ods.pm:83
 #: ../AMC-perl/AMC/Export/register/ods.pm:98
 msgid "Horizontal flow"
-msgstr ""
+msgstr "Alignement horizontal"
 
 #. TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a vertical flow' in the exported ODS file.
 #: ../AMC-perl/AMC/Export/register/ods.pm:85
 #: ../AMC-perl/AMC/Export/register/ods.pm:99
 msgid "Vertical flow"
-msgstr ""
+msgstr "Alignement vertical"
 
 #. TRANSLATORS: Check button label in the exports tab. If checked, a table with indicative questions basic statistics will be added to the ODS exported spreadsheet.
 #: ../AMC-perl/AMC/Export/register/ods.pm:91
@@ -1934,7 +1949,19 @@ msgstr "Stats des questions indicatives"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:97
 msgid "None"
-msgstr ""
+msgstr "Aucun"
+
+#: ../AMC-perl/AMC/Export/register/ods.pm:113
+msgid "Yes"
+msgstr "Oui"
+
+#: ../AMC-perl/AMC/Export/register/ods.pm:114
+msgid ""Yes, with scope separator ':'","
+msgstr ""Oui, avec le séparateur de champs ':'","
+
+#: ../AMC-perl/AMC/Export/register/ods.pm:115
+msgid "Yes, with scope separator '.'"
+msgstr "Oui, avec le séparateur de champs '.'"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:102
 msgid "Create a table with basic statistics about answers for each indicative question?"
@@ -2007,6 +2034,10 @@ msgstr "Sélectionnez la ou les copies que vous voulez imprimer (ctrl-a permet d
 msgid "Print separate answer sheet separately"
 msgstr "Imprimer la page de réponses séparément"
 
+#: ../AMC-gui-choix_pages_impression.glade:71
+msgid Answer sheet printing"
+msgstr "Impression feuille réponses"
+
 #: ../AMC-gui-choix_pages_impression.glade:95
 msgid "Printer:"
 msgstr "Imprimante :"
@@ -2041,11 +2072,11 @@ msgstr "Indiquez la copie de l'enseignant, afin de connaître quelles sont les b
 
 #: ../AMC-gui-choix_postcorrect.glade:194
 msgid "Guess simple/multiple status"
-msgstr ""
+msgstr "Estimer statut simple/multiple des questions"
 
 #: ../AMC-gui-choix_postcorrect.glade:198
 msgid "Sets type of all questions for which 2 or more answers are ticked on the teacher answer sheet to multiple"
-msgstr ""
+msgstr "Identifie sur la feuille du professeur les questions multiples pour lesquelles 2 ou plusieurs réponses sont cochées"
 
 #: ../AMC-gui-choix_projet.glade:9
 msgid "Open a MC project"
@@ -2290,6 +2321,10 @@ msgstr "Méthode d'impression"
 msgid "<b>Printing</b>"
 msgstr "<b>Impression</b>"
 
+#: ../AMC-gui-edit_preferences.glade:924
+msgid "Useful printing options"
+msgstr "Options d'impression utiles"
+
 #: ../AMC-gui-edit_preferences.glade:952
 msgid "Number of processes"
 msgstr "Processus en parallèle"
@@ -2499,20 +2534,25 @@ msgstr "Proportion des cases à mesurer"
 
 #: ../AMC-gui-edit_preferences.glade:1902
 msgid "Do you want to process scans with 3 corner circles only?"
-msgstr ""
+msgstr "Souhaitez-vous vérifier les scans avec seulement 3 angles marqués ?"
 
 #: ../AMC-gui-edit_preferences.glade:1917
 msgid "Process scans with 3 corner marks"
-msgstr ""
+msgstr "Contôle des scans avec 3 angles marqués"
 
 #: ../AMC-gui-edit_preferences.glade:1932
 msgid "<b>Detection parameters</b>"
 msgstr "<b>Paramètres de détection</b>"
 
+#. TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is not considered to be ticked.
+#:../AMC-gui-edit_preferences.glade:1963
+msgid "Default upper darkness threshold"
+msgstr "seuil de noirceur maximal"
+
 #: ../AMC-gui-edit_preferences.glade:1998
 #, fuzzy
 msgid "Max size"
-msgstr "Taille texte"
+msgstr "Taille maximale"
 
 #: ../AMC-gui-edit_preferences.glade:2005
 #, fuzzy
@@ -2587,7 +2627,7 @@ msgstr "Polices :"
 #: ../AMC-gui-edit_preferences.glade:2399
 #, fuzzy
 msgid "When marks are written on annotated papers left to the boxes, shifts to the left marks by this value. You can use mm or in as a unit."
-msgstr "Décalage vers la gauche des notes de chaque question, en nombre de caractères, quand les notes des questions sont indiquées à gauche des cases."
+msgstr "Décalage vers la gauche des notes de chaque question, en précisant mm ou in, quand les notes des questions sont indiquées à gauche des cases."
 
 #: ../AMC-gui-edit_preferences.glade:2433
 msgid "<b>To be ticked</b>"
@@ -2681,7 +2721,7 @@ msgstr "Seuil de noirceur"
 
 #: ../AMC-gui-edit_preferences.glade:3354
 msgid "If black proportion is greater than this value, the box will be considered as beeing ticked. If students have been told to darken the boxes entirely, one can choose value 0.5. If students have been told to tick the boxes, values around 0.15 seems appropriate."
-msgstr "Seuil de proportion de pixels noirs à partir duquel une case sera considérée comme étant cochée. Si la consigne est de noircir tptalement la case, on peut utiliser 0,5. Si la consigne permet de cocher par des croix, une valeur de l'ordre de 0,15 semble appropriée."
+msgstr "Seuil de proportion de pixels noirs à partir duquel une case sera considérée comme étant cochée. Si la consigne est de noircir totalement la case, on peut utiliser 0,5. Si la consigne permet de cocher par des croix, une valeur de l'ordre de 0,15 semble appropriée."
 
 #: ../AMC-gui-edit_preferences.glade:3376
 msgid "<b>Automatic data capture</b>"
@@ -2706,7 +2746,7 @@ msgstr "Note maximale"
 #: ../AMC-gui-edit_preferences.glade:3501
 #, fuzzy
 msgid "Floor mark"
-msgstr "Voir les notes"
+msgstr "Note plancher"
 
 #: ../AMC-gui-edit_preferences.glade:3512
 msgid "Floor mark: any exam with a global mark less than this value will be given this mark. Let empty for no floor mark."
@@ -2726,7 +2766,7 @@ msgstr "Note minimale"
 
 #: ../AMC-gui-edit_preferences.glade:3555
 msgid "Mark associated with null score"
-msgstr ""
+msgstr "Note associée à un score nul"
 
 #: ../AMC-gui-edit_preferences.glade:3587
 msgid "<b>Global mark rules</b>"
@@ -2755,11 +2795,11 @@ msgstr "Texte a écrire en face de chaque question. Il sera évalué par perl : 
 #: ../AMC-gui-edit_preferences.glade:3729
 #, fuzzy
 msgid "Cancelled questions annotation text"
-msgstr "Annotation des questions"
+msgstr "Texte d'annotation des questions annulées"
 
 #: ../AMC-gui-edit_preferences.glade:3741
 msgid "Same as above, but for cancelled questions (when using allowempty)."
-msgstr ""
+msgstr "Comme au-dessus mais pour des questions annulées (quand l'option allowempty est utilisée)."
 
 #: ../AMC-gui-edit_preferences.glade:3763
 msgid "<b>Papers annotation</b>"
@@ -2851,11 +2891,11 @@ msgstr "<b>Sujet</b>"
 
 #: ../AMC-gui-mailing.glade:270
 msgid "Enable HTML Tags"
-msgstr ""
+msgstr "Autoriser le codage HTML"
 
 #: ../AMC-gui-mailing.glade:274
 msgid "Use HTML tags in the body of your message such as <b>, <i>, <u>, <p> etc."
-msgstr ""
+msgstr "Utilisez les codes HTML dans le message comme <b>, <i>, <u>, <p> etc."
 
 #: ../AMC-gui-mailing.glade:313
 msgid "<b>Body</b>"
@@ -3371,7 +3411,7 @@ msgstr "Cases cochées"
 
 #: ../AMC-perl/AMC/Gui/Zooms.glade:285
 msgid "Toggle mode. With 'click', left-click to toggle and right-click to toggle a group."
-msgstr ""
+msgstr "Clic gauche ou droit pour déplacer vers un groupe."
 
 #~ msgid "Grouping students annotated pages together..."
 #~ msgstr "Regroupement des pages corrigées par étudiant..."
@@ -3582,7 +3622,7 @@ msgstr ""
 #~ msgstr "Elle est bien plus rapide que celle que vous avez utilisé jusqu'à maintenant."
 
 #~ msgid "Do you want to use it from now on?"
-#~ msgstr "Voulez-vous l'utiliser d'orénavant ?"
+#~ msgstr "Voulez-vous l'utiliser dorénavant ?"
 
 #~ msgid "If you experience any problem with this new implementation, you can change back to the old one setting \"%s\" to \"%s\" in %s (tab \"%s\")."
 #~ msgstr "Si vous rencontrez des problèmes avec cette nouvelle implémentation, vous pouvez revenir à l'ancienne méthode en donnant à « %s » la valeur « %s » dans %s (onglet « %s »)."

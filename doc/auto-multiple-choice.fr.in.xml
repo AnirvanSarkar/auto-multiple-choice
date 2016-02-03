@@ -1757,9 +1757,7 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
             <para><option>chiffres</option> : si on utilise l'option
             <option>ensemble</option>, l'option <option>chiffres</option>
             demande d'identifier les questions avec des chiffres plutôt
-            qu'avec des lettres (ce qui est le comportement par défaut). Avec
-            cette option, il faut bien entendu veiller à ce que le nombre de
-            réponses ne dépasse pas 9 pour chaque question.</para>
+            qu'avec des lettres (ce qui est le comportement par défaut). </para>
           </listitem>
 
           <listitem>
@@ -1937,10 +1935,43 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
   \end{reponseshoriz}
 \end{question}</programlisting>
         </para>
+  
+      <sect4>
+      <title>Dernier choix</title>
+
+      <para> Vous pouvez choisir de toujours laisser une ou plusieurs réponses en dernière position
+      avec la commande <command>\lastchoices</command>.</para>
+        <programlisting>
+        \begin{question}{color}
+        Which color?
+        \begin{choiceshoriz}
+        \wrongchoice{red}
+        \wrongchoice{blue}
+        \wrongchoice{yellow}
+        \lastchoices
+        \correctchoice{transparent}
+        \wrongchoice{can't say}
+      \end{choiceshoriz}
+        \end{question}
+
+        \begin{questionmult}{number}
+        How many?
+        \begin{choiceshoriz}
+        \wrongchoice{none}
+        \correctchoice{one}
+        \wrongchoice{two}
+        \wrongchoice{three}
+        \lastchoices
+        \correctchoice{not so much}
+        \wrongchoice{a lot}
+        \end{choiceshoriz}
+        \end{questionmult}
+        </programlisting>
+      </sect4>
       </sect3>
 
-      <sect3>
-        <title>Approfondir la réponse</title>
+      <sect3 id="latex.explain">
+        <title id="latex.explain.title">Approfondir la réponse</title>
 
         <para>Lors de l'impression du corrigé, vous pouvez apporter des
         précisions grâce à la commande <command>\explain</command>. Cette
@@ -2375,6 +2406,17 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
             <para><option>down</option> représente la taille du déplacement
             vers le bas des cases.</para>
           </listitem>
+  
+        <listitem>
+          <para><option>cross=true</option> visible uniquement sur la feuille réponse,
+          indique par une croix la bonne réponse au lieu de colorier la case. </para>
+        </listitem>
+  
+          <listitem>
+          <para><option>crossrule=1.5</option> visible uniquement  sur la feuille réponse,
+          représente l'épaisse de la croix précédente. </para>
+        </listitem>
+  
         </itemizedlist>
 
         <para>Pour obtenir des cases plus petites, on pourra, par exemple,
@@ -2426,6 +2468,31 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <programlisting>\definecolor{amcboxcolor}{rgb}{0.67,0.88,0.5}
 \AMCboxColor{amcboxcolor}</programlisting>
+
+        <note>
+        <para>
+        La commande latex pour basculer en mode corrigé (cases bonnes réponses coloriées) est <command>\AMC@correc </command>.
+        Vous pouvez créer une commmande pour indiquer à AMC de basculer en mode corrigé même dans le sujet (DOC-sujet.pdf).
+        Le code si dessous est à inscrire juste après  \begin{document}.
+        </para>
+        <programlisting>
+        \makeatletter
+        \def\AMCforcecorrect{\AMC@correctrue}
+        \makeatother</programlisting>
+        <para>
+        Vous pouvez inclure cette commande pour une question particulière qui sera encadrée
+        par des accolades pour limiter l'effet. Indiquez un barème nulle ou utilisez la commande <command>\QuestionIndicative</command>
+        </para>
+        <programlisting>
+        {\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
+         .....
+          \end{questionmult}
+        }
+        </programlisting>
+        
+        
+        </note>
+
       </sect3>
 
       <sect3>
@@ -2472,6 +2539,28 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           <command>\AMCbeginQuestion</command> ou utiliser la commande
           ci-dessus.</para>
         </note>
+
+        <warning>
+       <para>
+       Avec le mode copies préremplies  (voir <xref endterm="CopiesPrerempliesTitre"
+          linkend="CopiesPremplies"/>) , cette commande doit être appelée via
+        une <informalexample>macro</informalexample> dans le préambule.
+       </para> 
+      <programlisting>\def\jepasse{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
+      </programlisting>
+      <para>puis de l'utiliser quand on en a besoin (Ne pas oublier d'insérer des crochets autour pour limiter son effet à une question) :</para>
+      <programlisting>
+{\jepasse
+\begin{question}{Calibre600}
+
+Quel calibre doit-on choisir pour mesurer une tension inconnue?
+\begin{reponseshoriz}[o]
+\mauvaise{200}\mauvaise{2}\mauvaise{20}\mauvaise{200}\bonne{600}
+\end{reponseshoriz}
+\end{question}
+}
+      </programlisting>
+        </warning>
 
         <para>La présentation des réponses peut être modifiée de la même
         façon, si on utilise l'environnement <option>reponsesperso</option> au
@@ -2549,6 +2638,14 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 </programlisting>
           </listitem>
         </orderedlist>
+
+
+        <note>
+       <para>Pour éviter lors d'un saut de page que le numéro de la question et les réponses soient séparées,
+       modifiez la commande comme ceci :  </para> 
+        <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}\nopagebreak} 
+        </programlisting>
+        </note>
 
         <para>Ces définitions sont à insérer juste après la balise
         <code>\begin{document}</code> dans le document LaTeX.</para>
@@ -2943,7 +3040,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
         <note>
           <para>Si vous avez mis à jour la version test (1.2.2014.041103) vers
-          la version actuelle (1.2.2014.111201) ou supérieure, la commande
+          la version actuelle (1.2.2015.102901) ou supérieure, la commande
           <command>\AMCqlabel</command> n'a plus d'utilité. Les questions
           doivent simplement être référencées avec la commande
           <command>\AMClabel</command>. Cependant, elle a été conservée pour
@@ -3057,6 +3154,9 @@ et inscrivez votre nom et prénom ci-dessous.
       <sect3 id="AMCtext">
         <title>Personnalisation des textes insérés par AMC</title>
 
+       <warning><para>Pour utiliser ces options, changez la commande <command>
+       \exemplaire{}</command> par <command>\onecopy{}</command>.</para></warning>
+
         <para>Il est possible de personnaliser certain textes insérés par le
         paquet automultiplechoice, grâce à la commande
         <command>\AMCtext</command> :</para>
@@ -3089,6 +3189,16 @@ et inscrivez votre nom et prénom ci-dessous.
             remplace « Explication » (en français) par le
             <replaceable>titre</replaceable> avant le texte explicatif fourni
             avec l'option <option>explain</option>.</para>
+
+            <para>L'option par défaut de cette commande est :</para>
+
+            <programlisting>\AMCtext{explain}{\textit{\textbf{Explanation: }}}</programlisting>            
+          </listitem>
+
+          <listitem>
+            <para><code>\AMCtext{footnote}{<replaceable>titre</replaceable>}</code>
+            remplace le numéro de la page (\thepage code tex) par le
+            <replaceable>titre</replaceable> dans la note de pied de page.</para>
           </listitem>
 
           <listitem>
@@ -3417,8 +3527,10 @@ et inscrivez votre nom et prénom ci-dessous.
                 Avec la valeur <code>false</code> (valeur par défaut), si pour
                 certains chiffres aucune case n'est cochée, ces chiffres
                 seront fixés à la valeur 0.</para>
+               <warning> <para>AMC considère la réponse comme fausse si
+             toutes les cases n'ont pas été cochées.</para></warning>
               </listitem>
-            </varlistentry>
+             </varlistentry>
 
             <varlistentry>
               <term>vertical=<replaceable>bool</replaceable></term>
@@ -3578,9 +3690,13 @@ et inscrivez votre nom et prénom ci-dessous.
                 <emphasis>approximative</emphasis> (et sera rétribuée de
                 <code>scoreapprox</code> points). La valeur par défaut est
                 0.</para>
+                <warning> <para>AMC considère tous les nombres (décimaux inclus)
+              comme des entiers avant de faire la différence et de comparer
+              avec <code>approx</code>.</para></warning>
               </listitem>
             </varlistentry>
           </variablelist>
+
 
           <para>Vous pouvez modifier la valeur par défaut (pour tout votre
           questionnaire) de toutes ces options grâce à la commande
@@ -4842,15 +4958,12 @@ Durée : 10 minutes.
         par perl.</para>
 
         <note>
-           Les opérateurs sont : &gt; supérieur à, &gt;= supérieur ou égal, &lt; inférieur à, &lt;= inférieur ou égal, == égalité, != différent. 
+           <para>Les opérateurs sont : &gt; supérieur à, &gt;= supérieur ou égal, &lt; inférieur à, &lt;= inférieur ou égal, == égalité, != différent. </para>
         </note>
 
-        <note>
+        <note><para>
            La fonction test s'écrit 
-
-          <programlisting> ( TEST ? INSTRUCTION SI VRAI : INSTRUCTION SI FAUX)</programlisting>
-
-           
+          <programlisting> ( TEST ? INSTRUCTION SI VRAI : INSTRUCTION SI FAUX)</programlisting></para>
         </note>
 
         <para>D'autres variables sont aussi utilisables :</para>
@@ -4934,6 +5047,19 @@ Durée : 10 minutes.
         </orderedlist>
       </sect3>
 
+      <sect3 id="Calcul.note.finale">
+        <title> Calcul de la note finale</title>
+  
+        <menuchoice>
+       <guimenu>Édition</guimenu><guimenuitem>Préférences</guimenuitem>
+       <guimenuitem>Projet</guimenuitem></menuchoice>
+       <itemizedlist>
+       <listitem>Granularité : choisissez votre valeur d'arrondi</listitem>
+       <listitem>Type d'arrondi : inférieur, normal, supérieur</listitem>
+       </itemizedlist>
+       
+      </sect3>
+
       <sect3 id="correction.sujet">
         <title>Corriger des erreurs de barème</title>
 
@@ -4983,15 +5109,12 @@ Durée : 10 minutes.
         </itemizedlist>
 
         <note>
+        <para>
            Si vous estimez qu'une question doit être annulée, modifiez le barème comme ceci 
-
           <command>\bareme{b=0,m=0,e=0,v=0}</command>
-
            ou notez la question comme indicative 
-
-          <command>\QuestionIndicative</command>
-
-           . 
+          <command>\QuestionIndicative</command>.
+        </para>
         </note>
       </sect3>
     </sect2>
@@ -5075,6 +5198,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           <itemizedlist>
             <listitem>
                point-virgule ou deux-points ou tabulation pour séparer les champs et virgule pour séparer les emails. 
+            </listitem>
+
+            <listitem> Avec cette option, il faut déclarer dans le préambule
+              <programlisting>\usepackage[babel=true,kerning=true]{microtype}</programlisting>
             </listitem>
 
             <listitem>
@@ -5357,21 +5484,21 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
         <itemizedlist>
           <listitem>
-            <para><command>Only pages with answers</command> : les feuilles de
+            <para><command>Seulement la feuille de réponses</command> : les feuilles de
             réponses seront annotées.</para>
           </listitem>
         </itemizedlist>
 
         <itemizedlist>
           <listitem>
-            <para><command>Questions pages from subject</command> : le sujet
-            et les feuilles de réponses seront annotées.</para>
+            <para><command>Sujet avec feuille de réponses</command> : les feuilles de réponses seront annotées 
+            et le sujet vierge sera inclus au fichier pdf.</para>
           </listitem>
         </itemizedlist>
 
         <itemizedlist>
           <listitem>
-            <para><command>Questions pages from correction</command> : les
+            <para><command>Sujet et feuille de réponses</command> : les
             feuilles de réponses seront annotées et le sujet corrigé sera
             inclus.</para>
           </listitem>
@@ -5412,7 +5539,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </listitem>
 
           <listitem>
-             Where defined in the source (voir 
+             Indiqué dans le fichier source (voir 
 
             <xref endterm="definir.zone.notation.titre"
                   linkend="definir.zone.notation"/>
@@ -5691,10 +5818,21 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
 \end{question}
 </programlisting>
       </note>
+      <note>
+      <para>Vous pouvez utiliser ces deux options ensembles.</para>
+      <para>Pour activer cette option, vous pouvez définir, juste après le <informalexample>\begin{document}</informalexample>
+      <programlisting>
+\makeatletter
+\def\setoutsidebox{\AMC@outside@boxtrue}
+\makeatother</programlisting> 
+      </para>
+      <para>Puis, pour l'utiliser localement (à l'intérieur des accolades) dans le formulaire :</para>
+      <programlisting>{\setoutsidebox\formulaire}</programlisting>
+      </note>
     </sect2>
 
-    <sect2>
-      <title>Copies préremplies</title>
+    <sect2 id="CopiesPremplies">
+      <title id="CopiesPrerempliesTitre">Copies préremplies</title>
 
       <para>Dans certaines situations, il peut être souhaitable de préparer
       des copies nominatives pour tous les étudiants, à partir d'une liste
@@ -5930,6 +6068,8 @@ Moniuszko;Stanisław;003</programlisting>
     <sect2>
       <title>Paramétrer AMC pour l'utilisation de GMAIL</title>
 
+      <para>Connectez-vous sur votrre compte GMAIL puis activer l'option :  autoriser les applications non sécurisées.</para>
+
       <programlisting> sudo apt-get install msmtp </programlisting>
 
       <para>Dans les préférences de AMC</para>
@@ -6013,7 +6153,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
       <programlisting>
 \FPeval{\x}{trunc(a+random*b,c)}
 </programlisting> <itemizedlist>
-          <listitem>\x sera compris entre a et b</listitem>
+          <listitem>\x sera compris entre a et a+b</listitem>
 
           <listitem>, séparateur</listitem>
 
