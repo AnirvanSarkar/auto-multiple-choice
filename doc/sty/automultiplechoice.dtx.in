@@ -3811,7 +3811,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % |\AMC@intituleHead| is the title to be printed at the beginning
 % (used for corrected sheet, and empty on subject). |\AMC@note| is
-% printed at the bottom of each page.
+% printed at the bottom of each page. You can change its value using
+% |\AMCsetFoot|\marg{foot}.
 %
 %    \begin{macrocode}
 \def\AMCcercle#1#2{%
@@ -3824,6 +3825,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}
 \def\AMC@intituleHead{\AMC@loc@corrected}
 \def\AMC@note{}
+\def\AMCsetFoot#1{\def\AMC@note{#1}}
 \newcommand\AMCStudentNumber{\the\AMC@etud}
 \newcommand\AMCIDBoxesA{\AMCbin@begin{1}\AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}}
 \newcommand\AMCIDBoxesB{\AMCbin@begin{2}\AMC@binaryBoxes[\AMC@NCBpage]{\thepage}}
