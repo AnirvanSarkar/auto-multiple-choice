@@ -330,19 +330,20 @@ sub expose_drawing {
 
 	## boxes drawings
 
+        $self->{'gc'}->set_line_attributes($self->{linewidth_special},
+                                           GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
+        $self->{'gc'}->set_foreground($self->{'invalid_color'});
+        for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /E/ }
+                  @{$self->{'layinfo'}->{'box'}}) {
+          $self->draw_box($box,'',$self->{box_external});
+        }
+        $self->{'gc'}->set_foreground($self->{'empty_color'});
+        for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /V/ }
+                  @{$self->{'layinfo'}->{'box'}}) {
+          $self->draw_box($box,'',$self->{box_external});
+        }
+
 	if($self->{'onscan'}) {
-	  $self->{'gc'}->set_line_attributes($self->{linewidth_special},
-					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
-	  $self->{'gc'}->set_foreground($self->{'invalid_color'});
-	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /E/ }
-		    @{$self->{'layinfo'}->{'box'}}) {
-	    $self->draw_box($box,'',$self->{box_external});
-	  }
-	  $self->{'gc'}->set_foreground($self->{'empty_color'});
-	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /V/ }
-		    @{$self->{'layinfo'}->{'box'}}) {
-	    $self->draw_box($box,'',$self->{box_external});
-	  }
 	  $self->{'gc'}->set_line_attributes($self->{linewidth_box_scan},
 					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
 	  $self->{'gc'}->set_foreground($self->{'color'});
@@ -356,18 +357,6 @@ sub expose_drawing {
 	    $self->draw_box($box,'');
 	  }
 	} else {
-	  $self->{'gc'}->set_line_attributes($self->{linewidth_special},
-					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
-	  $self->{'gc'}->set_foreground($self->{'invalid_color'});
-	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /E/ }
-		    @{$self->{'layinfo'}->{'box'}}) {
-	    $self->draw_box($box,'',$self->{box_external});
-	  }
-	  $self->{'gc'}->set_foreground($self->{'empty_color'});
-	  for $box (grep { $_->{scoring}->{why} && $_->{scoring}->{why} =~ /V/ }
-		    @{$self->{'layinfo'}->{'box'}}) {
-	    $self->draw_box($box,'',$self->{box_external});
-	  }
 	  $self->{'gc'}->set_line_attributes($self->{linewidth_box},
 					     GDK_LINE_SOLID,GDK_CAP_BUTT,GDK_JOIN_MITER);
 	  $self->{'gc'}->set_foreground($self->{'color'});
