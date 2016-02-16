@@ -264,8 +264,8 @@ sub build_stats_table {
     $doc->cellStyle($stats,$ybase+1,$x+2,'statCol');
 # TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
     $doc->cellValue($stats,$ybase+1,$x+2,encode('utf-8',__("/all")));
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
     $doc->cellStyle($stats,$ybase+1,$x+3,'statCol');
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
     $doc->cellValue($stats,$ybase+1,$x+3,encode('utf-8',__("/expr")));
 
     $doc->columnStyle($stats,$x+4,"col.Space");

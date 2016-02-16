@@ -1376,12 +1376,12 @@ $prefs->store_register(
     'print_extract_with'=>cb_model('pdftk'=>'pdftk',
 				   'gs'=>'gs (ghostscript)'
 				   ),
-		       'print_answersheet'=>cb_model(''=>__"Standard",
 # TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
-						     'split'=>__"Separate answer sheet",
+		       'print_answersheet'=>cb_model(''=>__"Standard",
 # TRANLATORS: One of the way to handle separate answer sheet when printing: print separately answer sheet and question. This is a menu entry.
-						     'first'=>__"Answer sheet first"),
+						     'split'=>__"Separate answer sheet",
 # TRANLATORS: One of the way to handle separate answer sheet when printing: print the answr sheet first. This is a menu entry.
+						     'first'=>__"Answer sheet first"),
 		      );
 
 # TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
@@ -6362,10 +6362,10 @@ sub send_emails {
     if($o{'email_sender'}) {
       $message.=sprintf(__("The email address you entered (%s) is not correct."),
 			$o{'email_sender'}).
-	"\n".__"Please edit your preferencies to correct your email address.";
+	"\n".__"Please edit your preferences to correct your email address.";
     } else {
       $message.=__("You did not enter your email address.").
-	"\n".__"Please edit the preferencies to set your email address.";
+	"\n".__"Please edit the preferences to set your email address.";
     }
     my $dialog = Gtk2::MessageDialog
       ->new_with_markup($w{'main_window'},
@@ -6386,7 +6386,7 @@ sub send_emails {
       ->new_with_markup($w{'main_window'},
 			'destroy-with-parent',
 # TRANSLATORS: Do not translate the 'sendmail' word.
-			'error','ok',sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferencies (%s). Please update your configuration."),$o{'email_sendmail_path'}));
+			'error','ok',sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."),$o{'email_sendmail_path'}));
     $dialog->run;
     $dialog->destroy;
 
