@@ -110,8 +110,11 @@ sub build_config_gui {
   $renderer = Gtk2::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
   $prefs->store_register('export_ods_groupsep'=>cb_model(""=>__"No",
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and you can detect the scope from a question ID using the text before the separator :'
 							 ":"=>__"Yes, with scope separator ':'",
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and you can detect the scope from a question ID using the text before the separator .'
 							 "."=>__"Yes, with scope separator '.'"));
   $w->{'export_c_export_ods_groupsep'}=$widget;
 
