@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -1735,14 +1735,18 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           </listitem>
 
           <listitem>
+            <para><option>noshufflegroups</option> : annule le mélange automatique de
+            l'ordre des groupes. (voir <xref endterm="Groupes.questions.titre" linkend="Groupes.questions"/>)</para>
+          </listitem>
+
+          <listitem>
             <para><option>correc</option> : produit la correction du QCM, et
             non le sujet.</para>
           </listitem>
 
           <listitem>
             <para><option>correcindiv</option> : produit la correction de tous
-            les sujets. Très utile si vous utilisez des nombres
-            aléatoires.</para>
+            les sujets. </para>
           </listitem>
 
           <listitem>
@@ -1765,6 +1769,11 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
             <option>ensemble</option>, cette option demande à ce que les
             lettres ou chiffres soient inscrits, sur la feuille de réponses, à
             l'extérieur des cases à cocher plutôt qu'à l'intérieur.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>init</option> : initialise le générateur du hasard à partir
+            de l'horloge. <emphasis> Option pour test : ne pas utiliser pour un examen !</emphasis> </para>
           </listitem>
 
           <listitem>
@@ -1791,6 +1800,22 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           </listitem>
 
           <listitem>
+            <para><option>fullgroups</option> : annule le paramètre
+            optionnel de  <command>\restituegroup</command>
+            et <command>\copygroup</command>, ainsi chaque groupe 
+            est entièrement inséré et copié. (voir <xref endterm="Groupes.questions.titre" linkend="Groupes.questions"/>)</para>
+          </listitem>
+
+          <listitem>
+            <para><option>storebox</option> : Si vous choisissez de modifier
+            la forme des cases à cocher (carrées par défaut voir <xref endterm="style.cases.titre"
+            linkend="style.cases"/>) par des ovales ou des cercles, vous pouvez transmettre 
+            cette option à automultiplechoice pour qu'il utilise <option>\storebox</option> 
+            plutôt que <option>\savebox</option> pour stocker le dessin des cases.</para>
+            <para><package>\storebox</package> doit être déclaré dans le préambule.</para>
+          </listitem>
+
+          <listitem>
             <para><option>automarks</option> : en mode
             <option>ensemble</option>, utilisez cette option si vous voulez
             que les marques de calage ne soient pas imprimées sur les pages de
@@ -1799,17 +1824,10 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
             en redéfinissant la commande
             <command>\AMCsubjectPageTag</command> :</para>
 
-            <para>Il faut d'abord inscrire dans le préambule :</para>
-
-            <programlisting>\makeatletter
-\def\Nsujet{\the\AMCid@etud}
-\makeatother</programlisting>
-
-            <para>puis</para>
-
             <programlisting>\renewcommand\AMCsubjectPageTag{%
-  \fbox{\texttt{\Nsujet:\thepage}}%
+  \fbox{\texttt{\the\AMCid@etud:\thepage}}%
 }</programlisting>
+
 
             <warning>
               <para>L'option <option>automarks</option> ne doit pas être
@@ -1870,7 +1888,7 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           exemple !). Il ne faut pas utiliser d'identifiants se terminant par
           un nombre entier entre crochets (comme
           <parameter>marine-marchande[2]</parameter> ou
-          <parameter>123[27</parameter>]), car cette forme d'identifiants est
+          <parameter>123[27]</parameter>), car cette forme d'identifiants est
           réservée à la saisie de longs codes (par exemple grâce à
           <command>\AMCcode</command> - voir <xref
           linkend="latex.codes"/>).</para>
@@ -2150,8 +2168,8 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         </warning>
       </sect3>
 
-      <sect3>
-        <title>Groupes de questions</title>
+      <sect3 id="Groupes.questions">
+        <title id="Groupes.questions.titre">Groupes de questions</title>
 
         <para>L'inclusion de questions dans des groupes permet de mélanger les
         questions à l'intérieur de ces groupes, de manière différente pour
@@ -2183,7 +2201,8 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <para>La manière dont le groupe est restitué peut être contrôlée par
         le mode du groupe, défini grâce à la commande
-        <command>setgroupmode</command> :</para>
+        <command>setgroupmode</command>  (appelé après la création des groupes
+        et avant <command>\exemplaire</command>):</para>
 
         <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
 
@@ -2262,6 +2281,14 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           </listitem>
 
           <listitem>
+            <para><code>\insertgroupfrom[n]{ungroupe}{i}</code> 
+            Cette commande fait la même chose que 
+            <code>\restituegroupe[n]{ungroupe}</code> mais la sélection débute
+            à l'élément <replaceable>i</replaceable>. Le premier élément a pour
+            valeur d'indice 0.</para>
+          </listitem>
+
+          <listitem>
             <para><code>\cleargroup{groupe}</code> efface tout le contenu du
             groupe.</para>
           </listitem>
@@ -2290,6 +2317,17 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 \copygroup[5]{GB}{tout}
 \copygroup{GO}{tout}
 \restituegroupe{tout}</programlisting>
+
+        <itemizedlist>
+          <listitem>
+          <para><code>\copygroupfrom[n]{depuis}{vers}{i}</code>
+          Cette commande fait la même chose que <code>\copygroup[n]{depuis}{vers}</code>
+          mais la sélection débute à l'élément <replaceable>i</replaceable>. Le premier
+          élément a pour valeur d'indice 0.</para>
+          </listitem>
+        </itemizedlist>
+
+
       </sect3>
 
       <sect3>
@@ -2363,12 +2401,17 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         pages par feuille.</para>
       </warning>
 
-      <sect3>
-        <title>Style des cases à cocher</title>
+      <sect3 id="style.cases">
+        <title id="style.cases.titre">Style des cases à cocher</title>
 
-        <para>La commande <command>\AMCboxDimensions</command> permet de
-        modifier une ou plusieurs dimensions relatives aux cases à
-        cocher :</para>
+        <para>La commande <command>\AMCboxStyle</command> 
+        (nouveau nom de la commande <command>\AMCboxDimensions</command>
+        qui reste compatible avec les options ci-dessous ) permet de modifier
+        une ou plusieurs dimensions relatives aux cases à  cocher :</para>
+
+        <para>Les valeurs par défaut des options sont :</para>
+  
+       <programlisting>\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}</programlisting> 
 
         <itemizedlist>
           <listitem>
@@ -2407,6 +2450,13 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
             vers le bas des cases.</para>
           </listitem>
   
+         <listitem>
+            <para><option>outsidesep</option> représente la distance entre
+            la case et la lettre (ou le chiffre) quand l'option <option>outsidebox</option>
+            est choisie (voir <xref endterm="sec.package.options.titre"
+          linkend="sec.package.options"/>). </para>
+          </listitem>
+  
         <listitem>
           <para><option>cross=true</option> visible uniquement sur la feuille réponse,
           indique par une croix la bonne réponse au lieu de colorier la case. </para>
@@ -2422,7 +2472,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <para>Pour obtenir des cases plus petites, on pourra, par exemple,
         utiliser la commande</para>
 
-        <programlisting>\AMCboxDimensions{size=1.7ex,down=.2ex}</programlisting>
+        <programlisting>\AMCboxStyle{size=1.7ex,down=.2ex}</programlisting>
 
         <para>Lors de l'utilisation de l'option <option>ensemble</option>, il
         est possible de modifier la manière de nommer les cases à cocher
@@ -2598,14 +2648,27 @@ Quel calibre doit-on choisir pour mesurer une tension inconnue?
       <sect3>
         <title>Mise en page</title>
 
-        <para>Les marges ont été choisies de telle manière que le document
-        s'imprime correctement sur la majorité des imprimantes. Si votre
-        imprimante permet de les réduire, vous pouvez le faire en utilisant la
-        commande <command>geometry</command> du paquet LaTeX
-        <package>geometry</package>. Par exemple, pour resserrer le haut des
-        copies, on pourra utiliser <code>\geometry{top=3cm}</code> au lieu de
-        la valeur 3.5cm utilisée par défaut, juste avant le
-        <code>\begin{document}</code>.</para>
+        <sect4>
+          <title>Marges</title>
+         <para>Les marges ont été choisies de telle manière que le document
+           s'imprime correctement sur la majorité des imprimantes. Si votre
+            imprimante permet de les réduire, vous pouvez le faire en utilisant la
+            commande <command>geometry</command> du paquet LaTeX
+            <package>geometry</package>. Par exemple, pour resserrer le haut des
+            copies, on pourra utiliser <code>\geometry{top=3cm}</code> au lieu de
+            la valeur 3.5cm utilisée par défaut, juste avant le
+            <code>\begin{document}</code>.</para>
+            </sect4>
+  
+        <sect4>
+         <title>Nombre de pages</title>
+       <para>AMC gère automatiquement le nombre de pages à générer pour
+           chaque sujet. Vous pouvez choisir de fixer un nombre de pages
+            identiques pour chaque sujet avec la commande
+            <command>\AMCaddpagesto{entier}</command> à placer juste avant
+            la commande <command>\clearpage</command> .</para>
+            </sect4>  
+
       </sect3>
 
       <sect3>
@@ -2638,14 +2701,6 @@ Quel calibre doit-on choisir pour mesurer une tension inconnue?
 </programlisting>
           </listitem>
         </orderedlist>
-
-
-        <note>
-       <para>Pour éviter lors d'un saut de page que le numéro de la question et les réponses soient séparées,
-       modifiez la commande comme ceci :  </para> 
-        <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}\nopagebreak} 
-        </programlisting>
-        </note>
 
         <para>Ces définitions sont à insérer juste après la balise
         <code>\begin{document}</code> dans le document LaTeX.</para>
@@ -3084,41 +3139,6 @@ et inscrivez votre nom et prénom ci-dessous.
         souhaitable.</para>
       </sect3>
 
-      <sect4 id="exemple">
-        <title>Un exemple d'utilisation des références pour numéroter les
-        pages de la façon x/y dans le pied de page.</title>
-
-        <para>Dans le préambule, tapez :</para>
-
-        <programlisting>
-\makeatletter
-\def\Nsujet{\the\AMCid@etud}
-\makeatother
-\renewcommand\AMCsubjectPageTag{\Nsujet}
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-</programlisting>
-
-        <note>
-          <para><command>\AMCsubjectPageTag </command>est la commande qui
-          définit le numéro des pages (voir<xref
-          linkend="sec.package.options"/>).</para>
-
-          <para><command>\the\AMCid@etud</command> est le compteur qui gère le
-          numéro de chaque sujet généré par AMC.</para>
-        </note>
-
-        <para>Insérez, dans le document latex, juste avant la commande
-        <command>\clearpage</command>, la commande
-        <command>\AMClabel{lastpage}</command>.</para>
-
-        <para>Après <command>\begin{document} </command>mais avant
-        <command>\exemplaire{}</command>, tapez :</para>
-
-        <programlisting>\fancyfoot[C]{\hfill{}sujet N\degre{}\AMCsubjectPageTag \hfill{}PAGE~\thepage{}
- sur \AMCpageref{lastpage}\hfill{}}</programlisting>
-      </sect4>
-
       <sect4 id="Cleveref">
         <title>Utilisation du paquet <package>Cleveref</package>.</title>
 
@@ -3195,13 +3215,7 @@ et inscrivez votre nom et prénom ci-dessous.
             <programlisting>\AMCtext{explain}{\textit{\textbf{Explanation: }}}</programlisting>            
           </listitem>
 
-          <listitem>
-            <para><code>\AMCtext{footnote}{<replaceable>titre</replaceable>}</code>
-            remplace le numéro de la page (\thepage code tex) par le
-            <replaceable>titre</replaceable> dans la note de pied de page.</para>
-          </listitem>
-
-          <listitem>
+            <listitem>
             <para>Vous pouvez aussi considérer l'utilisation de commandes
             comme celles-ci (données ici avec comme deuxième argument la
             valeur par défaut en français) :</para>
@@ -3210,15 +3224,14 @@ et inscrivez votre nom et prénom ci-dessous.
 \AMCtext{message}{Pour votre examen, imprimez de pr\'ef\'erence
                   les documents compil\'es \`a l'aide de auto-multiple-choice.}</programlisting>
           </listitem>
+  
+          <listitem>
+            <para><code>\AMCsetFoot{<replaceable>\thepage</replaceable>}</code>
+            affiche le numéro de la page en pied de page. </para>
+          </listitem>
+  
         </itemizedlist>
       </sect3>
-
-      <note>
-        <para>Utilisez <command> \onecopy </command> au lieu de
-        <command>\exemplaire </command>car <command>\exemplaire</command>
-        remet les messages français par défaut (à part cela, les deux
-        commandes font la même chose).</para>
-      </note>
 
       <sect3 id="code.binaire">
         <title id="code.binaire.titre">Le code binaire</title>
@@ -3302,6 +3315,21 @@ et inscrivez votre nom et prénom ci-dessous.
 
     <sect2>
       <title>Des questions mathématiques à énoncés aléatoires</title>
+
+        <para>La première précaution à prendre, pour avoir des sujets
+        identiques malgré les recompilations latex est de choisir la base de
+        génération des nombres pseudo-aléatoires.</para>
+
+        <para><programlisting>\FPseed=<replaceable>entier</replaceable>
+</programlisting></para>
+
+        <note><para>
+         <replaceable>entier</replaceable> peut prendre des valeurs prédéfinies
+         par LaTex <item>\the\year</item>, <item>\the\month</item> ou
+         <item>\the\day</item> mais <emphasis> surtout pas <item>\the\time</item>
+         </emphasis>.
+        </para>
+        </note>
 
       <sect3>
         <title>Utilisation du package fp</title>
@@ -4702,7 +4730,7 @@ Nom et prénom :
         </informaltable>
 
         <note>
-           haut=x est réécrit en d=x-N, p=0 
+          <para>haut=x est réécrit en d=x-N, p=0 </para>
         </note>
 
         <important>
@@ -4711,7 +4739,6 @@ Nom et prénom :
           de la question, voir l'exemple ci-dessous.</para>
         </important>
 
-        <example>
           <programlisting>
 \begin{questionmult}{03}\bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
 Cite un gaz  important de l'air et son pourcentage.
@@ -4730,7 +4757,7 @@ Cite un gaz  important de l'air et son pourcentage.
 \end{multicols}
 \end{questionmult}
 </programlisting>
-        </example>
+ 
 
         <note>
           <para>Si vous indiquez <code>MAX=3</code> pour une question pouvant
@@ -4963,7 +4990,7 @@ Durée : 10 minutes.
 
         <note><para>
            La fonction test s'écrit 
-          <programlisting> ( TEST ? INSTRUCTION SI VRAI : INSTRUCTION SI FAUX)</programlisting></para>
+          <programlisting> ( test ? instruction si vrai : instruction si faux)</programlisting></para>
         </note>
 
         <para>D'autres variables sont aussi utilisables :</para>
@@ -5558,15 +5585,15 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
        Vous pouvez modifier les valeurs par défaut pour le traitement des scans dans le menu 
 
-      <menuchoice>
+      <para><menuchoice>
         <guimenuitem>Édition</guimenuitem>
 
         <guimenuitem>Préférences</guimenuitem>
 
         <guimenuitem>Scan</guimenuitem>
-      </menuchoice>
+      </menuchoice></para>
 
-      . 
+      
 
       <para>
         <command>Conversion des scans</command>
