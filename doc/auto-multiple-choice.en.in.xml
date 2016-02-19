@@ -2400,10 +2400,17 @@ Durée : 10 minutes.
 
         <note>
           <para>Each question must have a number, even it is not displayed, to
-          make sure of package cleveref's compatibility. Type
-          <command>\AMCquestionNumberfalse</command> command just after
-          <command>\AMCbeginQuestion</command> to have following numbers or
-          use the above command.</para>
+          make sure of compatibility with cleveref package. When you want to
+          hide the number for a particular question and do not want to
+          increase the number, use <command>\AMCquestionNumberfalse</command>
+          command as in the following example:</para>
+	  <programlisting>{
+  \AMCquestionNumberfalse
+  \def\AMCbeginQuestion#1#2{}
+  \begin{question}
+    ...
+  \end{question}
+}</programlisting>
         </note>
 
         <para>The display of answers can be modified in the same fashion, if
