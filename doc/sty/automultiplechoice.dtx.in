@@ -3372,7 +3372,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@amclog{AUTOQCM[B=set.intV=\the\AMC@numeric@value,%
     set.intX=\AMC@numeric@compute]^^J}%
   \ifKV@AMCNumeric@significant%
-    \AMC@amclog{AUTOQCM[B=set.Vdifference="min( abs((intV)-(intX)) , abs(10*(intV)-(intX)) , abs((intV)-10*(intX)) )"]^^J}%
+    \AMC@amclog{AUTOQCM[B=set.Vdifference="min( abs((intV)-(intX)) , abs(\the\AMC@numeric@base * (intV) - (intX)) , abs((intV) - \the\AMC@numeric@base * (intX)) )"]^^J}%
   \else%
     \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}%
   \fi%
