@@ -348,7 +348,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>L-None:</term>
 
           <listitem>
-            <para>「<emphasis>該当なし</emphasis>」（上記オプション参照）にかわる文字列を設定します。</para>
+            <para>「<emphasis>該当なし</emphasis>」（上記オプション参照）に代わる文字列を設定します。</para>
           </listitem>
         </varlistentry>
 
@@ -364,7 +364,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>L-Question:</term>
 
           <listitem>
-            <para>必要なら、試験問題内での「<emphasis>問</emphasis>」にかわる文字列を設定します。</para>
+            <para>必要なら、試験問題内での「<emphasis>問</emphasis>」に代わる文字列を設定します。</para>
           </listitem>
         </varlistentry>
 
@@ -372,7 +372,7 @@ Presentation: 以下の設問に最も適切な解答を
           <term>L-Name:</term>
 
           <listitem>
-            <para>受験者が氏名を記入するボックスに書かれる「<emphasis>氏名</emphasis>」にかわる文字列を設定します。</para>
+            <para>受験者が氏名を記入するボックスに書かれる「<emphasis>氏名</emphasis>」に代わる文字列を設定します。</para>
           </listitem>
         </varlistentry>
 
@@ -662,7 +662,7 @@ Presentation: 以下の設問に最も適切な解答を
 
         <programlisting>*&lt;lines=4&gt; 月について述べよ。
 -[O]{0} 誤り
--[P]{1} 微妙
+-[P]{1} 部分点
 +[V]{2} 正解</programlisting>
 
         <para>以下のグローバルオプションを使用することも検討すべきです:</para>
@@ -4182,10 +4182,21 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 \end{question}
 </programlisting>
       </note>
+        <note>
+      <para>二つのオプションを共に使用することもできます。</para>
+      <para><informalexample>\begin{document}</informalexample>の後に次のように記述します。
+      <programlisting>
+\makeatletter
+\def\setoutsidebox{\AMC@outside@boxtrue}
+\makeatother</programlisting> 
+      </para>
+      <para>そして用紙内でローカルに（波括弧の内側で）使用します:</para>
+      <programlisting>{\setoutsidebox\AMCform}</programlisting>
+      </note>
     </sect2>
 
-    <sect2>
-      <title>指名試験問題用紙</title>
+    <sect2 id="Nominative.sheets">
+      <title id="Nominative.sheets.title">指名試験問題用紙</title>
 
       <para>状況によっては、受験者名簿をもとに各受験者を個別に指名した試験問題用紙を準備すると有用かもしれません。これをどのように行うか見てみます。</para>
 
