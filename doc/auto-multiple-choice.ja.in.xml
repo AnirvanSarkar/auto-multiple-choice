@@ -263,7 +263,7 @@ Presentation: 以下の設問に最も適切な解答を
     <sect2>
       <title>コメント</title>
 
-      <para>AMC-TXTソースファイル内の `<code>#</code>' 文字で<emphasis>始まる</emphasis>行にはコメントを書くことができます。AMCはこれらの行を無視します。</para>
+      <para>AMC-TXTソースファイル内の<quote><code>#</code></quote>文字で<emphasis>始まる</emphasis>行にはコメントを書くことができます。AMCはこれらの行を無視します。</para>
     </sect2>
 
     <sect2>
@@ -1458,7 +1458,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
  <sect4>
       <title>Last choice</title>
 
-      <para><command>\lastchoices</command>コマンドを使用すると、いくつかの選択肢を最後に置くことができます。</para>
+      <para><command>\lastchoices</command>コマンドを使用すると、一部の選択肢をシャフルせず常に末尾に置くことができます。</para>
         <programlisting>
         \begin{question}{color}
         なにいろ？
@@ -2400,7 +2400,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
     <sect2>
       <title>AMC用のオプション</title>
 
-      <para>ソースファイルのヘッダ（'%'で始まる先頭行）に、AMCに渡すオプションをいくつか付加することができます:</para>
+      <para>ソースファイルのヘッダ（<quote><code>%</code></quote>で始まる先頭行）に、AMCに渡すオプションをいくつか付加することができます:</para>
 
       <variablelist>
         <varlistentry>
@@ -3018,7 +3018,7 @@ Name :
             <listitem>
               <para>ボックスを完全に塗りつぶすことで、AMCに<emphasis>マークしていない</emphasis>と認識させることができます。</para>
 
-          <para><command>デフォルトの黒ピクセル値上限閾値</command>変数（<xref endterm="preferences.defaut.titre" linkend="preferences.defaut"/>参照）の値は1に近くしなければなりません。</para>
+          <para><command>デフォルトの黒ピクセル値上限閾値</command>変数（<xref endterm="preferences.default.title" linkend="preferences.default"/>参照）の値は1に近くしなければなりません。</para>
             </listitem>
           </itemizedlist>
         </sect4>
@@ -3698,16 +3698,16 @@ Name:
       <sect3 id="liste.etudiants">
         <title id="liste.etudiants.title">受験者名簿</title>
 
-        <para>事前に受験者名簿を準備しておかなければなりません。この名簿は、いくつもの試験で再利用することができます。このリストは `<code>#</code>' で始まるコメント行をオプションとしてもつ、次の例のようなCSVファイルです:<programlisting># STUDENTS / 1ST YEAR
+        <para>事前に受験者名簿を準備しておかなければなりません。この名簿は、いくつもの試験で再利用することができます。このリストは<quote><code>#</code></quote>で始まるコメント行をオプションとしてもつ、次の例のようなCSVファイルです:<programlisting># STUDENTS / 1ST YEAR
 surname:name:id:email
 Bienvenüe:Alexis:001:paamc@passoire.fr
 Boulix:Jojo:002:jojo.boulix@rien.xx
 Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
-        <para>ファイルの冒頭にある `<code>#</code>' で始まる行はコメントです。コメントでない最初の行は（<code>`:'</code> で区切った）カラム名を格納します。その行以降は、受験者1名につき1行で、対応する情報を記入します。必ず<code>name</code>あるいは<code>surname</code>という名前のカラムに受験者名を格納しないと、下で説明する手動識別でボタン表示ができなくなります。<!--英文・仏文にない表現で必要性の理由を説明--></para>
+        <para>ファイルの冒頭にある<quote><code>#</code></quote>で始まる行はコメントです。コメントでない最初の行は（<quote><code>:</code></quote>で区切った）カラム名を格納します。その行以降は、受験者1名につき1行で、対応する情報を記入します。必ず<code>name</code>あるいは<code>surname</code>という名前のカラムに受験者名を格納しないと、下で説明する手動識別でボタン表示ができなくなります。<!--英文・仏文にない表現で必要性の理由を説明--></para>
 
         <note>
-           <para>セパレータの <code>`:'</code> は、カンマ、セミコロン、タブのいずれかに置き換えることができます。しかし、名簿ファイルのすべての箇所で同じセパレータを使わなければなりません。どの文字をセパレータとして（この4種から）選ぶかは、コメントでない最初の行において、どれが最も多く出現するかで決定されます。</para>
+           <para>セパレータの<quote><code>:</code></quote>は、カンマ、セミコロン、タブのいずれかに置き換えることができます。しかし、名簿ファイルのすべての箇所で同じセパレータを使わなければなりません。どの文字をセパレータとして（この4種から）選ぶかは、コメントでない最初の行の中でどの文字が最も多く出現するかで決定されます。</para>
 
            <para>CSVファイルであれば適合するはずです。</para>
         </note>
@@ -3962,9 +3962,9 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       </sect3>
     </sect2>
    
-    <sect2 id="preferences.defaut">
+    <sect2 id="preferences.default">
 
-      <title id="preferences.defaut.title">デフォルト値の設定</title>
+      <title id="preferences.default.title">デフォルト値の設定</title>
 
 <para>
       <menuchoice>
@@ -4007,7 +4007,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
   </sect1>
 
   <sect1>
-    <title>非標準の使用方法</title>
+    <title>標準外の使用方法</title>
 
     <sect2>
       <title>問題用紙コピー方式</title>
@@ -4716,7 +4716,7 @@ Moniuszko;Stanisław;003</programlisting>
                   <replaceable>filename</replaceable></option></term>
 
                   <listitem>
-                    <para>出力するファイル名を設定します。'<literal>%e</literal>' というシーケンスがあれば4桁の試験問題番号に置換されます。<replaceable>filename</replaceable>が '<literal>%e</literal>' を含んでいない場合、'<literal>-%e.pdf</literal>' という文字列が付け足されます。</para>
+                    <para>出力するファイル名を設定します。<quote><literal>%e</literal></quote>というシーケンスがあれば4桁の試験問題番号に置換されます。<replaceable>filename</replaceable>が<quote><literal>%e</literal></quote>を含んでいない場合、<quote><literal>-%e.pdf</literal></quote>という文字列が付け足されます。</para>
                   </listitem>
                 </varlistentry>
               </variablelist>
@@ -4731,7 +4731,7 @@ Moniuszko;Stanisław;003</programlisting>
                   <replaceable>command</replaceable></option></term>
 
                   <listitem>
-                    <para>印刷に使用するコマンドを指定します。<replaceable>command</replaceable>の文字列は（引用符を使用していても）空白文字の場所で区切られます。'<literal>%f</literal>' というシーケンスは（印刷する試験問題を含んだ）PDFファイル名に置換され、'<literal>%e</literal>' は試験問題番号に置換されます。</para>
+                    <para>印刷に使用するコマンドを指定します。<replaceable>command</replaceable>の文字列は（引用符を使用していても）空白文字の場所で区切られます。<quote><literal>%f</literal></quote>というシーケンスは（印刷する試験問題を含んだ）PDFファイル名に置換され、<quote><literal>%e</literal></quote>は試験問題番号に置換されます。</para>
                   </listitem>
                 </varlistentry>
               </variablelist>
@@ -5119,11 +5119,11 @@ Moniuszko;Stanisław;003</programlisting>
             --arrondi <replaceable>rounding</replaceable></option></term>
 
             <listitem>
-              <para>得点が<replaceable>granularity</replaceable>の倍数になるように丸めます。<replaceable>rounding</replaceable>が '<literal>i</literal>' なら、（<citerefentry>
+              <para>得点が<replaceable>granularity</replaceable>の倍数になるように丸めます。<replaceable>rounding</replaceable>が<quote><literal>i</literal></quote>なら、（<citerefentry>
                   <refentrytitle>floor</refentrytitle>
 
                   <manvolnum>3</manvolnum>
-                </citerefentry>がするように）切り捨てます。<replaceable>rounding</replaceable>が '<literal>n</literal>' なら、近い方に丸めます。<replaceable>rounding</replaceable>が '<literal>s</literal>' なら、（<citerefentry>
+                </citerefentry>がするように）切り捨てます。<replaceable>rounding</replaceable>が<quote><literal>n</literal></quote>なら、近い方に丸めます。<replaceable>rounding</replaceable>が<quote><literal>s</literal></quote>なら、（<citerefentry>
                   <refentrytitle>ceil</refentrytitle>
 
                   <manvolnum>3</manvolnum>
@@ -5785,7 +5785,7 @@ Moniuszko;Stanisław;003</programlisting>
               <replaceable>name-model</replaceable></option></term>
 
               <listitem>
-                <para>受験者名簿ファイルから受験者名を構成するためのモデルを設定します。デフォルト値は '<code>(nom|surname) (prenom|name)</code>' で、この場合、氏名は<code>nom</code>カラム（なければ<code>surname</code>カラム）の内容の後に<code>prenom</code>カラム（なければ<code>name</code>カラム）の内容を続けたものになり、したがって、フランス語か英語の単純なCSVファイルでたいていうまくいきます。</para>
+                <para>受験者名簿ファイルから受験者名を構成するためのモデルを設定します。デフォルト値は<quote><code>(nom|surname) (prenom|name)</code></quote>で、この場合、氏名は<code>nom</code>カラム（なければ<code>surname</code>カラム）の内容の後に<code>prenom</code>カラム（なければ<code>name</code>カラム）の内容を続けたものになり、したがって、フランス語か英語の単純なCSVファイルでたいていうまくいきます。</para>
               </listitem>
             </varlistentry>
 
@@ -5899,7 +5899,7 @@ Moniuszko;Stanisław;003</programlisting>
                   </varlistentry>
                 </variablelist>
 
-                <para>デフォルト値は '<literal>(N)-(ID).pdf</literal>' です。</para>
+                <para>デフォルト値は<quote><literal>(N)-(ID).pdf</literal></quote>です。</para>
               </listitem>
             </varlistentry>
           </variablelist>
