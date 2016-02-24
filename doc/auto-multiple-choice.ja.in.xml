@@ -89,7 +89,7 @@
     </legalnotice>
   </articleinfo>
 
-  <sect1>
+  <sect1 id="license">
     <title>ライセンス</title>
 
     <para>Auto Multiple Choiceはフリーソフトウェアです。あなたはこれを、フリーソフトウェア財団によって発行されたGNU一般公衆利用許諾書バージョン2か、（希望によっては）それ以降のバージョンのいずれかの定める条件の下で再頒布または改変することができます。</para>
@@ -100,13 +100,13 @@
   <sect1 id="prerequis">
     <title>必要条件</title>
 
-    <sect2>
+    <sect2 id="prerequis.os">
       <title>オペレーティングシステム</title>
 
       <para>AMCユーティリティはLinux用に開発されています。MAC OS XやWindowsにもそれほど困難なく移植できるかもしれませんが、すぐにとりかかる準備はできていません。これを行ってみたい方は連絡をしてください。少しはお手伝いできますし、必要ならAMCに変更を加えさせていただきます。</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="prerequis.soft">
       <title>ソフトウェア</title>
 
       <note>
@@ -129,7 +129,7 @@
         </listitem>
       </itemizedlist>
 
-      <sect3>
+      <sect3 id="prerequis.soft.v">
         <title>AMCで用いるソフトウェアの推奨バージョン</title>
 
         <para>AMCで用いるソフトウェアのバージョンが古いと、そのバグにより正常な動作の妨げになるものがあります。</para>
@@ -146,7 +146,7 @@
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="prerequis.latex">
       <title>LaTeX</title>
 
       <para>AMCのバージョン1.1からは、試験問題をLaTeX言語で記述することは必須ではなくなりました（プレーンテキストでの代替文法については<xref linkend="AMC-TXT"/>を参照）。しかし、LaTeXは試験問題を記述するためのネイティブなAMC言語であり、比べものにならない自由度で試験問題をデザインすることができます。LaTeX形式に抵抗のある人でも、用意されたテンプレートで自分の選択式試験問題をすぐに書き始められます。</para>
@@ -156,7 +156,7 @@
   <sect1 id="usagenotes">
     <title>利用メモ</title>
 
-    <sect2>
+    <sect2 id="num.limits">
       <title>数値的な限界</title>
 
       <para>（0.156以降の）現在までのバージョンでは、試験あたりの受験者数は4,095人まで、試験あたりの（受験者ごとの）ページ数は63ページまでに限定されています（これらのデフォルト値は変更可能です。<xref endterm="binary.code.title" linkend="binary.code"/>参照）。</para>
@@ -166,7 +166,7 @@
       <para>LaTeX自体の限界でコンパイルができないことがあり、例えば、「<errortext>No room for a new \toks</errortext>」というエラーが出ます。この場合、<code>\usepackage{etex}</code>コマンドにより<package>etex</package>パッケージを試してみてください。</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="versions">
       <title>バージョン</title>
 
       <para>問題が出ることは多くはありませんが、あるプロジェクトを実施している間（試験問題用紙を印刷してから採点して成績をつけ終わるまでの期間）はプログラムのバージョンを変更しないことをお勧めします。何らかのプロジェクトを実施している最中に適用してしまうと、AMCの正常な動作に干渉してしまうような修正がいくつかあります。</para>
@@ -203,7 +203,7 @@
       </itemizedlist>
     </sect2>
 
-    <sect2>
+    <sect2 id="install">
       <title>インストール</title>
 
       <para>debian、Ubuntuあるいはその派生OSでは、debian公式リポジトリとubuntu AMCリポジトリを用いることができます。Mandriva、openSUSE、Fedoraでは、ビルド済のRPMパッケージを用いることができます。インストール手順は<ulink url="http://home.gna.org/auto-qcm/download">AMCウェブサイト</ulink>で説明されています。</para>
@@ -216,7 +216,7 @@ make
 sudo make install</screen>
     </sect2>
 
-    <sect2>
+    <sect2 id="launch">
       <title>起動</title>
 
       <para>インストールが完了したら、Gnomeの一般メニュー（あるいは、KDEなどの対応するメニュー）から<menuchoice><guimenu>アプリケーション</guimenu><guisubmenu>教育</guisubmenu><guimenuitem>Auto Multiple Choice</guimenuitem></menuchoice>を選ぶことにより、GUIを起動することができます。また、<userinput>auto-multiple-choice</userinput>コマンドを使用することもできます。</para>
@@ -260,13 +260,13 @@ Presentation: 以下の設問に最も適切な解答を
 
     <para>AMC-TXTの構造はすでにおわかりのとおりです。最初に全体的なオプションがあり、そして設問が続きます。</para>
 
-    <sect2>
+    <sect2 id="txt.comments">
       <title>コメント</title>
 
       <para>AMC-TXTソースファイル内の<quote><code>#</code></quote>文字で<emphasis>始まる</emphasis>行にはコメントを書くことができます。AMCはこれらの行を無視します。</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.opts">
       <title>全体オプション</title>
 
       <para>以下のオプションを（任意の順序で）使用することができます:</para>
@@ -500,7 +500,7 @@ Presentation: 以下の設問に最も適切な解答を
         </varlistentry>
       </variablelist>
 
-      <sect3>
+      <sect3 id="txt.separate">
         <title>別紙答案用紙</title>
 
         <para>試験問題に別紙答案用紙を用いる場合は、次のオプションを指定してください:</para>
@@ -549,12 +549,12 @@ Presentation: 以下の設問に最も適切な解答を
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.questions">
       <title>設問</title>
 
       <para>単一選択問題（唯一の選択肢のみが正解となる設問）は、行を<code>*</code>で始め、複数選択問題（任意個の正解がある設問）は<code>**</code>で始めます。そのうしろに設問文を続け、以降の行に<code>+</code>で始まる正しい選択肢と、 <code>-</code>で始まる誤った選択肢を書きます。</para>
 
-      <sect3>
+      <sect3 id="txt.questions.opts">
         <title>設問オプション</title>
 
         <para>設問にはいくつかオプションが設定できます。それらは次の例のように、<code>*</code>か<code>**</code>のあとに角括弧で囲み、カンマで区切って並べます:</para>
@@ -636,7 +636,7 @@ Presentation: 以下の設問に最も適切な解答を
         </variablelist>
       </sect3>
 
-      <sect3>
+      <sect3 id="txt.questions.scoring">
         <title>採点基準</title>
 
         <para>特定の設問や選択肢の開始文字（<code>*</code>、<code>**</code>、<code>+</code>、<code>-</code>）とオプションの後に、波括弧で囲んで採点基準を設定することができます。例えば次の例のようになりますが、採点基準の詳細については、<xref linkend="bareme"/>を参照してください。</para>
@@ -655,7 +655,7 @@ Presentation: 以下の設問に最も適切な解答を
 </programlisting>
       </sect3>
 
-      <sect3>
+      <sect3 id="txt.questions.open">
         <title>記述式設問</title>
 
         <para>次の例のように<code>&lt;</code>と<code>&gt;</code>で囲むことにより、記述式の設問（<xref linkend="openquestions"/> 参照）を定義することができます:</para>
@@ -687,7 +687,7 @@ Presentation: 以下の設問に最も適切な解答を
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.multiline">
       <title>複数行</title>
 
       <para>文章はどこで切って次の行に続けても（それが空行であっても）、それがオプションや次の設問文や選択肢の開始と混同さえされなければかまいません。例として次の設問を見てください:</para>
@@ -732,7 +732,7 @@ Presentation: 以下の設問に最も適切な解答を
 - 何千万個も</programlisting>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.title">
       <title>タイトル</title>
 
       <para>タイトルをつけるには、<code>[==</code>と<code>==]</code>で囲みます。</para>
@@ -881,7 +881,7 @@ Presentation: 以下の設問に最も適切な解答を
       </warning>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.includes">
       <title>他のファイルのインクルード</title>
 
       <para>次のようにして他のファイルをインクルードできます:</para>
@@ -901,7 +901,7 @@ Presentation: 以下の設問に最も適切な解答を
 
     <para>選択式試験問題用のLaTeXファイルをどのように作ればいいかを簡潔に示すいくつかの例から始めます。それぞれのLaTeXファイルはテンプレートとして用意されているので、これらのテンプレートの一つを用いて選択式試験問題プロジェクトを作ることができます。</para>
 
-    <sect2>
+    <sect2 id="latex.simple">
       <title>簡単な例</title>
 
       <para><!--NAME: 単純な例
@@ -1020,7 +1020,7 @@ DESC: 単一選択問題1件と複数選択問題1件からなる単純な例（
         </calloutlist></para>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.shuffle">
       <title>設問グループとシャフルの例</title>
 
       <para>この例では、設問の順序は試験問題の実体ごとに変えたいけれど、同じ分野の設問どうしはいっしょにまとめておきたい場合を考えます。この目的のためには、設問グループを二つ作成し、各グループ内で設問をランダムにシャフルします。</para>
@@ -1272,7 +1272,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
       </warning>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.commands">
       <title>LaTeXコマンドの説明</title>
 
       <sect3 id="sec.package.options">
@@ -1455,7 +1455,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 \end{question}</programlisting>
         </para>
 
- <sect4>
+ <sect4 id="latex.lastchoice">
       <title>Last choice</title>
 
       <para><command>\lastchoices</command>コマンドを使用すると、一部の選択肢をシャフルせず常に末尾に置くことができます。</para>
@@ -1557,7 +1557,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
         <para>このようにすると、最初と三つめの設問では解説の前に<emphasis>解説: </emphasis>と表示しますが、二つ目の設問の解説の前には<emphasis>理由: </emphasis>と表示されます。</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.choices.multicol">
         <title>選択肢を複数カラムに配置</title>
 
         <para>（スペースを節約するために）選択肢を複数のカラムに置くには、LaTeXの<package>multicol</package>パッケージを用いて、<option>multicols</option>環境内に<option>choices</option>環境を入れることができます。</para>
@@ -1584,7 +1584,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
         </para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.choices.space">
         <title>選択肢間のスペース</title>
 
         <para>通常の選択肢間の垂直間隔もパラメータ化されており、寸法<parameter>AMCinterIrep</parameter>により変更することができます:</para>
@@ -1600,7 +1600,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
         <para>得点表記領域をオプションで付加することができます（<xref
         endterm="marks.position.title" linkend="marks.position"/>参照）。</para>
 
-        <sect4>
+        <sect4 id="latex.zone.std">
           <title><option>separateanswersheet</option>オプションを使用しない場合</title>
 
           <para>以下のコマンドを<command>\begin{document}</command>コマンドから<command>\onecopy</command>コマンドまでの間に入力してください:</para>
@@ -1612,7 +1612,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
           <para><parameter>position</parameter>の値は、none, question, margin, marginsのいずれかです。</para>
         </sect4>
 
-        <sect4>
+        <sect4 id="latex.zone.separate">
           <title><option>separateanswersheet</option>オプションを使用する場合</title>
 
           <para>以下のコマンドを<command>\begin{document}</command>コマンドから<command>\onecopy</command>コマンドまでの間に入力してください:</para>
@@ -1745,7 +1745,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.page">
         <title>用紙サイズと余白</title>
 
         <para>LaTeXの<command>automultiplechoice</command>パッケージは<command>geometry</command>を用いて余白とページレイアウトを設定しています。その設定を上書きするには、<code>\begin{document}</code>の直前で<command>\geometry</command>コマンドを用いてください。詳細はgeometryパッケージのドキュメントを参照してください。AMCが設定する初期値は次のとおりです:</para>
@@ -1877,7 +1877,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
         </note>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.style">
         <title>設問の外見スタイル</title>
 
         <para>LaTeXの<command>AMCbeginQuestion</command>コマンドを再定義することにより、各設問の外見を変更することができます。デフォルトの定義は次のとおりです:</para>
@@ -1955,22 +1955,22 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
         <para>これらの寸法は、設問間（<code>quest</code>）あるいは選択肢間（<code>rep</code>）の垂直間隔で、またボックスモード用（<code>B</code>。<command>\AMCBoxedAnswers</command>の使用時や<option>box</option>パッケージオプション使用時）と標準モード用（<code>I</code>）です。</para>
       </sect3>
 
-    <sect3>
+    <sect3 id="latex.layout">
         <title>レイアウト</title>
 
-        <sect4>
+        <sect4 id="latex.layout.margins">
           <title>マージン</title>
            <para>マージンはほとんどのプリンタで正しく印刷できるように選んであります。変更するには、LaTeXの<package>geometry</package>パッケージにある<command>geometry</command>コマンドを使用することができます。例えば、トップマージンを減らすには、デフォルトの3.5cmの代わりに、<code>\begin{document}</code>の直前で<code>\geometry{top=3cm}</code>とします。</para>
             </sect4>
   
-        <sect4>
+        <sect4 id="latex.layout.npages">
          <title>ページ番号</title>
            <para>AMCは各試験問題のページ番号を自動的に取り扱います。<command>\clearpage</command>の前に<command>\AMCaddpagesto{integer}</command>コマンドを置くと、いくつか空ページが挿入され、その次のページ番号が各試験問題で同一になります。</para>
         </sect4>  
 
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.style.separate">
         <title>別紙答案用紙方式</title>
 
         <para><option>separateanswersheet</option>オプション（<xref linkend="secensemble"/>参照）で生成される別紙答案用紙のレイアウトを変更することも可能です。</para>
@@ -2214,7 +2214,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{解答は別紙答案用紙に記入してください。}}}</programlisting>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.oneletter">
         <title>1文字選択肢</title>
 
         <para>選択肢の記述に長い文章は必要でなく1文字で十分の場合があります。別紙答案用紙を用いる場合、問題用紙と答案用紙の両方にボックスを表示するのはとても面倒です。そのような場合、<code>choices</code>環境のかわりに<command>\AMCBoxOnly</command>コマンドを使用してください:</para>
@@ -2246,7 +2246,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         </variablelist>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.seed">
         <title>シャフルパラメータの選択</title>
 
         <para>シャフルの生成に用いる乱数生成器のシードは、以下のコマンドで変更することができます（documentの最初の方で、少なくとも<command>onecopy</command>コマンドの外で使わなければなりません）:</para>
@@ -2258,13 +2258,13 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         <para>割り当てた値（1から4194303までの中から選びます）が変更されると、シャフルが変わります。もちろん、試験問題用紙を印刷した後は、この値を変更してはいけません。</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.separate.sect">
         <title>セクション分けと別紙答案用紙</title>
 
         <para>別紙答案用紙上にもセクション分けが見えるようにするには、<command>\section</command>と<command>\subsection</command>の代わりに、<command>\AMCsection</command>と<command>\AMCsubsection</command>を使用してください。</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.refs">
         <title>試験問題内での参照</title>
 
         <para>LaTeXのコマンド<command>\label</command>、<command>\ref</command>、<command>\pageref</command>コマンドを設問や選択肢で用いると、試験問題の実体化ごとに同じ引数で呼び出され、毎回参照する番号が変わるので、問題が発生します。これを解決するには、それぞれ<command>\AMClabel</command>、<command>\AMCref</command>、<command>\AMCpageref</command>を用いてください。これらは、<command>\label</command>、<command>\ref</command>、<command>\pageref</command>を呼び出す前に、引数に実体の番号を付加します。</para>
@@ -2394,7 +2394,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.amcopts">
       <title>AMC用のオプション</title>
 
       <para>ソースファイルのヘッダ（<quote><code>%</code></quote>で始まる先頭行）に、AMCに渡すオプションをいくつか付加することができます:</para>
@@ -2418,7 +2418,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
       </variablelist>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.numerical">
       <title>乱数を用いた数学設問</title>
 
         <para>latexを走らせて試験問題をコンパイルするたびに常に同じ結果が得られるよう、最初に乱数シードを設定しなければなりません:</para>
@@ -2430,7 +2430,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
          <replaceable>integer</replaceable>はLaTeXで既定の値<item>\the\year</item>, <item>\the\month</item>, <item>\the\day</item>が使えますが、<emphasis>絶対に<item>\the\time</item>を使ってはいけません</emphasis>。</para>
         </note>  
 
-      <sect3>
+      <sect3 id="latex.numerical.fp">
         <title>fpパッケージの使用</title>
 
         <para><package>automultiplechoice</package>の前に<programlisting>\usepackage{fp}</programlisting>として<package>fp</package>パッケージを使用すると、乱数データを用いた練習問題を作ることができます。<package>fp</package>パッケージのドキュメントは<ulink url="http://mirrors.ctan.org/macros/latex/contrib/fp/README">http://mirrors.ctan.org/macros/latex/contrib/fp/README</ulink>にあります。以下では単純な例から見てみます。</para>
@@ -2735,7 +2735,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         </sect4>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.numerical.pgf">
         <title>pgf/tikzパッケージの使用</title>
 
         <para>このパッケージは、<package>automuliplechoice</package>パッケージの<emphasis>後</emphasis>にロードしなければなりません。</para>
@@ -2747,7 +2747,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
         <para><programlisting>\pgfmathsetseed{2056}</programlisting></para>
 
-        <sect4>
+        <sect4 id="latex.numerical.pgf.simple">
           <title>単純な計算</title>
 
           <para>これは単純な計算を用いた例です</para>
@@ -2787,7 +2787,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
             </note></para>
         </sect4>
 
-        <sect4>
+        <sect4 id="latex.numerical.pgf.graphs">
           <title>グラフ</title>
 
           <para>tkizパッケージはグラフを（ランダムなものもそうでないものも）作成することもできます。</para>
@@ -2821,7 +2821,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         </sect4>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.numerical.lualatex">
         <title>LuaLaTeXの使用</title>
 
         <para><command>lualatex</command>コマンドを用いれば、LaTeX文書内でLUA言語を使用できます。これを用いる場合は、文書はUTF-8でエンコードされている必要があり、<package>inputenc</package>パッケージはロードできません。これに関する情報は <ulink url="http://www.luatex.org/documentation.html">http://www.luatex.org/documentation.html</ulink> を参照してください。</para>
@@ -2909,7 +2909,7 @@ Name :
 
     <para>ここでは、選択式試験問題の作成から受験者の得点の編集まで、GUIによる使用例を解説します。</para>
 
-    <sect2>
+    <sect2 id="gui.new">
       <title>プロジェクトの新規作成</title>
 
       <para>GUIを開きましょう。通常は、Gnomeの一般メニュー（あるいは、KDEなどの対応するメニュー）から<menuchoice><guimenu>アプリケーション</guimenu><guisubmenu>教育</guisubmenu><guimenuitem>Auto Multiple Choice</guimenuitem></menuchoice>を選んで開きます。<userinput>auto-multiple-choice</userinput>コマンドを直接使うこともできます。</para>
@@ -2943,7 +2943,7 @@ Name :
       <para>ここでは、<guilabel>テンプレート</guilabel>を選択します。次のウィンドウがテンプレートを示します。例えば、<guilabel>[JA] ドキュメント</guilabel>グループから、<guilabel>単純な例</guilabel>を選びます。これで、<guibutton>ソースファイル編集</guibutton>ボタンによりデフォルトのエディタが起動し、編集してレイアウトや設問を変更できるようになります。</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.prepare">
       <title>試験問題の作成</title>
 
       <para>試験問題の作成は二つのステップからなります。最初にLaTeXソースファイルから、参照用の文書を作成しなければなりません。これは<guibutton>文書更新</guibutton>をクリックすることにより行われ、以下の文書が生成されます</para>
@@ -2991,7 +2991,7 @@ Name :
       </important>
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.test">
       <title>試験</title>
       <para>受験者に合格してもらいましょう。</para>
       
@@ -3004,7 +3004,7 @@ Name :
       <sect3 id="correction.boxes">
         <title id="correction.boxes.title">試験中のボックスの修正</title>
 
-        <sect4>
+        <sect4 id="gui.correct.tick">
           <title>ボックスにチェックを付けさせる場合</title>
 
           <itemizedlist>
@@ -3020,7 +3020,7 @@ Name :
           </itemizedlist>
         </sect4>
 
-        <sect4>
+        <sect4 id="gui.correct.fill">
           <title>ボックスを塗りつぶさせる場合</title>
 
           <itemizedlist>
@@ -3035,14 +3035,14 @@ Name :
       
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.capture">
       <title>答案のスキャン</title>
 
       <para>ここでは、受験者の答案の入力方法を説明します。これは、自動あるいは手動で行うことができます。</para>
 
       <para>GUIの<guilabel>マーク認識</guilabel>タブに行きます。</para>
 
-      <sect3>
+      <sect3 id="gui.capture.auto">
         <title>自動入力</title>
 
         <para>受験者が記入したマークを自動認識するには、事前に答案をデジタル化しておかなければなりません。私の場合は、その作業を（私の操作なしに束にした全ページに対して）自動でやってくれるコピー機/スキャナを使い、300dpi、OCRモード（文字認識向き、グレースケールでないモノクロモードのことで、文字認識をしてくれるわけではありません）の設定で行って、各ページが一つのTIFFファイルとしてスキャンデータが得られます。（訳注: 訳者の場合、300dpi、グレースケールを使用しています。）</para>
@@ -3070,7 +3070,7 @@ Name :
         </itemizedlist>
       </sect3>
 
-      <sect3>
+      <sect3 id="gui.capture.manual">
         <title>手動入力</title>
 
         <para>スキャナの使用が困難な場合や、いくつかの用紙で自動入力が期待どおりに動作しなかった場合に、手動で入力を行うことができます。このためには、<guilabel>試験実施後のマーク認識</guilabel>のセクションにある<guibutton>手動</guibutton>ボタンによりウィンドウを開きます。このウィンドウでは、目的のページのマークされたボックスを自分で（クリックして）入力することができます。</para>
@@ -3081,12 +3081,12 @@ Name :
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.marks">
       <title>採点</title>
 
       <para>GUIの<guilabel>採点</guilabel>タブでは、<guilabel>採点</guilabel>セクションでスキャンデータから受験者の得点を計算するとともに、受験者が記入したコードを読み取ります（<xref linkend="latex.codes"/>参照）。</para>
 
-      <sect3>
+      <sect3 id="gui.marks.proc">
         <title>採点処理</title>
 
         <para>得点の計算は<guibutton>採点</guibutton>ボタンで起動しますが、以下の選択をしておく必要があります:</para>
@@ -3731,10 +3731,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <para>準備した受験者名簿は<guilabel>受験者識別</guilabel>セクションの<guibutton>ファイル登録</guibutton>ボタンにより選択します。そして受験者名簿の中でユニークなカラム（一般には、受験番号を格納するカラム）を一つ選ばなければなりません。最後に、自動識別の準備として、（使用した場合には）LaTeXの<command>\AMCcode</command>コマンドで使用した関連するコード名を選びます。</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="gui.assoc">
         <title>受験者識別</title>
 
-        <sect4>
+        <sect4 id="gui.assoc.auto">
           <title>自動識別</title>
 
           <para><guilabel>受験者識別</guilabel>セクションの<guibutton>自動</guibutton>ボタンを押すと、受験者が記入したコードの対応づけが開始します。その結果は、後から（半）手動識別により確認したり改善したりできます。</para>
@@ -3744,7 +3744,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </warning>
         </sect4>
 
-        <sect4>
+        <sect4 id="gui.assoc.manual">
           <title>手動識別</title>
 
           <para>受験者の氏名を読み取るためのウィンドウを開くには、<guilabel>受験者識別</guilabel>セクションの<guibutton>手動</guibutton>ボタンをクリックします。このウィンドウは、上部に受験者が記入した氏名の画像が順番に表示され、下部に名簿にある受験者ごとにボタンが並び、さらに右側には答案用紙の一覧で区別できるようになっています。各ページについて、上部に提示された氏名に対応したボタンをクリックします（デフォルトでは識別できなかった答案だけが表示されますが、「<guilabel>識別済も表示</guilabel>」ボックスにチェックすれば変更できます）。すべてのページを読み取れたら、氏名の画像のかわりに青い背景が表示されるので、最後に<guibutton>保存</guibutton>ボタンをクリックして受験者識別を終了するだけです。</para>
@@ -3757,7 +3757,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
       <para>このステージでは、<guibutton>エクスポート</guibutton>ボタンを使って、採点表をさまざまな形式（現在のところ、CSVとOpenOffice）で取り出せます。エクスポートすると、それに引き続いて、（可能なら）エクスポートされたファイルが適切なソフトウェアで開かれます。</para>
 
-      <sect3>
+      <sect3 id="gui.export.ods">
         <title>ODS（OpenOffice、LibreOffice）へのエクスポート</title>
 
         <para>エクスポートされたファイルでは、以下の色が使われています:</para>
@@ -3798,7 +3798,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.annotate">
       <title>採点記入</title>
 
       <para><guibutton>採点記入</guibutton>ボタンを押すと、答案への採点記入が始まります。各スキャンデータに、次のように記入されます（これらはデフォルトの記入書式で、設定で変更できます）:</para>
@@ -4003,10 +4003,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
     </sect2>    
   </sect1>
 
-  <sect1>
+  <sect1 id="alt">
     <title>標準外の使用方法</title>
 
-    <sect2>
+    <sect2 id="alt.photocopy">
       <title>問題用紙コピー方式</title>
 
       <para><xref endterm="printing.title" linkend="printing"/>で説明したように、複数の受験者に同一の答案用紙をコピーして配るのは常に可能とは限りません。しかし、別紙答案用紙方式で、設問と選択肢がシャフルされていなければ、問題用紙はコピーで用意して、答案用紙だけ全員分個別に印刷することができます。ここではその方法を詳しく説明します。</para>

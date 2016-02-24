@@ -91,7 +91,7 @@
     </legalnotice>
   </articleinfo>
 
-  <sect1>
+  <sect1 id="license">
     <title>License</title>
 
     <para>Auto Multiple Choice is free software: you can redistribute it
@@ -110,7 +110,7 @@
   <sect1 id="prerequis">
     <title>Prerequisites</title>
 
-    <sect2>
+    <sect2 id="prerequis.os">
       <title>Operating system</title>
 
       <para>The AMC utilities have been written for Linux. They might be
@@ -120,7 +120,7 @@
       changes in AMC if necessary.</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="prerequis.soft">
       <title>Software</title>
 
       <note>
@@ -147,7 +147,7 @@
         </listitem>
       </itemizedlist>
 
-      <sect3>
+      <sect3 id="prerequis.soft.v">
         <title>Recommended versions for software used by AMC</title>
 
         <para>A few bugs in old versions of software used by AMC are
@@ -172,7 +172,7 @@
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="prerequis.latex">
       <title>LaTeX</title>
 
       <para>From version 1.1 of AMC, it is not mandatory anymore to write your
@@ -188,7 +188,7 @@
   <sect1 id="usagenotes">
     <title>Usage notes</title>
 
-    <sect2>
+    <sect2 id="num.limits">
       <title>Numerical limitations</title>
 
       <para>In the present version (starting with version 0.156), the maximum
@@ -205,7 +205,7 @@
       <code>\usepackage{etex}</code> command.</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="versions">
       <title>Versions</title>
 
       <para>Even though it should not have too many consequences, it is
@@ -260,7 +260,7 @@
       </itemizedlist>
     </sect2>
 
-    <sect2>
+    <sect2 id="install">
       <title>Installation</title>
 
       <para>With debian, Ubuntu, or a derived operating system, you can use
@@ -279,7 +279,7 @@ make
 sudo make install</screen>
     </sect2>
 
-    <sect2>
+    <sect2 id="launch">
       <title>Access</title>
 
       <para>Once the installation is made, the graphical user interface can be
@@ -346,7 +346,7 @@ the best you can.
     <para>You already understand AMC-TXT structure: some general options
     first, and then questions.</para>
 
-    <sect2>
+    <sect2 id="txt.comments">
       <title>Comments</title>
 
       <para>You can write some comments inside your AMC-TXT source file in
@@ -354,7 +354,7 @@ the best you can.
       lines won't be considered by AMC.</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.opts">
       <title>General options</title>
 
       <para>Here are the options you can use (in any order):</para>
@@ -666,7 +666,7 @@ the best you can.
         </varlistentry>
       </variablelist>
 
-      <sect3>
+      <sect3 id="txt.separate">
         <title>Separate answer sheet</title>
 
         <para>To use separate answer sheets for your questionnaire, consider
@@ -719,7 +719,7 @@ the best you can.
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.questions">
       <title>Questions</title>
 
       <para>Simple questions (questions for which one and only one answer is
@@ -729,7 +729,7 @@ the best you can.
       question itself, and the choices, introduced with a <code>+</code> for
       correct ones and with a <code>-</code> for wrong ones.</para>
 
-      <sect3>
+      <sect3 id="txt.questions.opts">
         <title>Questions options</title>
 
         <para>Some options are available for questions. They must be separated
@@ -828,7 +828,7 @@ one plus one?
         </variablelist>
       </sect3>
 
-      <sect3>
+      <sect3 id="txt.questions.scoring">
         <title>Scoring strategy</title>
 
         <para>You can set the scoring strategy for a particular question or
@@ -852,7 +852,7 @@ one plus one?
 </programlisting>
       </sect3>
 
-      <sect3>
+      <sect3 id="txt.questions.open">
         <title>Open questions</title>
 
         <para>You can define open question giving options (see <xref
@@ -889,7 +889,7 @@ one plus one?
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.multiline">
       <title>Multi-line</title>
 
       <para>You can always continue some text on the next lines (even if some
@@ -943,7 +943,7 @@ How many stars in the sky?
 - ten millions</programlisting>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.title">
       <title>Title</title>
 
       <para>To get a title, enclose it between <code>[==</code> and
@@ -1129,7 +1129,7 @@ How many stars in the sky?
       </warning>
     </sect2>
 
-    <sect2>
+    <sect2 id="txt.includes">
       <title>Including other files</title>
 
       <para>You can include other files with:</para>
@@ -1167,7 +1167,7 @@ How many stars in the sky?
     templates, so that one can create a new MCQ project starting with one of
     these templates.</para>
 
-    <sect2>
+    <sect2 id="latex.simple">
       <title>A simple example</title>
 
       <para><!--NAME: Simple example
@@ -1310,7 +1310,7 @@ Duration : 10 minutes.
         </calloutlist></para>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.shuffle">
       <title>An example with groups of questions and shuffling</title>
 
       <para>In this example, we want the order in which questions appear in
@@ -1599,7 +1599,7 @@ Durée : 10 minutes.
       </warning>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.commands">
       <title>Description of the LaTeX commands</title>
 
       <sect3 id="sec.package.options">
@@ -1874,7 +1874,7 @@ Durée : 10 minutes.
 \end{question}</programlisting>
         </para>
 
- <sect4>
+ <sect4 id="latex.lastchoice">
       <title>Last choice</title>
 
       <para> You may force AMC to let  one or more answers as last choices with the command <command>\lastchoices</command>.</para>
@@ -1994,7 +1994,7 @@ Durée : 10 minutes.
         </emphasis> before the explanation of second question.</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.choices.multicol">
         <title>Putting answers on multiple columns</title>
 
         <para>To put answers on several columns (and thus save space), one can
@@ -2031,7 +2031,7 @@ Durée : 10 minutes.
         </para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.choices.space">
         <title>Space between answers</title>
 
         <para>Let us note that it is also possible to parameterize the
@@ -2050,7 +2050,7 @@ Durée : 10 minutes.
         <para>You may add an additional option of marking area (see <xref
         endterm="marks.position.title" linkend="marks.position"/>).</para>
 
-        <sect4>
+        <sect4 id="latex.zone.std">
           <title>Without the <option>separateanswersheet</option>
           option</title>
 
@@ -2068,7 +2068,7 @@ Durée : 10 minutes.
           none, question, margin, margins.</para>
         </sect4>
 
-        <sect4>
+        <sect4 id="latex.zone.separate">
           <title>With the <option>separateanswersheet</option> option</title>
 
           <para>Type this command after <command>\begin{document}</command>
@@ -2251,7 +2251,7 @@ Durée : 10 minutes.
 
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.page">
         <title>Page size, margins</title>
 
         <para>The <command>automultiplechoice</command> LaTeX package uses
@@ -2441,7 +2441,7 @@ Durée : 10 minutes.
         </note>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.style">
         <title>Questions presentation style</title>
 
         <para>The way each question is presented can be modified by redefining
@@ -2544,10 +2544,10 @@ Choose the greater.
         (<code>I</code>).</para>
       </sect3>
 
-    <sect3>
+    <sect3 id="latex.layout">
         <title>Layout</title>
 
-        <sect4>
+        <sect4 id="latex.layout.margins">
           <title>Margins</title>
            <para>Margins were chosen so that the document prints correctly on
            most printers. If your printer reduces, you can use the command
@@ -2557,7 +2557,7 @@ Choose the greater.
             the default value 3.5cm, just before <code>\begin{document}</code>.</para>
             </sect4>
   
-        <sect4>
+        <sect4 id="latex.layout.npages">
          <title>Number of pages</title>
           <para>AMC automatically handles the number of pages for each subject.
           You can choose to fix a identical number of pages for each subject
@@ -2567,7 +2567,7 @@ Choose the greater.
 
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.style.separate">
         <title>Separate answer sheet presentation style</title>
 
         <para>It is also possible to modify the layout of the separate answer
@@ -2873,7 +2873,7 @@ and write your first and last names below.
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.oneletter">
         <title>One-letter answers</title>
 
         <para>Sometimes this is not necessary to write some long text to
@@ -2913,7 +2913,7 @@ and write your first and last names below.
         </variablelist>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.seed">
         <title>Choice of shuffling parameters</title>
 
         <para>One can modify the seed of the random number generator used to
@@ -2931,7 +2931,7 @@ and write your first and last names below.
         printed.</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.separate.sect">
         <title>Using sectioning and separate answer sheet</title>
 
         <para>For sectioning to be also visible in the separate answer sheet
@@ -2940,7 +2940,7 @@ and write your first and last names below.
         <command>\section</command> and <command>\subsection</command>.</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.refs">
         <title>Using references inside the test sheets</title>
 
         <para>Using LaTeX commands <command>\label</command>,
@@ -3115,7 +3115,7 @@ and write your first and last names below.
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.amcopts">
       <title>Options for AMC</title>
 
       <para>You can add in the source file header (the first lines that begin
@@ -3146,7 +3146,7 @@ and write your first and last names below.
       </variablelist>
     </sect2>
 
-    <sect2>
+    <sect2 id="latex.numerical">
       <title>Mathematical questions with randomized statements</title>
 
         <para>First of all, you must set the random seed to be sure to get the
@@ -3163,7 +3163,7 @@ and write your first and last names below.
         </para>
         </note>  
 
-      <sect3>
+      <sect3 id="latex.numerical.fp">
         <title>Using package fp</title>
 
         <para>Thanks to the LaTeX package <package>fp</package>, whose
@@ -3553,7 +3553,7 @@ respective parameters \VQa{} and \VQb{}.
         </sect4>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.numerical.pgf">
         <title>Using package pgf/tikz</title>
 
         <para>This package must be declare <emphasis>after</emphasis> the
@@ -3569,7 +3569,7 @@ respective parameters \VQa{} and \VQb{}.
 
         <para><programlisting>\pgfmathsetseed{2056}</programlisting></para>
 
-        <sect4>
+        <sect4 id="latex.numerical.pgf.simple">
           <title>A simple computation</title>
 
           <para>Here is an example with a simple computation:</para>
@@ -3617,7 +3617,7 @@ respective parameters \VQa{} and \VQb{}.
             </note></para>
         </sect4>
 
-        <sect4>
+        <sect4 id="latex.numerical.pgf.graphs">
           <title>Graphics</title>
 
           <para>The tkiz package also allows to make (random or not)
@@ -3661,7 +3661,7 @@ respective parameters \VQa{} and \VQb{}.
         </sect4>
       </sect3>
 
-      <sect3>
+      <sect3 id="latex.numerical.lualatex">
         <title>Using LuaLaTeX</title>
 
         <para>LUA language can be used inside LaTeX documents thanks to the
@@ -3737,7 +3737,7 @@ Name :
         </note>
       </sect3>
       
-          <sect3 id="Use.PSTricks">
+          <sect3 id="latex.pstricks">
         <title>Use PSTricks</title>
 
         <para>Load this package <emphasis>after</emphasis>
@@ -3766,7 +3766,7 @@ Name :
     from the conception of the multiple-choice test until the edition of
     students' scores.</para>
 
-    <sect2>
+    <sect2 id="gui.new">
       <title>Creating a new project and subject</title>
 
       <para>Let's open the graphic interface. This can be done ordinarily by
@@ -3829,7 +3829,7 @@ Name :
       launches the default editor.</para>
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.prepare">
       <title>Preparing the subject</title>
 
       <para>Preparing a project is done in two steps. First we must make the
@@ -3905,7 +3905,7 @@ Name :
       <guibutton>Print copies</guibutton> after calculating the layout.</para>
      </sect2>
 
-    <sect2>
+    <sect2 id="gui.test">
       <title>Test</title>
       <para>Let  the students pass the exam.</para>
         <important>
@@ -3914,16 +3914,16 @@ Name :
         remain identical to distributed copies.</para>
       </important> 
       
-      <sect3 id="advice">
-        <title id="advice.title">Advices</title>
+      <sect3 id="gui.advice">
+        <title>Advices</title>
 
         <para>It is preferable that students use a black or blue pen or B or HB  pencil.</para>
       </sect3>
 
-      <sect3 id="correction.boxes">
-        <title id="correction.boxes.title">Correction of the boxes during the exam</title>
+      <sect3 id="gui.correct">
+        <title>Correction of the boxes during the exam</title>
 
-        <sect4>
+        <sect4 id="gui.correct.tick">
           <title>The student tick the boxes</title>
 
           <itemizedlist>
@@ -3944,7 +3944,7 @@ Name :
           </itemizedlist>
         </sect4>
 
-        <sect4>
+        <sect4 id="gui.correct.fill">
           <title>The students color the boxes</title>
 
           <itemizedlist>
@@ -3961,7 +3961,7 @@ Name :
       
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.capture">
       <title>Reading the copies</title>
 
       <para>Now we shall describe the input from students' copies, which can
@@ -3970,7 +3970,7 @@ Name :
       <para>Let's move to the <guilabel>Data capture</guilabel> tab of the
       graphical interface.</para>
 
-      <sect3>
+      <sect3 id="gui.capture.auto">
         <title>Automated input</title>
 
         <para>For automatic recognition of the checked boxes in the students'
@@ -4029,7 +4029,7 @@ Name :
         </itemizedlist>
       </sect3>
 
-      <sect3>
+      <sect3 id="gui.capture.manual">
         <title>Manual input</title>
 
         <para>If we cannot use easily the scanner, or if, for a few copies,
@@ -4048,7 +4048,7 @@ Name :
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.marks">
       <title>Correction</title>
 
       <para>In the <guilabel>Marking</guilabel> tab of the graphic interface,
@@ -4056,7 +4056,7 @@ Name :
       the students from the inputs, but also to read the codes written by the
       students (see <xref linkend="latex.codes"/>).</para>
 
-      <sect3>
+      <sect3 id="gui.marks.proc">
         <title>Process</title>
 
         <para>The computation of the scores is launched with the button
@@ -4868,10 +4868,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         used).</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="gui.assoc">
         <title>Association</title>
 
-        <sect4>
+        <sect4 id="gui.assoc.auto">
           <title>Automated association</title>
 
           <para>When we push the button <guibutton>Automatic</guibutton> in
@@ -4890,7 +4890,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           </warning>
         </sect4>
 
-        <sect4>
+        <sect4 id="gui.assoc.manual">
           <title>Manual association</title>
 
           <para>To open the window allowing recognition of the students'
@@ -4920,7 +4920,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       opening of the produced file by the appropriate software (if
       available).</para>
 
-      <sect3>
+      <sect3 id="gui.export.ods">
         <title>Export to ODS (OpenOffice, LibreOffice)</title>
 
         <para>In the exported file, the following colors are used:</para>
@@ -4968,7 +4968,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       </sect3>
     </sect2>
 
-    <sect2>
+    <sect2 id="gui.annotate">
       <title>Annotation</title>
 
       <para>When we push the button <guibutton>Annotate papers</guibutton>,
@@ -5208,10 +5208,10 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
    </sect2>    
    </sect1>
 
-  <sect1>
+  <sect1 id="alt">
     <title>Alternative usages</title>
 
-    <sect2>
+    <sect2 id="alt.photocopy">
       <title>Photocopied subject</title>
 
       <para>As explained in <xref endterm="printing.title"
