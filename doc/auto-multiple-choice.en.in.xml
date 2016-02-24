@@ -2075,7 +2075,6 @@ Durée : 10 minutes.
           and before the command <command>\onecopy</command> :</para>
 
           <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
-        </sect4>
 
         <para>The variables <parameter>width</parameter>,
         <parameter>height</parameter>, <parameter>depth</parameter> describe
@@ -2089,6 +2088,7 @@ Durée : 10 minutes.
           <para>Don't type one of those commands <emphasis> after</emphasis>
           printing.</para>
         </warning>
+        </sect4>
       </sect3>
 
       <sect3 id="Groups.questions">
@@ -2308,11 +2308,11 @@ Durée : 10 minutes.
 
         <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
 \AMCidsPosition{pos=top}</programlisting>
-      </sect3>
 
       <warning>
         <para>Do not load package <command>pgfpages</command> or any other layout applications</para>
       </warning>
+      </sect3>
 
       <sect3 id="box.style">
         <title id="box.style.title">Check-box presentation style</title>
@@ -2491,11 +2491,11 @@ Durée : 10 minutes.
         <warning>
        <para>
        With nominative sheets (see <xref endterm="Nominative.sheets.title"
-          linkend="Nominative.sheets"/>) , set up it with a new 
-          <informalexample>command</informalexample> in the  preamble.
+          linkend="Nominative.sheets"/>), set up it with a new 
+          command in the preamble.
        </para> 
-      <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
-      </programlisting>
+      <informalexample><programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
+      </programlisting></informalexample>
       <para>and use it when you need it. (Do not forget to type inside brackets to limit the effect) :</para>
       <programlisting>
 {\Iswitch
@@ -2994,7 +2994,6 @@ and write your first and last names below.
         realization. Without that last command, the numbering of figures would
         go on from one realization to the next one, which is clearly not
         desirable.</para>
-      </sect3>
 
       <sect4 id="cleveref"><title>Using the package cleveref</title>
       <para>This package sort in an ascending order the questions' numbers,
@@ -3003,13 +3002,18 @@ and write your first and last names below.
       <warning>
           <para>This package must be loaded <emphasis>after</emphasis> the
           package <package>automultiplechoice</package>.</para>
-        </warning> To use this package, a new command was created:
-      <command>\AMCstudentlabel</command>. <para>
+      </warning>
+
+      <para>To use this package, a new command was created:
+      <command>\AMCstudentlabel</command>.
           <programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{motor}}</programlisting>
-        </para>
-      <para><emphasis>led</emphasis>,<emphasis>lamp</emphasis>,<emphasis>motor</emphasis>
+      <emphasis>led</emphasis>, <emphasis>lamp</emphasis>, <emphasis>motor</emphasis>
       are the created labels to reference the questions with the command
-      \AMClabel{}.</para></sect4>
+      \AMClabel{}.</para>
+
+      </sect4>
+
+      </sect3>
 
       <sect3 id="AMCtext">
         <title>Customizing some texts inserted by AMC</title>
@@ -3156,10 +3160,7 @@ and write your first and last names below.
         </programlisting></para>
 
         <note><para>
-         <replaceable>integer</replaceable> may get predefined values by LaTeX
-          <item>\the\year</item>, <item>\the\month</item> or
-         <item>\the\day</item> but <emphasis> definitely not <item>\the\time</item>
-         </emphasis>.
+         <replaceable>integer</replaceable> must be fixed, and not computed from date/time values.
         </para>
         </note>  
 
@@ -3927,18 +3928,19 @@ Name :
           <title>The student tick the boxes</title>
 
           <itemizedlist>
-            <listitem>
+            <listitem><para>
             They can erase the box  or overlay a correction tape but
             should not <emphasis>redrawing the box</emphasis>.
-            </listitem>
+            </para></listitem>
 
             <listitem>
+              <para>
               They can completely darken one or more boxes to indicate
                to AMC that these answers should not be considered <emphasis>as correct</emphasis>.
-
-          <para>The variable <command>Default
+              </para>
+              <para>The variable <command>Default
           upper darkness threshold</command> (see <xref
-          endterm="preferences.defaut.titre"
+          endterm="preferences.defaut.title"
           linkend="preferences.defaut"/>). must be close to 1.</para>
             </listitem>
           </itemizedlist>
@@ -3949,8 +3951,10 @@ Name :
 
           <itemizedlist>
             <listitem>
+              <para>
             They <emphasis>must</emphasis> erase the box  or overlay a correction tape but
             should not <emphasis>redrawing the box</emphasis>.
+              </para>
             </listitem>
           </itemizedlist>
 
@@ -4710,15 +4714,18 @@ Name:
     
         <sect3 id="calculing.final.mark">
         <title>Calculing final mark</title>
-  
+
+        <para>
+          You can configure final mark computation using
         <menuchoice>
-       <guimenu>Edit</guimenu><guimenuitem>Preferences</guimenuitem>
+       <guimenu>Edit</guimenu><guisubmenu>Preferences</guisubmenu>
        <guimenuitem>Project</guimenuitem></menuchoice>
        <itemizedlist>
-       <listitem>Grain : choose the rounding value</listitem>
-       <listitem>Rounding type : lower, normal, greater</listitem>
+       <listitem><para>Grain : choose the rounding value</para></listitem>
+       <listitem><para>Rounding type : lower, normal, greater</para></listitem>
        </itemizedlist>
-       
+        </para>
+        
       </sect3>
 
       <sect3 id="correc.test">
@@ -4733,15 +4740,21 @@ Name:
 
         <itemizedlist>
           <listitem>
-            turn correct answer into wrong answers. 
+            <para>
+              turn correct answer into wrong answers.
+            </para>
           </listitem>
 
           <listitem>
-            turn wrong answer into correct answers. 
+            <para>
+              turn wrong answer into correct answers.
+            </para>
           </listitem>
 
           <listitem>
-           Modify the scoring scale for one or several question or the default scoring. 
+            <para>
+              Modify the scoring scale for one or several question or the default scoring.
+            </para>
           </listitem>
         </itemizedlist>
 
@@ -4749,23 +4762,33 @@ Name:
 
         <itemizedlist>
           <listitem>
-            Turn a simple question into a  multiple choices question. 
+            <para>
+              Turn a simple question into a  multiple choices question.
+            </para>
           </listitem>
 
           <listitem>
-            Turn a multiple choices question into a simple question. 
+            <para>
+              Turn a multiple choices question into a simple question.
+            </para>
           </listitem>
 
           <listitem>
-            Add questions, answers. 
+            <para>
+              Add questions, answers.
+            </para>
           </listitem>
 
           <listitem>
-            Remove questions, answers.
+            <para>
+              Remove questions, answers.
+            </para>
           </listitem>
 
           <listitem>
-             Modify the order of the questions and/or answers. 
+            <para>
+              Modify the order of the questions and/or answers.
+            </para>
           </listitem>
         </itemizedlist>
 
@@ -4844,11 +4867,15 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <itemizedlist>
             <listitem>
-               A semi-colon or colon or tabulation to separate the headers and a comma to separate the email adresses. 
+              <para>
+                A semi-colon or colon or tabulation to separate the headers and a comma to separate the email adresses.
+              </para>
             </listitem>
 
             <listitem>
-               A comma to separate the headers and email adresses between inverted comma/quotation marks. 
+              <para>
+                A comma to separate the headers and email adresses between inverted comma/quotation marks.
+              </para>
             </listitem>
           </itemizedlist>
 
@@ -5135,30 +5162,30 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <para>Default choices</para>
 
         <itemizedlist>
-          <listitem>
+          <listitem><para>
              (none) 
-          </listitem>
+          </para></listitem>
 
-          <listitem>
+          <listitem><para>
              In the margin. 
-          </listitem>
+          </para></listitem>
 
-          <listitem>
+          <listitem><para>
              In the both margins 
-          </listitem>
+          </para></listitem>
 
-          <listitem>
+          <listitem><para>
              Beside the boxes. 
-          </listitem>
+          </para></listitem>
 
-          <listitem>
+          <listitem><para>
              Where defined in the source (see 
 
             <xref endterm="marks.display.area.title"
                   linkend="marks.display.area"/>
 
              ). 
-          </listitem>
+          </para></listitem>
         </itemizedlist>
       </sect3>
     </sect2>
@@ -5181,13 +5208,13 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       </para>
 
       <itemizedlist>
-        <listitem>Vector formats density (DPI) : 250</listitem>
+        <listitem><para>Vector formats density (DPI) : 250</para></listitem>
 
-        <listitem>Black &amp; white conversion threshold : 0.60</listitem>
+        <listitem><para>Black &amp; white conversion threshold : 0.60</para></listitem>
 
-        <listitem>Erase red from scans : unticked</listitem>
+        <listitem><para>Erase red from scans : unticked</para></listitem>
 
-        <listitem>Force conversion: unticked</listitem>
+        <listitem><para>Force conversion: unticked</para></listitem>
       </itemizedlist>
 
       <para>
@@ -5195,15 +5222,15 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       </para>
 
       <itemizedlist>
-        <listitem>Marks size max increase: 0.20</listitem>
+        <listitem><para>Marks size max increase: 0.20</para></listitem>
 
-        <listitem>Marks size max decrease : 0.20</listitem>
+        <listitem><para>Marks size max decrease : 0.20</para></listitem>
 
-        <listitem>Default darkness threshold : 0.15</listitem>
+        <listitem><para>Default darkness threshold : 0.15</para></listitem>
 
-        <listitem>Default upper darkness threshold : 1</listitem>
+        <listitem><para>Default upper darkness threshold : 1</para></listitem>
 
-        <listitem>Process scans with 3 corner marks : unticked</listitem>
+        <listitem><para>Process scans with 3 corner marks : unticked</para></listitem>
       </itemizedlist>
    </sect2>    
    </sect1>
@@ -5416,7 +5443,7 @@ student number &amp; class &amp; subject\\
       </note>
         <note>
       <para> You may use these two options together.</para>
-      <para>Type, just after <informalexample>\begin{document}</informalexample>
+      <para>Type, just after <code>\begin{document}</code>
       <programlisting>
 \makeatletter
 \def\setoutsidebox{\AMC@outside@boxtrue}
@@ -5450,8 +5477,8 @@ Moniuszko,Stanisław,003</programlisting>
             multiple recipients.</para>
 
             <itemizedlist>
-              <listitem>Headers separated by a semi-colon and email adresses
-              by a comma.</listitem>
+              <listitem><para>Headers separated by a semi-colon and email adresses
+              by a comma.</para></listitem>
             </itemizedlist>
 
             <programlisting>
@@ -5460,12 +5487,13 @@ Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
 Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
 Moniuszko;Stanisław;003</programlisting>
           </warning>
-        </listitem>
 
-        <warning>
+          <warning>
           <para>Do not use _ (underscore) with the student's name or forename.
           A compilation error will be display.</para>
         </warning>
+
+        </listitem>
 
         <listitem>
           <para>The LaTeX source file has to load csvsimple package,
