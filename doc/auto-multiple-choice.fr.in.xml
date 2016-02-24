@@ -166,7 +166,7 @@
       <title>Limitations numériques</title>
 
       <para>Dans la version actuelle (à partir de la version 0.156), le nombre
-      de copies est limité à 4 095 et le nombre de pages par copies est limité
+      de copies est limité à 4 095 et le nombre de pages par copies est limité
       à 63 ( Valeurs par défaut mais modifiables voir <xref
       endterm="code.binaire.titre" linkend="code.binaire"/>).</para>
 
@@ -2013,20 +2013,19 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 \end{reponses}
 \explain{Le monoxyde de carbone est un gaz incolore, inodore et toxique.}
 \end{question}
-</programlisting>
-      </sect3>
+        </programlisting>
 
-      <note>
-        <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
-        affiché. Vous pouvez modifier ce texte pour une ou plusieurs questions
-        avec la commande <command>\AMCtext</command> (Voir <xref
-        linkend="AMCtext"/>).</para>
-      </note>
+        <note>
+          <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
+          affiché. Vous pouvez modifier ce texte pour une ou plusieurs questions
+          avec la commande <command>\AMCtext</command> (Voir <xref
+          linkend="AMCtext"/>).</para>
+        </note>
 
-      <para>Un exemple issu de la documentation anglaise.</para>
+        <para>Un exemple issu de la documentation anglaise.</para>
 
-      <para>
-        <programlisting>
+        <para>
+          <programlisting>
 \begin{question}{elevation}
   Parmi les montagnes suivantes, laquelle est la plus haute ?
       \begin{reponses}
@@ -2065,7 +2064,8 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
       <para><emphasis>Explication :</emphasis> sera affiché avant les
       explications de la première et troisième réponse, <emphasis>Raison
       :</emphasis> avant les explications de la deuxième question.</para>
-
+      </sect3>
+      
       <sect3 id="latex.choices.multicol">
         <title>Réponses sur plusieurs colonnes</title>
 
@@ -2157,21 +2157,21 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           <command>\exemplaire</command> :</para>
 
           <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+
+          <para>Les grandeurs <parameter>width</parameter>,
+          <parameter>height</parameter>, <parameter>depth</parameter>
+          définissent les dimensions de la case de notation ainsi que son
+          emplacement sur la feuille de réponses.</para>
+
+          <para>La variable <parameter>position</parameter> peut prendre les
+          valeurs : none, question, margin, margins.</para>
+
+          <warning>
+            <para>Vous ne pouvez pas modifier votre sujet<emphasis> a
+            posteriori</emphasis> en rajoutant l'une de ces fonctions après
+            l'impression du sujet.</para>
+          </warning>
         </sect4>
-
-        <para>Les grandeurs <parameter>width</parameter>,
-        <parameter>height</parameter>, <parameter>depth</parameter>
-        définissent les dimensions de la case de notation ainsi que son
-        emplacement sur la feuille de réponses.</para>
-
-        <para>La variable <parameter>position</parameter> peut prendre les
-        valeurs : none, question, margin, margins.</para>
-
-        <warning>
-          <para>Vous ne pouvez pas modifier votre sujet<emphasis> a
-          posteriori</emphasis> en rajoutant l'une de ces fonctions après
-          l'impression du sujet.</para>
-        </warning>
       </sect3>
 
       <sect3 id="Groupes.questions">
@@ -2398,14 +2398,15 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <para>Concluons par un exemple raisonnable au format A5 :</para>
 
         <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
-\AMCidsPosition{pos=top}</programlisting>
-      </sect3>
+        \AMCidsPosition{pos=top}</programlisting>
 
-      <warning>
-        <para>N'utilisez pas le paquet <command>pgfpages</command> ou toutes
-        autres commandes de mise en page modifiant l'impression du nombre de
-        pages par feuille.</para>
-      </warning>
+        <warning>
+          <para>N'utilisez pas le paquet <command>pgfpages</command> ou toutes
+          autres commandes de mise en page modifiant l'impression du nombre de
+          pages par feuille.</para>
+        </warning>
+
+      </sect3>
 
       <sect3 id="style.cases">
         <title id="style.cases.titre">Style des cases à cocher</title>
@@ -2600,12 +2601,14 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
        <para>
        Avec le mode copies préremplies  (voir <xref endterm="CopiesPrerempliesTitre"
           linkend="CopiesPremplies"/>) , cette commande doit être appelée via
-        une <informalexample>macro</informalexample> dans le préambule.
+        une macro dans le préambule.
        </para> 
-      <programlisting>\def\jepasse{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
-      </programlisting>
-      <para>puis de l'utiliser quand on en a besoin (Ne pas oublier d'insérer des crochets autour pour limiter son effet à une question) :</para>
-      <programlisting>
+       <informalexample>
+         <programlisting>\def\jepasse{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
+         </programlisting>
+       </informalexample>
+       <para>puis de l'utiliser quand on en a besoin (Ne pas oublier d'insérer des crochets autour pour limiter son effet à une question) :</para>
+       <programlisting>
 {\jepasse
 \begin{question}{Calibre600}
 
@@ -3143,39 +3146,39 @@ et inscrivez votre nom et prénom ci-dessous.
         copie. Sans cette dernière commande, la numérotation des figures
         continuerait d'une copie à l'autre, ce qui n'est pas
         souhaitable.</para>
-      </sect3>
 
-      <sect4 id="Cleveref">
-        <title>Utilisation du paquet <package>Cleveref</package>.</title>
+        <sect4 id="Cleveref">
+          <title>Utilisation du paquet <package>Cleveref</package>.</title>
 
-        <para>Ce paquet permet d'ordonner les numéros des questions, les pages
-        des questions ou les pages des références par ordre croissant (la
-        documentation <ulink
-        url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>)</para>
+          <para>Ce paquet permet d'ordonner les numéros des questions, les pages
+          des questions ou les pages des références par ordre croissant (la
+          documentation <ulink
+          url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>)</para>
 
-        <warning>
-          <para>Le paquet doit être déclaré <emphasis>après</emphasis> le
-          paquet <package>automuliplechoice</package>.</para>
+          <warning>
+            <para>Le paquet doit être déclaré <emphasis>après</emphasis> le
+            paquet <package>automuliplechoice</package>.</para>
+
+            <para>
+              <programlisting>\usepackage[french]{cleveref}</programlisting>
+            </para>
+          </warning>
+
+          <para>L'utilisation de ce paquet nécessite l'introduction d'une
+          nouvelle commande <command>\AMCstudentlabel</command>{référence de la
+          question}.</para>
 
           <para>
-            <programlisting>\usepackage[french]{cleveref}</programlisting>
+            <programlisting>\cref{\AMCstudentlabel{dipole},\AMCstudentlabel{cours},\AMCstudentlabel{raisonnement}}</programlisting>
           </para>
-        </warning>
 
-        <para>L'utilisation de ce paquet nécessite l'introduction d'une
-        nouvelle commande <command>\AMCstudentlabel</command>{référence de la
-        question}.</para>
-
-        <para>
-          <programlisting>\cref{\AMCstudentlabel{dipole},\AMCstudentlabel{cours},\AMCstudentlabel{raisonnement}}</programlisting>
-        </para>
-
-        <para>Avec <emphasis>dipole</emphasis>, <emphasis>cours</emphasis> et
-        <emphasis>raisonnement</emphasis> les références des questions sont
-        indexées, respectivement, avec \AMClabel{dipole}, \AMClabel{cours},
-        \AMClabel{raisonnement}. Les numéros de ces trois questions seront
-        automatiquement classés lors de la compilation.</para>
-      </sect4>
+          <para>Avec <emphasis>dipole</emphasis>, <emphasis>cours</emphasis> et
+          <emphasis>raisonnement</emphasis> les références des questions sont
+          indexées, respectivement, avec \AMClabel{dipole}, \AMClabel{cours},
+          \AMClabel{raisonnement}. Les numéros de ces trois questions seront
+          automatiquement classés lors de la compilation.</para>
+        </sect4>
+      </sect3>
 
       <sect3 id="AMCtext">
         <title>Personnalisation des textes insérés par AMC</title>
@@ -3330,10 +3333,7 @@ et inscrivez votre nom et prénom ci-dessous.
 </programlisting></para>
 
         <note><para>
-         <replaceable>entier</replaceable> peut prendre des valeurs prédéfinies
-         par LaTex <item>\the\year</item>, <item>\the\month</item> ou
-         <item>\the\day</item> mais <emphasis> surtout pas <item>\the\time</item>
-         </emphasis>.
+         <replaceable>entier</replaceable> doit être un entier immuable, qui ne changera jamais : ne pas utiliser de valeur liée à la date !
         </para>
         </note>
 
@@ -4199,24 +4199,23 @@ Nom et prénom :
 
           <itemizedlist>
             <listitem>
-              Ils peuvent effacer la/les case(s) avec la gomme ou la recouvrir de ruban correcteur mais ne 
-
-              <emphasis>doivent pas redessiner les contours</emphasis>
-
-              .
+              <para>Ils peuvent effacer la/les case(s) avec la gomme ou la recouvrir de ruban correcteur mais ne 
+              
+              <emphasis>doivent pas redessiner les contours</emphasis>.
+              </para>
             </listitem>
 
             <listitem>
-              Ils peuvent noircir complétement une ou plusieurs cases de réponses pour indiquer à AMC qu'elles ne doivent pas être prise en compte comme 
-
-              <emphasis>bonne réponses</emphasis>
-
-              . 
-
-              <para>Vous devez indiquer une valeur proche de 1 à la variable
-              <command>Default upper darkness threshold</command> (voir <xref
-              endterm="preferences.defaut.titre"
-              linkend="preferences.defaut"/>).</para>
+              <para>
+                Ils peuvent noircir complétement une ou plusieurs cases de réponses pour indiquer à AMC qu'elles ne doivent pas être prise en compte comme 
+                <emphasis>bonne réponses</emphasis>. 
+              </para>
+              <para>
+                Vous devez indiquer une valeur proche de 1 à la variable
+                <command>Default upper darkness threshold</command> (voir <xref
+                endterm="preferences.defaut.titre"
+                linkend="preferences.defaut"/>).
+              </para>
             </listitem>
           </itemizedlist>
         </sect4>
@@ -4226,15 +4225,12 @@ Nom et prénom :
 
           <itemizedlist>
             <listitem>
-              Ils 
-
-              <emphasis>doivent</emphasis>
-
-               effacer la/les case(s) avec la gomme ou la recouvrir de ruban correcteur mais ne 
-
-              <emphasis>doivent pas redessiner les contours</emphasis>
-
-              .
+              <para>
+                Ils 
+                <emphasis>doivent</emphasis>
+                effacer la/les case(s) avec la gomme ou la recouvrir de ruban correcteur mais ne 
+                <emphasis>doivent pas redessiner les contours</emphasis>.
+              </para>
             </listitem>
           </itemizedlist>
 
@@ -4326,27 +4322,33 @@ Nom et prénom :
                 <listitem>
                   <para>AMC ne dispose d'aucune fonction de traitement
                   d'image. Pour corriger le calage, vous pouvez redessiner les
-                  marques à l'aide d'un éditeur d'image. <itemizedlist>
-                      <listitem>
-                         Notez les scans non reconnus, 
-
+                  marques à l'aide d'un éditeur d'image.
+                  <itemizedlist>
+                    <listitem>
+                      <para>
+                        Notez les scans non reconnus, 
                         <emphasis>ne les effacez pas !</emphasis>
+                      </para>
+                    </listitem>
 
-                         
-                      </listitem>
+                    <listitem>
+                      <para>
+                        Ouvrez-les avec l'éditeur d'image (les fichiers se trouvent dans le dossier scan du projet).
+                      </para>
+                    </listitem>
 
-                      <listitem>
-                         Ouvrez-les avec l'éditeur d'image (les fichiers se trouvent dans le dossier scan du projet). 
-                      </listitem>
+                    <listitem>
+                      <para>
+                        Sauvegardez-les (Ctrl+S).
+                      </para>
+                    </listitem>
 
-                      <listitem>
-                         Sauvegardez-les (Ctrl+S). 
-                      </listitem>
-
-                      <listitem>
-                         Reprenez la correction en ne choisissant que les derniers fichiers modifiés. 
-                      </listitem>
-                    </itemizedlist></para>
+                    <listitem>
+                      <para>
+                        Reprenez la correction en ne choisissant que les derniers fichiers modifiés.
+                      </para>
+                    </listitem>
+                  </itemizedlist></para>
                 </listitem>
               </itemizedlist>
             </note>
@@ -5083,13 +5085,18 @@ Durée : 10 minutes.
       <sect3 id="Calcul.note.finale">
         <title> Calcul de la note finale</title>
   
-        <menuchoice>
-       <guimenu>Édition</guimenu><guimenuitem>Préférences</guimenuitem>
-       <guimenuitem>Projet</guimenuitem></menuchoice>
-       <itemizedlist>
-       <listitem>Granularité : choisissez votre valeur d'arrondi</listitem>
-       <listitem>Type d'arrondi : inférieur, normal, supérieur</listitem>
-       </itemizedlist>
+        <para>
+          Le calcul de la note finale prend en compte les options suivantes :
+          <menuchoice>
+            <guimenu>Édition</guimenu>
+            <guisubmenu>Préférences</guisubmenu>
+            <guimenuitem>Projet</guimenuitem>
+          </menuchoice>
+          <itemizedlist>
+            <listitem><para>Granularité : choisissez votre valeur d'arrondi</para></listitem>
+            <listitem><para>Type d'arrondi : inférieur, normal, supérieur</para></listitem>
+          </itemizedlist>
+        </para>
        
       </sect3>
 
@@ -5105,15 +5112,21 @@ Durée : 10 minutes.
 
         <itemizedlist>
           <listitem>
-             Transformer des bonnes réponses en mauvaises réponses. 
+            <para>
+              Transformer des bonnes réponses en mauvaises réponses.
+            </para>
           </listitem>
 
           <listitem>
-             Transformer des mauvaises réponses en bonnes réponses. 
+            <para>
+              Transformer des mauvaises réponses en bonnes réponses.
+            </para>
           </listitem>
 
           <listitem>
-             Modifier le barème d'une ou plusieurs questions, le barème par défaut. 
+            <para>
+              Modifier le barème d'une ou plusieurs questions, le barème par défaut.
+            </para>
           </listitem>
         </itemizedlist>
 
@@ -5121,23 +5134,33 @@ Durée : 10 minutes.
 
         <itemizedlist>
           <listitem>
-             Transformer une question simple en question multiple. 
+            <para>
+              Transformer une question simple en question multiple.
+            </para>
           </listitem>
 
           <listitem>
-             Transformer une question multiple en question simple. 
+            <para>
+              Transformer une question multiple en question simple.
+            </para>
           </listitem>
 
           <listitem>
-             Ajouter des réponses, des questions. 
+            <para>
+              Ajouter des réponses, des questions.
+            </para>
           </listitem>
 
           <listitem>
-             Enlever des réponses, des questions. 
+            <para>
+              Enlever des réponses, des questions.
+            </para>
           </listitem>
 
           <listitem>
-             Modifier l'ordre des questions et/ou des réponses. 
+            <para>
+              Modifier l'ordre des questions et/ou des réponses.
+            </para>
           </listitem>
         </itemizedlist>
 
@@ -5230,15 +5253,22 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <itemizedlist>
             <listitem>
-               point-virgule ou deux-points ou tabulation pour séparer les champs et virgule pour séparer les emails. 
-            </listitem>
-
-            <listitem> Avec cette option, il faut déclarer dans le préambule
-              <programlisting>\usepackage[babel=true,kerning=true]{microtype}</programlisting>
+              <para>
+                point-virgule ou deux-points ou tabulation pour séparer les champs et virgule pour séparer les emails.
+              </para>
             </listitem>
 
             <listitem>
-               virgule pour séparer les champs et les emails entre guillemets et séparés par une virgule. 
+              <para>
+                Avec cette option, il faut déclarer dans le préambule
+                <programlisting>\usepackage[babel=true,kerning=true]{microtype}</programlisting>
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                virgule pour séparer les champs et les emails entre guillemets et séparés par une virgule.
+              </para>
             </listitem>
           </itemizedlist>
 
@@ -5556,28 +5586,35 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
         <itemizedlist>
           <listitem>
-             (aucune). 
+            <para>
+              (aucune).
+            </para>
           </listitem>
 
           <listitem>
-             Dans la marge. 
+            <para>
+              Dans la marge.
+            </para>
           </listitem>
 
           <listitem>
-             Dans les deux marges. 
+            <para>
+              Dans les deux marges.
+            </para>
           </listitem>
 
           <listitem>
-             A côté des cases. 
+            <para>
+              A côté des cases.
+            </para>
           </listitem>
 
           <listitem>
-             Indiqué dans le fichier source (voir 
-
-            <xref endterm="definir.zone.notation.titre"
-                  linkend="definir.zone.notation"/>
-
-             ). 
+            <para>
+              Indiqué dans le fichier source (voir 
+              <xref endterm="definir.zone.notation.titre"
+                    linkend="definir.zone.notation"/>).
+            </para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -5589,52 +5626,51 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       <title id="preferences.defaut.titre">Les valeurs par défaut du menu
       préférence</title>
 
+      <para>
        Vous pouvez modifier les valeurs par défaut pour le traitement des scans dans le menu 
 
-      <para><menuchoice>
-        <guimenuitem>Édition</guimenuitem>
-
-        <guimenuitem>Préférences</guimenuitem>
-
-        <guimenuitem>Scan</guimenuitem>
-      </menuchoice></para>
-
+       <menuchoice>
+         <guimenuitem>Édition</guimenuitem>
+         <guisubmenu>Préférences</guisubmenu>
+         <guimenuitem>Scan</guimenuitem>
+       </menuchoice>
+      </para>
       
 
       <para>
-        <command>Conversion des scans</command>
+        <guimenuitem>Conversion des scans</guimenuitem>
       </para>
 
        
 
       <itemizedlist>
-        <listitem>Densité des scans vectoriel (DPI) : 250</listitem>
+        <listitem><para>Densité des scans vectoriel (DPI) : 250</para></listitem>
 
-        <listitem>Seuil de conversion : 0.60</listitem>
+        <listitem><para>Seuil de conversion : 0.60</para></listitem>
 
-        <listitem>Effacer le rouge des scans : décoché</listitem>
+        <listitem><para>Effacer le rouge des scans : décoché</para></listitem>
 
-        <listitem>Forcer la conversion : décoché</listitem>
+        <listitem><para>Forcer la conversion : décoché</para></listitem>
       </itemizedlist>
 
        
 
       <para>
-        <command>Paramètres de détection</command>
+        <guimenuitem>Paramètres de détection</guimenuitem>
       </para>
 
        
 
       <itemizedlist>
-        <listitem>Majoration de la taille des marques : 0.20</listitem>
+        <listitem><para>Majoration de la taille des marques : 0.20</para></listitem>
 
-        <listitem>Minoration de la taille des marques : 0.20</listitem>
+        <listitem><para>Minoration de la taille des marques : 0.20</para></listitem>
 
-        <listitem>Seuil de noirceur par défaut : 0.15</listitem>
+        <listitem><para>Seuil de noirceur par défaut : 0.15</para></listitem>
 
-        <listitem>Default upper darkness threshold : 1</listitem>
+        <listitem><para>Default upper darkness threshold : 1</para></listitem>
 
-        <listitem>Process scans with 3 corner marks : décoché</listitem>
+        <listitem><para>Process scans with 3 corner marks : décoché</para></listitem>
       </itemizedlist>
 
        
@@ -5853,7 +5889,7 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
       </note>
       <note>
       <para>Vous pouvez utiliser ces deux options ensembles.</para>
-      <para>Pour activer cette option, vous pouvez définir, juste après le <informalexample>\begin{document}</informalexample>
+      <para>Pour activer cette option, vous pouvez définir, juste après le <code>\begin{document}</code>
       <programlisting>
 \makeatletter
 \def\setoutsidebox{\AMC@outside@boxtrue}
@@ -5888,7 +5924,9 @@ Moniuszko,Stanisław,003</programlisting></para>
 
             <itemizedlist>
               <listitem>
-                 point-virgule pour les champs et virgule pour séparer les emails. 
+                <para>
+                  point-virgule pour les champs et virgule pour séparer les emails.
+                </para>
               </listitem>
             </itemizedlist>
 
@@ -6105,32 +6143,20 @@ Moniuszko;Stanisław;003</programlisting>
 
       <programlisting> sudo apt-get install msmtp </programlisting>
 
-      <para>Dans les préférences de AMC</para>
-
+      <para>Dans les préférences de AMC :
       <menuchoice>
-        <guimenuitem>Edition</guimenuitem>
-
-        <guimenuitem>Préférences</guimenuitem>
-
-        <guimenuitem>Courriel</guimenuitem>
-
+        <guimenu>Edition</guimenu>
+        <guisubmenu>Préférences</guisubmenu>
+        <guisubmenu>Courriel</guisubmenu>
         <guimenuitem>Méthode d'envoi</guimenuitem>
-      </menuchoice>
-
-      <para>choisir</para>
-
+      </menuchoice>,
+      choisir
       <guibutton>sendmail</guibutton>
-
-      <para>et mettre le chemin :</para>
-
-      <programlisting>/usr/bin/msmtp </programlisting>
-
-      <para>Ouvrir le fichier</para>
-
+      et mettre le chemin :
+      <programlisting>/usr/bin/msmtp</programlisting>
+      Ouvrir le fichier
       <programlisting>sudo gedit /etc/msmtprc  </programlisting>
-
-      <para>et copier</para>
-
+      et copier
       <programlisting>
 account gmail 
 host smtp.gmail.com 
@@ -6141,74 +6167,88 @@ auth login
 from <emphasis>votre nom ou adresse mail du compte gmail</emphasis> 
 user <emphasis>votre adresse mail du compte gmail</emphasis> 
 password <emphasis>votre mot de passe du compte gmail</emphasis> 
-</programlisting>
+      </programlisting>
+      </para>
     </sect2>
 
     <sect2 id="Texmaker"><title
     id="Personnaliser.Texmaker.pour.AMC">Personnaliser Texmaker pour
-    AMC</title> Si vous utilisez Texmaker, vous pouvez ajouter les raccourcis
-    des environnements question et réponses en allant dans le Menu <menuchoice>
-        <guimenuitem>Utilisateur</guimenuitem>
+    AMC</title>
 
-        <guimenuitem>Personnaliser complétion</guimenuitem>
-      </menuchoice> puis entrez <command>\begin{question}{}</command> puis
-    cliquez sur ajouter. Faites de même avec <command>reponses</command> et
-    <command>reponseshoriz</command>.</sect2>
+    <para>
+      Si vous utilisez Texmaker, vous pouvez ajouter les raccourcis
+      des environnements question et réponses en allant dans le Menu <menuchoice>
+      <guimenuitem>Utilisateur</guimenuitem>
+      <guimenuitem>Personnaliser complétion</guimenuitem>
+      </menuchoice> puis entrez <code>\begin{question}{}</code> puis
+    cliquez sur ajouter. Faites de même avec <code>reponses</code> et
+    <command>reponseshoriz</command>.
+    </para>
+    </sect2>
 
-    <sect2 id="divers.fp"><title>Le paquet <command>fp</command> par l'exemple </title> La
+    <sect2 id="divers.fp"><title>Le paquet <command>fp</command> par l'exemple </title>
+
+    <para>La
     documentation du paquet <command>fp</command> n'est pas très détaillée et
     compréhensible pour un grand débutant au langage latex. Voici les
-    commandes expliquées par un exemple.</sect2>
+    commandes expliquées par un exemple.
+    </para>
 
     <itemizedlist>
-      <listitem>La commande <command>\FPprint{\x}</command> permet d'afficher
+      <listitem><para>La commande <command>\FPprint{\x}</command> permet d'afficher
       la valeur de x. Cependant, la commande <command>\numprint{...}</command>
       du paquet <command> \usepackage[autolanguage]{numprint}</command> est
       préférable car elle affiche une virgule pour les nombres décimaux au
-      lieu d'un point et groupe par trois les chiffres.</listitem>
+      lieu d'un point et groupe par trois les chiffres.</para></listitem>
 
-      <listitem>La fonction \FPrandom{\x} calcul un nombre
-      aléatoire.</listitem>
+      <listitem><para>La fonction \FPrandom{\x} calcul un nombre
+      aléatoire.</para></listitem>
 
-      <listitem>La fonction \FPseed\x permet de modifier le système de
+      <listitem><para>La fonction \FPseed\x permet de modifier le système de
       génération de nombre aléatoire : \x peut prendre \time, \the\day,
       \the\month, \the\year <programlisting>
 \FPeval{\compteur}{clip(\the\month*\the\time*1.1)}
 \FPseed\time
-</programlisting></listitem>
+</programlisting></para></listitem>
 
-      <listitem>La fonction \FPeval{\x}{...} permet de faire des calculs et
-      d’affecter le résultat à la variable \x.</listitem>
+      <listitem><para>La fonction \FPeval{\x}{...} permet de faire des calculs et
+      d’affecter le résultat à la variable \x.</para></listitem>
 
-      <listitem>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a
-      chiffres après la virgule à la variable \y. <note> On peut cumuler les
-      fonctions \FPeval (avec toutes les fonctions de calcul) et \FPtrunc.
-      <programlisting>
+      <listitem>
+        <para>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a
+        chiffres après la virgule à la variable \y.
+        </para>
+        <note>
+          <para> On peut cumuler les
+          fonctions \FPeval (avec toutes les fonctions de calcul) et \FPtrunc.
+          <programlisting>
 \FPeval{\x}{trunc(a+random*b,c)}
-</programlisting> <itemizedlist>
-          <listitem>\x sera compris entre a et a+b</listitem>
+          </programlisting>
+          <itemizedlist>
+            <listitem><para>\x sera compris entre a et a+b</para></listitem>
+            <listitem><para>, séparateur</para></listitem>
+            <listitem><para>c : nombre de chiffre après la virgule</para></listitem>
+          </itemizedlist>
+          </para>
+        </note>
+      </listitem>
 
-          <listitem>, séparateur</listitem>
+      <listitem><para>La fonction \FPround{\y}{\x}{a} transfère le nombre \x avec a
+      chiffres après la virgule à la variable \y et arrondi.</para></listitem>
 
-          <listitem>c : nombre de chiffre après la virgule</listitem>
-        </itemizedlist> </note></listitem>
+      <listitem><para>La fonction \FPclip{\y}{\x} transfère le nombre \x , sans les
+      zéros après la virgule, à la variable \y.</para></listitem>
 
-      <listitem>La fonction \FPround{\y}{\x}{a} transfère le nombre \x avec a
-      chiffres après la virgule à la variable \y et arrondi.</listitem>
-
-      <listitem>La fonction \FPclip{\y}{\x} transfère le nombre \x , sans les
-      zéros après la virgule, à la variable \y.</listitem>
-
-      <listitem>Les fonctions \FPadd{\x}{a}{b}, \FPdiv{\x}{a}{b},
+      <listitem><para>Les fonctions \FPadd{\x}{a}{b}, \FPdiv{\x}{a}{b},
       \FPmul{\x}{a}{b}, \FPsub{\x}{a}{b} attribue à la variable \x la somme de
       a+b, le quotient de a/b, le produit de a*b, et le reste de
-      a-b</listitem>
+      a-b</para></listitem>
 
-      <listitem>La fonction FPset{\x}{\y} attribue à la variable \x (macro ou
-      chaîne) la valeur \y</listitem>
+      <listitem><para>La fonction FPset{\x}{\y} attribue à la variable \x (macro ou
+      chaîne) la valeur \y</para></listitem>
 
-      <listitem>\FPabs{\x}{a} renvoie la valeur absolue de a, \FPneg{\y}{a}
-      renvoie l'opposé de a</listitem>
+      <listitem><para>\FPabs{\x}{a} renvoie la valeur absolue de a, \FPneg{\y}{a}
+      renvoie l'opposé de a</para></listitem>
 
       <listitem>
         <para>La commande \FPiflt{\x}{\y} {instruction 1} \else {instruction
@@ -6236,12 +6276,12 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
         <programlisting> a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
       </listitem>
 
-      <listitem>La commande \FPe affiche la valeur de e=2.71828182845904523,
-      la commande \FPpi affich la valeur de pi.</listitem>
+      <listitem><para>La commande \FPe affiche la valeur de e=2.71828182845904523,
+      la commande \FPpi affich la valeur de pi.</para></listitem>
 
-      <listitem>La commande \FPexp{\x}{a} attribue à la variable \x la valeur
+      <listitem><para>La commande \FPexp{\x}{a} attribue à la variable \x la valeur
       e^a, la commande \FPln{\x}{a} attribue à la variable \x la valeur
-      ln(a)</listitem>
+      ln(a)</para></listitem>
 
       <listitem>
         <para>La commande \FPpow{\x}{a}{b} attribue à la variable \x la valeur
@@ -6251,36 +6291,39 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
         <para>On peut écrire \FPeval{\x}{root(b,a)}</para>
       </listitem>
 
-      <listitem>La commande \FPpascal{\x}{a} attribe à \x la ligne a du
-      triangle de pascal.</listitem>
+      <listitem><para>La commande \FPpascal{\x}{a} attribe à \x la ligne a du
+      triangle de pascal.</para></listitem>
 
-      <listitem>La commande \FPsin{\x}{a} attribue à \x la valeur du sinus de
+      <listitem><para>La commande \FPsin{\x}{a} attribue à \x la valeur du sinus de
       a qui est exprimé en radians. <programlisting>\FPeval{\x}{sin(30*\FPpi/180)}\FPprint{\x}</programlisting>
-      <para> La commande est identique pour les autres fonctions
+      La commande est identique pour les autres fonctions
       trigonométriques Il faut remplacer sin par le terme entre
       parenthèse.</para> <itemizedlist>
-          <listitem>cosinus (cos), tangente (tan), cotangente (cot)</listitem>
+          <listitem><para>cosinus (cos), tangente (tan), cotangente (cot)</para></listitem>
 
-          <listitem>La commande \FPsincos{\x}{\y}{a} attribue à \x la valeur
+          <listitem><para>La commande \FPsincos{\x}{\y}{a} attribue à \x la valeur
           du sinus de a qui est exprimé en radians et \y la valeur du cosinus
-          de a qui est exprimé en radians.</listitem>
+          de a qui est exprimé en radians.</para></listitem>
 
-          <listitem>La commande \FPtancot{\x}{\y}{a} attribue à \x la valeur
+          <listitem><para>La commande \FPtancot{\x}{\y}{a} attribue à \x la valeur
           de la tangente de a qui est exprimé en radians et \y la valeur de la
-          cotangente de a.</listitem>
+          cotangente de a.</para></listitem>
 
-          <listitem>arcsinus (arcsin), arccos(arccos), arctangent (arctan),
-          arccot(arc cotangente)</listitem>
+          <listitem><para>arcsinus (arcsin), arccos(arccos), arctangent (arctan),
+          arccot(arc cotangente)</para></listitem>
 
-          <listitem>La commande \FParcsincos{\x}{\y}{a} attribue à \x la
+          <listitem><para>La commande \FParcsincos{\x}{\y}{a} attribue à \x la
           valeur de l’arc sinus(a), \x sera exprimé en radians, à \y la valeur
-          de l’arc cosinus(a), \y sera exprimé en radians.</listitem>
+          de l’arc cosinus(a), \y sera exprimé en radians.</para></listitem>
 
-          <listitem>La commande \FParctancot{\x}{\y}{a} attribue à \x la
+          <listitem><para>La commande \FParctancot{\x}{\y}{a} attribue à \x la
           valeur de l’arc tangente(a), \x sera exprimé en radians, à \y la
           valeur de l’arc cotangente(a), \y sera exprimé en
-          radians.</listitem>
-        </itemizedlist></listitem>
-    </itemizedlist>
+          radians.</para></listitem>
+        </itemizedlist>
+      </listitem>
+      </itemizedlist>
+
+      </sect2>
   </sect1>
 </article>
