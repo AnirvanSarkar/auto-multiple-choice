@@ -79,7 +79,7 @@ html/index.html: FORCE
 	date > $@
 
 %.tgz: %.d
-	tar cznf $@ -C $< $(TAR_REPRODUCIBLE_ARGS) .
+	tar cn -C $< $(TAR_REPRODUCIBLE_ARGS) -O . | gzip $(GZIP_REPRODUCIBLE_ARGS) -c > $@
 
 FORCE: ;
 
