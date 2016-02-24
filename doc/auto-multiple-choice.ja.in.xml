@@ -1622,11 +1622,11 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
           <para><parameter>width</parameter>, <parameter>height</parameter>, <parameter>depth</parameter>の各変数は得点表記記入領域の寸法を表します。</para>
 
           <para><parameter>position</parameter>の値は、none, question, margin, marginsのいずれかです。</para>
-        </sect4>
 
         <warning>
           <para>これらのコマンドを、試験問題の印刷<emphasis>後</emphasis>に入力してはいけません。</para>
         </warning>
+        </sect4>
       </sect3>
 
       <sect3 id="Groups.questions">
@@ -1778,11 +1778,12 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
         <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
 \AMCidsPosition{pos=top}</programlisting>
-      </sect3>
 
-      <warning>
+<warning>
         <para><command>pgfpages</command>パッケージや、他のレイアウト用パッケージをロードしないでください。</para>
       </warning>
+
+      </sect3>
 
       <sect3 id="box.style">
         <title id="box.style.title">マーク用ボックスの外見スタイル</title>
@@ -2299,7 +2300,6 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         <programlisting>\setcounter{figure}{0}</programlisting>
 
         <para>を挿入して、図の番号がどの実体でも1から始まるようにすることです。これを行わないと、実体ごとに番号が増加してしまい、意図した動作ではなくなってしまいます。</para>
-      </sect3>
 
       <sect4 id="cleveref"><title>cleverefパッケージの使用</title>
         <para>このパッケージは、設問番号、設問ページ番号、ラベルのページ番号を昇順にソートします（ドキュメント <ulink url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>）。</para>
@@ -2316,6 +2316,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
         <para><emphasis>led</emphasis>, <emphasis>lamp</emphasis>, <emphasis>moter</emphasis>は、設問を参照するために \AMClabel{led}, \AMClabel{lamp}, \AMClabel{moter} で作成されたラベルです。これらの設問の番号はコンパイル時に自動的にソートされます。</para>
       </sect4>
+      </sect3>
 
       <sect3 id="AMCtext">
         <title>AMCが挿入するテキストのカスタマイズ</title>
@@ -2427,7 +2428,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         </programlisting></para>
 
         <note><para>
-         <replaceable>integer</replaceable>はLaTeXで既定の値<item>\the\year</item>, <item>\the\month</item>, <item>\the\day</item>が使えますが、<emphasis>絶対に<item>\the\time</item>を使ってはいけません</emphasis>。</para>
+         <replaceable>integer</replaceable>はLaTeXで既定の値<code>\the\year</code>, <code>\the\month</code>, <code>\the\day</code>が使えますが、<emphasis>絶対に<code>\the\time</code>を使ってはいけません</emphasis>。</para>
         </note>  
 
       <sect3 id="latex.numerical.fp">
@@ -4181,11 +4182,11 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       </note>
         <note>
       <para>二つのオプションを共に使用することもできます。</para>
-      <para><informalexample>\begin{document}</informalexample>の後に次のように記述します。
-      <programlisting>
+      <para><code>\begin{document}</code>の後に次のように記述します。
+      <informalexample><programlisting>
 \makeatletter
 \def\setoutsidebox{\AMC@outside@boxtrue}
-\makeatother</programlisting> 
+\makeatother</programlisting></informalexample>
       </para>
       <para>そして用紙内でローカルに（波括弧の内側で）使用します:</para>
       <programlisting>{\setoutsidebox\AMCform}</programlisting>
@@ -4220,11 +4221,12 @@ Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
 Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
 Moniuszko;Stanisław;003</programlisting>
           </warning>
-        </listitem>
 
-        <warning>
+          <warning>
           <para>受験生の氏名に _ （アンダースコア）を使用しないでください。コンパイル時にエラーが発生します。</para>
         </warning>
+
+        </listitem>
 
         <listitem>
           <para>LaTeXソースファイルで、次のようにcsvsimpleパッケージをロードします:</para>
