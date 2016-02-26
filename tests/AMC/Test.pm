@@ -92,6 +92,7 @@ sub new {
      'skip_prepare'=>0,
      'skip_scans'=>0,
      'tracedest'=>'STDERR',
+     'debug_file'=>'',
     };
 
   for (keys %oo) {
@@ -124,6 +125,7 @@ sub new {
 
   GetOptions("debug!"=>\$self->{'debug'},
              "blind!"=>\$self->{'blind'},
+             "log-to=s"=>\$self->{debug_file},
              "to-stdout!"=>\$to_stdout);
 
   $self->{tracedest} = 'STDOUT' if($to_stdout);
@@ -189,7 +191,8 @@ sub install {
     mkdir($self->{'temp_dir'}."/$d") if(!-d $self->{'temp_dir'}."/$d");
   }
 
-  $self->{'debug_file'}=$self->{'temp_dir'}."/debug.log";
+  $self->{'debug_file'}=$self->{'temp_dir'}."/debug.log"
+    if(!$self->{'debug_file'});
   open(DB,">",$self->{'debug_file'});
   print DB "Test\n";
   close(DB);
