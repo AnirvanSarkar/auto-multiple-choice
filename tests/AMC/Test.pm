@@ -30,11 +30,8 @@ use AMC::NamesFile;
 use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
 use File::Temp qw(tempfile tempdir);
-use File::Copy::Recursive qw(rcopy);
 use File::Copy;
 use Digest::MD5;
-
-use OpenOffice::OODoc;
 
 use Data::Dumper;
 
@@ -167,7 +164,12 @@ sub install {
   $self->{'temp_dir'} = tempdir( DIR=>$temp_loc,
 				 CLEANUP => (!$self->{'debug'}) );
 
-  rcopy($self->{'dir'}.'/*',$self->{'temp_dir'});
+  opendir(my $sh,$self->{'dir'})
+    || die "can't opendir $self->{dir}: $!";
+  for my $f (grep { ! /^\./ } (readdir($sh))) {
+    system("cp","-r",$self->{'dir'}.'/'.$f,$self->{'temp_dir'});
+  }
+  closedir $sh;
 
   print { $self->{tracedest} } "[>] Installed in $self->{'temp_dir'}\n";
 
@@ -688,6 +690,8 @@ sub check_export {
   }
 
   if($self->{'export_ods'}) {
+    require OpenOffice::OODoc;
+
     $self->begin("ODS full export test");
     $self->amc_command('export',
 		       '--data','%DATA',
@@ -697,7 +701,7 @@ sub check_export {
 		       '--option-out','stats=h',
 		       '-o','%PROJ/export.ods',
 		      );
-    my $doc = odfDocument(file=>$self->{'temp_dir'}.'/export.ods');
+    my $doc = OpenOffice::OODoc::odfDocument(file=>$self->{'temp_dir'}.'/export.ods');
     my %iq=();
     my $i=0;
     while(my $id=$doc->getCellValue(1,0,$i)) {
