@@ -94,6 +94,7 @@ sub new {
      'check_zooms'=>{},
      'skip_prepare'=>0,
      'skip_scans'=>0,
+     'tracedest'=>'STDERR',
     };
 
   for (keys %oo) {
@@ -122,7 +123,13 @@ sub new {
   $self->{names}=AMC::NamesFile::new($self->{'dir'}.'/'.$self->{list},'utf8','id')
     if(-f $self->{'dir'}.'/'.$self->{list});
 
-  GetOptions("debug!"=>\$self->{'debug'},"blind!"=>\$self->{'blind'});
+  my $to_stdout=0;
+
+  GetOptions("debug!"=>\$self->{'debug'},
+             "blind!"=>\$self->{'blind'},
+             "to-stdout!"=>\$to_stdout);
+
+  $self->{tracedest} = 'STDOUT' if($to_stdout);
 
   $self->install;
 
@@ -162,7 +169,7 @@ sub install {
 
   rcopy($self->{'dir'}.'/*',$self->{'temp_dir'});
 
-  print STDERR "[>] Installed in $self->{'temp_dir'}\n";
+  print { $self->{tracedest} } "[>] Installed in $self->{'temp_dir'}\n";
 
   if(-d ($self->{'temp_dir'}."/scans") && !$self->{'scans'}) {
     opendir(my $dh, $self->{'temp_dir'}."/scans")
@@ -242,7 +249,7 @@ sub see_file {
 
 sub trace {
   my ($self,@m)=@_;
-  print STDERR join(' ',@m)."\n";
+  print { $self->{tracedest} } join(' ',@m)."\n";
   open LOG,">>$self->{'debug_file'}";
   print LOG join(' ',@m)."\n";
   close LOG;

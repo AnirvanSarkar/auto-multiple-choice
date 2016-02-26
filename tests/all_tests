@@ -4,7 +4,7 @@ RESULT_FILE=/tmp/amc-test.log
 
 for t in t/*/test.pl
 do
-  if $t $@ > $RESULT_FILE 2>&1
+  if $t --to-stdout $@ > $RESULT_FILE
   then
       echo -e "[ \e[0;32mOK\e[0m ] $t"
   else
