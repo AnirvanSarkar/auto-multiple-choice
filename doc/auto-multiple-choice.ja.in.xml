@@ -47,9 +47,9 @@
     </author>
 
     <author>
-      <firstname>Gérard</firstname>
+      <firstname>Frédéric</firstname>
 
-      <surname>Carpeaux</surname>
+      <surname>Bréal</surname>
 
       <contrib>著者・編集者</contrib>
     </author>
@@ -1623,9 +1623,9 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
           <para><parameter>position</parameter>の値は、none, question, margin, marginsのいずれかです。</para>
 
-        <warning>
-          <para>これらのコマンドを、試験問題の印刷<emphasis>後</emphasis>に入力してはいけません。</para>
-        </warning>
+          <warning>
+            <para>これらのコマンドを、試験問題の印刷<emphasis>後</emphasis>に入力してはいけません。</para>
+          </warning>
         </sect4>
       </sect3>
 
@@ -1779,9 +1779,9 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
         <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
 \AMCidsPosition{pos=top}</programlisting>
 
-<warning>
-        <para><command>pgfpages</command>パッケージや、他のレイアウト用パッケージをロードしないでください。</para>
-      </warning>
+        <warning>
+          <para><command>pgfpages</command>パッケージや、他のレイアウト用パッケージをロードしないでください。</para>
+        </warning>
 
       </sect3>
 
@@ -1914,7 +1914,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
         <warning>
        <para>
-       指名試験問題用紙（<xref endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>参照）を使用する場合は、プリアンブルで新しいコマンドにこれを設定し、</para> 
+       指名試験問題用紙（<xref endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>参照）を使用する場合は、プリアンブルで次のように新しいコマンドを設定し、</para> 
       <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
       </programlisting>
       <para>必要な箇所で使用します（効果の範囲を限定するため、波括弧内に記述することを忘れないでください）:</para>
@@ -2301,21 +2301,18 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
         <para>を挿入して、図の番号がどの実体でも1から始まるようにすることです。これを行わないと、実体ごとに番号が増加してしまい、意図した動作ではなくなってしまいます。</para>
 
-      <sect4 id="cleveref"><title>cleverefパッケージの使用</title>
-        <para>このパッケージは、設問番号、設問ページ番号、ラベルのページ番号を昇順にソートします（ドキュメント <ulink url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>）。</para>
+        <sect4 id="cleveref"><title>cleverefパッケージの使用</title>
+          <para>このパッケージは、設問番号、設問ページ番号、ラベルのページ番号を昇順にソートします（ドキュメント <ulink url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>）。</para>
+          <warning>
+            <para>このパッケージは、<package>automuliplechoice</package>パッケージの<emphasis>後</emphasis>にロードしなければなりません。</para>
+          </warning>
 
-        <warning>
-          <para>このパッケージは、<package>automuliplechoice</package>パッケージの<emphasis>後</emphasis>にロードしなければなりません。</para>
-        </warning>
+          <para>このパッケージを使用するために新しいコマンド<command>\AMCstudentlabel</command>を導入しました。
+            <programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{moter}}</programlisting>
+            <emphasis>led</emphasis>, <emphasis>lamp</emphasis>, <emphasis>moter</emphasis>は、設問を参照するために \AMClabel{led}, \AMClabel{lamp}, \AMClabel{moter} で作成されたラベルです。これらの設問の番号はコンパイル時に自動的にソートされます。</para>
 
-        <para>このパッケージを使用するには新しいコマンド<command>\AMCstudentlabel</command>を導入する必要があります。</para>
+        </sect4>
 
-        <para>
-          <programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{moter}}</programlisting>
-        </para>
-
-        <para><emphasis>led</emphasis>, <emphasis>lamp</emphasis>, <emphasis>moter</emphasis>は、設問を参照するために \AMClabel{led}, \AMClabel{lamp}, \AMClabel{moter} で作成されたラベルです。これらの設問の番号はコンパイル時に自動的にソートされます。</para>
-      </sect4>
       </sect3>
 
       <sect3 id="AMCtext">
@@ -2428,7 +2425,7 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
         </programlisting></para>
 
         <note><para>
-         <replaceable>integer</replaceable>はLaTeXで既定の値<code>\the\year</code>, <code>\the\month</code>, <code>\the\day</code>が使えますが、<emphasis>絶対に<code>\the\time</code>を使ってはいけません</emphasis>。</para>
+         <replaceable>integer</replaceable>は固定値でなければなりません。日付や時刻から計算してはいけません。</para>
         </note>  
 
       <sect3 id="latex.numerical.fp">
@@ -2885,7 +2882,7 @@ Name :
         </note>
       </sect3>
       
-      <sect3 id="Use.PSTricks">
+      <sect3 id="latex.pstricks">
         <title>PSTricksの使用</title>
 
         <para>このパッケージは<package>automuliplechoice</package>の<emphasis>after</emphasis>にロードしてください。</para>
@@ -2996,21 +2993,21 @@ Name :
       <title>試験</title>
       <para>受験者に合格してもらいましょう。</para>
       
-      <sect3 id="advice">
-        <title id="advice.title">アドバイス</title>
+      <sect3 id="gui.advice">
+        <title>アドバイス</title>
 
-        <para>受験者は、黒または青のペンか、BまたはHBの鉛筆を使用することが望ましいです。</para>
+        <para>受験者は、黒または青のペンか、BまたはHBの鉛筆を使用するべきです。</para>
       </sect3>
 
-      <sect3 id="correction.boxes">
-        <title id="correction.boxes.title">試験中のボックスの修正</title>
+      <sect3 id="gui.correct">
+        <title>試験中のボックスの修正</title>
 
         <sect4 id="gui.correct.tick">
           <title>ボックスにチェックを付けさせる場合</title>
 
           <itemizedlist>
             <listitem>
-            <para>消しゴムや修正テープを使用できますが、<emphasis>ボックスの書きなおし</emphasis>はすべきでありません。</para>
+              <para>消しゴムや修正テープを使用できますが、<emphasis>ボックスの書きなおし</emphasis>はすべきでありません。<!-- 訳注: 「書きなおし」だと意味がよくわからない --></para>
             </listitem>
 
             <listitem>
@@ -3026,7 +3023,7 @@ Name :
 
           <itemizedlist>
             <listitem>
-            <para>消しゴムや修正テープを使用し<emphasis>なければなりません</emphasis>。<emphasis>ボックスの書きなおし</emphasis>はすべきでありません。</para>
+              <para>消しゴムや修正テープを使用し<emphasis>なければなりません</emphasis>。<emphasis>ボックスの書きなおし</emphasis>はすべきでありません。<!-- 訳注: 「書きなおし」だと意味がよくわからない --></para>
             </listitem>
           </itemizedlist>
 
@@ -3363,7 +3360,7 @@ Name :
         </note>
 
         <important>
-          <para>設問の採点基準の内部で<code>default</code>パラメータを使用して変数のデフォルト値を設定する必要があります。<!-- 訳注: 仏版はましだが英版はおかしい --></para>
+          <para>変数のデフォルト値は、<code>default</code>パラメータを使用して設問の採点基準として設定する必要があります。<!-- 訳注: 仏版はましだが英版はおかしい --></para>
         </important>
 
           <programlisting>
@@ -3614,20 +3611,24 @@ Name:
         <sect3 id="calculing.final.mark">
         <title>最終得点の計算</title>
   
-        <para><menuchoice>
-       <guimenu>編集</guimenu><guimenuitem>設定</guimenuitem>
-       <guimenuitem>プロジェクト</guimenuitem></menuchoice></para>
-       <itemizedlist>
-       <listitem><para>最小単位: 丸めの単位を選択</para></listitem>
-       <listitem><para>丸めタイプ: 切捨て, 丸め, 切上げ</para></listitem>
-       </itemizedlist>
+        <para>最終得点の計算方法は次のメニューから設定します:
+          <menuchoice>
+            <guimenu>編集</guimenu>
+            <guisubmenu>設定</guisubmenu>
+            <guimenuitem>プロジェクト</guimenuitem>
+          </menuchoice>
+          <itemizedlist>
+            <listitem><para>最小単位: 丸めの単位を選択</para></listitem>
+            <listitem><para>丸めタイプ: 切捨て, 丸め, 切上げ</para></listitem>
+          </itemizedlist>
+        </para>
        
       </sect3>
 
       <sect3 id="correc.test">
         <title>採点誤りの修正</title>
 
-        <para>試験の後でも、採点基準を変更することができます。しかし、文書を<emphasis>けして</emphasis>更新してはいけません。テキストエディタでソースファイルを開き、変更して保存するのが最善です。</para>
+        <para>試験の後でも、採点基準を変更することができます。しかし、文書を<emphasis>けして</emphasis>更新してはいけません。テキストエディタでソースファイルを開き、変更して保存する方がよいでしょう。</para>
 
         <para>しても構わないこと:</para>
 
@@ -3999,7 +4000,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
         <listitem><para>デフォルトのマーク判定上限閾値: 1</para></listitem>
 
-        <listitem><para>隅マーカーが3個でも処理: オフ</para></listitem>
+        <listitem><para>認識できた四隅マーカーが3個でも処理: オフ</para></listitem>
       </itemizedlist>
     </sect2>    
   </sect1>
@@ -4208,8 +4209,7 @@ Golin,André,002
 Moniuszko,Stanisław,003</programlisting>
 
           <warning>
-            <para>Type carefully the CSV file to send the same test to
-            multiple recipients.</para>
+            <para>同一の採点結果を複数の宛先に送付する場合はCSVを注意して作成してください。</para>
 
             <itemizedlist>
               <listitem><para>セミコロンでフィールドを区切り、カンマでメールアドレスを区切る。</para></listitem>
@@ -4223,8 +4223,8 @@ Moniuszko;Stanisław;003</programlisting>
           </warning>
 
           <warning>
-          <para>受験生の氏名に _ （アンダースコア）を使用しないでください。コンパイル時にエラーが発生します。</para>
-        </warning>
+            <para>受験生の氏名に<quote><code>_</code></quote>（アンダースコア）を使用しないでください。コンパイル時にエラーが発生します。</para>
+          </warning>
 
         </listitem>
 
