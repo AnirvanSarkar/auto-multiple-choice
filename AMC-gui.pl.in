@@ -124,6 +124,7 @@ POSIX::setlocale(&POSIX::LC_NUMERIC,"C");
 
 my $debug=0;
 my $debug_file='';
+my $do_nothing=0;
 
 my $profile='';
 my $project_dir='';
@@ -132,6 +133,7 @@ GetOptions("debug!"=>\$debug,
 	   "debug-file=s"=>\$debug_file,
 	   "profile=s"=>\$profile,
 	   "p=s"=>\$project_dir,
+           "do-nothing!"=>\$do_nothing,
 	   );
 
 $project_dir=Cwd::realpath($project_dir) if($project_dir);
@@ -997,7 +999,7 @@ sub debug_set {
     $debug=$w{'menu_debug'}->get_active;
     debug "DEBUG MODE : OFF" if(!$debug);
     set_debug_mode($debug);
-    if($debug) {
+    if($debug && !$do_nothing) {
 	debug "DEBUG MODE : ON";
 
 	my $dialog = Gtk2::MessageDialog
@@ -7030,6 +7032,10 @@ sub cleanup_dialog {
 
 #######################################
 
+exit 0 if($do_nothing);
+
+#######################################
+
 if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
     $w{'main_window'}->resize($o{'taille_x_main'},$o{'taille_y_main'});
 }
@@ -7059,8 +7065,6 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 	$dialog->destroy;
     }
 }
-
-#######################################
 
 test_commandes();
 test_debian_amc();
