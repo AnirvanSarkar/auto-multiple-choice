@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2015 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2016 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -562,7 +562,7 @@ sub one_scan {
   # Some more image reports
   ##########################################
 
-  my $nom_file="name-".studentids_string(@spc[0,2]).".jpg";
+  my $nom_file="name-".studentids_string_filename(@spc[0,2]).".jpg";
 
   my $whole_page;
 

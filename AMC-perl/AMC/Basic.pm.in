@@ -606,6 +606,12 @@ sub studentids_string {
   return($student.($copy ? ':'.$copy : ''));
 }
 
+sub studentids_string_filename {
+  my ($student,$copy)=@_;
+  $student='' if(!defined($student));
+  return($student.($copy ? '-'.$copy : ''));
+}
+
 sub annotate_source_change {
   my ($capture,$transaction)=@_;
   my $t=time();
