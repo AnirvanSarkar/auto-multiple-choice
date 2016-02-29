@@ -55,7 +55,7 @@ po-clean.pl: po-clean.pl.in ../Makefile.versions
 
 $(DOMAIN).bpot: $(PERL) $(GLADE)
 	xgettext $(XGETTO) --from-code=UTF-8 --add-comments=TRANSLATORS: $(PERL) -k__ -k__p -k -o $@
-	xgettext $(XGETTO) -j $(GLADE) -o $@
+	xgettext $(XGETTO) -j $(GLADE) -L Glade -o $@
 
 list:
 	grep -lr __ $(AMC) |grep '\.\(pl\|pm\)$$' | grep -v 'debian' ; ls $(GLADE)
