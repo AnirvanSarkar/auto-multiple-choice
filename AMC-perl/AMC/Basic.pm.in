@@ -439,7 +439,7 @@ local *AMC_STDERR_BACKUP;
 
 sub set_debug {
     my ($debug)=@_;
-    if($debug =~ /\// && -f $debug) {
+    if($debug =~ /[\/.]/ && -f $debug) {
 	# c'est un nom de fichier
 	$amc_debug_fh=new IO::File;
 	$amc_debug_fh->open($debug,">>");
