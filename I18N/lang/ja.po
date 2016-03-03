@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.2.2016.022902 (r:e6c431add948)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
 "POT-Creation-Date: 2016-02-29 21:31 +0100\n"
-"PO-Revision-Date: 2016-03-03 13:54+0900\n"
+"PO-Revision-Date: 2016-03-03 14:42+0900\n"
 "Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language: ja\n"
@@ -1444,7 +1444,7 @@ msgstr "診断"
 
 #: ../AMC-gui.pl:5103
 msgid "Pages that miss data capture to complete students sheets:"
-msgstr "受験生答案の一部が不足しているページ:"
+msgstr "答案の欠落ページ:"
 
 #: ../AMC-gui.pl:5212
 #, perl-format
@@ -2149,11 +2149,11 @@ msgstr "ページレイアウト"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:123
 msgid "Original"
-msgstr "オリジナル用紙表示"
+msgstr "オリジナル用紙"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:124 ../AMC-gui-edit_preferences.glade:2146
 msgid "Scan"
-msgstr "スキャン画像表示"
+msgstr "スキャン画像"
 
 #. TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through all pages. Please keep this text very short (say less than 5 letters) so that the window is not too large
 #: ../AMC-perl/AMC/Gui/Manuel.pm:128
@@ -2971,7 +2971,7 @@ msgstr "印刷・スキャン後の四隅マーカーの最大縮小率（0.1は
 #: ../AMC-gui-edit_preferences.glade:1997
 #: ../AMC-gui-edit_preferences.glade:2307
 msgid "Can be customized on a per-project basis in the Project tab."
-msgstr "プロジェクト「タブ」で、プロジェクトごとにカスタマイズできます。"
+msgstr "「プロジェクト」タブで、プロジェクトごとにカスタマイズできます。"
 
 #: ../AMC-gui-edit_preferences.glade:1998
 msgid "Default darkness threshold"
@@ -2982,8 +2982,8 @@ msgid ""
 "If black proportion is greater than this value, the box will be considered "
 "as beeing ticked. This is a default value, it can be changed in each project."
 msgstr ""
-"ボックス内の黒ピクセルの比率がこの値より大きい場合にマークされていると判定さ"
-"れます。これはデフォルト値で、プロジェクトごとに変更できます。"
+"黒ピクセルの比率がこの値より大きければ、ボックスがマークされていると判定され"
+"ます。これはデフォルト値で、プロジェクトごとに変更できます。"
 
 #: ../AMC-gui-edit_preferences.glade:2030
 msgid ""
@@ -3193,9 +3193,10 @@ msgid ""
 "one can choose value 0.5. If students have been told to tick the boxes, "
 "values around 0.15 seems appropriate."
 msgstr ""
-"暗さがこの値より大きければ、ボックスがマークされていると判定されます。受験者"
-"にボックスを完全に塗りつぶすように指示した場合は、0.5 を選ぶといいでしょう。"
-"受験者にボックスをチェックするように指示した場合は、0.15 付近の値が適当です。"
+"黒ピクセルの比率がこの値より大きければ、ボックスがマークされていると判定され"
+"ます。受験者にボックスを完全に塗りつぶすように指示した場合は、0.5 を選ぶとい"
+"いでしょう。受験者にボックスをチェックするように指示した場合は、0.15 付近の値"
+"が適当です。"
 
 #: ../AMC-gui-edit_preferences.glade:3557
 msgid "Upper darkness threshold"
@@ -3207,8 +3208,9 @@ msgid ""
 "ticked. Setting this threshold to a value less than one allows the students "
 "to cancel ticked boxes by filling them completely."
 msgstr ""
-"ボックス内の黒ピクセルの比率がこの値より大きい場合にマークされていると判定さ"
-"れます。これはデフォルト値で、プロジェクトごとに変更できます。"
+"黒ピクセルの比率がこの値より大きければ、ボックスがマークされて<b>いない</b>と"
+"判定されます。1より小さい値を設定すれば、受験者はチェックしたボックスを完全に"
+"塗りつぶすことで取り消すことができます。"
 
 #: ../AMC-gui-edit_preferences.glade:3593
 msgid "<b>Automatic data capture</b>"
@@ -3395,7 +3397,7 @@ msgstr "送信失敗のみ選択"
 
 #: ../AMC-gui-mailing.glade:184
 msgid "Select all students whose report sending has failed last time."
-msgstr "前回メール送信に失敗した受験生のみ選択します。"
+msgstr "前回メール送信に失敗した受験者のみ選択します。"
 
 #: ../AMC-gui-mailing.glade:231
 msgid "<b>Addressees</b>"
