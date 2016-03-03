@@ -12,7 +12,7 @@
     <date>@/PACKAGE_V_ISODATE/@</date>
 
     <abstract>
-      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャンデータからのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~@/PACKAGE_V_VC/@）</para>
+      <para>AMCは、プレーンテキストあるいはLaTeXで記述されたマークシート方式の選択式試験問題を使用して、答案用紙のスキャン画像からのOMR（光学マーク認識）により自動採点と評定のできるユーティリティ群です。この文書はその使用説明書です。（バージョン@/PACKAGE_V_DEB/@~@/PACKAGE_V_VC/@）</para>
 
       <para>AMCプロジェクトは<ulink
       url="http://gna.org/">Gna!</ulink>によってホスティングされています。AMCウェブサイトは<ulink url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>にあり、プロジェクトがホスティングされているサイトは<ulink url="https://bitbucket.org/auto-multiple-choice/auto-multiple-choice">https://bitbucket.org/auto-multiple-choice/auto-multiple-choice</ulink>です。</para>
@@ -1356,7 +1356,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
           </listitem>
 
           <listitem>
-            <para><option>postcorrect</option>: スキャンデータの解析を終えてから（採点時）、出題者が作成した答案用紙を正解として指定したい場合にこのオプションを用います。詳細は<xref linkend="postcorrect"/>を参照してください。</para>
+            <para><option>postcorrect</option>: スキャン画像の解析を終えてから（採点時）、出題者が作成した答案用紙を正解として指定したい場合にこのオプションを用います。詳細は<xref linkend="postcorrect"/>を参照してください。</para>
           </listitem>
 
           <listitem>
@@ -3043,17 +3043,17 @@ Name :
       <sect3 id="gui.capture.auto">
         <title>自動入力</title>
 
-        <para>受験者が記入したマークを自動認識するには、事前に答案をデジタル化しておかなければなりません。私の場合は、その作業を（私の操作なしに束にした全ページに対して）自動でやってくれるコピー機/スキャナを使い、300dpi、OCRモード（文字認識向き、グレースケールでないモノクロモードのことで、文字認識をしてくれるわけではありません）の設定で行って、各ページが一つのTIFFファイルとしてスキャンデータが得られます。（訳注: 訳者の場合、300dpi、グレースケールを使用しています。）</para>
+        <para>受験者が記入したマークを自動認識するには、事前に答案をデジタル化しておかなければなりません。私の場合は、その作業を（私の操作なしに束にした全ページに対して）自動でやってくれるコピー機/スキャナを使い、300dpi、OCRモード（文字認識向き、グレースケールでないモノクロモードのことで、文字認識をしてくれるわけではありません）の設定で行って、各ページが一つのTIFFファイルとしてスキャン画像が得られます。（訳注: 訳者の場合、300dpi、グレースケールを使用しています。）</para>
 
         <note>
-          <para>スキャンデータを解析するには、それらを一つあるいは複数の画像ファイル（TIFF、JPG、PNG等）として持つ必要があります。ベクターグラフィックス形式（PDF、PS、EPS）でもかまいません。この場合はスキャンデータは解析前にPNGに変換されます（訳注: 多数のページを含むファイルを変換すると、ImageMagickが /var/tmp を多量に消費するので、ファイルを適度に分けた方がいいでしょう）。</para>
+          <para>スキャン画像を解析するには、それらを一つあるいは複数の画像ファイル（TIFF、JPG、PNG等）として持つ必要があります。ベクターグラフィックス形式（PDF、PS、EPS）でもかまいません。この場合はスキャン画像は解析前にPNGに変換されます（訳注: 多数のページを含むファイルを変換すると、ImageMagickが /var/tmp を多量に消費するので、ファイルを適度に分けた方がいいでしょう）。</para>
         </note>
 
         <note>
-          <para>スキャンデータを使って最初に自動マーク認識を行う際は、個別答案用紙かコピー答案用紙のどちらの方法を使うかAMCに通知します（<xref endterm="printing.title" linkend="printing"/>参照）。</para>
+          <para>スキャン画像を使って最初に自動マーク認識を行う際は、個別答案用紙かコピー答案用紙のどちらの方法を使うかAMCに通知します（<xref endterm="printing.title" linkend="printing"/>参照）。</para>
         </note>
 
-        <para>そして、「<guilabel>試験実施後のマーク認識</guilabel>」セクションの<guilabel>自動</guilabel>ボタンで開いたダイアログから、スキャンデータファイルをすべて選択したのち、このダイアログの<guibutton>OK</guibutton>ボタンで開始します。AMCは光学マーク認識を開始して、四隅のマーカー位置を検出し、ボックスの位置を決定して、各ボックスの黒ピクセルの量を検出します。</para>
+        <para>そして、「<guilabel>試験実施後のマーク認識</guilabel>」セクションの<guilabel>自動</guilabel>ボタンで開いたダイアログから、スキャン画像ファイルをすべて選択したのち、このダイアログの<guibutton>OK</guibutton>ボタンで開始します。AMCは光学マーク認識を開始して、四隅のマーカー位置を検出し、ボックスの位置を決定して、各ボックスの黒ピクセルの量を検出します。</para>
 
         <para>各ページの解析結果は<guilabel>診断</guilabel>セクションのリストに表示されます:</para>
 
@@ -3082,7 +3082,7 @@ Name :
     <sect2 id="gui.marks">
       <title>採点</title>
 
-      <para>GUIの<guilabel>採点</guilabel>タブでは、<guilabel>採点</guilabel>セクションでスキャンデータから受験者の得点を計算するとともに、受験者が記入したコードを読み取ります（<xref linkend="latex.codes"/>参照）。</para>
+      <para>GUIの<guilabel>採点</guilabel>タブでは、<guilabel>採点</guilabel>セクションでスキャン画像から受験者の得点を計算するとともに、受験者が記入したコードを読み取ります（<xref linkend="latex.codes"/>参照）。</para>
 
       <sect3 id="gui.marks.proc">
         <title>採点処理</title>
@@ -3803,7 +3803,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
     <sect2 id="gui.annotate">
       <title>採点記入</title>
 
-      <para><guibutton>採点記入</guibutton>ボタンを押すと、答案への採点記入が始まります。各スキャンデータに、次のように記入されます（これらはデフォルトの記入書式で、設定で変更できます）:</para>
+      <para><guibutton>採点記入</guibutton>ボタンを押すと、答案への採点記入が始まります。各スキャン画像に、次のように記入されます（これらはデフォルトの記入書式で、設定で変更できます）:</para>
 
       <itemizedlist>
         <listitem>
@@ -3974,7 +3974,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
 
        <para>
-        <command>スキャンデータの変換</command>
+        <command>スキャン画像の変換</command>
       </para>
 
       <itemizedlist>
@@ -3982,7 +3982,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
         <listitem><para>黒&amp;白ピクセル判別閾値: 0.60</para></listitem>
 
-        <listitem><para>スキャンデータから赤色を除去: オフ</para></listitem>
+        <listitem><para>スキャン画像から赤色を除去: オフ</para></listitem>
 
         <listitem><para>変換を強制: オフ</para></listitem>
       </itemizedlist>
@@ -4877,7 +4877,7 @@ Moniuszko;Stanisław;003</programlisting>
       <refnamediv>
         <refname>AMC-analyse</refname>
 
-        <refpurpose>AMC選択式試験問題のスキャンデータから自動マーク認識する</refpurpose>
+        <refpurpose>AMC選択式試験問題のスキャン画像から自動マーク認識する</refpurpose>
       </refnamediv>
 
       <refsynopsisdiv>
@@ -4906,7 +4906,7 @@ Moniuszko;Stanisław;003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-analyse.pl</command>コマンドは、AMC選択式試験問題の答案用紙のスキャンデータから自動マーク認識を実行します。<command>AMC-analyse.pl</command>を呼び出す前に、<citerefentry>
+        <para><command>AMC-analyse.pl</command>コマンドは、AMC選択式試験問題の答案用紙のスキャン画像から自動マーク認識を実行します。<command>AMC-analyse.pl</command>を呼び出す前に、<citerefentry>
             <refentrytitle>AMC-prepare</refentrytitle>
 
             <manvolnum>1</manvolnum>
@@ -4978,7 +4978,7 @@ Moniuszko;Stanisław;003</programlisting>
             <replaceable>threshold</replaceable></option></term>
 
             <listitem>
-              <para>このパラメータはグレースケールのスキャンデータを白黒に変換する際に使用されます。値を大きくするとより多くのピクセルが黒とみなされ、値を小さくするとより多くのピクセルが白とみなされます。閾値は0と1の間でなければなりません。デフォルト値は0.6です。</para>
+              <para>このパラメータはグレースケールのスキャン画像を白黒に変換する際に使用されます。値を大きくするとより多くのピクセルが黒とみなされ、値を小さくするとより多くのピクセルが白とみなされます。閾値は0と1の間でなければなりません。デフォルト値は0.6です。</para>
             </listitem>
           </varlistentry>
 
@@ -4986,7 +4986,7 @@ Moniuszko;Stanisław;003</programlisting>
             <term><option>--ignore-red</option></term>
 
             <listitem>
-              <para>このオプションを用いると、カラースキャンデータの赤チャネルのみ使用されます。これにより、スキャンデータ上の赤色で記入されたものはすべて無視されます。ボックスが赤で印刷されている場合に有用です。</para>
+              <para>このオプションを用いると、カラースキャン画像の赤チャネルのみ使用されます。これにより、スキャン画像上の赤色で記入されたものはすべて無視されます。ボックスが赤で印刷されている場合に有用です。</para>
             </listitem>
           </varlistentry>
 
@@ -4995,7 +4995,7 @@ Moniuszko;Stanisław;003</programlisting>
             <replaceable>tol</replaceable></option></term>
 
             <listitem>
-              <para>スキャンデータの四隅にあるマーカーを検出する際の許容度を定義します。マーカーの検出には、目標サイズ<replaceable>target</replaceable>（印刷とスキャンが完璧であった場合のマーカーの正確なサイズ）に<emphasis>近い</emphasis>サイズの、黒い連結領域を探します。<replaceable>tol</replaceable>が単純な実数の場合、サイズが近いと判断されるのは(1-<replaceable>tol</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tol</replaceable>)*<replaceable>target</replaceable> までの範囲です。<replaceable>tol</replaceable>が<quote><replaceable>tinf</replaceable>,<replaceable>tsup</replaceable></quote>の形式（<replaceable>tinf</replaceable>と<replaceable>tsup</replaceable>は実数）の場合は(1-<replaceable>tinf</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tsup</replaceable>)*<replaceable>target</replaceable> までの範囲です。標準値は0.2です。</para>
+              <para>スキャン画像の四隅にあるマーカーを検出する際の許容度を定義します。マーカーの検出には、目標サイズ<replaceable>target</replaceable>（印刷とスキャンが完璧であった場合のマーカーの正確なサイズ）に<emphasis>近い</emphasis>サイズの、黒い連結領域を探します。<replaceable>tol</replaceable>が単純な実数の場合、サイズが近いと判断されるのは(1-<replaceable>tol</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tol</replaceable>)*<replaceable>target</replaceable> までの範囲です。<replaceable>tol</replaceable>が<quote><replaceable>tinf</replaceable>,<replaceable>tsup</replaceable></quote>の形式（<replaceable>tinf</replaceable>と<replaceable>tsup</replaceable>は実数）の場合は(1-<replaceable>tinf</replaceable>)*<replaceable>target</replaceable>から(1+<replaceable>tsup</replaceable>)*<replaceable>target</replaceable> までの範囲です。標準値は0.2です。</para>
             </listitem>
           </varlistentry>
 
@@ -5012,7 +5012,7 @@ Moniuszko;Stanisław;003</programlisting>
             <replaceable>copy_id</replaceable></option></term>
 
             <listitem>
-              <para>このオプションは<option>--multiple</option>と共に使用されます。スキャンごとの複製番号が<replaceable>copy_id</replaceable>から開始し、引数で指定したスキャンデータと同じ順序で割り当てられます。</para>
+              <para>このオプションは<option>--multiple</option>と共に使用されます。スキャンごとの複製番号が<replaceable>copy_id</replaceable>から開始し、引数で指定したスキャン画像と同じ順序で割り当てられます。</para>
             </listitem>
           </varlistentry>
 
@@ -5940,9 +5940,9 @@ Moniuszko;Stanisław;003</programlisting>
         </refsect2>
 
         <refsect2>
-          <title>スキャンデータ埋込み用オプション</title>
+          <title>スキャン画像埋込み用オプション</title>
 
-          <para>スキャンデータが存在する場合、採点記入済PDFファイルに埋め込まれます。以下のオプションは埋め込むスキャンデータの品質を制御し、ファイルサイズを縮小できるようにします。</para>
+          <para>スキャン画像が存在する場合、採点記入済PDFファイルに埋め込まれます。以下のオプションは埋め込むスキャン画像の品質を制御し、ファイルサイズを縮小できるようにします。</para>
 
           <variablelist>
             <varlistentry>
@@ -5950,7 +5950,7 @@ Moniuszko;Stanisław;003</programlisting>
               <replaceable>maxsize</replaceable></option></term>
 
               <listitem>
-                <para>スキャンデータの最大サイズをピクセル単位で（<literal><replaceable>width</replaceable>x<replaceable>height</replaceable></literal>の形式で）設定します。デフォルト値は空で、この場合は上限はありません。指定したサイズより大きいスキャンデータは採点記入済ファイルに埋め込む前に縮小されます。</para>
+                <para>スキャン画像の最大サイズをピクセル単位で（<literal><replaceable>width</replaceable>x<replaceable>height</replaceable></literal>の形式で）設定します。デフォルト値は空で、この場合は上限はありません。指定したサイズより大きいスキャン画像は採点記入済ファイルに埋め込む前に縮小されます。</para>
               </listitem>
             </varlistentry>
 
