@@ -83,6 +83,7 @@ for my $f (@fichiers) {
 	    my $tar = Archive::Tar->new;
 
 	    $tar->add_data("$code_name.$ext",encode_utf8($ex),$tar_opts);
+            $tar->chmod("$code_name.$ext",'0644');
 	    $tar->add_data("description.xml",
 			   encode_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <description>
@@ -90,7 +91,8 @@ for my $f (@fichiers) {
   <text>'.$desc.'</text>
 </description>
 '),$tar_opts
-			   );
+                          );
+            $tar->chmod("description.xml",'0644');
 	    my $opts='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <projetAMC>
   <texsrc>%PROJET/'.$code_name.'.'.$ext.'</texsrc>
@@ -106,7 +108,7 @@ for my $f (@fichiers) {
 ';
 	    $tar->add_data("options.xml",
 			   encode_utf8($opts),$tar_opts);
-
+            $tar->chmod("options.xml",'0644');
 	    $tar->write("$rep/$code_name.tgz", COMPRESS_GZIP);
 
 	    print LOG "$rep/$code_name.tgz\n" if($liste);

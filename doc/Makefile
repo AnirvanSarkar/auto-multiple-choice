@@ -79,6 +79,8 @@ html/index.html: FORCE
 	date > $@
 
 %.tgz: %.d
+	find $< -type d -exec chmod 0755 '{}' \;
+	find $< -type f -exec chmod 0644 '{}' \;
 	tar cn -C $< $(TAR_REPRODUCIBLE_ARGS) -O . | gzip $(GZIP_REPRODUCIBLE_ARGS) -c > $@
 
 FORCE: ;
