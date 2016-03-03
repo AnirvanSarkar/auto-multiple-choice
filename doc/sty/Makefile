@@ -35,7 +35,7 @@ all: FORCE
 	$(MAKE) postclean
 
 sample-%.datetex.in: sample-%.tex
-	perl -pe 's!\\begin{document}!\\begin{document}\\pdfinfo{/CreationDate (D:@/PACKAGE_V_PDFDATE/@) /ModDate (D:@/PACKAGE_V_PDFDATE/@)}!;' < $< > $@
+	perl -pe 's!\\begin\{document\}!\\begin{document}\\pdfinfo{/CreationDate (D:@/PACKAGE_V_PDFDATE/@) /ModDate (D:@/PACKAGE_V_PDFDATE/@)}!;' < $< > $@
 
 sample-%.datetex: sample-%.datetex.in
 	$(MAKE) -C ../.. doc/sty/$@
