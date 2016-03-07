@@ -4142,55 +4142,49 @@ Nom et prénom :
         distribuées.</para>
       </important>
 
-      <sect3 id="gui.advice">
-        <title>Recommandations</title>
+      <para>Il est préférable que les étudiants utilisent un stylo noir ou
+      bleu ou un crayon à papier de type B ou HB.</para>
 
-        <para>Il est préférable que les étudiants utilisent un stylo noir ou
-        bleu ou un crayon à papier de type B ou HB.</para>
-      </sect3>
+      <para>Suivant les situations, on peut demander aux étudiants de
+      <emphasis>cocher</emphasis> ou de <emphasis>noircir
+      complètement</emphasis> les cases.</para>
 
       <sect3 id="gui.correct">
-        <title>Correction des cases pendant l'épreuve</title>
+        <title>Cases cochées</title>
 
-        <sect4 id="gui.correct.tick">
-          <title>Les élève cochent les cases</title>
+        <para>Dans ce cas, les étudiants peuvent effacer la/les case(s) avec
+        la gomme ou la recouvrir de ruban correcteur mais ne <emphasis>doivent
+        pas essayer d'en redessiner les contours</emphasis>. En effet, si ils
+        redessinent les contours de manière approximative, ces traits pourront
+        par erreur se situer à l'intérieur de la case et pourrront ainsi être
+        confondus avec une case cochée.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Ils peuvent effacer la/les case(s) avec la gomme ou la
-              recouvrir de ruban correcteur mais ne <emphasis>doivent pas
-              redessiner les contours</emphasis>.</para>
-            </listitem>
+        <para>Vous pouvez également permettre aux étudiants de corriger une
+        case cochée par erreur en la noircissant entièrement. Dans ce cas,
+        donnez une valeur inférieure à 1 (qui restera tout de même proche de
+        1) à la variable <guilabel>seuil de noirceur supérieur</guilabel>
+        (menu <guimenu>Préférences</guimenu>, onglet
+        <guilabel>Projet</guilabel>). Une case dont la proportion de noir est
+        comprise entre le <guilabel>seuil de noirceur</guilabel> et le
+        <guilabel>seuil de noirceur supérieur</guilabel> sera considérée comme
+        cochée. Si cette proportion dépasse le <guilabel>seuil de noirceur
+        supérieur</guilabel>, la case sera considérér comme non-cochée.</para>
+      </sect3>
 
-            <listitem>
-              <para>Ils peuvent noircir complétement une ou plusieurs cases de
-              réponses pour indiquer à AMC qu'elles ne doivent pas être prise
-              en compte comme <emphasis>bonne réponses</emphasis>.</para>
+      <sect3>
+        <title>Cases noircies</title>
 
-              <para>Vous devez indiquer une valeur proche de 1 à la variable
-              <command>Default upper darkness threshold</command> (voir <xref
-              endterm="preferences.defaut.titre"
-              linkend="preferences.defaut"/>).</para>
-            </listitem>
-          </itemizedlist>
-        </sect4>
+        <para>Dans le cas où les lettres (ou chiffres) référençant les
+        réponses sont inscrites à l'intérieur des cases, vous devez donner la
+        consigne aux étudiants de noircir complètement les cases, car AMC ne
+        sait pas faire la différence entre une lettre écrite dans une case et
+        une case cochée.</para>
 
-        <sect4 id="gui.correct.fill">
-          <title>Les élève colorient les cases</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>Ils <emphasis>doivent</emphasis> effacer la/les case(s)
-              avec la gomme ou la recouvrir de ruban correcteur mais ne
-              <emphasis>doivent pas redessiner les contours</emphasis>.</para>
-            </listitem>
-          </itemizedlist>
-
-          <para>Vous devez laisser la valeur 1 à la variable <command>Default
-          upper darkness threshold</command> (voir <xref
-          endterm="preferences.defaut.titre"
-          linkend="preferences.defaut"/>).</para>
-        </sect4>
+        <para>Les étudiants peuvent effacer la/les case(s) avec la gomme ou la
+        recouvrir de ruban correcteur, mais n'ont pas d'autre possibilité de
+        corriger une case cochée par erreur. Vous devrez bien entendu laisser
+        la valeur du <guilabel>seuil de noirceur supérieur</guilabel> à
+        1.</para>
       </sect3>
     </sect2>
 
