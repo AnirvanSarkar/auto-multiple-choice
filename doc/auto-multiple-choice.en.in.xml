@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -138,7 +138,7 @@
         </listitem>
 
         <listitem>
-          <para>ImageMagick</para>
+          <para>image processing libraries ImageMagick and OpenCV</para>
         </listitem>
 
         <listitem>
@@ -1666,8 +1666,10 @@ Durée : 10 minutes.
           </listitem>
 
           <listitem>
-            <para><option>noshufflegroups</option>: stops the automatic shuffling of
-            the group for the test (see <xref endterm="Groups.questions.title" linkend="Groups.questions"/>)</para>
+            <para><option>noshufflegroups</option>: stops the automatic
+            shuffling of the group for the test (see <xref
+            endterm="Groups.questions.title"
+            linkend="Groups.questions"/>)</para>
           </listitem>
 
           <listitem>
@@ -1703,9 +1705,9 @@ Durée : 10 minutes.
           </listitem>
 
           <listitem>
-            <para><option>init</option> : initializes the random generator from time.
-            <emphasis> This option is only for testing: don’t use it for a
-            real exam!</emphasis></para>
+            <para><option>init</option> : initializes the random generator
+            from time. <emphasis> This option is only for testing: don’t use
+            it for a real exam!</emphasis></para>
           </listitem>
 
           <listitem>
@@ -1730,19 +1732,23 @@ Durée : 10 minutes.
 
           <listitem>
             <para><option>fullgroups</option> : cancels the use of the
-            optional parameter of  <command>\insertgroup</command>
-            and <command>\copygroup</command>, so that each 
-            group is always fully inserted and fully copied.
-            (see <xref endterm="Groups.questions.title" linkend="Groups.questions"/>)</para>
+            optional parameter of <command>\insertgroup</command> and
+            <command>\copygroup</command>, so that each group is always fully
+            inserted and fully copied. (see <xref
+            endterm="Groups.questions.title"
+            linkend="Groups.questions"/>)</para>
           </listitem>
 
           <listitem>
-            <para><option>storebox</option> :If you choose to change the boxes' shape
-            (square by default, see <xref endterm="box.style.title" linkend="box.style"/>)
-            as ovals or circles, you may communicate this option to automultiplechoice to
-            use <option>\storebox</option>  rather than <option>\savebox</option>
-            to store the design of the boxes.</para>
-            <para><package>\storebox</package> must be loaded in preamble.</para>
+            <para><option>storebox</option> :If you choose to change the
+            boxes' shape (square by default, see <xref
+            endterm="box.style.title" linkend="box.style"/>) as ovals or
+            circles, you may communicate this option to automultiplechoice to
+            use <option>\storebox</option> rather than
+            <option>\savebox</option> to store the design of the boxes.</para>
+
+            <para><package>\storebox</package> must be loaded in
+            preamble.</para>
           </listitem>
 
           <listitem>
@@ -1823,8 +1829,9 @@ Durée : 10 minutes.
 
         <important>
           <para>Do not nest a question in a another environment question
-          otherwise the notes' export  will be incomplete
-          (see <xref endterm="sec.export.notes.title" linkend="sec.export.notes"/>).</para>
+          otherwise the notes' export will be incomplete (see <xref
+          endterm="sec.export.notes.title"
+          linkend="sec.export.notes"/>).</para>
         </important>
 
         <para>To keep the original order of the answers and prevent shuffling
@@ -1858,8 +1865,7 @@ Durée : 10 minutes.
         account in the grading, one uses the <code>\QuestionIndicative</code>
         command, as in the following example:</para>
 
-        <para>
-          <programlisting>\begin{question}{difficulty}\QuestionIndicative
+        <para><programlisting>\begin{question}{difficulty}\QuestionIndicative
   \scoring{auto=0,v=-1,e=-2}
   Did you find this class easy or difficult? Please answer on a scale from 0 (very difficult) to 5 
 (very easy).
@@ -1871,14 +1877,15 @@ Durée : 10 minutes.
     \correctchoice{4}
     \correctchoice{5}
   \end{choiceshoriz}
-\end{question}</programlisting>
-        </para>
+\end{question}</programlisting></para>
 
- <sect4 id="latex.lastchoice">
-      <title>Last choice</title>
+        <sect4 id="latex.lastchoice">
+          <title>Last choice</title>
 
-      <para> You may force AMC to let  one or more answers as last choices with the command <command>\lastchoices</command>.</para>
-        <programlisting>
+          <para>You may force AMC to let one or more answers as last choices
+          with the command <command>\lastchoices</command>.</para>
+
+          <programlisting>
         \begin{question}{color}
         Which color?
         \begin{choiceshoriz}
@@ -1904,7 +1911,7 @@ Durée : 10 minutes.
         \end{choiceshoriz}
         \end{questionmult}
         </programlisting>
-      </sect4>
+        </sect4>
       </sect3>
 
       <sect3 id="latex.explain">
@@ -1918,8 +1925,7 @@ Durée : 10 minutes.
 
         <para>Here is a simple example:</para>
 
-        <para>
-          <programlisting>
+        <para><programlisting>
 \begin{question}{explanation}
   Which has the highest elevation among the following?
   \begin{choices}
@@ -1930,8 +1936,7 @@ Durée : 10 minutes.
   \end{choices}
   \explain{Sagarmatha which literally means `Head of sky' is the native name of
            Mount Everest, the highest mountain in the world.}
-\end{question}</programlisting>
-        </para>
+\end{question}</programlisting></para>
 
         <note>
           <para>The <command>explain</command> command can be used inside
@@ -1950,8 +1955,7 @@ Durée : 10 minutes.
         command before the <command>\explain</command> command as in the
         following example:</para>
 
-        <para>
-          <programlisting>
+        <para><programlisting>
 \begin{question}{elevation}
   Which has the highest elevation among the following?
   \begin{choices}
@@ -1986,8 +1990,7 @@ Durée : 10 minutes.
   \end{choices}
   \explain{Aconcagua is located in the Andes mountain range while Mont Blanc
                  is located in the Alps.}
-\end{questionmult}</programlisting>
-        </para>
+\end{questionmult}</programlisting></para>
 
         <para>This will now print <emphasis>Explanation: </emphasis> before
         the explanations of first and third question but <emphasis>Reason:
@@ -2008,8 +2011,7 @@ Durée : 10 minutes.
         command was defined in order to prevent this phenomenon, by embedding
         each answer into a box. Here is an example of use:</para>
 
-        <para>
-          <programlisting>\begin{question}{two columns}
+        <para><programlisting>\begin{question}{two columns}
   What is a bird ?
   \begin{multicols}{2}\AMCBoxedAnswers
     \begin{choices}
@@ -2019,16 +2021,13 @@ Durée : 10 minutes.
       \wrongchoice{It is a steam machine devised to seal cans at high speed.}
     \end{choices}
   \end{multicols}
-\end{question}</programlisting>
-        </para>
+\end{question}</programlisting></para>
 
         <para>Let us note that it is also possible to parameterize the
         vertical space between two answer blocks, thanks to the dimension
         <parameter>AMCinterBrep</parameter>:</para>
 
-        <para>
-          <programlisting>\AMCinterBrep=.5ex</programlisting>
-        </para>
+        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
       </sect3>
 
       <sect3 id="latex.choices.space">
@@ -2038,9 +2037,7 @@ Durée : 10 minutes.
         vertical space between many answer blocks, thanks to the dimension
         <parameter>AMCinterIrep</parameter>:</para>
 
-        <para>
-          <programlisting>\AMCinterIrep=.75ex</programlisting>
-        </para>
+        <para><programlisting>\AMCinterIrep=.75ex</programlisting></para>
       </sect3>
 
       <sect3 id="marks.display.area">
@@ -2076,18 +2073,18 @@ Durée : 10 minutes.
 
           <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
 
-        <para>The variables <parameter>width</parameter>,
-        <parameter>height</parameter>, <parameter>depth</parameter> describe
-        the dimensions of the box marking and its location on the
-        sheet.</para>
+          <para>The variables <parameter>width</parameter>,
+          <parameter>height</parameter>, <parameter>depth</parameter> describe
+          the dimensions of the box marking and its location on the
+          sheet.</para>
 
-        <para>The <parameter>position</parameter> value may be equal to :
-        none, question, margin, margins.</para>
+          <para>The <parameter>position</parameter> value may be equal to :
+          none, question, margin, margins.</para>
 
-        <warning>
-          <para>Don't type one of those commands <emphasis> after</emphasis>
-          printing.</para>
-        </warning>
+          <warning>
+            <para>Don't type one of those commands <emphasis> after</emphasis>
+            printing.</para>
+          </warning>
         </sect4>
       </sect3>
 
@@ -2102,8 +2099,7 @@ Durée : 10 minutes.
         <para>One can put questions in a group one by one, as in the following
         example.</para>
 
-        <para>
-          <programlisting>\element{mygroup}{
+        <para><programlisting>\element{mygroup}{
   \begin{question}{easy}
     So, how much is one plus one?
     \begin{choiceshoriz}
@@ -2112,8 +2108,7 @@ Durée : 10 minutes.
       \wrongchoice{three}
     \end{choiceshoriz}
   \end{question}
-}</programlisting>
-        </para>
+}</programlisting></para>
 
         <important>
           <para>The formation of the group, using the
@@ -2205,10 +2200,10 @@ Durée : 10 minutes.
           </listitem>
 
           <listitem>
-            <para><code>\insertgroupfrom[n]{groupname}{i}</code> 
-            The command does the same as <code>\insertgroup[n]{groupname}</code>,
-            starting from element at index <replaceable>i</replaceable>
-            (the first element has index 0).</para>
+            <para><code>\insertgroupfrom[n]{groupname}{i}</code> The command
+            does the same as <code>\insertgroup[n]{groupname}</code>, starting
+            from element at index <replaceable>i</replaceable> (the first
+            element has index 0).</para>
           </listitem>
 
           <listitem>
@@ -2242,13 +2237,13 @@ Durée : 10 minutes.
 
         <itemizedlist>
           <listitem>
-          <para><code>\copygroupfrom[n]{groupA}{groupB}{i}</code>
-          The command does the same as <code>\copygroup[n]{groupA}{groupB}</code>
-          starting from element at index <replaceable>i</replaceable>
-          (the first element has index 0).</para>
+            <para><code>\copygroupfrom[n]{groupA}{groupB}{i}</code> The
+            command does the same as
+            <code>\copygroup[n]{groupA}{groupB}</code> starting from element
+            at index <replaceable>i</replaceable> (the first element has index
+            0).</para>
           </listitem>
         </itemizedlist>
-
       </sect3>
 
       <sect3 id="latex.page">
@@ -2309,22 +2304,23 @@ Durée : 10 minutes.
         <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
 \AMCidsPosition{pos=top}</programlisting>
 
-      <warning>
-        <para>Do not load package <command>pgfpages</command> or any other layout applications</para>
-      </warning>
+        <warning>
+          <para>Do not load package <command>pgfpages</command> or any other
+          layout applications</para>
+        </warning>
       </sect3>
 
       <sect3 id="box.style">
         <title id="box.style.title">Check-box presentation style</title>
 
-        <para>The <command>\AMCboxStyle</command>  (new name for the
-        <command>\AMCboxDimensions</command> command which
-        still compatible with the options) allows one to modify one or several
-        dimensions of the check-boxes.</para>
+        <para>The <command>\AMCboxStyle</command> (new name for the
+        <command>\AMCboxDimensions</command> command which still compatible
+        with the options) allows one to modify one or several dimensions of
+        the check-boxes.</para>
 
         <para>Default values are :</para>
-  
-       <programlisting>\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}</programlisting> 
+
+        <programlisting>\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}</programlisting>
 
         <itemizedlist>
           <listitem>
@@ -2357,24 +2353,25 @@ Durée : 10 minutes.
             <para><option>down</option> controls by how much boxes are pushed
             down.</para>
           </listitem>
-  
-         <listitem>
-            <para><option>outsidesep</option> for the distance between the box
-            and the letter when printed outside the box when the <option>outsidebox</option>
-            option is choosen (see <xref endterm="sec.package.options.title"
-          linkend="sec.package.options"/>). </para>
-          </listitem>
-  
-         <listitem>
-            <para><option>cross=true</option> only displayed on the answer sheet, shows
-            the good answer with a cross instead of filling in black the box</para>
-         </listitem> 
 
-        <listitem>
-          <para><option>crossrule=1.5pt</option> only displayed on the answer sheet, is the thickness of the cross.
-          </para>
-        </listitem>  
-  
+          <listitem>
+            <para><option>outsidesep</option> for the distance between the box
+            and the letter when printed outside the box when the
+            <option>outsidebox</option> option is choosen (see <xref
+            endterm="sec.package.options.title"
+            linkend="sec.package.options"/>).</para>
+          </listitem>
+
+          <listitem>
+            <para><option>cross=true</option> only displayed on the answer
+            sheet, shows the good answer with a cross instead of filling in
+            black the box</para>
+          </listitem>
+
+          <listitem>
+            <para><option>crossrule=1.5pt</option> only displayed on the
+            answer sheet, is the thickness of the cross.</para>
+          </listitem>
         </itemizedlist>
 
         <para>To obtain smaller boxes, one can e.g. use the command</para>
@@ -2422,22 +2419,28 @@ Durée : 10 minutes.
 \AMCboxColor{amcboxcolor}</programlisting>
 
         <note>
-        <para>
-        The switch used to tick or not correct answers is <command>\AMC@correc</command>.
-        You can define a command to set it to true, just after the \begin{document}.
-        </para>
-       <programlisting>
+          <para>The switch used to tick or not correct answers is
+          <command>\AMC@correc</command>. You can define a command to set it
+          to true, just after the \begin{document}.</para>
+
+          <programlisting>
         \makeatletter
         \def\AMCforcecorrect{\AMC@correctrue}
         \makeatother</programlisting>
-        <para>and then use it for a particular question (enclose in braces to limit its effect to one question):</para>
-        <programlisting>
+
+          <para>and then use it for a particular question (enclose in braces
+          to limit its effect to one question):</para>
+
+          <programlisting>
         {\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
          .....
           \end{questionmult}
         }
         </programlisting>
-        <para>You should tell AMC not to count points for this question (with a 0-point scoring, or using <command>\QuestionIndicative</command>).</para>
+
+          <para>You should tell AMC not to count points for this question
+          (with a 0-point scoring, or using
+          <command>\QuestionIndicative</command>).</para>
         </note>
       </sect3>
 
@@ -2448,9 +2451,7 @@ Durée : 10 minutes.
         the LaTeX command <command>AMCbeginQuestion</command>, whose default
         definition is the following:</para>
 
-        <para>
-          <programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting>
-        </para>
+        <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
 
         <para>The first parameter transmitted to this command is the number of
         the question to be displayed. The second parameter contains
@@ -2459,17 +2460,13 @@ Durée : 10 minutes.
         can be modified: its goal is to distinguish multiple questions from
         the others. By default, it displays a club.</para>
 
-        <para>
-          <programlisting>\def\multiSymbole{$\clubsuit$}</programlisting>
-        </para>
+        <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
 
         <para>Finally, one can modify the number of the next question with the
         <code>\AMCnumero command</code>. At the beginning of each realization
         of the test, a call to</para>
 
-        <para>
-          <programlisting>\AMCnumero{1}</programlisting>
-        </para>
+        <para><programlisting>\AMCnumero{1}</programlisting></para>
 
         <para>is performed, but this command can be used at any place.</para>
 
@@ -2479,6 +2476,7 @@ Durée : 10 minutes.
           hide the number for a particular question and do not want to
           increase the number, use <command>\AMCquestionNumberfalse</command>
           command as in the following example:</para>
+
           <programlisting>{
   \AMCquestionNumberfalse
   \def\AMCbeginQuestion#1#2{}
@@ -2489,15 +2487,19 @@ Durée : 10 minutes.
         </note>
 
         <warning>
-       <para>
-       With nominative sheets (see <xref endterm="Nominative.sheets.title"
-          linkend="Nominative.sheets"/>), set up it with a new 
-          command in the preamble.
-       </para> 
-      <informalexample><programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
-      </programlisting></informalexample>
-      <para>and use it when you need it. (Do not forget to type inside brackets to limit the effect) :</para>
-      <programlisting>
+          <para>With nominative sheets (see <xref
+          endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>),
+          set up it with a new command in the preamble.</para>
+
+          <informalexample>
+            <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
+      </programlisting>
+          </informalexample>
+
+          <para>and use it when you need it. (Do not forget to type inside
+          brackets to limit the effect) :</para>
+
+          <programlisting>
 {\Iswitch
 \begin{question}{Number}
 
@@ -2544,27 +2546,29 @@ Choose the greater.
         (<code>I</code>).</para>
       </sect3>
 
-    <sect3 id="latex.layout">
+      <sect3 id="latex.layout">
         <title>Layout</title>
 
         <sect4 id="latex.layout.margins">
           <title>Margins</title>
-           <para>Margins were chosen so that the document prints correctly on
-           most printers. If your printer reduces, you can use the command
-            <command>geometry</command> from laTex package
-            <package>geometry</package>. For example, In order to narrow 
-            the top margin's copies, we can use <code>\geometry{top=3cm}</code> instead
-            the default value 3.5cm, just before <code>\begin{document}</code>.</para>
-            </sect4>
-  
-        <sect4 id="latex.layout.npages">
-         <title>Number of pages</title>
-          <para>AMC automatically handles the number of pages for each subject.
-          You can choose to fix a identical number of pages for each subject
-          with the command <command>\AMCaddpagesto{integer}</command>
-          to type before the commande <command>\clearpage</command> .</para>
-            </sect4>  
 
+          <para>Margins were chosen so that the document prints correctly on
+          most printers. If your printer reduces, you can use the command
+          <command>geometry</command> from laTex package
+          <package>geometry</package>. For example, In order to narrow the top
+          margin's copies, we can use <code>\geometry{top=3cm}</code> instead
+          the default value 3.5cm, just before
+          <code>\begin{document}</code>.</para>
+        </sect4>
+
+        <sect4 id="latex.layout.npages">
+          <title>Number of pages</title>
+
+          <para>AMC automatically handles the number of pages for each
+          subject. You can choose to fix a identical number of pages for each
+          subject with the command <command>\AMCaddpagesto{integer}</command>
+          to type before the commande <command>\clearpage</command> .</para>
+        </sect4>
       </sect3>
 
       <sect3 id="latex.style.separate">
@@ -2596,7 +2600,7 @@ Choose the greater.
 </programlisting>
           </listitem>
         </orderedlist>
-  
+
         <para>These definitions have to be inserted just after
         <code>\begin{document}</code> in the LaTeX file.</para>
       </sect3>
@@ -2605,14 +2609,13 @@ Choose the greater.
         <title>Code acquisition</title>
 
         <para>Code acquisition can be easily performed thanks to the LaTeX
-        command <command>\AMCcode</command>, for instance to allow each student
-        to enter her/his student number by herself/himself on the answer
-        sheet. The two arguments of this command are a code/question
+        command <command>\AMCcode</command>, for instance to allow each
+        student to enter her/his student number by herself/himself on the
+        answer sheet. The two arguments of this command are a code/question
         identifier, and the number of digits to be used by the code. One can
         e.g. use the following header</para>
 
-        <para>
-          <programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
 \begin{minipage}[b]{6.5cm}
 $\longleftarrow{}$\hspace{0pt plus 1cm} please encode your student number below,
 and write your first and last names below.
@@ -2631,8 +2634,7 @@ and write your first and last names below.
   }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
 
 }
-</programlisting>
-        </para>
+</programlisting></para>
 
         <para>If the <option>separateanswersheet</option> option is used, the
         <command>\AMCcode</command> command has to be placed after the
@@ -2921,9 +2923,7 @@ and write your first and last names below.
         at the beginning of the document, and in any case outside the
         <command>onecopy</command> command):</para>
 
-        <para>
-          <programlisting>\AMCrandomseed{1527384}</programlisting>
-        </para>
+        <para><programlisting>\AMCrandomseed{1527384}</programlisting></para>
 
         <para>If the value that is assigned (to be chosen between 1 and
         4194303) is modified, then the shuffling will differ. Of course, one
@@ -2995,24 +2995,25 @@ and write your first and last names below.
         go on from one realization to the next one, which is clearly not
         desirable.</para>
 
-      <sect4 id="cleveref"><title>Using the package cleveref</title>
-      <para>This package sort in an ascending order the questions' numbers,
-      the questions' pages or the labels' pages (the documentation <ulink
-      url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>).</para>
-      <warning>
-          <para>This package must be loaded <emphasis>after</emphasis> the
-          package <package>automultiplechoice</package>.</para>
-      </warning>
+        <sect4 id="cleveref">
+          <title>Using the package cleveref</title>
 
-      <para>To use this package, a new command was created:
-      <command>\AMCstudentlabel</command>.
-          <programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{motor}}</programlisting>
-      <emphasis>led</emphasis>, <emphasis>lamp</emphasis>, <emphasis>motor</emphasis>
-      are the created labels to reference the questions with the command
-      \AMClabel{}.</para>
+          <para>This package sort in an ascending order the questions'
+          numbers, the questions' pages or the labels' pages (the
+          documentation <ulink
+          url="http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf">http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf</ulink>).</para>
 
-      </sect4>
+          <warning>
+            <para>This package must be loaded <emphasis>after</emphasis> the
+            package <package>automultiplechoice</package>.</para>
+          </warning>
 
+          <para>To use this package, a new command was created:
+          <command>\AMCstudentlabel</command>. <programlisting>\cref{\AMCstudentlabel{led},\AMCstudentlabel{lamp},\AMCstudentlabel{motor}}</programlisting>
+          <emphasis>led</emphasis>, <emphasis>lamp</emphasis>,
+          <emphasis>motor</emphasis> are the created labels to reference the
+          questions with the command \AMClabel{}.</para>
+        </sect4>
       </sect3>
 
       <sect3 id="AMCtext">
@@ -3054,7 +3055,7 @@ and write your first and last names below.
 
             <programlisting>\AMCtext{explain}{\textit{\textbf{Explanation: }}}</programlisting>
           </listitem>
-  
+
           <listitem>
             <para>You can also consider using commands like the following ones
             (here the second argument is set to the default English
@@ -3064,12 +3065,11 @@ and write your first and last names below.
 \AMCtext{message}{For your examination, preferably print documents
                   compiled from auto-multiple-choice.}</programlisting>
           </listitem>
-  
+
           <listitem>
             <para><code>\AMCsetFoot{<replaceable>\thepage</replaceable>}</code>
-            displays the page number in the footer. </para>
-          </listitem>  
-  
+            displays the page number in the footer.</para>
+          </listitem>
         </itemizedlist>
       </sect3>
 
@@ -3153,16 +3153,16 @@ and write your first and last names below.
     <sect2 id="latex.numerical">
       <title>Mathematical questions with randomized statements</title>
 
-        <para>First of all, you must set the random seed to be sure to get the
-        same result each time latex is run to compile the subject:</para>
+      <para>First of all, you must set the random seed to be sure to get the
+      same result each time latex is run to compile the subject:</para>
 
-        <para><programlisting>\FPseed=<replaceable>integer</replaceable>
+      <para><programlisting>\FPseed=<replaceable>integer</replaceable>
         </programlisting></para>
 
-        <note><para>
-         <replaceable>integer</replaceable> must be fixed, and not computed from date/time values.
-        </para>
-        </note>  
+      <note>
+        <para><replaceable>integer</replaceable> must be fixed, and not
+        computed from date/time values.</para>
+      </note>
 
       <sect3 id="latex.numerical.fp">
         <title>Using package fp</title>
@@ -3376,8 +3376,11 @@ respective parameters \VQa{} and \VQb{}.
                 digit and for the sign. If <code>false</code>, if some digits
                 has no ticked box, they will be set to zero. Defaults to
                 <code>false</code>.</para>
-                <warning><para>If one box, at least, is not ticked, the answer
-                will be considered as false.</para></warning>
+
+                <warning>
+                  <para>If one box, at least, is not ticked, the answer will
+                  be considered as false.</para>
+                </warning>
               </listitem>
             </varlistentry>
 
@@ -3530,12 +3533,15 @@ respective parameters \VQa{} and \VQb{}.
                 (value without the decimal point) for an answer to be said
                 <emphasis>approximative</emphasis> and be rewarded to
                 <code>scoreapprox</code> points (defaults to 0).</para>
-                <warning> <para>AMC handle all numbers (decimals included)
-               as integers before subtract and  compare with  <code>approx</code>
-               .</para></warning>
+
+                <warning>
+                  <para>AMC handle all numbers (decimals included) as integers
+                  before subtract and compare with <code>approx</code>
+                  .</para>
+                </warning>
               </listitem>
             </varlistentry>
-            </variablelist>
+          </variablelist>
 
           <para>You can set other default values (for the whole exam) for all
           these parameters using the command
@@ -3737,15 +3743,15 @@ Name :
           linkend="latex.numeric"/>)</para>
         </note>
       </sect3>
-      
-          <sect3 id="latex.pstricks">
+
+      <sect3 id="latex.pstricks">
         <title>Use PSTricks</title>
 
         <para>Load this package <emphasis>after</emphasis>
         <package>automuliplechoice</package>.</para>
 
-        <para>To use  <command>PSTricks</command>, vous have to configure
-        AMC : <menuchoice>
+        <para>To use <command>PSTricks</command>, vous have to configure AMC :
+        <menuchoice>
             <guimenu>Edit</guimenu>
 
             <guimenuitem>Preferences</guimenuitem>
@@ -3755,9 +3761,9 @@ Name :
             <guimenuitem>Default LaTex engine</guimenuitem>
 
             <guimenuitem>latex+dvipdf</guimenuitem>
-          </menuchoice> </para>
+          </menuchoice></para>
       </sect3>
-      </sect2>
+    </sect2>
   </sect1>
 
   <sect1 id="graphical-interface">
@@ -3904,21 +3910,24 @@ Name :
       separately (for example if copies contain multiple pages and when the
       printer allows to staple them together), we shall rather use the button
       <guibutton>Print copies</guibutton> after calculating the layout.</para>
-     </sect2>
+    </sect2>
 
     <sect2 id="gui.test">
       <title>Test</title>
-      <para>Let  the students pass the exam.</para>
-        <important>
+
+      <para>Let the students pass the exam.</para>
+
+      <important>
         <para>When the subject is printed and distributed, we may no more
         modify the <emphasis>work documents</emphasis> because they must
         remain identical to distributed copies.</para>
-      </important> 
-      
+      </important>
+
       <sect3 id="gui.advice">
         <title>Advices</title>
 
-        <para>It is preferable that students use a black or blue pen or B or HB  pencil.</para>
+        <para>It is preferable that students use a black or blue pen or B or
+        HB pencil.</para>
       </sect3>
 
       <sect3 id="gui.correct">
@@ -3928,20 +3937,20 @@ Name :
           <title>The student tick the boxes</title>
 
           <itemizedlist>
-            <listitem><para>
-            They can erase the box  or overlay a correction tape but
-            should not <emphasis>redrawing the box</emphasis>.
-            </para></listitem>
+            <listitem>
+              <para>They can erase the box or overlay a correction tape but
+              should not <emphasis>redrawing the box</emphasis>.</para>
+            </listitem>
 
             <listitem>
-              <para>
-              They can completely darken one or more boxes to indicate
-               to AMC that these answers should not be considered <emphasis>as correct</emphasis>.
-              </para>
-              <para>The variable <command>Default
-          upper darkness threshold</command> (see <xref
-          endterm="preferences.defaut.title"
-          linkend="preferences.defaut"/>). must be close to 1.</para>
+              <para>They can completely darken one or more boxes to indicate
+              to AMC that these answers should not be considered <emphasis>as
+              correct</emphasis>.</para>
+
+              <para>The variable <command>Default upper darkness
+              threshold</command> (see <xref
+              endterm="preferences.defaut.title"
+              linkend="preferences.defaut"/>). must be close to 1.</para>
             </listitem>
           </itemizedlist>
         </sect4>
@@ -3951,18 +3960,16 @@ Name :
 
           <itemizedlist>
             <listitem>
-              <para>
-            They <emphasis>must</emphasis> erase the box  or overlay a correction tape but
-            should not <emphasis>redrawing the box</emphasis>.
-              </para>
+              <para>They <emphasis>must</emphasis> erase the box or overlay a
+              correction tape but should not <emphasis>redrawing the
+              box</emphasis>.</para>
             </listitem>
           </itemizedlist>
 
-          <para>The variable <command>Default upper darkness threshold</command> )
-          must be equal to 1.</para>
+          <para>The variable <command>Default upper darkness
+          threshold</command> ) must be equal to 1.</para>
         </sect4>
-      </sect3> 
-      
+      </sect3>
     </sect2>
 
     <sect2 id="gui.capture">
@@ -4393,16 +4400,16 @@ Name :
         </informaltable>
 
         <note>
-          <para>haut=x has been written as d=x-N, p=0 </para>
+          <para>haut=x has been written as d=x-N, p=0</para>
         </note>
 
         <important>
-          <para>If you use the parameter <code>default</code>, you have to type
-          the variable's value <replaceable>XXX</replaceable> inside the scoring
-          of the question, see below.</para>
+          <para>If you use the parameter <code>default</code>, you have to
+          type the variable's value <replaceable>XXX</replaceable> inside the
+          scoring of the question, see below.</para>
         </important>
 
-          <programlisting>
+        <programlisting>
 \begin{questionmult}{03}\scoring{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
 Name an important gas in the air and its percentage.
 \begin{multicols}{4}
@@ -4420,13 +4427,11 @@ Name an important gas in the air and its percentage.
 \end{multicols}
 \end{questionmult}
 </programlisting>
- 
 
         <note>
-           <para> If you specify <code>MAX = 3</code> to a matter that
-           report 4 points, a student will have a score of 4/3 in this
-           question  </para>
-         </note>
+          <para>If you specify <code>MAX = 3</code> to a matter that report 4
+          points, a student will have a score of 4/3 in this question</para>
+        </note>
 
         <para>The default scale for a simple question is
         <code>e=0,v=0,b=1,m=0</code>, which gives one point for a good
@@ -4436,9 +4441,9 @@ Name an important gas in the air and its percentage.
         checked or wrong box not checked).</para>
 
         <note>
-          <para> You may assign the value <code>set.XXX</code> 
-          to  the variables  b and m.</para>
-          </note>
+          <para>You may assign the value <code>set.XXX</code> to the variables
+          b and m.</para>
+        </note>
 
         <para>The LaTeX command <command>\scoring</command> can also be used
         outside question definitions, for whole examination parameters:</para>
@@ -4625,12 +4630,12 @@ Name:
         all perl operators.</para>
 
         <note>
-           <para>The operators are : &gt; greater, &gt;= greater or equal, &lt; lesser, &lt;= lesser or equal, == equal, != no equal </para>
+          <para>The operators are : &gt; greater, &gt;= greater or equal, &lt;
+          lesser, &lt;= lesser or equal, == equal, != no equal</para>
         </note>
 
-        <note><para>
-           Test function is 
-          <programlisting> ( test ? if true: if false)</programlisting></para>
+        <note>
+          <para>Test function is <programlisting> ( test ? if true: if false)</programlisting></para>
         </note>
 
         <para>Other variables can also be used:</para>
@@ -4711,50 +4716,49 @@ Name:
           </listitem>
         </orderedlist>
       </sect3>
-    
-        <sect3 id="calculing.final.mark">
+
+      <sect3 id="calculing.final.mark">
         <title>Calculing final mark</title>
 
-        <para>
-          You can configure final mark computation using
-        <menuchoice>
-       <guimenu>Edit</guimenu><guisubmenu>Preferences</guisubmenu>
-       <guimenuitem>Project</guimenuitem></menuchoice>
-       <itemizedlist>
-       <listitem><para>Grain : choose the rounding value</para></listitem>
-       <listitem><para>Rounding type : lower, normal, greater</para></listitem>
-       </itemizedlist>
-        </para>
-        
+        <para>You can configure final mark computation using <menuchoice>
+            <guimenu>Edit</guimenu>
+
+            <guisubmenu>Preferences</guisubmenu>
+
+            <guimenuitem>Project</guimenuitem>
+          </menuchoice> <itemizedlist>
+            <listitem>
+              <para>Grain : choose the rounding value</para>
+            </listitem>
+
+            <listitem>
+              <para>Rounding type : lower, normal, greater</para>
+            </listitem>
+          </itemizedlist></para>
       </sect3>
 
       <sect3 id="correc.test">
         <title>Correct the scoring errors</title>
 
-        <para>You may, even after the test, change the scoring.
-       However, you must not <emphasis>never</emphasis> update the
-        document. It is better to open the file with a  text editor to make
-        changes and save it.</para>
+        <para>You may, even after the test, change the scoring. However, you
+        must not <emphasis>never</emphasis> update the document. It is better
+        to open the file with a text editor to make changes and save
+        it.</para>
 
         <para>You may :</para>
 
         <itemizedlist>
           <listitem>
-            <para>
-              turn correct answer into wrong answers.
-            </para>
+            <para>turn correct answer into wrong answers.</para>
           </listitem>
 
           <listitem>
-            <para>
-              turn wrong answer into correct answers.
-            </para>
+            <para>turn wrong answer into correct answers.</para>
           </listitem>
 
           <listitem>
-            <para>
-              Modify the scoring scale for one or several question or the default scoring.
-            </para>
+            <para>Modify the scoring scale for one or several question or the
+            default scoring.</para>
           </listitem>
         </itemizedlist>
 
@@ -4762,45 +4766,34 @@ Name:
 
         <itemizedlist>
           <listitem>
-            <para>
-              Turn a simple question into a  multiple choices question.
-            </para>
+            <para>Turn a simple question into a multiple choices
+            question.</para>
           </listitem>
 
           <listitem>
-            <para>
-              Turn a multiple choices question into a simple question.
-            </para>
+            <para>Turn a multiple choices question into a simple
+            question.</para>
           </listitem>
 
           <listitem>
-            <para>
-              Add questions, answers.
-            </para>
+            <para>Add questions, answers.</para>
           </listitem>
 
           <listitem>
-            <para>
-              Remove questions, answers.
-            </para>
+            <para>Remove questions, answers.</para>
           </listitem>
 
           <listitem>
-            <para>
-              Modify the order of the questions and/or answers.
-            </para>
+            <para>Modify the order of the questions and/or answers.</para>
           </listitem>
         </itemizedlist>
 
         <note>
-        <para>
-           If you want to cancel a question use this strategy 
-          <command>\scoring{b=0,m=0,e=0,v=0}</command>
-           or this one  <command>\QuestionIndicative</command>.
-        </para>
+          <para>If you want to cancel a question use this strategy
+          <command>\scoring{b=0,m=0,e=0,v=0}</command> or this one
+          <command>\QuestionIndicative</command>.</para>
         </note>
       </sect3>
-  
     </sect2>
 
     <sect2 id="sec.students.id">
@@ -4867,15 +4860,13 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
           <itemizedlist>
             <listitem>
-              <para>
-                A semi-colon or colon or tabulation to separate the headers and a comma to separate the email adresses.
-              </para>
+              <para>A semi-colon or colon or tabulation to separate the
+              headers and a comma to separate the email adresses.</para>
             </listitem>
 
             <listitem>
-              <para>
-                A comma to separate the headers and email adresses between inverted comma/quotation marks.
-              </para>
+              <para>A comma to separate the headers and email adresses between
+              inverted comma/quotation marks.</para>
             </listitem>
           </itemizedlist>
 
@@ -4891,8 +4882,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         columns as a unique key which will identify the students (generally,
         one chooses the column containing the student's number). Last, to
         prepare an automated association, we must choose the name of the
-        relevant code used in the LaTeX command <command>\AMCcode</command> (if
-        used).</para>
+        relevant code used in the LaTeX command <command>\AMCcode</command>
+        (if used).</para>
       </sect3>
 
       <sect3 id="gui.assoc">
@@ -5118,33 +5109,34 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
       endterm="liste.etudiants.title" linkend="liste.etudiants"/>). If we let
       this field empty, a default value is built up based on the student's
       name and student number.</para>
-      
-  
+
       <sect3 id="Options.annotation.separateanswersheet">
-        <title id="Options.annotation.separateanswersheet.title">Options with the
-        option <option>separateanswersheet</option></title>
+        <title id="Options.annotation.separateanswersheet.title">Options with
+        the option <option>separateanswersheet</option></title>
 
         <itemizedlist>
           <listitem>
-            <para><command>Only pages with answers</command> : the answer sheets
-            will be annoted.</para>
+            <para><command>Only pages with answers</command> : the answer
+            sheets will be annoted.</para>
           </listitem>
         </itemizedlist>
 
         <itemizedlist>
           <listitem>
-            <para><command>Question pages from subject</command> : the answer sheets
-            will be annoted and the subject will be inclued to the pdf file.</para>
+            <para><command>Question pages from subject</command> : the answer
+            sheets will be annoted and the subject will be inclued to the pdf
+            file.</para>
           </listitem>
         </itemizedlist>
 
         <itemizedlist>
           <listitem>
-            <para><command>Question pages from correction</command> : the answer sheets
-            will be annoted and the corrected will be inclued to the pdf fil.</para>
+            <para><command>Question pages from correction</command> : the
+            answer sheets will be annoted and the corrected will be inclued to
+            the pdf fil.</para>
           </listitem>
         </itemizedlist>
-      </sect3>  
+      </sect3>
 
       <sect3 id="marks.position">
         <title id="marks.position.title">Marks' position</title>
@@ -5162,80 +5154,91 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         <para>Default choices</para>
 
         <itemizedlist>
-          <listitem><para>
-             (none) 
-          </para></listitem>
+          <listitem>
+            <para>(none)</para>
+          </listitem>
 
-          <listitem><para>
-             In the margin. 
-          </para></listitem>
+          <listitem>
+            <para>In the margin.</para>
+          </listitem>
 
-          <listitem><para>
-             In the both margins 
-          </para></listitem>
+          <listitem>
+            <para>In the both margins</para>
+          </listitem>
 
-          <listitem><para>
-             Beside the boxes. 
-          </para></listitem>
+          <listitem>
+            <para>Beside the boxes.</para>
+          </listitem>
 
-          <listitem><para>
-             Where defined in the source (see 
-
-            <xref endterm="marks.display.area.title"
-                  linkend="marks.display.area"/>
-
-             ). 
-          </para></listitem>
+          <listitem>
+            <para>Where defined in the source (see <xref
+            endterm="marks.display.area.title" linkend="marks.display.area"/>
+            ).</para>
+          </listitem>
         </itemizedlist>
       </sect3>
     </sect2>
-   
-   <sect2 id="preferences.defaut">
-       
 
+    <sect2 id="preferences.defaut">
       <title id="preferences.defaut.title">Default values edit menu</title>
 
-<para>
-      <menuchoice>
-        <guimenuitem>Edit</guimenuitem>
-        <guimenuitem>Preferences</guimenuitem>
-        <guimenuitem>Scan</guimenuitem>
-      </menuchoice></para>
+      <para><menuchoice>
+          <guimenuitem>Edit</guimenuitem>
 
+          <guimenuitem>Preferences</guimenuitem>
 
-       <para>
-        <command>Scans conversion</command>
-      </para>
+          <guimenuitem>Scan</guimenuitem>
+        </menuchoice></para>
+
+      <para><command>Scans conversion</command></para>
 
       <itemizedlist>
-        <listitem><para>Vector formats density (DPI) : 250</para></listitem>
+        <listitem>
+          <para>Vector formats density (DPI) : 250</para>
+        </listitem>
 
-        <listitem><para>Black &amp; white conversion threshold : 0.60</para></listitem>
+        <listitem>
+          <para>Black &amp; white conversion threshold : 0.60</para>
+        </listitem>
 
-        <listitem><para>Erase red from scans : unticked</para></listitem>
+        <listitem>
+          <para>Erase red from scans : unticked</para>
+        </listitem>
 
-        <listitem><para>Force conversion: unticked</para></listitem>
+        <listitem>
+          <para>Force conversion: unticked</para>
+        </listitem>
       </itemizedlist>
 
-      <para>
-        <command>Detection parameters</command>
-      </para>
+      <para><command>Detection parameters</command></para>
 
       <itemizedlist>
-        <listitem><para>Marks size max increase: 0.20</para></listitem>
+        <listitem>
+          <para>Marks size max increase: 0.20</para>
+        </listitem>
 
-        <listitem><para>Marks size max decrease : 0.20</para></listitem>
+        <listitem>
+          <para>Marks size max decrease : 0.20</para>
+        </listitem>
 
-        <listitem><para>Default darkness threshold : 0.15</para></listitem>
+        <listitem>
+          <para>Default darkness threshold : 0.15</para>
+        </listitem>
 
-        <listitem><para>Default upper darkness threshold : 1</para></listitem>
+        <listitem>
+          <para>Default upper darkness threshold : 1</para>
+        </listitem>
 
-      <listitem><para>Measured box proportion: 0.80</para></listitem>
+        <listitem>
+          <para>Measured box proportion: 0.80</para>
+        </listitem>
 
-        <listitem><para>Process scans with 3 corner marks : unticked</para></listitem>
+        <listitem>
+          <para>Process scans with 3 corner marks : unticked</para>
+        </listitem>
       </itemizedlist>
-   </sect2>    
-   </sect1>
+    </sect2>
+  </sect1>
 
   <sect1 id="alt">
     <title>Alternative usages</title>
@@ -5443,16 +5446,18 @@ student number &amp; class &amp; subject\\
 \end{question}
 </programlisting>
       </note>
-        <note>
-      <para> You may use these two options together.</para>
-      <para>Type, just after <code>\begin{document}</code>
-      <programlisting>
+
+      <note>
+        <para>You may use these two options together.</para>
+
+        <para>Type, just after <code>\begin{document}</code> <programlisting>
 \makeatletter
 \def\setoutsidebox{\AMC@outside@boxtrue}
-\makeatother</programlisting> 
-      </para>
-      <para> Then, to use it locally (inside braces) in the form :</para>
-      <programlisting>{\setoutsidebox\AMCform}</programlisting>
+\makeatother</programlisting></para>
+
+        <para>Then, to use it locally (inside braces) in the form :</para>
+
+        <programlisting>{\setoutsidebox\AMCform}</programlisting>
       </note>
     </sect2>
 
@@ -5479,8 +5484,10 @@ Moniuszko,Stanisław,003</programlisting>
             multiple recipients.</para>
 
             <itemizedlist>
-              <listitem><para>Headers separated by a semi-colon and email adresses
-              by a comma.</para></listitem>
+              <listitem>
+                <para>Headers separated by a semi-colon and email adresses by
+                a comma.</para>
+              </listitem>
             </itemizedlist>
 
             <programlisting>
@@ -5491,10 +5498,9 @@ Moniuszko;Stanisław;003</programlisting>
           </warning>
 
           <warning>
-          <para>Do not use _ (underscore) with the student's name or forename.
-          A compilation error will be display.</para>
-        </warning>
-
+            <para>Do not use _ (underscore) with the student's name or
+            forename. A compilation error will be display.</para>
+          </warning>
         </listitem>
 
         <listitem>
@@ -5558,8 +5564,7 @@ Moniuszko;Stanisław;003</programlisting>
           <command>\AMCassociation</command> call tells AMC to associate the
           current sheet to student with id <command>\id</command>.</para>
 
-          <para>
-            <calloutlist>
+          <para><calloutlist>
               <callout arearefs="separator.comma" id="separator.comma.exp">
                 <para>Use this command if the CSV file contains only one email
                 address per student.</para>
@@ -5570,8 +5575,7 @@ Moniuszko;Stanisław;003</programlisting>
                 <para>Use this command if the CSV file contains multiple email
                 addresses per student.</para>
               </callout>
-            </calloutlist>
-          </para>
+            </calloutlist></para>
         </listitem>
 
         <listitem>
