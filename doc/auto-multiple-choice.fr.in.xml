@@ -1681,17 +1681,16 @@ Durée : 10 minutes.
               page, annuler, pour une question, cette option avec la commande
               <command>\AMCnobloc</command>.</para>
 
-              <programlisting>
-{\AMCnobloc%
-\begin{question}{prez}
-Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
-\begin{reponses}
-\bonne{René Coty}
-\mauvaise{Alain Prost}
-\mauvaise{Marcel Proust}
- \mauvaise{Claude Monet}
-\end{reponses}
-\end{question}%
+              <programlisting>{\AMCnobloc%
+ \begin{question}{prez}
+   Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
+   \begin{reponses}
+     \bonne{René Coty}
+     \mauvaise{Alain Prost}
+     \mauvaise{Marcel Proust}
+     \mauvaise{Claude Monet}
+   \end{reponses}
+ \end{question}%
 }% </programlisting>
             </note>
           </listitem>
@@ -1911,13 +1910,13 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
         (juste après l'appel au paquet <package>automultiplechoice</package>
         par exemple) la ligne <programlisting>\usepackage{multicol}</programlisting>et
         en incluant l'environnement reponses à l'intérieur d'un environnement
-        multicols de la manière suivante : <programlisting>  \begin{multicols}{2}
-    \begin{reponses}
-      \bonne{La bonne réponse}
-      \mauvaise{Une mauvaise réponse}
-      \mauvaise{Une autre mauvaise réponse}
-    \end{reponses}
-  \end{multicols}</programlisting></para>
+        multicols de la manière suivante : <programlisting>\begin{multicols}{2}
+  \begin{reponses}
+    \bonne{La bonne réponse}
+    \mauvaise{Une mauvaise réponse}
+    \mauvaise{Une autre mauvaise réponse}
+  \end{reponses}
+\end{multicols}</programlisting></para>
 
         <para>Pour les réponses plus courtes encore, on peut demander à ce que
         les réponses soient imprimées les unes à la suite des autres, en
@@ -1991,17 +1990,15 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
         (ce qui inclut les environnements <option>questionmult</option>,
         <option>questionmultx</option>), affichera le texte écrit.</para>
 
-        <programlisting>
-\begin{question}{combustion}
-Quel gaz apparaît lors de la combustion incomplète du butane~?
-\begin{reponses}
-\bonne{Le monoxyde de carbone.}
-\mauvaise{Le dioxyde de carbone.}
-\mauvaise{Le dioxygène.}
-\end{reponses}
-\explain{Le monoxyde de carbone est un gaz incolore, inodore et toxique.}
-\end{question}
-        </programlisting>
+        <programlisting>\begin{question}{combustion}
+  Quel gaz apparaît lors de la combustion incomplète du butane~?
+  \begin{reponses}
+    \bonne{Le monoxyde de carbone.}
+    \mauvaise{Le dioxyde de carbone.}
+    \mauvaise{Le dioxygène.}
+  \end{reponses}
+  \explain{Le monoxyde de carbone est un gaz incolore, inodore et toxique.}
+\end{question}      </programlisting>
 
         <note>
           <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
@@ -2010,8 +2007,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           linkend="AMCtext"/>).</para>
         </note>
 
-        <para><programlisting>
-\begin{question}{elevation}
+        <para><programlisting>\begin{question}{elevation}
   Parmi les montagnes suivantes, laquelle est la plus haute ?
       \begin{reponses}
       \bonne{Sagarmatha}
@@ -2572,25 +2568,21 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           préambule.</para>
 
           <informalexample>
-            <programlisting>\def\jepasse{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
-         </programlisting>
+            <programlisting>\def\jepasse{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}</programlisting>
           </informalexample>
 
           <para>puis de l'utiliser quand on en a besoin (Ne pas oublier
           d'insérer des crochets autour pour limiter son effet à une question)
           :</para>
 
-          <programlisting>
-{\jepasse
-\begin{question}{Calibre600}
-
-Quel calibre doit-on choisir pour mesurer une tension inconnue?
-\begin{reponseshoriz}[o]
-\mauvaise{200}\mauvaise{2}\mauvaise{20}\mauvaise{200}\bonne{600}
-\end{reponseshoriz}
-\end{question}
-}
-      </programlisting>
+          <programlisting>{\jepasse
+ \begin{question}{Calibre600}
+   Quel calibre doit-on choisir pour mesurer une tension inconnue?
+   \begin{reponseshoriz}[o]
+     \mauvaise{200}\mauvaise{2}\mauvaise{20}\mauvaise{200}\bonne{600}
+   \end{reponseshoriz}
+ \end{question}
+}</programlisting>
         </warning>
 
         <para>La présentation des réponses peut être modifiée de la même
@@ -2607,9 +2599,8 @@ Quel calibre doit-on choisir pour mesurer une tension inconnue?
           <command>\exemplaire</command>, il faut doubler les
           <code>#</code>.</para>
 
-          <programlisting>
-        \def\AMCanswer##1##2{##1  ##2}
-        \def\AMCbeginQuestion##1##2{}</programlisting>
+          <programlisting>\def\AMCanswer##1##2{##1  ##2}
+\def\AMCbeginQuestion##1##2{}</programlisting>
         </important>
 
         <para>Certains espacements peuvent également être modifiés :</para>
@@ -2717,8 +2708,7 @@ et inscrivez votre nom et prénom ci-dessous.
     \end{minipage}
   }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
 
-}
-</programlisting></para>
+}</programlisting></para>
 
         <note>
           <para>Ici l'identifiant est <emphasis>etu</emphasis> qui servira à
@@ -3239,13 +3229,11 @@ et inscrivez votre nom et prénom ci-dessous.
         <para>Dans le préambule, déclarez les commandes ci-dessous (ici avec
         les valeurs par défaut).</para>
 
-        <programlisting>
-\makeatletter
+        <programlisting>\makeatletter
 \AMC@NCBetud=12
 \AMC@NCBpage=6
 \AMC@NCBcheck=6
-\makeatother
-          </programlisting>
+\makeatother          </programlisting>
 
         <note>
           <para>Les valeurs de <command>\AMC@NCBpage</command> et
@@ -4703,22 +4691,21 @@ Nom et prénom :
           de la question, voir l'exemple ci-dessous.</para>
         </important>
 
-        <programlisting>
-\begin{questionmult}{03}\bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
-Cite un gaz  important de l'air et son pourcentage.
-\begin{multicols}{4}
-\begin{reponses}
-\mauvaise{vapeur d’eau}
-\mauvaise{gaz}
-\bonne{diazote}\bareme{set.COMP=1}
-\bonne{dioxygène}\bareme{set.COMP=2}
-\mauvaise{dioxyde de carbone}
-\bonne{20\%}\bareme{set.PROP=2}
-\mauvaise{40\%}
-\mauvaise{60\%}
-\bonne{80\%}\bareme{set.PROP=1}
-\end{reponses}
-\end{multicols}
+        <programlisting>\begin{questionmult}{03}\bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
+  Cite un gaz  important de l'air et son pourcentage.
+  \begin{multicols}{4}
+    \begin{reponses}
+      \mauvaise{vapeur d’eau}
+      \mauvaise{gaz}
+      \bonne{diazote}\bareme{set.COMP=1}
+      \bonne{dioxygène}\bareme{set.COMP=2}
+      \mauvaise{dioxyde de carbone}
+      \bonne{20\%}\bareme{set.PROP=2}
+      \mauvaise{40\%}
+      \mauvaise{60\%}
+      \bonne{80\%}\bareme{set.PROP=1}
+    \end{reponses}
+  \end{multicols}
 \end{questionmult}
 </programlisting>
 
@@ -4742,9 +4729,7 @@ Cite un gaz  important de l'air et son pourcentage.
           <para>Vous pouvez affecter à b et m les valeurs de la variable
           déclarée avec <code>set.XXX</code>.</para>
 
-          <programlisting>
-  \begin{questionmult}{Q1}\bareme{default.CONF=1,m=-CONF,b=CONF}
-          </programlisting>
+          <programlisting>\begin{questionmult}{Q1}\bareme{default.CONF=1,m=-CONF,b=CONF}         </programlisting>
         </note>
 
         <para>La commande LaTeX <command>\bareme</command> peut aussi être
@@ -4925,8 +4910,7 @@ Durée : 10 minutes.
         <command>\baremeDefautS</command>, il faudra l'annuler si vous
         utilisez un barème particulier pour différentes questions.</para>
 
-        <programlisting>
-\begin{questionmult}\bareme{b=1,m=-0.5,formula=}
+        <programlisting>\begin{questionmult}\bareme{b=1,m=-0.5,formula=}
 [...]
 \end{questionmult}</programlisting>
 
@@ -4952,7 +4936,7 @@ Durée : 10 minutes.
         </note>
 
         <note>
-          <para>La fonction test s'écrit <programlisting> ( test ? instruction si vrai : instruction si faux)</programlisting></para>
+          <para>La fonction test s'écrit <programlisting>( test ? instruction si vrai : instruction si faux)</programlisting></para>
         </note>
 
         <para>D'autres variables sont aussi utilisables :</para>
@@ -5210,10 +5194,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             </listitem>
           </itemizedlist>
 
-          <programlisting>
-        nom,prenom,email
-        Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com" 
-        </programlisting>
+          <programlisting>nom,prenom,email
+Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
         </warning>
 
         <para>La liste des étudiants préparée (que se soit une liste simple ou
@@ -5812,23 +5794,21 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
         façon suivante:</para>
 
         <programlisting>\begin{question}{01}
-\begin{reponsesperso}
-\wrongchoice{A }%
-\wrongchoice{B }%
-\wrongchoice{C }%
-\wrongchoice{D }%
-\wrongchoice{E }%
-\end{reponsesperso}
-\end{question}
-</programlisting>
+  \begin{reponsesperso}
+    \wrongchoice{A }%
+    \wrongchoice{B }%
+    \wrongchoice{C }%
+    \wrongchoice{D }%
+    \wrongchoice{E }%
+  \end{reponsesperso}
+\end{question}</programlisting>
       </note>
 
       <note>
         <para>Vous pouvez utiliser ces deux options ensembles.</para>
 
         <para>Pour activer cette option, vous pouvez définir, juste après le
-        <code>\begin{document}</code> <programlisting>
-\makeatletter
+        <code>\begin{document}</code> <programlisting>\makeatletter
 \def\setoutsidebox{\AMC@outside@boxtrue}
 \makeatother</programlisting></para>
 
@@ -5868,8 +5848,7 @@ Moniuszko,Stanisław,003</programlisting></para>
               </listitem>
             </itemizedlist>
 
-            <programlisting>
-nom;prenom;id;email
+            <programlisting>nom;prenom;id;email
 Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
 Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
 Moniuszko;Stanisław;003</programlisting>
@@ -6080,7 +6059,7 @@ Moniuszko;Stanisław;003</programlisting>
       <para>Connectez-vous sur votrre compte GMAIL puis activer l'option :
       autoriser les applications non sécurisées.</para>
 
-      <programlisting> sudo apt-get install msmtp </programlisting>
+      <programlisting>sudo apt-get install msmtp </programlisting>
 
       <para>Dans les préférences de AMC : <menuchoice>
           <guimenu>Edition</guimenu>
@@ -6093,8 +6072,7 @@ Moniuszko;Stanisław;003</programlisting>
         </menuchoice>, choisir <guibutton>sendmail</guibutton> et mettre le
       chemin : <programlisting>/usr/bin/msmtp</programlisting> Ouvrir le
       fichier <programlisting>sudo gedit /etc/msmtprc  </programlisting> et
-      copier <programlisting>
-account gmail 
+      copier <programlisting>account gmail 
 host smtp.gmail.com 
 tls on 
 tls_certcheck off 
@@ -6102,8 +6080,7 @@ port 587
 auth login 
 from <emphasis>votre nom ou adresse mail du compte gmail</emphasis> 
 user <emphasis>votre adresse mail du compte gmail</emphasis> 
-password <emphasis>votre mot de passe du compte gmail</emphasis> 
-      </programlisting></para>
+password <emphasis>votre mot de passe du compte gmail</emphasis>      </programlisting></para>
     </sect2>
 
     <sect2 id="Texmaker">
@@ -6144,8 +6121,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
         <listitem>
           <para>La fonction \FPseed\x permet de modifier le système de
           génération de nombre aléatoire : \x peut prendre \time, \the\day,
-          \the\month, \the\year <programlisting>
-\FPeval{\compteur}{clip(\the\month*\the\time*1.1)}
+          \the\month, \the\year <programlisting>\FPeval{\compteur}{clip(\the\month*\the\time*1.1)}
 \FPseed\time
 </programlisting></para>
         </listitem>
@@ -6161,9 +6137,8 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
 
           <note>
             <para>On peut cumuler les fonctions \FPeval (avec toutes les
-            fonctions de calcul) et \FPtrunc. <programlisting>
-\FPeval{\x}{trunc(a+random*b,c)}
-          </programlisting> <itemizedlist>
+            fonctions de calcul) et \FPtrunc. <programlisting>\FPeval{\x}{trunc(a+random*b,c)}          </programlisting>
+            <itemizedlist>
                 <listitem>
                   <para>\x sera compris entre a et a+b</para>
                 </listitem>
@@ -6219,18 +6194,18 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
 
         <listitem>
           <para>La commande \FPlsolve{\x}{a}{b} cherche la valeur réelle \x
-          pour résoudre l'équation<programlisting>  a*\x+b=0.</programlisting></para>
+          pour résoudre l'équation<programlisting>a*\x+b=0.</programlisting></para>
 
           <para>La commande \FPqsolve{\x}{\y}{a}{b}{c} cherche les valeurs
-          réelles \x et \y pour résoudre l'équation <programlisting> a*x^2+b*x+c=0</programlisting></para>
+          réelles \x et \y pour résoudre l'équation <programlisting>a*x^2+b*x+c=0</programlisting></para>
 
           <para>La commande \FPcsolve{\x}{\y}{\z}{a}{b}{c}{d} cherche les
           valeurs réelles \x, \y et \z pour résoudre
-          l'équation<programlisting> a*x^3+b*x^2+c*x+d=0</programlisting></para>
+          l'équation<programlisting>a*x^3+b*x^2+c*x+d=0</programlisting></para>
 
           <para>La commande \FPqqsolve{\w}{\x}{\y}{\z}{a}{b}{c}{d}{e} cherche
           les valeurs réelles \w, \x, \y et \z pour résoudre l'équation
-          <programlisting> a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
+          <programlisting>a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
         </listitem>
 
         <listitem>

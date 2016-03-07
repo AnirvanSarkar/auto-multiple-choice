@@ -1608,8 +1608,7 @@ Durée : 10 minutes.
 
             <note>
               <para>You may occasionally cancel this option for each question
-              with the command <command>\AMCnobloc</command>. <programlisting>
-{\AMCnobloc%
+              with the command <command>\AMCnobloc</command>. <programlisting>{\AMCnobloc%
   \begin{question}{nb-ue}
     How many different states were members of the European Union in Jan. 2009?
     \begin{choiceshoriz}[o]
@@ -1826,13 +1825,13 @@ Durée : 10 minutes.
         <package>automultiplechoice</package> for instance) with
         <programlisting>\usepackage{multicol}</programlisting>and include the
         choices environment inside a multicols environment in the following
-        manner:<programlisting>  \begin{multicols}{2}
-    \begin{choices}
-      \correctchoice{The correct answer}
-      \wrongchoice{A wrong answer}
-      \wrongchoice{Another wrong answer}
-    \end{choices}
-  \end{multicols}</programlisting></para>
+        manner:<programlisting>\begin{multicols}{2}
+  \begin{choices}
+    \correctchoice{The correct answer}
+    \wrongchoice{A wrong answer}
+    \wrongchoice{Another wrong answer}
+  \end{choices}
+\end{multicols}</programlisting></para>
 
         <para>For even shorter answers, one can require questions to be
         printed following one another, using the <option>choiceshoriz</option>
@@ -1849,7 +1848,7 @@ Durée : 10 minutes.
         <para><programlisting>\begin{question}{difficulty}\QuestionIndicative
   \scoring{auto=0,v=-1,e=-2}
   Did you find this class easy or difficult? Please answer on a scale from 0 (very difficult) to 5 
-(very easy).
+  (very easy).
   \begin{choiceshoriz}[o]
     \correctchoice{0}
     \correctchoice{1}
@@ -1866,32 +1865,30 @@ Durée : 10 minutes.
           <para>You may force AMC to let one or more answers as last choices
           with the command <command>\lastchoices</command>.</para>
 
-          <programlisting>
-        \begin{question}{color}
-        Which color?
-        \begin{choiceshoriz}
-        \wrongchoice{red}
-        \wrongchoice{blue}
-        \wrongchoice{yellow}
-        \lastchoices
-        \correctchoice{transparent}
-        \wrongchoice{can't say}
-      \end{choiceshoriz}
-        \end{question}
+          <programlisting>\begin{question}{color}
+  Which color?
+  \begin{choiceshoriz}
+    \wrongchoice{red}
+    \wrongchoice{blue}
+    \wrongchoice{yellow}
+    \lastchoices
+    \correctchoice{transparent}
+    \wrongchoice{can't say}
+  \end{choiceshoriz}
+\end{question}
 
-        \begin{questionmult}{number}
-        How many?
-        \begin{choiceshoriz}
-        \wrongchoice{none}
-        \correctchoice{one}
-        \wrongchoice{two}
-        \wrongchoice{three}
-        \lastchoices
-        \correctchoice{not so much}
-        \wrongchoice{a lot}
-        \end{choiceshoriz}
-        \end{questionmult}
-        </programlisting>
+\begin{questionmult}{number}
+  How many?
+  \begin{choiceshoriz}
+    \wrongchoice{none}
+    \correctchoice{one}
+    \wrongchoice{two}
+    \wrongchoice{three}
+    \lastchoices
+    \correctchoice{not so much}
+    \wrongchoice{a lot}
+  \end{choiceshoriz}
+\end{questionmult}        </programlisting>
         </sect4>
       </sect3>
 
@@ -1906,8 +1903,7 @@ Durée : 10 minutes.
 
         <para>Here is a simple example:</para>
 
-        <para><programlisting>
-\begin{question}{explanation}
+        <para><programlisting>\begin{question}{explanation}
   Which has the highest elevation among the following?
   \begin{choices}
       \correctchoice{Sagarmatha}
@@ -1936,8 +1932,7 @@ Durée : 10 minutes.
         command before the <command>\explain</command> command as in the
         following example:</para>
 
-        <para><programlisting>
-\begin{question}{elevation}
+        <para><programlisting>\begin{question}{elevation}
   Which has the highest elevation among the following?
   \begin{choices}
       \correctchoice{Sagarmatha}
@@ -2404,19 +2399,17 @@ Durée : 10 minutes.
           <command>\AMC@correc</command>. You can define a command to set it
           to true, just after the \begin{document}.</para>
 
-          <programlisting>
-        \makeatletter
-        \def\AMCforcecorrect{\AMC@correctrue}
-        \makeatother</programlisting>
+          <programlisting>\makeatletter
+\def\AMCforcecorrect{\AMC@correctrue}
+\makeatother</programlisting>
 
           <para>and then use it for a particular question (enclose in braces
           to limit its effect to one question):</para>
 
-          <programlisting>
-        {\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
-         .....
-          \end{questionmult}
-        }
+          <programlisting>{\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
+   .....
+ \end{questionmult}
+}
         </programlisting>
 
           <para>You should tell AMC not to count points for this question
@@ -2473,22 +2466,19 @@ Durée : 10 minutes.
           set up it with a new command in the preamble.</para>
 
           <informalexample>
-            <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}
-      </programlisting>
+            <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}</programlisting>
           </informalexample>
 
           <para>and use it when you need it. (Do not forget to type inside
           brackets to limit the effect) :</para>
 
-          <programlisting>
-{\Iswitch
-\begin{question}{Number}
-
-Choose the greater.
-\begin{choiceshoriz}[o]
-\wrongchoice{200}\wrongchoice{2}\wrongchoice{20}\wrongchoice{200}\correctchoice{600}
-\end{choiceshoriz}
-\end{question}
+          <programlisting>{\Iswitch
+ \begin{question}{Number}
+   Choose the greater.
+   \begin{choiceshoriz}[o]
+     \wrongchoice{200}\wrongchoice{2}\wrongchoice{20}\wrongchoice{200}\correctchoice{600}
+   \end{choiceshoriz}
+ \end{question}
 }
       </programlisting>
         </warning>
@@ -2507,9 +2497,8 @@ Choose the greater.
           <para>Inside the commande <command>\onecopy</command>, double the
           <code>#</code>.</para>
 
-          <programlisting>
-        \def\AMCanswer##1##2{##1  ##2}
-        \def\AMCbeginQuestion##1##2{}</programlisting>
+          <programlisting>\def\AMCanswer##1##2{##1  ##2}
+\def\AMCbeginQuestion##1##2{}</programlisting>
         </important>
 
         <para>One can also change spacing redefining the following dimensions
@@ -3085,13 +3074,11 @@ and write your first and last names below.
         <para>Load those commands below in the preambule (here with the
         default values).</para>
 
-        <programlisting>
-\makeatletter
+        <programlisting>\makeatletter
 \AMC@NCBetud=12
 \AMC@NCBpage=6
 \AMC@NCBcheck=6
-\makeatother
-          </programlisting>
+\makeatother          </programlisting>
 
         <note>
           <para>The values <command>\AMC@NCBpage</command> and
@@ -3137,8 +3124,7 @@ and write your first and last names below.
       <para>First of all, you must set the random seed to be sure to get the
       same result each time latex is run to compile the subject:</para>
 
-      <para><programlisting>\FPseed=<replaceable>integer</replaceable>
-        </programlisting></para>
+      <para><programlisting>\FPseed=<replaceable>integer</replaceable></programlisting></para>
 
       <note>
         <para><replaceable>integer</replaceable> must be fixed, and not
@@ -4389,24 +4375,22 @@ Name :
           scoring of the question, see below.</para>
         </important>
 
-        <programlisting>
-\begin{questionmult}{03}\scoring{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
-Name an important gas in the air and its percentage.
-\begin{multicols}{4}
-\begin{choices}
-\wrongchoice{steam}
-\wrongchoice{gas}
-\correctchoice{nitrogen}\scoring{set.COMP=1}
-\correctchoice{oxygen}\scoring{set.COMP=2}
-\wrongchoice{carbon dioxide}
-\correctchoice{20\%}\scoringset.PROP=2}
-\wrongchoice{40\%}
-\wrongchoice{60\%}
-\correctchoice{80\%}\scoring{set.PROP=1}
-\end{choices}
-\end{multicols}
-\end{questionmult}
-</programlisting>
+        <programlisting>\begin{questionmult}{03}\scoring{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
+  Name an important gas in the air and its percentage.
+  \begin{multicols}{4}
+    \begin{choices}
+      \wrongchoice{steam}
+      \wrongchoice{gas}
+      \correctchoice{nitrogen}\scoring{set.COMP=1}
+      \correctchoice{oxygen}\scoring{set.COMP=2}
+      \wrongchoice{carbon dioxide}
+      \correctchoice{20\%}\scoringset.PROP=2}
+      \wrongchoice{40\%}
+      \wrongchoice{60\%}
+      \correctchoice{80\%}\scoring{set.PROP=1}
+    \end{choices}
+  \end{multicols}
+\end{questionmult}</programlisting>
 
         <note>
           <para>If you specify <code>MAX = 3</code> to a matter that report 4
@@ -4573,7 +4557,7 @@ Name:
         <programlisting>\def\barQmult{haut=3,p=-1}
 
 \begin{questionmult}\scoring{\barQmult}
-[...]
+  [...]
 \end{questionmult}</programlisting>
 
         <para>Another possibility comes with the LaTeX commands
@@ -4590,9 +4574,8 @@ Name:
         <command>\scoringDefautS</command>, you must cancel it to score
         different questions with a specific scoring.</para>
 
-        <programlisting>
-\begin{questionmult}\scoring{b=1,m=-0.5,formula=}
-[...]
+        <programlisting>\begin{questionmult}\scoring{b=1,m=-0.5,formula=}
+  [...]
 \end{questionmult}</programlisting>
 
         <para>In some cases, defining a global strategy can be interesting
@@ -4613,7 +4596,7 @@ Name:
         </note>
 
         <note>
-          <para>Test function is <programlisting> ( test ? if true: if false)</programlisting></para>
+          <para>Test function is <programlisting>( test ? if true: if false)</programlisting></para>
         </note>
 
         <para>Other variables can also be used:</para>
@@ -4848,10 +4831,8 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             </listitem>
           </itemizedlist>
 
-          <programlisting>
-        name,forenama,email
-        Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com" 
-        </programlisting>
+          <programlisting>name,forenama,email
+Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
         </warning>
 
         <para>The prepared list of students will then be selected with the
@@ -5414,22 +5395,20 @@ student number &amp; class &amp; subject\\
         and write your questions in the following way:</para>
 
         <programlisting>\begin{question}{01}
-\begin{choicescustom}
-\wrongchoice{A }%
-\wrongchoice{B }%
-\wrongchoice{C }%
-\wrongchoice{D }%
-\wrongchoice{E }%
-\end{choicescustom}
-\end{question}
-</programlisting>
+  \begin{choicescustom}
+    \wrongchoice{A }%
+    \wrongchoice{B }%
+    \wrongchoice{C }%
+    \wrongchoice{D }%
+    \wrongchoice{E }%
+  \end{choicescustom}
+\end{question}</programlisting>
       </note>
 
       <note>
         <para>You may use these two options together.</para>
 
-        <para>Type, just after <code>\begin{document}</code> <programlisting>
-\makeatletter
+        <para>Type, just after <code>\begin{document}</code> <programlisting>\makeatletter
 \def\setoutsidebox{\AMC@outside@boxtrue}
 \makeatother</programlisting></para>
 
@@ -5468,8 +5447,7 @@ Moniuszko,Stanisław,003</programlisting>
               </listitem>
             </itemizedlist>
 
-            <programlisting>
-name;surname;id;email
+            <programlisting>name;surname;id;email
 Boulix;Jojo;001;jojo@boulix.fr,parents@boulix.com
 Golin;André;002;andre_golin@truc.fr,papa.golin@rouge.fr,mamangolin@rouge.com
 Moniuszko;Stanisław;003</programlisting>
