@@ -2448,6 +2448,18 @@ Durée : 10 minutes.
             feuille réponse, représente l'épaisse de la croix
             précédente.</para>
           </listitem>
+
+          <listitem>
+            <para><option>color=<replaceable>col</replaceable></option> permet
+            d'indiquer la couleur à utiliser pour les cases à cocher. La
+            couleur <replaceable>col</replaceable> doit être reconnue par le
+            paquet LaTeX <command>xcolor</command>. On pourra ainsi utiliser
+            certains noms de couleurs (comme <replaceable>red</replaceable>
+            pour le rouge), ou définir soi-même sa couleur comme dans</para>
+
+            <programlisting>\definecolor{vertclair}{rgb}{0.67,0.88,0.5}
+\AMCboxColor{vertclair}</programlisting>
+          </listitem>
         </itemizedlist>
 
         <para>Pour obtenir des cases plus petites, on pourra, par exemple,
@@ -2486,19 +2498,6 @@ Durée : 10 minutes.
         des lettres grasses, on utilisera :</para>
 
         <programlisting>\def\AMCoutsideLabelFormat#1{\textbf{#1}}</programlisting>
-
-        <para>Notons enfin que la couleur des cases à cocher par les étudiants
-        peut être modifiée grâce à la commande :</para>
-
-        <programlisting>\AMCboxColor{red}</programlisting>
-
-        <para>en remplaçant <code>red</code> par la couleur désirée (qui doit
-        être reconnue par le paquet LaTeX <command>xcolor</command>). Pour
-        obtenir un vert clair par exemple, on pourra, par exemple,
-        utiliser</para>
-
-        <programlisting>\definecolor{amcboxcolor}{rgb}{0.67,0.88,0.5}
-\AMCboxColor{amcboxcolor}</programlisting>
 
         <note>
           <para>La commande latex pour basculer en mode corrigé (cases bonnes

@@ -2349,6 +2349,18 @@ Durée : 10 minutes.
             <para><option>crossrule=1.5pt</option> only displayed on the
             answer sheet, is the thickness of the cross.</para>
           </listitem>
+
+          <listitem>
+            <para><option>color=<replaceable>col</replaceable></option> gives
+            the color to be used to draw boxes. The color
+            <replaceable>col</replaceable> must be compatible with the
+            <command>xcolor</command> package. For example, some names such as
+            <replaceable>red</replaceable> can be used. You can also define
+            your proper color, as in</para>
+
+            <programlisting>\definecolor{mylightgreen}{rgb}{0.67,0.88,0.5}
+\AMCboxColor{mylightgreen}</programlisting>
+          </listitem>
         </itemizedlist>
 
         <para>To obtain smaller boxes, one can e.g. use the command</para>
@@ -2382,18 +2394,6 @@ Durée : 10 minutes.
         following example (here we need bold labels):</para>
 
         <programlisting>\def\AMCoutsideLabelFormat#1{\textbf{#1}}</programlisting>
-
-        <para>Also note that the color of the boxes to be ticked by the
-        students can be set using</para>
-
-        <programlisting>\AMCboxColor{red}</programlisting>
-
-        <para>replacing <code>red</code> by the desired color (that must be
-        recognized by the <command>xcolor</command> package). For example, you
-        can get a light green with</para>
-
-        <programlisting>\definecolor{amcboxcolor}{rgb}{0.67,0.88,0.5}
-\AMCboxColor{amcboxcolor}</programlisting>
 
         <note>
           <para>The switch used to tick or not correct answers is
