@@ -1727,9 +1727,6 @@ Durée : 10 minutes.
             circles, you may communicate this option to automultiplechoice to
             use <option>\storebox</option> rather than
             <option>\savebox</option> to store the design of the boxes.</para>
-
-            <para><package>\storebox</package> must be loaded in
-            preamble.</para>
           </listitem>
 
           <listitem>
@@ -1764,20 +1761,19 @@ Durée : 10 minutes.
 
         <programlisting>\onecopy{50}{ ... }</programlisting>
 
-        <para>If you have downloaded the LaTeX package
-        <package>environ</package> <emphasis>before</emphasis>
-        <package>automultiplechoice</package>, an alternative syntax is
-        available, using the <command>examcopy</command> environment, where
-        the number of realizations is an option (default is 5).</para>
+        <para>An alternative syntax is available, using the
+        <command>examcopy</command> environment, where the number of
+        realizations is an option (default is 5).</para>
 
         <programlisting>\begin{examcopy}[50]
 ...
 \end{examcopy}</programlisting>
 
         <note>
-          <para>The <package>environ</package> package is not available in the
-          TeX Live 2007 distribution, which is still used in Ubuntu
-          distributions up to version 9.10 (Karmic Koala).</para>
+          <para>To use examcopy, you need the <package>environ</package>
+          package to be installed, which is not available in the TeX Live 2007
+          distribution, still used in Ubuntu distributions up to version 9.10
+          (Karmic Koala).</para>
         </note>
       </sect3>
 
