@@ -6079,173 +6079,173 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>      </programl
 
       <itemizedlist>
         <listitem>
-          <para>La commande <command>\FPprint{\x}</command> permet d'afficher
-          la valeur de x. Cependant, la commande
-          <command>\numprint{...}</command> du paquet <command>
-          \usepackage[autolanguage]{numprint}</command> est préférable car
-          elle affiche une virgule pour les nombres décimaux au lieu d'un
-          point et groupe par trois les chiffres.</para>
+          <para>La commande <code>\FPprint{\x}</code> permet d'afficher la
+          valeur de x. Cependant, la commande <code>\numprint{...}</code> du
+          paquet <code> \usepackage[autolanguage]{numprint}</code> est
+          préférable car elle affiche une virgule pour les nombres décimaux au
+          lieu d'un point et groupe par trois les chiffres.</para>
         </listitem>
 
         <listitem>
-          <para>La fonction \FPrandom{\x} calcul un nombre aléatoire.</para>
+          <para>La fonction <code>\FPrandom{\x}</code> calcul un nombre
+          aléatoire.</para>
         </listitem>
 
         <listitem>
-          <para>La fonction \FPseed\x permet de modifier le système de
-          génération de nombre aléatoire : \x peut prendre \time, \the\day,
-          \the\month, \the\year <programlisting>\FPeval{\compteur}{clip(\the\month*\the\time*1.1)}
-\FPseed\time
-</programlisting></para>
+          <para>La fonction <code>\FPseed{12345}</code> permet de modifier le
+          système de génération de nombre aléatoire (choisir un entier fixé à
+          sa convenance).</para>
         </listitem>
 
         <listitem>
-          <para>La fonction \FPeval{\x}{...} permet de faire des calculs et
-          d’affecter le résultat à la variable \x.</para>
+          <para>La fonction <code>\FPeval{\x}{...}</code> permet de faire des
+          calculs et d’affecter le résultat à la variable
+          <code>\x</code>.</para>
         </listitem>
 
         <listitem>
-          <para>La fonction \FPtrunc{\y}{\x}{a} transfère le nombre \x avec a
-          chiffres après la virgule à la variable \y.</para>
+          <para>La fonction <code>\FPtrunc{\y}{\x}{a}</code> transfère le
+          nombre \x avec a chiffres après la virgule à la variable
+          <code>\y</code>.</para>
 
           <note>
-            <para>On peut cumuler les fonctions \FPeval (avec toutes les
-            fonctions de calcul) et \FPtrunc. <programlisting>\FPeval{\x}{trunc(a+random*b,c)}          </programlisting>
-            <itemizedlist>
-                <listitem>
-                  <para>\x sera compris entre a et a+b</para>
-                </listitem>
+            <para>On peut cumuler les fonctions <code>\FPeval</code> (avec
+            toutes les fonctions de calcul) et <code>\FPtrunc</code>, comme
+            dans l'exemple suivant qui choisit un réel au hasard entre
+            <code>a</code> et <code>a+b</code>, en gardant <code>c</code>
+            chiffres après la virgule : </para>
 
-                <listitem>
-                  <para>, séparateur</para>
-                </listitem>
-
-                <listitem>
-                  <para>c : nombre de chiffre après la virgule</para>
-                </listitem>
-              </itemizedlist></para>
+            <programlisting>\FPeval{\x}{trunc(a+random*b,c)}          </programlisting>
           </note>
         </listitem>
 
         <listitem>
-          <para>La fonction \FPround{\y}{\x}{a} transfère le nombre \x avec a
-          chiffres après la virgule à la variable \y et arrondi.</para>
+          <para>La fonction <code>\FPround{\y}{\x}{a}</code> transfère le
+          nombre <code>\x</code> avec a chiffres après la virgule à la
+          variable \y et arrondi.</para>
         </listitem>
 
         <listitem>
-          <para>La fonction \FPclip{\y}{\x} transfère le nombre \x , sans les
-          zéros après la virgule, à la variable \y.</para>
+          <para>La fonction <code>\FPclip{\y}{\x}</code> transfère le nombre
+          <code>\x</code>, sans les zéros après la virgule, à la variable
+          <code>\y</code>.</para>
         </listitem>
 
         <listitem>
-          <para>Les fonctions \FPadd{\x}{a}{b}, \FPdiv{\x}{a}{b},
-          \FPmul{\x}{a}{b}, \FPsub{\x}{a}{b} attribue à la variable \x la
-          somme de a+b, le quotient de a/b, le produit de a*b, et le reste de
-          a-b</para>
+          <para>Les fonctions <code>\FPadd{\x}{a}{b}</code>,
+          <code>\FPdiv{\x}{a}{b}</code>, <code>\FPmul{\x}{a}{b}</code>,
+          <code>\FPsub{\x}{a}{b}</code> attribue à la variable <code>\x</code>
+          la somme <code>a+b</code>, le quotient <code>a/b</code>, le produit
+          <code>a*b</code>, et la différence <code>a-b</code></para>
         </listitem>
 
         <listitem>
-          <para>La fonction FPset{\x}{\y} attribue à la variable \x (macro ou
-          chaîne) la valeur \y</para>
+          <para>La fonction <code>\FPset{\x}{\y}</code> attribue à la variable
+          <code>\x</code> (macro ou chaîne) la valeur <code>\y</code></para>
         </listitem>
 
         <listitem>
-          <para>\FPabs{\x}{a} renvoie la valeur absolue de a, \FPneg{\y}{a}
-          renvoie l'opposé de a</para>
+          <para><code>\FPabs{\x}{a}</code> renvoie la valeur absolue de
+          <code>a</code>, \FPneg{\y}{a} renvoie l'opposé de
+          <code>a</code></para>
         </listitem>
 
         <listitem>
-          <para>La commande \FPiflt{\x}{\y} {instruction 1} \else {instruction
-          2} \fi vérifie si \x est inérieur à \y dans ce cas l'instruction 1
-          est lancée sinon c'est l'instruction 2.</para>
+          <para>La commande <code>\FPiflt{\x}{\y} {instruction 1} \else
+          {instruction 2} \fi</code> vérifie si <code>\x</code> est inérieur à
+          <code>\y</code> dans ce cas l'instruction 1 est lancée sinon c'est
+          l'instruction 2.</para>
 
-          <para>Même principe les fonctions \FPifeq{\x}{\y}, \FPifgt{\x}{\y},
-          \FPifneg{\x}, \FPifpos{\x}, \FPifzero{\x}, \FPifint{\x} qui sont
-          respctivement des tests d'égalité, de supériorité, de négativité, de
-          positivité, de nullité ou d'entier.</para>
+          <para>Même principe les fonctions <code>\FPifeq{\x}{\y}</code>,
+          <code>\FPifgt{\x}{\y}</code>, <code>\FPifneg{\x}</code>,
+          <code>\FPifpos{\x}</code>, <code>\FPifzero{\x}</code>,
+          <code>\FPifint{\x}</code> qui sont respctivement des tests
+          d'égalité, de supériorité, de négativité, de positivité, de nullité
+          ou d'entier.</para>
         </listitem>
 
         <listitem>
-          <para>La commande \FPlsolve{\x}{a}{b} cherche la valeur réelle \x
-          pour résoudre l'équation<programlisting>a*\x+b=0.</programlisting></para>
+          <para>La commande <code>\FPlsolve{\x}{a}{b}</code> cherche la valeur
+          réelle <code>\x</code> pour résoudre l'équation<programlisting>a*\x+b=0.</programlisting></para>
 
-          <para>La commande \FPqsolve{\x}{\y}{a}{b}{c} cherche les valeurs
-          réelles \x et \y pour résoudre l'équation <programlisting>a*x^2+b*x+c=0</programlisting></para>
+          <para>La commande <code>\FPqsolve{\x}{\y}{a}{b}{c}</code> cherche
+          les valeurs réelles <code>\x</code> et <code>\y</code> pour résoudre
+          l'équation <programlisting>a*x^2+b*x+c=0</programlisting></para>
 
-          <para>La commande \FPcsolve{\x}{\y}{\z}{a}{b}{c}{d} cherche les
-          valeurs réelles \x, \y et \z pour résoudre
-          l'équation<programlisting>a*x^3+b*x^2+c*x+d=0</programlisting></para>
+          <para>La commande <code>\FPcsolve{\x}{\y}{\z}{a}{b}{c}{d}</code>
+          cherche les valeurs réelles <code>\x</code>, <code>\y</code> et
+          <code>\z</code> pour résoudre l'équation<programlisting>a*x^3+b*x^2+c*x+d=0</programlisting></para>
 
-          <para>La commande \FPqqsolve{\w}{\x}{\y}{\z}{a}{b}{c}{d}{e} cherche
-          les valeurs réelles \w, \x, \y et \z pour résoudre l'équation
-          <programlisting>a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
+          <para>La commande
+          <code>\FPqqsolve{\w}{\x}{\y}{\z}{a}{b}{c}{d}{e}</code> cherche les
+          valeurs réelles <code>\w</code>, <code>\x</code>, <code>\y</code> et
+          <code>\z</code> pour résoudre l'équation <programlisting>a*x^4+b*x^3+c*x^2+d*x+e=0</programlisting></para>
         </listitem>
 
         <listitem>
-          <para>La commande \FPe affiche la valeur de e=2.71828182845904523,
-          la commande \FPpi affich la valeur de pi.</para>
+          <para>La commande <code>\FPe</code> renvoie la valeur de
+          e=2.71828182845904523, la commande <code>\FPpi</code> renvoie la
+          valeur de pi.</para>
         </listitem>
 
         <listitem>
-          <para>La commande \FPexp{\x}{a} attribue à la variable \x la valeur
-          e^a, la commande \FPln{\x}{a} attribue à la variable \x la valeur
-          ln(a)</para>
+          <para>La commande <code>\FPexp{\x}{a}</code> attribue à la variable
+          <code>\x</code> la valeur e^a, la commande <code>\FPln{\x}{a}</code>
+          attribue à la variable <code>\x</code> la valeur ln(a)</para>
         </listitem>
 
         <listitem>
-          <para>La commande \FPpow{\x}{a}{b} attribue à la variable \x la
-          valeur a^b, La commande \FProot{\x}{a}{b} attribue à la variable \x
-          la valeur a^(1/b).</para>
+          <para>La commande <code>\FPpow{\x}{a}{b}</code> attribue à la
+          variable <code>\x</code> la valeur a^b, La commande
+          <code>\FProot{\x}{a}{b}</code> attribue à la variable
+          <code>\x</code> la valeur a^(1/b).</para>
 
-          <para>On peut écrire \FPeval{\x}{root(b,a)}</para>
+          <para>On peut écrire <code>\FPeval{\x}{root(b,a)}</code></para>
         </listitem>
 
         <listitem>
-          <para>La commande \FPpascal{\x}{a} attribe à \x la ligne a du
-          triangle de pascal.</para>
+          <para>La commande <code>\FPpascal{\x}{a}</code> attribe à
+          <code>\x</code> la ligne a du triangle de pascal.</para>
         </listitem>
 
         <listitem>
-          <para>La commande \FPsin{\x}{a} attribue à \x la valeur du sinus de
-          a qui est exprimé en radians. <programlisting>\FPeval{\x}{sin(30*\FPpi/180)}\FPprint{\x}</programlisting>
-          La commande est identique pour les autres fonctions trigonométriques
-          Il faut remplacer sin par le terme entre parenthèse.</para>
+          <para>La commande <code>\FPsin{\x}{a}</code> attribue à
+          <code>\x</code> la valeur du sinus de a qui est exprimé en radians
+          (il existe une commande identique pour le cosinus
+          (<code>cos</code>), la tangente (<code>tan</code>), la cotangente
+          (<code>cot</code>), l'arcsinus (<code>arcsin</code>), l'arccosinus
+          (<code>arccos</code>), l'arctangente (<code>arctan</code>),
+          l'arccotangente (<code>arccot</code>)).</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>cosinus (cos), tangente (tan), cotangente (cot)</para>
-            </listitem>
+          <programlisting>\FPeval{\x}{sin(30*\FPpi/180)}\FPprint{\x}</programlisting>
+        </listitem>
 
-            <listitem>
-              <para>La commande \FPsincos{\x}{\y}{a} attribue à \x la valeur
-              du sinus de a qui est exprimé en radians et \y la valeur du
-              cosinus de a qui est exprimé en radians.</para>
-            </listitem>
+        <listitem>
+          <para>La commande <code>\FPsincos{\x}{\y}{a}</code> attribue à
+          <code>\x</code> la valeur du sinus de <code>a</code> qui est exprimé
+          en radians et <code>\y</code> la valeur du cosinus de <code>a</code>
+          qui est exprimé en radians.</para>
+        </listitem>
 
-            <listitem>
-              <para>La commande \FPtancot{\x}{\y}{a} attribue à \x la valeur
-              de la tangente de a qui est exprimé en radians et \y la valeur
-              de la cotangente de a.</para>
-            </listitem>
+        <listitem>
+          <para>La commande <code>\FPtancot{\x}{\y}{a}</code> attribue à
+          <code>\x</code> la valeur de la tangente de <code>a</code> qui est
+          exprimé en radians et <code>\y</code> la valeur de la cotangente de
+          <code>a</code>.</para>
+        </listitem>
 
-            <listitem>
-              <para>arcsinus (arcsin), arccos(arccos), arctangent (arctan),
-              arccot(arc cotangente)</para>
-            </listitem>
+        <listitem>
+          <para>La commande <code>\FParcsincos{\x}{\y}{a}</code> attribue à
+          <code>\x</code> la valeur de l’arc sinus(a), <code>\x</code> sera
+          exprimé en radians, à <code>\y</code> la valeur de l’arc cosinus(a),
+          <code>\y</code> sera exprimé en radians.</para>
+        </listitem>
 
-            <listitem>
-              <para>La commande \FParcsincos{\x}{\y}{a} attribue à \x la
-              valeur de l’arc sinus(a), \x sera exprimé en radians, à \y la
-              valeur de l’arc cosinus(a), \y sera exprimé en radians.</para>
-            </listitem>
-
-            <listitem>
-              <para>La commande \FParctancot{\x}{\y}{a} attribue à \x la
-              valeur de l’arc tangente(a), \x sera exprimé en radians, à \y la
-              valeur de l’arc cotangente(a), \y sera exprimé en
-              radians.</para>
-            </listitem>
-          </itemizedlist>
+        <listitem>
+          <para>La commande <code>\FParctancot{\x}{\y}{a}</code> attribue à
+          <code>\x</code> la valeur de l’arc tangente(a), <code>\x</code> sera
+          exprimé en radians, à <code>\y</code> la valeur de l’arc
+          cotangente(a), <code>\y</code> sera exprimé en radians.</para>
         </listitem>
       </itemizedlist>
     </sect2>
