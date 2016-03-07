@@ -166,7 +166,7 @@
 
       <para>Dans la version actuelle (à partir de la version 0.156), le nombre
       de copies est limité à 4 095 et le nombre de pages par copies est limité
-      à 63 ( Valeurs par défaut mais modifiables voir <xref
+      à 63 (valeurs par défaut mais modifiables voir <xref
       endterm="code.binaire.titre" linkend="code.binaire"/>).</para>
 
       <para>Le nombre de réponses proposées pour une même question est limité
@@ -613,7 +613,7 @@ lesquels sont positifs ?
           <term>DefaultScoringS:</term>
 
           <listitem>
-            <para>Donne la barème par défaut pour les questions simples
+            <para>Donne le barème par défaut pour les questions simples
             (Reportez-vous à <xref linkend="bareme"/> pour la description des
             barèmes possibles). La valeur par défaut à cette option est le
             barème qui donne un point à la bonne réponse, et zéro aux
@@ -625,7 +625,7 @@ lesquels sont positifs ?
           <term>DefaultScoringM:</term>
 
           <listitem>
-            <para>Donne le barème par défaut pour les questions multiple
+            <para>Donne le barème par défaut pour les questions multiples
             (Reportez-vous à <xref linkend="bareme"/> pour la description des
             barèmes possibles). La valeur par défaut de cette option est
             <code>haut=2</code>, ce qui correspond à un barème donnant deux
@@ -1006,7 +1006,7 @@ Combien y a-t-il d'étoiles dans le ciel ?
 
       <programlisting>![height=2cm]images/oiseau.png!</programlisting>
 
-      <para>Dans cet exemple, l'image <filename>images/zozo.png</filename>
+      <para>Dans cet exemple, l'image <filename>images/oiseau.png</filename>
       située dans le répertoire du projet sera insérée avec une hauteur de
       2cm. Les options que l'on peut utiliser entre les crochets sont celles
       de la commande LaTeX <command>\includegraphics</command> (par exemple,
@@ -1135,7 +1135,8 @@ Combien y a-t-il d'étoiles dans le ciel ?
             textes en arabe. Par défaut, AMC utilisera
             <emphasis>Rasheeq</emphasis>, une police du projet <ulink
             url="http://arabeyes.org/">ArabEyes</ulink> (disponible dans la
-            paquet ttf-arabeyes sur debian et ubuntu par exemple).</para>
+            paquet <package>ttf-arabeyes</package> sur debian et ubuntu par
+            exemple).</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -1812,8 +1813,8 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
             <para><option>fullgroups</option> : annule le paramètre optionnel
             de <command>\restituegroup</command> et
             <command>\copygroup</command>, ainsi chaque groupe est entièrement
-            inséré et copié. (voir <xref endterm="Groupes.questions.titre"
-            linkend="Groupes.questions"/>)</para>
+            inséré et copié (voir <xref endterm="Groupes.questions.titre"
+            linkend="Groupes.questions"/>).</para>
           </listitem>
 
           <listitem>
@@ -1972,32 +1973,30 @@ Parmi les personnalités suivantes, laquelle a été présidente de la républiq
           réponses en dernière position avec la commande
           <command>\lastchoices</command>.</para>
 
-          <programlisting>
-        \begin{question}{color}
-        Which color?
-        \begin{choiceshoriz}
-        \wrongchoice{red}
-        \wrongchoice{blue}
-        \wrongchoice{yellow}
-        \lastchoices
-        \correctchoice{transparent}
-        \wrongchoice{can't say}
-      \end{choiceshoriz}
-        \end{question}
+          <programlisting>\begin{question}{color}
+  Which color?
+  \begin{choiceshoriz}
+    \wrongchoice{red}
+    \wrongchoice{blue}
+    \wrongchoice{yellow}
+    \lastchoices
+    \correctchoice{transparent}
+    \wrongchoice{can't say}
+  \end{choiceshoriz}
+\end{question}
 
-        \begin{questionmult}{number}
-        How many?
-        \begin{choiceshoriz}
-        \wrongchoice{none}
-        \correctchoice{one}
-        \wrongchoice{two}
-        \wrongchoice{three}
-        \lastchoices
-        \correctchoice{not so much}
-        \wrongchoice{a lot}
-        \end{choiceshoriz}
-        \end{questionmult}
-        </programlisting>
+\begin{questionmult}{number}
+  How many?
+  \begin{choiceshoriz}
+    \wrongchoice{none}
+    \correctchoice{one}
+    \wrongchoice{two}
+    \wrongchoice{three}
+    \lastchoices
+    \correctchoice{not so much}
+    \wrongchoice{a lot}
+  \end{choiceshoriz}
+\end{questionmult}       </programlisting>
         </sect4>
       </sect3>
 
@@ -2028,8 +2027,6 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           questions avec la commande <command>\AMCtext</command> (Voir <xref
           linkend="AMCtext"/>).</para>
         </note>
-
-        <para>Un exemple issu de la documentation anglaise.</para>
 
         <para><programlisting>
 \begin{question}{elevation}
@@ -2148,7 +2145,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         </sect4>
 
         <sect4 id="latex.zone.separate">
-          <title>Avec l'option<option> ensemble</option></title>
+          <title>Avec l'option <option>ensemble</option></title>
 
           <para>Dans ce mode, la feuille de réponses est séparée du
           sujet.</para>
@@ -2306,6 +2303,14 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
             optionnel qui permet de ne copier qu'un certain nombre d'éléments,
             comme dans <code>\copygroup[n]{depuis}{vers}</code>.</para>
           </listitem>
+
+          <listitem>
+            <para><code>\copygroupfrom[n]{depuis}{vers}{i}</code> Cette
+            commande fait la même chose que
+            <code>\copygroup[n]{depuis}{vers}</code> mais la sélection débute
+            à l'élément <replaceable>i</replaceable>. Le premier élément a
+            pour valeur d'indice 0.</para>
+          </listitem>
         </itemizedlist>
 
         <para>À l'aide de ces commandes, on peut par exemple composer un sujet
@@ -2323,16 +2328,6 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 \copygroup[5]{GB}{tout}
 \copygroup{GO}{tout}
 \restituegroupe{tout}</programlisting>
-
-        <itemizedlist>
-          <listitem>
-            <para><code>\copygroupfrom[n]{depuis}{vers}{i}</code> Cette
-            commande fait la même chose que
-            <code>\copygroup[n]{depuis}{vers}</code> mais la sélection débute
-            à l'élément <replaceable>i</replaceable>. Le premier élément a
-            pour valeur d'indice 0.</para>
-          </listitem>
-        </itemizedlist>
       </sect3>
 
       <sect3 id="latex.page">
@@ -2397,7 +2392,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
         <para>Concluons par un exemple raisonnable au format A5 :</para>
 
         <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
-        \AMCidsPosition{pos=top}</programlisting>
+\AMCidsPosition{pos=top}</programlisting>
 
         <warning>
           <para>N'utilisez pas le paquet <command>pgfpages</command> ou toutes
@@ -2411,7 +2406,7 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
 
         <para>La commande <command>\AMCboxStyle</command> (nouveau nom de la
         commande <command>\AMCboxDimensions</command> qui reste compatible
-        avec les options ci-dessous ) permet de modifier une ou plusieurs
+        avec les options ci-dessous) permet de modifier une ou plusieurs
         dimensions relatives aux cases à cocher :</para>
 
         <para>Les valeurs par défaut des options sont :</para>
@@ -2533,22 +2528,19 @@ Quel gaz apparaît lors de la combustion incomplète du butane~?
           même dans le sujet (DOC-sujet.pdf). Le code si dessous est à
           inscrire juste après \begin{document}.</para>
 
-          <programlisting>
-        \makeatletter
-        \def\AMCforcecorrect{\AMC@correctrue}
-        \makeatother</programlisting>
+          <programlisting>\makeatletter
+\def\AMCforcecorrect{\AMC@correctrue}
+\makeatother</programlisting>
 
           <para>Vous pouvez inclure cette commande pour une question
-          particulière qui sera encadrée par des accolades pour limiter
-          l'effet. Indiquez un barème nulle ou utilisez la commande
+          particulière qui sera encadrée par des accolades pour en limiter
+          l'effet. Indiquez un barème nul ou utilisez la commande
           <command>\QuestionIndicative</command></para>
 
-          <programlisting>
-        {\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
-         .....
-          \end{questionmult}
-        }
-        </programlisting>
+          <programlisting>{\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
+  .....
+ \end{questionmult}
+}        </programlisting>
         </note>
       </sect3>
 
@@ -2753,7 +2745,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <para>Vous devrez sélectionner cet identifiant dans le menu
           déroulant <guilabel>Titre du code pour association
-          automatique</guilabel>de l'onglet <guibutton>notation</guibutton>
+          automatique</guilabel> de l'onglet <guibutton>notation</guibutton>
           lors de l'association automatique des copies (voir <xref
           linkend="Association"/>).</para>
         </note>
@@ -2763,11 +2755,10 @@ et inscrivez votre nom et prénom ci-dessous.
         devra se trouver dans la partie formulaire, c'est-à-dire après la
         commande <command>AMCdebutFormulaire</command>.</para>
 
-        <para>Notez enfin que la présentation de ces formulaires de saisie de
-        codes peut être légèrement modifiée en changeant la valeur des
-        dimensions <command>\AMCcodeHspace</command>,
-        <command>\AMCcodeVspace</command> et
-        <command>\AMCcodeBoxSep</command>, qui représentent les espaces
+        <para>La présentation de ces formulaires de saisie de codes peut être
+        légèrement modifiée en changeant la valeur des dimensions
+        <command>\AMCcodeHspace</command>, <command>\AMCcodeVspace</command>
+        et <command>\AMCcodeBoxSep</command>, qui représentent les espaces
         horizontaux et verticaux entre les cases, ainsi que les espaces entre
         les cases et leurs étiquette (dans le cas où celles-ci sont inscrites
         à côté). Les valeurs par défaut sont définies de la manière
@@ -5255,7 +5246,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
         étudiants (en général, on choisit la colonne qui contient des numéros
         d'étudiants). Enfin, en vue d'une association automatique, il faut
         encore choisir le nom du code adopté dans la commande LaTeX
-        <command>AMCcode</command>.</para>
+        <command>\AMCcode</command>.</para>
       </sect3>
 
       <sect3 id="Association">
@@ -5268,7 +5259,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
             <para>Pour effectuer une association automatique, il est
             nécessaire d'avoir choisi un critère numérique (en général un
             numéro d'étudiant), d'avoir inclus au moins une commande
-            <command>AMCcode</command> (voir <xref linkend="latex.codes"/>)
+            <command>\AMCcode</command> (voir <xref linkend="latex.codes"/>)
             dans le fichier source LaTeX pour que les étudiants puissent coder
             ce critère numérique et d'avoir une colonne dans le fichier des
             étudiants qui contient le critère numérique.</para>
@@ -5582,7 +5573,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
     <sect2 id="preferences.defaut">
       <title id="preferences.defaut.titre">Les valeurs par défaut du menu
-      préférence</title>
+      Préférences</title>
 
       <para>Vous pouvez modifier les valeurs par défaut pour le traitement des
       scans dans le menu <menuchoice>
@@ -6147,7 +6138,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
 
           <guimenuitem>Personnaliser complétion</guimenuitem>
         </menuchoice> puis entrez <code>\begin{question}{}</code> puis cliquez
-      sur ajouter. Faites de même avec <code>reponses</code> et
+      sur ajouter. Faites de même avec <command>reponses</command> et
       <command>reponseshoriz</command>.</para>
     </sect2>
 
