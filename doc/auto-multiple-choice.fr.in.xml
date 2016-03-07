@@ -1286,8 +1286,6 @@ Durée : 10 minutes.
   \end{reponses}
 \end{questionmult}
 
-\clearpage    <co id="simple.clear" linkends="simple.clear.exp"/>
-
 }   <co id="simple.fin" linkends="simple.fin.exp"/>
 
 \end{document}
@@ -1348,11 +1346,6 @@ Durée : 10 minutes.
             réponses qu'il pense correctes, ou la dernière case (ajoutée
             automatiquement grâce à l'option <option>completemulti</option>
             passée au paquet en ligne 6).</para>
-          </callout>
-
-          <callout arearefs="simple.clear" id="simple.clear.exp">
-            <para>La commande <command>clearpage</command> permet de passer à
-            la page suivante pour le début de la copie suivante.</para>
           </callout>
 
           <callout arearefs="simple.fin" id="simple.fin.exp">
@@ -1464,9 +1457,6 @@ Nom et prénom :
 \end{center}
 
 \restituegroupe{histoire}
-
-\clearpage
-
 }
 
 \end{document}
@@ -1594,8 +1584,6 @@ Durée : 10 minutes.
 %%% fin de l'en-tête de la feuille de réponses
 
 \formulaire    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp"/>
-
-\clearpage    
 
 }  
 
@@ -2660,8 +2648,8 @@ Quel calibre doit-on choisir pour mesurer une tension inconnue?
           <para>AMC gère automatiquement le nombre de pages à générer pour
           chaque sujet. Vous pouvez choisir de fixer un nombre de pages
           identiques pour chaque sujet avec la commande
-          <command>\AMCaddpagesto{entier}</command> à placer juste avant la
-          commande <command>\clearpage</command> .</para>
+          <command>\AMCaddpagesto{entier}</command> à placer à la toute fin de
+          la description de la copie.</para>
         </sect4>
       </sect3>
 
@@ -3914,7 +3902,6 @@ Nom et prénom :
   \end{reponses}
 \end{question}
 
-\clearpage
 }
 
 \end{document}      </programlisting>
@@ -4130,11 +4117,10 @@ Nom et prénom :
           sujet comporte certaines copies ayant un nombre impair de pages, une
           impression recto-verso mettra plusieurs sujets sur une même feuille,
           ce qui les rendra inutilisables. Pour éviter ce problème, vous
-          pouvez remplacer (si ce n'est pas déjà fait), dans le fichier LaTeX
-          du sujet, la commande <command>\clearpage</command> par
-          <command>\AMCcleardoublepage</command>, qui ajoutera les pages
-          blanches nécessaires pour que tous les sujets aient un nombre pair
-          de pages (voir exemple section <xref
+          pouvez utiliser (si ce n'est pas déjà fait), dans le fichier LaTeX
+          du sujet, la commande <command>\AMCcleardoublepage</command>, qui
+          ajoutera les pages blanches nécessaires pour que tous les sujets
+          aient un nombre pair de pages (voir exemple section <xref
           linkend="secensemble"/>).</para>
         </listitem>
 
@@ -4906,8 +4892,6 @@ Durée : 10 minutes.
 \restituegroupe{qqs}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\clearpage
 
 }
 
