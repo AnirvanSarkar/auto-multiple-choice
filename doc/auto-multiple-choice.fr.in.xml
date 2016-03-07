@@ -3281,19 +3281,6 @@ et inscrivez votre nom et prénom ci-dessous.
     <sect2 id="latex.numerical">
       <title>Des questions mathématiques à énoncés aléatoires</title>
 
-      <para>La première précaution à prendre, pour avoir des sujets identiques
-      malgré les recompilations latex est de choisir la base de génération des
-      nombres pseudo-aléatoires.</para>
-
-      <para><programlisting>\FPseed=<replaceable>entier</replaceable>
-</programlisting></para>
-
-      <note>
-        <para><replaceable>entier</replaceable> doit être un entier immuable,
-        qui ne changera jamais : ne pas utiliser de valeur liée à la
-        date !</para>
-      </note>
-
       <sect3 id="latex.numerical.fp">
         <title>Utilisation du package fp</title>
 
@@ -3347,6 +3334,18 @@ et inscrivez votre nom et prénom ci-dessous.
           </calloutlist>Les noms de variables commençant par VQ ont été
         choisis afin de ne pas interférer avec d'autres commandes
         LaTeX.</para>
+
+        <note>
+          <para>Vous pouvez choisir la base de génération des nombres
+          pseudo-aléatoires (obtenus avec <command>random</command>) grâce à
+          la commande</para>
+
+          <para><programlisting>\FPseed=<replaceable>entier</replaceable></programlisting></para>
+
+          <para><replaceable>entier</replaceable> doit être un entier
+          immuable, qui ne changera jamais : ne pas utiliser de valeur liée à
+          la date !</para>
+        </note>
 
         <sect4 id="latex.intervals">
           <title>Choix parmi une suite d'intervalles</title>
@@ -6117,7 +6116,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>      </programl
             toutes les fonctions de calcul) et <code>\FPtrunc</code>, comme
             dans l'exemple suivant qui choisit un réel au hasard entre
             <code>a</code> et <code>a+b</code>, en gardant <code>c</code>
-            chiffres après la virgule : </para>
+            chiffres après la virgule :</para>
 
             <programlisting>\FPeval{\x}{trunc(a+random*b,c)}          </programlisting>
           </note>

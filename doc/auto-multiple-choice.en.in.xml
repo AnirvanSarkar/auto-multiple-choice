@@ -3114,16 +3114,6 @@ and write your first and last names below.
     <sect2 id="latex.numerical">
       <title>Mathematical questions with randomized statements</title>
 
-      <para>First of all, you must set the random seed to be sure to get the
-      same result each time latex is run to compile the subject:</para>
-
-      <para><programlisting>\FPseed=<replaceable>integer</replaceable></programlisting></para>
-
-      <note>
-        <para><replaceable>integer</replaceable> must be fixed, and not
-        computed from date/time values.</para>
-      </note>
-
       <sect3 id="latex.numerical.fp">
         <title>Using package fp</title>
 
@@ -3176,6 +3166,15 @@ and write your first and last names below.
             </callout>
           </calloutlist>Variable names beginning with VQ have been chosen so
         as to avoid interference with other LaTeX commands.</para>
+
+        <note>
+          <para>You can set the random seed with</para>
+
+          <para><programlisting>\FPseed=<replaceable>integer</replaceable></programlisting></para>
+
+          <para><replaceable>integer</replaceable> must be fixed, and not
+          computed from date/time values.</para>
+        </note>
 
         <sect4 id="latex.intervals">
           <title>Choosing an interval</title>
