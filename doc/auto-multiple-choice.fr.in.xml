@@ -1980,6 +1980,35 @@ Durée : 10 minutes.
   \end{choiceshoriz}
 \end{questionmult}       </programlisting>
         </sect4>
+
+        <sect4>
+          <title>Numéro de question</title>
+
+          <para>On peut modifier le numéro de la prochaine question à l'aide
+          de la commande <code>\AMCnumero</code>. Au début de chaque copie, un
+          appel à</para>
+
+          <para><programlisting>\AMCnumero{1}</programlisting></para>
+
+          <para>est effectué, mais cette commande peut être utilisée à tout
+          moment.</para>
+
+          <note>
+            <para>Pour cacher le numéro d'une question particulière et
+            conserver dans le sujet une continuité des numéros, ajouter la
+            commande <command>\AMCquestionNumberfalse</command> juste après
+            <command>\AMCbeginQuestion</command> (ou utiliser la commande
+            ci-dessus) :</para>
+
+            <programlisting>{
+  \AMCquestionNumberfalse
+  \def\AMCbeginQuestion#1#2{}
+  \begin{question}
+    ...
+  \end{question}
+}</programlisting>
+          </note>
+        </sect4>
       </sect3>
 
       <sect3 id="latex.explain">
@@ -2541,25 +2570,6 @@ Durée : 10 minutes.
         Par défaut, elle affiche un trèfle :</para>
 
         <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
-
-        <para>Enfin, on peut modifier le numéro de la prochaine question à
-        laide de la commande <code>\AMCnumero</code>. Au début de chaque
-        copie, un appel à</para>
-
-        <para><programlisting>\AMCnumero{1}</programlisting></para>
-
-        <para>est effectué, mais cette commande peut être utilisée à tout
-        moment.</para>
-
-        <note>
-          <para>La compatibilité avec le paquet Cleveref ( voir <xref
-          linkend="Cleveref"/>) oblige chaque question à posséder un numéro
-          même si celui-ci ne s'affiche pas. Pour afficher dans le sujet une
-          continuité des numéros, ajouter la commande
-          <command>\AMCquestionNumberfalse</command> juste après
-          <command>\AMCbeginQuestion</command> ou utiliser la commande
-          ci-dessus.</para>
-        </note>
 
         <warning>
           <para>Avec le mode copies préremplies (voir <xref

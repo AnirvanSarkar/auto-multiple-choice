@@ -1891,6 +1891,34 @@ Durée : 10 minutes.
   \end{choiceshoriz}
 \end{questionmult}        </programlisting>
         </sect4>
+
+        <sect4>
+          <title>Question numbers</title>
+
+          <para>One can modify the number of the next question with the
+          <code>\AMCnumero command</code>. At the beginning of each
+          realization of the test, a call to</para>
+
+          <para><programlisting>\AMCnumero{1}</programlisting></para>
+
+          <para>is performed, but this command can be used at any
+          place.</para>
+
+          <note>
+            <para>When you want to hide the number for a particular question
+            and do not want to increase the question number, use
+            <command>\AMCquestionNumberfalse</command> command as in the
+            following example:</para>
+
+            <programlisting>{
+  \AMCquestionNumberfalse
+  \def\AMCbeginQuestion#1#2{}
+  \begin{question}
+    ...
+  \end{question}
+}</programlisting>
+          </note>
+        </sect4>
       </sect3>
 
       <sect3 id="latex.explain">
@@ -2436,30 +2464,6 @@ Durée : 10 minutes.
         the others. By default, it displays a club.</para>
 
         <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
-
-        <para>Finally, one can modify the number of the next question with the
-        <code>\AMCnumero command</code>. At the beginning of each realization
-        of the test, a call to</para>
-
-        <para><programlisting>\AMCnumero{1}</programlisting></para>
-
-        <para>is performed, but this command can be used at any place.</para>
-
-        <note>
-          <para>Each question must have a number, even it is not displayed, to
-          make sure of compatibility with cleveref package. When you want to
-          hide the number for a particular question and do not want to
-          increase the number, use <command>\AMCquestionNumberfalse</command>
-          command as in the following example:</para>
-
-          <programlisting>{
-  \AMCquestionNumberfalse
-  \def\AMCbeginQuestion#1#2{}
-  \begin{question}
-    ...
-  \end{question}
-}</programlisting>
-        </note>
 
         <warning>
           <para>With nominative sheets (see <xref
