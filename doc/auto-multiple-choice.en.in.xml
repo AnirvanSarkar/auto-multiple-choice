@@ -3489,9 +3489,14 @@ respective parameters \VQa{} and \VQb{}.
                 <code>scoreapprox</code> points (defaults to 0).</para>
 
                 <warning>
-                  <para>AMC handle all numbers (decimals included) as integers
-                  before subtract and compare with <code>approx</code>
-                  .</para>
+                  <para>AMC converts all numbers (decimals included) to
+                  integers (simply removing the decimal point) before
+                  subtracting them and comparing with <code>approx</code>. As
+                  an example, with <code>decimals=2</code>, if the correct
+                  answer is 3.14 and the given answer is 3.2, then the integer
+                  difference is 320-314=6, so that the student gets
+                  <code>scoreapprox</code> points only if <code>approx</code>
+                  is 6 or greater.</para>
                 </warning>
               </listitem>
             </varlistentry>

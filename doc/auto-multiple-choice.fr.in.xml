@@ -3680,9 +3680,14 @@ et inscrivez votre nom et prénom ci-dessous.
                 0.</para>
 
                 <warning>
-                  <para>AMC considère tous les nombres (décimaux inclus) comme
-                  des entiers avant de faire la différence et de comparer avec
-                  <code>approx</code>.</para>
+                  <para>AMC transforme tous les nombres (décimaux inclus)
+                  comme des entiers (en enlevant la virgule) avant de faire la
+                  différence et de comparer avec <code>approx</code>. Par
+                  exemple, si <code>decimals=2</code>, si la bonne valeur est
+                  3,14 et si la valeur saisie est 3,2 alors la différence
+                  entière calculée est 320-314=6, de sorte que les points
+                  <code>scoreapprox</code> ne sont acquis que si
+                  <code>approx</code> vaut 6 ou plus.</para>
                 </warning>
               </listitem>
             </varlistentry>
