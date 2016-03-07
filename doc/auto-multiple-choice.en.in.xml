@@ -4582,16 +4582,16 @@ Name:
         every response is false, i.e. the wrong boxes have been checked and
         the right boxes are not). Operations allowed in those formulas are the
         four simple operations (<code>+</code> <code>-</code> <code>*</code>
-        <code>/</code>), cases operator <code>( ? : )</code>, parenthesis and
+        <code>/</code>), test operator <code>( ? : )</code>, parenthesis and
         all perl operators.</para>
 
         <note>
-          <para>The operators are : &gt; greater, &gt;= greater or equal, &lt;
-          lesser, &lt;= lesser or equal, == equal, != no equal</para>
-        </note>
+          <para>The test operator is written<programlisting>( test ? if true: if false)</programlisting></para>
 
-        <note>
-          <para>Test function is <programlisting>( test ? if true: if false)</programlisting></para>
+          <para>The test part can use operators like <code>&gt;</code>
+          (greater), <code>&gt;=</code> (greater or equal), <code>&lt;</code>
+          (lesser), <code>&lt;=</code> (lesser or equal), <code>==</code>
+          (equal), <code>!=</code> (different).</para>
         </note>
 
         <para>Other variables can also be used:</para>
