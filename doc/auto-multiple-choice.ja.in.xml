@@ -3529,34 +3529,32 @@ Name:
           </listitem>
 
           <listitem>
-            <para>（<menuchoice><guimenu>編集</guimenu><guimenuitem>設定</guimenuitem></menuchoice>ウィンドウの<guilabel>プロジェクト</guilabel>タブで）正の<emphasis>満点</emphasis>がパラメータとして設定されている場合、受験者の素点合計を<emphasis>素点合計の満点</emphasis>（完答での素点合計）で割り、設定されている<emphasis>満点</emphasis>を掛けることにより、受験者の<emphasis>得点</emphasis>が得られます。これにより、受験者が全問正解していれば、満点を得ることになります。満点を100点に設定した場合、受験者の得点は正解のパーセンテージとみなすことができます。</para>
+            <para>（<menuchoice><guimenu>編集</guimenu><guimenuitem>設定</guimenuitem></menuchoice>ウィンドウの<guilabel>プロジェクト</guilabel>タブで）正の<emphasis>満点</emphasis>がパラメータとして設定されている場合、受験者の素点合計を<emphasis>素点合計の満点</emphasis>（完答での素点合計）で割り、<emphasis>満点</emphasis> - <emphasis>下駄</emphasis>の差を掛けて<emphasis>下駄</emphasis>を加えることにより、受験者の<emphasis>得点</emphasis>を求めます。これにより、受験者が全問正解していれば満点を、まったく正解できなければ<emphasis>下駄</emphasis>の得点を得ることになります。<emphasis>満点</emphasis>を100点、<emphasis>下駄</emphasis>を0点に設定した場合、受験者の得点は正解のパーセンテージとみなすことができます。</para>
+          </listitem>
+
+          <listitem>
+            <para>得点は、
+            <menuchoice>
+                <guimenu>編集</guimenu>
+
+                <guisubmenu>設定</guisubmenu>
+
+                <guimenuitem>プロジェクト</guimenuitem>
+              </menuchoice>にある以下の設定を用いて丸められます:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>最小単位: 整数値が必要なら1に設定します。1/4単位で丸めるときは0.25に設定するなどできます。丸めを行わないときは0に設定してください。</para>
+              </listitem>
+
+              <listitem>
+                <para>丸めタイプ: 切捨て, 丸め, 切上げ</para>
+              </listitem>
+            </itemizedlist>
           </listitem>
         </orderedlist>
       </sect3>
     
-      <sect3 id="calculing.final.mark">
-        <title>最終得点の計算</title>
-  
-        <para>最終得点の計算方法は次のメニューから設定します:<menuchoice>
-            <guimenu>編集</guimenu>
-
-            <guisubmenu>設定</guisubmenu>
-
-            <guimenuitem>プロジェクト</guimenuitem>
-          </menuchoice>
-          <itemizedlist>
-            <listitem>
-              <para>最小単位: 丸めの単位を選択</para>
-            </listitem>
-
-            <listitem>
-              <para>丸めタイプ: 切捨て, 丸め, 切上げ</para>
-            </listitem>
-          </itemizedlist>
-        </para>
-       
-      </sect3>
-
       <sect3 id="correc.test">
         <title>採点誤りの修正</title>
 
