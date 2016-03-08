@@ -3905,7 +3905,7 @@ Name :
         <guilabel>upper darkness threshold</guilabel>, the box is considered
         as been ticked. If the darkness ratio is greater than the
         <guilabel>upper darkness ratio</guilabel>, the box is considered as
-        not ticked. </para>
+        not ticked.</para>
       </sect3>
 
       <sect3 id="gui.correct">
@@ -4653,34 +4653,41 @@ Name:
                 <guimenuitem>Preferences</guimenuitem>
               </menuchoice> window), the total score of the student is divided
             by the <emphasis>maximum total score</emphasis> (which is the
-            total score for a perfect copy), and multiplied by the
-            <emphasis>maximum mark</emphasis>, to get the student's
-            <emphasis>mark</emphasis>. This way, if the student answered
-            perfectly to all questions, his mark will be the maximum mark. If
-            you set the maximum mark to 100, the student's mark can be seen as
-            a percentage of good answers.</para>
+            total score for a perfect copy), and multiplied by the difference
+            (<emphasis>maximal mark</emphasis> - <emphasis>minimal
+            mark</emphasis>), then added to the <emphasis>minimal
+            mark</emphasis> to get the student's <emphasis>mark</emphasis>.
+            This way, if the student answered perfectly to all questions, his
+            mark will be the maximum mark, and a student with null score will
+            get the <emphasis>minimal mark</emphasis>. If you set the
+            <emphasis>maximal mark</emphasis> to 100 and the <emphasis>minimal
+            mark</emphasis> to 0, the student's mark can be seen as a
+            percentage of good answers.</para>
+          </listitem>
+
+          <listitem>
+            <para>This mark is rounded using the following settings from
+            <menuchoice>
+                <guimenu>Edit</guimenu>
+
+                <guisubmenu>Preferences</guisubmenu>
+
+                <guimenuitem>Project</guimenuitem>
+              </menuchoice>:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Grain: set it to 1 if you need an integer value, set it
+                to 0.25 if you need to round up to a quarter, etc. Set it to 0
+                if you want to cancel rounding.</para>
+              </listitem>
+
+              <listitem>
+                <para>Rounding type: lower, normal, greater</para>
+              </listitem>
+            </itemizedlist>
           </listitem>
         </orderedlist>
-      </sect3>
-
-      <sect3 id="calculing.final.mark">
-        <title>Calculing final mark</title>
-
-        <para>You can configure final mark computation using <menuchoice>
-            <guimenu>Edit</guimenu>
-
-            <guisubmenu>Preferences</guisubmenu>
-
-            <guimenuitem>Project</guimenuitem>
-          </menuchoice> <itemizedlist>
-            <listitem>
-              <para>Grain : choose the rounding value</para>
-            </listitem>
-
-            <listitem>
-              <para>Rounding type : lower, normal, greater</para>
-            </listitem>
-          </itemizedlist></para>
       </sect3>
 
       <sect3 id="correc.test">

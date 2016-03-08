@@ -5004,37 +5004,45 @@ Durée : 10 minutes.
               </menuchoice>), le <emphasis>score total</emphasis> est divisé
             par le <emphasis>score maximal</emphasis> (c'est-à-dire le
             <emphasis>score total</emphasis> calculé pour une copie parfaite),
-            puis multiplié par la <emphasis>note maximale</emphasis>, pour
-            obtenir la <emphasis>note</emphasis> de l'étudiant. De cette
-            façon, un étudiant ayant répondu de manière parfaite se verra
-            attribuer la <emphasis>note maximale</emphasis>. Avec une
-            <emphasis>note maximale</emphasis> fixée à 100, la
-            <emphasis>note</emphasis> de l'étudiant pourra être vue comme un
-            pourcentage de bonnes réponses. En France, on utilise souvent une
-            <emphasis>note maximale</emphasis> égale à 20.</para>
+            puis multiplié par la différence (<emphasis>note
+            maximale</emphasis> - <emphasis>note minimale</emphasis>), auquel
+            on ajoute enfin la <emphasis>note minimale</emphasis> pour obtenir
+            la <emphasis>note</emphasis> de l'étudiant. De cette façon, un
+            étudiant ayant répondu de manière parfaite se verra attribuer la
+            <emphasis>note maximale</emphasis> et un étudiant ayant obtenu un
+            score nul se verra attribuer la <emphasis>note
+            minimale</emphasis>. Avec une <emphasis>note maximale</emphasis>
+            fixée à 100 et une <emphasis>note minimale</emphasis> fixée à 0,
+            la <emphasis>note</emphasis> de l'étudiant pourra être vue comme
+            un pourcentage de bonnes réponses. En France, on utilise souvent
+            une <emphasis>note maximale</emphasis> égale à 20 et une
+            <emphasis>note minimale</emphasis> égale à 0.</para>
+          </listitem>
+
+          <listitem>
+            <para>La note ainsi obtenue est arrondie en utilisant les options
+            suivantes de <menuchoice>
+                <guimenu>Édition</guimenu>
+
+                <guisubmenu>Préférences</guisubmenu>
+
+                <guimenuitem>Projet</guimenuitem>
+              </menuchoice> :</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Granularité : pour obtenir un arrondi à l'entier,
+                choisir la valeur 1. Pour un arrondi au quart de point,
+                choisir 0,25, etc. Une valeur nulle annulera l'arrondi
+                final.</para>
+              </listitem>
+
+              <listitem>
+                <para>Type d'arrondi : inférieur, normal, supérieur</para>
+              </listitem>
+            </itemizedlist>
           </listitem>
         </orderedlist>
-      </sect3>
-
-      <sect3 id="Calcul.note.finale">
-        <title>Calcul de la note finale</title>
-
-        <para>Le calcul de la note finale prend en compte les options
-        suivantes : <menuchoice>
-            <guimenu>Édition</guimenu>
-
-            <guisubmenu>Préférences</guisubmenu>
-
-            <guimenuitem>Projet</guimenuitem>
-          </menuchoice> <itemizedlist>
-            <listitem>
-              <para>Granularité : choisissez votre valeur d'arrondi</para>
-            </listitem>
-
-            <listitem>
-              <para>Type d'arrondi : inférieur, normal, supérieur</para>
-            </listitem>
-          </itemizedlist></para>
       </sect3>
 
       <sect3 id="correction.sujet">
