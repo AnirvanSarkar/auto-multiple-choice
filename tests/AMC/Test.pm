@@ -129,6 +129,7 @@ sub new {
              "to-stdout!"=>\$to_stdout);
 
   $self->{tracedest} = 'STDOUT' if($to_stdout);
+  binmode $self->{tracedest}, ":utf8";
 
   $self->install;
 
@@ -255,7 +256,7 @@ sub see_file {
 sub trace {
   my ($self,@m)=@_;
   print { $self->{tracedest} } join(' ',@m)."\n";
-  open LOG,">>$self->{'debug_file'}";
+  open LOG,">>:utf8",$self->{'debug_file'};
   print LOG join(' ',@m)."\n";
   close LOG;
 }
