@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -3410,11 +3410,11 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <note>
             <para>Si vous préférez la virgule comme séparateur décimal, il
-            faut utiliser la commande <command>\numprint</command> du paquet
-            <package>numprint</package> ( voir <xref endterm="Divers.titre"
+            faut utiliser la commande <command>\num</command> du paquet
+            <package>siunitx</package> ( voir <xref endterm="Divers.titre"
             linkend="Divers"/>).</para>
 
-            <programlisting>\def\AMCIntervalFormat#1#2{[\numprint{#1}-\,\numprint{#2}[}</programlisting>
+            <programlisting>\def\AMCIntervalFormat#1#2{[\num{#1}-\,\num{#2}[}</programlisting>
           </note>
         </sect4>
 
@@ -4260,8 +4260,7 @@ Nom et prénom :
 
                       <guimenuitem>Scan</guimenuitem>
 
-                      <guimenuitem>Process scan with 3 corner
-                      marks</guimenuitem>
+                      <guimenuitem>Contrôle des scans avec 3 angles marqués</guimenuitem>
                     </menuchoice></para>
                 </listitem>
 
@@ -5592,7 +5591,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
         </listitem>
 
         <listitem>
-          <para>Process scans with 3 corner marks : décoché</para>
+          <para>Contrôle des scans avec 3 angles marqués : décoché</para>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -6085,10 +6084,18 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>      </programl
       <itemizedlist>
         <listitem>
           <para>La commande <code>\FPprint{\x}</code> permet d'afficher la
-          valeur de x. Cependant, la commande <code>\numprint{...}</code> du
-          paquet <code> \usepackage[autolanguage]{numprint}</code> est
-          préférable car elle affiche une virgule pour les nombres décimaux au
+          valeur de x. Cependant, la commande <code>\num{...}</code> du
+          paquet <code>siunitx</code> est préférable car 
+          elle affiche une virgule pour les nombres décimaux au
           lieu d'un point et groupe par trois les chiffres.</para>
+          <programlisting>
+          <para>
+          \usepackage{siunitx}
+          \sisetup{locale = FR,detect-all,quotient-mode=fraction,
+          input-product=*, list-final-separator = { \translate{et} },
+          list-pair-separator = { \translate{et} },range-phrase = { \translate{à} },
+          separate-uncertainty = true,group-minimum-digits=3}</para>
+          </programlisting>
         </listitem>
 
         <listitem>
@@ -6097,7 +6104,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>      </programl
         </listitem>
 
         <listitem>
-          <para>La fonction <code>\FPseed{12345}</code> permet de modifier le
+          <para>La fonction <code>\FPseed=12345</code> permet de modifier le
           système de génération de nombre aléatoire (choisir un entier fixé à
           sa convenance).</para>
         </listitem>
@@ -6157,7 +6164,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>      </programl
 
         <listitem>
           <para>La commande <code>\FPiflt{\x}{\y} {instruction 1} \else
-          {instruction 2} \fi</code> vérifie si <code>\x</code> est inérieur à
+          {instruction 2} \fi</code> vérifie si <code>\x</code> est inférieur à
           <code>\y</code> dans ce cas l'instruction 1 est lancée sinon c'est
           l'instruction 2.</para>
 
