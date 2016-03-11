@@ -152,6 +152,20 @@ sub define_statements {
 		   ." ELSE auto END AS real"
 		   ." FROM $at"
 		   ." ) WHERE real=?||''"},
+     'realCounts'=>{'sql'=>
+                    " SELECT t.student AS student,t.copy AS copy,t.real AS real,t.manual AS manual,t.auto AS auto,c.n AS n"
+                    ." FROM"
+                    ." ( SELECT CASE"
+                    ."   WHEN manual IS NOT NULL THEN manual"
+                    ."   ELSE auto END AS real,student,copy,manual,auto FROM $at"
+                    ." ) AS t,"
+                    ." ( SELECT CASE"
+                    ."   WHEN manual IS NOT NULL THEN manual"
+                    ."   ELSE auto END AS real,"
+                    ."   COUNT(*) AS n FROM $at GROUP by real"
+                    ." ) AS c"
+                    ." ON t.real=c.real"
+                   },
      'realBack'=>{'sql'=>"SELECT student,copy FROM ( SELECT CASE"
 		  ." WHEN manual IS NOT NULL THEN manual"
 		  ." ELSE auto END AS real, student, copy"
@@ -300,6 +314,40 @@ sub state {
     my $nb=$self->sql_single($self->statement('realCount'),$r);
     return($nb==1 ? 1 : 2);
   }
+}
+
+# counts_hash() returns a hashref $r that can be used to get the
+# number of copies that has the same associated student as some copy.
+#
+# if $student,$copy is associated with a student,
+# $r->{studentids_string($student,$copy)} is a hashref with
+# manual -> student ID of manual association
+# auto   -> student ID of auto association
+# real   -> associated student ID
+# n      -> number of copies with the sams associated student
+# state  -> the same as state($student,$copy)
+# color  -> color used in copies list
+
+sub counts_hash {
+  my ($self)=@_;
+  my $r={};
+  for my $l (@{$self->dbh->selectall_arrayref($self->statement('realCounts'),
+                                              { Slice => {} })}) {
+    my $etat=(!defined($l->{real}) || !$l->{real} || $l->{real} eq 'NONE' ? 0
+              : $l->{n}==1 ? 1 : 2);
+    $r->{studentids_string($l->{student},$l->{copy})}=
+      {%$l,
+       etat=>$etat,
+       color=>($etat==0 ?
+               (defined($l->{manual}) && $l->{manual} eq 'NONE' ? 'salmon' : undef)
+               :
+               $etat==1 ?
+               ($l->{manual} ? 'lightgreen' : 'lightblue')
+               :
+               'salmon'),
+      };
+  }
+  return($r);
 }
 
 # delete_target($code) removes associations made with student ID $code

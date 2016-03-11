@@ -456,38 +456,18 @@ sub maj_contenu_liste_sc {
 #
 # {IN:}
 sub maj_couleurs_liste { # mise a jour des couleurs la liste
-    my ($self)=@_;
-
-    for my $ii (0..$#{$self->{'images'}}) {
-      my @sc=$self->image_sc($ii);
-      my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$ii);
-      if($iter) {
-	my $etat=$self->{'assoc'}->state(@sc);
-	my $coul;
-	if($etat==0) {
-	  my $x=$self->{'assoc'}->get_manual(@sc);
-	  if(defined($x) && $x eq 'NONE') {
-	    $coul='salmon';
-	  } else {
-	    $coul=undef;
-	  }
-	} elsif($etat==1) {
-	  if($self->{'assoc'}->get_manual(@sc)) {
-	    $coul='lightgreen';
-	  } else {
-	    $coul='lightblue';
-	  }
-	} else {
-	  $coul='salmon';
-	}
-	$self->{'copies_store'}->set($iter,
-				     COPIES_BG,$coul,
-				    );
-      } else {
-	debug_and_stderr "*** [color] no iter for image $ii, sheet "
-	  .studentids_string(@sc)." ***\n";
-      }
-    }
+  my ($self)=@_;
+  my $counts=$self->{'assoc'}->counts_hash();
+  my $iter=$self->{'copies_store'}->get_iter_first();
+  while(defined($iter)) {
+    my @sc=$self->{'copies_store'}->get($iter,COPIES_STUDENT,COPIES_COPY);
+    $self->{'copies_store'}
+      ->set($iter,
+            COPIES_BG,
+            $counts->{studentids_string(@sc)}->{color},
+           );
+    $iter=$self->{'copies_store'}->iter_next($iter);
+  }
 }
 
 # Quits.
