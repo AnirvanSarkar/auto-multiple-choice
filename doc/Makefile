@@ -21,14 +21,14 @@ SHELL=/bin/sh
 
 include ../Makefile-all.conf
 
-DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard *.xml))
+DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard auto-multiple-choice.*.xml))
 
 IMAGES=$(addprefix html/images/,$(notdir $(wildcard img_src/*.svg))) $(addprefix html/images/callouts/,$(notdir $(wildcard img_src/callouts/*.svg)))
 BLOCK_IMAGES=$(addprefix img_pdf/,$(notdir $(wildcard img_src/*.svg)))
 
 MODELS=$(wildcard modeles/*/*.d)
 
-all: $(filter-out %.ja.pdf,$(DOCBOOKS:.xml=.pdf)) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz) html/index.html;
+all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz) html/index.html;
 
 images: $(IMAGES:.svg=.png)
 
@@ -53,15 +53,25 @@ html/index.html: FORCE
 	./index.pl $(DOCBOOKS:.xml=) > $@
 
 %.tex: %.xml amcdocstyle.sty
-	dblatex -t tex --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
+	 case $< in \
+	   *.ja.xml) dblatex -P latex.encoding=utf8 -b xetex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@ ;; \
+	   *.xml) dblatex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@ ;; \
+	 esac
 
 %.pdf: %.tex $(BLOCK_IMAGES:.svg=.pdf)
 	export TEXINPUTS=./img_pdf/: ; case $< in \
-	  *.ja.tex) platex $<; platex $<; dvipdf $*.dvi ;; \
+	  *.ja.tex) \
+            sed -i -e '/setuplocale/a\
+\\usepackage{xeCJK}\
+\\setCJKmainfont{IPAexMincho}\
+\\setCJKsansfont{IPAexGothic}\
+\\setCJKmonofont{IPAexGothic}\
+' $<; \
+            xelatex $<; xelatex $< ;; \
 	  *.tex) pdflatex $<; pdflatex $< ;; \
 	esac
 	perl -pi -e 's:/ID \[<[A-F0-9]+> <[A-F0-9]+>\]:/ID [<00> <00>]:i' $@
-	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
+	rm -f $(foreach ext,aux bak cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
 
