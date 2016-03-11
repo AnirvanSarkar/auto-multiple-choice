@@ -1915,7 +1915,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 \AMCinterIquest=0pt
 \AMCinterBquest=3ex</programlisting>
 
-        <para>これらの寸法は、設問間（<code>quest</code>）あるいは選択肢間（<code>rep</code>）の垂直間隔で、またボックスモード用（<code>B</code>。<command>\AMCBoxedAnswers</command>の使用時や<option>box</option>パッケージオプション使用時）と標準モード用（<code>I</code>）です。</para>
+        <para>これらの寸法は、設問間（<code>quest</code>）と選択肢間（<code>rep</code>）の垂直間隔で、またボックスモード用（<code>B</code>−<command>\AMCBoxedAnswers</command>の使用時や<option>box</option>パッケージオプション使用時）と標準モード用（<code>I</code>）です。</para>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -2675,9 +2675,9 @@ $\longleftarrow{}$\hspace{0pt plus 1cm} 受験番号を以下にマークし、�
 
           <programlisting>\AMCnumericOpts{scoreexact=3,borderwidth=2pt}</programlisting>
 
-          <para>さらに、（<code>separateanswersheet</code>オプションで別紙答案用紙を使用していて）別紙答案用紙の外で<command>\AMCnumericChoices</command>を用いた設問に付加するテキストを、<command>\AMCntextGoto</command>コマンドを再定義して設定することができます:</para>
+          <para>さらに、<code>separateanswersheet</code>オプションにより別紙答案用紙を使用する場合、<command>\AMCntextGoto</command>コマンドを再定義することにより、問題用紙側の<command>\AMCnumericChoices</command>を使用する各設問の最後に付加するテキストを設定することができます:</para>
 
-          <programlisting>\def\AMCntextGoto{\par{\bf\emph{別紙答案用紙に解答を記入してください。}}}</programlisting>
+          <programlisting>\def\AMCntextGoto{\par{\bf\emph{解答は別紙答案用紙に記入してください。}}}</programlisting>
 
         </sect4>
       </sect3>
