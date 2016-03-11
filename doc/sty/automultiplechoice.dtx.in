@@ -2125,6 +2125,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \ifnum\AMCbin@ndigits<#1\advance\AMCbin@ndigits\@ne%
 \AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\repeat%
 \the\AMCbin@sequence%
+\ifnum\AMCbin@ndigits>#1\PackageError{automultiplechoice}{Too low AMC@NCB value (got #1 but needs \the\AMCbin@ndigits)}{Number of available digits is #1, but needs \the\AMCbin@ndigits}\fi%
 }}
 %    \end{macrocode}\end{macro}
 %
