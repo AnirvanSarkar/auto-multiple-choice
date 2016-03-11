@@ -71,7 +71,7 @@ html/index.html: FORCE
 	  *.tex) pdflatex $<; pdflatex $< ;; \
 	esac
 	perl -pi -e 's:/ID \[<[A-F0-9]+> <[A-F0-9]+>\]:/ID [<00> <00>]:i' $@
-	rm -f $(foreach ext,aux bak cb cb2 glo idx log out toc,$*.$(ext))
+	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
 
