@@ -188,8 +188,6 @@ sub new {
 
 	push @bouton_nom,$b;
 	push @bouton_eb,$eb;
-	$b->show_all();
-	$eb->show();
 	$b->signal_connect (clicked => sub { $self->choisit($i) });
 	$b->set_focus_on_click(0);
 	$self->style_bouton($i);
@@ -356,6 +354,8 @@ sub set_n_cols {
     }
   }
   $self->{'scrolled_tableau'}->set_policy('never','automatic');
+
+  $self->{'tableau'}->show_all();
 
   Gtk2->main_iteration while ( Gtk2->events_pending );
   $self->{'general'}->window()->set_cursor(undef);
