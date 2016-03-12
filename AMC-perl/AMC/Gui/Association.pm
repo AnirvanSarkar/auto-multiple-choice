@@ -336,9 +336,11 @@ sub set_n_cols {
   $self->{'general'}->window()->set_cursor($self->{'cursor_watch'});
   Gtk2->main_iteration while ( Gtk2->events_pending );
 
-  $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
+  $self->{'tableau'}->hide();
 
   $self->{'tableau'}->foreach(sub { $self->{'tableau'}->remove(shift); });
+
+  $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
 
   my $x=0;
   my $y=0;
