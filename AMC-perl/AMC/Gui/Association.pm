@@ -158,6 +158,8 @@ sub new {
 						 'Glib::String',
 						 );
 
+    $self->initial_size;
+
     my @bouton_nom=();
     my @bouton_eb=();
     $self->{'boutons'}=\@bouton_nom;
@@ -286,8 +288,6 @@ sub new {
     $self->{'assoc'}->begin_read_transaction('ANCL');
     $self->maj_couleurs_liste();
     $self->{'assoc'}->end_transaction('ANCL');
-
-    $self->initial_size;
 
     return($self);
 }
