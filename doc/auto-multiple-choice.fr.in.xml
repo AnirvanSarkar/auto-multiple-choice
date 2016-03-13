@@ -1287,7 +1287,7 @@ Durée : 10 minutes.
   \end{reponses}
 \end{questionmult}
 
-\AMCaddpagesto{3} <co id="AMCaddpage" linkends="AMCaddpage.exp"/>
+\AMCaddpagesto{3} <co id="AMCaddpagesto" linkends="AMCaddpagesto.exp"/>
 
 }   <co id="simple.fin" linkends="simple.fin.exp"/>
 
@@ -1351,7 +1351,7 @@ Durée : 10 minutes.
             passée au paquet en ligne 6).</para>
           </callout>
 
-          <callout arearefs="AMCaddpage" id="AMCaddpage.exp">
+          <callout arearefs="AMCaddpagesto" id="AMCaddpagesto.exp">
             <para>Facultatif voir <xref linkend="latex.layout.npages"/>.</para>
           </callout>
 
@@ -1569,7 +1569,7 @@ Durée : 10 minutes.
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
 
-% \AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.sujet" linkends="AMCaddpage.separateanswersheet.sujet.exp"/>
+% \AMCaddpagesto{3} <co id="AMCaddpagesto.separateanswersheet.sujet" linkends="AMCaddpagesto.separateanswersheet.sujet.exp"/>
 
 \AMCdebutFormulaire    <co id="debut.form" linkends="debut.form.exp"/>
 
@@ -1594,7 +1594,7 @@ Durée : 10 minutes.
 
 \formulaire    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp"/>
 
-\AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.total" linkends="AMCaddpage.separateanswersheet.total.exp"/>
+\AMCaddpagesto{3} <co id="AMCaddpagesto.separateanswersheet" linkends="AMCaddpagesto.separateanswersheet.exp"/>
 
 }  
 
@@ -1611,10 +1611,6 @@ Durée : 10 minutes.
             est facultative).</para>
           </callout>
 
-          <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
-            <para>Facultatif voir <xref linkend="latex.layout.npages"/>. (Ici commande commentée donc sans effet.) </para>
-          </callout>
-
           <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
             <para>Ce saut de page précède la page spéciale où seront
             regroupées toutes les cases à cocher. Si on imprime en
@@ -1623,6 +1619,10 @@ Durée : 10 minutes.
             formulaire soit sur une feuille séparée des autres. Si on imprime
             en recto simple, on peut utiliser simplement
             <command>\clearpage</command>.</para>
+          </callout>
+
+          <callout arearefs="AMCaddpagesto.separateanswersheet.sujet" id="AMCaddpagesto.separateanswersheet.sujet.exp">
+            <para>Facultatif voir <xref linkend="latex.layout.npages"/>. (Ici commande commentée donc sans effet.) </para>
           </callout>
 
           <callout arearefs="debut.form" id="debut.form.exp">
@@ -1641,10 +1641,11 @@ Durée : 10 minutes.
             <para>C'est la commande LaTeX <command>formulaire</command> qui
             écrit toutes les cases à cocher.</para>
           </callout>
-
-          <callout arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
-            <para>Facultatif voir <xref linkend="latex.layout.npages"/>.</para>
+  
+            <callout arearefs="AMCaddpagesto.separateanswersheet" id="AMCaddpagesto.separateanswersheet.exp">
+          <para>Facultatif voir <xref linkend="latex.layout.npages"/>.</para>
           </callout>
+  
         </calloutlist></para>
 
       <warning>
@@ -2672,16 +2673,12 @@ Durée : 10 minutes.
           <sect5 id="latex.layout.npages.separateanswersheet">
             <title>Avec l'option <option>ensemble</option></title>
 
-              <calloutlist>
-               <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
-                  <para> Le nombre total de pages du sujet est égal au nombre fixé (ici 3). Effacez ou commentez
+                  <para> Placé avant <command>\AMCdebutFormulaire</command> :
+                  le nombre total de pages du sujet est égal au nombre fixé (ici 3). Effacez ou commentez
                   <command>\AMCcleardoublepage</command> ou <command>\clearpage</command>.</para>
-              </callout>
 
-               <callout arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
-                  <para> Le nombre total de pages sujet+formulaire est égal au nombre fixé (ici 3).</para>
-              </callout>
-            </calloutlist>
+                  <para> Placé après <commande>\formulaire</commande> : le nombre total de pages sujet+formulaire est égal au nombre fixé (ici 3).</para>
+
             <warning><para>Insérez une seule commande <command>\AMCaddpagesto{entier}</command> dans le fichier.</para></warning>
           </sect5>
         </sect4>

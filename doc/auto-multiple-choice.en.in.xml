@@ -1229,7 +1229,7 @@ Duration : 10 minutes.
   \end{choices}
 \end{questionmult}
 
-\AMCaddpagesto{3} <co id="AMCaddpage" linkends="AMCaddpage.exp"/>
+\AMCaddpagesto{3} <co id="AMCaddpagesto" linkends="AMCaddpagesto.exp"/>
 
 }   <co id="simple.fin" linkends="simple.fin.exp"/>
 
@@ -1290,7 +1290,7 @@ Duration : 10 minutes.
             used in the reference to the package in line 6).</para>
           </callout>
 
-          <callout arearefs="AMCaddpage" id="AMCaddpage.exp">
+          <callout arearefs="AMCaddpagesto" id="AMCaddpagesto.exp">
             <para>Optional see<xref linkend="latex.layout.npages"/>.</para>
           </callout>
 
@@ -1509,7 +1509,7 @@ Durée : 10 minutes.
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
 
-% \AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.sujet" linkends="AMCaddpage.separateanswersheet.sujet.exp"/>
+% \AMCaddpagesto{3} <co id="AMCaddpagesto.separateanswersheet.sujet" linkends="AMCaddpagesto.separateanswersheet.sujet.exp"/>
 
 \AMCformBegin    <co id="debut.form" linkends="debut.form.exp"/>
 
@@ -1534,7 +1534,7 @@ Durée : 10 minutes.
 
 \AMCform    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp"/>
 
-\AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.total" linkends="AMCaddpage.separateanswersheet.total.exp"/>
+\AMCaddpagesto{3} <co id="AMCaddpagesto.separateanswersheet" linkends="AMCaddpagesto.separateanswersheet.exp"/>
 
 }  
 
@@ -1550,10 +1550,6 @@ Durée : 10 minutes.
             identified on the answer sheet (this line is optional).</para>
           </callout>
 
-          <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
-            <para>Optional see <xref linkend="latex.layout.npages"/>. (Here, the  command is commented so no effect.) </para>
-          </callout>
-
           <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
             <para>This page break is put before the special page where the
             check-boxes are put together. If one does recto-verso printing, it
@@ -1561,6 +1557,10 @@ Durée : 10 minutes.
             that this page is printed apart from the others. In the case of
             recto printing, one can simply use
             <command>\clearpage</command>.</para>
+          </callout>
+
+          <callout arearefs="AMCaddpagesto.separateanswersheet.sujet" id="AMCaddpagesto.separateanswersheet.sujet.exp">
+            <para>Optional see <xref linkend="latex.layout.npages"/>. (Here, the  command is commented so no effect.) </para>
           </callout>
 
           <callout arearefs="debut.form" id="debut.form.exp">
@@ -1580,7 +1580,7 @@ Durée : 10 minutes.
             check-boxes.</para>
           </callout>
 
-          <callout arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
+          <callout arearefs="AMCaddpagesto.separateanswersheet" id="AMCaddpagesto.separateanswersheet.exp">
             <para>Optional see <xref linkend="latex.layout.npages"/>.</para>
           </callout>
 
@@ -2563,17 +2563,15 @@ Durée : 10 minutes.
 
           <sect5 id="latex.layout.npages.separateanswersheet">
             <title>With the option <option>separateanswersheet</option></title>
-            
-              <calloutlist>
-               <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
-                  <para> The total number of pages for the subject is equal to the fixed integer (here 3). Erase or comment
-                  <command>\AMCcleardoublepage</command> or <command>\clearpage</command>.</para>
-              </callout>
 
-               <callout  arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
-                  <para>The total number of pages subject+form is equal to the fixed integer (here 3).</para>
-              </callout>
-            </calloutlist>
+                  <para>Inserted before <command>\AMCformBegin</command>:
+                  The total number of pages for the subject is equal to the fixed integer (here 3). Erase or comment
+                  <command>\AMCcleardoublepage</command> or <command>\clearpage</command>.</para>
+
+                  <para>Inserted after <command>\AMCform</command>:
+                  The total number of pages subject+form is equal to the fixed integer (here 3).</para>
+
+
             <warning><para>Insert an unique command <command>\AMCaddpagesto{integer}</command> into the file.</para></warning>
           </sect5>
         </sect4>
