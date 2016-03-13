@@ -1569,6 +1569,8 @@ Durée : 10 minutes.
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
 
+% \AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.sujet" linkends="AMCaddpage.separateanswersheet.sujet.exp"/>
+
 \AMCdebutFormulaire    <co id="debut.form" linkends="debut.form.exp"/>
 
 %%% début de l'en-tête de la feuille de réponses
@@ -1592,6 +1594,8 @@ Durée : 10 minutes.
 
 \formulaire    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp"/>
 
+\AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.total" linkends="AMCaddpage.separateanswersheet.total.exp"/>
+
 }  
 
 \end{document}</programlisting>Les remarques suivantes devraient éclaircir cet
@@ -1605,6 +1609,10 @@ Durée : 10 minutes.
             <para>On peut redéfinir de cette manière la façon dont les
             questions seront identifiées sur la page des réponses (cette ligne
             est facultative).</para>
+          </callout>
+
+          <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
+            <para>Facultatif voir <xref linkend="latex.layout.npages"/>. (Ici commande commentée donc sans effet.) </para>
           </callout>
 
           <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
@@ -1632,6 +1640,10 @@ Durée : 10 minutes.
           <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
             <para>C'est la commande LaTeX <command>formulaire</command> qui
             écrit toutes les cases à cocher.</para>
+          </callout>
+
+          <callout arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
+            <para>Facultatif voir <xref linkend="latex.layout.npages"/>.</para>
           </callout>
         </calloutlist></para>
 
@@ -2656,6 +2668,22 @@ Durée : 10 minutes.
           identiques pour chaque sujet avec la commande
           <command>\AMCaddpagesto{entier}</command> à placer à la toute fin de
           la description de la copie.</para>
+  
+          <sect5 id="latex.layout.npages.separateanswersheet">
+            <title>Avec l'option <option>ensemble</option></title>
+              <calloutlist>
+
+               <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
+                  <para> Le nombre total de pages du sujet est égal au nombre fixé (ici 3). Effacez ou commentez
+                  <command>\AMCcleardoublepage</command> ou <command>\clearpage</command>.</para>
+              </callout>
+
+               <callout arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
+                  <para> Le nombre total de pages sujet+formulaire est égal au nombre fixé (ici 3).</para>
+              </callout>
+            </calloutlist>
+            <warning><para>Insérez une seule commande <command>\AMCaddpagesto{entier}</command> dans le fichier.</para></warning>
+          </sect5>
         </sect4>
       </sect3>
 
