@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -1229,7 +1229,7 @@ Duration : 10 minutes.
   \end{choices}
 \end{questionmult}
 
-\AMCaddpagesto{3} <co id="AMCaddpage" linkends="AMCaddpage.exp"/>
+% \AMCaddpagesto{3} <co id="AMCaddpage" linkends="AMCaddpage.exp"/>
 
 }   <co id="simple.fin" linkends="simple.fin.exp"/>
 
@@ -1291,7 +1291,8 @@ Duration : 10 minutes.
           </callout>
 
           <callout arearefs="AMCaddpage" id="AMCaddpage.exp">
-            <para>Optional see<xref linkend="latex.layout.npages"/>.</para>
+            <para>Uncomment this line to add enough blank pages to get a
+            3-pages copy (see<xref linkend="latex.layout.npages"/>).</para>
           </callout>
 
           <callout arearefs="simple.fin" id="simple.fin.exp">
@@ -1509,7 +1510,8 @@ Durée : 10 minutes.
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
 
-% \AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.sujet" linkends="AMCaddpage.separateanswersheet.sujet.exp"/>
+% \AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.sujet"
+            linkends="AMCaddpage.separateanswersheet.sujet.exp"/>
 
 \AMCformBegin    <co id="debut.form" linkends="debut.form.exp"/>
 
@@ -1534,7 +1536,8 @@ Durée : 10 minutes.
 
 \AMCform    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp"/>
 
-\AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.total" linkends="AMCaddpage.separateanswersheet.total.exp"/>
+% \AMCaddpagesto{5} <co id="AMCaddpage.separateanswersheet.total"
+            linkends="AMCaddpage.separateanswersheet.total.exp"/>
 
 }  
 
@@ -1550,10 +1553,6 @@ Durée : 10 minutes.
             identified on the answer sheet (this line is optional).</para>
           </callout>
 
-          <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
-            <para>Optional see <xref linkend="latex.layout.npages"/>. (Here, the  command is commented so no effect.) </para>
-          </callout>
-
           <callout arearefs="ensemble.cp" id="ensemble.cp.exp">
             <para>This page break is put before the special page where the
             check-boxes are put together. If one does recto-verso printing, it
@@ -1561,6 +1560,13 @@ Durée : 10 minutes.
             that this page is printed apart from the others. In the case of
             recto printing, one can simply use
             <command>\clearpage</command>.</para>
+          </callout>
+
+          <callout arearefs="AMCaddpage.separateanswersheet.sujet"
+                   id="AMCaddpage.separateanswersheet.sujet.exp">
+            <para>Uncomment to get three pages for the question part of each
+            copy, see <xref linkend="latex.layout.npages"/>. (Here, the
+            command is commented so no effect.)</para>
           </callout>
 
           <callout arearefs="debut.form" id="debut.form.exp">
@@ -1580,10 +1586,12 @@ Durée : 10 minutes.
             check-boxes.</para>
           </callout>
 
-          <callout arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
-            <para>Optional see <xref linkend="latex.layout.npages"/>.</para>
+          <callout arearefs="AMCaddpage.separateanswersheet.total"
+                   id="AMCaddpage.separateanswersheet.total.exp">
+            <para>Uncomment to get five pages for the whole copy
+            (question+answer sheet), see <xref
+            linkend="latex.layout.npages"/>.</para>
           </callout>
-
         </calloutlist></para>
 
       <warning>
@@ -1945,7 +1953,9 @@ Durée : 10 minutes.
         optional and are only displayed in the Solution and Catalog
         file.</para>
 
-        <warning><para> Not displayed in the individual solution</para></warning>
+        <warning>
+          <para>Not displayed in the individual solution</para>
+        </warning>
 
         <para>Here is a simple example:</para>
 
@@ -2559,23 +2569,9 @@ Durée : 10 minutes.
           <para>AMC automatically handles the number of pages for each
           subject. You can choose to fix a identical number of pages for each
           subject with the command <command>\AMCaddpagesto{integer}</command>
-          to type at the end of the copy description.</para>
-
-          <sect5 id="latex.layout.npages.separateanswersheet">
-            <title>With the option <option>separateanswersheet</option></title>
-            
-              <calloutlist>
-               <callout arearefs="AMCaddpage.separateanswersheet.sujet" id="AMCaddpage.separateanswersheet.sujet.exp">
-                  <para> The total number of pages for the subject is equal to the fixed integer (here 3). Erase or comment
-                  <command>\AMCcleardoublepage</command> or <command>\clearpage</command>.</para>
-              </callout>
-
-               <callout  arearefs="AMCaddpage.separateanswersheet.total" id="AMCaddpage.separateanswersheet.total.exp">
-                  <para>The total number of pages subject+form is equal to the fixed integer (here 3).</para>
-              </callout>
-            </calloutlist>
-            <warning><para>Insert an unique command <command>\AMCaddpagesto{integer}</command> into the file.</para></warning>
-          </sect5>
+          to be called at a place you need to reach this number of pages
+          (usually at the end of the copy description or between the question
+          and the answer sheet).</para>
         </sect4>
       </sect3>
 
