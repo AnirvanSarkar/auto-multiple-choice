@@ -31,7 +31,7 @@ all: FORCE
 	makeindex -s gind.ist -o $(PACK).ind $(PACK).idx
 	pdflatex $(PACK).dtx
 	pdflatex $(PACK).dtx
-	perl -pi -e 's:/ID \[<[A-F0-9]+> <[A-F0-9]+>\]:/ID [<00> <00>]:i' $(PACK).pdf
+	../../reproducible-pdf.pl --id $(PACK).pdf
 	$(MAKE) postclean
 
 sample-%.datetex.in: sample-%.tex
@@ -42,7 +42,7 @@ sample-%.datetex: sample-%.datetex.in
 
 sample-%.pdf: sample-%.datetex
 	pdflatex -jobname sample-$* $<
-	perl -pi -e 's:/ID \[<[A-F0-9]+> <[A-F0-9]+>\]:/ID [<00> <00>]:i' $@
+	../../reproducible-pdf.pl --id $@
 
 postclean:
 	-rm -f pexa-*

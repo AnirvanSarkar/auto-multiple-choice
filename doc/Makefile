@@ -67,10 +67,9 @@ html/index.html: FORCE
 \\setCJKsansfont{IPAexGothic}\
 \\setCJKmonofont{IPAexGothic}\
 ' $<; \
-            xelatex $<; xelatex $< ;; \
-	  *.tex) pdflatex $<; pdflatex $< ;; \
+            xelatex $<; xelatex $<; ../reproducible-pdf.pl --fonts --id $@ ;; \
+	  *.tex) pdflatex $<; pdflatex $<; ../reproducible-pdf.pl --id $@ ;; \
 	esac
-	perl -pi -e 's:/ID \[<[A-F0-9]+> <[A-F0-9]+>\]:/ID [<00> <00>]:i' $@
 	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
