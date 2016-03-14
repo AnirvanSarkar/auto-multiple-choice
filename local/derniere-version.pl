@@ -73,7 +73,7 @@ sub vc {
     my $vx=version($x);
     my $vy=version($y);
     print STDERR "$vx $vy\n" if($debug);
-    `dpkg --compare-versions $vx '>' $vy`;
+    `dpkg --compare-versions $vx gt $vy`;
     return($?);
 }
 
