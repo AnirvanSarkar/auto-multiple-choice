@@ -21,14 +21,19 @@ SHELL=/bin/sh
 
 include ../Makefile-all.conf
 
-DOCBOOKS=$(filter-out $(wildcard *.in.xml),$(wildcard auto-multiple-choice.*.xml))
+ALL_DOCBOOKS = $(filter-out $(wildcard *.in.xml),$(wildcard auto-multiple-choice.*.xml))
+DOC_LANG ?= $(patsubst auto-multiple-choice.%.xml,%,$(ALL_DOCBOOKS))
+SELECTED_DOCBOOKS = $(foreach onelang,$(DOC_LANG),auto-multiple-choice.$(onelang).xml)
 
 IMAGES=$(addprefix html/images/,$(notdir $(wildcard img_src/*.svg))) $(addprefix html/images/callouts/,$(notdir $(wildcard img_src/callouts/*.svg)))
 BLOCK_IMAGES=$(addprefix img_pdf/,$(notdir $(wildcard img_src/*.svg)))
 
 MODELS=$(wildcard modeles/*/*.d)
 
-all: $(DOCBOOKS:.xml=.pdf) $(DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz) html/index.html;
+all: $(SELECTED_DOCBOOKS:.xml=.pdf) $(SELECTED_DOCBOOKS:.xml=.x) $(IMAGES:.svg=.png) $(MODELS:.d=.tgz) html/index.html;
+
+show_doc_lang:
+	@echo "DOC_LANG = $(DOC_LANG)"
 
 images: $(IMAGES:.svg=.png)
 
