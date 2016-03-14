@@ -26,8 +26,8 @@ PERLPATH ?= /usr/bin/perl
 
 # DATE/TIME to be substituted
 
-DATE_RPMCHL:=$(shell LC_TIME=en_US date +"%a %b %e %Y")
-DATE_DEBCHL:=$(shell LANG=en_US date "+%a, %d %b %Y %H:%M:%S %z")
+DATE_RPMCHL:=$(shell LC_TIME=en date +"%a %b %e %Y")
+DATE_DEBCHL:=$(shell LANG=en date "+%a, %d %b %Y %H:%M:%S %z")
 
 # list variables to be substituted in *.in files
 
@@ -190,8 +190,8 @@ install_lang: $(addprefix install_lang_,$(LANGS)) ;
 
 install_models_%: FORCE
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODELSDIR)/$*
-	install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.tgz $(DESTDIR)/$(MODELSDIR)/$*
-	install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.xml $(DESTDIR)/$(MODELSDIR)/$*
+	-install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.tgz $(DESTDIR)/$(MODELSDIR)/$*
+	-install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.xml $(DESTDIR)/$(MODELSDIR)/$*
 
 install_models: $(addprefix install_models_,$(SUBMODS)) ;
 
@@ -357,6 +357,10 @@ tmp_deb:
 	$(MAKE) local/deb-auto-changelog
 	$(MAKE) tmp_copy
 	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
+	perl -pi -e 's/^DL=.*/DL=$(SRC_DOC_LANG)/' $(TMP_SOURCE_DIR)/debian/rules
+ifneq (,$(SKIP_DEP))
+	$(foreach onedep,$(SKIP_DEP),perl -pi -e 's/(,\s*$(onedep)|$(onedep),)//' $(TMP_SOURCE_DIR)/debian/control)
+endif
 
 debsrc_vok: ssources tmp_deb
 	test -f $(ORIG_SOURCES) || cp /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(ORIG_SOURCES)
