@@ -967,6 +967,8 @@ DESC: 単一選択問題1件と複数選択問題1件からなる単純な例（
   \end{choices}
 \end{questionmult}
 
+% \AMCaddpagesto{3} <co id="AMCaddpage" linkends="AMCaddpage.exp"/>
+
 }   <co id="simple.fin" linkends="simple.fin.exp"/>
 
 \end{document}
@@ -1001,6 +1003,10 @@ DESC: 単一選択問題1件と複数選択問題1件からなる単純な例（
 
           <callout arearefs="simple.qrmult" id="simple.qrmult.exp">
             <para><command>questionmult</command>および<command>choices</command>環境は、任意個数の正解のある選択式問題を作成します。受験者は、正解と思われるすべてのボックスにマークするか、（6行目のパッケージ読込みでの<option>completemulti</option>オプションで自動的に追加された）最後のボックスにマークすることになります。</para>
+          </callout>
+
+          <callout arearefs="AMCaddpage" id="AMCaddpage.exp">
+            <para>各試験問題のページ数を3ページに固定するには、この行をアンコメントしてください。（<xref linkend="latex.layout.npages"/>参照）</para>
           </callout>
 
           <callout arearefs="simple.fin" id="simple.fin.exp">
@@ -1201,6 +1207,9 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
 \AMCcleardoublepage    <co id="ensemble.cp" linkends="ensemble.cp.exp"/>
 
+% \AMCaddpagesto{3} <co id="AMCaddpage.separateanswersheet.sujet"
+            linkends="AMCaddpage.separateanswersheet.sujet.exp"/>
+
 \AMCformBegin    <co id="debut.form" linkends="debut.form.exp"/>
 
 %%% 答案用紙ヘッダー開始
@@ -1224,6 +1233,9 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
 \AMCform    <co id="ensemble.formulaire" linkends="ensemble.formulaire.exp"/>
 
+% \AMCaddpagesto{5} <co id="AMCaddpage.separateanswersheet.total"
+            linkends="AMCaddpage.separateanswersheet.total.exp"/>
+
 }  
 
 \end{document}</programlisting>以下の解説により、上の例がより明確になるでしょう:<calloutlist>
@@ -1239,6 +1251,11 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
             <para>この改ページはマーク用ボックスを集めた答案専用の用紙の前に置きます。両面印刷を行う場合は、このページが次の用紙に印刷されるように<command>\AMCcleardoublepage</command>を使用してください。片面印刷の場合は、単純に<command>\clearpage</command>でもかまいません。</para>
           </callout>
 
+          <callout arearefs="AMCaddpage.separateanswersheet.sujet"
+                   id="AMCaddpage.separateanswersheet.sujet.exp">
+            <para>各試験問題の問題ページ数を3ページに固定するには、この行をアンコメントしてください。（<xref linkend="latex.layout.npages"/>参照）（このままではコメントアウトされているので、何も起きません）</para>
+          </callout>
+
           <callout arearefs="debut.form" id="debut.form.exp">
             <para>このコマンドは答案用紙部の開始を示します。答案用紙側にしか現れない設問（例えば<command>\AMCcode</command>で生成される擬似的な設問）を適切に扱うために必要です。</para>
           </callout>
@@ -1249,6 +1266,11 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
           <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
             <para><command>AMCform</command>コマンドにより、マーク用ボックスがすべて出力されます。</para>
+          </callout>
+
+          <callout arearefs="AMCaddpage.separateanswersheet.total"
+                   id="AMCaddpage.separateanswersheet.total.exp">
+            <para>各試験問題のページ数（問題ページと答案ページの合計）を5ページに固定するには、この行をアンコメントしてください。（<xref linkend="latex.layout.npages"/>参照）</para>
           </callout>
         </calloutlist></para>
 
@@ -1494,7 +1516,11 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
       <sect3 id="latex.explain">
         <title id="latex.explain.title">設問の模範解答解説</title>
 
-        <para>設問に対する解答に解説を加えるには、<command>\explain</command>コマンドを使うことができます。解説はオプションであり、模範解答とカタログファイルにのみ表示されます。</para>
+        <para>設問に対する解答に解説を加えるには、<command>\explain</command>コマンドを使うことができます。解説はオプションであり、模範解答と設問カタログファイルにのみ表示されます。</para>
+
+        <warning>
+          <para>個別模範解答には表示されません。</para>
+        </warning>
 
         <para>単純な例を示します:</para>
 
@@ -1930,7 +1956,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
         <sect4 id="latex.layout.npages">
           <title>ページ番号</title>
 
-          <para>AMCは各試験問題のページ番号を自動的に取り扱います。<command>\clearpage</command>の前に<command>\AMCaddpagesto{integer}</command>コマンドを置くと、いくつか空ページが挿入され、その次のページ番号が各試験問題で同一になります。</para>
+          <para>AMCは各試験問題のページ番号を自動的に取り扱います。各試験問題の末尾や問題用紙と答案用紙の区切りなどに<command>\AMCaddpagesto{integer}</command>コマンドを置くと、いくつか空ページが挿入され、その次のページ番号が各試験問題で同一になります。</para>
         </sect4>
 
       </sect3>
