@@ -83,7 +83,7 @@ DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
 # list *.in files for @/VAR/@ substitution
 
-FROM_IN=auto-multiple-choice auto-multiple-choice.desktop $(GLADE_FROMIN) AMC-gui.pl AMC-latex-link.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+FROM_IN=auto-multiple-choice auto-multiple-choice.desktop $(GLADE_FROMIN) AMC-gui.pl AMC-latex-link.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
 
 # Is this a precomp tarball? If so, the PRECOMP file is present.
 
