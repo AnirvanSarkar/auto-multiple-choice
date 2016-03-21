@@ -499,6 +499,10 @@ sub define_statements {
      'zoomsCleanup'=>{'sql'=>"UPDATE $t_zone SET imagedata=NULL WHERE type=?"},
      'pageZonesAll'=>{'sql'=>"SELECT * FROM $t_zone"
 		      ." WHERE type=?"},
+     'pageZonesAutoCount'=>
+     {'sql'=>"SELECT COUNT(*) FROM $t_zone"
+      ." WHERE student=? AND page=? AND copy=? AND type=?"
+      ." AND total>0"},
      'pageZonesD'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual"
 		    ." FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"
@@ -525,7 +529,7 @@ sub define_statements {
 			    ." WHERE student=? AND page=? AND copy=?"},
      'ticked'=>{'sql'=>"SELECT CASE"
 		." WHEN manual >= 0 THEN manual"
-		." WHEN total<=0 THEN -1"
+		." WHEN total<=0 THEN 0"
 		." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		." ELSE 0"
 		." END FROM $t_zone"
@@ -535,7 +539,7 @@ sub define_statements {
 		    ." WHEN why=\"V\" THEN 0"
 		    ." WHEN why=\"E\" THEN 0"
 		    ." WHEN zone.manual >= 0 THEN zone.manual"
-		    ." WHEN zone.total<=0 THEN -1"
+		    ." WHEN zone.total<=0 THEN 0"
 		    ." WHEN zone.black >= ? * zone.total AND zone.black <= ? * zone.total THEN 1"
 		    ." ELSE 0"
 		    ." END) AS nb"
@@ -559,7 +563,7 @@ sub define_statements {
 		   },
      'tickedList'=>{'sql'=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
-		    ." WHEN total<=0 THEN -1"
+		    ." WHEN total<=0 THEN 0"
 		    ." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		    ." ELSE 0"
 		    ." END FROM $t_zone"
@@ -567,7 +571,7 @@ sub define_statements {
 		    ." ORDER BY id_b"},
      'tickedPage'=>{'sql'=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
-		    ." WHEN total<=0 THEN -1"
+		    ." WHEN total<=0 THEN 0"
 		    ." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		    ." ELSE 0"
 		    ." END,id_a,id_b FROM $t_zone"
@@ -1261,6 +1265,9 @@ sub remove_manual {
   my ($self,$student,$page,$copy)=@_;
   $self->statement('setManualPage')->execute(-1,$student,$page,$copy);
   $self->statement('setManualPageZones')->execute(-1,$student,$page,$copy);
+  if($self->page_zones_auto_count($student,$page,$copy)==0) {
+    $self->delete_page_data($student,$page,$copy);
+  }
 }
 
 # counts returns a hash %r giving the %r{'complete'} number of
@@ -1324,6 +1331,15 @@ sub delete_page_data {
   $self->statement('deletePagePositions')->execute($student,$page,$copy);
   $self->statement('deletePageZones')->execute($student,$page,$copy);
   $self->statement('deletePage')->execute($student,$page,$copy);
+}
+
+# page_zones_auto_count($student,$page,$copy) returns the number of
+# zones in page with automatic data capture.
+
+sub page_zones_auto_count {
+  my ($self,$student,$page,$copy)=@_;
+  return($self->sql_single($self->statement('pageZonesAutoCount'),
+                           $student,$page,$copy,ZONE_BOX));
 }
 
 # get_student_pages($student,$copy) returns an arrayref giving some
