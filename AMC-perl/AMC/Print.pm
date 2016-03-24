@@ -109,10 +109,10 @@ sub printer_options_table {
   my $widget;
   my $renderer;
   for my $o (@options) {
-    $table->attach(Gtk2::Label->new($o->{description}),
+    $table->attach(Gtk3::Label->new($o->{description}),
 		   0,1,$y,$y+1,["expand","fill"],[],0,0);
-    $widget=Gtk2::ComboBox->new_with_model();
-    $renderer = Gtk2::CellRendererText->new();
+    $widget=Gtk3::ComboBox->new();
+    $renderer = Gtk3::CellRendererText->new();
     $widget->pack_start($renderer, TRUE);
     $widget->add_attribute($renderer,'text',COMBO_TEXT);
     $w->{'printer_c_'.$o->{name}}=$widget;

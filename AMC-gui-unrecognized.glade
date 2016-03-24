@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.18.3 -->
 <interface>
-  <!-- interface-requires gtk+ 3.0 -->
+  <requires lib="gtk+" version="3.0"/>
   <object class="GtkWindow" id="main_recog">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Unrecognized scans</property>
     <child>
-      <object class="GtkVPaned" id="inconnu_vpaned">
+      <object class="GtkPaned" id="inconnu_vpaned">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <object class="GtkVBox" id="Vbox1">
             <property name="visible">True</property>
@@ -65,7 +67,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="unrecognized_prev" swapped="no"/>
                   </object>
@@ -82,7 +83,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <signal name="clicked" handler="analyse_diagnostic" swapped="no"/>
                   </object>
                   <packing>
@@ -98,7 +98,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="unrecognized_delete" swapped="no"/>
                   </object>
@@ -115,7 +114,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="unrecognized_next" swapped="no"/>
                   </object>
@@ -149,11 +147,11 @@
           </object>
           <packing>
             <property name="resize">False</property>
-            <property name="shrink">True</property>
+            <property name="shrink">False</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHPaned" id="inconnu_hpaned">
+          <object class="GtkPaned" id="inconnu_hpaned">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
@@ -200,7 +198,7 @@
                 </child>
               </object>
               <packing>
-                <property name="resize">False</property>
+                <property name="resize">True</property>
                 <property name="shrink">True</property>
               </packing>
             </child>

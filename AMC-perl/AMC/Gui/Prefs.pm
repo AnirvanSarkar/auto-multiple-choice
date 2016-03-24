@@ -117,7 +117,8 @@ sub transmet_pref {
       } elsif ($wp=$self->find_object($gap,$prefixe,'_fb_',$ta,$t,$update)) {
 	$wp->set_font_name($h->{$t});
       } elsif ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
-	$wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
+	my $c=Gtk3::Gdk::Color::parse($h->{$t});
+        $wp->set_color($c);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
 	$wp->set_active($h->{$t});
       } elsif ($wp=$self->find_object($gap,$prefixe,'_c_',$ta,$t,$update)) {
@@ -212,9 +213,10 @@ sub reprend_pref {
 	$n=$wp->get_active();
       } elsif($wp=$self->{w}->{$prefixe.'_c_'.$tgui}) {
 	debug "Found combobox";
-	if ($wp->get_model) {
-	  if ($wp->get_active_iter) {
-	    $n=$wp->get_model->get($wp->get_active_iter,COMBO_ID);
+	if (my $model=$wp->get_model) {
+          my ($ok,$iter)=$wp->get_active_iter;
+	  if ($ok && $iter) {
+	    $n=$wp->get_model->get($iter,COMBO_ID);
 	  } else {
 	    debug "No active iter for combobox ".$prefixe.'_c_'.$tgui;
 	    $n='';

@@ -1,9 +1,10 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.18.3 -->
 <interface>
-  <requires lib="gtk+" version="2.16"/>
-  <!-- interface-naming-policy project-wide -->
+  <requires lib="gtk+" version="3.0"/>
   <object class="GtkAboutDialog" id="apropos">
     <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">AMC A propos</property>
     <property name="role">amc-apropos</property>
@@ -14,36 +15,8 @@
     <property name="startup_id">amc-apropos</property>
     <property name="program_name">Auto Multiple Choice</property>
     <property name="version">@/PACKAGE_V_DEB/@</property>
-    <property name="copyright">Copyright ⓒ 2008-2016 AMC Team</property>
+    <property name="copyright">Copyright (C) 2008-2013 Alexis Bienvenüe</property>
     <property name="comments" translatable="yes">Automatic multiple choice questionnaires management</property>
-    <property name="authors">Alexis Bienvenüe
-Hiroto Kagotani
-Anirvan Sarkar</property>
-    <property name="documenters">Alexis Bienvenüe
-Frédéric Bréal
-Hiroto Kagotani
-    </property>
-    <property name="translator_credits">Arabic:
-  Ali Hatim
-
-French:
-  Alexis Bienvenüe
-  Frédéric Bréal
-
-German:
-  Tobias Rad
-  Karoline Schölzke
-  Florian Schöngaßner
-  Dominik Vogel
-
-Japanese:
-  Hiroto Kagotani
-
-Spanish:
-  Andrés Alvarado
-  Mónico Briseño
-  Rafael Rodriguez
-  </property>
     <property name="license">                    GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
@@ -326,25 +299,28 @@ POSSIBILITY OF SUCH DAMAGES.
                      END OF TERMS AND CONDITIONS
 </property>
     <property name="logo_icon_name">auto-multiple-choice</property>
-    <signal name="response" handler="close_apropos"/>
+    <signal name="response" handler="close_apropos" swapped="no"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox2">
+      <object class="GtkBox" id="dialog-vbox2">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area2">
+          <object class="GtkButtonBox" id="dialog-action_area2">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>

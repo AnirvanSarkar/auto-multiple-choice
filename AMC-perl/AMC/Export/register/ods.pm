@@ -66,16 +66,16 @@ sub needs_module {
 
 sub build_config_gui {
   my ($self,$w,$prefs)=@_;
-  my $t=Gtk2::Table->new(3,2);
+  my $t=Gtk3::Table->new(3,2,0);
   my $widget;
   my $renderer;
   my $y=0;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, a table with questions basic statistics will be added to the ODS exported spreadsheet.
-  $t->attach(Gtk2::Label->new(__"Stats table"),
+  $t->attach(Gtk3::Label->new(__"Stats table"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::ComboBox->new_with_model();
-  $renderer = Gtk2::CellRendererText->new();
+  $widget=Gtk3::ComboBox->new();
+  $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
 # TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
@@ -89,10 +89,10 @@ sub build_config_gui {
   $y++;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, a table with indicative questions basic statistics will be added to the ODS exported spreadsheet.
-  $t->attach(Gtk2::Label->new(__"Indicative stats table"),
+  $t->attach(Gtk3::Label->new(__"Indicative stats table"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::ComboBox->new_with_model();
-  $renderer = Gtk2::CellRendererText->new();
+  $widget=Gtk3::ComboBox->new();
+  $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
   $prefs->store_register('export_ods_statsindic'=>cb_model(""=>__"None",
@@ -104,10 +104,10 @@ sub build_config_gui {
   $y++;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.
-  $t->attach(Gtk2::Label->new(__"Score groups"),
+  $t->attach(Gtk3::Label->new(__"Score groups"),
 	     0,1,$y,$y+1,["expand","fill"],[],0,0);
-  $widget=Gtk2::ComboBox->new_with_model();
-  $renderer = Gtk2::CellRendererText->new();
+  $widget=Gtk3::ComboBox->new();
+  $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
 # TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
@@ -122,7 +122,7 @@ sub build_config_gui {
   $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;
 
-  my $b=Gtk2::Button->new_with_label(__"Choose columns");
+  my $b=Gtk3::Button->new_with_label(__"Choose columns");
   $b->signal_connect(clicked => \&main::choose_columns_current);
   $t->attach($b,0,2,$y,$y+1,["expand","fill"],[],0,0);
   $y++;

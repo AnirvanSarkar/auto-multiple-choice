@@ -41,9 +41,9 @@ sub new {
     $self->{'out.statsindic'}='';
     $self->{'out.groupsums'}='';
     $self->{'out.groupsep'}=':';
-    if(can_load(modules=>{'Gtk2'=>undef,'Cairo'=>undef})) {
-      debug "Using Gtk2/Cairo to compute column width";
-      $self->{'calc.Gtk2'}=1;
+    if(can_load(modules=>{'Gtk3'=>undef,'Cairo'=>undef})) {
+      debug "Using Gtk3/Cairo to compute column width";
+      $self->{'calc.Gtk3'}=1;
     }
     bless ($self, $class);
     return $self;
@@ -61,7 +61,7 @@ sub text_width {
   my ($self,$title,@t)=@_;
   my $width=0;
 
-  if($self->{'calc.Gtk2'}) {
+  if($self->{'calc.Gtk3'}) {
 
     my $font=Pango::FontDescription->from_string($self->{'out.font'}." ".(10*$self->{'out.size'}));
     $font->set_stretch('normal');
