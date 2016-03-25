@@ -179,7 +179,7 @@ sub new {
 						   NAMES_I,$i);
 	$b->add($l);
 	$b->set_tooltip_text($name);
-	$l->set_size_request(10,-1);
+	$l->set_ellipsize("middle");
 	if($self->{'rtl'}
 	   && $self->{'general'}->get_direction() eq 'rtl') {
 	  $l->set_alignment(0,.5);
@@ -339,15 +339,13 @@ sub set_n_cols {
 
   $self->{'tableau'}->foreach(sub { $self->{'tableau'}->remove(shift); });
 
-  $self->{'tableau'}->resize($self->{'assoc-ncols'},$nligs);
-
   my $x=0;
   my $y=0;
   my $i=-1;
  NAME: for my $b (@{$self->{'boutons_eb'}}) {
     $i++;
     next NAME if(!$self->{'show_all'} && $self->{'taken_list'}->[$i]);
-    $self->{'tableau'}->attach($b,$x,$x+1,$y,$y+1,["expand","fill"],[],1,1);
+    $self->{'tableau'}->attach($b,$x,$y,1,1);
     $x++;
     if($x>=$self->{'assoc-ncols'}) {
       $y++;
@@ -818,11 +816,11 @@ sub style_bouton {
 	if($pris) {
 	    $b->set_relief(GTK_RELIEF_NONE);
 	    $b->override_background_color('prelight',($actif ? $col_actif : $col_pris));
-	    $b->set_label($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
+	    $b->get_child()->set_text($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
 	} else {
 	    $b->set_relief(GTK_RELIEF_NORMAL);
 	    $b->override_background_color('prelight',undef);
-	    $b->set_label($self->{'liste'}->data_n($i,'_ID_'));
+	    $b->get_child()->set_text($self->{'liste'}->data_n($i,'_ID_'));
 	}
 	if($eb) {
 	    my $col=undef;
