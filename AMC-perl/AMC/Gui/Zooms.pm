@@ -481,7 +481,6 @@ sub remplit {
     my @good_ids=grep { $self->{'position'}->{$_} == $cat } (@{$self->{'ids'}});
 
     my $n_ligs=ceil((@good_ids ? (1+$#good_ids)/$self->{'n_cols'} : 1));
-    $self->{'zooms_table_'.$cat}->resize($n_ligs,$self->{'n_cols'});
     $self->{'n_ligs'}->{$cat}=$n_ligs;
 
     for my $i (0..$#good_ids) {
@@ -501,7 +500,7 @@ sub remplit {
 	}
 
 	$self->{'zooms_table_'.$cat}->attach($self->{'eb'}->{$id},
-					     $x,$x+1,$y,$y+1,[],[],4,3);
+					     $x,$y,1,1);
     }
 }
 
