@@ -20,7 +20,7 @@
 
 package AMC::Gui::Commande;
 
-use Gtk2::Helper;
+use Glib;
 use Encode;
 
 use AMC::Basic;
@@ -51,7 +51,7 @@ sub new {
 	'pid'=>'',
 	'avance'=>'',
 	'fh'=>'',
-	'tag'=>'',
+	'tag'=>[],
 	'pid'=>'',
     };
 
@@ -112,9 +112,11 @@ sub open {
     $self->{'pid'}=open($self->{'fh'},"-|",@{$self->{'commande'}});
     if(defined($self->{'pid'})) {
 
-	$self->{'tag'}=Gtk2::Helper->add_watch( fileno( $self->{'fh'} ),
-						in => sub { $self->get_output() }
-						);
+	push @{$self->{'tag'}},
+	  Glib::IO->add_watch( fileno( $self->{'fh'} ),
+			       in => sub { $self->get_output() }),
+          Glib::IO->add_watch( fileno( $self->{'fh'} ),
+                               hup => sub { $self->close() });
 
 	debug "Command [".$self->{'pid'}."] : "
 	  .join(' ',map { /\s/ || ! $_ ? "\"$_\"" : $_ }
@@ -140,10 +142,10 @@ sub open {
 sub stop_watch {
   my ($self)=@_;
 
-  if($self->{tag}) {
-    Gtk2::Helper->remove_watch( $self->{tag} );
-    $self->{tag}='';
+  for my $t (@{$self->{tag}}) {
+    Glib::Source->remove( $t );
   }
+  $self->{tag}=[];
 }
 
 sub close {

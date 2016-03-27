@@ -91,7 +91,7 @@ if($list) {
 				   'global'=>1,
 				  );
 
-  Gtk2->main;
+  Gtk3->main;
 }
 
 

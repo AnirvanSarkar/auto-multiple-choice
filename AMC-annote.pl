@@ -20,7 +20,7 @@
 
 use Getopt::Long;
 
-use Gtk2;
+use Gtk3;
 use Cairo;
 
 use List::Util qw(min max sum);
@@ -158,7 +158,7 @@ if($fich_noms) {
 
 sub color_rgb {
     my ($s)=@_;
-    my $col=Gtk2::Gdk::Color->parse($s);
+    my $col=Gtk3::Gdk::Color::parse($s);
     return($col->red/65535,$col->green/65535,$col->blue/65535);
 }
 

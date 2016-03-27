@@ -32,7 +32,7 @@ use POSIX qw/strftime/;
 use Encode;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
-use Glib;
+use Glib qw/TRUE FALSE/;
 
 use constant {
     COMBO_ID => 1,
@@ -632,7 +632,7 @@ sub __p($) {
 
 sub cb_model {
     my @texte=(@_);
-    my $cs=Gtk2::ListStore->new ('Glib::String','Glib::String');
+    my $cs=Gtk3::ListStore->new ('Glib::String','Glib::String');
     my $k;
     my $t;
     while(($k,$t)=splice(@texte,0,2)) {

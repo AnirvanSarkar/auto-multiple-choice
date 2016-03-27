@@ -24,7 +24,7 @@ use AMC::Basic;
 
 use Encode;
 
-use Gtk2 -init;
+use Gtk3 -init;
 
 use constant {
     TAB_ID => 0,
@@ -35,8 +35,8 @@ use constant {
 
 sub ajoute_colonne {
     my ($tree,$store,$titre,$i)=@_;
-    my $renderer=Gtk2::CellRendererText->new;
-    my $column = Gtk2::TreeViewColumn->new_with_attributes(
+    my $renderer=Gtk3::CellRendererText->new;
+    my $column = Gtk3::TreeViewColumn->new_with_attributes(
 	$titre,
 	$renderer,
 	text=> $i,
@@ -69,7 +69,7 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk2::Builder->new();
+    $self->{'gui'}=Gtk3::Builder->new();
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
@@ -88,7 +88,7 @@ sub new {
     for (qw/student copy/) {
       $self->{'postcorrect_'.$_}=
 	$self->{'scoring'}->variable('postcorrect_'.$_);
-      $self->{'postcorrect_'.$_}=-1 if(!defined($self->{'postcorrect_'.$_}));
+      $self->{'postcorrect_'.$_}=-1 if(!defined($self->{'postcorrect_'.$_}) || $self->{'postcorrect_'.$_} eq '');
     }
 
     my @codes=$self->{'scoring'}->codes;
@@ -96,7 +96,7 @@ sub new {
       grep { $_->{'title'} !~ /\.[0-9]+$/ }
       ($self->{'scoring'}->questions);
 
-    my $store = Gtk2::ListStore->new ( map {'Glib::String' } (1..(3+1+$#codes+1+$#questions)) );
+    my $store = Gtk3::ListStore->new ( map {'Glib::String' } (1..(3+1+$#codes+1+$#questions)) );
 
     $self->{'tableau'}->set_model($store);
 
@@ -168,7 +168,7 @@ sub quitter {
     my ($self)=(@_);
 
     if($self->{'global'}) {
-	Gtk2->main_quit;
+	Gtk3->main_quit;
     } else {
 	$self->{'general'}->destroy;
     }

@@ -117,7 +117,8 @@ sub transmet_pref {
       } elsif ($wp=$self->find_object($gap,$prefixe,'_fb_',$ta,$t,$update)) {
 	$wp->set_font_name($h->{$t});
       } elsif ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
-	$wp->set_color(Gtk2::Gdk::Color->parse($h->{$t}));
+	my $c=Gtk3::Gdk::Color::parse($h->{$t});
+        $wp->set_color($c);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
 	$wp->set_active($h->{$t});
       } elsif ($wp=$self->find_object($gap,$prefixe,'_c_',$ta,$t,$update)) {
@@ -169,17 +170,14 @@ sub reprend_pref {
       debug "Looking for widget <$tgui> in domain <$prefixe>";
       my $n;
       my $wp;
+      my $found=1;
       if ($wp=$self->{w}->{$prefixe.'_x_'.$tgui}) {
 	debug "Found string entry";
 	$n=$wp->get_text();
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_t_'.$tgui}) {
 	debug "Found text entry";
 	my $buf=$wp->get_buffer;
 	$n=$buf->get_text($buf->get_start_iter,$buf->get_end_iter,1);
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_f_'.$tgui}) {
 	debug "Found file chooser";
 	if ($wp->get_action =~ /-folder$/i) {
@@ -198,38 +196,27 @@ sub reprend_pref {
 	    $n=$self->{shortcuts}->relatif($n);
 	  }
 	}
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_v_'.$tgui}) {
 	debug "Found (v) check button";
 	$n=$wp->get_active();
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_s_'.$tgui}) {
 	debug "Found spin button";
 	$n=$wp->get_value();
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_fb_'.$tgui}) {
 	debug "Found font button";
 	$n=$wp->get_font_name();
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_col_'.$tgui}) {
 	debug "Found color chooser";
 	$n=$wp->get_color()->to_string();
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_cb_'.$tgui}) {
 	debug "Found checkbox";
 	$n=$wp->get_active();
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
       } elsif($wp=$self->{w}->{$prefixe.'_c_'.$tgui}) {
 	debug "Found combobox";
-	if ($wp->get_model) {
-	  if ($wp->get_active_iter) {
-	    $n=$wp->get_model->get($wp->get_active_iter,COMBO_ID);
+	if (my $model=$wp->get_model) {
+          my ($ok,$iter)=$wp->get_active_iter;
+	  if ($ok && $iter) {
+	    $n=$wp->get_model->get($iter,COMBO_ID);
 	  } else {
 	    debug "No active iter for combobox ".$prefixe.'_c_'.$tgui;
 	    $n='';
@@ -237,6 +224,11 @@ sub reprend_pref {
 	} else {
 	  $n=$wp->get_active();
 	}
+      } else {
+        $found=0;
+      }
+      if($found) {
+        $h->{$t}='' if(!defined($h->{$t}));
 	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
 	$h->{$t}=$n;
       }

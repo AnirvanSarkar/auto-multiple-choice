@@ -214,7 +214,15 @@ sub get_auto {
 sub get_real {
   my ($self,$student,$copy)=@_;
   return($self->sql_single($self->statement('getReal'),
-			   $student,$copy));
+                           $student,$copy));
+}
+
+# with_association($student,$copy) returns TRUE if the copy is associated
+
+sub with_association {
+  my ($self,$student,$copy)=@_;
+  my $r=$self->get_real($student,$copy);
+  return(defined($r) && $r ne '');
 }
 
 # set_manual($student,$copy,$manual) sets the manual association ID for the

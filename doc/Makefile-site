@@ -6,10 +6,10 @@ HVERSION=htdocs/version.shtml
 
 TMPDIR:=$(shell mktemp -d)
 
-STABLEVERSION=1.2.0
+STABLEVERSION=1.3.0
 STABLESRC=../download_area/files/auto-multiple-choice_$(STABLEVERSION)_sources.tar.gz
 
-DOCVERSION=1.2.0
+DOCVERSION=1.3.0
 SRC=/tmp/auto-multiple-choice_$(DOCVERSION)_sources.tar.gz
 
 BASEDIR=$(TMPDIR)/auto-multiple-choice-$(DOCVERSION)
@@ -29,18 +29,11 @@ xml: FORCE
 	tar xvzf $(SRC) -C $(TMPDIR)
 	$(MAKE) -C $(BASEDIR) MAJ
 
-%.pdf: xml
-	dblatex -t tex $(XML).$*.xml -o $(XML).$*.tex
-	perl $(DOCDIR)/addlink.pl $(XML).$*.tex
-	cd $(DOCDIR); pdflatex `basename $(XML)`.$* ; pdflatex `basename $(XML)`.$*
-
 %.html: xml
 	xsltproc --nonet --stringparam base.dir $(SITEDOC).$*/ $(DOCDIR)/doc-xhtml-site.$*.xsl $(XML).$*.xml
 
 # doc a partir de la derniere version dans testing
-doc: FORCE fr.pdf en.pdf fr.html en.html
-	cp $(XML).fr.pdf  ../download_area/files/auto-multiple-choice.fr.pdf
-	cp $(XML).en.pdf  ../download_area/files/auto-multiple-choice.en.pdf
+doc: FORCE fr.html en.html ja.html ;
 
 site: version doc map
 	$(MAKE) -C ../download_area signe sync

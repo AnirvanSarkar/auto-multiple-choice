@@ -20,7 +20,7 @@
 
 use Getopt::Long;
 
-use Gtk2 -init;
+use Gtk3 -init;
 
 use Glib::Object::Introspection;
 
@@ -114,8 +114,8 @@ use constant {
 
 my $libnotify_error='';
 
-Gtk2::IconTheme->get_default->prepend_search_path(amc_specdir('icons'));
-Gtk2::Window->set_default_icon_list(map { Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$_,"force-svg") } (8,16,32,48,64,128));
+Gtk3::IconTheme::get_default->prepend_search_path(amc_specdir('icons'));
+Gtk3::Window::set_default_icon_list([map { Gtk3::IconTheme::get_default->load_icon("auto-multiple-choice",$_,"force-svg") } (8,16,32,48,64,128)]);
 
 use_gettext;
 use_amc_plugins();
@@ -159,7 +159,7 @@ if($debug) {
     print "DEBUG ==> ".AMC::Basic::debug_file()."\n";
 }
 
-debug_pm_version("Gtk2");
+debug_pm_version("Gtk3");
 
 my %w=();
 
@@ -183,7 +183,7 @@ $encodage_systeme='UTF-8' if(!$encodage_systeme);
 
 sub hex_color {
     my $s=shift;
-    return(Gtk2::Gdk::Color->parse($s)->to_string());
+    return(Gtk3::Gdk::Color::parse($s)->to_string());
 }
 
 # Default general options, to be used when not set in the main options
@@ -327,6 +327,8 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'notify_annotation'=>1,
 	      'notify_desktop'=>1,
 	      'notify_command'=>'',
+
+              project_icon_size=>16,
 
               view_invalid_color=>"#FFEF3B",
               view_empty_color=>"#78FFED",
@@ -486,10 +488,11 @@ sub notify_end_of_work {
 
 sub test_magick {
   if(!magick_perl_module(1)) {
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'error','ok','');
+    $dialog->set_markup(
 			__"None of the perl modules <b>Graphics::Magick</b> and <b>Image::Magick</b> are installed: AMC won't work properly!"
 		       );
     $dialog->run;
@@ -514,23 +517,24 @@ sub test_commandes {
 	}
     }
     if(@pasbon && !$dont_warn) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'warning','ok',
+      my $dialog = Gtk3::MessageDialog
+        ->new($w{'main_window'},
+              'destroy-with-parent',
+              'warning','ok','');
+      $dialog->set_markup(
 # TRANSLATORS: Message (first part) when some of the commands that are given in the preferences cannot be found.
-			      __("Some commands allowing to open documents can't be found:")
-			      ." ".join(", ",map { "<b>$_</b>"; } @pasbon).". "
+                          __("Some commands allowing to open documents can't be found:")
+                          ." ".join(", ",map { "<b>$_</b>"; } @pasbon).". "
 # TRANSLATORS: Message (second part) when some of the commands that are given in the preferences cannot be found.
-			      .__("Please check its correct spelling and install missing software.")." "
+                          .__("Please check its correct spelling and install missing software.")." "
 # TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
-			      .sprintf(__"You can change used commands following <i>%s</i> from menu <i>%s</i>.",
+                          .sprintf(__"You can change used commands following <i>%s</i> from menu <i>%s</i>.",
 # TRANSLATORS: "Preferences" menu
-				       __"Preferences",
+                                   __"Preferences",
 # TRANSLATORS: "Edit" menu
-				       __"Edit"));
-	$dialog->run;
-	$dialog->destroy;
+                                   __"Edit"));
+      $dialog->run;
+      $dialog->destroy;
     }
     return(@missing);
 }
@@ -554,10 +558,11 @@ sub test_debian_amc {
     if(deb_is_installed("auto-multiple-choice-common") &&
        !deb_is_installed("auto-multiple-choice")) {
       debug "ERROR: auto-multiple-choice package not installed!";
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok','');
+      $dialog->set_markup(
 			  __"The package <i>auto-multiple-choice-common</i> is installed, but not <i>auto-multiple-choice</i>.\n<b>AMC won't work properly until you install auto-multiple-choice package!</b>"
 			  );
       $dialog->run;
@@ -646,7 +651,7 @@ sub sauve_state {
 	debug "Saving state...";
 
 	if(pref_xx_ecrit(\%state,'AMCState',$state_file)) {
-	    my $dialog = Gtk2::MessageDialog
+	    my $dialog = Gtk3::MessageDialog
 		->new($w{'main_window'},
 		      'destroy-with-parent',
 		      'error','ok',
@@ -665,10 +670,11 @@ sub sauve_state {
 # annulation apprentissage
 
 sub annule_apprentissage {
-    my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'question','yes-no',
+    my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'question','yes-no','');
+    $dialog->set_markup(
 # Explains that some dialogs are shown only to learn AMC, only once by default (first part).
 			  __("Several dialogs try to help you be at ease handling AMC.")." ".
 # Explains that some dialogs are shown only to learn AMC, only once by default (second part). %s will be replaced with the text "Show this message again next time" that is written along the checkbox allowing the user to keep these learning message next time.
@@ -826,10 +832,11 @@ sub test_libnotify {
 
     if($libnotify_error && $o{'notify_desktop'}) {
       debug "libnotify loading error: $libnotify_error";
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'warning','ok',
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'warning','ok','');
+      $dialog->set_markup(
 			  "Please install <b>libnotify</b> to make desktop notifications available."
 			 );
       $dialog->run;
@@ -936,7 +943,7 @@ sub moteur_latex {
 
 sub read_glade {
     my ($main_widget,@widgets)=@_;
-    my $g=Gtk2::Builder->new();
+    my $g=Gtk3::Builder->new();
     my $glade_file=$glade_base.$main_widget.".glade";
     debug "Reading glade file ".$glade_file;
     $g->set_translation_domain('auto-multiple-choice');
@@ -1002,7 +1009,7 @@ sub debug_set {
     if($debug && !$do_nothing) {
 	debug "DEBUG MODE : ON";
 
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
@@ -1019,7 +1026,7 @@ $w{'menu_debug'}->set_active($debug);
 
 # add doc list menu
 
-my $docs_menu=Gtk2::Menu->new();
+my $docs_menu=Gtk3::Menu->new();
 
 my @doc_langs=();
 
@@ -1044,13 +1051,12 @@ for my $l (@doc_langs) {
     $ltext=code2language($l);
     $ltext=$l if(! $ltext);
     $ltext=$ltext_loc{$ltext} if($ltext_loc{$ltext});
-    my $m=Gtk2::ImageMenuItem->new_with_label($ltext);
-    my $it=Gtk2::IconTheme->new();
-    my ($taille,undef)=Gtk2::IconSize->lookup('menu');
+    my $m=Gtk3::ImageMenuItem->new_with_label($ltext);
+    my $it=Gtk3::IconTheme->new();
     $it->prepend_search_path($hdocdir."auto-multiple-choice.$l");
-    my $ii=$it->lookup_icon("flag",$taille ,"force-svg");
+    my $ii=$it->lookup_icon("flag",$o{project_icon_size} ,"force-svg");
     if($ii) {
-	$m->set_image(Gtk2::Image->new_from_pixbuf($it->load_icon("flag",$taille ,"force-svg")));
+	$m->set_image(Gtk3::Image->new_from_pixbuf($it->load_icon("flag",$o{project_icon_size} ,"force-svg")));
     }
     $m->signal_connect("activate",\&activate_doc,$l);
     $docs_menu->append($m);
@@ -1059,14 +1065,6 @@ for my $l (@doc_langs) {
 $docs_menu->show_all();
 
 $w{'doc_menu'}->set_submenu($docs_menu);
-
-# make state entries with same background color as around...
-$col=$w{'prepare_src'}->style()->bg('prelight');
-for my $s (qw/normal insensitive/) {
-  for my $k (qw/src docs layout capture marking unrecognized assoc/) {
-    $w{'state_'.$k}->modify_base($s,$col);
-  }
-}
 
 ###
 
@@ -1077,14 +1075,14 @@ sub dialogue_apprentissage {
     $buttons='ok' if(!$buttons);
     if($force || !$state{'apprentissage'}->{$key}) {
       my $garde;
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  $type,$buttons,
-			  @oo);
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              $type,$buttons,'');
+      $dialog->set_markup(@oo);
 
       if(!$force) {
-	$garde=Gtk2::CheckButton->new(__"Show this message again next time");
+	$garde=Gtk3::CheckButton->new(__"Show this message again next time");
 	$garde->set_active(0);
 	$garde->can_focus(0);
 
@@ -1109,16 +1107,16 @@ sub dialogue_apprentissage {
 
 ### COPIES
 
-my $copies_store = Gtk2::ListStore->new ('Glib::String');
+my $copies_store = Gtk3::ListStore->new ('Glib::String');
 
 ### FILES FOR TEMPLATE
 
-my $template_files_store = Gtk2::TreeStore->new ('Glib::String',
+my $template_files_store = Gtk3::TreeStore->new ('Glib::String',
 						 'Glib::String');
 
 ### Unrecognized scans
 
-my $inconnu_store = Gtk2::ListStore->new ('Glib::String','Glib::String',
+my $inconnu_store = Gtk3::ListStore->new ('Glib::String','Glib::String',
 					  'Glib::String','Glib::String',
 					  'Glib::String');
 
@@ -1126,7 +1124,7 @@ $inconnu_store->set_sort_column_id(INCONNU_TIME_N,GTK_SORT_ASCENDING);
 
 ### modele EMAILS
 
-my $emails_store=Gtk2::ListStore->new ('Glib::String',
+my $emails_store=Gtk3::ListStore->new ('Glib::String',
 				       'Glib::String',
 				       'Glib::String',
 				       'Glib::String',
@@ -1135,7 +1133,7 @@ my $emails_store=Gtk2::ListStore->new ('Glib::String',
 
 ### modele EMAILS
 
-my $attachments_store=Gtk2::ListStore->new ('Glib::String',
+my $attachments_store=Gtk3::ListStore->new ('Glib::String',
 					    'Glib::String',
 					    'Glib::String',
 					   );
@@ -1146,7 +1144,7 @@ my $diag_store;
 
 sub new_diagstore {
   $diag_store
-    = Gtk2::ListStore->new ('Glib::String',
+    = Gtk3::ListStore->new ('Glib::String',
 			    'Glib::String',
 			    'Glib::String',
 			    'Glib::String',
@@ -1177,34 +1175,34 @@ new_diagstore();
 sort_diagstore();
 show_diagstore();
 
-$renderer=Gtk2::CellRendererText->new;
+$renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"identifier",
+$column = Gtk3::TreeViewColumn->new_with_attributes (__"identifier",
 						     $renderer,
 						     text=> DIAG_ID,
 						     'background'=> DIAG_ID_BACK);
 $column->set_sort_column_id(DIAG_ID);
 $w{'diag_tree'}->append_column ($column);
 
-$renderer=Gtk2::CellRendererText->new;
+$renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of data captures.
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"updated",
+$column = Gtk3::TreeViewColumn->new_with_attributes (__"updated",
 						     $renderer,
 						     text=> DIAG_MAJ);
 $w{'diag_tree'}->append_column ($column);
 
-$renderer=Gtk2::CellRendererText->new;
+$renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"MSE",
+$column = Gtk3::TreeViewColumn->new_with_attributes (__"MSE",
 						     $renderer,
 						     'text'=> DIAG_EQM,
 						     'background'=> DIAG_EQM_BACK);
 $column->set_sort_column_id(DIAG_EQM);
 $w{'diag_tree'}->append_column ($column);
 
-$renderer=Gtk2::CellRendererText->new;
+$renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
-$column = Gtk2::TreeViewColumn->new_with_attributes (__"sensitivity",
+$column = Gtk3::TreeViewColumn->new_with_attributes (__"sensitivity",
 						     $renderer,
 						     'text'=> DIAG_DELTA,
 						     'background'=> DIAG_DELTA_BACK);
@@ -1481,7 +1479,7 @@ sub exporte {
 	if(@manque) {
 	    debug 'Exporting to '.$format.': Needs perl modules '.join(', ',@manque);
 
-	    my $dialog = Gtk2::MessageDialog
+	    my $dialog = Gtk3::MessageDialog
 	      ->new($w{'main_window'},
 		    'destroy-with-parent',
 		    'error','ok',
@@ -1520,7 +1518,7 @@ sub exporte {
 
 		 my $t=$c->higher_message_type();
 		 if($t) {
-		   my $dialog = Gtk2::MessageDialog
+		   my $dialog = Gtk3::MessageDialog
 		     ->new($w{'main_window'},
 			   'destroy-with-parent',
 			   ($t eq 'ERR' ? 'error' : $t eq 'WARN' ? 'warning' : 'info'),
@@ -1538,7 +1536,7 @@ sub exporte {
 		   view_dir($shortcuts->absolu('%PROJET/exports/'));
 		 }
 	       } else {
-		 my $dialog = Gtk2::MessageDialog
+		 my $dialog = Gtk3::MessageDialog
 		   ->new($w{'main_window'},
 			 'destroy-with-parent',
 			 'warning','ok',
@@ -1587,8 +1585,9 @@ sub zooms_display {
 sub zooms_line_base {
   my ($forget_it)=@_;
   my @selected=$w{'diag_tree'}->get_selection->get_selected_rows;
-  if(@selected) {
-    my $iter=$diag_store->get_iter($selected[0]);
+  my $first_selected=$selected[0]->[0];
+  if(defined($first_selected)) {
+    my $iter=$diag_store->get_iter($first_selected);
     my $id=$diag_store->get($iter,DIAG_ID);
     zooms_display((map { $diag_store->get($iter,$_) } (DIAG_ID_STUDENT,
 						       DIAG_ID_PAGE,
@@ -1602,7 +1601,7 @@ sub zooms_line_open { zooms_line_base(0); }
 
 sub layout_line {
   my @selected=$w{'diag_tree'}->get_selection->get_selected_rows;
-  for my $s (@selected) {
+  for my $s (@{$selected[0]}) {
     my $iter=$diag_store->get_iter($s);
     my @id=map { $diag_store->get($iter,$_); } 
       (DIAG_ID_STUDENT,DIAG_ID_PAGE,DIAG_ID_COPY);
@@ -1618,12 +1617,13 @@ sub layout_line {
 sub delete_line {
   my @selected=$w{'diag_tree'}->get_selection->get_selected_rows;
   my $f;
-  if(@selected) {
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'question','yes-no',
-			sprintf((__"You requested to delete all data capture results for %d page(s)"),1+$#selected)."\n"
+  if(@{$selected[0]}) {
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'question','yes-no','');
+    $dialog->set_markup(
+			sprintf((__"You requested to delete all data capture results for %d page(s)"),1+$#{$selected[0]})."\n"
 			.'<b>'.(__"All data and image files related to these pages will be deleted.")."</b>\n"
 			.(__"Do you really want to continue?")
 		       );
@@ -1632,7 +1632,7 @@ sub delete_line {
     if($reponse eq 'yes') {
       my @iters=();
       $projet{'_capture'}->begin_transaction('rmAN');
-      for my $s (@selected) {
+      for my $s (@{$selected[0]}) {
 	my $iter=$diag_store->get_iter($s);
 	my @id=map { $diag_store->get($iter,$_); } 
 	  (DIAG_ID_STUDENT,DIAG_ID_PAGE,DIAG_ID_COPY);
@@ -1698,7 +1698,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 							DIAG_ID_PAGE,
 							DIAG_ID_COPY)];
 
-	    my $menu = Gtk2::Menu->new;
+	    my $menu = Gtk3::Menu->new;
 	    my $c=0;
 	    my @actions=('page');
 
@@ -1711,8 +1711,8 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 
 	    if(@bi) {
 		$c++;
-		my $item = Gtk2::ImageMenuItem->new($diag_menu{'zoom'}->{text});
-		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{'zoom'}->{icon},'menu'));
+		my $item = Gtk3::ImageMenuItem->new($diag_menu{'zoom'}->{text});
+		$item->set_image(Gtk3::Image->new_from_icon_name($diag_menu{'zoom'}->{icon},'menu'));
 		$menu->append ($item);
 		$item->show;
 		$item->signal_connect (activate => sub {
@@ -1737,8 +1737,8 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	      }
 	      if(-f $f) {
 		$c++;
-		my $item = Gtk2::ImageMenuItem->new($diag_menu{$a}->{text});
-		$item->set_image(Gtk2::Image->new_from_icon_name($diag_menu{$a}->{icon},'menu'));
+		my $item = Gtk3::ImageMenuItem->new($diag_menu{$a}->{text});
+		$item->set_image(Gtk3::Image->new_from_icon_name($diag_menu{$a}->{icon},'menu'));
 		$menu->append ($item);
 		$item->show;
 		$item->signal_connect (activate => sub {
@@ -1798,11 +1798,11 @@ sub commande_parallele {
 	    exit(0);
 	}
     } else {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
-			      sprintf(__"Following command could not be run: <b>%s</b>, perhaps due to a poor configuration?",$c[0]));
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(sprintf(__"Following command could not be run: <b>%s</b>, perhaps due to a poor configuration?",$c[0]));
 	$dialog->run;
 	$dialog->destroy;
 
@@ -1848,9 +1848,8 @@ sub projects_show {
     ->set_tooltip_text(sprintf(__("Current directory: %s"),$w{'local_rep_projets'}));
 
   if(!$w{'icon_project'}) {
-    my ($taille,undef)=Gtk2::IconSize->lookup('menu');
-    $w{'icon_project'} = Gtk2::IconTheme->get_default->load_icon("auto-multiple-choice",$taille ,"force-svg");
-    $w{'icon_project_dir'} = Gtk2::IconTheme->get_default->load_icon("gtk-no",$taille ,"force-svg");
+    $w{'icon_project'} = Gtk3::IconTheme::get_default->load_icon("auto-multiple-choice",$o{project_icon_size} ,"force-svg");
+    $w{'icon_project_dir'} = Gtk3::IconTheme::get_default->load_icon("gtk-no",$o{project_icon_size} ,"force-svg");
     $w{'icon_project'}=$w{'main_window'}->render_icon ('gtk-open', 'menu')
       if(!$w{'icon_project'});
   }
@@ -1924,8 +1923,8 @@ sub liste_des_projets {
 
 	# mise a jour liste des projets dans la fenetre
 
-	$proj_store = Gtk2::ListStore->new ('Glib::String',
-					    'Gtk2::Gdk::Pixbuf');
+	$proj_store = Gtk3::ListStore->new ('Glib::String',
+					    'Gtk3::Gdk::Pixbuf');
 
 	$w{'choix_projets_liste'}->set_model($proj_store);
 
@@ -1939,7 +1938,7 @@ sub liste_des_projets {
 	$w{'choix_projet'}->set_keep_above(1);
 
     } else {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
@@ -1951,7 +1950,7 @@ sub liste_des_projets {
 }
 
 sub project_choose_directory {
-  my $d=Gtk2::FileChooserDialog
+  my $d=Gtk3::FileChooserDialog
     ->new(__("Choose directory"),
 	  $w{'choix_projet'},'select-folder',
 	  'gtk-cancel'=>'cancel',
@@ -1976,7 +1975,7 @@ sub projet_gestion_check {
 
     # lequel ?
 
-    my $sel=$w{'choix_projets_liste'}->get_selected_items();
+    my $sel=$w{'choix_projets_liste'}->get_selected_items()->[0];
     my $iter;
     my $proj;
 
@@ -1992,7 +1991,7 @@ sub projet_gestion_check {
     # est-ce le projet en cours ?
 
     if($projet{'nom'} && $proj eq $projet{'nom'}) {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'choix_projet'},
 		  'destroy-with-parent',
 		  'error','ok',
@@ -2013,10 +2012,11 @@ sub projet_liste_clone {
   my $proj_clone=new_filename($shortcuts->absolu($w{'local_rep_projets'}).'/'.$proj);
   my (undef,undef,$proj_c) = splitpath($proj_clone);
 
-  my $dialog = Gtk2::MessageDialog
-    ->new_with_markup($w{'choix_projet'},
-		      'destroy-with-parent',
-		      'warning','ok-cancel',
+  my $dialog = Gtk3::MessageDialog
+    ->new($w{'choix_projet'},
+          'destroy-with-parent',
+          'warning','ok-cancel','');
+  $dialog->set_markup(
 		      sprintf(__("This will clone project <b>%s</b> to a new project <i>%s</i>."),
 			      $proj,$proj_c));
   my $r=$dialog->run;
@@ -2077,10 +2077,11 @@ sub projet_mv_yes {
 	    my $dir_nouveau=$w{'local_rep_projets'}."/".$nom_nouveau;
 	    if(-d $dir_nouveau) {
 		$w{'choix_projet'}->set_keep_above(0);
-		my $dialog = Gtk2::MessageDialog
-		    ->new_with_markup($w{'main_window'},
-				      'destroy-with-parent',
-				      'error','ok',
+		my $dialog = Gtk3::MessageDialog
+                  ->new($w{'main_window'},
+                        'destroy-with-parent',
+                        'error','ok','');
+                $dialog->set_markup(
 # TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
 				      sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),$dir_nouveau));
 		$dialog->run;
@@ -2147,13 +2148,13 @@ sub project_copy {
 	if($i/$total-$last_fraction>1/40) {
 	  $last_fraction=$i/$total;
 	  $w{'avancement'}->set_fraction($last_fraction);
-	  Gtk2->main_iteration while ( Gtk2->events_pending );
+	  Gtk3::main_iteration while ( Gtk3::events_pending );
 	}
       }
       $w{'avancement'}->set_text($old_text);
       $w{'commande'}->hide();
 
-      my $dialog = Gtk2::MessageDialog
+      my $dialog = Gtk3::MessageDialog
 	->new($parent_window,
 	      'destroy-with-parent',
 	      'info','ok',
@@ -2169,7 +2170,7 @@ sub project_copy {
     }
   }
   if($err) {
-    my $dialog = Gtk2::MessageDialog
+    my $dialog = Gtk3::MessageDialog
       ->new($parent_window,
 	    'destroy-with-parent',
 	    'error','ok',
@@ -2189,10 +2190,11 @@ sub projet_liste_supprime {
 
     # on demande confirmation...
     $w{'choix_projet'}->set_keep_above(0);
-    my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'warning','ok-cancel',
+    my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'warning','ok-cancel','');
+    $dialog->set_markup(
 			  sprintf(__("You asked to remove project <b>%s</b>.")." "
 				  .__("This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example.")." "
 				  .__("Is this really what you want?"),$proj));
@@ -2226,7 +2228,7 @@ sub projet_charge_ok {
 
     # ouverture projet deja existant
 
-    my $sel=$w{'choix_projets_liste'}->get_selected_items();
+    my $sel=$w{'choix_projets_liste'}->get_selected_items()->[0];
     my $proj;
 
     if($sel) {
@@ -2234,15 +2236,16 @@ sub projet_charge_ok {
     }
 
     $w{'choix_projet'}->destroy();
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    Gtk3::main_iteration while ( Gtk3::events_pending );
 
     if($proj) {
 	my $reponse='yes';
 	if(! -f fich_options($proj,$w{'local_rep_projets'})) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'warning','yes-no',
+	    my $dialog = Gtk3::MessageDialog
+		->new($w{'main_window'},
+                      'destroy-with-parent',
+                      'warning','yes-no','');
+            $dialog->set_markup(
 				  sprintf(__("You selected directory <b>%s</b> as a project to open.")." "
 					  .__("However, this directory does not seem to contain a project. Do you still want to try?"),$proj));
 	    $reponse=$dialog->run;
@@ -2256,10 +2259,11 @@ sub projet_charge_ok {
 
 	  if($w{'local_rep_projets'} =~ /^\/media\//
 	    && $shortcuts->absolu($o{'projects_home'}) !~ /^\/media\//) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'warning','yes-no',
+	    my $dialog = Gtk3::MessageDialog
+		->new($w{'main_window'},
+                      'destroy-with-parent',
+                      'warning','yes-no','');
+            $dialog->set_markup(
 				  sprintf(__("You selected project <b>%s</b> from directory <i>%s</i>.")." "
 					  .__("Do you want to copy this project to your projects directory before opening it?"),
 					  $proj,$w{'local_rep_projets'}));
@@ -2291,8 +2295,9 @@ sub restricted_check {
 	$text->set_text($nom);
 	$warning->show();
 
-	for(qw/normal active/) {
-	    $text->modify_base($_,Gtk2::Gdk::Color->parse('#FFC0C0'));
+	my $col=Gtk3::Gdk::Color::parse('#FFC0C0');
+        for(qw/normal active/) {
+	    $text->modify_base($_,$col);
 	}
 	Glib::Timeout->add (500, sub {
 	    $text->modify_style($style);
@@ -2316,10 +2321,11 @@ sub projet_charge_nouveau {
 
     if(-e $w{'local_rep_projets'}."/$proj") {
 
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 			      sprintf(__("The name <b>%s</b> is already used in the projects directory.")." "
 				      .__"You must choose another name to create a project.",$proj));
 	$dialog->run;
@@ -2351,7 +2357,7 @@ sub projet_sauve {
     }
 
     if(pref_xx_ecrit($po,'projetAMC',$of,$projet{'options'})) {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
@@ -2397,10 +2403,11 @@ sub set_project_option {
 sub doc_maj {
     my $sur=0;
     if($projet{'_capture'}->n_pages_transaction()>0) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'warning','ok-cancel',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'warning','ok-cancel','');
+        $dialog->set_markup(
 			      __("Papers analysis was already made on the basis of the current working documents.")." "
 			      .__("You already made the examination on the basis of these documents.")." "
 			      .__("If you modify working documents, you will not be capable any more of analyzing the papers you have already distributed!")." "
@@ -2423,10 +2430,11 @@ sub doc_maj {
     $projet{_layout}->end_transaction('DMAJ');
     if($pc > 0) {
 	if(!$sur) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'question','ok-cancel',
+	    my $dialog = Gtk3::MessageDialog
+              ->new($w{'main_window'},
+                    'destroy-with-parent',
+                    'question','ok-cancel','');
+            $dialog->set_markup(
 				  __("Layouts are already calculated for the current documents.")." "
 				  .__("Updating working documents, the layouts will become obsolete and will thus be erased.")." "
 				  .__("Do you wish to continue?")." "
@@ -2472,10 +2480,11 @@ sub doc_maj {
       }
       $message.=__("Install these components on your system and try again.");
 
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',$message);
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok','');
+      $dialog->set_markup($message);
       $dialog->run;
       $dialog->destroy;
 
@@ -2553,11 +2562,11 @@ sub doc_maj {
 			       __"Command output details");
 		     $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($projet{'options'}->{'filter'} eq 'latex');
 
-		     my $dialog = Gtk2::MessageDialog
-		       ->new_with_markup($w{'main_window'},
-					 'destroy-with-parent',
-					 'error','ok',
-					 $message);
+		     my $dialog = Gtk3::MessageDialog
+		       ->new($w{'main_window'},
+                             'destroy-with-parent',
+                             'error','ok','');
+                     $dialog->set_markup($message);
 		     $dialog->run;
 		     $dialog->destroy;
 		   } else {
@@ -2608,10 +2617,11 @@ sub doc_maj {
 		   my $ensemble=$c->variable('ensemble') && !$c->variable('outsidebox');
 		   if (($ensemble  || $c->variable('insidebox'))
 		       && $projet{'options'}->{'seuil'}<0.4) {
-		     my $dialog = Gtk2::MessageDialog
-		       ->new_with_markup($w{'main_window'},
-					 'destroy-with-parent',
-					 'question','yes-no',
+		     my $dialog = Gtk3::MessageDialog
+		       ->new($w{'main_window'},
+                             'destroy-with-parent',
+                             'question','yes-no','');
+                     $dialog->set_markup(
 					 sprintf(($ensemble ?
 						  __("Your question has a separate answers sheet.")." "
 						  .__("In this case, letters are shown inside boxes.") :
@@ -2677,7 +2687,12 @@ sub nonnul {
 }
 
 sub autre_imprimante {
-    my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
+  my %alias=();
+  my %trouve=();
+
+  my ($ok,$imp_iter)=$w{'imprimante'}->get_active_iter;
+  if($ok) {
+    my $i=$w{'imprimante'}->get_model->get($imp_iter,COMBO_ID);
     debug "Choix imprimante $i";
 
     $o{options_impression}->{printer}={}
@@ -2691,15 +2706,17 @@ sub autre_imprimante {
 
     $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
     $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printer}->{$i});
+  }
 }
 
 sub sujet_impressions {
 
     if(! -f $shortcuts->absolu($projet{'options'}->{'doc_question'})) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 # TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
 			      __"You don't have any question to print: please check your source file and update working documents first.");
 	$dialog->run;
@@ -2712,10 +2729,11 @@ sub sujet_impressions {
     my $c=$projet{'_layout'}->pages_count;
     $projet{'_layout'}->end_transaction('PGCN');
     if($c==0) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 # TRANSLATORS: Message when AMC does not know about the subject pages that has been generated. Usualy this means that the layout computation step has not been made.
 			      __("Question's pages are not detected.")." "
 			      .__"Perhaps you forgot to compute layouts?");
@@ -2736,7 +2754,7 @@ sub sujet_impressions {
 
 	my $error=$print_module->check_available();
 	if($error) {
-	  my $dialog = Gtk2::MessageDialog
+	  my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
@@ -2757,7 +2775,7 @@ sub sujet_impressions {
 	my $default_printer=$w{print_object}->default_printer();
 
 	if(!$default_printer) {
-	    my $dialog = Gtk2::MessageDialog
+	    my $dialog = Gtk3::MessageDialog
 		->new($w{'main_window'},
 		      'destroy-with-parent',
 		      'error','ok',
@@ -2823,9 +2841,9 @@ sub sujet_impressions {
 
     $w{'arbre_choix_copies'}->set_model($copies_store);
 
-    my $renderer=Gtk2::CellRendererText->new;
+    my $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
-    my $column = Gtk2::TreeViewColumn->new_with_attributes (__"papers",
+    my $column = Gtk3::TreeViewColumn->new_with_attributes (__"papers",
 							    $renderer,
 							    text=> COPIE_N );
     $w{'arbre_choix_copies'}->append_column ($column);
@@ -2861,26 +2879,33 @@ sub sujet_impressions_ok {
     my $os='none';
     my @e=();
 
-    for my $i ($w{'arbre_choix_copies'}->get_selection()->get_selected_rows() ) {
-	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N);
+    my @selected=$w{'arbre_choix_copies'}->get_selection()->get_selected_rows();
+    for my $i (@{$selected[0]}) {
+	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N) if($i);
     }
 
     $prefs->reprend_pref('impall',$o{'options_impression'});
 
     if($o{'methode_impression'} =~ /^CUPS/) {
-	my $i=$w{'imprimante'}->get_model->get($w{'imprimante'}->get_active_iter,COMBO_ID);
-	if($i ne $o{'imprimante'}) {
-	    $o{'imprimante'}=$i;
-	    $o{'_modifie'}=1;
-	}
+      my ($ok,$imp_iter)=$w{'imprimante'}->get_active_iter;
+      my $i;
+      if($ok) {
+	$i=$w{'imprimante'}->get_model->get($imp_iter,COMBO_ID);
+      } else {
+	$i='default';
+      }
+      if($i ne $o{'imprimante'}) {
+	$o{'imprimante'}=$i;
+	$o{'_modifie'}=1;
+      }
 
-	$prefs->reprend_pref('imp',$o{'options_impression'});
-	$prefs->reprend_pref('printer',$o{options_impression}->{printer}->{$i});
+      $prefs->reprend_pref('imp',$o{'options_impression'});
+      $prefs->reprend_pref('printer',$o{options_impression}->{printer}->{$i});
 
-	$os=options_string($o{options_impression},
-			   $o{options_impression}->{printer}->{$i});
+      $os=options_string($o{options_impression},
+                         $o{options_impression}->{printer}->{$i});
 
-	debug("Printing options : $os");
+      debug("Printing options : $os");
     }
 
     if($o{'methode_impression'} eq 'file') {
@@ -2906,7 +2931,7 @@ sub sujet_impressions_ok {
 
     if(!@e) {
 	# No page selected:
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
@@ -2940,10 +2965,11 @@ sub sujet_impressions_ok {
 	  # This looks strange: a few sheets printed, a few sheets
 	  # generated, and photocopy mode not selected yet. Ask the
 	  # user if he wants to select this mode now.
-	  my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'question','yes-no',
+	  my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'question','yes-no','');
+          $dialog->set_markup(
 			      __("You selected only a few sheets to print.")."\n".
 			      "<b>".__("Are you going to photocopy some printed subjects before giving them to the students?")."</b>\n".
 			      __("If so, the corresponding option will be set for this project.")." ".
@@ -2964,10 +2990,11 @@ sub sujet_impressions_ok {
       # This options needs pdftk!
       if($o{print_extract_with} ne 'pdftk') {
 	if(commande_accessible('pdftk')) {
-	  my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'info','ok',
+	  my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'info','ok','');
+          $dialog->set_markup(
 # TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
 			      sprintf(__("You selected the '%s' option, that uses 'pdftk', so the %s has been set to 'pdftk' for you."),
 				      __("Answer sheet first"),__("Extracting method"))
@@ -2978,10 +3005,11 @@ sub sujet_impressions_ok {
 	  $o{print_extract_with}='pdftk';
 	  $o{_modifie}.=',print_extract_with';$o{_modifie_ok}=1;
 	} else {
-	  my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	  my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+          $dialog->set_markup(
 			      sprintf(__("You selected the '%s' option, but this option needs 'pdftk' to be installed on your system. Please install it and try again."),
 				      __"Answer sheet first")
 			     );
@@ -3062,11 +3090,13 @@ sub save_state_after_printing {
 sub calcule_mep {
     if($projet{'options'}->{'doc_setting'} !~ /\.xy$/) {
 	# OLD STYLE WORKING DOCUMENTS... Not supported anymore: update!
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error', # message type
-			      'ok', # which set of buttons?
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error', # message type
+                  'ok', # which set of buttons?
+                  '');
+        $dialog->set_markup(
 			      __("Working documents are in an old format, which is not supported anymore.")." <b>"
 			      .__("Please generate again the working documents!")."</b>");
 	$dialog->run;
@@ -3093,11 +3123,13 @@ sub calcule_mep {
 		 $projet{'_layout'}->end_transaction('PGCN');
 		 if($c<1) {
 		   # avertissement...
-		   my $dialog = Gtk2::MessageDialog
-		     ->new_with_markup($w{'main_window'},
-				       'destroy-with-parent',
-				       'error', # message type
-				       'ok', # which set of buttons?
+		   my $dialog = Gtk3::MessageDialog
+		     ->new($w{'main_window'},
+                           'destroy-with-parent',
+                           'error', # message type
+                           'ok', # which set of buttons?
+                           '');
+                   $dialog->set_markup(
 				       __("No layout detected.")." "
 				       .__("<b>Don't go through the examination</b> before fixing this problem, otherwise you won't be able to use AMC for correction."));
 		   $dialog->run;
@@ -3174,10 +3206,11 @@ sub saisie_manuelle {
          empty_color_name=>$o{view_empty_color},
 	);
     } else {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 			      __("No layout for this project.")." "
 # TRANSLATORS: Here, the first %s will be replaced with "Layout detection" (a button title), and the second %s with "Preparation" (the tab title where one can find this button).
 			      .sprintf(__("Please use button <i>%s</i> in <i>%s</i> before manual data capture."),
@@ -3244,10 +3277,11 @@ sub saisie_auto_annule {
 }
 
 sub saisie_auto_info {
-  my $dialog=Gtk2::MessageDialog
-    ->new_with_markup($w{'saisie_auto'},'destroy-with-parent','info','ok',
-		      __("Automatic data capture can be done in two different modes:")."\n"
-		      ."<b>".
+  my $dialog=Gtk3::MessageDialog
+    ->new($w{'saisie_auto'},'destroy-with-parent','info','ok','');
+  $dialog->set_markup(
+                      __("Automatic data capture can be done in two different modes:")."\n"
+                      ."<b>".
 # TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
 		      __("Different answer sheets").
 		      ".</b> ".
@@ -3359,7 +3393,7 @@ sub saisie_auto_ok {
 
     $prefs->reprend_pref('saisie_auto',$projet{'options'});
     $w{'saisie_auto'}->destroy();
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    Gtk3::main_iteration while ( Gtk3::events_pending );
 
     clear_old('diagnostic',
 	      $shortcuts->absolu('%PROJET/cr/diagnostic'));
@@ -3479,10 +3513,11 @@ sub valide_liste {
     if($err) {
       students_list_show();
 	if(!$oo{'noinfo'}) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'error','ok',
+	    my $dialog = Gtk3::MessageDialog
+		->new($w{'main_window'},
+                      'destroy-with-parent',
+                      'error','ok','');
+            $dialog->set_markup(
 				  sprintf(__"Unsuitable names file: %d errors, first on line %d.",$err,$errlig));
 	    $dialog->run;
 	    $dialog->destroy;
@@ -3494,10 +3529,11 @@ sub valide_liste {
 	if($e>0) {
 	    debug "NamesFile: $e empty IDs";
 	    students_list_show();
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'warning','ok',
+	    my $dialog = Gtk3::MessageDialog
+		->new($w{'main_window'},
+                      'destroy-with-parent',
+                      'warning','ok','');
+            $dialog->set_markup(
 # TRANSLATORS: Here, do not translate 'name' and 'surname' (except in french), as the column names in the students list file has to be named in english in order to be properly detected.
 				  sprintf(__"Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled.",$e,$fl)." ".
 				  __"Edit the names file to correct it, and re-read.");
@@ -3511,10 +3547,11 @@ sub valide_liste {
 		    @$d=(@{$d}[0..8],'(and more)');
 		}
 		students_list_show();
-		my $dialog = Gtk2::MessageDialog
-		    ->new_with_markup($w{'main_window'},
-				      'destroy-with-parent',
-				      'warning','ok',
+		my $dialog = Gtk3::MessageDialog
+		    ->new($w{'main_window'},
+                          'destroy-with-parent',
+                          'warning','ok','');
+                $dialog->set_markup(
 				      sprintf(__"Found duplicate names: <i>%s</i>. Check that all names are different.",join(', ',@$d))." ".__"Edit the names file to correct it, and re-read.");
 		$dialog->run;
 		$dialog->destroy;
@@ -3540,28 +3577,31 @@ sub valide_liste {
 sub check_possible_assoc {
     my ($code)=@_;
     if(! -s $shortcuts->absolu($projet{'options'}->{'listeetudiants'})) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 # TRANSLATORS: Here, %s will be replaced with the name of the tab "Data capture".
 			      sprintf(__"Before associating names to papers, you must choose a students list file in tab \"%s\".",
 				      __"Data capture"));
 	$dialog->run;
 	$dialog->destroy;
     } elsif(!$projet{'options'}->{'liste_key'}) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 			      __("Please choose a key from primary keys in students list before association."));
 	$dialog->run;
 	$dialog->destroy;
     } elsif($code && ! $projet{'options'}->{'assoc_code'}) {
-	my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 			      __("Please choose a code (made with LaTeX command \\AMCcode) before automatic association."));
 	$dialog->run;
 	$dialog->destroy;
@@ -3593,7 +3633,7 @@ sub associe {
 					'size_prefs'=>($o{'conserve_taille'} ? \%o : ''),
 				       );
       if($ga->{'erreur'}) {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	  ->new($w{'main_window'},
 		'destroy-with-parent',
 		'error','ok',
@@ -3602,7 +3642,7 @@ sub associe {
 	$dialog->destroy;
       }
     } else {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
@@ -3648,10 +3688,11 @@ sub assoc_resultat {
     my ($auto,$man,$both)=$projet{'_association'}->counts();
     $projet{'_association'}->end_transaction('ARCC');
 
-    my $dialog=Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'info','ok',
+    my $dialog=Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'info','ok','');
+    $dialog->set_markup(
 			sprintf(__("Automatic association completed: %d students recognized."),$auto).
 # TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
 			($auto==0 ? "\n<b>".sprintf(__("Please check \"%s\" and \"%s\" values and try again."),
@@ -3741,10 +3782,11 @@ sub filter_changed {
 	.__("Do you wish to continue?")." "
 	  .__("Click on Ok to erease old working documents and change file format, and on Cancel to get back to the same file format.");
     }
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'question','ok-cancel',$text);
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'question','ok-cancel','');
+    $dialog->set_markup($text);
     my $reponse=$dialog->run;
     $dialog->destroy;
 
@@ -3783,7 +3825,7 @@ sub change_liste_key {
   if($projet{_students_list}->head_n_duplicates($projet{'options'}->{'liste_key'})) {
     debug "Invalid key: back to old value $previous_liste_key";
 
-    my $dialog = Gtk2::MessageDialog
+    my $dialog = Gtk3::MessageDialog
       ->new($w{'main_window'},
 	    'destroy-with-parent',
 	    'error','ok',
@@ -3819,10 +3861,11 @@ sub change_liste_key {
       if ($man>0) {
 	# manual association work has been made
 
-	my $dialog=Gtk2::MessageDialog
-	  ->new_with_markup($w{'main_window'},
-			    'destroy-with-parent',
-			    'warning','yes-no',
+	my $dialog=Gtk3::MessageDialog
+	  ->new($w{'main_window'},
+                'destroy-with-parent',
+                'warning','yes-no','');
+        $dialog->set_markup(
 			    sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
 			    sprintf(__("Some manual association data has be found, which will be lost if the primary key is changed. Do you want to switch back to the primary key \"%s\" and keep association data?"),$assoc_liste_key)
 			   );
@@ -3843,10 +3886,11 @@ sub change_liste_key {
       } else {
 	if ($projet{'options'}->{'assoc_code'}) {
 	  # only automated association, easy to re-run
-	  my $dialog=Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'info','ok',
+	  my $dialog=Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'info','ok','');
+          $dialog->set_markup(
 			      sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
 			      __("Automatic papers/students association will be re-run to update the association data.")
 			     );
@@ -3869,7 +3913,7 @@ sub voir_notes {
   if($c>0) {
     my $n=AMC::Gui::Notes::new('scoring'=>$projet{'_scoring'});
   } else {
-    my $dialog = Gtk2::MessageDialog
+    my $dialog = Gtk3::MessageDialog
       ->new($w{'main_window'},
 	    'destroy-with-parent',
 	    'info','ok',
@@ -3957,8 +4001,6 @@ sub noter_postcorrect {
 			      postcorrect_photo postcorrect_apply/);
 
 	AMC::Gui::PageArea::add_feuille($w{'postcorrect_photo'});
-	$w{'postcorrect_photo'}
-	  ->signal_connect('expose_event'=>\&AMC::Gui::PageArea::expose_drawing);
 
 	debug "Student range: $postcorrect_student_min,$postcorrect_student_max\n";
 	$w{'postcorrect_student'}->set_range($postcorrect_student_min,$postcorrect_student_max);
@@ -3997,9 +4039,9 @@ sub postcorrect_change_copy {
     }
     debug "Postcorrect name field image: $f";
     if(-f $f) {
-      $w{'postcorrect_photo'}->set_image($f);
+      $w{'postcorrect_photo'}->set_content(image=>$f);
     } else {
-      $w{'postcorrect_photo'}->set_image('NONE');
+      $w{'postcorrect_photo'}->set_content();
     }
 }
 
@@ -4212,20 +4254,14 @@ sub select_students {
 			  students_select_list students_list_search/);
   my $lk=$projet{'options'}->{'liste_key'};
 
-  $col=$w{'choose_students'}->style()->bg('prelight');
-  for my $s (qw/normal insensitive/) {
-    for my $k (qw/students_instructions/) {
-      $w{$k}->modify_base($s,$col);
-    }
-  }
-  my $students_store=Gtk2::ListStore
+  my $students_store=Gtk3::ListStore
     ->new('Glib::String','Glib::String','Glib::String',
 	  'Glib::String','Glib::String',
 	  'Glib::Boolean','Glib::Boolean');
 
-  my $filtered=Gtk2::TreeModelFilter->new($students_store);
+  my $filtered=Gtk3::TreeModelFilter->new($students_store);
   $filtered->set_visible_column(5);
-  my $filtered_sorted=Gtk2::TreeModelSort->new($filtered);
+  my $filtered_sorted=Gtk3::TreeModelSort->new_with_model($filtered);
 
   $filtered_sorted->set_sort_func(0,\&sort_num,0);
   $filtered_sorted->set_sort_func(1,\&sort_string,1);
@@ -4235,15 +4271,15 @@ sub select_students {
   $w{'students_list_filtered_sorted'}=$filtered_sorted;
 
   $w{'students_select_list'}->set_model($filtered_sorted);
-  my $renderer=Gtk2::CellRendererText->new;
-  my $column = Gtk2::TreeViewColumn->new_with_attributes (__"exam ID",
+  my $renderer=Gtk3::CellRendererText->new;
+  my $column = Gtk3::TreeViewColumn->new_with_attributes (__"exam ID",
 							  $renderer,
 							  text=> 0);
   $column->set_sort_column_id(0);
   $w{'students_select_list'}->append_column ($column);
 
   if($lk) {
-    $column = Gtk2::TreeViewColumn->new_with_attributes ($lk,
+    $column = Gtk3::TreeViewColumn->new_with_attributes ($lk,
 							 $renderer,
 							 text=> 4);
     $column->set_sort_column_id(4);
@@ -4251,7 +4287,7 @@ sub select_students {
     $w{'students_select_list'}->append_column ($column);
   }
 
-  $column = Gtk2::TreeViewColumn->new_with_attributes (__"student",
+  $column = Gtk3::TreeViewColumn->new_with_attributes (__"student",
 						       $renderer,
 						       text=> 1);
   $column->set_sort_column_id(1);
@@ -4511,8 +4547,9 @@ sub activate_doc {
 sub change_methode_impression {
     if($w{'pref_x_print_command_pdf'}) {
 	my $m='';
-	if($w{'pref_c_methode_impression'}->get_active_iter) {
-	    $m=$w{'pref_c_methode_impression'}->get_model->get($w{'pref_c_methode_impression'}->get_active_iter,COMBO_ID);
+	my ($ok,$iter)=$w{'pref_c_methode_impression'}->get_active_iter;
+        if($ok) {
+	    $m=$w{'pref_c_methode_impression'}->get_model->get($iter,COMBO_ID);
 	}
 	$w{'pref_x_print_command_pdf'}->set_sensitive($m eq 'commande');
     }
@@ -4649,10 +4686,11 @@ sub accepte_preferences {
 	debug "Ask user $label_general | $label_projet";
 
 	if ($label_projet && $label_general) {
-	  my $dialog = Gtk2::MessageDialog
-	    ->new_with_markup($w{'main_window'},
-			      'destroy-with-parent',
-			      'question','yes-no',
+	  my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'question','yes-no','');
+          $dialog->set_markup(
 			      sprintf(__("You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"),
 				      $label_general,$label_projet,$projet{'nom'}));
 	  my $reponse=$dialog->run;
@@ -4702,7 +4740,7 @@ sub sauve_pref_generales {
     debug "Saving general preferences...";
 
     if(pref_xx_ecrit(\%o,'AMC',$o_file)) {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
@@ -4860,12 +4898,11 @@ sub mep_warnings {
 	# should not be possible to go there...
 	return();
     }
-    my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'warning','ok',
-			  $m
-	);
+    my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'warning','ok','');
+    $dialog->set_markup($m);
     $dialog->run;
     $dialog->destroy;
 
@@ -5026,7 +5063,7 @@ sub detecte_analyse {
     $frac=0;
     if($total>0) {
       $w{'avancement'}->set_text(__"Looking for analysis...");
-      Gtk2->main_iteration while ( Gtk2->events_pending );
+      Gtk3::main_iteration while ( Gtk3::events_pending );
     }
     for my $p (@$summary) {
       $diag_store->insert_with_values
@@ -5045,7 +5082,7 @@ sub detecte_analyse {
       if($i/$total>=$frac+.05) {
 	$frac=$i/$total;
 	$w{'avancement'}->set_fraction($frac);
-	Gtk2->main_iteration while ( Gtk2->events_pending );
+	Gtk3::main_iteration while ( Gtk3::events_pending );
       }
     }
 
@@ -5055,7 +5092,7 @@ sub detecte_analyse {
     $w{'avancement'}->set_text($av_text);
     $w{'avancement'}->set_fraction(0) if(!$oo{'interne'});
     $w{'commande'}->hide() if(!$oo{'interne'});
-    Gtk2->main_iteration while ( Gtk2->events_pending );
+    Gtk3::main_iteration while ( Gtk3::events_pending );
 
     my $r=update_analysis_summary();
 
@@ -5095,11 +5132,12 @@ sub show_missing_pages {
 			   $p->{'page'},$p->{'copy'});
   }
 
-  my $dialog = Gtk2::MessageDialog
-    ->new_with_markup
+  my $dialog = Gtk3::MessageDialog
+    ->new
       ($w{'main_window'},
        'destroy-with-parent',
-       'info','ok',
+       'info','ok','');
+  $dialog->set_markup(
        "<b>".(__"Pages that miss data capture to complete students sheets:")."</b>"
        .$l
       );
@@ -5138,30 +5176,21 @@ sub open_unrecognized {
 			   inconnu_hpaned inconnu_vpaned
 			   main_recog state_scanrecog ur_frame_scan/);
 
-  # make state entries with same background color as around...
-  my $col=$w{'ur_frame_scan'}->style()->bg('normal');
-  for my $s (qw/normal insensitive/) {
-    for my $k (qw/scanrecog/) {
-      $w{'state_'.$k}->modify_base($s,$col);
-    }
-  }
-
   for (qw/scan preprocessed/) {
     AMC::Gui::PageArea::add_feuille($w{$_.'_area'});
-    $w{$_.'_area'}->signal_connect('expose_event'=>\&AMC::Gui::PageArea::expose_drawing);
   }
 
   $w{'inconnu_tree'}->set_model($inconnu_store);
 
-  $renderer=Gtk2::CellRendererText->new;
-  $column = Gtk2::TreeViewColumn->new_with_attributes ("scan",
+  $renderer=Gtk3::CellRendererText->new;
+  $column = Gtk3::TreeViewColumn->new_with_attributes ("scan",
 						       $renderer,
 						       text=> INCONNU_SCAN);
   $w{'inconnu_tree'}->append_column ($column);
   $column->set_sort_column_id(INCONNU_SCAN);
 
-  $renderer=Gtk2::CellRendererText->new;
-  $column = Gtk2::TreeViewColumn->new_with_attributes ("date",
+  $renderer=Gtk3::CellRendererText->new;
+  $column = Gtk3::TreeViewColumn->new_with_attributes ("date",
 						       $renderer,
 						       text=> INCONNU_TIME);
   $w{'inconnu_tree'}->append_column ($column);
@@ -5172,34 +5201,30 @@ sub open_unrecognized {
   $w{'inconnu_tree'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
   $w{'inconnu_tree'}->get_selection->signal_connect("changed",\&unrecognized_line);
   $w{'inconnu_tree'}->get_selection->select_iter($inconnu_store->get_iter_first);
-
-  $w{'inconnu_vpaned'}->child1_shrink(0);
-
-  $w{'inconnu_hpaned'}->child1_resize(1);
-  $w{'inconnu_hpaned'}->child2_resize(1);
 }
 
 sub unrecognized_line {
   my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
+  my $first_selected=$sel[0]->[0];
   my $iter='';
-  if(@sel && defined($sel[0])) {
-    $iter=$inconnu_store->get_iter($sel[0]);
+  if(defined($first_selected)) {
+    $iter=$inconnu_store->get_iter($first_selected);
   }
   if($iter) {
-    $w{'inconnu_tree'}->scroll_to_cell($sel[0]);
+    $w{'inconnu_tree'}->scroll_to_cell($first_selected,undef,0,0,0);
     my $scan=$shortcuts->absolu($inconnu_store->get($iter,INCONNU_FILE));
     if(-f $scan) {
-      $w{'scan_area'}->set_image($scan);
+      $w{'scan_area'}->set_content(image=>$scan);
     } else {
       debug_and_stderr "Scan not found: $scan";
-      $w{'scan_area'}->set_image('NONE');
+      $w{'scan_area'}->set_content();
     }
 
     my $preproc=$inconnu_store->get($iter,INCONNU_PREPROC);
     if(-f $preproc) {
-      $w{'preprocessed_area'}->set_image($preproc);
+      $w{'preprocessed_area'}->set_content(image=>$preproc);
     } else {
-      $w{'preprocessed_area'}->set_image('NONE');
+      $w{'preprocessed_area'}->set_content();
     }
 
     if($w{'scan_area'}->get_image) {
@@ -5212,8 +5237,8 @@ sub unrecognized_line {
       $w{'state_scanrecog'}->set_text(sprintf((__"Error loading scan %s"),$scan));
     }
   } else {
-    $w{'scan_area'}->set_image('NONE');
-    $w{'preprocessed_area'}->set_image('NONE');
+    $w{'scan_area'}->set_content();
+    $w{'preprocessed_area'}->set_content();
     state_image('scanrecog','gtk-dialog-question');
     $w{'state_scanrecog'}->set_text(__"No scan selected");
   }
@@ -5222,13 +5247,16 @@ sub unrecognized_line {
 sub unrecognized_next {
   my ($widget,@sel)=@_;
   @sel=() if(!defined($sel[0]));
-  @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows
-    if(!@sel);
-  my $iter;
-  if(@sel && defined($sel[$#sel])) {
-    $iter=$inconnu_store->iter_next($inconnu_store->get_iter($sel[$#sel]));
+  if(!@sel) {
+    @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
+    @sel=@{$sel[0]};
   }
-  $iter=$inconnu_store->get_iter_first if(!$iter);
+  my $iter;
+  my $ok=0;
+  if(@sel && defined($sel[$#sel])) {
+    $ok=$inconnu_store->iter_next($inconnu_store->get_iter($sel[$#sel]));
+  }
+  $iter=$inconnu_store->get_iter_first if(!$ok);
 
   $w{'inconnu_tree'}->get_selection->unselect_all;
   $w{'inconnu_tree'}->get_selection->select_iter($iter) if($iter);
@@ -5236,9 +5264,10 @@ sub unrecognized_next {
 
 sub unrecognized_prev {
   my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
+  my $first_selected=$sel[0]->[0];
   my $iter;
-  if(@sel && defined($sel[0])) {
-    my $p=$inconnu_store->get_path($inconnu_store->get_iter($sel[0]));
+  if(defined($first_selected)) {
+    my $p=$inconnu_store->get_path($inconnu_store->get_iter($first_selected));
     if($p->prev) {
       $iter=$inconnu_store->get_iter($p);
     } else {
@@ -5254,6 +5283,7 @@ sub unrecognized_prev {
 sub unrecognized_delete {
   my @iters;
   my @sel=($w{'inconnu_tree'}->get_selection->get_selected_rows);
+  @sel=@{$sel[0]};
   return if(!@sel);
 
   $projet{'_capture'}->begin_transaction('rmUN');
@@ -5272,8 +5302,9 @@ sub unrecognized_delete {
 
 sub analyse_diagnostic {
   my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
-  if(@sel) {
-    my $iter=$inconnu_store->get_iter($sel[0]);
+  my $first_selected=$sel[0]->[0];
+  if(defined($first_selected)) {
+    my $iter=$inconnu_store->get_iter($first_selected);
     my $scan=$shortcuts->absolu($inconnu_store->get($iter,INCONNU_FILE));
     my $diagnostic_file=$inconnu_store->get($iter,INCONNU_PREPROC);
 
@@ -5298,7 +5329,7 @@ sub set_source_tex {
 }
 
 sub liste_montre_nom {
-    my $dialog = Gtk2::MessageDialog
+    my $dialog = Gtk3::MessageDialog
 	->new($w{'main_window'},
 	      'destroy-with-parent',
 	      'info','ok',
@@ -5444,9 +5475,9 @@ sub make_template {
     $template_files_store->clear;
 
     $w{'template_files_tree'}->set_model($template_files_store);
-	my $renderer=Gtk2::CellRendererText->new;
+	my $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is a column title for the list of files to be included in a template being created.
-	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"file",
+	my $column = Gtk3::TreeViewColumn->new_with_attributes(__"file",
 							       $renderer,
 							       text=> TEMPLATE_FILES_FILE );
     $w{'template_files_tree'}->append_column ($column);
@@ -5526,7 +5557,7 @@ sub template_filename_verif {
 }
 
 sub make_template_add {
-    my $fs=Gtk2::FileSelection->new(__"Add files to template");
+    my $fs=Gtk3::FileSelection->new(__"Add files to template");
     $fs->set_filename($shortcuts->absolu('%PROJET/'));
     $fs->set_select_multiple(1);
     $fs->hide_fileop_buttons;
@@ -5542,10 +5573,11 @@ sub make_template_add {
     $fs->destroy();
 
     if($err) {
-	my $dialog=Gtk2::MessageDialog
-	    ->new_with_markup($w{'make_template'},
-			      'destroy-with-parent',
-			      'error','ok',
+	my $dialog=Gtk3::MessageDialog
+	    ->new($w{'make_template'},
+                  'destroy-with-parent',
+                  'error','ok','');
+        $dialog->set_markup(
 			      __("When making a template, you can only add files that are within the project directory."));
 	$dialog->run();
 	$dialog->destroy();
@@ -5554,8 +5586,9 @@ sub make_template_add {
 
 sub make_template_del {
     my @i=();
-    for my $path ($w{'template_files_tree'}->get_selection->get_selected_rows) {
-	push @i,$template_files_store->get_iter($path);
+    my @selected=$w{'template_files_tree'}->get_selection->get_selected_rows;
+    for my $path (@{$selected[0]}) {
+	push @i,$template_files_store->get_iter($path) if($path);
     }
     for(@i) {
 	$template_files_store->remove($_);
@@ -5655,7 +5688,7 @@ sub source_latex_choisir {
 	$gap=read_glade('source_latex_modele',
 			qw/modeles_liste modeles_description model_choice_button mlist_separation/);
 
-	$modeles_store = Gtk2::TreeStore->new('Glib::String',
+	$modeles_store = Gtk3::TreeStore->new('Glib::String',
 					      'Glib::String',
 					      'Glib::String');
 
@@ -5664,17 +5697,15 @@ sub source_latex_choisir {
 	charge_modeles($modeles_store,undef,amc_specdir('models'));
 
 	$w{'modeles_liste'}->set_model($modeles_store);
-	my $renderer=Gtk2::CellRendererText->new;
+	my $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is a column name for the list of available templates, when creating a new project based on a template.
-	my $column = Gtk2::TreeViewColumn->new_with_attributes(__"template",
+	my $column = Gtk3::TreeViewColumn->new_with_attributes(__"template",
 							       $renderer,
 							       text=> MODEL_NOM );
 	$w{'modeles_liste'}->append_column ($column);
 	$w{'modeles_liste'}->get_selection->signal_connect("changed",\&source_latex_mmaj);
 
 	$w{'mlist_separation'}->set_position(.5*$w{'mlist_separation'}->get_property('max-position'));
-	$w{'mlist_separation'}->child1_resize(1);
-	$w{'mlist_separation'}->child2_resize(1);
 
 	$reponse=$w{'source_latex_modele'}->run();
 
@@ -5712,7 +5743,7 @@ sub source_latex_choisir {
 
 	# default filter: all possible source files
 
-	my $filtre_all=Gtk2::FileFilter->new();
+	my $filtre_all=Gtk3::FileFilter->new();
 	$filtre_all->set_name(__"All source files");
 	for my $m (@filter_modules) {
 	  for my $p ("AMC::Filter::register::$m"->file_patterns) {
@@ -5724,7 +5755,7 @@ sub source_latex_choisir {
 	# filters for each filter module
 
 	for my $m (@filter_modules) {
-	  my $f=Gtk2::FileFilter->new();
+	  my $f=Gtk3::FileFilter->new();
 # TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
 	  my @pat=();
 	  for my $p ("AMC::Filter::register::$m"->file_patterns) {
@@ -5764,7 +5795,7 @@ sub source_latex_choisir {
 
 	    $w{'source_latex_choix_zip'}->set_current_folder($home_dir);
 
-	    my $filtre_zip=Gtk2::FileFilter->new();
+	    my $filtre_zip=Gtk3::FileFilter->new();
 	    $filtre_zip->set_name(__"Archive (zip, tgz)");
 	    $filtre_zip->add_pattern("*.zip");
 	    $filtre_zip->add_pattern("*.tar.gz");
@@ -5789,10 +5820,11 @@ sub source_latex_choisir {
 	my ($n,$suivant)=n_fich($temp_dir);
 
 	if($rv || $n==0) {
-	    my $dialog = Gtk2::MessageDialog
-		->new_with_markup($w{'main_window'},
-				  'destroy-with-parent',
-				  'error','ok',
+	    my $dialog = Gtk3::MessageDialog
+		->new($w{'main_window'},
+                      'destroy-with-parent',
+                      'error','ok','');
+            $dialog->set_markup(
 				  sprintf(__"Nothing extracted from archive %s. Check it.",$fich));
 	    $dialog->run;
 	    $dialog->destroy;
@@ -5916,7 +5948,7 @@ sub importe_source {
     return() if(is_local($projet{'options'}->{'texsrc'},1));
 
     if(-f $dest) {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','yes-no',
@@ -5933,7 +5965,7 @@ sub importe_source {
     if(copy_latex($shortcuts->absolu($projet{'options'}->{'texsrc'}),$dest)) {
 	$projet{'options'}->{'texsrc'}=$shortcuts->relatif($dest);
 	set_source_tex();
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
@@ -5941,7 +5973,7 @@ sub importe_source {
 	$dialog->run;
 	$dialog->destroy;
     } else {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
@@ -6009,17 +6041,17 @@ sub valide_projet {
 }
 
 sub cursor_wait {
-  $w{cursor_watch}=Gtk2::Gdk::Cursor->new('GDK_WATCH')
+  $w{cursor_watch}=Gtk3::Gdk::Cursor->new('GDK_WATCH')
     if(!$w{cursor_watch});
-  $w{main_window}->window()->set_cursor($w{cursor_watch})
+  $w{main_window}->get_window()->set_cursor($w{cursor_watch})
     if($w{main_window});
-  Gtk2->main_iteration while ( Gtk2->events_pending );
+  Gtk3::main_iteration while ( Gtk3::events_pending );
 }
 
 sub cursor_standard {
-  $w{main_window}->window()->set_cursor(undef)
+  $w{main_window}->get_window()->set_cursor(undef)
     if($w{main_window});
-  Gtk2->main_iteration while ( Gtk2->events_pending );
+  Gtk3::main_iteration while ( Gtk3::events_pending );
 }
 
 sub projet_ouvre {
@@ -6139,10 +6171,11 @@ sub quitte_projet {
     if ($m || $mo) {
       my $save=1;
       if ($m) {
-	my $dialog = Gtk2::MessageDialog
-	  ->new_with_markup($w{'main_window'},
-			    'destroy-with-parent',
-			    'question','yes-no',
+	my $dialog = Gtk3::MessageDialog
+	  ->new($w{'main_window'},
+                'destroy-with-parent',
+                'question','yes-no','');
+        $dialog->set_markup(
 			    sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
 	my $reponse=$dialog->run;
 	$dialog->destroy;
@@ -6186,11 +6219,11 @@ sub quitter {
     if($m || $mo) {
       my $save;
       if($m) {
-	my $dialog = Gtk2::MessageDialog
-	  ->new_with_markup($w{'main_window'},
-			    'destroy-with-parent',
-			    'question','yes-no',
-			    __"You did not save main options, which have been modified: do you want to save them before leaving?");
+	my $dialog = Gtk3::MessageDialog
+	  ->new($w{'main_window'},
+                'destroy-with-parent',
+                'question','yes-no',
+                __"You did not save main options, which have been modified: do you want to save them before leaving?");
 	my $response=$dialog->run;
 	$dialog->destroy;
 	if($response eq 'yes') {
@@ -6207,14 +6240,15 @@ sub quitter {
       }
     }
 
-    Gtk2->main_quit;
+    Gtk3->main_quit;
 }
 
 sub bug_report {
-    my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'info','ok',
+    my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'info','ok','');
+    $dialog->set_markup(
 			  __("In order to send a useful bug report, please attach the following documents:")."\n"
 			  ."- ".__("an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the <b>project directory</b>, <b>scan files</b> and <b>configuration directory</b> (.AMC.d in home directory), so as to reproduce and analyse this problem.")."\n"
 			  ."- ".__("the <b>log file</b> produced when the debugging mode (in Help menu) is checked. Please try to reproduce the bug with this mode activated.")."\n\n"
@@ -6223,9 +6257,9 @@ sub bug_report {
 				   )
 	);
     my $ma=$dialog->get('message-area');
-    my $web=Gtk2::LinkButton->new_with_label("http://project.auto-multiple-choice.net/projects/auto-multiple-choice/issues",__("AMC community site"));
+    my $web=Gtk3::LinkButton->new_with_label("http://project.auto-multiple-choice.net/projects/auto-multiple-choice/issues",__("AMC community site"));
     $ma->add($web);
-    my $mail=Gtk2::LinkButton->new_with_label('mailto:paamc@passoire.fr',
+    my $mail=Gtk3::LinkButton->new_with_label('mailto:paamc@passoire.fr',
 					      'paamc@passoire.fr');
     $ma->add($mail);
     $ma->show_all();
@@ -6276,7 +6310,7 @@ sub email_attachment_addtolist {
 }
 
 sub email_attachment_add {
-  my $d=Gtk2::FileChooserDialog
+  my $d=Gtk3::FileChooserDialog
     ->new(__("Attach file"),
 	  $w{'main_window'},'open',
 	  'gtk-cancel'=>'cancel',
@@ -6290,9 +6324,10 @@ sub email_attachment_add {
 }
 
 sub email_attachment_remove {
+  my @selected=$w{'attachments_list'}->get_selection->get_selected_rows;
   for my $i (map { $attachments_store->get_iter($_); }
-	     ($w{'attachments_list'}->get_selection->get_selected_rows)) {
-    $attachments_store->remove($i);
+	     (@{$selected[0]}) ) {
+    $attachments_store->remove($i) if($i);
   }
 }
 
@@ -6306,16 +6341,16 @@ sub send_emails {
   $projet{'_report'}->end_transaction('emNU');
 
   if($n==0) {
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',
-			__("There are no annotated corrected answer sheets to send.")
-			." "
-			.($n_annotated>0 ?
-			  __("Please group the annotated sheets to PDF files to be able to send them.") :
-			  __("Please annotate answer sheets and group them to PDF files to be able to send them.") )
-		       );
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'error','ok',
+            __("There are no annotated corrected answer sheets to send.")
+            ." "
+            .($n_annotated>0 ?
+              __("Please group the annotated sheets to PDF files to be able to send them.") :
+              __("Please annotate answer sheets and group them to PDF files to be able to send them.") )
+           );
     $dialog->run;
     $dialog->destroy;
 
@@ -6340,10 +6375,11 @@ sub send_emails {
   if(@manque) {
     debug 'Mailing: Needs perl modules '.join(', ',@manque);
 
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'error','ok','');
+    $dialog->set_markup(
 			sprintf(__("Sending emails requires some perl modules that are not installed: %s. Please install these modules and try again."),
 			'<b>'.join(', ',@manque).'</b>')
 		       );
@@ -6369,10 +6405,11 @@ sub send_emails {
       $message.=__("You did not enter your email address.").
 	"\n".__"Please edit the preferences to set your email address.";
     }
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',$message);
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'error','ok','');
+    $dialog->set_markup($message);
     $dialog->run;
     $dialog->destroy;
 
@@ -6384,11 +6421,12 @@ sub send_emails {
   if($o{'email_transport'} eq 'sendmail'
      && $o{'email_sendmail_path'}
      && !-f $o{'email_sendmail_path'}) {
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
 # TRANSLATORS: Do not translate the 'sendmail' word.
-			'error','ok',sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."),$o{'email_sendmail_path'}));
+            'error','ok','');
+    $dialog->set_markup(sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."),$o{'email_sendmail_path'}));
     $dialog->run;
     $dialog->destroy;
 
@@ -6404,11 +6442,11 @@ sub send_emails {
 		 cb_model(map { $_=>$_ } (@cols)));
 
   if(!@cols) {
-    my $dialog = Gtk2::MessageDialog
-      ->new_with_markup($w{'main_window'},
-			'destroy-with-parent',
-			'error','ok',
-		       __"No email addresses has been found in the students list file. You need to write the students addresses in a column of this file.");
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'error','ok',
+            __"No email addresses has been found in the students list file. You need to write the students addresses in a column of this file.");
     $dialog->run;
     $dialog->destroy;
 
@@ -6439,9 +6477,9 @@ sub send_emails {
   $w{'label_name'}->set_text(project_email_name());
 
   $w{'attachments_list'}->set_model($attachments_store);
-  $renderer=Gtk2::CellRendererText->new;
+  $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
-  $column = Gtk2::TreeViewColumn->new_with_attributes (__"file",
+  $column = Gtk3::TreeViewColumn->new_with_attributes (__"file",
 						       $renderer,
 						       text=> ATTACHMENTS_NAME,
 						      'foreground'=> ATTACHMENTS_FOREGROUND,
@@ -6454,27 +6492,27 @@ sub send_emails {
   #
 
   $w{'emails_list'}->set_model($emails_store);
-  $renderer=Gtk2::CellRendererText->new;
+  $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of a column containing copy numbers in a table showing all annotated answer sheets, when sending them to the students by email.
-  $column = Gtk2::TreeViewColumn->new_with_attributes (__"copy",
+  $column = Gtk3::TreeViewColumn->new_with_attributes (__"copy",
 						       $renderer,
 						       text=> EMAILS_SC);
   $w{'emails_list'}->append_column ($column);
-  $renderer=Gtk2::CellRendererText->new;
+  $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
-  $column = Gtk2::TreeViewColumn->new_with_attributes (__"name",
+  $column = Gtk3::TreeViewColumn->new_with_attributes (__"name",
 						       $renderer,
 						       text=> EMAILS_NAME);
   $w{'emails_list'}->append_column ($column);
-  $renderer=Gtk2::CellRendererText->new;
+  $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of a column containing students email addresses in a table showing all annotated answer sheets, when sending them to the students by email.
-  $column = Gtk2::TreeViewColumn->new_with_attributes (__"email",
+  $column = Gtk3::TreeViewColumn->new_with_attributes (__"email",
 						       $renderer,
 						       text=> EMAILS_EMAIL);
   $w{'emails_list'}->append_column ($column);
-  $renderer=Gtk2::CellRendererText->new;
+  $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of a column containing mailing status (not sent, already sent, failed) in a table showing all annotated answer sheets, when sending them to the students by email.
-  $column = Gtk2::TreeViewColumn->new_with_attributes (__"status",
+  $column = Gtk3::TreeViewColumn->new_with_attributes (__"status",
 						       $renderer,
 						       text=> EMAILS_STATUS);
   $w{'emails_list'}->append_column ($column);
@@ -6522,6 +6560,7 @@ sub send_emails {
     $prefs->reprend_pref('email',$projet{'options'});
     # get selection
     my @selected=$w{'emails_list'}->get_selection->get_selected_rows;
+    @selected=@{$selected[0]};
     for my $i (@selected) {
       my $iter=$emails_store->get_iter($i);
       push @ids,$emails_store->get($iter,EMAILS_ID);
@@ -6529,9 +6568,10 @@ sub send_emails {
     # get attachments filenames
     my @f=();
     my $iter=$attachments_store->get_iter_first;
-    while($iter) {
+    my $ok=defined($iter);
+    while($ok) {
       push @f,$shortcuts->relatif($attachments_store->get($iter,ATTACHMENTS_FILE));
-      $iter=$attachments_store->iter_next($iter);
+      $ok=$attachments_store->iter_next($iter);
     }
     if(@f) {
       $projet{'options'}->{'email_attachment'}=[@f];
@@ -6545,12 +6585,12 @@ sub send_emails {
   if($resp==1) {
     my @missing=grep { ! -f $shortcuts->absolu($_) } (@{$projet{'options'}->{'email_attachment'}});
     if(@missing) {
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  __("Some files you asked to be attached to the emails are missing:")."\n".join("\n",@missing)."\n".
-			  __("Please create them or remove them from the list of attached files."));
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok',
+              __("Some files you asked to be attached to the emails are missing:")."\n".join("\n",@missing)."\n".
+              __("Please create them or remove them from the list of attached files."));
       $dialog->run();
       $dialog->destroy();
       $resp=0;
@@ -6612,11 +6652,11 @@ sub send_emails {
 	       if($failed>0) {
 		 push @message,"<b>".sprintf("%d message(s) could not be sent.",$failed)."</b>";
 	       }
-	       my $dialog = Gtk2::MessageDialog
-		 ->new_with_markup($w{'main_window'},
-				   'destroy-with-parent',
-				   ($failed>0 ? 'warning' : 'info'),'ok',
-				   join("\n",@message));
+	       my $dialog = Gtk3::MessageDialog
+		 ->new($w{'main_window'},
+                       'destroy-with-parent',
+                       ($failed>0 ? 'warning' : 'info'),'ok','');
+               $dialog->set_markup(join("\n",@message));
 	       $dialog->run;
 	       $dialog->destroy;
 	     },
@@ -6629,10 +6669,11 @@ sub email_change_col {
   $prefs->reprend_pref('email',\%oo);
 
   my $i=$emails_store->get_iter_first;
-  while(defined($i)) {
+  my $ok=defined($i);
+  while($ok) {
     my ($s)=$projet{_students_list}->data($email_key,$emails_store->get($i,EMAILS_ID));
     $emails_store->set($i,EMAILS_EMAIL,$s->{$oo{'email_col'}});
-    $i=$emails_store->iter_next($i);
+    $ok=$emails_store->iter_next($i);
   }
 }
 
@@ -6646,22 +6687,22 @@ sub mailing_select_failed {
 }
 
 sub mailing_set_project_name {
-  my $dialog=Gtk2::Dialog
+  my $dialog=Gtk3::Dialog
     ->new(__("Set exam name"),$w{''},
 	  ['destroy-with-parent'],'gtk-cancel'=>'cancel','gtk-ok'=>'ok',
 	  );
   $dialog->set_default_response ('ok');
 
-  my $t=Gtk2::Table->new(2,2);
+  my $t=Gtk3::Table->new(2,2,0);
   my $widget;
-  $t->attach(Gtk2::Label->new(__"Examination name"),0,1,0,1,
+  $t->attach(Gtk3::Label->new(__"Examination name"),0,1,0,1,
 	     [],[],2,2);
-  $widget=Gtk2::Entry->new();
+  $widget=Gtk3::Entry->new();
   $w{'set_name_x_nom_examen'}=$widget;
   $t->attach($widget,1,2,0,1,['expand','fill'],[],2,2);
-  $t->attach(Gtk2::Label->new(__"Code (short name) for examination"),0,1,1,2,
+  $t->attach(Gtk3::Label->new(__"Code (short name) for examination"),0,1,1,2,
 	     [],[],2,2);
-  $widget=Gtk2::Entry->new();
+  $widget=Gtk3::Entry->new();
   $w{'set_name_x_code_examen'}=$widget;
   $t->attach($widget,1,2,1,2,['expand','fill'],[],2,2);
 
@@ -6707,17 +6748,11 @@ sub choose_columns {
   my $gcol=read_glade('choose_columns',
 		      qw/columns_list columns_instructions/);
 
-  $col=$w{'choose_columns'}->style()->bg('prelight');
-  for my $s (qw/normal insensitive/) {
-    for my $k (qw/columns_instructions/) {
-      $w{$k}->modify_base($s,$col);
-    }
-  }
-  my $columns_store=Gtk2::ListStore->new('Glib::String','Glib::String');
+  my $columns_store=Gtk3::ListStore->new('Glib::String','Glib::String');
   $w{'columns_list'}->set_model($columns_store);
-  my $renderer=Gtk2::CellRendererText->new;
+  my $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
-  my $column = Gtk2::TreeViewColumn->new_with_attributes (__"column",
+  my $column = Gtk3::TreeViewColumn->new_with_attributes (__"column",
 						       $renderer,
 						       text=> 0);
   $w{'columns_list'}->append_column ($column);
@@ -6742,8 +6777,8 @@ sub choose_columns {
   if($resp==1) {
     my @k=();
     my @s=$w{'columns_list'}->get_selection->get_selected_rows;
-    for my $i (@s) {
-      push @k,$columns_store->get($columns_store->get_iter($i),1);
+    for my $i (@{$s[0]}) {
+      push @k,$columns_store->get($columns_store->get_iter($i),1) if($i);
     }
     $projet{'options'}->{'export_'.$type.'_columns'}=join(',',@k);
   }
@@ -6760,12 +6795,12 @@ sub choose_columns_current {
 # PLUGINS
 
 sub plugins_add {
-  my $d=Gtk2::FileChooserDialog
+  my $d=Gtk3::FileChooserDialog
     ->new(__("Install an AMC plugin"),
 	  $w{'main_window'},'open',
 	  'gtk-cancel'=>'cancel',
 	  'gtk-ok'=>'ok');
-  my $filter=Gtk2::FileFilter->new();
+  my $filter=Gtk3::FileFilter->new();
   $filter->set_name(__"Plugins (zip, tgz)");
   for my $ext (qw/ZIP zip TGZ tgz tar.gz TAR.GZ/) {
     $filter->add_pattern("*.$ext");
@@ -6782,11 +6817,11 @@ sub plugins_add {
     my ($temp_dir,$error)=unzip_to_temp($plugin);
 
     if($error) {
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  sprintf(__("An error occured while trying to extract files from the plugin archive: %s."),$error));
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok',
+              sprintf(__("An error occured while trying to extract files from the plugin archive: %s."),$error));
       $dialog->run;
       $dialog->destroy;
       return();
@@ -6796,32 +6831,32 @@ sub plugins_add {
 
     my ($nf,$main)=n_fich($temp_dir);
     if($nf<1) {
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  __"Nothing extracted from the plugin archive. Check it.");
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok',
+              __"Nothing extracted from the plugin archive. Check it.");
       $dialog->run;
       $dialog->destroy;
       return();
     }
     if($nf>1 || !-d $main) {
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  __"This is not a valid plugin, as it contains more than one directory at the first level.");
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok',
+              __"This is not a valid plugin, as it contains more than one directory at the first level.");
       $dialog->run;
       $dialog->destroy;
       return();
     }
 
     if(!-d "$main/perl/AMC") {
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  __"This is not a valid plugin, as it does not contain a perl/AMC subdirectory.");
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok',
+              __"This is not a valid plugin, as it does not contain a perl/AMC subdirectory.");
       $dialog->run;
       $dialog->destroy;
       return();
@@ -6833,10 +6868,11 @@ sub plugins_add {
     # already installed?
 
     if($name=~/[^.]/ && -e "$o_dir/plugins/$name") {
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'question','yes-no',
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'question','yes-no','');
+      $dialog->set_markup(
 			  sprintf(__("A plugin is already installed with the same name (%s). Do you want to delete the old one and overwrite?"),
 				  "<b>$name</b>"));
       my $r=$dialog->run;
@@ -6851,21 +6887,21 @@ sub plugins_add {
     debug "Installing plugin $name to $o_dir/plugins";
 
     if(system('mv',$main,"$o_dir/plugins")!=0) {
-      my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'error','ok',
-			  sprintf(__("Error while moving the plugin to the user plugin directory: %s"),$!));
+      my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok',
+              sprintf(__("Error while moving the plugin to the user plugin directory: %s"),$!));
       my $r=$dialog->run;
       $dialog->destroy;
       return();
     }
 
-    my $dialog = Gtk2::MessageDialog
-	->new_with_markup($w{'main_window'},
-			  'destroy-with-parent',
-			  'info','ok',
-			  __"Please restart AMC before using the new plugin...");
+    my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'info','ok',
+              __"Please restart AMC before using the new plugin...");
       my $r=$dialog->run;
       $dialog->destroy;
 
@@ -6960,7 +6996,7 @@ my @cleanup_components
 
 sub table_sep {
   my ($t,$y,$x)=@_;
-  my $sep=Gtk2::HSeparator->new();
+  my $sep=Gtk3::HSeparator->new();
   $t->attach($sep,0,$x,$y,$y+1,["expand","fill"],[],0,0);
 }
 
@@ -6980,17 +7016,17 @@ sub cleanup_dialog {
       $t.= "\n".__("Total size of concerned files:")." ".
 	human_readable_size($s);
     }
-    my $label=Gtk2::Label->new($t);
+    my $label=Gtk3::Label->new($t);
     $label->set_justify('left');
     $label->set_line_wrap(1);
     $label->set_line_wrap_mode('word');
 
-    my $check=Gtk2::CheckButton->new;
+    my $check=Gtk3::CheckButton->new;
     $c->{check}=$check;
-    my $short_label=Gtk2::Label->new($c->{short});
+    my $short_label=Gtk3::Label->new($c->{short});
     $short_label->set_justify('center');
     $short_label->set_sensitive(!( defined($s) && $s==0));
-    my $hb=Gtk2::HBox->new();
+    my $hb=Gtk3::HBox->new();
     $hb->pack_start($check,FALSE,FALSE,0);
     $hb->pack_start($short_label,TRUE,TRUE,0);
     $hb->show_all;
@@ -7006,7 +7042,7 @@ sub cleanup_dialog {
   }
 
   $dialog->destroy();
-  Gtk2->main_iteration while ( Gtk2->events_pending );
+  Gtk3::main_iteration while ( Gtk3::events_pending );
 
   debug "RESPONSE=$reponse";
 
@@ -7021,7 +7057,7 @@ sub cleanup_dialog {
     }
   }
 
-  $dialog = Gtk2::MessageDialog
+  $dialog = Gtk3::MessageDialog
     ->new($w{'main_window'},
 	  'destroy-with-parent',
 	  'info','ok',
@@ -7057,7 +7093,7 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 	}
     }
     if($message) {
-	my $dialog = Gtk2::MessageDialog
+	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',$message);
@@ -7071,7 +7107,7 @@ test_debian_amc();
 test_libnotify();
 test_magick();
 
-Gtk2->main();
+Gtk3->main();
 
 1;
 
