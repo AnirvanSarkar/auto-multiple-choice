@@ -1092,7 +1092,7 @@ sub write_latex {
     print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
   }
 
-  print OUT "\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
+  print OUT "\n\n\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
 
   print OUT "}\n";
   print OUT "\\end{document}\n";
