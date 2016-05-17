@@ -2706,6 +2706,8 @@ sub autre_imprimante {
 
     $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
     $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printer}->{$i});
+  } else {
+    debug "No printer choice!";
   }
 }
 
