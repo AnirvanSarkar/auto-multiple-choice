@@ -6695,18 +6695,16 @@ sub mailing_set_project_name {
 	  );
   $dialog->set_default_response ('ok');
 
-  my $t=Gtk3::Table->new(2,2,0);
+  my $t=Gtk3::Grid->new();
   my $widget;
-  $t->attach(Gtk3::Label->new(__"Examination name"),0,1,0,1,
-	     [],[],2,2);
+  $t->attach(Gtk3::Label->new(__"Examination name"),0,0,1,1);
   $widget=Gtk3::Entry->new();
   $w{'set_name_x_nom_examen'}=$widget;
-  $t->attach($widget,1,2,0,1,['expand','fill'],[],2,2);
-  $t->attach(Gtk3::Label->new(__"Code (short name) for examination"),0,1,1,2,
-	     [],[],2,2);
+  $t->attach($widget,1,0,1,1);
+  $t->attach(Gtk3::Label->new(__"Code (short name) for examination"),0,1,1,1);
   $widget=Gtk3::Entry->new();
   $w{'set_name_x_code_examen'}=$widget;
-  $t->attach($widget,1,2,1,2,['expand','fill'],[],2,2);
+  $t->attach($widget,1,1,1,1);
 
   $t->show_all;
   $dialog->get_content_area()->add ($t);
