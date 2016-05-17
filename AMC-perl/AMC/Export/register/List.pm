@@ -58,17 +58,18 @@ sub options_default {
 
 sub build_config_gui {
   my ($self,$w,$prefs)=@_;
-  my $t=Gtk3::Table->new(2,2,0);
+  my $t=Gtk3::Grid->new();
   my $widget;
   my $y=0;
   $t->attach(Gtk3::Label->new(__"Number of columns"),
-	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+	     0,$y,1,1);
   $widget=Gtk3::SpinButton->new(Gtk3::Adjustment->new(1,1,5,1,1,0),0,0);
   $widget->set_tooltip_text(__"Long list is divided into this number of columns on each page.");
   $w->{'export_s_export_ncols'}=$widget;
-  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,1,$y,1,1);
   $y++;
-  $t->attach(Gtk3::Label->new(__"Paper size"),0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach(Gtk3::Label->new(__"Paper size"),
+             0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   my $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
@@ -78,7 +79,7 @@ sub build_config_gui {
 						     "letter"=>"Letter",
 						     "legal"=>"Legal"));
   $w->{'export_c_export_pagesize'}=$widget;
-  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,1,$y,1,1);
   $y++;
 
   $t->show_all;

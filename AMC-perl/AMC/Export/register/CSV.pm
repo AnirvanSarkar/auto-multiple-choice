@@ -65,13 +65,13 @@ sub options_default {
 
 sub build_config_gui {
   my ($self,$w,$prefs)=@_;
-  my $t=Gtk3::Table->new(3,2,0);
+  my $t=Gtk3::Grid->new();
   my $widget;
   my $y=0;
   my $renderer;
 
   $t->attach(Gtk3::Label->new(__"Separator"),
-	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+	     0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
@@ -80,10 +80,11 @@ sub build_config_gui {
 							   ";"=>";",
 							   ","=>","));
   $w->{'export_c_export_csv_separateur'}=$widget;
-  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,1,$y,1,1);
   $y++;
 
-  $t->attach(Gtk3::Label->new(__"Ticked boxes"),0,1,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach(Gtk3::Label->new(__"Ticked boxes"),
+             0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
@@ -93,12 +94,12 @@ sub build_config_gui {
 						       "AB"=>(__"Yes:")." AB",
 						      ));
   $w->{'export_c_export_csv_ticked'}=$widget;
-  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,1,$y,1,1);
   $y++;
 
   $widget=Gtk3::Button->new_with_label(__"Choose columns");
   $widget->signal_connect(clicked => \&main::choose_columns_current);
-  $t->attach($widget,0,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,0,$y,2,1);
   $y++;
 
   $t->show_all;
