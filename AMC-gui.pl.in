@@ -6525,7 +6525,7 @@ sub send_emails {
 
   $emails_store->clear;
   for my $i (@$email_r) {
-    my ($s)=$projet{_students_list}->data($email_key,$i->{id});
+    my ($s)=$projet{_students_list}->data($email_key,$i->{id},test_numeric=>1);
     my @sc=$projet{'_association'}->real_back($i->{id});
     $emails_store->set($emails_store->append,
 		       EMAILS_ID,$i->{id},
@@ -6673,7 +6673,7 @@ sub email_change_col {
   my $i=$emails_store->get_iter_first;
   my $ok=defined($i);
   while($ok) {
-    my ($s)=$projet{_students_list}->data($email_key,$emails_store->get($i,EMAILS_ID));
+    my ($s)=$projet{_students_list}->data($email_key,$emails_store->get($i,EMAILS_ID),test_numeric=>1);
     $emails_store->set($i,EMAILS_EMAIL,$s->{$oo{'email_col'}});
     $ok=$emails_store->iter_next($i);
   }
