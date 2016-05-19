@@ -3380,11 +3380,15 @@ sub analyse_call_go {
 
 sub clean_gtk2_filenames {
   my @f=@_;
-  return( 
-	 map { 
-	   if (utf8::is_utf8($_)) {
-	     $_= Glib->filename_from_unicode ($_);
-	   } $_; 
+  return(
+	 map {
+           if(ref($_) eq 'ARRAY') {
+             return(clean_gtk2_filenames(@$_));
+           } else {
+             if (utf8::is_utf8($_)) {
+               $_= Glib->filename_from_unicode ($_);
+             } $_;
+           }
 	 } @f);
 }
 
