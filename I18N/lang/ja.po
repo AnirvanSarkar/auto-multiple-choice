@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.2.2016.022902 (r:e6c431add948)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
 "POT-Creation-Date: 2016-02-29 21:31 +0100\n"
-"PO-Revision-Date: 2016-03-03 14:42+0900\n"
+"PO-Revision-Date: 2016-04-15 12:22+0900\n"
 "Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language: ja\n"
@@ -1046,9 +1046,9 @@ msgid ""
 "Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or "
 "<b>surname</b> column is present, and always filled."
 msgstr ""
-"名簿ファイル<i>%2$s</i>中に氏名の識別できない行が%1$d件あります。先頭行に"
-"<b>name</b>あるいは<b>surname</b>という名前のカラムがあることと、すべての行に"
-"正しく記入されていることを確認してください。"
+"名簿ファイル<i>%2$s</i>中に氏名のない行が%1$d件あります。先頭行に<b>name</b>"
+"あるいは<b>surname</b>という名前のカラムがあることと、すべての行に正しく記入"
+"されていることを確認してください。"
 
 #: ../AMC-gui.pl:3503 ../AMC-gui.pl:3518
 msgid "Edit the names file to correct it, and re-read."
@@ -1089,8 +1089,8 @@ msgid ""
 "Please choose a code (made with LaTeX command \\AMCcode) before automatic "
 "association."
 msgstr ""
-"自動識別の前に、（LaTeXコマンド \\AMCcode で作成した）コード名を選んでくださ"
-"い。"
+"自動受験者識別の前に、（LaTeXコマンド \\AMCcode で作成した）コード名を選んで"
+"ください。"
 
 #. TRANSLATORS: Here, %s will be replaced with "Students identification", which refers to a paragraph in the tab "Marking" from AMC main window.
 #: ../AMC-gui.pl:3610
@@ -1108,12 +1108,12 @@ msgstr "受験者識別"
 
 #: ../AMC-gui.pl:3634
 msgid "Automatic association..."
-msgstr "自動識別..."
+msgstr "自動受験者識別..."
 
 #: ../AMC-gui.pl:3655
 #, perl-format
 msgid "Automatic association completed: %d students recognized."
-msgstr "自動識別完了: 受験者 %d 人を認識しました。"
+msgstr "自動受験者識別完了: 受験者 %d 人を認識しました。"
 
 #. TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
 #: ../AMC-gui.pl:3657
@@ -1135,8 +1135,8 @@ msgid ""
 "check that all is fine and, if necessary, read manually students names which "
 "have not been automatically identified."
 msgstr ""
-"自動識別が終了しました。すべて成功しているかどうか確認し、必要に応じて自動識"
-"別できなかった受験者の氏名を手動で読みとるには、手動識別を用いることができま"
+"自動受験者識別が終了しました。手動受験者識別を用いれば、すべて成功しているか"
+"確認して、必要なら識別できなかった受験者の氏名を手動で読みとることができま"
 "す。"
 
 #: ../AMC-gui.pl:3735
@@ -1189,14 +1189,15 @@ msgid ""
 "key is changed. Do you want to switch back to the primary key \"%s\" and "
 "keep association data?"
 msgstr ""
-"手動識別データが既にいくつかありますが、受験者識別用カラムを変更すると失われ"
-"ます。受験者識別用カラムを \"%s\" に戻して受験者識別データを残しますか？"
+"手動受験者識別データが既にいくつかありますが、受験者識別用カラムを変更すると"
+"失われます。受験者識別用カラムを \"%s\" に戻して受験者識別データを残します"
+"か？"
 
 #: ../AMC-gui.pl:3851
 msgid ""
 "Automatic papers/students association will be re-run to update the "
 "association data."
-msgstr "受験者識別データを更新するため答案と受験者の自動識別が再実行されます。"
+msgstr "自動受験者識別を再実行して受験者識別データを更新します。"
 
 #: ../AMC-gui.pl:3876
 #, perl-format
@@ -1245,7 +1246,7 @@ msgstr "受験者名簿の受験者識別用カラムがありません"
 #: ../AMC-gui.pl:4174
 #, perl-format
 msgid "Missing identification for %d answer sheets"
-msgstr "答案 %d 件の識別ができていません"
+msgstr "答案 %d 件の受験者識別ができていません"
 
 #: ../AMC-gui.pl:4176
 msgid "All completed answer sheets are associated with a student name"
@@ -2429,7 +2430,7 @@ msgstr ""
 
 #: ../AMC-gui-choix_postcorrect.glade:194
 msgid "Guess simple/multiple status"
-msgstr "単一/複数選択問題を自動識別"
+msgstr "単一/複数選択問題を自動判別"
 
 #: ../AMC-gui-choix_postcorrect.glade:198
 msgid ""
@@ -2797,12 +2798,12 @@ msgstr "<b>スキャン画像表示</b>"
 
 #: ../AMC-gui-edit_preferences.glade:1391
 msgid "Starting number of columns for names in the manual association window."
-msgstr "手動識別での氏名表示の初期カラム数。"
+msgstr "手動受験者識別での氏名表示の初期カラム数。"
 
 #. Label in the preferences window, corresponding to "Starting number of columns for names in the manual association window".
 #: ../AMC-gui-edit_preferences.glade:1412
 msgid "Number of columns for names"
-msgstr "手動識別の表示カラム数"
+msgstr "手動受験者識別の表示カラム数"
 
 #: ../AMC-gui-edit_preferences.glade:1423
 msgid ""
@@ -3872,7 +3873,7 @@ msgstr "<b>前処理結果</b>"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:14
 msgid "Manual association"
-msgstr "手動識別"
+msgstr "手動受験者識別"
 
 #. This is the label of the check button that controls wheter the auto-completion for students names will be made looking at the beginnig of the names or at the whole names.
 #: ../AMC-perl/AMC/Gui/Association.glade:84
@@ -3903,7 +3904,7 @@ msgstr ""
 
 #: ../AMC-perl/AMC/Gui/Association.glade:407
 msgid "Remove manual association for this paper"
-msgstr "この答案の手動識別を削除"
+msgstr "この答案の手動受験者識別を削除"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:423
 msgid ""
@@ -3917,7 +3918,7 @@ msgstr "不明"
 
 #: ../AMC-perl/AMC/Gui/Association.glade:502
 msgid "Save associations."
-msgstr "手動識別結果を保存する。"
+msgstr "手動受験者識別結果を保存する。"
 
 #: ../AMC-perl/AMC/Gui/Manuel.glade:13
 msgid "Paper data capture"

@@ -66,14 +66,14 @@ sub needs_module {
 
 sub build_config_gui {
   my ($self,$w,$prefs)=@_;
-  my $t=Gtk3::Table->new(3,2,0);
+  my $t=Gtk3::Grid->new();
   my $widget;
   my $renderer;
   my $y=0;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, a table with questions basic statistics will be added to the ODS exported spreadsheet.
   $t->attach(Gtk3::Label->new(__"Stats table"),
-	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+	     0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
@@ -85,12 +85,12 @@ sub build_config_gui {
 # TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a vertical flow' in the exported ODS file.
 					      "v"=>__("Vertical flow")));
   $w->{'export_c_export_ods_stats'}=$widget;
-  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,1,$y,1,1);
   $y++;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, a table with indicative questions basic statistics will be added to the ODS exported spreadsheet.
   $t->attach(Gtk3::Label->new(__"Indicative stats table"),
-	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+	     0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
@@ -99,13 +99,13 @@ sub build_config_gui {
 						   "h"=>__"Horizontal flow",
 						   "v"=>__"Vertical flow"));
   $w->{'export_c_export_ods_statsindic'}=$widget;
-  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,1,$y,1,1);
   $widget->set_tooltip_text(__"Create a table with basic statistics about answers for each indicative question?");
   $y++;
 
 # TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.
   $t->attach(Gtk3::Label->new(__"Score groups"),
-	     0,1,$y,$y+1,["expand","fill"],[],0,0);
+	     0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
@@ -119,12 +119,12 @@ sub build_config_gui {
   $w->{'export_c_export_ods_groupsep'}=$widget;
 
   $widget->set_tooltip_text(__"Add sums of the scores for each question group? To define groups, use question ids in the form \"group:question\" or \"group.question\", depending on the scope separator.");
-  $t->attach($widget,1,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($widget,1,$y,1,1);
   $y++;
 
   my $b=Gtk3::Button->new_with_label(__"Choose columns");
   $b->signal_connect(clicked => \&main::choose_columns_current);
-  $t->attach($b,0,2,$y,$y+1,["expand","fill"],[],0,0);
+  $t->attach($b,0,$y,2,1);
   $y++;
 
   $t->show_all;

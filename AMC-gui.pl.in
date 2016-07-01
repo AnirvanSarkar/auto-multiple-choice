@@ -2706,6 +2706,8 @@ sub autre_imprimante {
 
     $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
     $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printer}->{$i});
+  } else {
+    debug "No printer choice!";
   }
 }
 
@@ -6523,7 +6525,7 @@ sub send_emails {
 
   $emails_store->clear;
   for my $i (@$email_r) {
-    my ($s)=$projet{_students_list}->data($email_key,$i->{id});
+    my ($s)=$projet{_students_list}->data($email_key,$i->{id},test_numeric=>1);
     my @sc=$projet{'_association'}->real_back($i->{id});
     $emails_store->set($emails_store->append,
 		       EMAILS_ID,$i->{id},
@@ -6671,7 +6673,7 @@ sub email_change_col {
   my $i=$emails_store->get_iter_first;
   my $ok=defined($i);
   while($ok) {
-    my ($s)=$projet{_students_list}->data($email_key,$emails_store->get($i,EMAILS_ID));
+    my ($s)=$projet{_students_list}->data($email_key,$emails_store->get($i,EMAILS_ID),test_numeric=>1);
     $emails_store->set($i,EMAILS_EMAIL,$s->{$oo{'email_col'}});
     $ok=$emails_store->iter_next($i);
   }
@@ -6693,18 +6695,16 @@ sub mailing_set_project_name {
 	  );
   $dialog->set_default_response ('ok');
 
-  my $t=Gtk3::Table->new(2,2,0);
+  my $t=Gtk3::Grid->new();
   my $widget;
-  $t->attach(Gtk3::Label->new(__"Examination name"),0,1,0,1,
-	     [],[],2,2);
+  $t->attach(Gtk3::Label->new(__"Examination name"),0,0,1,1);
   $widget=Gtk3::Entry->new();
   $w{'set_name_x_nom_examen'}=$widget;
-  $t->attach($widget,1,2,0,1,['expand','fill'],[],2,2);
-  $t->attach(Gtk3::Label->new(__"Code (short name) for examination"),0,1,1,2,
-	     [],[],2,2);
+  $t->attach($widget,1,0,1,1);
+  $t->attach(Gtk3::Label->new(__"Code (short name) for examination"),0,1,1,1);
   $widget=Gtk3::Entry->new();
   $w{'set_name_x_code_examen'}=$widget;
-  $t->attach($widget,1,2,1,2,['expand','fill'],[],2,2);
+  $t->attach($widget,1,1,1,1);
 
   $t->show_all;
   $dialog->get_content_area()->add ($t);
