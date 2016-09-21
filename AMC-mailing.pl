@@ -34,6 +34,8 @@ use Email::Address;
 use Email::Sender;
 use Email::Sender::Simple qw(sendmail);
 
+use Time::HiRes qw( usleep );
+
 my $project_dir='';
 my $data_dir='';
 my $students_list='';
@@ -53,6 +55,7 @@ my $project_name='';
 my $cc='';
 my $bcc='';
 my $log_file='';
+my $delay_s=0;
 my @attach_files=();
 
 @ARGV=unpack_args(@ARGV);
@@ -78,6 +81,7 @@ GetOptions("project=s"=>\$project_dir,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
 	   "attach=s"=>\@attach_files,
+           "delay=s"=>\$delay_s,
            "log=s"=>\$log_file,
 	   "cc=s"=>\$cc,
 	   "bcc=s"=>\$bcc,
@@ -270,6 +274,7 @@ STUDENT: for my $i (@$r) {
     } else {
       debug "No file: $file";
     }
+    usleep(int(1000000*$delay_s));
   } else {
     debug "No dest";
   }
