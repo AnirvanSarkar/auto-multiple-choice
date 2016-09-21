@@ -318,6 +318,7 @@ my %o_defaut=('pdf_viewer'=>['commande',
 	      'defaut_email_subject'=>__"Exam result",
 # TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
 	      'defaut_email_text'=>__"Please find enclosed your annotated completed answer sheet.\nRegards.",
+              'email_delay'=>0,
 
 	      'csv_surname_headers'=>'',
 	      'csv_name_headers'=>'',
@@ -6586,6 +6587,7 @@ sub send_emails {
 		      "--smtp-port",$o{'email_smtp_port'},
 		      "--cc",$o{'email_cc'},
 		      "--bcc",$o{'email_bcc'},
+                      "--delay",$o{'email_delay'},
 		     );
 
     for(@{$projet{'options'}->{'email_attachment'}}) {
