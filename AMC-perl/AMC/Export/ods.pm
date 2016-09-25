@@ -36,14 +36,13 @@ sub new {
     $self->{'out.code'}="";
     $self->{'out.columns'}='student.key,student.name';
     $self->{'out.font'}="Arial";
-    $self->{'out.size'}="10";
     $self->{'out.stats'}='';
     $self->{'out.statsindic'}='';
     $self->{'out.groupsums'}='';
     $self->{'out.groupsep'}=':';
-    if(can_load(modules=>{'Gtk3'=>undef,'Cairo'=>undef})) {
-      debug "Using Gtk3/Cairo to compute column width";
-      $self->{'calc.Gtk3'}=1;
+    if(can_load(modules=>{'Pango'=>undef,'Cairo'=>undef})) {
+      debug "Using Pango/Cairo to compute column width";
+      $self->{'calc.Cairo'}=1;
     }
     bless ($self, $class);
     return $self;
@@ -58,12 +57,13 @@ sub load {
 # returns the column width (in cm) to use when including the given texts.
 
 sub text_width {
-  my ($self,$title,@t)=@_;
+  my ($self,$size,$title,@t)=@_;
   my $width=0;
+  my $height=0;
 
-  if($self->{'calc.Gtk3'}) {
+  if($self->{'calc.Cairo'}) {
 
-    my $font=Pango::FontDescription->from_string($self->{'out.font'}." ".(10*$self->{'out.size'}));
+    my $font=Pango::FontDescription->from_string($self->{'out.font'}." ".(10*$size));
     $font->set_stretch('normal');
 
     my $surface = Cairo::ImageSurface->create('argb32', 10,10);
@@ -73,7 +73,7 @@ sub text_width {
     $font->set_weight('bold');
     $layout->set_font_description($font);
     $layout->set_text($title);
-    ($width,undef)=$layout->get_pixel_size();
+    ($width,$height)=$layout->get_pixel_size();
 
     $font->set_weight('normal');
     $layout->set_font_description($font);
@@ -81,16 +81,18 @@ sub text_width {
       $layout->set_text($text);
       my ($text_x,$text_y)=$layout->get_pixel_size();
       $width=$text_x if($text_x>$width);
+      $height=$text_y if($text_y>$height);
     }
 
-    return( 0.002772 * $width + 0.019891 + 0.3 );
+    return( 0.002772 * $width + 0.019891 + 0.3,
+            0.002772 * $height + 0.019891);
 
   } else {
     $width=length($title);
     for my $text (@t) {
       $width=length($text) if(length($text)>$width);
     }
-    return(0.22*$width+0.3);
+    return(0.22*$width+0.3,0.5);
   }
 }
 
@@ -858,6 +860,15 @@ sub export {
 
     my $jj=$y0;
 
+    my @titles=();
+
+    sub get_title {
+      my ($o)=@_;
+      my $t=encode('utf-8',$o->{'title'});
+      push @titles,$t;
+      return $t;
+    }
+
     ##########################################################################
     # first row: titles
     ##########################################################################
@@ -886,16 +897,16 @@ sub export {
 	$doc->columnStyle($feuille,$ii,'col.notes');
 	$doc->cellStyle($feuille,$y0,$ii,
 			($_->{group_sum} ? 'EnteteGS' : 'EnteteVertical'));
-	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_->{'title'}));
+	$doc->cellValue($feuille,$y0,$ii++,get_title($_));
     }
     for(@questions_1) {
 	$doc->columnStyle($feuille,$ii,'col.notes');
 	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
-	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_->{'title'}));
+	$doc->cellValue($feuille,$y0,$ii++,get_title($_));
     }
     for(@codes) {
 	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
-	$doc->cellValue($feuille,$y0,$ii++,encode('utf-8',$_));
+	$doc->cellValue($feuille,$y0,$ii++,get_title($_));
     }
 
     ##########################################################################
@@ -1164,7 +1175,7 @@ sub export {
       if($col_styles{$_}) {
 	$doc->columnStyle($feuille,$code_col{$_},"col.".$col_styles{$_});
       } else {
-	my $cm=$self->text_width(@{$col_content{$_}});
+	my ($cm,$cmh)=$self->text_width(10,@{$col_content{$_}});
 	debug "Column width [$_] = $cm cm";
 	$doc->createStyle("col.X.$_",
 			  family=>'table-column',
@@ -1175,6 +1186,36 @@ sub export {
 			 );
 	$doc->columnStyle($feuille,$code_col{$_},"col.X.$_");
       }
+    }
+
+    ##########################################################################
+    # try to set right line height for titles
+    ##########################################################################
+
+    {
+      my ($cm,$cmh)=$self->text_width(10,@titles);
+      debug "Titles height = $cm cm";
+      $doc->createStyle("row.Titles",
+                        family=>'table-row',
+                        properties=>{
+                                     -area=>'table-row',
+                                     'row-height' => $cm."cm",
+                                     'use-optimal-row-height'=>"false",
+                                    },
+                       );
+      $doc->rowStyle($feuille,$y0,"row.Titles");
+
+      ($cm,$cmh)=$self->text_width(16,encode('utf-8',$self->{'out.nom'}));
+      debug "Name height = $cmh cm";
+      $doc->createStyle("row.Head",
+                        family=>'table-row',
+                        properties=>{
+                                     -area=>'table-row',
+                                     'row-height' => $cmh."cm",
+                                     'use-optimal-row-height'=>"false",
+                                    },
+                       );
+      $doc->rowStyle($feuille,0,"row.Head");
     }
 
     ##########################################################################
