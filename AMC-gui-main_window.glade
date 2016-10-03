@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
   <object class="GtkAccelGroup" id="accelgroup1"/>
@@ -1111,10 +1111,10 @@
                                         <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="focus_on_click">False</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">Show images of the boxes from the scan, and check their categorization.</property>
                                         <property name="image">image7</property>
-                                        <property name="focus_on_click">False</property>
                                         <property name="image_position">top</property>
                                         <signal name="clicked" handler="zooms_line_open" swapped="no"/>
                                       </object>
@@ -1130,10 +1130,10 @@
                                         <property name="use_action_appearance">False</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="focus_on_click">False</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">Show where corner marks have been detected on the scan, and where boxes are supposed to be.</property>
                                         <property name="image">image19</property>
-                                        <property name="focus_on_click">False</property>
                                         <property name="image_position">top</property>
                                         <signal name="clicked" handler="layout_line" swapped="no"/>
                                       </object>
@@ -1201,8 +1201,8 @@
                                     <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
                                     <property name="focus_on_click">False</property>
+                                    <property name="receives_default">True</property>
                                     <signal name="clicked" handler="show_missing_pages" swapped="no"/>
                                   </object>
                                   <packing>
@@ -2579,6 +2579,7 @@
               <object class="GtkScrolledWindow" id="scrolledwindow8">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="vexpand">True</property>
                 <child>
                   <object class="GtkTextView" id="log_general">
                     <property name="visible">True</property>
