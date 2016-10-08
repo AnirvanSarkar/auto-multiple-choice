@@ -4566,6 +4566,9 @@ sub edit_preferences {
     for my $k (@widgets_disabled_when_preferences_opened) {
       $w{$k}->set_sensitive(0);
     }
+
+    $prefs->clear_widgets();
+
     my $gap=read_glade('edit_preferences',
 		       qw/pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree email_group_sendmail email_group_SMTP/);
 

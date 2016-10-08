@@ -40,6 +40,11 @@ sub new {
   return($self);
 }
 
+sub clear_widgets {
+  my ($self)=@_;
+  $self->{w}={};
+}
+
 sub store_register {
   my ($self,%c)=@_;
   for my $key (keys %c) {
