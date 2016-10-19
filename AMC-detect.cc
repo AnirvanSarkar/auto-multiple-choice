@@ -592,7 +592,7 @@ void calage(IplImage* src,IplImage* illustr,
   } else {
     /* There are less than 3 correct connected components: can't know
        where are the marks on the scan! */
-    printf("! NMARKS=%d : Not enought marks detected.\n",n_cc);
+    printf("! NMARKS=%d : Not enough marks detected.\n",n_cc);
   }
 
   cvClearMemStorage(storage);
