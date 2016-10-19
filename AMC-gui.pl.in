@@ -2533,11 +2533,14 @@ sub doc_maj {
 	     'progres.id'=>'MAJ',
 	     'progres.pulse'=>0.01,
 	     'fin'=>sub {
-		 my ($c,%data)=@_;
-		 if(!$data{cancelled}) {
+                 my ($c,%data)=@_;
+		 if($data{cancelled}) {
+                   debug "Prepare documents: CANCELLED!";
+                 } else {
 		   my @err=$c->erreurs();
 		   my @warn=$c->warnings();
 		   if (@err || @warn) {
+                     debug "Errors preparing documents!";
 		     notify_end_of_work('documents',
 					__"Problems while preparing documents");
 
@@ -2563,6 +2566,7 @@ sub doc_maj {
 			       __"Command output details");
 		     $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($projet{'options'}->{'filter'} eq 'latex');
 
+                     debug($message);
 		     my $dialog = Gtk3::MessageDialog
 		       ->new($w{'main_window'},
                              'destroy-with-parent',
@@ -2581,6 +2585,8 @@ sub doc_maj {
 		       $ok=0 if(! -f $shortcuts->absolu($projet{'options'}->{'doc_'.$_}));
 		     }
 		     if ($ok) {
+
+                       debug "All documents are successfully generated";
 
 		       # set project option from filter requests
 
@@ -4786,8 +4792,9 @@ sub file_maj {
 }
 
 sub check_document {
-    my ($filename,$k)=@_;
-    $w{'but_'.$k}->set_sensitive(-f $filename);
+  my ($filename,$k)=@_;
+  debug("Document $filename ".(-f $filename ? "exists" : "NOT FOUND"));
+  $w{'but_'.$k}->set_sensitive(-f $filename);
 }
 
 sub state_image {

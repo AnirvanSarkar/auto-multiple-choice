@@ -720,7 +720,10 @@ if($to_do{s}) {
     analyse_amclog("$jobname.amc");
     give_latex_errors(__"question sheet");
 
-    exit(1) if($a_errors>0);
+    if($a_errors>0) {
+      debug("$a_errors errors detected: EXIT");
+      exit(1);
+    }
 
     transfer("$jobname.pdf",$out_sujet);
     transfer("$jobname.xy",$out_calage);

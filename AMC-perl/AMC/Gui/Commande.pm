@@ -116,7 +116,7 @@ sub open {
 	  Glib::IO->add_watch( fileno( $self->{'fh'} ),
 			       in => sub { $self->get_output() }),
           Glib::IO->add_watch( fileno( $self->{'fh'} ),
-                               hup => sub { $self->close() });
+                               hup => sub { $self->get_output() });
 
 	debug "Command [".$self->{'pid'}."] : "
 	  .join(' ',map { /\s/ || ! $_ ? "\"$_\"" : $_ }
@@ -167,7 +167,10 @@ sub close {
   $self->{'avancement'}->set_text('');
 
   &{$self->{'finw'}}($self,%data) if($self->{'finw'});
-  &{$self->{'fin'}}($self,%data) if($self->{'fin'});
+  if($self->{'fin'}) {
+    debug "Calling <fin> hook";
+    &{$self->{'fin'}}($self,%data);
+  }
 }
 
 sub get_output {
@@ -176,6 +179,7 @@ sub get_output {
     return if($self->{closing});
 
     if( eof($self->{'fh'}) ) {
+      debug "END of input";
       $self->close();
     } else {
 	my $fh=$self->{'fh'};
@@ -202,7 +206,9 @@ sub get_output {
 	  if($line =~ /^(ERR|INFO|WARN)/) {
 	    chomp(my $lc=$line);
 	    $lc =~ s/^(ERR|INFO|WARN)[:>]\s*//;
-	    $self->add_message($1,$lc);
+            my $type=$1;
+            debug "Detected $type message";
+	    $self->add_message($type,$lc);
 	  }
 	  if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
 	    $self->{'variables'}->{$1}=$2;
