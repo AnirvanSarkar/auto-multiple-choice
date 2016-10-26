@@ -569,7 +569,7 @@ sub check_assoc {
 
 sub annote {
   my ($self)=@_;
-  return if(!$self->{'annote'});
+  return if($self->{blind} || !$self->{'annote'});
 
   my $nf=$self->{'temp_dir'}."/num-pdf";
   open(NUMS,">$nf");
