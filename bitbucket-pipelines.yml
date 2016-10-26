@@ -11,7 +11,7 @@ pipelines:
         script: # Modify the commands below to build your repository.
           - make version_files
           - make
-          - make install
+          - make install && texhash
           - apt-get update -y
           - apt-get install -y --no-install-recommends texlive-lang-arabic
           - cd tests && ./all_tests --blind
