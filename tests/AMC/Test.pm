@@ -266,7 +266,10 @@ sub command {
 
   $self->trace("[*] ".join(' ',@c)) if($self->{'debug'});
   if(!run(\@c,'>>',$self->{'debug_file'},'2>>',$self->{'debug_file'})) {
-    $self->trace("[E] Command returned with $?");
+    my $cc=$c[0];
+    $cc.=" ".$c[1] if($#c>0);
+    $cc.=" ..." if($#c>1);
+    $self->trace("[E] Command `$cc' returned with $?");
     exit 1;
   }
 }
