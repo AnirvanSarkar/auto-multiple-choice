@@ -238,7 +238,7 @@ sub see_file {
 	$self->trace("[T] File ok (compare): $ff");
       } else {
 	$self->trace("[E] File different (compare): $ff");
-	exit(1);
+	exit(1) if(!$self->{blind});
       }
     } else {
       my $i=0;
