@@ -12,7 +12,5 @@ pipelines:
           - make version_files
           - make
           - make install && texhash
-          - apt-get update -y
-          - apt-get install -y --no-install-recommends texlive-lang-arabic
           - cd tests && ./all_tests --blind
           
