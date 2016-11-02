@@ -21,6 +21,6 @@
 require "./AMC/Test.pm";
 
 AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       notemax=>0,check_marks=>{3=>13})
+	       notemax=>0,check_marks=>{3=>15})
   ->default_process;
 
