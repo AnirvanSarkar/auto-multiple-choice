@@ -23,6 +23,7 @@ use encoding "utf-8";
 use File::Copy;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
+use Clone;
 
 use Module::Load;
 
@@ -264,7 +265,8 @@ sub check_question {
 sub analyse_amclog {
   my ($amclog_file)=@_;
 
-  my %analyse_data=();
+  my $analyse_data={etu=>0,qs=>{}};
+  my $analyse_data_s0={}; # backup for student 0
   my %titres=();
   @errors_msg=();
 
@@ -278,61 +280,78 @@ sub analyse_amclog {
     if (/AUTOQCM\[Q=([0-9]+)\]/) {
 
       # first check that the previous question is ok:
-      check_question($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+      check_question($analyse_data->{q},$analyse_data->{etu}.":".$analyse_data->{titre});
 
       # then clear current question data:
-      $analyse_data{'q'}={};
+      $analyse_data->{q}={};
 
       # if this question has already be seen for current student...
-      if ($analyse_data{'qs'}->{$1}) {
+      if ($analyse_data->{qs}->{$1}) {
 
-	if ($analyse_data{'qs'}->{$1}->{'partial'}) {
+	if ($analyse_data->{qs}->{$1}->{partial}) {
 	  # if the question was partial (answers was not given in the
 	  # question, but are now given in the answer sheet), it's
 	  # ok. Simply get back the data already processed, and clear
 	  # 'partial' and 'closed' flags:
 
-	  $analyse_data{'q'}=$analyse_data{'qs'}->{$1};
+	  $analyse_data->{q}=$analyse_data->{qs}->{$1};
 	  for my $flag (qw/partial closed/) {
-	    delete($analyse_data{'q'}->{$flag});
+	    delete($analyse_data->{q}->{$flag});
 	  }
 	} else {
 	  # if the question was NOT partial, this is an error!
 
 	  $a_errors++;
 	  push @errors_msg,"ERR: "
-	    .sprintf(__("question ID used several times for the same paper: \"%s\"")." [%s]\n",$titres{$1},$analyse_data{'etu'});
+	    .sprintf(__("question ID used several times for the same paper: \"%s\"")." [%s]\n",$titres{$1},$analyse_data->{etu});
 	}
       }
 
       # register question data
-      $analyse_data{'titre'}=$titres{$1};
-      $analyse_data{'qs'}->{$1}=$analyse_data{'q'};
+      $analyse_data->{titre}=$titres{$1};
+      $analyse_data->{qs}->{$1}=$analyse_data->{q};
     }
 
     # AUTOQCM[QPART] tells that we end with a question without having
     # given all the answers
 
     if (/AUTOQCM\[QPART\]/) {
-      $analyse_data{'q'}->{'partial'}=1;
+      $analyse_data->{q}->{partial}=1;
     }
 
     # AUTOQCM[FQ] tells that we have finished with the current question
 
     if (/AUTOQCM\[FQ\]/) {
-      $analyse_data{'q'}->{'closed'}=1;
+      $analyse_data->{q}->{closed}=1;
     }
 
     # AUTOQCM[ETU=N] tells that we begin with student number N.
 
     if (/AUTOQCM\[ETU=([0-9]+)\]/) {
+      my $student=$1;
+
+      # backup
+
+      $analyse_data_s0=$analyse_data if($analyse_data->{etu}==0);
+
       # first check the last question from preceding student is ok:
 
-      check_question($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+      check_question($analyse_data->{q},$analyse_data->{etu}.":".$analyse_data->{titre});
 
-      # then clear all %analyse_data to begin with this student:
+      # then clear all $analyse_data to begin with this student:
 
-      %analyse_data=('etu'=>$1,'qs'=>{});
+      $analyse_data={'etu'=>$student,'qs'=>{}};
+    }
+
+    # AUTOQCM[BR=N] tells that this student is a replicate of student N
+
+    if(/AUTOQCM\[BR=([0-9]+)\]/) {
+      my $alias=$1;
+      die "Unimplemented positive student alias" if($alias!=0);
+
+      my $student=$analyse_data->{etu};
+      $analyse_data=Clone::clone($analyse_data_s0);
+      $analyse_data->{etu}=$student;
     }
 
     # AUTOACM[NUM=N=ID] tells that question number N (internal
@@ -344,20 +363,20 @@ sub analyse_amclog {
       # stores this association (two-way)
 
       $titres{$1}=$2;
-      $analyse_data{'titres'}->{$2}=1;
+      $analyse_data->{titres}->{$2}=1;
     }
 
     # AUTOQCM[MULT] tells that current question is a multiple question
 
     if (/AUTOQCM\[MULT\]/) {
-      $analyse_data{'q'}->{'mult'}=1;
+      $analyse_data->{q}->{mult}=1;
     }
 
     # AUTOQCM[INDIC] tells that current question is an indicative
     # question
 
     if (/AUTOQCM\[INDIC\]/) {
-      $analyse_data{'q'}->{'indicative'}=1;
+      $analyse_data->{q}->{indicative}=1;
     }
 
     # AUTOQCM[REP=N:S] tells that answer number N is S (S can be 'B'
@@ -366,25 +385,25 @@ sub analyse_amclog {
     if (/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
       my $rep="R".$1;
 
-      if ($analyse_data{'q'}->{'closed'}) {
+      if ($analyse_data->{q}->{closed}) {
 	# If current question is already closed, this is an error!
 
 	$a_errors++;
 	push @errors_msg,"ERR: "
 	  .sprintf(__("An answer appears to be given outside a question environment, after question \"%s\"")." [%s]\n",
-		   $analyse_data{'titre'},$analyse_data{'etu'});
+		   $analyse_data->{titre},$analyse_data->{etu});
       }
 
-      if (defined($analyse_data{'q'}->{$rep})) {
+      if (defined($analyse_data->{q}->{$rep})) {
 	# if we already saw an answer with the same N, this is an error!
 
 	$a_errors++;
 	push @errors_msg,"ERR: "
-	  .sprintf(__("Answer number ID used several times for the same question: %s")." [%s]\n",$1,$analyse_data{'titre'});
+	  .sprintf(__("Answer number ID used several times for the same question: %s")." [%s]\n",$1,$analyse_data->{titre});
       }
 
       # stores the answer's status
-      $analyse_data{'q'}->{$rep}=($2 eq 'B' ? 1 : 0);
+      $analyse_data->{q}->{$rep}=($2 eq 'B' ? 1 : 0);
     }
 
     # AUTOQCM[VAR:N=V] tells that variable named N has value V
@@ -398,7 +417,7 @@ sub analyse_amclog {
 
   # check that the last question from the last student is ok:
 
-  check_question($analyse_data{'q'},$analyse_data{'etu'}.":".$analyse_data{'titre'});
+  check_question($analyse_data->{q},$analyse_data->{etu}.":".$analyse_data->{titre});
 
   # Send error messages to the calling program through STDOUT
 
@@ -839,7 +858,10 @@ if($to_do{b}) {
     my $capture=$data->module('capture');
 
     my $qs={};
+    my $qs0={}; # memory for student 0 (when using AMCformS)
     my $current_q={};
+    my $qs0_count=0;
+    my $finished_with_student=0;
 
     # and parse the log...
 
@@ -847,7 +869,7 @@ if($to_do{b}) {
     annotate_source_change($capture);
     $scoring->clear_strategy;
 
-    while(<AMCLOG>) {
+  PARSELOG: while(<AMCLOG>) {
 	debug($_) if($_);
 
 	# AUTOQCM[TOTAL=N] tells that the total number of sheets is
@@ -863,6 +885,20 @@ if($to_do{b}) {
 		print "*** TOTAL=$t ***\n";
 	    }
 	}
+
+	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
+          # save if student 0
+          $qs0=$qs if($etu==0);
+	  # beginning of student sheet
+	  $avance->progres($delta) if($etu ne '');
+	  $etu=$1;
+	  print "Sheet $etu...\n";
+	  debug "Sheet $etu...\n";
+	  $qs={};
+          $finished_with_student=0;
+	}
+
+        next PARSELOG if($finished_with_student);
 
 	if(/AUTOQCM\[FQ\]/) {
 	  # end of question: register it (or update it)
@@ -889,15 +925,6 @@ if($to_do{b}) {
 			  'strategy'=>'',
 	      };
 	  }
-	}
-
-	if(/AUTOQCM\[ETU=([0-9]+)\]/) {
-	  # beginning of student sheet
-	  $avance->progres($delta) if($etu ne '');
-	  $etu=$1;
-	  print "Sheet $etu...\n";
-	  debug "Sheet $etu...\n";
-	  $qs={};
 	}
 
 	if(/AUTOQCM\[NUM=([0-9]+)=(.+)\]/) {
@@ -931,8 +958,12 @@ if($to_do{b}) {
 
 	if(/AUTOQCM\[BR=([0-9]+)\]/) {
 	  my $alias=$1;
+          die "Unimplemented positive student alias" if($alias!=0);
 	  $scoring->replicate($alias,$etu);
 	  $etu=$alias;
+          $qs=$qs0 if($etu==0);
+          $finished_with_student=1 if($qs0_count>0);
+          $qs0_count++;
 	}
 
 	if(/AUTOQCM\[B=([^\]]+)\]/) {
