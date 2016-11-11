@@ -3013,6 +3013,28 @@ et inscrivez votre nom et prénom ci-dessous.
         comme suit :</para>
 
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{Répondez sur la feuille de réponses.}}}</programlisting>
+        
+        <tip>
+        <para> Si le nombre de cases réponses est important, utilisez l'astuce ci-dessous (<command>\parbox</command>) pour obliger un passage
+        à la ligne.</para>
+         <programlisting>\AMCOpen{lines=6}{
+          \hbox{\parbox{8.5cm}{
+			    \bonne[1]{1}\scoring{b=1}
+			    \bonne[2]{2}\scoring{b=2}
+			    \bonne[3]{3}\scoring{b=3}
+			    \bonne[4]{4}\scoring{b=4}
+			    \bonne[5]{5}\scoring{b=5}
+			    \bonne[6]{6}\scoring{b=6}
+			    \bonne[7]{7}\scoring{b=7}
+			    \bonne[8]{8}\scoring{b=8}
+			    \bonne[9]{9}\scoring{b=9}
+			    \bonne[10]{10}\scoring{b=10}
+			    \mauvaise[F]{F}\scoring{b=0}
+                    }}
+            }
+	      </programlisting> 
+          </tip>
+        
       </sect3>
 
       <sect3 id="latex.oneletter">
@@ -6060,6 +6082,55 @@ Moniuszko,Stanisław,003</programlisting></para>
             <manvolnum>1</manvolnum>
           </citerefentry>.</para>
       </refsect1>
+    </refentry>
+  
+   <refentry id="AMC-prepare">
+      <refmeta>
+        <refentrytitle>AMC-prepare</refentrytitle>
+
+        <manvolnum>1</manvolnum>
+
+        <refmiscinfo class="source">Auto Multiple Choice</refmiscinfo>
+
+        <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
+      </refmeta>
+  
+      <refnamediv>
+        <refname>AMC-prepare</refname>
+
+        <refpurpose>prepare le document de travail à partire
+        du fichier source LaTeX</refpurpose>
+      </refnamediv>  
+  
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">prepare</arg>
+
+          <arg choice="plain">--mode s</arg>
+
+          <arg choice="plain">--prefix
+          <replaceable>répertoire-project</replaceable></arg>
+
+          <arg choice="plain"><replaceable>fichier source AMC</replaceable></arg>
+        </cmdsynopsis>
+
+        <cmdsynopsis>
+          <command>auto-multiple-choice</command>
+
+          <arg choice="plain">prepare</arg>
+
+          <arg choice="plain">--mode b</arg>
+
+          <arg choice="plain">--data
+          <replaceable>répertoire-données-project</replaceable></arg>
+
+          <arg choice="plain"><replaceable>fichier source AMC</replaceable></arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>  
+  
+  NE PAS EFFACER
     </refentry>
   </sect1>
 
