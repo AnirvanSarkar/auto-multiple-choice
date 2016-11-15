@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -2872,6 +2872,26 @@ and write your first and last names below.
         question can also be defined, as:</para>
 
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
+        
+                <tip>
+        <para> if the number of boxes is significant, use this tip (<command>\parbox</command>) to force a linebreak.</para>
+         <programlisting>\AMCOpen{lines=6}{
+          \hbox{\parbox{8.5cm}{
+			    \correctchoice[1]{1}\scoring{b=1}
+			    \correctchoice[2]{2}\scoring{b=2}
+			    \correctchoice[3]{3}\scoring{b=3}
+			    \correctchoice[4]{4}\scoring{b=4}
+			    \correctchoice[5]{5}\scoring{b=5}
+			    \correctchoice[6]{6}\scoring{b=6}
+			    \correctchoice[7]{7}\scoring{b=7}
+			    \correctchoice[8]{8}\scoring{b=8}
+			    \correctchoice[9]{9}\scoring{b=9}
+			    \correctchoice[10]{10}\scoring{b=10}
+			    \wrongchoice[F]{F}\scoring{b=0}
+                    }}
+            }
+	      </programlisting> 
+          </tip>
       </sect3>
 
       <sect3 id="latex.oneletter">
