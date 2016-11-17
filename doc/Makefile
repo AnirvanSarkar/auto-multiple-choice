@@ -97,6 +97,9 @@ html/index.html: FORCE
 	find $< -type f -exec chmod 0644 '{}' \;
 	tar cn -C $< $(TAR_REPRODUCIBLE_ARGS) -O . | gzip $(GZIP_REPRODUCIBLE_ARGS) -c > $@
 
+check: FORCE
+	./check_xml
+
 FORCE: ;
 
-.PHONY: FORCE all images clean
+.PHONY: FORCE all images clean check

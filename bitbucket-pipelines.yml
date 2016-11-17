@@ -12,5 +12,5 @@ pipelines:
           - make version_files
           - make
           - make install && texhash
-          - cd tests && make && ./all_tests --blind
-          
+          - make -C tests blind-test
+          - make -C doc check

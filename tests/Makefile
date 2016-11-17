@@ -30,8 +30,13 @@ all: $(EPS)
 clean:
 	-rm $(EPS)
 
-test: $(EPS)
+test: $(EPS) FORCE
 	./all_tests
 
-.PHONY: all clean test
+blind-test: $(EPS) FORCE
+	./all_tests --blind
+
+FORCE: ;
+
+.PHONY: FORCE all clean test blind-test
 
