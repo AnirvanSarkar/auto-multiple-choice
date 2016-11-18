@@ -22,8 +22,7 @@
 
 #include <math.h>
 #include <cstddef>
-#include "cv.h"
-#include "highgui.h"
+
 #include <stdio.h>
 #include <locale.h>
 
@@ -36,10 +35,13 @@
   #include<minimal-getline.c>
 #endif
 
+#include "opencv2/core/core_c.h"
+
 #if CV_MAJOR_VERSION > 2
   #define OPENCV_23 1
   #define OPENCV_21 1
   #define OPENCV_20 1
+  #define OPENCV_30 1
 #else
   #if CV_MAJOR_VERSION == 2
     #define OPENCV_20 1
@@ -50,6 +52,16 @@
        #define OPENCV_23 1
     #endif
   #endif
+#endif
+
+#include "opencv2/imgproc/imgproc_c.h"
+#ifdef OPENCV_30
+  #include "opencv2/imgcodecs/imgcodecs_c.h"
+  #ifdef AMC_DETECT_HIGHGUI
+    #include "opencv2/highgui/highgui_c.h"
+  #endif
+#else
+  #include "opencv2/highgui/highgui_c.h"
 #endif
 
 int processing_error=0;
@@ -1273,6 +1285,7 @@ int main( int argc, char** argv )
   }
 
 #ifdef OPENCV_21
+#ifdef AMC_DETECT_HIGHGUI
   if(view==1) {
     cvNamedWindow( "Source", CV_WINDOW_NORMAL );
     cvShowImage( "Source", src );
@@ -1282,6 +1295,7 @@ int main( int argc, char** argv )
 
     cvReleaseImage(&dst);
   }
+#endif
 #endif
 
   if(illustr && strlen(out_image_file)>1) {
