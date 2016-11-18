@@ -2002,11 +2002,41 @@ Three digits and two letters:\insertgroup{mixed}.
 %   |\AMCoutsideLabelFormat| first: if you need bold characters,
 %   redifine it with |\def\AMCoutsideLabelFormat#1{\textbf{#1}}|
 %
+%   |\AMC@keyBox@| is used instead of |\AMCformBox@| when the text
+%   that corresponds to the answer is the letter/character inside the
+%   box itself (see |\AMCcode| and |\AMCnumericChoices|.
+%
 %    \begin{macrocode}
 \def\AMCoutsideLabelFormat#1{#1}
 \newcommand\AMCboxOutsideLetter[2]{#1\nobreak\hspace{.1em}\AMCoutsideLabelFormat{#2}}
+\newif\ifAMC@printformoutside@%
+\newcommand\ifAMC@printformoutside{%
+  \AMC@printformoutside@false%
+  \ifAMC@ensemble\ifAMC@outside@box%
+    \ifAMCformulaire@dedans\AMC@printformoutside@true\fi%
+    \ifAMC@zoneformulaire\AMC@printformoutside@true\fi%
+  \fi\fi%
+  \ifAMC@printformoutside@%
+}
 \newcommand\AMC@formBox@[4]{%
-  \ifAMC@outside@box% letter to be written outside the box
+  \ifAMC@printformoutside% letter to be written outside the box
+    \AMCboxOutsideLetter{\AMC@answerBox@{}{#2}{#3}{#4}}{#1}%
+  \else%
+    \AMC@answerBox@{#1}{#2}{#3}{#4}%
+  \fi%
+}
+\newif\ifAMC@printkeyoutside@%
+\newcommand\ifAMC@printkeyoutside{%
+  \AMC@printkeyoutside@false%
+  \ifAMC@ensemble%
+    \ifAMC@outside@box\AMC@printkeyoutside@true\fi%
+  \else%
+    \ifAMC@inside@box\else\AMC@printkeyoutside@true\fi%
+  \fi%
+  \ifAMC@printkeyoutside@%
+}
+\newcommand\AMC@keyBox@[4]{%
+  \ifAMC@printkeyoutside%
     \AMCboxOutsideLetter{\AMC@answerBox@{}{#2}{#3}{#4}}{#1}%
   \else%
     \AMC@answerBox@{#1}{#2}{#3}{#4}%
@@ -2025,13 +2055,13 @@ Three digits and two letters:\insertgroup{mixed}.
       \ifAMCformulaire@dedans% for answer boxes inside form sheet
         \protect\AMC@formBox{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
       \else% outside form sheet: not to be read during data capture
-        \AMC@answerBox{#1}{#2}{1}{casequestion:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
+        \AMC@formBox{#1}{#2}{1}{casequestion:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
     \fi\fi%
   \else% no separate sheet for answers: always read
     \ifAMC@inside@box%
-      \AMC@answerBox{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
+      \AMC@formBox{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
     \else%
-      \AMC@answerBox@{}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
+      \AMC@formBox@{}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
     \fi%
   \fi%
 }
@@ -3119,9 +3149,9 @@ Three digits and two letters:\insertgroup{mixed}.
   \global\advance\AMCrep@count\@ne\relax%
   \AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:\ifx#2\@empty\@empty M\else B\fi]^^J}%
   \ifAMC@correc%
-    \protect\AMC@formBox@{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
+    \protect\AMC@keyBox@{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
   \else%
-    \protect\AMC@formBox@{#1}{}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
+    \protect\AMC@keyBox@{#1}{}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
   \fi%
 }
 %    \end{macrocode}
