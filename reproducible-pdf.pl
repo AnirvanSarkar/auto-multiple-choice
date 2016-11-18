@@ -2,6 +2,7 @@
 
 use Getopt::Long;
 use File::Temp qw(tempfile);
+use File::Copy;
 
 my $debug=0;
 my $do_fonts=0;
@@ -15,6 +16,15 @@ GetOptions("debug!"=>\$debug,
 my ($pdf_source,$pdf_output)=@ARGV;
 
 die "Needs PDF source file" if(!$pdf_source);
+
+if($ENV{SKIP_REPRODUCIBLE_PDF}) {
+  if($pdf_output && $pdf_output ne $pdf_source) {
+    move($pdf_source,$pdf_output);
+  }
+  print "reproducible-pdf: skipped\n";
+  exit 0;
+}
+
 $pdf_output=$pdf_source if(!$pdf_output);
 
 my ($fh_us,$uncompressed_source)=tempfile( 'US-XXXXXX', TMPDIR => 1 );
