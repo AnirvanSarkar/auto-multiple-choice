@@ -36,6 +36,7 @@
 #endif
 
 #include "opencv2/core/core_c.h"
+#include "opencv2/core/core.hpp"
 
 #if CV_MAJOR_VERSION > 2
   #define OPENCV_23 1
@@ -55,13 +56,17 @@
 #endif
 
 #include "opencv2/imgproc/imgproc_c.h"
+#include "opencv2/imgproc/imgproc.hpp"
 #ifdef OPENCV_30
   #include "opencv2/imgcodecs/imgcodecs_c.h"
+  #include "opencv2/imgcodecs/imgcodecs.hpp"
   #ifdef AMC_DETECT_HIGHGUI
     #include "opencv2/highgui/highgui_c.h"
+    #include "opencv2/highgui/highgui.hpp"
   #endif
 #else
   #include "opencv2/highgui/highgui_c.h"
+  #include "opencv2/highgui/highgui.hpp"
 #endif
 
 int processing_error=0;
@@ -155,6 +160,7 @@ void load_image(IplImage** src,char *filename,
   double max;
 
   if(ignore_red) {
+    printf(": loading red channel from %s ...\n",filename);
     if((color=cvLoadImage(filename,
 #ifdef OPENCV_23
 			  CV_LOAD_IMAGE_ANYCOLOR
@@ -182,6 +188,7 @@ void load_image(IplImage** src,char *filename,
       return;
     }
   } else {
+    printf(": loading %s ...\n",filename);
     if((*src=cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE))==NULL) {
       printf("! LOAD : Error loading scan file in GRAYSCALE [%s]\n",filename);
       printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
