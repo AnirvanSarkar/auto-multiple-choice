@@ -85,6 +85,8 @@ my $jobname="amc-compiled";
 
 my $f_tex;
 
+my $epoch='';
+
 @ARGV=unpack_args(@ARGV);
 
 GetOptions("mode=s"=>\$mode,
@@ -106,6 +108,7 @@ GetOptions("mode=s"=>\$mode,
 	   "n-copies=s"=>\$number_of_copies,
 	   "filter=s"=>\$filter,
 	   "filtered-source=s"=>\$filtered_source,
+           "epoch=s"=>\$epoch,
 	   );
 
 set_debug($debug);
@@ -200,6 +203,14 @@ for(\$data_dir,\$source,\$filtered_source) {
 }
 
 set_filtered_source($filtered_source);
+
+# set environment variables for reproducible output
+
+if($epoch) {
+  $ENV{SOURCE_DATE_EPOCH}=$epoch;
+  $ENV{SOURCE_DATE_EPOCH_TEX_PRIMITIVES}=1;
+  $ENV{FORCE_SOURCE_DATE}=1;
+}
 
 # These variables are used to track errors from LaTeX compiling
 
@@ -662,6 +673,18 @@ sub transfer {
     }
 }
 
+# latex_reprocucible_commands($engine) returns commands suitable for
+# the given engine to get reproducible output.
+
+sub latex_reproducible_commands {
+  my ($engine)=@_;
+  if($engine eq 'pdflatex') {
+    return("\\pdfsuppressptexinfo=-1\\pdftrailerid{}");
+  } else {
+    return("");
+  }
+}
+
 # latex_cmd(%o) builds the LaTeX command and arguments to be passed to
 # the execute command, using the engine specifications and extra
 # options %o to pass to LaTeX: for each name=>value from %o, a LaTeX
@@ -679,7 +702,8 @@ sub latex_cmd {
 	   @engine_args,
 	   "\\nonstopmode"
 	   .join('',map { "\\def\\".$_."{".$o{$_}."}"; } (keys %o) )
-	   ." \\input{\"$f_tex\"}");
+           .($epoch ? latex_reproducible_commands($latex_engine) : "")
+	   ."\\input{\"$f_tex\"}");
 }
 
 # check_engine() checks that the requeted LaTeX engine is available on
