@@ -6270,16 +6270,20 @@ sub project_email_name {
 
 sub email_attachment_addtolist {
   for my $f (@_) {
-    my $name=$f;
-    $name =~ s/.*\///;
-    $attachments_store->set($attachments_store->append,
-			    ATTACHMENTS_FILE,$shortcuts->absolu($f),
-			    ATTACHMENTS_NAME,$name,
-			    ATTACHMENTS_FOREGROUND,
-			    (-f $shortcuts->absolu($f) ?
-			     hex_color('black') :
-			     hex_color('red')),
-			   );
+    if(ref($f) eq 'ARRAY') {
+      email_attachment_addtolist(@$f);
+    } else {
+      my $name=$f;
+      $name =~ s/.*\///;
+      $attachments_store->set($attachments_store->append,
+                              ATTACHMENTS_FILE,$shortcuts->absolu($f),
+                              ATTACHMENTS_NAME,$name,
+                              ATTACHMENTS_FOREGROUND,
+                              (-f $shortcuts->absolu($f) ?
+                               hex_color('black') :
+                               hex_color('red')),
+                             );
+    }
   }
 }
 
