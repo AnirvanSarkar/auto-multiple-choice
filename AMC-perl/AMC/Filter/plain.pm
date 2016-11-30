@@ -355,6 +355,7 @@ sub read_file {
       debug "Group A=$action O=$options";
       my %oo=$self->read_options($options);
       if($action eq '(') {
+        $self->{options}->{use_needspace}=1 if($oo{needspace});
 	$self->{reader_state}->{group}=
 	  $self->group_by_id($oo{group},
 			     parent=>$self->{reader_state}->{group},
@@ -802,6 +803,8 @@ sub file_header {
   $t .= "\\usepackage{"
     .($self->{'options'}->{'arabic'} && $self->bidi_year()<2011
       ? "fmultico" : "multicol")."}\n";
+  $t .= "\\usepackage{needspace}\n"
+    if($self->{options}->{use_needspace});
   $t .= "\\setmainfont{".$self->{'options'}->{'font'}."}\n"
     if($self->{'options'}->{'font'});
   $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
@@ -971,6 +974,8 @@ sub group_insert_command_name {
 sub group_insert_command_def {
   my ($self,$group)=@_;
   my $t="\\def".$self->group_insert_command_name($group)."{";
+  $t.="\\needspace{".$group->{needspace}."}\n"
+    if($group->{needspace});
   if($group->{header}) {
     $t.="\\noindent ".$self->format_text($group->{header});
     $t.="\\vspace{1.5ex}\\par\n" if(!$group->{custom}
