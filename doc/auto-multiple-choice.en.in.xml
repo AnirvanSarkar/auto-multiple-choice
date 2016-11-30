@@ -2812,7 +2812,23 @@ and write your first and last names below.
               area for corrected answer sheets.</para>
             </listitem>
           </varlistentry>
+        </variablelist>
 
+        <tip>
+        <para>Use the command <command>\savebox</command>,
+        <emphasis>outside the onecopy command</emphasis>,
+        to display a longer text with linebreaks.</para>
+        <programlisting>
+       \newsavebox{\correcbox}
+        \savebox{\correcbox}{\parbox{5cm}{\color{red}{Here a linebreak\\or\\here...}}}
+       </programlisting> 
+       <para> Call out the boxe's contents:</para>
+        <programlisting>
+        \AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{Question}
+       </programlisting> 
+        </tip>
+
+        <variablelist>
           <varlistentry>
             <term>width=<replaceable>dim</replaceable></term>
 
@@ -2984,8 +3000,7 @@ and write your first and last names below.
         <command>\ref</command> and <command>\pageref</command>.</para>
 
         <note>
-          <para>If you updated the test version (1.2.2014.041103) to the
-          current version (1.2.2015.102901) or greater, you don't have to type
+          <para>Since the version 1.2.2015.102901, you don't have to use
           the command <command>\AMCqlabel</command> to label a question but
           type <command>\AMClabel</command>. The old command remain compatible
           with your previous tex files/exams.</para>
