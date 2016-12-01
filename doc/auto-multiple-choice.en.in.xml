@@ -547,6 +547,21 @@ the best you can.
         </varlistentry>
 
         <varlistentry>
+          <term>Pages:</term>
+
+          <listitem>
+            <para>Gives a minimal number of pages for each question sheet. If
+            a question has less pages, some white pages will be added. When
+            using a separate answer sheet, this option can be written
+            <option><replaceable>q</replaceable>+<replaceable>a</replaceable></option>
+            (eg. <option>4+2</option>), where <replaceable>q</replaceable>
+            will be the minimum number of pages for the question itself, and
+            <replaceable>q</replaceable>+<replaceable>a</replaceable> the
+            minimum number of pages for the whole sheet.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term>ManualDuplex:</term>
 
           <listitem>
@@ -2815,17 +2830,20 @@ and write your first and last names below.
         </variablelist>
 
         <tip>
-        <para>Use the command <command>\savebox</command>,
-        <emphasis>outside the onecopy command</emphasis>,
-        to display a longer text with linebreaks.</para>
-        <programlisting>
+          <para>Use the command <command>\savebox</command>, <emphasis>outside
+          the onecopy command</emphasis>, to display a longer text with
+          linebreaks.</para>
+
+          <programlisting>
        \newsavebox{\correcbox}
         \savebox{\correcbox}{\parbox{5cm}{\color{red}{Here a linebreak\\or\\here...}}}
-       </programlisting> 
-       <para> Call out the boxe's contents:</para>
-        <programlisting>
+       </programlisting>
+
+          <para>Call out the boxe's contents:</para>
+
+          <programlisting>
         \AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{Question}
-       </programlisting> 
+       </programlisting>
         </tip>
 
         <variablelist>
@@ -2899,10 +2917,12 @@ and write your first and last names below.
         question can also be defined, as:</para>
 
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
-        
-                <tip>
-        <para> if the number of boxes is significant, use this tip (<command>\parbox</command>) to force a linebreak.</para>
-         <programlisting>\AMCOpen{lines=6}{
+
+        <tip>
+          <para>if the number of boxes is significant, use this tip
+          (<command>\parbox</command>) to force a linebreak.</para>
+
+          <programlisting>\AMCOpen{lines=6}{
           \hbox{\parbox{8.5cm}{
 			    \correctchoice[1]{1}\scoring{b=1}
 			    \correctchoice[2]{2}\scoring{b=2}
@@ -2917,8 +2937,8 @@ and write your first and last names below.
 			    \wrongchoice[F]{F}\scoring{b=0}
                     }}
             }
-	      </programlisting> 
-          </tip>
+	      </programlisting>
+        </tip>
       </sect3>
 
       <sect3 id="latex.oneletter">
@@ -3000,10 +3020,10 @@ and write your first and last names below.
         <command>\ref</command> and <command>\pageref</command>.</para>
 
         <note>
-          <para>Since the version 1.2.2015.102901, you don't have to use
-          the command <command>\AMCqlabel</command> to label a question but
-          type <command>\AMClabel</command>. The old command remain compatible
-          with your previous tex files/exams.</para>
+          <para>Since the version 1.2.2015.102901, you don't have to use the
+          command <command>\AMCqlabel</command> to label a question but type
+          <command>\AMClabel</command>. The old command remain compatible with
+          your previous tex files/exams.</para>
         </note>
 
         <para>One also has to reset counters to zero at the beginning of each
@@ -5874,8 +5894,8 @@ Moniuszko,Stanisław,003</programlisting>
             <replaceable>EPOCH</replaceable></option></term>
 
             <listitem>
-              <para>gives an epoch (number of seconds since january 1,
-              1970) to get a reproducible pdf output.</para>
+              <para>gives an epoch (number of seconds since january 1, 1970)
+              to get a reproducible pdf output.</para>
             </listitem>
           </varlistentry>
 

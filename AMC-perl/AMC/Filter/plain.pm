@@ -55,6 +55,7 @@ sub new {
 				 PackageOptions
 				 NameFieldWidth NameFieldLines NameFieldLinespace
 				 TitleWidth
+                                 Pages
 				/];
 
     # from these options, which ones are boolean valued?
@@ -170,6 +171,22 @@ sub parse_options {
   # relay LaTeX engine option to the project itself
   $self->set_project_option('moteur_latex_b',
 			    $self->{'options'}->{'latexengine'});
+
+  # split Pages option to pages_question and/or pages_total
+  if($self->{options}->{pages}) {
+    if($self->{options}->{separateanswersheet} &&
+       $self->{options}->{pages} =~ /^\s*([0-9]*)\s*\+\s*([0-9]*)\s*$/) {
+      my $a=$1 || 0;
+      my $b=$2 || 0;
+      $self->{options}->{pages_question}=$a;
+      $self->{options}->{pages_total}=$a+$b;
+    } elsif($self->{options}->{pages} =~ /^\s*([0-9]+)\s*$/) {
+      $self->{options}->{pages_total}=$1;
+    } else {
+# TRANSLATORS: Message when the Pages option used in AMC-TXT can't be parsed. %s will be replaced with the option value
+      $self->error(sprintf(__"Pages option value can't be understood: %s",$self->{options}->{pages}));
+    }
+  }
 }
 
 # adds an object (hash) to a container (list) and returns the
@@ -1071,6 +1088,8 @@ sub write_latex {
 
   # separate answer sheet
   if($self->{'options'}->{'separateanswersheet'}) {
+    print OUT "\n\\AMCaddpagesto{".$self->{options}->{pages_question}."}"
+      if($self->{options}->{pages_question});
     if($self->{'options'}->{'singlesided'}) {
       print OUT "\n\\clearpage\n\n";
     } else {
@@ -1097,7 +1116,10 @@ sub write_latex {
     print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
   }
 
-  print OUT "\n\n\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
+  print OUT "\n\n";
+  print OUT "\\AMCaddpagesto{".$self->{options}->{pages_total}."}\n"
+      if($self->{options}->{pages_total});
+  print OUT "\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
 
   print OUT "}\n";
   print OUT "\\end{document}\n";

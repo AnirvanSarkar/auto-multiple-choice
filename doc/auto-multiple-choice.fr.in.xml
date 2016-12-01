@@ -565,6 +565,23 @@ lesquels sont positifs ?
         </varlistentry>
 
         <varlistentry>
+          <term>Pages:</term>
+
+          <listitem>
+            <para>Donne un nombre de pages minimal pour le sujet. Si un sujet
+            comporte moins de pages que cette valeur, des pages blanches
+            seront ajoutées. Dans le cas de l'utilisation d'une feuille de
+            réponses séparée, cette option peut être écrite sous la forme
+            <option><replaceable>s</replaceable>+<replaceable>r</replaceable></option>
+            (par exemple <option>4+2</option>), où
+            <replaceable>s</replaceable> sera le nombre de pages minimal pour
+            la partie sujet et
+            <replaceable>s</replaceable>+<replaceable>r</replaceable> le
+            nombre de pages minimal pour le sujet complet.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term>ManualDuplex:</term>
 
           <listitem>
@@ -2953,17 +2970,21 @@ et inscrivez votre nom et prénom ci-dessous.
         </variablelist>
 
         <tip>
-        <para>Utilisez la commande <command>\savebox</command>,
-        <emphasis>en dehors de la commande exemplaire</emphasis>,
-        pour afficher un texte plus long sur plusieurs lignes.</para>
-        <programlisting>
+          <para>Utilisez la commande <command>\savebox</command>, <emphasis>en
+          dehors de la commande exemplaire</emphasis>, pour afficher un texte
+          plus long sur plusieurs lignes.</para>
+
+          <programlisting>
        \newsavebox{\correcbox}
         \savebox{\correcbox}{\parbox{5cm}{\color{red}{Ici\\ou\\l\`a...}}}
-       </programlisting> 
-       <para> Puis, appelez le contenu de la boîte à l'endroit voulu :</para>
-        <programlisting>
+       </programlisting>
+
+          <para>Puis, appelez le contenu de la boîte à l'endroit voulu
+          :</para>
+
+          <programlisting>
         \AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{le bareme}
-       </programlisting> 
+       </programlisting>
         </tip>
 
         <variablelist>
@@ -3041,11 +3062,13 @@ et inscrivez votre nom et prénom ci-dessous.
         comme suit :</para>
 
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{Répondez sur la feuille de réponses.}}}</programlisting>
-        
+
         <tip>
-        <para> Si le nombre de cases réponses est important, utilisez l'astuce ci-dessous (<command>\parbox</command>) pour obliger un passage
-        à la ligne.</para>
-         <programlisting>\AMCOpen{lines=6}{
+          <para>Si le nombre de cases réponses est important, utilisez
+          l'astuce ci-dessous (<command>\parbox</command>) pour obliger un
+          passage à la ligne.</para>
+
+          <programlisting>\AMCOpen{lines=6}{
           \hbox{\parbox{8.5cm}{
 			    \bonne[1]{1}\scoring{b=1}
 			    \bonne[2]{2}\scoring{b=2}
@@ -3060,9 +3083,8 @@ et inscrivez votre nom et prénom ci-dessous.
 			    \mauvaise[F]{F}\scoring{b=0}
                     }}
             }
-	      </programlisting> 
-          </tip>
-        
+	      </programlisting>
+        </tip>
       </sect3>
 
       <sect3 id="latex.oneletter">
@@ -3367,10 +3389,11 @@ et inscrivez votre nom et prénom ci-dessous.
 
       <sect3 id="latex.numerical.fp">
         <title>Utilisation du package fp</title>
-  
+
         <note>
-        <para> Un mode d'emploi succint se trouve à la fin de la documentation  voir <xref endterm="Divers.titre"
-         linkend="Divers"/>).</para>
+          <para>Un mode d'emploi succint se trouve à la fin de la
+          documentation voir <xref endterm="Divers.titre"
+          linkend="Divers"/>).</para>
         </note>
 
         <para>Grâce au paquet LaTeX <package>fp</package>, dont la
@@ -6115,8 +6138,8 @@ Moniuszko,Stanisław,003</programlisting></para>
           </citerefentry>.</para>
       </refsect1>
     </refentry>
-  
-   <refentry id="AMC-prepare">
+
+    <refentry id="AMC-prepare">
       <refmeta>
         <refentrytitle>AMC-prepare</refentrytitle>
 
@@ -6126,14 +6149,14 @@ Moniuszko,Stanisław,003</programlisting></para>
 
         <refmiscinfo class="version">@/PACKAGE_V_DEB/@</refmiscinfo>
       </refmeta>
-  
+
       <refnamediv>
         <refname>AMC-prepare</refname>
 
-        <refpurpose>prépare le document de travail à partir
-        du fichier source LaTeX</refpurpose>
-      </refnamediv>  
-  
+        <refpurpose>prépare le document de travail à partir du fichier source
+        LaTeX</refpurpose>
+      </refnamediv>
+
       <refsynopsisdiv>
         <cmdsynopsis>
           <command>auto-multiple-choice</command>
@@ -6145,7 +6168,8 @@ Moniuszko,Stanisław,003</programlisting></para>
           <arg choice="plain">--prefix
           <replaceable>répertoire-project</replaceable></arg>
 
-          <arg choice="plain"><replaceable>fichier source AMC</replaceable></arg>
+          <arg choice="plain"><replaceable>fichier source
+          AMC</replaceable></arg>
         </cmdsynopsis>
 
         <cmdsynopsis>
@@ -6158,16 +6182,17 @@ Moniuszko,Stanisław,003</programlisting></para>
           <arg choice="plain">--data
           <replaceable>répertoire-données-project</replaceable></arg>
 
-          <arg choice="plain"><replaceable>fichier source AMC</replaceable></arg>
+          <arg choice="plain"><replaceable>fichier source
+          AMC</replaceable></arg>
         </cmdsynopsis>
       </refsynopsisdiv>
 
       <refsect1>
         <title>Description</title>
+
         <para>Voir documentation en anglais.</para>
       </refsect1>
-  
-      </refentry>
+    </refentry>
   </sect1>
 
   <sect1 id="Divers">
