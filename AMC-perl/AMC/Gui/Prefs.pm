@@ -87,19 +87,17 @@ sub find_object {
 
 sub transmet_pref {
   my ($self,$gap,$prefixe,$h,$alias,$seulement,$update)=@_;
-  my $wp;
 
   debug "Updating GUI for <$prefixe>";
 
   for my $t (keys %$h) {
+    my $wp;
     if (!$seulement || $seulement->{$t}) {
       my $ta=$t;
       $ta=$alias->{$t} if($alias->{$t});
 
       if ($wp=$self->find_object($gap,$prefixe,'_t_',$ta,$t,$update)) {
 	$wp->get_buffer->set_text($h->{$t});
-      } elsif ($wp=$self->find_object($gap,$prefixe,'_x_',$ta,$t,$update)) {
-	$wp->set_text($h->{$t});
       } elsif ($wp=$self->find_object($gap,$prefixe,'_f_',$ta,$t,$update)) {
 	my $path=$h->{$t};
 	if ($self->{shortcuts}) {
@@ -152,6 +150,8 @@ sub transmet_pref {
 	} else {
 	  print STDERR $prefixe.'_ce_'.$t." : cannot find text widget\n";
 	}
+      } elsif ($wp=$self->find_object($gap,$prefixe,'_x_',$ta,$t,$update)) {
+	$wp->set_text($h->{$t});
       }
       debug "Key $t --> $ta : ".(defined($wp) ? "found widget $wp" : "NONE");
     }
