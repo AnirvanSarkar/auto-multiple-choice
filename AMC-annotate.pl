@@ -242,6 +242,7 @@ my $annotate
 		      embedded_max_size=>$embedded_max_size,
 		      embedded_format=>$embedded_format,
 		      embedded_jpeg_quality=>$embedded_jpeg_quality,
+                      rtl=>$rtl,
 		     );
 
 $annotate->go();
