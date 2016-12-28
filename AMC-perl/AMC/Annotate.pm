@@ -83,6 +83,7 @@ sub new {
 	      embedded_max_size=>'',
 	      embedded_format=>'jpeg',
 	      embedded_jpeg_quality=>80,
+              rtl=>'',
 	      debug=>(get_debug() ? 1 : 0),
 	  };
 
