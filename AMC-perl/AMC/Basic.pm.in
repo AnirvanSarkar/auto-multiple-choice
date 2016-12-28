@@ -589,7 +589,7 @@ sub translate_id_name {
 
 sub format_date {
   my ($time)=@_;
-  return(decode('UTF-8',strftime("%x %X",localtime($time))));
+  return(strftime("%x %X",localtime($time)));
 }
 
 sub pageids_string {

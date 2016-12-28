@@ -4788,7 +4788,7 @@ sub file_maj {
 	    return('NOTFOUND');
 	}
     }
-    return(decode('UTF-8',strftime("%x %X",localtime($oldest))));
+    return(format_date($oldest));
 }
 
 sub check_document {
