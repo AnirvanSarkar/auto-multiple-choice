@@ -52,6 +52,7 @@ sub new {
 	'out.rtl'=>'',
 
 	'sort.keys'=>['s:student.name','n:student.line'],
+        'sort.cols'=>'smart',
 
 	'marks'=>[],
 
@@ -151,16 +152,34 @@ sub test_indicative {
   }
 }
 
+sub sort_cols {
+  my ($self,@x)=@_;
+  return(sort { $self->cols_cmp($a->{title},$b->{title}) } (@x));
+}
+
+sub cols_cmp {
+  my ($self,$a,$b)=@_;
+  if($self->{'sort.cols'} eq 'smart') {
+    if($a !~ /[^0-9\s]/ && $b !~ /[^0-9\s]/) {
+      return($a <=> $b);
+    } else {
+      return($a cmp $b);
+    }
+  } else {
+    return(0);
+  }
+}
+
 sub codes_questions {
   my ($self,$codes,$questions,$plain)=@_;
   @$codes=$self->{'_scoring'}->codes();
   my $code_digit_pattern=$self->{_layout}->code_digit_pattern();
   if($plain) {
     my $codes_re="(".join("|",map { "\Q$_\E" } @$codes).")";
-    @$questions=grep { $_->{'title'} !~ /^$codes_re$code_digit_pattern$/ }
-      $self->{'_scoring'}->questions;
+    @$questions=$self->sort_cols(grep { $_->{'title'} !~ /^$codes_re$code_digit_pattern$/ }
+                                 $self->{'_scoring'}->questions);
   } else {
-    @$questions=$self->{'_scoring'}->questions;
+    @$questions=$self->sort_cols($self->{'_scoring'}->questions);
   }
   for(@$questions) { $self->test_indicative($_); }
   @$questions=$self->insert_groups_sum_headers(@$questions);
