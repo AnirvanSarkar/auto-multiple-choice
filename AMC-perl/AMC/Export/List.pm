@@ -20,7 +20,8 @@
 package AMC::Export::List;
 
 use File::Temp qw/ tempfile tempdir /;
-use Gtk3;
+
+use Pango;
 use Cairo;
 
 use AMC::Basic;
