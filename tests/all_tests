@@ -3,7 +3,7 @@
 RESULT_FILE=/tmp/amc-test.log
 FAILS=0
 
-for t in t/*/test.pl
+for t in t/*/test.sh t/*/test.pl
 do
   if $t --to-stdout $@ > $RESULT_FILE
   then
