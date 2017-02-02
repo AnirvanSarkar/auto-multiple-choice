@@ -30,6 +30,12 @@ GetOptions("liste=s"=>\$liste,
 
 my $tar_opts={uid=>0,gid=>0,uname=>'root',gname=>'root',mtime=>1420066800};
 
+my $can_chmod=1;
+if(!defined(&{Archive::Tar::chmod})) {
+  $can_chmod=0;
+  print "! Archive::Tar::chmod not available\n";
+}
+
 my @fichiers=@ARGV;
 
 open(LOG,">$liste") if($liste);
@@ -83,7 +89,7 @@ for my $f (@fichiers) {
 	    my $tar = Archive::Tar->new;
 
 	    $tar->add_data("$code_name.$ext",encode_utf8($ex),$tar_opts);
-            $tar->chmod("$code_name.$ext",'0644');
+            $tar->chmod("$code_name.$ext",'0644') if($can_chmod);
 	    $tar->add_data("description.xml",
 			   encode_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <description>
@@ -92,7 +98,7 @@ for my $f (@fichiers) {
 </description>
 '),$tar_opts
                           );
-            $tar->chmod("description.xml",'0644');
+            $tar->chmod("description.xml",'0644') if($can_chmod);
 	    my $opts='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <projetAMC>
   <texsrc>%PROJET/'.$code_name.'.'.$ext.'</texsrc>
@@ -108,7 +114,7 @@ for my $f (@fichiers) {
 ';
 	    $tar->add_data("options.xml",
 			   encode_utf8($opts),$tar_opts);
-            $tar->chmod("options.xml",'0644');
+            $tar->chmod("options.xml",'0644') if($can_chmod);
 	    $tar->write("$rep/$code_name.tgz", COMPRESS_GZIP);
 
 	    print LOG "$rep/$code_name.tgz\n" if($liste);
