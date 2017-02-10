@@ -5947,7 +5947,20 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
           forme suivante :<programlisting>nom,prenom,id
 Boulix,Jojo,001
 Golin,André,002
-Moniuszko,Stanisław,003</programlisting></para>
+Moniuszko,Stanisław,003</programlisting>
+ou <programlisting>nom,prenom,id,mail
+Boulix,Jojo,001,jojo@boulix.fr
+Golin,André,002,andre@golin.fr
+Moniuszko,Stanisław,003,Moniuszko@Stanisław.fr</programlisting> ou
+<programlisting>nom,prenom,id,mail
+Boulix,Jojo,001,"jojo@boulix.fr,tata@boulix.fr"
+Golin,André,002,"andre@golin.fr,golin@andre.fr"
+Moniuszko,Stanisław,003,"Moniuszko@Stanisław.fr,stan@stanislaw.fr"</programlisting> 
+ou <programlisting>nom;prenom;id;mail
+Boulix;Jojo;001;jojo@boulix.fr,tata@boulix.fr
+Golin;André;002;andre@golin.fr,golin@andre.fr
+Moniuszko;Stanisław;003;Moniuszko@Stanisław.fr,stan@stanislaw.fr</programlisting> 
+</para>
 
           <warning>
             <para>Ne pas utiliser le symbole _ (underscore) dans le nom ou
@@ -5965,48 +5978,121 @@ Moniuszko,Stanisław,003</programlisting></para>
           <para>Dans le fichier source, le sujet doit être défini sous la
           forme d'une commande LaTeX produisant un seul sujet, qui sera
           appelée (autant de fois qu'il y a d'étudiants) par la commande
-          <command>\csvreader</command> de la façon suivante (on suppose que
-          les questions ont été préalablement insérées dans un groupe appelé
-          <code>general</code>) :</para>
+          <command>\csvreader</command> de la façon suivante  :</para>
 
-          <programlisting>\newcommand{\sujet}{
-  \onecopy{1}{    
+        <programlisting>\documentclass[a4paper]{article}
 
-    \noindent{\bf AutoMultipleChoice  \hfill TEST}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage[french]{babel}<co
+              id="french.babel" linkends="french.babel.exp"/>
+%\usepackage[babel=true,kerning=true]{microtype}<co
+              id="microtype" linkends="microtype.exp"/>
 
-    \vspace*{.5cm}
+\usepackage[francais,bloc,completemulti]{automultiplechoice}
+\usepackage{csvsimple}
 
-    \begin{center}\em
-      Test des copies pr\'e-remplies.
-    \end{center}
+\newcommand{\sujet}{%
+\exemplaire{1}{%
+%\shorthandon{;} <co id="shorthandoff" linkends="shorthandoff.exp"/> 
+%%% debut de l'en-tête des copies :
 
-    \hfill \champnom{\fbox{    
-        \begin{minipage}{.5\linewidth}
-          Nom:
-      
-          \Large\bf \prenom{} \nom{}
+\noindent{\bf QCM  \hfill TEST}
 
-          \vspace*{1mm}
-        \end{minipage}
-      }}
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf Histoire et géographie\\ Examen du 01/01/2008
+\end{minipage}
+\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Nom et prénom :
 
-    \noindent\hrulefill
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
 
-    \vspace{1ex}
+%%% fin de l'en-tête
 
-    \melangegroupe{general}
-    \restituegroupe{general}
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large Géographie
+  \vspace{1mm}\hrule
+\end{center}
 
-    \AMCassociation{\id}
-  }
+\restituegroupe{geographie}
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large Histoire
+  \vspace{2mm}\hrule
+\end{center}
+
+\restituegroupe{histoire}
+}%fin commande \exemplaire
+}%fin commande \newcommand
+
+\begin{document}
+
+%%% préparation des groupes
+
+\setdefaultgroupmode{withreplacement}
+
+\element{geographie}{
+  \begin{question}{Paris}
+    Dans quel continent se situe Paris~?
+    \begin{reponses}
+      \bonne{L'Europe}
+      \mauvaise{L'Afrique}
+      \mauvaise{L'Asie}
+      \mauvaise{La planète Mars}
+    \end{reponses}
+  \end{question}
 }
 
+\element{geographie}{
+  \begin{question}{Cameroun}
+    Quelle est la capitale du Cameroun~?
+    \begin{reponses}
+      \bonne{Yaoundé}
+      \mauvaise{Douala}
+      \mauvaise{Abou-Dabi}
+    \end{reponses}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{question}{Marignan}
+    En quelle année a eu lieu la bataille de Marignan~?
+    \begin{reponseshoriz}
+      \bonne{1515}
+      \mauvaise{1915}
+      \mauvaise{1519}
+    \end{reponseshoriz}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{questionmult}{Nantes}
+    Que peut-on dire de l'Édit de Nantes~?
+    \begin{reponses}
+      \bonne{Il a été signé en 1598}
+      \bonne{Il a été définitivement révoqué par Louis XIV}
+      \mauvaise{Il a été signé par Henri II}
+    \end{reponses}
+  \end{questionmult}
+}
+
+%%génération des sujets
 \csvreader[head to column names]{liste.csv}{}{\sujet} <co
               id="separateur.virgule" linkends="separateur.virgule.exp"/>
+%\shorthandoff{;} <co id="shorthandoff" linkends="shorthandoff.exp"/> 
 %\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\sujet}<co
               id="separateur.pointvirgule"
               linkends="separateur.pointvirgule.exp"/>
-</programlisting>
+
+\end{document}
+
+        </programlisting>
+
 
           <para>Notez l'utilisation de l'option <code>head to column
           names</code> de <command>\csvreader</command> qui définit des
@@ -6018,17 +6104,42 @@ Moniuszko,Stanisław,003</programlisting></para>
           l'identifiant d'étudiant <command>\id</command>.</para>
 
           <para><calloutlist>
+  
+              <callout arearefs="french.babel"
+                        id="french.babel.exp">
+              <para> Si vous utilisez un fichier similaire au 4e exemple
+              avec le paquet <command>\usepackage[french]{babel}</command>,
+              le caractère ";" est activé, ce qui interfère avec la détection de ce
+              caractère en tant que séparateur dans le fichier CSV.
+              Pensez à décommenter cette ligne pour l'activer.</para>
+              </callout>  
+  
+              <callout arearefs="microtype"
+                        id="microtype.exp">
+              <para> L'astuce est de recourir à microtype pour corriger
+              ce problème (et on peut profiter  des avantages de microtype).
+              Pensez à décommenter cette ligne pour l'activer.</para>
+              </callout>
+
+              <callout arearefs="shorthandoff"
+                       id="shorthandoff.exp">
+                <para>Au lieu d'utiliser <command>\usepackage[babel=true,kerning=true]{microtype}</command>,
+                cette solution est possible pour contourner le problème. Décommentez cette ligne.</para>
+              </callout>  
+
               <callout arearefs="separateur.virgule"
                        id="separateur.virgule.exp">
-                <para>Utilisez cette commande si le fichier CSV ne contient
-                qu'une adresse mail par étudiant.</para>
+                <para>Utilisez cette commande si le fichier CSV correspond
+                à un des 3 premiers exemples.</para>
               </callout>
+
 
               <callout arearefs="separateur.pointvirgule"
                        id="separateur.pointvirgule.exp">
-                <para>Utilisez cette commande si le fichier CSV contient
-                plusieurs adresses mail par étudiant.</para>
+                <para>Utilisez cette commande si le fichier CSV correspond
+                au 4e exemple.</para>
               </callout>
+  
             </calloutlist></para>
         </listitem>
 
