@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -5994,7 +5994,7 @@ Moniuszko;Stanisław;003;Moniuszko@Stanisław.fr,stan@stanislaw.fr</programlisti
 
 \newcommand{\sujet}{%
 \exemplaire{1}{%
-%\shorthandon{;} <co id="shorthandoff" linkends="shorthandoff.exp"/> 
+%\shorthandon{;} <co id="shorthandoff.a" linkends="shorthandoff.exp"/> 
 %%% debut de l'en-tête des copies :
 
 \noindent{\bf QCM  \hfill TEST}
@@ -6084,7 +6084,7 @@ Nom et prénom :
 %%génération des sujets
 \csvreader[head to column names]{liste.csv}{}{\sujet} <co
               id="separateur.virgule" linkends="separateur.virgule.exp"/>
-%\shorthandoff{;} <co id="shorthandoff" linkends="shorthandoff.exp"/> 
+%\shorthandoff{;} <co id="shorthandoff.b" linkends="shorthandoff.exp"/> 
 %\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\sujet}<co
               id="separateur.pointvirgule"
               linkends="separateur.pointvirgule.exp"/>
@@ -6121,7 +6121,7 @@ Nom et prénom :
               Pensez à décommenter cette ligne pour l'activer.</para>
               </callout>
 
-              <callout arearefs="shorthandoff"
+              <callout arearefs="shorthandoff.a shorthandoff.b"
                        id="shorthandoff.exp">
                 <para>Au lieu d'utiliser <command>\usepackage[babel=true,kerning=true]{microtype}</command>,
                 cette solution est possible pour contourner le problème. Décommentez cette ligne.</para>
