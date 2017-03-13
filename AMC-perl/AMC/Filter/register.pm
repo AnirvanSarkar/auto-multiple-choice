@@ -127,15 +127,13 @@ sub claim {
 #####################################################################
 
 sub set_oo {
-  my ($self,$o)=@_;
-  $self->{'project_options'}=$o;
+  my ($self,$config)=@_;
+  $self->{'project_options'}=$config;
 }
 
 sub set_project_option {
   my ($self,$name,$value)=@_;
-  my $old=$self->{'project_options'}->{$name};
-  $self->{'project_options'}->{$name}=$value;
-  $self->{'project_options'}->{'_modifie'}.=','.$name if($value ne $old);
+  $self->{'project_options'}->set("project:$name",$value);
 }
 
 sub missing_latex_packages {

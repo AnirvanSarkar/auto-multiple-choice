@@ -49,6 +49,7 @@ use Module::Load::Conditional qw/check_install/;
 use AMC::Path;
 use AMC::Basic;
 use AMC::State;
+use AMC::Config;
 use AMC::Data;
 use AMC::DataModule::capture ':zone';
 use AMC::DataModule::report ':const';
@@ -167,268 +168,20 @@ my $glade_base=__FILE__;
 $glade_base =~ s/\.p[ml]$/-/i;
 
 my $home_dir=Glib::get_home_dir();
+my $encodage_systeme=langinfo(CODESET());
 
 my $shortcuts=AMC::Path::new(home_dir=>$home_dir);
-my $prefs=AMC::Gui::Prefs::new(shortcuts=>$shortcuts,alternate_w=>\%w);
-
-my $o_file='';
-my $o_dir=amc_user_confdir();
-my $state_file="$o_dir/state.xml";
+my $config=AMC::Config::new(shortcuts=>$shortcuts,home_dir=>$home_dir,profile=>$profile);
+my $prefs=AMC::Gui::Prefs::new(shortcuts=>$shortcuts,alternate_w=>\%w,config=>$config);
 
 my $monitor=AMC::FileMonitor->new();
 
-# Gets system encoding
-my $encodage_systeme=langinfo(CODESET());
-$encodage_systeme='UTF-8' if(!$encodage_systeme);
-
 sub hex_color {
-    my $s=shift;
-    return(Gtk3::Gdk::Color::parse($s)->to_string());
+  my $s=shift;
+  return(Gtk3::Gdk::Color::parse($s)->to_string());
 }
 
-# Default general options, to be used when not set in the main options
-# file
-
-my %o_defaut=('pdf_viewer'=>['commande',
-			     'evince','acroread','gpdf','okular','xpdf',
-			     ],
-	      'img_viewer'=>['commande',
-			     'eog','ristretto','gpicview','mirage','gwenview',
-			     ],
-	      'csv_viewer'=>['commande',
-			     'gnumeric','kspread','libreoffice','localc','oocalc',
-			     ],
-	      'ods_viewer'=>['commande',
-			     'libreoffice','localc','oocalc',
-			     ],
-	      'xml_viewer'=>['commande',
-			     'gedit','kedit','kwrite','mousepad','leafpad',
-			     ],
-	      'tex_editor'=>['commande',
-			     'texmaker','kile','gummi','emacs','gedit','kedit','kwrite','mousepad','leafpad',
-			     ],
-	      'txt_editor'=>['commande',
-			     'gedit','kedit','kwrite','mousepad','emacs','leafpad',
-			     ],
-	      'html_browser'=>['commande',
-			       'sensible-browser %u',
-			       'firefox %u',
-			       'galeon %u',
-			       'konqueror %u',
-			       'dillo %u',
-			       'chromium %u',
-			       ],
-	      'dir_opener'=>['commande',
-			     'nautilus --no-desktop file://%d',
-			     'pcmanfm %d',
-			     'Thunar %d',
-			     'konqueror file://%d',
-			     'dolphin %d',
-			     ],
-	      'print_command_pdf'=>['commande',
-				    'cupsdoprint %f','lpr %f',
-				    ],
-	      'print_extract_with'=>'pdftk',
-# TRANSLATORS: directory name for projects. This directory will be created (if needed) in the home directory of the user. Please use only alphanumeric characters, and - or _. No accentuated characters.
-	      'rep_projets'=>$home_dir.'/'.__"MC-Projects",
-	      'projects_home'=>$home_dir.'/'.__"MC-Projects",
-	      'rep_modeles'=>$o_dir."/Models",
-	      'seuil_eqm'=>3.0,
-	      'seuil_sens'=>8.0,
-	      'saisie_dpi'=>150,
-	      'vector_scan_density'=>250,
-	      'force_convert'=>'',
-	      'n_procs'=>0,
-	      'delimiteur_decimal'=>',',
-	      'defaut_encodage_liste'=>'UTF-8',
-	      'encodage_interne'=>'UTF-8',
-	      'defaut_encodage_csv'=>'UTF-8',
-	      'encodage_latex'=>'',
-	      'defaut_moteur_latex_b'=>'pdflatex',
-	      'defaut_seuil'=>0.15,
-	      'defaut_seuil_up'=>1.0,
-	      'assoc_window_size'=>'',
-	      'mailing_window_size'=>'',
-	      'preferences_window_size'=>'',
-	      'checklayout_window_size'=>'',
-	      'manual_window_size'=>'',
-	      'conserve_taille'=>1,
-	      'methode_impression'=>'CUPS',
-	      'imprimante'=>'',
-	      'printer_useful_options'=>'Staple Stapling StapleLocation StapleSet StapleOption',
-	      'options_impression'=>{'sides'=>'two-sided-long-edge',
-				     'number-up'=>1,
-				     'repertoire'=>'/tmp',
-				     'print_answersheet'=>'',
-				     },
-	      'manuel_image_type'=>'xpm',
-	      'assoc_ncols'=>4,
-	      'tolerance_marque_inf'=>0.2,
-	      'tolerance_marque_sup'=>0.2,
-	      'box_size_proportion'=>0.8,
-	      'bw_threshold'=>0.6,
-	      'ignore_red'=>0,
-	      'try_three'=>1,
-
-	      'prepare_solution'=>1,
-	      'prepare_indiv_solution'=>1,
-	      'prepare_catalog'=>1,
-
-	      'symboles_trait'=>2,
-	      'symboles_indicatives'=>'',
-	      'symbole_0_0_type'=>'none',
-	      'symbole_0_0_color'=>hex_color('black'),
-	      'symbole_0_1_type'=>'circle',
-	      'symbole_0_1_color'=>hex_color('red'),
-	      'symbole_1_0_type'=>'mark',
-	      'symbole_1_0_color'=>hex_color('red'),
-	      'symbole_1_1_type'=>'mark',
-	      'symbole_1_1_color'=>hex_color('blue'),
-
-	      'annote_font_name'=>'Linux Libertine O 12',
-	      'annote_ecart'=>5.5,
-	      'annote_chsign'=>4,
-
-	      'ascii_filenames'=>'',
-
-	      'defaut_annote_rtl'=>'',
-# TRANSLATORS: This is the default text to be written on the top of the first page of each paper when annotating. From this string, %s will be replaced with the student final mark, %m with the maximum mark he can obtain, %S with the student total score, and %M with the maximum score the student can obtain.
-	      'defaut_verdict'=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
-	      'defaut_verdict_q'=>"\"%"."s/%"."m\"",
-	      'defaut_verdict_qc'=>"\"X\"",
-	      'embedded_max_size'=>'1000x1500',
-	      'embedded_format'=>'jpeg',
-	      'embedded_jpeg_quality'=>75,
-
-	      'zoom_window_height'=>400,
-	      'zoom_window_factor'=>1.0,
-	      'zooms_ncols'=>4,
-	      'zooms_edit_mode'=>0,
-
-	      'email_sender'=>'',
-	      'email_cc'=>'',
-	      'email_bcc'=>'',
-	      'email_transport'=>'sendmail',
-	      'email_sendmail_path'=>['commande',
-				      '/usr/sbin/sendmail','/usr/bin/sendmail',
-				      '/sbin/sendmail','/bin/sendmail'],
-	      'email_smtp_host'=>'smtp',
-	      'email_smtp_port'=>25,
-# TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
-	      'defaut_email_subject'=>__"Exam result",
-# TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
-	      'defaut_email_text'=>__"Please find enclosed your annotated completed answer sheet.\nRegards.",
-              'email_delay'=>0,
-
-	      'csv_surname_headers'=>'',
-	      'csv_name_headers'=>'',
-	      'notify_documents'=>0,
-	      'notify_capture'=>1,
-	      'notify_grading'=>1,
-	      'notify_annotation'=>1,
-	      'notify_desktop'=>1,
-	      'notify_command'=>'',
-
-              project_icon_size=>16,
-
-              view_invalid_color=>"#FFEF3B",
-              view_empty_color=>"#78FFED",
-	      );
-
-# MacOSX universal command to open files or directories : /usr/bin/open
-if(lc($^O) eq 'darwin') {
-    for my $k (qw/pdf_viewer img_viewer csv_viewer ods_viewer xml_viewer tex_editor txt_editor dir_opener/) {
-	$o_defaut{$k}=['commande','/usr/bin/open','open'];
-    }
-    $o_defaut{'html_browser'}=['commande','/usr/bin/open %u','open %u'];
-}
-
-# Default options for projects
-
-my %projet_defaut=('texsrc'=>'',
-		   'data'=>'data',
-		   'cr'=>'cr',
-		   'listeetudiants'=>'',
-		   'notes'=>'notes.xml',
-		   'seuil'=>'',
-		   'seuil_up'=>'',
-		   'encodage_csv'=>'',
-		   'encodage_liste'=>'',
-		   'maj_bareme'=>1,
-		   'doc_question'=>'DOC-sujet.pdf',
-		   'doc_solution'=>'DOC-corrige.pdf',
-		   'doc_indiv_solution'=>'DOC-indiv-solution.pdf',
-		   'doc_setting'=>'DOC-calage.xy',
-		   'doc_catalog'=>'DOC-catalog.pdf',
-		   'filter'=>'',
-		   'filtered_source'=>'DOC-filtered.tex',
-
-		   'modele_regroupement'=>'',
-		   'regroupement_compose'=>0,
-		   'regroupement_type'=>'STUDENTS',
-		   'regroupement_copies'=>'ALL',
-
-		   'note_null'=>0,
-		   'note_min'=>'',
-		   'note_max'=>20,
-		   'note_max_plafond'=>1,
-		   'note_grain'=>"0.5",
-		   'note_arrondi'=>'inf',
-
-		   'liste_key'=>'',
-		   'assoc_code'=>'',
-
-		   'moteur_latex_b'=>'',
-
-		   'nom_examen'=>'',
-		   'code_examen'=>'',
-
-		   'nombre_copies'=>0,
-
-		   'postcorrect_student'=>0,
-		   'postcorrect_copy'=>0,
-		   'postcorrect_set_multiple'=>'',
-
-		   '_modifie'=>1,
-		   '_modifie_ok'=>0,
-
-		   'format_export'=>'CSV',
-
-		   'after_export'=>'file',
-		   'export_include_abs'=>'',
-
-		   'annote_position'=>'marges',
-
-		   'verdict'=>'',
-		   'verdict_q'=>'',
-		   'verdict_qc'=>'',
-		   'annote_rtl'=>'',
-
-		   'export_sort'=>'n',
-
-		   'auto_capture_mode'=>-1,
-		   'allocate_ids'=>0,
-
-		   'email_col'=>'',
-		   'email_subject'=>"",
-		   'email_text'=>"",
-		   'email_attachment'=>[],
-		   'email_use_html'=>'',
-		   );
-
-# Add default project options for each export module:
-
-my @export_modules=perl_module_search('AMC::Export::register');
-for my $m (@export_modules) {
-  load("AMC::Export::register::$m");
-  my %d="AMC::Export::register::$m"->options_default;
-  for(keys %d) {
-    $projet_defaut{$_}=$d{$_};
-  }
-}
-@export_modules=sort { "AMC::Export::register::$a"->weight
-			 <=> "AMC::Export::register::$b"->weight }
-  @export_modules;
+my @export_modules=@{$config->{export_modules}};
 
 # Reads filter plugins list
 
@@ -456,15 +209,12 @@ sub best_filter_for_file {
 
 # -----------------
 
-my %o=();
-my %state=();
-
 ## Notifications
 
 sub notify_end_of_work {
   my ($action,$message)=@_;
-  if($o{'notify_'.$action}) {
-    if($o{'notify_desktop'}) {
+  if($config->get('notify_'.$action)) {
+    if($config->get('notify_desktop')) {
       if($libnotify_error) {
 	debug "Notification ignored: $libnotify_error";
       } else {
@@ -473,9 +223,9 @@ sub notify_end_of_work {
 	$notification->show;
       }
     }
-    if($o{'notify_command'}) {
+    if($config->get('notify_command')) {
       my @cmd=map { s/[%]m/$message/g;s/[%]a/$action/g;$_; }
-	quotewords('\s+',0,$o{'notify_command'});
+	quotewords('\s+',0,$config->get('notify_command'));
       if(commande_accessible($cmd[0])) {
 	commande_parallele(@cmd);
       } else {
@@ -499,45 +249,6 @@ sub test_magick {
     $dialog->run;
     $dialog->destroy;
   }
-}
-
-# Test whether all commands defined to open/view files are
-# reachable. If not, the user is warned...
-
-sub test_commandes {
-    my ($dont_warn)=@_;
-    my @pasbon=();
-    my @missing=();
-    for my $c (grep { /_(viewer|editor|opener)$/ } keys(%o)) {
-	my $nc=$o{$c};
-	$nc =~ s/\s.*//;
-	if(!commande_accessible($nc)) {
-	    debug "Missing command [$c]: $nc";
-	    push @missing,$c;
-	    push @pasbon,$nc;
-	}
-    }
-    if(@pasbon && !$dont_warn) {
-      my $dialog = Gtk3::MessageDialog
-        ->new($w{'main_window'},
-              'destroy-with-parent',
-              'warning','ok','');
-      $dialog->set_markup(
-# TRANSLATORS: Message (first part) when some of the commands that are given in the preferences cannot be found.
-                          __("Some commands allowing to open documents can't be found:")
-                          ." ".join(", ",map { "<b>$_</b>"; } @pasbon).". "
-# TRANSLATORS: Message (second part) when some of the commands that are given in the preferences cannot be found.
-                          .__("Please check its correct spelling and install missing software.")." "
-# TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
-                          .sprintf(__"You can change used commands following <i>%s</i> from menu <i>%s</i>.",
-# TRANSLATORS: "Preferences" menu
-                                   __"Preferences",
-# TRANSLATORS: "Edit" menu
-                                   __"Edit"));
-      $dialog->run;
-      $dialog->destroy;
-    }
-    return(@missing);
 }
 
 # tests if debian package auto-multiple-choice-common is installed but
@@ -572,102 +283,6 @@ sub test_debian_amc {
   }
 }
 
-# Creates general options directory if not present
-
-if(! -d $o_dir) {
-    mkdir($o_dir) or die "Error creating $o_dir : $!";
-
-    # gets older verions (<=0.254) main configuration file and move it
-    # to the new location
-
-    if(-f $home_dir.'/.AMC.xml') {
-	debug "Moving old configuration file";
-	move($home_dir.'/.AMC.xml',$o_dir."/cf.default.xml");
-    }
-}
-
-for my $o_sub (qw/plugins/) {
-  mkdir("$o_dir/$o_sub") if(! -d "$o_dir/$o_sub");
-}
-
-#
-
-sub sub_modif {
-  my ($opts)=@_;
-  my ($m,$mo)=($opts->{'_modifie'},$opts->{'_modifie_ok'});
-  for my $k (keys %$opts) {
-    if(ref($opts->{$k}) eq 'HASH') {
-      ($m_sub,$mo_sub)=sub_modif($opts->{$k});
-      $m=join_nonempty(',',$m,$m_sub);
-      $mo=1 if($mo_sub);
-    }
-  }
-  return($m,$mo);
-}
-
-sub clear_sub_modif {
-  my ($data)=@_;
-  delete($data->{_modifie});
-  delete($data->{_modifie_ok});
-  for my $k (grep { ref($data->{$_}) eq 'HASH' } (keys %$data)) {
-    clear_sub_modif($data->{$k});
-  }
-}
-
-# Read/write options XML files
-
-sub pref_xx_lit {
-  my ($fichier)=@_;
-  if((! -f $fichier) || -z $fichier) {
-    return();
-  } else {
-    debug("Reading XML config file $fichier ...");
-    my $data=XMLin($fichier,SuppressEmpty => '',
-		   ForceArray=>['docs','email_attachment','printer']);
-    clear_sub_modif($data);
-    return(%$data);
-  }
-}
-
-sub pref_xx_ecrit {
-    my ($data,$key,$fichier,$data_orig)=@_;
-    if(open my $fh,">:encoding(utf-8)",$fichier) {
-	XMLout($data,
-	       "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-	       "RootName"=>$key,'NoAttr'=>1,
-	       "OutputFile" => $fh,
-	       );
-	close $fh;
-	clear_sub_modif($data_orig || $data);
-	return(0);
-    } else {
-	return(1);
-    }
-}
-
-# Read/write running state
-
-sub sauve_state {
-    if($state{'_modifie'} || $state{'_modifie_ok'}) {
-	debug "Saving state...";
-
-	if(pref_xx_ecrit(\%state,'AMCState',$state_file)) {
-	    my $dialog = Gtk3::MessageDialog
-		->new($w{'main_window'},
-		      'destroy-with-parent',
-		      'error','ok',
-# TRANSLATORS: Error writing one of the configuration files (global or project). The first %s will be replaced with the path of that file, and the second with the error text.
-		      __"Error writing state file %s: %s",
-		      $state_file,$!);
-	    $dialog->run;
-	    $dialog->destroy;
-	} else {
-	    $state{'_modifie'}=0;
-	    $state{'_modifie_ok'}=0;
-	}
-    }
-}
-
 # annulation apprentissage
 
 sub annule_apprentissage {
@@ -689,136 +304,15 @@ sub annule_apprentissage {
     $dialog->destroy;
     if($reponse eq 'yes') {
 	debug "Clearing learning states...";
-	$state{'apprentissage'}={};
-	$state{'_modifie'}=1;
-	sauve_state();
+	$config->set("state:apprentissage",{});
+	$config->save();
     }
-}
-
-# Read the state file
-
-if(-r $state_file) {
-    %state=pref_xx_lit($state_file);
-    $state{'apprentissage'}={} if(!$state{'apprentissage'});
-}
-
-$state{'_modifie'}=0;
-$state{'_modifie_ok'}=0;
-
-# gets the last used profile
-
-if(!$state{'profile'}) {
-    $state{'profile'}='default';
-    $state{'_modifie'}=1;
-}
-
-# sets new profile if given as a command argument
-
-if($profile && $profile ne $state{'profile'}) {
-    $state{'profile'}=$profile;
-    $state{'_modifie'}=1;
-}
-
-sauve_state();
-
-debug "Profile : $state{'profile'}";
-
-$o_file=$o_dir."/cf.".$state{'profile'}.".xml";
-
-# Read general options ...
-
-if(-r $o_file) {
-    %o=pref_xx_lit($o_file);
-}
-
-sub set_option_to_default {
-    my ($key,$subkey,$force)=@_;
-    if($subkey) {
-	if($force || ! exists($o{$key}->{$subkey})) {
-	    $o{$key}->{$subkey}=$o_defaut{$key}->{$subkey};
-	    debug "New sub-global parameter : $key/$subkey = $o{$key}->{$subkey}";
-	}
-    } else {
-	if($force || ! exists($o{$key})) {
-	    # set to default
-	    if(ref($o_defaut{$key}) eq 'ARRAY') {
-		my ($type,@valeurs)=@{$o_defaut{$key}};
-		if($type eq 'commande') {
-		  UC: for my $c (@valeurs) {
-		      if(commande_accessible($c)) {
-			  $o{$key}=$c;
-			  last UC;
-		      }
-		  }
-		    if(!$o{$key}) {
-			debug "No available command for option $key: using the first one";
-			$o{$key}=$valeurs[0];
-		    }
-		} else {
-		    debug "ERR: unknown option type : $type";
-		}
-	    } elsif(ref($o_defaut{$key}) eq 'HASH') {
-		$o{$key}={%{$o_defaut{$key}}};
-	    } else {
-		$o{$key}=$o_defaut{$key};
-		$o{$key}=$encodage_systeme if($key =~ /^encodage_/ && !$o{$key});
-	    }
-	    debug "New global parameter : $key = $o{$key}" if($o{$key});
-	} else {
-	    # already defined option: go with sub-options if any
-	    if(ref($o_defaut{$key}) eq 'HASH') {
-		for my $kk (keys %{$o_defaut{$key}}) {
-		    set_option_to_default($key,$kk,$force);
-		}
-	    }
-	}
-    }
-}
-
-# sets undefined options to default value
-
-for my $k (keys %o_defaut) {
-    set_option_to_default($k);
-}
-
-# for unexisting commands options, see if we can find an available one
-# from the default list
-
-for my $k (test_commandes(1)) {
-    set_option_to_default($k,'','FORCE');
-}
-
-# Clears modified flag for the options
-
-$o{'_modifie'}=0;
-$o{'_modifie_ok'}=0;
-
-# some options were renamed to defaut_* between 0.226 and 0.227
-
-for(qw/encodage_liste encodage_csv/) {
-    if($o{"$_"} && ! $o{"defaut_$_"}) {
-	$o{"defaut_$_"}=$o{"$_"};
-	$o{'_modifie'}=1;
-    }
-}
-
-# Replace old (pre 0.280) rep_modeles value with new one
-
-if($o{'rep_modeles'} eq '/usr/share/doc/auto-multiple-choice/exemples') {
-    $o{'rep_modeles'}=$o_defaut{'rep_modeles'};
-    $o{'_modifie'}=1;
-}
-
-# Internal encoding _must_ be UTF-8, for XML::Writer (used by
-# AMC::Gui::Association for example) to work
-if($o{'encodage_interne'} ne 'UTF-8') {
-    $o{'encodage_interne'}='UTF-8';
-    $o{'_modifie'}=1;
 }
 
 # Reset projects directory to standard one
 
-$o{'rep_projets'}=$shortcuts->absolu($o{'projects_home'});
+$config->set('global:rep_projets',
+             $config->get_absolute('projects_home'));
 
 # Warn if Notify is not available
 sub test_libnotify {
@@ -831,7 +325,7 @@ sub test_libnotify {
     };
     $libnotify_error=$@;
 
-    if($libnotify_error && $o{'notify_desktop'}) {
+    if($libnotify_error && $config->get('notify_desktop')) {
       debug "libnotify loading error: $libnotify_error";
       my $dialog = Gtk3::MessageDialog
 	->new($w{'main_window'},
@@ -842,8 +336,7 @@ sub test_libnotify {
 			 );
       $dialog->run;
       $dialog->destroy;
-      $o{'notify_desktop'}='';
-      $o{'_modifie'}=1;
+      $config->set('notify_desktop','');
     }
   }
 }
@@ -857,8 +350,9 @@ if(-f $project_dir) {
 $project_dir =~ s/\/+$//;
 if(-d $project_dir) {
   my ($v,$d,$f)=splitpath($project_dir);
-  $o{'rep_projets'}=catpath($v,$d,'');
-  $o{'rep_projets'} =~ s/\/+$//;
+  my $r=catpath($v,$d,'');
+  $r =~ s/\/+$//;
+  $config->set('rep_projets',$r);
   @ARGV=$f;
 }
 
@@ -866,7 +360,7 @@ if(-d $project_dir) {
 # Edit/Parameters can be disrupted)
 
 for my $k (qw/rep_projets rep_modeles/) {
-  my $path=$o{$k};
+  my $path=$config->get($k);
   if(-e $path) {
     debug "WARNING: $path ($k) is not a directory!" if(!-d $path);
   } else {
@@ -877,11 +371,11 @@ for my $k (qw/rep_projets rep_modeles/) {
 sub set_projects_home {
   my ($p)=@_;
 
-  $o{'rep_projets'}=$p;
+  $config->set('rep_projets',$p);
   $shortcuts->set(projects_path=>$p);
 }
 
-set_projects_home($o{'rep_projets'});
+set_projects_home($config->get('rep_projets'));
 
 #############################################################################
 
@@ -889,18 +383,15 @@ my %projet=();
 
 sub bon_encodage {
     my ($type)=@_;
-    return($projet{'options'}->{"encodage_$type"}
-	   || $o{"defaut_encodage_$type"}
-	   || $o{"encodage_$type"}
-	   || $o_defaut{"defaut_encodage_$type"}
-	   || $o_defaut{"encodage_$type"}
+    return($config->get("encodage_$type")
+	   || $config->get("defaut_encodage_$type")
 	   || "UTF-8");
 }
 
 sub csv_build_0 {
   my ($k,@default)=@_;
   push @default,grep { $_ } map { s/^\s+//;s/\s+$//;$_; }
-    split(/,+/,$o{'csv_'.$k.'_headers'});
+    split(/,+/,$config->get('csv_'.$k.'_headers'));
   return("(".join("|",@default).")");
 }
 
@@ -913,12 +404,12 @@ sub id2file {
     my ($id,$prefix,$extension)=(@_);
     $id =~ s/\+//g;
     $id =~ s/\//-/g;
-    return($shortcuts->absolu($projet{'options'}->{'cr'})."/$prefix-$id.$extension");
+    return($config->get_absolute('cr')."/$prefix-$id.$extension");
 }
 
 sub is_local {
     my ($f,$proj)=@_;
-    my $prefix=$o{'rep_projets'}."/";
+    my $prefix=$config->get('rep_projets')."/";
     $prefix .= $projet{'nom'}."/" if($proj);
     if(defined($f)) {
 	return($f !~ /^[\/%]/
@@ -931,15 +422,14 @@ sub is_local {
 
 sub fich_options {
     my ($nom,$rp)=@_;
-    $rp=$o{'rep_projets'} if(!$rp);
+    $rp=$config->get('rep_projets') if(!$rp);
     return "$rp/$nom/options.xml";
 }
 
 sub moteur_latex {
-    my $m=$projet{'options'}->{'moteur_latex_b'};
-    $m=$o{'defaut_moteur_latex_b'} if(!$m);
-    $m=$o_defaut{'defaut_moteur_latex_b'} if(!$m);
-    return($m);
+  return($config->get('moteur_latex_b')
+         || $config->get('defaut_moteur_latex_b')
+        );
 }
 
 sub read_glade {
@@ -1055,9 +545,9 @@ for my $l (@doc_langs) {
     my $m=Gtk3::ImageMenuItem->new_with_label($ltext);
     my $it=Gtk3::IconTheme->new();
     $it->prepend_search_path($hdocdir."auto-multiple-choice.$l");
-    my $ii=$it->lookup_icon("flag",$o{project_icon_size} ,"force-svg");
+    my $ii=$it->lookup_icon("flag",$config->get("project_icon_size") ,"force-svg");
     if($ii) {
-	$m->set_image(Gtk3::Image->new_from_pixbuf($it->load_icon("flag",$o{project_icon_size} ,"force-svg")));
+	$m->set_image(Gtk3::Image->new_from_pixbuf($it->load_icon("flag",$config->get("project_icon_size") ,"force-svg")));
     }
     $m->signal_connect("activate",\&activate_doc,$l);
     $docs_menu->append($m);
@@ -1074,7 +564,7 @@ sub dialogue_apprentissage {
     my $resp='';
     $type='info' if(!$type);
     $buttons='ok' if(!$buttons);
-    if($force || !$state{'apprentissage'}->{$key}) {
+    if($force || !$config->get("apprentissage/$key")) {
       my $garde;
       my $dialog = Gtk3::MessageDialog
 	->new($w{'main_window'},
@@ -1096,9 +586,7 @@ sub dialogue_apprentissage {
 
       if(!($force || $garde->get_active())) {
 	debug "Learning : $key";
-	$state{'apprentissage'}->{$key}=1;
-	$state{'_modifie'}=1;
-	sauve_state();
+        $config->set("apprentissage/$key",1);
       }
 
       $dialog->destroy;
@@ -1265,21 +753,19 @@ for my $m ({name=>"CUPS",description=>"CUPS"},
   my $error=$mod->check_available();
   if(! $error) {
     push @printing_methods,$m->{name},$m->{description};
-    if(!$o{methode_impression}) {
-      $o{methode_impression}=$m->{name};
-      $o{_modifie_ok}=1;
+    if(!$config->get("methode_impression")) {
+      $config->set("global:methode_impression",$m->{name});
       debug "Switching to printing method <$m->{name}>.";
     }
   } else {
-    if($o{methode_impression} eq $m->{name}) {
-      $o{methode_impression}='';
+    if($config->get("methode_impression") eq $m->{name}) {
+      $config->set("global:methode_impression",'');
       debug "Printing method <$m->{name}> is not available: $error";
     }
   }
 }
-if(!$o{methode_impression}) {
-  $o{methode_impression}='commande';
-  $o{_modifie_ok}=1;
+if(!$config->get("methode_impression")) {
+  $config->set("global:methode_impression",'commande');
   debug "Switching to printing method <commande>.";
 }
 
@@ -1412,19 +898,19 @@ for my $m (@export_modules) {
 ### export
 
 sub maj_export {
-    my $old_format=$projet{'options'}->{'format_export'};
+    my $old_format=$config->get('format_export');
 
     valide_options_for_domain('export','',@_);
 
-    if($projet{'options'}->{'_modifie'} =~ /\bexport_sort\b/) {
+    if($config->key_changed("export_sort")) {
       annotate_source_change($projet{'_capture'},1);
     }
 
-    debug "Format : ".$projet{'options'}->{'format_export'};
+    debug "Format : ".$config->get('format_export');
 
     for(@export_modules) {
       if($w{'config_export_module_'.$_}) {
-	if($projet{'options'}->{'format_export'} eq $_) {
+	if($config->get('format_export') eq $_) {
 	  $w{'config_export_module_'.$_}->show;
 	} else {
 	  $w{'config_export_module_'.$_}->hide;
@@ -1432,7 +918,7 @@ sub maj_export {
       }
     }
 
-    my %hide=("AMC::Export::register::".$projet{'options'}->{'format_export'})
+    my %hide=("AMC::Export::register::".$config->get('format_export'))
       ->hide();
     for (qw/standard_export_options/) {
       if($hide{$_}) {
@@ -1447,20 +933,20 @@ sub exporte {
 
   maj_export();
 
-    my $format=$projet{'options'}->{'format_export'};
+    my $format=$config->get('format_export');
     my @options=();
     my $ext="AMC::Export::register::$format"->extension();
     if(!$ext) {
 	$ext=lc($format);
     }
     my $type="AMC::Export::register::$format"->type();
-    my $code=$projet{'options'}->{'code_examen'};
+    my $code=$config->get('code_examen');
     $code=$projet{'nom'} if(!$code);
     my $output=$shortcuts->absolu('%PROJET/exports/'.$code.$ext);
     my @needs_module=();
 
     my %ofc="AMC::Export::register::$format"
-      ->options_from_config($projet{'options'},\%o,\%o_defaut);
+      ->options_from_config($config);
     for(keys %ofc) {
       push @options,"--option-out",$_.'='.$ofc{$_};
     }
@@ -1498,13 +984,13 @@ sub exporte {
 			  pack_args(
 				    "--debug",debug_file(),
 				    "--module",$format,
-				    "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
-				    "--useall",$projet{'options'}->{'export_include_abs'},
-				    "--sort",$projet{'options'}->{'export_sort'},
-				    "--fich-noms",$shortcuts->absolu($projet{'options'}->{'listeetudiants'}),
+				    "--data",$config->get_absolute('data'),
+				    "--useall",$config->get('export_include_abs'),
+				    "--sort",$config->get('export_sort'),
+				    "--fich-noms",$config->get_absolute('listeetudiants'),
 				    "--noms-encodage",bon_encodage('liste'),
 				    "--csv-build-name",csv_build_name(),
-				    ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
+				    ($config->get('annote_rtl') ? "--rtl" : "--no-rtl"),
 				    "--output",$output,
 				    @options
 				   ),
@@ -1530,10 +1016,10 @@ sub exporte {
 		   $dialog->destroy;
 		 }
 
-		 if($projet{'options'}->{'after_export'} eq 'file') {
-		   commande_parallele($o{$type.'_viewer'},$output)
-		     if($o{$type.'_viewer'});
-		 } elsif($projet{'options'}->{'after_export'} eq 'dir') {
+		 if($config->get('after_export') eq 'file') {
+		   commande_parallele($config->get($type.'_viewer'),$output)
+		     if($config->get($type.'_viewer'));
+		 } elsif($config->get('after_export') eq 'dir') {
 		   view_dir($shortcuts->absolu('%PROJET/exports/'));
 		 }
 	       } else {
@@ -1567,17 +1053,17 @@ sub zooms_display {
        $w{'zooms_window'}->actif) {
 	$w{'zooms_window'}->page([$student,$page,$copy],$zd,$forget_it);
     } elsif(!$forget_it) {
-	$w{'zooms_window'}=AMC::Gui::Zooms::new('seuil'=>$projet{'options'}->{'seuil'},
-						'seuil_up'=>$projet{'options'}->{'seuil_up'},
-						'n_cols'=>$o{'zooms_ncols'},
+	$w{'zooms_window'}=AMC::Gui::Zooms::new('seuil'=>$config->get('seuil'),
+						'seuil_up'=>$config->get('seuil_up'),
+						'n_cols'=>$config->get('zooms_ncols'),
 						'zooms_dir'=>$zd,
 						'page_id'=>[$student,$page,$copy],
-						'size-prefs',\%o,
-						'encodage_interne'=>$o{'encodage_interne'},
+						'size-prefs',$config,
+						'encodage_interne'=>$config->get('encodage_interne'),
 						'data'=>$projet{'_capture'},
-						'cr-dir'=>$shortcuts->absolu($projet{'options'}->{'cr'}),
+						'cr-dir'=>$config->get_absolute('cr'),
 						'list_view'=>$w{'diag_tree'},
-						'global_options'=>\%o,
+						'global_options'=>$config,
 						'prefs'=>$prefs,
 	    );
     }
@@ -1607,11 +1093,11 @@ sub layout_line {
     my @id=map { $diag_store->get($iter,$_); } 
       (DIAG_ID_STUDENT,DIAG_ID_PAGE,DIAG_ID_COPY);
     $projet{'_capture'}->begin_read_transaction('Layl');
-    my $f=$shortcuts->absolu($projet{'options'}->{'cr'}).'/'
+    my $f=$config->get_absolute('cr').'/'
       .$projet{'_capture'}->get_layout_image(@id);
     $projet{'_capture'}->end_transaction('Layl');
 
-    commande_parallele($o{'img_viewer'},$f) if(-f $f);
+    commande_parallele($config->get('img_viewer'),$f) if(-f $f);
   }
 }
 
@@ -1641,7 +1127,7 @@ sub delete_line {
 	#
 	# 1) get image files generated, and remove them
 	#
-	my $crdir=$shortcuts->absolu($projet{'options'}->{'cr'});
+	my $crdir=$config->get_absolute('cr');
 	my @files=();
 	#
 	# scan file
@@ -1670,7 +1156,7 @@ sub delete_line {
 	#
 	$projet{'_capture'}->delete_page_data(@id);
 
-	if($projet{'options'}->{'auto_capture_mode'} == 1) {
+	if($config->get('auto_capture_mode') == 1) {
 	  $projet{'_scoring'}->delete_scoring_data(@id[0,2]);
 	  $projet{'_association'}->delete_association_data(@id[0,2]);
 	}
@@ -1730,7 +1216,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 	      my $f;
 	      if($a eq 'page') {
 		$projet{'_capture'}->begin_read_transaction('gLIm');
-		$f=$shortcuts->absolu($projet{'options'}->{'cr'}).'/'
+		$f=$config->get_absolute('cr').'/'
 		  .$projet{'_capture'}->get_layout_image(@$id);
 		$projet{'_capture'}->end_transaction('gLIm');
 	      } else {
@@ -1745,7 +1231,7 @@ $w{'diag_tree'}->signal_connect('button_release_event' =>
 		$item->signal_connect (activate => sub {
 					 my (undef, $sortkey) = @_;
 					 debug "Looking at $f...";
-					 commande_parallele($o{'img_viewer'},$f);
+					 commande_parallele($config->get('img_viewer'),$f);
 				       }, $_);
 	      }
 	    }
@@ -1849,8 +1335,8 @@ sub projects_show {
     ->set_tooltip_text(sprintf(__("Current directory: %s"),$w{'local_rep_projets'}));
 
   if(!$w{'icon_project'}) {
-    $w{'icon_project'} = Gtk3::IconTheme::get_default->load_icon("auto-multiple-choice",$o{project_icon_size} ,"force-svg");
-    $w{'icon_project_dir'} = Gtk3::IconTheme::get_default->load_icon("gtk-no",$o{project_icon_size} ,"force-svg");
+    $w{'icon_project'} = Gtk3::IconTheme::get_default->load_icon("auto-multiple-choice",$config->get("project_icon_size") ,"force-svg");
+    $w{'icon_project_dir'} = Gtk3::IconTheme::get_default->load_icon("gtk-no",$config->get("project_icon_size") ,"force-svg");
     $w{'icon_project'}=$w{'main_window'}->render_icon ('gtk-open', 'menu')
       if(!$w{'icon_project'});
   }
@@ -1873,9 +1359,9 @@ sub projects_show {
 sub liste_des_projets {
     my %oo=(@_);
 
-    mkdir($o{'rep_projets'}) if(-d $o{'rep_projets'});
+    $w{'local_rep_projets'}=$config->get('rep_projets');
 
-    $w{'local_rep_projets'}=$o{'rep_projets'};
+    mkdir($w{'local_rep_projets'}) if(-d $w{'local_rep_projets'});
 
     my @projs=projects_list();
 
@@ -1943,7 +1429,7 @@ sub liste_des_projets {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'info','ok',
-		  __"You don't have any MC project in directory %s!",$o{'rep_projets'});
+		  __"You don't have any MC project in directory %s!",$config->get('rep_projets'));
 	$dialog->run;
 	$dialog->destroy;
 
@@ -2259,7 +1745,7 @@ sub projet_charge_ok {
 	  # to copy it first to the user standard projects directory:
 
 	  if($w{'local_rep_projets'} =~ /^\/media\//
-	    && $shortcuts->absolu($o{'projects_home'}) !~ /^\/media\//) {
+	    && $config->get_absolute('projects_home') !~ /^\/media\//) {
 	    my $dialog = Gtk3::MessageDialog
 		->new($w{'main_window'},
                       'destroy-with-parent',
@@ -2271,11 +1757,11 @@ sub projet_charge_ok {
 	    my $r=$dialog->run;
 	    $dialog->destroy;
 	    if($r eq 'yes') {
-	      my $proj_dest=new_filename($shortcuts->absolu($o{'projects_home'}).'/'.$proj);
+	      my $proj_dest=new_filename($config->get_absolute('projects_home').'/'.$proj);
 	      if(project_copy($w{'local_rep_projets'}.'/'.$proj,
 			      $proj_dest)) {
 		(undef,undef,$proj_dest) = splitpath($proj_dest);
-		$w{'local_rep_projets'}=$shortcuts->absolu($o{'projects_home'});
+		$w{'local_rep_projets'}=$config->get_absolute('projects_home');
 		$proj=$proj_dest;
 	      }
 	    }
@@ -2350,32 +1836,15 @@ sub projet_charge_non {
 
 sub projet_sauve {
     debug "Saving project...";
-    my $of=fich_options($projet{'nom'});
-    my $po={%{$projet{'options'}}};
 
-    for(qw/listeetudiants/) {
-	$po->{$_}=$shortcuts->relatif($po->{$_});
-    }
-
-    if(pref_xx_ecrit($po,'projetAMC',$of,$projet{'options'})) {
-	my $dialog = Gtk3::MessageDialog
-	    ->new($w{'main_window'},
-		  'destroy-with-parent',
-		  'error','ok',
-		  __"Error writing to options file %s: %s",$of,$!);
-	$dialog->run;
-	$dialog->destroy;
-    }
+    $config->save();
 }
 
 sub projet_check_and_save {
-    if($projet{'nom'}) {
-	valide_options_notation();
-	my ($m,$mo)=sub_modif($projet{'options'});
-	if($m || $mo) {
-	    projet_sauve();
-	}
-    }
+  if($projet{'nom'}) {
+    valide_options_notation();
+    $config->save();
+  }
 }
 
 ### Actions des boutons de la partie DOCUMENTS
@@ -2392,14 +1861,6 @@ my %component_name=('latex_packages'=>__("LaTeX packages:"),
 		    'commands'=>__("Commands:"),
 		    'fonts'=>__("Fonts:"),
 		    );
-
-sub set_project_option {
-  my ($name,$value)=@_;
-  my $old=$projet{'options'}->{$name};
-  $projet{'options'}->{$name}=$value;
-  $projet{'options'}->{'_modifie'}.=','.$name if($value ne $old);
-}
-
 
 sub doc_maj {
     my $sur=0;
@@ -2454,14 +1915,13 @@ sub doc_maj {
 
     # new layout document : XY (from LaTeX)
 
-    if($projet{'options'}->{'doc_setting'} =~ /\.pdf$/) {
-	$projet{'options'}->{'doc_setting'}=$projet_defaut{'doc_setting'};
-	$projet{'options'}->{'_modifie'}=1;
+    if($config->get('doc_setting') =~ /\.pdf$/) {
+      $config->set_project_option_to_default('doc_setting','FORCE');
     }
 
     # check for filter dependencies
 
-    my $filter_register=("AMC::Filter::register::".$projet{'options'}->{'filter'})
+    my $filter_register=("AMC::Filter::register::".$config->get('filter'))
       ->new();
 
     my $check=$filter_register->check_dependencies();
@@ -2494,8 +1954,8 @@ sub doc_maj {
 
     # set options from filter:
 
-    if($projet{'options'}->{'filter'}) {
-      $filter_register->set_oo($projet{'options'});
+    if($config->get('filter')) {
+      $filter_register->set_oo($config);
       $filter_register->configure();
     }
 
@@ -2508,23 +1968,23 @@ sub doc_maj {
 
     #
     my $mode_s='s[';
-    $mode_s.='s' if($o{'prepare_solution'});
-    $mode_s.='c' if($o{'prepare_catalog'});
+    $mode_s.='s' if($config->get('prepare_solution'));
+    $mode_s.='c' if($config->get('prepare_catalog'));
     $mode_s.=']';
-    $mode_s.='k' if($o{'prepare_indiv_solution'});
+    $mode_s.='k' if($config->get('prepare_indiv_solution'));
     commande('commande'=>["auto-multiple-choice","prepare",
 			  "--with",moteur_latex(),
-			  "--filter",$projet{'options'}->{'filter'},
-			  "--filtered-source",$shortcuts->absolu($projet{'options'}->{'filtered_source'}),
+			  "--filter",$config->get('filter'),
+			  "--filtered-source",$config->get_absolute('filtered_source'),
 			  "--debug",debug_file(),
-			  "--out-sujet",$shortcuts->absolu($projet{'options'}->{'doc_question'}),
-			  "--out-corrige",$shortcuts->absolu($projet{'options'}->{'doc_solution'}),
-			  "--out-corrige-indiv",$shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'}),
-			  "--out-catalog",$shortcuts->absolu($projet{'options'}->{'doc_catalog'}),
-			  "--out-calage",$shortcuts->absolu($projet{'options'}->{'doc_setting'}),
+			  "--out-sujet",$config->get_absolute('doc_question'),
+			  "--out-corrige",$config->get_absolute('doc_solution'),
+			  "--out-corrige-indiv",$config->get_absolute('doc_indiv_solution'),
+			  "--out-catalog",$config->get_absolute('doc_catalog'),
+			  "--out-calage",$config->get_absolute('doc_setting'),
 			  "--mode",$mode_s,
-			  "--n-copies",$projet{'options'}->{'nombre_copies'},
-			  $shortcuts->absolu($projet{'options'}->{'texsrc'}),
+			  "--n-copies",$config->get('nombre_copies'),
+			  $config->get_absolute('texsrc'),
 			  "--prefix",$shortcuts->absolu('%PROJET/'),
 			  "--latex-stdout",
 			  ],
@@ -2564,7 +2024,7 @@ sub doc_maj {
 		       sprintf(__("See also the processing log in '%s' below."),
 			       # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
 			       __"Command output details");
-		     $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($projet{'options'}->{'filter'} eq 'latex');
+		     $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($config->get('filter') eq 'latex');
 
                      debug($message);
 		     my $dialog = Gtk3::MessageDialog
@@ -2582,7 +2042,7 @@ sub doc_maj {
 
 		     my $ok=1;
 		     for (qw/question solution setting/) {
-		       $ok=0 if(! -f $shortcuts->absolu($projet{'options'}->{'doc_'.$_}));
+		       $ok=0 if(! -f $config->get_absolute('doc_'.$_));
 		     }
 		     if ($ok) {
 
@@ -2593,7 +2053,7 @@ sub doc_maj {
 		       my %vars=$c->variables;
 		       for my $k (keys %vars) {
 			 if ($k =~ /^project:(.*)/) {
-			   set_project_option($1,$vars{$k});
+			   $config->set($k,$vars{$k});
 			 }
 		       }
 
@@ -2617,13 +2077,11 @@ sub doc_maj {
 		   } elsif($c->variable('ensemble')) {
 		     $ap='cases';
 		   }
-		   $projet{'options'}->{'_modifie'}=1
-		     if ($projet{'options'}->{'annote_position'} ne $ap);
-		   $projet{'options'}->{'annote_position'}=$ap;
+		   $config->set('annote_position',$ap);
 
 		   my $ensemble=$c->variable('ensemble') && !$c->variable('outsidebox');
 		   if (($ensemble  || $c->variable('insidebox'))
-		       && $projet{'options'}->{'seuil'}<0.4) {
+		       && $config->get('seuil')<0.4) {
 		     my $dialog = Gtk3::MessageDialog
 		       ->new($w{'main_window'},
                              'destroy-with-parent',
@@ -2640,13 +2098,12 @@ sub doc_maj {
 						 .__("Would you like to set it to 0.5?")
 						 # TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
 						 ,__"darkness threshold",
-						 $projet{'options'}->{'seuil'}) );
+						 $config->get('seuil')) );
 		     my $reponse=$dialog->run;
 		     $dialog->destroy;
 		     if ($reponse eq 'yes') {
-		       $projet{'options'}->{'seuil'}=0.5;
-		       $projet{'options'}->{'seuil_up'}=1.0;
-		       $projet{'options'}->{'_modifie'}=1;
+		       $config->set('seuil',0.5);
+		       $config->set('seuil_up',1.0);
 		     }
 		   }
 		 }
@@ -2659,26 +2116,26 @@ sub filter_details {
   my $gd=read_glade('filter_details',
 		    qw/filter_text/);
   debug "Filter details: conf->details GUI";
-  $prefs->transmet_pref($gd,'filter_details',$projet{'options'});
+  $prefs->transmet_pref($gd,'filter_details',"project:");
   my $r=$w{'filter_details'}->run();
   if($r == 10) {
-    my %oo=('filter'=>'');
+    $config->set_local_keys('filter');
     debug "Filter details: new value->local";
-    $prefs->reprend_pref('filter_details',\%oo);
+    $prefs->reprend_pref('filter_details','local:');
     $w{'filter_details'}->destroy;
     debug "Filter details: local->main GUI";
-    $prefs->transmet_pref($gui,'pref_prep',\%oo);
+    $prefs->transmet_pref($gui,'pref_prep','local:');
   } else {
     $w{'filter_details'}->destroy;
   }
 }
 
 sub filter_details_update {
-  my %oo=('filter'=>'');
-  $prefs->reprend_pref('filter_details',\%oo);
+  $config->set_local_keys('filter');
+  $prefs->reprend_pref('filter_details','local:');
   my $b=$w{'filter_text'}->get_buffer;
-  if($oo{'filter'}) {
-    $b->set_text(("AMC::Filter::register::".$oo{'filter'})->description);
+  if($config->get('local:filter')) {
+    $b->set_text(("AMC::Filter::register::".$config->get('local:filter'))->description);
   } else {
     $b->set_text('');
   }
@@ -2702,17 +2159,19 @@ sub autre_imprimante {
     my $i=$w{'imprimante'}->get_model->get($imp_iter,COMBO_ID);
     debug "Choix imprimante $i";
 
-    $o{options_impression}->{printer}={}
-      if(!$o{options_impression}->{printer});
-    $o{options_impression}->{printer}->{$i}={}
-      if(!$o{options_impression}->{printer}->{$i});
+    $config->set("global:options_impression/printer",{})
+      if(!$config->get("options_impression/printer"));
+    my $printer_settings=$config->get("options_impression/printer");
+
+    $printer_settings->{$i}={}
+      if(!$printer_settings->{$i});
 
     $w{print_object}->printer_options_table($w{printing_options_table},
 					   \%w,$prefs,
-					   $i,$o{options_impression}->{printer}->{$i});
+					   $i,$printer_settings->{$i});
 
-    $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
-    $prefs->transmet_pref($g_imprime,'printer',$o{options_impression}->{printer}->{$i});
+    $prefs->transmet_pref($g_imprime,'imp','options_impression');
+    $prefs->transmet_pref($g_imprime,'printer',"options_impression/printer/$i");
   } else {
     debug "No printer choice!";
   }
@@ -2720,7 +2179,7 @@ sub autre_imprimante {
 
 sub sujet_impressions {
 
-    if(! -f $shortcuts->absolu($projet{'options'}->{'doc_question'})) {
+    if(! -f $config->get_absolute('doc_question')) {
 	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
                   'destroy-with-parent',
@@ -2754,9 +2213,9 @@ sub sujet_impressions {
 
     debug "Choosing pages to print...";
 
-    if($o{'methode_impression'} =~ /^CUPS/) {
+    if($config->get('methode_impression') =~ /^CUPS/) {
 
-      	my $print_module="AMC::Print::".lc($o{methode_impression});
+      	my $print_module="AMC::Print::".lc($config->get("methode_impression"));
 	load($print_module);
 
 	# checks for availibility
@@ -2767,7 +2226,7 @@ sub sujet_impressions {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
-		  sprintf(__("You chose the printing method '%s' but it is not available (%s). Please install the missing dependencies or switch to another printing method."),$o{'methode_impression'},$error));
+		  sprintf(__("You chose the printing method '%s' but it is not available (%s). Please install the missing dependencies or switch to another printing method."),$config->get('methode_impression'),$error));
 	    $dialog->run;
 	    $dialog->destroy;
 
@@ -2775,7 +2234,7 @@ sub sujet_impressions {
 	}
 
 	$w{print_object}=$print_module->
-	  new(useful_options=>$o{printer_useful_options});
+	  new(useful_options=>$config->get("printer_useful_options"));
 
 	# check for a installed printer
 
@@ -2801,11 +2260,11 @@ sub sujet_impressions {
     $g_imprime=read_glade('choix_pages_impression',
 			  qw/arbre_choix_copies bloc_imprimante answersheet_box imprimante printing_options_table bloc_fichier/);
 
-    $prefs->transmet_pref($g_imprime,'impall',$o{'options_impression'});
+    $prefs->transmet_pref($g_imprime,'impall',"options_impression");
 
-    debug "Printing method: $o{'methode_impression'}";
+    debug "Printing method: ".$config->get('methode_impression');
 
-    if($o{'methode_impression'} =~ /^CUPS/) {
+    if($config->get('methode_impression') =~ /^CUPS/) {
 	$w{'bloc_imprimante'}->show();
 
 	# les imprimantes :
@@ -2814,30 +2273,30 @@ sub sujet_impressions {
 	debug "Printers : ".join(' ',map { $_->{name} } @printers);
 	my $p_model=cb_model(map { $_->{name}=>$_->{description} } @printers);
 	$w{'imprimante'}->set_model($p_model);
-	if(! $o{'imprimante'}) {
+	if(! $config->get('imprimante')) {
 	    my $defaut=$w{print_object}->default_printer;
 	    if($defaut) {
-		$o{'imprimante'}=$defaut;
+		$config->set('imprimante',$defaut);
 	    } else {
-		$o{'imprimante'}=$printers[0]->{name};
+		$config->set('imprimante',$printers[0]->{name});
 	    }
 	}
-	my $i=model_id_to_iter($p_model,COMBO_ID,$o{'imprimante'});
+	my $i=model_id_to_iter($p_model,COMBO_ID,$config->get('imprimante'));
 	if($i) {
 	  $w{'imprimante'}->set_active_iter($i);
 	  # (this will call autre_imprimante and transmet_pref with
 	  # the right options)
 	} else {
 	  # updates the values in the GUI from the general options
-	  $prefs->transmet_pref($g_imprime,'imp',$o{'options_impression'});
+	  $prefs->transmet_pref($g_imprime,'imp','options_impression');
 	}
     }
 
-    if($o{'methode_impression'} eq 'file') {
+    if($config->get('methode_impression') eq 'file') {
 	$w{'bloc_imprimante'}->hide();
 	$w{'bloc_fichier'}->show();
 
-	$prefs->transmet_pref($g_imprime,'impf',$o{'options_impression'});
+	$prefs->transmet_pref($g_imprime,'impf','options_impression');
     }
 
     $copies_store->clear();
@@ -2864,8 +2323,8 @@ sub sujet_impressions {
 sub sujet_impressions_cancel {
 
   if(get_debug()) {
-    $prefs->reprend_pref('imp',$o{'options_impression'});
-    debug(Dumper($o{'options_impression'}));
+    $prefs->reprend_pref('imp',"options_impression");
+    debug(Dumper($config->get('options_impression')));
   }
 
   $w{'choix_pages_impression'}->destroy;
@@ -2893,9 +2352,9 @@ sub sujet_impressions_ok {
 	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N) if($i);
     }
 
-    $prefs->reprend_pref('impall',$o{'options_impression'});
+    $prefs->reprend_pref('impall','options_impression');
 
-    if($o{'methode_impression'} =~ /^CUPS/) {
+    if($config->get('methode_impression') =~ /^CUPS/) {
       my ($ok,$imp_iter)=$w{'imprimante'}->get_active_iter;
       my $i;
       if($ok) {
@@ -2903,33 +2362,25 @@ sub sujet_impressions_ok {
       } else {
 	$i='default';
       }
-      if($i ne $o{'imprimante'}) {
-	$o{'imprimante'}=$i;
-	$o{'_modifie'}=1;
-      }
+      $config->set('imprimante',$i);
 
-      $prefs->reprend_pref('imp',$o{'options_impression'});
-      $prefs->reprend_pref('printer',$o{options_impression}->{printer}->{$i});
+      $prefs->reprend_pref('imp','options_impression');
+      $prefs->reprend_pref('printer',"options_impression/printer/$i");
 
-      $os=options_string($o{options_impression},
-                         $o{options_impression}->{printer}->{$i});
+      $os=options_string($config->get("options_impression"),
+                         $config->get("options_impression/printer")->{$i});
 
       debug("Printing options : $os");
     }
 
-    if($o{'methode_impression'} eq 'file') {
-	$prefs->reprend_pref('impf',$o{'options_impression'});
+    if($config->get('methode_impression') eq 'file') {
+	$prefs->reprend_pref('impf','options_impression');
 
-	if($o{'options_impression'}->{'_modifie'}) {
-	    $o{'_modifie'}=1;
-	    delete $o{'options_impression'}->{'_modifie'};
-	}
-
-	if(!$o{'options_impression'}->{'repertoire'}) {
-	    debug "Print to file : no destionation...";
-	    $o{'options_impression'}->{'repertoire'}='';
+	if(!$config->get('options_impression/repertoire')) {
+	    debug "Print to file : no destination...";
+	    $config->set('options_impression/repertoire','');
 	} else {
-	  my $path=$shortcuts->absolu($o{'options_impression'}->{'repertoire'});
+	  my $path=$config->get_absolute('options_impression/repertoire');
 	  mkdir($path) if(! -e $path);
 	}
     }
@@ -2970,7 +2421,7 @@ sub sujet_impressions_ok {
 				       );
 	return() if($resp eq 'no');
       } elsif($students<=10) {
-	if($projet{'options'}->{'auto_capture_mode'} != 1) {
+	if($config->get('auto_capture_mode') != 1) {
 	  # This looks strange: a few sheets printed, a few sheets
 	  # generated, and photocopy mode not selected yet. Ask the
 	  # user if he wants to select this mode now.
@@ -2987,17 +2438,14 @@ sub sujet_impressions_ok {
 	  my $reponse=$dialog->run;
 	  $dialog->destroy;
 	  my $mult=($reponse eq 'yes' ? 1 : 0);
-	  if($mult != $projet{'options'}->{'auto_capture_mode'}) {
-	    $projet{'options'}->{'auto_capture_mode'}=$mult;
-	    $projet{'options'}->{'_modifie_ok'}=1;
-	  }
+          $config->set('auto_capture_mode',$mult);
 	}
       }
     }
 
-    if($o{'options_impression'}->{'print_answersheet'} eq 'first') {
+    if($config->get('options_impression/print_answersheet') eq 'first') {
       # This options needs pdftk!
-      if($o{print_extract_with} ne 'pdftk') {
+      if($config->get('print_extract_with') ne 'pdftk') {
 	if(commande_accessible('pdftk')) {
 	  my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
@@ -3011,8 +2459,7 @@ sub sujet_impressions_ok {
 	  $dialog->run;
 	  $dialog->destroy;
 
-	  $o{print_extract_with}='pdftk';
-	  $o{_modifie}.=',print_extract_with';$o{_modifie_ok}=1;
+	  $config->set("print_extract_with",'pdftk');
 	} else {
 	  my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
@@ -3036,31 +2483,32 @@ sub sujet_impressions_ok {
     $fh->seek( 0, SEEK_END );
 
     my @o_answer=('--no-split','--no-answer-first');
-    if($o{'options_impression'}->{'print_answersheet'} eq 'split') {
+    if($config->get('options_impression/print_answersheet') eq 'split') {
       @o_answer=('--split','--no-answer-first');
-    } elsif($o{'options_impression'}->{'print_answersheet'} eq 'first') {
+    } elsif($config->get('options_impression/print_answersheet') eq 'first') {
       @o_answer=('--answer-first','--no-split');
     }
 
     commande('commande'=>["auto-multiple-choice","imprime",
-			  "--methode",$o{'methode_impression'},
-			  "--imprimante",$o{'imprimante'},
+			  "--methode",$config->get('methode_impression'),
+			  "--imprimante",$config->get('imprimante'),
 			  "--options",$os,
-			  "--output",$shortcuts->absolu($o{'options_impression'}->{'repertoire'})."/sheet-%e.pdf",
+			  "--output",$config->get_absolute('options_impression/repertoire')."/sheet-%e.pdf",
 			  @o_answer,
-			  "--print-command",$o{'print_command_pdf'},
-			  "--sujet",$shortcuts->absolu($projet{'options'}->{'doc_question'}),
-			  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
+			  "--print-command",$config->get('print_command_pdf'),
+			  "--sujet",$config->get_absolute('doc_question'),
+			  "--data",$config->get_absolute('data'),
 			  "--progression-id",'impression',
 			  "--progression",1,
 			  "--debug",debug_file(),
 			  "--fich-numeros",$fh->filename,
-			  "--extract-with",$o{'print_extract_with'},
+			  "--extract-with",$config->get('print_extract_with'),
 			  ],
 	     'signal'=>2,
 	     'texte'=>__"Print papers one by one...",
 	     'progres.id'=>'impression',
-	     'o'=>{'fh'=>$fh,'etu'=>\@e,'printer'=>$o{'imprimante'},'method'=>$o{'methode_impression'}},
+	     'o'=>{'fh'=>$fh,'etu'=>\@e,'printer'=>$config->get('imprimante'),
+                   'method'=>$config->get('methode_impression')},
 	     'fin'=>sub {
 		 my $c=shift;
 		 close($c->{'o'}->{'fh'});
@@ -3077,12 +2525,12 @@ sub save_state_after_printing {
     $st->read();
 
     my @files=grep { -f $shortcuts->absolu($_) }
-      map { $projet{'options'}->{'doc_'.$_} }
+      map { $config->get('doc_'.$_) }
       (qw/question solution setting catalog/);
-    push @files,$shortcuts->absolu($projet{'options'}->{'texsrc'});
+    push @files,$config->get_absolute('texsrc');
 
-    push @files,$shortcuts->absolu($projet{'options'}->{'filtered_source'})
-      if(-f $shortcuts->absolu($projet{'options'}->{'filtered_source'}));
+    push @files,$config->get_absolute('filtered_source')
+      if(-f $config->get_absolute('filtered_source'));
 
     if(!$st->check_local_md5(@files)) {
 	$st=AMC::State::new('directory'=>$shortcuts->absolu('%PROJET/'));
@@ -3097,7 +2545,7 @@ sub save_state_after_printing {
 }
 
 sub calcule_mep {
-    if($projet{'options'}->{'doc_setting'} !~ /\.xy$/) {
+    if($config->get('doc_setting') !~ /\.xy$/) {
 	# OLD STYLE WORKING DOCUMENTS... Not supported anymore: update!
 	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
@@ -3116,10 +2564,10 @@ sub calcule_mep {
 
     commande('commande'=>["auto-multiple-choice","meptex",
 			  "--debug",debug_file(),
-			  "--src",$shortcuts->absolu($projet{'options'}->{'doc_setting'}),
+			  "--src",$config->get_absolute('doc_setting'),
 			  "--progression-id",'MEP',
 			  "--progression",1,
-			  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
+			  "--data",$config->get_absolute('data'),
 			  ],
 	     'texte'=>__"Detecting layouts...",
 	     'progres.id'=>'MEP',
@@ -3170,15 +2618,15 @@ sub saisie_manuelle {
       if(!$regarder) {
 	# if auto_capture_mode is not set, ask the user...
 	my $n=check_auto_capture_mode();
-	if($projet{'options'}->{'auto_capture_mode'}<0) {
+	if($config->get('auto_capture_mode')<0) {
 	  my $gsa=read_glade('choose-mode',
 			     qw/saisie_auto_c_auto_capture_mode
 				button_capture_go/);
 	  $w{saisie_auto_cb_allocate_ids}='';
-	  $prefs->transmet_pref($gsa,'saisie_auto',$projet{'options'});
+	  $prefs->transmet_pref($gsa,'saisie_auto','project:');
 	  my $ret=$w{'choose-mode'}->run();
 	  if($ret==1) {
-	    $prefs->reprend_pref('saisie_auto',$projet{'options'});
+	    $prefs->reprend_pref('saisie_auto','project:');
 	    $w{'choose-mode'}->destroy;
 	  } else {
 	    $w{'choose-mode'}->destroy;
@@ -3191,28 +2639,28 @@ sub saisie_manuelle {
 
       my $gm=AMC::Gui::Manuel::new
 	(
-	 'multiple'=>$projet{'options'}->{'auto_capture_mode'},
-	 'data-dir'=>$shortcuts->absolu($projet{'options'}->{'data'}),
+	 'multiple'=>$config->get('auto_capture_mode'),
+	 'data-dir'=>$config->get_absolute('data'),
 	 'project-dir'=>$shortcuts->absolu('%PROJET'),
-	 'sujet'=>$shortcuts->absolu($projet{'options'}->{'doc_question'}),
+	 'sujet'=>$config->get_absolute('doc_question'),
 	 'etud'=>'',
-	 'dpi'=>$o{'saisie_dpi'},
-	 'seuil'=>$projet{'options'}->{'seuil'},
-	 'seuil_up'=>$projet{'options'}->{'seuil_up'},
-	 'seuil_sens'=>$o{'seuil_sens'},
-	 'seuil_eqm'=>$o{'seuil_eqm'},
+	 'dpi'=>$config->get('saisie_dpi'),
+	 'seuil'=>$config->get('seuil'),
+	 'seuil_up'=>$config->get('seuil_up'),
+	 'seuil_sens'=>$config->get('seuil_sens'),
+	 'seuil_eqm'=>$config->get('seuil_eqm'),
 	 'global'=>0,
-	 'encodage_interne'=>$o{'encodage_interne'},
-	 'image_type'=>$o{'manuel_image_type'},
+	 'encodage_interne'=>$config->get('encodage_interne'),
+	 'image_type'=>$config->get('manuel_image_type'),
 	 'retient_m'=>1,
 	 'editable'=>($regarder ? 0 : 1),
 	 'en_quittant'=>($regarder ? '' : 
 			 sub { detecte_analyse(); assoc_state(); }),
-	 'size_monitor'=>{env=>\%o,
+	 'size_monitor'=>{config=>$config,
 			  key=>($regarder?'checklayout':'manual')
 			  .'_window_size'},
-         invalid_color_name=>$o{view_invalid_color},
-         empty_color_name=>$o{view_empty_color},
+         invalid_color_name=>$config->get("view_invalid_color"),
+         empty_color_name=>$config->get("view_empty_color"),
 	);
     } else {
 	my $dialog = Gtk3::MessageDialog
@@ -3233,14 +2681,14 @@ sub saisie_manuelle {
 sub check_auto_capture_mode {
   $projet{'_capture'}->begin_read_transaction('ckac');
   my $n=$projet{'_capture'}->n_copies;
-  if($n>0 && $projet{'options'}->{'auto_capture_mode'} <0) {
+  if($n>0 && $config->get('auto_capture_mode') <0) {
     # the auto_capture_mode (sheets photocopied or not) is not set,
     # but some capture has already been done. This looks weird, but
     # it can be the case if captures were made with an old AMC
     # version, or if project parameters have not been saved...
     # So we try to detect the correct value from the capture data.
-    $projet{'options'}->{'auto_capture_mode'}=
-      ($projet{'_capture'}->n_photocopy() > 0 ? 1 : 0);
+    $config->set('auto_capture_mode',
+                 ($projet{'_capture'}->n_photocopy() > 0 ? 1 : 0));
   }
   $projet{'_capture'}->end_transaction('ckac');
   return($n);
@@ -3260,20 +2708,21 @@ sub saisie_automatique {
 			  saisie_auto_cb_allocate_ids
 			  button_capture_go/);
     $w{'copie_scans'}->set_active(1);
-    $prefs->transmet_pref($gsa,'saisie_auto',$projet{'options'});
+    $prefs->transmet_pref($gsa,'saisie_auto','project:');
     $w{'saisie_auto_cb_allocate_ids'}->set_label(sprintf(__"Pre-allocate sheet ids from the page numbers, starting at %d",$mcopy));
 
     $w{'saisie_auto_c_auto_capture_mode'}->set_sensitive($n==0);
 }
 
 sub saisie_auto_mode_update {
-  my %o=('auto_capture_mode'=>undef);
+  $config->set_local_keys('auto_capture_mode');
   # the mode value (auto_capture_mode) has been updated.
-  valide_options_for_domain('saisie_auto',\%o,@_);
-  $o{'auto_capture_mode'}=-1 if(!defined($o{'auto_capture_mode'}));
-  $w{'button_capture_go'}->set_sensitive($o{'auto_capture_mode'}>=0);
+  valide_options_for_domain('saisie_auto','local:',@_);
+  my $acm=$config->get('local:auto_capture_mode');
+  $acm=-1 if(!defined($acm));
+  $w{'button_capture_go'}->set_sensitive($acm>=0);
   if($w{saisie_auto_cb_allocate_ids}) {
-    if($o{'auto_capture_mode'}==1) {
+    if($acm == 1) {
       $w{'saisie_auto_cb_allocate_ids'}->show();
     } else {
       $w{'saisie_auto_cb_allocate_ids'}->hide();
@@ -3320,10 +2769,10 @@ sub analyse_call {
     my @args=("--progression-id",'analyse',
 	      "--list",$fh->filename,
 	      "--debug",debug_file(),
-	      "--vector-density",$o{'vector_scan_density'},
+	      "--vector-density",$config->get('vector_scan_density'),
 	     );
     push @args,"--copy-to",$oo{'copy'} if($oo{'copy'});
-    push @args,"--force-convert" if($o{force_convert});
+    push @args,"--force-convert" if($config->get("force_convert"));
     $projet{_layout}->begin_transaction('Orie');
     my $orientation=$projet{_layout}->orientation();
     $projet{_layout}->end_transaction('Orie');
@@ -3350,19 +2799,19 @@ sub analyse_call {
 sub analyse_call_go {
   my (%oo)=@_;
   my @args=("--debug",debug_file(),
-	    ($projet{'options'}->{'auto_capture_mode'} ? "--multiple" : "--no-multiple"),
-	    "--tol-marque",$o{'tolerance_marque_inf'}.','.$o{'tolerance_marque_sup'},
-	    "--prop",$o{'box_size_proportion'},
-	    "--bw-threshold",$o{'bw_threshold'},
+	    ($config->get('auto_capture_mode') ? "--multiple" : "--no-multiple"),
+	    "--tol-marque",$config->get('tolerance_marque_inf').','.$config->get('tolerance_marque_sup'),
+	    "--prop",$config->get('box_size_proportion'),
+	    "--bw-threshold",$config->get('bw_threshold'),
 	    "--progression-id",'analyse',
 	    "--progression",1,
-	    "--n-procs",$o{'n_procs'},
-	    "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
+	    "--n-procs",$config->get('n_procs'),
+	    "--data",$config->get_absolute('data'),
 	    "--projet",$shortcuts->absolu('%PROJET/'),
-	    "--cr",$shortcuts->absolu($projet{'options'}->{'cr'}),
+	    "--cr",$config->get_absolute('cr'),
 	    "--liste-fichiers",$oo{'liste'},
-	    ($o{'ignore_red'} ? "--ignore-red" : "--no-ignore-red"),
-	    ($o{'try_three'} ? "--try-three" : "--no-try-three"),
+	    ($config->get('ignore_red') ? "--ignore-red" : "--no-ignore-red"),
+	    ($config->get('try_three') ? "--try-three" : "--no-try-three"),
 	   );
 
   push @args,"--pre-allocate",$oo{'allocate'} if($oo{'allocate'});
@@ -3404,7 +2853,7 @@ sub saisie_auto_ok {
 			     ($w{'saisie_auto'}->get_filenames()));
     my $copie=$w{'copie_scans'}->get_active();
 
-    $prefs->reprend_pref('saisie_auto',$projet{'options'});
+    $prefs->reprend_pref('saisie_auto','project:');
     $w{'saisie_auto'}->destroy();
     Gtk3::main_iteration while ( Gtk3::events_pending );
 
@@ -3418,7 +2867,7 @@ sub saisie_auto_ok {
 		 'copy'=>($copie ? $shortcuts->absolu('scans/') : ''),
 		 'text'=>__("Automatic data capture..."),
 		 'progres'=>'analyse',
-		 'allocate'=>($projet{'options'}->{'allocate_ids'} ?
+		 'allocate'=>($config->get('allocate_ids') ?
 			      $w{'saisie_auto_allocate_start'} : 0),
 		 'fin'=>sub {
 		     my ($c,%data)=@_;
@@ -3438,8 +2887,8 @@ sub choisit_liste {
 	->get_object('liste_dialog');
 
     my @f;
-    if($projet{'options'}->{'listeetudiants'}) {
-	@f=splitpath($shortcuts->absolu($projet{'options'}->{'listeetudiants'}));
+    if($config->get('listeetudiants')) {
+	@f=splitpath($config->get_absolute('listeetudiants'));
     } else {
 	@f=splitpath($shortcuts->absolu('%PROJET/'));
     }
@@ -3466,9 +2915,9 @@ sub choisit_liste {
 }
 
 sub edite_liste {
-    my $f=$shortcuts->absolu($projet{'options'}->{'listeetudiants'});
+    my $f=$config->get_absolute('listeetudiants');
     debug "Editing $f...";
-    commande_parallele($o{'txt_editor'},$f);
+    commande_parallele($config->get('txt_editor'),$f);
 }
 
 sub students_list_show {
@@ -3479,10 +2928,10 @@ sub students_list_show {
 sub students_list_hide {
   $w{'liste_refresh'}->hide();
   $monitor->remove_key('type','StudentsList');
-  $monitor->add_file($shortcuts->absolu($projet{'options'}->{'listeetudiants'}),
+  $monitor->add_file($config->get_absolute('listeetudiants'),
 		     \&students_list_show,
 		     type=>'StudentsList')
-    if($projet{'options'}->{'listeetudiants'});
+    if($config->get('listeetudiants'));
 }
 
 sub valide_liste {
@@ -3490,20 +2939,19 @@ sub valide_liste {
     debug "* valide_liste";
 
     if(defined($oo{'set'}) && !$oo{'nomodif'}) {
-	$projet{'options'}->{'listeetudiants'}=$shortcuts->relatif($oo{'set'});
-	$projet{'options'}->{'_modifie'}=1;
+	$config->set('listeetudiants',$shortcuts->relatif($oo{'set'}));
     }
 
-    my $fl=$shortcuts->absolu($projet{'options'}->{'listeetudiants'});
-    $fl='' if(!$projet{'options'}->{'listeetudiants'});
+    my $fl=$config->get_absolute('listeetudiants');
+    $fl='' if(!$config->get('listeetudiants'));
 
     my $fn=$fl;
     $fn =~ s/.*\///;
-    
+
     # For proper markup rendering escape '<', '>' and '&' characters
     # in filename with \<, \gt;, and \&
     $fn=Glib::Markup::escape_text($fn);
-    
+
     if($fl) {
 	$w{'liste_filename'}->set_markup("<b>$fn</b>");
 	for(qw/liste_path liste_edit/) {
@@ -3581,7 +3029,7 @@ sub valide_liste {
 					     map { ($_,$_) }
 					     (@heads)));
     }
-    $prefs->transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});
+    $prefs->transmet_pref($gui,'pref_assoc',"project:",{},{'liste_key'=>1});
     assoc_state();
 }
 
@@ -3589,7 +3037,7 @@ sub valide_liste {
 
 sub check_possible_assoc {
     my ($code)=@_;
-    if(! -s $shortcuts->absolu($projet{'options'}->{'listeetudiants'})) {
+    if(! -s $config->get_absolute('listeetudiants')) {
 	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
                   'destroy-with-parent',
@@ -3600,7 +3048,7 @@ sub check_possible_assoc {
 				      __"Data capture"));
 	$dialog->run;
 	$dialog->destroy;
-    } elsif(!$projet{'options'}->{'liste_key'}) {
+    } elsif(!$config->get('liste_key')) {
 	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
                   'destroy-with-parent',
@@ -3609,7 +3057,7 @@ sub check_possible_assoc {
 			      __("Please choose a key from primary keys in students list before association."));
 	$dialog->run;
 	$dialog->destroy;
-    } elsif($code && ! $projet{'options'}->{'assoc_code'}) {
+    } elsif($code && ! $config->get('assoc_code')) {
 	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
                   'destroy-with-parent',
@@ -3627,23 +3075,23 @@ sub check_possible_assoc {
 # manual association
 sub associe {
     return() if(!check_possible_assoc(0));
-    if(-f $shortcuts->absolu($projet{'options'}->{'listeetudiants'})) {
-      my $ga=AMC::Gui::Association::new('cr'=>$shortcuts->absolu($projet{'options'}->{'cr'}),
-					'data_dir'=>$shortcuts->absolu($projet{'options'}->{'data'}),
-					'liste'=>$shortcuts->absolu($projet{'options'}->{'listeetudiants'}),
-					'liste_key'=>$projet{'options'}->{'liste_key'},
+    if(-f $config->get_absolute('listeetudiants')) {
+      my $ga=AMC::Gui::Association::new('cr'=>$config->get_absolute('cr'),
+					'data_dir'=>$config->get_absolute('data'),
+					'liste'=>$config->get_absolute('listeetudiants'),
+					'liste_key'=>$config->get('liste_key'),
 					'identifiant'=>csv_build_name(),
 
-					'fichier-liens'=>$shortcuts->absolu($projet{'options'}->{'association'}),
+					'fichier-liens'=>$config->get_absolute('association'),
 					'global'=>0,
-					'assoc-ncols'=>$o{'assoc_ncols'},
+					'assoc-ncols'=>$config->get('assoc_ncols'),
 					'encodage_liste'=>bon_encodage('liste'),
-					'encodage_interne'=>$o{'encodage_interne'},
-					'rtl'=>$projet{'options'}->{'annote_rtl'},
+					'encodage_interne'=>$config->get('encodage_interne'),
+					'rtl'=>$config->get('annote_rtl'),
 					'fin'=>sub {
 					  assoc_state();
 					},
-					'size_prefs'=>($o{'conserve_taille'} ? \%o : ''),
+					'size_prefs'=>($config->get('conserve_taille') ? $config : ''),
 				       );
       if($ga->{'erreur'}) {
 	my $dialog = Gtk3::MessageDialog
@@ -3673,14 +3121,14 @@ sub associe_auto {
     return() if(!check_possible_assoc(1));
 
     commande('commande'=>["auto-multiple-choice","association-auto",
-			  pack_args("--data",$shortcuts->absolu($projet{'options'}->{'data'}),
-				    "--notes-id",$projet{'options'}->{'assoc_code'},
-				    "--liste",$shortcuts->absolu($projet{'options'}->{'listeetudiants'}),
-				    "--liste-key",$projet{'options'}->{'liste_key'},
+			  pack_args("--data",$config->get_absolute('data'),
+				    "--notes-id",$config->get('assoc_code'),
+				    "--liste",$config->get_absolute('listeetudiants'),
+				    "--liste-key",$config->get('liste_key'),
 				    "--csv-build-name",csv_build_name(),
 				    "--encodage-liste",bon_encodage('liste'),
 				    "--debug",debug_file(),
-				    ($projet{'options'}->{'assoc_code'} eq '<preassoc>' ?
+				    ($config->get('assoc_code') eq '<preassoc>' ?
 				     "--pre-association" : "--no-pre-association"),
 				   ),
 	     ],
@@ -3719,47 +3167,37 @@ sub assoc_resultat {
 			   __("Automatic association is now finished. You can ask for manual association to check that all is fine and, if necessary, read manually students names which have not been automatically identified.")) if($auto>0);
 }
 
-sub valide_cb {
-    my ($var,$cb)=@_;
-    my $cbc=$cb->get_active();
-    if($cbc xor $$var) {
-	$$var=$cbc;
-	$projet{'options'}->{'_modifie'}=1;
-	debug "* valide_cb";
-    }
-}
-
 sub valide_options_correction {
-    my ($ww,$o)=@_;
-    my $name=$ww->get_name();
-    debug "Options validation from $name";
-    if(!$w{$name}) {
-	debug "WARNING: Option validation failed, unknown name $name.";
-    } else {
-	valide_cb(\$projet{'options'}->{$name},$w{$name});
-    }
+  my ($ww,$o)=@_;
+  my $name=$ww->get_name();
+  debug "Options validation from $name";
+  if(!$w{$name}) {
+    debug "WARNING: Option validation failed, unknown name $name.";
+  } else {
+    $config->set("project:$name",$w{$name}->get_active() ? 1 : 0);
+  }
 }
 
 sub valide_options_for_domain {
-    my ($domain,$oo,$widget,$user_data)=@_;
-    $oo=$projet{'options'} if(!$oo);
+    my ($domain,$root,$widget,$user_data)=@_;
+    $root='project:' if(!$root);
     if($widget) {
 	my $name=$widget->get_name();
 	debug "<$domain> options validation for widget $name";
 
 	if($name =~ /${domain}_[a-z]+_(.*)/) {
-	    $prefs->reprend_pref($domain,$oo,'',{$1=>1});
+	    $prefs->reprend_pref($domain,$root,'',{$1=>1});
 	} else {
 	  debug "Widget $name is not in domain <$domain>!";
 	}
     } else {
 	debug "<$domain> options validation: ALL";
-	$prefs->reprend_pref($domain,$oo);
+	$prefs->reprend_pref($domain,$root);
     }
 }
 
 sub valide_options_association {
-  $previous_liste_key=$projet{'options'}->{'liste_key'};
+  $previous_liste_key=$config->get('liste_key');
   valide_options_for_domain('pref_assoc','',@_);
 }
 
@@ -3772,17 +3210,20 @@ sub filter_changed {
 
   # check it is a different value...
 
-  debug "Filter changed callback / options=".$projet{'options'}->{'filter'};
+  debug "Filter changed callback / options=".$config->get('filter');
 
-  my %oo=('filter'=>$projet{'options'}->{'filter'});
-  valide_options_for_domain('pref_prep',\%oo,@_);
-  return if(!$oo{'_modifie'});
+  $config->set_local_keys();
+  my $old_filter=$config->get('filter');
+  $config->set('local:filter',$old_filter);
+  valide_options_for_domain('pref_prep','local:',@_);
+  my $new_filter=$config->get('local:filter');
+  return if($old_filter eq $new_filter);
 
-  debug "Filter changed -> ".$oo{'filter'};
+  debug "Filter changed -> ".$new_filter;
 
   # working document already built: ask for confirmation
 
-  if(-f $shortcuts->absolu($projet{'options'}->{'doc_question'})) {
+  if(-f $config->get_absolute('doc_question')) {
     debug "Ask for confirmation";
     my $text;
     if($projet{'_capture'}->n_pages_transaction()>0) {
@@ -3804,7 +3245,7 @@ sub filter_changed {
     $dialog->destroy;
 
     if($reponse eq 'cancel') {
-      $prefs->transmet_pref($gui,'pref_prep',$projet{'options'});
+      $prefs->transmet_pref($gui,'pref_prep','project:');
       return(0);
     }
 
@@ -3816,26 +3257,26 @@ sub filter_changed {
 
   # No source created: change source filename
 
-  if(!-f $shortcuts->absolu($projet{'options'}->{'texsrc'})) {
-    $projet{'options'}->{'texsrc'}='%PROJET/'.
-      ("AMC::Filter::register::".$projet{'options'}->{'filter'})
-	->default_filename();
-    $w{'state_src'}->set_text($shortcuts->absolu($projet{'options'}->{'texsrc'}));
+  if(!-f $config->get_absolute('texsrc')) {
+    $config->set('project:texsrc','%PROJET/'.
+      ("AMC::Filter::register::".$config->get('filter'))
+	->default_filename());
+    $w{'state_src'}->set_text($config->get_absolute('texsrc'));
   }
 
 }
 
 sub valide_options_notation {
     valide_options_for_domain('notation','',@_);
-    if($projet{'options'}->{'_modifie'} =~ /\bregroupement_compose\b/) {
+    if($config->key_changed("regroupement_compose")) {
       annotate_source_change($projet{'_capture'},1);
     }
-    $w{'groupe_model'}->set_sensitive($projet{'options'}->{'regroupement_type'} eq 'STUDENTS');
+    $w{'groupe_model'}->set_sensitive($config->get('regroupement_type') eq 'STUDENTS');
 }
 
 sub change_liste_key {
-  debug "New liste_key: ".$projet{'options'}->{'liste_key'};
-  if($projet{_students_list}->head_n_duplicates($projet{'options'}->{'liste_key'})) {
+  debug "New liste_key: ".$config->get('liste_key');
+  if($projet{_students_list}->head_n_duplicates($config->get('liste_key'))) {
     debug "Invalid key: back to old value $previous_liste_key";
 
     my $dialog = Gtk3::MessageDialog
@@ -3843,20 +3284,20 @@ sub change_liste_key {
 	    'destroy-with-parent',
 	    'error','ok',
 	    __"You can't choose column '%s' as a key in the students list, as it contains duplicates (value '%s')",
-	    $projet{'options'}->{'liste_key'},
-	    $projet{_students_list}->head_first_duplicate($projet{'options'}->{'liste_key'}),
+	    $config->get('liste_key'),
+	    $projet{_students_list}->head_first_duplicate($config->get('liste_key')),
 	   );
     $dialog->run;
     $dialog->destroy;
 
 
-    $projet{'options'}->{'liste_key'}=
-      ($previous_liste_key ne $projet{'options'}->{'liste_key'}
-       ? $previous_liste_key : "");
-    $prefs->transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});
+    $config->set('liste_key',
+                 ($previous_liste_key ne $config->get('liste_key')
+                  ? $previous_liste_key : ""));
+    $prefs->transmet_pref($gui,'pref_assoc','project:',{},{'liste_key'=>1});
     return();
   }
-  if ($projet{'options'}->{'liste_key'}) {
+  if ($config->get('liste_key')) {
 
     $projet{'_association'}->begin_read_transaction('cLky');
     my $assoc_liste_key=$projet{'_association'}->variable('key_in_list');
@@ -3866,7 +3307,7 @@ sub change_liste_key {
 
     debug "Association [$assoc_liste_key] counts: AUTO=$auto MANUAL=$man BOTH=$both";
 
-    if ($assoc_liste_key ne $projet{'options'}->{'liste_key'}
+    if ($assoc_liste_key ne $config->get('liste_key')
 	&& $auto+$man>0) {
       # liste_key has changed and some association has been
       # made with another liste_key
@@ -3879,7 +3320,7 @@ sub change_liste_key {
                 'destroy-with-parent',
                 'warning','yes-no','');
         $dialog->set_markup(
-			    sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
+			    sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$config->get('liste_key'))." ".
 			    sprintf(__("Some manual association data has be found, which will be lost if the primary key is changed. Do you want to switch back to the primary key \"%s\" and keep association data?"),$assoc_liste_key)
 			   );
 	my $resp=$dialog->run;
@@ -3889,22 +3330,22 @@ sub change_liste_key {
 	  # clears association data
 	  clear_processing('assoc');
 	  # automatic association run
-	  if ($projet{'options'}->{'assoc_code'} && $auto>0) {
+	  if ($config->get('assoc_code') && $auto>0) {
 	    associe_auto;
 	  }
 	} else {
-	  $projet{'options'}->{'liste_key'}=$assoc_liste_key;
-	  $prefs->transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'liste_key'=>1});
+	  $config->set('liste_key',$assoc_liste_key);
+	  $prefs->transmet_pref($gui,'pref_assoc','project:',{},{'liste_key'=>1});
 	}
       } else {
-	if ($projet{'options'}->{'assoc_code'}) {
+	if ($config->get('assoc_code')) {
 	  # only automated association, easy to re-run
 	  my $dialog=Gtk3::MessageDialog
 	    ->new($w{'main_window'},
                   'destroy-with-parent',
                   'info','ok','');
           $dialog->set_markup(
-			      sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$projet{'options'}->{'liste_key'})." ".
+			      sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$config->get('liste_key'))." ".
 			      __("Automatic papers/students association will be re-run to update the association data.")
 			     );
 	  $dialog->run;
@@ -3939,28 +3380,28 @@ sub voir_notes {
 }
 
 sub noter {
-  if($projet{'options'}->{'maj_bareme'}) {
+  if($config->get('maj_bareme')) {
     my $mode="b";
-    my $pdf_corrected=$shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'});
+    my $pdf_corrected=$config->get_absolute('doc_indiv_solution');
     if(-f $pdf_corrected) {
       debug "Removing pre-existing $pdf_corrected";
       unlink($pdf_corrected);
     }
-    $mode.='k' if($o{'prepare_indiv_solution'});
+    $mode.='k' if($config->get('prepare_indiv_solution'));
 
-    my $n_copies=$projet{'options'}->{'nombre_copies'};
+    my $n_copies=$config->get('nombre_copies');
     commande('commande'=>["auto-multiple-choice","prepare",
 			  "--out-corrige-indiv",$pdf_corrected,
 			  "--n-copies",$n_copies,
 			  "--with",moteur_latex(),
-			  "--filter",$projet{'options'}->{'filter'},
-			  "--filtered-source",$shortcuts->absolu($projet{'options'}->{'filtered_source'}),
+			  "--filter",$config->get('filter'),
+			  "--filtered-source",$config->get_absolute('filtered_source'),
 			  "--debug",debug_file(),
 			  "--progression-id",'bareme',
 			  "--progression",1,
-			  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
+			  "--data",$config->get_absolute('data'),
 			  "--mode",$mode,
-			  $shortcuts->absolu($projet{'options'}->{'texsrc'}),
+			  $config->get_absolute('texsrc'),
 			 ],
 	     'texte'=>__"Extracting marking scale...",
 	     'fin'=>\&noter_postcorrect,
@@ -4018,10 +3459,10 @@ sub noter_postcorrect {
 	debug "Student range: $postcorrect_student_min,$postcorrect_student_max\n";
 	$w{'postcorrect_student'}->set_range($postcorrect_student_min,$postcorrect_student_max);
 
-	if($projet{'options'}->{'postcorrect_student'}) {
+	if($config->get('postcorrect_student')) {
 	  for (qw/student copy/) {
 	    $w{'postcorrect_'.$_}
-	      ->set_value($projet{'options'}->{'postcorrect_'.$_});
+	      ->set_value($config->get('postcorrect_'.$_));
 	  }
 	} else {
 	  $w{'postcorrect_student'}->set_value($postcorrect_student_min);
@@ -4029,7 +3470,7 @@ sub noter_postcorrect {
 	  $w{'postcorrect_copy'}->set_value($c[0]);
 	}
 
-	$w{postcorrect_set_multiple}->set_active($projet{'options'}->{postcorrect_set_multiple});
+	$w{postcorrect_set_multiple}->set_active($config->get("postcorrect_set_multiple"));
 
     } else {
 	noter_calcul('','');
@@ -4048,7 +3489,7 @@ sub postcorrect_change_copy {
     if(!defined($f)) {
       $f='' ;
     } else {
-      $f=$shortcuts->absolu($projet{'options'}->{'cr'})."/$f";
+      $f=$config->get_absolute('cr')."/$f";
     }
     debug "Postcorrect name field image: $f";
     if(-f $f) {
@@ -4122,14 +3563,9 @@ sub choix_postcorrect_ok {
     my $mult=$w{postcorrect_set_multiple}->get_active();
     $w{'choix_postcorrect'}->destroy();
 
-    if( $student != $projet{'options'}->{'postcorrect_student'}
-      || $copy != $projet{'options'}->{'postcorrect_copy'}
-      || $mult != $projet{'options'}->{'postcorrect_set_multiple'}) {
-	$projet{'options'}->{'postcorrect_student'}=$student;
-	$projet{'options'}->{'postcorrect_copy'}=$copy;
-	$projet{'options'}->{'postcorrect_set_multiple'}=$mult;
-	$projet{'options'}->{'_modifie_ok'}=1;
-    }
+    $config->set('postcorrect_student',$student);
+    $config->set('postcorrect_copy',$copy);
+    $config->set('postcorrect_set_multiple',$mult);
 
     noter_calcul($student,$copy,$mult);
 }
@@ -4145,16 +3581,16 @@ sub noter_calcul {
 
     commande('commande'=>["auto-multiple-choice","note",
 			  "--debug",debug_file(),
-			  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
-			  "--seuil",$projet{'options'}->{'seuil'},
-			  "--seuil-up",$projet{'options'}->{'seuil_up'},
+			  "--data",$config->get_absolute('data'),
+			  "--seuil",$config->get('seuil'),
+			  "--seuil-up",$config->get('seuil_up'),
 
-			  "--grain",$projet{'options'}->{'note_grain'},
-			  "--arrondi",$projet{'options'}->{'note_arrondi'},
-			  "--notemax",$projet{'options'}->{'note_max'},
-			  ($projet{'options'}->{'note_max_plafond'} ? "--plafond" : "--no-plafond"),
-			  "--notenull",$projet{'options'}->{'note_null'},
-			  "--notemin",$projet{'options'}->{'note_min'},
+			  "--grain",$config->get('note_grain'),
+			  "--arrondi",$config->get('note_arrondi'),
+			  "--notemax",$config->get('note_max'),
+			  ($config->get('note_max_plafond') ? "--plafond" : "--no-plafond"),
+			  "--notenull",$config->get('note_null'),
+			  "--notemin",$config->get('note_min'),
 			  "--postcorrect-student",$postcorrect_student,
 			  "--postcorrect-copy",$postcorrect_copy,
 			  ($postcorrect_set_multiple ?
@@ -4199,7 +3635,7 @@ sub noter_resultat {
 
 # TRANSLATORS: you can omit the [...] part, just here to explain context
   my @cbs=(''=>__p("(none) [No code found in LaTeX file]"));
-  if(my $el=get_enc($o{'encodage_latex'})) {
+  if(my $el=get_enc($config->get('encodage_latex'))) {
     push @cbs,map { $_=>decode($el->{iso},$_) } (@codes);
   } else {
     push @cbs,map { $_=>$_ } (@codes);
@@ -4209,7 +3645,7 @@ sub noter_resultat {
     debug "Adding pre-association item";
   }
   $prefs->store_register('assoc_code'=>cb_model(@cbs));
-  $prefs->transmet_pref($gui,'pref_assoc',$projet{'options'},{},{'assoc_code'=>1});
+  $prefs->transmet_pref($gui,'pref_assoc','project:',{},{'assoc_code'=>1});
 
   $w{'onglet_reports'}->set_sensitive(defined($avg));
 }
@@ -4217,9 +3653,9 @@ sub noter_resultat {
 sub assoc_state {
   my $i='gtk-dialog-question';
   my $t='';
-  if(! -s $shortcuts->absolu($projet{'options'}->{'listeetudiants'})) {
+  if(! -s $config->get_absolute('listeetudiants')) {
     $t=__"No students list file";
-  } elsif(!$projet{'options'}->{'liste_key'}) {
+  } elsif(!$config->get('liste_key')) {
     $t=__"No primary key from students list file";
   } else {
     $projet{'_association'}->begin_read_transaction('ARST');
@@ -4239,12 +3675,10 @@ sub assoc_state {
 sub opt_symbole {
     my ($s)=@_;
     my $k=$s;
-    my $type='none';
-    my $color='red';
 
     $k =~ s/-/_/g;
-    $type=$o{'symbole_'.$k.'_type'} if(defined($o{'symbole_'.$k.'_type'}));
-    $color=$o{'symbole_'.$k.'_color'} if(defined($o{'symbole_'.$k.'_color'}));
+    my $type=$config->get('symbole_'.$k.'_type','none');
+    my $color=$config->get('symbole_'.$k.'_color','red');
 
     return("$s:$type/$color");
 }
@@ -4265,7 +3699,7 @@ sub select_students {
   my $gstud=read_glade('choose_students',
 		       qw/choose_students_area students_instructions
 			  students_select_list students_list_search/);
-  my $lk=$projet{'options'}->{'liste_key'};
+  my $lk=$config->get('liste_key');
 
   my $students_store=Gtk3::ListStore
     ->new('Glib::String','Glib::String','Glib::String',
@@ -4419,7 +3853,7 @@ sub select_students_all {
 sub annote_copies {
   my $id_file='';
 
-  if($projet{'options'}->{'regroupement_copies'} eq 'SELECTED') {
+  if($config->get('regroupement_copies') eq 'SELECTED') {
     # use a file in project directory to store students ids for which
     # sheets will be annotated
     $id_file=$shortcuts->absolu('%PROJET/selected-ids');
@@ -4428,7 +3862,7 @@ sub annote_copies {
 
   my $single_output='';
 
-  if($projet{'options'}->{'regroupement_type'} eq 'ALL') {
+  if($config->get('regroupement_type') eq 'ALL') {
     $single_output=($id_file ?
 # TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
                    (__("Selected_students")).".pdf" :
@@ -4437,46 +3871,48 @@ sub annote_copies {
   }
 
   commande('commande'=>["auto-multiple-choice","annotate",
-			pack_args("--cr",$shortcuts->absolu($projet{'options'}->{'cr'}),
+			pack_args("--cr",$config->get_absolute('cr'),
 				  "--project",$shortcuts->absolu('%PROJET/'),
 				  "--projects",$shortcuts->absolu('%PROJETS/'),
-				  "--data",$shortcuts->absolu($projet{'options'}->{'data'}),
-				  "--subject",$shortcuts->absolu($projet{'options'}->{'doc_question'}),
-				  "--corrected",$shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'}),
-				  "--filename-model",$projet{'options'}->{'modele_regroupement'},
-				  ($o{'ascii_filenames'}?"--force-ascii":"--no-force-ascii"),
+				  "--data",$config->get_absolute('data'),
+				  "--subject",$config->get_absolute('doc_question'),
+				  "--corrected",$config->get_absolute('doc_indiv_solution'),
+				  "--filename-model",$config->get('modele_regroupement'),
+				  ($config->get('ascii_filenames')
+                                   ?"--force-ascii":"--no-force-ascii"),
 				  "--single-output",$single_output,
-				  "--sort",$projet{'options'}->{'export_sort'},
+				  "--sort",$config->get('export_sort'),
 				  "--id-file",$id_file,
 				  "--debug",debug_file(),
 				  "--progression-id",'annotate',
 				  "--progression",1,
-				  "--line-width",$o{'symboles_trait'},
-				  "--font-name",$o{'annote_font_name'},
+				  "--line-width",$config->get('symboles_trait'),
+				  "--font-name",$config->get('annote_font_name'),
 				  "--symbols",join(',',map { opt_symbole($_); } 
 						   (qw/0-0 0-1 1-0 1-1/)),
-				  ($o{'symboles_indicatives'}?"--indicatives":"--no-indicatives"),
-				  "--position",$projet{'options'}->{'annote_position'},
-				  "--dist-to-box",$o{'annote_ecart'},
-				  "--n-digits",$o{'annote_chsign'},
-				  "--verdict",$projet{'options'}->{'verdict'},
-				  "--verdict-question",$projet{'options'}->{'verdict_q'},
-				  "--verdict-question-cancelled",$projet{'options'}->{'verdict_qc'},
-				  "--names-file",$shortcuts->absolu($projet{'options'}->{'listeetudiants'}),
+				  ($config->get('symboles_indicatives')
+                                   ?"--indicatives":"--no-indicatives"),
+				  "--position",$config->get('annote_position'),
+				  "--dist-to-box",$config->get('annote_ecart'),
+				  "--n-digits",$config->get('annote_chsign'),
+				  "--verdict",$config->get('verdict'),
+				  "--verdict-question",$config->get('verdict_q'),
+				  "--verdict-question-cancelled",$config->get('verdict_qc'),
+				  "--names-file",$config->get_absolute('listeetudiants'),
 				  "--names-encoding",bon_encodage('liste'),
 				  "--csv-build-name",csv_build_name(),
-				  ($projet{'options'}->{'annote_rtl'} ? "--rtl" : "--no-rtl"),
+				  ($config->get('annote_rtl') ? "--rtl" : "--no-rtl"),
 				  "--changes-only",1,
-				  "--sort",$projet{'options'}->{'export_sort'},
-				  "--compose",$projet{'options'}->{'regroupement_compose'},
-				  "--n-copies",$projet{'options'}->{'nombre_copies'},
-				  "--src",$shortcuts->absolu($projet{'options'}->{'texsrc'}),
+				  "--sort",$config->get('export_sort'),
+				  "--compose",$config->get('regroupement_compose'),
+				  "--n-copies",$config->get('nombre_copies'),
+				  "--src",$config->get_absolute('texsrc'),
 				  "--with",moteur_latex(),
-				  "--filter",$projet{'options'}->{'filter'},
-				  "--filtered-source",$shortcuts->absolu($projet{'options'}->{'filtered_source'}),
-				  "--embedded-max-size",$o{'embedded_max_size'},
-				  "--embedded-format",$o{'embedded_format'},
-				  "--embedded-jpeg-quality",$o{'embedded_jpeg_quality'},
+				  "--filter",$config->get('filter'),
+				  "--filtered-source",$config->get_absolute('filtered_source'),
+				  "--embedded-max-size",$config->get('embedded_max_size'),
+				  "--embedded-format",$config->get('embedded_format'),
+				  "--embedded-jpeg-quality",$config->get('embedded_jpeg_quality'),
 				 )
 		       ],
 	   'texte'=>__"Annotating papers...",
@@ -4502,7 +3938,7 @@ sub view_dir {
 
     debug "Look at $dir";
     my $seq=0;
-    my @c=map { $seq+=s/[%]d/$dir/g;$_; } split(/\s+/,$o{'dir_opener'});
+    my @c=map { $seq+=s/[%]d/$dir/g;$_; } split(/\s+/,$config->get('dir_opener'));
     push @c,$dir if(!$seq);
     # nautilus attend des arguments dans l'encodage specifie par LANG & co.
     @c=map { encode($encodage_systeme,$_); } @c;
@@ -4515,15 +3951,15 @@ sub open_exports_dir {
 }
 
 sub open_templates_dir {
-    view_dir($o{'rep_modeles'});
+    view_dir($config->get('rep_modeles'));
 }
 
 sub regarde_regroupements {
-    view_dir($shortcuts->absolu($projet{'options'}->{'cr'})."/corrections/pdf");
+    view_dir($config->get_absolute('cr')."/corrections/pdf");
 }
 
 sub plugins_browse {
-  view_dir("$o_dir/plugins");
+  view_dir($config->subdir("plugins"));
 }
 
 ###
@@ -4546,7 +3982,7 @@ sub activate_doc {
 	if($lang && -f $hdocdir."auto-multiple-choice.$lang/index.html");
 
     my $seq=0;
-    my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$o{'html_browser'});
+    my @c=map { $seq+=s/[%]u/$url/g;$_; } split(/\s+/,$config->get('html_browser'));
     push @c,$url if(!$seq);
     @c=map { encode($encodage_systeme,$_); } @c;
 
@@ -4580,9 +4016,9 @@ sub edit_preferences {
 
     $w{'edit_preferences_manager'}=$gap;
 
-    if($o{'conserve_taille'}) {
+    if($config->get('conserve_taille')) {
       AMC::Gui::WindowSize::size_monitor
-	  ($w{'edit_preferences'},{env=>\%o,
+	  ($w{'edit_preferences'},{config=>$config,
 				   key=>'preferences_window_size'});
     }
 
@@ -4591,8 +4027,8 @@ sub edit_preferences {
     for my $t (grep { /^pref(_projet)?_[xfcv]_/ } (keys %w)) {
 	delete $w{$t};
     }
-    $prefs->transmet_pref($gap,'pref',\%o);
-    $prefs->transmet_pref($gap,'pref_projet',$projet{'options'}) if($projet{'nom'});
+    $prefs->transmet_pref($gap,'pref','global:');
+    $prefs->transmet_pref($gap,'pref_projet','project:') if($projet{'nom'});
 
     # projet ouvert ?
     if($projet{'nom'}) {
@@ -4603,8 +4039,8 @@ sub edit_preferences {
     }
 
     # anavailable options, managed by the filter:
-    if($projet{'options'}->{'filter'}) {
-      for my $k (("AMC::Filter::register::".$projet{'options'}->{'filter'})
+    if($config->get('filter')) {
+      for my $k (("AMC::Filter::register::".$config->get('filter'))
 		 ->forced_options()) {
       TYPES: for my $t (qw/c cb ce col f s t v x/) {
 	  if(my $w=$gap->get_object("pref_projet_".$t."_".$k)) {
@@ -4634,8 +4070,8 @@ sub closes_preferences {
 }
 
 sub accepte_preferences {
-  $prefs->reprend_pref('pref',\%o);
-  $prefs->reprend_pref('pref_projet',$projet{'options'}) if($projet{'nom'});
+  $prefs->reprend_pref('pref','global:');
+  $prefs->reprend_pref('pref_projet','project:') if($projet{'nom'});
 
   my %pm;
   my %gm;
@@ -4643,8 +4079,8 @@ sub accepte_preferences {
   my %labels;
 
   if ($projet{'nom'}) {
-    %pm=map { $_=>1 } (split(/,/,$projet{'options'}->{'_modifie'}));
-    %gm=map { $_=>1 } (split(/,/,$o{'_modifie'}));
+    %pm=map { $_=>1 } ($config->changed_keys('project'));
+    %gm=map { $_=>1 } ($config->changed_keys('global'));
     @dgm=grep { /^defaut_/ } (keys %gm);
 
     for my $k (@dgm) {
@@ -4682,8 +4118,6 @@ sub accepte_preferences {
 
     # Look at modified default values...
 
-    debug "Modified (general): $o{'_modifie'}";
-    debug "Modified (project): ".$projet{'options'}->{'_modifie'};
     debug "Labels: ".join(',',keys %labels);
 
     for my $k (@dgm) {
@@ -4691,7 +4125,7 @@ sub accepte_preferences {
       $kp =~ s/^defaut_//;
 
       debug "Test G:$k / P:$kp";
-      if ((!$pm{$kp}) && ($projet{'options'}->{$kp} ne $o{$k})) {
+      if ((!$pm{$kp}) && ($config->get($kp) ne $config->get($k))) {
 	# project option has NOT been modified, and the new
 	# value of general default option is different from
 	# project option. Ask the user for modifying also the
@@ -4716,8 +4150,7 @@ sub accepte_preferences {
 
 	  if ($reponse eq 'yes') {
 	    # change also project option value
-	    $projet{'options'}->{$kp}=$o{$k};
-	    $projet{'options'}->{'_modifie'}.=",$kp";
+	    $config->set($kp,$config->get($k));
 	  }
 
 	}
@@ -4727,44 +4160,33 @@ sub accepte_preferences {
 
   if ($projet{'nom'}) {
     for my $k (qw/note_null note_min note_max note_grain/) {
-      $projet{'options'}->{$k} =~ s/\s+//g;
+      my $v=$config->get($k);
+      $v =~ s/\s+//g;
+      $config->set($k,$v);
     }
   }
 
-  if(defined($o{'_modifie'})
-     && $o{'_modifie'} =~ /\bprojects_home\b/
+  if($config->key_changed("projects_home")
      && !$projet{'nom'}) {
-    set_projects_home($shortcuts->absolu($o{'projects_home'}));
+    set_projects_home($config->get_absolute('projects_home'));
   }
 
-  sauve_pref_generales();
-
-  test_commandes();
+  $config->test_commands();
   test_libnotify();
 
-  if (defined($projet{'options'}->{'_modifie'})
-      && $projet{'options'}->{'_modifie'} =~ /\bseuil(_up)?\b/) {
+  if($config->key_changed("seuil") ||
+     $config->key_changed("seuil_up")) {
     if ($projet{'_capture'}->n_pages_transaction()>0) {
-      # mise a jour de la liste diagnostic
       detecte_analyse();
     }
   }
+
+  $config->save();
 }
 
 
 sub sauve_pref_generales {
-    debug "Saving general preferences...";
-
-    if(pref_xx_ecrit(\%o,'AMC',$o_file)) {
-	my $dialog = Gtk3::MessageDialog
-	    ->new($w{'main_window'},
-		  'destroy-with-parent',
-		  'error','ok',
-		  __"Error writing to options file %s: %s"
-		  ,$o_file,$!);
-	$dialog->run;
-	$dialog->destroy;
-    }
+  $config->save();
 }
 
 sub annule_preferences {
@@ -4807,12 +4229,12 @@ sub state_image {
 }
 
 sub detecte_documents {
-    check_document($shortcuts->absolu($projet{'options'}->{'doc_question'}),'question');
-    check_document($shortcuts->absolu($projet{'options'}->{'doc_solution'}),'solution');
-    check_document($shortcuts->absolu($projet{'options'}->{'doc_indiv_solution'}),'indiv_solution');
-    check_document($shortcuts->absolu($projet{'options'}->{'doc_catalog'}),'catalog');
-    my $s=file_maj(map { $shortcuts->absolu($projet{'options'}->{'doc_'.$_})
-		   } (qw/question setting/));
+    check_document($config->get_absolute('doc_question'),'question');
+    check_document($config->get_absolute('doc_solution'),'solution');
+    check_document($config->get_absolute('doc_indiv_solution'),'indiv_solution');
+    check_document($config->get_absolute('doc_catalog'),'catalog');
+    my $s=file_maj(map { $config->get_absolute('doc_'.$_)
+                       } (qw/question setting/));
     my $ok='gtk-yes';
     if($s eq 'UNREADABLE') {
 	$s=__("Working documents are not readable");
@@ -4829,9 +4251,9 @@ sub detecte_documents {
 
 sub show_document {
     my ($sel)=@_;
-    my $f=$shortcuts->absolu($projet{'options'}->{'doc_'.$sel});
+    my $f=$config->get_absolute('doc_'.$sel);
     debug "Looking at $f...";
-    commande_parallele($o{'pdf_viewer'},$f);
+    commande_parallele($config->get('pdf_viewer'),$f);
 }
 
 sub show_question {
@@ -4940,7 +4362,7 @@ sub clear_processing {
 
   if($s{'doc'}) {
     for (qw/question solution setting catalog/) {
-      my $f=$shortcuts->absolu($projet{'options'}->{'doc_'.$_});
+      my $f=$config->get_absolute('doc_'.$_);
       unlink($f) if(-f $f);
     }
     detecte_documents();
@@ -5070,10 +4492,10 @@ sub detecte_analyse {
     $projet{'_capture'}->begin_read_transaction('ADCP');
 
     my $summary=$projet{'_capture'}
-      ->summaries('darkness_threshold'=>$projet{'options'}->{'seuil'},
-		  'darkness_threshold_up'=>$projet{'options'}->{'seuil_up'},
-		  'sensitivity_threshold'=>$o{'seuil_sens'},
-		  'mse_threshold'=>$o{'seuil_eqm'});
+      ->summaries('darkness_threshold'=>$config->get('seuil'),
+		  'darkness_threshold_up'=>$config->get('seuil_up'),
+		  'sensitivity_threshold'=>$config->get('seuil_sens'),
+		  'mse_threshold'=>$config->get('seuil_eqm'));
 
     $total=$#{$summary}+1;
     $i=0;
@@ -5351,20 +4773,19 @@ sub liste_montre_nom {
 	      'destroy-with-parent',
 	      'info','ok',
 	      __"Names list file for this project is:\n%s",
-	      ($projet{'options'}->{'listeetudiants'} ? $shortcuts->absolu($projet{'options'}->{'listeetudiants'}) : __"(no file)" ));
+	      ($config->get('listeetudiants') ? $config->get_absolute('listeetudiants') : __"(no file)" ));
     $dialog->run;
     $dialog->destroy;
 }
 
 sub valide_source_tex {
-    $projet{'options'}->{'_modifie'}=1;
     debug "* valide_source_tex";
 
-    $w{'state_src'}->set_text($shortcuts->absolu($projet{'options'}->{'texsrc'}));
+    $w{'state_src'}->set_text($config->get_absolute('texsrc'));
 
-    if(!$projet{'options'}->{'filter'}) {
-      $projet{'options'}->{'filter'}=
-	best_filter_for_file($shortcuts->absolu($projet{'options'}->{'texsrc'}));
+    if(!$config->get('filter')) {
+      $config->set('filter',
+                   best_filter_for_file($config->get_absolute('texsrc')));
     }
 
     detecte_documents();
@@ -5503,7 +4924,7 @@ sub make_template {
     # Detects files to include
 
     template_add_file($template_files_store,$w{'template_files_tree'},
-		      $shortcuts->absolu($projet{'options'}->{'texsrc'}));
+		      $config->get_absolute('texsrc'));
     template_add_file($template_files_store,$w{'template_files_tree'},
 		      fich_options($projet{'nom'}));
 
@@ -5521,7 +4942,7 @@ sub make_template {
 
 	# Creates template
 
-	my $tfile=$o{'rep_modeles'}.'/'.$w{'template_file_name'}->get_text().".tgz";
+	my $tfile=$config->get('rep_modeles').'/'.$w{'template_file_name'}->get_text().".tgz";
 	my $tar=Archive::Tar->new();
 	$template_files_store->foreach(\&add_to_archive,[$tar]);
 
@@ -5569,7 +4990,7 @@ sub template_filename_verif {
     restricted_check($w{'template_file_name'},$w{'template_file_name_style'},
 		     $w{'template_file_name_warning'},"a-zA-Z0-9_+-");
     my $t=$w{'template_file_name'}->get_text();
-    my $tfile=$o{'rep_modeles'}.'/'.$t.".tgz";
+    my $tfile=$config->get('rep_modeles').'/'.$t.".tgz";
     $w{'mt_ok'}->set_sensitive($t && !-e $tfile);
 }
 
@@ -5665,7 +5086,7 @@ sub source_latex_choisir {
 	return(0,'');
     }
 
-    if(-e $o{'rep_projets'}."/".$oo{'nom'}) {
+    if(-e $config->get('rep_projets')."/".$oo{'nom'}) {
 	debug "ERR: existing project directory $oo{'nom'} for source_latex_choisir";
 	return(0,'');
     }
@@ -5709,7 +5130,8 @@ sub source_latex_choisir {
 					      'Glib::String',
 					      'Glib::String');
 
-	charge_modeles($modeles_store,undef,$o{'rep_modeles'}) if($o{'rep_modeles'});
+	charge_modeles($modeles_store,undef,$config->get('rep_modeles'))
+          if($config->get('rep_modeles'));
 
 	charge_modeles($modeles_store,undef,amc_specdir('models'));
 
@@ -5858,7 +5280,7 @@ sub source_latex_choisir {
 
 	    # bouge les fichiers la ou il faut
 
-	    my $hd=$o{'rep_projets'}."/".$oo{'nom'};
+	    my $hd=$config->get('rep_projets')."/".$oo{'nom'};
 
 	    mkdir($hd) if(! -e $hd);
 
@@ -5899,7 +5321,7 @@ sub source_latex_choisir {
 
     } elsif($bouton{'vide'}) {
 
-      my $hd=$o{'rep_projets'}."/".$oo{'nom'};
+      my $hd=$config->get('rep_projets')."/".$oo{'nom'};
 
       mkdir($hd) if(! -e $hd);
 
@@ -5939,7 +5361,7 @@ sub copy_latex {
     close(SRC);
 
     my $ie=get_enc($i);
-    my $id=get_enc($o{'encodage_latex'});
+    my $id=get_enc($config->get('encodage_latex'));
     if($ie && $id && $ie->{'iso'} ne $id->{'iso'}) {
 	debug "Reencoding $ie->{'iso'} => $id->{'iso'}";
 	open(SRC,"<:encoding($ie->{'iso'})",$src) or return('');
@@ -5958,11 +5380,11 @@ sub copy_latex {
 }
 
 sub importe_source {
-    my ($fxa,$fxb,$fb) = splitpath($projet{'options'}->{'texsrc'});
+    my ($fxa,$fxb,$fb) = splitpath($config->get('texsrc'));
     my $dest=$shortcuts->absolu($fb);
 
     # fichier deja dans le repertoire projet...
-    return() if(is_local($projet{'options'}->{'texsrc'},1));
+    return() if(is_local($config->get('texsrc'),1));
 
     if(-f $dest) {
 	my $dialog = Gtk3::MessageDialog
@@ -5979,8 +5401,8 @@ sub importe_source {
 	}
     }
 
-    if(copy_latex($shortcuts->absolu($projet{'options'}->{'texsrc'}),$dest)) {
-	$projet{'options'}->{'texsrc'}=$shortcuts->relatif($dest);
+    if(copy_latex($config->get_absolute('texsrc'),$dest)) {
+	$config->set('project:texsrc',$shortcuts->relatif($dest));
 	set_source_tex();
 	my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
@@ -6001,24 +5423,25 @@ sub importe_source {
 }
 
 sub edit_src {
-    my $f=$shortcuts->absolu($projet{'options'}->{'texsrc'});
+    my $f=$config->get_absolute('texsrc');
 
     # create new one if necessary
 
     if(!-f $f) {
       debug "Creating new empty source file...";
-      ("AMC::Filter::register::".$projet{'options'}->{'filter'})
+      ("AMC::Filter::register::".$config->get('filter'))
 	->default_content($f);
     }
 
     #
 
     debug "Editing $f...";
-    my $editor=$o{'txt_editor'};
-    if($projet{'options'}->{'filter'}) {
-      my $type=("AMC::Filter::register::".$projet{'options'}->{'filter'})
+    my $editor=$config->get('txt_editor');
+    if($config->get('filter')) {
+      my $type=("AMC::Filter::register::".$config->get('filter'))
 	->filetype();
-      $editor=$o{$type.'_editor'} if($o{$type.'_editor'});
+      $editor=$config->get($type.'_editor')
+        if($config->get($type.'_editor'));
     }
     commande_parallele($editor,$f);
 }
@@ -6026,7 +5449,7 @@ sub edit_src {
 sub valide_projet {
     set_source_tex();
 
-    $projet{'_data'}=AMC::Data->new($shortcuts->absolu($projet{'options'}->{'data'}),
+    $projet{'_data'}=AMC::Data->new($config->get_absolute('data'),
 				    'progress'=>\%w);
     for (qw/layout capture scoring association report/) {
       $projet{'_'.$_}=$projet{'_data'}->module($_);
@@ -6037,10 +5460,10 @@ sub valide_projet {
     detecte_mep();
     detecte_analyse('premier'=>1);
 
-    debug "Correction options : MB".$projet{'options'}->{'maj_bareme'};
-    $w{'maj_bareme'}->set_active($projet{'options'}->{'maj_bareme'});
+    debug "Correction options : MB".$config->get('maj_bareme');
+    $w{'maj_bareme'}->set_active($config->get('maj_bareme'));
 
-    $prefs->transmet_pref($gui,'notation',$projet{'options'});
+    $prefs->transmet_pref($gui,'notation','project:');
 
     $w{'main_window'}->set_title($projet{'nom'}.' - '.
 				 'Auto Multiple Choice');
@@ -6049,8 +5472,8 @@ sub valide_projet {
 
     valide_liste('noinfo'=>1,'nomodif'=>1);
 
-    $prefs->transmet_pref($gui,'export',$projet{'options'});
-    $prefs->transmet_pref($gui,'pref_prep',$projet{'options'});
+    $prefs->transmet_pref($gui,'export','project:');
+    $prefs->transmet_pref($gui,'pref_prep','project:');
 
     for my $k (@widgets_only_when_opened) {
       $w{$k}->set_sensitive(1);
@@ -6100,74 +5523,25 @@ sub projet_ouvre {
 
 	$projet{'nom'}=$proj;
 	$shortcuts->set(project_name=>$proj);
-	$projet{'options'}->{'texsrc'}=$texsrc;
 
-	if(!$deja) {
-
-	    if(-f fich_options($proj)) {
-		debug "Reading options for project $proj...";
-
-		$projet{'options'}={pref_xx_lit(fich_options($proj))};
-
-		# Get old style working documents names
-		if(ref($projet{'options'}->{docs}) eq 'ARRAY') {
-		  $projet{'options'}->{doc_question}=$projet{'options'}->{docs}->[0];
-		  $projet{'options'}->{doc_solution}=$projet{'options'}->{docs}->[1];
-		  $projet{'options'}->{doc_setting}=$projet{'options'}->{docs}->[2];
-		  $projet{'options'}->{'_modifie_ok'}=1;
-		}
-
-		# pour effacer des trucs en trop venant d'un bug anterieur...
-		for(keys %{$projet{'options'}}) {
-		    delete($projet{'options'}->{$_})
-			if($_ !~ /^ext_/ && !exists($projet_defaut{$_}));
-		}
-
-		# Old style CSV ticked option
-		if($projet{'cochees'} && !$projet{'ticked'}) {
-		  $projet{'ticked'}='01';
-		  delete($projet{'cochees'});
-		}
-
-		debug "Read options:",
-		  Dumper(\%projet);
-	    } else {
-		debug "No options file...";
-	    }
-	}
+        $config->open_project($proj);
+        $config->set('project:texsrc',$texsrc) if($texsrc);
 
 	$projet{'nom'}=$proj;
-	$shortcuts->set(project_name=>$proj);
 
 	# creation du repertoire et des sous-repertoires de projet
 
 	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports:) {
-	    my $rep=$o{'rep_projets'}."/$proj/$sous";
+	    my $rep=$config->get('rep_projets')."/$proj/$sous";
 	    if(! -x $rep) {
 		debug "Creating directory $rep...";
 		mkdir($rep);
 	    }
 	}
 
-	# recuperation des options par defaut si elles ne sont pas encore definies dans la conf du projet
-
-	for my $k (keys %projet_defaut) {
-	    if(! exists($projet{'options'}->{$k})) {
-		if($o{'defaut_'.$k}) {
-		    $projet{'options'}->{$k}=$o{'defaut_'.$k};
-		    debug "New parameter (default) : $k";
-		} else {
-		    $projet{'options'}->{$k}=$projet_defaut{$k};
-		    debug "New parameter : $k";
-		}
-	    }
-	}
-
 	$w{'onglets_projet'}->set_sensitive(1);
 
 	valide_projet();
-
-	$projet{'options'}->{'_modifie'}='';
 
 	set_source_tex(1) if($new_source);
 
@@ -6183,30 +5557,7 @@ sub quitte_projet {
     maj_export();
     valide_options_notation();
 
-    my ($m,$mo)=sub_modif($projet{'options'});
-
-    if ($m || $mo) {
-      my $save=1;
-      if ($m) {
-	my $dialog = Gtk3::MessageDialog
-	  ->new($w{'main_window'},
-                'destroy-with-parent',
-                'question','yes-no','');
-        $dialog->set_markup(
-			    sprintf(__"You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?",$projet{'nom'}));
-	my $reponse=$dialog->run;
-	$dialog->destroy;
-
-	if ($reponse eq 'yes') {
-	  $save=1;
-	} elsif ($reponse eq 'no') {
-	  $save=0;
-	} else {
-	  return(0);
-	}
-      }
-      projet_sauve() if($save);
-    }
+    $config->close_project();
 
     %projet=();
 
@@ -6221,41 +5572,13 @@ sub quitte_projet {
 sub quitter {
     quitte_projet() or return(1);
 
-    if($o{'conserve_taille'}) {
-	my ($x,$y)=$w{'main_window'}->get_size();
-	if(!$o{'taille_x_main'} || !$o{'taille_y_main'}
-	   || $x != $o{'taille_x_main'} || $y != $o{'taille_y_main'}) {
-	    $o{'taille_x_main'}=$x;
-	    $o{'taille_y_main'}=$y;
-	    $o{'_modifie_ok'}=1;
-	}
+    if($config->get('conserve_taille')) {
+      my ($x,$y)=$w{'main_window'}->get_size();
+      $config->set("global:taille_x_main",$x);
+      $config->set("global:taille_y_main",$y);
     }
 
-    my ($m,$mo)=sub_modif(\%o);
-
-    if($m || $mo) {
-      my $save;
-      if($m) {
-	my $dialog = Gtk3::MessageDialog
-	  ->new($w{'main_window'},
-                'destroy-with-parent',
-                'question','yes-no',
-                __"You did not save main options, which have been modified: do you want to save them before leaving?");
-	my $response=$dialog->run;
-	$dialog->destroy;
-	if($response eq 'yes') {
-	  $save=1;
-	} elsif($response eq 'no') {
-	  $save=0;
-	} else {
-	  return();
-	}
-      }
-
-      if($save) {
-	sauve_pref_generales();
-      }
-    }
+    $config->save();
 
     Gtk3->main_quit;
 }
@@ -6288,10 +5611,10 @@ sub bug_report {
 #######################################
 
 sub pref_change_delivery {
-  my %oo=('email_transport'=>'');
-  $prefs->reprend_pref('pref',\%oo);
+  $config->set_local_keys('email_transport');
+  $prefs->reprend_pref('pref','local:');
   for my $k (qw/sendmail SMTP/) {
-    $w{'email_group_'.$k}->set_sensitive($k eq $oo{'email_transport'});
+    $w{'email_group_'.$k}->set_sensitive($k eq $config->get('local:email_transport'));
   }
 }
 
@@ -6301,8 +5624,8 @@ my $email_r;
 
 sub project_email_name {
   my ($markup)=@_;
-  my $pn=($projet{'options'}->{'nom_examen'}
-	  || $projet{'options'}->{'code_examen'}
+  my $pn=($config->get('nom_examen')
+	  || $config->get('code_examen')
 	  || $projet{'nom'});
   if($markup) {
     return($pn eq $projet{'nom'} ? "<b>$pn</b>" : $pn);
@@ -6382,9 +5705,9 @@ sub send_emails {
 
   my @needs_module=(qw/Email::Address Email::MIME
 		       Email::Sender Email::Sender::Simple/);
-  if($o{'email_transport'} eq 'sendmail') {
+  if($config->get('email_transport') eq 'sendmail') {
     push @needs_module,'Email::Sender::Transport::Sendmail';
-  } elsif($o{'email_transport'} eq 'SMTP') {
+  } elsif($config->get('email_transport') eq 'SMTP') {
     push @needs_module,'Email::Sender::Transport::SMTP';
   }
   my @manque=();
@@ -6414,13 +5737,13 @@ sub send_emails {
 
   # then check a correct sender address has been set
 
-  my @sa=Email::Address->parse($o{'email_sender'});
+  my @sa=Email::Address->parse($config->get('email_sender'));
 
   if(!@sa) {
     my $message;
-    if($o{'email_sender'}) {
+    if($config->get('email_sender')) {
       $message.=sprintf(__("The email address you entered (%s) is not correct."),
-			$o{'email_sender'}).
+			$config->get('email_sender')).
 	"\n".__"Please edit your preferences to correct your email address.";
     } else {
       $message.=__("You did not enter your email address.").
@@ -6439,15 +5762,15 @@ sub send_emails {
 
   # Now check (if applicable) that sendmail path is ok
 
-  if($o{'email_transport'} eq 'sendmail'
-     && $o{'email_sendmail_path'}
-     && !-f $o{'email_sendmail_path'}) {
+  if($config->get('email_transport') eq 'sendmail'
+     && $config->get('email_sendmail_path')
+     && !-f $config->get('email_sendmail_path')) {
     my $dialog = Gtk3::MessageDialog
       ->new($w{'main_window'},
             'destroy-with-parent',
 # TRANSLATORS: Do not translate the 'sendmail' word.
             'error','ok','');
-    $dialog->set_markup(sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."),$o{'email_sendmail_path'}));
+    $dialog->set_markup(sprintf(__("The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."),$config->get('email_sendmail_path')));
     $dialog->run;
     $dialog->destroy;
 
@@ -6486,8 +5809,8 @@ sub send_emails {
     }
   }
 
-  $projet{'options'}->{'email_col'}=$col_max
-    if(!$projet{'options'}->{'email_col'});
+  $config->set('project:email_col',$col_max)
+    if(!$config->get('email_col'));
 
   # Then, open configuration window...
   my $gap=read_glade('mailing',
@@ -6564,21 +5887,21 @@ sub send_emails {
   $w{'emails_list'}->get_selection->select_all;
 
   $attachments_store->clear;
-  email_attachment_addtolist(@{$projet{'options'}->{'email_attachment'}});
+  email_attachment_addtolist(@{$config->get('email_attachment')});
 
-  $w{'attachments_expander'}->set_expanded(@{$projet{'options'}->{'email_attachment'}} ? 1 : 0);
-  
-  if($o{'conserve_taille'}) {
+  $w{'attachments_expander'}->set_expanded(@{$config->get('email_attachment')} ? 1 : 0);
+
+  if($config->get('conserve_taille')) {
     AMC::Gui::WindowSize::size_monitor
-	($w{'email_dialog'},{env=>\%o,
+	($w{'email_dialog'},{config=>$config,
 			     key=>'mailing_window_size'});
   }
 
-  $prefs->transmet_pref($gap,'email',$projet{'options'});
+  $prefs->transmet_pref($gap,'email','project:');
   my $resp=$w{'email_dialog'}->run;
   my @ids=();
   if($resp==1) {
-    $prefs->reprend_pref('email',$projet{'options'});
+    $prefs->reprend_pref('email','project:');
     # get selection
     my @selected=$w{'emails_list'}->get_selection->get_selected_rows;
     @selected=@{$selected[0]};
@@ -6595,16 +5918,16 @@ sub send_emails {
       $ok=$attachments_store->iter_next($iter);
     }
     if(@f) {
-      $projet{'options'}->{'email_attachment'}=[@f];
+      $config->set('project:email_attachment',[@f]);
     } else {
-      delete($projet{'options'}->{'email_attachment'});
+      $config->set('project:email_attachment',[]);
     }
   }
   $w{'email_dialog'}->destroy;
 
   # are all attachments present?
   if($resp==1) {
-    my @missing=grep { ! -f $shortcuts->absolu($_) } (@{$projet{'options'}->{'email_attachment'}});
+    my @missing=grep { ! -f $shortcuts->absolu($_) } (@{$config->get('email_attachment')});
     if(@missing) {
       my $dialog = Gtk3::MessageDialog
 	->new($w{'main_window'},
@@ -6628,25 +5951,26 @@ sub send_emails {
 
     my @mailing_args=("--project",$shortcuts->absolu('%PROJET/'),
 		      "--project-name",project_email_name(),
-		      "--students-list",$shortcuts->absolu($projet{'options'}->{'listeetudiants'}),
+		      "--students-list",$config->get_absolute('listeetudiants'),
 		      "--list-encoding",bon_encodage('liste'),
 		      "--csv-build-name",csv_build_name(),
 		      "--ids-file",$fh->filename,
-		      "--email-column",$projet{'options'}->{'email_col'},
-		      "--sender",$o{'email_sender'},
-		      "--subject",$projet{'options'}->{'email_subject'},
-		      "--text",$projet{'options'}->{'email_text'},
-		      "--text-content-type",($projet{'options'}->{'email_use_html'} ? 'text/html' : 'text/plain'),
-		      "--transport",$o{'email_transport'},
-		      "--sendmail-path",$o{'email_sendmail_path'},
-		      "--smtp-host",$o{'email_smtp_host'},
-		      "--smtp-port",$o{'email_smtp_port'},
-		      "--cc",$o{'email_cc'},
-		      "--bcc",$o{'email_bcc'},
-                      "--delay",$o{'email_delay'},
+		      "--email-column",$config->get('email_col'),
+		      "--sender",$config->get('email_sender'),
+		      "--subject",$config->get('email_subject'),
+		      "--text",$config->get('email_text'),
+		      "--text-content-type",
+                      ($config->get('email_use_html') ? 'text/html' : 'text/plain'),
+		      "--transport",$config->get('email_transport'),
+		      "--sendmail-path",$config->get('email_sendmail_path'),
+		      "--smtp-host",$config->get('email_smtp_host'),
+		      "--smtp-port",$config->get('email_smtp_port'),
+		      "--cc",$config->get('email_cc'),
+		      "--bcc",$config->get('email_bcc'),
+                      "--delay",$config->get('email_delay'),
 		     );
 
-    for(@{$projet{'options'}->{'email_attachment'}}) {
+    for(@{$config->get('email_attachment')}) {
       push @mailing_args,"--attach",$shortcuts->absolu($_);
     }
 
@@ -6687,14 +6011,14 @@ sub send_emails {
 }
 
 sub email_change_col {
-  my %oo=('email_col'=>'');
-  $prefs->reprend_pref('email',\%oo);
+  $config->set_local_keys('email_col');
+  $prefs->reprend_pref('email','local:');
 
   my $i=$emails_store->get_iter_first;
   my $ok=defined($i);
   while($ok) {
     my ($s)=$projet{_students_list}->data($email_key,$emails_store->get($i,EMAILS_ID),test_numeric=>1);
-    $emails_store->set($i,EMAILS_EMAIL,$s->{$oo{'email_col'}});
+    $emails_store->set($i,EMAILS_EMAIL,$s->{$config->get('local:email_col')});
     $ok=$emails_store->iter_next($i);
   }
 }
@@ -6729,12 +6053,12 @@ sub mailing_set_project_name {
   $t->show_all;
   $dialog->get_content_area()->add ($t);
 
-  $prefs->transmet_pref('','set_name',$projet{'options'},{},'',1);
+  $prefs->transmet_pref('','set_name','project:',{},'',1);
 
   my $response = $dialog->run;
 
   if($response eq 'ok') {
-    $prefs->reprend_pref('set_name',$projet{'options'},'',
+    $prefs->reprend_pref('set_name','project:','',
 		 {'nom_examen'=>1,'code_examen'=>1});
     $w{'label_name'}->set_text(project_email_name());
   }
@@ -6747,7 +6071,7 @@ sub mailing_set_project_name {
 sub choose_columns {
   my ($type)=@_;
 
-  my $l=$projet{'options'}->{'export_'.$type.'_columns'};
+  my $l=$config->get('export_'.$type.'_columns');
 
   my $i=1;
   my %selected=map { $_=>$i++ } (split(/,+/,$l));
@@ -6800,14 +6124,14 @@ sub choose_columns {
     for my $i (@{$s[0]}) {
       push @k,$columns_store->get($columns_store->get_iter($i),1) if($i);
     }
-    $projet{'options'}->{'export_'.$type.'_columns'}=join(',',@k);
+    $config->set('export_'.$type.'_columns',join(',',@k));
   }
 
   $w{'choose_columns'}->destroy;
 }
 
 sub choose_columns_current {
-  choose_columns(lc($projet{'options'}->{'format_export'}));
+  choose_columns(lc($config->get('format_export')));
 }
 
 #######################################
@@ -6887,7 +6211,7 @@ sub plugins_add {
 
     # already installed?
 
-    if($name=~/[^.]/ && -e "$o_dir/plugins/$name") {
+    if($name=~/[^.]/ && -e $config->subdir("plugins/$name")) {
       my $dialog = Gtk3::MessageDialog
 	->new($w{'main_window'},
               'destroy-with-parent',
@@ -6899,14 +6223,14 @@ sub plugins_add {
       $dialog->destroy;
       return if($r ne 'yes');
 
-      remove_tree("$o_dir/plugins/$name",{'verbose'=>0,'safe'=>1,'keep_root'=>0});
+      remove_tree($config->subdir("plugins/$name"),{'verbose'=>0,'safe'=>1,'keep_root'=>0});
     }
 
     # go!
 
-    debug "Installing plugin $name to $o_dir/plugins";
+    debug "Installing plugin $name to ".$config->subdir("plugins");
 
-    if(system('mv',$main,"$o_dir/plugins")!=0) {
+    if(system('mv',$main,$config->subdir("plugins"))!=0) {
       my $dialog = Gtk3::MessageDialog
 	->new($w{'main_window'},
               'destroy-with-parent',
@@ -7093,8 +6417,9 @@ exit 0 if($do_nothing);
 
 #######################################
 
-if($o{'conserve_taille'} && $o{'taille_x_main'} && $o{'taille_y_main'}) {
-    $w{'main_window'}->resize($o{'taille_x_main'},$o{'taille_y_main'});
+if($config->get('conserve_taille')
+   && $config->get('taille_x_main') && $config->get('taille_y_main')) {
+    $w{'main_window'}->resize($config->get('taille_x_main'),$config->get('taille_y_main'));
 }
 
 projet_ouvre($ARGV[0]);
@@ -7123,7 +6448,8 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
     }
 }
 
-test_commandes();
+$config->connect_to_window($w{main_window});
+
 test_debian_amc();
 test_libnotify();
 test_magick();

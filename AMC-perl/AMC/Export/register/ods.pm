@@ -41,14 +41,14 @@ sub extension {
 }
 
 sub options_from_config {
-  my ($self,$options_project,$options_main,$options_default)=@_;
-  return("columns"=>$options_project->{'export_ods_columns'},
-	 "nom"=>$options_project->{'nom_examen'},
-	 "code"=>$options_project->{'code_examen'},
-	 "stats"=>$options_project->{'export_ods_stats'},
-	 "statsindic"=>$options_project->{'export_ods_statsindic'},
-	 "groupsums"=>($options_project->{'export_ods_groupsep'} ne ''),
-	 "groupsep"=>$options_project->{'export_ods_groupsep'},
+  my ($self,$config)=@_;
+  return("columns"=>$config->get('export_ods_columns'),
+	 "nom"=>$config->get('nom_examen'),
+	 "code"=>$config->get('code_examen'),
+	 "stats"=>$config->get('export_ods_stats'),
+	 "statsindic"=>$config->get('export_ods_statsindic'),
+	 "groupsums"=>($config->get('export_ods_groupsep') ne ''),
+	 "groupsep"=>$config->get('export_ods_groupsep'),
 	 );
 }
 

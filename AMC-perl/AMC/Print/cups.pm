@@ -110,7 +110,7 @@ sub printer_selected_options {
   if($ppd) {
     for my $k (split(/\s+/,$self->{useful_options})) {
       my $option=$ppd->getOption($k);
-      if(%$option) {
+      if(ref($option) eq 'HASH') {
 	push @o,{name=>$k,
 		 description=>nonnul($option->{'text'}),
 		 default=>nonnul($option->{'defchoice'}),

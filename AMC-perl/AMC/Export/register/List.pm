@@ -42,12 +42,12 @@ sub extension {
 }
 
 sub options_from_config {
-  my ($self,$options_project,$options_main,$options_default)=@_;
-  return("nom"=>$options_project->{'nom_examen'},
-	 "code"=>$options_project->{'code_examen'},
-	 "decimal"=>$options_main->{'delimiteur_decimal'},
-	 "pagesize"=>$options_project->{'export_pagesize'},
-	 "ncols"=>$options_project->{'export_ncols'},
+  my ($self,$config)=@_;
+  return("nom"=>$config->get('nom_examen'),
+	 "code"=>$config->get('code_examen'),
+	 "decimal"=>$config->get('delimiteur_decimal'),
+	 "pagesize"=>$config->get('export_pagesize'),
+	 "ncols"=>$config->get('export_ncols'),
 	);
 }
 

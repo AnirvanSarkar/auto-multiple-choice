@@ -27,6 +27,7 @@ sub new {
 
   my $self={stores=>{},
 	    shortcuts=>'',
+            config=>'',
 	    w=>{},
 	    alternate_w=>'',
 	   };
@@ -86,22 +87,24 @@ sub find_object {
 # _fb_ font button
 
 sub transmet_pref {
-  my ($self,$gap,$prefixe,$h,$alias,$seulement,$update)=@_;
+  my ($self,$gap,$prefixe,$root,$alias,$seulement,$update)=@_;
   my $wp;
 
   debug "Updating GUI for <$prefixe>";
 
-  for my $t (keys %$h) {
+  for my $t ($self->{config}->list_keys_from_root($root)) {
     if (!$seulement || $seulement->{$t}) {
+      my $value=$self->{config}->get("$root/$t");
+      print STDERR "WARNING: undefined value for key $root/$t\n" if(!defined($value));
       my $ta=$t;
       $ta=$alias->{$t} if($alias->{$t});
 
       if ($wp=$self->find_object($gap,$prefixe,'_t_',$ta,$t,$update)) {
-	$wp->get_buffer->set_text($h->{$t});
+	$wp->get_buffer->set_text($value);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_x_',$ta,$t,$update)) {
-	$wp->set_text($h->{$t});
+	$wp->set_text($value);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_f_',$ta,$t,$update)) {
-	my $path=$h->{$t};
+	my $path=$value;
 	if ($self->{shortcuts}) {
 	  if ($t =~ /^projects_/) {
 	    $path=$self->{shortcuts}->absolu($path,'<HOME>');
@@ -116,21 +119,21 @@ sub transmet_pref {
 	  $wp->set_filename($path);
 	}
       } elsif ($wp=$self->find_object($gap,$prefixe,'_v_',$ta,$t,$update)) {
-	$wp->set_active($h->{$t});
+	$wp->set_active($value);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_s_',$ta,$t,$update)) {
-	$wp->set_value($h->{$t});
+	$wp->set_value($value);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_fb_',$ta,$t,$update)) {
-	$wp->set_font_name($h->{$t});
+	$wp->set_font_name($value);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_col_',$ta,$t,$update)) {
-	my $c=Gtk3::Gdk::Color::parse($h->{$t});
+	my $c=Gtk3::Gdk::Color::parse($value);
         $wp->set_color($c);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_cb_',$ta,$t,$update)) {
-	$wp->set_active($h->{$t});
+	$wp->set_active($value);
       } elsif ($wp=$self->find_object($gap,$prefixe,'_c_',$ta,$t,$update)) {
 	if ($self->store_get($ta)) {
-	  debug "CB_STORE($t) ALIAS $ta modifie ($t=>$h->{$t})";
+	  debug "CB_STORE($t) ALIAS $ta modifie ($t=>$value)";
 	  $wp->set_model($self->store_get($ta));
-	  my $i=model_id_to_iter($wp->get_model,COMBO_ID,$h->{$t});
+	  my $i=model_id_to_iter($wp->get_model,COMBO_ID,$value);
 	  if ($i) {
 	    debug("[$t] find $i",
 		  " -> ".$self->store_get($ta)->get($i,COMBO_TEXT));
@@ -139,7 +142,7 @@ sub transmet_pref {
 	} else {
 	  $self->{w}->{$prefixe.'_c_'.$t}='';
 	  debug "no CB_STORE for $ta";
-	  $wp->set_active($h->{$t});
+	  $wp->set_active($value);
 	}
       } elsif ($wp=$self->find_object($gap,$prefixe,'_ce_',$ta,$t,$update)) {
 	if ($self->store_get($ta)) {
@@ -148,7 +151,7 @@ sub transmet_pref {
 	}
 	my @we=grep { my (undef,$pr)=$_->class_path();$pr =~ /(yrtnE|Entry)/ } ($wp->get_children());
 	if (@we) {
-	  $we[0]->set_text($h->{$t});
+	  $we[0]->set_text($value);
 	  $self->{w}->{$prefixe.'_x_'.$t}=$we[0];
 	} else {
 	  print STDERR $prefixe.'_ce_'.$t." : cannot find text widget\n";
@@ -163,12 +166,11 @@ sub transmet_pref {
 
 # met a jour les preferences depuis les widgets correspondants
 sub reprend_pref {
-  my ($self,$prefixe,$h,$oprefix,$seulement)=@_;
-  $h->{'_modifie'}=($h->{'_modifie'} ? 1 : '');
+  my ($self,$prefixe,$root,$oprefix,$seulement)=@_;
 
   debug "Restricted search: ".join(',',keys %$seulement)
     if ($seulement);
-  for my $t (keys %$h) {
+  for my $t ($self->{config}->list_keys_from_root($root)) {
     if (!$seulement || $seulement->{$t}) {
       my $tgui=$t;
       $tgui =~ s/$oprefix$// if($oprefix);
@@ -233,16 +235,12 @@ sub reprend_pref {
         $found=0;
       }
       if($found) {
-        $h->{$t}='' if(!defined($h->{$t}));
-	$h->{'_modifie'}.=",$t" if($h->{$t} ne $n);
-	$h->{$t}=$n;
+        $self->{config}->set($root ? "$root/$t" : $t,$n);
       }
     } else {
       debug "Skip widget <$t>";
     }
   }
-
-  debug "Changes : $h->{'_modifie'}";
 }
 
 1;

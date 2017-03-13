@@ -361,6 +361,11 @@ sub connects_to_database {
     ->variable_transaction('darkness_threshold') if(!$self->{darkness_threshold});
   $self->{darkness_threshold_up}=$self->{scoring}
     ->variable_transaction('darkness_threshold_up') if(!$self->{darkness_threshold_up});
+
+  # But darkness_threshold_up is not defined for old projects… set it
+  # to an inactive value in this case
+
+  $self->{darkness_threshold_up}=1.0 if(!$self->{darkness_threshold_up});
 }
 
 sub error {

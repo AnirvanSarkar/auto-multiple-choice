@@ -41,25 +41,22 @@ sub extension {
 }
 
 sub options_from_config {
-  my ($self,$options_project,$options_main,$options_default)=@_;
-  my $enc=$options_project->{"encodage_csv"}
-    || $options_main->{"defaut_encodage_csv"}
-      || $options_main->{"encodage_csv"}
-	|| $options_main->{"defaut_encodage_csv"}
-	  || $options_default->{"encodage_csv"}
-	    || "UTF-8";
-  return("encodage"=>$enc,
-	 "columns"=>$options_project->{'export_csv_columns'},
-	 "decimal"=>$options_main->{'delimiteur_decimal'},
-	 "separateur"=>$options_project->{'export_csv_separateur'},
-	 "ticked"=>$options_project->{'export_csv_ticked'},
+  my ($self,$config)=@_;
+  my $enc=$config->get("encodage_csv")
+    || $config->get("defaut_encodage_csv")
+    || "UTF-8";
+  return(encodage=>$enc,
+	 columns=>$config->get('export_csv_columns'),
+	 decimal=>$config->get('delimiteur_decimal'),
+	 separateur=>$config->get('export_csv_separateur'),
+	 ticked=>$config->get('export_csv_ticked'),
 	);
 }
 
 sub options_default {
-  return('export_csv_separateur'=>";",
-	 'export_csv_ticked'=>'',
-	 'export_csv_columns'=>'student.copy,student.key,student.name',
+  return(export_csv_separateur=>";",
+	 export_csv_ticked=>'',
+	 export_csv_columns=>'student.copy,student.key,student.name',
 	);
 }
 

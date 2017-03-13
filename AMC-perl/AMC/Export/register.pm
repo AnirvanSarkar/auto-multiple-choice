@@ -42,7 +42,7 @@ sub type {
 }
 
 sub options_from_config {
-  my ($self,$options_project,$options_main,$options_default)=@_;
+  my ($self,$config)=@_;
   return();
 }
 

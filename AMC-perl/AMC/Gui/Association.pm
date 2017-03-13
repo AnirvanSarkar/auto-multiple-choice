@@ -404,7 +404,7 @@ sub initial_size {
   my ($self)=@_;
   if($self->{'size_prefs'}) {
     AMC::Gui::WindowSize::size_monitor
-	($self->{'general'},{env=>$self->{'size_prefs'},
+	($self->{'general'},{config=>$self->{'size_prefs'},
 			     key=>'assoc_window_size'});
   }
 }

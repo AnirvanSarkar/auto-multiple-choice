@@ -22,8 +22,8 @@ package AMC::Gui::WindowSize;
 
 sub size_monitor {
   my ($window,$options)=@_;
-  if($options->{env}) {
-    if($options->{env}->{$options->{key}} =~ /^([0-9]+)x([0-9]+)$/) {
+  if($options->{config}) {
+    if($options->{config}->get($options->{key}) =~ /^([0-9]+)x([0-9]+)$/) {
       $window->resize($1,$2);
     }
     $window->signal_connect('configure-event'=>\&AMC::Gui::WindowSize::resize,
@@ -33,12 +33,9 @@ sub size_monitor {
 
 sub resize {
   my ($window,$event,$options)=@_;
-  if($options->{env} && $event->type eq 'configure') {
+  if($options->{config} && $event->type eq 'configure') {
     my $dims=join('x',$event->width,$event->height);
-    if($dims ne $options->{env}->{$options->{key}}) {
-      $options->{env}->{$options->{key}}=$dims;
-      $options->{env}->{'_modifie_ok'}=1;
-    }
+    $options->{config}->set($options->{key},$dims);
   }
   0;
 }

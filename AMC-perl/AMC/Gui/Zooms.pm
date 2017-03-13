@@ -68,7 +68,7 @@ sub new {
     }
 
     if($self->{global_options}) {
-      $self->{zooms_edit_mode}=$self->{global_options}->{zooms_edit_mode};
+      $self->{zooms_edit_mode}=$self->{global_options}->get('zooms_edit_mode');
     }
 
     $self->{prefs}->store_register(
@@ -101,8 +101,8 @@ sub new {
     }
 
     if($self->{'size-prefs'}) {
-	$self->{'factor'}=$self->{'size-prefs'}->{'zoom_window_factor'}
-	if($self->{'size-prefs'}->{'zoom_window_factor'});
+	$self->{'factor'}=$self->{'size-prefs'}->get('zoom_window_factor')
+	if($self->{'size-prefs'}->get('zoom_window_factor'));
     }
     $self->{'factor'}=0.1 if($self->{'factor'}<0.1);
     $self->{'factor'}=5 if($self->{'factor'}>5);
@@ -138,7 +138,7 @@ sub new {
 
     if($self->{'size-prefs'}) {
 	my @s=$self->{'main_window'}->get_size();
-	$s[1]=$self->{'size-prefs'}->{'zoom_window_height'};
+	$s[1]=$self->{'size-prefs'}->get('zoom_window_height');
 	$s[1]=200 if($s[1]<200);
 	$self->{'main_window'}->resize(@s);
     }
@@ -153,10 +153,7 @@ sub edit_mode_update {
 
   $self->{prefs}->reprend_pref('zooms',$self);
   if($self->{global_options}) {
-    if($self->{global_options}->{zooms_edit_mode} != $self->{zooms_edit_mode}) {
-      $self->{global_options}->{_modifie_ok}=1;
-      $self->{global_options}->{zooms_edit_mode}=$self->{zooms_edit_mode};
-    }
+    $self->{global_options}->set('zooms_edit_mode',$self->{zooms_edit_mode});
   }
 }
 
@@ -619,9 +616,8 @@ sub quit {
 
     if($self->{'size-prefs'}) {
 	my ($x,$y)=$self->{'main_window'}->get_size();
-	$self->{'size-prefs'}->{'zoom_window_factor'}=$self->{'factor'};
-	$self->{'size-prefs'}->{'zoom_window_height'}=$y;
-	$self->{'size-prefs'}->{'_modifie_ok'}=1;
+	$self->{'size-prefs'}->set('zoom_window_factor',$self->{'factor'});
+	$self->{'size-prefs'}->set('zoom_window_height',$y);
     }
 
     if(!$self->{'conforme'}) {
