@@ -5557,15 +5557,7 @@ sub projet_ouvre {
 
 	quitte_projet();
 
-	$projet{'nom'}=$proj;
-	$shortcuts->set(project_name=>$proj);
-
-        $config->open_project($proj);
-        $config->set('project:texsrc',$texsrc) if($texsrc);
-
-	$projet{'nom'}=$proj;
-
-	# creation du repertoire et des sous-repertoires de projet
+	# creates project directory structure
 
 	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports:) {
 	    my $rep=$config->get('rep_projets')."/$proj/$sous";
@@ -5574,6 +5566,14 @@ sub projet_ouvre {
 		mkdir($rep);
 	    }
 	}
+
+	$projet{'nom'}=$proj;
+	$shortcuts->set(project_name=>$proj);
+
+        $config->open_project($proj);
+        $config->set('project:texsrc',$texsrc) if($texsrc);
+
+	$projet{'nom'}=$proj;
 
 	$w{'onglets_projet'}->set_sensitive(1);
 
