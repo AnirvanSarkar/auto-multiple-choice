@@ -419,7 +419,7 @@ sub analyse_amclog {
 
     # AUTOQCM[VAR:N=V] tells that variable named N has value V
 
-    if (/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
+    if (/AUTOQCM\[VAR:([0-9a-zA-Z.:-]+)=([^\]]+)\]/) {
       $info_vars{$1}=$2;
     }
 

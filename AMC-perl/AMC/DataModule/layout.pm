@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2016 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -436,6 +436,10 @@ sub define_statements {
        'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
 		       ." WHERE markdiameter>0"
 		       ." LIMIT 1"},
+       'boxPage'=>{'sql'=>"SELECT page FROM ".$self->table("box")
+                   ." WHERE student=? AND question=? AND answer=? AND role=?"},
+       'namefieldPage'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
+                   ." WHERE student=?"},
        'dims'=>{'sql'=>"SELECT width,height,markdiameter,dpi FROM "
 		.$self->table("page")
 		." WHERE student=? AND page=?"},
@@ -879,6 +883,24 @@ sub code_digit_pattern {
     # 'codename[N]'
     return("\\.(\\d+)");
   }
+}
+
+# Get the page where we can find the box for a particular student,
+# question, box
+
+sub box_page {
+  my ($self,$student,$question,$answer,$role)=@_;
+  $role=BOX_ROLE_ANSWER if(!$role);
+  return($self->sql_single($self->statement('boxPage'),
+                           $student,$question,$answer,$role));
+}
+
+# Get the page where we can find the namefield for a particular student
+
+sub namefield_page {
+  my ($self,$student)=@_;
+  return($self->sql_single($self->statement('namefieldPage'),
+                           $student));
 }
 
 1;

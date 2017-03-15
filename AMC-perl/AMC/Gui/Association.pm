@@ -116,15 +116,13 @@ sub new {
     $self->{'capture'}->end_transaction('AIMG');
 
     for my $p (@$nfs) {
-      my $file='';
-      if($p->{'image'}) {
-	$file=$self->{'namefield_dir'}."/".$p->{'image'};
+      my $file=$p->{image};
+      $file='' if(!defined($file));
+      if($file && $file !~ /^text:/) {
+        $file=$self->{'namefield_dir'}."/".$file;
+        $file='' if(!-r $file);
       }
-      if(-r $file) {
-	push @images,{'file'=>$file,%$p};
-      } else {
-	push @images,{'file'=>'',%$p};
-      }
+      push @images,{'file'=>$file,%$p};
     }
 
     my $iimage=-1;
@@ -691,8 +689,7 @@ sub image_sc_string {
 sub image_filename {
   my ($self,$i)=@_;
   return(undef) if ($i<0 || $i>$#{$self->{'images'}});
-  my $f=$self->{'images'}->[$i]->{'file'};
-  return(-r $f ? $f : '');
+  return( $self->{'images'}->[$i]->{'file'} );
 }
 
 # Shows name field image corresponding to sheet at line $i in the
@@ -706,7 +703,11 @@ sub charge_image {
 
     if(defined($file)) {
       if($file) {
-	$self->{'photo'}->set_content(image=>$file);
+	if($file =~ /^text:(.*)/) {
+          $self->{'photo'}->set_content(text=>$1);
+        } else {
+          $self->{'photo'}->set_content(image=>$file);
+        }
       } else {
 	my $text=pageids_string(map { $self->{'images'}->[$i]->{$_} } (qw/student page copy/));
 	$self->{'photo'}->set_content(text=>$text);

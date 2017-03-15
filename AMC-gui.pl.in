@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2016 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -2053,6 +2053,7 @@ sub doc_maj {
 		       my %vars=$c->variables;
 		       for my $k (keys %vars) {
 			 if ($k =~ /^project:(.*)/) {
+                           debug "Configuration: $k = $vars{$k}";
 			   $config->set($k,$vars{$k});
 			 }
 		       }
@@ -2177,6 +2178,22 @@ sub autre_imprimante {
   }
 }
 
+sub project_printing_method {
+  if($config->get('project:pdfform')) {
+    return('file');
+  } else {
+    return($config->get("methode_impression"));
+  }
+}
+
+sub project_extract_with {
+  if($config->get('project:pdfform')) {
+    return('pdftk+NA');
+  } else {
+    return($config->get("print_extract_with"));
+  }
+}
+
 sub sujet_impressions {
 
     if(! -f $config->get_absolute('doc_question')) {
@@ -2211,11 +2228,11 @@ sub sujet_impressions {
 	return();
     }
 
-    debug "Choosing pages to print...";
+    my $method=project_printing_method();
 
-    if($config->get('methode_impression') =~ /^CUPS/) {
+    if($method =~ /^CUPS/) {
 
-      	my $print_module="AMC::Print::".lc($config->get("methode_impression"));
+      	my $print_module="AMC::Print::".lc($method);
 	load($print_module);
 
 	# checks for availibility
@@ -2226,7 +2243,7 @@ sub sujet_impressions {
 	    ->new($w{'main_window'},
 		  'destroy-with-parent',
 		  'error','ok',
-		  sprintf(__("You chose the printing method '%s' but it is not available (%s). Please install the missing dependencies or switch to another printing method."),$config->get('methode_impression'),$error));
+		  sprintf(__("You chose the printing method '%s' but it is not available (%s). Please install the missing dependencies or switch to another printing method."),$method,$error));
 	    $dialog->run;
 	    $dialog->destroy;
 
@@ -2262,9 +2279,9 @@ sub sujet_impressions {
 
     $prefs->transmet_pref($g_imprime,'impall',"options_impression");
 
-    debug "Printing method: ".$config->get('methode_impression');
+    debug "Printing method: ".$method;
 
-    if($config->get('methode_impression') =~ /^CUPS/) {
+    if($method =~ /^CUPS/) {
 	$w{'bloc_imprimante'}->show();
 
 	# les imprimantes :
@@ -2292,7 +2309,7 @@ sub sujet_impressions {
 	}
     }
 
-    if($config->get('methode_impression') eq 'file') {
+    if($method eq 'file') {
 	$w{'bloc_imprimante'}->hide();
 	$w{'bloc_fichier'}->show();
 
@@ -2354,7 +2371,9 @@ sub sujet_impressions_ok {
 
     $prefs->reprend_pref('impall','options_impression');
 
-    if($config->get('methode_impression') =~ /^CUPS/) {
+    my $method=project_printing_method();
+
+    if($method =~ /^CUPS/) {
       my ($ok,$imp_iter)=$w{'imprimante'}->get_active_iter;
       my $i;
       if($ok) {
@@ -2373,7 +2392,7 @@ sub sujet_impressions_ok {
       debug("Printing options : $os");
     }
 
-    if($config->get('methode_impression') eq 'file') {
+    if($method eq 'file') {
 	$prefs->reprend_pref('impf','options_impression');
 
 	if(!$config->get('options_impression/repertoire')) {
@@ -2489,8 +2508,10 @@ sub sujet_impressions_ok {
       @o_answer=('--answer-first','--no-split');
     }
 
+    my $extract_with=project_extract_with();
+
     commande('commande'=>["auto-multiple-choice","imprime",
-			  "--methode",$config->get('methode_impression'),
+			  "--methode",$method,
 			  "--imprimante",$config->get('imprimante'),
 			  "--options",$os,
 			  "--output",$config->get_absolute('options_impression/repertoire')."/sheet-%e.pdf",
@@ -2502,13 +2523,13 @@ sub sujet_impressions_ok {
 			  "--progression",1,
 			  "--debug",debug_file(),
 			  "--fich-numeros",$fh->filename,
-			  "--extract-with",$config->get('print_extract_with'),
+			  "--extract-with",$extract_with,
 			  ],
 	     'signal'=>2,
 	     'texte'=>__"Print papers one by one...",
 	     'progres.id'=>'impression',
 	     'o'=>{'fh'=>$fh,'etu'=>\@e,'printer'=>$config->get('imprimante'),
-                   'method'=>$config->get('methode_impression')},
+                   'method'=>$method},
 	     'fin'=>sub {
 		 my $c=shift;
 		 close($c->{'o'}->{'fh'});
@@ -2764,6 +2785,21 @@ sub analyse_call {
 			 UNLINK=> 1);
   print $fh join("\n",@{$oo{'f'}})."\n";
   $fh->seek( 0, SEEK_END );
+
+  # first try to see if some of the files are PDF forms
+
+  commande(commande=>["auto-multiple-choice","read-pdfform",
+                      "--progression-id",'analyse',
+                      "--list",$fh->filename,
+                      "--debug",debug_file(),
+                      ($config->get('auto_capture_mode') ? "--multiple" : "--no-multiple"),
+                      "--data",$config->get_absolute('data'),
+                     ],
+           signal=>2,
+           progres.id=>$oo{'progres'},
+           );
+
+  # extract individual images scans
 
   if($oo{'getimages'}) {
     my @args=("--progression-id",'analyse',

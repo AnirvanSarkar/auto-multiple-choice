@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2008-2016 Alexis Bienvenue
+% Copyright (C) 2008-2017 Alexis Bienvenue
 %
 % This file is part of Auto-Multiple-Choice
 %
@@ -29,7 +29,7 @@
 \keepsilent
 \preamble
 
-Copyright (C) 2008-2016 Alexis Bienvenue
+Copyright (C) 2008-2017 Alexis Bienvenue
 
 This file is part of Auto-Multiple-Choice
 
@@ -166,6 +166,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@pagelayouttrue}
 % \DoNotIndex{\AMC@plainfalse}
 % \DoNotIndex{\AMC@plaintrue}
+% \DoNotIndex{\AMC@pdfformfalse}
+% \DoNotIndex{\AMC@pdfformtrue}
 % \DoNotIndex{\AMC@automarksfalse}
 % \DoNotIndex{\AMC@automarkstrue}
 % \DoNotIndex{\AMC@postcorrectfalse}
@@ -451,6 +453,11 @@ along with Auto-Multiple-Choice.  If not, see
 % \ioption{storebox} asks to use |\storebox| instead of |\savebox| to
 % handle ovals (when using oval shape). The package |storebox| will be
 % loaded.
+%
+% \ioption{pdfform} use this option to produce PDF forms. The PDF
+% sheet won't be printed, but filled by each student with a PDF
+% reader. The completed PDF will then be sent to the teacher, and
+% given to AMC for data capture.
 % \end{itemize}
 %
 % See also section~\ref{d:french} for a french version of some of
@@ -1247,6 +1254,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %   |automarks| package option.
 % \item |\ifAMC@invisible| is true is the DVI/PDF output is not
 %   important (used for example for scoring strategy extraction).
+% \item |\ifAMC@pdfform| is true if the output is a PDF form. This PDF
+%   will not be printed but will be filled by the students with a PDF
+%   reader and sent back to the teacher.
 % \end{description}
 %    \begin{macrocode}
 \newcount\AMCload@counter
@@ -1284,6 +1294,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@postcorrect\AMC@postcorrectfalse
 \newif\ifAMC@automarks\AMC@automarksfalse
 \newif\ifAMC@invisible\AMC@invisiblefalse
+\newif\ifAMC@pdfform\AMC@pdfformfalse
 \let\AMCcompleteMulti=\AMCcomplete@multitrue
 \let\AMCnoCompleteMulti=\AMCcomplete@multifalse
 %    \end{macrocode}
@@ -1570,6 +1581,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % For references to questions:
 %    \begin{macrocode}
 \AtBeginDocument{\@ifpackageloaded{cleveref}{%
+    \message{AMC/cleveref integration loaded^^J}%
     \crefalias{AMCquestionaff}{question}%
     \crefname{question}{\AMC@loc@question}{\AMC@loc@questions}%
 }{}}%
@@ -1765,7 +1777,25 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand{\namefield}[1]{\AMC@tracebox{1}{nom}{#1}}
 %    \end{macrocode}\end{macro}
 % It is used to enclose the page region where students are to write
-% their names, so as te retreive it easily from the scans. For example,
+% their names, so as te retreive it easily from the scans.
+%
+% \begin{macro}{\namefielddots}
+%   The command |\namefielddots| can be used to fill a line with dots
+%   (printed sheets) or use a text field in PDF forms:
+%    \begin{macrocode}
+\newcommand{\namefielddots}{%
+  \noindent%
+  \ifAMC@pdfform%
+    \hspace*{\fill}%
+    \TextField[name={\the\AMCid@etud:namefield},width=.95\linewidth,bordercolor=0 0 0]{}%
+    \hspace*{\fill}
+  \else%
+    \dotfill
+  \fi%
+}
+%    \end{macrocode}\end{macro}
+%
+% As an example,
 %\iffalse
 %<*doc>
 %\fi
@@ -1774,7 +1804,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \begin{minipage}{5cm}
     Name:
 
-    \vspace*{.5cm}\noindent\dotfill
+    \vspace*{.5cm}
+    \namefielddots
     \vspace{2mm}
   \end{minipage}}}
 \end{verbatim}
@@ -1898,6 +1929,23 @@ Three digits and two letters:\insertgroup{mixed}.
       \fi%
     }}%
 }
+\newcommand\AMC@shapeprepare@form{}
+\newcommand\AMC@shape@form@base[4]{%
+  \ifx\@empty#2\@empty%
+    \def\AMC@shape@form@ticked{false}%
+  \else%
+    \def\AMC@shape@form@ticked{true}%
+  \fi%
+  \AMC@tracebox{#3}{#4}{%
+    \CheckBox[checked=\AMC@shape@form@ticked,%
+              checkboxsymbol=\ding{110},name={#4},%
+              bordercolor=0 0 0,
+              width=\AMC@boxedwidth,height=\AMC@boxedheight]{}{}%
+  }%
+}
+\newcommand\AMC@shape@form[4]{%
+  \AMC@shape@form@base{#1}{#2}{#3}{\the\AMCid@etud:#4}%
+}
 \newcommand\AMC@shapeprepare@none{}
 \newcommand\AMC@shape@none[4]{ #1 }
 %    \end{macrocode}\end{macro}
@@ -1958,7 +2006,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newlength\AMC@boxedheight
 \newlength\AMC@oval@radius
 \newlength\AMC@outside@sep
-\define@choicekey{AMCdim}{shape}{square,oval,none}{\def\AMC@shapename{#1}}
+\define@choicekey{AMCdim}{shape}{square,oval,form,none}{\def\AMC@shapename{#1}}
 \define@key{AMCdim}{size}{\AMC@boxedwidth=#1\AMC@boxedheight=#1}
 \define@key{AMCdim}{height}{\AMC@boxedheight=#1}
 \define@key{AMCdim}{width}{\AMC@boxedwidth=#1}
@@ -2863,12 +2911,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %   several questions without a number, and then print questions with a
 %   number starting at one.
 %   
-%   |\AMC@stepQuestion| will increase this counter and |\AMC@qaff|will
+%   |\AMC@stepQuestion| will increase this counter and |\AMC@qaff| will
 %   format the question number out.
 %    \begin{macrocode}
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
-\newcommand\AMC@stepQuestion{\ifAMCquestionNumber\refstepcounter{AMCquestionaff}\fi}
+\newcommand\AMC@stepQuestion{\ifAMCquestionNumber\stepcounter{AMCquestionaff}\fi}
 \newcommand\AMC@qaff{\arabic{AMCquestionaff}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
@@ -3943,7 +3991,11 @@ Three digits and two letters:\insertgroup{mixed}.
     \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageNoMarks}\fi\fi%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
-    #2\clearpage}\advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+    \ifAMC@pdfform\begin{Form}\fi%
+      #2%
+    \ifAMC@pdfform\end{Form}\fi%
+    \clearpage}%
+  \advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
   \global\AMCid@etudstart=\AMCid@etud%
 }
 %    \end{macrocode}\end{macro}
@@ -4069,10 +4121,18 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{automarks}{\AMC@automarkstrue}
 \newif\ifAMCneeds@storebox\AMCneeds@storeboxfalse
 \DeclareOptionX{storebox}{\AMCneeds@storeboxtrue}
+\DeclareOptionX{pdfform}{\AMC@pdfformtrue}
 \ProcessOptionsX
 
 \ifAMCneeds@storebox
   \RequirePackage{storebox}\AtBeginDocument{{}}%
+\fi
+\ifAMC@pdfform
+  \AMC@amclog{AUTOQCM[VAR:pdfform=1]^^J}%
+  \AMCboxStyle{shape=form}%
+  \RequirePackage[pageanchor=false]{hyperref}%
+\else%
+   \AMC@amclog{AUTOQCM[VAR:pdfform=0]^^J}%
 \fi
 \AtBeginDocument{
   \ifAMCneeds@storebox

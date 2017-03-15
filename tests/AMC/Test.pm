@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2012-2016 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -353,6 +353,12 @@ sub analyse {
   close(SL);
 
   #
+
+  $self->amc_command('read-pdfform',
+		     '--list',$scans_list,
+		     '--data','%DATA',
+		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
+                    );
 
   $self->amc_command('getimages',
 		     '--list',$scans_list,

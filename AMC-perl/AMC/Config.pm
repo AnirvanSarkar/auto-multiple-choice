@@ -381,6 +381,8 @@ sub defaults {
      email_text=>"",
      email_attachment=>[],
      email_use_html=>'',
+
+     pdfform=>0,
     };
 
   # MacOSX universal command to open files or directories : /usr/bin/open
