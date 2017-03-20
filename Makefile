@@ -310,7 +310,7 @@ local: global
 ifdef DEBSIGN_KEY
 DEBSIGN=-k$(DEBSIGN_KEY)
 else
-DEBSIGN=-us -uc
+DEBSIGN=--no-sign
 endif
 
 BUILDOPTS=-I.svn -Idownload_area -Ilocal $(DEBSIGN)
@@ -365,10 +365,10 @@ endif
 
 debsrc_vok: ssources tmp_deb
 	test -f $(ORIG_SOURCES) || cp /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(ORIG_SOURCES)
-	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S $(BUILDOPTS)
+	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S $(BUILDOPTS) $(MORE_BUILDOPTS)
 
 deb_vok: tmp_deb
-	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -b $(BUILDOPTS)
+	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -b $(BUILDOPTS) $(MORE_BUILDOPTS)
 
 # % : make sure version_files are rebuilt before calling target %_vok
 
