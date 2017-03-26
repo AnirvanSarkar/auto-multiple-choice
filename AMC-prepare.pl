@@ -500,6 +500,8 @@ sub execute {
 
 	# lauches the command
 
+        debug "COMMAND: $ENV{AMC_CMD}";
+
 	$cmd_pid=open(EXEC,"-|",@{$oo{'command'}});
 	die "Can't exec ".join(' ',@{$oo{'command'}}) if(!$cmd_pid);
 

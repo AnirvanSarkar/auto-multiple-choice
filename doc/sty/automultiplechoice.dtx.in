@@ -1099,6 +1099,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{itemize}
 % Default values are |\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}|
 %
+% {\makeatletter\AMC@inside@boxtrue\makeatother
 % Setting the box color allows to print the boxes with some color that
 % won't disturb too much the data capture (for example red, but some
 % light grey can also be considered).\amccode
@@ -1110,6 +1111,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \end{choiceshoriz}
 %   \end{question}
 % \end{code}
+% }
 %
 % \subsubsection{Codes}
 % One may adapt the codes rendering from |\AMCcode| to one's needs
@@ -1154,6 +1156,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{xkeyval} % \setkeys
 \RequirePackage{rotating} % \rotatebox
 \RequirePackage{fancybox} % \boxput
+\RequirePackage{expl3}
 %    \end{macrocode}
 % It defines a version string:
 %    \begin{macrocode}
@@ -1835,35 +1838,68 @@ Three digits and two letters:\insertgroup{mixed}.
 %   is a box with a character in it. It is mainly used when answers
 %   are to be given on a separate answer sheet.
 %
-% These boxes can be drawn using command
-% |\AMC@answerBox@|\marg{char}\marg{filled}\marg{trace}\marg{key}:
-% \meta{char} is the character to print inside the box, \meta{trace}
-% is non-empty if you want to log the box position in the |.xy| file,
-% \meta{key} is the box identification, and \meta{filled} is non-empty
-% for filling the box.
+%   These boxes can be drawn using command
+%   |\AMC@answerBox@|\marg{char}\marg{answer}\marg{trace}\marg{key}:
+%   \meta{char} is the character to print inside the box, \meta{trace}
+%   is non-empty if you want to log the box position in the |.xy|
+%   file, \meta{key} is the box identification, and \meta{answer} is
+%   an answer to be written in the box (or |\AMC@checkedbox| for
+%   filling the box).
 %
-% Depending onthe required shape for the boxes, the corresponding
-% |\AMC@shape@xxx|\marg{char}\marg{filled}\marg{trace}\marg{key}
-% command is used.
+%   Depending onthe required shape for the boxes, the corresponding
+%   \begin{center}
+%   |\AMC@shape@xxx|\marg{char}\marg{answer}\marg{trace}\marg{key}
+% \end{center}
+% \noindent command is used.
 %
+% \begin{itemize}
+% \item
 % \begin{amcxyfile}{automultiplechoice.xy1}
-% For example, |\AMC@answerBox@{K}{}{1}{test}| produce the box
+% |\AMC@answerBox@{K}{}{1}{test}| produce the box
 % \makeatletter\AMC@answerBox{K}{}{1}{test}\makeatother, writing the
 % lines in the |.xy| file shown in section~\ref{a:boxed}.
 % \end{amcxyfile}
-%
+% \item |\AMC@answerBox@{K}{\AMC@checkedbox}{}{}| produces {\makeatletter\AMC@answerBox@{K}{\AMC@checkedbox}{}{}\makeatother}
+% \item |\AMC@answerBox@{}{8}{}{}| produces {\makeatletter\AMC@answerBox@{}{8}{}{}\makeatother}
+% \item |\AMC@answerBox@{K}{8}{1}{testb}| produces {\makeatletter\AMCboxStyle{shape=oval,color=red}\AMC@answerBox@{K}{8}{1}{testb}\makeatother} with |\AMCboxStyle{shape=oval,color=red}|
+% \end{itemize}
 %    \begin{macrocode}
+\def\AMC@checkedbox{}
 \let\AMC@new@savebox=\newsavebox
 \let\AMC@save@box=\savebox
 \let\AMC@use@box=\usebox
 \newif\ifAMC@draw@cross
+%    \end{macrocode}
+% The |\AMC@smashcentered|\marg{text} command shows the \meta{text}
+% centered at point.
+%    \begin{macrocode}
+\newbox\AMC@smashbox
+\newdimen\AMC@smashboxheight
+\newcommand{\AMC@smashcentered}[1]{{%
+    \setbox\AMC@smashbox\hbox{#1}%
+    \AMC@smashboxheight=\ht\AMC@smashbox%
+    \advance\AMC@smashboxheight by \dp\AMC@smashbox%
+    \vfuzz=\AMC@smashboxheight\hfuzz=\wd\AMC@smashbox%
+    \hspace*{-.5\wd\AMC@smashbox}\hbox to .5\wd\AMC@smashbox{%
+      \vbox to 0pt{%
+        \vspace*{-.5\AMC@smashboxheight}\vbox to .5\AMC@smashboxheight{%
+          \box\AMC@smashbox}}}%
+  }}
+%    \end{macrocode}
+% |\AMC@setcolors@|\marg{trace}\marg{answer} sets colours
+% |\AMC@boxcolor@| and |\AMC@fillcolor@| according to its
+% arguments. It also sets the |\ifAMC@draw@cross| switch if AMC should
+% draw a cross instead of filling the box.
+%    \begin{macrocode}
 \newcommand\AMC@setcolors@[2]{%
   \def\AMC@boxcolor@{\AMC@boxcolor}%
   \ifx\@empty#1\@empty \def\AMC@boxcolor@{black}\fi%
   \ifAMC@correc\def\AMC@boxcolor@{black}\fi%
-  \def\AMC@fillcolor@{\ifx\@empty#2\@empty white\else\AMC@boxcolor@\fi}%
+  \def\AMC@fillcolor@{\ifx #2\AMC@checkedbox%
+    \AMC@boxcolor@\else white\fi}%
   \AMC@draw@crossfalse%
-  \ifKV@AMCdim@cross\ifx\@empty#2\@empty\else\AMC@draw@crosstrue\fi\fi%
+  \ifKV@AMCdim@cross\ifx #2\AMC@checkedbox%
+    \AMC@draw@crosstrue\fi\fi%
 }
 \newcommand\AMC@answerBox@[4]{%
   \AMC@LR{\hspace{0pt}%
@@ -1884,10 +1920,15 @@ Three digits and two letters:\insertgroup{mixed}.
       \AMC@tracepos{#3}{#4}%
       \vfill%
       \hbox to \AMC@boxedwidth{\hfill%
-          \textcolor{\AMC@boxcolor@}{#1}%
+        \AMC@smashcentered{\textcolor{\AMC@boxcolor@}{#1}}%
+        \AMC@smashcentered{#2}%
         \hfill}\vfill}}%
     \AMC@tracepos{#3}{#4}}%
 }
+%    \end{macrocode}
+% |\AMC@makeovalbox|\marg{trace}\marg{answer}\marg{box} prepares an
+% oval frame in the \LaTeX{} box \meta{box}.
+%    \begin{macrocode}
 \newcommand\AMC@makeovalbox[3]{%
   \AMC@setcolors@{#1}{#2}%
   \ifKV@AMCdim@cross\def\AMC@fillcolor@{white}\fi%
@@ -1907,34 +1948,37 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 \newcommand\AMC@shapeprepare@oval{%
   \AMC@makeovalbox{1}{}{\AMC@ovalbox@R}%
-  \AMC@makeovalbox{1}{1}{\AMC@ovalbox@RF}%
+  \AMC@makeovalbox{1}{\AMC@checkedbox}{\AMC@ovalbox@RF}%
   \AMC@makeovalbox{}{}{\AMC@ovalbox@}%
-  \AMC@makeovalbox{}{1}{\AMC@ovalbox@F}%
+  \AMC@makeovalbox{}{\AMC@checkedbox}{\AMC@ovalbox@F}%
 }
 \newcommand\AMC@shape@oval[4]{%
   \AMC@setcolors@{#3}{#2}%
-  \AMC@tracebox{#3}{#4}{\boxput*(0,0){\textcolor{\AMC@boxcolor@}{#1}}{%
+  \AMC@tracebox{#3}{#4}{\boxput*(0,0){%
+      \AMC@smashcentered{\textcolor{\AMC@boxcolor@}{#1}}%
+      \AMC@smashcentered{#2}%
+    }{%
       \ifx\@empty#3\@empty%
-        \ifx\@empty#2\@empty%
-          \AMC@use@box{\AMC@ovalbox@}%
-        \else%
+        \ifx #2\AMC@checkedbox%
           \AMC@use@box{\AMC@ovalbox@F}%
+        \else%
+          \AMC@use@box{\AMC@ovalbox@}%
         \fi%
       \else%
-        \ifx\@empty#2\@empty%
-          \AMC@use@box{\AMC@ovalbox@R}%
-        \else%
+        \ifx #2\AMC@checkedbox%
           \AMC@use@box{\AMC@ovalbox@RF}%
+        \else%
+          \AMC@use@box{\AMC@ovalbox@R}%
         \fi%
       \fi%
     }}%
 }
 \newcommand\AMC@shapeprepare@form{}
 \newcommand\AMC@shape@form@base[4]{%
-  \ifx\@empty#2\@empty%
-    \def\AMC@shape@form@ticked{false}%
-  \else%
+  \ifx #2\AMC@checkedbox%
     \def\AMC@shape@form@ticked{true}%
+  \else%
+    \def\AMC@shape@form@ticked{false}%
   \fi%
   \AMC@tracebox{#3}{#4}{%
     \CheckBox[checked=\AMC@shape@form@ticked,%
@@ -2032,13 +2076,14 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}\end{macro}
 %
 % \begin{macro}{\AMCboxOutsideLetter}\begin{macro}{\AMC@box}\begin{macro}{\AMC@formBox@}\begin{macro}{\AMC@formBox}\begin{macro}{\AMCoutsideLabelFormat}
-%   Command |\AMC@box|\marg{char}\marg{filled} prints a box with
-%   character \meta{char} inside, and filled if \meta{filled} is
-%   non-empty, using global variables to identify the box (question
-%   and choice).
+%           Command |\AMC@box|\marg{char}\marg{answer} prints a box
+%           with character \meta{char} inside, showing answer
+%           \meta{answer} (|\AMC@checkedbox| to get a filled box),
+%           using global variables to identify the box (question and
+%           choice).
 %
 %   It calls
-%   |\AMC@formBox@|\marg{char}\marg{filled}\marg{trace}\marg{key} to
+%   |\AMC@formBox@|\marg{char}\marg{answer}\marg{trace}\marg{key} to
 %   actually render the box.
 %
 %   Command |\AMC@formBox| simply sets the first argument when empty
@@ -2185,7 +2230,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcount\AMCbin@id
 \newcount\AMCbin@digit
 \def\AMCbin@one{\advance\AMCbin@digit\@ne%
-  \AMC@answerBox@{}{1}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}}
+  \AMC@answerBox@{}{\AMC@checkedbox}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}}
 \def\AMCbin@zero{\advance\AMCbin@digit\@ne%
   \AMC@answerBox@{}{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}}
 \def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=\z@}
@@ -2593,8 +2638,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % \begin{macro}{\AMCformQuestion}\begin{macro}{\AMCformAnswer}
 %     First define commands that will announce questions and answers
 %     on the separate answer sheet (these commands can be modified by
-%     the user): |\AMCformQuestion|\marg{n} is responsible for
-%     announcing question number \meta{n}, and
+%     the user): |\AMCformQuestion| is responsible for
+%     announcing question, and
 %     |\AMCformAnswer|\marg{box} is responsible for printing the box
 %     to be ticked, given as argument \meta{box}.
 %
@@ -2602,19 +2647,17 @@ Three digits and two letters:\insertgroup{mixed}.
 %     counter |\AMC@ncase| value before calling their counterparts.
 %
 %    \begin{macrocode}
-\def\AMCmem@ireData{}
 \def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
 \def\AMCformAfterQuestion{\ifAMC@asqbloc\egroup\fi}
-\def\AMCformQuestion#1{{\AMC@loc@qf{#1}}}
-\def\AMCformQuestionA#1#2{\setcounter{AMCquestionaff}{#1}%
-  \AMCid@quest=#2%
+\def\AMCformQuestion{{\AMC@loc@qf{\AMC@qaff}}}
+\def\AMCformQuestionA{%
   \setcounter{AMC@ncase}{0}%
   \AMCformBeforeQuestion%
   \ifAMC@asqbloc\vbox\bgroup\fi%
   \ifx\@empty\AMC@sza@callout\@empty\else%
     \csname\AMC@sza@callout\endcsname%
   \fi%
-  \AMCformQuestion{#1}%
+  \AMCformQuestion%
   \ifx\@empty\AMC@sza@callin\@empty\else%
     \csname\AMC@sza@callin\endcsname%
   \fi%
@@ -2623,13 +2666,12 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCformAnswerA#1{\addtocounter{AMC@ncase}{1}\AMCformAnswer{#1}}
 %    \end{macrocode}\end{macro}\end{macro}\
 %
-% \begin{macro}{\AMCmem@ireAJ}\begin{macro}{\AMCformBegin}\begin{macro}{\AMCform}\begin{macro}{\AMCformS}
+% \begin{macro}{\AMC@mem@add@ifneeded}\begin{macro}{\AMCformBegin}\begin{macro}{\AMCform}\begin{macro}{\AMCformS}
 %         These are commands to manage memory for separate answer
-%         sheet. |\AMCmem@ireAJ|\marg{code} adds \meta{code} to this
-%         memory. |\AMCmem@ireAJRep|\marg{code} adds to memory answer
-%         code \meta{code}, and |\AMCmem@ireQ|\marg{n}\marg{id} adds
-%         to memory question code to announce question numbered
-%         \meta{n} with id \meta{id}.
+%         sheet. |\AMC@mem@add@ifneeded|\marg{code} adds \meta{code} to this
+%         memory. |\AMC@mem@answer|\marg{code} adds to memory answer
+%         code \meta{code}, and |\AMC@mem@openQuestion| adds to memory question
+%         code to announce current question.
 %
 %       The command |\AMCformBegin| defines the beginning of the
 %       separate answer sheet for the current student sheet, and
@@ -2643,25 +2685,69 @@ Three digits and two letters:\insertgroup{mixed}.
 %       answer sheet.
 %
 %    \begin{macrocode}
-\newcommand\AMCmem@ireAJ[1]{%
+\ExplSyntaxOn
+
+\tl_new:N \amc_memory_content
+
+\cs_new:Nn \amc_clear_memory: { \tl_gclear:N \amc_memory_content }
+\cs_new_eq:NN \AMC@mem@clear \amc_clear_memory:
+
+\cs_new:Npn \amc_add_to_memory:n #1 {
+  \tl_gput_right:Nn \amc_memory_content {#1}
+}
+\cs_new_eq:NN \AMC@mem@add \amc_add_to_memory:n
+
+\cs_new:Npn \amc_add_to_memory_x:n #1 {
+  \tl_gput_right:Nx \amc_memory_content {#1}
+}
+\cs_new_eq:NN \AMC@mem@add@expanded \amc_add_to_memory_x:n
+
+\cs_new:Npn \amc_add_qidaffname:nnn #1#2#3 {
+  \amc_add_to_memory:n {\AMCid@quest=#1\setcounter{AMCquestionaff}{#2}%
+    \global\def\AMCid@name{#3}}
+}
+\cs_generate_variant:Nn \amc_add_qidaffname:nnn { xxx }
+\cs_new_eq:NN \AMC@mem@qidaffname \amc_add_qidaffname:xxx
+
+\cs_new:Npn \amc_add_aid:n #1 {
+  \amc_add_to_memory:n {\AMCrep@count=#1}
+}
+\cs_generate_variant:Nn \amc_add_aid:n { x }
+\cs_new_eq:NN \AMC@mem@aid \amc_add_aid:x
+
+\cs_new:Nn \amc_use_memory: {\amc_memory_content}
+\cs_new_eq:NN \AMC@mem@show \amc_use_memory:
+
+\ExplSyntaxOff
+\newcommand\AMC@mem@add@ifneeded[1]{%
   \ifAMC@ensemble\ifAMC@zoneformulaire\else%
     \begingroup\AMCformulaire@dedanstrue%
-      \let\protect\@unexpandable@protect%
-      \global\edef\AMCmem@ireData{\AMCmem@ireData #1}%
+    \AMC@mem@add{#1}%
     \endgroup\fi\fi}
-\newcommand\AMCmem@ireAJRep[1]{%
-  \addtocounter{AMC@ncase}{1}\AMCmem@ireAJ{\protect\AMCformAnswerA{#1}}}
-\newcommand\AMCmem@ireQ[2]{\AMCmem@ireAJ{\protect\AMCformQuestionA{#1}{#2}}}
+\newcommand\AMC@mem@add@expanded@ifneeded[1]{%
+  \ifAMC@ensemble\ifAMC@zoneformulaire\else%
+    \begingroup\AMCformulaire@dedanstrue%
+    \AMC@mem@add@expanded{#1}%
+    \endgroup\fi\fi}
+\newcommand\AMC@mem@answer[1]{%
+  \addtocounter{AMC@ncase}{1}%
+  \AMC@mem@aid{\the\AMCrep@count}%
+  \AMC@mem@add@ifneeded{\AMCformAnswerA{#1}}}
+\newcommand\AMC@mem@openQuestion{%
+  \AMC@mem@qidaffname{\the\AMCid@quest}{\arabic{AMCquestionaff}}{\AMCid@name}%
+  \AMC@mem@add@ifneeded{\AMCformQuestionA}%
+}
 \def\AMCformBegin{%
   \AMC@zoneformulairetrue\setcounter{section}{0}%
   \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageFull}\fi\fi%
 }
 \newcommand\AMCform{%
-  \ifAMC@ensemble\AMCformulaire@dedanstrue\AMCmem@ireData%
-  \global\def\AMCmem@ireData{}\fi}
+  \ifAMC@ensemble\AMCformulaire@dedanstrue%
+    \AMC@mem@show\AMC@mem@clear%
+  \fi}
 \newcommand\AMCformS{%
   \ifAMC@ensemble\AMCformulaire@dedanstrue%
-  \AMC@amclog{AUTOQCM[BR=0]^^J}\AMCmem@ireData%
+  \AMC@amclog{AUTOQCM[BR=0]^^J}\AMC@mem@show%
   \fi}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
@@ -2671,8 +2757,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %     same argument, both in the subject \emph{and} in the separate
 %     answer sheet.
 %    \begin{macrocode}
-\newcommand{\AMCsection}[1]{\section{#1}\AMCmem@ireAJ{\protect\section{#1}}}
-\newcommand{\AMCsubsection}[1]{\subsection{#1}\AMCmem@ireAJ{\protect\subsection{#1}}}
+\newcommand{\AMCsection}[1]{\section{#1}\AMC@mem@add@ifneeded{\section{#1}}}
+\newcommand{\AMCsubsection}[1]{\subsection{#1}\AMC@mem@add@ifneeded{\subsection{#1}}}
 %    \end{macrocode}
 % \end{macro}\end{macro}
 %
@@ -2714,14 +2800,14 @@ Three digits and two letters:\insertgroup{mixed}.
 %     formatting when the user wants to put answers inside a \LaTeX{}
 %     box.
 %    \begin{macrocode}
-\newcommand\AMCrep@bloc[2]{\AMCmem@ireAJRep{#1}%
+\newcommand\AMCrep@bloc[2]{\AMC@mem@answer{#1}%
   \par\noindent\begin{minipage}{\linewidth}%
     \begin{itemize}\item[#1] #2\end{itemize}\end{minipage}%
   \vspace{\AMCinterBrep}}
-\newcommand\AMCrep@itemize[2]{\AMCmem@ireAJRep{#1}\item[#1] #2}
-\newcommand\AMCrep@ligne[2]{\AMCmem@ireAJRep{#1}%
+\newcommand\AMCrep@itemize[2]{\AMC@mem@answer{#1}\item[#1] #2}
+\newcommand\AMCrep@ligne[2]{\AMC@mem@answer{#1}%
   \mbox{#1\hspace*{1em}#2}\hspace{3em plus 4em}}
-\newcommand\AMCrep@perso[2]{\AMCmem@ireAJRep{#1}\AMCanswer{#1}{#2}}
+\newcommand\AMCrep@perso[2]{\AMC@mem@answer{#1}\AMCanswer{#1}{#2}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMCbeginAnswer}\begin{macro}{\AMCendAnswer}\begin{macro}{\AMCanswer}
@@ -2746,7 +2832,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand{\correctchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
   \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
   \global\AMCune@bonnetrue%
-  \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{1}%
+  \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{\AMC@checkedbox}%
       \else\AMC@box{#1}{}\fi}{#2}}{\the\AMCrep@count}\ignorespaces}
 \newcommand{\wrongchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
   \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
@@ -2972,8 +3058,8 @@ Three digits and two letters:\insertgroup{mixed}.
     \csname\AMC@sz@callin\endcsname%
   \fi%
   \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
-  \AMCmem@ireQ{\arabic{AMCquestionaff}}{\the\AMCid@quest}}%
-{\ifAMC@qbloc\end{minipage}\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}\AMCmem@ireAJ{\AMCformAfterQuestion}}
+  \AMC@mem@openQuestion}%
+{\ifAMC@qbloc\end{minipage}\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}\AMC@mem@add@ifneeded{\AMCformAfterQuestion}}
 \newenvironment{questionmult}[1]{%
   \AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}%
   \AMCtype@multitrue\ifAMC@calibration%
@@ -3168,34 +3254,37 @@ Three digits and two letters:\insertgroup{mixed}.
 % |separateanswersheet| option is used.
 %
 % This command uses the
-% |\AMCformatChoices|\marg{showcommand}\marg{hidecommand}\marg{qname}\marg{qid}
-% command, that calls either \meta{hidecommand} if the
-% |separateanswersheet| option is used and if we are currently in the
-% question part (not in the answer sheet), or \meta{showcommand} when
-% all the boxes are to be produced.
+% |\AMCformatChoices|\marg{showcommand}\marg{hidecommand}\marg{arg1}\marg{arg2}
+% command, that calls either \meta{hidecommand}\marg{arg1}\marg{arg2}
+% if the |separateanswersheet| option is used and if we are currently
+% in the question part (not in the answer sheet), or
+% \meta{showcommand}\marg{arg1}\marg{arg2} when all the boxes are to
+% be produced.
 % 
 %    \begin{macrocode}
 \newcommand\AMCformatChoices[4]{%
   \global\AMCrep@count=\z@%
-  \AMCmem@ireAJ{\global\AMCrep@count=\z@%
-    \protect #1{#3}{#4}{\AMCid@name}{\the\AMCid@quest}}%
+  \AMC@mem@qidaffname{\the\AMCid@quest}{\arabic{AMCquestionaff}}{\AMCid@name}%
+  \AMC@mem@add@ifneeded{\global\AMCrep@count=\z@%
+    #1{#3}{#4}}%
   \ifAMC@ensemble%
-    #2{#3}{#4}{\AMCid@name}{\the\AMCid@quest}%
+    #2{#3}{#4}%
     \AMC@amclog{AUTOQCM[QPART]^^J}%
   \else%
-    #1{#3}{#4}{\AMCid@name}{\the\AMCid@quest}%
+    #1{#3}{#4}%
   \fi%
 }
 %    \end{macrocode}
 %
-% The |\AMCnumeric@char|\marg{inside}\marg{correct} draw a box with
-% content \meta{inside} (only if needed), where \meta{correct} is |1|
+% The |\AMCnumeric@char|\marg{inside}\marg{answer} draw a box with
+% content \meta{inside} (only if needed), where \meta{answer} is |\AMC@checkedbox|
 % if the corresponding choice is correct and empty if not.
 %
 %    \begin{macrocode}
 \newcommand{\AMCnumeric@char}[2]{%
   \global\advance\AMCrep@count\@ne\relax%
-  \AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:\ifx#2\@empty\@empty M\else B\fi]^^J}%
+  \AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:\ifx#2\AMC@checkedbox%
+    B\else M\fi]^^J}%
   \ifAMC@correc%
     \protect\AMC@keyBox@{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
   \else%
@@ -3221,7 +3310,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newdimen\AMCnumeric@Vspace\AMCnumeric@Vspace=1ex
 \newcommand{\AMCnumeric@digit}[2]{%
   \ifnum\AMC@chiffres=#1%
-    \AMCnumeric@char{\the\AMC@chiffres}{1}%
+    \AMCnumeric@char{\the\AMC@chiffres}{\AMC@checkedbox}%
   \else%
     \AMCnumeric@char{\the\AMC@chiffres}{}%
   \fi%
@@ -3230,11 +3319,11 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifnum#1<\z@%
     \hbox{\AMCnumeric@char{$+$}{}}\vspace{\AMCnumeric@Vspace}
     \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}%
-    \hbox{\AMCnumeric@char{$-$}{1}}
+    \hbox{\AMCnumeric@char{$-$}{\AMC@checkedbox}}
     \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}%
     \global\multiply#1\m@ne%
   \else%
-    \hbox{\AMCnumeric@char{$+$}{1}}\vspace{\AMCnumeric@Vspace}
+    \hbox{\AMCnumeric@char{$+$}{\AMC@checkedbox}}\vspace{\AMCnumeric@Vspace}
     \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}%
     \hbox{\AMCnumeric@char{$-$}{}}
     \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}%
@@ -3334,7 +3423,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 %
 % The command
-% |\AMCnumericShow|\marg{value}\marg{opts}\marg{qname}\marg{qid} is
+% |\AMCnumericShow|\marg{value}\marg{opts} is
 % called to draw all necessary boxes to code a numerical value
 % \meta{value} with options given as a comma separated list
 % \meta{opts}. |\AMCnumericOpts|\marg{opts} can be used to set some
@@ -3385,12 +3474,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % Then the command |\AMCnumericShow| itself:
 %    \begin{macrocode}
-\newcommand\AMCnumericShow[4]{%
-%    \end{macrocode}
-% The first line allows to keep the question ID number and name
-% accurate even in the separate answer sheet.
-%    \begin{macrocode}
-  \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
+\newcommand\AMCnumericShow[2]{%
 %    \end{macrocode}
 % We have to tell AMC that the scoring we will give concerns this question:
 %    \begin{macrocode}
@@ -3566,12 +3650,26 @@ Three digits and two letters:\insertgroup{mixed}.
 % used in the LaTeX source code of the exam.
 %
 %    \begin{macrocode}
-\newcommand\AMCnumericHide[4]{%
+\newcommand\AMCnumericHide[2]{%
   \setkeys{AMCNumeric}{#2}%
   \AMCntextGoto%
   \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
-\def\AMCnumericChoices{\AMCformatChoices{\AMCnumericShow}{\AMCnumericHide}}
+\def\AMCnumericChoicesPlain{\AMCformatChoices{\AMCnumericShow}{\AMCnumericHide}}
+%    \end{macrocode}
+% The \marg{value} argument is often given as a macro, that is to be
+% expanded before calling |\AMCnumericChoicesPlain|, so that its value
+% will be the same in the separate answer sheet...
+%    \begin{macrocode}
+\ExplSyntaxOn
+
+\cs_new:Npn \amc_numeric_choices:nn #1#2 {
+  \AMCnumericChoicesPlain{#1}{#2}
+}
+\cs_generate_variant:Nn \amc_numeric_choices:nn { xn }
+\cs_new_eq:NN \AMCnumericChoices \amc_numeric_choices:xn
+
+\ExplSyntaxOff
 %    \end{macrocode}
 % \end{macro}
 %
@@ -3713,8 +3811,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCopenOpts[1]{\setkeys{AMCOpen}{#1}}
 %    \end{macrocode}
 % 
-% The command |\AMCOpen| is similar to |\AMCnumericChoices|,
-% calling either |\AMCopenShow| or |\AMCopenHide|.
+% The command |\AMCOpen| is similar to |\AMCnumericChoices|, calling
+% either |\AMCopenShow| or |\AMCopenHide|.
 %    \begin{macrocode}
 \newcommand\AMCopen@lines{%
   \begin{minipage}{\AMCopen@Width}%
@@ -3726,8 +3824,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \ifnum\AMCopen@Lines>\@ne\par\advance\AMCopen@Lines\m@ne\repeat%
   \end{minipage}
 }
-\newcommand\AMCopenShow[4]{
-  \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
+\newcommand\AMCopenShow[2]{
   \ifAMC@ensemble\ifAMCformulaire@dedans%
     \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}%
   \fi\fi%
@@ -3781,7 +3878,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@amclog{AUTOQCM[FQ]^^J}%
   \fi\fi%
 }
-\newcommand\AMCopenHide[4]{%
+\newcommand\AMCopenHide[2]{%
   \AMCotextGoto%
   \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
@@ -3795,9 +3892,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %   Sometimes the letters printed in the boxes (or just after them)
 %   are enough to describe the answers. In such cases, printing the
 %   boxes both on the question and on the answer sheet is not
-%   necessary. The |\AMCBoxOnly| can be used as a replacement for
-%   the |choices| environment:
-%\iffalse
+%   necessary. The |\AMCBoxOnly|\marg{options}\marg{choices} can be
+%   used as a replacement for the |choices| environment: \iffalse
 %<*doc>
 %\fi
 \begin{verbatim}
@@ -3817,8 +3913,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@boolkey{AMCBoxOnly}{ordered}[false]{}
 \setkeys{AMCBoxOnly}{ordered}
 \newcommand\AMCboOpts[1]{\setkeys{AMCBoxOnly}{#1}}
-\newcommand\AMCboShow[4]{%
-  \ifAMC@ensemble\def\AMCid@name{#3}\AMCid@quest=#4\fi%
+\newcommand\AMCboShow[2]{%
   \ifAMC@ensemble\ifAMCformulaire@dedans%
     \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}%
   \fi\fi%
@@ -3840,7 +3935,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@amclog{AUTOQCM[FQ]^^J}%
   \fi\fi%
 }
-\newcommand\AMCboHide[4]{
+\newcommand\AMCboHide[2]{
   \AMCbotextGoto%
   \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
