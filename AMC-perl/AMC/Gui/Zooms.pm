@@ -118,7 +118,8 @@ sub new {
 	$self->{$_}=$self->{'gui'}->get_object($_);
     }
 
-    $self->{prefs}->transmet_pref($self->{'gui'},'zooms',$self);
+    $self->{prefs}->transmet_pref($self->{'gui'},
+                                  prefix=>'zooms',hash=>$self);
 
     $self->{'label_0'}->set_markup('<b>'.$self->{'label_0'}->get_text.'</b>');
     $self->{'label_1'}->set_markup('<b>'.$self->{'label_1'}->get_text.'</b>');
@@ -151,7 +152,7 @@ sub new {
 sub edit_mode_update {
   my ($self)=@_;
 
-  $self->{prefs}->reprend_pref('zooms',$self);
+  $self->{prefs}->reprend_pref(prefix=>'zooms',hash=>$self);
   if($self->{global_options}) {
     $self->{global_options}->set('zooms_edit_mode',$self->{zooms_edit_mode});
   }

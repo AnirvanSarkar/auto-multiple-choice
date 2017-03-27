@@ -135,7 +135,7 @@ GetOptions("debug!"=>\$debug,
 	   "profile=s"=>\$profile,
 	   "p=s"=>\$project_dir,
            "do-nothing!"=>\$do_nothing,
-	   );
+          );
 
 $project_dir=Cwd::realpath($project_dir) if($project_dir);
 
@@ -2117,15 +2117,16 @@ sub filter_details {
   my $gd=read_glade('filter_details',
 		    qw/filter_text/);
   debug "Filter details: conf->details GUI";
-  $prefs->transmet_pref($gd,'filter_details',"project:");
+  $prefs->transmet_pref($gd,prefix=>'filter_details',
+                        root=>"project:");
   my $r=$w{'filter_details'}->run();
   if($r == 10) {
     $config->set_local_keys('filter');
     debug "Filter details: new value->local";
-    $prefs->reprend_pref('filter_details','local:');
+    $prefs->reprend_pref(prefix=>'filter_details',container=>'local');
     $w{'filter_details'}->destroy;
     debug "Filter details: local->main GUI";
-    $prefs->transmet_pref($gui,'pref_prep','local:');
+    $prefs->transmet_pref($gui,prefix=>'pref_prep',root=>'local:');
   } else {
     $w{'filter_details'}->destroy;
   }
@@ -2133,7 +2134,7 @@ sub filter_details {
 
 sub filter_details_update {
   $config->set_local_keys('filter');
-  $prefs->reprend_pref('filter_details','local:');
+  $prefs->reprend_pref(prefix=>'filter_details',container=>'local');
   my $b=$w{'filter_text'}->get_buffer;
   if($config->get('local:filter')) {
     $b->set_text(("AMC::Filter::register::".$config->get('local:filter'))->description);
@@ -2171,8 +2172,10 @@ sub autre_imprimante {
 					   \%w,$prefs,
 					   $i,$printer_settings->{$i});
 
-    $prefs->transmet_pref($g_imprime,'imp','options_impression');
-    $prefs->transmet_pref($g_imprime,'printer',"options_impression/printer/$i");
+    $prefs->transmet_pref($g_imprime,prefix=>'imp',
+                          root=>'options_impression');
+    $prefs->transmet_pref($g_imprime,prefix=>'printer',
+                          root=>"options_impression/printer/$i");
   } else {
     debug "No printer choice!";
   }
@@ -2277,7 +2280,8 @@ sub sujet_impressions {
     $g_imprime=read_glade('choix_pages_impression',
 			  qw/arbre_choix_copies bloc_imprimante answersheet_box imprimante printing_options_table bloc_fichier/);
 
-    $prefs->transmet_pref($g_imprime,'impall',"options_impression");
+    $prefs->transmet_pref($g_imprime,prefix=>'impall',
+                          root=>"options_impression");
 
     debug "Printing method: ".$method;
 
@@ -2305,7 +2309,8 @@ sub sujet_impressions {
 	  # the right options)
 	} else {
 	  # updates the values in the GUI from the general options
-	  $prefs->transmet_pref($g_imprime,'imp','options_impression');
+	  $prefs->transmet_pref($g_imprime,prefix=>'imp',
+                                root=>'options_impression');
 	}
     }
 
@@ -2313,7 +2318,8 @@ sub sujet_impressions {
 	$w{'bloc_imprimante'}->hide();
 	$w{'bloc_fichier'}->show();
 
-	$prefs->transmet_pref($g_imprime,'impf','options_impression');
+	$prefs->transmet_pref($g_imprime,prefix=>'impf',
+                              root=>'options_impression');
     }
 
     $copies_store->clear();
@@ -2340,7 +2346,8 @@ sub sujet_impressions {
 sub sujet_impressions_cancel {
 
   if(get_debug()) {
-    $prefs->reprend_pref('imp',"options_impression");
+    $prefs->reprend_pref(prefix=>'imp');
+    $Data::Dumper::Indent = 0;
     debug(Dumper($config->get('options_impression')));
   }
 
@@ -2369,7 +2376,7 @@ sub sujet_impressions_ok {
 	push @e,$copies_store->get($copies_store->get_iter($i),COPIE_N) if($i);
     }
 
-    $prefs->reprend_pref('impall','options_impression');
+    $prefs->reprend_pref(prefix=>'impall');
 
     my $method=project_printing_method();
 
@@ -2383,8 +2390,8 @@ sub sujet_impressions_ok {
       }
       $config->set('imprimante',$i);
 
-      $prefs->reprend_pref('imp','options_impression');
-      $prefs->reprend_pref('printer',"options_impression/printer/$i");
+      $prefs->reprend_pref(prefix=>'imp');
+      $prefs->reprend_pref(prefix=>'printer');
 
       $os=options_string($config->get("options_impression"),
                          $config->get("options_impression/printer")->{$i});
@@ -2393,7 +2400,7 @@ sub sujet_impressions_ok {
     }
 
     if($method eq 'file') {
-	$prefs->reprend_pref('impf','options_impression');
+	$prefs->reprend_pref(prefix=>'impf');
 
 	if(!$config->get('options_impression/repertoire')) {
 	    debug "Print to file : no destination...";
@@ -2644,10 +2651,11 @@ sub saisie_manuelle {
 			     qw/saisie_auto_c_auto_capture_mode
 				button_capture_go/);
 	  $w{saisie_auto_cb_allocate_ids}='';
-	  $prefs->transmet_pref($gsa,'saisie_auto','project:');
+	  $prefs->transmet_pref($gsa,prefix=>'saisie_auto',
+                                root=>'project:');
 	  my $ret=$w{'choose-mode'}->run();
 	  if($ret==1) {
-	    $prefs->reprend_pref('saisie_auto','project:');
+	    $prefs->reprend_pref(prefix=>'saisie_auto');
 	    $w{'choose-mode'}->destroy;
 	  } else {
 	    $w{'choose-mode'}->destroy;
@@ -2729,7 +2737,8 @@ sub saisie_automatique {
 			  saisie_auto_cb_allocate_ids
 			  button_capture_go/);
     $w{'copie_scans'}->set_active(1);
-    $prefs->transmet_pref($gsa,'saisie_auto','project:');
+    $prefs->transmet_pref($gsa,prefix=>'saisie_auto',
+                          root=>'project:');
     $w{'saisie_auto_cb_allocate_ids'}->set_label(sprintf(__"Pre-allocate sheet ids from the page numbers, starting at %d",$mcopy));
 
     $w{'saisie_auto_c_auto_capture_mode'}->set_sensitive($n==0);
@@ -2738,7 +2747,7 @@ sub saisie_automatique {
 sub saisie_auto_mode_update {
   $config->set_local_keys('auto_capture_mode');
   # the mode value (auto_capture_mode) has been updated.
-  valide_options_for_domain('saisie_auto','local:',@_);
+  valide_options_for_domain('saisie_auto','local',@_);
   my $acm=$config->get('local:auto_capture_mode');
   $acm=-1 if(!defined($acm));
   $w{'button_capture_go'}->set_sensitive($acm>=0);
@@ -2796,7 +2805,7 @@ sub analyse_call {
                       "--data",$config->get_absolute('data'),
                      ],
            signal=>2,
-           progres.id=>$oo{'progres'},
+           'progres.id'=>$oo{'progres'},
            );
 
   # extract individual images scans
@@ -2889,7 +2898,7 @@ sub saisie_auto_ok {
 			     ($w{'saisie_auto'}->get_filenames()));
     my $copie=$w{'copie_scans'}->get_active();
 
-    $prefs->reprend_pref('saisie_auto','project:');
+    $prefs->reprend_pref(prefix=>'saisie_auto');
     $w{'saisie_auto'}->destroy();
     Gtk3::main_iteration while ( Gtk3::events_pending );
 
@@ -3065,7 +3074,8 @@ sub valide_liste {
 					     map { ($_,$_) }
 					     (@heads)));
     }
-    $prefs->transmet_pref($gui,'pref_assoc',"project:",{},{'liste_key'=>1});
+    $prefs->transmet_pref($gui,prefix=>'pref_assoc',
+                          keys=>["project:liste_key"]);
     assoc_state();
 }
 
@@ -3215,20 +3225,20 @@ sub valide_options_correction {
 }
 
 sub valide_options_for_domain {
-    my ($domain,$root,$widget,$user_data)=@_;
-    $root='project:' if(!$root);
+    my ($domain,$container,$widget,$user_data)=@_;
+    $container='project' if(!$container);
     if($widget) {
 	my $name=$widget->get_name();
 	debug "<$domain> options validation for widget $name";
 
 	if($name =~ /${domain}_[a-z]+_(.*)/) {
-	    $prefs->reprend_pref($domain,$root,'',{$1=>1});
+	    $prefs->reprend_pref(prefix=>$domain,keys=>[$container.":".$1],trace=>1);
 	} else {
 	  debug "Widget $name is not in domain <$domain>!";
 	}
     } else {
 	debug "<$domain> options validation: ALL";
-	$prefs->reprend_pref($domain,$root);
+	$prefs->reprend_pref(prefix=>$domain,container=>$container);
     }
 }
 
@@ -3251,7 +3261,7 @@ sub filter_changed {
   $config->set_local_keys();
   my $old_filter=$config->get('filter');
   $config->set('local:filter',$old_filter);
-  valide_options_for_domain('pref_prep','local:',@_);
+  valide_options_for_domain('pref_prep','local',@_);
   my $new_filter=$config->get('local:filter');
   return if($old_filter eq $new_filter);
 
@@ -3281,7 +3291,8 @@ sub filter_changed {
     $dialog->destroy;
 
     if($reponse eq 'cancel') {
-      $prefs->transmet_pref($gui,'pref_prep','project:');
+      $prefs->transmet_pref($gui,prefix=>'pref_prep',
+                            root=>'project:');
       return(0);
     }
 
@@ -3330,7 +3341,8 @@ sub change_liste_key {
     $config->set('liste_key',
                  ($previous_liste_key ne $config->get('liste_key')
                   ? $previous_liste_key : ""));
-    $prefs->transmet_pref($gui,'pref_assoc','project:',{},{'liste_key'=>1});
+    $prefs->transmet_pref($gui,prefix=>'pref_assoc',
+                          keys=>['project:liste_key']);
     return();
   }
   if ($config->get('liste_key')) {
@@ -3371,7 +3383,8 @@ sub change_liste_key {
 	  }
 	} else {
 	  $config->set('liste_key',$assoc_liste_key);
-	  $prefs->transmet_pref($gui,'pref_assoc','project:',{},{'liste_key'=>1});
+	  $prefs->transmet_pref($gui,prefix=>'pref_assoc',
+                                keys=>['project:liste_key']);
 	}
       } else {
 	if ($config->get('assoc_code')) {
@@ -3681,7 +3694,8 @@ sub noter_resultat {
     debug "Adding pre-association item";
   }
   $prefs->store_register('assoc_code'=>cb_model(@cbs));
-  $prefs->transmet_pref($gui,'pref_assoc','project:',{},{'assoc_code'=>1});
+  $prefs->transmet_pref($gui,prefix=>'pref_assoc',
+                        keys=>['project:assoc_code']);
 
   $w{'onglet_reports'}->set_sensitive(defined($avg));
 }
@@ -4045,8 +4059,6 @@ sub edit_preferences {
       $w{$k}->set_sensitive(0);
     }
 
-    $prefs->clear_widgets();
-
     my $gap=read_glade('edit_preferences',
 		       qw/pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression symboles_tree email_group_sendmail email_group_SMTP/);
 
@@ -4060,11 +4072,11 @@ sub edit_preferences {
 
     # tableau type/couleurs pour correction
 
-    for my $t (grep { /^pref(_projet)?_[xfcv]_/ } (keys %w)) {
-	delete $w{$t};
-    }
-    $prefs->transmet_pref($gap,'pref','global:');
-    $prefs->transmet_pref($gap,'pref_projet','project:') if($projet{'nom'});
+    $prefs->widget_store_clear(store=>'prefwindow');
+
+    $prefs->transmet_pref($gap,store=>'prefwindow',prefix=>'pref',root=>'global:');
+    $prefs->transmet_pref($gap,store=>'prefwindow_project',prefix=>'pref_projet',
+                          root=>'project:') if($projet{'nom'});
 
     # projet ouvert ?
     if($projet{'nom'}) {
@@ -4106,8 +4118,8 @@ sub closes_preferences {
 }
 
 sub accepte_preferences {
-  $prefs->reprend_pref('pref','global:');
-  $prefs->reprend_pref('pref_projet','project:') if($projet{'nom'});
+  $prefs->reprend_pref(store=>'prefwindow',prefix=>'pref');
+  $prefs->reprend_pref(store=>'prefwindow_project',prefix=>'pref_projet') if($projet{'nom'});
 
   my %pm;
   my %gm;
@@ -5499,7 +5511,8 @@ sub valide_projet {
     debug "Correction options : MB".$config->get('maj_bareme');
     $w{'maj_bareme'}->set_active($config->get('maj_bareme'));
 
-    $prefs->transmet_pref($gui,'notation','project:');
+    $prefs->transmet_pref($gui,prefix=>'notation',
+                          root=>'project:');
 
     $w{'main_window'}->set_title($projet{'nom'}.' - '.
 				 'Auto Multiple Choice');
@@ -5508,8 +5521,12 @@ sub valide_projet {
 
     valide_liste('noinfo'=>1,'nomodif'=>1);
 
-    $prefs->transmet_pref($gui,'export','project:');
-    $prefs->transmet_pref($gui,'pref_prep','project:');
+    # options specific to some export module:
+    $prefs->transmet_pref('',prefix=>'export',root=>'project:');
+    # standard export options:
+    $prefs->transmet_pref($gui,prefix=>'export',root=>'project:');
+
+    $prefs->transmet_pref($gui,prefix=>'pref_prep',root=>'project:');
 
     for my $k (@widgets_only_when_opened) {
       $w{$k}->set_sensitive(1);
@@ -5648,9 +5665,14 @@ sub bug_report {
 
 sub pref_change_delivery {
   $config->set_local_keys('email_transport');
-  $prefs->reprend_pref('pref','local:');
-  for my $k (qw/sendmail SMTP/) {
-    $w{'email_group_'.$k}->set_sensitive($k eq $config->get('local:email_transport'));
+  $prefs->reprend_pref(store=>'prefwindow',prefix=>'pref',container=>'local');
+  my $transport=$config->get('local:email_transport');
+  if($transport) {
+    for my $k (qw/sendmail SMTP/) {
+      $w{'email_group_'.$k}->set_sensitive($k eq $transport);
+    }
+  } else {
+    debug "WARNING: could not retrieve email_transport!";
   }
 }
 
@@ -5933,11 +5955,11 @@ sub send_emails {
 			     key=>'mailing_window_size'});
   }
 
-  $prefs->transmet_pref($gap,'email','project:');
+  $prefs->transmet_pref($gap,prefix=>'email',root=>'project:');
   my $resp=$w{'email_dialog'}->run;
   my @ids=();
   if($resp==1) {
-    $prefs->reprend_pref('email','project:');
+    $prefs->reprend_pref(prefix=>'email');
     # get selection
     my @selected=$w{'emails_list'}->get_selection->get_selected_rows;
     @selected=@{$selected[0]};
@@ -6048,7 +6070,7 @@ sub send_emails {
 
 sub email_change_col {
   $config->set_local_keys('email_col');
-  $prefs->reprend_pref('email','local:');
+  $prefs->reprend_pref(prefix=>'email',container=>'local');
 
   my $i=$emails_store->get_iter_first;
   my $ok=defined($i);
@@ -6089,13 +6111,12 @@ sub mailing_set_project_name {
   $t->show_all;
   $dialog->get_content_area()->add ($t);
 
-  $prefs->transmet_pref('','set_name','project:',{},'',1);
+  $prefs->transmet_pref('',prefix=>'set_name',root=>'project:');
 
   my $response = $dialog->run;
 
   if($response eq 'ok') {
-    $prefs->reprend_pref('set_name','project:','',
-		 {'nom_examen'=>1,'code_examen'=>1});
+    $prefs->reprend_pref(prefix=>'set_name');
     $w{'label_name'}->set_text(project_email_name());
   }
 

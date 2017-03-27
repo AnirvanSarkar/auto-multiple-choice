@@ -713,7 +713,19 @@ sub key_changed {
 
 sub changed_keys {
   my ($self,$container)=@_;
-  return(grep { $_ } split(/,/,$self->{$container}->{_changed}));
+  if($container) {
+    if($self->{$container}->{_changed}) {
+      return(grep { $_ } split(/,/,$self->{$container}->{_changed}));
+    } else {
+      return();
+    }
+  } else {
+    my @r=();
+    for my $c (qw/global project state/) {
+      push @r,$self->changed_keys($c);
+    }
+    return(@r);
+  }
 }
 
 sub list_hash_keys {
