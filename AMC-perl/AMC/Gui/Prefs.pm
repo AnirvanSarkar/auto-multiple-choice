@@ -176,6 +176,10 @@ sub transmet_pref {
       $value=$self->{config}->get($full_key);
     }
 
+    if($o{container}) {
+      $full_key =~ s/^.*:/$o{container}:/;
+    }
+
     my $key=$full_key;
     $key =~ s/.*[\/:]//;
 

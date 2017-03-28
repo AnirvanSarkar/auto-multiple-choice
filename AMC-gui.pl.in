@@ -2126,7 +2126,8 @@ sub filter_details {
     $prefs->reprend_pref(prefix=>'filter_details',container=>'local');
     $w{'filter_details'}->destroy;
     debug "Filter details: local->main GUI";
-    $prefs->transmet_pref($gui,prefix=>'pref_prep',root=>'local:');
+    $prefs->transmet_pref($gui,prefix=>'pref_prep',
+                          keys=>["local:filter"],container=>'project');
   } else {
     $w{'filter_details'}->destroy;
   }
@@ -3232,7 +3233,7 @@ sub valide_options_for_domain {
 	debug "<$domain> options validation for widget $name";
 
 	if($name =~ /${domain}_[a-z]+_(.*)/) {
-	    $prefs->reprend_pref(prefix=>$domain,keys=>[$container.":".$1],trace=>1);
+	    $prefs->reprend_pref(prefix=>$domain,keys=>["project:".$1],trace=>1,container=>$container);
 	} else {
 	  debug "Widget $name is not in domain <$domain>!";
 	}
@@ -3256,10 +3257,11 @@ sub filter_changed {
 
   # check it is a different value...
 
-  debug "Filter changed callback / options=".$config->get('filter');
+  my $old_filter=$config->get('filter');
+
+  debug "Filter changed callback / old=$old_filter";
 
   $config->set_local_keys();
-  my $old_filter=$config->get('filter');
   $config->set('local:filter',$old_filter);
   valide_options_for_domain('pref_prep','local',@_);
   my $new_filter=$config->get('local:filter');
@@ -3304,7 +3306,7 @@ sub filter_changed {
 
   # No source created: change source filename
 
-  if(!-f $config->get_absolute('texsrc')) {
+  if(!-f $config->get_absolute('texsrc') || -z $config->get_absolute('texsrc')) {
     $config->set('project:texsrc','%PROJET/'.
       ("AMC::Filter::register::".$config->get('filter'))
 	->default_filename());
