@@ -1759,6 +1759,20 @@ Three digits and two letters:\insertgroup{mixed}.
 %%    \end{macrocode}
 % \end{macro}
 % \end{macro}
+%
+% \begin{macro}{\AMC@boxKind}
+%   The command |\AMCboxKind|\marg{kind}\marg{key} write into the |xy| file the
+%   \emph{kind} of the current answer box. This \emph{kind} should be
+%   empty for a standard box to be ticked, and may be |c:digit|,
+%   |c:sign| for exemple for boxes where the students have to write a
+%   character.
+%    \begin{macrocode}
+\def\AMC@boxKind#1#2{%
+  \ifAMC@calibration\ifx\@empty#1\@empty\else%
+    \immediate\write\AMC@XYFILE{\string\kind{\the\AMCid@etud/\thepage:#2}{#1}}%
+  \fi\fi}
+%    \end{macrocode}
+% \end{macro}
 % 
 % \begin{environment}{amcxyfile}
 %   The following lines defines an environment to use a particular file
@@ -1905,6 +1919,9 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@LR{\hspace{0pt}%
     \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename@\endcsname%
       {\AMCchoiceLabelFormat{#1}}{#2}{#3}{#4}}}%
+  \ifx\@empty#3\@empty\else%
+    \AMC@boxKind{\AMC@box@kind}{#4}%
+  \fi%
 }
 \newcommand\AMC@shapeprepare@square{}
 \newcommand\AMC@shape@square[4]{%
@@ -2050,6 +2067,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newlength\AMC@boxedheight
 \newlength\AMC@oval@radius
 \newlength\AMC@outside@sep
+\def\AMC@box@kind{}
 \define@choicekey{AMCdim}{shape}{square,oval,form,none}{\def\AMC@shapename{#1}}
 \define@key{AMCdim}{size}{\AMC@boxedwidth=#1\AMC@boxedheight=#1}
 \define@key{AMCdim}{height}{\AMC@boxedheight=#1}
@@ -2058,6 +2076,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCdim}{outsidesep}{\AMC@outside@sep=#1}
 \define@key{AMCdim}{down}{\AMC@boxeddown=#1}
 \define@key{AMCdim}{color}{\def\AMC@boxcolor{#1}}
+\define@key{AMCdim}{kind}{\def\AMC@box@kind{#1}}
 \define@boolkey{AMCdim}{cross}[false]{}
 \define@key{AMCdim}{crosschar}[\textbf{\textsf{X}}]{\def\AMC@crosschar{#1}}
 \define@key{AMCdim}{crossrule}[1.5pt]{\AMC@crossrule=#1}
@@ -2840,6 +2859,23 @@ Three digits and two letters:\insertgroup{mixed}.
   \ignorespaces}
 %    \end{macrocode}\end{macro}\end{macro}
 %
+% \begin{macro}{\characterentry}
+%   The command |\characterentry|\oarg{id}\marg{character}\marg{text}
+%   can also be used to draw a box where the student should
+%   \emph{write} a character, with correct answer given by
+%   \meta{character}.
+%    \begin{macrocode}
+\newcommand{\characterentry}[3][]{\global\advance\AMCrep@count\@ne\relax%
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:\AMC@box@kind=#2]^^J}\fi%
+  \AMCload@@reponse{\une@rep{%
+      \ifAMC@correc%
+        \AMC@box{#1}{#2}%
+      \else%
+        \AMC@box{#1}{}%
+      \fi}{#3}}{\the\AMCrep@count}\ignorespaces}
+%    \end{macrocode}
+% \end{macro}
+% 
 % \subsubsection{Score zones}
 % \begin{macro}{\AMCscoreZone}\begin{macro}{\AMCscoreZoneAnswerSheet}
 % The position of the scores on the annotated answer sheets can be

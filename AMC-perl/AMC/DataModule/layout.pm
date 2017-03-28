@@ -82,6 +82,10 @@ package AMC::DataModule::layout;
 #
 # * answer is the answer number for this question
 #
+# * kind is the box kind. Use an empty value for standard boxes to be
+#   ticked, or c:digit, c:sign, etc. for boxes where to write a
+#   character.
+#
 # * xmin,xmax,ymin,ymax give the box coordinates
 #
 # * flags is an integer that contains the flags from BOX_FLAGS_* (see
@@ -148,7 +152,7 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(5);
+  return(6);
 }
 
 sub drop_box_table {
@@ -161,7 +165,7 @@ sub create_box_table {
   my ($self,$tmp)=@_;
   $self->sql_do("CREATE ".($tmp ? "TEMPORARY ":"")
 		."TABLE IF NOT EXISTS ".($tmp ? "box_tmp" :$self->table("box"))
-		." (student INTEGER, page INTEGER, role INTEGER DEFAULT 1, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0, PRIMARY KEY (student,role,question,answer))");
+		." (student INTEGER, page INTEGER, role INTEGER DEFAULT 1, question INTEGER, answer INTEGER, kind TEXT, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0, PRIMARY KEY (student,role,question,answer))");
   if(!$tmp) {
     $self->sql_do("CREATE INDEX ".$self->index("index_box_studentpage")." ON "
 		  .$self->table("box","self")." (student,page,role)");
@@ -195,7 +199,7 @@ sub version_upgrade {
 		      ." (student INTEGER PRIMARY KEY, id TEXT)");
 	$self->populate_from_xml;
 
-	return(5);
+	return(6);
     }
     if($old_version==1) {
       $self->sql_do("ALTER TABLE ".$self->table("box")
@@ -250,6 +254,11 @@ sub version_upgrade {
       $self->sql_do("DROP TABLE box_tmp");
       return(5);
     }
+    if($old_version==5) {
+      $self->sql_do("ALTER TABLE ".$self->table("box")
+                    ." ADD COLUMN kind TEXT");
+      return(6);
+    }
     return('');
 }
 
@@ -295,7 +304,7 @@ sub populate_from_xml {
 		    }
 		    for my $c (@{$l->{'case'}}) {
 			$self->statement('NEWBox')->execute(
-			    @lid,BOX_ROLE_ANSWER,(map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)),0
+			    @lid,BOX_ROLE_ANSWER,(map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)),0,undef
 			    );
 		    }
 		    for my $d (@{$l->{'chiffre'}}) {
@@ -351,8 +360,8 @@ sub define_statements {
        'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
 		   ." (student,page,corner,x,y) VALUES (?,?,?,?,?)"},
        'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
-		  ." (student,page,role,question,answer,xmin,xmax,ymin,ymax,flags)"
-		  ." VALUES (?,?,?,?,?,?,?,?,?,?)"},
+		  ." (student,page,role,question,answer,xmin,xmax,ymin,ymax,flags,kind)"
+		  ." VALUES (?,?,?,?,?,?,?,?,?,?,?)"},
        'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
 		    ." (student,page,numberid,digitid,xmin,xmax,ymin,ymax)"
 		    ." VALUES (?,?,?,?,?,?,?,?)"},
@@ -438,6 +447,11 @@ sub define_statements {
 		       ." LIMIT 1"},
        'boxPage'=>{'sql'=>"SELECT page FROM ".$self->table("box")
                    ." WHERE student=? AND question=? AND answer=? AND role=?"},
+       'boxGetKind'=>{'sql'=>"SELECT kind FROM ".$self->table("box")
+                      ." WHERE student=? AND question=? AND answer=? AND role=?"},
+       'boxSetKind'=>{'sql'=>"UPDATE ".$self->table("box")
+                      ." SET kind=?"
+                      ." WHERE student=? AND question=? AND answer=? AND role=?"},
        'namefieldPage'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
                    ." WHERE student=?"},
        'dims'=>{'sql'=>"SELECT width,height,markdiameter,dpi FROM "
@@ -581,8 +595,8 @@ sub full_ids {
     return($self->sql_list($self->statement('FULLIDS')));
 }
 
-#Return list of student, page, question
-sub student_question_page{
+# Return list of student, page, question
+sub student_question_page {
     my ($self)=@_;
     my @list = @{$self->dbh
 		     ->selectall_arrayref($self->statement('MapQuestionPage'))};
@@ -901,6 +915,21 @@ sub namefield_page {
   my ($self,$student)=@_;
   return($self->sql_single($self->statement('namefieldPage'),
                            $student));
+}
+
+# Get/set box kind for a particular box
+
+sub box_kind {
+  my ($self,$student,$question,$answer,$role,$value)=@_;
+  $role=BOX_ROLE_ANSWER if(!$role);
+  if(defined($value)) {
+    $self->statement('boxSetKind')
+      ->execute($value,
+                $student,$question,$answer,$role);
+  } else {
+    return($self->sql_single($self->statement('boxGetKind'),
+                             $student,$question,$answer,$role));
+  }
 }
 
 1;

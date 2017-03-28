@@ -97,6 +97,7 @@ sub ajoute {
 
 my @pages=();
 my @flags=();
+my %kind=();
 my @pre_assoc=();
 my $cases;
 my $page_number=0;
@@ -136,12 +137,13 @@ while(<SRC>) {
 		     -cases=>$cases};
     }
     if(/\\tracepos\{(.+?)\}\{([+-]?[0-9.]+[a-z]*)\}\{([+-]?[0-9.]+[a-z]*)\}(?:\{([a-zA-Z]*)\})?$/) {
-	$i=$1;
+      my $id=$1;
+	my $i=$id;
 	my $x=read_inches($2);
 	my $y=read_inches($3);
 	my $shape=$4;
 	$i =~ s/^[0-9]+\/[0-9]+://;
-	$cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0,'shape'=>''}
+	$cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0,'shape'=>'',id=>$id}
 	  if(!$cases->{$i});
 	ajoute($cases->{$i}->{'bx'},$x);
 	ajoute($cases->{$i}->{'by'},$y);
@@ -166,6 +168,9 @@ while(<SRC>) {
     }
     if(/\\with\{(.+?)=(.*)\}/) {
       $build_vars{$1}=$2;
+    }
+    if(/\\kind\{(.+?)\}\{(.+?)\}/) {
+      $kind{$1}=$2;
     }
 }
 close(SRC);
@@ -261,7 +266,7 @@ PAGE: for my $p (@pages) {
 	$layout->question_name($q,$name) if($name ne '');
 	$layout->statement('NEWBox')
 	  ->execute(@ep,$role{$type},
-		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'});
+		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'},$kind{$c->{$k}->{id}});
       }
     }
 
