@@ -112,9 +112,19 @@ package AMC::DataModule::capture;
 #   capture action, 0 if declared not to be filled, and -1 if no
 #   manual data capture occured for this zone.
 #
+# * text_auto is a text, extracted from the box content (OCR), if
+#   applicable (boxes with a non-empty kind value in the layout
+#   database).
+#
+# * text_manual is the result of manual data capture that should
+#   replace automatic data capture stored in text_auto.
+#
 # * image is the name of the zone image file, extracted from the
 #   scan. This filename is relative to the %PROJET/cr/zooms directory
 #   (%PROJET is here the project directory).
+#
+# * imagedata is the zone image itself, extracted from the scan, as a
+#   BLOB
 
 # position retains the position of the zones corners on the scan
 #
@@ -150,12 +160,19 @@ use constant {
 
   POSITION_BOX=>1,
   POSITION_MEASURE=>2,
+
+  PRI_MANUAL=>1,
+  PRI_AUTO=>2,
+  PRI_APPLICABLE=>0,
 };
 
 our @EXPORT_OK = qw(ZONE_FRAME ZONE_NAME ZONE_DIGIT ZONE_BOX
-		  POSITION_BOX POSITION_MEASURE);
+                    POSITION_BOX POSITION_MEASURE
+                    PRI_MANUAL PRI_AUTO PRI_APPLICABLE
+                  );
 our %EXPORT_TAGS = ( 'zone' => [ qw/ZONE_FRAME ZONE_NAME ZONE_DIGIT ZONE_BOX/ ],
 		     'position'=> [ qw/POSITION_BOX POSITION_MEASURE/ ],
+                     'pri' => [ qw/PRI_MANUAL PRI_AUTO PRI_APPLICABLE/ ],
 		   );
 
 use DBI qw(:sql_types);
@@ -169,7 +186,7 @@ use XML::Simple;
 use_gettext();
 
 sub version_current {
-  return(4);
+  return(5);
 }
 
 sub version_upgrade {
@@ -237,6 +254,13 @@ sub version_upgrade {
 
       $self->progression('end');
       return(4);
+    }
+    if($old_version==4) {
+      $self->sql_do("ALTER TABLE ".$self->table("zone")
+                    ." ADD COLUMN text_auto TEXT");
+      $self->sql_do("ALTER TABLE ".$self->table("zone")
+                    ." ADD COLUMN text_manual TEXT");
+      return(5);
     }
     return('');
 }
@@ -527,6 +551,9 @@ sub define_statements {
      'setManualPageZones'=>{'sql'=>"UPDATE $t_zone"
 			    ." SET manual=?"
 			    ." WHERE student=? AND page=? AND copy=?"},
+     'clearManualTextPageZones'
+     =>{sql=>"UPDATE $t_zone"
+       ." SET text_manual=? WHERE student=? AND page=? AND copy=?"},
      'ticked'=>{'sql'=>"SELECT CASE"
 		." WHEN manual >= 0 THEN manual"
 		." WHEN total<=0 THEN 0"
@@ -667,6 +694,23 @@ sub define_statements {
 		      ." WHERE z.student=? AND z.page=? AND z.copy=?"
 		      ."   AND z.type=? AND p.type=?"
 		      ." ORDER BY z.zoneid,p.corner"},
+     'getTextApplicable'
+     =>{sql=>"SELECT CASE WHEN text_manual IS NULL OR text_manual='' THEN text_auto"
+        ." ELSE text_manual END AS text"
+        ." FROM $t_zone WHERE "
+        ."student=? AND copy=? AND id_a=? AND id_b=? AND type=?"},
+     'getTextAuto'
+     =>{sql=>"SELECT text_auto FROM $t_zone WHERE "
+        ."student=? AND copy=? AND id_a=? AND id_b=? AND type=?"},
+     'getTextManual'
+     =>{sql=>"SELECT text_manual FROM $t_zone WHERE "
+        ."student=? AND copy=? AND id_a=? AND id_b=? AND type=?"},
+     'setTextAuto'
+     =>{sql=>"UPDATE $t_zone SET text_auto=? WHERE "
+        ."student=? AND copy=? AND id_a=? AND id_b=? AND type=?"},
+     'setTextManual'
+     =>{sql=>"UPDATE $t_zone SET text_manual=? WHERE "
+        ."student=? AND copy=? AND id_a=? AND id_b=? AND type=?"},
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
@@ -1265,6 +1309,7 @@ sub remove_manual {
   my ($self,$student,$page,$copy)=@_;
   $self->statement('setManualPage')->execute(-1,$student,$page,$copy);
   $self->statement('setManualPageZones')->execute(-1,$student,$page,$copy);
+  $self->statement('clearManualTextPageZones')->execute(undef,$student,$page,$copy);
   if($self->page_zones_auto_count($student,$page,$copy)==0) {
     $self->delete_page_data($student,$page,$copy);
   }
@@ -1484,6 +1529,31 @@ sub zooms_cleanup_transaction {
   $self->end_transaction('zcln');
   $self->vacuum();
   return($n);
+}
+
+# get_box_text(student,copy,question,answer,pri) gets the text written by
+# the studant in a particular box. With pri=PRI_AUTO, retrieve the
+# text read by OCR during automatic data capture. With pri=PRI_MANUAL,
+# retrive the text entered with manual data capture. With
+# pri=PRI_APPLICABLE, retrive the manual one, or the automatic one if
+# the manual one is empty.
+
+sub get_box_text {
+  my ($self,$student,$copy,$question,$answer,$pri)=@_;
+    return($self->sql_single($self->statement('getText'.
+                                              ($pri==PRI_AUTO ? 'Auto' :
+                                               $pri==PRI_MANUAL ? 'Manual' :
+                                               'Applicable')),
+                             $student,$copy,$question,$answer,ZONE_BOX));
+}
+
+# set_box_text(student,copy,question,answer,pri,value) sets the text value
+# (here pri=PRI_APPLICABLE is not allowed).
+
+sub set_box_text {
+  my ($self,$student,$copy,$question,$answer,$pri,$value)=@_;
+  $self->statement('setText'.($pri==PRI_AUTO ? 'Auto' : 'Manual'))
+      ->execute($value,$student,$copy,$question,$answer,ZONE_BOX);
 }
 
 1;

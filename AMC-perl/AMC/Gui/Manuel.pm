@@ -32,7 +32,8 @@ use AMC::Basic;
 use AMC::Gui::PageArea;
 use AMC::Gui::WindowSize;
 use AMC::Data;
-use AMC::DataModule::capture qw/:zone/;
+use AMC::DataModule::capture qw/:zone :pri/;
+use AMC::DataModule::layout qw/:flags/;
 
 use constant {
     MDIAG_ID => 0,
@@ -414,8 +415,18 @@ sub maj_list_i {
 }
 
 sub choix {
-    my ($self,$widget,$event)=(@_);
-    $widget->choix($event);
+  my ($self,$widget,$event)=(@_);
+  $widget->choix($event);
+}
+
+sub key_press {
+  my ($self,$widget,$event)=(@_);
+  $widget->key_press($event);
+}
+
+sub loose_focus {
+  my ($self,$widget,$event)=(@_);
+  $widget->loose_focus($event);
 }
 
 sub une_modif {
@@ -525,7 +536,11 @@ sub charge_i {
 	  $ci{'ymax'}=$c->{'y'} if($c->{'y'}>$ci{'ymax'});
 	  $ci{'xmin'}=$c->{'x'} if($c->{'x'}<$ci{'xmin'});
 	  $ci{'ymin'}=$c->{'y'} if($c->{'y'}<$ci{'ymin'});
-	  push @{$self->{'layinfo'}->{'box'}},{%ci} if($c->{'corner'}==4);
+          if($c->{'corner'}==4) {
+            $ci{kind}=$self->{layout}
+              ->box_kind($spc[0],$ci{question},$ci{answer},BOX_ROLE_ANSWER);
+            push @{$self->{'layinfo'}->{'box'}},{%ci};
+          }
 	}
       } else {
 	my $c;
@@ -552,13 +567,18 @@ sub charge_i {
 	for my $i (@{$self->{'layinfo'}->{'box'}}) {
 	  my $id=$i->{'question'}."."
 	    .$i->{'answer'};
-	  my $t=$self->{'capture'}
-	    ->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
-		     $self->{'seuil'},$self->{'seuil_up'});
-	  $t='' if(!defined($t));
-	  debug "Q=$id R=$t";
-	  $i->{'id'}=[@spc];
-	  $i->{'ticked'}=$t;
+	  if($i->{kind} && $i->{kind} =~ /^c:/) {
+            $i->{entry}=$self->{capture}
+              ->get_box_text(@spc[0,2],$i->{question},$i->{answer},
+                             PRI_APPLICABLE);
+          } else {
+            my $t=$self->{'capture'}
+              ->ticked(@spc[0,2],$i->{'question'},$i->{'answer'},
+                       $self->{'seuil'},$self->{'seuil_up'});
+            $t='' if(!defined($t));
+            debug "Q=$id R=$t";
+            $i->{'ticked'}=$t;
+          }
 	}
       }
     }
@@ -596,9 +616,12 @@ sub ecrit {
 
       for my $i (@{$self->{'layinfo'}->{'box'}}) {
 	$self->{'capture'}
-	  ->set_manual(@{$i->{'id'}},
+	  ->set_manual(@spc,
 		       ZONE_BOX,$i->{'question'},$i->{'answer'},
 		       ($i->{'ticked'} ? 1 : 0));
+        $self->{capture}->set_box_text(@spc[0,2],$i->{question},$i->{answer},
+                                       PRI_MANUAL,$i->{entry})
+          if($i->{kind});
       }
 
       $self->{'capture'}->end_transaction('manw');

@@ -25,6 +25,13 @@ use AMC::Basic;
 
 @ISA=("Gtk3::DrawingArea");
 
+my %allowed_chars_for_kind=
+  ('digit'=>'[0-9]',
+   'alpha'=>'[a-zA-Z]',
+   'sign'=>'[+-]',
+   'alphanum'=>'[a-zA-Z0-9]',
+   );
+
 sub add_feuille {
     my ($self,%oo)=@_;
     bless($self,"AMC::Gui::PageArea");
@@ -53,6 +60,7 @@ sub add_feuille {
     $self->{empty_color_name}="#78FFED";
     $self->{invalid_color_name}="#FFEF3B";
     $self->{drawings_color_name}="red";
+    $self->{focus_color_name}="#FF8181";
     $self->{text_color_name}="black";
 
     $self->{linewidth_zone}=1;
@@ -67,7 +75,7 @@ sub add_feuille {
 	$self->{$_}=$oo{$_} if(defined($self->{$_}));
     }
 
-    for my $type ('',qw/scorezone_ question_ unticked_ empty_ invalid_ drawings_ text_/) {
+    for my $type ('',qw/scorezone_ question_ unticked_ empty_ invalid_ drawings_ text_ focus_/) {
       $self->{$type.'color'}=
 	Gtk3::Gdk::RGBA::parse($self->{$type.'color_name'}) if($type);
     }
@@ -113,6 +121,7 @@ sub set_image {
   } else {
     $self->{'i-src'}='';
   }
+  $self->{current_box}='';
   $self->{'layinfo'}=$layinfo;
   $self->{'modifs'}=0;
   $self->allocate_drawing();
@@ -145,10 +154,10 @@ sub sync {
 sub modif {
     my $self=shift;
     $self->{'modifs'}=1;
-}
+  }
 
-sub choix {
-  my ($self,$event)=(@_);
+sub not_editable {
+  my ($self)=@_;
 
   if(!$self->{'editable'}) {
     return TRUE;
@@ -166,6 +175,21 @@ sub choix {
     return TRUE;
   }
 
+  return();
+}
+
+sub loose_focus {
+  my ($self,$event)=(@_);
+
+  $self->{current_box}='';
+  $self->queue_draw();
+}
+
+sub choix {
+  my ($self,$event)=(@_);
+
+  return TRUE if($self->not_editable);
+
   if($self->{'layinfo'}->{'box'}) {
 
       if ($event->button == 1) {
@@ -175,17 +199,59 @@ sub choix {
 
 	      if($x<=$i->{'xmax'}*$self->{'rx'} && $x>=$i->{'xmin'}*$self->{'rx'}
 		 && $y<=$i->{'ymax'}*$self->{'ry'} && $y>=$i->{'ymin'}*$self->{'ry'}) {
-		  $self->{'modifs'}=1;
 
-		  debug " -> box $i\n";
-		  $i->{'ticked'}=!$i->{'ticked'};
-
+		  if($i->{kind}) {
+                    debug " -> box selected: $i";
+                    $self->{current_box}=$i;
+                    $self->grab_focus();
+                  } else {
+                    $self->modif();
+                    debug " -> box clicked: $i";
+                    $i->{'ticked'}=!$i->{'ticked'};
+                  }
                   $self->queue_draw();
 	      }
 	  }
       }
 
   }
+  return TRUE;
+}
+
+sub key_press {
+  my ($self,$event)=(@_);
+
+  return TRUE if($self->not_editable);
+
+  my $key=Gtk3::Gdk::keyval_name($event->keyval);
+  debug "Key pressed: $key";
+
+  if($self->{current_box}) {
+    if($self->{current_box}->{kind} =~ /^c:(.*)/) {
+      my $k=$1;
+      if($key eq 'Delete' || $key eq 'BackSpace') {
+        delete $self->{current_box}->{entry};
+        $self->modif();
+        $self->queue_draw();
+        return TRUE;
+      }
+      my $allowed_chars=$allowed_chars_for_kind{$k};
+      if($allowed_chars && $key !~ /^$allowed_chars$/) {
+        debug "  -> not in allowed chars: $key";
+        return TRUE;
+      }
+      if(length($key) != 1) {
+        debug "  -> non-standard key: $key";
+        return TRUE;
+      }
+      $self->{current_box}->{entry}=$key;
+      $self->modif();
+      $self->queue_draw();
+    } else {
+      debug "This box kind is not handled: $kind";
+    }
+  }
+
   return TRUE;
 }
 
@@ -210,6 +276,35 @@ sub extend {
     }
   }
   return(@xy);
+}
+
+sub draw_entry {
+  my ($self,$context,$box)=@_;
+
+  return if(!$box->{entry});
+
+  my $w=($box->{xmax}-$box->{xmin})*$self->{rx};
+  my $h=($box->{ymax}-$box->{ymin})*$self->{ry};
+  if($w<3 || $h<3) {
+    debug "Skip draw_entry in small box: size $w x $h";
+    return();
+  }
+  $context->select_font_face( "Sans", "normal", "bold" );
+  $context->set_font_size( 100 );
+  my $ext=$context->text_extents($box->{entry});
+
+  return() if($ext->{width}<=0 || $ext->{height}<=0);
+
+  my $r=0.8*$w/$ext->{width};
+  my $ry=0.8*$h/$ext->{height};
+  $r=$ry if($ry<$r);
+
+  $context->set_font_size( 100*$r );
+  $ext=$context->text_extents($box->{entry});
+  $context->move_to(($box->{xmin}+$box->{xmax})*$self->{rx}/2-($ext->{width}+1)/2,
+                    ($box->{ymin}+$box->{ymax})*$self->{ry}/2+($ext->{height}+1)/2);
+  $context->show_text($box->{entry});
+  $context->stroke;
 }
 
 sub draw_box {
@@ -414,6 +509,19 @@ sub draw {
 	for $box (@{$self->{'layinfo'}->{'scorezone'}}) {
 	  $self->draw_box($context,$box,'');
 	}
+
+        for $box (@{$self->{'layinfo'}->{'box'}}) {
+          if($box->{entry}) {
+            $self->context_color($context,'drawings');
+            $self->draw_entry($context,$box);
+          }
+        }
+
+        if($self->{current_box}) {
+          $context->set_line_width($self->{linewidth_box});
+          $self->context_color($context,'focus');
+          $self->draw_box($context,$self->{current_box},'',$self->{box_external});
+        }
 
 	debug "Done.";
     }
