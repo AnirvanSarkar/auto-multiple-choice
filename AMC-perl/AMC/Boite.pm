@@ -264,6 +264,13 @@ sub commande_mesure0 {
     return($c);
 }
 
+sub commande_extract0 {
+    my ($self,$prop,$shape)=(@_);
+    my $c="extract0 "
+      .join(' ',$self->etendue_xy('xy'));
+    return($c);
+}
+
 # renvoie les coordonnees du centre de la boite.
 
 sub centre {

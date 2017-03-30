@@ -186,7 +186,7 @@ sub detecte_cb {
 sub get_layout_data {
   my ($student,$page,$all)=@_;
   my $r={'corners.test'=>{},'zoom.file'=>{},'darkness.data'=>{},
-	'boxes'=>{},'flags'=>{}};
+	'boxes'=>{},'flags'=>{},kind=>{}};
 
   ($r->{'width'},$r->{'height'},$r->{'markdiameter'},undef)
     =$layout->dims($student,$page);
@@ -205,6 +205,7 @@ sub get_layout_data {
 			   (qw/xmin ymin xmax ymax/));
       $r->{'flags'}->{$c->{'question'}.".".$c->{'answer'}}=
 	$c->{'flags'};
+      $r->{kind}->{$c->{'question'}.".".$c->{'answer'}}=$c->{kind};
     }
     for my $c ($layout->type_info('namefield',$student,$page)) {
       $r->{'boxes'}->{'namefield'}=
@@ -296,24 +297,35 @@ sub measure_box {
     if(!($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
       my $pc;
 
-      $pc=$ld->{'boxes'}->{$k}
-	->commande_mesure0($prop,get_shape($ld->{'flags'}->{$k}));
+      if($ld->{kind}->{$k} =~ /^c:/) {
+        $pc=$ld->{'boxes'}->{$k}
+          ->commande_extract0($prop,get_shape($ld->{'flags'}->{$k}));
 
-      for($process->commande($pc)) {
-	if(/^TCORNER\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
-	  $ld->{'boxes.scan'}->{$k}->def_point_suivant($1,$2);
-	}
-	if(/^COIN\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
-	  $ld->{'corners.test'}->{$k}->def_point_suivant($1,$2);
-	}
-	if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
-	  $r=($2==0 ? 0 : $1/$2);
-	  debug sprintf("Binary box $k: %d/%d = %.4f\n",$1,$2,$r);
-	  $ld->{'darkness.data'}->{$k}=[$2,$1];
-	}
-	if(/^ZOOM\s+(.*)/) {
-	  $ld->{'zoom.file'}->{$k}=$1;
-	}
+        for($process->commande($pc)) {
+          if(/^ZOOM\s+(.*)/) {
+            $ld->{'zoom.file'}->{$k}=$1;
+          }
+        }
+      } else {
+        $pc=$ld->{'boxes'}->{$k}
+          ->commande_mesure0($prop,get_shape($ld->{'flags'}->{$k}));
+
+        for($process->commande($pc)) {
+          if(/^TCORNER\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
+            $ld->{'boxes.scan'}->{$k}->def_point_suivant($1,$2);
+          }
+          if(/^COIN\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
+            $ld->{'corners.test'}->{$k}->def_point_suivant($1,$2);
+          }
+          if(/^PIX\s+([0-9]+)\s+([0-9]+)$/) {
+            $r=($2==0 ? 0 : $1/$2);
+            debug sprintf("Binary box $k: %d/%d = %.4f\n",$1,$2,$r);
+            $ld->{'darkness.data'}->{$k}=[$2,$1];
+          }
+          if(/^ZOOM\s+(.*)/) {
+            $ld->{'zoom.file'}->{$k}=$1;
+          }
+        }
       }
     }
 
@@ -630,9 +642,15 @@ sub one_scan {
 			   @{$ld->{'darkness.data'}->{$k}},
 			   undef,
 			   file_content($zoom_dir."/".$ld->{'zoom.file'}->{$k}));
-	} else {
-	  debug "No darkness data for box $k";
-	}
+	} elsif($ld->{'zoom.file'}->{$k}) {
+	  $capture->set_zone_auto_id($zoneid,
+                                     0,0,
+                                     undef,
+                                     file_content($zoom_dir."/".$ld->{'zoom.file'}->{$k}));
+          debug "No darkness data for box $k";
+        } else {
+          debug "Nothing to save for box $k";
+        }
       }
       if($ld->{'boxes'}->{$k} && !$ld->{'boxes.scan'}->{$k}) {
 	$ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;

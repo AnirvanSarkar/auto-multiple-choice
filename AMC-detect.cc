@@ -21,6 +21,7 @@
 */
 
 #include <math.h>
+#include <string.h>
 #include <cstddef>
 
 #include <stdio.h>
@@ -137,7 +138,7 @@ void agrege(double x,double y,double* coins_x,double* coins_y) {
 
   load_image(...) loads the scan image, with some pre-processings:
 
-  - if ignore_red is true, the red color is discarder from the scan:
+  - if ignore_red is true, the red color is discarded from the scan:
     only the red channel is kept from the scan.
 
   - the image is (a little) smoothed with a Gaussian kernel, and a
@@ -154,7 +155,7 @@ void agrege(double x,double y,double* coins_x,double* coins_y) {
 
 */
 
-void load_image(IplImage** src,char *filename,
+void load_image(IplImage** src,IplImage** src_grayscale,char *filename,
 		int ignore_red,double threshold=0.6,int view=0) {
   IplImage* color;
   double max;
@@ -195,6 +196,12 @@ void load_image(IplImage** src,char *filename,
       processing_error=3;
       return;
     }
+  }
+
+  /* save current grayscale image */
+  if(src_grayscale!=NULL) {
+    *src_grayscale=cvCreateImage( cvGetSize(*src), (*src)->depth, 1 );
+    cvCopy(*src,*src_grayscale);
   }
 
   cvMinMaxLoc(*src,NULL,&max);
@@ -242,6 +249,49 @@ void pre_traitement(IplImage* src,int lissage_trous,int lissage_poussieres) {
 typedef struct {
   double a,b,c,d,e,f;
 } linear_transform;
+
+/* linear_transform copy */
+
+void lt_copy(linear_transform *dst, linear_transform *src) {
+  memcpy(dst,src,sizeof(linear_transform));
+}
+
+/* as a OpenCV matrix
+ */
+
+CvMat* lt_matrix(linear_transform *t) {
+  CvMat* m=cvCreateMat(2,3,CV_32FC1);
+  CV_MAT_ELEM(*m,float,0,0)=t->a;
+  CV_MAT_ELEM(*m,float,0,1)=t->b;
+  CV_MAT_ELEM(*m,float,0,2)=t->e;
+  CV_MAT_ELEM(*m,float,1,0)=t->c;
+  CV_MAT_ELEM(*m,float,1,1)=t->d;
+  CV_MAT_ELEM(*m,float,1,2)=t->f;
+  return(m);
+}
+
+/* enlargement(t) returns the linear mean enlargement of the linear
+   transform
+*/
+
+double enlargement(linear_transform *t) {
+  double det=t->a * t->d - t->b * t->c;
+  if(det>=0)
+    return(sqrt(det));
+  else
+    return(0);
+}
+
+/* enlarge(t,ratio) composes t with an homothety */
+
+void enlarge(linear_transform *t, double ratio) {
+  t->a *= ratio;
+  t->b *= ratio;
+  t->c *= ratio;
+  t->d *= ratio;
+  t->e *= ratio;
+  t->f *= ratio;
+}
 
 /* transforme(t,x,y,&xp,&yp) applies the linear transform t to the
    point (x,y) to give (xp,yp)
@@ -698,6 +748,47 @@ int check_zooms_dir(int student, char *zooms_dir=NULL,int log=0) {
   return(ok);
 }
 
+/* save_zoom(...) saves a straighten up zoom of the box */
+
+void save_zoom(IplImage* src, int xmin, int xmax, int ymin, int ymax,
+               int student, int question, int answer,
+               char* zooms_dir) {
+  int ok;
+  static char* zoom_file=NULL;
+#if OPENCV_20
+  static int save_options[3]={CV_IMWRITE_PNG_COMPRESSION,7,0};
+#endif
+
+  if(zooms_dir!=NULL && student>=0) {
+    /* check if directory is present, or ceate it */
+    ok=check_zooms_dir(student,zooms_dir,0);
+
+    /* save zoom file */
+    if(ok) {
+      if(asprintf(&zoom_file,"%s/%d-%d.png",zooms_dir,question,answer)>0) {
+        printf(": Saving zoom to %s\n",zoom_file);
+        printf(": Z=(%d,%d)+(%d,%d)\n",
+               xmin,ymin,xmax-xmin,ymax-ymin);
+        cvSetImageROI(src,
+                      cvRect(xmin,ymin,xmax-xmin,ymax-ymin));
+        if(cvSaveImage(zoom_file,src
+#if OPENCV_20
+                       ,save_options
+#endif
+                       )!=1) {
+          printf("! ZOOMS : Zoom save error\n");
+        } else {
+          printf("ZOOM %d-%d.png\n",question,answer);
+        }
+        
+        cvResetImageROI(src);
+      } else {
+        printf("! ZOOMFN : Zoom file name error\n");
+      }
+    }
+  }
+}
+
 /* mesure_case(...) computes the darkness value (number of black
    pixels, and total number of pixels) of a particular box on the
    scan. A "zoom" (small image with the box on the scan only) can be
@@ -780,12 +871,6 @@ void mesure_case(IplImage *src,IplImage *illustr,int illustr_mode,
   int ty=src->height;
 
   CvPoint coins_int[4];
-
-  static char* zoom_file=NULL;
-
-#if OPENCV_20
-  static int save_options[3]={CV_IMWRITE_PNG_COMPRESSION,7,0};
-#endif
 
   npix=0;
   npixnoir=0;
@@ -958,38 +1043,32 @@ void mesure_case(IplImage *src,IplImage *illustr,int illustr_mode,
     
     /* making zoom */
 
-    if(zooms_dir!=NULL && student>=0) {
-
-      /* check if directory is present, or ceate it */
-      ok=check_zooms_dir(student,zooms_dir,0);
-
-      /* save zoom file */
-      if(ok) {
-	if(asprintf(&zoom_file,"%s/%d-%d.png",zooms_dir,question,answer)>0) {
-	  printf(": Saving zoom to %s\n",zoom_file);
-	  printf(": Z=(%d,%d)+(%d,%d)\n",
-		 z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin);
-	  cvSetImageROI(illustr,
-			cvRect(z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin));
-	  if(cvSaveImage(zoom_file,illustr
-#if OPENCV_20
-			 ,save_options
-#endif
-			 )!=1) {
-	    printf("! ZOOMS : Zoom save error\n");
-	  } else {
-	    printf("ZOOM %d-%d.png\n",question,answer);
-	  }
-	  
-	  cvResetImageROI(illustr);
-	} else {
-	  printf("! ZOOMFN : Zoom file name error\n");
-	}
-      }
-    }
+    save_zoom(illustr,
+              z_xmin,z_xmax,z_ymin,z_ymax,
+              student,question,answer,zooms_dir);
   }
 
   printf("PIX %d %d\n",npixnoir,npix);
+}
+
+/* rotate_page
+
+   Makes a rotated version of the source scan, so that subject->dst
+   coordinates is a <ratio> homothety.
+
+*/
+
+void rotate_page(IplImage* src,linear_transform* transfo,IplImage** dst,double *ratio) {
+  linear_transform rot;
+  CvMat* map_matrix;
+
+  lt_copy(&rot,transfo);
+  *ratio=1.0/enlargement(transfo);
+  enlarge(&rot,*ratio);
+  map_matrix = lt_matrix(&rot);
+  *dst=cvCreateImage(cvGetSize(src),src->depth,src->nChannels);
+  cvWarpAffine(src,*dst,map_matrix);
+  cvReleaseMat(&map_matrix);
 }
 
 /* MAIN
@@ -1017,6 +1096,7 @@ int main( int argc, char** argv )
   double coins_x[4],coins_y[4];
   double coins_x0[4],coins_y0[4];
   double tmp;
+  double ratio=0;
   int upside_down;
   int i;
   int student,page,question,answer;
@@ -1025,6 +1105,8 @@ int main( int argc, char** argv )
   double mse;
 
   IplImage* src=NULL;
+  IplImage* src_grayscale=NULL;
+  IplImage* src_rotated=NULL;
   IplImage* dst=NULL;
   IplImage* illustr=NULL;
   IplImage* src_calage=NULL;
@@ -1119,7 +1201,7 @@ int main( int argc, char** argv )
 	  }
 	}
 
-	load_image(&src,scan_file,ignore_red,threshold,view);
+	load_image(&src,&src_grayscale,scan_file,ignore_red,threshold,view);
 	printf(": Image loaded\n");
 
 	if(processing_error==0) {
@@ -1230,6 +1312,19 @@ int main( int argc, char** argv )
       } else if(sscanf(commande,"id %d %d %d %d",
 		       &student,&page,&question,&answer)==4) {
 	/* box id */
+      } else if(sscanf(commande,"extract0 %lf %lf %lf %lf",
+		       &xmin,&xmax,&ymin,&ymax)==4) {
+        /* "extract0" and 4 arguments: xmin, xmax, ymin, ymax
+           extracts a rotated sub-image from scan
+         */
+        if(src_rotated==NULL) {
+          printf(": Rotate page\n");
+          rotate_page(src_grayscale,&transfo_back,&src_rotated,&ratio);
+        }
+        xmin*=ratio;xmax*=ratio;
+        ymin*=ratio;ymax*=ratio;
+        save_zoom(src_rotated,xmin,xmax,ymin,ymax,
+                  student,question,answer,zooms_dir);
       } else if(sscanf(commande,"mesure0 %lf %s %lf %lf %lf %lf",
 		       &prop,shape_name,
 		       &xmin,&xmax,&ymin,&ymax)==6) {
