@@ -5558,7 +5558,8 @@ sub projet_ouvre {
 
     if($proj) {
 	my ($ok,$texsrc);
-	cursor_wait;
+
+	quitte_projet();
 
 	# choix fichier latex si nouveau projet...
 	if($deja) {
@@ -5574,7 +5575,7 @@ sub projet_ouvre {
 	    }
 	}
 
-	quitte_projet();
+	cursor_wait;
 
 	# creates project directory structure
 
@@ -5590,7 +5591,8 @@ sub projet_ouvre {
 	$shortcuts->set(project_name=>$proj);
 
         $config->open_project($proj);
-        $config->set('project:texsrc',$texsrc) if($texsrc);
+        $config->set('project:texsrc',$texsrc)
+          if($texsrc && !$config->get('project:texsrc'));
 
 	$projet{'nom'}=$proj;
 
