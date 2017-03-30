@@ -5087,7 +5087,7 @@ sub n_fich {
     my ($dir)=@_;
 
     if(opendir(NFICH,$dir)) {
-	my @f=grep { ! /^\./ } readdir(NFICH);
+	my @f=grep { ! /^(\.|__MACOSX)/ } readdir(NFICH);
 	closedir(NFICH);
 
 	return(1+$#f,"$dir/$f[0]");
