@@ -968,16 +968,25 @@ if($to_do{b}) {
 	  $current_q->{'indicative'}=1;
 	}
 
-	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
+	if(/AUTOQCM\[REP=([0-9]+):(.*)\]/) {
 	  # answer
 	  $rep=$1;
+          my $answer=$2;
 	  my $qq=$quest;
 	  if($outside_quest && !$qq) {
 	    $qq=$outside_quest;
 	    debug_and_stderr "WARNING: answer outside questions for student $etu (after question $qq)";
 	  }
-	  $scoring->new_answer
-	    ($etu,$qq,$rep,($2 eq 'B' ? 1 : 0),'');
+          if($answer eq 'B' || $answer eq 'M') {
+            $scoring->new_answer
+              ($etu,$qq,$rep,($2 eq 'B' ? 1 : 0),'');
+          } elsif($answer =~ /^([c]:.+?)=(.*)$/) {
+            my ($kind,$value)=($1,$2);
+            $scoring->new_answer
+              ($etu,$qq,$rep,0,'',$value);
+          } else {
+            die "Can't parse answer ($etu,$qq,$rep) value: $answer";
+          }
 	}
 
 	# AUTOQCM[BR=N] tells that this student is a replicate of student N

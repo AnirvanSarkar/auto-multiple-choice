@@ -24,6 +24,8 @@ use AMC::Basic;
 use AMC::DataModule::scoring qw/:question/;
 use AMC::ScoringEnv;
 
+use Data::Dumper;
+
 sub new {
     my (%o)=(@_);
 
@@ -115,7 +117,7 @@ sub prepare_question {
 sub set_number_variables {
   my ($self,$question_data,$correct)=@_;
 
-  my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0};
+  my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0,'N_WRITE'=>0,'N_ENTRY'=>0,'E_ENTRY'=>''};
 
   $self->{env}->set_type($correct);
 
@@ -126,11 +128,13 @@ sub set_number_variables {
   my $n_plain=0;
   my $ticked_noneof='';
 
-  for my $a (@{$question_data->{'answers'}}) {
+  for my $a (sort { $a->{answer} <=> $b->{answer} }
+             @{$question_data->{'answers'}}) {
     my $c=$a->{'correct'};
     my $t=($correct ? $c : $a->{'ticked'});
+    my $text=($correct ? $a->{correct_text} : $a->{text});
 
-    debug("[ Q ".$a->{'question'}." A ".$a->{'answer'}." ] ticked $t (correct $c) TYPE=$correct\n");
+    debug("[ Q ".$a->{'question'}." A ".$a->{'answer'}." ] ticked $t (correct $c) text '$a->{text}' (correct '$a->{correct_text}') TYPE=$correct\n");
 
     $n_ok+=($c == $t ? 1 : 0);
     $n_ticked+=$t;
@@ -145,9 +149,19 @@ sub set_number_variables {
       $vars->{'N'.$bn}++;
       $vars->{'N'.$bn.$co}++ if($co);
 
+      $vars->{'N_WRITE'}++ if($a->{text});
+      $vars->{'N_ENTRY'}++ if($a->{correct_text});
+
+      $vars->{'E_CORRECT'.$a->{answer}}='"'.$a->{correct_text}.'"' if($a->{correct_text});
+      if($a->{text}) {
+        $vars->{'E_ENTRY'.$a->{answer}}='"'.$text.'"' if($text);
+        $vars->{'E_ENTRY'} .= $text;
+      }
+
       $n_plain++;
     }
   }
+  $vars->{'E_ENTRY'}='"'.$vars->{'E_ENTRY'}.'"';
 
   $self->{env}->set_variables_from_hashref($vars,0);
   $self->{env}->set_variable("N",$n_plain,0);
@@ -304,7 +318,11 @@ sub multiple_standard_score {
   for my $a (@$answers) {
     # process only plain answers, not the "none of the above" answer
     if($a->{'answer'} != 0) {
-      my $code=($correct || ($a->{'ticked'}==$a->{'correct'})
+      debug "Answer data: ".Dumper($a);
+      my $code=($correct ||
+                ($a->{'ticked'}==$a->{'correct'} &&
+                 ($a->{correct_text} ? $a->{correct_text} eq $a->{text} : 1)
+                )
 		? "b" : "m");
       my $answer_env=$self->{env}->clone;
       $answer_env->process_directives($a->{'strategy'});
@@ -367,7 +385,7 @@ sub score_question {
     $why="E";
     $xx=$self->directive("e");
     debug "Scoring errors: ".join(', ',$self->{env}->errors);
-  } elsif($self->variable("N_TICKED")==0) {
+  } elsif($self->variable("N_TICKED")==0 && $self->variable("N_WRITE")==0) {
     # no ticked boxes at all
     $xx=$self->directive("v");
     $why='V';

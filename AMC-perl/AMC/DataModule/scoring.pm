@@ -104,6 +104,8 @@ package AMC::DataModule::scoring;
 #
 # * correct is 1 if this choice is correct (use of \correctchoice).
 #
+# * correct_text is the right answer for an entry box.
+#
 # * strategy is the answer scoring strategy string, given in the LaTeX
 #   file after the corresponding correctchoice/wrongchoice commands.
 #
@@ -203,7 +205,7 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(1);
+  return(2);
 }
 
 sub version_upgrade {
@@ -223,7 +225,7 @@ sub version_upgrade {
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("question")
 		      ." (student INTEGER, question INTEGER, type INTEGER, indicative INTEGER DEFAULT 0, strategy TEXT, PRIMARY KEY (student,question))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("answer")
-		      ." (student INTEGER, question INTEGER, answer INTEGER, correct INTEGER, strategy INTEGER, PRIMARY KEY (student,question,answer))");
+		      ." (student INTEGER, question INTEGER, answer INTEGER, correct INTEGER, correct_text TEXT, strategy INTEGER, PRIMARY KEY (student,question,answer))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("alias")
 		      ." (student INTEGER,see INTEGER)");
 
@@ -239,7 +241,12 @@ sub version_upgrade {
 
 	$self->populate_from_xml;
 
-	return(1);
+	return(2);
+    }
+    if($old_version==1) {
+      $self->sql_do("ALTER TABLE ".$self->table("answer")
+                    ." ADD COLUMN correct_text TEXT");
+      return(2);
     }
     return('');
 }
@@ -387,8 +394,8 @@ sub define_statements {
 		     ." (student,question,type,indicative,strategy)"
 		     ." VALUES (?,?,?,?,?)"},
      'NEWAnswer'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("answer")
-		   ." (student,question,answer,correct,strategy)"
-		   ." VALUES (?,?,?,?,?)"},
+		   ." (student,question,answer,correct,strategy,correct_text)"
+		   ." VALUES (?,?,?,?,?,?)"},
      'setAnswerStrat'=>{'sql'=>"UPDATE ".$self->table("answer")
 		       ." SET strategy=? WHERE student=? AND question=? AND answer=?"},
      'addAnswerStrat'=>{'sql'=>"UPDATE ".$self->table("answer")
@@ -492,19 +499,22 @@ sub define_statements {
 		  ." WHERE question=?"
 		  ." AND NOT (student=? AND copy=?)"},
      'studentAnswersBase'=>
-     {'sql'=>"SELECT question,answer"
-      .",correct,strategy"
-      .",(SELECT CASE"
-      ."         WHEN manual >= 0 THEN manual"
-      ."         WHEN total<=0 THEN -1"
-      ."         WHEN black >= ? * total AND black <= ? * total THEN 1"
-      ."         ELSE 0"
-      ."  END FROM $t_zone"
-      ."  WHERE $t_zone.student=? AND $t_zone.copy=? AND $t_zone.type=?"
-      ."        AND $t_zone.id_a=$t_answer.question AND $t_zone.id_b=$t_answer.answer"
-      ." ) AS ticked"
-      ." FROM ".$self->table("answer")
-      ." WHERE student=?"},
+     {sql=>"SELECT"
+      ." question,answer,correct,correct_text,strategy,"
+      ." CASE"
+      ."   WHEN manual >= 0 THEN manual"
+      ."   WHEN total<=0 THEN -1"
+      ."   WHEN black >= ? * total AND black <= ? * total THEN 1"
+      ."   ELSE 0"
+      ." END AS ticked,"
+      ." CASE"
+      ."   WHEN text_manual IS NOT NULL AND text_manual != '' THEN text_manual"
+      ."   ELSE text_auto"
+      ." END AS text"
+      ." FROM ".$self->table("answer"). " a"
+      ." LEFT OUTER JOIN $t_zone z"
+      ." ON z.student=? AND z.copy=? AND z.id_a=a.question AND z.id_b=a.answer"
+      ." WHERE z.type=? AND a.student=?"},
      'studentQuestionsBase'=>
      {'sql'=>"SELECT q.question,q.type,q.indicative,q.strategy,t.title"
       .",d.strategy AS default_strategy"
@@ -627,14 +637,14 @@ sub question_strategy {
   return($self->sql_single($self->statement('qStrat'),$student,$question));
 }
 
-# new_answer($student,$question,$answer,$correct,$strategy) adds an
+# new_answer($student,$question,$answer,$correct,$strategy,$correct_text) adds an
 # answer in the database, giving its characteristics. If the answer
 # already exists, it is updated with no error.
 
 sub new_answer {
-  my ($self,$student,$question,$answer,$correct,$strategy)=@_;
+  my ($self,$student,$question,$answer,$correct,$strategy,$correct_text)=@_;
   $self->statement('NEWAnswer')->execute
-    ($student,$question,$answer,$correct,$strategy);
+    ($student,$question,$answer,$correct,$strategy,$correct_text);
 }
 
 # answer_strategy($student,$question,$answer) returns the scoring
@@ -1010,6 +1020,9 @@ sub student_global {
 #       },
 #  ...
 # }
+#
+# Note that for entry boxes, the answer hash includes correct_text and
+# text values
 
 sub student_scoring_base {
   my ($self,$student,$copy,$darkness_threshold,$darkness_threshold_up)=@_;
