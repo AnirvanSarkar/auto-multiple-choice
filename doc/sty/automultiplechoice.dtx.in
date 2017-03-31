@@ -3071,6 +3071,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %         Environment |{questionmultx}|\marg{key} is the same as
 %         |questionmult|, but with no use of |\multiSymbole|.
 %
+%         Environment |{questionentry}|\marg{key} is the same as
+%         |questionmultx|, but disabling the ``none of these answers''
+%         answer (using |\AMCnoCompleteMulti|). This is usefull for
+%         questions where answeres use entry boxes (boxes where the
+%         student has to \emph{write} something).
+%
 %         Environment |{questionouverte}|\oarg{width} is used for open
 %         questions (that won't be marked automatically!), with width
 %         given as an optional argument (defaults to 3\,cm).
@@ -3104,6 +3110,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \newenvironment{questionmultx}[1]{%
   \begingroup\def\multiSymbole{}\begin{questionmult}{#1}}%
 {\end{questionmult}\endgroup}
+\newenvironment{questionentry}[1]{%
+  \begin{questionmultx}{#1}\AMCnoCompleteMulti}%
+  {\end{questionmultx}}
 \newdimen\ouverte@vs
 \newenvironment{questionouverte}[1][3cm]{%
   \AMC@stepQuestion%
