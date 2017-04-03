@@ -711,6 +711,17 @@ sub define_statements {
      'setTextManual'
      =>{sql=>"UPDATE $t_zone SET text_manual=? WHERE "
         ."student=? AND copy=? AND id_a=? AND id_b=? AND type=?"},
+     'entryImages'
+     =>{sql=>"SELECT i.student AS student,copy,i.question AS question,i.answer AS answer,kind,imagedata,text_manual,text_auto,correct_text"
+        ." FROM"
+        ." (SELECT"
+        ."  z.student AS student,copy,question,answer,kind,imagedata,text_manual,text_auto"
+        ."  FROM $t_zone z LEFT OUTER JOIN $t_box b"
+        ."  ON z.student=b.student AND z.id_a=b.question AND z.id_b=b.answer"
+        ."  WHERE z.type=? AND z.imagedata IS NOT NULL"
+        ." ) i LEFT OUTER JOIN ".$self->table("answer","scoring")." a"
+        ." ON i.student=a.student AND i.question=a.question AND i.answer=a.answer"
+       },
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
