@@ -200,8 +200,8 @@ void load_image(IplImage** src,IplImage** src_grayscale,char *filename,
 
   /* save current grayscale image */
   if(src_grayscale!=NULL) {
-    *src_grayscale=cvCreateImage( cvGetSize(*src), (*src)->depth, 1 );
-    cvCopy(*src,*src_grayscale);
+    *src_grayscale=cvCreateImage( cvGetSize(*src), IPL_DEPTH_8U, 1 );
+    cvNormalize(*src,*src_grayscale,0,255,cv::NORM_MINMAX);
   }
 
   cvMinMaxLoc(*src,NULL,&max);
@@ -768,9 +768,9 @@ void save_zoom(IplImage* src, int xmin, int xmax, int ymin, int ymax,
       if(asprintf(&zoom_file,"%s/%d-%d.png",zooms_dir,question,answer)>0) {
         printf(": Saving zoom to %s\n",zoom_file);
         printf(": Z=(%d,%d)+(%d,%d)\n",
-               xmin,ymin,xmax-xmin,ymax-ymin);
+               xmin,ymin,xmax-xmin+1,ymax-ymin+1);
         cvSetImageROI(src,
-                      cvRect(xmin,ymin,xmax-xmin,ymax-ymin));
+                      cvRect(xmin,ymin,xmax-xmin+1,ymax-ymin+1));
         if(cvSaveImage(zoom_file,src
 #if OPENCV_20
                        ,save_options
