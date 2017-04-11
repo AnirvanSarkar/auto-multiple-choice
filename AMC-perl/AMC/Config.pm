@@ -388,9 +388,9 @@ sub defaults {
   # MacOSX universal command to open files or directories : /usr/bin/open
   if(lc($^O) eq 'darwin') {
     for my $k (qw/pdf_viewer img_viewer csv_viewer ods_viewer xml_viewer tex_editor txt_editor dir_opener/) {
-      $self->{o_default}->{$k}=['commande','/usr/bin/open','open'];
+      $self->{o_default}->{$k}=['command','/usr/bin/open','open'];
     }
-    $self->{o_default}->{html_browser}=['commande','/usr/bin/open %u','open %u'];
+    $self->{o_default}->{html_browser}=['command','/usr/bin/open %u','open %u'];
   }
 
   # Add default project options for each export module:
