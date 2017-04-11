@@ -575,7 +575,7 @@ sub dialogue_apprentissage {
       if(!$force) {
 	$garde=Gtk3::CheckButton->new(__"Show this message again next time");
 	$garde->set_active(0);
-	$garde->can_focus(0);
+	$garde->set_can_focus(0);
 
 	$dialog->get_content_area()->add($garde);
       }
