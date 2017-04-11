@@ -76,7 +76,7 @@ sub check_odir {
   # Creates general options directory if not present
 
   if(! -d $self->{o_dir}) {
-    mkdir($o_dir) or die "Error creating $o_dir : $!";
+    mkdir($self->{o_dir}) or die "Error creating $self->{o_dir} : $!";
 
     # gets older verions (<=0.254) main configuration file and move it
     # to the new location
