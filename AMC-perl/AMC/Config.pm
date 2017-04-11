@@ -81,9 +81,9 @@ sub check_odir {
     # gets older verions (<=0.254) main configuration file and move it
     # to the new location
 
-    if(-f $home_dir.'/.AMC.xml') {
+    if(-f $self->{home_dir}.'/.AMC.xml') {
       debug "Moving old configuration file";
-      move($home_dir.'/.AMC.xml',$self->{o_dir}."/cf.default.xml");
+      move($self->{home_dir}.'/.AMC.xml',$self->{o_dir}."/cf.default.xml");
     }
   }
 
