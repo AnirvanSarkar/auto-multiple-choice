@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -1464,7 +1464,7 @@ DESC: An example (from the documentation) where all check-boxes are put together
 
 \AMCrandomseed{1237893}
 
-\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1:} }    <co
+\def\AMCformQuestion#1{{\sc Question #1:}}    <co
             id="ensemble.fq" linkends="ensemble.fq.exp"/>
 
 \setdefaultgroupmode{withoutreplacement}
@@ -2626,10 +2626,10 @@ Durée : 10 minutes.
           <listitem>
             <para>For a deeper modification of the display settings, one can
             also redefine the commands that are used at the beginning of each
-            question and for each answer (here follows the default
-            definitions):</para>
+            question and for each answer:</para>
 
-            <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1:}}
+            <programlisting>\def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
+\def\AMCformQuestion#1{\textbf{Question #1:}}
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
           </listitem>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="ja">
@@ -1134,7 +1134,7 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
 
 \AMCrandomseed{1237893}
 
-\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc 問 #1:} }    <co
+\def\AMCformQuestion#1{{\sc 問 #1:}}    <co
             id="ensemble.fq" linkends="ensemble.fq.exp"/>
 
 \setdefaultgroupmode{withoutreplacement}
@@ -1976,9 +1976,10 @@ DESC: 各受験者用にすべてのマーク用ボックスを1枚の別紙に�
           </listitem>
 
           <listitem>
-            <para>表示設定をもっと細かく変更したい場合は、各設問と選択肢の開始に使われるコマンドを再定義することができます（以下はデフォルトの定義を示します）:</para>
+            <para>表示設定をもっと細かく変更したい場合は、各設問と選択肢の開始に使われるコマンドを再定義することができます:</para>
 
-            <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1:}}
+            <programlisting>\def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
+\def\AMCformQuestion#1{{\bf 問 #1:} }
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
           </listitem>

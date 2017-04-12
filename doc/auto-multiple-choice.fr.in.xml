@@ -1527,7 +1527,7 @@ DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont 
 
 \AMCrandomseed{1237893}
 
-\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1 :} }    <co
+\def\AMCformQuestion#1{{\sc Question #1 :}}    <co
             id="ensemble.fq" linkends="ensemble.fq.exp"/>
 
 \setdefaultgroupmode{withoutreplacement}
@@ -2741,10 +2741,10 @@ Durée : 10 minutes.
           <listitem>
             <para>Pour un changement plus profond de la mise en page, on peut
             aussi redéfinir les commandes utilisées en début de chaque
-            question et pour chaque réponse (ici c'est la définition par
-            défaut) :</para>
+            question et pour chaque réponse :</para>
 
-            <programlisting>\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par{\bf Question #1 :}}
+            <programlisting>\def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
+\def\AMCformQuestion#1{\textbf{Question #1 :}}
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
           </listitem>

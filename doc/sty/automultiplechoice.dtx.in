@@ -2638,7 +2638,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % \begin{macro}{\AMCformQuestion}\begin{macro}{\AMCformAnswer}
 %     First define commands that will announce questions and answers
 %     on the separate answer sheet (these commands can be modified by
-%     the user): |\AMCformQuestion| is responsible for
+%     the user): |\AMCformQuestion|\marg{number} is responsible for
 %     announcing question, and
 %     |\AMCformAnswer|\marg{box} is responsible for printing the box
 %     to be ticked, given as argument \meta{box}.
@@ -2649,7 +2649,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
 \def\AMCformAfterQuestion{\ifAMC@asqbloc\egroup\fi}
-\def\AMCformQuestion{{\AMC@loc@qf{\AMC@qaff}}}
+\def\AMCformQuestion#1{\AMC@loc@qf{#1}}
+\def\AMCformQuestionN{\AMCformQuestion{\AMC@qaff}}
 \def\AMCformQuestionA{%
   \setcounter{AMC@ncase}{0}%
   \AMCformBeforeQuestion%
@@ -2657,7 +2658,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifx\@empty\AMC@sza@callout\@empty\else%
     \csname\AMC@sza@callout\endcsname%
   \fi%
-  \AMCformQuestion%
+  \AMCformQuestionN%
   \ifx\@empty\AMC@sza@callin\@empty\else%
     \csname\AMC@sza@callin\endcsname%
   \fi%
