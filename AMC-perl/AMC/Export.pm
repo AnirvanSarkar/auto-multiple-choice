@@ -223,6 +223,10 @@ sub pre_process {
 	$m->{'student.name'}=$n->{'_ID_'};
 	$m->{'student.line'}=$n->{'_LINE_'};
 	$m->{'student.all'}={%$n};
+        # $n->{$lk} should be equal to $m->{'student.key'}, but in
+        # some cases (older versions), the code stored in the database
+        # has leading zeroes removed...
+        $keys{$n->{$lk}}=1;
       } else {
 	for(qw/name line/) {
 	  $m->{"student.$_"}='?';

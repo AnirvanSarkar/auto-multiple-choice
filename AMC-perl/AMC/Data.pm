@@ -61,7 +61,6 @@ sub connect {
   $self->{'dbh'}=DBI->connect("dbi:SQLite:",undef,undef,
 			      {AutoCommit => 0,
 			       RaiseError => 0,
-			       sqlite_see_if_its_a_number => 1,
 			      });
   $self->{'dbh'}->sqlite_busy_timeout($self->{'timeout'});
   $self->{'dbh'}->{sqlite_unicode}=1;

@@ -202,7 +202,7 @@ for my $f (@attach_files) {
 }
 
 STUDENT: for my $i (@$r) {
-  my ($s)=$students->data($key,$i->{'id'});
+  my ($s)=$students->data($key,$i->{'id'},test_numeric=>1);
   my $dest=$s->{$email_column};
   debug "Loop: ID $i->{'id'} DEST [$dest]";
   if($ids_file && !$ids{$i->{'id'}}) {

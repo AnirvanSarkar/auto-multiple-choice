@@ -36,12 +36,12 @@ $t->{'datatable'}='association_association';
 $t->begin('AMC::DataModule::association::get/set');
 
 $a->set_manual(1,2,"001");
-$t->test($a->get_manual(1,2),1);
+$t->test($a->get_manual(1,2),"001");
 $a->set_manual(1,2,"001A");
 $t->test($a->get_manual(1,2),"001A");
 
 $a->set_auto(1,2,"001");
-$t->test($a->get_auto(1,2),1);
+$t->test($a->get_auto(1,2),"001");
 $a->set_auto(1,2,"001A");
 $t->test($a->get_auto(1,2),"001A");
 
@@ -107,8 +107,8 @@ $a->set_manual(2,6,"024");
 $t->test(\@c,[11,0]);
 @c=$a->real_back("001");
 $t->test(\@c,[2,4]);
-@c=$a->real_back(1);
-$t->test(\@c,[2,4]);
+@c=$a->real_back("1");
+$t->test(\@c,[]);
 @c=$a->real_back("023");
 $t->test(\@c,[2,5]);
 @c=$a->real_back("024");
