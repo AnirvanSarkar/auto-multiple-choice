@@ -4096,6 +4096,23 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 %    \end{macrocode}\end{macro}
 %
+% \begin{macro}{\AMCaddpagesto}
+%   In some situations, one needs all question sheets to have the same
+%   number of pages. The command |\AMCaddpagesto|\marg{n} adds enough
+%   (white) pages to get at least \meta{n} pages in the current
+%   question sheet.
+%    \begin{macrocode}
+\newcount\AMC@addpages
+\newcommand{\AMCaddpagesto}[1]{%
+  \AMC@addpages=#1\advance\AMC@addpages\@ne%
+  \clearpage%
+  \@whilenum\thepage<\AMC@addpages\do{%
+    \ifAMC@automarks\pagestyle{AMCpageEmpty}\fi%
+    \hbox{}\clearpage%
+  }%
+}
+%    \end{macrocode}\end{macro}
+%
 % \begin{macro}{\AMCcleardoublepage}
 %   If you want to print the subject all at one time in duplex mode,
 %   it is necessary to end each subject with an even number of
@@ -4104,24 +4121,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %   before the separate answer sheet (if any).
 %
 %    \begin{macrocode}
-\def\AMCcleardoublepage{\ifodd\thepage\clearpage%
-  \ifAMC@automarks\pagestyle{AMCpageEmpty}\fi%
-  ~\fi\clearpage}
-%    \end{macrocode}\end{macro}
-%
-% \begin{macro}{\AMCaddpagesto}
-%   In some situations, one needs all question sheets to have the same
-%   number of pages. The command |\AMCaddpagesto|\marg{n} adds enough
-%   (white) pages to get at least \meta{n} pages in the current
-%   question sheet.
-%    \begin{macrocode}
-\newcommand{\AMCaddpagesto}[1]{%
-  \@whilenum\thepage<#1\do{%
-    \clearpage~%
-    \ifnum\thepage<#1%
-      \ifAMC@automarks\pagestyle{AMCpageEmpty}\fi%
-    \fi%
-  }%
+\def\AMCcleardoublepage{%
+  \clearpage%
+  \ifodd\thepage\else%
+    \ifAMC@automarks\pagestyle{AMCpageEmpty}\fi%
+    \hbox{}\clearpage%
+  \fi%
 }
 %    \end{macrocode}\end{macro}
 %

@@ -93,6 +93,7 @@ sub new {
      'skip_scans'=>0,
      'tracedest'=>'STDERR',
      'debug_file'=>'',
+     'pages'=>'',
     };
 
   for (keys %oo) {
@@ -950,11 +951,30 @@ sub update_sqlite {
   return($self);
 }
 
+sub check_pages {
+  my ($self)=@_;
+  if($self->{pages}) {
+    $self->trace("[T] Pages check : ".join(",",@{$self->{pages}}));
+    my $l=AMC::Data->new($self->{'temp_dir'}."/data")->module('layout');
+    $l->begin_read_transaction('npag');
+    for my $i (0..$#{$self->{pages}}) {
+      my @p=$l->pages_for_student($i+1);
+      my $mx=-1;
+      for my $pp (@p) {
+        $mx=$pp if $pp>$mx;
+      }
+      $self->test($mx,$self->{pages}->[$i]);
+    }
+    $l->end_transaction('npag');
+  }
+}
+
 sub default_process {
   my ($self)=@_;
 
   $self->prepare if(!$self->{skip_prepare});
   $self->defects;
+  $self->check_pages;
   $self->analyse if(!$self->{skip_scans});
   $self->check_zooms;
   $self->note;
