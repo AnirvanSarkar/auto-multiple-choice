@@ -186,7 +186,9 @@ sub transmet_pref {
     my ($w,$kind)=$self->find_object($gap,$full_key,%o);
 
     debug "Key $full_key --> "
-      .($w ? "found widget ".ref($w) : "NONE")." [$o{store}]";
+      .($w ? "found widget ".ref($w) : "NONE")
+      .($kind ? " {$kind}" : "")
+      ." [$o{store}]";
     if(defined($value)) {
       debug "  gui <- $value" if($w);
     } else {
@@ -247,7 +249,7 @@ sub transmet_pref {
         my @we=grep { my (undef,$pr)=$_->class_path();$pr =~ /(yrtnE|Entry)/ } ($w->get_children());
         if (@we) {
           $we[0]->set_text($value);
-          $self->widget_store_set($full_key,$key,'x',$we[0]);
+          $self->widget_store_set($full_key,$key,'x',$we[0],%o);
         } else {
           print STDERR "$key/CE : cannot find text widget\n";
         }
