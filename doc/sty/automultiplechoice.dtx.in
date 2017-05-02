@@ -4086,6 +4086,9 @@ Three digits and two letters:\insertgroup{mixed}.
   \advance\AMCid@etudfin\AMCid@etud\relax%
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
   \loop{%
+    \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
+      \string\rngstate{\the\AMCid@etud}{\the\AMC@SR}%
+    }\fi%
     \AMC@zoneformulairefalse\setcounter{page}{1}\setcounter{section}{0}%
     \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageNoMarks}\fi\fi%
     \AMCnumero{1}%
