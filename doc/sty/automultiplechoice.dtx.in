@@ -1328,6 +1328,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %   question, in standard mode (without package option |box|).
 % \item |\AMCinterBquest| is the amount of vertical space left after a
 %   question, in 'boxed' mode (with package option |box|).
+% \item |\AMCpostOquest| is the amount of vertical space left after an
+%   open question.
 % \end{description}
 %    \begin{macrocode}
 \newdimen\AMCformVSpace\AMCformVSpace=1.2ex
@@ -1336,6 +1338,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newdimen\AMCinterBrep\AMCinterBrep=.5ex
 \newdimen\AMCinterIquest\AMCinterIquest=\z@
 \newdimen\AMCinterBquest\AMCinterBquest=3ex
+\newdimen\AMCpostOquest\AMCpostOquest=7mm
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
 % \subsection{Human readable sheet ID position}
@@ -3872,7 +3875,7 @@ Three digits and two letters:\insertgroup{mixed}.
         \fcolorbox{\AMCocol@FrameRule}{white}{%
           \csname\AMCopen@contentcommand\endcsname
         }}%
-      \vspace{7mm}\par%
+      \vspace{\AMCpostOquest}\par%
     \fi%
   }%
   \ifAMC@ensemble\ifAMCformulaire@dedans%
