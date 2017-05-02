@@ -4359,6 +4359,7 @@ my %defect_text=
    'SEVERAL_NAMES'=>__("The \\namefield command is used several times for the same subject. This should not be the case, as each student should write his name only once"),
    'NO_BOX'=>__("No box to be ticked"),
    'DIFFERENT_POSITIONS'=>__("The corner marks and binary boxes are not at the same location on all pages"),
+   'OUT_OF_PAGE'=>__("Some material has been placed out of the page. This is often a result of a multiple columns question group starting too close from the page bottom. In such a case, use \"needspace\"."),
   );
 
 sub mep_warnings {
@@ -4374,6 +4375,11 @@ sub mep_warnings {
 	      sprintf(__('(See for example pages %s and %s)'),
 		      pageids_string($dd->{'student_a'},$dd->{'page_a'}),
 		      pageids_string($dd->{'student_b'},$dd->{'page_b'})).'.';
+          } elsif($k eq 'OUT_OF_PAGE') {
+            $m.="\n<b>".$defect_text{$k}."</b> ".
+	      sprintf(__('(Concerns %1$d pages, see for example page %2$s)'),
+                      1+$#{$dd},
+		      pageids_string($dd->[0]->{'student'},$dd->[0]->{'page'})).'.';
 	  } else {
 	    my @e=sort { $a <=> $b } (@{$dd});
 	    if(@e) {

@@ -73,7 +73,7 @@ my %role=(
 
 sub read_inches {
     my ($dim)=@_;
-    if($dim =~ /^\s*([0-9]*\.?[0-9]*)\s*([a-zA-Z]+)\s*$/) {
+    if($dim =~ /^\s*([+-]?[0-9]*\.?[0-9]*)\s*([a-zA-Z]+)\s*$/) {
 	if($u_in_one_inch{$2}) {
 	    return($1 / $u_in_one_inch{$2});
 	} else {

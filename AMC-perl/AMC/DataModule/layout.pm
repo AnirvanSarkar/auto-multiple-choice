@@ -422,6 +422,14 @@ sub define_statements {
 			   ." WHERE student=? AND page=?"},
        'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student"},
+       'DEFECT_OUT_OF_PAGE'=>
+       {'sql'=>"SELECT student,page,count() as n FROM "
+        ." (SELECT b.student,b.page,xmin,xmax,ymin,ymax,width,height FROM "
+        .$self->table("box")." as b, "
+        .$self->table("page")." as p "
+        ."  ON b.student==p.student AND b.page==p.page)"
+        ." WHERE (xmin<0 OR ymin<0 OR xmax>width OR ymax>height)"
+        ." GROUP BY student,page ORDER BY student,page"},
        'subjectpageForStudent'=>
        {'sql'=>"SELECT MIN(subjectpage),MAX(subjectpage) FROM ".$self->table("page")
 	." WHERE student=?"},
@@ -701,6 +709,9 @@ sub students {
 # * {'SEVERAL_NAMES'} is a pointer on an array containing all the student
 #   numbers for which there is more than one name field
 #
+# * {'OUT_OF_PAGE'} is a pointer on a array containing all pages where
+#   some box is outside the page.
+#
 # * {'DIFFERENT_POSITIONS'} is a pointer to a hash returned by
 #   check_positions($delta)
 sub defects {
@@ -710,6 +721,11 @@ sub defects {
     for my $type (qw/NO_BOX NO_NAME SEVERAL_NAMES/) {
 	my @s=$self->sql_list($self->statement('DEFECT_'.$type));
 	$r{$type}=[@s] if(@s);
+      }
+    for my $type (qw/OUT_OF_PAGE/) {
+      my @s=@{$self->dbh->selectall_arrayref($self->statement('DEFECT_'.$type),
+                                            {Slice=>{}})};
+      $r{$type}=[@s] if(@s);
     }
     my $pos=$self->check_positions($delta);
     $r{'DIFFERENT_POSITIONS'}=$pos if($pos);
