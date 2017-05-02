@@ -56,6 +56,7 @@ sub new {
 				 NameFieldWidth NameFieldLines NameFieldLinespace
 				 TitleWidth
                                  Pages
+                                 RandomSeed
 				/];
 
     # from these options, which ones are boolean valued?
@@ -93,6 +94,7 @@ sub new {
        'namefieldlines'=>'',
        'namefieldlinespace'=>'.5em',
        'titlewidth'=>".47\\linewidth",
+       'randomseed'=>"1527384",
       };
 
     # List of modules to be used when parsing (see parse_*
@@ -833,7 +835,7 @@ sub file_header {
     if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
   $t .= "\\begin{document}\n";
   $t .= "\\def\\AMCmakeTitle#1{\\par\\noindent\\hrule\\vspace{1ex}{\\hspace*{\\fill}\\Large\\bf #1\\hspace*{\\fill}}\\vspace{1ex}\\par\\noindent\\hrule\\par\\vspace{1ex}}\n";
-  $t .= "\\AMCrandomseed{1527384}\n";
+  $t .= "\\AMCrandomseed{".$self->{'options'}->{'randomseed'}."}\n";
   if($self->{'options'}->{'boxcolor'}) {
     if($self->{'options'}->{'boxcolor'}
        =~ /^\\definecolor\{amcboxcolor\}/) {
