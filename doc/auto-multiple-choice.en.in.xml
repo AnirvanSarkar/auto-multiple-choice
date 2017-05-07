@@ -413,6 +413,21 @@ the best you can.
         </varlistentry>
 
         <varlistentry>
+          <term>RandomSeed:</term>
+
+          <listitem>
+       <para>One can modify the seed of the random number generator used to
+        produce the shuffle, thanks to the option. If the value that is assigned (
+        to be chosen between 1 and 4194303) is modified, then the shuffling
+         will differ. Of course, one  must not modify this value after the test sheets
+         have been printed.</para>
+        
+        <note><para>The value is recorded in the xy file. The default value is equal to
+        1527384.</para></note>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term>Code:</term>
 
           <listitem>
@@ -1517,7 +1532,7 @@ DESC: An example (from the documentation) where all check-boxes are put together
 \end{minipage}
 
 \begin{center}\em
-Durée : 10 minutes.
+Duration : 10 minutes.
 
   No documents allowed. The use of electronic calculators is forbidden.
 
@@ -2569,13 +2584,14 @@ Durée : 10 minutes.
         <programlisting>\AMCinterIrep=0pt
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
-\AMCinterBquest=3ex</programlisting>
+\AMCinterBquest=3ex
+\AMCpostOquest=7mm</programlisting>
 
         <para>These dimensions are the vertical space between questions
         (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
         (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
         <option>box</option> package option) or standard mode
-        (<code>I</code>).</para>
+        (<code>I</code>) and the space left after an open question.</para>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -2996,6 +3012,8 @@ and write your first and last names below.
         4194303) is modified, then the shuffling will differ. Of course, one
         must not modify this value after the test sheets have been
         printed.</para>
+        
+        <note><para>The value is recorded in the xy file.</para></note>
       </sect3>
 
       <sect3 id="latex.separate.sect">
@@ -3622,7 +3640,7 @@ respective parameters \VQa{} and \VQb{}.
       <sect3 id="latex.numerical.pgf">
         <title>Using package pgf/tikz</title>
 
-        <para>This package must be declare <emphasis>after</emphasis> the
+        <para>This package must be declared <emphasis>after</emphasis> the
         package <package>automultiplechoice</package>.</para>
 
         <para>LaTeX package <package>pgf/tikz</package> (see <ulink
@@ -5532,7 +5550,7 @@ Moniuszko,Stanisław,003</programlisting>
 
           <warning>
             <para>Do not use _ (underscore) with the student's name or
-            forename. A compilation error will be display.</para>
+            forename. A compilation error will be displayed.</para>
           </warning>
         </listitem>
 

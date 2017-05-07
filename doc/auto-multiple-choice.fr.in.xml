@@ -407,6 +407,21 @@ lesquels sont positifs ?
         </varlistentry>
 
         <varlistentry>
+          <term>RandomSeed:</term>
+
+          <listitem>
+            <para>Si le mélange des question et des réponses ne nous convient pas,
+        on peut toujours en changer en modifiant la graine du générateur
+        aléatoire utilisé pour le mélange, grâce à cette option. Si la valeur fournie
+        (à choisir entre 1 et 4194303) est modifiée, alors le mélange sera différent.
+        Bien entendu, une fois les copies d'examen imprimées, il ne faut surtout
+        pas modifier cette  valeur !</para>
+        <note><para>La valeur est enregistrée dans le fichier xy. La valeur par défaut
+         est 1527384.</para></note>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term>ShuffleQuestions:</term>
 
           <listitem>
@@ -2681,13 +2696,15 @@ Durée : 10 minutes.
         <programlisting>\AMCinterIrep=0pt
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
-\AMCinterBquest=3ex</programlisting>
+\AMCinterBquest=3ex
+\AMCpostOquest=7mm</programlisting>
 
         <para>Ces dimensions correspondent aux espaces verticaux ajoutés entre
         les questions (<code>quest</code>) ou les réponses (<code>rep</code>),
         en mode boîte (<code>B</code>, obtenu avec
         <command>\AMCBoxedAnswers</command> ou l'option de package
-        <option>bloc</option>) ou standard (<code>I</code>).</para>
+        <option>bloc</option>) ou standard (<code>I</code>) et l'espace après une 
+        question ouverte.</para>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -3144,6 +3161,7 @@ et inscrivez votre nom et prénom ci-dessous.
         modifiée, alors le mélange sera différent. Bien entendu, une fois les
         copies d'examen imprimées, il ne faut surtout pas modifier cette
         valeur !</para>
+        <note><para>La valeur est enregistrée dans le fichier xy</para>.</note>
       </sect3>
 
       <sect3 id="latex.separate.sect">
