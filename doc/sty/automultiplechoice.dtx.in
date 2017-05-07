@@ -3006,7 +3006,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
-\newcommand\AMC@stepQuestion{\ifAMCquestionNumber\stepcounter{AMCquestionaff}\fi}
+\newcommand\AMC@stepQuestion{\ifAMCquestionNumber\refstepcounter{AMCquestionaff}\fi}
 \newcommand\AMC@qaff{\arabic{AMCquestionaff}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
