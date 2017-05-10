@@ -3785,6 +3785,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCocol@Foreground{}
 \def\AMCopen@answer{}
 \def\AMCopen@question{}
+\def\AMCopen@lineuptext{}
 \define@key{AMCOpen}{backgroundcol}{\def\AMCocol@Background{#1}}
 \define@key{AMCOpen}{foregroundcol}{\def\AMCocol@Foreground{#1}}
 \define@key{AMCOpen}{Treserved}{\def\AMCotextReserved{#1}}
@@ -3807,6 +3808,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCOpen}{framerulecol}{\def\AMCocol@FrameRule{#1}}
 \newdimen\AMCopen@framerule\AMCopen@framerule=1pt
 \define@key{AMCOpen}{framerule}{\AMCopen@framerule=#1}
+\define@key{AMCOpen}{lineuptext}{\def\AMCopen@lineuptext{#1}}
 \define@boolkey{AMCOpen}{dots}[true]{}
 \define@boolkey{AMCOpen}{scan}[true]{}
 \define@boolkey{AMCOpen}{annotate}[false]{}
@@ -3834,8 +3836,15 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi\fi%
   {\setkeys{AMCOpen}{#1}%
     \ifKV@AMCOpen@lineup%
-      \ifAMC@ensemble\else\par\fi%
-      \ifAMC@correc\smash{\AMCopen@answer}\fi\dotfill%
+      \ifAMC@ensemble\else%
+        \ifx\@empty\AMCopen@lineuptext\@empty\fi%
+      \fi%
+      \ifAMC@correc\smash{\AMCopen@answer}\fi%
+      \ifx\@empty\AMCopen@lineuptext\@empty%
+        \dotfill%
+      \else%
+        \AMCopen@lineuptext\hfill%
+      \fi%
     \else%
       \hspace*{.5em}\linebreak[1]\hspace*{\fill}%
     \fi%
