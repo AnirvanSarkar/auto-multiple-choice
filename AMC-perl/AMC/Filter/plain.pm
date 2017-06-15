@@ -561,12 +561,15 @@ sub parse_brackets {
   return(@o);
 }
 
-# parse_embf inserts LaTeX commands to switch to italic or bold font
-# when '[_ ... _]' or '[* ... *]' constructs are used in AMC-TXT.
+# parse_embf inserts LaTeX commands to switch to italic, bold or
+# typewriter font or underlined text when '[_ ... _]', '[* ... *]',
+# '[| ... |]' or '[/ ... /]' constructs are used in AMC-TXT, respectively.
 sub parse_embf {
   my ($self,@components)=@_;
   my @c=$self->parse_brackets('_',"\\textit{","}",@components);
   @c=$self->parse_brackets('*',"\\textbf{","}",@c);
+  @c=$self->parse_brackets('/',"\\underline{","}",@c);
+  @c=$self->parse_brackets('|',"\\texttt{","}",@c);
   return(@c);
 }
 
