@@ -16,10 +16,8 @@
       optique de marques (OMR). Le présent document décrit son utilisation
       (pour la version @/PACKAGE_V_DEB/@~@/PACKAGE_V_VC/@).</para>
 
-      <para>Le projet AMC est hébergé par <ulink
-      url="http://gna.org/">Gna !</ulink> : vous retrouverez son site internet
-      à l'adresse <ulink
-      url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>,
+      <para>Le projet AMC est hébergé à l'adresse <ulink
+      url="http://home.gna.org/auto-qcm/">http://www.auto-multiple-choice.net/</ulink>,
       et la page d'hébergement du projet à l'adresse <ulink
       url="https://bitbucket.org/auto-multiple-choice/auto-multiple-choice">https://bitbucket.org/auto-multiple-choice/auto-multiple-choice</ulink>.</para>
     </abstract>
@@ -416,7 +414,7 @@ lesquels sont positifs ?
         (à choisir entre 1 et 4194303) est modifiée, alors le mélange sera différent.
         Bien entendu, une fois les copies d'examen imprimées, il ne faut surtout
         pas modifier cette  valeur !</para>
-        <note><para>La valeur est enregistrée dans le fichier xy. La valeur par défaut
+        <note><para>La valeur est enregistrée dans le fichier xy (sous la forme <code>\rngstate{1}{1527384}</code>). La valeur par défaut
          est 1527384.</para></note>
           </listitem>
         </varlistentry>
@@ -1017,11 +1015,16 @@ Combien y a-t-il d'étoiles dans le ciel ?
     </sect2>
 
     <sect2 id="parse_embf">
-      <title>Gras, italique</title>
+      <title>Gras, italique, typewriter, souligné</title>
 
-      <para>Les parties du textes à écrire en gras devront être entourées de
-      <code>[*</code> et <code>*]</code>. Les parties à mettre en italique
-      devront être entourées de <code>[_</code> et <code>_]</code>.</para>
+      <para>Les parties du textes à écrire en <emphasis>gras</emphasis>
+      devront être entourées de <code>[*</code> et <code>*]</code>.
+      Les parties à mettre en <emphasis>italique</emphasis> devront être
+      entourées de <code>[_</code> et <code>_]</code>.
+      Pour avoir une police façon machine à écrire <emphasis>typewriter</emphasis>,
+      le texte devra être encadré par <code>[|</code> et <code>|]</code>. 
+      Pour <emphasis>souligner</emphasis>, encadrer le texte par <code>[/</code> 
+      et <code>/]</code>. </para>
 
       <programlisting>** Choisissez parmi les expressions suivantes celles
    où le mot en italique est [*un adjectif*].
@@ -1933,6 +1936,8 @@ Durée : 10 minutes.
         
        <para>Pour différencier les copies, la commande <command>\exemplairepair</command>
        peut être utile. À utiliser sous la forme d'un test de condition.</para>
+   
+       <para>Le numéro de la copie peut être obtenu par la commande <command>\AMCStudentNumber</command>.</para>
       </sect3>
 
       <sect3 id="latex.qr">
@@ -2879,6 +2884,15 @@ et inscrivez votre nom et prénom ci-dessous.
           </varlistentry>
 
           <varlistentry>
+            <term>lineuptext=<replaceable>texte</replaceable></term>
+
+            <listitem>
+              <para> si <code>lineup=true</code>, le texte et les cases de
+              notation sont présentés sur la même ligne. </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>lines=<replaceable>num</replaceable></term>
 
             <listitem>
@@ -3164,7 +3178,8 @@ et inscrivez votre nom et prénom ci-dessous.
         modifiée, alors le mélange sera différent. Bien entendu, une fois les
         copies d'examen imprimées, il ne faut surtout pas modifier cette
         valeur !</para>
-        <note><para>La valeur est enregistrée dans le fichier xy.</para></note>
+        <note><para>La valeur est enregistrée dans le fichier xy (sous la forme <code>\rngstate{1}{1515}</code>). La valeur par défaut
+         est 1515.</para></note>
       </sect3>
 
       <sect3 id="latex.separate.sect">

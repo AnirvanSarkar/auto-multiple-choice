@@ -19,10 +19,8 @@
       describes its use (for the version
       @/PACKAGE_V_DEB/@~@/PACKAGE_V_VC/@).</para>
 
-      <para>The AMC project is hosted by <ulink
-      url="http://gna.org/">Gna !</ulink> : you can find the AMC web-site
-      there <ulink
-      url="http://home.gna.org/auto-qcm/">http://home.gna.org/auto-qcm/</ulink>,
+      <para>You can find the AMC web-site there <ulink
+      url="http://home.gna.org/auto-qcm/">http://www.auto-multiple-choice.net/</ulink>,
       and the web-page where the project is hosted there <ulink
       url="https://bitbucket.org/auto-multiple-choice/auto-multiple-choice">https://bitbucket.org/auto-multiple-choice/auto-multiple-choice</ulink>.</para>
     </abstract>
@@ -422,7 +420,7 @@ the best you can.
          will differ. Of course, one  must not modify this value after the test sheets
          have been printed.</para>
         
-        <note><para>The value is recorded in the xy file. The default value is equal to
+        <note><para>The value is recorded in the xy file (as <code>\rngstate{1}{1527384}</code>). The default value is equal to
         1527384.</para></note>
           </listitem>
         </varlistentry>
@@ -1848,10 +1846,10 @@ Duration : 10 minutes.
         </note>
         
         <para>
-        To make some differences in the copies, checking if the student
-        sheet number is odd, with <command>\exemplairepair</command> command,
-        can be useful.
-        </para>
+        To differentiate between odd and even-numbered copy, use
+        <command>\exemplairepair</command> command.</para>
+        
+        <para>The command <command>\AMCStudentNumber</command> get the copy number.</para>
       </sect3>
 
       <sect3 id="latex.qr">
@@ -2750,6 +2748,15 @@ and write your first and last names below.
           </varlistentry>
 
           <varlistentry>
+            <term>lineuptext=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para> if <code>lineup=true</code>, the text and ansewering area
+              will be on the same line.. </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term>lines=<replaceable>num</replaceable></term>
 
             <listitem>
@@ -3022,7 +3029,7 @@ and write your first and last names below.
         must not modify this value after the test sheets have been
         printed.</para>
         
-        <note><para>The value is recorded in the xy file.</para></note>
+        <note><para>The value is recorded in the xy file (as <code>\rngstate{1}{1515}</code>). The default value is 1515.</para></note>
       </sect3>
 
       <sect3 id="latex.separate.sect">
