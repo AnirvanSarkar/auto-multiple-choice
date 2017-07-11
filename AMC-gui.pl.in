@@ -4884,24 +4884,26 @@ sub charge_modeles {
     }
 
     for my $m (sort { $a cmp $b } @ms) {
-	my $child = $store->append($parent);
-
 	my $nom=$m;
 	$nom =~ s/\.tgz$//i;
 	my $desc_text=__"(no description)";
-	my $tar=Archive::Tar->new($rep."/$m");
-	my @desc=grep { /description.xml$/ } ($tar->list_files());
-	if($desc[0]) {
+	my $tar=Archive::Tar->new();
+        if($tar->read($rep."/$m")) {
+          my @desc=grep { /description.xml$/ } ($tar->list_files());
+          if($desc[0]) {
 	    my $d=XMLin($tar->get_content($desc[0]),'SuppressEmpty'=>'');
 	    $nom=$d->{'title'} if($d->{'title'});
 	    $desc_text=$d->{'text'} if($d->{'text'});
-	}
-	debug "Adding model $m";
-	debug "NAME=$nom DESC=$desc_text";
-	$store->set($child,
-		    MODEL_NOM,$nom,
-		    MODEL_PATH,$rep."/$m",
-		    MODEL_DESC,$desc_text);
+          }
+          debug "Adding model $m";
+          debug "NAME=$nom DESC=$desc_text";
+          $store->set($store->append($parent),
+                      MODEL_NOM,$nom,
+                      MODEL_PATH,$rep."/$m",
+                      MODEL_DESC,$desc_text);
+        } else {
+          debug_and_stderr "WARNING: Could not read archive file \"$rep/$m\" ...";
+        }
     }
 }
 
