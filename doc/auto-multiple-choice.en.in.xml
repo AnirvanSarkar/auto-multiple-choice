@@ -414,14 +414,17 @@ the best you can.
           <term>RandomSeed:</term>
 
           <listitem>
-       <para>One can modify the seed of the random number generator used to
-        produce the shuffle, thanks to the option. If the value that is assigned (
-        to be chosen between 1 and 4194303) is modified, then the shuffling
-         will differ. Of course, one  must not modify this value after the test sheets
-         have been printed.</para>
-        
-        <note><para>The value is recorded in the xy file (as <code>\rngstate{1}{1527384}</code>). The default value is equal to
-        1527384.</para></note>
+            <para>One can modify the seed of the random number generator used
+            to produce the shuffle, thanks to the option. If the value that is
+            assigned ( to be chosen between 1 and 4194303) is modified, then
+            the shuffling will differ. Of course, one must not modify this
+            value after the test sheets have been printed.</para>
+
+            <note>
+              <para>The value is recorded in the xy file (as
+              <code>\rngstate{1}{1527384}</code>). The default value is equal
+              to 1527384.</para>
+            </note>
           </listitem>
         </varlistentry>
 
@@ -674,7 +677,8 @@ the best you can.
 
           <listitem>
             <para>Gives a comma-separated list of features to disable. Current
-            implemented features are <code>images</code> (see <xref
+            implemented features are <code>verbatim</code> (see <xref
+            linkend="parse_verbatim"/>), <code>images</code> (see <xref
             linkend="parse_images"/>), <code>embf</code> (see <xref
             linkend="parse_embf"/>) and <code>local_latex</code> (see <xref
             linkend="parse_local_latex"/>).</para>
@@ -973,6 +977,26 @@ How many stars in the sky?
 
       <para>To get a title, enclose it between <code>[==</code> and
       <code>==]</code>.</para>
+    </sect2>
+
+    <sect2 id="parse_verbatim">
+      <title>Verbatim content</title>
+
+      <para>To get a <emphasis>verbatim</emphasis> block (as computer code),
+      enclose it between <code>[verbatim]</code> and
+      <code>[/verbatim]</code>:</para>
+
+      <programlisting>* What does this program print?
+[verbatim]
+main( )
+{
+    printf("hello, world\n");
+}
+[/verbatim]
+
++ [| hello, world |]
+- [| hello |]
+- [| world |]</programlisting>
     </sect2>
 
     <sect2 id="parse_embf">
@@ -1480,8 +1504,8 @@ DESC: An example (from the documentation) where all check-boxes are put together
 
 \AMCrandomseed{1237893}
 
-\def\AMCformQuestion#1{{\sc Question #1:}}    <co
-            id="ensemble.fq" linkends="ensemble.fq.exp"/>
+\def\AMCformQuestion#1{{\sc Question #1:}}    <co id="ensemble.fq"
+            linkends="ensemble.fq.exp"/>
 
 \setdefaultgroupmode{withoutreplacement}
 
@@ -1818,13 +1842,11 @@ Duration : 10 minutes.
           </listitem>
 
           <listitem>
-            <para><option>nopage</option>: use this option if
-            you don need margins, corner circles and page identification
-            boxes, that is if the document is not intended to be used
-            with AMC (for example to produce exercises lists).
-            </para>
+            <para><option>nopage</option>: use this option if you don need
+            margins, corner circles and page identification boxes, that is if
+            the document is not intended to be used with AMC (for example to
+            produce exercises lists).</para>
           </listitem>
-        
         </itemizedlist>
       </sect3>
 
@@ -1853,12 +1875,12 @@ Duration : 10 minutes.
           distribution, still used in Ubuntu distributions up to version 9.10
           (Karmic Koala).</para>
         </note>
-        
-        <para>
-        To differentiate between odd and even-numbered copy, use
+
+        <para>To differentiate between odd and even-numbered copy, use
         <command>\exemplairepair</command> command.</para>
-        
-        <para>The command <command>\AMCStudentNumber</command> get the copy number.</para>
+
+        <para>The command <command>\AMCStudentNumber</command> get the copy
+        number.</para>
       </sect3>
 
       <sect3 id="latex.qr">
@@ -2134,10 +2156,10 @@ Duration : 10 minutes.
         area</title>
 
         <para>You may add an additional option of marking area (see <xref
-        endterm="marks.position.title" linkend="marks.position"/>) with the package
-        <package>tikz</package>.</para>
+        endterm="marks.position.title" linkend="marks.position"/>) with the
+        package <package>tikz</package>.</para>
 
-       <programlisting>\usepackage{tikz}</programlisting>
+        <programlisting>\usepackage{tikz}</programlisting>
 
         <sect4 id="latex.zone.std">
           <title>Without the <option>separateanswersheet</option>
@@ -2174,7 +2196,9 @@ Duration : 10 minutes.
           none, question, margin, margins.</para>
 
           <warning>
-          <para>The option <option>margins</option> does not work with AMC-TXT.</para>
+            <para>The option <option>margins</option> does not work with
+            AMC-TXT.</para>
+
             <para>Don't type one of those commands <emphasis>after</emphasis>
             printing.</para>
           </warning>
@@ -2606,8 +2630,8 @@ Duration : 10 minutes.
         <para>These dimensions are the vertical space between questions
         (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
         (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
-        <option>box</option> package option) or standard mode
-        (<code>I</code>) and the space left after an open question.</para>
+        <option>box</option> package option) or standard mode (<code>I</code>)
+        and the space left after an open question.</para>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -2707,9 +2731,10 @@ and write your first and last names below.
         <command>\AMCformBegin</command> command.</para>
 
         <para>Note that the codes rendering from <command>\AMCcode</command>
-        can be adapted modifying the lengths <command>\AMCcodeHspace</command>,
-        <command>\AMCcodeVspace</command> representing the horizontal and
-        vertical amount of space between boxes. Default values are set with the following commands:</para>
+        can be adapted modifying the lengths
+        <command>\AMCcodeHspace</command>, <command>\AMCcodeVspace</command>
+        representing the horizontal and vertical amount of space between
+        boxes. Default values are set with the following commands:</para>
 
         <programlisting>\AMCcodeHspace=.5em
 \AMCcodeVspace=.5em
@@ -2760,8 +2785,8 @@ and write your first and last names below.
             <term>lineuptext=<replaceable>text</replaceable></term>
 
             <listitem>
-              <para> if <code>lineup=true</code>, the text and ansewering area
-              will be on the same line.. </para>
+              <para>if <code>lineup=true</code>, the text and ansewering area
+              will be on the same line..</para>
             </listitem>
           </varlistentry>
 
@@ -3037,8 +3062,11 @@ and write your first and last names below.
         4194303) is modified, then the shuffling will differ. Of course, one
         must not modify this value after the test sheets have been
         printed.</para>
-        
-        <note><para>The value is recorded in the xy file (as <code>\rngstate{1}{1515}</code>). The default value is 1515.</para></note>
+
+        <note>
+          <para>The value is recorded in the xy file (as
+          <code>\rngstate{1}{1515}</code>). The default value is 1515.</para>
+        </note>
       </sect3>
 
       <sect3 id="latex.separate.sect">
