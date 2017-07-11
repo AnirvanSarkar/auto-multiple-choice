@@ -70,6 +70,10 @@ sub new {
 
     # current groups list
     $self->{'groups'}=[];
+    # global LaTeX definitions
+    $self->{latex_defs}=[];
+    # packages needed
+    $self->{packages}={};
     # maximum of digits that a hrizontal code can handle
     $self->{'maxhorizcode'}=6;
     # options values
@@ -101,7 +105,7 @@ sub new {
     # corresponding methods for implementation). Modules in the
     # Disable global option won't be used.
 
-    $self->{'parse_modules'}=['local_latex','images','embf','title','text'];
+    $self->{'parse_modules'}=['verbatim','local_latex','images','embf','title','text'];
 
     # current question number among questions for which no ID is given
     # in the source
@@ -120,7 +124,23 @@ my %l_arabic=('l-question'=>'السؤال',
 my @alphabet_arabic=('أ','ب','ج','د','ه','و','ز','ح','ط','ي','ك','ل',
 		     'م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ',
 		     'ذ','ض','ظ','غ',
-		     );
+                    );
+
+# add a global LaTeX definition
+sub add_global_latex_def {
+  my ($self,$tex)=@_;
+  push @{$self->{latex_defs}},$tex;
+}
+
+# require a specific LaTeX package, with options in the form
+# needs_package("geometry","margins"=>'1cm',"noheadfoot"=>'')
+sub needs_package {
+  my ($self,$package,%options)=@_;
+  $self->{packages}->{$package}={} if(!defined($self->{packages}->{$package}));
+  for my $o (keys %options) {
+    $self->{packages}->{$package}->{$o}=$options{$o};
+  }
+}
 
 # parse boolean options to get 0 (from empty value, "NO" or " FALSE")
 # or 1 (from other values).
@@ -374,7 +394,7 @@ sub read_file {
       debug "Group A=$action O=$options";
       my %oo=$self->read_options($options);
       if($action eq '(') {
-        $self->{options}->{use_needspace}=1 if($oo{needspace});
+        $self->needs_package('needspace') if($oo{needspace});
 	$self->{reader_state}->{group}=
 	  $self->group_by_id($oo{group},
 			     parent=>$self->{reader_state}->{group},
@@ -527,6 +547,50 @@ sub parse_local_latex {
     }
   }
   return(@o);
+}
+
+# generic code to parse '[xxx] ... [/xxx]' constructs
+sub parse_tags {
+  my ($self,$name,$parse_content,@components)=@_;
+  my @o=();
+  for my $c (@components) {
+    if($c->{'type'} eq 'txt') {
+      my $s=$c->{'string'};
+      while($s =~ /\[\Q$name\E\](.*?)\[\/\Q$name\E\]/sp) {
+	my $content=$1;
+	my $before=${^PREMATCH};
+	my $after=${^POSTMATCH};
+	push @o,{'type'=>'txt','string'=>$before};
+	push @o,&$parse_content($self,$content);
+	$s=$after;
+      }
+      push @o,{'type'=>'txt','string'=>$s};
+    } else {
+      push @o,$c;
+    }
+  }
+  return(@o);
+}
+
+# insert LaTeX code to write verbatim texts
+sub verbatim_content {
+  my ($self,$verb)=@_;
+  my $letter=$self->unused_letter();
+
+  # adds linebreaks at the beginning and end of $verb, if they none already
+  $verb = "\n".$verb if($verb !~ /^\n/);
+  $verb = $verb."\n" if($verb !~ /\n$/);
+
+  $self->add_global_latex_def("\\begin{SaveVerbatim}{AMCverb$letter}$verb\\end{SaveVerbatim}");
+  $self->needs_package('fancyvrb');
+  return({type=>'latex',
+          string=>"\\UseVerbatim{AMCverb$letter}"});
+}
+
+# parse [verbatim] ... [/verbatim] constructs
+sub parse_verbatim {
+  my ($self,@components)=@_;
+  return($self->parse_tags("verbatim",\&verbatim_content,@components));
 }
 
 # generic code to parse '[xxx ... xxx]' constructs
@@ -739,9 +803,20 @@ sub format_question {
   return($t);
 }
 
+sub int_to_letters {
+  my ($self,$i)=@_;
+  my $l='';
+  while($i>0) {
+    $l=chr(ord("A")+($i % 26)).$l;
+    $i=int($i/26);
+  }
+  return($l);
+}
+
 sub unused_letter {
   my ($self)=@_;
-  return(chr(ord("A")+($self->{'letter_i'}++)));
+  $self->{'letter_i'}++;
+  return($self->int_to_letters($self->{'letter_i'}));
 }
 
 # returns a new group name 'groupX' (where X is a letter beginnig at
@@ -825,8 +900,18 @@ sub file_header {
   $t .= "\\usepackage{"
     .($self->{'options'}->{'arabic'} && $self->bidi_year()<2011
       ? "fmultico" : "multicol")."}\n";
-  $t .= "\\usepackage{needspace}\n"
-    if($self->{options}->{use_needspace});
+
+  # packages
+  for my $p (keys %{$self->{packages}}) {
+    my @opts=();
+    for my $o (keys %{$self->{packages}->{$p}}) {
+      push @opts,($o . ($self->{packages}->{$p}->{$o} eq '' ? '' :
+                        "=".$self->{packages}->{$p}->{$o}));
+    }
+    $t .= "\\usepackage".(@opts ? "[".join(",",@opts)."]" : "")
+      ."{".$p."}\n";
+  }
+
   $t .= "\\setmainfont{".$self->{'options'}->{'font'}."}\n"
     if($self->{'options'}->{'font'});
   $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
@@ -1028,9 +1113,7 @@ sub group_insert_command_def {
 sub write_latex {
   my ($self,$output_file)=@_;
 
-  open(OUT,">:utf8",$output_file);
-
-  print OUT $self->file_header();
+  my $tex='';
 
   for my $group (@{$self->{'groups'}}) {
 
@@ -1038,96 +1121,104 @@ sub write_latex {
 
     my @questions=grep { !($_->{first} || $_->{last}) }
       @{$group->{'questions'}};
+
     my $q;
     while($q=shift @questions) {
-      print OUT "\\element{".$self->group_name($group)."}{\n";
-      print OUT $self->format_question($q);
+      $tex .= "\\element{".$self->group_name($group)."}{\n";
+      $tex .= $self->format_question($q);
       while(@questions && $questions[0]->{'next'}) {
-	print OUT "\n";
-	print OUT $self->format_question(shift @questions);
+	$tex .= "\n";
+	$tex .= $self->format_question(shift @questions);
       }
-      print OUT "}\n";
+      $tex .= "}\n";
     }
 
     # command to print the group
 
-    print OUT $self->group_insert_command_def($group);
+    $tex .= $self->group_insert_command_def($group);
   }
 
-  print OUT "\\onecopy{5}{\n";
+  $tex .= "\\onecopy{5}{\n";
 
-  print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
-  print OUT $self->page_header(0);
-  print OUT $self->student_block
+  $tex .= "\\begin{arab}" if($self->{'options'}->{'arabic'});
+  $tex .= $self->page_header(0);
+  $tex .= $self->student_block
     if(!$self->{'options'}->{'separateanswersheet'});
 
   if($self->{'options'}->{'presentation'}) {
-    print OUT $self->format_text($self->{'options'}->{'presentation'})."\n\n";
+    $tex .= $self->format_text($self->{'options'}->{'presentation'})."\n\n";
   }
-  print OUT "\\vspace{4mm}\\noindent\\hrule\n";
-  print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
-  print OUT "\n\n";
+  $tex .= "\\vspace{4mm}\\noindent\\hrule\n";
+  $tex .= "\\end{arab}" if($self->{'options'}->{'arabic'});
+  $tex .= "\n\n";
 
   # shuffle groups...
   for my $g (@{$self->{groups}}) {
-    print OUT "\\shufflegroup{".$self->group_name($g)."}\n"
+    $tex .= "\\shufflegroup{".$self->group_name($g)."}\n"
       if(parse_bool(first_defined($g->{shuffle},$self->{'options'}->{'shufflequestions'})));
   }
 
   # print groups
-  print OUT "\\begin{arab}"
+  $tex .= "\\begin{arab}"
     if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
   if($self->{'options'}->{'columns'}>1) {
-    print OUT "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n";
+    $tex .= "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n";
   } else {
-    print OUT "\\vspace{2ex}\n\n";
+    $tex .= "\\vspace{2ex}\n\n";
   }
 
-  print OUT $self->group_insert_command_name($self->group_by_id('_main_'))."\n";
+  $tex .= $self->group_insert_command_name($self->group_by_id('_main_'))."\n";
 
   if($self->{'options'}->{'columns'}>1) {
-    print OUT "\\end{multicols}\n";
+    $tex .= "\\end{multicols}\n";
   }
-  print OUT "\\end{arab}"
+  $tex .= "\\end{arab}"
     if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
 
   # separate answer sheet
   if($self->{'options'}->{'separateanswersheet'}) {
-    print OUT "\n\\AMCaddpagesto{".$self->{options}->{pages_question}."}"
+    $tex .= "\n\\AMCaddpagesto{".$self->{options}->{pages_question}."}"
       if($self->{options}->{pages_question});
     if($self->{'options'}->{'singlesided'}) {
-      print OUT "\n\\clearpage\n\n";
+      $tex .= "\n\\clearpage\n\n";
     } else {
-      print OUT "\n\\AMCcleardoublepage\n\n";
+      $tex .= "\n\\AMCcleardoublepage\n\n";
     }
-    print OUT "\\AMCformBegin\n";
+    $tex .= "\\AMCformBegin\n";
 
-    print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
-    print OUT $self->page_header(1);
-    print OUT $self->student_block;
+    $tex .= "\\begin{arab}" if($self->{'options'}->{'arabic'});
+    $tex .= $self->page_header(1);
+    $tex .= $self->student_block;
     if($self->{'options'}->{'answersheetpresentation'}) {
-      print OUT $self->format_text($self->{'options'}->{'answersheetpresentation'})."\n\n";
+      $tex .= $self->format_text($self->{'options'}->{'answersheetpresentation'})."\n\n";
     }
-    print OUT "\\vspace{4mm}\\noindent\\hrule\n";
-    print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
-    print OUT "\n\n";
+    $tex .= "\\vspace{4mm}\\noindent\\hrule\n";
+    $tex .= "\\end{arab}" if($self->{'options'}->{'arabic'});
+    $tex .= "\n\n";
 
-    print OUT "\\begin{arab}" if($self->{'options'}->{'arabic'});
-    print OUT "\\begin{multicols}{".$self->{'options'}->{'answersheetcolumns'}."}\n"
+    $tex .= "\\begin{arab}" if($self->{'options'}->{'arabic'});
+    $tex .= "\\begin{multicols}{".$self->{'options'}->{'answersheetcolumns'}."}\n"
       if($self->{'options'}->{'answersheetcolumns'}>1);
-    print OUT "\\AMCform\n";
-    print OUT "\\end{multicols}\n"
+    $tex .= "\\AMCform\n";
+    $tex .= "\\end{multicols}\n"
       if($self->{'options'}->{'answersheetcolumns'}>1);
-    print OUT "\\end{arab}" if($self->{'options'}->{'arabic'});
+    $tex .= "\\end{arab}" if($self->{'options'}->{'arabic'});
   }
 
-  print OUT "\n\n";
-  print OUT "\\AMCaddpagesto{".$self->{options}->{pages_total}."}\n"
+  $tex .= "\n\n";
+  $tex .= "\\AMCaddpagesto{".$self->{options}->{pages_total}."}\n"
       if($self->{options}->{pages_total});
-  print OUT "\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
+  $tex .= "\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
 
-  print OUT "}\n";
-  print OUT "\\end{document}\n";
+  $tex .= "}\n";
+  $tex .= "\\end{document}\n";
+
+  open(OUT,">:utf8",$output_file);
+
+  print OUT $self->file_header();
+  print OUT join("\n",@{$self->{latex_defs}})."\n";
+  print OUT $tex;
+
   close(OUT);
 }
 
