@@ -449,7 +449,7 @@ sub read_file {
 			 'letter'=>$letter,
 			 'scoring'=>$scoring);
 	$self->value_cleanup($self->{reader_state}->{follow});
-	$follow=\$a->{'text'};
+	$self->{reader_state}->{follow}=\$a->{'text'};
       } else {
 	debug "Choice outside question";
 # TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
