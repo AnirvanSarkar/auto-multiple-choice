@@ -362,6 +362,9 @@ tmp_deb:
 ifneq (,$(SKIP_DEP))
 	$(foreach onedep,$(SKIP_DEP),perl -pi -e 's/(,\s*$(onedep)|$(onedep),)//' $(TMP_SOURCE_DIR)/debian/control)
 endif
+ifneq (,$(ADD_BUILD_DEP))
+	$(foreach onedep,$(ADD_BUILD_DEP),perl -pi -e 's/(?<=Build-Depends: )/$(onedep), /' $(TMP_SOURCE_DIR)/debian/control)
+endif
 
 debsrc_vok: ssources tmp_deb
 	test -f $(ORIG_SOURCES) || cp /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(ORIG_SOURCES)
