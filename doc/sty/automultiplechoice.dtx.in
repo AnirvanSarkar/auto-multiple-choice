@@ -2761,8 +2761,16 @@ Three digits and two letters:\insertgroup{mixed}.
 %     same argument, both in the subject \emph{and} in the separate
 %     answer sheet.
 %    \begin{macrocode}
-\newcommand{\AMCsection}[1]{\section{#1}\AMC@mem@add@ifneeded{\section{#1}}}
-\newcommand{\AMCsubsection}[1]{\subsection{#1}\AMC@mem@add@ifneeded{\subsection{#1}}}
+\newcommand{\AMCsectionNumbered}[1]{%
+  \section{#1}\AMC@mem@add@ifneeded{\section{#1}}}
+\newcommand{\AMCsubsectionNumbered}[1]{%
+  \subsection{#1}\AMC@mem@add@ifneeded{\subsection{#1}}}
+\newcommand{\AMCsectionStar}[1]{%
+  \section*{#1}\AMC@mem@add@ifneeded{\section*{#1}}}
+\newcommand{\AMCsubsectionStar}[1]{%
+  \subsection*{#1}\AMC@mem@add@ifneeded{\subsection*{#1}}}
+\def\AMCsection{\@ifstar\AMCsectionStar\AMCsectionNumbered}
+\def\AMCsubsection{\@ifstar\AMCsubsectionStar\AMCsubsectionNumbered}
 %    \end{macrocode}
 % \end{macro}\end{macro}
 %
