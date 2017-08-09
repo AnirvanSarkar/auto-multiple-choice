@@ -35,7 +35,7 @@ use AMC::DataModule::capture qw/:zone :position/;
 use AMC::DataModule::layout qw/:flags/;
 use AMC::Substitute;
 
-use encoding 'utf8';
+use utf8;
 
 my $cr_dir="";
 my $rep_projet='';

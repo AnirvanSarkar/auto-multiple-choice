@@ -36,7 +36,7 @@ use AMC::DataModule::capture qw/:zone :position/;
 use AMC::DataModule::layout qw/:flags/;
 use AMC::Gui::Avancement;
 
-use encoding 'utf8';
+use utf8;
 
 sub new {
     my (%o)=(@_);
