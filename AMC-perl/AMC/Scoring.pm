@@ -104,7 +104,7 @@ sub set_default_strategy {
 sub prepare_question {
   my ($self,$question_data)=@_;
 
-  $self->{env}=$self->{default_strategy}->clone;
+  $self->{env}=$self->{default_strategy}->clone(1);
   $self->{env}->process_directives($question_data->{default_strategy});
   $self->{env}->process_directives($question_data->{strategy});
 }
@@ -172,7 +172,7 @@ sub process_ticked_answers_setx {
     my $c=$a->{'correct'};
     my $t=($correct ? $c : $a->{'ticked'});
 
-    $self->{env}->variables_from_directives_string($a->{strategy},set=>1)
+    $self->{env}->variables_from_directives_string($a->{strategy},set=>1,setx=>1,setglobal=>1)
       if($t);
   }
 }
@@ -361,7 +361,7 @@ sub score_question {
 
   $self->set_number_variables($question_data,$correct);
   $self->process_ticked_answers_setx($question_data,$correct);
-  $self->{env}->variables_from_directives(default=>1,set=>1,setx=>1,requires=>1);
+  $self->{env}->variables_from_directives(default=>1,set=>1,setx=>1,setglobal=>1,requires=>1);
 
   if($self->{env}->n_errors()) {
     $why="E";
@@ -422,11 +422,13 @@ sub score_correct_question {
 # if not present, the score_correct_question value.
 sub score_max_question {
    my ($self,$etu,$question_data)=@_;
-   debug "MARK: scoring correct answers for MAX";
-   my ($x,$why)=($self->score_question($etu,0,$question_data,1));
    if($self->defined_directive("MAX")) {
-     return($self->directive("MAX"),'M');
+     my $m=$self->directive("MAX");
+     debug "MARK: get MAX from scoring directives: $m";
+     return($m,'M');
    } else {
+     debug "MARK: scoring correct answers for MAX";
+     my ($x,$why)=($self->score_question($etu,0,$question_data,1));
      return($x,$why);
    }
 }

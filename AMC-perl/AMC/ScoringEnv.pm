@@ -75,6 +75,7 @@ sub new {
   }
 
   $self->{errors}=[];
+  $self->{globalvariables}=$self->{variables};
 
   bless($self,$class);
 
@@ -110,8 +111,14 @@ sub clear_errors {
 }
 
 sub clone {
-  my ($self)=@_;
-  return(AMC::ScoringEnv->new($self));
+  my ($self,$from_global)=@_;
+  $c=AMC::ScoringEnv->new($self);
+  if($from_global) {
+    $c->{globalvariables}=$self->{variables};
+  } else {
+    $c->{globalvariables}=$self->{globalvariables};
+  }
+  return($c)
 }
 
 sub clone_directives {
@@ -138,14 +145,15 @@ sub set_type {
 # set variable value.
 
 sub set_variable {
-  my ($self,$vv,$value,$rw,$unlock)=@_;
-  $self->{variables}->{$vv}=[] if(!$self->{variables}->{$vv});
+  my ($self,$vv,$value,$rw,$unlock,$global)=@_;
+  $vars=($global ? 'globalvariables' : 'variables');
+  $self->{$vars}->{$vv}=[] if(!$self->{$vars}->{$vv});
   if((!$unlock)
-     && $self->{variables}->{$vv}->[$self->{type}]
-     && !$self->{variables}->{$vv}->[$self->{type}]->{rw}) {
+     && $self->{$vars}->{$vv}->[$self->{type}]
+     && !$self->{$vars}->{$vv}->[$self->{type}]->{rw}) {
     $self->error("Trying to set read-only variable $vv");
   } else {
-    $self->{variables}->{$vv}->[$self->{type}]={value=>$value,rw=>$rw};
+    $self->{$vars}->{$vv}->[$self->{type}]={value=>$value,rw=>$rw};
   }
 }
 
@@ -219,6 +227,11 @@ sub action_variable {
     $self->set_variable($key,
 			$self->evaluate($value),
 			0,1);
+  } elsif($action eq 'setglobal') {
+    debug "Setting global variable $key = $value";
+    $self->set_variable($key,
+			$self->evaluate($value),
+			0,1,1);
   } elsif($action eq 'requires') {
     $self->error("Variable $key required")
       if(!$self->defined_variable($key));
@@ -240,7 +253,7 @@ sub variables_from_directives {
   my ($self,%oo)=@_;
   debug "Variables from internal directives";
   my @keys=$self->sorted_directives_keys;
-  for my $a (qw/default set setx requires/) {
+  for my $a (qw/default set setx setglobal requires/) {
     $self->action_variables_from_directives($a,\@keys)
       if($oo{$a});
   }
@@ -261,7 +274,7 @@ sub action_variables_from_parse {
 
 sub variables_from_parsed_directives {
   my ($self,$parsed,%oo)=@_;
-  for my $a (qw/default set setx requires/) {
+  for my $a (qw/default set setx setglobal requires/) {
     $self->action_variables_from_parse($parsed,$a)
       if($oo{$a});
   }

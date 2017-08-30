@@ -217,7 +217,7 @@ for my $sc (@captured_studentcopy) {
 
   # Process each question in turn
 
-  for my $question (keys %{$ssb->{'questions'}}) {
+  for my $question (sort { $a cmp $b } (keys %{$ssb->{'questions'}})) {
 
     # $question is the question numerical ID, and
     # $q is the question scoring data (see AMC::DataModule::scoring)
