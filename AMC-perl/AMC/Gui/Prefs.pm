@@ -117,22 +117,29 @@ sub find_object {
   my $key=$full_key;
   $key =~ s/.*[\/:]//;
 
+  if(!$gap) {
+    my $record=$self->widget_store_get($full_key,%o);
+    return($record->{widget},$record->{kind}) if($record);
+  }
+
   for my $kind (@{$self->{kinds}}) {
     my $ww;
     if($gap) {
       $ww=$gap->get_object($o{prefix}.'_'.$kind.'_'.$key);
-    } else {
-      $ww=$self->widget_store_get($full_key,%o);
-      $ww=$ww->{widget} if($ww);
     }
     if(!$ww) {
-      $ww=$self->{alternate_w}->{$o{prefix}.'_'.$kind.'_'.$key};
+      my $alt=$self->{alternate_w}->{$o{prefix}.'_'.$kind.'_'.$key};
+      if($alt) {
+        debug "  :alt: ".ref($alt);
+        $ww=$alt;
+      }
     }
     if($ww && ref($ww) =~ '^Gtk') {
       $self->widget_store_set($full_key,$key,$kind,$ww,%o);
       return($ww,$kind);
     }
   }
+
   return('');
 }
 
