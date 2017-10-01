@@ -860,6 +860,10 @@ $prefs->store_register(
     'email_transport'=>cb_model('sendmail'=>__"sendmail",
 # TRANSLATORS: One of the ways to send mail: use a SMTP server. This is a menu entry.
 				'SMTP'=>__"SMTP"),
+    'email_smtp_ssl'=>cb_model(0=>__p"None [SMTP security]",
+# TRANSLATORS: SMTP security mode: None (nor SSL nor STARTTLS)
+                               'ssl'=>'SSL',
+                               'starttls'=>'STARTTLS'),
     'print_extract_with'=>cb_model('pdftk'=>'pdftk',
 				   'gs'=>'gs (ghostscript)'
 				   ),
@@ -6035,6 +6039,9 @@ sub send_emails {
 		      "--sendmail-path",$config->get('email_sendmail_path'),
 		      "--smtp-host",$config->get('email_smtp_host'),
 		      "--smtp-port",$config->get('email_smtp_port'),
+                      "--smtp-ssl",$config->get('email_smtp_ssl'),
+                      "--smtp-user",$config->get('email_smtp_user'),
+                      "--smtp-passwd-file",$config->passwd_file("SMTP"),
 		      "--cc",$config->get('email_cc'),
 		      "--bcc",$config->get('email_bcc'),
                       "--delay",$config->get('email_delay'),
@@ -6064,6 +6071,8 @@ sub send_emails {
 	       my @message;
 	       push @message,"<b>".(__"Cancelled.")."</b>"
 		 if($data{cancelled});
+               push @message,"<b>".(__"SMTP authentication failed: check SMTP configuration and password.")."</b>"
+		 if($c->variable('failed_auth'));
 	       push @message,sprintf(__"%d message(s) has been sent.",$ok);
 	       if($failed>0) {
 		 push @message,"<b>".sprintf("%d message(s) could not be sent.",$failed)."</b>";

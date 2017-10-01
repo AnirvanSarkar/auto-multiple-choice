@@ -105,6 +105,38 @@ sub set_local_keys {
   }
 }
 
+# Handling passwords
+
+sub passwd_file {
+  my ($self,$usage)=@_;
+  return($self->{o_dir}."/cf.".$self->{profile}.".p_$usage");
+}
+
+sub set_passwd {
+  my ($self,$usage,$pass)=@_;
+  my $file=$self->passwd_file($usage);
+  if(open my $fh,">",$file) {
+    chmod(0600,$file);
+    print $fh $pass;
+    print $fh "\n";
+    print $fh "*" x (64-length($pass)) if(length($pass)<64);
+    close $fh;
+  } else {
+    debug "ERROR: Can't open file $file to save passwd";
+  }
+}
+
+sub get_passwd {
+  my ($self,$usage)=@_;
+  my $file=$self->passwd_file($usage);
+  my $pass='';
+  if(-f $file) {
+    $pass=file_content($file);
+    $pass =~ s/\n.*//s;
+  }
+  return($pass);
+}
+
 # Read/write options XML files
 
 sub pref_xml_lit {
@@ -292,6 +324,9 @@ sub defaults {
                            '/sbin/sendmail','/bin/sendmail'],
      email_smtp_host=>'smtp',
      email_smtp_port=>25,
+     email_smtp_ssl=>0,
+     email_smtp_user=>'',
+     SMTP=>'',
 # TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
      defaut_email_subject=>__"Exam result",
 # TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.

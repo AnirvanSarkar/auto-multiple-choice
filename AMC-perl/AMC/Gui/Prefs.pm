@@ -30,7 +30,7 @@ sub new {
   my $self={stores=>{},
 	    shortcuts=>'',
             config=>'',
-            kinds=>[qw/c cb ce col f s t v x fb/],
+            kinds=>[qw/c cb ce col f s t v x fb p/],
 	    w=>{},
 	    alternate_w=>'',
 	   };
@@ -154,6 +154,7 @@ sub find_object {
 # _v_ check button
 # _x_ one line text
 # _fb_ font button
+# _p_ password (label)
 
 sub transmet_pref {
   my ($self,$gap,%o)=@_;
@@ -260,6 +261,8 @@ sub transmet_pref {
         } else {
           print STDERR "$key/CE : cannot find text widget\n";
         }
+      } elsif($kind eq 'p') {
+        $w->set_text($self->{config}->get_passwd($key));
       }
     }
   }
@@ -329,6 +332,9 @@ sub reprend_pref {
 	} else {
 	  $n=$s->{widget}->get_active();
 	}
+      } elsif($s->{kind} eq 'p') {
+        $self->{config}->set_passwd($s->{key},$s->{widget}->get_text());
+        $found=0;
       } else {
         $found=0;
       }

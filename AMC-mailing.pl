@@ -48,6 +48,9 @@ my $transport='sendmail';
 my $sendmail_path='/usr/sbin/sendmail';
 my $smtp_host='smtp';
 my $smtp_port=25;
+my $smtp_ssl='';
+my $smtp_user='';
+my $smtp_passwd_file='';
 my $text='';
 my $text_content_type='text/plain';
 my $subject='';
@@ -77,6 +80,9 @@ GetOptions("project=s"=>\$project_dir,
 	   "sendmail-path=s"=>\$sendmail_path,
 	   "smtp-host=s"=>\$smtp_host,
 	   "smtp-port=s"=>\$smtp_port,
+           "smtp-ssl=s"=>\$smtp_ssl,
+           "smtp-user=s"=>\$smtp_user,
+           "smtp-passwd-file=s"=>\$smtp_passwd_file,
 	   "debug=s"=>\$debug,
 	   "progression=s"=>\$progress,
 	   "progression-id=s"=>\$progress_id,
@@ -160,10 +166,18 @@ if($transport eq 'sendmail') {
   load Email::Sender::Transport::Sendmail;
   $t=Email::Sender::Transport::Sendmail->new({ sendmail => $sendmail_path });;
 } elsif($transport eq 'SMTP') {
+  my $pass='';
+  if($smtp_user && -f $smtp_passwd_file) {
+    $pass=file_content($smtp_passwd_file);
+    $pass =~ s/\n.*//s;
+  }
   load Email::Sender::Transport::SMTP;
   $t=Email::Sender::Transport::SMTP
     ->new({'host'=>$smtp_host,
 	   'port'=>$smtp_port,
+           'ssl'=>$smtp_ssl,
+           'sasl_username'=>$smtp_user,
+           'sasl_password'=>$pass,
 	   });
 } else {
   error("Unknown transport: $transport");
@@ -201,12 +215,18 @@ for my $f (@attach_files) {
   }
 }
 
+my $failed_auth=0;
+
 STUDENT: for my $i (@$r) {
   my ($s)=$students->data($key,$i->{'id'},test_numeric=>1);
   my $dest=$s->{$email_column};
   debug "Loop: ID $i->{'id'} DEST [$dest]";
   if($ids_file && !$ids{$i->{'id'}}) {
     debug "Skipped";
+    next STUDENT;
+  }
+  if($failed_auth) {
+    print "FAILED: auth\n";
     next STUDENT;
   }
   if($dest) {
@@ -253,21 +273,32 @@ STUDENT: for my $i (@$r) {
 	sendmail($email,{'transport'=>$t,to=>\@all_dests});
       } || $@;
 
-      my $status='OK';
+      my $status;
       my $m='';
-      if($b) {
-	if($b->isa('Email::Sender::Failure')) {
-	  $status='FAILED';
-	  $m=$b->message;
-	  $m =~ s/[\n\r]+/ | /g;
-	}
-      } else {
+
+      if($b->isa('Email::Sender::Failure')) {
         $status='FAILED';
-        $m='Email::Sender error';
+        $m=$b->message;
+        $m =~ s/[\n\r]+/ | /g;
+      } elsif($b->isa('Email::Sender::Success')) {
+        $status='OK';
+      } else {
+        $status='ERROR';
+        $m=$b;
       }
+
+      # In case of failed authentication, cancel all sendings
+      if($status eq 'FAILED' && $m =~ /failed auth/i) {
+        debug "Failed authentication: cancel all sendings";
+        $failed_auth=1;
+      }
+
       print "$status [$i->{'id'}] $m\n";
       debug "$status [$i->{'id'}] $m";
       print LOGF "$status [$i->{'id'} -> $dest] $m\n" if($log_file);
+
+      next STUDENT if($failed_auth);
+
       $report->report_mailing(@sc,
                               ($status eq 'OK' ? REPORT_MAIL_OK : REPORT_MAIL_FAILED),
                               $m,'now');
@@ -284,6 +315,8 @@ STUDENT: for my $i (@$r) {
 $data->end_transaction('Mail');
 
 $avance->fin();
+
+print "VAR: failed_auth=$failed_auth\n";
 
 if($log_file) {
   close(LOGF);
