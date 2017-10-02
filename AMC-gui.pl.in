@@ -862,7 +862,7 @@ $prefs->store_register(
 				'SMTP'=>__"SMTP"),
     'email_smtp_ssl'=>cb_model(0=>__p"None [SMTP security]",
 # TRANSLATORS: SMTP security mode: None (nor SSL nor STARTTLS)
-                               'ssl'=>'SSL',
+                               1=>'SSL',
                                'starttls'=>'STARTTLS'),
     'print_extract_with'=>cb_model('pdftk'=>'pdftk',
 				   'gs'=>'gs (ghostscript)'
@@ -5805,6 +5805,25 @@ sub send_emails {
     $dialog->destroy;
 
     return();
+  }
+
+  # STARTTLS is only available with Email::Sender >= 1.300027
+  # Warn in case it is not available
+
+  if($config->get('email_smtp_ssl') =~ /[^01]/) {
+    load "Email::Sender";
+    load "version";
+    if(version->parse($Email::Sender::VERSION)
+       < version->parse("1.300027")) {
+      my $dialog = Gtk3::MessageDialog
+        ->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok','');
+      $dialog->set_markup(__("SMTP security mode \"STARTTLS\" is only available with Email::Sender version 1.300027 and over. Please install a newer version of this perl module or change SMTP security mode, and try again."));
+      $dialog->run;
+      $dialog->destroy;
+      return();
+    }
   }
 
   load Email::Address;
