@@ -1762,7 +1762,24 @@ Three digits and two letters:\insertgroup{mixed}.
 %%    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% 
+%
+% \begin{macro}{\AMC@tracechar}
+%   The macro
+%   |\AMC@tracechar|\marg{char}\marg{unused}\marg{trace}\marg{key} is
+%   used to log (for further processing with AMC), into to |.xy| file,
+%   the character used to identify the box.
+%
+%    \begin{macrocode}
+\newcommand\AMC@tracechar[4]{%
+  \ifAMC@calibration\ifx\@empty#3\@empty\else%
+    \protected@write\AMC@XYFILE{}{%
+      \string\boxchar{\the\AMCid@etud/\thepage:#4}{#1}%
+    }%
+  \fi\fi%
+}
+%    \end{macrocode}
+% \end{macro}
+%
 % \begin{environment}{amcxyfile}
 %   The following lines defines an environment to use a particular file
 %   for positions outputs. This is used mainly for documentation or testing.
@@ -1977,7 +1994,7 @@ Three digits and two letters:\insertgroup{mixed}.
     }}%
 }
 \newcommand\AMC@shapeprepare@form{}
-\newcommand\AMC@shape@form@base[4]{%
+\newcommand\AMC@shape@form@base[5]{%
   \ifx #2\AMC@checkedbox%
     \def\AMC@shape@form@ticked{true}%
   \else%
@@ -1985,13 +2002,13 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \AMC@tracebox{#3}{#4}{%
     \CheckBox[checked=\AMC@shape@form@ticked,%
-              checkboxsymbol=\ding{110},name={#4},%
+              checkboxsymbol=\ding{110},name={#5},%
               bordercolor=0 0 0,
               width=\AMC@boxedwidth,height=\AMC@boxedheight]{}{}%
   }%
 }
 \newcommand\AMC@shape@form[4]{%
-  \AMC@shape@form@base{#1}{#2}{#3}{\the\AMCid@etud:#4}%
+  \AMC@shape@form@base{#1}{#2}{#3}{#4}{\the\AMCid@etud:#4}%
 }
 \newcommand\AMC@shapeprepare@none{}
 \newcommand\AMC@shape@none[4]{ #1 }
@@ -2120,6 +2137,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \else%
     \AMC@answerBox@{#1}{#2}{#3}{#4}%
   \fi%
+  \AMC@tracechar{#1}{#2}{#3}{#4}%
 }
 \newif\ifAMC@printkeyoutside@%
 \newcommand\ifAMC@printkeyoutside{%
@@ -2137,6 +2155,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \else%
     \AMC@answerBox@{#1}{#2}{#3}{#4}%
   \fi%
+  \AMC@tracechar{#1}{#2}{#3}{#4}%
 }
 \newcommand\AMC@formBox[4]{%
   \AMC@formBox@{\ifx\@empty#1\@empty%
@@ -3165,37 +3184,49 @@ Three digits and two letters:\insertgroup{mixed}.
 % \begin{minipage}[t]{.6\linewidth}
 %   \AMCcodeH{code}{3}
 % \end{minipage}
+%
+% \begin{macro}{\AMC@codeDigit}
+%   The macro |\AMC@codeDigit|\marg{char}\marg{vertical} is used to
+%   typeset the box with character \meta{char}, for vertical codes if
+%   \meta{vertical} is non-empty.
+% \end{macro}
 % 
 %    \begin{macrocode}
 \newcount\AMC@chiffres
 \newdimen\AMCcodeHspace\AMCcodeHspace=.5em
 \newdimen\AMCcodeVspace\AMCcodeVspace=.5em
+\newcommand{\AMC@codeDigit}[2]{%
+  \global\advance\AMCrep@count\@ne\relax%
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
+  \hbox{\AMC@keyBox@{#1}{}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}}%
+  \ifx\@empty#2\@empty%
+    \hspace{\AMCcodeHspace}%
+  \else%
+    \vspace{\AMCcodeVspace}%
+  \fi%
+}
 \newcommand{\AMCcode}[2]{%
 {\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
   \AMCquestionNumberfalse%
  \setlength{\parindent}{0pt}%
- \def\AMCbeginAnswer{\hspace{0pt}%
-    \vbox\bgroup}%
- \def\AMCendAnswer{\vspace{-\AMCcodeVspace}\egroup%
-    \hspace{\AMCcodeHspace}}%
- \def\AMCanswer##1##2{\hbox{\ifAMC@ensemble ##1\else%
-   \ifAMC@inside@box ##1\else{\AMCboxOutsideLetter{##1}{##2}}\fi\fi\hspace*{\fill}}%
-   \vspace{\AMCcodeVspace}}%
  \AMCnobloc%
  \AMC@chiffres=#2\loop%
  \begin{question}{#1[\the\AMC@chiffres]}\QuestionIndicative%
-   \begin{choicescustom}[o]\scoring{auto=0,formula=}%
-     \wrongchoice[0]{0}%
-     \wrongchoice[1]{1}%
-     \wrongchoice[2]{2}%
-     \wrongchoice[3]{3}%
-     \wrongchoice[4]{4}%
-     \wrongchoice[5]{5}%
-     \wrongchoice[6]{6}%
-     \wrongchoice[7]{7}%
-     \wrongchoice[8]{8}%
-     \wrongchoice[9]{9}%
-   \end{choicescustom}%
+   \scoring{auto=0,formula=}%
+   \global\AMCrep@count=\z@%
+   \hspace{0pt}\vbox{%
+     \AMC@codeDigit{0}{1}%
+     \AMC@codeDigit{1}{1}%
+     \AMC@codeDigit{2}{1}%
+     \AMC@codeDigit{3}{1}%
+     \AMC@codeDigit{4}{1}%
+     \AMC@codeDigit{5}{1}%
+     \AMC@codeDigit{6}{1}%
+     \AMC@codeDigit{7}{1}%
+     \AMC@codeDigit{8}{1}%
+     \AMC@codeDigit{9}{1}%
+     \vspace{-\AMCcodeVspace}}%
+   \hspace{\AMCcodeHspace}%
  \end{question}%
  \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
  \hspace{-\AMCcodeHspace}%
@@ -3204,26 +3235,23 @@ Three digits and two letters:\insertgroup{mixed}.
 {\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
   \AMCquestionNumberfalse%
  \setlength{\parindent}{0pt}%
- \def\AMCbeginAnswer{\hbox\bgroup}%
- \def\AMCendAnswer{\egroup\vspace{\AMCcodeVspace}\par}%
- \def\AMCanswer##1##2{\hbox{\ifAMC@ensemble ##1\else%
-   \ifAMC@inside@box ##1\else{\AMCboxOutsideLetter{##1}{##2}}\fi\fi}%
-   \hspace{\AMCcodeHspace}}%
  \AMCnobloc%
  \AMC@chiffres=#2\loop%
  \begin{question}{#1[\the\AMC@chiffres]}\QuestionIndicative%
-   \begin{choicescustom}[o]\scoring{auto=0,formula=}%
-     \wrongchoice[0]{0}%
-     \wrongchoice[1]{1}%
-     \wrongchoice[2]{2}%
-     \wrongchoice[3]{3}%
-     \wrongchoice[4]{4}%
-     \wrongchoice[5]{5}%
-     \wrongchoice[6]{6}%
-     \wrongchoice[7]{7}%
-     \wrongchoice[8]{8}%
-     \wrongchoice[9]{9}%
-   \end{choicescustom}%
+   \scoring{auto=0,formula=}%
+   \global\AMCrep@count=\z@%
+   \hbox{%
+     \AMC@codeDigit{0}{}%
+     \AMC@codeDigit{1}{}%
+     \AMC@codeDigit{2}{}%
+     \AMC@codeDigit{3}{}%
+     \AMC@codeDigit{4}{}%
+     \AMC@codeDigit{5}{}%
+     \AMC@codeDigit{6}{}%
+     \AMC@codeDigit{7}{}%
+     \AMC@codeDigit{8}{}%
+     \AMC@codeDigit{9}{}%
+   }\vspace{\AMCcodeVspace}\par%
  \end{question}%
  \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
 }}

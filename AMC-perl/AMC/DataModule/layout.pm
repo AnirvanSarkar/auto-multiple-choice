@@ -87,6 +87,9 @@ package AMC::DataModule::layout;
 # * flags is an integer that contains the flags from BOX_FLAGS_* (see
 #   below)
 #
+# * char is the character associated with the box (written inside or
+#   beside the box)
+#
 # layout_digit lists all the binary boxes to read student/page number
 # and checksum from the scans (boxes white for digit 0, black for
 # digit 1):
@@ -148,7 +151,7 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(5);
+  return(6);
 }
 
 sub drop_box_table {
@@ -250,6 +253,11 @@ sub version_upgrade {
       $self->sql_do("DROP TABLE box_tmp");
       return(5);
     }
+    if($old_version==5) {
+      $self->sql_do("ALTER TABLE ".$self->table("box")
+                    ." ADD COLUMN char TEXT");
+      return(6);
+    }
     return('');
 }
 
@@ -294,7 +302,7 @@ sub populate_from_xml {
 			    );
 		    }
 		    for my $c (@{$l->{'case'}}) {
-			$self->statement('NEWBox')->execute(
+			$self->statement('NEWBox0')->execute(
 			    @lid,BOX_ROLE_ANSWER,(map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)),0
 			    );
 		    }
@@ -350,9 +358,12 @@ sub define_statements {
        },
        'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
 		   ." (student,page,corner,x,y) VALUES (?,?,?,?,?)"},
-       'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
+       'NEWBox0'=>{'sql'=>"INSERT INTO ".$self->table("box")
 		  ." (student,page,role,question,answer,xmin,xmax,ymin,ymax,flags)"
 		  ." VALUES (?,?,?,?,?,?,?,?,?,?)"},
+       'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
+		  ." (student,page,role,question,answer,xmin,xmax,ymin,ymax,flags,char)"
+		  ." VALUES (?,?,?,?,?,?,?,?,?,?,?)"},
        'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
 		    ." (student,page,numberid,digitid,xmin,xmax,ymin,ymax)"
 		    ." VALUES (?,?,?,?,?,?,?,?)"},

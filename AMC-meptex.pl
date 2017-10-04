@@ -100,7 +100,6 @@ my @flags=();
 my @pre_assoc=();
 my $cases;
 my $page_number=0;
-my $i='';
 my %with_vars=();
 
 sub add_flag {
@@ -136,7 +135,7 @@ while(<SRC>) {
 		     -cases=>$cases};
     }
     if(/\\tracepos\{(.+?)\}\{([+-]?[0-9.]+[a-z]*)\}\{([+-]?[0-9.]+[a-z]*)\}(?:\{([a-zA-Z]*)\})?$/) {
-	$i=$1;
+	my $i=$1;
 	my $x=read_inches($2);
 	my $y=read_inches($3);
 	my $shape=$4;
@@ -154,6 +153,14 @@ while(<SRC>) {
 	    $cases->{$i}->{'flags'} |= BOX_FLAGS_SHAPE_OVAL;
 	  }
 	}
+    }
+    if(/\\boxchar\{(.+)\}\{(.*)\}$/) {
+      my $i=$1;
+      my $char=$2;
+      $i =~ s/^[0-9]+\/[0-9]+://;
+      $cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0,'shape'=>''}
+        if(!$cases->{$i});
+      $cases->{$i}->{char}=$char;
     }
     if(/\\dontscan\{(.*)\}/) {
       add_flag($1,BOX_FLAGS_DONTSCAN);
@@ -258,10 +265,11 @@ PAGE: for my $p (@pages) {
       }
       if($k=~/(case|casequestion|score|scorequestion):(.*):([0-9]+),(-?[0-9]+)$/) {
 	my ($type,$name,$q,$a)=($1,$2,$3,$4);
+        debug "- Box $k";
 	$layout->question_name($q,$name) if($name ne '');
 	$layout->statement('NEWBox')
 	  ->execute(@ep,$role{$type},
-		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'});
+		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'},$c->{$k}->{char});
       }
     }
 
