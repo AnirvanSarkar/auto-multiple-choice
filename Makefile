@@ -127,6 +127,9 @@ AMC-detect: AMC-detect.cc Makefile
 AMC-buildpdf: AMC-buildpdf.cc buildpdf.cc Makefile
 	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_PDF) $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
+rebuild: FORCE
+	$(MAKE) $(BINARIES) -W Makefile
+
 # substitution in *.in files
 
 vars-subs.pl: $(SUB_MAKEFILES)
