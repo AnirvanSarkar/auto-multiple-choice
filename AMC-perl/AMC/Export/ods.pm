@@ -864,7 +864,12 @@ sub export {
 
     sub get_title {
       my ($o)=@_;
-      my $t=encode('utf-8',$o->{'title'});
+      my $t;
+      if(ref($0) eq 'HASH') {
+        $t=encode('utf-8',$o->{'title'});
+      } else {
+        $t=encode('utf-8',$o);
+      }
       push @titles,$t;
       return $t;
     }
