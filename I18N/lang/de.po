@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto Multiple Choice\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2017-10-01 21:16 +0200\n"
+"POT-Creation-Date: 2017-10-05 14:53 +0200\n"
 "PO-Revision-Date: 2016-03-07 15:32+0000\n"
 "Last-Translator: Dominik Vogel <post@vogel-online.info>\n"
 "Language-Team: German (http://www.transifex.com/jojoboulix/auto-multiple-choice/language/de/)\n"
@@ -271,7 +271,7 @@ msgstr "wie in der Quelle beschrieben"
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
 #. TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:826 ../AMC-gui.pl:5921
+#: ../AMC-gui.pl:826 ../AMC-gui.pl:5940
 msgid "name"
 msgstr "Name"
 
@@ -905,7 +905,8 @@ msgid "Please choose a key from primary keys in students list before association
 msgstr "Bitte wählen Sie einen Primärschlüssel aus der Prüflingsliste vor der Zuordnung."
 
 #: ../AMC-gui.pl:3117
-msgid "Please choose a code (made with LaTeX command \\AMCcode) before automatic association."
+#, fuzzy
+msgid "Please choose a code (made with LaTeX command \\AMCcodeGrid or equivalent) before automatic association."
 msgstr "Bitte wählen Sie einen Code (erstellt mit dem LaTeX-Befehl \\AMCcode) vor der automatischen Zuordnung."
 
 #. TRANSLATORS: Here, %s will be replaced with "Students identification", which refers to a paragraph in the tab "Marking" from AMC main window.
@@ -1212,7 +1213,7 @@ msgstr "(keine Beschreibung)"
 
 #. TRANSLATORS: This is a column title for the list of files to be included in a template being created.
 #. TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
-#: ../AMC-gui.pl:4980 ../AMC-gui.pl:5900
+#: ../AMC-gui.pl:4980 ../AMC-gui.pl:5919
 msgid "file"
 msgstr "Datei"
 
@@ -1316,188 +1317,192 @@ msgstr "Bitte gruppieren Sie die Bögen mit Anmerkungen zu PDF-Dateien, um diese
 msgid "Sending emails requires some perl modules that are not installed: %s. Please install these modules and try again."
 msgstr "Das Versenden von E-Mails benötigt einige perl Module, die nicht installiert sind: %s. Bitte installieren Sie diese Module und wiederholen Sie den Vorgang."
 
-#: ../AMC-gui.pl:5819
+#: ../AMC-gui.pl:5822
+msgid "SMTP security mode \"STARTTLS\" is only available with Email::Sender version 1.300027 and over. Please install a newer version of this perl module or change SMTP security mode, and try again."
+msgstr ""
+
+#: ../AMC-gui.pl:5838
 #, perl-format
 msgid "The email address you entered (%s) is not correct."
 msgstr "Die eingegebene E-Mail-Adresse (%s) ist nicht korrekt."
 
-#: ../AMC-gui.pl:5821
+#: ../AMC-gui.pl:5840
 msgid "Please edit your preferences to correct your email address."
 msgstr "Bitte bearbeiten Sie Ihre Einstellungen, um die E-Mailadresse ändern zu können"
 
-#: ../AMC-gui.pl:5823
+#: ../AMC-gui.pl:5842
 msgid "You did not enter your email address."
 msgstr "Sie haben keine E-Mail-Adresse angegeben."
 
-#: ../AMC-gui.pl:5824
+#: ../AMC-gui.pl:5843
 msgid "Please edit the preferences to set your email address."
 msgstr "Bitte bearbeiten Sie die Einstellungen um Ihre E-Mail-Adresse einzugeben."
 
-#: ../AMC-gui.pl:5847
+#: ../AMC-gui.pl:5866
 #, perl-format
 msgid "The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."
 msgstr "Das Programm <i>sendmail</i> konnte nicht an der in den Einstellungen angegebenen Stelle (%s) gefunden werden. Bitte ändern Sie die Konfiguration."
 
-#: ../AMC-gui.pl:5867
+#: ../AMC-gui.pl:5886
 msgid "No email addresses has been found in the students list file. You need to write the students addresses in a column of this file."
 msgstr "Es konnten keine E-Mail-Adressen gefunden werden in der Prüflingslistendatei. Sie müssen die Prüflingsadressen in eine Spalte in dieser Datei schreiben."
 
 #. TRANSLATORS: This is the title of a column containing copy numbers in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:5915
+#: ../AMC-gui.pl:5934
 msgid "copy"
 msgstr "kopieren"
 
 #. TRANSLATORS: This is the title of a column containing students email addresses in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:5927
+#: ../AMC-gui.pl:5946
 msgid "email"
 msgstr "E-Mail"
 
 #. TRANSLATORS: This is the title of a column containing mailing status (not sent, already sent, failed) in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:5933
+#: ../AMC-gui.pl:5952
 msgid "status"
 msgstr "Status"
 
-#: ../AMC-gui.pl:5952
+#: ../AMC-gui.pl:5971
 msgid "failed"
 msgstr "fehlgeschlagen"
 
-#: ../AMC-gui.pl:6010
+#: ../AMC-gui.pl:6029
 msgid "Some files you asked to be attached to the emails are missing:"
 msgstr "Einige Dateien, die Sie  zu den E-Mails anhängen möchten, fehlen:"
 
-#: ../AMC-gui.pl:6011
+#: ../AMC-gui.pl:6030
 msgid "Please create them or remove them from the list of attached files."
 msgstr "Bitte erstellen Sie diese oder entfernen Sie diese von der Liste der angehängten Dateien."
 
-#: ../AMC-gui.pl:6063
+#: ../AMC-gui.pl:6082
 msgid "Sending emails..."
 msgstr "Senden der E-Mails..."
 
-#: ../AMC-gui.pl:6072
+#: ../AMC-gui.pl:6091
 msgid "Cancelled."
 msgstr "Vorgang abgebrochen."
 
-#: ../AMC-gui.pl:6074
+#: ../AMC-gui.pl:6093
 msgid "SMTP authentication failed: check SMTP configuration and password."
 msgstr ""
 
-#: ../AMC-gui.pl:6076
+#: ../AMC-gui.pl:6095
 #, perl-format
 msgid "%d message(s) has been sent."
 msgstr "%d Nachricht(en) wurde(n) gesendet."
 
-#: ../AMC-gui.pl:6116
+#: ../AMC-gui.pl:6135
 msgid "Set exam name"
 msgstr "festgelegter Prüfungsname"
 
-#: ../AMC-gui.pl:6123 ../AMC-gui-edit_preferences.glade:3937
+#: ../AMC-gui.pl:6142 ../AMC-gui-edit_preferences.glade:3937
 msgid "Examination name"
 msgstr "Prüfungsname"
 
-#: ../AMC-gui.pl:6127 ../AMC-gui-edit_preferences.glade:3948
+#: ../AMC-gui.pl:6146 ../AMC-gui-edit_preferences.glade:3948
 msgid "Code (short name) for examination"
 msgstr "Code (Kurzbezeichnung) für Prüfung"
 
 #. TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
-#: ../AMC-gui.pl:6177
+#: ../AMC-gui.pl:6196
 msgid "column"
 msgstr "Spalte"
 
-#: ../AMC-gui.pl:6185
+#: ../AMC-gui.pl:6204
 msgid "<full name>"
 msgstr "<vollständiger Name>"
 
-#: ../AMC-gui.pl:6186
+#: ../AMC-gui.pl:6205
 msgid "<student identifier>"
 msgstr "<Prüflingsidentifikator>"
 
-#: ../AMC-gui.pl:6187
+#: ../AMC-gui.pl:6206
 msgid "<student copy>"
 msgstr "<Prüflingskopie>"
 
-#: ../AMC-gui.pl:6221
+#: ../AMC-gui.pl:6240
 msgid "Install an AMC plugin"
 msgstr "Installieren Sie ein AMC-Plugin"
 
-#: ../AMC-gui.pl:6226
+#: ../AMC-gui.pl:6245
 msgid "Plugins (zip, tgz)"
 msgstr "Plugins (zip, tgz)"
 
-#: ../AMC-gui.pl:6246
+#: ../AMC-gui.pl:6265
 #, perl-format
 msgid "An error occured while trying to extract files from the plugin archive: %s."
 msgstr "Während des Entpackens aus dem Pluginverzeichnis trat ein Fehler auf: %s."
 
-#: ../AMC-gui.pl:6260
+#: ../AMC-gui.pl:6279
 msgid "Nothing extracted from the plugin archive. Check it."
 msgstr "Keine Daten aus dem Pluginverzeichnis extrahiert. Bitte überprüfen."
 
-#: ../AMC-gui.pl:6270
+#: ../AMC-gui.pl:6289
 msgid "This is not a valid plugin, as it contains more than one directory at the first level."
 msgstr "Dies ist ein ungültiges Plugin, da es mehr als ein Verzeichnis auf der ersten Ebene enthält."
 
-#: ../AMC-gui.pl:6281
+#: ../AMC-gui.pl:6300
 msgid "This is not a valid plugin, as it does not contain a perl/AMC subdirectory."
 msgstr "Dies ist kein gültiges Plugin, da es kein perl/AMC Unterverzeichnis enthält."
 
-#: ../AMC-gui.pl:6298
+#: ../AMC-gui.pl:6317
 #, perl-format
 msgid "A plugin is already installed with the same name (%s). Do you want to delete the old one and overwrite?"
 msgstr "Ein Plugin mit diesem Namen (%s) existiert bereits. Wollen Sie das alte Löschen und mit diesem Überschreiben?"
 
-#: ../AMC-gui.pl:6316
+#: ../AMC-gui.pl:6335
 #, perl-format
 msgid "Error while moving the plugin to the user plugin directory: %s"
 msgstr "Fehler beim Verschieben des Plugins in das Benutzerpluginverzeichnis: %s"
 
-#: ../AMC-gui.pl:6326
+#: ../AMC-gui.pl:6345
 msgid "Please restart AMC before using the new plugin..."
 msgstr "Bitte starten Sie AMC neu, bevor Sie das neue Plugin verwenden..."
 
-#: ../AMC-gui.pl:6378
+#: ../AMC-gui.pl:6397
 msgid "zooms"
 msgstr "Vergrößerungen"
 
-#: ../AMC-gui.pl:6379
+#: ../AMC-gui.pl:6398
 msgid "boxes images are extracted from the scans while processing automatic data capture. They can be removed if you don't plan to use the zooms dialog to check and correct boxes categorization. They can be recovered processing again automatic data capture from the same scans."
 msgstr "Bilder der Kästchen werden von den Scans extrahiert während der automatischen Verarbeitung der Datenerfassung. Sie können entfernt werden, wenn Sie nicht vorhaben, die Vergrößerung des Dialogs zu verwenden, um die Kategorisierung der Kästchen zu überprüfen und zu korrigieren. Sie können wiederhergestellt werden aus der erneuten Verarbeitung der automatischen Datenerfassung des gleichen Scans."
 
-#: ../AMC-gui.pl:6391
+#: ../AMC-gui.pl:6410
 msgid "layout reports"
 msgstr "Anordnungsbericht"
 
-#: ../AMC-gui.pl:6392
+#: ../AMC-gui.pl:6411
 msgid "these images are intended to show how the corner marks have been recognized and positioned on the scans. They can be safely removed once the scans are known to be well-recognized. They can be recovered processing again automatic data capture from the same scans."
 msgstr "Diese Bilder sollen zeigen wie die Eckpunkte erkannt wurden und auf den Scans positioniert sind. Sie können sicher entfernt werden wenn die Scans gut erkannt worden sind. Sie können wiederhergestellt werden bei der automatischen Datenerfassung des gleichen Scans."
 
-#: ../AMC-gui.pl:6407
+#: ../AMC-gui.pl:6426
 msgid "annotated pages"
 msgstr "mit Anmerkung versehene Seiten"
 
-#: ../AMC-gui.pl:6408
+#: ../AMC-gui.pl:6427
 msgid "jpeg annotated pages are made before beeing assembled to PDF annotated files. They can safely be removed, and will be recovered automatically the next time annotation will be requested."
 msgstr "jpeg kommentierte Seiten werden zuerst erstellt bevor sie zusammengefügt werden zu kommentierten PDF Dateien. Sie können sicher entfernt werden und können automatisch wiederhergestellt werden bei der nächsten Anmerkung."
 
-#: ../AMC-gui.pl:6438
+#: ../AMC-gui.pl:6457
 msgid "Total size of concerned files:"
 msgstr "Gesamtgröße der betreffenden Dateien:"
 
-#: ../AMC-gui.pl:6487
+#: ../AMC-gui.pl:6506
 #, perl-format
 msgid "%s files were removed."
 msgstr "%s Dateien wurden entfernt."
 
-#: ../AMC-gui.pl:6511
+#: ../AMC-gui.pl:6530
 #, perl-format
 msgid "I don't find the command %s."
 msgstr "Ich kann das Kommando %s nicht finden."
 
-#: ../AMC-gui.pl:6512
+#: ../AMC-gui.pl:6531
 msgid "Perhaps LaTeX is not installed?"
 msgstr "Vielleicht ist LaTeX nicht installiert?"
 
 #. TRANSLATORS: Do not translate 'auto-multiple-choice latex-link', which is a command to be typed on MacOsX
-#: ../AMC-gui.pl:6516
+#: ../AMC-gui.pl:6535
 msgid "The style file automultiplechoice.sty seems to be unreachable. Try to use command 'auto-multiple-choice latex-link' as root to fix this."
 msgstr "Die Style-Datei  automultiplechoice.sty ist nicht erreichbar. Versuchen Sie den Befehl 'auto-multiple-choice latex-link' als Wurzel um das Problem zulösen "
 
@@ -1638,24 +1643,24 @@ msgstr "Fehler beim Schreiben der Optionsdatei %s: %s"
 msgid "Fetching association results from old format XML files..."
 msgstr "Holen von Verbindungsergebnisen vom alten Format XML Dateien"
 
-#: ../AMC-perl/AMC/DataModule/capture.pm:206
+#: ../AMC-perl/AMC/DataModule/capture.pm:207
 msgid "Including zooms in the database..."
 msgstr "Inkludieren von Vergrößerungen in der Datenbank..."
 
-#: ../AMC-perl/AMC/DataModule/capture.pm:225
-#: ../AMC-perl/AMC/DataModule/capture.pm:233
+#: ../AMC-perl/AMC/DataModule/capture.pm:226
+#: ../AMC-perl/AMC/DataModule/capture.pm:234
 msgid "Building capture database indexes..."
 msgstr "Erstellen des Datenbankverfassungsindexes..."
 
-#: ../AMC-perl/AMC/DataModule/capture.pm:271
+#: ../AMC-perl/AMC/DataModule/capture.pm:272
 msgid "Fetching data capture results from old format XML files..."
 msgstr "Holen von Datenerfassungsergebnissen aus alten Format XML Dateien..."
 
-#: ../AMC-perl/AMC/DataModule/layout.pm:211
+#: ../AMC-perl/AMC/DataModule/layout.pm:214
 msgid "Building layout database indexes..."
 msgstr "Erstellen der Aufmachung des Dankenbankindexes..."
 
-#: ../AMC-perl/AMC/DataModule/layout.pm:264
+#: ../AMC-perl/AMC/DataModule/layout.pm:272
 msgid "Fetching layout data from old format XML files..."
 msgstr "Holen von Anordnungsdaten von alten Format XML Dateien..."
 
@@ -1709,56 +1714,56 @@ msgid "Marks"
 msgstr "Noten"
 
 #. TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
-#: ../AMC-perl/AMC/Export/ods.pm:1240
+#: ../AMC-perl/AMC/Export/ods.pm:1245
 msgid "Questions statistics"
 msgstr "Fragenstatistik"
 
 #. TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
-#: ../AMC-perl/AMC/Export/ods.pm:1247
+#: ../AMC-perl/AMC/Export/ods.pm:1252
 msgid "Indicative questions statistics"
 msgstr "bezeichnende Fragenstatistik"
 
 #. TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
-#: ../AMC-perl/AMC/Export/ods.pm:1257 ../AMC-perl/AMC/Export/ods.pm:1261
+#: ../AMC-perl/AMC/Export/ods.pm:1262 ../AMC-perl/AMC/Export/ods.pm:1266
 msgid "Legend"
 msgstr "Legende"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been asked to some students.
-#: ../AMC-perl/AMC/Export/ods.pm:1267
+#: ../AMC-perl/AMC/Export/ods.pm:1272
 msgid "Non applicable"
 msgstr "Nicht zutreffend"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered.
-#: ../AMC-perl/AMC/Export/ods.pm:1271
+#: ../AMC-perl/AMC/Export/ods.pm:1276
 msgid "No answer"
 msgstr "Keine Antwort"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered, but are cancelled by the use of allowempty scoring strategy.
-#: ../AMC-perl/AMC/Export/ods.pm:1275
+#: ../AMC-perl/AMC/Export/ods.pm:1280
 msgid "Cancelled"
 msgstr "Vorgang abgebrochen"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
-#: ../AMC-perl/AMC/Export/ods.pm:1279
+#: ../AMC-perl/AMC/Export/ods.pm:1284
 msgid "Invalid answer"
 msgstr "Ungültige Antwort"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
-#: ../AMC-perl/AMC/Export/ods.pm:1284
+#: ../AMC-perl/AMC/Export/ods.pm:1289
 msgid "Correct answer"
 msgstr "Richtige Antwort"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
-#: ../AMC-perl/AMC/Export/ods.pm:1288
+#: ../AMC-perl/AMC/Export/ods.pm:1293
 msgid "Wrong answer"
 msgstr "Falsche Antwort"
 
 #. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the indicative questions.
-#: ../AMC-perl/AMC/Export/ods.pm:1293
+#: ../AMC-perl/AMC/Export/ods.pm:1298
 msgid "Indicative"
 msgstr "Bezeichnend"
 
-#: ../AMC-perl/AMC/Export/ods.pm:1321
+#: ../AMC-perl/AMC/Export/ods.pm:1326
 msgid "An old state of the exported file seems to be already opened. Use File/Reload from OpenOffice/LibreOffice to refresh."
 msgstr "Eine alte Version der exportierten Datei ist bereits geöffnet. Bitte klicken Sie auf File/Reload in  OpenOffice/LibreOffice um zu aktualisieren."
 

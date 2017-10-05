@@ -740,7 +740,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsection{Students identification}
 %
-% \DescribeMacro{\namefield}\DescribeMacro{\AMCcode}\DescribeMacro{\AMCcodeH}
+% \DescribeMacro{\namefield}\DescribeMacro{\AMCcodeGrid}\DescribeMacro{\AMCcodeGridInt}
 % There are two ways to associate students to their sheets.
 % \begin{itemize}
 % \item Always add to one page of each copy some place for the student
@@ -767,13 +767,12 @@ Three digits and two letters:\insertgroup{mixed}.
 % \item For automated student identification, if for example students
 %   have a 6-digits student number, you can ask them to code it
 %   somewhere on the question sheet. This can be done using the
-%   |\AMCcode|\marg{key}\marg{ndigits} command, where \meta{key} is the key
-%   identifier, that can be used to retrieve coded student numbers
-%   from the scans, and \meta{ndigits} is the number of digits for
-%   numbers to be coded.
-% \vspace{2ex}
+%   |\AMCcodeGridInt|\oarg{opts}\marg{key}\marg{ndigits} command,
+%   where \meta{key} is the key identifier, that can be used to
+%   retrieve coded student numbers from the scans, and \meta{ndigits}
+%   is the number of digits for numbers to be coded.  \vspace{2ex}
 %   \begin{code}
-%  \AMCcode{student}{6}
+%  \AMCcodeGridInt{student}{6}
 %
 %   \end{code}
 %
@@ -781,7 +780,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   {\PexaDefaults{samplewidth=.7\PexaWidth}
 % \vspace{2ex}
 %   \begin{code}
-%  \AMCcodeH{student}{3}  
+%  \AMCcodeGridInt[h]{student}{3}  
 %   \end{code}
 %   }
 % \end{itemize}
@@ -1114,7 +1113,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % }
 %
 % \subsubsection{Codes}
-% One may adapt the codes rendering from |\AMCcode| to one's needs
+% One may adapt the codes rendering from |\AMCcodeGrid| to one's needs
 % modifying the following lengths:
 % \begin{itemize}
 % \item |\AMCcodeHspace| is the amount of horizontal space between two
@@ -1247,7 +1246,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   the box on the answer sheet.
 % \item |\ifAMCformulaire@dedans| is true for questions inside
 %   separate answer sheet.
-% \item |\ifAMC@zoneformulaire| is true for codes (made by |\AMCcode|)
+% \item |\ifAMC@zoneformulaire| is true for codes (made by |\AMCcodeGrid|)
 %   inside separate answer sheet.
 % \item |\ifAMC@pagelayout| is true if the AMC page layout, with signs
 %   for scan analysis, is to be used.
@@ -2117,7 +2116,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %   |\AMC@keyBox@| is used instead of |\AMCformBox@| when the text
 %   that corresponds to the answer is the letter/character inside the
-%   box itself (see |\AMCcode| and |\AMCnumericChoices|.
+%   box itself (see |\AMCcodeGrid| and |\AMCnumericChoices|.
 %
 %    \begin{macrocode}
 \def\AMCoutsideLabelFormat#1{#1}
@@ -3148,42 +3147,59 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsubsection{Codes}
 %
-% \begin{macro}{\AMCcode}\begin{macro}{\AMCcodeH}
-% \noindent\begin{minipage}[t]{.45\linewidth}
-% Students can code some numerical information (such as student
-% number) through special questions, which can be formatted easily
-% with the command |\AMCcode|\marg{key}\marg{ndigits}, where
-% \meta{key} is a key prefix and \meta{ndigits} is the number of
-% required digits. The digits entered by the student will be available
-% through the questions \meta{key}|[1]|$,\ldots,$\meta{key}|[|\meta{ndigits}|]|.
+% \begin{macro}{\AMCcodeGrid}\begin{macro}{\AMCcodeGridInt}
+% \noindent\begin{minipage}[t]{.65\linewidth}
+%   Students can code some numerical information (such as student
+%   number) through special questions, which can be formatted easily
+%   with the command |\AMCcodeGrid|\oarg{opts}\marg{key}\marg{descr},
+%   where \meta{key} is a key prefix and \meta{descr} is a
+%   coma-separated list of character pools to offer. The characters
+%   entered by the student will be available through the questions
+%   \meta{key}|[1]|$,\ldots,$\meta{key}|[|\meta{length(descr)}|]|.
 %
-% As an example, |\AMCcode{code}{6}| produces the opposite boxes (two
-% results are show here: without or with |separateanswersheet|
-% option), and trace positions of all the boxes in the |.xy| file with
-% the |code| identifier: the first digit is represented by question
-% with key |code[6]|, the second by question with key |code[5]|, and so on.
+%   As an example,
 %
-% Positions of the boxes are logged in the |.xy| file, as shown in
-% section~\ref{a:code} for the first set of boxes (without
-% |separateanswersheet|, with digits outside boxes).
+%   |\AMCcodeGrid{code}{ABCD,012345,012345,012345,012345}|
+%   produces the opposite boxes (two results are show here: without or
+%   with |separateanswersheet| option), and trace positions of all the
+%   boxes in the |.xy| file with the |code| identifier: the first
+%   digit is represented by question with key |code[6]|, the second by
+%   question with key |code[5]|, and so on.
+%
+%   Positions of the boxes are logged in the |.xy| file, as shown in
+%   section~\ref{a:code} for the first set of boxes (without
+%   |separateanswersheet|, with digits outside boxes).
 % \end{minipage}\hfill
-% \begin{minipage}[t]{.45\linewidth}
-%   \begin{amcxyfile}{automultiplechoice.xy3}\AMCcode{code}{6}\end{amcxyfile}
+% \begin{minipage}[t]{.3\linewidth}
+%   \begin{amcxyfile}{automultiplechoice.xy3}\AMCcodeGrid{code}{ABCD,012345,012345,012345,012345}\end{amcxyfile}
 %
 % \vspace{4mm}
 %   \makeatletter\AMC@ensembletrue\makeatother
-%   \AMCcode{code}{6}
+%   \AMCcodeGrid{code}{ABCD,012345,012345,012345,012345}
 % \end{minipage}
 % \vspace{4mm}
 %
 % \noindent\begin{minipage}[t]{.35\linewidth}
-%   The ``horizontal'' version |\AMCcodeH| can also be considered,
-%   specially with a small number of digits. See opposite for the
-%   result of |\AMCcodeH{code}{3}|.
+%   The ``horizontal'' version can also be considered using option |h|,
+%   especially with a small number of digits. See opposite for the
+%   result of |\AMCcodeGrid[h]{code}{ABCDEF,0123456789,0123456789}|.
 % \end{minipage}\hfill
 % \begin{minipage}[t]{.6\linewidth}
-%   \AMCcodeH{code}{3}
+%   \AMCcodeGrid[h]{code}{ABCDEF,0123456789,0123456789}
 % \end{minipage}
+%
+% The |\AMCcodeGridInt|\oarg{opts}\marg{key}\marg{n} is a shorcut for
+% calling |\AMCcodeGrid| with \meta{n} digits from 0 to 9. This allows
+% to create grids for \meta{n}-digits integers easily.
+%
+% These two commands supports the following options (given as a
+% comma-separated list optional argument \meta{opts}):
+% \begin{itemize}
+% \item |vertical|=|true| or |false| to indicate the direction to be used (default is |true|);
+% \item |h| is a shortcut for |vertical=false|;
+% \item |v| is a shortcut for |vertical=true|;
+% \item |top| to request top-aligned columns in vertical direction.
+% \end{itemize}
 %
 %    \begin{macrocode}
 \newcount\AMC@chiffres
@@ -3447,7 +3463,9 @@ Three digits and two letters:\insertgroup{mixed}.
 % sets the value of the counter \meta{counter} to the digit number
 % \meta{digit} of \meta{integer} (digit number 0 of 567 is 7, number 1
 % is
-% 6...). |\AMCsignificantDigits|\oarg{base}\marg{nDigits}\marg{number}\marg{counter}
+% 6...).
+%
+% |\AMCsignificantDigits|\oarg{base}\marg{nDigits}\marg{number}\marg{counter}
 % sets the value of the counter \marg{counter} to the first
 % \marg{nDigits} significant digits from real number \marg{number},
 % so that for example |\AMCsignificantDigits{2}{0.05367}| returns 54.

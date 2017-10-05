@@ -1709,7 +1709,7 @@ Durée : 10 minutes.
             <para>Cette commande marque le début de la partie formulaire de la
             copie. Son utilisation est indispensable pour un bon traitement
             des questions qui n'apparaissent que dans cette partie, comme par
-            exemple celles générées par <command>AMCcode</command>.</para>
+            exemple celles générées par <command>AMCcodeGrid</command>.</para>
           </callout>
 
           <callout arearefs="ensemble.nom" id="ensemble.nom.exp">
@@ -2000,7 +2000,7 @@ Durée : 10 minutes.
           <parameter>marine-marchande[2]</parameter> ou
           <parameter>123[27]</parameter>), car cette forme d'identifiants est
           réservée à la saisie de longs codes (par exemple grâce à
-          <command>\AMCcode</command> - voir <xref
+          <command>\AMCcodeGrid</command> - voir <xref
           linkend="latex.codes"/>).</para>
         </important>
 
@@ -2821,14 +2821,15 @@ Durée : 10 minutes.
         <title>Saisie de codes</title>
 
         <para>L'entrée de codes peut être aisément effectuée à l'aide de la
-        commande LaTeX <command>\AMCcode{identifiant}{nombre}</command>, par
-        exemple pour que chaque étudiant codifie son numéro d'étudiant
+        commande LaTeX
+        <command>\AMCcodeGridInt[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>nombre</replaceable>}</command>,
+        par exemple pour que chaque étudiant codifie son numéro d'étudiant
         lui-même sur sa copie. Les deux arguments de cette commande sont un
         identifiant de question que vous choississez ainsi que le nombre de
         chiffres du codage désiré. On pourra, par exemple, utiliser l'en-tête
         de copie suivant :</para>
 
-        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcodeGridInt{etu}{8}\hspace*{\fill}
 \begin{minipage}[b]{6.5cm}
 $\longleftarrow{}$\hspace{0pt plus 1cm} codez votre numéro d'étu\-diant ci-contre,
 et inscrivez votre nom et prénom ci-dessous.
@@ -2861,9 +2862,10 @@ et inscrivez votre nom et prénom ci-dessous.
         </note>
 
         <para>Dans le cas de l'utilisation de l'option
-        <option>ensemble</option>, la commande <command>AMCcode</command>
-        devra se trouver dans la partie formulaire, c'est-à-dire après la
-        commande <command>AMCdebutFormulaire</command>.</para>
+        <option>ensemble</option>, la commande
+        <command>AMCcodeGridInt</command> devra se trouver dans la partie
+        formulaire, c'est-à-dire après la commande
+        <command>AMCdebutFormulaire</command>.</para>
 
         <para>La présentation de ces formulaires de saisie de codes peut être
         légèrement modifiée en changeant la valeur des dimensions
@@ -2875,9 +2877,57 @@ et inscrivez votre nom et prénom ci-dessous.
 \AMCcodeVspace=.5em
 </programlisting>
 
-        <para>Notons enfin qu'il existe aussi la version horizontale
-        <command>AMCcodeH</command> de cette commande, particulièrement utile
-        pour un faible nombre de chiffres dans le code à saisir.</para>
+        <para>Pour la saisie de codes plus complexes, par exemple comportant
+        des lettres, on pourra utiliser la commande
+        <command>\AMCcodeGrid[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>description</replaceable>}</command>.
+        L'argument <replaceable>description</replaceable> contient une liste
+        d' ensemble de caractères acceptés, séparés par des virgules. Par
+        exemple, pour saisir un code client dont le premier caractère est une
+        lettre entre A et E, suivi de trois chiffres, on utilisera
+        <command>\AMCcodeGrid{client}{ABCDE,0123456789,0123456789,0123456789}</command>.</para>
+
+        <para>Les deux commandes <command>\AMCcodeGrid</command> et
+        <command>\AMCcodeGridInt</command> acceptent des options, séparées par
+        des virgules, dans l'argument optionnel
+        <replaceable>options</replaceable> :</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>vertical=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>Indique la direction utilisée : donner à
+              <replaceable>bool</replaceable> la valeur <code>true</code>
+              (valeur par défaut) pour construire chaque chiffre en vertival,
+              et <code>false</code> en horizontal.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>v</term>
+
+            <listitem>
+              <para>alias pour <code>vertical=true</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>h</term>
+
+            <listitem>
+              <para>alias pour <code>vertical=false</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>top</term>
+
+            <listitem>
+              <para>permet d'aligner les colonnes en haut en direction
+              verticale.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
       </sect3>
 
       <sect3 id="questionsouvertes">
@@ -5421,7 +5471,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
         étudiants (en général, on choisit la colonne qui contient des numéros
         d'étudiants). Enfin, en vue d'une association automatique, il faut
         encore choisir le nom du code adopté dans la commande LaTeX
-        <command>\AMCcode</command>.</para>
+        <command>\AMCcodeGrid</command>.</para>
       </sect3>
 
       <sect3 id="Association">
@@ -5434,10 +5484,11 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
             <para>Pour effectuer une association automatique, il est
             nécessaire d'avoir choisi un critère numérique (en général un
             numéro d'étudiant), d'avoir inclus au moins une commande
-            <command>\AMCcode</command> (voir <xref linkend="latex.codes"/>)
-            dans le fichier source LaTeX pour que les étudiants puissent coder
-            ce critère numérique et d'avoir une colonne dans le fichier des
-            étudiants qui contient le critère numérique.</para>
+            <command>\AMCcodeGrid</command> (voir <xref
+            linkend="latex.codes"/>) dans le fichier source LaTeX pour que les
+            étudiants puissent coder ce critère numérique et d'avoir une
+            colonne dans le fichier des étudiants qui contient le critère
+            numérique.</para>
           </warning>
 
           <para>Pour réaliser l'association automatique des copies aux
@@ -5455,7 +5506,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
             <listitem>
               <para><guilabel>Titre du code pour association automatique
               :</guilabel> il s'agit de l'identifiant choisi dans le fichier
-              source LaTeX pour le code <command>\AMCcode</command> (voir
+              source LaTeX pour le code <command>\AMCcodeGrid</command> (voir
               <xref linkend="latex.codes"/>).</para>
             </listitem>
 
@@ -5940,9 +5991,9 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
 \hline
  \vspace{-0.25cm}
  &amp; &amp;\\
-\AMCcode{NumEtud}{10}\hspace*{\fill}&amp;
-\AMCcode{Classe}{2}\hspace*{\fill}&amp;
-\AMCcode{Sujet}{3}\hspace*{\fill}
+\AMCcodeGridInt{NumEtud}{10}\hspace*{\fill}&amp;
+\AMCcodeGridInt{Classe}{2}\hspace*{\fill}&amp;
+\AMCcodeGridInt{Sujet}{3}\hspace*{\fill}
 \\
 \hline
 \end{tabular}
