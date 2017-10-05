@@ -3185,76 +3185,117 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \AMCcodeH{code}{3}
 % \end{minipage}
 %
-% \begin{macro}{\AMC@codeDigit}
-%   The macro |\AMC@codeDigit|\marg{char}\marg{vertical} is used to
-%   typeset the box with character \meta{char}, for vertical codes if
-%   \meta{vertical} is non-empty.
-% \end{macro}
-% 
 %    \begin{macrocode}
 \newcount\AMC@chiffres
 \newdimen\AMCcodeHspace\AMCcodeHspace=.5em
 \newdimen\AMCcodeVspace\AMCcodeVspace=.5em
-\newcommand{\AMC@codeDigit}[2]{%
-  \global\advance\AMCrep@count\@ne\relax%
-  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
-  \hbox{\AMC@keyBox@{#1}{}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}}%
-  \ifx\@empty#2\@empty%
-    \hspace{\AMCcodeHspace}%
-  \else%
-    \vspace{\AMCcodeVspace}%
-  \fi%
+\ExplSyntaxOn
+
+\clist_new:N \amc_code_descr_clist
+\seq_new:N \amc_code_digits_seq
+\int_new:N \amc_code_digit_n_int
+\bool_new:N \amc_code_vertical_bool
+\bool_new:N \amc_code_top_bool
+
+\cs_new:Npn \amc_code_init:N #1 {
+  \def\AMCbeginQuestion##1##2{}
+  \def\AMCbeforeQuestion{}
+  \AMCnoScoreZone
+  \AMCquestionNumberfalse
+  \setlength{\parindent}{0pt}
+  \AMCnobloc
+  \int_set:Nn \amc_code_digit_n_int { \clist_count:N #1 }
 }
-\newcommand{\AMCcode}[2]{%
-{\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
-  \AMCquestionNumberfalse%
- \setlength{\parindent}{0pt}%
- \AMCnobloc%
- \AMC@chiffres=#2\loop%
- \begin{question}{#1[\the\AMC@chiffres]}\QuestionIndicative%
-   \scoring{auto=0,formula=}%
-   \global\AMCrep@count=\z@%
-   \hspace{0pt}\vbox{%
-     \AMC@codeDigit{0}{1}%
-     \AMC@codeDigit{1}{1}%
-     \AMC@codeDigit{2}{1}%
-     \AMC@codeDigit{3}{1}%
-     \AMC@codeDigit{4}{1}%
-     \AMC@codeDigit{5}{1}%
-     \AMC@codeDigit{6}{1}%
-     \AMC@codeDigit{7}{1}%
-     \AMC@codeDigit{8}{1}%
-     \AMC@codeDigit{9}{1}%
-     \vspace{-\AMCcodeVspace}}%
-   \hspace{\AMCcodeHspace}%
- \end{question}%
- \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
- \hspace{-\AMCcodeHspace}%
-}}
-\newcommand{\AMCcodeH}[2]{%
-{\def\AMCbeginQuestion##1##2{}\def\AMCbeforeQuestion{}\AMCnoScoreZone%
-  \AMCquestionNumberfalse%
- \setlength{\parindent}{0pt}%
- \AMCnobloc%
- \AMC@chiffres=#2\loop%
- \begin{question}{#1[\the\AMC@chiffres]}\QuestionIndicative%
-   \scoring{auto=0,formula=}%
-   \global\AMCrep@count=\z@%
-   \hbox{%
-     \AMC@codeDigit{0}{}%
-     \AMC@codeDigit{1}{}%
-     \AMC@codeDigit{2}{}%
-     \AMC@codeDigit{3}{}%
-     \AMC@codeDigit{4}{}%
-     \AMC@codeDigit{5}{}%
-     \AMC@codeDigit{6}{}%
-     \AMC@codeDigit{7}{}%
-     \AMC@codeDigit{8}{}%
-     \AMC@codeDigit{9}{}%
-   }\vspace{\AMCcodeVspace}\par%
- \end{question}%
- \advance\AMC@chiffres\m@ne\ifnum\AMC@chiffres>0\repeat%
-}}
+
+\cs_new:Nn \amc_code_digit_init: {
+  \QuestionIndicative
+  \global\AMCrep@count=\z@
+}
+
+\cs_new:Npn \amc_code_digit:n #1 {
+  \global\advance\AMCrep@count\@ne\relax
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[ REP = \the\AMCrep@count : M ]^^J}\fi
+  \hbox{\AMC@keyBox@{#1}{}{1}{case : \AMCid@name : \the\AMCid@quest , \the\AMCrep@count}}
+  \bool_if:NTF \amc_code_vertical_bool {
+    \vspace{\AMCcodeVspace}
+  }{
+    \hspace{\AMCcodeHspace}
+  }
+}
+
+\keys_define:nn { amccode } {
+  vertical .bool_set:N = \amc_code_vertical_bool,
+  vertical .initial:n = { true },
+  vertical .default:n = { true },
+  v .code:n = { \bool_set_true:N \amc_code_vertical_bool },
+  h .code:n = { \bool_set_false:N \amc_code_vertical_bool },
+  top .bool_set:N = \amc_code_top_bool,
+  top .initial:n = { false },
+  top .default:n = { true }
+}
+
+\cs_new:Npn \amc_code_generate:nNn #1#2#3 {
+  { \keys_set:nn { amccode } { #3 }
+    \amc_code_init:N #2
+    \clist_map_inline:Nn #2 { % iterates over 'digits'
+      \begin{question}{#1[ \int_use:N \amc_code_digit_n_int ]}
+        \amc_code_digit_init:
+        \seq_set_split:Nnn \amc_code_digits_seq {} { ##1 }
+        \bool_if:NTF \amc_code_vertical_bool {
+          \hspace{0pt}
+          \bool_if:NTF \amc_code_top_bool { \vtop } { \vbox }
+          \bgroup
+        }{
+          \hbox\bgroup
+        }
+        \seq_map_inline:Nn \amc_code_digits_seq {
+          % iterates over available characters for 'digit'
+          \amc_code_digit:n { ####1 }
+        }
+        \bool_if:NTF \amc_code_vertical_bool {
+          \vspace{-\AMCcodeVspace}\egroup
+          \hspace{\AMCcodeHspace}
+        }{
+          \egroup\vspace{\AMCcodeVspace}
+          \par
+        }
+      \end{question}
+      \int_decr:N \amc_code_digit_n_int
+    }
+  }
+}
+
+\cs_new:Npn \amc_code_generate:nnn #1#2#3 {
+  \clist_set:Nn \amc_code_descr_clist { #2 }
+  \amc_code_generate:nNn { #1 } \amc_code_descr_clist { #3 }
+}
+\cs_generate_variant:Nn \amc_code_generate:nnn { xxx }
+\newcommand{\AMCcodeGrid}[3][]{
+  \amc_code_generate:xxx { #2 } { #3 } { #1 }
+}
+
+\cs_new:Npn \amc_code_generate_integer:nnn #1#2#3 {
+  \clist_clear:N \amc_code_descr_clist
+  \prg_replicate:nn { #2 } { \clist_put_right:Nn \amc_code_descr_clist { 0123456789 } }
+  \amc_code_generate:nNn { #1 } \amc_code_descr_clist { #3 }
+}
+\cs_generate_variant:Nn \amc_code_generate_integer:nnn { xxx }
+\newcommand{\AMCcodeGridInt}[3][]{
+  \amc_code_generate_integer:xxx { #2 } { #3 } { #1 }
+}
+
+\cs_new:Npn \amc_code_generate_integer_v:nn #1#2 {
+  \amc_code_generate_integer:nnn { #1 } { #2 } { v }
+}
+\cs_new:Npn \amc_code_generate_integer_h:nn #1#2 {
+  \amc_code_generate_integer:nnn { #1 } { #2 } { h }
+}
+\cs_generate_variant:Nn \amc_code_generate_integer_v:nn { xx }
+\cs_generate_variant:Nn \amc_code_generate_integer_h:nn { xx }
+\cs_new_eq:NN \AMCcode \amc_code_generate_integer_v:xx
+\cs_new_eq:NN \AMCcodeH \amc_code_generate_integer_h:xx
+
+\ExplSyntaxOff
 %    \end{macrocode}\end{macro}\end{macro}
 %
 % \subsubsection{Numerical questions}
