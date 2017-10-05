@@ -162,6 +162,7 @@ use DBI qw(:sql_types);
 
 use AMC::Basic;
 use AMC::DataModule;
+use AMC::DataModule::layout ':flags';
 use XML::Simple;
 
 @ISA=("AMC::DataModule");
@@ -569,6 +570,13 @@ sub define_statements {
 		    ." END FROM $t_zone"
 		    ." WHERE student=? AND copy=? AND type=? AND id_a=?"
 		    ." ORDER BY id_b"},
+     'tickedChars'=>{sql=>"SELECT char FROM (SELECT id_b FROM $t_zone"
+                     ."       WHERE student=? AND copy=? AND id_a=? AND type=?"
+                     ."       AND (manual=1 OR (black >= ? * total AND black <= ? * total))"
+                     ." ),( SELECT answer,char FROM ".$self->table("box","layout")
+                     ."       WHERE student=? AND question=? AND role=?)"
+                     ." ON id_b=answer ORDER BY id_b"
+                    },
      'tickedPage'=>{'sql'=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
 		    ." WHEN total<=0 THEN 0"
@@ -1036,6 +1044,35 @@ sub ticked_list {
   return($self->sql_list($self->statement('tickedList'),
 			 $darkness_threshold,$darkness_threshold_up,
 			 $student,$copy,ZONE_BOX,$question));
+}
+
+# ticked_chars($student,$copy,$question,$darkness_threshold,$darkness_threshold_up)
+# returns a list with all the box labels (characters written inside or
+# beside the box) from the ticked answers related to a particular
+# question.
+
+sub ticked_chars {
+  my ($self,$student,$copy,$question,$darkness_threshold,$darkness_threshold_up)=@_;
+  die "Missing parameters in ticked_chars call"
+    if(!defined($darkness_threshold_up));
+  $self->{'data'}->require_module('layout');
+  return($self->sql_list($self->statement('tickedChars'),
+                         $student,$copy,$question,ZONE_BOX,
+			 $darkness_threshold,$darkness_threshold_up,
+                         $student,$question,BOX_ROLE_ANSWER));
+}
+
+# Same as ticked_chars, but paste the chars if they all exist, and
+# return undef otherwise
+
+sub ticked_chars_pasted {
+  my ($self,@args)=@_;
+  my @c=$self->ticked_chars(@args);
+  if(grep { !defined($_) } @c) {
+    return(undef);
+  } else {
+    return(join("",@c));
+  }
 }
 
 # ticked_list_0 id the same as ticked_list, but answer 0

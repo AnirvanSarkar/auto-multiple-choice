@@ -245,7 +245,13 @@ for my $sc (@captured_studentcopy) {
     # collect the value in the %codes hash.
 
     if ($q->{'title'} =~ /^(.*)$code_digit_pattern$/) {
-      $codes{$1}->{$2}=$xx;
+      my $code_name=$1;
+      my $code_digit=$2;
+      my $chars=$capture->
+        ticked_chars_pasted(@$sc,$question,$darkness_threshold,$darkness_threshold_up);
+      $chars=$xx if(!defined($chars));
+      debug "- code($code_name,$code_digit) = '$chars'";
+      $codes{$code_name}->{$code_digit}=$chars;
     }
 
     if ($q->{'indicative'}) {

@@ -455,6 +455,8 @@ sub define_statements {
        'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
 		       ." WHERE markdiameter>0"
 		       ." LIMIT 1"},
+       'boxChar'=>{'sql'=>"SELECT char FROM ".$self->table("box")
+                   ." WHERE student=? AND question=? AND answer=? AND role=?"},
        'boxPage'=>{'sql'=>"SELECT page FROM ".$self->table("box")
                    ." WHERE student=? AND question=? AND answer=? AND role=?"},
        'namefieldPage'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
@@ -919,6 +921,15 @@ sub box_page {
   my ($self,$student,$question,$answer,$role)=@_;
   $role=BOX_ROLE_ANSWER if(!$role);
   return($self->sql_single($self->statement('boxPage'),
+                           $student,$question,$answer,$role));
+}
+
+# Get the chararacter written inside or beside a box
+
+sub box_char {
+  my ($self,$student,$question,$answer,$role)=@_;
+  $role=BOX_ROLE_ANSWER if(!$role);
+  return($self->sql_single($self->statement('boxChar'),
                            $student,$question,$answer,$role));
 }
 
