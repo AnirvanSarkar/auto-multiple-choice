@@ -115,7 +115,7 @@ sub new {
   if (!$self->{'list'}) {
     opendir(my $dh, $self->{'dir'})
       || die "can't opendir $self->{'dir'}: $!";
-    my @l = grep { /\.txt$/ } readdir($dh);
+    my @l = grep { /\.(csv|txt)$/ } readdir($dh);
     closedir $dh;
     $self->{'list'}=$l[0];
   }
