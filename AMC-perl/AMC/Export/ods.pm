@@ -865,7 +865,7 @@ sub export {
     sub get_title {
       my ($o)=@_;
       my $t;
-      if(ref($0) eq 'HASH') {
+      if(ref($o) eq 'HASH') {
         $t=encode('utf-8',$o->{'title'});
       } else {
         $t=encode('utf-8',$o);
