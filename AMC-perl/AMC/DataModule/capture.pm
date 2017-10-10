@@ -80,6 +80,9 @@ package AMC::DataModule::capture;
 #   %PROJET/cr/corrections/jpg directory.
 #
 # * timestamp_annotate is the time the annotated page was produced.
+#
+# * overwritten is the number of times capture data has been
+#   overwritten
 
 # zone describes the different objects that can be found on the scans
 # (corner marks, boxes, name field)
@@ -170,7 +173,7 @@ use XML::Simple;
 use_gettext();
 
 sub version_current {
-  return(4);
+  return(5);
 }
 
 sub version_upgrade {
@@ -238,6 +241,10 @@ sub version_upgrade {
 
       $self->progression('end');
       return(4);
+    } elsif($old_version==4) {
+      $self->sql_do("ALTER TABLE ".$self->table("page")
+                    ." ADD COLUMN overwritten INTEGER DEFAULT 0");
+      return(5);
     }
     return('');
 }
@@ -397,6 +404,10 @@ sub define_statements {
      'SetPageAuto'=>{'sql'=>"UPDATE $t_page"
 		     ." SET src=?, timestamp_auto=?, a=?, b=?, c=?, d=?, e=?, f=?, mse=?"
 		     ." WHERE student=? AND page=? AND copy=?"},
+     'overwritePage'=>{sql=>"UPDATE ".$t_page
+                       ." SET overwritten=overwritten+1"
+                       ." WHERE student=? AND page=? AND copy=?"},
+     'overwriteClear'=>{sql=>"UPDATE $t_page SET overwritten=0"},
      'SetPageManual'=>{'sql'=>"UPDATE $t_page"
 		       ." SET timestamp_manual=?"
 		       ." WHERE student=? AND page=? AND copy=?"},
@@ -433,6 +444,10 @@ sub define_statements {
      'nCopies'=>{'sql'=>"SELECT COUNT(*) FROM (SELECT student,copy FROM $t_page"
 		 ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		 ." GROUP BY student,copy)"},
+     'nOverwritten'=>{sql=>"SELECT SUM(overwritten) FROM $t_page"},
+     'overwrittenPages'=>{sql=>"SELECT student,page,copy,overwritten,timestamp_auto"
+                          ." FROM $t_page WHERE overwritten>0"
+                          ." ORDER BY timestamp_auto DESC, student ASC, page ASC, copy ASC"},
      'studentCopies'=>{'sql'=>"SELECT student,copy FROM $t_page"
 		       ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		       ." GROUP BY student,copy ORDER BY student,copy"},
@@ -692,7 +707,8 @@ sub get_page {
 				       $student,$page,$copy));
 }
 
-# set_page_auto(...) fills one row of the page table.
+# set_page_auto(...) fills one row of the page table, and returns 1 if
+# some previous data has been overwritten.
 
 sub set_page_auto {
   my ($self,$src,$student,$page,$copy,
@@ -702,11 +718,20 @@ sub set_page_auto {
 					     $timestamp,$a,$b,$c,$d,$e,$f,
 					     $mse,
 					     $student,$page,$copy);
+    return(1);
   } else {
     $self->statement('NEWPageAuto')->execute($src,$student,$page,$copy,
 					     $timestamp,$a,$b,$c,$d,$e,$f,
 					     $mse);
+    return(0);
   }
+}
+
+# tag_overwritten(...) tags a page data as overwritten
+
+sub tag_overwritten {
+  my ($self,$student,$page,$copy)=@_;
+  $self->statement('overwritePage')->execute($student,$page,$copy);
 }
 
 # sep_page_manual($student,$page,$copy,$timestamp) sets the timestamp
@@ -791,6 +816,37 @@ sub set_zone_auto_id_without_imagedata {
 sub n_copies {
   my ($self)=@_;
   return($self->sql_single($self->statement('nCopies')));
+}
+
+# n_overwritten returns the total number of overwritten pages
+
+sub n_overwritten {
+  my ($self)=@_;
+  return($self->sql_single($self->statement('nOverwritten')));
+}
+
+# clear_overwritten clears overwritten status of all pages
+
+sub clear_overwritten {
+  my ($self)=@_;
+  $self->statement('overwriteClear')->execute();
+}
+
+# overwritten_pages() returns an arrayref of hashrefs with all pages
+# which have some overwritten data
+
+sub overwritten_pages {
+  my ($self)=@_;
+  return($self->dbh->selectall_arrayref($self->statement('overwrittenPages'),
+                                        { Slice=>{} }));
+}
+
+sub overwritten_pages_transaction {
+  my ($self)=@_;
+  $self->begin_read_transaction;
+  my $r=$self->overwritten_pages;
+  $self->end_transaction;
+  return($r);
 }
 
 # n_pages returns the number of pages for which a data capture (manual

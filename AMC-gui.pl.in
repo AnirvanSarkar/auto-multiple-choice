@@ -332,7 +332,7 @@ sub test_libnotify {
               'destroy-with-parent',
               'warning','ok','');
       $dialog->set_markup(
-			  "Please install <b>libnotify</b> to make desktop notifications available."
+			  __"Please install <b>libnotify</b> to make desktop notifications available."
 			 );
       $dialog->run;
       $dialog->destroy;
@@ -464,6 +464,7 @@ my $gui=read_glade('main_window',
     but_question but_solution but_indiv_solution but_catalog doc_line1
     prepare_docs prepare_layout prepare_src
     state_layout state_src state_docs state_unrecognized state_marking state_assoc
+    state_overwritten overwritten_line
     button_unrecognized button_show_missing
     edition_latex
     onglet_notation onglet_saisie onglet_reports
@@ -2810,6 +2811,12 @@ sub analyse_call {
                       "--data",$config->get_absolute('data'),
                      ],
            signal=>2,
+           o=>{overwritten=>$oo{overwritten}},
+           fin=>sub {
+             my $c=shift;
+             ${$c->{o}->{overwritten}}+=$c->variable('overwritten')
+               if($c->{o}->{overwritten} && $c->variable('overwritten'));
+           },
            'progres.id'=>$oo{'progres'},
            );
 
@@ -2870,6 +2877,7 @@ sub analyse_call_go {
 
   if($oo{'diagnostic'}) {
     push @args,"--debug-image-dir",$shortcuts->absolu('%PROJET/cr/diagnostic');
+    push @args,"--no-tag-overwritten";
   }
 
   # call AMC-analyse
@@ -2879,8 +2887,17 @@ sub analyse_call_go {
 	   'signal'=>2,
 	   'texte'=>$oo{'text'},
 	   'progres.id'=>$oo{'progres'},
-	   'o'=>{'fh'=>$oo{'fh'}},
-	   'fin'=>$oo{'fin'},
+	   'o'=>{'fh'=>$oo{'fh'},overwritten=>$oo{overwritten}},
+	   fin=>sub {
+             my ($c,%data)=@_;
+             debug "Overall [SCAN] overwritten pages @".$c.": "
+               .($c->variable('overwritten') || "(none)");
+             ${$c->{o}->{overwritten}} += $c->variable('overwritten')
+               if($c->{o}->{overwritten} && $c->variable('overwritten'));
+             debug "Calling original <fin> hook from analyse_call_go";
+             &{$oo{fin}}($c,%data)
+               if($oo{fin});
+           },
 	  );
 }
 
@@ -2912,6 +2929,8 @@ sub saisie_auto_ok {
 
     $w{'annulation'}->set_sensitive(1);
 
+    my $overwritten=0;
+
     analyse_call('f'=>\@f,
 		 'getimages'=>1,
 		 'copy'=>($copie ? $shortcuts->absolu('scans/') : ''),
@@ -2919,6 +2938,7 @@ sub saisie_auto_ok {
 		 'progres'=>'analyse',
 		 'allocate'=>($config->get('allocate_ids') ?
 			      $w{'saisie_auto_allocate_start'} : 0),
+                 overwritten=>\$overwritten,
 		 'fin'=>sub {
 		     my ($c,%data)=@_;
 		     close($c->{'o'}->{'fh'});
@@ -2927,6 +2947,18 @@ sub saisie_auto_ok {
 		     if(!$data{cancelled}) {
 		       notify_end_of_work('capture',__"Automatic data capture has been completed");
 		     }
+                     my $ov=${$c->{o}->{overwritten}};
+                     if($ov>0) {
+                       my $dialog = Gtk3::MessageDialog
+                         ->new($w{'main_window'},
+                               'destroy-with-parent',
+                               'warning','ok','');
+                       $dialog->set_markup(
+                                           sprintf(__"Some of the pages you submitted (%d of them) have already been processed before. Old data has been overwritten.",$ov)
+                                          );
+                       $dialog->run;
+                       $dialog->destroy;
+                     }
 		 },
 	);
 
@@ -4496,6 +4528,8 @@ sub update_analysis_summary {
   my $failed_nb=$projet{'_capture'}
     ->sql_single($projet{'_capture'}->statement('failedNb'));
 
+  my $ow=$projet{'_capture'}->n_overwritten;
+
   $w{'onglet_notation'}->set_sensitive($n>0);
 
   # resume
@@ -4517,6 +4551,13 @@ sub update_analysis_summary {
   }
   $w{'state_capture'}->set_text($tt);
 
+  if($ow>0) {
+    $w{state_overwritten}->set_text(sprintf(__"Overwritten pages: %d",$ow));
+    $w{overwritten_line}->show();
+  } else {
+    $w{overwritten_line}->hide();
+  }
+
   if ($failed_nb<=0) {
     if($r{'complete'}) {
       $tt=__"All scans were properly recognized.";
@@ -4534,6 +4575,45 @@ sub update_analysis_summary {
   $w{'state_unrecognized'}->set_text($tt);
 
   return(\%r);
+}
+
+sub overwritten_clear {
+  $projet{'_capture'}->begin_transaction('OWcl');
+  $projet{'_capture'}->clear_overwritten();
+  update_analysis_summary();
+  $projet{'_capture'}->end_transaction('OWcl');
+}
+
+sub overwritten_look {
+  my $go=read_glade('overwritten',
+                    qw/overwritten_dialog overwritten_list/);
+  my $olist=Gtk3::ListStore->new ('Glib::String','Glib::String','Glib::String');
+  $w{overwritten_list}->set_model($olist);
+
+  $w{overwritten_list}->append_column
+    (Gtk3::TreeViewColumn->new_with_attributes
+     (__"Page",Gtk3::CellRendererText->new,
+      text=> 0));
+  $w{overwritten_list}->append_column
+    (Gtk3::TreeViewColumn->new_with_attributes
+     (__"count",Gtk3::CellRendererText->new,
+      text=> 1));
+  $w{overwritten_list}->append_column
+    (Gtk3::TreeViewColumn->new_with_attributes
+     (__"Date",Gtk3::CellRendererText->new,
+      text=> 2));
+  for my $o (@{$projet{_capture}->overwritten_pages_transaction()}) {
+    $olist->set($olist->append,
+                0,pageids_string($o->{student},$o->{page},$o->{copy}),
+                1,$o->{overwritten},
+                2,format_date($o->{timestamp_auto}),
+               );
+  }
+
+  $w{overwritten_list}->get_selection->set_mode(GTK_SELECTION_NONE);
+
+  $w{overwritten_dialog}->run;
+  $w{overwritten_dialog}->destroy;
 }
 
 sub detecte_analyse {

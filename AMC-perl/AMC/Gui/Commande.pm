@@ -168,7 +168,7 @@ sub close {
 
   &{$self->{'finw'}}($self,%data) if($self->{'finw'});
   if($self->{'fin'}) {
-    debug "Calling <fin> hook";
+    debug "Calling <fin> hook @".$self;
     &{$self->{'fin'}}($self,%data);
   }
 }
@@ -212,6 +212,11 @@ sub get_output {
 	  }
 	  if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
 	    $self->{'variables'}->{$1}=$2;
+            debug "Set variable @".$self." $1 to ".$self->{'variables'}->{$1};
+	  }
+	  if($line =~ /^VAR\+:\s*(.*)/) {
+	    $self->{'variables'}->{$1}++;
+            debug "Step variable @".$self." $1 to ".$self->{'variables'}->{$1};
 	  }
 	  for my $k (qw/OK FAILED/) {
 	    if($line =~ /^$k/) {

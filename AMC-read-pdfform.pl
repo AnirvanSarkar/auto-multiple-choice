@@ -91,9 +91,14 @@ sub get_copy_id {
       $copy_id->{$key}=0;
     }
     push @pages,{student=>$student_id,page=>$page,copy=>$copy_id->{$key}};
-    $capture->set_page_auto(undef,$student_id,$page,$copy_id->{$key},time(),
-                            undef,undef,undef,undef,undef,undef,
-                            0);
+    if($capture->set_page_auto(undef,$student_id,$page,$copy_id->{$key},time(),
+                               undef,undef,undef,undef,undef,undef,
+                               0)) {
+      debug "Overwritten page data for [FORM] "
+        .pageids_string($student_id,$page,$copy_id->{$key});
+      $capture->tag_overwritten($student_id,$page,$copy_id->{$key});
+      print "VAR+: overwritten\n";
+    }
   }
   return($copy_id->{$key});
 }
@@ -181,3 +186,4 @@ if($list_file) {
 }
 
 $p->text('') if($p);
+

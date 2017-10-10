@@ -67,6 +67,7 @@ my $multiple='';
 my $ignore_red=1;
 my $pre_allocate=0;
 my $try_three=1;
+my $tag_overwritten=1;
 
 GetOptions("data=s"=>\$data_dir,
 	   "cr=s"=>\$cr_dir,
@@ -85,6 +86,7 @@ GetOptions("data=s"=>\$data_dir,
 	   "ignore-red!"=>\$ignore_red,
 	   "pre-allocate=s"=>\$pre_allocate,
 	   "try-three!"=>\$try_three,
+           "tag-overwritten!"=>\$tag_overwritten,
 	   );
 
 use_gettext;
@@ -593,8 +595,14 @@ sub one_scan {
   $capture->begin_transaction('CRSL');
   annotate_source_change($capture);
 
-  $capture->set_page_auto($sf,@spc,time(),
-			  $ld->{'transf'}->params);
+  if($capture->set_page_auto($sf,@spc,time(),
+                             $ld->{'transf'}->params)) {
+    debug "Overwritten page data for [SCAN] ".pageids_string(@spc);
+    if($tag_overwritten) {
+      $capture->tag_overwritten(@spc);
+      print "VAR+: overwritten\n";
+    }
+  }
 
   # removes (if exists) old entry in the failed database
   $capture->statement('deleteFailed')->execute($sf);
