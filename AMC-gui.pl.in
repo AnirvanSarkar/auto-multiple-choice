@@ -4528,7 +4528,7 @@ sub update_analysis_summary {
   my $failed_nb=$projet{'_capture'}
     ->sql_single($projet{'_capture'}->statement('failedNb'));
 
-  my $ow=$projet{'_capture'}->n_overwritten;
+  my $ow=$projet{'_capture'}->n_overwritten ||0;
 
   $w{'onglet_notation'}->set_sensitive($n>0);
 
