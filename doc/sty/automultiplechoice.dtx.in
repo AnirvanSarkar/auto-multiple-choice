@@ -3373,154 +3373,86 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 %    \end{macrocode}
 %
-% The |\AMCnumeric@char|\marg{inside}\marg{answer} draw a box with
-% content \meta{inside} (only if needed), where \meta{answer} is |\AMC@checkedbox|
-% if the corresponding choice is correct and empty if not.
+% Some computation commands are now defined. The command
+% |\amc_fp_decompose:NNn|\marg{fp var}\marg{int var}\marg{x} sets
+% \meta{fp var} to be the \emph{mantissa} and \meta{int var} the
+% \emph{exponent} of the flaoting point number \meta{x}. For example,
+% |\amc_fp_decompose:NNn\mant_fp\expo_int{123.456}| give the value
+% |1.23456| to |\mant_fp| and |2| to |\expo_int| (because
+% $123.456=1.23456\times 10^{2}$).
 %
+% The command |\amc_fp_to_digits:Nnnn|\marg{clist}\meta{x}\meta{n
+% digits}\meta{base} rounds the floating point number \meta{x} and
+% populates the comma separated list \meta{clist} with its \meta{n
+% digits} digits in base \meta{base}. An error is issued if \meta{x}
+% would have required more digits.
 %    \begin{macrocode}
-\newcommand{\AMCnumeric@char}[2]{%
-  \global\advance\AMCrep@count\@ne\relax%
-  \AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:\ifx#2\AMC@checkedbox%
-    B\else M\fi]^^J}%
-  \ifAMC@correc%
-    \protect\AMC@keyBox@{#1}{#2}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
-  \else%
-    \protect\AMC@keyBox@{#1}{}{1}{case:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}%
-  \fi%
+\ExplSyntaxOn
+
+\cs_new:Npn \amc_read_scientific_aux:NNw #1 #2 #3 e #4 e #5 \q_stop {
+  \fp_set:Nn #1 { #3 }
+  \int_set:Nn #2 { #4 }
 }
+\cs_new:Npn \amc_read_scientific:NNn #1 #2 #3 {
+  \amc_read_scientific_aux:NNw #1 #2 #3 \q_stop
+}
+\cs_generate_variant:Nn \amc_read_scientific:NNn { NNf, NNx }
+
+\fp_new:N \amc_fulls_fp
+\cs_new:Npn \amc_fp_decompose:NNn #1 #2 #3 {
+  \fp_set:Nn \amc_fulls_fp { #3 }
+  \amc_read_scientific:NNx #1 #2
+  { \fp_to_scientific:N \amc_fulls_fp e 0 e x }
+}
+\cs_generate_variant:Nn \amc_fp_decompose:NNn { NNx }
+
+\fp_new:N \amc_num_mantissa_fp
+\int_new:N \amc_num_exponent_int
+\cs_new:Npn \amc_fp_n_significant_digits:Nnn #1 #2 #3 {
+  \amc_fp_decompose:NNn \amc_num_mantissa_fp \amc_num_exponent_int
+  { #2 }
+  \fp_set:Nn #1
+  { round(\amc_num_mantissa_fp * 10^((#3)-1),0,0) }
+  \fp_compare:nTF { abs(#1) >= 10^(#3) }
+  {
+    \fp_set:Nn #1 { #1 / 10 }
+  } { }
+}
+
+\fp_new:N \amc_num_nsig_fp
+\cs_new:Npn \amc_fp_show_n_significant_digits:nn #1 #2 {
+  \amc_fp_n_significant_digits:Nnn \amc_num_nsig_fp { #1 } { #2 }
+}
+\cs_new_eq:NN \AMCsignificantDigits \amc_fp_show_n_significant_digits:nn
+
+\cs_new:Npn \amc_fp_show_significant_digits: {
+  \fp_use:N \amc_num_nsig_fp
+}
+\cs_new_eq:NN \AMCshowSignificantDigits \amc_fp_show_significant_digits:
+
+\cs_new:Npn \amc_fp_n_digits:Nnn #1 #2 #3 {
+  \fp_set:Nn #1
+    { round((#2) * 10^(#3),0,0) }
+}
+
+\int_new:N \amc_todigits_int
+\cs_new:Npn \amc_fp_to_digits:Nnnn #1 #2 #3 #4 {
+  \clist_clear:N #1
+  \int_set:Nn \amc_todigits_int { \fp_eval:n { abs(round(#2,0,0)) } }
+  \prg_replicate:nn { #3 } {
+    \clist_put_left:Nx #1 { \int_mod:nn \amc_todigits_int { #4 } }
+    \int_set:Nn \amc_todigits_int
+    { \int_div_truncate:nn \amc_todigits_int { #4 } }
+  }
+  \int_compare:nNnTF \amc_todigits_int = 0 { } {
+    \message{^^J!~Error:~number~too~large,
+      ~some~digits~will~be~discarded^^J}
+  }
+}
+
+\ExplSyntaxOff
 %    \end{macrocode}
 % 
-% The command |\AMCnumeric@digit|\marg{correct}\marg{maxdigit} draws a
-% box for current digit value |\AMC@chiffres|, if \meta{correct} is
-% the correct digit value, and \meta{maxdigit} is the maximal digit
-% value. The command |\AMCsignV|\marg{valuecount} draws two boxes for
-% the students to code the sign of the counter \meta{valuecount}
-% (which will be set to the absolute value). The command
-% |\AMCnumericH|\marg{varname}\marg{correct}\marg{maxdigit} draws a
-% serie of boxes for all possible values of a digit (from 0 to
-% \meta{maxdigit}), where the correct value is \meta{correct},
-% transmitting scoring data to AMC so that the vaiable \meta{varname}
-% will be set to the value chosen by the student.
-%
-%    \begin{macrocode}
-\newdimen\AMCnumeric@Hspace\AMCnumeric@Hspace=.5em
-\newdimen\AMCnumeric@Vspace\AMCnumeric@Vspace=1ex
-\newcommand{\AMCnumeric@digit}[2]{%
-  \ifnum\AMC@chiffres=#1%
-    \AMCnumeric@char{\the\AMC@chiffres}{\AMC@checkedbox}%
-  \else%
-    \AMCnumeric@char{\the\AMC@chiffres}{}%
-  \fi%
-}
-\newcommand{\AMCsignV}[1]{%
-  \ifnum#1<\z@%
-    \hbox{\AMCnumeric@char{$+$}{}}\vspace{\AMCnumeric@Vspace}
-    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}%
-    \hbox{\AMCnumeric@char{$-$}{\AMC@checkedbox}}
-    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}%
-    \global\multiply#1\m@ne%
-  \else%
-    \hbox{\AMCnumeric@char{$+$}{\AMC@checkedbox}}\vspace{\AMCnumeric@Vspace}
-    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}%
-    \hbox{\AMCnumeric@char{$-$}{}}
-    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}%
-  \fi%
-}
-\newcommand{\AMCnumericH}[3]{%
- \ifKV@AMCNumeric@nozero\AMC@chiffres=1\else\AMC@chiffres=0\fi%
- \loop%
-   \AMCnumeric@digit{#2}{#3}%
-   \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
- \advance\AMC@chiffres\@ne%
- \ifnum\AMC@chiffres<#3\relax\hspace{\AMCnumeric@Hspace}\repeat%
-}
-\newcommand{\AMCnumericV}[3]{%
- \ifKV@AMCNumeric@nozero\AMC@chiffres=1\else\AMC@chiffres=0\fi%
- \loop%
-   \vbox{\hbox{\AMCnumeric@digit{#2}{#3}}}%
-   \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
- \advance\AMC@chiffres\@ne%
- \ifnum\AMC@chiffres<#3\relax\vspace{\AMCnumeric@Vspace}\repeat%
-}
-\newcount\AMC@numeric@lastdigit%
-\newcommand{\AMCnumericVR}[3]{%
- \ifKV@AMCNumeric@nozero\AMC@numeric@lastdigit=1%
-   \else\AMC@numeric@lastdigit=0\fi%
- \AMC@chiffres=#3\advance\AMC@chiffres\m@ne\loop%
-   \vbox{\hbox{\AMCnumeric@digit{#2}{#3}}}%
-   \AMC@amclog{AUTOQCM[B=set.#1=\the\AMC@chiffres]^^J}%
- \ifnum\AMC@chiffres>\AMC@numeric@lastdigit%
-   \advance\AMC@chiffres\m@ne%
- \vspace{\AMCnumeric@Vspace}\repeat%
-}
-%    \end{macrocode}
-%
-% Some computation commands are now
-% defined. |\AMC@calcmodulo|\marg{integer}\marg{counter} sets the
-% counter \meta{counter} value to the last digit of \meta{integer}
-% (using base
-% |\AMC@numeric@base|). |\AMC@calcdigit|\marg{integer}\marg{digit}\marg{counter}
-% sets the value of the counter \meta{counter} to the digit number
-% \meta{digit} of \meta{integer} (digit number 0 of 567 is 7, number 1
-% is
-% 6...).
-%
-% |\AMCsignificantDigits|\oarg{base}\marg{nDigits}\marg{number}\marg{counter}
-% sets the value of the counter \marg{counter} to the first
-% \marg{nDigits} significant digits from real number \marg{number},
-% so that for example |\AMCsignificantDigits{2}{0.05367}| returns 54.
-%
-%    \begin{macrocode}
-\newcount\AMC@integer@modulo
-\newcommand\AMC@calcmodulo[2]{%
-  \AMC@integer@modulo=#1\divide\AMC@integer@modulo\AMC@numeric@base%
-  \multiply\AMC@integer@modulo\AMC@numeric@base%
-  \multiply\AMC@integer@modulo\m@ne\advance\AMC@integer@modulo by #1\relax%
-  #2=\AMC@integer@modulo%
-}
-\newcount\AMC@numeric@integer
-\newcount\AMC@numeric@calcdigit
-\newcommand\AMC@calcdigit[3]{%
-  \AMC@numeric@integer=#1%
-  \AMC@numeric@calcdigit=#2%
-  \ifnum#2>\z@\loop{%
-    \global\divide\AMC@numeric@integer\AMC@numeric@base}%
-    \advance\AMC@numeric@calcdigit\m@ne%
-  \ifnum\AMC@numeric@calcdigit>\z@\repeat%
-  \fi%
-  \AMC@calcmodulo{\the\AMC@numeric@integer}{#3}%
-}
-\newcommand\AMCsignificantDigits[4][10]{%
-  \FPifzero{#3}%
-    #4\z@%
-  \else%
-    \AMCsignificantDigits@nonnull[#1]{#2}{#3}{#4}
-    \AMC@givesign{#3}{#4}%
-  \fi%
-}
-\newcommand\AMC@givesign[2]{%
-  \FPifpos{#1}\else\multiply#2\m@ne\fi%
-}
-\newcommand\AMCsignificantDigits@nonnull[4][10]{%
-  \FPabs\AMC@FP@x{#3}%
-  \AMC@numeric@calcdigit=#2%
-  \AMC@numeric@integer=1%
-  \loop\multiply\AMC@numeric@integer by #1\advance\AMC@numeric@calcdigit\m@ne%
-    \ifnum\AMC@numeric@calcdigit>\z@\repeat%
-  \loop\FPiflt\AMC@FP@x{\the\AMC@numeric@integer}\else%
-    \FPeval\AMC@FP@x{AMC@FP@x / #1}\repeat%
-  \divide\AMC@numeric@integer by #1\relax%
-  \loop\FPiflt\AMC@FP@x{\the\AMC@numeric@integer}%
-    \FPeval\AMC@FP@x{AMC@FP@x * #1}\repeat%
-  \FPround\AMC@FP@x\AMC@FP@x0\relax%
-  \AMC@numeric@calcdigit=\AMC@FP@x%
-  \multiply\AMC@numeric@integer by #1\relax%
-  \ifnum\AMC@numeric@calcdigit<\AMC@numeric@integer\else%
-    \divide\AMC@numeric@calcdigit by #1\relax\fi%
-  #4=\AMC@numeric@calcdigit%
-}
-%    \end{macrocode}
-%
 % The command
 % |\AMCnumericShow|\marg{value}\marg{opts} is
 % called to draw all necessary boxes to code a numerical value
@@ -3530,217 +3462,358 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % Begin with the available options:
 %    \begin{macrocode}
-\def\AMCdecimalPoint{\raisebox{1ex}{\bf .}}
-\def\AMCntextSign{}
 \def\AMCntextGoto{}
 \def\AMCntextVHead#1{\emph{b#1}}
-\def\AMCncol@Border{lightgray}
-\def\AMCncol@Background{white}
-\def\AMCncol@BorderWidth{1mm}
-\newcount\AMC@numeric@digits
-\newcount\AMC@numeric@decd
-\newcount\AMC@numeric@value
-\newcount\AMC@numeric@x
-\newcount\AMC@numeric@base
-\define@key{AMCNumeric}{Tsign}{\def\AMCntextSign{#1}}
-\define@key{AMCNumeric}{Tpoint}{\def\AMCdecimalPoint{#1}}
-\define@key{AMCNumeric}{vspace}{\AMCnumeric@Vspace=#1}
-\define@key{AMCNumeric}{hspace}{\AMCnumeric@Hspace=#1}
-\define@key{AMCNumeric}{bordercol}{\def\AMCncol@Border{#1}}
-\define@key{AMCNumeric}{borderwidth}{\def\AMCncol@BorderWidth{#1}}
-\define@key{AMCNumeric}{backgroundcol}{\def\AMCncol@Background{#1}}
-\define@key{AMCNumeric}{digits}[3]{\AMC@numeric@digits=#1}
-\define@key{AMCNumeric}{decimals}[0]{\AMC@numeric@decd=#1}
-\define@key{AMCNumeric}{base}[10]{\AMC@numeric@base=#1}
-\define@boolkey{AMCNumeric}{sign}[true]{}
-\define@boolkey{AMCNumeric}{strict}[false]{}
-\define@boolkey{AMCNumeric}{scoring}[true]{}
-\define@boolkey{AMCNumeric}{vertical}[false]{}
-\define@boolkey{AMCNumeric}{reverse}[true]{}
-\define@boolkey{AMCNumeric}{vhead}[false]{}
-\define@boolkey{AMCNumeric}{nozero}[false]{}
-\define@boolkey{AMCNumeric}{significant}[false]{}
-\define@key{AMCNumeric}{scoreexact}[2]{\def\AMC@numeric@scoreexact{#1}}
-\define@key{AMCNumeric}{scoreapprox}[1]{\def\AMC@numeric@scoreapprox{#1}}
-\newcount\AMC@numeric@exact
-\newcount\AMC@numeric@approx
-\define@key{AMCNumeric}{exact}[0]{\AMC@numeric@exact=#1}
-\define@key{AMCNumeric}{approx}[0]{\AMC@numeric@approx=#1}
-\setkeys{AMCNumeric}{digits,decimals,base,sign,strict,scoring,vertical,
-                     reverse,vhead,scoreexact,scoreapprox,exact,approx,
-                     nozero,significant}
-\newcommand\AMCnumericOpts[1]{\setkeys{AMCNumeric}{#1}}
+\newdimen\AMCnumeric@Hspace\AMCnumeric@Hspace=.5em
+\newdimen\AMCnumeric@Vspace\AMCnumeric@Vspace=1ex
+\ExplSyntaxOn
+
+\keys_define:nn { amcnumeric } {
+  Tsign .code:n = {\def\AMCntextSign{#1}},
+  Tsign .initial:n = {},
+  Tpoint .code:n = {\def\AMCdecimalPoint{#1}},
+  Tpoint .initial:n = { \raisebox{1ex}{\bf .} },
+  vspace .code:n = {\AMCnumeric@Vspace=#1},
+  hspace .code:n = {\AMCnumeric@Hspace=#1},
+  bordercol .code:n = {\def\AMCncol@Border{#1}},
+  bordercol .initial:n = { lightgray },
+  borderwidth .code:n = {\def\AMCncol@BorderWidth{#1}},
+  borderwidth .initial:n = { 1mm },
+  backgroundcol .code:n = {\def\AMCncol@Background{#1}},
+  backgroundcol .initial:n = { white },
+  digits .int_set:N = \amc_num_ndigits_int,
+  digits .initial:n = { 3 },
+  decimals .int_set:N = \amc_num_decd_int,
+  decimals .initial:n = { 0 },
+  base .int_set:N = \amc_num_base_int,
+  base .initial:n = { 10 },
+  sign .bool_set:N = \amc_num_sign_bool,
+  sign .initial:n = { true },
+  sign .default:n = { true },
+  strict .bool_set:N = \amc_num_strict_bool,
+  strict .initial:n = { false },
+  strict .default:n = { true },
+  scoring .bool_set:N = \amc_num_scoring_bool,
+  scoring .initial:n = { true },
+  scoring .default:n = { true },
+  vertical .bool_set:N = \amc_num_vertical_bool,
+  vertical .initial:n = { false },
+  vertical .default:n = { true },
+  reverse .bool_set:N = \amc_num_reverse_bool,
+  reverse .initial:n = { false },
+  reverse .default:n = { true },
+  vhead .bool_set:N = \amc_num_vhead_bool,
+  vhead .initial:n = { false },
+  vhead .default:n = { true },
+  nozero .bool_set:N = \amc_num_nozero_bool,
+  nozero .initial:n = { false },
+  nozero .default:n = { true },
+  significant .bool_set:N = \amc_num_significant_bool,
+  significant .initial:n = { false },
+  significant .default:n = { true },
+  scoreexact .code:n = {\def\AMC@numeric@scoreexact{#1}},
+  scoreexact .initial:n = { 2 },
+  scoreapprox .code:n = {\def\AMC@numeric@scoreapprox{#1}},
+  scoreapprox .initial:n = { 1 },
+  exact .int_set:N = \amc_num_exact_int,
+  exact .initial:n = { 0 },
+  approx .int_set:N = \amc_num_approx_int,
+  approx .initial:n = { 0 }
+}
+
+\cs_new:Npn \amc_num_setopts #1 {
+  \keys_set:nn { amcnumeric } { #1 }
+}
+
+\cs_new_eq:NN \AMCnumericOpts \amc_num_setopts
+
 %    \end{macrocode}
-% Then the command |\AMCnumericShow| itself:
+%
+% The command |\amc_num_char:nn|\marg{inside}\marg{answer} draw a box
+% with content \meta{inside} (only if needed), where \meta{answer} is
+% |\AMC@checkedbox| if the corresponding choice is correct and empty
+% if not.
+%
 %    \begin{macrocode}
-\newcommand\AMCnumericShow[2]{%
+\cs_new:Npn \amc_num_char:nn #1 #2 {
+  \global\advance\AMCrep@count\@ne\relax
+  \AMC@amclog{AUTOQCM[REP= \the\AMCrep@count :
+    \ifx#2\AMC@checkedbox B\else M\fi ]^^J}
+  \ifAMC@correc
+    \protect\AMC@keyBox@{#1}{#2}{1}{case : \AMCid@name :
+      \the\AMCid@quest , \the\AMCrep@count}
+  \else
+    \protect\AMC@keyBox@{#1}{}{1}{case : \AMCid@name :
+      \the\AMCid@quest , \the\AMCrep@count}
+  \fi
+}
 %    \end{macrocode}
-% We have to tell AMC that the scoring we will give concerns this question:
+% The command |\amc_num_sign_boxes:N|\marg{fp} draws two boxes
+% for the students to code the sign of \meta{fp}.
 %    \begin{macrocode}
-  \ifAMC@ensemble\ifAMCformulaire@dedans%
+\cs_new:Npn \amc_num_sign_boxes:N #1 {
+  \fp_compare:nNnTF #1 < 0 {
+    \hbox{\amc_num_char:nn{$+$}{}}
+    \vspace{\AMCnumeric@Vspace}
+    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}
+    \hbox{\amc_num_char:nn{$-$}{\AMC@checkedbox}}
+    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}
+  } {
+    \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
+    \vspace{\AMCnumeric@Vspace}
+    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}
+    \hbox{\amc_num_char:nn{$-$}{}}
+    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}
+  }
+}
+%    \end{macrocode}
+% The command |\amc_num_digit_box:nn|\marg{i}\marg{j} draws a box for
+% current digit value \meta{i}, where \meta{j} is the correct value
+% for the current digit.
+%    \begin{macrocode}
+\cs_new:Npn \amc_num_digit_box:nn #1 #2 {
+  \int_compare:nNnTF { #1 } = { #2 } {
+    \amc_num_char:nn{ #1 }{\AMC@checkedbox}
+  } {
+    \amc_num_char:nn{ #1 }{}
+  }
+}
+%    \end{macrocode}
+% The command
+% |\amc_num_digit_boxes_h:nnn|\marg{varname}\marg{correct}\marg{maxdigit}
+% draws a serie of boxes for all possible values of a digit (from 0 to
+% \meta{maxdigit}), where the correct value is \meta{correct},
+% transmitting scoring data to AMC so that the vaiable \meta{varname}
+% will be set to the value chosen by the student.
+%    \begin{macrocode}
+\cs_new:Npn \amc_num_digit_boxes_h:nnn #1 #2 #3 {
+  \int_step_inline:nnnn
+  { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } }
+  { 1 } { #3 - 1 } {
+    \amc_num_digit_box:nn { ##1 }{ #2 }
+    \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
+    \hspace{\AMCnumeric@Hspace}
+  }
+  \hspace{-\AMCnumeric@Hspace}
+}
+
+\cs_new:Npn \amc_num_digit_boxes_v:nnn #1 #2 #3 {
+  \int_step_inline:nnnn
+  { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } }
+  { 1 } { #3 - 1 } {
+    \vbox{\hbox{
+        \amc_num_digit_box:nn { ##1 }{ #2 }
+      }}
+    \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
+    \vspace{\AMCnumeric@Vspace}
+  }
+  \vspace{-\AMCnumeric@Vspace}
+}
+
+\cs_new:Npn \amc_num_digit_boxes_vr:nnn #1 #2 #3 {
+  \int_step_inline:nnnn { #3 - 1 } { -1 }
+  { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } } {
+    \vbox{\hbox{
+        \amc_num_digit_box:nn { ##1 }{ #2 }
+      }}
+    \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
+    \vspace{\AMCnumeric@Vspace}
+  }
+  \vspace{-\AMCnumeric@Vspace}
+}
+
+%    \end{macrocode}
+% Then the command |\AMCnumericShow|\marg{x}\marg{options} itself:
+%    \begin{macrocode}
+
+\fp_new:N \amc_num_correct_fp
+\clist_new:N \amc_num_digits_clist
+\int_new:N \amc_num_digit_int
+\tl_new:N \amc_num_compute_tl
+
+\cs_new:Npn \amc_numeric_show:nn #1 #2 {
+%    \end{macrocode}
+% We have to tell AMC that the scoring we will give concerns this
+% question:
+%    \begin{macrocode}
+  \ifAMC@ensemble\ifAMCformulaire@dedans
     \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}
-  \fi\fi%
+  \fi\fi
 %    \end{macrocode}
 % Then we parse the options from \meta{opts}:
 %    \begin{macrocode}
-  {\setkeys{AMCNumeric}{#2}%
+  {\keys_set:nn { amcnumeric } { #2 }
 %    \end{macrocode}
-% When |decimal| is positive, convert the real correct value to integer.
+% Convert the floating point correct value to integer, taking into
+% account the parameters |significant| and |decimals|:
 %    \begin{macrocode}
-  \ifnum\AMC@numeric@decd>\z@%
-    \FPeval\AMC@numeric@eval{round(#1 * \the\AMC@numeric@base^\the\AMC@numeric@decd,0)}
-    \AMC@numeric@value=\AMC@numeric@eval%
-  \else%  
-    \ifKV@AMCNumeric@significant%
-      \AMCsignificantDigits[\the\AMC@numeric@base]{\AMC@numeric@digits}{#1}{\AMC@numeric@value}%
-    \else%
-      \AMC@numeric@value=#1%
-    \fi%
-  \fi%
+   \bool_if:NTF \amc_num_significant_bool {
+     \amc_fp_n_significant_digits:Nnn \amc_num_correct_fp { #1 } \amc_num_ndigits_int
+   } {
+     \amc_fp_n_digits:Nnn \amc_num_correct_fp { #1 } \amc_num_decd_int
+   }
+%    \end{macrocode}
+% Now extracts the required digits:
+%    \begin{macrocode}
+   \amc_fp_to_digits:Nnnn \amc_num_digits_clist \amc_num_correct_fp
+     { \amc_num_ndigits_int } { \amc_num_base_int }
 %    \end{macrocode}
 % The question scoring is given to AMC (if requested by the
 % |scoring=true| option). Note that the variable |intV| refers to the
 % correct value, and |intX| to the value entered by the student.
 %    \begin{macrocode}
-  \ifKV@AMCNumeric@scoring%
-    \AMC@amclog{AUTOQCM[B=haut=,mz=,formula=(Vdifference<=\the\AMC@numeric@exact?%
-      \AMC@numeric@scoreexact:%
-      \ifnum\AMC@numeric@approx>\z@%
-        (Vdifference<=\the\AMC@numeric@approx?\AMC@numeric@scoreapprox:0)%
-      \else%
-        0%
-      \fi)]^^J}%
-  \fi%
-  \def\AMC@numeric@compute{}%
-  \AMC@numeric@x=\AMC@numeric@digits\loop{%
-    \ifKV@AMCNumeric@strict%
-      \AMC@amclog{AUTOQCM[B=requires.int\@Alph\AMC@numeric@x=1]^^J}%
-    \else%
-      \AMC@amclog{AUTOQCM[B=default.int\@Alph\AMC@numeric@x=0]^^J}%
-    \fi%
-    \global\edef\AMC@numeric@compute{%
-      \ifnum\AMC@numeric@x=\AMC@numeric@digits\else%
-        (\AMC@numeric@compute)*\the\AMC@numeric@base+\fi%
-      int\@Alph\AMC@numeric@x}%
-  }\advance\AMC@numeric@x\m@ne\ifnum\AMC@numeric@x>0\repeat%
-  \ifKV@AMCNumeric@sign%
-    \ifKV@AMCNumeric@strict%
-      \AMC@amclog{AUTOQCM[B=requires.intS=1]^^J}%
-    \else%
-      \AMC@amclog{AUTOQCM[B=default.intS=1]^^J}%
-    \fi%
-    \global\edef\AMC@numeric@compute{(\AMC@numeric@compute)*(intS)}%
-  \fi%
-  \AMC@amclog{AUTOQCM[B=set.intV=\the\AMC@numeric@value,%
-    set.intX=\AMC@numeric@compute]^^J}%
-  \ifKV@AMCNumeric@significant%
-    \AMC@amclog{AUTOQCM[B=set.Vdifference="min( abs((intV)-(intX)) , abs(\the\AMC@numeric@base * (intV) - (intX)) , abs((intV) - \the\AMC@numeric@base * (intX)) )"]^^J}%
-  \else%
-    \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}%
-  \fi%
+   \bool_if:NTF \amc_num_scoring_bool {
+     \AMC@amclog{AUTOQCM[B=haut=,mz=,
+       formula=(Vdifference <= \int_use:N \amc_num_exact_int ?
+       \AMC@numeric@scoreexact :
+       \int_compare:nNnTF \amc_num_approx_int = 0 {
+         0
+       } {
+         (Vdifference <= \int_use:N\amc_num_approx_int ?
+           \AMC@numeric@scoreapprox : 0)
+       }
+       )]^^J}
+   } { }
+   \tl_clear:N \amc_num_compute_tl
+   \int_set_eq:NN \amc_num_digit_int \amc_num_ndigits_int
+   \int_while_do:nNnn \amc_num_digit_int > 0 {
+     \bool_if:NTF \amc_num_strict_bool {
+       \AMC@amclog{AUTOQCM[B=requires.digit
+         \int_to_Alph:n \amc_num_digit_int = 1]^^J}
+     } {
+       \AMC@amclog{AUTOQCM[B=default.digit
+         \int_to_Alph:n \amc_num_digit_int = 0]^^J}
+     }
+     \int_compare:nNnTF \amc_num_digit_int = \amc_num_ndigits_int { } {
+       \tl_put_left:Nn \amc_num_compute_tl { ( }
+       \tl_put_right:Nx \amc_num_compute_tl { ) *
+         \int_use:N \amc_num_base_int + }
+     }
+     \tl_put_right:Nx \amc_num_compute_tl
+       { digit \int_to_Alph:n \amc_num_digit_int }
+     \int_decr:N \amc_num_digit_int
+   }
+   \bool_if:NTF \amc_num_sign_bool {
+     \bool_if:NTF \amc_num_strict_bool {
+       \AMC@amclog{AUTOQCM[B=requires.intS=1]^^J}
+     } {
+       \AMC@amclog{AUTOQCM[B=default.intS=1]^^J}
+     }
+     \tl_put_left:Nn \amc_num_compute_tl { ( }
+     \tl_put_right:Nx \amc_num_compute_tl { ) * (intS) }
+   } { }
+   \AMC@amclog{AUTOQCM[B= set.intV = \fp_to_int:N\amc_num_correct_fp ,
+     set.intX = \amc_num_compute_tl ]^^J}
+   \bool_if:NTF \amc_num_significant_bool {
+     \AMC@amclog{AUTOQCM[B=set.Vdifference="min( abs((intV)-(intX)) ,
+       abs(\int_use:N\amc_num_base_int * (intV) - (intX)) ,
+       abs((intV) - \int_use:N\amc_num_base_int * (intX)) )"]^^J}
+   } {
+     \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}
+   }
 %    \end{macrocode}
 % Begin now with the frame around all the boxes:
 %    \begin{macrocode}
   \vspace{1.5ex}\par{%
-    \fboxrule=\AMCncol@BorderWidth%
-    \fcolorbox{\AMCncol@Border}{\AMCncol@Background}{%
+   \fboxrule=\AMCncol@BorderWidth
+   \fcolorbox{\AMCncol@Border}{\AMCncol@Background}{
 %    \end{macrocode}
 % Place the boxes to choose the sign, if requested.
 %    \begin{macrocode}
-      \ifKV@AMCNumeric@sign%
-        \vbox{%
-          \ifx\AMCntextSign\@empty\@empty\else%
-            \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi%
-          \AMCsignV{\AMC@numeric@value}}\hspace{.5em}%
-        \vrule%
-        \hspace{.5em}%
-      \fi%
-%    \end{macrocode}
-% We shift |\AMC@numeric@digits| and |\AMC@numeric@decd| counters so
-% that digit number 0 is the digit just before decimal point.
-%    \begin{macrocode}
-\advance\AMC@numeric@digits\m@ne%
-\advance\AMC@numeric@decd\m@ne%
+      \bool_if:NTF \amc_num_sign_bool {
+        \vbox{
+          \ifx\AMCntextSign\@empty\@empty\else
+            \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi
+          \amc_num_sign_boxes:N \amc_num_correct_fp
+        }
+        \hspace{.5em}
+        \vrule
+        \hspace{.5em}
+      } { }
 %    \end{macrocode}
 % For vertical mode (boxes for a single digit are on a same row;
 % usually used for binary numbers),
 %    \begin{macrocode}
-      \ifKV@AMCNumeric@vertical%
-        \hbox{%
+      \bool_if:NTF \amc_num_vertical_bool {
+        \hbox{
 %    \end{macrocode}
 % begin a loop over all digits,
 %    \begin{macrocode}
-          \loop{%
+          \int_set_eq:NN \amc_num_digit_int \amc_num_ndigits_int
+          \clist_map_inline:Nn \amc_num_digits_clist {
 %    \end{macrocode}
 % place the decimal point if necessary,
 %    \begin{macrocode}
-            \ifnum\AMC@numeric@digits=\AMC@numeric@decd\relax%
-              \hbox{\AMCdecimalPoint}%
-            \fi%
-%    \end{macrocode}
-% compute the digit value,
-%    \begin{macrocode}
-            \AMC@calcdigit{\the\AMC@numeric@value}%
-              {\the\AMC@numeric@digits}{\AMC@numeric@x}%
+            \int_compare:nNnTF \amc_num_digit_int = \amc_num_decd_int {
+              \hbox{ \AMCdecimalPoint }
+            } { }
 %    \end{macrocode}
 % draw the box for this digit,
 %    \begin{macrocode}
-            \hbox{\vbox{%
-              \ifKV@AMCNumeric@vhead%
-                \vbox{\hbox{\AMCntextVHead{\the\AMC@numeric@digits}}}%
-                \vspace{\AMCnumeric@Vspace}%
-              \fi%
-              {\advance\AMC@numeric@digits\@ne%
-               \ifKV@AMCNumeric@reverse%
-                 \AMCnumericVR{int\@Alph\AMC@numeric@digits}%
-                   {\the\AMC@numeric@x}{\AMC@numeric@base}%
-               \else%
-                 \AMCnumericV{int\@Alph\AMC@numeric@digits}%
-                   {\the\AMC@numeric@x}{\AMC@numeric@base}%
-               \fi}%
-            }}%
+            \hbox{\vbox{
+              \bool_if:NTF \amc_num_vhead_bool {
+                \vbox{\hbox{\AMCntextVHead{ \int_eval:n
+                      { \amc_num_digit_int - 1 } }}}
+                \vspace{\AMCnumeric@Vspace}
+              } { }
+              \bool_if:NTF \amc_num_reverse_bool {
+                \amc_num_digit_boxes_vr:nnn { digit
+                  \int_to_Alph:n \amc_num_digit_int }
+                  { ##1 } { \amc_num_base_int }
+              } {
+                \amc_num_digit_boxes_v:nnn { digit
+                  \int_to_Alph:n \amc_num_digit_int }
+                  { ##1 } { \amc_num_base_int }
+              }
+            }}
 %    \end{macrocode}
-% and end the loop over digits, adding space if this is not the last one.
+% and end the loop over digits, adding space if this is not the last
+% one.
 %    \begin{macrocode}
-           }\ifnum\AMC@numeric@digits>\z@%
-             \hspace{\AMCnumeric@Hspace}%
-          \advance\AMC@numeric@digits\m@ne\repeat%
-        }%
+          \int_compare:nNnTF \amc_num_digit_int > 1 {
+            \hspace{\AMCnumeric@Hspace}
+          } { }
+          \int_decr:N \amc_num_digit_int
+        }}
 %    \end{macrocode}
 % Now, do the same for horizontal mode.
 %    \begin{macrocode}
-       \else%
-         \hbox{\vbox{%
-           \loop{%
-             \ifnum\AMC@numeric@digits=\AMC@numeric@decd\relax%
-               \hbox{\AMCdecimalPoint}%
-             \fi%
-             \AMC@calcdigit{\the\AMC@numeric@value}%
-               {\the\AMC@numeric@digits}{\AMC@numeric@x}%
-             \hbox{%
-               {\advance\AMC@numeric@digits\@ne%
-                \AMCnumericH{int\@Alph\AMC@numeric@digits}%
-                  {\the\AMC@numeric@x}{\AMC@numeric@base}%
-             }}%
-           }\ifnum\AMC@numeric@digits>\z@%
-             \vspace{\AMCnumeric@Vspace}\par%
-           \advance\AMC@numeric@digits\m@ne\repeat%
-          }}%
-      \fi%
+       } {
+         \hbox{\vbox{
+             \int_set_eq:NN \amc_num_digit_int \amc_num_ndigits_int
+             \clist_map_inline:Nn \amc_num_digits_clist {
+               \int_compare:nNnTF
+               \amc_num_digit_int = \amc_num_decd_int {
+                 \hbox{ \AMCdecimalPoint }
+               } { }
+               \hbox{
+                 \amc_num_digit_boxes_h:nnn { digit
+                   \int_to_Alph:n \amc_num_digit_int }
+                   { ##1 } \amc_num_base_int
+               }
+               \int_compare:nNnTF \amc_num_digit_int > 1 {
+                 \vspace{\AMCnumeric@Vspace}
+               } { }
+               \int_decr:N \amc_num_digit_int
+             }}}
+      }
 %    \end{macrocode}
 % Close the frame around all the boxes.
 %    \begin{macrocode}
-    }%
-  }%
+    }
+  }
 %    \end{macrocode}
 % And tell AMC that we finished with this question:
 %    \begin{macrocode}
-  \ifAMC@ensemble\else\vspace{1.5ex}\par\fi%
-  \ifAMC@ensemble\ifAMCformulaire@dedans%
-    \AMC@amclog{AUTOQCM[FQ]^^J}%
-  \fi\fi%
-  }%
+  \ifAMC@ensemble\else\vspace{1.5ex}\par\fi
+  \ifAMC@ensemble\ifAMCformulaire@dedans
+    \AMC@amclog{AUTOQCM[FQ]^^J}
+  \fi\fi
+  }
 }
+
+\cs_new_eq:NN \AMCnumericShow \amc_numeric_show:nn
+
 %    \end{macrocode}
 %
 % |\AMCnumericHide| is called when the boxes are not to be drawn (in
@@ -3749,11 +3822,15 @@ Three digits and two letters:\insertgroup{mixed}.
 % used in the LaTeX source code of the exam.
 %
 %    \begin{macrocode}
-\newcommand\AMCnumericHide[2]{%
-  \setkeys{AMCNumeric}{#2}%
-  \AMCntextGoto%
-  \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
+\cs_new:Npn \amc_numeric_hide:nn #1 #2 {
+  \keys_set:nn { amcnumeric } { #2 }
+  \AMCntextGoto
+  \ifAMC@qbloc\else\vspace{1.5ex}\par\fi
 }
+
+\cs_new_eq:NN \AMCnumericHide \amc_numeric_hide:nn
+
+\ExplSyntaxOff
 \def\AMCnumericChoicesPlain{\AMCformatChoices{\AMCnumericShow}{\AMCnumericHide}}
 %    \end{macrocode}
 % The \marg{value} argument is often given as a macro, that is to be
@@ -3819,18 +3896,23 @@ Three digits and two letters:\insertgroup{mixed}.
 % to follow local conventions (writting $[a,b)$ instead of $[a,b[$ is
 % for example a common usage).
 %    \begin{macrocode}
-\def\AMC@intervx#1#2{\AMC@CI@cas{\AMCIntervalFormat{#1}{#2}}}
-\def\AMCIntervals#1#2#3#4{%
-\FPeval\AMC@CI@a{clip(#2)}%
-\let\AMC@CI@cas=\wrongchoice%
-\loop%
-  \FPeval\AMC@CI@b{clip(AMC@CI@a + #4)}%
-  \FPiflt{#1}\AMC@CI@b\let\AMC@CI@cas=\correctchoice\fi%
-  \FPiflt{#1}\AMC@CI@a\let\AMC@CI@cas=\wrongchoice\fi%
-  \@expandtwoargs\AMC@intervx{\AMC@CI@a}{\AMC@CI@b}%
-\FPiflt\AMC@CI@b{#3}%
-  \FPset\AMC@CI@a{\AMC@CI@b}%
-\repeat}
+\ExplSyntaxOn
+
+\fp_new:N \amc_interv_a
+\fp_new:N \amc_interv_b
+\cs_new:Npn \amc_intervals:nnnn #1 #2 #3 #4 {
+  \fp_set:Nn \amc_interv_a { #2 }
+  \fp_do_while:nn { \amc_interv_a < #3 } {
+    \fp_set:Nn \amc_interv_b { \amc_interv_a + #4 }
+    \fp_compare:nTF { \amc_interv_a <= #1 < \amc_interv_b }
+      \correctchoice \wrongchoice
+    {\AMCIntervalFormat{\fp_use:N \amc_interv_a}{\fp_use:N \amc_interv_b}}
+    \fp_set:Nn \amc_interv_a \amc_interv_b
+  }
+}
+\cs_new_eq:NN \AMCIntervals \amc_intervals:nnnn
+
+\ExplSyntaxOff
 %    \end{macrocode}\end{macro}
 %
 % \subsection{Open questions}
