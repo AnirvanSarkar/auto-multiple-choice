@@ -3531,6 +3531,15 @@ respective parameters \VQa{} and \VQb{}.
             </varlistentry>
 
             <varlistentry>
+              <term>exponent=<replaceable>num</replaceable></term>
+
+              <listitem>
+                <para>switch to scientific notation mode, with
+                <replaceable>num</replaceable> digits for the exponent.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
               <term>nozero=<replaceable>bool</replaceable></term>
 
               <listitem>
@@ -3546,6 +3555,14 @@ respective parameters \VQa{} and \VQb{}.
               <listitem>
                 <para>requests (or not) a signed value (defaults to
                 true).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>exposign=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>same for the exponent sign.</para>
               </listitem>
             </varlistentry>
 
@@ -3566,6 +3583,17 @@ respective parameters \VQa{} and \VQb{}.
               <listitem>
                 <para>if true, each digit is represented on one raw. If false
                 (default), each digit is represented on one line.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>expovertical=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>if <code>true</code>, the mantissa is
+                <emphasis>above</emphasis> the exponent. If <code>false</code>
+                (default), the mantissa is <emphasis>beside</emphasis> the
+                exponent.</para>
               </listitem>
             </varlistentry>
 
@@ -3659,6 +3687,18 @@ respective parameters \VQa{} and \VQb{}.
                 <para>sets the text for the period. Can also be redefined by
                 <code>\def\AMCdecimalPoint{<replaceable>text</replaceable>}</code>,
                 and defaults to <code>\raisebox{1ex}{\bf .}</code>.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Texponent=<replaceable>text</replaceable></term>
+
+              <listitem>
+                <para>sets the text that separates mantissa and exponent. Can
+                also be redefined by
+                <code>\def\AMCexponent{<replaceable>text</replaceable>}</code>,
+                and defaults to
+                <code>$\times10$\textasciicircum</code>.</para>
               </listitem>
             </varlistentry>
 

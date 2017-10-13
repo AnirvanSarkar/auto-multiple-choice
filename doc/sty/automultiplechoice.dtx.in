@@ -939,19 +939,28 @@ Three digits and two letters:\insertgroup{mixed}.
 %     positive, the LaTeX package |fp| must be loaded.
 %   \item[|base=|\meta{num}] gives the base for digits and decimals (defaults to 10).
 %   \item[|significant=|\meta{bool}] if |true|, the numbers to code
-%     are the first \emph{significant} digits from the first argument of
-%     |\AMCnumericChoices|. For example, the right answer to
-%     |\AMCnumericChoices|\linebreak[2]|{56945.23}|\linebreak[2]|{digits=2,significant=true}| is 57.
+%     are the first \emph{significant} digits from the first argument
+%     of |\AMCnumericChoices|. For example, the right answer to
+%     |\AMCnumericChoices|\linebreak[2]|{56945.23}|\linebreak[2]|{digits=2,significant=true}|
+%     is 57.
+%   \item[|exponent=|\meta{num}] gives the number of digits for the
+%     exponent, when requesting to enter the result in scientific
+%     notation.
 %   \item[|nozero=|\meta{bool}] if |true|, the choice 0 is removed for
 %     all digits. May be useful when |\AMCnumericChoices| is used to
 %     get a small ($<10$) positive value.
 %   \item[|sign=|\meta{bool}] requests (or not) a signed value (default to true).
+%   \item[|exposign=|\meta{bool}] requests (or not) a signed value of
+%     the exponent (default to true).
 %   \item[|strict=|\meta{bool}] if |true|, a box has to be ticked for
 %     every digit and for the sign. If |false|, if some digits has no
 %     ticked box, they will be set to zero. Defaults to |false|.
 %   \item[|vertical=|\meta{bool}] if |true|, each digit is represented
 %     on one raw. If |false| (default), each digit is represented on one
 %     line.
+%   \item[|expovertical=|\meta{bool}] if |true|, the mantissa is above
+%     the exponent. If |false| (default), the mantissa is beside the
+%     exponent.
 %   \item[|reverse=|\meta{bool}] if |true|, place higher values of the
 %     digits on the top in vertical mode (defaults to |true|).
 %   \item[|vhead=|\meta{bool}] if |true|, in vertical mode, a header
@@ -975,6 +984,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %   \item[|Tpoint=|\meta{text}] sets the text for the period. Can also
 %     be redefined by |\def\AMCdecimalPoint|\marg{text}, and defaults
 %     to |\raisebox{1ex}{\bf .}|.
+%   \item[|Texponent=|\meta{text}] sets the text before the exponent. Can also
+%     be redefined by |\def\AMCexponent|\marg{text}, and defaults
+%     to |$\times10$\textasciicircum|.
 %   \item[|scoring=|\meta{bool}] if |true|, a scoring strategy is given
 %     to AMC for this question. Defaults to |true|.
 %   \item[|scoreexact=|\meta{num}] gives the score for an exact answer (defaults to 2).
@@ -3473,6 +3485,8 @@ Three digits and two letters:\insertgroup{mixed}.
   Tsign .initial:n = {},
   Tpoint .code:n = {\def\AMCdecimalPoint{#1}},
   Tpoint .initial:n = { \raisebox{1ex}{\bf .} },
+  Texponent .code:n = {\def\AMCexponent{#1}},
+  Texponent .initial:n = { $\times10$\textasciicircum },
   vspace .code:n = {\AMCnumeric@Vspace=#1},
   hspace .code:n = {\AMCnumeric@Hspace=#1},
   bordercol .code:n = {\def\AMCncol@Border{#1}},
@@ -3485,11 +3499,16 @@ Three digits and two letters:\insertgroup{mixed}.
   digits .initial:n = { 3 },
   decimals .int_set:N = \amc_num_decd_int,
   decimals .initial:n = { 0 },
+  exponent .int_set:N = \amc_num_expo_int,
+  exponent .initial:n = { 0 },
   base .int_set:N = \amc_num_base_int,
   base .initial:n = { 10 },
   sign .bool_set:N = \amc_num_sign_bool,
   sign .initial:n = { true },
   sign .default:n = { true },
+  exposign .bool_set:N = \amc_num_exposign_bool,
+  exposign .initial:n = { true },
+  exposign .default:n = { true },
   strict .bool_set:N = \amc_num_strict_bool,
   strict .initial:n = { false },
   strict .default:n = { true },
@@ -3499,6 +3518,9 @@ Three digits and two letters:\insertgroup{mixed}.
   vertical .bool_set:N = \amc_num_vertical_bool,
   vertical .initial:n = { false },
   vertical .default:n = { true },
+  expovertical .bool_set:N = \amc_num_expovertical_bool,
+  expovertical .initial:n = { false },
+  expovertical .default:n = { true },
   reverse .bool_set:N = \amc_num_reverse_bool,
   reverse .initial:n = { false },
   reverse .default:n = { true },
@@ -3548,25 +3570,6 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi
 }
 %    \end{macrocode}
-% The command |\amc_num_sign_boxes:N|\marg{fp} draws two boxes
-% for the students to code the sign of \meta{fp}.
-%    \begin{macrocode}
-\cs_new:Npn \amc_num_sign_boxes:N #1 {
-  \fp_compare:nNnTF #1 < 0 {
-    \hbox{\amc_num_char:nn{$+$}{}}
-    \vspace{\AMCnumeric@Vspace}
-    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}
-    \hbox{\amc_num_char:nn{$-$}{\AMC@checkedbox}}
-    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}
-  } {
-    \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
-    \vspace{\AMCnumeric@Vspace}
-    \AMC@amclog{AUTOQCM[B=set.intS=1]^^J}
-    \hbox{\amc_num_char:nn{$-$}{}}
-    \AMC@amclog{AUTOQCM[B=set.intS=-1]^^J}
-  }
-}
-%    \end{macrocode}
 % The command |\amc_num_digit_box:nn|\marg{i}\marg{j} draws a box for
 % current digit value \meta{i}, where \meta{j} is the correct value
 % for the current digit.
@@ -3576,6 +3579,26 @@ Three digits and two letters:\insertgroup{mixed}.
     \amc_num_char:nn{ #1 }{\AMC@checkedbox}
   } {
     \amc_num_char:nn{ #1 }{}
+  }
+}
+%    \end{macrocode}
+% The command |\amc_num_sign_boxes:Nn|\marg{negative}\marg{prefix}
+% draws two boxes for the students to code the sign (with a right
+% value given by the boolean \meta{negative}).
+%    \begin{macrocode}
+\cs_new:Npn \amc_num_sign_boxes:N #1 #2 {
+  \bool_if:nTF { #1 } {
+    \hbox{\amc_num_char:nn{$+$}{}}
+    \vspace{\AMCnumeric@Vspace}
+    \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+    \hbox{\amc_num_char:nn{$-$}{\AMC@checkedbox}}
+    \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+  } {
+    \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
+    \vspace{\AMCnumeric@Vspace}
+    \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+    \hbox{\amc_num_char:nn{$-$}{}}
+    \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
   }
 }
 %    \end{macrocode}
@@ -3605,21 +3628,164 @@ Three digits and two letters:\insertgroup{mixed}.
         \amc_num_digit_box:nn { ##1 }{ #2 }
       }}
     \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
-    \vspace{\AMCnumeric@Vspace}
+    \int_compare:nNnTF { ##1 } < { #3 - 1 } {
+      \vspace{\AMCnumeric@Vspace}
+    } {}
   }
-  \vspace{-\AMCnumeric@Vspace}
 }
 
+\int_new:N \amc_num_first_digit_int
 \cs_new:Npn \amc_num_digit_boxes_vr:nnn #1 #2 #3 {
+  \int_set:Nn \amc_num_first_digit_int
+  { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } }
   \int_step_inline:nnnn { #3 - 1 } { -1 }
-  { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } } {
+  \amc_num_first_digit_int {
     \vbox{\hbox{
         \amc_num_digit_box:nn { ##1 }{ #2 }
       }}
     \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
-    \vspace{\AMCnumeric@Vspace}
+    \int_compare:nNnTF { ##1 } > \amc_num_first_digit_int {
+      \vspace{\AMCnumeric@Vspace}
+      } {}
   }
-  \vspace{-\AMCnumeric@Vspace}
+}
+%    \end{macrocode}
+% The command |\amc_num_integer_boxes_v:Nnn|\marg{correct
+% digits}\marg{prefix}\meta{decimals} draws boxes for integer entry,
+% without the sign.
+%    \begin{macrocode}
+\cs_new:Npn \amc_num_integer_boxes_v:Nnn #1 #2 #3 {
+%    \end{macrocode}
+% begin a loop over all digits,
+%    \begin{macrocode}
+  \int_set_eq:NN \amc_num_digit_int { \clist_count:N #1 }
+  \clist_map_inline:Nn #1 {
+%    \end{macrocode}
+% place the decimal point if necessary,
+%    \begin{macrocode}
+    \int_compare:nNnTF \amc_num_digit_int = { #3 } {
+      \hbox{ \AMCdecimalPoint }\hspace{\AMCnumeric@Hspace}
+    } { }
+%    \end{macrocode}
+% draw the box for this digit,
+%    \begin{macrocode}
+    \hbox{\vbox{
+        \bool_if:NTF \amc_num_vhead_bool {
+          \vbox{\hbox{\AMCntextVHead{ \int_eval:n
+                { \amc_num_digit_int - 1 } }}}
+          \vspace{\AMCnumeric@Vspace}
+        } { }
+        \bool_if:NTF \amc_num_reverse_bool {
+          \amc_num_digit_boxes_vr:nnn { #2
+            \int_to_Alph:n \amc_num_digit_int }
+          { ##1 } { \amc_num_base_int }
+        } {
+          \amc_num_digit_boxes_v:nnn { #2
+            \int_to_Alph:n \amc_num_digit_int }
+          { ##1 } { \amc_num_base_int }
+        }
+      }}
+%    \end{macrocode}
+% and end the loop over digits, adding space if this is not the last
+% one.
+%    \begin{macrocode}
+    \int_compare:nNnTF \amc_num_digit_int > 1 {
+      \hspace{\AMCnumeric@Hspace}
+    } { }
+    \int_decr:N \amc_num_digit_int
+  }
+}
+
+%    \end{macrocode}
+% The command |\amc_num_integer_boxes_h:Nnn|\marg{correct
+% digits}\marg{prefix}\meta{decimals} does the same, in horizontal mode.
+%    \begin{macrocode}
+
+\cs_new:Npn \amc_num_integer_boxes_h:Nnn #1 #2 #3 {
+  \vbox{
+    \int_set_eq:NN \amc_num_digit_int { \clist_count:N #1 }
+    \clist_map_inline:Nn #1 {
+      \int_compare:nNnTF
+      \amc_num_digit_int = { #3 } {
+        \hbox{ \AMCdecimalPoint }
+      } { }
+      \hbox{
+        \amc_num_digit_boxes_h:nnn { #2
+          \int_to_Alph:n \amc_num_digit_int }
+        { ##1 } \amc_num_base_int
+      }
+      \int_compare:nNnTF \amc_num_digit_int > 1 {
+        \vspace{\AMCnumeric@Vspace}
+      } { }
+      \int_decr:N \amc_num_digit_int
+    }}
+}
+
+%    \end{macrocode}
+% Finally, |\amc_num_integer_boxes:NnnNn|\marg{correct
+% digits}\marg{prefix}\marg{decimals}\marg{sign bool}\marg{positive} draws
+% boxes for integer entry, including the sign if \meta{sign bool} is
+% true.
+%    \begin{macrocode}
+
+\cs_new:Npn \amc_num_integer_boxes:NnnNn #1 #2 #3 #4 #5 {
+  \hbox{
+    \bool_if:NTF { #4 } {
+      \vbox{
+        \ifx\AMCntextSign\@empty\@empty\else
+        \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi
+        \amc_num_sign_boxes:N { #5 } { #2 }
+      }
+      \hspace{.5em}
+      \vrule
+      \hspace{.5em}
+    } { }
+    \hbox{
+      \bool_if:NTF \amc_num_vertical_bool
+      \amc_num_integer_boxes_v:Nnn \amc_num_integer_boxes_h:Nnn
+      #1 { #2 } { #3 }
+    }
+  }
+}
+
+%    \end{macrocode}
+% The command |\amc_num_build_integer_scoring:Nnnn|\marg{tl
+% var}\marg{sign bool}\marg{prefix}\marg{n} builds a scoring to
+% compute an integer from a serie of \meta{n}-digits boxes, with name
+% prefix \meta{prefix}, using a sign variable if \meta{sign bool} is
+% true.
+%    \begin{macrocode}
+
+\cs_new:Npn \amc_num_build_integer_scoring:Nnnn #1 #2 #3 #4 {
+  \tl_clear:N #1
+  \int_set_eq:NN \amc_num_digit_int { #4 }
+  \int_while_do:nNnn \amc_num_digit_int > 0 {
+    \bool_if:NTF \amc_num_strict_bool {
+      \AMC@amclog{AUTOQCM[B=requires. #3
+        \int_to_Alph:n \amc_num_digit_int = 1]^^J}
+    } {
+      \AMC@amclog{AUTOQCM[B=default. #3
+        \int_to_Alph:n \amc_num_digit_int = 0]^^J}
+    }
+    \int_compare:nNnTF \amc_num_digit_int = #4 { } {
+      \tl_put_left:Nn #1 { ( }
+      \tl_put_right:Nx #1 { ) *
+         \int_use:N \amc_num_base_int + }
+    }
+    \tl_put_right:Nx #1
+    { #3 \int_to_Alph:n \amc_num_digit_int }
+    \int_decr:N \amc_num_digit_int
+  }
+  \tl_put_left:Nn #1 { ( }
+  \tl_put_right:Nn #1 { ) }
+  \bool_if:NTF { #2 } {
+    \bool_if:NTF \amc_num_strict_bool {
+      \AMC@amclog{AUTOQCM[B=requires. sign #3 =1]^^J}
+    } {
+      \AMC@amclog{AUTOQCM[B=default. sign #3 =1]^^J}
+    }
+    \tl_put_right:Nx #1 { * ( sign #3 ) }
+  } { }
 }
 
 %    \end{macrocode}
@@ -3628,8 +3794,11 @@ Three digits and two letters:\insertgroup{mixed}.
 
 \fp_new:N \amc_num_correct_fp
 \clist_new:N \amc_num_digits_clist
+\clist_new:N \amc_num_expo_digits_clist
 \int_new:N \amc_num_digit_int
 \tl_new:N \amc_num_compute_tl
+\tl_new:N \amc_num_expo_tl
+\int_new:N \amc_num_correct_expo_int
 
 \cs_new:Npn \amc_numeric_show:nn #1 #2 {
 %    \end{macrocode}
@@ -3643,20 +3812,45 @@ Three digits and two letters:\insertgroup{mixed}.
 % Then we parse the options from \meta{opts}:
 %    \begin{macrocode}
   {\keys_set:nn { amcnumeric } { #2 }
+    \bool_if:nTF { \bool_if_p:N\amc_num_significant_bool
+      && \int_compare_p:n { \amc_num_base_int != 10 } } {
+      \message{^^J!~AMCnumeric~Error:~significant=true~can't~be~used~with~base!=10.^^J}
+    } {}
+    \bool_if:nTF { \int_compare_p:n { \amc_num_expo_int != 0 }
+      && \int_compare_p:n { \amc_num_base_int != 10 } } {
+      \message{^^J!~AMCnumeric~Error:~scientific~notation~can't~be~used~with~base!=10.^^J}
+    } {}
 %    \end{macrocode}
 % Convert the floating point correct value to integer, taking into
-% account the parameters |significant| and |decimals|:
+% account the parameters |significant|, |exponent| and |decimals|:
 %    \begin{macrocode}
    \bool_if:NTF \amc_num_significant_bool {
      \amc_fp_n_significant_digits:Nnn \amc_num_correct_fp { #1 } \amc_num_ndigits_int
    } {
-     \amc_fp_n_digits:Nnn \amc_num_correct_fp { #1 } \amc_num_decd_int
+     \int_compare:nNnTF \amc_num_expo_int > 0 {
+       \amc_fp_decompose:NNn \amc_num_mantissa_fp \amc_num_correct_expo_int { #1 }
+       \int_compare:nNnTF { \amc_num_ndigits_int - \amc_num_decd_int } > 1 {
+         \fp_set:Nn \amc_num_mantissa_fp {
+           \amc_num_mantissa_fp * 10^( \amc_num_ndigits_int - \amc_num_decd_int - 1 )
+         }
+         \int_set:Nn \amc_num_correct_expo_int {
+           \amc_num_correct_expo_int - ( \amc_num_ndigits_int - \amc_num_decd_int - 1 )
+         }
+       } {}
+       \amc_fp_n_digits:Nnn \amc_num_correct_fp \amc_num_mantissa_fp \amc_num_decd_int
+     } {
+       \amc_fp_n_digits:Nnn \amc_num_correct_fp { #1 } \amc_num_decd_int
+     }
    }
 %    \end{macrocode}
 % Now extracts the required digits:
 %    \begin{macrocode}
    \amc_fp_to_digits:Nnnn \amc_num_digits_clist \amc_num_correct_fp
-     { \amc_num_ndigits_int } { \amc_num_base_int }
+     \amc_num_ndigits_int \amc_num_base_int
+   \int_compare:nNnTF \amc_num_expo_int > 0 {
+     \amc_fp_to_digits:Nnnn \amc_num_expo_digits_clist \amc_num_correct_expo_int
+       \amc_num_expo_int \amc_num_base_int
+   } {}
 %    \end{macrocode}
 % The question scoring is given to AMC (if requested by the
 % |scoring=true| option). Note that the variable |intV| refers to the
@@ -3673,35 +3867,16 @@ Three digits and two letters:\insertgroup{mixed}.
            \AMC@numeric@scoreapprox : 0)
        }
        )]^^J}
-   } { }
-   \tl_clear:N \amc_num_compute_tl
-   \int_set_eq:NN \amc_num_digit_int \amc_num_ndigits_int
-   \int_while_do:nNnn \amc_num_digit_int > 0 {
-     \bool_if:NTF \amc_num_strict_bool {
-       \AMC@amclog{AUTOQCM[B=requires.digit
-         \int_to_Alph:n \amc_num_digit_int = 1]^^J}
-     } {
-       \AMC@amclog{AUTOQCM[B=default.digit
-         \int_to_Alph:n \amc_num_digit_int = 0]^^J}
-     }
-     \int_compare:nNnTF \amc_num_digit_int = \amc_num_ndigits_int { } {
-       \tl_put_left:Nn \amc_num_compute_tl { ( }
-       \tl_put_right:Nx \amc_num_compute_tl { ) *
-         \int_use:N \amc_num_base_int + }
-     }
+   } {}
+   \amc_num_build_integer_scoring:Nnnn
+     \amc_num_compute_tl \amc_num_sign_bool { digit } \amc_num_ndigits_int
+   \int_compare:nNnTF \amc_num_expo_int > 0 {
+     \amc_num_build_integer_scoring:Nnnn
+       \amc_num_expo_tl \amc_num_exposign_bool { expo } \amc_num_expo_int
+     \AMC@amclog{AUTOQCM[B= set. intE = \amc_num_expo_tl ]^^J}
      \tl_put_right:Nx \amc_num_compute_tl
-       { digit \int_to_Alph:n \amc_num_digit_int }
-     \int_decr:N \amc_num_digit_int
-   }
-   \bool_if:NTF \amc_num_sign_bool {
-     \bool_if:NTF \amc_num_strict_bool {
-       \AMC@amclog{AUTOQCM[B=requires.intS=1]^^J}
-     } {
-       \AMC@amclog{AUTOQCM[B=default.intS=1]^^J}
-     }
-     \tl_put_left:Nn \amc_num_compute_tl { ( }
-     \tl_put_right:Nx \amc_num_compute_tl { ) * (intS) }
-   } { }
+       { * \int_use:N\amc_num_base_int **( intE - (\int_use:N\amc_num_correct_expo_int) ) }
+   } {}
    \AMC@amclog{AUTOQCM[B= set.intV = \fp_to_int:N\amc_num_correct_fp ,
      set.intX = \amc_num_compute_tl ]^^J}
    \bool_if:NTF \amc_num_significant_bool {
@@ -3714,92 +3889,34 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % Begin now with the frame around all the boxes:
 %    \begin{macrocode}
-  \vspace{1.5ex}\par{%
-   \fboxrule=\AMCncol@BorderWidth
-   \fcolorbox{\AMCncol@Border}{\AMCncol@Background}{
-%    \end{macrocode}
-% Place the boxes to choose the sign, if requested.
-%    \begin{macrocode}
-      \bool_if:NTF \amc_num_sign_bool {
-        \vbox{
-          \ifx\AMCntextSign\@empty\@empty\else
-            \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi
-          \amc_num_sign_boxes:N \amc_num_correct_fp
-        }
-        \hspace{.5em}
-        \vrule
-        \hspace{.5em}
-      } { }
-%    \end{macrocode}
-% For vertical mode (boxes for a single digit are on a same row;
-% usually used for binary numbers),
-%    \begin{macrocode}
-      \bool_if:NTF \amc_num_vertical_bool {
-        \hbox{
-%    \end{macrocode}
-% begin a loop over all digits,
-%    \begin{macrocode}
-          \int_set_eq:NN \amc_num_digit_int \amc_num_ndigits_int
-          \clist_map_inline:Nn \amc_num_digits_clist {
-%    \end{macrocode}
-% place the decimal point if necessary,
-%    \begin{macrocode}
-            \int_compare:nNnTF \amc_num_digit_int = \amc_num_decd_int {
-              \hbox{ \AMCdecimalPoint }
-            } { }
-%    \end{macrocode}
-% draw the box for this digit,
-%    \begin{macrocode}
-            \hbox{\vbox{
-              \bool_if:NTF \amc_num_vhead_bool {
-                \vbox{\hbox{\AMCntextVHead{ \int_eval:n
-                      { \amc_num_digit_int - 1 } }}}
-                \vspace{\AMCnumeric@Vspace}
-              } { }
-              \bool_if:NTF \amc_num_reverse_bool {
-                \amc_num_digit_boxes_vr:nnn { digit
-                  \int_to_Alph:n \amc_num_digit_int }
-                  { ##1 } { \amc_num_base_int }
-              } {
-                \amc_num_digit_boxes_v:nnn { digit
-                  \int_to_Alph:n \amc_num_digit_int }
-                  { ##1 } { \amc_num_base_int }
-              }
-            }}
-%    \end{macrocode}
-% and end the loop over digits, adding space if this is not the last
-% one.
-%    \begin{macrocode}
-          \int_compare:nNnTF \amc_num_digit_int > 1 {
-            \hspace{\AMCnumeric@Hspace}
-          } { }
-          \int_decr:N \amc_num_digit_int
+  \vspace{1.5ex}\par{
+    \fboxrule=\AMCncol@BorderWidth
+    \fcolorbox{\AMCncol@Border}{\AMCncol@Background}{
+      \bool_if:NTF \amc_num_expovertical_bool {
+        \hbox{\vbox{
+          \vbox{\amc_num_integer_boxes:NnnNn
+          \amc_num_digits_clist { digit } \amc_num_decd_int \amc_num_sign_bool
+          { \fp_compare_p:nNn \amc_num_correct_fp < 0}}
+          \int_compare:nNnTF \amc_num_expo_int > 0 {
+            \vspace{\AMCnumeric@Vspace}
+            \vbox{\hbox{\AMCexponent}}
+            \vspace{\AMCnumeric@Vspace}
+            \vbox{\amc_num_integer_boxes:NnnNn
+            \amc_num_expo_digits_clist { expo } { 0 } \amc_num_exposign_bool
+            { \int_compare_p:nNn \amc_num_correct_expo_int < 0 }}
+          } {}
         }}
-%    \end{macrocode}
-% Now, do the same for horizontal mode.
-%    \begin{macrocode}
-       } {
-         \hbox{\vbox{
-             \int_set_eq:NN \amc_num_digit_int \amc_num_ndigits_int
-             \clist_map_inline:Nn \amc_num_digits_clist {
-               \int_compare:nNnTF
-               \amc_num_digit_int = \amc_num_decd_int {
-                 \hbox{ \AMCdecimalPoint }
-               } { }
-               \hbox{
-                 \amc_num_digit_boxes_h:nnn { digit
-                   \int_to_Alph:n \amc_num_digit_int }
-                   { ##1 } \amc_num_base_int
-               }
-               \int_compare:nNnTF \amc_num_digit_int > 1 {
-                 \vspace{\AMCnumeric@Vspace}
-               } { }
-               \int_decr:N \amc_num_digit_int
-             }}}
+      } {
+        \amc_num_integer_boxes:NnnNn
+        \amc_num_digits_clist { digit } \amc_num_decd_int \amc_num_sign_bool
+        { \fp_compare_p:nNn \amc_num_correct_fp < 0}
+        \int_compare:nNnTF \amc_num_expo_int > 0 {
+          \hspace{\AMCnumeric@Hspace}\AMCexponent\hspace{\AMCnumeric@Hspace}
+          \amc_num_integer_boxes:NnnNn
+          \amc_num_expo_digits_clist { expo } { 0 } \amc_num_exposign_bool
+          { \int_compare_p:nNn \amc_num_correct_expo_int < 0 }
+        } {}
       }
-%    \end{macrocode}
-% Close the frame around all the boxes.
-%    \begin{macrocode}
     }
   }
 %    \end{macrocode}

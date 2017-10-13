@@ -3672,11 +3672,10 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <programlisting>\begin{questionmultx}{sqrt}
   \FPeval\VQa{trunc(5+random*15,0)}
-  \FPeval\VQs{VQa^0.5}
   Calculez $\sqrt{\VQa}$ et arrondissez le résultat avec deux chiffres
   après la virgule.
 
-  \AMCnumericChoices{\VQs}{digits=3,decimals=2,sign=true,
+  \AMCnumericChoices{sqrt(\VQa)}{digits=3,decimals=2,sign=true,
                  borderwidth=0pt,backgroundcol=lightgray,approx=5}
 \end{questionmultx}
 </programlisting>
@@ -3734,6 +3733,16 @@ et inscrivez votre nom et prénom ci-dessous.
             </varlistentry>
 
             <varlistentry>
+              <term>exponent=<replaceable>num</replaceable></term>
+
+              <listitem>
+                <para>demande une saisie en notation scientifique, avec
+                <replaceable>num</replaceable> chiffres pour la puissance de
+                10.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
               <term>nozero=<replaceable>bool</replaceable></term>
 
               <listitem>
@@ -3749,6 +3758,14 @@ et inscrivez votre nom et prénom ci-dessous.
               <listitem>
                 <para>demande (ou non) la saisie d'un signe (la valeur par
                 défaut les <code>true</code>).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>exposign=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>même chose pour l'exposant.</para>
               </listitem>
             </varlistentry>
 
@@ -3772,6 +3789,17 @@ et inscrivez votre nom et prénom ci-dessous.
                 représenté par une colonne. Avec la valeur <code>false</code>
                 (valeur par défaut), chaque chiffre sera représenté par une
                 ligne.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>expovertical=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>avec la valeur <code>true</code>, la mantisse et
+                l'exposant seront présentés l'un en-dessous de l'autre. Avec
+                la valeur <code>false</code> (valeur par défaut), ils seront
+                présentés l'un à côté de l'autre.</para>
               </listitem>
             </varlistentry>
 
@@ -3871,6 +3899,18 @@ et inscrivez votre nom et prénom ci-dessous.
                 <code>\def\AMCdecimalPoint{<replaceable>text</replaceable>}</code>,
                 et la valeur par défaut est <code>\raisebox{1ex}{\bf
                 .}</code>.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Texponent=<replaceable>text</replaceable></term>
+
+              <listitem>
+                <para>donne le texte affiché entre la partie mantisse et la
+                partie exposant. Ce texte peut également être modifié par
+                <code>\def\AMCexponent{<replaceable>text</replaceable>}</code>,
+                et sa valeur par defaut est
+                <code>$\times10$\textasciicircum</code>.</para>
               </listitem>
             </varlistentry>
 
