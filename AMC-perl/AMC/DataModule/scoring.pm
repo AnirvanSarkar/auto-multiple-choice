@@ -453,6 +453,13 @@ sub define_statements {
 		 ." WHERE question=?"},
      'correct'=>{'sql'=>"SELECT correct FROM ".$self->table("answer")
 		 ." WHERE student=? AND question=? AND answer=?"},
+     'correctChars'=>
+     {sql=>"SELECT char FROM "
+      ." (SELECT answer FROM ".$self->table("answer")
+      ."  WHERE student=? AND question=? AND correct>0) AS correct,"
+      ." (SELECT answer,char FROM ".$self->table("box","layout")
+      ."  WHERE student=? AND question=? AND role=?) AS char"
+      ." ON correct.answer=char.answer ORDER BY correct.answer"},
      'correctForAll'=>{'sql'=>"SELECT question,answer,"
 		       ." MIN(correct) AS correct_min,"
 		       ." MAX(correct) AS correct_max "
@@ -668,6 +675,31 @@ sub correct_answer {
   my ($self,$student,$question,$answer)=@_;
   return($self->sql_single($self->statement('correct'),
 			   $student,$question,$answer));
+}
+
+# correct_chars($student,$question) returns the list of the chars
+# written inside (or beside) the boxes corresponding to correct
+# answers for a particular question
+
+sub correct_chars {
+  my ($self,$student,$question)=@_;
+  $self->{'data'}->require_module('layout');
+  return($self->sql_list($self->statement('correctChars'),
+                         $student,$question,
+                         $student,$question,BOX_ROLE_ANSWER));
+}
+
+# Same as correct_chars, but paste the chars if they all exist, and
+# return undef otherwise
+
+sub correct_chars_pasted {
+  my ($self,@args)=@_;
+  my @c=$self->correct_chars(@args);
+  if(grep { !defined($_) } @c) {
+    return(undef);
+  } else {
+    return(join("",@c));
+  }
 }
 
 # correct_for_all() returns a reference to an array like
