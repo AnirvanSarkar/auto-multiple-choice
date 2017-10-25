@@ -140,34 +140,38 @@ if(@forms) {
   for my $f (@forms) {
     my $n_fields=0;
     if($f =~ /\.pdf$/i) {
-      # Extract form data with pdftk:
-      open(FORM,"-|","pdftk",$f,"dump_data_fields_utf8")
-        or die "Error with pdftk: $!";
-      my $field={};
-      clear_copy_id();
-      $data->begin_transaction('PDFF');
+      if(-f $f) {
+        # Extract form data with pdftk:
+        open(FORM,"-|","pdftk",$f,"dump_data_fields_utf8")
+          or die "Error with pdftk: $!";
+        my $field={};
+        clear_copy_id();
+        $data->begin_transaction('PDFF');
 
-      while(<FORM>) {
-        chomp;
-        if(/^---/) {
-          $n_fields += handle_field($field);
-          $field={};
+        while(<FORM>) {
+          chomp;
+          if(/^---/) {
+            $n_fields += handle_field($field);
+            $field={};
+          }
+          if(/^Field([^\s]*):\s(.*)/) {
+            $field->{$1}=$2;
+          }
         }
-        if(/^Field([^\s]*):\s(.*)/) {
-          $field->{$1}=$2;
-        }
+        close FORM;
+
+        $n_fields += handle_field($field);
+        $data->end_transaction('PDFF');
+
+        debug "Read $n_fields fields from $f";
+      } else {
+        debug "Skip file not found: $f";
       }
-      close FORM;
-
-      $n_fields += handle_field($field);
-      $data->end_transaction('PDFF');
-
-      debug "Read $n_fields fields from $f";
-
-      $p->progres($dp) if($p);
     } else {
       debug "Skip file without PDF extension: $f";
     }
+
+    $p->progres($dp) if($p);
 
     push @not_considered,$f if($n_fields==0);
   }

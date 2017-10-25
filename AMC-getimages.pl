@@ -24,7 +24,6 @@ use AMC::Gui::Avancement;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempdir /;
 use File::Copy;
-use Unicode::Normalize;
 
 use Getopt::Long;
 
@@ -83,6 +82,7 @@ $copy_to =~ s:(?<=.)/+$::;
 
 sub original_file {
   my ($file_path)=@_;
+  utf8::downgrade($file_path);
   return({ path=>$file_path,orig=>1 });
 }
 
@@ -149,7 +149,9 @@ sub move_derivative {
     check_split_path($derivative);
     my $dest=new_filename($origin->{dir}."/".$derivative->{file});
     debug "Moving $derivative->{path} to $dest";
-    move($derivative->{path},$dest);
+    if(!move($derivative->{path},$dest)) {
+      debug_and_stderr "File move failed: $dest";
+    }
     $derivative->{path}=$dest;
     check_split_path($derivative,1);
   }
@@ -431,16 +433,14 @@ if($copy_to && @f) {
   my $c=0;
   for my $fich (@f) {
     check_split_path($fich);
-    my $fb=$fich->{file};
 
     # no accentuated or special characters in filename, please!
     # this could break the process somewere...
-    $fb=NFKD($fb);
-    $fb =~ s/\pM//og;
-    $fb =~ s/[^a-zA-Z0-9._+-]+/_/g;
-    $fb =~ s/^[^a-zA-Z0-9]/scan_/;
+    my $fb=string_to_filename($fich->{file},'scan');
 
     my $dest=$copy_to."/".$fb;
+    utf8::downgrade($dest);
+
     my $deplace=0;
 
     if($fich->{path} ne $dest) {

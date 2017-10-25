@@ -172,6 +172,7 @@ $single_output =~ s:.*/::;
 
 # We need a destination directory!
 
+utf8::downgrade($pdf_dir);
 if(! -d $pdf_dir) {
     attention("No PDF directory: $pdf_dir");
     die "No PDF directory: $pdf_dir";

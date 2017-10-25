@@ -87,7 +87,9 @@ GetOptions("data=s"=>\$data_dir,
 	   "pre-allocate=s"=>\$pre_allocate,
 	   "try-three!"=>\$try_three,
            "tag-overwritten!"=>\$tag_overwritten,
-	   );
+          );
+
+utf8::downgrade($debug_image_dir);
 
 use_gettext;
 
@@ -391,7 +393,10 @@ sub one_scan {
 
   my $sf_file=$sf;
   $sf_file=~ s:.*/::;
-  $debug_image=$debug_image_dir."/$sf_file.png" if($debug_image_dir);
+  if($debug_image_dir) {
+    $debug_image=$debug_image_dir."/$sf_file.png";
+    utf8::downgrade($debug_image);
+  }
 
   debug "Analysing scan $scan";
 

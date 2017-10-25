@@ -457,6 +457,7 @@ sub charge_i {
 
     my $scan_file=proj2abs({'%PROJET'=>$self->{'project-dir'}},
 			   $self->{'capture'}->get_scan_page(@spc));
+    utf8::downgrade($scan_file);
 
     debug "PAGE $page";
 

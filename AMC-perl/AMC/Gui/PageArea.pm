@@ -100,7 +100,9 @@ sub set_image {
   my ($self,$image,$layinfo)=@_;
   $self->{image_file}=$image;
   if($image && -f $image) {
-    eval { $self->{'i-src'}=Gtk3::Gdk::Pixbuf->new_from_file($image); };
+    eval { $self->{'i-src'} =
+             Gtk3::Gdk::Pixbuf->new_from_file(Glib::filename_to_unicode($image));
+         };
     if($@) {
       # Error loading scan...
       $self->{'i-src'}='';

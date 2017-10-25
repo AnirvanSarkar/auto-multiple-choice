@@ -89,6 +89,7 @@ for my $oo (@o_out) {
 
 debug "Exporting...";
 
+utf8::downgrade($output);
 $ex->export($output);
 
 print $ex->messages_as_string();

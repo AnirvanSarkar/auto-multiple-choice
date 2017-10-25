@@ -173,25 +173,28 @@ sub sql_tables {
 # defined in AMC::DataModule::$module perl package.
 
 sub require_module {
-    my ($self,$module)=@_;
-    if(!$self->{'modules'}->{$module}) {
-	my $filename=$self->{'directory'}."/".$module.".sqlite";
-	if(! -f $filename) {
-	    debug("Creating unexistant database file for module $module...");
-	}
-
-	debug "Connecting to database $module...";
-	$self->{'dbh'}->{AutoCommit}=1;
-	$self->sql_do("ATTACH DATABASE ".$self->sql_quote($filename)." AS $module");
-	$self->{'dbh'}->{AutoCommit}=0;
-
-	debug "Loading perl module $module...";
-	load("AMC::DataModule::$module");
-	$self->{'modules'}->{$module}="AMC::DataModule::$module"->new($self);
-	$self->{'files'}->{$module}=$filename;
-
-	debug "Module $module loaded.";
+  my ($self,$module)=@_;
+  if(!$self->{'modules'}->{$module}) {
+    my $filename=$self->{'directory'}."/".$module.".sqlite";
+    utf8::downgrade($filename);
+    if(! -f $filename) {
+      debug("Creating unexistant database file for module $module...");
     }
+
+    debug "Connecting to database $module...";
+    $self->{'dbh'}->{AutoCommit}=1;
+    $self->{'dbh'}->{sqlite_unicode}=0;
+    $self->sql_do("ATTACH DATABASE ? AS $module",$filename);
+    $self->{'dbh'}->{sqlite_unicode}=1;
+    $self->{'dbh'}->{AutoCommit}=0;
+
+    debug "Loading perl module $module...";
+    load("AMC::DataModule::$module");
+    $self->{'modules'}->{$module}="AMC::DataModule::$module"->new($self);
+    $self->{'files'}->{$module}=$filename;
+
+    debug "Module $module loaded.";
+  }
 }
 
 # module($module) returns the module object associated to module

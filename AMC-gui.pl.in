@@ -63,6 +63,8 @@ use AMC::Gui::Zooms;
 use AMC::FileMonitor;
 use AMC::Gui::WindowSize;
 
+use utf8;
+
 use Data::Dumper;
 
 use constant {
@@ -91,7 +93,8 @@ use constant {
     INCONNU_PREPROC => 4,
 
     PROJ_NOM => 0,
-    PROJ_ICO => 1,
+    PROJ_NOM_PLAIN => 1,
+    PROJ_ICO => 2,
 
     MODEL_NOM => 0,
     MODEL_PATH => 1,
@@ -136,8 +139,6 @@ GetOptions("debug!"=>\$debug,
 	   "p=s"=>\$project_dir,
            "do-nothing!"=>\$do_nothing,
           );
-
-$project_dir=Cwd::realpath($project_dir) if($project_dir);
 
 sub set_debug_mode {
   my ($debug)=@_;
@@ -344,11 +345,15 @@ sub test_libnotify {
 # goes to a specific directory if the project directory is given as a
 # command-line option
 
+utf8::downgrade($project_dir);
 if(-f $project_dir) {
   $project_dir =~ s/\/?options\.xml$//;
 }
 $project_dir =~ s/\/+$//;
+
 if(-d $project_dir) {
+  debug "Opening project from directory $project_dir ...";
+  $project_dir=Cwd::realpath($project_dir);
   my ($v,$d,$f)=splitpath($project_dir);
   my $r=catpath($v,$d,'');
   $r =~ s/\/+$//;
@@ -411,6 +416,7 @@ sub is_local {
     my ($f,$proj)=@_;
     my $prefix=$config->get('rep_projets')."/";
     $prefix .= $projet{'nom'}."/" if($proj);
+    utf8::downgrade($prefix);
     if(defined($f)) {
 	return($f !~ /^[\/%]/
 	       || $f =~ /^$prefix/
@@ -423,7 +429,9 @@ sub is_local {
 sub fich_options {
     my ($nom,$rp)=@_;
     $rp=$config->get('rep_projets') if(!$rp);
-    return "$rp/$nom/options.xml";
+    $rp.="/$nom/options.xml";
+    utf8::downgrade($rp);
+    return($rp);
 }
 
 sub moteur_latex {
@@ -1102,6 +1110,7 @@ sub layout_line {
       .$projet{'_capture'}->get_layout_image(@id);
     $projet{'_capture'}->end_transaction('Layl');
 
+    utf8::downgrade($f);
     commande_parallele($config->get('img_viewer'),$f) if(-f $f);
   }
 }
@@ -1319,14 +1328,16 @@ sub projet_gestion {
 
 sub projects_list {
   # construit la liste des projets existants
+  debug "Projects list: ".$w{'local_rep_projets'}
+            .(utf8::is_utf8($w{'local_rep_projets'}) ? " (UTF8)" : "");
   if(-d $w{'local_rep_projets'}) {
     opendir(DIR, $w{'local_rep_projets'})
       || die "Error opening directory ".$w{'local_rep_projets'}." : $!";
-    my @f=map { decode("utf-8",$_); } readdir(DIR);
+    my @f=grep { ! /^\./ } readdir(DIR);
+    closedir DIR;
     debug "F:".join(',',map { $_.":".(-d $w{'local_rep_projets'}."/".$_) } @f);
 
     my @projs = grep { ! /^\./ && -d $w{'local_rep_projets'}."/".$_ } @f;
-    closedir DIR;
     debug "[".$w{'local_rep_projets'}."] P:".join(',',@projs);
     return(@projs);
   }
@@ -1337,7 +1348,8 @@ sub projects_show {
   $p=[projects_list()] if(!$p);
 
   $w{'projet_bouton_choose_directory'}
-    ->set_tooltip_text(sprintf(__("Current directory: %s"),$w{'local_rep_projets'}));
+    ->set_tooltip_text(sprintf(__("Current directory: %s"),
+                               Glib::filename_display_name($w{'local_rep_projets'})));
 
   if(!$w{'icon_project'}) {
     $w{'icon_project'} = Gtk3::IconTheme::get_default->load_icon("auto-multiple-choice",$config->get("project_icon_size") ,"force-svg");
@@ -1351,12 +1363,17 @@ sub projects_show {
   my $prefix=($w{'main_window'}->get_direction() eq 'rtl' ?
 	      decode("utf-8","\xe2\x80\x8e"): '');
   for my $proj_name (sort { $a cmp $b } @$p) {
-    my $label=$proj_name;
-    $label=$prefix.$proj_name if($proj_name =~ /^[0-9]*$/);
+    my $is_amc=(-f fich_options($proj_name,$w{'local_rep_projets'}));
+    my $name_plain=$proj_name;
+    my $label=$proj_name=Glib::filename_display_name($proj_name);
+    $label=$prefix.$label if($proj_name =~ /^[0-9]*$/);
+    debug "Directory: $label".(utf8::is_utf8($label) ? " (utf8)" : "")
+      .($is_amc ? " (AMC)" : "");
     $proj_store->set($proj_store->append,
 		     PROJ_NOM,$label,
+		     PROJ_NOM_PLAIN,$name_plain,
 		     PROJ_ICO,
-		     (-f fich_options($proj_name,$w{'local_rep_projets'}) ?
+		     ($is_amc ?
 		      $w{'icon_project'} : $w{'icon_project_dir'} ));
   }
 }
@@ -1393,7 +1410,6 @@ sub liste_des_projets {
 	    $w{'label_etat'}->set_text(__"Existing projects:");
 
 	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
-	    $w{'projet_nom_style'} = $w{'projet_nom'}->get_modifier_style->copy;
 
 # TRANSLATORS: Window title when creating a new project.
 	    $w{'choix_projet'}->set_title(__"New AMC project");
@@ -1415,7 +1431,7 @@ sub liste_des_projets {
 
 	# mise a jour liste des projets dans la fenetre
 
-	$proj_store = Gtk3::ListStore->new ('Glib::String',
+	$proj_store = Gtk3::ListStore->new ('Glib::String','Glib::String',
 					    'Gtk3::Gdk::Pixbuf');
 
 	$w{'choix_projets_liste'}->set_model($proj_store);
@@ -1451,6 +1467,7 @@ sub project_choose_directory {
   my $r=$d->run;
   if($r eq 'ok') {
     my $rep=$d->get_filename || $d->get_current_directory;
+    utf8::downgrade($rep);
     if(-d $rep) {
       $w{'local_rep_projets'}=$rep;
     }
@@ -1473,7 +1490,7 @@ sub projet_gestion_check {
 
     if($sel) {
 	$iter=$proj_store->get_iter($sel);
-	$proj=$proj_store->get($iter,PROJ_NOM) if($iter);
+	$proj=$proj_store->get($iter,PROJ_NOM_PLAIN) if($iter);
     }
 
     return('','') if(!$proj);
@@ -1510,12 +1527,14 @@ sub projet_liste_clone {
           'warning','ok-cancel','');
   $dialog->set_markup(
 		      sprintf(__("This will clone project <b>%s</b> to a new project <i>%s</i>."),
-			      $proj,$proj_c));
+			      glib_filename($proj),glib_filename($proj_c)));
   my $r=$dialog->run;
   $dialog->destroy;
   if($r eq 'ok') {
-    project_copy($w{'local_rep_projets'}.'/'.$proj,
-		 $proj_clone,$w{'choix_projet'});
+    if(!project_copy($w{'local_rep_projets'}.'/'.$proj,
+                     $proj_clone,$w{'choix_projet'})) {
+      debug_and_stderr("ERROR (clone project): $!");
+    }
     projects_show();
   }
 }
@@ -1529,13 +1548,13 @@ sub projet_liste_renomme {
 
     # ouverture zone :
     $w{'projet_nouveau'}->show();
-    $w{'projet_nom'}->set_text($proj);
+    $w{'projet_nom'}->set_text(glib_filename($proj));
 
     $nom_original=$proj;
     $nom_original_iter=$iter;
 
     # boutons...
-    for (qw/annule renomme supprime/) {
+    for (qw/annule renomme clone supprime/) {
 	$w{'projet_bouton_'.$_}->hide();
     }
     for (qw/mv_no mv_yes/) {
@@ -1548,7 +1567,7 @@ sub projet_renomme_fin {
     $w{'projet_nouveau'}->hide();
 
     # boutons...
-    for (qw/annule renomme supprime/) {
+    for (qw/annule renomme clone supprime/) {
 	$w{'projet_bouton_'.$_}->show();
     }
     for (qw/mv_no mv_yes/) {
@@ -1557,45 +1576,54 @@ sub projet_renomme_fin {
 }
 
 sub projet_mv_yes {
-    projet_renomme_fin();
+  projet_renomme_fin();
 
-    my $nom_nouveau=$w{'projet_nom'}->get_text();
+  my $nom_nouveau=$w{'projet_nom'}->get_text();
+  utf8::encode($nom_nouveau);
 
-    return if($nom_nouveau eq $nom_original || !$nom_nouveau);
+  return if($nom_nouveau eq $nom_original || !$nom_nouveau);
 
-    if($w{'local_rep_projets'}) {
-	my $dir_original=$w{'local_rep_projets'}."/".$nom_original;
-	if(-d $dir_original) {
-	    my $dir_nouveau=$w{'local_rep_projets'}."/".$nom_nouveau;
-	    if(-d $dir_nouveau) {
-		$w{'choix_projet'}->set_keep_above(0);
-		my $dialog = Gtk3::MessageDialog
-                  ->new($w{'main_window'},
-                        'destroy-with-parent',
-                        'error','ok','');
-                $dialog->set_markup(
-# TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
-				      sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),$dir_nouveau));
-		$dialog->run;
-		$dialog->destroy;
-		$w{'choix_projet'}->set_keep_above(1);
+  if ($w{'local_rep_projets'}) {
+    my $dir_original=$w{'local_rep_projets'}."/".$nom_original;
+    utf8::downgrade($dir_original);
+    if (-d $dir_original) {
+      my $dir_nouveau=$w{'local_rep_projets'}."/".$nom_nouveau;
+      utf8::downgrade($dir_nouveau);
+      if (-d $dir_nouveau) {
+        $w{'choix_projet'}->set_keep_above(0);
+        my $dialog = Gtk3::MessageDialog
+          ->new($w{'main_window'},
+                'destroy-with-parent',
+                'error','ok','');
+        $dialog->set_markup(
+                            # TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
+                            sprintf(__("Directory <i>%s</i> already exists, so you can't choose this name."),glib_filename($dir_nouveau)));
+        $dialog->run;
+        $dialog->destroy;
+        $w{'choix_projet'}->set_keep_above(1);
 
-		return;
-	    } else {
-		# OK
+        return;
+      } else {
+        # OK
 
-		move($dir_original,$dir_nouveau);
+        if (!move($dir_original,$dir_nouveau)) {
+          debug_and_stderr("ERROR (move project): $!");
+        }
 
-		$proj_store->set($nom_original_iter,
-				 PROJ_NOM,$nom_nouveau,
-				 );
-	    }
-	} else {
-	    debug "No original directory";
-	}
+        $proj_store->set($nom_original_iter,
+                         PROJ_NOM,glib_filename($nom_nouveau),
+                        );
+        utf8::downgrade($nom_nouveau);
+        $proj_store->set($nom_original_iter,
+                         PROJ_NOM_PLAIN,$nom_nouveau,
+                        );
+      }
     } else {
-	debug "No projects directory";
+      debug_and_stderr "No original directory";
     }
+  } else {
+    debug "No projects directory";
+  }
 }
 
 sub projet_mv_no {
@@ -1610,6 +1638,8 @@ sub add_to_results {
 
 sub project_copy {
   my ($src,$dest,$parent_window)=@_;
+  utf8::downgrade($src);
+  utf8::downgrade($dest);
   $parent_window=$w{'main_window'} if(!$parent_window);
   my $err='';
   if(!$err && -e $dest) {
@@ -1689,7 +1719,7 @@ sub projet_liste_supprime {
     $dialog->set_markup(
 			  sprintf(__("You asked to remove project <b>%s</b>.")." "
 				  .__("This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example.")." "
-				  .__("Is this really what you want?"),$proj));
+				  .__("Is this really what you want?"),glib_filename($proj)));
     my $reponse=$dialog->run;
     $dialog->destroy;
     $w{'choix_projet'}->set_keep_above(1);
@@ -1705,14 +1735,15 @@ sub projet_liste_supprime {
     # suppression effective des fichiers...
 
     if($w{'local_rep_projets'}) {
-	my $dir=$w{'local_rep_projets'}."/".$proj;
-	if(-d $dir) {
-	    remove_tree($dir,{'verbose'=>0,'safe'=>1,'keep_root'=>0});
-	} else {
-	    debug "No directory $dir";
-	}
+      my $dir=$w{'local_rep_projets'}."/".$proj;
+      utf8::downgrade($dir);
+      if(-d $dir) {
+        remove_tree($dir,{'verbose'=>0,'safe'=>1,'keep_root'=>0});
+      } else {
+        debug "No directory $dir";
+      }
     } else {
-	debug "No projects directory";
+      debug "No projects directory";
     }
 }
 
@@ -1724,15 +1755,18 @@ sub projet_charge_ok {
     my $proj;
 
     if($sel) {
-	$proj=$proj_store->get($proj_store->get_iter($sel),PROJ_NOM);
+	$proj=$proj_store->get($proj_store->get_iter($sel),PROJ_NOM_PLAIN);
     }
 
     $w{'choix_projet'}->destroy();
     Gtk3::main_iteration while ( Gtk3::events_pending );
 
     if($proj) {
-	my $reponse='yes';
-	if(! -f fich_options($proj,$w{'local_rep_projets'})) {
+        my $reponse='yes';
+        my $options_file=fich_options($proj,$w{'local_rep_projets'});
+	if(! -f $options_file) {
+          debug_and_stderr "Options file not found: ".$options_file
+            .(utf8::is_utf8($options_file) ? " (UTF8)" : "");
 	    my $dialog = Gtk3::MessageDialog
 		->new($w{'main_window'},
                       'destroy-with-parent',
@@ -1781,25 +1815,29 @@ sub projet_charge_ok {
 }
 
 sub restricted_check {
-    my ($text,$style,$warning,$chars)=@_;
-    my $nom=$text->get_text();
-    if($nom =~ s/[^$chars]//g) {
-	$text->set_text($nom);
-	$warning->show();
+  my ($text,$warning,$chars)=@_;
+  my $nom=$text->get_text();
+  if (!$config->get('nonascii_projectnames')) {
+    if ($nom =~ s/[^$chars]//g) {
+      $text->set_text($nom);
+      $warning->show();
 
-	my $col=Gtk3::Gdk::Color::parse('#FFC0C0');
-        for(qw/normal active/) {
-	    $text->modify_base($_,$col);
-	}
-	Glib::Timeout->add (500, sub {
-	    $text->modify_style($style);
-	    return 0;
-	});
+      my $col=Gtk3::Gdk::RGBA::parse('#FFC0C0');
+      for (qw/normal active/) {
+        $text->override_background_color($_,$col);
+      }
+      Glib::Timeout->add (500, sub {
+                            for (qw/normal active/) {
+                              $text->override_background_color($_,undef);
+                            }
+                            return 0;
+                          });
     }
+  }
 }
 
 sub projet_nom_verif {
-    restricted_check($w{'projet_nom'},$w{'projet_nom_style'},$w{'projet_nouveau_syntaxe'},"a-zA-Z0-9._+:-");
+    restricted_check($w{'projet_nom'},$w{'projet_nouveau_syntaxe'},"a-zA-Z0-9._+:-");
 }
 
 sub projet_charge_nouveau {
@@ -1807,6 +1845,7 @@ sub projet_charge_nouveau {
     # creation nouveau projet
 
     my $proj=$w{'projet_nom'}->get_text();
+    utf8::encode($proj);
     $w{'choix_projet'}->destroy();
 
     # existe deja ?
@@ -2915,6 +2954,16 @@ sub clean_gtk2_filenames {
 	 } @f);
 }
 
+sub glib_filename {
+  my ($n)=@_;
+  utf8::downgrade($n);
+  return(Glib::filename_display_name($n));
+}
+
+sub glib_project_name {
+  return(glib_filename($projet{'nom'}));
+}
+
 sub saisie_auto_ok {
   my @f=clean_gtk2_filenames(sort { $a cmp $b } 
 			     ($w{'saisie_auto'}->get_filenames()));
@@ -3346,7 +3395,7 @@ sub filter_changed {
     $config->set('project:texsrc','%PROJET/'.
       ("AMC::Filter::register::".$config->get('filter'))
 	->default_filename());
-    $w{'state_src'}->set_text($config->get_absolute('texsrc'));
+    $w{'state_src'}->set_text(glib_filename($config->get_absolute('texsrc')));
   }
 
 }
@@ -4026,10 +4075,8 @@ sub view_dir {
 
     debug "Look at $dir";
     my $seq=0;
-    my @c=map { $seq+=s/[%]d/$dir/g;$_; } split(/\s+/,$config->get('dir_opener'));
+    my @c=map { $seq+=s/[%]d/$dir/g;utf8::downgrade($_);$_; } split(/\s+/,$config->get('dir_opener'));
     push @c,$dir if(!$seq);
-    # nautilus attend des arguments dans l'encodage specifie par LANG & co.
-    @c=map { encode($encodage_systeme,$_); } @c;
 
     commande_parallele(@c);
 }
@@ -4738,6 +4785,7 @@ sub update_unrecognized {
     $f =~ s:.*/::;
     my (undef,undef,$scan_n)=splitpath($shortcuts->absolu($ff->{'filename'}));
     my $preproc_file=$shortcuts->absolu('%PROJET/cr/diagnostic')."/".$scan_n.".png";
+
     $inconnu_store->set($iter,
 			INCONNU_SCAN,$f,
 			INCONNU_FILE,$ff->{'filename'},
@@ -4800,6 +4848,8 @@ sub unrecognized_line {
     }
 
     my $preproc=$inconnu_store->get($iter,INCONNU_PREPROC);
+    utf8::downgrade($preproc);
+
     if(-f $preproc) {
       $w{'preprocessed_area'}->set_content(image=>$preproc);
     } else {
@@ -4921,7 +4971,7 @@ sub liste_montre_nom {
 sub valide_source_tex {
     debug "* valide_source_tex";
 
-    $w{'state_src'}->set_text($config->get_absolute('texsrc'));
+    $w{'state_src'}->set_text(glib_filename($config->get_absolute('texsrc')));
 
     if(!$config->get('filter')) {
       $config->set('filter',
@@ -5050,8 +5100,6 @@ sub make_template {
 		      qw/template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok
 			template_description_scroll template_files_scroll/);
 
-    $w{'template_file_name_style'} = $w{'template_file_name'}->get_modifier_style->copy;
-
     $template_files_store->clear;
 
     $w{'template_files_tree'}->set_model($template_files_store);
@@ -5129,7 +5177,7 @@ sub add_to_archive {
 }
 
 sub template_filename_verif {
-    restricted_check($w{'template_file_name'},$w{'template_file_name_style'},
+    restricted_check($w{'template_file_name'},
 		     $w{'template_file_name_warning'},"a-zA-Z0-9_+-");
     my $t=$w{'template_file_name'}->get_text();
     my $tfile=$config->get('rep_modeles').'/'.$t.".tgz";
@@ -5522,11 +5570,13 @@ sub copy_latex {
 }
 
 sub importe_source {
-    my ($fxa,$fxb,$fb) = splitpath($config->get('texsrc'));
+  my $file=$config->get('texsrc');
+  utf8::downgrade($file);
+    my ($fxa,$fxb,$fb) = splitpath($file);
     my $dest=$shortcuts->absolu($fb);
 
     # fichier deja dans le repertoire projet...
-    return() if(is_local($config->get('texsrc'),1));
+    return() if(is_local($file,1));
 
     if(-f $dest) {
 	my $dialog = Gtk3::MessageDialog
@@ -5608,7 +5658,7 @@ sub valide_projet {
     $prefs->transmet_pref($gui,prefix=>'notation',
                           root=>'project:');
 
-    $w{'main_window'}->set_title($projet{'nom'}.' - '.
+    $w{'main_window'}->set_title(glib_project_name.' - '.
 				 'Auto Multiple Choice');
 
     noter_resultat();
@@ -5672,11 +5722,12 @@ sub projet_ouvre {
 	# creates project directory structure
 
 	for my $sous ('',qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports:) {
-	    my $rep=$config->get('rep_projets')."/$proj/$sous";
-	    if(! -x $rep) {
-		debug "Creating directory $rep...";
-		mkdir($rep);
-	    }
+          my $rep=$config->get('rep_projets')."/$proj/$sous";
+          utf8::downgrade($rep);
+          if(! -x $rep) {
+            debug "Creating directory $rep...";
+            mkdir($rep);
+          }
 	}
 
 	$projet{'nom'}=$proj;

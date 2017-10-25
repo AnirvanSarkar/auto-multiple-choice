@@ -72,14 +72,17 @@ sub commande {
 	$self->{'ipc'}=open2($self->{'ipc_out'},$self->{'ipc_in'},
 			     $self->{'exec_file'},@a);
 
-	binmode $self->{'ipc_out'},':utf8';
-	binmode $self->{'ipc_in'},':utf8';
+	binmode $self->{'ipc_out'};
+	binmode $self->{'ipc_in'};
 	debug "PID=".$self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'};
     }
 
-    debug "CMD : ".join(' ',@cmd);
+    my $s=join(' ',@cmd);
+    utf8::downgrade($s);
 
-    print { $self->{'ipc_in'} } join(' ',@cmd)."\n";
+    debug "CMD : $s";
+
+    print { $self->{'ipc_in'} } "$s\n";
 
     my $o;
   GETREPONSE: while($o=readline($self->{'ipc_out'})) {
@@ -96,7 +99,7 @@ sub ferme_commande {
     my ($self)=(@_);
     if($self->{'ipc'}) {
 	debug "Image sending QUIT";
-	print { $self->{'ipc_in'} } "quit\n";
+	$self->commande("quit");
 	waitpid $self->{'ipc'},0;
 	$self->{'ipc'}='';
 	$self->{'ipc_in'}='';

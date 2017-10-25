@@ -69,6 +69,7 @@ sub set_options {
 	if(defined($self->{$k})) {
 	    debug "Option $k = $f{$_}";
 	    $self->{$k}=$f{$_};
+            utf8::downgrade($self->{$k}) if($domaine eq 'fich');
 	} else {
 	    debug "Unusable option <$domaine.$_>\n";
 	}

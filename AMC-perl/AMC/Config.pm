@@ -109,7 +109,9 @@ sub set_local_keys {
 
 sub passwd_file {
   my ($self,$usage)=@_;
-  return($self->{o_dir}."/cf.".$self->{profile}.".p_$usage");
+  my $file=$self->{o_dir}."/cf.".$self->{profile}.".p_$usage";
+  utf8::downgrade($file);
+  return($file);
 }
 
 sub set_passwd {
@@ -141,6 +143,7 @@ sub get_passwd {
 
 sub pref_xml_lit {
   my ($file)=@_;
+  utf8::downgrade($file);
   if((! -f $file) || (! -r $file) || -z $file) {
     return();
   } else {
@@ -153,6 +156,7 @@ sub pref_xml_lit {
 
 sub pref_xml_ecrit {
   my ($data,$name,$file)=@_;
+  utf8::downgrade($file);
   if(open my $fh,">:encoding(utf-8)",$file) {
     XMLout($data,
            "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
@@ -243,6 +247,7 @@ sub defaults {
      rep_projets=>$self->{home_dir}.'/'.__"MC-Projects",
      projects_home=>$self->{home_dir}.'/'.__"MC-Projects",
      rep_modeles=>$self->{o_dir}."/Models",
+
      seuil_eqm=>3.0,
      seuil_sens=>8.0,
      saisie_dpi=>150,
@@ -299,7 +304,8 @@ sub defaults {
      annote_ecart=>5.5,
      annote_chsign=>4,
 
-     ascii_filenames=>'',
+     nonascii_projectnames=>'',
+     ascii_filenames=>1,
 
      defaut_annote_rtl=>'',
 # TRANSLATORS: This is the default text to be written on the top of the first page of each paper when annotating. From this string, %s will be replaced with the student final mark, %m with the maximum mark he can obtain, %S with the student total score, and %M with the maximum score the student can obtain.

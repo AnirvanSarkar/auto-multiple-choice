@@ -126,7 +126,9 @@ sub shortcuts {
 sub absolu {
     my ($self,$f,$proj)=@_;
     return($f) if(!defined($f));
-    return(proj2abs($self->shortcuts($proj),$f));
+    $f=proj2abs($self->shortcuts($proj),$f);
+    utf8::downgrade($f);
+    return($f);
 }
 
 # replaces some paths with their shortcuts in a file path

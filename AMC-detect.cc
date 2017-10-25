@@ -31,6 +31,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <errno.h>
+
 #ifdef NEEDS_GETLINE
   #include<minimal-getline.c>
 #endif
@@ -1143,6 +1145,7 @@ int main( int argc, char** argv )
 	}
       
 	if(out_image_file != NULL && illustr==NULL) {
+          printf(": Storing layout image\n");
 	  illustr=dst;
 	  dst=NULL;
 	}
@@ -1306,12 +1309,21 @@ int main( int argc, char** argv )
 #endif
 
   if(illustr && strlen(out_image_file)>1) {
+    printf(": Saving layout image to %s\n",out_image_file);
     if(cvSaveImage(out_image_file,illustr
 #if OPENCV_20
 		   ,save_options
 #endif
 		   )!=1) {
-      printf("! LAYS : Layout image save error\n");
+      int error = cvGetErrStatus();
+      const char * errorMessage = NULL;
+      if (error) {
+        errorMessage = cvErrorStr(error);
+      } else {
+        error = errno;
+        errorMessage = strerror(error);
+      }
+      printf("! LAYS : Layout image save error: %s\n",errorMessage);
     }
   }
 
