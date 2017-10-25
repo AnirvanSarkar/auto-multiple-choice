@@ -43,7 +43,8 @@ sub new {
 	'finw'=>'',
 	'signal'=>9,
 	'o'=>{},
-	'clear'=>1,
+        'clear'=>1,
+        'output_to_debug'=>(debug_file() eq 'stdout'),
 
 	'messages'=>[],
 	'variables'=>{},
@@ -183,8 +184,12 @@ sub get_output {
       $self->close();
     } else {
 	my $fh=$self->{'fh'};
-	my $line = decode("utf8",<$fh>);
-	my $r='';
+	my $line = <$fh>;
+        utf8::decode($line);
+
+        if($self->{output_to_debug}) {
+          debug_raw($line);
+        }
 
 	if($self->{'avancement'}) {
 	    if($self->{'progres.pulse'}) {
@@ -195,36 +200,33 @@ sub get_output {
 	    }
 	}
 
-	if($r eq '') {
-	  my $log=$self->{'log'};
-	  my $logbuff=$log->get_buffer();
+        my $log=$self->{'log'};
+        my $logbuff=$log->get_buffer();
 
-	  $logbuff->insert($logbuff->get_end_iter(),$line);
-	  $logbuff->place_cursor($logbuff->get_end_iter());
-	  $log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
+        $logbuff->insert($logbuff->get_end_iter(),$line);
+        $logbuff->place_cursor($logbuff->get_end_iter());
+        $log->scroll_to_iter($logbuff->get_end_iter(),0,0,0,0);
 
-	  if($line =~ /^(ERR|INFO|WARN)/) {
-	    chomp(my $lc=$line);
-	    $lc =~ s/^(ERR|INFO|WARN)[:>]\s*//;
-            my $type=$1;
-            debug "Detected $type message";
-	    $self->add_message($type,$lc);
-	  }
-	  if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
-	    $self->{'variables'}->{$1}=$2;
-            debug "Set variable @".$self." $1 to ".$self->{'variables'}->{$1};
-	  }
-	  if($line =~ /^VAR\+:\s*(.*)/) {
-	    $self->{'variables'}->{$1}++;
-            debug "Step variable @".$self." $1 to ".$self->{'variables'}->{$1};
-	  }
-	  for my $k (qw/OK FAILED/) {
-	    if($line =~ /^$k/) {
-	      $self->{'variables'}->{$k}++;
-	    }
-	  }
-	}
-
+        if($line =~ /^(ERR|INFO|WARN)/) {
+          chomp(my $lc=$line);
+          $lc =~ s/^(ERR|INFO|WARN)[:>]\s*//;
+          my $type=$1;
+          debug "Detected $type message";
+          $self->add_message($type,$lc);
+        }
+        if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
+          $self->{'variables'}->{$1}=$2;
+          debug "Set variable @".$self." $1 to ".$self->{'variables'}->{$1};
+        }
+        if($line =~ /^VAR\+:\s*(.*)/) {
+          $self->{'variables'}->{$1}++;
+          debug "Step variable @".$self." $1 to ".$self->{'variables'}->{$1};
+        }
+        for my $k (qw/OK FAILED/) {
+          if($line =~ /^$k/) {
+            $self->{'variables'}->{$k}++;
+          }
+        }
 
     }
 

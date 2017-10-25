@@ -44,7 +44,7 @@ BEGIN {
     our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
     @ISA         = qw(Exporter);
-    @EXPORT      = qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &studentids_string_filename &format_date &cb_model &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &amc_component &annotate_source_change &join_nonempty &string_to_usascii &string_to_filename);
+    @EXPORT      = qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &magick_module &magick_perl_module &debug &debug_raw &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &studentids_string_filename &format_date &cb_model &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &amc_component &annotate_source_change &join_nonempty &string_to_usascii &string_to_filename);
     %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -353,45 +353,50 @@ my $amc_debug='';
 my $amc_debug_fh='';
 my $amc_debug_filename='';
 
-sub set_debug_file {
-    if(!$amc_debug_fh) {
-	$amc_debug_fh = new File::Temp(TEMPLATE =>'AMC-DEBUG-XXXXXXXX',
-				       SUFFIX => '.log',
-				       UNLINK=>0,
-				       DIR=>File::Spec->tmpdir);
-	$amc_debug_filename=$amc_debug_fh->filename;
-	$amc_debug_fh->autoflush(1);
-	open(STDERR,">&",$amc_debug_fh);
+sub debug_general_info {
+  print $amc_debug_fh "This is AutoMultipleChoice, version @/PACKAGE_V_DEB/@ (@/PACKAGE_V_VC/@)\n";
+  print $amc_debug_fh "Perl: $^X $^V\n";
 
- 	# versions diverses...
+  print $amc_debug_fh "\n".("=" x 40)."\n\n";
+  if(commande_accessible('convert')) {
+    open(VERS,"-|",'convert','-version');
+    while(<VERS>) { chomp; print $amc_debug_fh "$_\n"; }
+    close(VERS);
+  } else {
+    print $amc_debug_fh "ImageMagick: not found\n";
+  }
 
-	print $amc_debug_fh "This is AutoMultipleChoice, version @/PACKAGE_V_DEB/@ (@/PACKAGE_V_VC/@)\n";
-	print $amc_debug_fh "Perl: $^X $^V\n";
+  print $amc_debug_fh ("=" x 40)."\n\n";
+  if(commande_accessible('gm')) {
+    open(VERS,"-|",'gm','-version');
+    while(<VERS>) { chomp; print $amc_debug_fh "$_\n"; }
+    close(VERS);
+  } else {
+    print $amc_debug_fh "GraphicsMagick: not found\n";
+  }
+  print $amc_debug_fh ("=" x 40)."\n\n";
 
- 	print $amc_debug_fh "\n".("=" x 40)."\n\n";
- 	if(commande_accessible('convert')) {
- 	    open(VERS,"-|",'convert','-version');
- 	    while(<VERS>) { chomp; print $amc_debug_fh "$_\n"; }
- 	    close(VERS);
- 	} else {
- 	    print $amc_debug_fh "ImageMagick: not found\n";
- 	}
-
- 	print $amc_debug_fh ("=" x 40)."\n\n";
- 	if(commande_accessible('gm')) {
- 	    open(VERS,"-|",'gm','-version');
- 	    while(<VERS>) { chomp; print $amc_debug_fh "$_\n"; }
- 	    close(VERS);
- 	} else {
- 	    print $amc_debug_fh "GraphicsMagick: not found\n";
- 	}
- 	print $amc_debug_fh ("=" x 40)."\n\n";
-
-    }
 }
 
 sub debug_file {
     return($amc_debug ? $amc_debug_filename : '');
+  }
+
+sub debug_raw {
+  my @s=@_;
+  return if(!$amc_debug);
+  for my $l (@s) {
+    $l=$l."\n" if($l !~ /\n$/);
+    if($amc_debug_filename eq 'stderr' || $amc_debug_filename eq 'stdout') {
+      print $amc_debug_fh $l;
+    } else {
+      flock($amc_debug_fh, LOCK_EX);
+      $amc_debug_fh->sync;
+      seek($amc_debug_fh, 0, SEEK_END);
+      print $amc_debug_fh $l;
+      flock($amc_debug_fh, LOCK_UN);
+    }
+  }
 }
 
 sub debug {
@@ -399,26 +404,18 @@ sub debug {
     return if(!$amc_debug);
     for my $l (@s) {
 	my @t = times();
-	$l=sprintf("[%7d,%7.02f] ",$$,$t[0]+$t[1]+$t[2]+$t[3]).$l;
-	$l=$l."\n" if($l !~ /\n$/);
-	if($amc_debug_fh) {
-	    flock($amc_debug_fh, LOCK_EX);
-	    $amc_debug_fh->sync;
-	    seek($amc_debug_fh, 0, SEEK_END);
-	    print $amc_debug_fh $l;
-	    flock($amc_debug_fh, LOCK_UN);
-	} else {
-	    print $l;
-	}
+	debug_raw(sprintf("[%7d,%7.02f] ",$$,$t[0]+$t[1]+$t[2]+$t[3]).$l);
     }
 }
 
 sub debug_and_stderr {
-    my @s=@_;
-    debug(@s);
+  my @s=@_;
+  debug(@s);
+  if($amc_debug_filename) {
     for(@s) {
-	print STDERR "$_\n";
+      print STDERR "$_\n";
     }
+  }
 }
 
 sub debug_pm_version {
@@ -438,27 +435,51 @@ sub next_debug {
 local *AMC_STDERR_BACKUP;
 
 sub set_debug {
-    my ($debug)=@_;
-    if($debug =~ /[\/.]/ && -f $debug) {
-	# c'est un nom de fichier
-	$amc_debug_fh=new IO::File;
-	$amc_debug_fh->open($debug,">>");
-	$amc_debug_fh->autoflush(1);
-	$amc_debug_filename=$debug;
-	$debug=1;
-	*AMC_STDERR_BACKUP=*STDERR;
-	*STDERR=$amc_debug_fh;
-	$amc_debug=1;
-	debug("[".$$."]>>");
+  my ($debug)=@_;
+  if($debug) {
+    my $empty=0;
+    *AMC_STDERR_BACKUP=*STDERR;
+    if($debug =~ /^(1|yes)$/i) {
+      # Continue with already used file
+      $debug=$amc_debug_filename || 'new';
     }
-    if($debug eq '') {
-      *STDERR=*AMC_STDERR_BACKUP;
+    if($debug eq 'stderr') {
+      $amc_debug_fh=*STDERR;
+      $amc_debug_filename='stderr';
+    } elsif($debug eq 'stdout') {
+      $amc_debug_fh=*STDOUT;
+      $amc_debug_filename='stdout';
+    } else {
+      # Use a file for debug log
+      if($debug =~ /^(new)$/i) {
+        # Create new file
+        $empty=1;
+        $amc_debug_fh = new File::Temp(TEMPLATE =>'AMC-DEBUG-XXXXXXXX',
+                                       SUFFIX => '.log',
+                                       UNLINK=>0,
+                                       DIR=>File::Spec->tmpdir);
+        $amc_debug_filename=$amc_debug_fh->filename;
+      } else {
+        # Use file given as argument
+        $empty = (!-s $debug);
+        $amc_debug_fh=new IO::File;
+        $amc_debug_filename=$debug;
+        $amc_debug_fh->open($debug,">>");
+      }
+      $amc_debug_fh->autoflush(1);
     }
-    $amc_debug=$debug;
-    set_debug_file() if($amc_debug && !$amc_debug_fh);
+    *STDERR=$amc_debug_fh;
+    $amc_debug=1;
+    debug("[".$$."]>>");
+    debug_general_info() if($empty);
 
     debug(@debug_memory);
     @debug_memory=();
+  } else {
+    # Leave debugging mode…
+    *STDERR=*AMC_STDERR_BACKUP if($amc_debug);
+    $amc_debug=0;
+  }
 }
 
 sub get_debug {

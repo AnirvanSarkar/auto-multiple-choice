@@ -152,13 +152,9 @@ sub set_debug_mode {
   }
 }
 
-if($debug_file) {
-    $debug=$debug_file;
-}
-
-if($debug) {
-    set_debug_mode($debug);
-    print "DEBUG ==> ".AMC::Basic::debug_file()."\n";
+if($debug || $debug_file) {
+  set_debug_mode($debug_file || 'new');
+  print "DEBUG ==> ".debug_file()."\n";
 }
 
 debug_pm_version("Gtk3");
