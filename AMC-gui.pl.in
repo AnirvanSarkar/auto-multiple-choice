@@ -219,9 +219,12 @@ sub notify_end_of_work {
       if($libnotify_error) {
 	debug "Notification ignored: $libnotify_error";
       } else {
-	my $notification=Notify::Notification->new('Auto Multiple Choice',$message,
-						   '@/ICONSDIR/@/auto-multiple-choice.svg');
-	$notification->show;
+	eval {
+          my $notification=Notify::Notification->new('Auto Multiple Choice',$message,
+                                                     '@/ICONSDIR/@/auto-multiple-choice.svg');
+          $notification->show;
+        };
+        $libnotify_error=$@;
       }
     }
     if($config->get('notify_command')) {
