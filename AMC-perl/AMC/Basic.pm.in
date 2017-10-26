@@ -411,7 +411,7 @@ sub debug {
 sub debug_and_stderr {
   my @s=@_;
   debug(@s);
-  if($amc_debug_filename) {
+  if(!($amc_debug && $amc_debug_filename eq 'stderr')) {
     for(@s) {
       print STDERR "$_\n";
     }
