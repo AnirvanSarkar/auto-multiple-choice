@@ -440,22 +440,28 @@ sub moteur_latex {
 }
 
 sub read_glade {
-    my ($main_widget,@widgets)=@_;
-    my $g=Gtk3::Builder->new();
-    my $glade_file=$glade_base.$main_widget.".glade";
-    debug "Reading glade file ".$glade_file;
-    $g->set_translation_domain('auto-multiple-choice');
-    $g->add_from_file($glade_file);
-    for ($main_widget,@widgets) {
-	$w{$_}=$g->get_object($_);
-	if($w{$_}) {
-	    $w{$_}->set_name($_) if(!/^(apropos)$/);
-	} else {
-	    debug "WARNING: Object $_ not found in $main_widget glade file.";
-	}
+  my ($main_widget,@widgets)=@_;
+  my $g=Gtk3::Builder->new();
+  my $glade_file=$glade_base.$main_widget.".glade";
+  debug "Reading glade file ".$glade_file;
+  $g->set_translation_domain('auto-multiple-choice');
+  $g->add_from_file($glade_file);
+  for my $i ($main_widget,@widgets) {
+    $w{$i}=$g->get_object($i);
+    if (ref($w{$i}) =~ /::(FileChooser|About)?Dialog$/
+        && !$w{$i}->is_visible()) {
+      debug "Found modal dialog: $i";
+      $w{$i}->set_transient_for($w{'main_window'});
+      $w{$i}->set_modal(1);
     }
-    $g->connect_signals(undef);
-    return($g);
+    if ($w{$i}) {
+      $w{$i}->set_name($i) if($i !~ /^(apropos)$/);
+    } else {
+      debug_and_stderr "WARNING: Object $i not found in $main_widget glade file.";
+    }
+  }
+  $g->connect_signals(undef);
+  return($g);
 }
 
 # As a workaround for Bug #93 these widgets are disabled when Preferences window is opened.
@@ -1440,9 +1446,7 @@ sub liste_des_projets {
 
 	projects_show(\@projs);
 
-	# attendons l'action de l'utilisateur (fonctions projet_charge_*)...
-
-	$w{'choix_projet'}->set_keep_above(1);
+        $w{'choix_projet'}->show();
 
     } else {
 	my $dialog = Gtk3::MessageDialog
@@ -1839,6 +1843,10 @@ sub projet_nom_verif {
     restricted_check($w{'projet_nom'},$w{'projet_nouveau_syntaxe'},"a-zA-Z0-9._+:-");
 }
 
+sub projet_charge_non {
+  $w{'choix_projet'}->destroy();
+}
+
 sub projet_charge_nouveau {
 
     # creation nouveau projet
@@ -1871,10 +1879,6 @@ sub projet_charge_nouveau {
       }
 
     }
-}
-
-sub projet_charge_non {
-    $w{'choix_projet'}->destroy();
 }
 
 sub projet_sauve {
@@ -2385,6 +2389,8 @@ sub sujet_impressions {
 
     $w{'arbre_choix_copies'}->get_selection->set_mode("multiple");
 
+
+    $w{'choix_pages_impression'}->show();
 }
 
 sub sujet_impressions_cancel {
@@ -2786,6 +2792,8 @@ sub saisie_automatique {
     $w{'saisie_auto_cb_allocate_ids'}->set_label(sprintf(__"Pre-allocate sheet ids from the page numbers, starting at %d",$mcopy));
 
     $w{'saisie_auto_c_auto_capture_mode'}->set_sensitive($n==0);
+
+    $w{saisie_auto}->show();
 }
 
 sub saisie_auto_mode_update {
@@ -3607,6 +3615,8 @@ sub noter_postcorrect {
 
 	$w{postcorrect_set_multiple}->set_active($config->get("postcorrect_set_multiple"));
 
+        $w{choix_postcorrect}->show();
+
     } else {
 	noter_calcul('','');
     }
@@ -4099,11 +4109,9 @@ sub plugins_browse {
 ###
 
 sub activate_apropos {
-    my $gap=read_glade('apropos');
-}
-
-sub close_apropos {
-    $w{'apropos'}->destroy();
+  my $gap=read_glade('apropos');
+  $w{'apropos'}->run();
+  $w{'apropos'}->destroy();
 }
 
 sub activate_doc {
@@ -4827,6 +4835,8 @@ sub open_unrecognized {
   $w{'inconnu_tree'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
   $w{'inconnu_tree'}->get_selection->signal_connect("changed",\&unrecognized_line);
   $w{'inconnu_tree'}->get_selection->select_iter($inconnu_store->get_iter_first);
+
+  $w{main_recog}->show();
 }
 
 sub unrecognized_line {

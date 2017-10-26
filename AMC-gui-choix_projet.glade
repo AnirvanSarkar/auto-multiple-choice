@@ -13,14 +13,12 @@
     <property name="stock">gtk-copy</property>
   </object>
   <object class="GtkDialog" id="choix_projet">
-    <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Open a MC project</property>
     <property name="role">amc-choix-projet</property>
-    <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="startup_id">amc-choix-projet</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox3">
@@ -418,13 +416,8 @@
     </child>
     <action-widgets>
       <action-widget response="0">projet_bouton_annule</action-widget>
-      <action-widget response="0">projet_bouton_creation</action-widget>
-      <action-widget response="0">projet_bouton_ouverture</action-widget>
-      <action-widget response="0">projet_bouton_renomme</action-widget>
-      <action-widget response="0">projet_bouton_clone</action-widget>
-      <action-widget response="0">projet_bouton_supprime</action-widget>
-      <action-widget response="0">projet_bouton_mv_no</action-widget>
-      <action-widget response="0">projet_bouton_mv_yes</action-widget>
+      <action-widget response="2">projet_bouton_creation</action-widget>
+      <action-widget response="1">projet_bouton_ouverture</action-widget>
     </action-widgets>
   </object>
 </interface>
