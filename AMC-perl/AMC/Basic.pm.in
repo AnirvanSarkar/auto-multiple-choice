@@ -507,6 +507,7 @@ sub clear_old {
 
 sub new_filename_compose {
   my ($prefix,$suffix,$n)=@_;
+  $suffix='' if(!$suffix);
   my $file;
   do {
     $n++;
