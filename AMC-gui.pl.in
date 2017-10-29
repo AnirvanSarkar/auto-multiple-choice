@@ -5324,6 +5324,7 @@ sub source_latex_choisir {
 
 	$gap=read_glade('source_latex_modele',
 			qw/modeles_liste modeles_description model_choice_button mlist_separation/);
+        $reponse=$w{'source_latex_modele'}->show();
 
 	$modeles_store = Gtk3::TreeStore->new('Glib::String',
 					      'Glib::String',
