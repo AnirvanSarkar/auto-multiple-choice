@@ -195,8 +195,7 @@ sub get_output {
 	    if($self->{'progres.pulse'}) {
 		$self->{'avancement'}->pulse;
 	    } else {
-	      $self->{'avance'}->lit($line,
-				     {'bar'=>$self->{'avancement'}});
+	      $self->{'avance'}->lit($line);
 	    }
 	}
 
