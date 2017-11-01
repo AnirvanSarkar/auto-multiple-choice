@@ -935,7 +935,7 @@ sub test_scoring {
   set_debug($self->{debug_file});
 
   $scoring->prepare_question($qdata->{questions}->{1});
-  my ($score,$why)=$scoring->score_question(1,0,$qdata->{questions}->{1},0);
+  my ($score,$why)=$scoring->score_question(1,$qdata->{questions}->{1},0);
 
   set_debug('');
 

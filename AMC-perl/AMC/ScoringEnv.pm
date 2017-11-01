@@ -210,30 +210,30 @@ sub action_variable {
   my ($self,$action,$key,$value)=@_;
   if($action eq 'default') {
     if(!$self->defined_variable($key)) {
-      debug "Default value for variable $key = $value";
+      debug "Default value for variable $key [$self->{type}] = $value";
       $self->set_variable($key,
 			  $self->evaluate($value),
 			  1);
     } else {
-      debug "Variable $key already set";
+      debug "Variable $key [$self->{type}] already set";
     }
   } elsif($action eq 'set') {
-    debug "Setting variable $key = $value";
+    debug "Setting variable $key [$self->{type}] = $value";
     $self->set_variable($key,
 			$self->evaluate($value),
 			0);
   } elsif($action eq 'setx') {
-    debug "Overwriting variable $key = $value";
+    debug "Overwriting variable $key [$self->{type}] = $value";
     $self->set_variable($key,
 			$self->evaluate($value),
 			0,1);
   } elsif($action eq 'setglobal') {
-    debug "Setting global variable $key = $value";
+    debug "Setting global variable $key [$self->{type}] = $value";
     $self->set_variable($key,
 			$self->evaluate($value),
 			0,1,1);
   } elsif($action eq 'requires') {
-    $self->error("Variable $key required")
+    $self->error("Variable $key [$self->{type}] required")
       if(!$self->defined_variable($key));
   }
 }
@@ -349,7 +349,7 @@ sub evaluate {
   my $calc=eval($string);
   $self->error("Syntax error (evaluation) : $string")
     if(!defined($calc));
-  debug "Evaluation : $string_orig => $string => $calc"
+  debug "Evaluation [$self->{type}] : $string_orig => $string => $calc"
     if($string_orig ne $calc);
 
   return($calc);
@@ -358,6 +358,15 @@ sub evaluate {
 sub defined_directive {
   my ($self,$key)=@_;
   return($self->{directives}->{$key});
+}
+
+sub get_directive_raw {
+  my ($self,$key)=@_;
+  if($self->{directives}->{$key}) {
+    return($self->{directives}->{$key}->{def});
+  } else {
+    return(undef);
+  }
 }
 
 sub get_directive {

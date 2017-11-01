@@ -137,11 +137,11 @@ my $layout=$data->module('layout');
 # Uses an AMC::Scoring object to actually compute the questions
 # scores.
 
-my $bar=AMC::Scoring::new('onerror'=>'die',
-			  'data'=>$data,
-			  'seuil'=>$darkness_threshold,
-			  'seuil_up'=>$darkness_threshold_up,
-			 );
+my $score=AMC::Scoring::new('onerror'=>'die',
+                            'data'=>$data,
+                            'seuil'=>$darkness_threshold,
+                            'seuil_up'=>$darkness_threshold_up,
+                           );
 
 $avance->progres(0.05);
 
@@ -209,7 +209,7 @@ for my $sc (@captured_studentcopy) {
   # transmits the main strategy (default strategy options values for
   # all questions) to the scoring engine.
 
-  $bar->set_default_strategy($ssb->{'main_strategy'});
+  $score->set_default_strategy($ssb->{'main_strategy'});
 
   # The @question_scores collects scores for all questions
 
@@ -236,9 +236,11 @@ for my $sc (@captured_studentcopy) {
     #
     # $max_score is the maximum score (score for perfect answers)
 
-    $bar->prepare_question($q);
-    ($xx,$why)=$bar->score_question(@$sc,$q,0);
-    ($max_score)=$bar->score_max_question($sc->[0],$q);
+    $score->prepare_question($q);
+    $score->set_type(0);
+    ($xx,$why)=$score->score_question($sc->[0],$q,0);
+    $score->set_type(1);
+    ($max_score)=$score->score_max_question($sc->[0],$q);
 
     # If the title of the question is 'codename[N]' (with a numerical
     # N), then this question represents a digit from a AMCcode, so we
@@ -276,7 +278,8 @@ for my $sc (@captured_studentcopy) {
 
   # Compute the final total score aggregating questions scores
 
-  my ($total,$max_i)=$bar->global_score($scoring,@question_scores);
+  $score->set_type(0);
+  my ($total,$max_i)=$score->global_score($scoring,@question_scores);
 
   # Now apply rounding scheme
 

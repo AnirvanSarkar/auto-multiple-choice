@@ -117,8 +117,6 @@ sub set_number_variables {
 
   my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0};
 
-  $self->{env}->set_type($correct);
-
   my $n_ok=0;
   my $n_ticked=0;
   my $ticked_adata='';
@@ -130,7 +128,7 @@ sub set_number_variables {
     my $c=$a->{'correct'};
     my $t=($correct ? $c : $a->{'ticked'});
 
-    debug("[ Q ".$a->{'question'}." A ".$a->{'answer'}." ] ticked $t (correct $c) TYPE=$correct\n");
+    debug("[ Q ".$a->{'question'}." A ".$a->{'answer'}." ] ticked $t (correct $c) CORRECT=$correct\n");
 
     $n_ok+=($c == $t ? 1 : 0);
     $n_ticked+=$t;
@@ -180,6 +178,11 @@ sub process_ticked_answers_setx {
 #######################################################
 # small methods to relay to embedded ScoringEnv object
 
+sub set_type {
+  my ($self,$type)=@_;
+  return($self->{env}->set_type($type));
+}
+
 sub variable {
   my ($self,$key)=@_;
   return($self->{env}->get_variable($key));
@@ -188,6 +191,11 @@ sub variable {
 sub directive {
   my ($self,$key)=@_;
   return($self->{env}->get_directive($key));
+}
+
+sub directive_raw {
+  my ($self,$key)=@_;
+  return($self->{env}->get_directive_raw($key));
 }
 
 sub set_directive {
@@ -257,7 +265,7 @@ sub syntax_error {
 sub use_formula {
   my ($self,$score,$why)=@_;
   if($self->defined_directive("formula")
-    && $self->directive("formula") =~ /[^\s]/) {
+    && $self->directive_raw("formula") =~ /[^\s]/) {
     # a formula is given to compute the score directly
     debug "Using formula";
     $$score=$self->directive("formula");
@@ -351,7 +359,7 @@ sub simple_standard_score {
 # returns the score for a particular student-sheet/question, applying
 # the given scoring strategy.
 sub score_question {
-  my ($self,$etu,$copy,$question_data,$correct)=@_;
+  my ($self,$etu,$question_data,$correct)=@_;
   my $answers=$question_data->{'answers'};
 
   my $xx='';
@@ -411,15 +419,11 @@ sub score_question {
   return($xx,$why);
 }
 
-# returns the score associated with correct answers for a question.
-sub score_correct_question {
-    my ($self,$etu,$question_data)=@_;
-    debug "MARK: scoring correct answers";
-    return($self->score_question($etu,0,$question_data,1));
-}
-
 # returns the maximum score for a question: MAX parameter value, or,
-# if not present, the score_correct_question value.
+# if not present:
+# - for indicative questions, the student score
+# - for standard questions, the score for a perfect copy
+
 sub score_max_question {
    my ($self,$etu,$question_data)=@_;
    if($self->defined_directive("MAX")) {
@@ -427,9 +431,13 @@ sub score_max_question {
      debug "MARK: get MAX from scoring directives: $m";
      return($m,'M');
    } else {
-     debug "MARK: scoring correct answers for MAX";
-     my ($x,$why)=($self->score_question($etu,0,$question_data,1));
-     return($x,$why);
+     if($question_data->{indicative}) {
+       debug "MARK: scoring STUDENT answers for MAX";
+       return($self->score_question($etu,$question_data,0));
+     } else {
+       debug "MARK: scoring correct answers for MAX";
+       return($self->score_question($etu,$question_data,1));
+     }
    }
 }
 
