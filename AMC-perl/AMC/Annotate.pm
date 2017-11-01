@@ -692,21 +692,11 @@ sub draw_symbol {
   my $r=$b->{'id_b'}; # answer number
   my $indic=$self->{scoring}->indicative($p_strategy,$q); # is it an indicative question?
 
-  return if($indic && !$self->{annotate_indicatives});
-
-  # to be ticked?
-  my $bonne=$self->{scoring}->correct_answer($p_strategy,$q,$r);
-
   # ticked on this scan?
   my $cochee=$self->{capture}->ticked(@$student,
 				      $q,$r,
 				      $self->{darkness_threshold},
 				      $self->{darkness_threshold_up});
-
-  debug "Q=$q R=$r $bonne-$cochee";
-
-  # get symbol to draw
-  my $sy=$self->{symbols}->{"$bonne-$cochee"};
 
   # get box position on subject
   my $box=$self->{layout}->get_box_info($student->[0],$q,$r,$b->{role});
@@ -720,6 +710,16 @@ sub draw_symbol {
 			map { $box->{$_} } (qw/xmin xmax ymin ymax/)
 		       ));
   }
+
+  return if($indic && !$self->{annotate_indicatives});
+
+  # to be ticked?
+  my $bonne=$self->{scoring}->correct_answer($p_strategy,$q,$r);
+
+  debug "Q=$q R=$r $bonne-$cochee";
+
+  # get symbol to draw
+  my $sy=$self->{symbols}->{"$bonne-$cochee"};
 
   if ($box->{flags}
       & BOX_FLAGS_DONTANNOTATE) {
