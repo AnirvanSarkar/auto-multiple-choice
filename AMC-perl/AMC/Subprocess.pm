@@ -78,7 +78,6 @@ sub commande {
     }
 
     my $s=join(' ',@cmd);
-    utf8::downgrade($s);
 
     debug "CMD : $s";
 

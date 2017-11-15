@@ -209,7 +209,8 @@ sub student_uptodate {
     # we say there is an up-to-date annotated answer sheet if the file
     # exists and has been built after the last time some result or
     # configuration variable were changed.
-    if(-f "$self->{pdf_dir}/$filename" && $timestamp>$source_change) {
+    my $path="$self->{pdf_dir}/$filename";
+    if(-f $path && $timestamp>$source_change) {
       return($filename);
     } else {
       debug "NOT up-to-date.";
@@ -558,6 +559,7 @@ sub command {
 
 sub stext {
   my ($self,$text)=@_;
+  utf8::encode($text);
   $self->command("stext begin\n$text\n__END__");
 }
 
@@ -993,16 +995,18 @@ sub process_student {
 
   if(!$self->{single_output}) {
     my ($f,$f_ok)=$self->pdf_output_filename($student);
+    my $path=$self->{pdf_dir}."/$f";
     if($f_ok ne '') {
       # we only need to move the file!
       debug "The file is up-to-date: $f_ok --> $f";
       if($f ne $f_ok) {
-	move("$self->{pdf_dir}/$f_ok","$self->{pdf_dir}/$f")
+        my $path_ok=$self->{pdf_dir}."/$f_ok";
+	move($path_ok,$path)
 	  || debug "ERROR: moving the annotated file in directory $self->{pdf_dir} from $f_ok to $f";
       }
       return();
     }
-    $self->command("output ".$self->{pdf_dir}."/$f");
+    $self->command("output $path");
   }
 
   # Go through all the pages for the student.
