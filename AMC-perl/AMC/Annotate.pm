@@ -203,14 +203,19 @@ sub student_uptodate {
     =$self->{report}->get_student_report_time(REPORT_ANNOTATED_PDF,@$student);
 
   if($filename) {
+    debug "Registered filename ".show_utf8($filename);
+    utf8::encode($filename);
     my $source_change=$self->{capture}->variable('annotate_source_change');
     debug "Registered answer sheet: updated at $timestamp, source change at $source_change";
 
     # we say there is an up-to-date annotated answer sheet if the file
     # exists and has been built after the last time some result or
     # configuration variable were changed.
+    debug "Directory ".show_utf8($self->{pdf_dir});
+    debug "Looking for filename ".show_utf8($filename);
     my $path="$self->{pdf_dir}/$filename";
     if(-f $path && $timestamp>$source_change) {
+      debug "Exists!";
       return($filename);
     } else {
       debug "NOT up-to-date.";
@@ -244,7 +249,7 @@ sub pdf_output_filename {
   }
   $f =~ s/\(N\)/$ex/gi;
 
-  debug "F[N]=$f";
+  debug "F[N]=".show_utf8($f);
 
   # get student data from the students list file, and substitutes
   # into filename
@@ -266,7 +271,7 @@ sub pdf_output_filename {
       }
     }
 
-    debug "F[n]=$f";
+    debug "F[n]=".show_utf8($f);
 
   } else {
     $f =~ s/-?\(ID\)//gi;
@@ -277,7 +282,7 @@ sub pdf_output_filename {
 
   if($self->{force_ascii}) {
     $f=string_to_filename($f,'copy');
-    debug "F[a]=$f";
+    debug "F[a]=".show_utf8($f);
   }
 
   # The filename we would like to use id $f, but now we have to check
@@ -305,7 +310,9 @@ sub pdf_output_filename {
 
   $self->{data}->end_transaction('rSST');
 
-  debug "F[R]=$f";
+  utf8::encode($f);
+
+  debug "F[R]=".show_utf8($f);
 
   return($f,$uptodate_filename);
 }
@@ -995,11 +1002,15 @@ sub process_student {
 
   if(!$self->{single_output}) {
     my ($f,$f_ok)=$self->pdf_output_filename($student);
+    debug "Directory ".show_utf8($self->{pdf_dir});
+    debug "Dest file ".show_utf8($f);
+    debug "Existing  ".show_utf8($f_ok);
     my $path=$self->{pdf_dir}."/$f";
     if($f_ok ne '') {
       # we only need to move the file!
-      debug "The file is up-to-date: $f_ok --> $f";
+      debug "The file is up-to-date";
       if($f ne $f_ok) {
+        debug "... but has to be moved: $f_ok --> $f";
         my $path_ok=$self->{pdf_dir}."/$f_ok";
 	move($path_ok,$path)
 	  || debug "ERROR: moving the annotated file in directory $self->{pdf_dir} from $f_ok to $f";
