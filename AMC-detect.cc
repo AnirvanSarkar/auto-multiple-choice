@@ -1286,6 +1286,7 @@ int main( int argc, char** argv )
 	  if(src!=NULL) cvFlip(src,NULL,-1);
 	  if(illustr!=NULL) cvFlip(illustr,NULL,-1);
 	  if(dst!=NULL) cvFlip(dst,NULL,-1);
+	  if(src_grayscale!=NULL) cvFlip(src_grayscale,NULL,-1);
 
 	  for(i=0;i<4;i++) {
 	    coins_x[i]=(src->width-1)-coins_x[i];
