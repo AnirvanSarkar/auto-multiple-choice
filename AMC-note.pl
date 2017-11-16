@@ -25,7 +25,7 @@ use AMC::Gui::Avancement;
 use AMC::Scoring;
 use AMC::Data;
 
-use encoding 'utf8';
+#use encoding 'utf8';
 
 my $darkness_threshold=0.1;
 my $darkness_threshold_up=1.0;
