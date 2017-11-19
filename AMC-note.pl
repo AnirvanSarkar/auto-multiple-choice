@@ -204,7 +204,7 @@ for my $sc (@captured_studentcopy) {
   # Gets the scoring strategy for current student/copy, including
   # which answers are correct, from the scoring database.
 
-  my $ssb=$scoring->student_scoring_base(@$sc,$darkness_threshold,$darkness_threshold_up);
+  my $ssb=$scoring->student_scoring_base_sorted(@$sc,$darkness_threshold,$darkness_threshold_up);
 
   # transmits the main strategy (default strategy options values for
   # all questions) to the scoring engine.
@@ -217,15 +217,14 @@ for my $sc (@captured_studentcopy) {
 
   # Process each question in turn
 
-  for my $question (sort { $a cmp $b } (keys %{$ssb->{'questions'}})) {
+  for my $q (@{$ssb->{'questions'}}) {
+
+    my $question=$q->{question};
 
     # $question is the question numerical ID, and
     # $q is the question scoring data (see AMC::DataModule::scoring)
 
-    my $q=$ssb->{'questions'}->{$question};
-
     debug "MARK: QUESTION $question TITLE ".$q->{'title'};
-    debug "Unknown question data !" if(!defined($q));
 
     # Uses the scoring engine to score the question...
     #

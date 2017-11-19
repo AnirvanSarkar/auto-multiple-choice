@@ -334,12 +334,16 @@ sub simple_standard_score {
   my ($self,$score,$why)=@_;
 
   my $sb=$self->{ticked_answer_data}->{'strategy'};
-  $sb =~ s/^\s*,+//;
-  $sb =~ s/,+\s*$//;
-  if($sb ne '') {
+  my @plain_directives=(grep { /[^\s]/ && ! /=/ }
+                        map { s/^\s*,+//;s/,+\s*$//;$_; }
+                        split(/,+/,$sb));
+  if($#plain_directives>0) {
+    debug "WARNING : multiple plain directives in strategy \"$sb\"";
+  }
+  if(@plain_directives) {
     # some value is given as a score for the
     # ticked answer
-    $$score=$sb;
+    $$score=pop @plain_directives;
   } else {
     # take into account the scoring strategy for
     # the question: 'auto', or 'b'/'m'

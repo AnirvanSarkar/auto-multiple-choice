@@ -1031,6 +1031,7 @@ sub student_global {
 # 'main_strategy'=>"",
 # 'questions'=>
 # { 1 =>{ 'question'=>1,
+#         'title' => 'questionID',
 #         'type'=>1,
 #         'indicative'=>0,
 #         'strategy'=>'',
@@ -1069,6 +1070,39 @@ sub student_scoring_base {
     }
   }
   return($r);
+}
+
+# student_scoring_base_sorted(...) organizes the data from
+# student_scoring_base to get sorted questions, relative to their IDs
+# (lexicographic order)
+#
+# 'main_strategy'=>"",
+# 'questions'=>
+# [ { 'question'=>1,
+#     'title' => 'questionID',
+#     'type'=>1,
+#     'indicative'=>0,
+#     'strategy'=>'',
+#     'answers'=>[ { 'question'=>1, 'answer'=>1,
+#                    'correct'=>1, 'ticked'=>0, 'strategy'=>"b=2" },
+#                  {'question'=>1, 'answer'=>2,
+#                    'correct'=>0, 'ticked'=>0, 'strategy'=>"" },
+#                ],
+#   },
+#  ...
+# ]
+
+sub student_scoring_base_sorted {
+  my ($self,@args)=@_;
+
+  my $ssb=$self->student_scoring_base(@args);
+  my @n=sort { $ssb->{questions}->{$a}->{title}
+                 cmp $ssb->{questions}->{$b}->{title} }
+    (keys %{$ssb->{questions}});
+  my $sorted_q=[map { $ssb->{questions}->{$_} } (@n)];
+  $ssb->{questions}=$sorted_q;
+
+  return($ssb);
 }
 
 # delete_scoring_data($student,$copy) deletes all scoring data
