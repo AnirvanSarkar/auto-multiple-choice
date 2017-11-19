@@ -208,6 +208,11 @@ sub defined_directive {
   return($self->{env}->defined_directive($key));
 }
 
+sub evaluate {
+  my ($self,$formula)=@_;
+  return($self->{env}->evaluate($formula));
+}
+
 #######################################################
 
 # process some complex strategies for multiple questions (haut, mz)
@@ -335,7 +340,7 @@ sub simple_standard_score {
 
   my $sb=$self->{ticked_answer_data}->{'strategy'};
   my @plain_directives=(grep { /[^\s]/ && ! /=/ }
-                        map { s/^\s*,+//;s/,+\s*$//;$_; }
+                        map { s/^\s+//; s/\s+$//; $_; }
                         split(/,+/,$sb));
   if($#plain_directives>0) {
     debug "WARNING : multiple plain directives in strategy \"$sb\"";
@@ -343,7 +348,7 @@ sub simple_standard_score {
   if(@plain_directives) {
     # some value is given as a score for the
     # ticked answer
-    $$score=pop @plain_directives;
+    $$score=$self->evaluate(pop @plain_directives);
   } else {
     # take into account the scoring strategy for
     # the question: 'auto', or 'b'/'m'
