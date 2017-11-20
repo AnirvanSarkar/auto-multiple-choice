@@ -186,20 +186,24 @@ sub get_variable {
 # parse directives strings
 
 sub parse_defs {
-  my ($self,$string)=@_;
+  my ($self,$string,$plain_only)=@_;
   my @r=();
-  my $plain=0;
   for my $def (quotewords(',+',0,$string)) {
     if($def) {
       if($def =~ /^\s*([.a-zA-Z0-9_-]+)\s*=\s*(.*)/) {
-	push @r,{key=>$1,value=>$2};
+        # "variable=value" case
+	push @r,{key=>$1,value=>$2} if(!$plain_only);
       } else {
-	if($plain>0) {
-	  $self->error("Not a definition string: $def");
-	} else {
-	  $plain++;
-	  push @r,{key=>"_PLAIN_",value=>$def};
-	}
+        # "value" case
+        $def =~ s/^\s+//;
+        $def =~ s/\s+$//;
+        if($def ne '') {
+          if($plain_only) {
+            push @r,$def;
+          } else {
+            push @r,{key=>"_PLAIN_",value=>$def};
+          }
+        }
       }
     }
   }
