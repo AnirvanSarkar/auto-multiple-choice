@@ -95,7 +95,11 @@ html/index.html: FORCE
 %.tgz: %.d
 	find $< -type d -exec chmod 0755 '{}' \;
 	find $< -type f -exec chmod 0644 '{}' \;
+ifeq ($(TAR_REPRODUCIBLE_ARGS),nonreproducible)
+	tar -cz -f $@ -C $< .
+else
 	tar cn -C $< $(TAR_REPRODUCIBLE_ARGS) -O . | gzip $(GZIP_REPRODUCIBLE_ARGS) -c > $@
+endif
 
 check: FORCE
 	./check_xml
