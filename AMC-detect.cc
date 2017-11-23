@@ -34,7 +34,7 @@
 #include <errno.h>
 
 #ifdef NEEDS_GETLINE
-  #include<minimal-getline.c>
+  #include <minimal-getline.c>
 #endif
 
 #include "opencv2/core/core_c.h"
@@ -71,7 +71,7 @@
   #include "opencv2/highgui/highgui.hpp"
 #endif
 
-int processing_error=0;
+int processing_error = 0;
 
 /*
   Note:
@@ -120,10 +120,10 @@ int processing_error=0;
  */
 
 void agrege_init(double tx,double ty,double* coins_x,double* coins_y) {
-  coins_x[0]=tx;coins_y[0]=ty;
-  coins_x[1]=0;coins_y[1]=ty;
-  coins_x[2]=0;coins_y[2]=0;
-  coins_x[3]=tx;coins_y[3]=0;
+  coins_x[0] = tx; coins_y[0] = ty;
+  coins_x[1] = 0;  coins_y[1] = ty;
+  coins_x[2] = 0;  coins_y[2] = 0;
+  coins_x[3] = tx; coins_y[3] = 0;
 }
 
 #define AGREGE_POINT(op,comp,i) if((x op y) comp (coins_x[i] op coins_y[i])) { coins_x[i]=x;coins_y[i]=y; }
@@ -157,56 +157,56 @@ void agrege(double x,double y,double* coins_x,double* coins_y) {
 */
 
 void load_image(IplImage** src,char *filename,
-		int ignore_red,double threshold=0.6,int view=0) {
+                int ignore_red,double threshold=0.6,int view=0) {
   IplImage* color;
   double max;
 
   if(ignore_red) {
-    printf(": loading red channel from %s ...\n",filename);
+    printf(": loading red channel from %s ...\n", filename);
     if((color=cvLoadImage(filename,
 #ifdef OPENCV_23
-			  CV_LOAD_IMAGE_ANYCOLOR
+                          CV_LOAD_IMAGE_ANYCOLOR
 #else
-			  CV_LOAD_IMAGE_UNCHANGED
+                          CV_LOAD_IMAGE_UNCHANGED
 #endif
-			  ))!= NULL) {
-      if(color->nChannels>=3) {
-	/* keeps only red channel */
-	cvSetImageCOI(color,3);
-	*src=cvCreateImage( cvGetSize(color), color->depth, 1 );
-	cvCopy(color,*src);
-	cvReleaseImage(&color);
-      } else if(color->nChannels!=1) {
-	printf("! LOAD : Scan file with 2 channels [%s]\n",filename);
-	processing_error=2;
-	return;
+                          )) != NULL) {
+      if(color->nChannels >= 3) {
+        /* keeps only red channel */
+        cvSetImageCOI(color, 3);
+        *src = cvCreateImage(cvGetSize(color), color->depth, 1);
+        cvCopy(color, *src);
+        cvReleaseImage(&color);
+      } else if(color->nChannels != 1) {
+        printf("! LOAD : Scan file with 2 channels [%s]\n", filename);
+        processing_error = 2;
+        return;
       } else {
-	*src=color;
+        *src = color;
       }
     } else {
-      printf("! LOAD : Error loading scan file in ANYCOLOR [%s]\n",filename);
-      printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
-      processing_error=3;
+      printf("! LOAD : Error loading scan file in ANYCOLOR [%s]\n", filename);
+      printf("! OpenCV error string: %s\n", cvErrorStr(cvGetErrStatus()));
+      processing_error = 3;
       return;
     }
   } else {
-    printf(": loading %s ...\n",filename);
-    if((*src=cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE))==NULL) {
-      printf("! LOAD : Error loading scan file in GRAYSCALE [%s]\n",filename);
-      printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
-      processing_error=3;
+    printf(": loading %s ...\n", filename);
+    if((*src=cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE)) == NULL) {
+      printf("! LOAD : Error loading scan file in GRAYSCALE [%s]\n", filename);
+      printf("! OpenCV error string: %s\n", cvErrorStr(cvGetErrStatus()));
+      processing_error = 3;
       return;
     }
   }
 
-  cvMinMaxLoc(*src,NULL,&max);
-  printf(": Image max = %.3f\n",max);
-  cvSmooth(*src,*src,CV_GAUSSIAN,3,3,1);
-  cvThreshold(*src,*src, max*threshold, 255, CV_THRESH_BINARY_INV );
+  cvMinMaxLoc(*src, NULL, &max);
+  printf(": Image max = %.3f\n", max);
+  cvSmooth(*src, *src,CV_GAUSSIAN, 3, 3, 1);
+  cvThreshold(*src, *src, max*threshold, 255, CV_THRESH_BINARY_INV);
   
-  if((*src)->origin==1) {
+  if((*src)->origin == 1) {
     printf(": Image flip\n");
-    cvFlip(*src,NULL,0);
+    cvFlip(*src, NULL, 0);
   }
 }
 
@@ -221,14 +221,24 @@ void load_image(IplImage** src,char *filename,
 */
 
 void pre_traitement(IplImage* src,int lissage_trous,int lissage_poussieres) {
-  printf("Morph: +%d -%d\n",lissage_trous,lissage_poussieres);
-  IplConvKernel* trous=cvCreateStructuringElementEx(1+2*lissage_trous,1+2*lissage_trous,
-						    lissage_trous,lissage_trous,CV_SHAPE_ELLIPSE);
-  IplConvKernel* poussieres=cvCreateStructuringElementEx(1+2*lissage_poussieres,1+2*lissage_poussieres,
-							 lissage_poussieres,lissage_poussieres,CV_SHAPE_ELLIPSE);
+  printf("Morph: +%d -%d\n", lissage_trous, lissage_poussieres);
+  
+  IplConvKernel* trous = cvCreateStructuringElementEx(
+      1 + 2*lissage_trous,
+      1 + 2*lissage_trous,
+      lissage_trous,
+      lissage_trous,
+      CV_SHAPE_ELLIPSE);
+  
+  IplConvKernel* poussieres = cvCreateStructuringElementEx(
+      1 + 2*lissage_poussieres,
+      1 + 2*lissage_poussieres,
+      lissage_poussieres,
+      lissage_poussieres,
+      CV_SHAPE_ELLIPSE);
 
-  cvMorphologyEx(src,src,NULL,trous,CV_MOP_CLOSE);
-  cvMorphologyEx(src,src,NULL,poussieres,CV_MOP_OPEN);
+  cvMorphologyEx(src, src, NULL, trous, CV_MOP_CLOSE);
+  cvMorphologyEx(src, src, NULL, poussieres, CV_MOP_OPEN);
 
   cvReleaseStructuringElement(&trous);
   cvReleaseStructuringElement(&poussieres);
@@ -250,8 +260,8 @@ typedef struct {
 */
 
 void transforme(linear_transform* t,double x,double y,double* xp,double* yp) {
-  *xp=t->a*x+t->b*y+t->e;
-  *yp=t->c*x+t->d*y+t->f;
+  *xp = t->a * x + t->b * y + t->e;
+  *yp = t->c * x + t->d * y + t->f;
 }
 
 /* POINTS AND LINES */
@@ -274,11 +284,11 @@ typedef struct {
 
 void calcule_demi_plan(point *a,point *b,ligne *l) {
   double vx,vy;
-  vx=b->y - a->y;
-  vy=-(b->x - a->x);
-  l->a=vx;
-  l->b=vy;
-  l->c=- a->x*vx - a->y*vy;
+  vx = b->y - a->y;
+  vy = -(b->x - a->x);
+  l->a = vx;
+  l->b = vy;
+  l->c = - a->x*vx - a->y*vy;
 }
 
 /* evalue_demi_plan(...) computes the sign of ax+by+c from line
@@ -286,7 +296,7 @@ void calcule_demi_plan(point *a,point *b,ligne *l) {
 */
 
 int evalue_demi_plan(ligne *l,double x,double y) {
-  return(l->a*x+l->b*y+l->c <= 0 ? 1 : 0);
+  return l->a * x + l->b * y + l->c <= 0 ? 1 : 0;
 }
 
 /* VECTOR ARITHMETIC */
@@ -295,11 +305,13 @@ int evalue_demi_plan(ligne *l,double x,double y) {
 */
 
 double moyenne(double *x, int n, int omit=-1) {
-  double s=0;
-  for(int i=0;i<n;i++) {
-    if(i!=omit) s+=x[i];
+  double s = 0;
+  for(int i = 0; i < n; i++) {
+    if(i != omit) {
+        s += x[i];
+    }
   }
-  return(s/(n-(omit>=0 ? 1 : 0)));
+  return s / (n - (omit >= 0 ? 1 : 0));
 }
 
 /* scalar_product(x[],y[],n) returns the scalar product of vectors x[]
@@ -307,15 +319,17 @@ double moyenne(double *x, int n, int omit=-1) {
 */
 
 double scalar_product(double *x,double *y,int n, int omit=-1) {
-  double sx,sy,sxy;
-  sx=0;sy=0;sxy=0;
-  for(int i=0;i<n;i++) {
-    if(i!=omit) {
-      sx+=x[i];sy+=y[i];sxy+=x[i]*y[i];
+  double sx = 0, sy = 0, sxy = 0;
+  for(int i = 0; i < n; i++) {
+    if(i != omit) {
+      sx += x[i];
+      sy += y[i];
+      sxy += x[i]*y[i];
     }
   }
-  if(omit>=0) n--;
-  return(sxy/n-sx/n*sy/n);
+  if(omit>=0)
+      n--;
+  return sxy/n - sx/n * sy/n;
 }
 
 /* sys_22(...) solves the 2x2 linear system
@@ -329,14 +343,14 @@ double scalar_product(double *x,double *y,int n, int omit=-1) {
 */
 
 void sys_22(double a,double b,double c,double d,double e,double f,
-	      double *x,double *y) {
-  double delta=a*d-b*c;
-  if(delta==0) {
+              double *x,double *y) {
+  double delta = a*d - b*c;
+  if(delta == 0) {
     printf("! NONINV : Non-invertible system.\n");
     return;
   }
-  *x=(d*e-b*f)/delta;
-  *y=(a*f-c*e)/delta;
+  *x = (d*e - b*f) / delta;
+  *y = (a*f - c*e) / delta;
 }
 
 /* square of x */
@@ -350,25 +364,24 @@ double sqr(double x) { return(x*x); }
 */
 
 void revert_transform(linear_transform *direct,
-		      linear_transform *back) {
-  double delta=direct->a*direct->d-direct->b*direct->c;
-  if(delta==0) {
+                      linear_transform *back) {
+  double delta = direct->a * direct->d - direct->b * direct->c;
+  if(delta == 0) {
     printf("! NONINV : Non-invertible system.\n");
     return;
   }
-  back->a=direct->d/delta;
-  back->b=-direct->b/delta;
-  back->e=(direct->b*direct->f-direct->e*direct->d)/delta;
+  back->a = direct->d / delta;
+  back->b = - direct->b / delta;
+  back->e = (direct->b * direct->f - direct->e * direct->d) / delta;
 
-  back->c=-direct->c/delta;
-  back->d=direct->a/delta;
-  back->f=(direct->e*direct->c-direct->a*direct->f)/delta;
+  back->c = - direct->c / delta;
+  back->d = direct->a / delta;
+  back->f = (direct->e * direct->c - direct->a * direct->f) / delta;
 
   printf("Back:\na'=%f\nb'=%f\nc'=%f\nd'=%f\ne'=%f\nf'=%f\n",
-	 back->a,back->b,
-	 back->c,back->d,
-	 back->e,
-	 back->f);
+         back->a, back->b,
+         back->c, back->d,
+         back->e, back->f);
 }
 
 /* optim(...) computes the linear transform T such that the sum S of
@@ -383,67 +396,67 @@ void revert_transform(linear_transform *direct,
 */
 
 double optim(double* points_x,double* points_y,
-	     double* points_xp,double* points_yp,
-	     int n,
-	     linear_transform* t,
-	     int omit=-1) {
-  double sxx=scalar_product(points_x,points_x,n,omit);
-  double sxy=scalar_product(points_x,points_y,n,omit);
-  double syy=scalar_product(points_y,points_y,n,omit);
+             double* points_xp,double* points_yp,
+             int n,
+             linear_transform* t,
+             int omit=-1) {
+  double sxx = scalar_product(points_x, points_x, n, omit);
+  double sxy = scalar_product(points_x, points_y, n, omit);
+  double syy = scalar_product(points_y, points_y, n, omit);
   
-  double sxxp=scalar_product(points_x,points_xp,n,omit);
-  double syxp=scalar_product(points_y,points_xp,n,omit);
-  double sxyp=scalar_product(points_x,points_yp,n,omit);
-  double syyp=scalar_product(points_y,points_yp,n,omit);
+  double sxxp = scalar_product(points_x, points_xp, n, omit);
+  double syxp = scalar_product(points_y, points_xp, n, omit);
+  double sxyp = scalar_product(points_x, points_yp, n, omit);
+  double syyp = scalar_product(points_y, points_yp, n, omit);
 
-  sys_22(sxx,sxy,sxy,syy,sxxp,syxp,&(t->a),&(t->b));
-  sys_22(sxx,sxy,sxy,syy,sxyp,syyp,&(t->c),&(t->d));
-  t->e=moyenne(points_xp,n,omit)
-    -(t->a*moyenne(points_x,n,omit)+t->b*moyenne(points_y,n,omit));
-  t->f=moyenne(points_yp,n,omit)
-    -(t->c*moyenne(points_x,n,omit)+t->d*moyenne(points_y,n,omit));
+  sys_22(sxx, sxy, sxy, syy, sxxp, syxp, &(t->a), &(t->b));
+  sys_22(sxx, sxy, sxy, syy, sxyp, syyp, &(t->c), &(t->d));
+  t->e = moyenne(points_xp,n,omit)
+    - (t->a * moyenne(points_x,n,omit) + t->b*moyenne(points_y,n,omit));
+  t->f = moyenne(points_yp,n,omit)
+    - (t->c * moyenne(points_x,n,omit) + t->d*moyenne(points_y,n,omit));
 
-  double mse=0;
-  for(int i=0;i<n;i++) {
-    if(i!=omit) {
-      mse+=sqr(points_xp[i]-(t->a*points_x[i]+t->b*points_y[i]+t->e));
-      mse+=sqr(points_yp[i]-(t->c*points_x[i]+t->d*points_y[i]+t->f));
+  double mse = 0;
+  for(int i = 0; i < n; i++) {
+    if(i != omit) {
+      mse += sqr(points_xp[i] - (t->a * points_x[i] + t->b * points_y[i] + t->e));
+      mse += sqr(points_yp[i] - (t->c * points_x[i] + t->d * points_y[i] + t->f));
     }
   }
-  mse=sqrt(mse/(n-(omit<=0 ? 1 : 0)));
-  return(mse);
+  mse = sqrt(mse / (n - (omit <= 0 ? 1 : 0)));
+  return mse;
 }
 
 /* transform_quality(&t) returns a "square distance" from the
    transform t to an exact orthonormal transform.
 */
 double transform_quality_2(linear_transform* t) {
-  return( SUM_SQUARE(t->c+t->b,t->d-t->a) / SUM_SQUARE(t->a,t->b) );
+  return SUM_SQUARE(t->c+t->b,t->d-t->a) / SUM_SQUARE(t->a,t->b);
 }
 
 /* omit_optim(...) tries an optim() call omitting in turn one of the
    points, and returns the best transform (the more "orthonormal"
    one).
 */
-double omit_optim(double* points_x,double* points_y,
-		  double* points_xp,double* points_yp,
-		  int n,
-		  linear_transform* t) {
+double omit_optim(double* points_x, double* points_y,
+                  double* points_xp, double* points_yp,
+                  int n,
+                  linear_transform* t) {
   linear_transform t_best;
-  double q,q_best;
-  int i_best=-1;
-  for(int i=0;i<n;i++) {
-    optim(points_x,points_y,points_xp,points_yp,n,t,i);
-    q=transform_quality_2(t);
-    printf("OMIT_CORNER=%d Q2=%lf\n",i,q);
-    if(i_best<0 || q<q_best) {
-      i_best=i;
-      q_best=q;
-      memcpy((void*)&t_best,(void*)t,sizeof(linear_transform));
+  double q, q_best;
+  int i_best = -1;
+  for(int i = 0; i < n; i++) {
+    optim(points_x, points_y, points_xp, points_yp, n, t, i);
+    q = transform_quality_2(t);
+    printf("OMIT_CORNER=%d Q2=%lf\n", i, q);
+    if(i_best < 0 || q < q_best) {
+      i_best = i;
+      q_best = q;
+      memcpy((void*)&t_best, (void*)t, sizeof(linear_transform));
     }
   }
-  memcpy((void*)t,(void*)&t_best,sizeof(linear_transform));
-  return(sqrt(q_best));
+  memcpy((void*)t, (void*)&t_best, sizeof(linear_transform));
+  return sqrt(q_best);
 }
 
 /* calage(...) tries to detect the position of a page on a scan.
@@ -485,22 +498,22 @@ double omit_optim(double* points_x,double* points_y,
 */
 
 void calage(IplImage* src,IplImage* illustr,
-	    double taille_orig_x,double taille_orig_y,
-	    double dia_orig,
-	    double tol_plus,double tol_moins,
-	    int n_min_cc,
-	    double* coins_x,double *coins_y,
-	    IplImage** dst,int view=0) {
+            double taille_orig_x, double taille_orig_y,
+            double dia_orig,
+            double tol_plus, double tol_moins,
+            int n_min_cc,
+            double* coins_x, double *coins_y,
+            IplImage** dst,int view=0) {
   CvPoint coins_int[4];
   int n_cc;
 
   /* computes target min and max size */
   
-  double rx=src->width/taille_orig_x;
-  double ry=src->height/taille_orig_y;
-  double target=dia_orig*(rx+ry)/2;
-  double target_max=target*(1+tol_plus);
-  double target_min=target*(1-tol_moins);
+  double rx = src->width / taille_orig_x;
+  double ry = src->height / taille_orig_y;
+  double target = dia_orig * (rx + ry) / 2;
+  double target_max = target * (1 + tol_plus);
+  double target_min = target * (1 - tol_moins);
 
   /* 1) remove holes that are smaller than 1/8 times the target mark
      diameter, and dusts that are smaller than 1/20 times the target
@@ -508,112 +521,115 @@ void calage(IplImage* src,IplImage* illustr,
   */
 
   pre_traitement(src,
-		 1+(int)((target_min+target_max)/2 /20),
-		 1+(int)((target_min+target_max)/2 /8));
+                 1 + (int)((target_min+target_max)/2 /20),
+                 1 + (int)((target_min+target_max)/2 /8));
 
-  if(view==2) {
+  if(view == 2) {
     /* prepares *dst from a copy of the scan (after pre-processing). */
-    *dst=cvCreateImage( cvGetSize(src), IPL_DEPTH_8U, 3 );
-    cvConvertImage(src,*dst);
-    cvNot(*dst,*dst);
+    *dst = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 3);
+    cvConvertImage(src, *dst);
+    cvNot(*dst, *dst);
   }
 
-  printf("Target size: %.1f ; %.1f\n",target_min,target_max);
+  printf("Target size: %.1f ; %.1f\n", target_min, target_max);
 
   /* 2) find connected components */
 
   static CvMemStorage* storage = cvCreateMemStorage(0);
   CvSeq* contour = 0;
-	  
-  cvFindContours( src, storage, &contour, sizeof(CvContour),
-		  CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+          
+  cvFindContours(src, storage, &contour, sizeof(CvContour),
+                 CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 
 #ifdef OPENCV_21
-  if(view==1) {
+  if(view == 1) {
     /* prepares *dst as a white image with same size as the scan. */
-    *dst=cvCreateImage( cvGetSize(src), 8, 3 );
-    cvZero( *dst );
+    *dst = cvCreateImage(cvGetSize(src), 8, 3);
+    cvZero(*dst);
   }
 #endif
 
   /* 3) returns the result, and draws reports */
 
-  agrege_init(src->width,src->height,coins_x,coins_y);
-  n_cc=0;
+  agrege_init(src->width, src->height, coins_x, coins_y);
+  n_cc = 0;
 
   printf("Detected connected components:\n");
 
-  for( ; contour != 0; contour = contour->h_next ) {
-    CvRect rect=cvBoundingRect(contour);
+  for( ; contour != 0; contour = contour->h_next) {
+    CvRect rect = cvBoundingRect(contour);
     /* discard the connected components that are too large or too small */
-    if(rect.width<=target_max && rect.width>=target_min &&
-       rect.height<=target_max && rect.height>=target_min) {
+    if(rect.width <= target_max && rect.width >= target_min &&
+       rect.height <= target_max && rect.height >= target_min) {
       /* updates the extreme points coordinates from the coordinates
-	 of the center of the connected component. */
-      agrege(rect.x+(rect.width-1)/2.0,rect.y+(rect.height-1)/2.0,coins_x,coins_y);
+         of the center of the connected component. */
+      agrege(rect.x + (rect.width - 1) / 2.0,
+             rect.y + (rect.height - 1) / 2.0,
+             coins_x,
+             coins_y);
       
       /* outputs connected component center and size. */
       printf("(%d;%d)+(%d;%d)\n",
-	     rect.x,rect.y,rect.width,rect.height);
+             rect.x, rect.y, rect.width, rect.height);
       n_cc++;
-	
+        
 #ifdef OPENCV_21
-     if(view==1) {
+     if(view == 1) {
        /* draws the connected component, and the enclosing rectangle,
-	  with a random color. */
-	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
-	cvRectangle(*dst,cvPoint(rect.x,rect.y),cvPoint(rect.x+rect.width,rect.y+rect.height),color);
-	cvDrawContours( *dst, contour, color, color, -1, CV_FILLED, 8 );
+          with a random color. */
+        CvScalar color = CV_RGB(rand() & 255, rand() & 255, rand() & 255);
+        cvRectangle(*dst, cvPoint(rect.x,rect.y), cvPoint(rect.x+rect.width,rect.y+rect.height), color);
+        cvDrawContours(*dst, contour, color, color, -1, CV_FILLED, 8);
       }
 #endif
      if(view==2) {
        /* draws the connected component, and the enclosing rectangle,
-	  in green. */
-       CvScalar color = CV_RGB( 60,198,127 );
-	cvRectangle(*dst,cvPoint(rect.x,rect.y),cvPoint(rect.x+rect.width,rect.y+rect.height),color);
-	cvDrawContours( *dst, contour, color, color, -1, CV_FILLED, 8 );
+          in green. */
+       CvScalar color = CV_RGB(60,198,127);
+        cvRectangle(*dst, cvPoint(rect.x,rect.y), cvPoint(rect.x+rect.width,rect.y+rect.height), color);
+        cvDrawContours(*dst, contour, color, color, -1, CV_FILLED, 8);
      }
     }
   }
 
-  if(n_cc>=n_min_cc) {
-    for(int i=0;i<4;i++) {
+  if(n_cc >= n_min_cc) {
+    for(int i = 0; i < 4; i++) {
       /* computes integer coordinates of the extreme coordinates, for
-	 later drawings */
-      if(view>0 || illustr!=NULL) {
-	coins_int[i].x=(int)coins_x[i];
-	coins_int[i].y=(int)coins_y[i];
+         later drawings */
+      if(view > 0 || illustr != NULL) {
+        coins_int[i].x = (int)coins_x[i];
+        coins_int[i].y = (int)coins_y[i];
       }
       /* outputs extreme points coordinates: the (supposed)
-	 coordinates of the marks on the scan. */
-      printf("Frame[%d]: %.1f ; %.1f\n",i,coins_x[i],coins_y[i]);
+         coordinates of the marks on the scan. */
+      printf("Frame[%d]: %.1f ; %.1f\n", i, coins_x[i], coins_y[i]);
     }
     
     if(view==1) {
 #ifdef OPENCV_21
       /* draws a rectangle to see the corner marks positions on the scan. */
-      for(int i=0;i<4;i++) {
-	cvLine(*dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(255,255,255),1,CV_AA);
+      for(int i = 0; i < 4; i++) {
+        cvLine(*dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(255,255,255), 1, CV_AA);
       }
 #endif
     }
     if(view==2) {
       /* draws a rectangle to see the corner marks positions on the scan. */
-      for(int i=0;i<4;i++) {
-	cvLine(*dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(193,29,27),1,CV_AA);
+      for(int i = 0; i < 4; i++) {
+        cvLine(*dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(193,29,27), 1, CV_AA);
       }
     }
 
     if(illustr!=NULL) {
       /* draws a rectangle to see the corner marks positions on the scan. */
-      for(int i=0;i<4;i++) {
-	cvLine(illustr,coins_int[i],coins_int[(i+1)%4],BLEU,1,CV_AA);
+      for(int i = 0; i < 4; i++) {
+        cvLine(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, CV_AA);
       }
     }
   } else {
     /* There are less than 3 correct connected components: can't know
        where are the marks on the scan! */
-    printf("! NMARKS=%d : Not enough marks detected.\n",n_cc);
+    printf("! NMARKS=%d : Not enough marks detected.\n", n_cc);
   }
 
   cvClearMemStorage(storage);
@@ -632,8 +648,8 @@ void calage(IplImage* src,IplImage* illustr,
 
 void deplace(int i,int j,double delta,point *coins) {
   double d;
-  CLOSER(coins[i],coins[j],x,d,delta);
-  CLOSER(coins[i],coins[j],y,d,delta);
+  CLOSER(coins[i], coins[j],x, d, delta);
+  CLOSER(coins[i], coins[j],y, d, delta);
 }
 
 /* deplace_xy(...) moves two real numbers *m1 and *m2 to each other,
@@ -641,9 +657,9 @@ void deplace(int i,int j,double delta,point *coins) {
 */
 
 void deplace_xy(double *m1,double *m2,double delta) {
-  double d=(*m2-*m1)*delta;
-  *m1+=d;
-  *m2-=d;
+  double d = (*m2-*m1) * delta;
+  *m1 += d;
+  *m2 -= d;
 }
 
 /* restreint(...) ensures that the point (*x,*y) is inside the image,
@@ -653,10 +669,10 @@ void deplace_xy(double *m1,double *m2,double delta) {
 */
 
 void restreint(int *x,int *y,int tx,int ty) {
-  if(*x<0) *x=0;
-  if(*y<0) *y=0;
-  if(*x>=tx) *x=tx-1;
-  if(*y>=ty) *y=ty-1;
+  if(*x < 0) *x = 0;
+  if(*y < 0) *y = 0;
+  if(*x >= tx) *x = tx - 1;
+  if(*y >= ty) *y = ty - 1;
 }
 
 /* if student>=0, check_zooms_dir(...) checks that the zoom directory
@@ -669,35 +685,35 @@ void restreint(int *x,int *y,int tx,int ty) {
 */
 
 int check_zooms_dir(int student, char *zooms_dir=NULL,int log=0) {
-  int ok=1;
+  int ok = 1;
   struct stat zd;
   
-  if(student>=0) {
-    if(stat(zooms_dir,&zd)!=0) {
-      if(errno==ENOENT) {
-	if(mkdir(zooms_dir,0755)!=0) {
-	  ok=0;
-	  printf("! ZOOMDC : Zoom dir creation error %d : %s\n",errno,zooms_dir);
-	} else {
-	  printf(": Zoom dir created %s\n",zooms_dir);
-	}
+  if(student >= 0) {
+    if(stat(zooms_dir,&zd) != 0) {
+      if(errno == ENOENT) {
+        if(mkdir(zooms_dir,0755) != 0) {
+          ok = 0;
+          printf("! ZOOMDC : Zoom dir creation error %d : %s\n", errno, zooms_dir);
+        } else {
+          printf(": Zoom dir created %s\n", zooms_dir);
+        }
       } else {
-	ok=0;
-	printf("! ZOOMDS : Zoom dir stat error %d : %s\n",errno,zooms_dir);
+        ok = 0;
+        printf("! ZOOMDS : Zoom dir stat error %d : %s\n", errno, zooms_dir);
       }
     } else {
       if(!S_ISDIR(zd.st_mode)) {
-	ok=0;
-	printf("! ZOOMDP : Zoom dir is not a directory : %s\n",zooms_dir);
+        ok = 0;
+        printf("! ZOOMDP : Zoom dir is not a directory : %s\n", zooms_dir);
       }
-    }	  
+    }          
   } else {
-    ok=0;
+    ok = 0;
     if(log) {
       printf(": No zoom dir to create (student<0).\n");
     }
   }
-  return(ok);
+  return ok;
 }
 
 /* mesure_case(...) computes the darkness value (number of black
@@ -762,236 +778,240 @@ int check_zooms_dir(int student, char *zooms_dir=NULL,int log=0) {
 */
 
 void mesure_case(IplImage *src,IplImage *illustr,int illustr_mode,
-		 int student,int page,int question, int answer,
-		 double prop,int shape_id,
-		 double o_xmin,double o_xmax,double o_ymin,double o_ymax,
-		 linear_transform *transfo_back,
-		 point *coins,IplImage *dst=NULL,
-		 char *zooms_dir=NULL,int view=0) {
-  int npix,npixnoir,xmin,xmax,ymin,ymax,x,y;
-  int z_xmin,z_xmax,z_ymin,z_ymax;
+                 int student,int page,int question, int answer,
+                 double prop,int shape_id,
+                 double o_xmin,double o_xmax,double o_ymin,double o_ymax,
+                 linear_transform *transfo_back,
+                 point *coins,IplImage *dst=NULL,
+                 char *zooms_dir=NULL,int view=0) {
+  int npix, npixnoir, xmin, xmax, ymin, ymax, x, y;
+  int z_xmin, z_xmax, z_ymin, z_ymax;
   ligne lignes[4];
-  int i,ok;
+  int i, ok;
   double delta;
-  double o_x,o_y;
+  double o_x, o_y;
   CvScalar pixel;
 
-  double ov_r,ov_r2,ov_dir,ov_center,ov_x0,ov_x1,ov_y0,ov_y1;
+  double ov_r, ov_r2, ov_dir, ov_center, ov_x0, ov_x1, ov_y0, ov_y1;
 
-  int tx=src->width;
-  int ty=src->height;
+  int tx = src->width;
+  int ty = src->height;
 
   CvPoint coins_int[4];
 
-  static char* zoom_file=NULL;
+  static char* zoom_file = NULL;
 
 #if OPENCV_20
-  static int save_options[3]={CV_IMWRITE_PNG_COMPRESSION,7,0};
+  static int save_options[3] = {CV_IMWRITE_PNG_COMPRESSION, 7, 0};
 #endif
 
-  npix=0;
-  npixnoir=0;
+  npix = 0;
+  npixnoir = 0;
 
-  if(illustr!=NULL) {
-    for(int i=0;i<4;i++) {
-      coins_int[i].x=(int)coins[i].x;
-      coins_int[i].y=(int)coins[i].y;
+  if(illustr != NULL) {
+    for(int i = 0; i < 4; i++) {
+      coins_int[i].x = (int)coins[i].x;
+      coins_int[i].y = (int)coins[i].y;
     }
 
-    if(illustr_mode==ILLUSTR_BOX) {
+    if(illustr_mode == ILLUSTR_BOX) {
       /* draws the box on the illustrated image (for zoom) */
-      for(int i=0;i<4;i++) {
-	cvLine(illustr,coins_int[i],coins_int[(i+1)%4],BLEU,1,CV_AA);
+      for(int i = 0; i < 4; i++) {
+        cvLine(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, CV_AA);
       }
     }
 
     /* bounding box for zoom */
-    z_xmin=tx-1;
-    z_xmax=0;
-    z_ymin=ty-1;
-    z_ymax=0;
-    for(int i=0;i<4;i++) {
-      if(coins_int[i].x<z_xmin) z_xmin=coins_int[i].x;
-      if(coins_int[i].x>z_xmax) z_xmax=coins_int[i].x;
-      if(coins_int[i].y<z_ymin) z_ymin=coins_int[i].y;
-      if(coins_int[i].y>z_ymax) z_ymax=coins_int[i].y;
+    z_xmin = tx - 1;
+    z_xmax = 0;
+    z_ymin = ty - 1;
+    z_ymax = 0;
+    for(int i = 0; i < 4; i++) {
+      if(coins_int[i].x < z_xmin) z_xmin = coins_int[i].x;
+      if(coins_int[i].x > z_xmax) z_xmax = coins_int[i].x;
+      if(coins_int[i].y < z_ymin) z_ymin = coins_int[i].y;
+      if(coins_int[i].y > z_ymax) z_ymax = coins_int[i].y;
     }
 
     /* a little bit larger... */
-    int delta=(z_xmax-z_xmin + z_ymax-z_ymin)/20;
-    z_xmin-=delta;
-    z_ymin-=delta;
-    z_xmax+=delta;
-    z_ymax+=delta;
+    int delta = (z_xmax - z_xmin + z_ymax - z_ymin) / 20;
+    z_xmin -= delta;
+    z_ymin -= delta;
+    z_xmax += delta;
+    z_ymax += delta;
   }
 
   /* box reduction */
-  delta=(1-prop)/2;
-  deplace(0,2,delta,coins);
-  deplace(1,3,delta,coins);
+  delta = (1 - prop) / 2;
+  deplace(0, 2, delta, coins);
+  deplace(1, 3, delta, coins);
 
-  deplace_xy(&o_xmin,&o_xmax,delta);
-  deplace_xy(&o_ymin,&o_ymax,delta);
+  deplace_xy(&o_xmin, &o_xmax, delta);
+  deplace_xy(&o_ymin, &o_ymax, delta);
 
   /* output points used for mesuring */
-  for(i=0;i<4;i++) {
+  for(i = 0; i < 4; i++) {
     printf("COIN %.3f,%.3f\n",coins[i].x,coins[i].y);
   }
 
   /* bounding box */
-  xmin=tx-1;
-  xmax=0;
-  ymin=ty-1;
-  ymax=0;
-  for(i=0;i<4;i++) {
-    if(coins[i].x<xmin) xmin=(int)coins[i].x;
-    if(coins[i].x>xmax) xmax=(int)coins[i].x;
-    if(coins[i].y<ymin) ymin=(int)coins[i].y;
-    if(coins[i].y>ymax) ymax=(int)coins[i].y;
+  xmin = tx - 1;
+  xmax = 0;
+  ymin = ty - 1;
+  ymax = 0;
+  for(i = 0; i < 4; i++) {
+    if(coins[i].x < xmin) xmin = (int)coins[i].x;
+    if(coins[i].x > xmax) xmax = (int)coins[i].x;
+    if(coins[i].y < ymin) ymin = (int)coins[i].y;
+    if(coins[i].y > ymax) ymax = (int)coins[i].y;
   }
 
-  restreint(&xmin,&ymin,tx,ty);
-  restreint(&xmax,&ymax,tx,ty);
+  restreint(&xmin, &ymin, tx, ty);
+  restreint(&xmax, &ymax, tx, ty);
 
-  if(o_xmin<0) {
+  if(o_xmin < 0) {
     /* computes half planes equations */
-    calcule_demi_plan(&coins[0],&coins[1],&lignes[0]);
-    calcule_demi_plan(&coins[1],&coins[2],&lignes[1]);
-    calcule_demi_plan(&coins[2],&coins[3],&lignes[2]);
-    calcule_demi_plan(&coins[3],&coins[0],&lignes[3]);
+    calcule_demi_plan(&coins[0], &coins[1], &lignes[0]);
+    calcule_demi_plan(&coins[1], &coins[2], &lignes[1]);
+    calcule_demi_plan(&coins[2], &coins[3], &lignes[2]);
+    calcule_demi_plan(&coins[3], &coins[0], &lignes[3]);
   } else {
     if(shape_id == SHAPE_OVAL) {
       if(o_xmax-o_xmin < o_ymax-o_ymin) {
-	/* vertical oval */
-	ov_dir=DIR_Y;
-	ov_r=(o_xmax-o_xmin)/2;
-	ov_x0=o_xmin;
-	ov_x1=o_xmax;
-	ov_y0=o_ymin+ov_r;
-	ov_y1=o_ymax-ov_r;
-	ov_center=(o_xmin+o_xmax)/2;
+        /* vertical oval */
+        ov_dir = DIR_Y;
+        ov_r = (o_xmax - o_xmin) / 2;
+        ov_x0 = o_xmin;
+        ov_x1 = o_xmax;
+        ov_y0 = o_ymin + ov_r;
+        ov_y1 = o_ymax - ov_r;
+        ov_center = (o_xmin + o_xmax) / 2;
       } else {
-	/* horizontal oval */
-	ov_dir=DIR_X;
-	ov_r=(o_ymax-o_ymin)/2;
-	ov_x0=o_xmin+ov_r;
-	ov_x1=o_xmax-ov_r;
-	ov_y0=o_ymin;
-	ov_y1=o_ymax;
-	ov_center=(o_ymin+o_ymax)/2;
+        /* horizontal oval */
+        ov_dir = DIR_X;
+        ov_r = (o_ymax - o_ymin) / 2;
+        ov_x0 = o_xmin + ov_r;
+        ov_x1 = o_xmax - ov_r;
+        ov_y0 = o_ymin;
+        ov_y1 = o_ymax;
+        ov_center = (o_ymin + o_ymax) / 2;
       }
-      ov_r2=ov_r*ov_r;
+      ov_r2 = ov_r * ov_r;
     }
   }
 
-  for(x=xmin;x<=xmax;x++) {
-    for(y=ymin;y<=ymax;y++) {
-      if(o_xmin<0) {
-	/* With "mesure" command, checks if this point is in the box
-	   or not from the scan coordinates (x,y) */
-	ok=1;
-	for(i=0;i<4;i++) {
-	  if(evalue_demi_plan(&lignes[i],(double)x,(double)y)==0) ok=0;
-	}
+  for(x = xmin; x <= xmax; x++) {
+    for(y = ymin; y <= ymax; y++) {
+      if(o_xmin < 0) {
+        /* With "mesure" command, checks if this point is in the box
+           or not from the scan coordinates (x,y) */
+        ok = 1;
+        for(i = 0; i < 4; i++) {
+          if(evalue_demi_plan(&lignes[i], (double)x, (double)y) == 0)
+              ok = 0;
+        }
       } else {
-	/* With "mesure0" command, computes the coordinates in the
-	   original image with transfo_back, and then check if the
-	   point is in the box (this is easier since this box has
-	   edges parallel to coordinate axis) */
-	transforme(transfo_back,(double)x,(double)y,&o_x,&o_y);
-	if(shape_id == SHAPE_OVAL) {
-	  if(ov_dir==DIR_X) {
-	    if(o_x<=ov_x0) {
-	      ok=( SUM_SQUARE(o_x-ov_x0,o_y-ov_center) <= ov_r2);
-	    } else if(o_x>=ov_x1) {
-	      ok=( SUM_SQUARE(o_x-ov_x1,o_y-ov_center) <= ov_r2);
-	    } else {
-	      ok=( o_y>=ov_y0 && o_y<=ov_y1 );
-	    }
-	  } else {
-	    if(o_y<=ov_y0) {
-	      ok=( SUM_SQUARE(o_y-ov_y0,o_x-ov_center) <= ov_r2);
-	    } else if(o_y>=ov_y1) {
-	      ok=( SUM_SQUARE(o_y-ov_y1,o_x-ov_center) <= ov_r2);
-	    } else {
-	      ok=( o_x>=ov_x0 && o_x<=ov_x1 );
-	    }
-	  }
-	} else {
-	  ok=!(o_x<o_xmin || o_x>o_xmax || o_y<o_ymin || o_y>o_ymax);
-	}
+        /* With "mesure0" command, computes the coordinates in the
+           original image with transfo_back, and then check if the
+           point is in the box (this is easier since this box has
+           edges parallel to coordinate axis) */
+        transforme(transfo_back, (double)x, (double)y, &o_x, &o_y);
+        if(shape_id == SHAPE_OVAL) {
+          if(ov_dir == DIR_X) {
+            if(o_x <= ov_x0) {
+              ok = (SUM_SQUARE(o_x - ov_x0, o_y - ov_center) <= ov_r2);
+            } else if(o_x>=ov_x1) {
+              ok = (SUM_SQUARE(o_x - ov_x1, o_y - ov_center) <= ov_r2);
+            } else {
+              ok = (o_y>=ov_y0 && o_y<=ov_y1);
+            }
+          } else {
+            if(o_y<=ov_y0) {
+              ok = (SUM_SQUARE(o_y - ov_y0, o_x - ov_center) <= ov_r2);
+            } else if(o_y>=ov_y1) {
+              ok = (SUM_SQUARE(o_y - ov_y1, o_x - ov_center) <= ov_r2);
+            } else {
+              ok = (o_x >= ov_x0 && o_x <= ov_x1);
+            }
+          }
+        } else {
+          ok = !(o_x < o_xmin || o_x > o_xmax || o_y < o_ymin || o_y > o_ymax);
+        }
       }
-      if(ok==1) {
-	npix++;
-	if(PIXEL(src,x,y)) npixnoir++;
-	if(illustr!=NULL && illustr_mode==ILLUSTR_PIXELS) {
-	  /* with option -k, colors (on the zooms) pixels that are
-	     taken into account while computing the darkness ratio of
-	     the boxes */
-	  CV_IMAGE_ELEM(illustr,uchar,y,x*3)=(PIXEL(src,x,y) ? 0 : 255);
-	  CV_IMAGE_ELEM(illustr,uchar,y,x*3+1)=128;
-	  CV_IMAGE_ELEM(illustr,uchar,y,x*3+2)=0;
-	}
+      if(ok == 1) {
+        npix++;
+        if(PIXEL(src,x,y))
+            npixnoir++;
+        if(illustr != NULL && illustr_mode == ILLUSTR_PIXELS) {
+          /* with option -k, colors (on the zooms) pixels that are
+             taken into account while computing the darkness ratio of
+             the boxes */
+          CV_IMAGE_ELEM(illustr, uchar, y, x*3) = (PIXEL(src,x,y) ? 0 : 255);
+          CV_IMAGE_ELEM(illustr, uchar, y, x*3+1) = 128;
+          CV_IMAGE_ELEM(illustr, uchar, y, x*3+2) = 0;
+        }
       }
     }
   }
       
-  if(view==1 || illustr!=NULL) {
-    for(int i=0;i<4;i++) {
-      coins_int[i].x=(int)coins[i].x;
-      coins_int[i].y=(int)coins[i].y;
+  if(view == 1 || illustr != NULL) {
+    for(int i = 0; i < 4; i++) {
+      coins_int[i].x = (int)coins[i].x;
+      coins_int[i].y = (int)coins[i].y;
     }
   }
 #ifdef OPENCV_21
-  if(view==1) {
-    for(int i=0;i<4;i++) {
-      cvLine(dst,coins_int[i],coins_int[(i+1)%4],CV_RGB(255,255,255),1,CV_AA);
+  if(view == 1) {
+    for(int i = 0; i < 4; i++) {
+      cvLine(dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(255,255,255), 1, CV_AA);
     }
   }
 #endif
-  if(illustr!=NULL) {
+  if(illustr != NULL) {
 
-    if(illustr_mode==ILLUSTR_BOX) {
+    if(illustr_mode == ILLUSTR_BOX) {
       /* draws the measuring box on the illustrated image (for zoom) */
-      for(int i=0;i<4;i++) {
-	cvLine(illustr,coins_int[i],coins_int[(i+1)%4],ROSE,1,CV_AA);
+      for(int i = 0; i < 4; i++) {
+        cvLine(illustr, coins_int[i], coins_int[(i+1)%4], ROSE, 1, CV_AA);
       }
     }
     
     /* making zoom */
 
-    if(zooms_dir!=NULL && student>=0) {
+    if(zooms_dir != NULL && student >= 0) {
 
       /* check if directory is present, or ceate it */
-      ok=check_zooms_dir(student,zooms_dir,0);
+      ok = check_zooms_dir(student, zooms_dir, 0);
 
       /* save zoom file */
       if(ok) {
-	if(asprintf(&zoom_file,"%s/%d-%d.png",zooms_dir,question,answer)>0) {
-	  printf(": Saving zoom to %s\n",zoom_file);
-	  printf(": Z=(%d,%d)+(%d,%d)\n",
-		 z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin);
-	  cvSetImageROI(illustr,
-			cvRect(z_xmin,z_ymin,z_xmax-z_xmin,z_ymax-z_ymin));
-	  if(cvSaveImage(zoom_file,illustr
+        if(asprintf(&zoom_file, "%s/%d-%d.png", zooms_dir, question, answer)>0) {
+          printf(": Saving zoom to %s\n", zoom_file);
+          printf(": Z=(%d,%d)+(%d,%d)\n",
+                 z_xmin, z_ymin, z_xmax - z_xmin, z_ymax - z_ymin);
+
+          cvSetImageROI(illustr,
+                        cvRect(z_xmin, z_ymin, z_xmax - z_xmin, z_ymax - z_ymin));
+          
+          if(cvSaveImage(zoom_file, illustr
 #if OPENCV_20
-			 ,save_options
+                         , save_options
 #endif
-			 )!=1) {
-	    printf("! ZOOMS : Zoom save error\n");
-	  } else {
-	    printf("ZOOM %d-%d.png\n",question,answer);
-	  }
-	  
-	  cvResetImageROI(illustr);
-	} else {
-	  printf("! ZOOMFN : Zoom file name error\n");
-	}
+                         ) != 1) {
+            printf("! ZOOMS : Zoom save error\n");
+          } else {
+            printf("ZOOM %d-%d.png\n", question, answer);
+          }
+          
+          cvResetImageROI(illustr);
+        } else {
+          printf("! ZOOMFN : Zoom file name error\n");
+        }
       }
     }
   }
 
-  printf("PIX %d %d\n",npixnoir,npix);
+  printf("PIX %d %d\n", npixnoir, npix);
 }
 
 /* MAIN
@@ -1001,47 +1021,47 @@ void mesure_case(IplImage *src,IplImage *illustr,int illustr_mode,
 
 */
 
-int main( int argc, char** argv )
+int main(int argc, char** argv)
 {
-  if(!setlocale(LC_ALL,"POSIX")) {
+  if(! setlocale(LC_ALL, "POSIX")) {
     printf("! LOCALE : setlocale failed\n");
   }
 
-  double threshold=0.6;
-  double taille_orig_x=0;
-  double taille_orig_y=0;
-  double dia_orig=0;
-  double tol_plus=0;
-  double tol_moins=0;
-  int n_min_cc=3;
+  double threshold = 0.6;
+  double taille_orig_x = 0;
+  double taille_orig_y = 0;
+  double dia_orig = 0;
+  double tol_plus = 0;
+  double tol_moins = 0;
+  int n_min_cc = 3;
 
-  double prop,xmin,xmax,ymin,ymax;
-  double coins_x[4],coins_y[4];
-  double coins_x0[4],coins_y0[4];
+  double prop, xmin, xmax, ymin, ymax;
+  double coins_x[4], coins_y[4];
+  double coins_x0[4], coins_y0[4];
   double tmp;
   int upside_down;
   int i;
-  int student,page,question,answer;
+  int student, page, question, answer;
   point box[4];
-  linear_transform transfo,transfo_back;
+  linear_transform transfo, transfo_back;
   double mse;
 
-  IplImage* src=NULL;
-  IplImage* dst=NULL;
-  IplImage* illustr=NULL;
-  IplImage* src_calage=NULL;
+  IplImage* src = NULL;
+  IplImage* dst = NULL;
+  IplImage* illustr = NULL;
+  IplImage* src_calage = NULL;
 
-  int illustr_mode=ILLUSTR_BOX;
+  int illustr_mode = ILLUSTR_BOX;
 
-  char *scan_file=NULL;
-  char *out_image_file=NULL;
-  char *zooms_dir=NULL;
-  int view=0;
-  int post_process_image=0;
-  int ignore_red=0;
+  char *scan_file = NULL;
+  char *out_image_file = NULL;
+  char *zooms_dir = NULL;
+  int view = 0;
+  int post_process_image = 0;
+  int ignore_red = 0;
 
 #if OPENCV_20
-  int save_options[3]={CV_IMWRITE_JPEG_QUALITY,75,0};
+  int save_options[3] = {CV_IMWRITE_JPEG_QUALITY, 75, 0};
 #endif
 
   // Options
@@ -1056,27 +1076,27 @@ int main( int argc, char** argv )
   // -v / -P : asks for marks detection debugging image report
 
   char c;
-  while ((c = getopt (argc, argv, "x:y:d:i:p:m:t:c:o:vPrk")) != -1) {
+  while ((c = getopt(argc, argv, "x:y:d:i:p:m:t:c:o:vPrk")) != -1) {
     switch (c) {
-    case 'x': taille_orig_x=atof(optarg);break; 
-    case 'y': taille_orig_y=atof(optarg);break; 
-    case 'd': dia_orig=atof(optarg);break; 
-    case 'p': tol_plus=atof(optarg);break;
-    case 'm': tol_moins=atof(optarg);break;
-    case 't': threshold=atof(optarg);break;
-    case 'c': n_min_cc=atoi(optarg);break;
-    case 'o': out_image_file=strdup(optarg);break;
-    case 'v': view=1;break;
-    case 'r': ignore_red=1;break;
-    case 'P': post_process_image=1;view=2;break;
-    case 'k': illustr_mode=ILLUSTR_PIXELS;break;
+    case 'x': taille_orig_x = atof(optarg); break; 
+    case 'y': taille_orig_y = atof(optarg); break; 
+    case 'd': dia_orig = atof(optarg); break; 
+    case 'p': tol_plus = atof(optarg); break;
+    case 'm': tol_moins = atof(optarg); break;
+    case 't': threshold = atof(optarg); break;
+    case 'c': n_min_cc = atoi(optarg); break;
+    case 'o': out_image_file = strdup(optarg); break;
+    case 'v': view = 1; break;
+    case 'r': ignore_red = 1; break;
+    case 'P': post_process_image = 1; view = 2; break;
+    case 'k': illustr_mode=ILLUSTR_PIXELS; break;
     }
   }
 
-  printf("TX=%.2f TY=%.2f DIAM=%.2f\n",taille_orig_x,taille_orig_y,dia_orig);
+  printf("TX=%.2f TY=%.2f DIAM=%.2f\n", taille_orig_x, taille_orig_y, dia_orig);
 
   size_t commande_t;
-  char* commande=NULL;
+  char* commande = NULL;
   char* endline;
   char text[128];
   char shape_name[32];
@@ -1086,204 +1106,213 @@ int main( int argc, char** argv )
   CvFont font;
   double fh;
 
-  while(getline(&commande,&commande_t,stdin)>=6) {
+  while(getline(&commande, &commande_t, stdin) >= 6) {
     //printf("LC_NUMERIC: %s\n",setlocale(LC_NUMERIC,NULL));
 
-    if((endline=strchr(commande,'\r'))) *endline='\0';
-    if((endline=strchr(commande,'\n'))) *endline='\0';
+    if((endline=strchr(commande, '\r')))
+        *endline='\0';
+    if((endline=strchr(commande, '\n')))
+        *endline='\0';
 
-    if(processing_error==0) {
+    if(processing_error == 0) {
 
-      if(strncmp(commande,"output ",7)==0) {
-	free(out_image_file);
-	out_image_file=strdup(commande+7);
-      } else if(strncmp(commande,"zooms ",6)==0) {
-	free(zooms_dir);
-	zooms_dir=strdup(commande+6);
-      } else if(strncmp(commande,"load ",5)==0) {
-	free(scan_file);
-	scan_file=strdup(commande+5);
+      if(strncmp(commande, "output ", 7) == 0) {
+        free(out_image_file);
+        out_image_file = strdup(commande + 7);
+      } else if(strncmp(commande,"zooms ", 6)==0) {
+        free(zooms_dir);
+        zooms_dir = strdup(commande + 6);
+      } else if(strncmp(commande,"load ", 5)==0) {
+        free(scan_file);
+        scan_file = strdup(commande + 5);
 
-	if(out_image_file != NULL &&
-	   !post_process_image) {
-	  illustr=cvLoadImage(scan_file, CV_LOAD_IMAGE_COLOR);
-	  if(illustr==NULL) {
-	    printf("! LOAD : Error loading scan file with color mode [%s]\n",scan_file);
-	    printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
+        if(out_image_file != NULL
+           && !post_process_image) {
+          illustr = cvLoadImage(scan_file, CV_LOAD_IMAGE_COLOR);
+          if(illustr == NULL) {
+            printf("! LOAD : Error loading scan file with color mode [%s]\n", scan_file);
+            printf("! OpenCV error string: %s\n", cvErrorStr(cvGetErrStatus()));
 
-	    processing_error=4;
-	  } else {
-	    if(illustr->origin==1) {
-	      printf(": Image flip\n");
-	      cvFlip(illustr,NULL,0);
-	    }
-	    printf(": Image background loaded\n");
-	  }
-	}
+            processing_error = 4;
+          } else {
+            if(illustr->origin == 1) {
+              printf(": Image flip\n");
+              cvFlip(illustr, NULL, 0);
+            }
+            printf(": Image background loaded\n");
+          }
+        }
 
-	load_image(&src,scan_file,ignore_red,threshold,view);
-	printf(": Image loaded\n");
+        load_image(&src,scan_file, ignore_red, threshold, view);
+        printf(": Image loaded\n");
 
-	if(processing_error==0) {
-	  src_calage=cvCloneImage(src);
-	  if(src_calage==NULL) {
-	    printf("! LOAD : Error cloning image\n");
-	    printf("! OpenCV error string: %s\n",cvErrorStr(cvGetErrStatus()));
+        if(processing_error == 0) {
+          src_calage = cvCloneImage(src);
+          if(src_calage == NULL) {
+            printf("! LOAD : Error cloning image\n");
+            printf("! OpenCV error string: %s\n", cvErrorStr(cvGetErrStatus()));
 
-	    processing_error=5;
-	  }
-	}
-	if(processing_error==0) {
-	  calage(src_calage,illustr,
-		 taille_orig_x,taille_orig_y,
-		 dia_orig,
-		 tol_plus, tol_moins,
-		 n_min_cc,
-		 coins_x,coins_y,
-		 &dst,view);
-	  upside_down=0;
-	}
+            processing_error = 5;
+          }
+        }
+        if(processing_error == 0) {
+          calage(src_calage,
+                 illustr,
+                 taille_orig_x,
+                 taille_orig_y,
+                 dia_orig,
+                 tol_plus,
+                 tol_moins,
+                 n_min_cc,
+                 coins_x
+                 coins_y,
+                 &dst,
+                 view);
+          
+          upside_down = 0;
+        }
       
-	if(out_image_file != NULL && illustr==NULL) {
+        if(out_image_file != NULL && illustr==NULL) {
           printf(": Storing layout image\n");
-	  illustr=dst;
-	  dst=NULL;
-	}
+          illustr = dst;
+          dst = NULL;
+        }
       
-	cvReleaseImage(&src_calage);
+        cvReleaseImage(&src_calage);
 
       } else if((sscanf(commande,"optim3 %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
-			&coins_x0[0],&coins_y0[0],
-			&coins_x0[1],&coins_y0[1],
-			&coins_x0[2],&coins_y0[2],
-			&coins_x0[3],&coins_y0[3])==8)
-		|| (strncmp(commande,"reoptim3",8)==0) ) {
-	/* TRYING TO OMIT EACH CORNER IN TURN */
-	/* "optim3" and 8 arguments: 4 marks positions (x y,
-	   order: UL UR BR BL)
-	   return: optimal linear transform and MSE */
-	/* "reoptim3": optim with the same arguments as for last "optim" call */
-	mse=omit_optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
-	printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
-	       transfo.a,transfo.b,
-	       transfo.c,transfo.d,
-	       transfo.e,
-	       transfo.f);
-	printf("MSE=0.0\n");
-	printf("QUALITY=%f\n",mse);
+                        &coins_x0[0], &coins_y0[0],
+                        &coins_x0[1], &coins_y0[1],
+                        &coins_x0[2], &coins_y0[2],
+                        &coins_x0[3], &coins_y0[3]) == 8)
+                || (strncmp(commande,"reoptim3",8) == 0) ) {
+        /* TRYING TO OMIT EACH CORNER IN TURN */
+        /* "optim3" and 8 arguments: 4 marks positions (x y,
+           order: UL UR BR BL)
+           return: optimal linear transform and MSE */
+        /* "reoptim3": optim with the same arguments as for last "optim" call */
+        mse = omit_optim(coins_x0, coins_y0, coins_x, coins_y, 4, &transfo);
+        printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+               transfo.a, transfo.b,
+               transfo.c, transfo.d,
+               transfo.e, transfo.f);
+        printf("MSE=0.0\n");
+        printf("QUALITY=%f\n", mse);
       
-	revert_transform(&transfo,&transfo_back);
+        revert_transform(&transfo, &transfo_back);
 
       } else if((sscanf(commande,"optim %lf,%lf %lf,%lf %lf,%lf %lf,%lf",
-			&coins_x0[0],&coins_y0[0],
-			&coins_x0[1],&coins_y0[1],
-			&coins_x0[2],&coins_y0[2],
-			&coins_x0[3],&coins_y0[3])==8)
-		|| (strncmp(commande,"reoptim",7)==0) ) {
-	/* "optim" and 8 arguments: 4 marks positions (x y,
-	   order: UL UR BR BL)
-	   return: optimal linear transform and MSE */
-	/* "reoptim": optim with the same arguments as for last "optim" call */
-	mse=optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
-	printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
-	       transfo.a,transfo.b,
-	       transfo.c,transfo.d,
-	       transfo.e,
-	       transfo.f);
-	printf("MSE=%f\n",mse);
+                        &coins_x0[0], &coins_y0[0],
+                        &coins_x0[1], &coins_y0[1],
+                        &coins_x0[2], &coins_y0[2],
+                        &coins_x0[3], &coins_y0[3]) == 8)
+                || (strncmp(commande,"reoptim",7) == 0) ) {
+        /* "optim" and 8 arguments: 4 marks positions (x y,
+           order: UL UR BR BL)
+           return: optimal linear transform and MSE */
+        /* "reoptim": optim with the same arguments as for last "optim" call */
+        mse = optim(coins_x0,coins_y0,coins_x,coins_y,4,&transfo);
+        printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+               transfo.a, transfo.b,
+               transfo.c, transfo.d,
+               transfo.e, transfo.f);
+        printf("MSE=%f\n",mse);
       
-	revert_transform(&transfo,&transfo_back);
+        revert_transform(&transfo, &transfo_back);
 
-      } else if(strncmp(commande,"rotateOK",8)==0) {
-	/* validates upside down rotation */
-	if(upside_down) {
-	  transfo.a=-transfo.a;
-	  transfo.b=-transfo.b;
-	  transfo.c=-transfo.c;
-	  transfo.d=-transfo.d;
-	  transfo.e=(src->width-1)-transfo.e;
-	  transfo.f=(src->height-1)-transfo.f;
-	
-	  if(src!=NULL) cvFlip(src,NULL,-1);
-	  if(illustr!=NULL) cvFlip(illustr,NULL,-1);
-	  if(dst!=NULL) cvFlip(dst,NULL,-1);
+      } else if(strncmp(commande,"rotateOK",8) == 0) {
+        /* validates upside down rotation */
+        if(upside_down) {
+          transfo.a = - transfo.a;
+          transfo.b = - transfo.b;
+          transfo.c = - transfo.c;
+          transfo.d = - transfo.d;
+          transfo.e = (src->width - 1) - transfo.e;
+          transfo.f = (src->height - 1) - transfo.f;
+        
+          if(src != NULL)
+              cvFlip(src,NULL, -1);
+          if(illustr != NULL)
+              cvFlip(illustr, NULL, -1);
+          if(dst != NULL)
+              cvFlip(dst, NULL, -1);
 
-	  for(i=0;i<4;i++) {
-	    coins_x[i]=(src->width-1)-coins_x[i];
-	    coins_y[i]=(src->height-1)-coins_y[i];
-	  }
+          for(i = 0; i < 4; i++) {
+            coins_x[i] = (src->width - 1) - coins_x[i];
+            coins_y[i] = (src->height - 1) - coins_y[i];
+          }
 
-	  upside_down=0;
+          upside_down = 0;
 
-	  printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
-		 transfo.a,transfo.b,
-		 transfo.c,transfo.d,
-		 transfo.e,
-		 transfo.f);
+          printf("Transfo:\na=%f\nb=%f\nc=%f\nd=%f\ne=%f\nf=%f\n",
+                 transfo.a, transfo.b,
+                 transfo.c, transfo.d,
+                 transfo.e, transfo.f);
 
-	  revert_transform(&transfo,&transfo_back);
-	}
-      } else if(strncmp(commande,"rotate180",9)==0) {
-	for(i=0;i<2;i++) {
-	  SWAP(coins_x[i],coins_x[i+2],tmp);
-	  SWAP(coins_y[i],coins_y[i+2],tmp);
-	}
-	upside_down=1-upside_down;
-	printf("UpsideDown=%d\n",upside_down);
+          revert_transform(&transfo, &transfo_back);
+        }
+      } else if(strncmp(commande,"rotate180", 9) == 0) {
+        for(i = 0; i < 2; i++) {
+          SWAP(coins_x[i], coins_x[i+2], tmp);
+          SWAP(coins_y[i], coins_y[i+2], tmp);
+        }
+        upside_down = 1 - upside_down;
+        printf("UpsideDown=%d\n", upside_down);
       } else if(sscanf(commande,"id %d %d %d %d",
-		       &student,&page,&question,&answer)==4) {
-	/* box id */
-      } else if(sscanf(commande,"mesure0 %lf %s %lf %lf %lf %lf",
-		       &prop,shape_name,
-		       &xmin,&xmax,&ymin,&ymax)==6) {
-	/* "mesure0" and 6 arguments: proportion, shape, xmin, xmax, ymin, ymax
-	   return: number of black pixels and total number of pixels */
-	transforme(&transfo,xmin,ymin,&box[0].x,&box[0].y);
-	transforme(&transfo,xmax,ymin,&box[1].x,&box[1].y);
-	transforme(&transfo,xmax,ymax,&box[2].x,&box[2].y);
-	transforme(&transfo,xmin,ymax,&box[3].x,&box[3].y);
+                       &student, &page, &question, &answer) == 4) {
+        /* box id */
+      } else if(sscanf(commande, "mesure0 %lf %s %lf %lf %lf %lf",
+                       &prop, shape_name,
+                       &xmin, &xmax, &ymin, &ymax) == 6) {
+        /* "mesure0" and 6 arguments: proportion, shape, xmin, xmax, ymin, ymax
+           return: number of black pixels and total number of pixels */
+        transforme(&transfo, xmin, ymin, &box[0].x, &box[0].y);
+        transforme(&transfo, xmax, ymin, &box[1].x, &box[1].y);
+        transforme(&transfo, xmax, ymax, &box[2].x, &box[2].y);
+        transforme(&transfo, xmin, ymax, &box[3].x, &box[3].y);
 
-	if(strcmp(shape_name,"oval")==0) {
-	  shape_id=SHAPE_OVAL;
-	} else {
-	  shape_id=SHAPE_SQUARE;
-	}
+        if(strcmp(shape_name,"oval") == 0) {
+          shape_id = SHAPE_OVAL;
+        } else {
+          shape_id = SHAPE_SQUARE;
+        }
 
-	/* output transformed points */
-	for(i=0;i<4;i++) {
-	  printf("TCORNER %.3f,%.3f\n",box[i].x,box[i].y);
-	}
+        /* output transformed points */
+        for(i = 0; i < 4; i++) {
+          printf("TCORNER %.3f,%.3f\n", box[i].x, box[i].y);
+        }
 
-	mesure_case(src,illustr,illustr_mode,
-		    student,page,question,answer,
-		    prop,shape_id,
-		    xmin,xmax,ymin,ymax,&transfo_back,
-		    box,dst,zooms_dir,view);
-	student=-1;
+        mesure_case(src, illustr, illustr_mode,
+                    student, page, question, answer,
+                    prop, shape_id,
+                    xmin, xmax, ymin, ymax, &transfo_back,
+                    box, dst, zooms_dir, view);
+        student = -1;
       } else if(sscanf(commande,"mesure %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-		       &prop,
-		       &box[0].x,&box[0].y,
-		       &box[1].x,&box[1].y,
-		       &box[2].x,&box[2].y,
-		       &box[3].x,&box[3].y)==9) {
-	/* "mesure" and 9 arguments: proportion, and 4 vertices
-	   (x y, order: UL UR BR BL)
-	   returns: number of black pixels and total number of pixels */
-	mesure_case(src,illustr,illustr_mode,
-		    student,page,question,answer,
-		    prop,SHAPE_SQUARE,
-		    -1,-1,-1,-1,NULL,
-		    box,dst,zooms_dir,view);
-	student=-1;
-      } else if(strlen(commande)<100 && 
-		sscanf(commande,"annote %s",text)==1) {
-	fh=src->height/50.0;
-	cvInitFont(&font,CV_FONT_HERSHEY_PLAIN,fh/14,fh/14,0.0,1+(int)(fh/20),CV_AA);
-	textpos.y=(int)(1.6*fh);textpos.x=10;
-	cvPutText(illustr,text,textpos,&font,BLEU);
+                       &prop,
+                       &box[0].x, &box[0].y,
+                       &box[1].x, &box[1].y,
+                       &box[2].x, &box[2].y,
+                       &box[3].x, &box[3].y) == 9) {
+        /* "mesure" and 9 arguments: proportion, and 4 vertices
+           (x y, order: UL UR BR BL)
+           returns: number of black pixels and total number of pixels */
+        mesure_case(src, illustr, illustr_mode,
+                    student, page, question, answer,
+                    prop, SHAPE_SQUARE,
+                    -1, -1, -1, -1, NULL,
+                    box, dst, zooms_dir, view);
+        student = -1;
+      } else if(strlen(commande) < 100 && 
+                sscanf(commande, "annote %s", text) == 1) {
+        fh = src->height / 50.0;
+        cvInitFont(&font, CV_FONT_HERSHEY_PLAIN, fh/14, fh/14, 0.0, 1+(int)(fh/20), CV_AA);
+        textpos.x = 10;
+        textpos.y = (int)(1.6 * fh)
+        cvPutText(illustr, text, textpos, &font, BLEU);
       } else {
-	printf(": %s\n",commande);
-	printf("! SYNERR : Syntax error\n");
+        printf(": %s\n", commande);
+        printf("! SYNERR : Syntax error\n");
       }
 
     } else {
@@ -1296,11 +1325,11 @@ int main( int argc, char** argv )
 
 #ifdef OPENCV_21
 #ifdef AMC_DETECT_HIGHGUI
-  if(view==1) {
-    cvNamedWindow( "Source", CV_WINDOW_NORMAL );
-    cvShowImage( "Source", src );
-    cvNamedWindow( "Components", CV_WINDOW_NORMAL );
-    cvShowImage( "Components", dst );
+  if(view == 1) {
+    cvNamedWindow("Source", CV_WINDOW_NORMAL);
+    cvShowImage("Source", src);
+    cvNamedWindow("Components", CV_WINDOW_NORMAL);
+    cvShowImage("Components", dst);
     cvWaitKey(0);
 
     cvReleaseImage(&dst);
@@ -1308,13 +1337,13 @@ int main( int argc, char** argv )
 #endif
 #endif
 
-  if(illustr && strlen(out_image_file)>1) {
-    printf(": Saving layout image to %s\n",out_image_file);
-    if(cvSaveImage(out_image_file,illustr
+  if(illustr && strlen(out_image_file) > 1) {
+    printf(": Saving layout image to %s\n", out_image_file);
+    if(cvSaveImage(out_image_file, illustr
 #if OPENCV_20
-		   ,save_options
+                   , save_options
 #endif
-		   )!=1) {
+                   ) != 1) {
       int error = cvGetErrStatus();
       const char * errorMessage = NULL;
       if (error) {
@@ -1323,7 +1352,7 @@ int main( int argc, char** argv )
         error = errno;
         errorMessage = strerror(error);
       }
-      printf("! LAYS : Layout image save error: %s\n",errorMessage);
+      printf("! LAYS : Layout image save error: %s\n", errorMessage);
     }
   }
 
