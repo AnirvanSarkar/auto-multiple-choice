@@ -1164,7 +1164,7 @@ int main(int argc, char** argv)
                  tol_plus,
                  tol_moins,
                  n_min_cc,
-                 coins_x
+                 coins_x,
                  coins_y,
                  &dst,
                  view);
@@ -1308,7 +1308,7 @@ int main(int argc, char** argv)
         fh = src->height / 50.0;
         cvInitFont(&font, CV_FONT_HERSHEY_PLAIN, fh/14, fh/14, 0.0, 1+(int)(fh/20), CV_AA);
         textpos.x = 10;
-        textpos.y = (int)(1.6 * fh)
+        textpos.y = (int)(1.6 * fh);
         cvPutText(illustr, text, textpos, &font, BLEU);
       } else {
         printf(": %s\n", commande);
