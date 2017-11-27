@@ -104,7 +104,9 @@ for my $f (@fichiers) {
   <texsrc>%PROJET/'.$code_name.'.'.$ext.'</texsrc>
 ';
 	    if($ext eq 'tex') {
-	      $opts .= '  <moteur_latex_b>pdflatex</moteur_latex_b>
+              my $engine='pdflatex';
+              $engine='platex+dvipdf' if($lang eq 'ja');
+	      $opts .= '  <moteur_latex_b>'.$engine.'</moteur_latex_b>
 ';
 	    } else {
 	      $opts .= '  <filter>plain</filter>
