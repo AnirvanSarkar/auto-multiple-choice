@@ -3413,7 +3413,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % splitting.
 %    \begin{macrocode}
   \tl_set:Nn \amc_ee_tl { #3 }
-  \tl_replace_once:Nxn \amc_ee_tl { \char_generate:nn { `e } { 12 } } { e }
+  \tl_replace_once:Nxn \amc_ee_tl { \catcode`e=12 e } { e }
   \seq_set_split:NnV \amc_ee_seq e \amc_ee_tl
   \fp_set:Nn #1 { \seq_item:Nn \amc_ee_seq 1 }
   \int_set:Nn #2 { \seq_item:Nn \amc_ee_seq 2 }
@@ -3438,7 +3438,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \amc_fp_decompose:NNn \amc_num_mantissa_fp \amc_num_exponent_int
   { #2 }
   \fp_set:Nn #1
-  { round(\amc_num_mantissa_fp * 10^((#3)-1),0,0) }
+  { round(\amc_num_mantissa_fp * 10^((#3)-1)) }
   \fp_compare:nTF { abs(#1) >= 10^(#3) }
   {
     \fp_set:Nn #1 { #1 / 10 }
@@ -3458,13 +3458,13 @@ Three digits and two letters:\insertgroup{mixed}.
 
 \cs_new:Npn \amc_fp_n_digits:Nnn #1 #2 #3 {
   \fp_set:Nn #1
-    { round((#2) * 10^(#3),0,0) }
+    { round((#2) * 10^(#3)) }
 }
 
 \int_new:N \amc_todigits_int
 \cs_new:Npn \amc_fp_to_digits:Nnnn #1 #2 #3 #4 {
   \clist_clear:N #1
-  \int_set:Nn \amc_todigits_int { \fp_eval:n { abs(round(#2,0,0)) } }
+  \int_set:Nn \amc_todigits_int { \fp_eval:n { abs(round(#2)) } }
   \prg_replicate:nn { #3 } {
     \clist_put_left:Nx #1 { \int_mod:nn \amc_todigits_int { #4 } }
     \int_set:Nn \amc_todigits_int
