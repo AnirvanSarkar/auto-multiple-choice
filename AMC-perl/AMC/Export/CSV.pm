@@ -62,6 +62,21 @@ sub parse_string {
     return($s);
 }
 
+sub i_to_a {
+  my ($self,$i)=@_;
+  if($i==0) {
+    return('0');
+  } else {
+    my $s='';
+    while($i>0) {
+      $s = chr(ord('a')+(($i-1) % 26)) . $s;
+      $i = int(($i-1)/26);
+    }
+    $s =~ s/^([a-z])/uc($1)/e;
+    return($s);
+  }
+}
+
 sub export {
     my ($self,$fichier)=@_;
     my $sep=$self->{'out.separateur'};
@@ -145,7 +160,7 @@ sub export {
 	      }
 	    }
 	    for my $i (0..$#tl) {
-	      $t.=chr(ord('A')+$i) if($tl[$i]);
+	      $t.=$self->i_to_a($i+1) if($tl[$i]);
 	    }
 	    push @columns,$self->parse_string($t);
 	  } else {
