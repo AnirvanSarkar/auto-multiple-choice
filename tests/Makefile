@@ -19,6 +19,8 @@
 
 SHELL=/bin/sh
 
+include ../Makefile-all.conf
+
 SVG=$(shell find . -name '*.svg')
 EPS=$(SVG:.svg=.eps)
 

@@ -55,7 +55,7 @@ img_pdf/%.pdf: img_src/%.svg
 	rsvg-convert -f pdf $< -o $@
 
 html/index.html: FORCE
-	./index.pl $(DOCBOOKS:.xml=) > $@
+	$(PERLPATH) ./index.pl $(DOCBOOKS:.xml=) > $@
 
 %.tex: %.xml amcdocstyle.sty
 	 case $< in \
@@ -72,15 +72,15 @@ html/index.html: FORCE
 \\setCJKsansfont{IPAexGothic}\
 \\setCJKmonofont{IPAexGothic}\
 ' $<; \
-            xelatex $<; xelatex $<; ../reproducible-pdf.pl --fonts --id $@ ;; \
-	  *.tex) pdflatex $<; pdflatex $<; ../reproducible-pdf.pl --id $@ ;; \
+            xelatex $<; xelatex $<; $(PERLPATH) ../reproducible-pdf.pl --fonts --id $@ ;; \
+	  *.tex) pdflatex $<; pdflatex $<; $(PERLPATH) ../reproducible-pdf.pl --id $@ ;; \
 	esac
 	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
 
 %.ext: %.xml
-	perl extrait-fichiers.pl --liste $@ $<
+	$(PERLPATH) extrait-fichiers.pl --liste $@ $<
 
 %.man: %.xml
 	xsltproc --nonet --catalogs --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" --param man.output.lang.in.name.enabled "1" $(DOCBOOK_MAN_XSL) $<

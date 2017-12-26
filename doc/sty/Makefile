@@ -19,6 +19,8 @@
 
 SHELL=/bin/sh
 
+include ../../Makefile-all.conf
+
 PACK=automultiplechoice
 
 SAMPLES=$(wildcard sample-*.tex)
@@ -31,21 +33,21 @@ all: FORCE
 	makeindex -s gind.ist -o $(PACK).ind $(PACK).idx
 	pdflatex $(PACK).dtx
 	pdflatex $(PACK).dtx
-	../../reproducible-pdf.pl --id $(PACK).pdf
+	$(PERLPATH) ../../reproducible-pdf.pl --id $(PACK).pdf
 	$(MAKE) postclean
 
 styonly: $(PACK).dtx
 	pdflatex $<
 
 sample-%.datetex.in: sample-%.tex
-	perl -pe 's!\\begin\{document\}!\\begin{document}\\pdfinfo{/CreationDate (D:@/PACKAGE_V_PDFDATE/@) /ModDate (D:@/PACKAGE_V_PDFDATE/@)}!;' < $< > $@
+	$(PERLPATH) -pe 's!\\begin\{document\}!\\begin{document}\\pdfinfo{/CreationDate (D:@/PACKAGE_V_PDFDATE/@) /ModDate (D:@/PACKAGE_V_PDFDATE/@)}!;' < $< > $@
 
 sample-%.datetex: sample-%.datetex.in
 	$(MAKE) -C ../.. doc/sty/$@
 
 sample-%.pdf: sample-%.datetex
 	pdflatex -jobname sample-$* $<
-	../../reproducible-pdf.pl --id $@
+	$(PERLPATH) ../../reproducible-pdf.pl --id $@
 
 postclean:
 	-rm -f pexa-*

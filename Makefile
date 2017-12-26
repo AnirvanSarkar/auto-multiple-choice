@@ -22,7 +22,6 @@
 include Makefile-all.conf
 
 PACKAGE_DEB_TARGET=unstable
-PERLPATH ?= /usr/bin/perl
 
 # DATE/TIME to be substituted
 
@@ -31,7 +30,7 @@ DATE_DEBCHL:=$(shell LANG=en date "+%a, %d %b %Y %H:%M:%S %z")
 
 # list variables to be substituted in *.in files
 
-SUBST_VARS:=$(sort $(shell grep -h '=' $(SUB_MAKEFILES) | perl -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PACKAGE_DEB_TARGET PERLPATH DATE_DEBCHL DATE_RPMCHL)
+SUBST_VARS:=$(sort $(shell grep -h '=' $(SUB_MAKEFILES) | $(PERLPATH) -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PACKAGE_DEB_TARGET PERLPATH DATE_DEBCHL DATE_RPMCHL)
 
 # Some default values
 
@@ -139,10 +138,10 @@ vars-subs.pl: $(SUB_MAKEFILES)
 	@echo 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' >> $@
 
 %.xml: %.in.xml vars-subs.pl 
-	perl -p vars-subs.pl $< > $@
+	$(PERLPATH) -p vars-subs.pl $< > $@
 
 %: %.in vars-subs.pl
-	perl -p vars-subs.pl $< > $@
+	$(PERLPATH) -p vars-subs.pl $< > $@
 
 # some components
 
@@ -326,7 +325,7 @@ ORIG_SOURCES=/tmp/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags
 
 version_files:
-	perl local/versions.pl
+	$(PERLPATH) local/versions.pl
 	$(MAKE) auto-multiple-choice.spec
 
 tmp_copy:
@@ -361,12 +360,12 @@ tmp_deb:
 	$(MAKE) local/deb-auto-changelog
 	$(MAKE) tmp_copy
 	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
-	perl -pi -e 's/^DL=.*/DL=$(SRC_DOC_LANG)/' $(TMP_SOURCE_DIR)/debian/rules
+	$(PERLPATH) -pi -e 's/^DL=.*/DL=$(SRC_DOC_LANG)/' $(TMP_SOURCE_DIR)/debian/rules
 ifneq (,$(SKIP_DEP))
-	$(foreach onedep,$(SKIP_DEP),perl -pi -e 's/(,\s*$(onedep)|$(onedep),)//' $(TMP_SOURCE_DIR)/debian/control)
+	$(foreach onedep,$(SKIP_DEP),$(PERLPATH) -pi -e 's/(,\s*$(onedep)|$(onedep),)//' $(TMP_SOURCE_DIR)/debian/control)
 endif
 ifneq (,$(ADD_BUILD_DEP))
-	$(foreach onedep,$(ADD_BUILD_DEP),perl -pi -e 's/(?<=Build-Depends: )/$(onedep), /' $(TMP_SOURCE_DIR)/debian/control)
+	$(foreach onedep,$(ADD_BUILD_DEP),$(PERLPATH) -pi -e 's/(?<=Build-Depends: )/$(onedep), /' $(TMP_SOURCE_DIR)/debian/control)
 endif
 
 debsrc_vok: ssources tmp_deb
