@@ -544,7 +544,9 @@ sub set_project_options_to_default {
 sub set_project_option_to_default {
   my ($self,$key,$force)=@_;
   if($force || ! exists($self->{project}->{$key})) {
-    if($self->{o_default}->{"defaut_".$key}) {
+    if(exists($self->{global}->{"defaut_".$key})) {
+      $self->{project}->{$key}=$self->{global}->{"defaut_".$key};
+    } elsif(exists($self->{o_default}->{"defaut_".$key})) {
       $self->{project}->{$key}=$self->{o_default}->{"defaut_".$key};
     } else {
       $self->{project}->{$key}=$self->{project_default}->{$key};
