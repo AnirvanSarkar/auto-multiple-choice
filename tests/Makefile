@@ -21,6 +21,8 @@ SHELL=/bin/sh
 
 include ../Makefile-all.conf
 
+export PERLPATH
+
 SVG=$(shell find . -name '*.svg')
 EPS=$(SVG:.svg=.eps)
 
