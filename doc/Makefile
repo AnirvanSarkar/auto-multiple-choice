@@ -63,8 +63,11 @@ html/index.html: FORCE
 	   *.xml) dblatex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@ ;; \
 	 esac
 
+PDFLATEX=pdflatex -halt-on-error -interaction=nonstopmode
+XELATEX=xelatex -halt-on-error -interaction=nonstopmode
+
 %.pdf: %.tex $(BLOCK_IMAGES:.svg=.pdf)
-	export TEXINPUTS=./img_pdf/: ; case $< in \
+	set -e; export TEXINPUTS=./img_pdf/: ; case $< in \
 	  *.ja.tex) \
             sed -i -e '/setuplocale/a\
 \\usepackage{xeCJK}\
@@ -72,8 +75,8 @@ html/index.html: FORCE
 \\setCJKsansfont{IPAexGothic}\
 \\setCJKmonofont{IPAexGothic}\
 ' $<; \
-            xelatex $<; xelatex $<; $(PERLPATH) ../reproducible-pdf.pl --fonts --id $@ ;; \
-	  *.tex) pdflatex $<; pdflatex $<; $(PERLPATH) ../reproducible-pdf.pl --id $@ ;; \
+            $(XELATEX) $<; $(XELATEX) $<; $(PERLPATH) ../reproducible-pdf.pl --fonts --id $@ ;; \
+	  *.tex) $(PDFLATEX) $<; $(PDFLATEX) $<; $(PERLPATH) ../reproducible-pdf.pl --id $@ ;; \
 	esac
 	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
