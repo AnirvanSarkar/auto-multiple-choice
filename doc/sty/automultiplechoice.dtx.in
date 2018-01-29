@@ -3044,7 +3044,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcounter{AMCquestionaff}
 \newcommand{\AMCnumero}[1]{\setcounter{AMCquestionaff}{#1}\addtocounter{AMCquestionaff}{-1}}
-\newcommand\AMC@stepQuestion{\ifAMCquestionNumber\refstepcounter{AMCquestionaff}\fi}
+\AtBeginDocument{%
+  \ifx\@skiphyperreftrue\@undefined%
+    \expandafter\newif\csname if@skiphyperref\endcsname%
+  \fi%
+}
+\newcommand\AMC@stepQuestion{\ifAMCquestionNumber\@skiphyperreftrue\refstepcounter{AMCquestionaff}\@skiphyperreffalse\fi}
 \newcommand\AMC@qaff{\arabic{AMCquestionaff}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
