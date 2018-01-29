@@ -4402,6 +4402,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCid@etudfin=\AMCnum@copies%
   \advance\AMCid@etudfin\AMCid@etud\relax%
   \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
+  \ifAMC@pdfform\begin{Form}\fi%
   \loop{%
     \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
       \string\rngstate{\the\AMCid@etud}{\the\AMC@SR}%
@@ -4410,11 +4411,10 @@ Three digits and two letters:\insertgroup{mixed}.
     \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageNoMarks}\fi\fi%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
-    \ifAMC@pdfform\begin{Form}\fi%
       #2%
-    \ifAMC@pdfform\end{Form}\fi%
     \clearpage}%
   \advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
+  \ifAMC@pdfform\end{Form}\fi%
   \global\AMCid@etudstart=\AMCid@etud%
 }
 %    \end{macrocode}\end{macro}
