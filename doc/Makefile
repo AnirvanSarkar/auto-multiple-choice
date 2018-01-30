@@ -69,7 +69,7 @@ XELATEX=xelatex -halt-on-error -interaction=nonstopmode
 %.pdf: %.tex $(BLOCK_IMAGES:.svg=.pdf)
 	set -e; export TEXINPUTS=./img_pdf/: ; case $< in \
 	  *.ja.tex) \
-            sed -i -e '/setuplocale/a\
+            sed -i -e '/setuplocale/a \ \
 \\usepackage{xeCJK}\
 \\setCJKmainfont{IPAexMincho}\
 \\setCJKsansfont{IPAexGothic}\
