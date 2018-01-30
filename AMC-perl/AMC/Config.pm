@@ -345,7 +345,7 @@ sub defaults {
      notify_capture=>1,
      notify_grading=>1,
      notify_annotation=>1,
-     notify_desktop=>1,
+     notify_desktop=>lc($^O) ne 'darwin', # macOS does not handle libnotify
      notify_command=>'',
 
      project_icon_size=>16,
