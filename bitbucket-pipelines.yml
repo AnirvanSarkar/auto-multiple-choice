@@ -6,8 +6,9 @@
 image: jojoboulix/amc-build
 
 pipelines:
-  default:
-    - step:
+  custom:
+    test-and-tarball:
+      - step:
         script: # Modify the commands below to build your repository.
           - make version_files
           - make
