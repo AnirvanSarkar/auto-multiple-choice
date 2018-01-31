@@ -25,19 +25,20 @@ PACK=automultiplechoice
 
 SAMPLES=$(wildcard sample-*.tex)
 
+PDFLATEX=pdflatex -halt-on-error -interaction=nonstopmode
 all: FORCE
-	pdflatex $(PACK).dtx
+	$(PDFLATEX) $(PACK).dtx
 	$(MAKE) $(SAMPLES:.tex=.pdf)
-	pdflatex $(PACK).dtx
+	$(PDFLATEX) $(PACK).dtx
 	makeindex -s gglo.ist -o $(PACK).gls $(PACK).glo
 	makeindex -s gind.ist -o $(PACK).ind $(PACK).idx
-	pdflatex $(PACK).dtx
-	pdflatex $(PACK).dtx
+	$(PDFLATEX) $(PACK).dtx
+	$(PDFLATEX) $(PACK).dtx
 	$(PERLPATH) ../../reproducible-pdf.pl --id $(PACK).pdf
 	$(MAKE) postclean
 
 styonly: $(PACK).dtx
-	pdflatex $<
+	$(PDFLATEX) $<
 
 sample-%.datetex.in: sample-%.tex
 	$(PERLPATH) -pe 's!\\begin\{document\}!\\begin{document}\\pdfinfo{/CreationDate (D:@/PACKAGE_V_PDFDATE/@) /ModDate (D:@/PACKAGE_V_PDFDATE/@)}!;' < $< > $@
