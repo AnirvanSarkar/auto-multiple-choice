@@ -317,10 +317,11 @@ endif
 
 BUILDOPTS=-I.svn -Idownload_area -Ilocal $(DEBSIGN)
 
-TMP_DIR=/tmp
+TMP_DIR=tmp
 SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
-ORIG_SOURCES=/tmp/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
+TARBALLS_DIR=tarballs
+ORIG_SOURCES=$(TARBALLS_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 
 SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags
 
@@ -339,22 +340,26 @@ portable_vok:
 	$(MAKE) tmp_copy
 	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR)
 	make AMCCONF=portable INSTREP=$(TMP_PORTABLE)/AMC -C $(TMP_SOURCE_DIR) install
-	cd $(TMP_PORTABLE) ; tar cvzf /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_portable.tar.gz $(SRC_EXCL) AMC
+	cd $(TMP_PORTABLE) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_portable.tar.gz $(SRC_EXCL) AMC
+	mv $(TMP_PORTABLE)/auto-multiple-choice_$(PACKAGE_V_DEB)_portable.tar.gz $(TARBALLS_DIR)
 	rm -rf $(TMP_PORTABLE)
 
 ssources_vok:
 	$(MAKE) tmp_copy
-	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
+	cd $(TMP_DIR) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
+	rm -rf $(TMP_SOURCE_DIR)
 
 sources_vok:
 	$(MAKE) tmp_copy
-	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
+	cd $(TMP_DIR) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) MAJ
 	$(MAKE) -C $(TMP_SOURCE_DIR) $(MAIN_LOGO).xpm I18N doc
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean_IN
 	$(MAKE) -C $(TMP_SOURCE_DIR) auto-multiple-choice.spec
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
-	cd /tmp ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
+	cd $(TMP_DIR) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
+	mv $(TMP_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB)_*.tar.gz $(TARBALLS_DIR)
+	rm -rf $(TMP_SOURCE_DIR)
 
 tmp_deb:
 	$(MAKE) local/deb-auto-changelog
@@ -367,13 +372,16 @@ endif
 ifneq (,$(ADD_BUILD_DEP))
 	$(foreach onedep,$(ADD_BUILD_DEP),$(PERLPATH) -pi -e 's/(?<=Build-Depends: )/$(onedep), /' $(TMP_SOURCE_DIR)/debian/control)
 endif
+	rm -rf $(TMP_SOURCE_DIR)
 
 debsrc_vok: ssources tmp_deb
-	test -f $(ORIG_SOURCES) || cp /tmp/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(ORIG_SOURCES)
+	test -f $(ORIG_SOURCES) || cp $(TMP_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(ORIG_SOURCES)
 	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -S $(BUILDOPTS) $(MORE_BUILDOPTS)
+	rm -rf $(TMP_SOURCE_DIR)
 
 deb_vok: tmp_deb
 	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -b $(BUILDOPTS) $(MORE_BUILDOPTS)
+	rm -rf $(TMP_SOURCE_DIR)
 
 # % : make sure version_files are rebuilt before calling target %_vok
 
