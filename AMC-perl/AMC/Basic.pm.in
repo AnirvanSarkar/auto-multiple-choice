@@ -91,6 +91,7 @@ sub amc_adapt_path {
     'icons'=>"@/ICONSDIR/@",
     'models'=>"@/MODELSDIR/@",
     'doc/auto-multiple-choice'=>"@/DOCDIR/@",
+    'locale' => "@/LOCALEDIR/@",
     );
 
 sub amc_specdir {
@@ -574,7 +575,7 @@ sub use_gettext {
     if(! -f ($localisation->dir()."/fr/LC_MESSAGES/auto-multiple-choice.mo")) {
 	$localisation->dir(amc_adapt_path(
 			       'locals'=>['locale'],
-			       'alt'=>[$localisation->dir()],
+			       'alt'=>[amc_specdir('locale'), $localisation->dir()],
 			   ));
     }
 

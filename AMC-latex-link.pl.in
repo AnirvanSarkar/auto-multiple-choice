@@ -115,8 +115,9 @@ if(@styles) {
 } else {
     my $loc=get_tex_var('TEXMFLOCAL');
     if(! -d $loc) {
-	print STDERR "ERROR: I don't find TEXMFLOCAL ($loc)\n";
-	exit(2);
+        print STDERR "WARNING: the directory TEXMFLOCAL does not exist ($loc).\n";
+        print STDERR "WARNING: trying to create $loc...\n";
+        mkdir("$loc");
     }
     my $installed='@/TEXDIR/@/automultiplechoice.sty';
     if(! -f $installed) {
