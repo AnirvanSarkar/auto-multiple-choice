@@ -332,7 +332,7 @@ version_files:
 tmp_copy:
 	rm -rf $(TMP_SOURCE_DIR)
 	mkdir $(TMP_SOURCE_DIR)
-	rsync -aC --exclude '*~' --exclude download_area --exclude local --exclude tmp --exclude tarballs . $(TMP_SOURCE_DIR)
+	rsync -aC --exclude '*~' --exclude .hg --exclude download_area --exclude local --exclude tmp --exclude tarballs . $(TMP_SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean
 
 portable_vok:
