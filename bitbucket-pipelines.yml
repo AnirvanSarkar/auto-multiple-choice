@@ -19,3 +19,11 @@ pipelines:
             - export TARBALL=auto-multiple-choice_$(hg log -r . --template '{latesttag}-{rev}-{node|short}')_dist.tar.gz
             - mv tarballs/auto-multiple-choice_*_precomp.tar.gz $TARBALL
             - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"$TARBALL"
+    tarball:
+      - step:
+          script: # Modify the commands below to build your repository.
+            - make version_files
+            - make sources
+            - export TARBALL=auto-multiple-choice_$(hg log -r . --template '{latesttag}-{rev}-{node|short}')_dist.tar.gz
+            - mv tarballs/auto-multiple-choice_*_precomp.tar.gz $TARBALL
+            - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"$TARBALL"
