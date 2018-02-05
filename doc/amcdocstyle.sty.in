@@ -21,7 +21,7 @@
 \ProvidesPackage{amcdocstyle}
 \RequirePackageWithOptions{docbook}
 \RequirePackage[USenglish]{isodate}
-
+\RequirePackage{ifxetex}
 \AtBeginDocument{
   \ifx\pdfinfo\undefined
   \hypersetup{pdfcreationdate=D:@/PACKAGE_V_PDFDATE/@,pdfmoddate=D:@/PACKAGE_V_PDFDATE/@}
@@ -31,3 +31,9 @@
   \renewcommand{\DBKdate}{\printdate{@/PACKAGE_V_ISODATE/@}}
   \expandafter\def\expandafter\DBKsubtitle\expandafter{\DBKsubtitle{} \href{https://www.auto-multiple-choice.net/}{https://www.auto-multiple-choice.net/}}
 }
+\ifxetex%
+  \RequirePackage{xeCJK}%
+  \setCJKmainfont{IPAexMincho}%
+  \setCJKsansfont{IPAexGothic}%
+  \setCJKmonofont{IPAexGothic}%
+\fi

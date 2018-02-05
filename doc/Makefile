@@ -57,27 +57,23 @@ img_pdf/%.pdf: img_src/%.svg
 html/index.html: FORCE
 	$(PERLPATH) ./index.pl $(DOCBOOKS:.xml=) > $@
 
+%.ja.tex: %.ja.xml amcdocstyle.sty
+	dblatex -P latex.encoding=utf8 -b xetex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
+
 %.tex: %.xml amcdocstyle.sty
-	 case $< in \
-	   *.ja.xml) dblatex -P latex.encoding=utf8 -b xetex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@ ;; \
-	   *.xml) dblatex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@ ;; \
-	 esac
+	dblatex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
 
 PDFLATEX=pdflatex -halt-on-error -interaction=nonstopmode
 XELATEX=xelatex -halt-on-error -interaction=nonstopmode
 
+%.ja.pdf: %.ja.tex $(BLOCK_IMAGES:.svg=.pdf)
+	set -e ; export TEXINPUTS=./img_pdf/: ; $(XELATEX) $<; $(XELATEX) $<
+	$(PERLPATH) ../reproducible-pdf.pl --fonts --id $@
+	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.ja.$(ext))
+
 %.pdf: %.tex $(BLOCK_IMAGES:.svg=.pdf)
-	set -e; export TEXINPUTS=./img_pdf/: ; case $< in \
-	  *.ja.tex) \
-            sed -i -e '/setuplocale/a \ \
-\\usepackage{xeCJK}\
-\\setCJKmainfont{IPAexMincho}\
-\\setCJKsansfont{IPAexGothic}\
-\\setCJKmonofont{IPAexGothic}\
-' $<; \
-            $(XELATEX) $<; $(XELATEX) $<; $(PERLPATH) ../reproducible-pdf.pl --fonts --id $@ ;; \
-	  *.tex) $(PDFLATEX) $<; $(PDFLATEX) $<; $(PERLPATH) ../reproducible-pdf.pl --id $@ ;; \
-	esac
+	set -e ; export TEXINPUTS=./img_pdf/: ; $(PDFLATEX) $<; $(PDFLATEX) $<
+	$(PERLPATH) ../reproducible-pdf.pl --id $@
 	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
