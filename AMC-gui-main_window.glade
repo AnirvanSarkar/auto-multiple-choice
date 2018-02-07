@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.2 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
   <object class="GtkAccelGroup" id="accelgroup1"/>
@@ -144,6 +144,52 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-dialog-warning</property>
+  </object>
+  <object class="GtkMenu" id="menu_columns">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tearoff_title">Columns</property>
+    <property name="menu_type_hint">dropdown-menu</property>
+    <child>
+      <object class="GtkCheckMenuItem" id="toggle_column_updated">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Updated</property>
+        <property name="use_underline">True</property>
+        <property name="active">True</property>
+        <signal name="toggled" handler="toggle_column" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkCheckMenuItem" id="toggle_column_mse">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">MSE</property>
+        <property name="use_underline">True</property>
+        <property name="active">True</property>
+        <signal name="toggled" handler="toggle_column" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkCheckMenuItem" id="toggle_column_sensitivity">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Sensitivity</property>
+        <property name="use_underline">True</property>
+        <property name="active">True</property>
+        <signal name="toggled" handler="toggle_column" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkCheckMenuItem" id="toggle_column_file">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Scan file</property>
+        <property name="use_underline">True</property>
+        <property name="active">True</property>
+        <signal name="toggled" handler="toggle_column" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="visible">True</property>
@@ -1132,26 +1178,47 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButtonBox" id="Vbuttonbox3">
+                                  <object class="GtkBox" id="box_buttons">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="orientation">vertical</property>
                                     <property name="spacing">5</property>
-                                    <property name="homogeneous">True</property>
-                                    <property name="layout_style">center</property>
                                     <child>
-                                      <object class="GtkButton" id="button13">
-                                        <property name="label" translatable="yes" comments="Label on the button used to open a window with the images of the boxes taken from the scan. This window can be used th check boxes categorization.">Zooms</property>
-                                        <property name="use_action_appearance">False</property>
+                                      <object class="GtkMenuButton" id="button_choose_columns">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="focus_on_click">False</property>
                                         <property name="receives_default">True</property>
-                                        <property name="tooltip_text" translatable="yes">Show images of the boxes from the scan, and check their categorization.</property>
-                                        <property name="image">image7</property>
-                                        <property name="image_position">top</property>
-                                        <property name="always_show_image">True</property>
-                                        <signal name="clicked" handler="zooms_line_open" swapped="no"/>
+                                        <property name="popup">menu_columns</property>
+                                        <child>
+                                          <object class="GtkBox" id="box_button_columns">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <child>
+                                              <object class="GtkLabel" id="label_columns">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="label" translatable="yes">Columns</property>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">0</property>
+                                              </packing>
+                                            </child>
+                                            <child>
+                                              <object class="GtkArrow" id="arrow0">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="arrow_type">down</property>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">1</property>
+                                              </packing>
+                                            </child>
+                                          </object>
+                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -1160,48 +1227,83 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkButton" id="button14">
-                                        <property name="label" translatable="yes" comments="Label of the button used to open a window showing a scan with the place where corner marks have been detected, and the position where the boxes are supposed to be.">Layout</property>
-                                        <property name="use_action_appearance">False</property>
+                                      <object class="GtkButtonBox" id="Vbuttonbox3">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="focus_on_click">False</property>
-                                        <property name="receives_default">True</property>
-                                        <property name="tooltip_text" translatable="yes">Show where corner marks have been detected on the scan, and where boxes are supposed to be.</property>
-                                        <property name="image">image19</property>
-                                        <property name="image_position">top</property>
-                                        <property name="always_show_image">True</property>
-                                        <signal name="clicked" handler="layout_line" swapped="no"/>
+                                        <property name="can_focus">False</property>
+                                        <property name="orientation">vertical</property>
+                                        <property name="spacing">5</property>
+                                        <property name="homogeneous">True</property>
+                                        <property name="layout_style">center</property>
+                                        <child>
+                                          <object class="GtkButton" id="button13">
+                                            <property name="label" translatable="yes" comments="Label on the button used to open a window with the images of the boxes taken from the scan. This window can be used th check boxes categorization.">Zooms</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="focus_on_click">False</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Show images of the boxes from the scan, and check their categorization.</property>
+                                            <property name="image">image7</property>
+                                            <property name="image_position">top</property>
+                                            <property name="always_show_image">True</property>
+                                            <signal name="clicked" handler="zooms_line_open" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">False</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button14">
+                                            <property name="label" translatable="yes" comments="Label of the button used to open a window showing a scan with the place where corner marks have been detected, and the position where the boxes are supposed to be.">Layout</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="focus_on_click">False</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Show where corner marks have been detected on the scan, and where boxes are supposed to be.</property>
+                                            <property name="image">image19</property>
+                                            <property name="image_position">top</property>
+                                            <property name="always_show_image">True</property>
+                                            <signal name="clicked" handler="layout_line" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">False</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button15">
+                                            <property name="label" translatable="yes" comments="Label of the button used to delete data capture for selected pages.">Remove</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Remove data capture for selected pages.</property>
+                                            <property name="image">image6</property>
+                                            <property name="image_position">top</property>
+                                            <property name="always_show_image">True</property>
+                                            <signal name="clicked" handler="delete_line" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">2</property>
+                                          </packing>
+                                        </child>
                                       </object>
                                       <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">False</property>
-                                        <property name="position">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkButton" id="button15">
-                                        <property name="label" translatable="yes" comments="Label of the button used to delete data capture for selected pages.">Remove</property>
-                                        <property name="use_action_appearance">False</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="receives_default">True</property>
-                                        <property name="tooltip_text" translatable="yes">Remove data capture for selected pages.</property>
-                                        <property name="image">image6</property>
-                                        <property name="image_position">top</property>
-                                        <property name="always_show_image">True</property>
-                                        <signal name="clicked" handler="delete_line" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
+                                        <property name="expand">True</property>
                                         <property name="fill">True</property>
-                                        <property name="position">2</property>
+                                        <property name="position">1</property>
                                       </packing>
                                     </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -2757,6 +2859,9 @@
           </packing>
         </child>
       </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
     </child>
   </object>
 </interface>

@@ -461,7 +461,7 @@ sub define_statements {
      'pagesChanged'=>{'sql'=>"SELECT student,page,copy FROM $t_page"
 		      ." WHERE timestamp_auto>? OR timestamp_manual>?"},
      'pagesSummary'=>
-     {'sql'=>"SELECT student,page,copy,mse,timestamp_auto,timestamp_manual"
+     {'sql'=>"SELECT student,page,copy,src,mse,timestamp_auto,timestamp_manual"
       .",CASE WHEN timestamp_auto>0 AND mse>? THEN ?"
       ."      ELSE ?"
       ."  END AS mse_color"
