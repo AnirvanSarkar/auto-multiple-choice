@@ -78,14 +78,15 @@ use constant {
     DIAG_ID => 0,
     DIAG_ID_BACK => 1,
     DIAG_MAJ => 2,
-    DIAG_EQM => 3,
-    DIAG_EQM_BACK => 4,
-    DIAG_DELTA => 5,
-    DIAG_DELTA_BACK => 6,
-    DIAG_ID_STUDENT => 7,
-    DIAG_ID_PAGE => 8,
-    DIAG_ID_COPY => 9,
-    DIAG_SCAN_FILE => 10,
+    DIAG_MAJ_NUM => 3,
+    DIAG_EQM => 4,
+    DIAG_EQM_BACK => 5,
+    DIAG_DELTA => 6,
+    DIAG_DELTA_BACK => 7,
+    DIAG_ID_STUDENT => 8,
+    DIAG_ID_PAGE => 9,
+    DIAG_ID_COPY => 10,
+    DIAG_SCAN_FILE => 11,
 
     INCONNU_FILE => 0,
     INCONNU_SCAN => 1,
@@ -660,6 +661,7 @@ sub new_diagstore {
 			    'Glib::String',
 			    'Glib::String',
 			    'Glib::String',
+			    'Glib::String',
 			    'Glib::String');
   $diag_store->set_sort_func(DIAG_EQM,\&sort_num,DIAG_EQM);
   $diag_store->set_sort_func(DIAG_DELTA,\&sort_num,DIAG_DELTA);
@@ -699,6 +701,7 @@ $renderer=Gtk3::CellRendererText->new;
 $capture_column{updated} = Gtk3::TreeViewColumn->new_with_attributes (__"updated",
 						     $renderer,
 						     text=> DIAG_MAJ);
+$capture_column{updated}->set_sort_column_id(DIAG_MAJ_NUM);
 $w{'diag_tree'}->append_column ($capture_column{updated});
 
 $renderer=Gtk3::CellRendererText->new;
@@ -4742,6 +4745,7 @@ sub detecte_analyse {
 	 DIAG_EQM,$p->{'mse_string'},
 	 DIAG_EQM_BACK,$p->{'mse_color'},
 	 DIAG_MAJ,format_date($p->{'timestamp'}),
+	 DIAG_MAJ_NUM,$p->{'timestamp'},
 	 DIAG_DELTA,$p->{'sensitivity_string'},
 	 DIAG_DELTA_BACK,$p->{'sensitivity_color'},
          DIAG_SCAN_FILE,path_to_filename($p->{'src'}),
