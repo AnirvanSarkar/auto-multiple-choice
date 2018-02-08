@@ -242,6 +242,32 @@ sub draw_box {
   }
 }
 
+sub box_miny {
+  my ($self,$box)=@_;
+  my $miny=$self->{'ty'};
+  if($box->{'xy'}) {
+    for my $i (0..3) {
+      my $y=$box->{'xy'}->[$i*2+1]*$self->{'ry'};
+      $miny=$y if($y<$miny);
+    }
+  } else {
+    $miny=$box->{'ymin'}*$self->{'ry'};
+  }
+  return($miny);
+}
+
+sub question_miny {
+  my ($self,$question)=@_;
+  my $miny=$self->{'ty'};
+  for my $l (@{$self->{'layinfo'}->{'box'}}) {
+    if($l->{question}==$question) {
+      my $y=$self->box_miny($l);
+      $miny=$y if($y<$miny);
+    }
+  }
+  return($miny);
+}
+
 sub allocate_drawing {
   my ($self,$evenement,@donnees)=@_;
   my $r=$self->get_allocation();

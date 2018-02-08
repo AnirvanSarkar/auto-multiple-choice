@@ -74,6 +74,8 @@ sub new {
 	      'size_monitor'=>'',
               'invalid_color_name'=>"#FFEF3B",
               'empty_color_name'=>"#78FFED",
+              'navigate_q_id'=>-1,
+              'navigate_q_margin'=>10,
 	  };
 
     for (keys %o) {
@@ -108,7 +110,7 @@ sub new {
     $self->{'gui'}->set_translation_domain('auto-multiple-choice');
     $self->{'gui'}->add_from_file($glade_xml);
 
-    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view navigate/) {
+    for my $k (qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view navigate navigate_question scan_yadjust/) {
 	$self->{$k}=$self->{'gui'}->get_object($k);
     }
 
@@ -132,6 +134,25 @@ sub new {
                                        2,__("i&e"));
       $self->{navigate}->set_model($self->{navigate_model});
       $self->{navigate}->set_active_iter($self->{navigate_model}->get_iter_first);
+
+      # get list of questions IDs
+
+      $self->{'capture'}->begin_read_transaction;
+      my @questions=sort { $a->{name} cmp $b->{name} }
+        $self->{layout}->questions_list();
+      $self->{'capture'}->end_transaction;
+
+      $self->{navigate_question_model}=
+        cb_model(-1,__("all"),map { $_->{question}, $_->{name} } @questions);
+      $self->{navigate_question}->set_model($self->{navigate_question_model});
+      $self->{navigate_question}->
+        set_active_iter($self->{navigate_question_model}->
+                        get_iter_first);
+
+      $self->{navigate_question}->signal_connect("changed",\&update_nav_question,
+                                                 $self);
+
+      # show navigation tab
 
       $self->{'navigation_h'}->show();
     }
@@ -616,10 +637,29 @@ sub synchronise {
   $self->maj_list_i;
 }
 
+sub update_nav_question {
+  my ($w,$self)=@_;
+  $self->{navigate_q_id}=get_active_id($w);
+  if($self->{navigate_q_id} >= 0) {
+    $self->{layout}->begin_read_transaction;
+    my @pages=$self->{layout}->pages_for_question($self->{navigate_q_id});
+    $self->{pages_ok}={map { pageids_string($_->{student},$_->{page}) => $_->{miny} }
+                       @pages};
+    $self->{layout}->end_transaction;
+    debug "NAVQ_PAGES=".join(', ',keys %{$self->{pages_ok}});
+    $self->move_if_not_ok();
+  }
+}
+
 sub navigate_ok {
   my ($self,$nav_mode,$path)=@_;
-  return(1) if($nav_mode==0);
   my $iter=$self->{diag_store}->get_iter($path);
+  if($self->{navigate_q_id} >= 0) {
+    my $student=$self->{diag_store}->get($iter,MDIAG_STUDENT);
+    my $page=$self->{diag_store}->get($iter,MDIAG_PAGE);
+    return(0) if(!exists($self->{pages_ok}->{pageids_string($student,$page)}));
+  }
+  return(1) if($nav_mode==0);
   my $why=$self->{diag_store}->get($iter,MDIAG_WHY);
   return(0) if($nav_mode==1 && $why !~ /E/);
   return(0) if($nav_mode==2 && $why !~ /[EV]/);
@@ -636,6 +676,7 @@ sub passe_precedent {
       $ok=$path->prev();
     } while($ok && !$self->navigate_ok($nav,$path));
     $self->{'diag_tree'}->set_cursor($path,undef,FALSE) if($ok);
+    $self->focus();
   } else {
     debug "Previous: no path";
   }
@@ -651,9 +692,34 @@ sub passe_suivant {
       $path->next();
     } while($path->to_string<$n && !$self->navigate_ok($nav,$path));
     $self->{'diag_tree'}->set_cursor($path,undef,FALSE) if($path->to_string<$n);
+    $self->focus();
   } else {
     debug "Next: no path";
   }
+}
+
+sub focus {
+  my ($self)=@_;
+  if($self->{navigate_q_id} >= 0) {
+    my $miny=$self->{area}->question_miny($self->{navigate_q_id})-$self->{navigate_q_margin};
+    $miny=0 if($miny<0);
+    my $adj_upper=$miny+$self->{scan_yadjust}->get_page_size();
+    $adj_upper=$self->{area}->{ty} if($adj_upper<$self->{area}->{ty});
+    $self->{scan_yadjust}->set_upper($adj_upper);
+    $self->{scan_yadjust}->set_value($miny);
+  } else {
+    $self->{scan_yadjust}->set_upper($self->{area}->{ty});
+  }
+}
+
+sub move_if_not_ok {
+  my ($self)=@_;
+  my $nav=$self->{navigate}->get_active();
+  my ($path)=$self->{'diag_tree'}->get_cursor();
+  if(!$self->navigate_ok($nav,$path)) {
+    $self->passe_suivant();
+  }
+  $self->focus();
 }
 
 sub annule {

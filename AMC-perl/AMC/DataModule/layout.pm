@@ -394,6 +394,8 @@ sub define_statements {
 		 ." WHERE student=? AND question=? AND answer=? AND role=?"},
        'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM ".$self->table("box")
 			     ." WHERE student=? AND role=? GROUP BY student,page"},
+       'PAGES_Q_box'=>{'sql'=>"SELECT student,page,min(ymin) as miny,max(ymax) as maxy FROM ".$self->table("box")
+                       ." WHERE role=? AND question=? GROUP BY student,page"},
        'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
 				   ." WHERE student=? GROUP BY student,page"},
        'PAGES_STUDENT_enter'=>
@@ -522,6 +524,7 @@ sub define_statements {
        {'sql'=>"SELECT student, page, question "
 	." FROM ".$self->table("box")." WHERE answer=1"
        },
+       'QuestionsList'=>{sql=>"SELECT * FROM ".$self->table("question")},
       };
 }
 
@@ -681,6 +684,17 @@ sub pages_for_student {
     }
     return($self->sql_list($self->statement('PAGES_STUDENT_'.$oo{'select'}),
 			   @args));
+  }
+
+# pages_for_question($question_id) returns all the pages (in the form
+# {student=>xx,page=>xx}) where one can find boxes to be checked for
+# this particular question.
+
+sub pages_for_question {
+  my ($self,$question_id)=@_;
+  return(@{$self->dbh->selectall_arrayref($self->statement('PAGES_Q_box'),
+                                          {Slice=>{}},
+                                          BOX_ROLE_ANSWER,$question_id)});
 }
 
 # pages_info_for_student($student,[%options]) returns a list of
@@ -939,6 +953,14 @@ sub namefield_page {
   my ($self,$student)=@_;
   return($self->sql_single($self->statement('namefieldPage'),
                            $student));
+}
+
+# Get the list of all questions
+
+sub questions_list {
+  my ($self)=@_;
+  return @{$self->dbh->selectall_arrayref($self->statement('QuestionsList'),
+                                          {Slice=>{}})};
 }
 
 1;
