@@ -3410,19 +3410,26 @@ Three digits and two letters:\insertgroup{mixed}.
 
 \tl_new:N \amc_ee_tl
 \seq_new:N \amc_ee_seq
-\cs_new:Npn \amc_read_scientific:NNn #1 #2 #3 {
 %    \end{macrocode}
 % Note that with some versions of |l3fp-convert| (prior to
 % 2017-09-18), |\fp_to_scientific| leads to a `e' with catcode 12
 % (\emph{other}). We convert it to catcode \emph{letter} before
 % splitting.
 %    \begin{macrocode}
-  \tl_set:Nn \amc_ee_tl { #3 }
-  \tl_replace_once:Nxn \amc_ee_tl { \catcode`e=12 e } { e }
-  \seq_set_split:NnV \amc_ee_seq e \amc_ee_tl
-  \fp_set:Nn #1 { \seq_item:Nn \amc_ee_seq 1 }
-  \int_set:Nn #2 { \seq_item:Nn \amc_ee_seq 2 }
+\group_begin:
+\char_set_catcode_other:N E
+\tl_to_lowercase:n
+{
+  \cs_new:Npn \amc_read_scientific:NNn #1 #2 #3 {
+    \tl_set:Nn \amc_ee_tl { #3 }
+    \tl_replace_once:Nxn \amc_ee_tl { E } { e }
+    \seq_set_split:NnV \amc_ee_seq e \amc_ee_tl
+    \fp_set:Nn #1 { \seq_item:Nn \amc_ee_seq 1 }
+    \int_set:Nn #2 { \seq_item:Nn \amc_ee_seq 2 }
+  }
 }
+\group_end:
+
 \cs_generate_variant:Nn \amc_read_scientific:NNn { NNf, NNx }
 
 \fp_new:N \amc_fulls_fp
