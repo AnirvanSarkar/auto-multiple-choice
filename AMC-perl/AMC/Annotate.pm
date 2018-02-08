@@ -20,7 +20,7 @@
 
 package AMC::Annotate;
 
-use Gtk3 -init;
+use Gtk3;
 use List::Util qw(min max sum);
 use File::Copy;
 use Unicode::Normalize;
