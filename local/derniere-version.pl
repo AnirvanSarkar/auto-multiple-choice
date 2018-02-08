@@ -38,14 +38,16 @@ GetOptions("base=s"=>\@d,
 	   "debug!"=>\$debug,
 	   );
 
-@d=("/home/alexis/enseignement","/tmp") if(!@d && !$fich);
+@d=("/home/alexis/enseignement","/tmp","tmp") if(!@d && !$fich);
 
 my @v;
 
 for my $d (@d) {
+  if(-d $d) {
     opendir(DIR,$d);
     push @v,map { "$d/$_" } grep { /^auto-multiple-choice_.*$ext$/ && ($precomp || ! /precomp/) && ! /current/ } readdir(DIR);
     closedir(DIR);
+  }
 }
 
 push @v,$fich if($fich);
@@ -64,7 +66,7 @@ sub la_date_en {
 
 sub version {
     my $f=shift;
-    $f =~ s/^.*_([^_-]+)(-[0-9]+)?(_[^_.]*)?\.?$ext/$1/;
+    $f =~ s/^.*?_([^_]+)(_.*)?\.?$ext/$1/;
     return($f);
 }
 

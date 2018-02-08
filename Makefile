@@ -21,8 +21,8 @@
 
 include Makefile-all.conf
 
-PACKAGE_DEB_TARGET=unstable
-
+PACKAGE_DEB_TARGET = unstable
+PACKAGE_DEB_DV ?= -1
 # DATE/TIME to be substituted
 
 DATE_RPMCHL:=$(shell LC_TIME=en date +"%a %b %e %Y")
@@ -321,7 +321,7 @@ TMP_DIR=tmp
 SOURCE_DIR=auto-multiple-choice-$(PACKAGE_V_DEB)
 TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
 TARBALLS_DIR=tarballs
-ORIG_SOURCES=$(TARBALLS_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
+ORIG_SOURCES=$(TMP_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 
 SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags
 
@@ -372,7 +372,6 @@ endif
 ifneq (,$(ADD_BUILD_DEP))
 	$(foreach onedep,$(ADD_BUILD_DEP),$(PERLPATH) -pi -e 's/(?<=Build-Depends: )/$(onedep), /' $(TMP_SOURCE_DIR)/debian/control)
 endif
-	rm -rf $(TMP_SOURCE_DIR)
 
 debsrc_vok: ssources tmp_deb
 	test -f $(ORIG_SOURCES) || cp $(TMP_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(ORIG_SOURCES)
