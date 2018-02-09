@@ -1169,6 +1169,7 @@ sub delete_line {
 			.'<b>'.(__"All data and image files related to these pages will be deleted.")."</b>\n"
 			.(__"Do you really want to continue?")
 		       );
+    $dialog->get_widget_for_response('yes')->get_style_context()->add_class("destructive-action");
     my $reponse=$dialog->run;
     $dialog->destroy;
     if($reponse eq 'yes') {
@@ -1759,6 +1760,7 @@ sub projet_liste_supprime {
 			  sprintf(__("You asked to remove project <b>%s</b>.")." "
 				  .__("This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example.")." "
 				  .__("Is this really what you want?"),glib_filename($proj)));
+    $dialog->get_widget_for_response('ok')->get_style_context()->add_class("destructive-action");
     my $reponse=$dialog->run;
     $dialog->destroy;
     $w{'choix_projet'}->set_keep_above(1);
@@ -1959,6 +1961,7 @@ sub doc_maj {
 			      .__("Do you wish to continue?")." "
 			      .__("Click on OK to erase the former layouts and update working documents, or on Cancel to cancel this operation.")." "
 			      ."<b>".__("To allow the use of an already printed question, cancel!")."</b>");
+        $dialog->get_widget_for_response('ok')->get_style_context()->add_class("destructive-action");
 	my $reponse=$dialog->run;
 	$dialog->destroy;
 
@@ -1984,8 +1987,9 @@ sub doc_maj {
 				  .__("Updating working documents, the layouts will become obsolete and will thus be erased.")." "
 				  .__("Do you wish to continue?")." "
 				  .__("Click on OK to erase the former layouts and update working documents, or on Cancel to cancel this operation.")
-				  ." <b>".__("To allow the use of an already printed question, cancel!")."</b>");
-	    my $reponse=$dialog->run;
+                                ." <b>".__("To allow the use of an already printed question, cancel!")."</b>");
+	    $dialog->get_widget_for_response('ok')->get_style_context()->add_class("destructive-action");
+            my $reponse=$dialog->run;
 	    $dialog->destroy;
 
 	    if($reponse ne 'ok') {
@@ -3501,6 +3505,7 @@ sub change_liste_key {
 			    sprintf(__("The primary key from the students list has been set to \"%s\", which is not the value from the association data."),$config->get('liste_key'))." ".
 			    sprintf(__("Some manual association data has be found, which will be lost if the primary key is changed. Do you want to switch back to the primary key \"%s\" and keep association data?"),$assoc_liste_key)
 			   );
+        $dialog->get_widget_for_response('yes')->get_style_context()->add_class("suggested-action");
 	my $resp=$dialog->run;
 	$dialog->destroy;
 
@@ -4319,6 +4324,7 @@ sub accepte_preferences {
           $dialog->set_markup(
 			      sprintf(__("You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"),
 				      $label_general,$label_projet,$projet{'nom'}));
+          $dialog->get_widget_for_response('yes')->get_style_context()->add_class("suggested-action");
 	  my $reponse=$dialog->run;
 	  $dialog->destroy;
 
