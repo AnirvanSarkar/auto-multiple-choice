@@ -75,7 +75,7 @@ die "Needs subject file" if(!$sujet);
 die "Needs print command" if($methode =~ /^command/i && !$print_cmd);
 die "Needs output file" if($methode =~ /^file/i && !$output_file);
 
-my @available_extracts=('pdftk','pdftk+NA','gs');
+my @available_extracts=('pdftk','pdftk+NA','gs','qpdf');
 
 die "Invalid value for extract_with: $extract_with"
   if(!grep(/^\Q$extract_with\E$/,@available_extracts));
@@ -173,6 +173,11 @@ sub process_pages {
 			"output",$fn_step);
     $commandes->execute("pdftk",$fn_step,
 			"output",$fn,"need_appearances");
+  } elsif($extract_with eq "qpdf") {
+    # Cmd: qpdf input.pdf --pages input.pdf 3,4-7,10 -- output.pdf
+    $commandes->execute("qpdf", $sujet, "--pages", $sujet,
+			join(",", map { $_->{first}."-".$_->{last} } @$slices),
+			"--",$fn);
   }
 
   if($methode =~ /^cups/i) {
