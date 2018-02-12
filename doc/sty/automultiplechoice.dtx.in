@@ -2847,8 +2847,12 @@ Three digits and two letters:\insertgroup{mixed}.
     \begin{itemize}\item[#1] #2\end{itemize}\end{minipage}%
   \vspace{\AMCinterBrep}}
 \newcommand\AMCrep@itemize[2]{\AMC@mem@answer{#1}\item[#1] #2}
+\newlength\AMChorizAnswerSep
+\setlength{\AMChorizAnswerSep}{3em plus 4em}
+\newlength\AMChorizBoxSep
+\setlength{\AMChorizBoxSep}{1em}
 \newcommand\AMCrep@ligne[2]{\AMC@mem@answer{#1}%
-  \mbox{#1\hspace*{1em}#2}\hspace{3em plus 4em}}
+  \mbox{#1\hspace*{\AMChorizBoxSep}#2}\hspace{\AMChorizAnswerSep}}
 \newcommand\AMCrep@perso[2]{\AMC@mem@answer{#1}\AMCanswer{#1}{#2}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
