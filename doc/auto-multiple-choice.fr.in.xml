@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -1776,6 +1776,15 @@ Durée : 10 minutes.
           </listitem>
 
           <listitem>
+            <para><option>pdfform</option> : permet de créer un formulaire,
+            remplissable via les lecteurs de fichiers pdf.</para>
+
+            <note>
+              <para>AMC ne gère pas l'envoi automatique des sujets.</para>
+            </note>
+          </listitem>
+
+          <listitem>
             <para><option>bloc</option> : place chaque question dans un bloc,
             de telle sorte qu'elle ne puisse pas être coupée par un saut de
             page.</para>
@@ -2743,14 +2752,17 @@ Durée : 10 minutes.
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
 \AMCinterBquest=3ex
-\AMCpostOquest=7mm</programlisting>
+\AMCpostOquest=7mm
+\setlength{\AMChorizAnswerSep}{3em plus 4em}
+\setlength{\AMChorizBoxSep}{1em}</programlisting>
 
         <para>Ces dimensions correspondent aux espaces verticaux ajoutés entre
         les questions (<code>quest</code>) ou les réponses (<code>rep</code>),
         en mode boîte (<code>B</code>, obtenu avec
         <command>\AMCBoxedAnswers</command> ou l'option de package
-        <option>bloc</option>) ou standard (<code>I</code>) et l'espace après
-        une question ouverte.</para>
+        <option>bloc</option>) ou standard (<code>I</code>), l'espace après
+        une question ouverte. Les deux dernières longueurs sont utilisées pour
+        l’environnement <option>reponsesperso</option>.</para>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -4520,6 +4532,13 @@ Nom et prénom :
         listes de la section <guilabel>Diagnostic</guilabel> :</para>
 
         <itemizedlist>
+
+          <listitem>
+            <para>La valeur <option>mise à jour</option> affiche la date
+            de la page traitée. Elle n'est pas affichée par défaut. Il faut l'activer
+            avec le bouton <guimenuitem>colonnes</guimenuitem>.</para>
+          </listitem>
+
           <listitem>
             <para>La valeur <emphasis>EQM</emphasis> (écart quadratique moyen)
             est un indicateur du bon calage sur les marques de calage (les
@@ -4589,6 +4608,13 @@ Nom et prénom :
             déroulée, et éventuellement de la corriger par glisser-déposer
             (drag and drop) ou par un clic (click)).</para>
           </listitem>
+
+          <listitem>
+            <para>La valeur <emphasis>scan files</emphasis> affiche le nom
+            de la page traitée. Elle n'est pas affichée par défaut. Il faut l'activer
+            avec le bouton <guimenuitem>colonnes</guimenuitem>.</para>
+          </listitem>
+
         </itemizedlist>
       </sect3>
 
@@ -6495,12 +6521,33 @@ Nom et prénom :
     <sect2 id="divers.gmail">
       <title>Paramétrer AMC pour l'utilisation de GMAIL</title>
 
-      <para>Connectez-vous sur votrre compte GMAIL puis activer l'option :
+      <para>Connectez-vous sur votre compte GMAIL puis activez l'option :
       autoriser les applications non sécurisées.</para>
 
-      <programlisting>sudo apt-get install msmtp </programlisting>
-
-      <para>Dans les préférences de AMC : <menuchoice>
+      <sect3>
+        <title>Utilisateurs linux (Ubuntu, Xubuntu, Lubuntu etc.)</title>
+  
+         <para>Tapez dans un terminal : </para>
+  
+         <programlisting>sudo apt-get install msmtp</programlisting>
+         <programlisting>sudo gedit /etc/msmtprc</programlisting> 
+  
+         <para>et copiez le texte suivant puis enregistrez le fichier. </para>
+  
+ <programlisting>
+account gmail 
+host smtp.gmail.com 
+tls on 
+tls_certcheck off 
+port 587 
+auth login 
+from <emphasis>votre adresse mail du compte gmail</emphasis> 
+user <emphasis>votre adresse mail du compte gmail</emphasis> 
+password <emphasis>votre mot de passe du compte gmail</emphasis> 
+</programlisting>
+  
+          <para>
+          Dans les préférences de AMC : <menuchoice>
           <guimenu>Edition</guimenu>
 
           <guisubmenu>Préférences</guisubmenu>
@@ -6508,18 +6555,47 @@ Nom et prénom :
           <guisubmenu>Courriel</guisubmenu>
 
           <guimenuitem>Méthode d'envoi</guimenuitem>
-        </menuchoice>, choisir <guibutton>sendmail</guibutton> et mettre le
-      chemin : <programlisting>/usr/bin/msmtp</programlisting> Ouvrir le
-      fichier <programlisting>sudo gedit /etc/msmtprc  </programlisting> et
-      copier <programlisting>account gmail 
+          </menuchoice>, choisir <guibutton>sendmail</guibutton> et mettre le
+         chemin : <programlisting>/usr/bin/msmtp</programlisting>
+          </para>
+        </sect3>
+
+
+      <sect3>
+      <title>Utilisateurs Macintosh</title>
+  
+          <para>Tapez dans un terminal : </para>  
+  
+         <programlisting>sudo port install msmtp</programlisting>
+          <programlisting>sudo pico ~/.msmtprc</programlisting>
+
+         <para>et copiez le texte suivant puis enregistrez le fichier. </para>
+
+ <programlisting>
+account gmail 
 host smtp.gmail.com 
 tls on 
 tls_certcheck off 
 port 587 
 auth login 
-from <emphasis>votre nom ou adresse mail du compte gmail</emphasis> 
+from <emphasis>votre adresse mail du compte gmail</emphasis> 
 user <emphasis>votre adresse mail du compte gmail</emphasis> 
-password <emphasis>votre mot de passe du compte gmail</emphasis>      </programlisting></para>
+password <emphasis>votre mot de passe du compte gmail</emphasis> 
+</programlisting>
+
+          <para>
+          Dans les préférences de AMC : <menuchoice>
+          <guimenu>Edition</guimenu>
+
+          <guisubmenu>Préférences</guisubmenu>
+
+          <guisubmenu>Courriel</guisubmenu>
+
+          <guimenuitem>Méthode d'envoi</guimenuitem>
+          </menuchoice>, choisir <guibutton>sendmail</guibutton> et mettre le
+         chemin : <programlisting>/opt/local/bin/msmtp</programlisting>
+          </para>
+        </sect3>
     </sect2>
 
     <sect2 id="Texmaker">

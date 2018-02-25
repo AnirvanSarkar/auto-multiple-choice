@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -242,9 +242,9 @@
 
         <listitem>
           <para>The LaTeX command <command>\AMCcode</command> was rewritten in
-          version 0.518. It is now more robust and configurable, but you will
+          version 0.518. It is now more robust and configurable, but you will 
           have to adapt the LaTeX sources you wrote for older versions to keep
-          the same layout.</para>
+         the same layout.</para>
         </listitem>
 
         <listitem>
@@ -8380,4 +8380,88 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
   </sect1>
+  
+  <sect1>
+  <title>miscellaneous</title>
+  
+  <sect2 id="divers.gmail">
+      <title>Configure AMC to use GMAIL</title>
+
+      <para>Login to your gmail account then enable the option :
+      Allowing less secure apps to access your account.</para>
+
+      <sect3>
+        <title>Linux users (Ubuntu,Xubuntu,Lubuntu etc.)</title>
+  
+         <para>Type in a terminal : </para>
+  
+         <programlisting>sudo apt-get install msmtp</programlisting>
+         <programlisting>sudo gedit /etc/msmtprc</programlisting> 
+  
+         <para>add the following content to msmtprc file and save it. </para>
+  
+ <programlisting>
+account gmail 
+host smtp.gmail.com 
+tls on 
+tls_certcheck off 
+port 587 
+auth login 
+from <emphasis>your_user_name@gmail.com</emphasis> 
+user <emphasis>your_user_name@gmail.com</emphasis> 
+password <emphasis>your_password</emphasis> 
+</programlisting>
+  
+          <para>
+          Set up AMC : <menuchoice>
+          <guimenu>Edit</guimenu>
+
+          <guisubmenu>Preferences</guisubmenu>
+
+          <guisubmenu>Email</guisubmenu>
+
+          <guimenuitem>Mail delivery method</guimenuitem>
+          </menuchoice>,  select <guibutton>sendmail</guibutton> and type
+         the path : <programlisting>/usr/bin/msmtp</programlisting>
+          </para>
+        </sect3>
+
+        <sect3>
+         <title>Macintosh users</title>
+  
+          <para>Type in a terminal : </para>
+  
+           <programlisting>sudo port install msmtp</programlisting>
+          <programlisting>sudo pico ~/.msmtprc</programlisting>
+
+           <para>add the following content to msmtprc file and save it. </para>
+
+ <programlisting>
+account gmail 
+host smtp.gmail.com 
+tls on 
+tls_certcheck off 
+port 587 
+auth login 
+from <emphasis>your_user_name@gmail.com</emphasis> 
+user <emphasis>your_user_name@gmail.com</emphasis> 
+password <emphasis>your_password</emphasis> 
+</programlisting>
+
+        <para>
+          Set up AMC : <menuchoice>
+          <guimenu>Edit</guimenu>
+
+          <guisubmenu>Preferences</guisubmenu>
+
+          <guisubmenu>Email</guisubmenu>
+
+          <guimenuitem>Mail delivery method</guimenuitem>
+          </menuchoice>,  select <guibutton>sendmail</guibutton> and type
+         the path : <programlisting>/opt/local/bin/msmtp</programlisting>
+          </para>
+        </sect3>
+    </sect2>
+  </sect1>
 </article>
+
