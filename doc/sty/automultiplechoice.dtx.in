@@ -2721,27 +2721,66 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \ExplSyntaxOn
 
-\tl_new:N \amc_memory_content
+\prg_set_conditional:Nnn \amc_if_separate_question: { p , T } {
+  \ifAMC@ensemble
+    \ifAMC@zoneformulaire
+      \prg_return_false:
+    \else
+      \prg_return_true:
+    \fi
+  \else
+    \prg_return_false:
+  \fi
+}
+\cs_new_eq:NN \AMC@if@separate@question \amc_if_separate_question:T
 
-\cs_new:Nn \amc_clear_memory: { \tl_gclear:N \amc_memory_content }
+\int_new:N \amc_memory_elts_count
+
+\cs_new:Nn \amc_clear_memory: { \int_gzero:N \amc_memory_elts_count }
 \cs_new_eq:NN \AMC@mem@clear \amc_clear_memory:
 
+\cs_new:Npn \amc_memory_elt_i:n #1 {
+  amc_memory_elts_ \int_to_alph:n { #1 }
+}
+\cs_new:Nn \amc_memory_current_elt: {
+  \amc_memory_elt_i:n \amc_memory_elts_count
+}
+\cs_new:Npn \amc_memory_vars_i:n #1 {
+  amc_memory_vars_ \int_to_alph:n { #1 }
+}
+\cs_new:Nn \amc_memory_current_vars: {
+  \amc_memory_vars_i:n \amc_memory_elts_count
+}
+
+\cs_new:Nn \amc_add_memory_elt: {
+  \int_gincr:N \amc_memory_elts_count
+  \tl_gclear_new:c { \amc_memory_current_elt: }
+  \tl_gclear_new:c { \amc_memory_current_vars: }
+}
+\cs_new_eq:NN \AMC@mem@next \amc_add_memory_elt:
+
 \cs_new:Npn \amc_add_to_memory:n #1 {
-  \tl_gput_right:Nn \amc_memory_content {#1}
+  \tl_gput_right:cn { \amc_memory_current_elt: } { #1 }
 }
 \cs_new_eq:NN \AMC@mem@add \amc_add_to_memory:n
 
-\cs_new:Npn \amc_add_to_memory_x:n #1 {
-  \tl_gput_right:Nx \amc_memory_content {#1}
+\cs_new:Npn \amc_add_to_vars:n #1 {
+  \tl_gput_right:cn { \amc_memory_current_vars: } { #1 }
 }
-\cs_new_eq:NN \AMC@mem@add@expanded \amc_add_to_memory_x:n
+\cs_new_eq:NN \AMC@mem@addvar \amc_add_to_vars:n
 
 \cs_new:Npn \amc_add_qidaffname:nnn #1#2#3 {
-  \amc_add_to_memory:n {\AMCid@quest=#1\setcounter{AMCquestionaff}{#2}%
+  \amc_add_to_vars:n {\AMCid@quest=#1\setcounter{AMCquestionaff}{#2}%
     \global\def\AMCid@name{#3}}
 }
 \cs_generate_variant:Nn \amc_add_qidaffname:nnn { xxx }
 \cs_new_eq:NN \AMC@mem@qidaffname \amc_add_qidaffname:xxx
+
+\cs_new:Npn \amc_mem_elt_cat:n #1 {
+  \amc_add_to_vars:n { \def\AMCmem@elt@cat{ #1 } }
+}
+\cs_generate_variant:Nn \amc_mem_elt_cat:n { x }
+\cs_new_eq:NN \AMC@mem@category \amc_mem_elt_cat:x
 
 \cs_new:Npn \amc_add_aid:n #1 {
   \amc_add_to_memory:n {\AMCrep@count=#1}
@@ -2749,27 +2788,48 @@ Three digits and two letters:\insertgroup{mixed}.
 \cs_generate_variant:Nn \amc_add_aid:n { x }
 \cs_new_eq:NN \AMC@mem@aid \amc_add_aid:x
 
-\cs_new:Nn \amc_use_memory: {\amc_memory_content}
+\cs_new:Npn \amc_if_category_is_p:n #1 {
+  \str_if_eq_p:on { \AMCmem@elt@cat } { #1 }
+}
+\cs_new:Npn \amc_use_memory:n #1 {
+  \int_step_inline:nnnn { 1 } { 1 } \amc_memory_elts_count {
+    \def\AMCmem@elt@cat{ plain }
+    \tl_use:c { \amc_memory_vars_i:n { ##1 } }
+    \bool_if:nTF { #1 } {
+      \tl_use:c { \amc_memory_elt_i:n { ##1 } }
+    } { }
+  }
+}
+\cs_new:Nn \amc_use_memory: { \amc_use_memory:n { \c_true_bool } }
 \cs_new_eq:NN \AMC@mem@show \amc_use_memory:
+\cs_new_eq:NN \AMC@mem@show@filter \amc_use_memory:n
+\cs_new_eq:NN \AMCifcategory \amc_if_category_is_p:n
 
 \ExplSyntaxOff
 \newcommand\AMC@mem@add@ifneeded[1]{%
-  \ifAMC@ensemble\ifAMC@zoneformulaire\else%
-    \begingroup\AMCformulaire@dedanstrue%
+  \AMC@if@separate@question{%
     \AMC@mem@add{#1}%
-    \endgroup\fi\fi}
-\newcommand\AMC@mem@add@expanded@ifneeded[1]{%
-  \ifAMC@ensemble\ifAMC@zoneformulaire\else%
-    \begingroup\AMCformulaire@dedanstrue%
-    \AMC@mem@add@expanded{#1}%
-    \endgroup\fi\fi}
+  }%
+}
+\newcommand\AMC@mem@addsingle@ifneeded[2]{%
+  \AMC@if@separate@question{%
+    \AMC@mem@next%
+    \AMC@mem@category{#2}%
+    \AMC@mem@add{#1}%
+  }%
+}
 \newcommand\AMC@mem@answer[1]{%
-  \addtocounter{AMC@ncase}{1}%
-  \AMC@mem@aid{\the\AMCrep@count}%
-  \AMC@mem@add@ifneeded{\AMCformAnswerA{#1}}}
+  \AMC@if@separate@question{%
+    \AMC@mem@aid{\the\AMCrep@count}%
+    \AMC@mem@add{\AMCformAnswerA{#1}}%
+  }%
+}
 \newcommand\AMC@mem@openQuestion{%
-  \AMC@mem@qidaffname{\the\AMCid@quest}{\arabic{AMCquestionaff}}{\AMCid@name}%
-  \AMC@mem@add@ifneeded{\AMCformQuestionA}%
+  \AMC@if@separate@question{%
+    \AMC@mem@next%
+    \AMC@mem@qidaffname{\the\AMCid@quest}{\arabic{AMCquestionaff}}{\AMCid@name}%
+    \AMC@mem@add{\AMCformQuestionA}%
+  }%
 }
 \def\AMCformBegin{%
   \AMC@zoneformulairetrue\setcounter{section}{0}%
@@ -2777,11 +2837,17 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 \newcommand\AMCform{%
   \ifAMC@ensemble\AMCformulaire@dedanstrue%
-    \AMC@mem@show\AMC@mem@clear%
+    \AMC@mem@show%
   \fi}
+\newcommand\AMCformFilter[1]{%
+  \ifAMC@ensemble\AMCformulaire@dedanstrue%
+    \AMC@mem@show@filter{#1}%
+  \fi}
+\newif\ifAMC@keepmemory
 \newcommand\AMCformS{%
   \ifAMC@ensemble\AMCformulaire@dedanstrue%
   \AMC@amclog{AUTOQCM[BR=0]^^J}\AMC@mem@show%
+  \AMC@keepmemorytrue%
   \fi}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
@@ -2792,13 +2858,13 @@ Three digits and two letters:\insertgroup{mixed}.
 %     answer sheet.
 %    \begin{macrocode}
 \newcommand{\AMCsectionNumbered}[1]{%
-  \section{#1}\AMC@mem@add@ifneeded{\section{#1}}}
+  \section{#1}\AMC@mem@addsingle@ifneeded{\section{#1}}{section}}
 \newcommand{\AMCsubsectionNumbered}[1]{%
-  \subsection{#1}\AMC@mem@add@ifneeded{\subsection{#1}}}
+  \subsection{#1}\AMC@mem@addsingle@ifneeded{\subsection{#1}}{subsection}}
 \newcommand{\AMCsectionStar}[1]{%
-  \section*{#1}\AMC@mem@add@ifneeded{\section*{#1}}}
+  \section*{#1}\AMC@mem@addsingle@ifneeded{\section*{#1}}{section}}
 \newcommand{\AMCsubsectionStar}[1]{%
-  \subsection*{#1}\AMC@mem@add@ifneeded{\subsection*{#1}}}
+  \subsection*{#1}\AMC@mem@addsingle@ifneeded{\subsection*{#1}}{subsection}}
 \def\AMCsection{\@ifstar\AMCsectionStar\AMCsectionNumbered}
 \def\AMCsubsection{\@ifstar\AMCsubsectionStar\AMCsubsectionNumbered}
 %    \end{macrocode}
@@ -3382,9 +3448,11 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \newcommand\AMCformatChoices[4]{%
   \global\AMCrep@count=\z@%
-  \AMC@mem@qidaffname{\the\AMCid@quest}{\arabic{AMCquestionaff}}{\AMCid@name}%
-  \AMC@mem@add@ifneeded{\global\AMCrep@count=\z@%
-    #1{#3}{#4}}%
+  \AMC@if@separate@question{%
+    \AMC@mem@qidaffname{\the\AMCid@quest}{\arabic{AMCquestionaff}}{\AMCid@name}%
+    \AMC@mem@add{\global\AMCrep@count=\z@%
+                #1{#3}{#4}}%
+  }%
   \ifAMC@ensemble%
     #2{#3}{#4}%
     \AMC@amclog{AUTOQCM[QPART]^^J}%
@@ -3978,7 +4046,10 @@ Three digits and two letters:\insertgroup{mixed}.
 \cs_new_eq:NN \AMCnumericHide \amc_numeric_hide:nn
 
 \ExplSyntaxOff
-\def\AMCnumericChoicesPlain{\AMCformatChoices{\AMCnumericShow}{\AMCnumericHide}}
+\def\AMCnumericChoicesPlain{%
+  \AMC@if@separate@question{\AMC@mem@category{numeric}}%
+  \AMCformatChoices{\AMCnumericShow}{\AMCnumericHide}%
+}
 %    \end{macrocode}
 % The \marg{value} argument is often given as a macro, that is to be
 % expanded before calling |\AMCnumericChoicesPlain|, so that its value
@@ -4219,7 +4290,10 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCotextGoto%
   \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
-\def\AMCOpen{\AMCformatChoices{\AMCopenShow}{\AMCopenHide}}
+\def\AMCOpen{%
+  \AMC@if@separate@question{\AMC@mem@category{open}}%
+  \AMCformatChoices{\AMCopenShow}{\AMCopenHide}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -4276,7 +4350,10 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCbotextGoto%
   \ifAMC@qbloc\else\vspace{1.5ex}\par\fi%
 }
-\def\AMCBoxOnly{\AMCformatChoices{\AMCboShow}{\AMCboHide}}
+\def\AMCBoxOnly{%
+  \AMC@if@separate@question{\AMC@mem@category{box}}%
+  \AMCformatChoices{\AMCboShow}{\AMCboHide}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -4427,7 +4504,9 @@ Three digits and two letters:\insertgroup{mixed}.
     \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageNoMarks}\fi\fi%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
+    \AMC@keepmemoryfalse%
       #2%
+    \ifAMC@keepmemory\else\AMC@mem@clear\fi%
     \clearpage}%
   \advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
   \ifAMC@pdfform\end{Form}\fi%
