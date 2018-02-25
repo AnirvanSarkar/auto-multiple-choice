@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -242,7 +242,7 @@
 
         <listitem>
           <para>The LaTeX command <command>\AMCcode</command> was rewritten in
-          version 0.518. It is now more robust and configurable, but you will 
+          version 0.518. It is now more robust and configurable, but you will
           have to adapt the LaTeX sources you wrote for older versions to keep
          the same layout.</para>
         </listitem>
@@ -1496,7 +1496,7 @@ Firstname and lastname:
 DESC: An example (from the documentation) where all check-boxes are put together on a separate sheet for each student.--><programlisting
       id="modeles-separate.tex" linenumbering="numbered">\documentclass[a4paper]{article}
 
-\usepackage[utf8x]{inputenc}    
+\usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 
 \usepackage[box,completemulti,separateanswersheet]{automultiplechoice}    <co
@@ -1511,7 +1511,7 @@ DESC: An example (from the documentation) where all check-boxes are put together
 \setdefaultgroupmode{withoutreplacement}
 
 \element{general}{
-  \begin{question}{prez}    
+  \begin{question}{prez}
     Among the following persons, which one has ever been a President of the French Republic?
     \begin{choices}
       \correctchoice{René Coty}
@@ -1523,7 +1523,7 @@ DESC: An example (from the documentation) where all check-boxes are put together
 }
 
 \element{general}{
-  \begin{questionmult}{pref}    
+  \begin{questionmult}{pref}
     Among the following cities, which ones are French prefectures?
     \begin{choices}
       \correctchoice{Poitiers}
@@ -1546,9 +1546,9 @@ DESC: An example (from the documentation) where all check-boxes are put together
   \end{question}
 }
 
-\onecopy{5}{    
+\onecopy{5}{
 
-%%% beginning of the test sheet header:    
+%%% beginning of the test sheet header:
 
 \noindent{\bf QCM  \hfill TEST}
 
@@ -1588,14 +1588,14 @@ Duration : 10 minutes.
 \hfill \namefield{\fbox{    <co id="ensemble.nom" linkends="ensemble.nom.exp"/>
     \begin{minipage}{.5\linewidth}
       Firstname and lastname:
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
   }}
 
 \begin{center}
-  \bf\em Answers must be given exclusively on this sheet: 
+  \bf\em Answers must be given exclusively on this sheet:
   answers given on the other sheets will be ignored.
 \end{center}
 
@@ -1606,7 +1606,7 @@ Duration : 10 minutes.
 % \AMCaddpagesto{5} <co id="AMCaddpage.separateanswersheet.total"
             linkends="AMCaddpage.separateanswersheet.total.exp"/>
 
-}  
+}
 
 \end{document}</programlisting>The following remarks should make the above
       example clearer :<calloutlist>
@@ -1951,7 +1951,7 @@ Duration : 10 minutes.
 
         <para><programlisting>\begin{question}{difficulty}\QuestionIndicative
   \scoring{auto=0,v=-1,e=-2}
-  Did you find this class easy or difficult? Please answer on a scale from 0 (very difficult) to 5 
+  Did you find this class easy or difficult? Please answer on a scale from 0 (very difficult) to 5
   (very easy).
   \begin{choiceshoriz}[o]
     \correctchoice{0}
@@ -2128,7 +2128,7 @@ Duration : 10 minutes.
   \begin{multicols}{2}\AMCBoxedAnswers
     \begin{choices}
       \correctchoice{It is an animal with wings, laying eggs. There are birds with all sorts of colors.}
-      \wrongchoice{It is a large piece of furniture, made of wood, and used most of the time to store 
+      \wrongchoice{It is a large piece of furniture, made of wood, and used most of the time to store
       household linen}
       \wrongchoice{It is a steam machine devised to seal cans at high speed.}
     \end{choices}
@@ -2715,12 +2715,12 @@ and write your first and last names below.
 
 \vspace{3ex}
 
-\hfill\namefield{\fbox{    
+\hfill\namefield{\fbox{
     \begin{minipage}{.9\linewidth}
       Firstname and lastname:
-      
+
       \vspace*{.5cm}\dotfill
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
@@ -3161,7 +3161,7 @@ and write your first and last names below.
     \caption{An animal}
     \AMClabel{tiger}
   \end{figure}
-    
+
   \begin{question}{tiger}
     Which is the animal on figure~\AMCref{tiger} page~\AMCpageref{tiger}?
     \begin{choices}
@@ -3408,7 +3408,7 @@ and write your first and last names below.
   \FPeval\VQa{trunc(2 + random * 4,0)}
   \FPeval\VQb{trunc(6 + random * 5,0)}
   \FPeval\VQr{VQa/(VQa+VQb)}
-  
+
   Let $X$ and $Y$ be two independent random variables, following the exponential distribution with
 respective parameters \VQa{} and \VQb{}.
   To which interval does the probability $\mathbb{P}[X&lt;Y]$ belong ?
@@ -3804,7 +3804,7 @@ respective parameters \VQa{} and \VQb{}.
 
           <para><programlisting>\begin{question}{inverse}
   \pgfmathrandominteger{\x}{1}{50}
-       
+
   How much is the reciprocal of $x=\x$?
 
   \begin{choices}
@@ -3831,7 +3831,7 @@ respective parameters \VQa{} and \VQb{}.
   How much is the reciprocal of $x=\pgfmathprintnumber{\x}$?
 
   \begin{choices}
-    \correctchoice{\pgfmathparse{1/\x}\pgfmathprintnumber{\pgfmathresult}} 
+    \correctchoice{\pgfmathparse{1/\x}\pgfmathprintnumber{\pgfmathresult}}
     \wrongchoice{\pgfmathparse{1/(\x +1))} \pgfmathprintnumber{\pgfmathresult}}
     \wrongchoice{\pgfmathparse{cos(\x)} \pgfmathprintnumber{\pgfmathresult}}
     \wrongchoice{\pgfmathparse{\x^(-0.5)} \pgfmathprintnumber{\pgfmathresult}}
@@ -3853,7 +3853,7 @@ respective parameters \VQa{} and \VQb{}.
 
           <para><programlisting>\begin{questionmult}{graph}
   Let us consider the three functions which graphs are plotted below:
-  \pgfmathrandominteger{\a}{2}{4}  
+  \pgfmathrandominteger{\a}{2}{4}
   \begin{center}
     \begin{tikzpicture}[domain=0:4]
       \draw[very thin,color=gray] (-0.1,-4.1) grid (3.9,3.9);
@@ -3866,7 +3866,7 @@ respective parameters \VQa{} and \VQb{}.
   \end{center}
   Then:
   \begin{choices}
-    \pgfmathrandominteger{\x0}{2}{4}  
+    \pgfmathrandominteger{\x0}{2}{4}
     \correctchoice{$f_{2}(\x0)$=\pgfmathparse{\a*sin(\x0 r)} \pgfmathprintnumber{\pgfmathresult}.}
     \correctchoice{$f_{3}(\x0)$=\pgfmathparse{\a*cos(\x0 r)} \pgfmathprintnumber{\pgfmathresult}.}
     \wrongchoice{La fonction $f_{1}(x)$ est une fonction linéaire.}
@@ -3943,9 +3943,9 @@ Name :
   How much is the square root of \directlua{tex.print(a)}?
 
   \begin{choices}
-    \correctchoice{\directlua{tex.print(math.sqrt(a))}} 
-    \wrongchoice{\directlua{tex.print(math.sqrt(2*a))}} 
-    \wrongchoice{\directlua{tex.print(math.sqrt(a*1.001))}} 
+    \correctchoice{\directlua{tex.print(math.sqrt(a))}}
+    \wrongchoice{\directlua{tex.print(math.sqrt(2*a))}}
+    \wrongchoice{\directlua{tex.print(math.sqrt(a*1.001))}}
   \end{choices}
 \end{question}
 
@@ -5505,7 +5505,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
       <para>Here is a minimal example:</para>
 
       <programlisting>\documentclass[a4paper]{article}
-\usepackage[separateanswersheet]{automultiplechoice}    
+\usepackage[separateanswersheet]{automultiplechoice}
 \begin{document}
 
 \noindent{\bf Subject}
@@ -5528,25 +5528,25 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
   \end{choices}
 \end{question}
 
-\AMCcleardoublepage    
+\AMCcleardoublepage
 
-\onecopy{5}{    
+\onecopy{5}{
 
-\AMCformBegin    
+\AMCformBegin
 
 {\large\bf Answer sheet:}
-\hfill \namefield{\fbox{    
+\hfill \namefield{\fbox{
     \begin{minipage}{.5\linewidth}
       Name:
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
   }}
 
-\AMCformS    
+\AMCformS
 
-}  
+}
 
 \end{document}
 </programlisting>
@@ -5588,11 +5588,11 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
 
       <programlisting>\documentclass[a4paper]{article}
 \usepackage{multicol}
-\usepackage[insidebox,noshuffle,postcorrect]{automultiplechoice}    
+\usepackage[insidebox,noshuffle,postcorrect]{automultiplechoice}
 
 \begin{document}
 
-\onecopy{5}{    
+\onecopy{5}{
 
 \noindent
 \begin{tabular}{|l|l|l|}
@@ -5607,12 +5607,12 @@ student number &amp; class &amp; subject\\
 \\
 \hline
 \end{tabular}
-\hfill\namefield{\fbox{    
+\hfill\namefield{\fbox{
     \begin{minipage}{.25\linewidth}
       Name:
-      
+
       \vspace*{.5cm}\dotfill
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
@@ -5646,9 +5646,9 @@ student number &amp; class &amp; subject\\
 
 % continue here to get as many questions as needed...
 
-\end{multicols}  
+\end{multicols}
 
-}   
+}
 
 \end{document}
 </programlisting>
@@ -5729,7 +5729,7 @@ Moniuszko,Stanisław,003</programlisting>
           <code>general</code>):</para>
 
           <programlisting>\newcommand{\subject}{
-  \onecopy{1}{    
+  \onecopy{1}{
 
     \noindent{\bf AutoMultipleChoice  \hfill TEST}
 
@@ -5739,10 +5739,10 @@ Moniuszko,Stanisław,003</programlisting>
       Pre-filled test.
     \end{center}
 
-    \hfill \namefield{\fbox{    
+    \hfill \namefield{\fbox{
         \begin{minipage}{.5\linewidth}
           Name:
-      
+
           \Large\bf \name{} \surname{}
 
           \vspace*{1mm}
@@ -8380,10 +8380,10 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
   </sect1>
-  
+
   <sect1>
   <title>miscellaneous</title>
-  
+
   <sect2 id="divers.gmail">
       <title>Configure AMC to use GMAIL</title>
 
@@ -8392,26 +8392,26 @@ Moniuszko,Stanisław,003</programlisting>
 
       <sect3>
         <title>Linux users (Ubuntu,Xubuntu,Lubuntu etc.)</title>
-  
+
          <para>Type in a terminal : </para>
-  
+
          <programlisting>sudo apt-get install msmtp</programlisting>
-         <programlisting>sudo gedit /etc/msmtprc</programlisting> 
-  
+         <programlisting>sudo gedit /etc/msmtprc</programlisting>
+
          <para>add the following content to msmtprc file and save it. </para>
-  
+
  <programlisting>
-account gmail 
-host smtp.gmail.com 
-tls on 
-tls_certcheck off 
-port 587 
-auth login 
-from <emphasis>your_user_name@gmail.com</emphasis> 
-user <emphasis>your_user_name@gmail.com</emphasis> 
-password <emphasis>your_password</emphasis> 
+account gmail
+host smtp.gmail.com
+tls on
+tls_certcheck off
+port 587
+auth login
+from <emphasis>your_user_name@gmail.com</emphasis>
+user <emphasis>your_user_name@gmail.com</emphasis>
+password <emphasis>your_password</emphasis>
 </programlisting>
-  
+
           <para>
           Set up AMC : <menuchoice>
           <guimenu>Edit</guimenu>
@@ -8428,24 +8428,24 @@ password <emphasis>your_password</emphasis>
 
         <sect3>
          <title>Macintosh users</title>
-  
+
           <para>Type in a terminal : </para>
-  
+
            <programlisting>sudo port install msmtp</programlisting>
           <programlisting>sudo pico ~/.msmtprc</programlisting>
 
            <para>add the following content to msmtprc file and save it. </para>
 
  <programlisting>
-account gmail 
-host smtp.gmail.com 
-tls on 
-tls_certcheck off 
-port 587 
-auth login 
-from <emphasis>your_user_name@gmail.com</emphasis> 
-user <emphasis>your_user_name@gmail.com</emphasis> 
-password <emphasis>your_password</emphasis> 
+account gmail
+host smtp.gmail.com
+tls on
+tls_certcheck off
+port 587
+auth login
+from <emphasis>your_user_name@gmail.com</emphasis>
+user <emphasis>your_user_name@gmail.com</emphasis>
+password <emphasis>your_password</emphasis>
 </programlisting>
 
         <para>
@@ -8464,4 +8464,3 @@ password <emphasis>your_password</emphasis>
     </sect2>
   </sect1>
 </article>
-

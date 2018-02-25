@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -1562,7 +1562,7 @@ Nom et prénom :
 DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont regroupées sur une page à part pour chaque étudiant.--><programlisting
       id="modeles-ensemble.tex" linenumbering="numbered">\documentclass[a4paper]{article}
 
-\usepackage[utf8x]{inputenc}    
+\usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 
 \usepackage[francais,bloc,completemulti,ensemble]{automultiplechoice}    <co
@@ -1577,7 +1577,7 @@ DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont 
 \setdefaultgroupmode{withoutreplacement}
 
 \element{general}{
-  \begin{question}{prez}    
+  \begin{question}{prez}
     Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
     \begin{reponses}
       \bonne{René Coty}
@@ -1589,7 +1589,7 @@ DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont 
 }
 
 \element{general}{
-  \begin{questionmult}{pref}    
+  \begin{questionmult}{pref}
     Parmi les villes suivantes, lesquelles sont des préfectures~?
     \begin{reponses}
       \bonne{Poitiers}
@@ -1612,9 +1612,9 @@ DESC: Un exemple (issu de la documentation) où toutes les cases à cocher sont 
   \end{question}
 }
 
-\exemplaire{5}{    
+\exemplaire{5}{
 
-%%% debut de l'en-tête des copies :    
+%%% debut de l'en-tête des copies :
 
 \noindent{\bf QCM  \hfill TEST}
 
@@ -1655,7 +1655,7 @@ Durée : 10 minutes.
 \hfill \champnom{\fbox{    <co id="ensemble.nom" linkends="ensemble.nom.exp"/>
     \begin{minipage}{.5\linewidth}
       Nom et prénom :
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
@@ -1673,7 +1673,7 @@ Durée : 10 minutes.
 % \AMCaddpagesto{5} <co id="AMCaddpage.separateanswersheet.total"
             linkends="AMCaddpage.separateanswersheet.total.exp"/>
 
-}  
+}
 
 \end{document}</programlisting>Les remarques suivantes devraient éclaircir cet
       exemple :<calloutlist>
@@ -2848,12 +2848,12 @@ et inscrivez votre nom et prénom ci-dessous.
 
 \vspace{3ex}
 
-\hfill\champnom{\fbox{    
+\hfill\champnom{\fbox{
     \begin{minipage}{.9\linewidth}
       Nom et prénom :
-      
+
       \vspace*{.5cm}\dotfill
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
@@ -3334,7 +3334,7 @@ et inscrivez votre nom et prénom ci-dessous.
     \caption{Un animal}
     \AMClabel{tigre}
   \end{figure}
-    
+
   \begin{question}{tigre}
     Quel est l'animal sur la photographie de la figure~\AMCref{tigre} en page \AMCpageref{tigre}~?
     \begin{reponses}
@@ -3613,7 +3613,7 @@ et inscrivez votre nom et prénom ci-dessous.
   \FPeval\VQa{trunc(2 + random * 4,0)}
   \FPeval\VQb{trunc(6 + random * 5,0)}
   \FPeval\VQr{VQa/(VQa+VQb)}
-  
+
   Soient $X$ et $Y$ deux variables aléatoires indépendantes, de lois exponentielles
   de paramètres respectifs \VQa{} et \VQb{}.
   À quel intervalle appartient la probabilité $\mathbb{P}[X&lt;Y]$ ?
@@ -4033,7 +4033,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <para><programlisting>\begin{question}{inverse}
   \pgfmathrandominteger{\x}{1}{50}
-       
+
   Quel est l'inverse de $x=\x$ ?
 
   \begin{reponses}
@@ -4060,7 +4060,7 @@ et inscrivez votre nom et prénom ci-dessous.
   Quel est l'inverse de $x=\pgfmathprintnumber{\x}$ ?
 
   \begin{reponses}
-    \bonne{\pgfmathparse{1/\x}\pgfmathprintnumber{\pgfmathresult}} 
+    \bonne{\pgfmathparse{1/\x}\pgfmathprintnumber{\pgfmathresult}}
     \mauvaise{\pgfmathparse{1/(\x +1))} \pgfmathprintnumber{\pgfmathresult}}
     \mauvaise{\pgfmathparse{cos(\x)} \pgfmathprintnumber{\pgfmathresult}}
     \mauvaise{\pgfmathparse{\x^(-0.5)} \pgfmathprintnumber{\pgfmathresult}}
@@ -4084,7 +4084,7 @@ et inscrivez votre nom et prénom ci-dessous.
           <para><programlisting>\begin{questionmult}{graphique}
   On considère trois fonctions f(x) dont les tracés sont représentés ci-dessous
   dans un repère orthonormé~:
-  \pgfmathrandominteger{\a}{2}{4}  
+  \pgfmathrandominteger{\a}{2}{4}
   \begin{center}
     \begin{tikzpicture}[domain=0:4]
       \draw[very thin,color=gray] (-0.1,-4.1) grid (3.9,3.9);
@@ -4097,7 +4097,7 @@ et inscrivez votre nom et prénom ci-dessous.
   \end{center}
   Alors :
   \begin{reponses}
-    \pgfmathrandominteger{\x0}{2}{4}  
+    \pgfmathrandominteger{\x0}{2}{4}
     \bonne{$f_{2}(\x0)$=\pgfmathparse{\a*sin(\x0 r)} \pgfmathprintnumber{\pgfmathresult}.}
     \bonne{$f_{3}(\x0)$=\pgfmathparse{\a*cos(\x0 r)} \pgfmathprintnumber{\pgfmathresult}.}
     \mauvaise{La fonction $f_{1}(x)$ est une fonction linéaire.}
@@ -4181,9 +4181,9 @@ Nom et prénom :
   Quelle est la racine carrée de \directlua{tex.print(a)}?
 
   \begin{reponses}
-    \bonne{\directlua{tex.print(math.sqrt(a))}} 
-    \mauvaise{\directlua{tex.print(math.sqrt(2*a))}} 
-    \mauvaise{\directlua{tex.print(math.sqrt(a*1.001))}} 
+    \bonne{\directlua{tex.print(math.sqrt(a))}}
+    \mauvaise{\directlua{tex.print(math.sqrt(2*a))}}
+    \mauvaise{\directlua{tex.print(math.sqrt(a*1.001))}}
   \end{reponses}
 \end{question}
 
@@ -5965,7 +5965,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
       <para>Voici un exemple minimal de fichier LaTeX :</para>
 
       <programlisting>\documentclass[a4paper]{article}
-\usepackage[ensemble]{automultiplechoice}    
+\usepackage[ensemble]{automultiplechoice}
 \begin{document}
 
 \noindent{\bf Sujet}
@@ -5988,25 +5988,25 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
   \end{reponses}
 \end{question}
 
-\AMCcleardoublepage    
+\AMCcleardoublepage
 
-\exemplaire{5}{    
+\exemplaire{5}{
 
-\AMCdebutFormulaire    
+\AMCdebutFormulaire
 
 {\large\bf Feuille de r\'eponses :}
-\hfill \champnom{\fbox{    
+\hfill \champnom{\fbox{
     \begin{minipage}{.5\linewidth}
       Nom:
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
   }}
 
-\AMCformS    
+\AMCformS
 
-}  
+}
 
 \end{document}</programlisting>
     </sect2>
@@ -6044,11 +6044,11 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
 
       <programlisting>\documentclass[a4paper]{article}
 \usepackage{multicol}
-\usepackage[insidebox,noshuffle,postcorrect]{automultiplechoice}    
+\usepackage[insidebox,noshuffle,postcorrect]{automultiplechoice}
 
 \begin{document}
 
-\exemplaire{5}{    
+\exemplaire{5}{
 
 \noindent
 \begin{tabular}{|l|l|l|}
@@ -6063,12 +6063,12 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
 \\
 \hline
 \end{tabular}
-\hfill\namefield{\fbox{    
+\hfill\namefield{\fbox{
     \begin{minipage}{.25\linewidth}
       Nom :
-      
+
       \vspace*{.5cm}\dotfill
-      
+
       \vspace*{.5cm}\dotfill
       \vspace*{1mm}
     \end{minipage}
@@ -6102,9 +6102,9 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
 
 % continuez ici pour ajouter autant de questions que souhaité...
 
-\end{multicols}  
+\end{multicols}
 
-}   
+}
 
 \end{document}</programlisting>
 
@@ -6210,7 +6210,7 @@ Moniuszko;Stanisław;003;Moniuszko@Stanisław.fr,stan@stanislaw.fr</programlisti
 
 \newcommand{\sujet}{%
 \exemplaire{1}{%
-%\shorthandon{;} <co id="shorthandoff.a" linkends="shorthandoff.exp"/> 
+%\shorthandon{;} <co id="shorthandoff.a" linkends="shorthandoff.exp"/>
 %%% debut de l'en-tête des copies :
 
 \noindent{\bf QCM  \hfill TEST}
@@ -6300,7 +6300,7 @@ Nom et prénom :
 %%génération des sujets
 \csvreader[head to column names]{liste.csv}{}{\sujet} <co
               id="separateur.virgule" linkends="separateur.virgule.exp"/>
-%\shorthandoff{;} <co id="shorthandoff.b" linkends="shorthandoff.exp"/> 
+%\shorthandoff{;} <co id="shorthandoff.b" linkends="shorthandoff.exp"/>
 %\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\sujet}<co
               id="separateur.pointvirgule"
               linkends="separateur.pointvirgule.exp"/>
@@ -6526,26 +6526,26 @@ Nom et prénom :
 
       <sect3>
         <title>Utilisateurs linux (Ubuntu, Xubuntu, Lubuntu etc.)</title>
-  
+
          <para>Tapez dans un terminal : </para>
-  
+
          <programlisting>sudo apt-get install msmtp</programlisting>
-         <programlisting>sudo gedit /etc/msmtprc</programlisting> 
-  
+         <programlisting>sudo gedit /etc/msmtprc</programlisting>
+
          <para>et copiez le texte suivant puis enregistrez le fichier. </para>
-  
+
  <programlisting>
-account gmail 
-host smtp.gmail.com 
-tls on 
-tls_certcheck off 
-port 587 
-auth login 
-from <emphasis>votre adresse mail du compte gmail</emphasis> 
-user <emphasis>votre adresse mail du compte gmail</emphasis> 
-password <emphasis>votre mot de passe du compte gmail</emphasis> 
+account gmail
+host smtp.gmail.com
+tls on
+tls_certcheck off
+port 587
+auth login
+from <emphasis>votre adresse mail du compte gmail</emphasis>
+user <emphasis>votre adresse mail du compte gmail</emphasis>
+password <emphasis>votre mot de passe du compte gmail</emphasis>
 </programlisting>
-  
+
           <para>
           Dans les préférences de AMC : <menuchoice>
           <guimenu>Edition</guimenu>
@@ -6563,24 +6563,24 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
 
       <sect3>
       <title>Utilisateurs Macintosh</title>
-  
-          <para>Tapez dans un terminal : </para>  
-  
+
+          <para>Tapez dans un terminal : </para>
+
          <programlisting>sudo port install msmtp</programlisting>
           <programlisting>sudo pico ~/.msmtprc</programlisting>
 
          <para>et copiez le texte suivant puis enregistrez le fichier. </para>
 
  <programlisting>
-account gmail 
-host smtp.gmail.com 
-tls on 
-tls_certcheck off 
-port 587 
-auth login 
-from <emphasis>votre adresse mail du compte gmail</emphasis> 
-user <emphasis>votre adresse mail du compte gmail</emphasis> 
-password <emphasis>votre mot de passe du compte gmail</emphasis> 
+account gmail
+host smtp.gmail.com
+tls on
+tls_certcheck off
+port 587
+auth login
+from <emphasis>votre adresse mail du compte gmail</emphasis>
+user <emphasis>votre adresse mail du compte gmail</emphasis>
+password <emphasis>votre mot de passe du compte gmail</emphasis>
 </programlisting>
 
           <para>
