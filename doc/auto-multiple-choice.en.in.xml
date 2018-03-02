@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -1698,6 +1698,14 @@ Duration : 10 minutes.
           </listitem>
 
           <listitem>
+            <para><option>pdfform</option>: create a pdf file to fill. </para>
+
+            <note>
+              <para>AMC does not automatically manage sending topics.</para>
+            </note>
+          </listitem>
+
+          <listitem>
             <para><option>box</option>: puts every question in a block, so
             that it cannot be split by a page break.</para>
 
@@ -2626,13 +2634,17 @@ Duration : 10 minutes.
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
 \AMCinterBquest=3ex
-\AMCpostOquest=7mm</programlisting>
+\AMCpostOquest=7mm
+\setlength{\AMChorizAnswerSep}{3em plus 4em}
+\setlength{\AMChorizBoxSep}{1em}
+</programlisting>
 
         <para>These dimensions are the vertical space between questions
         (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
         (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
         <option>box</option> package option) or standard mode (<code>I</code>)
-        and the space left after an open question.</para>
+        and the space left after an open question. The two last lengths are used
+        in environment: <option>choicescustom</option></para>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -4231,6 +4243,13 @@ Name :
         lists of the section <guilabel>Diagnosis</guilabel>:</para>
 
         <itemizedlist>
+
+        <listitem>
+          <para>The value<option>update</option> displays the date
+          the date the page was last modified. Hided by default. Click on the button
+          <guimenuitem>columns</guimenuitem> to show it.</para>
+        </listitem>
+
           <listitem>
             <para>The value <emphasis>MSD</emphasis> (mean square deviation)
             is an indication of the good framing of the marks (the four black
@@ -4250,6 +4269,13 @@ Name :
             worked correctly, and correct it if needed drag-and-dropping the
             boxes images).</para>
           </listitem>
+
+        <listitem>
+          <para>The value <emphasis>scan files</emphasis> displays the name of
+          the handled page.  Hided by default. Click on the button
+          <guimenuitem>columns</guimenuitem> to show it.</para>
+        </listitem>
+
         </itemizedlist>
       </sect3>
 
