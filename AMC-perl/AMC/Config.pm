@@ -643,6 +643,14 @@ sub open_project {
     $self->{project}->{_changed}=1;
   }
 
+  # Convert old style ODS group sum options
+  if(!defined($self->{project}->{export_ods_group})) {
+    $self->{project}->{export_ods_group} =
+      ($self->{project}->{export_ods_groupsep} eq '' ? 0 : 1);
+    $self->{project}->{export_ods_groupsep} = '.'
+      if(!$self->{project}->{export_ods_groupsep});
+  }
+
   $self->{shortcuts}->set(project_name=>$name)
     if($self->{shortcuts});
 

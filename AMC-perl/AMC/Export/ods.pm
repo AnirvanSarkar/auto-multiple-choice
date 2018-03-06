@@ -38,7 +38,7 @@ sub new {
     $self->{'out.font'}="Arial";
     $self->{'out.stats'}='';
     $self->{'out.statsindic'}='';
-    $self->{'out.groupsums'}='';
+    $self->{'out.groupsums'}=0;
     $self->{'out.groupsep'}=':';
     if(can_load(modules=>{'Pango'=>undef,'Cairo'=>undef})) {
       debug "Using Pango/Cairo to compute column width";
@@ -192,6 +192,7 @@ my %style_col=(qw/student.key CodeA
 	       student.copy NumCopie
 	       TOTAL NoteQ
 	       GS NoteGS
+	       GSp NoteGSp
 	       MAX NoteQ
 	       HEAD General
 	       /);
@@ -209,12 +210,14 @@ my %fonction_arrondi=(qw/i ROUNDDOWN
 sub set_cell {
   my ($doc,$feuille,$jj,$ii,$abs,$x,$value,%oo)=@_;
 
-  $value=encode('utf-8',$value) if($oo{'utf8'});
-  $doc->cellValueType($feuille,$jj,$ii,'float')
-    if($oo{'numeric'} && !$abs);
   $doc->cellStyle($feuille,$jj,$ii,
 		  ($abs && $style_col_abs{$x}
 		   ? $style_col_abs{$x} : ($style_col{$x} ? $style_col{$x} : $style_col{'HEAD'})));
+  $value=encode('utf-8',$value) if($oo{'utf8'});
+  $doc->cellValueType($feuille,$jj,$ii,'float')
+    if($oo{'numeric'} && !$abs);
+  $doc->cellValueType($feuille,$jj,$ii,'percentage')
+    if($oo{'pc'} && !$abs);
   if($oo{'formula'}) {
     $doc->cellFormula($feuille,$jj,$ii,$oo{'formula'});
   } else {
@@ -614,15 +617,28 @@ sub export {
 				  },
 		     );
 
-    # NoteQ : note pour une question
-    $styles->createStyle('NoteQ',
+    # NoteQbase
+    $styles->createStyle('NoteQbase',
 			 parent=>'Tableau',
 			 family=>'table-cell',
 			 properties=>{
 			     -area => 'paragraph',
 			     'fo:text-align' => "center",
 			 },
+			 );
+
+    # NoteQ : note pour une question
+    $styles->createStyle('NoteQ',
+			 parent=>'NoteQbase',
+			 family=>'table-cell',
 			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},
+			 );
+
+    # NoteQp : note pour une question, en pourcentage
+    $styles->createStyle('NoteQ',
+			 parent=>'NoteQbase',
+			 family=>'table-cell',
+			 'references'=>{'style:data-style-name' => 'Percentage'},
 			 );
 
     # NoteV : note car pas de reponse
@@ -634,7 +650,7 @@ sub export {
 			     'fo:background-color'=>"#ffff99",
 			 },
 			 'references'=>{'style:data-style-name' => 'NombreVide'},
-			 );
+ 			 );
 
     # NoteC : question annulee (par un allowempty)
     $styles->createStyle('NoteC',
@@ -660,13 +676,33 @@ sub export {
 
     # NoteGS : score total pour un groupe
     $styles->createStyle('NoteGS',
-			 parent=>'NoteQ',
+			 parent=>'NoteQbase',
 			 family=>'table-cell',
 			 properties=>{
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#c4eeba",
-			 },
-			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},
+                                     },
+                         'references'=>{'style:data-style-name' => 'DeuxDecimales'},
+			 );
+
+    # NoteGSp : pourcentage global pour un groupe
+    $styles->createStyle('NoteGSp',
+			 parent=>'NoteQbase',
+			 family=>'table-cell',
+			 properties=>{
+			     -area => 'table-cell',
+			     'fo:background-color'=>"#c4eeba",
+                                     },
+                         'references'=>{'style:data-style-name' => 'Percentage'},
+			 );
+    # NoteGSx : pourcentage maximal = 100%
+    $styles->createStyle('NoteGSx',
+			 parent=>'NoteGSp',
+			 family=>'table-cell',
+			 properties=>{
+                                      -area=>'text',
+				      'fo:font-size'=>"6pt",
+                                     },
 			 );
 
     # NoteX : pas de note car la question ne figure pas dans cette copie la
@@ -1062,6 +1098,7 @@ sub export {
 	    $doc->cellStyle($feuille,$jj,$ii,'NoteX');
 	  } else {
 	    if(defined($q->{group_sum})) {
+              # this is a group total column...
 	      if(@group_columns) {
 		if(defined($group_single{$q->{group_sum}})) {
 		  $group_single{$q->{group_sum}}->{ok}=0
@@ -1070,9 +1107,17 @@ sub export {
 		  $group_single{$q->{group_sum}}=
 		    {ii=>$ii,maxsum=>$group_maxsum,ok=>1};
 		}
-		set_cell($doc,$feuille,$jj,$ii,$m->{'abs'},
-			 'GS','','numeric'=>1,
-			 'formula'=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")");
+                if($self->{'out.groupsums'}==2) {
+                  # as a percentage
+                  set_cell($doc,$feuille,$jj,$ii,$m->{'abs'},
+                           'GSp','',pc=>1,
+                           'formula'=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")/".$group_maxsum);
+                } else {
+                  # value
+                  set_cell($doc,$feuille,$jj,$ii,$m->{'abs'},
+                           'GS','',numeric=>1,
+                           'formula'=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")");
+                }
 		push @{$col_cells{$ii}},$jj;
 	      } else {
 		$doc->cellStyle($feuille,$jj,$ii,'NoteX');
@@ -1161,7 +1206,14 @@ sub export {
     for my $g (keys %group_single) {
       my $j0=$code_row{'max'};
       my $i0=$group_single{$g}->{ii};
-      if($group_single{$g}->{ok}) {
+      if($self->{'out.groupsums'}==2) {
+        # for each student, percentages are reported, so that maximal
+        # value is 100%
+	$doc->cellStyle($feuille,$j0,$i0,'NoteGSx');
+        $doc->cellValueType($feuille,$j0,$i0,'percentage');
+	$doc->cellValue($feuille,$j0,$i0,1);
+	$doc->cellStyle($feuille,$code_row{'average'},$i0,'QpcGS');
+      } elsif($group_single{$g}->{ok}) {
 	$doc->cellStyle($feuille,$j0,$i0,'NoteGS');
 	$doc->cellValueType($feuille,$j0,$i0,'float');
 	$doc->cellValue($feuille,$j0,$i0,$group_single{$g}->{maxsum});

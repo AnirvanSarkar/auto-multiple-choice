@@ -47,7 +47,7 @@ sub options_from_config {
 	 "code"=>$config->get('code_examen'),
 	 "stats"=>$config->get('export_ods_stats'),
 	 "statsindic"=>$config->get('export_ods_statsindic'),
-	 "groupsums"=>($config->get('export_ods_groupsep') ne ''),
+	 "groupsums"=>$config->get('export_ods_group'),
 	 "groupsep"=>$config->get('export_ods_groupsep'),
 	 );
 }
@@ -56,7 +56,8 @@ sub options_default {
   return('export_ods_columns'=>'student.copy,student.key,student.name',
 	 'export_ods_stats'=>'',
 	 'export_ods_statsindic'=>'',
-	 'export_ods_groupsep'=>'',
+	 'export_ods_group'=>'0',
+	 'export_ods_groupsep'=>':',
 	 );
 }
 
@@ -106,20 +107,40 @@ sub build_config_gui {
 # TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.
   $t->attach(Gtk3::Label->new(__"Score groups"),
 	     0,$y,1,1);
+
+  my $w_groups=Gtk3::Grid->new();
+
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
 # TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
-  $prefs->store_register('export_ods_groupsep'=>cb_model(""=>__"No",
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and you can detect the scope from a question ID using the text before the separator :'
-							 ":"=>__"Yes, with scope separator ':'",
+  $prefs->store_register('export_ods_group'=>cb_model("0"=>__"No",
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and report total scores'
+                                                      "1"=>__"Yes (values)",
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and report total scores as percentages.'
+                                                      "2"=>__"Yes (percentages)"));
+  $w->{'export_c_export_ods_group'}=$widget;
+
+  $widget->set_tooltip_text(__"Add sums of the scores for each question group?");
+  $w_groups->attach($widget,0,0,1,1);
+
+  $w_groups->attach(Gtk3::Label->new(" ".(__"with scope separator")." "),1,0,1,1);
+
+  $widget=Gtk3::ComboBox->new();
+  $renderer = Gtk3::CellRendererText->new();
+  $widget->pack_start($renderer, TRUE);
+  $widget->add_attribute($renderer,'text',COMBO_TEXT);
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
+  $prefs->store_register('export_ods_groupsep'=>cb_model(":"=>__"':'",
 # TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and you can detect the scope from a question ID using the text before the separator .'
-							 "."=>__"Yes, with scope separator '.'"));
+							 "."=>__"'.'"));
   $w->{'export_c_export_ods_groupsep'}=$widget;
 
-  $widget->set_tooltip_text(__"Add sums of the scores for each question group? To define groups, use question ids in the form \"group:question\" or \"group.question\", depending on the scope separator.");
-  $t->attach($widget,1,$y,1,1);
+  $widget->set_tooltip_text(__"To define groups, use question ids in the form \"group:question\" or \"group.question\", depending on the scope separator.");
+  $w_groups->attach($widget,2,0,1,1);
+
+  $t->attach($w_groups,1,$y,1,1);
   $y++;
 
   my $b=Gtk3::Button->new_with_label(__"Choose columns");
