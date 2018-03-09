@@ -1947,6 +1947,27 @@ my %component_name=('latex_packages'=>__("LaTeX packages:"),
 		    'fonts'=>__("Fonts:"),
 		    );
 
+sub check_sty_version {
+  my ($c)=@_;
+  my $sty_v=$c->variable('styversion');
+  $sty_v='inknown' if(!$sty_v);
+  my $sty_p=$c->variable('stypath');
+  my $amc_v='@/PACKAGE_V_STY/@';
+  if($sty_v && $sty_v ne $amc_v) {
+    my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+                  'destroy-with-parent',
+                  'warning','ok','');
+    $dialog->set_markup
+      (__"Your AMC version and LaTeX style file version differ. Even if the documents are properly generated, this can lead to many problems using AMC.".
+       "\n".__"<b>Please check your installation to get matching AMC and LaTeX style file versions.</b>".
+       "\n".sprintf(__"AMC version: %s\nsty version: %s\nsty path: %s",$amc_v,$sty_v,$sty_p)
+      );
+    $dialog->run;
+    $dialog->destroy;
+  }
+}
+
 sub doc_maj {
     my $sur=0;
     if($projet{'_capture'}->n_pages_transaction()>0) {
@@ -2084,6 +2105,7 @@ sub doc_maj {
 		 if($data{cancelled}) {
                    debug "Prepare documents: CANCELLED!";
                  } else {
+                   check_sty_version($c);
 		   my @err=$c->erreurs();
 		   my @warn=$c->warnings();
 		   if (@err || @warn) {
@@ -3599,7 +3621,11 @@ sub noter {
 			  $config->get_absolute('texsrc'),
 			 ],
 	     'texte'=>__"Extracting marking scale...",
-	     'fin'=>\&noter_postcorrect,
+	     'fin'=>sub {
+               my ($c,%data)=@_;
+               check_sty_version($c);
+               noter_postcorrect();
+             },
 	     'progres.id'=>'bareme');
   } else {
     noter_calcul('','');

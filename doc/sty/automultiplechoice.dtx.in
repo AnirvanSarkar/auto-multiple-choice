@@ -21,7 +21,9 @@
 % \fi
 % \iffalse
 %<package>\NeedsTeXFormat{LaTeX2e}
-%<package>\ProvidesPackage{automultiplechoice}
+%<package>\def\AMC@VERSION{@/PACKAGE_V_STY/@}
+%<package>\typeout{AMC version: \AMC@VERSION}
+%<package>\ProvidesPackage{automultiplechoice}[\AMC@VERSION]
 %
 %<*batchfile>
 \begingroup
@@ -1168,10 +1170,6 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{rotating} % \rotatebox
 \RequirePackage{fancybox} % \boxput
 \RequirePackage{expl3}
-%    \end{macrocode}
-% It defines a version string:
-%    \begin{macrocode}
-\def\AMC@VERSION{AMC @/PACKAGE_V_DEB/@ @/PACKAGE_V_VC/@}
 %    \end{macrocode}
 % \begin{macro}{\AMC@amclog}\begin{macro}{\AMCmessage}
 %   Informations about questions and choices will be logged to a file

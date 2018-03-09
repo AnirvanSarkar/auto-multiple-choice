@@ -229,6 +229,20 @@ sub flush_errors {
 
 my %info_vars=();
 
+sub relay_info_vars {
+  # Relays variables to calling process
+
+  print "Variables :\n";
+  for my $k (keys %info_vars) {
+    print "VAR: $k=".$info_vars{$k}."\n";
+  }
+}
+
+sub exit_with_error {
+  relay_info_vars();
+  exit(1);
+}
+
 # check_question checks that, if the question question is a simple
 # one, the number of correct answers is exactly one.
 
@@ -473,7 +487,7 @@ sub execute {
 	}
     }
 
-    exit 1 if($errs);
+    exit_with_error() if($errs);
 
     # the filter could have changed the latex engine, so update it
     $oo{command}=[latex_cmd(@{$oo{command_opts}})];
@@ -528,6 +542,18 @@ sub execute {
 	      $e .= "..." if($e !~ /\.$/);
 	      push @latex_errors,$e;
 	    }
+
+            # detect style file path
+
+            if(m:\(([^\)]+/automultiplechoice.sty)(\)|$):) {
+              $info_vars{stypath}=$1;
+            }
+
+            # detect style file version
+
+            if(/^AMC version: (.*)/) {
+              $info_vars{styversion}=$1;
+            }
 
 	    # Relays LaTeX log to calling program
 
@@ -657,7 +683,7 @@ sub give_latex_errors {
 	for(@latex_errors) {
 	    print "ERR>$_\n";
 	}
-	exit(1);
+	exit_with_error();
     }
 }
 
@@ -714,7 +740,7 @@ sub latex_cmd {
 sub check_engine {
     if(!commande_accessible($latex_engine)) {
 	print "ERR: ".sprintf(__("LaTeX command configured is not present (%s). Install it or change configuration, and then rerun."),$latex_engine)."\n";
-	exit(1);
+	exit_with_error();
     }
 }
 
@@ -767,7 +793,7 @@ if($to_do{s}) {
 
     if($a_errors>0) {
       debug("$a_errors errors detected: EXIT");
-      exit(1);
+      exit_with_error();
     }
 
     transfer("$jobname.pdf",$out_sujet);
@@ -797,13 +823,6 @@ if($to_do{s}) {
     }
   }
   flush_errors();
-
-    # Relays variables to calling process
-
-    print "Variables :\n";
-    for my $k (keys %info_vars) {
-	print "VAR: $k=".$info_vars{$k}."\n";
-    }
 
     # 2) SOLUTION
 
@@ -1033,5 +1052,7 @@ if($to_do{b}) {
 
     $scoring->end_transaction('ScEx');
 }
+
+relay_info_vars();
 
 $avance->fin();

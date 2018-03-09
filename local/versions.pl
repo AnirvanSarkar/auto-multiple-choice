@@ -58,5 +58,6 @@ print VMK "PACKAGE_V_DEB=$k{'deb'}\n";
 print VMK "PACKAGE_V_VC=$k{'vc'}\n";
 print VMK "PACKAGE_V_PDFDATE=$k{year}$k{month}$k{day}000000\n";
 print VMK "PACKAGE_V_ISODATE=$k{year}-$k{month}-$k{day}\n";
+print VMK "PACKAGE_V_STY=$k{year}/$k{month}/$k{day} v$k{deb} $k{vc}\n";
 close(VMK);
 
