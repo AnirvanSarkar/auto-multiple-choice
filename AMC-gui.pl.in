@@ -3571,7 +3571,8 @@ sub voir_notes {
   my $c=$projet{'_scoring'}->marks_count;
   $projet{'_scoring'}->end_transaction('smMC');
   if($c>0) {
-    my $n=AMC::Gui::Notes::new('scoring'=>$projet{'_scoring'});
+    my $n=AMC::Gui::Notes::new
+      (scoring=>$projet{'_scoring'},layout=>$projet{'_layout'});
   } else {
     my $dialog = Gtk3::MessageDialog
       ->new($w{'main_window'},

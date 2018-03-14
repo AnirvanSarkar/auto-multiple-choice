@@ -56,8 +56,10 @@ sub formatte {
 
 sub new {
     my %o=(@_);
-    my $self={'scoring'=>'',
-	  };
+    my $self={
+              scoring=>'',
+              layout=>'',
+             };
     my $it;
 
     for (keys %o) {
@@ -91,9 +93,10 @@ sub new {
       $self->{'postcorrect_'.$_}=-1 if(!defined($self->{'postcorrect_'.$_}) || $self->{'postcorrect_'.$_} eq '');
     }
 
+    my $code_digit_pattern = $self->{layout}->code_digit_pattern();
     my @codes=$self->{'scoring'}->codes;
     my @questions=sort { $a->{'title'} cmp $b->{'title'} }
-      grep { $_->{'title'} !~ /\.[0-9]+$/ }
+      grep { $_->{'title'} !~ /$code_digit_pattern$/ }
       ($self->{'scoring'}->questions);
 
     my $store = Gtk3::ListStore->new ( map {'Glib::String' } (1..(3+1+$#codes+1+$#questions)) );
