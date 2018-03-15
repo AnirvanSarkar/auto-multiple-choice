@@ -176,10 +176,16 @@ clean_IN: FORCE
 	rm -f local/deb-auto-changelog
 	rm -f $(FROM_IN)
 
-clean: clean_IN FORCE
-	-rm -f $(BINARIES) $(MAIN_LOGO).xpm
-	-rm -f auto-multiple-choice.spec
+# When we are inside an extracted dist tarball, 'clean' will only remove the
+# files that did not come with in the dist tarball (we keep Makefile.versions
+# and doc/ for example). Otherwise, we remove everything.
+clean: clean_IN $(if $(PRECOMP_ARCHIVE),,distclean)
+	-rm -f $(BINARIES)
 	-rm -f vars-subs.pl
+
+distclean: clean_IN clean
+	-rm -f $(MAIN_LOGO).xpm
+	-rm -f auto-multiple-choice.spec
 	$(MAKE) -C doc/sty clean
 	$(MAKE) -C doc clean
 	$(MAKE) -C I18N clean
