@@ -826,17 +826,20 @@ push @printing_methods,
   'file',__("to files")
   ;
 
+# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
+my $rounding_store=cb_model('inf',__"floor",
+# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
+                            'normal',__"rounding",
+# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
+                            'sup',__"ceiling");
+
 $prefs->store_register(
 # TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
     'delimiteur_decimal'=>cb_model(',',__", (comma)",
 # TRANSLATORS: One option for decimal point: use a point. This is a menu entry.
 				   '.',__". (dot)"),
-# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-    'note_arrondi'=>cb_model('inf',__"floor",
-# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-			     'normal',__"rounding",
-# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-			     'sup',__"ceiling"),
+    'note_arrondi'=>$rounding_store,
+    'defaut_note_arrondi'=>$rounding_store,
     'methode_impression'=>cb_model(@printing_methods),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
     'sides'=>cb_model('one-sided',__p("one sided [No two-sided printing]"),
@@ -4239,6 +4242,13 @@ sub edit_preferences {
       AMC::Gui::WindowSize::size_monitor
 	  ($w{'edit_preferences'},{config=>$config,
 				   key=>'preferences_window_size'});
+    }
+
+    # copy tooltip from note_* to defaut_note_*
+    my $marking_prefs={min=>'x',max=>'x',null=>'x',grain=>'x',max_plafond=>'v',arrondi=>'c'};
+    for my $k (keys %$marking_prefs) {
+      $gap->get_object("pref_".$marking_prefs->{$k}."_defaut_note_$k")->set_tooltip_text
+        ($gap->get_object("pref_projet_".$marking_prefs->{$k}."_note_$k")->get_tooltip_text);
     }
 
     # tableau type/couleurs pour correction

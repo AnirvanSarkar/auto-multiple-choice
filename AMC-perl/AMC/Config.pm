@@ -307,6 +307,13 @@ sub defaults {
      nonascii_projectnames=>'',
      ascii_filenames=>1,
 
+     defaut_note_null=>0,
+     defaut_note_min=>'',
+     defaut_note_max=>20,
+     defaut_note_max_plafond=>1,
+     defaut_note_grain=>"0.5",
+     defaut_note_arrondi=>'inf',
+
      defaut_annote_rtl=>'',
 # TRANSLATORS: This is the default text to be written on the top of the first page of each paper when annotating. From this string, %s will be replaced with the student final mark, %m with the maximum mark he can obtain, %S with the student total score, and %M with the maximum score the student can obtain.
      defaut_verdict=>"%(ID)\n".__("Mark: %s/%m (total score: %S/%M)"),
