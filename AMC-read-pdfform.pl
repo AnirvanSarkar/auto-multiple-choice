@@ -62,8 +62,6 @@ if(-f $list_file) {
   close(LIST);
 }
 
-die "pdftk is needed to read PDF forms!" if(!commande_accessible('pdftk'));
-
 my $data=AMC::Data->new($data_dir);
 my $layout=$data->module('layout');
 my $capture=$data->module('capture');
@@ -141,9 +139,9 @@ if(@forms) {
     my $n_fields=0;
     if($f =~ /\.pdf$/i) {
       if(-f $f) {
-        # Extract form data with pdftk:
-        open(FORM,"-|","pdftk",$f,"dump_data_fields_utf8")
-          or die "Error with pdftk: $!";
+        # Extract form data with pdfformfields (before, we were using pdftk):
+        open(FORM,"-|","auto-multiple-choice","pdfformfields",$f)
+          or die "Error with pdfformfields: $!";
         my $field={};
         clear_copy_id();
         $data->begin_transaction('PDFF');

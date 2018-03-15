@@ -54,6 +54,7 @@ endif
 GCC_OPENCV ?= $(shell pkg-config --cflags opencv)
 GCC_OPENCV_LIBS ?= $(shell pkg-config --libs opencv)
 GCC_PDF ?= $(shell pkg-config --cflags --libs cairo pangocairo poppler-glib)
+GCC_POPPLER ?= $(shell pkg-config --cflags --libs poppler-glib gio-2.0)
 
 #
 
@@ -68,7 +69,7 @@ print-%: FORCE
 
 # AMC components to build
 
-BINARIES ?= AMC-detect AMC-buildpdf
+BINARIES ?= AMC-detect AMC-buildpdf AMC-pdfformfields
 
 MODS=AMC-*.pl
 GLADE_FROMIN:=$(basename $(wildcard AMC-gui-*.glade.in))
@@ -125,6 +126,9 @@ AMC-detect: AMC-detect.cc Makefile
 
 AMC-buildpdf: AMC-buildpdf.cc buildpdf.cc Makefile
 	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_PDF) $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
+
+AMC-pdfformfields: pdfformfields.c Makefile
+	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_POPPLER)
 
 rebuild: FORCE
 	$(MAKE) $(BINARIES) -W Makefile
