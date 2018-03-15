@@ -285,6 +285,26 @@ sub test_debian_amc {
   }
 }
 
+sub check_for_tmp_disk_space {
+  my ($needs_mo)=@_;
+  my $tmp_path=tmpdir();
+  my $space=free_disk_mo($tmp_path);
+  if(defined($space) && $space < $needs_mo) {
+    my $dialog = Gtk3::MessageDialog
+	->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok','');
+    $dialog->set_markup(
+                        sprintf((__"There is too little space left in the temporary disk directory (%s). <b>Please clean this directory and try again.</b>"),
+                                $tmp_path)
+                       );
+    $dialog->run;
+    $dialog->destroy;
+    return 0;
+  }
+  return 1;
+}
+
 # annulation apprentissage
 
 sub annule_apprentissage {
@@ -2904,8 +2924,12 @@ sub saisie_auto_info {
 
 sub analyse_call {
   my (%oo)=@_;
-  # make temporary file with the list of images to analyse
 
+  # meeds a little tmp disk space (for zooms), and first decent space
+  # for AMC-getimages...
+  return() if(!check_for_tmp_disk_space($oo{getimages} ? 20 : 2));
+
+  # make temporary file with the list of images to analyse
   my $fh=File::Temp->new(TEMPLATE => "liste-XXXXXX",
 			 TMPDIR => 1,
 			 UNLINK=> 1);
