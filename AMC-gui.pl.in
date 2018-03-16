@@ -1976,7 +1976,7 @@ sub check_sty_version {
   $sty_v='inknown' if(!$sty_v);
   my $sty_p=$c->variable('stypath');
   my $amc_v='@/PACKAGE_V_STY/@';
-  if($sty_v && $sty_v ne $amc_v) {
+  if($sty_p && $sty_v ne $amc_v) {
     my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
                   'destroy-with-parent',
