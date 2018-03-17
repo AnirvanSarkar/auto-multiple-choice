@@ -1973,7 +1973,7 @@ my %component_name=('latex_packages'=>__("LaTeX packages:"),
 sub check_sty_version {
   my ($c)=@_;
   my $sty_v=$c->variable('styversion');
-  $sty_v='inknown' if(!$sty_v);
+  $sty_v='unknown' if(!$sty_v);
   my $sty_p=$c->variable('stypath');
   my $amc_v='@/PACKAGE_V_STY/@';
   if($sty_p && $sty_v ne $amc_v) {
