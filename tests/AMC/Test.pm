@@ -63,6 +63,7 @@ sub new {
      'seuil'=>0.5,
      'seuil_up'=>1.0,
      'bw_threshold'=>0.6,
+     'ignore_red'=>'',
      'tol_marque'=>0.4,
      'rounding'=>'i',
      'grain'=>0.01,
@@ -372,6 +373,7 @@ sub analyse {
 		     '--bw-threshold',$self->{'bw_threshold'},
 		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
+                     ($self->{ignore_red} ? '--ignore-red' : '--no-ignore-red'),
 		     '--projet','%PROJ',
 		     '--data','%DATA',
 		     '--debug-image-dir','%PROJ/cr',
@@ -382,6 +384,7 @@ sub analyse {
 		     '--bw-threshold',$self->{'bw_threshold'},
 		     '--pre-allocate',$self->{'pre_allocate'},
 		     '--tol-marque',$self->{'tol_marque'},
+                     ($self->{ignore_red} ? '--ignore-red' : '--no-ignore-red'),
 		     ($self->{'debug'} || $self->{debug_pixels}
 		      ? '--debug-pixels' : '--no-debug-pixels'),
 		     '--projet','%PROJ',
