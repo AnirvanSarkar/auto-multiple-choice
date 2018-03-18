@@ -20,14 +20,22 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
-               perfect_copy=>[],notemax=>0,
-               ignore_red=>1,
-               'check_marks'=>{1=>2},
-	      )->default_process;
-AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
-               perfect_copy=>[],notemax=>0,
-               ignore_red=>'',
-               'check_marks'=>{1=>6},
-	      )->default_process;
+my $t=AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
+                     perfect_copy=>[],notemax=>0,multiple=>1,
+                     'check_marks'=>{'1:1'=>2,'1:2'=>6},
+                    );
+
+$t->prepare;
+
+$t->set(ignore_red=>1);
+$t->analyse;
+
+$t->set(ignore_red=>0);
+$t->analyse;
+
+$t->note;
+$t->get_marks;
+$t->check_marks;
+
+$t->ok;
 

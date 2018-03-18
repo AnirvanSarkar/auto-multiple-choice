@@ -144,6 +144,14 @@ sub new {
   return $self;
 }
 
+sub set {
+  my ($self,%oo)=@_;
+
+  for (keys %oo) {
+    $self->{$_}=$oo{$_} if(exists($self->{$_}));
+  }
+}
+
 sub read_checksums {
   my ($self,$file)=@_;
 
