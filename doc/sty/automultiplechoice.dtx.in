@@ -4711,6 +4711,30 @@ Three digits and two letters:\insertgroup{mixed}.
     examcopy/copieexamen will NOT be defined.}}
 %    \end{macrocode}\end{environment}
 %
+% \subsection{Use with recent LuaTeX versions}
+%
+% In recent LuaTeX versions, the commands |pdfsavepos|, |pdflastxpos|
+% and |pdflastypos| has been renamed, stripping the |pdf| part. The
+% following code tries to detect this situation and make the bindings
+% between the old and new command names.
+%
+%    \begin{macrocode}
+\ExplSyntaxOn
+
+\sys_if_engine_luatex:TF {
+  \cs_if_exist:NTF \pdfsavepos { } {
+    \cs_new_eq:NN \pdfsavepos \savepos
+  }
+  \cs_if_exist:NTF \pdflastxpos { } {
+    \cs_new_eq:NN \pdflastxpos \lastxpos
+  } 
+  \cs_if_exist:NTF \pdflastypos { } {
+    \cs_new_eq:NN \pdflastypos \lastypos
+  }
+} { }
+
+\ExplSyntaxOff
+%    \end{macrocode}
 % \subsection{External control}
 %
 % \begin{macro}{\SujetExterne}\begin{macro}{\ScoringExterne}
