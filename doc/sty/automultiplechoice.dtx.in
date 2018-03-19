@@ -1001,6 +1001,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %     correct integer value (value without the decimal point) for an
 %     answer to be said \emph{approximative} and be rewarded to
 %     |scoreapprox| points (defaults to 0).
+%   \item[|scorewrong=|\meta{num}] gives the score for a wrong answer (defaults to 0).
 %   \end{itemize}
 %
 %   The text added at the end of the questions using
@@ -3632,6 +3633,8 @@ Three digits and two letters:\insertgroup{mixed}.
   scoreexact .initial:n = { 2 },
   scoreapprox .code:n = {\def\AMC@numeric@scoreapprox{#1}},
   scoreapprox .initial:n = { 1 },
+  scorewrong .code:n = {\def\AMC@numeric@scorewrong{#1}},
+  scorewrong .initial:n = { 0 },
   exact .int_set:N = \amc_num_exact_int,
   exact .initial:n = { 0 },
   approx .int_set:N = \amc_num_approx_int,
@@ -3956,10 +3959,10 @@ Three digits and two letters:\insertgroup{mixed}.
        formula=(Vdifference <= \int_use:N \amc_num_exact_int ?
        \AMC@numeric@scoreexact :
        \int_compare:nNnTF \amc_num_approx_int = 0 {
-         0
+         \AMC@numeric@scorewrong
        } {
          (Vdifference <= \int_use:N\amc_num_approx_int ?
-           \AMC@numeric@scoreapprox : 0)
+           \AMC@numeric@scoreapprox : \AMC@numeric@scorewrong)
        }
        )]^^J}
    } {}
