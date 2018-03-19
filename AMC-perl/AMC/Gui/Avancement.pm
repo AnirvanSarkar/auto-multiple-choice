@@ -105,7 +105,6 @@ sub lit {
     if($r>=0 && $self->{'bar'}) {
       $self->{'bar'}->set_fraction($r);
       if($r==0 || $r>=$self->{'lastshown'}+$self->{'epsilon'}) {
-	Gtk3::main_iteration while ( Gtk3::events_pending );
 	$self->{'lastshown'}=$r;
       }
     }
