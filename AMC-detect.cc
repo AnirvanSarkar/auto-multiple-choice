@@ -570,7 +570,7 @@ void calage(cv::Mat src, cv::Mat illustr,
           with a random color. */
         cv::Scalar color = CV_RGB(rand() & 255, rand() & 255, rand() & 255);
         cv::rectangle(dst, cv::Point(rect.x,rect.y), cv::Point(rect.x+rect.width,rect.y+rect.height), color);
-        cv::drawContours(dst, contours, i, color, cv::FILLED, cv::LINE_8);
+        cv::drawContours(dst, contours, i, color, CV_FILLED);
       }
 #endif
      if(view==2) {
@@ -578,7 +578,7 @@ void calage(cv::Mat src, cv::Mat illustr,
           in green. */
         cv::Scalar color = CV_RGB(60,198,127);
         cv::rectangle(dst, cv::Point(rect.x,rect.y), cv::Point(rect.x+rect.width,rect.y+rect.height), color);
-        cv::drawContours(dst, contours, i, color, -1, CV_FILLED, 8);
+        cv::drawContours(dst, contours, i, color, -1, CV_FILLED);
      }
     }
   }
@@ -600,21 +600,21 @@ void calage(cv::Mat src, cv::Mat illustr,
 #ifdef OPENCV_21
       /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i = 0; i < 4; i++) {
-        cv::line(dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(255,255,255), 1, cv::LINE_AA);
+        cv::line(dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(255,255,255), 1, CV_AA);
       }
 #endif
     }
     if(view==2) {
       /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i = 0; i < 4; i++) {
-        cv::line(dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(193,29,27), 1, cv::LINE_AA);
+        cv::line(dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(193,29,27), 1, CV_AA);
       }
     }
 
     if(illustr.data!=NULL) {
       /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i = 0; i < 4; i++) {
-        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, cv::LINE_AA);
+        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, CV_AA);
       }
     }
   } else {
@@ -808,7 +808,7 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
     if(illustr_mode == ILLUSTR_BOX) {
       /* draws the box on the illustrated image (for zoom) */
       for(int i = 0; i < 4; i++) {
-        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, cv::LINE_AA);
+        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, CV_AA);
       }
     }
 
@@ -954,7 +954,7 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
 #ifdef OPENCV_21
   if(view == 1) {
     for(int i = 0; i < 4; i++) {
-      cv::line(dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(255,255,255), 1, cv::LINE_AA);
+      cv::line(dst, coins_int[i], coins_int[(i+1)%4], CV_RGB(255,255,255), 1, CV_AA);
     }
   }
 #endif
@@ -963,7 +963,7 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
     if(illustr_mode == ILLUSTR_BOX) {
       /* draws the measuring box on the illustrated image (for zoom) */
       for(int i = 0; i < 4; i++) {
-        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], ROSE, 1, cv::LINE_AA);
+        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], ROSE, 1, CV_AA);
       }
     }
 
@@ -1292,7 +1292,7 @@ int main(int argc, char** argv)
         fh = src.rows / 50.0;
         textpos.x = 10;
         textpos.y = (int)(1.6 * fh);
-        cv::putText(illustr, text, textpos, cv::FONT_HERSHEY_PLAIN, fh/14, BLEU, 1+(int)(fh/20), cv::LINE_AA);
+        cv::putText(illustr, text, textpos, cv::FONT_HERSHEY_PLAIN, fh/14, BLEU, 1+(int)(fh/20), CV_AA);
       } else {
         printf(": %s\n", commande);
         printf("! SYNERR : Syntax error\n");
