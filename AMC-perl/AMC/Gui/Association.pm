@@ -329,12 +329,17 @@ sub get_show_all {
 # {X:X}
 sub set_n_cols {
   my ($self)=@_;
-  my $nligs=POSIX::ceil($self->{'liste'}->taille()/$self->{'assoc-ncols'});
 
   $self->{'general'}->get_window()->set_cursor($self->{'cursor_watch'});
-  Gtk3::main_iteration while ( Gtk3::events_pending );
 
-  $self->{'tableau'}->hide();
+  $self->{'tableau'}->set_sensitive(0);
+
+  # wait for GUI update before going on with the table
+  Glib::Idle->add(\&set_n_cols_fill,$self,Glib::G_PRIORITY_LOW);
+}
+
+sub set_n_cols_fill {
+  my ($self)=@_;
 
   $self->{'tableau'}->foreach(sub { $self->{'tableau'}->remove(shift); });
 
@@ -354,9 +359,11 @@ sub set_n_cols {
   $self->{'scrolled_tableau'}->set_policy('never','automatic');
 
   $self->{'tableau'}->show_all();
+  $self->{'tableau'}->set_sensitive(1);
 
-  Gtk3::main_iteration while ( Gtk3::events_pending );
   $self->{'general'}->get_window()->set_cursor(undef);
+
+  return(0);
 }
 
 # Add a column to the names table
