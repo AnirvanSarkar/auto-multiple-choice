@@ -2818,6 +2818,7 @@ Three digits and two letters:\insertgroup{mixed}.
   }%
 }
 \newcommand\AMC@mem@answer[1]{%
+  \addtocounter{AMC@ncase}{1}%
   \AMC@if@separate@question{%
     \AMC@mem@aid{\the\AMCrep@count}%
     \AMC@mem@add{\AMCformAnswerA{#1}}%
