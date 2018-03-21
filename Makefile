@@ -331,7 +331,7 @@ TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
 TARBALLS_DIR=tarballs
 ORIG_SOURCES=$(TMP_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 
-SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags
+SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags --exclude .gitignore
 
 version_files:
 	$(PERLPATH) local/versions.pl
@@ -340,7 +340,7 @@ version_files:
 tmp_copy:
 	rm -rf $(TMP_SOURCE_DIR)
 	mkdir $(TMP_SOURCE_DIR)
-	rsync -aC --exclude '*~' --exclude .hg --exclude download_area --exclude local --exclude tmp --exclude tarballs . $(TMP_SOURCE_DIR)
+	rsync -aC --exclude '*~' --exclude .hg --exclude .git --exclude download_area --exclude local --exclude tmp --exclude tarballs . $(TMP_SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean
 
 portable_vok:
