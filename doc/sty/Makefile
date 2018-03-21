@@ -39,6 +39,7 @@ all: FORCE
 
 styonly: $(PACK).dtx
 	$(PDFLATEX) $<
+	$(MAKE) postclean
 
 sample-%.datetex.in: sample-%.tex
 	$(PERLPATH) -pe 's!\\begin\{document\}!\\begin{document}\\pdfinfo{/CreationDate (D:@/PACKAGE_V_PDFDATE/@) /ModDate (D:@/PACKAGE_V_PDFDATE/@)}!;' < $< > $@
