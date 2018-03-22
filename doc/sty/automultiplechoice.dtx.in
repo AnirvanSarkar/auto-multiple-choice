@@ -146,6 +146,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@affichekeystrue}
 % \DoNotIndex{\AMC@calibrationfalse}
 % \DoNotIndex{\AMC@calibrationtrue}
+% \DoNotIndex{\AMC@catalogfalse}
+% \DoNotIndex{\AMC@catalogtrue}
 % \DoNotIndex{\AMC@correcfalse}
 % \DoNotIndex{\AMC@correctrue}
 % \DoNotIndex{\AMC@correcheadfalse}
@@ -1293,6 +1295,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMCcomplete@multi\AMCcomplete@multifalse
 \newif\ifAMCquestionNumber\AMCquestionNumbertrue
 \newif\ifAMC@calibration\AMC@calibrationfalse
+\newif\ifAMC@catalog\AMC@catalogfalse
 \newif\ifAMC@plain\AMC@plainfalse
 \newif\ifAMCune@bonne
 \newif\ifAMCtype@multi
@@ -1711,6 +1714,25 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}\end{macro}\end{macro}
 %
 % \subsection{Boxes}
+% \subsubsection{Character logging}
+%
+% \begin{macro}{\AMC@logchar}
+%   The command |\AMC@logchar|\marg{char}\marg{key} logs the
+%   character written in the box referenced as \meta{key} in the |.cs|
+%   file. This is used in catalog mode, to get understandable
+%   references to answers from the statistics tables of the ODS
+%   export.
+%
+%    \begin{macrocode}
+\def\AMC@logchar#1#2{%
+  \protected@write\AMC@CSFILE{}{%
+    \string\answer%
+    {\the\AMCid@etud/\thepage:#2}%
+    {#1}}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsubsection{Position logging}
 %
 % \begin{macro}{\AMC@tracebox}\begin{macro}{\AMC@pagepos}
@@ -1932,6 +1954,9 @@ Three digits and two letters:\insertgroup{mixed}.
     \AMC@draw@crosstrue\fi\fi%
 }
 \newcommand\AMC@answerBox@[4]{%
+  \ifAMC@catalog%
+    \AMC@logchar{#1}{#4}%
+  \fi%
   \AMC@LR{\hspace{0pt}%
     \lower\AMC@boxeddown\hbox{\csname AMC@shape@\AMC@shapename@\endcsname%
       {\AMCchoiceLabelFormat{#1}}{#2}{#3}{#4}}}%
@@ -4624,6 +4649,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{calibration}{\AMC@calibrationtrue}
 \DeclareOptionX{nowatermark}{\AMC@watermarkfalse}
 \newcommand\AMC@catalogMode{%
+  \AMC@catalogtrue%
   \AMC@watermarkfalse\AMC@correcheadtrue%
   \AMC@correctrue\AMC@ordretrue\AMC@shuffleGfalse%
   \AMC@fullGroupstrue%
@@ -4842,6 +4868,14 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \immediate\write\AMC@XYFILE{\string\with{ncopies=\AMCNombreCopies}}%
 \fi%
 \fi
+%    \end{macrocode}
+%
+% Preparing writing to |.cs| file :
+%    \begin{macrocode}
+\ifAMC@catalog%
+\newwrite\AMC@CSFILE%
+\immediate\openout\AMC@CSFILE\jobname.cs%
+\fi%
 %    \end{macrocode}
 %
 % \subsection{French command names}

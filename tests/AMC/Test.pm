@@ -97,6 +97,7 @@ sub new {
      'pages'=>'',
      'extract_with'=>'qpdf',
      'force_convert'=>0,
+     'documents'=>'sc',
     };
 
   for (keys %oo) {
@@ -306,11 +307,12 @@ sub prepare {
   $self->amc_command('prepare',
 		     '--filter',$self->{'filter'},
 		     '--with',$self->{'tex_engine'},
-		     '--mode','s',
+		     '--mode','s['.$self->{documents}.']',
                      '--epoch',946684800,
 		     '--n-copies',$self->{'n_copies'},
 		     '--prefix',$self->{'temp_dir'}.'/',
 		     '%PROJ/'.$self->{'src'},
+		     '--data','%DATA',
 		    );
   $self->amc_command('meptex',
 		     '--src','%PROJ/calage.xy',

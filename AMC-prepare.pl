@@ -275,6 +275,30 @@ sub check_question {
     }
 }
 
+# analyse_cslog get the chars written in the boxes from the catalog
+# build, and updates the layout_char database accordingly
+
+sub analyse_cslog {
+  my ($cslog_file)=@_;
+
+  my $data=AMC::Data->new($data_dir);
+  my $layout=$data->module('layout');
+
+  $layout->begin_transaction('Char');
+  $layout->clear_char();
+  open(CSLOG,$cslog_file) or die "Unable to open $cslog_file: $!";
+  while (<CSLOG>) {
+    if(/\\answer\{.*:(\d+),(\d+)\}\{(.*)\}$/) {
+      my $question=$1;
+      my $answer=$2;
+      my $char=$3;
+      $layout->char($question,$answer,$char);
+    }
+  }
+  close(CSLOG);
+  $layout->end_transaction('Char');
+}
+
 # analyse_amclog checks common errors in LaTeX about questions:
 #
 # * same question ID used multiple times for the same paper, or same
@@ -840,6 +864,7 @@ if($to_do{s}) {
   if($to_do{s}=~/c/) {
     execute('command_opts'=>[%opts,'CatalogExterne'=>1]);
     transfer("$jobname.pdf",$out_catalog);
+    analyse_cslog("$jobname.cs");
     give_latex_errors(__"catalog");
   } else {
     debug "Catalog not requested: removing $out_catalog";

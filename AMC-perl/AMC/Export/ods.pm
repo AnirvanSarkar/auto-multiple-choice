@@ -52,6 +52,7 @@ sub load {
   my ($self)=@_;
   $self->SUPER::load();
   $self->{'_capture'}=$self->{'_data'}->module('capture');
+  $self->{'_layout'}=$self->{'_data'}->module('layout');
 }
 
 # returns the column width (in cm) to use when including the given texts.
@@ -251,6 +252,8 @@ sub build_stats_table {
   my $ybase=0;
   my $x=0;
 
+  $self->{_layout}->begin_read_transaction('Xods');
+
   for my $q (@q) {
 
     # QUESTION HEADERS
@@ -292,7 +295,8 @@ sub build_stats_table {
 	  $amax=$counts->{'answer'}
 	    if($counts->{'answer'}>$amax);
 	  $ya=4+$counts->{'answer'};
-	  $name=chr(ord("A")+$counts->{'answer'}-1);
+          $name=$self->{_layout}->char($q->{question},$counts->{answer});
+	  $name=chr(ord("A")+$counts->{'answer'}-1) if(!defined($name));
 	} else {
 	  $amax++;
 	  $ya=4+$amax;
@@ -357,6 +361,8 @@ sub build_stats_table {
     }
 
   }
+
+  $self->{_layout}->end_transaction('Xods');
 
 }
 

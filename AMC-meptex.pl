@@ -191,7 +191,7 @@ sub center {
 my $delta=(@pages ? 1/(1+$#pages) : 0);
 
 $layout->begin_transaction('MeTe');
-$layout->clear_all;
+$layout->clear_mep;
 $layout->clear_variables('build:%');
 for my $k (keys %build_vars) {
   $layout->variable("build:$k",$build_vars{$k});

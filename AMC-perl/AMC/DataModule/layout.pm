@@ -125,6 +125,14 @@ package AMC::DataModule::layout;
 #
 # * id is the association value (student id from the students list)
 #   for the corresponding student sheet
+#
+# layout_char contains the chars written inside the answer boxes in catalog mode
+#
+# * question is the question ID (see explanation in layout_box)
+#
+# * answer is the answer number
+#
+# * char is the character written inside the box
 
 use Exporter qw(import);
 
@@ -151,7 +159,7 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(6);
+  return(7);
 }
 
 sub drop_box_table {
@@ -257,6 +265,14 @@ sub version_upgrade {
       $self->sql_do("ALTER TABLE ".$self->table("box")
                     ." ADD COLUMN char TEXT");
       return(6);
+    }
+    if($old_version==6) {
+      $self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("char")
+                    ." (question INTEGER, answer INTEGER, char TEXT)");
+      $self->sql_do("CREATE UNIQUE INDEX IF NOT EXISTS "
+                    .$self->index("index_char")." ON "
+                    .$self->table("char","self")." (question,answer)");
+      return(7);
     }
     return('');
 }
@@ -525,7 +541,14 @@ sub define_statements {
 	." FROM ".$self->table("box")." WHERE answer=1"
        },
        'QuestionsList'=>{sql=>"SELECT * FROM ".$self->table("question")},
-      };
+       'CharClear'=>{sql=>"DELETE FROM ".$self->table("char")},
+       'CharSet'=>
+       {sql=>"INSERT OR IGNORE INTO ".$self->table("char")
+        ." (question,answer,char) VALUES (?,?,?)"},
+        'CharGet'=>
+       {sql=>"SELECT char FROM ".$self->table("char")
+        ." WHERE question=? AND answer=?"},
+     };
 }
 
 # clear_page_layout($student,$page) clears all the layout data for a
@@ -801,11 +824,17 @@ sub question_name {
 
 # clear_all clears all the layout data tables.
 
-sub clear_all {
+sub clear_mep {
     my ($self)=@_;
     for my $t (qw/page mark namefield box digit source question association/) {
 	$self->sql_do("DELETE FROM ".$self->table($t));
     }
+  }
+
+sub clear_all {
+  my ($self)=@_;
+  $self->clear_mep;
+  $self->clear_char;
 }
 
 # get_pages returns a reference to an array like
@@ -961,6 +990,26 @@ sub questions_list {
   my ($self)=@_;
   return @{$self->dbh->selectall_arrayref($self->statement('QuestionsList'),
                                           {Slice=>{}})};
+}
+
+# clear_char() clears the char table
+
+sub clear_char {
+  my ($self)=@_;
+  $self->statement("CharClear")->execute();
+}
+
+# char($question, $answer [,$char] ) gets or sets the character
+# associated with a particular answer.
+
+sub char {
+  my ($self,$question,$answer,$char)=@_;
+  if(defined($char)) {
+    $self->statement("CharSet")->execute($question,$answer,$char);
+  } else {
+    return($self->sql_single($self->statement('CharGet'),
+                             $question,$answer));
+  }
 }
 
 1;
