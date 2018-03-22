@@ -37,7 +37,7 @@ my $vector_density=300;
 my $orientation="";
 my $rotate_direction="90";
 my $force_convert=0;
-my %use=(pdfimages=>1,pdftk=>1);
+my %use=(pdfimages=>1,pdftk=>1,qpdf=>1);
 
 GetOptions("list=s"=>\$list_file,
 	   "progression-id=s"=>\$progress_id,
@@ -48,6 +48,7 @@ GetOptions("list=s"=>\$list_file,
 	   "rotate-direction=s"=>\$rotate_direction,
 	   "use-pdfimages!"=>\$use{pdfimages},
 	   "use-pdftk!"=>\$use{pdftk},
+     "use-qpdf!"=>\$use{qpdf},
 	   "force-convert!"=>\$force_convert,
 	  );
 
@@ -58,7 +59,7 @@ $use{pdfimages}=0 if($force_convert);
 # cancels use of pdfimages/pdftk if these commands are not available
 # on the system
 
-for my $cmd (qw/pdfimages pdftk/) {
+for my $cmd (qw/pdfimages pdftk qpdf/) {
   if($use{$cmd} && !commande_accessible($cmd)) {
     debug "WARNING: command $cmd not found";
     $use{$cmd}=0;
@@ -190,10 +191,10 @@ if(-f $list_file) {
 }
 
 ###################################################################
-# STEP 1: split multi-page PDF with pdfimages or pdftk, which uses
+# STEP 1: split multi-page PDF with pdfimages, pdftk or qpdf, which use
 # less memory than ImageMagick
 
-if($use{pdfimages} || $use{pdftk}) {
+if($use{pdfimages} || $use{pdftk} || $use{qpdf}) {
 
   # @pdfs is the list of PDF files
 
@@ -224,7 +225,7 @@ if($use{pdfimages} || $use{pdftk}) {
 
       check_split_path($file);
 
-      # First try pdfimages, which is much more judicious
+      # First, try pdfimages, which is much more judicious
 
       if($use{pdfimages}) {
 	if(system("pdfimages","-p",$file->{path},
@@ -265,7 +266,47 @@ if($use{pdfimages} || $use{pdftk}) {
 	}
       }
 
-      # If not successful with pdfimages, use pdftk
+      # Second, try qpdf
+      if($use{qpdf}) {
+        if(system("qpdf",$file->{path},"--split-pages",$temp_dir.'/'.$file->{file}.'-page-%d.pdf')==0) {
+
+          opendir(my $dh, $temp_dir)
+            || debug "can't opendir $temp_dir: $!";
+          my @images=map { "$temp_dir/$_" }
+            sort { $a cmp $b } grep { /-page-/ } readdir($dh);
+          closedir $dh;
+
+          if(@images) {
+
+            # qpdf produced some files. Check that the page
+            # numbers follow each other starting from 1
+
+            my $ok=1;
+            PDFIM: for my $i (0..$#images) {
+              if($images[$i] =~ /-page-([0-9]+)/) {
+                my $pp=$1;
+                if($pp != $i+1) {
+                  debug "INFO: missing page ".($i+1)." from qpdf";
+                  $ok=0;
+                  last PDFIM;
+                }
+              }
+            }
+            if($ok) {
+              debug "qpdf ok for $file->{file}";
+              push @fs,replace_by($file,@images);
+              next PDF;
+            }
+          } else {
+            debug "INFO: qpdf produced no file";
+          }
+
+        } else {
+          debug "ERROR while trying qpdf: [$?] $!";
+        }
+      }
+
+      # If not successful with pdfimages and qpdf, use pdftk
 
       if($use{pdftk}) {
 	if(system("pdftk",$file->{path},"burst","output",
