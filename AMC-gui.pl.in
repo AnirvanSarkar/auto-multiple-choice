@@ -938,7 +938,8 @@ $prefs->store_register(
                                1=>'SSL',
                                'starttls'=>'STARTTLS'),
     'print_extract_with'=>cb_model('pdftk'=>'pdftk',
-				   'gs'=>'gs (ghostscript)'
+				   'gs'=>'gs (ghostscript)',
+				   'qpdf'=>'qpdf',
 				   ),
 # TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
 		       'print_answersheet'=>cb_model(''=>__"Standard",
@@ -2324,7 +2325,11 @@ sub project_printing_method {
 
 sub project_extract_with {
   if($config->get('project:pdfform')) {
+    if($config->get('print_extract_with') eq 'qpdf') {
+      return('qpdf');
+    } else {
     return('pdftk+NA');
+    }
   } else {
     return($config->get("print_extract_with"));
   }
