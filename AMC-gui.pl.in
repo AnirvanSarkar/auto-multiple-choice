@@ -2611,28 +2611,35 @@ sub sujet_impressions_ok {
 
     if($config->get('options_impression/print_answersheet') eq 'first') {
       # This options needs pdftk!
-      if($config->get('print_extract_with') ne 'pdftk') {
-	if(commande_accessible('pdftk')) {
-	  my $dialog = Gtk3::MessageDialog
-	    ->new($w{'main_window'},
-                  'destroy-with-parent',
-                  'info','ok','');
-          $dialog->set_markup(
+      if($config->get('print_extract_with') !~ /(pdftk|qpdf)/) {
+        my $found=0;
+      EXTRACT: for my $cmd (qw/qpdf pdftk/) {
+          if(commande_accessible($cmd)) {
+            my $dialog = Gtk3::MessageDialog
+              ->new($w{'main_window'},
+                    'destroy-with-parent',
+                    'info','ok','');
+            $dialog->set_markup(
 # TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
-			      sprintf(__("You selected the '%s' option, that uses 'pdftk', so the %s has been set to 'pdftk' for you."),
-				      __("Answer sheet first"),__("Extracting method"))
-			     );
-	  $dialog->run;
-	  $dialog->destroy;
+                                sprintf(__("You selected the '%s' option, that uses '%s', so the %s has been set to '%s' for you."),
+                                        __("Answer sheet first"),$cmd,
+                                        __("Extracting method"),$cmd)
+                               );
+            $dialog->run;
+            $dialog->destroy;
 
-	  $config->set("print_extract_with",'pdftk');
-	} else {
+            $config->set("print_extract_with",$cmd);
+            $found=1;
+            last EXTRACT;
+          }
+        }
+        if(!$found) {
 	  my $dialog = Gtk3::MessageDialog
 	    ->new($w{'main_window'},
                   'destroy-with-parent',
                   'error','ok','');
           $dialog->set_markup(
-			      sprintf(__("You selected the '%s' option, but this option needs 'pdftk' to be installed on your system. Please install it and try again."),
+			      sprintf(__("You selected the '%s' option, but this option needs 'qpdf' or 'pdftk' to be installed on your system. Please install one of these and try again."),
 				      __"Answer sheet first")
 			     );
 	  $dialog->run;
