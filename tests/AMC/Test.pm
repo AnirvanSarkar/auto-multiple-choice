@@ -95,7 +95,7 @@ sub new {
      'tracedest'=>'STDERR',
      'debug_file'=>'',
      'pages'=>'',
-     'extract_with'=>'pdftk',
+     'extract_with'=>'qpdf',
     };
 
   for (keys %oo) {

@@ -35,10 +35,16 @@ clean:
 	-rm $(EPS)
 
 test: $(EPS) FORCE
+	@echo "Using qpdf"
 	./all_tests
+	@echo "Using pdftk"
+	./selected_tests --extract-with pdftk
 
 blind-test: $(EPS) FORCE
+	@echo "Using qpdf"
 	./all_tests --blind
+	@echo "Using pdftk"
+	./selected_tests --blind --extract-with pdftk
 
 FORCE: ;
 
