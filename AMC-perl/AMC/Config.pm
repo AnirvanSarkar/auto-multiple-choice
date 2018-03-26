@@ -242,7 +242,7 @@ sub defaults {
      print_command_pdf=>['command',
                          'cupsdoprint %f','lpr %f',
                         ],
-     print_extract_with=>'pdftk',
+     print_extract_with=>['command','qpdf','pdftk','gs'],
      # TRANSLATORS: directory name for projects. This directory will be created (if needed) in the home directory of the user. Please use only alphanumeric characters, and - or _. No accentuated characters.
      rep_projets=>$self->{home_dir}.'/'.__"MC-Projects",
      projects_home=>$self->{home_dir}.'/'.__"MC-Projects",
