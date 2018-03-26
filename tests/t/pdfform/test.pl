@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2018 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -20,5 +20,5 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'xelatex')
+AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'xelatex',extract_with=>'pdftk+NA')
   ->default_process;
