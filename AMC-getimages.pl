@@ -379,6 +379,11 @@ for my $fich (@f) {
       if($vector_density);
   }
 
+  # With ImageMagic, remove alpha channel to get white background
+  if(!use_gm_command()) {
+    push @pre_options,"-alpha","remove";
+  }
+
   debug "> Scan $fich->{path}: $np page(s)".($scene ? " [has scene>0]" : "");
   if($np>1 || $scene || $vector || $force_convert) {
     # split multipage image into 1-page images, and/or convert
