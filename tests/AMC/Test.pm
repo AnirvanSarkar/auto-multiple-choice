@@ -96,6 +96,7 @@ sub new {
      'debug_file'=>'',
      'pages'=>'',
      'extract_with'=>'qpdf',
+     'force_convert'=>0,
     };
 
   for (keys %oo) {
@@ -384,6 +385,7 @@ sub analyse {
 		     '--list',$scans_list,
 		     '--copy-to',$self->{'temp_dir'}."/scans",
 		     '--orientation',$self->get_orientation(),
+                     ($self->{force_convert} ? "--force-convert" : "--no-force-convert"),
                      @extract_opts,
 		     );
 
