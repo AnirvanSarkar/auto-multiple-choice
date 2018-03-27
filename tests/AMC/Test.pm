@@ -95,6 +95,8 @@ sub new {
      'tracedest'=>'STDERR',
      'debug_file'=>'',
      'pages'=>'',
+     'extract_with'=>'qpdf',
+     'force_convert'=>0,
     };
 
   for (keys %oo) {
@@ -128,7 +130,9 @@ sub new {
   GetOptions("debug!"=>\$self->{'debug'},
              "blind!"=>\$self->{'blind'},
              "log-to=s"=>\$self->{debug_file},
-             "to-stdout!"=>\$to_stdout);
+             "to-stdout!"=>\$to_stdout,
+             "extract-with=s"=>\$self->{extract_with},
+            );
 
   $self->{tracedest} = 'STDOUT' if($to_stdout);
   binmode $self->{tracedest}, ":utf8";
@@ -346,6 +350,7 @@ sub analyse {
 		       '--output','%PROJ/xx-copie-%e.pdf',
 		       '--fich-numeros',$nf,
 		       '--data','%DATA',
+                       '--extract-with',$self->{'extract_with'},
 		      );
 
     opendir(my $dh, $self->{'temp_dir'})
@@ -370,10 +375,18 @@ sub analyse {
 		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
                     );
 
+  my @extract_opts=();
+  if($self->{extract_with} =~ /^pdftk/) {
+    push @extract_opts, '--no-use-qpdf';
+  } elsif($self->{extract_with} eq 'qpdf') {
+    push @extract_opts, '--no-use-pdftk';
+  }
   $self->amc_command('getimages',
 		     '--list',$scans_list,
 		     '--copy-to',$self->{'temp_dir'}."/scans",
 		     '--orientation',$self->get_orientation(),
+                     ($self->{force_convert} ? "--force-convert" : "--no-force-convert"),
+                     @extract_opts,
 		     );
 
   $self->amc_command('analyse',

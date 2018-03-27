@@ -25,6 +25,10 @@ PACK=automultiplechoice
 
 SAMPLES=$(wildcard sample-*.tex)
 
+all %.pdf: export SOURCE_DATE_EPOCH=$(PACKAGE_V_EPOCH)
+all %.pdf: export SOURCE_DATE_EPOCH_TEX_PRIMITIVES=1
+all %.pdf: export FORCE_SOURCE_DATE=1
+
 PDFLATEX=pdflatex -halt-on-error -interaction=nonstopmode
 all: FORCE
 	$(PDFLATEX) $(PACK).dtx
@@ -34,7 +38,6 @@ all: FORCE
 	makeindex -s gind.ist -o $(PACK).ind $(PACK).idx
 	$(PDFLATEX) $(PACK).dtx
 	$(PDFLATEX) $(PACK).dtx
-	$(PERLPATH) ../../reproducible-pdf.pl --id $(PACK).pdf
 	$(MAKE) postclean
 
 styonly: $(PACK).dtx
@@ -49,7 +52,6 @@ sample-%.datetex: sample-%.datetex.in
 
 sample-%.pdf: sample-%.datetex
 	pdflatex -jobname sample-$* $<
-	$(PERLPATH) ../../reproducible-pdf.pl --id $@
 
 postclean:
 	-rm -f pexa-*

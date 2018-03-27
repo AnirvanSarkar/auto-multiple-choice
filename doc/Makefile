@@ -57,23 +57,18 @@ img_pdf/%.pdf: img_src/%.svg
 html/index.html: FORCE
 	$(PERLPATH) ./index.pl $(DOCBOOKS:.xml=) > $@
 
-%.ja.tex: %.ja.xml amcdocstyle.sty
+%.tex: %.xml amcdocstyle.sty
 	dblatex -P latex.encoding=utf8 -b xetex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
 
-%.tex: %.xml amcdocstyle.sty
-	dblatex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
-
-PDFLATEX=pdflatex -halt-on-error -interaction=nonstopmode
 XELATEX=xelatex -halt-on-error -interaction=nonstopmode
 
-%.ja.pdf: %.ja.tex $(BLOCK_IMAGES:.svg=.pdf)
-	set -e ; export TEXINPUTS=./img_pdf/: ; $(XELATEX) $<; $(XELATEX) $<
-	$(PERLPATH) ../reproducible-pdf.pl --fonts --id $@
-	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.ja.$(ext))
+%.pdf: export SOURCE_DATE_EPOCH=$(PACKAGE_V_EPOCH)
+%.pdf: export SOURCE_DATE_EPOCH_TEX_PRIMITIVES=1
+%.pdf: export FORCE_SOURCE_DATE=1
+%.pdf: export TEXINPUTS=./img_pdf/:
 
 %.pdf: %.tex $(BLOCK_IMAGES:.svg=.pdf)
-	set -e ; export TEXINPUTS=./img_pdf/: ; $(PDFLATEX) $<; $(PDFLATEX) $<
-	$(PERLPATH) ../reproducible-pdf.pl --id $@
+	set -e ; $(XELATEX) $<; $(XELATEX) $<
 	rm -f $(foreach ext,aux cb cb2 glo idx log out toc,$*.$(ext))
 
 %.x: %.ext %.man %.html ;
@@ -84,7 +79,6 @@ XELATEX=xelatex -halt-on-error -interaction=nonstopmode
 %.man: %.xml
 	xsltproc --nonet --catalogs --param man.charmap.use.subset "0" --param make.year.ranges "1" --param make.single.year.ranges "1" --param man.output.lang.in.name.enabled "1" $(DOCBOOK_MAN_XSL) $<
 	date > $@
-
 
 %.html: %.xml doc-xhtml.xsl
 	rm -f html/$*/*.html

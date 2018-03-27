@@ -53,6 +53,7 @@ LINES: while(<CHL>) {
     $k{year}=$2;
     $k{month}=$3;
     $k{day}=$4;
+    $k{epoch}=`date +%s -d "$2-$3-$4"`;
     last LINES;
   }
 }
@@ -64,5 +65,6 @@ print VMK "PACKAGE_V_VC=$k{'vc'}\n";
 print VMK "PACKAGE_V_PDFDATE=$k{year}$k{month}$k{day}000000\n";
 print VMK "PACKAGE_V_ISODATE=$k{year}-$k{month}-$k{day}\n";
 print VMK "PACKAGE_V_STY=$k{year}/$k{month}/$k{day} v$k{deb} $k{vc}\n";
+print VMK "PACKAGE_V_EPOCH=$k{epoch}\n";
 close(VMK);
 
