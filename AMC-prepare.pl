@@ -115,6 +115,8 @@ set_debug($debug);
 
 debug("AMC-prepare / DEBUG") if($debug);
 
+my %global_opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
+
 # Split the LaTeX engine string, to get
 #
 # 1) the engine command $latex_engine (eg. pdflatex)
@@ -786,6 +788,35 @@ if($to_do{f}) {
 }
 
 ############################################################################
+# MODE S: builds the solution
+############################################################################
+
+sub build_solution {
+  execute('command_opts'=>[%global_opts,'CorrigeExterne'=>1]);
+  transfer("$jobname.pdf",$out_corrige);
+  give_latex_errors(__"solution");
+}
+
+if($to_do{S}) {
+  build_solution();
+}
+
+############################################################################
+# MODE C: builds the catalog
+############################################################################
+
+sub build_catalog {
+  execute('command_opts'=>[%global_opts,'CatalogExterne'=>1]);
+  transfer("$jobname.pdf",$out_catalog);
+  analyse_cslog("$jobname.cs");
+  give_latex_errors(__"catalog");
+}
+
+if($to_do{C}) {
+  build_catalog();
+}
+
+############################################################################
 # MODE s: builds the subject and a solution (with all the answers for
 # questions, but with a different layout)
 ############################################################################
@@ -795,33 +826,31 @@ if($to_do{s}) {
 
   @output_files=($out_sujet,$out_calage,$out_corrige,$out_catalog);
 
-    my %opts=(qw/NoWatermarkExterne 1 NoHyperRef 1/);
+  $out_calage=$prefix."calage.xy" if(!$out_calage);
+  $out_corrige=$prefix."corrige.pdf" if(!$out_corrige);
+  $out_catalog=$prefix."catalog.pdf" if(!$out_catalog);
+  $out_sujet=$prefix."sujet.pdf" if(!$out_sujet);
 
-    $out_calage=$prefix."calage.xy" if(!$out_calage);
-    $out_corrige=$prefix."corrige.pdf" if(!$out_corrige);
-    $out_catalog=$prefix."catalog.pdf" if(!$out_catalog);
-    $out_sujet=$prefix."sujet.pdf" if(!$out_sujet);
-
-    for my $f ($out_calage,$out_corrige,$out_corrige_indiv,$out_sujet,$out_catalog) {
-	if(-f $f) {
-	    debug "Removing already existing file: $f";
-	    unlink($f);
-	}
+  for my $f ($out_calage,$out_corrige,$out_corrige_indiv,$out_sujet,$out_catalog) {
+    if(-f $f) {
+      debug "Removing already existing file: $f";
+      unlink($f);
     }
+  }
 
-    # 1) SUBJECT
+  # 1) SUBJECT
 
-    execute('command_opts'=>[%opts,'SujetExterne'=>1]);
-    analyse_amclog("$jobname.amc");
-    give_latex_errors(__"question sheet");
+  execute('command_opts'=>[%global_opts,'SujetExterne'=>1]);
+  analyse_amclog("$jobname.amc");
+  give_latex_errors(__"question sheet");
 
-    if($a_errors>0) {
-      debug("$a_errors errors detected: EXIT");
-      exit_with_error();
-    }
+  if($a_errors>0) {
+    debug("$a_errors errors detected: EXIT");
+    exit_with_error();
+  }
 
-    transfer("$jobname.pdf",$out_sujet);
-    transfer("$jobname.xy",$out_calage);
+  transfer("$jobname.pdf",$out_sujet);
+  transfer("$jobname.xy",$out_calage);
 
   # Looks for accents problems in question IDs...
 
@@ -848,24 +877,19 @@ if($to_do{s}) {
   }
   flush_errors();
 
-    # 2) SOLUTION
+  # 2) SOLUTION
 
   if($to_do{s}=~/s/) {
-    execute('command_opts'=>[%opts,'CorrigeExterne'=>1]);
-    transfer("$jobname.pdf",$out_corrige);
-    give_latex_errors(__"solution");
+    build_solution();
   } else {
     debug "Solution not requested: removing $out_corrige";
     unlink($out_corrige);
   }
 
-    # 3) CATALOG
+  # 3) CATALOG
 
   if($to_do{s}=~/c/) {
-    execute('command_opts'=>[%opts,'CatalogExterne'=>1]);
-    transfer("$jobname.pdf",$out_catalog);
-    analyse_cslog("$jobname.cs");
-    give_latex_errors(__"catalog");
+    build_catalog();
   } else {
     debug "Catalog not requested: removing $out_catalog";
     unlink($out_catalog);
@@ -890,7 +914,7 @@ if($to_do{k}) {
 
   @output_files=($of);
 
-  execute('command_opts'=>[qw/NoWatermarkExterne 1 NoHyperRef 1 CorrigeIndivExterne 1/]);
+  execute('command_opts'=>[%global_opts,qw/CorrigeIndivExterne 1/]);
   transfer("$jobname.pdf",$of);
   give_latex_errors(__"individual solution");
 }

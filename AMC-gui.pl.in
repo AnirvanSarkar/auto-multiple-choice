@@ -496,6 +496,7 @@ my @widgets_only_when_opened=(qw/cleanup_menu menu_projet_enreg menu_projet_mode
 
 my $gui=read_glade('main_window',
 		   qw/onglets_projet onglet_preparation
+    documents_popover toggle_documents
     but_question but_solution but_indiv_solution but_catalog doc_line1
     prepare_docs prepare_layout prepare_src
     state_layout state_src state_docs state_unrecognized state_marking state_assoc
@@ -1992,6 +1993,167 @@ sub check_sty_version {
   }
 }
 
+sub update_document {
+  my($mode,%opts)=@_;
+
+  commande('commande'=>["auto-multiple-choice","prepare",
+                        "--with",moteur_latex(),
+                        "--filter",$config->get('filter'),
+                        "--filtered-source",$config->get_absolute('filtered_source'),
+                        "--debug",debug_file(),
+                        "--out-sujet",$config->get_absolute('doc_question'),
+                        "--out-corrige",$config->get_absolute('doc_solution'),
+                        "--out-corrige-indiv",$config->get_absolute('doc_indiv_solution'),
+                        "--out-catalog",$config->get_absolute('doc_catalog'),
+                        "--out-calage",$config->get_absolute('doc_setting'),
+                        "--mode",$mode,
+                        "--n-copies",$config->get('nombre_copies'),
+                        $config->get_absolute('texsrc'),
+                        "--prefix",$shortcuts->absolu('%PROJET/'),
+                        "--latex-stdout",
+                        "--data",$config->get_absolute('data'),
+                       ],
+           'signal'=>2,
+           'texte'=>__"Documents update...",
+           'progres.id'=>'MAJ',
+           'progres.pulse'=>0.01,
+           'fin'=>\&end_of_document_update,
+           'o'=>\%opts);
+}
+
+sub end_of_document_update {
+  my ($c,%data)=@_;
+
+  detecte_documents();
+
+  if($data{cancelled}) {
+    debug "Prepare documents: CANCELLED!";
+    return();
+  }
+
+  check_sty_version($c);
+
+  my @err=$c->erreurs();
+  my @warn=$c->warnings();
+  if (@err || @warn) {
+    debug "Errors preparing documents!";
+    notify_end_of_work('documents',
+                       __"Problems while preparing documents");
+
+    my $message=__("Problems while processing the source file.");
+    if(!$c->{o}->{partial}) {
+      $message.=
+        ." "
+        .__("You have to correct the source file and re-run documents update.");
+    }
+
+    if(@err) {
+      $message.="\n\n".__("<b>Errors</b>")."\n"
+        .join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
+    }
+    if(@warn) {
+      $message.="\n\n".__("<b>Warnings</b>")."\n"
+        .join("\n",map { format_markup($_) } (@warn[0..mini(9,$#warn)])).($#warn>9 ? "\n\n<i>(".__("Only first ten warnings written").")</i>": "");
+    }
+
+    $message.="\n\n".
+      # TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+      sprintf(__("See also the processing log in '%s' below."),
+              # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
+              __"Command output details");
+    $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($config->get('filter') eq 'latex');
+
+    debug($message);
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'error','ok','');
+    $dialog->set_markup($message);
+    $dialog->run;
+    $dialog->destroy;
+
+    return();
+  }
+
+  notify_end_of_work('documents',
+                     __"Documents have been prepared");
+
+  if($c->{o}->{partial}) {
+    debug "Partial: return";
+    return();
+  }
+
+  # verif que tout y est
+
+  my $ok=1;
+  for (qw/question setting/) {
+    $ok=0 if(! -f $config->get_absolute('doc_'.$_));
+  }
+  if ($ok) {
+
+    debug "All documents are successfully generated";
+
+    # set project option from filter requests
+
+    my %vars=$c->variables;
+    for my $k (keys %vars) {
+      if ($k =~ /^project:(.*)/) {
+        debug "Configuration: $k = $vars{$k}";
+        $config->set($k,$vars{$k});
+      }
+    }
+
+    # success message
+
+    dialogue_apprentissage('MAJ_DOCS_OK','','',0,
+                           __("Working documents successfully generated.")." "
+                           # TRANSLATORS: Here, "them" refers to the working documents.
+                           .__("You can take a look at them double-clicking on the list.")." "
+                           # TRANSLATORS: Here, "they" refers to the working documents.
+                           .__("If they are correct, proceed to layouts detection..."));
+
+    # Try to guess the best place to write question
+    # scores when annotating. This option can be
+    # changed later in the Edit/Preferences window.
+    my $ap='marges';
+    if($c->variable('scorezones')) {
+      $ap='zones';
+    } elsif($c->variable('ensemble')) {
+      $ap='cases';
+    }
+    $config->set('annote_position',$ap);
+
+    my $ensemble=$c->variable('ensemble') && !$c->variable('outsidebox');
+    if (($ensemble  || $c->variable('insidebox'))
+        && $config->get('seuil')<0.4) {
+      my $dialog = Gtk3::MessageDialog
+        ->new($w{'main_window'},
+              'destroy-with-parent',
+              'question','yes-no','');
+      $dialog->set_markup(
+                          sprintf(($ensemble ?
+                                   __("Your question has a separate answers sheet.")." "
+                                   .__("In this case, letters are shown inside boxes.") :
+                                   __("Your question is set to present labels inside the boxes to be ticked."))
+                                  ." "
+                                  # TRANSLATORS: Here, %s will be replaced with the translation of "darkness threshold".
+                                  .__("For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project.")." "
+                                  .__("At the moment, this parameter is set to %.02f.")." "
+                                  .__("Would you like to set it to 0.5?")
+                                  # TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
+                                  ,__"darkness threshold",
+                                  $config->get('seuil')) );
+      my $reponse=$dialog->run;
+      $dialog->destroy;
+      if ($reponse eq 'yes') {
+        $config->set('seuil',0.5);
+        $config->set('seuil_up',1.0);
+      }
+    }
+  }
+
+}
+
 sub doc_maj {
     my $sur=0;
     if($projet{'_capture'}->n_pages_transaction()>0) {
@@ -2104,147 +2266,8 @@ sub doc_maj {
     $mode_s.='c' if($config->get('prepare_catalog'));
     $mode_s.=']';
     $mode_s.='k' if($config->get('prepare_indiv_solution'));
-    commande('commande'=>["auto-multiple-choice","prepare",
-			  "--with",moteur_latex(),
-			  "--filter",$config->get('filter'),
-			  "--filtered-source",$config->get_absolute('filtered_source'),
-			  "--debug",debug_file(),
-			  "--out-sujet",$config->get_absolute('doc_question'),
-			  "--out-corrige",$config->get_absolute('doc_solution'),
-			  "--out-corrige-indiv",$config->get_absolute('doc_indiv_solution'),
-			  "--out-catalog",$config->get_absolute('doc_catalog'),
-			  "--out-calage",$config->get_absolute('doc_setting'),
-			  "--mode",$mode_s,
-			  "--n-copies",$config->get('nombre_copies'),
-			  $config->get_absolute('texsrc'),
-			  "--prefix",$shortcuts->absolu('%PROJET/'),
-			  "--latex-stdout",
-			  "--data",$config->get_absolute('data'),
-			  ],
-	     'signal'=>2,
-	     'texte'=>__"Documents update...",
-	     'progres.id'=>'MAJ',
-	     'progres.pulse'=>0.01,
-	     'fin'=>sub {
-                 my ($c,%data)=@_;
-		 if($data{cancelled}) {
-                   debug "Prepare documents: CANCELLED!";
-                 } else {
-                   check_sty_version($c);
-		   my @err=$c->erreurs();
-		   my @warn=$c->warnings();
-		   if (@err || @warn) {
-                     debug "Errors preparing documents!";
-		     notify_end_of_work('documents',
-					__"Problems while preparing documents");
 
-		     my $message=__("Problems while processing the source file.")
-		       ." "
-			 .__("You have to correct the source file and re-run documents update.");
-
-		     if(@err) {
-		       $message.="\n\n".__("<b>Errors</b>")."\n"
-			 .join("\n",map { format_markup($_) } (@err[0..mini(9,$#err)])).($#err>9 ? "\n\n<i>(".__("Only first ten errors written").")</i>": "");
-
-		     }
-		     if(@warn) {
-		       $message.="\n\n".__("<b>Warnings</b>")."\n"
-			 .join("\n",map { format_markup($_) } (@warn[0..mini(9,$#warn)])).($#warn>9 ? "\n\n<i>(".__("Only first ten warnings written").")</i>": "");
-
-		     }
-
-		     $message.="\n\n".
-			   # TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-		       sprintf(__("See also the processing log in '%s' below."),
-			       # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
-			       __"Command output details");
-		     $message.=" ".__("Use LaTeX editor or latex command for a precise diagnosis.") if($config->get('filter') eq 'latex');
-
-                     debug($message);
-		     my $dialog = Gtk3::MessageDialog
-		       ->new($w{'main_window'},
-                             'destroy-with-parent',
-                             'error','ok','');
-                     $dialog->set_markup($message);
-		     $dialog->run;
-		     $dialog->destroy;
-		   } else {
-		     notify_end_of_work('documents',
-					__"Documents have been prepared");
-
-		     # verif que tout y est
-
-		     my $ok=1;
-		     for (qw/question solution setting/) {
-		       $ok=0 if(! -f $config->get_absolute('doc_'.$_));
-		     }
-		     if ($ok) {
-
-                       debug "All documents are successfully generated";
-
-		       # set project option from filter requests
-
-		       my %vars=$c->variables;
-		       for my $k (keys %vars) {
-			 if ($k =~ /^project:(.*)/) {
-                           debug "Configuration: $k = $vars{$k}";
-			   $config->set($k,$vars{$k});
-			 }
-		       }
-
-		       # success message
-
-		       dialogue_apprentissage('MAJ_DOCS_OK','','',0,
-					      __("Working documents successfully generated.")." "
-					      # TRANSLATORS: Here, "them" refers to the working documents.
-					      .__("You can take a look at them double-clicking on the list.")." "
-					      # TRANSLATORS: Here, "they" refers to the working documents.
-					      .__("If they are correct, proceed to layouts detection..."));
-		     }
-		   }
-
-		   # Try to guess the best place to write question
-		   # scores when annotating. This option can be
-		   # changed later in the Edit/Preferences window.
-		   my $ap='marges';
-		   if($c->variable('scorezones')) {
-		     $ap='zones';
-		   } elsif($c->variable('ensemble')) {
-		     $ap='cases';
-		   }
-		   $config->set('annote_position',$ap);
-
-		   my $ensemble=$c->variable('ensemble') && !$c->variable('outsidebox');
-		   if (($ensemble  || $c->variable('insidebox'))
-		       && $config->get('seuil')<0.4) {
-		     my $dialog = Gtk3::MessageDialog
-		       ->new($w{'main_window'},
-                             'destroy-with-parent',
-                             'question','yes-no','');
-                     $dialog->set_markup(
-					 sprintf(($ensemble ?
-						  __("Your question has a separate answers sheet.")." "
-						  .__("In this case, letters are shown inside boxes.") :
-						  __("Your question is set to present labels inside the boxes to be ticked."))
-						 ." "
-						 # TRANSLATORS: Here, %s will be replaced with the translation of "darkness threshold".
-						 .__("For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project.")." "
-						 .__("At the moment, this parameter is set to %.02f.")." "
-						 .__("Would you like to set it to 0.5?")
-						 # TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
-						 ,__"darkness threshold",
-						 $config->get('seuil')) );
-		     my $reponse=$dialog->run;
-		     $dialog->destroy;
-		     if ($reponse eq 'yes') {
-		       $config->set('seuil',0.5);
-		       $config->set('seuil_up',1.0);
-		     }
-		   }
-		 }
-		 detecte_documents();
-	     });
-
+    update_document($mode_s);
 }
 
 sub filter_details {
@@ -4480,6 +4503,20 @@ sub file_maj {
     return(format_date($oldest));
 }
 
+sub open_documents_popover {
+  if($w{toggle_documents}->get_active()) {
+    $w{documents_popover}->show_all();
+  } else {
+    $w{documents_popover}->hide();
+  }
+  return(1);
+}
+
+sub popover_hidden {
+  $w{toggle_documents}->set_active(0) if($w{toggle_documents});
+  return(1);
+}
+
 sub check_document {
   my ($filename,$k)=@_;
   debug("Document $filename ".(-f $filename ? "exists" : "NOT FOUND"));
@@ -4538,6 +4575,12 @@ sub show_indiv_solution {
 sub show_catalog {
     show_document('catalog');
 }
+
+sub update_catalog { update_document("C",partial=>1); }
+
+sub update_solution { update_document("S",partial=>1); }
+
+sub update_indiv_solution { update_document("k",partial=>1); }
 
 sub detecte_mep {
     $projet{'_layout'}->begin_read_transaction('LAYO');
