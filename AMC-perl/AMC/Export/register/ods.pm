@@ -52,6 +52,12 @@ sub options_from_config {
 	 );
 }
 
+sub needs_catalog {
+  my ($self,$config)=@_;
+  return($config->get('export_ods_stats')
+        || $config->get('export_ods_statsindic'));
+}
+
 sub options_default {
   return('export_ods_columns'=>'student.copy,student.key,student.name',
 	 'export_ods_stats'=>'',

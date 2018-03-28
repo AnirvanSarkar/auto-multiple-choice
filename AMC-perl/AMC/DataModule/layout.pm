@@ -548,6 +548,7 @@ sub define_statements {
         'CharGet'=>
        {sql=>"SELECT char FROM ".$self->table("char")
         ." WHERE question=? AND answer=?"},
+       'CharNb'=>{sql=>"SELECT COUNT(*) FROM ".$self->table("char")},
      };
 }
 
@@ -1010,6 +1011,18 @@ sub char {
     return($self->sql_single($self->statement('CharGet'),
                              $question,$answer));
   }
+}
+
+# nb_chars_transaction() returns the number of characters stored in
+# the layout_char table. This is often used to know if the table is
+# empty or not.
+
+sub nb_chars_transaction {
+  my ($self)=@_;
+  $self->begin_read_transaction('nbCh');
+  my $n=$self->sql_single($self->statement('CharNb'));
+  $self->end_transaction('nbCh');
+  return($n);
 }
 
 1;

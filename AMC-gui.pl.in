@@ -1012,106 +1012,147 @@ sub exporte {
 
   maj_export();
 
-    my $format=$config->get('format_export');
-    my @options=();
-    my $ext="AMC::Export::register::$format"->extension();
-    if(!$ext) {
-	$ext=lc($format);
-    }
-    my $type="AMC::Export::register::$format"->type();
-    my $code=$config->get('code_examen');
-    $code=$projet{'nom'} if(!$code);
-    my $output=$shortcuts->absolu('%PROJET/exports/'.$code.$ext);
-    my @needs_module=();
+  my $format=$config->get('format_export');
+  my @options=();
+  my $ext="AMC::Export::register::$format"->extension();
+  if(!$ext) {
+    $ext=lc($format);
+  }
+  my $type="AMC::Export::register::$format"->type();
+  my $code=$config->get('code_examen');
+  $code=$projet{'nom'} if(!$code);
+  my $output=$shortcuts->absolu('%PROJET/exports/'.$code.$ext);
+  my @needs_module=();
 
-    my %ofc="AMC::Export::register::$format"
-      ->options_from_config($config);
-    for(keys %ofc) {
-      push @options,"--option-out",$_.'='.$ofc{$_};
-    }
-    push @needs_module,"AMC::Export::register::$format"->needs_module();
+  my %ofc="AMC::Export::register::$format"
+    ->options_from_config($config);
+  my $needs_catalog="AMC::Export::register::$format"
+    ->needs_catalog($config);
+  for(keys %ofc) {
+    push @options,"--option-out",$_.'='.$ofc{$_};
+  }
+  push @needs_module,"AMC::Export::register::$format"->needs_module();
 
-    if(@needs_module) {
-	# teste si les modules necessaires sont disponibles
+  if(@needs_module) {
+    # teste si les modules necessaires sont disponibles
 
-	my @manque=();
+    my @manque=();
 
-	for my $m (@needs_module) {
-	    if(!check_install(module=>$m)) {
-		push @manque,$m;
-	    }
-	}
-
-	if(@manque) {
-	    debug 'Exporting to '.$format.': Needs perl modules '.join(', ',@manque);
-
-	    my $dialog = Gtk3::MessageDialog
-	      ->new($w{'main_window'},
-		    'destroy-with-parent',
-		    'error','ok',
-		    __("Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."),
-		    "AMC::Export::register::$format"->name(),join(', ',@manque)
-		   );
-	    $dialog->run;
-	    $dialog->destroy;
-
-	    return();
-	}
+    for my $m (@needs_module) {
+      if(!check_install(module=>$m)) {
+        push @manque,$m;
+      }
     }
 
-    commande('commande'=>["auto-multiple-choice","export",
-			  pack_args(
-				    "--debug",debug_file(),
-				    "--module",$format,
-				    "--data",$config->get_absolute('data'),
-				    "--useall",$config->get('export_include_abs'),
-				    "--sort",$config->get('export_sort'),
-				    "--fich-noms",$config->get_absolute('listeetudiants'),
-				    "--noms-encodage",bon_encodage('liste'),
-				    "--csv-build-name",csv_build_name(),
-				    ($config->get('annote_rtl') ? "--rtl" : "--no-rtl"),
-				    "--output",$output,
-				    @options
-				   ),
-			 ],
-	     'texte'=>__"Exporting marks...",
-	     'progres.id'=>'export',
-	     'progres.pulse'=>0.01,
-	     'fin'=>sub {
-	       my ($c,%data)=@_;
-	       if(-f $output) {
-		 # shows export messages
+    if(@manque) {
+      debug 'Exporting to '.$format.': Needs perl modules '.join(', ',@manque);
 
-		 my $t=$c->higher_message_type();
-		 if($t) {
-		   my $dialog = Gtk3::MessageDialog
-		     ->new($w{'main_window'},
-			   'destroy-with-parent',
-			   ($t eq 'ERR' ? 'error' : $t eq 'WARN' ? 'warning' : 'info'),
-			   'ok',
-			   join("\n",$c->get_messages($t))
-			   );
-		   $dialog->run;
-		   $dialog->destroy;
-		 }
+      my $dialog = Gtk3::MessageDialog
+        ->new($w{'main_window'},
+              'destroy-with-parent',
+              'error','ok',
+              __("Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."),
+              "AMC::Export::register::$format"->name(),join(', ',@manque)
+             );
+      $dialog->run;
+      $dialog->destroy;
 
-		 if($config->get('after_export') eq 'file') {
-		   commande_parallele($config->get($type.'_viewer'),$output)
-		     if($config->get($type.'_viewer'));
-		 } elsif($config->get('after_export') eq 'dir') {
-		   view_dir($shortcuts->absolu('%PROJET/exports/'));
-		 }
-	       } else {
-		 my $dialog = Gtk3::MessageDialog
-		   ->new($w{'main_window'},
-			 'destroy-with-parent',
-			 'warning','ok',
-			 __"Export to %s did not work: file not created...",$output);
-		 $dialog->run;
-		 $dialog->destroy;
-	       }
-	     }
-	     );
+      return();
+    }
+  }
+
+  # If some data involving detailed results (concerning some
+  # particular answers) is required, then check that the catalog
+  # document is prepared, or propose to build it.  This way, answers
+  # will be identified by the character drawn in the boxes in the
+  # catalog document. These characters default to A, B, C and so on,
+  # but can be others if requested in the source file.
+
+  if($needs_catalog) {
+    if(!$projet{'_layout'}->nb_chars_transaction()) {
+      my $dialog = Gtk3::MessageDialog
+        ->new($w{'main_window'},
+              'destroy-with-parent',
+              'question','yes-no','');
+      $dialog->set_markup(__"When referring to a particular answer in the export, the letter used will be the one found in the catalog. However, the catalog has not yet been built. Do you want to build it now?");
+      $dialog->get_widget_for_response('yes')->get_style_context()->add_class("suggested-action");
+      my $reponse=$dialog->run;
+      $dialog->destroy;
+      if($reponse eq 'yes') {
+        update_catalog();
+      }
+    }
+  }
+
+  # wait for GUI update before going on with the table
+  Glib::Idle->add(\&export_go,
+                  {
+                   format=>$format,output=>$output,
+                   o=>\@options,type=>$type,
+                  },
+                  Glib::G_PRIORITY_LOW);
+}
+
+sub export_go {
+  my ($opts)=@_;
+  commande('commande'=>["auto-multiple-choice","export",
+                        pack_args(
+                                  "--debug",debug_file(),
+                                  "--module",$opts->{format},
+                                  "--data",$config->get_absolute('data'),
+                                  "--useall",$config->get('export_include_abs'),
+                                  "--sort",$config->get('export_sort'),
+                                  "--fich-noms",$config->get_absolute('listeetudiants'),
+                                  "--noms-encodage",bon_encodage('liste'),
+                                  "--csv-build-name",csv_build_name(),
+                                  ($config->get('annote_rtl') ? "--rtl" : "--no-rtl"),
+                                  "--output",$opts->{output},
+                                  @{$opts->{o}},
+                                 ),
+                       ],
+           'texte'=>__"Exporting marks...",
+           'progres.id'=>'export',
+           'progres.pulse'=>0.01,
+           'fin'=>\&export_done,
+           'o'=>$opts,
+          );
+}
+
+sub export_done {
+  my ($c,%data)=@_;
+  my $output=$c->{o}->{output};
+  my $type=$c->{o}->{type};
+  if(-f $output) {
+    # shows export messages
+
+    my $t=$c->higher_message_type();
+    if($t) {
+      my $dialog = Gtk3::MessageDialog
+        ->new($w{'main_window'},
+              'destroy-with-parent',
+              ($t eq 'ERR' ? 'error' : $t eq 'WARN' ? 'warning' : 'info'),
+              'ok',
+              join("\n",$c->get_messages($t))
+             );
+      $dialog->run;
+      $dialog->destroy;
+    }
+
+    if($config->get('after_export') eq 'file') {
+      commande_parallele($config->get($type.'_viewer'),$output)
+        if($config->get($type.'_viewer'));
+    } elsif($config->get('after_export') eq 'dir') {
+      view_dir($shortcuts->absolu('%PROJET/exports/'));
+    }
+  } else {
+    my $dialog = Gtk3::MessageDialog
+      ->new($w{'main_window'},
+            'destroy-with-parent',
+            'warning','ok',
+            __"Export to %s did not work: file not created...",$output);
+    $dialog->run;
+    $dialog->destroy;
+  }
 }
 
 ## menu contextuel sur liste diagnostique -> visualisation zoom/page
@@ -2042,8 +2083,7 @@ sub end_of_document_update {
 
     my $message=__("Problems while processing the source file.");
     if(!$c->{o}->{partial}) {
-      $message.=
-        ." "
+      $message.=" "
         .__("You have to correct the source file and re-run documents update.");
     }
 

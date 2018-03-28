@@ -46,6 +46,11 @@ sub options_from_config {
   return();
 }
 
+sub needs_catalog {
+  my ($self,$config)=@_;
+  return(0);
+}
+
 sub options_default {
   return();
 }
