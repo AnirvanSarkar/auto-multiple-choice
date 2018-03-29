@@ -4751,17 +4751,15 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \ExplSyntaxOn
 
-\sys_if_engine_luatex:TF {
-  \cs_if_exist:NTF \pdfsavepos { } {
-    \cs_new_eq:NN \pdfsavepos \savepos
-  }
-  \cs_if_exist:NTF \pdflastxpos { } {
-    \cs_new_eq:NN \pdflastxpos \lastxpos
-  } 
-  \cs_if_exist:NTF \pdflastypos { } {
-    \cs_new_eq:NN \pdflastypos \lastypos
-  }
-} { }
+\cs_if_exist:NTF \pdfsavepos { } {
+  \cs_if_exist:NTF \savepos { \cs_new_eq:NN \pdfsavepos \savepos } { }
+}
+\cs_if_exist:NTF \pdflastxpos { } {
+  \cs_if_exist:NTF \lastxpos { \cs_new_eq:NN \pdflastxpos \lastxpos } { }
+}
+\cs_if_exist:NTF \pdflastypos { } {
+  \cs_if_exist:NTF \lastypos { \cs_new_eq:NN \pdflastypos \lastypos } { }
+}
 
 \ExplSyntaxOff
 %    \end{macrocode}
