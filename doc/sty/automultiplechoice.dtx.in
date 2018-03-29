@@ -31,7 +31,7 @@
 \keepsilent
 \preamble
 
-Copyright (C) 2008-2017 Alexis Bienvenue
+Copyright (C) 2008-2018 Alexis Bienvenue
 
 This file is part of Auto-Multiple-Choice
 
@@ -3514,7 +3514,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \group_begin:
 \char_set_catcode_other:N E
-\tl_to_lowercase:n
+\tex_lowercase:D
 {
   \cs_new:Npn \amc_read_scientific:NNn #1 #2 #3 {
     \tl_set:Nn \amc_ee_tl { #3 }
