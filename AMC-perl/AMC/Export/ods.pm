@@ -296,7 +296,8 @@ sub build_stats_table {
 	    if($counts->{'answer'}>$amax);
 	  $ya=4+$counts->{'answer'};
           $name=$self->{_layout}->char($q->{question},$counts->{answer});
-	  $name=chr(ord("A")+$counts->{'answer'}-1) if(!defined($name));
+	  $name=chr(ord("A")+$counts->{'answer'}-1)
+            if(!defined($name) || $name eq '');
 	} else {
 	  $amax++;
 	  $ya=4+$amax;
@@ -1291,6 +1292,12 @@ sub export {
       $self->{'_scoring'}->begin_read_transaction('XsLO');
       $dt=$self->{'_scoring'}->variable('darkness_threshold');
       $dtu=$self->{'_scoring'}->variable('darkness_threshold_up');
+
+      # comming back to old projects, the darkness_threshold_up was
+      # not stored but now we need a value: use the default value 1
+      # (which produces the same behavior as when it was not defined).
+      $dtu=1 if(!defined($dtu));
+
       $cts=$self->{'_capture'}->ticked_sums($dt,$dtu);
       $man=$self->{'_capture'}->max_answer_number();
       $correct_data=$self->{'_scoring'}->correct_for_all
