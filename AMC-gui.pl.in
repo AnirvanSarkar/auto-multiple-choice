@@ -498,12 +498,13 @@ my $gui=read_glade('main_window',
 		   qw/onglets_projet onglet_preparation
     documents_popover toggle_documents
     but_question but_solution but_indiv_solution but_catalog doc_line1
-    prepare_docs prepare_layout prepare_src state_src
+    prepare_docs prepare_layout prepare_src
     state_layout state_layout_label
     state_docs state_docs_label
     state_unrecognized state_unrecognized_label
     state_marking state_marking_label state_assoc state_assoc_label
     state_overwritten state_overwritten_label
+    button_edit_src
     button_unrecognized button_show_missing
     edition_latex
     onglet_notation onglet_saisie onglet_reports
@@ -3570,7 +3571,7 @@ sub filter_changed {
     $config->set('project:texsrc','%PROJET/'.
       ("AMC::Filter::register::".$config->get('filter'))
 	->default_filename());
-    $w{'state_src'}->set_text(glib_filename($config->get_absolute('texsrc')));
+    $w{button_edit_src}->set_tooltip_text(glib_filename($config->get_absolute('texsrc')));
   }
 
 }
@@ -5224,7 +5225,7 @@ sub liste_montre_nom {
 sub valide_source_tex {
     debug "* valide_source_tex";
 
-    $w{'state_src'}->set_text(glib_filename($config->get_absolute('texsrc')));
+    $w{button_edit_src}->set_tooltip_text(glib_filename($config->get_absolute('texsrc')));
 
     if(!$config->get('filter')) {
       $config->set('filter',
