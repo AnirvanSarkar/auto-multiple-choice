@@ -498,9 +498,12 @@ my $gui=read_glade('main_window',
 		   qw/onglets_projet onglet_preparation
     documents_popover toggle_documents
     but_question but_solution but_indiv_solution but_catalog doc_line1
-    prepare_docs prepare_layout prepare_src
-    state_layout state_src state_docs state_unrecognized state_marking state_assoc
-    state_overwritten overwritten_line
+    prepare_docs prepare_layout prepare_src state_src
+    state_layout state_layout_label
+    state_docs state_docs_label
+    state_unrecognized state_unrecognized_label
+    state_marking state_marking_label state_assoc state_assoc_label
+    state_overwritten state_overwritten_label
     button_unrecognized button_show_missing
     edition_latex
     onglet_notation onglet_saisie onglet_reports
@@ -509,7 +512,7 @@ my $gui=read_glade('main_window',
     doc_menu menu_debug
     menu_columns
     toggle_column_updated toggle_column_mse toggle_column_sensitivity toggle_column_file
-    diag_tree state_capture
+    diag_tree state_capture state_capture_label
     maj_bareme regroupement_corriges
     groupe_model
     pref_assoc_c_assoc_code pref_assoc_c_liste_key
@@ -3944,14 +3947,17 @@ sub noter_resultat {
   $projet{'_scoring'}->begin_read_transaction('MARK');
   my $avg=$projet{'_scoring'}->average_mark;
 
+  my $ok;
+  my $text;
   if(defined($avg)) {
-    state_image('marking','gtk-yes');
+    $ok='info';
 # TRANSLATORS: This is the marks mean for all students.
-    $w{'state_marking'}->set_text(sprintf(__"Mean: %.2f",$avg));
+    $text=sprintf(__"Mean: %.2f",$avg);
   } else {
-    state_image('marking','gtk-dialog-error');
-    $w{'state_marking'}->set_text(__("No marks computed"));
+    $ok='error';
+    $text=__("No marks computed");
   }
+  set_state('marking',$ok,$text);
 
   my @codes=$projet{'_scoring'}->codes;
   my $pre_assoc=$projet{'_layout'}->pre_association();
@@ -3979,7 +3985,7 @@ sub noter_resultat {
 }
 
 sub assoc_state {
-  my $i='gtk-dialog-question';
+  my $i='question';
   my $t='';
   if(! -s $config->get_absolute('listeetudiants')) {
     $t=__"No students list file";
@@ -3993,11 +3999,10 @@ sub assoc_state {
       $t=sprintf((__"Missing identification for %d answer sheets"),$mc);
     } else {
       $t=__"All completed answer sheets are associated with a student name";
-      $i='gtk-yes';
+      $i='info';
     }
   }
-  state_image('assoc',$i);
-  $w{'state_assoc'}->set_text($t);
+  set_state('assoc',$i,$t);
 }
 
 sub opt_symbole {
@@ -4563,6 +4568,14 @@ sub check_document {
   $w{'but_'.$k}->set_sensitive(-f $filename);
 }
 
+sub set_state {
+  my ($k,$type,$message)=@_;
+  $w{'state_'.$k}->set_message_type($type)
+    if(defined($type) && $w{'state_'.$k});
+  $w{'state_'.$k.'_label'}->set_text($message)
+    if(defined($message) && $w{'state_'.$k.'_label'});
+}
+
 sub state_image {
   my ($k,$stock)=@_;
   $w{'stateimg_'.$k}->set_from_stock($stock,
@@ -4579,18 +4592,23 @@ sub detecte_documents {
     check_document($config->get_absolute('doc_catalog'),'catalog');
     my $s=file_maj(map { $config->get_absolute('doc_'.$_)
                        } (qw/question setting/));
-    my $ok='gtk-yes';
+    my $ok='info';
     if($s eq 'UNREADABLE') {
 	$s=__("Working documents are not readable");
-	$ok='gtk-dialog-error';
+	$ok='error';
     } elsif($s eq 'NOTFOUND') {
 	$s=__("No working documents");
-	$ok='gtk-dialog-error';
+	$ok='warning';
     } else {
 	$s=__("Working documents last update:")." ".$s;
     }
-    state_image('docs',$ok);
-    $w{'state_docs'}->set_text($s);
+    if($ok eq 'info') {
+      $w{toggle_documents}->show();
+    } else {
+      $w{toggle_documents}->set_active(0);
+      $w{toggle_documents}->hide();
+    }
+    set_state('docs',$ok,$s);
 }
 
 sub show_document {
@@ -4635,22 +4653,21 @@ sub detecte_mep {
     }
     $w{'onglet_saisie'}->set_sensitive($c>0);
     my $s;
-    my $ok='gtk-yes';
+    my $ok='info';
     if($c<1) {
 	$s=__("No layout");
-	$ok='gtk-dialog-error';
+	$ok='error';
     } else {
 	$s=sprintf(__("Processed %d pages"),
 		   $c);
 	if(@def) {
 	    $s.=", ".__("but some defects were detected.");
-	    $ok='gtk-dialog-question';
+	    $ok=defects_class(@def);
 	} else {
 	    $s.='.';
 	}
     }
-    $w{'state_layout'}->set_text($s);
-    state_image('layout',$ok);
+    set_state('layout',$ok,$s);
 }
 
 my %defect_text=
@@ -4661,6 +4678,20 @@ my %defect_text=
    'DIFFERENT_POSITIONS'=>__("The corner marks and binary boxes are not at the same location on all pages"),
    'OUT_OF_PAGE'=>__("Some material has been placed out of the page. This is often a result of a multiple columns question group starting too close from the page bottom. In such a case, use \"needspace\"."),
   );
+
+sub defects_class {
+  my (@defects)=@_;
+  my $w=0;
+  my $e=0;
+  for my $k (@defects) {
+    if($k eq 'NO_NAME') {
+      $w++;
+    } else {
+      $e++;
+    }
+  }
+  return($e ? 'error' : $w ? 'question' : 'info');
+}
 
 sub mep_warnings {
     my $m='';
@@ -4799,44 +4830,45 @@ sub update_analysis_summary {
   # resume
 
   my $tt='';
+  my $ok='info';
   if ($r{'incomplete'}) {
     $tt=sprintf(__"Data capture from %d complete papers and %d incomplete papers",$r{'complete'},$r{'incomplete'});
-    state_image('capture','gtk-dialog-error');
+    $ok='error';
     $w{'button_show_missing'}->show();
   } elsif ($r{'complete'}) {
     $tt=sprintf(__("Data capture from %d complete papers"),$r{'complete'});
-    state_image('capture','gtk-yes');
+    $ok='info';
     $w{'button_show_missing'}->hide();
   } else {
     # TRANSLATORS: this text points out that no data capture has been made yet.
     $tt=sprintf(__"No data");
-    state_image('capture','gtk-dialog-error');
+    $ok='error';
     $w{'button_show_missing'}->hide();
   }
-  $w{'state_capture'}->set_text($tt);
+  set_state('capture',$ok,$tt);
 
   if($ow>0) {
-    $w{state_overwritten}->set_text(sprintf(__"Overwritten pages: %d",$ow));
-    $w{overwritten_line}->show();
+    set_state('overwritten','warning',sprintf(__"Overwritten pages: %d",$ow));
+    $w{state_overwritten}->show();
   } else {
-    $w{overwritten_line}->hide();
+    $w{state_overwritten}->hide();
   }
 
   if ($failed_nb<=0) {
     if($r{'complete'}) {
       $tt=__"All scans were properly recognized.";
-      state_image('unrecognized','gtk-yes');
+      $ok='info';
     } else {
       $tt="";
-      state_image('unrecognized',undef);
+      $ok='none';
     }
-    $w{'button_unrecognized'}->hide();
+    $w{'state_unrecognized'}->hide();
   } else {
     $tt=sprintf(__"%d scans were not recognized.",$failed_nb);
-    state_image('unrecognized','gtk-dialog-question');
-    $w{'button_unrecognized'}->show();
+    $ok='question';
+    $w{'state_unrecognized'}->show();
   }
-  $w{'state_unrecognized'}->set_text($tt);
+  set_state('unrecognized',$ok,$tt);
 
   return(\%r);
 }
@@ -6897,6 +6929,26 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 	$dialog->destroy;
     }
 }
+
+my $css=Gtk3::CssProvider->new();
+$css->load_from_data('
+infobar.info, infobar.info button {
+    background-color: #29A10F;
+    background-image: none;
+}
+infobar.warning, infobar.warning button {
+    background-color: #CD5600;
+    background-image: none;
+}
+infobar.error, infobar.error button {
+    background-color: #CD0500;
+    background-image: none;
+}
+');
+
+Gtk3::StyleContext::add_provider_for_screen
+  ( $w{main_window}->get_screen(),
+    $css, Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 $config->connect_to_window($w{main_window});
 
