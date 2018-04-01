@@ -490,7 +490,7 @@ sub read_glade {
 # Since Bug #93 only affects Ubuntu 12.04 LTS, this workaround can be safely removed when
 # Ubuntu 12.04 LTS reaches its end of life date i.e. April 2017
 
-my @widgets_disabled_when_preferences_opened=(qw/menu_project menu_edit menu_tools menu_help/);
+my @widgets_disabled_when_preferences_opened=(qw/menu_popover/);
 
 my @widgets_only_when_opened=(qw/cleanup_menu menu_projet_enreg menu_projet_modele/);
 
@@ -499,6 +499,7 @@ my $gui=read_glade('main_window',
     documents_popover toggle_documents
     but_question but_solution but_indiv_solution but_catalog doc_line1
     prepare_docs prepare_layout prepare_src
+    menu_popover header_bar
     state_layout state_layout_label
     state_docs state_docs_label
     state_unrecognized state_unrecognized_label
@@ -510,7 +511,7 @@ my $gui=read_glade('main_window',
     onglet_notation onglet_saisie onglet_reports
     log_general commande avancement annulation button_mep_warnings
     liste_filename liste_path liste_edit liste_setfile liste_refresh
-    doc_menu menu_debug
+    menu_debug
     menu_columns
     toggle_column_updated toggle_column_mse toggle_column_sensitivity toggle_column_file
     diag_tree state_capture state_capture_label
@@ -554,9 +555,15 @@ sub debug_set {
 	$dialog->run;
 	$dialog->destroy;
     }
+    Glib::Timeout->add
+        (500,sub { $w{menu_popover}->hide(); return(0); });
 }
 
 $w{'menu_debug'}->set_active($debug);
+
+sub open_menu {
+  $w{menu_popover}->show_all();
+}
 
 # add doc list menu
 
@@ -579,27 +586,6 @@ my %ltext_loc=('French'=>__"French",
 # TRANSLATORS: One of the documentation languages.
 	       'Japanese'=>__"Japanese",
 	       );
-
-for my $l (@doc_langs) {
-    my $ltext;
-    $ltext=code2language($l);
-    $ltext=$l if(! $ltext);
-    $ltext=$ltext_loc{$ltext} if($ltext_loc{$ltext});
-    my $m=Gtk3::ImageMenuItem->new_with_label($ltext);
-    my $it=Gtk3::IconTheme->new();
-    $it->prepend_search_path($hdocdir."auto-multiple-choice.$l");
-    my $ii=$it->lookup_icon("flag",$config->get("project_icon_size") ,"force-svg");
-    if($ii) {
-	$m->set_image(Gtk3::Image->new_from_pixbuf($it->load_icon("flag",$config->get("project_icon_size") ,"force-svg")));
-    }
-    $m->signal_connect("activate",\&activate_doc,$l);
-    $docs_menu->append($m);
-}
-
-$docs_menu->show_all();
-
-$w{'doc_menu'}->set_submenu($docs_menu);
-
 ###
 
 sub dialogue_apprentissage {
@@ -5913,8 +5899,8 @@ sub valide_projet {
     $prefs->transmet_pref($gui,prefix=>'notation',
                           root=>'project:');
 
-    $w{'main_window'}->set_title(glib_project_name.' - '.
-				 'Auto Multiple Choice');
+    $w{'header_bar'}->set_title(glib_project_name.' - '.
+                                'Auto Multiple Choice');
 
     noter_resultat();
 
@@ -6004,6 +5990,12 @@ sub projet_ouvre {
 
 	return(1);
     }
+  }
+
+sub gui_no_project {
+  for my $k (@widgets_only_when_opened) {
+    $w{$k}->set_sensitive(0);
+  }
 }
 
 sub quitte_projet {
@@ -6016,9 +6008,7 @@ sub quitte_projet {
 
     %projet=();
 
-    for my $k (@widgets_only_when_opened) {
-      $w{$k}->set_sensitive(0);
-    }
+    gui_no_project();
   }
 
   return(1);
@@ -6904,6 +6894,8 @@ if($config->get('conserve_taille')
    && $config->get('taille_x_main') && $config->get('taille_y_main')) {
     $w{'main_window'}->resize($config->get('taille_x_main'),$config->get('taille_y_main'));
 }
+
+gui_no_project();
 
 projet_ouvre($ARGV[0]);
 
