@@ -578,7 +578,7 @@ void calage(cv::Mat src, cv::Mat illustr,
           in green. */
         cv::Scalar color = CV_RGB(60,198,127);
         cv::rectangle(dst, cv::Point(rect.x,rect.y), cv::Point(rect.x+rect.width,rect.y+rect.height), color);
-        cv::drawContours(dst, contours, i, color, -1, CV_FILLED);
+        cv::drawContours(dst, contours, i, color, CV_FILLED);
      }
     }
   }
