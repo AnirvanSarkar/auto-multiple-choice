@@ -5118,12 +5118,13 @@ sub unrecognized_next {
   @sel=() if(!defined($sel[0]));
   if(!@sel) {
     @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
-    @sel=@{$sel[0]};
+    @sel=@{$sel[0]} if($sel[0]);
   }
   my $iter;
   my $ok=0;
   if(@sel && defined($sel[$#sel])) {
-    $ok=$inconnu_store->iter_next($inconnu_store->get_iter($sel[$#sel]));
+    $iter=$inconnu_store->get_iter($sel[$#sel]);
+    $ok=$inconnu_store->iter_next($iter);
   }
   $iter=$inconnu_store->get_iter_first if(!$ok);
 
