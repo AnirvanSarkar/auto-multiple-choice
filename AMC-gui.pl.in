@@ -4563,15 +4563,6 @@ sub set_state {
     if(defined($message) && $w{'state_'.$k.'_label'});
 }
 
-sub state_image {
-  my ($k,$stock)=@_;
-  $w{'stateimg_'.$k}->set_from_stock($stock,
-				     GTK_ICON_SIZE_BUTTON)
-    if($w{'stateimg_'.$k});
-  $w{'state_'.$k}->set_icon_from_stock(GTK_ENTRY_ICON_PRIMARY,$stock)
-    if($w{'state_'.$k});
-}
-
 sub detecte_documents {
     check_document($config->get_absolute('doc_question'),'question');
     check_document($config->get_absolute('doc_solution'),'solution');
@@ -5039,7 +5030,11 @@ sub open_unrecognized {
   my $dialog=read_glade('unrecognized',
 			qw/inconnu_tree scan_area preprocessed_area
 			   inconnu_hpaned inconnu_vpaned
-			   main_recog state_scanrecog ur_frame_scan/);
+			   state_scanrecog state_scanrecog_label
+                           unrecog_process_button
+                           unrecog_delete_button
+                           unrecog_next_button unrecog_previous_button
+                           ur_frame_scan/);
 
   for (qw/scan preprocessed/) {
     AMC::Gui::PageArea::add_feuille($w{$_.'_area'});
@@ -5067,49 +5062,73 @@ sub open_unrecognized {
   $w{'inconnu_tree'}->get_selection->signal_connect("changed",\&unrecognized_line);
   $w{'inconnu_tree'}->get_selection->select_iter($inconnu_store->get_iter_first);
 
-  $w{main_recog}->show();
+  $w{unrecognized}->show();
+}
+
+sub unrecognized_actions {
+  my ($available)=@_;
+  my %actions=(delete=>$available>0,
+               process=>$available==1,
+               next=>$available>=0,
+               previous=>$available>=0,
+              );
+  for my $k (keys %actions) {
+    if($actions{$k} > 0) {
+      $w{'unrecog_'.$k.'_button'}->show;
+    } else {
+      $w{'unrecog_'.$k.'_button'}->hide;
+    }
+  }
 }
 
 sub unrecognized_line {
-  my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
-  my $first_selected=$sel[0]->[0];
-  my $iter='';
-  if(defined($first_selected)) {
-    $iter=$inconnu_store->get_iter($first_selected);
-  }
-  if($iter) {
-    $w{'inconnu_tree'}->scroll_to_cell($first_selected,undef,0,0,0);
-    my $scan=$shortcuts->absolu($inconnu_store->get($iter,INCONNU_FILE));
-    if(-f $scan) {
-      $w{'scan_area'}->set_content(image=>$scan);
+  if($inconnu_store->get_iter_first) {
+    my @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
+    my $first_selected=$sel[0]->[0];
+    my $iter='';
+    if(defined($first_selected)) {
+      $iter=$inconnu_store->get_iter($first_selected);
+    }
+    if($iter) {
+      $w{'inconnu_tree'}->scroll_to_cell($first_selected,undef,0,0,0);
+      my $scan=$shortcuts->absolu($inconnu_store->get($iter,INCONNU_FILE));
+      if(-f $scan) {
+        $w{'scan_area'}->set_content(image=>$scan);
+      } else {
+        debug_and_stderr "Scan not found: $scan";
+        $w{'scan_area'}->set_content();
+      }
+
+      my $preproc=$inconnu_store->get($iter,INCONNU_PREPROC);
+      utf8::downgrade($preproc);
+
+      if(-f $preproc) {
+        $w{'preprocessed_area'}->set_content(image=>$preproc);
+      } else {
+        $w{'preprocessed_area'}->set_content();
+      }
+
+      if($w{'scan_area'}->get_image) {
+        my $scan_n=$scan;
+        $scan_n =~ s:^.*/::;
+        set_state('scanrecog','question',$scan_n);
+      } else {
+        set_state('scanrecog','error',
+                  sprintf((__"Error loading scan %s"),$scan));
+      }
+      unrecognized_actions(-f $preproc ? 2 : 1);
     } else {
-      debug_and_stderr "Scan not found: $scan";
       $w{'scan_area'}->set_content();
-    }
-
-    my $preproc=$inconnu_store->get($iter,INCONNU_PREPROC);
-    utf8::downgrade($preproc);
-
-    if(-f $preproc) {
-      $w{'preprocessed_area'}->set_content(image=>$preproc);
-    } else {
       $w{'preprocessed_area'}->set_content();
-    }
-
-    if($w{'scan_area'}->get_image) {
-      my $scan_n=$scan;
-      $scan_n =~ s:^.*/::;
-      state_image('scanrecog','gtk-dialog-question');
-      $w{'state_scanrecog'}->set_text($scan_n);
-    } else {
-      state_image('scanrecog','gtk-dialog-error');
-      $w{'state_scanrecog'}->set_text(sprintf((__"Error loading scan %s"),$scan));
+      set_state('scanrecog','question',__"No scan selected");
+      unrecognized_actions(0);
     }
   } else {
+    # empty list
+    set_state('scanrecog','info',__"No more unrecognized scans");
     $w{'scan_area'}->set_content();
     $w{'preprocessed_area'}->set_content();
-    state_image('scanrecog','gtk-dialog-question');
-    $w{'state_scanrecog'}->set_text(__"No scan selected");
+    unrecognized_actions(-1);
   }
 }
 
@@ -5118,7 +5137,11 @@ sub unrecognized_next {
   @sel=() if(!defined($sel[0]));
   if(!@sel) {
     @sel=$w{'inconnu_tree'}->get_selection->get_selected_rows;
-    @sel=@{$sel[0]} if($sel[0]);
+    if($sel[0]) {
+      @sel=@{$sel[0]};
+    } else {
+      @sel=();
+    }
   }
   my $iter;
   my $ok=0;
