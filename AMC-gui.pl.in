@@ -4557,8 +4557,14 @@ sub check_document {
 
 sub set_state {
   my ($k,$type,$message)=@_;
-  $w{'state_'.$k}->set_message_type($type)
-    if(defined($type) && $w{'state_'.$k});
+  if(defined($type) && $w{'state_'.$k}) {
+    if($type eq 'none') {
+      $w{'state_'.$k}->hide();
+    } else {
+      $w{'state_'.$k}->show();
+      $w{'state_'.$k}->set_message_type($type);
+    }
+  }
   $w{'state_'.$k.'_label'}->set_text($message)
     if(defined($message) && $w{'state_'.$k.'_label'});
 }
@@ -4570,7 +4576,7 @@ sub detecte_documents {
     check_document($config->get_absolute('doc_catalog'),'catalog');
     my $s=file_maj(map { $config->get_absolute('doc_'.$_)
                        } (qw/question setting/));
-    my $ok='info';
+    my $ok;
     if($s eq 'UNREADABLE') {
 	$s=__("Working documents are not readable");
 	$ok='error';
@@ -4578,7 +4584,8 @@ sub detecte_documents {
 	$s=__("No working documents");
 	$ok='warning';
     } else {
-	$s=__("Working documents last update:")." ".$s;
+        $s=__("Working documents last update:")." ".$s;
+        $ok='info';
     }
     if($ok eq 'info') {
       $w{toggle_documents}->show();
@@ -4631,7 +4638,7 @@ sub detecte_mep {
     }
     $w{'onglet_saisie'}->set_sensitive($c>0);
     my $s;
-    my $ok='info';
+    my $ok;
     if($c<1) {
 	$s=__("No layout");
 	$ok='error';
@@ -4642,7 +4649,8 @@ sub detecte_mep {
 	    $s.=", ".__("but some defects were detected.");
 	    $ok=defects_class(@def);
 	} else {
-	    $s.='.';
+            $s.='.';
+            $ok='info';
 	}
     }
     set_state('layout',$ok,$s);
@@ -4835,16 +4843,14 @@ sub update_analysis_summary {
   if ($failed_nb<=0) {
     if($r{'complete'}) {
       $tt=__"All scans were properly recognized.";
-      $ok='info';
+      $ok='none';
     } else {
       $tt="";
       $ok='none';
     }
-    $w{'state_unrecognized'}->hide();
   } else {
     $tt=sprintf(__"%d scans were not recognized.",$failed_nb);
     $ok='question';
-    $w{'state_unrecognized'}->show();
   }
   set_state('unrecognized',$ok,$tt);
 
