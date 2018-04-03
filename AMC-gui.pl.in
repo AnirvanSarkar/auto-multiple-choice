@@ -4958,7 +4958,7 @@ sub detecte_analyse {
     if($oo{'apprend'}) {
 	dialogue_apprentissage('SAISIE_AUTO','','',0,
 			       __("Automatic data capture now completed.")." "
-			       .($r->{'incomplet'}>0 ? sprintf(__("It is not complete (missing pages from %d papers).")." ",$r->{'incomplet'}) : '')
+			       .($r->{'incomplete'}>0 ? sprintf(__("It is not complete (missing pages from %d papers).")." ",$r->{'incomplete'}) : '')
 			       .__("You can analyse data capture quality with some indicators values in analysis list:")
 			       ."\n"
 			       .sprintf(__"- <b>%s</b> represents positioning gap for the four corner marks. Great value means abnormal page distortion.",__"MSE")
