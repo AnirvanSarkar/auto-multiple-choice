@@ -219,16 +219,17 @@ if($use{pdfimages} || $use{pdftk} || $use{qpdf}) {
       # makes a temporary directory to extract images from the PDF
 
       my $temp_loc=tmpdir();
-      my $temp_dir = tempdir( DIR=>$temp_loc,
-			      CLEANUP => (!get_debug()) );
-
-      debug "PDF split tmp dir: $temp_dir";
+      my $temp_dir;
 
       check_split_path($file);
 
       # First, try pdfimages, which is much more judicious
 
       if($use{pdfimages}) {
+        $temp_dir = tempdir( DIR=>$temp_loc,
+                             CLEANUP => (!get_debug()) );
+        debug "PDF split tmp dir / pdfimages: $temp_dir";
+
 	if(system("pdfimages","-p",$file->{path},
 		  $temp_dir.'/'.$file->{file}.'-page')==0) {
 
@@ -269,6 +270,10 @@ if($use{pdfimages} || $use{pdftk} || $use{qpdf}) {
 
       # Second, try qpdf
       if($use{qpdf}) {
+        $temp_dir = tempdir( DIR=>$temp_loc,
+                             CLEANUP => (!get_debug()) );
+        debug "PDF split tmp dir / qpdf: $temp_dir";
+
         if(system("qpdf",$file->{path},"--split-pages",$temp_dir.'/'.$file->{file}.'-page-%d.pdf')==0) {
 
           opendir(my $dh, $temp_dir)
@@ -279,25 +284,10 @@ if($use{pdfimages} || $use{pdftk} || $use{qpdf}) {
 
           if(@images) {
 
-            # qpdf produced some files. Check that the page
-            # numbers follow each other starting from 1
+            debug "qpdf ok for $file->{file}";
+            push @fs,replace_by($file,@images);
+            next PDF;
 
-            my $ok=1;
-            PDFIM: for my $i (0..$#images) {
-              if($images[$i] =~ /-page-([0-9]+)/) {
-                my $pp=$1;
-                if($pp != $i+1) {
-                  debug "INFO: missing page ".($i+1)." from qpdf";
-                  $ok=0;
-                  last PDFIM;
-                }
-              }
-            }
-            if($ok) {
-              debug "qpdf ok for $file->{file}";
-              push @fs,replace_by($file,@images);
-              next PDF;
-            }
           } else {
             debug "INFO: qpdf produced no file";
           }
@@ -310,6 +300,10 @@ if($use{pdfimages} || $use{pdftk} || $use{qpdf}) {
       # If not successful with pdfimages and qpdf, use pdftk
 
       if($use{pdftk}) {
+        $temp_dir = tempdir( DIR=>$temp_loc,
+                             CLEANUP => (!get_debug()) );
+        debug "PDF split tmp dir / pdftk: $temp_dir";
+
 	if(system("pdftk",$file->{path},"burst","output",
 		  $temp_dir.'/'.$file->{file}.'-page-%04d.pdf')==0) {
 
