@@ -28,6 +28,7 @@ use File::Copy;
 use Getopt::Long;
 
 use_gettext;
+binmode(STDOUT, ":utf8");
 
 my $list_file='';
 my $progress_id='';
@@ -48,7 +49,7 @@ GetOptions("list=s"=>\$list_file,
 	   "rotate-direction=s"=>\$rotate_direction,
 	   "use-pdfimages!"=>\$use{pdfimages},
 	   "use-pdftk!"=>\$use{pdftk},
-     "use-qpdf!"=>\$use{qpdf},
+           "use-qpdf!"=>\$use{qpdf},
 	   "force-convert!"=>\$force_convert,
 	  );
 
