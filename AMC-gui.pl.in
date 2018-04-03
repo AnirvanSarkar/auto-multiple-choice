@@ -3004,6 +3004,9 @@ sub analyse_call {
 
   # first try to see if some of the files are PDF forms
 
+  $oo{fh}=$fh;
+  $oo{liste}=$fh->filename;
+
   commande(commande=>["auto-multiple-choice","read-pdfform",
                       "--progression-id",'analyse',
                       "--list",$fh->filename,
@@ -3012,20 +3015,27 @@ sub analyse_call {
                       "--data",$config->get_absolute('data'),
                      ],
            signal=>2,
-           o=>{overwritten=>$oo{overwritten}},
+           o=>\%oo,
            fin=>sub {
-             my $c=shift;
+             my ($c,%data)=@_;
              ${$c->{o}->{overwritten}}+=$c->variable('overwritten')
                if($c->{o}->{overwritten} && $c->variable('overwritten'));
+             if(!$data{cancelled}) {
+               analyse_call_images(%{$c->{o}});
+             }
            },
            'progres.id'=>$oo{'progres'},
            );
+}
+
+sub analyse_call_images {
+  my (%oo)=@_;
 
   # extract individual images scans
 
   if($oo{'getimages'}) {
     my @args=("--progression-id",'analyse',
-	      "--list",$fh->filename,
+	      "--list",$oo{fh}->filename,
 	      "--debug",debug_file(),
 	      "--vector-density",$config->get('vector_scan_density'),
 	     );
@@ -3042,15 +3052,16 @@ sub analyse_call {
 			  @args],
 	     'signal'=>2,
 	     'progres.id'=>$oo{'progres'},
+             'o'=>\%oo,
 	     'fin'=>sub {
 	       my ($c,%data)=@_;
 	       if(!$data{cancelled}) {
-		 analyse_call_go('liste'=>$fh->filename,'fh'=>$fh,%oo);
+		 analyse_call_go(%{$c->{o}});
 	       }
 	     },
 	    );
   } else {
-    analyse_call_go('liste'=>$fh->filename,'fh'=>$fh,%oo);
+    analyse_call_go(%oo);
   }
 }
 
