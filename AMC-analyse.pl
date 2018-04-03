@@ -89,6 +89,8 @@ GetOptions("data=s"=>\$data_dir,
            "tag-overwritten!"=>\$tag_overwritten,
           );
 
+$tag_overwritten=0 if($multiple);
+
 utf8::downgrade($debug_image_dir);
 
 use_gettext;
