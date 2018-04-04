@@ -1011,6 +1011,7 @@ sub exporte {
   my $type="AMC::Export::register::$format"->type();
   my $code=$config->get('code_examen');
   $code=$projet{'nom'} if(!$code);
+  utf8::encode($code);
   my $output=$shortcuts->absolu('%PROJET/exports/'.$code.$ext);
   my @needs_module=();
 
