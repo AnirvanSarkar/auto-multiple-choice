@@ -3583,6 +3583,8 @@ sub valide_options_notation {
 }
 
 sub change_liste_key {
+  valide_options_association();
+
   debug "New liste_key: ".$config->get('liste_key');
   if($projet{_students_list}->head_n_duplicates($config->get('liste_key'))) {
     debug "Invalid key: back to old value $previous_liste_key";
