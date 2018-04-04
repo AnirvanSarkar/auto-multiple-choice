@@ -4891,14 +4891,17 @@ sub overwritten_look {
 
   $w{overwritten_list}->append_column
     (Gtk3::TreeViewColumn->new_with_attributes
+# TRANSLATORS: column title for the list of overwritten pages. This refers to the page from the question
      (__"Page",Gtk3::CellRendererText->new,
       text=> 0));
   $w{overwritten_list}->append_column
     (Gtk3::TreeViewColumn->new_with_attributes
+# TRANSLATORS: column title for the list of overwritten pages. This refers to the number of times the page has been overwritten.
      (__"count",Gtk3::CellRendererText->new,
       text=> 1));
   $w{overwritten_list}->append_column
     (Gtk3::TreeViewColumn->new_with_attributes
+# TRANSLATORS: column title for the list of overwritten pages. This refers to the date of the last data capture for the page.
      (__"Date",Gtk3::CellRendererText->new,
       text=> 2));
   for my $o (@{$projet{_capture}->overwritten_pages_transaction()}) {
