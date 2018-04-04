@@ -1849,7 +1849,10 @@ sub projet_charge_ok {
 
     # ouverture projet deja existant
 
-    my $sel=$w{'choix_projets_liste'}->get_selected_items()->[0];
+    my $sel_items=$w{'choix_projets_liste'}->get_selected_items();
+    return if(!$sel_items);
+    my $sel=$sel_items->[0];
+
     my $proj;
 
     if($sel) {
