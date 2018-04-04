@@ -1,17 +1,19 @@
-AC_INIT([znapzend], 1.3.1,[him@foo.bar])
-AC_PREREQ([2.59])
+AC_INIT([znapzend],[1.3.1],[him@foo.bar])
+AC_PREREQ([2.69])
 
-AC_LANG_PUSH([C++])
+AC_PROG_CXX
+# AC_LANG_PUSH([C++])
 
-AC_CONFIG_AUX_DIR(conftools)
+AC_CONFIG_AUX_DIR(autoconf)
+AC_CONFIG_MACRO_DIR(autoconf/m4)
 
 # need this to allow long path names
 AM_INIT_AUTOMAKE([1.9 tar-ustar foreign no-dependencies no-installinfo no-texinfo.tex nostdinc])
 
 
-# When AM_MAINTAINER_MODE is disabled, the build files (Makefile.in...) won't
-# be updated automatically when configure.ac is changed.
-AM_MAINTAINER_MODE([disable])
+# When AM_MAINTAINER_MODE is enabled, the build files (Makefile.in...) will
+# be updated automatically when Makefile.am or configure.ac is changed.
+AM_MAINTAINER_MODE([enable])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -23,13 +25,13 @@ AC_PATH_PROG(POD2MAN, pod2man, no)
 
 PKG_CHECK_MODULES(LIBFFI, [libffi])
 PKG_CHECK_MODULES(NETPBM, [netpbm])
-PKG_CHECK_MODULES(POPPLER, [poppler])
+PKG_CHECK_MODULES(POPPLER, [poppler poppler-glib])
 PKG_CHECK_MODULES(GTK3, [gtk+-3.0])
-PKG_CHECK_MODULES(GLIB, [glib-2.0])
+PKG_CHECK_MODULES(GLIB, [glib-2.0 gio-2.0])
 PKG_CHECK_MODULES(LIBRSVG, [librsvg-2.0])
-PKG_CHECK_MODULES(CAIRO, [cairo])
 PKG_CHECK_MODULES(OPENCV, [opencv])
-PKG_CHECK_MODULES(PANGO, [pango])
+PKG_CHECK_MODULES(PANGO, [pango pangocairo])
+PKG_CHECK_MODULES(CAIRO, [cairo])
 PKG_CHECK_MODULES(FREETYPE, [freetype2])
 
 PKG_CHECK_MODULES([IMAGEMAGICK], [imagemagick < 7],
@@ -40,24 +42,28 @@ PKG_CHECK_MODULES([IMAGEMAGICK], [imagemagick < 7],
 ])
 
 
-AC_ARG_WITH(gettext, AC_HELP_STRING([--with-gettext=PREFIX],
-            [Support translations using Gettext]),
-            [gettext_prefix=$withval], [])
-
-if test "x$gettext_prefix" != "x"; then
-    LDFLAGS="${LDFLAGS} -L$gettext/lib"
-    CPPFLAGS="${CPPFLAGS} -I$gettext/include"
-    PATH="${PATH}:$gettext/bin"
-elif test -f "/usr/local/lib/libintl.so" ; then
-    LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+AC_ARG_WITH(gettext,
+    AS_HELP_STRING([--with-gettext=PREFIX],[Prefix to where gettext is installed.]),
+    [gettext_prefix=$withval], [])
+# These exported variables are just meant to be temporary. They are used by
+# AC_CHECK_LIB and AC_CHECK_HEADER below.
+if test "x" != "x$gettext_prefix"; then
+    export LDFLAGS="${LDFLAGS} -L$gettext_prefix/lib"
+    export CPPFLAGS="${CPPFLAGS} -I$gettext_prefix/include"
+    export PATH="$gettext/bin:${PATH}"
 fi
-AC_CHECK_LIB([intl], [gettext])
-AC_CHECK_HEADER([libintl.h],
-    AC_CHECK_FUNC([gettext], [gettext=yes], gettext=no), gettext=no)
+echo $LDFLAGS
+AC_SEARCH_LIBS(gettext, [intl], [], AC_MSG_ERROR([libintl.a could not be found.
+    Try using --with-gettext=PREFIX or LDFLAGS=-L/path/to/libintl]))
+AC_CHECK_HEADER(libintl.h, [], AC_MSG_ERROR([libintl.h could not be found.
+    Try using --with-gettext=PREFIX or CPPFLAGS=-I/path/to/libintl.h]))
+# AC_SUBST(GETTEXT_LDFLAGS, [ac_cv_search_gettext])
+# AC_SUBST(GETTEXT_CPPFLAGS, [-I$ac_cv_lib_])
+
 AC_PATH_PROG([GETTEXT], [gettext], [no])
 AC_PATH_PROG([MSGFMT], [msgfmt], [no])
 if test "x$GETTEXT" = "xno" -o "x$MSGFMT" = "xno" ; then
-    AC_MSG_ERROR([Gettext not found. Try to set --with-gettext=PREFIX.])
+    AC_MSG_ERROR([gettext or msgfmt not found. Try to set --with-gettext=PREFIX.])
 else
     AC_SUBST([LOCALEDEFS], [-DLOCALEDIR=\\\"$localedir\\\"])
     AC_SUBST([CATALOG], [LC_MESSAGES])
@@ -71,7 +77,6 @@ else
         URL_CAT="$CURL --location --insecure"
     fi
 fi
-
 AC_SUBST(URL_CAT)
 
 
@@ -105,6 +110,7 @@ else
 fi
 
 AC_PROG_GREP
+AC_PROG_SED
 
 AC_ARG_VAR(GMAKE,   [Path to local GNU Make binary])
 AC_PATH_PROGS(GMAKE, [gnumake gmake make])
@@ -117,8 +123,7 @@ else
 fi
 
 AC_ARG_ENABLE(doc,
-        AC_HELP_STRING([--enable-doc],
-                        [Enable building of PDF and HTML documentation using DocBook]))
+    AS_HELP_STRING([--enable-doc],[Enable building of PDF and HTML documentation using DocBook]))
 AC_SUBST(enable_doc)
 
 actual_prefix=$prefix
@@ -133,7 +138,7 @@ AC_CONFIG_FILES([
     Makefile
     thirdparty/Makefile
     lib/Makefile
-    I18N/Makefile.in
+    I18N/Makefile
 ])
 
 AC_SUBST(VERSION)
