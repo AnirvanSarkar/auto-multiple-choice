@@ -510,7 +510,7 @@ my $gui=read_glade('main_window',
     edition_latex
     onglet_notation onglet_saisie onglet_reports
     log_general commande avancement annulation button_mep_warnings
-    liste_filename liste_path liste_edit liste_setfile liste_refresh
+    liste_filename liste_edit liste_setfile liste_refresh
     menu_debug
     menu_columns
     toggle_column_updated toggle_column_mse toggle_column_sensitivity toggle_column_file
@@ -3255,19 +3255,21 @@ sub valide_liste {
 
     # For proper markup rendering escape '<', '>' and '&' characters
     # in filename with \<, \gt;, and \&
-    $fn=Glib::Markup::escape_text($fn);
+    $fn=Glib::Markup::escape_text(glib_filename($fn));
 
     if($fl) {
-	$w{'liste_filename'}->set_markup("<b>$fn</b>");
-	for(qw/liste_path liste_edit/) {
+        $w{'liste_filename'}->set_markup("<b>$fn</b>");
+        $w{'liste_filename'}->set_tooltip_text(glib_filename($fl));
+	for(qw/liste_edit/) {
 	    $w{$_}->set_sensitive(1);
 	}
     } else {
 # TRANSLATORS: Names list file : (none)
-	$w{'liste_filename'}->set_markup(__"(none)");
-	for(qw/liste_path liste_edit/) {
-	    $w{$_}->set_sensitive(0);
-	}
+      $w{'liste_filename'}->set_markup(__"(none)");
+      $w{'liste_filename'}->set_tooltip_text('');
+      for(qw/liste_edit/) {
+        $w{$_}->set_sensitive(0);
+      }
     }
 
     $projet{_students_list}=AMC::NamesFile::new($fl,
@@ -5239,17 +5241,6 @@ sub set_source_tex {
 
     importe_source() if($importe);
     valide_source_tex();
-}
-
-sub liste_montre_nom {
-    my $dialog = Gtk3::MessageDialog
-	->new($w{'main_window'},
-	      'destroy-with-parent',
-	      'info','ok',
-	      __"Names list file for this project is:\n%s",
-	      ($config->get('listeetudiants') ? $config->get_absolute('listeetudiants') : __"(no file)" ));
-    $dialog->run;
-    $dialog->destroy;
 }
 
 sub valide_source_tex {
