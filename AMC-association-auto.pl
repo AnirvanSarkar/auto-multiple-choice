@@ -46,6 +46,9 @@ GetOptions("notes-id=s"=>\$notes_id,
 
 set_debug($debug);
 
+utf8::downgrade($liste_file);
+utf8::downgrade($data_dir);
+
 die "Needs notes-id" if(!$notes_id && !$preassoc);
 die "Needs liste-key" if(!$liste_key);
 die "Needs liste_file" if(! -s $liste_file);

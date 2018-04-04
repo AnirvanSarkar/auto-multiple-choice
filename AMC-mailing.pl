@@ -95,6 +95,9 @@ GetOptions("project=s"=>\$project_dir,
 
 set_debug($debug);
 
+utf8::downgrade($students_list);
+utf8::downgrade($ids_file);
+
 debug "Parameters: ".join(" ",map { "<$_>" } @ARGV_ORIG);
 
 sub error {
@@ -111,6 +114,7 @@ sub parse_add {
 }
 
 $data_dir="$project_dir/data" if($project_dir && !$data_dir);
+utf8::downgrade($data_dir);
 
 error("students list not found:$students_list") if(!-f $students_list);
 
@@ -155,6 +159,7 @@ $data->begin_read_transaction('Mail');
 my $subdir=$report->get_dir(REPORT_ANNOTATED_PDF);
 
 my $pdf_dir="$project_dir/$subdir";
+utf8::downgrade($pdf_dir);
 
 error("PDF directory not found: $pdf_dir") if(!-d $pdf_dir);
 
@@ -231,6 +236,8 @@ STUDENT: for my $i (@$r) {
   }
   if($dest) {
     my $file=$pdf_dir.'/'.$i->{'file'};
+    utf8::downgrade($file);
+
     debug "  FILE=$file";
     if(-f $file) {
       my $body='';
