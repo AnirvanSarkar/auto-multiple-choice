@@ -9,6 +9,13 @@ THIRDPARTY_DIST := $(shell test -d CPAN && find CPAN -type d -name ".??*" -prune
 
 EXTRA_DIST = $(THIRDPARTY_DIST) $(wildcard bin/cpanm)
 
+# The package Locale::gettext needs libintl.a but we cannot give it using
+# CPPFLAGS and LDFLAGS. Looking at Makefile.PL, we noticed that it is possible
+# to set them using the CC variable. It looks weird to set CC for all perl
+# packages! This fix comes from:
+#     https://rt.cpan.org/Public/Bug/Display.html?id=16098
+export PKG_CONFIG_PATH CFLAGS LIBS
+$(info PARAMS: CFLAGS=$(CFLAGS) LIBS=$(LIBS))
 all-local: touch
 
 touch: CPAN/touch ../config.status
@@ -16,7 +23,7 @@ touch: CPAN/touch ../config.status
 	$(AM_V_GEN)touch touch
 
 CPAN/touch: ../PERL_MODULES
-	echo "POPULATING OUR LOCAL micro CPAN"
+	@echo "POPULATING OUR LOCAL micro CPAN"
 	$(AM_V_GEN)$(URL_CAT) http://cpanmin.us | PERL_CPANM_HOME=$(THIRDPARTY_DIR) $(PERL) - -q --notest --local-lib $(THIRDPARTY_DIR) --save-dists $(THIRDPARTY_DIR)/CPAN --force App::cpanminus
 	$(AM_V_GEN)PERL_CPANM_HOME=$(THIRDPARTY_DIR)/Ore $(THIRDPARTY_DIR)/bin/cpanm -q --notest  --local-lib $(THIRDPARTY_DIR)/Ore File::Which OrePAN
 	$(AM_V_GEN)cat ../PERL_MODULES | PERL_CPANM_HOME=$(THIRDPARTY_DIR) xargs $(PERL) $(THIRDPARTY_DIR)/bin/cpanm -q --self-contained --notest --local-lib-contained $(THIRDPARTY_DIR) --save-dists $(THIRDPARTY_DIR)/CPAN
