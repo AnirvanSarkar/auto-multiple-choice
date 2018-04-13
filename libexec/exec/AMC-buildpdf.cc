@@ -20,7 +20,7 @@
 
 */
 
-#include "buildpdf.cc"
+#include "buildpdf.h"
 
 #include <stdio.h>
 #include <stdlib.h>
