@@ -2,7 +2,7 @@ AC_INIT([auto-multiple-choice],[1.3.1],[him@foo.bar])
 AC_PREREQ([2.69])
 
 AC_CONFIG_AUX_DIR(autoconf)
-AC_CONFIG_MACRO_DIR(autoconf/m4)
+# AC_CONFIG_MACRO_DIR(autoconf/m4)
 
 AC_PROG_CC
 AC_PROG_CXX
