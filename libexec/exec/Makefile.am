@@ -11,4 +11,3 @@ pdfformfields_CPPFLAGS = $(POPPLER_CFLAGS) $(GLIB_CFLAGS)
 pdfformfields_LDFLAGS = $(POPPLER_LIBS) $(GLIB_LIBS)
 
 libexec_PROGRAMS = buildpdf detect pdfformfields
-$(info $(CAIRO_CFLAGS))
