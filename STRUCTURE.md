@@ -22,10 +22,19 @@ Example of projects:
 
 - https://github.com/oetiker/znapzend/blob/master/Makefile.am
 - https://github.com/p12tic/wnckmm/blob/master/configure.ac
+- C project with clear-cut structure:
+  https://github.com/raspberrypi-ui/pcmanfm-stretch/blob/master/INSTALL
+- a project in Perl that hardcodes many @DIR@ in pl.in files:
+  https://github.com/skozawa/Comainu/blob/master/script/comainu.pl.in
+- perl + conf/ + data/
+  https://github.com/SeciossOpenSource/LISM
+- In the "Padre" project (a Perl GUI), they use a script ./dev to launch
+  the app from inside the source tree:
+  https://github.com/PadreIDE/Padre/blob/master/dev
 
-
-I think that automultiplechoice.sty, doc/*.pdf, doc/*.html and
-doc/auto-multiple-choice.1 must be in 
+Why did I choose to use pkg-config instead of using standard LDFLAGS/CPPFLAGS?
+Because perl packages are mostly using pkg-config, so it makes sense to rely
+on it for the .cc and .c compilations.
 
 Files being subsitutued on each 'make':
 
