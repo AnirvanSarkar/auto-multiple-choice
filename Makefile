@@ -377,6 +377,7 @@ sources_vok:
 tmp_deb:
 	$(MAKE) local/deb-auto-changelog
 	$(MAKE) tmp_copy
+	cd $(TMP_SOURCE_DIR) ; cp -r ppa debian
 	cp local/deb-auto-changelog $(TMP_SOURCE_DIR)/debian/changelog
 	$(PERLPATH) -pi -e 's/^DL=.*/DL=$(SRC_DOC_LANG)/' $(TMP_SOURCE_DIR)/debian/rules
 ifneq (,$(SKIP_DEP))
