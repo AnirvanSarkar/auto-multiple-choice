@@ -235,8 +235,9 @@ STUDENT: for my $i (@$r) {
     next STUDENT;
   }
   if($dest) {
-    my $file=$pdf_dir.'/'.$i->{'file'};
-    utf8::downgrade($file);
+    my $file=$i->{'file'};
+    utf8::encode($file);
+    $file=$pdf_dir."/$file";
 
     debug "  FILE=$file";
     if(-f $file) {
@@ -310,7 +311,7 @@ STUDENT: for my $i (@$r) {
                               ($status eq 'OK' ? REPORT_MAIL_OK : REPORT_MAIL_FAILED),
                               $m,'now');
     } else {
-      debug "No file: $file";
+      debug_and_stderr "No file: $file";
     }
     usleep(int(1000000*$delay_s));
   } else {
