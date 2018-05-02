@@ -33,7 +33,7 @@ my %k=(deb=>"XX",vc=>"",year=>"2016",month=>"01",day=>"01");
 
 open(CHL,"ChangeLog");
 LINES: while(<CHL>) {
-  if(/^([0-9:.a-z+-]+)\s+\((\d{4})-(\d{2})-(\d{2})\)/) {
+  if(/^([0-9~:.a-z+-]+)\s+\((\d{4})-(\d{2})-(\d{2})\)/) {
     $k{deb}=$1;
     $k{year}=$2;
     $k{month}=$3;
