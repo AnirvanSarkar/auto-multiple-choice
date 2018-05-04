@@ -31,6 +31,7 @@ DATE_DEBCHL:=$(shell LANG=en date "+%a, %d %b %Y %H:%M:%S %z")
 # list variables to be substituted in *.in files
 
 SUBST_VARS:=$(sort $(shell grep -h '=' $(SUB_MAKEFILES) | $(PERLPATH) -pe 's/\#.*//;s/\??\+?=.*//;' ) PACKAGE_DEB_DV PACKAGE_DEB_TARGET PERLPATH DATE_DEBCHL DATE_RPMCHL)
+SUBST_VARS_FOR_TEX = PACKAGE_V_STY PACKAGE_V_DEB
 
 # Some default values
 
@@ -139,6 +140,7 @@ vars-subs.pl: $(SUB_MAKEFILES) authors-subs.xsl authors.xml
 	@echo "Recording substitution variables from $(SUB_MAKEFILES)"
 	@echo "# Variables:" > $@
 	@$(foreach varname,$(SUBST_VARS), echo 's|@/$(varname)/@|$($(varname))|g;' >> $@ ; )
+	@$(foreach varname,$(SUBST_VARS_FOR_TEX), echo 's|@/$(varname)_TEX/@|$(subst ~,\\\\string~,$($(varname)))|g;' >> $@ ; )
 	@echo 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' >> $@
 	@echo "# From authors.xml:" >> $@
 	xsltproc --nonet authors-subs.xsl authors.xml >> $@
