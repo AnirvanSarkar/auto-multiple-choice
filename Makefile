@@ -138,11 +138,11 @@ rebuild: FORCE
 
 vars-subs.pl: $(SUB_MAKEFILES) authors-subs.xsl authors.xml
 	@echo "Recording substitution variables from $(SUB_MAKEFILES)"
-	@echo "# Variables:" > $@
-	@$(foreach varname,$(SUBST_VARS), echo 's|@/$(varname)/@|$($(varname))|g;' >> $@ ; )
-	@$(foreach varname,$(SUBST_VARS_FOR_TEX), echo 's|@/$(varname)_TEX/@|$(subst ~,\\\\string~,$($(varname)))|g;' >> $@ ; )
-	@echo 's+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;' >> $@
-	@echo "# From authors.xml:" >> $@
+	$(file > $@,# Variables:)
+	$(foreach varname,$(SUBST_VARS), $(file >> $@,s|@/$(varname)/@|$($(varname))|g;) )
+	$(foreach varname,$(SUBST_VARS_FOR_TEX), $(file >> $@,s|@/$(varname)_TEX/@|$(subst ~,\\string~,$($(varname)))|g;) )
+	$(file >> $@,s+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;)
+	$(file >> $@,# From authors.xml:)
 	xsltproc --nonet authors-subs.xsl authors.xml >> $@
 
 %.xml: %.in.xml vars-subs.pl 
