@@ -2003,10 +2003,12 @@ Three digits and two letters:\insertgroup{mixed}.
     \end{tikzpicture}}%
 }
 \newcommand\AMC@shapeprepare@oval{%
-  \AMC@makeovalbox{1}{}{\AMC@ovalbox@R}%
-  \AMC@makeovalbox{1}{\AMC@checkedbox}{\AMC@ovalbox@RF}%
-  \AMC@makeovalbox{}{}{\AMC@ovalbox@}%
-  \AMC@makeovalbox{}{\AMC@checkedbox}{\AMC@ovalbox@F}%
+  \ifx\AMC@ovalbox@R\@undefined\else%
+    \AMC@makeovalbox{1}{}{\AMC@ovalbox@R}%
+    \AMC@makeovalbox{1}{\AMC@checkedbox}{\AMC@ovalbox@RF}%
+    \AMC@makeovalbox{}{}{\AMC@ovalbox@}%
+    \AMC@makeovalbox{}{\AMC@checkedbox}{\AMC@ovalbox@F}%
+  \fi%
 }
 \newcommand\AMC@shape@oval[4]{%
   \AMC@setcolors@{#3}{#2}%
@@ -2117,6 +2119,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@boolkey{AMCdim}{cross}[false]{}
 \define@key{AMCdim}{crosschar}[\textbf{\textsf{X}}]{\def\AMC@crosschar{#1}}
 \define@key{AMCdim}{crossrule}[1.5pt]{\AMC@crossrule=#1}
+\def\AMC@shapeprepare{\csname AMC@shapeprepare@\AMC@shapename@ \endcsname}
 \def\AMCboxStyle#1{%
   \setkeys{AMCdim}{#1}%
   \ifnum\AMC@boxedwidth<\AMC@boxedheight%
@@ -2124,7 +2127,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \else%
     \AMC@oval@radius=\AMC@boxedheight\divide\AMC@oval@radius\tw@%
   \fi%
-  \csname AMC@shapeprepare@\AMC@shapename@ \endcsname%
+  \AMC@shapeprepare%
 }
 \AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black,cross,crosschar,crossrule}
 \newcommand\AMCboxColor[1]{\AMCboxStyle{color=#1}}
@@ -4681,16 +4684,17 @@ Three digits and two letters:\insertgroup{mixed}.
 \else%
    \AMC@amclog{AUTOQCM[VAR:project:pdfform=0]^^J}%
 \fi
-\AtBeginDocument{
-  \ifAMCneeds@storebox
+\AtBeginDocument{%
+  \ifAMCneeds@storebox%
     \let\AMC@new@savebox=\newstorebox%
     \let\AMC@save@box=\storebox%
     \let\AMC@use@box=\usestorebox%
-  \fi
-  \AMC@new@savebox{\AMC@ovalbox@R}
-  \AMC@new@savebox{\AMC@ovalbox@RF}
-  \AMC@new@savebox{\AMC@ovalbox@}
-  \AMC@new@savebox{\AMC@ovalbox@F}
+  \fi%
+  \AMC@new@savebox{\AMC@ovalbox@R}%
+  \AMC@new@savebox{\AMC@ovalbox@RF}%
+  \AMC@new@savebox{\AMC@ovalbox@}%
+  \AMC@new@savebox{\AMC@ovalbox@F}%
+  \AMC@shapeprepare%
 }
 %    \end{macrocode}
 %
