@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: 1.2.2016.022902 (r:e6c431add948)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
 "POT-Creation-Date: 2018-04-04 22:01 +0200\n"
-"PO-Revision-Date: 2016-04-15 12:22+0900\n"
+"PO-Revision-Date: 2018-05-08 23:21+0900\n"
 "Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
 "Language: ja\n"
@@ -63,7 +63,7 @@ msgstr ""
 #: ../AMC-gui.pl:298
 #, perl-format
 msgid "There is too little space left in the temporary disk directory (%s). <b>Please clean this directory and try again.</b>"
-msgstr ""
+msgstr "一時ファイルディレクトリ (%s) のスペースが不足しています。<b>このディレクトリをクリーンアップして再試行してください。</b>"
 
 #: ../AMC-gui.pl:317
 msgid "Several dialogs try to help you be at ease handling AMC."
@@ -83,9 +83,8 @@ msgid "Do you want to forgot which dialogs you have already seen and ask to show
 msgstr "これまでにどのダイアログを見たかクリアして、次回それらが表示されるようにしますか？"
 
 #: ../AMC-gui.pl:357
-#, fuzzy
 msgid "Please install <b>libnotify</b> to make desktop notifications available."
-msgstr "デスクトップ通知を有効にするには、perlの<b>Gtk2::Notify</b>パッケージをインストールしてください。"
+msgstr "デスクトップ通知を有効にするには、<b>libnotify</b> をインストールしてください。"
 
 #. TRANSLATORS: Message when switching to debugging mode.
 #: ../AMC-gui.pl:552
@@ -135,9 +134,8 @@ msgid "sensitivity"
 msgstr "白黒閾値近接度"
 
 #: ../AMC-gui.pl:737
-#, fuzzy
 msgid "scan file"
-msgstr "%s ファイル"
+msgstr "スキャン画像ファイル"
 
 #. TRANSLATORS: for encodings
 #: ../AMC-gui.pl:766 ../AMC-gui.pl:784
@@ -367,7 +365,7 @@ msgstr "SMTP"
 
 #: ../AMC-gui.pl:927
 msgid "None [SMTP security]"
-msgstr ""
+msgstr "なし"
 
 #: ../AMC-gui.pl:936
 msgid "Standard"
@@ -408,7 +406,7 @@ msgstr "'%s' にエクスポートするのに必要なperlモジュール %s �
 
 #: ../AMC-gui.pl:1068
 msgid "When referring to a particular answer in the export, the letter used will be the one found in the catalog. However, the catalog has not yet been built. Do you want to build it now?"
-msgstr ""
+msgstr "エクスポート中の各解答には設問カタログ中の文字が使用されます。しかし、設問カタログがまだ生成されていません。今すぐに生成しますか？"
 
 #: ../AMC-gui.pl:1104
 msgid "Exporting marks..."
@@ -583,11 +581,11 @@ msgstr "フォント:"
 
 #: ../AMC-gui.pl:2022
 msgid "Your AMC version and LaTeX style file version differ. Even if the documents are properly generated, this can lead to many problems using AMC.\n"
-msgstr ""
+msgstr "AMCのバージョンとLaTeXスタイルファイルのバージョンが異なっています。文書が適切に生成されたとしても、AMC使用時に種々の問題が発生する可能性があります。\n"
 
 #: ../AMC-gui.pl:2023
 msgid "<b>Please check your installation to get matching AMC and LaTeX style file versions.</b>\n"
-msgstr ""
+msgstr "<b>インストールを確認して、AMCとLaTeXスタイルファイルのバージョンを一致させてください。</b>\n"
 
 #: ../AMC-gui.pl:2024
 #, perl-format
@@ -596,6 +594,9 @@ msgid ""
 "sty version: %s\n"
 "sty path: %s"
 msgstr ""
+"AMCバージョン: %s\n"
+"styバージョン: %s\n"
+"styパス: %s"
 
 #: ../AMC-gui.pl:2052
 msgid "Documents update..."
@@ -797,18 +798,18 @@ msgstr "ただし、最初のスキャン画像をAMCで取り込むときに、
 
 #. TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
 #: ../AMC-gui.pl:2682
-#, fuzzy, perl-format
+#, perl-format
 msgid "You selected the '%s' option, that uses '%s', so the %s has been set to '%s' for you."
-msgstr "'pdftk' の必要な '%s' オプションを選択しているので、'%s' は 'pdftk' に設定されました。"
+msgstr "選択している '%s' オプションは '%s' を使用するので、'%s' は '%s' に設定されました。"
 
 #: ../AMC-gui.pl:2684 ../AMC-gui-edit_preferences.glade:902
 msgid "Extracting method"
 msgstr "抽出方法"
 
 #: ../AMC-gui.pl:2700
-#, fuzzy, perl-format
+#, perl-format
 msgid "You selected the '%s' option, but this option needs 'qpdf' or 'pdftk' to be installed on your system. Please install one of these and try again."
-msgstr "'%s' オプションを選択するにはシステムに 'pdftk' がインストールされている必要があります。インストールして再試行してください。"
+msgstr "'%s' オプションを選択するにはシステムに 'qpdf' または 'pdftk' がインストールされている必要があります。いずれかをインストールして再試行してください。"
 
 #: ../AMC-gui.pl:2741
 msgid "Print papers one by one..."
@@ -901,7 +902,7 @@ msgstr "自動マーク認識が完了しました。"
 #: ../AMC-gui.pl:3183
 #, perl-format
 msgid "Some of the pages you submitted (%d of them) have already been processed before. Old data has been overwritten."
-msgstr ""
+msgstr "提出したページのうち %d 件は既に処理済です。旧データは上書き更新されました。"
 
 #. TRANSLATORS: Names list file : (none)
 #: ../AMC-gui.pl:3271
@@ -945,9 +946,8 @@ msgid "Please choose a key from primary keys in students list before association
 msgstr "受験者識別をする前に、受験者名簿のカラムのうち識別に用いるカラム名を選んでください。"
 
 #: ../AMC-gui.pl:3377
-#, fuzzy
 msgid "Please choose a code (made with LaTeX command \\AMCcodeGrid or equivalent) before automatic association."
-msgstr "自動受験者識別の前に、（LaTeXコマンド \\AMCcode で作成した）コード名を選んでください。"
+msgstr "自動受験者識別の前に、（\\AMCcodeGrid または同等のLaTeXコマンドで作成した）コード名を選んでください。"
 
 #. TRANSLATORS: Here, %s will be replaced with "Students identification", which refers to a paragraph in the tab "Marking" from AMC main window.
 #: ../AMC-gui.pl:3422
@@ -1136,7 +1136,7 @@ msgstr "四隅マーカーと2進ボックスが全ページで同じ位置に�
 
 #: ../AMC-gui.pl:4684
 msgid "Some material has been placed out of the page. This is often a result of a multiple columns question group starting too close from the page bottom. In such a case, use \"needspace\"."
-msgstr ""
+msgstr "ページ外に配置された素材があります。これは、ページ下部付近で複数カラムの設問グループを開始したときによく発生します。その場合には \"needspace\" を使用してください。"
 
 #: ../AMC-gui.pl:4705
 msgid "Some potential defects were detected for this subject. Correct them in the source and update the working documents."
@@ -1148,9 +1148,9 @@ msgid "(See for example pages %s and %s)"
 msgstr "（例えば、ページ %s と %s を見てください）"
 
 #: ../AMC-gui.pl:4716
-#, fuzzy, perl-format
+#, perl-format
 msgid "(Concerns %1$d pages, see for example page %2$s)"
-msgstr "（%1$d 件の試験問題が関連しています。例として試験問題番号 %2$d を見てください）"
+msgstr "（%1$d 件のページが関連しています。例としてページ番号 %2$s を見てください）"
 
 #: ../AMC-gui.pl:4723
 #, perl-format
@@ -1175,7 +1175,7 @@ msgstr "マーク認識結果なし"
 #: ../AMC-gui.pl:4856
 #, perl-format
 msgid "Overwritten pages: %d"
-msgstr ""
+msgstr "上書き更新されたページ数: %d"
 
 #: ../AMC-gui.pl:4864
 msgid "All scans were properly recognized."
@@ -1188,19 +1188,18 @@ msgstr "スキャン画像のうち %d 件が認識できません"
 
 #. TRANSLATORS: column title for the list of overwritten pages. This refers to the page from the question
 #: ../AMC-gui.pl:4895
-#, fuzzy
 msgid "Page"
-msgstr "ページ:"
+msgstr "ページ"
 
 #. TRANSLATORS: column title for the list of overwritten pages. This refers to the number of times the page has been overwritten.
 #: ../AMC-gui.pl:4900
 msgid "count"
-msgstr ""
+msgstr "回数"
 
 #. TRANSLATORS: column title for the list of overwritten pages. This refers to the date of the last data capture for the page.
 #: ../AMC-gui.pl:4905
 msgid "Date"
-msgstr ""
+msgstr "最終更新"
 
 #: ../AMC-gui.pl:4946
 msgid "Looking for analysis..."
@@ -1252,9 +1251,8 @@ msgid "No scan selected"
 msgstr "スキャン画像が選択されていません"
 
 #: ../AMC-gui.pl:5156
-#, fuzzy
 msgid "No more unrecognized scans"
-msgstr "未認識スキャン画像"
+msgstr "未認識スキャン画像はありません"
 
 #: ../AMC-gui.pl:5234
 msgid "Making diagnostic image..."
@@ -1372,7 +1370,7 @@ msgstr "メールを送るのに必要なperlモジュール %s がインスト�
 
 #: ../AMC-gui.pl:6239
 msgid "SMTP security mode \"STARTTLS\" is only available with Email::Sender version 1.300027 and over. Please install a newer version of this perl module or change SMTP security mode, and try again."
-msgstr ""
+msgstr "SMTPセキュリティモード \"STARTTLS\" は Email::Sender のバージョン 1.300027 以上でのみ使用できます。このperlモジュールの最新バージョンをインストールするか、SMTPセキュリティモードを変更して、再試行してください。"
 
 #: ../AMC-gui.pl:6255
 #, perl-format
@@ -1437,7 +1435,7 @@ msgstr "キャンセル済"
 
 #: ../AMC-gui.pl:6510
 msgid "SMTP authentication failed: check SMTP configuration and password."
-msgstr ""
+msgstr "SMTP認証の失敗: SMTPの設定とパスワードを確認してください。"
 
 #: ../AMC-gui.pl:6512
 #, perl-format
@@ -1590,12 +1588,10 @@ msgid "LaTeX command configured is not present (%s). Install it or change config
 msgstr "設定されたLaTeXコマンド（%s）が存在しません。インストールするか設定を変更し、再実行してください。"
 
 #: ../AMC-prepare.pl:797
-#, fuzzy
 msgid "solution"
 msgstr "模範解答"
 
 #: ../AMC-prepare.pl:812
-#, fuzzy
 msgid "catalog"
 msgstr "設問カタログ"
 
@@ -1614,7 +1610,7 @@ msgstr "設問IDにアクセント付または非標準文字が使用されて�
 
 #: ../AMC-read-pdfform.pl:136
 msgid "Reading PDF forms..."
-msgstr ""
+msgstr "PDFフォームの読込み中..."
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-perl/AMC/Basic.pm:592
@@ -1698,9 +1694,9 @@ msgstr "編集"
 
 #. TRANSLATORS: Error writing one of the configuration files (global or project). The first %s will be replaced with the path of that file, and the second with the error text.
 #: ../AMC-perl/AMC/Config.pm:841
-#, fuzzy, perl-format
+#, perl-format
 msgid "Error writing configuration file %s: %s"
-msgstr "オプションファイル %s への書込みエラー: %s"
+msgstr "設定ファイル %s への書込みエラー: %s"
 
 #: ../AMC-perl/AMC/DataModule/association.pm:103
 msgid "Fetching association results from old format XML files..."
@@ -1838,7 +1834,7 @@ msgstr "左欄に受験番号をマークし、下欄に氏名を記入してく
 #: ../AMC-perl/AMC/Filter/plain.pm:209
 #, perl-format
 msgid "Pages option value can't be understood: %s"
-msgstr ""
+msgstr "Pagesオプション値が誤っています: %s"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:238
 #, perl-format
@@ -1894,9 +1890,8 @@ msgid "Sheet"
 msgstr "試験問題"
 
 #: ../AMC-perl/AMC/Gui/Association.pm:728
-#, fuzzy
 msgid "End"
-msgstr "..."
+msgstr "終了"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:117
 msgid "Page layout"
@@ -2059,36 +2054,34 @@ msgstr "素点グループ"
 #. TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and report total scores'
 #: ../AMC-perl/AMC/Export/register/ods.pm:126
 msgid "Yes (values)"
-msgstr ""
+msgstr "はい (素点合計)"
 
 #. TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and report total scores as percentages.'
 #: ../AMC-perl/AMC/Export/register/ods.pm:128
 msgid "Yes (percentages)"
-msgstr ""
+msgstr "はい (パーセンテージ)"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:131
 msgid "Add sums of the scores for each question group?"
-msgstr ""
+msgstr "設問グループごとに素点合計を付加しますか？"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:134
-#, fuzzy
 msgid "with scope separator"
-msgstr "スコープセパレータ '：' を使用"
+msgstr "スコープセレクタ"
 
 #. TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
 #: ../AMC-perl/AMC/Export/register/ods.pm:141
 msgid "':'"
-msgstr ""
+msgstr "':'"
 
 #. TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and you can detect the scope from a question ID using the text before the separator .'
 #: ../AMC-perl/AMC/Export/register/ods.pm:143
 msgid "'.'"
-msgstr ""
+msgstr "'.'"
 
 #: ../AMC-perl/AMC/Export/register/ods.pm:146
-#, fuzzy
 msgid "To define groups, use question ids in the form \"group:question\" or \"group.question\", depending on the scope separator."
-msgstr "設問グループごとに素点を合計しますか？グループを定義するには、スコープセバレータの設定により\"group:question\"または\"group.question\"という形式の設問IDを使用してください。"
+msgstr "グループを定義するには、スコープセバレータの設定に応じて \"group:question\" または \"group.question\" という形式の設問IDを使用してください。"
 
 #: ../AMC-perl/AMC/Filter/register/latex.pm:54
 msgid ""
@@ -2133,6 +2126,8 @@ msgid ""
 "Copyright (C) 2008-2018\n"
 "Alexis Bienvenüe and the AMC development team"
 msgstr ""
+"Copyright (C) 2008-2018\n"
+"Alexis BienvenüeとAMC開発チーム"
 
 #: ../AMC-gui-apropos.glade:19
 msgid "Automatic multiple choice questionnaires management"
@@ -2140,7 +2135,7 @@ msgstr "自動選択式試験問題管理"
 
 #: ../AMC-gui-apropos.glade:21
 msgid "Visit the AMC website"
-msgstr ""
+msgstr "AMCウェブサイトを開く"
 
 #: ../AMC-gui-choix_pages_impression.glade:33
 msgid "Papers printing"
@@ -2406,7 +2401,7 @@ msgstr "受験者の採点済答案のファイル名にASCII文字のみを使�
 
 #: ../AMC-gui-edit_preferences.glade:821
 msgid "Accept non-ASCII project names"
-msgstr ""
+msgstr "プロジェクト名に非ASCII文字を使用可"
 
 #: ../AMC-gui-edit_preferences.glade:848
 msgid "<b>Internationalization</b>"
@@ -2673,7 +2668,7 @@ msgstr "<b>検出パラメータ</b>"
 
 #: ../AMC-gui-edit_preferences.glade:2166
 msgid "These options are used when creating a new project. See the project tab for more details."
-msgstr ""
+msgstr "これらのオプションは新規プロジェクトの作成時に使用されます。詳細はプロジェクトタブを参照してください。"
 
 #: ../AMC-gui-edit_preferences.glade:2173
 #: ../AMC-gui-edit_preferences.glade:3760
@@ -2706,9 +2701,8 @@ msgid "ceil"
 msgstr "上限"
 
 #: ../AMC-gui-edit_preferences.glade:2312
-#, fuzzy
 msgid "<b>Default marking options</b>"
-msgstr "<b>デフォルト本文</b>"
+msgstr "<b>デフォルト採点オプション</b>"
 
 #: ../AMC-gui-edit_preferences.glade:2329 ../AMC-gui-main_window.glade:1943
 msgid "Marking"
@@ -2840,7 +2834,7 @@ msgstr "Bcc: アドレス"
 
 #: ../AMC-gui-edit_preferences.glade:3260
 msgid "Delay between sendings"
-msgstr ""
+msgstr "送信間隔"
 
 #: ../AMC-gui-edit_preferences.glade:3295
 msgid "Mail delivery method:"
@@ -2859,19 +2853,16 @@ msgid "SMTP port"
 msgstr "SMTPポート"
 
 #: ../AMC-gui-edit_preferences.glade:3424
-#, fuzzy
 msgid "SMTP security"
-msgstr "SMTPホスト"
+msgstr "SMTPセキュリティ"
 
 #: ../AMC-gui-edit_preferences.glade:3435
-#, fuzzy
 msgid "SMTP user"
-msgstr "SMTPホスト"
+msgstr "SMTPユーザ"
 
 #: ../AMC-gui-edit_preferences.glade:3472
-#, fuzzy
 msgid "SMTP password"
-msgstr "SMTPポート"
+msgstr "SMTPパスワード"
 
 #: ../AMC-gui-edit_preferences.glade:3509
 msgid "<b>Sending emails</b>"
@@ -3071,19 +3062,16 @@ msgid "<b>Attachments</b>"
 msgstr "<b>添付ファイル</b>"
 
 #: ../AMC-gui-main_window.glade:126
-#, fuzzy
 msgid "Updated"
 msgstr "更新日時"
 
 #: ../AMC-gui-main_window.glade:146
-#, fuzzy
 msgid "Sensitivity"
 msgstr "白黒閾値近接度"
 
 #: ../AMC-gui-main_window.glade:156
-#, fuzzy
 msgid "Scan file"
-msgstr "ファイルを設定"
+msgstr "スキャン画像ファイル"
 
 #: ../AMC-gui-main_window.glade:294
 msgid "Number of papers:"
@@ -3095,9 +3083,8 @@ msgstr "作成する試験問題の部数。ゼロの場合、LaTeXソースフ�
 
 #. TRANSLATORS: Use the character '_' before the key that can be used as a mnemonic (to activate documents update with Alt+key)
 #: ../AMC-gui-main_window.glade:343
-#, fuzzy
 msgid "_Update documents"
-msgstr "文書更新"
+msgstr "文書更新 (_U)"
 
 #: ../AMC-gui-main_window.glade:377
 msgid "Question"
@@ -3141,21 +3128,19 @@ msgstr "スキャン画像を表示"
 
 #: ../AMC-gui-main_window.glade:984
 msgid "Forget"
-msgstr ""
+msgstr "忘れる"
 
 #: ../AMC-gui-main_window.glade:1001
-#, fuzzy
 msgid "Look at pages"
-msgstr "スキャン画像を表示"
+msgstr "ページを表示"
 
 #: ../AMC-gui-main_window.glade:1086
 msgid "Pages:"
 msgstr "ページ:"
 
 #: ../AMC-gui-main_window.glade:1144
-#, fuzzy
 msgid "Columns"
-msgstr "カラム"
+msgstr "表示カラム"
 
 #. Label on the button used to open a window with the images of the boxes taken from the scan. This window can be used th check boxes categorization.
 #: ../AMC-gui-main_window.glade:1183 ../AMC-perl/AMC/Gui/Zooms.glade:13
@@ -3305,30 +3290,26 @@ msgid "Reports"
 msgstr "レポート"
 
 #: ../AMC-gui-main_window.glade:2650
-#, fuzzy
 msgid "Open project"
-msgstr "AMCプロジェクトを開く"
+msgstr "プロジェクトを開く"
 
 #: ../AMC-gui-main_window.glade:2691
-#, fuzzy
 msgid "Save project"
-msgstr "新規プロジェクト"
+msgstr "プロジェクトを保存する"
 
 #: ../AMC-gui-main_window.glade:2721
 msgid "Menu"
-msgstr ""
+msgstr "メニュー"
 
 #: ../AMC-gui-main_window.glade:2799 ../AMC-gui-main_window.glade:2838
 #: ../AMC-gui-main_window.glade:2877
-#, fuzzy
 msgid "Update the document"
-msgstr "文書更新"
+msgstr "文書を更新する"
 
 #: ../AMC-gui-main_window.glade:2813 ../AMC-gui-main_window.glade:2852
 #: ../AMC-gui-main_window.glade:2891
-#, fuzzy
 msgid "Open the document"
-msgstr "文書更新"
+msgstr "文書を開く"
 
 #: ../AMC-gui-main_window.glade:2953
 msgid "Export as template"
@@ -3343,18 +3324,16 @@ msgid "Manage"
 msgstr "管理"
 
 #: ../AMC-gui-main_window.glade:3017 ../AMC-gui-main_window.glade:3267
-#, fuzzy
 msgid "Help"
-msgstr "ヘルプ(_H)"
+msgstr "ヘルプ"
 
 #: ../AMC-gui-main_window.glade:3033
 msgid "About"
-msgstr ""
+msgstr "概要"
 
 #: ../AMC-gui-main_window.glade:3047
-#, fuzzy
 msgid "Cancel learning…"
-msgstr "学習をキャンセル..."
+msgstr "学習をキャンセルする..."
 
 #: ../AMC-gui-main_window.glade:3058
 msgid "Debugging"
@@ -3374,12 +3353,11 @@ msgstr "プラグイン"
 
 #: ../AMC-gui-main_window.glade:3200
 msgid "Browse"
-msgstr ""
+msgstr "一覧を見る"
 
 #: ../AMC-gui-main_window.glade:3214
-#, fuzzy
 msgid "Install plugin"
-msgstr "プラグインをインストールします。"
+msgstr "プラグインをインストールする"
 
 #: ../AMC-gui-make_template.glade:8
 msgid "Save as a template"
@@ -3411,7 +3389,7 @@ msgstr "テンプレートに含まれるファイル:"
 
 #: ../AMC-gui-overwritten.glade:49
 msgid "List of pages with overwritten data:"
-msgstr ""
+msgstr "上書き更新されたページの一覧"
 
 #: ../AMC-gui-saisie_auto.glade:8
 msgid "Please select all papers' scans"
@@ -3462,36 +3440,32 @@ msgstr ""
 "<b>シチュエーションを選択してください:</b>"
 
 #: ../AMC-gui-source_latex_dialog.glade:105
-#, fuzzy
 msgid "<b>Template</b>"
-msgstr "<b>ヘッダー</b>"
+msgstr "<b>テンプレート</b>"
 
 #: ../AMC-gui-source_latex_dialog.glade:119
 msgid "You did not write any description of the questionnaire, and want to start from a template."
 msgstr "試験問題をまだ何も作成しておらず、テンプレートから開始したい。"
 
 #: ../AMC-gui-source_latex_dialog.glade:171
-#, fuzzy
 msgid "<b>File</b>"
-msgstr "マークされている"
+msgstr "<b>ファイル</b>"
 
 #: ../AMC-gui-source_latex_dialog.glade:185
 msgid "You already wrote a questionnaire description, and want to use it for this project."
 msgstr "既に質問記述があり、このプロジェクトでそれを使いたい。"
 
 #: ../AMC-gui-source_latex_dialog.glade:237
-#, fuzzy
 msgid "<b>Empty</b>"
-msgstr "<b>タイプ</b>"
+msgstr "<b>空</b>"
 
 #: ../AMC-gui-source_latex_dialog.glade:251
 msgid "You want to write the description from zero."
 msgstr "記述をゼロから作成したい。"
 
 #: ../AMC-gui-source_latex_dialog.glade:303
-#, fuzzy
 msgid "<b>Archive</b>"
-msgstr "<b>添付ファイル</b>"
+msgstr "<b>アーカイブ</b>"
 
 #: ../AMC-gui-source_latex_dialog.glade:317
 msgid "You have a <i>.tgz</i> or <i>.zip</i> file containing the questionnaire and other related stuff, coming from a third party software or a backup."
@@ -3507,7 +3481,7 @@ msgstr "前処理"
 
 #: ../AMC-gui-unrecognized.glade:14
 msgid "Delete"
-msgstr ""
+msgstr "削除"
 
 #: ../AMC-gui-unrecognized.glade:29
 msgid "Unrecognized scans"
@@ -3603,9 +3577,8 @@ msgid "Save this page modifications, then go to next page."
 msgstr "このページの修正を保存し、次のページに進む。"
 
 #: ../AMC-perl/AMC/Gui/Manuel.glade:344
-#, fuzzy
 msgid "Focus on question:"
-msgstr "問題文の前に選択肢があります。"
+msgstr "注目する設問:"
 
 #: ../AMC-perl/AMC/Gui/Manuel.glade:429
 msgid "Remove manual modifications for this page. Automatic data capture for this page, if any, won't be changed."
