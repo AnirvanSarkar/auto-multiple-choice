@@ -55,7 +55,7 @@ img_pdf/%.pdf: img_src/%.svg
 	rsvg-convert -f pdf $< -o $@
 
 html/index.html: FORCE
-	$(PERLPATH) ./index.pl $(DOCBOOKS:.xml=) > $@
+	$(PERLPATH) ./index.pl $(SELECTED_DOCBOOKS:.xml=) > $@
 
 %.tex: %.xml amcdocstyle.sty
 	dblatex -P latex.encoding=utf8 -b xetex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
