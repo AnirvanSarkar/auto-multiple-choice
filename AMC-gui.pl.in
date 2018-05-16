@@ -4310,7 +4310,12 @@ sub activate_apropos {
 sub activate_doc {
     my ($w,$lang)=@_;
 
-    #print STDERR "$w / $lang\n";
+    if(!$lang) {
+      my $n=( bless $w, "Gtk3::Buildable" )->get_name;
+      if($n =~ /_([a-z]{2})$/) {
+        $lang=$1;
+      }
+    }
 
     my $url='file://'.$hdocdir;
     $url.="auto-multiple-choice.$lang/index.html"
