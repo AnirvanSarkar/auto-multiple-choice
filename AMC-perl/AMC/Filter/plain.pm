@@ -719,16 +719,16 @@ sub scoring_string {
   my ($self,$obj,$type)=@_;
   # manual scoring if some scoring was used, either for the question
   # or for one of the answers
-  my $manual_scoring=$obj->{'scoring'};
+  my $manual_scoring=($obj->{'scoring'} ne '' ? 1 : 0);
   if($obj->{answers}) {
     for my $a (@{$obj->{answers}}) {
-      $manual_scoring=1 if($a->{scoring});
+      $manual_scoring=1 if($a->{scoring} ne '');
     }
   }
   my $s=$obj->{'scoring'};
   # set to default only if no manual scoring:
   $s=$self->{'options'}->{'defaultscoring'.$type} if(!$manual_scoring);
-  return($s ? "\\scoring{$s}" : "");
+  return($s ne '' ? "\\scoring{$s}" : "");
 }
 
 # builds the LaTeX code for an answer: \correctchoice or \wrongchoice,
