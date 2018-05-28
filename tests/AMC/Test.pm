@@ -663,16 +663,25 @@ sub ok {
   }
 }
 
-sub defects {
+sub get_defects {
   my ($self)=@_;
 
   my $l=AMC::Data->new($self->{'temp_dir'}."/data")->module('layout');
   $l->begin_read_transaction('test');
-  my $d=$l->defects();
+  my $d={$l->defects()};
   $l->end_transaction('test');
+  return($d);
+}
+
+sub defects {
+  my ($self)=@_;
+
+  my $d=$self->get_defects();
+  delete $d->{NO_NAME};
   my @t=(keys %$d);
   if(@t) {
     $self->trace("[E] Layout defects: ".join(', ',@t));
+    exit 1;
   } else {
     $self->trace("[T] No layout defects");
   }

@@ -514,8 +514,8 @@ sub define_statements {
 	."  GROUP BY numberid,digitid) AS a,"
 	."  ".$self->table("digit")." AS b"
 	." ON a.digitid=b.digitid AND a.numberid=b.numberid"
-	."    AND (abs(a.xmin-b.xmin)>? OR abs(a.xmax-b.xmax)>?"
-	."         OR abs(a.ymin-b.ymin)>? OR abs(a.ymax-b.ymax)>?)"
+	."    AND (abs(a.xmin-b.xmin)>(?+0) OR abs(a.xmax-b.xmax)>(?+0)"
+	."         OR abs(a.ymin-b.ymin)>(?+0) OR abs(a.ymax-b.ymax)>(?+0))"
 	." LIMIT 1"},
        'checkPosMarks'=>
        {'sql'=>"SELECT a.student AS student_a,b.student AS student_b,"
@@ -526,7 +526,7 @@ sub define_statements {
 	."  GROUP BY corner) AS a,"
 	."  ".$self->table("mark")." AS b"
 	." ON a.corner=b.corner"
-	."    AND (abs(a.x-b.x)>? OR abs(a.y-b.y)>?)"
+	."    AND (abs(a.x-b.x)>(?+0) OR abs(a.y-b.y)>(?+0))"
 	." LIMIT 1"},
        'AssocNumber'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("association")},
        'orientation'=>{'sql'=>"SELECT MIN(ratio) AS minratio,"
