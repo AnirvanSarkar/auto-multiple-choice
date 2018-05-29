@@ -24,6 +24,8 @@ use AMC::Basic;
 use AMC::DataModule::scoring qw/:question/;
 use AMC::ScoringEnv;
 
+use Data::Dumper;
+
 sub new {
     my (%o)=(@_);
 
@@ -104,6 +106,7 @@ sub set_default_strategy {
 sub prepare_question {
   my ($self,$question_data)=@_;
 
+  debug "Question data is ".Dumper($question_data);
   $self->{env}=$self->{default_strategy}->clone(1);
   $self->{env}->process_directives($question_data->{default_strategy});
   $self->{env}->process_directives($question_data->{strategy});
@@ -344,6 +347,7 @@ sub simple_standard_score {
   if(@$plain_directives) {
     # some value is given as a score for the
     # ticked answer
+    debug "Scoring: plain value";
     $$score=$self->evaluate(pop @$plain_directives);
   } else {
     # take into account the scoring strategy for

@@ -189,7 +189,7 @@ sub parse_defs {
   my ($self,$string,$plain_only)=@_;
   my @r=();
   for my $def (quotewords(',+',0,$string)) {
-    if($def) {
+    if(length($def)) {
       if($def =~ /^\s*([.a-zA-Z0-9_-]+)\s*=\s*(.*)/) {
         # "variable=value" case
 	push @r,{key=>$1,value=>$2} if(!$plain_only);
