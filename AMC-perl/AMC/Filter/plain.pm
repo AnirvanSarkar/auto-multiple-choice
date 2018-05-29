@@ -87,7 +87,7 @@ sub new {
        'completemulti'=>1,
        'font'=>'Linux Libertine O',
        'arabicfont'=>'Rasheeq',
-       'defaultscoringm'=>'haut=2',
+       'implicitdefaultscoringm'=>'haut=2',
        'l-name'=>'',
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
        'disable'=>'',
@@ -719,16 +719,24 @@ sub scoring_string {
   my ($self,$obj,$type)=@_;
   # manual scoring if some scoring was used, either for the question
   # or for one of the answers
-  my $manual_scoring=($obj->{'scoring'} ne '' ? 1 : 0);
+  my $manual_scoring=(length $obj->{'scoring'} ? 1 : 0);
   if($obj->{answers}) {
     for my $a (@{$obj->{answers}}) {
-      $manual_scoring=1 if($a->{scoring} ne '');
+      $manual_scoring=1 if(length $a->{scoring});
     }
   }
   my $s=$obj->{'scoring'};
-  # set to default only if no manual scoring:
-  $s=$self->{'options'}->{'defaultscoring'.$type} if(!$manual_scoring);
-  return($s ne '' ? "\\scoring{$s}" : "");
+  # set to explicit default (defined by DefaultScoringS or
+  # DefaultScoringM):
+  if(! length($s)) {
+    $s=$self->{'options'}->{'defaultscoring'.$type};
+  }
+  # if no manual scoring and no explicit default scoring, use the
+  # implicit default scoring:
+  if(!length($s) && !$manual_scoring) {
+    $s=$self->{'options'}->{'implicitdefaultscoring'.$type};
+  }
+  return(length($s) ? "\\scoring{$s}" : "");
 }
 
 # builds the LaTeX code for an answer: \correctchoice or \wrongchoice,
