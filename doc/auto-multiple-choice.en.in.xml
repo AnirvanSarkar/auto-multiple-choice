@@ -1481,7 +1481,7 @@ Firstname and lastname:
     </sect2>
 
     <sect2 id="secensemble">
-      <title>An example with a separate answer sheet</title>
+      <title id="secensemble.title">An example with a separate answer sheet</title>
 
       <para>In this example, one wants the check-boxes to be put together in a
       separate sheet. This makes cheating more difficult, and, more
@@ -1769,7 +1769,7 @@ Duration : 10 minutes.
             <para><option>separateanswersheet</option>: requires that all
             check-boxes be put together at the end of the test sheet (usually,
             this option is used when one wants to have only one sheet to scan
-            per student - see the example in <xref
+            per student - see the example in <xref endterm="secensemble.title"
             linkend="secensemble"/>).</para>
           </listitem>
 
@@ -2679,7 +2679,7 @@ Duration : 10 minutes.
 
         <para>It is also possible to modify the layout of the separate answer
         sheet produced with the <option>separateanswersheet</option> option
-        (see section <xref linkend="secensemble"/>).</para>
+        (see  <xref endterm="secensemble.title" linkend="secensemble"/>).</para>
 
         <orderedlist>
           <listitem>
@@ -2701,11 +2701,38 @@ Duration : 10 minutes.
 \def\AMCformQuestion#1{\textbf{Question #1:}}
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
-          </listitem>
-        </orderedlist>
 
         <para>These definitions have to be inserted just after
         <code>\begin{document}</code> in the LaTeX file.</para>
+          </listitem>
+          
+          <listitem>
+          <para>
+         You can force AMC not to respect the arrangement of the questions and to store the open
+         questions in order to restore them together. This can be useful when you use package
+          <package>multicols</package >, the answers to open questions needing more space
+          when hand written.
+          </para>
+        
+        <para >The command <command>\AMCformFilter {!\AMCifcategory {open}}</command> 
+        displays all questions except the open questions then the command
+        <command>\AMCformFilter {\AMCifcategory {open}}</command > 
+        displays only the open questions. Both commands must be used <emphasis> together</emphasis >.</para > 
+        
+         <programlisting>
+%On two columns, the answers boxes are displayed
+%except the open questions.
+\begin{multicols}{2}
+\AMCformFilter{!\AMCifcategory{open}}
+\end{multicols}
+
+%All the open questions are displayed.
+\AMCformFilter{\AMCifcategory{open}}
+         </programlisting>
+         
+         <note><para>The ascending numbering is always respected.</para></note>
+          </listitem>
+        </orderedlist>
       </sect3>
 
       <sect3 id="latex.codes">
@@ -4082,7 +4109,7 @@ Name :
 
       <para>Preparing a project is done in two steps. First we must make the
       reference documents from the LaTeX source file. This can be done by
-      clicking the <guibutton>Update documents</guibutton>. The following
+      clicking the <guibutton>Update documents</guibutton> or <keycode>Alt+U</keycode>. The following
       documents are produced:</para>
 
       <itemizedlist>
@@ -8500,3 +8527,5 @@ password <emphasis>your_password</emphasis>
     </sect2>
   </sect1>
 </article>
+
+

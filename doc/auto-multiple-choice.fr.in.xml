@@ -1546,7 +1546,7 @@ Nom et prénom :
     </sect2>
 
     <sect2 id="secensemble">
-      <title>Un exemple avec une feuille de réponses séparée</title>
+      <title id="secensemble.titre">Un exemple avec une feuille de réponses séparée</title>
 
       <para>Dans cet exemple, on souhaite que les cases à cocher soient toutes
       rassemblées sur une feuille à part. De cette manière, la triche entre
@@ -1855,7 +1855,7 @@ Durée : 10 minutes.
             <para><option>ensemble</option> : demande à ce que les cases à
             cocher soient toutes rassemblées en fin de copie (cette option est
             en général utilisée quand on ne veut scanner qu'une seule page par
-            étudiant - voir l'exemple de la <xref
+            étudiant - voir <xref endterm="secensemble.titre"
             linkend="secensemble"/>).</para>
           </listitem>
 
@@ -2276,7 +2276,7 @@ Durée : 10 minutes.
           <para>Les grandeurs <parameter>width</parameter>,
           <parameter>height</parameter>, <parameter>depth</parameter>
           définissent les dimensions de la case de notation ainsi que son
-          emplacement sur la feuille de réponses.</para>
+          emplacement sur la feuille de réponses. Cette zone invisible est définie pour toutes les questions.</para>
 
           <para>La variable <parameter>position</parameter> peut prendre les
           valeurs : none, question, margin, margins.</para>
@@ -2297,7 +2297,7 @@ Durée : 10 minutes.
           <para>Les grandeurs <parameter>width</parameter>,
           <parameter>height</parameter>, <parameter>depth</parameter>
           définissent les dimensions de la case de notation ainsi que son
-          emplacement sur la feuille de réponses.</para>
+          emplacement sur la feuille de réponses. Cette zone invisible est définie pour toutes les questions.</para>
 
           <para>La variable <parameter>position</parameter> peut prendre les
           valeurs : none, question, margin, margins.</para>
@@ -2799,9 +2799,9 @@ Durée : 10 minutes.
 
         <para>Il est aussi possible de modifier la mise en page du formulaire
         de réponses séparé produit avec l'option <option>ensemble</option>
-        (voir section <xref linkend="secensemble"/>).</para>
+        (voir <xref endterm="secensemble.titre" linkend="secensemble"/>).</para>
 
-        <orderedlist>
+          <orderedlist>
           <listitem>
             <para>Si on veut simplement modifier l'espacement horizontal entre
             deux cases de réponses ou l'espacement vertical entre deux
@@ -2822,11 +2822,37 @@ Durée : 10 minutes.
 \def\AMCformQuestion#1{\textbf{Question #1 :}}
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
+
+<para>Ces définitions sont à insérer juste après la balise
+        <code>\begin{document}</code> dans le document LaTeX.</para>
+          </listitem>
+
+          <listitem>
+         <para> 
+         Vous pouvez forcer AMC à ne pas respecter l'ordre des questions et à mémoriser
+         les questions ouvertes afin qu'elles soient restituées ensemble. Cela peut être
+         utile lorsque vous utilisez le package <package>multicols</package>, les réponses écrites
+        à la main des questions ouvertes demandant plus d'espace.</para>
+        
+        <para>La commande <command>\AMCformFilter{!\AMCifcategory{open}}</command> affiche
+        toutes les questions sauf les questions ouvertes puis la commande
+        <command>\AMCformFilter{\AMCifcategory{open}}</command> affiche uniquement les
+        questions ouvertes. Les deux commandes doivent être utilisées <emphasis>ensemble</emphasis>.
+         </para> 
+         <programlisting>
+%Sur deux colonnes, les cases réponses sont affichées
+%à l'exception des questions ouvertes.
+\begin{multicols}{2}
+\AMCformFilter{!\AMCifcategory{open}}
+\end{multicols}
+
+%Toutes les questions ouvertes sont affichées.
+\AMCformFilter{\AMCifcategory{open}}
+         </programlisting>
+         
+         <note><para>L'ordre croissant des numéros est toujours respecté.</para></note>
           </listitem>
         </orderedlist>
-
-        <para>Ces définitions sont à insérer juste après la balise
-        <code>\begin{document}</code> dans le document LaTeX.</para>
       </sect3>
 
       <sect3 id="latex.codes">
@@ -4327,7 +4353,7 @@ Nom et prénom :
       <para>La préparation du projet se fait en deux étapes. Il faut tout
       d'abord fabriquer les documents de référence à partir du fichier source.
       Ceci se fait en cliquant sur le bouton <guibutton>Mise à
-      jour</guibutton> de la section <guilabel>Documents de
+      jour</guibutton> ou <keycode>Alt+D</keycode> de la section <guilabel>Documents de
       travail</guilabel>. Les documents produits sont les suivants :</para>
 
       <itemizedlist>
@@ -4414,7 +4440,7 @@ Nom et prénom :
           pouvez utiliser (si ce n'est pas déjà fait), dans le fichier LaTeX
           du sujet, la commande <command>\AMCcleardoublepage</command>, qui
           ajoutera les pages blanches nécessaires pour que tous les sujets
-          aient un nombre pair de pages (voir exemple section <xref
+          aient un nombre pair de pages (voir <xref endterm="secensemble.titre"
           linkend="secensemble"/>).</para>
         </listitem>
 
@@ -6809,3 +6835,4 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
     </sect2>
   </sect1>
 </article>
+
