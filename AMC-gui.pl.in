@@ -4311,7 +4311,7 @@ sub activate_doc {
     my ($w,$lang)=@_;
 
     if(!$lang) {
-      my $n=( bless $w, "Gtk3::Buildable" )->get_name;
+      my $n=$w->Gtk3::Buildable::get_name;
       if($n =~ /_([a-z]{2})$/) {
         $lang=$1;
       }
