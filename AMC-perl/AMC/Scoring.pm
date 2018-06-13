@@ -465,6 +465,9 @@ sub global_score {
   my $total=0;
   my $max=0;
 
+  # maybe global variables differ from a copy to another...
+  $self->{'default_strategy_plain'}->unevaluate_directives();
+
   my $skip=$self->{'default_strategy_plain'}->get_directive("allowempty");
   if($skip>0) {
     @questions=sort { ($a->{'raison'} eq 'V' ? 0 : 1) <=>

@@ -277,7 +277,6 @@ for my $sc (@captured_studentcopy) {
 
   # Compute the final total score aggregating questions scores
 
-  $score->set_type(0);
   my ($total,$max_i)=$score->global_score($scoring,@question_scores);
 
   # Now apply rounding scheme
