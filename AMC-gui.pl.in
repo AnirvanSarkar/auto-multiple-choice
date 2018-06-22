@@ -3684,7 +3684,10 @@ sub voir_notes {
   $projet{'_scoring'}->end_transaction('smMC');
   if($c>0) {
     my $n=AMC::Gui::Notes::new
-      (scoring=>$projet{'_scoring'},layout=>$projet{'_layout'});
+      (scoring=>$projet{'_scoring'},
+       layout=>$projet{'_layout'},
+       size_prefs=>($config->get('conserve_taille') ? $config : ''),
+      );
   } else {
     my $dialog = Gtk3::MessageDialog
       ->new($w{'main_window'},

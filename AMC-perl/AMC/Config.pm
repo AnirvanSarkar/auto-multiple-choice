@@ -267,6 +267,7 @@ sub defaults {
      preferences_window_size=>'',
      checklayout_window_size=>'',
      manual_window_size=>'',
+     marks_window_size=>'',
      conserve_taille=>1,
      methode_impression=>'CUPS',
      imprimante=>'',

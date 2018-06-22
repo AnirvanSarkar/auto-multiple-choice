@@ -21,6 +21,7 @@
 package AMC::Gui::Notes;
 
 use AMC::Basic;
+use AMC::Gui::WindowSize;
 
 use Encode;
 
@@ -59,6 +60,7 @@ sub new {
     my $self={
               scoring=>'',
               layout=>'',
+              size_prefs=>'',
              };
     my $it;
 
@@ -164,6 +166,11 @@ sub new {
     $store->insert_with_values($row++,@vv);
 
     $self->{'scoring'}->end_transaction;
+
+    AMC::Gui::WindowSize::size_monitor
+        ($self->{general},{config=>$self->{size_prefs},
+                           key=>'marks_window_size'});
+
     return($self);
 }
 
