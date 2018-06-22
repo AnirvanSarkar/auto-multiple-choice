@@ -948,7 +948,7 @@ sub orientation {
 sub code_digit_pattern {
   my ($self)=@_;
   my $type=$self->variable("build:codedigit");
-  if($type eq 'squarebrackets') {
+  if($type && $type eq 'squarebrackets') {
     # 'codename[N]'
     return("\\[(\\d+)\\]");
   } else {
