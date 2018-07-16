@@ -109,7 +109,7 @@ endif
 # Target switch (precomp archive or not)
 
 ifeq ($(PRECOMP_ARCHIVE),)
-all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm doc I18N
+all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz doc I18N
 	chmod a+x auto-multiple-choice
 else
 all: all_precomp
@@ -177,6 +177,10 @@ sync:
 %.xpm: %.png
 	pngtopnm $< | ppmtoxpm > $@
 
+$(MAIN_LOGO).svgz: $(MAIN_LOGO).svg
+	gzip -k -S z $<
+	$(foreach SIZE, $(APPICONSIZES), rsvg-convert -a -w $(SIZE) -h $(SIZE) $< -o $(MAIN_LOGO)-$(SIZE).png ;)
+
 # CLEAN
 
 clean_IN: FORCE
@@ -192,7 +196,7 @@ clean: clean_IN $(if $(PRECOMP_ARCHIVE),,distclean)
 	-rm -f vars-subs.pl
 
 distclean: clean_IN clean
-	-rm -f $(MAIN_LOGO).xpm
+	-rm -f $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz $(MAIN_LOGO)-*.png
 	-rm -f auto-multiple-choice.spec
 	$(MAKE) -C doc/sty clean
 	$(MAKE) -C doc clean
@@ -240,6 +244,13 @@ endif
 	install    -m 0755 $(USER_GROUP) auto-multiple-choice $(DESTDIR)/$(BINDIR)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(ICONSDIR)
 	install    -m 0644 $(USER_GROUP) icons/*.svg $(DESTDIR)/$(ICONSDIR)
+ifneq ($(APPICONDIR),)
+	install	-d -m 0755 $(USER_GROUP) $(DESTDIR)/$(APPICONDIR)/scalable/apps
+	install	   -m 0644 $(USER_GROUP) $(MAIN_LOGO).svgz $(DESTDIR)/$(APPICONDIR)/scalable/apps
+	$(foreach SIZE, $(APPICONSIZES),\
+	install	-d -m 0755 $(USER_GROUP) $(DESTDIR)/$(APPICONDIR)/$(SIZE)x$(SIZE)/apps ; \
+	install	   -m 0644 $(USER_GROUP) -T $(MAIN_LOGO)-$(SIZE).png $(DESTDIR)/$(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png ; )
+endif
 ifneq ($(PIXDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PIXDIR)
 	install    -m 0644 $(USER_GROUP) -T $(MAIN_LOGO).xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
@@ -300,7 +311,7 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang
+	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/auto-multiple-choice.svgz
 	-sudo rm -r /usr/lib/AMC
 
 local: global
@@ -323,6 +334,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/$(STY) $(TEXDIR)/automultiplechoice.sty
 	sudo ln -s $(LOCALDIR)/interfaces/amc-txt.lang $(LANG_GTKSOURCEVIEW_DIR)
 	sudo ln -s $(LOCALDIR)/interfaces/auto-multiple-choice.xml $(SHARED_MIMEINFO_DIR)
+	sudo ln -s $(LOCALDIR)/$(MAIN_LOGO).svgz $(APPICONDIR)
 
 ifdef DEBSIGN_KEY
 DEBSIGN=-k$(DEBSIGN_KEY)
@@ -368,7 +380,7 @@ sources_vok:
 	$(MAKE) tmp_copy
 	cd $(TMP_DIR) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) MAJ
-	$(MAKE) -C $(TMP_SOURCE_DIR) $(MAIN_LOGO).xpm I18N doc
+	$(MAKE) -C $(TMP_SOURCE_DIR) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz I18N doc
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean_IN
 	$(MAKE) -C $(TMP_SOURCE_DIR) auto-multiple-choice.spec
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
