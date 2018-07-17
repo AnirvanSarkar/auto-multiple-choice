@@ -109,14 +109,18 @@ endif
 # Target switch (precomp archive or not)
 
 ifeq ($(PRECOMP_ARCHIVE),)
-all: $(FROM_IN) $(BINARIES) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz doc I18N
+all:
+	$(MAKE) $(FROM_IN)
+	$(MAKE) $(BINARIES) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz doc I18N
 	chmod a+x auto-multiple-choice
 else
 all: all_precomp
 	chmod a+x auto-multiple-choice
 endif
 
-all_precomp: $(FROM_IN) $(BINARIES) ;
+all_precomp:
+	$(MAKE) $(FROM_IN)
+	$(MAKE) $(BINARIES)
 
 MAJ: $(FROM_IN) ;
 
