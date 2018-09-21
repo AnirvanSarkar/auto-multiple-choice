@@ -61,7 +61,7 @@ GCC_POPPLER ?= $(shell pkg-config --cflags --libs poppler-glib gio-2.0)
 
 SHELL=/bin/sh
 
-DESTDIR=
+DESTDIR ?=
 
 # debug...
 
