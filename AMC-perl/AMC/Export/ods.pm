@@ -644,7 +644,7 @@ sub export {
 			 );
 
     # NoteQp : note pour une question, en pourcentage
-    $styles->createStyle('NoteQ',
+    $styles->createStyle('NoteQp',
 			 parent=>'NoteQbase',
 			 family=>'table-cell',
 			 'references'=>{'style:data-style-name' => 'Percentage'},
