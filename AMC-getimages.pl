@@ -121,12 +121,17 @@ $p=AMC::Gui::Avancement::new(1,'id'=>$progress_id)
 sub image_size {
   my ($file)=@_;
   my @r=();
-  open(IDF,"-|",magick_module("identify"),"-format","%w,%h\n",$file);
-  while(<IDF>) {
-    chomp();
-    @r=($1,$2) if(/([^,]+),(.*)/);
+  my @cmd=(magick_module("identify"),"-format","%w,%h\n",$file);
+  if(open(IDF,"-|",@cmd)) {
+    while(<IDF>) {
+      chomp();
+      @r=($1,$2) if(/([^,]+),(.*)/);
+    }
+    close(IDF);
+  } else {
+    debug("CMD: ".join(' ',@cmd));
+    debug("ERROR: $!");
   }
-  close(IDF);
   return(@r);
 }
 
@@ -136,7 +141,12 @@ sub image_size {
 sub image_orientation {
   my ($file)=@_;
   my ($w,$h)=image_size($file);
-  return( $h>1.1*$w ? "portrait" : $w>1.1*$h ? "landscape" : "");
+  if(defined($h) && defined($w)) {
+    return( $h>1.1*$w ? "portrait" : $w>1.1*$h ? "landscape" : "");
+  } else {
+    debug "WARNING: undefined image orientation for $file";
+    return(undef);
+  }
 }
 
 # move_derivative($origin,$derivative) moves the file descried by
