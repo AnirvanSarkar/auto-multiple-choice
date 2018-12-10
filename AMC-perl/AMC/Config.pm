@@ -505,12 +505,7 @@ sub set_global_option_to_default {
         my ($kind,@values)=@{$self->{o_default}->{$key}};
         # [ 'command' , <commands> ] --> choose the first existing command
         if($kind eq 'command') {
-        UC: for my $c (@values) {
-            if(commande_accessible($c)) {
-              $self->{global}->{$key}=$c;
-              last UC;
-            }
-          }
+	  $self->{global}->{$key}=commande_accessible(\@values);
           if(!$self->{global}->{$key}) {
             debug "No available command for option $key: using the first one";
             $self->{global}->{$key}=$values[0];
