@@ -3700,13 +3700,24 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % The command |\amc_num_digit_box:nn|\marg{i}\marg{j} draws a box for
 % current digit value \meta{i}, where \meta{j} is the correct value
-% for the current digit.
+% for the current digit. If \meta{i} is greater than 9, it is converted to
+% a character from the English alphabet (A for 10, B for 11...)
 %    \begin{macrocode}
+\int_new:N \amc_num_digit_value_int
+\tl_new:N \amc_num_digit_value_tl
 \cs_new:Npn \amc_num_digit_box:nn #1 #2 {
+  \int_set:Nn \amc_num_digit_value_int { #1 }
+  \tl_set:Nn \amc_num_digit_value_tl {
+    \int_compare:nNnTF { \amc_num_digit_value_int } < { 10 }
+    { \int_to_arabic:n { \amc_num_digit_value_int } }
+    { \int_to_Alph:n { \amc_num_digit_value_int - 9 } }
+  }
   \int_compare:nNnTF { #1 } = { #2 } {
-    \amc_num_char:nn{ #1 }{\AMC@checkedbox}
+    \amc_num_char:nn{ \tl_use:N \amc_num_digit_value_tl }
+                    {\AMC@checkedbox}
   } {
-    \amc_num_char:nn{ #1 }{}
+    \amc_num_char:nn{ \tl_use:N \amc_num_digit_value_tl }
+                    {}
   }
 }
 %    \end{macrocode}
