@@ -1649,7 +1649,7 @@ Duration : 10 minutes.
           </callout>
 
           <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
-            <para>The LaTeX command <command>AMCform</command> writes all the
+            <para>The LaTeX command <command>\AMCform</command> writes all the
             check-boxes.</para>
           </callout>
 
@@ -2245,11 +2245,11 @@ Duration : 10 minutes.
         </important>
 
         <para>Finally, the group content can be output to the test sheet using
-        command <command>insertgroup</command>, as in<programlisting>\insertgroup{mygroup}</programlisting></para>
+        command <command>\insertgroup</command>, as in<programlisting>\insertgroup{mygroup}</programlisting></para>
 
         <para>Group insertion can be controlled by the group mode, that can be
-        set by the <command>setgroupmode</command> command (called after group
-        creation, once for all, before <command>onecopy</command>):</para>
+        set by the <command>\setgroupmode</command> command (called after group
+        creation, once for all, before <command>\onecopy</command>):</para>
 
         <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
 
@@ -2295,7 +2295,7 @@ Duration : 10 minutes.
 
         <para>Note that a default group mode can be set for all groups that
         will be created next (a group is created at the first
-        <command>element</command> call), using the command</para>
+        <command>\element</command> call), using the command</para>
 
         <programlisting>\setdefaultgroupmode{XXX}</programlisting>
 
@@ -2303,10 +2303,10 @@ Duration : 10 minutes.
         used.</para>
 
         <para>Once a group is formed, it is possible to shuffle questions
-        inside this group using the <command>shufflegroup</command> command.
+        inside this group using the <command>\shufflegroup</command> command.
         For instance<programlisting>\shufflegroup{mygroup}</programlisting></para>
 
-        <para>However, the command <command>shufflegroup</command> can always
+        <para>However, the command <command>\shufflegroup</command> can always
         be replaced by a proper use of group modes.</para>
 
         <warning>
@@ -2350,7 +2350,7 @@ Duration : 10 minutes.
         questions from group GA at random, 5 questions from group GB at
         random, and all the questions from group GO, shuffling all these
         questions, with the following code (to be used inside the argument of
-        the command <command>onecopy</command>, and supposing that the group
+        the command <command>\onecopy</command>, and supposing that the group
         mode of groups <code>GA</code>, <code>GB</code> and <code>all</code>
         is <code>withoutreplacement</code> or
         <code>withreplacement</code>):</para>
@@ -2572,7 +2572,7 @@ Duration : 10 minutes.
         <title>Questions presentation style</title>
 
         <para>The way each question is presented can be modified by redefining
-        the LaTeX command <command>AMCbeginQuestion</command>, whose default
+        the LaTeX command <command>\AMCbeginQuestion</command>, whose default
         definition is the following:</para>
 
         <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
@@ -2646,11 +2646,19 @@ Holded~\begin{choicescustom}[o]\wrongchoice{R1~}\scoring{b=0,m=-8}\wrongchoice{R
 </programlisting>
 
 <itemizedlist>
-<listitem>the command <command> \def\AMCbeginQuestion ## 1 ## 2 {} </command> (combined with the use of the <option> reponsesperso </option> environment) allows AMC to write not "Question XX". </listitem>
- <listitem> <command>\def\AMCbeginAnswer {} \def \AMCendAnswer {} </command> also refine the result. </listitem>
- <listitem> <command>\AMCnoCompleteMulti </command> allows to  tell AMC not to add the answer "none of these answers is correct" despite the use of questionmult. </listitem>
- <listitem> <command>\AMCdontAnnotate </command> ask AMC not to annotate these boxes there. </listitem>
+<listitem><para>the command <command>\def\AMCbeginQuestion##1##2{}</command> (combined with the use of the <option> reponsesperso </option> environment) allows AMC to write not "Question XX".</para></listitem>
+ <listitem><para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command> also refine the result.</para></listitem>
+ <listitem><para><command>\AMCnoCompleteMulti</command> allows to  tell AMC not to add the answer "none of these answers is correct" despite the use of questionmult.</para></listitem>
+ <listitem><para><command>\AMCdontAnnotate</command> ask AMC not to annotate these boxes there.</para></listitem>
 </itemizedlist>
+
+        <important>
+          <para>Inside the commande <command>\onecopy</command>, double the
+          <code>#</code>.</para>
+
+          <programlisting>\def\AMCanswer##1##2{##1  ##2}
+\def\AMCbeginQuestion##1##2{}</programlisting>
+        </important>
 </sect5>
 
 
@@ -2666,14 +2674,6 @@ How is the identity function defined?
 </programlisting>
 
 </sect5>
-
-        <important>
-          <para>Inside the commande <command>\onecopy</command>, double the
-          <code>#</code>.</para>
-
-          <programlisting>\def\AMCanswer##1##2{##1  ##2}
-\def\AMCbeginQuestion##1##2{}</programlisting>
-        </important>
 		</sect4>
 
       <sect4 id="spacing">
@@ -2766,9 +2766,9 @@ How is the identity function defined?
           when hand written.
           </para>
 
-        <para >The command <command>\AMCformFilter {!\AMCifcategory {open}}</command>
+        <para >The command <command>\AMCformFilter{!\AMCifcategory{open}}</command>
         displays all questions except the open questions then the command
-        <command>\AMCformFilter {\AMCifcategory {open}}</command >
+        <command>\AMCformFilter{\AMCifcategory{open}}</command >
         displays only the open questions. Both commands must be used <emphasis> together</emphasis >.</para >
 
          <programlisting>
@@ -5642,14 +5642,14 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
         </listitem>
 
         <listitem>
-          <para>Write the subject before calling <command>onecopy</command>
+          <para>Write the subject before calling <command>\onecopy</command>
           command or outside <command>examcopy</command> environment.</para>
         </listitem>
 
         <listitem>
           <para>Use <command>\AMCformS</command> to output answer boxes in
           each answer sheet, inside
-          <command>onecopy</command>/<command>examcopy</command>.</para>
+          <command>\onecopy</command>/<command>examcopy</command>.</para>
         </listitem>
       </itemizedlist>
 
@@ -6015,7 +6015,7 @@ What is the return value of the following R code?
             </sect3>
 
           <sect3 id="UsevVerb">
-          <title><command>UseVerb</command> from <package>fancyvrb</package> package.</title>
+          <title><command>\UseVerb</command> from <package>fancyvrb</package> package.</title>
             <para><ulink url="https://www.ctan.org/pkg/verbatim"> https://www.ctan.org/pkg/verbatim</ulink>.</para>
 
             <para>You can also record some one-line verbatims with the <package>fancyvrb</package> package (define your verbatim outside, before  <command>\onecopy)</command>:</para>

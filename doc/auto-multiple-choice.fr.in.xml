@@ -2772,11 +2772,20 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
 </programlisting>
 
 <itemizedlist>
-<listitem>la commande <command>\def\AMCbeginQuestion##1##2{} </command>(combinée avec l'utilisation de l'environnement <option>reponsesperso</option>) permet qu'AMC n'écrive pas "Question XX".</listitem>
- <listitem><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command> permettent également d'épurer le résultat.</listitem>
- <listitem><command>\AMCnoCompleteMulti</command> permet de demander à AMC de ne pas rajouter la réponse "aucune de ces réponses n'est correcte" marlgré l'utilisation de questionmult.</listitem>
- <listitem><command>\AMCdontAnnotate</command> demandent à AMC de ne pas annoter ces cases là.</listitem>
+<listitem><para>la commande <command>\def\AMCbeginQuestion##1##2{} </command>(combinée avec l'utilisation de l'environnement <option>reponsesperso</option>) permet qu'AMC n'écrive pas "Question XX".</para></listitem>
+ <listitem><para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command> permettent également d'épurer le résultat.</para></listitem>
+ <listitem><para><command>\AMCnoCompleteMulti</command> permet de demander à AMC de ne pas rajouter la réponse "aucune de ces réponses n'est correcte" marlgré l'utilisation de questionmult.</para></listitem>
+ <listitem><para><command>\AMCdontAnnotate</command> demandent à AMC de ne pas annoter ces cases là.</para></listitem>
 </itemizedlist>
+
+        <important>
+          <para>Lorsque vous êtes à l'intérieur de la commande
+          <command>\exemplaire</command>, il faut doubler les
+          <code>#</code>.</para>
+
+          <programlisting>\def\AMCanswer##1##2{##1  ##2}
+\def\AMCbeginQuestion##1##2{}</programlisting>
+        </important>
 </sect5>
 
 <sect5 id="reponsesperso.exemple2">
@@ -2792,15 +2801,6 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
 
 </sect5>
 
-
-        <important>
-          <para>Lorsque vous êtes à l'intérieur de la commande
-          <command>\exemplaire</command>, il faut doubler les
-          <code>#</code>.</para>
-
-          <programlisting>\def\AMCanswer##1##2{##1  ##2}
-\def\AMCbeginQuestion##1##2{}</programlisting>
-        </important>
       </sect4>
 
 <sect4 id="espaces">
@@ -4703,8 +4703,8 @@ Nom et prénom :
 		      <para>En cliquant sur les numéros de pages, AMC entoure les cases
 		      réponses :
 		    <itemizedlist>
-  		   <listitem>en cyan pour les réponses vides ;</listitem>
-  		   <listitem>en jaune pour les réponses invalides ;</listitem>
+  		   <listitem><para>en cyan pour les réponses vides ;</para></listitem>
+  		   <listitem><para>en jaune pour les réponses invalides ;</para></listitem>
 		     </itemizedlist>
 		     </para>
 
@@ -4715,8 +4715,8 @@ Nom et prénom :
           <guimenuitem>Scan</guimenuitem>
           </menuchoice></para>
 
-          <emph><para>Il est possible de cibler une question précise
-          (voir <xref endterm="gui.capture.manual.focus.title" linkend="gui.capture.manual.focus"/>)</para></emph>
+          <para><emphasis>Il est possible de cibler une question précise
+          (voir <xref endterm="gui.capture.manual.focus.title" linkend="gui.capture.manual.focus"/>)</emphasis></para>
         </sect4>
 
         <sect4 id="gui.capture.manual.focus">
