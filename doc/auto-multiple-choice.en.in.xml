@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -62,7 +62,7 @@
     </author>
 
     <copyright>
-      <year>2008-2018</year>
+      <year>2008-2019</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -2607,8 +2607,13 @@ Duration : 10 minutes.
  \end{question}
 }
       </programlisting>
+
+      <para> <emphasis> In this example, the question number will not be displayed through
+      the command <command>\AMCquestionNumberfalse</command>. </emphasis> </para>
         </warning>
 
+        <sect4 id="choicescustom">
+                <title>Choices custom</title>
         <para>The display of answers can be modified in the same fashion, if
         one uses the <option>choicescustom</option> environment instead of
         <option>choices</option> or <option>choiceshoriz</option>, redefining
@@ -2619,6 +2624,49 @@ Duration : 10 minutes.
 \def\AMCanswer#1#2{#1 #2}
 </programlisting>
 
+<sect5 id="reponsesperso.exemple1">
+<title>Example 1</title>
+
+<para>
+The check boxes can be used to penalize students who delay their copy, for example
+ (8 points less for a small delay and 20 points less for an exaggerated delay).
+  It will be enough to include at the desired place (for example in the header, something like this):
+</para>
+<programlisting>\fcolorbox{black}{gray}{\insertDelay}</programlisting>
+<para>the command <command>\insertDelay</command> is defined outside from \onecopy :</para>
+<programlisting>
+\def\insertDelay{ %
+{\def\AMCbeginQuestion##1##2{}\AMCnobloc%
+ \begin{questionmult}{00delay}
+ \AMCnoCompleteMulti\AMCdontAnnotate%
+ \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
+Holded~\begin{choicescustom}[o]\wrongchoice{R1~}\scoring{b=0,m=-8}\wrongchoice{R2}\scoringb=0,m=-20}\end{choicescustom}%
+ \end{questionmult}}%
+}
+</programlisting>
+
+<itemizedlist>
+<listitem>the command <command> \def\AMCbeginQuestion ## 1 ## 2 {} </command> (combined with the use of the <option> reponsesperso </option> environment) allows AMC to write not "Question XX". </listitem>
+ <listitem> <command>\def\AMCbeginAnswer {} \def \AMCendAnswer {} </command> also refine the result. </listitem>
+ <listitem> <command>\AMCnoCompleteMulti </command> allows to  tell AMC not to add the answer "none of these answers is correct" despite the use of questionmult. </listitem>
+ <listitem> <command>\AMCdontAnnotate </command> ask AMC not to annotate these boxes there. </listitem>
+</itemizedlist>
+</sect5>
+
+
+<sect5 id="choicescustom.example2">
+<title>Use in mathematics</title>
+<programlisting>
+\begin{questionmultx}{formula}\scoring{mz=2}\AMCnoCompleteMulti
+How is the identity function defined?
+  \begin{choicescustom}[o]
+    \[f(x)=\correctchoice[$y$]{}\wrongchoice{[$x$]{}\correctchoice[$+$]{}\correctchoice[$x^2$]{}\]
+  \end{choicescustom}
+\end{questionmultx}
+</programlisting>
+
+</sect5>
+
         <important>
           <para>Inside the commande <command>\onecopy</command>, double the
           <code>#</code>.</para>
@@ -2626,7 +2674,10 @@ Duration : 10 minutes.
           <programlisting>\def\AMCanswer##1##2{##1  ##2}
 \def\AMCbeginQuestion##1##2{}</programlisting>
         </important>
+		</sect4>
 
+      <sect4 id="spacing">
+      <title>Spacing</title>
         <para>One can also change spacing redefining the following dimensions
         (here are the default values):</para>
 
@@ -2645,6 +2696,7 @@ Duration : 10 minutes.
         <option>box</option> package option) or standard mode (<code>I</code>)
         and the space left after an open question. The two last lengths are used
         in environment: <option>choicescustom</option></para>
+        </sect4>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -4012,25 +4064,6 @@ Name :
         </note>
       </sect3>
 
-      <sect3 id="latex.pstricks">
-        <title>Use PSTricks</title>
-
-        <para>Load this package <emphasis>after</emphasis>
-        <package>automultiplechoice</package>.</para>
-
-        <para>To use <command>PSTricks</command>, you have to configure AMC :
-        <menuchoice>
-            <guimenu>Edit</guimenu>
-
-            <guimenuitem>Preferences</guimenuitem>
-
-            <guimenuitem>Main</guimenuitem>
-
-            <guimenuitem>Default LaTex engine</guimenuitem>
-
-            <guimenuitem>latex+dvipdf</guimenuitem>
-          </menuchoice></para>
-      </sect3>
     </sect2>
   </sect1>
 
@@ -4434,7 +4467,7 @@ Name :
         <command>questionmult</command>, to set it for every response, but
         also in the environment <command>choices</command>, to give scaling
         indications about a single response. The argument of the LaTeX command
-        scoring is made of indications like
+        <command>scoring</command> is made of indications like
         <code><replaceable>parameter</replaceable>=<replaceable>value</replaceable></code>,
         separated by comas. The usable parameters are the following (the table
         shows also in which context those parameters can be used):</para>
@@ -5917,6 +5950,141 @@ Moniuszko,Stanisław,003</programlisting>
       </itemizedlist>
     </sect2>
   </sect1>
+
+<sect1 id="conflits">
+  <title>Conflicts with other packages</title>
+
+       <sect2 id="packages">
+         <title>Packages to load after automultiplchoice</title>
+
+        <para>You must load the following packages  <emphasis>after</emphasis>
+        <package>automultiplechoice</package> : fancyvrb, fancybox, pstricks.</para>
+
+        <para>To use <command>PSTricks</command>, you have to configure AMC :
+        <menuchoice>
+            <guimenu>Edit</guimenu>
+
+            <guimenuitem>Preferences</guimenuitem>
+
+            <guimenuitem>Main</guimenuitem>
+
+            <guimenuitem>Default LaTex engine</guimenuitem>
+
+            <guimenuitem>latex+dvipdf</guimenuitem>
+          </menuchoice></para>
+      </sect2>
+
+        <sect2 id="verbatim">
+          <title><package>verbatim</package></title>
+          <para>From wiki <ulink url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
+          https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
+
+          <para>The <package>verbatim</package> environment interferes with AMC LaTeX package,
+          so that it is impossible to use it inside <command>question</command> or <command>questionmult</command>
+          environments... As an example, the following code won't compile:</para>
+
+          <programlisting>
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{verbatim}
+sum(sapply(1:2^2,function(x) { x/2 }))
+\end{verbatim}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+          </programlisting>
+            <sect3>
+            <title>Escaping</title>
+            <para>For very small texts, it is possible to escape all characters that have a special meaning for LaTeX. However, this can become quickly tedious.</para>
+<programlisting>
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{center}
+\texttt{sum(sapply(1:2\textasciicircum 2,function(x) \{ x/2 \}))}
+\end{center}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+</programlisting>
+            </sect3>
+
+          <sect3 id="UsevVerb">
+          <title><command>UseVerb</command> from <package>fancyvrb</package> package.</title>
+            <para><ulink url="https://www.ctan.org/pkg/verbatim"> https://www.ctan.org/pkg/verbatim</ulink>.</para>
+
+            <para>You can also record some one-line verbatims with the <package>fancyvrb</package> package (define your verbatim outside, before  <command>\onecopy)</command>:</para>
+          <programlisting>
+\SaveVerb{theRcode}'sum(sapply(1:2^2,function(x) { x/2 }))'
+...
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{center}
+\UseVerb{theRcode}
+\end{center}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+          </programlisting>
+          </sect3>
+
+          <sect3 id="verbatimbox">
+            <title><package>verbatimbox</package> package</title>
+            <para>For larger verbatims, the <package>verbatimbox </package>package can help you (define your verbatim outside, before  <command>\onecopy)</command>:</para>
+  <programlisting>
+\begin{myverbbox}{\Rcode}
+sum(sapply(1:2^2,function(x) { x/2 }))
+\end{myverbbox}
+...
+
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{center}
+\Rcode
+\end{center}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+  </programlisting>
+            </sect3>
+
+          <sect3 id="import">
+          <title>Import external files</title>
+            <para>Reading the verbatim from a separate file often helps. As an example, for a syntax highlighted
+          python code stored in a file named <code>prog.py</code> in the project directory, you can use</para>
+            <sect4 id="listings">
+            <title><package>listings</package> package</title>
+
+<programlisting>
+\lstset{language=Python}
+\lstinputlisting{prog.py}
+</programlisting>
+            </sect4>
+
+            <sect4 id="minted">
+            <title><package>minted</package> package</title>
+
+<programlisting>
+ \inputminted{python}{prog.py}
+</programlisting>
+            </sect4>
+
+            </sect3>
+            </sect2>
+
+
+</sect1>
 
   <sect1 id="commands">
     <title>Commands manual</title>
@@ -8556,7 +8724,7 @@ password <emphasis>your_password</emphasis>
            <para>add the following content to msmtprc file and save it. </para>
 
  <programlisting>
-account gmail
+account default
 host smtp.gmail.com
 tls on
 tls_certcheck off
@@ -8566,6 +8734,13 @@ from <emphasis>your_user_name@gmail.com</emphasis>
 user <emphasis>your_user_name@gmail.com</emphasis>
 password <emphasis>your_password</emphasis>
 </programlisting>
+
+        <para>Modify the access rights: </para>
+
+  <programlisting>
+sudo chown <emphasis>user_name</emphasis>:<emphasis>user_name</emphasis>/Users/<emphasis>user_name</emphasis>/.msmtprc
+chmod 0600 /Users/<emphasis>user_name</emphasis>/.msmtprc
+  </programlisting>
 
         <para>
           Set up AMC : <menuchoice>

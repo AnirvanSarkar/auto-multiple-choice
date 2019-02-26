@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -48,7 +48,7 @@
     </othercredit>
 
     <copyright>
-      <year>2008-2018</year>
+      <year>2008-2019</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -2013,6 +2013,13 @@ Durée : 10 minutes.
           linkend="latex.codes"/>).</para>
         </important>
 
+        <warning>
+       <para>Quand on utilise <package>babel</package> et l'option
+       <option>french</option>, ne pas mettre de <parameter>:</parameter>
+       ni <parameter>;</parameter> dans les identifiants de questions.
+       </para>
+        </warning>
+
         <note>
           <para>Le nombre de réponses pour une question est actuellement
           limité à 199.</para>
@@ -2726,16 +2733,65 @@ Durée : 10 minutes.
    \end{reponseshoriz}
  \end{question}
 }</programlisting>
+
+        <para><emphasis>Dans cet exemple, le numéro de la question ne sera pas affiché
+        via la commande <command>\AMCquestionNumberfalse</command>.</emphasis></para>
         </warning>
 
+        <sect4 id="reponsesperso">
+          <title>Environnement <option>reponsesperso</option></title>
         <para>La présentation des réponses peut être modifiée de la même
         façon, si on utilise l'environnement <option>reponsesperso</option> au
         lieu de <option>reponses</option> ou <option>reponseshoriz</option>,
         en redéfinissant les trois macros LaTeX suivantes :</para>
 
+
         <programlisting>\def\AMCbeginAnswer{}
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}</programlisting>
+
+<sect5 id="reponsesperso.exemple1">
+<title>Exemple 1</title>
+
+<para>
+On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur copie en retard,
+ par exemple (8 points en moins pour un petit retard, et 20 points en moins pour un retard exagéré).
+  Il suffira d'inclure à l'endroit désiré (par exemple dans l'en-tête quelque chose comme ça (ici je demande un fond gris) :
+</para>
+<programlisting>\fcolorbox{black}{gray}{\insertRetard}</programlisting>
+<para>où la commande <command>\insertRetard</command> a été définie en-dehors de \exemplaire :</para>
+<programlisting>
+\def\insertRetard{ %
+{\def\AMCbeginQuestion##1##2{}\AMCnobloc%
+ \begin{questionmult}{00retard}
+ \AMCnoCompleteMulti\AMCdontAnnotate%
+ \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
+ Réservé~\begin{reponsesperso}[o]\mauvaise{R1~}\bareme{b=0,m=-8}\mauvaise{R2}\bareme{b=0,m=-20}\end{reponsesperso}%
+ \end{questionmult}}%
+}
+</programlisting>
+
+<itemizedlist>
+<listitem>la commande <command>\def\AMCbeginQuestion##1##2{} </command>(combinée avec l'utilisation de l'environnement <option>reponsesperso</option>) permet qu'AMC n'écrive pas "Question XX".</listitem>
+ <listitem><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command> permettent également d'épurer le résultat.</listitem>
+ <listitem><command>\AMCnoCompleteMulti</command> permet de demander à AMC de ne pas rajouter la réponse "aucune de ces réponses n'est correcte" marlgré l'utilisation de questionmult.</listitem>
+ <listitem><command>\AMCdontAnnotate</command> demandent à AMC de ne pas annoter ces cases là.</listitem>
+</itemizedlist>
+</sect5>
+
+<sect5 id="reponsesperso.exemple2">
+<title>Utilisation en mathématiques</title>
+<programlisting>
+\begin{questionmultx}{formule}\bareme{mz=2}\AMCnoCompleteMulti
+  Comment est définie la fonction identité ?
+  \begin{reponsesperso}[o]
+    \[f(x)=\bonne[$y$]{}\mauvaise[$x$]{}\bonne[$+$]{}\bonne[$x^2$]{}\]
+  \end{reponsesperso}
+\end{questionmultx}
+</programlisting>
+
+</sect5>
+
 
         <important>
           <para>Lorsque vous êtes à l'intérieur de la commande
@@ -2745,7 +2801,10 @@ Durée : 10 minutes.
           <programlisting>\def\AMCanswer##1##2{##1  ##2}
 \def\AMCbeginQuestion##1##2{}</programlisting>
         </important>
+      </sect4>
 
+<sect4 id="espaces">
+<title>Espaces</title>
         <para>Certains espacements peuvent également être modifiés :</para>
 
         <programlisting>\AMCinterIrep=0pt
@@ -2763,6 +2822,7 @@ Durée : 10 minutes.
         <option>bloc</option>) ou standard (<code>I</code>), l'espace après
         une question ouverte. Les deux dernières longueurs sont utilisées pour
         l’environnement <option>reponsesperso</option>.</para>
+        </sect4>
       </sect3>
 
       <sect3 id="latex.layout">
@@ -4237,39 +4297,6 @@ Nom et prénom :
           linkend="latex.numeric"/>)</para>
         </note>
       </sect3>
-
-      <sect3 id="latex.pstricks">
-        <title>Utilisation de PSTricks</title>
-
-        <para>Vous devez déclarer ce paquet <emphasis>après</emphasis>
-        <package>automultiplechoice</package>.</para>
-
-        <para>Pour utiliser <command>PSTricks</command>, vous devez configurer
-        AMC : <menuchoice>
-            <guimenu>Édition</guimenu>
-
-            <guimenuitem>Préférences</guimenuitem>
-
-            <guimenuitem>Général</guimenuitem>
-
-            <guimenuitem>Moteur Latex par défaut</guimenuitem>
-
-            <guimenuitem>latex+dvipdf</guimenuitem>
-          </menuchoice> <note>
-            <para>Si vous utilisez Texmaker pour préparer vos documents, il
-            faut également le configurer :</para>
-
-            <para><menuchoice>
-                <guimenu>Options</guimenu>
-
-                <guimenuitem>Configurer Texmaker</guimenuitem>
-
-                <guimenuitem>Compil rapide</guimenuitem>
-
-                <guimenuitem>Latex + dvips + ps2pdf + voir PDF</guimenuitem>
-              </menuchoice></para>
-          </note></para>
-      </sect3>
     </sect2>
   </sect1>
 
@@ -4665,31 +4692,31 @@ Nom et prénom :
         entrer nous-même les cases qui ont été cochées (en cliquant dessus)
         sur les pages désirées.</para>
 
-        <warning>
+        <note>
           <para>Toute saisie manuelle effectuée sur une page prendra la place
           des résultats éventuels d'une saisie automatique pour cette même
           page.</para>
-        </warning>
+        </note>
 
         <sect4 id="gui.capture.manual.color">
-          <title>Visualisation des questions vides ou invalides</title>
-	  <para>En cliquant sur les numéros de pages, AMC entoure les cases
-	  réponses :
-	  <itemizedlist>
-            <listitem><para>en cyan pour les réponses vides ;</para></listitem>
-            <listitem><para>en jaune pour les réponses invalides.</para></listitem>
-	  </itemizedlist>
-	  </para>
+    		 <title>Visualisation des questions vides ou invalides</title>
+		      <para>En cliquant sur les numéros de pages, AMC entoure les cases
+		      réponses :
+		    <itemizedlist>
+  		   <listitem>en cyan pour les réponses vides ;</listitem>
+  		   <listitem>en jaune pour les réponses invalides ;</listitem>
+		     </itemizedlist>
+		     </para>
 
-	  <para>Ces couleurs peuvent être changées dans les préférences d'AMC :
-	  <menuchoice>
-            <guimenu>Préférences</guimenu>
-            <guisubmenu>Affichage</guisubmenu>
-            <guimenuitem>Scan</guimenuitem>
+		     <para>Ces couleurs peuvent être changées dans les préférences d'AMC :
+		     <menuchoice>
+          <guimenu>Préférences</guimenu>
+          <guisubmenu>Affichage</guisubmenu>
+          <guimenuitem>Scan</guimenuitem>
           </menuchoice></para>
 
-          <para>Il est possible de cibler une question précise
-          (voir <xref endterm="gui.capture.manual.focus.title" linkend="gui.capture.manual.focus"/>)</para>
+          <emph><para>Il est possible de cibler une question précise
+          (voir <xref endterm="gui.capture.manual.focus.title" linkend="gui.capture.manual.focus"/>)</para></emph>
         </sect4>
 
         <sect4 id="gui.capture.manual.focus">
@@ -4727,7 +4754,6 @@ Nom et prénom :
            </itemizedlist>
           </sect5>
          </sect4>
-
       </sect3>
     </sect2>
 
@@ -6460,6 +6486,139 @@ Nom et prénom :
     </sect2>
   </sect1>
 
+<sect1 id="conflits">
+  <title>Conflits avec d'autres paquets</title>
+
+       <sect2 id="paquets">
+         <title>Paquets à déclarer après automultiplchoice</title>
+
+        <para>Vous devez déclarer ces paquets <emphasis>après</emphasis>
+        <package>automultiplechoice</package> : fancyvrb, fancybox, pstricks.</para>
+
+        <para>Pour utiliser <command>pstricks</command>, vous devez configurer
+        AMC : <menuchoice>
+            <guimenu>Édition</guimenu>
+
+            <guimenuitem>Préférences</guimenuitem>
+
+            <guimenuitem>Général</guimenuitem>
+
+            <guimenuitem>Moteur Latex par défaut</guimenuitem>
+
+            <guimenuitem>latex+dvipdf</guimenuitem>
+          </menuchoice> </para>
+      </sect2>
+
+        <sect2 id="verbatim">
+          <title><package>verbatim</package></title>
+          <para>Issue du wiki <ulink url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
+          https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
+
+          <para>Le paquet <package>verbatim</package> perturbe AMC et il devient impossible
+          de l'utiliser dans les environnements <command>question</command> ou
+          <command>questionmult</command>. Cet exemple ne compile pas.</para>
+          <programlisting>
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{verbatim}
+sum(sapply(1:2^2,function(x) { x/2 }))
+\end{verbatim}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+          </programlisting>
+            <sect3>
+            <title>Accolades explicites</title>
+            <para>Pour les textes court, encadrer celui-ci dans une commande particulière (ici, texte en italique).</para>
+<programlisting>
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{center}
+\texttt{sum(sapply(1:2\textasciicircum 2,function(x) \{ x/2 \}))}
+\end{center}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+</programlisting>
+            </sect3>
+
+          <sect3 id="UsevVerb">
+          <title><command>UseVerb</command> du paquet <package>fancyvrb</package></title>
+            <para><ulink url="https://www.ctan.org/pkg/verbatim"> https://www.ctan.org/pkg/verbatim</ulink>.</para>
+            <para>Enregistrez le <emphasis>verbatim</emphasis> dans une commande avant <command>\exemplaire</command></para>
+          <programlisting>
+\SaveVerb{theRcode}'sum(sapply(1:2^2,function(x) { x/2 }))'
+...
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{center}
+\UseVerb{theRcode}
+\end{center}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+          </programlisting>
+          </sect3>
+
+          <sect3 id="verbatimbox">
+            <title>Paquet <package>verbatimbox</package></title>
+            <para>Pour des textes plus longs, enregistrez le <emphasis>verbatim</emphasis> dans un environnement
+            <command>myverbbox</command> avant <command>\exemplaire</command></para>
+  <programlisting>
+\begin{myverbbox}{\Rcode}
+sum(sapply(1:2^2,function(x) { x/2 }))
+\end{myverbbox}
+...
+
+\begin{question}{program}
+What is the return value of the following R code?
+\begin{center}
+\Rcode
+\end{center}
+\begin{choices}[o]
+\wrongchoice{2.5}
+\correctchoice{5}
+\wrongchoice{NaN}
+\end{choices}
+\end{question}
+  </programlisting>
+            </sect3>
+
+          <sect3 id="import">
+          <title>Import de fichiers externes</title>
+            <para><code>prog.py</code> est un fichier copié dans le répertoire du projet.</para>
+            <sect4 id="listings">
+            <title>Paquet <package>listings</package></title>
+
+<programlisting>
+\lstset{language=Python}
+\lstinputlisting{prog.py}
+</programlisting>
+            </sect4>
+
+            <sect4 id="minted">
+            <title>Paquet <package>minted</package></title>
+
+<programlisting>
+ \inputminted{python}{prog.py}
+</programlisting>
+            </sect4>
+
+            </sect3>
+            </sect2>
+
+
+</sect1>
+
   <sect1 id="commandes">
     <title>Manuel des commandes</title>
 
@@ -6665,7 +6824,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
          <para>et copiez le texte suivant puis enregistrez le fichier. </para>
 
  <programlisting>
-account gmail
+account default
 host smtp.gmail.com
 tls on
 tls_certcheck off
@@ -6675,6 +6834,13 @@ from <emphasis>votre adresse mail du compte gmail</emphasis>
 user <emphasis>votre adresse mail du compte gmail</emphasis>
 password <emphasis>votre mot de passe du compte gmail</emphasis>
 </programlisting>
+
+        <para>Modifiez les droits d'accès : </para>
+
+  <programlisting>
+sudo chown <emphasis>nom_utilisateur</emphasis>:<emphasis>nom_utilisateur</emphasis>/Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
+chmod 0600 /Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
+  </programlisting>
 
           <para>
           Dans les préférences de AMC : <menuchoice>
