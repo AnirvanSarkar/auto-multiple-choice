@@ -163,6 +163,8 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@inside@digittrue}
 % \DoNotIndex{\AMC@invisiblefalse}
 % \DoNotIndex{\AMC@invisibletrue}
+% \DoNotIndex{\AMC@keyslinefalse}
+% \DoNotIndex{\AMC@keyslinetrue}
 % \DoNotIndex{\AMC@ordrefalse}
 % \DoNotIndex{\AMC@ordretrue}
 % \DoNotIndex{\AMC@outside@boxfalse}
@@ -424,10 +426,18 @@ along with Auto-Multiple-Choice.  If not, see
 % markers in the |.xy| file. Without this option, a \LaTeX{} run
 % updates the document but not the |.xy| file.
 %
-% \ioption{nowatermark} calcels the ``DRAFT'' indications above pages.
+% \ioption{nowatermark} cancels the ``DRAFT'' indications above pages.
 %
 % \ioption{catalog} is used for formatting a catalog of questions, not
-% an exam. Then the questions identifiers will be printed.
+% an exam. Then the question identifiers will be printed.
+%
+% \ioption{keys} defines the way the question identifiers will be printed
+% on the catalog file. With
+% |keys=next| (the default), the question identifiers will be
+% printed next to the questions numbers. With |keys=line|, the
+% question identifiers will be printed on one line before the question
+% text, so that the question will look close to the final result on
+% the exam copies.
 %
 % \ioption{francais} asks for french localisation.
 %
@@ -1227,6 +1237,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % \item |\ifAMC@correchead| if some correction header is to be printed
 %   at the beginning.
 % \item |\ifAMC@affichekeys| if questions keys are to be printed.
+% \item |\ifAMC@keysline| if questions keys should be printed on a
+%   single line before the question text.
 % \item |\ifAMC@correc| if correct choices are to be checked on the
 %   produced document.
 % \item |\ifAMC@qbloc| if questions are to be included in \LaTeX{}
@@ -1289,6 +1301,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@fullGroups\AMC@fullGroupsfalse
 \newif\ifAMC@correchead\AMC@correcheadfalse
 \newif\ifAMC@affichekeys\AMC@affichekeysfalse
+\newif\ifAMC@keysline\AMC@keyslinefalse
 \newif\ifAMC@correc\AMC@correcfalse
 \newif\ifAMC@qbloc\AMC@qblocfalse
 \newif\ifAMC@asqbloc\AMC@asqblocfalse
@@ -3198,8 +3211,8 @@ Three digits and two letters:\insertgroup{mixed}.
     \csname\AMC@sz@callout\endcsname%
   \fi%
   \AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
-  \ifAMC@affichekeys\index{\texttt{#2}}\fi%
-  \AMCbeginQuestion{\ifAMC@affichekeys\ifAMC@ensemble\AMC@qaff\ \fi[\texttt{#2}]\else\AMC@qaff\fi}{#1}%
+  \ifAMC@affichekeys\index{\texttt{#2}}\ifAMC@keysline[\texttt{#2}]\newline\fi\fi%
+  \AMCbeginQuestion{\ifAMC@affichekeys\ifAMC@ensemble\AMC@qaff\ \fi\ifAMC@keysline\else[\texttt{#2}]\fi\else\AMC@qaff\fi}{#1}%
   \ifx\@empty\AMC@sz@callin\@empty\else%
     \csname\AMC@sz@callin\endcsname%
   \fi%
@@ -4669,7 +4682,10 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMC@correctrue\AMC@ordretrue\AMC@shuffleGfalse%
   \AMC@fullGroupstrue%
   \def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue}
+\newcommand\AMC@keys@next{\AMC@keyslinefalse}
+\newcommand\AMC@keys@line{\AMC@keyslinetrue}
 \DeclareOptionX{catalog}{\AMC@catalogMode}
+\DeclareOptionX{keys}[next]{\csname AMC@keys@#1\endcsname{}}
 \DeclareOptionX{francais}{\def\AMC@lang@code{FR}\AMC@loc@FR}
 \DeclareOptionX{lang}{\def\AMC@lang@code{#1}\csname AMC@loc@#1\endcsname}
 \DeclareOptionX{versionA}{%
