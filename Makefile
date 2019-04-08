@@ -315,7 +315,7 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/auto-multiple-choice.svgz
+	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz $(foreach SIZE, $(APPICONSIZES), $(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
 	-sudo rm -r /usr/lib/AMC
 
 local: global
@@ -338,7 +338,12 @@ local: global
 	sudo ln -s $(LOCALDIR)/$(STY) $(TEXDIR)/automultiplechoice.sty
 	sudo ln -s $(LOCALDIR)/interfaces/amc-txt.lang $(LANG_GTKSOURCEVIEW_DIR)
 	sudo ln -s $(LOCALDIR)/interfaces/auto-multiple-choice.xml $(SHARED_MIMEINFO_DIR)
-	sudo ln -s $(LOCALDIR)/$(MAIN_LOGO).svgz $(APPICONDIR)
+ifneq ($(APPICONDIR),)
+	sudo ln -s $(LOCALDIR)/$(MAIN_LOGO).svgz $(APPICONDIR)/scalable/apps
+	$(foreach SIZE, $(APPICONSIZES),\
+	sudo ln -s $(LOCALDIR)/$(MAIN_LOGO)-$(SIZE).png $(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png ; \
+	)
+endif
 
 ifdef DEBSIGN_KEY
 DEBSIGN=-k$(DEBSIGN_KEY)
