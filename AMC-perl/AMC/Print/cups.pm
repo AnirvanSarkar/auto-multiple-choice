@@ -81,7 +81,7 @@ sub weight {
 sub printers_list {
   my ($self)=@_;
   return(map { {name=>$_->getName(),
-		  description=>$_->getDescription()||$_->getName()} }
+		  description=>$_->getDescription() } }
 	 ($self->{cups}->getDestinations()));
 }
 

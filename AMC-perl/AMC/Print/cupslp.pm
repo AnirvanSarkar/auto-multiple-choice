@@ -58,11 +58,11 @@ sub weight {
 sub printers_list {
   my ($self)=@_;
   my @list=();
-  open(PL,"-|","lpstat","-a")
+  open(PL,"-|","lpstat","-e")
     or die "Can't exec lpstat: $!";
   while(<PL>) {
-    push @list,{name=>$1,description=>$1}
-      if(/^([^\s]+)\s+accept/);
+    chomp;
+    push @list,{name=>$_,description=>""};
   }
   close PL;
   return(@list);

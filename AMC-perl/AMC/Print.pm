@@ -147,4 +147,13 @@ sub print_file {
   my ($self,$filename)=@_;
 }
 
+# PRINTER DISPLAY NAME
+
+sub printer_text {
+  my ($self, $printer) = @_;
+  my $t = $printer->{name};
+  $t .= " (" . $printer->{description} . ")" if($printer->{description});
+  return($t);
+}
+
 1;
