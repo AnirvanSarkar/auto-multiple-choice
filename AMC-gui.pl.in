@@ -6977,16 +6977,16 @@ if("@/LATEX_FREE/@" =~ /(1|true|yes)/i) {
 
 my $css=Gtk3::CssProvider->new();
 $css->load_from_data('
-infobar.info, infobar.info button {
-    background-color: #29A10F;
+infobar.info, infobar.info box, infobar.info button {
+    background-color: @success_color;
     background-image: none;
 }
-infobar.warning, infobar.warning button {
-    background-color: #CD5600;
+infobar.warning, infobar.warning box, infobar.warning button {
+    background-color: @warning_color;
     background-image: none;
 }
-infobar.error, infobar.error button {
-    background-color: #CD0500;
+infobar.error, infobar.error box, infobar.error button {
+    background-color: @error_color;
     background-image: none;
 }
 ');
