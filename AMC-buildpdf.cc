@@ -57,7 +57,7 @@ int main(int argc, char** argv )
   g_type_init ();
 #endif
 
-  char ch;
+  int ch;
   while ((ch = getopt(argc, argv, "d:h:w:l:")) != -1) {
     switch(ch) {
     case 'd': dppt = atof(optarg) / 72.0; break;

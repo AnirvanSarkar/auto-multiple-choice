@@ -1073,7 +1073,7 @@ int main(int argc, char** argv)
   // -o file : gives output file name for detected layout report image
   // -v / -P : asks for marks detection debugging image report
 
-  char c;
+  int c;
   while ((c = getopt(argc, argv, "x:y:d:i:p:m:t:c:o:vPrk")) != -1) {
     switch (c) {
     case 'x': taille_orig_x = atof(optarg); break;
