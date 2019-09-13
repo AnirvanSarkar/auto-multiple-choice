@@ -56,6 +56,12 @@
   #endif
 #endif
 
+#ifdef OPENCV_30
+  #define OPENCV_USE_LINETYPE cv::LINE_AA
+#else
+  #define OPENCV_USE_LINETYPE 8
+#endif
+
 #include "opencv2/imgproc/imgproc.hpp"
 #ifdef OPENCV_30
   #include "opencv2/imgcodecs/imgcodecs.hpp"
@@ -520,14 +526,22 @@ void calage(cv::Mat src, cv::Mat illustr,
                  1 + (int)((target_min+target_max)/2 /20),
                  1 + (int)((target_min+target_max)/2 /8));
 
+#ifdef OPENCV_21
   if(view == 2) {
     /* prepares *dst from a copy of the scan (after pre-processing). */
-    dst = cv::Mat(cv::Size(src.rows, src.cols), CV_MAKETYPE(CV_8U, 3));
+    dst = cv::Mat(cv::Size(src.cols, src.rows),
+		  CV_MAKETYPE(CV_8U, 3));
 
-    // cvConvertImage(src, *dst) is not needed anymore as 'src' and 'dst' have
-    // the same type.
-    cv::bitwise_not(dst,dst);
+    cv::cvtColor(src, dst, cv::COLOR_GRAY2RGB);
+    cv::bitwise_not(dst, dst);
   }
+  if(view == 1) {
+    /* prepares *dst as a white image with same size as the scan. */
+    dst = cv::Mat::zeros(cv::Size(src.cols, src.rows),
+			 CV_MAKETYPE(CV_8U, 3));
+  }
+#endif
+
 
   printf("Target size: %.1f ; %.1f\n", target_min, target_max);
 
@@ -537,13 +551,6 @@ void calage(cv::Mat src, cv::Mat illustr,
   vector<vector<cv::Point> > contours;
   vector<cv::Vec4i> hierarchy; // unused; but could be used in drawContours
   cv::findContours(src, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
-
-#ifdef OPENCV_21
-  if(view == 1) {
-    /* prepares *dst as a white image with same size as the scan. */
-    dst = cv::Mat::zeros(cv::Size(src.rows, src.cols), CV_MAKETYPE(src.depth(), 3));
-  }
-#endif
 
   /* 3) returns the result, and draws reports */
 
@@ -575,16 +582,16 @@ void calage(cv::Mat src, cv::Mat illustr,
           with a random color. */
         cv::Scalar color = RGB_COLOR(rand() & 255, rand() & 255, rand() & 255);
         cv::rectangle(dst, cv::Point(rect.x,rect.y), cv::Point(rect.x+rect.width,rect.y+rect.height), color);
-        cv::drawContours(dst, contours, i, color, cv::FILLED);
-      }
-#endif
+        cv::drawContours(dst, contours, i, color, 2, OPENCV_USE_LINETYPE);
+     }
      if(view==2) {
        /* draws the connected component, and the enclosing rectangle,
           in green. */
         cv::Scalar color = RGB_COLOR(60,198,127);
         cv::rectangle(dst, cv::Point(rect.x,rect.y), cv::Point(rect.x+rect.width,rect.y+rect.height), color);
-        cv::drawContours(dst, contours, i, color, cv::FILLED);
+        cv::drawContours(dst, contours, i, color, 2, OPENCV_USE_LINETYPE);
      }
+#endif
     }
   }
 
@@ -601,25 +608,25 @@ void calage(cv::Mat src, cv::Mat illustr,
       printf("Frame[%d]: %.1f ; %.1f\n", i, coins_x[i], coins_y[i]);
     }
 
-    if(view==1) {
 #ifdef OPENCV_21
+    if(view==1) {
       /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i = 0; i < 4; i++) {
-        cv::line(dst, coins_int[i], coins_int[(i+1)%4], RGB_COLOR(255,255,255), 1, cv::LINE_AA);
+        cv::line(dst, coins_int[i], coins_int[(i+1)%4], RGB_COLOR(255,255,255), 1, OPENCV_USE_LINETYPE);
       }
-#endif
     }
     if(view==2) {
       /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i = 0; i < 4; i++) {
-        cv::line(dst, coins_int[i], coins_int[(i+1)%4], RGB_COLOR(193,29,27), 1, cv::LINE_AA);
+        cv::line(dst, coins_int[i], coins_int[(i+1)%4], RGB_COLOR(193,29,27), 1, OPENCV_USE_LINETYPE);
       }
     }
+#endif
 
     if(illustr.data!=NULL) {
       /* draws a rectangle to see the corner marks positions on the scan. */
       for(int i = 0; i < 4; i++) {
-        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, cv::LINE_AA);
+        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, OPENCV_USE_LINETYPE);
       }
     }
   } else {
@@ -813,7 +820,7 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
     if(illustr_mode == ILLUSTR_BOX) {
       /* draws the box on the illustrated image (for zoom) */
       for(int i = 0; i < 4; i++) {
-        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, cv::LINE_AA);
+        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], BLEU, 1, OPENCV_USE_LINETYPE);
       }
     }
 
@@ -959,7 +966,7 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
 #ifdef OPENCV_21
   if(view == 1) {
     for(int i = 0; i < 4; i++) {
-      cv::line(dst, coins_int[i], coins_int[(i+1)%4], RGB_COLOR(255,255,255), 1, cv::LINE_AA);
+      cv::line(dst, coins_int[i], coins_int[(i+1)%4], RGB_COLOR(255,255,255), 1, OPENCV_USE_LINETYPE);
     }
   }
 #endif
@@ -968,7 +975,7 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
     if(illustr_mode == ILLUSTR_BOX) {
       /* draws the measuring box on the illustrated image (for zoom) */
       for(int i = 0; i < 4; i++) {
-        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], ROSE, 1, cv::LINE_AA);
+        cv::line(illustr, coins_int[i], coins_int[(i+1)%4], ROSE, 1, OPENCV_USE_LINETYPE);
       }
     }
 
@@ -1298,7 +1305,7 @@ int main(int argc, char** argv)
         fh = src.rows / 50.0;
         textpos.x = 10;
         textpos.y = (int)(1.6 * fh);
-        cv::putText(illustr, text, textpos, cv::FONT_HERSHEY_PLAIN, fh/14, BLEU, 1+(int)(fh/20), cv::LINE_AA);
+        cv::putText(illustr, text, textpos, cv::FONT_HERSHEY_PLAIN, fh/14, BLEU, 1+(int)(fh/20), OPENCV_USE_LINETYPE);
       } else {
         printf(": %s\n", commande);
         printf("! SYNERR : Syntax error\n");
