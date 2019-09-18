@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -26,6 +26,7 @@ use AMC::DataModule::capture qw(:zone);
 use AMC::DataModule::scoring qw(:question);
 use AMC::Scoring;
 use AMC::NamesFile;
+use AMC::Queue;
 
 use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
@@ -40,6 +41,8 @@ use DBI;
 use IPC::Run qw(run);
 
 use Getopt::Long;
+
+use utf8;
 
 use_gettext;
 
@@ -98,6 +101,10 @@ sub new {
      'extract_with'=>'qpdf',
      'force_convert'=>0,
      'documents'=>'sc',
+     'speed'=>0,
+     'full_scans'=>'',
+     'full_density'=>300,
+     'tmpdir'=>'',
     };
 
   for (keys %oo) {
@@ -133,18 +140,23 @@ sub new {
              "log-to=s"=>\$self->{debug_file},
              "to-stdout!"=>\$to_stdout,
              "extract-with=s"=>\$self->{extract_with},
+	     "tmp=s"=>\$self->{tmpdir},
             );
+
+  $self->{tmpdir} = tmpdir() if(!$self->{tmpdir});
 
   $self->{tracedest} = 'STDOUT' if($to_stdout);
   binmode $self->{tracedest}, ":utf8";
 
   $self->install;
 
-  $self->{'check_dir'}=tmpdir()."/AMC-VISUAL-TEST";
+  $self->{'check_dir'}=$self->{tmpdir}."/AMC-VISUAL-TEST";
   mkdir($self->{'check_dir'}) if(!-d $self->{'check_dir'});
 
   $self->read_checksums($self->{'ok_checksums_file'});
   $self->read_checksums($self->{'dir'}.'/ok-checksums');
+
+  require Time::HiRes if($self->{speed});
 
   return $self;
 }
@@ -178,7 +190,7 @@ sub read_checksums {
 sub install {
   my ($self)=@_;
 
-  my $temp_loc=tmpdir();
+  my $temp_loc = $self->{tmpdir};
   $self->{'temp_dir'} = tempdir( DIR=>$temp_loc,
 				 CLEANUP => (!$self->{'debug'}) );
 
@@ -212,6 +224,25 @@ sub install {
   open(DB,">",$self->{'debug_file'});
   print DB "Test\n";
   close(DB);
+}
+
+sub start_clock {
+  my ($self) = @_;
+  return if(!$self->{speed});
+
+  $self->{start} = [times];
+  $self->{start_t} = [Time::HiRes::gettimeofday];
+}
+
+sub stop_clock {
+  my ($self, $title) = @_;
+  return if(!$self->{speed});
+
+  my @stop = times;
+  $self->trace(sprintf("[t] $title: USER = %.2f s, SYSTEM = %.2f s, REAL = %.2f s",
+		       $stop[2]-$self->{start}->[2],
+		       $stop[3]-$self->{start}->[3],
+		       Time::HiRes::tv_interval($self->{start_t})));
 }
 
 sub see_blob {
@@ -304,6 +335,7 @@ sub amc_command {
 sub prepare {
   my ($self)=@_;
 
+  $self->start_clock();
   $self->amc_command('prepare',
 		     '--filter',$self->{'filter'},
 		     '--with',$self->{'tex_engine'},
@@ -313,11 +345,14 @@ sub prepare {
 		     '--prefix',$self->{'temp_dir'}.'/',
 		     '%PROJ/'.$self->{'src'},
 		     '--data','%DATA',
-		    );
+      );
   $self->amc_command('meptex',
 		     '--src','%PROJ/calage.xy',
 		     '--data','%DATA',
-		    );
+      );
+  $self->stop_clock("subject and layout");
+
+  $self->start_clock();
   $self->amc_command('prepare',
 		     '--filter',$self->{'filter'},
 		     '--with',$self->{'tex_engine'},
@@ -325,13 +360,16 @@ sub prepare {
 		     '--n-copies',$self->{'n_copies'},
 		     '--data','%DATA',
 		     '%PROJ/'.$self->{'src'},
-		    );
+      );
+  $self->stop_clock("scoring strategy");
 }
 
 sub analyse {
   my ($self)=@_;
 
-  if($self->{'perfect_copy'}) {
+  $self->start_clock();
+
+  if($self->{perfect_copy} || $self->{full_scans}) {
     $self->amc_command('prepare',
 		       '--filter',$self->{'filter'},
 		       '--with',$self->{'tex_engine'},
@@ -340,8 +378,10 @@ sub analyse {
 		       '--n-copies',$self->{'n_copies'},
 		       '--prefix','%PROJ/',
 		       '%PROJ/'.$self->{'src'},
-		      );
+	);
+  }
 
+  if($self->{perfect_copy}) {
     my $nf=$self->{'temp_dir'}."/num";
     open(NUMS,">$nf");
     for (@{$self->{'perfect_copy'}}) { print NUMS "$_\n"; }
@@ -362,6 +402,39 @@ sub analyse {
     push @{$self->{'scans'}},map { $self->{'temp_dir'}."/$_" } @s;
   }
 
+  if($self->{full_scans}) {
+    my @cmd=("gs","-sDEVICE=png16m",
+	     "-sOutputFile=$self->{temp_dir}/full-%04d.png",
+	     "-r$self->{full_density}",
+	     "-dNOPAUSE","-dSAFER","-dBATCH");
+    push @cmd,"-dQUIET" if(!$self->{debug});
+    system(@cmd,$self->{'temp_dir'}."/corrige.pdf");
+
+    opendir(my $dh, $self->{'temp_dir'})
+      || die "can't opendir $self->{'temp_dir'}: $!";
+    my @s = grep { /^full-/ } readdir($dh);
+    closedir $dh;
+
+    my @st=();
+    my $q = AMC::Queue::new();
+    for my $page (@s) {
+      my $dest = $self->{'temp_dir'}."/".$page.".".$self->{full_scans};
+      $q->add_process (magick_module("convert"),
+		       "$self->{'temp_dir'}/$page",
+		       "-rotate", rand(6)-3,
+		       "+noise", "Poisson", "-threshold", "40%",
+		       "+noise", "Gaussian", "-threshold", "15%",
+		       $dest);
+      push @st, $dest;
+    }
+    $q->run;
+    push @{$self->{'scans'}}, @st;
+
+    $self->{perfect_copy}=[1..$self->{n_copies}];
+  }
+
+  $self->stop_clock("fake scans build");
+
   # prepares a file with the scans list
 
   my $scans_list=$self->{'temp_dir'}."/scans-list.txt";
@@ -370,6 +443,8 @@ sub analyse {
   close(SL);
 
   #
+
+  $self->start_clock();
 
   $self->amc_command('read-pdfform',
 		     '--list',$scans_list,
@@ -414,11 +489,15 @@ sub analyse {
 		     '--data','%DATA',
 		     '--liste-fichiers',$scans_list,
 		     );
+
+  $self->stop_clock("automatic data capture");
+
 }
 
 sub note {
   my ($self)=@_;
 
+  $self->start_clock();
   $self->amc_command('note',
 		     '--data','%DATA',
 		     '--seuil',$self->{'seuil'},
@@ -428,7 +507,8 @@ sub note {
 		     '--notemax',$self->{'notemax'},
 		     '--postcorrect-student',$self->{'postcorrect_student'},
 		     '--postcorrect-copy',$self->{'postcorrect_copy'},
-		     );
+      );
+  $self->stop_clock("scoring");
 }
 
 sub assoc {
@@ -472,9 +552,11 @@ sub get_marks {
   $self->{'marks'}=$dbh->selectall_arrayref("SELECT * FROM scoring_mark",
 					    { Slice => {} });
 
-  $self->trace("[I] Marks:");
-  for my $m (@{$self->{'marks'}}) {
-    $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy total max mark/)));
+  if(!$self->{full_scans}) {
+    $self->trace("[I] Marks:");
+    for my $m (@{$self->{'marks'}}) {
+      $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy total max mark/)));
+    }
   }
 }
 
@@ -493,7 +575,8 @@ sub check_perfect {
   return if(!$self->{'perfect_copy'});
 
   $self->trace("[T] Perfect copies test: "
-	       .join(',',@{$self->{'perfect_copy'}}));
+	       .($self->{full_scans} ? "ALL" :
+		 join(',',@{$self->{'perfect_copy'}})));
 
   my %p=map { $_=>1 } @{$self->{'perfect_copy'}};
 
@@ -547,7 +630,7 @@ sub get_assoc {
     $self->{'association'}=$dbh->selectall_arrayref("SELECT * FROM association_association",
 						    { Slice => {} });
 
-    $self->trace("[I] Assoc:");
+    $self->trace("[I] Assoc:") if(@{$self->{'association'}});
     for my $m (@{$self->{'association'}}) {
       for my $t (qw/auto manual/) {
         my ($n)=$self->{names}->data('id',$m->{$t},test_numeric=>1);
@@ -1004,6 +1087,33 @@ sub check_pages {
   }
 }
 
+sub report_hardware {
+  my ($self) = @_;
+  return if(!$self->{speed});
+
+  my %cpus=();
+  open(CPU, "/proc/cpuinfo");
+  while(<CPU>) {
+    chomp;
+    if(/model name\s*:\s*(.*)/) {
+      $cpus{$1}++;
+    }
+  }
+  close CPU;
+  for my $c (keys %cpus) {
+    $self->trace("[i] $cpus{$c} × $c");
+  }
+
+  open(MEM, "/proc/meminfo");
+  while(<MEM>) {
+    chomp;
+    if(/MemTotal\s*:\s*(.*)/) {
+      $self->trace("[i] memory: $1");
+    }
+  }
+  close MEM;
+}
+
 sub default_process {
   my ($self)=@_;
 
@@ -1021,6 +1131,7 @@ sub default_process {
   $self->check_assoc;
   $self->annote;
   $self->check_export;
+  $self->report_hardware;
 
   $self->ok;
 }
