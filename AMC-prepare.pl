@@ -23,7 +23,6 @@ use utf8;
 use File::Copy;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
-use Clone;
 
 use Module::Load;
 
@@ -249,12 +248,19 @@ sub exit_with_error {
 # one, the number of correct answers is exactly one.
 
 sub check_question {
-    my ($q,$t)=@_;
+    my ($q)=@_;
+
+    my $t = $analyse_data->{etu}.":".$analyse_data->{titre};
 
     # if postcorrection is used, this check cannot be made as we will
     # only know which answers are correct after having captured the
     # teacher's copy.
     return() if($info_vars{'postcorrect'});
+
+    # if is_alias is true, the questions has already been checked...
+    return if($q->{is_alias});
+
+    $q=$q->{q};
 
     if($q) {
       # For multiple questions, no problem. $q->{partial} means that
@@ -317,7 +323,6 @@ sub analyse_amclog {
   my ($amclog_file)=@_;
 
   my $analyse_data={etu=>0,qs=>{}};
-  my $analyse_data_s0={}; # backup for student 0
   my %titres=();
   @errors_msg=();
 
@@ -331,7 +336,7 @@ sub analyse_amclog {
     if (/AUTOQCM\[Q=([0-9]+)\]/) {
 
       # first check that the previous question is ok:
-      check_question($analyse_data->{q},$analyse_data->{etu}.":".$analyse_data->{titre});
+      check_question($analyse_data);
 
       # then clear current question data:
       $analyse_data->{q}={};
@@ -381,13 +386,9 @@ sub analyse_amclog {
     if (/AUTOQCM\[ETU=([0-9]+)\]/) {
       my $student=$1;
 
-      # backup
-
-      $analyse_data_s0=$analyse_data if($analyse_data->{etu}==0);
-
       # first check the last question from preceding student is ok:
 
-      check_question($analyse_data->{q},$analyse_data->{etu}.":".$analyse_data->{titre});
+      check_question($analyse_data);
 
       # then clear all $analyse_data to begin with this student:
 
@@ -398,11 +399,9 @@ sub analyse_amclog {
 
     if(/AUTOQCM\[BR=([0-9]+)\]/) {
       my $alias=$1;
-      die "Unimplemented positive student alias" if($alias!=0);
 
-      my $student=$analyse_data->{etu};
-      $analyse_data=Clone::clone($analyse_data_s0);
-      $analyse_data->{etu}=$student;
+      $analyse_data->{is_alias} = 1;
+      $analyse_data->{alias} = $alias; # unused ;)
     }
 
     # AUTOACM[NUM=N=ID] tells that question number N (internal
@@ -468,7 +467,7 @@ sub analyse_amclog {
 
   # check that the last question from the last student is ok:
 
-  check_question($analyse_data->{q},$analyse_data->{etu}.":".$analyse_data->{titre});
+  check_question($analyse_data);
 
   # Send error messages to the calling program through STDOUT
 
@@ -1052,7 +1051,7 @@ if($to_do{b}) {
 
 	if(/AUTOQCM\[BR=([0-9]+)\]/) {
 	  my $alias=$1;
-          die "Unimplemented positive student alias" if($alias!=0);
+
 	  $scoring->replicate($alias,$etu);
 	  $etu=$alias;
           $qs=$qs0 if($etu==0);
