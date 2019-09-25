@@ -183,6 +183,16 @@ sub hex_color {
 
 my @export_modules=@{$config->{export_modules}};
 
+# Reads decoders list
+
+my @decoders=perl_module_search('AMC::Decoder::register');
+for my $m (@decoders) {
+  load("AMC::Decoder::register::$m");
+}
+@decoders=sort { "AMC::Decoder::register::$a"->weight
+			 <=> "AMC::Decoder::register::$b"->weight }
+  @decoders;
+
 # Reads filter plugins list
 
 my @filter_modules=perl_module_search('AMC::Filter::register');
@@ -845,6 +855,8 @@ my $rounding_store=cb_model('inf',__"floor",
 # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
                             'sup',__"ceiling");
 
+my $nftype_store = cb_model(''=>__"Image",map { $_=>"AMC::Decoder::register::$_"->name() } (@decoders));
+
 $prefs->store_register(
 # TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
     'delimiteur_decimal'=>cb_model(',',__", (comma)",
@@ -869,6 +881,8 @@ $prefs->store_register(
     'assoc_code'=>$cb_model_vide_code,
     'format_export'=>cb_model(map { $_=>"AMC::Export::register::$_"->name() } (@export_modules)),
     'filter'=>cb_model(map { $_=>"AMC::Filter::register::$_"->name() } (@filter_modules)),
+    'defaut_name_field_type'=>$nftype_store,
+    'name_field_type'=>$nftype_store,
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
     'after_export'=>cb_model(""=>__"that's all",
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the exported file. This is a menu entry.
@@ -3120,6 +3134,60 @@ sub analyse_call_go {
 	  );
 }
 
+sub decode_name_fields_again {
+  decode_name_fields(1);
+}
+
+sub decode_name_fields {
+  my ($all) = @_;
+
+  my $type = $config->get('name_field_type');
+  if($type) {
+    my $reg = "AMC::Decoder::register::$type"->new();
+    my $deps = $reg->check_dependencies();
+    if(! $deps->{ok}) {
+      my $message = sprintf(__("You selected the decoder \"<i>%s</i>\", which requires some tools that are missing on your system:"), $reg->name())."\n";
+      if(@{$deps->{perl_modules}}) {
+	$message .= __("<b>Perl module(s):</b>")." "
+	    .join(", ", @{$deps->{perl_modules}})
+	    ."\n";
+      }
+      if(@{$deps->{commands}}) {
+	$message .= __("<b>Command(s):</b>")." "
+	    .join(", ", @{$deps->{commands}})
+	    ."\n";
+      }
+      $message .= __"Install these dependencies and try again";
+
+      my $dialog = Gtk3::MessageDialog
+	  ->new($w{'main_window'},
+		'destroy-with-parent',
+		'error','ok','');
+      $dialog->set_markup($message);
+      $dialog->run;
+      $dialog->destroy;
+
+      return();
+    }
+  }
+
+  commande('commande'=>["auto-multiple-choice", "decode",
+			"--debug", debug_file(),
+			"--data", $config->get_absolute('data'),
+			"--cr", $config->get_absolute('cr'),
+			"--project", $shortcuts->absolu('%PROJET/'),
+			($all ? "--all" : "--no-all"),
+			"--decoder", $type,
+			"--progression-id",'decode',
+			"--progression",1,
+	   ],
+	   'signal'=>2,
+	   'texte'=>__"Decoding name field images...",
+	   'progres.id'=>'decode',
+	   'fin'=>\&update_available_codes,
+      );
+}
+
 sub clean_gtk2_filenames {
   my @f=@_;
   return(
@@ -3171,6 +3239,7 @@ sub saisie_auto_ok {
 		 'fin'=>sub {
 		     my ($c,%data)=@_;
 		     close($c->{'o'}->{'fh'});
+		     decode_name_fields();
 		     detecte_analyse('apprend'=>1);
 		     assoc_state();
 		     if(!$data{cancelled}) {
@@ -3958,6 +4027,7 @@ sub noter_calcul {
 sub noter_resultat {
   $projet{'_scoring'}->begin_read_transaction('MARK');
   my $avg=$projet{'_scoring'}->average_mark;
+  $projet{'_scoring'}->end_transaction('MARK');
 
   my $ok;
   my $text;
@@ -3970,11 +4040,17 @@ sub noter_resultat {
     $text=__("No marks computed");
   }
   set_state('marking',$ok,$text);
+  update_available_codes();
+  $w{'onglet_reports'}->set_sensitive(defined($avg));
+}
+
+sub update_available_codes { 
+  $projet{'_scoring'}->begin_read_transaction('CODE');
 
   my @codes=$projet{'_scoring'}->codes;
   my $pre_assoc=$projet{'_layout'}->pre_association();
 
-  $projet{'_scoring'}->end_transaction('MARK');
+  $projet{'_scoring'}->end_transaction('CODE');
 
   debug "Codes : ".join(',',@codes);
 
@@ -3990,10 +4066,8 @@ sub noter_resultat {
     debug "Adding pre-association item";
   }
   $prefs->store_register('assoc_code'=>cb_model(@cbs));
-  $prefs->transmet_pref($gui,prefix=>'pref_assoc',
+  $prefs->transmet_pref($gui, prefix=>'pref_assoc',
                         keys=>['project:assoc_code']);
-
-  $w{'onglet_reports'}->set_sensitive(defined($avg));
 }
 
 sub assoc_state {
@@ -4506,6 +4580,29 @@ sub accepte_preferences {
 	  }
 
 	}
+      }
+    }
+
+    # Run again decoding if the name field type has changed
+
+    if($pm{name_field_type}) {
+      my $response;
+
+      if($config->get('name_field_type')) {
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'question','ok-cancel','');
+	$dialog->set_markup(
+	  __("You modified the name field type, so that the name fields has to be decoded again."));
+	$dialog->get_widget_for_response('ok')->get_style_context()->add_class("suggested-action");
+	$response = $dialog->run;
+	$dialog->destroy;
+      } else {
+	$response = 'ok';
+      }
+      if($response eq 'ok') {
+	decode_name_fields(1);
       }
     }
   }

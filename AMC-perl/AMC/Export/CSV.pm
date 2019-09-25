@@ -170,7 +170,7 @@ sub export {
       }
 
       for my $c (@codes) {
-	push @columns,$self->{'_scoring'}->student_code(@sc,$c);
+	push @columns, $self->parse_string($self->{'_scoring'}->student_code(@sc,$c));
       }
 
       print OUT join($sep,@columns)."\n";

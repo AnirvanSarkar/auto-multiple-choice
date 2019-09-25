@@ -153,6 +153,9 @@ package AMC::DataModule::scoring;
 # * code is the code name.
 #
 # * value is the code value.
+#
+# * direct is 1 if the score comes directly from a decoded zone image,
+#   and 0 if it is computed while scoring.
 
 # VARIABLES:
 #
@@ -187,10 +190,14 @@ use Exporter qw(import);
 use constant {
   QUESTION_SIMPLE => 1,
   QUESTION_MULT => 2,
+
+  DIRECT_MARK => 0,
+  DIRECT_NAMEFIELD => 1,
 };
 
-our @EXPORT_OK = qw(QUESTION_SIMPLE QUESTION_MULT);
+our @EXPORT_OK = qw(QUESTION_SIMPLE QUESTION_MULT DIRECT_MARK DIRECT_NAMEFIELD);
 our %EXPORT_TAGS = ( 'question' => [ qw/QUESTION_SIMPLE QUESTION_MULT/ ],
+		     'direct' => [ qw/DIRECT_MARK DIRECT_NAMEFIELD/ ],
 		   );
 
 use AMC::Basic;
@@ -203,7 +210,7 @@ use XML::Simple;
 @ISA=("AMC::DataModule");
 
 sub version_current {
-  return(1);
+  return(2);
 }
 
 sub version_upgrade {
@@ -232,14 +239,18 @@ sub version_upgrade {
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("mark")
 		      ." (student INTEGER, copy INTEGER, total REAL, max REAL, mark REAL, PRIMARY KEY (student,copy))");
 	$self->sql_do("CREATE TABLE IF NOT EXISTS ".$self->table("code")
-		      ." (student INTEGER, copy INTEGER, code TEXT, value TEXT, PRIMARY KEY (student,copy,code))");
+		      ." (student INTEGER, copy INTEGER, code TEXT, value TEXT, direct INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (student,copy,code))");
 
 	$self->statement('NEWdefault')->execute(QUESTION_SIMPLE,"");
 	$self->statement('NEWdefault')->execute(QUESTION_MULT,"");
 
 	$self->populate_from_xml;
 
-	return(1);
+	return(2);
+    } elsif($old_version==1) {
+      $self->sql_do("ALTER TABLE ".$self->table("code")
+		    ." ADD COLUMN direct INTEGER NOT NULL DEFAULT 0");
+      return(2);
     }
     return('');
 }
@@ -338,7 +349,8 @@ sub populate_from_xml {
 
       for my $code (keys %{$s->{'code'}}) {
 	$self->statement('NEWCode')->execute($student,0,$code,
-					     $s->{'code'}->{$code}->{'content'});
+					     $s->{'code'}->{$code}->{'content'},
+					     DIRECT_MARK);
       }
     } else {
       debug "WARNING: Unknown student <$student> importing XML marks";
@@ -428,9 +440,9 @@ sub define_statements {
      'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
 		  ." (student,copy,total,max,mark)"
 		  ." VALUES (?,?,?,?,?)"},
-     'NEWCode'=>{'sql'=>"INSERT INTO ".$self->table("code")
-		  ." (student,copy,code,value)"
-		  ." VALUES (?,?,?,?)"},
+     'NEWCode'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("code")
+		  ." (student,copy,code,value,direct)"
+		  ." VALUES (?,?,?,?,?)"},
 
      'studentMark'=>{'sql'=>"SELECT * FROM ".$self->table("mark")
 		     ." WHERE student=? AND copy=?"},
@@ -535,7 +547,10 @@ sub define_statements {
                   ."   GROUP BY student,page,question )"
                   . " b"
                   ." ON s.student=b.student AND s.question=b.question"
-                  ." GROUP BY s.student,b.page,s.copy"},
+		  ." GROUP BY s.student,b.page,s.copy"},
+      'clearDirect'=>
+     {sql=>"DELETE FROM ".$self->table("code")
+	  ." WHERE direct=?"},
     };
 }
 
@@ -808,9 +823,15 @@ sub clear_strategy {
 
 sub clear_score {
   my ($self)=@_;
-  for my $t (qw/score mark code/) {
+  for my $t (qw/score mark/) {
     $self->sql_do("DELETE FROM ".$self->table($t));
   }
+  $self->clear_code_direct(DIRECT_MARK);
+}
+
+sub clear_code_direct {
+  my ($self, $category)=@_;
+  $self->statement('clearDirect')->execute($category);
 }
 
 # set_answer_strategy($student,$question,$answer,$strategy) sets the
@@ -911,9 +932,10 @@ sub new_mark {
 # new_code($student,$copy,$code,$value) adds a code row.
 
 sub new_code {
-  my ($self,$student,$copy,$code,$value)=@_;
+  my ($self,$student,$copy,$code,$value,$direct)=@_;
+  $direct=0 if(!$direct);
   $self->statement('NEWCode')
-    ->execute($student,$copy,$code,$value);
+    ->execute($student,$copy,$code,$value,$direct);
 }
 
 # student_questions($student) returns a list of the question numbers

@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -141,7 +141,6 @@ package AMC::DataModule::capture;
 # * filename is the scan filename.
 #
 # * timestamp is the time when processing was done.
-
 
 use Exporter qw(import);
 
@@ -605,7 +604,13 @@ sub define_statements {
 		    ." WHERE zoneid=? AND type=?"},
      'zoneDist'=>{'sql'=>"SELECT AVG((x-?)*(x-?)+(y-?)*(y-?))"
 		  ." FROM $t_position"
-		  ." WHERE zoneid=? AND type=?"},
+		      ." WHERE zoneid=? AND type=?"},
+     'zoneImages'=>
+     {sql=>"SELECT zoneid, p.student as student, p.copy as copy, image, imagedata, timestamp_auto"
+	  ." FROM ".$self->table("zone")." as z,"
+	  ."      ".$self->table("page")." as p"
+	  ." ON z.student=p.student AND z.page=p.page AND z.copy=p.copy"
+	  ." WHERE type=?"},
      'getAnnotated'=>{'sql'=>"SELECT annotated,timestamp_annotate,student,page,copy"
 		      ." FROM $t_page"
 		      ." WHERE timestamp_annotate>0"
@@ -689,7 +694,7 @@ sub define_statements {
 		      ." ON z.zoneid=p.zoneid"
 		      ." WHERE z.student=? AND z.page=? AND z.copy=?"
 		      ."   AND z.type=? AND p.type=?"
-		      ." ORDER BY z.zoneid,p.corner"},
+			  ." ORDER BY z.zoneid,p.corner"},
     };
   $self->{'statements'}->{'pageSummary'}=
     {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
@@ -1577,6 +1582,16 @@ sub zooms_cleanup_transaction {
   $self->end_transaction('zcln');
   $self->vacuum();
   return($n);
+}
+
+# Get zone images from a particular type, with timestamp of creation
+
+sub zone_images_available {
+  my ($self, $type) = @_;
+  $type = ZONE_NAME if(!$type);
+  return($self->dbh->selectall_arrayref($self->statement('zoneImages'),
+                                        { Slice=>{} },
+					$type));
 }
 
 1;

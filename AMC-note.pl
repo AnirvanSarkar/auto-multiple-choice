@@ -325,6 +325,9 @@ for my $sc (@captured_studentcopy) {
   $avance->progres($delta);
 }
 
+# The end!
+
 $data->end_transaction('MARK');
 
 $avance->fin();
+

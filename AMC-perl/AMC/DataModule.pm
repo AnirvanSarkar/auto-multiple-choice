@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -34,14 +34,15 @@ use AMC::Basic;
 # stores its root in $self->{'data'}
 
 sub new {
-    my ($class,$data,%oo)=@_;
+    my ($class, $data, %oo)=@_;
 
     my $self=
       {
-       'data'=>$data,
-       'name'=>'',
-       'statements'=>{},
-       immutable=>{},
+       data => $data,
+       name => '',
+       statements => {},
+       immutable => {},
+       version_checked => 0,
       };
 
     for(keys %oo) {
@@ -55,8 +56,11 @@ sub new {
     bless($self,$class);
 
     $self->define_statements;
-    debug "Checking database version...";
-    $self->version_check;
+
+    if(! $self->{version_checked}) {
+      debug "Checking database version...";
+      $self->version_check;
+    }
 
     return $self;
 }
@@ -80,15 +84,15 @@ sub path {
 # module(name) returns another module from same data
 
 sub module {
-  my ($self,$name)=@_;
-  return($self->{data}->module($name));
+  my ($self, $name, %oo)=@_;
+  return($self->{data}->module($name, %oo));
 }
 
 # require_module(name) loads the module for the same data
 
 sub require_module {
-  my ($self,$name)=@_;
-  return($self->{data}->require_module($name));
+  my ($self, $name, %oo)=@_;
+  return($self->{data}->require_module($name, %oo));
 }
 
 # vacuum() loads the SQLite database separately, and asks for VACUUM
@@ -429,6 +433,8 @@ sub version_check {
     }
     $self->end_transaction('imtb');
   }
+
+  $self->{version_checked} = 1;
 }
 
 # immutable_variables() returns the list of variables that has to be

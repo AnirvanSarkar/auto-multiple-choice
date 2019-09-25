@@ -105,6 +105,7 @@ sub new {
      'full_scans'=>'',
      'full_density'=>300,
      'tmpdir'=>'',
+     'decoder'=>'',
     };
 
   for (keys %oo) {
@@ -494,6 +495,19 @@ sub analyse {
 
 }
 
+sub decode {
+  my ($self)=@_;
+
+  if($self->{decoder}) {
+    $self->amc_command('decode',
+		       '--data', '%DATA',
+		       '--project', '%PROJ',
+		       '--decoder', $self->{decoder},
+	);
+		     
+  }
+}
+
 sub note {
   my ($self)=@_;
 
@@ -633,9 +647,9 @@ sub get_assoc {
     $self->trace("[I] Assoc:") if(@{$self->{'association'}});
     for my $m (@{$self->{'association'}}) {
       for my $t (qw/auto manual/) {
-        my ($n)=$self->{names}->data('id',$m->{$t},test_numeric=>1);
+        my ($n)=$self->{names}->data($self->{list_key},$m->{$t},test_numeric=>1);
         if($n) {
-          $m->{$t}=$n->{id};
+          $m->{$t}=$n->{$self->{list_key}};
           $m->{name}=$n->{_ID_};
         }
       }
@@ -665,7 +679,7 @@ sub check_assoc {
   return if(!$self->{'check_assoc'});
 
   $self->trace("[T] Association test: "
-	       .join(',',keys %{$self->{'check_assoc'}}));
+	       .join(',',sort { $a <=> $b } (keys %{$self->{'check_assoc'}})));
 
   my %p=(%{$self->{'check_assoc'}});
 
@@ -1120,7 +1134,10 @@ sub default_process {
   $self->prepare if(!$self->{skip_prepare});
   $self->defects;
   $self->check_pages;
-  $self->analyse if(!$self->{skip_scans});
+  if(!$self->{skip_scans}) {
+    $self->analyse;
+    $self->decode;
+  }
   $self->check_zooms;
   $self->note;
   $self->assoc;

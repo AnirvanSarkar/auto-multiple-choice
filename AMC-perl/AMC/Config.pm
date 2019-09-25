@@ -360,6 +360,8 @@ sub defaults {
 
      view_invalid_color=>"#FFEF3B",
      view_empty_color=>"#78FFED",
+
+     defaut_name_field_type=>'',
     };
 
   $self->{project_default} =
@@ -432,6 +434,8 @@ sub defaults {
      email_use_html=>'',
 
      pdfform=>0,
+
+     name_field_type=>'',
     };
 
   # MacOSX universal command to open files or directories : /usr/bin/open

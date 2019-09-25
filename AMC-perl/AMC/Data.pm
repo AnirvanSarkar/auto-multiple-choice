@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -37,6 +37,7 @@ sub new {
        'timeout'=>300000,
        'dbh'=>'',
        'modules'=>{},
+       'version_checked' => {},	   
        'files'=>{},
        'on_error'=>'stdout,stderr,die',
        'progress'=>'',
@@ -68,16 +69,26 @@ sub connect {
     $self->sql_error(shift);
   };
 
-  my @mods=(keys %{$self->{'modules'}});
-  $self->{'modules'}={};
-  for(@mods) { $self->require_module($_); }
+  $self->{modules}={};
+  for my $m (keys %{$self->{version_checked}}) {
+    debug("Connects module $m ($self->{version_checked}->{$m})");
+    $self->require_module($m, version_checked => $self->{version_checked}->{$m});
+  }
 }
 
 # Disconnects...
 
 sub disconnect {
   my ($self)=@_;
+  $self->{version_checked} = {};
   if($self->{'dbh'}) {
+    # record the loaded modules, to be able to load them back with connect()
+    for my $m (keys %{$self->{modules}}) {
+      $self->{version_checked}->{$m}
+      = $self->{modules}->{$m}->{version_checked};
+    }
+    # disconnect and drop all references
+    $self->{modules} = {};
     $self->{'dbh'}->disconnect;
     $self->{'dbh'}='';
   }
@@ -173,7 +184,7 @@ sub sql_tables {
 # defined in AMC::DataModule::$module perl package.
 
 sub require_module {
-  my ($self,$module)=@_;
+  my ($self, $module, %oo)=@_;
   if(!$self->{'modules'}->{$module}) {
     my $filename=$self->{'directory'}."/".$module.".sqlite";
     utf8::downgrade($filename);
@@ -190,7 +201,7 @@ sub require_module {
 
     debug "Loading perl module $module...";
     load("AMC::DataModule::$module");
-    $self->{'modules'}->{$module}="AMC::DataModule::$module"->new($self);
+    $self->{'modules'}->{$module}="AMC::DataModule::$module"->new($self, %oo);
     $self->{'files'}->{$module}=$filename;
 
     debug "Module $module loaded.";
@@ -201,8 +212,8 @@ sub require_module {
 # $module (call the methods from module $module from this object).
 
 sub module {
-    my ($self,$module)=@_;
-    $self->require_module($module);
+    my ($self, $module, %oo)=@_;
+    $self->require_module($module, %oo);
     return($self->{'modules'}->{$module});
 }
 
