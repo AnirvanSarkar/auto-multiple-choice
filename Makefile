@@ -264,6 +264,8 @@ endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Export/register
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Filter
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Filter/register
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Decoder
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Decoder/register
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/DataModule
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Print
@@ -272,6 +274,8 @@ endif
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Export/register/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Export/register
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Filter/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Filter
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Filter/register/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Filter/register
+	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Decoder/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Decoder
+	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Decoder/register/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Decoder/register
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/DataModule/*.pm $(DESTDIR)/$(PERLDIR)/AMC/DataModule
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.pm $(DESTDIR)/$(PERLDIR)/AMC/Gui
 	install    -m 0644 $(USER_GROUP) AMC-perl/AMC/Gui/*.glade $(DESTDIR)/$(PERLDIR)/AMC/Gui
