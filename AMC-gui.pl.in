@@ -95,10 +95,6 @@ use constant {
     INCONNU_TIME_N => 3,
     INCONNU_PREPROC => 4,
 
-    PROJ_NOM => 0,
-    PROJ_NOM_PLAIN => 1,
-    PROJ_ICO => 2,
-
     MODEL_NOM => 0,
     MODEL_PATH => 1,
     MODEL_DESC => 2,
@@ -460,9 +456,14 @@ sub is_local {
 
 sub fich_options {
     my ($nom,$rp)=@_;
+
     $rp=$config->get('rep_projets') if(!$rp);
     $rp.="/$nom/options.xml";
+
     utf8::downgrade($rp);
+
+    debug "Options file: ".show_utf8($rp);
+    
     return($rp);
 }
 
@@ -1463,176 +1464,172 @@ sub projects_show {
   my ($p)=@_;
   $p=[projects_list()] if(!$p);
 
-  $w{'projet_bouton_choose_directory'}
-    ->set_tooltip_text(sprintf(__("Current directory: %s"),
-                               Glib::filename_display_name($w{'local_rep_projets'})));
+  # first remove all entries...
+  $w{choix_projets_liste}->foreach(sub { my ($child) = @_; $child->destroy() });
 
-  if(!$w{'icon_project'}) {
-    $w{'icon_project'} = Gtk3::IconTheme::get_default->load_icon("auto-multiple-choice",$config->get("project_icon_size") ,"force-svg");
-    $w{'icon_project_dir'} = Gtk3::IconTheme::get_default->load_icon("gtk-no",$config->get("project_icon_size") ,"force-svg");
-    $w{'icon_project'}=$w{'main_window'}->render_icon ('gtk-open', 'menu')
-      if(!$w{'icon_project'});
+  #
+  my $up = $w{'local_rep_projets'};
+  if($up ne '/') {
+    $up =~ s:/[^/]*/?$::;
+    
+    $w{choix_projets_liste}->add(create_project_widget(
+				   {label => "..",
+				    name => "..",
+				    path => $up,
+				    icon => "inode-directory",
+				   }));
   }
 
-  $proj_store->clear;
   # $prefix is the <LTR> UTF8 character in RTL environments.
   my $prefix=($w{'main_window'}->get_direction() eq 'rtl' ?
 	      decode("utf-8","\xe2\x80\x8e"): '');
   for my $proj_name (sort { $a cmp $b } @$p) {
-    my $is_amc=(-f fich_options($proj_name,$w{'local_rep_projets'}));
+    my $is_amc=(-f fich_options($proj_name, $w{'local_rep_projets'}));
     my $name_plain=$proj_name;
     my $label=$proj_name=Glib::filename_display_name($proj_name);
     $label=$prefix.$label if($proj_name =~ /^[0-9]*$/);
     debug "Directory: $label".(utf8::is_utf8($label) ? " (utf8)" : "")
-      .($is_amc ? " (AMC)" : "");
-    $proj_store->set($proj_store->append,
-		     PROJ_NOM,$label,
-		     PROJ_NOM_PLAIN,$name_plain,
-		     PROJ_ICO,
-		     ($is_amc ?
-		      $w{'icon_project'} : $w{'icon_project_dir'} ));
+	.($is_amc ? " (AMC)" : "");
+
+    utf8::encode($proj_name);
+    $w{choix_projets_liste}->add(create_project_widget(
+				   {label => $label,
+				    name => $proj_name,
+				    path => $w{'local_rep_projets'}."/".$proj_name,
+				    icon => ($is_amc ? "auto-multiple-choice" : "inode-directory" )
+				   }));
   }
+
+  $w{choix_projets_liste}->show_all;
+}
+
+sub create_project_widget {
+  my ($item) = @_;
+  my $label = Gtk3::Label->new($item->{label});
+  my $icon = Gtk3::Image->new_from_icon_name($item->{icon}, 'menu');
+  my $box = Gtk3::Box->new('horizontal',2);
+  $box->add($icon);
+  $box->add($label);
+  $box->{_amc_project_data} = { %$item };
+  return $box;
+}
+
+sub projects_list_select {
+  my ($flowbox, $boxchild) = @_;
+  my $selected_path = $boxchild->get_child->{_amc_project_data}->{name};
+  debug "Selected: $selected_path\n";
+  if(-f fich_options($selected_path, $w{'local_rep_projets'})) {
+    # an AMC project directory has been selected
+    if($w{'projet_bouton_ouverture'}->is_visible()) {
+      projet_charge_ok();
+    }
+  } else {
+    # move to other directory
+    $w{'local_rep_projets'} = $w{'local_rep_projets'}."/".$selected_path;
+    $w{projet_select_directory}->set_filename($w{'local_rep_projets'});
+    $w{projet_select_directory}->set_current_folder($w{'local_rep_projets'});
+  }
+}
+
+sub project_set_directory {
+  my ($filechooser) = @_;
+  my $directory = $filechooser->get_filename() || $filechooser->get_current_folder();
+  debug "Changed directory: $directory".(utf8::is_utf8($directory) ? " (utf8)" : "");
+  $w{'local_rep_projets'} = $directory;
+  projects_show();
 }
 
 sub liste_des_projets {
-    my %oo=(@_);
+  my %oo=(@_);
 
-    $w{'local_rep_projets'}=$config->get('rep_projets');
+  $w{'local_rep_projets'}=$config->get('rep_projets');
 
-    mkdir($w{'local_rep_projets'}) if(-d $w{'local_rep_projets'});
+  mkdir($w{'local_rep_projets'}) if(-d $w{'local_rep_projets'});
 
-    my @projs=projects_list();
+  # fenetre pour demander le nom du projet
 
-    if($#projs>=0 || $oo{'cree'}) {
+  my $gp=read_glade('choix_projet',
+		    qw/label_etat label_action
+		    choix_projets_liste
+		    projet_select_directory
+		    projet_bouton_ouverture projet_bouton_creation
+		    projet_bouton_supprime projet_bouton_annule
+		    projet_bouton_annule_label projet_bouton_renomme
+		    projet_bouton_clone
+		    projet_bouton_mv_yes projet_bouton_mv_no
+		    projet_nom projet_nouveau_syntaxe projet_nouveau/);
 
-	# fenetre pour demander le nom du projet
+  if($oo{'cree'}) {
+    $w{'projet_nouveau'}->show();
+    $w{'projet_bouton_creation'}->show();
+    $w{'projet_bouton_ouverture'}->hide();
 
-	my $gp=read_glade('choix_projet',
-			  qw/label_etat label_action
-            choix_projets_liste
-	    projet_bouton_ouverture projet_bouton_creation
-	    projet_bouton_supprime projet_bouton_annule
-	    projet_bouton_annule_label projet_bouton_renomme
-	    projet_bouton_clone
-	    projet_bouton_mv_yes projet_bouton_mv_no
-	    projet_bouton_choose_directory
-	    projet_nom projet_nouveau_syntaxe projet_nouveau/);
+    $w{'label_etat'}->set_text(__"Existing projects:");
 
-	if($oo{'cree'}) {
-	    $w{'projet_nouveau'}->show();
-	    $w{'projet_bouton_creation'}->show();
-	    $w{'projet_bouton_ouverture'}->hide();
+    $w{'choix_projet'}->set_focus($w{'projet_nom'});
 
-	    $w{'label_etat'}->set_text(__"Existing projects:");
-
-	    $w{'choix_projet'}->set_focus($w{'projet_nom'});
-
-# TRANSLATORS: Window title when creating a new project.
-	    $w{'choix_projet'}->set_title(__"New AMC project");
-	}
-
-
-	if($oo{'gestion'}) {
-	    $w{'label_etat'}->set_text(__"Projects management:");
-	    $w{'label_action'}->set_markup(__"Change project name:");
-	    $w{'projet_bouton_ouverture'}->hide();
-	    for (qw/supprime clone renomme/) {
-		$w{'projet_bouton_'.$_}->show();
-	    }
-	    $w{'projet_bouton_annule_label'}->set_text(__"Back");
-
-# TRANSLATORS: Window title when managing projects.
-	    $w{'choix_projet'}->set_title(__"AMC projects management");
-	}
-
-	# mise a jour liste des projets dans la fenetre
-
-	$proj_store = Gtk3::ListStore->new ('Glib::String','Glib::String',
-					    'Gtk3::Gdk::Pixbuf');
-
-	$w{'choix_projets_liste'}->set_model($proj_store);
-
-	$w{'choix_projets_liste'}->set_text_column(PROJ_NOM);
-	$w{'choix_projets_liste'}->set_pixbuf_column(PROJ_ICO);
-
-	projects_show(\@projs);
-
-        $w{'choix_projet'}->show();
-
-    } else {
-	my $dialog = Gtk3::MessageDialog
-	    ->new($w{'main_window'},
-		  'destroy-with-parent',
-		  'info','ok',
-		  __"You don't have any MC project in directory %s!",$config->get('rep_projets'));
-	$dialog->run;
-	$dialog->destroy;
-
-    }
-}
-
-sub project_choose_directory {
-  my $d=Gtk3::FileChooserDialog
-    ->new(__("Choose directory"),
-	  $w{'choix_projet'},'select-folder',
-	  'gtk-cancel'=>'cancel',
-	  'gtk-ok'=>'ok');
-  $d->set_current_folder($w{'local_rep_projets'});
-  my $r=$d->run;
-  if($r eq 'ok') {
-    my $rep=$d->get_filename || $d->get_current_directory;
-    utf8::downgrade($rep);
-    if(-d $rep) {
-      $w{'local_rep_projets'}=$rep;
-    }
+    # TRANSLATORS: Window title when creating a new project.
+    $w{'choix_projet'}->set_title(__"New AMC project");
   }
-  $d->destroy();
 
-  if($r eq 'ok') {
-    projects_show();
+
+  if($oo{'gestion'}) {
+    $w{'label_etat'}->set_text(__"Projects management:");
+    $w{'label_action'}->set_markup(__"Change project name:");
+    $w{'projet_bouton_ouverture'}->hide();
+    for (qw/supprime clone renomme/) {
+      $w{'projet_bouton_'.$_}->show();
+    }
+    $w{'projet_bouton_annule_label'}->set_text(__"Back");
+
+    # TRANSLATORS: Window title when managing projects.
+    $w{'choix_projet'}->set_title(__"AMC projects management");
   }
+
+  # mise a jour liste des projets dans la fenetre
+
+  if($config->get('conserve_taille')) {
+    AMC::Gui::WindowSize::size_monitor
+	($w{'choix_projet'}, {config=>$config,
+			      key=>'global:projects_list_window_size'});
+  }
+  
+  $w{projet_select_directory}->set_current_folder($w{'local_rep_projets'});
+  $w{choix_projet}->show;
 }
 
 sub projet_gestion_check {
-  my ($open_ok)=@_;
+  my ($open_ok) = @_;
 
-    # lequel ?
+  my $proj = get_selected_project();
 
-    my $sel=$w{'choix_projets_liste'}->get_selected_items()->[0];
-    my $iter;
-    my $proj;
+  return('') if(!$proj);
 
-    if($sel) {
-	$iter=$proj_store->get_iter($sel);
-	$proj=$proj_store->get($iter,PROJ_NOM_PLAIN) if($iter);
-    }
+  return($proj) if($open_ok);
 
-    return('','') if(!$proj);
+  # Impossible with current open project
 
-  return($proj,$iter) if($open_ok);
+  if($projet{'nom'} && $proj eq $projet{'nom'}) {
+    my $dialog = Gtk3::MessageDialog
+	->new($w{'choix_projet'},
+	      'destroy-with-parent',
+	      'error','ok',
+	      __"You can't change project %s since it's open.",$proj);
+    $dialog->run;
+    $dialog->destroy;
+    $w{'choix_projet'}->set_keep_above(1);
+    $proj = '';
+  }
 
-    # est-ce le projet en cours ?
-
-    if($projet{'nom'} && $proj eq $projet{'nom'}) {
-	my $dialog = Gtk3::MessageDialog
-	    ->new($w{'choix_projet'},
-		  'destroy-with-parent',
-		  'error','ok',
-		  __"You can't change project %s since it's open.",$proj);
-	$dialog->run;
-	$dialog->destroy;
-	$w{'choix_projet'}->set_keep_above(1);
-	$proj='';
-    }
-
-    return($proj,$iter);
+  return($proj);
 }
 
 sub projet_liste_clone {
-  my ($proj,$iter)=projet_gestion_check(1);
+  my ($proj) = projet_gestion_check(1);
   return if(!$proj);
 
-  my $proj_clone=new_filename($shortcuts->absolu($w{'local_rep_projets'}).'/'.$proj);
+  my $proj_clone =
+      new_filename($shortcuts->absolu($w{'local_rep_projets'}).'/'.$proj);
   my (undef,undef,$proj_c) = splitpath($proj_clone);
 
   my $dialog = Gtk3::MessageDialog
@@ -1654,10 +1651,9 @@ sub projet_liste_clone {
 }
 
 my $nom_original='';
-my $nom_original_iter='';
 
 sub projet_liste_renomme {
-    my ($proj,$iter)=projet_gestion_check();
+    my ($proj) = projet_gestion_check();
     return if(!$proj);
 
     # ouverture zone :
@@ -1665,7 +1661,6 @@ sub projet_liste_renomme {
     $w{'projet_nom'}->set_text(glib_filename($proj));
 
     $nom_original=$proj;
-    $nom_original_iter=$iter;
 
     # boutons...
     for (qw/annule renomme clone supprime/) {
@@ -1724,13 +1719,7 @@ sub projet_mv_yes {
           debug_and_stderr("ERROR (move project): $!");
         }
 
-        $proj_store->set($nom_original_iter,
-                         PROJ_NOM,glib_filename($nom_nouveau),
-                        );
-        utf8::downgrade($nom_nouveau);
-        $proj_store->set($nom_original_iter,
-                         PROJ_NOM_PLAIN,$nom_nouveau,
-                        );
+	projects_show();
       }
     } else {
       debug_and_stderr "No original directory";
@@ -1821,7 +1810,7 @@ sub project_copy {
 }
 
 sub projet_liste_supprime {
-    my ($proj,$iter)=projet_gestion_check();
+    my ($proj) = projet_gestion_check();
     return if(!$proj);
 
     # on demande confirmation...
@@ -1845,8 +1834,6 @@ sub projet_liste_supprime {
 
     debug "Removing project $proj !";
 
-    $proj_store->remove($iter);
-
     # suppression effective des fichiers...
 
     if($w{'local_rep_projets'}) {
@@ -1860,76 +1847,77 @@ sub projet_liste_supprime {
     } else {
       debug "No projects directory";
     }
+
+    projects_show();
+}
+
+sub get_selected_project {
+  my $sel_items=$w{'choix_projets_liste'}->get_selected_children();
+  return if(!@$sel_items);
+  my $proj=$sel_items->[0]->get_child()->{_amc_project_data}->{name};
+  return($proj);
 }
 
 sub projet_charge_ok {
+  # ouverture projet deja existant
 
-    # ouverture projet deja existant
+  my $proj=get_selected_project();
+  return if(!$proj);
 
-    my $sel_items=$w{'choix_projets_liste'}->get_selected_items();
-    return if(!$sel_items);
-    my $sel=$sel_items->[0];
+  $w{'choix_projet'}->destroy();
+  Gtk3::main_iteration while ( Gtk3::events_pending );
 
-    my $proj;
-
-    if($sel) {
-	$proj=$proj_store->get($proj_store->get_iter($sel),PROJ_NOM_PLAIN);
+  if($proj) {
+    my $reponse='yes';
+    my $options_file=fich_options($proj,$w{'local_rep_projets'});
+    if(! -f $options_file) {
+      debug_and_stderr "Options file not found: ".$options_file
+	  .(utf8::is_utf8($options_file) ? " (UTF8)" : "");
+      my $dialog = Gtk3::MessageDialog
+	  ->new($w{'main_window'},
+		'destroy-with-parent',
+		'warning','yes-no','');
+      $dialog->set_markup(
+	sprintf(__("You selected directory <b>%s</b> as a project to open.")." "
+		.__("However, this directory does not seem to contain a project. Do you still want to try?"),$proj));
+      $reponse=$dialog->run;
+      $dialog->destroy;
     }
+    if($reponse eq 'yes') {
+      quitte_projet() or return();
 
-    $w{'choix_projet'}->destroy();
-    Gtk3::main_iteration while ( Gtk3::events_pending );
+      # If the project to open lies on a removable media, suggest
+      # to copy it first to the user standard projects directory:
 
-    if($proj) {
-        my $reponse='yes';
-        my $options_file=fich_options($proj,$w{'local_rep_projets'});
-	if(! -f $options_file) {
-          debug_and_stderr "Options file not found: ".$options_file
-            .(utf8::is_utf8($options_file) ? " (UTF8)" : "");
-	    my $dialog = Gtk3::MessageDialog
-		->new($w{'main_window'},
-                      'destroy-with-parent',
-                      'warning','yes-no','');
-            $dialog->set_markup(
-				  sprintf(__("You selected directory <b>%s</b> as a project to open.")." "
-					  .__("However, this directory does not seem to contain a project. Do you still want to try?"),$proj));
-	    $reponse=$dialog->run;
-	    $dialog->destroy;
-	}
-	if($reponse eq 'yes') {
-	  quitte_projet() or return();
-
-	  # If the project to open lies on a removable media, suggest
-	  # to copy it first to the user standard projects directory:
-
-	  if($w{'local_rep_projets'} =~ /^\/media\//
-	    && $config->get_absolute('projects_home') !~ /^\/media\//) {
-	    my $dialog = Gtk3::MessageDialog
-		->new($w{'main_window'},
-                      'destroy-with-parent',
-                      'warning','yes-no','');
-            $dialog->set_markup(
-				  sprintf(__("You selected project <b>%s</b> from directory <i>%s</i>.")." "
-					  .__("Do you want to copy this project to your projects directory before opening it?"),
-					  $proj,$w{'local_rep_projets'}));
-	    my $r=$dialog->run;
-	    $dialog->destroy;
-	    if($r eq 'yes') {
-	      my $proj_dest=new_filename($config->get_absolute('projects_home').'/'.$proj);
-	      if(project_copy($w{'local_rep_projets'}.'/'.$proj,
-			      $proj_dest)) {
-		(undef,undef,$proj_dest) = splitpath($proj_dest);
-		$w{'local_rep_projets'}=$config->get_absolute('projects_home');
-		$proj=$proj_dest;
-	      }
-	    }
+      if($w{'local_rep_projets'} =~ /^\/media\//
+	 && $config->get_absolute('projects_home') !~ /^\/media\//) {
+	my $dialog = Gtk3::MessageDialog
+	    ->new($w{'main_window'},
+		  'destroy-with-parent',
+		  'warning','yes-no','');
+	$dialog->set_markup(
+	  sprintf(__("You selected project <b>%s</b> from directory <i>%s</i>.")." "
+		  .__("Do you want to copy this project to your projects directory before opening it?"),
+		  $proj,$w{'local_rep_projets'}));
+	my $r=$dialog->run;
+	$dialog->destroy;
+	if($r eq 'yes') {
+	  my $proj_dest=new_filename($config->get_absolute('projects_home').'/'.$proj);
+	  if(project_copy($w{'local_rep_projets'}.'/'.$proj,
+			  $proj_dest)) {
+	    (undef,undef,$proj_dest) = splitpath($proj_dest);
+	    $w{'local_rep_projets'}=$config->get_absolute('projects_home');
+	    $proj=$proj_dest;
 	  }
-
-	  # OK, now, open the project!
-
-	  set_projects_home($w{'local_rep_projets'});
-	  projet_ouvre($proj) ;
 	}
+      }
+
+      # OK, now, open the project!
+
+      set_projects_home($w{'local_rep_projets'});
+      projet_ouvre($proj) ;
     }
+  }
 }
 
 sub restricted_check {
@@ -2908,7 +2896,7 @@ sub saisie_manuelle {
 	 'en_quittant'=>($regarder ? '' : 
 			 sub { detecte_analyse(); assoc_state(); }),
 	 'size_monitor'=>{config=>$config,
-			  key=>($regarder?'checklayout':'manual')
+			  key=>"global:".($regarder?'checklayout':'manual')
 			  .'_window_size'},
          invalid_color_name=>$config->get("view_invalid_color"),
          empty_color_name=>$config->get("view_empty_color"),
@@ -4437,7 +4425,7 @@ sub edit_preferences {
     if($config->get('conserve_taille')) {
       AMC::Gui::WindowSize::size_monitor
 	  ($w{'edit_preferences'},{config=>$config,
-				   key=>'preferences_window_size'});
+				   key=>'global:preferences_window_size'});
     }
 
     # copy tooltip from note_* to defaut_note_*
@@ -6512,7 +6500,7 @@ sub send_emails {
   if($config->get('conserve_taille')) {
     AMC::Gui::WindowSize::size_monitor
 	($w{'email_dialog'},{config=>$config,
-			     key=>'mailing_window_size'});
+			     key=>'global:mailing_window_size'});
   }
 
   $prefs->transmet_pref($gap,prefix=>'email',root=>'project:');

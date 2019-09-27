@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.0"/>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-directory</property>
+  <requires lib="gtk+" version="3.12"/>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
@@ -20,6 +20,9 @@
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <property name="startup_id">amc-choix-projet</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox3">
         <property name="visible">True</property>
@@ -256,20 +259,7 @@
                 <property name="can_focus">False</property>
                 <property name="spacing">4</property>
                 <child>
-                  <object class="GtkButton" id="projet_bouton_choose_directory">
-                    <property name="label" translatable="yes">Choose directory</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="image">image1</property>
-                    <signal name="clicked" handler="project_choose_directory" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <object class="GtkLabel" id="label_etat">
@@ -291,28 +281,72 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolledwindow7">
-                <property name="height_request">200</property>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkFileChooserButton" id="projet_select_directory">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="action">select-folder</property>
+                    <property name="title" translatable="yes">Projects directory</property>
+                    <signal name="current-folder-changed" handler="project_set_directory" swapped="no"/>
+                    <signal name="file-set" handler="project_set_directory" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator" id="hseparator5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="name">liste_scroll</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkIconView" id="choix_projets_liste">
+                  <object class="GtkViewport" id="liste_viewport">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="margin">4</property>
-                    <property name="item_orientation">horizontal</property>
-                    <property name="spacing">4</property>
-                    <property name="row_spacing">1</property>
-                    <property name="column_spacing">1</property>
-                    <property name="item_padding">2</property>
-                    <signal name="item-activated" handler="projet_charge_ok" swapped="no"/>
+                    <property name="can_focus">False</property>
+                    <property name="valign">start</property>
+                    <child>
+                      <object class="GtkFlowBox" id="choix_projets_liste">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="min_children_per_line">1</property>
+                        <property name="activate_on_single_click">False</property>
+                        <signal name="child-activated" handler="projects_list_select" swapped="no"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -324,7 +358,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">4</property>
-                <property name="position">2</property>
+                <property name="position">4</property>
               </packing>
             </child>
           </object>
