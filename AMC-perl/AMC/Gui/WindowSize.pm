@@ -60,8 +60,8 @@ sub size_monitor {
 sub resize {
   my ($window, $event, $options)=@_;
   if($options->{config} && $event->type eq 'configure') {
-    my $dims=join('x', $event->width, $event->height);
-    my $pos=join('+', $event->window->get_root_origin);
+    my $dims=join('x', $window->get_size);
+    my $pos=join('+', $window->get_position);
     $options->{config}->set($options->{key}, $dims . "+" . $pos);
   }
   0;
