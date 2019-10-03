@@ -25,35 +25,35 @@ package AMC::Decoder::register::Barcode;
 use AMC::Decoder::register;
 use AMC::Basic;
 
-our @ISA=("AMC::Decoder::register");
+our @ISA = ("AMC::Decoder::register");
 
 use_gettext;
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    bless ($self, $class);
+    bless( $self, $class );
     return $self;
 }
 
 sub name {
-  return("Barcode");
+    return ("Barcode");
 }
 
 sub weight {
-  return(0.5);
+    return (0.5);
 }
 
 sub description {
-  return(__"Barcode");
+    return ( __ "Barcode" );
 }
 
 sub needs_perl_module {
-  return();
+    return ();
 }
 
 sub needs_command {
-  return('zbarimg');
+    return ('zbarimg');
 }
 
 1;

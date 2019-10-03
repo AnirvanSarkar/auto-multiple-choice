@@ -20,36 +20,52 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
-               perfect_copy=>[1],
-               grain=>0.1,rounding=>'s',
-               export_ods=>
-               {
-                stats=>[
-                        {id=>'A',invalid=>1,empty=>1,total=>5,
-                         answers=>[
-                                   {i=>1,ticked=>2},
-                                   {i=>2,ticked=>1},
-                                   {i=>3,ticked=>0},
-                                   {i=>4,ticked=>0},
-                                  ]},
-                        {id=>'B',invalid=>0,empty=>1,total=>5,
-                         answers=>[
-                                   {i=>1,ticked=>2},
-                                   {i=>2,ticked=>2},
-                                   {i=>3,ticked=>1},
-                                   {i=>4,ticked=>0},
-                                   {i=>5,ticked=>1},
-                                  ]},
-                         {id=>'C',invalid=>1,empty=>1,total=>5,
-                          answers=>[
-                                    {i=>1,ticked=>1},
-                                    {i=>2,ticked=>3},
-                                    {i=>3,ticked=>1},
-                                    {i=>4,ticked=>1},
-                                    {i=>5,ticked=>0},
-                                   ]},
-                      ],
-               },
-              )
-  ->default_process;
+AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'pdflatex',
+    perfect_copy => [1],
+    grain        => 0.1,
+    rounding     => 's',
+    export_ods   => {
+        stats => [
+            {
+                id      => 'A',
+                invalid => 1,
+                empty   => 1,
+                total   => 5,
+                answers => [
+                    { i => 1, ticked => 2 },
+                    { i => 2, ticked => 1 },
+                    { i => 3, ticked => 0 },
+                    { i => 4, ticked => 0 },
+                ]
+            },
+            {
+                id      => 'B',
+                invalid => 0,
+                empty   => 1,
+                total   => 5,
+                answers => [
+                    { i => 1, ticked => 2 },
+                    { i => 2, ticked => 2 },
+                    { i => 3, ticked => 1 },
+                    { i => 4, ticked => 0 },
+                    { i => 5, ticked => 1 },
+                ]
+            },
+            {
+                id      => 'C',
+                invalid => 1,
+                empty   => 1,
+                total   => 5,
+                answers => [
+                    { i => 1, ticked => 1 },
+                    { i => 2, ticked => 3 },
+                    { i => 3, ticked => 1 },
+                    { i => 4, ticked => 1 },
+                    { i => 5, ticked => 0 },
+                ]
+            },
+        ],
+    },
+)->default_process;

@@ -23,7 +23,7 @@ use AMC::Basic;
 
 use_gettext;
 
-my $t=AMC::Test->new(dir=>__FILE__);
+my $t = AMC::Test->new( dir => __FILE__ );
 
 $t->check_textest();
 

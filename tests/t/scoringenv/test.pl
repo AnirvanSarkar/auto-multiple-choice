@@ -26,64 +26,63 @@ use Data::Dumper;
 
 use_gettext;
 
-my $t=AMC::Test->new(dir=>__FILE__);
+my $t = AMC::Test->new( dir => __FILE__ );
 
 $t->begin("AMC::ScoringEnv type 0");
 
-my $se=AMC::ScoringEnv->new_from_directives_string("a=1,b=HA,c=HO+1");
+my $se = AMC::ScoringEnv->new_from_directives_string("a=1,b=HA,c=HO+1");
 
-$se->set_variable("HA",5,1);
-$se->set_variable("HO",10,1);
+$se->set_variable( "HA", 5,  1 );
+$se->set_variable( "HO", 10, 1 );
 
-$t->test($se->n_errors,0);
-$t->test($se->get_directive("a"),1);
-$t->test($se->get_directive("b"),5);
-$t->test($se->get_directive("c"),11);
+$t->test( $se->n_errors,           0 );
+$t->test( $se->get_directive("a"), 1 );
+$t->test( $se->get_directive("b"), 5 );
+$t->test( $se->get_directive("c"), 11 );
 
 $t->begin("AMC::ScoringEnv type 1");
 
 $se->set_type(1);
 
-$se->set_variable("HA",2,1);
-$se->set_variable("HO",2,1);
+$se->set_variable( "HA", 2, 1 );
+$se->set_variable( "HO", 2, 1 );
 
-$t->test($se->n_errors,0);
-$t->test($se->get_directive("a"),1);
-$t->test($se->get_directive("b"),2);
-$t->test($se->get_directive("c"),3);
+$t->test( $se->n_errors,           0 );
+$t->test( $se->get_directive("a"), 1 );
+$t->test( $se->get_directive("b"), 2 );
+$t->test( $se->get_directive("c"), 3 );
 
 $t->begin("AMC::ScoringEnv string(default.x,set.x,requires.x)");
 
 $se->set_type(2);
 
-$se->variables_from_directives_string
-  ("default.HA=10,default.HO=0,set.HO=HA*2,requires.HA=1,requires.HO=1",
-   default=>1,set=>1);
+$se->variables_from_directives_string(
+    "default.HA=10,default.HO=0,set.HO=HA*2,requires.HA=1,requires.HO=1",
+    default => 1,
+    set     => 1
+);
 
-$t->test($se->n_errors,0);
-$t->test($se->get_directive("a"),1);
-$t->test($se->get_directive("b"),10);
-$t->test($se->get_directive("c"),21);
+$t->test( $se->n_errors,           0 );
+$t->test( $se->get_directive("a"), 1 );
+$t->test( $se->get_directive("b"), 10 );
+$t->test( $se->get_directive("c"), 21 );
 
-$se->variables_from_directives_string
-  ("set.HO=5",set=>1);
-$t->test($se->n_errors,1);
+$se->variables_from_directives_string( "set.HO=5", set => 1 );
+$t->test( $se->n_errors, 1 );
 
-$se->variables_from_directives_string
-  ("requires.HI=1",requires=>1);
-$t->test($se->n_errors,2);
+$se->variables_from_directives_string( "requires.HI=1", requires => 1 );
+$t->test( $se->n_errors, 2 );
 
 $t->begin("AMC::ScoringEnv directives(default.x,set.x,requires.x)");
 
 $se->clear_errors;
 
 $se->process_directives("x=-XX,y=YY*3,set.XX=2,set.YY=XX*5+HA");
-$se->variables_from_directives(set=>1);
+$se->variables_from_directives( set => 1 );
 
-$t->test($se->n_errors,0);
-$t->test($se->get_directive("x"),-2);
-$t->test($se->get_directive("y"),60);
+$t->test( $se->n_errors,           0 );
+$t->test( $se->get_directive("x"), -2 );
+$t->test( $se->get_directive("y"), 60 );
 
 $t->ok;
-
 

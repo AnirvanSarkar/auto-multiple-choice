@@ -25,61 +25,63 @@ package AMC::Filter::register::plain;
 use AMC::Filter::register;
 use AMC::Basic;
 
-our @ISA=("AMC::Filter::register");
+our @ISA = ("AMC::Filter::register");
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    bless ($self, $class);
+    bless( $self, $class );
     return $self;
 }
 
 sub name {
-  return("AMC-TXT");
+    return ("AMC-TXT");
 }
 
 sub default_filename {
-  return("source.txt");
+    return ("source.txt");
 }
 
 sub default_content {
-  my ($self,$file)=@_;
-  open(EMPTY,">",$file);
-  print EMPTY "# AMC-TXT file\n";
-  print EMPTY "Title:\nPresentation:\n";
-  close(EMPTY);
+    my ( $self, $file ) = @_;
+    open( EMPTY, ">", $file );
+    print EMPTY "# AMC-TXT file\n";
+    print EMPTY "Title:\nPresentation:\n";
+    close(EMPTY);
 }
 
 sub description {
-  return(__"This is a plain text format for easy question writting. See the following minimal example:\n\nTitle: Paper title\n\n* Which is the capital city of Cameroon?\n+ Yaounde\n- Douala\n- Kribi");
+    return ( __
+"This is a plain text format for easy question writting. See the following minimal example:\n\nTitle: Paper title\n\n* Which is the capital city of Cameroon?\n+ Yaounde\n- Douala\n- Kribi"
+    );
 }
 
 sub weight {
-  return(0.2);
+    return (0.2);
 }
 
 sub forced_options {
-  return('moteur_latex_b');
+    return ('moteur_latex_b');
 }
 
 sub file_patterns {
-  return("*.txt","*.TXT");
+    return ( "*.txt", "*.TXT" );
 }
 
 sub needs_latex_package {
-  return("xltxtra","multicol");
+    return ( "xltxtra", "multicol" );
 }
 
 sub filetype {
-  return("txt");
+    return ("txt");
 }
 
 sub claim {
-  my ($self,$file)=@_;
-  my $h=$self->file_head($file,256);
-  return(.9) if($h && $h =~ /^\s*\#\s*AMC-TXT/);
-  return(.3) if($file =~ /\.txt$/i);
-  return(0.0);
+    my ( $self, $file ) = @_;
+    my $h = $self->file_head( $file, 256 );
+    return (.9) if ( $h && $h =~ /^\s*\#\s*AMC-TXT/ );
+    return (.3) if ( $file =~ /\.txt$/i );
+    return (0.0);
 }
 
 1;

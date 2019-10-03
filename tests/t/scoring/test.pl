@@ -25,90 +25,152 @@ use Data::Dumper;
 
 use_gettext;
 
-my $t=AMC::Test->new(dir=>__FILE__);
+my $t = AMC::Test->new( dir => __FILE__ );
 
 $t->begin("Scoring::simple");
 
-$t->test_scoring({multiple=>0,strategy=>"b=2"},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>0,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],2);
-$t->test_scoring({multiple=>0,strategy=>"b=2"},
-		 [{correct=>1,strategy=>'3',ticked=>1},
-		  {correct=>0,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],3);
-$t->test_scoring({multiple=>0,strategy=>"e=-1,b=2"},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>0,strategy=>'',ticked=>1},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],-1);
-$t->test_scoring({multiple=>0,strategy=>"v=-2,e=-1,b=2"},
-		 [{correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],-2);
+$t->test_scoring(
+    { multiple => 0, strategy => "b=2" },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 0, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    2
+);
+$t->test_scoring(
+    { multiple => 0, strategy => "b=2" },
+    [
+        { correct => 1, strategy => '3', ticked => 1 },
+        { correct => 0, strategy => '',  ticked => 0 },
+        { correct => 0, strategy => '',  ticked => 0 },
+    ],
+    3
+);
+$t->test_scoring(
+    { multiple => 0, strategy => "e=-1,b=2" },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 0, strategy => '', ticked => 1 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    -1
+);
+$t->test_scoring(
+    { multiple => 0, strategy => "v=-2,e=-1,b=2" },
+    [
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    -2
+);
 
 $t->begin("Scoring::multiple");
 
-$t->test_scoring({multiple=>1,strategy=>"b=2,m=-1",noneof_auto=>1},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],3);
-$t->test_scoring({multiple=>1,strategy=>"b=3,m=-2,p=-2",noneof_auto=>1},
-		 [{correct=>1,strategy=>'',ticked=>0},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],-1);
-$t->test_scoring({multiple=>1,strategy=>"e=-10,b=3,m=-2,p=-2"},
-		 [{correct=>0,noneof=>1,ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],-10);
-$t->test_scoring({multiple=>1,strategy=>"e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],-10);
-$t->test_scoring({multiple=>1,strategy=>"e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],3);
-$t->test_scoring({multiple=>1,strategy=>"e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>1},
-		 ],-10);
-$t->test_scoring({multiple=>1,default_strategy=>"formula=NBC-NMC",
-		  strategy=>"b=1,m=0"},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>1},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],1);
-$t->test_scoring({multiple=>1,default_strategy=>"formula=NBC-NMC",
-		  strategy=>"formula=,b=1,m=0"},
-		 [{correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>1},
-		  {correct=>1,strategy=>'',ticked=>0},
-		  {correct=>0,strategy=>'',ticked=>1},
-		  {correct=>0,strategy=>'',ticked=>0},
-		 ],3);
+$t->test_scoring(
+    { multiple => 1, strategy => "b=2,m=-1", noneof_auto => 1 },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    3
+);
+$t->test_scoring(
+    { multiple => 1, strategy => "b=3,m=-2,p=-2", noneof_auto => 1 },
+    [
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    -1
+);
+$t->test_scoring(
+    { multiple => 1, strategy => "e=-10,b=3,m=-2,p=-2" },
+    [
+        { correct => 0, noneof   => 1,  ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    -10
+);
+$t->test_scoring(
+    {
+        multiple => 1,
+        strategy => "e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"
+    },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    -10
+);
+$t->test_scoring(
+    {
+        multiple => 1,
+        strategy => "e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"
+    },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    3
+);
+$t->test_scoring(
+    {
+        multiple => 1,
+        strategy => "e=-10,formula=NBC,set.INVALID=NMC>0 || NBC>4"
+    },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 1 },
+    ],
+    -10
+);
+$t->test_scoring(
+    {
+        multiple         => 1,
+        default_strategy => "formula=NBC-NMC",
+        strategy         => "b=1,m=0"
+    },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 1 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    1
+);
+$t->test_scoring(
+    {
+        multiple         => 1,
+        default_strategy => "formula=NBC-NMC",
+        strategy         => "formula=,b=1,m=0"
+    },
+    [
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 1 },
+        { correct => 1, strategy => '', ticked => 0 },
+        { correct => 0, strategy => '', ticked => 1 },
+        { correct => 0, strategy => '', ticked => 0 },
+    ],
+    3
+);
 
 $t->ok;
-
 

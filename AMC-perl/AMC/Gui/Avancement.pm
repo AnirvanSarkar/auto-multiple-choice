@@ -25,95 +25,98 @@ package AMC::Gui::Avancement;
 use AMC::Basic;
 
 sub new {
-    my ($entier,%o)=(@_);
-    my $self={entier=>$entier,
-	      progres=>0,
-	      debug=>0,
-	      epsilon=>0.02,
-	      lastshown=>0,
-	      id=>'',
-	      bar=>'',
-	  };
+    my ( $entier, %o ) = (@_);
+    my $self = {
+        entier    => $entier,
+        progres   => 0,
+        debug     => 0,
+        epsilon   => 0.02,
+        lastshown => 0,
+        id        => '',
+        bar       => '',
+    };
 
-    for (keys %o) {
-	$self->{$_}=$o{$_} if(defined($self->{$_}));
+    for ( keys %o ) {
+        $self->{$_} = $o{$_} if ( defined( $self->{$_} ) );
     }
 
-    $self->{entier} = 0 if(!$self->{entier});
+    $self->{entier} = 0 if ( !$self->{entier} );
 
-    debug "Create progression pipe for <".$self->{id}."> up to $entier".
-      ($self->{bar}?" (progress bar side)":"");
+    debug "Create progression pipe for <"
+      . $self->{id}
+      . "> up to $entier"
+      . ( $self->{bar} ? " (progress bar side)" : "" );
 
     bless $self;
-    $|++ if($self->{id});
-    return($self);
+    $|++ if ( $self->{id} );
+    return ($self);
 }
 
 sub progres {
-    my ($self,$suite)=(@_);
-    $suite *=  $self->{entier};
-    $self->{progres}+=$suite;
-    if($self->{progres}>$self->{entier}) {
-	$suite-=$self->{progres}-$self->{entier};
-	$self->{progres}=$self->{entier};
+    my ( $self, $suite ) = (@_);
+    $suite *= $self->{entier};
+    $self->{progres} += $suite;
+    if ( $self->{progres} > $self->{entier} ) {
+        $suite -= $self->{progres} - $self->{entier};
+        $self->{progres} = $self->{entier};
     }
-    print "===<".$self->{id}.">=+$suite\n" if($self->{id});
+    print "===<" . $self->{id} . ">=+$suite\n" if ( $self->{id} );
 }
 
 sub text {
-  my ($self,$text)=(@_);
-  print "===<".$self->{id}.">=T($text)\n" if($self->{id});
+    my ( $self, $text ) = (@_);
+    print "===<" . $self->{id} . ">=T($text)\n" if ( $self->{id} );
 }
 
 sub progres_abs {
-    my ($self,$suite)=(@_);
-    $self->progres($suite-$self->{progres});
+    my ( $self, $suite ) = (@_);
+    $self->progres( $suite - $self->{progres} );
 }
 
 sub fin {
-    my ($self,$suite)=(@_);
+    my ( $self, $suite ) = (@_);
     $self->progres_abs(1);
 }
 
 sub etat {
-    my ($self)=@_;
-    return($self->{progres});
+    my ($self) = @_;
+    return ( $self->{progres} );
 }
 
 sub lit {
-    my ($self,$s)=(@_);
-    my $r=-1;
-    if($s =~ /===<(.*)>=\+([0-9,.]+(?:e[+-]?[0-9]+)?)/) {
-	my $id=$1;
-	my $suite=$2;
-	$suite =~ s/,/./;
-	$self->{progres}+=$suite;
+    my ( $self, $s ) = (@_);
+    my $r = -1;
+    if ( $s =~ /===<(.*)>=\+([0-9,.]+(?:e[+-]?[0-9]+)?)/ ) {
+        my $id    = $1;
+        my $suite = $2;
+        $suite =~ s/,/./;
+        $self->{progres} += $suite;
 
-	if($self->{progres}<0) {
-	    debug("progres($id)=$self->{progres}");
-	    $self->{progres}=0;
-	}
-	if($self->{progres}>1) {
-	    debug("progres($id)=$self->{progres}");
-	    $self->{progres}=1;
-	}
+        if ( $self->{progres} < 0 ) {
+            debug("progres($id)=$self->{progres}");
+            $self->{progres} = 0;
+        }
+        if ( $self->{progres} > 1 ) {
+            debug("progres($id)=$self->{progres}");
+            $self->{progres} = 1;
+        }
 
-	$r=$self->{progres};
+        $r = $self->{progres};
     }
-    if($s =~ /===<(.*)>=T\((.*)\)$/) {
-      if($self->{bar}) {
-	$self->{bar}->set_text($2);
-      }
-      $self->{progres}=0;
-      $r=0;
+    if ( $s =~ /===<(.*)>=T\((.*)\)$/ ) {
+        if ( $self->{bar} ) {
+            $self->{bar}->set_text($2);
+        }
+        $self->{progres} = 0;
+        $r = 0;
     }
-    if($r>=0 && $self->{bar}) {
-      $self->{bar}->set_fraction($r);
-      if($r==0 || $r>=$self->{lastshown}+$self->{epsilon}) {
-	$self->{lastshown}=$r;
-      }
+    if ( $r >= 0 && $self->{bar} ) {
+        $self->{bar}->set_fraction($r);
+        if ( $r == 0 || $r >= $self->{lastshown} + $self->{epsilon} ) {
+            $self->{lastshown} = $r;
+        }
     }
-    return($r);
+    return ($r);
 }
 
 1;

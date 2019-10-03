@@ -20,12 +20,18 @@
 
 require "./AMC/Test.pm";
 
-my $t=AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
-		     notemax=>0,seuil=>0.15,grain=>0.5,rounding=>'n',
-		     scans=>[],
-		     check_marks=>{1=>121,2=>330,3=>421,4=>432},
-		     check_assoc=>{1=>121,3=>421,2=>'x','m:2'=>330,4=>432},
-		     perfect_copy=>[2])->update_sqlite();
+my $t = AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'pdflatex',
+    notemax      => 0,
+    seuil        => 0.15,
+    grain        => 0.5,
+    rounding     => 'n',
+    scans        => [],
+    check_marks  => { 1 => 121, 2 => 330, 3 => 421, 4 => 432 },
+    check_assoc  => { 1 => 121, 3 => 421, 2 => 'x', 'm:2' => 330, 4 => 432 },
+    perfect_copy => [2]
+)->update_sqlite();
 $t->get_marks();
 $t->check_marks();
 

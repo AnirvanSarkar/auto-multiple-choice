@@ -21,61 +21,61 @@
 use POSIX;
 
 sub available {
-  my $c=shift;
-  $ok='';
-  for (split(/:/,$ENV{PATH})) {
-    $ok=1 if(-x "$_/$c");
-  }
-  return($ok);
+    my $c = shift;
+    $ok = '';
+    for ( split( /:/, $ENV{PATH} ) ) {
+        $ok = 1 if ( -x "$_/$c" );
+    }
+    return ($ok);
 }
 
-my %k=(deb=>"XX",vc=>"",year=>"2016",month=>"01",day=>"01");
+my %k = ( deb => "XX", vc => "", year => "2016", month => "01", day => "01" );
 
-open(CHL,"ChangeLog");
-LINES: while(<CHL>) {
-  if(/^([0-9~:.a-z+-]+)\s+\((\d{4})-(\d{2})-(\d{2})\)/) {
-    $k{deb}=$1;
-    $k{year}=$2;
-    $k{month}=$3;
-    $k{day}=$4;
-    last LINES;
-  }
+open( CHL, "ChangeLog" );
+LINES: while (<CHL>) {
+    if (/^([0-9~:.a-z+-]+)\s+\((\d{4})-(\d{2})-(\d{2})\)/) {
+        $k{deb}   = $1;
+        $k{year}  = $2;
+        $k{month} = $3;
+        $k{day}   = $4;
+        last LINES;
+    }
 }
 
-$ENV{TZ}="UTC";
+$ENV{TZ} = "UTC";
 POSIX::tzset();
-$k{epoch}=POSIX::mktime(0, 0, 0, $k{day}, $k{month}-1, $k{year}-1900);
+$k{epoch} = POSIX::mktime( 0, 0, 0, $k{day}, $k{month} - 1, $k{year} - 1900 );
 
-if(available("svnversion")) {
-  $s=`svnversion`;
-  if($s =~ /([0-9]+)[SM]*$/) {
-    $k{vc}="svn:$1";
-  }
+if ( available("svnversion") ) {
+    $s = `svnversion`;
+    if ( $s =~ /([0-9]+)[SM]*$/ ) {
+        $k{vc} = "svn:$1";
+    }
 }
 
-if(available("hg") && -d ".hg") {
-  $s=`hg id`;
-  if($s =~ /^([0-9a-f]+\+?)/) {
-    $k{vc}="r:$1";
-  }
+if ( available("hg") && -d ".hg" ) {
+    $s = `hg id`;
+    if ( $s =~ /^([0-9a-f]+\+?)/ ) {
+        $k{vc} = "r:$1";
+    }
 }
 
-if(available("git") && -d ".git") {
-  chomp($s=`git rev-parse --short HEAD`);
-  if($s =~ /^([0-9a-f]+\+?)/) {
-    $k{vc}="r:$1";
-  }
-  chomp($s=`git log -1 --date=short --format=%cd`);
-  if($s =~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) {
-    $k{deb} =~ s/\+(hg|git)[0-9]{4}-[0-9]{2}-[0-9]{2}/+git$s/;
-  }
+if ( available("git") && -d ".git" ) {
+    chomp( $s = `git rev-parse --short HEAD` );
+    if ( $s =~ /^([0-9a-f]+\+?)/ ) {
+        $k{vc} = "r:$1";
+    }
+    chomp( $s = `git log -1 --date=short --format=%cd` );
+    if ( $s =~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ ) {
+        $k{deb} =~ s/\+(hg|git)[0-9]{4}-[0-9]{2}-[0-9]{2}/+git$s/;
+    }
 }
 
 $k{sty} = "$k{year}/$k{month}/$k{day} v$k{deb} $k{vc}";
 $k{sty} =~ s/\s+/ /;
 $k{sty} =~ s/\s+$//;
 
-open(VMK,">Makefile.versions");
+open( VMK, ">Makefile.versions" );
 print VMK "PACKAGE_V_DEB=$k{deb}\n";
 print VMK "PACKAGE_V_VC=$k{vc}\n";
 print VMK "PACKAGE_V_PDFDATE=$k{year}$k{month}$k{day}000000\n";

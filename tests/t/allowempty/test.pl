@@ -20,12 +20,19 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,filter=>'plain',tex_engine=>'xelatex',
-	       src=>'sujet.txt',
-	       list=>'students.txt',
-	       code=>'student.number',check_assoc=>{4=>'00000973',
-							5=>'00000974'},
-	       check_marks=>{5=>10,4=>9},
-	       annote=>[4,5],annote_position=>'case',
-	      )->default_process;
+AMC::Test->new(
+    dir         => __FILE__,
+    filter      => 'plain',
+    tex_engine  => 'xelatex',
+    src         => 'sujet.txt',
+    list        => 'students.txt',
+    code        => 'student.number',
+    check_assoc => {
+        4 => '00000973',
+        5 => '00000974'
+    },
+    check_marks     => { 5 => 10, 4 => 9 },
+    annote          => [ 4, 5 ],
+    annote_position => 'case',
+)->default_process;
 

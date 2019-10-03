@@ -20,5 +20,8 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,tex_engine=>'xelatex',extract_with=>'pdftk+NA')
-  ->default_process;
+AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'xelatex',
+    extract_with => 'pdftk+NA'
+)->default_process;

@@ -26,78 +26,82 @@ use AMC::Basic;
 use AMC::Filter;
 
 use Cwd;
-use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
+use File::Spec::Functions
+  qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Copy;
 use Text::ParseWords;
 
-our @ISA=("AMC::Filter");
+our @ISA = ("AMC::Filter");
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
-    bless ($self, $class);
+    bless( $self, $class );
     return $self;
 }
 
 sub pre_filter {
-  my ($self,$input_file)=@_;
+    my ( $self, $input_file ) = @_;
 
-  # first of all, look in the source file header if there are some
-  # AMC options
+    # first of all, look in the source file header if there are some
+    # AMC options
 
-  $self->{options}={};
+    $self->{options} = {};
 
-  open(INPUT,$input_file);
- LINE: while(<INPUT>) {
-    if(/^[%]{2}AMC:\s*([a-zA-Z0-9_-]+)\s*=\s*(.*)/) {
-      $self->{options}->{$1}=$2;
+    open( INPUT, $input_file );
+  LINE: while (<INPUT>) {
+        if (/^[%]{2}AMC:\s*([a-zA-Z0-9_-]+)\s*=\s*(.*)/) {
+            $self->{options}->{$1} = $2;
+        }
+        last LINE if ( !/^%/ );
     }
-    last LINE if(!/^%/);
-  }
-  close(INPUT);
+    close(INPUT);
 
-  print STDERR "Options : ".join(' ',keys %{$self->{options}})."\n";
+    print STDERR "Options : " . join( ' ', keys %{ $self->{options} } ) . "\n";
 
-  # pass some of these options to AMC project configuration
+    # pass some of these options to AMC project configuration
 
-  $self->set_project_option('moteur_latex_b',$self->{options}->{latex_engine})
-    if($self->{options}->{latex_engine});
+    $self->set_project_option( 'moteur_latex_b',
+        $self->{options}->{latex_engine} )
+      if ( $self->{options}->{latex_engine} );
 
-  $self->set_filter_result('jobspecific',1) if($self->{options}->{jobspecific});
+    $self->set_filter_result( 'jobspecific', 1 )
+      if ( $self->{options}->{jobspecific} );
 
-  $self->set_filter_result('unchanged',1)
-    if(!$self->{options}->{preprocess_command});
+    $self->set_filter_result( 'unchanged', 1 )
+      if ( !$self->{options}->{preprocess_command} );
 }
 
 sub filter {
-  my ($self,$input_file,$output_file)=@_;
+    my ( $self, $input_file, $output_file ) = @_;
 
-  # exec preprocess command if needed
+    # exec preprocess command if needed
 
-  if($self->{options}->{preprocess_command}) {
+    if ( $self->{options}->{preprocess_command} ) {
 
-    # copy the file, unchanged
+        # copy the file, unchanged
 
-    copy($input_file,$output_file);
+        copy( $input_file, $output_file );
 
-    # exec preprocess command, that may modify this file
+        # exec preprocess command, that may modify this file
 
-    my ($fxa,$fxb,$f) = splitpath($output_file);
-    my @cmd=quotewords('\s+',0,$self->{options}->{preprocess_command});
-    $cmd[0]="./".$cmd[0] if($cmd[0] && $cmd[0] !~ m:/:);
-    push @cmd,$f;
+        my ( $fxa, $fxb, $f ) = splitpath($output_file);
+        my @cmd =
+          quotewords( '\s+', 0, $self->{options}->{preprocess_command} );
+        $cmd[0] = "./" . $cmd[0] if ( $cmd[0] && $cmd[0] !~ m:/: );
+        push @cmd, $f;
 
-    my $cwd=getcwd;
-    chdir(catpath($fxa,$fxb,''));
-    debug_and_stderr "Working directory: ".getcwd;
-    debug_and_stderr "Calling preprocess command: ".join(' ',@cmd);
-    $ENV{AMC_JOBNAME}=$self->{jobname};
-    if(system(@cmd)!=0) {
-      debug_and_stderr("Preprocess command call failed: [$?] $!");
+        my $cwd = getcwd;
+        chdir( catpath( $fxa, $fxb, '' ) );
+        debug_and_stderr "Working directory: " . getcwd;
+        debug_and_stderr "Calling preprocess command: " . join( ' ', @cmd );
+        $ENV{AMC_JOBNAME} = $self->{jobname};
+        if ( system(@cmd) != 0 ) {
+            debug_and_stderr("Preprocess command call failed: [$?] $!");
+        }
+        chdir($cwd);
+
     }
-    chdir($cwd);
-
-  }
 }
 
 1;

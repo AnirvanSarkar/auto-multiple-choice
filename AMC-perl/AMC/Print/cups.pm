@@ -28,130 +28,140 @@ use AMC::Basic;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 
-our @ISA=("AMC::Print");
+our @ISA = ("AMC::Print");
 
 sub nonnul {
-    my $s=shift;
+    my $s = shift;
     $s =~ s/\000//g;
-    return($s);
+    return ($s);
 }
 
 sub new {
-  my $class = shift;
-  my $self  = $class->SUPER::new(@_);
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
 
-  my @manque=();
+    my @manque = ();
 
-  for my $m ("Net::CUPS","Net::CUPS::PPD") {
-    if(check_install(module=>$m)) {
-      load($m);
-    } else {
-      push @manque,$m;
+    for my $m ( "Net::CUPS", "Net::CUPS::PPD" ) {
+        if ( check_install( module => $m ) ) {
+            load($m);
+        } else {
+            push @manque, $m;
+        }
     }
-  }
 
-  if(@manque) {
-    die "Needs Net::CUPS and Net::CUPS::PPD perl modules for CUPS printing";
-  } else {
-    debug_pm_version("Net::CUPS");
-    $self->{cups}=Net::CUPS->new();
-  }
+    if (@manque) {
+        die "Needs Net::CUPS and Net::CUPS::PPD perl modules for CUPS printing";
+    } else {
+        debug_pm_version("Net::CUPS");
+        $self->{cups} = Net::CUPS->new();
+    }
 
-  $self->{method}='cups';
-  return($self);
+    $self->{method} = 'cups';
+    return ($self);
 }
 
 sub check_available {
-  my @manque=();
+    my @manque = ();
 
-  for my $m ("Net::CUPS","Net::CUPS::PPD") {
-    if(!check_install(module=>$m)) {
-      push @manque,$m;
+    for my $m ( "Net::CUPS", "Net::CUPS::PPD" ) {
+        if ( !check_install( module => $m ) ) {
+            push @manque, $m;
+        }
     }
-  }
 
-  if(@manque) {
-    return(sprintf(__("Perl module(s) missing: %s"),join(' ',@manque)));
-  } else {
-    return();
-  }
+    if (@manque) {
+        return (
+            sprintf( __("Perl module(s) missing: %s"), join( ' ', @manque ) ) );
+    } else {
+        return ();
+    }
 }
 
 sub weight {
-  return(1.0);
+    return (1.0);
 }
 
 sub printers_list {
-  my ($self)=@_;
-  return(map { {name=>$_->getName(),
-		  description=>$_->getDescription() } }
-	 ($self->{cups}->getDestinations()));
+    my ($self) = @_;
+    return (
+        map { { name => $_->getName(), description => $_->getDescription() } }
+          ( $self->{cups}->getDestinations() ) );
 }
 
 sub default_printer {
-  my ($self)=@_;
-  # get default printer
-  my $d=$self->{cups}->getDestination();
-  if($d) {
-    return($d->getName());
-  } else {
-    # if no default printer found, get printers list...
-    my @d=$self->{cups}->getDestinations();
-    if(@d) {
-      # ... and return the first one
-      return($d[0]->getName());
+    my ($self) = @_;
+
+    # get default printer
+    my $d = $self->{cups}->getDestination();
+    if ($d) {
+        return ( $d->getName() );
     } else {
-      return("");
+
+        # if no default printer found, get printers list...
+        my @d = $self->{cups}->getDestinations();
+        if (@d) {
+
+            # ... and return the first one
+            return ( $d[0]->getName() );
+        } else {
+            return ("");
+        }
     }
-  }
 }
 
 sub printer_selected_options {
-  my ($self,$printer)=@_;
-  my @o=();
-  my $ppd=$self->{cups}->getPPD($printer);
-  if($ppd) {
-    for my $k (split(/\s+/,$self->{useful_options})) {
-      my $option=$ppd->getOption($k);
-      if(ref($option) eq 'HASH') {
-	push @o,{name=>$k,
-		 description=>nonnul($option->{text}),
-		 default=>nonnul($option->{defchoice}),
-		 values=>[map { {name=>nonnul($_->{choice}),
-				   description=>nonnul($_->{text}) } }
-			  (@{$option->{choices}})],
-		}
-      }
+    my ( $self, $printer ) = @_;
+    my @o   = ();
+    my $ppd = $self->{cups}->getPPD($printer);
+    if ($ppd) {
+        for my $k ( split( /\s+/, $self->{useful_options} ) ) {
+            my $option = $ppd->getOption($k);
+            if ( ref($option) eq 'HASH' ) {
+                push @o, {
+                    name        => $k,
+                    description => nonnul( $option->{text} ),
+                    default     => nonnul( $option->{defchoice} ),
+                    values      => [
+                        map {
+                            {
+                                name        => nonnul( $_->{choice} ),
+                                description => nonnul( $_->{text} )
+                            }
+                        } ( @{ $option->{choices} } )
+                    ],
+                };
+            }
+        }
+    } else {
+        debug "WARNING: getPPD failed for printer $printer";
     }
-  } else {
-    debug "WARNING: getPPD failed for printer $printer";
-  }
-  return(@o);
+    return (@o);
 }
 
 # PRINTING
 
 sub select_printer {
-  my ($self,$printer)=@_;
-  $self->{dest}=$self->{cups}->getDestination($printer);
+    my ( $self, $printer ) = @_;
+    $self->{dest} = $self->{cups}->getDestination($printer);
 }
 
 sub set_option {
-  my ($self,$option,$value)=@_;
-  if($self->{dest}) {
-    $self->{dest}->addOption($option,$value);
-  } else {
-    debug "WARNING: set_option with no DEST";
-  }
+    my ( $self, $option, $value ) = @_;
+    if ( $self->{dest} ) {
+        $self->{dest}->addOption( $option, $value );
+    } else {
+        debug "WARNING: set_option with no DEST";
+    }
 }
 
 sub print_file {
-  my ($self,$filename,$label)=@_;
-  if($self->{dest}) {
-    $self->{dest}->printFile($filename,$label);
-  } else {
-    debug "ERROR: print_file with no DEST";
-  }
+    my ( $self, $filename, $label ) = @_;
+    if ( $self->{dest} ) {
+        $self->{dest}->printFile( $filename, $label );
+    } else {
+        debug "ERROR: print_file with no DEST";
+    }
 }
 
 1;

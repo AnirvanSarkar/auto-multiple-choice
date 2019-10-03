@@ -27,7 +27,7 @@ use AMC::Basic;
 
 use XML::Simple;
 
-our @ISA=("AMC::Decoder");
+our @ISA = ("AMC::Decoder");
 
 use_gettext;
 
@@ -39,54 +39,64 @@ use_gettext;
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    bless ($self, $class);
+    bless( $self, $class );
     return $self;
 }
 
 sub decode_from_path {
-  my ($self, $path, $unlink_when_finished) = @_;
-  my $r;
-  my @cmd = ( "zbarimg", "--xml", "-q", $path );
-  debug("Calling: ".join(' ',@cmd));
-  my $xml = '';
-  if(open( ZBAR, "-|", @cmd)) {
-    while(<ZBAR>) {
-      $xml .= $_;
-    }
-    close ZBAR;
-    my $result = XMLin($xml, ForceArray => [ 'symbol' ]);
-    my $s = $result->{source}->{index}->{symbol};
-    if($s) {
-      my $best = $s->[0];
-      $r={ok => 1,
-	  status => "$best->{type} Q:$best->{quality}",
-	  value => $best->{data}};
+    my ( $self, $path, $unlink_when_finished ) = @_;
+    my $r;
+    my @cmd = ( "zbarimg", "--xml", "-q", $path );
+    debug( "Calling: " . join( ' ', @cmd ) );
+    my $xml = '';
+    if ( open( ZBAR, "-|", @cmd ) ) {
+        while (<ZBAR>) {
+            $xml .= $_;
+        }
+        close ZBAR;
+        my $result = XMLin( $xml, ForceArray => ['symbol'] );
+        my $s      = $result->{source}->{index}->{symbol};
+        if ($s) {
+            my $best = $s->[0];
+            $r = {
+                ok     => 1,
+                status => "$best->{type} Q:$best->{quality}",
+                value  => $best->{data}
+            };
+        } else {
+            $r = {
+                ok     => 0,
+                status => "no barcode found",
+                value  => ''
+            };
+        }
     } else {
-      $r={ok => 0,
-	  status => "no barcode found",
-	  value => ''};
+        $r = {
+            ok     => 0,
+            status => "failed: $!",
+            value  => ''
+        };
     }
-  } else {
-    $r={ok => 0,
-	status => "failed: $!",
-	value => ''};
-  }
-  unlink($path) if($unlink_when_finished);
-  return($r);
+    unlink($path) if ($unlink_when_finished);
+    return ($r);
 }
 
 sub decode_image {
-  my ($self, $path, $blob) = @_;
+    my ( $self, $path, $blob ) = @_;
 
-  if(-f $path) {
-    return($self->decode_from_path($path));
-  } elsif($blob) {
-    return($self->decode_from_path(blob_to_file($blob), 1));
-  } else {
-    return({ok => 0,
-	    status => 'no image',
-	    value => ''});
-  }
+    if ( -f $path ) {
+        return ( $self->decode_from_path($path) );
+    } elsif ($blob) {
+        return ( $self->decode_from_path( blob_to_file($blob), 1 ) );
+    } else {
+        return (
+            {
+                ok     => 0,
+                status => 'no image',
+                value  => ''
+            }
+        );
+    }
 }
 
 1;

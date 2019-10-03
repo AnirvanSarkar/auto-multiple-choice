@@ -20,20 +20,20 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
-	       seuil=>0.5,
-	       export_full_csv=>
-	       [
-                {-copy=>1,-question=>'expo1',-score=>5},
-		{-copy=>1,-question=>'expo2',-score=>5},
-		{-copy=>1,-question=>'scientific',-score=>5},
-                {-copy=>2,-question=>'expo1',-score=>3},
-		{-copy=>2,-question=>'expo2',-score=>3},
-		{-copy=>2,-question=>'scientific',-score=>3},
-                {-copy=>4,-question=>'expo1',-score=>0},
-		{-copy=>4,-question=>'expo2',-score=>0},
-		{-copy=>4,-question=>'scientific',-score=>0},
-		],
-	      )
-  ->default_process;
+AMC::Test->new(
+    dir             => __FILE__,
+    tex_engine      => 'pdflatex',
+    seuil           => 0.5,
+    export_full_csv => [
+        { -copy => 1, -question => 'expo1',      -score => 5 },
+        { -copy => 1, -question => 'expo2',      -score => 5 },
+        { -copy => 1, -question => 'scientific', -score => 5 },
+        { -copy => 2, -question => 'expo1',      -score => 3 },
+        { -copy => 2, -question => 'expo2',      -score => 3 },
+        { -copy => 2, -question => 'scientific', -score => 3 },
+        { -copy => 4, -question => 'expo1',      -score => 0 },
+        { -copy => 4, -question => 'expo2',      -score => 0 },
+        { -copy => 4, -question => 'scientific', -score => 0 },
+    ],
+)->default_process;
 

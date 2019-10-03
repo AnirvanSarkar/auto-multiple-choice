@@ -20,7 +20,8 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,
-               export_full_csv=>[{-copy=>3,-question=>'add',-score=>2}])
-  ->default_process;
+AMC::Test->new(
+    dir             => __FILE__,
+    export_full_csv => [ { -copy => 3, -question => 'add', -score => 2 } ]
+)->default_process;
 

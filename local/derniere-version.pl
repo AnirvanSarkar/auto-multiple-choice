@@ -23,72 +23,82 @@ use Getopt::Long;
 use Time::localtime;
 use File::stat;
 
-@d=();
-$mode='f';
-$ext='(i386|amd64).deb';
-$debug='';
-$precomp='';
-$fich='';
+@d       = ();
+$mode    = 'f';
+$ext     = '(i386|amd64).deb';
+$debug   = '';
+$precomp = '';
+$fich    = '';
 
-GetOptions("base=s"=>\@d,
-	   "fich=s"=>\$fich,
-	   "precomp!"=>\$precomp,
-	   "extension=s"=>\$ext,
-	   "mode=s"=>\$mode,
-	   "debug!"=>\$debug,
-	   );
+GetOptions(
+    "base=s"      => \@d,
+    "fich=s"      => \$fich,
+    "precomp!"    => \$precomp,
+    "extension=s" => \$ext,
+    "mode=s"      => \$mode,
+    "debug!"      => \$debug,
+);
 
-@d=("/home/alexis/enseignement","/tmp","tmp") if(!@d && !$fich);
+@d = ( "/home/alexis/enseignement", "/tmp", "tmp" ) if ( !@d && !$fich );
 
 my @v;
 
 for my $d (@d) {
-  if(-d $d) {
-    opendir(DIR,$d);
-    push @v,map { "$d/$_" } grep { /^auto-multiple-choice_.*$ext$/ && ($precomp || ! /precomp/) && ! /current/ } readdir(DIR);
-    closedir(DIR);
-  }
+    if ( -d $d ) {
+        opendir( DIR, $d );
+        push @v, map { "$d/$_" } grep {
+            /^auto-multiple-choice_.*$ext$/
+              && ( $precomp || !/precomp/ )
+              && !/current/
+        } readdir(DIR);
+        closedir(DIR);
+    }
 }
 
-push @v,$fich if($fich);
+push @v, $fich if ($fich);
 
-@mois=qw/janvier février mars avril mai juin juillet août septembre octobre novembre décembre/;
+@mois =
+  qw/janvier février mars avril mai juin juillet août septembre octobre novembre décembre/;
 
 sub la_date {
-    my $f=localtime(stat(shift)->mtime);
-    return($f->mday." ".$mois[$f->mon]." ".($f->year+1900));
+    my $f = localtime( stat(shift)->mtime );
+    return ( $f->mday . " " . $mois[ $f->mon ] . " " . ( $f->year + 1900 ) );
 }
 
 sub la_date_en {
-    my $f=localtime(stat(shift)->mtime);
-    return(sprintf("%d-%02d-%02d",$f->year+1900,$f->mon+1,$f->mday));
+    my $f = localtime( stat(shift)->mtime );
+    return (
+        sprintf( "%d-%02d-%02d", $f->year + 1900, $f->mon + 1, $f->mday ) );
 }
 
 sub version {
-    my $f=shift;
+    my $f = shift;
     $f =~ s/^.*?_([^_]+)(_.*)?\.?$ext/$1/;
-    return($f);
+    return ($f);
 }
 
 sub vc {
-    my ($x,$y)=@_;
-    my $vx=version($x);
-    my $vy=version($y);
-    print STDERR "$vx $vy\n" if($debug);
+    my ( $x, $y ) = @_;
+    my $vx = version($x);
+    my $vy = version($y);
+    print STDERR "$vx $vy\n" if ($debug);
     `dpkg --compare-versions $vx gt $vy`;
-    return($?);
+    return ($?);
 }
 
-@v=sort { vc($a,$b); } @v;
+@v = sort { vc( $a, $b ); } @v;
 
-if($mode =~ /f/i) {
+if ( $mode =~ /f/i ) {
     print "$v[0]\n";
-} elsif($mode =~ /v/i) {
-    print version($v[0])."\n";
-} elsif($mode =~ /h/i) {
-    print "<!--#set var=\"VERSION\" value=\"".version($v[0])."\"-->\n";
-    print "<!--#set var=\"VERSIONDATE\" value=\"".la_date($v[0])."\"-->\n";
-    print "<!--#set var=\"VERSIONDATEEN\" value=\"".la_date_en($v[0])."\"-->\n";
+} elsif ( $mode =~ /v/i ) {
+    print version( $v[0] ) . "\n";
+} elsif ( $mode =~ /h/i ) {
+    print "<!--#set var=\"VERSION\" value=\"" . version( $v[0] ) . "\"-->\n";
+    print "<!--#set var=\"VERSIONDATE\" value=\""
+      . la_date( $v[0] )
+      . "\"-->\n";
+    print "<!--#set var=\"VERSIONDATEEN\" value=\""
+      . la_date_en( $v[0] )
+      . "\"-->\n";
 }
-
 

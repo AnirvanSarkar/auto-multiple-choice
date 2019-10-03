@@ -20,10 +20,12 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,
-               tex_engine=>'pdflatex',
-               perfect_copy=>'',seuil=>0.5,
-               notemax=>24,rounding=>'n',
-               check_marks=>{1=>18,2=>16,3=>0},
-              )
-  ->default_process;
+AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'pdflatex',
+    perfect_copy => '',
+    seuil        => 0.5,
+    notemax      => 24,
+    rounding     => 'n',
+    check_marks  => { 1 => 18, 2 => 16, 3 => 0 },
+)->default_process;

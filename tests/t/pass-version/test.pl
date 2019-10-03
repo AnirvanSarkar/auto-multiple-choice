@@ -20,38 +20,38 @@
 
 require "./AMC/Test.pm";
 
-my $t=AMC::Test->new(dir=>__FILE__);
+my $t = AMC::Test->new( dir => __FILE__ );
 
-if(!open(MV,"../Makefile.versions")) {
-  $t->trace("[E] Can't open versions file: $!");
-  exit 1;
+if ( !open( MV, "../Makefile.versions" ) ) {
+    $t->trace("[E] Can't open versions file: $!");
+    exit 1;
 }
-while(<MV>) {
-  $vsty=$1 if(/PACKAGE_V_STY=(.*)/);
+while (<MV>) {
+    $vsty = $1 if (/PACKAGE_V_STY=(.*)/);
 }
 close MV;
 
-if(!$vsty) {
-  $t->trace("[E] Can't find PACKAGE_V_STY");
-  exit 1;
+if ( !$vsty ) {
+    $t->trace("[E] Can't find PACKAGE_V_STY");
+    exit 1;
 }
 
 $t->check_textest;
 
-if(!open(LOG,$t->{temp_dir}."/amc.log")) {
-  $t->trace("[E] Can't open log file: $!");
-  exit 1;
+if ( !open( LOG, $t->{temp_dir} . "/amc.log" ) ) {
+    $t->trace("[E] Can't open log file: $!");
+    exit 1;
 }
-while(<LOG>) {
-  if(/AMC version: (.*)/) { $va=$1; }
-  if(/Package: automultiplechoice (.*)/) { $vb=$1; }
+while (<LOG>) {
+    if (/AMC version: (.*)/) { $va = $1; }
+    if (/Package: automultiplechoice (.*)/) { $vb = $1; }
 }
 close LOG;
 
 $t->begin("versions");
 
-$t->test($va,$vsty,"AMC");
-$t->test($vb,$vsty,"package");
+$t->test( $va, $vsty, "AMC" );
+$t->test( $vb, $vsty, "package" );
 
 $t->end();
 

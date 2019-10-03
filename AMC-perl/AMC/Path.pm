@@ -24,122 +24,128 @@ use strict;
 package AMC::Path;
 
 BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT);
+    use Exporter ();
+    our ( $VERSION, @ISA, @EXPORT );
 
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw( &proj2abs &abs2proj );
+    @ISA    = qw(Exporter);
+    @EXPORT = qw( &proj2abs &abs2proj );
 }
 
 sub abs2proj {
-    my ($surnoms,$fich)=@_;
-    if(defined($fich) && $fich) {
+    my ( $surnoms, $fich ) = @_;
+    if ( defined($fich) && $fich ) {
 
-	$fich =~ s/\/{2,}/\//g;
+        $fich =~ s/\/{2,}/\//g;
 
-      CLES:for my $s (sort { length($surnoms->{$b}) <=> length($surnoms->{$a}) } grep { $_ && $surnoms->{$_} } (keys %$surnoms)) {
-	  my $rep=$surnoms->{$s};
-	  $rep.="/" if($rep !~ /\/$/);
-	  $rep =~ s/\/{2,}/\//g;
-	  if($fich =~ s/^\Q$rep\E\/*//) {
-	      $fich="$s/$fich";
-	      last CLES;
-	  }
-      }
+      CLES:
+        for
+          my $s ( sort { length( $surnoms->{$b} ) <=> length( $surnoms->{$a} ) }
+            grep { $_ && $surnoms->{$_} } ( keys %$surnoms ) )
+        {
+            my $rep = $surnoms->{$s};
+            $rep .= "/" if ( $rep !~ /\/$/ );
+            $rep =~ s/\/{2,}/\//g;
+            if ( $fich =~ s/^\Q$rep\E\/*// ) {
+                $fich = "$s/$fich";
+                last CLES;
+            }
+        }
 
-	return($fich);
+        return ($fich);
     } else {
-	return('');
+        return ('');
     }
 }
 
 sub proj2abs {
-    my ($surnoms,$fich)=@_;
-    if(defined($fich)) {
-	if($fich =~ /^\//) {
-	    return($fich);
-	} else {
-	    $fich =~ s/^([^\/]*)//;
-	    my $code=$1;
-	    if(!$surnoms->{$code}) {
-		$fich=$code.$fich;
-		$code=$surnoms->{''};
-	    }
-	    my $rep=$surnoms->{$code};
-	    $rep.="/" if($rep !~ /\/$/);
-	    $rep.=$fich;
-	    $rep =~ s/\/{2,}/\//g;
-	    return($rep);
-	}
+    my ( $surnoms, $fich ) = @_;
+    if ( defined($fich) ) {
+        if ( $fich =~ /^\// ) {
+            return ($fich);
+        } else {
+            $fich =~ s/^([^\/]*)//;
+            my $code = $1;
+            if ( !$surnoms->{$code} ) {
+                $fich = $code . $fich;
+                $code = $surnoms->{''};
+            }
+            my $rep = $surnoms->{$code};
+            $rep .= "/" if ( $rep !~ /\/$/ );
+            $rep .= $fich;
+            $rep =~ s/\/{2,}/\//g;
+            return ($rep);
+        }
     } else {
-	return('');
+        return ('');
     }
 }
 
 sub new {
-  my (%o)=(@_);
+    my (%o) = (@_);
 
-  my $self={projects_path=>'',
-	    project_name=>'',
-	    home_dir=>'',
-	   };
+    my $self = {
+        projects_path => '',
+        project_name  => '',
+        home_dir      => '',
+    };
 
-  for my $k (keys %o) {
-    $self->{$k}=$o{$k} if(defined($self->{$k}));
-  }
+    for my $k ( keys %o ) {
+        $self->{$k} = $o{$k} if ( defined( $self->{$k} ) );
+    }
 
-  bless $self;
+    bless $self;
 
-  return($self);
+    return ($self);
 }
 
 sub set {
-  my ($self,%p)=@_;
-  for my $key (keys %p) {
-    $self->{$key}=$p{$key};
-  }
+    my ( $self, %p ) = @_;
+    for my $key ( keys %p ) {
+        $self->{$key} = $p{$key};
+    }
 }
 
 # builds a shorcuts list
 
 sub shortcuts {
-    my ($self,$proj)=@_;
-    my %s=();
+    my ( $self, $proj ) = @_;
+    my %s = ();
 
-    $proj=$self->{project_name} if(!defined($proj));
-    $proj='' if(!defined($proj));
-    if($proj eq '<HOME>') {
-      %s=('%HOME',$self->{home_dir});
+    $proj = $self->{project_name} if ( !defined($proj) );
+    $proj = '' if ( !defined($proj) );
+    if ( $proj eq '<HOME>' ) {
+        %s = ( '%HOME', $self->{home_dir} );
     } else {
-      %s=('%PROJETS'=>$self->{projects_path},
-	  '%HOME',$self->{home_dir},
-	  ''=>'%PROJETS',
-	 );
-      if($proj) {
-	$s{'%PROJET'}=$self->{projects_path}."/".$proj;
-	$s{''}='%PROJET';
-      }
+        %s = (
+            '%PROJETS' => $self->{projects_path},
+            '%HOME', $self->{home_dir},
+            '' => '%PROJETS',
+        );
+        if ($proj) {
+            $s{'%PROJET'} = $self->{projects_path} . "/" . $proj;
+            $s{''}        = '%PROJET';
+        }
     }
 
-    return(\%s);
+    return ( \%s );
 }
 
 # expands shortcuts like %PROJET, %HOME from a file path
 
 sub absolu {
-    my ($self,$f,$proj)=@_;
-    return($f) if(!defined($f));
-    $f=proj2abs($self->shortcuts($proj),$f);
+    my ( $self, $f, $proj ) = @_;
+    return ($f) if ( !defined($f) );
+    $f = proj2abs( $self->shortcuts($proj), $f );
     utf8::downgrade($f);
-    return($f);
+    return ($f);
 }
 
 # replaces some paths with their shortcuts in a file path
 
 sub relatif {
-    my ($self,$f,$proj)=@_;
-    return($f) if(!defined($f));
-    return(abs2proj($self->shortcuts($proj),$f));
+    my ( $self, $f, $proj ) = @_;
+    return ($f) if ( !defined($f) );
+    return ( abs2proj( $self->shortcuts($proj), $f ) );
 }
 
 1;

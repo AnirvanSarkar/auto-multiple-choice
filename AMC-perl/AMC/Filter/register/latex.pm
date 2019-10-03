@@ -25,58 +25,64 @@ package AMC::Filter::register::latex;
 use AMC::Filter::register;
 use AMC::Basic;
 
-our @ISA=("AMC::Filter::register");
+our @ISA = ("AMC::Filter::register");
 
 use_gettext;
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    bless ($self, $class);
+    bless( $self, $class );
     return $self;
 }
 
 sub name {
-  return("LaTeX");
+    return ("LaTeX");
 }
 
 sub default_filename {
-  return("source.tex");
+    return ("source.tex");
 }
 
 sub default_content {
-  my ($self,$file)=@_;
-  open(EMPTY,">",$file);
-  print EMPTY "\\documentclass{article}\n";
-  print EMPTY "\\usepackage{automultiplechoice}\n";
-  print EMPTY "\\begin{document}\n\n\\end{document}\n";
-  close(EMPTY);
+    my ( $self, $file ) = @_;
+    open( EMPTY, ">", $file );
+    print EMPTY "\\documentclass{article}\n";
+    print EMPTY "\\usepackage{automultiplechoice}\n";
+    print EMPTY "\\begin{document}\n\n\\end{document}\n";
+    close(EMPTY);
 }
 
 sub description {
-  return(__"This is the native format for AMC. LaTeX is not so easy to use for unexperienced users, but the LaTeX power allows the user to build any multiple choice subject. As an example, the following is possible with LaTeX but not with other formats:\n* any kind of layout,\n* questions with random numerical values,\n* use of figures, mathematical formulas\n* and much more!");
+    return ( __
+"This is the native format for AMC. LaTeX is not so easy to use for unexperienced users, but the LaTeX power allows the user to build any multiple choice subject. As an example, the following is possible with LaTeX but not with other formats:\n* any kind of layout,\n* questions with random numerical values,\n* use of figures, mathematical formulas\n* and much more!"
+    );
 }
 
 sub weight {
-  return(0.1);
+    return (0.1);
 }
 
 sub file_patterns {
-  return("*.tex","*.TEX");
+    return ( "*.tex", "*.TEX" );
 }
 
 sub filetype {
-  return("tex");
+    return ("tex");
 }
 
 sub claim {
-  my ($self,$file)=@_;
-  my $h=$self->file_head($file,256);
-  return(.8) if($h && ($h =~ /\\usepackage.*\{automultiplechoice\}/
-		       || $h =~ /\\documentclass\{/));
-  return(.6) if($self->file_mimetype($file) eq 'text/x-tex');
-  return(.5) if($file =~ /\.tex$/i);
-  return(0.0);
+    my ( $self, $file ) = @_;
+    my $h = $self->file_head( $file, 256 );
+    return (.8)
+      if (
+        $h
+        && (   $h =~ /\\usepackage.*\{automultiplechoice\}/
+            || $h =~ /\\documentclass\{/ )
+      );
+    return (.6) if ( $self->file_mimetype($file) eq 'text/x-tex' );
+    return (.5) if ( $file =~ /\.tex$/i );
+    return (0.0);
 }
 
 1;

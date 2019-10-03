@@ -20,14 +20,17 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,
-	       tex_engine=>'pdflatex',
-	       perfect_copy=>'',seuil=>0.15,
-	       #	       'check_marks'=>{map { $_=>$_ } (1..5)},
-	       decoder=> 'BarcodeTail',
-	       check_assoc=>{1=>'0786', 4=>'org'},
-	       list=>'students.txt', list_key=>'code',
-	       code=>'_namefield',
-	      )
-  ->default_process;
+AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'pdflatex',
+    perfect_copy => '',
+    seuil        => 0.15,
+
+    #	       'check_marks'=>{map { $_=>$_ } (1..5)},
+    decoder     => 'BarcodeTail',
+    check_assoc => { 1 => '0786', 4 => 'org' },
+    list        => 'students.txt',
+    list_key    => 'code',
+    code        => '_namefield',
+)->default_process;
 

@@ -36,84 +36,89 @@ use_gettext;
 
 sub new {
     my $class = shift;
-    my $self={project_options=>''};
-    bless ($self, $class);
+    my $self  = { project_options => '' };
+    bless( $self, $class );
     return $self;
 }
 
 # short name of the file format
 sub name {
-  return("empty");
+    return ("empty");
 }
 
 # default filename when creating a new one inside project directory
 sub default_filename {
-  return("source");
+    return ("source");
 }
 
 # create new empty file
 sub default_content {
-  my ($self,$file)=@_;
+    my ( $self, $file ) = @_;
 }
 
 # weight in the list of all available formats. 0 is at the top, 1 is
 # at the bottom line
 sub weight {
-  return(1);
+    return (1);
 }
 
 # function to set some project parameters for this format to work properly.
 # use <set_project_option> method
 sub configure {
-  my ($self,$options_project);
+    my ( $self, $options_project );
 }
 
 # this function returns a list of project options that are set
 # automatically by the filter. These options will be greyed out in the
 # Edit/Preferences window so that the user can not modify them.
 sub forced_options {
-  return();
+    return ();
 }
 
 # description of the format, that will be display in the window
 # showing details about file formats
 sub description {
-  return(__"No description available.");
+    return ( __ "No description available." );
 }
 
 # list of file patterns (like "*.txt") that corresponds to source
 # files for this format
 sub file_patterns {
-  return();
+    return ();
 }
 
 # filetype to choose right editor. Currently, only "tex" and "txt" are
 # available.
 sub filetype {
-  return("");
+    return ("");
 }
 
 # returns an URL where to find documentation about the syntax to be
 # used
 sub doc_url {
-  return("");
+    return ("");
 }
 
 # list of required LaTeX packages
 sub needs_latex_package {
-  return();
+    return ();
 }
 
 # list of required commands
 sub needs_command {
-  return();
+    return ();
 }
 
 # list of required fonts
 sub needs_font {
-  return([{type=>'fontconfig',
-	   family=>[]}, # <--  needs one of the fonts in the list
-	 ]);
+    return (
+        [
+            {
+                type   => 'fontconfig',
+                family => []
+            },    # <--  needs one of the fonts in the list
+        ]
+    );
 }
 
 # returns a number that tells how likely the file is written for this
@@ -121,8 +126,8 @@ sub needs_font {
 # format", -1.0 means "I'm sure it is NOT written for this format",
 # and 0.0 means "I don't know".
 sub claim {
-  my ($self,$file)=@_;
-  return(0);
+    my ( $self, $file ) = @_;
+    return (0);
 }
 
 #####################################################################
@@ -130,82 +135,83 @@ sub claim {
 #####################################################################
 
 sub set_oo {
-  my ($self,$config)=@_;
-  $self->{project_options}=$config;
+    my ( $self, $config ) = @_;
+    $self->{project_options} = $config;
 }
 
 sub set_project_option {
-  my ($self,$name,$value)=@_;
-  $self->{project_options}->set("project:$name",$value);
+    my ( $self, $name, $value ) = @_;
+    $self->{project_options}->set( "project:$name", $value );
 }
 
 sub missing_latex_packages {
-  my ($self)=@_;
-  return() if(!commande_accessible("kpsewhich"));
-  my @mp=();
-  for my $p ($self->needs_latex_package()) {
-    my $ok=0;
-    open KW,"-|","kpsewhich","-all","$p.sty";
-    while(<KW>) { chomp();$ok=1 if(/./); }
-    close(KW);
-    push @mp,$p if(!$ok);
-  }
-  return(@mp);
+    my ($self) = @_;
+    return () if ( !commande_accessible("kpsewhich") );
+    my @mp = ();
+    for my $p ( $self->needs_latex_package() ) {
+        my $ok = 0;
+        open KW, "-|", "kpsewhich", "-all", "$p.sty";
+        while (<KW>) { chomp(); $ok = 1 if (/./); }
+        close(KW);
+        push @mp, $p if ( !$ok );
+    }
+    return (@mp);
 }
 
 sub missing_commands {
-  my ($self)=@_;
-  my @mc=();
-  for my $c ($self->needs_command()) {
-    push @mc,$c if(!commande_accessible($c));
-  }
-  return(@mc);
+    my ($self) = @_;
+    my @mc = ();
+    for my $c ( $self->needs_command() ) {
+        push @mc, $c if ( !commande_accessible($c) );
+    }
+    return (@mc);
 }
 
 sub missing_fonts {
-  my ($self)=@_;
-  my @mf=();
-  my $fonts=$self->needs_font;
-  for my $spec (@$fonts) {
-    push @mf,$spec if(!check_fonts($spec));
-  }
-  return(@mf);
+    my ($self) = @_;
+    my @mf     = ();
+    my $fonts  = $self->needs_font;
+    for my $spec (@$fonts) {
+        push @mf, $spec if ( !check_fonts($spec) );
+    }
+    return (@mf);
 }
 
 sub check_dependencies {
-  my ($self)=@_;
-  my %miss=(latex_packages=>[$self->missing_latex_packages()],
-	    commands=>[$self->missing_commands()],
-	    fonts=>[$self->missing_fonts()],
-	   );
-  my $ok=1;
-  for my $k (keys %miss) {
-    $ok=0 if(@{$miss{$k}});
-  }
-  $miss{ok}=$ok;
-  return(\%miss);
+    my ($self) = @_;
+    my %miss = (
+        latex_packages => [ $self->missing_latex_packages() ],
+        commands       => [ $self->missing_commands() ],
+        fonts          => [ $self->missing_fonts() ],
+    );
+    my $ok = 1;
+    for my $k ( keys %miss ) {
+        $ok = 0 if ( @{ $miss{$k} } );
+    }
+    $miss{ok} = $ok;
+    return ( \%miss );
 }
 
 sub file_head {
-  my ($self,$file,$size)=@_;
-  return('') if(!$file);
-  my $h;
-  my $n;
-  my $fh;
-  return if(!-f $file);
-  if(open($fh,"<",$file)) {
-    $n=read $fh,$h,$size;
-    close($fh);
-  }
-  if(!defined($n)) {
-    debug_and_stderr("Error reading from $file: $!");
-  }
-  return($h);
+    my ( $self, $file, $size ) = @_;
+    return ('') if ( !$file );
+    my $h;
+    my $n;
+    my $fh;
+    return if ( !-f $file );
+    if ( open( $fh, "<", $file ) ) {
+        $n = read $fh, $h, $size;
+        close($fh);
+    }
+    if ( !defined($n) ) {
+        debug_and_stderr("Error reading from $file: $!");
+    }
+    return ($h);
 }
 
 sub file_mimetype {
-  my ($self,$file)=@_;
-  return(AMC::Basic::file_mimetype($file));
+    my ( $self, $file ) = @_;
+    return ( AMC::Basic::file_mimetype($file) );
 }
 
 1;

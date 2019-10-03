@@ -22,26 +22,25 @@ use Data::Dumper;
 
 require "./AMC/Test.pm";
 
-my $t=AMC::Test->new(dir=>__FILE__,
-                    );
+my $t = AMC::Test->new( dir => __FILE__, );
 
 $t->prepare();
 
-my $d=$t->get_defects();
+my $d = $t->get_defects();
 
 $t->trace("[T] Defect test: different positions");
 
-if(!$d->{DIFFERENT_POSITIONS}) {
-  $t->trace("[E] Not detected!");
-  $t->trace(Dumper($d));
-  exit(1);
+if ( !$d->{DIFFERENT_POSITIONS} ) {
+    $t->trace("[E] Not detected!");
+    $t->trace( Dumper($d) );
+    exit(1);
 }
 
-delete($d->{DIFFERENT_POSITIONS});
+delete( $d->{DIFFERENT_POSITIONS} );
 
-my @t=(keys %$d);
-if(@t) {
-  $self->trace("[E] Layout defects: ".join(', ',@t));
+my @t = ( keys %$d );
+if (@t) {
+    $self->trace( "[E] Layout defects: " . join( ', ', @t ) );
 }
 
 $t->ok;

@@ -26,67 +26,71 @@ package AMC::Substitute;
 use AMC::Basic;
 
 sub new {
-    my (%o)=@_;
-    my $self={names=>'',
-	      scoring=>'',
-	      assoc=>'',
-	      name=>'',chsign=>4,
-	      lk=>'',
-	  };
+    my (%o) = @_;
+    my $self = {
+        names   => '',
+        scoring => '',
+        assoc   => '',
+        name    => '',
+        chsign  => 4,
+        lk      => '',
+    };
 
-    for (keys %o) {
-	$self->{$_}=$o{$_} if(defined($self->{$_}));
+    for ( keys %o ) {
+        $self->{$_} = $o{$_} if ( defined( $self->{$_} ) );
     }
 
     bless $self;
-    return($self);
+    return ($self);
 }
 
 sub format_note {
-  my ($self,$mark)=@_;
+    my ( $self, $mark ) = @_;
 
-  if($self->{chsign}) {
-    $mark=sprintf("%.*g",$self->{chsign},$mark);
-  }
-  return($mark);
+    if ( $self->{chsign} ) {
+        $mark = sprintf( "%.*g", $self->{chsign}, $mark );
+    }
+    return ($mark);
 }
 
 sub substitute {
-  my ($self,$text,$student,$copy)=@_;
+    my ( $self, $text, $student, $copy ) = @_;
 
-  if($self->{scoring}) {
-    my $student_mark=$self->{scoring}->student_global($student,$copy);
+    if ( $self->{scoring} ) {
+        my $student_mark = $self->{scoring}->student_global( $student, $copy );
 
-    if($student_mark) {
-      $text =~ s/\%[S]/$self->format_note($student_mark->{total})/ge;
-      $text =~ s/\%[M]/$self->format_note($student_mark->{max})/ge;
-      $text =~ s/\%[s]/$self->format_note($student_mark->{mark})/ge;
-      $text =~ s/\%[m]/$self->format_note($self->{scoring}->variable('mark_max'))/ge;
-    } else {
-      debug "No marks found ! Copy=".studentids_string($student,$copy);
+        if ($student_mark) {
+            $text =~ s/\%[S]/$self->format_note($student_mark->{total})/ge;
+            $text =~ s/\%[M]/$self->format_note($student_mark->{max})/ge;
+            $text =~ s/\%[s]/$self->format_note($student_mark->{mark})/ge;
+            $text =~
+s/\%[m]/$self->format_note($self->{scoring}->variable('mark_max'))/ge;
+        } else {
+            debug "No marks found ! Copy="
+              . studentids_string( $student, $copy );
+        }
     }
-  }
 
-  $text =~ s/\%[n]/$self->{name}/ge;
+    $text =~ s/\%[n]/$self->{name}/ge;
 
-  if($self->{assoc} && $self->{names}) {
-    $self->{lk}=$self->{assoc}->variable('key_in_list')
-      if(!$self->{lk});
+    if ( $self->{assoc} && $self->{names} ) {
+        $self->{lk} = $self->{assoc}->variable('key_in_list')
+          if ( !$self->{lk} );
 
-    my $i=$self->{assoc}->get_real($student,$copy);
-    my $n;
+        my $i = $self->{assoc}->get_real( $student, $copy );
+        my $n;
 
-    debug "Association -> ID=$i";
+        debug "Association -> ID=$i";
 
-    if(defined($i)) {
-      ($n)=$self->{names}->data($self->{lk},$i,test_numeric=>1);
-      if($n) {
-	$text=$self->{names}->substitute($n,$text,prefix=>'%');
-      }
+        if ( defined($i) ) {
+            ($n) = $self->{names}->data( $self->{lk}, $i, test_numeric => 1 );
+            if ($n) {
+                $text = $self->{names}->substitute( $n, $text, prefix => '%' );
+            }
+        }
     }
-  }
 
-  return($text);
+    return ($text);
 }
 
 1;

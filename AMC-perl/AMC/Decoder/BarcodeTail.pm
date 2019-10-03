@@ -26,7 +26,7 @@ use AMC::Decoder;
 use AMC::Decoder::Barcode;
 use AMC::Basic;
 
-our @ISA=("AMC::Decoder");
+our @ISA = ("AMC::Decoder");
 
 use_gettext;
 
@@ -38,19 +38,19 @@ use_gettext;
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    bless ($self, $class);
+    bless( $self, $class );
 
     $self->{base} = AMC::Decoder::Barcode->new();
-      
+
     return $self;
 }
 
 sub decode_image {
-  my ($self, $path, $blob) = @_;
+    my ( $self, $path, $blob ) = @_;
 
-  my $r = $self->{base}->decode_image($path, $blob);
-  $r->{value} =~ s/.*[^a-zA-Z0-9]+//;
-  return($r);
+    my $r = $self->{base}->decode_image( $path, $blob );
+    $r->{value} =~ s/.*[^a-zA-Z0-9]+//;
+    return ($r);
 }
 
 1;

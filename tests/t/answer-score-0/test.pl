@@ -20,18 +20,21 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,filter=>'plain',tex_engine=>'xelatex',
-               perfect_copy=>[2],seuil=>0.25,
-               export_full_csv=>[
-                                 {-copy=>3,-question=>'Q001',-score=>1},
-                                 {-copy=>3,-question=>'Q002',-score=>-1},
-                                 {-copy=>3,-question=>'Q003',-score=>2},
-                                 {-copy=>3,-question=>'Q004',-score=>-2},
-                                 {-copy=>3,-question=>'Q005',-score=>0},
-                                 {-copy=>3,-question=>'Q006',-score=>-10},
-                                 {-copy=>3,-question=>'Q007',-score=>-10},
-                                 {-copy=>3,-question=>'Q008',-score=>-10},
-                                 {-copy=>3,-question=>'Q009',-score=>0},
-                                 ],
-              )
-  ->default_process;
+AMC::Test->new(
+    dir             => __FILE__,
+    filter          => 'plain',
+    tex_engine      => 'xelatex',
+    perfect_copy    => [2],
+    seuil           => 0.25,
+    export_full_csv => [
+        { -copy => 3, -question => 'Q001', -score => 1 },
+        { -copy => 3, -question => 'Q002', -score => -1 },
+        { -copy => 3, -question => 'Q003', -score => 2 },
+        { -copy => 3, -question => 'Q004', -score => -2 },
+        { -copy => 3, -question => 'Q005', -score => 0 },
+        { -copy => 3, -question => 'Q006', -score => -10 },
+        { -copy => 3, -question => 'Q007', -score => -10 },
+        { -copy => 3, -question => 'Q008', -score => -10 },
+        { -copy => 3, -question => 'Q009', -score => 0 },
+    ],
+)->default_process;

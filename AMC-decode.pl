@@ -32,46 +32,47 @@ use AMC::Gui::Avancement;
 
 use Module::Load;
 
-my $zone_type = ZONE_NAME;
-my $tag = 'names';
+my $zone_type    = ZONE_NAME;
+my $tag          = 'names';
 my $decoder_name = '';
-my $all = 0;
-my $projects_dir = $ENV{HOME}.'/'.__("MC-Projects");
-my $project_dir = '';
-my $cr_dir = '';
-my $data_dir = '';
-my $debug = '';
-my $n_procs=0;
-my $progress=0;
-my $progress_id=0;
+my $all          = 0;
+my $projects_dir = $ENV{HOME} . '/' . __("MC-Projects");
+my $project_dir  = '';
+my $cr_dir       = '';
+my $data_dir     = '';
+my $debug        = '';
+my $n_procs      = 0;
+my $progress     = 0;
+my $progress_id  = 0;
 
-GetOptions("cr=s" => \$cr_dir,
-	   "project=s" => \$project_dir,
-	   "projects-dir=s",\$projects_dir,
-	   "data=s" => \$data_dir,
-	   "zone-type=s" => \$zone_type,
-	   "tag=s" => \$tag,
-	   "all!" => \$all,
-	   "decoder=s" => \$decoder_name,
-	   "debug=s" => \$debug,
-	   "n-procs=s" => \$n_procs,
-	   "progression=s"=>\$progress,
-	   "progression-id=s"=>\$progress_id,
-	   );
+GetOptions(
+    "cr=s"      => \$cr_dir,
+    "project=s" => \$project_dir,
+    "projects-dir=s", \$projects_dir,
+    "data=s"           => \$data_dir,
+    "zone-type=s"      => \$zone_type,
+    "tag=s"            => \$tag,
+    "all!"             => \$all,
+    "decoder=s"        => \$decoder_name,
+    "debug=s"          => \$debug,
+    "n-procs=s"        => \$n_procs,
+    "progression=s"    => \$progress,
+    "progression-id=s" => \$progress_id,
+);
 
-$project_dir=$projects_dir.'/'.$project_dir if($project_dir !~ /\//);
-$cr_dir=$project_dir."/cr" if(! $cr_dir);
-$data_dir=$project_dir."/data" if(! $data_dir);
+$project_dir = $projects_dir . '/' . $project_dir if ( $project_dir !~ /\// );
+$cr_dir      = $project_dir . "/cr"               if ( !$cr_dir );
+$data_dir    = $project_dir . "/data"             if ( !$data_dir );
 
 set_debug($debug);
 
-my $queue='';
+my $queue = '';
 
-my $progress_h=AMC::Gui::Avancement::new($progress, id=>$progress_id);
+my $progress_h = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 
 sub catch_signal {
     my $signame = shift;
-    $queue->killall() if($queue);
+    $queue->killall() if ($queue);
     die "Killed";
 }
 
@@ -83,66 +84,68 @@ $data->require_module('capture');
 $data->require_module('scoring');
 
 $data->begin_transaction('Deco');
-my @all_zones = @{$data->module('capture')->zone_images_available($zone_type)};
-my $last_decoded = $data->module('capture')->variable('last_decoded_'.$tag);
-$last_decoded = 0 if(!$last_decoded);
+my @all_zones =
+  @{ $data->module('capture')->zone_images_available($zone_type) };
+my $last_decoded = $data->module('capture')->variable( 'last_decoded_' . $tag );
+$last_decoded = 0 if ( !$last_decoded );
 
 $data->module('scoring')->clear_code_direct(DIRECT_NAMEFIELD)
-    if($all);
+  if ($all);
 
-if(!$decoder_name) {
-  $data->end_transaction('Deco');
-  debug("No decoder!");
-  exit(0);
+if ( !$decoder_name ) {
+    $data->end_transaction('Deco');
+    debug("No decoder!");
+    exit(0);
 }
 
-my $t=time();
+my $t = time();
 
 load("AMC::Decoder::$decoder_name");
 my $decoder = "AMC::Decoder::$decoder_name"->new();
 
-$queue=AMC::Queue::new('max.procs', $n_procs);
+$queue = AMC::Queue::new( 'max.procs', $n_procs );
 
 my $delta;
 
 sub decode_one {
-  my ($z) = @_;
-  my $path = $z->{image};
-  $path = "$cr_dir/$path" if($path);
-  my $d = $decoder->decode_image($path, $z->{imagedata});
-  debug("Zone $z->{zoneid}: $d->{ok} ($d->{status}) [$d->{value}]");
-  print "Student $z->{student}/$z->{copy}: "
-      .($d->{ok} ? "success" : "FAILED")
-      ." ($d->{status})"
-      .($d->{ok} ? " -> $d->{value}" : "")
-      ."\n";
+    my ($z) = @_;
+    my $path = $z->{image};
+    $path = "$cr_dir/$path" if ($path);
+    my $d = $decoder->decode_image( $path, $z->{imagedata} );
+    debug("Zone $z->{zoneid}: $d->{ok} ($d->{status}) [$d->{value}]");
+    print "Student $z->{student}/$z->{copy}: "
+      . ( $d->{ok} ? "success" : "FAILED" )
+      . " ($d->{status})"
+      . ( $d->{ok} ? " -> $d->{value}" : "" ) . "\n";
 
-  $data->connect;
-  my $scoring = $data->module('scoring');
-  $scoring->begin_transaction('DecS');
-  $scoring->new_code( $z->{student}, $z->{copy}, "_namefield", $d->{value},
-      DIRECT_NAMEFIELD );
-  $scoring->end_transaction('DecS');
-  $progress_h->progres($delta);
+    $data->connect;
+    my $scoring = $data->module('scoring');
+    $scoring->begin_transaction('DecS');
+    $scoring->new_code(
+        $z->{student}, $z->{copy}, "_namefield", $d->{value},
+        DIRECT_NAMEFIELD
+    );
+    $scoring->end_transaction('DecS');
+    $progress_h->progres($delta);
 }
 
 my $n_zones = 0;
 for my $z (@all_zones) {
-  debug("$z->{zoneid} $z->{image} $z->{timestamp_auto}".
-	($z->{timestamp_auto} >= $last_decoded ? " [X]" : ""));
+    debug( "$z->{zoneid} $z->{image} $z->{timestamp_auto}"
+          . ( $z->{timestamp_auto} >= $last_decoded ? " [X]" : "" ) );
 
-  if($all || $z->{timestamp_auto} >= $last_decoded) {
-    $n_zones += 1;
-    $queue->add_process(\&decode_one, $z);
-  }
-  
+    if ( $all || $z->{timestamp_auto} >= $last_decoded ) {
+        $n_zones += 1;
+        $queue->add_process( \&decode_one, $z );
+    }
+
 }
 
 $data->end_transaction('Deco');
 
 $data->disconnect();
 
-$delta = ($n_zones>1 ? 1/$n_zones : 1);
+$delta = ( $n_zones > 1 ? 1 / $n_zones : 1 );
 
 $queue->run();
 
@@ -152,5 +155,5 @@ debug("New last_decoded time for $tag: $t");
 
 $data->connect;
 my $capture = $data->module('capture');
-$capture->variable_transaction('last_decoded_' . $tag, $t);
+$capture->variable_transaction( 'last_decoded_' . $tag, $t );
 

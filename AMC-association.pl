@@ -24,77 +24,78 @@ use strict;
 use Getopt::Long;
 use AMC::Basic;
 
-my $cr_dir='';
-my $liste='';
-my $data_dir='';
-my $list='';
-my $set='';
-my $student='';
-my $copy=0;
-my $id=undef;
-my $raw='';
+my $cr_dir   = '';
+my $liste    = '';
+my $data_dir = '';
+my $list     = '';
+my $set      = '';
+my $student  = '';
+my $copy     = 0;
+my $id       = undef;
+my $raw      = '';
 
-GetOptions("cr=s"=>\$cr_dir,
-	   "liste=s"=>\$liste,
-	   "data=s"=>\$data_dir,
-	   "list!"=>\$list,
-	   "raw!"=>\$raw,
-	   "set!"=>\$set,
-	   "student=s"=>\$student,
-	   "copy=s"=>\$copy,
-	   "id=s"=>\$id,
-	   );
+GetOptions(
+    "cr=s"      => \$cr_dir,
+    "liste=s"   => \$liste,
+    "data=s"    => \$data_dir,
+    "list!"     => \$list,
+    "raw!"      => \$raw,
+    "set!"      => \$set,
+    "student=s" => \$student,
+    "copy=s"    => \$copy,
+    "id=s"      => \$id,
+);
 
-if($list) {
-  require AMC::Data;
+if ($list) {
+    require AMC::Data;
 
-  my $data=AMC::Data->new($data_dir);
-  my $assoc=$data->module('association');
-  my $capture=$data->module('capture');
-  $data->begin_read_transaction('ALST');
-  my @list;
-  if($raw) {
-    @list=map { [$_->{student},$_->{copy}] } (@{$assoc->list()});
-  } else {
-    @list=$capture->student_copies();
-  }
-  print "Student\tID\n";
-  for my $c (@list) {
-    print studentids_string(@$c)."\t";
-    my $manual=$assoc->get_manual(@$c);
-    my $auto=$assoc->get_auto(@$c);
-    if(defined($manual)) {
-      print $manual;
-      print " (manual";
-      if(defined($auto)) {
-	print ", auto=".$auto;
-      }
-      print ")\n";
-    } elsif(defined($auto)) {
-      print $auto." (auto)\n";
+    my $data    = AMC::Data->new($data_dir);
+    my $assoc   = $data->module('association');
+    my $capture = $data->module('capture');
+    $data->begin_read_transaction('ALST');
+    my @list;
+    if ($raw) {
+        @list = map { [ $_->{student}, $_->{copy} ] } ( @{ $assoc->list() } );
     } else {
-      print "(none)\n";
+        @list = $capture->student_copies();
     }
-  }
-  $data->end_transaction('ALST');
-} elsif($set) {
-  require AMC::Data;
+    print "Student\tID\n";
+    for my $c (@list) {
+        print studentids_string(@$c) . "\t";
+        my $manual = $assoc->get_manual(@$c);
+        my $auto   = $assoc->get_auto(@$c);
+        if ( defined($manual) ) {
+            print $manual;
+            print " (manual";
+            if ( defined($auto) ) {
+                print ", auto=" . $auto;
+            }
+            print ")\n";
+        } elsif ( defined($auto) ) {
+            print $auto. " (auto)\n";
+        } else {
+            print "(none)\n";
+        }
+    }
+    $data->end_transaction('ALST');
+} elsif ($set) {
+    require AMC::Data;
 
-  my $data=AMC::Data->new($data_dir);
-  my $assoc=$data->module('association');
-  $data->begin_transaction('ASET');
-  $assoc->set_manual($student,$copy,$id);
-  $data->end_transaction('ASET');
+    my $data  = AMC::Data->new($data_dir);
+    my $assoc = $data->module('association');
+    $data->begin_transaction('ASET');
+    $assoc->set_manual( $student, $copy, $id );
+    $data->end_transaction('ASET');
 } else {
-  require AMC::Gui::Association;
+    require AMC::Gui::Association;
 
-  my $g=AMC::Gui::Association::new(cr=>$cr_dir,
-				   liste=>$liste,
-				   data_dir=>$data_dir,
-				   global=>1,
-				  );
+    my $g = AMC::Gui::Association::new(
+        cr       => $cr_dir,
+        liste    => $liste,
+        data_dir => $data_dir,
+        global   => 1,
+    );
 
-  Gtk3->main;
+    Gtk3->main;
 }
-
 

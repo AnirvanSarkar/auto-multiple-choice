@@ -30,15 +30,19 @@ package AMC::Decoder;
 sub new {
     my ($class) = @_;
     my $self = {};
-    bless ($self, $class);
+    bless( $self, $class );
     return $self;
 }
 
 sub decode_image {
-  my ($self, $path, $blob) = @_;
-  return({ok => 0,
-	  status => 'no decoder',
-	  value => ''});
+    my ( $self, $path, $blob ) = @_;
+    return (
+        {
+            ok     => 0,
+            status => 'no decoder',
+            value  => ''
+        }
+    );
 }
 
 1;

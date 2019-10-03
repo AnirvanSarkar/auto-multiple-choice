@@ -25,28 +25,29 @@ package AMC::Print;
 use AMC::Basic;
 
 sub new {
-  my ($class,%o) = @_;
-  my $self={method=>'none',
-	    useful_options=>'',
-	    error=>'',
-	   };
+    my ( $class, %o ) = @_;
+    my $self = {
+        method         => 'none',
+        useful_options => '',
+        error          => '',
+    };
 
-  for my $k (keys %o) {
-    $self->{$k}=$o{$k} if(defined($self->{$k}));
-  }
+    for my $k ( keys %o ) {
+        $self->{$k} = $o{$k} if ( defined( $self->{$k} ) );
+    }
 
-  bless ($self, $class);
-  return $self;
+    bless( $self, $class );
+    return $self;
 }
 
 # printing-mode selection
 
 sub check_available {
-  return();
+    return ();
 }
 
 sub weight {
-  return(0);
+    return (0);
 }
 
 # PRINTING OPTIONS
@@ -55,15 +56,15 @@ sub weight {
 # {name=>'printer short name',
 #  description=>'printer description'}
 sub printers_list {
-  my ($self)=@_;
-  return();
+    my ($self) = @_;
+    return ();
 }
 
 # returns the default printer name
 sub default_printer {
-  my ($self)=@_;
-  my @p=$self->printers_list();
-  return($p[0]->{name});
+    my ($self) = @_;
+    my @p = $self->printers_list();
+    return ( $p[0]->{name} );
 }
 
 # returns a list of hashrefs
@@ -76,19 +77,20 @@ sub default_printer {
 #  default=>'default value name',
 # }
 sub printer_options_list {
-  my ($self,$printer)=@_;
-  return();
+    my ( $self, $printer ) = @_;
+    return ();
 }
 
 sub printer_selected_options {
-  my ($self,$printer)=@_;
-  if($self->{useful_options} =~ /[^\s]/) {
-    my $re="(".join("|",split(/\s+/,$self->{useful_options})).")";
-    return(grep { $_->{name} =~ /^$re$/i }
-	   ($self->printer_options_list($printer)));
-  } else {
-    return();
-  }
+    my ( $self, $printer ) = @_;
+    if ( $self->{useful_options} =~ /[^\s]/ ) {
+        my $re =
+          "(" . join( "|", split( /\s+/, $self->{useful_options} ) ) . ")";
+        return ( grep { $_->{name} =~ /^$re$/i }
+              ( $self->printer_options_list($printer) ) );
+    } else {
+        return ();
+    }
 }
 
 # Builds a Gtk table for printer options
@@ -98,65 +100,65 @@ sub printer_selected_options {
 # $printer = printer name
 # $printer_options = current printer options hashref
 sub printer_options_table {
-  my ($self,$table,$w,$prefs,$printer,$printer_options)=@_;
+    my ( $self, $table, $w, $prefs, $printer, $printer_options ) = @_;
 
-  my @options=$self->printer_selected_options($printer);
+    my @options = $self->printer_selected_options($printer);
 
-  for($table->get_children) {
-    $_->destroy();
-  }
-
-  my $y=0;
-  my $widget;
-  my $renderer;
-  for my $o (@options) {
-    $table->attach(Gtk3::Label->new($o->{description}),
-		   0,$y,1,1);
-    $widget=Gtk3::ComboBox->new();
-    $renderer = Gtk3::CellRendererText->new();
-    $widget->pack_start($renderer, Glib::TRUE);
-    $widget->add_attribute($renderer,'text',COMBO_TEXT);
-    $w->{'printer_c_'.$o->{name}}=$widget;
-    $table->attach($widget,1,$y,1,1);
-    $y++;
-
-    my %opt_values=map {
-      $_->{name}=>$_->{description}
-    } @{$o->{values}};
-
-    $prefs->store_register($o->{name} => cb_model(map {
-      ($_->{name},$_->{description})
-    } @{$o->{values}}));
-    my $opt_value=$printer_options->{$o->{name}};
-    if(!$opt_value || !$opt_values{$opt_value}) {
-      debug "Setting option $o->{name} to default: $o->{default}";
-      $printer_options->{$o->{name}}=$o->{default};
+    for ( $table->get_children ) {
+        $_->destroy();
     }
-  }
-  $table->show_all();
+
+    my $y = 0;
+    my $widget;
+    my $renderer;
+    for my $o (@options) {
+        $table->attach( Gtk3::Label->new( $o->{description} ), 0, $y, 1, 1 );
+        $widget   = Gtk3::ComboBox->new();
+        $renderer = Gtk3::CellRendererText->new();
+        $widget->pack_start( $renderer, Glib::TRUE );
+        $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
+        $w->{ 'printer_c_' . $o->{name} } = $widget;
+        $table->attach( $widget, 1, $y, 1, 1 );
+        $y++;
+
+        my %opt_values =
+          map { $_->{name} => $_->{description} } @{ $o->{values} };
+
+        $prefs->store_register(
+            $o->{name} => cb_model(
+                map { ( $_->{name}, $_->{description} ) } @{ $o->{values} }
+            )
+        );
+        my $opt_value = $printer_options->{ $o->{name} };
+        if ( !$opt_value || !$opt_values{$opt_value} ) {
+            debug "Setting option $o->{name} to default: $o->{default}";
+            $printer_options->{ $o->{name} } = $o->{default};
+        }
+    }
+    $table->show_all();
 }
 
 # PRINTING
 
 sub select_printer {
-  my ($self,$printer)=@_;
+    my ( $self, $printer ) = @_;
 }
 
 sub set_option {
-  my ($self,$option,$value)=@_;
+    my ( $self, $option, $value ) = @_;
 }
 
 sub print_file {
-  my ($self,$filename)=@_;
+    my ( $self, $filename ) = @_;
 }
 
 # PRINTER DISPLAY NAME
 
 sub printer_text {
-  my ($self, $printer) = @_;
-  my $t = $printer->{name};
-  $t .= " (" . $printer->{description} . ")" if($printer->{description});
-  return($t);
+    my ( $self, $printer ) = @_;
+    my $t = $printer->{name};
+    $t .= " (" . $printer->{description} . ")" if ( $printer->{description} );
+    return ($t);
 }
 
 1;

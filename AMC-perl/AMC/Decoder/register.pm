@@ -35,42 +35,42 @@ use_gettext;
 #####################################################################
 
 sub new {
-    my ($class, %o) = @_;
-    my $self = {dependencies => 'all'};
+    my ( $class, %o ) = @_;
+    my $self = { dependencies => 'all' };
 
-    for my $k (keys %o) {
-      $self->{$k} = $o{$k} if(defined($self->{$k}));
+    for my $k ( keys %o ) {
+        $self->{$k} = $o{$k} if ( defined( $self->{$k} ) );
     }
-    
-    bless ($self, $class);
+
+    bless( $self, $class );
     return $self;
 }
 
 # short name of the file format
 sub name {
-  return("empty");
+    return ("empty");
 }
 
 # weight in the list of all available formats. 0 is at the top, 1 is
 # at the bottom line
 sub weight {
-  return(1);
+    return (1);
 }
 
 # description of the format, that will be display in the window
 # showing details about file formats
 sub description {
-  return(__"No description available.");
+    return ( __ "No description available." );
 }
 
 # list of required perl modules
 sub needs_perl_module {
-  return();
+    return ();
 }
 
 # list of required commands
 sub needs_command {
-  return();
+    return ();
 }
 
 #####################################################################
@@ -78,39 +78,41 @@ sub needs_command {
 #####################################################################
 
 sub missing_perl_modules {
-  my ($self)=@_;
+    my ($self) = @_;
 
-  return(grep { !check_install(module=>$_) } ($self->needs_perl_module()));
+    return ( grep { !check_install( module => $_ ) }
+          ( $self->needs_perl_module() ) );
 }
 
 sub missing_commands {
-  my ($self)=@_;
-  my @mc=();
-  for my $c ($self->needs_command()) {
-    push @mc,$c if(!commande_accessible($c));
-  }
-  return(@mc);
+    my ($self) = @_;
+    my @mc = ();
+    for my $c ( $self->needs_command() ) {
+        push @mc, $c if ( !commande_accessible($c) );
+    }
+    return (@mc);
 }
 
 sub check_dependencies {
-  my ($self)=@_;
-  my %miss=(perl_modules=>[$self->missing_perl_modules()],
-	    commands=>[$self->missing_commands()],
-      );
-  my $ok;
-  if($self->{dependencies} eq 'all') {
-    $ok = 1;
-    for my $k (keys %miss) {
-      $ok=0 if(@{$miss{$k}});
+    my ($self) = @_;
+    my %miss = (
+        perl_modules => [ $self->missing_perl_modules() ],
+        commands     => [ $self->missing_commands() ],
+    );
+    my $ok;
+    if ( $self->{dependencies} eq 'all' ) {
+        $ok = 1;
+        for my $k ( keys %miss ) {
+            $ok = 0 if ( @{ $miss{$k} } );
+        }
+    } elsif ( $self->{dependencies} eq 'one_kind' ) {
+        $ok = 0;
+        for my $k ( keys %miss ) {
+            $ok = 1 if ( !@{ $miss{$k} } );
+        }
     }
-  } elsif($self->{dependencies} eq 'one_kind') {
-    $ok = 0;
-    for my $k (keys %miss) {
-      $ok=1 if(!@{$miss{$k}});
-    }
-  }
-  $miss{ok}=$ok;
-  return(\%miss);
+    $miss{ok} = $ok;
+    return ( \%miss );
 }
 
 1;

@@ -27,156 +27,169 @@ use AMC::Export;
 
 use Encode;
 
-our @ISA=("AMC::Export");
+our @ISA = ("AMC::Export");
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    $self->{'out.encodage'}='utf-8';
-    $self->{'out.separateur'}=",";
-    $self->{'out.decimal'}=",";
-    $self->{'out.entoure'}="\"";
-    $self->{'out.ticked'}="";
-    $self->{'out.columns'}='student.copy,student.key,student.name';
-    bless ($self, $class);
+    $self->{'out.encodage'}   = 'utf-8';
+    $self->{'out.separateur'} = ",";
+    $self->{'out.decimal'}    = ",";
+    $self->{'out.entoure'}    = "\"";
+    $self->{'out.ticked'}     = "";
+    $self->{'out.columns'}    = 'student.copy,student.key,student.name';
+    bless( $self, $class );
     return $self;
 }
 
 sub load {
-  my ($self)=@_;
-  $self->SUPER::load();
-  $self->{_capture}=$self->{_data}->module('capture');
+    my ($self) = @_;
+    $self->SUPER::load();
+    $self->{_capture} = $self->{_data}->module('capture');
 }
 
 sub parse_num {
-    my ($self,$n)=@_;
-    if($self->{'out.decimal'} ne '.') {
-	$n =~ s/\./$self->{'out.decimal'}/;
+    my ( $self, $n ) = @_;
+    if ( $self->{'out.decimal'} ne '.' ) {
+        $n =~ s/\./$self->{'out.decimal'}/;
     }
-    return($self->parse_string($n));
+    return ( $self->parse_string($n) );
 }
 
 sub parse_string {
-    my ($self,$s)=@_;
-    if($self->{'out.entoure'}) {
-	$s =~ s/$self->{'out.entoure'}/$self->{'out.entoure'}$self->{'out.entoure'}/g;
-	$s=$self->{'out.entoure'}.$s.$self->{'out.entoure'};
+    my ( $self, $s ) = @_;
+    if ( $self->{'out.entoure'} ) {
+        $s =~
+s/$self->{'out.entoure'}/$self->{'out.entoure'}$self->{'out.entoure'}/g;
+        $s = $self->{'out.entoure'} . $s . $self->{'out.entoure'};
     }
-    return($s);
+    return ($s);
 }
 
 sub i_to_a {
-  my ($self,$i)=@_;
-  if($i==0) {
-    return('0');
-  } else {
-    my $s='';
-    while($i>0) {
-      $s = chr(ord('a')+(($i-1) % 26)) . $s;
-      $i = int(($i-1)/26);
+    my ( $self, $i ) = @_;
+    if ( $i == 0 ) {
+        return ('0');
+    } else {
+        my $s = '';
+        while ( $i > 0 ) {
+            $s = chr( ord('a') + ( ( $i - 1 ) % 26 ) ) . $s;
+            $i = int( ( $i - 1 ) / 26 );
+        }
+        $s =~ s/^([a-z])/uc($1)/e;
+        return ($s);
     }
-    $s =~ s/^([a-z])/uc($1)/e;
-    return($s);
-  }
 }
 
 sub export {
-    my ($self,$fichier)=@_;
-    my $sep=$self->{'out.separateur'};
+    my ( $self, $fichier ) = @_;
+    my $sep = $self->{'out.separateur'};
 
-    $sep="\t" if($sep =~ /^tab$/i);
+    $sep = "\t" if ( $sep =~ /^tab$/i );
 
-    $self->{'noms.postcorrect'}=($self->{'out.ticked'} ne '');
+    $self->{'noms.postcorrect'} = ( $self->{'out.ticked'} ne '' );
 
     $self->pre_process();
 
-    open(OUT,">:encoding(".$self->{'out.encodage'}.")",$fichier);
+    open( OUT, ">:encoding(" . $self->{'out.encodage'} . ")", $fichier );
 
     $self->{_scoring}->begin_read_transaction('XCSV');
 
-    my $dt=$self->{_scoring}->variable('darkness_threshold');
-    my $dtu=$self->{_scoring}->variable('darkness_threshold_up');
-    $dtu=1 if(!defined($dtu));
-    my $lk=$self->{_assoc}->variable('key_in_list');
+    my $dt  = $self->{_scoring}->variable('darkness_threshold');
+    my $dtu = $self->{_scoring}->variable('darkness_threshold_up');
+    $dtu = 1 if ( !defined($dtu) );
+    my $lk = $self->{_assoc}->variable('key_in_list');
 
-    my @student_columns=split(/,+/,$self->{'out.columns'});
+    my @student_columns = split( /,+/, $self->{'out.columns'} );
 
-    my @columns=();
+    my @columns = ();
 
     for my $c (@student_columns) {
-      if($c eq 'student.key') {
-	push @columns,"A:".encode('utf-8',$lk);
-      } elsif($c eq 'student.name') {
-	push @columns,translate_column_title('nom');
-      } elsif($c eq 'student.copy') {
-	push @columns,translate_column_title('copie');
-      } else {
-	push @columns,encode('utf-8',$c);
-      }
+        if ( $c eq 'student.key' ) {
+            push @columns, "A:" . encode( 'utf-8', $lk );
+        } elsif ( $c eq 'student.name' ) {
+            push @columns, translate_column_title('nom');
+        } elsif ( $c eq 'student.copy' ) {
+            push @columns, translate_column_title('copie');
+        } else {
+            push @columns, encode( 'utf-8', $c );
+        }
     }
 
-    push @columns,map { translate_column_title($_); } ("note");
+    push @columns, map { translate_column_title($_); } ("note");
 
     my @codes;
     my @questions;
-    $self->codes_questions(\@codes,\@questions,!$self->{'out.ticked'});
+    $self->codes_questions( \@codes, \@questions, !$self->{'out.ticked'} );
 
-    if($self->{'out.ticked'}) {
-      push @columns,map { ($_->{title},"TICKED:".$_->{title}) } @questions;
-      $self->{'out.entoure'}="\"" if(!$self->{'out.entoure'});
+    if ( $self->{'out.ticked'} ) {
+        push @columns,
+          map { ( $_->{title}, "TICKED:" . $_->{title} ) } @questions;
+        $self->{'out.entoure'} = "\"" if ( !$self->{'out.entoure'} );
     } else {
-      push @columns,map { $_->{title} } @questions;
+        push @columns, map { $_->{title} } @questions;
     }
 
-    push @columns,@codes;
+    push @columns, @codes;
 
-    print OUT join($sep,map  { $self->parse_string($_) } @columns)."\n";
+    print OUT join( $sep, map { $self->parse_string($_) } @columns ) . "\n";
 
-    for my $m (@{$self->{marks}}) {
-      my @sc=($m->{student},$m->{copy});
+    for my $m ( @{ $self->{marks} } ) {
+        my @sc = ( $m->{student}, $m->{copy} );
 
-      @columns=();
+        @columns = ();
 
-      for my $c (@student_columns) {
-	push @columns,$self->parse_string($m->{$c} ?
-					  $m->{$c} :
-					  $m->{'student.all'}->{$c});
-      }
+        for my $c (@student_columns) {
+            push @columns,
+              $self->parse_string(
+                  $m->{$c}
+                ? $m->{$c}
+                : $m->{'student.all'}->{$c}
+              );
+        }
 
-      push @columns,$self->parse_num($m->{mark});
+        push @columns, $self->parse_num( $m->{mark} );
 
-      for my $q (@questions) {
-	push @columns,$self->parse_num($self->{_scoring}->question_score(@sc,$q->{question}));
-	if($self->{'out.ticked'}) {
-	  if($self->{'out.ticked'} eq '01') {
-	    push @columns,
-              $self->parse_string
-              (join(';',$self->{_capture}
-                    ->ticked_list_0(@sc,$q->{question},$dt,$dtu)));
-	  } elsif($self->{'out.ticked'} eq 'AB') {
-	    my $t='';
-	    my @tl=$self->{_capture}
-	      ->ticked_list(@sc,$q->{question},$dt,$dtu);
-	    if($self->{_capture}->has_answer_zero(@sc,$q->{question})) {
-	      if(shift @tl) {
-		$t.='0';
-	      }
-	    }
-	    for my $i (0..$#tl) {
-	      $t.=$self->i_to_a($i+1) if($tl[$i]);
-	    }
-	    push @columns,$self->parse_string($t);
-	  } else {
-	    push @columns,$self->parse_string('S?');
-	  }
-	}
-      }
+        for my $q (@questions) {
+            push @columns,
+              $self->parse_num(
+                $self->{_scoring}->question_score( @sc, $q->{question} ) );
+            if ( $self->{'out.ticked'} ) {
+                if ( $self->{'out.ticked'} eq '01' ) {
+                    push @columns,
+                      $self->parse_string(
+                        join( ';',
+                            $self->{_capture}
+                              ->ticked_list_0( @sc, $q->{question}, $dt, $dtu )
+                        )
+                      );
+                } elsif ( $self->{'out.ticked'} eq 'AB' ) {
+                    my $t  = '';
+                    my @tl = $self->{_capture}
+                      ->ticked_list( @sc, $q->{question}, $dt, $dtu );
+                    if ( $self->{_capture}
+                        ->has_answer_zero( @sc, $q->{question} ) )
+                    {
+                        if ( shift @tl ) {
+                            $t .= '0';
+                        }
+                    }
+                    for my $i ( 0 .. $#tl ) {
+                        $t .= $self->i_to_a( $i + 1 ) if ( $tl[$i] );
+                    }
+                    push @columns, $self->parse_string($t);
+                } else {
+                    push @columns, $self->parse_string('S?');
+                }
+            }
+        }
 
-      for my $c (@codes) {
-	push @columns, $self->parse_string($self->{_scoring}->student_code(@sc,$c));
-      }
+        for my $c (@codes) {
+            push @columns,
+              $self->parse_string( $self->{_scoring}->student_code( @sc, $c ) );
+        }
 
-      print OUT join($sep,@columns)."\n";
+        print OUT join( $sep, @columns ) . "\n";
     }
 
     close(OUT);

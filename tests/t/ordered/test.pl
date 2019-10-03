@@ -20,10 +20,16 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
-	       multiple=>1,pre_allocate=>5,
-	       seuil=>0.15,perfect_copy=>'',
-	       list_key=>'id',code=>'id',
-	       check_assoc=>{map { ("2:$_"=>sprintf("%02d",$_-4)) } (5..16)},
-	      )->default_process;
+AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'pdflatex',
+    multiple     => 1,
+    pre_allocate => 5,
+    seuil        => 0.15,
+    perfect_copy => '',
+    list_key     => 'id',
+    code         => 'id',
+    check_assoc =>
+      { map { ( "2:$_" => sprintf( "%02d", $_ - 4 ) ) } ( 5 .. 16 ) },
+)->default_process;
 

@@ -37,32 +37,31 @@ use AMC::Basic;
 # stores its root in $self->{data}
 
 sub new {
-    my ($class, $data, %oo)=@_;
+    my ( $class, $data, %oo ) = @_;
 
-    my $self=
-      {
-       data => $data,
-       name => '',
-       statements => {},
-       immutable => {},
-       version_checked => 0,
-      };
+    my $self = {
+        data            => $data,
+        name            => '',
+        statements      => {},
+        immutable       => {},
+        version_checked => 0,
+    };
 
-    for(keys %oo) {
-	$self->{$_}=$oo{$_} if(exists($self->{$_}));
+    for ( keys %oo ) {
+        $self->{$_} = $oo{$_} if ( exists( $self->{$_} ) );
     }
 
-    if(!$self->{name} && $class =~ /::([^:]+)$/) {
-	$self->{name}=$1;
-      }
+    if ( !$self->{name} && $class =~ /::([^:]+)$/ ) {
+        $self->{name} = $1;
+    }
 
-    bless($self,$class);
+    bless( $self, $class );
 
     $self->define_statements;
 
-    if(! $self->{version_checked}) {
-      debug "Checking database version...";
-      $self->version_check;
+    if ( !$self->{version_checked} ) {
+        debug "Checking database version...";
+        $self->version_check;
     }
 
     return $self;
@@ -72,7 +71,7 @@ sub new {
 # associated with the module.
 
 sub dbh {
-    my ($self)=@_;
+    my ($self) = @_;
     return $self->{data}->dbh;
 }
 
@@ -80,45 +79,49 @@ sub dbh {
 # module.
 
 sub path {
-  my ($self)=@_;
-  return($self->{data}->module_path($self->{name}));
+    my ($self) = @_;
+    return ( $self->{data}->module_path( $self->{name} ) );
 }
 
 # module(name) returns another module from same data
 
 sub module {
-  my ($self, $name, %oo)=@_;
-  return($self->{data}->module($name, %oo));
+    my ( $self, $name, %oo ) = @_;
+    return ( $self->{data}->module( $name, %oo ) );
 }
 
 # require_module(name) loads the module for the same data
 
 sub require_module {
-  my ($self, $name, %oo)=@_;
-  return($self->{data}->require_module($name, %oo));
+    my ( $self, $name, %oo ) = @_;
+    return ( $self->{data}->require_module( $name, %oo ) );
 }
 
 # vacuum() loads the SQLite database separately, and asks for VACUUM
 # on it.
 
 sub vacuum {
-  my ($self)=@_;
-  my $dbh=DBI->connect("dbi:SQLite:dbname=".$self->path(),undef,undef,
-		       {AutoCommit => 1,
-			RaiseError => 0,
-		       });
-  $dbh->{HandleError}=sub {
-    debug "VACUUM statement: ".shift;
-  };
-  $dbh->do("VACUUM");
-  $dbh->disconnect;
+    my ($self) = @_;
+    my $dbh = DBI->connect(
+        "dbi:SQLite:dbname=" . $self->path(),
+        undef, undef,
+        {
+            AutoCommit => 1,
+            RaiseError => 0,
+        }
+    );
+    $dbh->{HandleError} = sub {
+        debug "VACUUM statement: " . shift;
+    };
+    $dbh->do("VACUUM");
+    $dbh->disconnect;
 }
 
 # disconnect disconnects from SQLite
 
 sub disconnect {
-  my ($self)=@_;
-  $self->{data}->disconnect;
+    my ($self) = @_;
+    $self->{data}->disconnect;
 }
 
 # table($table_subname) gives a table name to use for some particular
@@ -128,35 +131,35 @@ sub disconnect {
 # corresponding to another module
 
 sub table {
-    my ($self,$table_subname,$module_name)=@_;
-    if($module_name) {
-      $module_name=$self->{name} if($module_name eq 'self');
-      return($module_name."_".$table_subname);
+    my ( $self, $table_subname, $module_name ) = @_;
+    if ($module_name) {
+        $module_name = $self->{name} if ( $module_name eq 'self' );
+        return ( $module_name . "_" . $table_subname );
     } else {
-      $module_name=$self->{name};
-      return($module_name.".".$module_name."_".$table_subname);
+        $module_name = $self->{name};
+        return ( $module_name . "." . $module_name . "_" . $table_subname );
     }
 }
 
 sub index {
-  my ($self,@args)=@_;
-  return($self->table(@args));
+    my ( $self, @args ) = @_;
+    return ( $self->table(@args) );
 }
 
 # sql_quote($string) can be used to quote a string before including it
 # in a SQL query.
 
 sub sql_quote {
-    my ($self,$string)=@_;
-    return($self->{data}->sql_quote($string));
+    my ( $self, $string ) = @_;
+    return ( $self->{data}->sql_quote($string) );
 }
 
 # sql_do($sql,@bind) executes the SQL query $sql, replacing ? by the
 # elements of @bind.
 
 sub sql_do {
-    my ($self,$sql,@bind)=@_;
-    $self->{data}->sql_do($sql,@bind);
+    my ( $self, $sql, @bind ) = @_;
+    $self->{data}->sql_do( $sql, @bind );
 }
 
 # sql_single($sql,@bind) calls the SQL query $sql (SQL string or
@@ -164,13 +167,14 @@ sub sql_do {
 # query, ? are replaced by the values from @bind.
 
 sub sql_single {
-    my ($self,$sql,@bind)=@_;
-    debug_and_stderr "WARNING: sql_single with no transaction -- $sql" if(!$self->{data}->{trans});
-    my $x=$self->dbh->selectrow_arrayref($sql,{},@bind);
-    if($x) {
-	return($x->[0]);
+    my ( $self, $sql, @bind ) = @_;
+    debug_and_stderr "WARNING: sql_single with no transaction -- $sql"
+      if ( !$self->{data}->{trans} );
+    my $x = $self->dbh->selectrow_arrayref( $sql, {}, @bind );
+    if ($x) {
+        return ( $x->[0] );
     } else {
-	return(undef);
+        return (undef);
     }
 }
 
@@ -179,13 +183,14 @@ sub sql_single {
 # of the result.
 
 sub sql_list {
-    my ($self,$sql,@bind)=@_;
-    debug_and_stderr "WARNING: sql_list with no transaction -- $sql" if(!$self->{data}->{trans});
-    my $x=$self->dbh->selectcol_arrayref($sql,{},@bind);
-    if($x) {
-	return(@$x);
+    my ( $self, $sql, @bind ) = @_;
+    debug_and_stderr "WARNING: sql_list with no transaction -- $sql"
+      if ( !$self->{data}->{trans} );
+    my $x = $self->dbh->selectcol_arrayref( $sql, {}, @bind );
+    if ($x) {
+        return (@$x);
     } else {
-	return(undef);
+        return (undef);
     }
 }
 
@@ -193,13 +198,14 @@ sub sql_list {
 # row of the result.
 
 sub sql_row {
-    my ($self,$sql,@bind)=@_;
-    debug_and_stderr "WARNING: sql_row with no transaction -- $sql" if(!$self->{data}->{trans});
-    my $x=$self->dbh->selectrow_arrayref($sql,{},@bind);
-    if($x) {
-	return(@$x);
+    my ( $self, $sql, @bind ) = @_;
+    debug_and_stderr "WARNING: sql_row with no transaction -- $sql"
+      if ( !$self->{data}->{trans} );
+    my $x = $self->dbh->selectrow_arrayref( $sql, {}, @bind );
+    if ($x) {
+        return (@$x);
     } else {
-	return(undef);
+        return (undef);
     }
 }
 
@@ -207,19 +213,19 @@ sub sql_row {
 # read transaction
 
 sub sql_single_embedded {
-    my ($self,$sql,@bind)=@_;
+    my ( $self, $sql, @bind ) = @_;
     $self->begin_read_transaction;
-    my $r=$self->sql_single($sql,@bind);
+    my $r = $self->sql_single( $sql, @bind );
     $self->end_transaction;
-    return($r);
+    return ($r);
 }
 
 sub sql_list_embedded {
-    my ($self,$sql,@bind)=@_;
+    my ( $self, $sql, @bind ) = @_;
     $self->begin_read_transaction;
-    my @r=$self->sql_list($sql,@bind);
+    my @r = $self->sql_list( $sql, @bind );
     $self->end_transaction;
-    return(@r);
+    return (@r);
 }
 
 # define_statements defines all the SQL statements often used by the
@@ -233,17 +239,18 @@ sub define_statements {
 # prepared only once, and only prepared if used.
 
 sub statement {
-    my ($self,$sid)=@_;
-    debug_and_stderr "WARNING: statement request with no transaction -- $sid" if(!$self->{data}->{trans});
-    my $s=$self->{statements}->{$sid};
-    if($s->{s}) {
-	return($s->{s});
-    } elsif($s->{sql}) {
-      debug "Preparing statement $sid";
-	$s->{s}=$self->dbh->prepare($s->{sql});
-	return($s->{s});
+    my ( $self, $sid ) = @_;
+    debug_and_stderr "WARNING: statement request with no transaction -- $sid"
+      if ( !$self->{data}->{trans} );
+    my $s = $self->{statements}->{$sid};
+    if ( $s->{s} ) {
+        return ( $s->{s} );
+    } elsif ( $s->{sql} ) {
+        debug "Preparing statement $sid";
+        $s->{s} = $self->dbh->prepare( $s->{sql} );
+        return ( $s->{s} );
     } else {
-	debug_and_stderr("Undefined SQL statement: $sid");
+        debug_and_stderr("Undefined SQL statement: $sid");
     }
 }
 
@@ -253,8 +260,8 @@ sub statement {
 # values from @bind.
 
 sub query {
-    my ($self,$query,@bind)=@_;
-    return($self->sql_single($self->statement($query),@bind));
+    my ( $self, $query, @bind ) = @_;
+    return ( $self->sql_single( $self->statement($query), @bind ) );
 }
 
 # same as query, but returns an array with all the rows of the first
@@ -262,56 +269,58 @@ sub query {
 # of the result.
 
 sub query_list {
-    my ($self,$query,@bind)=@_;
-    return($self->sql_list($self->statement($query),@bind));
+    my ( $self, $query, @bind ) = @_;
+    return ( $self->sql_list( $self->statement($query), @bind ) );
 }
 
 # same as query, but returns an array with all the values of the first
 # row of the result.
 
 sub query_row {
-    my ($self,$query,@bind)=@_;
-    return($self->sql_row($self->statement($query),@bind));
+    my ( $self, $query, @bind ) = @_;
+    return ( $self->sql_row( $self->statement($query), @bind ) );
 }
 
 # begin_transaction begins a transaction in immediate mode, to be used
 # to eventually write to the database.
 
 sub begin_transaction {
-    my ($self,$key)=@_;
+    my ( $self, $key ) = @_;
     my $time;
-    $key='----' if(!defined($key));
+    $key = '----' if ( !defined($key) );
     debug "Opening RW transaction for $self->{name} [$key]...";
-    $time=time;
+    $time = time;
     $self->{data}->begin_transaction($key);
-    $time=time-$time;
+    $time = time - $time;
     debug "[$key] <-> $self->{name}";
-    if($time>1) {
-      debug_and_stderr "[$key] Waited for database RW lock $time seconds";
+
+    if ( $time > 1 ) {
+        debug_and_stderr "[$key] Waited for database RW lock $time seconds";
     }
 }
 
 # begin_read_transaction begins a transaction for reading data.
 
 sub begin_read_transaction {
-    my ($self,$key)=@_;
+    my ( $self, $key ) = @_;
     my $time;
-    $key='----' if(!defined($key));
+    $key = '----' if ( !defined($key) );
     debug "Opening RO transaction for $self->{name} [$key]...";
-    $time=time;
+    $time = time;
     $self->{data}->begin_read_transaction($key);
-    $time=time-$time;
+    $time = time - $time;
     debug "[$key] <-  $self->{name}";
-    if($time>1) {
-      debug_and_stderr "[$key] Waited for database R lock $time seconds";
+
+    if ( $time > 1 ) {
+        debug_and_stderr "[$key] Waited for database R lock $time seconds";
     }
 }
 
 # end_transaction end the transaction.
 
 sub end_transaction {
-    my ($self,$key)=@_;
-    $key='----' if(!defined($key));
+    my ( $self, $key ) = @_;
+    $key = '----' if ( !defined($key) );
     debug "Closing transaction for $self->{name} [$key]...";
     $self->{data}->end_transaction($key);
     debug "[$key]  X  $self->{name}";
@@ -323,38 +332,40 @@ sub end_transaction {
 # variable($name,$value) sets the value of variable $name.
 
 sub variable {
-    my ($self,$name,$value)=@_;
-    my $vt=$self->table("variables");
-    if(defined($value)) {
-      $self->sql_do("INSERT OR REPLACE INTO $vt (name,value) VALUES (".
-		    $self->sql_quote($name).",".
-		    $self->sql_quote($value).")");
+    my ( $self, $name, $value ) = @_;
+    my $vt = $self->table("variables");
+    if ( defined($value) ) {
+        $self->sql_do( "INSERT OR REPLACE INTO $vt (name,value) VALUES ("
+              . $self->sql_quote($name) . ","
+              . $self->sql_quote($value)
+              . ")" );
     } else {
-      my $x=$self->dbh->selectrow_arrayref("SELECT value FROM $vt WHERE name=".
-					   $self->sql_quote($name));
-      return($x->[0]);
+        my $x = $self->dbh->selectrow_arrayref(
+            "SELECT value FROM $vt WHERE name=" . $self->sql_quote($name) );
+        return ( $x->[0] );
     }
 }
 
 # The same, but embedded in a SQL transaction
 
 sub variable_transaction {
-    my ($self,$name,$value)=@_;
-    my $vt=$self->table("variables");
+    my ( $self, $name, $value ) = @_;
+    my $vt = $self->table("variables");
     $self->begin_read_transaction('vTRS');
-    my $x=$self->dbh->selectrow_arrayref("SELECT value FROM $vt WHERE name=".
-					 $self->sql_quote($name));
+    my $x = $self->dbh->selectrow_arrayref(
+        "SELECT value FROM $vt WHERE name=" . $self->sql_quote($name) );
     $self->end_transaction('vTRS');
-    if(defined($value)) {
-      if($value ne $x->[0]) {
-	$self->begin_transaction('sTRS');
-	$self->sql_do("INSERT OR REPLACE INTO $vt (name,value) VALUES (".
-		      $self->sql_quote($name).",".
-		      $self->sql_quote($value).")");
-	$self->end_transaction('sTRS');
-      }
+    if ( defined($value) ) {
+        if ( $value ne $x->[0] ) {
+            $self->begin_transaction('sTRS');
+            $self->sql_do( "INSERT OR REPLACE INTO $vt (name,value) VALUES ("
+                  . $self->sql_quote($name) . ","
+                  . $self->sql_quote($value)
+                  . ")" );
+            $self->end_transaction('sTRS');
+        }
     } else {
-	return($x->[0]);
+        return ( $x->[0] );
     }
 }
 
@@ -363,81 +374,94 @@ sub variable_transaction {
 # exemple). If $pattern is given, only delete variables LIKE $pattern.
 
 sub clear_variables {
-  my ($self,$pattern)=@_;
-  if($pattern) {
-    $self->sql_do("DELETE FROM ".$self->table("variables")." WHERE name != 'version'"
-		  ." AND name LIKE ?",$pattern);
-  } else {
-    $self->sql_do("DELETE FROM ".$self->table("variables")." WHERE name != 'version'");
-  }
+    my ( $self, $pattern ) = @_;
+    if ($pattern) {
+        $self->sql_do(
+            "DELETE FROM "
+              . $self->table("variables")
+              . " WHERE name != 'version'"
+              . " AND name LIKE ?",
+            $pattern
+        );
+    } else {
+        $self->sql_do( "DELETE FROM "
+              . $self->table("variables")
+              . " WHERE name != 'version'" );
+    }
 }
 
 # version_check upgrades the module database to the last version.
 
 sub version_check {
-  my ($self)=@_;
-  my $vt=$self->table("variables");
+    my ($self) = @_;
+    my $vt = $self->table("variables");
 
-  # First try with only a read transaction, so that the process is
-  # not blocked if someone else is using the database.
-  $self->begin_read_transaction('rVAR');
-  my @vt=$self->{data}->sql_tables("%".$self->{name}."_variables");
-  $self->end_transaction('rVAR');
-  if (!@vt) {
-    # opens a RW transaction only if necessary
-    $self->begin_transaction('tVAR');
-    my @vt=$self->{data}->sql_tables("%".$self->{name}."_variables");
-    if (@vt) {
-      debug "variables table has just been created!";
+    # First try with only a read transaction, so that the process is
+    # not blocked if someone else is using the database.
+    $self->begin_read_transaction('rVAR');
+    my @vt = $self->{data}->sql_tables( "%" . $self->{name} . "_variables" );
+    $self->end_transaction('rVAR');
+    if ( !@vt ) {
+
+        # opens a RW transaction only if necessary
+        $self->begin_transaction('tVAR');
+        my @vt =
+          $self->{data}->sql_tables( "%" . $self->{name} . "_variables" );
+        if (@vt) {
+            debug "variables table has just been created!";
+        } else {
+            debug "Empty database: creating variables table";
+            $self->sql_do("CREATE TABLE $vt (name TEXT UNIQUE, value TEXT)");
+            $self->variable( 'version', '0' );
+        }
+        $self->end_transaction('tVAR');
     } else {
-      debug "Empty database: creating variables table";
-      $self->sql_do("CREATE TABLE $vt (name TEXT UNIQUE, value TEXT)");
-      $self->variable('version','0');
+        debug "variables table present.";
     }
-    $self->end_transaction('tVAR');
-  } else {
-    debug "variables table present.";
-  }
 
-  my $cv=$self->version_current;
-  if ($cv) {
-    my $vu=$self->variable_transaction('version');
+    my $cv = $self->version_current;
+    if ($cv) {
+        my $vu = $self->variable_transaction('version');
 
-    if ($vu < $cv) {
-      # Database upgrade
-      $self->begin_transaction('dbUG');
-      $vu=$self->variable('version');
-      my $v;
-      debug "Database version: $vu, needs to upgrade (current $cv)";
-      do {
-        $v=$vu;
-        $vu=$self->version_upgrade($v);
-        debug("Upgraded data module ".$self->{name}
-              ." from version $v to $vu")
-          if ($vu);
-      } while ($vu);
-      $self->variable('version',$v);
+        if ( $vu < $cv ) {
 
-      $self->end_transaction('dbUG');
-    } elsif ($vu > $cv) {
-      debug "WARNING: Database version ($vu) is higher than module current version ($cv)";
+            # Database upgrade
+            $self->begin_transaction('dbUG');
+            $vu = $self->variable('version');
+            my $v;
+            debug "Database version: $vu, needs to upgrade (current $cv)";
+            do {
+                $v  = $vu;
+                $vu = $self->version_upgrade($v);
+                debug(  "Upgraded data module "
+                      . $self->{name}
+                      . " from version $v to $vu" )
+                  if ($vu);
+            } while ($vu);
+            $self->variable( 'version', $v );
+
+            $self->end_transaction('dbUG');
+        } elsif ( $vu > $cv ) {
+            debug
+"WARNING: Database version ($vu) is higher than module current version ($cv)";
+        }
+    } else {
+        debug "WARNING: No module current version";
     }
-  } else {
-    debug "WARNING: No module current version";
-  }
 
-  # also get some specific database variables in memory
-  my @ivs=$self->immutable_variables();
-  if(@ivs) {
-    $self->begin_transaction('imtb');
-    for my $v (@ivs) {
-      $self->{immutable}->{$v}=$self->variable($v);
-      $self->{immutable}->{$v}='' if(!defined($self->{immutable}->{$v}));
+    # also get some specific database variables in memory
+    my @ivs = $self->immutable_variables();
+    if (@ivs) {
+        $self->begin_transaction('imtb');
+        for my $v (@ivs) {
+            $self->{immutable}->{$v} = $self->variable($v);
+            $self->{immutable}->{$v} = ''
+              if ( !defined( $self->{immutable}->{$v} ) );
+        }
+        $self->end_transaction('imtb');
     }
-    $self->end_transaction('imtb');
-  }
 
-  $self->{version_checked} = 1;
+    $self->{version_checked} = 1;
 }
 
 # immutable_variables() returns the list of variables that has to be
@@ -445,7 +469,7 @@ sub version_check {
 # default, overload by AMC::DataModule::XXX if neaded.
 
 sub immutable_variables {
-  return();
+    return ();
 }
 
 # version_current($v) is to be overloaded by AMC::DataModule::XXX
@@ -454,8 +478,8 @@ sub immutable_variables {
 # database has to be upgraded.
 
 sub version_current {
-    my ($self,$old_version)=@_;
-    return('');
+    my ( $self, $old_version ) = @_;
+    return ('');
 }
 
 # version_upgrade($v) is to be overloaded by AMC::DataModule::XXX
@@ -464,16 +488,15 @@ sub version_current {
 # is the latest version, version_upgrade must return a false value.
 
 sub version_upgrade {
-    my ($self,$old_version)=@_;
-    return('');
+    my ( $self, $old_version ) = @_;
+    return ('');
 }
 
 # see AMC::Data::progression
 
 sub progression {
-  my ($self,@a)=@_;
-  $self->{data}->progression(@a);
+    my ( $self, @a ) = @_;
+    $self->{data}->progression(@a);
 }
-
 
 1;

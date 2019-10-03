@@ -23,109 +23,113 @@ use XML::LibXML;
 use Encode;
 use Archive::Tar;
 
-my $liste='';
+my $liste = '';
 
-GetOptions("liste=s"=>\$liste,
-	  );
+GetOptions( "liste=s" => \$liste, );
 
-my $tar_opts={uid=>0,gid=>0,uname=>'root',gname=>'root',mtime=>1420066800};
+my $tar_opts =
+  { uid => 0, gid => 0, uname => 'root', gname => 'root', mtime => 1420066800 };
 
-my $can_chmod=1;
-if(!defined(&{Archive::Tar::chmod})) {
-  $can_chmod=0;
-  print "! Archive::Tar::chmod not available\n";
+my $can_chmod = 1;
+if ( !defined( &{Archive::Tar::chmod} ) ) {
+    $can_chmod = 0;
+    print "! Archive::Tar::chmod not available\n";
 }
 
-my @fichiers=@ARGV;
+my @fichiers = @ARGV;
 
-open(LOG,">$liste") if($liste);
+open( LOG, ">$liste" ) if ($liste);
 
 for my $f (@fichiers) {
 
     print "*** File $f\n";
 
     my $parser = XML::LibXML->new();
-    my $xp=$parser->parse_file($f);
+    my $xp     = $parser->parse_file($f);
 
-    my $lang='';
-    my @articles= $xp->findnodes('/article')->get_nodelist;
-    if($articles[0] && $articles[0]->findvalue('@lang')) {
-	$lang=$articles[0]->findvalue('@lang');
-	$lang =~ s/[.-].*//;
-	print "  I lang=$lang\n";
+    my $lang     = '';
+    my @articles = $xp->findnodes('/article')->get_nodelist;
+    if ( $articles[0] && $articles[0]->findvalue('@lang') ) {
+        $lang = $articles[0]->findvalue('@lang');
+        $lang =~ s/[.-].*//;
+        print "  I lang=$lang\n";
     }
 
     my $nodeset = $xp->findnodes('//programlisting');
 
-    foreach my $node ($nodeset->get_nodelist) {
+    foreach my $node ( $nodeset->get_nodelist ) {
 
-	my $id=$node->findvalue('@id');
-	my $ex=$node->textContent();
+        my $id = $node->findvalue('@id');
+        my $ex = $node->textContent();
 
-	if($id =~ /^(modeles)-(.*)\.(tex|txt)$/) {
+        if ( $id =~ /^(modeles)-(.*)\.(tex|txt)$/ ) {
 
-	    my $rep=$1;
-	    $rep.="/$lang" if($lang);
-	    my $name=$2;
-	    my $ext=$3;
-	    my $code_name=$name;
+            my $rep = $1;
+            $rep .= "/$lang" if ($lang);
+            my $name      = $2;
+            my $ext       = $3;
+            my $code_name = $name;
 
-	    print "  * extracting $rep/$code_name\n";
+            print "  * extracting $rep/$code_name\n";
 
-	    my $desc='Doc / sample LaTeX file';
+            my $desc = 'Doc / sample LaTeX file';
 
-	    my $parent=$node->parentNode();
-	    foreach my $fr ($parent->childNodes()) {
-		if($fr->nodeName() == '#comment') {
-		    my $c=$fr->toString();
-		    if($c =~ /^<!--\s*NAME:\s*(.*)\n\s*DESC:\s*((?:.|\n)*)-->$/) {
-			$name=$1;
-			$desc=$2;
-			print "    embedded description / N=$name\n";
-		    }
-		}
-	    }
+            my $parent = $node->parentNode();
+            foreach my $fr ( $parent->childNodes() ) {
+                if ( $fr->nodeName() == '#comment' ) {
+                    my $c = $fr->toString();
+                    if ( $c =~
+                        /^<!--\s*NAME:\s*(.*)\n\s*DESC:\s*((?:.|\n)*)-->$/ )
+                    {
+                        $name = $1;
+                        $desc = $2;
+                        print "    embedded description / N=$name\n";
+                    }
+                }
+            }
 
-	    my $tar = Archive::Tar->new;
+            my $tar = Archive::Tar->new;
 
-	    $tar->add_data("$code_name.$ext",encode_utf8($ex),$tar_opts);
-            $tar->chmod("$code_name.$ext",'0644') if($can_chmod);
-	    $tar->add_data("description.xml",
-			   encode_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            $tar->add_data( "$code_name.$ext", encode_utf8($ex), $tar_opts );
+            $tar->chmod( "$code_name.$ext", '0644' ) if ($can_chmod);
+            $tar->add_data(
+                "description.xml",
+                encode_utf8(
+                    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <description>
-  <title>'.$name.'</title>
-  <text>'.$desc.'</text>
+  <title>' . $name . '</title>
+  <text>' . $desc . '</text>
 </description>
-'),$tar_opts
-                          );
-            $tar->chmod("description.xml",'0644') if($can_chmod);
-	    my $opts='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+'
+                ),
+                $tar_opts
+            );
+            $tar->chmod( "description.xml", '0644' ) if ($can_chmod);
+            my $opts = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <projetAMC>
-  <texsrc>%PROJET/'.$code_name.'.'.$ext.'</texsrc>
+  <texsrc>%PROJET/' . $code_name . '.' . $ext . '</texsrc>
 ';
-	    if($ext eq 'tex') {
-              my $engine='pdflatex';
-              $engine='platex+dvipdf' if($lang eq 'ja');
-	      $opts .= '  <moteur_latex_b>'.$engine.'</moteur_latex_b>
+            if ( $ext eq 'tex' ) {
+                my $engine = 'pdflatex';
+                $engine = 'platex+dvipdf' if ( $lang eq 'ja' );
+                $opts .= '  <moteur_latex_b>' . $engine . '</moteur_latex_b>
 ';
-	    } else {
-	      $opts .= '  <filter>plain</filter>
+            } else {
+                $opts .= '  <filter>plain</filter>
 ';
-	    }
-	    $opts .= '</projetAMC>
+            }
+            $opts .= '</projetAMC>
 ';
-	    $tar->add_data("options.xml",
-			   encode_utf8($opts),$tar_opts);
-            $tar->chmod("options.xml",'0644') if($can_chmod);
-	    $tar->write("$rep/$code_name.tgz", COMPRESS_GZIP);
+            $tar->add_data( "options.xml", encode_utf8($opts), $tar_opts );
+            $tar->chmod( "options.xml", '0644' ) if ($can_chmod);
+            $tar->write( "$rep/$code_name.tgz", COMPRESS_GZIP );
 
-	    print LOG "$rep/$code_name.tgz\n" if($liste);
+            print LOG "$rep/$code_name.tgz\n" if ($liste);
 
-	}
+        }
     }
 
 }
 
-close(LOG) if($liste);
-
+close(LOG) if ($liste);
 

@@ -20,21 +20,25 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,
-               tex_engine=>'pdflatex',
-               perfect_copy=>[2],seuil=>0.15,
-               notemax=>'',rounding=>'',
-               list=>'names.csv',list_key=>'id',code=>'id',
-               check_assoc=>{4=>'3142'},
-               export_full_csv=>[
-                                 {-copy=>2,-question=>'h',-score=>2},
-                                 {-copy=>2,-question=>'f',-score=>2},
-                                 {-copy=>2,-question=>'m',-score=>2},
-                                 {-copy=>2,-question=>'s',-score=>2},
-                                 {-copy=>4,-question=>'h',-score=>1},
-                                 {-copy=>4,-question=>'f',-score=>1},
-                                 {-copy=>4,-question=>'m',-score=>1},
-                                 {-copy=>4,-question=>'s',-score=>0},
-                                 ],
-              )
-  ->default_process;
+AMC::Test->new(
+    dir             => __FILE__,
+    tex_engine      => 'pdflatex',
+    perfect_copy    => [2],
+    seuil           => 0.15,
+    notemax         => '',
+    rounding        => '',
+    list            => 'names.csv',
+    list_key        => 'id',
+    code            => 'id',
+    check_assoc     => { 4 => '3142' },
+    export_full_csv => [
+        { -copy => 2, -question => 'h', -score => 2 },
+        { -copy => 2, -question => 'f', -score => 2 },
+        { -copy => 2, -question => 'm', -score => 2 },
+        { -copy => 2, -question => 's', -score => 2 },
+        { -copy => 4, -question => 'h', -score => 1 },
+        { -copy => 4, -question => 'f', -score => 1 },
+        { -copy => 4, -question => 'm', -score => 1 },
+        { -copy => 4, -question => 's', -score => 0 },
+    ],
+)->default_process;

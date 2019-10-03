@@ -24,54 +24,54 @@ package AMC::Export::register;
 
 sub new {
     my $class = shift;
-    my $self={};
-    bless ($self, $class);
+    my $self  = {};
+    bless( $self, $class );
     return $self;
 }
 
 sub name {
-  return("empty");
+    return ("empty");
 }
 
 sub extension {
-  return('.xxx');
+    return ('.xxx');
 }
 
 sub type {
-  my ($self)=@_;
-  my $ext=$self->extension();
-  $ext =~ s/^.*\.//;
-  return($ext);
+    my ($self) = @_;
+    my $ext = $self->extension();
+    $ext =~ s/^.*\.//;
+    return ($ext);
 }
 
 sub options_from_config {
-  my ($self,$config)=@_;
-  return();
+    my ( $self, $config ) = @_;
+    return ();
 }
 
 sub needs_catalog {
-  my ($self,$config)=@_;
-  return(0);
+    my ( $self, $config ) = @_;
+    return (0);
 }
 
 sub options_default {
-  return();
+    return ();
 }
 
 sub needs_module {
-  return();
+    return ();
 }
 
 sub build_config_gui {
-  my ($self,$w,$prefs)=@_;
+    my ( $self, $w, $prefs ) = @_;
 }
 
 sub hide {
-  return(standard_export_options=>0);
+    return ( standard_export_options => 0 );
 }
 
 sub weight {
-  return(1);
+    return (1);
 }
 
 1;

@@ -20,10 +20,11 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,
-	       tex_engine=>'pdflatex',
-	       perfect_copy=>'',seuil=>0.15,
-	       check_assoc=>{1=>'AMA0123',2=>'0C54',3=>'PH10'},
-	      )
-  ->default_process;
+AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'pdflatex',
+    perfect_copy => '',
+    seuil        => 0.15,
+    check_assoc  => { 1 => 'AMA0123', 2 => '0C54', 3 => 'PH10' },
+)->default_process;
 

@@ -30,63 +30,65 @@ use Module::Load;
 
 use_amc_plugins();
 
-my $module='CSV';
-my $output='';
+my $module = 'CSV';
+my $output = '';
 
-my $data_dir='';
-my $fich_notes='';
-my $fich_assoc='';
-my $fich_noms='';
-my $noms_encodage='utf-8';
-my $csv_build_name='';
-my @o_out=();
-my $debug='';
-my $sort='n';
-my $useall=1;
-my $rtl='';
+my $data_dir       = '';
+my $fich_notes     = '';
+my $fich_assoc     = '';
+my $fich_noms      = '';
+my $noms_encodage  = 'utf-8';
+my $csv_build_name = '';
+my @o_out          = ();
+my $debug          = '';
+my $sort           = 'n';
+my $useall         = 1;
+my $rtl            = '';
 
-@ARGV=unpack_args(@ARGV);
-my @ARGV_ORIG=@ARGV;
+@ARGV = unpack_args(@ARGV);
+my @ARGV_ORIG = @ARGV;
 
-GetOptions("module=s"=>\$module,
-	   "sort=s"=>\$sort,
-	   "useall=s"=>\$useall,
-	   "data=s"=>\$data_dir,
-	   "fich-noms=s"=>\$fich_noms,
-	   "csv-build-name=s"=>\$csv_build_name,
-	   "noms-encodage=s"=>\$noms_encodage,
-	   "rtl!"=>\$rtl,
-	   "option-out=s"=>\@o_out,
-	   "output|o=s"=>\$output,
-	   "debug=s"=>\$debug,
-	   );
+GetOptions(
+    "module=s"         => \$module,
+    "sort=s"           => \$sort,
+    "useall=s"         => \$useall,
+    "data=s"           => \$data_dir,
+    "fich-noms=s"      => \$fich_noms,
+    "csv-build-name=s" => \$csv_build_name,
+    "noms-encodage=s"  => \$noms_encodage,
+    "rtl!"             => \$rtl,
+    "option-out=s"     => \@o_out,
+    "output|o=s"       => \$output,
+    "debug=s"          => \$debug,
+);
 
 set_debug($debug);
 
-debug "Parameters: ".join(" ",map { "<$_>" } @ARGV_ORIG);
+debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
 
 load("AMC::Export::$module");
 my $ex = "AMC::Export::$module"->new();
 
-$ex->set_options("sort",
-		 keys=>$sort);
+$ex->set_options( "sort", keys => $sort );
 
-$ex->set_options("fich",
-		 datadir=>$data_dir,
-		 noms=>$fich_noms,
-		 );
+$ex->set_options(
+    "fich",
+    datadir => $data_dir,
+    noms    => $fich_noms,
+);
 
-$ex->set_options("noms",
-		 encodage=>$noms_encodage,
-		 useall=>$useall,
-		 identifiant=>$csv_build_name,
-		 );
+$ex->set_options(
+    "noms",
+    encodage    => $noms_encodage,
+    useall      => $useall,
+    identifiant => $csv_build_name,
+);
 
-$ex->set_options("out",rtl=>$rtl);
+$ex->set_options( "out", rtl => $rtl );
 
 for my $oo (@o_out) {
-    if($oo =~ /([^=]+)=(.*)/) {
-	$ex->set_options("out",$1=>$2);
+    if ( $oo =~ /([^=]+)=(.*)/ ) {
+        $ex->set_options( "out", $1 => $2 );
     }
 }
 

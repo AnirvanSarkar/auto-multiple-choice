@@ -23,33 +23,37 @@ use Encode;
 use utf8;
 use Getopt::Long;
 
-my $comment_only='';
+my $comment_only = '';
 
-GetOptions("comment-only!"=>\$comment_only);
+GetOptions( "comment-only!" => \$comment_only );
 
-my ($from,$to)=@ARGV;
+my ( $from, $to ) = @ARGV;
 
-$v="@/PACKAGE_V_DEB/@ (@/PACKAGE_V_VC/@)";
+$v = "@/PACKAGE_V_DEB/@ (@/PACKAGE_V_VC/@)";
 
-chomp($date=`date "+%Y-%m-%d %H:%M %z"`);
+chomp( $date = `date "+%Y-%m-%d %H:%M %z"` );
 
 my $aref = Locale::PO->load_file_asarray($from);
 
-my @ok=grep { $_->msgid() !~ /^\"?gtk-/ } @$aref;
+my @ok = grep { $_->msgid() !~ /^\"?gtk-/ } @$aref;
 
-$ok[0]->comment(encode_utf8("Auto Multiple Choice\nCopyright 2008-2019 Alexis Bienvenue\nThis file is distributed under the same license as the AMC software"));
+$ok[0]->comment(
+    encode_utf8(
+"Auto Multiple Choice\nCopyright 2008-2019 Alexis Bienvenue\nThis file is distributed under the same license as the AMC software"
+    )
+);
 
-if(!$comment_only) {
-  $ok[0]->msgstr("Project-Id-Version: $v\n" .
-		 "Report-Msgid-Bugs-To: paamc\@passoire.fr\n" .
-		 "POT-Creation-Date: $date\n" .
-		 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n" .
-		 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n" .
-		 "Language-Team: LANGUAGE <LL@li.org>\n" .
-		 "MIME-Version: 1.0\n" .
-		 "Content-Type: text/plain; charset=CHARSET\n" .
-		 "Content-Transfer-Encoding: 8bit");
+if ( !$comment_only ) {
+    $ok[0]->msgstr( "Project-Id-Version: $v\n"
+          . "Report-Msgid-Bugs-To: paamc\@passoire.fr\n"
+          . "POT-Creation-Date: $date\n"
+          . "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
+          . "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+          . "Language-Team: LANGUAGE <LL@li.org>\n"
+          . "MIME-Version: 1.0\n"
+          . "Content-Type: text/plain; charset=CHARSET\n"
+          . "Content-Transfer-Encoding: 8bit" );
 }
 
-Locale::PO->save_file_fromarray($to,\@ok);
+Locale::PO->save_file_fromarray( $to, \@ok );
 

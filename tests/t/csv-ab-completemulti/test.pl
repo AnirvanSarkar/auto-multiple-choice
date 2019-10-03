@@ -20,15 +20,17 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,
-	       list=>'names.csv',n_copies=>1,
-	       list_key=>'id',code=>'<preassoc>',
-	       check_assoc=>{2=>'002'},
-	       perfect_copy=>[],
-	       export_full_csv=>[
-				 {-copy=>2,-question=>'bq1',-abc=>'B'},
-				 {-copy=>2,-question=>'bq2',-abc=>'0B'},
-				],
-	      )
-  ->default_process;
+AMC::Test->new(
+    dir             => __FILE__,
+    list            => 'names.csv',
+    n_copies        => 1,
+    list_key        => 'id',
+    code            => '<preassoc>',
+    check_assoc     => { 2 => '002' },
+    perfect_copy    => [],
+    export_full_csv => [
+        { -copy => 2, -question => 'bq1', -abc => 'B' },
+        { -copy => 2, -question => 'bq2', -abc => '0B' },
+    ],
+)->default_process;
 

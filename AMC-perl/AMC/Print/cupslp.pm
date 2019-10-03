@@ -25,108 +25,111 @@ package AMC::Print::cupslp;
 use AMC::Print;
 use AMC::Basic;
 
-our @ISA=("AMC::Print");
+our @ISA = ("AMC::Print");
 
 sub nonnul {
-    my $s=shift;
+    my $s = shift;
     $s =~ s/\000//g;
-    return($s);
+    return ($s);
 }
 
 sub new {
-  my $class = shift;
-  my $self  = $class->SUPER::new(@_);
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
 
-  $self->{method}='cupslp';
-  return($self);
+    $self->{method} = 'cupslp';
+    return ($self);
 }
 
 sub check_available {
-  my @missing=();
-  for my $command (qw/lp lpoptions lpstat/) {
-    push @missing,$command if(!commande_accessible($command));
-  }
-  if(@missing) {
-    return(sprintf(__("The following commands are missing: %s."),
-		   join(' ',@missing)));
-  } else {
-    return();
-  }
+    my @missing = ();
+    for my $command (qw/lp lpoptions lpstat/) {
+        push @missing, $command if ( !commande_accessible($command) );
+    }
+    if (@missing) {
+        return (
+            sprintf(
+                __("The following commands are missing: %s."),
+                join( ' ', @missing )
+            )
+        );
+    } else {
+        return ();
+    }
 }
 
 sub weight {
-  return(2.0);
+    return (2.0);
 }
 
 sub printers_list {
-  my ($self)=@_;
-  my @list=();
-  open(PL,"-|","lpstat","-e")
-    or die "Can't exec lpstat: $!";
-  while(<PL>) {
-    chomp;
-    push @list,{name=>$_,description=>""};
-  }
-  close PL;
-  return(@list);
+    my ($self) = @_;
+    my @list = ();
+    open( PL, "-|", "lpstat", "-e" )
+      or die "Can't exec lpstat: $!";
+    while (<PL>) {
+        chomp;
+        push @list, { name => $_, description => "" };
+    }
+    close PL;
+    return (@list);
 }
 
 sub default_printer {
-  my ($self)=@_;
-  open(PL,"-|","lpstat","-d")
-    or die "Can't exec lpstat: $!";
-  while(<PL>) {
-    return($1) if(/:\s*([^\s]+)/);
-  }
-  close PL;
-  return('');
+    my ($self) = @_;
+    open( PL, "-|", "lpstat", "-d" )
+      or die "Can't exec lpstat: $!";
+    while (<PL>) {
+        return ($1) if (/:\s*([^\s]+)/);
+    }
+    close PL;
+    return ('');
 }
 
 sub printer_options_list {
-  my ($self,$printer)=@_;
-  my @o=();
-  open(OL,"-|","lpoptions","-p",$printer,"-l")
-    or die "Can't exec lpoptions: $!";
-  while(<OL>) {
-    if(m!^([^\s]+)/([^:]+):\s*(.*)!) {
-      my %option=(name=>$1,description=>$2,values=>[]);
-      my $vals=$3;
-      for my $k (split(/\s+/,$vals)) {
-	if($k =~ s/^\*//) {
-	  $option{default}=$k;
-	}
-	push @{$option{values}},
-	  {name=>$k,description=>$k};
-      }
-      push @o,{%option};
+    my ( $self, $printer ) = @_;
+    my @o = ();
+    open( OL, "-|", "lpoptions", "-p", $printer, "-l" )
+      or die "Can't exec lpoptions: $!";
+    while (<OL>) {
+        if (m!^([^\s]+)/([^:]+):\s*(.*)!) {
+            my %option = ( name => $1, description => $2, values => [] );
+            my $vals   = $3;
+            for my $k ( split( /\s+/, $vals ) ) {
+                if ( $k =~ s/^\*// ) {
+                    $option{default} = $k;
+                }
+                push @{ $option{values} }, { name => $k, description => $k };
+            }
+            push @o, {%option};
+        }
     }
-  }
-  close OL;
-  return(@o);
+    close OL;
+    return (@o);
 }
 
 # PRINTING
 
 sub select_printer {
-  my ($self,$printer)=@_;
-  $self->{printername}=$printer;
-  $self->{printeroptions}={};
+    my ( $self, $printer ) = @_;
+    $self->{printername}    = $printer;
+    $self->{printeroptions} = {};
 }
 
 sub set_option {
-  my ($self,$option,$value)=@_;
-  $self->{printeroptions}->{$option}=$value;
+    my ( $self, $option, $value ) = @_;
+    $self->{printeroptions}->{$option} = $value;
 }
 
 sub print_file {
-  my ($self,$filename,$label)=@_;
-  my @command=("lp","-d",$self->{printername});
-  for my $k (keys %{$self->{printeroptions}}) {
-    push @command,"-o","$k=".$self->{printeroptions}->{$k};
-  }
-  push @command,$filename;
-  debug "Printing command: ".join(" ",@command);
-  system(@command);
+    my ( $self, $filename, $label ) = @_;
+    my @command = ( "lp", "-d", $self->{printername} );
+    for my $k ( keys %{ $self->{printeroptions} } ) {
+        push @command, "-o", "$k=" . $self->{printeroptions}->{$k};
+    }
+    push @command, $filename;
+    debug "Printing command: " . join( " ", @command );
+    system(@command);
 }
 
 1;

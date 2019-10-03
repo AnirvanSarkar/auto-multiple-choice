@@ -20,9 +20,13 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
-	       perfect_copy=>'',seuil=>0.2,debug_pixels=>1,
-	       check_marks=>{2=>20},
-	       check_zooms=>{'2-1'=>4},
-	      )->default_process;
+AMC::Test->new(
+    dir          => __FILE__,
+    tex_engine   => 'pdflatex',
+    perfect_copy => '',
+    seuil        => 0.2,
+    debug_pixels => 1,
+    check_marks  => { 2 => 20 },
+    check_zooms  => { '2-1' => 4 },
+)->default_process;
 

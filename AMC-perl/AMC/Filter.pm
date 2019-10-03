@@ -23,43 +23,44 @@ use strict;
 package AMC::Filter;
 
 sub new {
-    my ($class,%o) = @_;
-    my $self={errors=>[],
-	      project_options=>{},
-	      filter_results=>{},
-	      jobname=>'',
-	      jobspecific=>'',
-	     };
+    my ( $class, %o ) = @_;
+    my $self = {
+        errors          => [],
+        project_options => {},
+        filter_results  => {},
+        jobname         => '',
+        jobspecific     => '',
+    };
 
-    for my $k (keys %o) {
-	$self->{$k}=$o{$k} if(defined($self->{$k}));
+    for my $k ( keys %o ) {
+        $self->{$k} = $o{$k} if ( defined( $self->{$k} ) );
     }
 
-    bless ($self, $class);
+    bless( $self, $class );
     return $self;
 }
 
 sub clear {
-  my ($self)=@_;
-  $self->{errors}=[];
+    my ($self) = @_;
+    $self->{errors} = [];
 }
 
 sub error {
-  my ($self,$error_text)=@_;
-  push @{$self->{errors}},$error_text;
+    my ( $self, $error_text ) = @_;
+    push @{ $self->{errors} }, $error_text;
 }
 
 sub errors {
-  my ($self)=@_;
-  return(@{$self->{errors}});
+    my ($self) = @_;
+    return ( @{ $self->{errors} } );
 }
 
 sub pre_filter {
-  my ($self,$input_file)=@_;
+    my ( $self, $input_file ) = @_;
 }
 
 sub filter {
-  my ($self,$input_file,$output_file)=@_;
+    my ( $self, $input_file, $output_file ) = @_;
 }
 
 #####################################################################
@@ -67,24 +68,24 @@ sub filter {
 #####################################################################
 
 sub set_project_option {
-  my ($self,$name,$value)=@_;
-  $self->{project_options}->{$name}=$value;
-  print "VAR: project:$name=$value\n";
+    my ( $self, $name, $value ) = @_;
+    $self->{project_options}->{$name} = $value;
+    print "VAR: project:$name=$value\n";
 }
 
 sub set_filter_result {
-  my ($self,$name,$value)=@_;
-  $self->{filter_results}->{$name}=$value;
+    my ( $self, $name, $value ) = @_;
+    $self->{filter_results}->{$name} = $value;
 }
 
 sub get_filter_result {
-  my ($self,$name)=@_;
-  return($self->{filter_results}->{$name});
+    my ( $self, $name ) = @_;
+    return ( $self->{filter_results}->{$name} );
 }
 
 sub unchanged {
-  my ($self)=@_;
-  return($self->get_filter_result('unchanged'));
+    my ($self) = @_;
+    return ( $self->get_filter_result('unchanged') );
 }
 
 1;

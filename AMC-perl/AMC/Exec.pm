@@ -25,55 +25,60 @@ package AMC::Exec;
 use AMC::Basic;
 
 sub new {
-    my ($nom)=@_;
-    my $self={pid=>'',
-	      nom=>$nom || 'AMC',
-	  };
+    my ($nom) = @_;
+    my $self = {
+        pid => '',
+        nom => $nom || 'AMC',
+    };
     bless($self);
-    return($self);
+    return ($self);
 }
 
 sub catch_signal {
-    my ($self,$signame)=@_;
-    if($self->{pid}) {
-	debug "*** $self->{nom} : signal $signame, killing $self->{pid}...\n";
-	kill 9,$self->{pid};
+    my ( $self, $signame ) = @_;
+    if ( $self->{pid} ) {
+        debug "*** $self->{nom} : signal $signame, killing $self->{pid}...\n";
+        kill 9, $self->{pid};
     }
     die "$self->{nom} killed";
 }
 
 sub signalise {
-    my ($self)=@_;
-    $SIG{INT} = sub { my $s=shift;$self->catch_signal($s); };
+    my ($self) = @_;
+    $SIG{INT} = sub { my $s = shift; $self->catch_signal($s); };
 }
 
 sub execute {
-    my ($self,@c)=@_;
+    my ( $self, @c ) = @_;
 
-    my $prg=$c[0];
+    my $prg = $c[0];
 
-    if($prg) {
+    if ($prg) {
 
-	if(!commande_accessible($prg)) {
-	    debug "*** WARNING: program \"$prg\" not found in PATH!";
-	}
+        if ( !commande_accessible($prg) ) {
+            debug "*** WARNING: program \"$prg\" not found in PATH!";
+        }
 
-	my $cmd_pid=fork();
-	my @t=times();
-	if($cmd_pid) {
-	    $self->{pid}=$cmd_pid;
-	    debug "Command [$cmd_pid] : ".join(' ',@c);
-	    waitpid($cmd_pid,0);
-	    my @tb=times();
-	    debug "Cmd PID=$cmd_pid returns $?";
-	    debug sprintf("Total parent exec times during $cmd_pid: [%7.02f,%7.02f]",$tb[0]+$tb[1]-$t[0]-$t[1],$tb[2]+$tb[3]-$t[2]-$t[3]);
-	} else {
-	    exec(@c);
-	    die "Commande inexistante : $prg";
-	}
+        my $cmd_pid = fork();
+        my @t       = times();
+        if ($cmd_pid) {
+            $self->{pid} = $cmd_pid;
+            debug "Command [$cmd_pid] : " . join( ' ', @c );
+            waitpid( $cmd_pid, 0 );
+            my @tb = times();
+            debug "Cmd PID=$cmd_pid returns $?";
+            debug sprintf(
+                "Total parent exec times during $cmd_pid: [%7.02f,%7.02f]",
+                $tb[0] + $tb[1] - $t[0] - $t[1],
+                $tb[2] + $tb[3] - $t[2] - $t[3]
+            );
+        } else {
+            exec(@c);
+            die "Commande inexistante : $prg";
+        }
 
     } else {
-	debug "Command: no executable! ".join(' ',@c);
+        debug "Command: no executable! " . join( ' ', @c );
     }
 
 }
