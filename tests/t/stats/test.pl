@@ -20,10 +20,10 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-               'perfect_copy'=>[1],
-               'grain'=>0.1,'rounding'=>'s',
-               'export_ods'=>
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
+               perfect_copy=>[1],
+               grain=>0.1,rounding=>'s',
+               export_ods=>
                {
                 stats=>[
                         {id=>'A',invalid=>1,empty=>1,total=>5,

@@ -26,9 +26,9 @@ use AMC::Basic;
 
 # possible types: INFO, WARN, ERR
 
-my %message_type=('INFO'=>1,
-		  'WARN'=>2,
-		  'ERR'=>3,
+my %message_type=(INFO=>1,
+		  WARN=>2,
+		  ERR=>3,
 		  );
 
 sub add_message {
@@ -36,13 +36,13 @@ sub add_message {
   if(!$message_type{$type}) {
     debug "WARNING: inexistant message type - $type";
   }
-  push @{$self->{'messages'}},{'type'=>$type,'message'=>$message};
+  push @{$self->{messages}},{type=>$type,message=>$message};
 }
 
 sub get_messages {
   my ($self,$type)=@_;
-  return(map { $_->{'message'} }
-	 grep { $_->{'type'} eq $type } @{$self->{'messages'}});
+  return(map { $_->{message} }
+	 grep { $_->{type} eq $type } @{$self->{messages}});
 }
 
 sub n_messages {
@@ -54,8 +54,8 @@ sub n_messages {
 sub messages_as_string {
   my ($self)=@_;
   my $s='';
-  for(@{$self->{'messages'}}) {
-    $s.= $_->{'type'} .": ".$_->{'message'} ."\n";
+  for(@{$self->{messages}}) {
+    $s.= $_->{type} .": ".$_->{message} ."\n";
   }
   return($s);
 }
@@ -64,9 +64,9 @@ sub higher_message_type {
   my ($self)=@_;
   my $h=0;
   my $type='';
-  for(@{$self->{'messages'}}) {
-    if($message_type{$_->{'type'}} > $h) {
-      $type=$_->{'type'};
+  for(@{$self->{messages}}) {
+    if($message_type{$_->{type}} > $h) {
+      $type=$_->{type};
       $h=$message_type{$type};
     }
   }

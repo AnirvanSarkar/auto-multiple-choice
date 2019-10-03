@@ -20,7 +20,7 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
+AMC::Test->new(dir=>__FILE__,filter=>'plain',tex_engine=>'xelatex',
 	       n_copies => 100,
 	       perfect_copy => [], speed=>1,
 	       full_scans => 'jpg',

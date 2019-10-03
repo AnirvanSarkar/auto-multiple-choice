@@ -36,34 +36,34 @@ our @ISA=("AMC::Messages");
 sub new {
     my %o=(@_);
     my $self={
-	'commande'=>'',
-	'log'=>'',
-	'avancement'=>'',
-	'texte'=>'',
+	commande=>'',
+	log=>'',
+	avancement=>'',
+	texte=>'',
 	'progres.id'=>'',
 	'progres.pulse'=>'',
-	'fin'=>'',
-	'finw'=>'',
-	'signal'=>9,
-	'o'=>{},
-        'clear'=>1,
-        'output_to_debug'=>(debug_file() eq 'stdout'),
+	fin=>'',
+	finw=>'',
+	signal=>9,
+	o=>{},
+        clear=>1,
+        output_to_debug=>(debug_file() eq 'stdout'),
 
-	'messages'=>[],
-	'variables'=>{},
+	messages=>[],
+	variables=>{},
 
-	'pid'=>'',
-	'avance'=>'',
-	'fh'=>undef,
-	'tag'=>[],
-	'pid'=>'',
+	pid=>'',
+	avance=>'',
+	fh=>undef,
+	tag=>[],
+	pid=>'',
     };
 
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}) || /^niveau/);
     }
 
-    $self->{'commande'}=[$self->{'commande'}] if(!ref($self->{'commande'}));
+    $self->{commande}=[$self->{commande}] if(!ref($self->{commande}));
 
     bless $self;
 
@@ -72,7 +72,7 @@ sub new {
 
 sub proc_pid {
     my ($self)=(@_);
-    return($self->{'pid'});
+    return($self->{pid});
 }
 
 sub erreurs {
@@ -87,12 +87,12 @@ sub warnings {
 
 sub variables {
     my ($self)=(@_);
-    return(%{$self->{'variables'}});
+    return(%{$self->{variables}});
 }
 
 sub variable {
     my ($self,$k)=(@_);
-    return $self->{'variables'}->{$k};
+    return $self->{variables}->{$k};
 }
 
 sub quitte {
@@ -102,9 +102,9 @@ sub quitte {
     $self->stop_watch();
 
     my $pid=$self->proc_pid();
-    debug "Canceling command [".$self->{'signal'}."->".$pid."].";
+    debug "Canceling command [".$self->{signal}."->".$pid."].";
 
-    kill $self->{'signal'},$pid if($pid =~ /^[0-9]+$/);
+    kill $self->{signal},$pid if($pid =~ /^[0-9]+$/);
 
     $self->close(cancelled=>1);
 }
@@ -112,34 +112,34 @@ sub quitte {
 sub open {
     my ($self)=@_;
 
-    $self->{'times'}=[times()];
-    $self->{'pid'}=open($self->{'fh'},"-|",@{$self->{'commande'}});
-    if(defined($self->{'pid'})) {
+    $self->{times}=[times()];
+    $self->{pid}=open($self->{fh},"-|",@{$self->{commande}});
+    if(defined($self->{pid})) {
 
-	push @{$self->{'tag'}},
-	  Glib::IO->add_watch( fileno( $self->{'fh'} ),
+	push @{$self->{tag}},
+	  Glib::IO->add_watch( fileno( $self->{fh} ),
 			       in => sub { $self->get_output() }),
-          Glib::IO->add_watch( fileno( $self->{'fh'} ),
+          Glib::IO->add_watch( fileno( $self->{fh} ),
                                hup => sub { $self->get_output() });
 
-	debug "Command [".$self->{'pid'}."] : "
+	debug "Command [".$self->{pid}."] : "
 	  .join(' ',map { /\s/ || ! $_ ? "\"$_\"" : $_ }
-		@{$self->{'commande'}});
+		@{$self->{commande}});
 
-	if($self->{'avancement'}) {
-	    $self->{'avancement'}->set_text($self->{'texte'});
-	    $self->{'avancement'}->set_fraction(0);
-	    $self->{'avancement'}->set_pulse_step($self->{'progres.pulse'})
+	if($self->{avancement}) {
+	    $self->{avancement}->set_text($self->{texte});
+	    $self->{avancement}->set_fraction(0);
+	    $self->{avancement}->set_pulse_step($self->{'progres.pulse'})
 		if($self->{'progres.pulse'});
 	}
 
-	$self->{'avance'}=AMC::Gui::Avancement::new
-	  (0,'bar'=>$self->{'avancement'});
+	$self->{avance}=AMC::Gui::Avancement::new
+	  (0,bar=>$self->{avancement});
 
-	$self->{'log'}->get_buffer()->set_text('') if($self->{'clear'});
+	$self->{log}->get_buffer()->set_text('') if($self->{clear});
 
     } else {
-	print STDERR "ERROR execing command\n".join(' ',@{$self->{'commande'}})."\n";
+	print STDERR "ERROR execing command\n".join(' ',@{$self->{commande}})."\n";
     }
 }
 
@@ -157,23 +157,23 @@ sub close {
 
   $self->stop_watch();
 
-  close($self->{'fh'});
+  close($self->{fh});
 
-  debug "Command [".$self->{'pid'}."] : OK - ".($self->n_messages('ERR'))." erreur(s)\n";
+  debug "Command [".$self->{pid}."] : OK - ".($self->n_messages('ERR'))." erreur(s)\n";
 
   my @tb=times();
-  debug sprintf("Total parent exec times during ".$self->{pid}.": [%7.02f,%7.02f]",$tb[0]+$tb[1]-$self->{'times'}->[0]-$self->{'times'}->[1],$tb[2]+$tb[3]-$self->{'times'}->[2]-$self->{'times'}->[3]);
+  debug sprintf("Total parent exec times during ".$self->{pid}.": [%7.02f,%7.02f]",$tb[0]+$tb[1]-$self->{times}->[0]-$self->{times}->[1],$tb[2]+$tb[3]-$self->{times}->[2]-$self->{times}->[3]);
 
-  $self->{'pid'}='';
-  $self->{'tag'}='';
-  $self->{'fh'}=undef;
+  $self->{pid}='';
+  $self->{tag}='';
+  $self->{fh}=undef;
 
-  $self->{'avancement'}->set_text('');
+  $self->{avancement}->set_text('');
 
-  &{$self->{'finw'}}($self,%data) if($self->{'finw'});
-  if($self->{'fin'}) {
+  &{$self->{finw}}($self,%data) if($self->{finw});
+  if($self->{fin}) {
     debug "Calling <fin> hook @".$self;
-    &{$self->{'fin'}}($self,%data);
+    &{$self->{fin}}($self,%data);
   }
 }
 
@@ -182,11 +182,11 @@ sub get_output {
 
     return if($self->{closing});
 
-    if( eof($self->{'fh'}) ) {
+    if( eof($self->{fh}) ) {
       debug "END of input";
       $self->close();
     } else {
-	my $fh=$self->{'fh'};
+	my $fh=$self->{fh};
 	my $line = <$fh>;
         utf8::decode($line);
 
@@ -194,15 +194,15 @@ sub get_output {
           debug_raw($line);
         }
 
-	if($self->{'avancement'}) {
+	if($self->{avancement}) {
 	    if($self->{'progres.pulse'}) {
-		$self->{'avancement'}->pulse;
+		$self->{avancement}->pulse;
 	    } else {
-	      $self->{'avance'}->lit($line);
+	      $self->{avance}->lit($line);
 	    }
 	}
 
-        my $log=$self->{'log'};
+        my $log=$self->{log};
         my $logbuff=$log->get_buffer();
 
         $logbuff->insert($logbuff->get_end_iter(),$line);
@@ -217,16 +217,16 @@ sub get_output {
           $self->add_message($type,$lc);
         }
         if($line =~ /^VAR:\s*([^=]+)=(.*)/) {
-          $self->{'variables'}->{$1}=$2;
-          debug "Set variable @".$self." $1 to ".$self->{'variables'}->{$1};
+          $self->{variables}->{$1}=$2;
+          debug "Set variable @".$self." $1 to ".$self->{variables}->{$1};
         }
         if($line =~ /^VAR\+:\s*(.*)/) {
-          $self->{'variables'}->{$1}++;
-          debug "Step variable @".$self." $1 to ".$self->{'variables'}->{$1};
+          $self->{variables}->{$1}++;
+          debug "Step variable @".$self." $1 to ".$self->{variables}->{$1};
         }
         for my $k (qw/OK FAILED/) {
           if($line =~ /^$k/) {
-            $self->{'variables'}->{$k}++;
+            $self->{variables}->{$k}++;
           }
         }
 

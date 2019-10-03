@@ -32,14 +32,14 @@ use Data::Dumper;
 sub new {
     my ($class, %o)=(@_);
 
-    my $self={'onerror'=>'stderr',
-	      'seuil'=>0,
-	      'seuil_up'=>1.0,
-	      'data'=>'',
-	      'default_strategy'=>'',
-	      'default_strategy_plain'=>'',
-	      '_capture'=>'',
-	      '_scoring'=>'',
+    my $self={onerror=>'stderr',
+	      seuil=>0,
+	      seuil_up=>1.0,
+	      data=>'',
+	      default_strategy=>'',
+	      default_strategy_plain=>'',
+	      _capture=>'',
+	      _scoring=>'',
 	  };
 
     for my $k (keys %o) {
@@ -48,9 +48,9 @@ sub new {
 
     bless $self;
 
-    if($self->{'data'}) {
-      $self->{'_capture'}=$self->{'data'}->module('capture');
-      $self->{'_scoring'}=$self->{'data'}->module('scoring');
+    if($self->{data}) {
+      $self->{_capture}=$self->{data}->module('capture');
+      $self->{_scoring}=$self->{data}->module('scoring');
     }
 
     $self->set_default_strategy();
@@ -61,10 +61,10 @@ sub new {
 sub error {
   my ($self,$t)=@_;
   debug $t;
-  if($self->{'onerror'} =~ /\bstderr\b/i) {
+  if($self->{onerror} =~ /\bstderr\b/i) {
     print STDERR "$t\n";
   }
-  if($self->{'onerror'} =~ /\bdie\b/i) {
+  if($self->{onerror} =~ /\bdie\b/i) {
     die $t;
   }
 }
@@ -75,9 +75,9 @@ sub error {
 
 sub ticked {
   my ($self,$student,$copy,$question,$answer)=@_;
-  return($self->{'_capture'}
+  return($self->{_capture}
 	 ->ticked($student,$copy,$question,$answer,
-		  $self->{'seuil'},$self->{'seuil_up'}));
+		  $self->{seuil},$self->{seuil_up}));
 }
 
 # tells if the answer given by the student is the correct one (ticked
@@ -85,7 +85,7 @@ sub ticked {
 sub answer_is_correct {
     my ($self,$student,$copy,$question,$answer)=@_;
     return($self->ticked($student,$copy,$question,$answer)
-	   == $self->{'_scoring'}->correct_answer($student,$question,$answer));
+	   == $self->{_scoring}->correct_answer($student,$question,$answer));
 }
 
 #################
@@ -97,9 +97,9 @@ sub answer_is_correct {
 sub set_default_strategy {
   my ($self,$strategy_string)=@_;
   $strategy_string="" if(!defined($strategy_string));
-  $self->{'default_strategy_plain'}=
+  $self->{default_strategy_plain}=
     AMC::ScoringEnv->new_from_directives_string($strategy_string);
-  $self->{'default_strategy'}=AMC::ScoringEnv
+  $self->{default_strategy}=AMC::ScoringEnv
     ->new_from_directives_string("e=0,b=1,m=0,v=0,d=0,auto=-1,"
 				 .$strategy_string);
 }
@@ -122,7 +122,7 @@ sub prepare_question {
 sub set_number_variables {
   my ($self,$question_data,$correct)=@_;
 
-  my $vars={'NB'=>0,'NM'=>0,'NBC'=>0,'NMC'=>0};
+  my $vars={NB=>0,NM=>0,NBC=>0,NMC=>0};
 
   my $n_ok=0;
   my $n_ticked=0;
@@ -131,19 +131,19 @@ sub set_number_variables {
   my $n_plain=0;
   my $ticked_noneof='';
 
-  for my $a (@{$question_data->{'answers'}}) {
-    my $c=$a->{'correct'};
-    my $t=($correct ? $c : $a->{'ticked'});
+  for my $a (@{$question_data->{answers}}) {
+    my $c=$a->{correct};
+    my $t=($correct ? $c : $a->{ticked});
 
-    debug("[ Q ".$a->{'question'}." A ".$a->{'answer'}." ] ticked $t (correct $c) CORRECT=$correct\n");
+    debug("[ Q ".$a->{question}." A ".$a->{answer}." ] ticked $t (correct $c) CORRECT=$correct\n");
 
     $n_ok+=($c == $t ? 1 : 0);
     $n_ticked+=$t;
     $ticked_adata=$a if($t);
     $n_all++;
 
-    if($a->{'answer'}==0) {
-      $ticked_noneof=$a->{'ticked'};
+    if($a->{answer}==0) {
+      $ticked_noneof=$a->{ticked};
     } else {
       my $bn=($c ? 'B' : 'M');
       my $co=($t ? 'C' : '');
@@ -161,9 +161,9 @@ sub set_number_variables {
   $self->{env}->set_variable("N_TICKED",$n_ticked,0);
   $self->{env}->set_variable("NONEOF_TICKED",$ticked_noneof,0);
   $self->{env}->set_variable("IMULT",
-			     $question_data->{'type'}==QUESTION_MULT ? 1 : 0);
+			     $question_data->{type}==QUESTION_MULT ? 1 : 0);
   $self->{env}->set_variable("IS",
-			     $question_data->{'type'}==QUESTION_SIMPLE ? 1 : 0);
+			     $question_data->{type}==QUESTION_SIMPLE ? 1 : 0);
 
   $self->{ticked_answer_data}=$ticked_adata;
 }
@@ -173,9 +173,9 @@ sub set_number_variables {
 sub process_ticked_answers_setx {
   my ($self,$question_data,$correct)=@_;
 
-  for my $a (@{$question_data->{'answers'}}) {
-    my $c=$a->{'correct'};
-    my $t=($correct ? $c : $a->{'ticked'});
+  for my $a (@{$question_data->{answers}}) {
+    my $c=$a->{correct};
+    my $t=($correct ? $c : $a->{ticked});
 
     $self->{env}->variables_from_directives_string($a->{strategy},set=>1,setx=>1,setglobal=>1)
       if($t);
@@ -323,13 +323,13 @@ sub multiple_standard_score {
 
   for my $a (@$answers) {
     # process only plain answers, not the "none of the above" answer
-    if($a->{'answer'} != 0) {
-      my $code=($correct || ($a->{'ticked'}==$a->{'correct'})
+    if($a->{answer} != 0) {
+      my $code=($correct || ($a->{ticked}==$a->{correct})
 		? "b" : "m");
       my $answer_env=$self->{env}->clone;
-      $answer_env->process_directives($a->{'strategy'});
+      $answer_env->process_directives($a->{strategy});
       my $code_val=$answer_env->get_directive($code);
-      debug("Delta(".$a->{'answer'}."|$code)=$code_val");
+      debug("Delta(".$a->{answer}."|$code)=$code_val");
       $$score+=$code_val;
 
       # bforce|mforce directive for this answer: pass it to
@@ -345,7 +345,7 @@ sub multiple_standard_score {
 sub simple_standard_score {
   my ($self,$score,$why)=@_;
 
-  my $sb=$self->{ticked_answer_data}->{'strategy'};
+  my $sb=$self->{ticked_answer_data}->{strategy};
   my $plain_directives=$self->{env}->parse_defs($sb,1);
 
   if(@$plain_directives) {
@@ -359,7 +359,7 @@ sub simple_standard_score {
 
     if($self->directive("auto")>-1) {
       debug "Scoring: auto";
-      $$score=$self->{ticked_answer_data}->{'answer'}
+      $$score=$self->{ticked_answer_data}->{answer}
 	+$self->directive("auto")-1;
     } else {
       my $code=($self->variable("N_RIGHT")==$self->variable("N_ALL") ? "b" : "m");
@@ -373,7 +373,7 @@ sub simple_standard_score {
 # the given scoring strategy.
 sub score_question {
   my ($self,$etu,$question_data,$correct)=@_;
-  my $answers=$question_data->{'answers'};
+  my $answers=$question_data->{answers};
 
   my $xx='';
   my $why='';
@@ -462,7 +462,7 @@ sub score_max_question {
 # database.
 #
 # @questions is an array of elements like
-# {'score'=>xx,'raison'=>rr,'notemax'=>xxmax} for each question.
+# {score=>xx,raison=>rr,notemax=>xxmax} for each question.
 
 sub global_score {
   my ($self,$scoring,@questions)=@_;
@@ -470,30 +470,30 @@ sub global_score {
   my $max=0;
 
   # maybe global variables differ from a copy to another...
-  $self->{'default_strategy_plain'}->unevaluate_directives();
+  $self->{default_strategy_plain}->unevaluate_directives();
 
-  my $skip=$self->{'default_strategy_plain'}->get_directive("allowempty");
+  my $skip=$self->{default_strategy_plain}->get_directive("allowempty");
   if($skip>0) {
-    @questions=sort { ($a->{'raison'} eq 'V' ? 0 : 1) <=>
-			($b->{'raison'} eq 'V' ? 0 : 1)
-		      || $b->{'notemax'} <=> $a->{'notemax'} } @questions;
+    @questions=sort { ($a->{raison} eq 'V' ? 0 : 1) <=>
+			($b->{raison} eq 'V' ? 0 : 1)
+		      || $b->{notemax} <=> $a->{notemax} } @questions;
     while($skip>0 && @questions
-	  && $questions[0]->{'raison'} eq 'V') {
+	  && $questions[0]->{raison} eq 'V') {
       $skip--;
-      $scoring->cancel_score(@{$questions[0]->{'sc'}},
-			     $questions[0]->{'question'})
+      $scoring->cancel_score(@{$questions[0]->{sc}},
+			     $questions[0]->{question})
 	if($scoring);
       shift @questions;
     }
   }
 
   for my $q (@questions) {
-    $total+=$q->{'score'};
-    $max+=$q->{'notemax'};
+    $total+=$q->{score};
+    $max+=$q->{notemax};
   }
 
-  $max=$self->{'default_strategy_plain'}->get_directive("SUF")
-    if($self->{'default_strategy_plain'}->defined_directive("SUF"));
+  $max=$self->{default_strategy_plain}->get_directive("SUF")
+    if($self->{default_strategy_plain}->defined_directive("SUF"));
 
   if ($max<=0) {
     debug "Warning: Nonpositive value for MAX.";

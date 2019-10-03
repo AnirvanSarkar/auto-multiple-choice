@@ -115,7 +115,7 @@ sub check_split_path {
 
 my $dp;
 my $p;
-$p=AMC::Gui::Avancement::new(1,'id'=>$progress_id)
+$p=AMC::Gui::Avancement::new(1,id=>$progress_id)
   if($progress_id);
 
 # image_size computes the image size (width,height) using 'identify'

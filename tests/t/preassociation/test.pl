@@ -20,7 +20,7 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,
+AMC::Test->new(dir=>__FILE__,
 	       list=>'students.csv',n_copies=>1,
 	       list_key=>'id',code=>'<preassoc>',
 	       check_assoc=>{3=>903},

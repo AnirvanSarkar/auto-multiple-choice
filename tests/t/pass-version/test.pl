@@ -20,7 +20,7 @@
 
 require "./AMC/Test.pm";
 
-my $t=AMC::Test->new('dir'=>__FILE__);
+my $t=AMC::Test->new(dir=>__FILE__);
 
 if(!open(MV,"../Makefile.versions")) {
   $t->trace("[E] Can't open versions file: $!");
@@ -38,7 +38,7 @@ if(!$vsty) {
 
 $t->check_textest;
 
-if(!open(LOG,$t->{'temp_dir'}."/amc.log")) {
+if(!open(LOG,$t->{temp_dir}."/amc.log")) {
   $t->trace("[E] Can't open log file: $!");
   exit 1;
 }

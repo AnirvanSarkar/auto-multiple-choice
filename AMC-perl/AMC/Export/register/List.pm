@@ -46,17 +46,17 @@ sub extension {
 
 sub options_from_config {
   my ($self,$config)=@_;
-  return("nom"=>$config->get('nom_examen'),
-	 "code"=>$config->get('code_examen'),
-	 "decimal"=>$config->get('delimiteur_decimal'),
-	 "pagesize"=>$config->get('export_pagesize'),
-	 "ncols"=>$config->get('export_ncols'),
+  return(nom=>$config->get('nom_examen'),
+	 code=>$config->get('code_examen'),
+	 decimal=>$config->get('delimiteur_decimal'),
+	 pagesize=>$config->get('export_pagesize'),
+	 ncols=>$config->get('export_ncols'),
 	);
 }
 
 sub options_default {
-  return('export_ncols'=>2,
-	 'export_pagesize'=>'a4');
+  return(export_ncols=>2,
+	 export_pagesize=>'a4');
 }
 
 sub build_config_gui {
@@ -68,7 +68,7 @@ sub build_config_gui {
 	     0,$y,1,1);
   $widget=Gtk3::SpinButton->new(Gtk3::Adjustment->new(1,1,5,1,1,0),0,0);
   $widget->set_tooltip_text(__"Long list is divided into this number of columns on each page.");
-  $w->{'export_s_export_ncols'}=$widget;
+  $w->{export_s_export_ncols}=$widget;
   $t->attach($widget,1,$y,1,1);
   $y++;
   $t->attach(Gtk3::Label->new(__"Paper size"),
@@ -77,11 +77,11 @@ sub build_config_gui {
   my $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
-  $prefs->store_register('export_pagesize'=>cb_model("a3"=>"A3",
+  $prefs->store_register(export_pagesize=>cb_model("a3"=>"A3",
 						     "a4"=>"A4",
-						     "letter"=>"Letter",
-						     "legal"=>"Legal"));
-  $w->{'export_c_export_pagesize'}=$widget;
+						     letter=>"Letter",
+						     legal=>"Legal"));
+  $w->{export_c_export_pagesize}=$widget;
   $t->attach($widget,1,$y,1,1);
   $y++;
 

@@ -20,6 +20,6 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'n_copies'=>0,
-	       'tex_engine'=>'pdflatex',extract_with=>'qpdf')
+AMC::Test->new(dir=>__FILE__,n_copies=>0,
+	       tex_engine=>'pdflatex',extract_with=>'qpdf')
   ->default_process;

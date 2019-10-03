@@ -36,7 +36,7 @@ use_gettext;
 
 sub new {
     my $class = shift;
-    my $self={'project_options'=>''};
+    my $self={project_options=>''};
     bless ($self, $class);
     return $self;
 }
@@ -111,8 +111,8 @@ sub needs_command {
 
 # list of required fonts
 sub needs_font {
-  return([{'type'=>'fontconfig',
-	   'family'=>[]}, # <--  needs one of the fonts in the list
+  return([{type=>'fontconfig',
+	   family=>[]}, # <--  needs one of the fonts in the list
 	 ]);
 }
 
@@ -131,12 +131,12 @@ sub claim {
 
 sub set_oo {
   my ($self,$config)=@_;
-  $self->{'project_options'}=$config;
+  $self->{project_options}=$config;
 }
 
 sub set_project_option {
   my ($self,$name,$value)=@_;
-  $self->{'project_options'}->set("project:$name",$value);
+  $self->{project_options}->set("project:$name",$value);
 }
 
 sub missing_latex_packages {
@@ -174,15 +174,15 @@ sub missing_fonts {
 
 sub check_dependencies {
   my ($self)=@_;
-  my %miss=('latex_packages'=>[$self->missing_latex_packages()],
-	    'commands'=>[$self->missing_commands()],
-	    'fonts'=>[$self->missing_fonts()],
+  my %miss=(latex_packages=>[$self->missing_latex_packages()],
+	    commands=>[$self->missing_commands()],
+	    fonts=>[$self->missing_fonts()],
 	   );
   my $ok=1;
   for my $k (keys %miss) {
     $ok=0 if(@{$miss{$k}});
   }
-  $miss{'ok'}=$ok;
+  $miss{ok}=$ok;
   return(\%miss);
 }
 

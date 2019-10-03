@@ -158,7 +158,7 @@ for(split(/,/,join(',',@o_symbols))) {
 # try to set sensible values when these directories are not set by the
 # user:
 
-$projects_dir=$ENV{'HOME'}.'/'.__("MC-Projects") if(!$projects_dir);
+$projects_dir=$ENV{HOME}.'/'.__("MC-Projects") if(!$projects_dir);
 $project_dir=$projects_dir.'/'.$project_dir if($project_dir !~ /\//);
 $pdf_subject="DOC-sujet.pdf" if(!$pdf_subject);
 $pdf_subject=$project_dir.'/'.$pdf_subject if($pdf_subject !~ /\//);

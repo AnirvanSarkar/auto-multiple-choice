@@ -20,6 +20,6 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__)
+AMC::Test->new(dir=>__FILE__)
   ->default_process;
 

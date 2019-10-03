@@ -178,7 +178,7 @@ sub set_filtered_source {
 # Uses an AMC::Gui::Avancement object to tell regularly the calling
 # program how much work we have done so far.
 
-my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+my $avance=AMC::Gui::Avancement::new($progress,id=>$progress_id);
 
 # Get and test the source file
 
@@ -259,7 +259,7 @@ sub check_question {
     # if postcorrection is used, this check cannot be made as we will
     # only know which answers are correct after having captured the
     # teacher's copy.
-    return() if($info_vars{'postcorrect'});
+    return() if($info_vars{postcorrect});
 
     # if is_alias is true, the questions has already been checked...
     return if($q->{is_alias});
@@ -271,14 +271,14 @@ sub check_question {
       # all the question answers have not yet been parsed (this can
       # happen when using AMCnumericChoices or AMCOpen, because the
       # answers are only given in the separate answer sheet).
-	if(!($q->{'mult'} || $q->{'partial'})) {
+	if(!($q->{mult} || $q->{partial})) {
 	    my $n_correct=0;
 	    my $n_total=0;
 	    for my $i (grep { /^R/ } (keys %$q)) {
 		$n_total++;
 		$n_correct++ if($q->{$i});
 	    }
-	    if($n_correct!=1 && !$q->{'indicative'}) {
+	    if($n_correct!=1 && !$q->{indicative}) {
 		$a_errors++;
 		push @errors_msg,"ERR: "
 		    .sprintf(__("%d/%d good answers not coherent for a simple question")." [%s]\n",$n_correct,$n_total,$t);
@@ -396,7 +396,7 @@ sub analyse_amclog {
 
       # then clear all $analyse_data to begin with this student:
 
-      $analyse_data={'etu'=>$student,'qs'=>{}};
+      $analyse_data={etu=>$student,qs=>{}};
     }
 
     # AUTOQCM[BR=N] tells that this student is a replicate of student N
@@ -545,8 +545,8 @@ sub execute {
 
         debug "COMMAND: $ENV{AMC_CMD}";
 
-	$cmd_pid=open(EXEC,"-|",@{$oo{'command'}});
-	die "Can't exec ".join(' ',@{$oo{'command'}}) if(!$cmd_pid);
+	$cmd_pid=open(EXEC,"-|",@{$oo{command}});
+	die "Can't exec ".join(' ',@{$oo{command}}) if(!$cmd_pid);
 
 	# parses the output
 
@@ -592,7 +592,7 @@ sub execute {
 	close(EXEC);
 	$cmd_pid='';
 
-    } while( (($n_run<$min_runs) || ($rerun && $n_run<$max_runs)) && ! $oo{'once'});
+    } while( (($n_run<$min_runs) || ($rerun && $n_run<$max_runs)) && ! $oo{once});
 
     # For these engines, we already know what is the output format:
     # override detected one
@@ -689,8 +689,8 @@ sub do_filter {
 
     # sometimes the filter asks to override the LaTeX engine
 
-    split_latex_engine($filter_engine->{'project_options'}->{'moteur_latex_b'})
-      if($filter_engine->{'project_options'}->{'moteur_latex_b'});
+    split_latex_engine($filter_engine->{project_options}->{moteur_latex_b})
+      if($filter_engine->{project_options}->{moteur_latex_b});
 
   }
 
@@ -749,7 +749,7 @@ sub latex_reproducible_commands {
 sub latex_cmd {
     my (%o)=@_;
 
-    $o{'AMCNombreCopies'}=$number_of_copies if($number_of_copies>0);
+    $o{AMCNombreCopies}=$number_of_copies if($number_of_copies>0);
 
     return($latex_engine,
 	   "--jobname=".$jobname,
@@ -792,7 +792,7 @@ if($to_do{f}) {
 ############################################################################
 
 sub build_solution {
-  execute('command_opts'=>[%global_opts,'CorrigeExterne'=>1]);
+  execute(command_opts=>[%global_opts,CorrigeExterne=>1]);
   transfer("$jobname.pdf",$out_corrige);
   give_latex_errors(__"solution");
 }
@@ -806,7 +806,7 @@ if($to_do{S}) {
 ############################################################################
 
 sub build_catalog {
-  execute('command_opts'=>[%global_opts,'CatalogExterne'=>1]);
+  execute(command_opts=>[%global_opts,CatalogExterne=>1]);
   transfer("$jobname.pdf",$out_catalog);
   analyse_cslog("$jobname.cs");
   give_latex_errors(__"catalog");
@@ -840,7 +840,7 @@ if($to_do{s}) {
 
   # 1) SUBJECT
 
-  execute('command_opts'=>[%global_opts,'SujetExterne'=>1]);
+  execute(command_opts=>[%global_opts,SujetExterne=>1]);
   analyse_amclog("$jobname.amc");
   give_latex_errors(__"question sheet");
 
@@ -914,7 +914,7 @@ if($to_do{k}) {
 
   @output_files=($of);
 
-  execute('command_opts'=>[%global_opts,qw/CorrigeIndivExterne 1/]);
+  execute(command_opts=>[%global_opts,qw/CorrigeIndivExterne 1/]);
   transfer("$jobname.pdf",$of);
   give_latex_errors(__"individual solution");
 }
@@ -940,8 +940,8 @@ if($to_do{b}) {
 
     # Launches the LaTeX engine
 
-    execute('command_opts'=>[qw/ScoringExterne 1 NoHyperRef 1/],
-	    'once'=>1);
+    execute(command_opts=>[qw/ScoringExterne 1 NoHyperRef 1/],
+	    once=>1);
 
     open(AMCLOG,"$jobname.amc") or die "Unable to open $jobname.amc : $!";
 
@@ -997,10 +997,10 @@ if($to_do{b}) {
 	if(/AUTOQCM\[FQ\]/) {
 	  # end of question: register it (or update it)
 	  $scoring->new_question($etu,$quest,
-				 ($current_q->{'multiple'}
+				 ($current_q->{multiple}
 				  ? QUESTION_MULT : QUESTION_SIMPLE),
-				 $current_q->{'indicative'},
-				 $current_q->{'strategy'});
+				 $current_q->{indicative},
+				 $current_q->{strategy});
 	  $qs->{$quest}=$current_q;
 	  $outside_quest=$quest;
 	  $quest='';
@@ -1014,9 +1014,9 @@ if($to_do{b}) {
 	  if($qs->{$quest}) {
 	      $current_q=$qs->{$quest};
 	  } else {
-	      $current_q={'multiple'=>0,
-			  'indicative'=>0,
-			  'strategy'=>'',
+	      $current_q={multiple=>0,
+			  indicative=>0,
+			  strategy=>'',
 	      };
 	  }
 	}
@@ -1028,12 +1028,12 @@ if($to_do{b}) {
 
 	if(/AUTOQCM\[MULT\]/) {
 	  # this question is a multiple-style one
-	  $current_q->{'multiple'}=1;
+	  $current_q->{multiple}=1;
 	}
 
 	if(/AUTOQCM\[INDIC\]/) {
 	  # this question is an indicative one
-	  $current_q->{'indicative'}=1;
+	  $current_q->{indicative}=1;
 	}
 
 	if(/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
@@ -1068,9 +1068,9 @@ if($to_do{b}) {
 	      $scoring->add_answer_strategy($etu,$quest,$rep,$1);
 	    } else {
 	      # associated to a question
-	      $current_q->{'strategy'}=
-		  ($current_q->{'strategy'}
-		   ? $current_q->{'strategy'}.',' : '').$1;
+	      $current_q->{strategy}=
+		  ($current_q->{strategy}
+		   ? $current_q->{strategy}.',' : '').$1;
 	    }
 	  } else {
 	    # global scoring strategy, associated to a student if

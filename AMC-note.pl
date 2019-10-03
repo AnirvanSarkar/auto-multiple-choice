@@ -94,7 +94,7 @@ sub rounding_sup {
     return(ceil($x));
 }
 
-my %rounding_function=('i'=>\&rounding_inf,'n'=>\&rounding_central,'s'=>\&rounding_sup);
+my %rounding_function=(i=>\&rounding_inf,n=>\&rounding_central,s=>\&rounding_sup);
 
 # sets the rounding scheme to use to compute students marks, from
 # parameter $rounding_scheme
@@ -127,7 +127,7 @@ if($granularity<=0) {
 # Uses an AMC::Gui::Avancement object to tell regularly the calling
 # program how much work we have done so far.
 
-my $avance=AMC::Gui::Avancement::new($progres,'id'=>$progres_id);
+my $avance=AMC::Gui::Avancement::new($progres,id=>$progres_id);
 
 # Connects to the databases capture (to get the students sheets and to
 # know which boxes have been ticked) and scoring (to write the
@@ -141,10 +141,10 @@ my $layout=$data->module('layout');
 # Uses an AMC::Scoring object to actually compute the questions
 # scores.
 
-my $score=AMC::Scoring->new('onerror'=>'die',
-                            'data'=>$data,
-                            'seuil'=>$darkness_threshold,
-                            'seuil_up'=>$darkness_threshold_up,
+my $score=AMC::Scoring->new(onerror=>'die',
+                            data=>$data,
+                            seuil=>$darkness_threshold,
+                            seuil_up=>$darkness_threshold_up,
                            );
 
 $avance->progres(0.05);
@@ -213,7 +213,7 @@ for my $sc (@captured_studentcopy) {
   # transmits the main strategy (default strategy options values for
   # all questions) to the scoring engine.
 
-  $score->set_default_strategy($ssb->{'main_strategy'});
+  $score->set_default_strategy($ssb->{main_strategy});
 
   # The @question_scores collects scores for all questions
 
@@ -221,14 +221,14 @@ for my $sc (@captured_studentcopy) {
 
   # Process each question in turn
 
-  for my $q (@{$ssb->{'questions'}}) {
+  for my $q (@{$ssb->{questions}}) {
 
     my $question=$q->{question};
 
     # $question is the question numerical ID, and
     # $q is the question scoring data (see AMC::DataModule::scoring)
 
-    debug "MARK: QUESTION $question TITLE ".$q->{'title'};
+    debug "MARK: QUESTION $question TITLE ".$q->{title};
 
     # Uses the scoring engine to score the question...
     #
@@ -250,7 +250,7 @@ for my $sc (@captured_studentcopy) {
     # N), then this question represents a digit from a AMCcode, so we
     # collect the value in the %codes hash.
 
-    if ($q->{'title'} =~ /^(.*)$code_digit_pattern$/) {
+    if ($q->{title} =~ /^(.*)$code_digit_pattern$/) {
       my $code_name=$1;
       my $code_digit=$2;
       my $chars=$capture->
@@ -260,18 +260,18 @@ for my $sc (@captured_studentcopy) {
       $codes{$code_name}->{$code_digit}=$chars;
     }
 
-    if ($q->{'indicative'}) {
+    if ($q->{indicative}) {
       # If the question is indicative, we don't collect the value in
       # the @question_scores array
       $max_score=1;
     } else {
       # Otherwise, we collect all scoring results to compute later the
       # overall aggregated score for the student.
-      push @question_scores,{'score'=>$xx,
-			     'raison'=>$why,
-			     'notemax'=>$max_score,
-			     'sc'=>[@$sc],
-			     'question'=>$question,
+      push @question_scores,{score=>$xx,
+			     raison=>$why,
+			     notemax=>$max_score,
+			     sc=>[@$sc],
+			     question=>$question,
 			     };
     }
 

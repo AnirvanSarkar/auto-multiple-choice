@@ -115,8 +115,8 @@ sub printer_selected_options {
       my $option=$ppd->getOption($k);
       if(ref($option) eq 'HASH') {
 	push @o,{name=>$k,
-		 description=>nonnul($option->{'text'}),
-		 default=>nonnul($option->{'defchoice'}),
+		 description=>nonnul($option->{text}),
+		 default=>nonnul($option->{defchoice}),
 		 values=>[map { {name=>nonnul($_->{choice}),
 				   description=>nonnul($_->{text}) } }
 			  (@{$option->{choices}})],

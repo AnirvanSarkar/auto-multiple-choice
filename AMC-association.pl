@@ -88,10 +88,10 @@ if($list) {
 } else {
   require AMC::Gui::Association;
 
-  my $g=AMC::Gui::Association::new('cr'=>$cr_dir,
-				   'liste'=>$liste,
-				   'data_dir'=>$data_dir,
-				   'global'=>1,
+  my $g=AMC::Gui::Association::new(cr=>$cr_dir,
+				   liste=>$liste,
+				   data_dir=>$data_dir,
+				   global=>1,
 				  );
 
   Gtk3->main;

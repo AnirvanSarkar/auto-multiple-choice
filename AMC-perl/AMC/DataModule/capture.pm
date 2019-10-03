@@ -159,8 +159,8 @@ use constant {
 
 our @EXPORT_OK = qw(ZONE_FRAME ZONE_NAME ZONE_DIGIT ZONE_BOX
 		  POSITION_BOX POSITION_MEASURE);
-our %EXPORT_TAGS = ( 'zone' => [ qw/ZONE_FRAME ZONE_NAME ZONE_DIGIT ZONE_BOX/ ],
-		     'position'=> [ qw/POSITION_BOX POSITION_MEASURE/ ],
+our %EXPORT_TAGS = ( zone=> [ qw/ZONE_FRAME ZONE_NAME ZONE_DIGIT ZONE_BOX/ ],
+		     position=> [ qw/POSITION_BOX POSITION_MEASURE/ ],
 		   );
 
 use DBI qw(:sql_types);
@@ -214,7 +214,7 @@ sub version_upgrade {
 	my $ii=0;
 	for my $i (@{$list}) {
 	  if($i->{image}) {
-	    my $f=$self->{'data'}->{'directory'}."/../cr/zooms/".$i->{image};
+	    my $f=$self->{data}->{directory}."/../cr/zooms/".$i->{image};
 	    if(defined($f) && -f $f) {
 	      $self->set_image($i->{zoneid},file_content($f));
 	    }
@@ -263,8 +263,8 @@ sub populate_position {
     $self->statement('NEWPosition')
       ->execute($zoneid,
 		$corner,
-		$xml->{$corner}->{'x'},
-		$xml->{$corner}->{'y'},
+		$xml->{$corner}->{x},
+		$xml->{$corner}->{y},
 		$type);
   }
 }
@@ -274,7 +274,7 @@ sub populate_position {
 
 sub populate_from_xml {
   my ($self)=@_;
-  my $cr=$self->{'data'}->directory;
+  my $cr=$self->{data}->directory;
   $cr =~ s/\/[^\/]+\/?$/\/cr/;
   return if(!-d $cr);
 
@@ -293,47 +293,47 @@ sub populate_from_xml {
 		  ForceArray => ["analyse","chiffre","case","id"],
 		  KeepRoot=>1,
 		  KeyAttr=> [ 'id' ]);
-    next XML if(!$anx->{'analyse'});
-  ID: for my $id (keys %{$anx->{'analyse'}}) {
-      my $an=$anx->{'analyse'}->{$id};
+    next XML if(!$anx->{analyse});
+  ID: for my $id (keys %{$anx->{analyse}}) {
+      my $an=$anx->{analyse}->{$id};
       my @ep=get_ep($id);
       my %oo;
 
       my @st=stat("$cr/".$f);
-      $oo{'timestamp'}=$st[9];
+      $oo{timestamp}=$st[9];
 
-      if ($an->{'manuel'}) {
+      if ($an->{manuel}) {
 	# This is a XML description of a manual data capture: no
 	# position information, only ticked-or-not for all
 	# boxes
-	$self->set_page_manual(@ep,0,$oo{'timestamp'});
+	$self->set_page_manual(@ep,0,$oo{timestamp});
 
-	for my $c (keys %{$an->{'case'}}) {
-	  my $case=$an->{'case'}->{$c};
+	for my $c (keys %{$an->{case}}) {
+	  my $case=$an->{case}->{$c};
 	  $self->set_zone_manual(@ep,0,ZONE_BOX,
-				 $case->{'question'},$case->{'reponse'},
-				 $case->{'r'});
+				 $case->{question},$case->{reponse},
+				 $case->{r});
 	}
       } else {
 	# This is a XML description of an automatic data
 	# capture: contains full information about darkness and
 	# positions of the boxes
-	$oo{'mse'}=$an->{'transformation'}->{'mse'};
+	$oo{mse}=$an->{transformation}->{mse};
 	for my $k (qw/a b c d e f/) {
-	  $oo{$k}=$an->{'transformation'}->{'parametres'}->{$k};
+	  $oo{$k}=$an->{transformation}->{parametres}->{$k};
 	}
 
-	$self->set_page_auto($an->{'src'},@ep,0,
+	$self->set_page_auto($an->{src},@ep,0,
 			     map { $oo{$_} } (qw/timestamp a b c d e f mse/));
 
-	if($an->{'cadre'}) {
+	if($an->{cadre}) {
 	  my $zoneid=$self->get_zoneid(@ep,0,ZONE_FRAME,0,0,1);
-	  $self->populate_position($an->{'cadre'}->{'coin'},
+	  $self->populate_position($an->{cadre}->{coin},
 				   $zoneid,POSITION_BOX);
 	}
-	if($an->{'nom'}) {
+	if($an->{nom}) {
 	  my $zoneid=$self->get_zoneid(@ep,0,ZONE_NAME,0,0,1);
-	  $self->populate_position($an->{'nom'}->{'coin'},
+	  $self->populate_position($an->{nom}->{coin},
 				   $zoneid,POSITION_BOX);
 	  # Look if the namefield image is present...
 	  my $nf="nom-".id2idf($id).".jpg";
@@ -342,23 +342,23 @@ sub populate_from_xml {
 	  }
 	}
 
-	for my $c (keys %{$an->{'case'}}) {
-	  my $case=$an->{'case'}->{$c};
+	for my $c (keys %{$an->{case}}) {
+	  my $case=$an->{case}->{$c};
 	  my $zoneid=$self->get_zoneid(@ep,0,ZONE_BOX,
-				       $case->{'question'},$case->{'reponse'},1);
+				       $case->{question},$case->{reponse},1);
 
 	  my $zf=sprintf("%d-%d/%d-%d.png",
 			 @ep,
-			 $case->{'question'},$case->{'reponse'});
+			 $case->{question},$case->{reponse});
 	  $zf='' if(!-f "$cr/zooms/$zf");
 
 	  $self->set_zone_auto_id_without_imagedata
 	    ($zoneid,
-	     $case->{'pixels'},$case->{'pixelsnoirs'},
+	     $case->{pixels},$case->{pixelsnoirs},
 	     $zf);
 
-	  $self->populate_position($case->{'coin'},$zoneid,POSITION_BOX);
-	  $self->populate_position($an->{'casetest'}->{$c}->{'coin'},
+	  $self->populate_position($case->{coin},$zoneid,POSITION_BOX);
+	  $self->populate_position($an->{casetest}->{$c}->{coin},
 				   $zoneid,POSITION_MEASURE);
 	}
 
@@ -395,75 +395,75 @@ sub define_statements {
   my $t_namefield=$self->table("namefield","layout");
   my $t_layoutpage=$self->table("page","layout");
   my $t_lnf=$self->table("namefield","layout");
-  $self->{'statements'}=
+  $self->{statements}=
     {
-     'NEWPageAuto'=>{'sql'=>"INSERT INTO $t_page"
+     NEWPageAuto=>{sql=>"INSERT INTO $t_page"
 		     ." (src,student,page,copy,timestamp_auto,a,b,c,d,e,f,mse)"
 		     ." VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"},
-     'NEWPageManual'=>{'sql'=>"INSERT INTO $t_page"
+     NEWPageManual=>{sql=>"INSERT INTO $t_page"
 		       ." (student,page,copy,timestamp_manual)"
 		       ." VALUES (?,?,?,?)"},
-     'SetPageAuto'=>{'sql'=>"UPDATE $t_page"
+     SetPageAuto=>{sql=>"UPDATE $t_page"
 		     ." SET src=?, timestamp_auto=?, a=?, b=?, c=?, d=?, e=?, f=?, mse=?"
 		     ." WHERE student=? AND page=? AND copy=?"},
-     'overwritePage'=>{sql=>"UPDATE ".$t_page
+     overwritePage=>{sql=>"UPDATE ".$t_page
                        ." SET overwritten=overwritten+1"
                        ." WHERE student=? AND page=? AND copy=?"},
-     'overwriteClear'=>{sql=>"UPDATE $t_page SET overwritten=0"},
-     'SetPageManual'=>{'sql'=>"UPDATE $t_page"
+     overwriteClear=>{sql=>"UPDATE $t_page SET overwritten=0"},
+     SetPageManual=>{sql=>"UPDATE $t_page"
 		       ." SET timestamp_manual=?"
 		       ." WHERE student=? AND page=? AND copy=?"},
-     'NEWZone'=>{'sql'=>"INSERT INTO $t_zone"
+     NEWZone=>{sql=>"INSERT INTO $t_zone"
 		 ." (student,page,copy,type,id_a,id_b)"
 		 ." VALUES (?,?,?,?,?,?)"},
-     'getZoneID'=>{'sql'=>"SELECT zoneid FROM $t_zone"
+     getZoneID=>{sql=>"SELECT zoneid FROM $t_zone"
 		   ." WHERE student=? AND page=? AND copy=? AND type=? AND id_a=? AND id_b=?"},
-     'zonesCount'=>{'sql'=>"SELECT COUNT(*) FROM $t_zone"
+     zonesCount=>{sql=>"SELECT COUNT(*) FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"},
-     'zone'=>{'sql'=>"SELECT COUNT(*) FROM $t_zone"
+     zone=>{sql=>"SELECT COUNT(*) FROM $t_zone"
 	      ." WHERE student=? AND page=? AND copy=? AND type=?"
 	      ." AND id_a=? AND id_b=?"},
-     'NEWPosition'=>{'sql'=>"INSERT OR REPLACE INTO $t_position"
+     NEWPosition=>{sql=>"INSERT OR REPLACE INTO $t_position"
 		     ." (zoneid,corner,x,y,type)"
 		     ." VALUES (?,?,?,?,?)"},
-     'setPosition'=>{'sql'=>"UPDATE $t_position"
+     setPosition=>{sql=>"UPDATE $t_position"
 		     ." SET x=?, y=? WHERE zoneid=? AND corner=? AND type=?"},
-     'getPage'=>{'sql'=>"SELECT * FROM $t_page"
+     getPage=>{sql=>"SELECT * FROM $t_page"
 		 ." WHERE student=? AND page=? AND copy=?"},
-     'setZoneManual'=>{'sql'=>"UPDATE $t_zone"
+     setZoneManual=>{sql=>"UPDATE $t_zone"
 		       ." SET manual=? WHERE zoneid=?"},
-     'setZoneAuto'=>{'sql'=>"UPDATE $t_zone"
+     setZoneAuto=>{sql=>"UPDATE $t_zone"
 		     ." SET total=?, black=?, image=?, imagedata=? WHERE zoneid=?"},
-     'setZoneAutoPrim'=>{'sql'=>"UPDATE $t_zone"
+     setZoneAutoPrim=>{sql=>"UPDATE $t_zone"
 			 ." SET total=?, black=?, image=? WHERE zoneid=?"},
-     'nPages'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
+     nPages=>{sql=>"SELECT COUNT(*) FROM $t_page"
 		." WHERE timestamp_auto>0 OR timestamp_manual>0"},
-     'nPagesAuto'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
+     nPagesAuto=>{sql=>"SELECT COUNT(*) FROM $t_page"
 		   ." WHERE timestamp_auto>0"},
-     'students'=>{'sql'=>"SELECT student FROM $t_page"
+     students=>{sql=>"SELECT student FROM $t_page"
 		 ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		  ." GROUP BY student ORDER BY student"},
-     'nCopies'=>{'sql'=>"SELECT COUNT(*) FROM (SELECT student,copy FROM $t_page"
+     nCopies=>{sql=>"SELECT COUNT(*) FROM (SELECT student,copy FROM $t_page"
 		 ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		 ." GROUP BY student,copy)"},
-     'nOverwritten'=>{sql=>"SELECT SUM(overwritten) FROM $t_page"},
-     'overwrittenPages'=>{sql=>"SELECT student,page,copy,overwritten,timestamp_auto"
+     nOverwritten=>{sql=>"SELECT SUM(overwritten) FROM $t_page"},
+     overwrittenPages=>{sql=>"SELECT student,page,copy,overwritten,timestamp_auto"
                           ." FROM $t_page WHERE overwritten>0"
                           ." ORDER BY timestamp_auto DESC, student ASC, page ASC, copy ASC"},
-     'studentCopies'=>{'sql'=>"SELECT student,copy FROM $t_page"
+     studentCopies=>{sql=>"SELECT student,copy FROM $t_page"
 		       ." WHERE timestamp_auto>0 OR timestamp_manual>0"
 		       ." GROUP BY student,copy ORDER BY student,copy"},
-     'maxCopy'=>{'sql'=>"SELECT MAX(copy) FROM $t_page"},
-     'maxAnswer'=>{'sql'=>"SELECT MAX(id_b) FROM $t_zone WHERE type=?"},
-     'pageCopies'=>{'sql'=>"SELECT copy FROM $t_page"
+     maxCopy=>{sql=>"SELECT MAX(copy) FROM $t_page"},
+     maxAnswer=>{sql=>"SELECT MAX(id_b) FROM $t_zone WHERE type=?"},
+     pageCopies=>{sql=>"SELECT copy FROM $t_page"
 		    ." WHERE student=? AND page=? AND copy>=?"
 		    ." ORDER BY copy"},
-     'pageLastCopy'=>{'sql'=>"SELECT MAX(copy) FROM $t_page"
+     pageLastCopy=>{sql=>"SELECT MAX(copy) FROM $t_page"
 		      ." WHERE student=? AND page=?"},
-     'pagesChanged'=>{'sql'=>"SELECT student,page,copy FROM $t_page"
+     pagesChanged=>{sql=>"SELECT student,page,copy FROM $t_page"
 		      ." WHERE timestamp_auto>? OR timestamp_manual>?"},
-     'pagesSummary'=>
-     {'sql'=>"SELECT student,page,copy,src,mse,timestamp_auto,timestamp_manual"
+     pagesSummary=>
+     {sql=>"SELECT student,page,copy,src,mse,timestamp_auto,timestamp_manual"
       .",CASE WHEN timestamp_auto>0 AND mse>? THEN ?"
       ."      ELSE ?"
       ."  END AS mse_color"
@@ -485,74 +485,74 @@ sub define_statements {
       ."     AND $t_zone.page=$t_page.page AND $t_zone.copy=$t_page.copy"
       ."     AND $t_zone.type=? AND total>0) AS delta_up"
       ." FROM $t_page"},
-     'pages'=>{'sql'=>"SELECT * FROM $t_page"
+     pages=>{sql=>"SELECT * FROM $t_page"
 	       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
-     'missingPages'=>
-     {'sql'=>"SELECT enter.student AS student,enter.page AS page ,$t_page.copy AS copy"
+     missingPages=>
+     {sql=>"SELECT enter.student AS student,enter.page AS page ,$t_page.copy AS copy"
       ." FROM (SELECT student,page FROM $t_box WHERE role=1"
       ."       UNION SELECT student,page FROM $t_namefield) AS enter,"
       ."      $t_page"
       ." ON enter.student=$t_page.student"
       ." EXCEPT SELECT student,page,copy FROM $t_page"
       ." ORDER BY student,copy,page"},
-     'questionOnlyPages'=>
-     {'sql'=>"SELECT student,page,0 AS copy FROM $t_box WHERE role=2"
+     questionOnlyPages=>
+     {sql=>"SELECT student,page,0 AS copy FROM $t_box WHERE role=2"
       ." EXCEPT SELECT student,page,0 AS copy FROM $t_box WHERE role=1"},
-     'noCapturePages'=>
-     {'sql'=>"SELECT student,page,0 AS copy FROM $t_box WHERE role=1"
+     noCapturePages=>
+     {sql=>"SELECT student,page,0 AS copy FROM $t_box WHERE role=1"
       ." UNION SELECT student,page,0 AS copy FROM $t_namefield"
       ." EXCEPT SELECT student,page,copy FROM $t_page"
       ." WHERE timestamp_auto>0 OR timestamp_manual>0"},
-     'pageNearRatio'=>{'sql'=>"SELECT MIN(ABS(1.0*black/total-?))"
+     pageNearRatio=>{sql=>"SELECT MIN(ABS(1.0*black/total-?))"
 		       ." FROM $t_zone"
 		       ." WHERE student=? AND page=? AND copy=? AND total>0"},
-     'pageZones'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual,1 AS role FROM $t_zone"
+     pageZones=>{sql=>"SELECT zoneid,id_a,id_b,total,black,manual,1 AS role FROM $t_zone"
 		   ." WHERE student=? AND page=? AND copy=? AND type=?"},
-     'zonesImages'=>{'sql'=>"SELECT image FROM $t_zone"
+     zonesImages=>{sql=>"SELECT image FROM $t_zone"
 		     ." WHERE student=? AND page=? AND copy=? AND type=?"},
-     'imagePaths'=>{'sql'=>"SELECT zoneid,image FROM $t_zone WHERE type=?"},
-     'setImage'=>{'sql'=>"UPDATE $t_zone SET image='',imagedata=? WHERE zoneid=?"},
-     'zoomsTotalSize'=>{'sql'=>"SELECT SUM(LENGTH(imagedata)) FROM $t_zone"
+     imagePaths=>{sql=>"SELECT zoneid,image FROM $t_zone WHERE type=?"},
+     setImage=>{sql=>"UPDATE $t_zone SET image='',imagedata=? WHERE zoneid=?"},
+     zoomsTotalSize=>{sql=>"SELECT SUM(LENGTH(imagedata)) FROM $t_zone"
 			." WHERE type=?"},
-     'zoomsCleanup'=>{'sql'=>"UPDATE $t_zone SET imagedata=NULL WHERE type=?"},
-     'pageZonesAll'=>{'sql'=>"SELECT * FROM $t_zone"
+     zoomsCleanup=>{sql=>"UPDATE $t_zone SET imagedata=NULL WHERE type=?"},
+     pageZonesAll=>{sql=>"SELECT * FROM $t_zone"
 		      ." WHERE type=?"},
-     'pageZonesAutoCount'=>
-     {'sql'=>"SELECT COUNT(*) FROM $t_zone"
+     pageZonesAutoCount=>
+     {sql=>"SELECT COUNT(*) FROM $t_zone"
       ." WHERE student=? AND page=? AND copy=? AND type=?"
       ." AND total>0"},
-     'pageZonesD'=>{'sql'=>"SELECT zoneid,id_a,id_b,total,black,manual"
+     pageZonesD=>{sql=>"SELECT zoneid,id_a,id_b,total,black,manual"
 		    ." FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"
 		    ." AND total>0"
 		    ." ORDER BY 1.0*black/total"},
-     'pageZonesDI'=>{'sql'=>"SELECT *"
+     pageZonesDI=>{sql=>"SELECT *"
 		    ." FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"
 		    ." AND total>0"
 		    ." ORDER BY 1.0*black/total"},
-     'zoneDarkness'=>{'sql'=>"SELECT 1.0*black/total FROM $t_zone"
+     zoneDarkness=>{sql=>"SELECT 1.0*black/total FROM $t_zone"
 		      ." WHERE zoneid=? AND total>0"},
-     'zoneImage'=>{'sql'=>"SELECT image FROM $t_zone"
+     zoneImage=>{sql=>"SELECT image FROM $t_zone"
 		      ." WHERE student=? AND copy=? AND type=?"},
-     'setManualPage'=>{'sql'=>"UPDATE $t_page"
+     setManualPage=>{sql=>"UPDATE $t_page"
 		       ." SET timestamp_manual=?"
 		       ." WHERE student=? AND page=? AND copy=?"},
-     'setManual'=>{'sql'=>"UPDATE $t_zone"
+     setManual=>{sql=>"UPDATE $t_zone"
 		   ." SET manual=?"
 		   ." WHERE student=? AND page=? AND copy=?"
 		   ." AND type=? AND id_a=? AND id_b=?"},
-     'setManualPageZones'=>{'sql'=>"UPDATE $t_zone"
+     setManualPageZones=>{sql=>"UPDATE $t_zone"
 			    ." SET manual=?"
 			    ." WHERE student=? AND page=? AND copy=?"},
-     'ticked'=>{'sql'=>"SELECT CASE"
+     ticked=>{sql=>"SELECT CASE"
 		." WHEN manual >= 0 THEN manual"
 		." WHEN total<=0 THEN 0"
 		." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		." ELSE 0"
 		." END FROM $t_zone"
 		." WHERE student=? AND copy=? AND type=? AND id_a=? AND id_b=?"},
-     'tickedSums'=>{'sql'=>
+     tickedSums=>{sql=>
 		    "SELECT * FROM (SELECT zone.id_a AS question,zone.id_b AS answer,SUM(CASE"
 		    ." WHEN why=\"V\" THEN 0"
 		    ." WHEN why=\"E\" THEN 0"
@@ -579,7 +579,7 @@ sub define_statements {
 		    ." FROM scoring.scoring_score"
 		    ." GROUP BY question)"
 		   },
-     'tickedList'=>{'sql'=>"SELECT CASE"
+     tickedList=>{sql=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
 		    ." WHEN total<=0 THEN 0"
 		    ." WHEN black >= ? * total AND black <= ? * total THEN 1"
@@ -587,83 +587,83 @@ sub define_statements {
 		    ." END FROM $t_zone"
 		    ." WHERE student=? AND copy=? AND type=? AND id_a=?"
 		    ." ORDER BY id_b"},
-     'tickedChars'=>{sql=>"SELECT char FROM (SELECT id_b FROM $t_zone"
+     tickedChars=>{sql=>"SELECT char FROM (SELECT id_b FROM $t_zone"
                      ."       WHERE student=? AND copy=? AND id_a=? AND type=?"
                      ."       AND (manual=1 OR (black >= ? * total AND black <= ? * total))"
                      ." ),( SELECT answer,char FROM ".$self->table("box","layout")
                      ."       WHERE student=? AND question=? AND role=?)"
                      ." ON id_b=answer ORDER BY id_b"
                     },
-     'tickedPage'=>{'sql'=>"SELECT CASE"
+     tickedPage=>{sql=>"SELECT CASE"
 		    ." WHEN manual >= 0 THEN manual"
 		    ." WHEN total<=0 THEN 0"
 		    ." WHEN black >= ? * total AND black <= ? * total THEN 1"
 		    ." ELSE 0"
 		    ." END,id_a,id_b FROM $t_zone"
 		    ." WHERE student=? AND page=? AND copy=? AND type=?"},
-     'zoneCorner'=>{'sql'=>"SELECT x,y FROM $t_position"
+     zoneCorner=>{sql=>"SELECT x,y FROM $t_position"
 		    ." WHERE zoneid=? AND type=? AND corner=?"},
-     'zoneCenter'=>{'sql'=>"SELECT AVG(x),AVG(y) FROM $t_position"
+     zoneCenter=>{sql=>"SELECT AVG(x),AVG(y) FROM $t_position"
 		    ." WHERE zoneid=? AND type=?"},
-     'zoneDist'=>{'sql'=>"SELECT AVG((x-?)*(x-?)+(y-?)*(y-?))"
+     zoneDist=>{sql=>"SELECT AVG((x-?)*(x-?)+(y-?)*(y-?))"
 		  ." FROM $t_position"
 		      ." WHERE zoneid=? AND type=?"},
-     'zoneImages'=>
+     zoneImages=>
      {sql=>"SELECT zoneid, p.student as student, p.copy as copy, image, imagedata, timestamp_auto"
 	  ." FROM ".$self->table("zone")." as z,"
 	  ."      ".$self->table("page")." as p"
 	  ." ON z.student=p.student AND z.page=p.page AND z.copy=p.copy"
 	  ." WHERE type=?"},
-     'getAnnotated'=>{'sql'=>"SELECT annotated,timestamp_annotate,student,page,copy"
+     getAnnotated=>{sql=>"SELECT annotated,timestamp_annotate,student,page,copy"
 		      ." FROM $t_page"
 		      ." WHERE timestamp_annotate>0"
 		      ." ORDER BY student,copy,page"},
-     'getAnnotatedFiles'=>{'sql'=>"SELECT annotated"
+     getAnnotatedFiles=>{sql=>"SELECT annotated"
 			   ." FROM $t_page"
 			   ." WHERE timestamp_auto>0"
 			   ." ORDER BY student,copy,page"},
-     'getAnnotatedPage'=>{'sql'=>"SELECT annotated"
+     getAnnotatedPage=>{sql=>"SELECT annotated"
 			  ." FROM $t_page"
 			  ." WHERE timestamp_annotate>0"
 			  ." AND student=? AND page=? AND copy=?"},
-     'annotatedCount'=>{'sql'=>"SELECT COUNT(*) FROM $t_page"
+     annotatedCount=>{sql=>"SELECT COUNT(*) FROM $t_page"
 			." WHERE timestamp_annotate>0 AND annotated NOT NULL"},
-     'getScanPage'=>{'sql'=>"SELECT src"
+     getScanPage=>{sql=>"SELECT src"
 			  ." FROM $t_page"
 			  ." WHERE student=? AND page=? AND copy=?"},
-     'setAnnotated'=>{'sql'=>"UPDATE $t_page"
+     setAnnotated=>{sql=>"UPDATE $t_page"
 		      ." SET annotated=?, timestamp_annotate=?"
 		      ." WHERE student=? AND page=? AND copy=?"},
-     'setAnnotatedPageOutdated'=>{'sql'=>"UPDATE $t_page"
+     setAnnotatedPageOutdated=>{sql=>"UPDATE $t_page"
 				  ." SET timestamp_annotate=0"
 				  ." WHERE student=? AND page=? AND copy=?"},
-     'setAnnotatedCopyOutdated'=>{'sql'=>"UPDATE $t_page"
+     setAnnotatedCopyOutdated=>{sql=>"UPDATE $t_page"
 				  ." SET timestamp_annotate=0"
 				  ." WHERE student=? AND copy=?"},
-     'setLayout'=>{'sql'=>"UPDATE $t_page"
+     setLayout=>{sql=>"UPDATE $t_page"
 		   ." SET layout_image=?"
 		   ." WHERE student=? AND page=? AND copy=?"},
-     'getLayout'=>{'sql'=>"SELECT layout_image FROM $t_page"
+     getLayout=>{sql=>"SELECT layout_image FROM $t_page"
 		   ." WHERE student=? AND page=? AND copy=?"},
-     'questionHasZero'=>{'sql'=>"SELECT COUNT(*) FROM $t_zone"
+     questionHasZero=>{sql=>"SELECT COUNT(*) FROM $t_zone"
 			 ." WHERE student=? AND copy=? AND type=? AND id_a=?"
 			 ." AND id_b=0"},
-     'Failed'=>{'sql'=>"INSERT OR REPLACE INTO $t_failed"
+     Failed=>{sql=>"INSERT OR REPLACE INTO $t_failed"
 		." (filename,timestamp)"
 		." VALUES (?,?)"},
-     'failedList'=>{'sql'=>"SELECT * FROM $t_failed"},
-     'failedNb'=>{'sql'=>"SELECT COUNT(*) FROM $t_failed"},
-     'deleteFailed'=>{'sql'=>"DELETE FROM $t_failed WHERE filename=?"},
-     'deletePagePositions'=>
-     {'sql'=>"DELETE FROM $t_position"
+     failedList=>{sql=>"SELECT * FROM $t_failed"},
+     failedNb=>{sql=>"SELECT COUNT(*) FROM $t_failed"},
+     deleteFailed=>{sql=>"DELETE FROM $t_failed WHERE filename=?"},
+     deletePagePositions=>
+     {sql=>"DELETE FROM $t_position"
       ." WHERE zoneid IN"
       ." (SELECT zoneid FROM $t_zone WHERE student=? AND page=? AND copy=?)"},
-     'deletePageZones'=>{'sql'=>"DELETE FROM $t_zone"
+     deletePageZones=>{sql=>"DELETE FROM $t_zone"
 			 ." WHERE student=? AND page=? AND copy=?"},
-     'deletePage'=>{'sql'=>"DELETE FROM $t_page"
+     deletePage=>{sql=>"DELETE FROM $t_page"
 			 ." WHERE student=? AND page=? AND copy=?"},
-     'pagesStudent'=>
-     {'sql'=>"SELECT a.page AS page,a.subjectpage AS subjectpage,"
+     pagesStudent=>
+     {sql=>"SELECT a.page AS page,a.subjectpage AS subjectpage,"
       ."             b.annotated AS annotated"
       ." FROM (SELECT * FROM $t_layoutpage WHERE student=?) AS a"
       ." LEFT JOIN"
@@ -671,8 +671,8 @@ sub define_statements {
       ."        WHERE student=? AND copy=? AND timestamp_annotate>0) AS b"
       ." ON a.page=b.page ORDER BY a.page"
      },
-     'nameFields'=>
-     {'sql'=>"SELECT a.student AS student,a.page AS page,a.copy AS copy,"
+     nameFields=>
+     {sql=>"SELECT a.student AS student,a.page AS page,a.copy AS copy,"
       ."             b.image  AS image FROM"
       ." ( SELECT c.student,c.page,c.copy FROM"
       ."     (SELECT * FROM $t_page WHERE timestamp_auto>0 OR timestamp_manual>0 )"
@@ -682,8 +682,8 @@ sub define_statements {
       ." ( SELECT student,page,copy,image FROM $t_zone WHERE type=? ) AS b"
       ." ON a.student=b.student AND a.page=b.page AND a.copy=b.copy"
      },
-     'photocopy'=>{'sql'=>"SELECT COUNT(*) FROM $t_page WHERE copy>0"},
-     'zonesBBox'=>{'sql'=>"SELECT z.id_a AS question,z.id_b AS answer,"
+     photocopy=>{sql=>"SELECT COUNT(*) FROM $t_page WHERE copy>0"},
+     zonesBBox=>{sql=>"SELECT z.id_a AS question,z.id_b AS answer,"
 		   ."   min(p.x) AS xmin,max(p.x) AS xmax,"
 		   ."   min(p.y) AS ymin,max(p.y) AS ymax"
 		   ." FROM $t_zone AS z,$t_position as p"
@@ -691,7 +691,7 @@ sub define_statements {
 		   ." WHERE z.student=? AND z.page=? AND z.copy=?"
 		   ."   AND z.type=? AND p.type=?"
 		   ." GROUP BY z.zoneid"},
-     'zonesCorners'=>{'sql'=>"SELECT z.id_a AS question,z.id_b AS answer,"
+     zonesCorners=>{sql=>"SELECT z.id_a AS question,z.id_b AS answer,"
 		      ."   p.x AS x,p.y AS y,p.corner AS corner"
 		      ." FROM $t_zone AS z,$t_position as p"
 		      ." ON z.zoneid=p.zoneid"
@@ -699,10 +699,10 @@ sub define_statements {
 		      ."   AND z.type=? AND p.type=?"
 			  ." ORDER BY z.zoneid,p.corner"},
     };
-  $self->{'statements'}->{'pageSummary'}=
-    {'sql'=>$self->{'statements'}->{'pagesSummary'}->{'sql'}
+  $self->{statements}->{pageSummary}=
+    {sql=>$self->{statements}->{pagesSummary}->{sql}
      ." WHERE student=? AND page=? AND copy=?"};
-  $self->{'statements'}->{'pagesSummary'}->{'sql'}.=" ORDER BY student,page,copy";
+  $self->{statements}->{pagesSummary}->{sql}.=" ORDER BY student,page,copy";
 }
 
 # get_page($student,$page,$copy) returns all columns from the row with
@@ -955,25 +955,25 @@ sub page_sensitivity {
 # some summarized information about the page automated data capture
 # process:
 #
-# $s{'mse'} is the mean square error of the transform from question
+# $s{mse} is the mean square error of the transform from question
 # paper coordinates to scan coordinates
 #
-# $s{'mse_color'} is 'red' if the MSE exceeds
-# $options{'mse_threshold'}, and undef otherwise
+# $s{mse_color} is 'red' if the MSE exceeds
+# $options{mse_threshold}, and undef otherwise
 #
-# $s{'color'} is blue if some automated data capture occured for this
+# $s{color} is blue if some automated data capture occured for this
 # page, green if some manual data capture occured, and undef
 # otherwise.
 #
-# $s{'update'} is a textual reprsentation of the date when the last
+# $s{update} is a textual reprsentation of the date when the last
 # data capture occured.
 #
-# $s{'sensitivity'} is the sensitivity (see function page_sensitivity).
+# $s{sensitivity} is the sensitivity (see function page_sensitivity).
 #
-# $s{'sensitivity'} is 'red' is the sensitivity exceeds
-# $options{'sensitivity_threshold'}, undef otherwise.
+# $s{sensitivity} is 'red' is the sensitivity exceeds
+# $options{sensitivity_threshold}, undef otherwise.
 #
-# $s{'why'} (only available if $options{'why'} is true) collects all
+# $s{why} (only available if $options{why} is true) collects all
 # 'why' attributes from all qeustions on the page (from the scoring table)
 
 # summaries returns a reference to an array containing the summaries
@@ -983,16 +983,16 @@ sub compute_summaries {
   my ($self,$r,%oo)=@_;
   # compute some more variables from the SQL result
   for my $p (@$r) {
-    $p->{'mse_string'}=($p->{'timestamp_auto'}>0 ?
-			sprintf($p->{'timestamp_manual'}>0 ? "(%.01f)" : "%.01f",
-				$p->{'mse'})
+    $p->{mse_string}=($p->{timestamp_auto}>0 ?
+			sprintf($p->{timestamp_manual}>0 ? "(%.01f)" : "%.01f",
+				$p->{mse})
 			: "---");
-    $p->{'sensitivity'}=sensitivity($p->{'delta'},$oo{'darkness_threshold'},
-				    $p->{'delta_up'},$oo{'darkness_threshold_up'});
-    $p->{'sensitivity_string'}=(defined($p->{'sensitivity'}) 
-				? sprintf("%.1f",$p->{'sensitivity'}) : "---");
-    $p->{'sensitivity_color'}=(defined($p->{'sensitivity'}) ?
-			       ($p->{'sensitivity'} > $oo{'sensitivity_threshold'}
+    $p->{sensitivity}=sensitivity($p->{delta},$oo{darkness_threshold},
+				    $p->{delta_up},$oo{darkness_threshold_up});
+    $p->{sensitivity_string}=(defined($p->{sensitivity}) 
+				? sprintf("%.1f",$p->{sensitivity}) : "---");
+    $p->{sensitivity_color}=(defined($p->{sensitivity}) ?
+			       ($p->{sensitivity} > $oo{sensitivity_threshold}
 				? 'red' : undef) : undef);
   }
   if($oo{why}) {
@@ -1012,10 +1012,10 @@ sub page_summary {
   my ($self,$student,$page,$copy,%oo)=@_;
   my $r=$self->dbh->selectall_arrayref($self->statement('pageSummary'),
 				       {Slice=>{}},
-				       $oo{'mse_threshold'},'red',undef,
+				       $oo{mse_threshold},'red',undef,
 				       'lightblue','lightgreen',undef,
-				       $oo{'darkness_threshold'},ZONE_BOX,
-				       $oo{'darkness_threshold_up'},ZONE_BOX,
+				       $oo{darkness_threshold},ZONE_BOX,
+				       $oo{darkness_threshold_up},ZONE_BOX,
 				       $student,$page,$copy,
 				      );
   if($r && $r->[0]) {
@@ -1030,10 +1030,10 @@ sub summaries {
   my ($self,%oo)=@_;
   my $r=$self->dbh->selectall_arrayref($self->statement('pagesSummary'),
 				       {Slice=>{}},
-				       $oo{'mse_threshold'},'red',undef,
+				       $oo{mse_threshold},'red',undef,
 				       'lightblue','lightgreen',undef,
-				       $oo{'darkness_threshold'},ZONE_BOX,
-				       $oo{'darkness_threshold_up'},ZONE_BOX,
+				       $oo{darkness_threshold},ZONE_BOX,
+				       $oo{darkness_threshold_up},ZONE_BOX,
 				      );
   return($self->compute_summaries($r,%oo));
 }
@@ -1067,9 +1067,9 @@ sub ticked {
 # ticked_sums($darkness_threshold,$darkness_threshold_up) returns a
 # ref to a list of hashrefs like
 #
-# [{'question=>1,'answer'=>1,nb=>4},
-#  {'question=>1,'answer'=>'invalid',nb=>1},
-#  {'question=>1,'answer'=>'empty',nb=>2},
+# [{'question=>1,answer=>1,nb=>4},
+#  {'question=>1,answer=>'invalid',nb=>1},
+#  {'question=>1,answer=>'empty',nb=>2},
 # ]
 #
 # that gives, for each question, the number of times each answer was
@@ -1119,7 +1119,7 @@ sub ticked_chars {
   my ($self,$student,$copy,$question,$darkness_threshold,$darkness_threshold_up)=@_;
   die "Missing parameters in ticked_chars call"
     if(!defined($darkness_threshold_up));
-  $self->{'data'}->require_module('layout');
+  $self->{data}->require_module('layout');
   return($self->sql_list($self->statement('tickedChars'),
                          $student,$copy,$question,ZONE_BOX,
 			 $darkness_threshold,$darkness_threshold_up,
@@ -1371,28 +1371,28 @@ sub remove_manual {
   }
 }
 
-# counts returns a hash %r giving the %r{'complete'} number of
-# complete sheets captured, and the %r{'incomplete'} number of student
+# counts returns a hash %r giving the %r{complete} number of
+# complete sheets captured, and the %r{incomplete} number of student
 # sheets for which one part has been captured (with manual or
 # automated data capture), and one other part needs capturing.
-# Moreover, $r{'missing'} is a reference to an array containing
-# {'student'=>XXX,'page'=>XXX,'copy'=>XXX} for all missing pages.
+# Moreover, $r{missing} is a reference to an array containing
+# {student=>XXX,page=>XXX,copy=>XXX} for all missing pages.
 
 sub counts {
   my ($self)=@_;
-  my %r=('incomplete'=>0,'complete'=>0);
+  my %r=(incomplete=>0,complete=>0);
   my %dup=();
-  $self->{'data'}->require_module('layout');
-  $r{'missing'}=$self->dbh
+  $self->{data}->require_module('layout');
+  $r{missing}=$self->dbh
     ->selectall_arrayref($self->statement('missingPages'),{Slice=>{}});
-  for my $p (@{$r{'missing'}}) {
-    my $k=$p->{'student'}."/".$p->{'copy'};
+  for my $p (@{$r{missing}}) {
+    my $k=$p->{student}."/".$p->{copy};
     if(!$dup{$k}) {
-      $r{'incomplete'}++;
+      $r{incomplete}++;
       $dup{$k}=1;
     }
   }
-  $r{'complete'}=$self->n_copies()-$r{'incomplete'};
+  $r{complete}=$self->n_copies()-$r{incomplete};
   return(%r);
 }
 
@@ -1446,8 +1446,8 @@ sub page_zones_auto_count {
 # get_student_pages($student,$copy) returns an arrayref giving some
 # information for all pages from sheet ($student,$copy). For example:
 #
-# [{'page'=>1,'annotated'=>'page-37-1.jpg','subjectpage'=>181},
-#  {'page'=>2,'annotated'=>undef,'subjectpage'=>182},
+# [{page=>1,annotated=>'page-37-1.jpg',subjectpage=>181},
+#  {page=>2,annotated=>undef,subjectpage=>182},
 # ]
 #
 # For each page, a hashref contains:
@@ -1457,7 +1457,7 @@ sub page_zones_auto_count {
 
 sub get_student_pages {
   my ($self,$student,$copy)=@_;
-  $self->{'data'}->require_module('layout');
+  $self->{data}->require_module('layout');
   return($self->dbh->selectall_arrayref($self->statement('pagesStudent'),
 					{ Slice => {} },
 					$student,$student,$copy));
@@ -1475,7 +1475,7 @@ sub get_student_pages {
 
 sub get_namefields {
   my ($self)=@_;
-  $self->{'data'}->require_module('layout');
+  $self->{data}->require_module('layout');
   return($self->dbh->selectall_arrayref($self->statement('nameFields'),
 					{ Slice => {} },ZONE_NAME));
 }

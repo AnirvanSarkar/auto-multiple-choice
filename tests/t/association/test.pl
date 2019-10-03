@@ -23,15 +23,15 @@ use AMC::Basic;
 
 use_gettext;
 
-my $t=AMC::Test->new('dir'=>__FILE__);
+my $t=AMC::Test->new(dir=>__FILE__);
 my $d=$t->data;
 my $a=$d->module('association');
 my $c=$d->module('capture');
 
 $d->begin_transaction;
 
-$t->{'datamodule'}=$a;
-$t->{'datatable'}='association_association';
+$t->{datamodule}=$a;
+$t->{datatable}='association_association';
 
 $t->begin('AMC::DataModule::association::get/set');
 

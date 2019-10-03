@@ -67,7 +67,7 @@ sub build_config_gui {
 }
 
 sub hide {
-  return('standard_export_options'=>0);
+  return(standard_export_options=>0);
 }
 
 sub weight {

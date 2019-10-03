@@ -81,8 +81,8 @@ sub clean_id {
 # primary key to be found there (from column named $liste_key).
 
 my $liste_e=AMC::NamesFile::new($liste_file,
-				'encodage'=>$liste_enc,
-				"identifiant"=>$csv_build_name);
+				encodage=>$liste_enc,
+				identifiant=>$csv_build_name);
 
 my %bon_code;
 for my $ii (0..($liste_e->taille()-1)) {
@@ -109,23 +109,23 @@ if($preassoc) {
   $sth->execute($notes_id);
 }
 while(my $v=$sth->fetchrow_hashref) {
-  if($v->{'nb'}==1) {
+  if($v->{nb}==1) {
     # nb is the number of scans on which the same code value has been
     # read. If nb=1, this is OK: we can process association...
 
-    my $id_in_list=$bon_code{clean_id($v->{'value'})};
+    my $id_in_list=$bon_code{clean_id($v->{value})};
     if(defined($id_in_list)) {
       # Association OK
-      debug "Association OK for code value $v->{'value'} ($id_in_list)";
+      debug "Association OK for code value $v->{value} ($id_in_list)";
       $assoc->set_auto((map { $v->{$_} } (qw/student copy/)),$id_in_list);
     } else {
       # ... unless this value is NOT in the students list!
-      debug "Code value $v->{'value'} not found in students list: ignoring";
+      debug "Code value $v->{value} not found in students list: ignoring";
     }
   } else {
     # Code value found on several sheets: do nothing, wait for the
     # user to make a manual association for these sheets.
-    debug "Incorrect association for code value \"".$v->{'value'}."\": $v->{'nb'} instances";
+    debug "Incorrect association for code value \"".$v->{value}."\": $v->{nb} instances";
   }
 }
 

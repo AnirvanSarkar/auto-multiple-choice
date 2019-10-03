@@ -102,7 +102,7 @@ set_debug($debug);
 
 $queue=AMC::Queue::new('max.procs',$n_procs);
 
-my $progress_h=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+my $progress_h=AMC::Gui::Avancement::new($progress,id=>$progress_id);
 
 my $data;
 my $layout;
@@ -195,28 +195,28 @@ sub detecte_cb {
 sub get_layout_data {
   my ($student,$page,$all)=@_;
   my $r={'corners.test'=>{},'zoom.file'=>{},'darkness.data'=>{},
-	'boxes'=>{},'flags'=>{}};
+	boxes=>{},flags=>{}};
 
-  ($r->{'width'},$r->{'height'},$r->{'markdiameter'},undef)
+  ($r->{width},$r->{height},$r->{markdiameter},undef)
     =$layout->dims($student,$page);
-  $r->{'frame'}=AMC::Boite::new_complete($layout->all_marks($student,$page));
+  $r->{frame}=AMC::Boite::new_complete($layout->all_marks($student,$page));
 
   for my $c ($layout->type_info('digit',$student,$page)) {
-    my $k=code_cb($c->{'numberid'},$c->{'digitid'});
-    $r->{'boxes'}->{$k}=AMC::Boite::new_MN(map { $c->{$_} }
+    my $k=code_cb($c->{numberid},$c->{digitid});
+    $r->{boxes}->{$k}=AMC::Boite::new_MN(map { $c->{$_} }
 					   (qw/xmin ymin xmax ymax/));
   }
 
   if($all) {
     for my $c ($layout->type_info('box',$student,$page)) {
-      $r->{'boxes'}->{$c->{'question'}.".".$c->{'answer'}}=
+      $r->{boxes}->{$c->{question}.".".$c->{answer}}=
 	AMC::Boite::new_MN(map { $c->{$_} }
 			   (qw/xmin ymin xmax ymax/));
-      $r->{'flags'}->{$c->{'question'}.".".$c->{'answer'}}=
-	$c->{'flags'};
+      $r->{flags}->{$c->{question}.".".$c->{answer}}=
+	$c->{flags};
     }
     for my $c ($layout->type_info('namefield',$student,$page)) {
-      $r->{'boxes'}->{'namefield'}=
+      $r->{boxes}->{namefield}=
 	AMC::Boite::new_MN(map { $c->{$_} }
 			   (qw/xmin ymin xmax ymax/));
     }
@@ -226,7 +226,7 @@ sub get_layout_data {
 }
 
 my $t_type='lineaire';
-my $cale=AMC::Calage::new('type'=>$t_type);
+my $cale=AMC::Calage::new(type=>$t_type);
 
 $data=AMC::Data->new($data_dir);
 $layout=$data->module('layout');
@@ -255,21 +255,21 @@ sub command_transf {
   my @r=$process->commande(@args);
   for(@r) {
     $cale->{'t_'.$1}=$2 if(/([a-f])=(-?[0-9.]+)/);
-    $cale->{'MSE'}=$1 if(/MSE=([0-9.]+)/);
+    $cale->{MSE}=$1 if(/MSE=([0-9.]+)/);
   }
 }
 
 sub marks_fit {
   my ($process,$ld,$three)=@_;
 
-  $cale=AMC::Calage::new('type'=>'lineaire');
+  $cale=AMC::Calage::new(type=>'lineaire');
   command_transf($process,$cale,
 		 join(' ',"optim".($three? "3":""),
-		      $ld->{'frame'}->draw_points()));
+		      $ld->{frame}->draw_points()));
 
   debug "MSE=".$cale->mse();
 
-  $ld->{'transf'}=$cale;
+  $ld->{transf}=$cale;
 }
 
 sub get_shape {
@@ -286,7 +286,7 @@ sub get_shape {
 sub measure_box {
     my ($process,$ld,$k,@spc)=(@_);
     my $r=0;
-    my $flags=$ld->{'flags'}->{$k};
+    my $flags=$ld->{flags}->{$k};
 
     $ld->{'corners.test'}->{$k}=AMC::Boite::new();
 
@@ -301,14 +301,14 @@ sub measure_box {
     if(!($flags & BOX_FLAGS_DONTSCAN)) {
       $ld->{'boxes.scan'}->{$k}=AMC::Boite::new();
     } else {
-      $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
-      $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
+      $ld->{'boxes.scan'}->{$k}=$ld->{boxes}->{$k}->clone;
+      $ld->{'boxes.scan'}->{$k}->transforme($ld->{transf});
     }
 
     if(!($flags & BOX_FLAGS_DONTSCAN)) {
       my $pc;
 
-      $pc=$ld->{'boxes'}->{$k}
+      $pc=$ld->{boxes}->{$k}
 	->commande_mesure0($prop,get_shape($flags));
 
       for($process->commande($pc)) {
@@ -352,7 +352,7 @@ sub get_binary_number {
   my $fin='';
   do {
     my $k=code_cb($i,$a);
-    if($ld->{'boxes'}->{$k}) {
+    if($ld->{boxes}->{$k}) {
       push @ch,(measure_box($process,$ld,$k)>.5 ? 1 : 0);
       $a++;
     } else {
@@ -393,7 +393,7 @@ sub one_scan {
   my $sf=$scan;
   if($project_dir) {
     $sf=abs2proj({'%PROJET',$project_dir,
-		  '%HOME'=>$ENV{'HOME'},
+		  '%HOME'=>$ENV{HOME},
 		  ''=>'%PROJET',
 		 },
 		 $sf);
@@ -421,9 +421,9 @@ sub one_scan {
   ##########################################
 
   my @r;
-  my @args=('-x',$random_layout->{'width'},
-	    '-y',$random_layout->{'height'},
-	    '-d',$random_layout->{'markdiameter'},
+  my @args=('-x',$random_layout->{width},
+	    '-y',$random_layout->{height},
+	    '-d',$random_layout->{markdiameter},
 	    '-p',$tol_mark_plus,'-m',$tol_mark_moins,
 	    '-c',($try_three ? 3 : 4),
 	    '-t',$bw_threshold,
@@ -490,7 +490,7 @@ sub one_scan {
 	  process=>$process, scan=>$scan);
   }
 
-  command_transf($process,$random_layout->{'transf'},"rotateOK");
+  command_transf($process,$random_layout->{transf},"rotateOK");
 
   ##########################################
   # Get all boxes positions from the right page
@@ -509,7 +509,7 @@ sub one_scan {
     }
   }
 
-  $ld->{'transf'}=$random_layout->{'transf'};
+  $ld->{transf}=$random_layout->{transf};
 
   ##########################################
   # Get a free copy number
@@ -525,7 +525,7 @@ sub one_scan {
       debug "WARNING: pre-allocation failed. $allocate -> "
 	.pageids_string(@spc) if($pre_allocate && $allocate != $spc[2]);
       $capture->set_page_auto($sf,@spc,-1,
-			      $ld->{'transf'}->params);
+			      $ld->{transf}->params);
       $capture->end_transaction('cFCN');
     } else {
       push @spc,0;
@@ -541,7 +541,7 @@ sub one_scan {
   # Read darkness data from all boxes
   ##########################################
 
-  for my $k (keys %{$ld->{'boxes'}}) {
+  for my $k (keys %{$ld->{boxes}}) {
     measure_box($process,$ld,$k,@spc) if($k =~ /^[0-9]+\.[0-9]+$/);
   }
 
@@ -553,7 +553,7 @@ sub one_scan {
   # Creates layout image report
   ##########################################
 
-  my $layout_file="page-".pageids_string(@spc,'path'=>1).".jpg";
+  my $layout_file="page-".pageids_string(@spc,path=>1).".jpg";
 
   if($cr_dir) {
     my $out_cadre="$cr_dir/$layout_file";
@@ -580,12 +580,12 @@ sub one_scan {
 
   # Name field sub-image
 
-  if($ld->{'boxes'}->{'namefield'}) {
+  if($ld->{boxes}->{namefield}) {
     my $whole_page=magick_perl_module()->new();
     $whole_page->Read($scan);
 
-    my $n=$ld->{'boxes'}->{'namefield'}->clone;
-    $n->transforme($ld->{'transf'});
+    my $n=$ld->{boxes}->{namefield}->clone;
+    $n->transforme($ld->{transf});
     clear_old('name image file',"$cr_dir/$nom_file");
 
     debug "Name box : ".$n->txt();
@@ -603,7 +603,7 @@ sub one_scan {
   annotate_source_change($capture);
 
   if($capture->set_page_auto($sf,@spc,time(),
-                             $ld->{'transf'}->params)) {
+                             $ld->{transf}->params)) {
     debug "Overwritten page data for [SCAN] ".pageids_string(@spc);
     if($tag_overwritten) {
       $capture->tag_overwritten(@spc);
@@ -620,7 +620,7 @@ sub one_scan {
 			  $capture->get_zoneid(@spc,ZONE_FRAME,0,0,1),
 			  POSITION_BOX);
 
-  for my $k (keys %{$ld->{'boxes'}}) {
+  for my $k (keys %{$ld->{boxes}}) {
     my $zoneid;
     my ($n, $i);
     if($k =~ /^([0-9]+)\.([0-9]+)$/) {
@@ -638,7 +638,7 @@ sub one_scan {
 
     if($zoneid) {
       if($k ne 'namefield') {
-	if($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN) {
+	if($ld->{flags}->{$k} & BOX_FLAGS_DONTSCAN) {
 	  debug "Box $k is DONT_SCAN";
 	  $capture->set_zone_auto_id($zoneid,1,0,undef,undef);
 	} elsif($ld->{'darkness.data'}->{$k}) {
@@ -650,9 +650,9 @@ sub one_scan {
 	  debug "No darkness data for box $k";
 	}
       }
-      if($ld->{'boxes'}->{$k} && !$ld->{'boxes.scan'}->{$k}) {
-	$ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
-	$ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
+      if($ld->{boxes}->{$k} && !$ld->{'boxes.scan'}->{$k}) {
+	$ld->{'boxes.scan'}->{$k}=$ld->{boxes}->{$k}->clone;
+	$ld->{'boxes.scan'}->{$k}->transforme($ld->{transf});
       }
       $ld->{'boxes.scan'}->{$k}
 	->to_data($capture,$zoneid,POSITION_BOX);

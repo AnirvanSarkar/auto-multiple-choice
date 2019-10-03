@@ -50,7 +50,7 @@ die "No data dir $data_dir" if(! -d $data_dir);
 
 set_debug($debug);
 
-my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+my $avance=AMC::Gui::Avancement::new($progress,id=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
 my $layout=$data->module('layout');
@@ -59,19 +59,19 @@ my $capture=$data->module('capture');
 my $timestamp=time();
 
 # how much units in one inch ?
-my %u_in_one_inch=('in'=>1,
-		   'cm'=>2.54,
-		   'mm'=>25.4,
-		   'pt'=>72.27,
-		   'sp'=>65536*72.27,
+my %u_in_one_inch=(in=>1,
+		   cm=>2.54,
+		   mm=>25.4,
+		   pt=>72.27,
+		   sp=>65536*72.27,
     );
 
 # association code_in_amc_file => BOX_ROLE_*
 my %role=(
-	  'case'=>BOX_ROLE_ANSWER,
-	  'casequestion'=>BOX_ROLE_QUESTIONONLY,
-	  'score'=>BOX_ROLE_SCORE,
-	  'scorequestion'=>BOX_ROLE_SCOREQUESTION,
+	  case=>BOX_ROLE_ANSWER,
+	  casequestion=>BOX_ROLE_QUESTIONONLY,
+	  score=>BOX_ROLE_SCORE,
+	  scorequestion=>BOX_ROLE_SCOREQUESTION,
 	 );
 
 sub read_inches {
@@ -112,12 +112,12 @@ sub add_flag {
     my $f;
     if(@flags) {
       my $lf=$flags[$#flags];
-      if($lf->{'student'}==$student && $lf->{'question'}==$question) {
-	$lf->{'flags'} |= $flag;
+      if($lf->{student}==$student && $lf->{question}==$question) {
+	$lf->{flags} |= $flag;
 	return;
       }
     }
-    push @flags,{'student'=>$student,'question'=>$question,'flags'=>$flag};
+    push @flags,{student=>$student,question=>$question,flags=>$flag};
   } else {
     debug "ERROR: flag which question? <$x>";
   }
@@ -143,17 +143,17 @@ while(<SRC>) {
 	my $y=read_inches($3);
 	my $shape=$4;
 	$i =~ s/^[0-9]+\/[0-9]+://;
-	$cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0,'shape'=>''}
+	$cases->{$i}={bx=>[],by=>[],flags=>0,shape=>''}
 	  if(!$cases->{$i});
-	ajoute($cases->{$i}->{'bx'},$x);
-	ajoute($cases->{$i}->{'by'},$y);
-	if($cases->{$i}->{'shape'} &&
-	   $cases->{$i}->{'shape'} ne $shape) {
+	ajoute($cases->{$i}->{bx},$x);
+	ajoute($cases->{$i}->{by},$y);
+	if($cases->{$i}->{shape} &&
+	   $cases->{$i}->{shape} ne $shape) {
 	  debug "WARNING: different shapes for a single box ($i)";
 	} else {
-	  $cases->{$i}->{'shape'}=$shape;
+	  $cases->{$i}->{shape}=$shape;
 	  if($shape eq 'oval') {
-	    $cases->{$i}->{'flags'} |= BOX_FLAGS_SHAPE_OVAL;
+	    $cases->{$i}->{flags} |= BOX_FLAGS_SHAPE_OVAL;
 	  }
 	}
     }
@@ -161,7 +161,7 @@ while(<SRC>) {
       my $i=$1;
       my $char=$2;
       $i =~ s/^[0-9]+\/[0-9]+://;
-      $cases->{$i}={'bx'=>[],'by'=>[],'flags'=>0,'shape'=>''}
+      $cases->{$i}={bx=>[],by=>[],flags=>0,shape=>''}
         if(!$cases->{$i});
       $cases->{$i}->{char}=$char;
     }
@@ -182,8 +182,8 @@ close(SRC);
 
 sub bbox {
     my ($c)=@_;
-    return($c->{'bx'}->[0],$c->{'bx'}->[1],
-	   $c->{'by'}->[1],$c->{'by'}->[0]);
+    return($c->{bx}->[0],$c->{bx}->[1],
+	   $c->{by}->[1],$c->{by}->[0]);
 }
 
 sub center {
@@ -216,8 +216,8 @@ PAGE: for my $p (@pages) {
 
   KEY: for my $k (keys %{$p->{-cases}}) {
       for(0..1) {
-	  $p->{-cases}->{$k}->{'bx'}->[$_] *= $dpi;
-	  $p->{-cases}->{$k}->{'by'}->[$_] = $dpi*($p->{-dim_y} - $p->{-cases}->{$k}->{'by'}->[$_]);
+	  $p->{-cases}->{$k}->{bx}->[$_] *= $dpi;
+	  $p->{-cases}->{$k}->{by}->[$_] = $dpi*($p->{-dim_y} - $p->{-cases}->{$k}->{by}->[$_]);
       }
 
       if($k =~ /position[HB][GD]$/) {
@@ -257,9 +257,9 @@ PAGE: for my $p (@pages) {
 	    center($c->{'position'.$pos},'by')
 	    );
     }
-    if($c->{'nom'}) {
+    if($c->{nom}) {
 	$layout->statement('NEWNameField')->execute(
-	    @ep,bbox($c->{'nom'}));
+	    @ep,bbox($c->{nom}));
     }
     for my $k (sort { $a cmp $b } (keys %$c)) {
       if($k=~/chiffre:([0-9]+),([0-9]+)$/) {
@@ -272,7 +272,7 @@ PAGE: for my $p (@pages) {
 	$layout->question_name($q,$name) if($name ne '');
 	$layout->statement('NEWBox')
 	  ->execute(@ep,$role{$type},
-		    $q,$a,bbox($c->{$k}),$c->{$k}->{'flags'},$c->{$k}->{char});
+		    $q,$a,bbox($c->{$k}),$c->{$k}->{flags},$c->{$k}->{char});
       }
     }
 
@@ -282,7 +282,7 @@ PAGE: for my $p (@pages) {
 debug "Flagging questions...";
 
 for my $f (@flags) {
-  $layout->add_question_flag($f->{'student'},$f->{'question'},BOX_ROLE_ANSWER,$f->{'flags'});
+  $layout->add_question_flag($f->{student},$f->{question},BOX_ROLE_ANSWER,$f->{flags});
 }
 
 debug "Ending transaction...";

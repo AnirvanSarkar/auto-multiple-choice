@@ -34,7 +34,7 @@ package AMC::DataModule;
 use AMC::Basic;
 
 # a AMC::DataModule object is a branch of a AMC::Data object, and
-# stores its root in $self->{'data'}
+# stores its root in $self->{data}
 
 sub new {
     my ($class, $data, %oo)=@_;
@@ -52,8 +52,8 @@ sub new {
 	$self->{$_}=$oo{$_} if(exists($self->{$_}));
     }
 
-    if(!$self->{'name'} && $class =~ /::([^:]+)$/) {
-	$self->{'name'}=$1;
+    if(!$self->{name} && $class =~ /::([^:]+)$/) {
+	$self->{name}=$1;
       }
 
     bless($self,$class);
@@ -73,7 +73,7 @@ sub new {
 
 sub dbh {
     my ($self)=@_;
-    return $self->{'data'}->dbh;
+    return $self->{data}->dbh;
 }
 
 # path() returns the path of the SQLite database associated with the
@@ -81,7 +81,7 @@ sub dbh {
 
 sub path {
   my ($self)=@_;
-  return($self->{'data'}->module_path($self->{'name'}));
+  return($self->{data}->module_path($self->{name}));
 }
 
 # module(name) returns another module from same data
@@ -118,7 +118,7 @@ sub vacuum {
 
 sub disconnect {
   my ($self)=@_;
-  $self->{'data'}->disconnect;
+  $self->{data}->disconnect;
 }
 
 # table($table_subname) gives a table name to use for some particular
@@ -130,10 +130,10 @@ sub disconnect {
 sub table {
     my ($self,$table_subname,$module_name)=@_;
     if($module_name) {
-      $module_name=$self->{'name'} if($module_name eq 'self');
+      $module_name=$self->{name} if($module_name eq 'self');
       return($module_name."_".$table_subname);
     } else {
-      $module_name=$self->{'name'};
+      $module_name=$self->{name};
       return($module_name.".".$module_name."_".$table_subname);
     }
 }
@@ -148,7 +148,7 @@ sub index {
 
 sub sql_quote {
     my ($self,$string)=@_;
-    return($self->{'data'}->sql_quote($string));
+    return($self->{data}->sql_quote($string));
 }
 
 # sql_do($sql,@bind) executes the SQL query $sql, replacing ? by the
@@ -156,7 +156,7 @@ sub sql_quote {
 
 sub sql_do {
     my ($self,$sql,@bind)=@_;
-    $self->{'data'}->sql_do($sql,@bind);
+    $self->{data}->sql_do($sql,@bind);
 }
 
 # sql_single($sql,@bind) calls the SQL query $sql (SQL string or
@@ -165,7 +165,7 @@ sub sql_do {
 
 sub sql_single {
     my ($self,$sql,@bind)=@_;
-    debug_and_stderr "WARNING: sql_single with no transaction -- $sql" if(!$self->{'data'}->{'trans'});
+    debug_and_stderr "WARNING: sql_single with no transaction -- $sql" if(!$self->{data}->{trans});
     my $x=$self->dbh->selectrow_arrayref($sql,{},@bind);
     if($x) {
 	return($x->[0]);
@@ -180,7 +180,7 @@ sub sql_single {
 
 sub sql_list {
     my ($self,$sql,@bind)=@_;
-    debug_and_stderr "WARNING: sql_list with no transaction -- $sql" if(!$self->{'data'}->{'trans'});
+    debug_and_stderr "WARNING: sql_list with no transaction -- $sql" if(!$self->{data}->{trans});
     my $x=$self->dbh->selectcol_arrayref($sql,{},@bind);
     if($x) {
 	return(@$x);
@@ -194,7 +194,7 @@ sub sql_list {
 
 sub sql_row {
     my ($self,$sql,@bind)=@_;
-    debug_and_stderr "WARNING: sql_row with no transaction -- $sql" if(!$self->{'data'}->{'trans'});
+    debug_and_stderr "WARNING: sql_row with no transaction -- $sql" if(!$self->{data}->{trans});
     my $x=$self->dbh->selectrow_arrayref($sql,{},@bind);
     if($x) {
 	return(@$x);
@@ -234,14 +234,14 @@ sub define_statements {
 
 sub statement {
     my ($self,$sid)=@_;
-    debug_and_stderr "WARNING: statement request with no transaction -- $sid" if(!$self->{'data'}->{'trans'});
-    my $s=$self->{'statements'}->{$sid};
-    if($s->{'s'}) {
-	return($s->{'s'});
-    } elsif($s->{'sql'}) {
+    debug_and_stderr "WARNING: statement request with no transaction -- $sid" if(!$self->{data}->{trans});
+    my $s=$self->{statements}->{$sid};
+    if($s->{s}) {
+	return($s->{s});
+    } elsif($s->{sql}) {
       debug "Preparing statement $sid";
-	$s->{'s'}=$self->dbh->prepare($s->{'sql'});
-	return($s->{'s'});
+	$s->{s}=$self->dbh->prepare($s->{sql});
+	return($s->{s});
     } else {
 	debug_and_stderr("Undefined SQL statement: $sid");
     }
@@ -281,11 +281,11 @@ sub begin_transaction {
     my ($self,$key)=@_;
     my $time;
     $key='----' if(!defined($key));
-    debug "Opening RW transaction for $self->{'name'} [$key]...";
+    debug "Opening RW transaction for $self->{name} [$key]...";
     $time=time;
-    $self->{'data'}->begin_transaction($key);
+    $self->{data}->begin_transaction($key);
     $time=time-$time;
-    debug "[$key] <-> $self->{'name'}";
+    debug "[$key] <-> $self->{name}";
     if($time>1) {
       debug_and_stderr "[$key] Waited for database RW lock $time seconds";
     }
@@ -297,11 +297,11 @@ sub begin_read_transaction {
     my ($self,$key)=@_;
     my $time;
     $key='----' if(!defined($key));
-    debug "Opening RO transaction for $self->{'name'} [$key]...";
+    debug "Opening RO transaction for $self->{name} [$key]...";
     $time=time;
-    $self->{'data'}->begin_read_transaction($key);
+    $self->{data}->begin_read_transaction($key);
     $time=time-$time;
-    debug "[$key] <-  $self->{'name'}";
+    debug "[$key] <-  $self->{name}";
     if($time>1) {
       debug_and_stderr "[$key] Waited for database R lock $time seconds";
     }
@@ -312,9 +312,9 @@ sub begin_read_transaction {
 sub end_transaction {
     my ($self,$key)=@_;
     $key='----' if(!defined($key));
-    debug "Closing transaction for $self->{'name'} [$key]...";
-    $self->{'data'}->end_transaction($key);
-    debug "[$key]  X  $self->{'name'}";
+    debug "Closing transaction for $self->{name} [$key]...";
+    $self->{data}->end_transaction($key);
+    debug "[$key]  X  $self->{name}";
 }
 
 # variable($name) returns the value of variable $name, stored in the
@@ -381,12 +381,12 @@ sub version_check {
   # First try with only a read transaction, so that the process is
   # not blocked if someone else is using the database.
   $self->begin_read_transaction('rVAR');
-  my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
+  my @vt=$self->{data}->sql_tables("%".$self->{name}."_variables");
   $self->end_transaction('rVAR');
   if (!@vt) {
     # opens a RW transaction only if necessary
     $self->begin_transaction('tVAR');
-    my @vt=$self->{'data'}->sql_tables("%".$self->{'name'}."_variables");
+    my @vt=$self->{data}->sql_tables("%".$self->{name}."_variables");
     if (@vt) {
       debug "variables table has just been created!";
     } else {
@@ -412,7 +412,7 @@ sub version_check {
       do {
         $v=$vu;
         $vu=$self->version_upgrade($v);
-        debug("Upgraded data module ".$self->{'name'}
+        debug("Upgraded data module ".$self->{name}
               ." from version $v to $vu")
           if ($vu);
       } while ($vu);
@@ -472,7 +472,7 @@ sub version_upgrade {
 
 sub progression {
   my ($self,@a)=@_;
-  $self->{'data'}->progression(@a);
+  $self->{data}->progression(@a);
 }
 
 

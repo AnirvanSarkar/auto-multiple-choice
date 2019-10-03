@@ -99,26 +99,26 @@ sub version_upgrade {
 
 sub populate_from_xml {
   my ($self)=@_;
-  my $assoc_file=$self->{'data'}->directory;
+  my $assoc_file=$self->{data}->directory;
   $assoc_file =~ s:/[^/]+/?$:/association.xml:;
   return if(!-f $assoc_file);
 
   $self->progression('begin',__"Fetching association results from old format XML files...");
 
   my $i=IO::File->new($assoc_file,"<:encoding(utf-8)");
-  my $a=XMLin($i,'ForceArray'=>1,'KeyAttr'=>['id']);
+  my $a=XMLin($i,ForceArray=>1,KeyAttr=>['id']);
   $i->close();
 
-  $self->variable('key_in_list',$a->{'liste_key'});
-  $self->variable('code',$a->{'notes_id'});
+  $self->variable('key_in_list',$a->{liste_key});
+  $self->variable('code',$a->{notes_id});
 
-  my @s=(keys %{$a->{'copie'}});
+  my @s=(keys %{$a->{copie}});
   my $frac=0;
 
   for my $student (@s) {
-    my $s=$a->{'copie'}->{$student};
+    my $s=$a->{copie}->{$student};
     $self->statement('NEWAssoc')
-      ->execute($student,0,$s->{'manuel'},$s->{'auto'});
+      ->execute($student,0,$s->{manuel},$s->{auto});
     $frac++;
     $self->progression('fraction',$frac/(1+$#s));
   }
@@ -132,31 +132,31 @@ sub define_statements {
   my ($self)=@_;
   my $at=$self->table("association");
   my $t_page=$self->table("page","capture");
-  $self->{'statements'}=
+  $self->{statements}=
     {
-     'NEWAssoc'=>{'sql'=>"INSERT INTO $at"
+     NEWAssoc=>{sql=>"INSERT INTO $at"
 		  ." (student,copy,manual,auto) VALUES (?,?,?,?)"},
-     'insert'=>{'sql'=>"INSERT OR IGNORE INTO $at"
+     insert=>{sql=>"INSERT OR IGNORE INTO $at"
 		." (student,copy,manual,auto) VALUES (?,?,?,?)"},
-     'getManual'=>{'sql'=>"SELECT manual FROM $at"
+     getManual=>{sql=>"SELECT manual FROM $at"
 		   ." WHERE student=? AND copy=?"},
-     'getAuto'=>{'sql'=>"SELECT auto FROM $at"
+     getAuto=>{sql=>"SELECT auto FROM $at"
 		 ." WHERE student=? AND copy=?"},
-     'setManual'=>{'sql'=>"UPDATE $at"
+     setManual=>{sql=>"UPDATE $at"
 		   ." SET manual=? WHERE student=? AND copy=?"},
-     'setAuto'=>{'sql'=>"UPDATE $at"
+     setAuto=>{sql=>"UPDATE $at"
 		 ." SET auto=? WHERE student=? AND copy=?"},
-     'getReal'=>{'sql'=>"SELECT CASE"
+     getReal=>{sql=>"SELECT CASE"
 		 ." WHEN manual IS NOT NULL THEN manual"
 		 ." ELSE auto END"
 		 ." FROM $at"
 		 ." WHERE student=? AND copy=?"},
-     'realCount'=>{'sql'=>"SELECT COUNT(*) FROM ( SELECT CASE"
+     realCount=>{sql=>"SELECT COUNT(*) FROM ( SELECT CASE"
 		   ." WHEN manual IS NOT NULL THEN manual"
 		   ." ELSE auto END AS real"
 		   ." FROM $at"
 		   ." ) WHERE real=?||''"},
-     'realCounts'=>{'sql'=>
+     realCounts=>{sql=>
                     " SELECT t.student AS student,t.copy AS copy,t.real AS real,t.manual AS manual,t.auto AS auto,c.n AS n"
                     ." FROM"
                     ." ( SELECT CASE"
@@ -170,32 +170,32 @@ sub define_statements {
                     ." ) AS c"
                     ." ON t.real=c.real"
                    },
-     'realBack'=>{'sql'=>"SELECT student,copy FROM ( SELECT CASE"
+     realBack=>{sql=>"SELECT student,copy FROM ( SELECT CASE"
 		  ." WHEN manual IS NOT NULL THEN manual"
 		  ." ELSE auto END AS real, student, copy"
 		  ." FROM $at"
 		  ." ) WHERE real=?||''"},
-     'realBackInt'=>{'sql'=>"SELECT student,copy FROM ( SELECT CASE"
+     realBackInt=>{sql=>"SELECT student,copy FROM ( SELECT CASE"
                      ." WHEN manual IS NOT NULL THEN manual"
                      ." ELSE auto END AS real, student, copy"
                      ." FROM $at"
                      ." ) WHERE CAST(real AS INTEGER)=?"},
-     'counts'=>{'sql'=>"SELECT COUNT(auto),COUNT(manual),"
+     counts=>{sql=>"SELECT COUNT(auto),COUNT(manual),"
 		." SUM(CASE WHEN auto IS NOT NULL OR manual IS NOT NULL"
 		."          THEN 1 ELSE 0 END)"
 		." FROM $at"},
-     'clearAuto'=>{'sql'=>"UPDATE $at SET auto=NULL"},
-     'findManual'=>{'sql'=>"SELECT student,copy FROM $at WHERE manual=?||''"},
-     'unlink'=>{'sql'=>"UPDATE $at SET manual="
+     clearAuto=>{sql=>"UPDATE $at SET auto=NULL"},
+     findManual=>{sql=>"SELECT student,copy FROM $at WHERE manual=?||''"},
+     unlink=>{sql=>"UPDATE $at SET manual="
 		." ( CASE WHEN manual IS NULL OR auto=?||'' THEN 'NONE' ELSE NULL END )"
 		." WHERE manual=? OR ( auto=?||'' AND manual IS NULL )"},
-     'assocMissingCount'=>{'sql'=>"SELECT COUNT(*) FROM"
+     assocMissingCount=>{sql=>"SELECT COUNT(*) FROM"
 			   ."(SELECT student,copy FROM $t_page"
 			   ." EXCEPT SELECT student,copy FROM $at"
 			   ." WHERE manual IS NOT NULL OR auto IS NOT NULL)"},
-     'deleteAssociations'=>{'sql'=>"DELETE FROM $at"
+     deleteAssociations=>{sql=>"DELETE FROM $at"
 			    ." WHERE student=? AND copy=?"},
-     'list'=>{'sql'=>"SELECT * FROM $at ORDER BY student,copy"},
+     list=>{sql=>"SELECT * FROM $at ORDER BY student,copy"},
     };
 }
 
@@ -394,7 +394,7 @@ sub delete_target {
 
 sub missing_count {
   my ($self)=@_;
-  $self->{'data'}->require_module('capture');
+  $self->{data}->require_module('capture');
   return($self->sql_single($self->statement('assocMissingCount')));
 }
 

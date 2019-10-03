@@ -148,8 +148,8 @@ my $noms='';
 
 if($fich_noms) {
     $noms=AMC::NamesFile::new($fich_noms,
-			      "encodage"=>$noms_encodage,
-			      "identifiant"=>$csv_build_name);
+			      encodage=>$noms_encodage,
+			      identifiant=>$csv_build_name);
 
     debug "Keys in names file: ".join(", ",$noms->heads());
 }
@@ -162,7 +162,7 @@ sub color_rgb {
     return($col->red/65535,$col->green/65535,$col->blue/65535);
 }
 
-my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+my $avance=AMC::Gui::Avancement::new($progress,id=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
 my $capture=$data->module('capture');
@@ -247,11 +247,11 @@ if($id_file) {
 
 }
 
-my $subst=AMC::Substitute::new('names'=>$noms,
-			       'scoring'=>$scoring,
-			       'assoc'=>$assoc,
-			       'name'=>'',
-			       'chsign'=>$chiffres_significatifs,
+my $subst=AMC::Substitute::new(names=>$noms,
+			       scoring=>$scoring,
+			       assoc=>$assoc,
+			       name=>'',
+			       chsign=>$chiffres_significatifs,
 			       );
 
 print "* Annotation\n";
@@ -263,8 +263,8 @@ print "* Annotation\n";
     next PAGE;
   }
 
-  if($changes_only && $p->{'timestamp_annotate'}>$annotate_source_change) {
-    my $f=$p->{'annotated'};
+  if($changes_only && $p->{timestamp_annotate}>$annotate_source_change) {
+    my $f=$p->{annotated};
     if(-f "$cr_dir/corrections/jpg/$f") {
       print "Skipping page ".pageids_string(@spc). " (up to date)\n";
       debug "Skipping page ".pageids_string(@spc). " (up to date)";
@@ -274,14 +274,14 @@ print "* Annotation\n";
 
   debug "Analyzing ".pageids_string(@spc);
 
-  my $scan=$p->{'src'};
+  my $scan=$p->{src};
 
   debug "Scan file: $scan";
 
   if($rep_projet) {
     $scan=proj2abs({'%PROJET',$rep_projet,
 		    '%PROJETS',$rep_projets,
-		    '%HOME'=>$ENV{'HOME'},
+		    '%HOME'=>$ENV{HOME},
 		   },
 		   $scan);
   }
@@ -330,7 +330,7 @@ print "* Annotation\n";
 
     my ($x_ppem, $y_ppem, $ascender, $descender, $width, $height, $max_advance);
 
-    my $idf=pageids_string(@spc,'path'=>1);
+    my $idf=pageids_string(@spc,path=>1);
 
     print "Annotating $scan (sheet $idf)...\n";
 
@@ -340,7 +340,7 @@ print "* Annotation\n";
 
     # print global mark and name on the page
 
-    if($p->{'page'}==1 || $capture->zones_count(@spc,ZONE_NAME)) {
+    if($p->{page}==1 || $capture->zones_count(@spc,ZONE_NAME)) {
       my $text=$subst->substitute($verdict,@spc[0,2]);
 
       $lay->set_text($text);
@@ -361,9 +361,9 @@ print "* Annotation\n";
     $sth->execute(@spc,ZONE_BOX);
   BOX: while(my $b=$sth->fetchrow_hashref) {
 
-      my $p_strategy=$scoring->unalias($p->{'student'});
-      my $q=$b->{'id_a'};
-      my $r=$b->{'id_b'};
+      my $p_strategy=$scoring->unalias($p->{student});
+      my $q=$b->{id_a};
+      my $r=$b->{id_b};
       my $indic=$scoring->indicative($p_strategy,$q);
 
       next BOX if($indic && !$annote_indicatives);
@@ -372,7 +372,7 @@ print "* Annotation\n";
       my $bonne=$scoring->correct_answer($p_strategy,$q,$r);
 
       # ticked on this scan?
-      my $cochee=$capture->ticked($p->{'student'},$p->{'copy'},
+      my $cochee=$capture->ticked($p->{student},$p->{copy},
 				  $q,$r,$seuil,$seuil_up);
 
       debug "Q=$q R=$r $bonne-$cochee";
@@ -382,18 +382,18 @@ print "* Annotation\n";
       if($debug) {
 	for my $i (1..4) {
 	  debug(sprintf("Corner $i: (%.2f,%.2f)",
-			$capture->zone_corner($b->{'zoneid'},$i)));
+			$capture->zone_corner($b->{zoneid},$i)));
 	}
       }
 
-      if(!($layout->get_box_flags($p->{'student'},$q,$r,BOX_ROLE_ANSWER)
+      if(!($layout->get_box_flags($p->{student},$q,$r,BOX_ROLE_ANSWER)
 		  & BOX_FLAGS_DONTANNOTATE)) {
 	if($sy->{type} eq 'circle') {
-	  cercle_coors($context,$b->{'zoneid'},$sy->{color});
+	  cercle_coors($context,$b->{zoneid},$sy->{color});
 	} elsif($sy->{type} eq 'mark') {
-	  croix_coors($context,$b->{'zoneid'},$sy->{color});
+	  croix_coors($context,$b->{zoneid},$sy->{color});
 	} elsif($sy->{type} eq 'box') {
-	  boite_coors($context,$b->{'zoneid'},$sy->{color});
+	  boite_coors($context,$b->{zoneid},$sy->{color});
 	} elsif($sy->{type} eq 'none') {
 	} else {
 	  debug "Unknown symbol type ($bonne-$cochee): $sy->{type}";
@@ -404,9 +404,9 @@ print "* Annotation\n";
       # la question
 
       $question{$q}={} if(!$question{$q});
-      my @mil=milieu_cercle($b->{'zoneid'});
-      push @{$question{$q}->{'x'}},$mil[0];
-      push @{$question{$q}->{'y'}},$mil[1];
+      my @mil=milieu_cercle($b->{zoneid});
+      push @{$question{$q}->{x}},$mil[0];
+      push @{$question{$q}->{y}},$mil[1];
     }
 
     #########################################
@@ -421,17 +421,17 @@ print "* Annotation\n";
 
 	my $text;
 
-	if($result->{'why'} =~ /c/i) {
+	if($result->{why} =~ /c/i) {
 	  $text=$verdict_question_cancelled;
 	} else {
 	  $text=$verdict_question;
 	}
 
-	$text =~ s/\%[S]/$result->{'score'}/g;
-	$text =~ s/\%[M]/$result->{'max'}/g;
-	$text =~ s/\%[W]/$result->{'why'}/g;
-	$text =~ s/\%[s]/$subst->format_note($result->{'score'})/ge;
-	$text =~ s/\%[m]/$subst->format_note($result->{'max'})/ge;
+	$text =~ s/\%[S]/$result->{score}/g;
+	$text =~ s/\%[M]/$result->{max}/g;
+	$text =~ s/\%[W]/$result->{why}/g;
+	$text =~ s/\%[s]/$subst->format_note($result->{score})/ge;
+	$text =~ s/\%[m]/$subst->format_note($result->{max})/ge;
 
 	my $te=eval($text);
 	if($@) {
@@ -445,7 +445,7 @@ print "* Annotation\n";
 	my ($tx,$ty)=$lay->get_pixel_size;
 
 	# mean of the y coordinate of all boxes
-	my $y=sum(@{$question{$q}->{'y'}})/(1+$#{$question{$q}->{'y'}})-$ty/2;
+	my $y=sum(@{$question{$q}->{y}})/(1+$#{$question{$q}->{y}})-$ty/2;
 
 	if($position eq 'marge') {
 	  # scores written in one margin
@@ -457,9 +457,9 @@ print "* Annotation\n";
 	} elsif($position eq 'case') {
 	  # scores written at the left of the boxes
 	  if($rtl) {
-	    $x=max(@{$question{$q}->{'x'}}) + $ecart*$text_x ;
+	    $x=max(@{$question{$q}->{x}}) + $ecart*$text_x ;
 	  } else {
-	    $x=min(@{$question{$q}->{'x'}}) - $ecart*$text_x - $tx;
+	    $x=min(@{$question{$q}->{x}}) - $ecart*$text_x - $tx;
 	  }
 	} elsif($position eq 'marges') {
 	  # scores written in one of the margins (left or right),
@@ -468,11 +468,11 @@ print "* Annotation\n";
 
 	  # fist extract the y coordinates of the boxes in the left column
 	  my $left=1;
-	  my @y=map { $question{$q}->{'y'}->[$_] } grep { $rtl xor ( $question{$q}->{'x'}->[$_] <= $page_width/2 ) } (0..$#{$question{$q}->{'x'}} );
+	  my @y=map { $question{$q}->{y}->[$_] } grep { $rtl xor ( $question{$q}->{x}->[$_] <= $page_width/2 ) } (0..$#{$question{$q}->{x}} );
 	  if(!@y) {
 	    # if empty, use the right column
 	    $left=0;
-	    @y=map { $question{$q}->{'y'}->[$_] } grep { $rtl xor ( $question{$q}->{'x'}->[$_] > $page_width/2 ) } (0..$#{$question{$q}->{'x'}} );
+	    @y=map { $question{$q}->{y}->[$_] } grep { $rtl xor ( $question{$q}->{x}->[$_] > $page_width/2 ) } (0..$#{$question{$q}->{x}} );
 	  }
 
 	  # set the x-position to the right margin

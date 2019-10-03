@@ -23,7 +23,7 @@ use POSIX;
 sub available {
   my $c=shift;
   $ok='';
-  for (split(/:/,$ENV{'PATH'})) {
+  for (split(/:/,$ENV{PATH})) {
     $ok=1 if(-x "$_/$c");
   }
   return($ok);
@@ -42,7 +42,7 @@ LINES: while(<CHL>) {
   }
 }
 
-$ENV{"TZ"}="UTC";
+$ENV{TZ}="UTC";
 POSIX::tzset();
 $k{epoch}=POSIX::mktime(0, 0, 0, $k{day}, $k{month}-1, $k{year}-1900);
 
@@ -76,8 +76,8 @@ $k{sty} =~ s/\s+/ /;
 $k{sty} =~ s/\s+$//;
 
 open(VMK,">Makefile.versions");
-print VMK "PACKAGE_V_DEB=$k{'deb'}\n";
-print VMK "PACKAGE_V_VC=$k{'vc'}\n";
+print VMK "PACKAGE_V_DEB=$k{deb}\n";
+print VMK "PACKAGE_V_VC=$k{vc}\n";
 print VMK "PACKAGE_V_PDFDATE=$k{year}$k{month}$k{day}000000\n";
 print VMK "PACKAGE_V_ISODATE=$k{year}-$k{month}-$k{day}\n";
 print VMK "PACKAGE_V_STY=$k{sty}\n";

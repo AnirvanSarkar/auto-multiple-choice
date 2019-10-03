@@ -39,19 +39,19 @@ use XML::Simple;
 sub new {
     my (%o)=(@_);
 
-    my $self={'directory'=>'',
-	      'archivefile'=>'', # absolute
-	      'descfile'=>'state.xml',
+    my $self={directory=>'',
+	      archivefile=>'', # absolute
+	      descfile=>'state.xml',
           };
 
     for my $k (keys %o) {
         $self->{$k}=$o{$k} if(defined($self->{$k}));
     }
 
-    $self->{'archive'}=Archive::Zip->new();
-    $self->{'data'}={};
+    $self->{archive}=Archive::Zip->new();
+    $self->{data}={};
 
-    $self->{'directory'} =~ s/\/$//;
+    $self->{directory} =~ s/\/$//;
     
     bless $self;
     
@@ -60,7 +60,7 @@ sub new {
 
 sub archive {
     my ($self)=@_;
-    return($self->{'archive'});
+    return($self->{archive});
 }
 
 # reads the ARCHIVE file. If no filename is given, looks for the last ARCHIVE
@@ -68,44 +68,44 @@ sub archive {
 sub read {
     my ($self,$archivefile)=@_;
     if(!$archivefile) {
-	$archivefile=$self->{'archivefile'};
+	$archivefile=$self->{archivefile};
     }
     if(!$archivefile) {
 	# look for the last one in the directory
-	opendir(my $dh, $self->{'directory'})
+	opendir(my $dh, $self->{directory})
 	    or debug "Error opening directory $self->{directory}: $!";
 	my @st = sort { $b cmp $a }
-	grep { /^saved-[0-9-]+\.zip$/ && -f $self->{'directory'}."/$_" } readdir($dh);
+	grep { /^saved-[0-9-]+\.zip$/ && -f $self->{directory}."/$_" } readdir($dh);
 	closedir $dh;
 	
 	if(@st) {
 	    debug "Archive file found: $st[0]";
-	    $archivefile=$self->{'directory'}."/".$st[0];
+	    $archivefile=$self->{directory}."/".$st[0];
 	} else {
 	    debug "No ARCHIVE file";
 	    $archivefile='';
 	}
     }
     
-    $self->{'data'}={'md5'=>{},'print'=>[]};
+    $self->{data}={'md5'=>{},print=>[]};
     
     if(-f $archivefile) {
 	# opens the ARCHIVE file to look at the content
 	debug "Reading ARCHIVE $archivefile";
-	if( $self->{'archive'}->read($archivefile) != AZ_OK ) {
+	if( $self->{archive}->read($archivefile) != AZ_OK ) {
 	    debug "Error reading $archivefile";
 	} else {
 	    # look for XML description file, with MD5 sums and
 	    # printing information, and read it
-	    my $xml = $self->{'archive'}->contents($self->{'descfile'});
+	    my $xml = $self->{archive}->contents($self->{descfile});
 	    if($xml) {
-		$self->{'data'}=XMLin($xml,ForceArray => 1,ContentKey=>'content',KeyAttr =>['file']);
-		$self->{'archivefile'}=$archivefile;
+		$self->{data}=XMLin($xml,ForceArray => 1,ContentKey=>'content',KeyAttr =>['file']);
+		$self->{archivefile}=$archivefile;
 	    }
 	}
     } else {
 	debug "No file $archivefile";
-	$self->{'archivefile'}='';
+	$self->{archivefile}='';
     }
 }
 
@@ -114,33 +114,33 @@ sub read {
 sub write {
     my ($self,$archivefile)=@_;
     if($archivefile) {
-	$self->{'archivefile'}=$archivefile;
+	$self->{archivefile}=$archivefile;
     } else {
-	$archivefile=$self->{'archivefile'};
+	$archivefile=$self->{archivefile};
     }
     if(!$archivefile) {
 	# if no filename is given, create it from date and time
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 	    localtime(time);
 	
-	$archivefile=$self->{'directory'}."/".
+	$archivefile=$self->{directory}."/".
 	    sprintf("saved-%d-%02d-%02d-%02d-%02d-%02d.zip",
 		    $year+1900,$mon+1,$mday,$hour,$min,$sec);
-	$self->{'archivefile'}=$archivefile;
+	$self->{archivefile}=$archivefile;
     }
 
     # adds XML file to ARCHIVE
     my $xml=XMLout(
-	$self->{'data'},
+	$self->{data},
 	ContentKey=>'content',KeyAttr =>['file'],
 	RootName=>'state',
 	);
-    $self->{'archive'}->removeMember($self->{'descfile'});
-    $self->{'archive'}->addString($xml,$self->{'descfile'});
+    $self->{archive}->removeMember($self->{descfile});
+    $self->{archive}->addString($xml,$self->{descfile});
     
     # writes to disk
     debug "Writing ARCHIVE to $archivefile ...";
-    unless ( $self->{'archive'}->overwriteAs($archivefile) == AZ_OK ) {
+    unless ( $self->{archive}->overwriteAs($archivefile) == AZ_OK ) {
 	debug "Error writing to $archivefile";
     }
 }
@@ -152,27 +152,27 @@ sub add_print {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 	localtime(time);
     
-    push @{$self->{'data'}->{'print'}},{%oo,'date'=>sprintf("%d-%02d-%02d %02d:%02d:%02d",$year+1900,$mon+1,$mday,$hour,$min,$sec)};
+    push @{$self->{data}->{print}},{%oo,date=>sprintf("%d-%02d-%02d %02d:%02d:%02d",$year+1900,$mon+1,$mday,$hour,$min,$sec)};
 
 }
 
 # clears all MD5 sums from current state
 sub clear_md5 {
      my ($self)=@_;
-     $self->{'data'}->{'md5'}={};
+     $self->{data}->{'md5'}={};
 }
 
 # returns MD5 sum stocked in the ARCHIVE state for a given file
 sub get_md5 {
     my ($self,$file)=@_;
-    my $r=$self->{'data'}->{'md5'}->{$file}->{'content'};
+    my $r=$self->{data}->{'md5'}->{$file}->{content};
     return(defined($r) ? $r : '');
 }
 
 # sets MD5 sum in current state
 sub set_md5 {
     my ($self,$file,$sum)=@_;
-    $self->{'data'}->{'md5'}->{$file}->{'content'}=$sum;
+    $self->{data}->{'md5'}->{$file}->{content}=$sum;
 }
 
 # check if given files are all unchanged
@@ -201,7 +201,7 @@ sub check_md5 {
 	    $localfile=$file;
 	    $file =~ s/.*\///;
 	} else {
-	    $localfile=$self->{'directory'}."/".$file;
+	    $localfile=$self->{directory}."/".$file;
 	}
     }
 
@@ -236,7 +236,7 @@ sub add_md5 {
 	    $localfile=$file;
 	    $file =~ s/.*\///;
 	} else {
-	    $localfile=$self->{'directory'}."/".$file;
+	    $localfile=$self->{directory}."/".$file;
 	}
     }
 
@@ -262,13 +262,13 @@ sub add_file {
 	    $localfile=$file;
 	    $file =~ s/.*\///;
 	} else {
-	    $localfile=$self->{'directory'}."/".$file;
+	    $localfile=$self->{directory}."/".$file;
 	}
     }
 
     if(-f $localfile) {
 	debug "Adding $localfile [$file]...";
-	if($self->{'archive'}->addFile($localfile,$file)) {
+	if($self->{archive}->addFile($localfile,$file)) {
 	    $self->add_md5($file,$localfile);
 	    debug "OK.";
 	    return(1);

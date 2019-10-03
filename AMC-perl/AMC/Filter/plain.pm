@@ -40,7 +40,7 @@ sub new {
 
     # list of available global options:
 
-    $self->{'options_names'}=[qw/Title Presentation Code Lang Font
+    $self->{options_names}=[qw/Title Presentation Code Lang Font
 				 BoxColor PaperSize
 				 AnswerSheetTitle AnswerSheetPresentation
 				 AnswerSheetColumns
@@ -64,7 +64,7 @@ sub new {
 
     # from these options, which ones are boolean valued?
 
-    $self->{'options_boolean'}=[qw/LaTeX xltxtra
+    $self->{options_boolean}=[qw/LaTeX xltxtra
 				   ShuffleQuestions QuestionBlocks
 				   CompleteMulti SeparateAnswerSheet AutoMarks
 				   Arabic
@@ -72,47 +72,47 @@ sub new {
 				  /];
 
     # current groups list
-    $self->{'groups'}=[];
+    $self->{groups}=[];
     # global LaTeX definitions
     $self->{latex_defs}=[];
     # packages needed
     $self->{packages}={};
     # maximum of digits that a hrizontal code can handle
-    $self->{'maxhorizcode'}=6;
+    $self->{maxhorizcode}=6;
     # options values
-    $self->{'options'}={};
+    $self->{options}={};
 
     # default values for options:
 
-    $self->{'default_options'}=
-      {'latexengine'=>'xelatex','xltxtra'=>1,
-       'questionblocks'=>1,'shufflequestions'=>1,
-       'completemulti'=>1,
-       'font'=>'Linux Libertine O',
-       'arabicfont'=>'Rasheeq',
-       'implicitdefaultscoringm'=>'haut=2',
+    $self->{default_options}=
+      {latexengine=>'xelatex',xltxtra=>1,
+       questionblocks=>1,shufflequestions=>1,
+       completemulti=>1,
+       font=>'Linux Libertine O',
+       arabicfont=>'Rasheeq',
+       implicitdefaultscoringm=>'haut=2',
        'l-name'=>'',
        'l-student'=>__("Please code your student number opposite, and write your name in the box below."),
-       'disable'=>'',
-       'manualduplex'=>'',
-       'singlesided'=>'',
-       'codedigitsdirection'=>'',
-       'namefieldwidth'=>'',
-       'namefieldlines'=>'',
-       'namefieldlinespace'=>'.5em',
-       'titlewidth'=>".47\\linewidth",
-       'randomseed'=>"1527384",
+       disable=>'',
+       manualduplex=>'',
+       singlesided=>'',
+       codedigitsdirection=>'',
+       namefieldwidth=>'',
+       namefieldlines=>'',
+       namefieldlinespace=>'.5em',
+       titlewidth=>".47\\linewidth",
+       randomseed=>"1527384",
       };
 
     # List of modules to be used when parsing (see parse_*
     # corresponding methods for implementation). Modules in the
     # Disable global option won't be used.
 
-    $self->{'parse_modules'}=['verbatim','local_latex','images','embf','title','text'];
+    $self->{parse_modules}=['verbatim','local_latex','images','embf','title','text'];
 
     # current question number among questions for which no ID is given
     # in the source
-    $self->{'qid'}=0;
+    $self->{qid}=0;
 
     bless ($self, $class);
     return $self;
@@ -136,7 +136,7 @@ sub add_global_latex_def {
 }
 
 # require a specific LaTeX package, with options in the form
-# needs_package("geometry","margins"=>'1cm',"noheadfoot"=>'')
+# needs_package("geometry",margins=>'1cm',noheadfoot=>'')
 sub needs_package {
   my ($self,$package,%options)=@_;
   $self->{packages}->{$package}={} if(!defined($self->{packages}->{$package}));
@@ -165,37 +165,37 @@ sub parse_options {
   my ($self)=@_;
 
   # boolean options are parsed to get 0 or 1
-  for my $n (@{$self->{'options_boolean'}}) {
-    $self->{'options'}->{lc($n)}=parse_bool($self->{'options'}->{lc($n)});
+  for my $n (@{$self->{options_boolean}}) {
+    $self->{options}->{lc($n)}=parse_bool($self->{options}->{lc($n)});
   }
 
   # if AR language is selected, apply default arabic localisation
   # options and set 'arabic' option to 1
-  if($self->{'options'}->{'lang'} eq 'AR') {
+  if($self->{options}->{lang} eq 'AR') {
     for (keys %l_arabic) {
-      $self->{'options'}->{$_}=$l_arabic{$_}
-	if(!$self->{'options'}->{$_});
+      $self->{options}->{$_}=$l_arabic{$_}
+	if(!$self->{options}->{$_});
     }
-    $self->{'options'}->{'arabic'}=1;
+    $self->{options}->{arabic}=1;
   }
 
   # if JA language is selected, switch to 'platex+dvipdf' LaTeX
   # engine, remove default font and don't use xltxtra LaTeX package
-  if($self->{'options'}->{'lang'} eq 'JA') {
-    $self->{'default_options'}->{'latexengine'}='platex+dvipdf';
-    $self->{'default_options'}->{'font'}='';
-    $self->{'default_options'}->{'xltxtra'}='';
+  if($self->{options}->{lang} eq 'JA') {
+    $self->{default_options}->{latexengine}='platex+dvipdf';
+    $self->{default_options}->{font}='';
+    $self->{default_options}->{xltxtra}='';
   }
 
   # set options values to default if not defined in the source
-  for my $k (keys %{$self->{'default_options'}}) {
-    $self->{'options'}->{$k}=$self->{'default_options'}->{$k}
-      if(!defined($self->{'options'}->{$k}));
+  for my $k (keys %{$self->{default_options}}) {
+    $self->{options}->{$k}=$self->{default_options}->{$k}
+      if(!defined($self->{options}->{$k}));
   }
 
   # relay LaTeX engine option to the project itself
   $self->set_project_option('moteur_latex_b',
-			    $self->{'options'}->{'latexengine'});
+			    $self->{options}->{latexengine});
 
   # split Pages option to pages_question and/or pages_total
   if($self->{options}->{pages}) {
@@ -225,7 +225,7 @@ sub add_object {
 # adds a group to current state
 sub add_group {
   my ($self,%g)=@_;
-  add_object($self->{'groups'},%g);
+  add_object($self->{groups},%g);
 }
 
 # cleanup for text: removes leading and trailing spaces
@@ -249,15 +249,15 @@ sub parse_error {
 sub check_answers {
   my ($self,$question)=@_;
   if($question) {
-    if($#{$question->{'answers'}}<1) {
+    if($#{$question->{answers}}<1) {
 # TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
       $self->parse_error(__"Previous question has less than two choices");
     } else {
       my $n_correct=0;
-      for my $a (@{$question->{'answers'}}) {
-	$n_correct++ if($a->{'correct'});
+      for my $a (@{$question->{answers}}) {
+	$n_correct++ if($a->{correct});
       }
-      if(!($question->{'multiple'} || $question->{'indicative'})) {
+      if(!($question->{multiple} || $question->{indicative})) {
 	if($n_correct!=1) {
 # TRANSLATORS: Error text for AMC-TXT parsing
 	  $self->parse_error(sprintf(__("Previous question is a simple question but has %d correct choice(s)"),$n_correct));
@@ -282,14 +282,14 @@ sub group_by_id {
   }
 
   if(!$group) {
-    $group=$self->add_group('id'=>$id,'questions'=>[],%oo);
+    $group=$self->add_group(id=>$id,questions=>[],%oo);
 
     if($id ne '_main_') {
       # calls newly created group from the 'main' one
 
       my $main=$self->group_by_id('_main_');
 
-      add_object($main->{'questions'},
+      add_object($main->{questions},
 		 textonly=>1,
 		 text=>{type=>'latex',
 			string=>$self->group_insert_command_name($group)},
@@ -315,7 +315,7 @@ sub read_options {
   return(%oo);
 }
 
-# parse the whole source file to a data tree ($self->{'groups'})
+# parse the whole source file to a data tree ($self->{groups})
 sub read_source {
   my ($self,$input_file)=@_;
 
@@ -335,7 +335,7 @@ sub read_file {
   my ($self,$input_file)=@_;
 
   # regexp that matches an option name:
-  my $opt_re='('.join('|',@{$self->{'options_names'}}).')';
+  my $opt_re='('.join('|',@{$self->{options_names}}).')';
 
   debug "Parsing $input_file";
 
@@ -379,7 +379,7 @@ sub read_file {
       debug "Option line ($1)";
       $self->{options}->{lc($1)}=$2;
       $self->value_cleanup($self->{reader_state}->{follow});
-      $self->{reader_state}->{follow}=\$self->{'options'}->{lc($1)};
+      $self->{reader_state}->{follow}=\$self->{options}->{lc($1)};
       $self->check_answers($self->{reader_state}->{question});
       $self->{reader_state}->{question}='';
       next LINE;
@@ -431,13 +431,13 @@ sub read_file {
       }
 
       $self->{reader_state}->{question}=
-	add_object($q_group->{'questions'},
-		   'multiple'=>length($star)==2,
-		   'open'=>$angles,
-		   'scoring'=>$scoring,
-		   'text'=>$text,'answers'=>[],%oo);
+	add_object($q_group->{questions},
+		   multiple=>length($star)==2,
+		   open=>$angles,
+		   scoring=>$scoring,
+		   text=>$text,answers=>[],%oo);
       $self->value_cleanup($self->{reader_state}->{follow});
-      $self->{reader_state}->{follow}=\$self->{reader_state}->{question}->{'text'};
+      $self->{reader_state}->{follow}=\$self->{reader_state}->{question}->{text};
       next LINE;
     }
 
@@ -450,11 +450,11 @@ sub read_file {
 	my $text=$4;
 	debug "Choice G=$sign L=$letter S=$scoring";
 	my $a=add_object($self->{reader_state}->{question}->{answers},
-			 'text'=>$text,'correct'=>($sign eq '+'),
-			 'letter'=>$letter,
-			 'scoring'=>$scoring);
+			 text=>$text,correct=>($sign eq '+'),
+			 letter=>$letter,
+			 scoring=>$scoring);
 	$self->value_cleanup($self->{reader_state}->{follow});
-	$self->{reader_state}->{follow}=\$a->{'text'};
+	$self->{reader_state}->{follow}=\$a->{text};
       } else {
 	debug "Choice outside question";
 # TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
@@ -478,7 +478,7 @@ sub read_file {
 # is often no bold font arabic font.
 sub bf_or {
   my($self,$replace,$bf)=@_;
-  return($self->{'options'}->{'arabic'}
+  return($self->{options}->{arabic}
 	 ? $replace : ($bf ? $bf : "\\bf"));
 }
 
@@ -505,24 +505,24 @@ sub parse_images {
   my ($self,@components)=@_;
   my @o=();
   for my $c (@components) {
-    if($c->{'type'} eq 'txt') {
-      my $s=$c->{'string'};
+    if($c->{type} eq 'txt') {
+      my $s=$c->{string};
       while($s =~ /!(?:\{([^!\s]+)\})?(?:\[([^!\s]+)\])?([^!\s]+)!/p) {
 	my $options=$1;
 	my $ig_options=$2;
 	my $path=$3;
 	my $before=${^PREMATCH};
 	my $after=${^POSTMATCH};
-	push @o,{'type'=>'txt','string'=>$before};
+	push @o,{type=>'txt',string=>$before};
 	my $l="\\includegraphics".($ig_options ? '['.$ig_options.']' : '')
 	  .'{'.$path.'}';
 	if($options =~ /\bcenter\b/) {
 	  $l="\\begin{center}$l\\end{center}";
 	}
-	push @o,{'type'=>'latex','string'=>$l};
+	push @o,{type=>'latex',string=>$l};
 	$s=$after;
       }
-      push @o,{'type'=>'txt','string'=>$s};
+      push @o,{type=>'txt',string=>$s};
     } else {
       push @o,$c;
     }
@@ -536,17 +536,17 @@ sub parse_local_latex {
   my ($self,@components)=@_;
   my @o=();
   for my $c (@components) {
-    if($c->{'type'} eq 'txt') {
-      my $s=$c->{'string'};
+    if($c->{type} eq 'txt') {
+      my $s=$c->{string};
       while($s =~ /\[\[(((?!\]\]).)+)\]\]/p) {
 	my $latex=$1;
 	my $before=${^PREMATCH};
 	my $after=${^POSTMATCH};
-	push @o,{'type'=>'txt','string'=>$before};
-	push @o,{'type'=>'latex','string'=>$latex};
+	push @o,{type=>'txt',string=>$before};
+	push @o,{type=>'latex',string=>$latex};
 	$s=$after;
       }
-      push @o,{'type'=>'txt','string'=>$s};
+      push @o,{type=>'txt',string=>$s};
     } else {
       push @o,$c;
     }
@@ -559,17 +559,17 @@ sub parse_tags {
   my ($self,$name,$parse_content,@components)=@_;
   my @o=();
   for my $c (@components) {
-    if($c->{'type'} eq 'txt') {
-      my $s=$c->{'string'};
+    if($c->{type} eq 'txt') {
+      my $s=$c->{string};
       while($s =~ /\[\Q$name\E\](.*?)\[\/\Q$name\E\]/sp) {
 	my $content=$1;
 	my $before=${^PREMATCH};
 	my $after=${^POSTMATCH};
-	push @o,{'type'=>'txt','string'=>$before};
+	push @o,{type=>'txt',string=>$before};
 	push @o,&$parse_content($self,$content);
 	$s=$after;
       }
-      push @o,{'type'=>'txt','string'=>$s};
+      push @o,{type=>'txt',string=>$s};
     } else {
       push @o,$c;
     }
@@ -605,8 +605,8 @@ sub parse_brackets {
   my $levels=0;
   my $tex;
   for my $c (@components) {
-    if($c->{'type'} eq 'txt') {
-      my $s=$c->{'string'};
+    if($c->{type} eq 'txt') {
+      my $s=$c->{string};
       while($s =~ /(\[\Q$modifier\E|\Q$modifier\E\])/p) {
 	my $sep=$1;
 	my $before=${^PREMATCH};
@@ -618,11 +618,11 @@ sub parse_brackets {
 	  $tex=$tex_close;
 	  $levels--;
 	}
-	push @o,{'type'=>'txt','string'=>$before};
-	push @o,{'type'=>'latex','string'=>$tex};
+	push @o,{type=>'txt',string=>$before};
+	push @o,{type=>'latex',string=>$tex};
 	$s=$after;
       }
-      push @o,{'type'=>'txt','string'=>$s};
+      push @o,{type=>'txt',string=>$s};
     } else {
       push @o,$c;
     }
@@ -656,9 +656,9 @@ sub parse_text {
   my ($self,@components)=@_;
   my @o=();
   for my $c (@components) {
-    if($c->{'type'} eq 'txt') {
-      my $s=$c->{'string'};
-      if(! $self->{'options'}->{'latex'}) {
+    if($c->{type} eq 'txt') {
+      my $s=$c->{string};
+      if(! $self->{options}->{latex}) {
 	$s =~ s/\\/\\(\\backslash\\)/g;
 	$s =~ s/~/\\(\\sim\\)/g;
 	$s =~ s/\*/\\(\\ast\\)/g;
@@ -667,7 +667,7 @@ sub parse_text {
 	$s =~ s/\$/\\textdollar{}/g;
 	$s =~ s/\^/\\textasciicircum{}/g;
       }
-      push @o,{'type'=>'latex','string'=>$s};
+      push @o,{type=>'latex',string=>$s};
     } else {
       push @o,$c;
     }
@@ -679,10 +679,10 @@ sub parse_text {
 # not disabled by the Disable global option).
 sub parse_all {
   my ($self,@components)=@_;
-  for my $m (@{$self->{'parse_modules'}}) {
+  for my $m (@{$self->{parse_modules}}) {
     my $mm='parse_'.$m;
     @components=$self->$mm(@components)
-      if($self->{'options'}->{'disable'} !~ /\b$m\b/);
+      if($self->{options}->{disable} !~ /\b$m\b/);
   }
   return(@components);
 }
@@ -692,11 +692,11 @@ sub check_latex {
   my ($self,@components)=@_;
   my @s=();
   for my $c (@components) {
-    if($c->{'type'} ne 'latex') {
+    if($c->{type} ne 'latex') {
       debug_and_stderr "ERR(FILTER): non-latex resulting component (".
-	$c->{'type'}."): ".$c->{'string'};
+	$c->{type}."): ".$c->{string};
     }
-    push @s,$c->{'string'};
+    push @s,$c->{string};
   }
   return(@s);
 }
@@ -712,7 +712,7 @@ sub format_text {
   } else {
     $t =~ s/^\s+//;
     $t =~ s/\s+$//;
-    $src={'type'=>'txt','string'=>$t};
+    $src={type=>'txt',string=>$t};
   }
 
   return(join('',$self->check_latex($self->parse_all($src))));
@@ -724,22 +724,22 @@ sub scoring_string {
   my ($self,$obj,$type)=@_;
   # manual scoring if some scoring was used, either for the question
   # or for one of the answers
-  my $manual_scoring=(length $obj->{'scoring'} ? 1 : 0);
+  my $manual_scoring=(length $obj->{scoring} ? 1 : 0);
   if($obj->{answers}) {
     for my $a (@{$obj->{answers}}) {
       $manual_scoring=1 if(length $a->{scoring});
     }
   }
-  my $s=$obj->{'scoring'};
+  my $s=$obj->{scoring};
   # set to explicit default (defined by DefaultScoringS or
   # DefaultScoringM):
   if(! length($s)) {
-    $s=$self->{'options'}->{'defaultscoring'.$type};
+    $s=$self->{options}->{'defaultscoring'.$type};
   }
   # if no manual scoring and no explicit default scoring, use the
   # implicit default scoring:
   if(!length($s) && !$manual_scoring) {
-    $s=$self->{'options'}->{'implicitdefaultscoring'.$type};
+    $s=$self->{options}->{'implicitdefaultscoring'.$type};
   }
   return(length($s) ? "\\scoring{$s}" : "");
 }
@@ -748,10 +748,10 @@ sub scoring_string {
 # followed by the scoring command
 sub format_answer {
   my ($self,$a)=@_;
-  my $t='\\'.($a->{'correct'} ? 'correct' : 'wrong').'choice';
+  my $t='\\'.($a->{correct} ? 'correct' : 'wrong').'choice';
   $t.='['.$a->{letter}.']' if($a->{letter} ne '');
   $t.='{'
-    .$self->format_text($a->{'text'})."}";
+    .$self->format_text($a->{text})."}";
   $t.=$self->scoring_string($a,'a');
   $t.="\n";
   return($t);
@@ -759,7 +759,7 @@ sub format_answer {
 
 sub arabic_env {
   my ($self,$action)=@_;
-  if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011) {
+  if($self->{options}->{arabic} && $self->bidi_year()<2011) {
     return("\\".$action."{arab}");
   } else {
     return("");
@@ -774,31 +774,31 @@ sub format_question {
   if($q->{textonly}) {
 
     $t.=$self->arabic_env('begin');
-    $t.=$self->format_text($q->{'text'})."\n";
+    $t.=$self->format_text($q->{text})."\n";
     $t.=$self->arabic_env('end');
 
   } else {
 
-    my $qid=$q->{'id'};
-    $qid=$q->{'name'} if(!$qid);
-    $qid=sprintf("Q%03d",++$self->{'qid'}) if(!$qid);
-    my $mult=($q->{'multiple'} ? 'mult' : '');
-    my $ct=($q->{'horiz'} ? 'horiz' : '');
+    my $qid=$q->{id};
+    $qid=$q->{name} if(!$qid);
+    $qid=sprintf("Q%03d",++$self->{qid}) if(!$qid);
+    my $mult=($q->{multiple} ? 'mult' : '');
+    my $ct=($q->{horiz} ? 'horiz' : '');
 
     $t.=$self->arabic_env('begin');
     $t.='\\begin{question'.$mult.'}{'.$qid."}";
-    $t.=$self->scoring_string($q,($q->{'multiple'} ? 'm' : 's'));
+    $t.=$self->scoring_string($q,($q->{multiple} ? 'm' : 's'));
     $t.="\n";
-    $t.=$self->format_text($q->{'text'})."\n";
-    $t.="\\QuestionIndicative\n" if($q->{'indicative'});
+    $t.=$self->format_text($q->{text})."\n";
+    $t.="\\QuestionIndicative\n" if($q->{indicative});
     if ($q->{open} ne '') {
       $t.="\\AMCOpen{".$q->{open}."}{";
     } else {
-      $t.="\\begin{multicols}{".$q->{'columns'}."}\n"
-	if ($q->{'columns'}>1);
-      $t.="\\begin{choices$ct}".($q->{'ordered'} ? "[o]" : "")."\n";
+      $t.="\\begin{multicols}{".$q->{columns}."}\n"
+	if ($q->{columns}>1);
+      $t.="\\begin{choices$ct}".($q->{ordered} ? "[o]" : "")."\n";
     }
-    for my $a (@{$q->{'answers'}}) {
+    for my $a (@{$q->{answers}}) {
       $t.=$self->format_answer($a);
     }
     if ($q->{open} ne '') {
@@ -806,7 +806,7 @@ sub format_question {
     } else {
       $t.="\\end{choices$ct}\n";
       $t.="\\end{multicols}\n"
-	if ($q->{'columns'}>1);
+	if ($q->{columns}>1);
     }
     $t.="\\end{question".$mult."}";
     $t.=$self->arabic_env('end');
@@ -828,8 +828,8 @@ sub int_to_letters {
 
 sub unused_letter {
   my ($self)=@_;
-  $self->{'letter_i'}++;
-  return($self->int_to_letters($self->{'letter_i'}));
+  $self->{letter_i}++;
+  return($self->int_to_letters($self->{letter_i}));
 }
 
 # returns a new group name 'groupX' (where X is a letter beginnig at
@@ -856,20 +856,20 @@ sub group_name {
 # used to adapt the LaTeX code to version before or after 2011
 sub bidi_year {
   my ($self)=@_;
-  if(!$self->{'bidiyear'}) {
+  if(!$self->{bidiyear}) {
     my $f=find_latex_file("bidi.sty");
     if(-f $f) {
       open(BIDI,$f);
     BIDLIG: while(<BIDI>) {
 	if(/\\bididate\{([0-9]+)\//) {
-	  $self->{'bidiyear'}=$1;
+	  $self->{bidiyear}=$1;
 	  last BIDLIG;
 	}
       }
       close(BIDI);
     }
   }
-  return($self->{'bidiyear'});
+  return($self->{bidiyear});
 }
 
 # builds and returns the LaTeX header
@@ -879,7 +879,7 @@ sub file_header {
 
   my @package_options=();
 
-  my $o=$self->{'options'}->{packageoptions};
+  my $o=$self->{options}->{packageoptions};
   $o =~ s/^\s+//;
   $o =~ s/\s+$//;
   if($o) {
@@ -888,30 +888,30 @@ sub file_header {
     }
   }
 
-  push @package_options,"bloc" if($self->{'options'}->{'questionblocks'});
+  push @package_options,"bloc" if($self->{options}->{questionblocks});
   for my $on (qw/completemulti separateanswersheet automarks/) {
-    push @package_options,$on if($self->{'options'}->{$on});
+    push @package_options,$on if($self->{options}->{$on});
   }
 
-  push @package_options,"lang=".uc($self->{'options'}->{'lang'})
-    if($self->{'options'}->{'lang'});
+  push @package_options,"lang=".uc($self->{options}->{lang})
+    if($self->{options}->{lang});
 
   my $po='';
   $po='['.join(',',@package_options).']' if(@package_options);
 
-  if($self->{'options'}->{'arabic'}) {
+  if($self->{options}->{arabic}) {
     $t.="% bidi YEAR ".$self->bidi_year()."\n";
   }
 
   $t .= "\\documentclass{article}\n";
   $t .= "\\usepackage{bidi}\n"
-    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
-  $t .= "\\usepackage{xltxtra}\n" if($self->{'options'}->{'xltxtra'});
+    if($self->{options}->{arabic} && $self->bidi_year()<2011);
+  $t .= "\\usepackage{xltxtra}\n" if($self->{options}->{xltxtra});
   $t .= "\\usepackage{arabxetex}\n"
-    if($self->{'options'}->{'arabic'} && $self->bidi_year()<2011);
+    if($self->{options}->{arabic} && $self->bidi_year()<2011);
   $t .= "\\usepackage".$po."{automultiplechoice}\n";
   $t .= "\\usepackage{"
-    .($self->{'options'}->{'arabic'} && $self->bidi_year()<2011
+    .($self->{options}->{arabic} && $self->bidi_year()<2011
       ? "fmultico" : "multicol")."}\n";
 
   # packages
@@ -925,48 +925,48 @@ sub file_header {
       ."{".$p."}\n";
   }
 
-  $t .= "\\setmainfont{".$self->{'options'}->{'font'}."}\n"
-    if($self->{'options'}->{'font'});
-  $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{'options'}->{'arabicfont'}."}\n"
-    if($self->{'options'}->{'arabicfont'} && $self->{'options'}->{'arabic'});
-  $t .= "\\geometry{paper=".lc($self->{'options'}->{'papersize'})."paper}\n"
-    if($self->{'options'}->{'papersize'});
-  $t .= $self->{'options'}->{'latex-preambule'};
+  $t .= "\\setmainfont{".$self->{options}->{font}."}\n"
+    if($self->{options}->{font});
+  $t .= "\\newfontfamily{\\arabicfont}[Script=Arabic,Scale=1]{".$self->{options}->{arabicfont}."}\n"
+    if($self->{options}->{arabicfont} && $self->{options}->{arabic});
+  $t .= "\\geometry{paper=".lc($self->{options}->{papersize})."paper}\n"
+    if($self->{options}->{papersize});
+  $t .= $self->{options}->{'latex-preambule'};
   $t .= "\\usepackage{arabxetex}\n"
-    if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
+    if($self->{options}->{arabic} && $self->bidi_year()>=2011);
   $t .= "\\begin{document}\n";
   $t .= "\\def\\AMCmakeTitle#1{\\par\\noindent\\hrule\\vspace{1ex}{\\hspace*{\\fill}\\Large\\bf #1\\hspace*{\\fill}}\\vspace{1ex}\\par\\noindent\\hrule\\par\\vspace{1ex}}\n";
-  $t .= "\\AMCrandomseed{".$self->{'options'}->{'randomseed'}."}\n";
-  if($self->{'options'}->{'boxcolor'}) {
-    if($self->{'options'}->{'boxcolor'}
+  $t .= "\\AMCrandomseed{".$self->{options}->{randomseed}."}\n";
+  if($self->{options}->{boxcolor}) {
+    if($self->{options}->{boxcolor}
        =~ /^\\definecolor\{amcboxcolor\}/) {
-      $t .= $self->{'options'}->{'boxcolor'};
-    } elsif($self->{'options'}->{'boxcolor'}
+      $t .= $self->{options}->{boxcolor};
+    } elsif($self->{options}->{boxcolor}
        =~ /^\#([a-f0-9]{2})([a-f0-9]{2})([a-f0-9]{2})$/i) {
       $t .= "\\definecolor{amcboxcolor}{rgb}{"
 	.sprintf("%0.2f,%0.2f,%0.2f",map { hex($_)/256.0 } ($1,$2,$3))."}\n";
     } else {
       $t .= "\\definecolor{amcboxcolor}{named}{"
-	.$self->{'options'}->{'boxcolor'}."}\n";
+	.$self->{options}->{boxcolor}."}\n";
     }
     $t .= "\\AMCboxColor{amcboxcolor}\n";
   }
   $t .= "\\AMCtext{none}{"
-    .$self->format_text($self->{'options'}->{'l-none'})."}\n"
-    if($self->{'options'}->{'l-none'});
-  $t .= "\\def\\AMCotextGoto{\\par ".$self->format_text($self->{'options'}->{'l-opentext'})."}\n"
-    if($self->{'options'}->{'l-opentext'});
-  $t .= "\\def\\AMCotextReserved{".$self->format_text($self->{'options'}->{'l-openreserved'})."}\n"
-    if($self->{'options'}->{'l-openreserved'});
+    .$self->format_text($self->{options}->{'l-none'})."}\n"
+    if($self->{options}->{'l-none'});
+  $t .= "\\def\\AMCotextGoto{\\par ".$self->format_text($self->{options}->{'l-opentext'})."}\n"
+    if($self->{options}->{'l-opentext'});
+  $t .= "\\def\\AMCotextReserved{".$self->format_text($self->{options}->{'l-openreserved'})."}\n"
+    if($self->{options}->{'l-openreserved'});
 
   $t.="\\def\\AMCbeginQuestion#1#2{\\noindent{"
     .$self->bf_or("\\Large")." "
-      .$self->{'options'}->{'l-question'}." #1} #2\\hspace{1em}}\n"
+      .$self->{options}->{'l-question'}." #1} #2\\hspace{1em}}\n"
 	."\\def\\AMCformQuestion#1{{"
 	  .$self->bf_or("\\Large")." "
-	    .$self->{'options'}->{'l-question'}." #1 :}}\n"
-	      if($self->{'options'}->{'l-question'});
-  if($self->{'options'}->{'arabic'}) {
+	    .$self->{options}->{'l-question'}." #1 :}}\n"
+	      if($self->{options}->{'l-question'});
+  if($self->{options}->{arabic}) {
     $t.="\\def\\AMCchoiceLabel#1{\\csname ArabicAlphabet\\Alph{#1}\\endcsname}\n";
     my $letter="A";
     for my $c (@alphabet_arabic) {
@@ -974,7 +974,7 @@ sub file_header {
       $letter++;
     }
   }
-  $t .= $self->{'options'}->{'latex-begindocument'};
+  $t .= $self->{options}->{'latex-begindocument'};
 
   return($t);
 }
@@ -987,22 +987,22 @@ sub page_header {
 
   my $titlekey='';
 
-  if($self->{'options'}->{'separateanswersheet'}) {
+  if($self->{options}->{separateanswersheet}) {
     if($answersheet) {
-      if($self->{'options'}->{'code'}>0) {
+      if($self->{options}->{code}>0) {
 	$titlekey='answersheettitle';
       }
     } else {
       $titlekey='title';
     }
   } else {
-    if($self->{'options'}->{'code'}>0) {
+    if($self->{options}->{code}>0) {
       $titlekey='title';
     }
   }
-  if($titlekey && $self->{'options'}->{$titlekey}) {
+  if($titlekey && $self->{options}->{$titlekey}) {
     $t.="\\begin{center}".$self->bf_or("\\Large","\\bf\\large")." "
-      .$self->format_text($self->{'options'}->{$titlekey})
+      .$self->format_text($self->{options}->{$titlekey})
 	."\\end{center}";
     $t.="\n\n";
   }
@@ -1013,18 +1013,18 @@ sub page_header {
 sub full_namefield {
   my ($self,$with_code)=@_;
   my $n_ligs;
-  if($self->{'options'}->{'namefieldlines'}) {
-    $n_ligs=$self->{'options'}->{'namefieldlines'};
+  if($self->{options}->{namefieldlines}) {
+    $n_ligs=$self->{options}->{namefieldlines};
   } else {
     $n_ligs=($with_code ? 2 : 1);
   }
   my $t='';
   $t.="\\namefield{\\fbox{";
   $t.="\\begin{minipage}{.9\\linewidth}"
-    .($self->{'options'}->{'l-name'}
-      ? $self->{'options'}->{'l-name'}
+    .($self->{options}->{'l-name'}
+      ? $self->{options}->{'l-name'}
       : '\\AMClocalized{namesurname}')
-      .(("\n\n\\vspace*{".$self->{'options'}->{'namefieldlinespace'}."}\\dotfill") x $n_ligs)
+      .(("\n\n\\vspace*{".$self->{options}->{namefieldlinespace}."}\\dotfill") x $n_ligs)
 	."\n\\vspace*{1mm}"
 	  ."\n\\end{minipage}";
   $t.="\n}}";
@@ -1037,27 +1037,27 @@ sub student_block {
   my ($self)=@_;
   my $t='';
 
-  if($self->{'options'}->{'code'}>0) {
+  if($self->{options}->{code}>0) {
     # Header layout with a code (student number)
 
-    my $vertical=($self->{'options'}->{'code'}>$self->{'maxhorizcode'});
+    my $vertical=($self->{options}->{code}>$self->{maxhorizcode});
     $vertical=1 if($self->{options}->{codedigitsdirection} =~ /^v/i);
     $vertical=0 if($self->{options}->{codedigitsdirection} =~ /^h/i);
 
     $t.="{\\setlength{\\parindent}{0pt}\\hspace*{\\fill}";
     $t.=($vertical?"":"\\hbox{\\vtop{");
-    $t.= "\\LR{" if($self->{'options'}->{'arabic'} && $vertical);
+    $t.= "\\LR{" if($self->{options}->{arabic} && $vertical);
     $t.="\\AMCcode".($vertical ? "" : "H")."{student.number}{".
-	$self->{'options'}->{'code'}."}";
-    $t.= "}" if($self->{'options'}->{'arabic'} && $vertical);
+	$self->{options}->{code}."}";
+    $t.= "}" if($self->{options}->{arabic} && $vertical);
     $t.=($vertical?"":"}}")."\\hspace*{\\fill}"
       ."\\begin{minipage}".($vertical?"[b]":"[t]")."{"
-      .($self->{'options'}->{'namefieldwidth'} ?
-	$self->{'options'}->{'namefieldwidth'} : '5.8cm')
+      .($self->{options}->{namefieldwidth} ?
+	$self->{options}->{namefieldwidth} : '5.8cm')
 	."}"
-	."\$\\long".($self->{'options'}->{'arabic'} ? "right" : "left")
+	."\$\\long".($self->{options}->{arabic} ? "right" : "left")
 	  ."arrow{}\$\\hspace{0pt plus 1cm}"
-	    .$self->{'options'}->{'l-student'}
+	    .$self->{options}->{'l-student'}
 	      ."\\vspace{3ex}\n\n\\hfill"
 		.$self->full_namefield(1)
 		  ."\\hfill\\vspace{5ex}\\end{minipage}\\hspace*{\\fill}"
@@ -1066,19 +1066,19 @@ sub student_block {
   } else {
     # header layout without code
     $t.= "\\begin{minipage}{"
-      .$self->{'options'}->{'titlewidth'}
+      .$self->{options}->{titlewidth}
       ."}\n";
-    my $titlekey=($self->{'options'}->{'separateanswersheet'}
+    my $titlekey=($self->{options}->{separateanswersheet}
 		  ? 'answersheettitle' : 'title');
-    if($self->{'options'}->{$titlekey}) {
+    if($self->{options}->{$titlekey}) {
       $t.= "\\begin{center}".$self->bf_or("\\Large","\\bf\\large")." "
-	.$self->format_text($self->{'options'}->{$titlekey})
+	.$self->format_text($self->{options}->{$titlekey})
 	  ."\\end{center}\n\n";
     }
     $t.= "\\end{minipage}\\hfill\n";
     $t.= "\\begin{minipage}{".
-      ($self->{'options'}->{'namefieldwidth'} ?
-	$self->{'options'}->{'namefieldwidth'} : ".47\\linewidth")
+      ($self->{options}->{namefieldwidth} ?
+	$self->{options}->{namefieldwidth} : ".47\\linewidth")
       ."}\n";
     $t.= $self->full_namefield(0);
     $t.= "\\end{minipage}\\vspace{4mm}\n\n";
@@ -1128,18 +1128,18 @@ sub write_latex {
 
   my $tex='';
 
-  for my $group (@{$self->{'groups'}}) {
+  for my $group (@{$self->{groups}}) {
 
     # create group elements from the questions
 
     my @questions=grep { !($_->{first} || $_->{last}) }
-      @{$group->{'questions'}};
+      @{$group->{questions}};
 
     my $q;
     while($q=shift @questions) {
       $tex .= "\\element{".$self->group_name($group)."}{\n";
       $tex .= $self->format_question($q);
-      while(@questions && $questions[0]->{'next'}) {
+      while(@questions && $questions[0]->{next}) {
 	$tex .= "\n";
 	$tex .= $self->format_question(shift @questions);
       }
@@ -1153,75 +1153,75 @@ sub write_latex {
 
   $tex .= "\\onecopy{5}{\n";
 
-  $tex .= "\\begin{arab}" if($self->{'options'}->{'arabic'});
+  $tex .= "\\begin{arab}" if($self->{options}->{arabic});
   $tex .= $self->page_header(0);
   $tex .= $self->student_block
-    if(!$self->{'options'}->{'separateanswersheet'});
+    if(!$self->{options}->{separateanswersheet});
 
-  if($self->{'options'}->{'presentation'}) {
-    $tex .= $self->format_text($self->{'options'}->{'presentation'})."\n\n";
+  if($self->{options}->{presentation}) {
+    $tex .= $self->format_text($self->{options}->{presentation})."\n\n";
   }
   $tex .= "\\vspace{4mm}\\noindent\\hrule\n";
-  $tex .= "\\end{arab}" if($self->{'options'}->{'arabic'});
+  $tex .= "\\end{arab}" if($self->{options}->{arabic});
   $tex .= "\n\n";
 
   # shuffle groups...
   for my $g (@{$self->{groups}}) {
     $tex .= "\\shufflegroup{".$self->group_name($g)."}\n"
-      if(parse_bool(first_defined($g->{shuffle},$self->{'options'}->{'shufflequestions'})));
+      if(parse_bool(first_defined($g->{shuffle},$self->{options}->{shufflequestions})));
   }
 
   # print groups
   $tex .= "\\begin{arab}"
-    if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
-  if($self->{'options'}->{'columns'}>1) {
-    $tex .= "\\begin{multicols}{".$self->{'options'}->{'columns'}."}\n";
+    if($self->{options}->{arabic} && $self->bidi_year()>=2011);
+  if($self->{options}->{columns}>1) {
+    $tex .= "\\begin{multicols}{".$self->{options}->{columns}."}\n";
   } else {
     $tex .= "\\vspace{2ex}\n\n";
   }
 
   $tex .= $self->group_insert_command_name($self->group_by_id('_main_'))."\n";
 
-  if($self->{'options'}->{'columns'}>1) {
+  if($self->{options}->{columns}>1) {
     $tex .= "\\end{multicols}\n";
   }
   $tex .= "\\end{arab}"
-    if($self->{'options'}->{'arabic'} && $self->bidi_year()>=2011);
+    if($self->{options}->{arabic} && $self->bidi_year()>=2011);
 
   # separate answer sheet
-  if($self->{'options'}->{'separateanswersheet'}) {
+  if($self->{options}->{separateanswersheet}) {
     $tex .= "\n\\AMCaddpagesto{".$self->{options}->{pages_question}."}"
       if($self->{options}->{pages_question});
-    if($self->{'options'}->{'singlesided'}) {
+    if($self->{options}->{singlesided}) {
       $tex .= "\n\\clearpage\n\n";
     } else {
       $tex .= "\n\\AMCcleardoublepage\n\n";
     }
     $tex .= "\\AMCformBegin\n";
 
-    $tex .= "\\begin{arab}" if($self->{'options'}->{'arabic'});
+    $tex .= "\\begin{arab}" if($self->{options}->{arabic});
     $tex .= $self->page_header(1);
     $tex .= $self->student_block;
-    if($self->{'options'}->{'answersheetpresentation'}) {
-      $tex .= $self->format_text($self->{'options'}->{'answersheetpresentation'})."\n\n";
+    if($self->{options}->{answersheetpresentation}) {
+      $tex .= $self->format_text($self->{options}->{answersheetpresentation})."\n\n";
     }
     $tex .= "\\vspace{4mm}\\noindent\\hrule\n";
-    $tex .= "\\end{arab}" if($self->{'options'}->{'arabic'});
+    $tex .= "\\end{arab}" if($self->{options}->{arabic});
     $tex .= "\n\n";
 
-    $tex .= "\\begin{arab}" if($self->{'options'}->{'arabic'});
-    $tex .= "\\begin{multicols}{".$self->{'options'}->{'answersheetcolumns'}."}\n"
-      if($self->{'options'}->{'answersheetcolumns'}>1);
+    $tex .= "\\begin{arab}" if($self->{options}->{arabic});
+    $tex .= "\\begin{multicols}{".$self->{options}->{answersheetcolumns}."}\n"
+      if($self->{options}->{answersheetcolumns}>1);
     $tex .= "\\AMCform\n";
     $tex .= "\\end{multicols}\n"
-      if($self->{'options'}->{'answersheetcolumns'}>1);
-    $tex .= "\\end{arab}" if($self->{'options'}->{'arabic'});
+      if($self->{options}->{answersheetcolumns}>1);
+    $tex .= "\\end{arab}" if($self->{options}->{arabic});
   }
 
   $tex .= "\n\n";
   $tex .= "\\AMCaddpagesto{".$self->{options}->{pages_total}."}\n"
       if($self->{options}->{pages_total});
-  $tex .= "\\AMCcleardoublepage\n" if($self->{'options'}->{'manualduplex'});
+  $tex .= "\\AMCcleardoublepage\n" if($self->{options}->{manualduplex});
 
   $tex .= "}\n";
   $tex .= "\\end{document}\n";
@@ -1241,12 +1241,12 @@ sub check {
   my ($self)=@_;
   my @cf=('font');
   my @mf=();
-  push @cf,'arabicfont' if($self->{'options'}->{'arabic'});
+  push @cf,'arabicfont' if($self->{options}->{arabic});
   for my $k (@cf) {
-    if($self->{'options'}->{'font'}) {
-      if(!check_fonts({'type'=>'fontconfig',
-		       'family'=>[$self->{'options'}->{$k}]})) {
-	push @mf,$self->{'options'}->{$k}
+    if($self->{options}->{font}) {
+      if(!check_fonts({type=>'fontconfig',
+		       family=>[$self->{options}->{$k}]})) {
+	push @mf,$self->{options}->{$k}
       }
     }
   }

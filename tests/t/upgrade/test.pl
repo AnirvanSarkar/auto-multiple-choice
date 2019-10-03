@@ -20,7 +20,7 @@
 
 require "./AMC/Test.pm";
 
-my $t=AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
+my $t=AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
 		     notemax=>0,seuil=>0.15,grain=>0.5,rounding=>'n',
 		     scans=>[],
 		     check_marks=>{1=>121,2=>330,3=>421,4=>432},

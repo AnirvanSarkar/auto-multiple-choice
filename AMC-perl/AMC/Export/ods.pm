@@ -44,7 +44,7 @@ sub new {
     $self->{'out.statsindic'}='';
     $self->{'out.groupsums'}=0;
     $self->{'out.groupsep'}=':';
-    if(can_load(modules=>{'Pango'=>undef,'Cairo'=>undef})) {
+    if(can_load(modules=>{Pango=>undef,Cairo=>undef})) {
       debug "Using Pango/Cairo to compute column width";
       $self->{'calc.Cairo'}=1;
     }
@@ -55,8 +55,8 @@ sub new {
 sub load {
   my ($self)=@_;
   $self->SUPER::load();
-  $self->{'_capture'}=$self->{'_data'}->module('capture');
-  $self->{'_layout'}=$self->{'_data'}->module('layout');
+  $self->{_capture}=$self->{_data}->module('capture');
+  $self->{_layout}=$self->{_data}->module('layout');
 }
 
 # returns the column width (in cm) to use when including the given texts.
@@ -217,14 +217,14 @@ sub set_cell {
 
   $doc->cellStyle($feuille,$jj,$ii,
 		  ($abs && $style_col_abs{$x}
-		   ? $style_col_abs{$x} : ($style_col{$x} ? $style_col{$x} : $style_col{'HEAD'})));
+		   ? $style_col_abs{$x} : ($style_col{$x} ? $style_col{$x} : $style_col{HEAD})));
   $value=encode('utf-8',$value) if($oo{'utf8'});
   $doc->cellValueType($feuille,$jj,$ii,'float')
-    if($oo{'numeric'} && !$abs);
+    if($oo{numeric} && !$abs);
   $doc->cellValueType($feuille,$jj,$ii,'percentage')
-    if($oo{'pc'} && !$abs);
-  if($oo{'formula'}) {
-    $doc->cellFormula($feuille,$jj,$ii,$oo{'formula'});
+    if($oo{pc} && !$abs);
+  if($oo{formula}) {
+    $doc->cellFormula($feuille,$jj,$ii,$oo{formula});
   } else {
     $doc->cellValue($feuille,$jj,$ii,$value);
   }
@@ -235,14 +235,14 @@ sub build_stats_table {
 
   my $vertical_flow=$direction =~ /^v/i;
 
-  my %y_item=('all'=>2,'empty'=>3,'invalid'=>4);
+  my %y_item=(all=>2,empty=>3,invalid=>4);
 # TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
-  my %y_name=('all'=>__"ALL",
+  my %y_name=(all=>__"ALL",
 # TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question did not get an answer. Please let this label short.
-	      'empty'=>__"NA",
+	      empty=>__"NA",
 # TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got an invalid answer. Please let this label short.
-	      'invalid'=>__"INVALID");
-  my %y_style=('empty'=>'qidE','invalid'=>'qidI');
+	      invalid=>__"INVALID");
+  my %y_style=(empty=>'qidE',invalid=>'qidI');
 
   my $n_answers=1+$#{$cts};
   my $n_questions=1+$#q;
@@ -265,7 +265,7 @@ sub build_stats_table {
     $doc->cellSpan($stats,$ybase,$x,4);
     $doc->cellStyle($stats,$ybase,$x,
 		    'StatsQName'.(!$correct_data ? 'I' :'S'));
-    $doc->cellValue($stats,$ybase,$x,encode('utf-8',$q->{'title'}));
+    $doc->cellValue($stats,$ybase,$x,encode('utf-8',$q->{title}));
 
     $doc->cellStyle($stats,$ybase+1,$x,'statCol');
 # TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the reference of the boxes. Please let this name short.
@@ -286,21 +286,21 @@ sub build_stats_table {
 
     my $amax=0;
 
-    for my $counts (sort { $a->{'answer'} eq "0" ? 1
-			     : $b->{'answer'} eq "0" ? -1 : 0 }
+    for my $counts (sort { $a->{answer} eq "0" ? 1
+			     : $b->{answer} eq "0" ? -1 : 0 }
 		    grep { $_->{question} eq $q->{question} } @$cts) {
 
-      my $ya=$y_item{$counts->{'answer'}};
-      my $name=$y_name{$counts->{'answer'}};
-      my $style=$y_style{$counts->{'answer'}};
+      my $ya=$y_item{$counts->{answer}};
+      my $name=$y_name{$counts->{answer}};
+      my $style=$y_style{$counts->{answer}};
 
       if(!$ya) {
-	if($counts->{'answer'}>0) {
-	  $amax=$counts->{'answer'}
-	    if($counts->{'answer'}>$amax);
-	  $ya=4+$counts->{'answer'};
+	if($counts->{answer}>0) {
+	  $amax=$counts->{answer}
+	    if($counts->{answer}>$amax);
+	  $ya=4+$counts->{answer};
           $name=$self->{_layout}->char($q->{question},$counts->{answer});
-	  $name=chr(ord("A")+$counts->{'answer'}-1)
+	  $name=chr(ord("A")+$counts->{answer}-1)
             if(!defined($name) || $name eq '');
 	} else {
 	  $amax++;
@@ -312,7 +312,7 @@ sub build_stats_table {
 
       $doc->cellStyle($stats,$ybase+$ya,$x+1,'NumCopie');
       $doc->cellValueType($stats,$ybase+$ya,$x+1,'float');
-      $doc->cellValue($stats,$ybase+$ya,$x+1,$counts->{'nb'});
+      $doc->cellValue($stats,$ybase+$ya,$x+1,$counts->{nb});
       $doc->cellStyle($stats,$ybase+$ya,$x,($style ? $style : 'General'));
       $doc->cellValue($stats,$ybase+$ya,$x,encode('utf-8',$name));
     }
@@ -349,11 +349,11 @@ sub build_stats_table {
     # SETS COLOR FOR CORRECT OR NOT ANSWERS
 
     for my $c (grep { $_->{question} eq $q->{question} } @$correct_data) {
-      my $ya=4+$c->{'answer'};
-      $ya=4+$amax if($c->{'answer'}==0);
+      my $ya=4+$c->{answer};
+      $ya=4+$amax if($c->{answer}==0);
       $doc->cellStyle($stats,$ybase+$ya,$x,
-		      $c->{'correct_max'}==0 ? 'qidW' :
-		      $c->{'correct_min'}==1 ? 'qidC' :
+		      $c->{correct_max}==0 ? 'qidW' :
+		      $c->{correct_min}==1 ? 'qidC' :
 		      'qidX');
     }
 
@@ -382,9 +382,9 @@ sub export {
 
     $self->pre_process();
 
-    $self->{'_scoring'}->begin_read_transaction('XODS');
+    $self->{_scoring}->begin_read_transaction('XODS');
 
-    my $rd=$self->{'_scoring'}->variable('rounding');
+    my $rd=$self->{_scoring}->variable('rounding');
     $rd='' if(!defined($rd));
     
     my $arrondi='';
@@ -394,7 +394,7 @@ sub export {
       debug "Unknown rounding type: $rd";
     }
 
-    my $grain=$self->{'_scoring'}->variable('granularity');
+    my $grain=$self->{_scoring}->variable('granularity');
     $grain=0 if(!defined($grain));
     
     my $ndg=0;
@@ -410,10 +410,10 @@ sub export {
       $ndg=length($1);
     }
 
-    my $lk=$self->{'_assoc'}->variable('key_in_list');
+    my $lk=$self->{_assoc}->variable('key_in_list');
 
-    my $notemin=$self->{'_scoring'}->variable('mark_floor');
-    my $plafond=$self->{'_scoring'}->variable('ceiling');
+    my $notemin=$self->{_scoring}->variable('mark_floor');
+    my $plafond=$self->{_scoring}->variable('ceiling');
 
     $notemin='' if(!defined($notemin) || $notemin =~ /[a-z]/i);
 
@@ -439,7 +439,7 @@ sub export {
 			  'column-width' => "1cm",
 		      },
 		      );
-    $col_styles{'notes'}=1;
+    $col_styles{notes}=1;
 
     for(keys %largeurs) {
 	$doc->createStyle('col.'.$_,
@@ -471,7 +471,7 @@ sub export {
 				    'number:min-integer-digits'=>"1",
 				},
 	);
-    $styles->appendElement($pc,'number:text','text'=>'%');
+    $styles->appendElement($pc,'number:text',text=>'%');
 
 
     $styles->createStyle('NombreVide',
@@ -513,7 +513,7 @@ sub export {
 			     'fo:text-align' => "start",
 			     'fo:margin-left' => "0.1cm",
 			 },
-			 'references'=>{'style:data-style-name' => 'Percentage'},
+			 references=>{'style:data-style-name' => 'Percentage'},
 			 );
     # Qpc : pourcentage de reussite global pour une question
     $styles->createStyle('Qpc',
@@ -523,7 +523,7 @@ sub export {
 			     -area => 'paragraph',
 			     'fo:text-align' => "center",
 			 },
-			 'references'=>{'style:data-style-name' => 'Percentage'},
+			 references=>{'style:data-style-name' => 'Percentage'},
 			 );
 
     # QpcGS : pourcentage de reussite global pour un groupe
@@ -553,7 +553,7 @@ sub export {
 			 },
 			 );
     $styles->createStyle('StatsQNameS',
-			 'parent'=>'StatsQName',
+			 parent=>'StatsQName',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -561,7 +561,7 @@ sub export {
 				     },
 			);
     $styles->createStyle('StatsQNameM',
-			 'parent'=>'StatsQName',
+			 parent=>'StatsQName',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -569,7 +569,7 @@ sub export {
 				     },
 			);
     $styles->createStyle('StatsQNameI',
-			 'parent'=>'StatsQName',
+			 parent=>'StatsQName',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -593,7 +593,7 @@ sub export {
 			 );
 
     $styles->createStyle('qidW',
-			 'parent'=>'General',
+			 parent=>'General',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -601,7 +601,7 @@ sub export {
 				     },
 			);
     $styles->createStyle('qidC',
-			 'parent'=>'General',
+			 parent=>'General',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -609,7 +609,7 @@ sub export {
 				     },
 			);
     $styles->createStyle('qidX',
-			 'parent'=>'General',
+			 parent=>'General',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -617,7 +617,7 @@ sub export {
 				     },
 			);
     $styles->createStyle('qidI',
-			 'parent'=>'General',
+			 parent=>'General',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -625,7 +625,7 @@ sub export {
 				     },
 			);
     $styles->createStyle('qidE',
-			 'parent'=>'General',
+			 parent=>'General',
 			 family=>'table-cell',
 			 properties=>{
 				      -area => 'table-cell',
@@ -655,14 +655,14 @@ sub export {
     $styles->createStyle('NoteQ',
 			 parent=>'NoteQbase',
 			 family=>'table-cell',
-			 'references'=>{'style:data-style-name' => 'DeuxDecimales'},
+			 references=>{'style:data-style-name' => 'DeuxDecimales'},
 			 );
 
     # NoteQp : note pour une question, en pourcentage
     $styles->createStyle('NoteQp',
 			 parent=>'NoteQbase',
 			 family=>'table-cell',
-			 'references'=>{'style:data-style-name' => 'Percentage'},
+			 references=>{'style:data-style-name' => 'Percentage'},
 			 );
 
     # NoteV : note car pas de reponse
@@ -673,7 +673,7 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#ffff99",
 			 },
-			 'references'=>{'style:data-style-name' => 'NombreVide'},
+			 references=>{'style:data-style-name' => 'NombreVide'},
  			 );
 
     # NoteC : question annulee (par un allowempty)
@@ -684,7 +684,7 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#b1e3e9",
 			 },
-			 'references'=>{'style:data-style-name' => 'NombreVide'},
+			 references=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
     # NoteE : note car erreur "de syntaxe"
@@ -695,7 +695,7 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#ffbaba",
 			 },
-			 'references'=>{'style:data-style-name' => 'NombreVide'},
+			 references=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
     # NoteGS : score total pour un groupe
@@ -706,7 +706,7 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#c4eeba",
                                      },
-                         'references'=>{'style:data-style-name' => 'DeuxDecimales'},
+                         references=>{'style:data-style-name' => 'DeuxDecimales'},
 			 );
 
     # NoteGSp : pourcentage global pour un groupe
@@ -717,7 +717,7 @@ sub export {
 			     -area => 'table-cell',
 			     'fo:background-color'=>"#c4eeba",
                                      },
-                         'references'=>{'style:data-style-name' => 'Percentage'},
+                         references=>{'style:data-style-name' => 'Percentage'},
 			 );
     # NoteGSx : pourcentage maximal = 100%
     $styles->createStyle('NoteGSx',
@@ -737,7 +737,7 @@ sub export {
 			     -area => 'paragraph',
 			     'fo:text-align' => "center",
 			 },
-			 'references'=>{'style:data-style-name' => 'NombreVide'},
+			 references=>{'style:data-style-name' => 'NombreVide'},
 			 );
 
     $styles->updateStyle('NoteX',
@@ -789,7 +789,7 @@ sub export {
 			     -area => 'paragraph',
 			     'fo:text-align' => "right",
 			 },
-			 'references'=>{'style:data-style-name' => 'numNote'},
+			 references=>{'style:data-style-name' => 'numNote'},
 			 );
 
     $styles->updateStyle('NoteF',
@@ -883,14 +883,14 @@ sub export {
     my @questions_0=grep { $_->{indic0} } @questions;
     my @questions_1=grep { $_->{indic1} } @questions;
 
-    debug "Questions: ".join(', ',map { $_->{'question'}.'='.$_->{'title'} } @questions);
-    debug "Questions PLAIN: ".join(', ',map { $_->{'title'} } @questions_0);
-    debug "Questions INDIC: ".join(', ',map { $_->{'title'} } @questions_1);
+    debug "Questions: ".join(', ',map { $_->{question}.'='.$_->{title} } @questions);
+    debug "Questions PLAIN: ".join(', ',map { $_->{title} } @questions_0);
+    debug "Questions INDIC: ".join(', ',map { $_->{title} } @questions_1);
 
     my $nq=1+$#student_columns+1+$#questions_0+1+$#questions_1;
 
     my $dimx=3+$nq+1+$#codes;
-    my $dimy=6+1+$#{$self->{'marks'}};
+    my $dimy=6+1+$#{$self->{marks}};
 
     my $feuille=$doc->getTable(0,$dimy,$dimx);
     $doc->expandTable($feuille, $dimy, $dimx);
@@ -926,7 +926,7 @@ sub export {
       my ($o)=@_;
       my $t;
       if(ref($o) eq 'HASH') {
-        $t=encode('utf-8',$o->{'title'});
+        $t=encode('utf-8',$o->{title});
       } else {
         $t=encode('utf-8',$o);
       }
@@ -983,24 +983,24 @@ sub export {
     # optional row: null score
     ##########################################################################
 
-    my $mark_null=$self->{'_scoring'}->variable('mark_null');
+    my $mark_null=$self->{_scoring}->variable('mark_null');
     $mark_null=0 if(!defined($mark_null));
     
     if($mark_null!=0) {
       $jj++;
 
-      $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
-      $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
-      $doc->cellValue($feuille,$jj,$code_col{'total'},
+      $doc->cellSpan($feuille,$jj,$code_col{total},2);
+      $doc->cellStyle($feuille,$jj,$code_col{total},'General');
+      $doc->cellValue($feuille,$jj,$code_col{total},
 		      encode('utf-8',translate_id_name('null')));
 
-      $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
-      $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
-      $doc->cellValue($feuille,$jj,$code_col{'note'},
+      $doc->cellStyle($feuille,$jj,$code_col{note},'NoteF');
+      $doc->cellValueType($feuille,$jj,$code_col{note},'float');
+      $doc->cellValue($feuille,$jj,$code_col{note},
 		      $mark_null);
-      $notenull='[.'.yx2ooo($jj,$code_col{'note'},1,1).']';
+      $notenull='[.'.yx2ooo($jj,$code_col{note},1,1).']';
 
-      $code_row{'null'}=$jj;
+      $code_row{null}=$jj;
     } else {
       $notenull='';
     }
@@ -1011,16 +1011,16 @@ sub export {
 
     $jj++;
 
-    $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
-    $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
-    $doc->cellValue($feuille,$jj,$code_col{'total'},
+    $doc->cellSpan($feuille,$jj,$code_col{total},2);
+    $doc->cellStyle($feuille,$jj,$code_col{total},'General');
+    $doc->cellValue($feuille,$jj,$code_col{total},
 		    encode('utf-8',translate_id_name('max')));
 
-    $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
-    $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
-    $doc->cellValue($feuille,$jj,$code_col{'note'},
-		    $self->{'_scoring'}->variable('mark_max'));
-    $notemax='[.'.yx2ooo($jj,$code_col{'note'},1,1).']';
+    $doc->cellStyle($feuille,$jj,$code_col{note},'NoteF');
+    $doc->cellValueType($feuille,$jj,$code_col{note},'float');
+    $doc->cellValue($feuille,$jj,$code_col{note},
+		    $self->{_scoring}->variable('mark_max'));
+    $notemax='[.'.yx2ooo($jj,$code_col{note},1,1).']';
 
     $ii=$x1;
     for(@questions_0) {
@@ -1030,11 +1030,11 @@ sub export {
 	$doc->cellStyle($feuille,$jj,$ii,'NoteQ');
 	$doc->cellValueType($feuille,$jj,$ii,'float');
 	$doc->cellValue($feuille,$jj,$ii++,
-			$self->{'_scoring'}->question_maxmax($_->{'question'}));
+			$self->{_scoring}->question_maxmax($_->{question}));
       }
     }
 
-    $code_row{'max'}=$jj;
+    $code_row{max}=$jj;
 
     ##########################################################################
     # third row: mean
@@ -1042,11 +1042,11 @@ sub export {
 
     $jj++;
 
-    $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
-    $doc->cellStyle($feuille,$jj,$code_col{'total'},'General');
-    $doc->cellValue($feuille,$jj,$code_col{'total'},
+    $doc->cellSpan($feuille,$jj,$code_col{total},2);
+    $doc->cellStyle($feuille,$jj,$code_col{total},'General');
+    $doc->cellValue($feuille,$jj,$code_col{total},
 		    encode('utf-8',translate_id_name('moyenne')));
-    $code_row{'average'}=$jj;
+    $code_row{average}=$jj;
 
     ##########################################################################
     # following rows: students sheets
@@ -1059,12 +1059,12 @@ sub export {
 
     $y1=$jj+1;
 
-    for my $m (@{$self->{'marks'}}) {
+    for my $m (@{$self->{marks}}) {
 	$jj++;
 
 	# @presents collects the indices of the rows corresponding to
 	# students that where present at the exam.
-	push @presents,$jj if(!$m->{'abs'});
+	push @presents,$jj if(!$m->{abs});
 
 	# for current student sheet, @score_columns collects the
 	# indices of the columns where questions scores (only those
@@ -1084,24 +1084,24 @@ sub export {
 	  my $value=($m->{$_} ? $m->{$_} : $m->{'student.all'}->{$_});
 	  push @{$col_content{$_}},$value;
 	  set_cell($doc,$feuille,$jj,$ii++,
-		   $m->{'abs'},$_,
+		   $m->{abs},$_,
 		   $value,'utf8'=>1);
 	}
 
-	if($m->{'abs'}) {
+	if($m->{abs}) {
 	  set_cell($doc,$feuille,$jj,$ii,1,
-		   'NOTE',$m->{'mark'});
+		   'NOTE',$m->{mark});
 	} else {
 	  set_cell($doc,$feuille,$jj,$ii,0,
-		   'NOTE','','numeric'=>1,
-		   'formula'=>"oooc:=IF($notemax>0;"
+		   'NOTE','',numeric=>1,
+		   formula=>"oooc:=IF($notemax>0;"
 		   .($notemin ne '' ? "MAX($notemin;" : "")
 		   .($plafond ? "MIN($notemax;" : "")
 		   .($notenull ? $notenull."+" : "")
 		   ."$arrondi([."
-		   .yx2ooo($jj,$code_col{'total'})
+		   .yx2ooo($jj,$code_col{total})
 		   ."]/[."
-		   .yx2ooo($jj,$code_col{'max'})
+		   .yx2ooo($jj,$code_col{max})
 		   ."]*".($notenull ? "(".$notemax."-".$notenull.")" : $notemax)."/$grain)*$grain"
 		   .($plafond ? ")" : "")
 		   .($notemin ne '' ? ")" : "")
@@ -1109,7 +1109,7 @@ sub export {
 		   .($notemin ne '' ? "MAX($notemin;" : "")
 		   .($notenull ? $notenull."+" : "")
 		   ."$arrondi([."
-		   .yx2ooo($jj,$code_col{'total'})
+		   .yx2ooo($jj,$code_col{total})
 		   ."]/$grain)*$grain"
 		   .($notemin ne '' ? ")" : "")
 		   .")");
@@ -1117,8 +1117,8 @@ sub export {
 	$ii++;
 
 	$ii++; # see later for SUM column value...
-	set_cell($doc,$feuille,$jj,$ii++,$m->{'abs'},
-		 'MAX',$m->{'max'},'numeric'=>1);
+	set_cell($doc,$feuille,$jj,$ii++,$m->{abs},
+		 'MAX',$m->{max},numeric=>1);
 
 	# second: columns for all questions scores
 
@@ -1126,7 +1126,7 @@ sub export {
 	my $group_maxsum=0;
 
 	for my $q (@questions_0,@questions_1) {
-	  if($m->{'abs'}) {
+	  if($m->{abs}) {
 	    $doc->cellStyle($feuille,$jj,$ii,'NoteX');
 	  } else {
 	    if(defined($q->{group_sum})) {
@@ -1141,14 +1141,14 @@ sub export {
 		}
                 if($self->{'out.groupsums'}==2) {
                   # as a percentage
-                  set_cell($doc,$feuille,$jj,$ii,$m->{'abs'},
+                  set_cell($doc,$feuille,$jj,$ii,$m->{abs},
                            'GSp','',pc=>1,
-                           'formula'=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")/".$group_maxsum);
+                           formula=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")/".$group_maxsum);
                 } else {
                   # value
-                  set_cell($doc,$feuille,$jj,$ii,$m->{'abs'},
+                  set_cell($doc,$feuille,$jj,$ii,$m->{abs},
                            'GS','',numeric=>1,
-                           'formula'=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")");
+                           formula=>"oooc:=SUM(".subrow_condensed($jj,@group_columns).")");
                 }
 		push @{$col_cells{$ii}},$jj;
 	      } else {
@@ -1157,26 +1157,26 @@ sub export {
 	      @group_columns=();
 	      $group_maxsum=0;
 	    } else {
-	      my $r=$self->{'_scoring'}
-		->question_result($m->{'student'},$m->{'copy'},$q->{'question'});
+	      my $r=$self->{_scoring}
+		->question_result($m->{student},$m->{copy},$q->{question});
 	      $doc->cellValueType($feuille,$jj,$ii,'float');
-	      if($self->{'_scoring'}->indicative($m->{'student'},$q->{'question'})) {
+	      if($self->{_scoring}->indicative($m->{student},$q->{question})) {
 		$doc->cellStyle($feuille,$jj,$ii,'CodeV');
 	      } else {
-		if(defined($r->{'score'})) {
-		  if(!$scores{$q->{'question'}}) {
-		    $scores{$q->{'question'}}=1;
+		if(defined($r->{score})) {
+		  if(!$scores{$q->{question}}) {
+		    $scores{$q->{question}}=1;
 		    push @scores_columns,$ii;
 		    push @{$col_cells{$ii}},$jj;
 		    if($q->{group}) {
 		      push @group_columns,$ii;
 		      $group_maxsum+=$r->{max};
 		    }
-		    if($r->{'why'} =~ /c/i) {
+		    if($r->{why} =~ /c/i) {
 		      $doc->cellStyle($feuille,$jj,$ii,'NoteC');
-		    } elsif($r->{'why'} =~ /v/i) {
+		    } elsif($r->{why} =~ /v/i) {
 		      $doc->cellStyle($feuille,$jj,$ii,'NoteV');
-		    } elsif($r->{'why'} =~ /e/i) {
+		    } elsif($r->{why} =~ /e/i) {
 		      $doc->cellStyle($feuille,$jj,$ii,'NoteE');
 		    } else {
 		      $doc->cellStyle($feuille,$jj,$ii,'NoteQ');
@@ -1188,7 +1188,7 @@ sub export {
 		  $doc->cellStyle($feuille,$jj,$ii,'NoteX');
 		}
 	      }
-	      $doc->cellValue($feuille,$jj,$ii,$r->{'score'});
+	      $doc->cellValue($feuille,$jj,$ii,$r->{score});
 	    }
 	  }
 	  $ii++;
@@ -1199,14 +1199,14 @@ sub export {
 	for(@codes) {
 	  $doc->cellStyle($feuille,$jj,$ii,'CodeV');
 	  $doc->cellValue($feuille,$jj,$ii++,
-			  $self->{'_scoring'}
-			  ->student_code($m->{'student'},$m->{'copy'},$_));
+			  $self->{_scoring}
+			  ->student_code($m->{student},$m->{copy},$_));
 	}
 
 	# come back to add sum of the scores
-	set_cell($doc,$feuille,$jj,$code_col{'total'},$m->{'abs'},
-		 'TOTAL','','numeric'=>1,
-		 'formula'=>"oooc:=SUM(".subrow_condensed($jj,@scores_columns).")");
+	set_cell($doc,$feuille,$jj,$code_col{total},$m->{abs},
+		 'TOTAL','',numeric=>1,
+		 formula=>"oooc:=SUM(".subrow_condensed($jj,@scores_columns).")");
     }
 
     ##########################################################################
@@ -1215,28 +1215,28 @@ sub export {
 
     $ii=$x1;
     for my $q (@questions_0) {
-      $doc->cellStyle($feuille,$code_row{'average'},$ii,'Qpc');
-      $doc->cellFormula($feuille,$code_row{'average'},$ii,
+      $doc->cellStyle($feuille,$code_row{average},$ii,'Qpc');
+      $doc->cellFormula($feuille,$code_row{average},$ii,
 			"oooc:=AVERAGE("
 			.subcolumn_condensed(x2ooo($ii),@{$col_cells{$ii}})
-			.")/[.".yx2ooo($code_row{'max'},$ii)."]");
+			.")/[.".yx2ooo($code_row{max},$ii)."]");
 
       $ii++;
     }
 
-    $doc->cellStyle($feuille,$code_row{'average'},$code_col{'note'},'NoteF');
-    $doc->cellFormula($feuille,$code_row{'average'},$code_col{'note'},
+    $doc->cellStyle($feuille,$code_row{average},$code_col{note},'NoteF');
+    $doc->cellFormula($feuille,$code_row{average},$code_col{note},
 		      "oooc:=AVERAGE("
-     		      .subcolumn_condensed(x2ooo($code_col{'note'}),@presents).")");
+     		      .subcolumn_condensed(x2ooo($code_col{note}),@presents).")");
 
-    $self->{'_scoring'}->end_transaction('XODS');
+    $self->{_scoring}->end_transaction('XODS');
 
     ##########################################################################
     # back to row for groups max
     ##########################################################################
 
     for my $g (keys %group_single) {
-      my $j0=$code_row{'max'};
+      my $j0=$code_row{max};
       my $i0=$group_single{$g}->{ii};
       if($self->{'out.groupsums'}==2) {
         # for each student, percentages are reported, so that maximal
@@ -1244,15 +1244,15 @@ sub export {
 	$doc->cellStyle($feuille,$j0,$i0,'NoteGSx');
         $doc->cellValueType($feuille,$j0,$i0,'percentage');
 	$doc->cellValue($feuille,$j0,$i0,1);
-	$doc->cellStyle($feuille,$code_row{'average'},$i0,'QpcGS');
+	$doc->cellStyle($feuille,$code_row{average},$i0,'QpcGS');
       } elsif($group_single{$g}->{ok}) {
 	$doc->cellStyle($feuille,$j0,$i0,'NoteGS');
 	$doc->cellValueType($feuille,$j0,$i0,'float');
 	$doc->cellValue($feuille,$j0,$i0,$group_single{$g}->{maxsum});
-	$doc->cellStyle($feuille,$code_row{'average'},$i0,'QpcGS');
+	$doc->cellStyle($feuille,$code_row{average},$i0,'QpcGS');
       } else {
 	$doc->cellStyle($feuille,$j0,$i0,'NoteX');
-	$doc->cellStyle($feuille,$code_row{'average'},$i0,'NoteX');
+	$doc->cellStyle($feuille,$code_row{average},$i0,'NoteX');
       }
     }
 
@@ -1314,20 +1314,20 @@ sub export {
     my ($dt,$dtu,$cts,$man,$correct_data);
 
     if($self->{'out.stats'} || $self->{'out.statsindic'}) {
-      $self->{'_scoring'}->begin_read_transaction('XsLO');
-      $dt=$self->{'_scoring'}->variable('darkness_threshold');
-      $dtu=$self->{'_scoring'}->variable('darkness_threshold_up');
+      $self->{_scoring}->begin_read_transaction('XsLO');
+      $dt=$self->{_scoring}->variable('darkness_threshold');
+      $dtu=$self->{_scoring}->variable('darkness_threshold_up');
 
       # comming back to old projects, the darkness_threshold_up was
       # not stored but now we need a value: use the default value 1
       # (which produces the same behavior as when it was not defined).
       $dtu=1 if(!defined($dtu));
 
-      $cts=$self->{'_capture'}->ticked_sums($dt,$dtu);
-      $man=$self->{'_capture'}->max_answer_number();
-      $correct_data=$self->{'_scoring'}->correct_for_all
+      $cts=$self->{_capture}->ticked_sums($dt,$dtu);
+      $man=$self->{_capture}->max_answer_number();
+      $correct_data=$self->{_scoring}->correct_for_all
 	if($self->{'out.stats'});
-      $self->{'_scoring'}->end_transaction('XsLO');
+      $self->{_scoring}->end_transaction('XsLO');
     }
 
     if($self->{'out.stats'}) {
@@ -1405,8 +1405,8 @@ sub export {
 
     $meta->title(encode('utf-8',$self->{'out.nom'}));
     $meta->subject('');
-    $meta->creator($ENV{'USER'});
-    $meta->initial_creator($ENV{'USER'});
+    $meta->creator($ENV{USER});
+    $meta->initial_creator($ENV{USER});
     $meta->creation_date($la_date);
     $meta->date($la_date);
 

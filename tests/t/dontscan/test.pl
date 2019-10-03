@@ -20,7 +20,7 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
 	       notemax=>0,check_marks=>{4=>2},perfect_copy=>'')
   ->default_process;
 

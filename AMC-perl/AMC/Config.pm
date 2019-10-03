@@ -162,9 +162,9 @@ sub pref_xml_ecrit {
   utf8::downgrade($file);
   if(open my $fh,">:encoding(utf-8)",$file) {
     XMLout($data,
-           "XMLDecl"=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-           "RootName"=>$name,'NoAttr'=>1,
-           "OutputFile" => $fh,
+           XMLDecl=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+           RootName=>$name,NoAttr=>1,
+           OutputFile=> $fh,
           );
     close $fh;
     return(0);

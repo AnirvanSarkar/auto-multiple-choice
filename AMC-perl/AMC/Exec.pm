@@ -26,8 +26,8 @@ use AMC::Basic;
 
 sub new {
     my ($nom)=@_;
-    my $self={'pid'=>'',
-	      'nom'=>$nom || 'AMC',
+    my $self={pid=>'',
+	      nom=>$nom || 'AMC',
 	  };
     bless($self);
     return($self);
@@ -35,11 +35,11 @@ sub new {
 
 sub catch_signal {
     my ($self,$signame)=@_;
-    if($self->{'pid'}) {
-	debug "*** $self->{'nom'} : signal $signame, killing $self->{'pid'}...\n";
-	kill 9,$self->{'pid'};
+    if($self->{pid}) {
+	debug "*** $self->{nom} : signal $signame, killing $self->{pid}...\n";
+	kill 9,$self->{pid};
     }
-    die "$self->{'nom'} killed";
+    die "$self->{nom} killed";
 }
 
 sub signalise {
@@ -61,7 +61,7 @@ sub execute {
 	my $cmd_pid=fork();
 	my @t=times();
 	if($cmd_pid) {
-	    $self->{'pid'}=$cmd_pid;
+	    $self->{pid}=$cmd_pid;
 	    debug "Command [$cmd_pid] : ".join(' ',@c);
 	    waitpid($cmd_pid,0);
 	    my @tb=times();

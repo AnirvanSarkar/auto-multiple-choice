@@ -56,7 +56,7 @@ use constant {
 
 our @EXPORT_OK = qw(REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
                     REPORT_MAIL_OK REPORT_MAIL_FAILED);
-our %EXPORT_TAGS = ( 'const' => [ qw/REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
+our %EXPORT_TAGS = ( const=> [ qw/REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
                                      REPORT_MAIL_OK REPORT_MAIL_FAILED/ ],
 		   );
 
@@ -110,39 +110,39 @@ sub define_statements {
   my $t_student=$self->table("student");
   my $t_directory=$self->table("directory");
   my $t_assoc=$self->table("association","association");
-  $self->{'statements'}=
+  $self->{statements}=
     {
-     'addDirectory'=>{'sql'=>"INSERT INTO $t_directory"
+     addDirectory=>{sql=>"INSERT INTO $t_directory"
 		      ." (type,directory)"
 		      ." VALUES(?,?)"},
-     'getDir'=>{'sql'=>"SELECT directory FROM $t_directory"
+     getDir=>{sql=>"SELECT directory FROM $t_directory"
 		." WHERE type=?"},
-     'numType'=>{'sql'=>"SELECT COUNT(*) FROM $t_student"
+     numType=>{sql=>"SELECT COUNT(*) FROM $t_student"
 		 ." WHERE type=?"},
-     'allType'=>{'sql'=>"SELECT file FROM $t_student"
+     allType=>{sql=>"SELECT file FROM $t_student"
 		 ." WHERE type=?"},
-     'filesWithType'=>
-     {'sql'=>"SELECT file FROM $t_student"
+     filesWithType=>
+     {sql=>"SELECT file FROM $t_student"
       ." WHERE type IN"
       ." ( SELECT a.type FROM $t_directory AS a,$t_directory AS b"
       ."   ON a.directory=b.directory AND b.type=? )"},
-     'setStudent'=>{'sql'=>"INSERT OR REPLACE INTO $t_student"
+     setStudent=>{sql=>"INSERT OR REPLACE INTO $t_student"
 		    ." (file,timestamp,type,student,copy,"
                     ."  mail_status,mail_message,mail_timestamp)"
 		    ." VALUES (?,?,?,?,?,?,?,?)"},
-     'setMailing'=>{'sql'=>"UPDATE $t_student SET "
+     setMailing=>{sql=>"UPDATE $t_student SET "
 		    ." mail_status=?, mail_message=?, mail_timestamp=?"
 		    ." WHERE type=? AND student=? AND copy=?"},
-     'getStudent'=>{'sql'=>"SELECT file FROM $t_student"
+     getStudent=>{sql=>"SELECT file FROM $t_student"
 		    ." WHERE type=? AND student=? AND copy=?"},
-     'getStudentTime'=>{'sql'=>"SELECT file,timestamp FROM $t_student"
+     getStudentTime=>{sql=>"SELECT file,timestamp FROM $t_student"
 			." WHERE type=? AND student=? AND copy=?"},
-     'deleteType'=>{'sql'=>"DELETE FROM $t_student"
+     deleteType=>{sql=>"DELETE FROM $t_student"
 		    ." WHERE type=?"},
-     'deleteReport'=>{'sql'=>"DELETE FROM $t_student"
+     deleteReport=>{sql=>"DELETE FROM $t_student"
 		      ." WHERE type=? AND student=? AND copy=?"},
-     'getAssociatedType'=>
-     {'sql'=>"SELECT CASE"
+     getAssociatedType=>
+     {sql=>"SELECT CASE"
       ."  WHEN a.manual IS NOT NULL THEN a.manual"
       ."  ELSE a.auto END AS id,r.file AS file,r.mail_status AS mail_status"
       ." FROM $t_assoc AS a,"
@@ -249,13 +249,13 @@ sub get_student_report_time {
 # type $type with the corresponding association IDs (primary key of
 # the student in the students list file), like
 #
-# [{'file'=>'001.pdf','id'=>'001234','mail_status'=>0,
-#  {'file'=>'002.pdf','id'=>'001538','mail_status'=>1,
+# [{file=>'001.pdf',id=>'001234',mail_status=>0,
+#  {file=>'002.pdf',id=>'001538',mail_status=>1,
 # ]
 
 sub get_associated_type {
   my ($self,$type)=@_;
-  $self->{'data'}->require_module('association');
+  $self->{data}->require_module('association');
   return($self->dbh->selectall_arrayref($self->statement('getAssociatedType'),
 					{Slice=>{}},$type));
 }

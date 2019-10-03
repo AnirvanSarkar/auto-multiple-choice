@@ -199,8 +199,8 @@ use constant {
 };
 
 our @EXPORT_OK = qw(QUESTION_SIMPLE QUESTION_MULT DIRECT_MARK DIRECT_NAMEFIELD);
-our %EXPORT_TAGS = ( 'question' => [ qw/QUESTION_SIMPLE QUESTION_MULT/ ],
-		     'direct' => [ qw/DIRECT_MARK DIRECT_NAMEFIELD/ ],
+our %EXPORT_TAGS = ( question=> [ qw/QUESTION_SIMPLE QUESTION_MULT/ ],
+		     direct=> [ qw/DIRECT_MARK DIRECT_NAMEFIELD/ ],
 		   );
 
 use AMC::Basic;
@@ -263,7 +263,7 @@ sub version_upgrade {
 
 sub populate_from_xml {
   my ($self)=@_;
-  my $scoring_file=$self->{'data'}->directory;
+  my $scoring_file=$self->{data}->directory;
   $scoring_file =~ s:/[^/]+/?$:/bareme.xml:;
   return if(!-f $scoring_file);
 
@@ -271,34 +271,34 @@ sub populate_from_xml {
 
   my $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
-  $self->main_strategy(-1,$xml->{'main'});
-  my @s=(keys %{$xml->{'etudiant'}});
+  $self->main_strategy(-1,$xml->{main});
+  my @s=(keys %{$xml->{etudiant}});
   my $frac=0;
 
   for my $student (@s) {
-    my $s=$xml->{'etudiant'}->{$student};
+    my $s=$xml->{etudiant}->{$student};
     if($student eq 'defaut') {
       $self->default_strategy(QUESTION_SIMPLE,
-			      $s->{'question'}->{'S'}->{'bareme'});
+			      $s->{question}->{S}->{bareme});
       $self->default_strategy(QUESTION_MULT,
-			      $s->{'question'}->{'M'}->{'bareme'});
+			      $s->{question}->{M}->{bareme});
     } elsif($student =~ /^[0-9]+$/) {
-      $self->main_strategy($student,$s->{'main'});
-      for my $question (keys %{$s->{'question'}}) {
+      $self->main_strategy($student,$s->{main});
+      for my $question (keys %{$s->{question}}) {
 	if($question =~ /^[0-9]+$/) {
-	  my $q=$s->{'question'}->{$question};
-	  $self->question_title($question,$q->{'titre'});
+	  my $q=$s->{question}->{$question};
+	  $self->question_title($question,$q->{titre});
 	  $self->new_question
 	    ($student,$question,
-	     ($q->{'multiple'} ? QUESTION_MULT : QUESTION_SIMPLE),
-	     ($q->{'indicative'} ? 1 : 0),$q->{'bareme'});
+	     ($q->{multiple} ? QUESTION_MULT : QUESTION_SIMPLE),
+	     ($q->{indicative} ? 1 : 0),$q->{bareme});
 
-	  if($q->{'reponse'}) {
-	    if(ref($q->{'reponse'}) eq 'HASH') {
-	      for my $answer (keys %{$q->{'reponse'}}) {
-		my $a=$q->{'reponse'}->{$answer};
+	  if($q->{reponse}) {
+	    if(ref($q->{reponse}) eq 'HASH') {
+	      for my $answer (keys %{$q->{reponse}}) {
+		my $a=$q->{reponse}->{$answer};
 		$self->new_answer($student,$question,$answer,
-				  $a->{'bonne'},$a->{'bareme'});
+				  $a->{bonne},$a->{bareme});
 	      }
 	    } else {
 	      debug "WARNING: reponse is not a HASHREF for S=$student Q=$question";
@@ -315,7 +315,7 @@ sub populate_from_xml {
     $self->progression('fraction',0.5*$frac/($#s+1));
   }
 
-  $scoring_file=$self->{'data'}->directory;
+  $scoring_file=$self->{data}->directory;
   $scoring_file =~ s:/[^/]+/?$:/notes.xml:;
   return if(!-f $scoring_file);
 
@@ -323,36 +323,36 @@ sub populate_from_xml {
 
   $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
 
-  $self->variable('darkness_threshold',$xml->{'seuil'});
+  $self->variable('darkness_threshold',$xml->{seuil});
   $self->variable('darkness_threshold_up',1.0);
-  $self->variable('mark_floor',$xml->{'notemin'});
-  $self->variable('mark_max',$xml->{'notemax'});
-  $self->variable('ceiling',$xml->{'plafond'});
-  $self->variable('rounding',$xml->{'arrondi'});
-  $self->variable('granularity',$xml->{'grain'});
+  $self->variable('mark_floor',$xml->{notemin});
+  $self->variable('mark_max',$xml->{notemax});
+  $self->variable('ceiling',$xml->{plafond});
+  $self->variable('rounding',$xml->{arrondi});
+  $self->variable('granularity',$xml->{grain});
 
-  @s=(keys %{$xml->{'copie'}});
+  @s=(keys %{$xml->{copie}});
   for my $student (@s) {
-    my $s=$xml->{'copie'}->{$student};
+    my $s=$xml->{copie}->{$student};
 
     if($student =~ /^(moyenne|max)$/) {
       debug "Skipping student <$student>";
     } elsif($student =~ /^[0-9]+$/) {
       $self->statement('NEWMark')
 	->execute($student,0,
-		  map { $s->{'total'}->[0]->{$_} } (qw/total max note/));
+		  map { $s->{total}->[0]->{$_} } (qw/total max note/));
 
-      for my $title (keys %{$s->{'question'}}) {
-	my $q=$s->{'question'}->{$title};
+      for my $title (keys %{$s->{question}}) {
+	my $q=$s->{question}->{$title};
 	my $question=$self->question_number($title);
 	$self->statement('NEWScore')
 	  ->execute($student,0,$question,
-		    $q->{'note'},$q->{'max'},$q->{'raison'});
+		    $q->{note},$q->{max},$q->{raison});
       }
 
-      for my $code (keys %{$s->{'code'}}) {
+      for my $code (keys %{$s->{code}}) {
 	$self->statement('NEWCode')->execute($student,0,$code,
-					     $s->{'code'}->{$code}->{'content'},
+					     $s->{code}->{$code}->{content},
 					     DIRECT_MARK);
       }
     } else {
@@ -372,50 +372,50 @@ sub define_statements {
   my $t_answer=$self->table("answer");
   my $t_default=$self->table("default");
   my $t_zone=$self->table("zone","capture");
-  $self->{'statements'}=
+  $self->{statements}=
     {
-     'NEWdefault'=>{'sql'=>"INSERT INTO $t_default"
+     NEWdefault=>{sql=>"INSERT INTO $t_default"
 		    ." (type,strategy) VALUES (?,?)"},
-     'getDefault'=>{'sql'=>"SELECT strategy FROM $t_default"
+     getDefault=>{sql=>"SELECT strategy FROM $t_default"
 		    ." WHERE type=?"},
-     'setDefault'=>{'sql'=>"UPDATE $t_default"
+     setDefault=>{sql=>"UPDATE $t_default"
 		    ." SET strategy=? WHERE type=?"},
-     'noDefault'=>{'sql'=>"UPDATE $t_default"
+     noDefault=>{sql=>"UPDATE $t_default"
 		    ." SET strategy=''"},
-     'NEWMain'=>{'sql'=>"INSERT INTO ".$self->table("main")
+     NEWMain=>{sql=>"INSERT INTO ".$self->table("main")
 		  ." (student,strategy) VALUES (?,?)"},
-     'getMain'=>{'sql'=>"SELECT strategy FROM ".$self->table("main")
+     getMain=>{sql=>"SELECT strategy FROM ".$self->table("main")
 		  ." WHERE student=?"},
-     'getAllMain'=>{'sql'=>"SELECT strategy FROM ".$self->table("main")
+     getAllMain=>{sql=>"SELECT strategy FROM ".$self->table("main")
 		    ." WHERE student=? OR student=-1 OR student=0 ORDER BY student"},
-     'setMain'=>{'sql'=>"UPDATE ".$self->table("main")
+     setMain=>{sql=>"UPDATE ".$self->table("main")
 		  ." SET strategy=? WHERE student=?"},
-     'NEWTitle'=>{'sql'=>"INSERT INTO ".$self->table("title")
+     NEWTitle=>{sql=>"INSERT INTO ".$self->table("title")
 		  ." (question,title) VALUES (?,?)"},
-     'getTitle'=>{'sql'=>"SELECT title FROM ".$self->table("title")
+     getTitle=>{sql=>"SELECT title FROM ".$self->table("title")
 		  ." WHERE question=?"},
-     'getQNumber'=>{'sql'=>"SELECT question FROM ".$self->table("title")
+     getQNumber=>{sql=>"SELECT question FROM ".$self->table("title")
 		    ." WHERE title=?"},
-     'setTitle'=>{'sql'=>"UPDATE ".$self->table("title")
+     setTitle=>{sql=>"UPDATE ".$self->table("title")
 		  ." SET title=? WHERE question=?"},
-     'NEWQuestion'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("question")
+     NEWQuestion=>{sql=>"INSERT OR REPLACE INTO ".$self->table("question")
 		     ." (student,question,type,indicative,strategy)"
 		     ." VALUES (?,?,?,?,?)"},
-     'NEWAnswer'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("answer")
+     NEWAnswer=>{sql=>"INSERT OR REPLACE INTO ".$self->table("answer")
 		   ." (student,question,answer,correct,strategy)"
 		   ." VALUES (?,?,?,?,?)"},
-     'setAnswerStrat'=>{'sql'=>"UPDATE ".$self->table("answer")
+     setAnswerStrat=>{sql=>"UPDATE ".$self->table("answer")
 		       ." SET strategy=? WHERE student=? AND question=? AND answer=?"},
-     'addAnswerStrat'=>{'sql'=>"UPDATE ".$self->table("answer")
+     addAnswerStrat=>{sql=>"UPDATE ".$self->table("answer")
 			    ." SET strategy=strategy||? WHERE student=? AND question=? AND answer=?"},
-     'NEWAlias'=>{'sql'=>"INSERT INTO ".$self->table("alias")
+     NEWAlias=>{sql=>"INSERT INTO ".$self->table("alias")
 		  ." (student,see) VALUES (?,?)"},
-     'getAlias'=>{'sql'=>"SELECT see FROM ".$self->table("alias")
+     getAlias=>{sql=>"SELECT see FROM ".$self->table("alias")
 		  ." WHERE student=?"},
-     'postCorrectNew'=>{'sql'=>"CREATE TEMPORARY TABLE IF NOT EXISTS"
+     postCorrectNew=>{sql=>"CREATE TEMPORARY TABLE IF NOT EXISTS"
 		       ." pc_temp (q INTEGER, a INTEGER, c REAL, PRIMARY KEY(q,a))"},
-     'postCorrectClr'=>{'sql'=>"DELETE FROM pc_temp"},
-     'postCorrectPop'=>{'sql'=>"INSERT INTO pc_temp (q,a,c) "
+     postCorrectClr=>{sql=>"DELETE FROM pc_temp"},
+     postCorrectPop=>{sql=>"INSERT INTO pc_temp (q,a,c) "
 			." SELECT id_a,id_b,CASE"
 			."   WHEN manual >= 0 THEN manual"
 			."   WHEN total<=0 THEN -1"
@@ -424,7 +424,7 @@ sub define_statements {
 			." END"
 			." FROM ".$self->table("zone","capture")
 			." WHERE capture_zone.student=? AND capture_zone.copy=? AND capture_zone.type=?"},
-     'postCorrectMul'=>{'sql'=>"UPDATE ".$self->table("question")
+     postCorrectMul=>{sql=>"UPDATE ".$self->table("question")
 			." SET type=CASE"
 			."   WHEN (SELECT sum(c) FROM pc_temp"
 			."          WHERE q=question)>1"
@@ -432,89 +432,89 @@ sub define_statements {
 			."   ELSE ?"
 			." END"
 		       },
-     'postCorrectSet'=>{'sql'=>"UPDATE ".$self->table("answer")
+     postCorrectSet=>{sql=>"UPDATE ".$self->table("answer")
 			." SET correct=(SELECT c FROM pc_temp"
 			."     WHERE q=question AND a=answer)"},
-     'NEWScore'=>{'sql'=>"INSERT INTO ".$self->table("score")
+     NEWScore=>{sql=>"INSERT INTO ".$self->table("score")
 		  ." (student,copy,question,score,max,why)"
 		  ." VALUES (?,?,?,?,?,?)"},
-     'cancelScore'=>{'sql'=>"UPDATE ".$self->table("score")
+     cancelScore=>{sql=>"UPDATE ".$self->table("score")
 		     ." SET why=? WHERE student=? AND copy=? AND question=?"},
-     'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
+     NEWMark=>{sql=>"INSERT INTO ".$self->table("mark")
 		  ." (student,copy,total,max,mark)"
 		  ." VALUES (?,?,?,?,?)"},
-     'NEWCode'=>{'sql'=>"INSERT OR REPLACE INTO ".$self->table("code")
+     NEWCode=>{sql=>"INSERT OR REPLACE INTO ".$self->table("code")
 		  ." (student,copy,code,value,direct)"
 		  ." VALUES (?,?,?,?,?)"},
 
-     'studentMark'=>{'sql'=>"SELECT * FROM ".$self->table("mark")
+     studentMark=>{sql=>"SELECT * FROM ".$self->table("mark")
 		     ." WHERE student=? AND copy=?"},
-     'marks'=>{'sql'=>"SELECT * FROM ".$self->table("mark")},
-     'marksCount'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("mark")},
-     'codes'=>{'sql'=>"SELECT code FROM ".$self->table("code")
+     marks=>{sql=>"SELECT * FROM ".$self->table("mark")},
+     marksCount=>{sql=>"SELECT COUNT(*) FROM ".$self->table("mark")},
+     codes=>{sql=>"SELECT code FROM ".$self->table("code")
 	       ." GROUP BY code ORDER BY code"},
-     'qStrat'=>{'sql'=>"SELECT strategy FROM ".$self->table("question")
+     qStrat=>{sql=>"SELECT strategy FROM ".$self->table("question")
 		." WHERE student=? AND question=?"},
-     'aStrat'=>{'sql'=>"SELECT strategy FROM ".$self->table("answer")
+     aStrat=>{sql=>"SELECT strategy FROM ".$self->table("answer")
 		." WHERE student=? AND question=? AND answer=?"},
-     'answers'=>{'sql'=>"SELECT answer FROM ".$self->table("answer")
+     answers=>{sql=>"SELECT answer FROM ".$self->table("answer")
 		 ." WHERE student=? AND question=?"
 		." ORDER BY answer"},
-     'studentQuestions'=>{'sql'=>"SELECT question FROM ".$self->table("question")
+     studentQuestions=>{sql=>"SELECT question FROM ".$self->table("question")
 			  ." WHERE student=?"},
-     'questions'=>{'sql'=>"SELECT question,title FROM ".$self->table("title")
+     questions=>{sql=>"SELECT question,title FROM ".$self->table("title")
 		   ." ORDER BY title"},
-     'qMaxMax'=>{'sql'=>"SELECT MAX(max) FROM ".$self->table("score")
+     qMaxMax=>{sql=>"SELECT MAX(max) FROM ".$self->table("score")
 		 ." WHERE question=?"},
-     'correct'=>{'sql'=>"SELECT correct FROM ".$self->table("answer")
+     correct=>{sql=>"SELECT correct FROM ".$self->table("answer")
 		 ." WHERE student=? AND question=? AND answer=?"},
-     'correctChars'=>
+     correctChars=>
      {sql=>"SELECT char FROM "
       ." (SELECT answer FROM ".$self->table("answer")
       ."  WHERE student=? AND question=? AND correct>0) AS correct,"
       ." (SELECT answer,char FROM ".$self->table("box","layout")
       ."  WHERE student=? AND question=? AND role=?) AS char"
       ." ON correct.answer=char.answer ORDER BY correct.answer"},
-     'correctForAll'=>{'sql'=>"SELECT question,answer,"
+     correctForAll=>{sql=>"SELECT question,answer,"
 		       ." MIN(correct) AS correct_min,"
 		       ." MAX(correct) AS correct_max "
 		       ." FROM ".$self->table("answer")
 		       ." GROUP BY question,answer"},
-     'multiple'=>{'sql'=>"SELECT type FROM ".$self->table("question")
+     multiple=>{sql=>"SELECT type FROM ".$self->table("question")
 		 ." WHERE student=? AND question=?"},
-     'indicative'=>{'sql'=>"SELECT indicative FROM ".$self->table("question")
+     indicative=>{sql=>"SELECT indicative FROM ".$self->table("question")
 		    ." WHERE student=? AND question=?"},
-     'numQIndic'=>{'sql'=>"SELECT COUNT(*) FROM"
+     numQIndic=>{sql=>"SELECT COUNT(*) FROM"
 		   ." ( SELECT question FROM ".$self->table("question")
 		   ." WHERE indicatve=? GROUP BY question)"},
-     'oneIndic'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("question")
+     oneIndic=>{sql=>"SELECT COUNT(*) FROM ".$self->table("question")
 		  ." WHERE question=? AND indicative=?"},
-     'getScore'=>{'sql'=>"SELECT score FROM ".$self->table("score")
+     getScore=>{sql=>"SELECT score FROM ".$self->table("score")
 		  ." WHERE student=? AND copy=? AND question=?"},
-     'getScoreC'=>{'sql'=>"SELECT score,max,why FROM ".$self->table("score")
+     getScoreC=>{sql=>"SELECT score,max,why FROM ".$self->table("score")
 		   ." WHERE student=? AND copy=? AND question=?"},
-     'getCode'=>{'sql'=>"SELECT value FROM ".$self->table("code")
+     getCode=>{sql=>"SELECT value FROM ".$self->table("code")
 		  ." WHERE student=? AND copy=? AND code=?"},
-     'codesCounts'=>{'sql'=>"SELECT student,copy,value,COUNT(*) as nb"
+     codesCounts=>{sql=>"SELECT student,copy,value,COUNT(*) as nb"
 		     ." FROM ".$self->table("code")
 		     ." WHERE code=? GROUP BY value"},
-     'preAssocCounts'=>
-     {'sql'=>"SELECT m.student,m.copy,l.id AS value,COUNT(*) AS nb"
+     preAssocCounts=>
+     {sql=>"SELECT m.student,m.copy,l.id AS value,COUNT(*) AS nb"
       ." FROM ".$self->table("mark")." AS m"
       ."      , ".$self->table("association","layout")." AS l"
       ." ON m.student=l.student AND m.copy=0"
       ." GROUP BY l.id"},
 
-     'avgMark'=>{'sql'=>"SELECT AVG(mark) FROM ".$self->table("mark")
+     avgMark=>{sql=>"SELECT AVG(mark) FROM ".$self->table("mark")
 		 ." WHERE NOT (student=? AND copy=?)"},
-     'avgQuest'=>{'sql'=>"SELECT CASE"
+     avgQuest=>{sql=>"SELECT CASE"
 		  ." WHEN SUM(max)>0 THEN 100*SUM(score)/SUM(max)"
 		  ." ELSE '-' END"
 		  ." FROM ".$self->table("score")
 		  ." WHERE question=?"
 		  ." AND NOT (student=? AND copy=?)"},
-     'studentAnswersBase'=>
-     {'sql'=>"SELECT question,answer"
+     studentAnswersBase=>
+     {sql=>"SELECT question,answer"
       .",correct,strategy"
       .",(SELECT CASE"
       ."         WHEN manual >= 0 THEN manual"
@@ -527,8 +527,8 @@ sub define_statements {
       ." ) AS ticked"
       ." FROM ".$self->table("answer")
       ." WHERE student=?"},
-     'studentQuestionsBase'=>
-     {'sql'=>"SELECT q.question,q.type,q.indicative,q.strategy,t.title"
+     studentQuestionsBase=>
+     {sql=>"SELECT q.question,q.type,q.indicative,q.strategy,t.title"
       .",d.strategy AS default_strategy"
       ." FROM ".$self->table("question"). " q"
       ." LEFT OUTER JOIN ".$self->table("default")." d"
@@ -536,13 +536,13 @@ sub define_statements {
       ." LEFT OUTER JOIN ".$self->table("title")." t"
       ." ON q.question=t.question"
       ." WHERE student=?"},
-     'deleteScores'=>{'sql'=>"DELETE FROM ".$self->table('score')
+     deleteScores=>{sql=>"DELETE FROM ".$self->table('score')
 		     ." WHERE student=? AND copy=?"},
-     'deleteMarks'=>{'sql'=>"DELETE FROM ".$self->table('mark')
+     deleteMarks=>{sql=>"DELETE FROM ".$self->table('mark')
 		    ." WHERE student=? AND copy=?"},
-     'deleteCodes'=>{'sql'=>"DELETE FROM ".$self->table('code')
+     deleteCodes=>{sql=>"DELETE FROM ".$self->table('code')
 		    ." WHERE student=? AND copy=?"},
-     'pagesWhy'=>{'sql'=>"SELECT s.student,s.copy,GROUP_CONCAT(s.why) as why,b.page FROM "
+     pagesWhy=>{sql=>"SELECT s.student,s.copy,GROUP_CONCAT(s.why) as why,b.page FROM "
                   .$self->table('score')." s"
                   ." JOIN "
                   ." ( SELECT student,page,question FROM ".$self->table("box","layout")
@@ -551,7 +551,7 @@ sub define_statements {
                   . " b"
                   ." ON s.student=b.student AND s.question=b.question"
 		  ." GROUP BY s.student,b.page,s.copy"},
-      'clearDirect'=>
+      clearDirect=>
      {sql=>"DELETE FROM ".$self->table("code")
 	  ." WHERE direct=?"},
     };
@@ -701,7 +701,7 @@ sub correct_answer {
 
 sub correct_chars {
   my ($self,$student,$question)=@_;
-  $self->{'data'}->require_module('layout');
+  $self->{data}->require_module('layout');
   return($self->sql_list($self->statement('correctChars'),
                          $student,$question,
                          $student,$question,BOX_ROLE_ANSWER));
@@ -896,7 +896,7 @@ sub postcorrect {
       $darkness_threshold,$darkness_threshold_up,$set_multiple)=@_;
   die "Missing parameters in postcorrect call"
     if(!defined($darkness_threshold_up));
-  $self->{'data'}->require_module('capture');
+  $self->{data}->require_module('capture');
   $self->statement('postCorrectNew')->execute();
   $self->statement('postCorrectClr')->execute();
   $self->statement('postCorrectPop')
@@ -951,7 +951,7 @@ sub student_questions {
 }
 
 # questions returns an array of pointers (one for each question) to
-# hashes ('question'=><question_number>,'title'=>'question_title').
+# hashes (question=><question_number>,title=>'question_title').
 
 sub questions {
   my ($self)=@_;
@@ -998,7 +998,7 @@ sub question_score {
 }
 
 # question_result($student,$copy,$question) returns a pointer to a
-# hash ('score'=>XXX,'max'=>XXX,'why'=>XXX) extracted from the
+# hash (score=>XXX,max=>XXX,why=>XXX) extracted from the
 # question table.
 
 sub question_result {
@@ -1038,7 +1038,7 @@ sub question_average {
 }
 
 # student_global($student,$copy) returns a pointer to a hash
-# ('student'=>XXX,'copy'=>XXX,'total'=>XXX,'max'=>XXX,'mark'=>XXX)
+# (student=>XXX,copy=>XXX,total=>XXX,max=>XXX,mark=>XXX)
 # extracted from the mark table.
 
 sub student_global {
@@ -1055,15 +1055,15 @@ sub student_global {
 #
 # 'main_strategy'=>"",
 # 'questions'=>
-# { 1 =>{ 'question'=>1,
+# { 1 =>{ question=>1,
 #         'title' => 'questionID',
 #         'type'=>1,
 #         'indicative'=>0,
 #         'strategy'=>'',
-#         'answers'=>[ { 'question'=>1, 'answer'=>1,
-#                        'correct'=>1, 'ticked'=>0, 'strategy'=>"b=2" },
-#                      {'question'=>1, 'answer'=>2,
-#                        'correct'=>0, 'ticked'=>0, 'strategy'=>"" },
+#         'answers'=>[ { question=>1, answer=>1,
+#                        'correct'=>1, ticked=>0, strategy=>"b=2" },
+#                      {question=>1, answer=>2,
+#                        'correct'=>0, ticked=>0, strategy=>"" },
 #                    ],
 #       },
 #  ...
@@ -1073,11 +1073,11 @@ sub student_scoring_base {
   my ($self,$student,$copy,$darkness_threshold,$darkness_threshold_up)=@_;
   die "Missing parameters in student_scoring_base call"
     if(!defined($darkness_threshold_up));
-  $self->{'data'}->require_module('capture');
+  $self->{data}->require_module('capture');
   my $student_strategy=$self->unalias($student);
-  my $r={'student_alias'=>$student_strategy,
-	 'questions'=>{},
-	 'main_strategy'=>$self->main_strategy_all($student_strategy)};
+  my $r={student_alias=>$student_strategy,
+	 questions=>{},
+	 main_strategy=>$self->main_strategy_all($student_strategy)};
   my @sid=($student);
   push @sid,$student_strategy if($student != $student_strategy);
   for my $s (@sid) {
@@ -1085,13 +1085,13 @@ sub student_scoring_base {
     $sth=$self->statement('studentQuestionsBase');
     $sth->execute($s);
     while(my $qa=$sth->fetchrow_hashref) {
-      $r->{'questions'}->{$qa->{'question'}}=$qa;
+      $r->{questions}->{$qa->{question}}=$qa;
     }
     $sth=$self->statement('studentAnswersBase');
     $sth->execute($darkness_threshold,$darkness_threshold_up,
 		  $student,$copy,ZONE_BOX,$s);
     while(my $qa=$sth->fetchrow_hashref) {
-      push @{$r->{'questions'}->{$qa->{'question'}}->{'answers'}},$qa;
+      push @{$r->{questions}->{$qa->{question}}->{answers}},$qa;
     }
   }
   return($r);
@@ -1103,15 +1103,15 @@ sub student_scoring_base {
 #
 # 'main_strategy'=>"",
 # 'questions'=>
-# [ { 'question'=>1,
+# [ { question=>1,
 #     'title' => 'questionID',
 #     'type'=>1,
 #     'indicative'=>0,
 #     'strategy'=>'',
-#     'answers'=>[ { 'question'=>1, 'answer'=>1,
-#                    'correct'=>1, 'ticked'=>0, 'strategy'=>"b=2" },
-#                  {'question'=>1, 'answer'=>2,
-#                    'correct'=>0, 'ticked'=>0, 'strategy'=>"" },
+#     'answers'=>[ { question=>1, answer=>1,
+#                    'correct'=>1, ticked=>0, strategy=>"b=2" },
+#                  {question=>1, answer=>2,
+#                    'correct'=>0, ticked=>0, strategy=>"" },
 #                ],
 #   },
 #  ...

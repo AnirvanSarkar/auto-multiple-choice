@@ -20,12 +20,12 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       'bw_threshold'=>0.4,n_copies=>6,
-	       'seuil'=>0.5,
-	       'grain'=>0.6,
-	       'perfect_copy'=>'',
-	       'export_full_csv'=>
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
+	       bw_threshold=>0.4,n_copies=>6,
+	       seuil=>0.5,
+	       grain=>0.6,
+	       perfect_copy=>'',
+	       export_full_csv=>
 	       [{-copy=>1,-question=>'inf-expo-indep',-score=>1},
 		{-copy=>1,-question=>'sum',-score=>2},
 		{-copy=>1,-question=>'product',-score=>2},

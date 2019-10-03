@@ -36,14 +36,14 @@ sub new {
 
     my $self=
       {
-       'directory'=>$dir,
-       'timeout'=>300000,
-       'dbh'=>'',
-       'modules'=>{},
-       'version_checked' => {},	   
-       'files'=>{},
-       'on_error'=>'stdout,stderr,die',
-       'progress'=>'',
+       directory=>$dir,
+       timeout=>300000,
+       dbh=>'',
+       modules=>{},
+       version_checked=> {},	   
+       files=>{},
+       on_error=>'stdout,stderr,die',
+       progress=>'',
       };
 
     for(keys %oo) {
@@ -62,13 +62,13 @@ sub new {
 
 sub connect {
   my ($self)=@_;
-  $self->{'dbh'}=DBI->connect("dbi:SQLite:",undef,undef,
+  $self->{dbh}=DBI->connect("dbi:SQLite:",undef,undef,
 			      {AutoCommit => 0,
 			       RaiseError => 0,
 			      });
-  $self->{'dbh'}->sqlite_busy_timeout($self->{'timeout'});
-  $self->{'dbh'}->{sqlite_unicode}=1;
-  $self->{'dbh'}->{HandleError}=sub {
+  $self->{dbh}->sqlite_busy_timeout($self->{timeout});
+  $self->{dbh}->{sqlite_unicode}=1;
+  $self->{dbh}->{HandleError}=sub {
     $self->sql_error(shift);
   };
 
@@ -84,7 +84,7 @@ sub connect {
 sub disconnect {
   my ($self)=@_;
   $self->{version_checked} = {};
-  if($self->{'dbh'}) {
+  if($self->{dbh}) {
     # record the loaded modules, to be able to load them back with connect()
     for my $m (keys %{$self->{modules}}) {
       $self->{version_checked}->{$m}
@@ -92,8 +92,8 @@ sub disconnect {
     }
     # disconnect and drop all references
     $self->{modules} = {};
-    $self->{'dbh'}->disconnect;
-    $self->{'dbh'}='';
+    $self->{dbh}->disconnect;
+    $self->{dbh}='';
   }
 }
 
@@ -103,16 +103,16 @@ sub sql_error {
   my ($self,$e)=@_;
   my $s="SQL ERROR: $e\nSQL STATEMENT: ".$DBI::lasth->{Statement};
   debug "$s";
-  print "$s\n" if($self->{'on_error'} =~ /\bstdout\b/);
-  print STDERR "$s\n" if($self->{'on_error'} =~ /\bstderr\b/);
-  die "*SQL*" if($self->{'on_error'} =~ /\bdie\b/);
+  print "$s\n" if($self->{on_error} =~ /\bstdout\b/);
+  print STDERR "$s\n" if($self->{on_error} =~ /\bstderr\b/);
+  die "*SQL*" if($self->{on_error} =~ /\bdie\b/);
 }
 
 # directory returns the directory where databases files are stored.
 
 sub directory {
     my ($self)=@_;
-    return($self->{'directory'});
+    return($self->{directory});
 }
 
 # dbh returns the DBI object corresponding to the SQLite session with
@@ -120,7 +120,7 @@ sub directory {
 
 sub dbh {
     my ($self)=@_;
-    return($self->{'dbh'});
+    return($self->{dbh});
 }
 
 # begin_transaction begins a transaction in immediate mode, to be used
@@ -129,10 +129,10 @@ sub dbh {
 sub begin_transaction {
     my ($self,$key)=@_;
     $key='----' if(!$key);
-    debug_and_stderr "WARNING: opened transaction $self->{'trans'}"
-      if($self->{'trans'});
+    debug_and_stderr "WARNING: opened transaction $self->{trans}"
+      if($self->{trans});
     $self->sql_do("BEGIN IMMEDIATE");
-    $self->{'trans'}=$key;
+    $self->{trans}=$key;
 }
 
 # begin_read_transaction begins a transaction for reading data.
@@ -140,10 +140,10 @@ sub begin_transaction {
 sub begin_read_transaction {
     my ($self,$key)=@_;
     $key='----' if(!$key);
-    debug_and_stderr "WARNING: opened transaction $self->{'trans'}"
-      if($self->{'trans'});
+    debug_and_stderr "WARNING: opened transaction $self->{trans}"
+      if($self->{trans});
     $self->sql_do("BEGIN");
-    $self->{'trans'}=$key;
+    $self->{trans}=$key;
 }
 
 # end_transaction end the transaction.
@@ -151,10 +151,10 @@ sub begin_read_transaction {
 sub end_transaction {
     my ($self,$key)=@_;
     $key='----' if(!$key);
-    debug_and_stderr "WARNING: closing transaction $self->{'trans'} declared as $key"
-      if($self->{'trans'} ne $key);
+    debug_and_stderr "WARNING: closing transaction $self->{trans} declared as $key"
+      if($self->{trans} ne $key);
     $self->sql_do("COMMIT");
-    $self->{'trans'}='';
+    $self->{trans}='';
 }
 
 # sql_quote($string) can be used to quote a string before including it
@@ -162,7 +162,7 @@ sub end_transaction {
 
 sub sql_quote {
     my ($self,$string)=@_;
-    return $self->{'dbh'}->quote($string);
+    return $self->{dbh}->quote($string);
 }
 
 # sql_do($sql,@bind) executes the SQL query $sql, replacing ? by the
@@ -171,15 +171,15 @@ sub sql_quote {
 sub sql_do {
     my ($self,$sql,@bind)=@_;
     debug_and_stderr "WARNING: sql_do with no transaction -- $sql"
-      if($sql !~ /^\s*(attach|begin)/i && !$self->{'trans'});
-    $self->{'dbh'}->do($sql,{},@bind);
+      if($sql !~ /^\s*(attach|begin)/i && !$self->{trans});
+    $self->{dbh}->do($sql,{},@bind);
 }
 
 # sql_tables($tables) gets the list of tables matching pattern $tables.
 
 sub sql_tables {
     my ($self,$tables)=@_;
-    return($self->{'dbh'}->tables('%','%',$tables));
+    return($self->{dbh}->tables('%','%',$tables));
 }
 
 # require_module($module) loads the database file corresponding to
@@ -188,24 +188,24 @@ sub sql_tables {
 
 sub require_module {
   my ($self, $module, %oo)=@_;
-  if(!$self->{'modules'}->{$module}) {
-    my $filename=$self->{'directory'}."/".$module.".sqlite";
+  if(!$self->{modules}->{$module}) {
+    my $filename=$self->{directory}."/".$module.".sqlite";
     utf8::downgrade($filename);
     if(! -f $filename) {
       debug("Creating unexistant database file for module $module...");
     }
 
     debug "Connecting to database $module...";
-    $self->{'dbh'}->{AutoCommit}=1;
-    $self->{'dbh'}->{sqlite_unicode}=0;
+    $self->{dbh}->{AutoCommit}=1;
+    $self->{dbh}->{sqlite_unicode}=0;
     $self->sql_do("ATTACH DATABASE ? AS $module",$filename);
-    $self->{'dbh'}->{sqlite_unicode}=1;
-    $self->{'dbh'}->{AutoCommit}=0;
+    $self->{dbh}->{sqlite_unicode}=1;
+    $self->{dbh}->{AutoCommit}=0;
 
     debug "Loading perl module $module...";
     load("AMC::DataModule::$module");
-    $self->{'modules'}->{$module}="AMC::DataModule::$module"->new($self, %oo);
-    $self->{'files'}->{$module}=$filename;
+    $self->{modules}->{$module}="AMC::DataModule::$module"->new($self, %oo);
+    $self->{files}->{$module}=$filename;
 
     debug "Module $module loaded.";
   }
@@ -217,7 +217,7 @@ sub require_module {
 sub module {
     my ($self, $module, %oo)=@_;
     $self->require_module($module, %oo);
-    return($self->{'modules'}->{$module});
+    return($self->{modules}->{$module});
 }
 
 # module_path($module) returns the path of the SQLite database
@@ -226,7 +226,7 @@ sub module {
 
 sub module_path {
     my ($self,$module)=@_;
-    return($self->{'files'}->{$module});
+    return($self->{files}->{$module});
 }
 
 
@@ -236,44 +236,44 @@ sub module_path {
 sub progression {
   my ($self,$action,$argument)=@_;
 
-  if(ref($self->{'progress'}) eq 'CODE') {
-    &{$self->{'progress'}}($action,$argument);
-  } elsif(ref($self->{'progress'}) eq 'HASH') {
+  if(ref($self->{progress}) eq 'CODE') {
+    &{$self->{progress}}($action,$argument);
+  } elsif(ref($self->{progress}) eq 'HASH') {
 
     require Gtk3;
     
     if($action eq 'begin') {
       $self->{'progress.lasttext'}
-	=$self->{'progress'}->{'avancement'}->get_text();
-      $self->{'progress'}->{'avancement'}->set_text($argument);
+	=$self->{progress}->{avancement}->get_text();
+      $self->{progress}->{avancement}->set_text($argument);
 
-      if($self->{'progress'}->{'annulation'}) {
+      if($self->{progress}->{annulation}) {
 	$self->{'progress.lastcancel'}
-	  =$self->{'progress'}->{'annulation'}->get_sensitive;
-	$self->{'progress'}->{'annulation'}->set_sensitive(0);
+	  =$self->{progress}->{annulation}->get_sensitive;
+	$self->{progress}->{annulation}->set_sensitive(0);
       }
 
       $self->{'progress.lastfaction'}
-	=$self->{'progress'}->{'avancement'}->get_fraction;
+	=$self->{progress}->{avancement}->get_fraction;
 
-      $self->{'progress'}->{'avancement'}->set_fraction(0);
+      $self->{progress}->{avancement}->set_fraction(0);
 
       $self->{'progress.lastvisible'}
-	  =$self->{'progress'}->{'commande'}->get_visible;
-      $self->{'progress'}->{'commande'}->show();
+	  =$self->{progress}->{commande}->get_visible;
+      $self->{progress}->{commande}->show();
 
       $self->{'progress.time'}=0;
 
       "Gtk3::main_iteration"->() while ( "Gtk3::events_pending"->() );
     } elsif($action eq 'end') {
-      $self->{'progress'}->{'avancement'}
+      $self->{progress}->{avancement}
 	->set_fraction($self->{'progress.lastfaction'});
-      $self->{'progress'}->{'commande'}
+      $self->{progress}->{commande}
 	->set_visible($self->{'progress.lastvisible'});
-      $self->{'progress'}->{'avancement'}
+      $self->{progress}->{avancement}
 	->set_text($self->{'progress.lasttext'});
-      if($self->{'progress'}->{'annulation'}) {
-	$self->{'progress'}->{'annulation'}
+      if($self->{progress}->{annulation}) {
+	$self->{progress}->{annulation}
 	  ->set_sensitive($self->{'progress.lastcancel'});
       }
       "Gtk3::main_iteration"->() while ( "Gtk3::events_pending"->() );
@@ -281,7 +281,7 @@ sub progression {
       # Don't update progress bar more than once a second.
       if(time>$self->{'progress.time'}) {
 	$self->{'progress.time'}=time;
-	$self->{'progress'}->{'avancement'}->set_fraction($argument);
+	$self->{progress}->{avancement}->set_fraction($argument);
 	"Gtk3::main_iteration"->() while ( "Gtk3::events_pending"->() );
       }
     }

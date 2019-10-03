@@ -47,8 +47,8 @@ sub get_ncpu {
 sub new {
     my (%o)=@_;
 
-    my $self={'pids'=>[],
-	      'queue'=>[],
+    my $self={pids=>[],
+	      queue=>[],
 	      'max.procs'=>0,
 	  };
 
@@ -68,25 +68,25 @@ sub new {
 
 sub add_process {
     my ($self,@o)=@_;
-    push @{$self->{'queue'}},[@o];
+    push @{$self->{queue}},[@o];
 }
 
 sub maj {
     my ($self)=@_;
     my @p=();
-    for my $pid (@{$self->{'pids'}}) {
+    for my $pid (@{$self->{pids}}) {
 	push @p,$pid if(kill(0,$pid));
     }
-    @{$self->{'pids'}}=@p;
+    @{$self->{pids}}=@p;
     debug "MAJ : ".join(' ',@p);
-    return(1+$#{$self->{'pids'}});
+    return(1+$#{$self->{pids}});
 }
 
 sub killall {
     my ($self)=@_;
-    $self->{'queue'}=[];
+    $self->{queue}=[];
     print "Queue interruption\n";
-    for my $p (@{$self->{'pids'}}) {
+    for my $p (@{$self->{pids}}) {
 	print "Queue: killing $p\n";
 	kill 9,$p;
     }
@@ -95,15 +95,15 @@ sub killall {
 sub run {
     my ($self,$subsys)=@_;
     debug "Queue RUN";
-    while(@{$self->{'queue'}}) {
+    while(@{$self->{queue}}) {
 	while($self->maj() < $self->{'max.procs'}
-	    && @{$self->{'queue'}}) {
-	    my $cs=shift(@{$self->{'queue'}});
+	    && @{$self->{queue}}) {
+	    my $cs=shift(@{$self->{queue}});
 	    if($cs) {
 		my $p=fork();
 		if($p) {
 		    debug "Fork : $p";
-		    push @{$self->{'pids'}},$p;
+		    push @{$self->{pids}},$p;
 		} else {
 		    if(ref($cs->[0]) eq 'ARRAY') {
 			for my $c (@$cs) {

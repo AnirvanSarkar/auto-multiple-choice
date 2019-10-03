@@ -52,7 +52,7 @@ die "data directory not found: $data_dir" if(!-d $data_dir);
 
 set_debug($debug);
 
-my $p=AMC::Gui::Avancement::new(1,'id'=>$progress_id)
+my $p=AMC::Gui::Avancement::new(1,id=>$progress_id)
   if($progress_id);
 
 my @forms=(@ARGV);

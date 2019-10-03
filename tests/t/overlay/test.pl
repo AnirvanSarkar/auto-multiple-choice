@@ -20,7 +20,7 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
+AMC::Test->new(dir=>__FILE__,filter=>'plain',tex_engine=>'xelatex',
                force_convert=>1,notemax=>0,
                check_marks=>{2=>11,4=>12},
 	      )->default_process;

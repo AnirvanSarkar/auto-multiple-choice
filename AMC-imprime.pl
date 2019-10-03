@@ -94,7 +94,7 @@ if(!grep(/^\Q$extract_with\E$/,@available_extracts)) {
   debug("Switching to extract engine $extract_with");
 }
 
-my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+my $avance=AMC::Gui::Avancement::new($progress,id=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
 my $layout=$data->module('layout');

@@ -20,10 +20,10 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       'seuil'=>0.5,perfect_copy=>'',
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
+	       seuil=>0.5,perfect_copy=>'',
                ignore_red=>1,
-	       'export_full_csv'=>
+	       export_full_csv=>
 	       [{-copy=>4,-question=>'ballot1',-abc=>'BE'}],
 	      )->default_process;
 

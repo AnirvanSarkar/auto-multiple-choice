@@ -20,8 +20,8 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       'seuil'=>0.5,
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
+	       seuil=>0.5,
 	      )
   ->default_process;
 

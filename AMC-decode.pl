@@ -36,7 +36,7 @@ my $zone_type = ZONE_NAME;
 my $tag = 'names';
 my $decoder_name = '';
 my $all = 0;
-my $projects_dir = $ENV{'HOME'}.'/'.__("MC-Projects");
+my $projects_dir = $ENV{HOME}.'/'.__("MC-Projects");
 my $project_dir = '';
 my $cr_dir = '';
 my $data_dir = '';
@@ -67,7 +67,7 @@ set_debug($debug);
 
 my $queue='';
 
-my $progress_h=AMC::Gui::Avancement::new($progress, 'id'=>$progress_id);
+my $progress_h=AMC::Gui::Avancement::new($progress, id=>$progress_id);
 
 sub catch_signal {
     my $signame = shift;

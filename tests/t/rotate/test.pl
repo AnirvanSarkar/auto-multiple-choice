@@ -20,8 +20,8 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       'seuil'=>0.15,'grain'=>0.1,'rounding'=>'n',
-	       'check_marks'=>{2=>16.7,4=>6.7},
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
+	       seuil=>0.15,grain=>0.1,rounding=>'n',
+	       check_marks=>{2=>16.7,4=>6.7},
 	      )->default_process;
 

@@ -150,7 +150,7 @@ sub new {
 
     # set up the object to send progress to calling program
     $self->{avance}=AMC::Gui::Avancement::new($self->{progress},
-					      'id'=>$self->{progress_id})
+					      id=>$self->{progress_id})
       if($self->{progress});
 
     bless $self;
@@ -188,7 +188,7 @@ sub absolute_path {
   if($self->{project_dir}) {
     $path=proj2abs({'%PROJET',$self->{project_dir},
 		    '%PROJETS',$self->{projects_dir},
-		    '%HOME'=>$ENV{'HOME'},
+		    '%HOME'=>$ENV{HOME},
 		   },
 		   $path);
   }
@@ -369,8 +369,8 @@ sub connects_students_list {
 
   if(-f $self->{names_file}) {
     $self->{names}=AMC::NamesFile::new($self->{names_file},
-				       "encodage"=>$self->{names_encoding},
-				       "identifiant"=>$self->{csv_build_name});
+				       encodage=>$self->{names_encoding},
+				       identifiant=>$self->{csv_build_name});
 
     debug "Keys in names file: ".join(", ",$self->{names}->heads());
   } else {
@@ -381,11 +381,11 @@ sub connects_students_list {
   # marks, student name, and so on in the verdict strings for question
   # scores and global header.
 
-  $self->{subst}=AMC::Substitute::new('names'=>$self->{names},
-				      'scoring'=>$self->{scoring},
-				      'assoc'=>$self->{association},
-				      'name'=>'',
-				      'chsign'=>$self->{significant_digits},
+  $self->{subst}=AMC::Substitute::new(names=>$self->{names},
+				      scoring=>$self->{scoring},
+				      assoc=>$self->{association},
+				      name=>'',
+				      chsign=>$self->{significant_digits},
 				     );
 }
 
@@ -407,13 +407,13 @@ sub compute_sorted_students_list {
 
     my $sorted_students=AMC::Export->new();
     $sorted_students->set_options('fich',
-				  'datadir'=>$self->{data_dir},
-				  'noms'=>$self->{names_file});
+				  datadir=>$self->{data_dir},
+				  noms=>$self->{names_file});
     $sorted_students->set_options('noms',
-				  'encodage'=>$self->{names_encoding},
-				  'useall'=>0);
+				  encodage=>$self->{names_encoding},
+				  useall=>0);
     $sorted_students->set_options('sort',
-				  'keys'=>$self->{sort});
+				  keys=>$self->{sort});
     $sorted_students->pre_process();
 
     $self->{sorted_students}=$sorted_students;
@@ -429,9 +429,9 @@ sub sort_students {
   $self->compute_sorted_students_list();
   my %include=map { studentids_string(@$_)=>1 } (@{$self->{students}});
   $self->{students}=[
-		     map { [ $_->{'student'},$_->{'copy'} ] }
-		     grep { $include{studentids_string($_->{'student'},$_->{'copy'})} }
-		     (@{$self->{sorted_students}->{'marks'}})
+		     map { [ $_->{student},$_->{copy} ] }
+		     grep { $include{studentids_string($_->{student},$_->{copy})} }
+		     (@{$self->{sorted_students}->{marks}})
 		    ];
 
 }
@@ -701,8 +701,8 @@ sub draw_symbol {
   my ($self,$student,$b,$tick)=@_;
 
   my $p_strategy=$self->{scoring}->unalias($student->[0]);
-  my $q=$b->{'id_a'}; # question number
-  my $r=$b->{'id_b'}; # answer number
+  my $q=$b->{id_a}; # question number
+  my $r=$b->{id_b}; # answer number
   my $indic=$self->{scoring}->indicative($p_strategy,$q); # is it an indicative question?
 
   # ticked on this scan?
@@ -754,8 +754,8 @@ sub draw_symbol {
   # well-positioned
 
   $self->{question}->{$q}={} if(!$self->{question}->{$q});
-  push @{$self->{question}->{$q}->{'x'}},($box->{xmin}+$box->{xmax})/2;
-  push @{$self->{question}->{$q}->{'y'}},($box->{ymin}+$box->{ymax})/2;
+  push @{$self->{question}->{$q}->{x}},($box->{xmin}+$box->{xmax})/2;
+  push @{$self->{question}->{$q}->{y}},($box->{ymin}+$box->{ymax})/2;
 }
 
 # draws symbols on one page
@@ -798,7 +798,7 @@ sub qtext {
   # begins with the right verdict version depending on if the question
   # result was cancelled or not.
 
-  if ($result->{'why'} =~ /c/i) {
+  if ($result->{why} =~ /c/i) {
     $text=$self->{verdict_question_cancelled};
   } else {
     $text=$self->{verdict_question};
@@ -806,11 +806,11 @@ sub qtext {
 
   # substitute scores values
 
-  $text =~ s/\%[S]/$result->{'score'}/g;
-  $text =~ s/\%[M]/$result->{'max'}/g;
-  $text =~ s/\%[W]/$result->{'why'}/g;
-  $text =~ s/\%[s]/$self->{subst}->format_note($result->{'score'})/ge;
-  $text =~ s/\%[m]/$self->{subst}->format_note($result->{'max'})/ge;
+  $text =~ s/\%[S]/$result->{score}/g;
+  $text =~ s/\%[M]/$result->{max}/g;
+  $text =~ s/\%[W]/$result->{why}/g;
+  $text =~ s/\%[s]/$self->{subst}->format_note($result->{score})/ge;
+  $text =~ s/\%[m]/$self->{subst}->format_note($result->{max})/ge;
 
   # evaluates the result
 
@@ -830,7 +830,7 @@ sub qtext {
 sub q_ymean {
   my ($self,$q)=@_;
 
-  return(sum(@{$self->{question}->{$q}->{'y'}})/(1+$#{$self->{question}->{$q}->{'y'}}));
+  return(sum(@{$self->{question}->{$q}->{y}})/(1+$#{$self->{question}->{$q}->{y}}));
 }
 
 
@@ -857,15 +857,15 @@ sub qtext_position_marges {
 
   # fist extract the y coordinates of the boxes in the left column
   my $left=1;
-  my @y=map { $self->{question}->{$q}->{'y'}->[$_] }
-    grep { $self->{rtl} xor ( $self->{question}->{$q}->{'x'}->[$_] <= $self->{width}/2 ) }
-      (0..$#{$self->{question}->{$q}->{'x'}} );
+  my @y=map { $self->{question}->{$q}->{y}->[$_] }
+    grep { $self->{rtl} xor ( $self->{question}->{$q}->{x}->[$_] <= $self->{width}/2 ) }
+      (0..$#{$self->{question}->{$q}->{x}} );
   if (!@y) {
     # if empty, use the right column
     $left=0;
-    @y=map { $self->{question}->{$q}->{'y'}->[$_] } 
-      grep { $self->{rtl} xor ( $self->{question}->{$q}->{'x'}->[$_] > $self->{width}/2 ) }
-	(0..$#{$self->{question}->{$q}->{'x'}} );
+    @y=map { $self->{question}->{$q}->{y}->[$_] } 
+      grep { $self->{rtl} xor ( $self->{question}->{$q}->{x}->[$_] > $self->{width}/2 ) }
+	(0..$#{$self->{question}->{$q}->{x}} );
   }
 
   # set the x-position to the left or right margin
@@ -883,7 +883,7 @@ sub qtext_position_marges {
 sub qtext_position_case {
   my ($self,$student,$page,$q)=@_;
 
-  my $x=max(@{$self->{question}->{$q}->{'x'}})
+  my $x=max(@{$self->{question}->{$q}->{x}})
     + ($self->{rtl} ? 1: -1)*$self->{dist_to_box}*$self->{dpi};
   my $y=$self->q_ymean($q);
   return("stext $x $y 0 0.5");

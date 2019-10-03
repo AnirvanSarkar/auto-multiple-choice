@@ -46,15 +46,15 @@ my $HUGE=32000;
 sub new {
     my (%o)=(@_);
 
-    my $self={'type'=>'lineaire',
-	      'log'=>1,
-	      't_a'=>'',
-	      't_b'=>'',
-	      't_c'=>'',
-	      't_d'=>'',
-	      't_e'=>'',
-	      't_f'=>'',
-	      'MSE'=>'',
+    my $self={type=>'lineaire',
+	      log=>1,
+	      t_a=>'',
+	      t_b=>'',
+	      t_c=>'',
+	      t_d=>'',
+	      t_e=>'',
+	      t_f=>'',
+	      MSE=>'',
 	  };
 
     for my $k (keys %o) {
@@ -71,19 +71,19 @@ sub new {
 
 sub mse {
     my ($self)=(@_);
-    return($self->{'MSE'});
+    return($self->{MSE});
 }
 
 sub identity {
     my ($self)=(@_);
-    $self->{'type'}='lineaire';
-    $self->{'t_a'}=1;
-    $self->{'t_b'}=0;
-    $self->{'t_c'}=0;
-    $self->{'t_d'}=1;
-    $self->{'t_e'}=0;
-    $self->{'t_f'}=0;
-    $self->{'MSE'}=0;
+    $self->{type}='lineaire';
+    $self->{t_a}=1;
+    $self->{t_b}=0;
+    $self->{t_c}=0;
+    $self->{t_d}=1;
+    $self->{t_e}=0;
+    $self->{t_f}=0;
+    $self->{MSE}=0;
 }
 
 ##########################################################
@@ -121,10 +121,10 @@ sub resoud_22 {
 sub clear_min_max {
     my $self=shift;
 
-    $self->{'t_x_min'}=$HUGE;
-    $self->{'t_y_min'}=$HUGE;
-    $self->{'t_x_max'}=0;
-    $self->{'t_y_max'}=0;
+    $self->{t_x_min}=$HUGE;
+    $self->{t_y_min}=$HUGE;
+    $self->{t_x_max}=0;
+    $self->{t_y_max}=0;
 }
 
 sub transforme {
@@ -132,16 +132,16 @@ sub transforme {
     
     my ($xp,$yp);
 
-    if($self->{'type'} =~ /^[hl]/i) {
-	$xp=$self->{'t_a'}*$x+$self->{'t_b'}*$y+$self->{'t_e'};
-	$yp=$self->{'t_c'}*$x+$self->{'t_d'}*$y+$self->{'t_f'};
+    if($self->{type} =~ /^[hl]/i) {
+	$xp=$self->{t_a}*$x+$self->{t_b}*$y+$self->{t_e};
+	$yp=$self->{t_c}*$x+$self->{t_d}*$y+$self->{t_f};
     }
 
     if(!$nominmax) {
-	$self->{'t_x_min'}=$xp if($xp<$self->{'t_x_min'});
-	$self->{'t_y_min'}=$yp if($yp<$self->{'t_y_min'});
-	$self->{'t_x_max'}=$xp if($xp>$self->{'t_x_max'});
-	$self->{'t_y_max'}=$yp if($yp>$self->{'t_y_max'});
+	$self->{t_x_min}=$xp if($xp<$self->{t_x_min});
+	$self->{t_y_min}=$yp if($yp<$self->{t_y_min});
+	$self->{t_x_max}=$xp if($xp>$self->{t_x_max});
+	$self->{t_y_max}=$yp if($yp>$self->{t_y_max});
     }
 
     return($xp,$yp);
@@ -150,7 +150,7 @@ sub transforme {
 sub calage {
     my ($self,$cx,$cy,$cxp,$cyp)=(@_);
 
-    if($self->{'type'} =~ /^h/i) {
+    if($self->{type} =~ /^h/i) {
 	###################### HELMERT
 
 	my ($theta,$alpha);
@@ -172,17 +172,17 @@ sub calage {
 	    $theta+=($theta>0 ? -1 : 1)*$M_PI;
 	}
 
-	$self->{'t_e'}=moyenne(@$cxp)-$alpha*(moyenne(@$cx)*cos($theta)-moyenne(@$cy)*sin($theta));
-	$self->{'t_f'}=moyenne(@$cyp)-$alpha*(moyenne(@$cx)*sin($theta)+moyenne(@$cy)*cos($theta));
+	$self->{t_e}=moyenne(@$cxp)-$alpha*(moyenne(@$cx)*cos($theta)-moyenne(@$cy)*sin($theta));
+	$self->{t_f}=moyenne(@$cyp)-$alpha*(moyenne(@$cx)*sin($theta)+moyenne(@$cy)*cos($theta));
 
 	debug "alpha = $alpha\n";
 
-	$self->{'t_a'}=$alpha*cos($theta);
-	$self->{'t_b'}=-$alpha*sin($theta);
-	$self->{'t_c'}=$alpha*sin($theta);
-	$self->{'t_d'}=$alpha*cos($theta);
+	$self->{t_a}=$alpha*cos($theta);
+	$self->{t_b}=-$alpha*sin($theta);
+	$self->{t_c}=$alpha*sin($theta);
+	$self->{t_d}=$alpha*cos($theta);
 
-    } elsif($self->{'type'} =~ /^l/i) {
+    } elsif($self->{type} =~ /^l/i) {
 	########################## LINEAIRE
 
 	my $sxx=crochet($cx,$cx);
@@ -194,23 +194,23 @@ sub calage {
 	my $sxyp=crochet($cx,$cyp);
 	my $syyp=crochet($cy,$cyp);
 
-	($self->{'t_a'},$self->{'t_b'})
+	($self->{t_a},$self->{t_b})
 	    =resoud_22($sxx,$sxy,$sxy,$syy,$sxxp,$syxp);
-	$self->{'t_e'}=moyenne(@$cxp)-($self->{'t_a'}*moyenne(@$cx)+$self->{'t_b'}*moyenne(@$cy));
+	$self->{t_e}=moyenne(@$cxp)-($self->{t_a}*moyenne(@$cx)+$self->{t_b}*moyenne(@$cy));
 
-	($self->{'t_c'},$self->{'t_d'})
+	($self->{t_c},$self->{t_d})
 	    =resoud_22($sxx,$sxy,$sxy,$syy,$sxyp,$syyp);
-	$self->{'t_f'}=moyenne(@$cyp)-($self->{'t_c'}*moyenne(@$cx)+$self->{'t_d'}*moyenne(@$cy));
+	$self->{t_f}=moyenne(@$cyp)-($self->{t_c}*moyenne(@$cx)+$self->{t_d}*moyenne(@$cy));
 	
     } else {
-	debug "ERR: invalid type: $self->{'type'}\n";
+	debug "ERR: invalid type: $self->{type}\n";
     }
 
-    if($self->{'log'} && $self->{'type'} =~ /^[hl]/i) {
+    if($self->{log} && $self->{type} =~ /^[hl]/i) {
 	debug "Linear transform:\n";
 	debug sprintf(" %7.3f %7.3f     %10.3f\n %7.3f %7.3f     %10.3f\n",
-		      $self->{'t_a'},$self->{'t_b'},$self->{'t_e'},
-		      $self->{'t_c'},$self->{'t_d'},$self->{'t_f'});
+		      $self->{t_a},$self->{t_b},$self->{t_e},
+		      $self->{t_c},$self->{t_d},$self->{t_f});
     }
 
     ############ evaluation de la qualite de l'ajustement
@@ -220,12 +220,12 @@ sub calage {
 	my ($x,$y)=$self->transforme($cx->[$i],$cy->[$i],1);
 	$sd+=($x-$cxp->[$i])**2+($y-$cyp->[$i])**2;
     }
-    $self->{'MSE'}=sqrt($sd/($#{$cx}+1));
+    $self->{MSE}=sqrt($sd/($#{$cx}+1));
 
-    debug(sprintf("MSE = %.3f\n",$self->{'MSE'}));
-    printf("Adjust: MSE = %.3f\n",$self->{'MSE'}) if($self->{'log'});
+    debug(sprintf("MSE = %.3f\n",$self->{MSE}));
+    printf("Adjust: MSE = %.3f\n",$self->{MSE}) if($self->{log});
 
-    return($self->{'MSE'});
+    return($self->{MSE});
 }
 
 sub params {
@@ -237,15 +237,15 @@ sub xml {
     my ($self,$i)=(@_);
     my $pre=" " x $i;
     my $r=$pre.sprintf("<transformation type=\"%s\" mse=\"%f\">\n",
-		       $self->{'type'},$self->{'MSE'});
+		       $self->{type},$self->{MSE});
     $r.=$pre."  <parametres>\n";
-    if($self->{'type'} =~ /^[hl]/i) {
-	$r.=$pre."      <a>".$self->{'t_a'}."</a>\n";
-	$r.=$pre."      <b>".$self->{'t_b'}."</b>\n";
-	$r.=$pre."      <c>".$self->{'t_c'}."</c>\n";
-	$r.=$pre."      <d>".$self->{'t_d'}."</d>\n";
-	$r.=$pre."      <e>".$self->{'t_e'}."</e>\n";
-	$r.=$pre."      <f>".$self->{'t_f'}."</f>\n";
+    if($self->{type} =~ /^[hl]/i) {
+	$r.=$pre."      <a>".$self->{t_a}."</a>\n";
+	$r.=$pre."      <b>".$self->{t_b}."</b>\n";
+	$r.=$pre."      <c>".$self->{t_c}."</c>\n";
+	$r.=$pre."      <d>".$self->{t_d}."</d>\n";
+	$r.=$pre."      <e>".$self->{t_e}."</e>\n";
+	$r.=$pre."      <f>".$self->{t_f}."</f>\n";
     }
     $r.=$pre."  </parametres>\n";
     $r.=$pre."</transformation>\n";

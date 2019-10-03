@@ -24,11 +24,11 @@ package AMC::Filter;
 
 sub new {
     my ($class,%o) = @_;
-    my $self={'errors'=>[],
-	      'project_options'=>{},
-	      'filter_results'=>{},
-	      'jobname'=>'',
-	      'jobspecific'=>'',
+    my $self={errors=>[],
+	      project_options=>{},
+	      filter_results=>{},
+	      jobname=>'',
+	      jobspecific=>'',
 	     };
 
     for my $k (keys %o) {
@@ -41,17 +41,17 @@ sub new {
 
 sub clear {
   my ($self)=@_;
-  $self->{'errors'}=[];
+  $self->{errors}=[];
 }
 
 sub error {
   my ($self,$error_text)=@_;
-  push @{$self->{'errors'}},$error_text;
+  push @{$self->{errors}},$error_text;
 }
 
 sub errors {
   my ($self)=@_;
-  return(@{$self->{'errors'}});
+  return(@{$self->{errors}});
 }
 
 sub pre_filter {
@@ -68,18 +68,18 @@ sub filter {
 
 sub set_project_option {
   my ($self,$name,$value)=@_;
-  $self->{'project_options'}->{$name}=$value;
+  $self->{project_options}->{$name}=$value;
   print "VAR: project:$name=$value\n";
 }
 
 sub set_filter_result {
   my ($self,$name,$value)=@_;
-  $self->{'filter_results'}->{$name}=$value;
+  $self->{filter_results}->{$name}=$value;
 }
 
 sub get_filter_result {
   my ($self,$name)=@_;
-  return($self->{'filter_results'}->{$name});
+  return($self->{filter_results}->{$name});
 }
 
 sub unchanged {

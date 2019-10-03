@@ -125,8 +125,8 @@ utf8::downgrade($data_dir);
 error("students list not found:$students_list") if(!-f $students_list);
 
 my $students=AMC::NamesFile::new($students_list,
-				 'encodage'=>$list_encoding,
-				 "identifiant"=>$csv_build_name);
+				 encodage=>$list_encoding,
+				 identifiant=>$csv_build_name);
 
 error("data directory not found: $data_dir") if(!-d $data_dir);
 
@@ -150,16 +150,16 @@ if($log_file) {
   print LOGF localtime." Starting mailing...\n";
 }
 
-my $avance=AMC::Gui::Avancement::new($progress,'id'=>$progress_id);
+my $avance=AMC::Gui::Avancement::new($progress,id=>$progress_id);
 
 my $data=AMC::Data->new($data_dir);
 my $report=$data->module('report');
 my $assoc=$data->module('association');
 my $scoring=$data->module('scoring');
 
-my $subst=AMC::Substitute::new('assoc'=>$assoc,'scoring'=>$scoring,
-			       'names'=>$students,
-			       'name'=>$project_name);
+my $subst=AMC::Substitute::new(assoc=>$assoc,scoring=>$scoring,
+			       names=>$students,
+			       name=>$project_name);
 
 $data->begin_read_transaction('Mail');
 my $subdir=$report->get_dir(REPORT_ANNOTATED_PDF);
@@ -184,11 +184,11 @@ if($transport eq 'sendmail') {
   }
   load Email::Sender::Transport::SMTP;
   $t=Email::Sender::Transport::SMTP
-    ->new({'host'=>$smtp_host,
-	   'port'=>$smtp_port,
-           'ssl'=>$smtp_ssl,
-           'sasl_username'=>$smtp_user,
-           'sasl_password'=>$pass,
+    ->new({host=>$smtp_host,
+	   port=>$smtp_port,
+           ssl=>$smtp_ssl,
+           sasl_username=>$smtp_user,
+           sasl_password=>$pass,
 	   });
 } else {
   error("Unknown transport: $transport");
@@ -229,10 +229,10 @@ for my $f (@attach_files) {
 my $failed_auth=0;
 
 STUDENT: for my $i (@$r) {
-  my ($s)=$students->data($key,$i->{'id'},test_numeric=>1);
+  my ($s)=$students->data($key,$i->{id},test_numeric=>1);
   my $dest=$s->{$email_column};
-  debug "Loop: ID $i->{'id'} DEST [$dest]";
-  if($ids_file && !$ids{$i->{'id'}}) {
+  debug "Loop: ID $i->{id} DEST [$dest]";
+  if($ids_file && !$ids{$i->{id}}) {
     debug "Skipped";
     next STUDENT;
   }
@@ -241,7 +241,7 @@ STUDENT: for my $i (@$r) {
     next STUDENT;
   }
   if($dest) {
-    my $file=$i->{'file'};
+    my $file=$i->{file};
     utf8::encode($file);
     $file=$pdf_dir."/$file";
 
@@ -252,7 +252,7 @@ STUDENT: for my $i (@$r) {
       while(<PDF>) { $body.=$_; }
       close(PDF);
 
-      my @sc=$assoc->real_back($i->{'id'});
+      my @sc=$assoc->real_back($i->{id});
       my @parts=
 	(
 	 Email::MIME->create(attributes=>
@@ -284,7 +284,7 @@ STUDENT: for my $i (@$r) {
       push @all_dests,parse_add($cc) if($cc);
       push @all_dests,parse_add($bcc) if($bcc);
       my $b=eval {
-	sendmail($email,{'transport'=>$t,to=>\@all_dests});
+	sendmail($email,{transport=>$t,to=>\@all_dests});
       } || $@;
 
       my $status;
@@ -307,9 +307,9 @@ STUDENT: for my $i (@$r) {
         $failed_auth=1;
       }
 
-      print "$status [$i->{'id'}] $m\n";
-      debug "$status [$i->{'id'}] $m";
-      print LOGF "$status [$i->{'id'} -> $dest] $m\n" if($log_file);
+      print "$status [$i->{id}] $m\n";
+      debug "$status [$i->{id}] $m";
+      print LOGF "$status [$i->{id} -> $dest] $m\n" if($log_file);
 
       next STUDENT if($failed_auth);
 

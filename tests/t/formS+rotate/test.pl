@@ -20,12 +20,12 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       'grain'=>0.1,
-	       'check_marks'=>{4=>13.3},
-	       'verdict'=>'TOTAL : %S/%M => %s/%m',
-	       'model'=>'(N).PDF',
-	       'annote'=>[3,4],'annote_files'=>['0003.PDF','0004.PDF'],
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
+	       grain=>0.1,
+	       check_marks=>{4=>13.3},
+	       verdict=>'TOTAL : %S/%M => %s/%m',
+	       model=>'(N).PDF',
+	       annote=>[3,4],annote_files=>['0003.PDF','0004.PDF'],
 	      )
   ->default_process;
 

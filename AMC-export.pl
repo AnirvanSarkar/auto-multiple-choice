@@ -69,20 +69,20 @@ load("AMC::Export::$module");
 my $ex = "AMC::Export::$module"->new();
 
 $ex->set_options("sort",
-		 "keys"=>$sort);
+		 keys=>$sort);
 
 $ex->set_options("fich",
-		 "datadir"=>$data_dir,
-		 "noms"=>$fich_noms,
+		 datadir=>$data_dir,
+		 noms=>$fich_noms,
 		 );
 
 $ex->set_options("noms",
-		 "encodage"=>$noms_encodage,
-		 "useall"=>$useall,
-		 "identifiant"=>$csv_build_name,
+		 encodage=>$noms_encodage,
+		 useall=>$useall,
+		 identifiant=>$csv_build_name,
 		 );
 
-$ex->set_options("out","rtl"=>$rtl);
+$ex->set_options("out",rtl=>$rtl);
 
 for my $oo (@o_out) {
     if($oo =~ /([^=]+)=(.*)/) {

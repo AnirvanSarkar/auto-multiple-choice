@@ -20,14 +20,14 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,
-	       'tex_engine'=>'pdflatex',
-	       'perfect_copy'=>'','seuil'=>0.15,
-	       'postcorrect_student'=>2,'postcorrect_copy'=>0,
-	       'check_marks'=>{2=>20,3=>12.5},
-	       'check_assoc'=>{2=>'01012012',3=>'01234567'},
-	       'model'=>'(team)',
-	       'annote'=>[3],'annote_files'=>['Tas_d_oeufs_casses.pdf'],'annote_ascii'=>1,
+AMC::Test->new(dir=>__FILE__,
+	       tex_engine=>'pdflatex',
+	       perfect_copy=>'',seuil=>0.15,
+	       postcorrect_student=>2,postcorrect_copy=>0,
+	       check_marks=>{2=>20,3=>12.5},
+	       check_assoc=>{2=>'01012012',3=>'01234567'},
+	       model=>'(team)',
+	       annote=>[3],annote_files=>['Tas_d_oeufs_casses.pdf'],annote_ascii=>1,
 	      )
   ->default_process;
 

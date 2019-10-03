@@ -20,7 +20,7 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(dir=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
+AMC::Test->new(dir=>__FILE__,filter=>'plain',tex_engine=>'xelatex',
                perfect_copy=>[2],seuil=>0.25,
                export_full_csv=>[
                                  {-copy=>3,-question=>'Q001',-score=>1},

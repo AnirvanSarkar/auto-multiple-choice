@@ -31,10 +31,10 @@ our @ISA=("AMC::Messages");
 
 use_gettext;
 
-my %sorting=('l'=>['n:student.line'],
-	     'm'=>['n:mark','s:student.name','n:student.line'],
-	     'i'=>['n:student','n:copy','n:student.line'],
-	     'n'=>['s:student.name','n:student.line'],
+my %sorting=(l=>['n:student.line'],
+	     m=>['n:mark','s:student.name','n:student.line'],
+	     i=>['n:student','n:copy','n:student.line'],
+	     n=>['s:student.name','n:student.line'],
 	    );
 
 sub new {
@@ -43,7 +43,7 @@ sub new {
 	'fich.datadir'=>'',
 	'fich.noms'=>'',
 
-	'noms'=>'',
+	noms=>'',
 
 	'noms.encodage'=>'',
 	'noms.separateur'=>'',
@@ -57,9 +57,9 @@ sub new {
 	'sort.keys'=>['s:student.name','n:student.line'],
         'sort.cols'=>'smart',
 
-	'marks'=>[],
+	marks=>[],
 
-	'messages'=>[],
+	messages=>[],
     };
     bless ($self, $class);
     return $self;
@@ -94,13 +94,13 @@ sub load {
     my ($self)=@_;
     die "Needs data directory" if(!-d $self->{'fich.datadir'});
 
-    $self->{'_data'}=AMC::Data->new($self->{'fich.datadir'});
-    $self->{'_scoring'}=$self->{'_data'}->module('scoring');
-    $self->{'_layout'}=$self->{'_data'}->module('layout');
-    $self->{'_assoc'}=$self->{'_data'}->module('association');
+    $self->{_data}=AMC::Data->new($self->{'fich.datadir'});
+    $self->{_scoring}=$self->{_data}->module('scoring');
+    $self->{_layout}=$self->{_data}->module('layout');
+    $self->{_assoc}=$self->{_data}->module('association');
 
-    if($self->{'fich.noms'} && ! $self->{'noms'}) {
-	$self->{'noms'}=AMC::NamesFile::new($self->{'fich.noms'},
+    if($self->{'fich.noms'} && ! $self->{noms}) {
+	$self->{noms}=AMC::NamesFile::new($self->{'fich.noms'},
 					    $self->opts_spec('noms'),
 					   );
     }
@@ -152,7 +152,7 @@ sub test_indicative {
   my ($self,$question)=@_;
   for my $state (0,1) {
     $question->{'indic'.$state}=1
-      if($self->{'_scoring'}->one_indicative($question->{question},$state));
+      if($self->{_scoring}->one_indicative($question->{question},$state));
   }
 }
 
@@ -176,14 +176,14 @@ sub cols_cmp {
 
 sub codes_questions {
   my ($self,$codes,$questions,$plain)=@_;
-  @$codes=$self->{'_scoring'}->codes();
+  @$codes=$self->{_scoring}->codes();
   my $code_digit_pattern=$self->{_layout}->code_digit_pattern();
   if($plain) {
     my $codes_re="(".join("|",map { "\Q$_\E" } @$codes).")";
-    @$questions=$self->sort_cols(grep { $_->{'title'} !~ /^$codes_re$code_digit_pattern$/ }
-                                 $self->{'_scoring'}->questions);
+    @$questions=$self->sort_cols(grep { $_->{title} !~ /^$codes_re$code_digit_pattern$/ }
+                                 $self->{_scoring}->questions);
   } else {
-    @$questions=$self->sort_cols($self->{'_scoring'}->questions);
+    @$questions=$self->sort_cols($self->{_scoring}->questions);
   }
   for(@$questions) { $self->test_indicative($_); }
   @$questions=$self->insert_groups_sum_headers(@$questions);
@@ -198,37 +198,37 @@ sub pre_process {
 
     $self->load();
 
-    $self->{'_scoring'}->begin_read_transaction('EXPP');
+    $self->{_scoring}->begin_read_transaction('EXPP');
 
-    my $lk=$self->{'_assoc'}->variable('key_in_list');
+    my $lk=$self->{_assoc}->variable('key_in_list');
     my %keys=();
     my @marks=();
-    my @post_correct=$self->{'_scoring'}->postcorrect_sc;
+    my @post_correct=$self->{_scoring}->postcorrect_sc;
 
     # Get all students from the marks table
 
-    my $sth=$self->{'_scoring'}->statement('marks');
+    my $sth=$self->{_scoring}->statement('marks');
     $sth->execute;
   STUDENT: while(my $m=$sth->fetchrow_hashref) {
       next STUDENT if((!$self->{'noms.postcorrect'}) &&
 		      $m->{student}==$post_correct[0] &&
-		      $m->{'copy'}==$post_correct[1]);
+		      $m->{copy}==$post_correct[1]);
 
-      $m->{'abs'}=0;
-      $m->{'student.copy'}=studentids_string($m->{'student'},$m->{'copy'});
+      $m->{abs}=0;
+      $m->{'student.copy'}=studentids_string($m->{student},$m->{copy});
 
       # Association key for this sheet
-      $m->{'student.key'}=$self->{'_assoc'}->get_real($m->{'student'},$m->{'copy'});
+      $m->{'student.key'}=$self->{_assoc}->get_real($m->{student},$m->{copy});
       $keys{$m->{'student.key'}}=1 if($m->{'student.key'});
 
       # find the corresponding name
       my $n;
-      if($self->{'noms'}) {
-	($n)=$self->{'noms'}->data($lk,$m->{'student.key'},test_numeric=>1);
+      if($self->{noms}) {
+	($n)=$self->{noms}->data($lk,$m->{'student.key'},test_numeric=>1);
       }
       if($n) {
-	$m->{'student.name'}=$n->{'_ID_'};
-	$m->{'student.line'}=$n->{'_LINE_'};
+	$m->{'student.name'}=$n->{_ID_};
+	$m->{'student.line'}=$n->{_LINE_};
 	$m->{'student.all'}={%$n};
         # $n->{$lk} should be equal to $m->{'student.key'}, but in
         # some cases (older versions), the code stored in the database
@@ -244,19 +244,19 @@ sub pre_process {
 
     # Now, add students with no mark (if requested)
 
-    if($self->{'noms.useall'} && $self->{'noms'}) {
-      for my $i ($self->{'noms'}->liste($lk)) {
+    if($self->{'noms.useall'} && $self->{noms}) {
+      for my $i ($self->{noms}->liste($lk)) {
 	if(!$keys{$i}) {
-	  my ($name)=$self->{'noms'}->data($lk,$i,test_numeric=>1);
+	  my ($name)=$self->{noms}->data($lk,$i,test_numeric=>1);
 	  push @marks,
-	    {'student'=>'',
-	     'copy'=>'',
+	    {student=>'',
+	     copy=>'',
 	     'student.copy'=>'',
-	     'abs'=>1,
+	     abs=>1,
 	     'student.key'=>$name->{$lk},
-	     'mark'=>$self->{'noms.abs'},
-	     'student.name'=>$name->{'_ID_'},
-	     'student.line'=>$name->{'_LINE_'},
+	     mark=>$self->{'noms.abs'},
+	     'student.name'=>$name->{_ID_},
+	     'student.line'=>$name->{_LINE_},
 	     'student.all'=>{%$name},
 	    };
 	}
@@ -266,9 +266,9 @@ sub pre_process {
     # sorting as requested
 
     debug "Sorting with keys ".join(", ",@{$self->{'sort.keys'}});
-    $self->{'marks'}=[sort { $self->compare($a,$b); } @marks];
+    $self->{marks}=[sort { $self->compare($a,$b); } @marks];
 
-    $self->{'_scoring'}->end_transaction('EXPP');
+    $self->{_scoring}->end_transaction('EXPP');
 
 }
 

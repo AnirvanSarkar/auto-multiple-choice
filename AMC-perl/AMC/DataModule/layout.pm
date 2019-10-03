@@ -152,7 +152,7 @@ use constant {
 };
 
 our @EXPORT_OK = qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION);
-our %EXPORT_TAGS = ( 'flags' => [ qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION/ ],
+our %EXPORT_TAGS = ( flags=> [ qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION/ ],
 		     );
 
 use AMC::Basic;
@@ -285,7 +285,7 @@ sub version_upgrade {
 
 sub populate_from_xml {
     my ($self)=@_;
-    my $mep=$self->{'data'}->directory;
+    my $mep=$self->{data}->directory;
     $mep =~ s/\/[^\/]+\/?$/\/mep/;
     if(-d $mep) {
       $self->progression('begin',__"Fetching layout data from old format XML files...");
@@ -301,36 +301,36 @@ sub populate_from_xml {
 	    my $lay=XMLin("$mep/".$f,
 			  ForceArray => 1,KeepRoot => 1, KeyAttr=> [ 'id' ]);
 
-	    if($lay->{'mep'}) {
+	    if($lay->{mep}) {
 		my @st=stat("$mep/".$f);
 		debug "Populating data from $f...";
-		for my $laymep (keys %{$lay->{'mep'}}) {
-		    my $l=$lay->{'mep'}->{$laymep};
+		for my $laymep (keys %{$lay->{mep}}) {
+		    my $l=$lay->{mep}->{$laymep};
 		    my @epc;
 		    if($laymep =~ /^\+([0-9]+)\/([0-9]+)\/([0-9]+)\+$/) {
 			@epc=($1,$2,$3);
 			$self->statement('NEWLayout')->execute(
 			    @epc,
 			    (map { $l->{$_} } (qw/page dpi tx ty diametremarque/)),
-			    $self->source_id($l->{'src'},$st[9]));
+			    $self->source_id($l->{src},$st[9]));
 		    }
 		    my @lid=($epc[0],$epc[1]);
-		    for my $n (@{$l->{'nom'}}) {
+		    for my $n (@{$l->{nom}}) {
 			$self->statement('NEWNameField')->execute(
 			    @lid,map { $n->{$_} } (qw/xmin xmax ymin ymax/)
 			    );
 		    }
-		    for my $c (@{$l->{'case'}}) {
+		    for my $c (@{$l->{case}}) {
 			$self->statement('NEWBox0')->execute(
 			    @lid,BOX_ROLE_ANSWER,(map { $c->{$_} } (qw/question reponse xmin xmax ymin ymax/)),0
 			    );
 		    }
-		    for my $d (@{$l->{'chiffre'}}) {
+		    for my $d (@{$l->{chiffre}}) {
 			$self->statement('NEWDigit')->execute(
 			    @lid,map { $d->{$_} } (qw/n i xmin xmax ymin ymax/)
 			    );
 		    }
-		    my $marks=$l->{'coin'};
+		    my $marks=$l->{coin};
 		    for my $i (keys %$marks) {
 			$self->statement('NEWMark')->execute(
 			    @lid,$i,map { $marks->{$i}->{$_}->[0] } (qw/x y/)
@@ -344,16 +344,16 @@ sub populate_from_xml {
       $self->progression('end');
     }
 
-    my $scoring_file=$self->{'data'}->directory;
+    my $scoring_file=$self->{data}->directory;
     $scoring_file =~ s:/[^/]+/?$:/bareme.xml:;
     if(-f $scoring_file) {
       my $xml=XMLin($scoring_file,ForceArray => 1,KeyAttr=> [ 'id' ]);
-      my @s=grep { /^[0-9]+$/ } (keys %{$xml->{'etudiant'}});
+      my @s=grep { /^[0-9]+$/ } (keys %{$xml->{etudiant}});
       for my $i (@s) {
-	my $student=$xml->{'etudiant'}->{$i};
-	for my $question (keys %{$student->{'question'}}) {
-	  my $q=$student->{'question'}->{$question};
-	  $self->question_name($question,$q->{'titre'});
+	my $student=$xml->{etudiant}->{$i};
+	for my $question (keys %{$student->{question}}) {
+	  my $q=$student->{question}->{$question};
+	  $self->question_name($question,$q->{titre});
 	}
       }
     }
@@ -363,153 +363,153 @@ sub populate_from_xml {
 
 sub define_statements {
     my ($self)=@_;
-    $self->{'statements'}=
+    $self->{statements}=
       {
-       'CLEARPAGE'=>{'sql'=>"DELETE FROM ? WHERE student=? AND page=?"},
-       'COUNT'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")},
-       'StudentsCount'=>{'sql'=>"SELECT COUNT(*) FROM"
+       CLEARPAGE=>{sql=>"DELETE FROM ? WHERE student=? AND page=?"},
+       COUNT=>{sql=>"SELECT COUNT(*) FROM ".$self->table("page")},
+       StudentsCount=>{sql=>"SELECT COUNT(*) FROM"
 			 ." ( SELECT student FROM ".$self->table("page")
 			 ."   GROUP BY student )"},
-       'NEWLayout'=>
-       {'sql'=>"INSERT INTO ".$self->table("page")
+       NEWLayout=>
+       {sql=>"INSERT INTO ".$self->table("page")
 	." (student,page,checksum,subjectpage,dpi,width,height,markdiameter,sourceid)"
 	." VALUES (?,?,?,?,?,?,?,?,?)"
        },
-       'NEWMark'=>{'sql'=>"INSERT INTO ".$self->table("mark")
+       NEWMark=>{sql=>"INSERT INTO ".$self->table("mark")
 		   ." (student,page,corner,x,y) VALUES (?,?,?,?,?)"},
-       'NEWBox0'=>{'sql'=>"INSERT INTO ".$self->table("box")
+       'NEWBox0'=>{sql=>"INSERT INTO ".$self->table("box")
 		  ." (student,page,role,question,answer,xmin,xmax,ymin,ymax,flags)"
 		  ." VALUES (?,?,?,?,?,?,?,?,?,?)"},
-       'NEWBox'=>{'sql'=>"INSERT INTO ".$self->table("box")
+       NEWBox=>{sql=>"INSERT INTO ".$self->table("box")
 		  ." (student,page,role,question,answer,xmin,xmax,ymin,ymax,flags,char)"
 		  ." VALUES (?,?,?,?,?,?,?,?,?,?,?)"},
-       'NEWDigit'=>{'sql'=>"INSERT INTO ".$self->table("digit")
+       NEWDigit=>{sql=>"INSERT INTO ".$self->table("digit")
 		    ." (student,page,numberid,digitid,xmin,xmax,ymin,ymax)"
 		    ." VALUES (?,?,?,?,?,?,?,?)"},
-       'NEWNameField'=>{'sql'=>"INSERT INTO ".$self->table("namefield")
+       NEWNameField=>{sql=>"INSERT INTO ".$self->table("namefield")
 			." (student,page,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?)"},
-       'NEWQuestion'=>{'sql'=>"INSERT INTO ".$self->table("question")
+       NEWQuestion=>{sql=>"INSERT INTO ".$self->table("question")
 		       ." (question,name) VALUES (?,?)"},
-       'NEWAssociation'=>{'sql'=>"INSERT INTO ".$self->table("association")
+       NEWAssociation=>{sql=>"INSERT INTO ".$self->table("association")
 			  ." (student,id) VALUES (?,?)"},
-       'IDS'=>{'sql'=>"SELECT student || ',' || page FROM ".$self->table("page")
+       IDS=>{sql=>"SELECT student || ',' || page FROM ".$self->table("page")
 	       ." ORDER BY student,page"},
-       'FULLIDS'=>{'sql'=>"SELECT '+' || student || '/' || page || '/' || checksum || '+' FROM "
+       FULLIDS=>{sql=>"SELECT '+' || student || '/' || page || '/' || checksum || '+' FROM "
 		   .$self->table("page")
 		   ." ORDER BY student,page"},
-       'PAGES_STUDENT_all'=>{'sql'=>"SELECT page FROM ".$self->table("page")
+       PAGES_STUDENT_all=>{sql=>"SELECT page FROM ".$self->table("page")
 			     ." WHERE student=? ORDER BY page"},
-       'STUDENTS'=>{'sql'=>"SELECT student FROM ".$self->table("page")
+       STUDENTS=>{sql=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student ORDER BY student"},
-       'pageQuestionBoxes'=>
-       {'sql'=>"SELECT question AS id_a,answer AS id_b,role"
+       pageQuestionBoxes=>
+       {sql=>"SELECT question AS id_a,answer AS id_b,role"
 	." FROM ".$self->table("box")
 	." WHERE role=2 AND student=? AND page=?"},
-       'Q_Flag'=>{'sql'=>"UPDATE ".$self->table("box")
+       Q_Flag=>{sql=>"UPDATE ".$self->table("box")
 		  ." SET flags=flags|? WHERE student=? AND question=? AND role=?"},
-       'A_Flags'=>{'sql'=>"SELECT flags FROM ".$self->table("box")
+       A_Flags=>{sql=>"SELECT flags FROM ".$self->table("box")
 		  ." WHERE student=? AND question=? AND answer=? AND role=?"},
-       'A_All'=>{'sql'=>"SELECT * FROM ".$self->table("box")
+       A_All=>{sql=>"SELECT * FROM ".$self->table("box")
 		 ." WHERE student=? AND question=? AND answer=? AND role=?"},
-       'PAGES_STUDENT_box'=>{'sql'=>"SELECT page FROM ".$self->table("box")
+       PAGES_STUDENT_box=>{sql=>"SELECT page FROM ".$self->table("box")
 			     ." WHERE student=? AND role=? GROUP BY student,page"},
-       'PAGES_Q_box'=>{'sql'=>"SELECT student,page,min(ymin) as miny,max(ymax) as maxy FROM ".$self->table("box")
+       PAGES_Q_box=>{sql=>"SELECT student,page,min(ymin) as miny,max(ymax) as maxy FROM ".$self->table("box")
                        ." WHERE role=? AND question=? GROUP BY student,page"},
-       'PAGES_STUDENT_namefield'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
+       PAGES_STUDENT_namefield=>{sql=>"SELECT page FROM ".$self->table("namefield")
 				   ." WHERE student=? GROUP BY student,page"},
-       'PAGES_STUDENT_enter'=>
-       {'sql'=>"SELECT page FROM ("
+       PAGES_STUDENT_enter=>
+       {sql=>"SELECT page FROM ("
 	."SELECT student,page FROM ".$self->table("box")." WHERE role=1 UNION "
 	."SELECT student,page FROM ".$self->table("namefield")
 	.") AS enter WHERE student=? GROUP BY student,page"},
-       'PAGES_enter'=>
-       {'sql'=>"SELECT student,page FROM ("
+       PAGES_enter=>
+       {sql=>"SELECT student,page FROM ("
 	."SELECT student,page FROM ".$self->table("box")." WHERE role=1 UNION "
 	."SELECT student,page FROM ".$self->table("namefield")
 	.") AS enter GROUP BY student,page ORDER BY student,page"},
-       'MAX_enter'=>
-       {'sql'=>"SELECT MAX(n) FROM"
+       MAX_enter=>
+       {sql=>"SELECT MAX(n) FROM"
 	." ( SELECT COUNT(*) AS n FROM"
 	."   ( SELECT student,page FROM ".$self->table("box")." WHERE role=1"
 	."     UNION SELECT student,page FROM ".$self->table("namefield")
 	."   ) GROUP BY student )"},
-       'DEFECT_NO_BOX'=>
-       {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
+       DEFECT_NO_BOX=>
+       {sql=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
 	." WHERE student>0 AND"
 	."   NOT EXISTS(SELECT * FROM ".$self->table("box")." AS local WHERE role=1 AND"
 	."              local.student=list.student)"},
-       'DEFECT_NO_NAME'=>
-       {'sql'=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
+       DEFECT_NO_NAME=>
+       {sql=>"SELECT student FROM (SELECT student FROM ".$self->table("page")
 	." GROUP BY student) AS list"
 	." WHERE student>0 AND"
 	."   NOT EXISTS(SELECT * FROM ".$self->table("namefield")." AS local"
 	."              WHERE local.student=list.student)"},
-       'DEFECT_SEVERAL_NAMES'=>
-       {'sql'=>"SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
+       DEFECT_SEVERAL_NAMES=>
+       {sql=>"SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
 	.$self->table("namefield")." GROUP BY student) AS counts WHERE n>1"},
-       'pageFilename'=>{'sql'=>"SELECT student || '-' || page || '-' || checksum FROM "
+       pageFilename=>{sql=>"SELECT student || '-' || page || '-' || checksum FROM "
 			.$self->table("page")." WHERE student=? AND page=?"},
-       'pageSubjectPage'=>{'sql'=>"SELECT subjectpage FROM ".$self->table("page")
+       pageSubjectPage=>{sql=>"SELECT subjectpage FROM ".$self->table("page")
 			   ." WHERE student=? AND page=?"},
-       'students'=>{'sql'=>"SELECT student FROM ".$self->table("page")
+       students=>{sql=>"SELECT student FROM ".$self->table("page")
 		    ." GROUP BY student"},
-       'DEFECT_OUT_OF_PAGE'=>
-       {'sql'=>"SELECT student,page,count() as n FROM "
+       DEFECT_OUT_OF_PAGE=>
+       {sql=>"SELECT student,page,count() as n FROM "
         ." (SELECT b.student,b.page,xmin,xmax,ymin,ymax,width,height FROM "
         .$self->table("box")." as b, "
         .$self->table("page")." as p "
         ."  ON b.student==p.student AND b.page==p.page)"
         ." WHERE (xmin<0 OR ymin<0 OR xmax>width OR ymax>height)"
         ." GROUP BY student,page ORDER BY student,page"},
-       'subjectpageForStudent'=>
-       {'sql'=>"SELECT MIN(subjectpage),MAX(subjectpage) FROM ".$self->table("page")
+       subjectpageForStudent=>
+       {sql=>"SELECT MIN(subjectpage),MAX(subjectpage) FROM ".$self->table("page")
 	." WHERE student=?"},
-       'subjectpageForStudentA'=>
-       {'sql'=>"SELECT MIN(p.subjectpage),MAX(p.subjectpage) FROM "
+       subjectpageForStudentA=>
+       {sql=>"SELECT MIN(p.subjectpage),MAX(p.subjectpage) FROM "
 	.$self->table("page")." AS p"
 	." ,( SELECT student,page FROM ".$self->table("box")." WHERE role=1"
 	."    UNION"
 	."    SELECT student,page FROM ".$self->table("namefield")." ) AS a"
 	." ON p.student=a.student AND p.page=a.page"
 	." WHERE p.student=?"},
-       'studentPage'=>{'sql'=>"SELECT student,page FROM ".$self->table("page")
+       studentPage=>{sql=>"SELECT student,page FROM ".$self->table("page")
 		       ." WHERE markdiameter>0"
 		       ." LIMIT 1"},
-       'boxChar'=>{'sql'=>"SELECT char FROM ".$self->table("box")
+       boxChar=>{sql=>"SELECT char FROM ".$self->table("box")
                    ." WHERE student=? AND question=? AND answer=? AND role=?"},
-       'boxPage'=>{'sql'=>"SELECT page FROM ".$self->table("box")
+       boxPage=>{sql=>"SELECT page FROM ".$self->table("box")
                    ." WHERE student=? AND question=? AND answer=? AND role=?"},
-       'namefieldPage'=>{'sql'=>"SELECT page FROM ".$self->table("namefield")
+       namefieldPage=>{sql=>"SELECT page FROM ".$self->table("namefield")
                    ." WHERE student=?"},
-       'dims'=>{'sql'=>"SELECT width,height,markdiameter,dpi FROM "
+       dims=>{sql=>"SELECT width,height,markdiameter,dpi FROM "
 		.$self->table("page")
 		." WHERE student=? AND page=?"},
-       'mark'=>{'sql'=>"SELECT x,y FROM ".$self->table("mark")
+       mark=>{sql=>"SELECT x,y FROM ".$self->table("mark")
 		." WHERE student=? AND page=? AND corner=?"},
-       'pageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
+       pageInfo=>{sql=>"SELECT * FROM ".$self->table("page")
 		    ." WHERE student=? AND page=?"},
-       'studentPageInfo'=>{'sql'=>"SELECT * FROM ".$self->table("page")
+       studentPageInfo=>{sql=>"SELECT * FROM ".$self->table("page")
 			   ." WHERE student=? ORDER BY page"},
-       'digitInfo'=>{'sql'=>"SELECT * FROM ".$self->table("digit")
+       digitInfo=>{sql=>"SELECT * FROM ".$self->table("digit")
 		     ." WHERE student=? AND page=?"},
-       'boxInfo'=>{'sql'=>"SELECT * FROM ".$self->table("box")
+       boxInfo=>{sql=>"SELECT * FROM ".$self->table("box")
 		   ." WHERE student=? AND page=? AND role>=? AND role<=?"},
-       'namefieldInfo'=>{'sql'=>"SELECT * FROM ".$self->table("namefield")
+       namefieldInfo=>{sql=>"SELECT * FROM ".$self->table("namefield")
 			 ." WHERE student=? AND page=?"},
-       'scoreZones'=>{'sql'=>"SELECT * FROM ".$self->table("box")
+       scoreZones=>{sql=>"SELECT * FROM ".$self->table("box")
 		      ." WHERE student=? AND page=? AND question=?"
 		      ." AND role>=? AND role<=?"},
-       'exists'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("page")
+       exists=>{sql=>"SELECT COUNT(*) FROM ".$self->table("page")
 		  ." WHERE student=? AND page=? AND checksum=?"},
-       'questionName'=>{'sql'=>"SELECT name FROM ".$self->table("question")
+       questionName=>{sql=>"SELECT name FROM ".$self->table("question")
 			." WHERE question=?"},
-       'sourceID'=>{'sql'=>"SELECT sourceid FROM ".$self->table("source")
+       sourceID=>{sql=>"SELECT sourceid FROM ".$self->table("source")
 		    ." WHERE src=? AND timestamp=?"},
-       'NEWsource'=>{'sql'=>"INSERT INTO ".$self->table("source")
+       NEWsource=>{sql=>"INSERT INTO ".$self->table("source")
 		     ." (src,timestamp) VALUES(?,?)"},
-       'checkPosDigits'=>
-       {'sql'=>"SELECT a.student AS student_a,b.student AS student_b,"
+       checkPosDigits=>
+       {sql=>"SELECT a.student AS student_a,b.student AS student_b,"
 	."         a.page AS page_a, b.page AS page_b,* FROM"
 	." (SELECT * FROM"
 	."   (SELECT * FROM ".$self->table("digit")
@@ -520,8 +520,8 @@ sub define_statements {
 	."    AND (abs(a.xmin-b.xmin)>(?+0) OR abs(a.xmax-b.xmax)>(?+0)"
 	."         OR abs(a.ymin-b.ymin)>(?+0) OR abs(a.ymax-b.ymax)>(?+0))"
 	." LIMIT 1"},
-       'checkPosMarks'=>
-       {'sql'=>"SELECT a.student AS student_a,b.student AS student_b,"
+       checkPosMarks=>
+       {sql=>"SELECT a.student AS student_a,b.student AS student_b,"
 	."         a.page AS page_a, b.page AS page_b,* FROM"
 	." (SELECT * FROM"
 	."   (SELECT * FROM ".$self->table("mark")
@@ -531,27 +531,27 @@ sub define_statements {
 	." ON a.corner=b.corner"
 	."    AND (abs(a.x-b.x)>(?+0) OR abs(a.y-b.y)>(?+0))"
 	." LIMIT 1"},
-       'AssocNumber'=>{'sql'=>"SELECT COUNT(*) FROM ".$self->table("association")},
-       'orientation'=>{'sql'=>"SELECT MIN(ratio) AS minratio,"
+       AssocNumber=>{sql=>"SELECT COUNT(*) FROM ".$self->table("association")},
+       orientation=>{sql=>"SELECT MIN(ratio) AS minratio,"
 		       ."             MAX(ratio) AS maxratio FROM "
 		       ." (SELECT CASE WHEN ABS(width)<1 THEN 1"
 		       ."              ELSE height/width END"
 		       ."         AS ratio"
 		       ."  FROM ".$self->table("page")
 		       ." )"},
-       'MapQuestionPage'=>
-       {'sql'=>"SELECT student, page, question "
+       MapQuestionPage=>
+       {sql=>"SELECT student, page, question "
 	." FROM ".$self->table("box")." WHERE answer=1"
        },
-       'QuestionsList'=>{sql=>"SELECT * FROM ".$self->table("question")},
-       'CharClear'=>{sql=>"DELETE FROM ".$self->table("char")},
-       'CharSet'=>
+       QuestionsList=>{sql=>"SELECT * FROM ".$self->table("question")},
+       CharClear=>{sql=>"DELETE FROM ".$self->table("char")},
+       CharSet=>
        {sql=>"INSERT OR IGNORE INTO ".$self->table("char")
         ." (question,answer,char) VALUES (?,?,?)"},
-        'CharGet'=>
+        CharGet=>
        {sql=>"SELECT char FROM ".$self->table("char")
         ." WHERE question=? AND answer=?"},
-       'CharNb'=>{sql=>"SELECT COUNT(*) FROM ".$self->table("char")},
+       CharNb=>{sql=>"SELECT COUNT(*) FROM ".$self->table("char")},
      };
 }
 
@@ -703,13 +703,13 @@ sub score_zones {
 
 sub pages_for_student {
     my ($self,$student,%oo)=@_;
-    $oo{'select'}='all' if(!$oo{'select'});
+    $oo{select}='all' if(!$oo{select});
     my @args=($student);
     if($oo{select} eq 'box') {
       $oo{role}=BOX_ROLE_ANSWER if(!$oo{role});
       push @args,$oo{role};
     }
-    return($self->sql_list($self->statement('PAGES_STUDENT_'.$oo{'select'}),
+    return($self->sql_list($self->statement('PAGES_STUDENT_'.$oo{select}),
 			   @args));
   }
 
@@ -757,16 +757,16 @@ sub students {
 # * {'NO_BOX} is a pointer on an array containing all the student
 #   numbers for which there is no box to be filled in the subject
 #
-# * {'NO_NAME'} is a pointer on an array containing all the student
+# * {NO_NAME} is a pointer on an array containing all the student
 #   numbers for which there is no name field
 #
-# * {'SEVERAL_NAMES'} is a pointer on an array containing all the student
+# * {SEVERAL_NAMES} is a pointer on an array containing all the student
 #   numbers for which there is more than one name field
 #
-# * {'OUT_OF_PAGE'} is a pointer on a array containing all pages where
+# * {OUT_OF_PAGE} is a pointer on a array containing all pages where
 #   some box is outside the page.
 #
-# * {'DIFFERENT_POSITIONS'} is a pointer to a hash returned by
+# * {DIFFERENT_POSITIONS} is a pointer to a hash returned by
 #   check_positions($delta)
 sub defects {
     my ($self,$delta)=@_;
@@ -782,7 +782,7 @@ sub defects {
       $r{$type}=[@s] if(@s);
     }
     my $pos=$self->check_positions($delta);
-    $r{'DIFFERENT_POSITIONS'}=$pos if($pos);
+    $r{DIFFERENT_POSITIONS}=$pos if($pos);
     return(%r);
 }
 

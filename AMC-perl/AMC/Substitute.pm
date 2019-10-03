@@ -27,11 +27,11 @@ use AMC::Basic;
 
 sub new {
     my (%o)=@_;
-    my $self={'names'=>'',
-	      'scoring'=>'',
-	      'assoc'=>'',
-	      'name'=>'','chsign'=>4,
-	      'lk'=>'',
+    my $self={names=>'',
+	      scoring=>'',
+	      assoc=>'',
+	      name=>'',chsign=>4,
+	      lk=>'',
 	  };
 
     for (keys %o) {
@@ -45,8 +45,8 @@ sub new {
 sub format_note {
   my ($self,$mark)=@_;
 
-  if($self->{'chsign'}) {
-    $mark=sprintf("%.*g",$self->{'chsign'},$mark);
+  if($self->{chsign}) {
+    $mark=sprintf("%.*g",$self->{chsign},$mark);
   }
   return($mark);
 }
@@ -54,34 +54,34 @@ sub format_note {
 sub substitute {
   my ($self,$text,$student,$copy)=@_;
 
-  if($self->{'scoring'}) {
-    my $student_mark=$self->{'scoring'}->student_global($student,$copy);
+  if($self->{scoring}) {
+    my $student_mark=$self->{scoring}->student_global($student,$copy);
 
     if($student_mark) {
-      $text =~ s/\%[S]/$self->format_note($student_mark->{'total'})/ge;
-      $text =~ s/\%[M]/$self->format_note($student_mark->{'max'})/ge;
-      $text =~ s/\%[s]/$self->format_note($student_mark->{'mark'})/ge;
-      $text =~ s/\%[m]/$self->format_note($self->{'scoring'}->variable('mark_max'))/ge;
+      $text =~ s/\%[S]/$self->format_note($student_mark->{total})/ge;
+      $text =~ s/\%[M]/$self->format_note($student_mark->{max})/ge;
+      $text =~ s/\%[s]/$self->format_note($student_mark->{mark})/ge;
+      $text =~ s/\%[m]/$self->format_note($self->{scoring}->variable('mark_max'))/ge;
     } else {
       debug "No marks found ! Copy=".studentids_string($student,$copy);
     }
   }
 
-  $text =~ s/\%[n]/$self->{'name'}/ge;
+  $text =~ s/\%[n]/$self->{name}/ge;
 
-  if($self->{'assoc'} && $self->{'names'}) {
-    $self->{'lk'}=$self->{'assoc'}->variable('key_in_list')
-      if(!$self->{'lk'});
+  if($self->{assoc} && $self->{names}) {
+    $self->{lk}=$self->{assoc}->variable('key_in_list')
+      if(!$self->{lk});
 
-    my $i=$self->{'assoc'}->get_real($student,$copy);
+    my $i=$self->{assoc}->get_real($student,$copy);
     my $n;
 
     debug "Association -> ID=$i";
 
     if(defined($i)) {
-      ($n)=$self->{'names'}->data($self->{'lk'},$i,test_numeric=>1);
+      ($n)=$self->{names}->data($self->{lk},$i,test_numeric=>1);
       if($n) {
-	$text=$self->{'names'}->substitute($n,$text,'prefix'=>'%');
+	$text=$self->{names}->substitute($n,$text,prefix=>'%');
       }
     }
   }

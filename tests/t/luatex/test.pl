@@ -20,6 +20,6 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'lualatex',
+AMC::Test->new(dir=>__FILE__,tex_engine=>'lualatex',
 	      )->default_process;
 

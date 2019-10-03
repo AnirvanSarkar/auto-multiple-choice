@@ -44,12 +44,12 @@ GetOptions("sujet=s"=>\$sujet,
 
 set_debug($debug);
 
-my $g=AMC::Gui::Manuel::new('liste'=>$liste,
-			    'sujet'=>$sujet,
-			    'etud'=>$etud,
-			    'dpi'=>$dpi,
-			    'seuil'=>$seuil,
-			    'global'=>1,
+my $g=AMC::Gui::Manuel::new(liste=>$liste,
+			    sujet=>$sujet,
+			    etud=>$etud,
+			    dpi=>$dpi,
+			    seuil=>$seuil,
+			    global=>1,
 			    );
 
 Gtk3->main;

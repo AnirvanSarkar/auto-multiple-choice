@@ -20,9 +20,9 @@
 
 require "./AMC/Test.pm";
 
-my $t=AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
+my $t=AMC::Test->new(dir=>__FILE__,filter=>'plain',tex_engine=>'xelatex',
                      perfect_copy=>[],notemax=>0,multiple=>1,
-                     'check_marks'=>{'1:1'=>2,'1:2'=>6},
+                     check_marks=>{'1:1'=>2,'1:2'=>6},
                     );
 
 $t->prepare;

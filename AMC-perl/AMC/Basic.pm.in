@@ -60,8 +60,8 @@ BEGIN {
 
 my $amc_base_path;
 
-if($ENV{'AMCBASEDIR'}) {
-    $amc_base_path=$ENV{'AMCBASEDIR'};
+if($ENV{AMCBASEDIR}) {
+    $amc_base_path=$ENV{AMCBASEDIR};
 } else {
     $amc_base_path=__FILE__;
     $amc_base_path =~ s|/Basic\.pm$||;
@@ -73,12 +73,12 @@ sub amc_adapt_path {
     my %oo=@_;
     my @p=();
     my $r='';
-    push @p,$oo{'path'} if($oo{'path'});
-    push @p,map { "$amc_base_path/$_" } (@{$oo{'locals'}}) if($oo{'locals'});
-    push @p,@{$oo{'alt'}} if($oo{'alt'});
-    if($oo{'file'}) {
-      TFILE: for(@p) { if( -f "$_/$oo{'file'}" )
-		       { $r="$_/$oo{'file'}";last TFILE; } }
+    push @p,$oo{path} if($oo{path});
+    push @p,map { "$amc_base_path/$_" } (@{$oo{locals}}) if($oo{locals});
+    push @p,@{$oo{alt}} if($oo{alt});
+    if($oo{file}) {
+      TFILE: for(@p) { if( -f "$_/$oo{file}" )
+		       { $r="$_/$oo{file}";last TFILE; } }
     } else {
       TDIR: for(@p) { if( -d ) { $r=$_;last TDIR; } }
     }
@@ -88,21 +88,21 @@ sub amc_adapt_path {
 # ---------------------------------------------------
 
 our %install_dirs=(
-    'lib'=>"@/MODSDIR/@",
-    'libexec'=>"@/MODSDIR/@/exec",
-    'libperl'=>"@/MODSDIR/@/perl",
-    'icons'=>"@/ICONSDIR/@",
-    'models'=>"@/MODELSDIR/@",
+    lib=>"@/MODSDIR/@",
+    libexec=>"@/MODSDIR/@/exec",
+    libperl=>"@/MODSDIR/@/perl",
+    icons=>"@/ICONSDIR/@",
+    models=>"@/MODELSDIR/@",
     'doc/auto-multiple-choice'=>"@/DOCDIR/@",
-    'locale' => "@/LOCALEDIR/@",
+    locale=> "@/LOCALEDIR/@",
     );
 
 sub amc_specdir {
     my ($class)=@_;
     if($install_dirs{$class}) {
 	return(amc_adapt_path(
-		   'path'=>$install_dirs{$class},
-		   'locals'=>[$class,'.'],
+		   path=>$install_dirs{$class},
+		   locals=>[$class,'.'],
 	       ));
     } else {
 	die "Unknown class for amc_specdir: $class";
@@ -142,7 +142,7 @@ sub commande_accessible {
       return (-x $c);
     } else {
       my $ok='';
-      for (split(/:/,$ENV{'PATH'})) {
+      for (split(/:/,$ENV{PATH})) {
 	$ok=1 if(-x "$_/$c");
       }
       return($ok);
@@ -223,7 +223,7 @@ sub id2idf {
     $id =~ s/[\+\/]+/-/g;
     $id =~ s/^-+//;
     $id =~ s/-+$//;
-    $id =~ s/([0-9]+-[0-9]+)-.*/$1/ if($oo{'simple'});
+    $id =~ s/([0-9]+-[0-9]+)-.*/$1/ if($oo{simple});
     return($id);
 }
 
@@ -299,9 +299,9 @@ sub sort_from_columns {
   my ($liststore, $itera, $iterb, $sortkeys) = @_;
   my $r=0;
  SK:for my $c (@$sortkeys) {
-    my $a = $liststore->get ($itera, $c->{'col'});
-    my $b = $liststore->get ($iterb, $c->{'col'});
-    if($c->{'type'} =~ /^n/) {
+    my $a = $liststore->get ($itera, $c->{col});
+    my $b = $liststore->get ($iterb, $c->{col});
+    if($c->{type} =~ /^n/) {
       $a=0 if(!defined($a));
       $b=0 if(!defined($b));
       $r=$a <=> $b;
@@ -572,7 +572,7 @@ sub unpack_args {
     if($args[0] eq '--xmlargs') {
 	shift(@args);
 	my $file=shift(@args);
-	my $xa=XMLin($file,'ForceArray'=>1,'SuppressEmpty'=>'')->{'arg'};
+	my $xa=XMLin($file,ForceArray=>1,SuppressEmpty=>'')->{arg};
 	unshift(@args,@$xa);
 	unlink($file) or debug("Could not unlink $file: $!");
 	next_debug("Unpacked args: ".join(' ',@args));
@@ -589,8 +589,8 @@ sub use_gettext {
     # For portable installs
     if(! -f ($localisation->dir()."/fr/LC_MESSAGES/auto-multiple-choice.mo")) {
 	$localisation->dir(amc_adapt_path(
-			       'locals'=>['locale'],
-			       'alt'=>[amc_specdir('locale'), $localisation->dir()],
+			       locals=>['locale'],
+			       alt=>[amc_specdir('locale'), $localisation->dir()],
 			   ));
     }
 
@@ -600,21 +600,21 @@ sub use_gettext {
 sub init_translations {
     %titles=(
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	'nom'=>__p("Name [name column title in exported spreadsheet]"),
+	nom=>__p("Name [name column title in exported spreadsheet]"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	'note'=>__p("Mark [mark column title in exported spreadsheet]"),
+	note=>__p("Mark [mark column title in exported spreadsheet]"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	'copie'=>__p("Exam [exam number column title in exported spreadsheet]"),
+	copie=>__p("Exam [exam number column title in exported spreadsheet]"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	'total'=>__p("Score [total score column title in exported spreadsheet]"),
+	total=>__p("Score [total score column title in exported spreadsheet]"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	'max'=>__p("Max [maximum score column title in exported spreadsheet]"),
+	max=>__p("Max [maximum score column title in exported spreadsheet]"),
 	);
     %id_names=(
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	'max'=>__p("max [maximum score row name in exported spreadsheet]"),
+	max=>__p("max [maximum score row name in exported spreadsheet]"),
 # TRANSLATORS: you can omit the [...] part, just here to explain context
-	'moyenne'=>__p("mean [means of scores row name in exported spreadsheet]"),
+	moyenne=>__p("mean [means of scores row name in exported spreadsheet]"),
 	);
 }
 
@@ -637,7 +637,7 @@ sub pageids_string {
   my ($student,$page,$copy,%oo)=@_;
   my $s=$student.'/'.$page
     .($copy ? ':'.$copy : '');
-  $s =~ s/[^0-9]/-/g if($oo{'path'});
+  $s =~ s/[^0-9]/-/g if($oo{path});
   return($s);
 }
 
@@ -696,16 +696,16 @@ sub get_active_id {
 
 sub check_fonts {
   my ($spec)=@_;
-  if($spec->{'type'} =~ /fontconfig/i && @{$spec->{'family'}}) {
+  if($spec->{type} =~ /fontconfig/i && @{$spec->{family}}) {
     if(commande_accessible("fc-list")) {
       my $ok=0;
-      for my $f (@{$spec->{'family'}}) {
+      for my $f (@{$spec->{family}}) {
 	open FC,"-|","fc-list",$f,"family";
 	while(<FC>) { chomp();$ok=1 if(/./); }
 	close FC;
       }
       if(!$ok) {
-	my $re='('.join("|",map { quotemeta($_) } (@{$spec->{'family'}})).')';
+	my $re='('.join("|",map { quotemeta($_) } (@{$spec->{family}})).')';
 	open FC,"-|","fc-list",":","file";
       FCL: while(<FC>) {
 	  if(/$re:\s*$/) {

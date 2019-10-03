@@ -79,9 +79,9 @@ sub proj2abs {
 sub new {
   my (%o)=(@_);
 
-  my $self={'projects_path'=>'',
-	    'project_name'=>'',
-	    'home_dir'=>'',
+  my $self={projects_path=>'',
+	    project_name=>'',
+	    home_dir=>'',
 	   };
 
   for my $k (keys %o) {

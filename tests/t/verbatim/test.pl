@@ -20,9 +20,9 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'filter'=>'plain','tex_engine'=>'xelatex',
-               'seuil'=>0.15,
-	       'export_full_csv'=>[
+AMC::Test->new(dir=>__FILE__,filter=>'plain',tex_engine=>'xelatex',
+               seuil=>0.15,
+	       export_full_csv=>[
 				  {-copy=>4,-question=>'Cam',-score=>1},
 				  {-copy=>4,-question=>'positive',-score=>2},
 				  {-copy=>4,-question=>'one',-score=>0},

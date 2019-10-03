@@ -20,9 +20,9 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,'tex_engine'=>'pdflatex',
-	       'seuil'=>0.5,
-	       'export_full_csv'=>
+AMC::Test->new(dir=>__FILE__,tex_engine=>'pdflatex',
+	       seuil=>0.5,
+	       export_full_csv=>
 	       [
                 {-copy=>1,-question=>'expo1',-score=>5},
 		{-copy=>1,-question=>'expo2',-score=>5},

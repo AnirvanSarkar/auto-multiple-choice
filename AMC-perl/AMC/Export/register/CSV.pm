@@ -76,10 +76,10 @@ sub build_config_gui {
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
-  $prefs->store_register('export_csv_separateur'=>cb_model("TAB"=>'<TAB>',
+  $prefs->store_register(export_csv_separateur=>cb_model(TAB=>'<TAB>',
 							   ";"=>";",
 							   ","=>","));
-  $w->{'export_c_export_csv_separateur'}=$widget;
+  $w->{export_c_export_csv_separateur}=$widget;
   $t->attach($widget,1,$y,1,1);
   $y++;
 
@@ -89,11 +89,11 @@ sub build_config_gui {
   $renderer = Gtk3::CellRendererText->new();
   $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
-  $prefs->store_register('export_csv_ticked'=>cb_model(""=>__"No",
+  $prefs->store_register(export_csv_ticked=>cb_model(""=>__"No",
 						       "01"=>(__"Yes:")." 0;0;1;0",
-						       "AB"=>(__"Yes:")." AB",
+						       AB=>(__"Yes:")." AB",
 						      ));
-  $w->{'export_c_export_csv_ticked'}=$widget;
+  $w->{export_c_export_csv_ticked}=$widget;
   $t->attach($widget,1,$y,1,1);
   $y++;
 

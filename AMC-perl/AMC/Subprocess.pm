@@ -27,26 +27,26 @@ use IPC::Open2;
 
 sub new {
     my (%o)=(@_);
-    my $self={'file'=>'',
-	      'ipc_in'=>'',
-	      'ipc_out'=>'',
-	      'ipc'=>'',
-	      'args'=>['%f'],
-	      'mode'=>'detect',
-	      'exec_file'=>'',
+    my $self={file=>'',
+	      ipc_in=>'',
+	      ipc_out=>'',
+	      ipc=>'',
+	      args=>['%f'],
+	      mode=>'detect',
+	      exec_file=>'',
 	  };
 
     for my $k (keys %o) {
 	$self->{$k}=$o{$k} if(defined($self->{$k}));
     }
 
-    if(! $self->{'exec_file'}) {
-      if($self->{'mode'}) {
-	$self->{'exec_file'}=amc_specdir('libexec').'/AMC-'.$self->{'mode'};
+    if(! $self->{exec_file}) {
+      if($self->{mode}) {
+	$self->{exec_file}=amc_specdir('libexec').'/AMC-'.$self->{mode};
       }
     }
 
-    if(! -f $self->{'exec_file'}) {
+    if(! -f $self->{exec_file}) {
       die "AMC::Subprocess: No program to execute";
     }
 
@@ -66,28 +66,28 @@ sub commande {
     my ($self,@cmd)=(@_);
     my @r=();
 
-    if(!$self->{'ipc'}) {
+    if(!$self->{ipc}) {
 	debug "Exec subprocess..."; 
-	my @a=map { ( $_ eq '%f' ? $self->{'file'} : $_ ) }
-	(@{$self->{'args'}});
-	debug join(' ',$self->{'exec_file'},@a);
-	$self->{'times'}=[times()];
-	$self->{'ipc'}=open2($self->{'ipc_out'},$self->{'ipc_in'},
-			     $self->{'exec_file'},@a);
+	my @a=map { ( $_ eq '%f' ? $self->{file} : $_ ) }
+	(@{$self->{args}});
+	debug join(' ',$self->{exec_file},@a);
+	$self->{times}=[times()];
+	$self->{ipc}=open2($self->{ipc_out},$self->{ipc_in},
+			     $self->{exec_file},@a);
 
-	binmode $self->{'ipc_out'};
-	binmode $self->{'ipc_in'};
-	debug "PID=".$self->{'ipc'}." : ".$self->{'ipc_in'}." --> ".$self->{'ipc_out'};
+	binmode $self->{ipc_out};
+	binmode $self->{ipc_in};
+	debug "PID=".$self->{ipc}." : ".$self->{ipc_in}." --> ".$self->{ipc_out};
     }
 
     my $s=join(' ',@cmd);
 
     debug "CMD : $s";
 
-    print { $self->{'ipc_in'} } "$s\n";
+    print { $self->{ipc_in} } "$s\n";
 
     my $o;
-  GETREPONSE: while($o=readline($self->{'ipc_out'})) {
+  GETREPONSE: while($o=readline($self->{ipc_out})) {
       chomp($o);
       debug "|> $o";
       last GETREPONSE if($o =~ /_{2}END_{2}/);
@@ -99,16 +99,16 @@ sub commande {
 
 sub ferme_commande {
     my ($self)=(@_);
-    if($self->{'ipc'}) {
+    if($self->{ipc}) {
 	debug "Image sending QUIT";
 	$self->commande("quit");
-	waitpid $self->{'ipc'},0;
-	$self->{'ipc'}='';
-	$self->{'ipc_in'}='';
-	$self->{'ipc_out'}='';
+	waitpid $self->{ipc},0;
+	$self->{ipc}='';
+	$self->{ipc_in}='';
+	$self->{ipc_out}='';
 	my @tb=times();
 	debug sprintf("Image finished: parent times [%7.02f,%7.02f]",
-		      $tb[0]+$tb[1]-$self->{'times'}->[0]-$self->{'times'}->[1],$tb[2]+$tb[3]-$self->{'times'}->[2]-$self->{'times'}->[3]);
+		      $tb[0]+$tb[1]-$self->{times}->[0]-$self->{times}->[1],$tb[2]+$tb[3]-$self->{times}->[2]-$self->{times}->[3]);
     }
 }
 

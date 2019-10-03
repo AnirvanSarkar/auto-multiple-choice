@@ -45,7 +45,7 @@ sub new {
 sub load {
   my ($self)=@_;
   $self->SUPER::load();
-  $self->{'_capture'}=$self->{'_data'}->module('capture');
+  $self->{_capture}=$self->{_data}->module('capture');
 }
 
 sub parse_num {
@@ -92,12 +92,12 @@ sub export {
 
     open(OUT,">:encoding(".$self->{'out.encodage'}.")",$fichier);
 
-    $self->{'_scoring'}->begin_read_transaction('XCSV');
+    $self->{_scoring}->begin_read_transaction('XCSV');
 
-    my $dt=$self->{'_scoring'}->variable('darkness_threshold');
-    my $dtu=$self->{'_scoring'}->variable('darkness_threshold_up');
+    my $dt=$self->{_scoring}->variable('darkness_threshold');
+    my $dtu=$self->{_scoring}->variable('darkness_threshold_up');
     $dtu=1 if(!defined($dtu));
-    my $lk=$self->{'_assoc'}->variable('key_in_list');
+    my $lk=$self->{_assoc}->variable('key_in_list');
 
     my @student_columns=split(/,+/,$self->{'out.columns'});
 
@@ -122,18 +122,18 @@ sub export {
     $self->codes_questions(\@codes,\@questions,!$self->{'out.ticked'});
 
     if($self->{'out.ticked'}) {
-      push @columns,map { ($_->{'title'},"TICKED:".$_->{'title'}) } @questions;
+      push @columns,map { ($_->{title},"TICKED:".$_->{title}) } @questions;
       $self->{'out.entoure'}="\"" if(!$self->{'out.entoure'});
     } else {
-      push @columns,map { $_->{'title'} } @questions;
+      push @columns,map { $_->{title} } @questions;
     }
 
     push @columns,@codes;
 
     print OUT join($sep,map  { $self->parse_string($_) } @columns)."\n";
 
-    for my $m (@{$self->{'marks'}}) {
-      my @sc=($m->{'student'},$m->{'copy'});
+    for my $m (@{$self->{marks}}) {
+      my @sc=($m->{student},$m->{copy});
 
       @columns=();
 
@@ -143,21 +143,21 @@ sub export {
 					  $m->{'student.all'}->{$c});
       }
 
-      push @columns,$self->parse_num($m->{'mark'});
+      push @columns,$self->parse_num($m->{mark});
 
       for my $q (@questions) {
-	push @columns,$self->parse_num($self->{'_scoring'}->question_score(@sc,$q->{'question'}));
+	push @columns,$self->parse_num($self->{_scoring}->question_score(@sc,$q->{question}));
 	if($self->{'out.ticked'}) {
 	  if($self->{'out.ticked'} eq '01') {
 	    push @columns,
               $self->parse_string
-              (join(';',$self->{'_capture'}
-                    ->ticked_list_0(@sc,$q->{'question'},$dt,$dtu)));
+              (join(';',$self->{_capture}
+                    ->ticked_list_0(@sc,$q->{question},$dt,$dtu)));
 	  } elsif($self->{'out.ticked'} eq 'AB') {
 	    my $t='';
-	    my @tl=$self->{'_capture'}
-	      ->ticked_list(@sc,$q->{'question'},$dt,$dtu);
-	    if($self->{_capture}->has_answer_zero(@sc,$q->{'question'})) {
+	    my @tl=$self->{_capture}
+	      ->ticked_list(@sc,$q->{question},$dt,$dtu);
+	    if($self->{_capture}->has_answer_zero(@sc,$q->{question})) {
 	      if(shift @tl) {
 		$t.='0';
 	      }
@@ -173,7 +173,7 @@ sub export {
       }
 
       for my $c (@codes) {
-	push @columns, $self->parse_string($self->{'_scoring'}->student_code(@sc,$c));
+	push @columns, $self->parse_string($self->{_scoring}->student_code(@sc,$c));
       }
 
       print OUT join($sep,@columns)."\n";

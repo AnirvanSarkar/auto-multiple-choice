@@ -22,7 +22,7 @@ use Data::Dumper;
 
 require "./AMC/Test.pm";
 
-my $t=AMC::Test->new('dir'=>__FILE__,
+my $t=AMC::Test->new(dir=>__FILE__,
                     );
 
 $t->prepare();

@@ -20,16 +20,16 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new('dir'=>__FILE__,
-	       'tex_engine'=>'pdflatex',
-	       'perfect_copy'=>'','seuil'=>0.15,
+AMC::Test->new(dir=>__FILE__,
+	       tex_engine=>'pdflatex',
+	       perfect_copy=>'',seuil=>0.15,
                association_manual=>
                [
                 {id=>'01X',student=>4,copy=>0},
                 {id=>'01Y',student=>5,copy=>0},
                ],
-	       'check_marks'=>{map { $_=>$_ } (1..5)},
-	       'check_assoc'=>{1=>'1',2=>'02',3=>'0003',
+	       check_marks=>{map { $_=>$_ } (1..5)},
+	       check_assoc=>{1=>'1',2=>'02',3=>'0003',
                                4=>'x',5=>'x',
                                'm:4'=>'01X','m:5'=>'01Y'},
 	      )

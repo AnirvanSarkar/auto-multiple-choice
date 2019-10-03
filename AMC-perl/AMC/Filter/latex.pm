@@ -60,13 +60,13 @@ sub pre_filter {
 
   # pass some of these options to AMC project configuration
 
-  $self->set_project_option('moteur_latex_b',$self->{options}->{'latex_engine'})
-    if($self->{options}->{'latex_engine'});
+  $self->set_project_option('moteur_latex_b',$self->{options}->{latex_engine})
+    if($self->{options}->{latex_engine});
 
   $self->set_filter_result('jobspecific',1) if($self->{options}->{jobspecific});
 
   $self->set_filter_result('unchanged',1)
-    if(!$self->{options}->{'preprocess_command'});
+    if(!$self->{options}->{preprocess_command});
 }
 
 sub filter {
@@ -74,7 +74,7 @@ sub filter {
 
   # exec preprocess command if needed
 
-  if($self->{options}->{'preprocess_command'}) {
+  if($self->{options}->{preprocess_command}) {
 
     # copy the file, unchanged
 
@@ -83,7 +83,7 @@ sub filter {
     # exec preprocess command, that may modify this file
 
     my ($fxa,$fxb,$f) = splitpath($output_file);
-    my @cmd=quotewords('\s+',0,$self->{options}->{'preprocess_command'});
+    my @cmd=quotewords('\s+',0,$self->{options}->{preprocess_command});
     $cmd[0]="./".$cmd[0] if($cmd[0] && $cmd[0] !~ m:/:);
     push @cmd,$f;
 

@@ -28,36 +28,36 @@ use Text::CSV;
 
 sub new {
     my ($f,%o)=@_;
-    my $self={'fichier'=>$f,
-	      'encodage'=>'utf-8',
-	      'separateur'=>'',
-	      'identifiant'=>'',
+    my $self={fichier=>$f,
+	      encodage=>'utf-8',
+	      separateur=>'',
+	      identifiant=>'',
 
-	      'heads'=>[],
-	      'problems'=>{},
+	      heads=>[],
+	      problems=>{},
 	      'numeric.content'=>{},
 	      'simple.content'=>{},
-	      'err'=>[0,0],
+	      err=>[0,0],
 	  };
 
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
 
-    $self->{'separateur'}=":,;\t" if(!$self->{'separateur'});
-    $self->{'identifiant'}='(nom|surname) (prenom|name)'
-	if(!$self->{'identifiant'});
+    $self->{separateur}=":,;\t" if(!$self->{separateur});
+    $self->{identifiant}='(nom|surname) (prenom|name)'
+	if(!$self->{identifiant});
 
     bless $self;
 
-    @{$self->{'err'}}=($self->load());
+    @{$self->{err}}=($self->load());
 
     return($self);
 }
 
 sub errors {
     my ($self)=@_;
-    return(@{$self->{'err'}});
+    return(@{$self->{err}});
 }
 
 sub load {
@@ -67,31 +67,31 @@ sub load {
     my $err=0;
     my $errlig=0;
     my $line;
-    my $sep=$self->{'separateur'};
+    my $sep=$self->{separateur};
 
-    $self->{'noms'}=[];
+    $self->{noms}=[];
 
-    if($self->{'fichier'} &&
-       -f $self->{'fichier'} && ! -z $self->{'fichier'}) {
+    if($self->{fichier} &&
+       -f $self->{fichier} && ! -z $self->{fichier}) {
 
-      debug "Reading names file $self->{'fichier'}";
+      debug "Reading names file $self->{fichier}";
 
       # First pass: detect the number of comment lines, and the
       # separator
 
       my $comment_lines=0;
 
-      if(open(LISTE,"<:encoding(".$self->{'encodage'}.")",
-	      $self->{'fichier'})) {
+      if(open(LISTE,"<:encoding(".$self->{encodage}.")",
+	      $self->{fichier})) {
       LINE: while(<LISTE>) {
 	  if(/^\#/) {
 	    $comment_lines++;
 	    next LINE;
 	  }
 	  my $entetes=$_;
-	  if(length($self->{'separateur'})>1) {
+	  if(length($self->{separateur})>1) {
 	    my $nn=-1;
-	    for my $s (split(//,$self->{'separateur'})) {
+	    for my $s (split(//,$self->{separateur})) {
 	      my $k=0;
 	      while($entetes =~ /$s/g) { $k++; }
 	      if($k>$nn) {
@@ -106,7 +106,7 @@ sub load {
 	close LISTE;
       }
 
-      debug "NamesFile $self->{'fichier'}: $comment_lines comments lines";
+      debug "NamesFile $self->{fichier}: $comment_lines comments lines";
 
       # Second pass: read the file with Text::CSV
 
@@ -115,8 +115,8 @@ sub load {
       $self->{duplicates}={};
 
       my $io;
-      if(open($io,"<:encoding(".$self->{'encodage'}.")",
-	      $self->{'fichier'})) {
+      if(open($io,"<:encoding(".$self->{encodage}.")",
+	      $self->{fichier})) {
 
 	# skip comments lines
 
@@ -131,9 +131,9 @@ sub load {
 
 	# first line: header
 
-	$self->{'heads'}=$csv->getline ($io);
-	if($self->{'heads'}) {
-	  for my $h (@{$self->{'heads'}}) {
+	$self->{heads}=$csv->getline ($io);
+	if($self->{heads}) {
+	  for my $h (@{$self->{heads}}) {
 	    $self->{'numeric.content'}->{$h}=0;
 	    $self->{'simple.content'}->{$h}=0;
 	  }
@@ -141,7 +141,7 @@ sub load {
 	  debug("CSV [SEP=$sep]: Can't read headers");
 	  return(1,$.);
 	}
-	$csv->column_names ($self->{'heads'});
+	$csv->column_names ($self->{heads});
 
 	# following lines
 
@@ -173,8 +173,8 @@ sub load {
 		$self->{'simple.content'}->{$k} ++
 		  if($row->{$k} =~ /^[ a-z0-9.+-]*$/i);
 	      }
-	      $row->{'_LINE_'}=$csv_line;
-	      push @{$self->{'noms'}},$row;
+	      $row->{_LINE_}=$csv_line;
+	      push @{$self->{noms}},$row;
 	    } else {
 	      debug "Blank line $. detected";
 	    }
@@ -192,13 +192,13 @@ sub load {
 
 	# find unique identifiers
 
-	for my $h (@{$self->{'heads'}}) {
+	for my $h (@{$self->{heads}}) {
 	  my @lk=(keys %{$data{$h}});
-	  $self->{duplicates}->{$h}->{n}=$#{$self->{'noms'}}-$#lk;
+	  $self->{duplicates}->{$h}->{n}=$#{$self->{noms}}-$#lk;
 	}
 
-	$self->{'keys'}=[grep { $self->{duplicates}->{$_}->{n} == 0 }
-			 @{$self->{'heads'}}];
+	$self->{keys}=[grep { $self->{duplicates}->{$_}->{n} == 0 }
+			 @{$self->{heads}}];
 
 	# rajout identifiant
 	$self->calc_identifiants();
@@ -210,18 +210,18 @@ sub load {
       }
     } else {
 	debug("Inexistant or empty names list file");
-	debug("(file=".$self->{'fichier'}.")")
-	  if(defined($self->{'fichier'}));
-	$self->{'heads'}=[];
-	$self->{'keys'}=[];
-	$self->{'problems'}={'ID.dup'=>[],'ID.empty'=>0};
+	debug("(file=".$self->{fichier}.")")
+	  if(defined($self->{fichier}));
+	$self->{heads}=[];
+	$self->{keys}=[];
+	$self->{problems}={'ID.dup'=>[],'ID.empty'=>0};
 	return(0,0);
     }
 }
 
 sub head_first_duplicate {
   my ($self,$key)=@_;
-  return($self->{'duplicates'}->{$key}->{content});
+  return($self->{duplicates}->{$key}->{content});
 }
 
 sub head_n_duplicates {
@@ -251,52 +251,52 @@ sub calc_identifiants {
     my ($self)=@_;
     my %ids=();
 
-    $self->{'problems'}={'ID.dup'=>[],'ID.empty'=>0};
+    $self->{problems}={'ID.dup'=>[],'ID.empty'=>0};
 
-    for my $n (@{$self->{'noms'}}) {
-	my $i=$self->substitute($n,$self->{'identifiant'});
-	$n->{'_ID_'}=$i;
+    for my $n (@{$self->{noms}}) {
+	my $i=$self->substitute($n,$self->{identifiant});
+	$n->{_ID_}=$i;
 	if($i) {
 	    if($ids{$i}) {
-		push @{$self->{'problems'}->{'ID.dup'}},$i;
+		push @{$self->{problems}->{'ID.dup'}},$i;
 	    } else {
 		$ids{$i}=1;
 	    }
 	} else {
-	    $self->{'problems'}->{'ID.empty'}++;
+	    $self->{problems}->{'ID.empty'}++;
 	}
     }
 }
 
 sub problem {
     my ($self,$k)=@_;
-    return($self->{'problems'}->{$k});
+    return($self->{problems}->{$k});
 }
 
 sub tri {
     my ($self,$cle)=@_;
-    $self->{'noms'}=[sort { $a->{$cle} cmp $b->{$cle} } @{$self->{'noms'}}];
+    $self->{noms}=[sort { $a->{$cle} cmp $b->{$cle} } @{$self->{noms}}];
 }
 
 sub tri_num {
     my ($self,$cle)=@_;
-    $self->{'noms'}=[sort { $a->{$cle} <=> $b->{$cle} } @{$self->{'noms'}}];
+    $self->{noms}=[sort { $a->{$cle} <=> $b->{$cle} } @{$self->{noms}}];
 }
 
 sub taille {
     my ($self)=@_;
-    return(1+$#{$self->{'noms'}});
+    return(1+$#{$self->{noms}});
 }
 
 sub heads { # entetes
     my ($self)=@_;
-    return(@{$self->{'heads'}});
+    return(@{$self->{heads}});
 }
 
 sub heads_count {
   my ($self,$check)=@_;
   my %h=map { $_=>0 } ($self->heads());
-  for my $n (@{$self->{'noms'}}) {
+  for my $n (@{$self->{noms}}) {
     for my $k (keys %h) {
       $h{$k}++ if(&$check($n->{$k}));
     }
@@ -311,7 +311,7 @@ sub keys { # entetes qui peuvent servir de cle unique
 		  || $self->{'numeric.content'}->{$b} <=>
 		      $self->{'numeric.content'}->{$a}
 		  || $a cmp $b }
-		  @{$self->{'keys'}});
+		  @{$self->{keys}});
 }
 
 sub heads_for_keys { # entetes qui peuvent servir de cle unique
@@ -323,12 +323,12 @@ sub heads_for_keys { # entetes qui peuvent servir de cle unique
 		  || $self->{'numeric.content'}->{$b} <=>
 		      $self->{'numeric.content'}->{$a}
 		  || $a cmp $b }
-		  @{$self->{'heads'}});
+		  @{$self->{heads}});
 }
 
 sub liste {
     my ($self,$head)=@_;
-    return(map { $_->{$head} } @{$self->{'noms'}} );
+    return(map { $_->{$head} } @{$self->{noms}} );
 }
 
 # use names fields from $n to subsitute (HEADER) substrings in $s
@@ -337,10 +337,10 @@ sub substitute {
 
     my $prefix='';
 
-    $prefix=$oo{'prefix'} if(defined($oo{'prefix'}));
+    $prefix=$oo{prefix} if(defined($oo{prefix}));
 
-    if(defined($n->{'_ID_'})) {
-	my $nom=$n->{'_ID_'};
+    if(defined($n->{_ID_})) {
+	my $nom=$n->{_ID_};
 	$nom =~ s/^\s+//;
 	$nom =~ s/\s+$//;
 	$nom =~ s/\s+/ /g;
@@ -374,25 +374,25 @@ sub same_values {
 sub data {
     my ($self,$head,$c,%oo)=@_;
     return() if(!defined($c));
-    my @k=grep { defined($self->{'noms'}->[$_]->{$head})
-		   && same_values($self->{'noms'}->[$_]->{$head},$c,$oo{test_numeric}) }
-      (0..$#{$self->{'noms'}});
-    if(!$oo{'all'}) {
+    my @k=grep { defined($self->{noms}->[$_]->{$head})
+		   && same_values($self->{noms}->[$_]->{$head},$c,$oo{test_numeric}) }
+      (0..$#{$self->{noms}});
+    if(!$oo{all}) {
 	if($#k!=0) {
 	    print STDERR "Error: non-unique name (".(1+$#k)." records)\n";
 	    return();
 	}
     }
-    if($oo{'i'}) {
+    if($oo{i}) {
 	return(@k);
     } else {
-	return(map { $self->{'noms'}->[$_] } @k);
+	return(map { $self->{noms}->[$_] } @k);
     }
 }
 
 sub data_n {
     my ($self,$n,$cle)=@_;
-    return($self->{'noms'}->[$n]->{$cle});
+    return($self->{noms}->[$n]->{$cle});
 }
 
 1;

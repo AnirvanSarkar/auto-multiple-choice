@@ -121,14 +121,14 @@ my $jpgdir=$projet_dir."/cr/corrections/jpg";
 my $pdfdir="";
 
 my $avance=AMC::Gui::Avancement::new($progress * ($single_output ? 0.8 : 1),
-				     'id'=>$progress_id);
+				     id=>$progress_id);
 
 my $noms='';
 
 if(-f $fich_noms) {
     $noms=AMC::NamesFile::new($fich_noms,
-			      "encodage"=>$noms_encodage,
-			      "identifiant"=>$csv_build_name);
+			      encodage=>$noms_encodage,
+			      identifiant=>$csv_build_name);
 
     debug "Keys in names file: ".join(", ",$noms->heads());
 }
@@ -198,10 +198,10 @@ sub write_pdf {
     debug "DENSITY : $d_x x $d_y --> $dens\n";
     debug "destination: $file";
 
-    my $w=$img->Write('filename'=>$file,
-		      'page'=>($dens*$dest_size_x).'x'.($dens*$dest_size_y),
-		      'adjoin'=>'True','units'=>'PixelsPerInch',
-		      'compression'=>'jpeg','density'=>$dens.'x'.$dens);
+    my $w=$img->Write(filename=>$file,
+		      page=>($dens*$dest_size_x).'x'.($dens*$dest_size_y),
+		      adjoin=>'True',units=>'PixelsPerInch',
+		      compression=>'jpeg',density=>$dens.'x'.$dens);
 
     if($w) {
 	print "Write error: $w\n";
@@ -233,9 +233,9 @@ my $sorted_students='';
 if($single_output) {
   # one single output file: students must be in the right order
   $sorted_students=AMC::Export->new();
-  $sorted_students->set_options('fich','datadir'=>$data_dir,'noms'=>$fich_noms);
-  $sorted_students->set_options('noms','encodage'=>$noms_encodage,'useall'=>0);
-  $sorted_students->set_options('sort','keys'=>$sort);
+  $sorted_students->set_options('fich',datadir=>$data_dir,noms=>$fich_noms);
+  $sorted_students->set_options('noms',encodage=>$noms_encodage,useall=>0);
+  $sorted_students->set_options('sort',keys=>$sort);
   $sorted_students->pre_process();
 }
 
@@ -257,9 +257,9 @@ if($id_file) {
     # sort students
     my %include=map { studentids_string(@$_)=>1 } (@students);
     @students=
-      map { [ $_->{'student'},$_->{'copy'} ] }
-	grep { $include{studentids_string($_->{'student'},$_->{'copy'})} }
-	  (@{$sorted_students->{'marks'}});
+      map { [ $_->{student},$_->{copy} ] }
+	grep { $include{studentids_string($_->{student},$_->{copy})} }
+	  (@{$sorted_students->{marks}});
   }
 
 }
@@ -272,8 +272,8 @@ else {
   } else {
     if($single_output) {
       # one single output file: students must be in the right order
-      @students=map { [ $_->{'student'},$_->{'copy'} ] }
-	(@{$sorted_students->{'marks'}});
+      @students=map { [ $_->{student},$_->{copy} ] }
+	(@{$sorted_students->{marks}});
     } else {
       # one output file per student: order is not important.
       $capture->begin_read_transaction;
@@ -519,7 +519,7 @@ for my $e (@students) {
 
     for my $p (@$pp) {
 
-      my $f_j0=$p->{'annotated'};
+      my $f_j0=$p->{annotated};
       my $f_j;
 
       if ($f_j0) {
@@ -534,14 +534,14 @@ for my $e (@students) {
       if ($f_j) {
 	# correction JPG presente : on transforme en PDF
 
-	debug "Page ".studentids_string(@$e)."/$p->{'page'} annotated ($f_j)";
+	debug "Page ".studentids_string(@$e)."/$p->{page} annotated ($f_j)";
 	stk_ppm_add($f_j);
 
       } elsif ($compose) {
 	# pas de JPG annote : on prend la page corrigee
 
-	debug "Page ".studentids_string(@$e)."/$p->{'page'} from corrected sheet";
-	stk_pdf_add($p->{'subjectpage'});
+	debug "Page ".studentids_string(@$e)."/$p->{page} from corrected sheet";
+	stk_pdf_add($p->{subjectpage});
       }
     }
 

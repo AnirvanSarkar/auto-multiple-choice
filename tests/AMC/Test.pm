@@ -54,93 +54,93 @@ sub new {
 
   my $self=
     {
-     'dir'=>'',
-     'filter'=>'',
-     'tex_engine'=>'pdflatex',
-     'multiple'=>'',
-     'pre_allocate'=>0,
-     'n_copies'=>5,
-     'check_marks'=>'',
-     'perfect_copy'=>[3],
-     'src'=>'',
-     'debug'=>0,
-     'debug_pixels'=>0,
-     'scans'=>'',
-     'seuil'=>0.5,
-     'seuil_up'=>1.0,
-     'bw_threshold'=>0.6,
-     'ignore_red'=>'',
-     'tol_marque'=>0.4,
-     'rounding'=>'i',
-     'grain'=>0.01,
-     'notemax'=>20,
-     'postcorrect_student'=>'',
-     'postcorrect_copy'=>'',
-     'list'=>'',
-     'list_key'=>'id',
-     'code'=>'student',
-     'check_assoc'=>'',
-     'association_manual'=>'',
-     'annote'=>'',
-     'annote_files'=>[],
-     'annote_ascii'=>0,
-     'annote_position'=>'marge',
-     'verdict'=>'%(id) %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
-     'verdict_question'=>"\"%"."s/%"."m\"",
-     'model'=>'(N).pdf',
-     'ok_checksums'=>{},
-     'ok_checksums_file'=>'',
-     'to_check'=>[],
-     'export_full_csv'=>[],
-     'export_csv_ticked'=>'AB',
-     'export_ods'=>'',
-     'blind'=>0,
-     'check_zooms'=>{},
-     'skip_prepare'=>0,
-     'skip_scans'=>0,
-     'tracedest'=>\*STDERR,
-     'debug_file'=>'',
-     'pages'=>'',
-     'extract_with'=>'qpdf',
-     'force_convert'=>0,
-     'documents'=>'sc',
-     'speed'=>0,
-     'full_scans'=>'',
-     'full_density'=>300,
-     'tmpdir'=>'',
-     'decoder'=>'',
+     dir=>'',
+     filter=>'',
+     tex_engine=>'pdflatex',
+     multiple=>'',
+     pre_allocate=>0,
+     n_copies=>5,
+     check_marks=>'',
+     perfect_copy=>[3],
+     src=>'',
+     debug=>0,
+     debug_pixels=>0,
+     scans=>'',
+     seuil=>0.5,
+     seuil_up=>1.0,
+     bw_threshold=>0.6,
+     ignore_red=>'',
+     tol_marque=>0.4,
+     rounding=>'i',
+     grain=>0.01,
+     notemax=>20,
+     postcorrect_student=>'',
+     postcorrect_copy=>'',
+     list=>'',
+     list_key=>'id',
+     code=>'student',
+     check_assoc=>'',
+     association_manual=>'',
+     annote=>'',
+     annote_files=>[],
+     annote_ascii=>0,
+     annote_position=>'marge',
+     verdict=>'%(id) %(ID)'."\n".'TOTAL : %S/%M => %s/%m',
+     verdict_question=>"\"%"."s/%"."m\"",
+     model=>'(N).pdf',
+     ok_checksums=>{},
+     ok_checksums_file=>'',
+     to_check=>[],
+     export_full_csv=>[],
+     export_csv_ticked=>'AB',
+     export_ods=>'',
+     blind=>0,
+     check_zooms=>{},
+     skip_prepare=>0,
+     skip_scans=>0,
+     tracedest=>\*STDERR,
+     debug_file=>'',
+     pages=>'',
+     extract_with=>'qpdf',
+     force_convert=>0,
+     documents=>'sc',
+     speed=>0,
+     full_scans=>'',
+     full_density=>300,
+     tmpdir=>'',
+     decoder=>'',
     };
 
   for (keys %oo) {
     $self->{$_}=$oo{$_} if(exists($self->{$_}));
   }
 
-  $self->{'dir'} =~ s:/[^/]*$::;
+  $self->{dir} =~ s:/[^/]*$::;
 
   bless($self,$class);
 
-  if (!$self->{'src'}) {
-    opendir(my $dh, $self->{'dir'})
-      || die "can't opendir $self->{'dir'}: $!";
+  if (!$self->{src}) {
+    opendir(my $dh, $self->{dir})
+      || die "can't opendir $self->{dir}: $!";
     my @tex = grep { /\.(tex|txt)$/ } sort { $a cmp $b } readdir($dh);
     closedir $dh;
-    $self->{'src'}=$tex[0];
+    $self->{src}=$tex[0];
   }
 
-  if (!$self->{'list'}) {
-    opendir(my $dh, $self->{'dir'})
-      || die "can't opendir $self->{'dir'}: $!";
+  if (!$self->{list}) {
+    opendir(my $dh, $self->{dir})
+      || die "can't opendir $self->{dir}: $!";
     my @l = grep { /\.(csv|txt)$/ } readdir($dh);
     closedir $dh;
-    $self->{'list'}=$l[0];
+    $self->{list}=$l[0];
   }
-  $self->{names}=AMC::NamesFile::new($self->{'dir'}.'/'.$self->{list},'utf8','id')
-    if($self->{list} && -f $self->{'dir'}.'/'.$self->{list});
+  $self->{names}=AMC::NamesFile::new($self->{dir}.'/'.$self->{list},'utf8','id')
+    if($self->{list} && -f $self->{dir}.'/'.$self->{list});
 
   my $to_stdout=0;
 
-  GetOptions("debug!"=>\$self->{'debug'},
-             "blind!"=>\$self->{'blind'},
+  GetOptions("debug!"=>\$self->{debug},
+             "blind!"=>\$self->{blind},
              "log-to=s"=>\$self->{debug_file},
              "to-stdout!"=>\$to_stdout,
              "extract-with=s"=>\$self->{extract_with},
@@ -154,11 +154,11 @@ sub new {
 
   $self->install;
 
-  $self->{'check_dir'}=$self->{tmpdir}."/AMC-VISUAL-TEST";
-  mkdir($self->{'check_dir'}) if(!-d $self->{'check_dir'});
+  $self->{check_dir}=$self->{tmpdir}."/AMC-VISUAL-TEST";
+  mkdir($self->{check_dir}) if(!-d $self->{check_dir});
 
-  $self->read_checksums($self->{'ok_checksums_file'});
-  $self->read_checksums($self->{'dir'}.'/ok-checksums');
+  $self->read_checksums($self->{ok_checksums_file});
+  $self->read_checksums($self->{dir}.'/ok-checksums');
 
   require Time::HiRes if($self->{speed});
 
@@ -181,7 +181,7 @@ sub read_checksums {
     open CSF,$file or die "Error opening $file: $!";
     while (<CSF>) {
       if (/^\s*([a-f0-9]+)\s/) {
-	$self->{'ok_checksums'}->{$1}=1;
+	$self->{ok_checksums}->{$1}=1;
 	$n++;
       }
     }
@@ -195,39 +195,39 @@ sub install {
   my ($self)=@_;
 
   my $temp_loc = $self->{tmpdir};
-  $self->{'temp_dir'} = tempdir( DIR=>$temp_loc,
-				 CLEANUP => (!$self->{'debug'}) );
+  $self->{temp_dir} = tempdir( DIR=>$temp_loc,
+				 CLEANUP => (!$self->{debug}) );
 
-  opendir(my $sh,$self->{'dir'})
+  opendir(my $sh,$self->{dir})
     || die "can't opendir $self->{dir}: $!";
   for my $f (grep { ! /^\./ } (readdir($sh))) {
-    system("cp","-r",$self->{'dir'}.'/'.$f,$self->{'temp_dir'});
+    system("cp","-r",$self->{dir}.'/'.$f,$self->{temp_dir});
   }
   closedir $sh;
 
-  print { $self->{tracedest} } "[>] Installed in $self->{'temp_dir'}\n";
+  print { $self->{tracedest} } "[>] Installed in $self->{temp_dir}\n";
 
-  if(-d ($self->{'temp_dir'}."/scans") && !$self->{'scans'}) {
-    opendir(my $dh, $self->{'temp_dir'}."/scans")
-      || die "can't opendir $self->{'temp_dir'}: $!";
+  if(-d ($self->{temp_dir}."/scans") && !$self->{scans}) {
+    opendir(my $dh, $self->{temp_dir}."/scans")
+      || die "can't opendir $self->{temp_dir}: $!";
     my @s = grep { ! /^\./ } readdir($dh);
     closedir $dh;
 
     if(@s) {
       $self->trace("[I] Provided scans: ".(1+$#s));
-      $self->{'scans'}=[map { $self->{'temp_dir'}."/scans/$_" } sort { $a cmp $b } @s];
+      $self->{scans}=[map { $self->{temp_dir}."/scans/$_" } sort { $a cmp $b } @s];
     }
   }
   
-  $self->{'scans'}=[] if(!$self->{'scans'});
+  $self->{scans}=[] if(!$self->{scans});
 
   for my $d (qw(data cr cr/corrections cr/corrections/jpg cr/corrections/pdf scans)) {
-    mkdir($self->{'temp_dir'}."/$d") if(!-d $self->{'temp_dir'}."/$d");
+    mkdir($self->{temp_dir}."/$d") if(!-d $self->{temp_dir}."/$d");
   }
 
-  $self->{'debug_file'}=$self->{'temp_dir'}."/debug.log"
-    if(!$self->{'debug_file'});
-  open(DB,">",$self->{'debug_file'});
+  $self->{debug_file}=$self->{temp_dir}."/debug.log"
+    if(!$self->{debug_file});
+  open(DB,">",$self->{debug_file});
   print DB "Test\n";
   close(DB);
 }
@@ -253,7 +253,7 @@ sub stop_clock {
 
 sub see_blob {
   my ($self,$name,$blob)=@_;
-  my $path=$self->{'temp_dir'}.'/'.$name;
+  my $path=$self->{temp_dir}.'/'.$name;
   open FILE,">$path";
   binmode(FILE);
   print FILE $blob;
@@ -280,11 +280,11 @@ sub see_file {
   my $dig=$digest->hexdigest;
   my $ff=$file;
   $ff =~ s:.*/::;
-  if($self->{'ok_checksums'}->{$dig}) {
+  if($self->{ok_checksums}->{$dig}) {
     $self->trace("[T] File ok (checksum): $ff");
   } else {
     # compares with already validated file
-    my $validated=$self->{'temp_dir'}."/checked/$ff";
+    my $validated=$self->{temp_dir}."/checked/$ff";
     if(-f $validated && $ff =~ /\.pdf$/i) {
       if(run('comparepdf','-ca','-v0',$validated,$file)) {
 	$self->trace("[T] File ok (compare): $ff");
@@ -296,11 +296,11 @@ sub see_file {
       my $i=0;
       my $dest;
       do {
-	$dest=sprintf("%s/%04d-%s",$self->{'check_dir'},$i,$ff);
+	$dest=sprintf("%s/%04d-%s",$self->{check_dir},$i,$ff);
 	$i++;
       } while(-f $dest);
       copy($file,$dest);
-      push @{$self->{'to_check'}},[$dig,$dest];
+      push @{$self->{to_check}},[$dig,$dest];
     }
   }
 }
@@ -308,8 +308,8 @@ sub see_file {
 sub trace {
   my ($self,@m)=@_;
   print { $self->{tracedest} } join(' ',@m)."\n";
-  if($self->{'debug_file'}) {
-    open(LOG,">>:utf8",$self->{'debug_file'}) || die "Unable to open file $self->{debug_file} as log";
+  if($self->{debug_file}) {
+    open(LOG,">>:utf8",$self->{debug_file}) || die "Unable to open file $self->{debug_file} as log";
     print LOG join(' ',@m)."\n";
     close LOG;
   }
@@ -318,8 +318,8 @@ sub trace {
 sub command {
   my ($self,@c)=@_;
 
-  $self->trace("[*] ".join(' ',@c)) if($self->{'debug'});
-  if(!run(\@c,'>>',$self->{'debug_file'},'2>>',$self->{'debug_file'})) {
+  $self->trace("[*] ".join(' ',@c)) if($self->{debug});
+  if(!run(\@c,'>>',$self->{debug_file},'2>>',$self->{debug_file})) {
     my $cc=$c[0];
     $cc.=" ".$c[1] if($#c>0);
     $cc.=" ..." if($#c>1);
@@ -331,9 +331,9 @@ sub command {
 sub amc_command {
   my ($self,$sub,@opts)=@_;
 
-  push @opts,'--debug','%PROJ/debug.log' if($self->{'debug'});
-  @opts=map { s:%DATA:$self->{'temp_dir'}/data:g;
-	      s:%PROJ:$self->{'temp_dir'}:g;
+  push @opts,'--debug','%PROJ/debug.log' if($self->{debug});
+  @opts=map { s:%DATA:$self->{temp_dir}/data:g;
+	      s:%PROJ:$self->{temp_dir}:g;
 	      $_;
 	    } @opts;
 
@@ -345,13 +345,13 @@ sub prepare {
 
   $self->start_clock();
   $self->amc_command('prepare',
-		     '--filter',$self->{'filter'},
-		     '--with',$self->{'tex_engine'},
+		     '--filter',$self->{filter},
+		     '--with',$self->{tex_engine},
 		     '--mode','s['.$self->{documents}.']',
                      '--epoch',946684800,
-		     '--n-copies',$self->{'n_copies'},
-		     '--prefix',$self->{'temp_dir'}.'/',
-		     '%PROJ/'.$self->{'src'},
+		     '--n-copies',$self->{n_copies},
+		     '--prefix',$self->{temp_dir}.'/',
+		     '%PROJ/'.$self->{src},
 		     '--data','%DATA',
       );
   $self->amc_command('meptex',
@@ -362,12 +362,12 @@ sub prepare {
 
   $self->start_clock();
   $self->amc_command('prepare',
-		     '--filter',$self->{'filter'},
-		     '--with',$self->{'tex_engine'},
+		     '--filter',$self->{filter},
+		     '--with',$self->{tex_engine},
 		     '--mode','b',
-		     '--n-copies',$self->{'n_copies'},
+		     '--n-copies',$self->{n_copies},
 		     '--data','%DATA',
-		     '%PROJ/'.$self->{'src'},
+		     '%PROJ/'.$self->{src},
       );
   $self->stop_clock("scoring strategy");
 }
@@ -379,20 +379,20 @@ sub analyse {
 
   if($self->{perfect_copy} || $self->{full_scans}) {
     $self->amc_command('prepare',
-		       '--filter',$self->{'filter'},
-		       '--with',$self->{'tex_engine'},
+		       '--filter',$self->{filter},
+		       '--with',$self->{tex_engine},
 		       '--mode','k',
                        '--epoch',946684800,
-		       '--n-copies',$self->{'n_copies'},
+		       '--n-copies',$self->{n_copies},
 		       '--prefix','%PROJ/',
-		       '%PROJ/'.$self->{'src'},
+		       '%PROJ/'.$self->{src},
 	);
   }
 
   if($self->{perfect_copy}) {
-    my $nf=$self->{'temp_dir'}."/num";
+    my $nf=$self->{temp_dir}."/num";
     open(NUMS,">$nf");
-    for (@{$self->{'perfect_copy'}}) { print NUMS "$_\n"; }
+    for (@{$self->{perfect_copy}}) { print NUMS "$_\n"; }
     close(NUMS);
     $self->amc_command('imprime',
 		       '--sujet','%PROJ/corrige.pdf',
@@ -400,14 +400,14 @@ sub analyse {
 		       '--output','%PROJ/xx-copie-%e.pdf',
 		       '--fich-numeros',$nf,
 		       '--data','%DATA',
-                       '--extract-with',$self->{'extract_with'},
+                       '--extract-with',$self->{extract_with},
 		      );
 
-    opendir(my $dh, $self->{'temp_dir'})
-      || die "can't opendir $self->{'temp_dir'}: $!";
+    opendir(my $dh, $self->{temp_dir})
+      || die "can't opendir $self->{temp_dir}: $!";
     my @s = grep { /^xx-copie-/ } readdir($dh);
     closedir $dh;
-    push @{$self->{'scans'}},map { $self->{'temp_dir'}."/$_" } @s;
+    push @{$self->{scans}},map { $self->{temp_dir}."/$_" } @s;
   }
 
   if($self->{full_scans}) {
@@ -416,19 +416,19 @@ sub analyse {
 	     "-r$self->{full_density}",
 	     "-dNOPAUSE","-dSAFER","-dBATCH");
     push @cmd,"-dQUIET" if(!$self->{debug});
-    system(@cmd,$self->{'temp_dir'}."/corrige.pdf");
+    system(@cmd,$self->{temp_dir}."/corrige.pdf");
 
-    opendir(my $dh, $self->{'temp_dir'})
-      || die "can't opendir $self->{'temp_dir'}: $!";
+    opendir(my $dh, $self->{temp_dir})
+      || die "can't opendir $self->{temp_dir}: $!";
     my @s = grep { /^full-/ } readdir($dh);
     closedir $dh;
 
     my @st=();
     my $q = AMC::Queue::new();
     for my $page (@s) {
-      my $dest = $self->{'temp_dir'}."/".$page.".".$self->{full_scans};
+      my $dest = $self->{temp_dir}."/".$page.".".$self->{full_scans};
       $q->add_process (magick_module("convert"),
-		       "$self->{'temp_dir'}/$page",
+		       "$self->{temp_dir}/$page",
 		       "-rotate", rand(6)-3,
 		       "+noise", "Poisson", "-threshold", "40%",
 		       "+noise", "Gaussian", "-threshold", "15%",
@@ -436,7 +436,7 @@ sub analyse {
       push @st, $dest;
     }
     $q->run;
-    push @{$self->{'scans'}}, @st;
+    push @{$self->{scans}}, @st;
 
     $self->{perfect_copy}=[1..$self->{n_copies}];
   }
@@ -445,9 +445,9 @@ sub analyse {
 
   # prepares a file with the scans list
 
-  my $scans_list=$self->{'temp_dir'}."/scans-list.txt";
+  my $scans_list=$self->{temp_dir}."/scans-list.txt";
   open(SL,">",$scans_list) or die "Open $scans_list: $!";
-  for(@{$self->{'scans'}}) { print SL "$_\n"; }
+  for(@{$self->{scans}}) { print SL "$_\n"; }
   close(SL);
 
   #
@@ -457,7 +457,7 @@ sub analyse {
   $self->amc_command('read-pdfform',
 		     '--list',$scans_list,
 		     '--data','%DATA',
-		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
+		     ($self->{multiple} ? '--multiple' : '--no-multiple'),
                     );
 
   my @extract_opts=();
@@ -468,30 +468,30 @@ sub analyse {
   }
   $self->amc_command('getimages',
 		     '--list',$scans_list,
-		     '--copy-to',$self->{'temp_dir'}."/scans",
+		     '--copy-to',$self->{temp_dir}."/scans",
 		     '--orientation',$self->get_orientation(),
                      ($self->{force_convert} ? "--force-convert" : "--no-force-convert"),
                      @extract_opts,
 		     );
 
   $self->amc_command('analyse',
-		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
-		     '--bw-threshold',$self->{'bw_threshold'},
-		     '--pre-allocate',$self->{'pre_allocate'},
-		     '--tol-marque',$self->{'tol_marque'},
+		     ($self->{multiple} ? '--multiple' : '--no-multiple'),
+		     '--bw-threshold',$self->{bw_threshold},
+		     '--pre-allocate',$self->{pre_allocate},
+		     '--tol-marque',$self->{tol_marque},
                      ($self->{ignore_red} ? '--ignore-red' : '--no-ignore-red'),
 		     '--projet','%PROJ',
 		     '--data','%DATA',
 		     '--debug-image-dir','%PROJ/cr',
 		     '--liste-fichiers',$scans_list,
-		     ) if($self->{'debug'});
+		     ) if($self->{debug});
   $self->amc_command('analyse',
-		     ($self->{'multiple'} ? '--multiple' : '--no-multiple'),
-		     '--bw-threshold',$self->{'bw_threshold'},
-		     '--pre-allocate',$self->{'pre_allocate'},
-		     '--tol-marque',$self->{'tol_marque'},
+		     ($self->{multiple} ? '--multiple' : '--no-multiple'),
+		     '--bw-threshold',$self->{bw_threshold},
+		     '--pre-allocate',$self->{pre_allocate},
+		     '--tol-marque',$self->{tol_marque},
                      ($self->{ignore_red} ? '--ignore-red' : '--no-ignore-red'),
-		     ($self->{'debug'} || $self->{debug_pixels}
+		     ($self->{debug} || $self->{debug_pixels}
 		      ? '--debug-pixels' : '--no-debug-pixels'),
 		     '--projet','%PROJ',
 		     '--data','%DATA',
@@ -521,13 +521,13 @@ sub note {
   $self->start_clock();
   $self->amc_command('note',
 		     '--data','%DATA',
-		     '--seuil',$self->{'seuil'},
-		     '--seuil-up',$self->{'seuil_up'},
-		     '--grain',$self->{'grain'},
-		     '--arrondi',$self->{'rounding'},
-		     '--notemax',$self->{'notemax'},
-		     '--postcorrect-student',$self->{'postcorrect_student'},
-		     '--postcorrect-copy',$self->{'postcorrect_copy'},
+		     '--seuil',$self->{seuil},
+		     '--seuil-up',$self->{seuil_up},
+		     '--grain',$self->{grain},
+		     '--arrondi',$self->{rounding},
+		     '--notemax',$self->{notemax},
+		     '--postcorrect-student',$self->{postcorrect_student},
+		     '--postcorrect-copy',$self->{postcorrect_copy},
       );
   $self->stop_clock("scoring");
 }
@@ -535,18 +535,18 @@ sub note {
 sub assoc {
   my ($self)=@_;
 
-  return if(!$self->{'list'});
+  return if(!$self->{list});
 
   my @code=();
-  if($self->{'code'} eq '<preassoc>') {
+  if($self->{code} eq '<preassoc>') {
     push @code,'--pre-association';
   } else {
-    push @code,'--notes-id',$self->{'code'};
+    push @code,'--notes-id',$self->{code};
   }
 
   $self->amc_command('association-auto',
-		     '--liste','%PROJ/'.$self->{'list'},
-		     '--liste-key',$self->{'list_key'},
+		     '--liste','%PROJ/'.$self->{list},
+		     '--liste-key',$self->{list_key},
 		     @code,
 		     '--data','%DATA',
                     );
@@ -554,7 +554,7 @@ sub assoc {
   if($self->{association_manual}) {
     for my $a (@{$self->{association_manual}}) {
       $self->amc_command('association',
-                         '--liste','%PROJ/'.$self->{'list'},
+                         '--liste','%PROJ/'.$self->{list},
                          '--data','%DATA',
                          '--set',
                          '--student',$a->{student},
@@ -568,14 +568,14 @@ sub assoc {
 sub get_marks {
   my ($self)=@_;
 
-  my $sf=$self->{'temp_dir'}."/data/scoring.sqlite";
+  my $sf=$self->{temp_dir}."/data/scoring.sqlite";
   my $dbh = DBI->connect("dbi:SQLite:dbname=$sf","","");
-  $self->{'marks'}=$dbh->selectall_arrayref("SELECT * FROM scoring_mark",
+  $self->{marks}=$dbh->selectall_arrayref("SELECT * FROM scoring_mark",
 					    { Slice => {} });
 
   if(!$self->{full_scans}) {
     $self->trace("[I] Marks:");
-    for my $m (@{$self->{'marks'}}) {
+    for my $m (@{$self->{marks}}) {
       $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy total max mark/)));
     }
   }
@@ -584,7 +584,7 @@ sub get_marks {
 sub get_orientation {
   my ($self)=@_;
 
-  my $l=AMC::Data->new($self->{'temp_dir'}."/data")->module('layout');
+  my $l=AMC::Data->new($self->{temp_dir}."/data")->module('layout');
   $l->begin_read_transaction('tgor');
   my $o=$l->orientation();
   $l->end_transaction('tgor');
@@ -593,18 +593,18 @@ sub get_orientation {
 
 sub check_perfect {
   my ($self)=@_;
-  return if(!$self->{'perfect_copy'});
+  return if(!$self->{perfect_copy});
 
   $self->trace("[T] Perfect copies test: "
 	       .($self->{full_scans} ? "ALL" :
-		 join(',',@{$self->{'perfect_copy'}})));
+		 join(',',@{$self->{perfect_copy}})));
 
-  my %p=map { $_=>1 } @{$self->{'perfect_copy'}};
+  my %p=map { $_=>1 } @{$self->{perfect_copy}};
 
-  for my $m (@{$self->{'marks'}}) {
-    $p{$m->{'student'}}=0
-      if($m->{'total'} == $m->{'max'}
-	&& $m->{'total'}>0 );
+  for my $m (@{$self->{marks}}) {
+    $p{$m->{student}}=0
+      if($m->{total} == $m->{max}
+	&& $m->{total}>0 );
   }
 
   for my $i (keys %p) {
@@ -617,24 +617,24 @@ sub check_perfect {
 
 sub check_marks {
   my ($self)=@_;
-  return if(!$self->{'check_marks'});
+  return if(!$self->{check_marks});
 
   $self->trace("[T] Marks test: "
-	       .join(',',keys %{$self->{'check_marks'}}));
+	       .join(',',keys %{$self->{check_marks}}));
 
-  my %p=(%{$self->{'check_marks'}});
+  my %p=(%{$self->{check_marks}});
 
-  for my $m (@{$self->{'marks'}}) {
-    my $st=studentids_string($m->{'student'},$m->{'copy'});
+  for my $m (@{$self->{marks}}) {
+    my $st=studentids_string($m->{student},$m->{copy});
     if(defined($p{$st})) {
-      if($p{$st} == $m->{'mark'}) {
+      if($p{$st} == $m->{mark}) {
 	delete($p{$st});
       }
     }
-    $st='/'.$self->find_assoc($m->{'student'},$m->{'copy'});
+    $st='/'.$self->find_assoc($m->{student},$m->{copy});
     if(defined($p{$st})) {
       delete($p{$st})
-	  if($p{$st} == $m->{'mark'});
+	  if($p{$st} == $m->{mark});
     }
   }
 
@@ -649,15 +649,15 @@ sub check_marks {
 sub get_assoc {
   my ($self)=@_;
 
-  my $sf=$self->{'temp_dir'}."/data/association.sqlite";
+  my $sf=$self->{temp_dir}."/data/association.sqlite";
 
   if(-f $sf) {
     my $dbh = DBI->connect("dbi:SQLite:dbname=$sf","","");
-    $self->{'association'}=$dbh->selectall_arrayref("SELECT * FROM association_association",
+    $self->{association}=$dbh->selectall_arrayref("SELECT * FROM association_association",
 						    { Slice => {} });
 
-    $self->trace("[I] Assoc:") if(@{$self->{'association'}});
-    for my $m (@{$self->{'association'}}) {
+    $self->trace("[I] Assoc:") if(@{$self->{association}});
+    for my $m (@{$self->{association}}) {
       for my $t (qw/auto manual/) {
         my ($n)=$self->{names}->data($self->{list_key},$m->{$t},test_numeric=>1);
         if($n) {
@@ -673,9 +673,9 @@ sub get_assoc {
 sub find_assoc {
   my ($self,$student,$copy)=@_;
   my $r='';
-  for my $a (@{$self->{'association'}}) {
-    $r=(defined($a->{'manual'}) ? $a->{'manual'} : $a->{'auto'})
-      if($a->{'student'} == $student && $a->{'copy'} == $copy);
+  for my $a (@{$self->{association}}) {
+    $r=(defined($a->{manual}) ? $a->{manual} : $a->{auto})
+      if($a->{student} == $student && $a->{copy} == $copy);
   }
   return($r);
 }
@@ -688,19 +688,19 @@ sub compare {
 
 sub check_assoc {
   my ($self)=@_;
-  return if(!$self->{'check_assoc'});
+  return if(!$self->{check_assoc});
 
   $self->trace("[T] Association test: "
-	       .join(',',sort { $a cmp $b } (keys %{$self->{'check_assoc'}})));
+	       .join(',',sort { $a cmp $b } (keys %{$self->{check_assoc}})));
 
-  my %p=(%{$self->{'check_assoc'}});
+  my %p=(%{$self->{check_assoc}});
 
-  for my $m (@{$self->{'association'}}) {
-    my $st=studentids_string($m->{'student'},$m->{'copy'});
+  for my $m (@{$self->{association}}) {
+    my $st=studentids_string($m->{student},$m->{copy});
     delete($p{$st})
-      if(defined($p{$st}) && compare($self->{'check_assoc'}->{$st},$m->{'auto'}));
+      if(defined($p{$st}) && compare($self->{check_assoc}->{$st},$m->{auto}));
     delete($p{'m:'.$st})
-      if(defined($p{'m:'.$st}) && compare($self->{'check_assoc'}->{'m:'.$st},$m->{'manual'}));
+      if(defined($p{'m:'.$st}) && compare($self->{check_assoc}->{'m:'.$st},$m->{manual}));
   }
 
   my @no=(keys %p);
@@ -713,61 +713,61 @@ sub check_assoc {
 
 sub annote {
   my ($self)=@_;
-  return if($self->{blind} || !$self->{'annote'});
+  return if($self->{blind} || !$self->{annote});
 
-  my $nf=$self->{'temp_dir'}."/num-pdf";
+  my $nf=$self->{temp_dir}."/num-pdf";
   open(NUMS,">$nf");
-  for (@{$self->{'annote'}}) { print NUMS "$_\n"; }
+  for (@{$self->{annote}}) { print NUMS "$_\n"; }
   close(NUMS);
 
   my @args=(
-    '--verdict',$self->{'verdict'},
-    '--verdict-question',$self->{'verdict_question'},
-    '--position',$self->{'annote_position'},
+    '--verdict',$self->{verdict},
+    '--verdict-question',$self->{verdict_question},
+    '--position',$self->{annote_position},
     '--project','%PROJ',
     '--data','%DATA',
-    ($self->{'annote_ascii'}
+    ($self->{annote_ascii}
      ? "--force-ascii" : "--no-force-ascii"),
-    '--n-copies',$self->{'n_copies'},
+    '--n-copies',$self->{n_copies},
     '--subject','%PROJ/sujet.pdf',
-    '--src','%PROJ/'.$self->{'src'},
-    '--with',$self->{'tex_engine'},
-    '--filename-model',$self->{'model'},
+    '--src','%PROJ/'.$self->{src},
+    '--with',$self->{tex_engine},
+    '--filename-model',$self->{model},
     '--id-file','%PROJ/num-pdf',
-    '--darkness-threshold',$self->{'seuil'},
-    '--darkness-threshold-up',$self->{'seuil_up'},
+    '--darkness-threshold',$self->{seuil},
+    '--darkness-threshold-up',$self->{seuil_up},
       );
-  push @args,'--names-file','%PROJ/'.$self->{'list'} if($self->{'list'});
+  push @args,'--names-file','%PROJ/'.$self->{list} if($self->{list});
   $self->amc_command('annotate',@args);
 
-  my $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
+  my $pdf_dir=$self->{temp_dir}.'/cr/corrections/pdf';
   opendir(my $dh, $pdf_dir)
     || die "can't opendir $pdf_dir: $!";
   my @pdf = grep { /\.pdf$/i } readdir($dh);
   closedir $dh;
   for my $f (@pdf) { $self->see_file($pdf_dir.'/'.$f); }
 
-  if(@{$self->{'annote_files'}}) {
+  if(@{$self->{annote_files}}) {
     my %p=map { $_=>1 } @pdf;
-    for my $f (@{$self->{'annote_files'}}) {
+    for my $f (@{$self->{annote_files}}) {
       if(!$p{$f}) {
 	$self->trace("[E] Annotated file $f has not been generated.");
 	exit(1);
       }
     }
-    $self->trace("[T] Annotated file names: ".join(', ',@{$self->{'annote_files'}}));
+    $self->trace("[T] Annotated file names: ".join(', ',@{$self->{annote_files}}));
   }
 }
 
 sub ok {
   my ($self)=@_;
   $self->end;
-  if(@{$self->{'to_check'}}) {
-    $self->trace("[?] ".(1+$#{$self->{'to_check'}})." files to check in $self->{'check_dir'}:");
-    for(@{$self->{'to_check'}}) {
+  if(@{$self->{to_check}}) {
+    $self->trace("[?] ".(1+$#{$self->{to_check}})." files to check in $self->{check_dir}:");
+    for(@{$self->{to_check}}) {
       $self->trace("    ".$_->[0]." ".$_->[1]);
     }
-    exit(2) if(!$self->{'blind'});
+    exit(2) if(!$self->{blind});
   } else {
     $self->trace("[0] Test completed succesfully");
   }
@@ -776,7 +776,7 @@ sub ok {
 sub get_defects {
   my ($self)=@_;
 
-  my $l=AMC::Data->new($self->{'temp_dir'}."/data")->module('layout');
+  my $l=AMC::Data->new($self->{temp_dir}."/data")->module('layout');
   $l->begin_read_transaction('test');
   my $d={$l->defects()};
   $l->end_transaction('test');
@@ -799,7 +799,7 @@ sub defects {
 
 sub check_export {
   my ($self)=@_;
-  my @csv=@{$self->{'export_full_csv'}};
+  my @csv=@{$self->{export_full_csv}};
   if(@csv) {
     $self->begin("CSV full export test (".(1+$#csv)." scores)");
     my @args=('--data','%DATA',
@@ -808,10 +808,10 @@ sub check_export {
 	      '--option-out','ticked='.$self->{export_csv_ticked},
 	      '-o','%PROJ/export.csv',
 	);
-    push @args, '--fich-noms', '%PROJ/'.$self->{'list'} if($self->{'list'});
+    push @args, '--fich-noms', '%PROJ/'.$self->{list} if($self->{list});
     $self->amc_command('export',@args);
     my $c=Text::CSV->new();
-    open my $fh,"<:encoding(utf-8)",$self->{'temp_dir'}.'/export.csv';
+    open my $fh,"<:encoding(utf-8)",$self->{temp_dir}.'/export.csv';
     my $i=0;
     my %heads=map { $_ => $i++ } (@{$c->getline($fh)});
     my $copy=$heads{translate_column_title('copie')};
@@ -828,7 +828,7 @@ sub check_export {
 	  $self->test($row->[$heads{"TICKED:".$t->{-question}}],
 		      $t->{-abc},"ABC for copy ".$t->{-copy}
 		      ." Q=".$t->{-question});
-	  $t->{'checked'}=1;
+	  $t->{checked}=1;
 	}
 	if($t->{-copy} eq $row->[$copy]
 	   && $t->{-question} && defined($heads{$t->{-question}})
@@ -836,13 +836,13 @@ sub check_export {
 	  $self->test($row->[$heads{$t->{-question}}],
 		      $t->{-score},"score for copy ".$t->{-copy}
 		      ." Q=".$t->{-question});
-	  $t->{'checked'}=1;
+	  $t->{checked}=1;
 	}
       }
     }
     close $fh;
     for my $t (@csv) {
-      if(!$t->{'checked'}) {
+      if(!$t->{checked}) {
 	$self->trace("[E] CSV: line not found. ".join(', ',map { $_.'='.$t->{$_} } (keys %$t)));
 	exit(1);
       }
@@ -850,7 +850,7 @@ sub check_export {
     $self->end;
   }
 
-  if($self->{'export_ods'}) {
+  if($self->{export_ods}) {
     require OpenOffice::OODoc;
 
     $self->begin("ODS full export test");
@@ -861,18 +861,18 @@ sub check_export {
       '--option-out','stats=h',
       '-o','%PROJ/export.ods',
 	);
-    push @args, '--fich-noms','%PROJ/'.$self->{'list'} if($self->{'list'});
+    push @args, '--fich-noms','%PROJ/'.$self->{list} if($self->{list});
     $self->amc_command('export',
 		       @args
 		      );
-    my $doc = OpenOffice::OODoc::odfDocument(file=>$self->{'temp_dir'}.'/export.ods');
+    my $doc = OpenOffice::OODoc::odfDocument(file=>$self->{temp_dir}.'/export.ods');
     my %iq=();
     my $i=0;
     while(my $id=$doc->getCellValue(1,0,$i)) {
       $iq{$id}=$i;
       $i+=5;
     }
-  ONEQ: for my $q (@{$self->{'export_ods'}->{stats}}) {
+  ONEQ: for my $q (@{$self->{export_ods}->{stats}}) {
       my $i=$iq{$q->{id}};
       if(defined($i)) {
         $self->test($doc->getCellValue(1,2,$i+1),$q->{total},'total');
@@ -893,11 +893,11 @@ sub check_export {
 
 sub check_zooms {
   my ($self)=@_;
-  my $cz=$self->{'check_zooms'};
+  my $cz=$self->{check_zooms};
   my @zk=keys %$cz;
   return if(!@zk);
 
-  my $capture=AMC::Data->new($self->{'temp_dir'}."/data")->module('capture');
+  my $capture=AMC::Data->new($self->{temp_dir}."/data")->module('capture');
   $capture->begin_read_transaction('cZOO');
 
   for my $p (keys %{$cz}) {
@@ -935,18 +935,18 @@ sub check_zooms {
 sub check_textest {
   my ($self,$tex_file)=@_;
   if(!$tex_file) {
-    opendir(my $dh, $self->{'dir'})
-      || die "can't opendir $self->{'dir'}: $!";
+    opendir(my $dh, $self->{dir})
+      || die "can't opendir $self->{dir}: $!";
     my @tex = grep { /\.tex$/ } readdir($dh);
     closedir $dh;
     $tex_file=$tex[0] if(@tex);
   }
-  $tex_file=$self->{'temp_dir'}."/".$tex_file;
+  $tex_file=$self->{temp_dir}."/".$tex_file;
   if(-f $tex_file) {
     my (@value_is,@value_shouldbe);
     chomp(my $cwd = `pwd`);
-    chdir($self->{'temp_dir'});
-    open(TEX,"-|",$self->{'tex_engine'},
+    chdir($self->{temp_dir});
+    open(TEX,"-|",$self->{tex_engine},
 	 $tex_file);
     while(<TEX>) {
       if(/^\!/) {
@@ -983,13 +983,13 @@ sub check_textest {
 
 sub data {
   my ($self)=@_;
-  return(AMC::Data->new($self->{'temp_dir'}."/data"));
+  return(AMC::Data->new($self->{temp_dir}."/data"));
 }
 
 sub begin {
   my ($self,$title)=@_;
-  $self->end if($self->{'test_title'});
-  $self->{'test_title'}=$title;
+  $self->end if($self->{test_title});
+  $self->{test_title}=$title;
   $self->{'n.subt'}=0;
 }
 
@@ -997,19 +997,19 @@ sub end {
   my ($self)=@_;
   $self->trace("[T] ".
 	       ($self->{'n.subt'} ? "(".$self->{'n.subt'}.") " : "")
-	       .$self->{'test_title'}) if($self->{'test_title'});
-  $self->{'test_title'}='';
+	       .$self->{test_title}) if($self->{test_title});
+  $self->{test_title}='';
 }
 
 sub datadump {
   my ($self)=@_;
-  if($self->{'datamodule'} && $self->{'datatable'}) {
-    print Dumper($self->{'datamodule'}->dbh
-		 ->selectall_arrayref("SELECT * FROM $self->{'datatable'}",
+  if($self->{datamodule} && $self->{datatable}) {
+    print Dumper($self->{datamodule}->dbh
+		 ->selectall_arrayref("SELECT * FROM $self->{datatable}",
 				      { Slice=>{} }));
   }
-  $self->{'datamodule'}->end_transaction
-    if($self->{'datamodule'});
+  $self->{datamodule}->end_transaction
+    if($self->{datamodule});
 }
 
 sub test {
@@ -1024,7 +1024,7 @@ sub test {
   } else {
     no warnings 'uninitialized';
     if($x ne $v) {
-      $self->trace("[E] ".$self->{'test_title'}." [$subtest] : \'$x\' should be \'$v\'");
+      $self->trace("[E] ".$self->{test_title}." [$subtest] : \'$x\' should be \'$v\'");
       $self->datadump;
       exit(1);
     }
@@ -1035,7 +1035,7 @@ sub test_undef {
   my ($self,$x)=@_;
   $self->{'n.subt'}++;
   if(defined($x)) {
-    $self->trace("[E] ".$self->{'test_title'}." [$self->{'n.subt'}] : \'$x\' should be undef");
+    $self->trace("[E] ".$self->{test_title}." [$self->{'n.subt'}] : \'$x\' should be undef");
     $self->datadump;
     exit(1);
   }
@@ -1044,7 +1044,7 @@ sub test_undef {
 sub test_scoring {
   my ($self,$question,$answers,$target_score)=@_;
 
-  my $data=AMC::Data->new($self->{'temp_dir'}."/data");
+  my $data=AMC::Data->new($self->{temp_dir}."/data");
   my $s=$data->module('scoring');
   my $c=$data->module('capture');
 
@@ -1093,7 +1093,7 @@ sub test_scoring {
 
 sub update_sqlite {
   my ($self)=@_;
-  my $d=AMC::Data->new($self->{'temp_dir'}."/data");
+  my $d=AMC::Data->new($self->{temp_dir}."/data");
   for my $m (qw/layout capture scoring association report/) {
     $d->module($m);
   }
@@ -1104,7 +1104,7 @@ sub check_pages {
   my ($self)=@_;
   if($self->{pages}) {
     $self->trace("[T] Pages check : ".join(",",@{$self->{pages}}));
-    my $l=AMC::Data->new($self->{'temp_dir'}."/data")->module('layout');
+    my $l=AMC::Data->new($self->{temp_dir}."/data")->module('layout');
     $l->begin_read_transaction('npag');
     for my $i (0..$#{$self->{pages}}) {
       my @p=$l->pages_for_student($i+1);

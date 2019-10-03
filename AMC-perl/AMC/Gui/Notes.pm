@@ -44,7 +44,7 @@ sub ajoute_colonne {
 	$titre,
 	$renderer,
 	text=> $i,
-	'background'=>TAB_COLOR );
+	background=>TAB_COLOR );
     $column->set_sort_column_id($i);
     $tree->append_column($column);
     $store->set_sort_func($i,\&sort_num,$i);
@@ -76,66 +76,66 @@ sub new {
     my $glade_xml=__FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->{'gui'}=Gtk3::Builder->new();
-    $self->{'gui'}->set_translation_domain('auto-multiple-choice');
-    $self->{'gui'}->add_from_file($glade_xml);
+    $self->{gui}=Gtk3::Builder->new();
+    $self->{gui}->set_translation_domain('auto-multiple-choice');
+    $self->{gui}->add_from_file($glade_xml);
 
     for my $k (qw/general tableau/) {
-	$self->{$k}=$self->{'gui'}->get_object($k);
+	$self->{$k}=$self->{gui}->get_object($k);
     }
 
-    if($self->{'general'}->get_direction() eq 'rtl') {
-	$self->{'tableau'}->set_grid_lines('horizontal');
+    if($self->{general}->get_direction() eq 'rtl') {
+	$self->{tableau}->set_grid_lines('horizontal');
     }
 
-    $self->{'gui'}->connect_signals(undef,$self);
+    $self->{gui}->connect_signals(undef,$self);
 
-    $self->{'scoring'}->begin_read_transaction;
+    $self->{scoring}->begin_read_transaction;
 
     for (qw/student copy/) {
       $self->{'postcorrect_'.$_}=
-	$self->{'scoring'}->variable('postcorrect_'.$_);
+	$self->{scoring}->variable('postcorrect_'.$_);
       $self->{'postcorrect_'.$_}=-1 if(!defined($self->{'postcorrect_'.$_}) || $self->{'postcorrect_'.$_} eq '');
     }
 
     my $code_digit_pattern = $self->{layout}->code_digit_pattern();
-    my @codes=$self->{'scoring'}->codes;
-    my @questions=sort { $a->{'title'} cmp $b->{'title'} }
-      grep { $_->{'title'} !~ /$code_digit_pattern$/ }
-      ($self->{'scoring'}->questions);
+    my @codes=$self->{scoring}->codes;
+    my @questions=sort { $a->{title} cmp $b->{title} }
+      grep { $_->{title} !~ /$code_digit_pattern$/ }
+      ($self->{scoring}->questions);
 
     my $store = Gtk3::ListStore->new ( map {'Glib::String' } (1..(3+1+$#codes+1+$#questions)) );
 
-    $self->{'tableau'}->set_model($store);
+    $self->{tableau}->set_model($store);
 
-    ajoute_colonne($self->{'tableau'},$store,
+    ajoute_colonne($self->{tableau},$store,
 		   translate_column_title("copie"),TAB_ID);
-    ajoute_colonne($self->{'tableau'},$store,
+    ajoute_colonne($self->{tableau},$store,
 		   translate_column_title("note"),TAB_NOTE);
 
     my $i=TAB_DETAIL ;
-    for((map { $_->{'title'}} @questions),@codes) {
-	ajoute_colonne($self->{'tableau'},$store,decode('utf-8',$_),$i++);
+    for((map { $_->{title}} @questions),@codes) {
+	ajoute_colonne($self->{tableau},$store,decode('utf-8',$_),$i++);
     }
 
     my $row=0;
     my @vv;
 
-  COPIE:for my $m ($self->{'scoring'}->marks) {
-      my @sc=($m->{'student'},$m->{'copy'});
+  COPIE:for my $m ($self->{scoring}->marks) {
+      my @sc=($m->{student},$m->{copy});
       @vv=(TAB_ID,studentids_string(@sc),
-	      TAB_NOTE,formatte($m->{'mark'}),
-	      TAB_COLOR,($sc[0]==$self->{'postcorrect_student'} &&
-			 $sc[1]==$self->{'postcorrect_copy'}
+	      TAB_NOTE,formatte($m->{mark}),
+	      TAB_COLOR,($sc[0]==$self->{postcorrect_student} &&
+			 $sc[1]==$self->{postcorrect_copy}
 			 ? '#CAEC87' : undef)
 	      );
       $i=TAB_DETAIL ;
       for(@questions) {
 	push @vv,$i++,
-	  formatte($self->{'scoring'}->question_score(@sc,$_->{'question'}));
+	  formatte($self->{scoring}->question_score(@sc,$_->{question}));
       }
       for(@codes) {
-	push @vv,$i++,$self->{'scoring'}->student_code(@sc,$_);
+	push @vv,$i++,$self->{scoring}->student_code(@sc,$_);
       }
 
       $store->insert_with_values($row++,@vv);
@@ -144,16 +144,16 @@ sub new {
     # Average row
 
     @vv=(TAB_ID,translate_id_name('moyenne'),
-	 TAB_NOTE,formatte($self->{'scoring'}->average_mark),
+	 TAB_NOTE,formatte($self->{scoring}->average_mark),
 	);
 
     $i=TAB_DETAIL ;
     for(@questions) {
       my $p;
-      if($self->{'scoring'}->one_indicative($_->{'question'})) {
+      if($self->{scoring}->one_indicative($_->{question})) {
 	$p='-';
       } else {
-	$p=$self->{'scoring'}->question_average($_->{'question'});
+	$p=$self->{scoring}->question_average($_->{question});
 	if($p ne '-') {
 	  $p=sprintf("%.0f%%",$p);
 	} else {
@@ -168,7 +168,7 @@ sub new {
 
     $store->insert_with_values($row++,@vv);
 
-    $self->{'scoring'}->end_transaction;
+    $self->{scoring}->end_transaction;
 
     AMC::Gui::WindowSize::size_monitor
         ($self->{general},{config=>$self->{size_prefs},
@@ -180,10 +180,10 @@ sub new {
 sub quitter {
     my ($self)=(@_);
 
-    if($self->{'global'}) {
+    if($self->{global}) {
 	Gtk3->main_quit;
     } else {
-	$self->{'general'}->destroy;
+	$self->{general}->destroy;
     }
 }
 

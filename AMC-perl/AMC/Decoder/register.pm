@@ -94,8 +94,8 @@ sub missing_commands {
 
 sub check_dependencies {
   my ($self)=@_;
-  my %miss=('perl_modules'=>[$self->missing_perl_modules()],
-	    'commands'=>[$self->missing_commands()],
+  my %miss=(perl_modules=>[$self->missing_perl_modules()],
+	    commands=>[$self->missing_commands()],
       );
   my $ok;
   if($self->{dependencies} eq 'all') {
@@ -109,7 +109,7 @@ sub check_dependencies {
       $ok=1 if(!@{$miss{$k}});
     }
   }
-  $miss{'ok'}=$ok;
+  $miss{ok}=$ok;
   return(\%miss);
 }
 

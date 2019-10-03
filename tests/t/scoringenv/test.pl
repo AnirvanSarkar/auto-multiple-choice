@@ -26,7 +26,7 @@ use Data::Dumper;
 
 use_gettext;
 
-my $t=AMC::Test->new('dir'=>__FILE__);
+my $t=AMC::Test->new(dir=>__FILE__);
 
 $t->begin("AMC::ScoringEnv type 0");
 
