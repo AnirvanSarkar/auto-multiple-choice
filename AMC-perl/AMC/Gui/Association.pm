@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Gui::Association;
 
 use AMC::Basic;
@@ -31,6 +34,7 @@ use Getopt::Long;
 
 use POSIX;
 use Gtk3 -init;
+use Glib qw/TRUE FALSE/;
 
 use constant {
     COPIES_N => 0,
@@ -439,7 +443,7 @@ sub maj_contenu_liste {
 # {X:IN}
 sub maj_contenu_liste_iimage {
   my ($self,$iimage)=@_;
-  my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$ii);
+  my $iter=model_id_to_iter($self->{'copies_store'},COPIES_IIMAGE,$iimage);
   my @sc=map { $self->{'images'}->[$iimage]->{$_} } (qw/student copy/);
   $self->maj_contenu_liste($iimage,$iter,@sc);
 }
@@ -568,11 +572,11 @@ sub efface_manuel {
 
     if($i>=0) {
       $self->{'assoc'}->begin_transaction('ADEL');
-      $self->{'capture'}->outdate_annotated_copy(@sc);
 
       my @sc=$self->image_sc($i);
       my @r=$self->sc2inom(@sc);
 
+      $self->{'capture'}->outdate_annotated_copy(@sc);
       $self->{'assoc'}->set_manual(@sc,undef);
 
       # update buttons
@@ -602,11 +606,11 @@ sub inconnu {
 
     if($i>=0) {
       $self->{'assoc'}->begin_transaction('AUNK');
-      $self->{'capture'}->outdate_annotated_copy(@sc);
 
       my @sc=$self->image_sc($i);
       my @r=$self->sc2inom(@sc);
 
+      $self->{'capture'}->outdate_annotated_copy(@sc);
       $self->{'assoc'}->set_manual(@sc,'NONE');
 
       for(@r) {
@@ -725,7 +729,7 @@ sub charge_image {
       $self->vraie_copie(1);
     } else {
 	$i=-1;
-	$self->{'photo'}->set_image(background_color=>'#6CB9ED',text=>__"End");
+	$self->{'photo'}->set_content(background_color=>'#6CB9ED',text=>__"End");
 	$self->vraie_copie(0);
     }
     $self->{'iimage'}=$i;
@@ -823,11 +827,11 @@ sub style_bouton {
     my $eb=$self->{'boutons_eb'}->[$i];
     if($b) {
 	if($pris) {
-	    $b->set_relief(GTK_RELIEF_NONE);
+	    $b->set_relief('GTK_RELIEF_NONE');
 	    $b->override_background_color('prelight',($actif ? $col_actif : $col_pris));
 	    $b->get_child()->set_text($self->{'liste'}->data_n($i,'_ID_')." ($pris)");
 	} else {
-	    $b->set_relief(GTK_RELIEF_NORMAL);
+	    $b->set_relief('GTK_RELIEF_NORMAL');
 	    $b->override_background_color('prelight',undef);
 	    $b->get_child()->set_text($self->{'liste'}->data_n($i,'_ID_'));
 	}

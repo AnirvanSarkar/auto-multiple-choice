@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2014-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2014-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::Gui::Prefs;
 
@@ -287,6 +290,7 @@ sub reprend_pref {
     if($s) {
       debug "Key $s->{full_key}: kind $s->{kind}";
 
+      my $n;
       my $found=1;
       if ($s->{kind} eq 'x') {
 	$n=$s->{widget}->get_text();

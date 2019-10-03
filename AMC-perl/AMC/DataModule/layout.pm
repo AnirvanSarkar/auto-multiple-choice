@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::DataModule::layout;
 
@@ -156,7 +159,7 @@ use AMC::Basic;
 use AMC::DataModule;
 use XML::Simple;
 
-@ISA=("AMC::DataModule");
+our @ISA=("AMC::DataModule");
 
 sub version_current {
   return(7);
@@ -288,7 +291,7 @@ sub populate_from_xml {
       $self->progression('begin',__"Fetching layout data from old format XML files...");
 
 	opendir(DIR, $mep) || die "can't opendir $mep: $!";
-	@xmls = grep { /\.xml$/ && -s "$mep/".$_ } 
+	my @xmls = grep { /\.xml$/ && -s "$mep/".$_ } 
 	readdir(DIR);
 	closedir DIR;
 
@@ -701,7 +704,7 @@ sub score_zones {
 sub pages_for_student {
     my ($self,$student,%oo)=@_;
     $oo{'select'}='all' if(!$oo{'select'});
-    @args=($student);
+    my @args=($student);
     if($oo{select} eq 'box') {
       $oo{role}=BOX_ROLE_ANSWER if(!$oo{role});
       push @args,$oo{role};

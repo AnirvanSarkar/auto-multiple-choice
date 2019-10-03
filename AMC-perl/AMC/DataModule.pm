@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::DataModule;
 
 # AMC::DataModule is the base class for modules written to be loaded

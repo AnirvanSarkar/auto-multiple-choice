@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Filter::latex;
 
 use AMC::Basic;
@@ -27,7 +30,7 @@ use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs t
 use File::Copy;
 use Text::ParseWords;
 
-@ISA=("AMC::Filter");
+our @ISA=("AMC::Filter");
 
 sub new {
     my $class = shift;

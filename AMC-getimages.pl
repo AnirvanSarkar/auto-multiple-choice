@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use AMC::Basic;
 use AMC::Gui::Avancement;
@@ -191,6 +194,7 @@ sub replace_by {
 # command, or in a file
 
 my @f=map { original_file($_) } (@ARGV);
+my @fs;
 
 if(-f $list_file) {
   open(LIST,$list_file);

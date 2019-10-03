@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,13 +17,16 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Export::register::ods;
 
 use AMC::Export::register;
 use AMC::Basic;
 use AMC::Gui::Prefs;
 
-@ISA=("AMC::Export::register");
+our @ISA=("AMC::Export::register");
 
 sub new {
     my $class = shift;
@@ -83,7 +86,7 @@ sub build_config_gui {
 	     0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
-  $widget->pack_start($renderer, TRUE);
+  $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
 # TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
   $prefs->store_register('export_ods_stats'=>cb_model(""=>__p("None [no stats table to export]"),
@@ -100,7 +103,7 @@ sub build_config_gui {
 	     0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
-  $widget->pack_start($renderer, TRUE);
+  $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
   $prefs->store_register('export_ods_statsindic'=>cb_model(""=>__"None",
 						   "h"=>__"Horizontal flow",
@@ -118,7 +121,7 @@ sub build_config_gui {
 
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
-  $widget->pack_start($renderer, TRUE);
+  $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
 # TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
   $prefs->store_register('export_ods_group'=>cb_model("0"=>__"No",
@@ -135,7 +138,7 @@ sub build_config_gui {
 
   $widget=Gtk3::ComboBox->new();
   $renderer = Gtk3::CellRendererText->new();
-  $widget->pack_start($renderer, TRUE);
+  $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
 # TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
   $prefs->store_register('export_ods_groupsep'=>cb_model(":"=>__"':'",

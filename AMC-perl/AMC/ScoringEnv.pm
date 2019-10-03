@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::ScoringEnv;
 
@@ -112,7 +115,7 @@ sub clear_errors {
 
 sub clone {
   my ($self,$from_global)=@_;
-  $c=AMC::ScoringEnv->new($self);
+  my $c=AMC::ScoringEnv->new($self);
   if($from_global) {
     $c->{globalvariables}=$self->{variables};
   } else {
@@ -146,7 +149,7 @@ sub set_type {
 
 sub set_variable {
   my ($self,$vv,$value,$rw,$unlock,$global)=@_;
-  $vars=($global ? 'globalvariables' : 'variables');
+  my $vars=($global ? 'globalvariables' : 'variables');
   $self->{$vars}->{$vv}=[] if(!$self->{$vars}->{$vv});
   if((!$unlock)
      && $self->{$vars}->{$vv}->[$self->{type}]
@@ -298,7 +301,7 @@ sub process_variables {
 
 sub unevaluate_directives {
   my ($self)=@_;
-  for my $key (%{$self->{directives}}) {
+  for my $key (keys %{$self->{directives}}) {
     $self->{directives}->{$key}->{evaluated}=0;
   }
 }

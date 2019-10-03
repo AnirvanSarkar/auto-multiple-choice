@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use Getopt::Long;
 use File::Spec::Functions qw/tmpdir/;
@@ -146,7 +149,7 @@ sub process_pages {
   my ($slices,$f_dest,$elong)=@_;
 
   my $tmp = File::Temp->new( DIR=>tmpdir(),UNLINK => 1, SUFFIX => '.pdf' );
-  $fn=$tmp->filename();
+  my $fn=$tmp->filename();
   my $n_slices=1+$#{$slices};
 
   print "Student $elong : $n_slices slices to file $fn...\n";

@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::DataModule::capture;
 
 # AMC capture data management.
@@ -167,7 +170,7 @@ use AMC::DataModule;
 use AMC::DataModule::layout ':flags';
 use XML::Simple;
 
-@ISA=("AMC::DataModule");
+our @ISA=("AMC::DataModule");
 
 use_gettext();
 
@@ -280,7 +283,7 @@ sub populate_from_xml {
   my $cordir="$cr/corrections/jpg/";
 
   opendir(DIR, $cr) || die "can't opendir $cr: $!";
-  @xmls = grep { /\.xml$/ && -s "$cr/".$_ } readdir(DIR);
+  my @xmls = grep { /\.xml$/ && -s "$cr/".$_ } readdir(DIR);
   closedir DIR;
 
   my $frac=0;
@@ -944,7 +947,7 @@ sub page_sensitivity {
   my $delta_up=$self->sql_single($self->statement('pageNearRatio'),
 				 $darkness_threshold_up,
 				 $student,$page,$copy);
-  return(sensitivity($delta,$darkness-threshold,
+  return(sensitivity($delta,$darkness_threshold,
 		     $delta_up,$darkness_threshold_up));
 }
 

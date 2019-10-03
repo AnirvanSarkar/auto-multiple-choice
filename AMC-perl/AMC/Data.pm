@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Data;
 
 # AMC::Data handles data storage management for AMC. An AMC::Data can
@@ -236,6 +239,9 @@ sub progression {
   if(ref($self->{'progress'}) eq 'CODE') {
     &{$self->{'progress'}}($action,$argument);
   } elsif(ref($self->{'progress'}) eq 'HASH') {
+
+    require Gtk3;
+    
     if($action eq 'begin') {
       $self->{'progress.lasttext'}
 	=$self->{'progress'}->{'avancement'}->get_text();
@@ -258,7 +264,7 @@ sub progression {
 
       $self->{'progress.time'}=0;
 
-      Gtk3::main_iteration while ( Gtk3::events_pending );
+      "Gtk3::main_iteration"->() while ( "Gtk3::events_pending"->() );
     } elsif($action eq 'end') {
       $self->{'progress'}->{'avancement'}
 	->set_fraction($self->{'progress.lastfaction'});
@@ -270,13 +276,13 @@ sub progression {
 	$self->{'progress'}->{'annulation'}
 	  ->set_sensitive($self->{'progress.lastcancel'});
       }
-      Gtk3::main_iteration while ( Gtk3::events_pending );
+      "Gtk3::main_iteration"->() while ( "Gtk3::events_pending"->() );
     } elsif($action eq 'fraction') {
       # Don't update progress bar more than once a second.
       if(time>$self->{'progress.time'}) {
 	$self->{'progress.time'}=time;
 	$self->{'progress'}->{'avancement'}->set_fraction($argument);
-	Gtk3::main_iteration while ( Gtk3::events_pending );
+	"Gtk3::main_iteration"->() while ( "Gtk3::events_pending"->() );
       }
     }
   }

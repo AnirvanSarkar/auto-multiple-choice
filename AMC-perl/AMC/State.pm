@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::State;
 
@@ -70,7 +73,7 @@ sub read {
     if(!$archivefile) {
 	# look for the last one in the directory
 	opendir(my $dh, $self->{'directory'})
-	    or debug "Error opening directory $directory: $!";
+	    or debug "Error opening directory $self->{directory}: $!";
 	my @st = sort { $b cmp $a }
 	grep { /^saved-[0-9-]+\.zip$/ && -f $self->{'directory'}."/$_" } readdir($dh);
 	closedir $dh;

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Gui::Zooms;
 
 use File::Spec::Functions qw/tmpdir/;
@@ -27,6 +30,7 @@ use AMC::DataModule::capture ':zone';
 use AMC::Gui::Prefs;
 
 use Gtk3 -init;
+use Glib qw/TRUE FALSE/;
 
 use POSIX qw(ceil);
 
@@ -129,7 +133,7 @@ sub new {
     for(0,1) {
       $self->{'event_'.$_}->drag_dest_set('all',
                                           [Gtk3::TargetEntry->new('STRING',0,ID_AMC_BOX)],
-                                          [GDK_ACTION_MOVE],
+                                          ['GDK_ACTION_MOVE'],
                                          );
 	$self->{'event_'.$_}->signal_connect(
 	    'drag-data-received' => \&target_drag_data_received,[$self,$_]);
@@ -240,7 +244,7 @@ sub safe_pixbuf {
     # Then try using Graphics::Magick to convert to XPM
     my $i=magick_perl_module()->new();
     $i->BlobToImage($image);
-    if( ! $i[0]) {
+    if( ! $i->[0]) {
       # Try using temporary file to do the same
       my $tf=tmpdir()."/AMC-tempzoom";
       open TZ,">$tf";binmode TZ;print TZ $image;close TZ;
@@ -266,8 +270,8 @@ sub safe_pixbuf {
   my ($text_x,$text_y)=$layout->get_pixel_size();
   my $pixmap=Gtk3::Gdk::Pixmap->new(undef,$text_x,$text_y,$colormap->get_visual->depth);
   $pixmap->set_colormap($colormap);
-  $pixmap->draw_rectangle($g->style->bg_gc(GTK_STATE_NORMAL),TRUE,0,0,$text_x,$text_y);
-  $pixmap->draw_layout($g->style->fg_gc(GTK_STATE_NORMAL),0,0,$layout);
+  $pixmap->draw_rectangle($g->style->bg_gc('GTK_STATE_NORMAL'),TRUE,0,0,$text_x,$text_y);
+  $pixmap->draw_layout($g->style->fg_gc('GTK_STATE_NORMAL'),0,0,$layout);
   $p=Gtk3::Gdk::Pixbuf->get_from_drawable($pixmap, $colormap,0,0,0,0, $text_x, $text_y);
   return($p,0);
 }
@@ -313,7 +317,7 @@ sub load_boxes {
 	  Gtk3::Label->new(sprintf("%.3f",
 				   $self->{'_capture'}
 				   ->zone_darkness($z->{'zoneid'})));
-	$self->{'label'}->{$id}->set_justify(GTK_JUSTIFY_LEFT);
+	$self->{'label'}->{$id}->set_justify('GTK_JUSTIFY_LEFT');
 
 	my $hb=Gtk3::HBox->new();
 	$self->{'eb'}->{$id}=Gtk3::EventBox->new();
@@ -322,9 +326,9 @@ sub load_boxes {
 	$hb->add($self->{'image'}->{$id});
 	$hb->add($self->{'label'}->{$id});
 
-	$self->{'eb'}->{$id}->drag_source_set(GDK_BUTTON1_MASK,
+	$self->{'eb'}->{$id}->drag_source_set('GDK_BUTTON1_MASK',
 					      [Gtk3::TargetEntry->new('STRING',0,ID_AMC_BOX)],
-                                              [GDK_ACTION_MOVE],
+                                              ['GDK_ACTION_MOVE'],
                                              );
 	$self->{'eb'}->{$id}
 	  ->signal_connect('drag-data-get' => \&source_drag_data_get,
@@ -487,13 +491,13 @@ sub remplit {
 	my $y=int($i/$self->{'n_cols'});
 
 	if($self->{'eff_pos'}->{$id} != $cat) {
-	    $self->{'eb'}->{$id}->override_background_color(GTK_STATE_FLAG_NORMAL,$col_modif);
+	    $self->{'eb'}->{$id}->override_background_color('GTK_STATE_FLAG_NORMAL',$col_modif);
 	    $self->{'conforme'}=0;
 	} else {
 	    if($self->{'auto_pos'}->{$id} == $cat) {
-		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_FLAG_NORMAL,undef);
+		$self->{'eb'}->{$id}->override_background_color('GTK_STATE_FLAG_NORMAL',undef);
 	    } else {
-		$self->{'eb'}->{$id}->override_background_color(GTK_STATE_FLAG_NORMAL,$col_manuel);
+		$self->{'eb'}->{$id}->override_background_color('GTK_STATE_FLAG_NORMAL',$col_manuel);
 	    }
 	}
 
@@ -525,7 +529,7 @@ sub zoom_it {
       my $ty=int($self->{'pb_src'}->{$id}->get_height * $self->{'factor'});
       $x+=$tx;$y+=$ty;$n++;
       $self->{'pb'}->{$id}=$self->{'pb_src'}->{$id}
-	->scale_simple($tx,$ty,GDK_INTERP_BILINEAR);
+	->scale_simple($tx,$ty,'GDK_INTERP_BILINEAR');
       $self->{'image'}->{$id}->set_from_pixbuf($self->{'pb'}->{$id});
     }
 
@@ -548,7 +552,7 @@ sub zoom_it {
       my $tx=int($self->{'pb_src'}->{$id}->get_width * $fx);
       my $ty=int($self->{'pb_src'}->{$id}->get_height * $fx);
       $self->{'pb'}->{$id}=$self->{'pb_src'}->{$id}
-	->scale_simple($tx,$ty,GDK_INTERP_BILINEAR);
+	->scale_simple($tx,$ty,'GDK_INTERP_BILINEAR');
       $self->{'image'}->{$id}->set_from_pixbuf($self->{'pb'}->{$id});
     }
 

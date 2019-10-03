@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::DataModule::association;
 
@@ -61,7 +64,7 @@ use AMC::DataModule;
 use IO::File;
 use XML::Simple;
 
-@ISA=("AMC::DataModule");
+our @ISA=("AMC::DataModule");
 
 sub version_current {
   return(1);

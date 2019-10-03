@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use utf8;
 
@@ -97,7 +100,6 @@ GetOptions("mode=s"=>\$mode,
 	   "out-corrige=s"=>\$out_corrige,
 	   "out-corrige-indiv=s"=>\$out_corrige_indiv,
 	   "out-catalog=s"=>\$out_catalog,
-	   "convert-opts=s"=>\$convert_opts,
 	   "debug=s"=>\$debug,
 	   "latex-stdout!"=>\$latex_stdout,
 	   "progression=s"=>\$progress,
@@ -160,6 +162,8 @@ sub set_filtered_source {
   # change directory where the $filtered_source is, and set $f_base to
   # the $filtered_source without path and without extension
 
+  my ($v, $d, $f_base);
+  
   ($v,$d,$f_tex)=splitpath($filtered_source);
   chdir(catpath($v,$d,""));
   $f_base=$f_tex;
@@ -250,7 +254,7 @@ sub exit_with_error {
 sub check_question {
     my ($q)=@_;
 
-    my $t = $analyse_data->{etu}.":".$analyse_data->{titre};
+    my $t = $q->{etu}.":".$q->{titre};
 
     # if postcorrection is used, this check cannot be made as we will
     # only know which answers are correct after having captured the
@@ -667,9 +671,6 @@ sub prepare_filter {
 }
 
 sub do_filter {
-  my $f_base;
-  my $v;
-  my $d;
   my $n_err=0;
 
   if($filter) {

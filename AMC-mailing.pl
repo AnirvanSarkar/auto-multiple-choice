@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use Getopt::Long;
 
@@ -60,9 +63,12 @@ my $bcc='';
 my $log_file='';
 my $delay_s=0;
 my @attach_files=();
+my $debug='';
+my $progress='';
+my $progress_id='';
 
 @ARGV=unpack_args(@ARGV);
-@ARGV_ORIG=@ARGV;
+my @ARGV_ORIG=@ARGV;
 
 GetOptions("project=s"=>\$project_dir,
 	   "project-name=s"=>\$project_name,

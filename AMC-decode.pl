@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 use Getopt::Long;
 
 use AMC::Basic;
@@ -68,8 +71,6 @@ my $progress_h=AMC::Gui::Avancement::new($progress, 'id'=>$progress_id);
 
 sub catch_signal {
     my $signame = shift;
-    debug "*** AMC-decode : signal $signame, transfered to $pid...";
-    kill 2, $pid if($pid);
     $queue->killall() if($queue);
     die "Killed";
 }
@@ -150,6 +151,6 @@ $progress_h->fin();
 debug("New last_decoded time for $tag: $t");
 
 $data->connect;
-$capture = $data->module('capture');
+my $capture = $data->module('capture');
 $capture->variable_transaction('last_decoded_' . $tag, $t);
 

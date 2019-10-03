@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,10 +18,14 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Gui::Manuel;
 
 use Getopt::Long;
 use Gtk3 -init;
+use Glib qw/TRUE FALSE/;
 
 use XML::Simple;
 use File::Spec::Functions qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
@@ -221,7 +225,7 @@ sub new {
 
 sub new_diagstore {
   my ($self)=@_;
-  $diag_store = Gtk3::ListStore->new ('Glib::String',
+  my $diag_store = Gtk3::ListStore->new ('Glib::String',
 				      'Glib::String',
 				      'Glib::String',
 				      'Glib::String',
@@ -246,7 +250,7 @@ sub new_diagstore {
 
 sub sort_diagstore {
   my ($self)=@_;
-  $self->{'diag_store'}->set_sort_column_id(MDIAG_ID,GTK_SORT_ASCENDING);
+  $self->{'diag_store'}->set_sort_column_id(MDIAG_ID,'ascending');
 }
 
 sub show_diagstore {
@@ -345,7 +349,7 @@ sub maj_list_all {
   push @$capture_free,@{$self->{'capture'}->no_capture_pages};
   $self->{'capture'}->end_transaction;
 
-  $diag_store = $self->new_diagstore;
+  my $diag_store = $self->new_diagstore;
 
   debug "Adding ".(1+$#$summary)." summaries to list...";
   my $select_iid=-1;

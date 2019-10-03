@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Basic;
 
 use Locale::gettext ':libintl_h';
@@ -84,7 +87,7 @@ sub amc_adapt_path {
 
 # ---------------------------------------------------
 
-%install_dirs=(
+our %install_dirs=(
     'lib'=>"@/MODSDIR/@",
     'libexec'=>"@/MODSDIR/@/exec",
     'libperl'=>"@/MODSDIR/@/perl",
@@ -138,7 +141,7 @@ sub commande_accessible {
     if($c =~ /^\//) {
       return (-x $c);
     } else {
-      $ok='';
+      my $ok='';
       for (split(/:/,$ENV{'PATH'})) {
 	$ok=1 if(-x "$_/$c");
       }
@@ -434,7 +437,7 @@ sub debug_pm_version {
      my ($module)=@_;
      my $version;
      if (defined($version = $module->VERSION())) {
-         debug "[VERSION] $module: $version";
+         debug("[VERSION] $module: $version");
      }
 }
 
@@ -505,14 +508,14 @@ sub clear_old {
     my ($type,@f)=@_;
     for my $file (@f) {
 	if(-f $file) {
-	    debug "Clearing old $type file: $file";
+	    debug("Clearing old $type file: $file");
 	    unlink($file);
 	} elsif(-d $file) {
-	    debug "Clearing old $type directory: $file";
-	    opendir(my $dh, $file) || debug "ERROR: can't opendir $file: $!";
+	    debug("Clearing old $type directory: $file");
+	    opendir(my $dh, $file) || debug("ERROR: can't opendir $file: $!");
 	    my @content = grep { -f $_ } map { "$file/$_" } readdir($dh);
 	    closedir $dh;
-	    debug "Removing ".(1+$#content)." files.";
+	    debug("Removing ".(1+$#content)." files.");
 	    unlink(@content);
 	}
     }
@@ -546,10 +549,10 @@ sub new_filename {
 
 sub pack_args {
     my @args=@_;
-    $pack_fh = new File::Temp(TEMPLATE =>'AMC-PACK-XXXXXXXX',
-			      SUFFIX => '.xml',
-			      UNLINK=>1,
-			      DIR=>File::Spec->tmpdir);
+    my $pack_fh = new File::Temp(TEMPLATE =>'AMC-PACK-XXXXXXXX',
+				 SUFFIX => '.xml',
+				 UNLINK=>0,
+				 DIR=>File::Spec->tmpdir);
     binmode($pack_fh,':utf8');
     my $writer = new XML::Writer(OUTPUT=>$pack_fh,
 				 ENCODING=>'UTF-8',
@@ -571,6 +574,7 @@ sub unpack_args {
 	my $file=shift(@args);
 	my $xa=XMLin($file,'ForceArray'=>1,'SuppressEmpty'=>'')->{'arg'};
 	unshift(@args,@$xa);
+	unlink($file) or debug("Could not unlink $file: $!");
 	next_debug("Unpacked args: ".join(' ',@args));
     }
     return(@args);
@@ -652,7 +656,7 @@ sub studentids_string_filename {
 sub annotate_source_change {
   my ($capture,$transaction)=@_;
   my $t=time();
-  debug "Annotate source has changed! Time=$t";
+  debug("Annotate source has changed! Time=$t");
   $capture->begin_transaction('asCh') if($transaction);
   $capture->variable('annotate_source_change',$t);
   $capture->end_transaction('asCh') if($transaction);
@@ -730,7 +734,7 @@ sub use_amc_plugins {
       map { "$plugins_dir/$_/perl" } readdir($dh);
     closedir $dh;
   } else {
-    debug "Can't open plugins dir $plugins_dir: $!";
+    debug("Can't open plugins dir $plugins_dir: $!");
   }
 }
 
@@ -809,7 +813,7 @@ sub string_to_filename {
   $prefix='f' if(!$prefix);
   $s=string_to_usascii($s);
   $s =~ s/[^a-zA-Z0-9.-]/_/g;
-  $s =~ s/^[^a-zA-Z0-9]/$prefix_/;
+  $s =~ s/^[^a-zA-Z0-9]/${prefix}_/;
   return($s);
 }
 

@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,12 +18,16 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Gui::PageArea;
 
 use Gtk3;
+use Glib qw/TRUE FALSE/;
 use AMC::Basic;
 
-@ISA=("Gtk3::DrawingArea");
+our @ISA=("Gtk3::DrawingArea");
 
 sub add_feuille {
     my ($self,%oo)=@_;
@@ -349,11 +353,11 @@ sub draw {
 
       debug("Rendering with SX=$sx SY=$sy");
 
-      my $i=Gtk3::Gdk::Pixbuf->new(GDK_COLORSPACE_RGB,1,8,$self->{'tx'},$self->{'ty'});
+      my $i=Gtk3::Gdk::Pixbuf->new('GDK_COLORSPACE_RGB',1,8,$self->{'tx'},$self->{'ty'});
 
       $self->{'i-src'}->scale($i,0,0,$self->{'tx'},$self->{'ty'},0,0,
 			      $sx,$sy,
-			      GDK_INTERP_BILINEAR);
+			      'GDK_INTERP_BILINEAR');
 
       Gtk3::Gdk::cairo_set_source_pixbuf($context,$i,0,0);
       $context->paint();

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2013-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2013-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use Getopt::Long;
 
@@ -78,7 +81,7 @@ my $embedded_format="jpeg";
 my $changes_only='';
 
 my $compose='';
-my $moteur_latex='pdflatex';
+my $latex_engine='pdflatex';
 my $src_file='';
 my $filter='';
 my $filtered_source='';
@@ -217,7 +220,7 @@ my $annotate
 		      names_file=>$names_file,
 		      names_encoding=>$names_encoding,
 		      association_key=>$association_key,
-		      csv_build_name=>$csv_buildname,
+		      csv_build_name=>$csv_build_name,
 		      significant_digits=>$significant_digits,
 		      darkness_threshold=>$darkness_threshold,
 		      darkness_threshold_up=>$darkness_threshold_up,

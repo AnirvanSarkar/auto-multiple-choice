@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Filter::plain;
 
 use AMC::Filter;
@@ -27,7 +30,7 @@ use Data::Dumper;
 
 use utf8;
 
-@ISA=("AMC::Filter");
+our @ISA=("AMC::Filter");
 
 use_gettext;
 
@@ -228,8 +231,10 @@ sub add_group {
 # cleanup for text: removes leading and trailing spaces
 sub value_cleanup {
   my ($self,$v)=@_;
-  $$v =~ s/^\s+//;
-  $$v =~ s/\s+$//;
+  if($v) {
+    $$v =~ s/^\s+//;
+    $$v =~ s/\s+$//;
+  }
 }
 
 # issue an AMC-TXT (syntax) error to be shown by the GUI
@@ -657,7 +662,7 @@ sub parse_text {
 	$s =~ s/\\/\\(\\backslash\\)/g;
 	$s =~ s/~/\\(\\sim\\)/g;
 	$s =~ s/\*/\\(\\ast\\)/g;
-	$s =~ s/([&{}\#_%])/\\\1/g;
+	$s =~ s/([&{}\#_%])/\\$1/g;
 	$s =~ s/-/-{}/g;
 	$s =~ s/\$/\\textdollar{}/g;
 	$s =~ s/\^/\\textasciicircum{}/g;

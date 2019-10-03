@@ -17,13 +17,16 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Decoder::BarcodeTail;
 
 use AMC::Decoder;
 use AMC::Decoder::Barcode;
 use AMC::Basic;
 
-@ISA=("AMC::Decoder");
+our @ISA=("AMC::Decoder");
 
 use_gettext;
 

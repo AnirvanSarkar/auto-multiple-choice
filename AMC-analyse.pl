@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
@@ -126,18 +129,18 @@ if($scans_list && open(LISTE,$scans_list)) {
 exit(0) if($#scans <0);
 
 sub error {
-    my ($process,$e,$silent)=@_;
-    if($process) {
+    my ($e,%opts)=@_;
+    if($opts{process}) {
       if($debug_image) {
-	$process->commande("output ".$debug_image);
-	$process->ferme_commande;
+	$opts{process}->commande("output ".$debug_image);
+	$opts{process}->ferme_commande;
       }
     }
-    if($silent) {
+    if($opts{silent}) {
 	debug $e;
     } else {
-	debug "ERROR($scan): $e\n";
-	print "ERROR($scan): $e\n";
+	debug "ERROR($opts{scan}): $e\n";
+	print "ERROR($opts{scan}): $e\n";
     }
     exit(1);
 }
@@ -232,7 +235,7 @@ $layout->begin_read_transaction('cRLY');
 
 if($layout->pages_count()==0) {
   $layout->end_transaction('cRLY');
-  error('',"No layout");
+  error("No layout");
 }
 debug "".$layout->pages_count()." layouts\n";
 
@@ -283,6 +286,7 @@ sub get_shape {
 sub measure_box {
     my ($process,$ld,$k,@spc)=(@_);
     my $r=0;
+    my $flags=$ld->{'flags'}->{$k};
 
     $ld->{'corners.test'}->{$k}=AMC::Boite::new();
 
@@ -290,20 +294,22 @@ sub measure_box {
 	if($k =~ /^([0-9]+)\.([0-9]+)$/) {
 	    $process->commande(join(' ',"id",@spc[0,1],$1,$2))
 	}
+    } else {
+      $flags=0 if(!defined($flags));
     }
 
-    if(!($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
+    if(!($flags & BOX_FLAGS_DONTSCAN)) {
       $ld->{'boxes.scan'}->{$k}=AMC::Boite::new();
     } else {
       $ld->{'boxes.scan'}->{$k}=$ld->{'boxes'}->{$k}->clone;
       $ld->{'boxes.scan'}->{$k}->transforme($ld->{'transf'});
     }
 
-    if(!($ld->{'flags'}->{$k} & BOX_FLAGS_DONTSCAN)) {
+    if(!($flags & BOX_FLAGS_DONTSCAN)) {
       my $pc;
 
       $pc=$ld->{'boxes'}->{$k}
-	->commande_mesure0($prop,get_shape($ld->{'flags'}->{$k}));
+	->commande_mesure0($prop,get_shape($flags));
 
       for($process->commande($pc)) {
 	if(/^TCORNER\s+(-?[0-9\.]+),(-?[0-9\.]+)$/) {
@@ -359,7 +365,7 @@ sub get_binary_number {
 sub get_id_from_boxes {
   my ($process,$ld,$data_layout)=@_;
 
-  @epc=map { get_binary_number($process,$ld,$_) } (1,2,3);
+  my @epc=map { get_binary_number($process,$ld,$_) } (1,2,3);
   my $id_page="+".join('/',@epc)."+";
   print "Page : $id_page\n";
   debug("Found binary ID: $id_page");
@@ -438,7 +444,7 @@ sub one_scan {
     }
   }
 
-  $cadre_general=AMC::Boite::new_complete(@c);
+  my $cadre_general=AMC::Boite::new_complete(@c);
 
   debug "Global frame:",
     $cadre_general->txt();
@@ -448,6 +454,7 @@ sub one_scan {
   ##########################################
 
   my @epc;
+  my @spc;
   my $upside_down=0;
   my $ok;
 
@@ -479,7 +486,8 @@ sub one_scan {
     $capture->failed($sf);
     $capture->end_transaction('CFLD');
 
-    error($process,sprintf("No layout for ID +%d/%d/%d+",@epc)) ;
+    error(sprintf("No layout for ID +%d/%d/%d+",@epc),
+	  process=>$process, scan=>$scan);
   }
 
   command_transf($process,$random_layout->{'transf'},"rotateOK");
@@ -537,21 +545,18 @@ sub one_scan {
     measure_box($process,$ld,$k,@spc) if($k =~ /^[0-9]+\.[0-9]+$/);
   }
 
-  if($out_cadre) {
-    $process->commande("annote ".pageids_string(@spc));
-  }
-
-  error($process,"End of diagnostic",1) if($debug_image);
+  error("End of diagnostic",
+	silent=>1,
+	process=>$process, scan=>$scan) if($debug_image);
 
   ##########################################
   # Creates layout image report
   ##########################################
 
-  $layout_file="page-".pageids_string(@spc,'path'=>1).".jpg";
-  $out_cadre="$cr_dir/$layout_file"
-    if($cr_dir && !$out_cadre);
+  my $layout_file="page-".pageids_string(@spc,'path'=>1).".jpg";
 
-  if($out_cadre) {
+  if($cr_dir) {
+    my $out_cadre="$cr_dir/$layout_file";
     $process->commande("output ".$out_cadre);
   }
 
@@ -573,26 +578,21 @@ sub one_scan {
 
   my $nom_file="name-".studentids_string_filename(@spc[0,2]).".jpg";
 
-  my $whole_page;
-
-  if($out_cadre || $nom_file) {
-    debug "Reading scan $scan for extractions...";
-    $whole_page=magick_perl_module()->new();
-    $whole_page->Read($scan);
-  }
-
   # Name field sub-image
 
-  if($nom_file && $ld->{'boxes'}->{'namefield'}) {
+  if($ld->{'boxes'}->{'namefield'}) {
+    my $whole_page=magick_perl_module()->new();
+    $whole_page->Read($scan);
+
     my $n=$ld->{'boxes'}->{'namefield'}->clone;
     $n->transforme($ld->{'transf'});
     clear_old('name image file',"$cr_dir/$nom_file");
 
     debug "Name box : ".$n->txt();
-    my $e=$whole_page->Clone();
-    $e->Crop(geometry=>$n->etendue_xy('geometry',$zoom_plus));
+
+    $whole_page->Crop(geometry=>$n->etendue_xy('geometry', 0));
     debug "Writing to $cr_dir/$nom_file...";
-    $e->Write("$cr_dir/$nom_file");
+    $whole_page->Write("$cr_dir/$nom_file");
   }
 
   ##########################################
@@ -622,6 +622,7 @@ sub one_scan {
 
   for my $k (keys %{$ld->{'boxes'}}) {
     my $zoneid;
+    my ($n, $i);
     if($k =~ /^([0-9]+)\.([0-9]+)$/) {
       my $question=$1;
       my $answer=$2;

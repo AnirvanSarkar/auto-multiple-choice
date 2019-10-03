@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2015-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2015-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Print::cups;
 
 use AMC::Print;
@@ -25,7 +28,7 @@ use AMC::Basic;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 
-@ISA=("AMC::Print");
+our @ISA=("AMC::Print");
 
 sub nonnul {
     my $s=shift;

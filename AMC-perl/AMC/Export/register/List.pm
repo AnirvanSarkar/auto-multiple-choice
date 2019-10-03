@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,13 +17,16 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Export::register::List;
 
 use AMC::Export::register;
 use AMC::Basic;
 use AMC::Gui::Prefs;
 
-@ISA=("AMC::Export::register");
+our @ISA=("AMC::Export::register");
 
 sub new {
     my $class = shift;
@@ -72,7 +75,7 @@ sub build_config_gui {
              0,$y,1,1);
   $widget=Gtk3::ComboBox->new();
   my $renderer = Gtk3::CellRendererText->new();
-  $widget->pack_start($renderer, TRUE);
+  $widget->pack_start($renderer, Glib::TRUE);
   $widget->add_attribute($renderer,'text',COMBO_TEXT);
   $prefs->store_register('export_pagesize'=>cb_model("a3"=>"A3",
 						     "a4"=>"A4",

@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,11 +18,15 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 use Getopt::Long;
 
 use Gtk3 -init;
 
 use Glib::Object::Introspection;
+use Glib qw/TRUE FALSE/;
 
 use XML::Simple;
 use IO::File;
@@ -650,7 +654,7 @@ my $inconnu_store = Gtk3::ListStore->new ('Glib::String','Glib::String',
 					  'Glib::String','Glib::String',
 					  'Glib::String');
 
-$inconnu_store->set_sort_column_id(INCONNU_TIME_N,GTK_SORT_ASCENDING);
+$inconnu_store->set_sort_column_id(INCONNU_TIME_N,'ascending');
 
 ### modele EMAILS
 
@@ -697,7 +701,7 @@ sub new_diagstore {
 }
 
 sub sort_diagstore {
-  $diag_store->set_sort_column_id(DIAG_ID,GTK_SORT_ASCENDING);
+  $diag_store->set_sort_column_id(DIAG_ID,'ascending');
 }
 
 sub show_diagstore {
@@ -709,6 +713,7 @@ sort_diagstore();
 show_diagstore();
 
 my %capture_column=();
+my ($renderer,$column);
 
 $renderer=Gtk3::CellRendererText->new;
 # TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
@@ -752,7 +757,7 @@ $capture_column{file} = Gtk3::TreeViewColumn->new_with_attributes (__"scan file"
 $capture_column{file}->set_sort_column_id(DIAG_SCAN_FILE);
 $w{'diag_tree'}->append_column ($capture_column{file});
 
-$w{'diag_tree'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+$w{'diag_tree'}->get_selection->set_mode('multiple');
 
 # columns to be shown...
 
@@ -3567,6 +3572,8 @@ sub valide_options_for_domain {
     }
 }
 
+my $previous_liste_key;
+
 sub valide_options_association {
   $previous_liste_key=$config->get('liste_key');
   valide_options_for_domain('pref_assoc','',@_);
@@ -4165,7 +4172,7 @@ sub select_students {
   }
   $projet{'_capture'}->end_transaction('gSLi');
 
-  $w{'students_select_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+  $w{'students_select_list'}->get_selection->set_mode('multiple');
   for (@selected_iters) {
     $w{'students_select_list'}->get_selection->select_iter
       ($filtered_sorted->convert_child_iter_to_iter
@@ -4543,8 +4550,8 @@ sub accepte_preferences {
 	# value of general default option is different from
 	# project option. Ask the user for modifying also the
 	# project option value
-	$label_projet=$labels{$kp};
-	$label_general=$labels{$k};
+	my $label_projet=$labels{$kp};
+	my $label_general=$labels{$k};
 
 	debug "Ask user $label_general | $label_projet";
 
@@ -5008,7 +5015,7 @@ sub overwritten_look {
                );
   }
 
-  $w{overwritten_list}->get_selection->set_mode(GTK_SELECTION_NONE);
+  $w{overwritten_list}->get_selection->set_mode('none');
 
   $w{overwritten_dialog}->run;
   $w{overwritten_dialog}->destroy;
@@ -5182,7 +5189,7 @@ sub open_unrecognized {
 
   update_unrecognized();
 
-  $w{'inconnu_tree'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+  $w{'inconnu_tree'}->get_selection->set_mode('multiple');
   $w{'inconnu_tree'}->get_selection->signal_connect("changed",\&unrecognized_line);
   $w{'inconnu_tree'}->get_selection->select_iter($inconnu_store->get_iter_first);
 
@@ -5501,7 +5508,7 @@ sub make_template {
 
     # Waits for action
 
-    $resp=$w{'make_template'}->run();
+    my $resp=$w{'make_template'}->run();
 
     if($resp eq "1") {
 
@@ -5690,9 +5697,9 @@ sub source_latex_choisir {
 
 	# choix d'un modele
 
-	$gap=read_glade('source_latex_modele',
+	my $gap=read_glade('source_latex_modele',
 			qw/modeles_liste modeles_description model_choice_button mlist_separation/);
-        $reponse=$w{'source_latex_modele'}->show();
+        my $reponse=$w{'source_latex_modele'}->show();
 
 	$modeles_store = Gtk3::TreeStore->new('Glib::String',
 					      'Glib::String',
@@ -5744,7 +5751,7 @@ sub source_latex_choisir {
 
 	# choisir un fichier deja present
 
-	$gap=read_glade('source_latex_choix');
+	my $gap=read_glade('source_latex_choix');
 
 	$w{'source_latex_choix'}->set_current_folder($home_dir);
 
@@ -5777,7 +5784,7 @@ sub source_latex_choisir {
 
 	#
 
-	$reponse=$w{'source_latex_choix'}->run();
+	my $reponse=$w{'source_latex_choix'}->run();
 
 	my $f=$w{'source_latex_choix'}->get_filename();
 
@@ -5798,7 +5805,7 @@ sub source_latex_choisir {
 
 	    # choisir un fichier ZIP
 
-	    $gap=read_glade('source_latex_choix_zip');
+	    my $gap=read_glade('source_latex_choix_zip');
 
 	    $w{'source_latex_choix_zip'}->set_current_folder($home_dir);
 
@@ -5811,7 +5818,7 @@ sub source_latex_choisir {
 	    $filtre_zip->add_pattern("*.ZIP");
 	    $w{'source_latex_choix_zip'}->add_filter($filtre_zip);
 
-	    $reponse=$w{'source_latex_choix_zip'}->run();
+	    my $reponse=$w{'source_latex_choix_zip'}->run();
 
 	    $fich=$w{'source_latex_choix_zip'}->get_filename();
 
@@ -6437,7 +6444,7 @@ sub send_emails {
   $w{'attachments_list'}->append_column ($column);
 
   $w{'attachments_list'}->set_tooltip_column(ATTACHMENTS_FILE);
-  $w{'attachments_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+  $w{'attachments_list'}->get_selection->set_mode('multiple');
 
   #
 
@@ -6489,7 +6496,7 @@ sub send_emails {
 
   $projet{'_report'}->end_transaction('emCC');
 
-  $w{'emails_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+  $w{'emails_list'}->get_selection->set_mode('multiple');
   $w{'emails_list'}->get_selection->select_all;
 
   $attachments_store->clear;
@@ -6686,7 +6693,7 @@ sub choose_columns {
   my $i=1;
   my %selected=map { $_=>$i++ } (split(/,+/,$l));
   my %order=();
-  @available=('student.copy','student.key','student.name',
+  my @available=('student.copy','student.key','student.name',
 	      $projet{_students_list}->heads());
   $i=0;
   for(@available) {
@@ -6724,7 +6731,7 @@ sub choose_columns {
     push @selected_iters,$iter if($selected{$c});
   }
   $w{'columns_list'}->set_reorderable(1);
-  $w{'columns_list'}->get_selection->set_mode(GTK_SELECTION_MULTIPLE);
+  $w{'columns_list'}->get_selection->set_mode('multiple');
   for(@selected_iters) { $w{'columns_list'}->get_selection->select_iter($_); }
 
   my $resp=$w{'choose_columns'}->run;

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2009-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use Getopt::Long;
 
@@ -43,7 +46,7 @@ my $useall=1;
 my $rtl='';
 
 @ARGV=unpack_args(@ARGV);
-@ARGV_ORIG=@ARGV;
+my @ARGV_ORIG=@ARGV;
 
 GetOptions("module=s"=>\$module,
 	   "sort=s"=>\$sort,
@@ -63,7 +66,7 @@ set_debug($debug);
 debug "Parameters: ".join(" ",map { "<$_>" } @ARGV_ORIG);
 
 load("AMC::Export::$module");
-$ex = "AMC::Export::$module"->new();
+my $ex = "AMC::Export::$module"->new();
 
 $ex->set_options("sort",
 		 "keys"=>$sort);

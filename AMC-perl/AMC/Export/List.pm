@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Export::List;
 
 use File::Temp qw/ tempfile tempdir /;
@@ -27,7 +30,7 @@ use Cairo;
 use AMC::Basic;
 use AMC::Export;
 
-@ISA=("AMC::Export");
+our @ISA=("AMC::Export");
 
 sub new {
     my $class = shift;
@@ -89,7 +92,7 @@ sub show_title {
 	$l0->set_font_description (Pango::FontDescription->from_string ($self->{'out.font'}));
 
 	$l0->set_text($self->{'out.nom'});
-	($text_x,$text_y)=$l0->get_pixel_size();
+	my ($text_x,$text_y)=$l0->get_pixel_size();
 	if($self->{'out.rtl'}) {
 	    $self->{'context'}->move_to($self->{'page_x'}-$text_x-$self->{'out.margin'},
 					$self->{'out.margin'});

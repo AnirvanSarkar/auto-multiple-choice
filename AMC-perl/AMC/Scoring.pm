@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2012-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2012-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Scoring;
 
 use AMC::Basic;
@@ -27,7 +30,7 @@ use AMC::ScoringEnv;
 use Data::Dumper;
 
 sub new {
-    my (%o)=(@_);
+    my ($class, %o)=(@_);
 
     my $self={'onerror'=>'stderr',
 	      'seuil'=>0,
@@ -93,6 +96,7 @@ sub answer_is_correct {
 
 sub set_default_strategy {
   my ($self,$strategy_string)=@_;
+  $strategy_string="" if(!defined($strategy_string));
   $self->{'default_strategy_plain'}=
     AMC::ScoringEnv->new_from_directives_string($strategy_string);
   $self->{'default_strategy'}=AMC::ScoringEnv

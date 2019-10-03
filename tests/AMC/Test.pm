@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Test;
 
 use AMC::Basic;
@@ -95,7 +98,7 @@ sub new {
      'check_zooms'=>{},
      'skip_prepare'=>0,
      'skip_scans'=>0,
-     'tracedest'=>'STDERR',
+     'tracedest'=>\*STDERR,
      'debug_file'=>'',
      'pages'=>'',
      'extract_with'=>'qpdf',
@@ -132,7 +135,7 @@ sub new {
     $self->{'list'}=$l[0];
   }
   $self->{names}=AMC::NamesFile::new($self->{'dir'}.'/'.$self->{list},'utf8','id')
-    if(-f $self->{'dir'}.'/'.$self->{list});
+    if($self->{list} && -f $self->{'dir'}.'/'.$self->{list});
 
   my $to_stdout=0;
 
@@ -146,7 +149,7 @@ sub new {
 
   $self->{tmpdir} = tmpdir() if(!$self->{tmpdir});
 
-  $self->{tracedest} = 'STDOUT' if($to_stdout);
+  $self->{tracedest} = \*STDOUT if($to_stdout);
   binmode $self->{tracedest}, ":utf8";
 
   $self->install;
@@ -215,6 +218,8 @@ sub install {
       $self->{'scans'}=[map { $self->{'temp_dir'}."/scans/$_" } sort { $a cmp $b } @s];
     }
   }
+  
+  $self->{'scans'}=[] if(!$self->{'scans'});
 
   for my $d (qw(data cr cr/corrections cr/corrections/jpg cr/corrections/pdf scans)) {
     mkdir($self->{'temp_dir'}."/$d") if(!-d $self->{'temp_dir'}."/$d");
@@ -303,9 +308,11 @@ sub see_file {
 sub trace {
   my ($self,@m)=@_;
   print { $self->{tracedest} } join(' ',@m)."\n";
-  open LOG,">>:utf8",$self->{'debug_file'};
-  print LOG join(' ',@m)."\n";
-  close LOG;
+  if($self->{'debug_file'}) {
+    open(LOG,">>:utf8",$self->{'debug_file'}) || die "Unable to open file $self->{debug_file} as log";
+    print LOG join(' ',@m)."\n";
+    close LOG;
+  }
 }
 
 sub command {
@@ -619,11 +626,16 @@ sub check_marks {
 
   for my $m (@{$self->{'marks'}}) {
     my $st=studentids_string($m->{'student'},$m->{'copy'});
-    delete($p{$st})
-      if($p{$st} == $m->{'mark'});
+    if(defined($p{$st})) {
+      if($p{$st} == $m->{'mark'}) {
+	delete($p{$st});
+      }
+    }
     $st='/'.$self->find_assoc($m->{'student'},$m->{'copy'});
-    delete($p{$st})
-      if($p{$st} == $m->{'mark'});
+    if(defined($p{$st})) {
+      delete($p{$st})
+	  if($p{$st} == $m->{'mark'});
+    }
   }
 
   my @no=(keys %p);
@@ -653,7 +665,7 @@ sub get_assoc {
           $m->{name}=$n->{_ID_};
         }
       }
-      $self->trace("    ".join(' ',map { $_."=".$m->{$_} } (qw/student copy auto manual name/)));
+      $self->trace("    ".join(' ',map { $_."=".(defined($m->{$_}) ? $m->{$_} : "<undef>") } (qw/student copy auto manual name/)));
     }
   }
 }
@@ -679,16 +691,16 @@ sub check_assoc {
   return if(!$self->{'check_assoc'});
 
   $self->trace("[T] Association test: "
-	       .join(',',sort { $a <=> $b } (keys %{$self->{'check_assoc'}})));
+	       .join(',',sort { $a cmp $b } (keys %{$self->{'check_assoc'}})));
 
   my %p=(%{$self->{'check_assoc'}});
 
   for my $m (@{$self->{'association'}}) {
     my $st=studentids_string($m->{'student'},$m->{'copy'});
     delete($p{$st})
-      if(compare($self->{'check_assoc'}->{$st},$m->{'auto'}));
+      if(defined($p{$st}) && compare($self->{'check_assoc'}->{$st},$m->{'auto'}));
     delete($p{'m:'.$st})
-      if(compare($self->{'check_assoc'}->{'m:'.$st},$m->{'manual'}));
+      if(defined($p{'m:'.$st}) && compare($self->{'check_assoc'}->{'m:'.$st},$m->{'manual'}));
   }
 
   my @no=(keys %p);
@@ -708,26 +720,27 @@ sub annote {
   for (@{$self->{'annote'}}) { print NUMS "$_\n"; }
   close(NUMS);
 
-  $self->amc_command('annotate',
-		     '--names-file','%PROJ/'.$self->{'list'},
-		     '--verdict',$self->{'verdict'},
-		     '--verdict-question',$self->{'verdict_question'},
-		     '--position',$self->{'annote_position'},
-		     '--project','%PROJ',
-		     '--data','%DATA',
-		     ($self->{'annote_ascii'}
-		      ? "--force-ascii" : "--no-force-ascii"),
-		     '--n-copies',$self->{'n_copies'},
-		     '--subject','%PROJ/sujet.pdf',
-		     '--src','%PROJ/'.$self->{'src'},
-		     '--with',$self->{'tex_engine'},
-		     '--filename-model',$self->{'model'},
-		     '--id-file','%PROJ/num-pdf',
-		     '--darkness-threshold',$self->{'seuil'},
-		     '--darkness-threshold-up',$self->{'seuil_up'},
-		     );
+  my @args=(
+    '--verdict',$self->{'verdict'},
+    '--verdict-question',$self->{'verdict_question'},
+    '--position',$self->{'annote_position'},
+    '--project','%PROJ',
+    '--data','%DATA',
+    ($self->{'annote_ascii'}
+     ? "--force-ascii" : "--no-force-ascii"),
+    '--n-copies',$self->{'n_copies'},
+    '--subject','%PROJ/sujet.pdf',
+    '--src','%PROJ/'.$self->{'src'},
+    '--with',$self->{'tex_engine'},
+    '--filename-model',$self->{'model'},
+    '--id-file','%PROJ/num-pdf',
+    '--darkness-threshold',$self->{'seuil'},
+    '--darkness-threshold-up',$self->{'seuil_up'},
+      );
+  push @args,'--names-file','%PROJ/'.$self->{'list'} if($self->{'list'});
+  $self->amc_command('annotate',@args);
 
-  $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
+  my $pdf_dir=$self->{'temp_dir'}.'/cr/corrections/pdf';
   opendir(my $dh, $pdf_dir)
     || die "can't opendir $pdf_dir: $!";
   my @pdf = grep { /\.pdf$/i } readdir($dh);
@@ -789,14 +802,14 @@ sub check_export {
   my @csv=@{$self->{'export_full_csv'}};
   if(@csv) {
     $self->begin("CSV full export test (".(1+$#csv)." scores)");
-    $self->amc_command('export',
-		       '--data','%DATA',
-		       '--module','CSV',
-		       '--fich-noms','%PROJ/'.$self->{'list'},
-		       '--option-out','columns=student.copy',
-		       '--option-out','ticked='.$self->{export_csv_ticked},
-		       '-o','%PROJ/export.csv',
-		      );
+    my @args=('--data','%DATA',
+	      '--module','CSV',
+	      '--option-out','columns=student.copy',
+	      '--option-out','ticked='.$self->{export_csv_ticked},
+	      '-o','%PROJ/export.csv',
+	);
+    push @args, '--fich-noms', '%PROJ/'.$self->{'list'} if($self->{'list'});
+    $self->amc_command('export',@args);
     my $c=Text::CSV->new();
     open my $fh,"<:encoding(utf-8)",$self->{'temp_dir'}.'/export.csv';
     my $i=0;
@@ -841,13 +854,16 @@ sub check_export {
     require OpenOffice::OODoc;
 
     $self->begin("ODS full export test");
+    my @args=(
+      '--data','%DATA',
+      '--module','ods',
+      '--option-out','columns=student.copy',
+      '--option-out','stats=h',
+      '-o','%PROJ/export.ods',
+	);
+    push @args, '--fich-noms','%PROJ/'.$self->{'list'} if($self->{'list'});
     $self->amc_command('export',
-		       '--data','%DATA',
-		       '--module','ods',
-		       '--fich-noms','%PROJ/'.$self->{'list'},
-		       '--option-out','columns=student.copy',
-		       '--option-out','stats=h',
-		       '-o','%PROJ/export.ods',
+		       @args
 		      );
     my $doc = OpenOffice::OODoc::odfDocument(file=>$self->{'temp_dir'}.'/export.ods');
     my %iq=();
@@ -927,7 +943,7 @@ sub check_textest {
   }
   $tex_file=$self->{'temp_dir'}."/".$tex_file;
   if(-f $tex_file) {
-    my @value_is,@value_shouldbe;
+    my (@value_is,@value_shouldbe);
     chomp(my $cwd = `pwd`);
     chdir($self->{'temp_dir'});
     open(TEX,"-|",$self->{'tex_engine'},
@@ -1006,6 +1022,7 @@ sub test {
       $self->test($x->[$i],$v->[$i],1);
     }
   } else {
+    no warnings 'uninitialized';
     if($x ne $v) {
       $self->trace("[E] ".$self->{'test_title'}." [$subtest] : \'$x\' should be \'$v\'");
       $self->datadump;
@@ -1060,7 +1077,7 @@ sub test_scoring {
 
   $s->end_transaction('tSCO');
 
-  my $scoring=AMC::Scoring->new(data=>$self->{'temp_dir'}."/data");
+  my $scoring=AMC::Scoring->new(data=>$data);
   $scoring->set_default_strategy($question->{default_strategy})
     if($question->{default_strategy});
 

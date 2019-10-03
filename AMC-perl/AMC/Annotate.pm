@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2013-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2013-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::Annotate;
 
@@ -97,6 +100,7 @@ sub new {
 
     $self->{type}=($self->{single_output} ? REPORT_SINGLE_ANNOTATED_PDF
 		   : REPORT_ANNOTATED_PDF );
+    $self->{loaded_pdf}='';
 
     # checks that the position option is available
     $self->{position}=lc($self->{position});
@@ -904,7 +908,8 @@ sub write_qscore {
   return if($self->{position} eq 'none');
 
   # no score to write for indicative questions
-  if($self->{scoring}->indicative($p_strategy,$q)) {
+  my $p_strategy=$self->{scoring}->unalias($student->[0]);
+  if($self->{scoring}->indicative($p_strategy,$question)) {
     debug "Indicative question: no score to write";
     return;
   }

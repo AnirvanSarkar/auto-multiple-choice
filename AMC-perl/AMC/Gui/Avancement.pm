@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::Gui::Avancement;
 
@@ -35,6 +38,8 @@ sub new {
     for (keys %o) {
 	$self->{$_}=$o{$_} if(defined($self->{$_}));
     }
+
+    $self->{entier} = 0 if(!$self->{entier});
 
     debug "Create progression pipe for <".$self->{id}."> up to $entier".
       ($self->{bar}?" (progress bar side)":"");

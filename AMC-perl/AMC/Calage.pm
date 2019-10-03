@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::Calage;
 
@@ -150,7 +153,7 @@ sub calage {
     if($self->{'type'} =~ /^h/i) {
 	###################### HELMERT
 
-	my $theta,$alpha;
+	my ($theta,$alpha);
 
 	$theta=atan2(crochet($cx,$cyp)-crochet($cxp,$cy),
 		     crochet($cx,$cxp)+crochet($cy,$cyp));

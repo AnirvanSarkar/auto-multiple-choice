@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Export::ods;
 
 use AMC::Basic;
@@ -28,7 +31,7 @@ use Module::Load::Conditional qw/can_load/;
 
 use OpenOffice::OODoc;
 
-@ISA=("AMC::Export");
+our @ISA=("AMC::Export");
 
 sub new {
     my $class = shift;
@@ -382,6 +385,8 @@ sub export {
     $self->{'_scoring'}->begin_read_transaction('XODS');
 
     my $rd=$self->{'_scoring'}->variable('rounding');
+    $rd='' if(!defined($rd));
+    
     my $arrondi='';
     if($rd =~ /^([ins])/i) {
       $arrondi=$fonction_arrondi{$1};
@@ -390,6 +395,8 @@ sub export {
     }
 
     my $grain=$self->{'_scoring'}->variable('granularity');
+    $grain=0 if(!defined($grain));
+    
     my $ndg=0;
     $grain =~ s/,/./;
     if($grain <= 0) {
@@ -408,7 +415,7 @@ sub export {
     my $notemin=$self->{'_scoring'}->variable('mark_floor');
     my $plafond=$self->{'_scoring'}->variable('ceiling');
 
-    $notemin='' if($notemin =~ /[a-z]/i);
+    $notemin='' if(!defined($notemin) || $notemin =~ /[a-z]/i);
 
     my $la_date = odfLocaltime();
 
@@ -923,7 +930,6 @@ sub export {
       } else {
         $t=encode('utf-8',$o);
       }
-      push @titles,$t;
       return $t;
     }
 
@@ -955,23 +961,32 @@ sub export {
 	$doc->columnStyle($feuille,$ii,'col.notes');
 	$doc->cellStyle($feuille,$y0,$ii,
 			($_->{group_sum} ? 'EnteteGS' : 'EnteteVertical'));
-	$doc->cellValue($feuille,$y0,$ii++,get_title($_));
+	my $t=get_title($_);
+	push @titles, $t;
+	$doc->cellValue($feuille,$y0,$ii++,$t);
     }
     for(@questions_1) {
 	$doc->columnStyle($feuille,$ii,'col.notes');
 	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
-	$doc->cellValue($feuille,$y0,$ii++,get_title($_));
+	my $t=get_title($_);
+	push @titles, $t;
+	$doc->cellValue($feuille,$y0,$ii++,$t);
     }
     for(@codes) {
 	$doc->cellStyle($feuille,$y0,$ii,'EnteteIndic');
-	$doc->cellValue($feuille,$y0,$ii++,get_title($_));
+	my $t=get_title($_);
+	push @titles, $t;
+	$doc->cellValue($feuille,$y0,$ii++,$t);
     }
 
     ##########################################################################
     # optional row: null score
     ##########################################################################
 
-    if($self->{'_scoring'}->variable('mark_null')!=0) {
+    my $mark_null=$self->{'_scoring'}->variable('mark_null');
+    $mark_null=0 if(!defined($mark_null));
+    
+    if($mark_null!=0) {
       $jj++;
 
       $doc->cellSpan($feuille,$jj,$code_col{'total'},2);
@@ -982,7 +997,7 @@ sub export {
       $doc->cellStyle($feuille,$jj,$code_col{'note'},'NoteF');
       $doc->cellValueType($feuille,$jj,$code_col{'note'},'float');
       $doc->cellValue($feuille,$jj,$code_col{'note'},
-		      $self->{'_scoring'}->variable('mark_null'));
+		      $mark_null);
       $notenull='[.'.yx2ooo($jj,$code_col{'note'},1,1).']';
 
       $code_row{'null'}=$jj;
@@ -1042,7 +1057,7 @@ sub export {
     my @scores_columns;
     my %group_single=();
 
-    my $y1=$jj+1;
+    $y1=$jj+1;
 
     for my $m (@{$self->{'marks'}}) {
 	$jj++;
@@ -1296,7 +1311,7 @@ sub export {
     # tables for questions basic statistics
     ##########################################################################
 
-    my ($dt,$cts,$man,$correct_data);
+    my ($dt,$dtu,$cts,$man,$correct_data);
 
     if($self->{'out.stats'} || $self->{'out.statsindic'}) {
       $self->{'_scoring'}->begin_read_transaction('XsLO');

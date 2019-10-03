@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Export;
 
 use AMC::Basic;
@@ -24,7 +27,7 @@ use AMC::Data;
 use AMC::NamesFile;
 use AMC::Messages;
 
-@ISA=("AMC::Messages");
+our @ISA=("AMC::Messages");
 
 use_gettext;
 
@@ -216,10 +219,13 @@ sub pre_process {
 
       # Association key for this sheet
       $m->{'student.key'}=$self->{'_assoc'}->get_real($m->{'student'},$m->{'copy'});
-      $keys{$m->{'student.key'}}=1;
+      $keys{$m->{'student.key'}}=1 if($m->{'student.key'});
 
       # find the corresponding name
-      my ($n)=$self->{'noms'}->data($lk,$m->{'student.key'},test_numeric=>1);
+      my $n;
+      if($self->{'noms'}) {
+	($n)=$self->{'noms'}->data($lk,$m->{'student.key'},test_numeric=>1);
+      }
       if($n) {
 	$m->{'student.name'}=$n->{'_ID_'};
 	$m->{'student.line'}=$n->{'_LINE_'};
@@ -238,7 +244,7 @@ sub pre_process {
 
     # Now, add students with no mark (if requested)
 
-    if($self->{'noms.useall'}) {
+    if($self->{'noms.useall'} && $self->{'noms'}) {
       for my $i ($self->{'noms'}->liste($lk)) {
 	if(!$keys{$i}) {
 	  my ($name)=$self->{'noms'}->data($lk,$i,test_numeric=>1);

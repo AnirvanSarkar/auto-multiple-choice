@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use Getopt::Long;
 use Encode;
@@ -56,11 +59,11 @@ my $capture=$data->module('capture');
 my $timestamp=time();
 
 # how much units in one inch ?
-%u_in_one_inch=('in'=>1,
-		'cm'=>2.54,
-		'mm'=>25.4,
-		'pt'=>72.27,
-		'sp'=>65536*72.27,
+my %u_in_one_inch=('in'=>1,
+		   'cm'=>2.54,
+		   'mm'=>25.4,
+		   'pt'=>72.27,
+		   'sp'=>65536*72.27,
     );
 
 # association code_in_amc_file => BOX_ROLE_*
@@ -100,7 +103,7 @@ my @flags=();
 my @pre_assoc=();
 my $cases;
 my $page_number=0;
-my %with_vars=();
+my %build_vars=();
 
 sub add_flag {
   my ($x,$flag)=@_;

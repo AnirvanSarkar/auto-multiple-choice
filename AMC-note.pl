@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 use Getopt::Long;
 use POSIX qw(ceil floor);
@@ -36,6 +39,7 @@ my $perfect_mark=20;
 my $ceiling=1;
 my $granularity='0.5';
 my $rounding='';
+my $rounding_scheme='';
 my $data_dir='';
 
 my $postcorrect_student='';
@@ -137,7 +141,7 @@ my $layout=$data->module('layout');
 # Uses an AMC::Scoring object to actually compute the questions
 # scores.
 
-my $score=AMC::Scoring::new('onerror'=>'die',
+my $score=AMC::Scoring->new('onerror'=>'die',
                             'data'=>$data,
                             'seuil'=>$darkness_threshold,
                             'seuil_up'=>$darkness_threshold_up,
@@ -237,9 +241,10 @@ for my $sc (@captured_studentcopy) {
 
     $score->prepare_question($q);
     $score->set_type(0);
-    ($xx,$why)=$score->score_question($sc->[0],$q,0);
+    my ($xx,$why)=$score->score_question($sc->[0],$q,0);
     $score->set_type(1);
-    ($max_score)=$score->score_max_question($sc->[0],$q);
+    use Data::Dumper; debug("1ST ".Dumper($score->{env}->{directives}));
+    my ($max_score)=$score->score_max_question($sc->[0],$q);
 
     # If the title of the question is 'codename[N]' (with a numerical
     # N), then this question represents a digit from a AMCcode, so we

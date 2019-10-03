@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2011-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2011-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::DataModule::scoring;
 
@@ -207,7 +210,7 @@ use AMC::DataModule::layout ':flags';
 
 use XML::Simple;
 
-@ISA=("AMC::DataModule");
+our @ISA=("AMC::DataModule");
 
 sub version_current {
   return(2);
@@ -1042,7 +1045,7 @@ sub student_global {
   my ($self,$student,$copy)=@_;
   my $sth=$self->statement('studentMark');
   $sth->execute($student,$copy);
-  return($x=$sth->fetchrow_hashref);
+  return($sth->fetchrow_hashref);
 }
 
 # student_scoring_base($student,$copy,$darkness_threshold,$darkness_threshold_up)

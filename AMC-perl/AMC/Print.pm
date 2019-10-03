@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2015-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2015-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::Print;
 
@@ -111,7 +114,7 @@ sub printer_options_table {
 		   0,$y,1,1);
     $widget=Gtk3::ComboBox->new();
     $renderer = Gtk3::CellRendererText->new();
-    $widget->pack_start($renderer, TRUE);
+    $widget->pack_start($renderer, Glib::TRUE);
     $widget->add_attribute($renderer,'text',COMBO_TEXT);
     $w->{'printer_c_'.$o->{name}}=$widget;
     $table->attach($widget,1,$y,1,1);

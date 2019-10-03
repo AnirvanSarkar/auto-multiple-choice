@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2009-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::NamesFile;
 
@@ -156,7 +159,8 @@ sub load {
 	    }
 	    if($ok) {
 	      $csv_line++;
-	      for my $k (keys %$row) {
+	      for my $k (grep { defined($row->{$_}) } (keys %$row)) {
+		$data{$k} = {} if(!$data{$k});
 		if(defined($data{$k}->{$row->{$k}})
 		   && $data{$k}->{$row->{$k}}==1
 		   && !$self->{duplicates}->{$k} ) {

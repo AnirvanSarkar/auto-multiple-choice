@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Gui::Commande;
 
 use Glib;
@@ -28,7 +31,7 @@ use AMC::Gui::Avancement;
 
 use AMC::Messages;
 
-@ISA=("AMC::Messages");
+our @ISA=("AMC::Messages");
 
 sub new {
     my %o=(@_);
@@ -51,7 +54,7 @@ sub new {
 
 	'pid'=>'',
 	'avance'=>'',
-	'fh'=>'',
+	'fh'=>undef,
 	'tag'=>[],
 	'pid'=>'',
     };
@@ -163,7 +166,7 @@ sub close {
 
   $self->{'pid'}='';
   $self->{'tag'}='';
-  $self->{'fh'}='';
+  $self->{'fh'}=undef;
 
   $self->{'avancement'}->set_text('');
 

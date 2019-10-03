@@ -17,6 +17,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use warnings;
+use strict;
+
 package AMC::Decoder::Barcode;
 
 use AMC::Decoder;
@@ -24,7 +27,7 @@ use AMC::Basic;
 
 use XML::Simple;
 
-@ISA=("AMC::Decoder");
+our @ISA=("AMC::Decoder");
 
 use_gettext;
 
@@ -42,7 +45,7 @@ sub new {
 
 sub decode_from_path {
   my ($self, $path, $unlink_when_finished) = @_;
-
+  my $r;
   my @cmd = ( "zbarimg", "--xml", "-q", $path );
   debug("Calling: ".join(' ',@cmd));
   my $xml = '';

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2017 Alexis Bienvenue <paamc@passoire.fr>
+# Copyright (C) 2008-2019 Alexis Bienvenue <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
+
+use warnings;
+use strict;
 
 package AMC::Queue;
 
@@ -117,6 +120,7 @@ sub run {
 		      &$c(@$cs);
 		      exit(0);
 		    } else {
+		      no warnings 'exec';
 			debug "Command [$$] : ".join(' ',@$cs);
 			exec(@$cs);
 			debug "Bad exec $$ [".$cs->[0]."] unknown command";
