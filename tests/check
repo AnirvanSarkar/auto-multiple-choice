@@ -1,0 +1,15 @@
+#! /bin/bash
+
+RESULT_FILE=/tmp/amc-check.log
+FAILS=0
+
+ARGS=$@
+
+source ./try_one.sh
+
+for t in checks/*.sh
+do
+    try_one $t || FAILS=1
+done
+
+exit $FAILS
