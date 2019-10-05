@@ -3334,6 +3334,12 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcount\AMC@chiffres
 \newdimen\AMCcodeHspace\AMCcodeHspace=.5em
 \newdimen\AMCcodeVspace\AMCcodeVspace=.5em
+\newcommand\AMCcodeID@squarebrackets[2]{#1[#2]}
+\newcommand\AMCcodeID@dot[2]{#1.#2}
+\newcommand\AMCcodeID@@[1]{%
+  \expandafter\def\expandafter\AMCcodeID\expandafter{\csname AMCcodeID@#1\endcsname}%
+}
+\AMCcodeID@@{squarebrackets}
 \ExplSyntaxOn
 
 \clist_new:N \amc_code_descr_clist
@@ -3383,7 +3389,7 @@ Three digits and two letters:\insertgroup{mixed}.
   { \keys_set:nn { amccode } { #3 }
     \amc_code_init:N #2
     \clist_map_inline:Nn #2 { % iterates over 'digits'
-      \begin{question}{#1[ \int_use:N \amc_code_digit_n_int ]}
+      \begin{question}{\AMCcodeID{#1}{ \int_use:N \amc_code_digit_n_int }}
         \amc_code_digit_init:
         \seq_set_split:Nnn \amc_code_digits_seq {} { ##1 }
         \bool_if:NTF \amc_code_vertical_bool {
@@ -4699,6 +4705,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMCneeds@storebox\AMCneeds@storeboxfalse
 \DeclareOptionX{storebox}{\AMCneeds@storeboxtrue}
 \DeclareOptionX{pdfform}{\AMC@pdfformtrue}
+\DeclareOptionX{codedigit}{\AMCcodeID@@{#1}}
 \ProcessOptionsX
 
 \ifAMCneeds@storebox
@@ -4837,6 +4844,9 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \fi
 \ifx\NoWatermarkExterne\undefined\else
 \AMC@watermarkfalse
+\fi
+\ifx\codeDigitExterne\undefined\else
+\AMCcodeID@@{\codeDigitExterne}
 \fi
 %    \end{macrocode}
 % \end{macro}\end{macro}\end{macro}\end{macro}\end{macro}

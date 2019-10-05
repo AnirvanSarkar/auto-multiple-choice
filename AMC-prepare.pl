@@ -69,6 +69,7 @@ my $engine_topdf    = '';
 my $prefix          = '';
 my $filter          = '';
 my $filtered_source = '';
+my $codedigit       = '';
 
 my $debug        = '';
 my $latex_stdout = '';
@@ -112,6 +113,7 @@ GetOptions(
     "n-copies=s"          => \$number_of_copies,
     "filter=s"            => \$filter,
     "filtered-source=s"   => \$filtered_source,
+    "codedigit=s"         => \$codedigit,
     "epoch=s"             => \$epoch,
 );
 
@@ -1006,20 +1008,34 @@ if ( $to_do{b} ) {
 
     my $delta = 0;
 
-    # Launches the LaTeX engine
-
-    execute(
-        command_opts => [qw/ScoringExterne 1 NoHyperRef 1/],
-        once         => 1
-    );
-
-    open( AMCLOG, "$jobname.amc" ) or die "Unable to open $jobname.amc : $!";
-
     # Opens a connection with the database
 
     my $data    = AMC::Data->new($data_dir);
     my $scoring = $data->module('scoring');
     my $capture = $data->module('capture');
+
+    # Launches the LaTeX engine
+
+    my @opts = (qw/ScoringExterne 1 NoHyperRef 1/);
+
+    if ( !$codedigit ) {
+
+        # if not explicitly given, uses the same codedigit convention
+        # as recorded from the 'extract layout' phase
+        my $layout = $data->module('layout');
+        $codedigit = $layout->variable_transaction('build:codedigit');
+        $codedigit = 'dot' if ( !$codedigit );    # old AMC versions
+    }
+    if ($codedigit) {
+        push @opts, "codeDigitExterne", $codedigit;
+    }
+
+    execute(
+        command_opts => [@opts],
+        once         => 1
+    );
+
+    open( AMCLOG, "$jobname.amc" ) or die "Unable to open $jobname.amc : $!";
 
     my $qs                    = {};
     my $qs0                   = {}; # memory for student 0 (when using AMCformS)
@@ -1152,11 +1168,11 @@ if ( $to_do{b} ) {
                 } else {
 
                     # associated to a question
-                    $current_q->{strategy} =
-                      (   $current_q->{strategy}
+                    $current_q->{strategy} = (
+                          $current_q->{strategy}
                         ? $current_q->{strategy} . ','
-                        : '' )
-                      . $1;
+                        : ''
+                    ) . $1;
                 }
             } else {
 
