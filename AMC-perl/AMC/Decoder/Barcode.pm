@@ -58,6 +58,10 @@ sub decode_from_path {
         my $s      = $result->{source}->{index}->{symbol};
         if ($s) {
             my $best = $s->[0];
+            for my $i ( 1 .. $#{$s} ) {
+                $best = $s->[$i]
+                  if ( $s->[$i]->{quality} > $best->{quality} );
+            }
             $r = {
                 ok     => 1,
                 status => "$best->{type} Q:$best->{quality}",
