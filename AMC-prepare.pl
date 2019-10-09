@@ -672,12 +672,16 @@ sub execute {
 
                 debug "Converting DVI to PDF with $engine_topdf ...";
                 if ( $engine_topdf eq 'dvipdf' ) {
-                    system( $engine_topdf, "$jobname.dvi", "$jobname.pdf" );
+                    system_debug( cmd =>
+                          [ $engine_topdf, "$jobname.dvi", "$jobname.pdf" ] );
                 } else {
-                    system( $engine_topdf, "-o", "$jobname.pdf",
-                        "$jobname.dvi" );
+                    system_debug(
+                        cmd => [
+                            $engine_topdf,  "-o",
+                            "$jobname.pdf", "$jobname.dvi"
+                        ]
+                    );
                 }
-                debug_and_stderr "ERROR $engine_topdf: $?" if ($?);
             } else {
 
                 # No available DVI->PDF engine!

@@ -250,8 +250,12 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                 debug "PDF split tmp dir / pdfimages: $temp_dir";
 
                 if (
-                    system( "pdfimages", "-p", $file->{path},
-                        $temp_dir . '/' . $file->{file} . '-page' ) == 0
+                    system_debug(
+                        cmd => [
+                            "pdfimages", "-p", $file->{path},
+                            $temp_dir . '/' . $file->{file} . '-page'
+                        ]
+                      ) == 0
                   )
                 {
 
@@ -289,7 +293,7 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                     }
 
                 } else {
-                    debug "ERROR while trying pdfimages: [$?] $!";
+                    debug "ERROR while trying pdfimages...";
                 }
             }
 
@@ -302,8 +306,12 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                 debug "PDF split tmp dir / qpdf: $temp_dir";
 
                 if (
-                    system( "qpdf", $file->{path}, "--split-pages",
-                        $temp_dir . '/' . $file->{file} . '-page-%d.pdf' ) == 0
+                    system_debug(
+                        cmd => [
+                            "qpdf", $file->{path}, "--split-pages",
+                            $temp_dir . '/' . $file->{file} . '-page-%d.pdf'
+                        ]
+                      ) == 0
                   )
                 {
 
@@ -324,7 +332,7 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                     }
 
                 } else {
-                    debug "ERROR while trying qpdf: [$?] $!";
+                    debug "ERROR while trying qpdf...";
                 }
             }
 
@@ -338,9 +346,15 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                 debug "PDF split tmp dir / pdftk: $temp_dir";
 
                 if (
-                    system( "pdftk", $file->{path}, "burst", "output",
-                        $temp_dir . '/' . $file->{file} . '-page-%04d.pdf' ) ==
-                    0
+                    system(
+                        cmd => [
+                            "pdftk",
+                            $file->{path},
+                            "burst",
+                            "output",
+                            $temp_dir . '/' . $file->{file} . '-page-%04d.pdf'
+                        ]
+                      ) == 0
                   )
                 {
 
@@ -359,7 +373,7 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                     }
 
                 } else {
-                    debug "ERROR while trying pdftk burst: [$?] $!";
+                    debug "ERROR while trying pdftk burst...";
                 }
             }
 
@@ -410,7 +424,7 @@ for my $fich (@f) {
             "-dBATCH"
         );
         push @cmd, "-dQUIET" if ( !$debug );
-        system( @cmd, $fich->{path} );
+        system_debug( cmd => [ @cmd, $fich->{path} ], die_on_error => 1 );
 
         opendir( my $dh, $temp_dir ) || debug "can't opendir $temp_dir: $!";
         push @fs,
@@ -506,8 +520,14 @@ for my $fich (@f) {
             }
             $fb .= $suffix_change;
 
-            system( magick_module("convert"),
-                @pre_options, $fich->{path}, "+adjoin", "$temp_dir/$fb" );
+            system_debug(
+                cmd => [
+                    magick_module("convert"), @pre_options,
+                    $fich->{path},            "+adjoin",
+                    "$temp_dir/$fb"
+                ],
+                die_on_error => 1
+            );
             opendir( my $dh, $temp_dir ) || debug "can't opendir $temp_dir: $!";
             push @fs,
               replace_by( $fich,
@@ -551,10 +571,10 @@ if ($orientation) {
             );
             debug "CMD: " . join( ' ', @cmd );
 
-            if ( system(@cmd) == 0 ) {
+            if ( system_debug( cmd => [@cmd] ) == 0 ) {
                 push @fs, replace_by( $fich, $dest );
             } else {
-                debug "Error while rotating $fich->{path}: $?";
+                debug "Error while rotating $fich->{path}...";
                 push @fs, $fich;
             }
         } else {

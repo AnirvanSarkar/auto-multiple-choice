@@ -536,8 +536,12 @@ sub charge_i {
         $self->{general}->get_window()->set_cursor( $self->{cursor_watch} );
         Gtk3::main_iteration while (Gtk3::events_pending);
 
-        system( "pdftoppm", "-f", $page, "-l", $page, "-r", $self->{dpi},
-            $self->{sujet}, $self->{'temp-dir'} . "/page" );
+        system_debug(
+            cmd => [
+                "pdftoppm", "-f", $page, "-l", $page, "-r", $self->{dpi},
+                $self->{sujet}, $self->{'temp-dir'} . "/page"
+            ]
+        );
 
         # recherche de ce qui a ete fabrique...
         opendir( TDIR, $self->{'temp-dir'} )
@@ -553,9 +557,13 @@ sub charge_i {
         if ( $self->{image_type} && $self->{image_type} ne 'ppm' ) {
             $tmp_image = $self->{'tmp-image'} . "." . $self->{image_type};
             debug "ppmto" . $self->{image_type} . " : $tmp_ppm -> $tmp_image";
-            system( "ppmto"
-                  . $self->{image_type}
-                  . " \"$tmp_ppm\" > \"$tmp_image\"" );
+            system_debug(
+                cmd => [
+                        "ppmto"
+                      . $self->{image_type}
+                      . " \"$tmp_ppm\" > \"$tmp_image\""
+                ]
+            );
         }
 
         $display_image = $tmp_image;

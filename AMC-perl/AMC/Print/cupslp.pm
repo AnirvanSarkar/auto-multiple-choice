@@ -129,7 +129,7 @@ sub print_file {
     }
     push @command, $filename;
     debug "Printing command: " . join( " ", @command );
-    system(@command);
+    system_stderr( cmd => [@command] );
 }
 
 1;

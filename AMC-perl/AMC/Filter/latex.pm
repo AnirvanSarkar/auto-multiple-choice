@@ -96,8 +96,8 @@ sub filter {
         debug_and_stderr "Working directory: " . getcwd;
         debug_and_stderr "Calling preprocess command: " . join( ' ', @cmd );
         $ENV{AMC_JOBNAME} = $self->{jobname};
-        if ( system(@cmd) != 0 ) {
-            debug_and_stderr("Preprocess command call failed: [$?] $!");
+        if ( system_debug( cmd => [@cmd] ) != 0 ) {
+            debug_and_stderr("Preprocess command call failed!");
         }
         chdir($cwd);
 
