@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -244,7 +244,7 @@
           <para>The LaTeX command <command>\AMCcode</command> was rewritten in
           version 0.518. It is now more robust and configurable, but you will
           have to adapt the LaTeX sources you wrote for older versions to keep
-         the same layout.</para>
+          the same layout.</para>
         </listitem>
 
         <listitem>
@@ -670,6 +670,42 @@ the best you can.
             <para>Give commands to be inserted at the beginning of the LaTeX
             <command>document</command> environment (for example macro
             definitions).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>LaTeX-BeginCopy:</term>
+
+          <listitem>
+            <para>Give LaTeX commands to be inserted at the beginning of the
+            copy description.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>LaTeX-EndCopy:</term>
+
+          <listitem>
+            <para>Give LaTeX commands to be inserted at the end of the copy
+            description.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>PDF-BeginCopy:</term>
+
+          <listitem>
+            <para>Give the name of a PDF file to be inserted at the beginning
+            of all copies of the exam.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>PDF-EndCopy:</term>
+
+          <listitem>
+            <para>Give the name of a PDF file to be inserted at the end of all
+            copies of the exam.</para>
           </listitem>
         </varlistentry>
 
@@ -1481,7 +1517,8 @@ Firstname and lastname:
     </sect2>
 
     <sect2 id="secensemble">
-      <title id="secensemble.title">An example with a separate answer sheet</title>
+      <title id="secensemble.title">An example with a separate answer
+      sheet</title>
 
       <para>In this example, one wants the check-boxes to be put together in a
       separate sheet. This makes cheating more difficult, and, more
@@ -1698,7 +1735,7 @@ Duration : 10 minutes.
           </listitem>
 
           <listitem>
-            <para><option>pdfform</option>: create a pdf file to fill. </para>
+            <para><option>pdfform</option>: create a pdf file to fill.</para>
 
             <note>
               <para>AMC does not automatically manage sending topics.</para>
@@ -1806,10 +1843,10 @@ Duration : 10 minutes.
             use <command>\onecopy</command> with this layout.</para>
           </listitem>
 
-        <listitem>
-          <para><option>keys=line</option>: allow one-line key printing in
-          catalog mode.</para>
-        </listitem>
+          <listitem>
+            <para><option>keys=line</option>: allow one-line key printing in
+            catalog mode.</para>
+          </listitem>
 
           <listitem>
             <para><option>postcorrect</option>: use this option if you want to
@@ -2253,8 +2290,9 @@ Duration : 10 minutes.
         command <command>\insertgroup</command>, as in<programlisting>\insertgroup{mygroup}</programlisting></para>
 
         <para>Group insertion can be controlled by the group mode, that can be
-        set by the <command>\setgroupmode</command> command (called after group
-        creation, once for all, before <command>\onecopy</command>):</para>
+        set by the <command>\setgroupmode</command> command (called after
+        group creation, once for all, before
+        <command>\onecopy</command>):</para>
 
         <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
 
@@ -2613,33 +2651,39 @@ Duration : 10 minutes.
 }
       </programlisting>
 
-      <para> <emphasis> In this example, the question number will not be displayed through
-      the command <command>\AMCquestionNumberfalse</command>. </emphasis> </para>
+          <para><emphasis> In this example, the question number will not be
+          displayed through the command
+          <command>\AMCquestionNumberfalse</command>. </emphasis></para>
         </warning>
 
         <sect4 id="choicescustom">
-                <title>Choices custom</title>
-        <para>The display of answers can be modified in the same fashion, if
-        one uses the <option>choicescustom</option> environment instead of
-        <option>choices</option> or <option>choiceshoriz</option>, redefining
-        the three following LaTeX macros:</para>
+          <title>Choices custom</title>
 
-        <programlisting>\def\AMCbeginAnswer{}
+          <para>The display of answers can be modified in the same fashion, if
+          one uses the <option>choicescustom</option> environment instead of
+          <option>choices</option> or <option>choiceshoriz</option>,
+          redefining the three following LaTeX macros:</para>
+
+          <programlisting>\def\AMCbeginAnswer{}
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}
 </programlisting>
 
-<sect5 id="reponsesperso.exemple1">
-<title>Example 1</title>
+          <sect5 id="reponsesperso.exemple1">
+            <title>Example 1</title>
 
-<para>
-The check boxes can be used to penalize students who delay their copy, for example
- (8 points less for a small delay and 20 points less for an exaggerated delay).
-  It will be enough to include at the desired place (for example in the header, something like this):
-</para>
-<programlisting>\fcolorbox{black}{gray}{\insertDelay}</programlisting>
-<para>the command <command>\insertDelay</command> is defined outside from \onecopy :</para>
-<programlisting>
+            <para>The check boxes can be used to penalize students who delay
+            their copy, for example (8 points less for a small delay and 20
+            points less for an exaggerated delay). It will be enough to
+            include at the desired place (for example in the header, something
+            like this):</para>
+
+            <programlisting>\fcolorbox{black}{gray}{\insertDelay}</programlisting>
+
+            <para>the command <command>\insertDelay</command> is defined
+            outside from \onecopy :</para>
+
+            <programlisting>
 \def\insertDelay{ %
 {\def\AMCbeginQuestion##1##2{}\AMCnobloc%
  \begin{questionmult}{00delay}
@@ -2650,26 +2694,44 @@ Holded~\begin{choicescustom}[o]\wrongchoice{R1~}\scoring{b=0,m=-8}\wrongchoice{R
 }
 </programlisting>
 
-<itemizedlist>
-<listitem><para>the command <command>\def\AMCbeginQuestion##1##2{}</command> (combined with the use of the <option> reponsesperso </option> environment) allows AMC to write not "Question XX".</para></listitem>
- <listitem><para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command> also refine the result.</para></listitem>
- <listitem><para><command>\AMCnoCompleteMulti</command> allows to  tell AMC not to add the answer "none of these answers is correct" despite the use of questionmult.</para></listitem>
- <listitem><para><command>\AMCdontAnnotate</command> ask AMC not to annotate these boxes there.</para></listitem>
-</itemizedlist>
+            <itemizedlist>
+              <listitem>
+                <para>the command
+                <command>\def\AMCbeginQuestion##1##2{}</command> (combined
+                with the use of the <option> reponsesperso </option>
+                environment) allows AMC to write not "Question XX".</para>
+              </listitem>
 
-        <important>
-          <para>Inside the commande <command>\onecopy</command>, double the
-          <code>#</code>.</para>
+              <listitem>
+                <para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command>
+                also refine the result.</para>
+              </listitem>
 
-          <programlisting>\def\AMCanswer##1##2{##1  ##2}
+              <listitem>
+                <para><command>\AMCnoCompleteMulti</command> allows to tell
+                AMC not to add the answer "none of these answers is correct"
+                despite the use of questionmult.</para>
+              </listitem>
+
+              <listitem>
+                <para><command>\AMCdontAnnotate</command> ask AMC not to
+                annotate these boxes there.</para>
+              </listitem>
+            </itemizedlist>
+
+            <important>
+              <para>Inside the commande <command>\onecopy</command>, double
+              the <code>#</code>.</para>
+
+              <programlisting>\def\AMCanswer##1##2{##1  ##2}
 \def\AMCbeginQuestion##1##2{}</programlisting>
-        </important>
-</sect5>
+            </important>
+          </sect5>
 
+          <sect5 id="choicescustom.example2">
+            <title>Use in mathematics</title>
 
-<sect5 id="choicescustom.example2">
-<title>Use in mathematics</title>
-<programlisting>
+            <programlisting>
 \begin{questionmultx}{formula}\scoring{mz=2}\AMCnoCompleteMulti
 How is the identity function defined?
   \begin{choicescustom}[o]
@@ -2677,16 +2739,16 @@ How is the identity function defined?
   \end{choicescustom}
 \end{questionmultx}
 </programlisting>
+          </sect5>
+        </sect4>
 
-</sect5>
-		</sect4>
+        <sect4 id="spacing">
+          <title>Spacing</title>
 
-      <sect4 id="spacing">
-      <title>Spacing</title>
-        <para>One can also change spacing redefining the following dimensions
-        (here are the default values):</para>
+          <para>One can also change spacing redefining the following
+          dimensions (here are the default values):</para>
 
-        <programlisting>\AMCinterIrep=0pt
+          <programlisting>\AMCinterIrep=0pt
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
 \AMCinterBquest=3ex
@@ -2695,12 +2757,13 @@ How is the identity function defined?
 \setlength{\AMChorizBoxSep}{1em}
 </programlisting>
 
-        <para>These dimensions are the vertical space between questions
-        (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
-        (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
-        <option>box</option> package option) or standard mode (<code>I</code>)
-        and the space left after an open question. The two last lengths are used
-        in environment: <option>choicescustom</option></para>
+          <para>These dimensions are the vertical space between questions
+          (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
+          (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
+          <option>box</option> package option) or standard mode
+          (<code>I</code>) and the space left after an open question. The two
+          last lengths are used in environment:
+          <option>choicescustom</option></para>
         </sect4>
       </sect3>
 
@@ -2736,7 +2799,8 @@ How is the identity function defined?
 
         <para>It is also possible to modify the layout of the separate answer
         sheet produced with the <option>separateanswersheet</option> option
-        (see  <xref endterm="secensemble.title" linkend="secensemble"/>).</para>
+        (see  <xref endterm="secensemble.title"
+        linkend="secensemble"/>).</para>
 
         <orderedlist>
           <listitem>
@@ -2759,24 +2823,25 @@ How is the identity function defined?
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
 
-        <para>These definitions have to be inserted just after
-        <code>\begin{document}</code> in the LaTeX file.</para>
+            <para>These definitions have to be inserted just after
+            <code>\begin{document}</code> in the LaTeX file.</para>
           </listitem>
 
           <listitem>
-          <para>
-         You can force AMC not to respect the arrangement of the questions and to store the open
-         questions in order to restore them together. This can be useful when you use package
-          <package>multicols</package >, the answers to open questions needing more space
-          when hand written.
-          </para>
+            <para>You can force AMC not to respect the arrangement of the
+            questions and to store the open questions in order to restore them
+            together. This can be useful when you use package
+            <package>multicols</package>, the answers to open questions
+            needing more space when hand written.</para>
 
-        <para >The command <command>\AMCformFilter{!\AMCifcategory{open}}</command>
-        displays all questions except the open questions then the command
-        <command>\AMCformFilter{\AMCifcategory{open}}</command >
-        displays only the open questions. Both commands must be used <emphasis> together</emphasis >.</para >
+            <para>The command
+            <command>\AMCformFilter{!\AMCifcategory{open}}</command> displays
+            all questions except the open questions then the command
+            <command>\AMCformFilter{\AMCifcategory{open}}</command> displays
+            only the open questions. Both commands must be used <emphasis>
+            together</emphasis>.</para>
 
-         <programlisting>
+            <programlisting>
 %On two columns, the answers boxes are displayed
 %except the open questions.
 \begin{multicols}{2}
@@ -2787,7 +2852,9 @@ How is the identity function defined?
 \AMCformFilter{\AMCifcategory{open}}
          </programlisting>
 
-         <note><para>The ascending numbering is always respected.</para></note>
+            <note>
+              <para>The ascending numbering is always respected.</para>
+            </note>
           </listitem>
         </orderedlist>
       </sect3>
@@ -3859,14 +3926,14 @@ respective parameters \VQa{} and \VQb{}.
               </listitem>
             </varlistentry>
 
-              <varlistentry>
+            <varlistentry>
               <term>scorewrong=<replaceable>num</replaceable></term>
-                <listitem>
+
+              <listitem>
                 <para>gives the score for an wrong answer (defaults to
                 0).</para>
               </listitem>
             </varlistentry>
-
           </variablelist>
 
           <para>You can set other default values (for the whole exam) for all
@@ -4068,7 +4135,6 @@ Name :
           linkend="latex.numeric"/>)</para>
         </note>
       </sect3>
-
     </sect2>
   </sect1>
 
@@ -4147,8 +4213,8 @@ Name :
 
       <para>Preparing a project is done in two steps. First we must make the
       reference documents from the LaTeX source file. This can be done by
-      clicking the <guibutton>Update documents</guibutton> or <keycode>Alt+U</keycode>. The following
-      documents are produced:</para>
+      clicking the <guibutton>Update documents</guibutton> or
+      <keycode>Alt+U</keycode>. The following documents are produced:</para>
 
       <itemizedlist>
         <listitem>
@@ -4317,12 +4383,11 @@ Name :
         lists of the section <guilabel>Diagnosis</guilabel>:</para>
 
         <itemizedlist>
-
-        <listitem>
-          <para>The value<option>update</option> displays the date
-          the date the page was last modified. Hided by default. Click on the button
-          <guimenuitem>columns</guimenuitem> to show it.</para>
-        </listitem>
+          <listitem>
+            <para>The value<option>update</option> displays the date the date
+            the page was last modified. Hided by default. Click on the button
+            <guimenuitem>columns</guimenuitem> to show it.</para>
+          </listitem>
 
           <listitem>
             <para>The value <emphasis>MSD</emphasis> (mean square deviation)
@@ -4344,12 +4409,11 @@ Name :
             boxes images).</para>
           </listitem>
 
-        <listitem>
-          <para>The value <emphasis>scan files</emphasis> displays the name of
-          the handled page.  Hided by default. Click on the button
-          <guimenuitem>columns</guimenuitem> to show it.</para>
-        </listitem>
-
+          <listitem>
+            <para>The value <emphasis>scan files</emphasis> displays the name
+            of the handled page. Hided by default. Click on the button
+            <guimenuitem>columns</guimenuitem> to show it.</para>
+          </listitem>
         </itemizedlist>
       </sect3>
 
@@ -4371,60 +4435,90 @@ Name :
         </warning>
 
         <sect4 id="gui.capture.manual.color">
-	  <title>Viewing empty or inavlid questions</title>
-	  <para>By clicking on the page numbers, AMC wrap the boxes answers
-	  with a colored square :
-	  <itemizedlist>
-            <listitem><para>cyan for empty answers,</para></listitem>
-            <listitem><para>yellow for invalid answers.</para></listitem>
-	  </itemizedlist>
-	  </para>
+          <title>Viewing empty or inavlid questions</title>
 
-	  <para>You may change this colors in the menu tab:
-	  <menuchoice>
-            <guimenu>Preferences</guimenu>
-            <guisubmenu>Display</guisubmenu>
-            <guimenuitem>Scan</guimenuitem>
-          </menuchoice></para>
+          <para>By clicking on the page numbers, AMC wrap the boxes answers
+          with a colored square : <itemizedlist>
+              <listitem>
+                <para>cyan for empty answers,</para>
+              </listitem>
 
-          <para>It is possible to search a specific question
-          (see <xref endterm="gui.capture.manual.focus.title" linkend="gui.capture.manual.focus"/>)</para>
+              <listitem>
+                <para>yellow for invalid answers.</para>
+              </listitem>
+            </itemizedlist></para>
+
+          <para>You may change this colors in the menu tab: <menuchoice>
+              <guimenu>Preferences</guimenu>
+
+              <guisubmenu>Display</guisubmenu>
+
+              <guimenuitem>Scan</guimenuitem>
+            </menuchoice></para>
+
+          <para>It is possible to search a specific question (see <xref
+          endterm="gui.capture.manual.focus.title"
+          linkend="gui.capture.manual.focus"/>)</para>
         </sect4>
 
         <sect4 id="gui.capture.manual.focus">
-         <title id="gui.capture.manual.focus.title">Select a specific question</title>
-         <para>This option make it possible to manually mark on-screen a specific question.
-          This save your having to search on each page the question if they are shuffled.</para>
+          <title id="gui.capture.manual.focus.title">Select a specific
+          question</title>
 
-         <sect5 id="gui.capture.manual.open.question.focus">
-           <title>Mark an open question on-screen</title>
-           <itemizedlist>
-           <listitem><para>open the manual input tab and select  "scan" as background,</para></listitem>
-           <listitem><para>select the question to mark
-           (drop-down menu above the list of pages) .</para></listitem>
-           </itemizedlist>
+          <para>This option make it possible to manually mark on-screen a
+          specific question. This save your having to search on each page the
+          question if they are shuffled.</para>
 
-           <para>The open question's check-boxes are on the top of the window, and when you click
-           <guibutton>next</guibutton> you move forward to the following student, always for the same question.</para>
+          <sect5 id="gui.capture.manual.open.question.focus">
+            <title>Mark an open question on-screen</title>
 
-           <note><para>All questions can be checked like this.</para></note>
+            <itemizedlist>
+              <listitem>
+                <para>open the manual input tab and select "scan" as
+                background,</para>
+              </listitem>
+
+              <listitem>
+                <para>select the question to mark (drop-down menu above the
+                list of pages) .</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>The open question's check-boxes are on the top of the
+            window, and when you click <guibutton>next</guibutton> you move
+            forward to the following student, always for the same
+            question.</para>
+
+            <note>
+              <para>All questions can be checked like this.</para>
+            </note>
           </sect5>
 
           <sect5 id="gui.capture.manual.empty.invalid.question.focus">
-           <title>Check on-screen pages with invalid or empty questions</title>
-           <itemizedlist>
-           <listitem> <para>The marking must be ended before use
-           (see <xref endterm="gui.marks.proc.title" linkend="gui.marks.proc"/>
-           section <xref endterm="gui.marks.title" linkend="gui.marks"/>),</para></listitem>
-           <listitem><para> open the manual input tab and select  "scan" as background,</para>
-           </listitem>
-           <listitem><para>choose if you want to navigate through all pages, through pages
-           with invalid answers (inv), or through pages with invalid or empty answers (i &amp; e).
-           </para></listitem>
-           </itemizedlist>
-            </sect5>
-         </sect4>
+            <title>Check on-screen pages with invalid or empty
+            questions</title>
 
+            <itemizedlist>
+              <listitem>
+                <para>The marking must be ended before use (see <xref
+                endterm="gui.marks.proc.title" linkend="gui.marks.proc"/>
+                section <xref endterm="gui.marks.title"
+                linkend="gui.marks"/>),</para>
+              </listitem>
+
+              <listitem>
+                <para>open the manual input tab and select "scan" as
+                background,</para>
+              </listitem>
+
+              <listitem>
+                <para>choose if you want to navigate through all pages,
+                through pages with invalid answers (inv), or through pages
+                with invalid or empty answers (i &amp; e).</para>
+              </listitem>
+            </itemizedlist>
+          </sect5>
+        </sect4>
       </sect3>
     </sect2>
 
@@ -5956,39 +6050,43 @@ Moniuszko,Stanisław,003</programlisting>
     </sect2>
   </sect1>
 
-<sect1 id="conflits">
-  <title>Conflicts with other packages</title>
+  <sect1 id="conflits">
+    <title>Conflicts with other packages</title>
 
-       <sect2 id="packages">
-         <title>Packages to load after automultiplchoice</title>
+    <sect2 id="packages">
+      <title>Packages to load after automultiplchoice</title>
 
-        <para>You must load the following packages  <emphasis>after</emphasis>
-        <package>automultiplechoice</package> : fancyvrb, fancybox, pstricks.</para>
+      <para>You must load the following packages <emphasis>after</emphasis>
+      <package>automultiplechoice</package> : fancyvrb, fancybox,
+      pstricks.</para>
 
-        <para>To use <command>PSTricks</command>, you have to configure AMC :
-        <menuchoice>
-            <guimenu>Edit</guimenu>
+      <para>To use <command>PSTricks</command>, you have to configure AMC :
+      <menuchoice>
+          <guimenu>Edit</guimenu>
 
-            <guimenuitem>Preferences</guimenuitem>
+          <guimenuitem>Preferences</guimenuitem>
 
-            <guimenuitem>Main</guimenuitem>
+          <guimenuitem>Main</guimenuitem>
 
-            <guimenuitem>Default LaTex engine</guimenuitem>
+          <guimenuitem>Default LaTex engine</guimenuitem>
 
-            <guimenuitem>latex+dvipdf</guimenuitem>
-          </menuchoice></para>
-      </sect2>
+          <guimenuitem>latex+dvipdf</guimenuitem>
+        </menuchoice></para>
+    </sect2>
 
-        <sect2 id="verbatim">
-          <title><package>verbatim</package></title>
-          <para>From wiki <ulink url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
-          https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
+    <sect2 id="verbatim">
+      <title><package>verbatim</package></title>
 
-          <para>The <package>verbatim</package> environment interferes with AMC LaTeX package,
-          so that it is impossible to use it inside <command>question</command> or <command>questionmult</command>
-          environments... As an example, the following code won't compile:</para>
+      <para>From wiki <ulink
+      url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
+      https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
 
-          <programlisting>
+      <para>The <package>verbatim</package> environment interferes with AMC
+      LaTeX package, so that it is impossible to use it inside
+      <command>question</command> or <command>questionmult</command>
+      environments... As an example, the following code won't compile:</para>
+
+      <programlisting>
 \begin{question}{program}
 What is the return value of the following R code?
 \begin{verbatim}
@@ -6001,10 +6099,15 @@ sum(sapply(1:2^2,function(x) { x/2 }))
 \end{choices}
 \end{question}
           </programlisting>
-            <sect3>
-            <title>Escaping</title>
-            <para>For very small texts, it is possible to escape all characters that have a special meaning for LaTeX. However, this can become quickly tedious.</para>
-<programlisting>
+
+      <sect3>
+        <title>Escaping</title>
+
+        <para>For very small texts, it is possible to escape all characters
+        that have a special meaning for LaTeX. However, this can become
+        quickly tedious.</para>
+
+        <programlisting>
 \begin{question}{program}
 What is the return value of the following R code?
 \begin{center}
@@ -6017,14 +6120,20 @@ What is the return value of the following R code?
 \end{choices}
 \end{question}
 </programlisting>
-            </sect3>
+      </sect3>
 
-          <sect3 id="UsevVerb">
-          <title><command>\UseVerb</command> from <package>fancyvrb</package> package.</title>
-            <para><ulink url="https://www.ctan.org/pkg/verbatim"> https://www.ctan.org/pkg/verbatim</ulink>.</para>
+      <sect3 id="UsevVerb">
+        <title><command>\UseVerb</command> from <package>fancyvrb</package>
+        package.</title>
 
-            <para>You can also record some one-line verbatims with the <package>fancyvrb</package> package (define your verbatim outside, before  <command>\onecopy)</command>:</para>
-          <programlisting>
+        <para><ulink url="https://www.ctan.org/pkg/verbatim">
+        https://www.ctan.org/pkg/verbatim</ulink>.</para>
+
+        <para>You can also record some one-line verbatims with the
+        <package>fancyvrb</package> package (define your verbatim outside,
+        before <command>\onecopy)</command>:</para>
+
+        <programlisting>
 \SaveVerb{theRcode}'sum(sapply(1:2^2,function(x) { x/2 }))'
 ...
 \begin{question}{program}
@@ -6039,12 +6148,16 @@ What is the return value of the following R code?
 \end{choices}
 \end{question}
           </programlisting>
-          </sect3>
+      </sect3>
 
-          <sect3 id="verbatimbox">
-            <title><package>verbatimbox</package> package</title>
-            <para>For larger verbatims, the <package>verbatimbox </package>package can help you (define your verbatim outside, before  <command>\onecopy)</command>:</para>
-  <programlisting>
+      <sect3 id="verbatimbox">
+        <title><package>verbatimbox</package> package</title>
+
+        <para>For larger verbatims, the <package>verbatimbox </package>package
+        can help you (define your verbatim outside, before
+        <command>\onecopy)</command>:</para>
+
+        <programlisting>
 \begin{myverbbox}{\Rcode}
 sum(sapply(1:2^2,function(x) { x/2 }))
 \end{myverbbox}
@@ -6062,34 +6175,34 @@ What is the return value of the following R code?
 \end{choices}
 \end{question}
   </programlisting>
-            </sect3>
+      </sect3>
 
-          <sect3 id="import">
-          <title>Import external files</title>
-            <para>Reading the verbatim from a separate file often helps. As an example, for a syntax highlighted
-          python code stored in a file named <code>prog.py</code> in the project directory, you can use</para>
-            <sect4 id="listings">
-            <title><package>listings</package> package</title>
+      <sect3 id="import">
+        <title>Import external files</title>
 
-<programlisting>
+        <para>Reading the verbatim from a separate file often helps. As an
+        example, for a syntax highlighted python code stored in a file named
+        <code>prog.py</code> in the project directory, you can use</para>
+
+        <sect4 id="listings">
+          <title><package>listings</package> package</title>
+
+          <programlisting>
 \lstset{language=Python}
 \lstinputlisting{prog.py}
 </programlisting>
-            </sect4>
+        </sect4>
 
-            <sect4 id="minted">
-            <title><package>minted</package> package</title>
+        <sect4 id="minted">
+          <title><package>minted</package> package</title>
 
-<programlisting>
+          <programlisting>
  \inputminted{python}{prog.py}
 </programlisting>
-            </sect4>
-
-            </sect3>
-            </sect2>
-
-
-</sect1>
+        </sect4>
+      </sect3>
+    </sect2>
+  </sect1>
 
   <sect1 id="commands">
     <title>Commands manual</title>
@@ -6629,11 +6742,11 @@ What is the return value of the following R code?
 
               <listitem>
                 <para>gives the command to use to extract pages from the PDF
-                subject. Currently, <command>pdftk</command>, <command>gs</command>
-                and <command>qpdf</command> are available.
-                The default value is <command>pdftk</command>,
-                but <command>qpdf</command> and then <command>gs</command>
-                will be used if the <command>pdftk</command> command is not
+                subject. Currently, <command>pdftk</command>,
+                <command>gs</command> and <command>qpdf</command> are
+                available. The default value is <command>pdftk</command>, but
+                <command>qpdf</command> and then <command>gs</command> will be
+                used if the <command>pdftk</command> command is not
                 installed.</para>
               </listitem>
             </varlistentry>
@@ -8674,25 +8787,26 @@ What is the return value of the following R code?
   </sect1>
 
   <sect1>
-  <title>miscellaneous</title>
+    <title>miscellaneous</title>
 
-  <sect2 id="divers.gmail">
+    <sect2 id="divers.gmail">
       <title>Configure AMC to use GMAIL</title>
 
-      <para>Login to your gmail account then enable the option :
-      Allowing less secure apps to access your account.</para>
+      <para>Login to your gmail account then enable the option : Allowing less
+      secure apps to access your account.</para>
 
       <sect3>
         <title>Linux users (Ubuntu,Xubuntu,Lubuntu etc.)</title>
 
-         <para>Type in a terminal : </para>
+        <para>Type in a terminal :</para>
 
-         <programlisting>sudo apt-get install msmtp</programlisting>
-         <programlisting>sudo gedit /etc/msmtprc</programlisting>
+        <programlisting>sudo apt-get install msmtp</programlisting>
 
-         <para>add the following content to msmtprc file and save it. </para>
+        <programlisting>sudo gedit /etc/msmtprc</programlisting>
 
- <programlisting>
+        <para>add the following content to msmtprc file and save it.</para>
+
+        <programlisting>
 account gmail
 host smtp.gmail.com
 tls on
@@ -8704,31 +8818,30 @@ user <emphasis>your_user_name@gmail.com</emphasis>
 password <emphasis>your_password</emphasis>
 </programlisting>
 
-          <para>
-          Set up AMC : <menuchoice>
-          <guimenu>Edit</guimenu>
+        <para>Set up AMC : <menuchoice>
+            <guimenu>Edit</guimenu>
 
-          <guisubmenu>Preferences</guisubmenu>
+            <guisubmenu>Preferences</guisubmenu>
 
-          <guisubmenu>Email</guisubmenu>
+            <guisubmenu>Email</guisubmenu>
 
-          <guimenuitem>Mail delivery method</guimenuitem>
-          </menuchoice>,  select <guibutton>sendmail</guibutton> and type
-         the path : <programlisting>/usr/bin/msmtp</programlisting>
-          </para>
-        </sect3>
+            <guimenuitem>Mail delivery method</guimenuitem>
+          </menuchoice>, select <guibutton>sendmail</guibutton> and type the
+        path : <programlisting>/usr/bin/msmtp</programlisting></para>
+      </sect3>
 
-        <sect3>
-         <title>Macintosh users</title>
+      <sect3>
+        <title>Macintosh users</title>
 
-          <para>Type in a terminal : </para>
+        <para>Type in a terminal :</para>
 
-           <programlisting>sudo port install msmtp</programlisting>
-          <programlisting>sudo pico ~/.msmtprc</programlisting>
+        <programlisting>sudo port install msmtp</programlisting>
 
-           <para>add the following content to msmtprc file and save it. </para>
+        <programlisting>sudo pico ~/.msmtprc</programlisting>
 
- <programlisting>
+        <para>add the following content to msmtprc file and save it.</para>
+
+        <programlisting>
 account default
 host smtp.gmail.com
 tls on
@@ -8740,26 +8853,24 @@ user <emphasis>your_user_name@gmail.com</emphasis>
 password <emphasis>your_password</emphasis>
 </programlisting>
 
-        <para>Modify the access rights: </para>
+        <para>Modify the access rights:</para>
 
-  <programlisting>
+        <programlisting>
 sudo chown <emphasis>user_name</emphasis>:<emphasis>user_name</emphasis>/Users/<emphasis>user_name</emphasis>/.msmtprc
 chmod 0600 /Users/<emphasis>user_name</emphasis>/.msmtprc
   </programlisting>
 
-        <para>
-          Set up AMC : <menuchoice>
-          <guimenu>Edit</guimenu>
+        <para>Set up AMC : <menuchoice>
+            <guimenu>Edit</guimenu>
 
-          <guisubmenu>Preferences</guisubmenu>
+            <guisubmenu>Preferences</guisubmenu>
 
-          <guisubmenu>Email</guisubmenu>
+            <guisubmenu>Email</guisubmenu>
 
-          <guimenuitem>Mail delivery method</guimenuitem>
-          </menuchoice>,  select <guibutton>sendmail</guibutton> and type
-         the path : <programlisting>/opt/local/bin/msmtp</programlisting>
-          </para>
-        </sect3>
+            <guimenuitem>Mail delivery method</guimenuitem>
+          </menuchoice>, select <guibutton>sendmail</guibutton> and type the
+        path : <programlisting>/opt/local/bin/msmtp</programlisting></para>
+      </sect3>
     </sect2>
   </sect1>
 </article>

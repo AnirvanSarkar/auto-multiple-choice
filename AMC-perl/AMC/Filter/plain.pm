@@ -49,6 +49,8 @@ sub new {
           DefaultScoringM DefaultScoringS
           L-Question L-None L-Name L-Student
           LaTeX LaTeX-Preambule LaTeX-BeginDocument
+          LaTeX-BeginCopy LaTeX-EndCopy
+          PDF-BeginCopy PDF-EndCopy
           LaTeXEngine xltxtra
           ShuffleQuestions Columns QuestionBlocks
           Arabic ArabicFont
@@ -120,6 +122,10 @@ sub new {
         code                  => 0,
         'latex-preambule'     => '',
         'latex-begindocument' => '',
+        'latex-begincopy'     => '',
+        'latex-endcopy'       => '',
+        'pdf-begincopy'       => '',
+        'pdf-endcopy'         => '',
     };
 
     # List of modules to be used when parsing (see parse_*
@@ -228,6 +234,13 @@ sub parse_options {
     # relay LaTeX engine option to the project itself
     $self->set_project_option( 'moteur_latex_b',
         $self->{options}->{latexengine} );
+
+    # PDF-* needs the pdfpages package
+    if (   $self->{options}->{'pdf-begincopy'}
+        || $self->{options}->{'pdf-endcopy'} )
+    {
+        $self->needs_package('pdfpages');
+    }
 
     # split Pages option to pages_question and/or pages_total
     if ( $self->{options}->{pages} ) {
@@ -1291,6 +1304,11 @@ sub write_latex {
     }
 
     $tex .= "\\onecopy{5}{\n";
+    if ( $self->{options}->{'pdf-begincopy'} ) {
+        $tex .= '\\includepdf[pages=-,pagecommand={\\thispagestyle{empty}}]{'
+          . $self->{options}->{'pdf-begincopy'} . "}\n";
+    }
+    $tex .= $self->{options}->{'latex-begincopy'};
 
     $tex .= "\\begin{arab}" if ( $self->{options}->{arabic} );
     $tex .= $self->page_header(0);
@@ -1373,6 +1391,11 @@ sub write_latex {
     }
 
     $tex .= "\n\n";
+    $tex .= $self->{options}->{'latex-endcopy'};
+    if ( $self->{options}->{'pdf-endcopy'} ) {
+        $tex .= '\includepdf[pages=-,pagecommand={\thispagestyle{empty}}]{'
+          . $self->{options}->{'pdf-endcopy'} . "}\n";
+    }
     $tex .= "\\AMCaddpagesto{" . $self->{options}->{pages_total} . "}\n"
       if ( $self->{options}->{pages_total} );
     $tex .= "\\AMCcleardoublepage\n" if ( $self->{options}->{manualduplex} );

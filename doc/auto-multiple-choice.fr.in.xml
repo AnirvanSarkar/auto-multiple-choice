@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="fr">
@@ -699,6 +699,42 @@ lesquels sont positifs ?
             <para>Donne des commandes LaTeX à ajouter au début de
             l'environnement <command>document</command> (par exemple des
             définitions de macros).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>LaTeX-BeginCopy:</term>
+
+          <listitem>
+            <para>Donne des commandes LaTeX à ajouter au début de la
+            description d'une copie.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>LaTeX-EndCopy:</term>
+
+          <listitem>
+            <para>Donne des commandes LaTeX à ajouter à la fin de la
+            description d'une copie.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>PDF-BeginCopy:</term>
+
+          <listitem>
+            <para>Donne le nom d'un fichier PDF à ajouter au début de chaque
+            copie.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>PDF-EndCopy:</term>
+
+          <listitem>
+            <para>Donne le nom d'un fichier PDF à ajouter à la fin de chaque
+            copie.</para>
           </listitem>
         </varlistentry>
 
@@ -1546,7 +1582,8 @@ Nom et prénom :
     </sect2>
 
     <sect2 id="secensemble">
-      <title id="secensemble.titre">Un exemple avec une feuille de réponses séparée</title>
+      <title id="secensemble.titre">Un exemple avec une feuille de réponses
+      séparée</title>
 
       <para>Dans cet exemple, on souhaite que les cases à cocher soient toutes
       rassemblées sur une feuille à part. De cette manière, la triche entre
@@ -2019,10 +2056,10 @@ Durée : 10 minutes.
         </important>
 
         <warning>
-       <para>Quand on utilise <package>babel</package> et l'option
-       <option>french</option>, ne pas mettre de <parameter>:</parameter>
-       ni <parameter>;</parameter> dans les identifiants de questions.
-       </para>
+          <para>Quand on utilise <package>babel</package> et l'option
+          <option>french</option>, ne pas mettre de <parameter>:</parameter>
+          ni <parameter>;</parameter> dans les identifiants de
+          questions.</para>
         </warning>
 
         <note>
@@ -2288,7 +2325,8 @@ Durée : 10 minutes.
           <para>Les grandeurs <parameter>width</parameter>,
           <parameter>height</parameter>, <parameter>depth</parameter>
           définissent les dimensions de la case de notation ainsi que son
-          emplacement sur la feuille de réponses. Cette zone invisible est définie pour toutes les questions.</para>
+          emplacement sur la feuille de réponses. Cette zone invisible est
+          définie pour toutes les questions.</para>
 
           <para>La variable <parameter>position</parameter> peut prendre les
           valeurs : none, question, margin, margins.</para>
@@ -2309,7 +2347,8 @@ Durée : 10 minutes.
           <para>Les grandeurs <parameter>width</parameter>,
           <parameter>height</parameter>, <parameter>depth</parameter>
           définissent les dimensions de la case de notation ainsi que son
-          emplacement sur la feuille de réponses. Cette zone invisible est définie pour toutes les questions.</para>
+          emplacement sur la feuille de réponses. Cette zone invisible est
+          définie pour toutes les questions.</para>
 
           <para>La variable <parameter>position</parameter> peut prendre les
           valeurs : none, question, margin, margins.</para>
@@ -2739,33 +2778,40 @@ Durée : 10 minutes.
  \end{question}
 }</programlisting>
 
-        <para><emphasis>Dans cet exemple, le numéro de la question ne sera pas affiché
-        via la commande <command>\AMCquestionNumberfalse</command>.</emphasis></para>
+          <para><emphasis>Dans cet exemple, le numéro de la question ne sera
+          pas affiché via la commande
+          <command>\AMCquestionNumberfalse</command>.</emphasis></para>
         </warning>
 
         <sect4 id="reponsesperso">
           <title>Environnement <option>reponsesperso</option></title>
-        <para>La présentation des réponses peut être modifiée de la même
-        façon, si on utilise l'environnement <option>reponsesperso</option> au
-        lieu de <option>reponses</option> ou <option>reponseshoriz</option>,
-        en redéfinissant les trois macros LaTeX suivantes :</para>
 
+          <para>La présentation des réponses peut être modifiée de la même
+          façon, si on utilise l'environnement <option>reponsesperso</option>
+          au lieu de <option>reponses</option> ou
+          <option>reponseshoriz</option>, en redéfinissant les trois macros
+          LaTeX suivantes :</para>
 
-        <programlisting>\def\AMCbeginAnswer{}
+          <programlisting>\def\AMCbeginAnswer{}
 \def\AMCendAnswer{}
 \def\AMCanswer#1#2{#1 #2}</programlisting>
 
-<sect5 id="reponsesperso.exemple1">
-<title>Exemple 1</title>
+          <sect5 id="reponsesperso.exemple1">
+            <title>Exemple 1</title>
 
-<para>
-On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur copie en retard,
- par exemple (8 points en moins pour un petit retard, et 20 points en moins pour un retard exagéré).
-  Il suffira d'inclure à l'endroit désiré (par exemple dans l'en-tête quelque chose comme ça (ici je demande un fond gris) :
-</para>
-<programlisting>\fcolorbox{black}{gray}{\insertRetard}</programlisting>
-<para>où la commande <command>\insertRetard</command> a été définie en-dehors de \exemplaire :</para>
-<programlisting>
+            <para>On peut utiliser des cases à cocher pour pénaliser les
+            étudiants rendant leur copie en retard, par exemple (8 points en
+            moins pour un petit retard, et 20 points en moins pour un retard
+            exagéré). Il suffira d'inclure à l'endroit désiré (par exemple
+            dans l'en-tête quelque chose comme ça (ici je demande un fond
+            gris) :</para>
+
+            <programlisting>\fcolorbox{black}{gray}{\insertRetard}</programlisting>
+
+            <para>où la commande <command>\insertRetard</command> a été
+            définie en-dehors de \exemplaire :</para>
+
+            <programlisting>
 \def\insertRetard{ %
 {\def\AMCbeginQuestion##1##2{}\AMCnobloc%
  \begin{questionmult}{00retard}
@@ -2776,26 +2822,46 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
 }
 </programlisting>
 
-<itemizedlist>
-<listitem><para>la commande <command>\def\AMCbeginQuestion##1##2{} </command>(combinée avec l'utilisation de l'environnement <option>reponsesperso</option>) permet qu'AMC n'écrive pas "Question XX".</para></listitem>
- <listitem><para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command> permettent également d'épurer le résultat.</para></listitem>
- <listitem><para><command>\AMCnoCompleteMulti</command> permet de demander à AMC de ne pas rajouter la réponse "aucune de ces réponses n'est correcte" marlgré l'utilisation de questionmult.</para></listitem>
- <listitem><para><command>\AMCdontAnnotate</command> demandent à AMC de ne pas annoter ces cases là.</para></listitem>
-</itemizedlist>
+            <itemizedlist>
+              <listitem>
+                <para>la commande <command>\def\AMCbeginQuestion##1##2{}
+                </command>(combinée avec l'utilisation de l'environnement
+                <option>reponsesperso</option>) permet qu'AMC n'écrive pas
+                "Question XX".</para>
+              </listitem>
 
-        <important>
-          <para>Lorsque vous êtes à l'intérieur de la commande
-          <command>\exemplaire</command>, il faut doubler les
-          <code>#</code>.</para>
+              <listitem>
+                <para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command>
+                permettent également d'épurer le résultat.</para>
+              </listitem>
 
-          <programlisting>\def\AMCanswer##1##2{##1  ##2}
+              <listitem>
+                <para><command>\AMCnoCompleteMulti</command> permet de
+                demander à AMC de ne pas rajouter la réponse "aucune de ces
+                réponses n'est correcte" marlgré l'utilisation de
+                questionmult.</para>
+              </listitem>
+
+              <listitem>
+                <para><command>\AMCdontAnnotate</command> demandent à AMC de
+                ne pas annoter ces cases là.</para>
+              </listitem>
+            </itemizedlist>
+
+            <important>
+              <para>Lorsque vous êtes à l'intérieur de la commande
+              <command>\exemplaire</command>, il faut doubler les
+              <code>#</code>.</para>
+
+              <programlisting>\def\AMCanswer##1##2{##1  ##2}
 \def\AMCbeginQuestion##1##2{}</programlisting>
-        </important>
-</sect5>
+            </important>
+          </sect5>
 
-<sect5 id="reponsesperso.exemple2">
-<title>Utilisation en mathématiques</title>
-<programlisting>
+          <sect5 id="reponsesperso.exemple2">
+            <title>Utilisation en mathématiques</title>
+
+            <programlisting>
 \begin{questionmultx}{formule}\bareme{mz=2}\AMCnoCompleteMulti
   Comment est définie la fonction identité ?
   \begin{reponsesperso}[o]
@@ -2803,16 +2869,15 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
   \end{reponsesperso}
 \end{questionmultx}
 </programlisting>
+          </sect5>
+        </sect4>
 
-</sect5>
+        <sect4 id="espaces">
+          <title>Espaces</title>
 
-      </sect4>
+          <para>Certains espacements peuvent également être modifiés :</para>
 
-<sect4 id="espaces">
-<title>Espaces</title>
-        <para>Certains espacements peuvent également être modifiés :</para>
-
-        <programlisting>\AMCinterIrep=0pt
+          <programlisting>\AMCinterIrep=0pt
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
 \AMCinterBquest=3ex
@@ -2820,13 +2885,13 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
 \setlength{\AMChorizAnswerSep}{3em plus 4em}
 \setlength{\AMChorizBoxSep}{1em}</programlisting>
 
-        <para>Ces dimensions correspondent aux espaces verticaux ajoutés entre
-        les questions (<code>quest</code>) ou les réponses (<code>rep</code>),
-        en mode boîte (<code>B</code>, obtenu avec
-        <command>\AMCBoxedAnswers</command> ou l'option de package
-        <option>bloc</option>) ou standard (<code>I</code>), l'espace après
-        une question ouverte. Les deux dernières longueurs sont utilisées pour
-        l’environnement <option>reponsesperso</option>.</para>
+          <para>Ces dimensions correspondent aux espaces verticaux ajoutés
+          entre les questions (<code>quest</code>) ou les réponses
+          (<code>rep</code>), en mode boîte (<code>B</code>, obtenu avec
+          <command>\AMCBoxedAnswers</command> ou l'option de package
+          <option>bloc</option>) ou standard (<code>I</code>), l'espace après
+          une question ouverte. Les deux dernières longueurs sont utilisées
+          pour l’environnement <option>reponsesperso</option>.</para>
         </sect4>
       </sect3>
 
@@ -2864,9 +2929,10 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
 
         <para>Il est aussi possible de modifier la mise en page du formulaire
         de réponses séparé produit avec l'option <option>ensemble</option>
-        (voir <xref endterm="secensemble.titre" linkend="secensemble"/>).</para>
+        (voir <xref endterm="secensemble.titre"
+        linkend="secensemble"/>).</para>
 
-          <orderedlist>
+        <orderedlist>
           <listitem>
             <para>Si on veut simplement modifier l'espacement horizontal entre
             deux cases de réponses ou l'espacement vertical entre deux
@@ -2888,23 +2954,26 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
 \def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
 </programlisting>
 
-<para>Ces définitions sont à insérer juste après la balise
-        <code>\begin{document}</code> dans le document LaTeX.</para>
+            <para>Ces définitions sont à insérer juste après la balise
+            <code>\begin{document}</code> dans le document LaTeX.</para>
           </listitem>
 
           <listitem>
-         <para>
-         Vous pouvez forcer AMC à ne pas respecter l'ordre des questions et à mémoriser
-         les questions ouvertes afin qu'elles soient restituées ensemble. Cela peut être
-         utile lorsque vous utilisez le package <package>multicols</package>, les réponses écrites
-        à la main des questions ouvertes demandant plus d'espace.</para>
+            <para>Vous pouvez forcer AMC à ne pas respecter l'ordre des
+            questions et à mémoriser les questions ouvertes afin qu'elles
+            soient restituées ensemble. Cela peut être utile lorsque vous
+            utilisez le package <package>multicols</package>, les réponses
+            écrites à la main des questions ouvertes demandant plus
+            d'espace.</para>
 
-        <para>La commande <command>\AMCformFilter{!\AMCifcategory{open}}</command> affiche
-        toutes les questions sauf les questions ouvertes puis la commande
-        <command>\AMCformFilter{\AMCifcategory{open}}</command> affiche uniquement les
-        questions ouvertes. Les deux commandes doivent être utilisées <emphasis>ensemble</emphasis>.
-         </para>
-         <programlisting>
+            <para>La commande
+            <command>\AMCformFilter{!\AMCifcategory{open}}</command> affiche
+            toutes les questions sauf les questions ouvertes puis la commande
+            <command>\AMCformFilter{\AMCifcategory{open}}</command> affiche
+            uniquement les questions ouvertes. Les deux commandes doivent être
+            utilisées <emphasis>ensemble</emphasis>.</para>
+
+            <programlisting>
 %Sur deux colonnes, les cases réponses sont affichées
 %à l'exception des questions ouvertes.
 \begin{multicols}{2}
@@ -2915,7 +2984,10 @@ On peut utiliser des cases à cocher pour pénaliser les étudiants rendant leur
 \AMCformFilter{\AMCifcategory{open}}
          </programlisting>
 
-         <note><para>L'ordre croissant des numéros est toujours respecté.</para></note>
+            <note>
+              <para>L'ordre croissant des numéros est toujours
+              respecté.</para>
+            </note>
           </listitem>
         </orderedlist>
       </sect3>
@@ -4079,7 +4151,7 @@ et inscrivez votre nom et prénom ci-dessous.
               </listitem>
             </varlistentry>
 
-             <varlistentry>
+            <varlistentry>
               <term>scorewrong=<replaceable>num</replaceable></term>
 
               <listitem>
@@ -4385,8 +4457,9 @@ Nom et prénom :
       <para>La préparation du projet se fait en deux étapes. Il faut tout
       d'abord fabriquer les documents de référence à partir du fichier source.
       Ceci se fait en cliquant sur le bouton <guibutton>Mise à
-      jour</guibutton> ou <keycode>Alt+D</keycode> de la section <guilabel>Documents de
-      travail</guilabel>. Les documents produits sont les suivants :</para>
+      jour</guibutton> ou <keycode>Alt+D</keycode> de la section
+      <guilabel>Documents de travail</guilabel>. Les documents produits sont
+      les suivants :</para>
 
       <itemizedlist>
         <listitem>
@@ -4472,8 +4545,8 @@ Nom et prénom :
           pouvez utiliser (si ce n'est pas déjà fait), dans le fichier LaTeX
           du sujet, la commande <command>\AMCcleardoublepage</command>, qui
           ajoutera les pages blanches nécessaires pour que tous les sujets
-          aient un nombre pair de pages (voir <xref endterm="secensemble.titre"
-          linkend="secensemble"/>).</para>
+          aient un nombre pair de pages (voir <xref
+          endterm="secensemble.titre" linkend="secensemble"/>).</para>
         </listitem>
 
         <listitem>
@@ -4599,11 +4672,11 @@ Nom et prénom :
         listes de la section <guilabel>Diagnostic</guilabel> :</para>
 
         <itemizedlist>
-
           <listitem>
-            <para>La valeur <option>mise à jour</option> affiche la date
-            de la page traitée. Elle n'est pas affichée par défaut. Il faut l'activer
-            avec le bouton <guimenuitem>colonnes</guimenuitem>.</para>
+            <para>La valeur <option>mise à jour</option> affiche la date de la
+            page traitée. Elle n'est pas affichée par défaut. Il faut
+            l'activer avec le bouton
+            <guimenuitem>colonnes</guimenuitem>.</para>
           </listitem>
 
           <listitem>
@@ -4677,11 +4750,11 @@ Nom et prénom :
           </listitem>
 
           <listitem>
-            <para>La valeur <emphasis>scan files</emphasis> affiche le nom
-            de la page traitée. Elle n'est pas affichée par défaut. Il faut l'activer
-            avec le bouton <guimenuitem>colonnes</guimenuitem>.</para>
+            <para>La valeur <emphasis>scan files</emphasis> affiche le nom de
+            la page traitée. Elle n'est pas affichée par défaut. Il faut
+            l'activer avec le bouton
+            <guimenuitem>colonnes</guimenuitem>.</para>
           </listitem>
-
         </itemizedlist>
       </sect3>
 
@@ -4704,61 +4777,93 @@ Nom et prénom :
         </note>
 
         <sect4 id="gui.capture.manual.color">
-    		 <title>Visualisation des questions vides ou invalides</title>
-		      <para>En cliquant sur les numéros de pages, AMC entoure les cases
-		      réponses :
-		    <itemizedlist>
-  		   <listitem><para>en cyan pour les réponses vides ;</para></listitem>
-  		   <listitem><para>en jaune pour les réponses invalides ;</para></listitem>
-		     </itemizedlist>
-		     </para>
+          <title>Visualisation des questions vides ou invalides</title>
 
-		     <para>Ces couleurs peuvent être changées dans les préférences d'AMC :
-		     <menuchoice>
-          <guimenu>Préférences</guimenu>
-          <guisubmenu>Affichage</guisubmenu>
-          <guimenuitem>Scan</guimenuitem>
-          </menuchoice></para>
+          <para>En cliquant sur les numéros de pages, AMC entoure les cases
+          réponses : <itemizedlist>
+              <listitem>
+                <para>en cyan pour les réponses vides ;</para>
+              </listitem>
 
-          <para><emphasis>Il est possible de cibler une question précise
-          (voir <xref endterm="gui.capture.manual.focus.title" linkend="gui.capture.manual.focus"/>)</emphasis></para>
+              <listitem>
+                <para>en jaune pour les réponses invalides ;</para>
+              </listitem>
+            </itemizedlist></para>
+
+          <para>Ces couleurs peuvent être changées dans les préférences d'AMC
+          : <menuchoice>
+              <guimenu>Préférences</guimenu>
+
+              <guisubmenu>Affichage</guisubmenu>
+
+              <guimenuitem>Scan</guimenuitem>
+            </menuchoice></para>
+
+          <para><emphasis>Il est possible de cibler une question précise (voir
+          <xref endterm="gui.capture.manual.focus.title"
+          linkend="gui.capture.manual.focus"/>)</emphasis></para>
         </sect4>
 
         <sect4 id="gui.capture.manual.focus">
-         <title id="gui.capture.manual.focus.title">Sélection d'une question</title>
-         <para>Cette option permet de corriger manuellement à l'écran
-         une question ciblée. Cela évite de chercher la question sur
-         chaque page si les questions sont mélangées.</para>
+          <title id="gui.capture.manual.focus.title">Sélection d'une
+          question</title>
 
-         <sect5 id="gui.capture.manual.open.question.focus">
-           <title>Corriger une question ouverte à l'écran</title>
-           <itemizedlist>
-           <listitem><para>Ouvrez la fenêtre de saisie manuelle et sélectionnez
-           le scan comme fond ;</para></listitem>
-           <listitem><para>sélectionnez la question que vous voulez corriger
-           (menu déroulant au-dessus de la liste des pages) .</para></listitem>
-           </itemizedlist>
-           <para>Les cases à cocher de la question ouverte se situent en
-           haut de la fenêtre, et quand vous cliquez sur <guibutton>suivant</guibutton>
-           vous passez à l'étudiant suivant, toujours pour cette question.</para>
-           <note><para>Les questions simples et multiples peuvent aussi
-           être corrigées ainsi.</para></note>
+          <para>Cette option permet de corriger manuellement à l'écran une
+          question ciblée. Cela évite de chercher la question sur chaque page
+          si les questions sont mélangées.</para>
+
+          <sect5 id="gui.capture.manual.open.question.focus">
+            <title>Corriger une question ouverte à l'écran</title>
+
+            <itemizedlist>
+              <listitem>
+                <para>Ouvrez la fenêtre de saisie manuelle et sélectionnez le
+                scan comme fond ;</para>
+              </listitem>
+
+              <listitem>
+                <para>sélectionnez la question que vous voulez corriger (menu
+                déroulant au-dessus de la liste des pages) .</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>Les cases à cocher de la question ouverte se situent en haut
+            de la fenêtre, et quand vous cliquez sur
+            <guibutton>suivant</guibutton> vous passez à l'étudiant suivant,
+            toujours pour cette question.</para>
+
+            <note>
+              <para>Les questions simples et multiples peuvent aussi être
+              corrigées ainsi.</para>
+            </note>
           </sect5>
 
           <sect5 id="gui.capture.manual.empty.invalid.question.focus">
-           <title>Vérifier à l'écran les pages avec des questions invalides ou vides</title>
-           <itemizedlist>
-           <listitem> <para>Vous devez <emphasis>d'abord</emphasis> corriger les copies
-           (voir <xref endterm="gui.marks.proc.title" linkend="gui.marks.proc"/>
-           de la section <xref endterm="gui.marks.title" linkend="gui.marks"/>) ;</para></listitem>
-           <listitem><para>ouvrez la fenêtre de saisie manuelle et sélectionnez
-           le scan comme fond ;</para></listitem>
-           <listitem><para>choisissez si vous voulez étudier toutes les pages (toutes),
-           les pages avec réponses incohérentes seulement (inv), ou les pages avec réponses
-           incohérentes ou vides seulement (i &amp; v).</para></listitem>
-           </itemizedlist>
+            <title>Vérifier à l'écran les pages avec des questions invalides
+            ou vides</title>
+
+            <itemizedlist>
+              <listitem>
+                <para>Vous devez <emphasis>d'abord</emphasis> corriger les
+                copies (voir <xref endterm="gui.marks.proc.title"
+                linkend="gui.marks.proc"/> de la section <xref
+                endterm="gui.marks.title" linkend="gui.marks"/>) ;</para>
+              </listitem>
+
+              <listitem>
+                <para>ouvrez la fenêtre de saisie manuelle et sélectionnez le
+                scan comme fond ;</para>
+              </listitem>
+
+              <listitem>
+                <para>choisissez si vous voulez étudier toutes les pages
+                (toutes), les pages avec réponses incohérentes seulement
+                (inv), ou les pages avec réponses incohérentes ou vides
+                seulement (i &amp; v).</para>
+              </listitem>
+            </itemizedlist>
           </sect5>
-         </sect4>
+        </sect4>
       </sect3>
     </sect2>
 
@@ -4801,19 +4906,19 @@ Nom et prénom :
       <sect3 id="bareme">
         <title id="bareme.title">Barème</title>
 
-        <para>Le barème utilisé pour la notation des copies est indiqué dans le
-        fichier source LaTeX du questionnaire, à l'aide de la commande
-        <command>bareme</command>. Elle peut être utilisée dans un environnement
-        <command>question</command> ou <command>questionmult</command>, pour
-        fixer des paramètres de barème concernant toutes les réponses, mais
-        aussi dans l'environnement <command>reponses</command>, pour donner des
-        indications de barème ne concernant qu'une réponse. L'argument de la
-        commande LaTeX <command>bareme</command> est constitué d'indications du
-        type
+        <para>Le barème utilisé pour la notation des copies est indiqué dans
+        le fichier source LaTeX du questionnaire, à l'aide de la commande
+        <command>bareme</command>. Elle peut être utilisée dans un
+        environnement <command>question</command> ou
+        <command>questionmult</command>, pour fixer des paramètres de barème
+        concernant toutes les réponses, mais aussi dans l'environnement
+        <command>reponses</command>, pour donner des indications de barème ne
+        concernant qu'une réponse. L'argument de la commande LaTeX
+        <command>bareme</command> est constitué d'indications du type
         <code><replaceable>parametre</replaceable>=<replaceable>valeur</replaceable></code>,
         séparés par des virgules. Les paramètres utilisables sont les suivants
-        (le tableau indique aussi dans quels cadres ces paramètres peuvent être
-        utilisés) :</para>
+        (le tableau indique aussi dans quels cadres ces paramètres peuvent
+        être utilisés) :</para>
 
         <informaltable>
           <tgroup cols="6">
@@ -6491,38 +6596,43 @@ Nom et prénom :
     </sect2>
   </sect1>
 
-<sect1 id="conflits">
-  <title>Conflits avec d'autres paquets</title>
+  <sect1 id="conflits">
+    <title>Conflits avec d'autres paquets</title>
 
-       <sect2 id="paquets">
-         <title>Paquets à déclarer après automultiplchoice</title>
+    <sect2 id="paquets">
+      <title>Paquets à déclarer après automultiplchoice</title>
 
-        <para>Vous devez déclarer ces paquets <emphasis>après</emphasis>
-        <package>automultiplechoice</package> : fancyvrb, fancybox, pstricks.</para>
+      <para>Vous devez déclarer ces paquets <emphasis>après</emphasis>
+      <package>automultiplechoice</package> : fancyvrb, fancybox,
+      pstricks.</para>
 
-        <para>Pour utiliser <command>pstricks</command>, vous devez configurer
-        AMC : <menuchoice>
-            <guimenu>Édition</guimenu>
+      <para>Pour utiliser <command>pstricks</command>, vous devez configurer
+      AMC : <menuchoice>
+          <guimenu>Édition</guimenu>
 
-            <guimenuitem>Préférences</guimenuitem>
+          <guimenuitem>Préférences</guimenuitem>
 
-            <guimenuitem>Général</guimenuitem>
+          <guimenuitem>Général</guimenuitem>
 
-            <guimenuitem>Moteur Latex par défaut</guimenuitem>
+          <guimenuitem>Moteur Latex par défaut</guimenuitem>
 
-            <guimenuitem>latex+dvipdf</guimenuitem>
-          </menuchoice> </para>
-      </sect2>
+          <guimenuitem>latex+dvipdf</guimenuitem>
+        </menuchoice></para>
+    </sect2>
 
-        <sect2 id="verbatim">
-          <title><package>verbatim</package></title>
-          <para>Issue du wiki <ulink url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
-          https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
+    <sect2 id="verbatim">
+      <title><package>verbatim</package></title>
 
-          <para>Le paquet <package>verbatim</package> perturbe AMC et il devient impossible
-          de l'utiliser dans les environnements <command>question</command> ou
-          <command>questionmult</command>. Cet exemple ne compile pas.</para>
-          <programlisting>
+      <para>Issue du wiki <ulink
+      url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
+      https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
+
+      <para>Le paquet <package>verbatim</package> perturbe AMC et il devient
+      impossible de l'utiliser dans les environnements
+      <command>question</command> ou <command>questionmult</command>. Cet
+      exemple ne compile pas.</para>
+
+      <programlisting>
 \begin{question}{program}
 What is the return value of the following R code?
 \begin{verbatim}
@@ -6535,10 +6645,14 @@ sum(sapply(1:2^2,function(x) { x/2 }))
 \end{choices}
 \end{question}
           </programlisting>
-            <sect3>
-            <title>Accolades explicites</title>
-            <para>Pour les textes court, encadrer celui-ci dans une commande particulière (ici, texte en italique).</para>
-<programlisting>
+
+      <sect3>
+        <title>Accolades explicites</title>
+
+        <para>Pour les textes court, encadrer celui-ci dans une commande
+        particulière (ici, texte en italique).</para>
+
+        <programlisting>
 \begin{question}{program}
 What is the return value of the following R code?
 \begin{center}
@@ -6551,13 +6665,19 @@ What is the return value of the following R code?
 \end{choices}
 \end{question}
 </programlisting>
-            </sect3>
+      </sect3>
 
-          <sect3 id="UsevVerb">
-          <title><command>UseVerb</command> du paquet <package>fancyvrb</package></title>
-            <para><ulink url="https://www.ctan.org/pkg/verbatim"> https://www.ctan.org/pkg/verbatim</ulink>.</para>
-            <para>Enregistrez le <emphasis>verbatim</emphasis> dans une commande avant <command>\exemplaire</command></para>
-          <programlisting>
+      <sect3 id="UsevVerb">
+        <title><command>UseVerb</command> du paquet
+        <package>fancyvrb</package></title>
+
+        <para><ulink url="https://www.ctan.org/pkg/verbatim">
+        https://www.ctan.org/pkg/verbatim</ulink>.</para>
+
+        <para>Enregistrez le <emphasis>verbatim</emphasis> dans une commande
+        avant <command>\exemplaire</command></para>
+
+        <programlisting>
 \SaveVerb{theRcode}'sum(sapply(1:2^2,function(x) { x/2 }))'
 ...
 \begin{question}{program}
@@ -6572,13 +6692,17 @@ What is the return value of the following R code?
 \end{choices}
 \end{question}
           </programlisting>
-          </sect3>
+      </sect3>
 
-          <sect3 id="verbatimbox">
-            <title>Paquet <package>verbatimbox</package></title>
-            <para>Pour des textes plus longs, enregistrez le <emphasis>verbatim</emphasis> dans un environnement
-            <command>myverbbox</command> avant <command>\exemplaire</command></para>
-  <programlisting>
+      <sect3 id="verbatimbox">
+        <title>Paquet <package>verbatimbox</package></title>
+
+        <para>Pour des textes plus longs, enregistrez le
+        <emphasis>verbatim</emphasis> dans un environnement
+        <command>myverbbox</command> avant
+        <command>\exemplaire</command></para>
+
+        <programlisting>
 \begin{myverbbox}{\Rcode}
 sum(sapply(1:2^2,function(x) { x/2 }))
 \end{myverbbox}
@@ -6596,33 +6720,33 @@ What is the return value of the following R code?
 \end{choices}
 \end{question}
   </programlisting>
-            </sect3>
+      </sect3>
 
-          <sect3 id="import">
-          <title>Import de fichiers externes</title>
-            <para><code>prog.py</code> est un fichier copié dans le répertoire du projet.</para>
-            <sect4 id="listings">
-            <title>Paquet <package>listings</package></title>
+      <sect3 id="import">
+        <title>Import de fichiers externes</title>
 
-<programlisting>
+        <para><code>prog.py</code> est un fichier copié dans le répertoire du
+        projet.</para>
+
+        <sect4 id="listings">
+          <title>Paquet <package>listings</package></title>
+
+          <programlisting>
 \lstset{language=Python}
 \lstinputlisting{prog.py}
 </programlisting>
-            </sect4>
+        </sect4>
 
-            <sect4 id="minted">
-            <title>Paquet <package>minted</package></title>
+        <sect4 id="minted">
+          <title>Paquet <package>minted</package></title>
 
-<programlisting>
+          <programlisting>
  \inputminted{python}{prog.py}
 </programlisting>
-            </sect4>
-
-            </sect3>
-            </sect2>
-
-
-</sect1>
+        </sect4>
+      </sect3>
+    </sect2>
+  </sect1>
 
   <sect1 id="commandes">
     <title>Manuel des commandes</title>
@@ -6784,14 +6908,15 @@ What is the return value of the following R code?
       <sect3>
         <title>Utilisateurs linux (Ubuntu, Xubuntu, Lubuntu etc.)</title>
 
-         <para>Tapez dans un terminal : </para>
+        <para>Tapez dans un terminal :</para>
 
-         <programlisting>sudo apt-get install msmtp</programlisting>
-         <programlisting>sudo gedit /etc/msmtprc</programlisting>
+        <programlisting>sudo apt-get install msmtp</programlisting>
 
-         <para>et copiez le texte suivant puis enregistrez le fichier. </para>
+        <programlisting>sudo gedit /etc/msmtprc</programlisting>
 
- <programlisting>
+        <para>et copiez le texte suivant puis enregistrez le fichier.</para>
+
+        <programlisting>
 account gmail
 host smtp.gmail.com
 tls on
@@ -6803,32 +6928,30 @@ user <emphasis>votre adresse mail du compte gmail</emphasis>
 password <emphasis>votre mot de passe du compte gmail</emphasis>
 </programlisting>
 
-          <para>
-          Dans les préférences de AMC : <menuchoice>
-          <guimenu>Edition</guimenu>
+        <para>Dans les préférences de AMC : <menuchoice>
+            <guimenu>Edition</guimenu>
 
-          <guisubmenu>Préférences</guisubmenu>
+            <guisubmenu>Préférences</guisubmenu>
 
-          <guisubmenu>Courriel</guisubmenu>
+            <guisubmenu>Courriel</guisubmenu>
 
-          <guimenuitem>Méthode d'envoi</guimenuitem>
+            <guimenuitem>Méthode d'envoi</guimenuitem>
           </menuchoice>, choisir <guibutton>sendmail</guibutton> et mettre le
-         chemin : <programlisting>/usr/bin/msmtp</programlisting>
-          </para>
-        </sect3>
-
+        chemin : <programlisting>/usr/bin/msmtp</programlisting></para>
+      </sect3>
 
       <sect3>
-      <title>Utilisateurs Macintosh</title>
+        <title>Utilisateurs Macintosh</title>
 
-          <para>Tapez dans un terminal : </para>
+        <para>Tapez dans un terminal :</para>
 
-         <programlisting>sudo port install msmtp</programlisting>
-          <programlisting>sudo pico ~/.msmtprc</programlisting>
+        <programlisting>sudo port install msmtp</programlisting>
 
-         <para>et copiez le texte suivant puis enregistrez le fichier. </para>
+        <programlisting>sudo pico ~/.msmtprc</programlisting>
 
- <programlisting>
+        <para>et copiez le texte suivant puis enregistrez le fichier.</para>
+
+        <programlisting>
 account default
 host smtp.gmail.com
 tls on
@@ -6840,26 +6963,24 @@ user <emphasis>votre adresse mail du compte gmail</emphasis>
 password <emphasis>votre mot de passe du compte gmail</emphasis>
 </programlisting>
 
-        <para>Modifiez les droits d'accès : </para>
+        <para>Modifiez les droits d'accès :</para>
 
-  <programlisting>
+        <programlisting>
 sudo chown <emphasis>nom_utilisateur</emphasis>:<emphasis>nom_utilisateur</emphasis>/Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
 chmod 0600 /Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
   </programlisting>
 
-          <para>
-          Dans les préférences de AMC : <menuchoice>
-          <guimenu>Edition</guimenu>
+        <para>Dans les préférences de AMC : <menuchoice>
+            <guimenu>Edition</guimenu>
 
-          <guisubmenu>Préférences</guisubmenu>
+            <guisubmenu>Préférences</guisubmenu>
 
-          <guisubmenu>Courriel</guisubmenu>
+            <guisubmenu>Courriel</guisubmenu>
 
-          <guimenuitem>Méthode d'envoi</guimenuitem>
+            <guimenuitem>Méthode d'envoi</guimenuitem>
           </menuchoice>, choisir <guibutton>sendmail</guibutton> et mettre le
-         chemin : <programlisting>/opt/local/bin/msmtp</programlisting>
-          </para>
-        </sect3>
+        chemin : <programlisting>/opt/local/bin/msmtp</programlisting></para>
+      </sect3>
     </sect2>
 
     <sect2 id="Texmaker">
