@@ -165,6 +165,7 @@ sub needs_package {
 # or 1 (from other values).
 sub parse_bool {
     my ($b) = @_;
+    return (undef) if ( !defined($b) );
     if ( $b =~ /^\s*(no|false|0)\s*$/i ) {
         return (0);
     } else {
@@ -343,12 +344,14 @@ sub group_by_id {
 sub read_options {
     my ( $self, $options_string ) = @_;
     my %oo   = ();
-    my @opts = split( /,+/, $options_string );
-    for (@opts) {
-        if (/^([^=]+)=(.*)/) {
-            $oo{$1} = $2;
-        } else {
-            $oo{$_} = 1;
+    if ($options_string) {
+        my @opts = split( /,+/, $options_string );
+        for (@opts) {
+            if (/^([^=]+)=(.*)/) {
+                $oo{$1} = $2;
+            } else {
+                $oo{$_} = 1;
+            }
         }
     }
     return (%oo);
@@ -470,7 +473,10 @@ sub read_file {
             my $options = $3;
             my $scoring = $4;
             my $text    = $5;
-            debug "Question S=$star A=$angles O=$options S=$scoring";
+            debug "Question S=$star A="
+              . printable($angles) . " O="
+              . printable($options) . " S="
+              . printable($scoring);
             my %oo      = $self->read_options($options);
             my $q_group = $self->{reader_state}->{group};
 
@@ -481,7 +487,7 @@ sub read_file {
             $self->{reader_state}->{question} = add_object(
                 $q_group->{questions},
                 multiple => length($star) == 2,
-                open     => $angles,
+                open     => ( defined($angles) ? $angles : '' ),
                 scoring  => $scoring,
                 text     => $text,
                 answers  => [],
@@ -500,7 +506,9 @@ sub read_file {
                 my $letter  = $2;
                 my $scoring = $3;
                 my $text    = $4;
-                debug "Choice G=$sign L=$letter S=$scoring";
+                debug "Choice G=$sign L="
+                  . printable($letter) . " S="
+                  . printable($scoring);
                 my $a = add_object(
                     $self->{reader_state}->{question}->{answers},
                     text    => $text,
@@ -816,7 +824,7 @@ sub scoring_string {
 sub format_answer {
     my ( $self, $a ) = @_;
     my $t = '\\' . ( $a->{correct} ? 'correct' : 'wrong' ) . 'choice';
-    $t .= '[' . $a->{letter} . ']' if ( $a->{letter} ne '' );
+    $t .= '[' . $a->{letter} . ']' if ( $a->{letter} && $a->{letter} ne '' );
     $t .= '{' . $self->format_text( $a->{text} ) . "}";
     $t .= $self->scoring_string( $a, 'a' );
     $t .= "\n";
@@ -861,7 +869,7 @@ sub format_question {
             $t .= "\\AMCOpen{" . $q->{open} . "}{";
         } else {
             $t .= "\\begin{multicols}{" . $q->{columns} . "}\n"
-              if ( $q->{columns} > 1 );
+              if ( $q->{columns} && $q->{columns} > 1 );
             $t .= "\\begin{choices$ct}" . ( $q->{ordered} ? "[o]" : "" ) . "\n";
         }
         for my $a ( @{ $q->{answers} } ) {
@@ -872,7 +880,7 @@ sub format_question {
         } else {
             $t .= "\\end{choices$ct}\n";
             $t .= "\\end{multicols}\n"
-              if ( $q->{columns} > 1 );
+              if ( $q->{columns} && $q->{columns} > 1 );
         }
         $t .= "\\end{question" . $mult . "}";
         $t .= $self->arabic_env('end');
@@ -946,9 +954,9 @@ sub file_header {
     my @package_options = ();
 
     my $o = $self->{options}->{packageoptions};
-    $o =~ s/^\s+//;
-    $o =~ s/\s+$//;
     if ($o) {
+        $o =~ s/^\s+//;
+        $o =~ s/\s+$//;
         for my $oo ( split( /,+/, $o ) ) {
             push @package_options, $oo;
         }
@@ -1010,7 +1018,8 @@ sub file_header {
       if ( $self->{options}->{arabicfont} && $self->{options}->{arabic} );
     $t .= "\\geometry{paper=" . lc( $self->{options}->{papersize} ) . "paper}\n"
       if ( $self->{options}->{papersize} );
-    $t .= $self->{options}->{'latex-preambule'};
+    $t .= $self->{options}->{'latex-preambule'}
+      if ( $self->{options}->{'latex-preambule'} );
     $t .= "\\usepackage{arabxetex}\n"
       if ( $self->{options}->{arabic} && $self->bidi_year() >= 2011 );
     $t .= "\\begin{document}\n";
@@ -1218,7 +1227,7 @@ sub group_insert_command_def {
             && $group->{columns} <= 1 );
     }
     $t .= "\\begin{multicols}{" . $group->{columns} . "}"
-      if ( $group->{columns} > 1 );
+      if ( $group->{columns} && $group->{columns} > 1 );
     for my $q ( grep { $_->{first} } ( @{ $group->{questions} } ) ) {
         $t .= $self->format_question($q) . "\n";
     }
@@ -1229,7 +1238,7 @@ sub group_insert_command_def {
         $t .= "\n" . $self->format_question($q);
     }
     $t .= "\\end{multicols}"
-      if ( $group->{columns} > 1 );
+      if ( $group->{columns} && $group->{columns} > 1 );
     if ( $group->{footer} ) {
         $t .= $self->format_text( $group->{footer} );
         $t .= "\\vspace{1.5ex}\\par\n"
