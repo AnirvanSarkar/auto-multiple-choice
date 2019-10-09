@@ -90,7 +90,7 @@ my $liste_e = AMC::NamesFile::new(
 my %bon_code;
 for my $ii ( 0 .. ( $liste_e->taille() - 1 ) ) {
     my $id = $liste_e->data_n( $ii, $liste_key );
-    $bon_code{ clean_id($id) } = $id;
+    $bon_code{ clean_id($id) } = $id if ( defined($id) );
 }
 
 debug "Cleaned student list keys: " . join( ',', keys %bon_code );

@@ -352,14 +352,22 @@ sub evaluate {
 
     my $string_orig = $string;
     for my $vv ( keys %{ $self->{variables} } ) {
-        $string =~
-          s/\b$vv\b/$self->{variables}->{$vv}->[$self->{type}]->{value}/g;
+        my $value = $self->get_variable($vv);
+        if ( defined($value) ) {
+            $string =~ s/\b$vv\b/$value/g;
+        } else {
+            $string =~ s/\b$vv\b/undef/g;
+        }
     }
     my $calc = eval($string);
     $self->error("Syntax error (evaluation) : $string")
       if ( !defined($calc) );
-    debug "Evaluation [$self->{type}] : $string_orig => $string => $calc"
-      if ( $string_orig ne $calc );
+    debug "Evaluation ["
+      . printable( $self->{type} ) . "] : "
+      . printable($string_orig) . " => "
+      . printable($string) . " => "
+      . printable($calc)
+      if ( !defined($calc) || $string_orig ne $calc );
 
     return ($calc);
 }

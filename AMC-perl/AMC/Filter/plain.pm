@@ -99,21 +99,27 @@ sub new {
         shufflequestions        => 1,
         completemulti           => 1,
         font                    => 'Linux Libertine O',
+        arabic                  => '',
         arabicfont              => 'Rasheeq',
         implicitdefaultscoringm => 'haut=2',
         'l-name'                => '',
         'l-student'             => __(
 "Please code your student number opposite, and write your name in the box below."
         ),
-        disable             => '',
-        manualduplex        => '',
-        singlesided         => '',
-        codedigitsdirection => '',
-        namefieldwidth      => '',
-        namefieldlines      => '',
-        namefieldlinespace  => '.5em',
-        titlewidth          => ".47\\linewidth",
-        randomseed          => "1527384",
+        disable               => '',
+        manualduplex          => '',
+        singlesided           => '',
+        columns               => 1,
+        codedigitsdirection   => '',
+        namefieldwidth        => '',
+        namefieldlines        => '',
+        namefieldlinespace    => '.5em',
+        titlewidth            => ".47\\linewidth",
+        randomseed            => "1527384",
+        lang                  => '',
+        code                  => 0,
+        'latex-preambule'     => '',
+        'latex-begindocument' => '',
     };
 
     # List of modules to be used when parsing (see parse_*
@@ -143,6 +149,11 @@ my @alphabet_arabic = (
     'ك', 'ل', 'م', 'ن', 'س', 'ع', 'ف', 'ص', 'ق', 'ر',
     'ش', 'ت', 'ث', 'خ', 'ذ', 'ض', 'ظ', 'غ',
 );
+
+sub is_multicol {
+    my ($o) = @_;
+    return ( defined( $o->{columns} ) && $o->{columns} > 1 );
+}
 
 # add a global LaTeX definition
 sub add_global_latex_def {
@@ -187,22 +198,25 @@ sub parse_options {
           parse_bool( $self->{options}->{ lc($n) } );
     }
 
-    # if AR language is selected, apply default arabic localisation
-    # options and set 'arabic' option to 1
-    if ( $self->{options}->{lang} eq 'AR' ) {
-        for ( keys %l_arabic ) {
-            $self->{options}->{$_} = $l_arabic{$_}
-              if ( !$self->{options}->{$_} );
-        }
-        $self->{options}->{arabic} = 1;
-    }
+    if ( $self->{options}->{lang} ) {
 
-    # if JA language is selected, switch to 'platex+dvipdf' LaTeX
-    # engine, remove default font and don't use xltxtra LaTeX package
-    if ( $self->{options}->{lang} eq 'JA' ) {
-        $self->{default_options}->{latexengine} = 'platex+dvipdf';
-        $self->{default_options}->{font}        = '';
-        $self->{default_options}->{xltxtra}     = '';
+        # if AR language is selected, apply default arabic localisation
+        # options and set 'arabic' option to 1
+        if ( $self->{options}->{lang} eq 'AR' ) {
+            for ( keys %l_arabic ) {
+                $self->{options}->{$_} = $l_arabic{$_}
+                  if ( !$self->{options}->{$_} );
+            }
+            $self->{options}->{arabic} = 1;
+        }
+
+        # if JA language is selected, switch to 'platex+dvipdf' LaTeX
+        # engine, remove default font and don't use xltxtra LaTeX package
+        if ( $self->{options}->{lang} eq 'JA' ) {
+            $self->{default_options}->{latexengine} = 'platex+dvipdf';
+            $self->{default_options}->{font}        = '';
+            $self->{default_options}->{xltxtra}     = '';
+        }
     }
 
     # set options values to default if not defined in the source
@@ -440,7 +454,7 @@ sub read_file {
             my $action  = $1;
             my $options = $2;
             my $text    = $3;
-            debug "Group A=$action O=$options";
+            debug "Group A=" . printable($action) . " O=" . printable($options);
             my %oo = $self->read_options($options);
             if ( $action eq '(' ) {
                 $self->needs_package('needspace') if ( $oo{needspace} );
@@ -869,7 +883,7 @@ sub format_question {
             $t .= "\\AMCOpen{" . $q->{open} . "}{";
         } else {
             $t .= "\\begin{multicols}{" . $q->{columns} . "}\n"
-              if ( $q->{columns} && $q->{columns} > 1 );
+              if ( is_multicol($q) );
             $t .= "\\begin{choices$ct}" . ( $q->{ordered} ? "[o]" : "" ) . "\n";
         }
         for my $a ( @{ $q->{answers} } ) {
@@ -880,7 +894,7 @@ sub format_question {
         } else {
             $t .= "\\end{choices$ct}\n";
             $t .= "\\end{multicols}\n"
-              if ( $q->{columns} && $q->{columns} > 1 );
+              if ( is_multicol($q) );
         }
         $t .= "\\end{question" . $mult . "}";
         $t .= $self->arabic_env('end');
@@ -1018,8 +1032,7 @@ sub file_header {
       if ( $self->{options}->{arabicfont} && $self->{options}->{arabic} );
     $t .= "\\geometry{paper=" . lc( $self->{options}->{papersize} ) . "paper}\n"
       if ( $self->{options}->{papersize} );
-    $t .= $self->{options}->{'latex-preambule'}
-      if ( $self->{options}->{'latex-preambule'} );
+    $t .= $self->{options}->{'latex-preambule'};
     $t .= "\\usepackage{arabxetex}\n"
       if ( $self->{options}->{arabic} && $self->bidi_year() >= 2011 );
     $t .= "\\begin{document}\n";
@@ -1224,10 +1237,10 @@ sub group_insert_command_def {
         $t .= "\\noindent " . $self->format_text( $group->{header} );
         $t .= "\\vspace{1.5ex}\\par\n"
           if (!$group->{custom}
-            && $group->{columns} <= 1 );
+            && !is_multicol($group) );
     }
     $t .= "\\begin{multicols}{" . $group->{columns} . "}"
-      if ( $group->{columns} && $group->{columns} > 1 );
+      if ( is_multicol($group) );
     for my $q ( grep { $_->{first} } ( @{ $group->{questions} } ) ) {
         $t .= $self->format_question($q) . "\n";
     }
@@ -1238,7 +1251,7 @@ sub group_insert_command_def {
         $t .= "\n" . $self->format_question($q);
     }
     $t .= "\\end{multicols}"
-      if ( $group->{columns} && $group->{columns} > 1 );
+      if ( is_multicol($group) );
     if ( $group->{footer} ) {
         $t .= $self->format_text( $group->{footer} );
         $t .= "\\vspace{1.5ex}\\par\n"
@@ -1309,16 +1322,17 @@ sub write_latex {
     # print groups
     $tex .= "\\begin{arab}"
       if ( $self->{options}->{arabic} && $self->bidi_year() >= 2011 );
-    if ( $self->{options}->{columns} > 1 ) {
+    if ( is_multicol( $self->{options} ) ) {
         $tex .= "\\begin{multicols}{" . $self->{options}->{columns} . "}\n";
-    } else {
+    }
+    else {
         $tex .= "\\vspace{2ex}\n\n";
     }
 
     $tex .=
       $self->group_insert_command_name( $self->group_by_id('_main_') ) . "\n";
 
-    if ( $self->{options}->{columns} > 1 ) {
+    if ( is_multicol( $self->{options} ) ) {
         $tex .= "\\end{multicols}\n";
     }
     $tex .= "\\end{arab}"

@@ -1247,17 +1247,17 @@ sub report_hardware {
         }
     }
     close MEM;
-  }
+}
 
 sub report_uninitialized {
-  my ($self) = @_;
-  my $u=0;
-  open(LOG,$self->{debug_file});
-  while(<LOG>) {
-    $u+=1 if(/uninitialized/i);
-  }
-  close LOG;
-  $self->trace("[i] uninitialized: $u") if($u);
+    my ($self) = @_;
+    my $u = 0;
+    open( LOG, $self->{debug_file} );
+    while (<LOG>) {
+        $u += 1 if ( /uninitialized/i && !/at \(eval [0-9]+\) line/ );
+    }
+    close LOG;
+    $self->trace("[i] uninitialized: $u") if ($u);
 }
 
 sub default_process {

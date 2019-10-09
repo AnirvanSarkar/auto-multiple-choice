@@ -50,7 +50,7 @@ sub load {
 
 sub parse_num {
     my ( $self, $n ) = @_;
-    if ( $self->{'out.decimal'} ne '.' ) {
+    if ( defined($n) && $self->{'out.decimal'} ne '.' ) {
         $n =~ s/\./$self->{'out.decimal'}/;
     }
     return ( $self->parse_string($n) );
@@ -58,6 +58,7 @@ sub parse_num {
 
 sub parse_string {
     my ( $self, $s ) = @_;
+    $s = '' if ( !defined($s) );
     if ( $self->{'out.entoure'} ) {
         $s =~
 s/$self->{'out.entoure'}/$self->{'out.entoure'}$self->{'out.entoure'}/g;

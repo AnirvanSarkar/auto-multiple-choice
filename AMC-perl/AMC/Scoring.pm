@@ -507,7 +507,7 @@ sub global_score {
     $self->{default_strategy_plain}->unevaluate_directives();
 
     my $skip = $self->{default_strategy_plain}->get_directive("allowempty");
-    if ( $skip > 0 ) {
+    if ( $skip && $skip > 0 ) {
         @questions = sort {
             ( $a->{raison} eq 'V' ? 0 : 1 ) <=> ( $b->{raison} eq 'V' ? 0 : 1 )
               || $b->{notemax} <=> $a->{notemax}

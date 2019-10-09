@@ -135,6 +135,7 @@ sub handle_field {
         my $zoneid =
           $capture->get_zoneid( $student_id, $page, $copy, ZONE_NAME, 0, 0, 1 );
         my $value = decode_utf8( $field->{Value} );
+        $value = '' if ( !defined($value) );
         $capture->set_zone_auto_id( $zoneid, -1, -1, "text:" . $value, undef );
         return (1);
     }

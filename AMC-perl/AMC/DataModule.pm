@@ -356,7 +356,7 @@ sub variable_transaction {
         "SELECT value FROM $vt WHERE name=" . $self->sql_quote($name) );
     $self->end_transaction('vTRS');
     if ( defined($value) ) {
-        if ( $value ne $x->[0] ) {
+        if ( !defined($x->[0]) || $value ne $x->[0] ) {
             $self->begin_transaction('sTRS');
             $self->sql_do( "INSERT OR REPLACE INTO $vt (name,value) VALUES ("
                   . $self->sql_quote($name) . ","

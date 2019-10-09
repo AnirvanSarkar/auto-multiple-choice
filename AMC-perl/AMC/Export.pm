@@ -263,7 +263,7 @@ sub pre_process {
 
     if ( $self->{'noms.useall'} && $self->{noms} ) {
         for my $i ( $self->{noms}->liste($lk) ) {
-            if ( !$keys{$i} ) {
+            if ( !defined($i) || !$keys{$i} ) {
                 my ($name) = $self->{noms}->data( $lk, $i, test_numeric => 1 );
                 push @marks,
                   {
@@ -301,10 +301,16 @@ sub compare {
         if ( $k =~ /^([ns]):(.*)/ ) {
             $mode = $1;
             $key  = $2;
+            my $default = ( $mode eq 'n' ? 0 : '' );
+            my $a       = $xa->{$key};
+            my $b       = $xb->{$key};
+            $a = $default if ( !defined($a) );
+            $b = $default if ( !defined($b) );
             if ( $mode eq 'n' ) {
-                $r = $r || ( $xa->{$key} <=> $xb->{$key} );
-            } else {
-                $r = $r || ( $xa->{$key} cmp $xb->{$key} );
+                $r = $r || ( $a <=> $b );
+            }
+            else {
+                $r = $r || ( $a cmp $b );
             }
         }
     }
