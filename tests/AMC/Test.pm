@@ -1247,6 +1247,17 @@ sub report_hardware {
         }
     }
     close MEM;
+  }
+
+sub report_uninitialized {
+  my ($self) = @_;
+  my $u=0;
+  open(LOG,$self->{debug_file});
+  while(<LOG>) {
+    $u+=1 if(/uninitialized/i);
+  }
+  close LOG;
+  $self->trace("[i] uninitialized: $u") if($u);
 }
 
 sub default_process {
@@ -1270,6 +1281,8 @@ sub default_process {
     $self->annote;
     $self->check_export;
     $self->report_hardware;
+
+    $self->report_uninitialized;
 
     $self->ok;
 }
