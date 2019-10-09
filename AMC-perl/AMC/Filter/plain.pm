@@ -255,9 +255,9 @@ sub parse_options {
             $self->{options}->{pages_total} = $1;
         } else {
 
-# TRANSLATORS: Message when the Pages option used in AMC-TXT can't be parsed. %s will be replaced with the option value
             $self->error(
                 sprintf(
+# TRANSLATORS: Message when the Pages option used in AMC-TXT can't be parsed. %s will be replaced with the option value
                     __ "Pages option value can't be understood: %s",
                     $self->{options}->{pages}
                 )
@@ -304,8 +304,8 @@ sub check_answers {
     if ($question) {
         if ( $#{ $question->{answers} } < 1 ) {
 
-# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
             $self->parse_error(
+# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
                 __ "Previous question has less than two choices" );
         } else {
             my $n_correct = 0;

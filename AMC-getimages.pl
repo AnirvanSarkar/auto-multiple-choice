@@ -481,26 +481,26 @@ for my $fich (@f) {
             if ($p) {
                 if ($vector) {
 
-# TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
                     $p->text(
                         sprintf(
+# TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
                             __("Converting %s to bitmap..."),
                             $fich->{file}
                         )
                     );
                 } elsif ( $np > 1 ) {
 
-# TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
                     $p->text(
                         sprintf(
+# TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
                             __("Splitting multi-page image %s..."),
                             $fich->{file}
                         )
                     );
                 } elsif ( $scene || $force_convert ) {
 
-# TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
                     $p->text(
+# TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
                         sprintf( __("Processing image %s..."), $fich->{file} )
                     );
                 }

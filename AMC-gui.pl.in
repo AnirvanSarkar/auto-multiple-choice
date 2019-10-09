@@ -605,8 +605,8 @@ sub debug_set {
             # TRANSLATORS: Message when switching to debugging mode.
             __("Debugging mode.") . " "
 
-# TRANSLATORS: Message when switching to debugging mode. %s will be replaced with the path of the log file.
               . sprintf(
+# TRANSLATORS: Message when switching to debugging mode. %s will be replaced with the path of the log file.
                 __ "Debugging informations will be written in file %s.",
                 AMC::Basic::debug_file()
               )
@@ -639,8 +639,8 @@ if ( opendir( DOD, $hdocdir ) ) {
     debug("DOCUMENTATION : Can't open directory $hdocdir: $!");
 }
 
-# TRANSLATORS: One of the documentation languages.
 my %ltext_loc = (
+# TRANSLATORS: One of the documentation languages.
     French => __ "French",
 
     # TRANSLATORS: One of the documentation languages.
@@ -756,8 +756,8 @@ my ( $renderer, $column );
 
 $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
 $column = Gtk3::TreeViewColumn->new_with_attributes(
+# TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
     __ "identifier",
     $renderer,
     text       => DIAG_ID,
@@ -768,8 +768,8 @@ $w{diag_tree}->append_column($column);
 
 $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of data captures.
 $capture_column{updated} =
+# TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of data captures.
   Gtk3::TreeViewColumn->new_with_attributes( __ "updated", $renderer,
     text => DIAG_MAJ );
 $capture_column{updated}->set_sort_column_id(DIAG_MAJ_NUM);
@@ -777,8 +777,8 @@ $w{diag_tree}->append_column( $capture_column{updated} );
 
 $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
 $capture_column{mse} = Gtk3::TreeViewColumn->new_with_attributes(
+# TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
     __ "MSE",
     $renderer,
     text       => DIAG_EQM,
@@ -789,8 +789,8 @@ $w{diag_tree}->append_column( $capture_column{mse} );
 
 $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
 $capture_column{sensitivity} = Gtk3::TreeViewColumn->new_with_attributes(
+# TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
     __ "sensitivity",
     $renderer,
     text       => DIAG_DELTA,
@@ -828,10 +828,10 @@ for my $c (qw/updated file/) {
 }
 
 # rajouter a partir de Encode::Supported
-# TRANSLATORS: for encodings
 my $encodages = [
     {
         qw/inputenc latin1 iso ISO-8859-1/,
+# TRANSLATORS: for encodings
         txt => 'ISO-8859-1 (' . __("Western Europe") . ')'
     },
 
@@ -907,12 +907,12 @@ sub get_enc {
     return ('');
 }
 
-# TRANSLATORS: you can omit the [...] part, just here to explain context
 my $cb_model_vide_key =
+# TRANSLATORS: you can omit the [...] part, just here to explain context
   cb_model( '' => __p "(none) [No primary key found in association list]" );
 
-# TRANSLATORS: you can omit the [...] part, just here to explain context
 my $cb_model_vide_code =
+# TRANSLATORS: you can omit the [...] part, just here to explain context
   cb_model( '' => __p "(none) [No code found in LaTeX file]" );
 
 my @printing_methods = ();
@@ -950,8 +950,8 @@ push @printing_methods,
 # TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
   'file', __("to files");
 
-# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
 my $rounding_store = cb_model(
+# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
     'inf', __ "floor",
 
     # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
@@ -1008,8 +1008,8 @@ $prefs->store_register(
     defaut_name_field_type => $nftype_store,
     name_field_type        => $nftype_store,
 
-# TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
     after_export => cb_model(
+# TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
         "" => __ "that's all",
 
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the exported file. This is a menu entry.
@@ -1036,8 +1036,8 @@ $prefs->store_register(
         zones => __ "where defined in the source",
     ),
 
-# TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
     export_sort => cb_model(
+# TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
         n => __ "name",
 
 # TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student sheet number. This is a menu entry.
@@ -1055,16 +1055,16 @@ $prefs->store_register(
         jpeg => 'JPEG'
     ),
 
-# TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make one PDF file per student, with all his pages. This is a menu entry.
     regroupement_type => cb_model(
+# TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make one PDF file per student, with all his pages. This is a menu entry.
         STUDENTS => __ "One file per student",
 
 # TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make only one PDF with all students sheets. This is a menu entry.
         ALL => __ "One file for all students",
     ),
 
-# TRANSLATORS: One of the possible way to annotate answer sheets: here we only select pages where the student has written something (in separate answer sheet mode, these are the pages from the answer sheet and not the pages from the subject).
     regroupement_compose => cb_model(
+# TRANSLATORS: One of the possible way to annotate answer sheets: here we only select pages where the student has written something (in separate answer sheet mode, these are the pages from the answer sheet and not the pages from the subject).
         0 => __ "Only pages with answers",
 
 # TRANSLATORS: One of the possible way to annotate answer sheets: here we take the pages were the students has nothing to write (often question pages from a subject with separate answer sheet option) from the subject.
@@ -1091,8 +1091,8 @@ $prefs->store_register(
         1 => __ "Some answer sheets were photocopied"
     ),
 
-# TRANSLATORS: One of the ways to send mail: use sendmail command. This is a menu entry.
     email_transport => cb_model(
+# TRANSLATORS: One of the ways to send mail: use sendmail command. This is a menu entry.
         sendmail => __ "sendmail",
 
 # TRANSLATORS: One of the ways to send mail: use a SMTP server. This is a menu entry.
@@ -1123,8 +1123,8 @@ $prefs->store_register(
     ),
 );
 
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
 my $symbole_type_cb = cb_model(
+# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
     none => __ "nothing",
 
 # TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
@@ -1366,8 +1366,8 @@ sub export_done {
 
 ## menu contextuel sur liste diagnostique -> visualisation zoom/page
 
-# TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, an image will be opened to see where the corner marks were detected.
 my %diag_menu = (
+# TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, an image will be opened to see where the corner marks were detected.
     page => { text => __ "page adjustment", icon => 'gtk-zoom-fit' },
 
 # TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, a window will be opened were the user can see all boxes on the scans and how they were filled by the students, and correct detection of ticked-or-not if needed.
@@ -1985,8 +1985,8 @@ sub projet_mv_yes {
                     'destroy-with-parent', 'error', 'ok', '' );
                 $dialog->set_markup(
 
-# TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
                     sprintf(
+# TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
                         __(
 "Directory <i>%s</i> already exists, so you can't choose this name."
                         ),
@@ -2458,8 +2458,8 @@ sub end_of_document_update {
 
         $message .= "\n\n" .
 
-# TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
           sprintf(
+# TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
             __("See also the processing log in '%s' below."),
 
 # TRANSLATORS: Title of the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
@@ -2561,8 +2561,8 @@ sub end_of_document_update {
                       . " "
                       . __("Would you like to set it to 0.5?")
 
-# TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
                     ,
+# TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
                     __ "darkness threshold",
                     $config->get('seuil')
                 )
@@ -2993,8 +2993,8 @@ sub sujet_impressions {
 
     my $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
     my $column =
+# TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
       Gtk3::TreeViewColumn->new_with_attributes( __ "papers", $renderer,
         text => COPIE_N );
     $w{arbre_choix_copies}->append_column($column);
@@ -3166,8 +3166,8 @@ sub sujet_impressions_ok {
                         'destroy-with-parent', 'info', 'ok', '' );
                     $dialog->set_markup(
 
-# TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
                         sprintf(
+# TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
                             __(
 "You selected the '%s' option, that uses '%s', so the %s has been set to '%s' for you."
                             ),
@@ -3458,8 +3458,8 @@ sub saisie_manuelle {
         $dialog->set_markup(
             __("No layout for this project.") . " "
 
-# TRANSLATORS: Here, the first %s will be replaced with "Layout detection" (a button title), and the second %s with "Preparation" (the tab title where one can find this button).
               . sprintf(
+# TRANSLATORS: Here, the first %s will be replaced with "Layout detection" (a button title), and the second %s with "Preparation" (the tab title where one can find this button).
                 __(
 "Please use button <i>%s</i> in <i>%s</i> before manual data capture."
                 ),
@@ -4057,8 +4057,8 @@ sub check_possible_assoc {
             'error', 'ok', '' );
         $dialog->set_markup(
 
-# TRANSLATORS: Here, %s will be replaced with the name of the tab "Data capture".
             sprintf(
+# TRANSLATORS: Here, %s will be replaced with the name of the tab "Data capture".
                 __
 "Before associating names to papers, you must choose a students list file in tab \"%s\".",
                 __ "Data capture"
@@ -4129,8 +4129,8 @@ sub associe {
             'destroy-with-parent',
             'info', 'ok',
 
-# TRANSLATORS: Here, %s will be replaced with "Students identification", which refers to a paragraph in the tab "Marking" from AMC main window.
             sprintf(
+# TRANSLATORS: Here, %s will be replaced with "Students identification", which refers to a paragraph in the tab "Marking" from AMC main window.
                 __
 "Before associating names to papers, you must choose a students list file in paragraph \"%s\".",
                 __ "Students identification"
@@ -4199,11 +4199,11 @@ sub assoc_resultat {
           )
           .
 
-# TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
           (
             $auto == 0
             ? "\n<b>"
               . sprintf(
+# TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
                 __("Please check \"%s\" and \"%s\" values and try again."),
                 __("Primary key from this list"),
                 __("Code name for automatic association")
@@ -6507,8 +6507,8 @@ sub make_template {
     $w{template_files_tree}->set_model($template_files_store);
     my $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is a column title for the list of files to be included in a template being created.
     my $column =
+# TRANSLATORS: This is a column title for the list of files to be included in a template being created.
       Gtk3::TreeViewColumn->new_with_attributes( __ "file", $renderer,
         text => TEMPLATE_FILES_FILE );
     $w{template_files_tree}->append_column($column);
@@ -6808,13 +6808,13 @@ sub source_latex_choisir {
         for my $m (@filter_modules) {
             my $f = Gtk3::FileFilter->new();
 
-# TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
             my @pat = ();
             for my $p ( "AMC::Filter::register::$m"->file_patterns ) {
                 push @pat, $p;
                 $f->add_pattern($p);
             }
             $f->set_name(
+# TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
                 sprintf( __("%s files"), "AMC::Filter::register::$m"->name() )
                   . ' ('
                   . join( ', ', @pat )
@@ -7554,8 +7554,8 @@ sub send_emails {
     $w{attachments_list}->set_model($attachments_store);
     $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
     $column = Gtk3::TreeViewColumn->new_with_attributes(
+# TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
         __ "file",
         $renderer,
         text       => ATTACHMENTS_NAME,
@@ -7908,8 +7908,8 @@ sub choose_columns {
     $w{columns_list}->set_model($columns_store);
     my $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
     my $column = Gtk3::TreeViewColumn->new_with_attributes(
+# TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
         __ "column",
         $renderer,
         text => 0

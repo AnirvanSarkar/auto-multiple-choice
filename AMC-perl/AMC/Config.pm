@@ -642,8 +642,8 @@ sub test_commands {
                   )
                   . " "
 
-# TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
                   . sprintf(
+# TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
                     __
 "You can change used commands following <i>%s</i> from menu <i>%s</i>.",
 

@@ -137,8 +137,8 @@ sub new {
         $self->{scan_view_model} = cb_model( 0, __("Original"), 1, __("Scan") );
         $self->{scan_view}->set_model( $self->{scan_view_model} );
 
-# TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through all pages. Please keep this text very short (say less than 5 letters) so that the window is not too large
         $self->{navigate_model} = cb_model(
+# TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through all pages. Please keep this text very short (say less than 5 letters) so that the window is not too large
             0, __("all"),
 
 # TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through pages with some invalid answers. Please keep this text very short (say less than 5 letters) so that the window is not too large

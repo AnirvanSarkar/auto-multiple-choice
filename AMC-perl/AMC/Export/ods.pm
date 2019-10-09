@@ -263,8 +263,8 @@ sub build_stats_table {
 
     my %y_item = ( all => 2, empty => 3, invalid => 4 );
 
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
     my %y_name = (
+# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
         all => __ "ALL",
 
 # TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question did not get an answer. Please let this label short.
@@ -304,18 +304,18 @@ sub build_stats_table {
         $doc->cellValue( $stats, $ybase + 1, $x, encode( 'utf-8', __("Box") ) );
         $doc->cellStyle( $stats, $ybase + 1, $x + 1, 'statCol' );
 
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
         $doc->cellValue( $stats, $ybase + 1, $x + 1,
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
             encode( 'utf-8', __("Nb") ) );
         $doc->cellStyle( $stats, $ybase + 1, $x + 2, 'statCol' );
 
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
         $doc->cellValue( $stats, $ybase + 1, $x + 2,
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
             encode( 'utf-8', __("/all") ) );
         $doc->cellStyle( $stats, $ybase + 1, $x + 3, 'statCol' );
 
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
         $doc->cellValue( $stats, $ybase + 1, $x + 3,
+# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
             encode( 'utf-8', __("/expr") ) );
 
         $doc->columnStyle( $stats, $x + 4, "col.Space" );
@@ -1488,8 +1488,8 @@ sub export {
 
     if ( $self->{'out.stats'} ) {
 
-# TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
         my $stats_0 =
+# TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
           $doc->appendTable( encode( 'utf-8', __("Questions statistics") ) );
 
         $self->build_stats_table( $self->{'out.stats'}, $cts, $correct_data,
@@ -1498,8 +1498,8 @@ sub export {
 
     if ( $self->{'out.statsindic'} ) {
 
-# TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
         my $stats_1 = $doc->appendTable(
+# TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
             encode( 'utf-8', __("Indicative questions statistics") ) );
 
         $self->build_stats_table( $self->{'out.statsindic'},
@@ -1542,14 +1542,14 @@ sub export {
     if ( $self->{'out.stats'} ) {
         $doc->cellStyle( $legend, $jj, 0, 'qidC' );
 
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
         $doc->cellValue( $legend, $jj, 1,
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
             encode( 'utf-8', __("Correct answer") ) );
         $jj++;
         $doc->cellStyle( $legend, $jj, 0, 'qidW' );
 
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
         $doc->cellValue( $legend, $jj, 1,
+# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
             encode( 'utf-8', __("Wrong answer") ) );
         $jj++;
     }

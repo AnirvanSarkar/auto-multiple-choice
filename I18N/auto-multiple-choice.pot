@@ -4,9 +4,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.4.0+git2019-10-05 (r:cc0d6e3)\n"
+"Project-Id-Version: 1.4.0+git2019-10-09 (r:d6b0d47)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2019-10-05 19:39 +0200\n"
+"POT-Creation-Date: 2019-10-09 21:56 +0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL>\n"
 "Language-Team: LANGUAGE <LL.org>\n"
@@ -24,22 +24,25 @@ msgstr ""
 msgid "Splitting multi-page PDF files..."
 msgstr ""
 
-#: ../AMC-getimages.pl:473
+#. TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
+#: ../AMC-getimages.pl:487
 #, perl-format
 msgid "Converting %s to bitmap..."
 msgstr ""
 
-#: ../AMC-getimages.pl:482
+#. TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
+#: ../AMC-getimages.pl:496
 #, perl-format
 msgid "Splitting multi-page image %s..."
 msgstr ""
 
-#: ../AMC-getimages.pl:490
+#. TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
+#: ../AMC-getimages.pl:504
 #, perl-format
 msgid "Processing image %s..."
 msgstr ""
 
-#: ../AMC-getimages.pl:572
+#: ../AMC-getimages.pl:592
 msgid "Copying scans to project directory..."
 msgstr ""
 
@@ -83,11 +86,13 @@ msgstr ""
 msgid "Debugging mode."
 msgstr ""
 
+#. TRANSLATORS: Message when switching to debugging mode. %s will be replaced with the path of the log file.
 #: ../AMC-gui.pl:610
 #, perl-format
 msgid "Debugging informations will be written in file %s."
 msgstr ""
 
+#. TRANSLATORS: One of the documentation languages.
 #: ../AMC-gui.pl:644 ../AMC-gui-main_window.glade:3145
 msgid "French"
 msgstr ""
@@ -102,19 +107,23 @@ msgstr ""
 msgid "Japanese"
 msgstr ""
 
+#. TRANSLATORS: This is the title of the column containing student/copy identifier in the table showing the results of data captures.
 #: ../AMC-gui.pl:761
 msgid "identifier"
 msgstr ""
 
+#. TRANSLATORS: This is the title of the column containing data capture date/time in the table showing the results of data captures.
 #: ../AMC-gui.pl:773
 msgid "updated"
 msgstr ""
 
+#. TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
 #: ../AMC-gui.pl:782 ../AMC-gui.pl:6087 ../AMC-perl/AMC/Gui/Manuel.pm:212
 #: ../AMC-gui-main_window.glade:136
 msgid "MSE"
 msgstr ""
 
+#. TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
 #: ../AMC-gui.pl:794 ../AMC-gui.pl:6093 ../AMC-perl/AMC/Gui/Manuel.pm:222
 msgid "sensitivity"
 msgstr ""
@@ -123,6 +132,7 @@ msgstr ""
 msgid "scan file"
 msgstr ""
 
+#. TRANSLATORS: for encodings
 #: ../AMC-gui.pl:835 ../AMC-gui.pl:885
 msgid "Western Europe"
 msgstr ""
@@ -156,6 +166,7 @@ msgstr ""
 msgid "Unicode"
 msgstr ""
 
+#. TRANSLATORS: you can omit the [...] part, just here to explain context
 #: ../AMC-gui.pl:912 ../AMC-gui.pl:4037
 msgid "(none) [No primary key found in association list]"
 msgstr ""
@@ -175,6 +186,7 @@ msgstr ""
 msgid "to files"
 msgstr ""
 
+#. TRANSLATORS: One of the rounding method for marks. This is a menu entry.
 #: ../AMC-gui.pl:955
 msgid "floor"
 msgstr ""
@@ -220,6 +232,7 @@ msgstr ""
 msgid "(none) [No transitional image type (direct processing)]"
 msgstr ""
 
+#. TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
 #: ../AMC-gui.pl:1013
 msgid "that's all"
 msgstr ""
@@ -258,6 +271,7 @@ msgstr ""
 msgid "where defined in the source"
 msgstr ""
 
+#. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
 #. TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
 #: ../AMC-gui.pl:1041 ../AMC-gui.pl:7581
 msgid "name"
@@ -273,6 +287,7 @@ msgstr ""
 msgid "line in students list"
 msgstr ""
 
+#. TRANSLATORS: One of the possible way to group annotated answer sheets together to PDF files: make one PDF file per student, with all his pages. This is a menu entry.
 #: ../AMC-gui.pl:1060
 msgid "One file per student"
 msgstr ""
@@ -282,6 +297,7 @@ msgstr ""
 msgid "One file for all students"
 msgstr ""
 
+#. TRANSLATORS: One of the possible way to annotate answer sheets: here we only select pages where the student has written something (in separate answer sheet mode, these are the pages from the answer sheet and not the pages from the subject).
 #: ../AMC-gui.pl:1068
 msgid "Only pages with answers"
 msgstr ""
@@ -320,6 +336,7 @@ msgstr ""
 msgid "Some answer sheets were photocopied"
 msgstr ""
 
+#. TRANSLATORS: One of the ways to send mail: use sendmail command. This is a menu entry.
 #: ../AMC-gui.pl:1096
 msgid "sendmail"
 msgstr ""
@@ -345,6 +362,7 @@ msgstr ""
 msgid "Answer sheet first"
 msgstr ""
 
+#. TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
 #: ../AMC-gui.pl:1128
 msgid "nothing"
 msgstr ""
@@ -382,6 +400,7 @@ msgstr ""
 msgid "Export to %s did not work: file not created..."
 msgstr ""
 
+#. TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, an image will be opened to see where the corner marks were detected.
 #: ../AMC-gui.pl:1371 ../AMC-gui.pl:6099
 msgid "page adjustment"
 msgstr ""
@@ -576,6 +595,7 @@ msgstr ""
 msgid "Only first ten warnings written"
 msgstr ""
 
+#. TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
 #: ../AMC-gui.pl:2463
 #, perl-format
 msgid "See also the processing log in '%s' below."
@@ -634,6 +654,7 @@ msgstr ""
 msgid "Would you like to set it to 0.5?"
 msgstr ""
 
+#. TRANSLATORS: This parameter is the ratio of dark pixels number over total pixels number inside box above which a box is considered to be ticked.
 #: ../AMC-gui.pl:2566
 msgid "darkness threshold"
 msgstr ""
@@ -701,6 +722,7 @@ msgstr ""
 msgid "You chose a printing method using CUPS but there are no configured printer in CUPS. Please configure some printer or switch to another printing method."
 msgstr ""
 
+#. TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
 #: ../AMC-gui.pl:2998
 msgid "papers"
 msgstr ""
@@ -925,6 +947,7 @@ msgstr ""
 msgid "Automatic association completed: %d students recognized."
 msgstr ""
 
+#. TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
 #: ../AMC-gui.pl:4207
 #, perl-format
 msgid "Please check \"%s\" and \"%s\" values and try again."
@@ -1222,6 +1245,8 @@ msgstr ""
 msgid "(no description)"
 msgstr ""
 
+#. TRANSLATORS: This is a column title for the list of files to be included in a template being created.
+#. TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
 #: ../AMC-gui.pl:6512 ../AMC-gui.pl:7559
 msgid "file"
 msgstr ""
@@ -1243,6 +1268,7 @@ msgstr ""
 msgid "All source files"
 msgstr ""
 
+#. TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
 #: ../AMC-gui.pl:6818
 #, perl-format
 msgid "%s files"
@@ -1412,6 +1438,7 @@ msgstr ""
 msgid "Code (short name) for examination"
 msgstr ""
 
+#. TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
 #: ../AMC-gui.pl:7913
 msgid "column"
 msgstr ""
@@ -1523,81 +1550,81 @@ msgstr ""
 msgid "question ID used several times for the same paper: \"%s\""
 msgstr ""
 
-#: ../AMC-prepare.pl:472
+#: ../AMC-prepare.pl:474
 #, perl-format
 msgid "An answer appears to be given outside a question environment, after question \"%s\""
 msgstr ""
 
-#: ../AMC-prepare.pl:489
+#: ../AMC-prepare.pl:491
 #, perl-format
 msgid "Answer number ID used several times for the same question: %s"
 msgstr ""
 
-#: ../AMC-prepare.pl:755
+#: ../AMC-prepare.pl:761
 #, perl-format
 msgid "%d errors during LaTeX compiling"
 msgstr ""
 
-#: ../AMC-prepare.pl:817
+#: ../AMC-prepare.pl:823
 #, perl-format
 msgid "LaTeX command configured is not present (%s). Install it or change configuration, and then rerun."
 msgstr ""
 
-#: ../AMC-prepare.pl:850
+#: ../AMC-prepare.pl:856
 msgid "solution"
 msgstr ""
 
-#: ../AMC-prepare.pl:865
+#: ../AMC-prepare.pl:871
 msgid "catalog"
 msgstr ""
 
-#: ../AMC-prepare.pl:900
+#: ../AMC-prepare.pl:906
 msgid "question sheet"
 msgstr ""
 
-#: ../AMC-prepare.pl:934
+#: ../AMC-prepare.pl:940
 #, perl-format
 msgid "please remove accentuated or non-standard characters from the following question ID: \"%s\""
 msgstr ""
 
-#: ../AMC-prepare.pl:944
+#: ../AMC-prepare.pl:950
 msgid "some question IDs seems to have accentuated or non-standard characters. This may break future processings."
 msgstr ""
 
-#: ../AMC-read-pdfform.pl:147
+#: ../AMC-read-pdfform.pl:148
 msgid "Reading PDF forms..."
 msgstr ""
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-perl/AMC/Basic.pm:635
+#: ../AMC-perl/AMC/Basic.pm:662
 msgid "Name [name column title in exported spreadsheet]"
 msgstr ""
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-perl/AMC/Basic.pm:638
+#: ../AMC-perl/AMC/Basic.pm:665
 msgid "Mark [mark column title in exported spreadsheet]"
 msgstr ""
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-perl/AMC/Basic.pm:641
+#: ../AMC-perl/AMC/Basic.pm:668
 msgid "Exam [exam number column title in exported spreadsheet]"
 msgstr ""
 
-#: ../AMC-perl/AMC/Basic.pm:645
+#: ../AMC-perl/AMC/Basic.pm:672
 msgid "Score [total score column title in exported spreadsheet]"
 msgstr ""
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-perl/AMC/Basic.pm:648
+#: ../AMC-perl/AMC/Basic.pm:675
 msgid "Max [maximum score column title in exported spreadsheet]"
 msgstr ""
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-perl/AMC/Basic.pm:653
+#: ../AMC-perl/AMC/Basic.pm:680
 msgid "max [maximum score row name in exported spreadsheet]"
 msgstr ""
 
-#: ../AMC-perl/AMC/Basic.pm:657
+#: ../AMC-perl/AMC/Basic.pm:684
 msgid "mean [means of scores row name in exported spreadsheet]"
 msgstr ""
 
@@ -1679,6 +1706,7 @@ msgstr ""
 msgid "No description available."
 msgstr ""
 
+#. TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
 #: ../AMC-perl/AMC/Export/ods.pm:268
 msgid "ALL"
 msgstr ""
@@ -1698,14 +1726,17 @@ msgstr ""
 msgid "Box"
 msgstr ""
 
+#. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
 #: ../AMC-perl/AMC/Export/ods.pm:309
 msgid "Nb"
 msgstr ""
 
+#. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
 #: ../AMC-perl/AMC/Export/ods.pm:314
 msgid "/all"
 msgstr ""
 
+#. TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
 #: ../AMC-perl/AMC/Export/ods.pm:319
 msgid "/expr"
 msgstr ""
@@ -1720,10 +1751,12 @@ msgstr ""
 msgid "Marks"
 msgstr ""
 
+#. TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
 #: ../AMC-perl/AMC/Export/ods.pm:1493
 msgid "Questions statistics"
 msgstr ""
 
+#. TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
 #: ../AMC-perl/AMC/Export/ods.pm:1503
 msgid "Indicative questions statistics"
 msgstr ""
@@ -1753,10 +1786,12 @@ msgstr ""
 msgid "Invalid answer"
 msgstr ""
 
+#. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
 #: ../AMC-perl/AMC/Export/ods.pm:1547
 msgid "Correct answer"
 msgstr ""
 
+#. TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
 #: ../AMC-perl/AMC/Export/ods.pm:1553
 msgid "Wrong answer"
 msgstr ""
@@ -1770,50 +1805,52 @@ msgstr ""
 msgid "An old state of the exported file seems to be already opened. Use File/Reload from OpenOffice/LibreOffice to refresh."
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:106
+#: ../AMC-perl/AMC/Filter/plain.pm:109
 msgid "Please code your student number opposite, and write your name in the box below."
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:233
+#. TRANSLATORS: Message when the Pages option used in AMC-TXT can't be parsed. %s will be replaced with the option value
+#: ../AMC-perl/AMC/Filter/plain.pm:261
 #, perl-format
 msgid "Pages option value can't be understood: %s"
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:268
+#: ../AMC-perl/AMC/Filter/plain.pm:296
 #, perl-format
 msgid "Line %d"
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:281
+#. TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
+#: ../AMC-perl/AMC/Filter/plain.pm:309
 msgid "Previous question has less than two choices"
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:294
+#: ../AMC-perl/AMC/Filter/plain.pm:322
 #, perl-format
 msgid "Previous question is a simple question but has %d correct choice(s)"
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:386
+#: ../AMC-perl/AMC/Filter/plain.pm:416
 msgid "Invalid encoding: you must use UTF-8, but your source file was saved using another encoding"
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:413
+#: ../AMC-perl/AMC/Filter/plain.pm:443
 #, perl-format
 msgid "File not found: %s"
 msgstr ""
 
 #. TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option is given a value
-#: ../AMC-perl/AMC/Filter/plain.pm:432
+#: ../AMC-perl/AMC/Filter/plain.pm:462
 #, perl-format
 msgid "Unknown option: %s"
 msgstr ""
 
 #. TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
-#: ../AMC-perl/AMC/Filter/plain.pm:517
+#: ../AMC-perl/AMC/Filter/plain.pm:552
 msgid "Choice outside question"
 msgstr ""
 
-#: ../AMC-perl/AMC/Filter/plain.pm:1394
+#: ../AMC-perl/AMC/Filter/plain.pm:1440
 #, perl-format
 msgid "The following fonts does not seem to be installed on the system: <b>%s</b>."
 msgstr ""
@@ -1842,6 +1879,7 @@ msgstr ""
 msgid "Scan"
 msgstr ""
 
+#. TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through all pages. Please keep this text very short (say less than 5 letters) so that the window is not too large
 #: ../AMC-perl/AMC/Gui/Manuel.pm:142 ../AMC-perl/AMC/Gui/Manuel.pm:162
 msgid "all"
 msgstr ""
@@ -1860,12 +1898,12 @@ msgstr ""
 msgid "page"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Manuel.pm:572
+#: ../AMC-perl/AMC/Gui/Manuel.pm:580
 #, perl-format
 msgid "This is a template exam that you cannot edit. To create a new exam from this one to be edited, use the '%s' button."
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Manuel.pm:573 ../AMC-perl/AMC/Gui/Manuel.glade:406
+#: ../AMC-perl/AMC/Gui/Manuel.pm:581 ../AMC-perl/AMC/Gui/Manuel.glade:406
 msgid "Add photocopy"
 msgstr ""
 
@@ -1922,6 +1960,7 @@ msgstr ""
 msgid "Ticked boxes"
 msgstr ""
 
+#. TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
 #: ../AMC-perl/AMC/Export/register/CSV.pm:99
 #: ../AMC-perl/AMC/Export/register/ods.pm:142
 msgid "No"
@@ -1959,6 +1998,7 @@ msgstr ""
 msgid "Stats table"
 msgstr ""
 
+#. TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
 #: ../AMC-perl/AMC/Export/register/ods.pm:96
 msgid "None [no stats table to export]"
 msgstr ""
@@ -2011,6 +2051,7 @@ msgstr ""
 msgid "with scope separator"
 msgstr ""
 
+#. TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
 #: ../AMC-perl/AMC/Export/register/ods.pm:169
 msgid "':'"
 msgstr ""

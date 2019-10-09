@@ -90,9 +90,9 @@ sub build_config_gui {
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
 
-# TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
     $prefs->store_register(
         export_ods_stats => cb_model(
+# TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
             "" => __p("None [no stats table to export]"),
 
 # TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a horizontal flow' in the exported ODS file.
@@ -136,9 +136,9 @@ sub build_config_gui {
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
 
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
     $prefs->store_register(
         export_ods_group => cb_model(
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
             "0" => __ "No",
 
 # TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and report total scores'
@@ -163,9 +163,9 @@ sub build_config_gui {
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
 
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
     $prefs->store_register(
         export_ods_groupsep => cb_model(
+# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
             ":" => __ "':'",
 
 # TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and you can detect the scope from a question ID using the text before the separator .'
