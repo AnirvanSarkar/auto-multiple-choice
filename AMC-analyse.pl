@@ -212,6 +212,7 @@ sub get_layout_data {
         my $k = code_cb( $c->{numberid}, $c->{digitid} );
         $r->{boxes}->{$k} =
           AMC::Boite::new_MN( map { $c->{$_} } (qw/xmin ymin xmax ymax/) );
+        $r->{flags}->{$k} = 0;
     }
 
     if ($all) {
@@ -673,8 +674,12 @@ sub one_scan {
                         $zoneid,
                         @{ $ld->{'darkness.data'}->{$k} },
                         undef,
-                        file_content(
-                            $zoom_dir . "/" . $ld->{'zoom.file'}->{$k}
+                        (
+                            $ld->{'zoom.file'}->{$k}
+                            ? file_content(
+                                $zoom_dir . "/" . $ld->{'zoom.file'}->{$k}
+                              )
+                            : undef
                         )
                     );
                 } else {

@@ -336,7 +336,7 @@ sub analyse_cslog {
 sub analyse_amclog {
     my ($amclog_file) = @_;
 
-    my $analyse_data = { etu => 0, qs => {} };
+    my $analyse_data = { etu => 0, titre => '', qs => {} };
     my %titres       = ();
     @errors_msg = ();
 
@@ -389,6 +389,8 @@ sub analyse_amclog {
 
             # register question data
             $analyse_data->{titre} = $titres{$1};
+            $analyse_data->{titre} = 'unknown'
+              if ( !defined( $analyse_data->{titre} ) );
             $analyse_data->{qs}->{$1} = $analyse_data->{q};
         }
 
@@ -416,7 +418,7 @@ sub analyse_amclog {
 
             # then clear all $analyse_data to begin with this student:
 
-            $analyse_data = { etu => $student, qs => {} };
+            $analyse_data = { etu => $student, titre => '', qs => {} };
         }
 
         # AUTOQCM[BR=N] tells that this student is a replicate of student N

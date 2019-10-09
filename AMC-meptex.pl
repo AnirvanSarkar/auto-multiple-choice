@@ -34,9 +34,9 @@ my $src;
 my $data_dir;
 my $dpi = 300;
 
-my $progress;
-my $progress_id;
-my $debug;
+my $progress    = 0;
+my $progress_id = '';
+my $debug       = '';
 
 GetOptions(
     "src=s"            => \$src,

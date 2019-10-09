@@ -42,9 +42,7 @@ sub new {
 
     $self->{entier} = 0 if ( !$self->{entier} );
 
-    debug "Create progression pipe for <"
-      . $self->{id}
-      . "> up to $entier"
+    debug "Create progression pipe for <$self->{id}> up to $self->{entier}"
       . ( $self->{bar} ? " (progress bar side)" : "" );
 
     bless $self;

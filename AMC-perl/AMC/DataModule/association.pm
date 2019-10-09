@@ -314,7 +314,10 @@ sub clear_auto {
 
 sub check_keys {
     my ( $self, $key_in_list, $code ) = @_;
-    if ( $self->variable('key_in_list') ne $key_in_list ) {
+    my $registered_key_in_list = $self->variable('key_in_list');
+    if ( !defined($registered_key_in_list)
+        || $registered_key_in_list ne $key_in_list )
+    {
         debug "Association variable mismatch: clearing database";
         $self->clear;
         $self->variable( 'key_in_list', $key_in_list );
