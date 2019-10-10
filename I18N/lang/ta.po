@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.4.0~beta1 (r:a488cdb)\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2019-10-09 21:56 +0200\n"
+"POT-Creation-Date: 2019-10-10 11:20 +0200\n"
 "PO-Revision-Date: 2018-05-06\n"
 "Last-Translator: Balaganesh B. 14310063 <balaganesh.b@iitgn.ac.in>, 2018\n"
 "Language-Team: Tamil (https://www.transifex.com/jojoboulix/teams/10701/ta/)\n"
@@ -123,13 +123,13 @@ msgid "updated"
 msgstr "புதுப்பிக்கப்பட்டது"
 
 #. TRANSLATORS: This is the title of the column containing Mean Square Error Distance (some kind of mean distance between the location of the four corner marks on the scan and the location where they should be if the scan was not distorted at all) in the table showing the results of data captures.
-#: ../AMC-gui.pl:782 ../AMC-gui.pl:6087 ../AMC-perl/AMC/Gui/Manuel.pm:212
+#: ../AMC-gui.pl:782 ../AMC-gui.pl:6096 ../AMC-perl/AMC/Gui/Manuel.pm:212
 #: ../AMC-gui-main_window.glade:136
 msgid "MSE"
 msgstr " சராசாி இருபடிப் பிழை"
 
 #. TRANSLATORS: This is the title of the column containing so-called "sensitivity" (an indicator telling the user if the darkness ratio of some boxes on the page are very near the threshold. A great value tells that some darkness ratios are very near the threshold, so that the capture is very sensitive to the threshold. A small value is a good thing) in the table showing the results of data captures.
-#: ../AMC-gui.pl:794 ../AMC-gui.pl:6093 ../AMC-perl/AMC/Gui/Manuel.pm:222
+#: ../AMC-gui.pl:794 ../AMC-gui.pl:6102 ../AMC-perl/AMC/Gui/Manuel.pm:222
 msgid "sensitivity"
 msgstr "ஒளிக்கூருணர்வுத்திறன்"
 
@@ -177,7 +177,7 @@ msgid "(none) [No primary key found in association list]"
 msgstr "(ஒன்றுமில்லை) [இணைப்பு பட்டியலில் முதன்மைக் குறியைக் காணவில்லை]"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-gui.pl:916 ../AMC-gui.pl:4836
+#: ../AMC-gui.pl:916 ../AMC-gui.pl:4847
 msgid "(none) [No code found in LaTeX file]"
 msgstr "(ஒன்றுமில்லை) [LaTeX கோப்பில் எந்தக் குறிமுறையும் இல்லை]"
 
@@ -279,7 +279,7 @@ msgstr "மூலத்தில் எங்கே வரையறுக்க�
 
 #. TRANSLATORS: One of the possible sorting criteria for students in the exported spreadsheet with scores: the student name. This is a menu entry.
 #. TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:1041 ../AMC-gui.pl:7581
+#: ../AMC-gui.pl:1041 ../AMC-gui.pl:7590
 msgid "name"
 msgstr "பெயர்"
 
@@ -407,12 +407,12 @@ msgid "Export to %s did not work: file not created..."
 msgstr "%sக்கு ஏற்றுதல் வேலை செய்யவில்லை: கோப்பு உருவாக்கப்படவில்லை ..."
 
 #. TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, an image will be opened to see where the corner marks were detected.
-#: ../AMC-gui.pl:1371 ../AMC-gui.pl:6099
+#: ../AMC-gui.pl:1371 ../AMC-gui.pl:6108
 msgid "page adjustment"
 msgstr "பக்கத்தைச் சீரமை"
 
 #. TRANSLATORS: One of the popup menu that appears when right-clicking on a page in the data capture diagnosis table. Choosing this entry, a window will be opened were the user can see all boxes on the scans and how they were filled by the students, and correct detection of ticked-or-not if needed.
-#: ../AMC-gui.pl:1374 ../AMC-gui.pl:6100
+#: ../AMC-gui.pl:1374 ../AMC-gui.pl:6109
 msgid "boxes zooms"
 msgstr "கட்டங்களைப் பொிதாக்கு"
 
@@ -1023,532 +1023,538 @@ msgstr "சராசாி: %.2f"
 msgid "No marks computed"
 msgstr "மதிப்பெண்கள் கணக்கிடப்படவில்லை"
 
-#: ../AMC-gui.pl:4843
+#. TRANSLATORS: menu item when choosing the code to use for association from the completed answer sheets. This item corresponds to pre-association (each student has an individualized sheet)
+#: ../AMC-gui.pl:4827
 msgid "Pre-association"
 msgstr "முன்னிணைப்பு"
 
-#: ../AMC-gui.pl:4858
+#. TRANSLATORS: menu item when choosing the code to use for association from the completed answer sheets. This item corresponds to the decoded name field (eg. when a barcode identifying the student has been sticked in the name field)
+#: ../AMC-gui.pl:4829
+msgid "Decoded name field"
+msgstr ""
+
+#: ../AMC-gui.pl:4867
 msgid "No students list file"
 msgstr "மாணவா்கள் பெயா் பட்டியல் கோப்பு இல்லை"
 
-#: ../AMC-gui.pl:4860
+#: ../AMC-gui.pl:4869
 msgid "No primary key from students list file"
 msgstr "மாணவா்கள் பெயா் பட்டியல் கோப்பில் முதன்மைக்குறி இல்லை"
 
-#: ../AMC-gui.pl:4867
+#: ../AMC-gui.pl:4876
 #, perl-format
 msgid "Missing identification for %d answer sheets"
 msgstr "%d இந்த பதில்தாள்களின் அடையாளமறிதல் விடுபட்டுள்ளது"
 
-#: ../AMC-gui.pl:4872
+#: ../AMC-gui.pl:4881
 msgid "All completed answer sheets are associated with a student name"
 msgstr "மாணவா்களின் பெயா்களோடு அவா்களின் முடிக்கப்பெற்ற பதில் தாள்கள் இணைக்கப்பட்டது"
 
-#: ../AMC-gui.pl:4930
+#: ../AMC-gui.pl:4939
 msgid "exam ID"
 msgstr "தோ்வு அடையாளம்"
 
-#: ../AMC-gui.pl:4946
+#: ../AMC-gui.pl:4955
 msgid "student"
 msgstr "மாணவா்"
 
 #. TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
-#: ../AMC-gui.pl:5111
+#: ../AMC-gui.pl:5120
 msgid "Selected_students"
 msgstr "குறிப்பிட்ட_மாணவா்கள்"
 
 #. TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-#: ../AMC-gui.pl:5115
+#: ../AMC-gui.pl:5124
 msgid "All_students"
 msgstr "அனைத்து_மாணவா்கள்"
 
-#: ../AMC-gui.pl:5206
+#: ../AMC-gui.pl:5215
 msgid "Annotating papers..."
 msgstr "பதில்தாள்கள் சுட்டுவிளக்கப்பட்டுக் கொண்டிருக்கிறது..."
 
-#: ../AMC-gui.pl:5211
+#: ../AMC-gui.pl:5220
 msgid "Annotations have been completed"
 msgstr "சுட்டுவிளக்கப்படுத்தல் முடிவடைந்தது"
 
-#: ../AMC-gui.pl:5359
+#: ../AMC-gui.pl:5368
 #, perl-format
 msgid "Project \"%s\" preferences"
 msgstr "திட்டப்பணி \"%s\" ன் முன்மதிப்பீடுகள்"
 
-#: ../AMC-gui.pl:5364
+#: ../AMC-gui.pl:5373
 msgid "Project preferences"
 msgstr "திட்டப்பணி முன்மதிப்பீடுகள்"
 
-#: ../AMC-gui.pl:5482
+#: ../AMC-gui.pl:5491
 #, perl-format
 msgid "You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"
 msgstr "புதிய திட்டப்பணி உருவாக்கும் போது பயன்படுத்திய \"<b>%s</b>\" ன் இயல்பான மதிப்பை நீங்கள் மாற்றியுள்ளீா்கள். திறக்கப்பட்ட திட்டப்பணி \"<i>%s</i>\" ல் இதையும் \"<b>%s</b>\" மாற்ற விரும்புகிறீா்களா?"
 
-#: ../AMC-gui.pl:5516
+#: ../AMC-gui.pl:5525
 msgid "You modified the name field type, so that the name fields has to be decoded again."
 msgstr ""
 
-#: ../AMC-gui.pl:5632
+#: ../AMC-gui.pl:5641
 msgid "Working documents are not readable"
 msgstr "பணி ஆவணங்களைப் படிக்க முடியவில்லை"
 
-#: ../AMC-gui.pl:5635
+#: ../AMC-gui.pl:5644
 msgid "No working documents"
 msgstr "பணி ஆவணங்கள் இல்லை"
 
-#: ../AMC-gui.pl:5638
+#: ../AMC-gui.pl:5647
 msgid "Working documents last update:"
 msgstr "பணி ஆவணங்கள் இறுதியாக புதுப்பிக்கப்படுகிறது:"
 
-#: ../AMC-gui.pl:5694
+#: ../AMC-gui.pl:5703
 msgid "No layout"
 msgstr "அமைவு இல்லை"
 
-#: ../AMC-gui.pl:5697
+#: ../AMC-gui.pl:5706
 #, perl-format
 msgid "Processed %d pages"
 msgstr "%d பக்கங்கள் செயல்முறைக்குள்ளாக்கப்பட்டது"
 
-#: ../AMC-gui.pl:5699
+#: ../AMC-gui.pl:5708
 msgid "but some defects were detected."
 msgstr "ஆனால் சில குறைபாடுகள் கண்டறியப்பட்டன."
 
-#: ../AMC-gui.pl:5711
+#: ../AMC-gui.pl:5720
 msgid "The \\namefield command is not used. Writing subjects without name field is not recommended"
 msgstr "கட்டளை \\namefield ஐப் பயன்படுத்தவில்லை. \\namefield இல்லாமல் பாடங்களை எழுதுவது பாிந்துரைக்கப்படவில்லை"
 
-#: ../AMC-gui.pl:5714
+#: ../AMC-gui.pl:5723
 msgid "The \\namefield command is used several times for the same subject. This should not be the case, as each student should write his name only once"
 msgstr "கட்டளை \\namefield பலமுறை ஒரே பாடத்திற்கு பயன்படுத்தப்பட்டுள்ளது. ஆனால் மாணவா்கள் தங்கள் பெயரை ஒரு முறை எழுதினால் போதுமானது"
 
-#: ../AMC-gui.pl:5716
+#: ../AMC-gui.pl:5725
 msgid "No box to be ticked"
 msgstr "எந்த கட்டத்திலும் சுட்டத் தேவையில்லை"
 
-#: ../AMC-gui.pl:5718
+#: ../AMC-gui.pl:5727
 msgid "The corner marks and binary boxes are not at the same location on all pages"
 msgstr "அனைத்துப் பக்கங்களிலும் இருமக் கட்டங்களும் மூலைகளிலுள்ள வட்டக்குறியும் ஒரே இடத்தில் அமையவில்லை"
 
-#: ../AMC-gui.pl:5721
+#: ../AMC-gui.pl:5730
 msgid "Some material has been placed out of the page. This is often a result of a multiple columns question group starting too close from the page bottom. In such a case, use \"needspace\"."
 msgstr "பக்கத்திற்க்கு வெளியே சில பொருள் வைக்கப்பட்டுள்ளது. பல் நெடுவரிசைகளின் கேள்விக்குழுவானது பக்கத்தின் கீழே மிக நெருக்கமாக தொடங்குவதால் ஏற்ப்பட்ட விளைவு. அத்தகைய நிலையில், \"தேவையான இடத்தைப்\" பயன்படுத்தவும்."
 
-#: ../AMC-gui.pl:5744
+#: ../AMC-gui.pl:5753
 msgid "Some potential defects were detected for this subject. Correct them in the source and update the working documents."
 msgstr "இந்த பாடத்தில் சில சாத்தியமான குறைபாடுகள் கண்டறியப்பட்டன. மூலத்தில் அவற்றை சாிசெய்து, பணி ஆவணங்களை புதுப்பிக்கவும்."
 
-#: ../AMC-gui.pl:5753
+#: ../AMC-gui.pl:5762
 #, perl-format
 msgid "(See for example pages %s and %s)"
 msgstr "(எடுத்துக்காட்டாக பக்கங்கள் %s மற்றும் %s ஐப் பாா்க்கவும்)"
 
-#: ../AMC-gui.pl:5761
+#: ../AMC-gui.pl:5770
 #, perl-format
 msgid "(Concerns %1$d pages, see for example page %2$s)"
 msgstr "( தொடர்பான பக்கங்கள் %1$d, எடுத்துக்காட்டாக %2$s பக்கத்தைப் பார்க்கவும்)"
 
-#: ../AMC-gui.pl:5772
+#: ../AMC-gui.pl:5781
 #, perl-format
 msgid "(Concerns %1$d exams, see for example sheet %2$d)"
 msgstr "(%1$d தோ்வுகள் தெடா்பாக தாள் %2$d ஐ உதாரணமாகப் பாா்க்கவும்)"
 
-#: ../AMC-gui.pl:5898
+#: ../AMC-gui.pl:5907
 #, perl-format
 msgid "Data capture from %d complete papers and %d incomplete papers"
 msgstr "%d முழுமையான மற்றும் %d முழுமையற்ற தாள்களில் இருந்து தரவை எடுத்தல்"
 
-#: ../AMC-gui.pl:5904
+#: ../AMC-gui.pl:5913
 #, perl-format
 msgid "Data capture from %d complete papers"
 msgstr "%d முழுமையான தாள்களில் இருந்து தரவை எடுத்தல்"
 
 #. TRANSLATORS: this text points out that no data capture has been made yet.
-#: ../AMC-gui.pl:5910
+#: ../AMC-gui.pl:5919
 msgid "No data"
 msgstr "தரவு இல்லை"
 
-#: ../AMC-gui.pl:5918
+#: ../AMC-gui.pl:5927
 #, perl-format
 msgid "Overwritten pages: %d"
 msgstr "மேலெழுதப்பட்ட பக்கங்கள்: %d"
 
-#: ../AMC-gui.pl:5926
+#: ../AMC-gui.pl:5935
 msgid "All scans were properly recognized."
 msgstr "அனைத்து அலகீடுகளும் ஒழுங்காக கண்டுணரப்பட்டது."
 
-#: ../AMC-gui.pl:5933
+#: ../AMC-gui.pl:5942
 #, perl-format
 msgid "%d scans were not recognized."
 msgstr "%d அலகீடுகள் ஒழுங்காக கண்டுணரப்படவில்லை."
 
 #. TRANSLATORS: column title for the list of overwritten pages. This refers to the page from the question
-#: ../AMC-gui.pl:5959
+#: ../AMC-gui.pl:5968
 msgid "Page"
 msgstr "பக்கம்"
 
 #. TRANSLATORS: column title for the list of overwritten pages. This refers to the number of times the page has been overwritten.
-#: ../AMC-gui.pl:5965
+#: ../AMC-gui.pl:5974
 msgid "count"
 msgstr "எண்ணிக்கை"
 
 #. TRANSLATORS: column title for the list of overwritten pages. This refers to the date of the last data capture for the page.
-#: ../AMC-gui.pl:5971
+#: ../AMC-gui.pl:5980
 msgid "Date"
 msgstr "கிழமை"
 
-#: ../AMC-gui.pl:6014
+#: ../AMC-gui.pl:6023
 msgid "Looking for analysis..."
 msgstr "பகுப்பாய்விற்க்காக பாா்த்துக்கொண்டிருக்கிறது..."
 
-#: ../AMC-gui.pl:6070
+#: ../AMC-gui.pl:6079
 msgid "Automatic data capture now completed."
 msgstr "தானியக்க தரவு எடுத்தல் இப்போது முடிவடைந்தது."
 
-#: ../AMC-gui.pl:6074
+#: ../AMC-gui.pl:6083
 #, perl-format
 msgid "It is not complete (missing pages from %d papers)."
 msgstr "இது முடிவடையவில்லை (விடுபட்ட பக்கங்கள் %d ஐ தாளிலிருந்து)."
 
-#: ../AMC-gui.pl:6081
+#: ../AMC-gui.pl:6090
 msgid "You can analyse data capture quality with some indicators values in analysis list:"
 msgstr "பகுப்பாய்வு பட்டியலில் சில குறிகாட்டிகளின் மதிப்புகளைக்கொண்டு உள்ளிட்ட தரவுகளின் தரத்தை நீங்கள் பகுப்பாய்வு செய்யலாம்:"
 
-#: ../AMC-gui.pl:6086
+#: ../AMC-gui.pl:6095
 #, perl-format
 msgid "- <b>%s</b> represents positioning gap for the four corner marks. Great value means abnormal page distortion."
 msgstr "- <b>%s</b> நான்கு மூலையில் வட்டகுறிகளுக்கிடையே உள்ள இடைவெளி இருப்பதை குறிக்கிறது. இதன் மதிப்பு அதிகமெனில் இயல்பற்ற பக்க உருக்குலைவு என்று பொருள்."
 
-#: ../AMC-gui.pl:6092
+#: ../AMC-gui.pl:6101
 #, perl-format
 msgid "- great values of <b>%s</b> are seen when darkness ratio is very close to the threshold for some boxes."
 msgstr "- சில கட்டங்களின் இருள் விகிதம் நிலையெல்லைக்கு அருகில் இருந்தால் இதன் <b>%s</b> மதிப்பு அதிகமாகும்."
 
-#: ../AMC-gui.pl:6098
+#: ../AMC-gui.pl:6107
 #, perl-format
 msgid "You can also look at the scan adjustment (<i>%s</i>) and ticked and unticked boxes (<i>%s</i>) using right-click on lines from table <i>%s</i>."
 msgstr "நீங்கள் அலகீடு சாியமைப்பைப் பாா்க்கலாம் (<i>%s</i>) மற்றும் <i>%s</i>என்ற அட்டவணையிலுள்ள கோடுகளின் மேல் வலது-சுட்டியை அழுத்தி நிரப்பப்பட்ட மற்றும் நிரப்பப்படாத கட்டங்களை (<i>%s</i>) பாா்க்கலாம்."
 
-#: ../AMC-gui.pl:6101
+#: ../AMC-gui.pl:6110
 msgid "Diagnosis"
 msgstr "குறையறிதல்"
 
-#: ../AMC-gui.pl:6127
+#: ../AMC-gui.pl:6136
 msgid "Pages that miss data capture to complete students sheets:"
 msgstr "மாணவா்கள் தாள்களைத் திருத்தி முடிக்கத் தேவையான தரவு உள்ளீடு விடுபட்டுள்ள பக்கங்கள்:"
 
-#: ../AMC-gui.pl:6256
+#: ../AMC-gui.pl:6265
 #, perl-format
 msgid "Error loading scan %s"
 msgstr "அலகீடை சுமையேற்றுவதில் பிழை %s"
 
-#: ../AMC-gui.pl:6262
+#: ../AMC-gui.pl:6271
 msgid "No scan selected"
 msgstr "ஒரு அலகீடும் தோ்வு செய்யப்படவில்லை"
 
-#: ../AMC-gui.pl:6268
+#: ../AMC-gui.pl:6277
 msgid "No more unrecognized scans"
 msgstr "கண்டறியப்படாத அலகீடுகள் இல்லை"
 
-#: ../AMC-gui.pl:6349
+#: ../AMC-gui.pl:6358
 msgid "Making diagnostic image..."
 msgstr "குறையறியும் படத்தை உருவாக்குகிறது..."
 
-#: ../AMC-gui.pl:6419
+#: ../AMC-gui.pl:6428
 msgid "(no description)"
 msgstr "(ஒரு குறிப்புமில்லை)"
 
 #. TRANSLATORS: This is a column title for the list of files to be included in a template being created.
 #. TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
-#: ../AMC-gui.pl:6512 ../AMC-gui.pl:7559
+#: ../AMC-gui.pl:6521 ../AMC-gui.pl:7568
 msgid "file"
 msgstr "கோப்பு"
 
-#: ../AMC-gui.pl:6594
+#: ../AMC-gui.pl:6603
 msgid "Add files to template"
 msgstr "வாா்ப்புருவில் கோப்புகளைச் சோ்"
 
-#: ../AMC-gui.pl:6621
+#: ../AMC-gui.pl:6630
 msgid "When making a template, you can only add files that are within the project directory."
 msgstr "வாா்ப்புருவை உருவாக்கும் போது திட்டப்பணி அடைவிலுள்ள கோப்புகளை மட்டுமே சோ்க்க முடியும்."
 
 #. TRANSLATORS: This is a column name for the list of available templates, when creating a new project based on a template.
-#: ../AMC-gui.pl:6746
+#: ../AMC-gui.pl:6755
 msgid "template"
 msgstr "வாா்ப்புரு"
 
-#: ../AMC-gui.pl:6798
+#: ../AMC-gui.pl:6807
 msgid "All source files"
 msgstr "அனைத்து மூலக்கோப்புகள்"
 
 #. TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
-#: ../AMC-gui.pl:6818
+#: ../AMC-gui.pl:6827
 #, perl-format
 msgid "%s files"
 msgstr "%s கோப்புகள்"
 
-#: ../AMC-gui.pl:6853
+#: ../AMC-gui.pl:6862
 msgid "Archive (zip, tgz)"
 msgstr "காப்பகக் கோப்பு (zip, tgz)"
 
-#: ../AMC-gui.pl:6882
+#: ../AMC-gui.pl:6891
 #, perl-format
 msgid "Nothing extracted from archive %s. Check it."
 msgstr "%s காப்பகக் கோப்பிலிருந்து எதையுமே எடுக்கவில்லை. அதைச் சரிபாா்க்கவும்."
 
-#: ../AMC-gui.pl:7017
+#: ../AMC-gui.pl:7026
 #, perl-format
 msgid "File %s already exists in project directory: do you want to replace it?"
 msgstr "திட்டப்பணி அடைவில் கோப்பு %s ஏற்கனவே உள்ளது: நீங்கள் அதை மாற்றிட விரும்புகிறீர்களா?"
 
-#: ../AMC-gui.pl:7021
+#: ../AMC-gui.pl:7030
 msgid "Click yes to replace it and loose pre-existing contents, or No to cancel source file import."
 msgstr "அதை மாற்றுவதற்கு ஆம் என்பதைச் சுட்டவும் முன்புள்ள உள்ளடக்கங்கள் இழக்கப்படும், அல்லது மூல கோப்பு இறக்குமதியை இரத்து செய்ய இல்லை என்பதைச் சுட்டவும்."
 
-#: ../AMC-gui.pl:7040
+#: ../AMC-gui.pl:7049
 msgid "The source file has been copied to project directory."
 msgstr "திட்டப்பணி அடைவிற்கு மூல கோப்பு நகலெடுக்கப்பட்டுள்ளது."
 
-#: ../AMC-gui.pl:7042
+#: ../AMC-gui.pl:7051
 #, perl-format
 msgid "You can now edit it with button \"%s\" or with any editor."
 msgstr "நீங்கள் இப்போது \"%s\" பொத்தானுடன் பதிப்பிக்கலாம் அல்லது எந்த பதிப்பியுடனும் திருத்தலாம்."
 
-#: ../AMC-gui.pl:7043 ../AMC-gui-main_window.glade:241
+#: ../AMC-gui.pl:7052 ../AMC-gui-main_window.glade:241
 msgid "Edit source file"
 msgstr "மூலக்கோப்பினை பதிப்பி"
 
-#: ../AMC-gui.pl:7051
+#: ../AMC-gui.pl:7060
 #, perl-format
 msgid "Error copying source file: %s"
 msgstr "மூலக்கோப்பினை நகலெடுக்கும் போது பிழை: %s"
 
-#: ../AMC-gui.pl:7243
+#: ../AMC-gui.pl:7252
 msgid "In order to send a useful bug report, please attach the following documents:"
 msgstr "பயனுள்ள பிழை அறிக்கையை அனுப்ப, பின்வரும் ஆவணங்களை இணைக்கவும்:"
 
-#: ../AMC-gui.pl:7247
+#: ../AMC-gui.pl:7256
 msgid "an archive (in some compressed format, like ZIP, 7Z, TGZ...) containing the <b>project directory</b>, <b>scan files</b> and <b>configuration directory</b> (.AMC.d in home directory), so as to reproduce and analyse this problem."
 msgstr "<b>திட்டப்பணி அடைவு</b>,<b>அலகீடு கோப்புகள்</b> மற்றும் <b>உருப்படுத்தல் அடைவு</b>ஆகியவற்றை உள்ளடக்கிய ஒரு ஆவண காப்பகம் (சில சுருக்கப்பட்ட வடிவத்தில், எ.கா. ZIP, 7Z, TGZ...) (முகப்பு அடைவில் .AMC.d), அதை மறுஉருவாக்கம் செய்து இந்த பிரச்சினையை ஆய்வு செய்ய வேண்டும்."
 
-#: ../AMC-gui.pl:7251
+#: ../AMC-gui.pl:7260
 msgid "the <b>log file</b> produced when the debugging mode (in Help menu) is checked. Please try to reproduce the bug with this mode activated."
 msgstr "(உதவிப் பட்டியில்) வழுநீக்கி பாணியை தொிவு செய்திருந்தால் <b>பதிவு கோப்பு</b> உருவாக்கப்படும். இந்த பாணியை செயலூக்கி பிழைப் பதிவை மறுஉருவாக்கம் செய்யவும். "
 
-#: ../AMC-gui.pl:7255
+#: ../AMC-gui.pl:7264
 #, perl-format
 msgid "Bug reports can be filled at %s or sent to the address below."
 msgstr "பிழை அறிக்கைகளை %s இல் நிரப்பலாம் அல்லது கீழே உள்ள முகவாிக்கு அனுப்பலாம்."
 
-#: ../AMC-gui.pl:7256 ../AMC-gui.pl:7262
+#: ../AMC-gui.pl:7265 ../AMC-gui.pl:7271
 msgid "AMC community site"
 msgstr "தானியக்க பல தொிவின் சமூக தளம்"
 
-#: ../AMC-gui.pl:7336
+#: ../AMC-gui.pl:7345
 msgid "Attach file"
 msgstr "கோப்பினை இணைக்க"
 
-#: ../AMC-gui.pl:7372
+#: ../AMC-gui.pl:7381
 msgid "There are no annotated corrected answer sheets to send."
 msgstr "அனுப்பப்படாத சுட்டுவிளக்கப்பட்ட பதில் தாள்கள் எதுவும் இல்லை."
 
-#: ../AMC-gui.pl:7377
+#: ../AMC-gui.pl:7386
 msgid "Please group the annotated sheets to PDF files to be able to send them."
 msgstr "தயவு செய்து சுட்டுவிளக்கத் தாள்களை PDF கோப்புக் குழுவாக்கி அவைகளை அனுப்ப முடியும்படி செய்யவும்."
 
-#: ../AMC-gui.pl:7380
+#: ../AMC-gui.pl:7389
 msgid "Please annotate answer sheets and group them to PDF files to be able to send them."
 msgstr "தயவு செய்து பதில் தாள்களில் சுட்டுவிளக்கம் இட்டு PDF கோப்புக் குழுவாக்கி அவைகளை அனுப்ப முடியும்படி செய்யவும்."
 
-#: ../AMC-gui.pl:7416
+#: ../AMC-gui.pl:7425
 #, perl-format
 msgid "Sending emails requires some perl modules that are not installed: %s. Please install these modules and try again."
 msgstr "மின்னஞ்சல்களை அனுப்பத் தேவையான சில perl கூறுகள் நிறுவப்படவில்லை:%s. இந்த கூறுகளை நிறுவிய பின்பு மீண்டும் முயற்சிக்கவும்."
 
-#: ../AMC-gui.pl:7441
+#: ../AMC-gui.pl:7450
 msgid "SMTP security mode \"STARTTLS\" is only available with Email::Sender version 1.300027 and over. Please install a newer version of this perl module or change SMTP security mode, and try again."
 msgstr "SMTP பாதுகாப்பு முறை \"STARTTLS\" ஆனது Email::Sender பதிப்பு 1.300027 மற்றும் அதற்கு மேல் மட்டுமே கிடைக்கும். இந்த perl கூறின் புதிய பதிப்பை நிறுவி அல்லது SMTP பாதுகாப்பு முறைமையை மாற்றி, மீண்டும் முயற்சிக்கவும்."
 
-#: ../AMC-gui.pl:7460
+#: ../AMC-gui.pl:7469
 #, perl-format
 msgid "The email address you entered (%s) is not correct."
 msgstr "நீங்கள் உள்ளிட்ட மின்னஞ்சல் முகவாி (%s) சாியானது அல்ல."
 
-#: ../AMC-gui.pl:7465
+#: ../AMC-gui.pl:7474
 msgid "Please edit your preferences to correct your email address."
 msgstr "தயவுசெய்து உங்கள் மின்னஞ்சல் முகவாியை சாிசெய்ய முன் மதிப்பீடுகளைப் பதிப்பிக்கவும்."
 
-#: ../AMC-gui.pl:7467
+#: ../AMC-gui.pl:7476
 msgid "You did not enter your email address."
 msgstr "நீங்கள் உங்கள் மின்னஞ்சல் முகவாியை உள்ளிடவில்லை."
 
-#: ../AMC-gui.pl:7468
+#: ../AMC-gui.pl:7477
 msgid "Please edit the preferences to set your email address."
 msgstr "தயவுசெய்து உங்கள் மின்னஞ்சல் முகவாியை அமைக்க முன் மதிப்பீடுகளைப் பதிப்பிக்கவும்."
 
-#: ../AMC-gui.pl:7496
+#: ../AMC-gui.pl:7505
 #, perl-format
 msgid "The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."
 msgstr "முன்மதிப்பீடுகளில் (%s) நீங்கள் குறிப்பிட்ட இடத்தில் <i>sendmail</i> நிரலைக் காணவில்லை. தயவுசெய்து உங்கள் உருப்படுத்தலைப் புதுப்பிக்கவும்."
 
-#: ../AMC-gui.pl:7521
+#: ../AMC-gui.pl:7530
 msgid "No email addresses has been found in the students list file. You need to write the students addresses in a column of this file."
 msgstr "மாணவா்கள் பட்டியல் கோப்பில் எந்த மின்னஞ்சல் முகவாிகளும் இல்லை. இந்த கோப்பின் ஒரு நெடுவாிசையில் மாணவா்களின் மின்னஞ்சல் முகவாிகளை எழுதவும்."
 
 #. TRANSLATORS: This is the title of a column containing copy numbers in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:7575
+#: ../AMC-gui.pl:7584
 msgid "copy"
 msgstr "நகல்"
 
 #. TRANSLATORS: This is the title of a column containing students email addresses in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:7587
+#: ../AMC-gui.pl:7596
 msgid "email"
 msgstr "மின்னஞ்சல்"
 
 #. TRANSLATORS: This is the title of a column containing mailing status (not sent, already sent, failed) in a table showing all annotated answer sheets, when sending them to the students by email.
-#: ../AMC-gui.pl:7593
+#: ../AMC-gui.pl:7602
 msgid "status"
 msgstr "நிலமை"
 
-#: ../AMC-gui.pl:7619
+#: ../AMC-gui.pl:7628
 msgid "failed"
 msgstr "தோல்வியடைந்தது"
 
-#: ../AMC-gui.pl:7690
+#: ../AMC-gui.pl:7699
 msgid "Some files you asked to be attached to the emails are missing:"
 msgstr "நீங்கள் மின்னஞ்சல்களுடன் இணைக்கக் கேட்டுக் கொண்ட சில கோப்புகளைக் காணவில்லை:"
 
-#: ../AMC-gui.pl:7695
+#: ../AMC-gui.pl:7704
 msgid "Please create them or remove them from the list of attached files."
 msgstr "தயவுசெய்து அவற்றை உருவாக்கவும் அல்லது இணைக்கப்பட வேண்டிய கோப்புகளின் பட்டியலில் இருந்து அவற்றை நீக்கவும்."
 
-#: ../AMC-gui.pl:7777
+#: ../AMC-gui.pl:7786
 msgid "Sending emails..."
 msgstr "மின்னஞ்சல்களை அனுப்புகிறது..."
 
-#: ../AMC-gui.pl:7786
+#: ../AMC-gui.pl:7795
 msgid "Cancelled."
 msgstr "இரத்தானது."
 
-#: ../AMC-gui.pl:7791
+#: ../AMC-gui.pl:7800
 msgid "SMTP authentication failed: check SMTP configuration and password."
 msgstr "SMTP அங்கீகரிப்பு தோல்வியுற்றது: SMTP உருப்படுத்தல் மற்றும் கடவுச்சொல்லை சோதிக்கவும்."
 
-#: ../AMC-gui.pl:7796
+#: ../AMC-gui.pl:7805
 #, perl-format
 msgid "%d message(s) has been sent."
 msgstr "%d செய்தி(கள்) அனுப்பப்பட்டது."
 
-#: ../AMC-gui.pl:7845
+#: ../AMC-gui.pl:7854
 msgid "Set exam name"
 msgstr "தோ்வுப் பெயரை அமை"
 
-#: ../AMC-gui.pl:7854 ../AMC-gui-edit_preferences.glade:4212
+#: ../AMC-gui.pl:7863 ../AMC-gui-edit_preferences.glade:4212
 msgid "Examination name"
 msgstr "தோ்வுப் பெயா்"
 
-#: ../AMC-gui.pl:7858 ../AMC-gui-edit_preferences.glade:4223
+#: ../AMC-gui.pl:7867 ../AMC-gui-edit_preferences.glade:4223
 msgid "Code (short name) for examination"
 msgstr "தோ்வுக்கான குறிமுறை (குறுகிய பெயா்)"
 
 #. TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
-#: ../AMC-gui.pl:7913
+#: ../AMC-gui.pl:7922
 msgid "column"
 msgstr "நெடுவாிசை"
 
-#: ../AMC-gui.pl:7922
+#: ../AMC-gui.pl:7931
 msgid "<full name>"
 msgstr "<full name>"
 
-#: ../AMC-gui.pl:7923
+#: ../AMC-gui.pl:7932
 msgid "<student identifier>"
 msgstr "<student identifier>"
 
-#: ../AMC-gui.pl:7924
+#: ../AMC-gui.pl:7933
 msgid "<student copy>"
 msgstr "<student copy>"
 
-#: ../AMC-gui.pl:7957
+#: ../AMC-gui.pl:7966
 msgid "Install an AMC plugin"
 msgstr "ஒரு தானியக்க பல தொிவு சொருகியை நிறுவவும்"
 
-#: ../AMC-gui.pl:7963
+#: ../AMC-gui.pl:7972
 msgid "Plugins (zip, tgz)"
 msgstr "சொருகிகள் (zip, tgz) "
 
-#: ../AMC-gui.pl:7985
+#: ../AMC-gui.pl:7994
 #, perl-format
 msgid "An error occured while trying to extract files from the plugin archive: %s."
 msgstr "சொருகி ஆவணகாப்பகத்திலிருந்து கோப்புகளை பிாித்தெடுக்க முயற்சிக்கும் போது பிழை நோ்ந்துவிட்டது: %s."
 
-#: ../AMC-gui.pl:8002
+#: ../AMC-gui.pl:8011
 msgid "Nothing extracted from the plugin archive. Check it."
 msgstr "சொருகி ஆவணகாப்பகத்திலிருந்து எதையுமே பிாித்தெடுக்கவில்லை. அதைச் சாிபாா்க்கவும்."
 
-#: ../AMC-gui.pl:8014
+#: ../AMC-gui.pl:8023
 msgid "This is not a valid plugin, as it contains more than one directory at the first level."
 msgstr "முதல் நிலையில் ஒன்றுக்கும் மேற்பட்ட அடைவைக் கொண்டிருப்பதால், இது செல்லுபடியாகும் சொருகியல்ல."
 
-#: ../AMC-gui.pl:8028
+#: ../AMC-gui.pl:8037
 msgid "This is not a valid plugin, as it does not contain a perl/AMC subdirectory."
 msgstr "இது ஒரு செல்லுபடியாகும் சொருகியல்ல, ஏனெனில் இதில் ஒரு perl/AMC துணை அடைவு இல்லை."
 
-#: ../AMC-gui.pl:8047
+#: ../AMC-gui.pl:8056
 #, perl-format
 msgid "A plugin is already installed with the same name (%s). Do you want to delete the old one and overwrite?"
 msgstr "(%s) இந்தப் பெயாில் ஏற்கனவே ஒரு சொருகி நிறுவப்பட்டுள்ளது. பழையதை அழித்து அதன் மேலெழுதவா?"
 
-#: ../AMC-gui.pl:8071
+#: ../AMC-gui.pl:8080
 #, perl-format
 msgid "Error while moving the plugin to the user plugin directory: %s"
 msgstr "சொருகியை பயனர் சொருகி அடைவுக்கு நகா்த்தும் போது ஏற்பட்ட பிழை: %s"
 
-#: ../AMC-gui.pl:8084
+#: ../AMC-gui.pl:8093
 msgid "Please restart AMC before using the new plugin..."
 msgstr "புதிய சொருகி பயன்படுத்துவதற்கு முன் தானியக்க பல தொிவை மீண்டும் இயக்கவும்..."
 
-#: ../AMC-gui.pl:8136
+#: ../AMC-gui.pl:8145
 msgid "zooms"
 msgstr "பொிதாக்கல்"
 
-#: ../AMC-gui.pl:8138
+#: ../AMC-gui.pl:8147
 msgid "boxes images are extracted from the scans while processing automatic data capture. They can be removed if you don't plan to use the zooms dialog to check and correct boxes categorization. They can be recovered processing again automatic data capture from the same scans."
 msgstr "தானியங்கு தரவு உள்ளீடுகளைச் செயலாக்கும்போது, அலகீடுகளில் இருந்து கட்டங்களின் உருவங்கள் பிாித்தெடுக்கப்பட்டன. பொிதாக்கல் உரையாடலைப் பயன்படுத்தி கட்ட வகைப்படுத்தலைச் சாிபாா்த்து, திருத்த நீங்கள் திட்டமிடவில்லை என்றால் அவைகளை அகற்றலாம். தானியங்கு தரவு உள்ளீடைப் பயன்படுத்தி அதே அலகீட்டிலிருந்து தானாகவே மீண்டும் தரவை மீட்டெடுக்க முடியும்."
 
-#: ../AMC-gui.pl:8158
+#: ../AMC-gui.pl:8167
 msgid "layout reports"
 msgstr "அமைவு அறிக்கைகள்"
 
-#: ../AMC-gui.pl:8160
+#: ../AMC-gui.pl:8169
 msgid "these images are intended to show how the corner marks have been recognized and positioned on the scans. They can be safely removed once the scans are known to be well-recognized. They can be recovered processing again automatic data capture from the same scans."
 msgstr "இந்த படங்கள் அலகீடுகளின் மூலையில் வட்டக்குறி எவ்வாறு அடையாளம் காணப்படுகிறது என்பதைக் காண்பிக்கிறது. அலகீடுகள் நன்கு கண்டுணரப்பட்டதாக அறிந்ததும் அவை பாதுகாப்பாக நீக்கப்படும். தானியங்கு தரவு உள்ளீடைப் பயன்படுத்தி அதே அலகீட்டிலிருந்து தானாகவே மீண்டும் தரவை மீட்டெடுக்க முடியும்."
 
-#: ../AMC-gui.pl:8183
+#: ../AMC-gui.pl:8192
 msgid "annotated pages"
 msgstr "சுட்டுவிளக்கப்பட்ட பக்கங்கள்"
 
-#: ../AMC-gui.pl:8185
+#: ../AMC-gui.pl:8194
 msgid "jpeg annotated pages are made before beeing assembled to PDF annotated files. They can safely be removed, and will be recovered automatically the next time annotation will be requested."
 msgstr "jpeg சுட்டுவிளக்க தாள்கள் PDF சுட்டுவிளக்க கோப்புகள் தொகுக்கப்படும் முன் உருவாக்கப்பட்டன. அவைகள் பாதுகாப்பாக அகற்றப்படலாம், மேலும் அடுத்த முறை சுட்டுவிளக்கம் கோரப்படும் போது தானாகவே மீட்டெடுக்கப்படும்."
 
-#: ../AMC-gui.pl:8226
+#: ../AMC-gui.pl:8235
 msgid "Total size of concerned files:"
 msgstr "சம்பந்தப்பட்ட கோப்புகளின் மொத்த அளவு:"
 
-#: ../AMC-gui.pl:8272
+#: ../AMC-gui.pl:8281
 #, perl-format
 msgid "%s files were removed."
 msgstr "%sகோப்புகள் அகற்றப்பட்டன. "
 
-#: ../AMC-gui.pl:8301
+#: ../AMC-gui.pl:8310
 #, perl-format
 msgid "I don't find the command %s."
 msgstr "நான் %s என்ற கட்டளையைக் கண்டுபிடிக்கவில்லை."
 
-#: ../AMC-gui.pl:8302
+#: ../AMC-gui.pl:8311
 msgid "Perhaps LaTeX is not installed?"
 msgstr "ஒருவேளை LaTeX நிறுவப்படவில்லையா?"
 
-#: ../AMC-gui.pl:8308
+#: ../AMC-gui.pl:8317
 msgid "The style file automultiplechoice.sty seems to be unreachable. Try to use command 'auto-multiple-choice latex-link' as root to fix this."
 msgstr "automultiplechoice.sty என்ற பாங்கு கோப்பை அடையமுடியவில்லை. இதைச் சாிசெய்ய 'auto-multi-choice latex-link' கட்டளையைப் பயன்படுத்த முயற்சிக்கவும்."
 

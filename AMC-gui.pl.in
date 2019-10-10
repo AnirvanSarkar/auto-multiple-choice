@@ -4822,6 +4822,13 @@ sub noter_resultat {
     $w{onglet_reports}->set_sensitive( defined($avg) );
 }
 
+my $assoc_code_name = {
+# TRANSLATORS: menu item when choosing the code to use for association from the completed answer sheets. This item corresponds to pre-association (each student has an individualized sheet)
+    '<preassoc>' => __ "Pre-association",
+# TRANSLATORS: menu item when choosing the code to use for association from the completed answer sheets. This item corresponds to the decoded name field (eg. when a barcode identifying the student has been sticked in the name field)
+    '_namefield' => __ "Decoded name field",
+};
+
 sub update_available_codes {
     $projet{_scoring}->begin_read_transaction('CODE');
 
@@ -4830,18 +4837,20 @@ sub update_available_codes {
 
     $projet{_scoring}->end_transaction('CODE');
 
+    if ($pre_assoc) {
+        push @codes, '<preassoc>';
+    }
+
     debug "Codes : " . join( ',', @codes );
 
     # TRANSLATORS: you can omit the [...] part, just here to explain context
     my @cbs = ( '' => __p("(none) [No code found in LaTeX file]") );
     if ( my $el = get_enc( $config->get('encodage_latex') ) ) {
-        push @cbs, map { $_ => decode( $el->{iso}, $_ ) } (@codes);
+        push @cbs,
+          map { $_ => $assoc_code_name->{$_} || decode( $el->{iso}, $_ ) }
+          (@codes);
     } else {
-        push @cbs, map { $_ => $_ } (@codes);
-    }
-    if ($pre_assoc) {
-        push @cbs, '<preassoc>', __ "Pre-association";
-        debug "Adding pre-association item";
+        push @cbs, map { $_ => $assoc_code_name->{$_} || $_ } (@codes);
     }
     $prefs->store_register( assoc_code => cb_model(@cbs) );
     $prefs->transmet_pref(
