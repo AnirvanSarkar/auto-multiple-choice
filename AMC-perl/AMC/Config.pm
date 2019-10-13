@@ -618,7 +618,7 @@ sub test_commands {
     my ( $self, $dont_warn ) = @_;
 
     for my $k ( $self->unavailable_commands_keys() ) {
-        set_global_option_to_default( $k, '', 'FORCE' );
+        $self->set_global_option_to_default( $k, '', 'FORCE' );
     }
 
     my @uc = $self->unavailable_commands_keys();
