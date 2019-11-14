@@ -165,7 +165,7 @@
       <para>Dans la version actuelle (à partir de la version 0.156), le nombre
       de copies est limité à 4 095 et le nombre de pages par copies est limité
       à 63 (valeurs par défaut mais modifiables voir <xref
-      endterm="code.binaire.titre" linkend="code.binaire"/>).</para>
+      endterm="code.binaire.title" linkend="code.binaire"/>).</para>
 
       <para>Le nombre de réponses proposées pour une même question est limité
       à 199 (valeur par défaut non modifiable).</para>
@@ -1439,7 +1439,9 @@ Durée : 10 minutes.
           <callout arearefs="simple.champnom" id="simple.champnom.exp">
             <para>La commande <command>champnom</command> permet d'indiquer la
             partie du questionnaire dans laquelle chaque étudiant inscrira son
-            nom.</para>
+            nom ou un code barre (voir <xref linkend="gui.asso.auto.barcode"/>).
+            Sera remplacée par <command>\namefielddots</command> si vous utilisez
+            l'option <option>pdfform</option> (voir <xref linkend="sec.package.options"/>).</para>
           </callout>
 
           <callout arearefs="simple.qr" id="simple.qr.exp">
@@ -1582,7 +1584,7 @@ Nom et prénom :
     </sect2>
 
     <sect2 id="secensemble">
-      <title id="secensemble.titre">Un exemple avec une feuille de réponses
+      <title id="secensemble.title">Un exemple avec une feuille de réponses
       séparée</title>
 
       <para>Dans cet exemple, on souhaite que les cases à cocher soient toutes
@@ -1786,7 +1788,7 @@ Durée : 10 minutes.
       <title>Description des commandes LaTeX</title>
 
       <sect3 id="sec.package.options">
-        <title id="sec.package.options.titre">Options du paquet</title>
+        <title id="sec.package.options.title">Options du paquet</title>
 
         <para>L'utilisation du paquet <package>automultiplechoice</package> se
         fait grâce à la ligne <programlisting>\usepackage[...]{automultiplechoice}</programlisting>où
@@ -1874,7 +1876,7 @@ Durée : 10 minutes.
           <listitem>
             <para><option>noshufflegroups</option> : annule le mélange
             automatique de l'ordre des groupes. (voir <xref
-            endterm="Groupes.questions.titre"
+            endterm="Groupes.questions.title"
             linkend="Groupes.questions"/>)</para>
           </listitem>
 
@@ -1892,7 +1894,7 @@ Durée : 10 minutes.
             <para><option>ensemble</option> : demande à ce que les cases à
             cocher soient toutes rassemblées en fin de copie (cette option est
             en général utilisée quand on ne veut scanner qu'une seule page par
-            étudiant - voir <xref endterm="secensemble.titre"
+            étudiant - voir <xref endterm="secensemble.title"
             linkend="secensemble"/>).</para>
           </listitem>
 
@@ -1949,14 +1951,14 @@ Durée : 10 minutes.
             <para><option>fullgroups</option> : annule le paramètre optionnel
             de <command>\restituegroup</command> et
             <command>\copygroup</command>, ainsi chaque groupe est entièrement
-            inséré et copié (voir <xref endterm="Groupes.questions.titre"
+            inséré et copié (voir <xref endterm="Groupes.questions.title"
             linkend="Groupes.questions"/>).</para>
           </listitem>
 
           <listitem>
             <para><option>storebox</option> : Si vous choisissez de modifier
             la forme des cases à cocher (carrées par défaut voir <xref
-            endterm="style.cases.titre" linkend="style.cases"/>) par des
+            endterm="style.cases.title" linkend="style.cases"/>) par des
             ovales ou des cercles, vous pouvez transmettre cette option à
             automultiplechoice pour qu'il utilise <option>\storebox</option>
             plutôt que <option>\savebox</option> pour stocker le dessin des
@@ -1990,6 +1992,11 @@ Durée : 10 minutes.
             d'identification de page d'AMC. Cette option est donc à utiliser
             pour produire des documents qui ne seront pas traités par AMC,
             comme des listes d'exercices par exemple.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>nowatermark</option>: retire le filigrane (projet)
+            si vous compilez hors AMC. <emphasis>Très dangereux</emphasis>.</para>
           </listitem>
         </itemizedlist>
       </sect3>
@@ -2030,6 +2037,15 @@ Durée : 10 minutes.
       <sect3 id="latex.qr">
         <title id="latex.qr.title">Questions et réponses</title>
 
+        <important>
+          <para>Il ne faut pas imbriquer deux questions sinon l'export des
+          notes sera incomplet (voir <xref endterm="sec.export.notes.title"
+          linkend="sec.export.notes"/>).</para>
+        </important>
+
+         <sect4>
+         	<title>Questions simples</title>
+
         <para>Pour les questions simples (une seule réponse correcte), on
         utilisera le modèle suivant : <programlisting
         linenumbering="unnumbered">\begin{question}{identifiant}
@@ -2040,1072 +2056,17 @@ Durée : 10 minutes.
     \mauvaise{Une autre mauvaise réponse}
   \end{reponses}
 \end{question}</programlisting></para>
-
-        <important>
-          <para>Il faut utiliser un <parameter>identifiant</parameter>
-          différent pour chaque question. Un identifiant peut être constitué
-          de chiffres, lettres et caractères simples (ne pas utiliser le
-          caractère souligné <code>_</code>, les accolades, crochets, par
-          exemple !). Il ne faut pas utiliser d'identifiants se terminant par
-          un nombre entier entre crochets (comme
-          <parameter>marine-marchande[2]</parameter> ou
-          <parameter>123[27]</parameter>), car cette forme d'identifiants est
-          réservée à la saisie de longs codes (par exemple grâce à
-          <command>\AMCcodeGrid</command> - voir <xref
-          linkend="latex.codes"/>).</para>
-        </important>
-
-        <warning>
-          <para>Quand on utilise <package>babel</package> et l'option
-          <option>french</option>, ne pas mettre de <parameter>:</parameter>
-          ni <parameter>;</parameter> dans les identifiants de
-          questions.</para>
-        </warning>
-
-        <note>
-          <para>Le nombre de réponses pour une question est actuellement
-          limité à 199.</para>
-        </note>
-
-        <important>
-          <para>Il ne faut pas imbriquer deux questions sinon l'export des
-          notes sera incomplet (voir <xref endterm="sec.export.notes.titre"
-          linkend="sec.export.notes"/>).</para>
-        </important>
-
-        <para>Pour demander à garder l'ordre des réponses pour cette
-        question-ci, on peut utiliser l'option <option>o</option> de
-        l'environnement <option>reponses</option>, en remplaçant la ligne 3
-        par <programlisting>\begin{reponses}[o]</programlisting></para>
-
-        <para>Pour mettre les réponses sur deux colonnes, on peut utiliser le
-        package <package>multicol</package> en mettant dans le préambule
-        (juste après l'appel au paquet <package>automultiplechoice</package>
-        par exemple) la ligne <programlisting>\usepackage{multicol}</programlisting>et
-        en incluant l'environnement reponses à l'intérieur d'un environnement
-        multicols de la manière suivante : <programlisting>\begin{multicols}{2}
-  \begin{reponses}
-    \bonne{La bonne réponse}
-    \mauvaise{Une mauvaise réponse}
-    \mauvaise{Une autre mauvaise réponse}
-  \end{reponses}
-\end{multicols}</programlisting></para>
-
-        <para>Pour les réponses plus courtes encore, on peut demander à ce que
-        les réponses soient imprimées les unes à la suite des autres, en
-        utilisant l'environnement <option>reponseshoriz</option> au lieu de
-        <option>reponses</option>.</para>
-
-        <para>Les questions multiples (celles pour lesquelles aucune, une ou
-        plusieurs réponses peuvent être correctes) utiliseront l'environnement
-        <option>questionmult</option> au lieu de
-        <option>question</option>.</para>
-
-        <para>Dans le cas où la question posée est juste informative et ne
-        doit pas contribuer à la note de l'étudiant, on utilisera la commande
-        <code>\QuestionIndicative</code>, comme dans l'exemple
-        suivant :</para>
-
-        <para><programlisting>\begin{question}{facilite}\QuestionIndicative
-  \bareme{auto=0,v=-1,e=-2}
-  Vous êtes-vous sentis à l'aise ou en difficulté dans cet enseignement ?
-  Répondez sur une échelle de 0 (grandes difficultés) à 5 (très à l'aise).
-  \begin{reponseshoriz}[o]
-    \bonne{0}
-    \bonne{1}
-    \bonne{2}
-    \bonne{3}
-    \bonne{4}
-    \bonne{5}
-  \end{reponseshoriz}
-\end{question}</programlisting></para>
-
-        <sect4 id="latex.lastchoice">
-          <title>Dernier choix</title>
-
-          <para>Vous pouvez choisir de toujours laisser une ou plusieurs
-          réponses en dernière position avec la commande
-          <command>\lastchoices</command>.</para>
-
-          <programlisting>\begin{question}{color}
-  Which color?
-  \begin{choiceshoriz}
-    \wrongchoice{red}
-    \wrongchoice{blue}
-    \wrongchoice{yellow}
-    \lastchoices
-    \correctchoice{transparent}
-    \wrongchoice{can't say}
-  \end{choiceshoriz}
-\end{question}
-
-\begin{questionmult}{number}
-  How many?
-  \begin{choiceshoriz}
-    \wrongchoice{none}
-    \correctchoice{one}
-    \wrongchoice{two}
-    \wrongchoice{three}
-    \lastchoices
-    \correctchoice{not so much}
-    \wrongchoice{a lot}
-  \end{choiceshoriz}
-\end{questionmult}       </programlisting>
-        </sect4>
-
-        <sect4>
-          <title>Numéro de question</title>
-
-          <para>On peut modifier le numéro de la prochaine question à l'aide
-          de la commande <code>\AMCnumero</code>. Au début de chaque copie, un
-          appel à</para>
-
-          <para><programlisting>\AMCnumero{1}</programlisting></para>
-
-          <para>est effectué, mais cette commande peut être utilisée à tout
-          moment.</para>
-
-          <note>
-            <para>Pour cacher le numéro d'une question particulière et
-            conserver dans le sujet une continuité des numéros, ajouter la
-            commande <command>\AMCquestionNumberfalse</command> juste après
-            <command>\AMCbeginQuestion</command> (ou utiliser la commande
-            ci-dessus) :</para>
-
-            <programlisting>{
-  \AMCquestionNumberfalse
-  \def\AMCbeginQuestion#1#2{}
-  \begin{question}
-    ...
-  \end{question}
-}</programlisting>
-          </note>
-        </sect4>
-      </sect3>
-
-      <sect3 id="latex.explain">
-        <title id="latex.explain.title">Approfondir la réponse</title>
-
-        <para>Lors de l'impression du corrigé, vous pouvez apporter des
-        précisions grâce à la commande <command>\explain</command>. Cette
-        commande, à insérer dans un environnement <option>question</option>
-        (ce qui inclut les environnements <option>questionmult</option>,
-        <option>questionmultx</option>), affichera le texte écrit.</para>
-
-        <warning>
-          <para>Ne sera pas affiché sur le corrigé individuel.</para>
-        </warning>
-
-        <programlisting>\begin{question}{combustion}
-  Quel gaz apparaît lors de la combustion incomplète du butane~?
-  \begin{reponses}
-    \bonne{Le monoxyde de carbone.}
-    \mauvaise{Le dioxyde de carbone.}
-    \mauvaise{Le dioxygène.}
-  \end{reponses}
-  \explain{Le monoxyde de carbone est un gaz incolore, inodore et toxique.}
-\end{question}      </programlisting>
-
-        <note>
-          <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
-          affiché. Vous pouvez modifier ce texte pour une ou plusieurs
-          questions avec la commande <command>\AMCtext</command> (Voir <xref
-          linkend="AMCtext"/>).</para>
-        </note>
-
-        <para><programlisting>\begin{question}{elevation}
-  Parmi les montagnes suivantes, laquelle est la plus haute ?
-      \begin{reponses}
-      \bonne{Sagarmatha}
-      \mauvaise{K2}
-      \mauvaise{Mont Blanc}
-      \mauvaise{Aconcagua}
-  \end{reponses}
-  \explain{Sagarmatha qui signifie littéralement `la tête du ciel' est le nom indigène du mont Everest, la montagne la plus haute du monde.}
-\end{question}
-
-\begin{question}{odd}
-  Cochez l'intrus.
-  \begin{reponses}
-      \bonne{Kilimanjaro}
-      \mauvaise{Himalayas}
-      \mauvaise{Alpes}
-      \mauvaise{Andes}
-  \end{reponses}
-  \AMCtext{explain}{\textit{\textbf{Raison :}}}
-  \explain{Le Kilimanjaro est une montagne tandis que les autres sont des chaînes de montagnes.}
-\end{question}
-
-\begin{questionmult}{himalaya}
-  Parmi les montagnes suivantes, lesquelles se trouvent dans l'Himalaya ?
-  \begin{reponses}
-      \bonne{Mount Everest}
-      \bonne{K2}
-      \mauvaise{Mont Blanc}
-      \mauvaise{Aconcagua}
-  \end{reponses}
-  \explain{L'Aconcagua est situé dans la cordillère des Andes tandis que le Mont Blanc se trouve dans les Alpes.}
-\end{questionmult}</programlisting></para>
-
-        <para><emphasis>Explication :</emphasis> sera affiché avant les
-        explications de la première et troisième réponse, <emphasis>Raison
-        :</emphasis> avant les explications de la deuxième question.</para>
-      </sect3>
-
-      <sect3 id="latex.choices.multicol">
-        <title>Réponses sur plusieurs colonnes</title>
-
-        <para>Afin de présenter les réponses sur plusieurs colonnes (et gagner
-        de la place), on pourra englober l'environnement
-        <option>reponses</option> dans un environnement
-        <option>multicols</option>, en utilisant le paquet LaTeX
-        <package>multicol</package>.</para>
-
-        <para>Si de plus les réponses tiennent sur plusieurs lignes, cela
-        pourrait entraîner le passage d'une réponse d'une colonne à l'autre,
-        ce qui est un peu déroutant pour le lecteur. La commande
-        <command>\AMCBoxedAnswers</command> a été définie afin d'éviter ce
-        phénomène, en enveloppant chaque réponse dans une boite. On pourra
-        l'utiliser comme dans l'exemple suivant :</para>
-
-        <para><programlisting>\begin{question}{deux colonnes}
-  Qu'est-ce qu'un oiseau ?
-  \begin{multicols}{2}\AMCBoxedAnswers
-    \begin{reponses}
-      \bonne{C'est un animal à ailes et qui pond des \oe{}ufs.
-        Il y en a de toutes les couleurs}
-      \mauvaise{C'est un grand meuble en bois qui sert la plupart
-        du temps à ranger du linge de maison}
-      \mauvaise{C'est une machine à vapeur qui permet de fermer
-        les boîtes de conserve à grande vitesse}
-    \end{reponses}
-  \end{multicols}
-\end{question}</programlisting></para>
-
-        <para>On notera qu'il est aussi possible de paramétrer l'espace
-        vertical séparant deux blocs de réponse grâce à la dimension
-        <parameter>AMCinterBrep</parameter> :</para>
-
-        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
-      </sect3>
-
-      <sect3 id="latex.choices.space">
-        <title>Espacement entre les réponses</title>
-
-        <para>Il est possible d'augmenter l'espace vertical séparant plusieurs
-        réponses en modifiant la dimension
-        <parameter>AMCinterIrep</parameter> :</para>
-
-        <programlisting>\AMCinterIrep=.75ex</programlisting>
-      </sect3>
-
-      <sect3 id="definir.zone.notation">
-        <title id="definir.zone.notation.titre">Définir la zone de
-        notation</title>
-
-        <para>Vous pouvez ajouter une option supplémentaire de zone de
-        notation (voir <xref endterm="position.note.titre"
-        linkend="position.note"/>) avec le package
-        <package>tikz</package>.</para>
-
-        <programlisting>\usepackage{tikz}</programlisting>
-
-        <sect4 id="latex.zone.std">
-          <title>Sans l'option <option>ensemble</option></title>
-
-          <para>Dans ce mode, le sujet et les réponses sont sur la(es) même(s)
-          feuilles.</para>
-
-          <para>Taper cette commande, après le
-          <command>\begin{document}</command> et avant la commande
-          <command>\exemplaire</command> :</para>
-
-          <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
-
-          <para>Les grandeurs <parameter>width</parameter>,
-          <parameter>height</parameter>, <parameter>depth</parameter>
-          définissent les dimensions de la case de notation ainsi que son
-          emplacement sur la feuille de réponses. Cette zone invisible est
-          définie pour toutes les questions.</para>
-
-          <para>La variable <parameter>position</parameter> peut prendre les
-          valeurs : none, question, margin, margins.</para>
-        </sect4>
-
-        <sect4 id="latex.zone.separate">
-          <title>Avec l'option <option>ensemble</option></title>
-
-          <para>Dans ce mode, la feuille de réponses est séparée du
-          sujet.</para>
-
-          <para>Taper cette commande, après le
-          <command>\begin{document}</command> et avant la commande
-          <command>\exemplaire</command> :</para>
-
-          <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
-
-          <para>Les grandeurs <parameter>width</parameter>,
-          <parameter>height</parameter>, <parameter>depth</parameter>
-          définissent les dimensions de la case de notation ainsi que son
-          emplacement sur la feuille de réponses. Cette zone invisible est
-          définie pour toutes les questions.</para>
-
-          <para>La variable <parameter>position</parameter> peut prendre les
-          valeurs : none, question, margin, margins.</para>
-
-          <warning>
-            <para>L'option <option>margins</option> ne fonctionne pas avec
-            AMC-TXT</para>
-
-            <para>Vous ne pouvez pas modifier votre sujet<emphasis> a
-            posteriori</emphasis> en rajoutant l'une de ces fonctions après
-            l'impression du sujet.</para>
-          </warning>
-        </sect4>
-      </sect3>
-
-      <sect3 id="Groupes.questions">
-        <title id="Groupes.questions.titre">Groupes de questions</title>
-
-        <para>L'inclusion de questions dans des groupes permet de mélanger les
-        questions à l'intérieur de ces groupes, de manière différente pour
-        chaque copie. Chaque groupe de questions devra avoir un nom formé
-        uniquement de lettres non-accentuées.</para>
-
-        <para>On peut mettre une à une des questions dans un groupe, comme
-        dans l'exemple suivant : <programlisting>\element{ungroupe}{
-  \begin{question}{facile}
-    Alors, combien font un plus un~?
-    \begin{reponseshoriz}
-      \bonne{deux}
-      \mauvaise{zéro}
-      \mauvaise{trois}
-    \end{reponseshoriz}
-  \end{question}
-}</programlisting></para>
-
-        <important>
-          <para>La constitution du groupe, par les commandes
-          <command>element</command>, doit être faite une seule fois : ces
-          commandes doivent donc être utilisées <emphasis>avant</emphasis> la
-          commande <command>exemplaire</command>, qui va répéter certaines
-          actions pour chaque copie.</para>
-        </important>
-
-        <para>Enfin, on restitue les questions du groupe par la commande
-        <command>restituegroupe</command>, comme dans <programlisting>\restituegroupe{ungroupe}</programlisting></para>
-
-        <para>La manière dont le groupe est restitué peut être contrôlée par
-        le mode du groupe, défini grâce à la commande
-        <command>setgroupmode</command>  (appelé après la création des groupes
-        et avant <command>\exemplaire</command>):</para>
-
-        <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
-
-        <para>où <code>XXX</code> peut prendre les valeurs suivantes :</para>
-
-        <variablelist>
-          <varlistentry>
-            <term>fixed</term>
-
-            <listitem>
-              <para>avec ce mode, les éléments du groupe sont pris à partir du
-              début du groupe à chaque restitution.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>cyclic</term>
-
-            <listitem>
-              <para>les éléments sont pris à la suite les uns des autres à
-              chaque restitution, en repartant du début si nécessaire.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>withreplacement</term>
-
-            <listitem>
-              <para>même chose que pour <code>fixed</code>, mais le groupe est
-              mélangé à chaque fois.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>withoutreplacement</term>
-
-            <listitem>
-              <para>comme <code>cyclic</code>, en ajoutant un mélange à chaque
-              fois que l'on reprend au début.</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-
-        <para>Un mode par défaut peut être choisi pour tous les groupes qui
-        seront créés ensuite (un groupe est créé à la première utilisation de
-        <command>element</command>) :</para>
-
-        <programlisting>\setdefaultgroupmode{XXX}</programlisting>
-
-        <para>Une fois un groupe constitué, on peut mélanger les questions qui
-        le composent par la commande <command>melangegroupe</command> : par
-        exemple, <programlisting>\melangegroupe{ungroupe}</programlisting></para>
-
-        <para>Cependant, cette commande n'a pas à être utilisée si on utilise
-        les modes de groupes comme il faut.</para>
-
-        <warning>
-          <para>Si vous réutilisez des sujets mis en page avec une version
-          antérieure à AMC 1.2.2014.111201 et choisissez un des trois autres
-          modes que celui par défaut (<code>fixed</code>), supprimez la
-          commande <command>\melangegroupe</command>.</para>
-        </warning>
-
-        <para>Si cette commande n'est pas utilisée, c'est le mode
-        <code>fixed</code> qui sera utilisé.</para>
-
-        <para>On peut manipuler les groupes de questions de manière plus
-        précise grâce aux commandes suivantes :</para>
-
-        <itemizedlist>
-          <listitem>
-            <para><code>\restituegroupe[n]{ungroupe}</code> (utilisation du
-            paramètre optionnel <replaceable>n</replaceable>) restitue
-            uniquement les <replaceable>n</replaceable> premiers éléments du
-            groupe.</para>
-          </listitem>
-
-          <listitem>
-            <para><code>\insertgroupfrom[n]{ungroupe}{i}</code> Cette commande
-            fait la même chose que <code>\restituegroupe[n]{ungroupe}</code>
-            mais la sélection débute à l'élément <replaceable>i</replaceable>.
-            Le premier élément a pour valeur d'indice 0.</para>
-          </listitem>
-
-          <listitem>
-            <para><code>\cleargroup{groupe}</code> efface tout le contenu du
-            groupe.</para>
-          </listitem>
-
-          <listitem>
-            <para><code>\copygroup{depuis}{vers}</code> copie le contenu du
-            groupe <replaceable>depuis</replaceable> à la fin du groupe
-            <replaceable>vers</replaceable>. Cette commande admet un argument
-            optionnel qui permet de ne copier qu'un certain nombre d'éléments,
-            comme dans <code>\copygroup[n]{depuis}{vers}</code>.</para>
-          </listitem>
-
-          <listitem>
-            <para><code>\copygroupfrom[n]{depuis}{vers}{i}</code> Cette
-            commande fait la même chose que
-            <code>\copygroup[n]{depuis}{vers}</code> mais la sélection débute
-            à l'élément <replaceable>i</replaceable>. Le premier élément a
-            pour valeur d'indice 0.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>À l'aide de ces commandes, on peut par exemple composer un sujet
-        en prenant 4 questions au hasard dans le groupe GA, 5 questions au
-        hasard dans le groupe GB, toutes les questions du groupe GO, puis en
-        mélangeant le tout, grâce aux commandes suivantes (à mettre à
-        l'intérieur du texte en argument de la commande
-        <command>exemplaire</command>, et en supposant que les groupes
-        <code>GA</code>, <code>GB</code> et <code>tout</code> sont de mode
-        <code>withreplacement</code> ou
-        <code>withoutreplacement</code>) :</para>
-
-        <programlisting>\cleargroup{tout}
-\copygroup[4]{GA}{tout}
-\copygroup[5]{GB}{tout}
-\copygroup{GO}{tout}
-\restituegroupe{tout}</programlisting>
-      </sect3>
-
-      <sect3 id="latex.page">
-        <title>Papier, marges</title>
-
-        <para>Le paquet LaTeX <command>automultiplechoice</command> utilise
-        <command>geometry</command> pour gérer les marges et la mise en page.
-        Vous pouvez modifier ses réglages grâce à l'utilisation de la commande
-        <command>\geometry</command> juste avant le
-        <code>\begin{document}</code> - voir la documentation du paquet
-        <command>geometry</command> pour plus de détails. Les valeurs
-        initialisées par AMC sont les suivantes :</para>
-
-        <programlisting>\geometry{hmargin=3cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=3.5cm,bottom=2.5cm}</programlisting>
-
-        <para>Si vous réduisez les marges pour gagner de la place, gardez à
-        l'esprit que :</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>Les quatre marques de coin doivent être imprimées
-            entièrement (elles pourraient disparaître à cause des marges
-            d'impression).</para>
-          </listitem>
-
-          <listitem>
-            <para>Les quatre marques de coin doivent apparaître complètement
-            sur les scans des copies remplies par les étudiants (si elles sont
-            trop près des bords, elles pourraient disparaître lors du scan à
-            la suite d'un décalage ou d'une rotation des feuilles de
-            papier).</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>Vous pouvez également préciser la taille de papier à utiliser en
-        ajoutant l'option correspondante à la liste donnée en argument à
-        <command>\geometry</command>. Parmi les valeurs possibles, on trouvera
-        <code>a4paper</code>, <code>a5paper</code>, <code>a6paper</code>,
-        <code>b4paper</code>, <code>b5paper</code>, <code>ansibpaper</code>,
-        <code>ansicpaper</code>, <code>ansidpaper</code>,
-        <code>letterpaper</code>, <code>executivepaper</code>,
-        <code>legalpaper</code>.</para>
-
-        <para>Pour des petites tailles de papier, il peut aussi être
-        intéressant de modifier la position de l'identifiant de copie (de la
-        forme <code>+1/1/53+</code>) à côté de son équivalent en cases
-        blanches et noires, en haut de chaque page. Ceci est rendu possible
-        par la commande <command>\AMCidsPosition</command>, sous la
-        forme</para>
-
-        <programlisting>\AMCidsPosition{pos=<replaceable>p</replaceable>,width=<replaceable>w</replaceable>,height=<replaceable>h</replaceable>}</programlisting>
-
-        <para>où <replaceable>p</replaceable> peut valoir <code>none</code>
-        (ne pas écrire cet identifiant), <code>top</code> (l'écrire au-dessus)
-        et <code>side</code> (à côté), et <replaceable>w</replaceable> et
-        <replaceable>h</replaceable> sont les dimensions de la boîte
-        (invisible) qui entoure l'identifiant. Les valeurs par défaut sont les
-        suivantes :</para>
-
-        <programlisting>\AMCidsPosition{pos=side,width=4cm,height=3ex}</programlisting>
-
-        <para>Concluons par un exemple raisonnable au format A5 :</para>
-
-        <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
-\AMCidsPosition{pos=top}</programlisting>
-
-        <warning>
-          <para>N'utilisez pas le paquet <command>pgfpages</command> ou toutes
-          autres commandes de mise en page modifiant l'impression du nombre de
-          pages par feuille.</para>
-        </warning>
-      </sect3>
-
-      <sect3 id="style.cases">
-        <title id="style.cases.titre">Style des cases à cocher</title>
-
-        <para>La commande <command>\AMCboxStyle</command> (nouveau nom de la
-        commande <command>\AMCboxDimensions</command> qui reste compatible
-        avec les options ci-dessous) permet de modifier une ou plusieurs
-        dimensions relatives aux cases à cocher :</para>
-
-        <para>Les valeurs par défaut des options sont :</para>
-
-        <programlisting>\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}</programlisting>
-
-        <itemizedlist>
-          <listitem>
-            <para><option>shape</option> représente la forme des cases à
-            cocher. La valeur <replaceable>square</replaceable> produit des
-            carrés (ou des rectangles si on donne des dimensions différentes
-            pour la hauteur et la largeur). La valeur
-            <replaceable>oval</replaceable> produit des cercles ou des ovales.
-            Si vous voulez utiliser <replaceable>oval</replaceable>, vous
-            devez charger le paquet LaTeX tikz.</para>
-          </listitem>
-
-          <listitem>
-            <para><option>width</option> représente la largeur des
-            cases ;</para>
-          </listitem>
-
-          <listitem>
-            <para><option>height</option> représente la hauteur des
-            cases ;</para>
-          </listitem>
-
-          <listitem>
-            <para><option>size</option> représente la taille (à la fois
-            <option>width</option> et <option>height</option>) de ces
-            cases ;</para>
-          </listitem>
-
-          <listitem>
-            <para><option>rule</option> représente l'épaisseur du contour des
-            cases ;</para>
-          </listitem>
-
-          <listitem>
-            <para><option>down</option> représente la taille du déplacement
-            vers le bas des cases.</para>
-          </listitem>
-
-          <listitem>
-            <para><option>outsidesep</option> représente la distance entre la
-            case et la lettre (ou le chiffre) quand l'option
-            <option>outsidebox</option> est choisie (voir <xref
-            endterm="sec.package.options.titre"
-            linkend="sec.package.options"/>).</para>
-          </listitem>
-
-          <listitem>
-            <para><option>cross=true</option> visible uniquement sur la
-            feuille réponse, indique par une croix la bonne réponse au lieu de
-            colorier la case.</para>
-          </listitem>
-
-          <listitem>
-            <para><option>crossrule=1.5</option> visible uniquement sur la
-            feuille réponse, représente l'épaisse de la croix
-            précédente.</para>
-          </listitem>
-
-          <listitem>
-            <para><option>color=<replaceable>col</replaceable></option> permet
-            d'indiquer la couleur à utiliser pour les cases à cocher. La
-            couleur <replaceable>col</replaceable> doit être reconnue par le
-            paquet LaTeX <command>xcolor</command>. On pourra ainsi utiliser
-            certains noms de couleurs (comme <replaceable>red</replaceable>
-            pour le rouge), ou définir soi-même sa couleur comme dans</para>
-
-            <programlisting>\definecolor{vertclair}{rgb}{0.67,0.88,0.5}
-\AMCboxStyle{color=vertclair}</programlisting>
-          </listitem>
-        </itemizedlist>
-
-        <para>Pour obtenir des cases plus petites, on pourra, par exemple,
-        utiliser la commande</para>
-
-        <programlisting>\AMCboxStyle{size=1.7ex,down=.2ex}</programlisting>
-
-        <para>Lors de l'utilisation de l'option <option>ensemble</option>, il
-        est possible de modifier la manière de nommer les cases à cocher
-        (c'est-à-dire ce qui sera inscrit dans chaque case). Le comportement
-        par défaut est d'écrire des lettres majuscules, ou des chiffres si
-        l'option <option>chiffres</option> est utilisée. Pour changer cela, il
-        faut redéfinir la commande <command>\AMCchoiceLabel</command>, qui
-        prend comme unique argument le nom du compteur utilisé pour la
-        numérotation des cases. Ainsi, pour obtenir des lettres minuscules, on
-        utilisera :</para>
-
-        <programlisting>\def\AMCchoiceLabel#1{\alph{#1}}</programlisting>
-
-        <para>De même, lors de l'utilisation du paquet LaTeX
-        <command>arabxetex</command>, la commande suivante pourra se révéler
-        utile :</para>
-
-        <programlisting>\def\AMCchoiceLabel#1{\textLR{\Alph{#1}}}</programlisting>
-
-        <para>Pour changer le style des lettres inscrites dans les cases, on
-        pourra également redéfinir la commande
-        <command>\AMCchoiceLabelFormat</command>. Par exemple, pour obtenir
-        des lettres grasses, on utilisera :</para>
-
-        <programlisting>\def\AMCchoiceLabelFormat#1{\textbf{#1}}</programlisting>
-
-        <para>Pour changer le style des lettres inscrites à l'exterieur des
-        cases, on pourra également redéfinir la commande
-        <command>\AMCoutsideLabelFormat</command>. Par exemple, pour obtenir
-        des lettres grasses, on utilisera :</para>
-
-        <programlisting>\def\AMCoutsideLabelFormat#1{\textbf{#1}}</programlisting>
-
-        <note>
-          <para>La commande latex pour basculer en mode corrigé (cases bonnes
-          réponses coloriées) est <command>\AMC@correctrue</command>. Vous
-          pouvez créer une commmande pour indiquer à AMC de basculer en mode
-          corrigé même dans le sujet (DOC-sujet.pdf). Le code si dessous est à
-          inscrire juste après \begin{document}.</para>
-
-          <programlisting>\makeatletter
-\def\AMCforcecorrect{\AMC@correctrue}
-\makeatother</programlisting>
-
-          <para>Vous pouvez inclure cette commande pour une question
-          particulière qui sera encadrée par des accolades pour en limiter
-          l'effet. Indiquez un barème nul ou utilisez la commande
-          <command>\QuestionIndicative</command></para>
-
-          <programlisting>{\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
-  .....
- \end{questionmult}
-}        </programlisting>
-        </note>
-      </sect3>
-
-      <sect3 id="latex.style">
-        <title>Style du questionnaire</title>
-
-        <para>La façon dont chaque question est présentée peut être modifiée
-        en redéfinissant la commande LaTeX
-        <command>AMCbeginQuestion</command>, dont la définition par défaut est
-        la suivante :</para>
-
-        <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
-
-        <para>Le premier paramètre transmis à cette commande est le numéro de
-        question à afficher. Le second paramètre contient
-        <code>\multiSymbole</code> dans le cas dune question à plusieurs
-        réponses possibles, et est vide dans les autres cas. La commande
-        <code>\multiSymbole</code> peut aussi être modifiée : elle a pour
-        charge de différentier les questions à réponses multiples des autres.
-        Par défaut, elle affiche un trèfle :</para>
-
-        <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
-
-        <warning>
-          <para>Avec le mode copies préremplies (voir <xref
-          endterm="CopiesPrerempliesTitre" linkend="CopiesPremplies"/>) ,
-          cette commande doit être appelée via une macro dans le
-          préambule.</para>
-
-          <informalexample>
-            <programlisting>\def\jepasse{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}</programlisting>
-          </informalexample>
-
-          <para>puis de l'utiliser quand on en a besoin (Ne pas oublier
-          d'insérer des crochets autour pour limiter son effet à une question)
-          :</para>
-
-          <programlisting>{\jepasse
- \begin{question}{Calibre600}
-   Quel calibre doit-on choisir pour mesurer une tension inconnue?
-   \begin{reponseshoriz}[o]
-     \mauvaise{200}\mauvaise{2}\mauvaise{20}\mauvaise{200}\bonne{600}
-   \end{reponseshoriz}
- \end{question}
-}</programlisting>
-
-          <para><emphasis>Dans cet exemple, le numéro de la question ne sera
-          pas affiché via la commande
-          <command>\AMCquestionNumberfalse</command>.</emphasis></para>
-        </warning>
-
-        <sect4 id="reponsesperso">
-          <title>Environnement <option>reponsesperso</option></title>
-
-          <para>La présentation des réponses peut être modifiée de la même
-          façon, si on utilise l'environnement <option>reponsesperso</option>
-          au lieu de <option>reponses</option> ou
-          <option>reponseshoriz</option>, en redéfinissant les trois macros
-          LaTeX suivantes :</para>
-
-          <programlisting>\def\AMCbeginAnswer{}
-\def\AMCendAnswer{}
-\def\AMCanswer#1#2{#1 #2}</programlisting>
-
-          <sect5 id="reponsesperso.exemple1">
-            <title>Exemple 1</title>
-
-            <para>On peut utiliser des cases à cocher pour pénaliser les
-            étudiants rendant leur copie en retard, par exemple (8 points en
-            moins pour un petit retard, et 20 points en moins pour un retard
-            exagéré). Il suffira d'inclure à l'endroit désiré (par exemple
-            dans l'en-tête quelque chose comme ça (ici je demande un fond
-            gris) :</para>
-
-            <programlisting>\fcolorbox{black}{gray}{\insertRetard}</programlisting>
-
-            <para>où la commande <command>\insertRetard</command> a été
-            définie en-dehors de \exemplaire :</para>
-
-            <programlisting>
-\def\insertRetard{ %
-{\def\AMCbeginQuestion##1##2{}\AMCnobloc%
- \begin{questionmult}{00retard}
- \AMCnoCompleteMulti\AMCdontAnnotate%
- \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
- Réservé~\begin{reponsesperso}[o]\mauvaise{R1~}\bareme{b=0,m=-8}\mauvaise{R2}\bareme{b=0,m=-20}\end{reponsesperso}%
- \end{questionmult}}%
-}
-</programlisting>
-
-            <itemizedlist>
-              <listitem>
-                <para>la commande <command>\def\AMCbeginQuestion##1##2{}
-                </command>(combinée avec l'utilisation de l'environnement
-                <option>reponsesperso</option>) permet qu'AMC n'écrive pas
-                "Question XX".</para>
-              </listitem>
-
-              <listitem>
-                <para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command>
-                permettent également d'épurer le résultat.</para>
-              </listitem>
-
-              <listitem>
-                <para><command>\AMCnoCompleteMulti</command> permet de
-                demander à AMC de ne pas rajouter la réponse "aucune de ces
-                réponses n'est correcte" marlgré l'utilisation de
-                questionmult.</para>
-              </listitem>
-
-              <listitem>
-                <para><command>\AMCdontAnnotate</command> demandent à AMC de
-                ne pas annoter ces cases là.</para>
-              </listitem>
-            </itemizedlist>
-
-            <important>
-              <para>Lorsque vous êtes à l'intérieur de la commande
-              <command>\exemplaire</command>, il faut doubler les
-              <code>#</code>.</para>
-
-              <programlisting>\def\AMCanswer##1##2{##1  ##2}
-\def\AMCbeginQuestion##1##2{}</programlisting>
-            </important>
-          </sect5>
-
-          <sect5 id="reponsesperso.exemple2">
-            <title>Utilisation en mathématiques</title>
-
-            <programlisting>
-\begin{questionmultx}{formule}\bareme{mz=2}\AMCnoCompleteMulti
-  Comment est définie la fonction identité ?
-  \begin{reponsesperso}[o]
-    \[f(x)=\bonne[$y$]{}\mauvaise[$x$]{}\bonne[$+$]{}\bonne[$x^2$]{}\]
-  \end{reponsesperso}
-\end{questionmultx}
-</programlisting>
-          </sect5>
-        </sect4>
-
-        <sect4 id="espaces">
-          <title>Espaces</title>
-
-          <para>Certains espacements peuvent également être modifiés :</para>
-
-          <programlisting>\AMCinterIrep=0pt
-\AMCinterBrep=.5ex
-\AMCinterIquest=0pt
-\AMCinterBquest=3ex
-\AMCpostOquest=7mm
-\setlength{\AMChorizAnswerSep}{3em plus 4em}
-\setlength{\AMChorizBoxSep}{1em}</programlisting>
-
-          <para>Ces dimensions correspondent aux espaces verticaux ajoutés
-          entre les questions (<code>quest</code>) ou les réponses
-          (<code>rep</code>), en mode boîte (<code>B</code>, obtenu avec
-          <command>\AMCBoxedAnswers</command> ou l'option de package
-          <option>bloc</option>) ou standard (<code>I</code>), l'espace après
-          une question ouverte. Les deux dernières longueurs sont utilisées
-          pour l’environnement <option>reponsesperso</option>.</para>
-        </sect4>
-      </sect3>
-
-      <sect3 id="latex.layout">
-        <title>Mise en page</title>
-
-        <sect4 id="latex.layout.margins">
-          <title>Marges</title>
-
-          <para>Les marges ont été choisies de telle manière que le document
-          s'imprime correctement sur la majorité des imprimantes. Si votre
-          imprimante permet de les réduire, vous pouvez le faire en utilisant
-          la commande <command>geometry</command> du paquet LaTeX
-          <package>geometry</package>. Par exemple, pour resserrer le haut des
-          copies, on pourra utiliser <code>\geometry{top=3cm}</code> au lieu
-          de la valeur 3.5cm utilisée par défaut, juste avant le
-          <code>\begin{document}</code>.</para>
-        </sect4>
-
-        <sect4 id="latex.layout.npages">
-          <title>Nombre de pages</title>
-
-          <para>AMC gère automatiquement le nombre de pages à générer pour
-          chaque sujet. Vous pouvez choisir de fixer un nombre de pages
-          identiques pour chaque sujet avec la commande
-          <command>\AMCaddpagesto{entier}</command> à placer à l'endroit où
-          vous souhaitez atteindre ce nombre de pages (en général à la toute
-          fin de la description de la copie, ou juste avant le
-          formulaire).</para>
-        </sect4>
-      </sect3>
-
-      <sect3 id="latex.style.separate">
-        <title>Style du formulaire séparé</title>
-
-        <para>Il est aussi possible de modifier la mise en page du formulaire
-        de réponses séparé produit avec l'option <option>ensemble</option>
-        (voir <xref endterm="secensemble.titre"
-        linkend="secensemble"/>).</para>
-
-        <orderedlist>
-          <listitem>
-            <para>Si on veut simplement modifier l'espacement horizontal entre
-            deux cases de réponses ou l'espacement vertical entre deux
-            questions, il suffit de redéfinir les dimensions
-            suivantes :</para>
-
-            <programlisting>\AMCformHSpace=.3em
-\AMCformVSpace=1.2ex
-</programlisting>
-          </listitem>
-
-          <listitem>
-            <para>Pour un changement plus profond de la mise en page, on peut
-            aussi redéfinir les commandes utilisées en début de chaque
-            question et pour chaque réponse :</para>
-
-            <programlisting>\def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
-\def\AMCformQuestion#1{\textbf{Question #1 :}}
-\def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
-</programlisting>
-
-            <para>Ces définitions sont à insérer juste après la balise
-            <code>\begin{document}</code> dans le document LaTeX.</para>
-          </listitem>
-
-          <listitem>
-            <para>Vous pouvez forcer AMC à ne pas respecter l'ordre des
-            questions et à mémoriser les questions ouvertes afin qu'elles
-            soient restituées ensemble. Cela peut être utile lorsque vous
-            utilisez le package <package>multicols</package>, les réponses
-            écrites à la main des questions ouvertes demandant plus
-            d'espace.</para>
-
-            <para>La commande
-            <command>\AMCformFilter{!\AMCifcategory{open}}</command> affiche
-            toutes les questions sauf les questions ouvertes puis la commande
-            <command>\AMCformFilter{\AMCifcategory{open}}</command> affiche
-            uniquement les questions ouvertes. Les deux commandes doivent être
-            utilisées <emphasis>ensemble</emphasis>.</para>
-
-            <programlisting>
-%Sur deux colonnes, les cases réponses sont affichées
-%à l'exception des questions ouvertes.
-\begin{multicols}{2}
-\AMCformFilter{!\AMCifcategory{open}}
-\end{multicols}
-
-%Toutes les questions ouvertes sont affichées.
-\AMCformFilter{\AMCifcategory{open}}
-         </programlisting>
-
-            <note>
-              <para>L'ordre croissant des numéros est toujours
-              respecté.</para>
-            </note>
-          </listitem>
-        </orderedlist>
-      </sect3>
-
-      <sect3 id="latex.codes">
-        <title>Saisie de codes</title>
-
-        <para>L'entrée de codes peut être aisément effectuée à l'aide de la
-        commande LaTeX
-        <command>\AMCcodeGridInt[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>nombre</replaceable>}</command>,
-        par exemple pour que chaque étudiant codifie son numéro d'étudiant
-        lui-même sur sa copie. Les deux arguments de cette commande sont un
-        identifiant de question que vous choississez ainsi que le nombre de
-        chiffres du codage désiré. On pourra, par exemple, utiliser l'en-tête
-        de copie suivant :</para>
-
-        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcodeGridInt{etu}{8}\hspace*{\fill}
-\begin{minipage}[b]{6.5cm}
-$\longleftarrow{}$\hspace{0pt plus 1cm} codez votre numéro d'étu\-diant ci-contre,
-et inscrivez votre nom et prénom ci-dessous.
-
-\vspace{3ex}
-
-\hfill\champnom{\fbox{
-    \begin{minipage}{.9\linewidth}
-      Nom et prénom :
-
-      \vspace*{.5cm}\dotfill
-
-      \vspace*{.5cm}\dotfill
-      \vspace*{1mm}
-    \end{minipage}
-  }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
-
-}</programlisting></para>
-
-        <note>
-          <para>Ici l'identifiant est <emphasis>etu</emphasis> qui servira à
-          AMC pour attribuer chaque copie à un étudiant et 8 est le nombre de
-          cases pour le code.</para>
-
-          <para>Vous devrez sélectionner cet identifiant dans le menu
-          déroulant <guilabel>Titre du code pour association
-          automatique</guilabel> de l'onglet <guibutton>notation</guibutton>
-          lors de l'association automatique des copies (voir <xref
-          linkend="Association"/>).</para>
-        </note>
-
-        <para>Dans le cas de l'utilisation de l'option
-        <option>ensemble</option>, la commande
-        <command>AMCcodeGridInt</command> devra se trouver dans la partie
-        formulaire, c'est-à-dire après la commande
-        <command>AMCdebutFormulaire</command>.</para>
-
-        <para>La présentation de ces formulaires de saisie de codes peut être
-        légèrement modifiée en changeant la valeur des dimensions
-        <command>\AMCcodeHspace</command>, <command>\AMCcodeVspace</command>
-        qui représentent les espaces horizontaux et verticaux entre les cases.
-        Les valeurs par défaut sont définies de la manière suivante :</para>
-
-        <programlisting>\AMCcodeHspace=.5em
-\AMCcodeVspace=.5em
-</programlisting>
-
-        <para>Pour la saisie de codes plus complexes, par exemple comportant
-        des lettres, on pourra utiliser la commande
-        <command>\AMCcodeGrid[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>description</replaceable>}</command>.
-        L'argument <replaceable>description</replaceable> contient une liste
-        d' ensemble de caractères acceptés, séparés par des virgules. Par
-        exemple, pour saisir un code client dont le premier caractère est une
-        lettre entre A et E, suivi de trois chiffres, on utilisera
-        <command>\AMCcodeGrid{client}{ABCDE,0123456789,0123456789,0123456789}</command>.</para>
-
-        <para>Les deux commandes <command>\AMCcodeGrid</command> et
-        <command>\AMCcodeGridInt</command> acceptent des options, séparées par
-        des virgules, dans l'argument optionnel
-        <replaceable>options</replaceable> :</para>
-
-        <variablelist>
-          <varlistentry>
-            <term>vertical=<replaceable>bool</replaceable></term>
-
-            <listitem>
-              <para>Indique la direction utilisée : donner à
-              <replaceable>bool</replaceable> la valeur <code>true</code>
-              (valeur par défaut) pour construire chaque chiffre en vertival,
-              et <code>false</code> en horizontal.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>v</term>
-
-            <listitem>
-              <para>alias pour <code>vertical=true</code>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>h</term>
-
-            <listitem>
-              <para>alias pour <code>vertical=false</code>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>top</term>
-
-            <listitem>
-              <para>permet d'aligner les colonnes en haut en direction
-              verticale.</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-      </sect3>
-
-      <sect3 id="questionsouvertes">
+		</sect4>
+ 
+		<sect4>
+          <title>Questions multiples</title>
+          <para>Les questions multiples (celles pour lesquelles aucune, une ou
+         plusieurs réponses peuvent être correctes) utiliseront l'environnement
+         <option>questionmult</option> au lieu de
+          <option>question</option>.</para>
+    </sect4>
+
+         <sect4 id="questionsouvertes">
         <title>Questions ouvertes</title>
 
         <para>On peut ajouter des questions ouvertes (qui ne sont pas à choix
@@ -3368,24 +2329,149 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <programlisting>\AMCOpen{lines=6}{
           \hbox{\parbox{8.5cm}{
-			    \bonne[1]{1}\scoring{b=1}
-			    \bonne[2]{2}\scoring{b=2}
-			    \bonne[3]{3}\scoring{b=3}
-			    \bonne[4]{4}\scoring{b=4}
-			    \bonne[5]{5}\scoring{b=5}
-			    \bonne[6]{6}\scoring{b=6}
-			    \bonne[7]{7}\scoring{b=7}
-			    \bonne[8]{8}\scoring{b=8}
-			    \bonne[9]{9}\scoring{b=9}
-			    \bonne[10]{10}\scoring{b=10}
-			    \mauvaise[F]{F}\scoring{b=0}
-                    }}
+          \mauvaise[F]{F}\scoring{0}
+          \mauvaise[1]{1}\scoring{1}
+          \mauvaise[2]{2}\scoring{2}
+          \mauvaise[3]{3}\scoring{3}
+          \mauvaise[4]{4}\scoring{4}
+          \mauvaise[5]{5}\scoring{5}
+          \mauvaise[6]{6}\scoring{6}
+          \mauvaise[7]{7}\scoring{7}
+          \mauvaise[8]{8}\scoring{8}
+          \mauvaise[9]{9}\scoring{9}
+          \bonne[10]{10}\scoring{10}
+              }}
             }
-	      </programlisting>
+        </programlisting>
         </tip>
-      </sect3>
+      </sect4>
 
-      <sect3 id="latex.oneletter">
+      <sect4>
+        <title>Questions indicatives</title>
+        <para>Dans le cas où la question posée est juste informative et ne
+        doit pas contribuer à la note de l'étudiant, on utilisera la commande
+        <code>\QuestionIndicative</code>, comme dans l'exemple
+        suivant :</para>
+
+        <para><programlisting>\begin{question}{facilite}\QuestionIndicative
+  \bareme{auto=0,v=-1,e=-2}
+  Vous êtes-vous sentis à l'aise ou en difficulté dans cet enseignement ?
+  Répondez sur une échelle de 0 (grandes difficultés) à 5 (très à l'aise).
+  \begin{reponseshoriz}[o]
+    \bonne{0}
+    \bonne{1}
+    \bonne{2}
+    \bonne{3}
+    \bonne{4}
+    \bonne{5}
+  \end{reponseshoriz}
+\end{question}</programlisting></para>
+  </sect4>
+
+    <sect4 id="identifiant">
+      <title id="identifiant.title">Identifiant des questions</title>
+        <important>
+          <para>Il faut utiliser un <parameter>identifiant</parameter>
+          différent pour chaque question. Un identifiant peut être constitué
+          de chiffres, lettres et caractères simples (ne pas utiliser le
+          caractère souligné <code>_</code>, les accolades, crochets, par
+          exemple !). Il ne faut pas utiliser d'identifiants se terminant par
+          un nombre entier entre crochets (comme
+          <parameter>marine-marchande[2]</parameter> ou
+          <parameter>123[27]</parameter>), car cette forme d'identifiants est
+          réservée à la saisie de longs codes (par exemple grâce à
+          <command>\AMCcodeGrid</command> - voir <xref
+          linkend="latex.codes"/>).</para>
+        </important>
+
+        <para>L'identifiant peut être de la forme
+        <programlisting>groupe.identifiant</programlisting> ou 
+        <programlisting>groupe:identifiant</programlisting> (voir remarque
+        <xref endterm="babel.french.title" linkend="babel.french"/>) pour obtenir
+        le total d'un même groupe de questions lors de l'export des notes 
+        (voir <xref endterm="sec.export.notes.title" linkend="sec.export.notes"/>).</para>
+      </sect4>
+
+        <sect4>
+          <title>Numéro de question</title>
+
+          <para>On peut modifier le numéro de la prochaine question à l'aide
+          de la commande <code>\AMCnumero</code>. Au début de chaque copie, un
+          appel à</para>
+
+          <para><programlisting>\AMCnumero{1}</programlisting></para>
+
+          <para>est effectué, mais cette commande peut être utilisée à tout
+          moment.</para>
+
+          <note>
+            <para>Pour cacher le numéro d'une question particulière et
+            conserver dans le sujet une continuité des numéros, ajouter la
+            commande <command>\AMCquestionNumberfalse</command> juste après
+            <command>\AMCbeginQuestion</command> (ou utiliser la commande
+            ci-dessus) :</para>
+
+            <programlisting>{
+  \AMCquestionNumberfalse
+  \def\AMCbeginQuestion#1#2{}
+  \begin{question}
+    ...
+  \end{question}
+}</programlisting>
+          </note>
+        </sect4>
+
+      <sect4 id="latex.choices.multicol">
+        <title>Réponses sur plusieurs colonnes</title>
+
+        <para>Afin de présenter les réponses sur plusieurs colonnes (et gagner
+        de la place), on pourra englober l'environnement
+        <option>reponses</option> dans un environnement
+        <option>multicols</option>, en utilisant le paquet LaTeX
+        <package>multicol</package> de la manière suivante :
+
+         <programlisting>\begin{multicols}{2}
+  \begin{reponses}
+    \bonne{La bonne réponse}
+    \mauvaise{Une mauvaise réponse}
+    \mauvaise{Une autre mauvaise réponse}
+  \end{reponses}
+\end{multicols}</programlisting></para>
+
+        <para>Pour les réponses plus courtes encore, on peut demander à ce que
+        les réponses soient imprimées les unes à la suite des autres, en
+        utilisant l'environnement <option>reponseshoriz</option> au lieu de
+        <option>reponses</option>.</para>
+
+        <para>Si de plus les réponses tiennent sur plusieurs lignes, cela
+        pourrait entraîner le passage d'une réponse d'une colonne à l'autre,
+        ce qui est un peu déroutant pour le lecteur. La commande
+        <command>\AMCBoxedAnswers</command> a été définie afin d'éviter ce
+        phénomène, en enveloppant chaque réponse dans une boite. On pourra
+        l'utiliser comme dans l'exemple suivant :</para>
+
+        <para><programlisting>\begin{question}{deux colonnes}
+  Qu'est-ce qu'un oiseau ?
+  \begin{multicols}{2}\AMCBoxedAnswers
+    \begin{reponses}
+      \bonne{C'est un animal à ailes et qui pond des \oe{}ufs.
+        Il y en a de toutes les couleurs}
+      \mauvaise{C'est un grand meuble en bois qui sert la plupart
+        du temps à ranger du linge de maison}
+      \mauvaise{C'est une machine à vapeur qui permet de fermer
+        les boîtes de conserve à grande vitesse}
+    \end{reponses}
+  \end{multicols}
+\end{question}</programlisting></para>
+
+        <para>On notera qu'il est aussi possible de paramétrer l'espace
+        vertical séparant deux blocs de réponse grâce à la dimension
+        <parameter>AMCinterBrep</parameter> :</para>
+
+        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
+      </sect4>
+
+<sect4 id="latex.oneletter">
         <title>Réponses en une lettre</title>
 
         <para>Dans certains cas, une lettre suffit pour décrire la réponse
@@ -3424,7 +2510,975 @@ et inscrivez votre nom et prénom ci-dessous.
             </listitem>
           </varlistentry>
         </variablelist>
+      </sect4>
+
+  <sect4 id="latex.explain">
+        <title id="latex.explain.title">Approfondir la réponse</title>
+
+        <para>Lors de l'impression du corrigé, vous pouvez apporter des
+        précisions grâce à la commande <command>\explain</command>. Cette
+        commande, à insérer dans un environnement <option>question</option>
+        (ce qui inclut les environnements <option>questionmult</option>,
+        <option>questionmultx</option>), affichera le texte écrit.</para>
+
+        <warning>
+           <para>Ne sera pas affiché sur le corrigé individuel. Pour contourner cela,
+            dans le préambule  écrivez ceci :
+<programlisting>
+\makeatletter
+\renewcommand{\explain}[1]{%
+  \ifAMC@correc%
+  \AMCif@env{question}{\par\noindent{\AMC@loc@explain#1}}{\AMC@error@explain}\vspace{1ex}%
+  \else%
+  \AMCif@env{question}{}{\AMC@error@explain}%
+  \fi%
+}
+\makeatother
+</programlisting> 
+         </para>
+        </warning>
+
+        <programlisting>\begin{question}{combustion}
+  Quel gaz apparaît lors de la combustion incomplète du butane~?
+  \begin{reponses}
+    \bonne{Le monoxyde de carbone.}
+    \mauvaise{Le dioxyde de carbone.}
+    \mauvaise{Le dioxygène.}
+  \end{reponses}
+  \explain{Le monoxyde de carbone est un gaz incolore, inodore et toxique.}
+\end{question}      </programlisting>
+
+        <note>
+          <para>Par défaut, le mot <emphasis>Explication</emphasis> sera
+          affiché. Vous pouvez modifier ce texte pour une ou plusieurs
+          questions avec la commande <command>\AMCtext</command> (Voir <xref
+          linkend="AMCtext"/>).</para>
+        </note>
+
+        <para><programlisting>\begin{question}{elevation}
+  Parmi les montagnes suivantes, laquelle est la plus haute ?
+      \begin{reponses}
+      \bonne{Sagarmatha}
+      \mauvaise{K2}
+      \mauvaise{Mont Blanc}
+      \mauvaise{Aconcagua}
+  \end{reponses}
+  \explain{Sagarmatha qui signifie littéralement `la tête du ciel' est le nom indigène du mont Everest, la montagne la plus haute du monde.}
+\end{question}
+
+\begin{question}{odd}
+  Cochez l'intrus.
+  \begin{reponses}
+      \bonne{Kilimanjaro}
+      \mauvaise{Himalayas}
+      \mauvaise{Alpes}
+      \mauvaise{Andes}
+  \end{reponses}
+  \AMCtext{explain}{\textit{\textbf{Raison :}}}
+  \explain{Le Kilimanjaro est une montagne tandis que les autres sont des chaînes de montagnes.}
+\end{question}
+
+\begin{questionmult}{himalaya}
+  Parmi les montagnes suivantes, lesquelles se trouvent dans l'Himalaya ?
+  \begin{reponses}
+      \bonne{Mount Everest}
+      \bonne{K2}
+      \mauvaise{Mont Blanc}
+      \mauvaise{Aconcagua}
+  \end{reponses}
+  \explain{L'Aconcagua est situé dans la cordillère des Andes tandis que le Mont Blanc se trouve dans les Alpes.}
+\end{questionmult}</programlisting></para>
+
+        <para><emphasis>Explication :</emphasis> sera affiché avant les
+        explications de la première et troisième réponse, <emphasis>Raison
+        :</emphasis> avant les explications de la deuxième question.</para>
+      </sect4>
+
+      <sect4 id="garder.ordre.reponses.">
+        <title>Garder l'ordre des réponses</title>
+        <para>Pour demander à garder l'ordre des réponses pour cette
+        question-ci, on peut utiliser l'option <option>o</option> de
+        l'environnement <option>reponses</option>, en remplaçant la ligne 3
+        par <programlisting>\begin{reponses}[o]</programlisting></para>
+      
+        <sect5 id="latex.lastchoice">
+          <title>Dernier choix</title>
+
+          <para>Vous pouvez choisir de toujours laisser une ou plusieurs
+          réponses en dernière position avec la commande
+          <command>\lastchoices</command>.</para>
+
+          <programlisting>\begin{question}{color}
+  Which color?
+  \begin{choiceshoriz}
+    \wrongchoice{red}
+    \wrongchoice{blue}
+    \wrongchoice{yellow}
+    \lastchoices
+    \correctchoice{transparent}
+    \wrongchoice{can't say}
+  \end{choiceshoriz}
+\end{question}
+
+\begin{questionmult}{number}
+  How many?
+  \begin{choiceshoriz}
+    \wrongchoice{none}
+    \correctchoice{one}
+    \wrongchoice{two}
+    \wrongchoice{three}
+    \lastchoices
+    \correctchoice{not so much}
+    \wrongchoice{a lot}
+  \end{choiceshoriz}
+\end{questionmult}       </programlisting>
+        </sect5>
+      </sect4>
+
+      <sect4 id="latex.numeric.toc">
+        <title>Réponse numérique</title>
+        <para> voir <xref linkend="latex.numeric"/></para>
+      </sect4>
+
+      <sect4 id="latex.choices.space">
+        <title>Espacement entre les réponses</title>
+
+        <para>Il est possible d'augmenter l'espace vertical séparant plusieurs
+        réponses en modifiant la dimension
+        <parameter>AMCinterIrep</parameter> :</para>
+
+        <programlisting>\AMCinterIrep=.75ex</programlisting>
+      </sect4>
+
+    <sect4 id="remarques">
+        <title>Remarques</title>
+        <sect5 id="babel.french">
+        <title id="babel.french.title">French et babel</title>
+        <warning>
+          <para>Quand on utilise <package>babel</package> et l'option
+          <option>french</option>, ne pas mettre de <parameter>:</parameter>
+          ni <parameter>;</parameter> dans les identifiants de
+          questions.</para>
+        </warning>
+        </sect5>
+
+        <sect5 id="maximum.reponses">
+        <title>Nombre maximal de réponses</title>
+          <para>Le nombre de réponses pour une question est actuellement
+          limité à 199.</para>
+        </sect5>
+        </sect4>  
+
       </sect3>
+
+      <sect3 id="definir.zone.notation">
+        <title id="definir.zone.notation.title">Définir la zone de
+        notation</title>
+
+        <para>Vous pouvez ajouter une option supplémentaire de zone de
+        notation (voir <xref endterm="position.note.title"
+        linkend="position.note"/>) avec le package
+        <package>tikz</package>.</para>
+
+        <programlisting>\usepackage{tikz}</programlisting>
+
+        <sect4 id="latex.zone.std">
+          <title>Sans l'option <option>ensemble</option></title>
+
+          <para>Dans ce mode, le sujet et les réponses sont sur la(es) même(s)
+          feuilles.</para>
+
+          <para>Taper cette commande, après le
+          <command>\begin{document}</command> et avant la commande
+          <command>\exemplaire</command> :</para>
+
+          <programlisting>\AMCsetScoreZone{width=1.5em,height=1.5ex,depth=.5ex,position=margins}</programlisting>
+
+          <para>Les grandeurs <parameter>width</parameter>,
+          <parameter>height</parameter>, <parameter>depth</parameter>
+          définissent les dimensions de la case de notation ainsi que son
+          emplacement sur la feuille de réponses. Cette zone invisible est
+          définie pour toutes les questions.</para>
+
+          <para>La variable <parameter>position</parameter> peut prendre les
+          valeurs : none, question, margin, margins.</para>
+        </sect4>
+
+        <sect4 id="latex.zone.separate">
+          <title>Avec l'option <option>ensemble</option></title>
+
+          <para>Dans ce mode, la feuille de réponses est séparée du
+          sujet.</para>
+
+          <para>Taper cette commande, après le
+          <command>\begin{document}</command> et avant la commande
+          <command>\exemplaire</command> :</para>
+
+          <programlisting>\AMCsetScoreZoneAnswerSheet{width=1.5em,height=1.5ex,depth=.5ex,position=question}</programlisting>
+
+          <para>Les grandeurs <parameter>width</parameter>,
+          <parameter>height</parameter>, <parameter>depth</parameter>
+          définissent les dimensions de la case de notation ainsi que son
+          emplacement sur la feuille de réponses. Cette zone invisible est
+          définie pour toutes les questions.</para>
+
+          <para>La variable <parameter>position</parameter> peut prendre les
+          valeurs : none, question, margin, margins.</para>
+
+          <warning>
+            <para>L'option <option>margins</option> ne fonctionne pas avec
+            AMC-TXT</para>
+
+            <para>Vous ne pouvez pas modifier votre sujet<emphasis> a
+            posteriori</emphasis> en rajoutant l'une de ces fonctions après
+            l'impression du sujet.</para>
+          </warning>
+        </sect4>
+      </sect3>
+
+      <sect3 id="Groupes.questions">
+        <title id="Groupes.questions.title">Groupes de questions</title>
+
+        <para>L'inclusion de questions dans des groupes permet de mélanger les
+        questions à l'intérieur de ces groupes, de manière différente pour
+        chaque copie. Chaque groupe de questions devra avoir un nom formé
+        uniquement de lettres non-accentuées.</para>
+
+        <para>On peut mettre une à une des questions dans un groupe, comme
+        dans l'exemple suivant : <programlisting>\element{ungroupe}{
+  \begin{question}{facile}
+    Alors, combien font un plus un~?
+    \begin{reponseshoriz}
+      \bonne{deux}
+      \mauvaise{zéro}
+      \mauvaise{trois}
+    \end{reponseshoriz}
+  \end{question}
+}</programlisting></para>
+
+        <important>
+          <para>La constitution du groupe, par les commandes
+          <command>element</command>, doit être faite une seule fois : ces
+          commandes doivent donc être utilisées <emphasis>avant</emphasis> la
+          commande <command>exemplaire</command>, qui va répéter certaines
+          actions pour chaque copie.</para>
+        </important>
+
+        <para>Enfin, on restitue les questions du groupe par la commande
+        <command>restituegroupe</command>, comme dans <programlisting>\restituegroupe{ungroupe}</programlisting></para>
+
+        <para>La manière dont le groupe est restitué peut être contrôlée par
+        le mode du groupe, défini grâce à la commande
+        <command>setgroupmode</command>  (appelé après la création des groupes
+        et avant <command>\exemplaire</command>):</para>
+
+        <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
+
+        <para>où <code>XXX</code> peut prendre les valeurs suivantes :</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>fixed</term>
+
+            <listitem>
+              <para>avec ce mode, les éléments du groupe sont pris à partir du
+              début du groupe à chaque restitution.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>cyclic</term>
+
+            <listitem>
+              <para>les éléments sont pris à la suite les uns des autres à
+              chaque restitution, en repartant du début si nécessaire.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>withreplacement</term>
+
+            <listitem>
+              <para>même chose que pour <code>fixed</code>, mais le groupe est
+              mélangé à chaque fois.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>withoutreplacement</term>
+
+            <listitem>
+              <para>comme <code>cyclic</code>, en ajoutant un mélange à chaque
+              fois que l'on reprend au début.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>Un mode par défaut peut être choisi pour tous les groupes qui
+        seront créés ensuite (un groupe est créé à la première utilisation de
+        <command>element</command>) :</para>
+
+        <programlisting>\setdefaultgroupmode{XXX}</programlisting>
+
+        <para>Une fois un groupe constitué, on peut mélanger les questions qui
+        le composent par la commande <command>melangegroupe</command> : par
+        exemple, <programlisting>\melangegroupe{ungroupe}</programlisting></para>
+
+        <para>Cependant, cette commande n'a pas à être utilisée si on utilise
+        les modes de groupes comme il faut.</para>
+
+        <warning>
+          <para>Si vous réutilisez des sujets mis en page avec une version
+          antérieure à AMC 1.2.2014.111201 et choisissez un des trois autres
+          modes que celui par défaut (<code>fixed</code>), supprimez la
+          commande <command>\melangegroupe</command>.</para>
+        </warning>
+
+        <para>Si cette commande n'est pas utilisée, c'est le mode
+        <code>fixed</code> qui sera utilisé.</para>
+
+        <para>On peut manipuler les groupes de questions de manière plus
+        précise grâce aux commandes suivantes :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><code>\restituegroupe[n]{ungroupe}</code> (utilisation du
+            paramètre optionnel <replaceable>n</replaceable>) restitue
+            uniquement les <replaceable>n</replaceable> premiers éléments du
+            groupe.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\insertgroupfrom[n]{ungroupe}{i}</code> Cette commande
+            fait la même chose que <code>\restituegroupe[n]{ungroupe}</code>
+            mais la sélection débute à l'élément <replaceable>i</replaceable>.
+            Le premier élément a pour valeur d'indice 0.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\cleargroup{groupe}</code> efface tout le contenu du
+            groupe.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\copygroup{depuis}{vers}</code> copie le contenu du
+            groupe <replaceable>depuis</replaceable> à la fin du groupe
+            <replaceable>vers</replaceable>. Cette commande admet un argument
+            optionnel qui permet de ne copier qu'un certain nombre d'éléments,
+            comme dans <code>\copygroup[n]{depuis}{vers}</code>.</para>
+          </listitem>
+
+          <listitem>
+            <para><code>\copygroupfrom[n]{depuis}{vers}{i}</code> Cette
+            commande fait la même chose que
+            <code>\copygroup[n]{depuis}{vers}</code> mais la sélection débute
+            à l'élément <replaceable>i</replaceable>. Le premier élément a
+            pour valeur d'indice 0.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>À l'aide de ces commandes, on peut par exemple composer un sujet
+        en prenant 4 questions au hasard dans le groupe GA, 5 questions au
+        hasard dans le groupe GB, toutes les questions du groupe GO, puis en
+        mélangeant le tout, grâce aux commandes suivantes (à mettre à
+        l'intérieur du texte en argument de la commande
+        <command>exemplaire</command>, et en supposant que les groupes
+        <code>GA</code>, <code>GB</code> et <code>tout</code> sont de mode
+        <code>withreplacement</code> ou
+        <code>withoutreplacement</code>) :</para>
+
+        <programlisting>\cleargroup{tout}
+\copygroup[4]{GA}{tout}
+\copygroup[5]{GB}{tout}
+\copygroup{GO}{tout}
+\restituegroupe{tout}</programlisting>
+      </sect3>
+
+      <sect3 id="latex.page">
+        <title>Papier, marges</title>
+
+        <para>Le paquet LaTeX <command>automultiplechoice</command> utilise
+        <command>geometry</command> pour gérer les marges et la mise en page.
+        Vous pouvez modifier ses réglages grâce à l'utilisation de la commande
+        <command>\geometry</command> juste avant le
+        <code>\begin{document}</code> - voir la documentation du paquet
+        <command>geometry</command> pour plus de détails. Les valeurs
+        initialisées par AMC sont les suivantes :</para>
+
+        <programlisting>\geometry{hmargin=3cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=3.5cm,bottom=2.5cm}</programlisting>
+
+        <para>Si vous réduisez les marges pour gagner de la place, gardez à
+        l'esprit que :</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Les quatre marques de coin doivent être imprimées
+            entièrement (elles pourraient disparaître à cause des marges
+            d'impression).</para>
+          </listitem>
+
+          <listitem>
+            <para>Les quatre marques de coin doivent apparaître complètement
+            sur les scans des copies remplies par les étudiants (si elles sont
+            trop près des bords, elles pourraient disparaître lors du scan à
+            la suite d'un décalage ou d'une rotation des feuilles de
+            papier).</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Vous pouvez également préciser la taille de papier à utiliser en
+        ajoutant l'option correspondante à la liste donnée en argument à
+        <command>\geometry</command>. Parmi les valeurs possibles, on trouvera
+        <code>a4paper</code>, <code>a5paper</code>, <code>a6paper</code>,
+        <code>b4paper</code>, <code>b5paper</code>, <code>ansibpaper</code>,
+        <code>ansicpaper</code>, <code>ansidpaper</code>,
+        <code>letterpaper</code>, <code>executivepaper</code>,
+        <code>legalpaper</code>.</para>
+
+        <para>Pour des petites tailles de papier, il peut aussi être
+        intéressant de modifier la position de l'identifiant de copie (de la
+        forme <code>+1/1/53+</code>) à côté de son équivalent en cases
+        blanches et noires, en haut de chaque page. Ceci est rendu possible
+        par la commande <command>\AMCidsPosition</command>, sous la
+        forme</para>
+
+        <programlisting>\AMCidsPosition{pos=<replaceable>p</replaceable>,width=<replaceable>w</replaceable>,height=<replaceable>h</replaceable>}</programlisting>
+
+        <para>où <replaceable>p</replaceable> peut valoir <code>none</code>
+        (ne pas écrire cet identifiant), <code>top</code> (l'écrire au-dessus)
+        et <code>side</code> (à côté), et <replaceable>w</replaceable> et
+        <replaceable>h</replaceable> sont les dimensions de la boîte
+        (invisible) qui entoure l'identifiant. Les valeurs par défaut sont les
+        suivantes :</para>
+
+        <programlisting>\AMCidsPosition{pos=side,width=4cm,height=3ex}</programlisting>
+
+        <para>Concluons par un exemple raisonnable au format A5 :</para>
+
+        <programlisting>\geometry{a5paper,hmargin=1.6cm,top=2.5cm}
+\AMCidsPosition{pos=top}</programlisting>
+
+        <warning>
+          <para>N'utilisez pas le paquet <command>pgfpages</command> ou toutes
+          autres commandes de mise en page modifiant l'impression du nombre de
+          pages par feuille.</para>
+        </warning>
+      </sect3>
+
+      <sect3 id="style.cases">
+        <title id="style.cases.title">Style des cases à cocher</title>
+
+        <para>La commande <command>\AMCboxStyle</command> (nouveau nom de la
+        commande <command>\AMCboxDimensions</command> qui reste compatible
+        avec les options ci-dessous) permet de modifier une ou plusieurs
+        dimensions relatives aux cases à cocher :</para>
+
+        <para>Les valeurs par défaut des options sont :</para>
+
+        <programlisting>\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}</programlisting>
+
+        <itemizedlist>
+          <listitem>
+            <para><option>shape</option> représente la forme des cases à
+            cocher. La valeur <replaceable>square</replaceable> produit des
+            carrés (ou des rectangles si on donne des dimensions différentes
+            pour la hauteur et la largeur). La valeur
+            <replaceable>oval</replaceable> produit des cercles ou des ovales.
+            Si vous voulez utiliser <replaceable>oval</replaceable>, vous
+            devez charger le paquet LaTeX tikz.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>width</option> représente la largeur des
+            cases ;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>height</option> représente la hauteur des
+            cases ;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>size</option> représente la taille (à la fois
+            <option>width</option> et <option>height</option>) de ces
+            cases ;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>rule</option> représente l'épaisseur du contour des
+            cases ;</para>
+          </listitem>
+
+          <listitem>
+            <para><option>down</option> représente la taille du déplacement
+            vers le bas des cases.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>outsidesep</option> représente la distance entre la
+            case et la lettre (ou le chiffre) quand l'option
+            <option>outsidebox</option> est choisie (voir <xref
+            endterm="sec.package.options.title"
+            linkend="sec.package.options"/>).</para>
+          </listitem>
+
+          <listitem>
+            <para><option>cross=true</option> visible uniquement sur la
+            feuille réponse, indique par une croix la bonne réponse au lieu de
+            colorier la case.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>crossrule=1.5</option> visible uniquement sur la
+            feuille réponse, représente l'épaisse de la croix
+            précédente.</para>
+          </listitem>
+
+          <listitem>
+            <para><option>color=<replaceable>col</replaceable></option> permet
+            d'indiquer la couleur à utiliser pour les cases à cocher. La
+            couleur <replaceable>col</replaceable> doit être reconnue par le
+            paquet LaTeX <command>xcolor</command>. On pourra ainsi utiliser
+            certains noms de couleurs (comme <replaceable>red</replaceable>
+            pour le rouge), ou définir soi-même sa couleur comme dans</para>
+
+            <programlisting>\definecolor{vertclair}{rgb}{0.67,0.88,0.5}
+\AMCboxStyle{color=vertclair}</programlisting>
+          </listitem>
+        </itemizedlist>
+
+        <para>Pour obtenir des cases plus petites, on pourra, par exemple,
+        utiliser la commande</para>
+
+        <programlisting>\AMCboxStyle{size=1.7ex,down=.2ex}</programlisting>
+
+        <para>Lors de l'utilisation de l'option <option>ensemble</option>, il
+        est possible de modifier la manière de nommer les cases à cocher
+        (c'est-à-dire ce qui sera inscrit dans chaque case). Le comportement
+        par défaut est d'écrire des lettres majuscules, ou des chiffres si
+        l'option <option>chiffres</option> est utilisée. Pour changer cela, il
+        faut redéfinir la commande <command>\AMCchoiceLabel</command>, qui
+        prend comme unique argument le nom du compteur utilisé pour la
+        numérotation des cases. Ainsi, pour obtenir des lettres minuscules, on
+        utilisera :</para>
+
+        <programlisting>\def\AMCchoiceLabel#1{\alph{#1}}</programlisting>
+
+        <para>De même, lors de l'utilisation du paquet LaTeX
+        <command>arabxetex</command>, la commande suivante pourra se révéler
+        utile :</para>
+
+        <programlisting>\def\AMCchoiceLabel#1{\textLR{\Alph{#1}}}</programlisting>
+
+        <para>Pour changer le style des lettres inscrites dans les cases, on
+        pourra également redéfinir la commande
+        <command>\AMCchoiceLabelFormat</command>. Par exemple, pour obtenir
+        des lettres grasses, on utilisera :</para>
+
+        <programlisting>\def\AMCchoiceLabelFormat#1{\textbf{#1}}</programlisting>
+
+        <para>Pour changer le style des lettres inscrites à l'exterieur des
+        cases, on pourra également redéfinir la commande
+        <command>\AMCoutsideLabelFormat</command>. Par exemple, pour obtenir
+        des lettres grasses, on utilisera :</para>
+
+        <programlisting>\def\AMCoutsideLabelFormat#1{\textbf{#1}}</programlisting>
+
+        <note>
+          <para>La commande latex pour basculer en mode corrigé (cases bonnes
+          réponses coloriées) est <command>\AMC@correctrue</command>. Vous
+          pouvez créer une commmande pour indiquer à AMC de basculer en mode
+          corrigé même dans le sujet (DOC-sujet.pdf). Le code ci-dessous est à
+          inscrire juste après \begin{document}.</para>
+
+          <programlisting>\makeatletter
+\def\AMCforcecorrect{\AMC@correctrue}
+\makeatother</programlisting>
+
+          <para>Vous pouvez inclure cette commande pour une question
+          particulière qui sera encadrée par des accolades pour en limiter
+          l'effet. Indiquez un barème nul ou utilisez la commande
+          <command>\QuestionIndicative</command></para>
+
+          <programlisting>{\AMCforcecorrect\begin{questionmult}{test}\QuestionIndicative
+  .....
+ \end{questionmult}
+}        </programlisting>
+        </note>
+      </sect3>
+
+      <sect3 id="latex.style">
+        <title>Style du questionnaire</title>
+
+        <para>La façon dont chaque question est présentée peut être modifiée
+        en redéfinissant la commande LaTeX
+        <command>AMCbeginQuestion</command>, dont la définition par défaut est
+        la suivante :</para>
+
+        <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
+
+        <para>Le premier paramètre transmis à cette commande est le numéro de
+        question à afficher. Le second paramètre contient
+        <code>\multiSymbole</code> dans le cas dune question à plusieurs
+        réponses possibles, et est vide dans les autres cas. La commande
+        <code>\multiSymbole</code> peut aussi être modifiée : elle a pour
+        charge de différentier les questions à réponses multiples des autres.
+        Par défaut, elle affiche un trèfle :</para>
+
+        <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
+
+        <warning>
+          <para>Avec le mode copies préremplies (voir <xref
+          endterm="CopiesPrerempliesTitle" linkend="CopiesPremplies"/>) ,
+          cette commande doit être appelée via une macro dans le
+          préambule.</para>
+
+          <informalexample>
+            <programlisting>\def\jepasse{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}</programlisting>
+          </informalexample>
+
+          <para>puis de l'utiliser quand on en a besoin (Ne pas oublier
+          d'insérer des accolades autour pour limiter son effet à une question)
+          :</para>
+
+          <programlisting>{\jepasse
+ \begin{question}{Calibre600}
+   Quel calibre doit-on choisir pour mesurer une tension inconnue?
+   \begin{reponseshoriz}[o]
+     \mauvaise{200}\mauvaise{2}\mauvaise{20}\mauvaise{200}\bonne{600}
+   \end{reponseshoriz}
+ \end{question}
+}</programlisting>
+
+          <para><emphasis>Dans cet exemple, le numéro de la question ne sera
+          pas affiché via la commande
+          <command>\AMCquestionNumberfalse</command>.</emphasis></para>
+        </warning>
+
+        <sect4 id="reponsesperso">
+          <title>Environnement <option>reponsesperso</option></title>
+
+          <para>La présentation des réponses peut être modifiée de la même
+          façon, si on utilise l'environnement <option>reponsesperso</option>
+          au lieu de <option>reponses</option> ou
+          <option>reponseshoriz</option>, en redéfinissant les trois macros
+          LaTeX suivantes :</para>
+
+          <programlisting>\def\AMCbeginAnswer{}
+\def\AMCendAnswer{}
+\def\AMCanswer#1#2{#1 #2}</programlisting>
+
+          <sect5 id="reponsesperso.exemple1">
+            <title>Exemple 1</title>
+
+            <para>On peut utiliser des cases à cocher pour pénaliser les
+            étudiants rendant leur copie en retard, par exemple (8 points en
+            moins pour un petit retard, et 20 points en moins pour un retard
+            exagéré). Il suffira d'inclure à l'endroit désiré (par exemple
+            dans l'en-tête quelque chose comme ça (ici je demande un fond
+            gris) :</para>
+
+            <programlisting>\fcolorbox{black}{gray}{\insertRetard}</programlisting>
+
+            <para>où la commande <command>\insertRetard</command> a été
+            définie en-dehors de \exemplaire :</para>
+
+            <programlisting>
+\def\insertRetard{ %
+{\def\AMCbeginQuestion##1##2{}\AMCnobloc%
+ \begin{questionmult}{00retard}
+ \AMCnoCompleteMulti\AMCdontAnnotate%
+ \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
+ Réservé~\begin{reponsesperso}[o]\mauvaise{R1~}\bareme{b=0,m=-8}\mauvaise{R2}\bareme{b=0,m=-20}\end{reponsesperso}%
+ \end{questionmult}}%
+}
+</programlisting>
+
+            <itemizedlist>
+              <listitem>
+                <para>la commande <command>\def\AMCbeginQuestion##1##2{}
+                </command>(combinée avec l'utilisation de l'environnement
+                <option>reponsesperso</option>) permet qu'AMC n'écrive pas
+                "Question XX".</para>
+              </listitem>
+
+              <listitem>
+                <para><command>\def\AMCbeginAnswer{}\def\AMCendAnswer{}</command>
+                permettent également d'épurer le résultat.</para>
+              </listitem>
+
+              <listitem>
+                <para><command>\AMCnoCompleteMulti</command> permet de
+                demander à AMC de ne pas rajouter la réponse "aucune de ces
+                réponses n'est correcte" marlgré l'utilisation de
+                questionmult.</para>
+              </listitem>
+
+              <listitem>
+                <para><command>\AMCdontAnnotate</command> demandent à AMC de
+                ne pas annoter ces cases là.</para>
+              </listitem>
+            </itemizedlist>
+
+            <important>
+              <para>Lorsque vous êtes à l'intérieur de la commande
+              <command>\exemplaire</command>, il faut doubler les
+              <code>#</code>.</para>
+
+              <programlisting>\def\AMCanswer##1##2{##1  ##2}
+\def\AMCbeginQuestion##1##2{}</programlisting>
+            </important>
+          </sect5>
+
+          <sect5 id="reponsesperso.exemple2">
+            <title>Utilisation en mathématiques</title>
+
+            <programlisting>
+\begin{questionmultx}{formule}\bareme{mz=2}\AMCnoCompleteMulti
+  Comment est définie la fonction identité ?
+  \begin{reponsesperso}[o]
+    \[f(x)=\bonne[$y$]{}\mauvaise[$x$]{}\bonne[$+$]{}\bonne[$x^2$]{}\]
+  \end{reponsesperso}
+\end{questionmultx}
+</programlisting>
+          </sect5>
+        </sect4>
+
+        <sect4 id="espaces">
+          <title>Espaces</title>
+
+          <para>Certains espacements peuvent également être modifiés :</para>
+
+          <programlisting>\AMCinterIrep=0pt
+\AMCinterBrep=.5ex
+\AMCinterIquest=0pt
+\AMCinterBquest=3ex
+\AMCpostOquest=7mm
+\setlength{\AMChorizAnswerSep}{3em plus 4em}
+\setlength{\AMChorizBoxSep}{1em}</programlisting>
+
+          <para>Ces dimensions correspondent aux espaces verticaux ajoutés
+          entre les questions (<code>quest</code>) ou les réponses
+          (<code>rep</code>), en mode boîte (<code>B</code>, obtenu avec
+          <command>\AMCBoxedAnswers</command> ou l'option de package
+          <option>bloc</option>) ou standard (<code>I</code>), l'espace après
+          une question ouverte. Les deux dernières longueurs sont utilisées
+          pour l’environnement <option>reponsesperso</option>.</para>
+        </sect4>
+      </sect3>
+
+      <sect3 id="latex.layout">
+        <title>Mise en page</title>
+
+        <sect4 id="latex.layout.margins">
+          <title>Marges</title>
+
+          <para>Les marges ont été choisies de telle manière que le document
+          s'imprime correctement sur la majorité des imprimantes. Si votre
+          imprimante permet de les réduire, vous pouvez le faire en utilisant
+          la commande <command>geometry</command> du paquet LaTeX
+          <package>geometry</package>. Par exemple, pour resserrer le haut des
+          copies, on pourra utiliser <code>\geometry{top=3cm}</code> au lieu
+          de la valeur 3.5cm utilisée par défaut, juste avant le
+          <code>\begin{document}</code>.</para>
+        </sect4>
+
+        <sect4 id="latex.layout.npages">
+          <title>Nombre de pages</title>
+
+          <para>AMC gère automatiquement le nombre de pages à générer pour
+          chaque sujet. Vous pouvez choisir de fixer un nombre de pages
+          identiques pour chaque sujet avec la commande
+          <command>\AMCaddpagesto{entier}</command> à placer à l'endroit où
+          vous souhaitez atteindre ce nombre de pages (en général à la toute
+          fin de la description de la copie, ou juste avant le
+          formulaire).</para>
+        </sect4>
+      </sect3>
+
+      <sect3 id="latex.style.separate">
+        <title>Style du formulaire séparé</title>
+
+        <para>Il est aussi possible de modifier la mise en page du formulaire
+        de réponses séparé produit avec l'option <option>ensemble</option>
+        (voir <xref endterm="secensemble.title"
+        linkend="secensemble"/>).</para>
+
+        <orderedlist>
+          <listitem>
+            <para>Si on veut simplement modifier l'espacement horizontal entre
+            deux cases de réponses ou l'espacement vertical entre deux
+            questions, il suffit de redéfinir les dimensions
+            suivantes :</para>
+
+            <programlisting>\AMCformHSpace=.3em
+\AMCformVSpace=1.2ex
+</programlisting>
+          </listitem>
+
+          <listitem>
+            <para>Pour un changement plus profond de la mise en page, on peut
+            aussi redéfinir les commandes utilisées en début de chaque
+            question et pour chaque réponse :</para>
+
+            <programlisting>\def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}
+\def\AMCformQuestion#1{\textbf{Question #1 :}}
+\def\AMCformAnswer#1{\hspace{\AMCformHSpace} #1}
+</programlisting>
+
+            <para>Ces définitions sont à insérer juste après la balise
+            <code>\begin{document}</code> dans le document LaTeX.</para>
+          </listitem>
+
+          <listitem>
+            <para>Vous pouvez forcer AMC à ne pas respecter l'ordre des
+            questions et à mémoriser les questions ouvertes afin qu'elles
+            soient restituées ensemble. Cela peut être utile lorsque vous
+            utilisez le package <package>multicols</package>, les réponses
+            écrites à la main des questions ouvertes demandant plus
+            d'espace.</para>
+
+            <para>La commande
+            <command>\AMCformFilter{!\AMCifcategory{open}}</command> affiche
+            toutes les questions sauf les questions ouvertes puis la commande
+            <command>\AMCformFilter{\AMCifcategory{open}}</command> affiche
+            uniquement les questions ouvertes. Les deux commandes doivent être
+            utilisées <emphasis>ensemble</emphasis>.</para>
+
+            <programlisting>
+%Sur deux colonnes, les cases réponses sont affichées
+%à l'exception des questions ouvertes.
+\begin{multicols}{2}
+\AMCformFilter{!\AMCifcategory{open}}
+\end{multicols}
+
+%Toutes les questions ouvertes sont affichées.
+\AMCformFilter{\AMCifcategory{open}}
+         </programlisting>
+
+            <note>
+              <para>L'ordre croissant des numéros est toujours
+              respecté.</para>
+            </note>
+          </listitem>
+        </orderedlist>
+      </sect3>
+
+      <sect3 id="latex.codes">
+        <title>Saisie de codes</title>
+
+        <para>L'entrée de codes peut être aisément effectuée à l'aide de la
+        commande LaTeX
+        <command>\AMCcodeGridInt[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>nombre</replaceable>}</command>,
+        par exemple pour que chaque étudiant codifie son numéro d'étudiant
+        lui-même sur sa copie. Les deux arguments de cette commande sont un
+        identifiant de question que vous choississez ainsi que le nombre de
+        chiffres du codage désiré. On pourra, par exemple, utiliser l'en-tête
+        de copie suivant :</para>
+
+        <para><programlisting>{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcodeGridInt{etu}{8}\hspace*{\fill}
+\begin{minipage}[b]{6.5cm}
+$\longleftarrow{}$\hspace{0pt plus 1cm} codez votre numéro d'étu\-diant ci-contre,
+et inscrivez votre nom et prénom ci-dessous.
+
+\vspace{3ex}
+
+\hfill\champnom{\fbox{
+    \begin{minipage}{.9\linewidth}
+      Nom et prénom :
+
+      \vspace*{.5cm}\dotfill
+
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}\hfill\vspace{5ex}\end{minipage}\hspace*{\fill}
+
+}</programlisting></para>
+
+        <note>
+          <para>Ici l'identifiant est <emphasis>etu</emphasis> qui servira à
+          AMC pour attribuer chaque copie à un étudiant et 8 est le nombre de
+          cases pour le code.</para>
+
+          <para>Vous devrez sélectionner cet identifiant dans le menu
+          déroulant <guilabel>Titre du code pour association
+          automatique</guilabel> de l'onglet <guibutton>notation</guibutton>
+          lors de l'association automatique des copies (voir <xref
+          linkend="gui.assoc"/>).</para>
+        </note>
+
+        <para>Dans le cas de l'utilisation de l'option
+        <option>ensemble</option>, la commande
+        <command>AMCcodeGridInt</command> devra se trouver dans la partie
+        formulaire, c'est-à-dire après la commande
+        <command>AMCdebutFormulaire</command>.</para>
+
+        <para>La présentation de ces formulaires de saisie de codes peut être
+        légèrement modifiée en changeant la valeur des dimensions
+        <command>\AMCcodeHspace</command>, <command>\AMCcodeVspace</command>
+        qui représentent les espaces horizontaux et verticaux entre les cases.
+        Les valeurs par défaut sont définies de la manière suivante :</para>
+
+        <programlisting>\AMCcodeHspace=.5em
+\AMCcodeVspace=.5em
+</programlisting>
+
+        <para>Pour la saisie de codes plus complexes, par exemple comportant
+        des lettres, on pourra utiliser la commande
+        <command>\AMCcodeGrid[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>description</replaceable>}</command>.
+        L'argument <replaceable>description</replaceable> contient une liste
+        d' ensemble de caractères acceptés, séparés par des virgules. Par
+        exemple, pour saisir un code client dont le premier caractère est une
+        lettre entre A et E, suivi de trois chiffres, on utilisera
+        <command>\AMCcodeGrid{client}{ABCDE,0123456789,0123456789,0123456789}</command>.</para>
+
+        <para>Les deux commandes <command>\AMCcodeGrid</command> et
+        <command>\AMCcodeGridInt</command> acceptent des options, séparées par
+        des virgules, dans l'argument optionnel
+        <replaceable>options</replaceable> :</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>vertical=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>Indique la direction utilisée : donner à
+              <replaceable>bool</replaceable> la valeur <code>true</code>
+              (valeur par défaut) pour construire chaque chiffre en vertival,
+              et <code>false</code> en horizontal.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>v</term>
+
+            <listitem>
+              <para>alias pour <code>vertical=true</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>h</term>
+
+            <listitem>
+              <para>alias pour <code>vertical=false</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>top</term>
+
+            <listitem>
+              <para>permet d'aligner les colonnes en haut en direction
+              verticale.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </sect3>
+
+
+      
 
       <sect3 id="latex.seed">
         <title>Choix du mélange</title>
@@ -3619,7 +3673,7 @@ et inscrivez votre nom et prénom ci-dessous.
       </sect3>
 
       <sect3 id="code.binaire">
-        <title id="code.binaire.titre">Le code binaire</title>
+        <title id="code.binaire.title">Le code binaire</title>
 
         <para>Le code binaire permet à AMC de reconnaître le numéro du sujet
         et le numéro de la page du sujet.</para>
@@ -3699,7 +3753,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
         <note>
           <para>Un mode d'emploi succint se trouve à la fin de la
-          documentation voir <xref endterm="Divers.titre"
+          documentation voir <xref endterm="Divers.title"
           linkend="Divers"/>).</para>
         </note>
 
@@ -3830,7 +3884,7 @@ et inscrivez votre nom et prénom ci-dessous.
           <note>
             <para>Si vous préférez la virgule comme séparateur décimal, il
             faut utiliser la commande <command>\num</command> du paquet
-            <package>siunitx</package> ( voir <xref endterm="Divers.titre"
+            <package>siunitx</package> ( voir <xref endterm="Divers.title"
             linkend="Divers"/>).</para>
 
             <programlisting>\def\AMCIntervalFormat#1#2{[\num{#1}-\,\num{#2}[}</programlisting>
@@ -3860,6 +3914,10 @@ et inscrivez votre nom et prénom ci-dessous.
           multiple car plusieurs cases doivent être cochées, mais pourtant une
           seule réponse est correcte, et nous ne souhaitons donc pas afficher
           le symbole des questions multiples normales.</para>
+
+
+            <sect5 id="AMCnumericChoices.options">
+              <title>Options</title>
 
           <para>Les options disponibles dans le deuxième argument de cette
           commande sont les suivants :</para>
@@ -4175,8 +4233,33 @@ et inscrivez votre nom et prénom ci-dessous.
 
           <programlisting>\def\AMCntextGoto{\par{\bf\emph{Codez la réponse
      sur la feuille de réponses séparée.}}}</programlisting>
+            </sect5>
+
+       <sect5 id="intX-intV">
+          <title>Accès aux valeurs</title>
+          <variablelist>
+
+          <varlistentry>
+              <term>intX</term>
+
+              <listitem>
+                <para>valeur brute entrée par l'étudiant.</para>
+              </listitem>
+            </varlistentry>
+
+                      <varlistentry>
+              <term>intV</term>
+
+              <listitem>
+                <para>bonne valeur brute.</para>
+              </listitem>
+            </varlistentry>
+
+          </variablelist>
+        </sect5>
+
         </sect4>
-      </sect3>
+     </sect3>
 
       <sect3 id="latex.numerical.pgf">
         <title>Utilisation du package pgf/tikz</title>
@@ -4492,7 +4575,7 @@ Nom et prénom :
     </sect2>
 
     <sect2 id="impression">
-      <title id="impression.titre">Impression du sujet</title>
+      <title id="impression.title">Impression du sujet</title>
 
       <para>Vous pouvez fonctionner de deux manières différentes :</para>
 
@@ -4546,7 +4629,7 @@ Nom et prénom :
           du sujet, la commande <command>\AMCcleardoublepage</command>, qui
           ajoutera les pages blanches nécessaires pour que tous les sujets
           aient un nombre pair de pages (voir <xref
-          endterm="secensemble.titre" linkend="secensemble"/>).</para>
+          endterm="secensemble.title" linkend="secensemble"/>).</para>
         </listitem>
 
         <listitem>
@@ -4585,7 +4668,7 @@ Nom et prénom :
       <emphasis>cocher</emphasis> ou de <emphasis>noircir
       complètement</emphasis> les cases.</para>
 
-      <sect3 id="gui.correct">
+      <sect3 id="gui.advice">
         <title>Cases cochées</title>
 
         <para>Dans ce cas, les étudiants peuvent effacer la/les case(s) avec
@@ -4607,7 +4690,7 @@ Nom et prénom :
         supérieur</guilabel>, la case sera considérér comme non-cochée.</para>
       </sect3>
 
-      <sect3>
+      <sect3 id="gui.correct">
         <title>Cases noircies</title>
 
         <para>Dans le cas où les lettres (ou chiffres) référençant les
@@ -4656,7 +4739,7 @@ Nom et prénom :
           <para>Lors de la première saisie automatique, vous aurez à indiquer
           à AMC quelle méthode vous avez choisie : sujets différents pour tous
           les étudiants, ou photocopie de certains sujets (voir <xref
-          endterm="impression.titre" linkend="impression"/>).</para>
+          endterm="impression.title" linkend="impression"/>).</para>
         </note>
 
         <para>On sélectionne alors l'ensemble des fichiers obtenus à partir du
@@ -5712,7 +5795,7 @@ Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
           menu déroulant <guilabel>Identifiant unique dans cette
           liste</guilabel> de l'onglet <guibutton>Notation</guibutton> lors de
           l'association automatique des copies (voir <xref
-          linkend="Association"/>).</para>
+          linkend="gui.assoc"/>).</para>
         </note>
 
         <para>Les lignes du fichier qui commencent par le caractère
@@ -5769,15 +5852,18 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
         <command>\AMCcodeGrid</command>.</para>
       </sect3>
 
-      <sect3 id="Association">
-        <title>Association</title>
+      <sect3 id="gui.assoc">
+        <title id="gui.assoc.title">Association</title>
 
         <sect4 id="gui.assoc.auto">
-          <title>Association automatique</title>
+          <title id="gui.assoc.auto.title">Association automatique</title>
 
-          <warning>
-            <para>Pour effectuer une association automatique, il est
-            nécessaire d'avoir choisi un critère numérique (en général un
+          <sect5 id="gui.asso.auto.freebarcode">
+            <title>Sans code barre</title>
+
+              <warning>
+              <para>Pour effectuer une association automatique, il est
+              nécessaire d'avoir choisi un critère numérique (en général un
             numéro d'étudiant), d'avoir inclus au moins une commande
             <command>\AMCcodeGrid</command> (voir <xref
             linkend="latex.codes"/>) dans le fichier source LaTeX pour que les
@@ -5805,6 +5891,15 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
               <xref linkend="latex.codes"/>).</para>
             </listitem>
 
+          <listitem>
+            <para> Vérifiez le type du champs nom : 
+          <menuchoice>
+            <guimenu>Préférences</guimenu> <guimenuitem>Projet</guimenuitem>
+            <guisubmenu>Type du champs nom</guisubmenu> <guisubmenu>Image</guisubmenu>
+           </menuchoice>
+              </para>
+           </listitem>
+
             <listitem>
               <para>En appuyant sur le bouton
               <guibutton>Automatique</guibutton> de la partie
@@ -5814,7 +5909,63 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
               association manuelle.</para>
             </listitem>
           </itemizedlist>
-        </sect4>
+          </sect5>
+
+         <sect5 id="gui.asso.auto.barcode">
+            <title id="gui.asso.auto.barcode.title">Avec un code barre</title>
+            <para>Le code barre devra être collé dans l'espace prévu par
+            <command>champnom</command>.</para>
+
+            <note><para>AMC ne crée pas de code barre, il vous appartient de le
+            faire avec un logiciel externe.</para></note>
+
+                    <para>Pour réaliser l'association automatique des copies aux
+          étudiants, complétez les deux menus déroulants de l'onglet
+          <guibutton>Notation</guibutton>:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><guilabel>Identifiant unique dans cette liste :</guilabel>
+              il s’agit du nom de la colonne qui, dans le ﬁchier csv des
+              étudiants, contient le numéro d’étudiants (voir <xref
+              linkend="liste.etudiants"/>).</para>
+            </listitem>
+
+            <listitem>
+              <para><guilabel>Titre du code pour association automatique
+              : </guilabel> <guimenuitem>_namefield</guimenuitem></para>
+            </listitem>
+
+          <listitem>
+            <para> Vérifiez le type du champs nom : 
+           <menuchoice>
+               <guimenu>Préférences</guimenu> <guimenuitem>Projet</guimenuitem>
+               <guisubmenu>Type du champs nom</guisubmenu>
+               <guisubmenu>Barcode ou Barcode tail</guisubmenu>
+               </menuchoice>.
+            </para>
+          </listitem>
+       
+          <listitem>
+            <para> Décodez le  champs nom : 
+           <menuchoice>
+               <guimenu>Menu</guimenu> <guimenuitem>Projet</guimenuitem>
+               <guisubmenu>Décoder le champs nom</guisubmenu>
+            </menuchoice>.
+           </para> 
+         </listitem>
+          
+         <listitem>
+              <para>En appuyant sur le bouton
+              <guibutton>Automatique</guibutton> de la partie
+              <guilabel>Identification des étudiants</guilabel>, la recherche
+              parmi la liste des codes renseignés par les étudiants s'opère.
+              On peut ensuite observer ou peaufiner le résultat grâce à une
+              association manuelle.</para>
+            </listitem>
+          </itemizedlist>
+        </sect5>
+       </sect4>
 
         <sect4 id="gui.assoc.manual">
           <title>Association manuelle</title>
@@ -5838,7 +5989,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
     </sect2>
 
     <sect2 id="sec.export.notes">
-      <title id="sec.export.notes.titre">Export de la liste des notes</title>
+      <title id="sec.export.notes.title">Export de la liste des notes</title>
 
       <para>À ce stade, nous pouvons récupérer la liste des notes sous
       plusieurs formats (pour l'instant CSV et OpenOffice), grâce au bouton
@@ -5894,6 +6045,17 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
               l'étudiant).</para>
             </listitem>
           </varlistentry>
+
+            <varlistentry>
+            <term>vert</term>
+
+            <listitem>
+              <para>utilisé pour le total des questions d'un même groupe
+              (score ou pourcentage). Voir <xref endterm="identifiant.title" linkend="identifiant"/>
+              et <xref endterm="Groupes.questions.title" linkend="Groupes.questions"/>.</para>
+            </listitem>
+          </varlistentry>
+
         </variablelist>
       </sect3>
     </sect2>
@@ -6051,7 +6213,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
       </sect3>
 
       <sect3 id="position.note">
-        <title id="position.note.titre">Position de la note</title>
+        <title id="position.note.title">Position de la note</title>
 
         <para>Vous pouvez choisir la position de la note à l'aide du menu
         <menuchoice>
@@ -6085,7 +6247,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
 
           <listitem>
             <para>Indiqué dans le fichier source (voir <xref
-            endterm="definir.zone.notation.titre"
+            endterm="definir.zone.notation.title"
             linkend="definir.zone.notation"/>).</para>
           </listitem>
         </itemizedlist>
@@ -6093,7 +6255,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
     </sect2>
 
     <sect2 id="preferences.defaut">
-      <title id="preferences.defaut.titre">Les valeurs par défaut du menu
+      <title id="preferences.defaut.title">Les valeurs par défaut du menu
       Préférences</title>
 
       <para>Vous pouvez modifier les valeurs par défaut pour le traitement des
@@ -6161,7 +6323,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
     <sect2 id="alt.photocopy">
       <title>Photocopie du sujet</title>
 
-      <para>Comme expliqué dans <xref endterm="impression.titre"
+      <para>Comme expliqué dans <xref endterm="impression.title"
       linkend="impression"/>, il n'est pas toujours possible de photocopier
       une feuille de réponses pour en donner à plusieurs étudiants. Cependant,
       dans le cas de l'utilisation de la feuille de réponses séparée, et quand
@@ -6173,7 +6335,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
       <itemizedlist>
         <listitem>
           <para>Utiliser l'option <option>ensemble</option> (voir <xref
-          endterm="sec.package.options.titre"
+          endterm="sec.package.options.title"
           linkend="sec.package.options"/>).</para>
         </listitem>
 
@@ -6259,7 +6421,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
         <listitem>
           <para>utiliser les options <option>postcorrect</option>,
           <option>insidebox</option> et <option>noshuffle</option> (voir <xref
-          endterm="sec.package.options.titre"
+          endterm="sec.package.options.title"
           linkend="sec.package.options"/>) ;</para>
         </listitem>
 
@@ -6380,7 +6542,7 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
     </sect2>
 
     <sect2 id="CopiesPremplies">
-      <title id="CopiesPrerempliesTitre">Copies préremplies</title>
+      <title id="CopiesPrerempliesTitle">Copies préremplies</title>
 
       <para>Dans certaines situations, il peut être souhaitable de préparer
       des copies nominatives pour tous les étudiants, à partir d'une liste
@@ -6646,7 +6808,7 @@ sum(sapply(1:2^2,function(x) { x/2 }))
 \end{question}
           </programlisting>
 
-      <sect3>
+      <sect3 id="accolades">
         <title>Accolades explicites</title>
 
         <para>Pour les textes court, encadrer celui-ci dans une commande
@@ -6897,7 +7059,12 @@ What is the return value of the following R code?
   </sect1>
 
   <sect1 id="Divers">
-    <title id="Divers.titre">Divers</title>
+    <title id="Divers.title">Divers</title>
+
+    <sect2 id="pythontex">
+      <title>pythontex</title>
+      <para>Consultez le wiki et le forum <ulink url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Calcul_formel_avec_Python_dans_AMC"/></para>
+    </sect2>
 
     <sect2 id="divers.gmail">
       <title>Paramétrer AMC pour l'utilisation de GMAIL</title>
@@ -6905,7 +7072,7 @@ What is the return value of the following R code?
       <para>Connectez-vous sur votre compte GMAIL puis activez l'option :
       autoriser les applications non sécurisées.</para>
 
-      <sect3>
+      <sect3 id="gmail.linux.users">
         <title>Utilisateurs linux (Ubuntu, Xubuntu, Lubuntu etc.)</title>
 
         <para>Tapez dans un terminal :</para>
@@ -6940,7 +7107,7 @@ password <emphasis>votre mot de passe du compte gmail</emphasis>
         chemin : <programlisting>/usr/bin/msmtp</programlisting></para>
       </sect3>
 
-      <sect3>
+      <sect3 id="Macintosh.users">
         <title>Utilisateurs Macintosh</title>
 
         <para>Tapez dans un terminal :</para>

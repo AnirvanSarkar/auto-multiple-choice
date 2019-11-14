@@ -422,7 +422,7 @@ the best you can.
             value after the test sheets have been printed.</para>
 
             <note>
-              <para>The value is recorded in the xy file (as
+              <para>The value is saved in the xy file (as
               <code>\rngstate{1}{1527384}</code>). The default value is equal
               to 1527384.</para>
             </note>
@@ -1372,7 +1372,11 @@ Duration : 10 minutes.
 
           <callout arearefs="simple.champnom" id="simple.champnom.exp">
             <para>The <command>namefield</command> command specifies where
-            students write their name.</para>
+            students write their name or a barcode (see
+            <xref linkend="gui.asso.auto.barcode"/>).
+           Will be substituted with <command>\namefielddots</command>
+           if you use <option>pdfform</option> option
+           (see <xref linkend = "sec.package.options" />).</para>
           </callout>
 
           <callout arearefs="simple.qr" id="simple.qr.exp">
@@ -1898,6 +1902,11 @@ Duration : 10 minutes.
             the document is not intended to be used with AMC (for example to
             produce exercises lists).</para>
           </listitem>
+
+         <listitem>
+            <para><option>nowatermark</option>: remove the watermark (draft) if you
+            compile withoutAMC. <emphasis> Very hazardous</emphasis>.</para>
+          </listitem>
         </itemizedlist>
       </sect3>
 
@@ -1937,6 +1946,16 @@ Duration : 10 minutes.
       <sect3 id="latex.qr">
         <title id="latex.qr.title">Questions and answers</title>
 
+        <important>
+          <para>Do not nest a question inside a another environment question
+          otherwise exporting the notes will be incomplete (see <xref
+          endterm="sec.export.notes.title"
+          linkend="sec.export.notes"/>).</para>
+        </important>
+
+
+        <sect4>
+        	<title>Simple questions</title>
         <para>For simple questions (a single correct answer), one uses the
         following model: <programlisting linenumbering="unnumbered">\begin{question}{identifier}
   Here is the question...
@@ -1946,55 +1965,281 @@ Duration : 10 minutes.
     \wrongchoice{Another wrong answer}
   \end{choices}
 \end{question}</programlisting></para>
+		</sect4>
 
-        <important>
-          <para>One must use a different identifier for every question. An
-          identifier can be made of digits, letters, and simple characters
-          (but do not use e.g. underscores, braces or brackets, that have a
-          special meaning in LaTeX files). Don't end your question identifier
-          with an integer enclosed in square brackets, as this syntax is
-          reserved to codes input.</para>
-        </important>
 
-        <note>
-          <para>The maximum number of answers for a given question is limited
-          to 199.</para>
-        </note>
-
-        <important>
-          <para>Do not nest a question in a another environment question
-          otherwise the notes' export will be incomplete (see <xref
-          endterm="sec.export.notes.title"
-          linkend="sec.export.notes"/>).</para>
-        </important>
-
-        <para>To keep the original order of the answers and prevent shuffling
-        for this specific question, one can use the <option>o</option> option
-        of the <option>choices</option> environment, replacing line 3 by the
-        following:<programlisting>\begin{choices}[o]</programlisting></para>
-
-        <para>To put the answers on two columns, one can use the
-        <package>multicol</package> package: load it in the preamble (just
-        after the reference to the package
-        <package>automultiplechoice</package> for instance) with
-        <programlisting>\usepackage{multicol}</programlisting>and include the
-        choices environment inside a multicols environment in the following
-        manner:<programlisting>\begin{multicols}{2}
-  \begin{choices}
-    \correctchoice{The correct answer}
-    \wrongchoice{A wrong answer}
-    \wrongchoice{Another wrong answer}
-  \end{choices}
-\end{multicols}</programlisting></para>
-
-        <para>For even shorter answers, one can require questions to be
-        printed following one another, using the <option>choiceshoriz</option>
-        environment instead of <option>choices</option>.</para>
-
-        <para>Multiple questions (those for which no, one, or several answers
+		<sect4>
+			<title>Multiple questions</title>
+			  <para>Multiple questions (those for which no, one, or several answers
         can be correct) use the <option>questionmult</option> environment
         instead of <option>question</option>.</para>
+		</sect4>
 
+      <sect4 id="openquestions">
+        <title>Open questions</title>
+
+        <para>One can sometimes require some open questions to be added to the
+        subject. One way to do so is to reserve boxes use to the teacher for
+        these questions. After the exam, the teacher reads the completed
+        answer sheets and tick the boxes according to the answers written by
+        the students for open questions. He will then scan the sheets and let
+        AMC correct the multiple choice questions and integrate the open
+        questions scores into the marks.<programlisting>\begin{question}{open}
+  Define \emph{inflation}.
+  \AMCOpen{lines=5}{\wrongchoice[W]{w}\scoring{0}\wrongchoice[P]{p}\scoring{1}\correctchoice[C]{c}\scoring{2}}
+\end{question}
+</programlisting></para>
+
+        <para>In this example, the teacher will get three boxes. If the first
+        (labeled W for wrong) is ticked, the student will get 0 points. If the
+        second (labeled P for partial) is ticked, the student will get 1
+        point. If the third (labeled C for correct) is ticked, the student
+        will get 2 points.</para>
+
+        <para>The first argument to <command>\AMCOpen</command> is a comma
+        separated list of options. The available options are:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>lineup=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>if <code>true</code>, the answering area and the scoring
+              boxes will be on the same line. If <code>false</code> (this is
+              default), the answering area is enclosed in a frame and placed
+              below the scoring boxes.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>lineuptext=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para>if <code>lineup=true</code>, the text and ansewering area
+              will be on the same line.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>lines=<replaceable>num</replaceable></term>
+
+            <listitem>
+              <para>sets the number of lines for the answer. Default value is
+              <code>1</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>lineheight=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the height of each line. Default value is
+              <code>1cm</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>dots=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>if <code>true</code> (Default), each line will be realized
+              by a line of dots.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>contentcommand=<replaceable>cmdname</replaceable></term>
+
+            <listitem>
+              <para>Use this option if you want to customize the content of
+              the answer area. You will have to define a
+              <command>\<replaceable>cmdname</replaceable></command> command
+              that has to produce the content.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>hspace=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the space between boxes in the marking area.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>backgroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>sets the background color of the marking area.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>foregroundcol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>sets the foreground color of the marking area.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>scan=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>if <code>false</code>, the boxes are not scanned (this can
+              be useful if you plan to use manual data capture only to mark
+              this question, and don't want to take into account the students
+              drawings on the boxes). Defaults to <code>true</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>annotate=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>if <code>false</code> (default value), the boxes from this
+              question won't be annotated when annotating the answer sheets
+              (only the score will be written).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>question=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para>sets a short text that helps the examiner to identify the
+              question. This text will be written before the scoring boxes,
+              only if a separate answer sheet is used.</para>
+
+              <para>The question's identifier will be displayed if you type
+              question in the options list.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>answer=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para>sets a short text that will be written in the answering
+              area for corrected answer sheets.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <tip>
+          <para>Use the command <command>\savebox</command>, <emphasis>outside
+          the onecopy command</emphasis>, to display a longer text with
+          linebreaks.</para>
+
+          <programlisting>
+       \newsavebox{\correcbox}
+        \savebox{\correcbox}{\parbox{5cm}{\color{red}{Here a linebreak\\or\\here...}}}
+       </programlisting>
+
+          <para>Call out the boxe's contents:</para>
+
+          <programlisting>
+        \AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{Question}
+       </programlisting>
+        </tip>
+
+        <variablelist>
+          <varlistentry>
+            <term>width=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the width of the frame enclosing the answering area
+              when <code>lineup=false</code>. Default value is
+              <code>.95\linewidth</code>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>framerule=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the line width for the frame enclosing the answering
+              area.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>framerulecol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>sets the frame color for the answering area.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>boxmargin=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the margin around the scoring boxes.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>boxframerule=<replaceable>dim</replaceable></term>
+
+            <listitem>
+              <para>sets the line width for the frame around the scoring
+              boxes.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>boxframerulecol=<replaceable>color</replaceable></term>
+
+            <listitem>
+              <para>sets the color of the frame around the scoring
+              boxes.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>You can set other default values (for the whole exam) for all
+        these parameters using the command <command>\AMCopenOpts</command>,
+        like</para>
+
+        <programlisting>\AMCopenOpts{boxframerule=2pt,boxframerulecol=red}</programlisting>
+
+        <para>Moreover, a little text can be written in the marking area to
+        tell the students not to tick these boxes, redefining the
+        <command>\AMCotextReserved</command> command, as:</para>
+
+        <programlisting>\def\AMCotextReserved{\emph{Reserved}}</programlisting>
+
+        <para>When using separate answer sheets, the text added to each open
+        question can also be defined, as:</para>
+
+        <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
+
+        <tip>
+          <para>if the number of boxes is significant, use this tip
+          (<command>\parbox</command>) to force a linebreak.</para>
+
+          <programlisting>\AMCOpen{lines=6}{
+          \hbox{\parbox{8.5cm}{
+          \wrongchoice[F]{F}\scoring{0}
+			    \wrongchoice[1]{1}\scoring{1}
+			    \wrongchoice[2]{2}\scoring{2}
+			    \wrongchoice[3]{3}\scoring{3}
+			    \wrongchoice[4]{4}\scoring{4}
+			    \wrongchoice[5]{5}\scoring{5}
+			    \wrongchoice[6]{6}\scoring{6}
+			    \wrongchoice[7]{7}\scoring{7}
+			    \wrongchoice[8]{8}\scoring{8}
+			    \wrongchoice[9]{9}\scoring{9}
+			    \correctchoice[10]{10}\scoring{10}
+                    }}
+            }
+	      </programlisting>
+        </tip>
+      </sect4>
+
+        <sect4>
+        	<title>Indicative question</title>
         <para>When the answer to the question is not supposed to be taken into
         account in the grading, one uses the <code>\QuestionIndicative</code>
         command, as in the following example:</para>
@@ -2012,37 +2257,25 @@ Duration : 10 minutes.
     \correctchoice{5}
   \end{choiceshoriz}
 \end{question}</programlisting></para>
+		</sect4>
 
-        <sect4 id="latex.lastchoice">
-          <title>Last choice</title>
+		<sect4 id="identifier">
+			<title id="identifier.title">Identifier</title>
+        <important>
+          <para>One must use a different identifier for every question. An
+          identifier can be made of digits, letters, and simple characters
+          (but do not use e.g. underscores, braces or brackets, that have a
+          special meaning in LaTeX files). Don't end your question identifier
+          with an integer enclosed in square brackets, as this syntax is
+          reserved to codes input.</para>
+        </important>
 
-          <para>You may force AMC to let one or more answers as last choices
-          with the command <command>\lastchoices</command>.</para>
-
-          <programlisting>\begin{question}{color}
-  Which color?
-  \begin{choiceshoriz}
-    \wrongchoice{red}
-    \wrongchoice{blue}
-    \wrongchoice{yellow}
-    \lastchoices
-    \correctchoice{transparent}
-    \wrongchoice{can't say}
-  \end{choiceshoriz}
-\end{question}
-
-\begin{questionmult}{number}
-  How many?
-  \begin{choiceshoriz}
-    \wrongchoice{none}
-    \correctchoice{one}
-    \wrongchoice{two}
-    \wrongchoice{three}
-    \lastchoices
-    \correctchoice{not so much}
-    \wrongchoice{a lot}
-  \end{choiceshoriz}
-\end{questionmult}        </programlisting>
+            <para>The style of the identifier may be
+        <programlisting>group.identifier</programlisting> or 
+        <programlisting>group:identifier</programlisting> (see 
+        <xref endterm="babel.french.title" linkend="babel.french"/>) to get
+        the total of a one group of questions when exporting notes 
+        (see <xref endterm="sec.export.notes.title" linkend="sec.export.notes"/>).</para>
         </sect4>
 
         <sect4>
@@ -2072,9 +2305,99 @@ Duration : 10 minutes.
 }</programlisting>
           </note>
         </sect4>
-      </sect3>
 
-      <sect3 id="latex.explain">
+      <sect4 id="latex.choices.multicol">
+        <title>Putting answers on multiple columns</title>
+
+        <para>To put the answers on two columns, one can use the
+        <package>multicol</package> package: load it in the preamble (just
+        after the reference to the package
+        <package>automultiplechoice</package> for instance) with
+        <programlisting>\usepackage{multicol}</programlisting>and include the
+        choices environment inside a multicols environment in the following
+        manner:<programlisting>\begin{multicols}{2}
+  \begin{choices}
+    \correctchoice{The correct answer}
+    \wrongchoice{A wrong answer}
+    \wrongchoice{Another wrong answer}
+  \end{choices}
+\end{multicols}</programlisting></para>
+
+        <para>For even shorter answers, one can require questions to be
+        printed following one another, using the <option>choiceshoriz</option>
+        environment instead of <option>choices</option>.</para>
+
+        <para>To put answers on several columns (and thus save space), one can
+        embed the <option>choices</option> environment in a
+        <option>multicols</option> environment, using the LaTeX package
+        <package>multicol</package>.</para>
+
+        <para>If, moreover, the answers do not fit into a single line, an
+        answer might be split over several columns, which might be a little
+        puzzling for the reader. The <command>\AMCBoxedAnswers</command>
+        command was defined in order to prevent this phenomenon, by embedding
+        each answer into a box. Here is an example of use:</para>
+
+        <para><programlisting>\begin{question}{two columns}
+  What is a bird ?
+  \begin{multicols}{2}\AMCBoxedAnswers
+    \begin{choices}
+      \correctchoice{It is an animal with wings, laying eggs. There are birds with all sorts of colors.}
+      \wrongchoice{It is a large piece of furniture, made of wood, and used most of the time to store
+      household linen}
+      \wrongchoice{It is a steam machine devised to seal cans at high speed.}
+    \end{choices}
+  \end{multicols}
+\end{question}</programlisting></para>
+
+        <para>Let us note that it is also possible to parameterize the
+        vertical space between two answer blocks, thanks to the dimension
+        <parameter>AMCinterBrep</parameter>:</para>
+
+        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
+      </sect4>
+
+      <sect4 id="latex.oneletter">
+        <title>One-letter answers</title>
+
+        <para>Sometimes this is not necessary to write some long text to
+        describe answers, and one letter or symbol is enough. When using a
+        separate answer sheet, it is quite annoying to print the boxes both on
+        the question and on the answer sheet. In such cases, use
+        <command>\AMCBoxOnly</command> instead of the <code>choices</code>
+        environment:</para>
+
+        <programlisting>\begin{question}{arm}
+  Which letter shows the \textit{arm} on the diagram?
+  \AMCBoxOnly{ordered=true}{\wrongchoice[A]{}\correctchoice[B]{}%
+    \wrongchoice[C]{}\wrongchoice[D]{}}
+\end{question}</programlisting>
+
+        <para>The first argument to <command>\AMCBoxOnly</command> is a comma
+        separated list of options. The available options are:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>help=<replaceable>text</replaceable></term>
+
+            <listitem>
+              <para>prints some reminder text before the boxes on the separate
+              answer sheet.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>ordered=<replaceable>bool</replaceable></term>
+
+            <listitem>
+              <para>if <code>true</code> (the default value is
+              <code>false</code>), the answers won't be shuffled.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </sect4>
+
+      <sect4 id="latex.explain">
         <title id="latex.explain.title">Explanation for the answers of a
         question</title>
 
@@ -2084,7 +2407,19 @@ Duration : 10 minutes.
         file.</para>
 
         <warning>
-          <para>Not displayed in the individual solution</para>
+          <para>Not displayed in the individual solution.
+          To get around this, type in preamble:</para>
+<programlisting>
+\makeatletter
+\renewcommand{\explain}[1]{%
+  \ifAMC@correc%
+  \AMCif@env{question}{\par\noindent{\AMC@loc@explain#1}}{\AMC@error@explain}\vspace{1ex}%
+  \else%
+  \AMCif@env{question}{}{\AMC@error@explain}%
+  \fi%
+}
+\makeatother
+</programlisting>          
         </warning>
 
         <para>Here is a simple example:</para>
@@ -2102,7 +2437,7 @@ Duration : 10 minutes.
 \end{question}</programlisting></para>
 
         <note>
-          <para>The <command>explain</command> command can be used inside
+          <para>The <command>explain</command> command must be used inside
           <option>question</option> like environments only. This includes
           <option>question</option>, <option>questionmult</option> and
           <option>questionmultx</option> environments.</para>
@@ -2157,42 +2492,56 @@ Duration : 10 minutes.
         <para>This will now print <emphasis>Explanation: </emphasis> before
         the explanations of first and third question but <emphasis>Reason:
         </emphasis> before the explanation of second question.</para>
-      </sect3>
+      </sect4>
 
-      <sect3 id="latex.choices.multicol">
-        <title>Putting answers on multiple columns</title>
+      	<sect4 id="keep.order.answers">
+      		<title>Keep the original order of the answers</title>
+        <para>To keep the original order of the answers and prevent shuffling
+        for this specific question, one can use the <option>o</option> option
+        of the <option>choices</option> environment, replacing line 3 by the
+        following:<programlisting>\begin{choices}[o]</programlisting></para>
 
-        <para>To put answers on several columns (and thus save space), one can
-        embed the <option>choices</option> environment in a
-        <option>multicols</option> environment, using the LaTeX package
-        <package>multicol</package>.</para>
+            <sect5 id="latex.lastchoice">
+          <title>Last choice</title>
 
-        <para>If, moreover, the answers do not fit into a single line, an
-        answer might be split over several columns, which might be a little
-        puzzling for the reader. The <command>\AMCBoxedAnswers</command>
-        command was defined in order to prevent this phenomenon, by embedding
-        each answer into a box. Here is an example of use:</para>
+          <para>You may force AMC to let one or more answers as last choices
+          with the command <command>\lastchoices</command>.</para>
 
-        <para><programlisting>\begin{question}{two columns}
-  What is a bird ?
-  \begin{multicols}{2}\AMCBoxedAnswers
-    \begin{choices}
-      \correctchoice{It is an animal with wings, laying eggs. There are birds with all sorts of colors.}
-      \wrongchoice{It is a large piece of furniture, made of wood, and used most of the time to store
-      household linen}
-      \wrongchoice{It is a steam machine devised to seal cans at high speed.}
-    \end{choices}
-  \end{multicols}
-\end{question}</programlisting></para>
+          <programlisting>\begin{question}{color}
+  Which color?
+  \begin{choiceshoriz}
+    \wrongchoice{red}
+    \wrongchoice{blue}
+    \wrongchoice{yellow}
+    \lastchoices
+    \correctchoice{transparent}
+    \wrongchoice{can't say}
+  \end{choiceshoriz}
+\end{question}
 
-        <para>Let us note that it is also possible to parameterize the
-        vertical space between two answer blocks, thanks to the dimension
-        <parameter>AMCinterBrep</parameter>:</para>
+\begin{questionmult}{number}
+  How many?
+  \begin{choiceshoriz}
+    \wrongchoice{none}
+    \correctchoice{one}
+    \wrongchoice{two}
+    \wrongchoice{three}
+    \lastchoices
+    \correctchoice{not so much}
+    \wrongchoice{a lot}
+  \end{choiceshoriz}
+\end{questionmult}</programlisting>
+        </sect5>
+    	</sect4>
+        
 
-        <para><programlisting>\AMCinterBrep=.5ex</programlisting></para>
-      </sect3>
+      <sect4 id="latex.numeric.toc">
+        <title>Numerical answer</title>
+        <para> see <xref linkend="latex.numeric"/></para>
+      </sect4>
 
-      <sect3 id="latex.choices.space">
+
+      <sect4 id="latex.choices.space">
         <title>Space between answers</title>
 
         <para>Let us note that it is also possible to parameterize the
@@ -2200,7 +2549,28 @@ Duration : 10 minutes.
         <parameter>AMCinterIrep</parameter>:</para>
 
         <para><programlisting>\AMCinterIrep=.75ex</programlisting></para>
+      </sect4>
+
+      	<sect4 id="remarks">
+      	  <title>Remarks</title>
+
+      	  	<sect5 id="babel.french">
+      	  		<title id="babel.french.title">Language package</title>
+      	  		<para>Some language packages may interfere with the identifier
+      	  		(french for example) if you use colon. Better use the dot.</para>
+      	  	</sect5>
+
+      	  <sect5 id="maximum.responses">
+        	<title>maximum number of responses</title>
+          <para>The maximum number of answers for a given question is limited
+          to 199.</para>
+       	 </sect5>
+      	</sect4>  
       </sect3>
+
+
+
+
 
       <sect3 id="marks.display.area">
         <title id="marks.display.area.title">Define the marks' display
@@ -2956,308 +3326,6 @@ and write your first and last names below.
         </variablelist>
       </sect3>
 
-      <sect3 id="openquestions">
-        <title>Open questions</title>
-
-        <para>One can sometimes require some open questions to be added to the
-        subject. One way to do so is to reserve boxes use to the teacher for
-        these questions. After the exam, the teacher reads the completed
-        answer sheets and tick the boxes according to the answers written by
-        the students for open questions. He will then scan the sheets and let
-        AMC correct the multiple choice questions and integrate the open
-        questions scores into the marks.<programlisting>\begin{question}{open}
-  Define \emph{inflation}.
-  \AMCOpen{lines=5}{\wrongchoice[W]{w}\scoring{0}\wrongchoice[P]{p}\scoring{1}\correctchoice[C]{c}\scoring{2}}
-\end{question}
-</programlisting></para>
-
-        <para>In this example, the teacher will get three boxes. If the first
-        (labeled W for wrong) is ticked, the student will get 0 points. If the
-        second (labeled P for partial) is ticked, the student will get 1
-        point. If the third (labeled C for correct) is ticked, the student
-        will get 2 points.</para>
-
-        <para>The first argument to <command>\AMCOpen</command> is a comma
-        separated list of options. The available options are:</para>
-
-        <variablelist>
-          <varlistentry>
-            <term>lineup=<replaceable>bool</replaceable></term>
-
-            <listitem>
-              <para>if <code>true</code>, the answering area and the scoring
-              boxes will be on the same line. If <code>false</code> (this is
-              default), the answering area is enclosed in a frame and placed
-              below the scoring boxes.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>lineuptext=<replaceable>text</replaceable></term>
-
-            <listitem>
-              <para>if <code>lineup=true</code>, the text and ansewering area
-              will be on the same line.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>lines=<replaceable>num</replaceable></term>
-
-            <listitem>
-              <para>sets the number of lines for the answer. Default value is
-              <code>1</code>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>lineheight=<replaceable>dim</replaceable></term>
-
-            <listitem>
-              <para>sets the height of each line. Default value is
-              <code>1cm</code>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>dots=<replaceable>bool</replaceable></term>
-
-            <listitem>
-              <para>if <code>true</code> (Default), each line will be realized
-              by a line of dots.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>contentcommand=<replaceable>cmdname</replaceable></term>
-
-            <listitem>
-              <para>Use this option if you want to customize the content of
-              the answer area. You will have to define a
-              <command>\<replaceable>cmdname</replaceable></command> command
-              that has to produce the content.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>hspace=<replaceable>dim</replaceable></term>
-
-            <listitem>
-              <para>sets the space between boxes in the marking area.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>backgroundcol=<replaceable>color</replaceable></term>
-
-            <listitem>
-              <para>sets the background color of the marking area.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>foregroundcol=<replaceable>color</replaceable></term>
-
-            <listitem>
-              <para>sets the foreground color of the marking area.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>scan=<replaceable>bool</replaceable></term>
-
-            <listitem>
-              <para>if <code>false</code>, the boxes are not scanned (this can
-              be useful if you plan to use manual data capture only to mark
-              this question, and don't want to take into account the students
-              drawings on the boxes). Defaults to <code>true</code>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>annotate=<replaceable>bool</replaceable></term>
-
-            <listitem>
-              <para>if <code>false</code> (default value), the boxes from this
-              question won't be annotated when annotating the answer sheets
-              (only the score will be written).</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>question=<replaceable>text</replaceable></term>
-
-            <listitem>
-              <para>sets a short text that helps the examiner to identify the
-              question. This text will be written before the scoring boxes,
-              only if a separate answer sheet is used.</para>
-
-              <para>The question's identifier will be displayed if you type
-              question in the options list.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>answer=<replaceable>text</replaceable></term>
-
-            <listitem>
-              <para>sets a short text that will be written in the answering
-              area for corrected answer sheets.</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-
-        <tip>
-          <para>Use the command <command>\savebox</command>, <emphasis>outside
-          the onecopy command</emphasis>, to display a longer text with
-          linebreaks.</para>
-
-          <programlisting>
-       \newsavebox{\correcbox}
-        \savebox{\correcbox}{\parbox{5cm}{\color{red}{Here a linebreak\\or\\here...}}}
-       </programlisting>
-
-          <para>Call out the boxe's contents:</para>
-
-          <programlisting>
-        \AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{Question}
-       </programlisting>
-        </tip>
-
-        <variablelist>
-          <varlistentry>
-            <term>width=<replaceable>dim</replaceable></term>
-
-            <listitem>
-              <para>sets the width of the frame enclosing the answering area
-              when <code>lineup=false</code>. Default value is
-              <code>.95\linewidth</code>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>framerule=<replaceable>dim</replaceable></term>
-
-            <listitem>
-              <para>sets the line width for the frame enclosing the answering
-              area.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>framerulecol=<replaceable>color</replaceable></term>
-
-            <listitem>
-              <para>sets the frame color for the answering area.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>boxmargin=<replaceable>dim</replaceable></term>
-
-            <listitem>
-              <para>sets the margin around the scoring boxes.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>boxframerule=<replaceable>dim</replaceable></term>
-
-            <listitem>
-              <para>sets the line width for the frame around the scoring
-              boxes.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>boxframerulecol=<replaceable>color</replaceable></term>
-
-            <listitem>
-              <para>sets the color of the frame around the scoring
-              boxes.</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-
-        <para>You can set other default values (for the whole exam) for all
-        these parameters using the command <command>\AMCopenOpts</command>,
-        like</para>
-
-        <programlisting>\AMCopenOpts{boxframerule=2pt,boxframerulecol=red}</programlisting>
-
-        <para>Moreover, a little text can be written in the marking area to
-        tell the students not to tick these boxes, redefining the
-        <command>\AMCotextReserved</command> command, as:</para>
-
-        <programlisting>\def\AMCotextReserved{\emph{Reserved}}</programlisting>
-
-        <para>When using separate answer sheets, the text added to each open
-        question can also be defined, as:</para>
-
-        <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
-
-        <tip>
-          <para>if the number of boxes is significant, use this tip
-          (<command>\parbox</command>) to force a linebreak.</para>
-
-          <programlisting>\AMCOpen{lines=6}{
-          \hbox{\parbox{8.5cm}{
-			    \correctchoice[1]{1}\scoring{b=1}
-			    \correctchoice[2]{2}\scoring{b=2}
-			    \correctchoice[3]{3}\scoring{b=3}
-			    \correctchoice[4]{4}\scoring{b=4}
-			    \correctchoice[5]{5}\scoring{b=5}
-			    \correctchoice[6]{6}\scoring{b=6}
-			    \correctchoice[7]{7}\scoring{b=7}
-			    \correctchoice[8]{8}\scoring{b=8}
-			    \correctchoice[9]{9}\scoring{b=9}
-			    \correctchoice[10]{10}\scoring{b=10}
-			    \wrongchoice[F]{F}\scoring{b=0}
-                    }}
-            }
-	      </programlisting>
-        </tip>
-      </sect3>
-
-      <sect3 id="latex.oneletter">
-        <title>One-letter answers</title>
-
-        <para>Sometimes this is not necessary to write some long text to
-        describe answers, and one letter or symbol is enough. When using a
-        separate answer sheet, it is quite annoying to print the boxes both on
-        the question and on the answer sheet. In such cases, use
-        <command>\AMCBoxOnly</command> instead of the <code>choices</code>
-        environment:</para>
-
-        <programlisting>\begin{question}{arm}
-  Which letter shows the \textit{arm} on the diagram?
-  \AMCBoxOnly{ordered=true}{\wrongchoice[A]{}\correctchoice[B]{}%
-    \wrongchoice[C]{}\wrongchoice[D]{}}
-\end{question}</programlisting>
-
-        <para>The first argument to <command>\AMCBoxOnly</command> is a comma
-        separated list of options. The available options are:</para>
-
-        <variablelist>
-          <varlistentry>
-            <term>help=<replaceable>text</replaceable></term>
-
-            <listitem>
-              <para>prints some reminder text before the boxes on the separate
-              answer sheet.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>ordered=<replaceable>bool</replaceable></term>
-
-            <listitem>
-              <para>if <code>true</code> (the default value is
-              <code>false</code>), the answers won't be shuffled.</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-      </sect3>
 
       <sect3 id="latex.seed">
         <title>Choice of shuffling parameters</title>
@@ -3644,6 +3712,10 @@ respective parameters \VQa{} and \VQb{}.
           but we can’t say that several answers are correct, so we don’t show
           the symbol for multiple questions.</para>
 
+
+            <sect5 id="AMCnumericChoices.options">
+              <title>Options</title>
+
           <para>Available options that can be used in the second argument of
           the <command>\AMCnumericChoices</command> command are the following
           (<replaceable>bool</replaceable> can be <code>true</code> or
@@ -3950,6 +4022,31 @@ respective parameters \VQa{} and \VQb{}.
 
           <programlisting>\def\AMCntextGoto{\par{\bf\emph{Please code the answer on
                            the separate answer sheet.}}}</programlisting>
+            </sect5>
+
+       <sect5 id="intX-intV">
+          <title>Access to values</title>
+          <variablelist>
+
+          <varlistentry>
+              <term>intX</term>
+
+              <listitem>
+                <para>raw value entered by student.</para>
+              </listitem>
+            </varlistentry>
+
+                      <varlistentry>
+              <term>intV</term>
+
+              <listitem>
+                <para>correct raw value.</para>
+              </listitem>
+            </varlistentry>
+
+          </variablelist>
+        </sect5>
+
         </sect4>
       </sect3>
 
@@ -5372,10 +5469,8 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
         <sect4 id="gui.assoc.auto">
           <title>Automated association</title>
 
-          <para>When we push the button <guibutton>Automatic</guibutton> in
-          the part <guilabel>Students identification</guilabel>, matching of
-          the codes given by the students begins. We can watch or improve the
-          result later with a (partial) manual association.</para>
+          	 <sect5 id="gui.asso.auto.freebarcode">
+          	 	<title>Without barcode</title>
 
           <warning>
             <para>To make an automated association, at least one command
@@ -5384,8 +5479,98 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
             list of students with a column containing a reference (generally a
             number of student) which will be identical to the input given in
             the boxes produced by the command
-            <command>AMCcode</command>.</para>
+            <command>AMCcodeGrid</command>.</para>
           </warning>
+
+          <para>To perform an automated association complete the two drop-down
+          menus on the <guibutton>Notation</guibutton> tab:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><guilabel>Primary key from this list:</guilabel>
+              the name of the column, in the list of
+             students, with the students' numbers (see <xref
+              linkend="liste.etudiants"/>).</para>
+            </listitem>
+
+            <listitem>
+              <para><guilabel>Code name for automatic association:
+              :</guilabel> the selected identifier thanks to the LaTeX
+              command <command>\AMCcodeGrid</command> (see
+              <xref linkend="latex.codes"/>).</para>
+            </listitem>
+
+          <listitem>
+            <para> Check the name filed type:
+           <menuchoice>
+               <guimenu>Preferences</guimenu> <guimenuitem>Project</guimenuitem>
+               <guisubmenu>Name field type</guisubmenu> <guisubmenu>Image</guisubmenu>
+              </menuchoice>
+              </para>
+             </listitem>
+
+            <listitem>
+ 	         <para>When we push the button <guibutton>Automatic</guibutton> in
+  	        the part <guilabel>Students identification</guilabel>, matching of
+  	        the codes given by the students begins. We can watch or improve the
+    	    result later with a (partial) manual association.</para>
+            </listitem>
+	       </itemizedlist>
+    	 </sect5>
+
+<sect5 id="gui.asso.auto.barcode">
+            <title> With a barcode</title>
+
+            <para>The barcode must be sticked in the space created by
+            <command>champnom</command>.</para>
+
+            <note><para>AMC does not create bar code, it is your
+            responsibility to do so with external software.</para></note>
+
+          <para>To perform an automated association complete the two drop-down
+          menus on the <guibutton>Notation</guibutton> tab:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><guilabel>Primary key from this list:</guilabel>
+              the name of the column, in the list of students,
+              with the students' numbers (see <xref
+              linkend="liste.etudiants"/>).</para>
+            </listitem>
+
+            <listitem>
+              <para><guilabel>Code name for automatic association:
+              : </guilabel> <guimenuitem>_namefield</guimenuitem></para>
+            </listitem>
+
+          <listitem>
+            <para>Check the name filed type:
+           <menuchoice>
+               <guimenu>Preferences</guimenu> <guimenuitem>Project</guimenuitem>
+               <guisubmenu>Name field type</guisubmenu> <guisubmenu>Barcode
+               or Barcode tail</guisubmenu>
+              </menuchoice>.
+              </para>
+           </listitem>
+
+          <listitem>
+            <para>Decode name fields:
+           <menuchoice>
+               <guimenu>Menu</guimenu> <guimenuitem>Project</guimenuitem>
+               <guisubmenu>Decode name fields</guisubmenu>
+              </menuchoice>.
+              </para>
+           </listitem>
+
+            <listitem>
+ 	         <para>When we push the button <guibutton>Automatic</guibutton> in
+  	        the part <guilabel>Students identification</guilabel>, matching of
+  	        the codes given by the students begins. We can watch or improve the
+    	    result later with a (partial) manual association.</para>
+            </listitem>
+          </itemizedlist>
+        </sect5>
+
         </sect4>
 
         <sect4 id="gui.assoc.manual">
@@ -5462,6 +5647,18 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
               <para>used for indicative questions.</para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term>green</term>
+
+            <listitem>
+              <para>used for total score of questions in the same group
+              (score or percentage). See
+              <xref endterm="identifier.title" linkend="identifier"/>
+              et <xref endterm="Groups.questions.title" linkend="Groups.questions"/></para>
+            </listitem>
+          </varlistentry>
+          
         </variablelist>
       </sect3>
     </sect2>
@@ -6100,7 +6297,7 @@ sum(sapply(1:2^2,function(x) { x/2 }))
 \end{question}
           </programlisting>
 
-      <sect3>
+      <sect3 id="escaping.brace">
         <title>Escaping</title>
 
         <para>For very small texts, it is possible to escape all characters
@@ -8786,8 +8983,13 @@ What is the return value of the following R code?
     </refentry>
   </sect1>
 
-  <sect1>
-    <title>miscellaneous</title>
+  <sect1 id="Miscellaneous">
+    <title>Miscellaneous</title>
+
+    <sect2>
+      <title>pythontex</title>
+      <para>See wiki</para>
+    </sect2>
 
     <sect2 id="divers.gmail">
       <title>Configure AMC to use GMAIL</title>
@@ -8795,7 +8997,7 @@ What is the return value of the following R code?
       <para>Login to your gmail account then enable the option : Allowing less
       secure apps to access your account.</para>
 
-      <sect3>
+      <sect3 id="gmail.linux.users">
         <title>Linux users (Ubuntu,Xubuntu,Lubuntu etc.)</title>
 
         <para>Type in a terminal :</para>
@@ -8830,7 +9032,7 @@ password <emphasis>your_password</emphasis>
         path : <programlisting>/usr/bin/msmtp</programlisting></para>
       </sect3>
 
-      <sect3>
+      <sect3 id="Macintosh.users">
         <title>Macintosh users</title>
 
         <para>Type in a terminal :</para>
