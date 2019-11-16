@@ -307,6 +307,7 @@ sub compare {
             $a = $default if ( !defined($a) );
             $b = $default if ( !defined($b) );
             if ( $mode eq 'n' ) {
+                no warnings;
                 $r = $r || ( $a <=> $b );
             }
             else {
