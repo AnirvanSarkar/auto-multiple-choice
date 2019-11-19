@@ -851,7 +851,7 @@ sub scoring_string {
 sub format_answer {
     my ( $self, $a ) = @_;
     my $t = '\\' . ( $a->{correct} ? 'correct' : 'wrong' ) . 'choice';
-    $t .= '[' . $a->{letter} . ']' if ( $a->{letter} && $a->{letter} ne '' );
+    $t .= '[' . $a->{letter} . ']' if ( defined($a->{letter}) && $a->{letter} ne '' );
     $t .= '{' . $self->format_text( $a->{text} ) . "}";
     $t .= $self->scoring_string( $a, 'a' );
     $t .= "\n";

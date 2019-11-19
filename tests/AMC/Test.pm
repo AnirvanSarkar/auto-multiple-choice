@@ -95,6 +95,7 @@ sub new {
         export_ods          => '',
         blind               => 0,
         check_zooms         => {},
+        check_subject       => '',
         skip_prepare        => 0,
         skip_scans          => 0,
         tracedest           => \*STDERR,
@@ -1076,6 +1077,11 @@ sub check_textest {
         $self->trace("[X] TeX file not found: $tex_file");
         exit(1);
     }
+  }
+
+sub check_subject {
+    my ($self) = @_;
+    $self->see_file( $self->{temp_dir} . "/sujet.pdf" );
 }
 
 sub data {
@@ -1263,7 +1269,8 @@ sub report_uninitialized {
 sub default_process {
     my ($self) = @_;
 
-    $self->prepare if ( !$self->{skip_prepare} );
+    $self->prepare       if ( !$self->{skip_prepare} );
+    $self->check_subject if ( $self->{check_subject} );
     $self->defects;
     $self->check_pages;
     if ( !$self->{skip_scans} ) {
