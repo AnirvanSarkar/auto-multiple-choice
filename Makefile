@@ -52,8 +52,13 @@ else
 endif
 endif
 
+ifeq ($(shell pkg-config --exists opencv4 && echo "OK"),OK)
+GCC_OPENCV ?= $(shell pkg-config --cflags opencv4)
+GCC_OPENCV_LIBS ?= $(shell pkg-config --libs opencv4)
+else
 GCC_OPENCV ?= $(shell pkg-config --cflags opencv)
 GCC_OPENCV_LIBS ?= $(shell pkg-config --libs opencv)
+endif
 GCC_PDF ?= $(shell pkg-config --cflags --libs cairo pangocairo poppler-glib)
 GCC_POPPLER ?= $(shell pkg-config --cflags --libs poppler-glib gio-2.0)
 
