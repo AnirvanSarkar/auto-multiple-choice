@@ -65,14 +65,32 @@ sub weight {
 sub printers_list {
     my ($self) = @_;
     my @list = ();
-    open( PL, "-|", "lpstat", "-e" )
-      or die "Can't exec lpstat: $!";
-    while (<PL>) {
-        chomp;
-        push @list, { name => $_, description => "" };
-    }
+    
+    # Verify if lpstat -e output to stderr
+    open( PL, "-|", "lpstat -e 2>&1 1>/dev/null" )
+        or die "Can't exec lpstat: $!";
+    my $err = <PL>;
     close PL;
-    return (@list);
+    if($err) {
+        # lpstat -e outputted to stderr so try lpstat -a
+        open(PL,"-|","lpstat","-a")
+           or die "Can't exec lpstat: $!";
+        while(<PL>) {
+            push @list,{name=>$1,description=>$1}
+              if(/^([^\s]+)\s+accept/);
+        }
+        close PL;
+	} else {
+        # lpstat -e outputted nothing to stderr so use it
+        open( PL, "-|", "lpstat", "-e" )
+            or die "Can't exec lpstat: $!";
+        while (<PL>) {
+            chomp;
+            push @list, { name => $_, description => "" };
+        }
+        close PL;
+    }
+    return(@list);
 }
 
 sub default_printer {
