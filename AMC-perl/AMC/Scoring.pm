@@ -406,13 +406,13 @@ sub score_question {
     $self->{env}->clear_errors;
 
     $self->set_number_variables( $question_data, $correct );
-    $self->{env}->variables_from_directives( setglobal => 1 );
     $self->process_ticked_answers_setx( $question_data, $correct );
     $self->{env}->variables_from_directives(
-        default  => 1,
-        set      => 1,
-        setx     => 1,
-        requires => 1
+        default   => 1,
+        set       => 1,
+        setx      => 1,
+        requires  => 1,
+        setglobal => 1,
     );
 
     if ( $self->{env}->n_errors() ) {

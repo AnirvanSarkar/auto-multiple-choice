@@ -49,6 +49,40 @@ sub max {
     return ($r);
 }
 
+sub amcround {
+    my ( $x, $ndd ) = @_;
+    return ( sprintf( "%.0f", $x * 10**$ndd ) );
+}
+
+sub amcroundnear {
+    my ( $x, $ndd ) = @_;
+    return
+      abs( sprintf( "%.0f", $x * 10**$ndd + 0.01 ) -
+          sprintf( "%.0f", $x * 10**$ndd - 0.01 ) );
+}
+
+sub amcrounddiff {
+    my ( $target, $x, $ndd ) = @_;
+    my $diff = abs( amcround( $target, $ndd ) - amcround( $x, $ndd ) );
+    my $tol  = max( amcroundnear( $target, $ndd ), amcroundnear( $x, $ndd ) );
+    return max( 0, $diff - $tol );
+}
+
+sub amcvdifference {
+    my ( $target, $x, $ndd, $nexpo ) = @_;
+    if ( $nexpo > 0 ) {
+        my ( $t0, $e ) = split( /e/, sprintf( "%.12e", $target ) );
+        if ( amcround( abs($t0), $ndd ) >= 10**( $ndd + 1 ) ) {
+            $e += 1;
+            $t0 /= 10;
+        }
+        return amcrounddiff( $t0, $x * 10**( -$e ), $ndd );
+    } else {
+        return amcrounddiff( $target, $x, $ndd );
+    }
+}
+
+
 sub new {
     my ( $class, @objects ) = (@_);
 

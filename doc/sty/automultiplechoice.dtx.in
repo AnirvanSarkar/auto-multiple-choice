@@ -1015,6 +1015,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %     answer to be said \emph{approximative} and be rewarded to
 %     |scoreapprox| points (defaults to 0).
 %   \item[|scorewrong=|\meta{num}] gives the score for a wrong answer (defaults to 0).
+%   \item[|keepas=|\meta{name}] keeps the value entered by the student
+%     in variable \marg{name}, for future use with \emph{alsocorrect}
+%     in another question.
+%   \item[|alsocorrect=|\meta{expression}] gives another acceptable answer,
+%     that can be based on the values entered by the student in the
+%     previous questions.
 %   \end{itemize}
 %
 %   The text added at the end of the questions using
@@ -3607,6 +3613,35 @@ Three digits and two letters:\insertgroup{mixed}.
   }
 }
 
+\cs_new:Npn \amc_invalid_digits:Nn #1 #2 {
+  \clist_clear:N #1
+  \prg_replicate:nn { #2 } { \clist_put_left:Nx #1 { -1 } }
+}
+
+\cs_new:Npn \amc_get_fp_sign:Nn #1 #2 {
+  \fp_compare:nNnTF #2 < 0 {
+    \int_set:Nn #1 { -1 }
+  }{
+    \fp_compare:nNnTF #2 > 0 {
+      \int_set:Nn #1 { 1 }
+    }{
+      \int_set:Nn #1 { 0 }
+    }
+  }
+}
+
+\cs_new:Npn \amc_get_int_sign:Nn #1 #2 {
+  \int_compare:nNnTF #2 < 0 {
+    \int_set:Nn #1 { -1 }
+  }{
+    \int_compare:nNnTF #2 > 0 {
+      \int_set:Nn #1 { 1 }
+    }{
+      \int_set:Nn #1 { 0 }
+    }
+  }
+}
+
 \ExplSyntaxOff
 %    \end{macrocode}
 % 
@@ -3687,7 +3722,11 @@ Three digits and two letters:\insertgroup{mixed}.
   exact .int_set:N = \amc_num_exact_int,
   exact .initial:n = { 0 },
   approx .int_set:N = \amc_num_approx_int,
-  approx .initial:n = { 0 }
+  approx .initial:n = { 0 },
+  keepas .code:n = {\def\AMC@numeric@keepas{#1}},
+  keepas .initial:n = {},
+  alsocorrect .code:n = {\def\AMC@numeric@alsocorrect{#1}},
+  alsocorrect .initial:n = {}
 }
 
 \cs_new:Npn \amc_num_setopts #1 {
@@ -3740,23 +3779,33 @@ Three digits and two letters:\insertgroup{mixed}.
   }
 }
 %    \end{macrocode}
-% The command |\amc_num_sign_boxes:Nn|\marg{negative}\marg{prefix}
+% The command |\amc_num_sign_boxes:Nn|\marg{sign}\marg{prefix}
 % draws two boxes for the students to code the sign (with a right
 % value given by the boolean \meta{negative}).
 %    \begin{macrocode}
-\cs_new:Npn \amc_num_sign_boxes:N #1 #2 {
-  \bool_if:nTF { #1 } {
-    \hbox{\amc_num_char:nn{$+$}{}}
-    \vspace{\AMCnumeric@Vspace}
-    \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
-    \hbox{\amc_num_char:nn{$-$}{\AMC@checkedbox}}
-    \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
-  } {
-    \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
-    \vspace{\AMCnumeric@Vspace}
-    \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
-    \hbox{\amc_num_char:nn{$-$}{}}
-    \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+\cs_new:Npn \amc_num_sign_boxes:Nn #1 #2 {
+  \int_case:nn { #1 } {
+    { -1 } {
+      \hbox{\amc_num_char:nn{$+$}{}}
+      \vspace{\AMCnumeric@Vspace}
+      \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+      \hbox{\amc_num_char:nn{$-$}{\AMC@checkedbox}}
+      \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+    }
+    { 1 } {
+      \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
+      \vspace{\AMCnumeric@Vspace}
+      \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+      \hbox{\amc_num_char:nn{$-$}{}}
+      \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+    }
+    { 0 } {
+      \hbox{\amc_num_char:nn{$+$}{}}
+      \vspace{\AMCnumeric@Vspace}
+      \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+      \hbox{\amc_num_char:nn{$-$}{}}
+      \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+    }
   }
 }
 %    \end{macrocode}
@@ -3880,19 +3929,19 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 
 %    \end{macrocode}
-% Finally, |\amc_num_integer_boxes:NnnNn|\marg{correct
-% digits}\marg{prefix}\marg{decimals}\marg{sign bool}\marg{positive} draws
+% Finally, |\amc_num_integer_boxes:NnnNN|\marg{correct
+% digits}\marg{prefix}\marg{decimals}\marg{sign bool}\marg{sign} draws
 % boxes for integer entry, including the sign if \meta{sign bool} is
 % true.
 %    \begin{macrocode}
 
-\cs_new:Npn \amc_num_integer_boxes:NnnNn #1 #2 #3 #4 #5 {
+\cs_new:Npn \amc_num_integer_boxes:NnnNN #1 #2 #3 #4 #5 {
   \hbox{
     \bool_if:NTF { #4 } {
       \vbox{
         \ifx\AMCntextSign\@empty\@empty\else
         \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi
-        \amc_num_sign_boxes:N { #5 } { #2 }
+        \amc_num_sign_boxes:Nn { #5 } { #2 }
       }
       \hspace{.5em}
       \vrule
@@ -3954,6 +4003,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \clist_new:N \amc_num_digits_clist
 \clist_new:N \amc_num_expo_digits_clist
 \int_new:N \amc_num_digit_int
+\int_new:N \amc_num_sign_int
+\int_new:N \amc_num_expo_sign_int
 \tl_new:N \amc_num_compute_tl
 \tl_new:N \amc_num_expo_tl
 \int_new:N \amc_num_correct_expo_int
@@ -3982,6 +4033,11 @@ Three digits and two letters:\insertgroup{mixed}.
 % Convert the floating point correct value to integer, taking into
 % account the parameters |significant|, |exponent| and |decimals|:
 %    \begin{macrocode}
+   \ifx\@empty#1\@empty
+     \fp_set:Nn \amc_num_correct_fp { 0 }
+     \fp_set:Nn \amc_num_mantissa_fp { 0 }
+     \int_set:Nn \amc_num_correct_expo_int { 0 }
+   \else
    \bool_if:NTF \amc_num_significant_bool {
      \amc_fp_n_significant_digits:Nnn \amc_num_correct_fp { #1 } \amc_num_ndigits_int
    } {
@@ -4000,15 +4056,25 @@ Three digits and two letters:\insertgroup{mixed}.
        \amc_fp_n_digits:Nnn \amc_num_correct_fp { #1 } \amc_num_decd_int
      }
    }
+   \fi
 %    \end{macrocode}
 % Now extracts the required digits:
 %    \begin{macrocode}
-   \amc_fp_to_digits:Nnnn \amc_num_digits_clist \amc_num_correct_fp
-     \amc_num_ndigits_int \amc_num_base_int
-   \int_compare:nNnTF \amc_num_expo_int > 0 {
-     \amc_fp_to_digits:Nnnn \amc_num_expo_digits_clist \amc_num_correct_expo_int
-       \amc_num_expo_int \amc_num_base_int
-   } {}
+   \ifx\@empty#1\@empty
+     \amc_invalid_digits:Nn \amc_num_digits_clist \amc_num_ndigits_int
+     \amc_invalid_digits:Nn \amc_num_expo_digits_clist \amc_num_expo_int
+     \int_set:Nn \amc_num_sign_int { 0 }
+     \int_set:Nn \amc_num_expo_sign_int { 0 }
+   \else
+     \amc_fp_to_digits:Nnnn \amc_num_digits_clist \amc_num_correct_fp
+       \amc_num_ndigits_int \amc_num_base_int
+     \amc_get_fp_sign:Nn \amc_num_sign_int \amc_num_correct_fp
+     \int_compare:nNnTF \amc_num_expo_int > 0 {
+       \amc_fp_to_digits:Nnnn \amc_num_expo_digits_clist \amc_num_correct_expo_int
+         \amc_num_expo_int \amc_num_base_int
+       \amc_get_int_sign:Nn \amc_num_expo_sign_int \amc_num_correct_expo_int
+     } {}
+   \fi    
 %    \end{macrocode}
 % The question scoring is given to AMC (if requested by the
 % |scoring=true| option). Note that the variable |intV| refers to the
@@ -4032,18 +4098,49 @@ Three digits and two letters:\insertgroup{mixed}.
      \amc_num_build_integer_scoring:Nnnn
        \amc_num_expo_tl \amc_num_exposign_bool { expo } \amc_num_expo_int
      \AMC@amclog{AUTOQCM[B= set. intE = \amc_num_expo_tl ]^^J}
-     \tl_put_right:Nx \amc_num_compute_tl
-       { * \int_use:N\amc_num_base_int **( intE - (\int_use:N\amc_num_correct_expo_int) ) }
    } {}
    \AMC@amclog{AUTOQCM[B= set.intV = \fp_to_int:N\amc_num_correct_fp ,
-     set.intX = \amc_num_compute_tl ]^^J}
+     set.intXX = \amc_num_compute_tl ]^^J}
+   \int_compare:nNnTF \amc_num_expo_int > 0 {
+     \AMC@amclog{AUTOQCM[B= set.intX = intXX * \int_use:N\amc_num_base_int **( intE - (\int_use:N\amc_num_correct_expo_int) )]^^J}
+   }{
+     \AMC@amclog{AUTOQCM[B= set.intX = intXX]^^J}
+   }
+   \int_compare:nNnTF \amc_num_expo_int > 0 {
+     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE - \int_use:N\amc_num_decd_int)]^^J}
+   }{
+     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (- \int_use:N\amc_num_decd_int) ]^^J}
+   }
+   \ifx\@empty\AMC@numeric@keepas\@empty\else
+   \AMC@amclog{AUTOQCM[B= setglobal.\AMC@numeric@keepas = valueX ]^^J}
+   \fi
+   \ifx\@empty#1\@empty
+   \bool_if:NTF \amc_num_significant_bool {
+     \AMC@amclog{AUTOQCM[B=set.Vdifference=0]^^J}
+   }{
+     \ifx\@empty\AMC@numeric@alsocorrect\@empty
+       \AMC@amclog{AUTOQCM[B=set.Vdifference=0]^^J}
+     \else
+       \AMC@amclog{AUTOQCM[B="set.Vdifference =
+         amcvdifference( \AMC@numeric@alsocorrect, valueX, \int_use:N\amc_num_decd_int, \int_use:N\amc_num_expo_int)
+         "]^^J}
+     \fi
+   }
+   \else
    \bool_if:NTF \amc_num_significant_bool {
      \AMC@amclog{AUTOQCM[B=set.Vdifference="min( abs((intV)-(intX)) ,
        abs(\int_use:N\amc_num_base_int * (intV) - (intX)) ,
        abs((intV) - \int_use:N\amc_num_base_int * (intX)) )"]^^J}
    } {
+     \ifx\@empty\AMC@numeric@alsocorrect\@empty
      \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}
+     \else
+     \AMC@amclog{AUTOQCM[B="set.Vdifference =
+       min( amcvdifference( \AMC@numeric@alsocorrect, valueX, \int_use:N\amc_num_decd_int, \int_use:N\amc_num_expo_int),
+       abs((intV)-(intX)) )" ]^^J}
+     \fi
    }
+   \fi
 %    \end{macrocode}
 % Begin now with the frame around all the boxes:
 %    \begin{macrocode}
@@ -4052,27 +4149,27 @@ Three digits and two letters:\insertgroup{mixed}.
     \fcolorbox{\AMCncol@Border}{\AMCncol@Background}{
       \bool_if:NTF \amc_num_expovertical_bool {
         \hbox{\vbox{
-          \vbox{\amc_num_integer_boxes:NnnNn
+          \vbox{\amc_num_integer_boxes:NnnNN
           \amc_num_digits_clist { digit } \amc_num_decd_int \amc_num_sign_bool
-          { \fp_compare_p:nNn \amc_num_correct_fp < 0}}
+          \amc_num_sign_int}
           \int_compare:nNnTF \amc_num_expo_int > 0 {
             \vspace{\AMCnumeric@Vspace}
             \vbox{\hbox{\AMCexponent}}
             \vspace{\AMCnumeric@Vspace}
-            \vbox{\amc_num_integer_boxes:NnnNn
-            \amc_num_expo_digits_clist { expo } { 0 } \amc_num_exposign_bool
-            { \int_compare_p:nNn \amc_num_correct_expo_int < 0 }}
+            \vbox{\amc_num_integer_boxes:NnnNN
+              \amc_num_expo_digits_clist { expo } { 0 } \amc_num_exposign_bool
+              \amc_num_expo_sign_int}
           } {}
         }}
       } {
-        \amc_num_integer_boxes:NnnNn
+        \amc_num_integer_boxes:NnnNN
         \amc_num_digits_clist { digit } \amc_num_decd_int \amc_num_sign_bool
-        { \fp_compare_p:nNn \amc_num_correct_fp < 0}
+        \amc_num_sign_int
         \int_compare:nNnTF \amc_num_expo_int > 0 {
           \hspace{\AMCnumeric@Hspace}\AMCexponent\hspace{\AMCnumeric@Hspace}
-          \amc_num_integer_boxes:NnnNn
+          \amc_num_integer_boxes:NnnNN
           \amc_num_expo_digits_clist { expo } { 0 } \amc_num_exposign_bool
-          { \int_compare_p:nNn \amc_num_correct_expo_int < 0 }
+          \amc_num_expo_sign_int
         } {}
       }
     }
