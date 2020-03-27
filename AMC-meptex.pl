@@ -128,7 +128,7 @@ sub add_flag {
 
 debug "Reading $src...";
 
-open( SRC, $src ) or die "Unable to open $src : $!";
+open( SRC, "<:utf8", $src ) or die "Unable to open $src : $!";
 while (<SRC>) {
     if (/\\page\{([^\}]+)\}\{([^\}]+)\}\{([^\}]+)\}/) {
         my $id = $1;
@@ -184,8 +184,12 @@ while (<SRC>) {
     if (/\\dontannotate\{(.*)\}/) {
         add_flag( $1, BOX_FLAGS_DONTANNOTATE );
     }
-    if (/\\association\{([0-9]+)\}\{(.*)\}/) {
-        push @pre_assoc, [ $1, $2 ];
+    if (/\\association\{([0-9]+)\}\{(.*)\}\{(.*)\}/) {
+        my $student  = $1;
+        my $id       = $2;
+        my $filename = $3;
+        $filename =~ s/[\{\}\\]+//g;
+        push @pre_assoc, [ $student, $id, $filename ];
     }
     if (/\\with\{(.+?)=(.*)\}/) {
         $build_vars{$1} = $2;

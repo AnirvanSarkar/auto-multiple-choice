@@ -4741,11 +4741,13 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \begin{macro}{\AMCassociation}
 %   Association between sheets and students can be made before the
-%   exam with the |\AMCassociation|\marg{id} command.
+%   exam with the |\AMCassociation|\oarg{filename}\marg{id}
+%   command. The optional argument \meta{filename} will be used when
+%   printing student sheets to files.
 %    \begin{macrocode}
-\newcommand{\AMCassociation}[1]{%
+\newcommand{\AMCassociation}[2][]{%
   \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
-    \string\association{\the\AMCid@etud}{#1}%
+    \string\association{\the\AMCid@etud}{#2}{#1}%
   }\fi%
 }
 %    \end{macrocode}

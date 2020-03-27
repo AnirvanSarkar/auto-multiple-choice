@@ -129,6 +129,9 @@ package AMC::DataModule::layout;
 # * id is the association value (student id from the students list)
 #   for the corresponding student sheet
 #
+# * filename is the filename suggested when printing the students
+#   sheets to files.
+#
 # layout_char contains the chars written inside the answer boxes in catalog mode
 #
 # * question is the question ID (see explanation in layout_box)
@@ -168,7 +171,7 @@ use XML::Simple;
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (7);
+    return (8);
 }
 
 sub drop_box_table {
@@ -315,6 +318,11 @@ sub version_upgrade {
               . $self->table( "char", "self" )
               . " (question,answer)" );
         return (7);
+    }
+    if ( $old_version == 7 ) {
+        $self->sql_do(
+            "ALTER TABLE " . $self->table("association") . " ADD COLUMN filename TEXT" );
+        return (8);
     }
     return ('');
 }
@@ -467,8 +475,11 @@ sub define_statements {
         NEWAssociation => {
                 sql => "INSERT INTO "
               . $self->table("association")
-              . " (student,id) VALUES (?,?)"
+              . " (student,id,filename) VALUES (?,?,?)"
         },
+        AssociationFilename => { sql => "SELECT filename FROM "
+              . $self->table("association")
+              . " WHERE student=?" },
         IDS => {
                 sql => "SELECT student || ',' || page FROM "
               . $self->table("page")
@@ -1171,8 +1182,8 @@ sub get_box_info {
 # pre-association data (associations made before the exam)
 
 sub new_association {
-    my ( $self, $student, $id ) = @_;
-    $self->statement('NEWAssociation')->execute( $student, $id );
+    my ( $self, $student, $id, $filename ) = @_;
+    $self->statement('NEWAssociation')->execute( $student, $id, $filename );
 }
 
 # pre_association() returns the number of pre-asociations
@@ -1180,6 +1191,16 @@ sub new_association {
 sub pre_association {
     my ($self) = @_;
     return ( $self->sql_single( $self->statement("AssocNumber") ) );
+}
+
+# get_associated_filename(student) returns the filename suggested by
+# pre-association for this student
+
+sub get_associated_filename {
+    my ( $self, $student ) = @_;
+    return (
+        $self->sql_single( $self->statement("AssociationFilename"), $student )
+    );
 }
 
 # orientation() returns "portrait" or "landscape" if all pages have

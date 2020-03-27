@@ -50,6 +50,16 @@
     <property name="can_focus">False</property>
     <property name="icon_name">amc-send</property>
   </object>
+  <object class="GtkImage" id="imagess">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">amc-send</property>
+  </object>
+  <object class="GtkImage" id="imagessc">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-preferences</property>
+  </object>
   <object class="GtkImage" id="image20">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -672,7 +682,51 @@
                     <property name="position">5</property>
                   </packing>
                 </child>
-              </object>
+                <child>
+                  <object class="GtkButtonBox" id="send_subject_action">
+                    <property name="visible">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="layout_style">end</property>
+                    <child>
+                      <object class="GtkButton" id="send_subject_config_button">
+                        <property name="label">List…</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="image">imagessc</property>
+                        <property name="always_show_image">True</property>
+                        <signal name="clicked" handler="send_subjects_config" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="buttonss">
+                        <property name="label" translatable="yes">Send...</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="image">imagess</property>
+                        <property name="always_show_image">True</property>
+                        <signal name="clicked" handler="send_subjects" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">6</property>
+                  </packing>
+                </child>
+                </object>
               <packing>
                 <property name="tab_fill">False</property>
               </packing>

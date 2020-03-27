@@ -361,12 +361,20 @@ sub defaults {
         email_smtp_user => '',
         SMTP            => '',
 
+# TRANSLATORS: Subject of the emails which can be sent to the students to give them their subject.
+        df_subjectemail_email_subject => __ "Exam question",
+
+# TRANSLATORS: Body text of the emails which can be sent to the students to give them their subject.
+        df_subjectemail_email_text => __
+"Please find enclosed your question sheet.\nRegards.",
+
 # TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
-        defaut_email_subject => __ "Exam result",
+        df_annotatedemail_email_subject => __ "Exam result",
 
 # TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
-        defaut_email_text => __
+        df_annotatedemail_email_text => __
 "Please find enclosed your annotated completed answer sheet.\nRegards.",
+
         email_delay => 0,
 
         csv_surname_headers => '',
@@ -449,10 +457,10 @@ sub defaults {
         allocate_ids      => 0,
 
         email_col        => '',
-        email_subject    => "",
-        email_text       => "",
         email_attachment => [],
-        email_use_html   => '',
+
+        subjectemail   => {},
+        annotatedemail => {},
 
         pdfform => 0,
 
@@ -579,6 +587,19 @@ sub set_project_options_to_default {
 
     for my $k ( keys %{ $self->{project_default} } ) {
         $self->set_project_option_to_default($k);
+    }
+
+    for my $k ( keys %{ $self->{global} } ) {
+        if ( $k =~ /df_([a-z]+)_(.*)/ ) {
+            my $c  = $1;
+            my $kk = $2;
+            $self->{project}->{$c} = {}
+              if ( ! $self->{project}->{$c} );
+            if ( !exists( $self->{project}->{$c}->{$kk} ) ) {
+                print "New option $c/$kk from $k\n";
+                $self->{project}->{$c}->{$kk} = $self->{global}->{$k};
+            }
+        }
     }
 }
 

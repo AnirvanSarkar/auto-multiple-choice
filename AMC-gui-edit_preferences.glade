@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.0 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.16"/>
   <object class="GtkAdjustment" id="adjustment1">
@@ -1917,13 +1917,12 @@
                                       <object class="GtkComboBox" id="pref_c_defaut_name_field_type">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-					<child>
+                                        <child>
                                           <object class="GtkCellRendererText" id="cellrenderertext_nft"/>
                                           <attributes>
                                             <attribute name="text">0</attribute>
                                           </attributes>
                                         </child>
-
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -3557,12 +3556,60 @@
                                 <property name="can_focus">False</property>
                                 <property name="left_padding">12</property>
                                 <child>
-                                  <object class="GtkEntry" id="pref_x_defaut_email_subject">
+                                  <object class="GtkBox" id="boxsubjectemail">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="invisible_char">●</property>
-                                    <property name="primary_icon_activatable">False</property>
-                                    <property name="secondary_icon_activatable">False</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="orientation">vertical</property>
+                                    <child>
+                                      <object class="GtkLabel" id="labelsubjectemail">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Default subject</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkEntry" id="pref_x_df_subjectemail_email_subject">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="invisible_char">●</property>
+                                        <property name="primary_icon_activatable">False</property>
+                                        <property name="secondary_icon_activatable">False</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="labelcontent">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Default content</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTextView" id="pref_t_df_subjectemail_email_text">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="left_margin">6</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">3</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -3571,7 +3618,7 @@
                               <object class="GtkLabel" id="label8">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">&lt;b&gt;Default subject&lt;/b&gt;</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Sending question sheets&lt;/b&gt;</property>
                                 <property name="use_markup">True</property>
                               </object>
                             </child>
@@ -3594,16 +3641,59 @@
                                 <property name="can_focus">False</property>
                                 <property name="left_padding">12</property>
                                 <child>
-                                  <object class="GtkScrolledWindow" id="scrolledwindow4">
+                                  <object class="GtkBox" id="boxannotemail">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="shadow_type">in</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="orientation">vertical</property>
                                     <child>
-                                      <object class="GtkTextView" id="pref_t_defaut_email_text">
+                                      <object class="GtkLabel" id="labelannotemail">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Default subject</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkEntry" id="pref_x_df_annotatedemail_email_subject">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="invisible_char">●</property>
+                                        <property name="primary_icon_activatable">False</property>
+                                        <property name="secondary_icon_activatable">False</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="contentlabelannotemail">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Default content</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTextView" id="pref_t_df_annotatedemail_email_text">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="left_margin">6</property>
                                       </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">3</property>
+                                      </packing>
                                     </child>
                                   </object>
                                 </child>
@@ -3613,7 +3703,7 @@
                               <object class="GtkLabel" id="label9">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">&lt;b&gt;Default content&lt;/b&gt;</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Sending annotated answer sheets&lt;/b&gt;</property>
                                 <property name="use_markup">True</property>
                               </object>
                             </child>
@@ -3760,13 +3850,12 @@
                                       <object class="GtkComboBox" id="pref_projet_c_name_field_type">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-					<child>
+                                        <child>
                                           <object class="GtkCellRendererText" id="cellrenderertext_nft0"/>
                                           <attributes>
                                             <attribute name="text">0</attribute>
                                           </attributes>
                                         </child>
-
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -4024,9 +4113,9 @@
                                           <object class="GtkScrolledWindow" id="scrolledwindow6">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="min_content_height">75</property>
                                             <property name="border_width">1</property>
                                             <property name="shadow_type">in</property>
+                                            <property name="min_content_height">75</property>
                                             <child>
                                               <object class="GtkTextView" id="pref_projet_t_verdict">
                                                 <property name="visible">True</property>

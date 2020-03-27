@@ -66,6 +66,8 @@ my @attach_files      = ();
 my $debug             = '';
 my $progress          = '';
 my $progress_id       = '';
+my $report_kind       = REPORT_ANNOTATED_PDF;
+my $preassoc_key      = '';
 
 @ARGV = unpack_args(@ARGV);
 my @ARGV_ORIG = @ARGV;
@@ -75,9 +77,11 @@ GetOptions(
     "project-name=s"      => \$project_name,
     "data=s"              => \$data_dir,
     "students-list=s"     => \$students_list,
+    "preassoc-key=s"      => \$preassoc_key,
     "list-encoding=s"     => \$list_encoding,
     "csv-build-name=s"    => \$csv_build_name,
     "ids-file=s"          => \$ids_file,
+    "report=s"            => \$report_kind,
     "email-column=s"      => \$email_column,
     "sender=s"            => \$sender,
     "text=s"              => \$text,
@@ -106,6 +110,14 @@ utf8::downgrade($students_list);
 utf8::downgrade($ids_file);
 
 debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
+
+my $report_filename =
+    {
+     &REPORT_ANNOTATED_PDF => "corrected.pdf",
+     &REPORT_PRINTED_COPY => "subject.pdf",
+    }->{$report_kind} || "file.pdf";
+
+my $via_preassoc = ( $report_kind == REPORT_PRINTED_COPY );
 
 sub error {
     my ($text) = @_;
@@ -147,6 +159,7 @@ if ( -f $ids_file ) {
 }
 
 if ($log_file) {
+    utf8::downgrade($log_file);
     open( LOGF, ">>", $log_file )
       or debug "Error opening log file $log_file: $!";
     print LOGF localtime . " Starting mailing...\n";
@@ -155,6 +168,7 @@ if ($log_file) {
 my $avance = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 
 my $data    = AMC::Data->new($data_dir);
+my $layout  = $data->module('layout');
 my $report  = $data->module('report');
 my $assoc   = $data->module('association');
 my $scoring = $data->module('scoring');
@@ -167,15 +181,24 @@ my $subst = AMC::Substitute::new(
 );
 
 $data->begin_read_transaction('Mail');
-my $subdir = $report->get_dir(REPORT_ANNOTATED_PDF);
+my $subdir = $report->get_dir($report_kind);
 
-my $pdf_dir = "$project_dir/$subdir";
-utf8::downgrade($pdf_dir);
+my $pdf_dir = "";
+if($subdir) {
+    $pdf_dir = "$project_dir/$subdir";
+    utf8::downgrade($pdf_dir);
+}
 
-error("PDF directory not found: $pdf_dir") if ( !-d $pdf_dir );
+error("PDF directory not found: $pdf_dir") if ( $pdf_dir && !-d $pdf_dir );
 
-my $key = $assoc->variable('key_in_list');
-my $r   = $report->get_associated_type(REPORT_ANNOTATED_PDF);
+my ($key, $r);
+if ( $via_preassoc ) {
+    $key = $preassoc_key;
+    $r = $report->get_preassociated_type($report_kind);
+} else {
+    $key = $assoc->variable('key_in_list');
+    $r = $report->get_associated_type($report_kind);
+}
 
 my $t;
 if ( $transport eq 'sendmail' ) {
@@ -252,16 +275,16 @@ STUDENT: for my $i (@$r) {
     if ($dest) {
         my $file = $i->{file};
         utf8::encode($file);
-        $file = $pdf_dir . "/$file";
+        if ($pdf_dir) {
+            $file = $pdf_dir . "/$file";
+        }
 
         debug "  FILE=$file";
         if ( -f $file ) {
             my $body = '';
-            open( PDF, $file );
-            while (<PDF>) { $body .= $_; }
-            close(PDF);
+            $body = file_content($file);
 
-            my @sc    = $assoc->real_back( $i->{id} );
+            my @sc    = ( $i->{student}, $i->{copy} );
             my @parts = (
                 Email::MIME->create(
                     attributes => {
@@ -273,10 +296,10 @@ STUDENT: for my $i (@$r) {
                 ),
                 Email::MIME->create(
                     attributes => {
-                        filename     => "corrected.pdf",
+                        filename     => $report_filename,
                         content_type => "application/pdf",
                         encoding     => "base64",
-                        name         => "corrected.pdf",
+                        name         => $report_filename,
                         disposition  => "attachment",
                     },
                     body => $body,
@@ -326,7 +349,7 @@ STUDENT: for my $i (@$r) {
 
             next STUDENT if ($failed_auth);
 
-            $report->report_mailing( @sc,
+            $report->report_mailing( $report_kind, @sc,
                 ( $status eq 'OK' ? REPORT_MAIL_OK : REPORT_MAIL_FAILED ),
                 $m, 'now' );
         } else {

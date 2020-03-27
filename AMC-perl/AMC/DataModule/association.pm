@@ -291,7 +291,8 @@ sub counts {
     my ($self) = @_;
     my $sth = $self->statement('counts');
     $sth->execute;
-    return ( @{ $sth->fetchrow_arrayref } );
+    my @r = map { $_ || 0 } @{ $sth->fetchrow_arrayref };
+    return (@r);
 }
 
 # clear clears all association data.

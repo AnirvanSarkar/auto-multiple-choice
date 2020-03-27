@@ -48,18 +48,23 @@ use Exporter qw(import);
 use constant {
     REPORT_ANNOTATED_PDF        => 1,
     REPORT_SINGLE_ANNOTATED_PDF => 2,
+    REPORT_PRINTED_COPY         => 3,
 
     REPORT_MAIL_NO     => 0,
     REPORT_MAIL_OK     => 1,
     REPORT_MAIL_FAILED => 100,
 };
 
-our @EXPORT_OK = qw(REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
-  REPORT_MAIL_OK REPORT_MAIL_FAILED);
+our @EXPORT_OK = qw(
+  REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
+  REPORT_PRINTED_COPY REPORT_MAIL_OK REPORT_MAIL_FAILED
+);
 our %EXPORT_TAGS = (
     const => [
-        qw/REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
-          REPORT_MAIL_OK REPORT_MAIL_FAILED/
+        qw(
+          REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
+          REPORT_PRINTED_COPY REPORT_MAIL_OK REPORT_MAIL_FAILED
+        ),
     ],
 );
 
@@ -165,11 +170,21 @@ sub define_statements {
         getAssociatedType => {
                 sql => "SELECT CASE"
               . "  WHEN a.manual IS NOT NULL THEN a.manual"
-              . "  ELSE a.auto END AS id,r.file AS file,r.mail_status AS mail_status"
+              . "  ELSE a.auto END AS id,a.student AS student,a.copy AS copy,r.file AS file,r.mail_status AS mail_status"
               . " FROM $t_assoc AS a,"
               . "   (SELECT * FROM $t_student WHERE type=?) AS r"
               . " ON a.student=r.student AND a.copy=r.copy"
         },
+        getPreAssociatedType => { sql =>
+              "SELECT a.student AS student, r.copy AS copy, a.id AS id, r.file AS file, r.mail_status AS mail_status"
+              . " FROM "
+              . $self->table( "association", "layout" )
+              . " AS a,"
+              . "   (SELECT * FROM $t_student WHERE type=?) AS r"
+              . " ON a.student=r.student" },
+        clearReports =>
+        { sql => "DELETE FROM $t_student"
+              ." WHERE type=?"},
     };
 }
 
@@ -207,14 +222,14 @@ sub set_student_report {
       ->execute( $file, $timestamp, $type, $student, $copy, 0, "", 0 );
 }
 
-# report_mailing($student,$copy,$status,$message,$timestamp) records
-# mailing status for the report
+# report_mailing($type,$student,$copy,$status,$message,$timestamp)
+# records mailing status for the report
 
 sub report_mailing {
-    my ( $self, $student, $copy, $status, $message, $timestamp ) = @_;
+    my ( $self, $type, $student, $copy, $status, $message, $timestamp ) = @_;
     $timestamp = time() if ( $timestamp eq 'now' );
     $self->statement('setMailing')
-      ->execute( $status, $message, $timestamp, REPORT_ANNOTATED_PDF, $student,
+      ->execute( $status, $message, $timestamp, $type, $student,
         $copy );
 }
 
@@ -294,6 +309,21 @@ sub get_associated_type {
     );
 }
 
+# get_preassociated_type($type): same as get_associated_type, but
+# using pre-association
+
+sub get_preassociated_type {
+    my ( $self, $type ) = @_;
+    $self->{data}->require_module('layout');
+    return (
+        $self->dbh->selectall_arrayref(
+            $self->statement('getPreAssociatedType'),
+            { Slice => {} }, $type
+        )
+    );
+}
+
+
 # type_count($type) returns the number of recorded reports of type
 # $type.
 
@@ -323,6 +353,35 @@ sub all_there {
     }
     @f = ( keys %f_here );
     return ( $#f == $n );
+}
+
+# printed_filename(student,filename) sets the PDF printed copy file
+# name for this student, and printed_filename(student) gets it.
+
+sub printed_filename {
+    my ( $self, $student, $filename ) = @_;
+    if ( defined($filename) ) {
+        $self->set_student_report( REPORT_PRINTED_COPY, $student, 0, $filename,
+            'now' );
+    } else {
+        return $self->get_student_report( REPORT_PRINTED_COPY, $student, 0 );
+    }
+}
+
+# clear all filenames
+
+sub printed_clear {
+    my ($self) = @_;
+
+    $self->statement("clearReports")->execute(REPORT_PRINTED_COPY);
+}
+
+# number of printed sbjects
+
+sub n_printed {
+    my ($self) = @_;
+
+    return $self->type_count(REPORT_PRINTED_COPY);
 }
 
 1;

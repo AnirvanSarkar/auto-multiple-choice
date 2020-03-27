@@ -99,6 +99,7 @@ my $avance = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 
 my $data   = AMC::Data->new($data_dir);
 my $layout = $data->module('layout');
+my $report = $data->module('report');
 
 my @es;
 
@@ -147,13 +148,20 @@ if ( $methode =~ /^cups/i ) {
 }
 
 sub process_pages {
-    my ( $slices, $f_dest, $elong ) = @_;
+    my ( $slices, $f_dest, $e, $suggested_filename, $suffix ) = @_;
 
+    my $elong = sprintf( "%04d", $e );
     my $tmp = File::Temp->new( DIR => tmpdir(), UNLINK => 1, SUFFIX => '.pdf' );
     my $fn  = $tmp->filename();
     my $n_slices = 1 + $#{$slices};
+    my $suffixed_elong = $elong;
+    if ($suffix) {
+        $suffixed_elong .= "-" . $suffix;
+    } else {
+        $suffix='';
+    }
 
-    print "Student $elong : $n_slices slices to file $fn...\n";
+    print "Student $elong [$suffix]: $n_slices slices to file $fn...\n";
     return () if ( $n_slices == 0 );
 
     if ( $extract_with eq 'gs' ) {
@@ -194,16 +202,31 @@ sub process_pages {
     }
 
     if ( $methode =~ /^cups/i ) {
-        $cups->print_file( $fn, "QCM : sheet $elong" );
+        $cups->print_file( $fn, "QCM : sheet $elong [$suffix]" );
     } elsif ( $methode =~ /^file/i ) {
         $f_dest .= "-%e.pdf" if ( $f_dest !~ /[%]e/ );
-        $f_dest =~ s/[%]e/$elong/g;
-
-        debug "Moving to $f_dest";
-        move( $fn, $f_dest );
+        if ($suggested_filename) {
+            utf8::decode($f_dest);
+            utf8::encode($suggested_filename);
+            debug "FDEST=".show_utf8($f_dest)."\n";
+            debug "SUGG=".show_utf8($suggested_filename)."\n";
+            $f_dest =~ s/[%]e/$suggested_filename/g;
+            utf8::downgrade($f_dest);
+        } else {
+            $f_dest =~ s/[%]e/$suffixed_elong/g;
+        }
+        debug "Moving to " . show_utf8($f_dest);
+        if ( move( $fn, $f_dest ) ) {
+            $report->begin_transaction("prtS");
+            utf8::decode($f_dest);
+            $report->printed_filename( $e, $f_dest );
+            $report->end_transaction("prtS");
+        } else {
+            debug "MOVE FAILED!";
+        }
     } elsif ( $methode =~ /^command/i ) {
         my @c =
-          map { s/[%]f/$fn/g; s/[%]e/$elong/g; $_; } split( /\s+/, $print_cmd );
+          map { s/[%]f/$fn/g; s/[%]e/$suffixed_elong/g; $_; } split( /\s+/, $print_cmd );
 
         #print STDERR join(' ',@c)."\n";
         $commandes->execute(@c);
@@ -215,12 +238,12 @@ sub process_pages {
 }
 
 for my $e (@es) {
-    my $elong = sprintf( "%04d", $e );
-    my ( $debut, $fin, $debutA, $finA );
+    my ( $debut, $fin, $debutA, $finA, $suggested_filename );
     $layout->begin_read_transaction('prSP');
     ( $debut,  $fin )  = $layout->query_row( 'subjectpageForStudent',  $e );
     ( $debutA, $finA ) = $layout->query_row( 'subjectpageForStudentA', $e )
       if ( $split || $answer_first );
+    $suggested_filename = $layout->get_associated_filename($e);
     $layout->end_transaction('prSP');
 
     my @sl_all = ();
@@ -242,15 +265,18 @@ for my $e (@es) {
     }
 
     if ($split) {
-        process_pages( \@sl_preanswer,  $output_file, $elong . "-0S" );
-        process_pages( \@sl_answer,     $output_file, $elong . "-1A" );
-        process_pages( \@sl_postanswer, $output_file, $elong . "-2S" );
+        process_pages( \@sl_preanswer, $output_file, $e,
+            $suggested_filename, "0S" );
+        process_pages( \@sl_answer, $output_file, $e, $suggested_filename,
+            "1A" );
+        process_pages( \@sl_postanswer, $output_file, $e,
+            $suggested_filename, "2S" );
     } else {
         if ($answer_first) {
             process_pages( [ @sl_answer, @sl_postanswer, @sl_preanswer ],
-                $output_file, $elong );
+                $output_file, $e, $suggested_filename );
         } else {
-            process_pages( \@sl_all, $output_file, $elong );
+            process_pages( \@sl_all, $output_file, $e, $suggested_filename );
         }
     }
 

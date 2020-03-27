@@ -212,6 +212,8 @@ for ( \$data_dir, \$source, \$filtered_source ) {
     $$_ = rel2abs($$_);
 }
 
+my $data = AMC::Data->new($data_dir);
+
 set_filtered_source($filtered_source);
 
 # set environment variables for reproducible output
@@ -303,7 +305,6 @@ sub check_question {
 sub analyse_cslog {
     my ($cslog_file) = @_;
 
-    my $data   = AMC::Data->new($data_dir);
     my $layout = $data->module('layout');
 
     $layout->begin_transaction('Char');
@@ -901,6 +902,12 @@ if ( $to_do{s} ) {
 
     # 1) SUBJECT
 
+    my $report = $data->module('report');
+
+    $report->begin_transaction("prtX");
+    $report->printed_clear();
+    $report->end_transaction("prtX");
+
     execute( command_opts => [ %global_opts, SujetExterne => 1 ] );
     analyse_amclog("$jobname.amc");
     give_latex_errors( __ "question sheet" );
@@ -1016,7 +1023,6 @@ if ( $to_do{b} ) {
 
     # Opens a connection with the database
 
-    my $data    = AMC::Data->new($data_dir);
     my $scoring = $data->module('scoring');
     my $capture = $data->module('capture');
 
