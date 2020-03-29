@@ -254,7 +254,7 @@ sub get_value {
     my $r = '';
   KEY: for my $k ( split( /\|+/, $key ) ) {
         for my $h ( $self->heads() ) {
-            if ( $k =~ /^$h:([0-9]+)$/i ) {
+            if ( $k =~ /^\Q$h\E:([0-9]+)$/i ) {
                 if ( defined( $vals->{$h} ) ) {
                     $r = sprintf( "%0" . $1 . "d", $vals->{$h} );
                 }
