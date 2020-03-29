@@ -80,13 +80,15 @@ s/\%[m]/$self->format_note($self->{scoring}->variable('mark_max'))/ge;
         my $i = $self->{assoc}->get_real( $student, $copy );
         my $n;
 
-        debug "Association -> ID=$i";
-
         if ( defined($i) ) {
+            debug "Association -> ID=$i";
+
             ($n) = $self->{names}->data( $self->{lk}, $i, test_numeric => 1 );
             if ($n) {
                 $text = $self->{names}->substitute( $n, $text, prefix => '%' );
             }
+        } else {
+            debug "Not associated";
         }
     }
 
