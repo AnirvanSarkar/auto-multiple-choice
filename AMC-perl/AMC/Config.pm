@@ -596,7 +596,7 @@ sub set_project_options_to_default {
             $self->{project}->{$c} = {}
               if ( ! $self->{project}->{$c} );
             if ( !exists( $self->{project}->{$c}->{$kk} ) ) {
-                print "New option $c/$kk from $k\n";
+                debug "New option $c/$kk from $k\n";
                 $self->{project}->{$c}->{$kk} = $self->{global}->{$k};
             }
         }
