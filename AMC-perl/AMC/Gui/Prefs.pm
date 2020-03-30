@@ -218,15 +218,20 @@ sub transmet_pref {
                 if ( $self->{shortcuts} ) {
                     if ( $key =~ /^projects_/ ) {
                         $path = $self->{shortcuts}->absolu( $path, '<HOME>' );
-                    } elsif ( $key !~ /^rep_/ ) {
-                        $path = $self->{shortcuts}->absolu($path);
+                    } elsif ( $key !~ /^rep_/ || $key eq 'listeetudiants' ) {
+                        $path = $self->{shortcuts}->absolu($path) if ($path);
                     }
                 }
                 if ( $w->get_action =~ /-folder$/i ) {
                     mkdir($path) if ( !-e $path );
                     $w->set_current_folder($path);
-                } else {
-                    $w->set_filename($path);
+                  } else {
+                    if ($path) {
+                        $w->set_filename($path);
+                    } else {
+                        $w->set_current_folder(
+                            $self->{shortcuts}->absolu('%PROJET/') );
+                    }
                 }
             } elsif ( $kind eq 'v' ) {
                 $w->set_active($value);
@@ -320,7 +325,8 @@ sub reprend_pref {
                 if ( $self->{shortcuts} ) {
                     if ( $s->{key} =~ /^projects_/ ) {
                         $n = $self->{shortcuts}->relatif( $n, '<HOME>' );
-                    } elsif ( $s->{key} !~ /^rep_/ ) {
+                    } elsif ( $s->{key} !~ /^rep_/ || $key eq 'listeetudiants' )
+                    {
                         $n = $self->{shortcuts}->relatif($n);
                     }
                 }
