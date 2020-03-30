@@ -63,6 +63,7 @@ sub new {
           TitleWidth
           Pages
           RandomSeed
+          PreAssociation PreAssociationKey PreAssociationName
           /
     ];
 
@@ -126,6 +127,9 @@ sub new {
         'latex-endcopy'       => '',
         'pdf-begincopy'       => '',
         'pdf-endcopy'         => '',
+        preassociation        => '',
+        preassociationkey     => 'id',
+        preassociationname    => "\\name{} \\surname{}",
     };
 
     # List of modules to be used when parsing (see parse_*
@@ -240,6 +244,11 @@ sub parse_options {
         || $self->{options}->{'pdf-endcopy'} )
     {
         $self->needs_package('pdfpages');
+    }
+
+    # Pre-association works with package csvsimple
+    if ( $self->{options}->{preassociation} ) {
+        $self->needs_package('csvsimple');
     }
 
     # split Pages option to pages_question and/or pages_total
@@ -1149,21 +1158,24 @@ sub full_namefield {
     }
     my $t = '';
     $t .= "\\namefield{\\fbox{";
-    $t .= "\\begin{minipage}{.9\\linewidth}"
-      . (
-          $self->{options}->{'l-name'}
-        ? $self->{options}->{'l-name'}
-        : '\\AMClocalized{namesurname}'
-      )
-      . (
-        (
-                "\n\n\\vspace*{"
-              . $self->{options}->{namefieldlinespace}
-              . "}\\dotfill"
-        ) x $n_ligs
-      )
-      . "\n\\vspace*{1mm}"
-      . "\n\\end{minipage}";
+    $t .= "\\begin{minipage}{.9\\linewidth}";
+    if ( $self->{options}->{preassociation} ) {
+      $t .= "\\vspace*{1mm}\\AMClocalized{namesurname}\\vspace*{2mm}\\newline\\hspace*{.5em}{\\Large\\bf ".$self->{options}->{preassociationname}."}";
+    } else {
+        $t .= (
+              $self->{options}->{'l-name'}
+            ? $self->{options}->{'l-name'}
+            : '\\AMClocalized{namesurname}'
+          )
+          . (
+            (
+                    "\n\n\\vspace*{"
+                  . $self->{options}->{namefieldlinespace}
+                  . "}\\dotfill"
+            ) x $n_ligs
+          );
+    }
+    $t .= "\n\\vspace*{1mm}" . "\n\\end{minipage}";
     $t .= "\n}}";
     return ($t);
 }
@@ -1303,7 +1315,12 @@ sub write_latex {
         $tex .= $self->group_insert_command_def($group);
     }
 
-    $tex .= "\\onecopy{5}{\n";
+    # beginning of copy
+    if ( $self->{options}->{preassociation} ) {
+        $tex .= "\\def\\CopyModel{\n\\onecopy{1}{\n";
+    } else {
+        $tex .= "\\onecopy{5}{\n";
+    }
     if ( $self->{options}->{'pdf-begincopy'} ) {
         $tex .= '\\includepdf[pages=-,pagecommand={\\thispagestyle{empty}}]{'
           . $self->{options}->{'pdf-begincopy'} . "}\n";
@@ -1400,7 +1417,19 @@ sub write_latex {
       if ( $self->{options}->{pages_total} );
     $tex .= "\\AMCcleardoublepage\n" if ( $self->{options}->{manualduplex} );
 
-    $tex .= "}\n";
+    # end of copy
+    if ( $self->{options}->{preassociation} ) {
+        $tex .=
+          "\\AMCassociation{\\" . $self->{options}->{preassociationkey} . "}\n";
+        $tex .= "}\n}\n";
+        $tex .=
+            "\\csvreader[head to column names]{"
+          . $self->{options}->{preassociation}
+          . "}{}{\\CopyModel}\n";
+    } else {
+        $tex .= "}\n";
+    }
+
     $tex .= "\\end{document}\n";
 
     open( OUT, ">:utf8", $output_file );
