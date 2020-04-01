@@ -3108,9 +3108,10 @@ sub sujet_impressions_ok {
         $projet{_layout}->begin_read_transaction('pPFP');
         my $max_p    = $projet{_layout}->max_enter();
         my $students = $projet{_layout}->students_count();
+        my $preassoc = $projet{_layout}->pre_association();
         $projet{_layout}->end_transaction('pPFP');
 
-        if ( $max_p > 1 ) {
+        if ( $max_p > 1 && !$preassoc ) {
 
             # Some sheets have more than one enter-page: multiple scans
             # are not supported...
@@ -3131,7 +3132,7 @@ sub sujet_impressions_ok {
                   . __("Do you want to print the selected sheets anyway?"),
             );
             return () if ( $resp eq 'no' );
-        } elsif ( $students <= 10 ) {
+        } elsif ( $students <= 10 && !$preassoc ) {
             if ( $config->get('auto_capture_mode') != 1 ) {
 
                 # This looks strange: a few sheets printed, a few sheets
