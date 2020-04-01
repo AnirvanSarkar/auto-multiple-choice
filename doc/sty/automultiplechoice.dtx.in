@@ -4746,9 +4746,9 @@ Three digits and two letters:\insertgroup{mixed}.
 %   printing student sheets to files.
 %    \begin{macrocode}
 \newcommand{\AMCassociation}[2][]{%
-  \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
-    \string\association{\the\AMCid@etud}{#2}{#1}%
-  }\fi%
+  \ifAMC@calibration%
+  \immediate\write\AMC@XYFILE{\string\association{\the\AMCid@etud}{#2}{#1}}%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}
