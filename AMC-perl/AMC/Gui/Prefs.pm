@@ -221,6 +221,7 @@ sub transmet_pref {
                     } elsif ( $key !~ /^rep_/ || $key eq 'listeetudiants' ) {
                         $path = $self->{shortcuts}->absolu($path) if ($path);
                     }
+                    debug "Path is now: " . show_utf8($path);
                 }
                 if ( $w->get_action =~ /-folder$/i ) {
                     mkdir($path) if ( !-e $path );

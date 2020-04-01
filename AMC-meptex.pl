@@ -213,6 +213,7 @@ $layout->begin_transaction('MeTe');
 $layout->clear_mep;
 $layout->clear_variables('build:%');
 for my $k ( keys %build_vars ) {
+    debug "build:$k=" . show_utf8( $build_vars{$k} );
     $layout->variable( "build:$k", $build_vars{$k} );
 }
 annotate_source_change($capture);

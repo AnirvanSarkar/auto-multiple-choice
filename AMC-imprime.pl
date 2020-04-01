@@ -204,17 +204,17 @@ sub process_pages {
     if ( $methode =~ /^cups/i ) {
         $cups->print_file( $fn, "QCM : sheet $elong [$suffix]" );
     } elsif ( $methode =~ /^file/i ) {
+        utf8::decode($f_dest);
         $f_dest .= "-%e.pdf" if ( $f_dest !~ /[%]e/ );
         if ($suggested_filename) {
-            utf8::decode($f_dest);
             utf8::encode($suggested_filename);
             debug "FDEST=".show_utf8($f_dest)."\n";
             debug "SUGG=".show_utf8($suggested_filename)."\n";
             $f_dest =~ s/[%]e/$suggested_filename/g;
-            utf8::downgrade($f_dest);
         } else {
             $f_dest =~ s/[%]e/$suffixed_elong/g;
         }
+        utf8::downgrade($f_dest);
         debug "Moving to " . show_utf8($f_dest);
         if ( move( $fn, $f_dest ) ) {
             $report->begin_transaction("prtS");

@@ -530,7 +530,7 @@ sub set_debug {
             }
             $amc_debug_fh->autoflush(1);
         }
-        binmode $amc_debug_fh;
+        binmode $amc_debug_fh, ":utf8";
         *STDERR    = $amc_debug_fh;
         $amc_debug = 1;
         debug( "[" . $$ . "]>>" );

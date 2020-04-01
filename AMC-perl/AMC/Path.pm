@@ -148,4 +148,17 @@ sub relatif {
     return ( abs2proj( $self->shortcuts($proj), $f ) );
 }
 
+# get absolute filename, relative to project directory
+
+sub absolu_base {
+    my ( $self, $f ) = @_;
+    return ($f) if ( !defined($f) );
+    return File::Spec->rel2abs( $f, $self->absolu('%PROJET') );
+}
+
+sub relatif_base {
+    my ( $self, $f, $proj ) = @_;
+    return $self->relatif( $self->absolu_base($f), $proj );
+}
+
 1;

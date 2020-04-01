@@ -342,7 +342,8 @@ sub variable {
     } else {
         my $x = $self->dbh->selectrow_arrayref(
             "SELECT value FROM $vt WHERE name=" . $self->sql_quote($name) );
-        return ( $x->[0] );
+        my $value = $x->[0];
+        return ( $value );
     }
 }
 

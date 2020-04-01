@@ -1317,6 +1317,10 @@ sub write_latex {
 
     # beginning of copy
     if ( $self->{options}->{preassociation} ) {
+        $tex .=
+            "\\AMCstudentslistfile{"
+          . $self->{options}->{preassociation} . "}{"
+          . $self->{options}->{preassociationkey} . "}\n";
         $tex .= "\\def\\CopyModel{\n\\onecopy{1}{\n";
     } else {
         $tex .= "\\onecopy{5}{\n";

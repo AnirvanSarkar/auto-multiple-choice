@@ -3350,6 +3350,10 @@ sub calcule_mep {
             if ( !$data{cancelled} ) {
                 $projet{_layout}->begin_read_transaction('PGCN');
                 my $c = $projet{_layout}->pages_count();
+                my $sl_file =
+                  $projet{_layout}->variable("build:studentslistfile");
+                my $sl_key =
+                  $projet{_layout}->variable("build:studentslistkey");
                 $projet{_layout}->end_transaction('PGCN');
                 if ( $c < 1 ) {
 
@@ -3371,6 +3375,14 @@ sub calcule_mep {
                     $dialog->destroy;
 
                 } else {
+                    if ($sl_file) {
+                        utf8::encode($sl_file);
+                        debug "SL_FILE=".show_utf8($sl_file);
+                        debug "SL_KEY =".show_utf8($sl_key);
+                        $config->set( 'listeetudiants',
+                            $shortcuts->relatif_base($sl_file) );
+                        $config->set( 'liste_key', $sl_key ) if ($sl_key);
+                    }
                     dialogue_apprentissage(
                         'MAJ_MEP_OK',
                         '', '', 0,
@@ -7966,8 +7978,11 @@ sub send_subjects_config {
     my $gap = read_glade( 'studentslist', qw/sl_f_listeetudiants/ );
     $w{students_list_gui} = $gap;
 
-    #$w{sl_f_listeetudiants}->
-    $prefs->transmet_pref( $gap, prefix => 'sl', root => 'project:' );
+    $prefs->transmet_pref(
+        $gap,
+        prefix => 'sl',
+        keys   => [ 'listeetudiants', 'liste_key' ]
+    );
     $w{studentslist}->run;
     $prefs->reprend_pref( prefix => 'sl' );
     $prefs->transmet_pref(

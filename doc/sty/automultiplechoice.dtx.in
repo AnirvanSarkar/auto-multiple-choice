@@ -4753,6 +4753,20 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\AMCstudentslistfile}
+%   You can also pass AMC the path to the CSV file with students, and
+%   the unique key that can be used, with
+%   |\AMCstudentslistfile|\marg{path}\marg{key}.
+%    \begin{macrocode}
+\newcommand{\AMCstudentslistfile}[2]{%
+  \ifAMC@calibration%
+  \immediate\write\AMC@XYFILE{\string\with{studentslistfile=#1}}%
+  \immediate\write\AMC@XYFILE{\string\with{studentslistkey=#2}}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}
+
 % \subsection{Package options}
 %
 % See section~\ref{d:options} for the options descriptions.
