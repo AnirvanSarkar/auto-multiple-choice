@@ -2503,8 +2503,14 @@ sub end_of_document_update {
         my %vars = $c->variables;
         for my $k ( keys %vars ) {
             if ( $k =~ /^project:(.*)/ ) {
+                my $kk = $1;
                 debug "Configuration: $k = $vars{$k}";
                 $config->set( $k, $vars{$k} );
+                $prefs->transmet_pref(
+                    $gui,
+                    prefix => 'pref_prep',
+                    keys   => [$kk]
+                );
             }
         }
 

@@ -746,6 +746,16 @@ sub do_filter {
             $filter_engine->{project_options}->{moteur_latex_b} )
           if ( $filter_engine->{project_options}->{moteur_latex_b} );
 
+        # or to set the number of copies to a particular value
+
+        $number_of_copies =
+          $filter_engine->{project_options}->{'nombre_copies'}
+          if (
+            exists(
+                $filter_engine->{project_options}->{'nombre_copies'}
+            )
+          );
+
     }
 
     return ($n_err);

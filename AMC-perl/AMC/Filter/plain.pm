@@ -248,6 +248,7 @@ sub parse_options {
 
     # Pre-association works with package csvsimple
     if ( $self->{options}->{preassociation} ) {
+        $self->set_project_option('nombre_copies',0);
         $self->needs_package('csvsimple');
     }
 
