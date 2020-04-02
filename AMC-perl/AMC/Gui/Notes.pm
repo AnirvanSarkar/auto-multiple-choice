@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Gui::Notes;
 
@@ -119,7 +119,7 @@ sub new {
 
     my $i = TAB_DETAIL;
     for ( ( map { $_->{title} } @questions ), @codes ) {
-        ajoute_colonne( $self->{tableau}, $store, decode( 'utf-8', $_ ), $i++ );
+        ajoute_colonne( $self->{tableau}, $store, $_, $i++ );
     }
 
     my $row = 0;

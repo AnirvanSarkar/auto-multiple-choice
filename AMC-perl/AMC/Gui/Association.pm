@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Gui::Association;
 
@@ -129,7 +129,6 @@ sub new {
         $file = '' if ( !defined($file) );
         if ( $file && $file !~ /^text:/ ) {
             $file = $self->{namefield_dir} . "/" . $file;
-            utf8::downgrade($file);
             $file = '' if ( !-r $file );
         }
         push @images, { file => $file, %$p };

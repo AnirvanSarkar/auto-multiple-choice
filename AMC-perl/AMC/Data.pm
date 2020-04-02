@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Data;
 
@@ -197,7 +197,6 @@ sub require_module {
     my ( $self, $module, %oo ) = @_;
     if ( !$self->{modules}->{$module} ) {
         my $filename = $self->{directory} . "/" . $module . ".sqlite";
-        utf8::downgrade($filename);
         if ( !-f $filename ) {
             debug("Creating unexistant database file for module $module...");
         }

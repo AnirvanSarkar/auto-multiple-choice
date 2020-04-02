@@ -22,10 +22,12 @@
 # mode:perl
 # End:
 
+use 5.012;
+
 use File::Spec::Functions qw/catfile catpath splitpath updir/;
 use Cwd;
 
-$mods_dir="@/MODSDIR/@";
+my $mods_dir="@/MODSDIR/@";
 $ENV{'LC_NUMERIC'}="C";
 
 sub mod_path {
@@ -40,9 +42,9 @@ sub mod_path {
 
 # For portable distribution
 if(! -d $mods_dir) {
-    ($volume,$directory,$file) = splitpath(__FILE__);
+    my ($volume,$directory,$file) = splitpath(__FILE__);
     my $wd=getcwd();
-    $base_dir=catfile(catpath( $volume, $directory ),updir);
+    my $base_dir=catfile(catpath( $volume, $directory ),updir);
     chdir($base_dir);
     $base_dir=getcwd();
     chdir($wd);
@@ -54,6 +56,13 @@ if(! -d $mods_dir) {
 	$ENV{'PATH'}=$ENV{'PATH'}.":".catfile($base_dir,'bin');
     }
 }
+
+# default unicode setting
+if(! $ENV{PERL_UNICODE}) {
+    $ENV{PERL_UNICODE} = 'ASL';
+}
+
+my $action;
 
 if($#ARGV==0) {
     if(mod_path($ARGV[0])) {

@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use Getopt::Long;
 use File::Spec::Functions qw/tmpdir/;
@@ -260,21 +260,17 @@ sub process_pages {
     if ( $methode =~ /^cups/i ) {
         $cups->print_file( $fn, "QCM : sheet $elong [$suffix]" );
     } elsif ( $methode =~ /^file/i ) {
-        utf8::decode($f_dest);
         $f_dest .= "-%e.pdf" if ( $f_dest !~ /[%]e/ );
         if ($suggested_filename) {
-            utf8::encode($suggested_filename);
             debug "FDEST=".show_utf8($f_dest)."\n";
             debug "SUGG=".show_utf8($suggested_filename)."\n";
             $f_dest =~ s/[%]e/$suggested_filename/g;
         } else {
             $f_dest =~ s/[%]e/$suffixed_elong/g;
         }
-        utf8::downgrade($f_dest);
         debug "Moving to " . show_utf8($f_dest);
         if ( move( $fn, $f_dest ) ) {
             $report->begin_transaction("prtS");
-            utf8::decode($f_dest);
             $report->printed_filename( $e, $f_dest );
             $report->end_transaction("prtS");
         } else {

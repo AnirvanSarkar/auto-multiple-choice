@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Annotate;
 
@@ -93,10 +93,6 @@ sub new {
 
     for my $k ( keys %o ) {
         $self->{$k} = $o{$k} if ( defined( $self->{$k} ) );
-    }
-
-    for my $k ( grep { /_(dir|file)$/ || /^pdf_/ } ( keys %$self ) ) {
-        utf8::downgrade( $self->{$k} );
     }
 
     $self->{type} = (
@@ -199,7 +195,6 @@ sub absolute_path {
             $path
         );
     }
-    utf8::downgrade($path);
     return ($path);
 }
 
@@ -215,7 +210,6 @@ sub student_uptodate {
 
     if ($filename) {
         debug "Registered filename " . show_utf8($filename);
-        utf8::encode($filename);
         my $source_change =
           $self->{capture}->variable('annotate_source_change');
         debug
@@ -323,8 +317,6 @@ sub pdf_output_filename {
     $self->{report}->set_student_report( $self->{type}, @$student, $f, 'now' );
 
     $self->{data}->end_transaction('rSST');
-
-    utf8::encode($f);
 
     debug "F[R]=" . show_utf8($f);
 
@@ -590,7 +582,6 @@ sub command {
 
 sub stext {
     my ( $self, $text ) = @_;
-    utf8::encode($text);
     $self->command("stext begin\n$text\n__END__");
 }
 

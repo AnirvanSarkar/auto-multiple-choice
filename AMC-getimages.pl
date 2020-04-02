@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use AMC::Basic;
 use AMC::Gui::Avancement;
@@ -32,7 +32,6 @@ use File::Copy;
 use Getopt::Long;
 
 use_gettext;
-binmode( STDOUT, ":utf8" );
 
 my $list_file        = '';
 my $progress_id      = '';
@@ -63,6 +62,8 @@ GetOptions(
 
 set_debug($debug);
 
+debug("Copy to $copy_to") if ($copy_to);
+
 $use{pdfimages} = 0 if ($force_convert);
 
 # cancels use of pdfimages/pdftk if these commands are not available
@@ -92,7 +93,6 @@ $copy_to =~ s:(?<=.)/+$::;
 
 sub original_file {
     my ($file_path) = @_;
-    utf8::downgrade($file_path);
     return ( { path => $file_path, orig => 1 } );
 }
 
@@ -627,7 +627,6 @@ if ( $copy_to && @f ) {
         my $fb = string_to_filename( $fich->{file}, 'scan' );
 
         my $dest = $copy_to . "/" . $fb;
-        utf8::downgrade($dest);
 
         my $deplace = 0;
 
@@ -663,7 +662,7 @@ if ( $copy_to && @f ) {
 # STEP 5: updates the files list with processed files names
 
 if ($list_file) {
-    open( LIST, ">", $list_file );
+    open( LIST, ">:utf8", $list_file );
     for (@f) {
         print LIST $_->{path} . "\n";
     }

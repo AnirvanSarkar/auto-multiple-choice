@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Subprocess;
 
@@ -77,8 +77,8 @@ sub commande {
         $self->{ipc} =
           open2( $self->{ipc_out}, $self->{ipc_in}, $self->{exec_file}, @a );
 
-        binmode $self->{ipc_out};
-        binmode $self->{ipc_in};
+        binmode $self->{ipc_out}, ':utf8';
+        binmode $self->{ipc_in}, ':utf8';
         debug "PID="
           . $self->{ipc} . " : "
           . $self->{ipc_in} . " --> "

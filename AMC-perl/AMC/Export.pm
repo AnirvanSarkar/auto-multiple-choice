@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Export;
 
@@ -73,7 +73,6 @@ sub set_options {
         if ( defined( $self->{$k} ) ) {
             debug "Option $k = $f{$_}";
             $self->{$k} = $f{$_};
-            utf8::downgrade( $self->{$k} ) if ( $domaine eq 'fich' );
         } else {
             debug "Unusable option <$domaine.$_>\n";
         }

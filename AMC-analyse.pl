@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
@@ -95,8 +95,6 @@ GetOptions(
 
 $tag_overwritten = 0 if ($multiple);
 
-utf8::downgrade($debug_image_dir);
-
 use_gettext;
 
 set_debug($debug);
@@ -114,7 +112,7 @@ my @scans = @ARGV;
 
 # Adds scan files from a list file
 
-if ( $scans_list && open( LISTE, $scans_list ) ) {
+if ( $scans_list && open( LISTE, '<:utf8', $scans_list ) ) {
     while (<LISTE>) {
         chomp;
         if ( -f $_ ) {
@@ -414,7 +412,6 @@ sub one_scan {
     $sf_file =~ s:.*/::;
     if ($debug_image_dir) {
         $debug_image = $debug_image_dir . "/$sf_file.png";
-        utf8::downgrade($debug_image);
     }
 
     debug "Analysing scan $scan";

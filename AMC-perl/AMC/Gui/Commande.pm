@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Gui::Commande;
 
@@ -198,7 +198,6 @@ sub get_output {
     } else {
         my $fh   = $self->{fh};
         my $line = <$fh>;
-        utf8::decode($line);
 
         if ( $self->{output_to_debug} ) {
             debug_raw($line);

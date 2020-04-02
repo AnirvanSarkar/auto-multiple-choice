@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use Getopt::Long;
 
@@ -94,7 +94,6 @@ for my $oo (@o_out) {
 
 debug "Exporting...";
 
-utf8::downgrade($output);
 $ex->export($output);
 
 print $ex->messages_as_string();

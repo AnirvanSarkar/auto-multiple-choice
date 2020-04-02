@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Path;
 
@@ -136,7 +136,6 @@ sub absolu {
     my ( $self, $f, $proj ) = @_;
     return ($f) if ( !defined($f) );
     $f = proj2abs( $self->shortcuts($proj), $f );
-    utf8::downgrade($f, 1);
     return ($f);
 }
 

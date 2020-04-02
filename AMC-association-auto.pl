@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use Getopt::Long;
 use AMC::Basic;
@@ -49,9 +49,6 @@ GetOptions(
 );
 
 set_debug($debug);
-
-utf8::downgrade($liste_file);
-utf8::downgrade($data_dir);
 
 die "Needs notes-id"   if ( !$notes_id && !$preassoc );
 die "Needs liste-key"  if ( !$liste_key );

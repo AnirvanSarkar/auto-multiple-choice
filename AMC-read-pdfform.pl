@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use AMC::Basic;
 use AMC::Gui::Avancement;
@@ -33,7 +33,6 @@ use Getopt::Long;
 use Data::Dumper;
 
 use_gettext;
-binmode( STDOUT, ":utf8" );
 
 my $list_file   = '';
 my $progress_id = '';

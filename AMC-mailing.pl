@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use Getopt::Long;
 
@@ -106,9 +106,6 @@ GetOptions(
 
 set_debug($debug);
 
-utf8::downgrade($students_list);
-utf8::downgrade($ids_file);
-
 debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
 
 my $report_filename =
@@ -132,7 +129,6 @@ sub parse_add {
 }
 
 $data_dir = "$project_dir/data" if ( $project_dir && !$data_dir );
-utf8::downgrade($data_dir);
 
 error("students list not found:$students_list") if ( !-f $students_list );
 
@@ -159,7 +155,6 @@ if ( -f $ids_file ) {
 }
 
 if ($log_file) {
-    utf8::downgrade($log_file);
     open( LOGF, ">>", $log_file )
       or debug "Error opening log file $log_file: $!";
     print LOGF localtime . " Starting mailing...\n";
@@ -186,7 +181,6 @@ my $subdir = $report->get_dir($report_kind);
 my $pdf_dir = "";
 if($subdir) {
     $pdf_dir = "$project_dir/$subdir";
-    utf8::downgrade($pdf_dir);
 }
 
 error("PDF directory not found: $pdf_dir") if ( $pdf_dir && !-d $pdf_dir );
@@ -274,7 +268,7 @@ STUDENT: for my $i (@$r) {
     }
     if ($dest) {
         my $file = $i->{file};
-        utf8::encode($file);
+
         if ($pdf_dir) {
             $file = $pdf_dir . "/$file";
         }

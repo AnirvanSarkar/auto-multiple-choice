@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Gui::Manuel;
 
@@ -513,7 +513,6 @@ sub charge_i {
         { '%PROJET' => $self->{'project-dir'} },
         $self->{capture}->get_scan_page(@spc)
     );
-    utf8::downgrade($scan_file);
 
     debug "PAGE $page";
 

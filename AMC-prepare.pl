@@ -19,9 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
-
-use utf8;
+use 5.012;
 
 use File::Copy;
 use File::Spec::Functions

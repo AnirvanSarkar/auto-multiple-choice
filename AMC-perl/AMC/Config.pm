@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Config;
 
@@ -118,7 +118,6 @@ sub set_local_keys {
 sub passwd_file {
     my ( $self, $usage ) = @_;
     my $file = $self->{o_dir} . "/cf." . $self->{profile} . ".p_$usage";
-    utf8::downgrade($file);
     return ($file);
 }
 
@@ -151,7 +150,6 @@ sub get_passwd {
 
 sub pref_xml_lit {
     my ($file) = @_;
-    utf8::downgrade($file);
     if ( ( !-f $file ) || ( !-r $file ) || -z $file ) {
         return ();
     } else {
@@ -167,7 +165,6 @@ sub pref_xml_lit {
 
 sub pref_xml_ecrit {
     my ( $data, $name, $file ) = @_;
-    utf8::downgrade($file);
     if ( open my $fh, ">:utf8", $file ) {
         XMLout(
             $data,
@@ -837,7 +834,6 @@ sub set {
 sub set_relatif_os {
     my ( $self, $key, $value ) = @_;
     $value = $self->{shortcuts}->relatif_base($value);
-    utf8::decode($value);
     $self->set( $key, $value );
 }
 

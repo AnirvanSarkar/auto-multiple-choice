@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 use Getopt::Long;
 
@@ -68,8 +68,6 @@ use AMC::Gui::Zooms;
 use AMC::FileMonitor;
 use AMC::Gui::WindowSize;
 use AMC::Print;
-
-use utf8;
 
 use Data::Dumper;
 
@@ -408,7 +406,6 @@ sub test_libnotify {
 # goes to a specific directory if the project directory is given as a
 # command-line option
 
-utf8::downgrade($project_dir);
 if ( -f $project_dir ) {
     $project_dir =~ s/\/?options\.xml$//;
 }
@@ -479,7 +476,6 @@ sub is_local {
     my ( $f, $proj ) = @_;
     my $prefix = $config->get('rep_projets') . "/";
     $prefix .= $projet{nom} . "/" if ($proj);
-    utf8::downgrade($prefix);
     if ( defined($f) ) {
         return ( $f !~ /^[\/%]/ || $f =~ /^$prefix/ || $f =~ /[\%]PROJET\// );
     } else {
@@ -492,8 +488,6 @@ sub fich_options {
 
     $rp = $config->get('rep_projets') if ( !$rp );
     $rp .= "/$nom/options.xml";
-
-    utf8::downgrade($rp);
 
     debug "Options file: " . show_utf8($rp);
 
@@ -1195,7 +1189,7 @@ sub exporte {
     my $type = "AMC::Export::register::$format"->type();
     my $code = $config->get('code_examen');
     $code = $projet{nom} if ( !$code );
-    utf8::encode($code);
+
     my $output       = $shortcuts->absolu( '%PROJET/exports/' . $code . $ext );
     my @needs_module = ();
 
@@ -1430,7 +1424,6 @@ sub layout_line {
           . $projet{_capture}->get_layout_image(@id);
         $projet{_capture}->end_transaction('Layl');
 
-        utf8::downgrade($f);
         commande_parallele( $config->get('img_viewer'), $f ) if ( -f $f );
     }
 }
@@ -1691,13 +1684,9 @@ sub projet_gestion {
 sub projects_list {
 
     # construit la liste des projets existants
-    debug "Projects list: " . $w{local_rep_projets}
-      . ( utf8::is_utf8( $w{local_rep_projets} ) ? " (UTF8)" : "" );
+    debug "Projects list: " . show_utf8( $w{local_rep_projets} );
     if ( -d $w{local_rep_projets} ) {
-        opendir( DIR, $w{local_rep_projets} )
-          || die "Error opening directory " . $w{local_rep_projets} . " : $!";
-        my @f = grep { !/^\./ } readdir(DIR);
-        closedir DIR;
+        my @f = dir_contents_u( $w{local_rep_projets} );
         debug "F:"
           . join( ',',
             map { $_ . ":" . ( -d $w{local_rep_projets} . "/" . $_ ) } @f );
@@ -1743,10 +1732,9 @@ sub projects_show {
         my $name_plain = $proj_name;
         my $label      = $proj_name = Glib::filename_display_name($proj_name);
         $label = $prefix . $label if ( $proj_name =~ /^[0-9]*$/ );
-        debug "Directory: $label" . ( utf8::is_utf8($label) ? " (utf8)" : "" )
-          . ( $is_amc                                       ? " (AMC)"  : "" );
+        debug "Directory: " . show_utf8($label)
+          . ( $is_amc ? " (AMC)" : "" );
 
-        utf8::encode($proj_name);
         $w{choix_projets_liste}->add(
             create_project_widget(
                 {
@@ -1777,7 +1765,7 @@ sub create_project_widget {
 sub projects_list_select {
     my ( $flowbox, $boxchild ) = @_;
     my $selected_path = $boxchild->get_child->{_amc_project_data}->{name};
-    debug "Selected: $selected_path\n";
+    debug "Selected: " . show_utf8($selected_path);
     if ( -f fich_options( $selected_path, $w{local_rep_projets} ) ) {
 
         # an AMC project directory has been selected
@@ -1788,7 +1776,11 @@ sub projects_list_select {
 
         # move to other directory
         $w{local_rep_projets} = $w{local_rep_projets} . "/" . $selected_path;
-        $w{projet_select_directory}->set_filename( $w{local_rep_projets} );
+
+        debug "Move to directory: " . show_utf8( $w{local_rep_projets} );
+
+        $w{projet_select_directory}
+          ->set_filename( $w{local_rep_projets} );
         $w{projet_select_directory}
           ->set_current_folder( $w{local_rep_projets} );
     }
@@ -1796,10 +1788,9 @@ sub projects_list_select {
 
 sub project_set_directory {
     my ($filechooser) = @_;
-    my $directory =
-      $filechooser->get_filename() || $filechooser->get_current_folder();
-    debug "Changed directory: $directory"
-      . ( utf8::is_utf8($directory) ? " (utf8)" : "" );
+    my $directory = clean_gtk_filenames( $filechooser->get_filename()
+          || $filechooser->get_current_folder() );
+    debug "Changed directory: " . show_utf8($directory);
     $w{local_rep_projets} = $directory;
     $config->set_relatif_os( 'rep_projets', $directory );
     projects_show();
@@ -1971,16 +1962,13 @@ sub projet_mv_yes {
     projet_renomme_fin();
 
     my $nom_nouveau = $w{projet_nom}->get_text();
-    utf8::encode($nom_nouveau);
 
     return if ( $nom_nouveau eq $nom_original || !$nom_nouveau );
 
     if ( $w{local_rep_projets} ) {
         my $dir_original = $w{local_rep_projets} . "/" . $nom_original;
-        utf8::downgrade($dir_original);
         if ( -d $dir_original ) {
             my $dir_nouveau = $w{local_rep_projets} . "/" . $nom_nouveau;
-            utf8::downgrade($dir_nouveau);
             if ( -d $dir_nouveau ) {
                 $w{choix_projet}->set_keep_above(0);
                 my $dialog = Gtk3::MessageDialog->new( $w{main_window},
@@ -2030,8 +2018,6 @@ sub add_to_results {
 
 sub project_copy {
     my ( $src, $dest, $parent_window ) = @_;
-    utf8::downgrade($src);
-    utf8::downgrade($dest);
     $parent_window = $w{main_window} if ( !$parent_window );
     my $err = '';
     if ( !$err && -e $dest ) {
@@ -2133,7 +2119,6 @@ sub projet_liste_supprime {
 
     if ( $w{local_rep_projets} ) {
         my $dir = $w{local_rep_projets} . "/" . $proj;
-        utf8::downgrade($dir);
         if ( -d $dir ) {
             remove_tree( $dir, { verbose => 0, safe => 1, keep_root => 0 } );
         } else {
@@ -2167,8 +2152,8 @@ sub projet_charge_ok {
         my $reponse      = 'yes';
         my $options_file = fich_options( $proj, $w{local_rep_projets} );
         if ( !-f $options_file ) {
-            debug_and_stderr "Options file not found: " . $options_file
-              . ( utf8::is_utf8($options_file) ? " (UTF8)" : "" );
+            debug_and_stderr "Options file not found: "
+              . show_utf8($options_file);
             my $dialog =
               Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
                 'warning', 'yes-no', '' );
@@ -2277,7 +2262,6 @@ sub projet_charge_nouveau {
     # creation nouveau projet
 
     my $proj = $w{projet_nom}->get_text();
-    utf8::encode($proj);
     $w{choix_projet}->destroy();
 
     # existe deja ?
@@ -3286,12 +3270,10 @@ sub sujet_impressions_ok {
     my $extract_with = project_extract_with();
 
     my $directory = $config->get_absolute('options_impression/repertoire');
-    utf8::upgrade($directory);
     debug "Directory: " . show_utf8($directory);
     my $prefix = __p("sheet [filename prefix when printing to files]");
     if ( $config->get('code_examen') ) {
         $prefix = $config->get('code_examen');
-        utf8::encode($prefix);
     }
     debug "Prefix: " . show_utf8($prefix);
 
@@ -3451,7 +3433,6 @@ sub calcule_mep {
 
                 } else {
                     if ($sl_file) {
-                        utf8::encode($sl_file);
                         debug "SL_FILE=".show_utf8($sl_file);
                         debug "SL_KEY =".show_utf8($sl_key);
                         $config->set( 'listeetudiants',
@@ -3686,8 +3667,9 @@ sub analyse_call {
     my $fh = File::Temp->new(
         TEMPLATE => "liste-XXXXXX",
         TMPDIR   => 1,
-        UNLINK   => 1
-    );
+        UNLINK   => (get_debug() ? 0 : 1)
+                            );
+    binmode $fh, ":utf8";
     print $fh join( "\n", @{ $oo{f} } ) . "\n";
     $fh->seek( 0, SEEK_END );
 
@@ -3888,25 +3870,8 @@ sub decode_name_fields {
     );
 }
 
-sub clean_gtk2_filenames {
-    my @f = @_;
-    return (
-        map {
-            if ( ref($_) eq 'ARRAY' ) {
-                return ( clean_gtk2_filenames(@$_) );
-            } else {
-                if ( utf8::is_utf8($_) ) {
-                    $_ = Glib->filename_from_unicode($_);
-                }
-                $_;
-            }
-        } @f
-    );
-}
-
 sub glib_filename {
     my ($n) = @_;
-    utf8::downgrade($n);
     return ( Glib::filename_display_name($n) );
 }
 
@@ -3915,8 +3880,8 @@ sub glib_project_name {
 }
 
 sub saisie_auto_ok {
-    my @f = clean_gtk2_filenames( sort { $a cmp $b }
-          ( $w{saisie_auto}->get_filenames() ) );
+    my @f = sort { $a cmp $b }
+          ( clean_gtk_filenames( $w{saisie_auto}->get_filenames() ) );
     my $copie = $w{copie_scans}->get_active();
 
     $prefs->reprend_pref( prefix => 'saisie_auto' );
@@ -3983,7 +3948,7 @@ sub choisit_liste {
     my $ret = $dial->run();
     debug("Names list file choice [$ret]");
 
-    my $file = $dial->get_filename();
+    my $file = clean_gtk_filenames( $dial->get_filename() );
     $dial->destroy();
 
     if ( $ret eq '1' ) {
@@ -5350,7 +5315,7 @@ sub view_dir {
 
     debug "Look at $dir";
     my $seq = 0;
-    my @c   = map { $seq += s/[%]d/$dir/g; utf8::downgrade($_); $_; }
+    my @c   = map { $seq += s/[%]d/$dir/g;  $_; }
       split( /\s+/, $config->get('dir_opener') );
     push @c, $dir if ( !$seq );
 
@@ -5399,7 +5364,6 @@ sub activate_doc {
     my @c   = map { $seq += s/[%]u/$url/g; $_; }
       split( /\s+/, $config->get('html_browser') );
     push @c, $url if ( !$seq );
-    @c = map { encode( $encodage_systeme, $_ ); } @c;
 
     commande_parallele(@c);
 }
@@ -6369,7 +6333,6 @@ sub unrecognized_line {
             }
 
             my $preproc = $inconnu_store->get( $iter, INCONNU_PREPROC );
-            utf8::downgrade($preproc);
 
             if ( -f $preproc ) {
                 $w{preprocessed_area}->set_content( image => $preproc );
@@ -6685,7 +6648,7 @@ sub make_template {
         $writer->endTag('description');
         $writer->end();
 
-        $tar->add_data( 'description.xml', encode_utf8($desc) );
+        $tar->add_data( 'description.xml', $desc );
 
         $tar->write( $tfile, COMPRESS_GZIP );
     }
@@ -6956,7 +6919,7 @@ sub source_latex_choisir {
 
         my $reponse = $w{source_latex_choix}->run();
 
-        my $f = $w{source_latex_choix}->get_filename();
+        my $f = clean_gtk_filenames( $w{source_latex_choix}->get_filename() );
 
         $w{source_latex_choix}->destroy();
 
@@ -6990,7 +6953,7 @@ sub source_latex_choisir {
 
             my $reponse = $w{source_latex_choix_zip}->run();
 
-            $fich = $w{source_latex_choix_zip}->get_filename();
+            $fich = clean_gtk_filenames( $w{source_latex_choix_zip}->get_filename() );
 
             $w{source_latex_choix_zip}->destroy();
 
@@ -7131,7 +7094,6 @@ s/\\usepackage\[([^\]]*)\]\{inputenc\}/\\usepackage[$id->{inputenc}]{inputenc}/;
 
 sub importe_source {
     my $file = $config->get('texsrc');
-    utf8::downgrade($file);
     my ( $fxa, $fxb, $fb ) = splitpath($file);
     my $dest = $shortcuts->absolu($fb);
 
@@ -7300,7 +7262,6 @@ sub projet_ouvre {
           )
         {
             my $rep = $config->get('rep_projets') . "/$proj/$sous";
-            utf8::downgrade($rep);
             if ( !-x $rep ) {
                 debug "Creating directory $rep...";
                 mkdir($rep);
@@ -7471,7 +7432,7 @@ sub email_attachment_add {
     $d->set_select_multiple(1);
     my $r = $d->run;
     if ( $r eq 'ok' ) {
-        email_attachment_addtolist( $d->get_filenames );
+        email_attachment_addtolist( clean_gtk_filenames( $d->get_filenames ) );
     }
     $d->destroy();
 }
@@ -8174,7 +8135,7 @@ sub plugins_add {
 
     my $r = $d->run;
     if ( $r eq 'ok' ) {
-        my $plugin = $d->get_filename;
+        my $plugin = clean_gtk_filenames( $d->get_filename );
         $d->destroy;
 
         # unzip in a temporary directory

@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Gui::Prefs;
 
@@ -315,13 +315,13 @@ sub reprend_pref {
                   $buf->get_text( $buf->get_start_iter, $buf->get_end_iter, 1 );
             } elsif ( $s->{kind} eq 'f' ) {
                 if ( $s->{widget}->get_action =~ /-folder$/i ) {
-                    if ( -d $s->{widget}->get_filename() ) {
-                        $n = $s->{widget}->get_filename();
-                    } else {
-                        $n = $s->{widget}->get_current_folder();
+                    $n = clean_gtk_filenames( $s->{widget}->get_filename() );
+                    if ( !-d $n ) {
+                        $n = clean_gtk_filenames(
+                            $s->{widget}->get_current_folder() );
                     }
                 } else {
-                    $n = $s->{widget}->get_filename();
+                    $n = clean_gtk_filenames( $s->{widget}->get_filename() );
                 }
                 if ( $self->{shortcuts} ) {
                     if ( $s->{key} =~ /^projects_/ ) {

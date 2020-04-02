@@ -19,7 +19,7 @@
 # <http://www.gnu.org/licenses/>.
 
 use warnings;
-use strict;
+use 5.012;
 
 package AMC::Basic;
 
@@ -49,7 +49,7 @@ BEGIN {
 
     @ISA = qw(Exporter);
     @EXPORT =
-      qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &system_debug &magick_module &use_gm_command &magick_perl_module &debug &debug_raw &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &studentids_string_filename &format_date &cb_model &get_active_id &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &blob_to_file &amc_component &annotate_source_change &join_nonempty &printable &string_to_usascii &string_to_filename &show_utf8 &path_to_filename &free_disk_mo);
+      qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &system_debug &magick_module &use_gm_command &magick_perl_module &debug &debug_raw &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &studentids_string_filename &format_date &cb_model &get_active_id &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &blob_to_file &amc_component &annotate_source_change &join_nonempty &printable &string_to_usascii &string_to_filename &show_utf8 &path_to_filename &free_disk_mo &dir_contents_u &clean_gtk_filenames);
     %EXPORT_TAGS = ();    # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -530,7 +530,6 @@ sub set_debug {
             }
             $amc_debug_fh->autoflush(1);
         }
-        binmode $amc_debug_fh, ":utf8";
         *STDERR    = $amc_debug_fh;
         $amc_debug = 1;
         debug( "[" . $$ . "]>>" );
@@ -576,14 +575,12 @@ sub new_filename_compose {
     do {
         $n++;
         $file = $prefix . "_" . sprintf( "%04d", $n ) . $suffix;
-        utf8::downgrade($file);
     } while ( -e $file );
     return ($file);
 }
 
 sub new_filename {
     my ($file) = @_;
-    utf8::downgrade($file);
     if ( !-e $file ) {
         return ($file);
     } elsif ( $file =~ /^(.*?)_([0-9]+)(\.[a-z0-9]+)?$/i ) {
@@ -603,10 +600,8 @@ sub pack_args {
         UNLINK   => 0,
         DIR      => File::Spec->tmpdir
     );
-    binmode( $pack_fh, ':utf8' );
     my $writer = new XML::Writer(
         OUTPUT      => $pack_fh,
-        ENCODING    => 'UTF-8',
         DATA_MODE   => 1,
         DATA_INDENT => 2
     );
@@ -728,10 +723,19 @@ sub annotate_source_change {
     $capture->end_transaction('asCh') if ($transaction);
 }
 
-sub __($) { return ( $localisation->get(shift) ); }
+sub __($) {
+    my $t = $localisation->get(shift);
+    return($t);
+}
+
+sub __g($) {
+    my $t = __(shift);
+    utf8::decode($t);
+    return($t);
+}
 
 sub __p($) {
-    my $str = $localisation->get(shift);
+    my $str = __(shift);
     $str =~ s/\s+\[.*\]\s*$//;
     return ($str);
 }
@@ -790,7 +794,6 @@ sub check_fonts {
 
 sub amc_user_confdir {
     my $d = Glib::get_home_dir() . '/.AMC.d';
-    utf8::downgrade($d);
     return ($d);
 }
 
@@ -862,7 +865,6 @@ sub printable {
 
 sub string_to_usascii {
     my ($s) = @_;
-    utf8::decode($s);
     if ( check_install( module => "Text::Unidecode" ) ) {
         autoload("Text::Unidecode");
         $s = unidecode($s);
@@ -896,6 +898,30 @@ sub path_to_filename {
     return ($file);
 }
 
+sub clean_gtk_filenames {
+    my @f = @_;
+    if(wantarray()) {
+        return (
+            map {
+                my $x = $_;
+                if ( ref($x) eq 'ARRAY' ) {
+                    clean_gtk_filenames(@$x);
+                } else {
+                    
+                    # if ( utf8::is_utf8($_) ) {
+                    #     $_ = Glib->filename_from_unicode($_);
+                    # }
+                    utf8::decode($x);
+                    $x;
+                }
+            } @f
+            );
+    } else {
+        utf8::decode($f[0]);
+        return($f[0]);
+    }
+}
+
 sub amc_component {
     my ($name) = @_;
     $0 = "auto-multiple-choice $name";
@@ -915,6 +941,18 @@ sub free_disk_mo {
         }
     }
     return undef;
+}
+
+sub dir_contents_u {
+    my ($dir) = @_;
+    if ( opendir( DIR, $dir ) ) {
+        my @f = grep { !/^\./ } readdir(DIR);
+        closedir DIR;
+        return ( map { utf8::decode($_); $_; } @f );
+    } else {
+        debug_and_stderr("Error opening directory $dir: $!");
+        return ();
+    }
 }
 
 1;
