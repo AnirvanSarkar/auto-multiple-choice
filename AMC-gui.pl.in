@@ -374,10 +374,6 @@ sub annule_apprentissage {
     }
 }
 
-# Reset projects directory to standard one
-
-$config->set( 'global:rep_projets', $config->get_absolute('projects_home') );
-
 # Warn if Notify is not available
 sub test_libnotify {
     my $initted = eval { Notify::is_initted() };
@@ -431,8 +427,8 @@ if ( -d $project_dir ) {
 # creates projets and models directories if needed (if not present,
 # Edit/Parameters can be disrupted)
 
-for my $k (qw/rep_projets rep_modeles/) {
-    my $path = $config->get($k);
+for my $k (qw/projects_home rep_modeles/) {
+    my $path = $config->get_absolute($k);
     if ( -e $path ) {
         debug "WARNING: $path ($k) is not a directory!" if ( !-d $path );
     } else {
@@ -1805,13 +1801,18 @@ sub project_set_directory {
     debug "Changed directory: $directory"
       . ( utf8::is_utf8($directory) ? " (utf8)" : "" );
     $w{local_rep_projets} = $directory;
+    $config->set_relatif_os( 'rep_projets', $directory );
     projects_show();
 }
 
 sub liste_des_projets {
     my %oo = (@_);
 
-    $w{local_rep_projets} = $config->get('rep_projets');
+    $w{local_rep_projets} = $config->get_absolute('rep_projets')
+      if ( !( $w{local_rep_projets} && -d $w{local_rep_projets} ) );
+
+    $w{local_rep_projets} = $config->get_absolute('projects_home')
+      if ( !( $w{local_rep_projets} && -d $w{local_rep_projets} ) );
 
     mkdir( $w{local_rep_projets} ) if ( -d $w{local_rep_projets} );
 

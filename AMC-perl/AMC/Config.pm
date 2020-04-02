@@ -168,7 +168,7 @@ sub pref_xml_lit {
 sub pref_xml_ecrit {
     my ( $data, $name, $file ) = @_;
     utf8::downgrade($file);
-    if ( open my $fh, ">:encoding(utf-8)", $file ) {
+    if ( open my $fh, ">:utf8", $file ) {
         XMLout(
             $data,
             XMLDecl =>
@@ -829,6 +829,13 @@ sub set {
     } else {
         die "Unknown container for key $key";
     }
+}
+
+sub set_relatif_os {
+    my ( $self, $key, $value ) = @_;
+    $value = $self->{shortcuts}->relatif_base($value);
+    utf8::decode($value);
+    $self->set( $key, $value );
 }
 
 sub key_changed {
