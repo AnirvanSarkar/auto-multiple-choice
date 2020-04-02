@@ -7991,6 +7991,12 @@ sub send_subjects_config {
         prefix => 'sl',
         keys   => [ 'listeetudiants', 'liste_key' ]
     );
+    send_subjects_config_file();
+    $prefs->transmet_pref(
+        $gap,
+        prefix => 'sl',
+        keys   => ['liste_key']
+    );
     $w{studentslist}->run;
     $prefs->reprend_pref( prefix => 'sl' );
     $prefs->transmet_pref(
