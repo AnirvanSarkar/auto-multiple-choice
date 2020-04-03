@@ -62,7 +62,7 @@
     </author>
 
     <copyright>
-      <year>2008-2019</year>
+      <year>2008-2020</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -783,7 +783,103 @@ the best you can.
           </varlistentry>
         </variablelist>
       </sect3>
+
+      <sect3 id="txt.Nominative.sheets">
+        <title id="txt.Nominative.sheets.title">Nominative sheets</title>
+
+      <para>In some situations, it can be useful to prepare nominative sheets
+      for all students, from a list of students. Let us see how this can be
+      done.</para>
+
+            <variablelist>
+
+              <varlistentry>
+                <term>PreAssociation:</term>
+
+                <listitem>
+                  <para>The list of the students' filename   
+                    <emphasis>with .csv extension</emphasis>.</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>PreAssociationKey:</term>
+
+                <listitem>
+              <para><guilabel>Primary key from this list:</guilabel>
+              the name of the column, in the list of
+             students, with the students' numbers (see <xref
+              linkend="liste.etudiants"/>).</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>PreAssociationName: </term>
+
+                <listitem>
+                  <para><guilabel>\forname{} \name{}</guilabel> headers in the students
+                   list for the  current student
+            </para>
+                </listitem>
+              </varlistentry>
+
+            </variablelist>
+
+          <itemizedlist>
+            <listitem>
+
+           <para>The students list has to be a CSV list. Suppose in the
+          following that the file students.csv, in the project directory, is
+          UTF8 encoded and that its content is like the following:</para>
+
+<programlisting>name,forename,id,mail
+Boulix,Jojo,001,jojo@boulix.fr
+Golin,André,002,andre@golin.fr
+Moniuszko,Stanisław,003,Moniuszko@Stanisław.fr
+</programlisting> 
+
+          <warning>
+            <para>Do not use _ (underscore) with the student's name or
+            forename. A compilation error will be displayed.</para>
+          </warning>
+             </listitem>
+
+
+            <listitem>
+             <para> <command>Code</command> must be equal to zero or omitted.</para>
+            </listitem>
+          </itemizedlist>
+
+    <!--NAME:  AMC-TXT source file and nominative sheets.
+DESC: A very simple example (from the documentation) using the AMC-TXT format. This is a very simple plain text format to write your questionnaires without any LaTeX knowledge.-->
+<para>
+ <programlisting id="modeles-simple-txt-nominative-sheets.txt">
+# AMC-TXT source file and nominative sheets.
+
+PaperSize: A4
+Lang: EN
+PreAssociation: students.csv
+PreAssociationKey: id
+PreAssociationName: \forename{} \name{}
+Title: My first AMC questionnaire
+
+Presentation: Please answer the following questions
+the best you can.
+
+* What is the capital city of Cameroon?
++ Yaounde
+- Douala
+- Kribi
+
+** From the following numbers, which are positive?
+- -2
++ 2
++ 10</programlisting>
+</para>
+            <para>More details about correction: see the last item <xref linkend="Nominative.sheets"/>.</para>
+      </sect3>
     </sect2>
+
 
     <sect2 id="txt.questions">
       <title>Questions</title>
@@ -964,7 +1060,7 @@ one plus one?
       a choice. As an example, consider the following question:</para>
 
       <programlisting>* How much are 2
-  + 2?
++ 2?
 - 0
 + 4
 - 10</programlisting>
@@ -1244,6 +1340,145 @@ main( )
         marks in A...</para>
       </warning>
     </sect2>
+
+  <sect2 id="Exemple-Minimal">
+    <title>A minimal example (a little bit more complet)</title>
+      <para><ulink url="https://project.auto-multiple-choice.net/boards/4/topics/9291">
+          An example from french forum</ulink></para>
+
+    <!--NAME: AMC-TXT A minimal example (a little bit more complet)
+DESC: A minimal example (a little bit more complet) ( using the AMC-TXT format and LaTeX code.-->
+<para>
+  <programlisting>
+# A minimal example (a little bit more complet)
+PaperSize: A4
+Lang: FR
+CompleteMulti: 0 <co id="NoCompletMulti" linkends="NoCompletMulti.exp"/>
+ShuffleQuestions: 0 <co id="noshuffle" linkends="noshuffle.exp"/>
+LaTeX:1 <co id="commandeLaTeX" linkends="commandeLaTeX.exp"/>
+LaTex-Preambule: \geometry{hmargin=2cm,headheight=2cm,headsep=.3cm,footskip=1cm,top=2.5cm,
+bottom=2cm}<co id="packagegeometry" linkends="addpackages.exp"/>
+
+\usepackage{siunitx}<co id="packagesiunitx" linkends="addpackages.exp"/>
+\sisetup{locale = FR,detect-all,per-mode=symbol,quotient-mode=fraction,input-product=*,%
+list-final-separator = { \translate{et} },list-pair-separator = { \translate{et} },%
+range-phrase = { \translate{à} },separate-uncertainty = true,group-minimum-digits=3,%
+per-mode=symbol,inter-unit-product=\ensuremath{{}\!\cdot{}\!{}}}
+
+\usepackage[french]{babel}<co id="packagebabel" linkends="addpackages.exp"/>
+
+LaTeX-BeginDocument: \def\multiSymbole{$\star$} <co id="clubsuit" linkends="clubsuit.exp"/>
+
+Title: Évaluation de SVT \no{}4 <co id="numeroBabel" linkends="numeroBabel.exp"/> : Régimes et équilibres alimentaires
+
+Presentation: Colorier en noir la case correspondante à la proposition correcte pour chaque
+ phrase.
+
+*([shuffle=true]<co id="ShuffleQuestions-groupe" linkends="ShuffleQuestions-groupe.exp"/>
+ PARTIE I : Quelques connaissances du cours 
+
+**[horiz,last<co id="lastquestion" linkends="lastquestion.exp"/>]Les aliments contiennent : 
++ Des lipides
+- Des acides
++ Des sels minéraux
+
+**La dépense énergétique minimum de notre corps est : 
++ Le métabolisme de base
+- Les besoins énergétiques
+- L'IMC
+
+**[columns=2]Les aliments nous apportent de : 
++ La matière
+- Du diabète 
++ De l'énergie
+
+**[columns=2]Les besoins énergétiques d’une personne varient suivant : 
++ Le sexe
++ Les activités physiques
+- Les aliments consommés
+
+*[columns=2]Manger équilibré signifie : 
++ Equilibrer nos apports et nos dépenses
+- Manger ce qui nous fait envie
+- Manger plus que ce qu’on dépense
+
+**[columns=2]Manger en excès par rapport à ses besoins peut aboutir à : 
+- Des carences
++ Des maladies cardio-vasculaires
+- Un manque de nutriments
+
+**[columns=2]L'IMC signifie : 
+- Indice de Maladies cardio-vasculaires
++ Indice de Masse Corporelle
+- Indice de Matière et de Composition
+
+*) 
+
+*(PARTIE II : Le goûter de Vanessa
+
+**[columns=2]Dans le gouter de Vanessa, l'aliment le plus énergétique est :
+- les pruneaux
++ Les biscuits
+- les deux sont identiques.
+
+**[columns=2]Par rapport aux biscuits, les pruneaux contiennent  : 
++ moins de protides
+- plus de glucides
++ moins de lipides
+
+**[columns=2]Les dépenses énergétiques journalières d'une adolescente sont en moyenne de
+\SI{10000}{\kilo\joule} <co id="siunitxLaTeX" linkends="siunitxLaTeX.exp"/>.
+ Vanessa a consommé \SI{3200}{kJ} au petit-déjeuner, \SI{3500}{kJ} à midi et
+  \SI{2400}{\kilo\joule} au diner. Elle a donc mangé équilibré :
+- Faux
++ Vrai
+
+*)
+</programlisting> 
+</para>
+
+<para><calloutlist>
+  <callout arearefs="NoCompletMulti" id="NoCompletMulti.exp">
+    <para>The answer "None of these answers are correct" will be not added.</para>
+  </callout>
+
+  <callout arearefs="noshuffle" id="noshuffle.exp">
+    <para>Questions will not be shuffled.</para>
+  </callout>
+
+  <callout arearefs="commandeLaTeX" id="commandeLaTeX.exp">
+    <para>Allow to insert LaTeX code.</para>
+  </callout>
+
+  <callout arearefs="packagegeometry packagesiunitx packagebabel" id="addpackages.exp">
+    <para>Different usefull <package>packages</package>.</para>
+  </callout>
+
+  <callout arearefs="clubsuit" id="clubsuit.exp">
+    <para> The multisymbole is now a star.</para>
+  </callout>
+
+  <callout arearefs="numeroBabel" id="numeroBabel.exp">
+    <para>Use of LaTeX language through the <package>babel</package>package.</para>
+  </callout>
+
+  <callout arearefs="ShuffleQuestions-groupe" id="ShuffleQuestions-groupe.exp">
+    <para>Those questions <emphasis>will be shuffled</emphasis>.</para>
+  </callout>
+
+  <callout arearefs="lastquestion" id="lastquestion.exp">
+    <para>This question will be <emphasis>always</emphasis> at last position.</para>
+  </callout>
+
+  <callout arearefs="siunitxLaTeX" id="siunitxLaTeX.exp">
+    <para><command>LaTeX:1</command> and <command>LaTeX-Preambule</command>
+    make possible this LaTeX code.</para>
+  </callout>
+
+</calloutlist></para>
+  </sect2>
+
+
   </sect1>
 
   <sect1 id="latex">
@@ -2278,19 +2513,26 @@ Duration : 10 minutes.
         (see <xref endterm="sec.export.notes.title" linkend="sec.export.notes"/>).</para>
         </sect4>
 
-        <sect4>
+        <sect4 id="question.number">
           <title>Question numbers</title>
 
+
+          <sect5 id="reset">
+          	     	<title>Reset the numeration</title>
+          
           <para>One can modify the number of the next question with the
           <code>\AMCnumero command</code>. At the beginning of each
           realization of the test, a call to</para>
 
           <para><programlisting>\AMCnumero{1}</programlisting></para>
 
-          <para>is performed, but this command can be used at any
+          <para>is done, but this command can be used at any
           place.</para>
+      		</sect5>
 
-          <note>
+          <sect5 id="number.cancelled">
+          	<title>Do not display the number</title>
+
             <para>When you want to hide the number for a particular question
             and do not want to increase the question number, use
             <command>\AMCquestionNumberfalse</command> command as in the
@@ -2303,7 +2545,75 @@ Duration : 10 minutes.
     ...
   \end{question}
 }</programlisting>
-          </note>
+           	</sect5>
+
+
+           	<sect5 id="questions.counter">
+           	<title>Questions counter</title>
+          	<para>The internal counter is <code>AMCquestionaff</code>.
+          	To display the total number of pages at the beginning, it is necessary
+			declare the <package>totcount</package> package. Here an example:</para>
+<programlisting>
+documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[english,box,completemulti]{automultiplechoice}
+\usepackage{totcount}
+\regtotcounter{AMCquestionaff}    
+\begin{document}
+
+\exemplaire{10}{    
+
+There is \total{AMCquestionaff} questions.
+
+
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\end{minipage}
+\champnom{\fbox{    
+                \begin{minipage}{.5\linewidth}
+                  Name and surname :
+
+                  \vspace*{.5cm}\dotfill
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+
+   
+\begin{question}{prez}
+    Among the following persons, which one has ever been a President of the French Republic?
+    \begin{choices}
+      \correctchoice{René Coty}
+      \wrongchoice{Alain Prost}
+      \wrongchoice{Marcel Proust}
+      \wrongchoice{Claude Monet}
+    \end{choices}
+  \end{question}
+\end{question}
+
+  \begin{questionmult}{pref}
+    Among the following cities, which ones are French prefectures?
+    \begin{choices}
+      \correctchoice{Poitiers}
+      \wrongchoice{Sainte-Menehould}
+      \correctchoice{Avignon}
+    \end{choices}
+  \end{questionmult}
+
+% \AMCaddpagesto{3} 
+
+%\theAMCquestionaff
+}   
+
+\end{document}
+</programlisting>	
+           	</sect5>
         </sect4>
 
       <sect4 id="latex.choices.multicol">
@@ -2536,7 +2846,7 @@ Duration : 10 minutes.
         
 
       <sect4 id="latex.numeric.toc">
-        <title>Numerical answer</title>
+        <title>Numerical answer (not available with AMC-TXT)</title>
         <para> see <xref linkend="latex.numeric"/></para>
       </sect4>
 
@@ -3984,7 +4294,10 @@ respective parameters \VQa{} and \VQb{}.
                 (value without the decimal point) for an answer to be said
                 <emphasis>approximative</emphasis> and be rewarded to
                 <code>scoreapprox</code> points (defaults to 0).</para>
-
+              </listitem>
+            </varlistentry>
+          </variablelist>
+            
                 <warning>
                   <para>AMC converts all numbers (decimals included) to
                   integers (simply removing the decimal point) before
@@ -3995,9 +4308,9 @@ respective parameters \VQa{} and \VQb{}.
                   <code>scoreapprox</code> points only if <code>approx</code>
                   is 6 or greater.</para>
                 </warning>
-              </listitem>
-            </varlistentry>
 
+
+        <variablelist>
             <varlistentry>
               <term>scorewrong=<replaceable>num</replaceable></term>
 
@@ -4006,7 +4319,94 @@ respective parameters \VQa{} and \VQb{}.
                 0).</para>
               </listitem>
             </varlistentry>
+
+            <varlistentry>
+              <term>keepas=<replaceable>text</replaceable></term>
+
+              <listitem>
+                <para>keeps the value entered by the student for 
+                future use with <emphasis>alsocorrect</emphasis>
+                in another question.</para>
+                <para>All following questions must follow the
+                lexicographic order of IDs</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>alsocorrect=<replaceable>text</replaceable></term>
+
+              <listitem>
+                <para>gives another acceptable answer, that can be based
+                  on the values entered by the student in the previous questions.
+                  The formula use perl code:
+                  <programlisting>+, -, *, /, ** (power)</programlisting>
+                </para>
+              </listitem>
+            </varlistentry>
           </variablelist>
+
+<programlisting>
+ \begin{question}{carre-a}
+    \QuestionIndicative
+    Choose any number.
+    \begin{reponseshoriz}[o]
+      \wronhchoice{2}\scoring{2,setglobal.Number=2}
+      \wronhchoice{3}\scoring{3,setglobal.Number=3}
+      \wronhchoice{4}\scoring{4,setglobal.Number=4}
+      \wronhchoice{5}\scoring{5,setglobal.Number=5}
+    \end{reponseshoriz}
+  \end{question}
+  
+  \begin{questionmultx}{carre-b}
+    \AMCdontAnnotate\bareme{MAX=2}
+    What is his square?
+    \AMCnumericChoices{}{digits=2,approx=1,alsocorrect=Number**2}
+  \end{questionmultx}
+
+
+
+  \begin{minipage}{.3\linewidth}
+    \begin{tikzpicture}
+      \draw[fill=blue!50] (0,0) ellipse (1.5 and 0.2);
+      \draw (1.5,0) -- (0,5) -- (-1.5,0);
+      \draw (1.6,0) -- (2,0);
+      \draw (1.6,5) -- (2,5);
+      \draw[&lt;-&gt;] (1.8,0) -- (1.8,5);
+      \node[right] at (1.8,2.5) {$h=5$};
+      \draw (0,-0.4) -- (0,-0.8);
+      \draw (1.5,-0.4) -- (1.5,-0.8);
+      \draw[&lt;-&gt;] (0,-0.6) -- (1.5,-0.6);
+      \node[below] at (0.75,-0.6) {$r=1.5$};
+      \draw[fill=black] (0,0) circle (0.02);
+    \end{tikzpicture}
+  \end{minipage}
+  \begin{minipage}{.65\linewidth}
+    \begin{questionmultx}{cone-a}
+      What is the area of the blue disc?
+      \AMCnumericChoices{pi*1.5^2}{digits=3,decimals=2,exponent=2,approx=2,sign=false,
+      exposign=true,expovertical=true,keepas=Surface}
+    \end{questionmultx}
+        
+    \begin{questionmultx}{cone-b}
+      What is the volume of the cone?
+      \AMCnumericChoices{pi*1.5^2*5/3}{digits=3,decimals=2,exponent=2,approx=2,sign=false,
+      exposign=true,expovertical=true,alsocorrect=Surface*5/3}
+    \end{questionmultx}
+  \end{minipage}  
+
+
+
+  \begin{questionmultx}{pipi2-a}
+    What is the value of$\pi$ ?
+    \AMCnumericChoices{pi}{digits=3,decimals=2,sign=false,keepas=Pi}
+  \end{questionmultx}
+
+  \begin{questionmultx}{pipi2-b}
+    What is the value  $\pi^2$ ?
+    \AMCnumericChoices{pi^2}{digits=3,decimals=2,sign=false,approx=1,alsocorrect=Pi**2}
+  \end{questionmultx}  
+</programlisting>
+
 
           <para>You can set other default values (for the whole exam) for all
           these parameters using the command
@@ -4339,6 +4739,50 @@ Name :
       use the button <guibutton>Check layouts</guibutton>. A short insight
       allows to check that red checkboxes are correctly located over the boxes
       of the subject.</para>
+    </sect2>
+
+<sect2 id="mailing">
+      <title id="mailing.title">Sending exam</title>
+
+      <para>Emailing exam sheets is possible.</para>
+
+      <itemizedlist>
+        <listitem>
+        <para>You must prepare nominative sheets 
+        (see <xref endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>
+        (LaTeX) or 
+        <xref endterm="txt.Nominative.sheets.title" linkend="txt.Nominative.sheets"/>
+        (AMC-TXT)).
+        </para>
+       </listitem>
+
+        <listitem>
+        <para>Select printing to files : <menuchoice>
+             <guimenu>Edition</guimenu>
+             <guimenuitem>Preferences</guimenuitem>
+             <guimenuitem>Printing</guimenuitem>
+             <guimenuitem>Printing method</guimenuitem>
+             <guisubmenu>to files.</guisubmenu>
+             </menuchoice></para>
+        </listitem>
+
+        <listitem>
+        <para>Print the files.</para>
+       </listitem>
+    
+        <listitem>
+        <para>Click on <guibutton>List…</guibutton> then select the csv file.</para>
+              <para><guilabel>Primary key from this list:</guilabel>
+              the name of the column, in the list of
+             students, with the students' numbers (see <xref
+              linkend="liste.etudiants"/>).</para>
+        </listitem>
+
+        <listitem>
+        <para>Send the exams.</para>
+       </listitem>
+
+      </itemizedlist>
     </sect2>
 
     <sect2 id="printing">
@@ -4865,7 +5309,8 @@ Name :
                 <entry>When you give this parameter a value
                 <replaceable>n</replaceable>, the score given for a perfect
                 response will be <replaceable>n</replaceable>, and one point
-                will be withdrawn for each error.</entry>
+                will be withdrawn for each error. <code>haut=n has been rewritten
+                as d=n-N, p=0</code></entry>
               </row>
 
               <row>
@@ -4882,7 +5327,8 @@ Name :
                 <entry>Gives the maximal value given for the question (for a
                 "question scored 5", one can write MAX=5). To be used only
                 when it is not the same value as when one replies every good
-                response.</entry>
+                response. If you specify <code>MAX = 3</code> with 4 points
+                question, a student will have a score of 4/3 in this question.</entry>
               </row>
 
               <row>
@@ -4952,7 +5398,12 @@ Name :
 
                 <entry>Gives a value to the variable
                 <replaceable>XXX</replaceable> in the case when no ticked
-                boxes gave a value to <replaceable>XXX</replaceable>.</entry>
+                boxes gave a value to <replaceable>XXX</replaceable>.
+                If you use the parameter default, you must declare the variable
+                XXX inside the scoring. You may assign the value set.XXX to the variables b and m.
+<programlisting>\begin{questionmult}{Q1}
+\bareme{default.CONF=1,m=-CONF,b=CONF}</programlisting>
+            </entry>
               </row>
 
               <row>
@@ -4975,49 +5426,12 @@ Name :
           </tgroup>
         </informaltable>
 
-        <note>
-          <para>haut=x has been written as d=x-N, p=0</para>
-        </note>
-
-        <important>
-          <para>If you use the parameter <code>default</code>, you have to
-          type the variable's value <replaceable>XXX</replaceable> inside the
-          scoring of the question, see below.</para>
-        </important>
-
-        <programlisting>\begin{questionmult}{03}\scoring{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
-  Name an important gas in the air and its percentage.
-  \begin{multicols}{4}
-    \begin{choices}
-      \wrongchoice{steam}
-      \wrongchoice{gas}
-      \correctchoice{nitrogen}\scoring{set.COMP=1}
-      \correctchoice{oxygen}\scoring{set.COMP=2}
-      \wrongchoice{carbon dioxide}
-      \correctchoice{20\%}\scoringset.PROP=2}
-      \wrongchoice{40\%}
-      \wrongchoice{60\%}
-      \correctchoice{80\%}\scoring{set.PROP=1}
-    \end{choices}
-  \end{multicols}
-\end{questionmult}</programlisting>
-
-        <note>
-          <para>If you specify <code>MAX = 3</code> to a matter that report 4
-          points, a student will have a score of 4/3 in this question</para>
-        </note>
-
         <para>The default scale for a simple question is
         <code>e=0,v=0,b=1,m=0</code>, which gives one point for a good
         response and no point in the other cases. The default scaling for a
         multiple question is <code>e=0,v=0,b=1,m=0,p=-100,d=0</code>, which
         gives a point for every checked box, either good or not (good box
         checked or wrong box not checked).</para>
-
-        <note>
-          <para>You may assign the value <code>set.XXX</code> to the variables
-          b and m.</para>
-        </note>
 
         <para>The LaTeX command <command>\scoring</command> can also be used
         outside question definitions, for whole examination parameters:</para>
@@ -5126,6 +5540,26 @@ DESC: Example (from the documentation) with different scoring strategies.--><pro
     \wrongchoice{Check to give 3 points}\scoring{b=0,m=3}
     \correctchoice{Get one if checked, but give one if not}\scoring{m=-1}
   \end{choices}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{03}
+scoring{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
+  Name an important gas in the air and its percentage.
+  \begin{multicols}{4}
+    \begin{choices}
+      \wrongchoice{steam}
+      \wrongchoice{gas}
+      \correctchoice{nitrogen}\scoring{set.COMP=1}
+      \correctchoice{oxygen}\scoring{set.COMP=2}
+      \wrongchoice{carbon dioxide}
+      \correctchoice{20\%}\scoringset.PROP=2}
+      \wrongchoice{40\%}
+      \wrongchoice{60\%}
+      \correctchoice{80\%}\scoring{set.PROP=1}
+    \end{choices}
+  \end{multicols}
 \end{questionmult}
 }
 
@@ -6160,6 +6594,14 @@ Moniuszko,Stanisław,003</programlisting>
             forename. A compilation error will be displayed.</para>
           </warning>
         </listitem>
+
+           <listitem>
+             <para> <command>\onecopy{1}</command> must be equal to one.</para>
+           </listitem>
+
+           <listitem>
+            <para>The number of papers must be equal to zero (graphical interface).</para>
+           </listitem> 
 
         <listitem>
           <para>The LaTeX source file has to load csvsimple package,
@@ -8985,6 +9427,57 @@ What is the return value of the following R code?
   <sect1 id="Miscellaneous">
     <title>Miscellaneous</title>
 
+    <sect2 id="Crop.subject">
+      <title id="Crop.subject.title">Cut the <filename>DOC-sujet.pdf</filename> file
+      in several files</title>
+      <para>
+    <menuchoice>
+          <guimenuitem>Preferences</guimenuitem>
+
+          <guimenuitem>Main</guimenuitem>
+
+          <guimenuitem>Printing</guimenuitem>
+
+          <guimenuitem>Printing with method </guimenuitem>
+
+          <guimenuitem>to files</guimenuitem>
+        </menuchoice></para>
+    </sect2>
+
+  <sect2 id="A5onA4">
+      <title id="A5onA4.title">processing chain : 2 pages per sheet (2 A5 on 1 A4)</title>
+      <para>You may print the <filename>DOC-sujet.pdf</filename> file on 2 pages
+      per 1 sheet with any pdf reader  but AMC will not be able to analyse automatic
+      data capture from scans, you have to <quote>crop</quote> it.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>convert pdf scans to pbm images.</para>
+        <programlisting>pdfimages yourfile.pdf foo</programlisting>
+        </listitem>
+
+        <listitem>
+          <para><quote>Crop</quote> each image into two pages.</para>
+        <programlisting>mogrify -rotate -90 -crop 50%x100% *.pbm</programlisting>
+
+          <note>
+            <para>Noneeded to do after the previous command:
+            <programlisting>mogrify -rotate +90 -crop 50%x100% *.pbm</programlisting> 
+            <emphasis>all</emphasis> pages will be treated and automatically renamed with ImageMagick.</para>
+            <para>You can force ImageMagick to apply simultaneous black/white threshold
+              to the image to make  box  checking easier (here 80%).
+              <programlisting>mogrify -rotate -90 -crop 50%x100% -threshold 80% *.pbm</programlisting>
+          </para>
+          </note>
+        </listitem>
+
+        <listitem>
+          <para>Let’s move to the Data capture tab of the graphical interface
+          and select this set of <filename>pbm</filename> images.</para>
+        </listitem>
+    </itemizedlist>
+    </sect2>
+
     <sect2>
       <title>pythontex</title>
       <para>See wiki</para>
@@ -9075,3 +9568,4 @@ chmod 0600 /Users/<emphasis>user_name</emphasis>/.msmtprc
     </sect2>
   </sect1>
 </article>
+
