@@ -123,7 +123,6 @@ int main(int argc, char **argv) {
     for (int id_page = 0; id_page < poppler_document_get_n_pages(document); id_page++) {
         GList *list = poppler_page_get_form_field_mapping(poppler_document_get_page(document,id_page));
         for (int i=0; i<g_list_length(list); i++) {
-            if (i > 0) printf("---\n");
 
             PopplerFormFieldMapping *f = g_list_nth_data(list, i);
             // printf("field found, id: %d, name: %s\n",poppler_form_field_get_id(f->field),poppler_form_field_get_name(f->field));
@@ -173,7 +172,10 @@ int main(int argc, char **argv) {
                 printf("FieldValue: %s\n", poppler_form_field_button_get_state(f->field) ? "Yes" : "Off");
                 printf("FieldStateOption: Off\nFieldStateOption: Yes\n");
             }
+
             count++;
+            printf("---\n");
+
         }
     }
     if (DEBUG) printf("number of fields: %d\n", count);
