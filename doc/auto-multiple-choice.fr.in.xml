@@ -1678,7 +1678,7 @@ Durée : 10 minutes.
             <para>La commande <command>champnom</command> permet d'indiquer la
             partie du questionnaire dans laquelle chaque étudiant inscrira son
             nom ou un code barre (voir <xref linkend="gui.asso.auto.barcode"/>).
-            Sera remplacée par <command>\namefielddots</command> si vous utilisez
+            Sera complétée par <command>\namefielddots</command> si vous utilisez
             l'option <option>pdfform</option> (voir <xref linkend="sec.package.options"/>).</para>
           </callout>
 
@@ -5917,7 +5917,6 @@ DESC: Exemple (issu de la documentation) de spécification du barème.--><progra
 \begin{questionmult}{03}
 \bareme{default.COMP=10,default.PROP=11,formula=(COMP==PROP ? 1 : 0),MAX=1}
   Cite un gaz  important de l'air et son pourcentage.
-  \begin{multicols}{4}
     \begin{reponses}
       \mauvaise{vapeur d’eau}
       \mauvaise{gaz}
@@ -5929,7 +5928,6 @@ DESC: Exemple (issu de la documentation) de spécification du barème.--><progra
       \mauvaise{60\%}
       \bonne{80\%}\bareme{set.PROP=1}
     \end{reponses}
-  \end{multicols}
 \end{questionmult}
 }
 
@@ -5955,8 +5953,6 @@ Durée : 10 minutes.
 \vspace{1ex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\melangegroupe{qqs}
 
 \restituegroupe{qqs}
 
@@ -7869,4 +7865,5 @@ chmod 0600 /Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
     </sect2>
   </sect1>
 </article>
+
 
