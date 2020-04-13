@@ -130,6 +130,7 @@ sub new {
         preassociation        => '',
         preassociationkey     => 'id',
         preassociationname    => "\\name{} \\surname{}",
+        answersheetcolumns    => 1,
     };
 
     # List of modules to be used when parsing (see parse_*
