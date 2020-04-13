@@ -64,11 +64,12 @@ int main(int argc, char **argv) {
     "like PDFtk's dump_data_fields_utf8. Supports AcroForm & XfaForm PDF forms.\n"
     "\n"
     "Usage:\n"
-    "  pdfformfields (<file> | -)\n"
+    "  pdfformfields (<file> | -) [<password>]\n"
     "  pdfformfields --help\n"
     "\n"
     "Options:\n"
     "  <file> is the name of the file\n"
+    "  <password> is an optional password to decrypt the PDF file\n"
     "  -h --help       Show this screen.\n"
     "\n"
     "Details on output:\n"
@@ -88,7 +89,8 @@ int main(int argc, char **argv) {
     "     showing in the field values and names. So I strip 'U+FEFF' from\n"
     "     values/names before printing.\n";
 
-    char f_name[256] = "";
+    char *f_name = NULL;
+    char *password = NULL;
     GFile *f_fd;
     char *arg;
 
@@ -97,14 +99,19 @@ int main(int argc, char **argv) {
             fprintf(stdout,"%s",help);
             exit(0);
         }
-        else if (0==strcmp("-",argv[i])) {
-            strcpy(f_name, "/dev/stdin");
+        else if (f_name==NULL) {
+            if (0==strcmp("-",argv[i])) {
+                f_name = "/dev/stdin";
+            }
+            else {
+              f_name = strdup(argv[i]);
+            }
         }
         else {
-            strcpy(f_name, argv[i]);
+            password = strdup(argv[i]);
         }
     }
-    if (strlen(f_name) == 0) {
+    if (f_name == NULL) {
         fprintf(stderr,"usage: you must give a file name (or - for stdin)\n");
         return 124;
     }
@@ -112,7 +119,7 @@ int main(int argc, char **argv) {
     GError *error = NULL;
     PopplerDocument *document;
 
-    document = poppler_document_new_from_gfile (g_file_new_for_commandline_arg(f_name), NULL, NULL, &error);
+    document = poppler_document_new_from_gfile (g_file_new_for_commandline_arg(f_name), password, NULL, &error);
     if (document == NULL) {
         printf("error: poppler could not open '%s': %s\n", f_name, error->message);
         return 2;
@@ -179,6 +186,9 @@ int main(int argc, char **argv) {
         }
     }
     if (DEBUG) printf("number of fields: %d\n", count);
+
+    free(f_name);
+    free(password);
 
     return 0;
 }

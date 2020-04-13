@@ -42,7 +42,8 @@ my $vector_density   = 300;
 my $orientation      = "";
 my $rotate_direction = "90";
 my $force_convert    = 0;
-my %use              = ( pdfimages => 1, pdftk => 1, qpdf => 1 );
+my $password         = '';
+my %use = ( pdfimages => 1, pdftk => 1, qpdf => 1, gs => 1 );
 
 GetOptions(
     "list=s"             => \$list_file,
@@ -55,7 +56,9 @@ GetOptions(
     "use-pdfimages!"     => \$use{pdfimages},
     "use-pdftk!"         => \$use{pdftk},
     "use-qpdf!"          => \$use{qpdf},
+    "use-gs!"            => \$use{gs},
     "force-convert!"     => \$force_convert,
+    "password=s"         => \$password,
 );
 
 set_debug($debug);
@@ -249,10 +252,13 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                 );
                 debug "PDF split tmp dir / pdfimages: $temp_dir";
 
+                my @pdfimages_command = ("pdfimages");
+                push @pdfimages_command, "-upw", $password if ($password ne '');
+
                 if (
                     system_debug(
                         cmd => [
-                            "pdfimages", "-p", $file->{path},
+                            @pdfimages_command, "-p", $file->{path},
                             $temp_dir . '/' . $file->{file} . '-page'
                         ]
                       ) == 0
@@ -305,10 +311,13 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                 );
                 debug "PDF split tmp dir / qpdf: $temp_dir";
 
+                my @qpdf_command = ("qpdf");
+                push @qpdf_command, "--password=$password" if ($password ne '');
+
                 if (
                     system_debug(
                         cmd => [
-                            "qpdf", $file->{path}, "--split-pages",
+                            @qpdf_command, $file->{path}, "--split-pages",
                             $temp_dir . '/' . $file->{file} . '-page-%d.pdf'
                         ]
                       ) == 0
@@ -345,11 +354,13 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
                 );
                 debug "PDF split tmp dir / pdftk: $temp_dir";
 
+                my @pdftk_command = ( "pdftk", $file->{path} );
+                push @pdftk_command, "input_pw", $password if ($password ne '');
+
                 if (
                     system(
                         cmd => [
-                            "pdftk",
-                            $file->{path},
+                            @pdftk_command,
                             "burst",
                             "output",
                             $temp_dir . '/' . $file->{file} . '-page-%04d.pdf'
@@ -400,7 +411,7 @@ for my $fich (@f) {
     check_split_path($fich);
 
     if ( $fich->{file} =~ /\.(pdf|eps|ps)$/i
-        && commande_accessible('gs') )
+        && commande_accessible('gs') && $use{gs} )
     {
         # ghostscript is preferred for PDF, EPS and PS files.
 
@@ -422,7 +433,8 @@ for my $fich (@f) {
             "-sOutputFile=$temp_dir/$fb", "-r$vector_density",
             "-dNOPAUSE",                  "-dSAFER",
             "-dBATCH"
-        );
+                  );
+        push @cmd, "-sPDFPassword=$password" if($password ne '');
         push @cmd, "-dQUIET" if ( !$debug );
         system_debug( cmd => [ @cmd, $fich->{path} ], die_on_error => 1 );
 
@@ -440,21 +452,12 @@ for my $fich (@f) {
         my $suffix_change = '';
         my @pre_options   = ();
 
+        push @pre_options, "-authenticate", $password if ($password ne '');
+
         # number of pages :
         my $np = 0;
 
-        # any scene with number > 0 ? This may cause problems with OpenCV
         my $scene = 0;
-        open( NP, "-|", magick_module("identify"),
-            "-format", "%s\n", $fich->{path} );
-        while (<NP>) {
-            chomp();
-            if (/[^\s]/) {
-                $np++;
-                $scene = 1 if ( $_ > 0 );
-            }
-        }
-        close(NP);
 
         # Is this a vector format file? If so, we have to convert it
         # to bitmap
@@ -462,8 +465,31 @@ for my $fich (@f) {
         if ( $fich->{file} =~ /\.(pdf|eps|ps)$/i ) {
             $vector        = 1;
             $suffix_change = '.png';
-            @pre_options   = ( '-density', $vector_density )
+            push @pre_options, '-density', $vector_density
               if ($vector_density);
+
+            debug "> Scan $fich->{path}: Vector";
+        } else {
+
+            # any scene with number > 0 ? This may cause problems with OpenCV
+            if (
+                open( NP, "-|", magick_module("identify"),
+                    "-format", "%s\n", $fich->{path}
+                )
+              )
+            {
+                while (<NP>) {
+                    chomp();
+                    if (/[^\s]/) {
+                        $np++;
+                        $scene = 1 if ( $_ > 0 );
+                    }
+                }
+                close(NP);
+            }
+
+            debug "> Scan $fich->{path}: $np page(s)"
+              . ( $scene ? " [has scene>0]" : "" );
         }
 
         # With ImageMagic, remove alpha channel to get white background
@@ -471,8 +497,6 @@ for my $fich (@f) {
             push @pre_options, "-alpha", "remove";
         }
 
-        debug "> Scan $fich->{path}: $np page(s)"
-          . ( $scene ? " [has scene>0]" : "" );
         if ( $np > 1 || $scene || $vector || $force_convert ) {
 
             # split multipage image into 1-page images, and/or convert

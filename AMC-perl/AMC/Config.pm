@@ -462,7 +462,10 @@ sub defaults {
         subjectemail   => {},
         annotatedemail => {},
 
-        pdfform => 0,
+        pdfform          => 0,
+        pdf_password_use => '',
+        pdf_password     => '',
+        pdf_password_key => '',
 
         name_field_type => '',
     };

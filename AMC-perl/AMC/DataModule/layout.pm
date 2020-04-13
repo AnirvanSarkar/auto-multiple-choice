@@ -477,6 +477,9 @@ sub define_statements {
               . $self->table("association")
               . " (student,id,filename) VALUES (?,?,?)"
         },
+        AssociationID => { sql => "SELECT id FROM "
+              . $self->table("association")
+              . " WHERE student=?" },
         AssociationFilename => { sql => "SELECT filename FROM "
               . $self->table("association")
               . " WHERE student=?" },
@@ -1194,12 +1197,22 @@ sub pre_association {
 }
 
 # get_associated_filename(student) returns the filename suggested by
-# pre-association for this student
+# pre-association for this student sheet number
 
 sub get_associated_filename {
     my ( $self, $student ) = @_;
     return (
         $self->sql_single( $self->statement("AssociationFilename"), $student )
+    );
+}
+
+# get_associated_id(student) returns the student ID associated by
+# pre-association for this student sheet number
+
+sub get_associated_id {
+    my ( $self, $student ) = @_;
+    return (
+        $self->sql_single( $self->statement("AssociationID"), $student )
     );
 }
 

@@ -103,12 +103,16 @@ sub new {
         pages               => '',
         extract_with        => 'qpdf',
         force_convert       => 0,
+        force_magick        => 0,
+        no_gs               => 0,
         documents           => 'sc',
         speed               => 0,
         full_scans          => '',
         full_density        => 300,
         tmpdir              => '',
         decoder             => '',
+        password            => '',
+        password_key        => 'password',
     };
 
     for ( keys %oo ) {
@@ -132,7 +136,7 @@ sub new {
           || die "can't opendir $self->{dir}: $!";
         my @l = grep { /\.(csv|txt)$/ } readdir($dh);
         closedir $dh;
-        $self->{list} = $l[0];
+        $self->{list} = $l[0] || '';
     }
     $self->{names} =
       AMC::NamesFile::new( $self->{dir} . '/' . $self->{list}, 'utf8', 'id' )
@@ -173,6 +177,8 @@ sub set {
     for ( keys %oo ) {
         $self->{$_} = $oo{$_} if ( exists( $self->{$_} ) );
     }
+
+    return $self;
 }
 
 sub read_checksums {
@@ -237,6 +243,8 @@ sub install {
     open( DB, ">", $self->{debug_file} );
     print DB "Test\n";
     close(DB);
+
+    return $self;
 }
 
 sub start_clock {
@@ -407,13 +415,17 @@ sub analyse {
         for ( @{ $self->{perfect_copy} } ) { print NUMS "$_\n"; }
         close(NUMS);
         $self->amc_command(
-            'imprime',               '--sujet',
-            '%PROJ/corrige.pdf',     '--methode',
-            'file',                  '--output',
-            '%PROJ/xx-copie-%e.pdf', '--fich-numeros',
-            $nf,                     '--data',
-            '%DATA',                 '--extract-with',
-            $self->{extract_with},
+            'imprime',
+            '--sujet'         => '%PROJ/corrige.pdf',
+            '--methode'       => 'file',
+            '--output'        => '%PROJ/xx-copie-%e.pdf',
+            '--fich-numeros'  => $nf,
+            '--data'          => '%DATA',
+            '--extract-with'  => $self->{extract_with},
+            '--password'      => $self->{password},
+            '--password-key'  => $self->{password_key},
+            '--students-list' => '%PROJ/' . $self->{list},
+            '--list-key'      => $self->{list_key},
         );
 
         opendir( my $dh, $self->{temp_dir} )
@@ -476,26 +488,35 @@ sub analyse {
 
     $self->start_clock();
 
-    $self->amc_command( 'read-pdfform', '--list', $scans_list,
-        '--data', '%DATA',
+    $self->amc_command(
+        'read-pdfform',
+        '--list'     => $scans_list,
+        '--data'     => '%DATA',
+        '--password' => $self->{password},
         ( $self->{multiple} ? '--multiple' : '--no-multiple' ),
     );
 
     my @extract_opts = ();
-    if ( $self->{extract_with} =~ /^pdftk/ ) {
+    if ( $self->{extract_with} =~ /^pdftk/ || $self->{force_magick} ) {
         push @extract_opts, '--no-use-qpdf';
-    } elsif ( $self->{extract_with} eq 'qpdf' ) {
+    }
+    if ( $self->{extract_with} eq 'qpdf' || $self->{force_magick} ) {
         push @extract_opts, '--no-use-pdftk';
+    }
+    if ( $self->{no_gs} ) {
+        push @extract_opts, '--no-use-gs';
     }
     $self->amc_command(
         'getimages',
-        '--list',
-        $scans_list,
-        '--copy-to',
-        $self->{temp_dir} . "/scans",
-        '--orientation',
-        $self->get_orientation(),
-        ( $self->{force_convert} ? "--force-convert" : "--no-force-convert" ),
+        '--list'        => $scans_list,
+        '--copy-to'     => $self->{temp_dir} . "/scans",
+        '--orientation' => $self->get_orientation(),
+        '--password'    => $self->{password},
+        (
+            $self->{force_convert} || $self->{force_magick}
+            ? "--force-convert"
+            : "--no-force-convert"
+        ),
         @extract_opts,
     );
 
@@ -1292,6 +1313,8 @@ sub default_process {
     $self->report_uninitialized;
 
     $self->ok;
+
+    return $self;
 }
 
 1;

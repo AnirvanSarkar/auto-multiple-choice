@@ -40,6 +40,7 @@ my $progress_id = '';
 my $debug       = '';
 my $data_dir    = '';
 my $multiple    = '';
+my $password    = '';
 
 GetOptions(
     "list=s"           => \$list_file,
@@ -47,6 +48,7 @@ GetOptions(
     "debug=s"          => \$debug,
     "multiple!"        => \$multiple,
     "data=s"           => \$data_dir,
+    "password=s"       => \$password,
 );
 
 die "data directory not found: $data_dir" if ( !-d $data_dir );
@@ -154,7 +156,8 @@ if (@forms) {
             if ( -f $f ) {
 
            # Extract form data with pdfformfields (before, we were using pdftk):
-                open( FORM, "-|", "auto-multiple-choice", "pdfformfields", $f )
+                open( FORM, "-|", "auto-multiple-choice", "pdfformfields", $f,
+                    $password )
                   or die "Error with pdfformfields: $!";
                 my $field = {};
                 clear_copy_id();

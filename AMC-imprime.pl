@@ -33,6 +33,7 @@ use AMC::Basic;
 use AMC::Exec;
 use AMC::Data;
 use AMC::Gui::Avancement;
+use AMC::NamesFile;
 
 my $data_dir            = "";
 my $sujet               = '';
@@ -49,6 +50,10 @@ my $output_answers_file = '';
 my $split               = '';
 my $answer_first        = '';
 my $extract_with        = 'pdftk';
+my $password            = '';
+my $students_list       = '';
+my $students_list_key   = '';
+my $password_key        = '';
 
 GetOptions(
     "data=s"           => \$data_dir,
@@ -65,6 +70,10 @@ GetOptions(
     "options=s"        => \$options,
     "debug=s"          => \$debug,
     "extract-with=s"   => \$extract_with,
+    "password=s"       => \$password,
+    "students-list=s"  => \$students_list,
+    "list-key=s"       => \$students_list_key,
+    "password-key=s"   => \$password_key,
 );
 
 set_debug($debug);
@@ -100,6 +109,13 @@ my $avance = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 my $data   = AMC::Data->new($data_dir);
 my $layout = $data->module('layout');
 my $report = $data->module('report');
+
+my $students = '';
+utf8::downgrade($students_list);
+if ( -f $students_list ) {
+    $students =
+      AMC::NamesFile::new( $students_list, identifiant => $students_list_key );
+}
 
 my @es;
 
@@ -148,7 +164,7 @@ if ( $methode =~ /^cups/i ) {
 }
 
 sub process_pages {
-    my ( $slices, $f_dest, $e, $suggested_filename, $suffix ) = @_;
+    my ( $slices, $f_dest, $e, $suggested_filename, $student_id, $suffix ) = @_;
 
     my $elong = sprintf( "%04d", $e );
     my $tmp = File::Temp->new( DIR => tmpdir(), UNLINK => 1, SUFFIX => '.pdf' );
@@ -164,25 +180,51 @@ sub process_pages {
     print "Student $elong [$suffix]: $n_slices slices to file $fn...\n";
     return () if ( $n_slices == 0 );
 
+    my $user_password  = '';
+    my $owner_password = '';
+    if ($password) {
+        $user_password = $password;
+        debug "PDF file locked with password (ID=$student_id)";
+        if ( $students && defined($student_id) ) {
+            debug "Looking for personal password...";
+            my ($s) = $students->data( $students_list_key, $student_id );
+            $owner_password = $s->{$password_key};
+            $owner_password = '' if ( !defined($owner_password) );
+            debug "Found $owner_password";
+        }
+    }
+
     if ( $extract_with eq 'gs' ) {
         die
-"Can't use <gs> to build multiple-slices PDF file. Please switch to <pdftk>."
+"Can't use <gs> to build multiple-slices PDF file. Please switch to <qpdf>."
           if ( $n_slices > 1 );
+        my @gscommand =
+          ( "gs", "-dBATCH", "-dNOPAUSE", "-q", "-sDEVICE=pdfwrite" );
+        $owner_password = $user_password if ( !$owner_password );
+        if ($user_password) {
+            push @gscommand, "-sUserPassword=$user_password";
+        }
+        if ($owner_password) {
+            push @gscommand, "-sOwnerPassword=$owner_password";
+        }
         $commandes->execute(
-            "gs",
-            "-dBATCH",
-            "-dNOPAUSE",
-            "-q",
-            "-sDEVICE=pdfwrite",
-            "-sOutputFile=$fn",
+            @gscommand, "-sOutputFile=$fn",
             "-dFirstPage=" . $slices->[0]->{first},
-            "-dLastPage=" . $slices->[0]->{last},
-            $sujet
+            "-dLastPage=" . $slices->[0]->{last}, $sujet
         );
     } elsif ( $extract_with eq 'pdftk' ) {
-        $commandes->execute( "pdftk", $sujet, "cat",
+        my @pdftkcommand = (
+            "pdftk", $sujet, "cat",
             ( map { $_->{first} . "-" . $_->{last} } @$slices ),
-            "output", $fn );
+            "output", $fn
+        );
+        if ($user_password) {
+            push @pdftkcommand, "user_pw", $user_password;
+        }
+        if ($owner_password) {
+            push @pdftkcommand, "owner_pw", $owner_password;
+        }
+        $commandes->execute(@pdftkcommand);
     } elsif ( $extract_with eq 'pdftk+NA' ) {
 
         # Use pdftk with a workaround to keep PDF forms.
@@ -191,14 +233,28 @@ sub process_pages {
         $commandes->execute( "pdftk", $sujet, "cat",
             ( map { $_->{first} . "-" . $_->{last} } @$slices ),
             "output", $fn_step );
-        $commandes->execute( "pdftk", $fn_step,
-            "output", $fn, "need_appearances" );
+        my @pdftkcommand =
+          ( "pdftk", $fn_step, "output", $fn, "need_appearances" );
+        if ($user_password) {
+            push @pdftkcommand, "user_pw", $user_password;
+        }
+        if ($owner_password) {
+            push @pdftkcommand, "owner_pw", $owner_password;
+        }
+        $commandes->execute(@pdftkcommand);
     } elsif ( $extract_with eq "qpdf" ) {
 
         # Cmd: qpdf input.pdf --pages input.pdf 3,4-7,10 -- output.pdf
-        $commandes->execute( "qpdf", $sujet, "--pages", $sujet,
-            join( ",", map { $_->{first} . "-" . $_->{last} } @$slices ),
-            "--", $fn );
+        $owner_password = $user_password if ( !$owner_password );
+        my @qpdfcommand = ("qpdf");
+        if ($password) {
+            push @qpdfcommand, "--encrypt", $user_password, $owner_password,
+              128, "--";
+        }
+        push @qpdfcommand, $sujet, "--pages", $sujet,
+          join( ",", map { $_->{first} . "-" . $_->{last} } @$slices ),
+          "--";
+        $commandes->execute( @qpdfcommand, $fn );
     }
 
     if ( $methode =~ /^cups/i ) {
@@ -238,12 +294,13 @@ sub process_pages {
 }
 
 for my $e (@es) {
-    my ( $debut, $fin, $debutA, $finA, $suggested_filename );
+    my ( $debut, $fin, $debutA, $finA, $suggested_filename, $student_id );
     $layout->begin_read_transaction('prSP');
     ( $debut,  $fin )  = $layout->query_row( 'subjectpageForStudent',  $e );
     ( $debutA, $finA ) = $layout->query_row( 'subjectpageForStudentA', $e )
       if ( $split || $answer_first );
     $suggested_filename = $layout->get_associated_filename($e);
+    $student_id = $layout->get_associated_id($e);
     $layout->end_transaction('prSP');
 
     my @sl_all = ();
@@ -266,17 +323,18 @@ for my $e (@es) {
 
     if ($split) {
         process_pages( \@sl_preanswer, $output_file, $e,
-            $suggested_filename, "0S" );
+            $suggested_filename, $student_id, "0S" );
         process_pages( \@sl_answer, $output_file, $e, $suggested_filename,
-            "1A" );
+            $student_id, "1A" );
         process_pages( \@sl_postanswer, $output_file, $e,
-            $suggested_filename, "2S" );
+            $suggested_filename, $student_id, "2S" );
     } else {
         if ($answer_first) {
             process_pages( [ @sl_answer, @sl_postanswer, @sl_preanswer ],
-                $output_file, $e, $suggested_filename );
+                $output_file, $e, $suggested_filename, $student_id );
         } else {
-            process_pages( \@sl_all, $output_file, $e, $suggested_filename );
+            process_pages( \@sl_all, $output_file, $e, $suggested_filename,
+                $student_id );
         }
     }
 

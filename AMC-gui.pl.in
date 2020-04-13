@@ -2856,7 +2856,9 @@ sub sujet_impressions {
     }
 
     $projet{_layout}->begin_read_transaction('PGCN');
-    my $c = $projet{_layout}->pages_count;
+    my $c        = $projet{_layout}->pages_count;
+    my $preassoc =
+      $projet{_layout}->pre_association() && $config->get('listeetudiants');
     $projet{_layout}->end_transaction('PGCN');
     if ( $c == 0 ) {
         my $dialog =
@@ -2929,8 +2931,12 @@ sub sujet_impressions {
 
     debug "Printing dialog...";
 
-    $g_imprime = read_glade( 'choix_pages_impression',
-        qw/arbre_choix_copies bloc_imprimante answersheet_box imprimante printing_options_table bloc_fichier/
+    $g_imprime = read_glade(
+        'choix_pages_impression',
+        qw/arbre_choix_copies bloc_imprimante answersheet_box
+          imprimante printing_options_table bloc_fichier
+          impfp_cb_pdf_password_use impfp_x_pdf_password
+          options_pdf_passwords/
     );
 
     $prefs->transmet_pref(
@@ -2987,6 +2993,27 @@ sub sujet_impressions {
             prefix => 'impf',
             root   => 'options_impression'
         );
+        $prefs->transmet_pref(
+            $g_imprime,
+            prefix => 'impfp',
+            root   => "project:",
+        );
+        if ($preassoc) {
+            valide_liste(
+                nolabel => 1,
+                gui     => $g_imprime,
+                prefix  => 'impfpu',
+                key     => 'pdf_password_key',
+            );
+            $prefs->transmet_pref(
+                $g_imprime,
+                prefix => 'impfpu',
+                keys   => ['pdf_password_key'],
+            );
+            $w{options_pdf_passwords}->show();
+        } else {
+            $w{options_pdf_passwords}->hide();
+        }
     }
 
     $copies_store->clear();
@@ -3010,6 +3037,31 @@ sub sujet_impressions {
     $w{arbre_choix_copies}->get_selection->set_mode("multiple");
 
     $w{choix_pages_impression}->show();
+  }
+
+sub random_password {
+    my $p     = '';
+    my @chars = split( //, "0123456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ_-+." );
+    for ( 0 .. 12 ) {
+        $p .= $chars[ rand( 1 + $#chars ) ];
+    }
+    return ($p);
+}
+
+sub pdf_password_toggle {
+    $prefs->reprend_pref( prefix => 'impfp' );
+    my $u = $config->get('pdf_password_use');
+    if ($u) {
+        if ( !$config->get('pdf_password') ) {
+            $config->set( 'pdf_password', random_password() );
+            $prefs->transmet_pref(
+                $g_imprime,
+                prefix => 'impfp',
+                keys   => ['pdf_password'],
+            );
+        }
+    }
+    $w{impfp_x_pdf_password}->set_sensitive($u);
 }
 
 sub sujet_impressions_cancel {
@@ -3077,7 +3129,10 @@ sub sujet_impressions_ok {
 
     if ( $method eq 'file' ) {
         $prefs->reprend_pref( prefix => 'impf' );
-
+        $prefs->reprend_pref( prefix => 'impfp' );
+        if($w{options_pdf_passwords}->is_visible) {
+            $prefs->reprend_pref( prefix => 'impfpu' );
+        }
         if ( !$config->get('options_impression/repertoire') ) {
             debug "Print to file : no destination...";
             $config->set( 'options_impression/repertoire', '' );
@@ -3269,7 +3324,19 @@ sub sujet_impressions_ok {
             $fh->filename,
             "--extract-with",
             $extract_with,
-        ],
+            "--password",
+            (
+                  $config->get('pdf_password_use')
+                ? $config->get('pdf_password')
+                : ""
+            ),
+            "--students-list",
+            $config->get_absolute('listeetudiants'),
+            "--list-key",
+            $config->get('liste_key'),
+            "--password-key",
+            $config->get('pdf_password_key'),
+          ],
         signal       => 2,
         texte        => __ "Print papers one by one...",
         'progres.id' => 'impression',
@@ -3640,13 +3707,14 @@ sub analyse_call {
             "--debug",
             debug_file(),
             (
-                $config->get('auto_capture_mode')
-                ? "--multiple"
+                $config->get('auto_capture_mode') ? "--multiple"
                 : "--no-multiple"
             ),
             "--data",
             $config->get_absolute('data'),
-        ],
+            "--password",
+            $config->get('pdf_password'),
+          ],
         signal => 2,
         o      => \%oo,
         fin    => sub {
@@ -3672,6 +3740,7 @@ sub analyse_call_images {
             "--list",           $oo{fh}->filename,
             "--debug",          debug_file(),
             "--vector-density", $config->get('vector_scan_density'),
+            "--password",       $config->get('pdf_password'),
         );
         push @args, "--copy-to", $oo{copy} if ( $oo{copy} );
         push @args, "--force-convert" if ( $config->get("force_convert") );
@@ -3955,6 +4024,7 @@ sub valide_liste {
     my %oo = @_;
     $oo{prefix} = 'pref_assoc' if ( !$oo{prefix} );
     $oo{gui} = $gui if ( !$oo{gui} );
+    $oo{key} = 'liste_key' if ( !$oo{key} );
 
     debug "* valide_liste";
 
@@ -4012,7 +4082,7 @@ sub valide_liste {
             $dialog->run;
             $dialog->destroy;
         }
-        $prefs->store_register( liste_key => $cb_model_vide_key );
+        $prefs->store_register( $oo{key} => $cb_model_vide_key );
     } else {
 
         # problems with ID (name/surname)
@@ -4068,7 +4138,7 @@ sub valide_liste {
 
         # TRANSLATORS: you can omit the [...] part, just here to explain context
         $prefs->store_register(
-            liste_key => cb_model(
+            $oo{key} => cb_model(
                 '',
                 __p("(none) [No primary key found in association list]"),
                 map { ( $_, $_ ) } (@heads)
@@ -4078,7 +4148,7 @@ sub valide_liste {
     $prefs->transmet_pref(
         $oo{gui},
         prefix => $oo{prefix},
-        keys   => ["project:liste_key"]
+        keys   => ["project:$oo{key}"]
     );
     assoc_state();
 }
