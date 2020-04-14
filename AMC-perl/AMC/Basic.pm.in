@@ -184,7 +184,7 @@ sub system_debug {
     return ($?);
 }
 
-my $gm_ok = commande_accessible('gm');
+my $gm_ok = commande_accessible('gm') && !$ENV{AMC_DONT_USE_GM};
 
 sub magick_module {
     my ($m) = @_;
