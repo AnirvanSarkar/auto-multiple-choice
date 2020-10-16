@@ -422,8 +422,6 @@ sub one_scan {
     $commands = AMC::Exec::new('AMC-analyse');
     $commands->signalise();
 
-    $process = AMC::Subprocess::new();
-
     ##########################################
     # Marks detection
     ##########################################
@@ -444,7 +442,7 @@ sub one_scan {
     push @args, '-r' if ($ignore_red);
     push @args, '-k' if ($debug_pixels);
 
-    $process->set( 'args', \@args );
+    $process = AMC::Subprocess::new( mode => 'detect', args => \@args );
 
     @r = $process->commande( "load " . $scan );
     my @c = ();

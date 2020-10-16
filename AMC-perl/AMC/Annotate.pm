@@ -555,9 +555,11 @@ sub process_start {
 
     $self->needs_dims;
 
-    $self->{process} = AMC::Subprocess::new( mode => 'buildpdf' );
-    $self->{process}->set( 'args',
-        [ '-d', $self->{dpi}, '-w', $self->{width}, '-h', $self->{height} ] );
+    $self->{process} = AMC::Subprocess::new(
+        mode => 'buildpdf',
+        'args' =>
+          [ '-d', $self->{dpi}, '-w', $self->{width}, '-h', $self->{height} ]
+    );
     $self->command( "embedded " . $self->{embedded_format} );
     if ( $self->{embedded_max_size} =~ /([0-9]*)x([0-9]*)/i ) {
         my $width  = $1;

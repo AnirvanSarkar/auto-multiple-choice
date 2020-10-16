@@ -33,6 +33,7 @@ sub new {
         ipc_out   => '',
         ipc       => '',
         args      => ['%f'],
+        first_arg => '',
         mode      => 'detect',
         exec_file => '',
     };
@@ -43,12 +44,12 @@ sub new {
 
     if ( !$self->{exec_file} ) {
         if ( $self->{mode} ) {
-            $self->{exec_file} =
-              amc_specdir('libexec') . '/AMC-' . $self->{mode};
+            $self->{exec_file} = "auto-multiple-choice";
+            $self->{first_arg} = $self->{mode};
         }
     }
 
-    if ( !-f $self->{exec_file} ) {
+    if ( !commande_accessible( $self->{exec_file} ) ) {
         die "AMC::Subprocess: No program to execute";
     }
 
@@ -72,13 +73,14 @@ sub commande {
         debug "Exec subprocess...";
         my @a =
           map { ( $_ eq '%f' ? $self->{file} : $_ ) } ( @{ $self->{args} } );
+        unshift @a, $self->{first_arg} if ( $self->{first_arg} );
         debug join( ' ', $self->{exec_file}, @a );
         $self->{times} = [ times() ];
         $self->{ipc} =
           open2( $self->{ipc_out}, $self->{ipc_in}, $self->{exec_file}, @a );
 
         binmode $self->{ipc_out}, ':utf8';
-        binmode $self->{ipc_in}, ':utf8';
+        binmode $self->{ipc_in},  ':utf8';
         debug "PID="
           . $self->{ipc} . " : "
           . $self->{ipc_in} . " --> "
