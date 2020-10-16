@@ -1977,7 +1977,7 @@ Duration : 10 minutes.
             <para><option>pdfform</option>: create a pdf file to fill.</para>
 
             <note>
-              <para>AMC does not automatically manage sending topics.</para>
+              <para>AMC does manage sending files.</para>
             </note>
           </listitem>
 
@@ -2363,20 +2363,42 @@ Duration : 10 minutes.
 
         <tip>
           <para>Use the command <command>\savebox</command>, <emphasis>outside
-          the onecopy command</emphasis>, to display a longer text with
+          the <command>onecopy</command> command</emphasis>, to display a longer text with
           linebreaks.</para>
 
           <programlisting>
-       \newsavebox{\correcbox}
-        \savebox{\correcbox}{\parbox{5cm}{\color{red}{Here a linebreak\\or\\here...}}}
+\newsavebox{\correcbox}
+\savebox{\correcbox}{\parbox{5cm}{\color{red}{Here a linebreak\\or\\here...}}}
        </programlisting>
 
           <para>Call out the boxe's contents:</para>
 
           <programlisting>
-        \AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{Question}
+\AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{the scoring}
        </programlisting>
         </tip>
+
+<warning>
+  <itemizedlist>
+    <listitem>
+<para> If the answer contains a comma or the equal sign, <replaceable>text</replaceable> 
+ must be  bracketed by braces. </para>
+  </listitem>
+      <listitem>
+  <para>If the answer contains commands <command>\command</command> or
+  definitions <command>\def</command>, you must add <command>\protect</command>.
+  </para>
+  </listitem>
+  </itemizedlist>
+
+<programlisting>
+\FPeval\aRandomVariable{round(3+8*random,2)}
+\FPeval\aCalculateVariable{round(\aRandomVariable*9.81,2)}
+
+\AMCOpen{answer={m=\protect\SI{\aRandomVariable}{\kilo\gram},%
+P=\protect\SI{\aCalculateVariable}{\newton}}{the scoring}
+</programlisting>
+</warning>
 
         <variablelist>
           <varlistentry>
@@ -2514,8 +2536,18 @@ Duration : 10 minutes.
         </sect4>
 
         <sect4 id="question.number">
-          <title>Question numbers</title>
+          <title>Question numbers, see also <xref linkend="latex.style"/></title>
 
+            <sect5 id="section.number">
+              <title>display section N°.question N°</title>
+<programlisting>
+\makeatletter
+\def\AMCbeginQuestion#1#2{\par\noindent{\bf \the\c@section.#1} #2\hspace*{1em}}
+\makeatother
+%use with amsmath package
+\numberwithin{AMCquestionaff}{section}
+</programlisting>
+    </sect5>
 
           <sect5 id="reset">
           	     	<title>Reset the numeration</title>
@@ -2545,6 +2577,34 @@ Duration : 10 minutes.
     ...
   \end{question}
 }</programlisting>
+
+        <warning>
+          <para>With nominative sheets (see <xref
+          endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>),
+          set up it with a new command in the preamble.</para>
+
+          <informalexample>
+            <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}</programlisting>
+          </informalexample>
+
+          <para>and use it when you need it. (Do not forget to type inside
+          brackets to limit the effect) :</para>
+
+          <programlisting>{\Iswitch
+ \begin{question}{Number}
+   Choose the greater.
+   \begin{choiceshoriz}[o]
+     \wrongchoice{200}\wrongchoice{2}\wrongchoice{20}\wrongchoice{200}\correctchoice{600}
+   \end{choiceshoriz}
+ \end{question}
+}
+      </programlisting>
+
+          <para><emphasis> In this example, the question number will not be
+          displayed through the command
+          <command>\AMCquestionNumberfalse</command>. </emphasis></para>
+        </warning>
+
            	</sect5>
 
 
@@ -2747,7 +2807,7 @@ There is \total{AMCquestionaff} questions.
 \end{question}</programlisting></para>
 
         <note>
-          <para>The <command>explain</command> command must be used inside
+          <para>The <command>explain</command> command must be typed inside
           <option>question</option> like environments only. This includes
           <option>question</option>, <option>questionmult</option> and
           <option>questionmultx</option> environments.</para>
@@ -3308,33 +3368,6 @@ There is \total{AMCquestionaff} questions.
         the others. By default, it displays a club.</para>
 
         <para><programlisting>\def\multiSymbole{$\clubsuit$}</programlisting></para>
-
-        <warning>
-          <para>With nominative sheets (see <xref
-          endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>),
-          set up it with a new command in the preamble.</para>
-
-          <informalexample>
-            <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}</programlisting>
-          </informalexample>
-
-          <para>and use it when you need it. (Do not forget to type inside
-          brackets to limit the effect) :</para>
-
-          <programlisting>{\Iswitch
- \begin{question}{Number}
-   Choose the greater.
-   \begin{choiceshoriz}[o]
-     \wrongchoice{200}\wrongchoice{2}\wrongchoice{20}\wrongchoice{200}\correctchoice{600}
-   \end{choiceshoriz}
- \end{question}
-}
-      </programlisting>
-
-          <para><emphasis> In this example, the question number will not be
-          displayed through the command
-          <command>\AMCquestionNumberfalse</command>. </emphasis></para>
-        </warning>
 
         <sect4 id="choicescustom">
           <title>Choices custom</title>
@@ -4770,6 +4803,27 @@ Name :
         <para>Print the files.</para>
        </listitem>
     
+      </itemizedlist> 
+
+             <note>
+            <para>AMC allow to protect all the files with your
+              owner password and each file with a user password.
+              AMC vous propose de protéger tous les fichiers par
+              un mot de passe propriétaire (vous) et chaque fichier par un
+              mot de passe utilisateur (l'étudiant).
+            </para>
+              <para>The list include a column title with the password</para>
+ <programlisting>
+# STUDENTS / 1ST YEAR
+surname,name,id,email,password
+Bienvenüe,Alexis,001,paamc@passoire.fr,123456
+Boulix,Jojo,002,jojo.boulix@rien.xx,789test01
+Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
+</programlisting>
+          </note>
+
+      <itemizedlist>
+
         <listitem>
         <para>Click on <guibutton>List…</guibutton> then select the csv file.</para>
               <para><guilabel>Primary key from this list:</guilabel>
@@ -5579,7 +5633,7 @@ Name:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+\shufflegroup{qqs}
 
 \insertgroup{qqs}
 
@@ -6646,6 +6700,10 @@ Moniuszko,Stanisław,003</programlisting>
   }
 }
 
+%password protect
+%\AMCstudentslistfile{liste.csv}{id} <co
+id="password.protect" linkends="password.protect.exp"/>
+
 \csvreader[head to column names]{students.csv}{}{\subject}<co
               id="separator.comma" linkends="separator.comma.exp"/>
 %\csvreader[head to column names,separator=semicolon]{liste.csv}{}{\subject}<co
@@ -6662,6 +6720,10 @@ Moniuszko,Stanisław,003</programlisting>
           current sheet to student with id <command>\id</command>.</para>
 
           <para><calloutlist>
+                 <callout arearefs="password.protect" id="password.protect.exp">
+                <para>To protect each file with a unique password.
+                </para></callout>
+
               <callout arearefs="separator.comma" id="separator.comma.exp">
                 <para>Use this command if the CSV file contains only one email
                 address per student.</para>
@@ -9425,6 +9487,94 @@ What is the return value of the following R code?
   <sect1 id="Miscellaneous">
     <title>Miscellaneous</title>
 
+    <sect2 id="texlive.vanilla">
+      <title id="texlive.vanilla.title">AMC and TeXLive «vanilla» (ubuntu et debian)</title>
+
+      <sect3 id="fresh.install">
+        <title id="fresh.install.title">AMC and TeXLive are not installed</title>
+      <itemizedlist>
+        <listitem>
+          <para>Install TeXLive on line.</para>
+        </listitem>
+      </itemizedlist>
+
+<programlisting>
+wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+tar -xzf install-tl-unx.tar.gz
+cd install-tl-20xxxx
+sudo ./install-tl
+</programlisting>
+
+  <note><para>Replace xxxx with the digits or type TABULATION.</para></note>
+
+      <itemizedlist>
+        <listitem>
+          <para>Select <emphasis>O</emphasis> then <emphasis>L</emphasis> and enter 3 times.</para>
+          <para>Select <emphasis>R</emphasis> then <emphasis>I</emphasis>.</para>
+        </listitem>
+      </itemizedlist>
+
+<note><para>TexLive-full is the setting default. If you don't want all the packages,
+  press <emphasis>C</emphasis> then  select your packages then <emphasis>R</emphasis>
+  and finally <emphasis>I</emphasis>.</para></note> 
+
+<programlisting>
+sudo apt install equivs --no-install-recommends
+mkdir -p /tmp/tl-equivs &amp;&amp; cd /tmp/tl-equivs
+equivs-control texlive-local  
+</programlisting>   
+
+      <itemizedlist>
+        <listitem>
+          <para>Open the web link and note the version number:  </para>
+          <para>  <ulink url="https://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt"/>.</para>
+        </listitem>
+      </itemizedlist>
+
+<programlisting>
+wget -O texlive-local http://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt
+equivs-build texlive-local
+sudo dpkg -i texlive-local_20xx-x_all.deb
+sudo apt install -f
+</programlisting>   
+
+      <itemizedlist>
+        <listitem>
+          <para>Install AMC.</para>
+        </listitem>
+      </itemizedlist>
+<programlisting>
+sudo add-apt-repository ppa:alexis.bienvenue/stable &amp;&amp; sudo apt-get update
+sudo apt-get install auto-multiple-choice &amp;&amp; sudo apt-get install msmtp
+</programlisting> 
+
+      <itemizedlist>
+        <listitem>
+          <para>Create a symbolic link.</para>
+        </listitem>
+      </itemizedlist>
+<programlisting>
+sudo ln -s /usr/share/texmf/tex/latex/AMC /usr/local/texlive/texmf-local/tex/latex/AMC
+sudo mktexlsr
+sudo tlmgr update --self --all
+</programlisting>       
+    </sect3>
+
+  <sect3 id="texlive.installed">
+    <title id="texlive.installed.title">AMC is not installed and TeXLive is(/usr/local/)</title>
+    <itemizedlist>
+        <listitem>
+          <para>Create a symbolic link.</para>
+        </listitem>
+      </itemizedlist>
+
+<programlisting>
+sudo ln -s /usr/share/texmf/tex/latex/AMC /usr/local/texlive/texmf-local/tex/latex/AMC
+sudo mktexlsr
+</programlisting>       
+  </sect3>
+    </sect2>
+
     <sect2 id="Crop.subject">
       <title id="Crop.subject.title">Cut the <filename>DOC-sujet.pdf</filename> file
       in several files</title>
@@ -9478,7 +9628,215 @@ What is the return value of the following R code?
 
     <sect2>
       <title>pythontex</title>
-      <para>See wiki</para>
+ <para>From <ulink url="https://project.auto-multiple-choice.net/attachments/450/Wiki_AMC_et_PythonTex.pdf"/> 
+ and <ulink url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Calcul_formel_avec_Python_dans_AMC"/></para>
+
+
+    <itemizedlist>
+    <listitem><para>You need to add a script nammed prePythonTex4AMC and <emphasis>make it executable</emphasis>.</para></listitem>
+    </itemizedlist>     
+
+<programlisting>
+#! /bin/sh
+SRC=$1
+echo "***** JOBNAME=$AMC_JOBNAME"
+echo "***** CMD=$AMC_CMD"
+rm -rf ./pythontex-files-*
+rm -f $AMC_JOBNAME.pytxcode
+$AMC_CMD
+echo "***** PYTHON"
+python /path/to/file/pythontex.py $AMC_JOBNAME.pytxcode
+echo "***** END FILTER"
+</programlisting>
+
+
+<note>
+<para>python3 works too.</para>
+<programlisting>
+python3 /path/to/file/pythontex3.py
+</programlisting>
+</note>
+
+    <itemizedlist>
+    <listitem><para>Add the following three lines to the beginning of the LaTex file.</para></listitem>
+    </itemizedlist> 
+
+<programlisting>
+%%AMC:preprocess_command=/path/to/file/prePythonTex4AMC
+%%AMC:jobspecific=1
+%%AMC:latex_engine=pdflatex --shell-escape
+</programlisting>  
+
+  <warning>
+    <para>Some python modules need to be installed (sympy, pygments)</para>
+  </warning>
+
+  <sect3 id="pythontex.exemple">
+    <title>An french example with python (from José OUIN : http://www.joseouin.fr)</title>
+
+<para><!--NAME: Un exemple avec python
+  DESC: Utilisation de pythontex-->
+  <programlisting>
+%%AMC:preprocess_command=/path/to/file/prePythonTex4AMC
+%%AMC:jobspecific=1
+%%AMC:latex_engine=pdflatex --shell-escape
+
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[english,bloc,completemulti]{automultiplechoice}    
+\usepackage{fancyhdr,amssymb,amsmath}
+
+% ---------- Utilisation de codes Python -----
+\usepackage{pythontex}
+%----------------------------------------------
+
+\begin{pycode}
+import numpy as np
+from sympy import *
+
+np.random.seed(12345)
+# IMPORTANT : ramdom seed
+
+def polyv2(b,p,d,q) :
+  x=Symbol('x')
+  myp = expand((x-b)**p*(x-d)**q)
+  return latex(myp)
+  
+def dp1x(a,b,c) :
+    x=Symbol('x')
+    y=Symbol('y')
+    f=(a*y-1)/(b*x-1)**c
+
+    g=diff(f,x,1)
+    g2=g/b
+    g3=g*(-1)
+    g4=g2*(-1)
+   
+    gl = latex(g)
+    g2l = latex(g2)
+    g3l = latex(g3)
+    g4l = latex(g4)
+
+    return np.array([gl,g2l,g3l,g4l])
+
+\end{pycode}
+
+\begin{document}
+
+\element{Questions}{%
+\begin{question}{QA}The value of $\pi$ is
+\begin{choices}
+\correctchoice{\py{np.pi}}
+\wrongchoice{\py{100+200}}
+\wrongchoice{\py{np.random.randint(10)+3.15}}
+\end{choices}
+\end{question}
+
+\begin{question}{QB}
+\pyc{a=np.random.randint(10)}
+\pyc{b=np.random.randint(10)}
+\pyc{z=np.complex(a,b)}
+
+ Let the complex number $\underline{Z}= py{a}+i. py{b}$, what is the value of
+$\underline{Z} 2$~?
+
+\begin{choices}
+\correctchoice{\py{z**2}}
+\wrongchoice{\py{np.conj(z**2)}}
+\wrongchoice{\py{1/z}}
+\end{choices}
+\end{question}
+}%
+
+\onecopy{5}{    
+
+
+%%% beginning of the test sheet header:
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf Test\\ Examination on Jan. 1st, 2008
+\end{minipage}
+%-------------------------------------
+
+\begin{center}\em
+
+Duration : 10 minutes.
+
+  No documents allowed. The use of electronic calculators is forbidden.
+
+  Questions using the sign \multiSymbole{} may have
+  zero, one or several correct answers.  Other questions have a single correct answer.
+
+  Negative points may be attributed to \emph{very bad} answers.
+ 
+\end{center}
+
+  \end{minipage}\hspace*{\fill}
+  }
+  
+\vspace{5ex}
+
+\begin{question}{deriv-px-1}
+      
+      \pyc{a=np.random.randint(2,7)} % 
+      \pyc{b=np.random.randint(2,5)} % 
+      \pyc{c=np.random.randint(2,5)} % 
+      \pyc{drvx=dp1x(a,b,c)}
+
+Let the following function: $f(x,y)= \dfrac{\py{a} y-1}{(\py{b} x-1)^{\py{c}}}$ 
+    
+What is the partial derivative $ \dfrac{\partial f(x,y)}{\partial x}$ ? 
+
+\begin{choiceshoriz}
+\correctchoice{$\py{drvx[0]}$}
+\wrongchoice{$\py{drvx[1]}$}         
+\wrongchoice{$\py{drvx[2]}$}
+\wrongchoice{$\py{drvx[3]}$}
+\end{choiceshoriz}
+
+\end{question}
+%---------------
+% POLYNOME
+%--------------
+
+\begin{question}{polynome-v2}
+      
+      \pyc{b=np.random.randint(2,7)} % racine r = b
+      \pyc{p=np.random.randint(2,4)} % p : ordre de mult de b
+      \pyc{d=np.random.randint(2,5)} % racine r = d
+      \pyc{q=np.random.randint(2,3)}  % q : ordre de mult de d    
+      \pyc{mypoly=polyv2(b,p,d,q)}    % construction de mypolyv2
+
+Let the polynomial: $\py{mypoly}$ 
+    
+What is the root multiplicity order $r = \py{b}$ ?
+
+\begin{choiceshoriz}
+\correctchoice{$\py{p}$}
+\wrongchoice{$\py{p+1}$}         
+\wrongchoice{$\py{p-1}$}
+\wrongchoice{$\py{p+2}$}
+\end{choiceshoriz}
+
+\end{question}
+
+\restituegroupe{Questions}
+
+}   
+
+\end{document}    
+  </programlisting>
+</para>
+</sect3>
+    </sect2>
+
+    <sect2 id="moodle">
+      <title>AMC and moodle</title>
+      <para><ulink url="https://github.com/nennigb/amc2moodle"/></para>
     </sect2>
 
     <sect2 id="divers.gmail">
@@ -9566,5 +9924,4 @@ chmod 0600 /Users/<emphasis>user_name</emphasis>/.msmtprc
     </sect2>
   </sect1>
 </article>
-
 
