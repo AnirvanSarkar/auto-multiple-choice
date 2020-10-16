@@ -600,6 +600,7 @@ sub pack_args {
         UNLINK   => 0,
         DIR      => File::Spec->tmpdir
     );
+    binmode $pack_fh, ':utf8';
     my $writer = new XML::Writer(
         OUTPUT      => $pack_fh,
         DATA_MODE   => 1,
