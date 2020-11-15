@@ -113,18 +113,57 @@ sub get_copy_id {
     return ( $copy_id->{$key} );
 }
 
+sub get_fields_from_pdf {
+    my ($pdf_file) = @_;
+    open( FORM, "-|", "auto-multiple-choice", "pdfformfields", $pdf_file,
+        $password )
+      or die "Error with pdfformfields: $!";
+    my @fields = ();
+    my $field  = {};
+
+    while (<FORM>) {
+        chomp;
+        if (/^---/) {
+            push @fields, $field if (%$field);
+            $field = {};
+        }
+        if (/^Field([^\s]*):\s(.*)/) {
+            $field->{$1} = $2;
+        }
+    }
+    close FORM;
+    push @fields, $field if (%$field);
+    return (@fields);
+}
+
+sub field_is_ticked_box {
+    my ( $field ) = @_;
+    return( $field->{Name} =~ /^([0-9]+):case:(.*):([0-9]+),([0-9]+)$/ &&
+            value_is_true( $field->{Value} )
+          );
+}
+
+sub count_ticked_boxes {
+    my ($fields) = @_;
+    my $c = 0;
+    for my $f (@$fields) {
+        $c += ( field_is_ticked_box($f) ? 1 : 0 );
+    }
+    return ($c);
+}
+
 sub handle_field {
-    my ($field) = @_;
+    my ( $field ) = @_;
 
     return (0) if ( !$field->{Name} );
     if ( $field->{Name} =~ /^([0-9]+):case:(.*):([0-9]+),([0-9]+)$/ ) {
         my ( $student_id, $q_name, $q_id, $a_id ) = ( $1, $2, $3, $4 );
-        my $page = $layout->box_page( $student_id, $q_id, $a_id );
-        my $copy = get_copy_id( $student_id, $page );
+        my $page   = $layout->box_page( $student_id, $q_id, $a_id );
+        my $copy   = get_copy_id( $student_id, $page );
+        my $ticked = value_is_true( $field->{Value} );
         debug( "Field " . $field->{Name} . " got PAGE=$page and COPY=$copy" );
         $capture->set_zone_auto( $student_id, $page, $copy,
-            ZONE_BOX, $q_id, $a_id,
-            100, ( value_is_true( $field->{Value} ) ? 100 : 0 ),
+            ZONE_BOX, $q_id, $a_id, 100, ( $ticked ? 100 : 0 ),
             undef, undef );
         return (1);
     }
@@ -154,28 +193,15 @@ if (@forms) {
         if ( $f =~ /\.pdf$/i ) {
             if ( -f $f ) {
 
-           # Extract form data with pdfformfields (before, we were using pdftk):
-                open( FORM, "-|", "auto-multiple-choice", "pdfformfields", $f,
-                    $password )
-                  or die "Error with pdfformfields: $!";
-                my $field = {};
-                clear_copy_id();
-                $data->begin_transaction('PDFF');
-
-                while (<FORM>) {
-                    chomp;
-                    if (/^---/) {
+                my @fields = get_fields_from_pdf($f);
+                if ( count_ticked_boxes( \@fields ) ) {
+                    clear_copy_id();
+                    $data->begin_transaction('PDFF');
+                    for my $field (@fields) {
                         $n_fields += handle_field($field);
-                        $field = {};
                     }
-                    if (/^Field([^\s]*):\s(.*)/) {
-                        $field->{$1} = $2;
-                    }
+                    $data->end_transaction('PDFF');
                 }
-                close FORM;
-
-                $n_fields += handle_field($field);
-                $data->end_transaction('PDFF');
 
                 debug "Read $n_fields fields from $f";
             } else {
