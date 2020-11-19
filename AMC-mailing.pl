@@ -54,6 +54,7 @@ my $smtp_port         = 25;
 my $smtp_ssl          = '';
 my $smtp_user         = '';
 my $smtp_passwd_file  = '';
+my $debug_smtp        = '';
 my $text              = '';
 my $text_content_type = 'text/plain';
 my $subject           = '';
@@ -94,6 +95,7 @@ GetOptions(
     "smtp-ssl=s"          => \$smtp_ssl,
     "smtp-user=s"         => \$smtp_user,
     "smtp-passwd-file=s"  => \$smtp_passwd_file,
+    "debug-smtp!"         => \$debug_smtp,
     "debug=s"             => \$debug,
     "progression=s"       => \$progress,
     "progression-id=s"    => \$progress_id,
@@ -213,6 +215,7 @@ if ( $transport eq 'sendmail' ) {
             ssl           => $smtp_ssl,
             sasl_username => $smtp_user,
             sasl_password => $pass,
+            debug         => $debug_smtp,
         }
     );
 } else {
