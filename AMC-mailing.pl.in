@@ -307,7 +307,12 @@ STUDENT: for my $i (@$r) {
                 header_str => [
                     From    => $sender,
                     To      => $dest,
-                    Subject => $subst->substitute( $subject, @sc )
+                    Subject => $subst->substitute( $subject, @sc ),
+                    "User-Agent" =>
+"AutoMultipleChoice, version @/PACKAGE_V_DEB/@ (@/PACKAGE_V_VC/@)",
+                    "X-Project"     => $project_name,
+                    "X-AMC-Student" => $i->{id},
+
                 ],
                 parts => [ @parts, @attachments ],
             );
