@@ -22,7 +22,7 @@ require "./AMC/Test.pm";
 
 AMC::Test->new(
     dir         => __FILE__,
-    tex_engine  => 'latex+dvipdf',
+    tex_engine  => 'latex+dvipdfmx',
     rounding    => 'n',
     check_marks => { 4 => 16.84 }
 )->default_process;
