@@ -446,7 +446,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \ioption{francais} asks for french localisation.
 %
 % \ioption{lang=XX} asks for localisation in |XX| language. At
-% present, only |DE| (German), |ES| (Spanish), |FR| (French), |IT|
+% present, only |CA| (Catalan), |DE| (German), |ES| (Spanish), |FR| (French), |IT|
 % (Italian), |JA| (Japanese), |NO| (Norwegian) and |NL| (Dutch) are available.
 %
 % \ioption{plain} cancels \textsf{environ} and \textsf{etex} automatic
@@ -1467,6 +1467,26 @@ Three digits and two letters:\insertgroup{mixed}.
 % Default text to write in the students' name box:
 %    \begin{macrocode}
 \def\AMC@loc@namesurname{Name and surname:}
+%    \end{macrocode}
+%
+% \subsubsection{Catalan}
+%
+% Catalan localisation is called with option |lang=CA|.
+%    \begin{macrocode}
+\def\AMC@loc@CA{
+  \def\AMC@loc@draft{PROJECTE}
+  \def\AMC@loc@message{Pel vostre examen, imprimiu preferiblement
+    els documents compilats amb l'ajuda de auto-multiple-choice.}
+  \def\AMC@loc@qf##1{\textbf{Pregunta ##1 :}}
+  \def\AMC@loc@q##1##2{\textbf{Pregunta ##1} ##2}
+  \def\AMC@loc@corrected{Correcci\'o}
+  \def\AMC@loc@catalog{Cat\`aleg}
+  \def\AMC@loc@explain{\textit{\textbf{Explicaci\'o : }}}
+  \def\AMC@loc@none{Cap de les respostes \'es correcte.}
+  \def\AMC@loc@question{pregunta}
+  \def\AMC@loc@questions{preguntes}
+  \def\AMC@loc@namesurname{Nom i cognoms:}
+}
 %    \end{macrocode}
 %
 % \subsubsection{Dutch}
