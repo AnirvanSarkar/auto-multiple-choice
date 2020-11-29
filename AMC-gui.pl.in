@@ -3411,6 +3411,8 @@ sub calcule_mep {
                   $projet{_layout}->variable("build:studentslistfile");
                 my $sl_key =
                   $projet{_layout}->variable("build:studentslistkey");
+                my $extract_only =
+                  $projet{_layout}->variable("build:extractonly");
                 $projet{_layout}->end_transaction('PGCN');
                 if ( $c < 1 ) {
 
@@ -3438,6 +3440,9 @@ sub calcule_mep {
                         $config->set( 'listeetudiants',
                             $shortcuts->relatif_base($sl_file) );
                         $config->set( 'liste_key', $sl_key ) if ($sl_key);
+                      }
+                    if($extract_only) {
+                        scoring_strategy_update(0);
                     }
                     dialogue_apprentissage(
                         'MAJ_MEP_OK',
@@ -4598,50 +4603,61 @@ sub original_n_copies {
     return ($n);
 }
 
+sub scoring_strategy_update {
+    my ( $with_indiv_solution, %command_opts ) = @_;
+
+    my $mode          = "b";
+    my $pdf_corrected = $config->get_absolute('doc_indiv_solution');
+    if ( -f $pdf_corrected ) {
+        debug "Removing pre-existing $pdf_corrected";
+        unlink($pdf_corrected);
+    }
+    $mode .= 'k' if ( $with_indiv_solution );
+
+    commande(
+        commande => [
+            "auto-multiple-choice",
+            "prepare",
+            "--out-corrige-indiv",
+            $pdf_corrected,
+            "--n-copies",
+            original_n_copies(),
+            "--with",
+            moteur_latex(),
+            "--filter",
+            $config->get('filter'),
+            "--filtered-source",
+            $config->get_absolute('filtered_source'),
+            "--debug",
+            debug_file(),
+            "--progression-id",
+            'bareme',
+            "--progression",
+            1,
+            "--data",
+            $config->get_absolute('data'),
+            "--mode",
+            $mode,
+            $config->get_absolute('texsrc'),
+        ],
+        texte        => __ "Extracting marking scale...",
+        'progres.id' => 'bareme',
+        %command_opts
+    );
+}
+
 sub noter {
     if ( $config->get('maj_bareme') ) {
-        my $mode          = "b";
-        my $pdf_corrected = $config->get_absolute('doc_indiv_solution');
-        if ( -f $pdf_corrected ) {
-            debug "Removing pre-existing $pdf_corrected";
-            unlink($pdf_corrected);
-        }
-        $mode .= 'k' if ( $config->get('prepare_indiv_solution') );
 
-        commande(
-            commande => [
-                "auto-multiple-choice",
-                "prepare",
-                "--out-corrige-indiv",
-                $pdf_corrected,
-                "--n-copies",
-                original_n_copies(),
-                "--with",
-                moteur_latex(),
-                "--filter",
-                $config->get('filter'),
-                "--filtered-source",
-                $config->get_absolute('filtered_source'),
-                "--debug",
-                debug_file(),
-                "--progression-id",
-                'bareme',
-                "--progression",
-                1,
-                "--data",
-                $config->get_absolute('data'),
-                "--mode",
-                $mode,
-                $config->get_absolute('texsrc'),
-            ],
-            texte => __ "Extracting marking scale...",
-            fin   => sub {
+        scoring_strategy_update(
+            $config->get('prepare_indiv_solution'),
+            fin => sub {
                 my ( $c, %data ) = @_;
                 check_sty_version($c);
                 noter_postcorrect();
             },
-            'progres.id' => 'bareme'
         );
+
     } else {
         noter_calcul( '', '' );
     }

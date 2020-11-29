@@ -74,6 +74,8 @@ my %role = (
     casequestion  => BOX_ROLE_QUESTIONONLY,
     score         => BOX_ROLE_SCORE,
     scorequestion => BOX_ROLE_SCOREQUESTION,
+    qtext         => BOX_ROLE_QUESTIONTEXT,
+    atext         => BOX_ROLE_ANSWERTEXT,
 );
 
 sub read_inches {
@@ -286,7 +288,7 @@ PAGE: for my $p (@pages) {
               ->execute( @ep, $1, $2, bbox( $c->{$k} ) );
         }
         if ( $k =~
-            /(case|casequestion|score|scorequestion):(.*):([0-9]+),(-?[0-9]+)$/
+            /(case|casequestion|score|scorequestion|qtext|atext):(.*):([0-9]+),(-?[0-9]+)$/
           )
         {
             my ( $type, $name, $q, $a ) = ( $1, $2, $3, $4 );

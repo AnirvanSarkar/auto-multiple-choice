@@ -187,6 +187,10 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\AMC@rbloctrue}
 % \DoNotIndex{\AMC@shuffleGfalse}
 % \DoNotIndex{\AMC@shuffleGtrue}
+% \DoNotIndex{\AMC@textPosfalse}
+% \DoNotIndex{\AMC@textPostrue}
+% \DoNotIndex{\AMC@extractOnlyfalse}
+% \DoNotIndex{\AMC@extractOnlytrue}
 % \DoNotIndex{\AMC@watermarkfalse}
 % \DoNotIndex{\AMC@watermarktrue}
 % \DoNotIndex{\AMC@zoneformulairefalse}
@@ -1255,6 +1259,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % \item |\ifAMC@rbloc| if answers are to be included in \LaTeX{} boxes
 %   (so that they can't be splitted on two different columns for
 %   example).
+% \item |\ifAMC@textPos| if questions and answers positions are to be logged.
+% \item |\ifAMC@extractOnly| if the PDF is only built to extract questions and answers images.
 % \item |\ifAMCcomplete@multi| if a choice
 %   ``\makeatletter\AMC@loc@none\makeatother'' is to be added to every
 %   multiple question.
@@ -1309,6 +1315,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@affichekeys\AMC@affichekeysfalse
 \newif\ifAMC@keysline\AMC@keyslinefalse
 \newif\ifAMC@correc\AMC@correcfalse
+\newif\ifAMC@textPos\AMC@textPosfalse
+\newif\ifAMC@extractOnly\AMC@extractOnlyfalse
 \newif\ifAMC@qbloc\AMC@qblocfalse
 \newif\ifAMC@asqbloc\AMC@asqblocfalse
 \newif\ifAMC@rbloc\AMC@rblocfalse
@@ -2957,8 +2965,11 @@ Three digits and two letters:\insertgroup{mixed}.
 %     box.
 %    \begin{macrocode}
 \newcommand\AMCrep@bloc[2]{\AMC@mem@answer{#1}%
-  \par\noindent\begin{minipage}{\linewidth}%
-    \begin{itemize}\item[#1] #2\end{itemize}\end{minipage}%
+  \par%
+  \ifAMC@textPos\vbox\bgroup\AMC@tracepos{1}{atext:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}\hbox\bgroup\AMC@tracepos{1}{atext:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}\fi%
+    \noindent\begin{minipage}{\linewidth}%
+      \begin{itemize}\item[#1] #2\end{itemize}\end{minipage}%
+    \ifAMC@textPos\AMC@tracepos{1}{atext:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}\egroup\AMC@tracepos{1}{atext:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}\egroup\fi%
   \vspace{\AMCinterBrep}}
 \newcommand\AMCrep@itemize[2]{\AMC@mem@answer{#1}\item[#1] #2}
 \newlength\AMChorizAnswerSep
@@ -2966,7 +2977,11 @@ Three digits and two letters:\insertgroup{mixed}.
 \newlength\AMChorizBoxSep
 \setlength{\AMChorizBoxSep}{1em}
 \newcommand\AMCrep@ligne[2]{\AMC@mem@answer{#1}%
-  \mbox{#1\hspace*{\AMChorizBoxSep}#2}\hspace{\AMChorizAnswerSep}}
+  \ifAMC@textPos%
+  \mbox{\AMC@tracebox{1}{atext:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}{#1\hspace*{\AMChorizBoxSep}#2}}%
+  \else%
+  \mbox{#1\hspace*{\AMChorizBoxSep}#2}%
+  \fi\hspace{\AMChorizAnswerSep}}
 \newcommand\AMCrep@perso[2]{\AMC@mem@answer{#1}\AMCanswer{#1}{#2}}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
@@ -3216,7 +3231,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifx\@empty\AMC@sz@callout\@empty\else%
     \csname\AMC@sz@callout\endcsname%
   \fi%
-  \AMCtype@multifalse\ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
+  \AMCtype@multifalse\ifAMC@qbloc\ifAMC@textPos\vbox\bgroup\AMC@tracepos{1}{qtext:#2:\the\AMCid@quest,0}\hbox\bgroup\AMC@tracepos{1}{qtext:#2:\the\AMCid@quest,0}\fi\noindent\begin{minipage}{\linewidth}\fi%
   \ifAMC@affichekeys\index{\texttt{#2}}\ifAMC@keysline[\texttt{#2}]\newline\fi\fi%
   \AMCbeginQuestion{\ifAMC@affichekeys\ifAMC@ensemble\AMC@qaff\ \fi\ifAMC@keysline\else[\texttt{#2}]\fi\else\AMC@qaff\fi}{#1}%
   \ifx\@empty\AMC@sz@callin\@empty\else%
@@ -3224,7 +3239,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \fi%
   \AMCformulaire@dedansfalse\setcounter{AMC@ncase}{0}%
   \AMC@mem@openQuestion}%
-{\ifAMC@qbloc\end{minipage}\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}\AMC@mem@add@ifneeded{\AMCformAfterQuestion}}
+{\ifAMC@qbloc\end{minipage}\ifAMC@textPos\AMC@tracepos{1}{qtext:\AMCid@name:\the\AMCid@quest,0}\egroup\AMC@tracepos{1}{qtext:\AMCid@name:\the\AMCid@quest,0}\egroup\fi\vspace{\AMCinterBquest}\else\vspace{\AMCinterIquest}\fi\AMCmessage{FQ}\AMC@mem@add@ifneeded{\AMCformAfterQuestion}}
 \newenvironment{questionmult}[1]{%
   \AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}%
   \AMCtype@multitrue\ifAMC@calibration%
@@ -3999,6 +4014,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % Then the command |\AMCnumericShow|\marg{x}\marg{options} itself:
 %    \begin{macrocode}
 
+\fp_new:N \amc_num_result_fp
 \fp_new:N \amc_num_correct_fp
 \clist_new:N \amc_num_digits_clist
 \clist_new:N \amc_num_expo_digits_clist
@@ -4080,6 +4096,13 @@ Three digits and two letters:\insertgroup{mixed}.
 % |scoring=true| option). Note that the variable |intV| refers to the
 % correct value, and |intX| to the value entered by the student.
 %    \begin{macrocode}
+   \fp_set:Nn \amc_num_result_fp { #1 }
+   \AMC@amclog{AUTOQCM[B=numval=\fp_use:N \amc_num_result_fp ,
+     numex=\int_use:N \amc_num_exact_int,
+     numapp=\int_use:N \amc_num_approx_int,
+     numsex=\AMC@numeric@scoreexact,
+     numsapp=\AMC@numeric@scoreapprox
+   ]}
    \bool_if:NTF \amc_num_scoring_bool {
      \AMC@amclog{AUTOQCM[B=haut=,mz=,
        formula=(Vdifference <= \int_use:N \amc_num_exact_int ?
@@ -4144,6 +4167,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % Begin now with the frame around all the boxes:
 %    \begin{macrocode}
+  \ifAMC@extractOnly\else
   \vspace{1.5ex}\par{
     \fboxrule=\AMCncol@BorderWidth
     \fcolorbox{\AMCncol@Border}{\AMCncol@Background}{
@@ -4174,6 +4198,7 @@ Three digits and two letters:\insertgroup{mixed}.
       }
     }
   }
+  \fi
 %    \end{macrocode}
 % And tell AMC that we finished with this question:
 %    \begin{macrocode}
@@ -4778,6 +4803,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{fullgroups}{\AMC@fullGroupstrue}
 \DeclareOptionX{answers}{\AMC@correcheadtrue\AMC@correctrue}
 \DeclareOptionX{indivanswers}{\AMC@correctrue}
+\DeclareOptionX{textpos}{\AMC@textPostrue}
+\DeclareOptionX{extractonly}{\AMC@extractOnlytrue\AMC@textPostrue\AMCboxStyle{shape=none}\AMCBoxedAnswers}
 \DeclareOptionX{box}{\AMC@qbloctrue}
 \DeclareOptionX{asbox}{\AMC@asqbloctrue}
 \DeclareOptionX{separateanswersheet}{\AMC@ensembletrue}
@@ -5014,6 +5041,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \immediate\write\AMC@XYFILE{\string\with{insidebox=\ifAMC@inside@box yes\else no\fi}}
 \immediate\write\AMC@XYFILE{\string\with{outsidebox=\ifAMC@outside@box yes\else no\fi}}
 \immediate\write\AMC@XYFILE{\string\with{postcorrect=\ifAMC@postcorrect yes\else no\fi}}
+\immediate\write\AMC@XYFILE{\string\with{extractonly=\ifAMC@extractOnly yes\else no\fi}}
 \immediate\write\AMC@XYFILE{\string\with{lang=\AMC@lang@code}}
 \ifx\AMCNombreCopies\undefined%
 \immediate\write\AMC@XYFILE{\string\with{ncopies=default}}%
