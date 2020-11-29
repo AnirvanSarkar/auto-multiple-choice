@@ -29,7 +29,8 @@ EPS=$(SVG:.svg=.eps)
 all: $(EPS)
 
 %.eps: %.svg
-	inkscape --export-eps $@ $<
+# old-style or new-style arguments 
+	inkscape --export-eps=$@ $< || inkscape --export-type=eps -o $@ $<
 
 clean:
 	-rm $(EPS)
