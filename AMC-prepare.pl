@@ -796,7 +796,7 @@ sub transfer {
 sub latex_reproducible_commands {
     my ($engine) = @_;
     if ( $engine eq 'pdflatex' ) {
-        return ("\\pdfsuppressptexinfo=-1\\pdftrailerid{}");
+        return ("\\pdfinfo{ /Producer (LaTeX) /Creator () }\\pdfsuppressptexinfo=-1\\pdftrailerid{}");
     } else {
         return ("");
     }
@@ -805,20 +805,29 @@ sub latex_reproducible_commands {
 # latex_cmd(%o) builds the LaTeX command and arguments to be passed to
 # the execute command, using the engine specifications and extra
 # options %o to pass to LaTeX: for each name=>value from %o, a LaTeX
-# command '\def\name{value}' is passed to LaTeX. This allows to relay
-# some options to LaTeX (number of copies, document needed for
-# exemple).
+# command '\def\name{value}' is passed to LaTeX through the
+# jobname-config.tex, that will be read by the automultiplechoice
+# package. This allows to relay some options to LaTeX (number of
+# copies, document needed for exemple).
 
 sub latex_cmd {
     my (%o) = @_;
 
     $o{AMCNombreCopies} = $number_of_copies if ( $number_of_copies > 0 );
 
-    return ( $latex_engine, "--jobname=" . $jobname, @engine_args,
-            "\\nonstopmode"
-          . join( '', map { "\\def\\" . $_ . "{" . $o{$_} . "}"; } ( keys %o ) )
-          . ( $epoch ? latex_reproducible_commands($latex_engine) : "" )
-          . "\\input{\"$f_tex\"}" );
+    # build a configuration tex file, that will be read by the
+    # autoultiplechoice LaTeX package, from the %o options:
+    open( CONFIG, ">:utf8", "$jobname-config.tex" )
+      or die "Unable to open config file: $!";
+    print CONFIG latex_reproducible_commands($latex_engine) if ($epoch);
+    for my $k ( keys %o ) {
+        print CONFIG "\\def\\" . $k . "{" . $o{$k} . "}";
+    }
+    print CONFIG "\n";
+    close(CONFIG);
+
+    return ( $latex_engine, "--jobname=" . $jobname,
+        "-interaction=nonstopmode", @engine_args, $f_tex );
 }
 
 # check_engine() checks that the requeted LaTeX engine is available on

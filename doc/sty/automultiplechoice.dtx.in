@@ -1195,6 +1195,14 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{fancybox} % \boxput
 \RequirePackage{expl3}
 %    \end{macrocode}
+%
+% First, we read the options that can be given by AMC through the
+% |jobname-config.tex| file:
+%    \begin{macrocode}
+\InputIfFileExists{\jobname-config.tex}%
+{\message{Loading configuration file...^^J}}{}
+%    \end{macrocode}
+% 
 % \begin{macro}{\AMC@amclog}\begin{macro}{\AMCmessage}
 %   Informations about questions and choices will be logged to a file
 %   with extension |amc|, to be parsed later. Macro |\AMC@amclog|
