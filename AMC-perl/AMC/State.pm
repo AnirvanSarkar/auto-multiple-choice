@@ -152,6 +152,7 @@ sub write {
         RootName   => 'state',
     );
     $self->{archive}->removeMember( $self->{descfile} );
+    utf8::encode $xml;
     $self->{archive}->addString( $xml, $self->{descfile} );
 
     # writes to disk
@@ -292,7 +293,9 @@ sub add_file {
 
     if ( -f $localfile ) {
         debug "Adding $localfile [$file]...";
-        if ( $self->{archive}->addFile( $localfile, $file ) ) {
+        my $encoded_file = $file;
+        utf8::encode $encoded_file;
+        if ( $self->{archive}->addFile( $localfile, $encoded_file ) ) {
             $self->add_md5( $file, $localfile );
             debug "OK.";
             return (1);
