@@ -114,6 +114,7 @@ sub open {
 
     $self->{times} = [ times() ];
     $self->{pid}   = open( $self->{fh}, "-|", @{ $self->{commande} } );
+    binmode $self->{fh}, ":utf8";
     if ( defined( $self->{pid} ) ) {
 
         push @{ $self->{tag} },

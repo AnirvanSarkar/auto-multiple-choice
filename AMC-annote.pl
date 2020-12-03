@@ -52,8 +52,6 @@ my $data_dir = '';
 my $taille_max  = "1000x1500";
 my $qualite_jpg = "65";
 
-my $debug = '';
-
 my $progress    = 1;
 my $progress_id = '';
 
@@ -89,7 +87,7 @@ my %symboles = (
     '1-1' => {qw/type mark color blue/},
 );
 
-@ARGV = unpack_args(@ARGV);
+unpack_args();
 
 GetOptions(
     "cr=s" => \$cr_dir,
@@ -97,7 +95,6 @@ GetOptions(
     "projets=s", \$rep_projets,
     "data=s"                       => \$data_dir,
     "id-file=s"                    => \$id_file,
-    "debug=s"                      => \$debug,
     "taille-max=s"                 => \$taille_max,
     "qualite=s"                    => \$qualite_jpg,
     "progression=s"                => \$progress,
@@ -120,8 +117,6 @@ GetOptions(
     "rtl!"                         => \$rtl,
     "changes-only!"                => \$changes_only,
 );
-
-set_debug($debug);
 
 print( ( "*" x 60 ) . "\n" );
 print "* WARNING: AMC-annote is now obsolete\n* Please move to AMC-annotate\n";
@@ -401,7 +396,7 @@ PAGE: for my $p (@pages) {
 
             my $sy = $symboles{"$bonne-$cochee"};
 
-            if ($debug) {
+            if ( get_debug() ) {
                 for my $i ( 1 .. 4 ) {
                     debug(
                         sprintf( "Corner $i: (%.2f,%.2f)",

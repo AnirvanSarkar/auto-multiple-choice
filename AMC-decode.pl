@@ -40,10 +40,11 @@ my $projects_dir = $ENV{HOME} . '/' . __("MC-Projects");
 my $project_dir  = '';
 my $cr_dir       = '';
 my $data_dir     = '';
-my $debug        = '';
 my $n_procs      = 0;
 my $progress     = 0;
 my $progress_id  = 0;
+
+unpack_args();
 
 GetOptions(
     "cr=s"      => \$cr_dir,
@@ -54,7 +55,6 @@ GetOptions(
     "tag=s"            => \$tag,
     "all!"             => \$all,
     "decoder=s"        => \$decoder_name,
-    "debug=s"          => \$debug,
     "n-procs=s"        => \$n_procs,
     "progression=s"    => \$progress,
     "progression-id=s" => \$progress_id,
@@ -63,8 +63,6 @@ GetOptions(
 $project_dir = $projects_dir . '/' . $project_dir if ( $project_dir !~ /\// );
 $cr_dir      = $project_dir . "/cr"               if ( !$cr_dir );
 $data_dir    = $project_dir . "/data"             if ( !$data_dir );
-
-set_debug($debug);
 
 my $queue = '';
 

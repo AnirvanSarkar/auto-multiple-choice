@@ -32,10 +32,9 @@ my $liste_key      = '';
 my $liste_enc      = 'utf-8';
 my $csv_build_name = '';
 my $data_dir       = '';
-my $debug          = '';
 my $preassoc       = '';
 
-@ARGV = unpack_args(@ARGV);
+unpack_args();
 
 GetOptions(
     "notes-id=s"       => \$notes_id,
@@ -45,10 +44,7 @@ GetOptions(
     "csv-build-name=s" => \$csv_build_name,
     "data=s"           => \$data_dir,
     "encodage-liste=s" => \$liste_enc,
-    "debug=s"          => \$debug,
 );
-
-set_debug($debug);
 
 die "Needs notes-id"   if ( !$notes_id && !$preassoc );
 die "Needs liste-key"  if ( !$liste_key );

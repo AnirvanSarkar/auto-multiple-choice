@@ -36,20 +36,18 @@ my $dpi = 300;
 
 my $progress    = 0;
 my $progress_id = '';
-my $debug       = '';
+
+unpack_args();
 
 GetOptions(
     "src=s"            => \$src,
     "data=s"           => \$data_dir,
     "progression-id=s" => \$progress_id,
     "progression=s"    => \$progress,
-    "debug=s"          => \$debug,
 );
 
 die "No src file $src"      if ( !-f $src );
 die "No data dir $data_dir" if ( !-d $data_dir );
-
-set_debug($debug);
 
 my $avance = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 

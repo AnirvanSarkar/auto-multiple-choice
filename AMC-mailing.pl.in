@@ -64,13 +64,12 @@ my $bcc               = '';
 my $log_file          = '';
 my $delay_s           = 0;
 my @attach_files      = ();
-my $debug             = '';
 my $progress          = '';
 my $progress_id       = '';
 my $report_kind       = REPORT_ANNOTATED_PDF;
 my $preassoc_key      = '';
 
-@ARGV = unpack_args(@ARGV);
+unpack_args();
 my @ARGV_ORIG = @ARGV;
 
 GetOptions(
@@ -96,7 +95,6 @@ GetOptions(
     "smtp-user=s"         => \$smtp_user,
     "smtp-passwd-file=s"  => \$smtp_passwd_file,
     "debug-smtp!"         => \$debug_smtp,
-    "debug=s"             => \$debug,
     "progression=s"       => \$progress,
     "progression-id=s"    => \$progress_id,
     "attach=s"            => \@attach_files,
@@ -105,8 +103,6 @@ GetOptions(
     "cc=s"                => \$cc,
     "bcc=s"               => \$bcc,
 );
-
-set_debug($debug);
 
 debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
 

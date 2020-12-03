@@ -52,7 +52,6 @@ $SIG{INT} = \&catch_signal;
 
 my $data_dir        = "";
 my $cr_dir          = "";
-my $debug           = '';
 my $debug_image_dir = '';
 my $debug_image     = '';
 my $debug_pixels    = 0;
@@ -72,13 +71,14 @@ my $pre_allocate    = 0;
 my $try_three       = 1;
 my $tag_overwritten = 1;
 
+unpack_args();
+
 GetOptions(
     "data=s"            => \$data_dir,
     "cr=s"              => \$cr_dir,
     "tol-marque=s"      => \$tol_mark,
     "prop=s"            => \$prop,
     "bw-threshold=s"    => \$bw_threshold,
-    "debug=s"           => \$debug,
     "debug-pixels!"     => \$debug_pixels,
     "progression=s"     => \$progress,
     "progression-id=s"  => \$progress_id,
@@ -96,8 +96,6 @@ GetOptions(
 $tag_overwritten = 0 if ($multiple);
 
 use_gettext;
-
-set_debug($debug);
 
 $queue = AMC::Queue::new( 'max.procs', $n_procs );
 

@@ -69,7 +69,6 @@ my $filter          = '';
 my $filtered_source = '';
 my $codedigit       = '';
 
-my $debug        = '';
 my $latex_stdout = '';
 
 my $n_procs          = 0;
@@ -90,7 +89,7 @@ my $f_tex;
 
 my $epoch = '';
 
-@ARGV = unpack_args(@ARGV);
+unpack_args();
 
 GetOptions(
     "mode=s"              => \$mode,
@@ -102,7 +101,6 @@ GetOptions(
     "out-corrige=s"       => \$out_corrige,
     "out-corrige-indiv=s" => \$out_corrige_indiv,
     "out-catalog=s"       => \$out_catalog,
-    "debug=s"             => \$debug,
     "latex-stdout!"       => \$latex_stdout,
     "progression=s"       => \$progress,
     "progression-id=s"    => \$progress_id,
@@ -115,9 +113,7 @@ GetOptions(
     "epoch=s"             => \$epoch,
 );
 
-set_debug($debug);
-
-debug("AMC-prepare / DEBUG") if ($debug);
+debug("AMC-prepare / DEBUG") if (get_debug());
 
 my %global_opts = (qw/NoWatermarkExterne 1 NoHyperRef 1/);
 

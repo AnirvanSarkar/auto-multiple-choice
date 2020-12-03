@@ -49,13 +49,12 @@ my $postcorrect_set_multiple = '';
 my $progres    = 1;
 my $progres_id = '';
 
-my $debug = '';
+unpack_args();
 
 GetOptions(
     "data=s"                    => \$data_dir,
     "seuil=s"                   => \$darkness_threshold,
     "seuil-up=s"                => \$darkness_threshold_up,
-    "debug=s"                   => \$debug,
     "grain=s"                   => \$granularity,
     "arrondi=s"                 => \$rounding_scheme,
     "notemax=s"                 => \$perfect_mark,
@@ -68,8 +67,6 @@ GetOptions(
     "progression-id=s"          => \$progres_id,
     "progression=s"             => \$progres,
 );
-
-set_debug($debug);
 
 # fixes decimal separator ',' potential problem, replacing it with a
 # dot.

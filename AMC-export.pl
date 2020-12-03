@@ -40,12 +40,11 @@ my $fich_noms      = '';
 my $noms_encodage  = 'utf-8';
 my $csv_build_name = '';
 my @o_out          = ();
-my $debug          = '';
 my $sort           = 'n';
 my $useall         = 1;
 my $rtl            = '';
 
-@ARGV = unpack_args(@ARGV);
+unpack_args();
 my @ARGV_ORIG = @ARGV;
 
 GetOptions(
@@ -59,10 +58,7 @@ GetOptions(
     "rtl!"             => \$rtl,
     "option-out=s"     => \@o_out,
     "output|o=s"       => \$output,
-    "debug=s"          => \$debug,
 );
-
-set_debug($debug);
 
 debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
 

@@ -34,9 +34,7 @@ use File::Spec::Functions qw/tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 
-@ARGV = unpack_args(@ARGV);
-
-my $debug = '';
+unpack_args();
 
 my $commandes = AMC::Exec::new('AMC-regroupe');
 $commandes->signalise();
@@ -65,7 +63,6 @@ my $tex_src         = '';
 my $filter          = '';
 my $filtered_source = '';
 
-my $debug         = '';
 my $nombre_copies = 0;
 my $force_ascii   = 0;
 
@@ -92,13 +89,10 @@ GetOptions(
     "rename!"           => \$rename,
     "id-file=s"         => \$id_file,
     "single-output=s"   => \$single_output,
-    "debug=s"           => \$debug,
     "sort=s"            => \$sort,
     "register!"         => \$register,
     "force-ascii!"      => \$force_ascii,
 );
-
-set_debug($debug);
 
 print( ( "*" x 60 ) . "\n" );
 print

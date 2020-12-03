@@ -40,7 +40,6 @@ my $sujet               = '';
 my $print_cmd           = 'cupsdoprint %f';
 my $progress            = '';
 my $progress_id         = '';
-my $debug               = '';
 my $fich_nums           = '';
 my $methode             = 'CUPS';
 my $imprimante          = '';
@@ -55,6 +54,8 @@ my $students_list       = '';
 my $students_list_key   = '';
 my $password_key        = '';
 
+unpack_args();
+
 GetOptions(
     "data=s"           => \$data_dir,
     "sujet=s"          => \$sujet,
@@ -68,15 +69,12 @@ GetOptions(
     "split!"           => \$split,
     "answer-first!"    => \$answer_first,
     "options=s"        => \$options,
-    "debug=s"          => \$debug,
     "extract-with=s"   => \$extract_with,
     "password=s"       => \$password,
     "students-list=s"  => \$students_list,
     "list-key=s"       => \$students_list_key,
     "password-key=s"   => \$password_key,
 );
-
-set_debug($debug);
 
 my $commandes = AMC::Exec::new('AMC-imprime');
 $commandes->signalise();

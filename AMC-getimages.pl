@@ -44,11 +44,12 @@ my $force_convert    = 0;
 my $password         = '';
 my %use = ( pdfimages => 1, pdftk => 1, qpdf => 1, gs => 1 );
 
+unpack_args();
+
 GetOptions(
     "list=s"             => \$list_file,
     "progression-id=s"   => \$progress_id,
     "copy-to=s"          => \$copy_to,
-    "debug=s"            => \$debug,
     "vector-density=s"   => \$vector_density,
     "orientation=s"      => \$orientation,
     "rotate-direction=s" => \$rotate_direction,
@@ -59,8 +60,6 @@ GetOptions(
     "force-convert!"     => \$force_convert,
     "password=s"         => \$password,
 );
-
-set_debug($debug);
 
 debug("Copy to $copy_to") if ($copy_to);
 
@@ -203,7 +202,7 @@ my @f = map { original_file($_) } (@ARGV);
 my @fs;
 
 if ( -f $list_file ) {
-    open( LIST, $list_file );
+    open( LIST, "<:utf8", $list_file );
     while (<LIST>) {
         chomp;
         push @f, original_file($_);
@@ -435,7 +434,7 @@ for my $fich (@f) {
             "-dBATCH"
                   );
         push @cmd, "-sPDFPassword=$password" if($password ne '');
-        push @cmd, "-dQUIET" if ( !$debug );
+        push @cmd, "-dQUIET" if ( !get_debug() );
         system_debug( cmd => [ @cmd, $fich->{path} ], die_on_error => 1 );
 
         opendir( my $dh, $temp_dir ) || debug "can't opendir $temp_dir: $!";
@@ -638,11 +637,11 @@ if ( $copy_to && @f ) {
                 $dest = new_filename($dest);
                 debug "--> $dest";
             }
+            debug "$fich->{path} --> $dest";
             if ( copy( $fich->{path}, $dest ) ) {
                 push @fl, derivative_file($dest);
                 $deplace = 1;
             } else {
-                debug "$fich->{path} --> $dest";
                 debug "COPY ERROR: $!";
             }
         }
@@ -662,11 +661,11 @@ if ( $copy_to && @f ) {
 # STEP 5: updates the files list with processed files names
 
 if ($list_file) {
-    open( LIST, ">:utf8", $list_file );
+    open( NEWLIST, ">:utf8", $list_file );
     for (@f) {
-        print LIST $_->{path} . "\n";
+        print NEWLIST $_->{path} . "\n";
     }
-    close(LIST);
+    close(NEWLIST);
 } else {
     debug "WARNING: no output list file requested";
 }

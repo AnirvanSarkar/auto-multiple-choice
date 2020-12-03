@@ -1280,9 +1280,9 @@ sub export_go {
         commande => [
             "auto-multiple-choice",
             "export",
+            "--debug",
+            debug_file(),
             pack_args(
-                "--debug",
-                debug_file(),
                 "--module",
                 $opts->{format},
                 "--data",
@@ -2358,34 +2358,36 @@ sub update_document {
         commande => [
             "auto-multiple-choice",
             "prepare",
-            "--with",
-            moteur_latex(),
-            "--filter",
-            $config->get('filter'),
-            "--filtered-source",
-            $config->get_absolute('filtered_source'),
             "--debug",
             debug_file(),
-            "--out-sujet",
-            $config->get_absolute('doc_question'),
-            "--out-corrige",
-            $config->get_absolute('doc_solution'),
-            "--out-corrige-indiv",
-            $config->get_absolute('doc_indiv_solution'),
-            "--out-catalog",
-            $config->get_absolute('doc_catalog'),
-            "--out-calage",
-            $config->get_absolute('doc_setting'),
-            "--mode",
-            $mode,
-            "--n-copies",
-            $config->get('nombre_copies'),
-            $config->get_absolute('texsrc'),
-            "--prefix",
-            $shortcuts->absolu('%PROJET/'),
-            "--latex-stdout",
-            "--data",
-            $config->get_absolute('data'),
+            pack_args(
+                "--with",
+                moteur_latex(),
+                "--filter",
+                $config->get('filter'),
+                "--filtered-source",
+                $config->get_absolute('filtered_source'),
+                "--out-sujet",
+                $config->get_absolute('doc_question'),
+                "--out-corrige",
+                $config->get_absolute('doc_solution'),
+                "--out-corrige-indiv",
+                $config->get_absolute('doc_indiv_solution'),
+                "--out-catalog",
+                $config->get_absolute('doc_catalog'),
+                "--out-calage",
+                $config->get_absolute('doc_setting'),
+                "--mode",
+                $mode,
+                "--n-copies",
+                $config->get('nombre_copies'),
+                $config->get_absolute('texsrc'),
+                "--prefix",
+                $shortcuts->absolu('%PROJET/'),
+                "--latex-stdout",
+                "--data",
+                $config->get_absolute('data'),
+            )
         ],
         signal          => 2,
         texte           => __ "Documents update...",
@@ -3281,44 +3283,46 @@ sub sujet_impressions_ok {
         commande => [
             "auto-multiple-choice",
             "imprime",
-            "--methode",
-            $method,
-            "--imprimante",
-            $config->get('imprimante'),
-            "--options",
-            $os,
-            "--output",
-            "$directory/$prefix-%e.pdf",
-            @o_answer,
-            "--print-command",
-            $config->get('print_command_pdf'),
-            "--sujet",
-            $config->get_absolute('doc_question'),
-            "--data",
-            $config->get_absolute('data'),
-            "--progression-id",
-            'impression',
-            "--progression",
-            1,
             "--debug",
             debug_file(),
-            "--fich-numeros",
-            $fh->filename,
-            "--extract-with",
-            $extract_with,
-            "--password",
-            (
-                  $config->get('pdf_password_use')
-                ? $config->get('pdf_password')
-                : ""
+            pack_args(
+                "--methode",
+                $method,
+                "--imprimante",
+                $config->get('imprimante'),
+                "--options",
+                $os,
+                "--output",
+                "$directory/$prefix-%e.pdf",
+                @o_answer,
+                "--print-command",
+                $config->get('print_command_pdf'),
+                "--sujet",
+                $config->get_absolute('doc_question'),
+                "--data",
+                $config->get_absolute('data'),
+                "--progression-id",
+                'impression',
+                "--progression",
+                1,
+                "--fich-numeros",
+                $fh->filename,
+                "--extract-with",
+                $extract_with,
+                "--password",
+                (
+                      $config->get('pdf_password_use')
+                    ? $config->get('pdf_password')
+                    : ""
+                ),
+                "--students-list",
+                $config->get_absolute('listeetudiants'),
+                "--list-key",
+                $config->get('liste_key'),
+                "--password-key",
+                $config->get('pdf_password_key'),
             ),
-            "--students-list",
-            $config->get_absolute('listeetudiants'),
-            "--list-key",
-            $config->get('liste_key'),
-            "--password-key",
-            $config->get('pdf_password_key'),
-          ],
+        ],
         signal       => 2,
         texte        => __ "Print papers one by one...",
         'progres.id' => 'impression',
@@ -3392,12 +3396,16 @@ sub calcule_mep {
 
     commande(
         commande => [
-            "auto-multiple-choice", "meptex",
-            "--debug",              debug_file(),
-            "--src",                $config->get_absolute('doc_setting'),
-            "--progression-id",     'MEP',
-            "--progression",        1,
-            "--data",               $config->get_absolute('data'),
+            "auto-multiple-choice",
+            "meptex",
+            "--debug",
+            debug_file(),
+            pack_args(
+                "--src",            $config->get_absolute('doc_setting'),
+                "--progression-id", 'MEP',
+                "--progression",    1,
+                "--data",           $config->get_absolute('data'),
+            ),
         ],
         texte        => __ "Detecting layouts...",
         'progres.id' => 'MEP',
@@ -3435,13 +3443,13 @@ sub calcule_mep {
 
                 } else {
                     if ($sl_file) {
-                        debug "SL_FILE=".show_utf8($sl_file);
-                        debug "SL_KEY =".show_utf8($sl_key);
+                        debug "SL_FILE=" . show_utf8($sl_file);
+                        debug "SL_KEY =" . show_utf8($sl_key);
                         $config->set( 'listeetudiants',
                             $shortcuts->relatif_base($sl_file) );
                         $config->set( 'liste_key', $sl_key ) if ($sl_key);
-                      }
-                    if($extract_only) {
+                    }
+                    if ($extract_only) {
                         scoring_strategy_update(0);
                     }
                     dialogue_apprentissage(
@@ -3687,21 +3695,24 @@ sub analyse_call {
         commande => [
             "auto-multiple-choice",
             "read-pdfform",
-            "--progression-id",
-            'analyse',
-            "--list",
-            $fh->filename,
             "--debug",
             debug_file(),
-            (
-                $config->get('auto_capture_mode') ? "--multiple"
-                : "--no-multiple"
-            ),
-            "--data",
-            $config->get_absolute('data'),
-            "--password",
-            $config->get('pdf_password'),
-          ],
+            pack_args(
+                "--progression-id",
+                'analyse',
+                "--list",
+                $fh->filename,
+                (
+                    $config->get('auto_capture_mode')
+                    ? "--multiple"
+                    : "--no-multiple"
+                ),
+                "--data",
+                $config->get_absolute('data'),
+                "--password",
+                $config->get('pdf_password')
+            )
+        ],
         signal => 2,
         o      => \%oo,
         fin    => sub {
@@ -3725,7 +3736,6 @@ sub analyse_call_images {
         my @args = (
             "--progression-id", 'analyse',
             "--list",           $oo{fh}->filename,
-            "--debug",          debug_file(),
             "--vector-density", $config->get('vector_scan_density'),
             "--password",       $config->get('pdf_password'),
         );
@@ -3739,7 +3749,11 @@ sub analyse_call_images {
         debug "Target orientation: $orientation";
 
         commande(
-            commande     => [ "auto-multiple-choice", "getimages", @args ],
+            commande => [
+                "auto-multiple-choice", "getimages",
+                "--debug",              debug_file(),
+                pack_args(@args)
+            ],
             signal       => 2,
             'progres.id' => $oo{progres},
             o            => \%oo,
@@ -3758,8 +3772,6 @@ sub analyse_call_images {
 sub analyse_call_go {
     my (%oo) = @_;
     my @args = (
-        "--debug",
-        debug_file(),
         ( $config->get('auto_capture_mode') ? "--multiple" : "--no-multiple" ),
         "--tol-marque",
         $config->get('tolerance_marque_inf') . ','
@@ -3799,12 +3811,16 @@ sub analyse_call_go {
     # call AMC-analyse
 
     commande(
-        commande     => [ "auto-multiple-choice", "analyse", @args ],
+        commande => [
+            "auto-multiple-choice", "analyse",
+            "--debug",              debug_file(),
+            pack_args(@args)
+        ],
         signal       => 2,
         texte        => $oo{text},
         'progres.id' => $oo{progres},
-        o   => { fh => $oo{fh}, overwritten => $oo{overwritten} },
-        fin => sub {
+        o            => { fh => $oo{fh}, overwritten => $oo{overwritten} },
+        fin          => sub {
             my ( $c, %data ) = @_;
             debug "Overall [SCAN] overwritten pages @" . $c . ": "
               . ( $c->variable('overwritten') || "(none)" );
@@ -3858,15 +3874,25 @@ sub decode_name_fields {
 
     commande(
         commande => [
-            "auto-multiple-choice", "decode",
-            "--debug",              debug_file(),
-            "--data",               $config->get_absolute('data'),
-            "--cr",                 $config->get_absolute('cr'),
-            "--project",            $shortcuts->absolu('%PROJET/'),
-            ( $all ? "--all" : "--no-all" ), "--decoder",
-            $type,    "--progression-id",
-            'decode', "--progression",
-            1,
+            "auto-multiple-choice",
+            "decode",
+            "--debug",
+            debug_file(),
+            pack_args(
+                "--data",
+                $config->get_absolute('data'),
+                "--cr",
+                $config->get_absolute('cr'),
+                "--project",
+                $shortcuts->absolu('%PROJET/'),
+                ( $all ? "--all" : "--no-all" ),
+                "--decoder",
+                $type,
+                "--progression-id",
+                'decode',
+                "--progression",
+                1,
+            ),
         ],
         signal       => 2,
         texte        => __ "Decoding name field images...",
@@ -4226,6 +4252,8 @@ sub associe_auto {
         commande => [
             "auto-multiple-choice",
             "association-auto",
+            "--debug",
+            debug_file(),
             pack_args(
                 "--data",
                 $config->get_absolute('data'),
@@ -4239,8 +4267,6 @@ sub associe_auto {
                 csv_build_name(),
                 "--encodage-liste",
                 bon_encodage('liste'),
-                "--debug",
-                debug_file(),
                 (
                     $config->get('assoc_code') eq '<preassoc>'
                     ? "--pre-association"
@@ -4618,27 +4644,29 @@ sub scoring_strategy_update {
         commande => [
             "auto-multiple-choice",
             "prepare",
-            "--out-corrige-indiv",
-            $pdf_corrected,
-            "--n-copies",
-            original_n_copies(),
-            "--with",
-            moteur_latex(),
-            "--filter",
-            $config->get('filter'),
-            "--filtered-source",
-            $config->get_absolute('filtered_source'),
             "--debug",
             debug_file(),
-            "--progression-id",
-            'bareme',
-            "--progression",
-            1,
-            "--data",
-            $config->get_absolute('data'),
-            "--mode",
-            $mode,
-            $config->get_absolute('texsrc'),
+            pack_args(
+                "--out-corrige-indiv",
+                $pdf_corrected,
+                "--n-copies",
+                original_n_copies(),
+                "--with",
+                moteur_latex(),
+                "--filter",
+                $config->get('filter'),
+                "--filtered-source",
+                $config->get_absolute('filtered_source'),
+                "--progression-id",
+                'bareme',
+                "--progression",
+                1,
+                "--data",
+                $config->get_absolute('data'),
+                "--mode",
+                $mode,
+                $config->get_absolute('texsrc'),
+            ),
         ],
         texte        => __ "Extracting marking scale...",
         'progres.id' => 'bareme',
@@ -4844,37 +4872,43 @@ sub noter_calcul {
 
     commande(
         commande => [
-            "auto-multiple-choice", "note",
-            "--debug",              debug_file(),
-            "--data",               $config->get_absolute('data'),
-            "--seuil",              $config->get('seuil'),
-            "--seuil-up",           $config->get('seuil_up'),
+            "auto-multiple-choice",
+            "note",
+            "--debug",
+            debug_file(),
+            pack_args(
+                "--data",     $config->get_absolute('data'),
+                "--seuil",    $config->get('seuil'),
+                "--seuil-up", $config->get('seuil_up'),
 
-            "--grain",
-            $config->get('note_grain'),
-            "--arrondi",
-            $config->get('note_arrondi'),
-            "--notemax",
-            $config->get('note_max'),
-            ( $config->get('note_max_plafond') ? "--plafond" : "--no-plafond" ),
-            "--notenull",
-            $config->get('note_null'),
-            "--notemin",
-            $config->get('note_min'),
-            "--postcorrect-student",
-            $postcorrect_student,
-            "--postcorrect-copy",
-            $postcorrect_copy,
-            (
-                $postcorrect_set_multiple
-                ? "--postcorrect-set-multiple"
-                : "--no-postcorrect-set-multiple"
+                "--grain",
+                $config->get('note_grain'),
+                "--arrondi",
+                $config->get('note_arrondi'),
+                "--notemax",
+                $config->get('note_max'),
+                (
+                    $config->get('note_max_plafond') ? "--plafond"
+                    : "--no-plafond"
+                ),
+                "--notenull",
+                $config->get('note_null'),
+                "--notemin",
+                $config->get('note_min'),
+                "--postcorrect-student",
+                $postcorrect_student,
+                "--postcorrect-copy",
+                $postcorrect_copy,
+                (
+                    $postcorrect_set_multiple ? "--postcorrect-set-multiple"
+                    : "--no-postcorrect-set-multiple"
+                ),
+
+                "--progression-id",
+                'notation',
+                "--progression",
+                1,
             ),
-
-            "--progression-id",
-            'notation',
-            "--progression",
-            1,
         ],
         signal       => 2,
         texte        => __ "Computing marks...",
@@ -5224,6 +5258,8 @@ sub annote_copies {
         commande => [
             "auto-multiple-choice",
             "annotate",
+            "--debug",
+            debug_file(),
             pack_args(
                 "--cr",
                 $config->get_absolute('cr'),
@@ -5249,8 +5285,6 @@ sub annote_copies {
                 $config->get('export_sort'),
                 "--id-file",
                 $id_file,
-                "--debug",
-                debug_file(),
                 "--progression-id",
                 'annotate',
                 "--progression",
@@ -7918,14 +7952,14 @@ sub do_mailing {
             commande => [
                 "auto-multiple-choice",
                 "mailing",
+                "--debug",
+                debug_file(),
                 pack_args(
-                    @mailing_args, "--debug",
-                    debug_file(),  "--progression-id",
-                    'mailing',     "--progression",
-                    1,             "--log",
+                    @mailing_args, "--progression-id",
+                    'mailing', "--progression", 1, "--log",
                     $shortcuts->absolu('mailing.log'),
                 ),
-            ],
+              ],
             'progres.id' => 'mailing',
             texte        => __ "Sending emails...",
             o            => { fh => $fh },

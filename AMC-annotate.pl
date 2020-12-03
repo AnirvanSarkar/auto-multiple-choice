@@ -46,8 +46,6 @@ my $darkness_threshold_up = '';
 
 my $data_dir = '';
 
-my $debug = '';
-
 my $progress    = 1;
 my $progress_id = '';
 
@@ -94,7 +92,7 @@ my %symboles = (
     '1-1' => {qw/type mark color blue/},
 );
 
-@ARGV = unpack_args(@ARGV);
+unpack_args();
 
 GetOptions(
     "cr=s" => \$cr_dir,
@@ -110,7 +108,6 @@ GetOptions(
     "single-output=s"              => \$single_output,
     "sort=s"                       => \$sort,
     "id-file=s"                    => \$id_file,
-    "debug=s"                      => \$debug,
     "progression=s"                => \$progress,
     "progression-id=s"             => \$progress_id,
     "line-width=s"                 => \$line_width,
@@ -144,8 +141,6 @@ GetOptions(
     "embedded-format=s"            => \$embedded_format,
     "embedded-jpeg-quality=s"      => \$embedded_jpeg_quality,
 );
-
-set_debug($debug);
 
 for ( split( /,/, join( ',', @o_symbols ) ) ) {
     if (/^([01]-[01]):(none|circle|mark|box)(?:[\/:]([\#a-z0-9]+))?$/) {

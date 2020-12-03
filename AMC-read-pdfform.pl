@@ -36,23 +36,21 @@ use_gettext;
 
 my $list_file   = '';
 my $progress_id = '';
-my $debug       = '';
 my $data_dir    = '';
 my $multiple    = '';
 my $password    = '';
 
+unpack_args();
+
 GetOptions(
     "list=s"           => \$list_file,
     "progression-id=s" => \$progress_id,
-    "debug=s"          => \$debug,
     "multiple!"        => \$multiple,
     "data=s"           => \$data_dir,
     "password=s"       => \$password,
 );
 
 die "data directory not found: $data_dir" if ( !-d $data_dir );
-
-set_debug($debug);
 
 my $p = AMC::Gui::Avancement::new( 1, id => $progress_id )
   if ($progress_id);

@@ -37,6 +37,7 @@ use Encode;
 use Module::Load;
 use Module::Load::Conditional qw/check_install can_load/;
 use Glib qw/TRUE FALSE/;
+use Getopt::Long;
 
 use constant {
     COMBO_ID   => 1,
@@ -485,7 +486,11 @@ sub debug_pm_version {
 my @debug_memory = ();
 
 sub next_debug {
-    push @debug_memory, @_;
+    if($amc_debug) {
+        debug @_;
+    } else {
+        push @debug_memory, @_;
+    }
 }
 
 local *AMC_STDERR_BACKUP;
@@ -520,13 +525,14 @@ sub set_debug {
                     DIR      => File::Spec->tmpdir
                 );
                 $amc_debug_filename = $amc_debug_fh->filename;
+                binmode $amc_debug_fh, ":utf8";
             } else {
 
                 # Use file given as argument
                 $empty              = ( !-s $debug );
                 $amc_debug_fh       = new IO::File;
                 $amc_debug_filename = $debug;
-                $amc_debug_fh->open( $debug, ">>" );
+                $amc_debug_fh->open( $debug, ">>:utf8" );
             }
             $amc_debug_fh->autoflush(1);
         }
@@ -537,6 +543,8 @@ sub set_debug {
 
         debug(@debug_memory);
         @debug_memory = ();
+
+        debug("$0 enters debugging mode, PERL_UNICODE=$ENV{PERL_UNICODE}");
     } else {
 
         # Leave debugging mode…
@@ -615,17 +623,29 @@ sub pack_args {
     return ( '--xmlargs', $fn );
 }
 
-sub unpack_args {
-    my @args = @_;
-    if ( $args[0] eq '--xmlargs' ) {
-        shift(@args);
-        my $file = shift(@args);
-        my $xa   = XMLin( $file, ForceArray => 1, SuppressEmpty => '' )->{arg};
-        unshift( @args, @$xa );
-        unlink($file) or debug("Could not unlink $file: $!");
-        next_debug( "Unpacked args: " . join( ' ', @args ) );
+sub braces_if_necessary {
+    my ($s) = @_;
+    if($s eq '' || $s =~ /\s/) {
+        "\"".$s."\"";
+    } else {
+        $s;
     }
-    return (@args);
+}
+
+sub unpack_args {
+    my $debug   = '';
+    my $xmlargs = '';
+    my $p       = Getopt::Long::Parser->new;
+    $p->configure('pass_through');
+    $p->getoptions( "debug=s" => \$debug, "xmlargs=s" => \$xmlargs );
+    set_debug($debug);
+    if ($xmlargs) {
+        my $xa = XMLin( $xmlargs, ForceArray => 1, SuppressEmpty => '' )->{arg};
+        unshift( @ARGV, @$xa );
+        unlink($xmlargs) or debug("Could not unlink $xmlargs: $!");
+        next_debug( "Unpacked args: "
+              . join( ' ', map { braces_if_necessary($_); } @ARGV ) );
+    }
 }
 
 my $localisation;
@@ -901,25 +921,24 @@ sub path_to_filename {
 
 sub clean_gtk_filenames {
     my @f = @_;
-    if(wantarray()) {
-        return (
-            map {
-                my $x = $_;
-                if ( ref($x) eq 'ARRAY' ) {
-                    clean_gtk_filenames(@$x);
-                } else {
-                    
-                    # if ( utf8::is_utf8($_) ) {
-                    #     $_ = Glib->filename_from_unicode($_);
-                    # }
-                    utf8::decode($x);
-                    $x;
-                }
-            } @f
-            );
+    my @r = map {
+        my $x = $_;
+        if ( ref($x) eq 'ARRAY' ) {
+            clean_gtk_filenames(@$x);
+        } else {
+
+            # if ( utf8::is_utf8($_) ) {
+            #     $_ = Glib->filename_from_unicode($_);
+            # }
+            #utf8::decode($x);
+            #$x;
+            Glib->filename_to_unicode($_);
+        }
+    } @f;
+    if ( wantarray() ) {
+        return (@r);
     } else {
-        utf8::decode($f[0]);
-        return($f[0]);
+        return ( $r[0] );
     }
 }
 
