@@ -28,7 +28,12 @@ my $t = AMC::Test->new(
     perfect_copy => [],
     seuil        => 0.25,
     check_marks  => { 1 => 20, 2 => 20, 3 => 20 },
-)->default_process;
+                      )->default_process;
+
+# With some ImageMagick versions, decrypt with password may fail:
+# see https://www.imagemagick.org/discourse-server/viewtopic.php?t=31530
+# Please upgrade ImageMagick to version 7.0.8 or above
+$t->may_fail();
 
 $t->set(
     force_convert => 1,

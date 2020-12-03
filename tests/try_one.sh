@@ -12,8 +12,15 @@ try_one() {
           return 0
       fi
   else
-      echo -e "[\e[0;31mFAIL\e[0m] $t"
-      sed ' s/^/       /;' $RESULT_FILE
-      return 1
+      if grep -iq 'test fail accepted' $RESULT_FILE ;
+      then
+          echo -e "[\e[0;33mFAIL\e[0m] $t"
+          sed ' s/^/       /;' $RESULT_FILE
+          return 0
+      else
+          echo -e "[\e[0;31mFAIL\e[0m] $t"
+          sed ' s/^/       /;' $RESULT_FILE
+          return 1
+      fi
   fi
 }

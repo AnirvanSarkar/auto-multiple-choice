@@ -1287,6 +1287,11 @@ sub report_uninitialized {
     $self->trace("[i] uninitialized: $u") if ($u);
 }
 
+sub may_fail {
+    my ($self) = @_;
+    $self->trace("[I] Test fail accepted.");
+}
+
 sub default_process {
     my ($self) = @_;
 
