@@ -3593,6 +3593,7 @@ sub saisie_automatique {
     my $gsa = read_glade(
         'saisie_auto',
         qw/copie_scans
+          saisie_auto_chooser
           saisie_auto_c_auto_capture_mode
           saisie_auto_cb_allocate_ids
           button_capture_go/
@@ -3912,7 +3913,7 @@ sub glib_project_name {
 
 sub saisie_auto_ok {
     my @f = sort { $a cmp $b }
-          ( clean_gtk_filenames( $w{saisie_auto}->get_filenames() ) );
+          ( clean_gtk_filenames( $w{saisie_auto_chooser}->get_filenames() ) );
     my $copie = $w{copie_scans}->get_active();
 
     $prefs->reprend_pref( prefix => 'saisie_auto' );
@@ -6091,7 +6092,7 @@ sub overwritten_clear {
 
 sub overwritten_look {
     my $go =
-      read_glade( 'overwritten', qw/overwritten_dialog overwritten_list/ );
+      read_glade( 'overwritten', qw/overwritten_list/ );
     my $olist =
       Gtk3::ListStore->new( 'Glib::String', 'Glib::String', 'Glib::String' );
     $w{overwritten_list}->set_model($olist);
@@ -6125,8 +6126,8 @@ sub overwritten_look {
 
     $w{overwritten_list}->get_selection->set_mode('none');
 
-    $w{overwritten_dialog}->run;
-    $w{overwritten_dialog}->destroy;
+    $w{overwritten}->run;
+    $w{overwritten}->destroy;
 }
 
 sub detecte_analyse {
@@ -6931,9 +6932,9 @@ sub source_latex_choisir {
 
         # choisir un fichier deja present
 
-        my $gap = read_glade('source_latex_choix');
+        my $gap = read_glade( 'source_latex_choix', qw/source_latex_chooser/ );
 
-        $w{source_latex_choix}->set_current_folder($home_dir);
+        $w{source_latex_chooser}->set_current_folder($home_dir);
 
         # default filter: all possible source files
 
@@ -6944,7 +6945,7 @@ sub source_latex_choisir {
                 $filtre_all->add_pattern($p);
             }
         }
-        $w{source_latex_choix}->add_filter($filtre_all);
+        $w{source_latex_chooser}->add_filter($filtre_all);
 
         # filters for each filter module
 
@@ -6962,14 +6963,14 @@ sub source_latex_choisir {
                   . ' ('
                   . join( ', ', @pat )
                   . ')' );
-            $w{source_latex_choix}->add_filter($f);
+            $w{source_latex_chooser}->add_filter($f);
         }
 
         #
 
         my $reponse = $w{source_latex_choix}->run();
 
-        my $f = clean_gtk_filenames( $w{source_latex_choix}->get_filename() );
+        my $f = clean_gtk_filenames( $w{source_latex_chooser}->get_filename() );
 
         $w{source_latex_choix}->destroy();
 
@@ -6988,9 +6989,10 @@ sub source_latex_choisir {
 
             # choisir un fichier ZIP
 
-            my $gap = read_glade('source_latex_choix_zip');
+            my $gap = read_glade( 'source_latex_choix_zip',
+                qw/source_latex_chooser_zip/ );
 
-            $w{source_latex_choix_zip}->set_current_folder($home_dir);
+            $w{source_latex_chooser_zip}->set_current_folder($home_dir);
 
             my $filtre_zip = Gtk3::FileFilter->new();
             $filtre_zip->set_name( __ "Archive (zip, tgz)" );
@@ -6999,11 +7001,11 @@ sub source_latex_choisir {
             $filtre_zip->add_pattern("*.tgz");
             $filtre_zip->add_pattern("*.TGZ");
             $filtre_zip->add_pattern("*.ZIP");
-            $w{source_latex_choix_zip}->add_filter($filtre_zip);
+            $w{source_latex_chooser_zip}->add_filter($filtre_zip);
 
             my $reponse = $w{source_latex_choix_zip}->run();
 
-            $fich = clean_gtk_filenames( $w{source_latex_choix_zip}->get_filename() );
+            $fich = clean_gtk_filenames( $w{source_latex_chooser_zip}->get_filename() );
 
             $w{source_latex_choix_zip}->destroy();
 

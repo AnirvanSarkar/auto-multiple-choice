@@ -1,18 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
-  <requires lib="gtk+" version="3.0"/>
+  <requires lib="gtk+" version="3.12"/>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">20</property>
     <property name="value">4</property>
     <property name="step_increment">1</property>
     <property name="page_increment">2</property>
   </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">go-previous-symbolic</property>
+  </object>
+  <object class="GtkImage" id="image5">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">go-next-symbolic</property>
+  </object>
   <object class="GtkWindow" id="general">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Manual association</property>
     <signal name="delete-event" handler="quitter" swapped="no"/>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="headerbar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title" translatable="yes">Manual association</property>
+        <child>
+          <object class="GtkButton" id="enregistrement">
+            <property name="label">gtk-quit</property>
+            <property name="use_action_appearance">False</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Save associations.</property>
+            <property name="use_stock">True</property>
+            <signal name="clicked" handler="enregistrer" swapped="no"/>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+          </packing>
+        </child>
+      </object>
+    </child>
     <child>
       <object class="GtkBox" id="hbox1">
         <property name="visible">True</property>
@@ -225,69 +259,6 @@
                                 <child>
                                   <placeholder/>
                                 </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
                               </object>
                             </child>
                           </object>
@@ -340,14 +311,14 @@
               <object class="GtkButtonBox" id="hbuttonbox2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">2</property>
                 <child>
                   <object class="GtkButton" id="button1">
-                    <property name="label">gtk-go-back</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_stock">True</property>
+                    <property name="image">image4</property>
                     <signal name="clicked" handler="va_precedent" swapped="no"/>
                   </object>
                   <packing>
@@ -375,12 +346,11 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="button2">
-                    <property name="label">gtk-go-forward</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_stock">True</property>
+                    <property name="image">image5</property>
                     <signal name="clicked" handler="va_suivant" swapped="no"/>
                   </object>
                   <packing>
@@ -495,36 +465,7 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkButtonBox" id="hbuttonbox1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="layout_style">spread</property>
-                <child>
-                  <object class="GtkButton" id="enregistrement">
-                    <property name="label">gtk-quit</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Save associations.</property>
-                    <property name="use_stock">True</property>
-                    <signal name="clicked" handler="enregistrer" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
