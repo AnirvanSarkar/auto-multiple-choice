@@ -3411,8 +3411,9 @@ sub calcule_mep {
         'progres.id' => 'MEP',
         fin          => sub {
             my ( $c, %data ) = @_;
-            detecte_mep();
-            if ( !$data{cancelled} ) {
+            if ( $data{cancelled} ) {
+                detecte_mep();
+            } else {
                 $projet{_layout}->begin_read_transaction('PGCN');
                 my $c = $projet{_layout}->pages_count();
                 my $sl_file =
@@ -3422,6 +3423,9 @@ sub calcule_mep {
                 my $extract_only =
                   $projet{_layout}->variable("build:extractonly");
                 $projet{_layout}->end_transaction('PGCN');
+
+                detecte_mep();
+
                 if ( $c < 1 ) {
 
                     # avertissement...
