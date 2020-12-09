@@ -2327,22 +2327,22 @@ my %component_name = (
 sub check_sty_version {
     my ($c) = @_;
     my $sty_v = $c->variable('styversion');
-    $sty_v = 'unknown' if ( !$sty_v );
+    $sty_v = '' if ( !defined($sty_v) );
     my $sty_p = $c->variable('stypath');
     my $amc_v = '@/PACKAGE_V_STY/@';
-    if ( $sty_p && $sty_v ne $amc_v ) {
+    if ( ( $sty_p || $sty_v ) && $sty_v ne $amc_v ) {
+        $sty_v = 'unknown' if ( !$sty_v );
+        $sty_p = 'unknown' if ( !$sty_p );
         my $dialog =
           Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
             'warning', 'ok', '' );
         $dialog->set_markup(
-            __
-"Your AMC version and LaTeX style file version differ. Even if the documents are properly generated, this can lead to many problems using AMC."
+            __("Your AMC version and LaTeX style file version differ. Even if the documents are properly generated, this can lead to many problems using AMC.")
               . "\n"
-              . __
-"<b>Please check your installation to get matching AMC and LaTeX style file versions.</b>"
+              . __("<b>Please check your installation to get matching AMC and LaTeX style file versions.</b>")
               . "\n"
               . sprintf(
-                __ "AMC version: %s\nsty version: %s\nsty path: %s",
+                __("AMC version: %s\nsty version: %s\nsty path: %s"),
                 $amc_v, $sty_v, $sty_p
               )
         );

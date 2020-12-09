@@ -611,7 +611,7 @@ sub execute {
 
             # detect style file path
 
-            if (m:\(([^\)]+/automultiplechoice.sty)(\)|$):) {
+            if (m=\(((?:[^\)]+/)?automultiplechoice.sty)(\)|$)=) {
                 $info_vars{stypath} = $1;
             }
 
