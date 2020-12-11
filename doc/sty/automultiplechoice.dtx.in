@@ -1197,37 +1197,6 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{csvsimple} 
 \RequirePackage{environ}
 %   \end{macrocode}
-%   \begin{macrocode}
-\newif\ifAMC@survey\AMC@surveyfalse
-\DeclareOptionX{survey}{\AMC@surveytrue}
-\ProcessOptionsX
-%
-\ifAMC@survey
-\RequirePackage{tikz}
-\usetikzlibrary{positioning, shapes, arrows, tikzmark, decorations.pathreplacing}
-\tikzset{
-    checkbox-sc/.style={
-      right=of lab\thecsvrow
-    },
-    vallab-sc/.style={
-      text width=4cm,
-      align=left,
-    },
-    checkbox-mc/.style={
-    },
-    vallab-mc/.style={
-      above=of box\thecsvrow,
-      text width=1.4cm,
-      align=center,
-    },
-    varlab-mc/.style={
-      text width=4cm,
-      align=left,
-    },
-    node distance= 0mm,
-  }
-\fi
-  % end{macrocode}
 %
 % First, we read the options that can be given by AMC through the
 % |jobname-config.tex| file:
@@ -4933,8 +4902,34 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{storebox}{\AMCneeds@storeboxtrue}
 \DeclareOptionX{pdfform}{\AMC@pdfformtrue}
 \DeclareOptionX{codedigit}{\AMCcodeID@@{#1}}
+\newif\ifAMC@survey\AMC@surveyfalse
+\DeclareOptionX{survey}{\AMC@surveytrue}
 \ProcessOptionsX
-
+\ifAMC@survey
+\RequirePackage{tikz}
+\usetikzlibrary{positioning, shapes, arrows, tikzmark, decorations.pathreplacing}
+\tikzset{
+    checkbox-sc/.style={
+      right=of lab\thecsvrow
+    },
+    vallab-sc/.style={
+      text width=4cm,
+      align=left,
+    },
+    checkbox-mc/.style={
+    },
+    vallab-mc/.style={
+      above=of box\thecsvrow,
+      text width=1.4cm,
+      align=center,
+    },
+    varlab-mc/.style={
+      text width=4cm,
+      align=left,
+    },
+    node distance= 0mm,
+  }
+\fi
 \ifAMCneeds@storebox
   \RequirePackage{storebox}\AtBeginDocument{{}}%
 \fi
