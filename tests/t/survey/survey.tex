@@ -1,0 +1,187 @@
+\documentclass[11 pt,german,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+
+%
+% QUESTIONNAIRE
+\usepackage[survey]{automultiplechoice}
+\AMCtext{message}{}
+\AMCtext{draft}{}
+%
+%
+% START DOCUMENT
+\begin{document}
+%
+% START QUESTIONNAIRE
+\begin{Questionnaires}{1}
+\parindent0pt
+%
+% ---------------------------
+% Question 1
+% question text
+\textbf{Question 1: Does the shop in which you work belong to a capitalist or to a limited company?}
+%
+\vskip5mm
+
+% select oval answer boxes
+\AMCboxStyle{shape=oval}
+%
+% single-choice format 
+\begin{variable-single}{capitalist}{99}
+	\begin{values}
+		\answer{Capitalist \dotfill}{0,3}{vallab-sc}{checkbox-sc}\scoring{b=3}
+		\answer{Limited company \dotfill}{0,2}{vallab-sc}{checkbox-sc}\scoring{b=2}
+		\answer{Don’t know \dotfill}{0,1}{vallab-sc}{checkbox-sc}\scoring{b=1}
+	\end{values}
+\end{variable-single} 
+
+\vskip10mm
+
+% ---------------------------
+% Question 2
+% question text
+\textbf{Question 2: What is the youngest age at which children are taken on?}
+%
+\vskip5mm
+%
+% single-choice format horizontal
+\begin{variable-single}{children}{99}
+	% connected answer boxes
+	\draw[dotted]
+		(.2,-.8) -- (9,-.8);
+	% answer options
+	\begin{values}
+		\answer{< 13 \\ years}{0,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=7}
+		\answer{13 \\ years}{1.25,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=6}
+		\answer{14 \\ years}{2.5,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=5}
+		\answer{15 \\ years}{3.75,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=4}
+		\answer{16 \\ years}{5,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=3}		
+		\answer{> 16 \\ years}{6.25,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=2}				
+		\answer{Don't \\ know}{9,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=1}						
+	\end{values}
+\end{variable-single} 
+
+\vskip10mm
+
+% ---------------------------
+% Question 3
+% question text
+\textbf{Question 3: Is the shop in a town or in a village?}
+%
+\vskip5mm
+%
+% single-choice format with filter instructions
+\begin{variable-single}{local}{99}
+	% answer options
+	\begin{values}
+		\answer{Town \dotfill}{0,1}{vallab-sc}{checkbox-sc}\scoring{b=2}
+		\answer{Village \dotfill}{0,0}{vallab-sc}{checkbox-sc}\scoring{b=1}
+	\end{values}
+	% filter instructions
+	\node[minimum width=25mm, font=\footnotesize] at (5.75,1) {Go on with question 5};
+	\node[minimum width=25mm, font=\footnotesize] at (5.75,0) {Go on with question 4};
+	% arrows
+	\draw[->] (2.75,1) -- (4,1);
+	\draw[->] (2.75,0) -- (4,0);
+\end{variable-single} 
+
+\vskip10mm
+
+% ---------------------------
+% Question 4
+% question text
+\textbf{Question 4: If your shop is in the country, is there sufficient work in the factory for your existence, or are you obliged to combine it with agricultural labor?}
+%
+\vskip5mm
+%
+% single-choice format
+\begin{variable-single}{existence}{99}
+	% answer options
+	\begin{values}
+		\answer{Sufficient work in the factory \dotfill}{0,1}{vallab-sc, text width=6.5cm}{checkbox-sc}\scoring{b=2}
+		\answer{Combine it with agricultural labor \dotfill}{0,0}{vallab-sc, text width=6.5cm}{checkbox-sc}\scoring{b=1}
+	\end{values}
+\end{variable-single} 
+
+\vskip10mm
+
+% ---------------------------
+% Question 5
+% question text
+\textbf{Question 5: Are safety measures to prevent accidents applied to the engine, transmission and machinery?} \textit{Please select all that apply!}
+%
+\vskip5mm
+%
+\AMCboxStyle{shape=square}
+%
+% multiple-choice format
+\foreach \label [count=\num from 1] in {engine, transmission, machinery}{
+	\begin{variable-multi}{safety\num}{\label \dotfill}{varlab-mc}{99}
+		\begin{values}
+			\answer{}{2.5,0}{vallab-mc}{checkbox-mc}\scoring{b=1}
+		\end{values}
+	\end{variable-multi}
+}
+
+\pagebreak 
+
+% ---------------------------
+% Question 6
+% 
+% reset question counter
+\setcounter{AMCquestionaff}{6}
+%
+% question text
+\textbf{Question 6: How satisfied are you with the hygienic conditions in the workshop regarding the following aspects?} \textit{Please select one answer for each row!}
+%
+\vskip5mm
+%
+% matrix/grid format
+%
+% first row with scale
+\begin{variable-multi}{hyg1}{Size of the room space \dotfill}{varlab-mc}{99}
+	\begin{values}
+		% connected answer boxes
+		\draw[double, thick] (2.5,0) -- (11,0);
+		% answer options
+		\answer{Very satisfied}{2.1,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=1}
+		\answer{Somewhat satisfied}{4.2,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=2}		 
+		\answer{Somewhat dissatisfied}{6.3,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=3}		
+		\answer{Very dissatisfied}{8.4,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=4}
+		\answer{Don't know}{10.5,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=5}				
+	\end{values}
+\end{variable-multi}
+%
+% remaining rows
+%
+\foreach {\label} [count=\num from 2] in {
+	Ventilation,
+	Temperature,
+	Plastering,
+	Lavatories,
+	General cleanliness,
+	Noise of Machinery,
+	Metallic Dust,
+	Dampness		
+}{
+	\begin{variable-multi}{hyg\num}{\label \dotfill}{varlab-mc}{99}
+	\begin{values}
+		% connected answer boxes
+		\draw[double, thick] (2.5,0) -- (11,0);
+		% answer options
+		\answer{}{2.1,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=1}
+		\answer{}{4.2,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=2}		 
+		\answer{}{6.3,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=3}		
+		\answer{}{8.4,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=4}
+		\answer{}{10.5,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=5}				
+	\end{values}
+	\end{variable-multi}
+}
+
+% END QUESTIONNAIRE
+\end{Questionnaires}
+% END DOCUMENT
+\end{document}
+
+
