@@ -1196,10 +1196,38 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{expl3}
 \RequirePackage{csvsimple} 
 \RequirePackage{environ}
+%   \end{macrocode}
+%   \begin{macrocode}
+\newif\ifAMC@survey\AMC@surveyfalse
+\DeclareOptionX{survey}{\AMC@surveytrue}
+\ProcessOptionsX
+%
+\ifAMC@survey
 \RequirePackage{tikz}
-\usetikzlibrary{positioning, shapes, arrows, tikzmark}
-\usetikzlibrary{decorations.pathreplacing}
-%    \end{macrocode}
+\usetikzlibrary{positioning, shapes, arrows, tikzmark, decorations.pathreplacing}
+\tikzset{
+    checkbox-sc/.style={
+      right=of lab\thecsvrow
+    },
+    vallab-sc/.style={
+      text width=4cm,
+      align=left,
+    },
+    checkbox-mc/.style={
+    },
+    vallab-mc/.style={
+      above=of box\thecsvrow,
+      text width=1.4cm,
+      align=center,
+    },
+    varlab-mc/.style={
+      text width=4cm,
+      align=left,
+    },
+    node distance= 0mm,
+  }
+\fi
+  % end{macrocode}
 %
 % First, we read the options that can be given by AMC through the
 % |jobname-config.tex| file:
@@ -2986,27 +3014,6 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCrep@count=\z@\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}%
   \AMCbeginAnswer\ignorespaces}%
   {\AMC@fin@rep\AMCendAnswer}
-\tikzset{
-checkbox-sc/.style={
-right=of lab\thecsvrow
-},
-vallab-sc/.style={
-text width=4cm,
-align=left,
-},
-checkbox-mc/.style={
-},
-vallab-mc/.style={	
-above=of box\thecsvrow,
-text width=1.4cm,
-align=center,
-},
-varlab-mc/.style={
-text width=4cm, 
-align=left,
-},
-node distance= 0mm,
-}
 \newenvironment{tikz-single}[1][r]{
 \AMCrep@count=\z@\def\une@rep{\AMCrep@tikz}\AMCrep@init{#1}%
 \begin{tikzpicture}}{\AMC@fin@rep\end{tikzpicture}} 
@@ -3080,7 +3087,7 @@ node distance= 0mm,
   \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
   \AMCload@@reponse{\une@rep{\AMC@box{#1}{}}{#2}}{\the\AMCrep@count}%
   \ignorespaces}
-%    \end{macrocode}\end{macro}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
 % \subsubsection{Score zones}
 % \begin{macro}{\AMCscoreZone}\begin{macro}{\AMCscoreZoneAnswerSheet}
@@ -3313,12 +3320,14 @@ node distance= 0mm,
   \AMC@amclog{AUTOQCM[MULT]^^J}\fi}%
 {\end{question}}
 \newenvironment{variable-single}[2]
-{\begin{questionmult}{#1}\scoring{v=#2}
+{\def\AMCbeginQuestion##1##2{}  
+\begin{questionmult}{#1}\scoring{v=#2}
 \begin{tikz-single}[o]}
 {\end{tikz-single}
 \end{questionmult}}
 \newenvironment{variable-multi}[4]
-{\begin{questionmult}{#1}\scoring{v=#4}
+{\def\AMCbeginQuestion##1##2{}  
+\begin{questionmult}{#1}\scoring{v=#4}
 \begin{tikz-multi}[o]
 \node[#3] (var) at (0,0) {#2};}		
 {\end{tikz-multi}
@@ -5162,24 +5171,11 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \let\choixIntervalles=\AMCIntervals
 %    \end{macrocode}
 % \section{SurveyAMC}
-% 
-% \begin{macro}{\surveyamc}
-%    \begin{macrocode}
-\def\surveyamc{\def\AMCbeginQuestion##1##2{}}
-%    \end{macrocode}
-% \end{macro}
-%
-% \begin{macro}{\qn}
-%    \begin{macrocode}
-\newcounter{qn}
-\def\qnum{\refstepcounter{qn}\theqn}
-%    \end{macrocode}
-% \end{macro}
 %
 % \begin{environment}{Questionnaires}\begin{environment}{auto}\begin{environment}{question-auto}\begin{environment}{values}\begin{environment}{values-auto}\begin{environment}{variable-auto}
 %    \begin{macrocode}
 \NewEnviron{Questionnaires}[1]{
-\onecopy{#1}{\setcounter{qn}{0}	
+\onecopy{#1}{
 \BODY
 }		
 }
