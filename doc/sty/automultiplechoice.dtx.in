@@ -4153,7 +4153,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % correct value, and |intX| to the value entered by the student.
 %    \begin{macrocode}
    \fp_set:Nn \amc_num_result_fp { #1 }
-   \AMC@amclog{AUTOQCM[B=numval=\fp_use:N \amc_num_result_fp ,
+   \AMC@amclog{AUTOQCM[B=numval=\fp_to_scientific:N \amc_num_result_fp ,
      numex=\int_use:N \amc_num_exact_int,
      numapp=\int_use:N \amc_num_approx_int,
      numsex=\AMC@numeric@scoreexact,

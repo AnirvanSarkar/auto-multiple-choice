@@ -1037,8 +1037,11 @@ sub students {
 sub defects {
     my ( $self, $delta ) = @_;
     $delta = 0.1 if ( !defined($delta) );
-    my %r = ();
-    for my $type (qw/NO_BOX NO_NAME SEVERAL_NAMES/) {
+    my %r     = ();
+    my @tests = (qw/NO_NAME SEVERAL_NAMES/);
+    push @tests, 'NO_BOX'
+      if ( $self->variable('build:extractonly') ne 'yes' );
+    for my $type (@tests) {
         my @s = $self->sql_list( $self->statement( 'DEFECT_' . $type ) );
         $r{$type} = [@s] if (@s);
     }

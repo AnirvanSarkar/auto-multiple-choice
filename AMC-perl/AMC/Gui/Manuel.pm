@@ -120,7 +120,10 @@ sub new {
     $self->{gui}->add_from_file($glade_xml);
 
     for my $k (
-        qw/general area navigation_h navigation_v goto goto_v diag_tree button_photocopy scan_view navigate navigate_question scan_yadjust/
+        qw/general area navigation_h navigation_v goto goto_v
+           diag_tree button_photocopy scan_view navigate
+           navigate_question scan_yadjust
+           button_erase button_cancel/
       )
     {
         $self->{$k} = $self->{gui}->get_object($k);
@@ -171,6 +174,8 @@ sub new {
 
         # show navigation tab
 
+        $self->{button_erase}->show();
+        $self->{button_cancel}->show();
         $self->{navigation_h}->show();
     }
 
