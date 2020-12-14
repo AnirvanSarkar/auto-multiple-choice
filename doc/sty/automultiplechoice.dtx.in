@@ -1194,7 +1194,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \RequirePackage{rotating} % \rotatebox
 \RequirePackage{fancybox} % \boxput
 \RequirePackage{expl3}
-%    \end{macrocode}
+\RequirePackage{csvsimple} 
+\RequirePackage{environ}
+%   \end{macrocode}
 %
 % First, we read the options that can be given by AMC through the
 % |jobname-config.tex| file:
@@ -2956,7 +2958,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \subsubsection{Formatting answers}
 %
-% \begin{environment}{choices}\begin{environment}{choiceshoriz}\begin{environment}{choicescustom}\begin{macro}{\AMCBoxedAnswers}
+% \begin{environment}{choices}\begin{environment}{choiceshoriz}\begin{environment}{choicescustom}\begin{environment}{tikz-single}\begin{environment}{tikz-multi}\begin{macro}{\AMCBoxedAnswers}
 %       Answers have to be included in an environment |choices|
 %       (standard), |choiceshoriz| (answers on one line) or
 %       |choicescustom| (user defined) depending on the desired
@@ -2981,9 +2983,15 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCrep@count=\z@\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}%
   \AMCbeginAnswer\ignorespaces}%
   {\AMC@fin@rep\AMCendAnswer}
-%    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}
+\newenvironment{tikz-single}[1][r]{
+\AMCrep@count=\z@\def\une@rep{\AMCrep@tikz}\AMCrep@init{#1}%
+\begin{tikzpicture}}{\AMC@fin@rep\end{tikzpicture}} 
+\newenvironment{tikz-multi}[1][r]{
+\AMCrep@count=\z@\def\une@rep{\AMCrep@tikzmat}\AMCrep@init{#1}%
+\begin{tikzpicture}[remember picture]}{\AMC@fin@rep\end{tikzpicture}}
+%    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}
 %
-% \begin{macro}{\AMCrep@bloc}\begin{macro}{\AMCrep@itemize}
+% \begin{macro}{\AMCrep@bloc}\begin{macro}{\AMCrep@tikz}\begin{macro}{\AMCrep@tikzmat}\begin{macro}{\AMCrep@itemize}
 % \begin{macro}{\AMCrep@ligne}\begin{macro}{\AMCrep@perso}
 %     For each of these styles, a corresponding
 %     |\AMCrep@|$xxx$\marg{box}\marg{text} is defined, which will
@@ -2999,6 +3007,8 @@ Three digits and two letters:\insertgroup{mixed}.
       \begin{itemize}\item[#1] #2\end{itemize}\end{minipage}%
     \ifAMC@textPos\AMC@tracepos{1}{atext:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}\egroup\AMC@tracepos{1}{atext:\AMCid@name:\the\AMCid@quest,\the\AMCrep@count}\egroup\fi%
   \vspace{\AMCinterBrep}}
+ \newcommand\AMCrep@tikz[5]{\AMC@mem@answer{#1}\node[#4] (lab\thecsvrow) at (#3) {#2} node[#5] (box\thecsvrow) {#1};}
+\newcommand\AMCrep@tikzmat[5]{\AMC@mem@answer{#1}\node[#5] (box\thecsvrow) at (#3) {#1} node[#4] (lab\thecsvrow) {#2};}  
 \newcommand\AMCrep@itemize[2]{\AMC@mem@answer{#1}\item[#1] #2}
 \newlength\AMChorizAnswerSep
 \setlength{\AMChorizAnswerSep}{3em plus 4em}
@@ -3011,7 +3021,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \mbox{#1\hspace*{\AMChorizBoxSep}#2}%
   \fi\hspace{\AMChorizAnswerSep}}
 \newcommand\AMCrep@perso[2]{\AMC@mem@answer{#1}\AMCanswer{#1}{#2}}
-%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMCbeginAnswer}\begin{macro}{\AMCendAnswer}\begin{macro}{\AMCanswer}
 %       The |custom| style will use user-defined commands to format
@@ -3026,12 +3036,17 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMCendAnswer{}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
-% \begin{macro}{\correctchoice}\begin{macro}{\wrongchoice}
+% \begin{macro}{\answer}\begin{macro}{\correctchoice}\begin{macro}{\wrongchoice}
 %     The commands |\correctchoice| and |\wrongchoice| are used inside
 %     |choices|-like environments to give the proposed answers and
 %     specify if they are to be tocked by the students or not.
 %
 %    \begin{macrocode}
+\newcommand{\answer}[5][]{\global\advance\AMCrep@count\@ne\relax%
+	\ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
+	\global\AMCune@bonnetrue%
+	\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{\AMC@checkedbox}%
+	\else\AMC@box{#1}{}\fi}{#2}{#3}{#4}{#5}}{\the\AMCrep@count}\ignorespaces}
 \newcommand{\correctchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
   \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
   \global\AMCune@bonnetrue%
@@ -3041,7 +3056,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
   \AMCload@@reponse{\une@rep{\AMC@box{#1}{}}{#2}}{\the\AMCrep@count}%
   \ignorespaces}
-%    \end{macrocode}\end{macro}\end{macro}
+%    \end{macrocode}\end{macro}\end{macro}\end{macro}
 %
 % \subsubsection{Score zones}
 % \begin{macro}{\AMCscoreZone}\begin{macro}{\AMCscoreZoneAnswerSheet}
@@ -3231,7 +3246,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\multiSymbole{$\clubsuit$}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
 % 
-% \begin{environment}{question}\begin{environment}{questionmult}\begin{environment}{questionouverte}\begin{macro}{\ouverte@vs}
+% \begin{environment}{question}\begin{environment}{questionmult}\begin{environment}{variable-single}\begin{environment}{variable-multi}\begin{environment}{questionouverte}\begin{macro}{\ouverte@vs}
 %         Environment |{question}|\marg{key} encloses a simple question
 %         (with one and only one correct choice) with associated
 %         unique key \meta{key} and the proposed answers.
@@ -3273,6 +3288,19 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCtype@multitrue\ifAMC@calibration%
   \AMC@amclog{AUTOQCM[MULT]^^J}\fi}%
 {\end{question}}
+\newenvironment{variable-single}[2]
+{\def\AMCbeginQuestion##1##2{}  
+\begin{questionmult}{#1}\scoring{v=#2}
+\begin{tikz-single}[o]}
+{\end{tikz-single}
+\end{questionmult}}
+\newenvironment{variable-multi}[4]
+{\def\AMCbeginQuestion##1##2{}  
+\begin{questionmult}{#1}\scoring{v=#4}
+\begin{tikz-multi}[o]
+\node[#3] (var) at (0,0) {#2};}		
+{\end{tikz-multi}
+\end{questionmult}}
 \newenvironment{questionmultx}[1]{%
   \begingroup\def\multiSymbole{}\begin{questionmult}{#1}}%
 {\end{questionmult}\endgroup}
@@ -3283,7 +3311,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifAMC@qbloc\noindent\begin{minipage}{\linewidth}\fi%
   \AMCbeginQuestion{\AMC@qaff}{}}%
 {\vspace*{\ouverte@vs}\ifAMC@qbloc\end{minipage}\vspace{3ex}\fi}
-%    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}
+%    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}
 %
 % \subsubsection{Explanations}
 %
@@ -4874,8 +4902,34 @@ Three digits and two letters:\insertgroup{mixed}.
 \DeclareOptionX{storebox}{\AMCneeds@storeboxtrue}
 \DeclareOptionX{pdfform}{\AMC@pdfformtrue}
 \DeclareOptionX{codedigit}{\AMCcodeID@@{#1}}
+\newif\ifAMC@survey\AMC@surveyfalse
+\DeclareOptionX{survey}{\AMC@surveytrue}
 \ProcessOptionsX
-
+\ifAMC@survey
+\RequirePackage{tikz}
+\usetikzlibrary{positioning, shapes, arrows, tikzmark, decorations.pathreplacing}
+\tikzset{
+    checkbox-sc/.style={
+      right=of lab\thecsvrow
+    },
+    vallab-sc/.style={
+      text width=4cm,
+      align=left,
+    },
+    checkbox-mc/.style={
+    },
+    vallab-mc/.style={
+      above=of box\thecsvrow,
+      text width=1.4cm,
+      align=center,
+    },
+    varlab-mc/.style={
+      text width=4cm,
+      align=left,
+    },
+    node distance= 0mm,
+  }
+\fi
 \ifAMCneeds@storebox
   \RequirePackage{storebox}\AtBeginDocument{{}}%
 \fi
@@ -5111,6 +5165,42 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \let\champnom=\namefield
 \let\choixIntervalles=\AMCIntervals
 %    \end{macrocode}
+% \section{SurveyAMC}
+%
+% \begin{environment}{Questionnaires}\begin{environment}{auto}\begin{environment}{question-auto}\begin{environment}{values}\begin{environment}{values-auto}\begin{environment}{variable-auto}
+%    \begin{macrocode}
+\NewEnviron{Questionnaires}[1]{
+\onecopy{#1}{
+\BODY
+}		
+}
+\NewEnviron{auto}[1]{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\BODY
+}		
+}
+\NewEnviron{question-auto}[3]{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\ifcsvstrcmp{#2}{#3}{\BODY \\}{}
+}
+}
+\newenvironment{values}{}{}
+\NewEnviron{values-auto}[5]{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\ifcsvstrcmp{#2}{#3}{
+\ifcsvstrcmp{#4}{#5}{\BODY \\		
+}{}
+}{}	
+}
+}
+\NewEnviron{variable-auto}[3]{
+\foreach \x in {#3}{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\ifcsvstrcmp{#2}{\x}{\BODY}{} 
+}
+}		
+}
+%    \end{macrocode}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}
 %
 % \section{Outputs}
 %
