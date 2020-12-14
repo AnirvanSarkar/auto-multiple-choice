@@ -3042,11 +3042,6 @@ Three digits and two letters:\insertgroup{mixed}.
 %     specify if they are to be tocked by the students or not.
 %
 %    \begin{macrocode}
-\newcommand{\answer}[5][]{\global\advance\AMCrep@count\@ne\relax%
-	\ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
-	\global\AMCune@bonnetrue%
-	\AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{\AMC@checkedbox}%
-	\else\AMC@box{#1}{}\fi}{#2}{#3}{#4}{#5}}{\the\AMCrep@count}\ignorespaces}
 \newcommand{\correctchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
   \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
   \global\AMCune@bonnetrue%
@@ -4905,7 +4900,73 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@survey\AMC@surveyfalse
 \DeclareOptionX{survey}{\AMC@surveytrue}
 \ProcessOptionsX
+\ifAMCneeds@storebox
+  \RequirePackage{storebox}\AtBeginDocument{{}}%
+\fi
+\ifAMC@pdfform
+  \AMC@amclog{AUTOQCM[VAR:project:pdfform=1]^^J}%
+  \AMCboxStyle{shape=form}%
+  \RequirePackage[pageanchor=false]{hyperref}%
+\else%
+   \AMC@amclog{AUTOQCM[VAR:project:pdfform=0]^^J}%
+\fi
+\AtBeginDocument{%
+  \ifAMCneeds@storebox%
+    \let\AMC@new@savebox=\newstorebox%
+    \let\AMC@save@box=\storebox%
+    \let\AMC@use@box=\usestorebox%
+  \fi%
+  \AMC@new@savebox{\AMC@ovalbox@R}%
+  \AMC@new@savebox{\AMC@ovalbox@RF}%
+  \AMC@new@savebox{\AMC@ovalbox@}%
+  \AMC@new@savebox{\AMC@ovalbox@F}%
+  \AMC@shapeprepare%
+}
+%    \end{macrocode}
+% \subsection{Survey add-on}
+% Some code and \textit{tikz} settings to help handling surveys, see
+% \url{https://survey.codes/pdf/surveyamc_manual.pdf} for more
+% details. This survey add-on is originally written by Claudia
+% Saalbach.
+% \begin{environment}{Questionnaires}\begin{environment}{auto}\begin{environment}{question-auto}\begin{environment}{values}\begin{environment}{values-auto}\begin{environment}{variable-auto}\begin{macro}{\answer}
+%    \begin{macrocode}
 \ifAMC@survey
+\NewEnviron{Questionnaires}[1]{
+\onecopy{#1}{
+\BODY
+}		
+}
+\NewEnviron{auto}[1]{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\BODY
+}		
+}
+\NewEnviron{question-auto}[3]{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\ifcsvstrcmp{#2}{#3}{\BODY \\}{}
+}
+}
+\newenvironment{values}{}{}
+\NewEnviron{values-auto}[5]{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\ifcsvstrcmp{#2}{#3}{
+\ifcsvstrcmp{#4}{#5}{\BODY \\		
+}{}
+}{}	
+}
+}
+\NewEnviron{variable-auto}[3]{
+\foreach \x in {#3}{
+\csvreader[head to column names, separator=tab]{#1}{}{
+\ifcsvstrcmp{#2}{\x}{\BODY}{} 
+}
+}		
+}
+\newcommand{\answer}[5][]{\global\advance\AMCrep@count\@ne\relax%
+  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
+  \global\AMCune@bonnetrue%
+  \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{\AMC@checkedbox}%
+  \else\AMC@box{#1}{}\fi}{#2}{#3}{#4}{#5}}{\the\AMCrep@count}\ignorespaces}
 \RequirePackage{tikz}
 \usetikzlibrary{positioning, shapes, arrows, tikzmark, decorations.pathreplacing}
 \tikzset{
@@ -4930,29 +4991,7 @@ Three digits and two letters:\insertgroup{mixed}.
     node distance= 0mm,
   }
 \fi
-\ifAMCneeds@storebox
-  \RequirePackage{storebox}\AtBeginDocument{{}}%
-\fi
-\ifAMC@pdfform
-  \AMC@amclog{AUTOQCM[VAR:project:pdfform=1]^^J}%
-  \AMCboxStyle{shape=form}%
-  \RequirePackage[pageanchor=false]{hyperref}%
-\else%
-   \AMC@amclog{AUTOQCM[VAR:project:pdfform=0]^^J}%
-\fi
-\AtBeginDocument{%
-  \ifAMCneeds@storebox%
-    \let\AMC@new@savebox=\newstorebox%
-    \let\AMC@save@box=\storebox%
-    \let\AMC@use@box=\usestorebox%
-  \fi%
-  \AMC@new@savebox{\AMC@ovalbox@R}%
-  \AMC@new@savebox{\AMC@ovalbox@RF}%
-  \AMC@new@savebox{\AMC@ovalbox@}%
-  \AMC@new@savebox{\AMC@ovalbox@F}%
-  \AMC@shapeprepare%
-}
-%    \end{macrocode}
+%    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}
 %
 % \subsection{Package Errors}
 %
@@ -5165,42 +5204,6 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \let\champnom=\namefield
 \let\choixIntervalles=\AMCIntervals
 %    \end{macrocode}
-% \section{SurveyAMC}
-%
-% \begin{environment}{Questionnaires}\begin{environment}{auto}\begin{environment}{question-auto}\begin{environment}{values}\begin{environment}{values-auto}\begin{environment}{variable-auto}
-%    \begin{macrocode}
-\NewEnviron{Questionnaires}[1]{
-\onecopy{#1}{
-\BODY
-}		
-}
-\NewEnviron{auto}[1]{
-\csvreader[head to column names, separator=tab]{#1}{}{
-\BODY
-}		
-}
-\NewEnviron{question-auto}[3]{
-\csvreader[head to column names, separator=tab]{#1}{}{
-\ifcsvstrcmp{#2}{#3}{\BODY \\}{}
-}
-}
-\newenvironment{values}{}{}
-\NewEnviron{values-auto}[5]{
-\csvreader[head to column names, separator=tab]{#1}{}{
-\ifcsvstrcmp{#2}{#3}{
-\ifcsvstrcmp{#4}{#5}{\BODY \\		
-}{}
-}{}	
-}
-}
-\NewEnviron{variable-auto}[3]{
-\foreach \x in {#3}{
-\csvreader[head to column names, separator=tab]{#1}{}{
-\ifcsvstrcmp{#2}{\x}{\BODY}{} 
-}
-}		
-}
-%    \end{macrocode}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}
 %
 % \section{Outputs}
 %
