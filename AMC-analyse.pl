@@ -139,7 +139,12 @@ sub error {
         debug "ERROR($opts{scan}): $e\n";
         print "ERROR($opts{scan}): $e\n";
     }
-    exit(1);
+    if ( $opts{register_failed} ) {
+        my $capture = AMC::Data->new($data_dir)->module('capture');
+        $capture->begin_transaction('CFLD');
+        $capture->failed( $opts{register_failed} );
+        $capture->end_transaction('CFLD');
+    }
 }
 
 sub check_rep {
@@ -238,6 +243,7 @@ $layout->begin_read_transaction('cRLY');
 if ( $layout->pages_count() == 0 ) {
     $layout->end_transaction('cRLY');
     error("No layout");
+    exit(1);
 }
 debug "" . $layout->pages_count() . " layouts\n";
 
@@ -444,10 +450,30 @@ sub one_scan {
 
     @r = $process->commande( "load " . $scan );
     my @c = ();
-    for (@r) {
-        if (/Frame\[([0-9]+)\]:\s*(-?[0-9.]+)\s*[,;]\s*(-?[0-9.]+)/) {
+    my %warns=();
+
+    for my $l (@r) {
+        if ( $l =~ /Frame\[([0-9]+)\]:\s*(-?[0-9.]+)\s*[,;]\s*(-?[0-9.]+)/ ) {
             push @c, $2, $3;
         }
+        if ( $l =~ /^\! ([A-Z_]+)/ ) {
+            my $k = $1;
+            $l =~ s/^\!\s*//;
+            $warns{$k} = $l;
+        }
+    }
+
+    # if not enough marks are detected, stop the process and report
+    # the error (with a different message if the page seems to be
+    # blank).
+    if ( my $m = $warns{MAYBE_BLANK} || $warns{NMARKS} ) {
+        error(
+            $m,
+            process         => $process,
+            scan            => $scan,
+            register_failed => ( $warns{NMARKS} ? $sf : '' ),
+        );
+        exit($warns{NMARKS} ? 1 : 0);
     }
 
     my $cadre_general = AMC::Boite::new_complete(@c);
@@ -491,17 +517,14 @@ sub one_scan {
     if ( !$ok ) {
 
         # Failed!
-        # Page ID has not been found: report it in the database.
-        my $capture = AMC::Data->new($data_dir)->module('capture');
-        $capture->begin_transaction('CFLD');
-        $capture->failed($sf);
-        $capture->end_transaction('CFLD');
 
         error(
             sprintf( "No layout for ID +%d/%d/%d+", @epc ),
-            process => $process,
-            scan    => $scan
+            process         => $process,
+            scan            => $scan,
+            register_failed => $sf,
         );
+        exit(1);
     }
 
     command_transf( $process, $random_layout->{transf}, "rotateOK" );
@@ -561,12 +584,15 @@ sub one_scan {
         measure_box( $process, $ld, $k, @spc ) if ( $k =~ /^[0-9]+\.[0-9]+$/ );
     }
 
-    error(
-        "End of diagnostic",
-        silent  => 1,
-        process => $process,
-        scan    => $scan
-    ) if ($debug_image);
+    if ($debug_image) {
+        error(
+            "End of diagnostic",
+            silent  => 1,
+            process => $process,
+            scan    => $scan
+        );
+        return();
+    }
 
     ##########################################
     # Creates layout image report

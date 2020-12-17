@@ -102,6 +102,8 @@ int processing_error = 0;
 #define ILLUSTR_BOX 1
 #define ILLUSTR_PIXELS 2
 
+#define OFF_CONTENT_PROP 0.1
+
 /*
 
    the following functions select, from a points sequence, four
@@ -508,6 +510,7 @@ void calage(cv::Mat src, cv::Mat illustr,
             cv::Mat &dst,int view=0) {
   cv::Point coins_int[4];
   int n_cc;
+  int n_content_cc;
 
   /* computes target min and max size */
 
@@ -556,11 +559,22 @@ void calage(cv::Mat src, cv::Mat illustr,
 
   agrege_init(src.cols, src.rows, coins_x, coins_y);
   n_cc = 0;
+  n_content_cc = 0;
 
   printf("Detected connected components:\n");
 
   for(int i = 0; i < contours.size(); i++) {
     cv::Rect rect = cv::boundingRect(cv::Mat(contours[i]));
+
+    /* count connected components that are in the content area of the
+       page (not in the margins) */
+
+    if(rect.x + rect.width <= src.cols * OFF_CONTENT_PROP ||
+       rect.x >= src.cols * (1-OFF_CONTENT_PROP) ||
+       rect.y + rect.height <= src.rows * OFF_CONTENT_PROP ||
+       rect.y >= src.rows * (1-OFF_CONTENT_PROP))
+      n_content_cc ++;
+    
     /* discard the connected components that are too large or too small */
     if(rect.width <= target_max && rect.width >= target_min &&
        rect.height <= target_max && rect.height >= target_min) {
@@ -632,7 +646,11 @@ void calage(cv::Mat src, cv::Mat illustr,
   } else {
     /* There are less than 3 correct connected components: can't know
        where are the marks on the scan! */
-    printf("! NMARKS=%d : Not enough marks detected.\n", n_cc);
+    printf("! NMARKS=%d: Not enough marks detected.\n", n_cc);
+
+    if(n_content_cc == 0) {
+      printf("! MAYBE_BLANK: page seems to be blank.\n");
+    }
   }
 }
 
