@@ -3887,15 +3887,6 @@ et inscrivez votre nom et prénom ci-dessous.
         transmettre à <command>\label</command>, <command>\ref</command> et
         <command>\pageref</command>.</para>
 
-        <note>
-          <para>Depuis la version 1.2.2015.102901, la commande
-          <command>\AMCqlabel</command> n'a plus d'utilité. Les questions
-          doivent simplement être référencées avec la commande
-          <command>\AMClabel</command>. Cependant, elle a été conservée pour
-          maintenir la compatibilté avec vos anciens sujets/fichiers
-          tex.</para>
-        </note>
-
         <para>Il faudra en outre penser à remettre les compteurs utilisés à
         zéro au début de chaque copie. Par exemple, si on veut inclure des
         références à des images regroupées dans une page à part dans certaines
@@ -7145,6 +7136,7 @@ DESC: Exemple au format LaTeX et copies pré-remplies.-->
 \restituegroupe{histoire}
 
 \AMCassociation{\id}%association
+%\AMCassociation[\nom-\prenom]{\id}<co id="nameFile" linkends="nameFile.exp"/>
 
 }%fin commande \exemplaire
 }%fin commande \newcommand
@@ -7238,6 +7230,11 @@ id="password.protect" linkends="password.protect.exp"/>
                 <para>L'astuce est de recourir à microtype pour corriger ce
                 problème (et on peut profiter des avantages de microtype).
                 Pensez à décommenter cette ligne pour l'activer.</para>
+              </callout>
+
+              <callout arearefs="nameFile" id="nameFile.exp">
+              	<para>Option pour inclure le nom de l'élève dans le nom de fichier
+                  lors de l'impression.</para>
               </callout>
 
               <callout arearefs="password.protect" id="password.protect.exp">

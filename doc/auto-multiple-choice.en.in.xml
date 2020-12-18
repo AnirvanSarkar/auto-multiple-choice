@@ -1977,7 +1977,7 @@ Duration : 10 minutes.
             <para><option>pdfform</option>: create a pdf file to fill.</para>
 
             <note>
-              <para>AMC does manage sending files.</para>
+              <para>AMC handle sending files.</para>
             </note>
           </listitem>
 
@@ -3716,12 +3716,6 @@ and write your first and last names below.
         their argument before transmitting it to <command>\label</command>,
         <command>\ref</command> and <command>\pageref</command>.</para>
 
-        <note>
-          <para>Since the version 1.2.2015.102901, you don't have to use the
-          command <command>\AMCqlabel</command> to label a question but type
-          <command>\AMClabel</command>. The old command remain compatible with
-          your previous tex files/exams.</para>
-        </note>
 
         <para>One also has to reset counters to zero at the beginning of each
         realization. For instance, if one wants to include references to
@@ -6697,6 +6691,7 @@ Moniuszko,Stanisław,003</programlisting>
     \insertgroup{general}
 
     \AMCassociation{\id}
+  %\AMCassociation[\name-\surname]{\id}<co id="nameFile" linkends="nameFile.exp"/>
   }
 }
 
@@ -6720,6 +6715,12 @@ id="password.protect" linkends="password.protect.exp"/>
           current sheet to student with id <command>\id</command>.</para>
 
           <para><calloutlist>
+
+          	   <callout arearefs="nameFile" id="nameFile.exp">
+              	<para>Optional argument to \AMCassociation to suggest a file name when
+    			printing to file.</para>
+              </callout>
+
                  <callout arearefs="password.protect" id="password.protect.exp">
                 <para>To protect each file with a unique password.
                 </para></callout>
