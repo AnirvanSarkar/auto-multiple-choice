@@ -522,6 +522,10 @@ sub define_statements {
               . " WHERE student=? AND page=? AND copy>=?"
               . " ORDER BY copy"
         },
+        studentLastCopy => {
+            sql => "SELECT MAX(copy) FROM $t_page"
+              . " WHERE student=?"
+        },
         pageLastCopy => {
             sql => "SELECT MAX(copy) FROM $t_page"
               . " WHERE student=? AND page=?"
@@ -1591,6 +1595,15 @@ sub new_page_copy {
             return (1);
         }
     }
+}
+
+# student_last_copy($student) returns the maximum copy number used for
+# student $student
+
+sub student_last_copy {
+    my ( $self, $student ) = @_;
+    return (
+        $self->sql_single( $self->statement('studentLastCopy'), $student ) );
 }
 
 # set_manual(...,$type,$id_a,$id_b,$manual) sets the manual value for

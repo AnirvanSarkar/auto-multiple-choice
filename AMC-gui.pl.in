@@ -1478,10 +1478,12 @@ sub delete_line {
                   $crdir . '/' . $projet{_capture}->get_layout_image(@id);
                 #
                 # annotated scan
-                push @files,
+                if(my $a=$projet{_capture}->get_annotated_page(@id)) {
+                  push @files,
                     $crdir
-                  . '/corrections/jpg/'
-                  . $projet{_capture}->get_annotated_page(@id);
+                    . '/corrections/jpg/'
+                    . $a;
+                }
                 #
                 # zooms
                 push @files,
@@ -3153,28 +3155,7 @@ sub sujet_impressions_ok {
         my $preassoc = $projet{_layout}->pre_association();
         $projet{_layout}->end_transaction('pPFP');
 
-        if ( $max_p > 1 && !$preassoc ) {
-
-            # Some sheets have more than one enter-page: multiple scans
-            # are not supported...
-            my $resp = dialogue_apprentissage(
-                'PRINT_FEW_PAGES',
-                'warning',
-                'yes-no',
-                $students <= 10,
-                __("You selected only a few sheets to print.") . "\n"
-                  . __(
-"As students are requested to write on more than one page, you must create as many exam sheets as necessary for all your students, with different sheets numbers, and print them all."
-                  )
-                  . " "
-                  . __(
-"If you print one or several sheets and photocopy them to have enough for all the students, <b>you won't be able to continue with AMC!</b>"
-                  )
-                  . "\n"
-                  . __("Do you want to print the selected sheets anyway?"),
-            );
-            return () if ( $resp eq 'no' );
-        } elsif ( $students <= 10 && !$preassoc ) {
+        if ( $students <= 10 && !$preassoc ) {
             if ( $config->get('auto_capture_mode') != 1 ) {
 
                 # This looks strange: a few sheets printed, a few sheets
@@ -3688,7 +3669,7 @@ sub analyse_call {
         UNLINK   => (get_debug() ? 0 : 1)
                             );
     binmode $fh, ":utf8";
-    print $fh join( "\n", @{ $oo{f} } ) . "\n";
+    print $fh join( "\n", sort { $a cmp $b } @{ $oo{f} } ) . "\n";
     $fh->seek( 0, SEEK_END );
 
     # first try to see if some of the files are PDF forms
@@ -3774,6 +3755,38 @@ sub analyse_call_images {
     }
 }
 
+sub report_analyse_errors {
+    my ($c) = @_;
+    my @err = $c->erreurs();
+    if (@err) {
+        debug "Errors with AMC-analyse!";
+        notify_end_of_work( 'capture', __("Data capture errors") );
+
+        my $message = __("AMC had problems with your scans.");
+
+        $message .= "\n\n"
+          . __("<b>Errors</b>") . "\n"
+          . join( "\n",
+            map { format_markup($_) } ( @err[ 0 .. mini( 9, $#err ) ] ) )
+          . (
+            $#err > 9
+            ? "\n\n<i>(" . __("Only first ten errors written") . ")</i>"
+            : ""
+          );
+
+        $message .= "\n\n<b>" . __("Please have a look at these scans.")."</b>";
+
+        debug($message);
+        my $dialog =
+          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
+            'error', 'ok', '' );
+        $dialog->set_markup($message);
+        $dialog->run;
+        $dialog->destroy;
+    }
+    return (@err);
+}
+
 sub analyse_call_go {
     my (%oo) = @_;
     my @args = (
@@ -3805,6 +3818,8 @@ sub analyse_call_go {
 
     push @args, "--pre-allocate", $oo{allocate} if ( $oo{allocate} );
 
+    push @args, "--unlink-on-global-err" if($oo{copy});
+
     # Diagnostic image file ?
 
     if ( $oo{diagnostic} ) {
@@ -3827,6 +3842,7 @@ sub analyse_call_go {
         o            => { fh => $oo{fh}, overwritten => $oo{overwritten} },
         fin          => sub {
             my ( $c, %data ) = @_;
+            report_analyse_errors($c);
             debug "Overall [SCAN] overwritten pages @" . $c . ": "
               . ( $c->variable('overwritten') || "(none)" );
             ${ $c->{o}->{overwritten} } += $c->variable('overwritten')
@@ -3942,10 +3958,11 @@ sub saisie_auto_ok {
         fin         => sub {
             my ( $c, %data ) = @_;
             close( $c->{o}->{fh} );
+            my @err = $c->erreurs();
             decode_name_fields();
             detecte_analyse( apprend => 1 );
             assoc_state();
-            if ( !$data{cancelled} ) {
+            if ( !$data{cancelled} && !@err ) {
                 notify_end_of_work( 'capture',
                     __ "Automatic data capture has been completed" );
             }

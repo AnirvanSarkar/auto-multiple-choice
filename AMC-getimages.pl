@@ -220,185 +220,199 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
 
     my @pdfs = grep { $_->{path} =~ /\.pdf$/i } @f;
 
-    # @fs will collect all split pages from PDF files. It is initialized
-    # with the list of non-PDF files.
-
-    @fs = grep { $_->{path} !~ /\.pdf$/i } @f;
-
     # starts PDFs processing...
 
     if (@pdfs) {
+
+        # @fs will collect all split pages from PDF files.
+
+        @fs = ();
+
         $dp = 1 / ( 1 + $#pdfs );
         $p->text( __("Splitting multi-page PDF files...") ) if ($p);
 
-      PDF: for my $file (@pdfs) {
+      PDF: for my $file (@f) {
+            if ( $file !~ /\.pdf$/i ) {
+                push @fs, $file;
+            } else {
 
-            $p->progres($dp) if ($p);
+                $p->progres($dp) if ($p);
 
-            # makes a temporary directory to extract images from the PDF
+                # makes a temporary directory to extract images from the PDF
 
-            my $temp_loc = tmpdir();
-            my $temp_dir;
+                my $temp_loc = tmpdir();
+                my $temp_dir;
 
-            check_split_path($file);
+                check_split_path($file);
 
-            # First, try pdfimages, which is much more judicious
+                # First, try pdfimages, which is much more judicious
 
-            if ( $use{pdfimages} ) {
-                $temp_dir = tempdir(
-                    DIR     => $temp_loc,
-                    CLEANUP => ( !get_debug() )
-                );
-                debug "PDF split tmp dir / pdfimages: $temp_dir";
+                if ( $use{pdfimages} ) {
+                    $temp_dir = tempdir(
+                        DIR     => $temp_loc,
+                        CLEANUP => ( !get_debug() )
+                    );
+                    debug "PDF split tmp dir / pdfimages: $temp_dir";
 
-                my @pdfimages_command = ("pdfimages");
-                push @pdfimages_command, "-upw", $password if ($password ne '');
+                    my @pdfimages_command = ("pdfimages");
+                    push @pdfimages_command, "-upw", $password
+                      if ( $password ne '' );
 
-                if (
-                    system_debug(
-                        cmd => [
-                            @pdfimages_command, "-p", $file->{path},
-                            $temp_dir . '/' . $file->{file} . '-page'
-                        ]
-                      ) == 0
-                  )
-                {
+                    if (
+                        system_debug(
+                            cmd => [
+                                @pdfimages_command, "-p", $file->{path},
+                                $temp_dir . '/' . $file->{file} . '-page'
+                            ]
+                        ) == 0
+                      )
+                    {
 
-                    opendir( my $dh, $temp_dir )
-                      || debug "can't opendir $temp_dir: $!";
-                    my @images = map { "$temp_dir/$_" }
-                      sort { $a cmp $b } grep { /-page-/ } readdir($dh);
-                    closedir $dh;
+                        opendir( my $dh, $temp_dir )
+                          || debug "can't opendir $temp_dir: $!";
+                        my @images = map { "$temp_dir/$_" }
+                          sort { $a cmp $b } grep { /-page-/ } readdir($dh);
+                        closedir $dh;
 
-                    if (@images) {
+                        if (@images) {
 
-                        # pdfimages produced some files. Check that the page
-                        # numbers follow each other starting from 1
+                            # pdfimages produced some files. Check that the page
+                            # numbers follow each other starting from 1
 
-                        my $ok = 1;
-                      PDFIM: for my $i ( 0 .. $#images ) {
-                            if ( $images[$i] =~ /-page-([0-9]+)/ ) {
-                                my $pp = $1;
-                                if ( $pp != $i + 1 ) {
-                                    debug "INFO: missing page "
-                                      . ( $i + 1 )
-                                      . " from pdfimages";
-                                    $ok = 0;
-                                    last PDFIM;
+                            my $ok = 1;
+                          PDFIM: for my $i ( 0 .. $#images ) {
+                                if ( $images[$i] =~ /-page-([0-9]+)/ ) {
+                                    my $pp = $1;
+                                    if ( $pp != $i + 1 ) {
+                                        debug "INFO: missing page "
+                                          . ( $i + 1 )
+                                          . " from pdfimages";
+                                        $ok = 0;
+                                        last PDFIM;
+                                    }
                                 }
                             }
+                            if ($ok) {
+                                debug "pdfimages ok for $file->{file}";
+                                push @fs, replace_by( $file, @images );
+                                next PDF;
+                            }
+                        } else {
+                            debug "INFO: pdfimages produced no file";
                         }
-                        if ($ok) {
-                            debug "pdfimages ok for $file->{file}";
+
+                    } else {
+                        debug "ERROR while trying pdfimages...";
+                    }
+                }
+
+                # Second, try qpdf
+                if ( $use{qpdf} ) {
+                    $temp_dir = tempdir(
+                        DIR     => $temp_loc,
+                        CLEANUP => ( !get_debug() )
+                    );
+                    debug "PDF split tmp dir / qpdf: $temp_dir";
+
+                    my @qpdf_command = ("qpdf");
+                    push @qpdf_command, "--password=$password"
+                      if ( $password ne '' );
+
+                    if (
+                        system_debug(
+                            cmd => [
+                                @qpdf_command,
+                                $file->{path},
+                                "--split-pages",
+                                $temp_dir . '/'
+                                  . $file->{file}
+                                  . '-page-%d.pdf'
+                            ]
+                        ) == 0
+                      )
+                    {
+
+                        opendir( my $dh, $temp_dir )
+                          || debug "can't opendir $temp_dir: $!";
+                        my @images = map { "$temp_dir/$_" }
+                          sort { $a cmp $b } grep { /-page-/ } readdir($dh);
+                        closedir $dh;
+
+                        if (@images) {
+
+                            debug "qpdf ok for $file->{file}";
                             push @fs, replace_by( $file, @images );
                             next PDF;
+
+                        } else {
+                            debug "INFO: qpdf produced no file";
                         }
-                    } else {
-                        debug "INFO: pdfimages produced no file";
-                    }
-
-                } else {
-                    debug "ERROR while trying pdfimages...";
-                }
-            }
-
-            # Second, try qpdf
-            if ( $use{qpdf} ) {
-                $temp_dir = tempdir(
-                    DIR     => $temp_loc,
-                    CLEANUP => ( !get_debug() )
-                );
-                debug "PDF split tmp dir / qpdf: $temp_dir";
-
-                my @qpdf_command = ("qpdf");
-                push @qpdf_command, "--password=$password" if ($password ne '');
-
-                if (
-                    system_debug(
-                        cmd => [
-                            @qpdf_command, $file->{path}, "--split-pages",
-                            $temp_dir . '/' . $file->{file} . '-page-%d.pdf'
-                        ]
-                      ) == 0
-                  )
-                {
-
-                    opendir( my $dh, $temp_dir )
-                      || debug "can't opendir $temp_dir: $!";
-                    my @images = map { "$temp_dir/$_" }
-                      sort { $a cmp $b } grep { /-page-/ } readdir($dh);
-                    closedir $dh;
-
-                    if (@images) {
-
-                        debug "qpdf ok for $file->{file}";
-                        push @fs, replace_by( $file, @images );
-                        next PDF;
 
                     } else {
-                        debug "INFO: qpdf produced no file";
+                        debug "ERROR while trying qpdf...";
                     }
-
-                } else {
-                    debug "ERROR while trying qpdf...";
                 }
-            }
 
-            # If not successful with pdfimages and qpdf, use pdftk
+                # If not successful with pdfimages and qpdf, use pdftk
 
-            if ( $use{pdftk} ) {
-                $temp_dir = tempdir(
-                    DIR     => $temp_loc,
-                    CLEANUP => ( !get_debug() )
-                );
-                debug "PDF split tmp dir / pdftk: $temp_dir";
+                if ( $use{pdftk} ) {
+                    $temp_dir = tempdir(
+                        DIR     => $temp_loc,
+                        CLEANUP => ( !get_debug() )
+                    );
+                    debug "PDF split tmp dir / pdftk: $temp_dir";
 
-                my @pdftk_command = ( "pdftk", $file->{path} );
-                push @pdftk_command, "input_pw", $password if ($password ne '');
+                    my @pdftk_command = ( "pdftk", $file->{path} );
+                    push @pdftk_command, "input_pw", $password
+                      if ( $password ne '' );
 
-                if (
-                    system(
-                        cmd => [
-                            @pdftk_command,
-                            "burst",
-                            "output",
-                            $temp_dir . '/' . $file->{file} . '-page-%04d.pdf'
-                        ]
-                      ) == 0
-                  )
-                {
+                    if (
+                        system(
+                            cmd => [
+                                @pdftk_command,
+                                "burst",
+                                "output",
+                                $temp_dir . '/'
+                                  . $file->{file}
+                                  . '-page-%04d.pdf'
+                            ]
+                        ) == 0
+                      )
+                    {
 
-                    opendir( my $dh, $temp_dir )
-                      || debug "can't opendir $temp_dir: $!";
-                    my @burst = replace_by( $file,
-                        map { "$temp_dir/$_" }
-                        sort { $a cmp $b } grep { /-page-/ } readdir($dh) );
-                    closedir $dh;
+                        opendir( my $dh, $temp_dir )
+                          || debug "can't opendir $temp_dir: $!";
+                        my @burst = replace_by( $file,
+                            map  { "$temp_dir/$_" }
+                            sort { $a cmp $b }
+                            grep { /-page-/ } readdir($dh) );
+                        closedir $dh;
 
-                    if (@burst) {
-                        push @fs, @burst;
-                        next PDF;
+                        if (@burst) {
+                            push @fs, @burst;
+                            next PDF;
+                        } else {
+                            debug "WARNING: pdftk produced no file";
+                        }
+
                     } else {
-                        debug "WARNING: pdftk produced no file";
+                        debug "ERROR while trying pdftk burst...";
                     }
-
-                } else {
-                    debug "ERROR while trying pdftk burst...";
                 }
+
+                # no success... keep the PDF to be processed by magick
+
+                push @fs, $file;
             }
-
-            # no success... keep the PDF to be processed by magick
-
-            push @fs, $file;
-
         }
 
         $p->text('') if ($p);
+
+        # To end, replaces the file list
+
+        @f = @fs;
     }
 
-    # To end, replaces the file list
-
-    @f = @fs;
 }
 
 ###################################################################

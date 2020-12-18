@@ -25,6 +25,8 @@ package AMC::Queue;
 use AMC::Basic;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
+use File::Temp qw/ tempdir /;
+use Storable;
 
 # recupere le nombre de CPU, avec Sys::CPU si ce module est installe
 sub get_ncpu {
@@ -48,9 +50,11 @@ sub new {
     my (%o) = @_;
 
     my $self = {
-        pids        => [],
-        queue       => [],
-        'max.procs' => 0,
+        pids                => [],
+        queue               => [],
+        pidof               => {},
+        get_returned_values => 0,
+        'max.procs'         => 0,
     };
 
     for my $k ( keys %o ) {
@@ -60,6 +64,12 @@ sub new {
     if ( $self->{'max.procs'} < 1 ) {
         $self->{'max.procs'} = get_ncpu();
         debug "Max number of processes: " . $self->{'max.procs'};
+    }
+
+    if ( $self->{get_returned_values} ) {
+        $self->{returned} = [];
+        $self->{tmpdir}   = tempdir( );
+        debug "Queue tmp dir: " . $self->{tmpdir};
     }
 
     bless $self;
@@ -75,20 +85,37 @@ sub add_process {
 sub maj {
     my ($self) = @_;
     my @p = ();
+    my %alive=();
     for my $pid ( @{ $self->{pids} } ) {
-        push @p, $pid if ( kill( 0, $pid ) );
+        if ( kill( 0, $pid ) ) {
+            push @p, $pid;
+            $alive{$pid} = 1;
+        }
     }
     @{ $self->{pids} } = @p;
     debug "MAJ : " . join( ' ', @p );
+    if ( $self->{get_returned_values} ) {
+        opendir( my $dh, $self->{tmpdir} )
+          || debug "Can't open $self->{tmpdir}: $!";
+        while ( readdir $dh ) {
+            if (/^[0-9]+$/ && !$alive{$self->{pidof}->{$_}}) {
+                my $f = $self->{tmpdir} . "/" . $_;
+                debug "Retrieving from $f";
+                $self->{returned}->[$_] = retrieve($f);
+                unlink($f);
+            }
+        }
+        closedir $dh;
+    }
     return ( 1 + $#{ $self->{pids} } );
 }
 
 sub killall {
     my ($self) = @_;
     $self->{queue} = [];
-    print "Queue interruption\n";
+    debug_and_stderr "Queue interruption\n";
     for my $p ( @{ $self->{pids} } ) {
-        print "Queue: killing $p\n";
+        debug_and_stderr "Queue: killing $p\n";
         kill 9, $p;
     }
 }
@@ -96,6 +123,7 @@ sub killall {
 sub run {
     my ( $self, $subsys ) = @_;
     debug "Queue RUN";
+    my $i = 0;
     while ( @{ $self->{queue} } ) {
         while ( $self->maj() < $self->{'max.procs'}
             && @{ $self->{queue} } )
@@ -106,6 +134,7 @@ sub run {
                 if ($p) {
                     debug "Fork : $p";
                     push @{ $self->{pids} }, $p;
+                    $self->{pidof}->{$i} = $p;
                 } else {
                     if ( ref( $cs->[0] ) eq 'ARRAY' ) {
                         for my $c (@$cs) {
@@ -119,7 +148,10 @@ sub run {
                         exit(0);
                     } elsif ( ref( $cs->[0] ) eq 'CODE' ) {
                         my $c = shift @$cs;
-                        &$c(@$cs);
+                        my $ret = &$c(@$cs);
+                        if($self->{get_returned_values}) {
+                            store($ret, $self->{tmpdir} . "/" . $i);
+                        }
                         exit(0);
                     } else {
                         no warnings 'exec';
@@ -129,6 +161,7 @@ sub run {
                         die "Unknown command";
                     }
                 }
+                $i++;
             } else {
                 debug "Queue empty";
             }
@@ -140,6 +173,12 @@ sub run {
         waitpid( -1, 0 );
     }
     debug("Leaving queue.");
+    rmdir $self->{tmpdir} if ( $self->{tmpdir} );
+}
+
+sub returned_values {
+    my ($self) = @_;
+    return ( $self->{returned} );
 }
 
 1;

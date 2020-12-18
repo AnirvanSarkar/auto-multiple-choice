@@ -220,7 +220,7 @@ sub install {
     if ( -d ( $self->{temp_dir} . "/scans" ) && !$self->{scans} ) {
         opendir( my $dh, $self->{temp_dir} . "/scans" )
           || die "can't opendir $self->{temp_dir}: $!";
-        my @s = grep { !/^\./ } readdir($dh);
+        my @s = sort { $a cmp $b } grep { !/^\./ } readdir($dh);
         closedir $dh;
 
         if (@s) {

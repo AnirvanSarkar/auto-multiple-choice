@@ -58,51 +58,53 @@ my $debug_pixels    = 0;
 my $progress        = 0;
 my $progress_id     = 0;
 my $scans_list;
-my $n_procs         = 0;
-my $project_dir     = '';
-my $tol_mark        = '';
-my $prop            = 0.8;
-my $bw_threshold    = 0.6;
-my $blur            = '1x1';
-my $threshold       = '60%';
-my $multiple        = '';
-my $ignore_red      = 1;
-my $pre_allocate    = 0;
-my $try_three       = 1;
-my $tag_overwritten = 1;
+my $n_procs              = 0;
+my $project_dir          = '';
+my $tol_mark             = '';
+my $prop                 = 0.8;
+my $bw_threshold         = 0.6;
+my $blur                 = '1x1';
+my $threshold            = '60%';
+my $multiple             = '';
+my $ignore_red           = 1;
+my $pre_allocate         = 0;
+my $try_three            = 1;
+my $tag_overwritten      = 1;
+my $unlink_on_global_err = 0;
 
 unpack_args();
 
 GetOptions(
-    "data=s"            => \$data_dir,
-    "cr=s"              => \$cr_dir,
-    "tol-marque=s"      => \$tol_mark,
-    "prop=s"            => \$prop,
-    "bw-threshold=s"    => \$bw_threshold,
-    "debug-pixels!"     => \$debug_pixels,
-    "progression=s"     => \$progress,
-    "progression-id=s"  => \$progress_id,
-    "liste-fichiers=s"  => \$scans_list,
-    "projet=s"          => \$project_dir,
-    "n-procs=s"         => \$n_procs,
-    "debug-image-dir=s" => \$debug_image_dir,
-    "multiple!"         => \$multiple,
-    "ignore-red!"       => \$ignore_red,
-    "pre-allocate=s"    => \$pre_allocate,
-    "try-three!"        => \$try_three,
-    "tag-overwritten!"  => \$tag_overwritten,
+    "data=s"                => \$data_dir,
+    "cr=s"                  => \$cr_dir,
+    "tol-marque=s"          => \$tol_mark,
+    "prop=s"                => \$prop,
+    "bw-threshold=s"        => \$bw_threshold,
+    "debug-pixels!"         => \$debug_pixels,
+    "progression=s"         => \$progress,
+    "progression-id=s"      => \$progress_id,
+    "liste-fichiers=s"      => \$scans_list,
+    "projet=s"              => \$project_dir,
+    "n-procs=s"             => \$n_procs,
+    "debug-image-dir=s"     => \$debug_image_dir,
+    "multiple!"             => \$multiple,
+    "ignore-red!"           => \$ignore_red,
+    "pre-allocate=s"        => \$pre_allocate,
+    "try-three!"            => \$try_three,
+    "tag-overwritten!"      => \$tag_overwritten,
+    "unlink-on-global-err!" => \$unlink_on_global_err,
 );
 
 $tag_overwritten = 0 if ($multiple);
 
 use_gettext;
 
-$queue = AMC::Queue::new( 'max.procs', $n_procs );
-
 my $progress_h = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 
 my $data;
 my $layout;
+
+my $max_enter;
 
 # Reads scan files from command line
 
@@ -136,8 +138,8 @@ sub error {
     if ( $opts{silent} ) {
         debug $e;
     } else {
-        debug "ERROR($opts{scan}): $e\n";
-        print "ERROR($opts{scan}): $e\n";
+        debug "ERR: Scan $opts{scan}: $e\n";
+        print "ERR: Scan $opts{scan}: $e\n";
     }
     if ( $opts{register_failed} ) {
         my $capture = AMC::Data->new($data_dir)->module('capture');
@@ -195,7 +197,7 @@ sub detecte_cb {
 }
 
 sub get_layout_data {
-    my ( $student, $page, $all ) = @_;
+    my ( $layout, $student, $page, $all ) = @_;
     my $r = {
         'corners.test'  => {},
         'zoom.file'     => {},
@@ -240,6 +242,8 @@ $layout = $data->module('layout');
 
 $layout->begin_read_transaction('cRLY');
 
+$max_enter = $layout->max_enter();
+
 if ( $layout->pages_count() == 0 ) {
     $layout->end_transaction('cRLY');
     error("No layout");
@@ -248,11 +252,9 @@ if ( $layout->pages_count() == 0 ) {
 debug "" . $layout->pages_count() . " layouts\n";
 
 my @ran           = $layout->random_studentPage;
-my $random_layout = get_layout_data(@ran);
+my $random_layout = get_layout_data($layout, @ran);
 
 $layout->end_transaction('cRLY');
-
-$data->disconnect;
 
 ########################################
 # Fits marks on scan to layout data
@@ -399,7 +401,7 @@ my $temp_dir;
 my $commands;
 
 sub one_scan {
-    my ( $scan, $allocate ) = @_;
+    my ( $scan, $allocate, $id_only ) = @_;
     my $sf = $scan;
     if ($project_dir) {
         $sf = abs2proj(
@@ -420,8 +422,9 @@ sub one_scan {
 
     debug "Analysing scan $scan";
 
-    $data->connect;
-    $layout = $data->module('layout');
+    my $data   = AMC::Data->new($data_dir);
+    my $layout = $data->module('layout');
+    my $capture = $data->module('capture');
 
     $commands = AMC::Exec::new('AMC-analyse');
     $commands->signalise();
@@ -467,13 +470,23 @@ sub one_scan {
     # the error (with a different message if the page seems to be
     # blank).
     if ( my $m = $warns{MAYBE_BLANK} || $warns{NMARKS} ) {
-        error(
-            $m,
-            process         => $process,
-            scan            => $scan,
-            register_failed => ( $warns{NMARKS} ? $sf : '' ),
-        );
-        exit($warns{NMARKS} ? 1 : 0);
+        if ($id_only) {
+            $process->ferme_commande;
+            return (
+                {
+                    error => $warns{NMARKS},
+                    blank => ( $warns{MAYBE_BLANK} ? 1 : 0 )
+                }
+            );
+        } else {
+            error(
+                $m,
+                process         => $process,
+                scan            => $scan,
+                register_failed => ( $warns{NMARKS} ? $sf : '' ),
+            );
+            return ();
+        }
     }
 
     my $cadre_general = AMC::Boite::new_complete(@c);
@@ -518,13 +531,23 @@ sub one_scan {
 
         # Failed!
 
-        error(
-            sprintf( "No layout for ID +%d/%d/%d+", @epc ),
-            process         => $process,
-            scan            => $scan,
-            register_failed => $sf,
-        );
-        exit(1);
+        if ($id_only) {
+            $process->ferme_commande;
+            return ( { error => 'No layout' } );
+        } else {
+            error(
+                sprintf( "No layout for ID +%d/%d/%d+", @epc ),
+                process         => $process,
+                scan            => $scan,
+                register_failed => $sf,
+            );
+            return ();
+        }
+    }
+
+    if ( $ok && $id_only ) {
+        $process->ferme_commande;
+        return ( { ids => [ $epc[0], $epc[1] ] } );
     }
 
     command_transf( $process, $random_layout->{transf}, "rotateOK" );
@@ -534,7 +557,7 @@ sub one_scan {
     ##########################################
 
     $layout->begin_read_transaction('cELY');
-    my $ld = get_layout_data( @epc[ 0, 1 ], 1 );
+    my $ld = get_layout_data( $layout, @epc[ 0, 1 ], 1 );
     $layout->end_transaction('cELY');
 
     # But keep all results from binary boxes analysis
@@ -551,8 +574,6 @@ sub one_scan {
     ##########################################
     # Get a free copy number
     ##########################################
-
-    my $capture = AMC::Data->new($data_dir)->module('capture');
 
     @spc = @epc[ 0, 1 ];
     if ( !$debug_image ) {
@@ -720,15 +741,187 @@ sub one_scan {
     $progress_h->progres($delta);
 }
 
-my $scan_i = 0;
-
-for my $s (@scans) {
-    my $a = ( $pre_allocate ? $pre_allocate + $scan_i : 0 );
-    debug "Pre-allocate ID=$a for scan $s\n" if ($pre_allocate);
-    $queue->add_process( \&one_scan, $s, $a );
-    $scan_i++;
+sub global_error {
+    my ($scans) = @_;
+    if ($unlink_on_global_err) {
+        for my $s (@$scans) {
+            if ( -f $s->{scan} ) {
+                debug "Unlink scan: $s->{scan}";
+                unlink( $s->{scan} );
+            } else {
+                debug "Scan to unlink not found: $s->{scan}";
+            }
+        }
+    }
+    exit(1);
 }
 
-$queue->run();
+if ( $max_enter > 1 && $multiple ) {
+
+    # photocopy mode, with more than 1 page per student copy: we must
+    # check first that we will be able to know which scans belongs to
+    # the same student…
+
+    debug "Photocopy mode with $max_enter answers pages";
+
+    my @allocate = ();
+    my $scan_i;
+
+    # first read ID from the scans…
+
+    $queue = AMC::Queue::new( 'max.procs', $n_procs, get_returned_values => 1 );
+
+    for my $s (@scans) {
+        $queue->add_process( \&one_scan, $s, 0, 1 );
+    }
+
+    $queue->run;
+
+    my $scan_ids = $queue->returned_values();
+
+    # merge scan files with result
+
+    for my $i ( 0 .. $#scans ) {
+        $scan_ids->[$i]->{scan} = $scans[$i];
+    }
+
+    # remove blank scans from list
+
+    $scan_ids = [
+        grep {
+            if ( $_->{blank} ) {
+                debug "Blank page: $_->{scan}";
+                if ($unlink_on_global_err) {
+                    debug "Unlink scan: $_->{scan}";
+                    unlink $_->{scan};
+                }
+                0;
+            } else {
+                1;
+            }
+        } @$scan_ids
+    ];
+
+    # Is there any unrecognized scan ? Abort if so.
+
+    my @unrecognized = grep { !defined( $_->{ids} ) } @$scan_ids;
+    if (@unrecognized) {
+        debug "UNRECOGNIZED:";
+        for my $s (@unrecognized) {
+            debug $s->{scan};
+        }
+        print "ERR: "
+          # TRANSLATORS: Message displayed when not all scans are recognized (AMC don't know which subject page some scans come from), after automatic data capture.
+          . sprintf( __("%d scans are not recognized:"), @unrecognized )."\n";
+        for my $i ( 0 .. min( 4, $#unrecognized ) ) {
+            print "ERR: " . $unrecognized[$i]->{scan} . "\n";
+        }
+        print "ERR: ...\n" if ( @unrecognized > 5 );
+        global_error($scan_ids);
+    }
+
+    # check that the scans are grouped by student copy number, and
+    # allocate a copy number.
+
+    my $copy_n       = {};
+    my $student_base = {};
+
+    my $capture = $data->module('capture');
+
+    for my $s (@$scan_ids) {
+        my ( $student, $page ) = @{ $s->{ids} };
+        if ( $copy_n->{$student}->{$page} ) {
+            $copy_n->{$student}->{$page}++;
+        } else {
+            if ( !$student_base->{$student} ) {
+                if ($pre_allocate) {
+                    $student_base->{$student} = $pre_allocate;
+                } else {
+                  $capture->begin_read_transaction('StBA');
+                  $student_base->{$student} =
+                      ($capture->student_last_copy($student) || 0) + 1;
+                  $capture->end_transaction('StBA');
+                }
+            }
+            $copy_n->{$student}->{$page} = $student_base->{$student};
+        }
+        $s->{copy} = $copy_n->{$student}->{$page};
+        my $max_for_student = max( values %{ $copy_n->{$student} } );
+        debug "Scan $s->{scan} ID="
+          . join( "/", @{ $s->{ids} } )
+          . " COPY=>$s->{copy}";
+        if ( $copy_n->{$student}->{$page} > $max_for_student + 1 ) {
+            print "ERR: "
+              # TRANSLATORS: Message displayed during automatic data capture with multiple-pages subjects and photocopy mode. AMC encountered another version of page %s but did not see the same number of versions of other pages from the same student.
+              . sprintf( __("Too much scans for page %s."), "$student/$page" )
+              . "\n";
+            print "ERR: $s->{scan}\n";
+            global_error($scan_ids);
+        }
+        if ( $copy_n->{$student}->{$page} < $max_for_student ) {
+            print "ERR: "
+              . sprintf(
+                # TRANSLATORS: Message displayed during automatic data capture with multiple-pages subjects and photocopy mode. AMC encountered another version of page %s but has already processed multiple times other pages from the same student.
+                __("One page %s is comming too late."),
+                "$student/$page"
+              ) . "\n";
+            print "ERR: $s->{scan}\n";
+            global_error($scan_ids);
+        }
+    }
+
+    # Chack that we have the same number of copies for each pages of
+    # the same student
+
+    my @student_nbfail;
+    for my $student ( keys %{$copy_n} ) {
+        my $n = undef;
+        for my $i ( values %{ $copy_n->{$student} } ) {
+            if ( !defined($n) ) {
+                $n = $i;
+            } elsif ( $i != $n ) {
+                push @student_nbfail, $student;
+            }
+        }
+    }
+    if (@student_nbfail) {
+        print "ERR: "
+          # TRANSLATORS: Message displayed during automatic data capture with multiple-pages subjects and photocopy mode.
+          . __("You did not provide the same number of copies for all pages.")
+          . "\n";
+        print "ERR: "
+          . __("Student sheet:") . " "
+          . join( ',', @student_nbfail ) . "\n";
+        global_error($scan_ids);
+    }
+
+    # All is OK: we can launch the full data capture!
+
+    $queue = AMC::Queue::new( 'max.procs', $n_procs );
+
+    my $start_copy = max($pre_allocate,0);
+
+    for my $s (@$scan_ids) {
+        $queue->add_process( \&one_scan, $s->{scan}, $s->{copy} );
+    }
+
+    $queue->run();
+
+} else {
+
+    $queue = AMC::Queue::new( 'max.procs', $n_procs );
+
+    my $scan_i = 0;
+
+    for my $s (@scans) {
+        my $a = ( $pre_allocate ? $pre_allocate + $scan_i : 0 );
+        debug "Pre-allocate ID=$a for scan $s\n" if ($pre_allocate);
+        $queue->add_process( \&one_scan, $s, $a );
+        $scan_i++;
+    }
+
+    $queue->run();
+
+}
 
 $progress_h->fin();
