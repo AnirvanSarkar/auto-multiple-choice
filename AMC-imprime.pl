@@ -85,7 +85,7 @@ die "Needs subject file"   if ( !$sujet );
 die "Needs print command" if ( $methode =~ /^command/i && !$print_cmd );
 die "Needs output file"   if ( $methode =~ /^file/i    && !$output_file );
 
-my @available_extracts = ( 'pdftk', 'pdftk+NA', 'gs', 'qpdf' );
+my @available_extracts = ( 'pdftk', 'pdftk+NA', 'gs', 'qpdf', 'sejda-console' );
 
 die "Invalid value for extract_with: $extract_with"
   if ( !grep( /^\Q$extract_with\E$/, @available_extracts ) );
@@ -253,6 +253,36 @@ sub process_pages {
           join( ",", map { $_->{first} . "-" . $_->{last} } @$slices ),
           "--";
         $commandes->execute( @qpdfcommand, $fn );
+
+    } elsif ( $extract_with eq 'sejda-console' ) {
+
+        my $fn_step   = "$fn.1.pdf";
+        my $extracted = ( $password ? $fn_step : $fn );
+
+        # First extract pages
+        my @sejdacommand = (
+            "sejda-console", "extractpages", "-f", $sujet, "-o", $extracted,
+            "--overwrite"
+        );
+        push @sejdacommand, "-s",
+          join( ",", map { $_->{first} . "-" . $_->{last} } @$slices );
+        $commandes->execute(@sejdacommand);
+
+        if ($password) {
+            @sejdacommand = (
+                "sejda-console", "encrypt", "-f", $fn_step, "-o", $fn,
+                "--overwrite"
+            );
+            if ($user_password) {
+                push @sejdacommand, "-u", $user_password;
+            }
+            if ($owner_password) {
+                push @sejdacommand, "-a", $owner_password;
+            }
+            $commandes->execute(@sejdacommand);
+
+            unlink $fn_step;
+        }
     }
 
     if ( $methode =~ /^cups/i ) {

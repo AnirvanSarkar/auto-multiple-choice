@@ -1097,9 +1097,10 @@ $prefs->store_register(
         starttls => 'STARTTLS'
     ),
     print_extract_with => cb_model(
-        pdftk => 'pdftk',
-        gs    => 'gs (ghostscript)',
-        qpdf  => 'qpdf',
+        pdftk           => 'pdftk',
+        gs              => 'gs (ghostscript)',
+        qpdf            => 'qpdf',
+        'sejda-console' => 'sejda-console',
     ),
 
 # TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
@@ -2814,14 +2815,21 @@ sub project_printing_method {
 }
 
 sub project_extract_with {
+    my $conf = $config->get('print_extract_with');
     if ( $config->get('project:pdfform') ) {
-        if ( $config->get('print_extract_with') eq 'qpdf' ) {
-            return ('qpdf');
+        if ( $conf =~ /^(qpdf|sejda|pdftk\+NA)/ ) {
+            return ($conf);
         } else {
-            return ('pdftk+NA');
+            if ( commande_accessible('sejda-console') ) {
+                return ('sejda-console');
+            } elsif ( commande_accessible('qpdf') ) {
+                return ('qpdf');
+            } else {
+                return ('pdftk+NA');
+            }
         }
     } else {
-        return ( $config->get("print_extract_with") );
+        return ($conf);
     }
 }
 
@@ -3189,9 +3197,9 @@ sub sujet_impressions_ok {
     if ( $config->get('options_impression/print_answersheet') eq 'first' ) {
 
         # This options needs pdftk!
-        if ( $config->get('print_extract_with') !~ /(pdftk|qpdf)/ ) {
+        if ( $config->get('print_extract_with') !~ /(pdftk|qpdf|sejda-console)/ ) {
             my $found = 0;
-          EXTRACT: for my $cmd (qw/qpdf pdftk/) {
+          EXTRACT: for my $cmd (qw/qpdf pdftk sejda-console/) {
                 if ( commande_accessible($cmd) ) {
                     my $dialog = Gtk3::MessageDialog->new( $w{main_window},
                         'destroy-with-parent', 'info', 'ok', '' );
@@ -3304,6 +3312,7 @@ sub sujet_impressions_ok {
                 $config->get('pdf_password_key'),
             ),
         ],
+        quiet_regex  => 'Discarded not relevant field',
         signal       => 2,
         texte        => __ "Print papers one by one...",
         'progres.id' => 'impression',

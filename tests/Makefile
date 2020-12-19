@@ -46,6 +46,10 @@ blind-test: $(EPS) FORCE
 	./all_tests --blind
 	@echo "Using pdftk"
 	./selected_tests --blind --extract-with pdftk
+ifneq (,$(wildcard /usr/local/bin/sejda-console))
+	@echo "Using sejda-console"
+	./selected_tests --blind --extract-with sejda-console
+endif
 
 FORCE: ;
 

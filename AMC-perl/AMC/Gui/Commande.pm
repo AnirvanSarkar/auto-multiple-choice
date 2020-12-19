@@ -48,6 +48,7 @@ sub new {
         o               => {},
         clear           => 1,
         output_to_debug => ( debug_file() eq 'stdout' ),
+        quiet_regex     => '',
 
         messages  => [],
         variables => {},
@@ -215,9 +216,11 @@ sub get_output {
         my $log     = $self->{log};
         my $logbuff = $log->get_buffer();
 
-        $logbuff->insert( $logbuff->get_end_iter(), $line );
-        $logbuff->place_cursor( $logbuff->get_end_iter() );
-        $log->scroll_to_iter( $logbuff->get_end_iter(), 0, 0, 0, 0 );
+        if ( !$self->{quiet_regex} || $line !~ /$self->{quiet_regex}/ ) {
+            $logbuff->insert( $logbuff->get_end_iter(), $line );
+            $logbuff->place_cursor( $logbuff->get_end_iter() );
+            $log->scroll_to_iter( $logbuff->get_end_iter(), 0, 0, 0, 0 );
+        }
 
         if ( $line =~ /^(ERR|INFO|WARN)/ ) {
             chomp( my $lc = $line );
