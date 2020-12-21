@@ -1,0 +1,96 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{math}
+\usepackage{pgffor}
+\usepackage[indivanswers,completemulti]{automultiplechoice}
+\usepackage{multicol}
+\begin{document}
+
+\setdefaultgroupmode{withoutreplacement}
+
+\element{questions}{
+  \begin{question}{simple}
+    Just a simple test question.
+    
+    \begin{choices}
+      {
+        \correctchoice{correct}
+        \wrongchoice{wrong A}
+        \wrongchoice{wrong B}
+        \wrongchoice{wrong C}
+      }
+      \lastchoices
+      {
+        \wrongchoice{final wrong answer}
+      }
+    \end{choices}
+  \end{question}
+}
+
+\ExplSyntaxOn
+\cs_new:Npn \amc_between:Nnn #1#2#3 {#1{\emph{between}~#2~and~#3.}}
+\cs_generate_variant:Nn \amc_between:Nnn { Nxx }
+\cs_new_eq:NN \betweenAnd \amc_between:Nxx
+\ExplSyntaxOff
+
+\element{questions}{
+  \begin{question}{formixed}
+    The value of $\pi$ is
+    \begin{multicols}{3}
+      \begin{choices}
+        \foreach \ans in {0,1,...,5} {
+          \tikzmath{
+            integer \rightbound;
+            \rightbound = \ans + 1;
+          }
+          \ifnum\ans=3
+          \betweenAnd{\correctchoice}{\ans}{\rightbound}
+          \else
+          \betweenAnd{\wrongchoice}{\ans}{\rightbound}
+          \fi
+        }
+      \end{choices}
+    \end{multicols}
+  \end{question}
+}
+
+\element{questions}{
+  \begin{question}{forordered}
+    The value of $\pi^2$ is
+    \begin{multicols}{3}
+      \begin{choices}[o]
+        \foreach \ans in {1,2,...,9} {
+          \tikzmath{
+            integer \rightbound;
+            \rightbound = \ans + 1;
+          }
+          \ifnum\ans=9
+            \correctchoice{\emph{between} \ans{} and \rightbound{}.}
+          \else
+            \wrongchoice{\emph{between} \ans{} and \rightbound{}.}
+          \fi
+        }
+      \end{choices}
+    \end{multicols}
+  \end{question}
+}
+
+\element{questions}{
+  \begin{questionmult}{positive}
+    Choose all positive numbers:
+    \begin{choices}
+      \correctchoice{4}
+      \correctchoice{$4-\pi$}
+      \wrongchoice{-1}
+      \wrongchoice{0}
+    \end{choices}
+  \end{questionmult}
+}
+
+\begin{copieexamen}[10]
+
+  \insertgroup{questions}
+
+\end{copieexamen}
+
+\end{document}

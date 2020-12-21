@@ -2674,8 +2674,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %     printing \meta{text}.
 %    \begin{macrocode}
 \newcommand\AMCload@reponse[2]{%
-  \advance\AMCload@counter\@ne\relax%
-  \csname reponse@\romannumeral\AMCload@counter\endcsname%
+  \global\advance\AMCload@counter\@ne\relax%
+  \global\csname reponse@\romannumeral\AMCload@counter\endcsname%
   =\expandafter{\expandafter\AMCrep@count\expandafter=#2 #1}%
 }
 \newcommand\AMCrien@deux[2]{#1}
