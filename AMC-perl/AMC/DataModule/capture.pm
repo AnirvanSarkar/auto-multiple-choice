@@ -698,15 +698,14 @@ sub define_statements {
               . " WHERE student=? AND copy=? AND type=? AND id_a=?"
               . " ORDER BY id_b"
         },
-        tickedChars => {
-                sql => "SELECT char FROM (SELECT id_b FROM $t_zone"
+        tickedChars => { sql => "SELECT char FROM (SELECT id_b FROM $t_zone"
               . "       WHERE student=? AND copy=? AND id_a=? AND type=?"
-              . "       AND (manual=1 OR (black >= ? * total AND black <= ? * total))"
+              . "       AND (manual=1 OR"
+              . "            manual<0 AND (black >= ? * total AND black <= ? * total))"
               . " ),( SELECT answer,char FROM "
               . $self->table( "box", "layout" )
               . "       WHERE student=? AND question=? AND role=?)"
-              . " ON id_b=answer ORDER BY id_b"
-        },
+              . " ON id_b=answer ORDER BY id_b" },
         tickedPage => {
                 sql => "SELECT CASE"
               . " WHEN manual >= 0 THEN manual"
