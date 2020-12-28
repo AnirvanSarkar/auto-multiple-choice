@@ -569,10 +569,10 @@ void calage(cv::Mat src, cv::Mat illustr,
     /* count connected components that are in the content area of the
        page (not in the margins) */
 
-    if(rect.x + rect.width <= src.cols * OFF_CONTENT_PROP ||
-       rect.x >= src.cols * (1-OFF_CONTENT_PROP) ||
-       rect.y + rect.height <= src.rows * OFF_CONTENT_PROP ||
-       rect.y >= src.rows * (1-OFF_CONTENT_PROP))
+    if( ! ( rect.x + rect.width <= src.cols * OFF_CONTENT_PROP ||
+            rect.x >= src.cols * (1-OFF_CONTENT_PROP) ||
+            rect.y + rect.height <= src.rows * OFF_CONTENT_PROP ||
+            rect.y >= src.rows * (1-OFF_CONTENT_PROP) ) )
       n_content_cc ++;
     
     /* discard the connected components that are too large or too small */
