@@ -2054,9 +2054,16 @@ Durée : 10 minutes.
             remplissable via les lecteurs de fichiers pdf.</para>
 
             <note>
-              <para>AMC gère l'envoi automatique des sujets.
-                (voir <xref endterm="mailing.title" linkend="mailing"/>).</para>
+              <para>AMC gère l'envoi automatique des sujets
+                (voir <xref endterm="mailing.title" linkend="mailing"/>) mais il faut installer
+                <productname>sejda-console</productname>.</para>
             </note>
+  <programlisting>
+cd
+wget https://github.com/torakiki/sejda/releases/download/v3.2.85/sejda-console-3.2.85-bin.zip
+unzip sejda-console-3.2.85-bin.zip
+sudo ln -s ~/sejda-console-3.2.85/bin/sejda-console /usr/local/bin
+</programlisting>
           </listitem>
 
           <listitem>
@@ -2281,9 +2288,9 @@ Durée : 10 minutes.
         <title id="latex.qr.title">Questions et réponses</title>
 
         <important>
-          <para>Il ne faut pas imbriquer deux questions sinon l'export des
-          notes sera incomplet (voir <xref endterm="sec.export.notes.title"
-          linkend="sec.export.notes"/>).</para>
+          <para>Il ne faut pas imbriquer une question dans un environnement
+          question ou tabularx sinon l'export des notes sera incomplet
+          (voir <xref endterm="sec.export.notes.title" linkend="sec.export.notes"/>).</para>
         </important>
 
          <sect4 id="questionssimples">
@@ -3212,25 +3219,12 @@ Durée : 10 minutes.
 
         <programlisting>\setdefaultgroupmode{XXX}</programlisting>
 
-        <para>Une fois un groupe constitué, on peut mélanger les questions qui
-        le composent par la commande <command>melangegroupe</command> : par
-        exemple, <programlisting>\melangegroupe{ungroupe}</programlisting></para>
-
-        <para>Cependant, cette commande n'a pas à être utilisée si on utilise
-        les modes de groupes comme il faut.</para>
-
-        <warning>
-          <para>Si vous réutilisez des sujets mis en page avec une version
-          antérieure à AMC 1.2.2014.111201 et choisissez un des trois autres
-          modes que celui par défaut (<code>fixed</code>), supprimez la
-          commande <command>\melangegroupe</command>.</para>
-        </warning>
-
         <para>Si cette commande n'est pas utilisée, c'est le mode
         <code>fixed</code> qui sera utilisé.</para>
 
         <para>On peut manipuler les groupes de questions de manière plus
-        précise grâce aux commandes suivantes :</para>
+        précise grâce aux commandes suivantes : <ulink
+      url="https://project.auto-multiple-choice.net/attachments/2711/tutoMelangeAMC.tex">tutoriel mélange</ulink></para>
 
         <itemizedlist>
           <listitem>
@@ -5034,12 +5028,23 @@ Nom et prénom :
 
     	  <listitem>
     		<para>Sélectionnez l'impression en fichiers : <menuchoice>
-             <guimenu>Édition</guimenu>
              <guimenuitem>Préférences</guimenuitem>
+             <guimenuitem>Général</guimenuitem>
              <guimenuitem>Impression</guimenuitem>
              <guimenuitem>Méthode d'impression</guimenuitem>
-             <guisubmenu>dans des fichiers.</guisubmenu>
-             </menuchoice></para>
+             <guisubmenu>dans des fichiers</guisubmenu>
+             </menuchoice>.</para>
+    		</listitem>
+
+    	  <listitem>
+    		<para><emphasis>Si l'option <option>pdfform</option> est active</emphasis>,
+    		sélectionnez sejda-console : <menuchoice>
+             <guimenuitem>Préférences</guimenuitem>
+             <guimenuitem>Général</guimenuitem>
+             <guimenuitem>Impression</guimenuitem>
+             <guimenuitem>Méthode d'extraction</guimenuitem>
+             <guisubmenu>sejda-console</guisubmenu>
+             </menuchoice>.</para>
     		</listitem>
 
     	  <listitem>
@@ -8248,4 +8253,3 @@ chmod 0600 /Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
     </sect2>
   </sect1>
 </article>
-

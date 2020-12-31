@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -1977,8 +1977,15 @@ Duration : 10 minutes.
             <para><option>pdfform</option>: create a pdf file to fill.</para>
 
             <note>
-              <para>AMC handle sending files.</para>
+              <para>AMC automates sending files (see <xref endterm="mailing.title" linkend="mailing"/>)
+              but you need to install <productname>sejda-console</productname>.</para>
             </note>
+  <programlisting>
+cd
+wget https://github.com/torakiki/sejda/releases/download/v3.2.85/sejda-console-3.2.85-bin.zip
+unzip sejda-console-3.2.85-bin.zip
+sudo ln -s ~/sejda-console-3.2.85/bin/sejda-console /usr/local/bin
+</programlisting>
           </listitem>
 
           <listitem>
@@ -2188,7 +2195,7 @@ Duration : 10 minutes.
         <title id="latex.qr.title">Questions and answers</title>
 
         <important>
-          <para>Do not nest a question inside a another environment question
+          <para>Do not nest a question inside a another environment question or tabularx
           otherwise exporting the notes will be incomplete (see <xref
           endterm="sec.export.notes.title"
           linkend="sec.export.notes"/>).</para>
@@ -3042,7 +3049,8 @@ There is \total{AMCquestionaff} questions.
 
         <programlisting>\setgroupmode{mygroup}{XXX}</programlisting>
 
-        <para>where <code>XXX</code> can be one of the following:</para>
+        <para>where <code>XXX</code> can be one of the following: <ulink
+      url="https://project.auto-multiple-choice.net/attachments/2712/tutoMelangeAMC.tex">tutorial shuffle</ulink></para>
 
         <variablelist>
           <varlistentry>
@@ -3094,15 +3102,6 @@ There is \total{AMCquestionaff} questions.
         <para>Once a group is formed, it is possible to shuffle questions
         inside this group using the <command>\shufflegroup</command> command.
         For instance<programlisting>\shufflegroup{mygroup}</programlisting></para>
-
-        <para>However, the command <command>\shufflegroup</command> can always
-        be replaced by a proper use of group modes.</para>
-
-        <warning>
-          <para>Delete the command <command>\shufflegroup</command> if you
-          rerun created tests with a AMC version lower to 1.2.2014.111201 and
-          if you change the default mode (<code>fixed</code>).</para>
-        </warning>
 
         <para>Groups of questions can be manipulated more precisely thanks to
         the following commands:</para>
@@ -4791,13 +4790,23 @@ Name :
 
         <listitem>
         <para>Select printing to files : <menuchoice>
-             <guimenu>Edition</guimenu>
              <guimenuitem>Preferences</guimenuitem>
              <guimenuitem>Printing</guimenuitem>
              <guimenuitem>Printing method</guimenuitem>
-             <guisubmenu>to files.</guisubmenu>
-             </menuchoice></para>
+             <guisubmenu>to files</guisubmenu>
+             </menuchoice>.</para>
         </listitem>
+
+    	  <listitem>
+    		<para><emphasis>If option <option>pdfform</option> is available</emphasis>,
+    		select sejda-console : <menuchoice>
+             <guimenuitem>Preferences</guimenuitem>
+             <guimenuitem>Main</guimenuitem>
+             <guimenuitem>Printing method</guimenuitem>
+             <guimenuitem>Extracting method</guimenuitem>
+             <guisubmenu>sejda-console</guisubmenu>
+             </menuchoice>.</para>
+    		</listitem>
 
         <listitem>
         <para>Print the files.</para>
@@ -5897,7 +5906,7 @@ Name:
         file with optional comments lines at the beginning with prefix
         `<code>#</code>', as in the following example:<programlisting># STUDENTS / 1ST YEAR
 surname:name:id:email
-Bienvenue:Alexis:001:paamc@passoire.fr
+Bienvenüe:Alexis:001:paamc@passoire.fr
 Boulix:Jojo:002:jojo.boulix@rien.xx
 Noël:Père:003:pere.noel@pole-nord.xx</programlisting></para>
 
@@ -9931,4 +9940,3 @@ chmod 0600 /Users/<emphasis>user_name</emphasis>/.msmtprc
     </sect2>
   </sect1>
 </article>
-
