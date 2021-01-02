@@ -63,7 +63,7 @@ my @cleanup_components = (
             my ($self) = @_;
             return (
                 $self->file_size( { recursive => 5 },
-                    $self->{config}->{shortcuts}->absolu('%PROJET/cr/zooms') )
+                    $self->absolu('%PROJET/cr/zooms') )
                   + $self->{capture}->zooms_total_size_transaction()
             );
         },
@@ -71,7 +71,7 @@ my @cleanup_components = (
             my ($self) = @_;
             return (
                 remove_tree(
-                    $self->{config}->{shortcuts}->absolu('%PROJET/cr/zooms'),
+                    $self->absolu('%PROJET/cr/zooms'),
                     { verbose => 0, safe => 1, keep_root => 1 } ) +
                   $self->{capture}->zooms_cleanup_transaction()
             );
@@ -88,13 +88,13 @@ my @cleanup_components = (
             return (
                 $self->file_size(
                     { pattern => '^page-', recursive => 1 },
-                    $self->{config}->{shortcuts}->absolu('%PROJET/cr/')
+                    $self->absolu('%PROJET/cr/')
                 )
             );
         },
         action => sub {
             my ($self) = @_;
-            my $dir = $self->{config}->{shortcuts}->absolu('%PROJET/cr/');
+            my $dir = $self->absolu('%PROJET/cr/');
             if ( opendir( CRDIR, $dir ) ) {
                 my @files =
                   map { "$dir/$_" } grep { /^page-/ } readdir(CRDIR);

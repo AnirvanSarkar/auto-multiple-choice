@@ -134,9 +134,9 @@ sub update {
         my $f    = $ff->{filename};
         $f =~ s:.*/::;
         my ( undef, undef, $scan_n ) =
-          splitpath( $self->{config}->{shortcuts}->absolu( $ff->{filename} ) );
+          splitpath( $self->absolu( $ff->{filename} ) );
         my $preproc_file =
-            $self->{config}->{shortcuts}->absolu('%PROJET/cr/diagnostic') . "/"
+            $self->absolu('%PROJET/cr/diagnostic') . "/"
           . $scan_n . ".png";
 
         $self->{store}->set(
@@ -208,12 +208,12 @@ sub delete {
         my $iter = $self->{store}->get_iter($s);
         my $file = $self->{store}->get( $iter, INCONNU_FILE );
         $self->{capture}->statement('deleteFailed')->execute($file);
-        unlink $self->{config}->{shortcuts}->absolu($file);
+        unlink $self->absolu($file);
         push @iters, $iter;
     }
     $self->next( '', @sel );
     for (@iters) { $self->{store}->remove($_); }
-    &{$self->{update_analysis_callback}}();
+    &{$self->{update_analysis_callback}}( $self->{callback_self} );
     $self->{capture}->end_transaction('rmUN');
 }
 
@@ -233,13 +233,14 @@ sub analyse_diagnostic {
 
         if ( !-f $diagnostic_file ) {
             &{ $self->{analysis_callback} }(
-                f          => [$scan],
-                text       => __("Making diagnostic image..."),
-                progres    => 'diagnostic',
-                diagnostic => 1,
-                fin        => sub {
-                    $self->line();
-                },
+                 $self->{callback_self},
+                 f          => [$scan],
+                 text       => __("Making diagnostic image..."),
+                 progres    => 'diagnostic',
+                 diagnostic => 1,
+                 fin        => sub {
+                     $self->line();
+                 },
             );
         }
     }

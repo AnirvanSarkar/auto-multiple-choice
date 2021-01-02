@@ -121,8 +121,8 @@ sub select_model {
     $self->{models_store} =
       Gtk3::TreeStore->new( 'Glib::String', 'Glib::String', 'Glib::String' );
 
-    $self->load_models( undef, $self->{config}->get('rep_modeles') )
-      if ( $self->{config}->get('rep_modeles') );
+    $self->load_models( undef, $self->get('rep_modeles') )
+      if ( $self->get('rep_modeles') );
 
     $self->load_models( undef, amc_specdir('models') );
 
@@ -346,7 +346,7 @@ sub install_source {
         return ( 0, '' );
     }
 
-    if ( -e $self->{config}->get('rep_projets') . "/" . $oo{nom} ) {
+    if ( -e $self->get('rep_projets') . "/" . $oo{nom} ) {
         debug
           "ERR: existing project directory $oo{nom} for install_source";
         return ( 0, '' );
@@ -391,7 +391,7 @@ sub install_source {
 
         return ( 0, '' ) if ( !$f );
 
-        $texsrc = $self->{config}->{shortcuts}->relatif( $f, $oo{nom} );
+        $texsrc = $self->relatif( $f, $oo{nom} );
         debug "Source LaTeX $f";
 
     } elsif ( $option eq 'zip' ) {
@@ -439,7 +439,7 @@ sub install_source {
 
             # move all files
 
-            my $hd = $self->{config}->get('rep_projets') . "/" . $oo{nom};
+            my $hd = $self->get('rep_projets') . "/" . $oo{nom};
 
             mkdir($hd) if ( !-e $hd );
 
@@ -480,7 +480,7 @@ sub install_source {
 
     } elsif ( $option eq 'vide' ) {
 
-        my $hd = $self->{config}->get('rep_projets') . "/" . $oo{nom};
+        my $hd = $self->get('rep_projets') . "/" . $oo{nom};
 
         mkdir($hd) if ( !-e $hd );
 
@@ -501,7 +501,7 @@ sub copy_latex {
     my ($self, $src, $dest, $new_encoding) = @_;
 
     if(!$new_encoding) {
-        $new_encoding = $self->{config}->get('encodage_latex');
+        $new_encoding = $self->get('encodage_latex');
     }
 
     # 1) find current encoding

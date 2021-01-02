@@ -43,9 +43,9 @@ sub new {
             open_project_name        => '',
             widgets                  => '',
             capture                  => '',
+            callback_self            => '',
             decode_callback          => '',
             detect_analysis_callback => '',
-            test_libnotify_callback  => '',
         },
         %oo
     );
@@ -70,19 +70,19 @@ sub printing_methods {
         my $error = $mod->check_available();
         if ( !$error ) {
             push @printing_methods, $m->{name}, $m->{description};
-            if ( !$self->{config}->get("methode_impression") ) {
-                $self->{config}->set( "global:methode_impression", $m->{name} );
+            if ( !$self->get("methode_impression") ) {
+                $self->set( "global:methode_impression", $m->{name} );
                 debug "Switching to printing method <$m->{name}>.";
             }
         } else {
-            if ( $self->{config}->get("methode_impression") eq $m->{name} ) {
-                $self->{config}->set( "global:methode_impression", '' );
+            if ( $self->get("methode_impression") eq $m->{name} ) {
+                $self->set( "global:methode_impression", '' );
                 debug "Printing method <$m->{name}> is not available: $error";
             }
         }
     }
-    if ( !$self->{config}->get("methode_impression") ) {
-        $self->{config}->set( "global:methode_impression", 'commande' );
+    if ( !$self->get("methode_impression") ) {
+        $self->set( "global:methode_impression", 'commande' );
         debug "Switching to printing method <commande>.";
     }
 
@@ -130,7 +130,7 @@ sub stores {
 
     $self->store_register(
         encodage_latex => cb_model(
-            map { $_->{iso} => $_->{txt} } (AMC::Encodings::encodings)
+            map { $_->{iso} => $_->{txt} } (AMC::Encodings::encodings())
         ),
 
   # TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
@@ -286,9 +286,9 @@ sub dialog {
     }
 
     # unavailable options, managed by the filter:
-    if ( $self->{config}->get('filter') ) {
+    if ( $self->get('filter') ) {
         for
-          my $k ( ( "AMC::Filter::register::" . $self->{config}->get('filter') )
+          my $k ( ( "AMC::Filter::register::" . $self->get('filter') )
             ->forced_options() )
         {
           TYPES: for my $t (qw/c cb ce col f s t v x/) {
@@ -335,13 +335,13 @@ sub change_methode_impression {
 sub change_delivery {
     my ($self) = @_;
 
-    $self->{config}->set_local_keys('email_transport');
+    $self->set_local_keys('email_transport');
     $self->{prefs}->reprend_pref(
         store     => 'prefwindow',
         prefix    => 'pref',
         container => 'local'
     );
-    my $transport = $self->{config}->get('local:email_transport');
+    my $transport = $self->get('local:email_transport');
     if ($transport) {
         for my $k (qw/sendmail SMTP/) {
             $self->get_ui( 'email_group_' . $k )
@@ -440,7 +440,7 @@ sub accept {
 
             debug "Test G:$k / P:$kp";
             if (   ( !$pm{$kp} )
-                && ( $self->{config}->get($kp) ne $self->{config}->get($k) ) )
+                && ( $self->get($kp) ne $self->get($k) ) )
             {
 
                 # project option has NOT been modified, and the new
@@ -476,7 +476,7 @@ sub accept {
                     if ( $reponse eq 'yes' ) {
 
                         # change also project option value
-                        $self->{config}->set( $kp, $self->{config}->get($k) );
+                        $self->set( $kp, $self->get($k) );
                     }
 
                 }
@@ -488,7 +488,7 @@ sub accept {
         if ( $pm{name_field_type} ) {
             my $response;
 
-            if ( $self->{config}->get('name_field_type') ) {
+            if ( $self->get('name_field_type') ) {
                 my $dialog = Gtk3::MessageDialog->new( $self->{parent_window},
                     'destroy-with-parent', 'question', 'ok-cancel', '' );
                 $dialog->set_markup(
@@ -504,14 +504,14 @@ sub accept {
                 $response = 'ok';
             }
             if ( $response eq 'ok' ) {
-                &{ $self->{decode_callback} }();
+                &{ $self->{decode_callback} }( $self->{callback_self} );
             }
         }
 
         for my $k (qw/note_null note_min note_max note_grain/) {
-            my $v = $self->{config}->get($k);
+            my $v = $self->get($k);
             $v =~ s/\s+//g;
-            $self->{config}->set( $k, $v );
+            $self->set( $k, $v );
         }
     }
 
@@ -519,17 +519,16 @@ sub accept {
         && !$self->{open_project_name} )
     {
         $self->{config}
-          ->set_projects_home( $self->{config}->get_absolute('projects_home') );
+          ->set_projects_home( $self->get_absolute('projects_home') );
     }
 
     $self->{config}->test_commands();
-    &{ $self->{test_libnotify_callback} }();
 
     if (   $self->{config}->key_changed("seuil")
         || $self->{config}->key_changed("seuil_up") )
     {
         if ( $self->{capture}->n_pages_transaction() > 0 ) {
-            &{ $self->{detect_analysis_callback} }();
+            &{ $self->{detect_analysis_callback} }( $self->{callback_self} );
         }
     }
 

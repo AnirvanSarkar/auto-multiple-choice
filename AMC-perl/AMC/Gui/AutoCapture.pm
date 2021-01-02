@@ -39,7 +39,8 @@ sub new {
 
     $self->merge_config(
         {
-            capture  => '',
+            capture       => '',
+            callback_self => '',
             callback => sub { debug "Error: missing AutoCapture callback"; },
         },
         %oo
@@ -84,14 +85,14 @@ sub set_env {
 sub check_auto_capture_mode {
     my ($self) = @_;
 
-    if ( $self->{n} > 0 && $self->{config}->get('auto_capture_mode') < 0 ) {
+    if ( $self->{n} > 0 && $self->get('auto_capture_mode') < 0 ) {
 
         # the auto_capture_mode (sheets photocopied or not) is not set,
         # but some capture has already been done. This looks weird, but
         # it can be the case if captures were made with an old AMC
         # version, or if project parameters have not been saved...
         # So we try to detect the correct value from the capture data.
-        $self->{config}->set( 'auto_capture_mode',
+        $self->set( 'auto_capture_mode',
             ( $self->{capture}->n_photocopy() > 0 ? 1 : 0 ) );
     }
 
@@ -164,7 +165,8 @@ sub ok {
         {
             copy_files => $copy_files,
             files      => \@files,
-            mcopy      => $self->{mcopy}
+            mcopy      => $self->{mcopy},
+            self       => $self->{callback_self}, 
         },
         Glib::G_PRIORITY_LOW
     );
@@ -174,11 +176,11 @@ sub ok {
 sub auto_mode_update {
     my ($self, @args) = @_;
 
-    $self->{config}->set_local_keys('auto_capture_mode');
+    $self->set_local_keys('auto_capture_mode');
 
     # the mode value (auto_capture_mode) has been updated.
     $self->{prefs}->valide_options_for_domain( 'saisie_auto', 'local', @args );
-    my $acm = $self->{config}->get('local:auto_capture_mode');
+    my $acm = $self->get('local:auto_capture_mode');
     $acm = -1 if ( !defined($acm) );
     $self->get_ui('button_capture_go')->set_sensitive( $acm >= 0 );
     my $w = $self->get_ui('saisie_auto_cb_allocate_ids');
@@ -234,7 +236,7 @@ sub choose_mode {
 
     $self->check_auto_capture_mode();
 
-    if ( $self->{config}->get('auto_capture_mode') >= 0 ) {
+    if ( $self->get('auto_capture_mode') >= 0 ) {
         return(1);
     }
 

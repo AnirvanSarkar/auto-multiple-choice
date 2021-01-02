@@ -23,22 +23,17 @@ use 5.012;
 
 package AMC::Gui::Learning;
 
+use parent 'AMC::Gui';
+
 use AMC::Basic;
 
 use Gtk3;
 
 sub new {
-    my ( $class, %o ) = (@_);
-    my $self = {
-        config      => '',
-        main_window => '',
-    };
+    my ( $class, %oo ) = (@_);
 
-    for ( keys %o ) {
-        $self->{$_} = $o{$_} if ( defined( $self->{$_} ) );
-    }
-
-    bless $self;
+    my $self = $class->SUPER::new(%oo);
+    bless( $self, $class );
 
     return ($self);
 }
@@ -48,10 +43,10 @@ sub lesson_full {
     my $resp = '';
     $type    = 'info' if ( !$type );
     $buttons = 'ok'   if ( !$buttons );
-    if ( $force || !$self->{config}->get("apprentissage/$key") ) {
+    if ( $force || !$self->get("apprentissage/$key") ) {
         my $garde;
         my $dialog =
-          Gtk3::MessageDialog->new( $self->{main_window}, 'destroy-with-parent',
+          Gtk3::MessageDialog->new( $self->{parent_window}, 'destroy-with-parent',
             $type, $buttons, '' );
         $dialog->set_markup(@oo);
 
@@ -70,7 +65,7 @@ sub lesson_full {
 
         if ( !( $force || $garde->get_active() ) ) {
             debug "Learning : $key";
-            $self->{config}->set( "apprentissage/$key", 1 );
+            $self->set( "apprentissage/$key", 1 );
         }
 
         $dialog->destroy;
@@ -159,7 +154,7 @@ sub forget {
     my ($self) = @_;
 
     my $dialog =
-      Gtk3::MessageDialog->new( $self->{main_window}, 'destroy-with-parent',
+      Gtk3::MessageDialog->new( $self->{parent_window}, 'destroy-with-parent',
         'question', 'yes-no', '' );
     $dialog->set_markup(
 
@@ -184,7 +179,7 @@ sub forget {
     $dialog->destroy;
     if ( $response eq 'yes' ) {
         debug "Clearing learning states...";
-        $self->{config}->set( "state:apprentissage", {} );
+        $self->set( "state:apprentissage", {} );
         $self->{config}->save();
     }
 }

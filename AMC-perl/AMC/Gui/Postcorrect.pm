@@ -84,10 +84,10 @@ sub choose_reference {
     $self->get_ui('postcorrect_student')
       ->set_range( $self->{student_min}, $self->{student_max} );
 
-    if ( $self->{config}->get('postcorrect_student') ) {
+    if ( $self->get('postcorrect_student') ) {
         for (qw/student copy/) {
             $self->get_ui( 'postcorrect_' . $_ )
-              ->set_value( $self->{config}->get( 'postcorrect_' . $_ ) );
+              ->set_value( $self->get( 'postcorrect_' . $_ ) );
         }
     } else {
         $self->get_ui('postcorrect_student')->set_value( $self->{student_min} );
@@ -97,7 +97,7 @@ sub choose_reference {
     }
 
     $self->get_ui('postcorrect_set_multiple')
-        ->set_active( $self->{config}->get("postcorrect_set_multiple") );
+        ->set_active( $self->get("postcorrect_set_multiple") );
 
     $self->change();
 
@@ -124,9 +124,9 @@ sub ok {
     my $mult    = $self->get_ui('postcorrect_set_multiple')->get_active();
     $self->get_ui('choix_postcorrect')->destroy();
 
-    $self->{config}->set( 'postcorrect_student',      $student );
-    $self->{config}->set( 'postcorrect_copy',         $copy );
-    $self->{config}->set( 'postcorrect_set_multiple', $mult );
+    $self->set( 'postcorrect_student',      $student );
+    $self->set( 'postcorrect_copy',         $copy );
+    $self->set( 'postcorrect_set_multiple', $mult );
 
     &{ $self->{ok_callback} }( $student, $copy, $mult );
 }
@@ -189,7 +189,7 @@ sub change_copy {
     if ( !defined($f) ) {
         $f = '';
     } else {
-        $f = $self->{config}->get_absolute('cr') . "/$f";
+        $f = $self->get_absolute('cr') . "/$f";
     }
     debug "Postcorrect name field image: $f";
     if ( -f $f ) {

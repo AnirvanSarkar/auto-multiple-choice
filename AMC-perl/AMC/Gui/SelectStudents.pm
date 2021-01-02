@@ -71,7 +71,7 @@ sub dialog {
           students_select_list students_list_search/
     );
 
-    my $lk = $self->{config}->get('liste_key');
+    my $lk = $self->get('liste_key');
 
     my $students_store = Gtk3::ListStore->new(
         'Glib::String', 'Glib::String',  'Glib::String', 'Glib::String',

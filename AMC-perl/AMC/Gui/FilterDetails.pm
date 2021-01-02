@@ -68,7 +68,7 @@ sub dialog {
     
     my $r = $self->get_ui('filter_details')->run();
     if ( $r == 10 ) {
-        $self->{config}->set_local_keys('filter');
+        $self->set_local_keys('filter');
         debug "Filter details: new value->local";
         $self->{prefs}->reprend_pref(
             prefix    => 'filter_details',
@@ -90,11 +90,11 @@ sub dialog {
 sub update {
     my ($self) = @_;
 
-    $self->{config}->set_local_keys('filter');
+    $self->set_local_keys('filter');
     $self->{prefs}
       ->reprend_pref( prefix => 'filter_details', container => 'local' );
     my $b      = $self->get_ui('filter_text')->get_buffer;
-    my $filter = $self->{config}->get('local:filter');
+    my $filter = $self->get('local:filter');
     if ($filter) {
         $b->set_text( "AMC::Filter::register::$filter"->description );
     } else {

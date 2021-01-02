@@ -89,7 +89,7 @@ sub dialog {
 
     return() if(!$self->check_for_sender_address());
 
-    if ( $self->{config}->get('email_transport') eq 'sendmail' ) {
+    if ( $self->get('email_transport') eq 'sendmail' ) {
         return () if ( !$self->check_for_sendmail() );
     }
     
@@ -112,8 +112,8 @@ sub dialog {
         return ();
     }
 
-    $self->{config}->set( 'project:email_col', $col_max )
-      if ( !$self->{config}->get('email_col') );
+    $self->set( 'project:email_col', $col_max )
+      if ( !$self->get('email_col') );
 
     # Launch dialog!
     
@@ -189,7 +189,7 @@ sub dialog {
         $self->{email_key} = $self->{association}->variable('key_in_list');
         $self->{email_r} = $self->{report}->get_associated_type($self->{kind});
     } else {
-        $self->{email_key} = $self->{config}->get('liste_key');
+        $self->{email_key} = $self->get('liste_key');
         $self->{email_r} = $self->{report}->get_preassociated_type($self->{kind});
     }
 
@@ -227,10 +227,10 @@ sub dialog {
     $emails_list->get_selection->set_mode('multiple');
     $emails_list->get_selection->select_all;
 
-    $self->attachment_addtolist( @{ $self->{config}->get('email_attachment') } );
+    $self->attachment_addtolist( @{ $self->get('email_attachment') } );
 
     $self->get_ui('attachments_expander')
-      ->set_expanded( @{ $self->{config}->get('email_attachment') } ? 1 : 0 );
+      ->set_expanded( @{ $self->get('email_attachment') } ? 1 : 0 );
 
     $self->{prefs}->transmet_pref( $self->{main}, prefix => 'email', root => 'project:' );
     $self->{prefs}->transmet_pref(
@@ -265,22 +265,22 @@ sub dialog {
         my $ok   = defined($iter);
         while ($ok) {
             push @f,
-              $self->{config}->{shortcuts}->relatif(
+              $self->relatif(
                 $attachments_store->get( $iter, ATTACHMENTS_FILE ) );
             $ok = $attachments_store->iter_next($iter);
         }
         if (@f) {
-            $self->{config}->set( 'project:email_attachment', [@f] );
+            $self->set( 'project:email_attachment', [@f] );
         } else {
-            $self->{config}->set( 'project:email_attachment', [] );
+            $self->set( 'project:email_attachment', [] );
         }
     }
     $self->get_ui('email_dialog')->destroy;
 
     # are all attachments present?
     if ( $resp == 1 ) {
-        my @missing = grep { !-f $self->{config}->{shortcuts}->absolu($_) }
-          ( @{ $self->{config}->get('email_attachment') } );
+        my @missing = grep { !-f $self->absolu($_) }
+          ( @{ $self->get('email_attachment') } );
         if (@missing) {
             my $dialog = Gtk3::MessageDialog->new(
                 $self->{parent_window},
@@ -347,9 +347,9 @@ sub check_for_perl_modules {
         qw/Email::Address Email::MIME
           Email::Sender Email::Sender::Simple/
     );
-    if ( $self->{config}->get('email_transport') eq 'sendmail' ) {
+    if ( $self->get('email_transport') eq 'sendmail' ) {
         push @needs_module, 'Email::Sender::Transport::Sendmail';
-    } elsif ( $self->{config}->get('email_transport') eq 'SMTP' ) {
+    } elsif ( $self->get('email_transport') eq 'SMTP' ) {
         push @needs_module, 'Email::Sender::Transport::SMTP';
     }
     my @manque = ();
@@ -380,7 +380,7 @@ sub check_for_perl_modules {
     # STARTTLS is only available with Email::Sender >= 1.300027
     # Warn in case it is not available
 
-    if ( $self->{config}->get('email_smtp_ssl') =~ /[^01]/ ) {
+    if ( $self->get('email_smtp_ssl') =~ /[^01]/ ) {
         load "Email::Sender";
         load "version";
         if ( version->parse($Email::Sender::VERSION) <
@@ -407,14 +407,14 @@ sub check_for_perl_modules {
 sub check_for_sender_address {
     my ($self) = @_;
 
-    my @sa = Email::Address->parse( $self->{config}->get('email_sender') );
+    my @sa = Email::Address->parse( $self->get('email_sender') );
 
     if ( !@sa ) {
         my $message;
-        if ( $self->{config}->get('email_sender') ) {
+        if ( $self->get('email_sender') ) {
             $message .= sprintf(
                 __("The email address you entered (%s) is not correct."),
-                $self->{config}->get('email_sender')
+                $self->get('email_sender')
               )
               . "\n"
               . __
@@ -439,8 +439,8 @@ sub check_for_sender_address {
 sub check_for_sendmail {
     my ($self) = @_;
 
-    if ( $self->{config}->get('email_sendmail_path')
-        && !-f $self->{config}->get('email_sendmail_path') )
+    if ( $self->get('email_sendmail_path')
+        && !-f $self->get('email_sendmail_path') )
     {
         my $dialog = Gtk3::MessageDialog->new(
             $self->{parent_window},
@@ -454,7 +454,7 @@ sub check_for_sendmail {
                 __(
 "The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."
                 ),
-                $self->{config}->get('email_sendmail_path')
+                $self->get('email_sendmail_path')
             )
         );
         $dialog->run;
@@ -501,12 +501,12 @@ sub attachment_addtolist {
             $self->{attachments_store}->set(
                 $self->{attachments_store}->append,
                 ATTACHMENTS_FILE,
-                $self->{config}->{shortcuts}->absolu($f),
+                $self->absolu($f),
                 ATTACHMENTS_NAME,
                 $name,
                 ATTACHMENTS_FOREGROUND,
                 (
-                    -f $self->{config}->{shortcuts}->absolu($f)
+                    -f $self->absolu($f)
                     ? hex_color('black')
                     : hex_color('red')
                 ),
@@ -557,8 +557,8 @@ sub select_failed {
 sub project_name {
     my ($self) = @_;
 
-    return ( $self->{config}->get('nom_examen')
-          || $self->{config}->get('code_examen')
+    return ( $self->get('nom_examen')
+          || $self->get('code_examen')
           || $self->{project_name} );
 }
 
@@ -603,7 +603,7 @@ sub set_project_name {
 sub change_col {
     my ($self) = @_;
 
-    $self->{config}->set_local_keys('email_col');
+    $self->set_local_keys('email_col');
     $self->{prefs}->reprend_pref( prefix => 'email', container => 'local' );
 
     my $i  = $self->{emails_store}->get_iter_first;
@@ -615,7 +615,7 @@ sub change_col {
             test_numeric => 1
         );
         $self->{emails_store}->set( $i, EMAILS_EMAIL,
-            $s->{ $self->{config}->get('local:email_col') } );
+            $s->{ $self->get('local:email_col') } );
         $ok = $self->{emails_store}->iter_next($i);
     }
 }

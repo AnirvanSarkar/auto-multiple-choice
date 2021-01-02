@@ -51,7 +51,7 @@ sub new {
 sub dialog {
     my ($self) = @_;
 
-    my $l = $self->{config}->get( 'export_' . $self->{type} . '_columns' );
+    my $l = $self->get( 'export_' . $self->{type} . '_columns' );
 
     my $i         = 1;
     my %selected  = map { $_ => $i++ } ( split( /,+/, $l ) );

@@ -31,6 +31,8 @@ use File::Copy;
 use File::Find;
 use AMC::Basic;
 
+use Gtk3;
+
 sub new {
     my ( $class, %oo ) = @_;
 
@@ -42,6 +44,7 @@ sub new {
             action             => '',
             current_project    => '',
             local_projects_dir => '',
+            callback_self      => '',
             open_callback      => '',
             new_callback       => '',
             progress_widget    => '',
@@ -62,8 +65,8 @@ sub new {
 sub projects_list_window {
     my ($self) = @_;
 
-    $self->{local_projects_dir} = $self->config_get_absolute('rep_projets');
-    $self->{local_projects_dir} = $self->config_get_absolute('projects_home')
+    $self->{local_projects_dir} = $self->get_absolute('rep_projets');
+    $self->{local_projects_dir} = $self->get_absolute('projects_home')
       if ( !( $self->{local_projects_dir} && -d $self->{local_projects_dir} ) );
 
     if ( !-d $self->{local_projects_dir} ) {
@@ -115,7 +118,7 @@ sub projects_list_window {
 
     # keep same size as last time used
 
-    if ( $self->config_get('conserve_taille') ) {
+    if ( $self->get('conserve_taille') ) {
         AMC::Gui::WindowSize::size_monitor(
             $self->get_ui('choix_projet'),
             {
@@ -138,7 +141,7 @@ sub set_directory {
           || $filechooser->get_current_folder() );
     debug "Changed directory: " . show_utf8($directory);
     $self->{local_projects_dir} = $directory;
-    $self->{config}->set_relatif_os( 'rep_projets', $directory );
+    $self->set_relatif_os( 'rep_projets', $directory );
     $self->projects_update_list();
 }
 
@@ -285,7 +288,7 @@ sub open_ok {
 sub open_callback_when_idle {
     my ($self) = @_;
     &{ $self->{open_callback} }
-        ( $self->{local_projects_dir}, $self->{project} );
+        ( $self->{callback_self}, $self->{local_projects_dir}, $self->{project} );
 
     return(0);
 }
@@ -357,7 +360,8 @@ sub new_project {
 
     } else {
 
-        &{ $self->{new_callback} }( $self->{local_projects_dir}, $proj );
+        &{ $self->{new_callback} }
+          ( $self->{callback_self}, $self->{local_projects_dir}, $proj );
 
     }
 }

@@ -57,7 +57,7 @@ sub new {
 sub options_file {
     my ($self) = @_;
 
-    return ( $self->{config}->get('rep_projets')
+    return ( $self->get('rep_projets')
           . "/$self->{project_name}/options.xml" );
 }
 
@@ -91,7 +91,7 @@ sub dialog {
 
     # Detects files to include
 
-    $self->add_file( $self->{config}->get_absolute('texsrc') );
+    $self->add_file( $self->get_absolute('texsrc') );
     $self->add_file( $self->options_file() );
 
     for (qw/description files/) {
@@ -116,7 +116,7 @@ sub add_file {
 
     # removes local part
 
-    my $p_dir = $self->{config}->{shortcuts}->absolu('%PROJET/');
+    my $p_dir = $self->absolu('%PROJET/');
     if ( $f =~ s:^\Q$p_dir\E:: ) {
         my $i = $self->path_from_tree( $f );
         return ($i);
@@ -156,7 +156,7 @@ sub add_to_archive {
     my ($tar, $self) = @$data;
 
     my $f  = $store->get( $iter, TEMPLATE_FILES_PATH );
-    my $af = $self->{config}->{shortcuts}->absolu("%PROJET/$f");
+    my $af = $self->absolu("%PROJET/$f");
 
     return (0) if ( $f eq 'description.xml' );
 
@@ -175,7 +175,7 @@ sub build {
 
     # Creates template
 
-    my $tfile = $self->{config}->get('rep_modeles') . '/'
+    my $tfile = $self->get('rep_modeles') . '/'
       . $self->get_ui('template_file_name')->get_text() . ".tgz";
     my $tar = Archive::Tar->new();
     $self->{store}->foreach( \&add_to_archive, [$tar, $self] );
@@ -208,7 +208,7 @@ sub filename_check {
         "a-zA-Z0-9_+-"
     );
     my $t     = $self->get_ui('template_file_name')->get_text();
-    my $tfile = $self->{config}->get('rep_modeles') . '/' . $t . ".tgz";
+    my $tfile = $self->get('rep_modeles') . '/' . $t . ".tgz";
     $self->get_ui('mt_ok')->set_sensitive( $t && !-e $tfile );
 }
 
@@ -220,7 +220,7 @@ sub add {
         $self->get_ui('make_template'),
         'open', __("Cancel"), 'cancel', __("Add"), 'accept'
     );
-    $fs->set_current_folder( $self->{config}->{shortcuts}->absolu('%PROJET/') );
+    $fs->set_current_folder( $self->absolu('%PROJET/') );
     $fs->set_select_multiple(1);
 
     my $err  = 0;

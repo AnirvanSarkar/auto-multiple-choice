@@ -42,6 +42,7 @@ sub new {
     $self->merge_config(
         {
             layout         => '',
+            callback_self  => '',
             print_callback => sub { debug "Warning: missing print_callback"; },
         },
         %oo
@@ -117,10 +118,10 @@ sub dialog {
 sub printing_method {
     my ($self) = @_;
 
-    if ( $self->{config}->get('project:pdfform') ) {
+    if ( $self->get('project:pdfform') ) {
         return ('file');
     } else {
-        return ( $self->{config}->get("methode_impression") );
+        return ( $self->get("methode_impression") );
     }
 }
 
@@ -133,7 +134,7 @@ sub set_env {
     $self->{students_count} = $self->{layout}->students_count;
     $self->{pages_count}    = $self->{layout}->pages_count;
     $self->{preassoc}       = $self->{layout}->pre_association()
-      && $self->{config}->get('listeetudiants');
+      && $self->get('listeetudiants');
     $self->{layout}->end_transaction('PGCN');
 
     $self->{options_string} = '';
@@ -146,7 +147,7 @@ sub set_env {
 sub check_layout {
     my ($self) = @_;
 
-    if ( !-f $self->{config}->get_absolute('doc_question') ) {
+    if ( !-f $self->get_absolute('doc_question') ) {
         my $dialog = Gtk3::MessageDialog->new( $self->{parent_window},
             'destroy-with-parent', 'error', 'ok', '' );
         $dialog->set_markup(
@@ -211,7 +212,7 @@ sub check_cups {
     }
 
     $self->{print_object} = $print_module->new(
-        useful_options => $self->{config}->get("printer_useful_options") );
+        useful_options => $self->get("printer_useful_options") );
 
     # check for a installed printer
 
@@ -250,16 +251,16 @@ sub dialog_cups {
       cb_model( map { $_->{name} => $self->{print_object}->printer_text($_) }
           @printers );
     $self->get_ui('imprimante')->set_model($p_model);
-    if ( !$self->config_get('imprimante') ) {
+    if ( !$self->get('imprimante') ) {
         my $defaut = $self->{print_object}->default_printer;
         if ($defaut) {
-            $self->{config}->set( 'imprimante', $defaut );
+            $self->set( 'imprimante', $defaut );
         } else {
-            $self->{config}->set( 'imprimante', $printers[0]->{name} );
+            $self->set( 'imprimante', $printers[0]->{name} );
         }
     }
     my $i =
-      model_id_to_iter( $p_model, COMBO_ID, $self->config_get('imprimante') );
+      model_id_to_iter( $p_model, COMBO_ID, $self->get('imprimante') );
     if ($i) {
         $self->get_ui('imprimante')->set_active_iter($i);
 
@@ -295,15 +296,19 @@ sub dialog_file {
         root   => "project:",
     );
     if ( $self->{preassoc} ) {
-        $self->{prefs}->transmet_pref(
-            $self->{main},
-            prefix => 'impfpu',
-            keys   => ['pdf_password_key'],
-        );
         $self->get_ui('options_pdf_passwords')->show();
     } else {
         $self->get_ui('options_pdf_passwords')->hide();
     }
+}
+
+sub pdf_password_key_update {
+    my ($self) = @_;
+    $self->{prefs}->transmet_pref(
+        $self->{main},
+        prefix => 'impfpu',
+        keys   => ['pdf_password_key'],
+    );
 }
 
 # prepare the list of available copies
@@ -343,17 +348,17 @@ sub printer_change {
           $self->get_ui('imprimante')->get_model->get( $imp_iter, COMBO_ID );
         debug "Printer: $i";
 
-        $self->{config}->set( "global:options_impression/printer", {} )
-          if ( !$self->{config}->get("options_impression/printer") );
+        $self->set( "global:options_impression/printer", {} )
+          if ( !$self->get("options_impression/printer") );
         my $printer_settings =
-          $self->{config}->get("options_impression/printer");
+          $self->get("options_impression/printer");
 
         $printer_settings->{$i} = {}
           if ( !$printer_settings->{$i} );
 
         $self->{print_object}->printer_options_table(
             $self->get_ui('printing_options_table'),
-            \%{ $self->{ui} },
+            $self->{ui},
             $self->{prefs}, $i, $printer_settings->{$i}
         );
 
@@ -389,10 +394,10 @@ sub pdf_password_toggle {
     my ($self) = @_;
 
     $self->{prefs}->reprend_pref( prefix => 'impfp' );
-    my $u = $self->{config}->get('pdf_password_use');
+    my $u = $self->get('pdf_password_use');
     if ($u) {
-        if ( !$self->{config}->get('pdf_password') ) {
-            $self->{config}->set( 'pdf_password', $self->random_password() );
+        if ( !$self->get('pdf_password') ) {
+            $self->set( 'pdf_password', $self->random_password() );
             $self->{prefs}->transmet_pref(
                 $self->{main},
                 prefix => 'impfp',
@@ -411,7 +416,7 @@ sub cancel {
     if ( get_debug() ) {
         $self->{prefs}->reprend_pref( prefix => 'imp' );
         $Data::Dumper::Indent = 0;
-        debug( Dumper( $self->{config}->get('options_impression') ) );
+        debug( Dumper( $self->get('options_impression') ) );
     }
 
     $self->get_ui('choix_pages_impression')->destroy;
@@ -474,7 +479,7 @@ sub ok {
     # The option 'print asnwer sheet first' needs one of the
     # extracting commands [qpdf, pdftk, sedja-console]
 
-    if ( $self->{config}->get('options_impression/print_answersheet') eq
+    if ( $self->get('options_impression/print_answersheet') eq
         'first' )
     {
         return ()
@@ -489,6 +494,7 @@ sub ok {
     # Ask for printing the exams!
 
     &{ $self->{print_callback} }(
+        $self->{callback_self},
         {
             printing_method => $self->{method},
             options_string  => $self->{options_string},
@@ -512,14 +518,14 @@ sub get_options_cups {
         } else {
             $i = 'default';
         }
-        $self->{config}->set( 'imprimante', $i );
+        $self->set( 'imprimante', $i );
 
         $self->{prefs}->reprend_pref( prefix => 'imp' );
         $self->{prefs}->reprend_pref( prefix => 'printer' );
 
         my $os =
-          $self->options_string( $self->{config}->get("options_impression"),
-            $self->{config}->get("options_impression/printer")->{$i} );
+          $self->options_string( $self->get("options_impression"),
+            $self->get("options_impression/printer")->{$i} );
 
         $self->{options_string} = $os;
 
@@ -554,15 +560,15 @@ sub get_options_file {
     if ( $self->{method} eq 'file' ) {
         $self->{prefs}->reprend_pref( prefix => 'impf' );
         $self->{prefs}->reprend_pref( prefix => 'impfp' );
-        if ( $self->get_ui('options_pdf_passwords')->is_visible ) {
+        if ( $self->{preassoc} ) {
             $self->{prefs}->reprend_pref( prefix => 'impfpu' );
         }
-        if ( !$self->{config}->get('options_impression/repertoire') ) {
+        if ( !$self->get('options_impression/repertoire') ) {
             debug "Print to file : no destination...";
-            $self->{config}->set( 'options_impression/repertoire', '' );
+            $self->set( 'options_impression/repertoire', '' );
         } else {
             my $path =
-              $self->{config}->get_absolute('options_impression/repertoire');
+              $self->get_absolute('options_impression/repertoire');
             mkdir($path) if ( !-e $path );
         }
     }
@@ -573,7 +579,7 @@ sub get_options_file {
 sub ask_for_photocopy_mode {
     my ($self) = @_;
 
-    if ( $self->{config}->get('auto_capture_mode') != 1 ) {
+    if ( $self->get('auto_capture_mode') != 1 ) {
         my $dialog = Gtk3::MessageDialog->new( $self->{parent_window},
             'destroy-with-parent', 'question', 'yes-no', '' );
         $dialog->set_markup(
@@ -592,7 +598,7 @@ sub ask_for_photocopy_mode {
         my $reponse = $dialog->run;
         $dialog->destroy;
         my $mult = ( $reponse eq 'yes' ? 1 : 0 );
-        $self->{config}->set( 'auto_capture_mode', $mult );
+        $self->set( 'auto_capture_mode', $mult );
     }
 }
 
@@ -606,7 +612,7 @@ sub needs_extract_with {
 
     my $found;
 
-    if ( $self->{config}->get('print_extract_with') =~ /$allowed_re/ ) {
+    if ( $self->get('print_extract_with') =~ /$allowed_re/ ) {
         $found = 1;
     } else {
         $found = 0;
@@ -630,7 +636,7 @@ sub needs_extract_with {
                 $dialog->run;
                 $dialog->destroy;
 
-                $self->{config}->set( "print_extract_with", $cmd );
+                $self->set( "print_extract_with", $cmd );
                 $found = 1;
                 last EXTRACT;
             }

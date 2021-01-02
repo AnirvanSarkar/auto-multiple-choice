@@ -37,6 +37,7 @@ sub new {
 
     $self->merge_config(
         {
+            callback_self => '',
             callback   => sub { debug "Error: missing StudentsList callback"; },
             main_gui   => '',
             main_prefs => '',
@@ -60,10 +61,10 @@ sub dialog {
     # existing), or the project directory
 
     my @f;
-    if ( $self->{config}->get('listeetudiants') ) {
-        @f = splitpath( $self->{config}->get_absolute('listeetudiants') );
+    if ( $self->get('listeetudiants') ) {
+        @f = splitpath( $self->get_absolute('listeetudiants') );
     } else {
-        @f = splitpath( $self->{config}->{shortcuts}->absolu('%PROJET/') );
+        @f = splitpath( $self->absolu('%PROJET/') );
     }
     $f[2] = '';
 
@@ -79,11 +80,11 @@ sub dialog {
 
         # file chosen
         debug( "List: " . $file );
-        &{ $self->{callback} }( set => $file );
+        &{ $self->{callback} }( $self->{callback_self}, set => $file );
     } elsif ( $ret eq '2' ) {
 
         # No list
-        &{ $self->{callback} }( set => '' );
+        &{ $self->{callback} }( $self->{callback_self}, set => '' );
     } else {
 
         # Cancel
@@ -134,10 +135,10 @@ sub config_file {
     $self->{prefs}->reprend_pref( prefix => 'sl' );
 
     # Updates main GUI
-    &{ $self->{callback} }();
+    &{ $self->{callback} }( $self->{callback_self} );
 
     # Updates dialog
-    &{ $self->{callback} }(
+    &{ $self->{callback} }( $self->{callback_self}, 
         nolabel => 1,
         prefs   => $self->{prefs},
         gui     => $self->{main},

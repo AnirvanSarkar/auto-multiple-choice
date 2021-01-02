@@ -110,22 +110,49 @@ sub read_glade {
     }
 }
 
-sub config_get {
+sub absolu {
     my ( $self, @args ) = @_;
-    if ( $self->{config} ) {
-        return ( $self->{config}->get(@args) );
-    } else {
-        return (undef);
-    }
+    return ( $self->{config}->{shortcuts}->absolu(@args) );
 }
 
-sub config_get_absolute {
+sub absolu_base {
     my ( $self, @args ) = @_;
-    if ( $self->{config} ) {
-        return ( $self->{config}->get_absolute(@args) );
-    } else {
-        return (undef);
-    }
+    return ( $self->{config}->{shortcuts}->absolu_base(@args) );
+}
+
+sub relatif {
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->{shortcuts}->relatif(@args) );
+}
+
+sub relatif_base {
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->{shortcuts}->relatif_base(@args) );
+}
+
+sub set {
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->set(@args) );
+}
+
+sub set_local_keys {
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->set_local_keys(@args) );
+}
+
+sub set_relatif_os {
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->set_relatif_os(@args) );
+}
+
+sub get {
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->get(@args) );
+}
+
+sub get_absolute {
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->get_absolute(@args) );
 }
 
 sub set_prefs {
@@ -150,7 +177,7 @@ sub store_register {
 sub restricted_check {
     my ( $self, $text, $warning, $chars ) = @_;
     my $nom = $text->get_text();
-    if ( !$self->config_get('nonascii_projectnames') ) {
+    if ( !$self->get('nonascii_projectnames') ) {
         if ( $nom =~ s/[^$chars]//g ) {
             $text->set_text($nom);
             $warning->show();

@@ -186,6 +186,8 @@ sub close {
     if ( $self->{fin} ) {
         debug "Calling <fin> hook @" . $self;
         &{ $self->{fin} }( $self, %data );
+    } else {
+        debug "No callback.";
     }
 }
 
