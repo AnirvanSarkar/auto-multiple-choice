@@ -253,6 +253,7 @@ sub new {
     $copies_store->set_sort_func( COPIES_N,      \&sort_num, COPIES_N );
     $copies_store->set_sort_func( COPIES_AUTO,   \&sort_num, COPIES_AUTO );
     $copies_store->set_sort_func( COPIES_MANUEL, \&sort_num, COPIES_MANUEL );
+    $copies_store->set_sort_column_id( COPIES_N, 'ascending' );
 
     $self->{copies_store} = $copies_store;
 

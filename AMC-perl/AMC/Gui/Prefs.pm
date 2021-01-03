@@ -381,4 +381,27 @@ sub reprend_pref {
       . join( ', ', $self->{config}->changed_keys() );
 }
 
+sub valide_options_for_domain {
+    my ( $self, $domain, $container, $widget, $user_data ) = @_;
+    $container = 'project' if ( !$container );
+    if ($widget) {
+        my $name = $widget->get_name();
+        debug "<$domain> options validation for widget $name";
+
+        if ( $name =~ /${domain}_[a-z]+_(.*)/ ) {
+            $self->reprend_pref(
+                prefix    => $domain,
+                keys      => [ "project:" . $1 ],
+                trace     => 1,
+                container => $container
+            );
+        } else {
+            debug "Widget $name is not in domain <$domain>!";
+        }
+    } else {
+        debug "<$domain> options validation: ALL";
+        $self->reprend_pref( prefix => $domain, container => $container );
+    }
+}
+
 1;

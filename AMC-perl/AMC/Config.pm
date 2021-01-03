@@ -951,4 +951,11 @@ sub save {
     }
 }
 
+sub set_projects_home {
+    my ($self, $p) = @_;
+
+    $self->set( 'rep_projets', $p );
+    $self->{shortcuts}->set( projects_path => $p );
+}
+
 1;

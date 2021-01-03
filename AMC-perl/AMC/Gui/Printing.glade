@@ -54,7 +54,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
-            <signal name="clicked" handler="sujet_impressions_cancel" swapped="no"/>
+            <signal name="clicked" handler="cancel" swapped="no"/>
           </object>
         </child>
         <child>
@@ -65,7 +65,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
-            <signal name="clicked" handler="sujet_impressions_ok" swapped="no"/>
+            <signal name="clicked" handler="ok" swapped="no"/>
             <style>
               <class name="suggested-action"/>
             </style>
@@ -216,7 +216,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">liststore3</property>
-                    <signal name="changed" handler="autre_imprimante" swapped="no"/>
+                    <signal name="changed" handler="printer_change" swapped="no"/>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext3"/>
                       <attributes>

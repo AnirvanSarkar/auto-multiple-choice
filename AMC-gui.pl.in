@@ -51,23 +51,41 @@ use Text::ParseWords;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 
-use AMC::Path;
 use AMC::Basic;
-use AMC::State;
 use AMC::Config;
 use AMC::Data;
 use AMC::DataModule::capture ':zone';
 use AMC::DataModule::report ':const';
-use AMC::Scoring;
-use AMC::Gui::Prefs;
-use AMC::Gui::Manuel;
-use AMC::Gui::Association;
-use AMC::Gui::Commande;
-use AMC::Gui::Notes;
-use AMC::Gui::Zooms;
+use AMC::Encodings;
 use AMC::FileMonitor;
+use AMC::Gui::APropos;
+use AMC::Gui::Association;
+use AMC::Gui::AutoCapture;
+use AMC::Gui::ChooseColumns;
+use AMC::Gui::Cleanup;
+use AMC::Gui::Commande;
+use AMC::Gui::CreateProject;
+use AMC::Gui::FilterDetails;
+use AMC::Gui::Learning;
+use AMC::Gui::Mailing;
+use AMC::Gui::Manuel;
+use AMC::Gui::Notes;
+use AMC::Gui::Overwritten;
+use AMC::Gui::Postcorrect;
+use AMC::Gui::Preferences;
+use AMC::Gui::Prefs;
+use AMC::Gui::Printing;
+use AMC::Gui::ProjectManager;
+use AMC::Gui::SelectStudents;
+use AMC::Gui::StudentsList;
+use AMC::Gui::Template;
+use AMC::Gui::Unrecognized;
 use AMC::Gui::WindowSize;
+use AMC::Gui::Zooms;
+use AMC::Path;
 use AMC::Print;
+use AMC::Scoring;
+use AMC::State;
 
 use Data::Dumper;
 
@@ -91,31 +109,6 @@ use constant {
     DIAG_ID_PAGE    => 9,
     DIAG_ID_COPY    => 10,
     DIAG_SCAN_FILE  => 11,
-
-    INCONNU_FILE    => 0,
-    INCONNU_SCAN    => 1,
-    INCONNU_TIME    => 2,
-    INCONNU_TIME_N  => 3,
-    INCONNU_PREPROC => 4,
-
-    MODEL_NOM  => 0,
-    MODEL_PATH => 1,
-    MODEL_DESC => 2,
-
-    COPIE_N => 0,
-
-    TEMPLATE_FILES_PATH => 0,
-    TEMPLATE_FILES_FILE => 1,
-
-    EMAILS_SC     => 0,
-    EMAILS_NAME   => 1,
-    EMAILS_EMAIL  => 2,
-    EMAILS_ID     => 3,
-    EMAILS_STATUS => 4,
-
-    ATTACHMENTS_FILE       => 0,
-    ATTACHMENTS_NAME       => 1,
-    ATTACHMENTS_FOREGROUND => 2,
 };
 
 my $libnotify_error = '';
@@ -191,23 +184,7 @@ my $prefs = AMC::Gui::Prefs::new(
 
 my $monitor = AMC::FileMonitor->new();
 
-sub hex_color {
-    my $s = shift;
-    return ( Gtk3::Gdk::Color::parse($s)->to_string() );
-}
-
 my @export_modules = @{ $config->{export_modules} };
-
-# Reads decoders list
-
-my @decoders = perl_module_search('AMC::Decoder::register');
-for my $m (@decoders) {
-    load("AMC::Decoder::register::$m");
-}
-@decoders = sort {
-    "AMC::Decoder::register::$a"->weight <=>
-      "AMC::Decoder::register::$b"->weight
-} @decoders;
 
 # Reads filter plugins list
 
@@ -338,40 +315,6 @@ sub check_for_tmp_disk_space {
     return 1;
 }
 
-# annulation apprentissage
-
-sub annule_apprentissage {
-    my $dialog =
-      Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-        'question', 'yes-no', '' );
-    $dialog->set_markup(
-
-# Explains that some dialogs are shown only to learn AMC, only once by default (first part).
-        __("Several dialogs try to help you be at ease handling AMC.") . " " .
-
-# Explains that some dialogs are shown only to learn AMC, only once by default (second part). %s will be replaced with the text "Show this message again next time" that is written along the checkbox allowing the user to keep these learning message next time.
-          sprintf(
-            __ "Unless you tick the \"%s\" box, they are shown only once.",
-
-# Explains that some dialogs are shown only to learn AMC, only once by default. This is the message shown along the checkbox allowing the user to keep these learning message next time.
-            __ "Show this message again next time"
-          )
-          . " "
-          .
-
-# Explains that some dialogs are shown only to learn AMC, only once by default (third part). If you answer YES here, all these dialogs will be shown again.
-          __
-"Do you want to forgot which dialogs you have already seen and ask to show all of them next time they should appear ?"
-    );
-    my $reponse = $dialog->run;
-    $dialog->destroy;
-    if ( $reponse eq 'yes' ) {
-        debug "Clearing learning states...";
-        $config->set( "state:apprentissage", {} );
-        $config->save();
-    }
-}
-
 # Warn if Notify is not available
 sub test_libnotify {
     my $initted = eval { Notify::is_initted() };
@@ -433,14 +376,7 @@ for my $k (qw/projects_home rep_modeles/) {
     }
 }
 
-sub set_projects_home {
-    my ($p) = @_;
-
-    $config->set( 'rep_projets', $p );
-    $shortcuts->set( projects_path => $p );
-}
-
-set_projects_home( $config->get('rep_projets') );
+$config->set_projects_home( $config->get('rep_projets') );
 
 #############################################################################
 
@@ -614,6 +550,15 @@ sub open_menu {
     $w{menu_popover}->show_all();
 }
 
+# learning
+
+my $learning =
+  AMC::Gui::Learning->new( config => $config, main_window => $w{main_window} );
+
+sub annule_apprentissage {
+    $learning->forget();
+}
+
 # add doc list menu
 
 my $docs_menu = Gtk3::Menu->new();
@@ -640,72 +585,6 @@ my %ltext_loc = (
     # TRANSLATORS: One of the documentation languages.
     Japanese => __ "Japanese",
 );
-###
-
-sub dialogue_apprentissage {
-    my ( $key, $type, $buttons, $force, @oo ) = @_;
-    my $resp = '';
-    $type    = 'info' if ( !$type );
-    $buttons = 'ok'   if ( !$buttons );
-    if ( $force || !$config->get("apprentissage/$key") ) {
-        my $garde;
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-            $type, $buttons, '' );
-        $dialog->set_markup(@oo);
-
-        if ( !$force ) {
-            $garde =
-              Gtk3::CheckButton->new( __ "Show this message again next time" );
-            $garde->set_active(0);
-            $garde->set_can_focus(0);
-
-            $dialog->get_content_area()->add($garde);
-        }
-
-        $dialog->show_all();
-
-        $resp = $dialog->run;
-
-        if ( !( $force || $garde->get_active() ) ) {
-            debug "Learning : $key";
-            $config->set( "apprentissage/$key", 1 );
-        }
-
-        $dialog->destroy;
-    }
-    return ($resp);
-}
-
-### COPIES
-
-my $copies_store = Gtk3::ListStore->new('Glib::String');
-
-### FILES FOR TEMPLATE
-
-my $template_files_store =
-  Gtk3::TreeStore->new( 'Glib::String', 'Glib::String' );
-
-### Unrecognized scans
-
-my $inconnu_store = Gtk3::ListStore->new(
-    'Glib::String', 'Glib::String', 'Glib::String', 'Glib::String',
-    'Glib::String'
-);
-
-$inconnu_store->set_sort_column_id( INCONNU_TIME_N, 'ascending' );
-
-### modele EMAILS
-
-my $emails_store = Gtk3::ListStore->new(
-    'Glib::String', 'Glib::String', 'Glib::String', 'Glib::String',
-    'Glib::String',
-);
-
-### modele EMAILS
-
-my $attachments_store =
-  Gtk3::ListStore->new( 'Glib::String', 'Glib::String', 'Glib::String', );
 
 ### modele DIAGNOSTIQUE SAISIE
 
@@ -818,86 +697,6 @@ for my $c (qw/updated file/) {
     $w{ "toggle_column_" . $c }->set_active(0);
 }
 
-# rajouter a partir de Encode::Supported
-my $encodages = [
-    {
-        qw/inputenc latin1 iso ISO-8859-1/,
-# TRANSLATORS: for encodings
-        txt => 'ISO-8859-1 (' . __("Western Europe") . ')'
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc latin2 iso ISO-8859-2/,
-        txt => 'ISO-8859-2 (' . __("Central Europe") . ')'
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc latin3 iso ISO-8859-3/,
-        txt => 'ISO-8859-3 (' . __("Southern Europe") . ')'
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc latin4 iso ISO-8859-4/,
-        txt => 'ISO-8859-4 (' . __("Northern Europe") . ')'
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc latin5 iso ISO-8859-5/,
-        txt => 'ISO-8859-5 (' . __("Cyrillic") . ')'
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc latin9 iso ISO-8859-9/,
-        txt => 'ISO-8859-9 (' . __("Turkish") . ')'
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc latin10 iso ISO-8859-10/,
-        txt => 'ISO-8859-10 (' . __("Northern") . ')'
-    },
-
-    # TRANSLATORS: for encodings
-    { qw/inputenc utf8x iso UTF-8/, txt => 'UTF-8 (' . __("Unicode") . ')' },
-    {
-        qw/inputenc cp1252 iso cp1252/,
-        txt   => 'Windows-1252',
-        alias => [ 'Windows-1252', 'Windows' ]
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc applemac iso MacRoman/,
-        txt => 'Macintosh ' . __ "Western Europe"
-    },
-
-    # TRANSLATORS: for encodings
-    {
-        qw/inputenc macce iso MacCentralEurRoman/,
-        txt => 'Macintosh ' . __ "Central Europe"
-    },
-];
-
-sub get_enc {
-    my ($txt) = @_;
-    for my $e (@$encodages) {
-        return ($e)
-          if ( $e->{inputenc} =~ /^$txt$/i
-            || $e->{iso} =~ /^$txt$/i );
-        if ( $e->{alias} ) {
-            for my $a ( @{ $e->{alias} } ) {
-                return ($e) if ( $a =~ /^$txt$/i );
-            }
-        }
-    }
-    return ('');
-}
-
 my $cb_model_vide_key =
 # TRANSLATORS: you can omit the [...] part, just here to explain context
   cb_model( '' => __p "(none) [No primary key found in association list]" );
@@ -906,88 +705,8 @@ my $cb_model_vide_code =
 # TRANSLATORS: you can omit the [...] part, just here to explain context
   cb_model( '' => __p "(none) [No code found in LaTeX file]" );
 
-my @printing_methods = ();
-for my $m (
-    { name => "CUPS",   description => "CUPS" },
-    { name => "CUPSlp", description => "CUPS (via lp)" },
-  )
-{
-    my $mod = "AMC::Print::" . lc( $m->{name} );
-    load($mod);
-    my $error = $mod->check_available();
-    if ( !$error ) {
-        push @printing_methods, $m->{name}, $m->{description};
-        if ( !$config->get("methode_impression") ) {
-            $config->set( "global:methode_impression", $m->{name} );
-            debug "Switching to printing method <$m->{name}>.";
-        }
-    } else {
-        if ( $config->get("methode_impression") eq $m->{name} ) {
-            $config->set( "global:methode_impression", '' );
-            debug "Printing method <$m->{name}> is not available: $error";
-        }
-    }
-}
-if ( !$config->get("methode_impression") ) {
-    $config->set( "global:methode_impression", 'commande' );
-    debug "Switching to printing method <commande>.";
-}
-
-push @printing_methods,
-
-# TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
-  'commande', __("command"),
-
-# TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
-  'file', __("to files");
-
-my $rounding_store = cb_model(
-# TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-    'inf', __ "floor",
-
-    # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-    'normal', __ "rounding",
-
-    # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-    'sup', __ "ceiling"
-);
-
-my $nftype_store = cb_model(
-    '' => __ "Image",
-    map { $_ => "AMC::Decoder::register::$_"->name() } (@decoders)
-);
-
 $prefs->store_register(
 
-  # TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
-    delimiteur_decimal => cb_model(
-        ',', __ ", (comma)",
-
- # TRANSLATORS: One option for decimal point: use a point. This is a menu entry.
-        '.', __ ". (dot)"
-    ),
-    note_arrondi        => $rounding_store,
-    defaut_note_arrondi => $rounding_store,
-    methode_impression  => cb_model(@printing_methods),
-
-    # TRANSLATORS: you can omit the [...] part, just here to explain context
-    sides => cb_model(
-        'one-sided', __p("one sided [No two-sided printing]"),
-
-        # TRANSLATORS: One of the two-side printing types. This is a menu entry.
-        'two-sided-long-edge', __ "long edge",
-
-        # TRANSLATORS: One of the two-side printing types. This is a menu entry.
-        'two-sided-short-edge', __ "short edge"
-    ),
-    encodage_latex => cb_model( map { $_->{iso} => $_->{txt} } (@$encodages) ),
-
-    # TRANSLATORS: you can omit the [...] part, just here to explain context
-    manuel_image_type => cb_model(
-        ppm => __p("(none) [No transitional image type (direct processing)]"),
-        xpm => 'XPM',
-        gif => 'GIF'
-    ),
     liste_key     => $cb_model_vide_key,
     assoc_code    => $cb_model_vide_code,
     format_export => cb_model(
@@ -996,8 +715,6 @@ $prefs->store_register(
     filter => cb_model(
         map { $_ => "AMC::Filter::register::$_"->name() } (@filter_modules)
     ),
-    defaut_name_field_type => $nftype_store,
-    name_field_type        => $nftype_store,
 
     after_export => cb_model(
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, do nothing more. This is a menu entry.
@@ -1008,23 +725,6 @@ $prefs->store_register(
 
 # TRANSLATORS: One of the actions that can be done after exporting the marks. Here, open the directory where the file is. This is a menu entry.
         dir => __ "open the directory",
-    ),
-
-    # TRANSLATORS: you can omit the [...] part, just here to explain context
-    annote_position => cb_model(
-        none => __p("(none) [No annotation position (do not write anything)]"),
-
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in one margin. This is a menu entry.
-        marge => __ "in one margin",
-
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in one of the two margins. This is a menu entry.
-        marges => __ "in the margins",
-
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: near the boxes. This is a menu entry.
-        case => __ "near boxes",
-
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the zones defined in the source file
-        zones => __ "where defined in the source",
     ),
 
     export_sort => cb_model(
@@ -1040,10 +740,6 @@ $prefs->store_register(
 # TRANSLATORS: you can omit the [...] part, just here to explain context
 # One of the possible sorting criteria for students in the exported spreadsheet with scores: the student mark. This is a menu entry.
         m => __p("mark [student mark, for sorting]"),
-    ),
-    embedded_format => cb_model(
-        png  => 'PNG',
-        jpeg => 'JPEG'
     ),
 
     regroupement_type => cb_model(
@@ -1072,66 +768,8 @@ $prefs->store_register(
 # TRANLATORS: For which students do you want to annotate papers? This is a menu entry.
         SELECTED => __ "Selected students",
     ),
-    auto_capture_mode => cb_model(
-        -1 => __ "Please select...",
 
-# TRANSLATORS: One of the ways exam was made: each student has a different answer sheet with a different copy number - no photocopy was made. This is a menu entry.
-        0 => __ "Different answer sheets",
-
-# TRANSLATORS: One of the ways exam was made: some students have the same exam subject, as some photocopies were made before distributing the subjects. This is a menu entry.
-        1 => __ "Some answer sheets were photocopied"
-    ),
-
-    email_transport => cb_model(
-# TRANSLATORS: One of the ways to send mail: use sendmail command. This is a menu entry.
-        sendmail => __ "sendmail",
-
-# TRANSLATORS: One of the ways to send mail: use a SMTP server. This is a menu entry.
-        SMTP => __ "SMTP"
-    ),
-    email_smtp_ssl => cb_model(
-        0 => __p "None [SMTP security]",
-
-        # TRANSLATORS: SMTP security mode: None (nor SSL nor STARTTLS)
-        1        => 'SSL',
-        starttls => 'STARTTLS'
-    ),
-    print_extract_with => cb_model(
-        pdftk           => 'pdftk',
-        gs              => 'gs (ghostscript)',
-        qpdf            => 'qpdf',
-        'sejda-console' => 'sejda-console',
-    ),
-
-# TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
-    print_answersheet => cb_model(
-        '' => __ "Standard",
-
-# TRANLATORS: One of the way to handle separate answer sheet when printing: print separately answer sheet and question. This is a menu entry.
-        split => __ "Separate answer sheet",
-
-# TRANLATORS: One of the way to handle separate answer sheet when printing: print the answr sheet first. This is a menu entry.
-        first => __ "Answer sheet first"
-    ),
 );
-
-my $symbole_type_cb = cb_model(
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
-    none => __ "nothing",
-
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
-    circle => __ "circle",
-
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, a cross.
-    mark => __ "mark",
-
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, the box outline.
-    box => __ "box",
-);
-
-for my $k (qw/0_0 0_1 1_0 1_1/) {
-    $prefs->store_register( "symbole_" . $k . "_type" => $symbole_type_cb );
-}
 
 # Add config GUI for export modules...
 
@@ -1148,7 +786,7 @@ for my $m (@export_modules) {
 sub maj_export {
     my $old_format = $config->get('format_export');
 
-    valide_options_for_domain( 'export', '', @_ );
+    $prefs->valide_options_for_domain( 'export', '', @_ );
 
     if ( $config->key_changed("export_sort") ) {
         annotate_source_change( $projet{_capture}, 1 );
@@ -1673,628 +1311,108 @@ sub commande_parallele {
 my $proj_store;
 
 sub projet_nouveau {
-    liste_des_projets( cree => 1 );
+    AMC::Gui::ProjectManager->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        action        => 'new',
+        new_callback  => \&create_new_project
+    );
 }
 
 sub projet_charge {
-    liste_des_projets();
+    AMC::Gui::ProjectManager->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        action        => 'open',
+        open_callback => \&open_project
+    );
 }
 
 sub projet_gestion {
-    liste_des_projets( gestion => 1 );
-}
-
-sub projects_list {
-
-    # construit la liste des projets existants
-    debug "Projects list: " . show_utf8( $w{local_rep_projets} );
-    if ( -d $w{local_rep_projets} ) {
-        my @f = dir_contents_u( $w{local_rep_projets} );
-        debug "F:"
-          . join( ',',
-            map { $_ . ":" . ( -d $w{local_rep_projets} . "/" . $_ ) } @f );
-
-        my @projs = grep { !/^\./ && -d $w{local_rep_projets} . "/" . $_ } @f;
-        debug "[" . $w{local_rep_projets} . "] P:" . join( ',', @projs );
-        return (@projs);
-    }
-}
-
-sub projects_show {
-    my ($p) = @_;
-    $p = [ projects_list() ] if ( !$p );
-
-    # first remove all entries...
-    $w{choix_projets_liste}
-      ->foreach( sub { my ($child) = @_; $child->destroy() } );
-
-    #
-    my $up = $w{local_rep_projets};
-    if ( $up ne '/' ) {
-        $up =~ s:/[^/]*/?$::;
-
-        $w{choix_projets_liste}->add(
-            create_project_widget(
-                {
-                    label => "..",
-                    name  => "..",
-                    path  => $up,
-                    icon  => "inode-directory",
-                }
-            )
-        );
-    }
-
-    # $prefix is the <LTR> UTF8 character in RTL environments.
-    my $prefix =
-      ( $w{main_window}->get_direction() eq 'rtl'
-        ? decode( "utf-8", "\xe2\x80\x8e" )
-        : '' );
-    for my $proj_name ( sort { $a cmp $b } @$p ) {
-        my $is_amc = ( -f fich_options( $proj_name, $w{local_rep_projets} ) );
-        my $name_plain = $proj_name;
-        my $label      = $proj_name = Glib::filename_display_name($proj_name);
-        $label = $prefix . $label if ( $proj_name =~ /^[0-9]*$/ );
-        debug "Directory: " . show_utf8($label)
-          . ( $is_amc ? " (AMC)" : "" );
-
-        $w{choix_projets_liste}->add(
-            create_project_widget(
-                {
-                    label => $label,
-                    name  => $proj_name,
-                    path  => $w{local_rep_projets} . "/" . $proj_name,
-                    icon =>
-                      ( $is_amc ? "auto-multiple-choice" : "inode-directory" )
-                }
-            )
-        );
-    }
-
-    $w{choix_projets_liste}->show_all;
-}
-
-sub create_project_widget {
-    my ($item) = @_;
-    my $label = Gtk3::Label->new( $item->{label} );
-    my $icon = Gtk3::Image->new_from_icon_name( $item->{icon}, 'menu' );
-    my $box  = Gtk3::Box->new( 'horizontal', 2 );
-    $box->add($icon);
-    $box->add($label);
-    $box->{_amc_project_data} = {%$item};
-    return $box;
-}
-
-sub projects_list_select {
-    my ( $flowbox, $boxchild ) = @_;
-    my $selected_path = $boxchild->get_child->{_amc_project_data}->{name};
-    debug "Selected: " . show_utf8($selected_path);
-    if ( -f fich_options( $selected_path, $w{local_rep_projets} ) ) {
-
-        # an AMC project directory has been selected
-        if ( $w{projet_bouton_ouverture}->is_visible() ) {
-            projet_charge_ok();
-        }
-    } else {
-
-        # move to other directory
-        $w{local_rep_projets} = $w{local_rep_projets} . "/" . $selected_path;
-
-        debug "Move to directory: " . show_utf8( $w{local_rep_projets} );
-
-        $w{projet_select_directory}
-          ->set_filename( $w{local_rep_projets} );
-        $w{projet_select_directory}
-          ->set_current_folder( $w{local_rep_projets} );
-    }
-}
-
-sub project_set_directory {
-    my ($filechooser) = @_;
-    my $directory = clean_gtk_filenames( $filechooser->get_filename()
-          || $filechooser->get_current_folder() );
-    debug "Changed directory: " . show_utf8($directory);
-    $w{local_rep_projets} = $directory;
-    $config->set_relatif_os( 'rep_projets', $directory );
-    projects_show();
-}
-
-sub liste_des_projets {
-    my %oo = (@_);
-
-    $w{local_rep_projets} = $config->get_absolute('rep_projets')
-      if ( !( $w{local_rep_projets} && -d $w{local_rep_projets} ) );
-
-    $w{local_rep_projets} = $config->get_absolute('projects_home')
-      if ( !( $w{local_rep_projets} && -d $w{local_rep_projets} ) );
-
-    mkdir( $w{local_rep_projets} ) if ( -d $w{local_rep_projets} );
-
-    # fenetre pour demander le nom du projet
-
-    my $gp = read_glade(
-        'choix_projet',
-        qw/label_etat label_action
-          choix_projets_liste
-          projet_select_directory
-          projet_bouton_ouverture projet_bouton_creation
-          projet_bouton_supprime projet_bouton_annule
-          projet_bouton_annule_label projet_bouton_renomme
-          projet_bouton_clone
-          projet_bouton_mv_yes projet_bouton_mv_no
-          projet_nom projet_nouveau_syntaxe projet_nouveau/
+    AMC::Gui::ProjectManager->new(
+        parent_window   => $w{main_window},
+        config          => $config,
+        action          => 'manage',
+        current_project => $projet{nom},
+        progress_widget => $w{avancement},
+        command_widget  => $w{commande}
     );
-
-    if ( $oo{cree} ) {
-        $w{projet_nouveau}->show();
-        $w{projet_bouton_creation}->show();
-        $w{projet_bouton_ouverture}->hide();
-
-        $w{label_etat}->set_text( __ "Existing projects:" );
-
-        $w{choix_projet}->set_focus( $w{projet_nom} );
-
-        # TRANSLATORS: Window title when creating a new project.
-        $w{choix_projet}->set_title( __ "New AMC project" );
-    }
-
-    if ( $oo{gestion} ) {
-        $w{label_etat}->set_text( __ "Projects management:" );
-        $w{label_action}->set_markup( __ "Change project name:" );
-        $w{projet_bouton_ouverture}->hide();
-        for (qw/supprime clone renomme/) {
-            $w{ 'projet_bouton_' . $_ }->show();
-        }
-        $w{projet_bouton_annule_label}->set_text( __ "Back" );
-
-        # TRANSLATORS: Window title when managing projects.
-        $w{choix_projet}->set_title( __ "AMC projects management" );
-    }
-
-    # mise a jour liste des projets dans la fenetre
-
-    if ( $config->get('conserve_taille') ) {
-        AMC::Gui::WindowSize::size_monitor(
-            $w{choix_projet},
-            {
-                config => $config,
-                key    => 'global:projects_list_window_size'
-            }
-        );
-    }
-
-    $w{projet_select_directory}->set_current_folder( $w{local_rep_projets} );
-    $w{choix_projet}->show;
 }
 
-sub projet_gestion_check {
-    my ($open_ok) = @_;
+sub open_project {
+    my ( $dir, $project ) = @_;
 
-    my $proj = get_selected_project();
-
-    return ('') if ( !$proj );
-
-    return ($proj) if ($open_ok);
-
-    # Impossible with current open project
-
-    if ( $projet{nom} && $proj eq $projet{nom} ) {
+    my $reponse      = 'yes';
+    my $options_file = fich_options( $project, $dir );
+    if ( !-f $options_file ) {
+        debug_and_stderr "Options file not found: " . show_utf8($options_file);
         my $dialog =
-          Gtk3::MessageDialog->new( $w{choix_projet}, 'destroy-with-parent',
-            'error', 'ok', __ "You can't change project %s since it's open.",
-            $proj );
-        $dialog->run;
-        $dialog->destroy;
-        $w{choix_projet}->set_keep_above(1);
-        $proj = '';
-    }
-
-    return ($proj);
-}
-
-sub projet_liste_clone {
-    my ($proj) = projet_gestion_check(1);
-    return if ( !$proj );
-
-    my $proj_clone =
-      new_filename( $shortcuts->absolu( $w{local_rep_projets} ) . '/' . $proj );
-    my ( undef, undef, $proj_c ) = splitpath($proj_clone);
-
-    my $dialog =
-      Gtk3::MessageDialog->new( $w{choix_projet}, 'destroy-with-parent',
-        'warning', 'ok-cancel', '' );
-    $dialog->set_markup(
-        sprintf(
-            __("This will clone project <b>%s</b> to a new project <i>%s</i>."),
-            glib_filename($proj), glib_filename($proj_c)
-        )
-    );
-    my $r = $dialog->run;
-    $dialog->destroy;
-
-    if ( $r eq 'ok' ) {
-        if (
-            !project_copy(
-                $w{local_rep_projets} . '/' . $proj, $proj_clone,
-                $w{choix_projet}
+          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
+            'warning', 'yes-no', '' );
+        $dialog->set_markup(
+            sprintf(
+                __("You selected directory <b>%s</b> as a project to open.")
+                  . " "
+                  . __(
+"However, this directory does not seem to contain a project. Do you still want to try?"
+                  ),
+                $project
             )
-          )
+        );
+        $reponse = $dialog->run;
+        $dialog->destroy;
+    }
+    if ( $reponse eq 'yes' ) {
+        quitte_projet() or return ();
+
+        # If the project to open lies on a removable media, suggest
+        # to copy it first to the user standard projects directory:
+
+        if (   $dir =~ /^\/media\//
+            && $config->get_absolute('projects_home') !~ /^\/media\// )
         {
-            debug_and_stderr("ERROR (clone project): $!");
-        }
-        projects_show();
-    }
-}
-
-my $nom_original = '';
-
-sub projet_liste_renomme {
-    my ($proj) = projet_gestion_check();
-    return if ( !$proj );
-
-    # ouverture zone :
-    $w{projet_nouveau}->show();
-    $w{projet_nom}->set_text( glib_filename($proj) );
-
-    $nom_original = $proj;
-
-    # boutons...
-    for (qw/annule renomme clone supprime/) {
-        $w{ 'projet_bouton_' . $_ }->hide();
-    }
-    for (qw/mv_no mv_yes/) {
-        $w{ 'projet_bouton_' . $_ }->show();
-    }
-}
-
-sub projet_renomme_fin {
-
-    # fermeture zone :
-    $w{projet_nouveau}->hide();
-
-    # boutons...
-    for (qw/annule renomme clone supprime/) {
-        $w{ 'projet_bouton_' . $_ }->show();
-    }
-    for (qw/mv_no mv_yes/) {
-        $w{ 'projet_bouton_' . $_ }->hide();
-    }
-}
-
-sub projet_mv_yes {
-    projet_renomme_fin();
-
-    my $nom_nouveau = $w{projet_nom}->get_text();
-
-    return if ( $nom_nouveau eq $nom_original || !$nom_nouveau );
-
-    if ( $w{local_rep_projets} ) {
-        my $dir_original = $w{local_rep_projets} . "/" . $nom_original;
-        if ( -d $dir_original ) {
-            my $dir_nouveau = $w{local_rep_projets} . "/" . $nom_nouveau;
-            if ( -d $dir_nouveau ) {
-                $w{choix_projet}->set_keep_above(0);
-                my $dialog = Gtk3::MessageDialog->new( $w{main_window},
-                    'destroy-with-parent', 'error', 'ok', '' );
-                $dialog->set_markup(
-
-                    sprintf(
-# TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
-                        __(
-"Directory <i>%s</i> already exists, so you can't choose this name."
-                        ),
-                        glib_filename($dir_nouveau)
-                    )
-                );
-                $dialog->run;
-                $dialog->destroy;
-                $w{choix_projet}->set_keep_above(1);
-
-                return;
-            } else {
-
-                # OK
-
-                if ( !move( $dir_original, $dir_nouveau ) ) {
-                    debug_and_stderr("ERROR (move project): $!");
-                }
-
-                projects_show();
-            }
-        } else {
-            debug_and_stderr "No original directory";
-        }
-    } else {
-        debug "No projects directory";
-    }
-}
-
-sub projet_mv_no {
-    projet_renomme_fin();
-}
-
-my @find_results = ();
-
-sub add_to_results {
-    push @find_results, $File::Find::name;
-}
-
-sub project_copy {
-    my ( $src, $dest, $parent_window ) = @_;
-    $parent_window = $w{main_window} if ( !$parent_window );
-    my $err = '';
-    if ( !$err && -e $dest ) {
-        $err = __("Destination project directory already exists");
-    }
-    if ( !$err ) {
-        @find_results = ();
-        find( { wanted => \&add_to_results, no_chdir => 1 }, $src );
-        my $total = 1 + $#find_results;
-        if ( $total > 0 ) {
-            my $done          = 0;
-            my $i             = 0;
-            my $last_fraction = 0;
-            my $old_text      = $w{avancement}->get_text();
-            $w{avancement}->set_text( __ "Copying project..." );
-            $w{avancement}->set_fraction(0);
-            $w{commande}->show();
-            for my $s (@find_results) {
-                my $d = $s;
-                $d =~ s:^$src:$dest:;
-                if ( -d $s ) {
-                    $done++ if ( mkdir($d) );
-                } else {
-                    $done++ if ( copy( $s, $d ) );
-                }
-                $i++;
-                if ( $i / $total - $last_fraction > 1 / 40 ) {
-                    $last_fraction = $i / $total;
-                    $w{avancement}->set_fraction($last_fraction);
-                    Gtk3::main_iteration while (Gtk3::events_pending);
-                }
-            }
-            $w{avancement}->set_text($old_text);
-            $w{commande}->hide();
-
-            my $dialog = Gtk3::MessageDialog->new(
-                $parent_window,
-                'destroy-with-parent',
-                'info', 'ok',
-                __("Your project has been copied")
-                  . (
-                    $done != $total
-                    ? " " . sprintf( __("(%d files out of %d)"), $done, $total )
-                    : ""
-                  )
-                  . "."
-            );
-            $dialog->run;
-            $dialog->destroy;
-        } else {
-            $err = __("Source project directory not found");
-        }
-    }
-    if ($err) {
-        my $dialog =
-          Gtk3::MessageDialog->new( $parent_window, 'destroy-with-parent',
-            'error', 'ok', __("An error occuried during project copy: %s."),
-            $err );
-        $dialog->run;
-        $dialog->destroy;
-        return (0);
-    }
-    return (1);
-}
-
-sub projet_liste_supprime {
-    my ($proj) = projet_gestion_check();
-    return if ( !$proj );
-
-    # on demande confirmation...
-    $w{choix_projet}->set_keep_above(0);
-    my $dialog =
-      Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-        'warning', 'ok-cancel', '' );
-    $dialog->set_markup(
-        sprintf(
-            __("You asked to remove project <b>%s</b>.") . " "
-              . __(
-"This will permanently erase all the files of this project, including the source file as well as all the files you put in the directory of this project, as the scans for example."
-              )
-              . " "
-              . __("Is this really what you want?"),
-            glib_filename($proj)
-        )
-    );
-    $dialog->get_widget_for_response('ok')->get_style_context()
-      ->add_class("destructive-action");
-    my $reponse = $dialog->run;
-    $dialog->destroy;
-    $w{choix_projet}->set_keep_above(1);
-
-    if ( $reponse ne 'ok' ) {
-        return;
-    }
-
-    debug "Removing project $proj !";
-
-    # suppression effective des fichiers...
-
-    if ( $w{local_rep_projets} ) {
-        my $dir = $w{local_rep_projets} . "/" . $proj;
-        if ( -d $dir ) {
-            remove_tree( $dir, { verbose => 0, safe => 1, keep_root => 0 } );
-        } else {
-            debug "No directory $dir";
-        }
-    } else {
-        debug "No projects directory";
-    }
-
-    projects_show();
-}
-
-sub get_selected_project {
-    my $sel_items = $w{choix_projets_liste}->get_selected_children();
-    return if ( !@$sel_items );
-    my $proj = $sel_items->[0]->get_child()->{_amc_project_data}->{name};
-    return ($proj);
-}
-
-sub projet_charge_ok {
-
-    # ouverture projet deja existant
-
-    my $proj = get_selected_project();
-    return if ( !$proj );
-
-    $w{choix_projet}->destroy();
-    Gtk3::main_iteration while (Gtk3::events_pending);
-
-    if ($proj) {
-        my $reponse      = 'yes';
-        my $options_file = fich_options( $proj, $w{local_rep_projets} );
-        if ( !-f $options_file ) {
-            debug_and_stderr "Options file not found: "
-              . show_utf8($options_file);
-            my $dialog =
-              Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-                'warning', 'yes-no', '' );
+            my $dialog = Gtk3::MessageDialog->new( $w{main_window},
+                'destroy-with-parent', 'warning', 'yes-no', '' );
             $dialog->set_markup(
                 sprintf(
                     __(
-                        "You selected directory <b>%s</b> as a project to open."
+"You selected project <b>%s</b> from directory <i>%s</i>."
                       )
                       . " "
                       . __(
-"However, this directory does not seem to contain a project. Do you still want to try?"
+"Do you want to copy this project to your projects directory before opening it?"
                       ),
-                    $proj
+                    $project, $dir
                 )
             );
-            $reponse = $dialog->run;
+            my $r = $dialog->run;
             $dialog->destroy;
-        }
-        if ( $reponse eq 'yes' ) {
-            quitte_projet() or return ();
-
-            # If the project to open lies on a removable media, suggest
-            # to copy it first to the user standard projects directory:
-
-            if (   $w{local_rep_projets} =~ /^\/media\//
-                && $config->get_absolute('projects_home') !~ /^\/media\// )
-            {
-                my $dialog = Gtk3::MessageDialog->new( $w{main_window},
-                    'destroy-with-parent', 'warning', 'yes-no', '' );
-                $dialog->set_markup(
-                    sprintf(
-                        __(
-"You selected project <b>%s</b> from directory <i>%s</i>."
-                          )
-                          . " "
-                          . __(
-"Do you want to copy this project to your projects directory before opening it?"
-                          ),
-                        $proj,
-                        $w{local_rep_projets}
-                    )
-                );
-                my $r = $dialog->run;
-                $dialog->destroy;
-                if ( $r eq 'yes' ) {
-                    my $proj_dest = new_filename(
-                        $config->get_absolute('projects_home') . '/' . $proj );
-                    if (
-                        project_copy(
-                            $w{local_rep_projets} . '/' . $proj, $proj_dest
-                        )
-                      )
-                    {
-                        ( undef, undef, $proj_dest ) = splitpath($proj_dest);
-                        $w{local_rep_projets} =
-                          $config->get_absolute('projects_home');
-                        $proj = $proj_dest;
-                    }
+            if ( $r eq 'yes' ) {
+                my $proj_dest = new_filename(
+                    $config->get_absolute('projects_home') . '/' . $project );
+                if ( project_copy( $dir . '/' . $project, $proj_dest ) ) {
+                    ( undef, undef, $proj_dest ) = splitpath($proj_dest);
+                    $dir     = $config->get_absolute('projects_home');
+                    $project = $proj_dest;
                 }
             }
-
-            # OK, now, open the project!
-
-            set_projects_home( $w{local_rep_projets} );
-            projet_ouvre($proj);
         }
+
+        # OK, now, open the project!
+
+        $config->set_projects_home($dir);
+        projet_ouvre($project);
     }
 }
 
-sub restricted_check {
-    my ( $text, $warning, $chars ) = @_;
-    my $nom = $text->get_text();
-    if ( !$config->get('nonascii_projectnames') ) {
-        if ( $nom =~ s/[^$chars]//g ) {
-            $text->set_text($nom);
-            $warning->show();
+sub create_new_project {
+    my ( $dir, $project ) = @_;
 
-            my $col = Gtk3::Gdk::RGBA::parse('#FFC0C0');
-            for (qw/normal active/) {
-                $text->override_background_color( $_, $col );
-            }
-            Glib::Timeout->add(
-                500,
-                sub {
-                    for (qw/normal active/) {
-                        $text->override_background_color( $_, undef );
-                    }
-                    return 0;
-                }
-            );
-        }
-    }
-}
+    quitte_projet() or return ();
 
-sub projet_nom_verif {
-    restricted_check( $w{projet_nom}, $w{projet_nouveau_syntaxe},
-        "a-zA-Z0-9._+:-" );
-}
-
-sub projet_charge_non {
-    $w{choix_projet}->destroy();
-}
-
-sub projet_charge_nouveau {
-
-    # creation nouveau projet
-
-    my $proj = $w{projet_nom}->get_text();
-    $w{choix_projet}->destroy();
-
-    # existe deja ?
-
-    if ( -e $w{local_rep_projets} . "/$proj" ) {
-
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-            'error', 'ok', '' );
-        $dialog->set_markup(
-            sprintf(
-                __(
-"The name <b>%s</b> is already used in the projects directory."
-                  )
-                  . " "
-                  . __ "You must choose another name to create a project.",
-                $proj
-            )
-        );
-        $dialog->run;
-        $dialog->destroy;
-
-    } else {
-        quitte_projet() or return ();
-
-        set_projects_home( $w{local_rep_projets} );
-        if ( projet_ouvre( $proj, 1 ) ) {
-            projet_sauve();
-        }
-
+    $config->set_projects_home($dir);
+    if ( projet_ouvre( $project, 1 ) ) {
+        projet_sauve();
     }
 }
 
@@ -2506,17 +1624,7 @@ sub end_of_document_update {
 
         # success message
 
-        dialogue_apprentissage(
-            'MAJ_DOCS_OK', '', '', 0,
-            __("Working documents successfully generated.") . " "
-
-              # TRANSLATORS: Here, "them" refers to the working documents.
-              . __("You can take a look at them double-clicking on the list.")
-              . " "
-
-              # TRANSLATORS: Here, "they" refers to the working documents.
-              . __("If they are correct, proceed to layouts detection...")
-        );
+        $learning->lesson('MAJ_DOCS_OK');
 
         # Try to guess the best place to write question
         # scores when annotating. This option can be
@@ -2722,45 +1830,14 @@ sub doc_maj {
 }
 
 sub filter_details {
-    my $gd = read_glade( 'filter_details', qw/filter_text/ );
-    debug "Filter details: conf->details GUI";
-    $prefs->transmet_pref(
-        $gd,
-        prefix => 'filter_details',
-        root   => "project:"
-    );
-    my $r = $w{filter_details}->run();
-    if ( $r == 10 ) {
-        $config->set_local_keys('filter');
-        debug "Filter details: new value->local";
-        $prefs->reprend_pref(
-            prefix    => 'filter_details',
-            container => 'local'
-        );
-        $w{filter_details}->destroy;
-        debug "Filter details: local->main GUI";
-        $prefs->transmet_pref(
-            $gui,
-            prefix    => 'pref_prep',
-            keys      => ["local:filter"],
-            container => 'project'
-        );
-    } else {
-        $w{filter_details}->destroy;
-    }
-}
 
-sub filter_details_update {
-    $config->set_local_keys('filter');
-    $prefs->reprend_pref( prefix => 'filter_details', container => 'local' );
-    my $b = $w{filter_text}->get_buffer;
-    if ( $config->get('local:filter') ) {
-        $b->set_text(
-            ( "AMC::Filter::register::" . $config->get('local:filter') )
-            ->description );
-    } else {
-        $b->set_text('');
-    }
+    AMC::Gui::FilterDetails->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        main_gui      => $gui,
+        main_prefs    => $prefs,
+    );
+
 }
 
 my $cups;
@@ -2770,40 +1847,6 @@ sub nonnul {
     my $s = shift;
     $s =~ s/\000//g;
     return ($s);
-}
-
-sub autre_imprimante {
-    my %alias  = ();
-    my %trouve = ();
-
-    my ( $ok, $imp_iter ) = $w{imprimante}->get_active_iter;
-    if ($ok) {
-        my $i = $w{imprimante}->get_model->get( $imp_iter, COMBO_ID );
-        debug "Choix imprimante $i";
-
-        $config->set( "global:options_impression/printer", {} )
-          if ( !$config->get("options_impression/printer") );
-        my $printer_settings = $config->get("options_impression/printer");
-
-        $printer_settings->{$i} = {}
-          if ( !$printer_settings->{$i} );
-
-        $w{print_object}->printer_options_table( $w{printing_options_table},
-            \%w, $prefs, $i, $printer_settings->{$i} );
-
-        $prefs->transmet_pref(
-            $g_imprime,
-            prefix => 'imp',
-            root   => 'options_impression'
-        );
-        $prefs->transmet_pref(
-            $g_imprime,
-            prefix => 'printer',
-            root   => "options_impression/printer/$i"
-        );
-    } else {
-        debug "No printer choice!";
-    }
 }
 
 sub project_printing_method {
@@ -2835,419 +1878,35 @@ sub project_extract_with {
 
 sub sujet_impressions {
 
-    if ( !-f $config->get_absolute('doc_question') ) {
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-            'error', 'ok', '' );
-        $dialog->set_markup(
-
-# TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
-            __
-"You don't have any question to print: please check your source file and update working documents first."
-        );
-        $dialog->run;
-        $dialog->destroy;
-
-        return ();
-    }
-
-    $projet{_layout}->begin_read_transaction('PGCN');
-    my $c        = $projet{_layout}->pages_count;
-    my $preassoc =
-      $projet{_layout}->pre_association() && $config->get('listeetudiants');
-    $projet{_layout}->end_transaction('PGCN');
-    if ( $c == 0 ) {
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-            'error', 'ok', '' );
-        $dialog->set_markup(
-
-# TRANSLATORS: Message when AMC does not know about the subject pages that has been generated. Usualy this means that the layout computation step has not been made.
-            __("Question's pages are not detected.") . " "
-              . __ "Perhaps you forgot to compute layouts?"
-        );
-        $dialog->run;
-        $dialog->destroy;
-
-        return ();
-    }
-
-    my $method = project_printing_method();
-
-    if ( $method =~ /^CUPS/ ) {
-
-        my $print_module = "AMC::Print::" . lc($method);
-        load($print_module);
-
-        # checks for availibility
-
-        my $error = $print_module->check_available();
-        if ($error) {
-            my $dialog = Gtk3::MessageDialog->new(
-                $w{main_window},
-                'destroy-with-parent',
-                'error', 'ok',
-                sprintf(
-                    __(
-"You chose the printing method '%s' but it is not available (%s). Please install the missing dependencies or switch to another printing method."
-                    ),
-                    $method, $error
-                )
-            );
-            $dialog->run;
-            $dialog->destroy;
-
-            return ();
-        }
-
-        $w{print_object} = $print_module->new(
-            useful_options => $config->get("printer_useful_options") );
-
-        # check for a installed printer
-
-        debug "Checking for at least one CUPS printer...";
-
-        my $default_printer = $w{print_object}->default_printer();
-
-        if ( !$default_printer ) {
-            my $dialog = Gtk3::MessageDialog->new(
-                $w{main_window},
-                'destroy-with-parent',
-                'error', 'ok',
-                __(
-"You chose a printing method using CUPS but there are no configured printer in CUPS. Please configure some printer or switch to another printing method."
-                )
-            );
-            $dialog->run;
-            $dialog->destroy;
-
-            return ();
-        }
-    }
-
-    debug "Printing dialog...";
-
-    $g_imprime = read_glade(
-        'choix_pages_impression',
-        qw/arbre_choix_copies bloc_imprimante answersheet_box
-          imprimante printing_options_table bloc_fichier
-          impfp_cb_pdf_password_use impfp_x_pdf_password
-          options_pdf_passwords/
+    my $g = AMC::Gui::Printing->new(
+        config         => $config,
+        parent_window  => $w{main_window},
+        layout         => $projet{_layout},
+        print_callback => \&print_exams,
     );
 
-    $prefs->transmet_pref(
-        $g_imprime,
-        prefix => 'impall',
-        root   => "options_impression"
-    );
-
-    debug "Printing method: " . $method;
-
-    if ( $method =~ /^CUPS/ ) {
-        $w{bloc_imprimante}->show();
-
-        # les imprimantes :
-
-        my @printers = $w{print_object}->printers_list();
-        debug "Printers : " . join( ' ', map { $_->{name} } @printers );
-        my $p_model =
-          cb_model( map { $_->{name} => $w{print_object}->printer_text($_) }
-              @printers );
-        $w{imprimante}->set_model($p_model);
-        if ( !$config->get('imprimante') ) {
-            my $defaut = $w{print_object}->default_printer;
-            if ($defaut) {
-                $config->set( 'imprimante', $defaut );
-            } else {
-                $config->set( 'imprimante', $printers[0]->{name} );
-            }
-        }
-        my $i =
-          model_id_to_iter( $p_model, COMBO_ID, $config->get('imprimante') );
-        if ($i) {
-            $w{imprimante}->set_active_iter($i);
-
-            # (this will call autre_imprimante and transmet_pref with
-            # the right options)
-        } else {
-
-            # updates the values in the GUI from the general options
-            $prefs->transmet_pref(
-                $g_imprime,
-                prefix => 'imp',
-                root   => 'options_impression'
-            );
-        }
-    }
-
-    if ( $method eq 'file' ) {
-        $w{bloc_imprimante}->hide();
-        $w{bloc_fichier}->show();
-
-        $prefs->transmet_pref(
-            $g_imprime,
-            prefix => 'impf',
-            root   => 'options_impression'
+    if ( $g->{preassoc} ) {
+        valide_liste(
+            nolabel => 1,
+            gui     => $g->{main},
+            prefix  => 'impfpu',
+            key     => 'pdf_password_key',
         );
-        $prefs->transmet_pref(
-            $g_imprime,
-            prefix => 'impfp',
-            root   => "project:",
-        );
-        if ($preassoc) {
-            valide_liste(
-                nolabel => 1,
-                gui     => $g_imprime,
-                prefix  => 'impfpu',
-                key     => 'pdf_password_key',
-            );
-            $prefs->transmet_pref(
-                $g_imprime,
-                prefix => 'impfpu',
-                keys   => ['pdf_password_key'],
-            );
-            $w{options_pdf_passwords}->show();
-        } else {
-            $w{options_pdf_passwords}->hide();
-        }
     }
 
-    $copies_store->clear();
-    $projet{_layout}->begin_read_transaction('PRNT');
-    my $row = 0;
-    for my $c ( $projet{_layout}->students() ) {
-        $copies_store->insert_with_values( $row++, COPIE_N, $c );
-    }
-    $projet{_layout}->end_transaction('PRNT');
-
-    $w{arbre_choix_copies}->set_model($copies_store);
-
-    my $renderer = Gtk3::CellRendererText->new;
-
-    my $column =
-# TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
-      Gtk3::TreeViewColumn->new_with_attributes( __ "papers", $renderer,
-        text => COPIE_N );
-    $w{arbre_choix_copies}->append_column($column);
-
-    $w{arbre_choix_copies}->get_selection->set_mode("multiple");
-
-    $w{choix_pages_impression}->show();
-  }
-
-sub random_password {
-    my $p     = '';
-    my @chars = split( //, "0123456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ_-+." );
-    for ( 0 .. 12 ) {
-        $p .= $chars[ rand( 1 + $#chars ) ];
-    }
-    return ($p);
 }
 
-sub pdf_password_toggle {
-    $prefs->reprend_pref( prefix => 'impfp' );
-    my $u = $config->get('pdf_password_use');
-    if ($u) {
-        if ( !$config->get('pdf_password') ) {
-            $config->set( 'pdf_password', random_password() );
-            $prefs->transmet_pref(
-                $g_imprime,
-                prefix => 'impfp',
-                keys   => ['pdf_password'],
-            );
-        }
-    }
-    $w{impfp_x_pdf_password}->set_sensitive($u);
-}
+sub print_exams {
+    my ($options) = @_;
 
-sub sujet_impressions_cancel {
-
-    if ( get_debug() ) {
-        $prefs->reprend_pref( prefix => 'imp' );
-        $Data::Dumper::Indent = 0;
-        debug( Dumper( $config->get('options_impression') ) );
-    }
-
-    $w{choix_pages_impression}->destroy;
-}
-
-sub options_strings {
-    my ($o) = @_;
-    return (
-        map { $_ . "=" . $o->{$_} }
-          grep {
-                 !/^_/
-              && !/^(repertoire|print_answersheet)$/
-              && exists( $o->{$_} )
-              && $o->{$_}
-              && !ref( $o->{$_} )
-          } ( keys %$o )
-    );
-}
-
-sub options_string {
-    my (@oos) = @_;
-    return ( join( ',', map { options_strings($_) } (@oos) ) );
-}
-
-sub sujet_impressions_ok {
-    my $os = 'none';
-    my @e  = ();
-
-    my @selected = $w{arbre_choix_copies}->get_selection()->get_selected_rows();
-    for my $i ( @{ $selected[0] } ) {
-        push @e, $copies_store->get( $copies_store->get_iter($i), COPIE_N )
-          if ($i);
-    }
-
-    $prefs->reprend_pref( prefix => 'impall' );
-
-    my $method = project_printing_method();
-
-    if ( $method =~ /^CUPS/ ) {
-        my ( $ok, $imp_iter ) = $w{imprimante}->get_active_iter;
-        my $i;
-        if ($ok) {
-            $i = $w{imprimante}->get_model->get( $imp_iter, COMBO_ID );
-        } else {
-            $i = 'default';
-        }
-        $config->set( 'imprimante', $i );
-
-        $prefs->reprend_pref( prefix => 'imp' );
-        $prefs->reprend_pref( prefix => 'printer' );
-
-        $os = options_string( $config->get("options_impression"),
-            $config->get("options_impression/printer")->{$i} );
-
-        debug("Printing options : $os");
-    }
-
-    if ( $method eq 'file' ) {
-        $prefs->reprend_pref( prefix => 'impf' );
-        $prefs->reprend_pref( prefix => 'impfp' );
-        if($w{options_pdf_passwords}->is_visible) {
-            $prefs->reprend_pref( prefix => 'impfpu' );
-        }
-        if ( !$config->get('options_impression/repertoire') ) {
-            debug "Print to file : no destination...";
-            $config->set( 'options_impression/repertoire', '' );
-        } else {
-            my $path = $config->get_absolute('options_impression/repertoire');
-            mkdir($path) if ( !-e $path );
-        }
-    }
-
-    $w{choix_pages_impression}->destroy;
-
-    debug "Printing: " . join( ",", @e );
-
-    if ( !@e ) {
-
-        # No page selected:
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-            'info', 'ok', __("You did not select any exam to print...") );
-        $dialog->run;
-        $dialog->destroy;
-        return ();
-    }
-
-    if ( 1 + $#e <= 10 ) {
-
-        # Less than 10 pages selected: is it a mistake?
-
-        $projet{_layout}->begin_read_transaction('pPFP');
-        my $max_p    = $projet{_layout}->max_enter();
-        my $students = $projet{_layout}->students_count();
-        my $preassoc = $projet{_layout}->pre_association();
-        $projet{_layout}->end_transaction('pPFP');
-
-        if ( $students <= 10 && !$preassoc ) {
-            if ( $config->get('auto_capture_mode') != 1 ) {
-
-                # This looks strange: a few sheets printed, a few sheets
-                # generated, and photocopy mode not selected yet. Ask the
-                # user if he wants to select this mode now.
-                my $dialog = Gtk3::MessageDialog->new( $w{main_window},
-                    'destroy-with-parent', 'question', 'yes-no', '' );
-                $dialog->set_markup(
-                        __("You selected only a few sheets to print.") . "\n"
-                      . "<b>"
-                      . __(
-"Are you going to photocopy some printed subjects before giving them to the students?"
-                      )
-                      . "</b>\n"
-                      . __(
-"If so, the corresponding option will be set for this project."
-                      )
-                      . " "
-                      . __(
-"However, you will be able to change this when giving your first scans to AMC."
-                      )
-                );
-                my $reponse = $dialog->run;
-                $dialog->destroy;
-                my $mult = ( $reponse eq 'yes' ? 1 : 0 );
-                $config->set( 'auto_capture_mode', $mult );
-            }
-        }
-    }
-
-    if ( $config->get('options_impression/print_answersheet') eq 'first' ) {
-
-        # This options needs pdftk!
-        if ( $config->get('print_extract_with') !~ /(pdftk|qpdf|sejda-console)/ ) {
-            my $found = 0;
-          EXTRACT: for my $cmd (qw/qpdf pdftk sejda-console/) {
-                if ( commande_accessible($cmd) ) {
-                    my $dialog = Gtk3::MessageDialog->new( $w{main_window},
-                        'destroy-with-parent', 'info', 'ok', '' );
-                    $dialog->set_markup(
-
-                        sprintf(
-# TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
-                            __(
-"You selected the '%s' option, that uses '%s', so the %s has been set to '%s' for you."
-                            ),
-                            __("Answer sheet first"),
-                            $cmd,
-                            __("Extracting method"),
-                            $cmd
-                        )
-                    );
-                    $dialog->run;
-                    $dialog->destroy;
-
-                    $config->set( "print_extract_with", $cmd );
-                    $found = 1;
-                    last EXTRACT;
-                }
-            }
-            if ( !$found ) {
-                my $dialog = Gtk3::MessageDialog->new( $w{main_window},
-                    'destroy-with-parent', 'error', 'ok', '' );
-                $dialog->set_markup(
-                    sprintf(
-                        __(
-"You selected the '%s' option, but this option needs 'qpdf' or 'pdftk' to be installed on your system. Please install one of these and try again."
-                        ),
-                        __ "Answer sheet first"
-                    )
-                );
-                $dialog->run;
-                $dialog->destroy;
-                return ();
-            }
-        }
-    }
+    return () if ( !@{$options->{exams}} );
 
     my $fh = File::Temp->new(
         TEMPLATE => "nums-XXXXXX",
         TMPDIR   => 1,
         UNLINK   => 1
     );
-    print $fh join( "\n", @e ) . "\n";
+    print $fh join( "\n", @{$options->{exams}} ) . "\n";
     $fh->seek( 0, SEEK_END );
 
     my @o_answer = ( '--no-split', '--no-answer-first' );
@@ -3276,11 +1935,11 @@ sub sujet_impressions_ok {
             debug_file(),
             pack_args(
                 "--methode",
-                $method,
+                $options->{printing_method},
                 "--imprimante",
                 $config->get('imprimante'),
                 "--options",
-                $os,
+                $options->{options_string},
                 "--output",
                 "$directory/$prefix-%e.pdf",
                 @o_answer,
@@ -3318,9 +1977,9 @@ sub sujet_impressions_ok {
         'progres.id' => 'impression',
         o            => {
             fh      => $fh,
-            etu     => \@e,
+            etu     => $options->{exams},
             printer => $config->get('imprimante'),
-            method  => $method
+            method  => $options->{method},
         },
         fin => sub {
             my $c = shift;
@@ -3446,19 +2105,8 @@ sub calcule_mep {
                     if ($extract_only) {
                         scoring_strategy_update(0);
                     }
-                    dialogue_apprentissage(
-                        'MAJ_MEP_OK',
-                        '', '', 0,
-                        __("Layouts are detected.") . " "
-                          . sprintf(
-                            __
-"You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red boxes are well positioned.",
-                            __ "Check layouts"
-                          )
-                          . " "
-                          . __
-                          "Then you can proceed to printing and to examination."
-                    );
+
+                    $learning->lesson('MAJ_MEP_OK');
                 }
             }
         }
@@ -3479,30 +2127,12 @@ sub saisie_manuelle {
     if ( $c > 0 ) {
 
         if ( !$regarder ) {
-
             # if auto_capture_mode is not set, ask the user...
-            my $n = check_auto_capture_mode();
-            if ( $config->get('auto_capture_mode') < 0 ) {
-                my $gsa = read_glade(
-                    'choose-mode',
-                    qw/saisie_auto_c_auto_capture_mode
-                      button_capture_go/
-                );
-                $w{saisie_auto_cb_allocate_ids} = '';
-                $prefs->transmet_pref(
-                    $gsa,
-                    prefix => 'saisie_auto',
-                    root   => 'project:'
-                );
-                my $ret = $w{'choose-mode'}->run();
-                if ( $ret == 1 ) {
-                    $prefs->reprend_pref( prefix => 'saisie_auto' );
-                    $w{'choose-mode'}->destroy;
-                } else {
-                    $w{'choose-mode'}->destroy;
-                    return ();
-                }
-            }
+            my $ok = AMC::Gui::AutoCapture->new(
+                parent_window => $w{main_window},
+                config        => $config,
+            )->choose_mode();
+            return () if ( !$ok );
         }
 
         # go for capture
@@ -3558,110 +2188,15 @@ sub saisie_manuelle {
     }
 }
 
-sub check_auto_capture_mode {
-    $projet{_capture}->begin_read_transaction('ckac');
-    my $n = $projet{_capture}->n_copies;
-    if ( $n > 0 && $config->get('auto_capture_mode') < 0 ) {
-
-        # the auto_capture_mode (sheets photocopied or not) is not set,
-        # but some capture has already been done. This looks weird, but
-        # it can be the case if captures were made with an old AMC
-        # version, or if project parameters have not been saved...
-        # So we try to detect the correct value from the capture data.
-        $config->set( 'auto_capture_mode',
-            ( $projet{_capture}->n_photocopy() > 0 ? 1 : 0 ) );
-    }
-    $projet{_capture}->end_transaction('ckac');
-    return ($n);
-}
-
 sub saisie_automatique {
 
-    # mode can't be changed if data capture has been made already
-    my $n = check_auto_capture_mode;
-    $projet{_capture}->begin_read_transaction('adcM');
-    my $mcopy = $projet{_capture}->max_copy_number() + 1;
-    $w{saisie_auto_allocate_start} = $mcopy;
-    $projet{_capture}->end_transaction('adcM');
+    AMC::Gui::AutoCapture->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        capture       => $projet{_capture},
+        callback      => \&auto_data_capture,
+    )->dialog();
 
-    my $gsa = read_glade(
-        'saisie_auto',
-        qw/copie_scans
-          saisie_auto_chooser
-          saisie_auto_c_auto_capture_mode
-          saisie_auto_cb_allocate_ids
-          button_capture_go/
-    );
-    $w{copie_scans}->set_active(1);
-    $prefs->transmet_pref(
-        $gsa,
-        prefix => 'saisie_auto',
-        root   => 'project:'
-    );
-    $w{saisie_auto_cb_allocate_ids}->set_label(
-        sprintf(
-            __ "Pre-allocate sheet ids from the page numbers, starting at %d",
-            $mcopy
-        )
-    );
-
-    $w{saisie_auto_c_auto_capture_mode}->set_sensitive( $n == 0 );
-
-    $w{saisie_auto}->show();
-}
-
-sub saisie_auto_mode_update {
-    $config->set_local_keys('auto_capture_mode');
-
-    # the mode value (auto_capture_mode) has been updated.
-    valide_options_for_domain( 'saisie_auto', 'local', @_ );
-    my $acm = $config->get('local:auto_capture_mode');
-    $acm = -1 if ( !defined($acm) );
-    $w{button_capture_go}->set_sensitive( $acm >= 0 );
-    if ( $w{saisie_auto_cb_allocate_ids} ) {
-        if ( $acm == 1 ) {
-            $w{saisie_auto_cb_allocate_ids}->show();
-        } else {
-            $w{saisie_auto_cb_allocate_ids}->hide();
-        }
-    }
-}
-
-sub saisie_auto_annule {
-    $w{saisie_auto}->destroy();
-}
-
-sub saisie_auto_info {
-    my $dialog =
-      Gtk3::MessageDialog->new( $w{saisie_auto}, 'destroy-with-parent', 'info',
-        'ok', '' );
-    $dialog->set_markup(
-        __("Automatic data capture can be done in two different modes:") . "\n"
-          . "<b>"
-          .
-
-# TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
-          __("Different answer sheets")
-          . ".</b> "
-          . __(
-"In the most robust one, you give a different exam (with a different exam number) to every student. You must not photocopy subjects before distributing them."
-          )
-          . "\n" . "<b>"
-          .
-
-# TRANSLATORS: This is a title for the AMC mode where some answer sheets have been photocopied before being distributed to the students.
-          __("Some answer sheets were photocopied")
-          . ".</b> "
-          . __(
-"In the second one (which can be used only if answer sheets to be scanned have one page per candidate) you can photocopy answer sheets and give the same subject to different students."
-          )
-          . "\n"
-          . __(
-"After the first automatic capture, you can't switch to the other mode."
-          )
-    );
-    $dialog->run;
-    $dialog->destroy;
 }
 
 sub analyse_call {
@@ -3848,10 +2383,16 @@ sub analyse_call_go {
         signal       => 2,
         texte        => $oo{text},
         'progres.id' => $oo{progres},
-        o            => { fh => $oo{fh}, overwritten => $oo{overwritten} },
+        o => {
+            fh          => $oo{fh},
+            overwritten => $oo{overwritten},
+            diagnostic  => $oo{diagnostic}
+          },
         fin          => sub {
             my ( $c, %data ) = @_;
-            report_analyse_errors($c);
+            if ( !$c->{o}->{diagnostic} ) {
+                report_analyse_errors($c);
+            }
             debug "Overall [SCAN] overwritten pages @" . $c . ": "
               . ( $c->variable('overwritten') || "(none)" );
             ${ $c->{o}->{overwritten} } += $c->variable('overwritten')
@@ -3931,23 +2472,12 @@ sub decode_name_fields {
     );
 }
 
-sub glib_filename {
-    my ($n) = @_;
-    return ( Glib::filename_display_name($n) );
-}
-
 sub glib_project_name {
     return ( glib_filename( $projet{nom} ) );
 }
 
-sub saisie_auto_ok {
-    my @f = sort { $a cmp $b }
-          ( clean_gtk_filenames( $w{saisie_auto_chooser}->get_filenames() ) );
-    my $copie = $w{copie_scans}->get_active();
-
-    $prefs->reprend_pref( prefix => 'saisie_auto' );
-    $w{saisie_auto}->destroy();
-    Gtk3::main_iteration while (Gtk3::events_pending);
+sub auto_data_capture {
+    my ($options) = @_;
 
     clear_old( 'diagnostic', $shortcuts->absolu('%PROJET/cr/diagnostic') );
 
@@ -3956,13 +2486,12 @@ sub saisie_auto_ok {
     my $overwritten = 0;
 
     analyse_call(
-        f         => \@f,
+        f         => $options->{files},
         getimages => 1,
-        copy      => ( $copie ? $shortcuts->absolu('scans/') : '' ),
-        text      => __("Automatic data capture..."),
-        progres   => 'analyse',
-        allocate =>
-          ( $config->get('allocate_ids') ? $w{saisie_auto_allocate_start} : 0 ),
+        copy => ( $options->{copy_files} ? $shortcuts->absolu('scans/') : '' ),
+        text => __("Automatic data capture..."),
+        progres     => 'analyse',
+        allocate    => ( $config->get('allocate_ids') ? $options->{mcopy} : 0 ),
         overwritten => \$overwritten,
         fin         => sub {
             my ( $c, %data ) = @_;
@@ -3995,37 +2524,13 @@ sub saisie_auto_ok {
 }
 
 sub choisit_liste {
-    my $dial = read_glade('liste_dialog')->get_object('liste_dialog');
 
-    my @f;
-    if ( $config->get('listeetudiants') ) {
-        @f = splitpath( $config->get_absolute('listeetudiants') );
-    } else {
-        @f = splitpath( $shortcuts->absolu('%PROJET/') );
-    }
-    $f[2] = '';
+    AMC::Gui::StudentsList->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        callback      => \&valide_liste
+    )->dialog();
 
-    $dial->set_current_folder( catpath(@f) );
-
-    my $ret = $dial->run();
-    debug("Names list file choice [$ret]");
-
-    my $file = clean_gtk_filenames( $dial->get_filename() );
-    $dial->destroy();
-
-    if ( $ret eq '1' ) {
-
-        # file chosen
-        debug( "List: " . $file );
-        valide_liste( set => $file );
-    } elsif ( $ret eq '2' ) {
-
-        # No list
-        valide_liste( set => '' );
-    } else {
-
-        # Cancel
-    }
 }
 
 sub edite_liste {
@@ -4052,6 +2557,7 @@ sub valide_liste {
     $oo{prefix} = 'pref_assoc' if ( !$oo{prefix} );
     $oo{gui} = $gui if ( !$oo{gui} );
     $oo{key} = 'liste_key' if ( !$oo{key} );
+    $oo{prefs} = $prefs if( !$oo{prefs} );
 
     debug "* valide_liste";
 
@@ -4109,7 +2615,7 @@ sub valide_liste {
             $dialog->run;
             $dialog->destroy;
         }
-        $prefs->store_register( $oo{key} => $cb_model_vide_key );
+        $oo{prefs}->store_register( $oo{key} => $cb_model_vide_key );
     } else {
 
         # problems with ID (name/surname)
@@ -4164,7 +2670,7 @@ sub valide_liste {
         debug "sorted heads: " . join( ",", @heads );
 
         # TRANSLATORS: you can omit the [...] part, just here to explain context
-        $prefs->store_register(
+        $oo{prefs}->store_register(
             $oo{key} => cb_model(
                 '',
                 __p("(none) [No primary key found in association list]"),
@@ -4172,7 +2678,7 @@ sub valide_liste {
             )
         );
     }
-    $prefs->transmet_pref(
+    $oo{prefs}->transmet_pref(
         $oo{gui},
         prefix => $oo{prefix},
         keys   => ["project:$oo{key}"]
@@ -4348,13 +2854,7 @@ sub assoc_resultat {
     $dialog->run;
     $dialog->destroy;
 
-    dialogue_apprentissage(
-        'ASSOC_AUTO_OK',
-        '', '', 0,
-        __(
-"Automatic association is now finished. You can ask for manual association to check that all is fine and, if necessary, read manually students names which have not been automatically identified."
-        )
-    ) if ( $auto > 0 );
+    $learning->lesson('ASSOC_AUTO_OK') if ( $auto > 0 );
 }
 
 sub valide_options_correction {
@@ -4368,38 +2868,15 @@ sub valide_options_correction {
     }
 }
 
-sub valide_options_for_domain {
-    my ( $domain, $container, $widget, $user_data ) = @_;
-    $container = 'project' if ( !$container );
-    if ($widget) {
-        my $name = $widget->get_name();
-        debug "<$domain> options validation for widget $name";
-
-        if ( $name =~ /${domain}_[a-z]+_(.*)/ ) {
-            $prefs->reprend_pref(
-                prefix    => $domain,
-                keys      => [ "project:" . $1 ],
-                trace     => 1,
-                container => $container
-            );
-        } else {
-            debug "Widget $name is not in domain <$domain>!";
-        }
-    } else {
-        debug "<$domain> options validation: ALL";
-        $prefs->reprend_pref( prefix => $domain, container => $container );
-    }
-}
-
 my $previous_liste_key;
 
 sub valide_options_association {
     $previous_liste_key = $config->get('liste_key');
-    valide_options_for_domain( 'pref_assoc', '', @_ );
+    $prefs->valide_options_for_domain( 'pref_assoc', '', @_ );
 }
 
 sub valide_options_preparation {
-    valide_options_for_domain( 'pref_prep', '', @_ );
+    $prefs->valide_options_for_domain( 'pref_prep', '', @_ );
 }
 
 sub filter_changed {
@@ -4413,7 +2890,7 @@ sub filter_changed {
 
     $config->set_local_keys();
     $config->set( 'local:filter', $old_filter );
-    valide_options_for_domain( 'pref_prep', 'local', @_ );
+    $prefs->valide_options_for_domain( 'pref_prep', 'local', @_ );
     my $new_filter = $config->get('local:filter');
     return if ( $old_filter eq $new_filter );
 
@@ -4484,7 +2961,7 @@ sub filter_changed {
 }
 
 sub valide_options_notation {
-    valide_options_for_domain( 'notation', '', @_ );
+    $prefs->valide_options_for_domain( 'notation', '', @_ );
     if ( $config->key_changed("regroupement_compose") ) {
         annotate_source_change( $projet{_capture}, 1 );
     }
@@ -4722,13 +3199,6 @@ sub noter {
     }
 }
 
-my $g_pcid;
-my %postcorrect_ids = ();
-my $postcorrect_copy_0;
-my $postcorrect_copy_1;
-my $postcorrect_student_min;
-my $postcorrect_student_max;
-
 sub noter_postcorrect {
     my ( $c, %data ) = @_;
 
@@ -4743,151 +3213,18 @@ sub noter_postcorrect {
 
         debug "PostCorrect option ON";
 
-        # gets available sheet ids
+        # Let the user choose the reference copy
 
-        %postcorrect_ids = ();
-
-        $projet{_capture}->begin_read_transaction('PCex');
-        my $sth = $projet{_capture}->statement('studentCopies');
-        $sth->execute;
-        while ( my $sc = $sth->fetchrow_hashref ) {
-            $postcorrect_student_min = $sc->{student}
-              if ( !defined($postcorrect_student_min) );
-            $postcorrect_ids{ $sc->{student} }->{ $sc->{copy} } = 1;
-            $postcorrect_student_max = $sc->{student};
-        }
-        $projet{_capture}->end_transaction('PCex');
-
-        # ask user for a choice
-
-        $g_pcid = read_glade(
-            'choix_postcorrect',
-            qw/postcorrect_student postcorrect_copy
-              postcorrect_set_multiple
-              postcorrect_photo postcorrect_apply/
+        my $pc = AMC::Gui::Postcorrect->new(
+            parent_window => $w{main_window},
+            config        => $config,
+            capture       => $projet{_capture}
         );
-
-        AMC::Gui::PageArea::add_feuille( $w{postcorrect_photo} );
-
-        debug
-          "Student range: $postcorrect_student_min,$postcorrect_student_max\n";
-        $w{postcorrect_student}
-          ->set_range( $postcorrect_student_min, $postcorrect_student_max );
-
-        if ( $config->get('postcorrect_student') ) {
-            for (qw/student copy/) {
-                $w{ 'postcorrect_' . $_ }
-                  ->set_value( $config->get( 'postcorrect_' . $_ ) );
-            }
-        } else {
-            $w{postcorrect_student}->set_value($postcorrect_student_min);
-            my @c = sort { $a <=> $b }
-              ( keys %{ $postcorrect_ids{$postcorrect_student_min} } );
-            $w{postcorrect_copy}->set_value( $c[0] );
-        }
-
-        $w{postcorrect_set_multiple}
-          ->set_active( $config->get("postcorrect_set_multiple") );
-
-        $w{choix_postcorrect}->show();
+        $pc->choose_reference( \&noter_calcul );
 
     } else {
         noter_calcul( '', '' );
     }
-}
-
-sub postcorrect_change_copy {
-    my $student = $w{postcorrect_student}->get_value();
-    my $copy    = $w{postcorrect_copy}->get_value();
-
-    $w{postcorrect_apply}->set_sensitive( $postcorrect_ids{$student}->{$copy} );
-
-    $projet{_capture}->begin_read_transaction('PCCN');
-    my ($f) = $projet{_capture}->zone_images( $student, $copy, ZONE_NAME );
-    $projet{_capture}->end_transaction('PCCN');
-    if ( !defined($f) ) {
-        $f = '';
-    } else {
-        $f = $config->get_absolute('cr') . "/$f";
-    }
-    debug "Postcorrect name field image: $f";
-    if ( -f $f ) {
-        $w{postcorrect_photo}->set_content( image => $f );
-    } else {
-        $w{postcorrect_photo}->set_content();
-    }
-}
-
-sub postcorrect_change {
-    my $student = $w{postcorrect_student}->get_value();
-
-    my @c = sort { $a <=> $b } ( keys %{ $postcorrect_ids{$student} } );
-    $postcorrect_copy_0 = $c[0];
-    $postcorrect_copy_1 = $c[$#c];
-
-    debug "Postcorrect copy range for student $student: $c[0],$c[$#c]\n";
-    $w{postcorrect_copy}->set_range( $c[0], $c[$#c] );
-
-    postcorrect_change_copy;
-}
-
-sub postcorrect_student_exists {
-    my ($student) = @_;
-    my @c = ();
-    @c = ( keys %{ $postcorrect_ids{$student} } )
-      if ( $postcorrect_ids{$student} );
-    return ( $#c >= 0 ? 1 : 0 );
-}
-
-sub postcorrect_previous {
-    my $student = $w{postcorrect_student}->get_value();
-    my $copy    = $w{postcorrect_copy}->get_value();
-
-    $copy--;
-    if ( $copy < $postcorrect_copy_0 ) {
-        do { $student-- } while ( $student >= $postcorrect_student_min
-            && !postcorrect_student_exists($student) );
-        if ( $student >= $postcorrect_student_min ) {
-            $w{postcorrect_student}->set_value($student);
-            $w{postcorrect_copy}->set_value(10000);
-        }
-    } else {
-        $w{postcorrect_copy}->set_value($copy);
-    }
-}
-
-sub postcorrect_next {
-    my $student = $w{postcorrect_student}->get_value();
-    my $copy    = $w{postcorrect_copy}->get_value();
-
-    $copy++;
-    if ( $copy > $postcorrect_copy_1 ) {
-        do { $student++ } while ( $student <= $postcorrect_student_max
-            && !postcorrect_student_exists($student) );
-        if ( $student <= $postcorrect_student_max ) {
-            $w{postcorrect_student}->set_value($student);
-            $w{postcorrect_copy}->set_value(0);
-        }
-    } else {
-        $w{postcorrect_copy}->set_value($copy);
-    }
-}
-
-sub choix_postcorrect_cancel {
-    $w{choix_postcorrect}->destroy();
-}
-
-sub choix_postcorrect_ok {
-    my $student = $w{postcorrect_student}->get_value();
-    my $copy    = $w{postcorrect_copy}->get_value();
-    my $mult    = $w{postcorrect_set_multiple}->get_active();
-    $w{choix_postcorrect}->destroy();
-
-    $config->set( 'postcorrect_student',      $student );
-    $config->set( 'postcorrect_copy',         $copy );
-    $config->set( 'postcorrect_set_multiple', $mult );
-
-    noter_calcul( $student, $copy, $mult );
 }
 
 sub noter_calcul {
@@ -5059,203 +3396,15 @@ sub opt_symbole {
 sub select_students {
     my ($id_file) = @_;
 
-    # restore last setting
-    my %ids = ();
-    if ( open( IDS, $id_file ) ) {
-        while (<IDS>) {
-            chomp;
-            $ids{$_} = 1 if (/^[0-9]+(:[0-9]+)?$/);
-        }
-        close(IDS);
-    }
-
-    # dialog to let the user choose...
-    my $gstud = read_glade(
-        'choose_students',
-        qw/choose_students_area students_instructions
-          students_select_list students_list_search/
-    );
-    my $lk = $config->get('liste_key');
-
-    my $students_store = Gtk3::ListStore->new(
-        'Glib::String', 'Glib::String',  'Glib::String', 'Glib::String',
-        'Glib::String', 'Glib::Boolean', 'Glib::Boolean'
+    AMC::Gui::SelectStudents->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        capture       => $projet{_capture},
+        association   => $projet{_association},
+        students_list => $projet{_students_list},
+        id_file       => $id_file,
     );
 
-    my $filtered = Gtk3::TreeModelFilter->new($students_store);
-    $filtered->set_visible_column(5);
-    my $filtered_sorted = Gtk3::TreeModelSort->new_with_model($filtered);
-
-    $filtered_sorted->set_sort_func( 0, \&sort_num,    0 );
-    $filtered_sorted->set_sort_func( 1, \&sort_string, 1 );
-
-    $w{students_list_store}           = $students_store;
-    $w{students_list_filtered}        = $filtered;
-    $w{students_list_filtered_sorted} = $filtered_sorted;
-
-    $w{students_select_list}->set_model($filtered_sorted);
-    my $renderer = Gtk3::CellRendererText->new;
-    my $column   = Gtk3::TreeViewColumn->new_with_attributes(
-        __ "exam ID",
-        $renderer,
-        text => 0
-    );
-    $column->set_sort_column_id(0);
-    $w{students_select_list}->append_column($column);
-
-    if ($lk) {
-        $column = Gtk3::TreeViewColumn->new_with_attributes( $lk, $renderer,
-            text => 4 );
-        $column->set_sort_column_id(4);
-        $filtered_sorted->set_sort_func( 4, \&sort_string, 4 );
-        $w{students_select_list}->append_column($column);
-    }
-
-    $column = Gtk3::TreeViewColumn->new_with_attributes(
-        __ "student",
-        $renderer,
-        text => 1
-    );
-    $column->set_sort_column_id(1);
-    $w{students_select_list}->append_column($column);
-
-    $projet{_capture}->begin_read_transaction('gSLi');
-    my $key            = $projet{_association}->variable('key_in_list');
-    my @selected_iters = ();
-    my $i              = 0;
-    for my $sc ( $projet{_capture}->student_copies ) {
-        my $id = $projet{_association}->get_real(@$sc);
-        my ($name) =
-          $projet{_students_list}->data( $key, $id, test_numeric => 1 );
-        my $iter = $students_store->insert_with_values(
-            $i++,
-            0 => studentids_string(@$sc),
-            1 => $name->{_ID_},
-            2 => $sc->[0],
-            3 => $sc->[1],
-            5 => 1,
-            4 => ( $lk ? $name->{$lk} : '' ),
-        );
-        push @selected_iters, $iter if ( $ids{ studentids_string(@$sc) } );
-    }
-    $projet{_capture}->end_transaction('gSLi');
-
-    $w{students_select_list}->get_selection->set_mode('multiple');
-    for (@selected_iters) {
-        $w{students_select_list}->get_selection->select_iter(
-            $filtered_sorted->convert_child_iter_to_iter(
-                $filtered->convert_child_iter_to_iter($_)
-            )
-        );
-    }
-
-    my $resp = $w{choose_students}->run;
-
-    select_students_save_selected_state();
-
-    my @k = ();
-
-    if ( $resp == 1 ) {
-        $students_store->foreach(
-            sub {
-                my ( $model, $path, $iter, $user ) = @_;
-                push @k, [ $students_store->get( $iter, 2, 3 ) ]
-                  if ( $students_store->get( $iter, 6 ) );
-                return (0);
-            }
-        );
-    }
-
-    $w{choose_students}->destroy;
-
-    if ( $resp == 1 ) {
-        open( IDS, ">$id_file" );
-        for (@k) {
-            print IDS studentids_string(@$_) . "\n";
-        }
-        close(IDS);
-    } else {
-        return ();
-    }
-
-    return (1);
-}
-
-sub select_students_save_selected_state {
-    my $sel    = $w{students_select_list}->get_selection;
-    my $fs     = $w{students_list_filtered_sorted};
-    my $f      = $w{students_list_filtered};
-    my $s      = $w{students_list_store};
-    my @states = ();
-    $fs->foreach(
-        sub {
-            my ( $model, $path, $iter, $user ) = @_;
-            push @states,
-              [
-                $f->convert_iter_to_child_iter(
-                    $fs->convert_iter_to_child_iter($iter)
-                ),
-                $sel->iter_is_selected($iter)
-              ];
-            return (0);
-        }
-    );
-    for my $row (@states) {
-        $s->set( $row->[0], 6 => $row->[1] );
-    }
-}
-
-sub select_students_recover_selected_state {
-    my $sel = $w{students_select_list}->get_selection;
-    my $f   = $w{students_list_filtered};
-    my $fs  = $w{students_list_filtered_sorted};
-    my $s   = $w{students_list_store};
-    $fs->foreach(
-        sub {
-            my ( $model, $path, $iter, $user ) = @_;
-            if (
-                $s->get(
-                    $f->convert_iter_to_child_iter(
-                        $fs->convert_iter_to_child_iter($iter)
-                    ),
-                    6
-                )
-              )
-            {
-                $sel->select_iter($iter);
-            } else {
-                $sel->unselect_iter($iter);
-            }
-            return (0);
-        }
-    );
-}
-
-sub select_students_search {
-    select_students_save_selected_state();
-    my $pattern = $w{students_list_search}->get_text;
-    my $s       = $w{students_list_store};
-    $s->foreach(
-        sub {
-            my ( $model, $path, $iter, $user ) = @_;
-            my ( $id, $n, $nb ) = $s->get( $iter, 0, 1, 4 );
-            $s->set(
-                $iter,
-                5 => (
-                         ( !$pattern )
-                      || $id =~ /$pattern/i
-                      || ( defined($n)  && $n =~ /$pattern/i )
-                      || ( defined($nb) && $nb =~ /$pattern/i ) ? 1 : 0
-                )
-            );
-            return (0);
-        }
-    );
-    select_students_recover_selected_state();
-}
-
-sub select_students_all {
-    $w{students_list_search}->set_text('');
 }
 
 sub annote_copies {
@@ -5422,9 +3571,9 @@ sub plugins_browse {
 ###
 
 sub activate_apropos {
-    my $gap = read_glade('apropos');
-    $w{apropos}->run();
-    $w{apropos}->destroy();
+
+    AMC::Gui::APropos->new( parent_window => $w{main_window} );
+
 }
 
 sub activate_doc {
@@ -5451,287 +3600,23 @@ sub activate_doc {
 
 ###
 
-###
-
-sub change_methode_impression {
-    if ( $w{pref_x_print_command_pdf} ) {
-        my $m = '';
-        my ( $ok, $iter ) = $w{pref_c_methode_impression}->get_active_iter;
-        if ($ok) {
-            $m =
-              $w{pref_c_methode_impression}->get_model->get( $iter, COMBO_ID );
-        }
-        $w{pref_x_print_command_pdf}->set_sensitive( $m eq 'commande' );
-    }
-}
-
 sub edit_preferences {
-    for my $k (@widgets_disabled_when_preferences_opened) {
-        $w{$k}->set_sensitive(0);
-    }
 
-    my $gap = read_glade( 'edit_preferences',
-        qw/pref_projet_tous pref_projet_annonce pref_x_print_command_pdf pref_c_methode_impression email_group_sendmail email_group_SMTP/
+    AMC::Gui::Preferences->new(
+        parent_window            => $w{main_window},
+        config                   => $config,
+        widgets                  => \%w,
+        capture                  => $projet{_capture},
+        decode_callback          => \&decode_name_fields_again,
+        detect_analysis_callback => \&detecte_analyse,
+        test_libnotify_callback  => \&test_libnotify,
+        open_project_name        => $projet{nom},
     );
 
-    $w{edit_preferences_manager} = $gap;
-
-    if ( $config->get('conserve_taille') ) {
-        AMC::Gui::WindowSize::size_monitor(
-            $w{edit_preferences},
-            {
-                config => $config,
-                key    => 'global:preferences_window_size'
-            }
-        );
-    }
-
-    # copy tooltip from note_* to defaut_note_*
-    my $marking_prefs = {
-        min         => 'x',
-        max         => 'x',
-        null        => 'x',
-        grain       => 'x',
-        max_plafond => 'v',
-        arrondi     => 'c'
-    };
-    for my $k ( keys %$marking_prefs ) {
-        $gap->get_object( "pref_" . $marking_prefs->{$k} . "_defaut_note_$k" )
-          ->set_tooltip_text(
-            $gap->get_object(
-                "pref_projet_" . $marking_prefs->{$k} . "_note_$k"
-            )->get_tooltip_text
-          );
-    }
-
-    # tableau type/couleurs pour correction
-
-    $prefs->widget_store_clear( store => 'prefwindow' );
-
-    $prefs->transmet_pref(
-        $gap,
-        store  => 'prefwindow',
-        prefix => 'pref',
-        root   => 'global:'
-    );
-    $prefs->transmet_pref(
-        $gap,
-        store  => 'prefwindow_project',
-        prefix => 'pref_projet',
-        root   => 'project:'
-    ) if ( $projet{nom} );
-
-    # projet ouvert ?
-    if ( $projet{nom} ) {
-        $w{pref_projet_annonce}->set_label( '<i>'
-              . sprintf( __ "Project \"%s\" preferences", $projet{nom} )
-              . '</i>.' );
-    } else {
-        $w{pref_projet_tous}->set_sensitive(0);
-        $w{pref_projet_annonce}
-          ->set_label( '<i>' . __("Project preferences") . '</i>' );
-    }
-
-    # anavailable options, managed by the filter:
-    if ( $config->get('filter') ) {
-        for my $k ( ( "AMC::Filter::register::" . $config->get('filter') )
-            ->forced_options() )
-        {
-          TYPES: for my $t (qw/c cb ce col f s t v x/) {
-                if ( my $w =
-                    $gap->get_object( "pref_projet_" . $t . "_" . $k ) )
-                {
-                    $w->set_sensitive(0);
-                    last TYPES;
-                }
-            }
-        }
-    }
-
-    change_methode_impression();
-
-    my $resp = $w{edit_preferences}->run();
-
-    if ($resp) {
-        accepte_preferences();
-    } else {
-        closes_preferences();
-    }
-}
-
-sub closes_preferences {
-    $w{edit_preferences}->destroy();
-    for my $k (@widgets_disabled_when_preferences_opened) {
-        $w{$k}->set_sensitive(1);
-    }
-}
-
-sub accepte_preferences {
-    $prefs->reprend_pref( store => 'prefwindow', prefix => 'pref' );
-    $prefs->reprend_pref(
-        store  => 'prefwindow_project',
-        prefix => 'pref_projet'
-    ) if ( $projet{nom} );
-
-    my %pm;
-    my %gm;
-    my @dgm;
-    my %labels;
-
-    if ( $projet{nom} ) {
-        %pm = map { $_ => 1 } ( $config->changed_keys('project') );
-        %gm = map { $_ => 1 } ( $config->changed_keys('global') );
-        @dgm = grep { /^defaut_/ } ( keys %gm );
-
-        for my $k (@dgm) {
-            my $l = $w{edit_preferences_manager}->get_object( 'label_' . $k );
-            $labels{$k} = $l->get_text() if ($l);
-            my $kp = $k;
-            $kp =~ s/^defaut_//;
-            $l = $w{edit_preferences_manager}->get_object( 'label_' . $kp );
-            $labels{$kp} = $l->get_text() if ($l);
-        }
-    }
-
-    closes_preferences();
-
-    if ( $projet{nom} ) {
-
-        # Check if annotations are still valid (same options)
-
-        my $changed = 0;
-        for (
-            qw/annote_chsign symboles_trait
-            embedded_format embedded_max_size embedded_jpeg_quality
-            symboles_indicatives annote_font_name annote_ecart/
-          )
-        {
-            $changed = 1 if ( $gm{$_} );
-        }
-        for my $tag (qw/0_0 0_1 1_0 1_1/) {
-            $changed = 1
-              if ( $gm{ "symbole_" . $tag . "_type" }
-                || $gm{ "symbole_" . $tag . "_color" } );
-        }
-        for (qw/annote_position verdict verdict_q annote_rtl/) {
-            $changed = 1 if ( $pm{$_} );
-        }
-
-        if ($changed) {
-            annotate_source_change( $projet{_capture}, 1 );
-        }
-
-        # Look at modified default values...
-
-        debug "Labels: " . join( ',', keys %labels );
-
-        for my $k (@dgm) {
-            my $kp = $k;
-            $kp =~ s/^defaut_//;
-
-            debug "Test G:$k / P:$kp";
-            if ( ( !$pm{$kp} ) && ( $config->get($kp) ne $config->get($k) ) ) {
-
-                # project option has NOT been modified, and the new
-                # value of general default option is different from
-                # project option. Ask the user for modifying also the
-                # project option value
-                my $label_projet  = $labels{$kp};
-                my $label_general = $labels{$k};
-
-                debug "Ask user $label_general | $label_projet";
-
-                if ( $label_projet && $label_general ) {
-                    my $dialog = Gtk3::MessageDialog->new( $w{main_window},
-                        'destroy-with-parent', 'question', 'yes-no', '' );
-                    $dialog->set_markup(
-                        sprintf(
-                            __(
-"You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"
-                            ),
-                            $label_general,
-                            $label_projet,
-                            $projet{nom}
-                        )
-                    );
-                    $dialog->get_widget_for_response('yes')
-                      ->get_style_context()->add_class("suggested-action");
-                    my $reponse = $dialog->run;
-                    $dialog->destroy;
-
-                    debug "Reponse: $reponse";
-
-                    if ( $reponse eq 'yes' ) {
-
-                        # change also project option value
-                        $config->set( $kp, $config->get($k) );
-                    }
-
-                }
-            }
-        }
-
-        # Run again decoding if the name field type has changed
-
-        if ( $pm{name_field_type} ) {
-            my $response;
-
-            if ( $config->get('name_field_type') ) {
-                my $dialog = Gtk3::MessageDialog->new( $w{main_window},
-                    'destroy-with-parent', 'question', 'ok-cancel', '' );
-                $dialog->set_markup(
-                    __(
-"You modified the name field type, so that the name fields has to be decoded again."
-                    )
-                );
-                $dialog->get_widget_for_response('ok')->get_style_context()
-                  ->add_class("suggested-action");
-                $response = $dialog->run;
-                $dialog->destroy;
-            } else {
-                $response = 'ok';
-            }
-            if ( $response eq 'ok' ) {
-                decode_name_fields(1);
-            }
-        }
-    }
-
-    if ( $projet{nom} ) {
-        for my $k (qw/note_null note_min note_max note_grain/) {
-            my $v = $config->get($k);
-            $v =~ s/\s+//g;
-            $config->set( $k, $v );
-        }
-    }
-
-    if ( $config->key_changed("projects_home")
-        && !$projet{nom} )
-    {
-        set_projects_home( $config->get_absolute('projects_home') );
-    }
-
-    $config->test_commands();
-    test_libnotify();
-
-    if (   $config->key_changed("seuil")
-        || $config->key_changed("seuil_up") )
-    {
-        if ( $projet{_capture}->n_pages_transaction() > 0 ) {
-            detecte_analyse();
-        }
-    }
-
-    $config->save();
 }
 
 sub sauve_pref_generales {
     $config->save();
-}
-
-sub annule_preferences {
-    debug "Canceling preferences modification";
-    closes_preferences();
 }
 
 sub file_maj {
@@ -6121,43 +4006,11 @@ sub overwritten_clear {
 }
 
 sub overwritten_look {
-    my $go =
-      read_glade( 'overwritten', qw/overwritten_list/ );
-    my $olist =
-      Gtk3::ListStore->new( 'Glib::String', 'Glib::String', 'Glib::String' );
-    $w{overwritten_list}->set_model($olist);
-
-    $w{overwritten_list}->append_column(
-        Gtk3::TreeViewColumn->new_with_attributes
-
-# TRANSLATORS: column title for the list of overwritten pages. This refers to the page from the question
-          ( __ "Page", Gtk3::CellRendererText->new, text => 0 )
+    AMC::Gui::Overwritten->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        capture       => $projet{_capture}
     );
-    $w{overwritten_list}->append_column(
-        Gtk3::TreeViewColumn->new_with_attributes
-
-# TRANSLATORS: column title for the list of overwritten pages. This refers to the number of times the page has been overwritten.
-          ( __ "count", Gtk3::CellRendererText->new, text => 1 )
-    );
-    $w{overwritten_list}->append_column(
-        Gtk3::TreeViewColumn->new_with_attributes
-
-# TRANSLATORS: column title for the list of overwritten pages. This refers to the date of the last data capture for the page.
-          ( __ "Date", Gtk3::CellRendererText->new, text => 2 )
-    );
-    for my $o ( @{ $projet{_capture}->overwritten_pages_transaction() } ) {
-        $olist->set(
-            $olist->append, 0,
-            pageids_string( $o->{student}, $o->{page}, $o->{copy} ), 1,
-            $o->{overwritten}, 2,
-            format_date( $o->{timestamp_auto} ),
-        );
-    }
-
-    $w{overwritten_list}->get_selection->set_mode('none');
-
-    $w{overwritten}->run;
-    $w{overwritten}->destroy;
 }
 
 sub detecte_analyse {
@@ -6239,43 +4092,7 @@ sub detecte_analyse {
     # dialogue apprentissage :
 
     if ( $oo{apprend} ) {
-        dialogue_apprentissage(
-            'SAISIE_AUTO',
-            '', '', 0,
-            __("Automatic data capture now completed.") . " "
-              . (
-                $r->{incomplete} > 0
-                ? sprintf(
-                    __("It is not complete (missing pages from %d papers).")
-                      . " ",
-                    $r->{incomplete}
-                  )
-                : ''
-              )
-              . __(
-"You can analyse data capture quality with some indicators values in analysis list:"
-              )
-              . "\n"
-              . sprintf(
-                __
-"- <b>%s</b> represents positioning gap for the four corner marks. Great value means abnormal page distortion.",
-                __ "MSE"
-              )
-              . "\n"
-              . sprintf(
-                __
-"- great values of <b>%s</b> are seen when darkness ratio is very close to the threshold for some boxes.",
-                __ "sensitivity"
-              )
-              . "\n"
-              . sprintf(
-                __
-"You can also look at the scan adjustment (<i>%s</i>) and ticked and unticked boxes (<i>%s</i>) using right-click on lines from table <i>%s</i>.",
-                __ "page adjustment",
-                __ "boxes zooms",
-                __ "Diagnosis"
-              )
-        );
+        $learning->lesson('SAISIE_AUTO', $r);
     }
 
 }
@@ -6306,229 +4123,16 @@ sub show_missing_pages {
     $dialog->destroy;
 }
 
-sub update_unrecognized {
-    $projet{_capture}->begin_read_transaction('UNRC');
-    my $failed =
-      $projet{_capture}
-      ->dbh->selectall_arrayref( $projet{_capture}->statement('failedList'),
-        { Slice => {} } );
-    $projet{_capture}->end_transaction('UNRC');
-
-    $inconnu_store->clear;
-    for my $ff (@$failed) {
-        my $iter = $inconnu_store->append;
-        my $f    = $ff->{filename};
-        $f =~ s:.*/::;
-        my ( undef, undef, $scan_n ) =
-          splitpath( $shortcuts->absolu( $ff->{filename} ) );
-        my $preproc_file =
-          $shortcuts->absolu('%PROJET/cr/diagnostic') . "/" . $scan_n . ".png";
-
-        $inconnu_store->set(
-            $iter,                           INCONNU_SCAN,
-            $f,                              INCONNU_FILE,
-            $ff->{filename},                 INCONNU_TIME,
-            format_date( $ff->{timestamp} ), INCONNU_TIME_N,
-            $ff->{timestamp},                INCONNU_PREPROC,
-            $preproc_file,
-        );
-    }
-}
-
 sub open_unrecognized {
 
-    my $dialog = read_glade(
-        'unrecognized',
-        qw/inconnu_tree scan_area preprocessed_area
-          inconnu_hpaned inconnu_vpaned
-          state_scanrecog state_scanrecog_label
-          unrecog_process_button
-          unrecog_delete_button
-          unrecog_next_button unrecog_previous_button
-          ur_frame_scan/
+    AMC::Gui::Unrecognized->new(
+        parent_window            => $w{main_window},
+        config                   => $config,
+        capture                  => $projet{_capture},
+        update_analysis_callback => \&update_analysis_summary,
+        analysis_callback        => \&analyse_call,
     );
 
-    for (qw/scan preprocessed/) {
-        AMC::Gui::PageArea::add_feuille( $w{ $_ . '_area' } );
-    }
-
-    $w{inconnu_tree}->set_model($inconnu_store);
-
-    $renderer = Gtk3::CellRendererText->new;
-    $column   = Gtk3::TreeViewColumn->new_with_attributes( "scan", $renderer,
-        text => INCONNU_SCAN );
-    $w{inconnu_tree}->append_column($column);
-    $column->set_sort_column_id(INCONNU_SCAN);
-
-    $renderer = Gtk3::CellRendererText->new;
-    $column   = Gtk3::TreeViewColumn->new_with_attributes( "date", $renderer,
-        text => INCONNU_TIME );
-    $w{inconnu_tree}->append_column($column);
-    $column->set_sort_column_id(INCONNU_TIME_N);
-
-    update_unrecognized();
-
-    $w{inconnu_tree}->get_selection->set_mode('multiple');
-    $w{inconnu_tree}
-      ->get_selection->signal_connect( "changed", \&unrecognized_line );
-    $w{inconnu_tree}
-      ->get_selection->select_iter( $inconnu_store->get_iter_first );
-
-    $w{unrecognized}->show();
-}
-
-sub unrecognized_actions {
-    my ($available) = @_;
-    my %actions = (
-        delete   => $available > 0,
-        process  => $available == 1,
-        next     => $available >= 0,
-        previous => $available >= 0,
-    );
-    for my $k ( keys %actions ) {
-        if ( $actions{$k} > 0 ) {
-            $w{ 'unrecog_' . $k . '_button' }->show;
-        } else {
-            $w{ 'unrecog_' . $k . '_button' }->hide;
-        }
-    }
-}
-
-sub unrecognized_line {
-    if ( $inconnu_store->get_iter_first ) {
-        my @sel            = $w{inconnu_tree}->get_selection->get_selected_rows;
-        my $first_selected = $sel[0]->[0];
-        my $iter           = '';
-        if ( defined($first_selected) ) {
-            $iter = $inconnu_store->get_iter($first_selected);
-        }
-        if ($iter) {
-            $w{inconnu_tree}->scroll_to_cell( $first_selected, undef, 0, 0, 0 );
-            my $scan =
-              $shortcuts->absolu( $inconnu_store->get( $iter, INCONNU_FILE ) );
-            if ( -f $scan ) {
-                $w{scan_area}->set_content( image => $scan );
-            } else {
-                debug_and_stderr "Scan not found: $scan";
-                $w{scan_area}->set_content();
-            }
-
-            my $preproc = $inconnu_store->get( $iter, INCONNU_PREPROC );
-
-            if ( -f $preproc ) {
-                $w{preprocessed_area}->set_content( image => $preproc );
-            } else {
-                $w{preprocessed_area}->set_content();
-            }
-
-            if ( $w{scan_area}->get_image ) {
-                my $scan_n = $scan;
-                $scan_n =~ s:^.*/::;
-                set_state( 'scanrecog', 'question', $scan_n );
-            } else {
-                set_state( 'scanrecog', 'error',
-                    sprintf( ( __ "Error loading scan %s" ), $scan ) );
-            }
-            unrecognized_actions( -f $preproc ? 2 : 1 );
-        } else {
-            $w{scan_area}->set_content();
-            $w{preprocessed_area}->set_content();
-            set_state( 'scanrecog', 'question', __ "No scan selected" );
-            unrecognized_actions(0);
-        }
-    } else {
-
-        # empty list
-        set_state( 'scanrecog', 'info', __ "No more unrecognized scans" );
-        $w{scan_area}->set_content();
-        $w{preprocessed_area}->set_content();
-        unrecognized_actions(-1);
-    }
-}
-
-sub unrecognized_next {
-    my ( $widget, @sel ) = @_;
-    @sel = () if ( !defined( $sel[0] ) );
-    if ( !@sel ) {
-        @sel = $w{inconnu_tree}->get_selection->get_selected_rows;
-        if ( $sel[0] ) {
-            @sel = @{ $sel[0] };
-        } else {
-            @sel = ();
-        }
-    }
-    my $iter;
-    my $ok = 0;
-    if ( @sel && defined( $sel[$#sel] ) ) {
-        $iter = $inconnu_store->get_iter( $sel[$#sel] );
-        $ok   = $inconnu_store->iter_next($iter);
-    }
-    $iter = $inconnu_store->get_iter_first if ( !$ok );
-
-    $w{inconnu_tree}->get_selection->unselect_all;
-    $w{inconnu_tree}->get_selection->select_iter($iter) if ($iter);
-}
-
-sub unrecognized_prev {
-    my @sel            = $w{inconnu_tree}->get_selection->get_selected_rows;
-    my $first_selected = $sel[0]->[0];
-    my $iter;
-    if ( defined($first_selected) ) {
-        my $p =
-          $inconnu_store->get_path( $inconnu_store->get_iter($first_selected) );
-        if ( $p->prev ) {
-            $iter = $inconnu_store->get_iter($p);
-        } else {
-            $iter = '';
-        }
-    }
-    $iter = $inconnu_store->get_iter_first if ( !$iter );
-
-    $w{inconnu_tree}->get_selection->unselect_all;
-    $w{inconnu_tree}->get_selection->select_iter($iter) if ($iter);
-}
-
-sub unrecognized_delete {
-    my @iters;
-    my @sel = ( $w{inconnu_tree}->get_selection->get_selected_rows );
-    @sel = @{ $sel[0] };
-    return if ( !@sel );
-
-    $projet{_capture}->begin_transaction('rmUN');
-    for my $s (@sel) {
-        my $iter = $inconnu_store->get_iter($s);
-        my $file = $inconnu_store->get( $iter, INCONNU_FILE );
-        $projet{_capture}->statement('deleteFailed')->execute($file);
-        unlink $shortcuts->absolu($file);
-        push @iters, $iter;
-    }
-    unrecognized_next( '', @sel );
-    for (@iters) { $inconnu_store->remove($_); }
-    update_analysis_summary();
-    $projet{_capture}->end_transaction('rmUN');
-}
-
-sub analyse_diagnostic {
-    my @sel            = $w{inconnu_tree}->get_selection->get_selected_rows;
-    my $first_selected = $sel[0]->[0];
-    if ( defined($first_selected) ) {
-        my $iter = $inconnu_store->get_iter($first_selected);
-        my $scan =
-          $shortcuts->absolu( $inconnu_store->get( $iter, INCONNU_FILE ) );
-        my $diagnostic_file = $inconnu_store->get( $iter, INCONNU_PREPROC );
-
-        if ( !-f $diagnostic_file ) {
-            analyse_call(
-                f          => [$scan],
-                text       => __("Making diagnostic image..."),
-                progres    => 'diagnostic',
-                diagnostic => 1,
-                fin        => sub {
-                    unrecognized_line();
-                },
-            );
-        }
-    }
 }
 
 sub set_source_tex {
@@ -6552,117 +4156,6 @@ sub valide_source_tex {
     detecte_documents();
 }
 
-my $modeles_store;
-
-sub charge_modeles {
-    my ( $store, $parent, $rep ) = @_;
-
-    return if ( !-d $rep );
-
-    my @all;
-    my @ms;
-    my @subdirs;
-
-    if ( opendir( DIR, $rep ) ) {
-        @all     = readdir(DIR);
-        @ms      = grep { /\.tgz$/ && -f $rep . "/$_" } @all;
-        @subdirs = grep { -d $rep . "/$_" && !/^\./ } @all;
-        closedir DIR;
-    } else {
-        debug("MODELS : Can't open directory $rep : $!");
-    }
-
-    for my $sd ( sort { $a cmp $b } @subdirs ) {
-        my $nom       = $sd;
-        my $desc_text = '';
-
-        my $child = $store->append($parent);
-        if ( -f $rep . "/$sd/directory.xml" ) {
-            my $d = XMLin( $rep . "/$sd/directory.xml" );
-            $nom       = $d->{title} if ( $d->{title} );
-            $desc_text = $d->{text}  if ( $d->{text} );
-        }
-        $store->set( $child, MODEL_NOM, $nom, MODEL_PATH, '',
-            MODEL_DESC, $desc_text );
-        charge_modeles( $store, $child, $rep . "/$sd" );
-    }
-
-    for my $m ( sort { $a cmp $b } @ms ) {
-        my $nom = $m;
-        $nom =~ s/\.tgz$//i;
-        my $desc_text = __ "(no description)";
-        my $tar       = Archive::Tar->new();
-        if ( $tar->read( $rep . "/$m" ) ) {
-            my @desc = grep { /description.xml$/ } ( $tar->list_files() );
-            if ( $desc[0] ) {
-                my $d =
-                  XMLin( $tar->get_content( $desc[0] ), SuppressEmpty => '' );
-                $nom       = $d->{title} if ( $d->{title} );
-                $desc_text = $d->{text}  if ( $d->{text} );
-            }
-            debug "Adding model $m";
-            debug "NAME=$nom DESC=$desc_text";
-            $store->set(
-                $store->append($parent),
-                MODEL_NOM, $nom, MODEL_PATH, $rep . "/$m",
-                MODEL_DESC, $desc_text
-            );
-        } else {
-            debug_and_stderr
-              "WARNING: Could not read archive file \"$rep/$m\" ...";
-        }
-    }
-}
-
-sub modele_dispo {
-    my $iter = $w{modeles_liste}->get_selection()->get_selected();
-    if ($iter) {
-        $w{model_choice_button}
-          ->set_sensitive( $modeles_store->get( $iter, MODEL_PATH ) ? 1 : 0 );
-    } else {
-        debug "No iter for models selection";
-    }
-}
-
-sub path_from_tree {
-    my ( $store, $view, $f ) = @_;
-    my $i = undef;
-
-    return (undef) if ( !$f );
-
-    my $d = '';
-
-    for my $pp ( split( m:/:, $f ) ) {
-        my $ipar = $i;
-        $d .= '/' if ($d);
-        $d .= $pp;
-        $i = model_id_to_iter( $store, TEMPLATE_FILES_PATH, $d );
-        if ( !$i ) {
-            $i = $store->append($ipar);
-            $store->set( $i, TEMPLATE_FILES_PATH, $d,
-                TEMPLATE_FILES_FILE, $pp );
-        }
-    }
-
-    $view->expand_to_path( $store->get_path($i) );
-    return ($i);
-}
-
-sub template_add_file {
-    my ( $store, $view, $f ) = @_;
-
-    # removes local part
-
-    my $p_dir = $shortcuts->absolu('%PROJET/');
-    if ( $f =~ s:^\Q$p_dir\E:: ) {
-        my $i = path_from_tree( $store, $view, $f );
-        return ($i);
-    } else {
-        debug "Trying to add non local file: $f (local dir is $p_dir)";
-        return (undef);
-    }
-}
-
 sub make_template {
 
     if ( !$projet{nom} ) {
@@ -6670,508 +4163,26 @@ sub make_template {
         return ();
     }
 
-    my $gt = read_glade(
-        'make_template',
-        qw/template_files_tree template_name template_file_name template_description template_file_name_warning mt_ok
-          template_description_scroll template_files_scroll/
+    projet_check_and_save();
+
+    AMC::Gui::Template->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        project_name  => $projet{nom},
     );
 
-    $template_files_store->clear;
-
-    $w{template_files_tree}->set_model($template_files_store);
-    my $renderer = Gtk3::CellRendererText->new;
-
-    my $column =
-# TRANSLATORS: This is a column title for the list of files to be included in a template being created.
-      Gtk3::TreeViewColumn->new_with_attributes( __ "file", $renderer,
-        text => TEMPLATE_FILES_FILE );
-    $w{template_files_tree}->append_column($column);
-    $w{template_files_tree}->get_selection->set_mode("multiple");
-
-    # Detects files to include
-
-    template_add_file( $template_files_store, $w{template_files_tree},
-        $config->get_absolute('texsrc') );
-    template_add_file( $template_files_store, $w{template_files_tree},
-        fich_options( $projet{nom} ) );
-
-    for (qw/description files/) {
-        $w{ 'template_' . $_ . '_scroll' }
-          ->set_policy( 'automatic', 'automatic' );
-    }
-
-    # Waits for action
-
-    my $resp = $w{make_template}->run();
-
-    if ( $resp eq "1" ) {
-
-        projet_check_and_save();
-
-        # Creates template
-
-        my $tfile = $config->get('rep_modeles') . '/'
-          . $w{template_file_name}->get_text() . ".tgz";
-        my $tar = Archive::Tar->new();
-        $template_files_store->foreach( \&add_to_archive, [$tar] );
-
-        # Description
-
-        my $buf = $w{template_description}->get_buffer;
-
-        my $desc   = '';
-        my $writer = new XML::Writer( OUTPUT => \$desc, ENCODING => 'utf-8' );
-        $writer->xmlDecl("UTF-8");
-        $writer->startTag('description');
-        $writer->dataElement( 'title', $w{template_name}->get_text() );
-        $writer->dataElement( 'text',
-            $buf->get_text( $buf->get_start_iter, $buf->get_end_iter, 1 ) );
-        $writer->endTag('description');
-        $writer->end();
-
-        $tar->add_data( 'description.xml', $desc );
-
-        $tar->write( $tfile, COMPRESS_GZIP );
-    }
-
-    $w{make_template}->destroy;
-}
-
-sub add_to_archive {
-    my ( $store, $path, $iter, $data ) = @_;
-    my ($tar) = @$data;
-
-    my $f  = $store->get( $iter, TEMPLATE_FILES_PATH );
-    my $af = $shortcuts->absolu("%PROJET/$f");
-
-    return (0) if ( $f eq 'description.xml' );
-
-    if ( -f $af ) {
-        debug "Adding to template archive: $f\n";
-        my $tf = Archive::Tar::File->new( file => $af );
-        $tf->rename($f);
-        $tar->add_files($tf);
-    }
-
-    return (0);
-}
-
-sub template_filename_verif {
-    restricted_check( $w{template_file_name}, $w{template_file_name_warning},
-        "a-zA-Z0-9_+-" );
-    my $t     = $w{template_file_name}->get_text();
-    my $tfile = $config->get('rep_modeles') . '/' . $t . ".tgz";
-    $w{mt_ok}->set_sensitive( $t && !-e $tfile );
-}
-
-sub make_template_add {
-    my $fs = Gtk3::FileSelection->new( __ "Add files to template" );
-    $fs->set_filename( $shortcuts->absolu('%PROJET/') );
-    $fs->set_select_multiple(1);
-    $fs->hide_fileop_buttons;
-
-    my $err  = 0;
-    my $resp = $fs->run();
-    if ( $resp eq 'ok' ) {
-        for my $f ( $fs->get_selections() ) {
-            $err++
-              if (
-                !defined(
-                    template_add_file(
-                        $template_files_store, $w{template_files_tree}, $f
-                    )
-                )
-              );
-        }
-    }
-    $fs->destroy();
-
-    if ($err) {
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{make_template}, 'destroy-with-parent',
-            'error', 'ok', '' );
-        $dialog->set_markup(
-            __(
-"When making a template, you can only add files that are within the project directory."
-            )
-        );
-        $dialog->run();
-        $dialog->destroy();
-    }
-}
-
-sub make_template_del {
-    my @i        = ();
-    my @selected = $w{template_files_tree}->get_selection->get_selected_rows;
-    for my $path ( @{ $selected[0] } ) {
-        push @i, $template_files_store->get_iter($path) if ($path);
-    }
-    for (@i) {
-        $template_files_store->remove($_);
-    }
-}
-
-sub n_fich {
-    my ($dir) = @_;
-
-    if ( opendir( NFICH, $dir ) ) {
-        my @f = grep { !/^(\.|__MACOSX)/ } readdir(NFICH);
-        closedir(NFICH);
-
-        return ( 1 + $#f, "$dir/$f[0]" );
-    } else {
-        debug("N_FICH : Can't open directory $dir : $!");
-        return (0);
-    }
-}
-
-sub unzip_to_temp {
-    my ($file) = @_;
-
-    my $temp_dir = tempdir( DIR => tmpdir(), CLEANUP => 1 );
-    my $error    = 0;
-
-    my @cmd;
-
-    if ( $file =~ /\.zip$/i ) {
-        @cmd = ( "unzip", "-d", $temp_dir, $file );
-    } else {
-        @cmd = ( "tar", "-x", "-v", "-z", "-f", $file, "-C", $temp_dir );
-    }
-
-    debug "Extracting archive files\nFROM: $file\nWITH: " . join( ' ', @cmd );
-    if ( open( UNZIP, "-|", @cmd ) ) {
-        while (<UNZIP>) {
-            debug $_;
-        }
-        close(UNZIP);
-    } else {
-        $error = $!;
-    }
-
-    return ( $temp_dir, $error );
 }
 
 sub source_latex_choisir {
-
-    my %oo     = @_;
-    my $texsrc = '';
-
-    if ( !$oo{nom} ) {
-        debug "ERR: Empty name for source_latex_choisir";
-        return ( 0, '' );
-    }
-
-    if ( -e $config->get('rep_projets') . "/" . $oo{nom} ) {
-        debug
-          "ERR: existing project directory $oo{nom} for source_latex_choisir";
-        return ( 0, '' );
-    }
-
-    my %bouton = ();
-
-    if ( $oo{type} ) {
-        $bouton{ $oo{type} } = 1;
-    } else {
-
-        # fenetre de choix du source latex
-
-        my $gap = read_glade('source_latex_dialog');
-
-        my $dialog = $gap->get_object('source_latex_dialog');
-
-        my $reponse = $dialog->run();
-
-        for (qw/new choix vide zip/) {
-            $bouton{$_} = $gap->get_object( 'sl_type_' . $_ )->get_active();
-            debug "Bouton $_" if ( $bouton{$_} );
-        }
-
-        $dialog->destroy();
-
-        debug "RESPONSE=$reponse";
-
-        return ( 0, '' ) if ( $reponse != 10 );
-    }
-
-    # actions apres avoir choisi le type de source latex a utiliser
-
-    if ( $bouton{new} ) {
-
-        # choix d'un modele
-
-        my $gap = read_glade( 'source_latex_modele',
-            qw/modeles_liste modeles_description model_choice_button mlist_separation/
-        );
-        my $reponse = $w{source_latex_modele}->show();
-
-        $modeles_store = Gtk3::TreeStore->new( 'Glib::String', 'Glib::String',
-            'Glib::String' );
-
-        charge_modeles( $modeles_store, undef, $config->get('rep_modeles') )
-          if ( $config->get('rep_modeles') );
-
-        charge_modeles( $modeles_store, undef, amc_specdir('models') );
-
-        $w{modeles_liste}->set_model($modeles_store);
-        my $renderer = Gtk3::CellRendererText->new;
-
-# TRANSLATORS: This is a column name for the list of available templates, when creating a new project based on a template.
-        my $column = Gtk3::TreeViewColumn->new_with_attributes( __ "template",
-            $renderer, text => MODEL_NOM );
-        $w{modeles_liste}->append_column($column);
-        $w{modeles_liste}
-          ->get_selection->signal_connect( "changed", \&source_latex_mmaj );
-
-        $w{mlist_separation}->set_position(
-            .5 * $w{mlist_separation}->get_property('max-position') );
-
-        $reponse = $w{source_latex_modele}->run();
-
-        debug "Dialog modele : $reponse";
-
-        # le modele est choisi : l'installer
-
-        my $mod;
-
-        if ($reponse) {
-            my $iter = $w{modeles_liste}->get_selection()->get_selected();
-            $mod = $modeles_store->get( $iter, MODEL_PATH ) if ($iter);
-        }
-
-        $w{source_latex_modele}->destroy();
-
-        return ( 0, '' ) if ( $reponse != 10 );
-
-        if ($mod) {
-            debug "Installing model $mod";
-            return (
-                source_latex_choisir(
-                    type   => 'zip',
-                    fich   => $mod,
-                    decode => 1,
-                    nom    => $oo{nom}
-                )
-            );
-        } else {
-            debug "No model";
-            return ( 0, '' );
-        }
-
-    } elsif ( $bouton{choix} ) {
-
-        # choisir un fichier deja present
-
-        my $gap = read_glade( 'source_latex_choix', qw/source_latex_chooser/ );
-
-        $w{source_latex_chooser}->set_current_folder($home_dir);
-
-        # default filter: all possible source files
-
-        my $filtre_all = Gtk3::FileFilter->new();
-        $filtre_all->set_name( __ "All source files" );
-        for my $m (@filter_modules) {
-            for my $p ( "AMC::Filter::register::$m"->file_patterns ) {
-                $filtre_all->add_pattern($p);
-            }
-        }
-        $w{source_latex_chooser}->add_filter($filtre_all);
-
-        # filters for each filter module
-
-        for my $m (@filter_modules) {
-            my $f = Gtk3::FileFilter->new();
-
-            my @pat = ();
-            for my $p ( "AMC::Filter::register::$m"->file_patterns ) {
-                push @pat, $p;
-                $f->add_pattern($p);
-            }
-            $f->set_name(
-# TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
-                sprintf( __("%s files"), "AMC::Filter::register::$m"->name() )
-                  . ' ('
-                  . join( ', ', @pat )
-                  . ')' );
-            $w{source_latex_chooser}->add_filter($f);
-        }
-
-        #
-
-        my $reponse = $w{source_latex_choix}->run();
-
-        my $f = clean_gtk_filenames( $w{source_latex_chooser}->get_filename() );
-
-        $w{source_latex_choix}->destroy();
-
-        return ( 0, '' ) if ( $reponse != 10 );
-
-        $texsrc = $shortcuts->relatif( $f, $oo{nom} );
-        debug "Source LaTeX $f";
-
-    } elsif ( $bouton{zip} ) {
-
-        my $fich;
-
-        if ( $oo{fich} ) {
-            $fich = $oo{fich};
-        } else {
-
-            # choisir un fichier ZIP
-
-            my $gap = read_glade( 'source_latex_choix_zip',
-                qw/source_latex_chooser_zip/ );
-
-            $w{source_latex_chooser_zip}->set_current_folder($home_dir);
-
-            my $filtre_zip = Gtk3::FileFilter->new();
-            $filtre_zip->set_name( __ "Archive (zip, tgz)" );
-            $filtre_zip->add_pattern("*.zip");
-            $filtre_zip->add_pattern("*.tar.gz");
-            $filtre_zip->add_pattern("*.tgz");
-            $filtre_zip->add_pattern("*.TGZ");
-            $filtre_zip->add_pattern("*.ZIP");
-            $w{source_latex_chooser_zip}->add_filter($filtre_zip);
-
-            my $reponse = $w{source_latex_choix_zip}->run();
-
-            $fich = clean_gtk_filenames( $w{source_latex_chooser_zip}->get_filename() );
-
-            $w{source_latex_choix_zip}->destroy();
-
-            return ( 0, '' ) if ( $reponse != 10 );
-        }
-
-        # cree un repertoire temporaire pour dezipper
-
-        my ( $temp_dir, $rv ) = unzip_to_temp($fich);
-
-        my ( $n, $suivant ) = n_fich($temp_dir);
-
-        if ( $rv || $n == 0 ) {
-            my $dialog =
-              Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-                'error', 'ok', '' );
-            $dialog->set_markup(
-                sprintf(
-                    __ "Nothing extracted from archive %s. Check it.",
-                    $fich
-                )
-            );
-            $dialog->run;
-            $dialog->destroy;
-            return ( 0, '' );
-        } else {
-
-            # unzip OK
-            # vire les repertoires intermediaires :
-
-            while ( $n == 1 && -d $suivant ) {
-                debug "Changing root directory : $suivant";
-                $temp_dir = $suivant;
-                ( $n, $suivant ) = n_fich($temp_dir);
-            }
-
-            # bouge les fichiers la ou il faut
-
-            my $hd = $config->get('rep_projets') . "/" . $oo{nom};
-
-            mkdir($hd) if ( !-e $hd );
-
-            my @archive_files;
-
-            if ( opendir( MVR, $temp_dir ) ) {
-                @archive_files = grep { !/^\./ } readdir(MVR);
-                closedir(MVR);
-            } else {
-                debug("ARCHIVE : Can't open $temp_dir : $!");
-            }
-
-            my $latex;
-
-            for my $ff (@archive_files) {
-                debug "Moving to project: $ff";
-                if ( $ff =~ /\.tex$/i ) {
-                    $latex = $ff;
-                    if ( $oo{decode} ) {
-                        debug "Decoding $ff...";
-                        move( "$temp_dir/$ff", "$temp_dir/$ff.0enc" );
-                        copy_latex( "$temp_dir/$ff.0enc", "$temp_dir/$ff" );
-                    }
-                }
-                if ( system( "mv", "$temp_dir/$ff", "$hd/$ff" ) != 0 ) {
-                    debug "ERR: Move failed: $temp_dir/$ff --> $hd/$ff -- $!";
-                    debug "(already exists)" if ( -e "$hd/$ff" );
-                }
-            }
-
-            if ($latex) {
-                $texsrc = "%PROJET/$latex";
-                debug "LaTeX found : $latex";
-            }
-
-            return ( 2, $texsrc );
-        }
-
-    } elsif ( $bouton{vide} ) {
-
-        my $hd = $config->get('rep_projets') . "/" . $oo{nom};
-
-        mkdir($hd) if ( !-e $hd );
-
-        $texsrc = 'source.tex';
-        my $sl = "$hd/$texsrc";
-
-    } else {
-        return ( 0, '' );
-    }
-
-    return ( 1, $texsrc );
-
-}
-
-sub source_latex_mmaj {
-    my $iter = $w{modeles_liste}->get_selection()->get_selected();
-    my $desc = '';
-
-    $desc = $modeles_store->get( $iter, MODEL_DESC ) if ($iter);
-    $w{modeles_description}->get_buffer->set_text($desc);
-}
-
-# copie en changeant eventuellement d'encodage
-sub copy_latex {
-    my ( $src, $dest ) = @_;
-
-    # 1) reperage du inputenc dans le source
-    my $i = '';
-    open( SRC, $src );
-  LIG: while (<SRC>) {
-        s/%.*//;
-        if (/\\usepackage\[([^\]]*)\]\{inputenc\}/) {
-            $i = $1;
-            last LIG;
-        }
-    }
-    close(SRC);
-
-    my $ie = get_enc($i);
-    my $id = get_enc( $config->get('encodage_latex') );
-    if ( $ie && $id && $ie->{iso} ne $id->{iso} ) {
-        debug "Reencoding $ie->{iso} => $id->{iso}";
-        open( SRC,  "<:encoding($ie->{iso})", $src ) or return ('');
-        open( DEST, ">:encoding($id->{iso})", $dest )
-          or close(SRC), return ('');
-        while (<SRC>) {
-            chomp;
-s/\\usepackage\[([^\]]*)\]\{inputenc\}/\\usepackage[$id->{inputenc}]{inputenc}/;
-            print DEST "$_\n";
-        }
-        close(DEST);
-        close(SRC);
-        return (1);
-    } else {
-        return ( copy( $src, $dest ) );
-    }
+    my %oo = @_;
+
+    my $create = AMC::Gui::CreateProject->new(
+        parent_window  => $w{main_window},
+        config         => $config,
+        filter_modules => \@filter_modules,
+    );
+
+    return ( $create->install_source(%oo) );
 }
 
 sub importe_source {
@@ -7204,7 +4215,7 @@ sub importe_source {
         }
     }
 
-    if ( copy_latex( $config->get_absolute('texsrc'), $dest ) ) {
+    if ( AMC::Gui::CreateProject->copy_latex( $config->get_absolute('texsrc'), $dest, $config->get('encodage_latex') ) ) {
         $config->set( 'project:texsrc', $shortcuts->relatif($dest) );
         set_source_tex();
         my $dialog = Gtk3::MessageDialog->new(
@@ -7309,66 +4320,69 @@ sub cursor_standard {
     Gtk3::main_iteration while (Gtk3::events_pending);
 }
 
+# Open project.
+#
+# if #deja, then the project is a new project to be created.
+
 sub projet_ouvre {
     my ( $proj, $deja ) = (@_);
 
     my $new_source = 0;
 
-    # ouverture du projet $proj. Si $deja==1, alors il faut le creer
+    return () if ( !$proj );
 
-    if ($proj) {
-        my ( $ok, $texsrc );
+    my ( $ok, $texsrc );
 
-        quitte_projet();
+    quitte_projet();
 
-        # choix fichier latex si nouveau projet...
-        if ($deja) {
-            ( $ok, $texsrc ) = source_latex_choisir( nom => $proj );
-            if ( !$ok ) {
-                cursor_standard;
-                return (0);
-            }
-            if ( $ok == 1 ) {
-                $new_source = 1;
-            } elsif ( $ok == 2 ) {
-                $deja = '';
-            }
+    if ($deja) {
+        # Select/create the source file
+
+        ( $ok, $texsrc ) = source_latex_choisir( nom => $proj );
+        if ( !$ok ) {
+            cursor_standard;
+            return (0);
         }
-
-        cursor_wait;
-
-        # creates project directory structure
-
-        for my $sous ( '',
-            qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports:
-          )
-        {
-            my $rep = $config->get('rep_projets') . "/$proj/$sous";
-            if ( !-x $rep ) {
-                debug "Creating directory $rep...";
-                mkdir($rep);
-            }
+        if ( $ok == 1 ) {
+            $new_source = 1;
+        } elsif ( $ok == 2 ) {
+            $deja = '';
         }
-
-        $projet{nom} = $proj;
-        $shortcuts->set( project_name => $proj );
-
-        $config->open_project($proj);
-        $config->set( 'project:texsrc', $texsrc )
-          if ( $texsrc && !$config->get('project:texsrc') );
-
-        $projet{nom} = $proj;
-
-        $w{onglets_projet}->set_sensitive(1);
-
-        valide_projet();
-
-        set_source_tex(1) if ($new_source);
-
-        cursor_standard;
-
-        return (1);
     }
+
+    cursor_wait;
+
+    # creates project directory structure
+
+    for my $sous ( '',
+        qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports:
+      )
+    {
+        my $rep = $config->get('rep_projets') . "/$proj/$sous";
+        if ( !-x $rep ) {
+            debug "Creating directory $rep...";
+            mkdir($rep);
+        }
+    }
+
+    $projet{nom} = $proj;
+    $shortcuts->set( project_name => $proj );
+
+    $config->open_project($proj);
+    $config->set( 'project:texsrc', $texsrc )
+      if ( $texsrc && !$config->get('project:texsrc') );
+
+    $projet{nom} = $proj;
+
+    $w{onglets_projet}->set_sensitive(1);
+
+    valide_projet();
+
+    set_source_tex(1) if ($new_source);
+
+    cursor_standard;
+
+    return (1);
 }
 
 sub gui_no_project {
@@ -7446,27 +4460,6 @@ sub bug_report {
 
 #######################################
 
-sub pref_change_delivery {
-    $config->set_local_keys('email_transport');
-    $prefs->reprend_pref(
-        store     => 'prefwindow',
-        prefix    => 'pref',
-        container => 'local'
-    );
-    my $transport = $config->get('local:email_transport');
-    if ($transport) {
-        for my $k (qw/sendmail SMTP/) {
-            $w{ 'email_group_' . $k }->set_sensitive( $k eq $transport );
-        }
-    } else {
-        debug "WARNING: could not retrieve email_transport!";
-    }
-}
-
-my $email_sl;
-my $email_key;
-my $email_r;
-
 sub project_email_name {
     my ($markup) = @_;
     my $pn =
@@ -7477,54 +4470,6 @@ sub project_email_name {
         return ( $pn eq $projet{nom} ? "<b>$pn</b>" : $pn );
     } else {
         return ($pn);
-    }
-}
-
-sub email_attachment_addtolist {
-    for my $f (@_) {
-        if ( ref($f) eq 'ARRAY' ) {
-            email_attachment_addtolist(@$f);
-        } else {
-            my $name = $f;
-            $name =~ s/.*\///;
-            $attachments_store->set(
-                $attachments_store->append,
-                ATTACHMENTS_FILE,
-                $shortcuts->absolu($f),
-                ATTACHMENTS_NAME,
-                $name,
-                ATTACHMENTS_FOREGROUND,
-                (
-                    -f $shortcuts->absolu($f)
-                    ? hex_color('black')
-                    : hex_color('red')
-                ),
-            );
-        }
-    }
-}
-
-sub email_attachment_add {
-    my $d = Gtk3::FileChooserDialog->new(
-        __("Attach file"),
-        $w{main_window}, 'open',
-        'gtk-cancel' => 'cancel',
-        'gtk-ok'     => 'ok'
-    );
-    $d->set_select_multiple(1);
-    my $r = $d->run;
-    if ( $r eq 'ok' ) {
-        email_attachment_addtolist( clean_gtk_filenames( $d->get_filenames ) );
-    }
-    $d->destroy();
-}
-
-sub email_attachment_remove {
-    my @selected = $w{attachments_list}->get_selection->get_selected_rows;
-    for
-      my $i ( map { $attachments_store->get_iter($_); } ( @{ $selected[0] } ) )
-    {
-        $attachments_store->remove($i) if ($i);
     }
 }
 
@@ -7549,374 +4494,19 @@ sub do_mailing {
     }->{$kind}
       || 'unknown';
 
-    if ( $kind == REPORT_PRINTED_COPY ) {
-    }
+    my @ids = AMC::Gui::Mailing->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        kind          => $kind,
+        kind_s        => $kind_s,
+        project_name  => $projet{nom},
+        report        => $projet{_report},
+        capture       => $projet{_capture},
+        association   => $projet{_association},
+        students_list => $projet{_students_list},
+    )->dialog();
 
-    if ( $kind == REPORT_ANNOTATED_PDF ) {
-
-        # are there some files to send?
-
-        $projet{_report}->begin_read_transaction('emNU');
-        my $n           = $projet{_report}->type_count(REPORT_ANNOTATED_PDF);
-        my $n_annotated = $projet{_capture}->annotated_count();
-        $projet{_report}->end_transaction('emNU');
-
-        if ( $n == 0 ) {
-            my $dialog = Gtk3::MessageDialog->new(
-                $w{main_window},
-                'destroy-with-parent',
-                'error', 'ok',
-                __("There are no annotated corrected answer sheets to send.")
-                  . " "
-                  . (
-                    $n_annotated > 0
-                    ? __(
-"Please group the annotated sheets to PDF files to be able to send them."
-                      )
-                    : __(
-"Please annotate answer sheets and group them to PDF files to be able to send them."
-                    )
-                  )
-            );
-            $dialog->run;
-            $dialog->destroy;
-
-            return ();
-        }
-    }
-
-    # check perl modules availibility
-
-    my @needs_module = (
-        qw/Email::Address Email::MIME
-          Email::Sender Email::Sender::Simple/
-    );
-    if ( $config->get('email_transport') eq 'sendmail' ) {
-        push @needs_module, 'Email::Sender::Transport::Sendmail';
-    } elsif ( $config->get('email_transport') eq 'SMTP' ) {
-        push @needs_module, 'Email::Sender::Transport::SMTP';
-    }
-    my @manque = ();
-    for my $m (@needs_module) {
-        if ( !check_install( module => $m ) ) {
-            push @manque, $m;
-        }
-    }
-    if (@manque) {
-        debug 'Mailing: Needs perl modules ' . join( ', ', @manque );
-
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-            'error', 'ok', '' );
-        $dialog->set_markup(
-            sprintf(
-                __(
-"Sending emails requires some perl modules that are not installed: %s. Please install these modules and try again."
-                ),
-                '<b>' . join( ', ', @manque ) . '</b>'
-            )
-        );
-        $dialog->run;
-        $dialog->destroy;
-
-        return ();
-    }
-
-    # STARTTLS is only available with Email::Sender >= 1.300027
-    # Warn in case it is not available
-
-    if ( $config->get('email_smtp_ssl') =~ /[^01]/ ) {
-        load "Email::Sender";
-        load "version";
-        if ( version->parse($Email::Sender::VERSION) <
-            version->parse("1.300027") )
-        {
-            my $dialog =
-              Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-                'error', 'ok', '' );
-            $dialog->set_markup(
-                __(
-"SMTP security mode \"STARTTLS\" is only available with Email::Sender version 1.300027 and over. Please install a newer version of this perl module or change SMTP security mode, and try again."
-                )
-            );
-            $dialog->run;
-            $dialog->destroy;
-            return ();
-        }
-    }
-
-    load Email::Address;
-
-    # then check a correct sender address has been set
-
-    my @sa = Email::Address->parse( $config->get('email_sender') );
-
-    if ( !@sa ) {
-        my $message;
-        if ( $config->get('email_sender') ) {
-            $message .= sprintf(
-                __("The email address you entered (%s) is not correct."),
-                $config->get('email_sender')
-              )
-              . "\n"
-              . __
-              "Please edit your preferences to correct your email address.";
-        } else {
-            $message .= __("You did not enter your email address.") . "\n"
-              . __ "Please edit the preferences to set your email address.";
-        }
-        my $dialog =
-          Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-            'error', 'ok', '' );
-        $dialog->set_markup($message);
-        $dialog->run;
-        $dialog->destroy;
-
-        return ();
-    }
-
-    # Now check (if applicable) that sendmail path is ok
-
-    if (   $config->get('email_transport') eq 'sendmail'
-        && $config->get('email_sendmail_path')
-        && !-f $config->get('email_sendmail_path') )
-    {
-        my $dialog = Gtk3::MessageDialog->new(
-            $w{main_window},
-            'destroy-with-parent',
-
-            # TRANSLATORS: Do not translate the 'sendmail' word.
-            'error', 'ok', ''
-        );
-        $dialog->set_markup(
-            sprintf(
-                __(
-"The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."
-                ),
-                $config->get('email_sendmail_path')
-            )
-        );
-        $dialog->run;
-        $dialog->destroy;
-
-        return ();
-    }
-
-    # find columns with emails in the students list file
-
-    my %cols_email = $projet{_students_list}
-      ->heads_count( sub { my @a = Email::Address->parse(@_); return (@a) } );
-    my @cols = grep { $cols_email{$_} > 0 } ( keys %cols_email );
-    $prefs->store_register( email_col => cb_model( map { $_ => $_ } (@cols) ) );
-
-    if ( !@cols ) {
-        my $dialog = Gtk3::MessageDialog->new(
-            $w{main_window},
-            'destroy-with-parent',
-            'error',
-            'ok',
-            __
-"No email addresses has been found in the students list file. You need to write the students addresses in a column of this file."
-        );
-        $dialog->run;
-        $dialog->destroy;
-
-        return ();
-    }
-
-    # which is the best column ?
-
-    my $nmax    = 0;
-    my $col_max = '';
-
-    for (@cols) {
-        if ( $cols_email{$_} > $nmax ) {
-            $nmax    = $cols_email{$_};
-            $col_max = $_;
-        }
-    }
-
-    $config->set( 'project:email_col', $col_max )
-      if ( !$config->get('email_col') );
-
-    # Then, open configuration window...
-    my $gap = read_glade(
-        'mailing',
-        qw/emails_list email_dialog label_name
-          attachments_list attachments_expander
-          /
-    );
-
-    $w{label_name}->set_text( project_email_name() );
-
-    $w{attachments_list}->set_model($attachments_store);
-    $renderer = Gtk3::CellRendererText->new;
-
-    $column = Gtk3::TreeViewColumn->new_with_attributes(
-# TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
-        __ "file",
-        $renderer,
-        text       => ATTACHMENTS_NAME,
-        foreground => ATTACHMENTS_FOREGROUND,
-    );
-    $w{attachments_list}->append_column($column);
-
-    $w{attachments_list}->set_tooltip_column(ATTACHMENTS_FILE);
-    $w{attachments_list}->get_selection->set_mode('multiple');
-
-    #
-
-    $w{emails_list}->set_model($emails_store);
-    $renderer = Gtk3::CellRendererText->new;
-
-# TRANSLATORS: This is the title of a column containing copy numbers in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "copy", $renderer,
-        text => EMAILS_SC );
-    $w{emails_list}->append_column($column);
-    $renderer = Gtk3::CellRendererText->new;
-
-# TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "name", $renderer,
-        text => EMAILS_NAME );
-    $w{emails_list}->append_column($column);
-    $renderer = Gtk3::CellRendererText->new;
-
-# TRANSLATORS: This is the title of a column containing students email addresses in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "email", $renderer,
-        text => EMAILS_EMAIL );
-    $w{emails_list}->append_column($column);
-    $renderer = Gtk3::CellRendererText->new;
-
-# TRANSLATORS: This is the title of a column containing mailing status (not sent, already sent, failed) in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "status", $renderer,
-        text => EMAILS_STATUS );
-    $w{emails_list}->append_column($column);
-
-    $projet{_report}->begin_read_transaction('emCC');
-    if ( $kind == REPORT_ANNOTATED_PDF ) {
-        $email_key = $projet{_association}->variable('key_in_list');
-        $email_r = $projet{_report}->get_associated_type($kind);
-    } else {
-        $email_key = $config->get('liste_key');
-        $email_r = $projet{_report}->get_preassociated_type($kind);
-    }
-    $emails_store->clear;
-    for my $i (@$email_r) {
-        my ($s) = $projet{_students_list}
-          ->data( $email_key, $i->{id}, test_numeric => 1 );
-        my @sc = $projet{_association}->real_back( $i->{id} );
-        $emails_store->set(
-            $emails_store->append,
-            EMAILS_ID,
-            $i->{id},
-            EMAILS_EMAIL,
-            '',
-            EMAILS_NAME,
-            $s->{_ID_},
-            EMAILS_SC,
-            ( defined( $sc[0] ) ? pageids_string(@sc) : "[" . $i->{id} . "]" ),
-            EMAILS_STATUS,
-            (
-                $i->{mail_status} == REPORT_MAIL_OK ? __("done")
-                : $i->{mail_status} == REPORT_MAIL_FAILED
-                ? __("failed")
-                : ""
-            ),
-        );
-    }
-    $w{emails_failed} = [
-        map    { $_->{id} }
-          grep { $_->{mail_status} == REPORT_MAIL_FAILED }
-          (@$email_r)
-    ];
-
-    $projet{_report}->end_transaction('emCC');
-
-    $w{emails_list}->get_selection->set_mode('multiple');
-    $w{emails_list}->get_selection->select_all;
-
-    $attachments_store->clear;
-    email_attachment_addtolist( @{ $config->get('email_attachment') } );
-
-    $w{attachments_expander}
-      ->set_expanded( @{ $config->get('email_attachment') } ? 1 : 0 );
-
-    if ( $config->get('conserve_taille') ) {
-        AMC::Gui::WindowSize::size_monitor(
-            $w{email_dialog},
-            {
-                config => $config,
-                key    => 'global:mailing_window_size'
-            }
-        );
-    }
-
-    $prefs->transmet_pref( $gap, prefix => 'email', root => 'project:' );
-    $prefs->transmet_pref(
-        $gap,
-        prefix => 'emailcat',
-        root   => "project:" . $kind_s
-    );
-    my $resp = $w{email_dialog}->run;
-    my @ids  = ();
-    if ( $resp == 1 ) {
-        $prefs->reprend_pref( prefix => 'email' );
-        $prefs->reprend_pref(
-            prefix => 'emailcat',
-            root   => "project:" . $kind_s
-        );
-
-        # get selection
-        my @selected = $w{emails_list}->get_selection->get_selected_rows;
-        @selected = @{ $selected[0] };
-        for my $i (@selected) {
-            my $iter = $emails_store->get_iter($i);
-            push @ids, $emails_store->get( $iter, EMAILS_ID );
-        }
-
-        # get attachments filenames
-        my @f    = ();
-        my $iter = $attachments_store->get_iter_first;
-        my $ok   = defined($iter);
-        while ($ok) {
-            push @f,
-              $shortcuts->relatif(
-                $attachments_store->get( $iter, ATTACHMENTS_FILE ) );
-            $ok = $attachments_store->iter_next($iter);
-        }
-        if (@f) {
-            $config->set( 'project:email_attachment', [@f] );
-        } else {
-            $config->set( 'project:email_attachment', [] );
-        }
-    }
-    $w{email_dialog}->destroy;
-
-    # are all attachments present?
-    if ( $resp == 1 ) {
-        my @missing = grep { !-f $shortcuts->absolu($_) }
-          ( @{ $config->get('email_attachment') } );
-        if (@missing) {
-            my $dialog = Gtk3::MessageDialog->new(
-                $w{main_window},
-                'destroy-with-parent',
-                'error', 'ok',
-                __(
-"Some files you asked to be attached to the emails are missing:"
-                  )
-                  . "\n"
-                  . join( "\n", @missing ) . "\n"
-                  . __(
-"Please create them or remove them from the list of attached files."
-                  )
-            );
-            $dialog->run();
-            $dialog->destroy();
-            $resp = 0;
-        }
-    }
-
-    if ( $resp == 1 ) {
+    if ( @ids ) {
 
         # writes the list of copies to send in a temporary file
         my $fh = File::Temp->new(
@@ -8032,97 +4622,16 @@ sub do_mailing {
     }
 }
 
-sub email_change_col {
-    $config->set_local_keys('email_col');
-    $prefs->reprend_pref( prefix => 'email', container => 'local' );
-
-    my $i  = $emails_store->get_iter_first;
-    my $ok = defined($i);
-    while ($ok) {
-        my ($s) = $projet{_students_list}->data(
-            $email_key,
-            $emails_store->get( $i, EMAILS_ID ),
-            test_numeric => 1
-        );
-        $emails_store->set( $i, EMAILS_EMAIL,
-            $s->{ $config->get('local:email_col') } );
-        $ok = $emails_store->iter_next($i);
-    }
-}
-
-sub mailing_select_failed {
-    my $select = $w{emails_list}->get_selection;
-    my $model  = $w{emails_list}->get_model();
-    $select->unselect_all();
-    for my $id ( @{ $w{emails_failed} } ) {
-        $select->select_iter( model_id_to_iter( $model, EMAILS_ID, $id ) );
-    }
-}
-
-sub mailing_set_project_name {
-    my $dialog = Gtk3::Dialog->new(
-        __("Set exam name"), $w{''},
-        ['destroy-with-parent'],
-        'gtk-cancel' => 'cancel',
-        'gtk-ok'     => 'ok',
-    );
-    $dialog->set_default_response('ok');
-
-    my $t = Gtk3::Grid->new();
-    my $widget;
-    $t->attach( Gtk3::Label->new( __ "Examination name" ), 0, 0, 1, 1 );
-    $widget = Gtk3::Entry->new();
-    $w{set_name_x_nom_examen} = $widget;
-    $t->attach( $widget, 1, 0, 1, 1 );
-    $t->attach( Gtk3::Label->new( __ "Code (short name) for examination" ),
-        0, 1, 1, 1 );
-    $widget = Gtk3::Entry->new();
-    $w{set_name_x_code_examen} = $widget;
-    $t->attach( $widget, 1, 1, 1, 1 );
-
-    $t->show_all;
-    $dialog->get_content_area()->add($t);
-
-    $prefs->transmet_pref( '', prefix => 'set_name', root => 'project:' );
-
-    my $response = $dialog->run;
-
-    if ( $response eq 'ok' ) {
-        $prefs->reprend_pref( prefix => 'set_name' );
-        $w{label_name}->set_text( project_email_name() );
-    }
-
-    $dialog->destroy;
-}
-
 sub send_subjects_config {
-    my $gap = read_glade( 'studentslist', qw/sl_f_listeetudiants/ );
-    $w{students_list_gui} = $gap;
 
-    $prefs->transmet_pref(
-        $gap,
-        prefix => 'sl',
-        keys   => [ 'listeetudiants', 'liste_key' ]
-    );
-    send_subjects_config_file();
-    $prefs->transmet_pref(
-        $gap,
-        prefix => 'sl',
-        keys   => ['liste_key']
-    );
-    $w{studentslist}->run;
-    $prefs->reprend_pref( prefix => 'sl' );
-    $prefs->transmet_pref(
-        $gui,
-        prefix => 'pref_assoc',
-        keys   => ['project:liste_key']
-    );
-    $w{studentslist}->destroy;
-}
+    AMC::Gui::StudentsList->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        callback      => \&valide_liste,
+        main_gui      => $gui,
+        main_prefs    => $prefs,
+    )->dialog_with_key();
 
-sub send_subjects_config_file {
-    $prefs->reprend_pref( prefix => 'sl' );
-    valide_liste( nolabel => 1, gui => $w{students_list_gui}, prefix => 'sl' );
 }
 
 #######################################
@@ -8130,67 +4639,12 @@ sub send_subjects_config_file {
 sub choose_columns {
     my ($type) = @_;
 
-    my $l = $config->get( 'export_' . $type . '_columns' );
-
-    my $i         = 1;
-    my %selected  = map { $_ => $i++ } ( split( /,+/, $l ) );
-    my %order     = ();
-    my @available = (
-        'student.copy', 'student.key', 'student.name',
-        $projet{_students_list}->heads()
+    AMC::Gui::ChooseColumns->new(
+        parent_window => $w{main_window},
+        config        => $config,
+        type          => $type,
+        students_list => $projet{_students_list},
     );
-    $i = 0;
-    for (@available) {
-        if ( $selected{$_} ) {
-            $i = $selected{$_};
-        } else {
-            $i .= '1';
-        }
-        $order{$_} = $i;
-    }
-    @available = sort { $order{$a} cmp $order{$b} } @available;
-
-    my $gcol =
-      read_glade( 'choose_columns', qw/columns_list columns_instructions/ );
-
-    my $columns_store = Gtk3::ListStore->new( 'Glib::String', 'Glib::String' );
-    $w{columns_list}->set_model($columns_store);
-    my $renderer = Gtk3::CellRendererText->new;
-
-    my $column = Gtk3::TreeViewColumn->new_with_attributes(
-# TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
-        __ "column",
-        $renderer,
-        text => 0
-    );
-    $w{columns_list}->append_column($column);
-
-    my @selected_iters = ();
-    for my $c (@available) {
-        my $name = $c;
-        $name = __("<full name>")          if ( $c eq 'student.name' );
-        $name = __("<student identifier>") if ( $c eq 'student.key' );
-        $name = __("<student copy>")       if ( $c eq 'student.copy' );
-        my $iter = $columns_store->append;
-        $columns_store->set( $iter, 0, $name, 1, $c );
-        push @selected_iters, $iter if ( $selected{$c} );
-    }
-    $w{columns_list}->set_reorderable(1);
-    $w{columns_list}->get_selection->set_mode('multiple');
-    for (@selected_iters) { $w{columns_list}->get_selection->select_iter($_); }
-
-    my $resp = $w{choose_columns}->run;
-    if ( $resp == 1 ) {
-        my @k = ();
-        my @s = $w{columns_list}->get_selection->get_selected_rows;
-        for my $i ( @{ $s[0] } ) {
-            push @k, $columns_store->get( $columns_store->get_iter($i), 1 )
-              if ($i);
-        }
-        $config->set( 'export_' . $type . '_columns', join( ',', @k ) );
-    }
-
-    $w{choose_columns}->destroy;
 }
 
 sub choose_columns_current {
@@ -8341,186 +4795,12 @@ sub plugins_add {
 
 #######################################
 
-sub file_size {
-    my ( $oo, @files ) = @_;
-    my $s = 0;
-    $oo->{recursive}--;
-  FILE: for my $f (@files) {
-        if ( -f $f ) {
-            $s += -s $f;
-        } elsif ( -d $f ) {
-            if ( $oo->{recursive} >= 0 ) {
-                if ( opendir( SDIR, $f ) ) {
-                    my @dir_files = map { "$f/$_"; }
-                      grep { !$oo->{pattern} || /$oo->{pattern}/ }
-                      grep { !/^\.{1,2}$/ } readdir(SDIR);
-                    closedir(SDIR);
-                    $s += file_size( {%$oo}, @dir_files );
-                }
-            }
-        }
-    }
-    return ($s);
-}
-
-my @size_units = ( 'k', 'M', 'G', 'T', 'P' );
-
-sub human_readable_size {
-    my ($s) = @_;
-    my $i = 0;
-    while ( $s >= 1024 ) {
-        $s /= 1024;
-        $i++;
-    }
-    if ( $i == 0 ) {
-        return ($s);
-    } else {
-        return ( sprintf( '%.3g%s', $s, $size_units[ $i - 1 ] ) );
-    }
-}
-
-my @cleanup_components = (
-    {
-        id    => 'zooms',
-        short => __("zooms"),
-        text  => __(
-"boxes images are extracted from the scans while processing automatic data capture. They can be removed if you don't plan to use the zooms dialog to check and correct boxes categorization. They can be recovered processing again automatic data capture from the same scans."
-        ),
-        size => sub {
-            return (
-                file_size( { recursive => 5 },
-                    $shortcuts->absolu('%PROJET/cr/zooms') ) +
-                  $projet{_capture}->zooms_total_size_transaction()
-            );
-        },
-        action => sub {
-            return (
-                remove_tree(
-                    $shortcuts->absolu('%PROJET/cr/zooms'),
-                    { verbose => 0, safe => 1, keep_root => 1 }
-                ) + $projet{_capture}->zooms_cleanup_transaction()
-            );
-        },
-    },
-    {
-        id    => 'matching_reports',
-        short => __("layout reports"),
-        text  => __(
-"these images are intended to show how the corner marks have been recognized and positioned on the scans. They can be safely removed once the scans are known to be well-recognized. They can be recovered processing again automatic data capture from the same scans."
-        ),
-        size => sub {
-            return (
-                file_size(
-                    { pattern => '^page-', recursive => 1 },
-                    $shortcuts->absolu('%PROJET/cr/')
-                )
-            );
-        },
-        action => sub {
-            my $dir = $shortcuts->absolu('%PROJET/cr/');
-            if ( opendir( CRDIR, $dir ) ) {
-                my @files = map { "$dir/$_" } grep { /^page-/ } readdir(CRDIR);
-                closedir(CRDIR);
-                return ( unlink(@files) );
-            } else {
-                return (0);
-            }
-        },
-    },
-    {
-        id    => 'annotated_pages',
-        short => __("annotated pages"),
-        text  => __(
-"jpeg annotated pages are made before beeing assembled to PDF annotated files. They can safely be removed, and will be recovered automatically the next time annotation will be requested."
-        ),
-        size => sub {
-            return (
-                file_size(
-                    { recursive => 5 },
-                    $shortcuts->absolu('%PROJET/cr/corrections/jpg')
-                )
-            );
-        },
-        action => sub {
-            return (
-                remove_tree(
-                    $shortcuts->absolu('%PROJET/cr/corrections/jpg'),
-                    { verbose => 0, safe => 1, keep_root => 1 }
-                )
-            );
-        },
-    },
-);
-
-sub table_sep {
-    my ( $t, $y, $x ) = @_;
-    my $sep = Gtk3::HSeparator->new();
-    $t->attach( $sep, 0, $x, $y, $y + 1, [ "expand", "fill" ], [], 0, 0 );
-}
-
 sub cleanup_dialog {
-    my %files;
-    my %cb;
-
-    my $gap = read_glade('cleanup');
-
-    my $dialog   = $gap->get_object('cleanup');
-    my $notebook = $gap->get_object('components');
-    for my $c (@cleanup_components) {
-        my $t = $c->{text};
-        my $s = undef;
-        if ( $c->{size} ) {
-            $s = &{ $c->{size} }();
-            $t .= "\n"
-              . __("Total size of concerned files:") . " "
-              . human_readable_size($s);
-        }
-        my $label = Gtk3::Label->new($t);
-        $label->set_justify('left');
-        $label->set_max_width_chars(50);
-        $label->set_line_wrap(1);
-        $label->set_line_wrap_mode('word');
-
-        my $check = Gtk3::CheckButton->new;
-        $c->{check} = $check;
-        my $short_label = Gtk3::Label->new( $c->{short} );
-        $short_label->set_justify('center');
-        $short_label->set_sensitive( !( defined($s) && $s == 0 ) );
-        my $hb = Gtk3::HBox->new();
-        $hb->pack_start( $check,       FALSE, FALSE, 0 );
-        $hb->pack_start( $short_label, TRUE,  TRUE,  0 );
-        $hb->show_all;
-
-        $notebook->append_page_menu( $label, $hb, undef );
-    }
-    $notebook->show_all;
-
-    my $reponse = $dialog->run();
-
-    for my $c (@cleanup_components) {
-        $c->{active} = $c->{check}->get_active();
-    }
-
-    $dialog->destroy();
-    Gtk3::main_iteration while (Gtk3::events_pending);
-
-    debug "RESPONSE=$reponse";
-
-    return () if ( $reponse != 10 );
-
-    my $n = 0;
-
-    for my $c (@cleanup_components) {
-        if ( $c->{active} ) {
-            debug "Removing " . $c->{id} . " ...";
-            $n += &{ $c->{action} };
-        }
-    }
-
-    $dialog = Gtk3::MessageDialog->new( $w{main_window}, 'destroy-with-parent',
-        'info', 'ok', __("%s files were removed."), $n );
-    $dialog->run;
-    $dialog->destroy;
+    AMC::Gui::Cleanup->new(
+        config        => $config,
+        parent_window => $w{main_window},
+        capture       => $projet{_capture}
+    );
 }
 
 #######################################

@@ -18,7 +18,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
-            <signal name="clicked" handler="saisie_auto_annule" swapped="no"/>
+            <signal name="clicked" handler="cancel" swapped="no"/>
           </object>
         </child>
         <child>
@@ -29,7 +29,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
-            <signal name="clicked" handler="saisie_auto_ok" swapped="no"/>
+            <signal name="clicked" handler="ok" swapped="no"/>
             <style>
               <class name="suggested-action"/>
             </style>
@@ -118,7 +118,7 @@
                           <object class="GtkComboBox" id="saisie_auto_c_auto_capture_mode">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <signal name="changed" handler="saisie_auto_mode_update" swapped="no"/>
+                            <signal name="changed" handler="auto_mode_update" swapped="no"/>
                             <child>
                               <object class="GtkCellRendererText" id="cellrenderertext2"/>
                               <attributes>
@@ -138,7 +138,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <signal name="clicked" handler="saisie_auto_info" swapped="no"/>
+                            <signal name="clicked" handler="info" swapped="no"/>
                             <child>
                               <object class="GtkImage" id="image1">
                                 <property name="visible">True</property>

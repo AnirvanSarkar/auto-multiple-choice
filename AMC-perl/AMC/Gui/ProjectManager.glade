@@ -16,7 +16,6 @@
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="role">amc-choix-projet</property>
-    <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <property name="startup_id">amc-choix-projet</property>
     <child type="titlebar">
@@ -30,7 +29,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="clicked" handler="projet_charge_non" swapped="no"/>
+            <signal name="clicked" handler="cancel" swapped="no"/>
             <child>
               <object class="GtkBox" id="hbox29">
                 <property name="visible">True</property>
@@ -69,7 +68,7 @@
             <property name="use_action_appearance">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="clicked" handler="projet_charge_nouveau" swapped="no"/>
+            <signal name="clicked" handler="new_project" swapped="no"/>
             <child>
               <object class="GtkBox" id="hbox27">
                 <property name="visible">True</property>
@@ -118,7 +117,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
-            <signal name="clicked" handler="projet_charge_ok" swapped="no"/>
+            <signal name="clicked" handler="open_ok" swapped="no"/>
             <style>
               <class name="suggested-action"/>
             </style>
@@ -146,7 +145,7 @@
                 <property name="use_action_appearance">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="projet_liste_renomme" swapped="no"/>
+                <signal name="clicked" handler="rename_project" swapped="no"/>
                 <child>
                   <object class="GtkBox" id="hbox28">
                     <property name="visible">True</property>
@@ -192,7 +191,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="image">image2</property>
-                <signal name="clicked" handler="projet_liste_clone" swapped="no"/>
+                <signal name="clicked" handler="clone_project" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -207,7 +206,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="projet_liste_supprime" swapped="no"/>
+                <signal name="clicked" handler="delete_project" swapped="no"/>
                 <style>
                   <class name="destructive-action"/>
                 </style>
@@ -225,7 +224,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="projet_mv_no" swapped="no"/>
+                <signal name="clicked" handler="rename_cancel" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -240,7 +239,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="projet_mv_yes" swapped="no"/>
+                <signal name="clicked" handler="rename_ok" swapped="no"/>
                 <style>
                   <class name="suggested-action"/>
                 </style>
@@ -301,8 +300,8 @@
                     <property name="can_focus">False</property>
                     <property name="action">select-folder</property>
                     <property name="title" translatable="yes">Projects directory</property>
-                    <signal name="current-folder-changed" handler="project_set_directory" swapped="no"/>
-                    <signal name="file-set" handler="project_set_directory" swapped="no"/>
+                    <signal name="current-folder-changed" handler="set_directory" swapped="no"/>
+                    <signal name="file-set" handler="set_directory" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -348,7 +347,7 @@
                         <property name="can_focus">False</property>
                         <property name="min_children_per_line">1</property>
                         <property name="activate_on_single_click">False</property>
-                        <signal name="child-activated" handler="projects_list_select" swapped="no"/>
+                        <signal name="child-activated" handler="select_item" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -424,7 +423,7 @@
                     <property name="invisible_char">•</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="secondary_icon_activatable">False</property>
-                    <signal name="changed" handler="projet_nom_verif" swapped="no"/>
+                    <signal name="changed" handler="check_project_name" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>

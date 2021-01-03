@@ -38,7 +38,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="choix_postcorrect_cancel" swapped="no"/>
+                <signal name="clicked" handler="cancel" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -54,7 +54,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="choix_postcorrect_ok" swapped="no"/>
+                <signal name="clicked" handler="ok" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -113,7 +113,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="postcorrect_previous" swapped="no"/>
+                    <signal name="clicked" handler="previous" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -132,9 +132,9 @@
                     <property name="adjustment">adjustment1</property>
                     <property name="snap_to_ticks">True</property>
                     <property name="numeric">True</property>
-                    <signal name="change-value" handler="postcorrect_change" swapped="no"/>
-                    <signal name="changed" handler="postcorrect_change" swapped="no"/>
-                    <signal name="preedit-changed" handler="postcorrect_change" swapped="no"/>
+                    <signal name="change-value" handler="change" swapped="no"/>
+                    <signal name="changed" handler="change" swapped="no"/>
+                    <signal name="preedit-changed" handler="change" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -153,7 +153,7 @@
                     <property name="adjustment">adjustment2</property>
                     <property name="snap_to_ticks">True</property>
                     <property name="numeric">True</property>
-                    <signal name="value-changed" handler="postcorrect_change_copy" swapped="no"/>
+                    <signal name="value-changed" handler="change_copy" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -169,7 +169,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="postcorrect_next" swapped="no"/>
+                    <signal name="clicked" handler="next" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

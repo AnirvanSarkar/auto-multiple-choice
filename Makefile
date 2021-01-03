@@ -78,20 +78,17 @@ print-%: FORCE
 BINARIES ?= AMC-detect AMC-buildpdf AMC-pdfformfields
 
 MODS=AMC-*.pl
-GLADE_FROMIN:=$(basename $(wildcard AMC-gui-*.glade.in))
-GLADE_SIMPLE:=$(filter-out $(GLADE_FROMIN),$(wildcard AMC-gui-*.glade))
-GLADE=$(GLADE_FROMIN) $(GLADE_SIMPLE)
 STY=doc/sty/automultiplechoice.sty
 DTX=doc/sty/automultiplechoice.dtx
 MOS=$(wildcard I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
 SUBMODS=$(notdir $(shell ls doc/modeles))
-
+GLADE_IN=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
 DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
 # list *.in files for @/VAR/@ substitution
 
-FROM_IN=auto-multiple-choice auto-multiple-choice.desktop $(GLADE_FROMIN) AMC-gui.pl AMC-latex-link.pl AMC-mailing.pl AMC-perl/AMC/Basic.pm doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.pl AMC-latex-link.pl AMC-mailing.pl AMC-perl/AMC/Basic.pm $(GLADE_IN:.glade.in=.glade) doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
 
 # Is this a precomp tarball? If so, the PRECOMP file is present.
 
@@ -242,7 +239,6 @@ endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODSDIR)/exec
 	install    -m 0755 $(USER_GROUP) $(MODS) $(DESTDIR)/$(MODSDIR)/perl
 	install    -m 0755 $(USER_GROUP) $(BINARIES) $(DESTDIR)/$(MODSDIR)/exec
-	install    -m 0644 $(USER_GROUP) $(GLADE) $(DESTDIR)/$(MODSDIR)/perl
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDIR)
 	install    -m 0644 $(USER_GROUP) $(STY) $(DESTDIR)/$(TEXDIR)
 ifneq ($(DESKTOPDIR),)

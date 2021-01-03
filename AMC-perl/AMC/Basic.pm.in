@@ -25,8 +25,9 @@ package AMC::Basic;
 
 use Locale::gettext ':libintl_h';
 
-use File::Temp;
+use File::Temp qw/ tempdir /;
 use File::Spec;
+use File::Spec::Functions qw/tmpdir/;
 use IO::File;
 use IPC::Open3;
 use Fcntl qw(:flock :seek);
@@ -50,7 +51,7 @@ BEGIN {
 
     @ISA = qw(Exporter);
     @EXPORT =
-      qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &system_debug &magick_module &use_gm_command &magick_perl_module &debug &debug_raw &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &studentids_string_filename &format_date &cb_model &get_active_id &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &blob_to_file &amc_component &annotate_source_change &join_nonempty &printable &string_to_usascii &string_to_filename &show_utf8 &path_to_filename &free_disk_mo &dir_contents_u &clean_gtk_filenames);
+      qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &attention &model_id_to_iter &commande_accessible &system_debug &magick_module &use_gm_command &magick_perl_module &debug &debug_raw &debug_and_stderr &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old &new_filename &pack_args &unpack_args &__ &__p &translate_column_title &translate_id_name &pageids_string &studentids_string &studentids_string_filename &format_date &cb_model &get_active_id &COMBO_ID &COMBO_TEXT &check_fonts &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content &blob_to_file &amc_component &annotate_source_change &join_nonempty &printable &string_to_usascii &string_to_filename &show_utf8 &path_to_filename &free_disk_mo &dir_contents_u &clean_gtk_filenames &glib_filename &n_fich &unzip_to_temp );
     %EXPORT_TAGS = ();    # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -600,6 +601,47 @@ sub new_filename {
     }
 }
 
+sub n_fich {
+    my ($dir) = @_;
+
+    if ( opendir( NFICH, $dir ) ) {
+        my @f = grep { !/^(\.|__MACOSX)/ } readdir(NFICH);
+        closedir(NFICH);
+
+        return ( 1 + $#f, "$dir/$f[0]" );
+    } else {
+        debug("N_FICH : Can't open directory $dir : $!");
+        return (0);
+    }
+}
+
+sub unzip_to_temp {
+    my ($file) = @_;
+
+    my $temp_dir = tempdir( DIR => tmpdir(), CLEANUP => 1 );
+    my $error    = 0;
+
+    my @cmd;
+
+    if ( $file =~ /\.zip$/i ) {
+        @cmd = ( "unzip", "-d", $temp_dir, $file );
+    } else {
+        @cmd = ( "tar", "-x", "-v", "-z", "-f", $file, "-C", $temp_dir );
+    }
+
+    debug "Extracting archive files\nFROM: $file\nWITH: " . join( ' ', @cmd );
+    if ( open( UNZIP, "-|", @cmd ) ) {
+        while (<UNZIP>) {
+            debug $_;
+        }
+        close(UNZIP);
+    } else {
+        $error = $!;
+    }
+
+    return ( $temp_dir, $error );
+}
+
 sub pack_args {
     my @args    = @_;
     my $pack_fh = new File::Temp(
@@ -745,8 +787,12 @@ sub annotate_source_change {
 }
 
 sub __($) {
-    my $t = $localisation->get(shift);
-    return($t);
+    if($localisation) {
+        my $t = $localisation->get(shift);
+        return($t);
+    } else {
+        die "Needs use_gettext before __(".shift.")";
+    }
 }
 
 sub __g($) {
@@ -917,6 +963,11 @@ sub string_to_filename {
 sub path_to_filename {
     my ( $volume, $directories, $file ) = File::Spec->splitpath(@_);
     return ($file);
+}
+
+sub glib_filename {
+    my ($n) = @_;
+    return ( Glib::filename_display_name($n) );
 }
 
 sub clean_gtk_filenames {
