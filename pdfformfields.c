@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
         GList *list = poppler_page_get_form_field_mapping(poppler_document_get_page(document,id_page));
         for (int i=0; i<g_list_length(list); i++) {
 
-            PopplerFormFieldMapping *f = g_list_nth_data(list, i);
+            PopplerFormFieldMapping *f = (PopplerFormFieldMapping *) g_list_nth_data(list, i);
             // printf("field found, id: %d, name: %s\n",poppler_form_field_get_id(f->field),poppler_form_field_get_name(f->field));
             PopplerFormFieldType type = poppler_form_field_get_field_type(f->field);
 
