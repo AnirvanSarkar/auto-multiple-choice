@@ -563,7 +563,7 @@ void calage(cv::Mat src, cv::Mat illustr,
 
   printf("Detected connected components:\n");
 
-  for(int i = 0; i < contours.size(); i++) {
+  for(vector<vector<cv::Point> >::size_type i = 0; i < contours.size(); i++) {
     cv::Rect rect = cv::boundingRect(cv::Mat(contours[i]));
 
     /* count connected components that are in the content area of the
