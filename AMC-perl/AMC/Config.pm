@@ -363,7 +363,8 @@ sub defaults {
 
 # TRANSLATORS: Body text of the emails which can be sent to the students to give them their subject.
         df_subjectemail_email_text => __
-"Please find enclosed your question sheet.\nRegards.",
+            "Please find enclosed your question sheet.\nRegards.",
+        df_subjectemail_email_use_html => '',
 
 # TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
         df_annotatedemail_email_subject => __ "Exam result",
@@ -371,6 +372,7 @@ sub defaults {
 # TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
         df_annotatedemail_email_text => __
 "Please find enclosed your annotated completed answer sheet.\nRegards.",
+        df_annotatedemail_email_use_html => '',
 
         email_delay => 0,
 
