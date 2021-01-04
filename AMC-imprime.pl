@@ -109,7 +109,7 @@ my $layout = $data->module('layout');
 my $report = $data->module('report');
 
 my $students = '';
-utf8::downgrade($students_list);
+
 if ( -f $students_list ) {
     $students =
       AMC::NamesFile::new( $students_list, identifiant => $students_list_key );
@@ -128,6 +128,8 @@ if ($fich_nums) {
     @es = $layout->query_list('students');
     $layout->end_transaction('prST');
 }
+
+debug( @es . " sheets to print" );
 
 my $cups;
 
