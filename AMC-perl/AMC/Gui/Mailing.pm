@@ -227,10 +227,10 @@ sub dialog {
     $emails_list->get_selection->set_mode('multiple');
     $emails_list->get_selection->select_all;
 
-    $self->attachment_addtolist( @{ $self->get('email_attachment') } );
+    $self->attachment_addtolist( @{ $self->get("project:$self->{kind_s}/email_attachment") } );
 
     $self->get_ui('attachments_expander')
-      ->set_expanded( @{ $self->get('email_attachment') } ? 1 : 0 );
+      ->set_expanded( @{ $self->get("project:$self->{kind_s}/email_attachment") } ? 1 : 0 );
 
     $self->{prefs}->transmet_pref( $self->{main}, prefix => 'email', root => 'project:' );
     $self->{prefs}->transmet_pref(
@@ -270,9 +270,9 @@ sub dialog {
             $ok = $attachments_store->iter_next($iter);
         }
         if (@f) {
-            $self->set( 'project:email_attachment', [@f] );
+            $self->set( "project:$self->{kind_s}/email_attachment", [@f] );
         } else {
-            $self->set( 'project:email_attachment', [] );
+            $self->set( "project:$self->{kind_s}/email_attachment", [] );
         }
     }
     $self->get_ui('email_dialog')->destroy;
@@ -280,7 +280,7 @@ sub dialog {
     # are all attachments present?
     if ( $resp == 1 ) {
         my @missing = grep { !-f $self->absolu($_) }
-          ( @{ $self->get('email_attachment') } );
+          ( @{ $self->get("project:$self->{kind_s}/email_attachment") } );
         if (@missing) {
             my $dialog = Gtk3::MessageDialog->new(
                 $self->{parent_window},

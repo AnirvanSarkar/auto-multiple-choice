@@ -365,6 +365,7 @@ sub defaults {
         df_subjectemail_email_text => __
             "Please find enclosed your question sheet.\nRegards.",
         df_subjectemail_email_use_html => '',
+        df_subjectemail_email_attachment => [],
 
 # TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
         df_annotatedemail_email_subject => __ "Exam result",
@@ -373,6 +374,7 @@ sub defaults {
         df_annotatedemail_email_text => __
 "Please find enclosed your annotated completed answer sheet.\nRegards.",
         df_annotatedemail_email_use_html => '',
+        df_annotatedemail_email_attachment => [],
 
         email_delay => 0,
 
@@ -456,7 +458,6 @@ sub defaults {
         allocate_ids      => 0,
 
         email_col        => '',
-        email_attachment => [],
 
         subjectemail   => {},
         annotatedemail => {},
@@ -548,16 +549,21 @@ sub set_global_option_to_default {
             if ( ref( $self->{o_default}->{$key} ) eq 'ARRAY' ) {
                 my ( $kind, @values ) = @{ $self->{o_default}->{$key} };
 
-              # [ 'command' , <commands> ] --> choose the first existing command
-                if ( $kind eq 'command' ) {
-                    $self->{global}->{$key} = commande_accessible( \@values );
-                    if ( !$self->{global}->{$key} ) {
-                        debug
-"No available command for option $key: using the first one";
-                        $self->{global}->{$key} = $values[0];
+                if($kind) {
+                    # [ 'command' , <commands> ] --> choose the first
+                    # existing command
+                    if ( $kind eq 'command' ) {
+                        $self->{global}->{$key} = commande_accessible( \@values );
+                        if ( !$self->{global}->{$key} ) {
+                            debug
+                                "No available command for option $key: using the first one";
+                            $self->{global}->{$key} = $values[0];
+                        }
+                    } else {
+                        debug "ERR: unknown option kind : $kind";
                     }
                 } else {
-                    debug "ERR: unknown option kind : $kind";
+                    $self->{global}->{$key} = [];
                 }
             } elsif ( ref( $self->{o_default}->{$key} ) eq 'HASH' ) {
 

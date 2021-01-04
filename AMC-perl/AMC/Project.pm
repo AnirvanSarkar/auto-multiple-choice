@@ -975,7 +975,7 @@ sub mailing {
         $self->{config}->get('email_delay'),
     );
 
-    for ( @{ $self->{config}->get('email_attachment') } ) {
+    for ( @{ $self->{config}->get("project:$oo{kind_s}/email_attachment") } ) {
         push @mailing_args, "--attach",
           $self->{config}->{shortcuts}->absolu($_);
     }
