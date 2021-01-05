@@ -1,38 +1,28 @@
-# Auto Multiple Choice
-# Copyright 2008-2021 Alexis Bienvenüe
-# This file is distributed under the same license as the AMC software
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.2.2016.022902 (r:e6c431add948)\n"
-"Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2021-01-05 09:33 +0100\n"
-"PO-Revision-Date: 2020-12-09 17:00+0100\n"
-"Last-Translator: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
-"Language-Team: Hiroto Kagotani <hiroto.kagotani@gmail.com>\n"
-"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-SourceCharset: utf-8\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: AutoMultipleChoice\n"
+"Language: ja\n"
 
 #. TRANSLATORS: Message displayed when not all scans are recognized (AMC don't know which subject page some scans come from), after automatic data capture.
 #: ../AMC-analyse.pl:815
-#, fuzzy, perl-format
+#, fuzzy
 msgid "%d scans are not recognized:"
 msgstr "スキャン画像のうち %d 件が認識できません"
 
 #. TRANSLATORS: Message displayed during automatic data capture with multiple-pages subjects and photocopy mode. AMC encountered another version of page %s but did not see the same number of versions of other pages from the same student.
 #: ../AMC-analyse.pl:856
-#, fuzzy, perl-format
+#, fuzzy
 msgid "Too much scans for page %s."
 msgstr "用紙番号 %s のボックス拡大画像"
 
 #. TRANSLATORS: Message displayed during automatic data capture with multiple-pages subjects and photocopy mode. AMC encountered another version of page %s but has already processed multiple times other pages from the same student.
 #: ../AMC-analyse.pl:865
-#, perl-format
 msgid "One page %s is comming too late."
-msgstr ""
+msgstr "sのページが来るのが遅すぎる。"
 
 #. TRANSLATORS: Message displayed during automatic data capture with multiple-pages subjects and photocopy mode.
 #: ../AMC-analyse.pl:890
@@ -57,19 +47,16 @@ msgstr "複数ページPDFファイル %s を分割しています..."
 
 #. TRANSLATORS: Here, %s will be replaced with the path of a file that will be converted.
 #: ../AMC-getimages.pl:524
-#, perl-format
 msgid "Converting %s to bitmap..."
 msgstr "%s をビットマップに変換しています..."
 
 #. TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
 #: ../AMC-getimages.pl:533
-#, perl-format
 msgid "Splitting multi-page image %s..."
 msgstr "複数ページ画像ファイル %s を分割しています..."
 
 #. TRANSLATORS: Here, %s will be replaced with the path of a file that will be splitted to several images (one per page).
 #: ../AMC-getimages.pl:541
-#, perl-format
 msgid "Processing image %s..."
 msgstr "画像ファイル %s を処理しています..."
 
@@ -78,7 +65,6 @@ msgid "Copying scans to project directory..."
 msgstr "スキャン画像をプロジェクトディレクトリにコピーしています..."
 
 #: ../AMC-gui.pl:144
-#, perl-format
 msgid "I don't find the command %s."
 msgstr "コマンド %s がみつかりません。"
 
@@ -91,32 +77,26 @@ msgid "The style file automultiplechoice.sty seems to be unreachable. Try to use
 msgstr "スタイルファイル automultiplechoice.sty がみつかりません。root 権限で 'auto-multiple-choice latex-link' コマンドを実行して、これを修正してください。"
 
 #: ../AMC-prepare.pl:288
-#, perl-format
 msgid "%d/%d good answers not coherent for a simple question"
 msgstr "単一選択問題に %d/%d 個の正解があります。"
 
 #: ../AMC-prepare.pl:376
-#, perl-format
 msgid "question ID used several times for the same paper: \"%s\""
 msgstr "試験問題内で同一の設問IDが複数回使われています: \"%s\""
 
 #: ../AMC-prepare.pl:469
-#, perl-format
 msgid "An answer appears to be given outside a question environment, after question \"%s\""
 msgstr "設問 \"%s\" のあとで、設問環境の外部に解答があります。"
 
 #: ../AMC-prepare.pl:486
-#, perl-format
 msgid "Answer number ID used several times for the same question: %s"
 msgstr "設問内で同一の選択肢番号IDが複数回使われています: %s"
 
 #: ../AMC-prepare.pl:766
-#, perl-format
 msgid "%d errors during LaTeX compiling"
 msgstr "LaTeXコンパイル時にエラーが %d 個ありました。"
 
 #: ../AMC-prepare.pl:837
-#, perl-format
 msgid "LaTeX command configured is not present (%s). Install it or change configuration, and then rerun."
 msgstr "設定されたLaTeXコマンド（%s）が存在しません。インストールするか設定を変更し、再実行してください。"
 
@@ -133,7 +113,6 @@ msgid "question sheet"
 msgstr "問題用紙"
 
 #: ../AMC-prepare.pl:960
-#, perl-format
 msgid "please remove accentuated or non-standard characters from the following question ID: \"%s\""
 msgstr "設問ID \"%s\" から、アクセント付または非標準文字を取り除いてください。"
 
@@ -191,11 +170,9 @@ msgstr "試験問題プレビュー"
 
 #: ../AMC-perl/AMC/Config.pm:366
 #, fuzzy
-msgid ""
-"Please find enclosed your question sheet.\n"
+msgid "Please find enclosed your question sheet.\n"
 "Regards."
-msgstr ""
-"答案の採点結果を添付ファイルで送付します。\n"
+msgstr "答案の採点結果を添付ファイルで送付します。\n"
 "採点ミスなどがないか確認してください。"
 
 #. TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
@@ -204,11 +181,9 @@ msgid "Exam result"
 msgstr "試験結果"
 
 #: ../AMC-perl/AMC/Config.pm:375
-msgid ""
-"Please find enclosed your annotated completed answer sheet.\n"
+msgid "Please find enclosed your annotated completed answer sheet.\n"
 "Regards."
-msgstr ""
-"答案の採点結果を添付ファイルで送付します。\n"
+msgstr "答案の採点結果を添付ファイルで送付します。\n"
 "採点ミスなどがないか確認してください。"
 
 #. TRANSLATORS: Message (first part) when some of the commands that are given in the preferences cannot be found.
@@ -221,7 +196,6 @@ msgid "Please check its correct spelling and install missing software."
 msgstr "コマンド名を確認し、不足しているソフトウェアをインストールしてください。"
 
 #: ../AMC-perl/AMC/Config.pm:677
-#, perl-format
 msgid "You can change used commands following <i>%s</i> from menu <i>%s</i>."
 msgstr "「<i>%2$s</i>」メニュー内の「<i>%1$s</i>」を選択して使用するコマンドを変更できます。"
 
@@ -237,7 +211,6 @@ msgstr "編集"
 
 #. TRANSLATORS: Error writing one of the configuration files (global or project). The first %s will be replaced with the path of that file, and the second with the error text.
 #: ../AMC-perl/AMC/Config.pm:946
-#, perl-format
 msgid "Error writing configuration file %s: %s"
 msgstr "設定ファイル %s への書込みエラー: %s"
 
@@ -285,7 +258,7 @@ msgstr "文書更新..."
 
 #: ../AMC-perl/AMC/Project.pm:443
 msgid "Decoding name field images..."
-msgstr ""
+msgstr "名前フィールドをデコードして..."
 
 #. TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
 #: ../AMC-perl/AMC/Project.pm:511
@@ -307,7 +280,7 @@ msgstr "自動受験者識別..."
 
 #: ../AMC-perl/AMC/Project.pm:696
 msgid "sheet [filename prefix when printing to files]"
-msgstr ""
+msgstr "写し"
 
 #: ../AMC-perl/AMC/Project.pm:748
 msgid "Print papers one by one..."
@@ -468,12 +441,10 @@ msgstr "左欄に受験番号をマークし、下欄に氏名を記入してく
 
 #. TRANSLATORS: Message when the Pages option used in AMC-TXT can't be parsed. %s will be replaced with the option value
 #: ../AMC-perl/AMC/Filter/plain.pm:272
-#, perl-format
 msgid "Pages option value can't be understood: %s"
 msgstr "Pagesオプション値が誤っています: %s"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:307
-#, perl-format
 msgid "Line %d"
 msgstr "第%d行"
 
@@ -483,7 +454,6 @@ msgid "Previous question has less than two choices"
 msgstr "前問には選択肢が2個以上ありません。"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:333
-#, perl-format
 msgid "Previous question is a simple question but has %d correct choice(s)"
 msgstr "この設問は単一選択問題なのに正解が%d個あります。"
 
@@ -492,13 +462,11 @@ msgid "Invalid encoding: you must use UTF-8, but your source file was saved usin
 msgstr "無効なエンコーディング: UTF-8を使用しなければなりませんが、他のエンコーディングを用いて保存されています。"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:459
-#, perl-format
 msgid "File not found: %s"
 msgstr "ファイルが見つかりません: %s"
 
 #. TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option is given a value
 #: ../AMC-perl/AMC/Filter/plain.pm:478
-#, perl-format
 msgid "Unknown option: %s"
 msgstr "不明なオプション: %s"
 
@@ -508,7 +476,6 @@ msgid "Choice outside question"
 msgstr "問題文の前に選択肢があります。"
 
 #: ../AMC-perl/AMC/Filter/plain.pm:1480
-#, perl-format
 msgid "The following fonts does not seem to be installed on the system: <b>%s</b>."
 msgstr "次のフォントがシステムにインストールされていないようです: <b>%s</b>."
 
@@ -541,7 +508,6 @@ msgid "Some answer sheets were photocopied"
 msgstr "コピー答案用紙モード"
 
 #: ../AMC-perl/AMC/Gui/AutoCapture.pm:125
-#, perl-format
 msgid "Pre-allocate sheet ids from the page numbers, starting at %d"
 msgstr "ページ番号に基づいて用紙番号を%dから割り当てる"
 
@@ -607,7 +573,6 @@ msgid "Total size of concerned files:"
 msgstr "関連するファイルの合計サイズ:"
 
 #: ../AMC-perl/AMC/Gui/Cleanup.pm:247
-#, perl-format
 msgid "%s files were removed."
 msgstr "%s ファイルが削除されました。"
 
@@ -626,7 +591,6 @@ msgstr "全ソースファイル"
 
 #. TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
 #: ../AMC-perl/AMC/Gui/CreateProject.pm:277
-#, perl-format
 msgid "%s files"
 msgstr "%s ファイル"
 
@@ -635,7 +599,6 @@ msgid "Archive (zip, tgz)"
 msgstr "アーカイブ（zip, tgz）"
 
 #: ../AMC-perl/AMC/Gui/CreateProject.pm:422
-#, perl-format
 msgid "Nothing extracted from archive %s. Check it."
 msgstr "アーカイブ %s から何も取り出せません。確認してください。"
 
@@ -662,7 +625,6 @@ msgid "Layouts are detected."
 msgstr "レイアウトが検出されました。"
 
 #: ../AMC-perl/AMC/Gui/Learning.pm:97
-#, perl-format
 msgid "You can check all is correct clicking on button <i>%s</i> and looking at question pages to see if red boxes are well positioned."
 msgstr "<i>%s</i> ボタンをクリックし、試験問題ページ上で赤いボックスが正しい位置にあるか見ることで、確認することができます。"
 
@@ -683,7 +645,6 @@ msgid "Automatic data capture now completed."
 msgstr "自動マーク認識が完了しました。"
 
 #: ../AMC-perl/AMC/Gui/Learning.pm:117
-#, perl-format
 msgid "It is not complete (missing pages from %d papers)."
 msgstr "完全ではありません（%d 件の答案に不足ページがあります)。"
 
@@ -692,7 +653,6 @@ msgid "You can analyse data capture quality with some indicators values in analy
 msgstr "マーク認識の品質は解析リスト中のいくつかの指標値で確認することができます:"
 
 #: ../AMC-perl/AMC/Gui/Learning.pm:129
-#, perl-format
 msgid "- <b>%s</b> represents positioning gap for the four corner marks. Great value means abnormal page distortion."
 msgstr "- <b>%s</b> は四隅マーカーの位置ずれを表します。この値が大きいとページのゆがみが異常に大きいことを意味します。"
 
@@ -703,7 +663,6 @@ msgid "MSE"
 msgstr "用紙ゆがみ"
 
 #: ../AMC-perl/AMC/Gui/Learning.pm:135
-#, perl-format
 msgid "- great values of <b>%s</b> are seen when darkness ratio is very close to the threshold for some boxes."
 msgstr "- 黒ピクセル比率がマーク判定閾値に非常に近いボックスがあると <b>%s</b> の値が大きくなります。"
 
@@ -714,7 +673,6 @@ msgid "sensitivity"
 msgstr "白黒閾値近接度"
 
 #: ../AMC-perl/AMC/Gui/Learning.pm:141
-#, perl-format
 msgid "You can also look at the scan adjustment (<i>%s</i>) and ticked and unticked boxes (<i>%s</i>) using right-click on lines from table <i>%s</i>."
 msgstr "<i>%3$s</i> 表の該当行を右クリックして、スキャンのずれ（<i>%s</i>）と各ボックスのマーク有無（<i>%s</i>）を見ることもできます。"
 
@@ -737,7 +695,6 @@ msgid "Several dialogs try to help you be at ease handling AMC."
 msgstr "ダイアログはAMCを簡単に扱うための手助けをしてくれます。"
 
 #: ../AMC-perl/AMC/Gui/Learning.pm:166
-#, perl-format
 msgid "Unless you tick the \"%s\" box, they are shown only once."
 msgstr "\"%s\" ボックスにチェックをしない限り、それらは一度しか表示されません。"
 
@@ -801,7 +758,6 @@ msgid "Please annotate answer sheets and group them to PDF files to be able to s
 msgstr "採点記入済答案を送るには、答案に採点を記入し、PDFにグループ化してください。"
 
 #: ../AMC-perl/AMC/Gui/Mailing.pm:369
-#, perl-format
 msgid "Sending emails requires some perl modules that are not installed: %s. Please install these modules and try again."
 msgstr "メールを送るのに必要なperlモジュール %s がインストールされていません。これらのモジュールをインストールして、もう一度試してください。"
 
@@ -810,7 +766,6 @@ msgid "SMTP security mode \"STARTTLS\" is only available with Email::Sender vers
 msgstr "SMTPセキュリティモード \"STARTTLS\" は Email::Sender のバージョン 1.300027 以上でのみ使用できます。このperlモジュールの最新バージョンをインストールするか、SMTPセキュリティモードを変更して、再試行してください。"
 
 #: ../AMC-perl/AMC/Gui/Mailing.pm:416
-#, perl-format
 msgid "The email address you entered (%s) is not correct."
 msgstr "入力されている差出人メールアドレス（%s）が正しくありません。"
 
@@ -827,7 +782,6 @@ msgid "Please edit the preferences to set your email address."
 msgstr "設定メニューを編集して、差出人メールアドレスを設定してください。"
 
 #: ../AMC-perl/AMC/Gui/Mailing.pm:455
-#, perl-format
 msgid "The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."
 msgstr "設定メニュー（%s）で指定した場所に <i>sendmail</i> プログラムがありません。設定を更新してください。"
 
@@ -850,11 +804,9 @@ msgid "Code (short name) for examination"
 msgstr "試験コード（短縮名）"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:176
-msgid ""
-"The package <i>auto-multiple-choice-common</i> is installed, but not <i>auto-multiple-choice</i>.\n"
+msgid "The package <i>auto-multiple-choice-common</i> is installed, but not <i>auto-multiple-choice</i>.\n"
 "<b>AMC won't work properly until you install auto-multiple-choice package!</b>"
-msgstr ""
-"<i>auto-multiple-choice-common</i>パッケージはインストールされましたが、<i>auto-multiple-choice</i>がインストールされていません。\n"
+msgstr "<i>auto-multiple-choice-common</i>パッケージはインストールされましたが、<i>auto-multiple-choice</i>がインストールされていません。\n"
 "<b>AMCは、auto-multiple-choiceパッケージをインストールしないと、正しく動作しません!</b>"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:192
@@ -940,7 +892,6 @@ msgstr "デバッグモード。"
 
 #. TRANSLATORS: Message when switching to debugging mode. %s will be replaced with the path of the log file.
 #: ../AMC-perl/AMC/Gui/Main.pm:422
-#, perl-format
 msgid "Debugging informations will be written in file %s."
 msgstr "デバッグ情報は %s ファイルに書き込まれます。"
 
@@ -957,7 +908,6 @@ msgid "the <b>log file</b> produced when the debugging mode (in Help menu) is ch
 msgstr "ヘルプメニュー内の「デバッグ」にチェックを入れて生成された<b>ログファイル</b>。このモードを有効にしてからバグを再発させてみてください。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:466
-#, perl-format
 msgid "Bug reports can be filled at %s or sent to the address below."
 msgstr "バグレポートは %s に記入するか、以下のアドレスに送付することができます。"
 
@@ -966,12 +916,10 @@ msgid "AMC community site"
 msgstr "AMCコミュニティサイト"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:591
-#, perl-format
 msgid "There is too little space left in the temporary disk directory (%s). <b>Please clean this directory and try again.</b>"
 msgstr "一時ファイルディレクトリ (%s) のスペースが不足しています。<b>このディレクトリをクリーンアップして再試行してください。</b>"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:619
-#, perl-format
 msgid "Following command could not be run: <b>%s</b>, perhaps due to a poor configuration?"
 msgstr "コマンド <b>%s</b> が起動できません。設定に不具合はありませんか？"
 
@@ -984,7 +932,6 @@ msgid "Plugins (zip, tgz)"
 msgstr "プラグイン （zip, tgz）"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:920
-#, perl-format
 msgid "An error occured while trying to extract files from the plugin archive: %s."
 msgstr "プラグインアーカイブからファイルを取り出す際にエラーがありました: %s。"
 
@@ -1001,12 +948,10 @@ msgid "This is not a valid plugin, as it does not contain a perl/AMC subdirector
 msgstr "perl/AMCサブディレクトリを含まないので、有効なプラグインではありません。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:984
-#, perl-format
 msgid "A plugin is already installed with the same name (%s). Do you want to delete the old one and overwrite?"
 msgstr "同じ名前のプラグイン（l%s）が既にインストールされています。削除して上書きしますか？"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1011
-#, perl-format
 msgid "Error while moving the plugin to the user plugin directory: %s"
 msgstr "プラグインをユーザープラグインディレクトリに移動する際にエラー: %s"
 
@@ -1015,7 +960,6 @@ msgid "Please restart AMC before using the new plugin..."
 msgstr "新しいプラグインを使用するにはAMCを再起動してください..."
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1085
-#, perl-format
 msgid "You selected directory <b>%s</b> as a project to open."
 msgstr "ディレクトリ <b>%s</b> を選択してプロジェクトを開こうとしています。"
 
@@ -1024,7 +968,6 @@ msgid "However, this directory does not seem to contain a project. Do you still 
 msgstr "しかしこのディレクトリにはプロジェクトが含まれていないようです。続けてみますか？"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1110
-#, perl-format
 msgid "You selected project <b>%s</b> from directory <i>%s</i>."
 msgstr "ディレクトリ <i>%2$s</i> にあるプロジェクト <b>%1$s</b> を選択しました。"
 
@@ -1033,7 +976,6 @@ msgid "Do you want to copy this project to your projects directory before openin
 msgstr "プロジェクトを開く前にあなたのプロジェクトディレクトリにコピーしますか？"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1279
-#, perl-format
 msgid "File %s already exists in project directory: do you want to replace it?"
 msgstr "プロジェクトディレクトリに %s ファイルが既に存在します。上書きしますか？"
 
@@ -1046,7 +988,6 @@ msgid "The source file has been copied to project directory."
 msgstr "ソースファイルがプロジェクトディレクトリにコピーされました。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1311
-#, perl-format
 msgid "You can now edit it with button \"%s\" or with any editor."
 msgstr "\"%s\" ボタンか、お気に入りのエディタで編集することができます。"
 
@@ -1055,7 +996,6 @@ msgid "Edit source file"
 msgstr "ソースファイル編集"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1320
-#, perl-format
 msgid "Error copying source file: %s"
 msgstr "ソースファイルのコピーエラー: %s"
 
@@ -1118,7 +1058,6 @@ msgid "Updating working documents, the layouts will become obsolete and will thu
 msgstr "作業文書を更新すると、レイアウトは無効になり消去されます。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1619
-#, perl-format
 msgid "To handle properly <i>%s</i> files, AMC needs the following components, that are currently missing:"
 msgstr "AMCで <i>%s</i> ファイルを適切に扱うには、現在欠けている次のコンポーネントが必要です:"
 
@@ -1135,13 +1074,10 @@ msgid "<b>Please check your installation to get matching AMC and LaTeX style fil
 msgstr "<b>インストールを確認して、AMCとLaTeXスタイルファイルのバージョンを一致させてください。</b>"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1693
-#, perl-format
-msgid ""
-"AMC version: %s\n"
+msgid "AMC version: %s\n"
 "sty version: %s\n"
 "sty path: %s"
-msgstr ""
-"AMCバージョン: %s\n"
+msgstr "AMCバージョン: %s\n"
 "styバージョン: %s\n"
 "styパス: %s"
 
@@ -1175,7 +1111,6 @@ msgstr "警告のうち先頭の10個だけ表示"
 
 #. TRANSLATORS: Here, %s will be replaced with the translation of "Command output details", and refers to the small expandable part at the bottom of AMC main window, where one can see the output of the commands lauched by AMC.
 #: ../AMC-perl/AMC/Gui/Main.pm:1756
-#, perl-format
 msgid "See also the processing log in '%s' below."
 msgstr "以下の '%s' にある処理ログ参照。"
 
@@ -1205,12 +1140,10 @@ msgid "Your question is set to present labels inside the boxes to be ticked."
 msgstr "これらの試験問題は、ボックス中にあるラベルをチェックするように設定されます。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1844
-#, perl-format
 msgid "For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project."
 msgstr "より正確にマークを検出するために、受験者にボックスを完全に塗りつぶすよう指示し、このプロジェクトの \"%s\" パラメータを 0.5 付近に選択してください。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:1847
-#, perl-format
 msgid "At the moment, this parameter is set to %.02f."
 msgstr "現在このパラメータは %0.2f に設定されています。"
 
@@ -1256,7 +1189,6 @@ msgid "No layout"
 msgstr "レイアウトなし"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2094
-#, perl-format
 msgid "Processed %d pages"
 msgstr "%d ページ処理済"
 
@@ -1289,17 +1221,14 @@ msgid "Some potential defects were detected for this subject. Correct them in th
 msgstr "この試験問題に潜在的な問題点がみつかりました。ソースを修正して作業文書を更新してください。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2158
-#, perl-format
 msgid "(See for example pages %s and %s)"
 msgstr "（例えば、ページ %s と %s を見てください）"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2166
-#, perl-format
 msgid "(Concerns %1$d pages, see for example page %2$s)"
 msgstr "（%1$d 件のページが関連しています。例としてページ番号 %2$s を見てください）"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2177
-#, perl-format
 msgid "(Concerns %1$d exams, see for example sheet %2$d)"
 msgstr "（%1$d 件の試験問題が関連しています。例として試験問題番号 %2$d を見てください）"
 
@@ -1308,7 +1237,6 @@ msgid "No layout for this project."
 msgstr "このプロジェクト用のレイアウトがありません。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2339
-#, perl-format
 msgid "Please use button <i>%s</i> in <i>%s</i> before manual data capture."
 msgstr "手動マーク認識の前に、「<i>%2$s</i>」タブ内の「<i>%1$s</i>」ボタンを使用してください。"
 
@@ -1329,7 +1257,6 @@ msgid "Automatic data capture has been completed"
 msgstr "自動マーク認識が完了しました。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2474
-#, perl-format
 msgid "Some of the pages you submitted (%d of them) have already been processed before. Old data has been overwritten."
 msgstr "提出したページのうち %d 件は既に処理済です。旧データは上書き更新されました。"
 
@@ -1340,7 +1267,7 @@ msgstr "マーク認識"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2490
 msgid "AMC had problems with your scans."
-msgstr ""
+msgstr "AMCでは、お客様のスキャンの解析に問題が発生しています。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2503
 #, fuzzy
@@ -1348,12 +1275,10 @@ msgid "Please have a look at these scans."
 msgstr "試験問題のスキャン画像をすべて選択してください"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2538
-#, perl-format
 msgid "Data capture from %d complete papers and %d incomplete papers"
 msgstr "完全な答案 %d 人分と、不完全な答案 %d 人分のマークが認識されました"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2544
-#, perl-format
 msgid "Data capture from %d complete papers"
 msgstr "完全な答案 %d 人分のマークが認識されました"
 
@@ -1363,7 +1288,6 @@ msgid "No data"
 msgstr "マーク認識結果なし"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2558
-#, perl-format
 msgid "Overwritten pages: %d"
 msgstr "上書き更新されたページ数: %d"
 
@@ -1372,7 +1296,6 @@ msgid "All scans were properly recognized."
 msgstr "スキャン画像はすべて適切に認識されました。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:2573
-#, perl-format
 msgid "%d scans were not recognized."
 msgstr "スキャン画像のうち %d 件が認識できません"
 
@@ -1399,7 +1322,6 @@ msgid "Looking for analysis..."
 msgstr "解析結果を確認しています..."
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3056
-#, perl-format
 msgid "You requested to delete all data capture results for %d page(s)"
 msgstr "%d ページ分のマーク認識結果の削除が要求されました。"
 
@@ -1412,7 +1334,6 @@ msgid "Do you really want to continue?"
 msgstr "本当に続けますか？"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3173
-#, perl-format
 msgid "Papers are not yet corrected: use button \"%s\"."
 msgstr "答案がまだ採点されていません: \"%s\" ボタンを使用してください。"
 
@@ -1427,7 +1348,6 @@ msgstr "採点が完了しました。"
 
 #. TRANSLATORS: This is the marks mean for all students.
 #: ../AMC-perl/AMC/Gui/Main.pm:3269
-#, perl-format
 msgid "Mean: %.2f"
 msgstr "平均: %.2f"
 
@@ -1436,9 +1356,8 @@ msgid "No marks computed"
 msgstr "得点が計算されていません"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3298
-#, perl-format
 msgid "You selected the decoder \"<i>%s</i>\", which requires some tools that are missing on your system:"
-msgstr ""
+msgstr "<i>%s</i>」のデコーダを選択していますが、これにはシステムに不足しているツールが必要です。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3303
 #, fuzzy
@@ -1463,7 +1382,7 @@ msgstr "印刷時識別済"
 #. TRANSLATORS: menu item when choosing the code to use for association from the completed answer sheets. This item corresponds to the decoded name field (eg. when a barcode identifying the student has been sticked in the name field)
 #: ../AMC-perl/AMC/Gui/Main.pm:3342
 msgid "Decoded name field"
-msgstr ""
+msgstr "デコードされた名前フィールド"
 
 #. TRANSLATORS: Names list file : (none)
 #: ../AMC-perl/AMC/Gui/Main.pm:3463
@@ -1471,12 +1390,10 @@ msgid "(none)"
 msgstr "(なし)"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3480
-#, perl-format
 msgid "Unsuitable names file: %d errors, first on line %d."
 msgstr "名簿ファイルが不適切です: エラーが%d個あり、最初のエラーは%d行目です。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3501
-#, perl-format
 msgid "Found %d empty names in names file <i>%s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled."
 msgstr "名簿ファイル<i>%2$s</i>中に氏名のない行が%1$d件あります。先頭行に<b>name</b>あるいは<b>surname</b>という名前のカラムがあることと、すべての行に正しく記入されていることを確認してください。"
 
@@ -1485,22 +1402,18 @@ msgid "Edit the names file to correct it, and re-read."
 msgstr "名簿ファイルを編集・修正して、再読込みしてください。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3522
-#, perl-format
 msgid "Found duplicate names: <i>%s</i>. Check that all names are different."
 msgstr "氏名 <i>%s</i> が重複しています: すべての氏名が異なっているか確認してください。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3575
-#, perl-format
 msgid "You can't choose column '%s' as a key in the students list, as it contains duplicates (value '%s')"
 msgstr "受験者名簿の '%s' カラムには重複（'%s'）が含まれているので、受験者識別用カラムとして選択できません。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3627 ../AMC-perl/AMC/Gui/Main.pm:3671
-#, perl-format
 msgid "The primary key from the students list has been set to \"%s\", which is not the value from the association data."
 msgstr "受験者名簿の受験者識別用カラムが \"%s\" に設定されました。これは現在の受験者識別データの値とは異なります。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3634
-#, perl-format
 msgid "Some manual association data has be found, which will be lost if the primary key is changed. Do you want to switch back to the primary key \"%s\" and keep association data?"
 msgstr "手動受験者識別データが既にいくつかありますが、受験者識別用カラムを変更すると失われます。受験者識別用カラムを \"%s\" に戻して受験者識別データを残しますか？"
 
@@ -1509,7 +1422,6 @@ msgid "Automatic papers/students association will be re-run to update the associ
 msgstr "自動受験者識別を再実行して受験者識別データを更新します。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3704
-#, perl-format
 msgid "Before associating names to papers, you must choose a students list file in tab \"%s\"."
 msgstr "答案の受験者識別をする前に、\"%s\" タブで、受験者名簿ファイルを選ばなければなりません。"
 
@@ -1528,7 +1440,6 @@ msgid "Please choose a code (made with LaTeX command \\AMCcodeGrid or equivalent
 msgstr "自動受験者識別の前に、（\\AMCcodeGrid または同等のLaTeXコマンドで作成した）コード名を選んでください。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3778
-#, perl-format
 msgid "Before associating names to papers, you must choose a students list file in paragraph \"%s\"."
 msgstr "答案の受験者識別をする前に、\"%s\" 欄で、受験者名簿ファイルを選ばなければなりません。"
 
@@ -1537,13 +1448,11 @@ msgid "Students identification"
 msgstr "受験者識別"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3820
-#, perl-format
 msgid "Automatic association completed: %d students recognized."
 msgstr "自動受験者識別完了: 受験者 %d 人を認識しました。"
 
 #. TRANSLATORS: Here %s and %s will be replaced with two parameters names: "Primary key from this list" and "Code name for automatic association".
 #: ../AMC-perl/AMC/Gui/Main.pm:3830
-#, perl-format
 msgid "Please check \"%s\" and \"%s\" values and try again."
 msgstr "\"%s\" と \"%s\" の値を確認してもう一度試してください。"
 
@@ -1564,7 +1473,6 @@ msgid "No primary key from students list file"
 msgstr "受験者名簿の受験者識別用カラムがありません"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:3862
-#, perl-format
 msgid "Missing identification for %d answer sheets"
 msgstr "答案 %d 件の受験者識別ができていません"
 
@@ -1573,7 +1481,6 @@ msgid "All completed answer sheets are associated with a student name"
 msgstr "答案はすべて受験者識別されています"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:4000
-#, perl-format
 msgid "Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."
 msgstr "'%s' にエクスポートするのに必要なperlモジュール %s がインストールされていません。これらのモジュールをインストールするか別のエクスポート形式に変更してください。"
 
@@ -1582,7 +1489,6 @@ msgid "When referring to a particular answer in the export, the letter used will
 msgstr "エクスポート中の各解答には設問カタログ中の文字が使用されます。しかし、設問カタログがまだ生成されていません。今すぐに生成しますか？"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:4093
-#, perl-format
 msgid "Export to %s did not work: file not created..."
 msgstr "%s へのエクスポートができません。ファイルは作成されませんでした..."
 
@@ -1599,7 +1505,6 @@ msgid "SMTP authentication failed: check SMTP configuration and password."
 msgstr "SMTP認証の失敗: SMTPの設定とパスワードを確認してください。"
 
 #: ../AMC-perl/AMC/Gui/Main.pm:4232
-#, perl-format
 msgid "%d message(s) has been sent."
 msgstr "%d 件のメッセージが送信されました。"
 
@@ -1635,7 +1540,6 @@ msgid "page"
 msgstr "ページ"
 
 #: ../AMC-perl/AMC/Gui/Manuel.pm:584
-#, perl-format
 msgid "This is a template exam that you cannot edit. To create a new exam from this one to be edited, use the '%s' button."
 msgstr "これはテンプレート試験問題なので編集できません。これをもとに新しい試験問題を作って編集するには、'%s' ボタンを使ってください。"
 
@@ -1760,7 +1664,6 @@ msgid "box"
 msgstr "四角形"
 
 #: ../AMC-perl/AMC/Gui/Preferences.pm:277
-#, perl-format
 msgid "Project \"%s\" preferences"
 msgstr "プロジェクト \"%s\" の設定"
 
@@ -1769,22 +1672,24 @@ msgid "Project preferences"
 msgstr "プロジェクト設定"
 
 #: ../AMC-perl/AMC/Gui/Preferences.pm:462
-#, perl-format
 msgid "You modified \"<b>%s</b>\" value, which is the default value used when creating new projects. Do you want to change also \"<b>%s</b>\" for the opened <i>%s</i> project?"
 msgstr "\"<b>%s</b>\" の値を修正しました。これは新しいプロジェクトを作成するときのデフォルト値です。\"<b>%s</b>\" （現在の \"<i>%s</i>\" プロジェクト用）も変更しますか？"
 
 #: ../AMC-perl/AMC/Gui/Preferences.pm:496
 msgid "You modified the name field type, so that the name fields has to be decoded again."
-msgstr ""
+msgstr "再度デコードする必要がある名前フィールドのタイプを変更しました。"
 
+#. TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
 #: ../AMC-perl/AMC/Gui/Printing.pm:55
 msgid "Standard"
 msgstr "標準"
 
+#. TRANLATORS: One of the way to handle separate answer sheet when printing: print separately answer sheet and question. This is a menu entry.
 #: ../AMC-perl/AMC/Gui/Printing.pm:58
 msgid "Separate answer sheet"
 msgstr "別紙答案用紙モード"
 
+#. TRANLATORS: One of the way to handle separate answer sheet when printing: print the answr sheet first. This is a menu entry.
 #: ../AMC-perl/AMC/Gui/Printing.pm:61 ../AMC-perl/AMC/Gui/Printing.pm:488
 msgid "Answer sheet first"
 msgstr "答案用紙優先"
@@ -1817,7 +1722,6 @@ msgid "Perhaps you forgot to compute layouts?"
 msgstr "レイアウト検出を忘れていませんか？"
 
 #: ../AMC-perl/AMC/Gui/Printing.pm:202
-#, perl-format
 msgid "You chose the printing method '%s' but it is not available (%s). Please install the missing dependencies or switch to another printing method."
 msgstr "印刷方法に '%s' を選択していますが、使用できません（%s）。必要なものをインストールするか、他の印刷方法に切り替えてください。"
 
@@ -1851,7 +1755,6 @@ msgid "However, you will be able to change this when giving your first scans to 
 msgstr "ただし、最初のスキャン画像をAMCで取り込むときに、これを変更することができます。"
 
 #: ../AMC-perl/AMC/Gui/Printing.pm:628
-#, perl-format
 msgid "You selected the '%s' option, that uses '%s', so the %s has been set to '%s' for you."
 msgstr "選択している '%s' オプションは '%s' を使用するので、'%s' は '%s' に設定されました。"
 
@@ -1861,7 +1764,7 @@ msgid "Extracting method"
 msgstr "抽出方法"
 
 #: ../AMC-perl/AMC/Gui/Printing.pm:653
-#, fuzzy, perl-format
+#, fuzzy
 msgid "You selected the '%s' option, but this option needs %s to be installed on your system. Please install one of these and try again."
 msgstr "'%s' オプションを選択するにはシステムに 'qpdf' または 'pdftk' がインストールされている必要があります。いずれかをインストールして再試行してください。"
 
@@ -1897,7 +1800,6 @@ msgid "AMC projects management"
 msgstr "AMCプロジェクト管理"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:351
-#, perl-format
 msgid "The name <b>%s</b> is already used in the projects directory."
 msgstr "プロジェクトディレクトリ内で <b>%s</b> という名前は既に使用されています。"
 
@@ -1906,17 +1808,14 @@ msgid "You must choose another name to create a project."
 msgstr "プロジェクトを作成するには別の名前をつける必要があります。"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:385
-#, perl-format
 msgid "You can't change project %s since it's open."
 msgstr "開いているプロジェクト %s は変更できません。"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:457
-#, perl-format
 msgid "Directory <i>%s</i> already exists, so you can't choose this name."
 msgstr "ディレクトリ <i>%s</i> は既に存在するので、この名前は選べません。"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:509
-#, perl-format
 msgid "This will clone project <b>%s</b> to a new project <i>%s</i>."
 msgstr "これは、プロジェクト <b>%s</b> を新しいプロジェクト <i>%s</i> にクローンします。"
 
@@ -1938,25 +1837,22 @@ msgid "Your project was not properly copied"
 msgstr "プロジェクトがコピーされました"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:606
-#, perl-format
 msgid "(%d files out of %d)"
 msgstr "（%d/%d ファイル）"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:610
 msgid "AMC encountered unknown problems copying your project: please make a copy yourself by other means."
-msgstr ""
+msgstr "AMCがプロジェクトをコピーする際に問題が発生しました: 他の方法を試してみてください。"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:617
 msgid "Source project directory not found"
 msgstr "コピー元プロジェクトディレクトリが見つかりません"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:623
-#, perl-format
 msgid "An error occuried during project copy: %s."
 msgstr "プロジェクトのコピー中にエラーが発生しました: %s。"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.pm:646
-#, perl-format
 msgid "You asked to remove project <b>%s</b>."
 msgstr "プロジェクト <b>%s</b> を削除します。"
 
@@ -1988,7 +1884,7 @@ msgstr "キャンセル"
 
 #: ../AMC-perl/AMC/Gui/Template.pm:221
 msgid "Add"
-msgstr ""
+msgstr "追加"
 
 #: ../AMC-perl/AMC/Gui/Template.pm:241
 msgid "When making a template, you can only add files that are within the project directory."
@@ -1999,7 +1895,6 @@ msgid "Making diagnostic image..."
 msgstr "診断画像を作成しています..."
 
 #: ../AMC-perl/AMC/Gui/Unrecognized.pm:302
-#, perl-format
 msgid "Error loading scan %s"
 msgstr "スキャン画像の読込みエラー: %s"
 
@@ -2022,7 +1917,6 @@ msgid "click"
 msgstr "クリック"
 
 #: ../AMC-perl/AMC/Gui/Zooms.pm:145 ../AMC-perl/AMC/Gui/Zooms.pm:464
-#, perl-format
 msgid "Boxes zooms for page %s"
 msgstr "用紙番号 %s のボックス拡大画像"
 
@@ -2039,22 +1933,20 @@ msgid "Dou you really want to close and ignore these modifications?"
 msgstr "本当にこの修正を閉じて無視しますか？"
 
 #: ../AMC-perl/AMC/Print/cups.pm:75
-#, perl-format
 msgid "Perl module(s) missing: %s"
 msgstr "未インストールperlモジュール: %s"
 
 #: ../AMC-perl/AMC/Print/cupslp.pm:52
-#, perl-format
 msgid "The following commands are missing: %s."
 msgstr "未インストールコマンド: %s"
 
 #: ../AMC-perl/AMC/Decoder/register/Barcode.pm:48
 msgid "Barcode"
-msgstr ""
+msgstr "バーコード"
 
 #: ../AMC-perl/AMC/Decoder/register/BarcodeTail.pm:48
 msgid "Barcode last alphanumeric characters"
-msgstr ""
+msgstr "バーコードの最後の英数字"
 
 #: ../AMC-perl/AMC/Export/register/CSV.pm:76
 msgid "Separator"
@@ -2170,22 +2062,19 @@ msgid "To define groups, use question ids in the form \"group:question\" or \"gr
 msgstr "グループを定義するには、スコープセバレータの設定に応じて \"group:question\" または \"group.question\" という形式の設問IDを使用してください。"
 
 #: ../AMC-perl/AMC/Filter/register/latex.pm:58
-msgid ""
-"This is the native format for AMC. LaTeX is not so easy to use for unexperienced users, but the LaTeX power allows the user to build any multiple choice subject. As an example, the following is possible with LaTeX but not with other formats:\n"
+msgid "This is the native format for AMC. LaTeX is not so easy to use for unexperienced users, but the LaTeX power allows the user to build any multiple choice subject. As an example, the following is possible with LaTeX but not with other formats:\n"
 "* any kind of layout,\n"
 "* questions with random numerical values,\n"
 "* use of figures, mathematical formulas\n"
 "* and much more!"
-msgstr ""
-"これはAMCのネイティブ形式です。LaTeXは未経験のユーザが使うのは容易ではありませんが、LaTeXの能力を使えば任意の選択式試験問題が作成できます。例えばLaTeXなら次のようなことができますが、他の形式ではできません:\n"
+msgstr "これはAMCのネイティブ形式です。LaTeXは未経験のユーザが使うのは容易ではありませんが、LaTeXの能力を使えば任意の選択式試験問題が作成できます。例えばLaTeXなら次のようなことができますが、他の形式ではできません:\n"
 "* 任意のレイアウト、\n"
 "* 乱数値を用いた設問、\n"
 "* 図や数式の使用、\n"
 "* などなど！"
 
 #: ../AMC-perl/AMC/Filter/register/plain.pm:55
-msgid ""
-"This is a plain text format for easy question writting. See the following minimal example:\n"
+msgid "This is a plain text format for easy question writting. See the following minimal example:\n"
 "\n"
 "Title: Paper title\n"
 "\n"
@@ -2193,8 +2082,7 @@ msgid ""
 "+ Yaounde\n"
 "- Douala\n"
 "- Kribi"
-msgstr ""
-"これは簡単な設問用のプレーンテキスト形式です。次の最小限の例を参考にしてください:\n"
+msgstr "これは簡単な設問用のプレーンテキスト形式です。次の最小限の例を参考にしてください:\n"
 "\n"
 "Title: 試験問題タイトル\n"
 "\n"
@@ -2210,11 +2098,9 @@ msgstr "AMCについて"
 
 #: ../AMC-perl/AMC/Gui/APropos.glade:17
 #, fuzzy
-msgid ""
-"Copyright (C) 2008-2021\n"
+msgid "Copyright (C) 2008-2021\n"
 "Alexis Bienvenüe and the AMC development team"
-msgstr ""
-"Copyright (C) 2008-2021\n"
+msgstr "Copyright (C) 2008-2021\n"
 "Alexis BienvenüeとAMC開発チーム"
 
 #: ../AMC-perl/AMC/Gui/APropos.glade:19
@@ -2326,11 +2212,9 @@ msgid "Source file"
 msgstr "全ソースファイル"
 
 #: ../AMC-perl/AMC/Gui/CreateProjectOption.glade:71
-msgid ""
-"A multiple choice project is mainly made of a source file, which describes the questionnaire.\n"
+msgid "A multiple choice project is mainly made of a source file, which describes the questionnaire.\n"
 "<b>Please choose your situation:</b>"
-msgstr ""
-"選択式試験問題のプロジェクトは主に質問事項を記述したソースファイルで作られます。\n"
+msgstr "選択式試験問題のプロジェクトは主に質問事項を記述したソースファイルで作られます。\n"
 "<b>シチュエーションを選択してください:</b>"
 
 #: ../AMC-perl/AMC/Gui/CreateProjectOption.glade:114
@@ -2709,7 +2593,7 @@ msgstr "プロジェクト"
 
 #: ../AMC-perl/AMC/Gui/Main.glade:2993
 msgid "Decode name fields"
-msgstr ""
+msgstr "名前フィールドをデコードする"
 
 #: ../AMC-perl/AMC/Gui/Main.glade:3021
 msgid "Export as template"
@@ -3173,7 +3057,7 @@ msgstr "このオプションにより、スキャン画像ファイルを必ず
 #: ../AMC-perl/AMC/Gui/Preferences.glade:1909
 #: ../AMC-perl/AMC/Gui/Preferences.glade:3842
 msgid "Name field type"
-msgstr ""
+msgstr "名前フィールドの種類"
 
 #: ../AMC-perl/AMC/Gui/Preferences.glade:1940
 msgid "<b>Scans conversion</b>"
@@ -3606,11 +3490,11 @@ msgstr "印刷可能なファイルの書込み先ディレクトリを選んで
 
 #: ../AMC-perl/AMC/Gui/Printing.glade:401
 msgid "Lock with password:"
-msgstr ""
+msgstr "パスワードでロックします。"
 
 #: ../AMC-perl/AMC/Gui/Printing.glade:441
 msgid "and personal password from column:"
-msgstr ""
+msgstr "と個々のカラムのパスワードを入力してください。"
 
 #: ../AMC-perl/AMC/Gui/ProjectManager.glade:25
 msgid "Open a MC project"
@@ -3666,7 +3550,7 @@ msgstr "受験者名簿ファイルを選択してください"
 
 #: ../AMC-perl/AMC/Gui/StudentsListKey.glade:12
 msgid "test"
-msgstr ""
+msgstr "しけん"
 
 #: ../AMC-perl/AMC/Gui/StudentsListKey.glade:18
 #: ../AMC-perl/AMC/Gui/StudentsListKey.glade:95
@@ -3675,10 +3559,10 @@ msgid "Students list"
 msgstr "受験者名簿:"
 
 #: ../AMC-perl/AMC/Gui/StudentsListKey.glade:65
-msgid ""
-"AMC needs a CSV file with all students and their emails.\n"
+msgid "AMC needs a CSV file with all students and their emails.\n"
 "Please choose the file to use, and a column that can be used as a primary key for students in this file."
-msgstr ""
+msgstr "AMCでは、学生の名前とメールアドレスを含むCSVファイルが必要です。\n"
+"使用するファイルと、そのファイルの中にある、学生を識別するためのユニークなキーとして使用できるカラムを選択してください。"
 
 #: ../AMC-perl/AMC/Gui/Template.glade:8
 msgid "Save as a template"
@@ -3738,7 +3622,7 @@ msgstr "マークのトグル方法のモード: クリックモードでは、�
 
 #: ../AMC-perl/AMC/Gui/Zooms.glade:87
 msgid "Apply changes"
-msgstr ""
+msgstr "変更を適用する"
 
 #: ../AMC-perl/AMC/Gui/Zooms.glade:189
 msgid "Unchecked boxes"
@@ -3748,171 +3632,3 @@ msgstr "マークされていないボックス"
 msgid "Checked boxes"
 msgstr "マークされているボックス"
 
-#~ msgid "As students are requested to write on more than one page, you must create as many exam sheets as necessary for all your students, with different sheets numbers, and print them all."
-#~ msgstr "受験者は複数のページに解答する必要があるので、全受験者に必要な分の部数を異なる試験問題番号で作成し、それを全部印刷しなければなりません。"
-
-#~ msgid "If you print one or several sheets and photocopy them to have enough for all the students, <b>you won't be able to continue with AMC!</b>"
-#~ msgstr "少数の部数だけ印刷して残りの全受験者分をコピーで作成した場合、<b>AMCで処理することができません！</b>"
-
-#~ msgid "Do you want to print the selected sheets anyway?"
-#~ msgstr "それでも選択した試験問題を印刷しますか？"
-
-#~ msgid "Proceed to data capture from scans with button OK"
-#~ msgstr "OKボタンを押すとスキャンファイルからのマーク認識に進みます"
-
-#~ msgid "Go to the previous page."
-#~ msgstr "前ページに戻る。"
-
-#~ msgid "Quit"
-#~ msgstr "終了"
-
-#~ msgid "Go to next page."
-#~ msgstr "次ページに進む。"
-
-#~ msgid "mark [student mark, for sorting]"
-#~ msgstr "得点"
-
-#~ msgid "Current directory: %s"
-#~ msgstr "現在のディレクトリ: %s"
-
-#~ msgid "You don't have any MC project in directory %s!"
-#~ msgstr "このディレクトリにはAMCプロジェクトがありません: %s!"
-
-#~ msgid "Choose directory"
-#~ msgstr "ディレクトリ選択"
-
-#~ msgid "Choose LaTeX source"
-#~ msgstr "LaTeXソースの選択"
-
-#~ msgid ""
-#~ "Names list file for this project is:\n"
-#~ "%s"
-#~ msgstr ""
-#~ "このプロジェクトの名簿ファイル:\n"
-#~ "%s"
-
-#~ msgid "(no file)"
-#~ msgstr "(ファイルなし)"
-
-#~ msgid "Path"
-#~ msgstr "パス"
-
-#~ msgid "Yes, with scope separator '.'"
-#~ msgstr "スコープセパレータ '.' を使用"
-
-#~ msgid "_Project"
-#~ msgstr "プロジェクト(_P)"
-
-#~ msgid "Open personal templates directory"
-#~ msgstr "個人テンプレートディレクトリを開く"
-
-#~ msgid "_Edit"
-#~ msgstr "編集(_E)"
-
-#~ msgid "_Tools"
-#~ msgstr "ツール(_T)"
-
-#~ msgid "Cleanup..."
-#~ msgstr "不要ファイル削除..."
-
-#~ msgid "Installed plugins"
-#~ msgstr "インストール済プラグイン"
-
-#~ msgid "Open the installed plugins directory."
-#~ msgstr "インストール済プラグイン一覧を開く"
-
-#~ msgid "Get debugging information in a file"
-#~ msgstr "ファイルにデバッグ情報を出力する"
-
-#~ msgid "Error writing state file %s: %s"
-#~ msgstr "状態ファイル %s の書込みエラー: %s"
-
-#~ msgid "You did not save project <i>%s</i> options, which have been modified: do you want to save them before leaving?"
-#~ msgstr "プロジェクト <i>%s</i> の修正済オプションを保存していません。プロジェクトを閉じる前に保存しますか？"
-
-#~ msgid "You did not save main options, which have been modified: do you want to save them before leaving?"
-#~ msgstr "修正済のメインオプションを保存していません。終了する前に保存しますか？"
-
-#~ msgid "Color used to highlight questions with no ticked answers in the manual data capture window"
-#~ msgstr "手動マーク認識ウィンドウで、マーク無記入の設問をハイライトする色"
-
-#~ msgid "Color used to highlight questions with invalid answers in the manual data capture window"
-#~ msgstr "手動マーク認識ウィンドウで、マーク矛盾の設問をハイライトする色"
-
-#~ msgid "Select all students whose report sending has failed last time."
-#~ msgstr "前回メール送信に失敗した受験者のみ選択します。"
-
-#~ msgid "Use HTML tags in the body of your message such as <b>, <i>, <u>, <p> etc."
-#~ msgstr "メッセージの本文に<b>, <i>, <u>, <p>などのHTMLタグを使用できるようにします。"
-
-#~ msgid "empty"
-#~ msgstr "空"
-
-#~ msgid "archive"
-#~ msgstr "アーカイブ"
-
-#~ msgid "If this is not ticked, the next copy is taken from the copies which are not yet associated (already associated copies are skipped), and when it is ticked, the next copy is taken from all the copies (you pass all associated and non-associated copies in turn)."
-#~ msgstr "オフにすると、（識別済の用紙はスキップして）未識別の用紙のみ表示します。オンにすると、すべての用紙を（識別済と未識別をまとめて順に）表示します。"
-
-#~ msgid "You chose printing method '%s' but there are no configured printer in CUPS. Please configure some printer or switch to another printing method."
-#~ msgstr "印刷方法に '%s' を選択していますが、CUPSに設定されたプリンタがありません。プリンタを設定するか、他の印刷方法に切り替えてください。"
-
-#~ msgid "Add sums of the scores for each question group? To define groups, use question ids in the form \"group:question\"."
-#~ msgstr "設問グループごとに素点を合計しますか？グループを定義するには、\"group:question\"という形式の設問IDを使用してください。"
-
-#~ msgid "(not supported)"
-#~ msgstr "(未サポート)"
-
-#~ msgid "Printing with method '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another printing method."
-#~ msgstr "印刷方法 '%s' に必要なperlモジュール %s がインストールされていません。これらのモジュールをインストールするか、他の印刷方法に切り替えてください。"
-
-#~ msgid "CUPS"
-#~ msgstr "CUPS"
-
-#~ msgid "Print separate answer sheet separately"
-#~ msgstr "別紙答案用紙を別に印刷する。"
-
-#~ msgid "Stapling"
-#~ msgstr "ステープル"
-
-#~ msgid "Name and surname"
-#~ msgstr "氏名"
-
-#~ msgid "PDF"
-#~ msgstr "PDF"
-
-#~ msgid "Font size"
-#~ msgstr "フォントサイズ"
-
-#~ msgid "Font size in points."
-#~ msgstr "ポイント単位でのフォントサイズ。"
-
-#~ msgid "compose"
-#~ msgstr "合成"
-
-#~ msgid "Find pages in solution if scan is not present? Useful with question with separated answers page."
-#~ msgstr "スキャンデータが存在しないページを模範解答から作成しますか？別紙答案用紙を使った試験問題に有用です。"
-
-#~ msgid "Grouping students annotated pages together..."
-#~ msgstr "受験者の採点記入済答案をまとめてグループ化しています..."
-
-#~ msgid "Renaming annotated files with new model..."
-#~ msgstr "採点記入済答案ファイルの名前を新しいテンプレートに沿って変更しています..."
-
-#~ msgid "Previous group was empty"
-#~ msgstr "前のグループは空です。"
-
-#~ msgid "Create a table with basic statistics about answers for each question?"
-#~ msgstr "各設問の解答に関する基本統計表を作成しますか？"
-
-#~ msgid "Size, in the form \"width\"x\"height\", for exemple 1000x1500"
-#~ msgstr "\"幅\"x\"高さ\"の形式でのサイズ（例 1000x1500）"
-
-#~ msgid "Maximum size in pixels"
-#~ msgstr "最大サイズ（ピクセル）"
-
-#~ msgid "<b>JPEG quality for annotated papers</b>"
-#~ msgstr "<b>採点記入済答案のJPEG品質</b>"
-
-#~ msgid "Value 60, for exemple, means that text size is chosen so that page height is 60 lines of text."
-#~ msgstr "例えば60に設定すると、ページの高さが60行になるように文字サイズが選択されます。"
