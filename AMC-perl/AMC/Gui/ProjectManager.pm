@@ -531,7 +531,9 @@ sub clone_project {
 
 sub add_to_results {
     my ($self) = @_;
-    push @{$self->{find_results}}, $File::Find::name;
+    my $f = $File::Find::name;
+    utf8::decode($f);
+    push @{$self->{find_results}}, $f;
 }
 
 sub clone_project_ok {
@@ -543,7 +545,9 @@ sub clone_project_ok {
     }
     if ( !$err ) {
         $self->{find_results} = [];
-        find( { wanted => sub { $self->add_to_results() }, no_chdir => 1 }, $src );
+        my $src_chars = $src;
+        utf8::encode($src_chars);
+        find( { wanted => sub { $self->add_to_results() }, no_chdir => 1 }, $src_chars );
         my $total = 1 + $#{$self->{find_results}};
         if ( $total > 0 ) {
             my $done          = 0;
@@ -556,10 +560,19 @@ sub clone_project_ok {
             for my $s (@{$self->{find_results}}) {
                 my $d = $s;
                 $d =~ s:^\Q$src\E:$dest:;
+                debug "Clone: $s -> $d";
                 if ( -d $s ) {
-                    $done++ if ( mkdir($d) );
+                    if ( mkdir($d) ) {
+                        $done++;
+                    } else {
+                        debug "* Failed!";
+                    }
                 } else {
-                    $done++ if ( copy( $s, $d ) );
+                    if ( copy( $s, $d ) ) {
+                        $done++;
+                    } else {
+                        debug "* Failed!";
+                    }
                 }
                 $i++;
                 if ( $i / $total - $last_fraction > 1 / 40 ) {
@@ -571,20 +584,35 @@ sub clone_project_ok {
             $self->{progress_widget}->set_text($old_text);
             $self->{command_widget}->hide();
 
-            my $dialog = Gtk3::MessageDialog->new(
-                $parent_window,
-                'destroy-with-parent',
-                'info', 'ok',
-                __("Your project has been copied")
-                  . (
-                    $done != $total
-                    ? " " . sprintf( __("(%d files out of %d)"), $done, $total )
-                    : ""
-                  )
-                  . "."
-            );
-            $dialog->run;
-            $dialog->destroy;
+            if ( $done == $total ) {
+                my $dialog = Gtk3::MessageDialog->new(
+                    $parent_window,
+                    'destroy-with-parent',
+                    'info', 'ok',
+                    __("Your project has been copied")
+                      . "."
+                );
+                $dialog->run;
+                $dialog->destroy;
+            } else {
+                my $dialog = Gtk3::MessageDialog->new(
+                    $parent_window,
+                    'destroy-with-parent',
+                    'error', 'ok',
+                    __("Your project was not properly copied")
+                      . (
+                        $done != $total
+                        ? " "
+                          . sprintf( __("(%d files out of %d)"), $done, $total )
+                        : ""
+                      )
+                    . ".\n"
+                    . __("AMC encountered unknown problems copying your project: please make a copy yourself by other means.")
+                );
+                $dialog->run;
+                $dialog->destroy;
+            }
+                
         } else {
             $err = __("Source project directory not found");
         }
