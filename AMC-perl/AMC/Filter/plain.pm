@@ -304,7 +304,7 @@ sub value_cleanup {
 sub parse_error {
     my ( $self, $text ) = @_;
     $self->error(
-        "<i>AMC-TXT(" . sprintf( __('Line %d'), $. ) . ")</i> " . $text );
+        "<i>AMC-TXT(" . sprintf( __('Line %d'), $self->{input_line} ) . ")</i> " . $text );
 }
 
 # check that a set of answers for a given question is coherent: one
@@ -421,7 +421,12 @@ sub read_file {
     open( my $infile, "<", $input_file );
     binmode($infile);
 
+    my $line = 0;
+
   LINE: while (<$infile>) {
+        $line ++;
+        $self->{input_line} = $line;
+
         if ( !utf8::decode($_) ) {
             $self->parse_error( __
 "Invalid encoding: you must use UTF-8, but your source file was saved using another encoding"
