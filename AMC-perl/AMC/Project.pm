@@ -791,7 +791,7 @@ sub scoring_strategy_update {
 
     my $mode          = "b";
     my $pdf_corrected = $self->{config}->get_absolute('doc_indiv_solution');
-    if ( -f $pdf_corrected ) {
+    if ( $with_indiv_solution && -f $pdf_corrected ) {
         debug "Removing pre-existing $pdf_corrected";
         unlink($pdf_corrected);
     }

@@ -370,6 +370,20 @@ sub variable_transaction {
     }
 }
 
+# variable_boolean($name) get a variable value, and set it to 0
+# (FALSE) if it equals "no" or some other string that should be
+# interpreted as FALSE, so that it can be used as-is as a boolean
+# expression
+
+sub variable_boolean {
+    my ( $self, $name ) = @_;
+    my $v = $self->variable($name);
+    if ( $v =~ /^(no|false|none)$/i ) {
+        $v = 0;
+    }
+    return ($v);
+}
+
 # clear_variables($pattern) clear all variables values that are not
 # used internally by the module (keeps the 'version' variable, for
 # exemple). If $pattern is given, only delete variables LIKE $pattern.

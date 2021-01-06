@@ -2024,7 +2024,7 @@ sub calcule_mep_callback {
         my $sl_key =
           $self->{project}->layout->variable("build:studentslistkey");
         my $extract_only =
-          $self->{project}->layout->variable("build:extractonly");
+          $self->{project}->layout->variable_boolean("build:extractonly");
         $self->{project}->layout->end_transaction('PGCN');
 
         $self->detecte_mep();
