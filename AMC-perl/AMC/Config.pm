@@ -254,8 +254,11 @@ sub defaults {
         print_command_pdf  => [ 'command', 'cupsdoprint %f', 'lpr %f', ],
         print_extract_with => [ 'command', 'gs',             'pdftk', 'qpdf' ],
 
-# TRANSLATORS: directory name for projects. This directory will be created (if needed) in the home directory of the user. Please use only alphanumeric characters, and - or _. No accentuated characters.
-        rep_projets   => $self->{home_dir} . '/' . __ "MC-Projects",
+        rep_projets => $self->{home_dir} . '/' . __
+          # TRANSLATORS: directory name for projects. This directory will be
+          # created (if needed) in the home directory of the user. Please use
+          # only alphanumeric characters, and - or _. No accentuated characters.
+          "MC-Projects",
         projects_home => $self->{home_dir} . '/' . __ "MC-Projects",
         rep_modeles   => $self->{o_dir} . "/Models",
 
@@ -330,12 +333,20 @@ sub defaults {
 
         defaut_annote_rtl => '',
 
-# TRANSLATORS: This is the default text to be written on the top of the first page of each paper when annotating. From this string, %s will be replaced with the student final mark, %m with the maximum mark he can obtain, %S with the student total score, and %M with the maximum score the student can obtain.
-        defaut_verdict    => "%(ID)\n" . __("Mark: %s/%m (total score: %S/%M)"),
-        defaut_verdict_q  => "\"%" . "s/%" . "m\"",
-        defaut_verdict_qc => "\"X\"",
-        embedded_max_size => '1000x1500',
-        embedded_format   => 'jpeg',
+        defaut_verdict => "%(ID)\n" .
+          __(
+            # TRANSLATORS: This is the default text to be written on the
+            # top of the first page of each paper when annotating. From
+            # this string, %s will be replaced with the student final
+            # mark, %m with the maximum mark he can obtain, %S with the
+            # student total score, and %M with the maximum score the
+            # student can obtain.
+            "Mark: %s/%m (total score: %S/%M)"
+          ),
+        defaut_verdict_q      => "\"%" . "s/%" . "m\"",
+        defaut_verdict_qc     => "\"X\"",
+        embedded_max_size     => '1000x1500',
+        embedded_format       => 'jpeg',
         embedded_jpeg_quality => 75,
 
         zoom_window_height => 400,
@@ -358,22 +369,30 @@ sub defaults {
         email_smtp_user => '',
         SMTP            => '',
 
-# TRANSLATORS: Subject of the emails which can be sent to the students to give them their subject.
-        df_subjectemail_email_subject => __ "Exam question",
+        df_subjectemail_email_subject => __
+          # TRANSLATORS: Subject of the emails which can be sent to the students
+          # to give them their subject.
+          "Exam question",
 
-# TRANSLATORS: Body text of the emails which can be sent to the students to give them their subject.
         df_subjectemail_email_text => __
-            "Please find enclosed your question sheet.\nRegards.",
-        df_subjectemail_email_use_html => '',
+          # TRANSLATORS: Body text of the emails which can be sent to the
+          # students to give them their subject.
+          "Please find enclosed your question sheet.\nRegards.",
+        df_subjectemail_email_use_html   => '',
         df_subjectemail_email_attachment => [],
 
-# TRANSLATORS: Subject of the emails which can be sent to the students to give them their annotated completed answer sheet.
-        df_annotatedemail_email_subject => __ "Exam result",
+        df_annotatedemail_email_subject => __
+          # TRANSLATORS: Subject of the emails which can be sent to the students
+          # to give them their annotated completed answer sheet.
+          "Exam result",
 
-# TRANSLATORS: Body text of the emails which can be sent to the students to give them their annotated completed answer sheet.
-        df_annotatedemail_email_text => __
-"Please find enclosed your annotated completed answer sheet.\nRegards.",
-        df_annotatedemail_email_use_html => '',
+        df_annotatedemail_email_text => __(
+            # TRANSLATORS: Body text of the emails which can be sent to the
+            # students to give them their annotated completed answer sheet.
+            "Please find enclosed your annotated"
+              . " completed answer sheet.\nRegards."
+        ),
+        df_annotatedemail_email_use_html   => '',
         df_annotatedemail_email_attachment => [],
 
         email_delay => 0,
@@ -457,7 +476,7 @@ sub defaults {
         auto_capture_mode => -1,
         allocate_ids      => 0,
 
-        email_col        => '',
+        email_col => '',
 
         subjectemail   => {},
         annotatedemail => {},
@@ -549,14 +568,16 @@ sub set_global_option_to_default {
             if ( ref( $self->{o_default}->{$key} ) eq 'ARRAY' ) {
                 my ( $kind, @values ) = @{ $self->{o_default}->{$key} };
 
-                if($kind) {
+                if ($kind) {
+
                     # [ 'command' , <commands> ] --> choose the first
                     # existing command
                     if ( $kind eq 'command' ) {
-                        $self->{global}->{$key} = commande_accessible( \@values );
+                        $self->{global}->{$key} =
+                          commande_accessible( \@values );
                         if ( !$self->{global}->{$key} ) {
                             debug
-                                "No available command for option $key: using the first one";
+"No available command for option $key: using the first one";
                             $self->{global}->{$key} = $values[0];
                         }
                     } else {
@@ -602,7 +623,7 @@ sub set_project_options_to_default {
             my $c  = $1;
             my $kk = $2;
             $self->{project}->{$c} = {}
-              if ( ! $self->{project}->{$c} );
+              if ( !$self->{project}->{$c} );
             if ( !exists( $self->{project}->{$c}->{$kk} ) ) {
                 debug "New option $c/$kk from $k\n";
                 $self->{project}->{$c}->{$kk} = $self->{global}->{$k};
@@ -659,23 +680,30 @@ sub test_commands {
                 'warning', 'ok', '' );
             $dialog->set_markup(
 
-# TRANSLATORS: Message (first part) when some of the commands that are given in the preferences cannot be found.
-                __("Some commands allowing to open documents can't be found:")
+                __(
+                    # TRANSLATORS: Message (first part) when some of
+                    # the commands that are given in the preferences
+                    # cannot be found.
+                    "Some commands allowing to open documents can't be found:"
+                  )
                   . " "
                   . join( ", ", map { "<b>" . $self->get($_) . "</b>"; } @uc )
                   . ". "
 
-# TRANSLATORS: Message (second part) when some of the commands that are given in the preferences cannot be found.
                   . __(
+             # TRANSLATORS: Message (second part) when some of the commands that
+             # are given in the preferences cannot be found.
 "Please check its correct spelling and install missing software."
                   )
                   . " "
 
                   . sprintf(
-# TRANSLATORS: Message (third part) when some of the commands that are given in the preferences cannot be found. The %s will be replaced with the name of the menu entry "Preferences" and the name of the menu "Edit".
                     __
+          # TRANSLATORS: Message (third part) when some of the commands that are
+          # given in the preferences cannot be found. The %s will be replaced
+          # with the name of the menu entry "Preferences" and the name of the
+          # menu "Edit".
 "You can change used commands following <i>%s</i> from menu <i>%s</i>.",
-
                     # TRANSLATORS: "Preferences" menu
                     __ "Preferences",
 
@@ -861,8 +889,10 @@ sub changed_keys {
     my ( $self, $container ) = @_;
     if ($container) {
         if ( $self->{$container}->{_changed} ) {
-            return ( grep { $_ }
-                  split( /,/, $self->{$container}->{_changed} ) );
+            return (
+                grep { $_ }
+                  split( /,/, $self->{$container}->{_changed} )
+            );
         } else {
             return ();
         }
@@ -941,9 +971,11 @@ sub save {
                             $self->{gui},
                             'destroy-with-parent',
                             'error', 'ok',
-
-# TRANSLATORS: Error writing one of the configuration files (global or project). The first %s will be replaced with the path of that file, and the second with the error text.
-                            __ "Error writing configuration file %s: %s",
+                            __
+          # TRANSLATORS: Error writing one of the configuration files (global or
+          # project). The first %s will be replaced with the path of that file,
+          # and the second with the error text.
+                              "Error writing configuration file %s: %s",
                             $file, $!
                         );
                         $dialog->run;
@@ -960,7 +992,7 @@ sub save {
 }
 
 sub set_projects_home {
-    my ($self, $p) = @_;
+    my ( $self, $p ) = @_;
 
     $self->set( 'rep_projets', $p );
     $self->{shortcuts}->set( projects_path => $p );

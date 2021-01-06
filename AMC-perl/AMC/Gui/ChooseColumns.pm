@@ -84,9 +84,11 @@ sub dialog {
     my $renderer = Gtk3::CellRendererText->new;
 
     my $column = Gtk3::TreeViewColumn->new_with_attributes(
-
-# TRANSLATORS: This is the title of a column containing all columns names from the students list file, when choosing which columns has to be exported to the spreadsheets.
-        __ "column",
+        __
+        # TRANSLATORS: This is the title of a column containing all columns
+        # names from the students list file, when choosing which columns has
+        # to be exported to the spreadsheets.
+        "column",
         $renderer,
         text => 0
     );

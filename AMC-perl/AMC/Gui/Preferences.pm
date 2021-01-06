@@ -87,12 +87,15 @@ sub printing_methods {
     }
 
     push @printing_methods,
-
-# TRANSLATORS: One of the printing methods: use a command (This is not the command name itself). This is a menu entry.
-      'commande', __("command"),
-
-# TRANSLATORS: One of the printing methods: print to files. This is a menu entry.
-      'file', __("to files");
+        'commande', __(
+            # TRANSLATORS: One of the printing methods: use a command
+            # (This is not the command name itself). This is a menu
+            # entry.
+            "command"),
+        'file', __(
+            # TRANSLATORS: One of the printing methods: print to
+            # files. This is a menu entry.
+            "to files");
 
     return (@printing_methods);
 }
@@ -117,15 +120,24 @@ sub stores {
     );
 
     my $rounding_store = cb_model(
-
-      # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-        'inf', __ "floor",
-
-      # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-        'normal', __ "rounding",
-
-      # TRANSLATORS: One of the rounding method for marks. This is a menu entry.
-        'sup', __ "ceiling"
+        'inf',
+        __(
+            # TRANSLATORS: One of the rounding method for marks. This
+            # is a menu entry.
+            "floor"
+        ),
+        'normal',
+        __(
+            # TRANSLATORS: One of the rounding method for marks. This
+            # is a menu entry.
+            "rounding"
+        ),
+        'sup',
+        __(
+            # TRANSLATORS: One of the rounding method for marks. This
+            # is a menu entry.
+            "ceiling"
+        )
     );
 
     $self->store_register(
@@ -133,13 +145,21 @@ sub stores {
             map { $_->{iso} => $_->{txt} } (AMC::Encodings::encodings())
         ),
 
-  # TRANSLATORS: One option for decimal point: use a comma. This is a menu entry
         delimiteur_decimal => cb_model(
-            ',', __ ", (comma)",
+            ',',
+            __(
+                # TRANSLATORS: One option for decimal point: use a
+                # comma. This is a menu entry
+                ", (comma)"
+            ),
 
- # TRANSLATORS: One option for decimal point: use a point. This is a menu entry.
-            '.', __ ". (dot)"
-        ),
+            '.',
+            __(
+                # TRANSLATORS: One option for decimal point: use a
+                # point. This is a menu entry.
+                ". (dot)"
+            )
+          ),
         methode_impression => cb_model( $self->printing_methods ),
         print_extract_with => cb_model(
             pdftk           => 'pdftk',
@@ -148,10 +168,12 @@ sub stores {
             'sejda-console' => 'sejda-console',
         ),
 
-        # TRANSLATORS: you can omit the [...] part, just here to explain context
         manuel_image_type => cb_model(
             ppm =>
-              __p("(none) [No transitional image type (direct processing)]"),
+            __p(
+                # TRANSLATORS: you can omit the [...] part, just here to
+                # explain context
+                "(none) [No transitional image type (direct processing)]"),
             xpm => 'XPM',
             gif => 'GIF'
         ),
@@ -164,53 +186,90 @@ sub stores {
             jpeg => 'JPEG'
         ),
         email_transport => cb_model(
+            sendmail => __(
+                # TRANSLATORS: One of the ways to send mail: use sendmail
+                # command. This is a menu entry.
+                "sendmail"
+            ),
 
-# TRANSLATORS: One of the ways to send mail: use sendmail command. This is a menu entry.
-            sendmail => __ "sendmail",
+            SMTP => __(
+                # TRANSLATORS: One of the ways to send mail: use a
+                # SMTP server. This is a menu entry.
+                "SMTP"
+            )
+          ),
 
-# TRANSLATORS: One of the ways to send mail: use a SMTP server. This is a menu entry.
-            SMTP => __ "SMTP"
-        ),
-
-        # TRANSLATORS: SMTP security mode: None (nor SSL nor STARTTLS)
         email_smtp_ssl => cb_model(
-            0        => __p "None [SMTP security]",
+            0        => __p(
+                # TRANSLATORS: SMTP security mode: None (nor SSL nor
+                # STARTTLS)
+                "None [SMTP security]"),
             1        => 'SSL',
             starttls => 'STARTTLS'
         ),
 
-        # TRANSLATORS: you can omit the [...] part, just here to explain context
         annote_position => cb_model(
             none =>
-              __p("(none) [No annotation position (do not write anything)]"),
+            __p(
+                # TRANSLATORS: you can omit the [...] part, just here to
+                # explain context
+                "(none) [No annotation position (do not write anything)]"),
 
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in one margin. This is a menu entry.
-            marge => __ "in one margin",
+            marge => __(
+                # TRANSLATORS: One of the possible location for
+                # questions scores on annotated completed answer
+                # sheet: in one margin. This is a menu entry.
+                "in one margin"),
 
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in one of the two margins. This is a menu entry.
-            marges => __ "in the margins",
+            marges => __(
+                # TRANSLATORS: One of the possible location for
+                # questions scores on annotated completed answer
+                # sheet: in one of the two margins. This is a menu
+                # entry.
+                "in the margins"),
 
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: near the boxes. This is a menu entry.
-            case => __ "near boxes",
+            case => __(
+                # TRANSLATORS: One of the possible location for
+                # questions scores on annotated completed answer
+                # sheet: near the boxes. This is a menu entry.
+                "near boxes"),
 
-# TRANSLATORS: One of the possible location for questions scores on annotated completed answer sheet: in the zones defined in the source file
-            zones => __ "where defined in the source",
+            zones => __(
+                # TRANSLATORS: One of the possible location for
+                # questions scores on annotated completed answer
+                # sheet: in the zones defined in the source file
+                "where defined in the source"),
         ),
     );
 
     my $symbole_type_cb = cb_model(
+        none => __(
+            # TRANSLATORS: One of the signs that can be drawn on
+            # annotated answer sheets to tell if boxes are to be
+            # ticked or not, and if they were detected as ticked or
+            # not.
+            "nothing"),
 
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
-        none => __ "nothing",
+        circle => __(
+            # TRANSLATORS: One of the signs that can be drawn on
+            # annotated answer sheets to tell if boxes are to be
+            # ticked or not, and if they were detected as ticked or
+            # not.
+            "circle"),
 
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not.
-        circle => __ "circle",
+        mark => __(
+            # TRANSLATORS: One of the signs that can be drawn on
+            # annotated answer sheets to tell if boxes are to be
+            # ticked or not, and if they were detected as ticked or
+            # not. Here, a cross.
+            "mark"),
 
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, a cross.
-        mark => __ "mark",
-
-# TRANSLATORS: One of the signs that can be drawn on annotated answer sheets to tell if boxes are to be ticked or not, and if they were detected as ticked or not. Here, the box outline.
-        box => __ "box",
+        box => __(
+            # TRANSLATORS: One of the signs that can be drawn on
+            # annotated answer sheets to tell if boxes are to be
+            # ticked or not, and if they were detected as ticked or
+            # not. Here, the box outline.
+            "box"),
     );
 
     for my $k (qw/0_0 0_1 1_0 1_1/) {

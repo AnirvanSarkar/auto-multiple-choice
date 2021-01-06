@@ -78,11 +78,19 @@ sub new {
 
     $self->{prefs}->store_register(
 
-# TRANSLATORS: One of the ways to change a box's ticked state in the zooms window
-        zooms_edit_mode => cb_model( ZOOMS_EDIT_DND, __ "drag and drop",
+        zooms_edit_mode => cb_model( ZOOMS_EDIT_DND,
+            __(
+               # TRANSLATORS: One of the ways to change a box's ticked
+               # state in the zooms window
+               "drag and drop"
+            ),
 
-# TRANSLATORS: One of the ways to change a box's ticked state in the zooms window
-            ZOOMS_EDIT_CLICK, __ "click"
+            ZOOMS_EDIT_CLICK,
+            __(
+               # TRANSLATORS: One of the ways to change a box's ticked
+               # state in the zooms window
+               "click"
+            )
         ),
     );
 

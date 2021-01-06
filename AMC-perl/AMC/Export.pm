@@ -33,7 +33,7 @@ use_gettext;
 
 my %sorting = (
     l => ['n:student.line'],
-    m => [ 'n:mark', 's:student.name', 'n:student.line' ],
+    'm' => [ 'n:mark', 's:student.name', 'n:student.line' ],
     i => [ 'n:student', 'n:copy', 'n:student.line' ],
     n => [ 's:student.name', 'n:student.line' ],
 );

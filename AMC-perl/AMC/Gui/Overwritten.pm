@@ -61,22 +61,40 @@ sub dialog {
     $self->get_ui('overwritten_list')->set_model($olist);
 
     $self->get_ui('overwritten_list')->append_column(
-        Gtk3::TreeViewColumn->new_with_attributes
-
-# TRANSLATORS: column title for the list of overwritten pages. This refers to the page from the question
-          ( __ "Page", Gtk3::CellRendererText->new, text => 0 )
+        Gtk3::TreeViewColumn->new_with_attributes(
+            __(
+                # TRANSLATORS: column title for the list of
+                # overwritten pages. This refers to the page from the
+                # question
+                "Page"
+            ),
+            Gtk3::CellRendererText->new,
+            text => 0
+        )
     );
     $self->get_ui('overwritten_list')->append_column(
-        Gtk3::TreeViewColumn->new_with_attributes
-
-# TRANSLATORS: column title for the list of overwritten pages. This refers to the number of times the page has been overwritten.
-          ( __ "count", Gtk3::CellRendererText->new, text => 1 )
+        Gtk3::TreeViewColumn->new_with_attributes(
+            __(
+                # TRANSLATORS: column title for the list of
+                # overwritten pages. This refers to the number of
+                # times the page has been overwritten.
+                "count"
+            ),
+            Gtk3::CellRendererText->new,
+            text => 1
+        )
     );
     $self->get_ui('overwritten_list')->append_column(
-        Gtk3::TreeViewColumn->new_with_attributes
-
-# TRANSLATORS: column title for the list of overwritten pages. This refers to the date of the last data capture for the page.
-          ( __ "Date", Gtk3::CellRendererText->new, text => 2 )
+        Gtk3::TreeViewColumn->new_with_attributes(
+            __(
+                # TRANSLATORS: column title for the list of
+                # overwritten pages. This refers to the date of the
+                # last data capture for the page.
+                "Date"
+            ),
+            Gtk3::CellRendererText->new,
+            text => 2
+        )
     );
     for my $o ( @{ $self->{capture}->overwritten_pages_transaction() } ) {
         $olist->set(

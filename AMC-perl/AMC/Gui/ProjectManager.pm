@@ -98,8 +98,11 @@ sub projects_list_window {
 
         $self->get_ui('choix_projet')->set_focus( $self->get_ui('projet_nom') );
 
-        # TRANSLATORS: Window title when creating a new project.
-        $self->get_ui('choix_projet')->set_title( __ "New AMC project" );
+        $self->get_ui('choix_projet')->set_title(
+            __
+              # TRANSLATORS: Window title when creating a new project.
+              "New AMC project"
+        );
     }
 
     if ( $self->{action} eq 'manage' ) {
@@ -111,9 +114,11 @@ sub projects_list_window {
         }
         $self->get_ui('projet_bouton_annule_label')->set_text( __ "Back" );
 
-        # TRANSLATORS: Window title when managing projects.
-        $self->get_ui('choix_projet')
-          ->set_title( __ "AMC projects management" );
+        $self->get_ui('choix_projet')->set_title(
+            __
+              # TRANSLATORS: Window title when managing projects.
+              "AMC projects management"
+        );
     }
 
     # keep same size as last time used
@@ -452,8 +457,10 @@ sub rename_ok {
                 $dialog->set_markup(
 
                     sprintf(
-# TRANSLATORS: Message when you want to create an AMC project with name xxx, but there already exists a directory in the projects directory with this name!
                         __(
+# TRANSLATORS: Message when you want to create an AMC project with
+# name xxx, but there already exists a directory in the projects
+# directory with this name!
 "Directory <i>%s</i> already exists, so you can't choose this name."
                         ),
                         glib_filename($dir_nouveau)

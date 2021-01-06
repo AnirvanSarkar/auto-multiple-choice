@@ -264,14 +264,31 @@ sub build_stats_table {
     my %y_item = ( all => 2, empty => 3, invalid => 4 );
 
     my %y_name = (
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the total number of sheets. Please let this label short.
-        all => __ "ALL",
+        all => __(
+            # TRANSLATORS: this is a row label in the table with
+            # questions basic statistics in the ODS exported
+            # spreadsheet. The corresponding row contains the total
+            # number of sheets. Please let this label short.
+            "ALL"
+        ),
 
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question did not get an answer. Please let this label short.
-        empty => __ "NA",
+        empty => __(
+           # TRANSLATORS: this is a row label in the table with
+           # questions basic statistics in the ODS exported
+           # spreadsheet. The corresponding row contains the number of
+           # sheets for which the question did not get an
+           # answer. Please let this label short.
+            "NA"
+        ),
 
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got an invalid answer. Please let this label short.
-        invalid => __ "INVALID"
+        invalid => __(
+           # TRANSLATORS: this is a row label in the table with
+           # questions basic statistics in the ODS exported
+           # spreadsheet. The corresponding row contains the number of
+           # sheets for which the question got an invalid
+           # answer. Please let this label short.
+            "INVALID"
+        )
     );
     my %y_style = ( empty => 'qidE', invalid => 'qidI' );
 
@@ -300,23 +317,81 @@ sub build_stats_table {
 
         $doc->cellStyle( $stats, $ybase + 1, $x, 'statCol' );
 
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the reference of the boxes. Please let this name short.
-        $doc->cellValue( $stats, $ybase + 1, $x, encode( 'utf-8', __("Box") ) );
+        $doc->cellValue(
+            $stats,
+            $ybase + 1,
+            $x,
+            encode(
+                'utf-8',
+                __(
+                   # TRANSLATORS: this is a head name in the table
+                   # with questions basic statistics in the ODS
+                   # exported spreadsheet. The corresponding column
+                   # contains the reference of the boxes. Please let
+                   # this name short.
+                    "Box"
+                )
+            )
+        );
         $doc->cellStyle( $stats, $ybase + 1, $x + 1, 'statCol' );
 
-        $doc->cellValue( $stats, $ybase + 1, $x + 1,
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains the number of items (ticked boxes, or invalid or empty questions). Please let this name short.
-            encode( 'utf-8', __("Nb") ) );
+        $doc->cellValue(
+            $stats,
+            $ybase + 1,
+            $x + 1,
+            encode(
+                'utf-8',
+                __(
+                   # TRANSLATORS: this is a head name in the table
+                   # with questions basic statistics in the ODS
+                   # exported spreadsheet. The corresponding column
+                   # contains the number of items (ticked boxes, or
+                   # invalid or empty questions). Please let this name
+                   # short.
+                    "Nb"
+                )
+            )
+        );
         $doc->cellStyle( $stats, $ybase + 1, $x + 2, 'statCol' );
 
-        $doc->cellValue( $stats, $ybase + 1, $x + 2,
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over all questions. Please let this name short.
-            encode( 'utf-8', __("/all") ) );
+        $doc->cellValue(
+            $stats,
+            $ybase + 1,
+            $x + 2,
+            encode(
+                'utf-8',
+                __(
+                   # TRANSLATORS: this is a head name in the table
+                   # with questions basic statistics in the ODS
+                   # exported spreadsheet. The corresponding column
+                   # contains percentage of questions for which the
+                   # corresponding box is ticked over all
+                   # questions. Please let this name short.
+                    "/all"
+                )
+            )
+        );
         $doc->cellStyle( $stats, $ybase + 1, $x + 3, 'statCol' );
 
-        $doc->cellValue( $stats, $ybase + 1, $x + 3,
-# TRANSLATORS: this is a head name in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding column contains percentage of questions for which the corresponding box is ticked over the expressed questions (counting only questions that did not get empty or invalid answers). Please let this name short.
-            encode( 'utf-8', __("/expr") ) );
+        $doc->cellValue(
+            $stats,
+            $ybase + 1,
+            $x + 3,
+            encode(
+                'utf-8',
+                __(
+                   # TRANSLATORS: this is a head name in the table
+                   # with questions basic statistics in the ODS
+                   # exported spreadsheet. The corresponding column
+                   # contains percentage of questions for which the
+                   # corresponding box is ticked over the expressed
+                   # questions (counting only questions that did not
+                   # get empty or invalid answers). Please let this
+                   # name short.
+                    "/expr"
+                )
+            )
+        );
 
         $doc->columnStyle( $stats, $x + 4, "col.Space" );
 
@@ -347,8 +422,14 @@ sub build_stats_table {
                     $amax++;
                     $ya = 4 + $amax;
 
-# TRANSLATORS: this is a row label in the table with questions basic statistics in the ODS exported spreadsheet. The corresponding row contains the number of sheets for which the question got the "none of the above are correct" answer. Please let this label short.
-                    $name = __ "NONE";
+                    $name = __
+                      # TRANSLATORS: this is a row label in the table
+                      # with questions basic statistics in the ODS
+                      # exported spreadsheet. The corresponding row
+                      # contains the number of sheets for which the
+                      # question got the "none of the above are
+                      # correct" answer. Please let this label short.
+                      "NONE";
                 }
             }
 
@@ -1012,9 +1093,10 @@ sub export {
             (
                 $self->{'out.code'} ? $self->{'out.code'}
                 :
-
-# TRANSLATORS: table name in the exported ODS spreadsheet for the table that contains the marks.
-                  __("Marks")
+             __(
+                # TRANSLATORS: table name in the exported ODS
+                # spreadsheet for the table that contains the marks.
+                "Marks")
             )
         )
     );
@@ -1488,9 +1570,16 @@ sub export {
 
     if ( $self->{'out.stats'} ) {
 
-        my $stats_0 =
-# TRANSLATORS: Label of the table with questions basic statistics in the exported ODS spreadsheet.
-          $doc->appendTable( encode( 'utf-8', __("Questions statistics") ) );
+        my $stats_0 = $doc->appendTable(
+            encode(
+                'utf-8',
+                __(
+                   # TRANSLATORS: Label of the table with questions
+                   # basic statistics in the exported ODS spreadsheet.
+                    "Questions statistics"
+                )
+            )
+        );
 
         $self->build_stats_table( $self->{'out.stats'}, $cts, $correct_data,
             $doc, $stats_0, @questions_0 );
@@ -1499,8 +1588,16 @@ sub export {
     if ( $self->{'out.statsindic'} ) {
 
         my $stats_1 = $doc->appendTable(
-# TRANSLATORS: Label of the table with indicative questions basic statistics in the exported ODS spreadsheet.
-            encode( 'utf-8', __("Indicative questions statistics") ) );
+            encode(
+                'utf-8',
+                __(
+                   # TRANSLATORS: Label of the table with indicative
+                   # questions basic statistics in the exported ODS
+                   # spreadsheet.
+                    "Indicative questions statistics"
+                )
+            )
+        );
 
         $self->build_stats_table( $self->{'out.statsindic'},
             $cts, 0, $doc, $stats_1, @questions_1 );
@@ -1510,8 +1607,19 @@ sub export {
     # Legend table
     ##########################################################################
 
-# TRANSLATORS: Label of the table with a legend (explaination of the colors used) in the exported ODS spreadsheet.
-    my $legend = $doc->appendTable( encode( 'utf-8', __("Legend") ), 9, 2 );
+    my $legend = $doc->appendTable(
+        encode(
+            'utf-8',
+            __(
+               # TRANSLATORS: Label of the table with a legend
+               # (explaination of the colors used) in the exported ODS
+               # spreadsheet.
+                "Legend"
+            )
+        ),
+        9,
+        2
+    );
 
     $doc->cellSpan( $legend, 0, 0, 2 );
     $doc->cellStyle( $legend, 0, 0, 'Titre' );
@@ -1521,42 +1629,110 @@ sub export {
 
     $doc->cellStyle( $legend, $jj, 0, 'NoteX' );
 
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been asked to some students.
-    $doc->cellValue( $legend, $jj, 1, encode( 'utf-8', __("Non applicable") ) );
+    $doc->cellValue(
+        $legend, $jj, 1,
+        encode(
+            'utf-8',
+            __(
+               # TRANSLATORS: From the legend in the exported ODS
+               # spreadsheet. This refers to the questions that have
+               # not been asked to some students.
+                "Non applicable"
+            )
+        )
+    );
     $jj++;
     $doc->cellStyle( $legend, $jj, 0, 'NoteV' );
 
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered.
-    $doc->cellValue( $legend, $jj, 1, encode( 'utf-8', __("No answer") ) );
+    $doc->cellValue(
+        $legend, $jj, 1,
+        encode(
+            'utf-8',
+            __(
+               # TRANSLATORS: From the legend in the exported ODS
+               # spreadsheet. This refers to the questions that have
+               # not been answered.
+                "No answer"
+            )
+        )
+    );
     $jj++;
     $doc->cellStyle( $legend, $jj, 0, 'NoteC' );
 
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that have not been answered, but are cancelled by the use of allowempty scoring strategy.
-    $doc->cellValue( $legend, $jj, 1, encode( 'utf-8', __("Cancelled") ) );
+    $doc->cellValue(
+        $legend, $jj, 1,
+        encode(
+            'utf-8',
+            __(
+               # TRANSLATORS: From the legend in the exported ODS
+               # spreadsheet. This refers to the questions that have
+               # not been answered, but are cancelled by the use of
+               # allowempty scoring strategy.
+                "Cancelled"
+            )
+        )
+    );
     $jj++;
     $doc->cellStyle( $legend, $jj, 0, 'NoteE' );
 
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
-    $doc->cellValue( $legend, $jj, 1, encode( 'utf-8', __("Invalid answer") ) );
+    $doc->cellValue(
+        $legend, $jj, 1,
+        encode(
+            'utf-8',
+            __(
+               # TRANSLATORS: From the legend in the exported ODS
+               # spreadsheet. This refers to the questions that got an
+               # invalid answer.
+                "Invalid answer"
+            )
+        )
+    );
     $jj++;
     if ( $self->{'out.stats'} ) {
         $doc->cellStyle( $legend, $jj, 0, 'qidC' );
 
-        $doc->cellValue( $legend, $jj, 1,
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
-            encode( 'utf-8', __("Correct answer") ) );
+        $doc->cellValue(
+            $legend, $jj, 1,
+            encode(
+                'utf-8',
+                __(
+                    # TRANSLATORS: From the legend in the exported ODS
+                    # spreadsheet. This refers to the questions that
+                    # got an invalid answer.
+                    "Correct answer"
+                )
+            )
+        );
         $jj++;
         $doc->cellStyle( $legend, $jj, 0, 'qidW' );
 
-        $doc->cellValue( $legend, $jj, 1,
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the questions that got an invalid answer.
-            encode( 'utf-8', __("Wrong answer") ) );
+        $doc->cellValue(
+            $legend, $jj, 1,
+            encode(
+                'utf-8',
+                __(
+                   # TRANSLATORS: From the legend in the exported ODS
+                   # spreadsheet. This refers to the questions that
+                   # got an invalid answer.
+                    "Wrong answer"
+                )
+            )
+        );
         $jj++;
     }
     $doc->cellStyle( $legend, $jj, 0, 'CodeV' );
 
-# TRANSLATORS: From the legend in the exported ODS spreadsheet. This refers to the indicative questions.
-    $doc->cellValue( $legend, $jj, 1, encode( 'utf-8', __("Indicative") ) );
+    $doc->cellValue(
+        $legend, $jj, 1,
+        encode(
+            'utf-8',
+            __(
+               # TRANSLATORS: From the legend in the exported ODS
+               # spreadsheet. This refers to the indicative questions.
+                "Indicative"
+            )
+        )
+    );
     $jj++;
 
     $doc->createStyle(

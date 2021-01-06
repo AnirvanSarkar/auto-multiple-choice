@@ -141,14 +141,32 @@ sub new {
         $self->{scan_view}->set_model( $self->{scan_view_model} );
 
         $self->{navigate_model} = cb_model(
-# TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through all pages. Please keep this text very short (say less than 5 letters) so that the window is not too large
-            0, __("all"),
+            0,
+            __(
+          # TRANSLATORS: This is one of the choices for pages navigation in
+          # manual data capture window. Here, navigation goes through all
+          # pages. Please keep this text very short (say less than 5 letters) so
+          # that the window is not too large
+                "all"
+            ),
 
-# TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through pages with some invalid answers. Please keep this text very short (say less than 5 letters) so that the window is not too large
-            1, __("inv"),
+            1,
+            __(
+          # TRANSLATORS: This is one of the choices for pages navigation in
+          # manual data capture window. Here, navigation goes through pages with
+          # some invalid answers. Please keep this text very short (say less
+          # than 5 letters) so that the window is not too large
+                "inv"
+            ),
 
-# TRANSLATORS: This is one of the choices for pages navigation in manual data capture window. Here, navigation goes through pages with empty or invalid answers. Please keep this text very short (say less than 5 letters) so that the window is not too large
-            2, __("i&e")
+            2,
+            __(
+          # TRANSLATORS: This is one of the choices for pages navigation in
+          # manual data capture window. Here, navigation goes through pages with
+          # empty or invalid answers. Please keep this text very short (say less
+          # than 5 letters) so that the window is not too large
+                "i&e"
+            )
         );
         $self->{navigate}->set_model( $self->{navigate_model} );
         $self->{navigate}

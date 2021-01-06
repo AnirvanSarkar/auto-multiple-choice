@@ -139,8 +139,11 @@ sub dialog {
     $renderer = Gtk3::CellRendererText->new;
 
     $column = Gtk3::TreeViewColumn->new_with_attributes(
-# TRANSLATORS: This is the title of a column containing attachments file paths in a table showing all attachments, when sending them to the students by email.
-        __ "file",
+        __
+        # TRANSLATORS: This is the title of a column containing attachments
+        # file paths in a table showing all attachments, when sending them to
+        # the students by email.
+        "file",
         $renderer,
         text       => ATTACHMENTS_NAME,
         foreground => ATTACHMENTS_FOREGROUND,
@@ -161,27 +164,55 @@ sub dialog {
     $emails_list->set_model($emails_store);
     $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of a column containing copy numbers in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "copy", $renderer,
-        text => EMAILS_SC );
+    $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __(
+          # TRANSLATORS: This is the title of a column containing copy numbers
+          # in a table showing all annotated answer sheets, when sending them to
+          # the students by email.
+            "copy"
+        ),
+        $renderer,
+        text => EMAILS_SC
+    );
     $emails_list->append_column($column);
     $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of a column containing students names in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "name", $renderer,
-        text => EMAILS_NAME );
+    $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __(
+          # TRANSLATORS: This is the title of a column containing students names
+          # in a table showing all annotated answer sheets, when sending them to
+          # the students by email.
+            "name"
+        ),
+        $renderer,
+        text => EMAILS_NAME
+    );
     $emails_list->append_column($column);
     $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of a column containing students email addresses in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "email", $renderer,
-        text => EMAILS_EMAIL );
+    $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __(
+          # TRANSLATORS: This is the title of a column containing students email
+          # addresses in a table showing all annotated answer sheets, when
+          # sending them to the students by email.
+            "email"
+        ),
+        $renderer,
+        text => EMAILS_EMAIL
+    );
     $emails_list->append_column($column);
     $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is the title of a column containing mailing status (not sent, already sent, failed) in a table showing all annotated answer sheets, when sending them to the students by email.
-    $column = Gtk3::TreeViewColumn->new_with_attributes( __ "status", $renderer,
-        text => EMAILS_STATUS );
+    $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __(
+          # TRANSLATORS: This is the title of a column containing mailing status
+          # (not sent, already sent, failed) in a table showing all annotated
+          # answer sheets, when sending them to the students by email.
+            "status"
+        ),
+        $renderer,
+        text => EMAILS_STATUS
+    );
     $emails_list->append_column($column);
 
     $self->{report}->begin_read_transaction('emCC');
@@ -445,14 +476,15 @@ sub check_for_sendmail {
         my $dialog = Gtk3::MessageDialog->new(
             $self->{parent_window},
             'destroy-with-parent',
-
-            # TRANSLATORS: Do not translate the 'sendmail' word.
             'error', 'ok', ''
         );
         $dialog->set_markup(
             sprintf(
                 __(
-"The <i>sendmail</i> program cannot be found at the location you specified in the preferences (%s). Please update your configuration."
+                    # TRANSLATORS: Do not translate the 'sendmail' word.
+                    "The <i>sendmail</i> program cannot be found at the location".
+                    " you specified in the preferences (%s).".
+                    " Please update your configuration."
                 ),
                 $self->get('email_sendmail_path')
             )

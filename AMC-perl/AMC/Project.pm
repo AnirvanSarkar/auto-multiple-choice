@@ -507,12 +507,22 @@ sub annotate {
             $oo{id_file}
             ?
 
-# TRANSLATORS: File name for single annotated answer sheets with only some selected students. Please use simple characters.
-              ( __("Selected_students") ) . ".pdf"
+              __(
+                # TRANSLATORS: File name for single annotated
+                # answer sheets with only some selected
+                # students. Please use simple characters.
+                "Selected_students"
+              )
+              . ".pdf"
             :
 
-# TRANSLATORS: File name for single annotated answer sheets with all students. Please use simple characters.
-              ( __("All_students") ) . ".pdf"
+              __(
+                # TRANSLATORS: File name for single annotated
+                # answer sheets with all students. Please use
+                # simple characters.
+                "All_students"
+              )
+              . ".pdf"
         );
     }
 

@@ -36,9 +36,13 @@ sub new {
 }
 
 sub name {
-
-   # TRANSLATORS: List of students with their scores: one of the export formats.
-    return ( __("PDF list") );
+    return (
+        __(
+            # TRANSLATORS: List of students with their scores: one
+            # of the export formats.
+            "PDF list"
+        )
+    );
 }
 
 sub extension {

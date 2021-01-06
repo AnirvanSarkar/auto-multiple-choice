@@ -268,7 +268,8 @@ sub parse_options {
 
             $self->error(
                 sprintf(
-# TRANSLATORS: Message when the Pages option used in AMC-TXT can't be parsed. %s will be replaced with the option value
+# TRANSLATORS: Message when the Pages option used in AMC-TXT can't be
+# parsed. %s will be replaced with the option value
                     __ "Pages option value can't be understood: %s",
                     $self->{options}->{pages}
                 )
@@ -316,8 +317,10 @@ sub check_answers {
         if ( $#{ $question->{answers} } < 1 ) {
 
             $self->parse_error(
-# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new question whereas the previous question has less than two choices
-                __ "Previous question has less than two choices" );
+                               __
+# TRANSLATORS: Error text for AMC-TXT parsing, when opening a new
+# question whereas the previous question has less than two choices
+                               "Previous question has less than two choices" );
         } else {
             my $n_correct = 0;
             for my $a ( @{ $question->{answers} } ) {
@@ -326,10 +329,10 @@ sub check_answers {
             if ( !( $question->{multiple} || $question->{indicative} ) ) {
                 if ( $n_correct != 1 ) {
 
-                    # TRANSLATORS: Error text for AMC-TXT parsing
                     $self->parse_error(
                         sprintf(
                             __(
+                    # TRANSLATORS: Error text for AMC-TXT parsing
 "Previous question is a simple question but has %d correct choice(s)"
                             ),
                             $n_correct
@@ -474,8 +477,10 @@ sub read_file {
         if (/^([a-z0-9-]+):/i) {
             debug "Unknown option";
 
-# TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option is given a value
-            $self->parse_error( sprintf( __("Unknown option: %s"), $1 ) );
+            $self->parse_error( sprintf( __(
+# TRANSLATORS: Error text for AMC-TXT parsing, when an unknown option
+# is given a value
+                                            "Unknown option: %s"), $1 ) );
         }
 
         # groups
@@ -564,8 +569,10 @@ sub read_file {
             } else {
                 debug "Choice outside question";
 
-# TRANSLATORS: Error text for AMC-TXT parsing when a choice is given but no question were opened
-                $self->parse_error( __ "Choice outside question" );
+                $self->parse_error( __
+# TRANSLATORS: Error text for AMC-TXT parsing when a choice is given
+# but no question were opened
+                                    "Choice outside question" );
             }
             next LINE;
         }

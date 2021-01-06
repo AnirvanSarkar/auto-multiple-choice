@@ -49,12 +49,19 @@ sub new {
     $self->store_register(
         auto_capture_mode => cb_model(
             -1 => __ "Please select...",
+            0 => __(
+                # TRANSLATORS: One of the ways exam was made: each
+                # student has a different answer sheet with a
+                # different copy number - no photocopy was made. This
+                # is a menu entry.
+                "Different answer sheets"),
 
-# TRANSLATORS: One of the ways exam was made: each student has a different answer sheet with a different copy number - no photocopy was made. This is a menu entry.
-            0 => __ "Different answer sheets",
-
-# TRANSLATORS: One of the ways exam was made: some students have the same exam subject, as some photocopies were made before distributing the subjects. This is a menu entry.
-            1 => __ "Some answer sheets were photocopied"
+            1 => __(
+                # TRANSLATORS: One of the ways exam was made: some
+                # students have the same exam subject, as some
+                # photocopies were made before distributing the
+                # subjects. This is a menu entry.
+                "Some answer sheets were photocopied")
         ),
     );
 
@@ -203,8 +210,11 @@ sub info {
           . "<b>"
           .
 
-# TRANSLATORS: This is a title for the AMC mode where the distributed exam papers are all different (different paper numbers at the top) -- photocopy is not used.
-          __("Different answer sheets")
+        __(
+            # TRANSLATORS: This is a title for the AMC mode where the
+            # distributed exam papers are all different (different
+            # paper numbers at the top) -- photocopy is not used.
+            "Different answer sheets")
           . ".</b> "
           . __(
 "In the most robust one, you give a different exam (with a different exam number) to every student. You must not photocopy subjects before distributing them."
@@ -212,8 +222,11 @@ sub info {
           . "\n" . "<b>"
           .
 
-# TRANSLATORS: This is a title for the AMC mode where some answer sheets have been photocopied before being distributed to the students.
-          __("Some answer sheets were photocopied")
+        __(
+            # TRANSLATORS: This is a title for the AMC mode where some
+            # answer sheets have been photocopied before being
+            # distributed to the students.
+            "Some answer sheets were photocopied")
           . ".</b> "
           . __(
 "In the second one (which can be used only if answer sheets to be scanned have one page per candidate) you can photocopy answer sheets and give the same subject to different students."

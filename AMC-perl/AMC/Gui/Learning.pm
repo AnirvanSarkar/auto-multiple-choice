@@ -80,13 +80,15 @@ sub lesson {
         $self->lesson_full(
             $key, '', '', 0,
             __("Working documents successfully generated.") . " "
-
-              # TRANSLATORS: Here, "them" refers to the working documents.
-              . __("You can take a look at them double-clicking on the list.")
+              . __(
+                # TRANSLATORS: Here, "them" refers to the working documents.
+                "You can take a look at them double-clicking on the list."
+              )
               . " "
-
-              # TRANSLATORS: Here, "they" refers to the working documents.
-              . __("If they are correct, proceed to layouts detection...")
+              . __(
+                # TRANSLATORS: Here, "they" refers to the working documents.
+                "If they are correct, proceed to layouts detection..."
+              )
         );
     } elsif ( $key eq 'MAJ_MEP_OK' ) {
         $self->lesson_full(

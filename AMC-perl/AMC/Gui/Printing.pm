@@ -50,26 +50,46 @@ sub new {
 
     $self->store_register(
 
-# TRANLATORS: One of the way to handle separate answer sheet when printing: standard (same as in the question pdf document). This is a menu entry.
         print_answersheet => cb_model(
-            '' => __ "Standard",
+            '' => __
+              # TRANSLATORS: One of the way to handle separate answer
+              # sheet when printing: standard (same as in the question
+              # pdf document). This is a menu entry.
+              "Standard",
 
-# TRANLATORS: One of the way to handle separate answer sheet when printing: print separately answer sheet and question. This is a menu entry.
-            split => __ "Separate answer sheet",
+            split => __
+              # TRANSLATORS: One of the way to handle separate answer
+              # sheet when printing: print separately answer sheet and
+              # question. This is a menu entry.
+              "Separate answer sheet",
 
-# TRANLATORS: One of the way to handle separate answer sheet when printing: print the answr sheet first. This is a menu entry.
-            first => __ "Answer sheet first"
+            first => __
+              # TRANSLATORS: One of the way to handle separate answer sheet when
+              # printing: print the answr sheet first. This is a menu entry.
+              "Answer sheet first"
         ),
 
-        # TRANSLATORS: you can omit the [...] part, just here to explain context
         sides => cb_model(
-            'one-sided', __p("one sided [No two-sided printing]"),
+            'one-sided',
+            __p(
+                # TRANSLATORS: you can omit the [...] part, just here to
+                # explain context
+                "one sided [No two-sided printing]"
+            ),
 
-        # TRANSLATORS: One of the two-side printing types. This is a menu entry.
-            'two-sided-long-edge', __ "long edge",
+            'two-sided-long-edge',
+            __(
+                # TRANSLATORS: One of the two-side printing
+                # types. This is a menu entry.
+                "long edge"
+            ),
 
-        # TRANSLATORS: One of the two-side printing types. This is a menu entry.
-            'two-sided-short-edge', __ "short edge"
+            'two-sided-short-edge',
+            __(
+                # TRANSLATORS: One of the two-side printing
+                # types. This is a menu entry.
+                "short edge"
+            )
         ),
     );
     $self->dialog();
@@ -151,10 +171,12 @@ sub check_layout {
         my $dialog = Gtk3::MessageDialog->new( $self->{parent_window},
             'destroy-with-parent', 'error', 'ok', '' );
         $dialog->set_markup(
-
-# TRANSLATORS: Message when the user required printing the question paper, but it is not present (probably the working documents have not been properly generated).
-            __
-"You don't have any question to print: please check your source file and update working documents first."
+            __(
+             # TRANSLATORS: Message when the user required printing the question
+             # paper, but it is not present (probably the working documents have
+             # not been properly generated).
+              "You don't have any question to print:"
+              . " please check your source file and update working documents first.")
         );
         $dialog->run;
         $dialog->destroy;
@@ -166,9 +188,13 @@ sub check_layout {
         my $dialog = Gtk3::MessageDialog->new( $self->{parent_window},
             'destroy-with-parent', 'error', 'ok', '' );
         $dialog->set_markup(
-
-# TRANSLATORS: Message when AMC does not know about the subject pages that has been generated. Usualy this means that the layout computation step has not been made.
-            __("Question's pages are not detected.") . " "
+            __(
+           # TRANSLATORS: Message when AMC does not know about the subject pages
+           # that has been generated. Usualy this means that the layout
+           # computation step has not been made.
+                "Question's pages are not detected."
+              )
+              . " "
               . __ "Perhaps you forgot to compute layouts?"
         );
         $dialog->run;
@@ -330,9 +356,16 @@ sub dialog_copies_list {
 
     my $column =
 
-# TRANSLATORS: This is the title of the column containing the paper's numbers (1,2,3,...) in the table showing all available papers, from which the user will choose those he wants to print.
-      Gtk3::TreeViewColumn->new_with_attributes( __ "papers", $renderer,
-        text => COPIE_N );
+      Gtk3::TreeViewColumn->new_with_attributes(
+        __(
+           # TRANSLATORS: This is the title of the column containing the paper's
+           # numbers (1,2,3,...) in the table showing all available papers, from
+           # which the user will choose those he wants to print.
+            "papers"
+        ),
+        $renderer,
+        text => COPIE_N
+      );
     $self->get_ui('arbre_choix_copies')->append_column($column);
     $self->get_ui('arbre_choix_copies')->get_selection->set_mode("multiple");
 
@@ -623,9 +656,14 @@ sub needs_extract_with {
                 $dialog->set_markup(
 
                     sprintf(
-# TRANSLATORS: the two %s will be replaced by the translations of "Answer sheet first" and "Extracting method".
                         __(
-"You selected the '%s' option, that uses '%s', so the %s has been set to '%s' for you."
+               # TRANSLATORS: %1$s and %3$s will be replaced by the
+               # translations of "Answer sheet first" and "Extracting
+               # method". %2$s (and %4$s) is a possible value of the "extracting
+               # method" that needs to be used when "Answer sheet
+               # first" is choosen
+                            "You selected the '%1\$s' option, that uses '%2\$s',"
+                              . " so the %3\$s has been set to '%4\$s' for you."
                         ),
                         $option_name,
                         $cmd,
@@ -650,7 +688,7 @@ sub needs_extract_with {
             $dialog->set_markup(
                 sprintf(
                     __(
-"You selected the '%s' option, but this option needs %s to be installed on your system. Please install one of these and try again."
+"You selected the '%s' option, but this option needs %s"." to be installed on your system. Please install one of these and try again."
                     ),
                     $option_name,
                     $self->say_all( "'", @allowed )
@@ -672,10 +710,12 @@ sub all_quoted {
     } else {
         my $last = pop @items;
         return (
-            join( ", ", map { "$quotechar$_$quotechar" } @items ) . " "
-
-# TRANSLATORS: word between the last two options in an enumeration. You can remove the [enumeration] part."
-              . __("or [enumeration]") . " $quotechar$last$quotechar"
+            join( ", ", map { "$quotechar$_$quotechar" } @items ) . " " . __(
+                # TRANSLATORS: word between the last two options in an
+                # enumeration. You can remove the [enumeration] part."
+                "or [enumeration]"
+              )
+              . " $quotechar$last$quotechar"
         );
     }
 

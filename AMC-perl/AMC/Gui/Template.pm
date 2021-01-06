@@ -82,10 +82,15 @@ sub dialog {
     $self->get_ui('template_files_tree')->set_model($self->{store});
     my $renderer = Gtk3::CellRendererText->new;
 
-    my $column =
-# TRANSLATORS: This is a column title for the list of files to be included in a template being created.
-      Gtk3::TreeViewColumn->new_with_attributes( __ "file", $renderer,
-        text => TEMPLATE_FILES_FILE );
+    my $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __(
+            # TRANSLATORS: This is a column title for the list of files to be
+            # included in a template being created.
+            "file"
+        ),
+        $renderer,
+        text => TEMPLATE_FILES_FILE
+    );
     $self->get_ui('template_files_tree')->append_column($column);
     $self->get_ui('template_files_tree')->get_selection->set_mode("multiple");
 

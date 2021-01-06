@@ -83,8 +83,16 @@ sub build_config_gui {
     my $renderer;
     my $y = 0;
 
-# TRANSLATORS: Check button label in the exports tab. If checked, a table with questions basic statistics will be added to the ODS exported spreadsheet.
-    $t->attach( Gtk3::Label->new( __ "Stats table" ), 0, $y, 1, 1 );
+    $t->attach(
+        Gtk3::Label->new(
+            __
+              # TRANSLATORS: Check button label in the exports tab. If
+              # checked, a table with questions basic statistics will
+              # be added to the ODS exported spreadsheet.
+              "Stats table"
+        ),
+        0, $y, 1, 1
+    );
     $widget   = Gtk3::ComboBox->new();
     $renderer = Gtk3::CellRendererText->new();
     $widget->pack_start( $renderer, Glib::TRUE );
@@ -92,22 +100,47 @@ sub build_config_gui {
 
     $prefs->store_register(
         export_ods_stats => cb_model(
-# TRANSLATORS: Menu to export statistics table in the exports tab. The first menu entry means 'do not build a stats table' in the exported ODS file. You can omit the [...] part, that is here only to state the context.
-            "" => __p("None [no stats table to export]"),
+            "" => __p(
+                # TRANSLATORS: Menu to export statistics table in the
+                # exports tab. Then first menu entry means 'do not
+                # build a stats table' in the exported ODS file. You
+                # can omit the [...]  part, that is here only to state
+                # the context.
+                "None [no stats table to export]"
+            ),
 
-# TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a horizontal flow' in the exported ODS file.
-            h => __("Horizontal flow"),
+            h => __(
+                # TRANSLATORS: Menu to export statistics table in the
+                # exports tab. The second menu entry means 'build a
+                # stats table, with a horizontal flow' in the exported
+                # ODS file.
+                "Horizontal flow"
+            ),
 
-# TRANSLATORS: Menu to export statistics table in the exports tab. The second menu entry means 'build a stats table, with a vertical flow' in the exported ODS file.
-            v => __("Vertical flow")
+            v => __(
+                # TRANSLATORS: Menu to export statistics table in the
+                # exports tab. The second menu entry means 'build a
+                # stats table, with a vertical flow' in the exported
+                # ODS file.
+                "Vertical flow"
+            )
         )
     );
     $w->{export_c_export_ods_stats} = $widget;
     $t->attach( $widget, 1, $y, 1, 1 );
     $y++;
 
-# TRANSLATORS: Check button label in the exports tab. If checked, a table with indicative questions basic statistics will be added to the ODS exported spreadsheet.
-    $t->attach( Gtk3::Label->new( __ "Indicative stats table" ), 0, $y, 1, 1 );
+    $t->attach(
+        Gtk3::Label->new(
+            __
+              # TRANSLATORS: Check button label in the exports tab. If
+              # checked, a table with indicative questions basic
+              # statistics will be added to the ODS exported
+              # spreadsheet.
+              "Indicative stats table"
+        ),
+        0, $y, 1, 1
+    );
     $widget   = Gtk3::ComboBox->new();
     $renderer = Gtk3::CellRendererText->new();
     $widget->pack_start( $renderer, Glib::TRUE );
@@ -126,8 +159,16 @@ sub build_config_gui {
     );
     $y++;
 
-# TRANSLATORS: Check button label in the exports tab. If checked, sums of the scores for groups of questions will be added to the exported table.
-    $t->attach( Gtk3::Label->new( __ "Score groups" ), 0, $y, 1, 1 );
+    $t->attach(
+        Gtk3::Label->new(
+            __
+              # TRANSLATORS: Check button label in the exports tab. If
+              # checked, sums of the scores for groups of questions
+              # will be added to the exported table.
+              "Score groups"
+        ),
+        0, $y, 1, 1
+    );
 
     my $w_groups = Gtk3::Grid->new();
 
@@ -138,14 +179,28 @@ sub build_config_gui {
 
     $prefs->store_register(
         export_ods_group => cb_model(
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
-            "0" => __ "No",
+            "0" => __(
+                # TRANSLATORS: Option for ODS export: group questions
+                # by scope? This is the menu entry for 'No, don't
+                # group questions by scope in the exported ODS file'
+                "No"
+            ),
 
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and report total scores'
-            "1" => __ "Yes (values)",
+            "1" => __(
+                # TRANSLATORS: Option for ODS export: group questions
+                # by scope? This is the menu entry for 'Yes, groups
+                # questions by scope in then exported ODS file, and
+                # report total scores'
+                "Yes (values)"
+            ),
 
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and report total scores as percentages.'
-            "2" => __ "Yes (percentages)"
+            "2" => __(
+                # TRANSLATORS: Option for ODS export: group questions
+                # by scope? This is the menu entry for 'Yes, group
+                # questions by scope in the exported ODS file, and
+                # report total scores as percentages.'
+                "Yes (percentages)"
+            )
         )
     );
     $w->{export_c_export_ods_group} = $widget;
@@ -165,11 +220,21 @@ sub build_config_gui {
 
     $prefs->store_register(
         export_ods_groupsep => cb_model(
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'No, don't group questions by scope in the exported ODS file'
-            ":" => __ "':'",
+            ":" => __(
+                # TRANSLATORS: Option for ODS export: group questions
+                # by scope? This is the menu entry for 'No, don't
+                # group questions by scope in the exported ODS file'
+                "':'"
+            ),
 
-# TRANSLATORS: Option for ODS export: group questions by scope? This is the menu entry for 'Yes, group questions by scope in the exported ODS file, and you can detect the scope from a question ID using the text before the separator .'
-            "." => __ "'.'"
+            "." => __(
+                # TRANSLATORS: Option for ODS export: group questions
+                # by scope? This is the menu_popover entry for 'Yes,
+                # group questions by scope in the exported ODS file,
+                # and you can detect the scope from a question ID
+                # using the text before the separator .'
+                "'.'"
+            )
         )
     );
     $w->{export_c_export_ods_groupsep} = $widget;

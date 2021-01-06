@@ -44,64 +44,94 @@ my $encodages = [
     {
         qw/inputenc latin1 iso ISO-8859-1/,
 
-        # TRANSLATORS: for encodings
-        txt => 'ISO-8859-1 (' . __("Western Europe") . ')'
+        txt => 'ISO-8859-1 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Western Europe"
+          )
+          . ')'
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc latin2 iso ISO-8859-2/,
-        txt => 'ISO-8859-2 (' . __("Central Europe") . ')'
+        txt => 'ISO-8859-2 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Central Europe"
+          )
+          . ')'
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc latin3 iso ISO-8859-3/,
-        txt => 'ISO-8859-3 (' . __("Southern Europe") . ')'
+        txt => 'ISO-8859-3 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Southern Europe"
+          )
+          . ')'
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc latin4 iso ISO-8859-4/,
-        txt => 'ISO-8859-4 (' . __("Northern Europe") . ')'
+        txt => 'ISO-8859-4 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Northern Europe"
+          )
+          . ')'
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc latin5 iso ISO-8859-5/,
-        txt => 'ISO-8859-5 (' . __("Cyrillic") . ')'
+        txt => 'ISO-8859-5 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Cyrillic"
+          )
+          . ')'
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc latin9 iso ISO-8859-9/,
-        txt => 'ISO-8859-9 (' . __("Turkish") . ')'
+        txt => 'ISO-8859-9 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Turkish"
+          )
+          . ')'
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc latin10 iso ISO-8859-10/,
-        txt => 'ISO-8859-10 (' . __("Northern") . ')'
+        txt => 'ISO-8859-10 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Northern"
+          )
+          . ')'
     },
 
-    # TRANSLATORS: for encodings
-    { qw/inputenc utf8x iso UTF-8/, txt => 'UTF-8 (' . __("Unicode") . ')' },
+    {
+        qw/inputenc utf8x iso UTF-8/,
+        txt => 'UTF-8 (' . __(
+            # TRANSLATORS: one of the available text file encodings
+            "Unicode"
+          )
+          . ')'
+    },
     {
         qw/inputenc cp1252 iso cp1252/,
         txt   => 'Windows-1252',
         alias => [ 'Windows-1252', 'Windows' ]
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc applemac iso MacRoman/,
-        txt => 'Macintosh ' . __ "Western Europe"
+        txt => 'Macintosh '
+          . __
+          # TRANSLATORS: one of the available text file encodings
+          "Western Europe"
     },
 
-    # TRANSLATORS: for encodings
     {
         qw/inputenc macce iso MacCentralEurRoman/,
-        txt => 'Macintosh ' . __ "Central Europe"
+        txt => 'Macintosh ' . __
+    # TRANSLATORS: one of the available text file encodings
+            "Central Europe"
     },
 ];
 

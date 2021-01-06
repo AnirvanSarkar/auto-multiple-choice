@@ -130,9 +130,15 @@ sub select_model {
 
     my $renderer = Gtk3::CellRendererText->new;
 
-# TRANSLATORS: This is a column name for the list of available templates, when creating a new project based on a template.
-    my $column = Gtk3::TreeViewColumn->new_with_attributes( __ "template",
-        $renderer, text => MODEL_NOM );
+    my $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __(
+            # TRANSLATORS: This is a column name for the list of available
+            # templates, when creating a new project based on a template.
+            "template"
+        ),
+        $renderer,
+        text => MODEL_NOM
+    );
     $self->get_ui('modeles_liste')->append_column($column);
 
     $self->get_ui('mlist_separation')
@@ -273,8 +279,15 @@ sub choose_file {
         }
         $f->set_name(
 
-# TRANSLATORS: This is the label of a choice in a menu to select only files that corresponds to a particular format (which can be LaTeX or Plain for example). %s will be replaced by the name of the format.
-            sprintf( __("%s files"), "AMC::Filter::register::$m"->name() )
+            sprintf(
+                __(
+          # TRANSLATORS: This is the label of a choice in a menu to select only
+          # files that corresponds to a particular format (which can be LaTeX or
+          # Plain for example). %s will be replaced by the name of the format.
+                    "%s files"
+                ),
+                "AMC::Filter::register::$m"->name()
+              )
               . ' ('
               . join( ', ', @pat ) . ')'
         );
