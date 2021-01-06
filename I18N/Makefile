@@ -27,7 +27,8 @@ XGETTO=
 
 AMC=..
 
-PERL=$(AMC)/*.pl $(AMC)/AMC-perl/AMC/*.pm $(AMC)/AMC-perl/AMC/**/*.pm $(AMC)/AMC-perl/AMC/**/**/*.pm 
+PERL=$(AMC)/*.pl $(AMC)/AMC-perl/AMC/*.pm $(AMC)/AMC-perl/AMC/**/*.pm $(AMC)/AMC-perl/AMC/**/**/*.pm
+PERLIN=$(AMC)/*.pl.in $(AMC)/AMC-perl/AMC/*.pm.in $(AMC)/AMC-perl/AMC/**/*.pm.in
 
 GLADE=$(AMC)/AMC-perl/AMC/**/*.glade
 
@@ -55,7 +56,8 @@ po-clean.pl: po-clean.pl.in ../Makefile.versions
 %.pot: %.bpot po-clean.pl
 	$(PERLPATH) po-clean.pl $< $@
 
-$(DOMAIN).bpot: $(PERL) $(GLADE)
+$(DOMAIN).bpot: $(PERL) $(PERLIN) $(GLADE)
+	$(MAKE) -C .. MAJ
 	xgettext $(XGETTO) --from-code=UTF-8 --add-comments=TRANSLATORS: $(PERL) -k__ -k__p -k -o $@
 	xgettext $(XGETTO) -j $(GLADE) -L Glade -o $@
 
