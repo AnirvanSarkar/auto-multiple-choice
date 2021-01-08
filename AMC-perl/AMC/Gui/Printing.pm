@@ -27,6 +27,7 @@ use parent 'AMC::Gui';
 
 use AMC::Basic;
 
+use Module::Load;
 use Data::Dumper;
 
 use constant { COPIE_N => 0, };
@@ -125,8 +126,16 @@ sub dialog {
         root   => "options_impression"
     );
 
-    $self->dialog_cups() if ( $self->{method} =~ /^CUPS/ );
-    $self->dialog_file() if ( $self->{method} eq 'file' );
+    if ( $self->{method} =~ /^CUPS/ ) {
+        $self->dialog_cups();
+    } else {
+        $self->get_ui('bloc_imprimante')->hide();
+    }
+    if ( $self->{method} eq 'file' ) {
+        $self->dialog_file();
+    } else {
+        $self->get_ui('bloc_fichier')->hide();
+    }
 
     $self->dialog_copies_list();
 
