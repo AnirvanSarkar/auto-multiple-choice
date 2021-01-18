@@ -114,9 +114,10 @@ sub open_window {
 
     $tree->get_selection->set_mode('multiple');
     $tree->get_selection->signal_connect( "changed", \&line, $self );
-    $tree->get_selection->select_iter( $store->get_iter_first );
 
     $self->get_ui('unrecognized')->show();
+
+    $tree->get_selection->select_iter( $store->get_iter_first );
 }
 
 sub update {
