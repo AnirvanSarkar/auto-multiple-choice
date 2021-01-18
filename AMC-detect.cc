@@ -179,7 +179,7 @@ void load_image(cv::Mat &src,char *filename,
 #endif
 			 );
     } catch (const cv::Exception& ex) {
-      printf("! LOAD : Error loading scan file in ANYCOLOR [%s]\n", filename);
+      printf("! LOAD: Error loading scan file in ANYCOLOR [%s]\n", filename);
       printf("! OpenCV error: %s\n", ex.what());
       processing_error = 3;
       return;
@@ -195,7 +195,7 @@ void load_image(cv::Mat &src,char *filename,
       cv::mixChannels(&color, 1, &src, 1, from_to, 1);
       color.release();
     } else if(color.channels() != 1) {
-      printf("! LOAD : Scan file with 2 channels [%s]\n", filename);
+      printf("! LOAD: Scan file with 2 channels [%s]\n", filename);
       processing_error = 2;
       return;
     } else {
@@ -206,7 +206,7 @@ void load_image(cv::Mat &src,char *filename,
     try {
       src = cv::imread(filename, cv::IMREAD_GRAYSCALE);
     } catch (const cv::Exception& ex) {
-      printf("! LOAD : Error loading scan file in GRAYSCALE [%s]\n", filename);
+      printf("! LOAD: Error loading scan file in GRAYSCALE [%s]\n", filename);
       printf("! OpenCV error: %s\n", ex.what());
       processing_error = 3;
       return;
@@ -350,7 +350,7 @@ void sys_22(double a,double b,double c,double d,double e,double f,
               double *x,double *y) {
   double delta = a*d - b*c;
   if(delta == 0) {
-    printf("! NONINV : Non-invertible system.\n");
+    printf("! NONINV: Non-invertible system.\n");
     return;
   }
   *x = (d*e - b*f) / delta;
@@ -371,7 +371,7 @@ void revert_transform(linear_transform *direct,
                       linear_transform *back) {
   double delta = direct->a * direct->d - direct->b * direct->c;
   if(delta == 0) {
-    printf("! NONINV : Non-invertible system.\n");
+    printf("! NONINV: Non-invertible system.\n");
     return;
   }
   back->a = direct->d / delta;
@@ -646,10 +646,10 @@ void calage(cv::Mat src, cv::Mat illustr,
   } else {
     /* There are less than 3 correct connected components: can't know
        where are the marks on the scan! */
-    printf("! NMARKS=%d: Not enough marks detected.\n", n_cc);
+    printf("! NMARKS=%d: Not enough corner marks detected.\n", n_cc);
 
     if(n_content_cc == 0) {
-      printf("! MAYBE_BLANK: page seems to be blank.\n");
+      printf("! MAYBE_BLANK: This page seems to be blank.\n");
     }
   }
 }
@@ -712,18 +712,18 @@ int check_zooms_dir(int student, char *zooms_dir=NULL,int log=0) {
       if(errno == ENOENT) {
         if(mkdir(zooms_dir,0755) != 0) {
           ok = 0;
-          printf("! ZOOMDC : Zoom dir creation error %d : %s\n", errno, zooms_dir);
+          printf("! ZOOMDC: Zoom dir creation error [%d : %s]\n", errno, zooms_dir);
         } else {
           printf(": Zoom dir created %s\n", zooms_dir);
         }
       } else {
         ok = 0;
-        printf("! ZOOMDS : Zoom dir stat error %d : %s\n", errno, zooms_dir);
+        printf("! ZOOMDS: Zoom dir stat error [%d : %s]\n", errno, zooms_dir);
       }
     } else {
       if(!S_ISDIR(zd.st_mode)) {
         ok = 0;
-        printf("! ZOOMDP : Zoom dir is not a directory : %s\n", zooms_dir);
+        printf("! ZOOMDP: Zoom dir is not a directory [%s]\n", zooms_dir);
       }
     }
   } else {
@@ -1020,13 +1020,13 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
 #endif
 				 );
 	  } catch (const cv::Exception& ex) {
-            printf("! ZOOMS : Zoom save error: %s\n", ex.what());
+            printf("! ZOOMS: Zoom save error [%s]\n", ex.what());
           }
 	  if(result)
 	    printf("ZOOM %d-%d.png\n", question, answer);
 
         } else {
-          printf("! ZOOMFN : Zoom file name error\n");
+          printf("! ZOOMFN: Zoom file name error.\n");
         }
       }
     }
@@ -1045,7 +1045,7 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
 int main(int argc, char** argv)
 {
   if(! setlocale(LC_ALL, "POSIX")) {
-    printf("! LOCALE : setlocale failed\n");
+    printf("! LOCALE: setlocale failed.\n");
   }
 
   double threshold = 0.6;
@@ -1153,7 +1153,7 @@ int main(int argc, char** argv)
 	  try {
 	    illustr = cv::imread(scan_file, cv::IMREAD_COLOR);
 	  } catch (const cv::Exception& ex) {
-            printf("! LOAD : Error loading scan file in COLOR [%s]\n", scan_file);
+            printf("! LOAD: Error loading scan file in COLOR [%s]\n", scan_file);
 	    printf("! OpenCV error: %s\n", ex.what());
             processing_error = 4;
 	  }
@@ -1166,7 +1166,7 @@ int main(int argc, char** argv)
         if(processing_error == 0) {
           src_calage = src.clone();
           if(src_calage.data == NULL) {
-            printf("! LOAD : Error cloning image\n");
+            printf("! LOAD: Error cloning image.\n");
             processing_error = 5;
           }
         }
@@ -1326,11 +1326,11 @@ int main(int argc, char** argv)
         cv::putText(illustr, text, textpos, cv::FONT_HERSHEY_PLAIN, fh/14, BLEU, 1+(int)(fh/20), OPENCV_USE_LINETYPE);
       } else {
         printf(": %s\n", commande);
-        printf("! SYNERR : Syntax error\n");
+        printf("! SYNERR: Syntax error.\n");
       }
 
     } else {
-      printf("! ERROR : not responding due to previous error.\n");
+      printf("! ERROR: not responding due to previous error.\n");
     }
 
     printf("__END__\n");
@@ -1360,7 +1360,7 @@ int main(int argc, char** argv)
 #endif
 		  );
     } catch (const cv::Exception& ex) {
-      printf("! LAYS : Layout image save error: %s\n", ex.what());
+      printf("! LAYS: Layout image save error [%s]\n", ex.what());
     }
   }
 

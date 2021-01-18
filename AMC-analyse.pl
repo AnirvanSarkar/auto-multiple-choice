@@ -99,6 +99,16 @@ $tag_overwritten = 0 if ($multiple);
 
 use_gettext;
 
+my %error_text = (
+    NMARKS      => __("Not enough corner marks detected"),
+    MAYBE_BLANK => __("This page seems to be blank"),
+);
+
+sub translate_error {
+    my ($s, $txt) = @_;
+    return ( $error_text{$s} || $txt );
+}
+
 my $progress_h = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 
 my $data;
@@ -462,6 +472,8 @@ sub one_scan {
         if ( $l =~ /^\! ([A-Z_]+)/ ) {
             my $k = $1;
             $l =~ s/^\!\s*//;
+            $l =~
+s/^([A-Z_]+)(.*):\s([^\[]+)( \[.*\]|\.)$/"[$1$2] " . translate_error($1, $3) . $4/e;
             $warns{$k} = $l;
         }
     }
