@@ -57,6 +57,7 @@ use AMC::Gui::WindowSize;
 use AMC::Gui::Zooms;
 use AMC::State;
 
+use Scalar::Util 'blessed';
 use File::Spec::Functions
   qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Path qw/remove_tree/;
@@ -529,16 +530,16 @@ sub annule_apprentissage {
 sub self_first {
     my (@args) = @_;
     if (@args) {
-        if ( $args[0]->isa("AMC::Gui") ) {
+        if ( blessed($args[0]) && $args[0]->isa("AMC::Gui") ) {
 
             # Called from AMC: $self is first
             return (@args);
-        } elsif ( $args[-1]->isa("AMC::Gui") ) {
+        } elsif ( blessed($args[-1]) && $args[-1]->isa("AMC::Gui") ) {
 
             # Called from a Gtk signal : $self is the last argument
             my $self = pop @args;
             return ( $self, @args );
-        } elsif ( $args[0]->isa("AMC::Gui::Commande" ) ) {
+        } elsif ( blessed($args[0]) && $args[0]->isa("AMC::Gui::Commande" ) ) {
             # Called from a AMC::Gui::commande callback
             return ( $args[0]->{o}->{callback_self}, @args );
         } else {
@@ -2434,7 +2435,7 @@ sub auto_data_capture_callback {
 # Auto data capture STEP 1 : detect PDF forms
 
 sub analyse_call {
-    my ( $self, %oo ) = @_;
+    my ( $self, %oo ) = self_first( @_ );
 
     # meeds a little tmp disk space (for zooms), and first decent space
     # for AMC-getimages...
@@ -2463,6 +2464,7 @@ sub analyse_call_images {
     my ( $self, %oo ) = @_;
 
     $oo{callback} = \&analyse_call_images_callback;
+
     $self->{project}->data_capture_get_images(%oo);
 }
 

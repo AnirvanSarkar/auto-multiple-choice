@@ -48,6 +48,7 @@ sub new {
     $self->merge_config(
         {
             capture => '',
+            callback_self => '',
             update_analysis_callback =>
               sub { debug "Missing update_analysis_callback"; },
             analysis_callback => sub { debug "Missing analysis_callback"; },

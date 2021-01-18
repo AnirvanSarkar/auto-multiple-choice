@@ -344,7 +344,7 @@ sub data_capture_get_images {
             fin          => $oo{callback}
         );
     } else {
-        &{ $oo{callback} }(%oo);
+        &{ $oo{callback} }( $oo{callback_self}, { o=> \%oo } );
     }
 }
 
