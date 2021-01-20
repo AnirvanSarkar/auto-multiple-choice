@@ -1588,7 +1588,7 @@ DESC: Un exemple simple (issu de la documentation) avec une question simple et u
                 \begin{minipage}{.5\linewidth}
                   Nom et prénom :
 
-                  \vspace*{.5cm}\dotfill
+                  \vspace*{.5cm}\namefielddots   <co id="simple.namefielddots" linkends="simple.namefielddots.exp"/>
                   \vspace*{1mm}
                 \end{minipage}
          }}
@@ -1674,9 +1674,13 @@ Durée : 10 minutes.
           <callout arearefs="simple.champnom" id="simple.champnom.exp">
             <para>La commande <command>champnom</command> permet d'indiquer la
             partie du questionnaire dans laquelle chaque étudiant inscrira son
-            nom ou un code barre (voir <xref linkend="gui.asso.auto.barcode"/>).
-            Sera complétée par <command>\namefielddots</command> si vous utilisez
-            l'option <option>pdfform</option> (voir <xref linkend="sec.package.options"/>).</para>
+            nom ou un code barre (voir <xref linkend="gui.asso.auto.barcode"/>).</para>
+          </callout>
+
+          <callout arearefs="simple.namefielddots" id="simple.namefielddots.exp">
+            <para>La commande <command>namefielddots</command> insère une ligne pointillée 
+            ou un champ à remplir si vous utilisez l'option <option>pdfform</option> 
+            (voir <xref linkend="sec.package.options"/>).</para>
           </callout>
 
           <callout arearefs="simple.qr" id="simple.qr.exp">
@@ -1791,7 +1795,7 @@ DESC: Un exemple (issu de la documentation) où les questions sont mélangées �
 \champnom{\fbox{\begin{minipage}{.5\linewidth}
 Nom et prénom :
 
-\vspace*{.5cm}\dotfill
+\vspace*{.5cm}\namefielddots
 \vspace*{1mm}
 \end{minipage}}}
 
@@ -1930,7 +1934,7 @@ Durée : 10 minutes.
     \begin{minipage}{.5\linewidth}
       Nom et prénom :
 
-      \vspace*{.5cm}\dotfill
+      \vspace*{.5cm}\namefielddots  <co id="ensemble.namefielddots" linkends="ensemble.namefielddots.exp"/>
       \vspace*{1mm}
     \end{minipage}
   }}
@@ -1989,6 +1993,12 @@ Durée : 10 minutes.
           <callout arearefs="ensemble.nom" id="ensemble.nom.exp">
             <para>La case où écrire son nom doit normalement être située sur
             la page des réponses !</para>
+          </callout>
+
+          <callout arearefs="ensemble.namefielddots" id="ensemble.namefielddots.exp">
+            <para>La commande <command>namefielddots</command> insère une ligne pointillée 
+            ou un champ à remplir si vous utilisez l'option <option>pdfform</option> 
+            (voir <xref linkend="sec.package.options"/>).</para>
           </callout>
 
           <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
@@ -2052,18 +2062,6 @@ Durée : 10 minutes.
           <listitem>
             <para><option>pdfform</option> : permet de créer un formulaire,
             remplissable via les lecteurs de fichiers pdf.</para>
-
-            <note>
-              <para>AMC gère l'envoi automatique des sujets
-                (voir <xref endterm="mailing.title" linkend="mailing"/>) mais il faut installer
-                <productname>sejda-console</productname>.</para>
-            </note>
-  <programlisting>
-cd
-wget https://github.com/torakiki/sejda/releases/download/v3.2.85/sejda-console-3.2.85-bin.zip
-unzip sejda-console-3.2.85-bin.zip
-sudo ln -s ~/sejda-console-3.2.85/bin/sejda-console /usr/local/bin
-</programlisting>
           </listitem>
 
           <listitem>
@@ -5035,16 +5033,25 @@ Nom et prénom :
              <guisubmenu>dans des fichiers</guisubmenu>
              </menuchoice>.</para>
     		</listitem>
-
+    		
     	  <listitem>
-    		<para><emphasis>Si l'option <option>pdfform</option> est active</emphasis>,
-    		sélectionnez sejda-console : <menuchoice>
+    		<para>Sélectionnez la méthode d'impression : <menuchoice>
              <guimenuitem>Préférences</guimenuitem>
              <guimenuitem>Général</guimenuitem>
              <guimenuitem>Impression</guimenuitem>
              <guimenuitem>Méthode d'extraction</guimenuitem>
-             <guisubmenu>sejda-console</guisubmenu>
+             <guisubmenu>pdftk / gs (ghostscipt) / qpdf (défaut) / sejda-console (non installé)</guisubmenu>
              </menuchoice>.</para>
+             
+              <warning><para>Si l'option <option>pdfform</option> est active,
+    		sélectionnez sejda-console (à installer)</para>
+ <programlisting>
+cd
+wget https://github.com/torakiki/sejda/releases/download/v3.2.85/sejda-console-3.2.85-bin.zip
+unzip sejda-console-3.2.85-bin.zip
+sudo ln -s ~/sejda-console-3.2.85/bin/sejda-console /usr/local/bin
+</programlisting>
+    		</warning>
     		</listitem>
 
     	  <listitem>
@@ -5288,7 +5295,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
             <note>
               <itemizedlist>
                 <listitem>
-                  <para>AMC dispose, depuis la version 1.2.1419, d'une option
+                  <para>AMC dispose d'une option
                   permettant de caler les feuilles avec seulement trois
                   marques. Vous devez configurer AMC :</para>
 
@@ -6804,7 +6811,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
         </listitem>
 
         <listitem>
-          <para>Default upper darkness threshold : 1</para>
+          <para>Seuil de noirceur par défaut supèrieur : 1</para>
         </listitem>
 
         <listitem>
@@ -7685,15 +7692,20 @@ sudo mktexlsr
     	<para>
 		<menuchoice>
           <guimenuitem>Préférences</guimenuitem>
-
           <guimenuitem>Général</guimenuitem>
-
           <guimenuitem>Impression</guimenuitem>
-
           <guimenuitem>Méthode d'impression</guimenuitem>
-
           <guimenuitem>dans des fichiers</guimenuitem>
         </menuchoice></para>
+        
+ 
+    		<para><menuchoice>
+             <guimenuitem>Préférences</guimenuitem>
+             <guimenuitem>Général</guimenuitem>
+             <guimenuitem>Impression</guimenuitem>
+             <guimenuitem>Méthode d'extraction</guimenuitem>
+             <guisubmenu>pdftk / gs (ghostscipt) / qpdf (défaut) / sejda-console (non installé)</guisubmenu>
+             </menuchoice>.</para>
     </sect2>
 
     <sect2 id="A5surA4">

@@ -1526,7 +1526,7 @@ DESC: A simple example (from the documentation) with one simple question and one
                 \begin{minipage}{.5\linewidth}
                   Firstname and lastname:
 
-                  \vspace*{.5cm}\dotfill
+                  \vspace*{.5cm}\namefielddots   <co id="simple.namefielddots" linkends="simple.namefielddots.exp"/>
                   \vspace*{1mm}
                 \end{minipage}
          }}
@@ -1612,6 +1612,12 @@ Duration : 10 minutes.
            Will be completed with <command>\namefielddots</command>
            if you use <option>pdfform</option> option
            (see <xref linkend = "sec.package.options" />).</para>
+          </callout>
+
+          <callout arearefs="simple.namefielddots" id="simple.namefielddots.exp">
+            <para>The <command>namefielddots</command> command insert a dotted line 
+            or a field to fill if the <option>pdfform</option> option is avaible
+            (see <xref linkend="sec.package.options"/>).</para>
           </callout>
 
           <callout arearefs="simple.qr" id="simple.qr.exp">
@@ -1865,7 +1871,7 @@ Duration : 10 minutes.
     \begin{minipage}{.5\linewidth}
       Firstname and lastname:
 
-      \vspace*{.5cm}\dotfill
+      \vspace*{.5cm}\namefielddots  <co id="ensemble.namefielddots" linkends="ensemble.namefielddots.exp"/>
       \vspace*{1mm}
     \end{minipage}
   }}
@@ -1924,6 +1930,12 @@ Duration : 10 minutes.
             sheet!</para>
           </callout>
 
+          <callout arearefs="ensemble.namefielddots" id="ensemble.namefielddots.exp">
+            <para>The <command>namefielddots</command> command insert a dotted line 
+            or a field to fill if the <option>pdfform</option> option is avaible
+            (see <xref linkend="sec.package.options"/>).</para>
+          </callout>
+
           <callout arearefs="ensemble.formulaire" id="ensemble.formulaire.exp">
             <para>The LaTeX command <command>\AMCform</command> writes all the
             check-boxes.</para>
@@ -1974,18 +1986,7 @@ Duration : 10 minutes.
           </listitem>
 
           <listitem>
-            <para><option>pdfform</option>: create a pdf file to fill.</para>
-
-            <note>
-              <para>AMC automates sending files (see <xref endterm="mailing.title" linkend="mailing"/>)
-              but you need to install <productname>sejda-console</productname>.</para>
-            </note>
-  <programlisting>
-cd
-wget https://github.com/torakiki/sejda/releases/download/v3.2.85/sejda-console-3.2.85-bin.zip
-unzip sejda-console-3.2.85-bin.zip
-sudo ln -s ~/sejda-console-3.2.85/bin/sejda-console /usr/local/bin
-</programlisting>
+            <para><option>pdfform</option>: creates a pdf file to fill.</para>
           </listitem>
 
           <listitem>
@@ -4791,22 +4792,32 @@ Name :
         <listitem>
         <para>Select printing to files : <menuchoice>
              <guimenuitem>Preferences</guimenuitem>
+             <guimenuitem>Main</guimenuitem>
              <guimenuitem>Printing</guimenuitem>
              <guimenuitem>Printing method</guimenuitem>
              <guisubmenu>to files</guisubmenu>
              </menuchoice>.</para>
         </listitem>
 
-    	  <listitem>
-    		<para><emphasis>If option <option>pdfform</option> is available</emphasis>,
-    		select sejda-console : <menuchoice>
+        <listitem>
+        <para>Select extracting method: <menuchoice>
              <guimenuitem>Preferences</guimenuitem>
              <guimenuitem>Main</guimenuitem>
-             <guimenuitem>Printing method</guimenuitem>
+             <guimenuitem>Printing</guimenuitem>
              <guimenuitem>Extracting method</guimenuitem>
-             <guisubmenu>sejda-console</guisubmenu>
+             <guisubmenu>pdftk / gs (ghostscipt) / qpdf (default) / sejda-console (not installed)</guisubmenu>
              </menuchoice>.</para>
-    		</listitem>
+             
+<warning><para>If option <option>pdfform</option> is available,
+    		select sejda-console : (to install)</para>
+ <programlisting>
+cd
+wget https://github.com/torakiki/sejda/releases/download/v3.2.85/sejda-console-3.2.85-bin.zip
+unzip sejda-console-3.2.85-bin.zip
+sudo ln -s ~/sejda-console-3.2.85/bin/sejda-console /usr/local/bin
+</programlisting>
+    		</warning>
+        </listitem>
 
         <listitem>
         <para>Print the files.</para>
@@ -9597,15 +9608,19 @@ sudo mktexlsr
       <para>
     <menuchoice>
           <guimenuitem>Preferences</guimenuitem>
-
           <guimenuitem>Main</guimenuitem>
-
           <guimenuitem>Printing</guimenuitem>
-
           <guimenuitem>Printing with method </guimenuitem>
-
           <guimenuitem>to files</guimenuitem>
         </menuchoice></para>
+
+            <para><menuchoice>
+             <guimenuitem>Preferences</guimenuitem>
+             <guimenuitem>Main</guimenuitem>
+             <guimenuitem>Printing</guimenuitem>
+             <guimenuitem>Extracting method</guimenuitem>
+             <guisubmenu>pdftk / gs (ghostscipt) / qpdf (default) / sejda-console (not installed)</guisubmenu>
+             </menuchoice>.</para>
     </sect2>
 
   <sect2 id="A5onA4">
