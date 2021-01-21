@@ -88,7 +88,7 @@ DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 
 # list *.in files for @/VAR/@ substitution
 
-FROM_IN=auto-multiple-choice auto-multiple-choice.desktop AMC-gui.pl AMC-latex-link.pl AMC-mailing.pl AMC-perl/AMC/Basic.pm AMC-perl/AMC/Gui/Main.pm $(GLADE_IN:.glade.in=.glade) doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+FROM_IN=auto-multiple-choice net.auto_multiple_choice.amc.desktop AMC-gui.pl AMC-latex-link.pl AMC-mailing.pl AMC-perl/AMC/Basic.pm AMC-perl/AMC/Gui/Main.pm $(GLADE_IN:.glade.in=.glade) doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
 
 # Is this a precomp tarball? If so, the PRECOMP file is present.
 
@@ -243,7 +243,11 @@ endif
 	install    -m 0644 $(USER_GROUP) $(STY) $(DESTDIR)/$(TEXDIR)
 ifneq ($(DESKTOPDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DESKTOPDIR)
-	install    -m 0644 $(USER_GROUP) -T auto-multiple-choice.desktop $(DESTDIR)/$(DESKTOPDIR)/auto-multiple-choice.desktop
+	install    -m 0644 $(USER_GROUP) net.auto_multiple_choice.amc.desktop $(DESTDIR)/$(DESKTOPDIR)
+endif
+ifneq ($(METAINFODIR),)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(METAINFODIR)
+	install    -m 0644 $(USER_GROUP) net.auto_multiple_choice.amc.metainfo.xml $(DESTDIR)/$(METAINFODIR)
 endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(BINDIR)
 	install    -m 0755 $(USER_GROUP) auto-multiple-choice $(DESTDIR)/$(BINDIR)
@@ -320,7 +324,7 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/auto-multiple-choice.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz $(foreach SIZE, $(APPICONSIZES), $(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
+	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz $(foreach SIZE, $(APPICONSIZES), $(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
 	-sudo rm -r /usr/lib/AMC
 
 local: global
@@ -338,7 +342,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
 	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice-doc
-	sudo ln -s $(LOCALDIR)/auto-multiple-choice.desktop $(DESKTOPDIR)/auto-multiple-choice.desktop
+	sudo ln -s $(LOCALDIR)/net.auto_multiple_choice.amc.desktop $(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop
 	sudo ln -s $(LOCALDIR)/doc/modeles $(MODELSDIR)
 	sudo ln -s $(LOCALDIR)/$(STY) $(TEXDIR)/automultiplechoice.sty
 	sudo ln -s $(LOCALDIR)/interfaces/amc-txt.lang $(LANG_GTKSOURCEVIEW_DIR)
