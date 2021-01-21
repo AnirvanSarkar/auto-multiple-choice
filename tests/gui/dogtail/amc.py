@@ -57,6 +57,7 @@ class AMC:
     def __init__(self):
         self.gui = None
         self.tmp_dir = os.getenv("HOME") + '/AMC-tmp'
+        self.cups_pdf_dir = os.getenv("HOME") + '/PDF'
         self.tmp_bookmark = 'AMC-tmp'
         self.project_name = 'test'
         self.debug = False
@@ -150,7 +151,7 @@ class AMC:
                 if hold_control:
                     registry.generateKeyboardEvent(
                         control_code, None, KEY_PRESS)
-                    sleep(0.2)
+                    time.sleep(0.2)
                 if double:
                     x.doubleClick()
                 else:
@@ -159,7 +160,7 @@ class AMC:
                         time.sleep(0.2)
                         dogtail.rawinput.pressKey('\n')
                 if hold_control:
-                    sleep(0.2)
+                    time.sleep(0.2)
                     registry.generateKeyboardEvent(
                         control_code, None, KEY_RELEASE)
                 disapeared = len(base.findChildren(
@@ -323,6 +324,42 @@ class AMC:
         time.sleep(2)
         documents.click()
 
+    def print_to_cups(self, copies=[1, 2, 3],
+                      printer='CUPS-PDF-Printer'):
+        if os.path.exists(self.cups_pdf_dir):
+            rmtree(self.cups_pdf_dir)
+        os.mkdir(self.cups_pdf_dir)
+        self.tab('Preparation').child('Print papers',
+                                      roleName='push button').click()
+        dialog = self.gui.child(roleName='dialog')
+        dialog.grab_focus()
+        # select copies
+        copies_table = dialog.child(roleName='table')
+        for i in copies:
+            copies_table.child(str(i)).select()
+        # select printer
+        cb = dialog.child('Printer:').parent.child(roleName='combo box')
+        items = [i.name for i in cb.findChildren(
+            dogtail.predicate.GenericPredicate(
+                roleName='menu item'))]
+        print(items)
+        full_printer = ''
+        for i in items:
+            if printer in i:
+                full_printer = i
+        print("Printing to %s" % full_printer)
+        if cb.combovalue != full_printer:
+            cb.combovalue = full_printer
+        # - go
+        dialog.child('OK').click()
+        # few sheets to print -> photocopy mode = No
+        self.click_dialog(button="No")
+        # return printed files
+        printed_files = os.listdir(self.cups_pdf_dir)
+        for f in printed_files:
+            self.copy_in_src_dir(self.cups_pdf_dir + '/' + f)
+        return printed_files
+
     def print_to_file(self, copies=[1, 2, 3], password=False):
         self.tab('Preparation').child('Print papers',
                                       roleName='push button').click()
@@ -336,7 +373,8 @@ class AMC:
         label = dialog.child('Destination directory')
         cb = label.parent.child(roleName='combo box')
         cb.combovalue = 'Other…'
-
+        time.sleep(0.5)
+        
         self.goto_tmp_dir()
         self.scroll_and_click(self.chooser_files_table(),
                               self.project_name, double=True)
@@ -614,13 +652,30 @@ class AMC:
         annotated.child(roleName='text').text = model
         reports.child('Annotate papers', roleName='push button').click()
 
-    def set_options(self, description=['TEST EXAM', 'test']):
+    def set_options(self,
+                    description=['TEST EXAM', 'test'],
+                    printing_method = None):
         self.gui.child('Properties', roleName='push button').click()
         dialog = self.gui.child('AMC Preferences')
         dialog.grab_focus()
+        tab = dialog.child('Main', roleName='page tab')
+        if printing_method:
+            time.sleep(1)
+            # scroll to tab bottom
+            sb = tab.findChildren(
+                dogtail.predicate.GenericPredicate(roleName='scroll bar'))
+            sb[1].value =2000
+            # Find printing method combo box 
+            desc = dialog.child('Printing')
+            ts = sorted([(a.position[1], a)
+                         for a in desc.findChildren(
+                                 dogtail.predicate.GenericPredicate(
+                                     roleName='combo box'))])
+            if ts[0][1].combovalue != printing_method:
+                ts[0][1].combovalue = printing_method
         dialog.child('Project', roleName='page tab').select()
-        time.sleep(1)
         if description:
+            time.sleep(1)
             desc = dialog.child('Examination description')
             ts = sorted([(a.position[1], a)
                          for a in desc.findChildren(
