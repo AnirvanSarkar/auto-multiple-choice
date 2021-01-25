@@ -114,7 +114,7 @@ sub new {
     $self->{config}->connect_to_window($self->get_ui('main_window'));
     $self->test_debian_amc();
     $self->test_magick();
-    $self->test_libnotify();
+    $self->test_libnotify() if(!$self->{do_nothing});
 
     $self->{monitor} = AMC::FileMonitor->new();
 
