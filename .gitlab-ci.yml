@@ -1,7 +1,11 @@
-image: jojoboulix/amc-build
 
-job:
+stages:
+  - build
+  - deploy
+
+job0:
   stage: build
+  image: jojoboulix/amc-build
   script:
   - make version_files
   - make
@@ -14,3 +18,19 @@ job:
   artifacts:
     paths:
     - '*_dist.tar.gz'
+
+job1:
+  only:
+    refs:
+      - master
+  stage: deploy
+  image: alpine
+  before_script:
+    - apk add openssh-client
+    - eval $(ssh-agent -s)
+    - ssh-add - < $PRECOMP_KEY
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - test "$SSH_CONFIG_FILE" && cp $SSH_CONFIG_FILE ~/.ssh/config
+    - "scp -o StrictHostKeyChecking=no *_dist.tar.gz $PRECOMP_USER@$PRECOMP_SERVER:precomp 2> /dev/null"
