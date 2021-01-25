@@ -85,6 +85,7 @@ LANGS=$(notdir $(basename $(MOS)))
 SUBMODS=$(notdir $(shell ls doc/modeles))
 GLADE_IN=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
 DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
+PYCACHE=tests/gui/dogtail/__pycache__
 
 # list *.in files for @/VAR/@ substitution
 
@@ -191,6 +192,7 @@ $(MAIN_LOGO).svgz: $(MAIN_LOGO).svg
 
 clean_IN: FORCE
 	rm -rf debian/auto-multiple-choice
+	rm -rf $(PYCACHE)
 	rm -f local/deb-auto-changelog
 	rm -f $(FROM_IN)
 
