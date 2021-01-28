@@ -370,7 +370,7 @@ TMP_SOURCE_DIR=$(TMP_DIR)/$(SOURCE_DIR)
 TARBALLS_DIR=tarballs
 ORIG_SOURCES=$(TMP_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB).orig.tar.gz
 
-SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags --exclude .gitignore --exclude .gitlab-ci.yml
+SRC_EXCL=--exclude debian '--exclude=*~' --exclude .hgignore --exclude .hgtags --exclude .gitignore --exclude .gitlab-ci.yml --exclude vars-subs.pl
 
 version_files:
 	$(PERLPATH) local/versions.pl
