@@ -1,25 +1,84 @@
 
 stages:
   - build
+  - test
+  - package
   - deploy
 
-job0:
+build:
   stage: build
   image: jojoboulix/amc-build
   script:
-  - make version_files
-  - make
-  - make install && texhash
-  - make -C tests blind-test
-  - make -C doc check
-  - make sources
-  - export TARBALL=auto-multiple-choice_$(git describe --tags)_dist.tar.gz
-  - "mv tarballs/auto-multiple-choice_*_precomp.tar.gz $TARBALL"
+    - make version_files
+    - make
+  artifacts:
+    untracked: true
+    public: false
+    expire_in: 4 days
+
+tests:
+  stage: test
+  needs:
+    - job: build
+      artifacts: true
+  image: jojoboulix/amc-build
+  script:
+    - make install && texhash
+    - make -C tests blind-test
+
+doc-xml:
+  stage: test
+  needs: []
+  image: debian:testing-slim
+  before_script:
+    - apt-get update
+    - apt-get install -y make libxml2-utils docbook-xml
+  script:
+    - make -C doc check
+
+pack-sources:
+  stage: build
+  image: jojoboulix/amc-build
+  script:
+    - make sources
+    - export TARBALL_V=$(git describe --tags)
+    - cd tarballs
+    - "mv auto-multiple-choice_*_precomp.tar.gz auto-multiple-choice_${TARBALL_V}_dist.tar.gz"
+    - "mv auto-multiple-choice_*_sources.tar.gz auto-multiple-choice_${TARBALL_V}_sources.tar.gz"
   artifacts:
     paths:
-    - '*_dist.tar.gz'
+      - tarballs/
 
-job1:
+pack-debian:
+  stage: package
+  needs:
+    - job: pack-sources
+      artifacts: true
+  image: debian:testing-slim
+  before_script:
+    - apt-get update
+    - apt-get install -y git git-buildpackage
+  script:
+    - mkdir debian-package
+    - cd debian-package
+    - gbp clone https://salsa.debian.org/georgesk/auto-multiple-choice.git
+    - mk-build-deps -i -t "apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -y" auto-multiple-choice/debian/control
+    - cd auto-multiple-choice
+    - git config user.name AMC
+    - git config user.email "paamc@passoire.fr"
+    - "export GBP_V=`grep auto-multiple-choice debian/changelog | head -n 1 | sed 's:.*(::; s:-[0-9]\\+).*$::'`"
+    - 'export GBP_DATE=`echo "$CI_COMMIT_TIMESTAMP" | head -c 16 | sed "s/[^0-9]//g"`'
+    - 'export GBP_UPSTREAM="$GBP_V+git$GBP_DATE"'
+    - 'gbp import-orig --upstream-version=$GBP_UPSTREAM --import-msg "New upstream version from git @$CI_COMMIT_SHORT_SHA" ../../tarballs/*_sources.tar.gz'
+    - gbp dch -N "$GBP_UPSTREAM-1" --git-author --commit
+    - gbp buildpackage
+  artifacts:
+    paths:
+      - "debian-package/auto-multiple-choice*_*"
+    exclude:
+      - "debian-package/auto-multiple-choice-build-deps*"
+
+depl-precomp:
   only:
     refs:
       - master
@@ -31,6 +90,6 @@ job1:
     - ssh-add - < $PRECOMP_KEY
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-  script:
     - test "$SSH_CONFIG_FILE" && cp $SSH_CONFIG_FILE ~/.ssh/config
-    - "scp -o StrictHostKeyChecking=no *_dist.tar.gz $PRECOMP_USER@$PRECOMP_SERVER:precomp 2> /dev/null"
+  script:
+    - "scp -o StrictHostKeyChecking=no tarballs/*_dist.tar.gz $PRECOMP_USER@$PRECOMP_SERVER:precomp 2> /dev/null"
