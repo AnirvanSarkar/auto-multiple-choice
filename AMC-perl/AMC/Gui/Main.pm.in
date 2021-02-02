@@ -838,7 +838,7 @@ sub notify_end_of_work {
                 eval {
                     my $notification =
                       Notify::Notification->new( 'Auto Multiple Choice',
-                        $message, '@/ICONSDIR/@/auto-multiple-choice.svg' );
+                        $message, amc_specdir('icons').'/auto-multiple-choice.svg' );
                     $notification->show;
                 };
                 $self->{libnotify_error} = $@;
