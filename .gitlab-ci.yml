@@ -49,6 +49,18 @@ pack-sources:
     paths:
       - tarballs/
 
+pack-portable:
+  stage: build
+  image: jojoboulix/amc-build
+  script:
+    - make portable
+    - export TARBALL_V=$(git describe --tags)
+    - cd tarballs
+    - "mv auto-multiple-choice_*_portable.tar.gz auto-multiple-choice_${TARBALL_V}_portable.tar.gz"
+  artifacts:
+    paths:
+      - tarballs/
+
 pack-debian:
   stage: package
   needs:
@@ -92,4 +104,4 @@ depl-precomp:
     - chmod 700 ~/.ssh
     - test "$SSH_CONFIG_FILE" && cp $SSH_CONFIG_FILE ~/.ssh/config
   script:
-    - "scp -o StrictHostKeyChecking=no tarballs/*_dist.tar.gz $PRECOMP_USER@$PRECOMP_SERVER:precomp 2> /dev/null"
+    - "scp -o StrictHostKeyChecking=no tarballs/*_dist.tar.gz tarballs/*_portable.tar.gz  $PRECOMP_USER@$PRECOMP_SERVER:precomp 2> /dev/null"
