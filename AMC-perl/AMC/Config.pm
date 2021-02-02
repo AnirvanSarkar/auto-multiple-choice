@@ -51,6 +51,7 @@ sub new {
         home_dir        => '',
         empty           => 0,
         gui             => 0,
+        testing         => '',
     };
 
     for my $k ( keys %o ) {
@@ -674,7 +675,7 @@ sub test_commands {
     my @uc = $self->unavailable_commands_keys();
 
     if ( @uc && !$dont_warn ) {
-        if ( $self->{gui} ) {
+        if ( $self->{gui} && ! $self->{testing} ) {
             my $dialog =
               Gtk3::MessageDialog->new( $self->{gui}, 'destroy-with-parent',
                 'warning', 'ok', '' );

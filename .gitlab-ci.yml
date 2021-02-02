@@ -61,6 +61,21 @@ pack-portable:
     paths:
       - tarballs/
 
+test-portable:
+  stage: test
+  needs:
+    - job: pack-portable
+      artifacts: true
+  image: jojoboulix/amc-build
+  script:
+    - pwd
+    - mkdir portable
+    - cd portable
+    - "tar xvzf ../tarballs/auto-multiple-choice_*_portable.tar.gz"
+    - cd ../tests/gui/dogtail
+    - AMC_PATH=$CI_PROJECT_DIR/portable/AMC/bin/auto-multiple-choice ./blind-tests.sh simple
+  allow_failure: true
+
 pack-debian:
   stage: package
   needs:

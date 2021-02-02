@@ -9,8 +9,29 @@ then
     echo "Creating $HOME/AMC-tmp ..."
     mkdir -p $HOME/AMC-tmp
 fi
+if [ ! -d $HOME/.AMC.d ];
+then
+    echo "Creating $HOME/.AMC.d ..."
+    mkdir -p $HOME/.AMC.d
+fi
 
-BDIR=$HOME/.config/gtk-3.0/
+STATE=$HOME/.AMC.d/state.xml
+if [ ! -f $STATE ];
+then
+    echo "Creating $STATE ..."
+    echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<state>
+  <apprentissage>
+    <ASSOC_AUTO_OK>1</ASSOC_AUTO_OK>
+    <MAJ_DOCS_OK>1</MAJ_DOCS_OK>
+    <MAJ_MEP_OK>1</MAJ_MEP_OK>
+    <SAISIE_AUTO>1</SAISIE_AUTO>
+  </apprentissage>
+  <profile>TEST</profile>
+</state>' > $STATE
+fi
+
+BDIR=$HOME/.config/gtk-3.0
 BFILE=$BDIR/bookmarks
 if [ ! -d $BDIR ];
 then
@@ -33,7 +54,7 @@ fi
 
 DISPLAY_NUM=${DISPLAY_NUM:-4}
 
-Xvfb :$DISPLAY_NUM &
+Xvfb :$DISPLAY_NUM -screen 0 1600x1200x24 &
 XVFB_PID=$!
 
 echo "Xvfb started for display $DISPLAY_NUM with PID $XVFB_PID"
@@ -58,6 +79,9 @@ do
     fi
 
 done
+
+# screenshot
+import -window root /tmp/AMC-window.jpg
 
 kill -9 $XVFB_PID
 

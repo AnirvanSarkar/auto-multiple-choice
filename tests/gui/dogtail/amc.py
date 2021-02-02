@@ -6,6 +6,8 @@ import csv
 import subprocess
 import time
 
+os.system('gsettings set org.gnome.desktop.interface toolkit-accessibility true')
+
 import dogtail.tc
 from dogtail.procedural import *
 import dogtail.utils
@@ -73,9 +75,9 @@ class AMC:
 
     def amc_cmd(self):
         if self.debug:
-            return self.amc_path + ' gui --debug --profile TEST'
+            return self.amc_path + ' gui --debug --testing --profile TEST'
         else:
-            return self.amc_path + ' gui --profile TEST'
+            return self.amc_path + ' gui --testing --profile TEST'
 
     def code(self):
         if self.shortcode:

@@ -56,6 +56,7 @@ POSIX::setlocale( &POSIX::LC_NUMERIC, "C" );
 my $debug      = 0;
 my $debug_file = '';
 my $do_nothing = 0;
+my $testing    = 0;
 
 my $profile     = '';
 my $project_dir = '';
@@ -66,6 +67,7 @@ GetOptions(
     "profile=s"    => \$profile,
     "p=s"          => \$project_dir,
     "do-nothing!"  => \$do_nothing,
+    "testing!"     => \$testing,
 );
 
 if ( $debug || $debug_file ) {
@@ -84,7 +86,8 @@ my $shortcuts = AMC::Path::new( home_dir => $home_dir );
 my $config    = AMC::Config::new(
     shortcuts => $shortcuts,
     home_dir  => $home_dir,
-    profile   => $profile
+    profile   => $profile,
+    testing   => $testing,
 );
 
 # goes to a specific directory if the project directory is given as a
@@ -123,7 +126,8 @@ my $project = AMC::Project->new( config => $config );
 my $main    = AMC::Gui::Main->new(
     config     => $config,
     project    => $project,
-    do_nothing => $do_nothing
+    do_nothing => $do_nothing,
+    testing    => $testing,
 );
 $project->set( 'gui', $main );
 
