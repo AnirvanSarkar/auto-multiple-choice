@@ -67,12 +67,15 @@ class AMC:
         self.shortcode = None
         self.global_password = 'ABCDEF'
         self.password_column = 'id'
+        self.amc_path = os.getenv("AMC_PATH")
+        if not self.amc_path:
+            self.amc_path = 'auto-multiple-choice'
 
     def amc_cmd(self):
         if self.debug:
-            return 'auto-multiple-choice gui --debug --profile TEST'
+            return self.amc_path + ' gui --debug --profile TEST'
         else:
-            return 'auto-multiple-choice gui --profile TEST'
+            return self.amc_path + ' gui --profile TEST'
 
     def code(self):
         if self.shortcode:
