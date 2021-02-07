@@ -59,6 +59,8 @@ html/index.html: FORCE
 
 %.tex: %.xml amcdocstyle.sty
 	dblatex -P latex.encoding=utf8 -b xetex -t tex -p custom.xsl --texstyle=amcdocstyle --xslt-opts="--nonet" --xslt-opts="--catalogs" $(DBLATEX_OPT) $< -o $@
+# dblatex bug workaround (python3 writes b'<:' instead of <:)
+	perl -pi -e "s,b'<:',<:,g ; s,b':>',:>,g " $@
 
 XELATEX=xelatex -halt-on-error -interaction=nonstopmode
 
