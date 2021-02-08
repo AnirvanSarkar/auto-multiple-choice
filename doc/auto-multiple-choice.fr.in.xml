@@ -3224,7 +3224,7 @@ Durée : 10 minutes.
         précise grâce aux commandes suivantes : <ulink
       url="https://project.auto-multiple-choice.net/attachments/2711/tutoMelangeAMC.tex">tutoriel mélange</ulink></para>
 
-        <itemizedlist>
+        <itemizedlist role="raggedright">
           <listitem>
             <para><code>\restituegroupe[n]{ungroupe}</code> (utilisation du
             paramètre optionnel <replaceable>n</replaceable>) restitue
@@ -3723,11 +3723,13 @@ Durée : 10 minutes.
       <sect3 id="latex.codes">
         <title>Saisie de codes</title>
 
-        <para>L'entrée de codes peut être aisément effectuée à l'aide de la
-        commande LaTeX
-        <command>\AMCcodeGridInt[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>nombre</replaceable>}</command>,
-        par exemple pour que chaque étudiant codifie son numéro d'étudiant
-        lui-même sur sa copie. Les deux arguments de cette commande sont un
+        <para>L'entrée de codes ( par exemple pour que chaque étudiant
+        codifie son numéro d'étudiant lui-même sur sa copie) peut être
+        aisément effectuée à l'aide de la commande LaTeX
+        </para>
+        <programlisting>\AMCcodeGridInt[<replaceable>options</replaceable>]{<replaceable>identifiant</replaceable>}{<replaceable>nombre</replaceable>}</programlisting>
+        <para>
+          Les deux arguments de cette commande sont un
         identifiant de question que vous choississez ainsi que le nombre de
         chiffres du codage désiré. On pourra, par exemple, utiliser l'en-tête
         de copie suivant :</para>
@@ -3787,7 +3789,8 @@ et inscrivez votre nom et prénom ci-dessous.
         d' ensemble de caractères acceptés, séparés par des virgules. Par
         exemple, pour saisir un code client dont le premier caractère est une
         lettre entre A et E, suivi de trois chiffres, on utilisera
-        <command>\AMCcodeGrid{client}{ABCDE,0123456789,0123456789,0123456789}</command>.</para>
+        </para>
+        <programlisting>\AMCcodeGrid{client}{ABCDE,0123456789,0123456789,0123456789}</programlisting>
 
         <para>Les deux commandes <command>\AMCcodeGrid</command> et
         <command>\AMCcodeGridInt</command> acceptent des options, séparées par
@@ -3900,7 +3903,8 @@ et inscrivez votre nom et prénom ci-dessous.
   \end{figure}
 
   \begin{question}{tigre}
-    Quel est l'animal sur la photographie de la figure~\AMCref{tigre} en page \AMCpageref{tigre}~?
+    Quel est l'animal sur la photographie de la figure~\AMCref{tigre}
+    en page \AMCpageref{tigre}~?
     \begin{reponses}
       \bonne{Un tigre}
       \mauvaise{Une girafe}
@@ -3936,11 +3940,9 @@ et inscrivez votre nom et prénom ci-dessous.
             <para><programlisting>\usepackage[french]{cleveref}</programlisting></para>
           </warning>
 
-          <para>L'utilisation de ce paquet nécessite l'introduction d'une
-          nouvelle commande <command>\AMCstudentlabel</command>{référence de
-          la question}.</para>
+          <para>Lors de l'utilisation de <command>\cref</command>, les références des questions devront être trnsformées par la commande <command>\AMCstudentlabel</command>, comme dans l'exemple suivant :</para>
 
-          <para><programlisting>\cref{\AMCstudentlabel{dipole},\AMCstudentlabel{cours},\AMCstudentlabel{raisonnement}}</programlisting></para>
+          <programlisting>\cref{\AMCstudentlabel{dipole},\AMCstudentlabel{cours},\AMCstudentlabel{raisonnement}}</programlisting>
 
           <para>Avec <emphasis>dipole</emphasis>, <emphasis>cours</emphasis>
           et <emphasis>raisonnement</emphasis> les références des questions
@@ -4219,7 +4221,7 @@ et inscrivez votre nom et prénom ci-dessous.
           </calloutlist>
 
           <para>La mise en forme des intervalles peut être modifiée en
-          redéfinissant la commande LaTeX
+          redéfinissant la commande
           <command>\AMCintervalFormat</command>, définie originellement
           par</para>
 
@@ -4399,7 +4401,8 @@ et inscrivez votre nom et prénom ci-dessous.
               <listitem>
                 <para>avec la valeur <code>true</code>, en mode
                 <code>vertical</code>, un en-tête sera placé au-dessus de
-                chaque colonne correspondant à un chiffre. Le texte de cet
+                chaque colonne correspondant à un chiffre.
+                </para><para>Le texte de cet
                 en-tête est donné par la commande
                 <command>\AMCntextVHead</command>, qui est originellement
                 définie par</para>
@@ -4487,7 +4490,7 @@ et inscrivez votre nom et prénom ci-dessous.
 
               <listitem>
                 <para>donne le texte affiché entre la partie mantisse et la
-                partie exposant. Ce texte peut également être modifié par
+                partie exposant.</para><para>Ce texte peut également être modifié par
                 <code>\def\AMCexponent{<replaceable>text</replaceable>}</code>,
                 et sa valeur par defaut est
                 <code>$\times10$\textasciicircum</code>.</para>
@@ -7321,9 +7324,9 @@ id="password.protect" linkends="password.protect.exp"/>
     <sect2 id="verbatim">
       <title><package>verbatim</package></title>
 
-      <para>Issue du wiki <ulink
+      <para>Issue du <ulink
       url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
-      https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
+      wiki</ulink>.</para>
 
       <para>Le paquet <package>verbatim</package> perturbe AMC et il devient
       impossible de l'utiliser dans les environnements
@@ -8180,7 +8183,8 @@ chmod 0600 /Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
 
         <listitem>
           <para>La commande <code>\FPlsolve{\x}{a}{b}</code> cherche la valeur
-          réelle <code>\x</code> pour résoudre l'équation<programlisting>a*\x+b=0.</programlisting></para>
+          réelle <code>\x</code> pour résoudre l'équation</para>
+          <programlisting>a*x+b=0.</programlisting>
 
           <para>La commande <code>\FPqsolve{\x}{\y}{a}{b}{c}</code> cherche
           les valeurs réelles <code>\x</code> et <code>\y</code> pour résoudre
@@ -8210,7 +8214,7 @@ chmod 0600 /Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
 
         <listitem>
           <para>La commande <code>\FPpow{\x}{a}{b}</code> attribue à la
-          variable <code>\x</code> la valeur a^b, La commande
+          variable <code>\x</code> la valeur a^b</para><para>La commande
           <code>\FProot{\x}{a}{b}</code> attribue à la variable
           <code>\x</code> la valeur a^(1/b).</para>
 

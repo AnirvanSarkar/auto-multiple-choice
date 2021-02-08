@@ -727,7 +727,7 @@ the best you can.
 
           <listitem>
             <para>Gives some more options to pass to the automultiplechoice
-            LaTeX package (see <xref linkend="sec.package.options"/>.</para>
+            LaTeX package (see <xref linkend="sec.package.options"/>).</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -3115,8 +3115,7 @@ There is \total{AMCquestionaff} questions.
           </listitem>
 
           <listitem>
-            <para><code>\insertgroupfrom[n]{groupname}{i}</code> The command
-            does the same as <code>\insertgroup[n]{groupname}</code>, starting
+            <para><code>\insertgroupfrom[n]{groupname}{i}</code> does the same as <code>\insertgroup[n]{groupname}</code>, starting
             from element at index <replaceable>i</replaceable> (the first
             element has index 0).</para>
           </listitem>
@@ -3152,8 +3151,7 @@ There is \total{AMCquestionaff} questions.
 
         <itemizedlist>
           <listitem>
-            <para><code>\copygroupfrom[n]{groupA}{groupB}{i}</code> The
-            command does the same as
+            <para><code>\copygroupfrom[n]{groupA}{groupB}{i}</code> does the same as
             <code>\copygroup[n]{groupA}{groupB}</code> starting from element
             at index <replaceable>i</replaceable> (the first element has index
             0).</para>
@@ -3361,7 +3359,7 @@ There is \total{AMCquestionaff} questions.
         <title>Questions presentation style</title>
 
         <para>The way each question is presented can be modified by redefining
-        the LaTeX command <command>\AMCbeginQuestion</command>, whose default
+        the command <command>\AMCbeginQuestion</command>, whose default
         definition is the following:</para>
 
         <para><programlisting>\def\AMCbeginQuestion#1#2{\par\noindent{\bf Question #1} #2\hspace*{1em}}</programlisting></para>
@@ -3582,8 +3580,9 @@ How is the identity function defined?
         <title>Code acquisition</title>
 
         <para>Code acquisition can be easily performed thanks to the LaTeX
-        command
-        <command>\AMCcodeGridInt[<replaceable>options</replaceable>]{<replaceable>key</replaceable>}{<replaceable>n</replaceable>}</command>,
+        command</para>
+        <programlisting>\AMCcodeGridInt[<replaceable>options</replaceable>]{<replaceable>key</replaceable>}{<replaceable>n</replaceable>}</programlisting>
+        <para>
         for instance to allow each student to enter her/his student number by
         herself/himself on the answer sheet. The two arguments of this command
         are a code/question key (identifier), and the number
@@ -4103,8 +4102,8 @@ respective parameters \VQa{} and \VQb{}.
                 significant digits from the first argument of
                 <command>\AMCnumericChoices</command>. For example, the right
                 answer to
-                <code>\AMCnumericChoices{56945.23}{digits=2,significant=true}</code>
-                is 57.</para>
+                </para><programlisting>\AMCnumericChoices{56945.23}{digits=2,significant=true}</programlisting>
+                <para>is 57.</para>
               </listitem>
             </varlistentry>
 
@@ -4121,7 +4120,8 @@ respective parameters \VQa{} and \VQb{}.
               <term>nozero=<replaceable>bool</replaceable></term>
 
               <listitem>
-                <para>if true, the choice 0 is removed for all digits. May be
+                <para>if true, the choice 0 is removed for all digits.
+                </para><para>May be
                 useful when using <command>\AMCnumericChoices</command> to
                 enter small (&lt;10) positive values.</para>
               </listitem>
@@ -5503,7 +5503,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
         <para>The default scale for a simple question is
         <code>e=0,v=0,b=1,m=0</code>, which gives one point for a good
         response and no point in the other cases. The default scaling for a
-        multiple question is <code>e=0,v=0,b=1,m=0,p=-100,d=0</code>, which
+        multiple question is</para><programlisting>e=0,v=0,b=1,m=0,p=-100,d=0</programlisting><para>which
         gives a point for every checked box, either good or not (good box
         checked or wrong box not checked).</para>
 
@@ -6802,9 +6802,9 @@ id="password.protect" linkends="password.protect.exp"/>
     <sect2 id="verbatim">
       <title><package>verbatim</package></title>
 
-      <para>From wiki <ulink
+      <para>From <ulink
       url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
-      https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions</ulink></para>
+      wiki</ulink>.</para>
 
       <para>The <package>verbatim</package> environment interferes with AMC
       LaTeX package, so that it is impossible to use it inside
@@ -8386,7 +8386,7 @@ What is the return value of the following R code?
 
               <listitem>
                 <para>sets the list of columns that are to be added to each
-                student. Default value is
+                student.</para><para>Default value is
                 <code>student.key,student.name</code>.</para>
               </listitem>
             </varlistentry>
@@ -8423,7 +8423,7 @@ What is the return value of the following R code?
 
               <listitem>
                 <para>sets the list of columns that are to be added to each
-                student. Default value is
+                student.</para><para>Default value is
                 <code>student.copy,student.key,student.name</code>.</para>
               </listitem>
             </varlistentry>
@@ -9159,7 +9159,7 @@ What is the return value of the following R code?
                 <literal>mark</literal>, <literal>box</literal> and
                 <replaceable>color</replaceable> is a color (name or #RGB, see
                 ImageMagick or GraphicsMagick documentation for details).
-                Default value is
+                </para><para>Default value is
                 "<code>0-0:none,0-1:circle:red,1-0:mark:red,1-1:mark:blue</code>".</para>
               </listitem>
             </varlistentry>
