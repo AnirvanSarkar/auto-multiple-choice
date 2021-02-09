@@ -136,7 +136,7 @@ AMC-buildpdf: AMC-buildpdf.cc buildpdf.cc Makefile
 	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_PDF) $(GCC_OPENCV) $(GCC_OPENCV_LIBS)
 
 AMC-pdfformfields: pdfformfields.c Makefile
-	$(GCC_PP) -o $@ $< $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLDFLAGS) -lstdc++ -lm $(GCC_POPPLER)
+	$(GCC) -o $@ $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -lm $(GCC_POPPLER)
 
 rebuild: FORCE
 	$(MAKE) $(BINARIES) -W Makefile
