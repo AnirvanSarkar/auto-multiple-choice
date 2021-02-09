@@ -835,6 +835,7 @@ sub define_statements {
               . " LEFT OUTER JOIN"
               . " ( SELECT student,page,copy,image FROM $t_zone WHERE type=? ) AS b"
               . " ON a.student=b.student AND a.page=b.page AND a.copy=b.copy"
+              . " ORDER BY student, page, copy"
         },
         photocopy => { sql => "SELECT COUNT(*) FROM $t_page WHERE copy>0" },
         zonesBBox => {
