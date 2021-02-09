@@ -579,13 +579,9 @@ sub charge_i {
         if ( $self->{image_type} && $self->{image_type} ne 'ppm' ) {
             $tmp_image = $self->{'tmp-image'} . "." . $self->{image_type};
             debug "ppmto" . $self->{image_type} . " : $tmp_ppm -> $tmp_image";
-            system_debug(
-                cmd => [
-                        "ppmto"
-                      . $self->{image_type}
-                      . " \"$tmp_ppm\" > \"$tmp_image\""
-                ]
-            );
+            system( "ppmto"
+                  . $self->{image_type}
+                  . " \"$tmp_ppm\" > \"$tmp_image\"" );
         }
 
         $display_image = $tmp_image;

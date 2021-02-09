@@ -137,18 +137,27 @@ sub perl_module_search {
     return ( sort { $a cmp $b } keys %mods );
 }
 
-# peut-on acceder a cette commande par exec ?
+# Can we exec this command? Check in $PATH...
+#
+# If $command_only is set, $c is a command file name.
+#
+# If $command_only is not set, $c can be a command followed by arguments
+
 sub commande_accessible {
-    my $c = shift;
+    my ( $c, $command_only ) = @_;
     if ( ref($c) eq 'ARRAY' ) {
         for my $u (@$c) {
-            return ($u) if ( $u && commande_accessible($u) );
+            return ($u) if ( $u && commande_accessible( $u, $command_only ) );
         }
         return (undef);
     } else {
-        $c =~ s/(?<=[^\s])\s.*//;
-        $c =~ s/^\s+//;
-        if ( $c =~ /^\// ) {
+        if ( !$command_only ) {
+            # extract the command name from a string containing the
+            # command and some arguments...
+            $c =~ s/(?<=[^\s])\s.*//;
+            $c =~ s/^\s+//;
+        }
+        if ( $c =~ /\// ) {
             return ( -x $c );
         } else {
             my $ok = '';
@@ -160,11 +169,16 @@ sub commande_accessible {
     }
 }
 
-# system() replacement with debugging...
+# system() replacement with debugging.
+#
+# system_debug( cmd => [ @c ]) runs the command with arguments @c, and
+# redirects STDOUT to the debug. $c[0] must be the command filename
+# itself only, not the command with space-delimited arguments.
+
 sub system_debug {
     my (%o) = @_;
     debug( "Calling cmd: " . join( " ", @{ $o{cmd} } ) );
-    if ( !commande_accessible( $o{cmd}->[0] ) ) {
+    if ( !commande_accessible( $o{cmd}->[0], 1 ) ) {
         debug_and_stderr("Can't find command: $o{cmd}->[0]");
         die "Command failed" if ( $o{die_on_error} );
         return (-1);

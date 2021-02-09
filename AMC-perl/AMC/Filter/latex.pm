@@ -88,7 +88,6 @@ sub filter {
         my ( $fxa, $fxb, $f ) = splitpath($output_file);
         my @cmd =
           quotewords( '\s+', 0, $self->{options}->{preprocess_command} );
-        $cmd[0] = "./" . $cmd[0] if ( $cmd[0] && $cmd[0] !~ m:/: );
         push @cmd, $f;
 
         my $cwd = getcwd;
