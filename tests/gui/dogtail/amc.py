@@ -299,6 +299,10 @@ class AMC:
             f.combovalue = filter
         preparation.child('Edit source file').click()
         time.sleep(1)
+        if os.getenv("DISPLAY") != ":0":
+            # with Xvfb and dbus-run-session, gedit faces timeouts so
+            # we have to wait a little.
+            time.sleep(30)
         gedit = root.application('gedit')
         t = gedit.child(roleName='text')
         t.text = text

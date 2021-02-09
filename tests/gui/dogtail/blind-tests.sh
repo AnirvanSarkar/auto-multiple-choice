@@ -4,6 +4,14 @@ FAILS=0
 
 TESTS=$@
 
+if [ ! "$TESTS" ];
+then
+    echo "Standard tests"
+    TESTS="cups manual pdfform postcorrect simple utf8"
+fi
+
+echo "Tests: $TESTS"
+
 if [ ! -d $HOME/AMC-tmp ];
 then
     echo "Creating $HOME/AMC-tmp ..."
@@ -52,6 +60,9 @@ else
     cp $BFILE.old $BFILE
 fi
 
+# gedit should not be too large
+gsettings set org.gnome.gedit.state.window size "(500, 500)"
+
 DISPLAY_NUM=${DISPLAY_NUM:-4}
 
 Xvfb :$DISPLAY_NUM -screen 0 1600x1200x24 &
@@ -67,23 +78,29 @@ then
     DBUS_RUN="dbus-run-session --"
 fi
 
+RESULTS_FILE=/tmp/AMC-guitests.log
+
+echo "GUI tests results:" > $RESULTS_FILE
+
 for t in $TESTS
 do
 
     if $DBUS_RUN ./test-$t.py
     then
-        echo -e "[ \e[0;32mOK\e[0m ] $t"
+        echo -e "[ \e[0;32mOK\e[0m ] $t" >> $RESULTS_FILE
     else
-        echo -e "[\e[0;31mFAIL\e[0m] $t"
+        echo -e "[\e[0;31mFAIL\e[0m] $t" >> $RESULTS_FILE
         FAILS=1
     fi
 
+    # screenshot
+    import -window root /tmp/AMC-gui-$t.jpg
+
 done
 
-# screenshot
-import -window root /tmp/AMC-window.jpg
-
 kill -9 $XVFB_PID
+
+cat $RESULTS_FILE
 
 exit $FAILS
 
