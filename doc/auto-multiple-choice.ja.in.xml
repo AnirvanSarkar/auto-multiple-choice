@@ -4517,51 +4517,51 @@ Moniuszko,Stanisław,003</programlisting>
 
         <para><command>auto-multiple-choice</command>コマンドは、引数を<command>AMC-<replaceable>action</replaceable>.pl</command>コマンドに渡して起動します。</para>
 
-        <para>動作を指定しない2番目の形式では、GUIである<command>AMC-gui.pl</command>が（プロジェクト名が指定されていればそれとともに）呼び出されます。</para>
+        <para>動作を指定しない2番目の形式では、GUIである<command>auto-multiple-choice gui</command>が（プロジェクト名が指定されていればそれとともに）呼び出されます。</para>
       </refsect1>
 
       <refsect1>
         <title>関連項目</title>
 
         <para>AMCの各動作: <citerefentry>
-            <refentrytitle>AMC-prepare</refentrytitle>
+            <refentrytitle>auto-multiple-choice-prepare</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>, <citerefentry>
-            <refentrytitle>AMC-imprime</refentrytitle>
+            <refentrytitle>auto-multiple-choice-imprime</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>, <citerefentry>
-            <refentrytitle>AMC-analyse</refentrytitle>
+            <refentrytitle>auto-multiple-choice-analyse</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>, <citerefentry>
-            <refentrytitle>AMC-note</refentrytitle>
+            <refentrytitle>auto-multiple-choice-note</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>, <citerefentry>
-            <refentrytitle>AMC-association-auto</refentrytitle>
+            <refentrytitle>auto-multiple-choice-association-auto</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>, <citerefentry>
-            <refentrytitle>AMC-export</refentrytitle>
+            <refentrytitle>auto-multiple-choice-export</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>, <citerefentry>
-            <refentrytitle>AMC-annotate</refentrytitle>
+            <refentrytitle>auto-multiple-choice-annotate</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>, <citerefentry>
-            <refentrytitle>AMC-regroupe</refentrytitle>
+            <refentrytitle>auto-multiple-choice-regroupe</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry></para>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-prepare">
+    <refentry id="auto-multiple-choice-prepare">
       <refmeta>
-        <refentrytitle>AMC-prepare</refentrytitle>
+        <refentrytitle>auto-multiple-choice-prepare</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -4571,7 +4571,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-prepare</refname>
+        <refname>auto-multiple-choice-prepare</refname>
 
         <refpurpose>LaTeXソースファイルから作業文書を作成する</refpurpose>
       </refnamediv>
@@ -4611,11 +4611,11 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-prepare.pl</command>コマンドは、選択式試験問題を記述したソースファイルから作業文書を生成します。抽出される情報は<option>--mode</option>引数の値によります。どちらのモードでもソースファイル名は引数として指定しなければなりません。</para>
+        <para><command>auto-multiple-choice prepare</command>コマンドは、選択式試験問題を記述したソースファイルから作業文書を生成します。抽出される情報は<option>--mode</option>引数の値によります。どちらのモードでもソースファイル名は引数として指定しなければなりません。</para>
 
         <itemizedlist>
           <listitem>
-            <para><quote><option>--mode s</option></quote>を用いると、<command>AMC-prepare.pl</command>は、試験問題ファイル（印刷して受験者に配布する試験問題用紙）、模範解答ファイル（正解をマークした答案用紙1部）、位置情報ファイル（ページ上のボックスの位置に関する情報を含んだファイル）を作成します。以下の引数が使用可能です:</para>
+            <para><quote><option>--mode s</option></quote>を用いると、<command>auto-multiple-choice prepare</command>は、試験問題ファイル（印刷して受験者に配布する試験問題用紙）、模範解答ファイル（正解をマークした答案用紙1部）、位置情報ファイル（ページ上のボックスの位置に関する情報を含んだファイル）を作成します。以下の引数が使用可能です:</para>
 
             <variablelist>
               <varlistentry>
@@ -4657,7 +4657,7 @@ Moniuszko,Stanisław,003</programlisting>
           </listitem>
 
           <listitem>
-            <para><quote><option>--mode b</option></quote>を用いると、<command>AMC-prepare.pl</command>は、ソースファイルから採点基準を抽出します。このモードでは、<option>--data</option>オプション（下記参照）を使用しなければなりません。</para>
+            <para><quote><option>--mode b</option></quote>を用いると、<command>auto-multiple-choice prepare</command>は、ソースファイルから採点基準を抽出します。このモードでは、<option>--data</option>オプション（下記参照）を使用しなければなりません。</para>
           </listitem>
         </itemizedlist>
 
@@ -4732,7 +4732,7 @@ Moniuszko,Stanisław,003</programlisting>
 
     <refentry>
       <refmeta>
-        <refentrytitle>AMC-meptex</refentrytitle>
+        <refentrytitle>auto-multiple-choice-meptex</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -4742,7 +4742,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-meptex</refname>
+        <refname>auto-multiple-choice-meptex</refname>
 
         <refpurpose>作業文書からレイアウト情報を取得しレイアウトデータベースに格納する</refpurpose>
       </refnamediv>
@@ -4762,13 +4762,13 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-meptex.pl</command>コマンドは作業文書<replaceable>calage.xy</replaceable>からレイアウト情報（全ページのボックス、マーカー、氏名領域の正確な位置）を取り出し、データディレクトリ<replaceable>directory</replaceable>のレイアウトデータベース（SQLiteファイル）に格納します。</para>
+        <para><command>auto-multiple-choice meptex</command>コマンドは作業文書<replaceable>calage.xy</replaceable>からレイアウト情報（全ページのボックス、マーカー、氏名領域の正確な位置）を取り出し、データディレクトリ<replaceable>directory</replaceable>のレイアウトデータベース（SQLiteファイル）に格納します。</para>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-imprime">
+    <refentry id="auto-multiple-choice-imprime">
       <refmeta>
-        <refentrytitle>AMC-imprime</refentrytitle>
+        <refentrytitle>auto-multiple-choice-imprime</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -4778,7 +4778,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-imprime</refname>
+        <refname>auto-multiple-choice-imprime</refname>
 
         <refpurpose>AMC試験問題用紙を受験者に配布できるように印刷する</refpurpose>
       </refnamediv>
@@ -4809,7 +4809,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>Description</title>
 
-        <para><command>AMC-imprime.pl</command>コマンドは選択した試験問題用紙を印刷します。</para>
+        <para><command>auto-multiple-choice imprime</command>コマンドは選択した試験問題用紙を印刷します。</para>
 
         <refsect2>
           <title>印刷内容の指定</title>
@@ -4823,7 +4823,7 @@ Moniuszko,Stanisław,003</programlisting>
 
               <listitem>
                 <para>（<citerefentry>
-                    <refentrytitle>AMC-prepare</refentrytitle>
+                    <refentrytitle>auto-multiple-choice-prepare</refentrytitle>
 
                     <manvolnum>1</manvolnum>
                   </citerefentry>で作成された）試験問題ファイルを設定します。</para>
@@ -4845,7 +4845,7 @@ Moniuszko,Stanisław,003</programlisting>
 
               <listitem>
                 <para>データファイルがあるディレクトリを指定します（<citerefentry>
-                    <refentrytitle>AMC-meptex</refentrytitle>
+                    <refentrytitle>auto-multiple-choice-meptex</refentrytitle>
 
                     <manvolnum>1</manvolnum>
                   </citerefentry>などを参照してください）。データディレクトリのレイアウトデータベースは一つの試験問題が何ページ目から何ページ目まであるかを知るのに使われます。</para>
@@ -4878,7 +4878,7 @@ Moniuszko,Stanisław,003</programlisting>
           <itemizedlist>
             <listitem>
               <para><quote><option>--methode CUPS</option></quote>を用いると、
-              <command>AMC-imprime.pl</command>はCUPSプリンタに印刷します。試験問題ごとに自動ステープルなどができるように1部につきプリントジョブを1件送ります。この方法では、以下のオプションを使用してください:</para>
+              <command>auto-multiple-choice imprime</command>はCUPSプリンタに印刷します。試験問題ごとに自動ステープルなどができるように1部につきプリントジョブを1件送ります。この方法では、以下のオプションを使用してください:</para>
 
               <variablelist>
                 <varlistentry>
@@ -4902,7 +4902,7 @@ Moniuszko,Stanisław,003</programlisting>
             </listitem>
 
             <listitem>
-              <para><quote><option>--methode file</option></quote>を用いると、<command>AMC-imprime.pl</command>は試験問題用紙をファイルに（1部につき1個）出力します。</para>
+              <para><quote><option>--methode file</option></quote>を用いると、<command>auto-multiple-choice imprime</command>は試験問題用紙をファイルに（1部につき1個）出力します。</para>
 
               <variablelist>
                 <varlistentry>
@@ -4917,7 +4917,7 @@ Moniuszko,Stanisław,003</programlisting>
             </listitem>
 
             <listitem>
-              <para><quote><option>--methode command</option></quote>を用いると、<command>AMC-imprime.pl</command>は試験問題1部ごとに指定したコマンドを使用します。</para>
+              <para><quote><option>--methode command</option></quote>を用いると、<command>auto-multiple-choice imprime</command>は試験問題1部ごとに指定したコマンドを使用します。</para>
 
               <variablelist>
                 <varlistentry>
@@ -4953,7 +4953,7 @@ Moniuszko,Stanisław,003</programlisting>
 
     <refentry>
       <refmeta>
-        <refentrytitle>AMC-getimages</refentrytitle>
+        <refentrytitle>auto-multiple-choice-getimages</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -4963,10 +4963,10 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-getimages</refname>
+        <refname>auto-multiple-choice-getimages</refname>
 
         <refpurpose>自動マーク認識用に<citerefentry>
-            <refentrytitle>AMC-analyse</refentrytitle>
+            <refentrytitle>auto-multiple-choice-analyse</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>に送るためのスキャン画像を用意する。</refpurpose>
@@ -4996,8 +4996,8 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-getimages.pl</command>コマンドは<citerefentry>
-            <refentrytitle>AMC-analyse</refentrytitle>
+        <para><command>auto-multiple-choice getimages</command>コマンドは<citerefentry>
+            <refentrytitle>auto-multiple-choice-analyse</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>に送る前にスキャン画像を用意します:</para>
@@ -5012,7 +5012,7 @@ Moniuszko,Stanisław,003</programlisting>
           </listitem>
         </itemizedlist>
 
-        <para>入力画像は、AMC-getimages.plへの引数としても、スキャンファイルのパスをすべて含むファイル名としても指定することができます。</para>
+        <para>入力画像は、auto-multiple-choice getimagesへの引数としても、スキャンファイルのパスをすべて含むファイル名としても指定することができます。</para>
 
         <variablelist>
           <varlistentry>
@@ -5020,7 +5020,7 @@ Moniuszko,Stanisław,003</programlisting>
             <replaceable>list-file</replaceable></option></term>
 
             <listitem>
-              <para>スキャンファイルのパスを（1行に一つ）含むファイルの名前を指定します。処理後にこのファイル内容は消去され、同じパスを<command>AMC-analyse.pl</command>の<option>--list-fichiers</option>オプションに渡せるように、スキャンファイルのパスが書き込まれます。</para>
+              <para>スキャンファイルのパスを（1行に一つ）含むファイルの名前を指定します。処理後にこのファイル内容は消去され、同じパスを<command>auto-multiple-choice analyse</command>の<option>--list-fichiers</option>オプションに渡せるように、スキャンファイルのパスが書き込まれます。</para>
             </listitem>
           </varlistentry>
 
@@ -5045,9 +5045,9 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-analyse">
+    <refentry id="auto-multiple-choice-analyse">
       <refmeta>
-        <refentrytitle>AMC-analyse</refentrytitle>
+        <refentrytitle>auto-multiple-choice-analyse</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -5057,7 +5057,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-analyse</refname>
+        <refname>auto-multiple-choice-analyse</refname>
 
         <refpurpose>AMC選択式試験問題のスキャン画像から自動マーク認識する</refpurpose>
       </refnamediv>
@@ -5088,12 +5088,12 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-analyse.pl</command>コマンドは、AMC選択式試験問題の答案用紙のスキャン画像から自動マーク認識を実行します。<command>AMC-analyse.pl</command>を呼び出す前に、<citerefentry>
-            <refentrytitle>AMC-prepare</refentrytitle>
+        <para><command>auto-multiple-choice analyse</command>コマンドは、AMC選択式試験問題の答案用紙のスキャン画像から自動マーク認識を実行します。<command>auto-multiple-choice analyse</command>を呼び出す前に、<citerefentry>
+            <refentrytitle>auto-multiple-choice-prepare</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>を呼び出して、作業文書（<option>--mode s</option>）とMEPファイル（<option>--mode m</option>）を作成し、<citerefentry>
-            <refentrytitle>AMC-meptex</refentrytitle>
+            <refentrytitle>auto-multiple-choice-meptex</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>を用いてレイアウトを処理しておかなければなりません。</para>
@@ -5105,7 +5105,7 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>データファイルがあるディレクトリを指定します（<citerefentry>
-                  <refentrytitle>AMC-meptex</refentrytitle>
+                  <refentrytitle>auto-multiple-choice-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
                 </citerefentry>などを参照してください）。デフォルトは<filename><replaceable>project-dir</replaceable>/data</filename>です。</para>
@@ -5218,9 +5218,9 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-note">
+    <refentry id="auto-multiple-choice-note">
       <refmeta>
-        <refentrytitle>AMC-note</refentrytitle>
+        <refentrytitle>auto-multiple-choice-note</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -5230,7 +5230,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-note</refname>
+        <refname>auto-multiple-choice-note</refname>
 
         <refpurpose>AMC選択式試験問題の採点をする</refpurpose>
       </refnamediv>
@@ -5266,12 +5266,12 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-note.pl</command>コマンドは<citerefentry>
-            <refentrytitle>AMC-prepare</refentrytitle>
+        <para><command>auto-multiple-choice note</command>コマンドは<citerefentry>
+            <refentrytitle>auto-multiple-choice-prepare</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>によってLaTeXソースファイルから取り出した採点基準と<citerefentry>
-            <refentrytitle>AMC-analyse</refentrytitle>
+            <refentrytitle>auto-multiple-choice-analyse</refentrytitle>
 
             <manvolnum>1</manvolnum>
           </citerefentry>によって作成されたマーク認識データとから、各答案の得点を計算します。</para>
@@ -5283,7 +5283,7 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>データファイルがあるディレクトリを指定します（<citerefentry>
-                  <refentrytitle>AMC-meptex</refentrytitle>
+                  <refentrytitle>auto-multiple-choice-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
                 </citerefentry>などを参照してください）。</para>
@@ -5295,7 +5295,7 @@ Moniuszko,Stanisław,003</programlisting>
             <replaceable>threshold</replaceable></option></term>
 
             <listitem>
-              <para>ボックスがマークされているかどうかを判定するための黒ピクセル比率の閾値を指定します。ボックスがマークされているかどうか判定する際、<command>AMC-note.pl</command>は黒ピクセル比率（全ピクセル数に対する黒ピクセル数の割合）を<replaceable>threshold</replaceable>（閾値）と比較します。黒ピクセル比率が<replaceable>threshold</replaceable>よりも大きい場合、このボックスはマークされていると宣言されます。標準的な値は通常レイアウトで0.15、別紙答案用紙レイアウト（ボックス内に文字が記入されており、受験者にはボックスを完全に塗りつぶすよう指示する）で0.5程度です。</para>
+              <para>ボックスがマークされているかどうかを判定するための黒ピクセル比率の閾値を指定します。ボックスがマークされているかどうか判定する際、<command>auto-multiple-choice note</command>は黒ピクセル比率（全ピクセル数に対する黒ピクセル数の割合）を<replaceable>threshold</replaceable>（閾値）と比較します。黒ピクセル比率が<replaceable>threshold</replaceable>よりも大きい場合、このボックスはマークされていると宣言されます。標準的な値は通常レイアウトで0.15、別紙答案用紙レイアウト（ボックス内に文字が記入されており、受験者にはボックスを完全に塗りつぶすよう指示する）で0.5程度です。</para>
             </listitem>
           </varlistentry>
 
@@ -5372,9 +5372,9 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-association-auto">
+    <refentry id="auto-multiple-choice-association-auto">
       <refmeta>
-        <refentrytitle>AMC-association-auto</refentrytitle>
+        <refentrytitle>auto-multiple-choice-association-auto</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -5384,7 +5384,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-association-auto</refname>
+        <refname>auto-multiple-choice-association-auto</refname>
 
         <refpurpose>AMC選択式試験問題の受験者と答案を自動識別する</refpurpose>
       </refnamediv>
@@ -5414,7 +5414,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-association-auto.pl</command>コマンドは、答案用紙の受験者を識別します（受験者が受験番号を正しく記入し、マーク認識に誤りがない場合）。詳細はユーザードキュメントの<xref linkend="sec.students.id"/>を参照してください。</para>
+        <para><command>auto-multiple-choice association-auto</command>コマンドは、答案用紙の受験者を識別します（受験者が受験番号を正しく記入し、マーク認識に誤りがない場合）。詳細はユーザードキュメントの<xref linkend="sec.students.id"/>を参照してください。</para>
 
         <variablelist>
           <varlistentry>
@@ -5423,7 +5423,7 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>データファイルがあるディレクトリを指定します（<citerefentry>
-                  <refentrytitle>AMC-meptex</refentrytitle>
+                  <refentrytitle>auto-multiple-choice-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
                 </citerefentry>などを参照してください）。</para>
@@ -5486,9 +5486,9 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-association">
+    <refentry id="auto-multiple-choice-association">
       <refmeta>
-        <refentrytitle>AMC-association</refentrytitle>
+        <refentrytitle>auto-multiple-choice-association</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -5498,7 +5498,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-association</refname>
+        <refname>auto-multiple-choice-association</refname>
 
         <refpurpose>AMC選択式試験問題の受験者と答案用紙を手動識別する。</refpurpose>
       </refnamediv>
@@ -5540,7 +5540,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-association.pl</command>コマンドは、答案用紙の受験者識別データを扱います。</para>
+        <para><command>auto-multiple-choice association</command>コマンドは、答案用紙の受験者識別データを扱います。</para>
 
         <variablelist>
           <varlistentry>
@@ -5549,7 +5549,7 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>データファイルがあるディレクトリを指定します（<citerefentry>
-                  <refentrytitle>AMC-prepare</refentrytitle>
+                  <refentrytitle>auto-multiple-choice-prepare</refentrytitle>
 
                   <manvolnum>1</manvolnum>
                 </citerefentry>などを参照してください）。</para>
@@ -5563,9 +5563,9 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-export">
+    <refentry id="auto-multiple-choice-export">
       <refmeta>
-        <refentrytitle>AMC-export</refentrytitle>
+        <refentrytitle>auto-multiple-choice-export</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -5575,7 +5575,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-export</refname>
+        <refname>auto-multiple-choice-export</refname>
 
         <refpurpose>AMC選択式試験問題の採点結果をエクスポートする</refpurpose>
       </refnamediv>
@@ -5605,7 +5605,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-export.pl</command>コマンドは、AMC選択式試験から採点結果をエクスポートします。</para>
+        <para><command>auto-multiple-choice export</command>コマンドは、AMC選択式試験から採点結果をエクスポートします。</para>
 
         <variablelist>
           <varlistentry>
@@ -5614,7 +5614,7 @@ Moniuszko,Stanisław,003</programlisting>
 
             <listitem>
               <para>データファイルがあるディレクトリを指定します（<citerefentry>
-                  <refentrytitle>AMC-meptex</refentrytitle>
+                  <refentrytitle>auto-multiple-choice-meptex</refentrytitle>
 
                   <manvolnum>1</manvolnum>
                 </citerefentry>などを参照してください）。</para>
@@ -5835,9 +5835,9 @@ Moniuszko,Stanisław,003</programlisting>
       </refsect1>
     </refentry>
 
-    <refentry id="AMC-annote">
+    <refentry id="auto-multiple-choice-annote">
       <refmeta>
-        <refentrytitle>AMC-annotate</refentrytitle>
+        <refentrytitle>auto-multiple-choice-annotate</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -5847,7 +5847,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-annotate</refname>
+        <refname>auto-multiple-choice-annotate</refname>
 
         <refpurpose>AMC選択式試験問題の答案に採点結果を記入する</refpurpose>
       </refnamediv>
@@ -5869,7 +5869,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-annotate.pl</command>コマンドは、答案に各設問の採点と全体の採点を記入し、PDFファイル（受験者別の複数ファイルか全体の単一ファイル）を出力します。</para>
+        <para><command>auto-multiple-choice annotate</command>コマンドは、答案に各設問の採点と全体の採点を記入し、PDFファイル（受験者別の複数ファイルか全体の単一ファイル）を出力します。</para>
 
         <refsect2>
           <title>全般オプション</title>
@@ -6112,7 +6112,7 @@ Moniuszko,Stanisław,003</programlisting>
 
               <listitem>
                 <para><citerefentry>
-                    <refentrytitle>AMC-prepare</refentrytitle>
+                    <refentrytitle>auto-multiple-choice-prepare</refentrytitle>
 
                     <manvolnum>1</manvolnum>
                   </citerefentry>を参照してください。</para>
@@ -6405,7 +6405,7 @@ Moniuszko,Stanisław,003</programlisting>
 
     <refentry>
       <refmeta>
-        <refentrytitle>AMC-mailing</refentrytitle>
+        <refentrytitle>auto-multiple-choice-mailing</refentrytitle>
 
         <manvolnum>1</manvolnum>
 
@@ -6415,7 +6415,7 @@ Moniuszko,Stanisław,003</programlisting>
       </refmeta>
 
       <refnamediv>
-        <refname>AMC-mailing</refname>
+        <refname>auto-multiple-choice-mailing</refname>
 
         <refpurpose>採点記入済答案のPDFを受験者にメールする</refpurpose>
       </refnamediv>
@@ -6461,7 +6461,7 @@ Moniuszko,Stanisław,003</programlisting>
       <refsect1>
         <title>解説</title>
 
-        <para><command>AMC-mailing.pl</command>コマンドは、採点記入済答案のPDFを受験者にメールで送付します。メールアドレスは受験者名簿ファイルから取り出されます。</para>
+        <para><command>auto-multiple-choice mailing</command>コマンドは、採点記入済答案のPDFを受験者にメールで送付します。メールアドレスは受験者名簿ファイルから取り出されます。</para>
 
         <variablelist>
           <varlistentry>
