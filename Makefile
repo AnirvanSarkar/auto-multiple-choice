@@ -185,7 +185,7 @@ sync:
 	pngtopnm $< | ppmtoxpm > $@
 
 $(MAIN_LOGO).svgz: $(MAIN_LOGO).svg
-	gzip -k -S z $<
+	gzip $(GZIP_REPRODUCIBLE_ARGS) -k -S z $<
 	$(foreach SIZE, $(APPICONSIZES), rsvg-convert -a -w $(SIZE) -h $(SIZE) $< -o $(MAIN_LOGO)-$(SIZE).png ;)
 
 # CLEAN
