@@ -67,7 +67,7 @@ sub options_default {
 }
 
 sub build_config_gui {
-    my ( $self, $w, $prefs ) = @_;
+    my ( $self, $main ) = @_;
     my $t = Gtk3::Grid->new();
     my $widget;
     my $y = 0;
@@ -78,14 +78,14 @@ sub build_config_gui {
     $renderer = Gtk3::CellRendererText->new();
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
-    $prefs->store_register(
+    $main->{prefs}->store_register(
         export_csv_separateur => cb_model(
             TAB => '<TAB>',
             ";" => ";",
             "," => ","
         )
     );
-    $w->{export_c_export_csv_separateur} = $widget;
+    $main->{ui}->{export_c_export_csv_separateur} = $widget;
     $t->attach( $widget, 1, $y, 1, 1 );
     $y++;
 
@@ -94,19 +94,19 @@ sub build_config_gui {
     $renderer = Gtk3::CellRendererText->new();
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
-    $prefs->store_register(
+    $main->{prefs}->store_register(
         export_csv_ticked => cb_model(
             ""   => __ "No",
             "01" => ( __ "Yes:" ) . " 0;0;1;0",
             AB   => ( __ "Yes:" ) . " AB",
         )
     );
-    $w->{export_c_export_csv_ticked} = $widget;
+    $main->{ui}->{export_c_export_csv_ticked} = $widget;
     $t->attach( $widget, 1, $y, 1, 1 );
     $y++;
 
     $widget = Gtk3::Button->new_with_label( __ "Choose columns" );
-    $widget->signal_connect( clicked => \&main::choose_columns_current );
+    $widget->signal_connect( clicked => sub { $main->choose_columns_current } );
     $t->attach( $widget, 0, $y, 2, 1 );
     $y++;
 

@@ -77,7 +77,7 @@ sub needs_module {
 }
 
 sub build_config_gui {
-    my ( $self, $w, $prefs ) = @_;
+    my ( $self, $main ) = @_;
     my $t = Gtk3::Grid->new();
     my $widget;
     my $renderer;
@@ -98,7 +98,7 @@ sub build_config_gui {
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
 
-    $prefs->store_register(
+    $main->{prefs}->store_register(
         export_ods_stats => cb_model(
             "" => __p(
                 # TRANSLATORS: Menu to export statistics table in the
@@ -126,7 +126,7 @@ sub build_config_gui {
             )
         )
     );
-    $w->{export_c_export_ods_stats} = $widget;
+    $main->{ui}->{export_c_export_ods_stats} = $widget;
     $t->attach( $widget, 1, $y, 1, 1 );
     $y++;
 
@@ -145,14 +145,14 @@ sub build_config_gui {
     $renderer = Gtk3::CellRendererText->new();
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
-    $prefs->store_register(
+    $main->{prefs}->store_register(
         export_ods_statsindic => cb_model(
             "" => __ "None",
             h  => __ "Horizontal flow",
             v  => __ "Vertical flow"
         )
     );
-    $w->{export_c_export_ods_statsindic} = $widget;
+    $main->{ui}->{export_c_export_ods_statsindic} = $widget;
     $t->attach( $widget, 1, $y, 1, 1 );
     $widget->set_tooltip_text( __
 "Create a table with basic statistics about answers for each indicative question?"
@@ -177,7 +177,7 @@ sub build_config_gui {
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
 
-    $prefs->store_register(
+    $main->{prefs}->store_register(
         export_ods_group => cb_model(
             "0" => __(
                 # TRANSLATORS: Option for ODS export: group questions
@@ -203,7 +203,7 @@ sub build_config_gui {
             )
         )
     );
-    $w->{export_c_export_ods_group} = $widget;
+    $main->{ui}->{export_c_export_ods_group} = $widget;
 
     $widget->set_tooltip_text(
         __ "Add sums of the scores for each question group?" );
@@ -218,7 +218,7 @@ sub build_config_gui {
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
 
-    $prefs->store_register(
+    $main->{prefs}->store_register(
         export_ods_groupsep => cb_model(
             ":" => __(
                 # TRANSLATORS: Option for ODS export: group questions
@@ -237,7 +237,7 @@ sub build_config_gui {
             )
         )
     );
-    $w->{export_c_export_ods_groupsep} = $widget;
+    $main->{ui}->{export_c_export_ods_groupsep} = $widget;
 
     $widget->set_tooltip_text( __
 "To define groups, use question ids in the form \"group:question\" or \"group.question\", depending on the scope separator."
@@ -248,7 +248,7 @@ sub build_config_gui {
     $y++;
 
     my $b = Gtk3::Button->new_with_label( __ "Choose columns" );
-    $b->signal_connect( clicked => \&main::choose_columns_current );
+    $b->signal_connect( clicked => sub { $main->choose_columns_current } );
     $t->attach( $b, 0, $y, 2, 1 );
     $y++;
 

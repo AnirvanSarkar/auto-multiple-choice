@@ -68,7 +68,7 @@ sub options_default {
 }
 
 sub build_config_gui {
-    my ( $self, $w, $prefs ) = @_;
+    my ( $self, $main ) = @_;
     my $t = Gtk3::Grid->new();
     my $widget;
     my $y = 0;
@@ -77,7 +77,7 @@ sub build_config_gui {
       Gtk3::SpinButton->new( Gtk3::Adjustment->new( 1, 1, 5, 1, 1, 0 ), 0, 0 );
     $widget->set_tooltip_text(
         __ "Long list is divided into this number of columns on each page." );
-    $w->{export_s_export_ncols} = $widget;
+    $main->{ui}->{export_s_export_ncols} = $widget;
     $t->attach( $widget, 1, $y, 1, 1 );
     $y++;
     $t->attach( Gtk3::Label->new( __ "Paper size" ), 0, $y, 1, 1 );
@@ -85,7 +85,7 @@ sub build_config_gui {
     my $renderer = Gtk3::CellRendererText->new();
     $widget->pack_start( $renderer, Glib::TRUE );
     $widget->add_attribute( $renderer, 'text', COMBO_TEXT );
-    $prefs->store_register(
+    $main->{prefs}->store_register(
         export_pagesize => cb_model(
             "a3"   => "A3",
             "a4"   => "A4",
@@ -93,7 +93,7 @@ sub build_config_gui {
             legal  => "Legal"
         )
     );
-    $w->{export_c_export_pagesize} = $widget;
+    $main->{ui}->{export_c_export_pagesize} = $widget;
     $t->attach( $widget, 1, $y, 1, 1 );
     $y++;
 

@@ -3980,7 +3980,7 @@ sub set_export {
 
     for my $m ( @{ $self->{config}->{export_modules} } ) {
         my $x = "AMC::Export::register::$m"
-          ->build_config_gui( $self->{ui}, $self->{prefs} );
+          ->build_config_gui( $self );
         if ($x) {
             $self->{ui}->{ 'config_export_module_' . $m } = $x;
             $self->{ui}->{config_export_modules}->pack_start( $x, 0, 0, 0 );

@@ -63,7 +63,7 @@ sub needs_module {
 }
 
 sub build_config_gui {
-    my ( $self, $w, $prefs ) = @_;
+    my ( $self, $main_ui ) = @_;
 }
 
 sub hide {
