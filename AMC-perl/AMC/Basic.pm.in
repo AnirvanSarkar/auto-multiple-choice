@@ -979,8 +979,13 @@ sub string_to_filename {
 }
 
 sub path_to_filename {
-    my ( $volume, $directories, $file ) = File::Spec->splitpath(@_);
-    return ($file);
+    my ($path) = @_;
+    if ( defined($path) ) {
+        my ( $volume, $directories, $file ) = File::Spec->splitpath($path);
+        return ($file);
+    } else {
+        return (undef);
+    }
 }
 
 sub glib_filename {

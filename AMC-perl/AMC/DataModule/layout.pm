@@ -1040,7 +1040,7 @@ sub defects {
     my %r     = ();
     my @tests = (qw/NO_NAME SEVERAL_NAMES/);
     push @tests, 'NO_BOX'
-      if ( $self->variable('build:extractonly') ne 'yes' );
+      if ( !$self->variable_boolean('build:extractonly') );
     for my $type (@tests) {
         my @s = $self->sql_list( $self->statement( 'DEFECT_' . $type ) );
         $r{$type} = [@s] if (@s);

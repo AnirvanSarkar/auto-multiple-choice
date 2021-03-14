@@ -378,7 +378,7 @@ sub variable_transaction {
 sub variable_boolean {
     my ( $self, $name ) = @_;
     my $v = $self->variable($name);
-    if ( $v =~ /^(no|false|none)$/i ) {
+    if ( !defined($v) || $v =~ /^(no|false|none)$/i ) {
         $v = 0;
     }
     return ($v);
