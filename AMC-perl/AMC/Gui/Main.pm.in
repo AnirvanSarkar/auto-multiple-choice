@@ -4176,7 +4176,7 @@ sub export_done_callback {
             );
             $self->commande_parallele( $cmd, $output ) if ($cmd);
         } elsif ( $self->get('after_export') eq 'dir' ) {
-            view_dir(
+            $self->view_dir(
                 $self->absolu('%PROJET/exports/') );
         }
     } else {
