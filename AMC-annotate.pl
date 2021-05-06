@@ -69,7 +69,8 @@ my $rtl = '';
 
 my $names_file      = '';
 my $names_encoding  = 'utf-8';
-my $association_key = '', my $csv_build_name = '';
+my $association_key = '';
+my $csv_build_name  = '';
 
 my $embedded_max_size     = "";
 my $embedded_jpeg_quality = 80;

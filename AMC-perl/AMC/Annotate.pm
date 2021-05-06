@@ -271,10 +271,11 @@ sub pdf_output_filename {
         debug "Association -> ID=$i";
 
         if ( defined($i) ) {
-            debug "Name found";
+            debug "Looking for student $self->{association_key} = $i";
             ($n) = $self->{names}
               ->data( $self->{association_key}, $i, test_numeric => 1 );
             if ($n) {
+                debug "Found";
                 $f = $self->{names}->substitute( $n, $f );
             }
         }
@@ -337,7 +338,8 @@ sub connects_to_database {
     # and darkness_threshold from the variables in the database.
 
     $self->{association_key} =
-      $self->{association}->variable_transaction('key_in_list');
+      $self->{association}->variable_transaction('key_in_list')
+      if( !$self->{association_key} );
     $self->{darkness_threshold} =
       $self->{scoring}->variable_transaction('darkness_threshold')
       if ( !$self->{darkness_threshold} );
