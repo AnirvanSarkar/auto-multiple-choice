@@ -41,8 +41,9 @@ my %sorting = (
 sub new {
     my $class = shift;
     my $self  = {
-        'fich.datadir' => '',
-        'fich.noms'    => '',
+        'fich.datadir'    => '',
+        'fich.noms'       => '',
+        'association.key' => '',
 
         noms => '',
 
@@ -212,7 +213,8 @@ sub pre_process {
 
     $self->{_scoring}->begin_read_transaction('EXPP');
 
-    my $lk           = $self->{_assoc}->variable('key_in_list');
+    my $lk = $self->{'association.key'}
+      || $self->{_assoc}->variable('key_in_list');
     my %keys         = ();
     my @marks        = ();
     my @post_correct = $self->{_scoring}->postcorrect_sc;

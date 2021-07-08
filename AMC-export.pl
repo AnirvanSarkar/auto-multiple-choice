@@ -33,31 +33,33 @@ use_amc_plugins();
 my $module = 'CSV';
 my $output = '';
 
-my $data_dir       = '';
-my $fich_notes     = '';
-my $fich_assoc     = '';
-my $fich_noms      = '';
-my $noms_encodage  = 'utf-8';
-my $csv_build_name = '';
-my @o_out          = ();
-my $sort           = 'n';
-my $useall         = 1;
-my $rtl            = '';
+my $data_dir        = '';
+my $fich_notes      = '';
+my $fich_assoc      = '';
+my $fich_noms       = '';
+my $association_key = '';
+my $noms_encodage   = 'utf-8';
+my $csv_build_name  = '';
+my @o_out           = ();
+my $sort            = 'n';
+my $useall          = 1;
+my $rtl             = '';
 
 unpack_args();
 my @ARGV_ORIG = @ARGV;
 
 GetOptions(
-    "module=s"         => \$module,
-    "sort=s"           => \$sort,
-    "useall=s"         => \$useall,
-    "data=s"           => \$data_dir,
-    "fich-noms=s"      => \$fich_noms,
-    "csv-build-name=s" => \$csv_build_name,
-    "noms-encodage=s"  => \$noms_encodage,
-    "rtl!"             => \$rtl,
-    "option-out=s"     => \@o_out,
-    "output|o=s"       => \$output,
+    "module=s"          => \$module,
+    "sort=s"            => \$sort,
+    "useall=s"          => \$useall,
+    "data=s"            => \$data_dir,
+    "fich-noms=s"       => \$fich_noms,
+    "association-key=s" => \$association_key,
+    "csv-build-name=s"  => \$csv_build_name,
+    "noms-encodage=s"   => \$noms_encodage,
+    "rtl!"              => \$rtl,
+    "option-out=s"      => \@o_out,
+    "output|o=s"        => \$output,
 );
 
 debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
@@ -69,9 +71,11 @@ $ex->set_options( "sort", keys => $sort );
 
 $ex->set_options(
     "fich",
-    datadir => $data_dir,
-    noms    => $fich_noms,
-);
+    datadir           => $data_dir,
+    noms              => $fich_noms,
+                );
+
+$ex->set_options( 'association', key => $association_key );
 
 $ex->set_options(
     "noms",

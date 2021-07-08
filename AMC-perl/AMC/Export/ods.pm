@@ -544,7 +544,8 @@ sub export {
         $ndg = length($1);
     }
 
-    my $lk = $self->{_assoc}->variable('key_in_list');
+    my $lk = $self->{'association.key'}
+      || $self->{_assoc}->variable('key_in_list');
 
     my $notemin = $self->{_scoring}->variable('mark_floor');
     my $plafond = $self->{_scoring}->variable('ceiling');
