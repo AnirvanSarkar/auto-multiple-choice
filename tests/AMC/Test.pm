@@ -91,6 +91,7 @@ sub new {
         ok_checksums_file   => '',
         to_check            => [],
         export_full_csv     => [],
+        export_columns      => 'student.copy',
         export_csv_ticked   => 'AB',
         export_ods          => '',
         blind               => 0,
@@ -884,11 +885,12 @@ sub check_export {
     if (@csv) {
         $self->begin( "CSV full export test (" . ( 1 + $#csv ) . " scores)" );
         my @args = (
-            '--data',       '%DATA',
-            '--module',     'CSV',
-            '--option-out', 'columns=student.copy',
-            '--option-out', 'ticked=' . $self->{export_csv_ticked},
-            '-o',           '%PROJ/export.csv',
+            '--data',            '%DATA',
+            '--module',          'CSV',
+            '--association-key', $self->{list_key},
+            '--option-out',      'columns=' . $self->{export_columns},
+            '--option-out',      'ticked=' . $self->{export_csv_ticked},
+            '-o',                '%PROJ/export.csv',
         );
         push @args, '--fich-noms', '%PROJ/' . $self->{list}
           if ( $self->{list} );
@@ -898,39 +900,42 @@ sub check_export {
         my $i     = 0;
         my %heads = map { $_ => $i++ } ( @{ $c->getline($fh) } );
         my $copy  = $heads{ translate_column_title('copie') };
+        my $name  = $heads{ translate_column_title('nom') };
 
-        if ( !defined($copy) ) {
+        if ( !defined($copy) && !defined($name) ) {
             $self->trace( "[E] CSV: "
-                  . translate_column_title('copie')
-                  . " column not found" );
+                  . translate_column_title('copie') . ' or '
+                  . translate_column_title('name')
+                  . " columns not found" );
             exit(1);
         }
         while ( my $row = $c->getline($fh) ) {
             for my $t (@csv) {
-                if (   $t->{-copy} eq $row->[$copy]
+                my $goodrow = '';
+                if ( $t->{-copy} && $t->{-copy} eq $row->[$copy] ) {
+                    $goodrow = 'copy ' . $t->{-copy};
+                }
+                if ( $t->{-name} && $t->{-name} eq $row->[$name] ) {
+                    $goodrow = 'name ' . $t->{-name};
+                }
+                if (   $goodrow
                     && $t->{-question}
                     && defined( $heads{ $t->{-question} } )
                     && $t->{-abc} )
                 {
                     $self->test(
                         $row->[ $heads{ "TICKED:" . $t->{-question} } ],
-                        $t->{-abc},
-                        "ABC for copy " . $t->{-copy} . " Q=" . $t->{-question}
-                    );
+                        $t->{-abc}, "ABC for $goodrow Q=" . $t->{-question} );
                     $t->{checked} = 1;
                 }
-                if (   $t->{-copy} eq $row->[$copy]
+                if (   $goodrow
                     && $t->{-question}
                     && defined( $heads{ $t->{-question} } )
                     && defined( $t->{-score} ) )
                 {
-                    $self->test(
-                        $row->[ $heads{ $t->{-question} } ],
+                    $self->test( $row->[ $heads{ $t->{-question} } ],
                         $t->{-score},
-                        "score for copy "
-                          . $t->{-copy} . " Q="
-                          . $t->{-question}
-                    );
+                        "score for $goodrow Q=" . $t->{-question} );
                     $t->{checked} = 1;
                 }
             }
@@ -952,11 +957,12 @@ sub check_export {
 
         $self->begin("ODS full export test");
         my @args = (
-            '--data',       '%DATA',
-            '--module',     'ods',
-            '--option-out', 'columns=student.copy',
-            '--option-out', 'stats=h',
-            '-o',           '%PROJ/export.ods',
+            '--data',            '%DATA',
+            '--module',          'ods',
+            '--association-key', $self->{list_key},
+            '--option-out',      'columns=' . $self->{export_columns},
+            '--option-out',      'stats=h',
+            '-o',                '%PROJ/export.ods',
         );
         push @args, '--fich-noms', '%PROJ/' . $self->{list}
           if ( $self->{list} );
