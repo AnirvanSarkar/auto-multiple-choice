@@ -290,9 +290,7 @@ sub see_file {
     open( FILE, $file ) or die "Can't open '$file': $!";
     while (<FILE>) {
         if ( $ext eq 'pdf' ) {
-            s:^/Producer \(.*\)::;
-            s:^/CreationDate \(.*\)::;
-            s:^/ModDate \(.*\)::;
+            s:(^|(?<=<<))\s*/(Producer|CreationDate|ModDate)\s+\(.*\)::;
         }
         $digest->add($_);
     }
@@ -302,28 +300,26 @@ sub see_file {
     $ff =~ s:.*/::;
     if ( $self->{ok_checksums}->{$dig} ) {
         $self->trace("[T] File ok (checksum): $ff");
-    } else {
+        return ();
+    }
 
-        # compares with already validated file
-        my $validated = $self->{temp_dir} . "/checked/$ff";
-        if ( -f $validated && $ff =~ /\.pdf$/i ) {
-            if ( run( 'comparepdf', '-ca', '-v0', $validated, $file ) ) {
-                $self->trace("[T] File ok (compare): $ff");
-            } else {
-                $self->trace("[E] File different (compare): $ff");
-                exit(1) if ( !$self->{blind} );
-            }
-        } else {
-            my $i = 0;
-            my $dest;
-            do {
-                $dest = sprintf( "%s/%04d-%s", $self->{check_dir}, $i, $ff );
-                $i++;
-            } while ( -f $dest );
-            copy( $file, $dest );
-            push @{ $self->{to_check} }, [ $dig, $dest ];
+    # compares with already validated file
+    my $validated = $self->{temp_dir} . "/checked/$ff";
+    if ( -f $validated && $ff =~ /\.pdf$/i ) {
+        if ( run( 'comparepdf', '-ca', '-v0', $validated, $file ) ) {
+            $self->trace("[T] File ok (compare): $ff");
+            return ();
         }
     }
+
+    my $i = 0;
+    my $dest;
+    do {
+        $dest = sprintf( "%s/%04d-%s", $self->{check_dir}, $i, $ff );
+        $i++;
+    } while ( -f $dest );
+    copy( $file, $dest );
+    push @{ $self->{to_check} }, [ $dig, $dest ];
 }
 
 sub trace {
