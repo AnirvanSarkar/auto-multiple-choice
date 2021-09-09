@@ -188,7 +188,14 @@ class AMC:
             found = self.gui.findChildren(
                 dogtail.predicate.GenericPredicate(
                     roleName='dialog'))
-        return(found[0])
+            return(found[0])
+        else:
+            d = found[0].findAncestor(dogtail.predicate.GenericPredicate(
+                roleName='dialog'))
+            if d:
+                return(d)
+            else:
+                return(found[0])
 
     def chooser_locations(self):
         loc_list = self.file_chooser_or_dialog().child(roleName='list box')
@@ -304,8 +311,11 @@ class AMC:
             # we have to wait a little.
             time.sleep(30)
         gedit = root.application('gedit')
-        t = gedit.child(roleName='text')
-        t.text = text
+        for t in gedit.findChildren(
+                dogtail.predicate.GenericPredicate(roleName='text')):
+            if t.text != "":
+                print("Set text to:\n" + text)
+                t.text = text
         gedit.child('Save').click()
         gedit.child('Save').parent.child('Close').click()
 
