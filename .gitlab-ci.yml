@@ -42,12 +42,12 @@ pack-sources:
   script:
     - make sources
     - export TARBALL_V=$(git describe --tags)
-    - cd tarballs
-    - "mv auto-multiple-choice_*_precomp.tar.gz auto-multiple-choice_${TARBALL_V}_dist.tar.gz"
-    - "mv auto-multiple-choice_*_sources.tar.gz auto-multiple-choice_${TARBALL_V}_sources.tar.gz"
+    - mkdir artifacts
+    - "mv tarballs/auto-multiple-choice_*_precomp.tar.gz artifacts/auto-multiple-choice_${TARBALL_V}_dist.tar.gz"
+    - "mv tarballs/auto-multiple-choice_*_sources.tar.gz artifacts/auto-multiple-choice_${TARBALL_V}_sources.tar.gz"
   artifacts:
     paths:
-      - tarballs/
+      - artifacts/
 
 pack-portable:
   stage: build
@@ -55,11 +55,11 @@ pack-portable:
   script:
     - make portable
     - export TARBALL_V=$(git describe --tags)
-    - cd tarballs
-    - "mv auto-multiple-choice_*_portable.tar.gz auto-multiple-choice_${TARBALL_V}_portable.tar.gz"
+    - mkdir artifacts
+    - "mv tarballs/auto-multiple-choice_*_portable.tar.gz artifacts/auto-multiple-choice_${TARBALL_V}_portable.tar.gz"
   artifacts:
     paths:
-      - tarballs/
+      - artifacts/
 
 test-portable:
   stage: test
@@ -71,7 +71,7 @@ test-portable:
     - pwd
     - mkdir portable
     - cd portable
-    - "tar xvzf ../tarballs/auto-multiple-choice_*_portable.tar.gz"
+    - "tar xvzf ../artifacts/auto-multiple-choice_*_portable.tar.gz"
     - cd ../tests/gui/dogtail
     - AMC_PATH=$CI_PROJECT_DIR/portable/AMC/bin/auto-multiple-choice ./blind-tests.sh simple
   allow_failure: true
@@ -96,7 +96,7 @@ pack-debian:
     - "export GBP_V=`grep auto-multiple-choice debian/changelog | head -n 1 | sed 's:.*(::; s:-[0-9]\\+).*$::'`"
     - 'export GBP_DATE=`echo "$CI_COMMIT_TIMESTAMP" | head -c 16 | sed "s/[^0-9]//g"`'
     - 'export GBP_UPSTREAM="$GBP_V+git$GBP_DATE"'
-    - 'gbp import-orig --upstream-version=$GBP_UPSTREAM --import-msg "New upstream version from git @$CI_COMMIT_SHORT_SHA" ../../tarballs/*_sources.tar.gz'
+    - 'gbp import-orig --upstream-version=$GBP_UPSTREAM --import-msg "New upstream version from git @$CI_COMMIT_SHORT_SHA" ../../artifacts/*_sources.tar.gz'
     - gbp dch -N "$GBP_UPSTREAM-1" --git-author --commit
     - gbp buildpackage
   artifacts:
@@ -120,4 +120,4 @@ depl-precomp:
     - chmod 700 ~/.ssh
     - test "$SSH_CONFIG_FILE" && cp $SSH_CONFIG_FILE ~/.ssh/config
   script:
-    - "scp -o StrictHostKeyChecking=no tarballs/*_dist.tar.gz tarballs/*_portable.tar.gz  $PRECOMP_USER@$PRECOMP_SERVER:precomp 2> /dev/null"
+    - "scp -o StrictHostKeyChecking=no artifacts/*_dist.tar.gz artifacts/*_portable.tar.gz $PRECOMP_USER@$PRECOMP_SERVER:precomp 2> /dev/null"
