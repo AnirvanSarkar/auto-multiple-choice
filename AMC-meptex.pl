@@ -130,10 +130,14 @@ debug "Reading $src...";
 
 open( SRC, "<:utf8", $src ) or die "Unable to open $src : $!";
 while (<SRC>) {
-    if (/\\page\{([^\}]+)\}\{([^\}]+)\}\{([^\}]+)\}/) {
+    if (/\\page\{([^\}]+)\}\{([^\}]+)\}\{([^\}]+)\}(?:\{([^\}]+)\}\{([^\}]+)\})?/) {
         my $id = $1;
         my $dx = $2;
         my $dy = $3;
+        my $px = $4;
+        my $py = $5;
+        $px = $dx if($px !~ /[1-9]/);
+        $py = $dy if($py !~ /[1-9]/);
         $page_number++;
         $cases = {};
         push @pages,
@@ -142,6 +146,8 @@ while (<SRC>) {
             -p     => $page_number,
             -dim_x => read_inches($dx),
             -dim_y => read_inches($dy),
+            -page_x => read_inches($px),
+            -page_y => read_inches($py),
             -cases => $cases
           };
     }
@@ -235,7 +241,7 @@ PAGE: for my $p (@pages) {
         for ( 0 .. 1 ) {
             $p->{-cases}->{$k}->{bx}->[$_] *= $dpi;
             $p->{-cases}->{$k}->{by}->[$_] =
-              $dpi * ( $p->{-dim_y} - $p->{-cases}->{$k}->{by}->[$_] );
+              $dpi * ( $p->{-page_y} - $p->{-cases}->{$k}->{by}->[$_] );
         }
 
         if ( $k =~ /position[HB][GD]$/ ) {

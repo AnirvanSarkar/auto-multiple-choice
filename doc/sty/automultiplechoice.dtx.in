@@ -1846,7 +1846,8 @@ Three digits and two letters:\insertgroup{mixed}.
   \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
     \string\page%
     {\the\AMCid@etud/\thepage/\the\AMCid@check}%
-    {\the\paperwidth}{\the\paperheight}}\fi}
+    {\the\paperwidth}{\the\paperheight}%
+    {\the\pdfpagewidth}{\the\pdfpageheight}}\fi}
 %    \end{macrocode}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMCdontScan}\begin{macro}{\AMCdontAnnotate}
@@ -5065,6 +5066,18 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 \cs_if_exist:NTF \pdflastypos { } {
   \cs_if_exist:NTF \lastypos { \cs_new_eq:NN \pdflastypos \lastypos } { }
+}
+%    \end{macrocode}
+%
+% In some situations, the \textit{page} dimensions are different from the \textit{paper} dimensions. This must be taken into account when computing coordinates.
+%
+%    \begin{macrocode}
+
+\cs_if_exist:NTF \pdfpagewidth { } {
+  \cs_new_eq:NN \pdfpagewidth \paperwidth
+}
+\cs_if_exist:NTF \pdfpageheight { } {
+  \cs_new_eq:NN \pdfpageheight \paperheight
 }
 
 \ExplSyntaxOff
