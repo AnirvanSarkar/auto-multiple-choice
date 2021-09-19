@@ -132,8 +132,6 @@ sub new {
     $self->{general}->set_title( __ "Page layout" )
       if ( !$self->{editable} );
 
-    $self->{button_photocopy}->hide() if ( !$self->{multiple} );
-
     if ( !$self->{editable} ) {
         $self->{navigation_v}->show();
     } else {
@@ -195,6 +193,7 @@ sub new {
         $self->{button_erase}->show();
         $self->{button_cancel}->show();
         $self->{navigation_h}->show();
+        $self->{button_photocopy}->show() if ( $self->{multiple} );
     }
 
     $self->{cursor_watch} = Gtk3::Gdk::Cursor->new('GDK_WATCH');
