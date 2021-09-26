@@ -1,0 +1,41 @@
+#! /usr/bin/perl
+#
+# Copyright (C) 2021 Alexis Bienvenüe <paamc@passoire.fr>
+#
+# This file is part of Auto-Multiple-Choice
+#
+# Auto-Multiple-Choice is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# Auto-Multiple-Choice is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Auto-Multiple-Choice.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+require "./AMC/Test.pm";
+
+AMC::Test->new(
+    dir             => __FILE__,
+    tex_engine      => 'pdflatex',
+    perfect_copy    => '',
+    list            => 'students.csv',
+    code            => 'id',
+    list_key        => 'id',
+    check_assoc     => { 4 => "AL3", 3 => "JU7" },
+    export_columns  => 'student.name',
+    export_full_csv => [
+        { -name => 'Alexis', -question => 'Q01', -score => 1 },
+        { -name => 'Alexis', -question => 'Q02', -score => 1 },
+        { -name => 'Julien', -question => 'Q01', -score => 1 },
+        { -name => 'Julien', -question => 'Q02', -score => 1 },
+    ],
+    notemax     => 80,
+    check_marks => { 3 => 2, 4 => 2 },
+)->default_process;
+

@@ -307,11 +307,11 @@ along with Auto-Multiple-Choice.  If not, see
 %   \makeatletter
 %   \begin{center}
 %     \begin{minipage}[b]{\AMC@CBtaille}
-%       \AMCbin@begin{1}\noindent%
-%       \AMC@binaryBoxes[\AMC@NCBetud]{2}\\
-%       \AMCbin@begin{2}\noindent%
-%       \AMC@binaryBoxes[\AMC@NCBpage]{1}\ignorespaces%
-%       \AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{59}%
+%       \noindent%
+%       \AMC@binaryCode{id=1,ndigits=\AMC@NCBetud}{2}\\
+%       \noindent%
+%       \AMC@binaryCode{id=2,ndigits=\AMC@NCBpage}{1}\ignorespaces%
+%       \AMC@binaryCode{id=3,ndigits=\AMC@NCBcheck}{59}%
 %     \end{minipage}
 %     \hbox to 4cm{\hspace*{\fill}%
 %     \texttt{+2/1/59+}}
@@ -2336,46 +2336,86 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}
 % \end{macro}\end{macro}\end{macro}\end{macro}
 %
-% \begin{macro}{\AMC@binaryBoxes}
-%   Command |\AMC@binaryBoxes|\oarg{ndigits}\marg{n} prints \meta{ndigits}
-%   boxes to represent number \meta{n} in its binary
-%   form. |\AMCbin@one| and |\AMCbin@zero| print individual
+% \begin{macro}{\AMC@binaryCode}
+%   The command |\AMC@binaryCode|\marg{options}\marg{n} prints
+%   boxes to represent the number \meta{n} in its binary
+%   form. Options from \meta{options} include:
+%   \begin{itemize}
+%   \item[|ndigits=|\meta{ndigits}] for the number of digits to be shown.
+%   \item[|id=|\meta{id}] for an ID of the number role (1 for the
+%     student number, 2 for the page number, 3 for the checking
+%     value).
+%   \item[|hsep=|\meta{hsep}] for the space between boxes.
+%   \item[|style=|\meta{style}] for some box style options.
+%   \end{itemize}
+%   |\AMCbin@one| and |\AMCbin@zero| print individual
 %   digit-boxes.
 %
-%   For example, |\AMC@binaryBoxes[12]{367}| shows $367=000101101111_2$
+%   For example, |\AMC@binaryCode{ndigits=12}{367}| shows $367=000101101111_2$
 %   using 12 boxes:
 %   \begin{center}
-%     \makeatletter\AMC@binaryBoxes[12]{367}\makeatother
+%     \makeatletter\AMC@binaryCode{ndigits=12}{367}\makeatother
 %   \end{center}
 %
 %    \begin{macrocode}
 \newtoks\AMCbin@sequence
 \newcount\AMCbin@number
-\newcount\AMCbin@ndigits
-\newcount\AMCbin@id
 \newcount\AMCbin@digit
-\def\AMCbin@one{\advance\AMCbin@digit\@ne%
-  \AMC@answerBox@{}{\AMC@checkedbox}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}}
-\def\AMCbin@zero{\advance\AMCbin@digit\@ne%
-  \AMC@answerBox@{}{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@digit}}
-\def\AMCbin@begin#1{\AMCbin@id=#1\AMCbin@digit=\z@}
-\newcommand{\AMC@binaryBoxes}[2][1]{%
-{\AMCboxDimensions{shape=square,size=.32cm,down=0pt,rule=.2pt,cross=false}\AMCbin@sequence={}\AMCbin@number=#2\relax%
-\AMCbin@ndigits=\z@%
+\newcount\AMCbin@id
+\newcount\AMCbin@did
+\newcount\AMCbin@ndigits
+\newdimen\AMCbin@hsep
+\define@key{AMCbin}{ndigits}{\AMCbin@ndigits=#1}
+\define@key{AMCbin}{id}{\AMCbin@id=#1}
+\define@key{AMCbin}{hsep}{\AMCbin@hsep=#1}
+\define@key{AMCbin}{style}[]{\def\AMCbin@style{#1}}
+\def\AMCbin@one{%
+  \ifnum\AMCbin@did>\z@%
+  \hspace{\AMCbin@hsep}%
+  \fi%
+  \advance\AMCbin@did\@ne%
+  \ifnum\AMCbin@id>0%
+  \AMC@answerBox@{}{\AMC@checkedbox}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@did}%
+  \else%
+  \AMC@answerBox@{}{\AMC@checkedbox}{1}{}%
+  \fi}
+\def\AMCbin@zero{%
+  \ifnum\AMCbin@did>\z@%
+  \hspace{\AMCbin@hsep}%
+  \fi%
+  \advance\AMCbin@did\@ne%
+  \ifnum\AMCbin@id>0%
+  \AMC@answerBox@{}{}{1}{chiffre:\the\AMCbin@id,\the\AMCbin@did}%
+  \else%
+  \AMC@answerBox@{}{}{1}{}%
+  \fi}
+\newcommand{\AMC@binaryCode}[2]{%
+\setkeys{AMCbin}{ndigits=1,hsep=0pt,style}\setkeys{AMCbin}{#1}%
+\AMCbin@did=\z@%
+{\AMCboxDimensions{shape=square,size=.32cm,down=0pt,rule=.2pt,cross=false}\expandafter\AMCboxDimensions\expandafter{\AMCbin@style}\AMCbin@sequence={}\AMCbin@number=#2\relax%
+\AMCbin@digit=\z@%
 \loop%
 \ifnum\AMCbin@number>\z@%
-\advance\AMCbin@ndigits\@ne%
+\advance\AMCbin@digit\@ne%
 \ifodd\AMCbin@number\AMCbin@sequence=\expandafter{\expandafter\AMCbin@one\the\AMCbin@sequence}%
 \else\AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\fi%
 \divide\AMCbin@number\tw@%
 \repeat%
 \loop\relax%
-\ifnum\AMCbin@ndigits<#1\advance\AMCbin@ndigits\@ne%
+\ifnum\AMCbin@digit<\AMCbin@ndigits\advance\AMCbin@digit\@ne%
 \AMCbin@sequence=\expandafter{\expandafter\AMCbin@zero\the\AMCbin@sequence}\repeat%
 \the\AMCbin@sequence%
-\ifnum\AMCbin@ndigits>#1\PackageError{automultiplechoice}{Too low AMC@NCB value (got #1 but needs \the\AMCbin@ndigits)}{Number of available digits is #1, but needs \the\AMCbin@ndigits}\fi%
+\ifnum\AMCbin@digit>\AMCbin@ndigits\PackageError{automultiplechoice}{Too low AMC@NCB value (got \the\AMCbin@ndigits, but needs \the\AMCbin@digit)}{Number of available digits is \the\AMCbin@ndigits, but needs \the\AMCbin@digit}\fi%
 }}
 %    \end{macrocode}\end{macro}
+% The commands |\AMCbin@begin| and |\AMC@binaryBoxes| are now unused
+% and are defined for backward compatibility.
+%    \begin{macrocode}
+\def\AMCbin@begin#1{\setkeys{AMCbin}{id=#1}}
+\newcommand{\AMC@binaryBoxes}[2][1]{%
+\AMC@binaryCode{ndigits=#1}{#2}%
+}
+%    \end{macrocode}
 %
 % \subsection{Checking Environment}
 %
@@ -4655,9 +4695,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \def\AMC@note{}
 \def\AMCsetFoot#1{\def\AMC@note{#1}}
 \newcommand\AMCStudentNumber{\the\AMCid@etud}
-\newcommand\AMCIDBoxesA{\AMCbin@begin{1}\AMC@binaryBoxes[\AMC@NCBetud]{\the\AMCid@etud}}
-\newcommand\AMCIDBoxesB{\AMCbin@begin{2}\AMC@binaryBoxes[\AMC@NCBpage]{\thepage}}
-\newcommand\AMCIDBoxesC{\AMCbin@begin{3}\AMC@binaryBoxes[\AMC@NCBcheck]{\the\AMCid@check}}
+\newcommand\AMCIDBoxesA{\AMC@binaryCode{id=1,ndigits=\AMC@NCBetud}{\the\AMCid@etud}}
+\newcommand\AMCIDBoxesB{\AMC@binaryCode{id=2,ndigits=\AMC@NCBpage}{\thepage}}
+\newcommand\AMCIDBoxesC{\AMC@binaryCode{id=3,ndigits=\AMC@NCBcheck}{\the\AMCid@check}}
 \newcommand\AMCIDBoxesABC{%
   \hbox{\vbox{\noindent\AMCIDBoxesA\\
     \noindent\AMCIDBoxesB\AMCIDBoxesC}}%
