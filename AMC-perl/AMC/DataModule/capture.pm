@@ -411,14 +411,14 @@ sub populate_from_xml {
 
 sub define_statements {
     my ($self)     = @_;
-    my $t_page     = $self->table("page");
-    my $t_zone     = $self->table("zone");
-    my $t_position = $self->table("position");
-    my $t_failed   = $self->table("failed");
-    my $t_box        = $self->table( "box",       "layout" );
-    my $t_namefield  = $self->table( "namefield", "layout" );
-    my $t_layoutpage = $self->table( "page",      "layout" );
-    my $t_lnf        = $self->table( "namefield", "layout" );
+    my $t_page       = $self->table("page");
+    my $t_zone       = $self->table("zone");
+    my $t_position   = $self->table("position");
+    my $t_failed     = $self->table("failed");
+    my $t_box        = $self->table( "box", "layout" );
+    my $t_layoutzone = $self->table( "zone", "layout" );
+    my $t_layoutpage = $self->table( "page", "layout" );
+
     $self->{statements} = {
         NEWPageAuto => {
                 sql => "INSERT INTO $t_page"
@@ -567,7 +567,7 @@ sub define_statements {
             sql =>
 "SELECT enter.student AS student,enter.page AS page ,$t_page.copy AS copy"
               . " FROM (SELECT student,page FROM $t_box WHERE role=1"
-              . "       UNION SELECT student,page FROM $t_namefield) AS enter,"
+              . "       UNION SELECT student,page FROM $t_layoutzone) AS enter,"
               . "      $t_page"
               . " ON enter.student=$t_page.student"
               . " EXCEPT SELECT student,page,copy FROM $t_page"
@@ -579,7 +579,7 @@ sub define_statements {
         },
         noCapturePages => {
                 sql => "SELECT student,page,0 AS copy FROM $t_box WHERE role=1"
-              . " UNION SELECT student,page,0 AS copy FROM $t_namefield"
+              . " UNION SELECT student,page,0 AS copy FROM $t_layoutzone"
               . " EXCEPT SELECT student,page,copy FROM $t_page"
               . " WHERE timestamp_auto>0 OR timestamp_manual>0"
         },
@@ -830,7 +830,7 @@ sub define_statements {
               . "             b.image  AS image FROM"
               . " ( SELECT c.student,c.page,c.copy FROM"
               . "     (SELECT * FROM $t_page WHERE timestamp_auto>0 OR timestamp_manual>0 )"
-              . "      AS c, $t_lnf AS l"
+              . "      AS c, (SELECT * from $t_layoutzone WHERE zone='__n') AS l"
               . "     ON c.student=l.student AND c.page=l.page ) AS a"
               . " LEFT OUTER JOIN"
               . " ( SELECT student,page,copy,image FROM $t_zone WHERE type=? ) AS b"

@@ -63,9 +63,13 @@ package AMC::DataModule::layout;
 #
 # * x,y are the mark center coordinates (in pixels, (0,0)=TopLeft)
 #
-# layout_namefield lists the name fields on the pages:
+# layout_zone lists the zones (including name fields) on the pages:
 #
 # * student,page identifies the page
+#
+# * zone identifies the zone name
+#
+# * flags is an integer that contains the flags from ZONE_FLAGS_* (see below)
 #
 # * xmin,xmax,ymin,ymax give the box around the name field
 #
@@ -147,6 +151,8 @@ use constant {
     BOX_FLAGS_DONTANNOTATE => 0x2,
     BOX_FLAGS_SHAPE_OVAL   => 0x10,
 
+    ZONE_FLAGS_ID => 0x1,
+
     # Do not change these values as they are hard-coded elsewhere
     BOX_ROLE_ANSWER => 1,    # Boxes to be ticked by the student
     BOX_ROLE_QUESTIONONLY =>
@@ -159,10 +165,10 @@ use constant {
 };
 
 our @EXPORT_OK =
-  qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION BOX_ROLE_QUESTIONTEXT BOX_ROLE_ANSWERTEXT);
+  qw(BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION BOX_ROLE_QUESTIONTEXT BOX_ROLE_ANSWERTEXT ZONE_FLAGS_ID);
 our %EXPORT_TAGS = (
     flags => [
-        qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION BOX_ROLE_QUESTIONTEXT BOX_ROLE_ANSWERTEXT/
+        qw/BOX_FLAGS_DONTSCAN BOX_FLAGS_DONTANNOTATE BOX_FLAGS_SHAPE_OVAL BOX_ROLE_ANSWER BOX_ROLE_QUESTIONONLY BOX_ROLE_SCORE BOX_ROLE_SCOREQUESTION BOX_ROLE_QUESTIONTEXT BOX_ROLE_ANSWERTEXT ZONE_FLAGS_ID/
     ],
 );
 
@@ -173,7 +179,7 @@ use XML::Simple;
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (8);
+    return (9);
 }
 
 sub drop_box_table {
@@ -202,44 +208,77 @@ sub version_upgrade {
     my ( $self, $old_version ) = @_;
     if ( $old_version == 0 ) {
 
-        # Upgrading from version 0 (empty database) to version 4 :
+        # Upgrading from version 0 (empty database) to version 9 :
         # creates all the tables.
 
         debug "Creating layout tables...";
+
+        # page
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("page")
               . " (student INTEGER, page INTEGER, checksum INTEGER, sourceid INTEGER, subjectpage INTEGER, dpi REAL, width REAL, height REAL, markdiameter REAL, PRIMARY KEY (student,page))"
         );
+
+        # mark
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("mark")
               . " (student INTEGER, page INTEGER, corner INTEGER, x REAL, y REAL, PRIMARY KEY (student,page,corner))"
         );
+
+        # zone
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
-              . $self->table("namefield")
-              . " (student INTEGER, page INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL)"
+              . $self->table("zone")
+              . " (student INTEGER, page INTEGER, zone TEXT, flags INTEGER DEFAULT 0,"
+              . " xmin REAL, xmax REAL, ymin REAL, ymax REAL )" );
+        $self->sql_do( "CREATE INDEX "
+              . $self->index("index_zone") . " ON "
+              . $self->table( "zone", "self" )
+              . " (student,page)" );
+
+        # box
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("box")
+              . " (student INTEGER, page INTEGER, role INTEGER DEFAULT 1, question INTEGER, answer INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, flags INTEGER DEFAULT 0, char TEXT, PRIMARY KEY (student,role,question,answer))"
         );
         $self->sql_do( "CREATE INDEX "
-              . $self->index("index_namefield") . " ON "
-              . $self->table( "namefield", "self" )
-              . " (student,page)" );
-        $self->create_box_table;
+              . $self->index("index_box_studentpage") . " ON "
+              . $self->table( "box", "self" )
+              . " (student,page,role)" );
+
+        # digit
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("digit")
               . " (student INTEGER, page INTEGER, numberid INTEGER, digitid INTEGER, xmin REAL, xmax REAL, ymin REAL, ymax REAL, PRIMARY KEY(student,page,numberid,digitid))"
         );
+
+        # source
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("source")
               . " (sourceid INTEGER PRIMARY KEY, src TEXT, timestamp INTEGER)"
         );
+
+        # question
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("question")
               . " (question INTEGER PRIMARY KEY, name TEXT)" );
+
+        # association
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("association")
-              . " (student INTEGER PRIMARY KEY, id TEXT)" );
+              . " (student INTEGER PRIMARY KEY, id TEXT, filename TEXT)" );
+
+        # char
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("char")
+              . " (question INTEGER, answer INTEGER, char TEXT)" );
+        $self->sql_do( "CREATE UNIQUE INDEX IF NOT EXISTS "
+              . $self->index("index_char") . " ON "
+              . $self->table( "char", "self" )
+              . " (question,answer)" );
+
         $self->populate_from_xml;
 
-        return (5);
+        return (9);
     }
     if ( $old_version == 1 ) {
         $self->sql_do( "ALTER TABLE "
@@ -326,6 +365,27 @@ sub version_upgrade {
             "ALTER TABLE " . $self->table("association") . " ADD COLUMN filename TEXT" );
         return (8);
     }
+    if ( $old_version == 8 ) {
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("zone")
+              . " (student INTEGER, page INTEGER, zone TEXT, flags INTEGER DEFAULT 0,"
+              . " xmin REAL, xmax REAL, ymin REAL, ymax REAL )" );
+        $self->sql_do( "CREATE INDEX "
+              . $self->index("index_zone") . " ON "
+              . $self->table( "zone", "self" )
+              . " (student,page)" );
+
+        $self->sql_do(
+            "INSERT INTO "
+              . $self->table("zone")
+              . " (student, page, zone, flags, xmin, xmax, ymin, ymax)"
+              . " SELECT student, page, ?, ?, xmin, xmax, ymin, ymax FROM "
+              . $self->table("namefield"),
+            '__n', ZONE_FLAGS_ID
+        );
+        $self->sql_do( "DROP TABLE IF EXISTS " . $self->table("namefield") );
+        return (9);
+    }
     return ('');
 }
 
@@ -373,8 +433,8 @@ sub populate_from_xml {
                     }
                     my @lid = ( $epc[0], $epc[1] );
                     for my $n ( @{ $l->{nom} } ) {
-                        $self->statement('NEWNameField')
-                          ->execute( @lid,
+                        $self->statement('NEWZone')
+                          ->execute( @lid, '__n', ZONE_FLAGS_ID,
                             map { $n->{$_} } (qw/xmin xmax ymin ymax/) );
                     }
                     for my $c ( @{ $l->{case} } ) {
@@ -464,10 +524,10 @@ sub define_statements {
               . " (student,page,numberid,digitid,xmin,xmax,ymin,ymax)"
               . " VALUES (?,?,?,?,?,?,?,?)"
         },
-        NEWNameField => {
+        NEWZone => {
                 sql => "INSERT INTO "
-              . $self->table("namefield")
-              . " (student,page,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?)"
+              . $self->table("zone")
+              . " (student,page,zone,flags,xmin,xmax,ymin,ymax) VALUES (?,?,?,?,?,?,?,?)"
         },
         NEWQuestion => {
                 sql => "INSERT INTO "
@@ -479,12 +539,16 @@ sub define_statements {
               . $self->table("association")
               . " (student,id,filename) VALUES (?,?,?)"
         },
-        AssociationID => { sql => "SELECT id FROM "
+        AssociationID => {
+                sql => "SELECT id FROM "
               . $self->table("association")
-              . " WHERE student=?" },
-        AssociationFilename => { sql => "SELECT filename FROM "
+              . " WHERE student=?"
+        },
+        AssociationFilename => {
+                sql => "SELECT filename FROM "
               . $self->table("association")
-              . " WHERE student=?" },
+              . " WHERE student=?"
+        },
         IDS => {
                 sql => "SELECT student || ',' || page FROM "
               . $self->table("page")
@@ -540,8 +604,8 @@ sub define_statements {
         },
         PAGES_STUDENT_namefield => {
                 sql => "SELECT page FROM "
-              . $self->table("namefield")
-              . " WHERE student=? GROUP BY student,page"
+              . $self->table("zone")
+              . " WHERE student=? AND zone=? GROUP BY student,page"
         },
         PAGES_STUDENT_enter => {
                 sql => "SELECT page FROM ("
@@ -549,7 +613,7 @@ sub define_statements {
               . $self->table("box")
               . " WHERE role=1 UNION "
               . "SELECT student,page FROM "
-              . $self->table("namefield")
+              . $self->table("zone")
               . ") AS enter WHERE student=? GROUP BY student,page"
         },
         PAGES_enter => {
@@ -558,7 +622,7 @@ sub define_statements {
               . $self->table("box")
               . " WHERE role=1 UNION "
               . "SELECT student,page FROM "
-              . $self->table("namefield")
+              . $self->table("zone")
               . ") AS enter GROUP BY student,page ORDER BY student,page"
         },
         MAX_enter => {
@@ -568,7 +632,7 @@ sub define_statements {
               . $self->table("box")
               . " WHERE role=1"
               . "     UNION SELECT student,page FROM "
-              . $self->table("namefield")
+              . $self->table("zone")
               . "   ) GROUP BY student )"
         },
         DEFECT_NO_BOX => {
@@ -587,13 +651,15 @@ sub define_statements {
               . " GROUP BY student) AS list"
               . " WHERE student>0 AND"
               . "   NOT EXISTS(SELECT * FROM "
-              . $self->table("namefield")
+              . $self->table("zone")
               . " AS local"
-              . "              WHERE local.student=list.student)"
+              . "              WHERE local.student=list.student"
+              . "              AND local.zone='__n')"
         },
         DEFECT_SEVERAL_NAMES => {
                 sql => "SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
-              . $self->table("namefield")
+              . $self->table("zone")
+              . " WHERE zone='__n'"
               . " GROUP BY student) AS counts WHERE n>1"
         },
         pageFilename => {
@@ -635,7 +701,8 @@ sub define_statements {
               . " WHERE role=1"
               . "    UNION"
               . "    SELECT student,page FROM "
-              . $self->table("namefield")
+              . $self->table("zone")
+              . " WHERE zone='__n'"
               . " ) AS a"
               . " ON p.student=a.student AND p.page=a.page"
               . " WHERE p.student=?"
@@ -658,8 +725,8 @@ sub define_statements {
         },
         namefieldPage => {
                 sql => "SELECT page FROM "
-              . $self->table("namefield")
-              . " WHERE student=?"
+              . $self->table("zone")
+              . " WHERE student=? AND zone='__n'"
         },
         dims => {
                 sql => "SELECT width,height,markdiameter,dpi FROM "
@@ -693,8 +760,8 @@ sub define_statements {
         },
         namefieldInfo => {
                 sql => "SELECT * FROM "
-              . $self->table("namefield")
-              . " WHERE student=? AND page=?"
+              . $self->table("zone")
+              . " WHERE student=? AND page=? AND zone='__n'"
         },
         scoreZones => {
                 sql => "SELECT * FROM "
@@ -787,7 +854,7 @@ sub define_statements {
 
 sub clear_page_layout {
     my ( $self, $student, $page ) = @_;
-    for my $t (qw/page box namefield digit/) {
+    for my $t (qw/page box zone digit/) {
         $self->statement('CLEARPAGE')
           ->execute( $self->table($t), $student, $page );
     }
@@ -963,6 +1030,9 @@ sub pages_for_student {
         $oo{role} = BOX_ROLE_ANSWER if ( !$oo{role} );
         push @args, $oo{role};
     }
+    if ( $oo{select} eq 'namefield' ) {
+        push @args, '__n';
+    }
     return (
         $self->sql_list(
             $self->statement( 'PAGES_STUDENT_' . $oo{select} ), @args
@@ -1104,7 +1174,7 @@ sub question_name {
 
 sub clear_mep {
     my ($self) = @_;
-    for my $t (qw/page mark namefield box digit source question association/) {
+    for my $t (qw/page mark zone box digit source question association/) {
         $self->sql_do( "DELETE FROM " . $self->table($t) );
     }
 }

@@ -1891,10 +1891,18 @@ Three digits and two letters:\insertgroup{mixed}.
 }{\let\AMC@XYFILE=\AMC@tmpXY\closeout\AMC@XYspecial}
 %    \end{macrocode}\end{environment}
 %
-% \begin{macro}{\namefield}
-% The |\namefield|\marg{name field content} is a simple call to |\AMC@tracebox|:
+% \begin{macro}{\AMCzone}
+% The |\AMCzone|\oarg{flags}\marg{zone name}\marg{zone content} is a simple call
+% to |\AMC@tracebox|:
 %    \begin{macrocode}
-\newcommand{\namefield}[1]{\AMC@tracebox{1}{nom}{#1}}
+\newcommand{\AMCzone}[3][]{\AMC@tracebox{1}{__zone:#1:#2}{#3}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\namefield}
+% The |\namefield|\marg{name field content} is a simple call to |\AMCzone|:
+%    \begin{macrocode}
+\newcommand{\namefield}[2][id]{\AMCzone[#1]{__n}{#2}}
 %    \end{macrocode}\end{macro}
 % It is used to enclose the page region where students are to write
 % their names, so as te retreive it easily from the scans.

@@ -76,6 +76,8 @@ my %role = (
     atext         => BOX_ROLE_ANSWERTEXT,
 );
 
+my %flag_num = ( id => ZONE_FLAGS_ID, );
+
 sub read_inches {
     my ($dim) = @_;
     if ( $dim =~ /^\s*([+-]?[0-9]*\.?[0-9]*)\s*([a-zA-Z]+)\s*$/ ) {
@@ -283,16 +285,26 @@ PAGE: for my $p (@pages) {
             center( $c->{ 'position' . $pos }, 'by' )
         );
     }
-    if ( $c->{nom} ) {
-        $layout->statement('NEWNameField')->execute( @ep, bbox( $c->{nom} ) );
-    }
     for my $k ( sort { $a cmp $b } ( keys %$c ) ) {
         if ( $k =~ /chiffre:([0-9]+),([0-9]+)$/ ) {
             $layout->statement('NEWDigit')
               ->execute( @ep, $1, $2, bbox( $c->{$k} ) );
         }
+        if ( $k =~ /__zone:(.*):(.*)/ ) {
+            my ( $flags_str, $zone ) = ( $1, $2 );
+            my $flags = 0;
+            for my $f ( split( /\s*,\s*/, $flags_str ) ) {
+                if ( $flag_num{$f} ) {
+                    $flags |= $flag_num{$f};
+                } else {
+                    debug "Unknown flag: $f";
+                }
+            }
+            $layout->statement('NEWZone')
+              ->execute( @ep, $zone, $flags, bbox( $c->{$k} ) );
+        }
         if ( $k =~
-            /(case|casequestion|score|scorequestion|qtext|atext):(.*):([0-9]+),(-?[0-9]+)$/
+/(case|casequestion|score|scorequestion|qtext|atext):(.*):([0-9]+),(-?[0-9]+)$/
           )
         {
             my ( $type, $name, $q, $a ) = ( $1, $2, $3, $4 );
