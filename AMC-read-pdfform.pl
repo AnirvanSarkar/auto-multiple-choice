@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#! /usr/bin/env perl
 #
 # Copyright (C) 2017-2021 Alexis Bienvenüe <paamc@passoire.fr>
 #
@@ -228,4 +228,3 @@ if ($list_file) {
 }
 
 $p->text('') if ($p);
-

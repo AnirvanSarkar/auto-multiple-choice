@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#! /usr/bin/env perl
 #
 # Copyright (C) 2012-2021 Alexis Bienvenüe <paamc@passoire.fr>
 #

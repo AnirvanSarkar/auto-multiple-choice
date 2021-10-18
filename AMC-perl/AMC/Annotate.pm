@@ -1,5 +1,3 @@
-#! /usr/bin/perl
-#
 # Copyright (C) 2013-2021 Alexis Bienvenüe <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
