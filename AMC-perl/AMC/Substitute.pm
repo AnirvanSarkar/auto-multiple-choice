@@ -28,12 +28,13 @@ use AMC::Basic;
 sub new {
     my (%o) = @_;
     my $self = {
-        names   => '',
-        scoring => '',
-        assoc   => '',
-        name    => '',
-        chsign  => 4,
-        lk      => '',
+        names     => '',
+        scoring   => '',
+        assoc     => '',
+        name      => '',
+        chsign    => 4,
+        lk        => '',
+        anonymous => '',
     };
 
     for ( keys %o ) {
@@ -72,6 +73,12 @@ s/\%[m]/$self->format_note($self->{scoring}->variable('mark_max'))/ge;
     }
 
     $text =~ s/\%[n]/$self->{name}/ge;
+
+    if ( $self->{assoc} && $self->{anonymous} && $text =~ /\%\(aID\)/ ) {
+        my $aid =
+          $self->{assoc}->anonymized( $student, $copy, $self->{anonymous} );
+        $text =~ s/\%\(aID\)/$aid/g;
+    }
 
     if ( $self->{assoc} && $self->{names} ) {
         $self->{lk} = $self->{assoc}->variable('key_in_list')

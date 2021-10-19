@@ -71,6 +71,8 @@ my $names_file      = '';
 my $names_encoding  = 'utf-8';
 my $association_key = '';
 my $csv_build_name  = '';
+my $anonymous       = '';
+my $header_only     = '';
 
 my $embedded_max_size     = "";
 my $embedded_jpeg_quality = 80;
@@ -128,6 +130,8 @@ GetOptions(
     "names-encoding=s"             => \$names_encoding,
     "association-key=s"            => \$association_key,
     "csv-build-name=s"             => \$csv_build_name,
+    "anonymous=s"                  => \$anonymous,
+    "header-only!"                 => \$header_only,
     "rtl!"                         => \$rtl,
     "changes-only!"                => \$changes_only,
     "sort=s"                       => \$sort,
@@ -222,12 +226,14 @@ my $annotate = AMC::Annotate::new(
     names_encoding             => $names_encoding,
     association_key            => $association_key,
     csv_build_name             => $csv_build_name,
+    anonymous                  => $anonymous,
     significant_digits         => $significant_digits,
     darkness_threshold         => $darkness_threshold,
     darkness_threshold_up      => $darkness_threshold_up,
     id_file                    => $id_file,
     sort                       => $sort,
     annotate_indicatives       => $annotate_indicatives,
+    header_only                => $header_only,
     position                   => $position,
     text_color                 => $text_color,
     line_width                 => $line_width,

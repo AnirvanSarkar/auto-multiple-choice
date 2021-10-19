@@ -592,6 +592,8 @@ sub accept {
     }
 
     $self->{config}->save();
+
+    $self->{callback_self}->update_visibility();
 }
 
 1;

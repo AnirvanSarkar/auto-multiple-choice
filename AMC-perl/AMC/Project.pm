@@ -107,7 +107,7 @@ sub open {
     # creates (if missing) project directory structure
 
     for my $sous ( '',
-        qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports:
+        qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports anonymous:
       )
     {
         my $rep = $self->{config}->get('rep_projets') . "/$proj/$sous";
@@ -1010,6 +1010,94 @@ sub mailing {
         texte        => __ "Sending emails...",
         o            => { fh => $fh, %oo },
         fin          => $oo{callback}
+    );
+}
+
+sub anonymize {
+    my ( $self, %oo ) = @_;
+
+    $self->commande(
+        commande => [
+            "auto-multiple-choice",
+            "annotate",
+            "--debug",
+            debug_file(),
+            pack_args(
+                "--cr",
+                $self->{config}->get_absolute('cr'),
+                "--project",
+                $self->{config}->{shortcuts}->absolu('%PROJET/'),
+                "--projects",
+                $self->{config}->{shortcuts}->absolu('%PROJETS/'),
+                "--data",
+                $self->{config}->get_absolute('data'),
+                "--subject",
+                $self->{config}->get_absolute('doc_question'),
+                "--corrected",
+                $self->{config}->get_absolute('doc_indiv_solution'),
+                "--progression-id",
+                'annotate',
+                "--progression",
+                1,
+                "--line-width",
+                $self->{config}->get('symboles_trait'),
+                "--font-name",
+                $self->{config}->get('annote_font_name'),
+                "--symbols",
+                join( ',', map { $self->opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/) ),
+                (
+                    $self->{config}->get('symboles_indicatives')
+                    ? "--indicatives"
+                    : "--no-indicatives"
+                ),
+                "--position",
+                $self->{config}->get('annote_position'),
+                "--dist-to-box",
+                $self->{config}->get('annote_ecart'),
+                "--n-digits",
+                $self->{config}->get('annote_chsign'),
+                "--verdict",'%(aID)',
+                "--verdict-question",
+                $self->{config}->get('verdict_q'),
+                "--verdict-question-cancelled",
+                $self->{config}->get('verdict_qc'),
+                "--names-file",
+                $self->{config}->get_absolute('listeetudiants'),
+                "--names-encoding",
+                $self->bon_encodage('liste'),
+                "--csv-build-name",
+                $self->csv_build_name(),
+                ( $self->{config}->get('annote_rtl') ? "--rtl" : "--no-rtl" ),
+                "--changes-only", 1,
+                "--n-copies",
+                $self->original_n_copies(),
+                "--src",
+                $self->{config}->get_absolute('texsrc'),
+                "--with",
+                $self->moteur_latex(),
+                "--filter",
+                $self->{config}->get('filter'),
+                "--filtered-source",
+                $self->{config}->get_absolute('filtered_source'),
+                "--embedded-max-size",
+                $self->{config}->get('embedded_max_size'),
+                "--embedded-format",
+                $self->{config}->get('embedded_format'),
+                "--embedded-jpeg-quality",
+                $self->{config}->get('embedded_jpeg_quality'),
+
+                "--filename-model","(aID)",
+                "--single-output",'',
+                "--compose",0,
+                "--pdf-dir",
+                $self->{config}->{shortcuts}->absolu('%PROJET/anonymous'),
+                "--header-only",
+                "--anonymous",$self->{config}->get('anonymous_model'),
+            ),
+        ],
+        texte => __ "Anonymizing...",
+        o     => \%oo,
+        fin   => $oo{callback},
     );
 }
 

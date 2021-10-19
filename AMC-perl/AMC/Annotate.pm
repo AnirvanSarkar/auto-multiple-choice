@@ -27,6 +27,7 @@ use Gtk3;
 use List::Util qw(min max sum);
 use File::Copy;
 use Unicode::Normalize;
+use File::Temp qw/ tempfile /;
 
 use AMC::Path;
 use AMC::Basic;
@@ -38,6 +39,8 @@ use AMC::DataModule::report ':const';
 use AMC::DataModule::capture qw/:zone :position/;
 use AMC::DataModule::layout qw/:flags/;
 use AMC::Gui::Avancement;
+use AMC::Calage;
+use AMC::Boite;
 
 use utf8;
 
@@ -57,6 +60,8 @@ sub new {
         names_encoding         => 'utf8',
         association_key        => '',
         csv_build_name         => '',
+        anonymous              => '',
+        header_only            => '',
         significant_digits     => 1,
         darkness_threshold     => '',
         darkness_threshold_up  => '',
@@ -100,6 +105,7 @@ sub new {
         ? REPORT_SINGLE_ANNOTATED_PDF
         : REPORT_ANNOTATED_PDF
     );
+    $self->{type}       = REPORT_ANONYMIZED_PDF if ( $self->{anonymous} );
     $self->{loaded_pdf} = '';
 
     # checks that the position option is available
@@ -205,8 +211,10 @@ sub absolute_path {
 sub student_uptodate {
     my ( $self, $student ) = @_;
 
-    my ( $filename, $timestamp ) = $self->{report}
-      ->get_student_report_time( REPORT_ANNOTATED_PDF, @$student );
+    my ( $filename, $timestamp ) =
+      $self->{report}->get_student_report_time(
+        ( $self->{anonymous} ? REPORT_ANONYMIZED_PDF : REPORT_ANNOTATED_PDF ),
+        @$student );
 
     if ($filename) {
         debug "Registered filename " . show_utf8($filename);
@@ -257,6 +265,16 @@ sub pdf_output_filename {
     $f =~ s/\(N\)/$ex/gi;
 
     debug "F[N]=" . show_utf8($f);
+
+    # Substitute (aID) with anonymous ID
+
+    if ( $self->{anonymous} && $f =~ /\(aID\)/ ) {
+        $self->{association}->begin_transaction('anon');
+        my $aid = $self->{association}
+          ->anonymized( $student->[0], $student->[1], $self->{anonymous} );
+        $f =~ s/\(aID\)/$aid/g;
+        $self->{association}->end_transaction('anon');
+    }
 
     # get student data from the students list file, and substitutes
     # into filename
@@ -391,11 +409,12 @@ sub connects_students_list {
     # scores and global header.
 
     $self->{subst} = AMC::Substitute::new(
-        names   => $self->{names},
-        scoring => $self->{scoring},
-        assoc   => $self->{association},
-        name    => '',
-        chsign  => $self->{significant_digits},
+        names     => $self->{names},
+        scoring   => $self->{scoring},
+        assoc     => $self->{association},
+        name      => '',
+        chsign    => $self->{significant_digits},
+        anonymous => $self->{anonymous},
     );
 }
 
@@ -658,6 +677,48 @@ sub page_background {
 
     if ( -f $scan ) {
 
+        # Anonymous mode : erease scan parts where the name, ID, and
+        # so on can be found
+
+        my $tmp_scan = '';
+
+        if ( $self->{anonymous} ) {
+            debug "Anonymize [$student->[0],$page->{page}] $scan ...";
+            my @idzones =
+              $self->{layout}->type_info( 'idzone', $student->[0], $page->{page} );
+            if (@idzones) {
+                debug "Anonymize ".(1+$#idzones)." zones";
+                my $fh;
+                my $t = AMC::Calage::new;
+                $t->set( map { "t_".$_ => $page_capture->{$_} }
+                         (qw/a b c d e f/) );
+                debug "* Anonymize $scan";
+                ( $fh, $tmp_scan ) = tempfile();
+                my $bg = magick_perl_module()->new();
+                $bg->Read($scan);
+                for my $z (@idzones) {
+                    my $box=AMC::Boite::new();
+                    $box->def_droite_MN(map { $z->{$_} } (qw/xmin ymin xmax ymax/));
+                    debug "> ".$box->contour();
+                    $box->transforme($t);
+                    $bg->Draw(primitive=>'polyline',
+                              fill=>'white',
+                              stroke=>'black',
+                              points=>$box->contour());
+                    $bg->Draw(primitive=>'line',
+                              stroke=>'blue',
+                              points=>$box->diag1());
+                    $bg->Draw(primitive=>'line',
+                              stroke=>'blue',
+                              points=>$box->diag2());
+                }
+                $bg->Write($tmp_scan);
+                $scan = $tmp_scan;
+            } else {
+                debug "Nothing to anonymize";
+            }
+        }
+
         # If the scan is available, use it (with AMC-buildpdf "page png"
         # or "page img" command, depending on the file type). The matrix
         # that transforms coordinates from subject to scan has been
@@ -673,7 +734,11 @@ sub page_background {
             join(
                 ' ', "matrix", map { $page_capture->{$_} } (qw/a b c d e f/)
             )
-        );
+                      );
+
+        if(-f $tmp_scan) {
+            unlink($tmp_scan);
+        }
 
         return (0);
     } else {
@@ -1027,8 +1092,10 @@ sub student_draw_page {
     if ( $draw >= 0 ) {
         $self->command("line width $self->{line_width}");
         $self->command("font name $self->{font_name}");
-        $self->page_symbols( $student, $page->{page}, $draw > 0 );
-        $self->page_qscores( $student, $page->{page} );
+        if(! $self->{header_only} ) {
+            $self->page_symbols( $student, $page->{page}, $draw > 0 );
+            $self->page_qscores( $student, $page->{page} );
+        }
         $self->command("matrix identity");
         $self->page_header($student);
     } else {

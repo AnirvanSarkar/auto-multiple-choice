@@ -413,6 +413,9 @@ sub defaults {
         view_empty_color   => "#78FFED",
 
         defaut_name_field_type => '',
+
+        view_anonymity  => '',
+        anonymous_model => 'edddds',
     };
 
     $self->{project_default} = {

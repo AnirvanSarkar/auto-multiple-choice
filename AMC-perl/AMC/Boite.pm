@@ -213,6 +213,42 @@ sub txt {
     }
 }
 
+sub contour {
+    my $self = shift;
+    return (
+        sprintf(
+            "%.2f,%.2f %.2f,%.2f %.2f,%.2f %.2f,%.2f %.2f,%.2f",
+            @{ $self->{coins}->[0] },
+            @{ $self->{coins}->[1] },
+            @{ $self->{coins}->[2] },
+            @{ $self->{coins}->[3] },
+            @{ $self->{coins}->[0] },
+        )
+    );
+}
+
+sub diag1 {
+    my $self = shift;
+    return (
+        sprintf(
+            "%.2f,%.2f %.2f,%.2f",
+            @{ $self->{coins}->[0] },
+            @{ $self->{coins}->[2] },
+        )
+    );
+}
+
+sub diag2 {
+    my $self = shift;
+    return (
+        sprintf(
+            "%.2f,%.2f %.2f,%.2f",
+            @{ $self->{coins}->[1] },
+            @{ $self->{coins}->[3] },
+        )
+    );
+}
+
 # renvoie une commande draw pour tracer la boite grace a ImageMagick
 sub draw_list {
     my $self = shift;

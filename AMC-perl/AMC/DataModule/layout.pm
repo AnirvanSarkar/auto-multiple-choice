@@ -763,6 +763,10 @@ sub define_statements {
               . $self->table("zone")
               . " WHERE student=? AND page=? AND zone='__n'"
         },
+        idzoneInfo => { sql => "SELECT * FROM "
+              . $self->table("zone")
+              . " WHERE student=? AND page=? AND flags & 1 = 1"
+              . " ORDER BY (xmax-xmin)*(ymax-ymin)" },
         scoreZones => {
                 sql => "SELECT * FROM "
               . $self->table("box")
@@ -960,7 +964,7 @@ sub page_info {
 
 # type_info($type,$student,$page,$role) returns an array of HASH
 # references containing all fiels in the $type table ($type may equal
-# digit, box or namefield) corresponding to the $student,$page
+# digit, box, namefield or idzone) corresponding to the $student,$page
 # page. The $role argument (which defaults to BOX_ROLE_ANSWER) is only
 # needed when $type is 'box' (or you can use $type='questionbox' with
 # no $role).

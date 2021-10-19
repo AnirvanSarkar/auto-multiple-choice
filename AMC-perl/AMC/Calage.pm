@@ -58,16 +58,21 @@ sub new {
         MSE  => '',
     };
 
-    for my $k ( keys %o ) {
-        $self->{$k} = $o{$k} if ( defined( $self->{$k} ) );
-    }
-
     bless $self;
+
+    $self->set(%o);
 
     $self->identity();
     $self->clear_min_max();
 
     return ($self);
+}
+
+sub set {
+    my ($self, %o) = (@_);
+    for my $k ( keys %o ) {
+        $self->{$k} = $o{$k} if ( defined( $self->{$k} ) );
+    }
 }
 
 sub mse {

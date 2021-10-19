@@ -49,6 +49,7 @@ use constant {
     REPORT_ANNOTATED_PDF        => 1,
     REPORT_SINGLE_ANNOTATED_PDF => 2,
     REPORT_PRINTED_COPY         => 3,
+    REPORT_ANONYMIZED_PDF       => 4,
 
     REPORT_MAIL_NO     => 0,
     REPORT_MAIL_OK     => 1,
@@ -56,13 +57,13 @@ use constant {
 };
 
 our @EXPORT_OK = qw(
-  REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
+  REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF REPORT_ANONYMIZED_PDF
   REPORT_PRINTED_COPY REPORT_MAIL_OK REPORT_MAIL_FAILED
 );
 our %EXPORT_TAGS = (
     const => [
         qw(
-          REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF
+          REPORT_ANNOTATED_PDF REPORT_SINGLE_ANNOTATED_PDF REPORT_ANONYMIZED_PDF
           REPORT_PRINTED_COPY REPORT_MAIL_OK REPORT_MAIL_FAILED
         ),
     ],
@@ -74,7 +75,7 @@ use AMC::DataModule;
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (2);
+    return (3);
 }
 
 sub version_upgrade {
@@ -115,6 +116,8 @@ sub version_upgrade {
               . " ADD COLUMN mail_message TEXT" );
 
         return (2);
+    } elsif( $old_version == 2 ) {
+        $self->set_dir(REPORT_ANONYMIZED_PDF, "anonymous");
     }
     return ('');
 }
@@ -134,6 +137,10 @@ sub define_statements {
         },
         getDir =>
           { sql => "SELECT directory FROM $t_directory" . " WHERE type=?" },
+        setDir => {
+            sql => "INSERT OR REPLACE INTO $t_directory"
+              . " (type,directory) VALUES (?,?)"
+        },
         numType =>
           { sql => "SELECT COUNT(*) FROM $t_student" . " WHERE type=?" },
         allType => { sql => "SELECT file FROM $t_student" . " WHERE type=?" },
@@ -175,16 +182,16 @@ sub define_statements {
               . "   (SELECT * FROM $t_student WHERE type=?) AS r"
               . " ON a.student=r.student AND a.copy=r.copy"
         },
-        getPreAssociatedType => { sql =>
-              "SELECT a.student AS student, r.copy AS copy, a.id AS id, r.file AS file, r.mail_status AS mail_status"
+        getPreAssociatedType => {
+            sql =>
+"SELECT a.student AS student, r.copy AS copy, a.id AS id, r.file AS file, r.mail_status AS mail_status"
               . " FROM "
               . $self->table( "association", "layout" )
               . " AS a,"
               . "   (SELECT * FROM $t_student WHERE type=?) AS r"
-              . " ON a.student=r.student" },
-        clearReports =>
-        { sql => "DELETE FROM $t_student"
-              ." WHERE type=?"},
+              . " ON a.student=r.student"
+        },
+        clearReports => { sql => "DELETE FROM $t_student" . " WHERE type=?" },
     };
 }
 
@@ -262,6 +269,14 @@ sub free_student_report {
 sub get_dir {
     my ( $self, $type ) = @_;
     return ( $self->sql_single( $self->statement('getDir'), $type ) );
+}
+
+# set_dir($type,$directory) sets the subdirectory (in project directory) where
+# files for type $type are stored.
+
+sub set_dir {
+    my ( $self, $type, $directory ) = @_;
+    $self->statement('setDir')->execute( $type, $directory );
 }
 
 # get_student_report($type,$student,$copy) returns the filename of a

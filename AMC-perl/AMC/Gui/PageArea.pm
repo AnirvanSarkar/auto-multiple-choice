@@ -38,6 +38,7 @@ sub add_feuille {
     $self->{background_color} = '';
 
     $self->{marks} = '';
+    $self->{zones} = '';
 
     $self->{'i-src'} = '';
     $self->{tx}      = 1;
@@ -81,6 +82,9 @@ sub add_feuille {
 
     if ( $self->{marks} ) {
         $self->{colormark} = Gtk3::Gdk::RGBA::parse( $self->{marks} );
+    }
+    if ( $self->{zones} ) {
+        $self->{colorzone} = Gtk3::Gdk::RGBA::parse( $self->{zones} );
     }
 
     $self->signal_connect( 'size-allocate' => \&allocate_drawing );
@@ -379,8 +383,14 @@ sub draw {
         debug "Done with rendering";
     }
 
-    if (   ( $self->{layinfo}->{box} || $self->{layinfo}->{namefield} )
-        && ( $self->{layinfo}->{page}->{width} ) )
+    if (
+        (
+               $self->{layinfo}->{box}
+            || $self->{layinfo}->{namefield}
+            || $self->{layinfo}->{idzone}
+        )
+        && ( $self->{layinfo}->{page}->{width} )
+      )
     {
         my $box;
 
@@ -391,6 +401,13 @@ sub draw {
 
         # layout drawings
 
+        if ( $self->{zones} ) {
+            Gtk3::Gdk::cairo_set_source_rgba( $context, $self->{colorzone} );
+
+            for $box ( @{ $self->{layinfo}->{idzone} } ) {
+                $self->draw_box( $context, $box, '', 0 );
+            }
+        }
         if ( $self->{marks} ) {
             Gtk3::Gdk::cairo_set_source_rgba( $context, $self->{colormark} );
 

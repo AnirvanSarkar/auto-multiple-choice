@@ -206,7 +206,8 @@ sub new {
         invalid_color_name => $self->{invalid_color_name},
         empty_color_name   => $self->{empty_color_name},
         editable           => $self->{editable},
-        marks              => ( $self->{editable} ? '' : 'blue' )
+        marks              => ( $self->{editable} ? '' : 'blue' ),
+        zones              => ( $self->{editable} ? '' : 'lightblue' ),
     );
 
     AMC::Gui::WindowSize::size_monitor( $self->window, $self->{size_monitor} )
@@ -601,7 +602,7 @@ sub charge_i {
 
         debug "Getting layout info";
 
-        for (qw/box questionbox namefield digit scorezone/) {
+        for (qw/box questionbox namefield idzone digit scorezone/) {
             $self->{layinfo}->{$_} = [];
         }
 
@@ -628,7 +629,7 @@ sub charge_i {
             my $c;
             my $sth;
 
-            for my $type (qw/box questionbox scorezone digit namefield/) {
+            for my $type (qw/box questionbox scorezone digit namefield idzone/) {
                 for my $c ( $self->{layout}->type_info( $type, @ep ) ) {
                     push @{ $self->{layinfo}->{$type} }, {%$c};
                 }

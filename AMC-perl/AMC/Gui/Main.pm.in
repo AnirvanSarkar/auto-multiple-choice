@@ -391,6 +391,7 @@ sub main_window {
           config_export_modules standard_export_options
           notation_c_regroupement_type notation_c_regroupement_compose
           pref_prep_s_nombre_copies pref_prep_c_filter
+          partie_anonymity
           /, @widgets_only_when_opened
     );
 
@@ -406,6 +407,8 @@ sub main_window {
 
     $self->get_ui('commande')->hide();
     $self->get_ui('menu_debug')->set_active( get_debug() ? 1 : 0 );
+
+    $self->update_visibility();
 
     $self->{learning} = AMC::Gui::Learning->new(
         config        => $self->{config},
@@ -1068,6 +1071,15 @@ sub plugins_add {
 #########################################################################
 # PROJECT
 #########################################################################
+
+sub update_visibility {
+    my ($self) = @_;
+    if($self->get('view_anonymity')) {
+        $self->get_ui('partie_anonymity')->show_all();
+    } else {
+        $self->get_ui('partie_anonymity')->hide();
+    }
+}
 
 sub projet_nouveau {
     my ($self) = @_;
@@ -3967,6 +3979,16 @@ sub assoc_state {
     } else {
         $self->get_ui('send_subject_config_button')->show();
     }
+}
+
+sub anonymize_go {
+    my ($self) = @_;
+    $self->{project}->anonymize();
+}
+
+sub anonymize_open {
+    my ($self) = @_;
+    $self->view_dir( $self->absolu('%PROJET/anonymous') );
 }
 
 #########################################################################

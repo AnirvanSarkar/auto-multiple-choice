@@ -63,11 +63,12 @@ use AMC::DataModule;
 
 use IO::File;
 use XML::Simple;
+use Digest::MD5 qw/md5/;
 
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (1);
+    return (2);
 }
 
 sub immutable_variables {
@@ -92,6 +93,16 @@ sub version_upgrade {
         $self->populate_from_xml;
 
         return (1);
+    } elsif ( $old_version == 1 ) {
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("anonymize")
+              . " (student INTEGER, copy INTEGER, anonymousid TEXT, PRIMARY KEY (student,copy))"
+        );
+        $self->sql_do( "CREATE INDEX "
+              . $self->index("index_anonymous") . " ON "
+              . $self->table( "anonymize", "self" )
+              . " (anonymousid)" );
+        return (2);
     }
     return ('');
 }
@@ -133,7 +144,8 @@ sub populate_from_xml {
 
 sub define_statements {
     my ($self) = @_;
-    my $at = $self->table("association");
+    my $at     = $self->table("association");
+    my $yt     = $self->table("anonymize");
     my $t_page = $self->table( "page", "capture" );
     $self->{statements} = {
         NEWAssoc => {
@@ -218,6 +230,11 @@ sub define_statements {
         deleteAssociations =>
           { sql => "DELETE FROM $at" . " WHERE student=? AND copy=?" },
         list => { sql => "SELECT * FROM $at ORDER BY student,copy" },
+        setAnonymized =>
+          { sql => "INSERT INTO $yt (student, copy, anonymousid) VALUES (?,?,?)" },
+        anonymized =>
+          { sql => "SELECT anonymousid FROM $yt WHERE student=? AND copy=?" },
+        deanonymized => { sql => "SELECT student, copy FROM $yt WHERE anonymousid=?" },
     };
 }
 
@@ -459,6 +476,88 @@ sub list {
             { Slice => {} }
         )
     );
+}
+
+# create_anonymousid($model) creates a new anonymous ID based on $model
+
+my $aid_characters = {
+    l => "ABCDEFGHJKLMNPQRSTUVWXYZ",
+    d => "0123456789",
+    e => "123456789",
+    s => "ABCDEFGHJKLMNPQRSTUVWXYZ",
+    n => "0123456789",
+};
+
+sub random_character {
+    my ( $self, $char ) = @_;
+    my $choices = $aid_characters->{$char};
+    if ($choices) {
+        return ( substr( $choices, int( rand( length($choices) ) ), 1 ) );
+    } else {
+        return $char;
+    }
+}
+
+sub digest {
+    my ( $self, $s, $n, $kind ) = @_;
+    $s =~ s/[^A-Z0-9]//;
+    my $x     = ord( substr( md5($s), $n, 1 ) );
+    my $chars = $aid_characters->{$kind};
+    if ($chars) {
+        return ( substr( $chars, $x % length($chars), 1 ) );
+    } else {
+        return ('?');
+    }
+}
+
+sub create_anonymousid {
+    my ( $self, $model ) = @_;
+    my $aid;
+    my $i;
+    my $tries=0;
+
+    do {
+        $tries++;
+        $aid = $model;
+        $i   = 0;
+        $aid =~ s/([lde])/$self->random_character($1)/ge;
+        $aid =~ s/([sn])/$self->digest($aid,$i++,$1)/ge;
+    } while ( defined( $self->de_anonymized($aid) ) && $tries<100 );
+
+    if($tries>=100) {
+        die "Not enough free characters in the anomymous ID model...";
+    }
+
+    return ($aid);
+}
+
+# anonymized($student,$copy,$model) returns an anonymous ID for a
+# student, based on the model
+
+sub anonymized {
+    my ( $self, $student, $copy, $model ) = @_;
+    my $aid =
+      $self->sql_single( $self->statement('anonymized'), $student, $copy );
+    if ( !$aid ) {
+        $aid = $self->create_anonymousid($model);
+        $self->statement('setAnonymized')->execute( $student, $copy, $aid );
+    }
+    return ($aid);
+}
+
+# de_anonymized($anonymousid) gives an array containing the student
+# and copy corresponding to $anonymousid, or undef if it does not
+# exist.
+
+sub de_anonymized {
+    my ( $self, $aid ) = @_;
+    my $v = $self->dbh->selectall_arrayref( $self->statement('deanonymized'),
+        {}, $aid );
+    if (@$v) {
+        return ( @{ $v->[0] } );
+    } else {
+        return ( undef, undef );
+    }
 }
 
 1;
