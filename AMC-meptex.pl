@@ -106,8 +106,9 @@ my @pages     = ();
 my @flags     = ();
 my @pre_assoc = ();
 my $cases;
-my $page_number = 0;
-my %build_vars  = ();
+my $page_number   = 0;
+my %build_vars    = ();
+my %question_name = ();
 
 sub add_flag {
     my ( $x, $flag ) = @_;
@@ -202,6 +203,9 @@ while (<SRC>) {
     if (/\\with\{(.+?)=(.*)\}/) {
         $build_vars{$1} = $2;
     }
+    if (/\\question\{([0-9]+)\}\{(.*)\}/) {
+        $question_name{$1} = $2;
+    }
 }
 close(SRC);
 
@@ -233,6 +237,11 @@ for my $pa (@pre_assoc) {
 }
 
 debug "Writing to database...";
+
+for my $id ( keys %question_name ) {
+    $layout->question_name( $id, $question_name{$id} )
+      if ( $question_name{$id} ne '' );
+}
 
 PAGE: for my $p (@pages) {
 
@@ -309,7 +318,6 @@ PAGE: for my $p (@pages) {
         {
             my ( $type, $name, $q, $a ) = ( $1, $2, $3, $4 );
             debug "- Box $k";
-            $layout->question_name( $q, $name ) if ( $name ne '' );
             $layout->statement('NEWBox')->execute(
                 @ep, $role{$type}, $q, $a,
                 bbox( $c->{$k} ),

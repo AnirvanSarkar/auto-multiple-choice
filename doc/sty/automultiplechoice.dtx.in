@@ -3319,7 +3319,10 @@ Three digits and two letters:\insertgroup{mixed}.
   \def\AMCcurrentenv{question}%
   \AMC@stepQuestion%
   \global\def\AMCid@name{#2}\AMC@affecte{#2}{\AMCid@quest}%
-  \ifAMC@calibration\AMCmessage{Q=\the\AMCid@quest}\fi%
+  \ifAMC@calibration%
+    \AMCmessage{Q=\the\AMCid@quest}%
+    \immediate\write\AMC@XYFILE{\string\question{\the\AMCid@quest}{\AMCid@name}}%
+  \fi%
   \AMCbeforeQuestion%
   \ifx\@empty\AMC@sz@callout\@empty\else%
     \csname\AMC@sz@callout\endcsname%
