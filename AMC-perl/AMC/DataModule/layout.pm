@@ -850,6 +850,12 @@ sub define_statements {
               . " WHERE question=? AND answer=?"
         },
         CharNb => { sql => "SELECT COUNT(*) FROM " . $self->table("char") },
+        questionNoBox => { sql => "SELECT question,name FROM "
+              . $self->table("question")
+              . " LEFT OUTER JOIN "
+              . $self->table("box")
+              . " AS b USING(question) WHERE b.question IS NULL"
+              . " ORDER BY name" },
     };
 }
 
@@ -1416,6 +1422,16 @@ sub nb_chars_transaction {
     my $n = $self->sql_single( $self->statement('CharNb') );
     $self->end_transaction('nbCh');
     return ($n);
+}
+
+# questions_with_no_box() returns the list of questions (as an array
+# of hashrefs with keys 'question' and 'name') that has no boxes.
+
+sub questions_with_no_box {
+    my ($self) = @_;
+    my $r = $self->dbh->selectall_arrayref( $self->statement('questionNoBox'),
+        { Slice => {} } );
+    return ($r);
 }
 
 1;

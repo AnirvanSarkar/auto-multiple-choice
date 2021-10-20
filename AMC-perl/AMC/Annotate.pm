@@ -28,6 +28,7 @@ use List::Util qw(min max sum);
 use File::Copy;
 use Unicode::Normalize;
 use File::Temp qw/ tempfile /;
+use Text::CSV;
 
 use AMC::Path;
 use AMC::Basic;
@@ -1172,6 +1173,33 @@ sub go {
         for my $student ( @{ $self->{students} } ) {
             $self->process_student($student);
             $self->{avance}->progres( 1 / $n ) if ( $self->{avance} );
+        }
+
+        # Anonymized sheets: add a spreadsheet with questions that are
+        # to be graded externally (with no boxes)
+
+        if ( $self->{anonymous} ) {
+            $self->{layout}->begin_transaction('aIDQ');
+            my $qnobox = $self->{layout}->questions_with_no_box();
+            my @aIDs =
+              sort { $a cmp $b }
+              map  { $self->{association}->anonymized( $_->[0], $_->[1] ) }
+              @{ $self->{students} };
+
+            $self->{layout}->end_transaction('aIDQ');
+
+            if (@$qnobox) {
+                my $qnobox = [ map { $_->{name} } (@$qnobox) ];
+
+                my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
+                open my $fh, ">", $self->{pdf_dir} . "/external.csv"
+                  or die "Unable to write to $self->{pdf_dir}/external.csv: $!";
+                $csv->say( $fh, [ "aID", @$qnobox ] );
+                for my $id (@aIDs) {
+                    $csv->say( $fh, [ $id, map { '' } (@$qnobox) ] );
+                }
+                close $fh;
+            }
         }
     }
 }
