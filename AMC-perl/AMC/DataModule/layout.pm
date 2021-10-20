@@ -602,6 +602,12 @@ sub define_statements {
               . $self->table("box")
               . " WHERE role=? AND question=? GROUP BY student,page"
         },
+        PAGES_Q_scores => {
+            sql =>
+              "SELECT question FROM "
+              . $self->table("box")
+              . " WHERE (role=? OR role=?) AND student=? AND page=? GROUP BY question"
+        },
         PAGES_STUDENT_namefield => {
                 sql => "SELECT page FROM "
               . $self->table("zone")
@@ -853,7 +859,7 @@ sub define_statements {
         questionNoBox => { sql => "SELECT question,name FROM "
               . $self->table("question")
               . " LEFT OUTER JOIN "
-              . $self->table("box")
+              . " (SELECT * FROM ".$self->table("box")." WHERE role=?)"
               . " AS b USING(question) WHERE b.question IS NULL"
               . " ORDER BY name" },
     };
@@ -1063,6 +1069,21 @@ sub pages_for_question {
                 BOX_ROLE_ANSWER, $question_id
             )
         }
+    );
+}
+
+# page_question_scores($student,$page) returns a list of questions
+# that are present on the page (with a box to be filled by the
+# students or a score zone)
+
+sub page_question_scores {
+    my ( $self, $student, $page ) = @_;
+    return (
+        $self->sql_list(
+            $self->statement('PAGES_Q_scores'), BOX_ROLE_ANSWER,
+            BOX_ROLE_SCORE,                     $student,
+            $page
+        )
     );
 }
 
@@ -1424,13 +1445,13 @@ sub nb_chars_transaction {
     return ($n);
 }
 
-# questions_with_no_box() returns the list of questions (as an array
+# questions_with_no_box() returns the list of questions (as an arrayref
 # of hashrefs with keys 'question' and 'name') that has no boxes.
 
 sub questions_with_no_box {
     my ($self) = @_;
     my $r = $self->dbh->selectall_arrayref( $self->statement('questionNoBox'),
-        { Slice => {} } );
+        { Slice => {} }, BOX_ROLE_ANSWER );
     return ($r);
 }
 

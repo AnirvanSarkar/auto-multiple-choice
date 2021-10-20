@@ -859,10 +859,6 @@ sub draw_symbol {
 sub page_symbols {
     my ( $self, $student, $page, $tick ) = @_;
 
-    # clears boxes positions data for the page
-
-    $self->{question} = {};
-
     # goes through all the boxes on the page
 
     # the question boxes (in separate answer sheet mode)
@@ -1001,12 +997,16 @@ sub qtext_position_zones {
     return ( \@c );
 }
 
-# writes one question score
+# writes one question score (or a particular text if given)
 
 sub write_qscore {
-    my ( $self, $student, $page, $question ) = @_;
+    my ( $self, $student, $page, $question, $text, $position ) = @_;
 
-    return if ( $self->{position} eq 'none' );
+    $position = $self->{position} if(!$position);
+
+    return if ( $position eq 'none' );
+
+    $text = $self->qtext( $student, $question ) if ( !defined($text) );
 
     # no score to write for indicative questions
     my $p_strategy = $self->{scoring}->unalias( $student->[0] );
@@ -1015,9 +1015,12 @@ sub write_qscore {
         return;
     }
 
-    my $text    = $self->qtext( $student, $question );
-    my $xy      = "qtext_position_" . $self->{position};
+    # if no coordinates, tries with a score zone...
+    $position = 'zones' if(!$self->{question}->{$question});
+
+    my $xy      = "qtext_position_" . $position;
     my $command = $self->$xy( $student, $page, $question );
+
     if ( ref($command) eq 'ARRAY' ) {
         if ( $#$command >= 0 ) {
             $self->stext($text);
@@ -1038,14 +1041,31 @@ sub page_qscores {
 
     if ( $self->{position} ne 'none' ) {
 
-        $self->needs_names;
-
         $self->set_color( $self->{text_color} );
 
         # go through all questions present on the page (recorded while
         # drawing symbols)
-        for my $q ( sort { $a cmp $b } ( keys %{ $self->{question} } ) ) {
+        for my $q (
+            $self->{layout}->page_question_scores( $student->[0], $page ) )
+        {
             $self->write_qscore( $student, $page, $q );
+        }
+
+    }
+}
+
+# write question IDs, for external scoring
+
+sub page_qids {
+    my ( $self, $student, $page ) = @_;
+
+    if ( $self->{position} ne 'none' ) {
+
+        $self->set_color( $self->{text_color} );
+
+        for my $q ( @{ $self->{qnobox} } ) {
+            $self->write_qscore( $student, $page, $q->{question}, $q->{name},
+                'zones' );
         }
 
     }
@@ -1089,6 +1109,9 @@ sub student_draw_page {
 
     debug "Processing page $student->[0]:$student->[1] page $page->{page} ...";
 
+    # clears boxes positions data for the page
+    $self->{question} = {};
+
     my $draw = $self->page_background( $student, $page );
     if ( $draw >= 0 ) {
         $self->command("line width $self->{line_width}");
@@ -1096,6 +1119,9 @@ sub student_draw_page {
         if(! $self->{header_only} ) {
             $self->page_symbols( $student, $page->{page}, $draw > 0 );
             $self->page_qscores( $student, $page->{page} );
+        }
+        if ( $self->{anonymous} ) {
+            $self->page_qids( $student, $page->{page} );
         }
         $self->command("matrix identity");
         $self->page_header($student);
@@ -1161,6 +1187,22 @@ sub go {
     if ( $n > 0 ) {
         $self->process_start;
 
+        # Anonymous mode: get list of anonymous IDs for stusents, and
+        # list of external questions.
+
+        if ( $self->{anonymous} ) {
+            $self->{layout}->begin_transaction('aIDQ');
+
+            $self->{qnobox} = $self->{layout}->questions_with_no_box();
+
+            $self->{aIDs} = [
+              sort { $a cmp $b }
+              map  { $self->{association}->anonymized( $_->[0], $_->[1] ) }
+              @{ $self->{students} } ];
+
+            $self->{layout}->end_transaction('aIDQ');
+        }
+
         # With option <single_output>, all annotated answer sheets are
         # made in a single PDF file. We open this file.
 
@@ -1179,24 +1221,16 @@ sub go {
         # to be graded externally (with no boxes)
 
         if ( $self->{anonymous} ) {
-            $self->{layout}->begin_transaction('aIDQ');
-            my $qnobox = $self->{layout}->questions_with_no_box();
-            my @aIDs =
-              sort { $a cmp $b }
-              map  { $self->{association}->anonymized( $_->[0], $_->[1] ) }
-              @{ $self->{students} };
-
-            $self->{layout}->end_transaction('aIDQ');
-
-            if (@$qnobox) {
-                my $qnobox = [ map { $_->{name} } (@$qnobox) ];
-
+            if ( @{ $self->{qnobox} } ) {
+                my @empty = ('') x (1+$#{$self->{qnobox}});
                 my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
                 open my $fh, ">", $self->{pdf_dir} . "/external.csv"
                   or die "Unable to write to $self->{pdf_dir}/external.csv: $!";
-                $csv->say( $fh, [ "aID", @$qnobox ] );
-                for my $id (@aIDs) {
-                    $csv->say( $fh, [ $id, map { '' } (@$qnobox) ] );
+                $csv->say( $fh,
+                    [ "aID", map { $_->{name} } @{ $self->{qnobox} } ] );
+                for my $id ( @{ $self->{aIDs} } ) {
+                    $csv->say( $fh,
+                        [ $id, @empty ] );
                 }
                 close $fh;
             }
