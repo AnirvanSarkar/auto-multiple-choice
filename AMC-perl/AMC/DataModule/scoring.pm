@@ -132,8 +132,19 @@ package AMC::DataModule::scoring;
 #
 #     P means that a floor has been applied.
 #
+#     X means that an external score has been applied.
+#
 # * max is the question score associated to a copy where all answers
 #   are correct (or 1 for indicative questions).
+#
+# external holds the question scores that are not computed by AMC, but
+# given from external data.
+#
+# * student, copy identifies the student.
+#
+# * question is the question number.
+#
+# * score is the score to be affected to this question.
 #
 # mark holds global marks of the students.
 #
@@ -214,7 +225,7 @@ use XML::Simple;
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (2);
+    return (3);
 }
 
 sub version_upgrade {
@@ -270,6 +281,12 @@ sub version_upgrade {
               . $self->table("code")
               . " ADD COLUMN direct INTEGER NOT NULL DEFAULT 0" );
         return (2);
+    } elsif ( $old_version == 2) {
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+                       . $self->table("external")
+                       . " (student INTEGER, copy INTEGER, question INTEGER, score REAL, PRIMARY KEY (student,copy,question))"
+        );
+        return (3);
     }
     return ('');
 }
@@ -720,6 +737,25 @@ sub define_statements {
         },
         clearDirect =>
           { sql => "DELETE FROM " . $self->table("code") . " WHERE direct=?" },
+
+        setExternal => {
+                sql => "INSERT OR REPLACE INTO "
+              . $self->table("external")
+              . " (student,copy,question,score) VALUES (?,?,?,?)"
+        },
+        getExternal => {
+                sql => "SELECT score FROM "
+              . $self->table("external")
+              . " WHERE student=? AND copy=? AND question=?"
+        },
+        deleteExternal => {
+                sql => "DELETE FROM "
+              . $self->table("external")
+        },
+        nExternal => {
+            sql => "SELECT count(*) as n,count(DISTINCT student) as ns"
+                . " FROM ".$self->table("external")
+        },
     };
 }
 
@@ -1279,10 +1315,11 @@ sub student_global {
 #         'type'=>1,
 #         'indicative'=>0,
 #         'strategy'=>'',
+#         'external'=>1.5,
 #         'answers'=>[ { question=>1, answer=>1,
-#                        'correct'=>1, ticked=>0, strategy=>"b=2" },
+#                        correct=>1, ticked=>0, strategy=>"b=2" },
 #                      {question=>1, answer=>2,
-#                        'correct'=>0, ticked=>0, strategy=>"" },
+#                        correct=>0, ticked=>0, strategy=>"" },
 #                    ],
 #       },
 #  ...
@@ -1307,6 +1344,7 @@ sub student_scoring_base {
         $sth = $self->statement('studentQuestionsBase');
         $sth->execute($s);
         while ( my $qa = $sth->fetchrow_hashref ) {
+            $self->add_question_external_score( $student, $copy, $qa );
             $r->{questions}->{ $qa->{question} } = $qa;
         }
         $sth = $self->statement('studentAnswersBase');
@@ -1360,6 +1398,59 @@ sub delete_scoring_data {
     my ( $self, $student, $copy ) = @_;
     for my $part (qw/Scores Marks Codes/) {
         $self->statement( 'delete' . $part )->execute( $student, $copy );
+    }
+}
+
+# set_external_score($student, $copy, $question, $score) sets a score
+# to a particular question, from external data.
+
+sub set_external_score {
+    my ( $self, $student, $copy, $question, $score ) = @_;
+    $self->statement('setExternal')
+      ->execute( $student, $copy, $question, $score );
+}
+
+# get_external_score($student, $copy, $question) gets the external
+# score associated with a particular question.
+
+sub get_external_score {
+    my ( $self, $student, $copy, $question ) = @_;
+    return (
+        $self->sql_single(
+            $self->statement('getExternal'),
+            $student, $copy, $question
+        )
+    );
+}
+
+# n_external() returns an array containing the number of external
+# scores, and the number of students with external scores.
+
+sub n_external {
+    my ($self) = @_;
+    return (
+        @{
+            $self->dbh->selectall_arrayref( $self->statement('nExternal'), {} )
+              ->[0]
+        }
+    );
+}
+
+# delete_external() deletes all external scoring data
+
+sub delete_external {
+    my ($self) = @_;
+    $self->statement('deleteExternal')->execute();
+}
+
+# add_question_external_score($q) adds the external score to a
+# question hashref
+
+sub add_question_external_score {
+    my ( $self, $student, $copy, $q ) = @_;
+    my $x = $self->get_external_score( $student, $copy, $q->{question} );
+    if ( defined($x) && $x ne '' ) {
+        $q->{external} = $x;
     }
 }
 

@@ -405,35 +405,43 @@ sub score_question {
 
     $self->{env}->clear_errors;
 
-    $self->set_number_variables( $question_data, $correct );
-    $self->process_ticked_answers_setx( $question_data, $correct );
-    $self->{env}->variables_from_directives(
-        default   => 1,
-        set       => 1,
-        setx      => 1,
-        requires  => 1,
-        setglobal => 1,
-    );
+    if ( defined( $question_data->{external} ) ) {
 
-    if ( $self->{env}->n_errors() ) {
-        $why = "E";
-        $xx  = $self->directive("e");
-        debug "Scoring errors: " . join( ', ', $self->{env}->errors );
-    } elsif ( $self->variable("N_TICKED") == 0 ) {
+        $xx = $question_data->{external};
+        $why = "X";
+        
+    } else {
 
-        # no ticked boxes at all
-        $xx  = $self->directive("v");
-        $why = 'V';
-    } elsif ( my $err = $self->syntax_error($correct) ) {
-        debug "Scoring syntax error: $err";
-        $xx  = $self->directive("e");
-        $why = 'E';
-    } elsif ( $self->variable("INVALID") ) {
-        debug "INVALID variable is set";
-        $xx  = $self->directive("e");
-        $why = 'E';
+        $self->set_number_variables( $question_data, $correct );
+        $self->process_ticked_answers_setx( $question_data, $correct );
+        $self->{env}->variables_from_directives(
+            default   => 1,
+            set       => 1,
+            setx      => 1,
+            requires  => 1,
+            setglobal => 1,
+        );
+
+        if ( $self->{env}->n_errors() ) {
+            $why = "E";
+            $xx  = $self->directive("e");
+            debug "Scoring errors: " . join( ', ', $self->{env}->errors );
+        } elsif ( $self->variable("N_TICKED") == 0 ) {
+
+            # no ticked boxes at all
+            $xx  = $self->directive("v");
+            $why = 'V';
+        } elsif ( my $err = $self->syntax_error($correct) ) {
+            debug "Scoring syntax error: $err";
+            $xx  = $self->directive("e");
+            $why = 'E';
+        } elsif ( $self->variable("INVALID") ) {
+            debug "INVALID variable is set";
+            $xx  = $self->directive("e");
+            $why = 'E';
+        }
     }
-
+    
     if ( !$why ) {
         if ( $self->variable("IMULT") ) {
 

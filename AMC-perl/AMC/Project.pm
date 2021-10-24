@@ -1101,4 +1101,27 @@ sub anonymize {
     );
 }
 
+sub get_external_scores {
+    my ( $self, %oo ) = @_;
+
+    $self->commande(
+        commande => [
+            "auto-multiple-choice",
+            "external",
+            "--debug",
+            debug_file(),
+            pack_args(
+                "--data",
+                $self->{config}->get_absolute('data'),
+                "--source",
+                $oo{source}
+            ),
+        ],
+        signal       => 2,
+        texte        => __ "Reading external scores...",
+        o            => \%oo,
+        fin          => $oo{callback},
+    );
+}
+
 1;

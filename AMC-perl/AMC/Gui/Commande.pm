@@ -86,6 +86,51 @@ sub warnings {
     return ( $self->get_messages('WARN') );
 }
 
+sub has_warnings_or_errors {
+    my ($self) = (@_);
+    return ( $self->n_messages('WARN') + $self->n_messages('ERR') );
+}
+
+sub format_markup {
+    my ( $self, $t ) = @_;
+    $t =~ s/\&/\&amp;/g;
+    return ($t);
+}
+
+sub mini { ( $_[0] < $_[1] ? $_[0] : $_[1] ) }
+
+sub problems_markup {
+    my ($self)  = (@_);
+    my @err     = $self->erreurs();
+    my @warn    = $self->warnings();
+    my $message = '';
+    if (@err) {
+        $message .= "\n\n"
+          . __("<b>Errors</b>") . "\n"
+          . join( "\n",
+            map { $self->format_markup($_) } ( @err[ 0 .. mini( 9, $#err ) ] ) )
+          . (
+            $#err > 9
+            ? "\n\n<i>(" . __("Only first ten errors written") . ")</i>"
+            : ""
+          );
+    }
+    if (@warn) {
+        $message .= "\n\n"
+          . __("<b>Warnings</b>") . "\n"
+          . join( "\n",
+            map { $self->format_markup($_) }
+              ( @warn[ 0 .. mini( 9, $#warn ) ] ) )
+          . (
+            $#warn > 9
+            ? "\n\n<i>(" . __("Only first ten warnings written") . ")</i>"
+            : ""
+          );
+    }
+    return($message);
+}
+
+
 sub variables {
     my ($self) = (@_);
     return ( %{ $self->{variables} } );

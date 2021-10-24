@@ -1,0 +1,131 @@
+#! /usr/bin/perl
+#
+# Copyright (C) 2021 Alexis Bienvenüe <paamc@passoire.fr>
+#
+# This file is part of Auto-Multiple-Choice
+#
+# Auto-Multiple-Choice is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# Auto-Multiple-Choice is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Auto-Multiple-Choice.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+use warnings;
+use 5.012;
+
+use Getopt::Long;
+use Text::CSV;
+
+use AMC::Basic;
+use AMC::Data;
+use AMC::Gui::Avancement;
+
+my $data_dir = '';
+my $source   = '';
+
+unpack_args();
+my @ARGV_ORIG = @ARGV;
+
+GetOptions( "data=s" => \$data_dir, "source=s" => \$source );
+
+debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
+
+sub error {
+    my ($text) = @_;
+    debug "AMC-external ERROR: $text";
+    print "ERROR: $text\n";
+    exit(1);
+}
+
+error("source file not found: $source") if ( !-f $source );
+
+my $data        = AMC::Data->new($data_dir);
+my $scoring     = $data->module('scoring');
+my $association = $data->module('association');
+
+my $csv = Text::CSV->new ({ binary => 1, auto_diag => 1 });
+open my $fh, "<:encoding(utf8)", $source or error("Error opening $source: $!");
+my %headers = map { $_ => 1 } (
+    $csv->header(
+        $fh, { sep_set => [ ";", ",", "\t" ], munge_column_names => 'none' }
+    )
+);
+
+# checks that the aID column exists
+error("Missing aID column") if(!$headers{aID});
+delete $headers{aID};
+
+$data->begin_read_transaction('xQnu');
+
+# get questions numbers for columns corresponding to existing questions
+for my $q ( keys %headers ) {
+    my $n = $scoring->question_number($q);
+    if ( defined($n) ) {
+        $headers{$q} = $n;
+    } else {
+        debug("Warning: unknown question $q");
+        delete $headers{$q};
+    }
+}
+
+$data->end_transaction('xQnu');
+
+error("No question column") if(!%headers);
+
+my @wrong_aid  = ();
+my @overwrites = ();
+my $n_scores   = 0;
+my $n_students = 0;
+
+$data->begin_transaction('xRfc');
+
+while ( my $row = $csv->getline_hr($fh) ) {
+    my ( $student, $copy ) = $association->de_anonymized( $row->{aID} );
+    if ( defined($student) ) {
+        $n_students++;
+        for my $q ( keys %headers ) {
+            if ( $row->{$q} =~ /[0-9]/ ) {
+                if (
+                    defined(
+                        $scoring->get_external_score(
+                            $student, $copy, $headers{$q}
+                        )
+                    )
+                  )
+                {
+                    debug
+"Already existing score for $row->{aID} ($student:$copy) $q";
+                    push @overwrites, "$row->{aID}/$q";
+                    print "WARN: ".__("Already existing score:")." $row->{aID} ($student:$copy) $q\n";
+                } else {
+                    $row->{$q} =~ s/,/./;
+                    $row->{$q} =~ s/[^0-9.]//g;
+                    $scoring->set_external_score( $student, $copy, $headers{$q},
+                        $row->{$q} );
+                    $n_scores++;
+                }
+            }
+        }
+    } else {
+        debug "Unknown anonymous ID $row->{aID}";
+        print "WARN: ".__("Unknown anonymous ID:")." $row->{aID}\n";
+        push @wrong_aid, $row->{aID};
+    }
+}
+
+close $fh;
+
+$data->end_transaction('xRfc');
+
+debug("Read $n_scores scores for $n_students students");
+
+print "VAR: nscores=$n_scores\n";
+print "VAR: nstudents=$n_students\n";

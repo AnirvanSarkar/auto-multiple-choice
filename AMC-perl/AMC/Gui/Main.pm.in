@@ -372,6 +372,7 @@ sub main_window {
           state_docs state_docs_label
           state_unrecognized state_unrecognized_label
           state_marking state_marking_label state_assoc state_assoc_label
+          state_anonymity state_anonymity_label
           state_overwritten state_overwritten_label
           button_edit_src
           button_unrecognized button_show_missing
@@ -556,8 +557,6 @@ sub self_first {
     }
 }
 
-sub mini { ( $_[0] < $_[1] ? $_[0] : $_[1] ) }
-
 sub best_filter_for_file {
     my ($file) = @_;
     my $mmax   = '';
@@ -736,12 +735,6 @@ sub cursor_standard {
     Gtk3::main_iteration while (Gtk3::events_pending);
 }
 
-sub format_markup {
-    my ( $self, $t ) = @_;
-    $t =~ s/\&/\&amp;/g;
-    return ($t);
-}
-
 sub commande_annule {
     my ($self) = @_;
     $self->{project}->commande_annule();
@@ -781,6 +774,7 @@ sub clear_processing {
 
     if ( $s{capture} ) {
         $self->{project}->capture->clear_all;
+        $self->{project}->scoring->delete_external();
     }
 
     if ( $s{mark} ) {
@@ -821,6 +815,7 @@ sub clear_processing {
     }
     if ( $s{capture} ) {
         $self->detecte_analyse();
+        $self->anonymize_update();
     }
     if ( $s{mark} ) {
         $self->noter_resultat();
@@ -1401,6 +1396,7 @@ sub valide_projet {
 
     $self->detecte_mep();
     $self->detecte_analyse( premier => 1 );
+    $self->anonymize_update();
 
     debug "Correction options : MB" . $self->get('maj_bareme');
     $self->get_ui('maj_bareme')
@@ -1758,9 +1754,7 @@ sub document_updated_callback {
 
     $self->check_sty_version($c);
 
-    my @err  = $c->erreurs();
-    my @warn = $c->warnings();
-    if ( @err || @warn ) {
+    if ( $c->has_warnings_or_errors ) {
         debug "Errors preparing documents!";
         $self->notify_end_of_work( 'documents',
             __ "Problems while preparing documents" );
@@ -1773,28 +1767,7 @@ sub document_updated_callback {
               );
         }
 
-        if (@err) {
-            $message .= "\n\n"
-              . __("<b>Errors</b>") . "\n"
-              . join( "\n",
-                map { $self->format_markup($_) } ( @err[ 0 .. mini( 9, $#err ) ] ) )
-              . (
-                $#err > 9
-                ? "\n\n<i>(" . __("Only first ten errors written") . ")</i>"
-                : ""
-              );
-        }
-        if (@warn) {
-            $message .= "\n\n"
-              . __("<b>Warnings</b>") . "\n"
-              . join( "\n",
-                map { $self->format_markup($_) } ( @warn[ 0 .. mini( 9, $#warn ) ] ) )
-              . (
-                $#warn > 9
-                ? "\n\n<i>(" . __("Only first ten warnings written") . ")</i>"
-                : ""
-              );
-        }
+        $message .= $c->problems_markup;
 
         $message .= "\n\n" .
 
@@ -2551,15 +2524,7 @@ sub report_analyse_errors {
 
         my $message = __("AMC had problems with your scans.");
 
-        $message .= "\n\n"
-          . __("<b>Errors</b>") . "\n"
-          . join( "\n",
-            map { $self->format_markup($_) } ( @err[ 0 .. mini( 9, $#err ) ] ) )
-          . (
-            $#err > 9
-            ? "\n\n<i>(" . __("Only first ten errors written") . ")</i>"
-            : ""
-          );
+        $message .= $c->problems_markup;
 
         $message .=
           "\n\n<b>" . __("Please have a look at these scans.") . "</b>";
@@ -3981,6 +3946,23 @@ sub assoc_state {
     }
 }
 
+sub anonymize_update {
+    my ($self) = @_;
+    my $ok     = 'info';
+    my $s      = '';
+
+    $self->{project}->data->begin_read_transaction('anUP');
+    my ( $n, $ns ) = $self->{project}->scoring->n_external();
+    my $n_reports =
+      $self->{project}->report->type_count(REPORT_ANONYMIZED_PDF);
+    $self->{project}->data->end_transaction('anUP');
+
+    $s = sprintf( __("%d anonymized sheets"), $n_reports );
+    $s .= " / " . sprintf( __("%d scores from %d students"), $n, $ns );
+
+    $self->set_state( 'anonymity', $ok, $s );
+}
+
 sub anonymize_go {
     my ($self) = @_;
     $self->{project}->anonymize();
@@ -3989,6 +3971,96 @@ sub anonymize_go {
 sub anonymize_open {
     my ($self) = @_;
     $self->view_dir( $self->absolu('%PROJET/anonymous') );
+}
+
+sub external_delete {
+    my ($self) = @_;
+
+    my $dialog = Gtk3::MessageDialog->new( $self->get_ui('main_window'),
+        'destroy-with-parent', 'warning', 'ok-cancel', '' );
+    $dialog->set_markup(
+        __("Are you sure you want to delete all external scores?") );
+    $dialog->get_widget_for_response('ok')->get_style_context()
+      ->add_class("destructive-action");
+    my $reponse = $dialog->run;
+    $dialog->destroy;
+
+    if ( $reponse ne 'ok' ) {
+        return (0);
+    }
+
+    $self->{project}->data->begin_transaction("dExG");
+    $self->{project}->scoring->delete_external();
+    $self->{project}->data->end_transaction("dExG");
+    $self->anonymize_update();
+}
+
+sub external_read {
+    my ($self) = @_;
+
+    my $d = Gtk3::FileChooserDialog->new(
+        __("Read external scores from CSV"),
+        $self->get_ui('main_window'), 'open',
+        'gtk-cancel' => 'cancel',
+        'gtk-ok'     => 'ok'
+    );
+    my $filter = Gtk3::FileFilter->new();
+    $filter->set_name( __ "CSV files" );
+    for my $ext (qw/CSV csv/) {
+        $filter->add_pattern("*.$ext");
+    }
+    $d->add_filter($filter);
+
+    my $r = $d->run;
+    if ( $r eq 'ok' ) {
+        my $source = clean_gtk_filenames( $d->get_filename );
+        $d->destroy;
+        
+        $self->{project}->get_external_scores(
+            source        => $source,
+            callback_self => $self,
+            callback      => \&external_read_callback
+        );
+    } else {
+        $d->destroy;
+    }
+}
+
+sub external_read_callback {
+    my ( $self, $c, %data ) = self_first(@_);
+
+    my $message = '';
+    my $type    = 'info';
+    my $button  = 'ok';
+
+    if ( $c->has_warnings_or_errors ) {
+        debug "Problems reading scores!";
+
+        $message = __("Problems while reading scores.");
+
+        $message .= $c->problems_markup;
+
+        $type='error';
+    } else {
+        $message = __("Success!");
+    }
+
+    if ( $c->variable('nscores') > 0 ) {
+        $message .= "\n\n"
+          . sprintf(
+            "%d scores from %d students have been read from your CSV file.",
+            $c->variable('nscores'),
+            $c->variable('nstudents')
+          );
+    }
+
+    my $dialog = Gtk3::MessageDialog->new( $self->get_ui('main_window'),
+        'destroy-with-parent', $type, $button, '' );
+    $dialog->set_markup($message);
+    $dialog->run;
+    $dialog->destroy;
+
+    $self->anonymize_update();
 }
 
 #########################################################################
