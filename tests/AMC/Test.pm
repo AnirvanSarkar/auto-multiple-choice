@@ -49,72 +49,76 @@ use utf8;
 
 use_gettext;
 
+my $defaults = {
+    dir                 => '',
+    filter              => '',
+    tex_engine          => 'pdflatex',
+    multiple            => '',
+    pre_allocate        => 0,
+    n_copies            => 5,
+    check_marks         => '',
+    perfect_copy        => [3],
+    src                 => '',
+    debug               => 0,
+    debug_pixels        => 0,
+    scans               => '',
+    seuil               => 0.5,
+    seuil_up            => 1.0,
+    bw_threshold        => 0.6,
+    ignore_red          => '',
+    tol_marque          => 0.4,
+    rounding            => 'i',
+    grain               => 0.01,
+    notemax             => 20,
+    postcorrect_student => '',
+    postcorrect_copy    => '',
+    list                => '',
+    list_key            => 'id',
+    code                => 'student',
+    check_assoc         => '',
+    association_manual  => '',
+    annote              => '',
+    annote_files        => [],
+    annote_ascii        => 0,
+    annote_position     => 'marge',
+    verdict             => '%(id) %(ID)' . "\n" . 'TOTAL : %S/%M => %s/%m',
+    verdict_question    => "\"%" . "s/%" . "m\"",
+    model               => '(N).pdf',
+    ok_checksums        => {},
+    ok_checksums_file   => '',
+    to_check            => [],
+    export_full_csv     => [],
+    export_columns      => 'student.copy',
+    export_csv_ticked   => 'AB',
+    export_ods          => '',
+    blind               => 0,
+    check_zooms         => {},
+    check_subject       => '',
+    skip_prepare        => 0,
+    skip_scans          => 0,
+    tracedest           => \*STDERR,
+    debug_file          => '',
+    pages               => '',
+    extract_with        => 'qpdf',
+    force_convert       => 0,
+    force_magick        => 0,
+    no_gs               => 0,
+    documents           => 'sc',
+    speed               => 0,
+    full_scans          => '',
+    full_density        => 300,
+    tmpdir              => '',
+    decoder             => '',
+    password            => '',
+    password_key        => 'password',
+    setup               => 1,
+    exitonerror         => 1,
+};
+
 sub new {
     my ( $class, %oo ) = @_;
 
-    my $self = {
-        dir                 => '',
-        filter              => '',
-        tex_engine          => 'pdflatex',
-        multiple            => '',
-        pre_allocate        => 0,
-        n_copies            => 5,
-        check_marks         => '',
-        perfect_copy        => [3],
-        src                 => '',
-        debug               => 0,
-        debug_pixels        => 0,
-        scans               => '',
-        seuil               => 0.5,
-        seuil_up            => 1.0,
-        bw_threshold        => 0.6,
-        ignore_red          => '',
-        tol_marque          => 0.4,
-        rounding            => 'i',
-        grain               => 0.01,
-        notemax             => 20,
-        postcorrect_student => '',
-        postcorrect_copy    => '',
-        list                => '',
-        list_key            => 'id',
-        code                => 'student',
-        check_assoc         => '',
-        association_manual  => '',
-        annote              => '',
-        annote_files        => [],
-        annote_ascii        => 0,
-        annote_position     => 'marge',
-        verdict             => '%(id) %(ID)' . "\n" . 'TOTAL : %S/%M => %s/%m',
-        verdict_question    => "\"%" . "s/%" . "m\"",
-        model               => '(N).pdf',
-        ok_checksums        => {},
-        ok_checksums_file   => '',
-        to_check            => [],
-        export_full_csv     => [],
-        export_columns      => 'student.copy',
-        export_csv_ticked   => 'AB',
-        export_ods          => '',
-        blind               => 0,
-        check_zooms         => {},
-        check_subject       => '',
-        skip_prepare        => 0,
-        skip_scans          => 0,
-        tracedest           => \*STDERR,
-        debug_file          => '',
-        pages               => '',
-        extract_with        => 'qpdf',
-        force_convert       => 0,
-        force_magick        => 0,
-        no_gs               => 0,
-        documents           => 'sc',
-        speed               => 0,
-        full_scans          => '',
-        full_density        => 300,
-        tmpdir              => '',
-        decoder             => '',
-        password            => '',
-        password_key        => 'password',
-    };
+    my $self = { error=>0, %$defaults };
 
     for ( keys %oo ) {
         $self->{$_} = $oo{$_} if ( exists( $self->{$_} ) );
@@ -123,6 +127,36 @@ sub new {
     $self->{dir} =~ s:/[^/]*$::;
 
     bless( $self, $class );
+
+    my $to_stdout = 0;
+
+    GetOptions(
+        "debug!"         => \$self->{debug},
+        "blind!"         => \$self->{blind},
+        "log-to=s"       => \$self->{debug_file},
+        "to-stdout!"     => \$to_stdout,
+        "extract-with=s" => \$self->{extract_with},
+        "tmp=s"          => \$self->{tmpdir},
+    );
+
+    $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
+
+    $self->{tracedest} = \*STDOUT if ($to_stdout);
+    binmode $self->{tracedest}, ":utf8";
+
+    $self->setup() if($self->{setup});
+
+    return $self;
+}
+
+sub clean {
+    my ($self) = @_;
+
+    $self->set( src => '', scans => '', names => '', list => '' );
+}
+
+sub setup {
+    my ($self)=@_;
 
     if ( !$self->{src} ) {
         opendir( my $dh, $self->{dir} )
@@ -143,21 +177,6 @@ sub new {
       AMC::NamesFile::new( $self->{dir} . '/' . $self->{list}, 'utf8', 'id' )
       if ( $self->{list} && -f $self->{dir} . '/' . $self->{list} );
 
-    my $to_stdout = 0;
-
-    GetOptions(
-        "debug!"         => \$self->{debug},
-        "blind!"         => \$self->{blind},
-        "log-to=s"       => \$self->{debug_file},
-        "to-stdout!"     => \$to_stdout,
-        "extract-with=s" => \$self->{extract_with},
-        "tmp=s"          => \$self->{tmpdir},
-    );
-
-    $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
-
-    $self->{tracedest} = \*STDOUT if ($to_stdout);
-    binmode $self->{tracedest}, ":utf8";
 
     $self->install;
 
@@ -168,8 +187,6 @@ sub new {
     $self->read_checksums( $self->{dir} . '/ok-checksums' );
 
     require Time::HiRes if ( $self->{speed} );
-
-    return $self;
 }
 
 sub set {
@@ -180,6 +197,12 @@ sub set {
     }
 
     return $self;
+}
+
+sub failed {
+    my ( $self, $error ) = @_;
+    $self->{error} += $error;
+    exit($error) if ( $self->{exitonerror} );
 }
 
 sub read_checksums {
@@ -342,7 +365,7 @@ sub command {
         $cc .= " " . $c[1] if ( $#c > 0 );
         $cc .= " ..."      if ( $#c > 1 );
         $self->trace("[E] Command `$cc' returned with $?");
-        exit 1;
+        $self->failed(1);
     }
 }
 
@@ -672,7 +695,7 @@ sub check_perfect {
     for my $i ( keys %p ) {
         if ( $p{$i} ) {
             $self->trace("[E] Non-perfect copy: $i");
-            exit(1);
+            $self->failed(1);
         }
     }
 }
@@ -703,7 +726,7 @@ sub check_marks {
     my @no = ( keys %p );
     if (@no) {
         $self->trace( "[E] Uncorrect marks: " . join( ',', @no ) );
-        exit(1);
+        $self->failed(1);
     }
 
 }
@@ -780,7 +803,7 @@ sub check_assoc {
     my @no = ( keys %p );
     if (@no) {
         $self->trace( "[E] Uncorrect association: " . join( ',', @no ) );
-        exit(1);
+        $self->failed(1);
     }
 
 }
@@ -827,7 +850,7 @@ sub annote {
         for my $f ( @{ $self->{annote_files} } ) {
             if ( !$p{$f} ) {
                 $self->trace("[E] Annotated file $f has not been generated.");
-                exit(1);
+                $self->failed(1);
             }
         }
         $self->trace( "[T] Annotated file names: "
@@ -838,16 +861,20 @@ sub annote {
 sub ok {
     my ($self) = @_;
     $self->end;
-    if ( @{ $self->{to_check} } ) {
-        $self->trace( "[?] "
-              . ( 1 + $#{ $self->{to_check} } )
-              . " files to check in $self->{check_dir}:" );
-        for ( @{ $self->{to_check} } ) {
-            $self->trace( "    " . $_->[0] . " " . $_->[1] );
-        }
-        exit(2) if ( !$self->{blind} );
+    if ( $self->{error} ) {
+        $self->trace("[E] Test failed (see errors above)");
     } else {
-        $self->trace("[0] Test completed succesfully");
+        if ( @{ $self->{to_check} } ) {
+            $self->trace( "[?] "
+                  . ( 1 + $#{ $self->{to_check} } )
+                  . " files to check in $self->{check_dir}:" );
+            for ( @{ $self->{to_check} } ) {
+                $self->trace( "    " . $_->[0] . " " . $_->[1] );
+            }
+            $self->failed(2) if ( !$self->{blind} );
+        } else {
+            $self->trace("[0] Test completed succesfully");
+        }
     }
 }
 
@@ -869,7 +896,7 @@ sub defects {
     my @t = ( keys %$d );
     if (@t) {
         $self->trace( "[E] Layout defects: " . join( ', ', @t ) );
-        exit 1;
+        $self->failed(1);
     } else {
         $self->trace("[T] No layout defects");
     }
@@ -903,7 +930,7 @@ sub check_export {
                   . translate_column_title('copie') . ' or '
                   . translate_column_title('name')
                   . " columns not found" );
-            exit(1);
+            $self->failed(1);
         }
         while ( my $row = $c->getline($fh) ) {
             for my $t (@csv) {
@@ -942,7 +969,7 @@ sub check_export {
                 $self->trace( "[E] CSV: line not found. "
                       . join( ', ', map { $_ . '=' . $t->{$_} } ( keys %$t ) )
                 );
-                exit(1);
+                $self->failed(1);
             }
         }
         $self->end;
@@ -988,7 +1015,7 @@ sub check_export {
             } else {
                 $self->trace(
                     "[E] Stats: question not found in stats table: $q->{id}");
-                exit 1;
+                $self->failed(1);
             }
         }
         $self->end;
@@ -1046,7 +1073,7 @@ sub check_zooms {
                   . ( 1 + $#zooms )
                   . " elements, but needs "
                   . $cz->{$p} );
-            exit(1);
+            $self->failed(1);
         }
     }
 
@@ -1072,7 +1099,7 @@ sub check_textest {
         while (<TEX>) {
             if (/^\!/) {
                 $self->trace("[E] latex error: $_");
-                exit(1);
+                $self->failed(1);
             }
             if (/^SECTION\((.*)\)/) {
                 $self->end();
@@ -1098,7 +1125,7 @@ sub check_textest {
         $self->end();
     } else {
         $self->trace("[X] TeX file not found: $tex_file");
-        exit(1);
+        $self->failed(1);
     }
   }
 
@@ -1158,7 +1185,7 @@ sub test {
                   . $self->{test_title}
                   . " [$subtest] : \'$x\' should be \'$v\'" );
             $self->datadump;
-            exit(1);
+            $self->failed(1);
         }
     }
 }
@@ -1171,7 +1198,7 @@ sub test_undef {
               . $self->{test_title}
               . " [$self->{'n.subt'}] : \'$x\' should be undef" );
         $self->datadump;
-        exit(1);
+        $self->failed(1);
     }
 }
 

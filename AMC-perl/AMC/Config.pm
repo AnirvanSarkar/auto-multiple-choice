@@ -764,7 +764,8 @@ sub open_project {
     # Convert old style ODS group sum options
     if ( !defined( $self->{project}->{export_ods_group} ) ) {
         $self->{project}->{export_ods_group} =
-          ( $self->{project}->{export_ods_groupsep} eq '' ? 0 : 1 );
+            ( defined($self->{project}->{export_ods_groupsep}) &&
+              $self->{project}->{export_ods_groupsep} ne '' ? 1 : 0 );
         $self->{project}->{export_ods_groupsep} = '.'
           if ( !$self->{project}->{export_ods_groupsep} );
     }
