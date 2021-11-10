@@ -1,6 +1,7 @@
 
 try_one() {
   t=$1
+  echo -en "[....] $t\r"
   if $t --to-stdout $ARGS > $RESULT_FILE
   then
       if grep -iq 'uninitialized' $RESULT_FILE ;
