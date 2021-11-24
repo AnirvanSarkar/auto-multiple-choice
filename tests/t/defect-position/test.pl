@@ -40,7 +40,7 @@ delete( $d->{DIFFERENT_POSITIONS} );
 
 my @t = ( keys %$d );
 if (@t) {
-    $self->trace( "[E] Layout defects: " . join( ', ', @t ) );
+    $t->trace( "[E] Layout defects: " . join( ', ', @t ) );
 }
 
 $t->ok;
