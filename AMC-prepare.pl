@@ -646,7 +646,9 @@ sub execute {
     # PDF, nothing has to be done...
 
     if ( $format eq 'dvi' ) {
-        if ( -f "$jobname.dvi" ) {
+        if ( $oo{latex_only} ) {
+            debug "No need to build the PDF file.";
+        } elsif ( -f "$jobname.dvi" ) {
 
             # default DVI->PDF engine is dvipdfmx
 
@@ -1057,7 +1059,8 @@ if ( $to_do{b} ) {
 
     execute(
         command_opts => [@opts],
-        once         => 1
+        once         => 1,
+        latex_only   => 1,
     );
 
     open( AMCLOG, "$jobname.amc" ) or die "Unable to open $jobname.amc : $!";
