@@ -668,6 +668,14 @@ sub define_statements {
               . " WHERE zone='__n'"
               . " GROUP BY student) AS counts WHERE n>1"
         },
+        DEFECT_INCOMPLETE_MULTI => {
+            sql => "SELECT student,page,"
+                . " SUM(CASE WHEN name like ? THEN 1 ELSE 0 END) AS nid"
+                . " FROM ". $self->table("box")." AS b,"
+                . $self->table("question")." AS q"
+                . " ON b.question=q.question WHERE role=?"
+                . " GROUP BY student,page HAVING nid=0"
+        },
         pageFilename => {
                 sql => "SELECT student || '-' || page || '-' || checksum FROM "
               . $self->table("page")
@@ -1135,10 +1143,16 @@ sub students {
 #
 # * {DIFFERENT_POSITIONS} is a pointer to a hash returned by
 #   check_positions($delta)
+#
+# * {INCOMPLETE_MULTI} is a pointer on an array of hashes containing
+#   all the student,page's where there are boxes to be checked by the
+#   student *but* no AMCcode[multi]
+
 sub defects {
     my ( $self, $delta ) = @_;
     $delta = 0.1 if ( !defined($delta) );
     my %r     = ();
+
     my @tests = (qw/NO_NAME SEVERAL_NAMES/);
     push @tests, 'NO_BOX'
       if ( !$self->variable_boolean('build:extractonly') );
@@ -1146,16 +1160,26 @@ sub defects {
         my @s = $self->sql_list( $self->statement( 'DEFECT_' . $type ) );
         $r{$type} = [@s] if (@s);
     }
-    for my $type (qw/OUT_OF_PAGE/) {
+
+    @tests=(qw/OUT_OF_PAGE/);
+    push @tests, 'INCOMPLETE_MULTI'
+      if ( $self->variable('build:multi') );
+    for my $type (@tests) {
+        my @bind = ();
+        if ( $type eq 'INCOMPLETE_MULTI' ) {
+            push @bind, $self->variable('build:multi') . '*%', BOX_ROLE_ANSWER;
+        }
         my @s = @{
             $self->dbh->selectall_arrayref(
                 $self->statement( 'DEFECT_' . $type ),
-                { Slice => {} } )
+                { Slice => {} }, @bind )
         };
         $r{$type} = [@s] if (@s);
     }
+
     my $pos = $self->check_positions($delta);
     $r{DIFFERENT_POSITIONS} = $pos if ($pos);
+
     return (%r);
 }
 

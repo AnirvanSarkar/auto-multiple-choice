@@ -3458,6 +3458,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % \item |h| is a shortcut for |vertical=false|;
 % \item |v| is a shortcut for |vertical=true|;
 % \item |top| to request top-aligned columns in vertical direction.
+% \item |multi| for codes that are repeated on each page.
 % \end{itemize}
 %
 %    \begin{macrocode}
@@ -3477,6 +3478,8 @@ Three digits and two letters:\insertgroup{mixed}.
 \int_new:N \amc_code_digit_n_int
 \bool_new:N \amc_code_vertical_bool
 \bool_new:N \amc_code_top_bool
+\bool_new:N \amc_code_multi_bool
+\clist_new:N \amc__multi_clist
 
 \cs_new:Npn \amc_code_init:N #1 {
   \def\AMCbeginQuestion##1##2{}
@@ -3512,14 +3515,36 @@ Three digits and two letters:\insertgroup{mixed}.
   h .code:n = { \bool_set_false:N \amc_code_vertical_bool },
   top .bool_set:N = \amc_code_top_bool,
   top .initial:n = { false },
-  top .default:n = { true }
+  top .default:n = { true },
+  multi .bool_set:N = \amc_code_multi_bool,
+  multi .initial:n = { false },
+  multi .default:n = { true }
 }
+
+\cs_new_nopar:Nn \amc_multi_report: {
+  \immediate\write\AMC@XYFILE{\string\with{multi=\clist_use:Nn\amc__multi_clist{,}}}
+}
+\cs_new_eq:NN \AMC@multi@report \amc_multi_report:
+\int_new:N \amc_multi_count_int
+\cs_new_nopar:Nn \amc_multi_clear: {
+  \int_gzero:N \amc_multi_count_int
+}
+\cs_new_eq:NN \AMC@multiclear \amc_multi_clear:
 
 \cs_new:Npn \amc_code_generate:nNn #1#2#3 {
   { \keys_set:nn { amccode } { #3 }
+    \bool_if:NTF \amc_code_multi_bool {
+      \clist_gset:Nn \amc__multi_clist { #1 }
+    } {}
+    \bool_if:NTF \amc_code_multi_bool { \int_gincr:N \amc_multi_count_int } {}
     \amc_code_init:N #2
     \clist_map_inline:Nn #2 { % iterates over 'digits'
-      \begin{question}{\AMCcodeID{#1}{ \int_use:N \amc_code_digit_n_int }}
+      \begin{question}{
+          \AMCcodeID{ #1 \bool_if:NTF 
+            \amc_code_multi_bool
+            { * \int_use:N \amc_multi_count_int } {} }
+          { \int_use:N \amc_code_digit_n_int }
+        }
         \amc_code_digit_init:
         \seq_set_split:Nnn \amc_code_digits_seq {} { ##1 }
         \bool_if:NTF \amc_code_vertical_bool {
@@ -4795,6 +4820,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageNoMarks}\fi\fi%
     \AMCnumero{1}%
     \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
+    \AMC@multiclear%
     \global\AMC@keepmemoryfalse%
       #2%
     \ifAMC@keepmemory\else\AMC@mem@clear\fi%
@@ -4802,6 +4828,7 @@ Three digits and two letters:\insertgroup{mixed}.
   \advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
   \global\AMCid@etudstart=\AMCid@etud%
   \ifAMC@pdfform\end{Form}\fi%
+  \AMC@multi@report%
 }
 %    \end{macrocode}\end{macro}
 %
