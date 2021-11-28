@@ -243,6 +243,10 @@ endif
 	install    -m 0755 $(USER_GROUP) $(BINARIES) $(DESTDIR)/$(MODSDIR)/exec
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDIR)
 	install    -m 0644 $(USER_GROUP) $(STY) $(DESTDIR)/$(TEXDIR)
+ifneq ($(CSSDIR),)
+	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(CSSDIR)
+	install    -m 0644 $(USER_GROUP) auto-multiple-choice.css $(DESTDIR)/$(CSSDIR)
+endif
 ifneq ($(DESKTOPDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DESKTOPDIR)
 	install    -m 0644 $(USER_GROUP) net.auto_multiple_choice.amc.desktop $(DESTDIR)/$(DESKTOPDIR)
@@ -326,7 +330,7 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz $(foreach SIZE, $(APPICONSIZES), $(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
+	-sudo rm /usr/share/auto-multiple-choice /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz $(foreach SIZE, $(APPICONSIZES), $(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
 	-sudo rm -r /usr/lib/AMC
 
 local: global
@@ -335,6 +339,7 @@ local: global
 	test -d /usr/lib/AMC/perl || sudo mkdir -p /usr/lib/AMC/perl
 	test -d /usr/lib/AMC/exec || sudo mkdir -p /usr/lib/AMC/exec
 	test -d /usr/share/auto-multiple-choice  || sudo mkdir -p /usr/share/auto-multiple-choice
+	test -d /usr/share/auto-multiple-choice/gtk  || sudo mkdir -p /usr/share/auto-multiple-choice/gtk
 	test -d $(TEXDIR) || sudo mkdir $(TEXDIR)
 	sudo ln -s $(LOCALDIR)/AMC-perl/AMC /usr/share/perl5/AMC
 	sudo ln -s $(LOCALDIR)/AMC-detect /usr/lib/AMC/exec/AMC-detect
@@ -349,6 +354,7 @@ local: global
 	sudo ln -s $(LOCALDIR)/$(STY) $(TEXDIR)/automultiplechoice.sty
 	sudo ln -s $(LOCALDIR)/interfaces/amc-txt.lang $(LANG_GTKSOURCEVIEW_DIR)
 	sudo ln -s $(LOCALDIR)/interfaces/auto-multiple-choice.xml $(SHARED_MIMEINFO_DIR)
+	sudo ln -s $(LOCALDIR)/auto-multiple-choice.css $(CSSDIR)
 ifneq ($(APPICONDIR),)
 	sudo ln -s $(LOCALDIR)/$(MAIN_LOGO).svgz $(APPICONDIR)/scalable/apps
 	$(foreach SIZE, $(APPICONSIZES),\

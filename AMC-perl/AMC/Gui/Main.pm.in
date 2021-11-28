@@ -128,23 +128,10 @@ sub new {
 sub set_css {
     my ($self) = @_;
     my $css = Gtk3::CssProvider->new();
-    $css->load_from_data( '
-infobar.info, infobar.info box {
-    background-color: @success_color;
-    background-image: none;
-}
-infobar.warning, infobar.warning box {
-    background-color: @warning_color;
-    background-image: none;
-}
-infobar.error, infobar.error box {
-    background-color: @error_color;
-    background-image: none;
-}
-infobar.info button box, infobar.warning button box, infobar.error button box {
-    background-color: transparent;
-}
-' );
+    my $css_file = "@/CSSDIR/@/auto-multiple-choice.css";
+    my $user_css_file = amc_user_confdir() . "/auto-multiple-choice.css";
+    $css_file = $user_css_file if ( -f $user_css_file );
+    $css->load_from_path($css_file) if ( -f $css_file );
 
     Gtk3::StyleContext::add_provider_for_screen(
         $self->get_ui('main_window')->get_screen(),
@@ -2575,7 +2562,7 @@ sub update_analysis_summary {
               sprintf( __
 "Data capture from %d complete papers, and %d papers to be matched.",
                 $r{complete}, $r{incomplete} );
-            $ok = 'warning';
+            $ok = 'info';
         } else {
             $tt =
               sprintf( __

@@ -1,0 +1,30 @@
+@define-color amc_info_color #23FF00;
+@define-color amc_error_color #FF2500;
+@define-color amc_warning_color #FFB900;
+@define-color amc_question_color #005FFF;
+
+@define-color amc_info_bg_color mix(@theme_bg_color, @amc_info_color, 0.2);
+@define-color amc_warning_bg_color mix(@theme_bg_color, @amc_warning_color, 0.2);
+@define-color amc_error_bg_color mix(@theme_bg_color, @amc_error_color, 0.2);
+@define-color amc_question_bg_color mix(@theme_bg_color, @amc_question_color, 0.2);
+
+infobar.info, infobar.info box {
+    background-color: @amc_info_bg_color;
+    background-image: none;
+}
+infobar.warning, infobar.warning box {
+    background-color: @amc_warning_bg_color;
+    background-image: none;
+}
+infobar.error, infobar.error box {
+    background-color: @amc_error_bg_color;
+    background-image: none;
+}
+infobar.question, infobar.question box {
+    background-color: @amc_question_bg_color;
+    background-image: none;
+}
+
+infobar.info button box, infobar.warning button box, infobar.error button box, infobar.question button box {
+    background-color: transparent;
+}
