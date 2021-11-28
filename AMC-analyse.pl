@@ -115,6 +115,7 @@ my $data;
 my $layout;
 
 my $max_enter;
+my $multi;
 
 # Reads scan files from command line
 
@@ -253,6 +254,7 @@ $layout = $data->module('layout');
 $layout->begin_read_transaction('cRLY');
 
 $max_enter = $layout->max_enter();
+$multi     = $layout->variable("build:multi");
 
 if ( $layout->pages_count() == 0 ) {
     $layout->end_transaction('cRLY');
@@ -768,7 +770,7 @@ sub global_error {
     exit(1);
 }
 
-if ( $max_enter > 1 && $multiple ) {
+if ( $max_enter > 1 && $multiple && !$multi ) {
 
     # photocopy mode, with more than 1 page per student copy: we must
     # check first that we will be able to know which scans belongs to

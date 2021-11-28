@@ -2394,6 +2394,7 @@ sub saisie_automatique {
     AMC::Gui::AutoCapture->new(
         parent_window => $self->get_ui('main_window'),
         config        => $self->{config},
+        layout        => $self->{project}->layout,
         capture       => $self->{project}->capture,
         callback_self => $self,
         callback      => \&auto_data_capture_callback,

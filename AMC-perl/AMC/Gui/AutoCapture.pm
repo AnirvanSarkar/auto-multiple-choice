@@ -39,6 +39,7 @@ sub new {
 
     $self->merge_config(
         {
+            layout        => '',
             capture       => '',
             callback_self => '',
             callback => sub { debug "Error: missing AutoCapture callback"; },
@@ -74,6 +75,7 @@ sub new {
 #
 # - n: the number of exam sheets already been captured
 # - mcopy: the first available copy number
+# - multi: code id with use of AMCcodeGrid[multi], if any
 
 sub set_env {
     my ($self) = @_;
@@ -82,6 +84,12 @@ sub set_env {
         $self->{capture}->begin_read_transaction('ckev');
         $self->{n} = $self->{capture}->n_copies;
         $self->{mcopy} = $self->{capture}->max_copy_number() + 1;
+
+        $self->{multi} = $self->{layout}->variable("build:multi");
+        if ( $self->{multi} ) {
+            $self->set( "project:allocate_ids", 1 );
+        }
+        
         $self->{capture}->end_transaction('ckev');
     }
 }
@@ -133,6 +141,9 @@ sub dialog {
             $self->{mcopy}
         )
     );
+    if ( $self->{multi} ) {
+        $self->get_ui('saisie_auto_cb_allocate_ids')->set_sensitive(0);
+    }
 
     $self->get_ui('saisie_auto_c_auto_capture_mode')
       ->set_sensitive( $self->{n} == 0 );
