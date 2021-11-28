@@ -1194,9 +1194,12 @@ sub go {
             $self->{qnobox} = $self->{layout}->questions_with_no_box();
 
             $self->{aIDs} = [
-              sort { $a cmp $b }
-              map  { $self->{association}->anonymized( $_->[0], $_->[1] ) }
-              @{ $self->{students} } ];
+                sort { $a cmp $b }
+                  map {
+                    $self->{association}
+                      ->anonymized( $_->[0], $_->[1], $self->{anonymous} )
+                  } @{ $self->{students} }
+            ];
 
             $self->{layout}->end_transaction('aIDQ');
         }
