@@ -2550,7 +2550,8 @@ sub report_analyse_errors {
 sub update_analysis_summary {
     my ($self) = @_;
 
-    my $n = $self->{project}->capture->n_pages;
+    my $multi = $self->{project}->layout->variable("build:multi");
+    my $n     = $self->{project}->capture->n_pages;
 
     my %r = $self->{project}->capture->counts;
 
@@ -2569,10 +2570,19 @@ sub update_analysis_summary {
     my $tt = '';
     my $ok = 'info';
     if ( $r{incomplete} ) {
-        $tt = sprintf(
-            __ "Data capture from %d complete papers and %d incomplete papers",
-            $r{complete}, $r{incomplete} );
-        $ok = 'error';
+        if ($multi) {
+            $tt =
+              sprintf( __
+"Data capture from %d complete papers, and %d papers to be matched.",
+                $r{complete}, $r{incomplete} );
+            $ok = 'warning';
+        } else {
+            $tt =
+              sprintf( __
+"Data capture from %d complete papers and %d incomplete papers",
+                $r{complete}, $r{incomplete} );
+            $ok = 'error';
+        }
         $self->get_ui('button_show_missing')->show();
     } elsif ( $r{complete} ) {
         $tt =
