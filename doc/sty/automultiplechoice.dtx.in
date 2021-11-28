@@ -3311,18 +3311,35 @@ Three digits and two letters:\insertgroup{mixed}.
 %         Environment |{questionouverte}|\oarg{width} is used for open
 %         questions (that won't be marked automatically!), with width
 %         given as an optional argument (defaults to 3\,cm).
+%
+%         The command |\AMCexternalQuestion|\marg{id}\marg{maxscore}
+%         allows to declare a question that will be scored outside
+%         AMC, with a maximal score \meta{maxscore}. When you use this
+%         command, you can manage the question number and question
+%         text freely (AMC won't handle this).
 %    \begin{macrocode}
 \ifx\question\undefined\else\let\question\undefined\fi
 \def\AMCnobloc{\AMC@qblocfalse}
 \def\AMCbloc{\AMC@qbloctrue}
-\newenvironment{question}[2][]{%
-  \def\AMCcurrentenv{question}%
-  \AMC@stepQuestion%
-  \global\def\AMCid@name{#2}\AMC@affecte{#2}{\AMCid@quest}%
+\newcommand\AMCstartWithQuestion[1]{%
+  \global\def\AMCid@name{#1}\AMC@affecte{#1}{\AMCid@quest}%
   \ifAMC@calibration%
     \AMCmessage{Q=\the\AMCid@quest}%
     \immediate\write\AMC@XYFILE{\string\question{\the\AMCid@quest}{\AMCid@name}}%
   \fi%
+}
+\newcommand\AMCexternalQuestion[2]{%
+  \AMCstartWithQuestion{#1}%
+  \ifAMC@calibration%
+    \AMC@amclog{AUTOQCM[B=MAX=#2]^^J}%
+    \AMC@amclog{AUTOQCM[MULT]^^J}%
+    \AMC@amclog{AUTOQCM[FQ]^^J}%
+  \fi%
+}
+\newenvironment{question}[2][]{%
+  \def\AMCcurrentenv{question}%
+  \AMC@stepQuestion%
+  \AMCstartWithQuestion{#2}%
   \AMCbeforeQuestion%
   \ifx\@empty\AMC@sz@callout\@empty\else%
     \csname\AMC@sz@callout\endcsname%
@@ -3522,7 +3539,9 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 
 \cs_new_nopar:Nn \amc_multi_report: {
+  \ifAMC@calibration
   \immediate\write\AMC@XYFILE{\string\with{multi=\clist_use:Nn\amc__multi_clist{,}}}
+  \fi
 }
 \cs_new_eq:NN \AMC@multi@report \amc_multi_report:
 \int_new:N \amc_multi_count_int
