@@ -137,6 +137,8 @@ sub set_number_variables {
     for my $a ( @{ $question_data->{answers} } ) {
         my $c = $a->{correct};
         my $t = ( $correct ? $c : $a->{ticked} );
+        $t = 0
+          if ( !defined($t) );
 
         debug(  "[ Q "
               . $a->{question} . " A "

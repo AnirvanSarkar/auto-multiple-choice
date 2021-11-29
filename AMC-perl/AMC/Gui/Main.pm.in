@@ -377,7 +377,7 @@ sub main_window {
           toggle_column_updated toggle_column_mse
           toggle_column_sensitivity toggle_column_file
           diag_tree state_capture state_capture_label
-          maj_bareme regroupement_corriges
+          maj_bareme gather_multi regroupement_corriges
           groupe_model
           pref_assoc_c_assoc_code pref_assoc_c_liste_key
           export_c_format_export
@@ -2609,6 +2609,20 @@ sub update_analysis_summary {
     }
     $self->set_state( 'unrecognized', $ok, $tt );
 
+    # Adapt marking GUI: with a multi-code, show the 'gather pages'
+    # option
+
+    if ($multi) {
+        $self->get_ui('gather_multi')
+          ->set_label(
+            sprintf( __("Gather pages with the same code \"%s\""), $multi ) );
+        $self->get_ui('gather_multi')->set_active( $r{complete} ? 0 : 1 );
+        $self->get_ui('gather_multi')->show();
+    } else {
+        $self->get_ui('gather_multi')->set_active(0);
+        $self->get_ui('gather_multi')->hide();
+    }
+
     return ( \%r );
 }
 
@@ -3245,10 +3259,7 @@ sub noter {
         );
 
     } else {
-        $self->{project}->compute_marks(
-            callback_self => $self,
-            callback      => \&compute_marks_callback
-        );
+        $self->compute_marks_go();
     }
 }
 
@@ -3290,19 +3301,56 @@ sub noter_postcorrect {
         );
 
     } else {
-        $self->{project}->compute_marks(
-            callback_self => $self,
-            callback      => \&compute_marks_callback
-        );
+        $self->compute_marks_go();
+    }
+}
+
+sub compute_marks_go {
+    my ( $self, %oo ) = @_;
+
+    $self->{project}->compute_marks(
+        %oo,
+        gather_multi => (
+            $self->get_ui('gather_multi')->get_active() && !$oo{second_pass}
+        ),
+        callback_self => $self,
+        callback      => \&compute_marks_callback
+    );
+}
+
+sub compute_marks_second_pass {
+    my ( $self, $c, %data ) = self_first(@_);
+
+    if ( $data{cancelled} ) {
+        $self->noter_resultat();
+    } else {
+        $self->detecte_analyse();
+        $self->anonymize_update();
+
+        $self->compute_marks_go( second_pass => 1 );
     }
 }
 
 sub compute_marks_callback {
     my ( $self, $c, %data ) = self_first(@_);
 
-    $self->notify_end_of_work( 'grading', __ "Grading has been completed" )
-      if ( !$data{cancelled} );
-    $self->noter_resultat();
+    if ( $data{cancelled} ) {
+        $self->noter_resultat();
+    } else {
+        if($c->{o}->{gather_multi}) {
+            # a first pass has been done to collect codes from the
+            # pages. Now we 1) try to gather pages with the same codes
+            # And 2) we compute marks again, to update the total
+            # scores and final marks
+            $self->{project}->gather_multicode(
+                callback_self => $self,
+                callback      => \&compute_marks_second_pass
+            );
+        } else {
+            $self->notify_end_of_work( 'grading', __ "Grading has been completed" );
+            $self->noter_resultat();
+        }
+    }
 }
 
 sub noter_resultat {

@@ -880,6 +880,10 @@ sub compute_marks {
                     $self->{config}->get('note_max_plafond') ? "--plafond"
                     : "--no-plafond"
                 ),
+                (
+                    $oo{gather_multi} ? "--multi-only"
+                    : "--no-multi-only"
+                ),
                 "--notenull",
                 $self->{config}->get('note_null'),
                 "--notemin",
@@ -902,6 +906,29 @@ sub compute_marks {
         signal       => 2,
         texte        => __ "Computing marks...",
         'progres.id' => 'notation',
+        o            => \%oo,
+        fin          => $oo{callback},
+    );
+}
+
+sub gather_multicode {
+    my ( $self, %oo ) = @_;
+    $self->commande(
+        commande => [
+            "auto-multiple-choice",
+            "gathermulticode",
+            "--debug",
+            debug_file(),
+            pack_args(
+                "--project",        $self->{config}->{shortcuts}->absolu('%PROJET/'),
+                "--data",           $self->{config}->get_absolute('data'),
+                "--progression-id", 'gathermulticode',
+                "--progression",    1,
+            ),
+        ],
+        signal       => 2,
+        texte        => __ "Gathering pages with the same code...",
+        'progres.id' => 'gathermulticode',
         o            => \%oo,
         fin          => $oo{callback},
     );

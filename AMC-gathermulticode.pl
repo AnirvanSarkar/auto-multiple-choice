@@ -1,0 +1,176 @@
+#! /usr/bin/env perl
+#
+# Copyright (C) 2021 Alexis Bienvenüe <paamc@passoire.fr>
+#
+# This file is part of Auto-Multiple-Choice
+#
+# Auto-Multiple-Choice is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# Auto-Multiple-Choice is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Auto-Multiple-Choice.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+use warnings;
+use 5.012;
+
+use Getopt::Long;
+
+use AMC::Basic;
+use AMC::Data;
+use AMC::DataModule::report ':const';
+use AMC::Gui::Avancement;
+use utf8;
+
+my $project_dir = '';
+my $data_dir    = '';
+my $progres     = 1;
+my $progres_id  = '';
+
+unpack_args();
+
+GetOptions(
+    "data=s"           => \$data_dir,
+    "project=s"        => \$project_dir,
+    "progression-id=s" => \$progres_id,
+    "progression=s"    => \$progres,
+);
+
+# Check directories
+
+if ( !-d $project_dir ) {
+    attention("No PROJECT directory: $project_dir");
+    die "No PROJECT directory: $project_dir";
+}
+
+$data_dir = "$project_dir/data" if ( !-f $data_dir );
+
+if ( !-d $data_dir ) {
+    attention("No DATA directory: $data_dir");
+    die "No DATA directory: $data_dir";
+}
+
+# Uses an AMC::Gui::Avancement object to tell regularly the calling
+# program how much work we have done so far.
+
+my $avance = AMC::Gui::Avancement::new( $progres, id => $progres_id );
+
+# Connects to the databases.
+
+my $data        = AMC::Data->new($data_dir);
+my $scoring     = $data->module('scoring');
+my $layout      = $data->module('layout');
+my $association = $data->module('association');
+my $capture     = $data->module('capture');
+my $report      = $data->module('report');
+
+my $code_base = $layout->variable_transaction('build:multi');
+
+if(!$code_base) {
+    debug "Project with no multi-code: cancelling.";
+    exit(0);
+} else {
+    debug "Multi-code: $code_base";
+}
+
+my $values={};
+
+$scoring->begin_read_transaction('Gcod');
+for my $c ( $scoring->multicode_values($code_base) ) {
+    push @{ $values->{ $c->{value} . ";", $c->{student} } }, $c
+        if($c->{value});
+}
+
+my @moves = ();
+
+my $delta = 0.25 * (%$values==0 ? 1 : 1/%$values);
+
+for my $v ( keys %$values ) {
+    my @codes = sort { $a->{copy} <=> $b->{copy} } @{ $values->{$v} };
+    debug "CODE VALUE $v: "
+      . join( ", ",
+        map { "[" . $_->{student} . ":" . $_->{copy} . "/" . $_->{code} . "]" }
+          (@codes) )
+      . "\n";
+    my %copies = ();
+    for my $c (@codes) { $copies{ $c->{copy} }++ }
+    if ( %copies <= 1 ) {
+        debug "Same copy for all: nothing to do";
+    } else {
+        my $dest = shift @codes;
+        for my $c (@codes) {
+            push @moves,
+              {
+                student => $dest->{student},
+                page    => $layout->question_first_page(
+                    $c->{code} . '[1]',
+                    $c->{student}
+                ),
+                from => $c->{copy},
+                to   => $dest->{copy}
+              }
+              if ( $dest->{copy} != $c->{copy} );
+        }
+    }
+    $avance->progres($delta);
+}
+
+$scoring->end_transaction('Gcod');
+
+# Moves
+
+$data->begin_transaction('GMOV');
+
+$delta = 0.75 * (@moves==0 ? 1 : 1/@moves);
+
+my %sc=();
+
+for my $m (@moves) {
+    debug
+"MOVE student $m->{student} page $m->{page} : copy $m->{from} -> $m->{to}";
+
+    $sc{ $m->{student} }->{ $m->{from} } = 1;
+    $sc{ $m->{student} }->{ $m->{to} }   = 1;
+
+    $association->forget_copy( $m->{student}, $m->{from} );
+    if (
+        $capture->move_page_copy(
+            $m->{student}, $m->{page}, $m->{from}, $m->{to}
+        )
+      )
+    {
+        $capture->tag_overwritten( $m->{student}, $m->{page}, $m->{to} );
+    }
+
+    $avance->progres($delta);
+}
+
+# delete reports
+
+for my $student (keys %sc) {
+    for my $copy (keys %{$sc{$student}}) {
+        debug "Removing reports for ($student,$copy)";
+        for my $type (REPORT_ANNOTATED_PDF, REPORT_ANONYMIZED_PDF) {
+            $report->remove_student_report($project_dir, $type, $student, $copy);
+        }
+    }
+}
+
+# delete scoring data, that should be rebuilt after
+
+debug "Delete computed marks";
+$scoring->forget_marks();
+
+$data->end_transaction('GMOV');
+
+# The end!
+
+$avance->fin();
+

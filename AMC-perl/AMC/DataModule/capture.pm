@@ -857,6 +857,12 @@ sub define_statements {
               . "   AND z.type=? AND p.type=?"
               . " ORDER BY z.zoneid,p.corner"
         },
+        movePage => { sql =>
+              "UPDATE $t_page SET copy=? WHERE student=? AND page=? AND copy=?"
+          },
+        moveZones => { sql =>
+              "UPDATE $t_zone SET copy=? WHERE student=? AND page=? AND copy=?"
+          },
     };
     $self->{statements}->{pageSummary} =
       { sql => $self->{statements}->{pagesSummary}->{sql}
@@ -899,6 +905,21 @@ sub set_page_auto {
     }
 }
 
+# move_page_copy() moves page data corresponding to ($student,$page,$copy)
+# to ($student,$page,$copy_dest), and returns 1 if this erased previous data.
+
+sub move_page_copy {
+    my ( $self, $student, $page, $copy, $copy_dest ) = @_;
+    my $previous = 0;
+    if ( $self->get_page( $student, $page, $copy_dest ) ) {
+        $previous = 1;
+        $self->delete_page_data( $student, $page, $copy_dest );
+    }
+    $self->statement('movePage')->execute($copy_dest, $student, $page, $copy);
+    $self->statement('moveZones')->execute($copy_dest, $student, $page, $copy);
+    return ($previous);
+}
+
 # tag_overwritten(...) tags a page data as overwritten
 
 sub tag_overwritten {
@@ -906,7 +927,7 @@ sub tag_overwritten {
     $self->statement('overwritePage')->execute( $student, $page, $copy );
 }
 
-# sep_page_manual($student,$page,$copy,$timestamp) sets the timestamp
+# set_page_manual($student,$page,$copy,$timestamp) sets the timestamp
 # for a manual data capture for a particular page. With no $timestamp
 # argument, present time is used.
 

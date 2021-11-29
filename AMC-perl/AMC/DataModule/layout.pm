@@ -867,9 +867,18 @@ sub define_statements {
         questionNoBox => { sql => "SELECT question,name FROM "
               . $self->table("question")
               . " LEFT OUTER JOIN "
-              . " (SELECT * FROM ".$self->table("box")." WHERE role=?)"
+              . " (SELECT * FROM "
+              . $self->table("box")
+              . " WHERE role=?)"
               . " AS b USING(question) WHERE b.question IS NULL"
               . " ORDER BY name" },
+        questionPage => { sql => "SELECT page FROM "
+              . $self->table("question")
+              . " AS q, "
+              . $self->table("box") . " AS b"
+              . " WHERE q.question=b.question"
+              . " AND name=? AND student=? AND role=?"
+              . " GROUP BY page ORDER BY page" },
     };
 }
 
@@ -1403,6 +1412,20 @@ sub box_page {
         )
     );
 }
+
+# question_first_page($name, $student) gets the first page where one
+# can find one box corresponding to question $name for student
+# $student
+
+sub question_first_page {
+    my ($self, $name, $student) = @_;
+   return (
+        $self->sql_single(
+            $self->statement('questionPage'),
+            $name, $student, BOX_ROLE_ANSWER
+        )
+    );
+} 
 
 # Get the chararacter written inside or beside a box
 

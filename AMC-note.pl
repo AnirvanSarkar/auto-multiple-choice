@@ -41,6 +41,7 @@ my $granularity     = '0.5';
 my $rounding        = '';
 my $rounding_scheme = '';
 my $data_dir        = '';
+my $multi_only      = '';
 
 my $postcorrect_student      = '';
 my $postcorrect_copy         = '';
@@ -59,6 +60,7 @@ GetOptions(
     "arrondi=s"                 => \$rounding_scheme,
     "notemax=s"                 => \$perfect_mark,
     "plafond!"                  => \$ceiling,
+    "multi-only!"               => \$multi_only,
     "notemin=s"                 => \$floor_mark,
     "notenull=s"                => \$null_mark,
     "postcorrect-student=s"     => \$postcorrect_student,
@@ -156,6 +158,7 @@ $data->begin_transaction('MARK');
 # get some useful build variables
 
 my $code_digit_pattern = $layout->code_digit_pattern();
+my $multi = $layout->variable('build:multi');
 
 # Write the variables values in the database, so that they can be
 # retrieved later, and clears all the scores that could have been
@@ -224,7 +227,11 @@ for my $sc (@captured_studentcopy) {
 
     # Process each question in turn
 
-    for my $q ( @{ $ssb->{questions} } ) {
+  QUESTION: for my $q ( @{ $ssb->{questions} } ) {
+
+        next QUESTION
+          if ( $multi_only
+            && $q->{title} !~ /^$multi\*[0-9]+$code_digit_pattern$/ );
 
         my $question = $q->{question};
 
@@ -288,41 +295,46 @@ for my $sc (@captured_studentcopy) {
         $scoring->new_score( @$sc, $question, $xx, $max_score, $why );
     }
 
-    # Compute the final total score aggregating questions scores
+    if ( !$multi_only ) {
 
-    my ( $total, $max_i ) = $score->global_score( $scoring, @question_scores );
+        # Compute the final total score aggregating questions scores
 
-    # Now apply rounding scheme
+        my ( $total, $max_i ) =
+          $score->global_score( $scoring, @question_scores );
 
-    my $x;
+        # Now apply rounding scheme
 
-    if ( $perfect_mark > 0 ) {
-        $x = ( $perfect_mark - $null_mark ) / $granularity * $total / $max_i;
-    } else {
-        $x = $total / $granularity;
+        my $x;
+
+        if ( $perfect_mark > 0 ) {
+            $x =
+              ( $perfect_mark - $null_mark ) / $granularity * $total / $max_i;
+        } else {
+            $x = $total / $granularity;
+        }
+        $x = &$rounding($x) if ($rounding);
+        $x *= $granularity;
+        $x += $null_mark;
+
+        # Apply ceiling
+
+        $x = $perfect_mark
+          if ( $perfect_mark > 0
+            && $ceiling
+            && ( $x - $perfect_mark ) * ( $perfect_mark - $null_mark ) > 0 );
+
+        # Apply floor
+
+        if ( $floor_mark ne '' && $floor_mark !~ /[a-z]/i ) {
+            $x = $floor_mark
+              if ( ( $perfect_mark == 0 && $x < $floor_mark )
+                || ( $x - $floor_mark ) * ( $perfect_mark - $null_mark ) < 0 );
+        }
+
+        # Writes the student's final mark in the scoring database
+
+        $scoring->new_mark( @$sc, $total, $max_i, $x );
     }
-    $x = &$rounding($x) if ($rounding);
-    $x *= $granularity;
-    $x += $null_mark;
-
-    # Apply ceiling
-
-    $x = $perfect_mark
-      if ( $perfect_mark > 0
-        && $ceiling
-        && ( $x - $perfect_mark ) * ( $perfect_mark - $null_mark ) > 0 );
-
-    # Apply floor
-
-    if ( $floor_mark ne '' && $floor_mark !~ /[a-z]/i ) {
-        $x = $floor_mark
-          if ( ( $perfect_mark == 0 && $x < $floor_mark )
-            || ( $x - $floor_mark ) * ( $perfect_mark - $null_mark ) < 0 );
-    }
-
-    # Writes the student's final mark in the scoring database
-
-    $scoring->new_mark( @$sc, $total, $max_i, $x );
 
     # Build the AMCcodes values from their digits, and store them in the
     # scoring database

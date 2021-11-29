@@ -649,6 +649,11 @@ sub define_statements {
               . $self->table("code")
               . " WHERE student=? AND copy=? AND code=?"
         },
+        multicodeValues => {
+                sql => "SELECT student,copy,code,value FROM "
+              . $self->table("code")
+              . " WHERE code LIKE ?"
+        },
         codesCounts => {
                 sql => "SELECT student,copy,value,COUNT(*) as nb"
               . " FROM "
@@ -1270,6 +1275,22 @@ sub student_code {
     );
 }
 
+# multicode_values($code_base) returns a list of code $code_base*NN (codes derivated
+# from the multi code option) values for all the different students
+
+sub multicode_values {
+    my ( $self, $code_base ) = @_;
+    return (
+        grep { $_->{code} =~ /^$code_base\*[0-9]+$/ }
+        @{
+            $self->dbh->selectall_arrayref(
+                $self->statement('multicodeValues'), { Slice => {} },
+                $code_base.'*%'
+            )
+        }
+    );
+}
+
 # postcorrect_sc returns (postcorrect_student,postcorrect_copy), or
 # (0,0) if not in postcorrect mode.
 
@@ -1441,6 +1462,15 @@ sub n_external {
 sub delete_external {
     my ($self) = @_;
     $self->statement('deleteExternal')->execute();
+}
+
+# forget_marks() deletes all scoring data from all students
+
+sub forget_marks {
+    my ($self) = @_;
+    for my $t (qw/mark code score external/) {
+        $self->sql_do("DELETE FROM ".$self->table($t));
+    }
 }
 
 # add_question_external_score($q) adds the external score to a

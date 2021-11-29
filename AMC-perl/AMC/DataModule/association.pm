@@ -229,6 +229,8 @@ sub define_statements {
         },
         deleteAssociations =>
           { sql => "DELETE FROM $at" . " WHERE student=? AND copy=?" },
+        deleteAnonymization =>
+          { sql => "DELETE FROM $yt" . " WHERE student=? AND copy=?" },
         list => { sql => "SELECT * FROM $at ORDER BY student,copy" },
         setAnonymized =>
           { sql => "INSERT INTO $yt (student, copy, anonymousid) VALUES (?,?,?)" },
@@ -558,6 +560,15 @@ sub de_anonymized {
     } else {
         return ( undef, undef );
     }
+}
+
+# forget_copy($student,$copy) delete entries in the anonymize and
+# association tables corresponding to ($student,$copy).
+
+sub forget_copy {
+    my ( $self, $student, $copy ) = @_;
+    $self->statement('deleteAssociations')->execute( $student, $copy );
+    $self->statement('deleteAnonymization')->execute( $student, $copy );
 }
 
 1;

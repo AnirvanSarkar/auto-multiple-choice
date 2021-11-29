@@ -118,6 +118,7 @@ sub version_upgrade {
         return (2);
     } elsif( $old_version == 2 ) {
         $self->set_dir(REPORT_ANONYMIZED_PDF, "anonymous");
+        return (3);
     }
     return ('');
 }
@@ -216,6 +217,19 @@ sub delete_student_type {
 sub delete_student_report {
     my ( $self, $type, $student, $copy ) = @_;
     $self->statement('deleteReport')->execute( $type, $student, $copy );
+}
+
+# remove_student_report($type, $student, $copy) removes a student
+# report, including the file.
+
+sub remove_student_report {
+    my ( $self, $project_dir, $type, $student, $copy ) = @_;
+    my $report = $self->get_student_report( $type, $student, $copy );
+    if ($report) {
+        my $file = $project_dir . "/" . $self->get_dir($type) . "/" . $report;
+        unlink($file);
+        $self->delete_student_report( $type, $student, $copy );
+    }
 }
 
 # set_student_type($type,$student,$copy,$file,$timestamp) creates a
