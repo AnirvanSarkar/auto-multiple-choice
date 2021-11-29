@@ -87,6 +87,7 @@ sub new {
         progress_id                => '',
         compose                    => 0,
         pdf_corrected              => '',
+        pdf_background             => '',
         changes_only               => '',
         embedded_max_size          => '',
         embedded_format            => 'jpeg',
