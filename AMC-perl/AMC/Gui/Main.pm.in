@@ -2623,6 +2623,13 @@ sub update_analysis_summary {
         $self->get_ui('gather_multi')->hide();
     }
 
+    my $an_style = $self->get_ui('partie_anonymity')->get_style_context();
+    if ( $r{incomplete} ) {
+        $an_style->add_class('greyout');
+    } else {
+        $an_style->remove_class('greyout');
+    }
+
     return ( \%r );
 }
 
