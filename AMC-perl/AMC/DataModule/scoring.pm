@@ -455,6 +455,11 @@ sub define_statements {
               . $self->table("title")
               . " WHERE title=?"
         },
+        getQLike => {
+                sql => "SELECT title FROM "
+              . $self->table("title")
+              . " WHERE title LIKE ?"
+        },
         setTitle => {
                 sql => "UPDATE "
               . $self->table("title")
@@ -1037,6 +1042,21 @@ sub question_title {
 sub question_number {
     my ( $self, $title ) = @_;
     return ( $self->sql_single( $self->statement('getQNumber'), $title ) );
+}
+
+# multicode_registered($code_base) returns TRUE if a multicode is
+# registered in curent scoring.
+
+sub multicode_registered {
+    my ( $self, $code_base, $code_digit_pattern ) = @_;
+    $code_digit_pattern = '.*' if ( !$code_digit_pattern );
+    my @titles = grep { /^$code_base\*[0-9]+$code_digit_pattern$/ } (
+        @{
+            $self->dbh->selectcol_arrayref( $self->statement('getQLike'),
+                {}, $code_base . '*%' )
+        }
+    );
+    return ( 0 + @titles );
 }
 
 # question_maxmax($question) returns the maximum of the max value for

@@ -904,7 +904,9 @@ sub compute_marks {
             ),
         ],
         signal       => 2,
-        texte        => __ "Computing marks...",
+        texte => ( $oo{gather_multi}
+            ? __("Reading codes...")
+            : __("Computing marks...") ),
         'progres.id' => 'notation',
         o            => \%oo,
         fin          => $oo{callback},

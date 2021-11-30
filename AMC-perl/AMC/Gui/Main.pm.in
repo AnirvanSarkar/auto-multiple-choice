@@ -377,7 +377,7 @@ sub main_window {
           toggle_column_updated toggle_column_mse
           toggle_column_sensitivity toggle_column_file
           diag_tree state_capture state_capture_label
-          maj_bareme gather_multi regroupement_corriges
+          maj_bareme button_gather_multicode regroupement_corriges
           groupe_model
           pref_assoc_c_assoc_code pref_assoc_c_liste_key
           export_c_format_export
@@ -2562,7 +2562,7 @@ sub update_analysis_summary {
               sprintf( __
 "Data capture from %d complete papers, and %d papers to be matched.",
                 $r{complete}, $r{incomplete} );
-            $ok = 'info';
+            $ok = 'warning';
         } else {
             $tt =
               sprintf( __
@@ -2610,17 +2610,12 @@ sub update_analysis_summary {
     $self->set_state( 'unrecognized', $ok, $tt );
 
     # Adapt marking GUI: with a multi-code, show the 'gather pages'
-    # option
+    # button
 
-    if ($multi) {
-        $self->get_ui('gather_multi')
-          ->set_label(
-            sprintf( __("Gather pages with the same code \"%s\""), $multi ) );
-        $self->get_ui('gather_multi')->set_active( $r{complete} ? 0 : 1 );
-        $self->get_ui('gather_multi')->show();
+    if ($multi && $r{incomplete}) {
+        $self->get_ui('button_gather_multicode')->show();
     } else {
-        $self->get_ui('gather_multi')->set_active(0);
-        $self->get_ui('gather_multi')->hide();
+        $self->get_ui('button_gather_multicode')->hide();
     }
 
     my $an_style = $self->get_ui('partie_anonymity')->get_style_context();
@@ -3206,6 +3201,71 @@ sub delete_line {
     }
 }
 
+sub gather_multicode {
+    my ($self) = @_;
+
+    # Are we ready to compute marks? If not, extract scoring strategy.
+
+    $self->{project}->scoring->begin_read_transaction('GMul');
+    my $code_base          = $self->{project}->layout->variable('build:multi');
+    my $code_digit_pattern = $self->{project}->layout->code_digit_pattern();
+    my $registered         = $self->{project}
+      ->scoring->multicode_registered( $code_base, $code_digit_pattern );
+    my $extracted = $self->{project}->scoring->variable('extracted');
+    $extracted = 0 if ( !$extracted );
+    $self->{project}->scoring->end_transaction('GMul');
+    my @srcstat = stat( $self->get_absolute('texsrc') );
+
+    if ( $registered && $extracted >= $srcstat[9] ) {
+        $self->gather_multicode_go();
+    } else {
+        debug
+          "It seems that the scoring strategy is not yet extracted: let's go";
+        $self->{project}->scoring_strategy_update(
+            0,
+            o   => { callback_self => $self },
+            fin => \&gather_multicode_go,
+        );
+    }
+}
+
+sub gather_multicode_go {
+    my ( $self, $c, %data ) = self_first(@_);
+
+    # compute code values
+
+    $self->{project}->compute_marks(
+        gather_multi  => 1,
+        callback_self => $self,
+        callback      => \&compute_multicode_callback
+    );
+}
+
+sub compute_multicode_callback {
+    my ( $self, $c, %data ) = self_first(@_);
+
+    # then gather pages with the same code values
+
+    if ( $data{cancelled} ) {
+        $self->noter_resultat();
+    } else {
+        $self->{project}->gather_multicode(
+            callback_self => $self,
+            callback      => \&gather_multicode_callback
+        );
+    }
+}
+
+sub gather_multicode_callback {
+    my ( $self, $c, %data ) = self_first(@_);
+
+    $self->noter_resultat();
+    if ( !$data{cancelled} ) {
+        $self->detecte_analyse();
+        $self->anonymize_update();
+    }
+}
+
 #########################################################################
 # MARKING
 #########################################################################
@@ -3317,25 +3377,9 @@ sub compute_marks_go {
 
     $self->{project}->compute_marks(
         %oo,
-        gather_multi => (
-            $self->get_ui('gather_multi')->get_active() && !$oo{second_pass}
-        ),
         callback_self => $self,
         callback      => \&compute_marks_callback
     );
-}
-
-sub compute_marks_second_pass {
-    my ( $self, $c, %data ) = self_first(@_);
-
-    if ( $data{cancelled} ) {
-        $self->noter_resultat();
-    } else {
-        $self->detecte_analyse();
-        $self->anonymize_update();
-
-        $self->compute_marks_go( second_pass => 1 );
-    }
 }
 
 sub compute_marks_callback {
@@ -3344,19 +3388,8 @@ sub compute_marks_callback {
     if ( $data{cancelled} ) {
         $self->noter_resultat();
     } else {
-        if($c->{o}->{gather_multi}) {
-            # a first pass has been done to collect codes from the
-            # pages. Now we 1) try to gather pages with the same codes
-            # And 2) we compute marks again, to update the total
-            # scores and final marks
-            $self->{project}->gather_multicode(
-                callback_self => $self,
-                callback      => \&compute_marks_second_pass
-            );
-        } else {
-            $self->notify_end_of_work( 'grading', __ "Grading has been completed" );
-            $self->noter_resultat();
-        }
+        $self->notify_end_of_work( 'grading', __ "Grading has been completed" );
+        $self->noter_resultat();
     }
 }
 

@@ -1231,6 +1231,8 @@ if ( $to_do{b} ) {
     }
     close(AMCLOG);
 
+    $scoring->variable('extracted', time());
+
     $scoring->end_transaction('ScEx');
 }
 
