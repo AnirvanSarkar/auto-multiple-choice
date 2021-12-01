@@ -413,11 +413,11 @@ sub prepare {
 }
 
 sub analyse {
-    my ($self) = @_;
+    my ($self, %oo) = @_;
 
     $self->start_clock();
 
-    if ( $self->{perfect_copy} || $self->{full_scans} ) {
+    if ( ($self->{perfect_copy} || $self->{full_scans}) && !$oo{directory} ) {
         $self->amc_command(
             'prepare',           '--filter',
             $self->{filter},     '--with',
@@ -429,7 +429,7 @@ sub analyse {
         );
     }
 
-    if ( $self->{perfect_copy} ) {
+    if ( $self->{perfect_copy} && !$oo{directory} ) {
         my $nf = $self->{temp_dir} . "/num";
         open( NUMS, ">$nf" );
         for ( @{ $self->{perfect_copy} } ) { print NUMS "$_\n"; }
@@ -455,7 +455,7 @@ sub analyse {
         push @{ $self->{scans} }, map { $self->{temp_dir} . "/$_" } @s;
     }
 
-    if ( $self->{full_scans} ) {
+    if ( $self->{full_scans} && !$oo{directory} ) {
         my @cmd = (
             "gs",
             "-sDEVICE=png16m",
@@ -501,7 +501,23 @@ sub analyse {
 
     my $scans_list = $self->{temp_dir} . "/scans-list.txt";
     open( SL, ">", $scans_list ) or die "Open $scans_list: $!";
-    for ( @{ $self->{scans} } ) { print SL "$_\n"; }
+    if ( $oo{directory} ) {
+        opendir( my $dh, $self->{temp_dir} . "/" . $oo{directory} )
+          || die "can't opendir $oo{directory}: $!";
+        my @s = sort { $a cmp $b } grep { !/^\./ } readdir($dh);
+        closedir $dh;
+
+        if (@s) {
+            $self->trace( "[I] " . @s . " scans from $oo{directory}" );
+            for my $f (@s) {
+                print SL $self->{temp_dir} . "/"
+                  . $oo{directory} . "/"
+                  . $f . "\n";
+            }
+        }
+    } else {
+        for ( @{ $self->{scans} } ) { print SL "$_\n"; }
+    }
     close(SL);
 
     #
@@ -539,6 +555,9 @@ sub analyse {
         ),
         @extract_opts,
     );
+
+    $self->{pre_allocate} = $oo{pre_allocate}
+      if ( exists( $oo{pre_allocate} ) );
 
     $self->amc_command(
         'analyse',
@@ -583,6 +602,13 @@ sub analyse {
 
 }
 
+sub gather_multicode {
+    my ($self)=@_;
+
+    $self->note( multi => 1 );
+    $self->amc_command( 'gathermulticode', '--project', '%PROJ', );
+}
+
 sub decode {
     my ($self) = @_;
 
@@ -594,18 +620,27 @@ sub decode {
 }
 
 sub note {
-    my ($self) = @_;
+    my ($self, %oo) = @_;
 
     $self->start_clock();
     $self->amc_command(
-        'note',                       '--data',
-        '%DATA',                      '--seuil',
-        $self->{seuil},               '--seuil-up',
-        $self->{seuil_up},            '--grain',
-        $self->{grain},               '--arrondi',
-        $self->{rounding},            '--notemax',
-        $self->{notemax},             '--postcorrect-student',
-        $self->{postcorrect_student}, '--postcorrect-copy',
+        'note',
+        ( $oo{multi} ? "--multi-only" : "--no-multi-only" ),
+        '--data',
+        '%DATA',
+        '--seuil',
+        $self->{seuil},
+        '--seuil-up',
+        $self->{seuil_up},
+        '--grain',
+        $self->{grain},
+        '--arrondi',
+        $self->{rounding},
+        '--notemax',
+        $self->{notemax},
+        '--postcorrect-student',
+        $self->{postcorrect_student},
+        '--postcorrect-copy',
         $self->{postcorrect_copy},
     );
     $self->stop_clock("scoring");

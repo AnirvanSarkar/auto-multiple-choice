@@ -1,0 +1,129 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[ensemble,automarks]{automultiplechoice}    
+\geometry{margin=1cm}
+
+\begin{document}
+
+\makeatletter
+
+\def\IDbox{%
+  \begin{minipage}{14cm}
+    \noindent\AMCzone[id]{identification\thepage}{%
+    \fbox{%
+      \begin{minipage}{\linewidth}
+        \noindent Darken the boxes corresponding to your student ID:\\[1.2ex]
+        \AMCcodeGrid[h,multi]{id}{ABCDEFGHJKLMNPQRSTUVWXYZ,0123456789}
+      \end{minipage}%
+    }%
+  }%
+  \end{minipage}
+}
+
+\fancypagestyle{AMCpageFull}{%
+  \fancyhf{}%
+  \fancyhead[L]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHG}}}}%
+  \fancyhead[R]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHD}}}}%
+  \fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}%
+  \fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}%
+  \fancyhead[C]{
+    \AMCIDBoxesABC\vspace{2mm}
+    \ifAMC@zoneformulaire\IDbox\fi
+  }%
+  \fancyhfoffset[EOLR]{5mm}%
+  \fancyfoot[C]{\AMC@note}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+\def\AMCformAfterQuestion{\ifAMC@asqbloc\egroup\fi\clearpage}
+
+\makeatother
+
+
+\AMCrandomseed{1237893}
+
+\setdefaultgroupmode{withoutreplacement}
+
+\element{general}{
+  \begin{question}{unit}
+    How much?
+    \begin{reponses}
+      \bonne{5}\scoring{5}
+      \mauvaise{4}\scoring{4}
+      \mauvaise{3}\scoring{3}
+      \mauvaise{2}\scoring{2}
+      \mauvaise{1}\scoring{1}
+    \end{reponses}
+  \end{question}
+}
+
+\element{general}{
+  \begin{question}{ten}
+    How much?
+    \begin{reponses}
+      \bonne{50}\scoring{50}
+      \mauvaise{40}\scoring{40}
+      \mauvaise{30}\scoring{30}
+      \mauvaise{20}\scoring{20}
+      \mauvaise{10}\scoring{10}
+    \end{reponses}
+  \end{question}
+}
+
+\element{general}{
+  \begin{question}{hundred}
+    How much?
+    \begin{reponses}
+      \bonne{500}\scoring{500}
+      \mauvaise{400}\scoring{400}
+      \mauvaise{300}\scoring{300}
+      \mauvaise{200}\scoring{200}
+      \mauvaise{100}\scoring{100}
+    \end{reponses}
+  \end{question}
+}
+
+\onecopy{5}{
+
+%%% debut de l'en-tête des copies :
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf AMC
+\end{minipage}
+
+\begin{center}\em
+  Please grab your points.
+\end{center}
+\vspace{1ex}
+
+\insertgroup{general}
+
+\clearpage
+
+\AMCformBegin
+\newgeometry{headheight=5cm,top=4.5cm}
+
+{\large\bf Your answers:}
+\hfill \namefield{\fbox{    
+    \begin{minipage}{.5\linewidth}
+      Name :
+
+      \vspace*{.5cm}\namefielddots  
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\AMCform    
+
+\restoregeometry
+
+}
+
+\end{document}
