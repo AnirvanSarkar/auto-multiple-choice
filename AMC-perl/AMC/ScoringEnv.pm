@@ -388,7 +388,11 @@ sub evaluate {
     for my $vv ( keys %{ $self->{variables} } ) {
         my $value = $self->get_variable($vv);
         if ( defined($value) ) {
-            $string =~ s/\b$vv\b/$value/g;
+            if ( $value eq "" ) {
+                $string =~ s/\b$vv\b/''/g;
+            } else {
+                $string =~ s/\b$vv\b/$value/g;
+            }
         } else {
             $string =~ s/\b$vv\b/undef/g;
         }

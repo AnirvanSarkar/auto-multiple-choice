@@ -1019,6 +1019,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %     answer to be said \emph{approximative} and be rewarded to
 %     |scoreapprox| points (defaults to 0).
 %   \item[|scorewrong=|\meta{num}] gives the score for a wrong answer (defaults to 0).
+%   \item[|ignoreblank|] can be used (only with number base 10) to
+%     ignore digits for which no box has been ticked. This way,
+%     ticking 5 for the first digit, no box for the second and 3 for
+%     the third digit will code the number 53, while this would have
+%     coded 503 without the |ignoreblank| option (because the default
+%     value for the second digit is 0).
 %   \item[|keepas=|\meta{name}] keeps the value entered by the student
 %     in variable \marg{name}, for future use with \emph{alsocorrect}
 %     in another question.
@@ -3863,6 +3869,9 @@ Three digits and two letters:\insertgroup{mixed}.
   scoring .bool_set:N = \amc_num_scoring_bool,
   scoring .initial:n = { true },
   scoring .default:n = { true },
+  ignoreblank .bool_set:N = \amc_num_ignoreblank_bool,
+  ignoreblank .initial:n = { false },
+  ignoreblank .default:n = { true },
   vertical .bool_set:N = \amc_num_vertical_bool,
   vertical .initial:n = { false },
   vertical .default:n = { true },
@@ -3899,6 +3908,14 @@ Three digits and two letters:\insertgroup{mixed}.
 
 \cs_new:Npn \amc_num_setopts #1 {
   \keys_set:nn { amcnumeric } { #1 }
+}
+
+\cs_new_nopar:Nn \amc_num_check_score_opts: {
+  \bool_if:NTF \amc_num_ignoreblank_bool {
+    \int_compare:nNnTF \amc_num_base_int = { 10 } { } {
+      \message{^^J!~Error:~ignoreblank~can~only~be~used~with~number~base~10^^J}
+    }
+  } {}
 }
 
 \cs_new_eq:NN \AMCnumericOpts \amc_num_setopts
@@ -4132,6 +4149,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 
 \cs_new:Npn \amc_num_build_integer_scoring:Nnnn #1 #2 #3 #4 {
+  \amc_num_check_score_opts:
   \tl_clear:N #1
   \int_set_eq:NN \amc_num_digit_int { #4 }
   \int_while_do:nNnn \amc_num_digit_int > 0 {
@@ -4140,18 +4158,31 @@ Three digits and two letters:\insertgroup{mixed}.
         \int_to_Alph:n \amc_num_digit_int = 1]^^J}
     } {
       \AMC@amclog{AUTOQCM[B=default. #3
-        \int_to_Alph:n \amc_num_digit_int = 0]^^J}
+        \int_to_Alph:n \amc_num_digit_int =
+        \bool_if:NTF \amc_num_ignoreblank_bool { } { 0 }
+        ]^^J}
     }
     \int_compare:nNnTF \amc_num_digit_int = #4 { } {
-      \tl_put_left:Nn #1 { ( }
-      \tl_put_right:Nx #1 { ) *
-         \int_use:N \amc_num_base_int + }
+      \bool_if:NTF \amc_num_ignoreblank_bool {
+        \tl_put_right:Nx #1 { ~.~ }
+        \int_compare:nNnTF \amc_num_decd_int = \amc_num_digit_int {
+          \tl_put_right:Nx #1 { "." ~.~ }
+        } { }
+      } {
+        \tl_put_left:Nn #1 { ( }
+        \tl_put_right:Nx #1 { ) *
+          \int_use:N \amc_num_base_int + }
+      }
     }
     \tl_put_right:Nx #1
     { #3 \int_to_Alph:n \amc_num_digit_int }
     \int_decr:N \amc_num_digit_int
   }
   \tl_put_left:Nn #1 { ( }
+  \bool_if:NTF \amc_num_ignoreblank_bool {
+    \tl_put_left:Nn #1 { 0 + ( }
+    \tl_put_right:Nn #1 { ) }
+  } { }
   \tl_put_right:Nn #1 { ) }
   \bool_if:NTF { #2 } {
     \bool_if:NTF \amc_num_strict_bool {
@@ -4282,10 +4313,18 @@ Three digits and two letters:\insertgroup{mixed}.
    }{
      \AMC@amclog{AUTOQCM[B= set.intX = intXX]^^J}
    }
-   \int_compare:nNnTF \amc_num_expo_int > 0 {
-     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE - \int_use:N\amc_num_decd_int)]^^J}
-   }{
-     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (- \int_use:N\amc_num_decd_int) ]^^J}
+   \bool_if:NTF \amc_num_ignoreblank_bool {
+     \int_compare:nNnTF \amc_num_expo_int > 0 {
+       \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE)]^^J}
+     }{
+       \AMC@amclog{AUTOQCM[B= set.valueX = intXX]^^J}
+     }
+   } {
+     \int_compare:nNnTF \amc_num_expo_int > 0 {
+       \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE - \int_use:N\amc_num_decd_int)]^^J}
+     }{
+       \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (- \int_use:N\amc_num_decd_int) ]^^J}
+     }
    }
    \ifx\@empty\AMC@numeric@keepas\@empty\else
    \AMC@amclog{AUTOQCM[B= setglobal.\AMC@numeric@keepas = valueX ]^^J}

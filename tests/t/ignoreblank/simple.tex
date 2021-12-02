@@ -1,0 +1,56 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[box,insidebox]{automultiplechoice}
+\usepackage{multicol}
+\begin{document}
+
+\AMCnumericOpts{ignoreblank=true}
+
+\onecopy{10}{    
+
+\noindent{\bf AMC  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ ignoreblank\end{minipage}
+\namefield{\fbox{    
+                \begin{minipage}{.5\linewidth}
+                  Name:
+
+                  \vspace*{.5cm}\namefielddots   
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\vspace{1ex}
+
+\begin{multicols}{2}
+  
+  \begin{questionmultx}{integer}
+    Code 12
+    \AMCnumericChoices{12}{digits=3,sign=false}
+  \end{questionmultx}
+
+  \begin{questionmultx}{sign}
+    Code significant digits for 0.01022
+    \AMCnumericChoices{0.01022}{significant=true,digits=2}
+  \end{questionmultx}
+
+  \begin{questionmultx}{decimal}
+    Code 12.34
+    \AMCnumericChoices{12.34}{digits=8,decimals=4,sign=false}
+  \end{questionmultx}
+
+\end{multicols}
+
+  \begin{questionmultx}{e}
+    Code -0.00123
+    \AMCnumericChoices{-0.00123}{digits=5,decimals=4,sign=true,exponent=2}
+  \end{questionmultx}
+
+}   
+
+\end{document}

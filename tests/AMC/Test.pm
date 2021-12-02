@@ -113,6 +113,7 @@ my $defaults = {
     password_key        => 'password',
     setup               => 1,
     exitonerror         => 1,
+    postinstall         => '',
 };
 
 sub new {
@@ -267,6 +268,10 @@ sub install {
     open( DB, ">", $self->{debug_file} );
     print DB "Test\n";
     close(DB);
+
+    if ( $self->{postinstall} ) {
+        &{ $self->{postinstall} }($self);
+    }
 
     return $self;
 }
