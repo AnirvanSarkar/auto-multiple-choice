@@ -26,8 +26,9 @@ AMC::Test->new(
     dir         => __FILE__,
     src         => 'simple.tex',
     tex_engine  => 'pdflatex',
-    check_marks => { 1 => 20, 2 => 20 }
-              )->default_process;
+    notemax     => 0,
+    check_marks => { 1 => 10, 2 => 10, 4 => 8 },
+)->default_process;
 
 @ARGV=@args;
 
@@ -40,10 +41,13 @@ AMC::Test->new(
         system( "env", "perl", "-pi", "-e", 's/.AMCnumericOpts/%/',
             "$self->{temp_dir}/simple.tex" );
     },
-    check_marks     => { 1 => 5, 2 => 5 },
+    notemax         => 0,
+    check_marks     => { 1 => 2, 2 => 2, 4 => 4 },
     export_full_csv => [
         { -copy => 1, -question => 'sign', -score => 2 },
-        { -copy => 2, -question => 'sign', -score => 2 }
+        { -copy => 2, -question => 'sign', -score => 2 },
+        { -copy => 4, -question => 'sign', -score => 2 },
+        { -copy => 4, -question => 'integer', -score => 2 },
     ],
 )->default_process;
 

@@ -4141,14 +4141,14 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 
 %    \end{macrocode}
-% The command |\amc_num_build_integer_scoring:Nnnn|\marg{tl
-% var}\marg{sign bool}\marg{prefix}\marg{n} builds a scoring to
-% compute an integer from a serie of \meta{n}-digits boxes, with name
-% prefix \meta{prefix}, using a sign variable if \meta{sign bool} is
-% true.
+% The command |\amc_num_build_integer_scoring:Nnnnn|\marg{tl
+% var}\marg{sign bool}\marg{prefix}\marg{n}\marg{decimals} builds a
+% scoring to compute an integer from a serie of \meta{n}-digits boxes
+% (from which \meta{decimals} are for decimals), with name prefix
+% \meta{prefix}, using a sign variable if \meta{sign bool} is true.
 %    \begin{macrocode}
 
-\cs_new:Npn \amc_num_build_integer_scoring:Nnnn #1 #2 #3 #4 {
+\cs_new:Npn \amc_num_build_integer_scoring:Nnnnn #1 #2 #3 #4 #5 {
   \amc_num_check_score_opts:
   \tl_clear:N #1
   \int_set_eq:NN \amc_num_digit_int { #4 }
@@ -4165,7 +4165,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \int_compare:nNnTF \amc_num_digit_int = #4 { } {
       \bool_if:NTF \amc_num_ignoreblank_bool {
         \tl_put_right:Nx #1 { ~.~ }
-        \int_compare:nNnTF \amc_num_decd_int = \amc_num_digit_int {
+        \int_compare:nNnTF \amc_num_digit_int = #5 {
           \tl_put_right:Nx #1 { "." ~.~ }
         } { }
       } {
@@ -4178,12 +4178,16 @@ Three digits and two letters:\insertgroup{mixed}.
     { #3 \int_to_Alph:n \amc_num_digit_int }
     \int_decr:N \amc_num_digit_int
   }
-  \tl_put_left:Nn #1 { ( }
   \bool_if:NTF \amc_num_ignoreblank_bool {
-    \tl_put_left:Nn #1 { 0 + ( }
+    \tl_put_left:Nn #1 { ( 0 + ( }
+    \tl_put_right:Nn #1 { ) ) }
+    \int_compare:nNnTF \amc_num_decd_int > 0 {
+      \tl_put_right:Nx #1 { * ( 10 ** \int_eval:n { #5 } ) }
+    } { }
+  } {
+    \tl_put_left:Nn #1 { ( }
     \tl_put_right:Nn #1 { ) }
-  } { }
-  \tl_put_right:Nn #1 { ) }
+  }
   \bool_if:NTF { #2 } {
     \bool_if:NTF \amc_num_strict_bool {
       \AMC@amclog{AUTOQCM[B=requires. sign #3 =1]^^J}
@@ -4299,11 +4303,12 @@ Three digits and two letters:\insertgroup{mixed}.
        }
        )]^^J}
    } {}
-   \amc_num_build_integer_scoring:Nnnn
+   \amc_num_build_integer_scoring:Nnnnn
      \amc_num_compute_tl \amc_num_sign_bool { digit } \amc_num_ndigits_int
+     \amc_num_decd_int
    \int_compare:nNnTF \amc_num_expo_int > 0 {
-     \amc_num_build_integer_scoring:Nnnn
-       \amc_num_expo_tl \amc_num_exposign_bool { expo } \amc_num_expo_int
+     \amc_num_build_integer_scoring:Nnnnn
+       \amc_num_expo_tl \amc_num_exposign_bool { expo } \amc_num_expo_int  { 0 }
      \AMC@amclog{AUTOQCM[B= set. intE = \amc_num_expo_tl ]^^J}
    } {}
    \AMC@amclog{AUTOQCM[B= set.intV = \fp_to_int:N\amc_num_correct_fp ,
@@ -4313,18 +4318,10 @@ Three digits and two letters:\insertgroup{mixed}.
    }{
      \AMC@amclog{AUTOQCM[B= set.intX = intXX]^^J}
    }
-   \bool_if:NTF \amc_num_ignoreblank_bool {
-     \int_compare:nNnTF \amc_num_expo_int > 0 {
-       \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE)]^^J}
-     }{
-       \AMC@amclog{AUTOQCM[B= set.valueX = intXX]^^J}
-     }
-   } {
-     \int_compare:nNnTF \amc_num_expo_int > 0 {
-       \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE - \int_use:N\amc_num_decd_int)]^^J}
-     }{
-       \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (- \int_use:N\amc_num_decd_int) ]^^J}
-     }
+   \int_compare:nNnTF \amc_num_expo_int > 0 {
+     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE - \int_use:N\amc_num_decd_int)]^^J}
+   }{
+     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (- \int_use:N\amc_num_decd_int) ]^^J}
    }
    \ifx\@empty\AMC@numeric@keepas\@empty\else
    \AMC@amclog{AUTOQCM[B= setglobal.\AMC@numeric@keepas = valueX ]^^J}

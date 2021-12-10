@@ -230,12 +230,17 @@ sub get_variable {
 sub parse_defs {
     my ( $self, $string, $plain_only ) = @_;
     my @r = ();
-    for my $def ( quotewords( ',+', 0, $string ) ) {
+    for my $def ( quotewords( ',+', 1, $string ) ) {
         if ( length($def) ) {
+            $def =~ s/^\s*(['"])(.*)\g{1}\s*$/$2/;
             if ( $def =~ /^\s*([.a-zA-Z0-9_-]+)\s*=\s*(.*)/ ) {
-
                 # "variable=value" case
-                push @r, { key => $1, value => $2 } if ( !$plain_only );
+                my $variable = $1;
+                my $value    = $2;
+                $value =~ s/\s+$//;
+                $value =~ s/^(['"])(.*)\g{1}$/$2/;
+                push @r, { key => $variable, value => $value }
+                  if ( !$plain_only );
             } else {
 
                 # "value" case

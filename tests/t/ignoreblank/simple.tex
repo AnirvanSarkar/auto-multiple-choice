@@ -46,9 +46,14 @@
 
 \end{multicols}
 
-  \begin{questionmultx}{e}
+  \begin{questionmultx}{e1}
     Code -0.00123
-    \AMCnumericChoices{-0.00123}{digits=5,decimals=4,sign=true,exponent=2}
+    \AMCnumericChoices{-0.00123}{digits=5,decimals=4,sign=true,exponent=2,keepas=ANumber}
+  \end{questionmultx}
+
+  \begin{questionmultx}{e2}
+    And the square root of the absolute value of the precedent number
+    \AMCnumericChoices{sqrt(0.00123)}{digits=3,decimals=2,sign=false,exponent=2,alsocorrect=sqrt(abs(ANumber)),exact=1}
   \end{questionmultx}
 
 }   
