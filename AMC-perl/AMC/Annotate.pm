@@ -401,7 +401,12 @@ sub connects_students_list {
 
         debug "Keys in names file: " . join( ", ", $self->{names}->heads() );
     } else {
-        debug "Names file not found: $self->{names_file}";
+        $self->{names} = '';
+        if ( $self->{names_file} ) {
+            debug "No names file";
+        } else {
+            debug "Names file not found: $self->{names_file}";
+        }
     }
 
     # Set up a AMC::Substitute object that will be used to substitute
@@ -885,6 +890,8 @@ sub qtext {
     my $result = $self->{scoring}->question_result( @$student, $question );
 
     my $text;
+
+    $self->needs_names;
 
     # begins with the right verdict version depending on if the question
     # result was cancelled or not.

@@ -80,7 +80,7 @@ my $embedded_format       = "jpeg";
 
 my $changes_only = '';
 
-my $compose         = '';
+my $compose         = 0;
 my $latex_engine    = 'pdflatex';
 my $src_file        = '';
 my $filter          = '';
