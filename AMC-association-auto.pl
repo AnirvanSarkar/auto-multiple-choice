@@ -33,6 +33,7 @@ my $liste_enc      = 'utf-8';
 my $csv_build_name = '';
 my $data_dir       = '';
 my $preassoc       = '';
+my $hard_fail      = '';
 
 unpack_args();
 
@@ -44,6 +45,7 @@ GetOptions(
     "csv-build-name=s" => \$csv_build_name,
     "data=s"           => \$data_dir,
     "encodage-liste=s" => \$liste_enc,
+    "hard-fail!"       => \$hard_fail,
 );
 
 die "Needs notes-id"   if ( !$notes_id && !$preassoc );
@@ -98,6 +100,8 @@ $assoc->clear_auto;
 
 # Loop on all codes that can be read on the scans.
 
+my $return_code = 0;
+
 my $sth = $scoring->statement( $preassoc ? 'preAssocCounts' : 'codesCounts' );
 if ($preassoc) {
     $sth->execute();
@@ -120,16 +124,21 @@ while ( my $v = $sth->fetchrow_hashref ) {
         } else {
 
             # ... unless this value is NOT in the students list!
-            debug "Code value $v->{value} not found in students list: ignoring";
+            debug_and_stderr( "Code value $v->{value}"
+                  . " not found in students list: ignoring" );
+            $return_code = 2;
         }
     } else {
 
         # Code value found on several sheets: do nothing, wait for the
         # user to make a manual association for these sheets.
-        debug "Incorrect association for code value \""
+        debug_and_stderr "Incorrect association for code value \""
           . $v->{value}
           . "\": $v->{nb} instances";
+        $return_code = 2;
     }
 }
 
 $assoc->end_transaction('ASSA');
+
+exit($return_code) if ($hard_fail);
