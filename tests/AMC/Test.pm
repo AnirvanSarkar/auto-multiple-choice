@@ -81,6 +81,7 @@ my $defaults = {
     annote_files        => [],
     annote_ascii        => 0,
     annote_position     => 'marge',
+    annotate_single     => '',
     verdict             => '%(id) %(ID)' . "\n" . 'TOTAL : %S/%M => %s/%m',
     verdict_question    => "\"%" . "s/%" . "m\"",
     model               => '(N).pdf',
@@ -850,7 +851,7 @@ sub check_assoc {
 
 sub annote {
     my ($self) = @_;
-    return if ( $self->{blind} || !$self->{annote} );
+    return if ( !$self->{annote} );
 
     my $nf = $self->{temp_dir} . "/num-pdf";
     open( NUMS, ">$nf" );
@@ -876,6 +877,13 @@ sub annote {
         '--darkness-threshold-up', $self->{seuil_up},
     );
     push @args, '--names-file', '%PROJ/' . $self->{list} if ( $self->{list} );
+
+    my $single_output = '';
+    if ( $self->{annotate_single} ) {
+        $single_output = $self->{annotate_single}->{filename} || "all.pdf";
+        push @args, '--single-output', $single_output;
+    }
+
     $self->amc_command( 'annotate', @args );
 
     my $pdf_dir = $self->{temp_dir} . '/cr/corrections/pdf';
@@ -883,7 +891,37 @@ sub annote {
       || die "can't opendir $pdf_dir: $!";
     my @pdf = grep { /\.pdf$/i } readdir($dh);
     closedir $dh;
-    for my $f (@pdf) { $self->see_file( $pdf_dir . '/' . $f ); }
+    if ( !$self->{blind} ) {
+        for my $f (@pdf) { $self->see_file( $pdf_dir . '/' . $f ); }
+    }
+
+    if ($single_output) {
+        if ( $self->{annotate_single}->{npages} ) {
+            if (
+                open( INFO, "-|",
+                    "pdfinfo", $pdf_dir . '/' . $single_output
+                )
+              )
+            {
+                my $np = 0;
+                while (<INFO>) {
+                    $np = $1 if (/^Pages:\s*([0-9]+)/);
+                }
+                close INFO;
+                if ( $np == $self->{annotate_single}->{npages} ) {
+                    $self->trace("[T] Single annotated PDF: $np pages");
+                } else {
+                    $self->trace(
+"[E] Wrong number of pages for single annotated PDF: $np instead of "
+                          . $self->{annotate_single}->{npages} );
+                    $self->failed(1);
+                }
+            } else {
+                $self->trace("[E] pdfinfo failed: $!");
+                $self->failed(1);
+            }
+        }
+    }
 
     if ( @{ $self->{annote_files} } ) {
         my %p = map { $_ => 1 } @pdf;

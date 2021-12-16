@@ -18,6 +18,9 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use utf8;
+use 5.012;
+
 require "./AMC/Test.pm";
 
 AMC::Test->new(
@@ -38,5 +41,8 @@ AMC::Test->new(
         { -copy => '2:5', -question => 'prez',   -abc   => 'C' },
         { -copy => '2:5', -question => 'points', -score => 3 },
     ],
+    annote          => [ '2:1', '2:2', '2:3' ],
+    annotate_single => { npages => 6 },
+    verdict         => 'TOTAL : %S/%M => %s/%m',
 )->default_process;
 
