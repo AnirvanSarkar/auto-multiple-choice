@@ -36,11 +36,12 @@ sub get_ncpu {
         debug_pm_version("Sys::CPU");
         $n = Sys::CPU::cpu_count();
     } else {
-        open( CI, "/proc/cpuinfo" );
-        while (<CI>) {
-            $n++ if (/^processor\s*:/);
+        if ( open( CI, "/proc/cpuinfo" ) ) {
+            while (<CI>) {
+                $n++ if (/^processor\s*:/);
+            }
+            close(CI);
         }
-        close(CI);
     }
     $n = 1 if ( $n <= 0 );
     return ($n);
