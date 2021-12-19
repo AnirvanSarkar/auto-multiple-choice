@@ -20,5 +20,11 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new( dir => __FILE__, tex_engine => 'xelatex' )->default_process;
+my $t=AMC::Test->new( dir => __FILE__, tex_engine => 'xelatex' );
+
+# Multicols and arabic is broken with recent texlive (2021). Looking
+# for a fix but this is not considered to be blocking for AMC.
+$t->may_fail();
+
+$t->default_process;
 
