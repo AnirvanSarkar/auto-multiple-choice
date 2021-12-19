@@ -332,12 +332,14 @@ sub see_file {
         return ();
     }
 
-    # compares with already validated file
-    my $validated = $self->{temp_dir} . "/checked/$ff";
-    if ( -f $validated && $ff =~ /\.pdf$/i ) {
-        if ( run( 'comparepdf', '-ca', '-v0', $validated, $file ) ) {
-            $self->trace("[T] File ok (compare): $ff");
-            return ();
+    if ( commande_accessible('comparepdf') ) {
+        # compares with already validated file
+        my $validated = $self->{temp_dir} . "/checked/$ff";
+        if ( -f $validated && $ff =~ /\.pdf$/i ) {
+            if ( run( 'comparepdf', '-ca', '-v0', $validated, $file ) ) {
+                $self->trace("[T] File ok (compare): $ff");
+                return ();
+            }
         }
     }
 
