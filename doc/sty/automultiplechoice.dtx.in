@@ -1857,12 +1857,15 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \end{macrocode}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMCdontScan}\begin{macro}{\AMCdontAnnotate}
-%     The commands |\AMCdontScan| and |\AMCdontAnnotate| write
+% \begin{macro}{\AMCreTick}
+%     The commands |\AMCdontScan|, |\AMCdontAnnotate| and |\AMCreTick| write
 %     into the |xy| file instructions related to the current question.
 %    \begin{macrocode}
 \newcommand{\AMCdontScan}{\ifAMC@calibration\immediate\write\AMC@XYFILE{\string\dontscan{\the\AMCid@etud,\the\AMCid@quest}}\fi}
 \newcommand{\AMCdontAnnotate}{\ifAMC@calibration\immediate\write\AMC@XYFILE{\string\dontannotate{\the\AMCid@etud,\the\AMCid@quest}}\fi}
+\newcommand{\AMCreTick}{\ifAMC@calibration\immediate\write\AMC@XYFILE{\string\retick{\the\AMCid@etud,\the\AMCid@quest}}\fi}
 %%    \end{macrocode}
+% \end{macro}
 % \end{macro}
 % \end{macro}
 %
@@ -4577,9 +4580,10 @@ Three digits and two letters:\insertgroup{mixed}.
 \define@key{AMCOpen}{lineuptext}{\def\AMCopen@lineuptext{#1}}
 \define@boolkey{AMCOpen}{dots}[true]{}
 \define@boolkey{AMCOpen}{scan}[true]{}
+\define@boolkey{AMCOpen}{retick}[true]{}
 \define@boolkey{AMCOpen}{annotate}[false]{}
 \define@boolkey{AMCOpen}{lineup}[false]{}
-\setkeys{AMCOpen}{dots,scan,annotate,lineup,contentcommand}
+\setkeys{AMCOpen}{dots,scan,retick,annotate,lineup,contentcommand}
 \newcommand\AMCopenOpts[1]{\setkeys{AMCOpen}{#1}}
 %    \end{macrocode}
 % 
@@ -4631,6 +4635,7 @@ Three digits and two letters:\insertgroup{mixed}.
           \fi%
           #2%
           \ifKV@AMCOpen@scan\else\AMCdontScan\fi%
+          \ifKV@AMCOpen@retick\AMCreTick\fi%
           \ifKV@AMCOpen@annotate\else\AMCdontAnnotate\fi%
         \end{choicescustom}%
         \ifx\@empty\AMCotextReserved\@empty%

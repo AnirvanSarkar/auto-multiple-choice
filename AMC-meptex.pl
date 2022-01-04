@@ -193,6 +193,9 @@ while (<SRC>) {
     if (/\\dontannotate\{(.*)\}/) {
         add_flag( $1, BOX_FLAGS_DONTANNOTATE );
     }
+    if (/\\retick\{(.*)\}/) {
+        add_flag( $1, BOX_FLAGS_RETICK );
+    }
     if (/\\association\{([0-9]+)\}\{(.*)\}\{(.*)\}/) {
         my $student  = $1;
         my $id       = $2;

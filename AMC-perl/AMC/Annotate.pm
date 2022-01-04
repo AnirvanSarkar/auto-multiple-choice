@@ -813,7 +813,7 @@ sub draw_symbol {
 
     # when the subject background is used instead of the scan, darken
     # boxes that have been ticked by the student
-    if ( $tick && $cochee ) {
+    if ( ( $tick || $box->{flags} & BOX_FLAGS_RETICK ) && $cochee ) {
         debug "Tick.";
         $self->set_color('black');
         $self->command(
