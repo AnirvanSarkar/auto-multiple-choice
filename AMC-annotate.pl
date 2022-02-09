@@ -62,6 +62,7 @@ my $dist_margin_globaltext = '3mm';
 my $significant_digits = 4;
 
 my $verdict                    = 'TOTAL : %S/%M => %s/%m';
+my $verdict_allpages           = '';
 my $verdict_question_cancelled = '"X"';
 my $verdict_question           = "\"%" . "s/%" . "m\"";
 
@@ -124,6 +125,7 @@ GetOptions(
     "dist-margin-global=s"         => \$dist_margin_globaltext,
     "n-digits=s"                   => \$significant_digits,
     "verdict=s"                    => \$verdict,
+    "verdict-allpages!"            => \$verdict_allpages,
     "verdict-question=s"           => \$verdict_question,
     "verdict-question-cancelled=s" => \$verdict_question_cancelled,
     "names-file=s"                 => \$names_file,
@@ -243,6 +245,7 @@ my $annotate = AMC::Annotate::new(
     dist_margin_globaltext     => $dist_margin_globaltext,
     symbols                    => \%symboles,
     verdict                    => $verdict,
+    verdict_allpages           => $verdict_allpages,
     verdict_question           => $verdict_question,
     verdict_question_cancelled => $verdict_question_cancelled,
     progress                   => $progress,

@@ -414,8 +414,10 @@ sub defaults {
 
         defaut_name_field_type => '',
 
-        view_anonymity  => '',
-        anonymous_model => 'edddds',
+        view_anonymity   => '',
+        anonymous_model  => 'edddds',
+        anonymous_header => '%(aID)',
+        anonymous_header_allpages => 1,
     };
 
     $self->{project_default} = {

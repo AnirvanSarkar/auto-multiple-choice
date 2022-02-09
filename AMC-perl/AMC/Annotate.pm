@@ -81,6 +81,7 @@ sub new {
             '1-1' => {qw/type mark color blue/},
         },
         verdict                    => '',
+        verdict_allpages           => '',
         verdict_question           => '',
         verdict_question_cancelled => '',
         progress                   => '',
@@ -1077,12 +1078,12 @@ sub page_qids {
     }
 }
 
-# draws the page header (only on the first page)
+# draws the page header (only on the first page if verdict_allpages is false)
 
 sub page_header {
     my ( $self, $student ) = @_;
 
-    if ( !$self->{header_drawn} ) {
+    if ( $self->{verdict_allpages} || !$self->{header_drawn} ) {
 
         $self->needs_names;
 
