@@ -425,7 +425,8 @@ sub read_file {
     binmode($infile);
 
     my $line = 0;
-
+    my $verbatim = 0;  # currently reading lines in a verbatim element?
+    
   LINE: while (<$infile>) {
         $line ++;
         $self->{input_line} = $line;
@@ -440,6 +441,26 @@ sub read_file {
         chomp;
 
         debug ":> $_";
+
+	if ($verbatim) {
+		debug "verb:> $_";
+		${ $self->{reader_state}->{follow} } .= "\n" . $_;
+		if (/\[\/verbatim\]/i) {
+		    $verbatim = 0;
+		    debug "EndVerbatim";
+		}
+		next LINE;
+	}
+	if (/\[verbatim\]/) {
+	    # if verbatim spans several lines, enter verbatim mode
+	    if (! /\[\/verbatim\]/) {
+                debug "Verbatim...";
+	        ${ $self->{reader_state}->{follow} } .= $_;
+	        $verbatim = 1;
+	        next LINE;
+            }
+	    # otherwise, just proceed normally
+	}
 
         # removes comments
         if (/^\s*\#/) {
