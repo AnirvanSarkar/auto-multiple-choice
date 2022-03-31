@@ -115,6 +115,7 @@ my $defaults = {
     setup               => 1,
     exitonerror         => 1,
     postinstall         => '',
+    additional_test     => '',
 };
 
 sub new {
@@ -940,7 +941,13 @@ sub annote {
 
 sub ok {
     my ($self) = @_;
+
     $self->end;
+
+    if($self->{additional_test}) {
+        &{ $self->{additional_test} }($self);
+    }
+
     if ( $self->{error} ) {
         $self->trace("[E] Test failed (see errors above)");
     } else {

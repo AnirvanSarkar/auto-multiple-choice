@@ -3495,6 +3495,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCcodeID@dot[2]{#1.#2}
 \newcommand\AMCcodeID@@[1]{%
   \expandafter\def\expandafter\AMCcodeID\expandafter{\csname AMCcodeID@#1\endcsname}%
+  \def\AMCcodeID@mode{#1}%
 }
 \AMCcodeID@@{squarebrackets}
 \ExplSyntaxOn
@@ -5313,7 +5314,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \newwrite\AMC@XYFILE%
 \immediate\openout\AMC@XYFILE\jobname.xy%
 \immediate\write\AMC@XYFILE{\string\version{\AMC@VERSION}}
-\immediate\write\AMC@XYFILE{\string\with{codedigit=squarebrackets}}
+\immediate\write\AMC@XYFILE{\string\with{codedigit=\AMCcodeID@mode}}
 \immediate\write\AMC@XYFILE{\string\with{version=\AMC@VERSION}}
 \immediate\write\AMC@XYFILE{\string\with{ensemble=\ifAMC@ensemble yes\else no\fi}}
 \immediate\write\AMC@XYFILE{\string\with{insidebox=\ifAMC@inside@box yes\else no\fi}}

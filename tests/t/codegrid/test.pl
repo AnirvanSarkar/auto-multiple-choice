@@ -20,11 +20,40 @@
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(
-    dir          => __FILE__,
-    tex_engine   => 'pdflatex',
-    perfect_copy => '',
-    seuil        => 0.15,
-    check_assoc  => { 1 => 'AMA0123', 2 => '0C54', 3 => 'PH10' },
-)->default_process;
+my $mode;
 
+sub choose_codedigit {
+    my ($self) = @_;
+    system( "perl", "-pi", "-e", "s/CODEDIGIT/$mode/",
+        $self->{temp_dir} . "/code.tex" );
+}
+
+sub check_codedigit {
+    my ($self) = @_;
+    my $l = AMC::Data->new( $self->{temp_dir} . "/data" )->module('layout');
+    my $v = $l->variable_transaction('build:codedigit');
+    if ( $v eq $mode ) {
+        $self->trace("[T] codedigit is $v");
+    } else {
+        $self->trace("[E] codedigit is $v instead of $mode");
+        $self->failed(1);
+    }
+}
+
+$mode = 'squarebrackets';
+
+my $t = AMC::Test->new(
+    dir             => __FILE__,
+    tex_engine      => 'pdflatex',
+    postinstall     => \&choose_codedigit,
+    additional_test => \&check_codedigit,
+    perfect_copy    => '',
+    seuil           => 0.15,
+    check_assoc     => { 1 => 'AMA0123', 2 => '0C54', 3 => 'PH10' },
+);
+
+$t->default_process();
+
+$mode = 'dot';
+$t->install();
+$t->default_process();
