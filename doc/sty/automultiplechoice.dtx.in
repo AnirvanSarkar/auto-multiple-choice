@@ -5365,8 +5365,8 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 %
 % \section{Outputs}
 %
-% In the |.xy| file, |1/|\meta{n} means
-% student sheet number~1 (there is only one ``student sheet'' for this
+% In the |.xy| file, |0/|\meta{n} means
+% student sheet number~0 (there is only one ``student sheet'' numbered 0 for this
 % document as we did not use |\onecopy|) and page number~\meta{n} inside this
 % student sheet. Then, each instance of the |\tracepos| command shows
 % $x$ and $y$ positions as arguments \#2 and \#3 (unit is |sp|, such
@@ -5388,7 +5388,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 % \subsection{\texttt{AMCcode} command}
 % \label{a:code}
 % Lines in the |.xy| file from a |\AMCcode| command. Here,
-% |code.|\meta{n}|:|\meta{q}|,|\meta{v} relates to digit number
+% |code[|\meta{n}|]:|\meta{q}|,|\meta{v} relates to digit number
 % \meta{n} from the right (\meta{n}=1 for units, \meta{n}=2 for tens,
 % \meta{n}=3 for hundreds and so on), question number \meta{q}
 % (|\AMCcode| uses a fake question; this number can be ignored), and
