@@ -326,7 +326,7 @@ sub analyse_cslog {
 # * answer given outside a question
 #
 # These errors can be detected parsing the *.amc log file produced by
-# LaTeX compilation, through AUTOQCM[...] messages.
+# LaTeX compilation, through \message{...} messages.
 
 sub analyse_amclog {
     my ($amclog_file) = @_;
@@ -340,9 +340,9 @@ sub analyse_amclog {
     open( AMCLOG, $amclog_file ) or die "Unable to open $amclog_file: $!";
     while (<AMCLOG>) {
 
-        # AUTOQCM[Q=N] tells that we begin with question number N
+        # Q=N tells that we begin with question number N
 
-        if (/AUTOQCM\[Q=([0-9]+)\]/) {
+        if (/\\message\{Q=([0-9]+)\}/) {
 
             # first check that the previous question is ok:
             check_question($analyse_data);
@@ -389,22 +389,22 @@ sub analyse_amclog {
             $analyse_data->{qs}->{$1} = $analyse_data->{q};
         }
 
-        # AUTOQCM[QPART] tells that we end with a question without having
+        # QPART tells that we end with a question without having
         # given all the answers
 
-        if (/AUTOQCM\[QPART\]/) {
+        if (/\\message\{QPART\}/) {
             $analyse_data->{q}->{partial} = 1;
         }
 
-        # AUTOQCM[FQ] tells that we have finished with the current question
+        # FQ tells that we have finished with the current question
 
-        if (/AUTOQCM\[FQ\]/) {
+        if (/\\message\{FQ\}/) {
             $analyse_data->{q}->{closed} = 1;
         }
 
-        # AUTOQCM[ETU=N] tells that we begin with student number N.
+        # ETU=N tells that we begin with student number N.
 
-        if (/AUTOQCM\[ETU=([0-9]+)\]/) {
+        if (/\\message\{ETU=([0-9]+)\}/) {
             my $student = $1;
 
             # first check the last question from preceding student is ok:
@@ -416,21 +416,21 @@ sub analyse_amclog {
             $analyse_data = { etu => $student, titre => '', qs => {} };
         }
 
-        # AUTOQCM[BR=N] tells that this student is a replicate of student N
+        # BR=N tells that this student is a replicate of student N
 
-        if (/AUTOQCM\[BR=([0-9]+)\]/) {
+        if (/\\message\{BR=([0-9]+)\}/) {
             my $alias = $1;
 
             $analyse_data->{is_alias} = 1;
             $analyse_data->{alias}    = $alias;    # unused ;)
         }
 
-        # AUTOACM[NUM=N=ID] tells that question number N (internal
+        # NUM=N=ID tells that question number N (internal
         # question number, not the question number shown on the sheet)
         # refers to ID (question name, string given as an argument to
         # question environment)
 
-        if (/AUTOQCM\[NUM=([0-9]+)=(.+)\]/) {
+        if (/\\message\{NUM=([0-9]+)=(.+)\}/) {
 
             # stores this association (two-way)
 
@@ -438,23 +438,23 @@ sub analyse_amclog {
             $analyse_data->{titres}->{$2} = 1;
         }
 
-        # AUTOQCM[MULT] tells that current question is a multiple question
+        # MULT tells that current question is a multiple question
 
-        if (/AUTOQCM\[MULT\]/) {
+        if (/\\message\{MULT\}/) {
             $analyse_data->{q}->{mult} = 1;
         }
 
-        # AUTOQCM[INDIC] tells that current question is an indicative
+        # INDIC tells that current question is an indicative
         # question
 
-        if (/AUTOQCM\[INDIC\]/) {
+        if (/\\message\{INDIC\}/) {
             $analyse_data->{q}->{indicative} = 1;
         }
 
-        # AUTOQCM[REP=N:S] tells that answer number N is S (S can be 'B'
+        # REP=N:S tells that answer number N is S (S can be 'B'
         # for 'correct' or 'M' for wrong)
 
-        if (/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
+        if (/\\message\{REP=([0-9]+):([BM])\}/) {
             my $rep = "R" . $1;
 
             if ( $analyse_data->{q}->{closed} ) {
@@ -495,9 +495,9 @@ sub analyse_amclog {
             $analyse_data->{q}->{$rep} = ( $2 eq 'B' ? 1 : 0 );
         }
 
-        # AUTOQCM[VAR:N=V] tells that variable named N has value V
+        # VAR:N=V tells that variable named N has value V
 
-        if (/AUTOQCM\[VAR:([0-9a-zA-Z.:-]+)=([^\]]+)\]/) {
+        if (/\\message\{VAR:([0-9a-zA-Z.:-]+)=(.+)\}/) {
             $info_vars{$1} = $2;
         }
 
@@ -1019,7 +1019,7 @@ if ( $to_do{k} ) {
 
 ############################################################################
 # MODE b: extracts the scoring strategy to the scoring database,
-# parsing the AUTOQCM[...] messages from the LaTeX output.
+# parsing the \message{...} messages from the LaTeX output.
 ############################################################################
 
 if ( $to_do{b} ) {
@@ -1080,11 +1080,11 @@ if ( $to_do{b} ) {
   PARSELOG: while (<AMCLOG>) {
         debug($_) if ($_);
 
-        # AUTOQCM[TOTAL=N] tells that the total number of sheets is
+        # TOTAL=N tells that the total number of sheets is
         # N. This will allow us to relay the progression of the
         # process to the calling process.
 
-        if (/AUTOQCM\[TOTAL=([\s0-9]+)\]/) {
+        if (/\\message\{TOTAL=([\s0-9]+)\}/) {
             my $t = $1;
             $t =~ s/\s//g;
             if ( $t > 0 ) {
@@ -1094,7 +1094,7 @@ if ( $to_do{b} ) {
             }
         }
 
-        if (/AUTOQCM\[ETU=([0-9]+)\]/) {
+        if (/\\message\{ETU=([0-9]+)\}/) {
 
             # save if student 0
             $qs0 = $qs if ( $etu == 0 );
@@ -1110,7 +1110,7 @@ if ( $to_do{b} ) {
 
         next PARSELOG if ($finished_with_student);
 
-        if (/AUTOQCM\[FQ\]/) {
+        if (/\\message\{FQ\}/) {
 
             # end of question: register it (or update it)
             $scoring->new_question(
@@ -1126,7 +1126,7 @@ if ( $to_do{b} ) {
             $rep           = '';
         }
 
-        if (/AUTOQCM\[Q=([0-9]+)\]/) {
+        if (/\\message\{Q=([0-9]+)\}/) {
 
             # beginning of question
             $quest = $1;
@@ -1142,25 +1142,25 @@ if ( $to_do{b} ) {
             }
         }
 
-        if (/AUTOQCM\[NUM=([0-9]+)=(.+)\]/) {
+        if (/\\message\{NUM=([0-9]+)=(.+)\}/) {
 
             # association question-number<->question-title
             $scoring->question_title( $1, $2 );
         }
 
-        if (/AUTOQCM\[MULT\]/) {
+        if (/\\message\{MULT\}/) {
 
             # this question is a multiple-style one
             $current_q->{multiple} = 1;
         }
 
-        if (/AUTOQCM\[INDIC\]/) {
+        if (/\\message\{INDIC\}/) {
 
             # this question is an indicative one
             $current_q->{indicative} = 1;
         }
 
-        if (/AUTOQCM\[REP=([0-9]+):([BM])\]/) {
+        if (/\\message\{REP=([0-9]+):([BM])\}/) {
 
             # answer
             $rep = $1;
@@ -1173,9 +1173,9 @@ if ( $to_do{b} ) {
             $scoring->new_answer( $etu, $qq, $rep, ( $2 eq 'B' ? 1 : 0 ), '' );
         }
 
-        # AUTOQCM[BR=N] tells that this student is a replicate of student N
+        # BR=N tells that this student is a replicate of student N
 
-        if (/AUTOQCM\[BR=([0-9]+)\]/) {
+        if (/\\message\{BR=([0-9]+)\}/) {
             my $alias = $1;
 
             $scoring->replicate( $alias, $etu );
@@ -1185,7 +1185,7 @@ if ( $to_do{b} ) {
             $qs0_count++;
         }
 
-        if (/AUTOQCM\[B=([^\]]+)\]/) {
+        if (/\\message\{B=(.+)\}/) {
 
             # scoring strategy string
             if ($quest) {
@@ -1210,17 +1210,17 @@ if ( $to_do{b} ) {
             }
         }
 
-        # AUTOQCM[BDS=string] gives us the default scoring stragety
+        # BDS=string gives us the default scoring stragety
         # for simple questions
-        # AUTOQCM[BDM=string] gives us the default scoring stragety
+        # BDM=string gives us the default scoring stragety
         # for multiple questions
 
-        if (/AUTOQCM\[BD(S|M)=([^\]]+)\]/) {
+        if (/\\message\{BD(S|M)=(.+)\}/) {
             $scoring->default_strategy(
                 ( $1 eq 'S' ? QUESTION_SIMPLE : QUESTION_MULT ), $2 );
         }
 
-        if (/AUTOQCM\[VAR:([0-9a-zA-Z.-]+)=([^\]]+)\]/) {
+        if (/\\message\{VAR:([0-9a-zA-Z.-]+)=(.+)\}/) {
 
             # variables
             my $name  = $1;

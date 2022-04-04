@@ -1219,7 +1219,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newwrite\AMC@logfile
 \immediate\openout\AMC@logfile=\jobname.amc
 \def\AMC@amclog#1{\immediate\write\AMC@logfile{#1}}
-\def\AMCmessage#1{\AMC@amclog{AUTOQCM[#1]^^J}}
+\def\AMCmessage#1{\AMC@amclog{\string\message{#1}}}
 %    \end{macrocode}\end{macro}\end{macro}
 %
 % \begin{macro}{\AMC@LR}
@@ -1774,7 +1774,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   ID associated to |key| (creating one if necessary).
 %   \begin{macrocode}
 \newcount\AMC@numerotation\AMC@numerotation=\z@%
-\def\AMC@definitnumero#1#2{\AMC@amclog{AUTOQCM[NUM=#1=#2]^^J}%
+\def\AMC@definitnumero#1#2{\AMCmessage{NUM=#1=#2}%
   \expandafter\global\expandafter\def\csname AMC@numtab@#2\endcsname{#1}}
 \def\AMC@prepare#1{\expandafter\ifx\csname AMC@numtab@#1\endcsname\relax%
   \global\advance\AMC@numerotation\@ne%
@@ -2321,7 +2321,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \AMC@tracebox{1}{score::\the\AMCid@quest,-1}{#1}%
   \fi%
   \ifAMCsz@logged\else%
-    \AMC@amclog{AUTOQCM[VAR:scorezones=1]^^J}%
+    \AMCmessage{VAR:scorezones=1}%
     \global\AMCsz@loggedtrue%
   \fi%
 }
@@ -2996,7 +2996,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newif\ifAMC@keepmemory
 \newcommand\AMCformS{%
   \ifAMC@ensemble\AMCformulaire@dedanstrue%
-  \AMC@amclog{AUTOQCM[BR=0]^^J}\AMC@mem@show%
+  \AMCmessage{BR=0}\AMC@mem@show%
   \global\AMC@keepmemorytrue%
   \fi}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
@@ -3107,12 +3107,12 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 %    \begin{macrocode}
 \newcommand{\correctchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
-  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
+  \ifAMC@calibration\AMCmessage{REP=\the\AMCrep@count:B}\fi%
   \global\AMCune@bonnetrue%
   \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{\AMC@checkedbox}%
       \else\AMC@box{#1}{}\fi}{#2}}{\the\AMCrep@count}\ignorespaces}
 \newcommand{\wrongchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
-  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:M]^^J}\fi%
+  \ifAMC@calibration\AMCmessage{REP=\the\AMCrep@count:M}\fi%
   \AMCload@@reponse{\une@rep{\AMC@box{#1}{}}{#2}}{\the\AMCrep@count}%
   \ignorespaces}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
@@ -3340,9 +3340,9 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCexternalQuestion[2]{%
   \AMCstartWithQuestion{#1}%
   \ifAMC@calibration%
-    \AMC@amclog{AUTOQCM[B=MAX=#2]^^J}%
-    \AMC@amclog{AUTOQCM[MULT]^^J}%
-    \AMC@amclog{AUTOQCM[FQ]^^J}%
+    \AMCmessage{B=MAX=#2}%
+    \AMCmessage{MULT}%
+    \AMCmessage{FQ}%
   \fi%
 }
 \newenvironment{question}[2][]{%
@@ -3365,7 +3365,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newenvironment{questionmult}[1]{%
   \AMCune@bonnefalse\begin{question}[{{\multiSymbole}}]{#1}%
   \AMCtype@multitrue\ifAMC@calibration%
-  \AMC@amclog{AUTOQCM[MULT]^^J}\fi}%
+  \AMCmessage{MULT}\fi}%
 {\end{question}}
 \newenvironment{variable-single}[2]
 {\def\AMCbeginQuestion##1##2{}  
@@ -3422,10 +3422,10 @@ Three digits and two letters:\insertgroup{mixed}.
 %         |\QuestionIndicative| tells that the current question is not
 %         no be taken into account in the global mark.
 %    \begin{macrocode}
-\def\scoring#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[B=#1]^^J}\fi}
-\def\scoringDefaultS#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDS=#1]^^J}\fi}
-\def\scoringDefaultM#1{\ifAMC@calibration\AMC@amclog{AUTOQCM[BDM=#1]^^J}\fi}
-\def\QuestionIndicative{\ifAMC@calibration\AMC@amclog{AUTOQCM[INDIC]^^J}\fi}
+\def\scoring#1{\ifAMC@calibration\AMCmessage{B=#1}\fi}
+\def\scoringDefaultS#1{\ifAMC@calibration\AMCmessage{BDS=#1}\fi}
+\def\scoringDefaultM#1{\ifAMC@calibration\AMCmessage{BDM=#1}\fi}
+\def\QuestionIndicative{\ifAMC@calibration\AMCmessage{INDIC}\fi}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
 % \subsection{Numerical data}
@@ -3525,7 +3525,7 @@ Three digits and two letters:\insertgroup{mixed}.
 
 \cs_new:Npn \amc_code_digit:n #1 {
   \global\advance\AMCrep@count\@ne\relax
-  \ifAMC@calibration\AMC@amclog{AUTOQCM[ REP = \the\AMCrep@count : M ]^^J}\fi
+  \ifAMC@calibration\AMCmessage{ REP = \the\AMCrep@count : M }\fi
   \hbox{\AMC@keyBox@{#1}{}{1}{case : \AMCid@name : \the\AMCid@quest , \the\AMCrep@count}}
   \bool_if:NTF \amc_code_vertical_bool {
     \vspace{\AMCcodeVspace}
@@ -3686,7 +3686,7 @@ Three digits and two letters:\insertgroup{mixed}.
   }%
   \ifAMC@ensemble%
     #2{#3}{#4}%
-    \AMC@amclog{AUTOQCM[QPART]^^J}%
+    \AMCmessage{QPART}%
   \else%
     #1{#3}{#4}%
   \fi%
@@ -3934,8 +3934,8 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
 \cs_new:Npn \amc_num_char:nn #1 #2 {
   \global\advance\AMCrep@count\@ne\relax
-  \AMC@amclog{AUTOQCM[REP= \the\AMCrep@count :
-    \ifx#2\AMC@checkedbox B\else M\fi ]^^J}
+  \AMCmessage{REP= \the\AMCrep@count :
+    \ifx#2\AMC@checkedbox B\else M\fi }
   \ifAMC@correc
     \protect\AMC@keyBox@{#1}{#2}{1}{case : \AMCid@name :
       \the\AMCid@quest , \the\AMCrep@count}
@@ -3977,23 +3977,23 @@ Three digits and two letters:\insertgroup{mixed}.
     { -1 } {
       \hbox{\amc_num_char:nn{$+$}{}}
       \vspace{\AMCnumeric@Vspace}
-      \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+      \AMCmessage{B=set. sign #2 =1}
       \hbox{\amc_num_char:nn{$-$}{\AMC@checkedbox}}
-      \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+      \AMCmessage{B=set. sign #2 =-1}
     }
     { 1 } {
       \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
       \vspace{\AMCnumeric@Vspace}
-      \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+      \AMCmessage{B=set. sign #2 =1}
       \hbox{\amc_num_char:nn{$-$}{}}
-      \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+      \AMCmessage{B=set. sign #2 =-1}
     }
     { 0 } {
       \hbox{\amc_num_char:nn{$+$}{}}
       \vspace{\AMCnumeric@Vspace}
-      \AMC@amclog{AUTOQCM[B=set. sign #2 =1]^^J}
+      \AMCmessage{B=set. sign #2 =1}
       \hbox{\amc_num_char:nn{$-$}{}}
-      \AMC@amclog{AUTOQCM[B=set. sign #2 =-1]^^J}
+      \AMCmessage{B=set. sign #2 =-1}
     }
   }
 }
@@ -4010,7 +4010,7 @@ Three digits and two letters:\insertgroup{mixed}.
   { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } }
   { 1 } { #3 - 1 } {
     \amc_num_digit_box:nn { ##1 }{ #2 }
-    \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
+    \AMCmessage{B= set. #1 = ##1}
     \hspace{\AMCnumeric@Hspace}
   }
   \hspace{-\AMCnumeric@Hspace}
@@ -4023,7 +4023,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \vbox{\hbox{
         \amc_num_digit_box:nn { ##1 }{ #2 }
       }}
-    \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
+    \AMCmessage{B= set. #1 = ##1}
     \int_compare:nNnTF { ##1 } < { #3 - 1 } {
       \vspace{\AMCnumeric@Vspace}
     } {}
@@ -4039,7 +4039,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \vbox{\hbox{
         \amc_num_digit_box:nn { ##1 }{ #2 }
       }}
-    \AMC@amclog{AUTOQCM[B= set. #1 = ##1 ]^^J}
+    \AMCmessage{B= set. #1 = ##1}
     \int_compare:nNnTF { ##1 } > \amc_num_first_digit_int {
       \vspace{\AMCnumeric@Vspace}
       } {}
@@ -4158,13 +4158,13 @@ Three digits and two letters:\insertgroup{mixed}.
   \int_set_eq:NN \amc_num_digit_int { #4 }
   \int_while_do:nNnn \amc_num_digit_int > 0 {
     \bool_if:NTF \amc_num_strict_bool {
-      \AMC@amclog{AUTOQCM[B=requires. #3
-        \int_to_Alph:n \amc_num_digit_int = 1]^^J}
+      \AMCmessage{B=requires. #3
+        \int_to_Alph:n \amc_num_digit_int = 1}
     } {
-      \AMC@amclog{AUTOQCM[B=default. #3
+      \AMCmessage{B=default. #3
         \int_to_Alph:n \amc_num_digit_int =
         \bool_if:NTF \amc_num_ignoreblank_bool { } { 0 }
-        ]^^J}
+        }
     }
     \int_compare:nNnTF \amc_num_digit_int = #4 { } {
       \bool_if:NTF \amc_num_ignoreblank_bool {
@@ -4194,9 +4194,9 @@ Three digits and two letters:\insertgroup{mixed}.
   }
   \bool_if:NTF { #2 } {
     \bool_if:NTF \amc_num_strict_bool {
-      \AMC@amclog{AUTOQCM[B=requires. sign #3 =1]^^J}
+      \AMCmessage{B=requires. sign #3 =1}
     } {
-      \AMC@amclog{AUTOQCM[B=default. sign #3 =1]^^J}
+      \AMCmessage{B=default. sign #3 =1}
     }
     \tl_put_right:Nx #1 { * ( sign #3 ) }
   } { }
@@ -4223,7 +4223,7 @@ Three digits and two letters:\insertgroup{mixed}.
 % question:
 %    \begin{macrocode}
   \ifAMC@ensemble\ifAMCformulaire@dedans
-    \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}
+    \AMCmessage{Q=\the\AMCid@quest}
   \fi\fi
 %    \end{macrocode}
 % Then we parse the options from \meta{opts}:
@@ -4289,14 +4289,14 @@ Three digits and two letters:\insertgroup{mixed}.
 % correct value, and |intX| to the value entered by the student.
 %    \begin{macrocode}
    \fp_set:Nn \amc_num_result_fp { #1 }
-   \AMC@amclog{AUTOQCM[B=numval=\fp_to_scientific:N \amc_num_result_fp ,
+   \AMCmessage{B=numval=\fp_to_scientific:N \amc_num_result_fp ,
      numex=\int_use:N \amc_num_exact_int,
      numapp=\int_use:N \amc_num_approx_int,
      numsex=\AMC@numeric@scoreexact,
      numsapp=\AMC@numeric@scoreapprox
-   ]}
+   }
    \bool_if:NTF \amc_num_scoring_bool {
-     \AMC@amclog{AUTOQCM[B=haut=,mz=,
+     \AMCmessage{B=haut=,mz=,
        formula=(Vdifference <= \int_use:N \amc_num_exact_int ?
        \AMC@numeric@scoreexact :
        \int_compare:nNnTF \amc_num_approx_int = 0 {
@@ -4305,7 +4305,7 @@ Three digits and two letters:\insertgroup{mixed}.
          (Vdifference <= \int_use:N\amc_num_approx_int ?
            \AMC@numeric@scoreapprox : \AMC@numeric@scorewrong)
        }
-       )]^^J}
+       )}
    } {}
    \amc_num_build_integer_scoring:Nnnnn
      \amc_num_compute_tl \amc_num_sign_bool { digit } \amc_num_ndigits_int
@@ -4313,47 +4313,47 @@ Three digits and two letters:\insertgroup{mixed}.
    \int_compare:nNnTF \amc_num_expo_int > 0 {
      \amc_num_build_integer_scoring:Nnnnn
        \amc_num_expo_tl \amc_num_exposign_bool { expo } \amc_num_expo_int  { 0 }
-     \AMC@amclog{AUTOQCM[B= set. intE = \amc_num_expo_tl ]^^J}
+     \AMCmessage{B= set. intE = \amc_num_expo_tl}
    } {}
-   \AMC@amclog{AUTOQCM[B= set.intV = \fp_to_int:N\amc_num_correct_fp ,
-     set.intXX = \amc_num_compute_tl ]^^J}
+   \AMCmessage{B= set.intV = \fp_to_int:N\amc_num_correct_fp ,
+     set.intXX = \amc_num_compute_tl }
    \int_compare:nNnTF \amc_num_expo_int > 0 {
-     \AMC@amclog{AUTOQCM[B= set.intX = intXX * \int_use:N\amc_num_base_int **( intE - (\int_use:N\amc_num_correct_expo_int) )]^^J}
+     \AMCmessage{B= set.intX = intXX * \int_use:N\amc_num_base_int **( intE - (\int_use:N\amc_num_correct_expo_int) )}
    }{
-     \AMC@amclog{AUTOQCM[B= set.intX = intXX]^^J}
+     \AMCmessage{B= set.intX = intXX}
    }
    \int_compare:nNnTF \amc_num_expo_int > 0 {
-     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE - \int_use:N\amc_num_decd_int)]^^J}
+     \AMCmessage{B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (intE - \int_use:N\amc_num_decd_int)}
    }{
-     \AMC@amclog{AUTOQCM[B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (- \int_use:N\amc_num_decd_int) ]^^J}
+     \AMCmessage{B= set.valueX = intXX * \int_use:N\amc_num_base_int ** (- \int_use:N\amc_num_decd_int)}
    }
    \ifx\@empty\AMC@numeric@keepas\@empty\else
-   \AMC@amclog{AUTOQCM[B= setglobal.\AMC@numeric@keepas = valueX ]^^J}
+   \AMCmessage{B= setglobal.\AMC@numeric@keepas = valueX}
    \fi
    \ifx\@empty#1\@empty
    \bool_if:NTF \amc_num_significant_bool {
-     \AMC@amclog{AUTOQCM[B=set.Vdifference=0]^^J}
+     \AMCmessage{B=set.Vdifference=0}
    }{
      \ifx\@empty\AMC@numeric@alsocorrect\@empty
-       \AMC@amclog{AUTOQCM[B=set.Vdifference=0]^^J}
+       \AMCmessage{B=set.Vdifference=0}
      \else
-       \AMC@amclog{AUTOQCM[B="set.Vdifference =
+       \AMCmessage{B="set.Vdifference =
          amcvdifference( \AMC@numeric@alsocorrect, valueX, \int_use:N\amc_num_decd_int, \int_use:N\amc_num_expo_int)
-         "]^^J}
+         "}
      \fi
    }
    \else
    \bool_if:NTF \amc_num_significant_bool {
-     \AMC@amclog{AUTOQCM[B=set.Vdifference="min( abs((intV)-(intX)) ,
+     \AMCmessage{B=set.Vdifference="min( abs((intV)-(intX)) ,
        abs(\int_use:N\amc_num_base_int * (intV) - (intX)) ,
-       abs((intV) - \int_use:N\amc_num_base_int * (intX)) )"]^^J}
+       abs((intV) - \int_use:N\amc_num_base_int * (intX)) )"}
    } {
      \ifx\@empty\AMC@numeric@alsocorrect\@empty
-     \AMC@amclog{AUTOQCM[B=set.Vdifference=abs((intV)-(intX))]^^J}
+     \AMCmessage{B=set.Vdifference=abs((intV)-(intX))}
      \else
-     \AMC@amclog{AUTOQCM[B="set.Vdifference =
+     \AMCmessage{B="set.Vdifference =
        min( amcvdifference( \AMC@numeric@alsocorrect, valueX, \int_use:N\amc_num_decd_int, \int_use:N\amc_num_expo_int),
-       abs((intV)-(intX)) )" ]^^J}
+       abs((intV)-(intX)) )"}
      \fi
    }
    \fi
@@ -4397,7 +4397,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %    \begin{macrocode}
   \ifAMC@ensemble\else\vspace{1.5ex}\par\fi
   \ifAMC@ensemble\ifAMCformulaire@dedans
-    \AMC@amclog{AUTOQCM[FQ]^^J}
+    \AMCmessage{FQ}
   \fi\fi
   }
 }
@@ -4603,7 +4603,7 @@ Three digits and two letters:\insertgroup{mixed}.
 }
 \newcommand\AMCopenShow[2]{
   \ifAMC@ensemble\ifAMCformulaire@dedans%
-    \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}%
+    \AMCmessage{Q=\the\AMCid@quest}%
   \fi\fi%
   {\setkeys{AMCOpen}{#1}%
     \ifKV@AMCOpen@lineup%
@@ -4660,7 +4660,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \fi%
   }%
   \ifAMC@ensemble\ifAMCformulaire@dedans%
-  \AMC@amclog{AUTOQCM[FQ]^^J}%
+  \AMCmessage{FQ}%
   \fi\fi%
 }
 \newcommand\AMCopenHide[2]{%
@@ -4703,7 +4703,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand\AMCboOpts[1]{\setkeys{AMCBoxOnly}{#1}}
 \newcommand\AMCboShow[2]{%
   \ifAMC@ensemble\ifAMCformulaire@dedans%
-    \AMC@amclog{AUTOQCM[Q=\the\AMCid@quest]^^J}%
+    \AMCmessage{Q=\the\AMCid@quest}%
   \fi\fi%
   {\setkeys{AMCBoxOnly}{#1}%
     \def\AMCbeginAnswer{}\def\AMCendAnswer{}%
@@ -4720,7 +4720,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \end{choicescustom}%
   }%
   \ifAMC@ensemble\ifAMCformulaire@dedans%
-  \AMC@amclog{AUTOQCM[FQ]^^J}%
+  \AMCmessage{FQ}%
   \fi\fi%
 }
 \newcommand\AMCboHide[2]{
@@ -4866,7 +4866,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand{\onecopy}[2]{%
   \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1%
   \else\AMCnum@copies=\AMCNombreCopies\fi%
-  \AMC@amclog{AUTOQCM[TOTAL=\the\AMCnum@copies]^^J}%
+  \AMCmessage{TOTAL=\the\AMCnum@copies}%
   \AMCid@etud=\AMCid@etudstart%
   \ifnum\AMCid@etud=0\AMCid@etud=\AMC@premierecopie\fi%
   \AMCid@etudfin=\AMCnum@copies%
@@ -4880,7 +4880,7 @@ Three digits and two letters:\insertgroup{mixed}.
     \AMC@zoneformulairefalse\setcounter{page}{1}\setcounter{section}{0}%
     \ifAMC@ensemble\ifAMC@automarks\pagestyle{AMCpageNoMarks}\fi\fi%
     \AMCnumero{1}%
-    \ifAMC@calibration\AMC@amclog{AUTOQCM[ETU=\the\AMCid@etud]^^J}\fi%
+    \ifAMC@calibration\AMCmessage{ETU=\the\AMCid@etud}\fi%
     \AMC@multiclear%
     \global\AMC@keepmemoryfalse%
       #2%
@@ -5050,11 +5050,11 @@ Three digits and two letters:\insertgroup{mixed}.
   \RequirePackage{storebox}\AtBeginDocument{{}}%
 \fi
 \ifAMC@pdfform
-  \AMC@amclog{AUTOQCM[VAR:project:pdfform=1]^^J}%
+  \AMCmessage{VAR:project:pdfform=1}%
   \AMCboxStyle{shape=form}%
   \RequirePackage[pageanchor=false]{hyperref}%
 \else%
-   \AMC@amclog{AUTOQCM[VAR:project:pdfform=0]^^J}%
+   \AMCmessage{VAR:project:pdfform=0}%
 \fi
 \AtBeginDocument{%
   \ifAMCneeds@storebox%
@@ -5109,7 +5109,7 @@ Three digits and two letters:\insertgroup{mixed}.
 }		
 }
 \newcommand{\answer}[5][]{\global\advance\AMCrep@count\@ne\relax%
-  \ifAMC@calibration\AMC@amclog{AUTOQCM[REP=\the\AMCrep@count:B]^^J}\fi%
+  \ifAMC@calibration\AMCmessage{REP=\the\AMCrep@count:B}\fi%
   \global\AMCune@bonnetrue%
   \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{\AMC@checkedbox}%
   \else\AMC@box{#1}{}\fi}{#2}{#3}{#4}{#5}}{\the\AMCrep@count}\ignorespaces}
@@ -5302,10 +5302,10 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 %
 % Telling outside if separate answer sheet, and boxes labelling, are requested:
 %    \begin{macrocode}
-\ifAMC@ensemble\AMC@amclog{AUTOQCM[VAR:ensemble=1]^^J}\fi
-\ifAMC@inside@box\AMC@amclog{AUTOQCM[VAR:insidebox=1]^^J}\fi
-\ifAMC@outside@box\AMC@amclog{AUTOQCM[VAR:outsidebox=1]^^J}\fi
-\ifAMC@postcorrect\AMC@amclog{AUTOQCM[VAR:postcorrect=1]^^J}\fi
+\ifAMC@ensemble\AMCmessage{VAR:ensemble=1}\fi
+\ifAMC@inside@box\AMCmessage{VAR:insidebox=1}\fi
+\ifAMC@outside@box\AMCmessage{VAR:outsidebox=1}\fi
+\ifAMC@postcorrect\AMCmessage{VAR:postcorrect=1}\fi
 %    \end{macrocode}
 %
 % Preparing writing to |.xy| file :
