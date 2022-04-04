@@ -1788,14 +1788,14 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \begin{macro}{\AMC@logchar}
 %   The command |\AMC@logchar|\marg{char}\marg{key} logs the
-%   character written in the box referenced as \meta{key} in the |.cs|
+%   character written in the box referenced as \meta{key} in the |.amc|
 %   file. This is used in catalog mode, to get understandable
 %   references to answers from the statistics tables of the ODS
 %   export.
 %
 %    \begin{macrocode}
 \def\AMC@logchar#1#2{%
-  \protected@write\AMC@CSFILE{}{%
+  \protected@write\AMC@logfile{}{%
     \string\answer%
     {\the\AMCid@etud/\thepage:#2}%
     {#1}}%
@@ -5328,14 +5328,6 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \immediate\write\AMC@XYFILE{\string\with{ncopies=\AMCNombreCopies}}%
 \fi%
 \fi
-%    \end{macrocode}
-%
-% Preparing writing to |.cs| file :
-%    \begin{macrocode}
-\ifAMC@catalog%
-\newwrite\AMC@CSFILE%
-\immediate\openout\AMC@CSFILE\jobname.cs%
-\fi%
 %    \end{macrocode}
 %
 % \subsection{French command names}

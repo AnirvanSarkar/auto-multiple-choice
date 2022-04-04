@@ -883,7 +883,7 @@ if ( $to_do{S} ) {
 sub build_catalog {
     execute( command_opts => [ %global_opts, CatalogExterne => 1 ] );
     transfer( "$jobname.pdf", $out_catalog );
-    analyse_cslog("$jobname.cs");
+    analyse_cslog("$jobname.amc");
     give_latex_errors( __ "catalog" );
 }
 
