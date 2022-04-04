@@ -1887,17 +1887,16 @@ Three digits and two letters:\insertgroup{mixed}.
 % \end{macro}
 %
 % \begin{environment}{amcxyfile}
-%   The following lines defines an environment to use a particular file
-%   for positions outputs. This is used mainly for documentation or testing.
+%   The following lines defines an environment to tag positions
+%   outputs for a particular part of the document. This is used mainly
+%   for documentation or testing.
 %
 %    \begin{macrocode}
-\newwrite\AMC@XYspecial
-\newwrite\AMC@tmpXY
 \newenvironment{amcxyfile}[1]{%
-  \openout\AMC@XYspecial#1%
-  \let\AMC@tmpXY=\AMC@XYFILE%
-  \let\AMC@XYFILE=\AMC@XYspecial%
-}{\let\AMC@XYFILE=\AMC@tmpXY\closeout\AMC@XYspecial}
+  \protected@write\AMC@XYFILE{}{\string\xyopen{#1}}%
+}{%
+  \protected@write\AMC@XYFILE{}{\string\xyclose{}}%
+}
 %    \end{macrocode}\end{environment}
 %
 % \begin{macro}{\AMCzone}
@@ -1950,7 +1949,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %</doc>
 %\fi
 % produces the following box:
-% \begin{amcxyfile}{automultiplechoice.xy2}
+% \begin{amcxyfile}{xy2}
 %   \begin{center}
 %     \namefield{\fbox{%
 %     \begin{minipage}{5cm}
@@ -1988,7 +1987,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %
 % \begin{itemize}
 % \item
-% \begin{amcxyfile}{automultiplechoice.xy1}
+% \begin{amcxyfile}{xy1}
 % |\AMC@answerBox@{K}{}{1}{test}| produce the box
 % \makeatletter\AMC@answerBox{K}{}{1}{test}\makeatother, writing the
 % lines in the |.xy| file shown in section~\ref{a:boxed}.
@@ -3456,7 +3455,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   |separateanswersheet|, with digits outside boxes).
 % \end{minipage}\hfill
 % \begin{minipage}[t]{.3\linewidth}
-%   \begin{amcxyfile}{automultiplechoice.xy3}\AMCcodeGrid{code}{ABCD,012345,012345,012345,012345}\end{amcxyfile}
+%   \begin{amcxyfile}{xy3}\AMCcodeGrid{code}{ABCD,012345,012345,012345,012345}\end{amcxyfile}
 %
 % \vspace{4mm}
 %   \makeatletter\AMC@ensembletrue\makeatother

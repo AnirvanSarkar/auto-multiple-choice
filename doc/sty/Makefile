@@ -38,6 +38,8 @@ all: FORCE
 	makeindex -s gind.ist -o $(PACK).ind $(PACK).idx
 	$(PDFLATEX) $(PACK).dtx
 	$(PDFLATEX) $(PACK).dtx
+	./get-subxy.pl
+	$(PDFLATEX) $(PACK).dtx
 	$(MAKE) postclean
 
 styonly: $(PACK).dtx
