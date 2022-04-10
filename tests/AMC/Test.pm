@@ -703,6 +703,8 @@ sub get_marks {
             );
         }
     }
+
+    $dbh->disconnect;
 }
 
 sub get_orientation {
@@ -712,6 +714,9 @@ sub get_orientation {
     $l->begin_read_transaction('tgor');
     my $o = $l->orientation();
     $l->end_transaction('tgor');
+
+    $l->disconnect;
+
     return ($o);
 }
 
@@ -806,6 +811,8 @@ sub get_assoc {
                 )
             );
         }
+
+        $dbh->disconnect;
     }
 }
 
@@ -972,6 +979,9 @@ sub get_defects {
     $l->begin_read_transaction('test');
     my $d = { $l->defects() };
     $l->end_transaction('test');
+
+    $l->disconnect;
+
     return ($d);
 }
 
@@ -1165,7 +1175,7 @@ sub check_zooms {
     }
 
     $capture->end_transaction('cZOO');
-
+    $capture->disconnect;
 }
 
 sub check_textest {
@@ -1336,6 +1346,8 @@ sub test_scoring {
     set_debug('');
 
     $self->test( $score, $target_score );
+
+    $data->disconnect;
 }
 
 sub update_sqlite {
@@ -1362,6 +1374,7 @@ sub check_pages {
             $self->test( $mx, $self->{pages}->[$i] );
         }
         $l->end_transaction('npag');
+        $l->disconnect;
     }
 }
 
