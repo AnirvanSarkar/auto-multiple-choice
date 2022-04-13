@@ -77,19 +77,20 @@ print-%: FORCE
 
 BINARIES ?= AMC-detect AMC-buildpdf AMC-pdfformfields
 
-MODS=AMC-*.pl
 STY=doc/sty/automultiplechoice.sty
 DTX=doc/sty/automultiplechoice.dtx
 MOS=$(wildcard I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
 SUBMODS=$(notdir $(shell ls doc/modeles))
+MODS_IN=$(wildcard AMC-*.pl.in)
+MODS=$(MODS_IN:.pl.in=.pl)
 GLADE_IN=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
 DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 PYCACHE=tests/gui/dogtail/__pycache__
 
 # list *.in files for @/VAR/@ substitution
 
-FROM_IN=auto-multiple-choice net.auto_multiple_choice.amc.desktop AMC-gui.pl AMC-latex-link.pl AMC-mailing.pl AMC-perl/AMC/Basic.pm AMC-perl/AMC/Gui/Main.pm $(GLADE_IN:.glade.in=.glade) doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+FROM_IN=auto-multiple-choice net.auto_multiple_choice.amc.desktop $(MODS) AMC-perl/AMC/Basic.pm AMC-perl/AMC/Gui/Main.pm $(GLADE_IN:.glade.in=.glade) doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
 
 # Is this a precomp tarball? If so, the PRECOMP file is present.
 
