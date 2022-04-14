@@ -331,8 +331,15 @@ LOCALDIR=$(shell pwd)
 
 global: FORCE
 	$(MAKE) -C I18N global LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
-	-sudo rm /usr/share/auto-multiple-choice /usr/share/perl5/AMC $(ICONSDIR) /usr/share/doc/auto-multiple-choice /usr/share/doc/auto-multiple-choice-doc $(LOCALEDIR)/fr/LC_MESSAGES/auto-multiple-choice.mo $(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop $(MODELSDIR) /usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty $(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml $(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang $(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz $(foreach SIZE, $(APPICONSIZES), $(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
-	-sudo rm -r /usr/lib/AMC
+	-sudo rm $(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop \
+		/usr/bin/auto-multiple-choice $(TEXDIR)/automultiplechoice.sty \
+		$(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml \
+		$(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang \
+		$(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz \
+		$(foreach SIZE, $(APPICONSIZES), \
+			$(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
+	-sudo rm -r /usr/lib/AMC /usr/share/auto-multiple-choice /usr/share/perl5/AMC \
+		/usr/share/doc/auto-multiple-choice*
 
 local: global
 	$(MAKE) -C I18N local LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
