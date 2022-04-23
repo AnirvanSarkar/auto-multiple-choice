@@ -183,16 +183,21 @@ sub model_description {
 sub load_models {
     my ( $self, $parent, $rep ) = @_;
 
+    utf8::encode($rep);
+
     return if ( !-d $rep );
 
     my @all;
     my @ms;
     my @subdirs;
 
+    debug "Looking for models at " . show_utf8($rep);
     if ( opendir( DIR, $rep ) ) {
-        @all     = readdir(DIR);
-        @ms      = grep { /\.tgz$/ && -f $rep . "/$_" } @all;
-        @subdirs = grep { -d $rep . "/$_" && !/^\./ } @all;
+        @all = readdir(DIR);
+        debug "dir content: " . join( ", ", @all );
+        @ms = grep { /\.tgz$/ && -f "$rep/$_" } @all;
+        debug "found: " . join( ", ", @ms );
+        @subdirs = grep { -d "$rep/$_" && !/^\./ } @all;
         closedir DIR;
     } else {
         debug("MODELS : Can't open directory $rep : $!");
@@ -216,21 +221,30 @@ sub load_models {
     for my $m ( sort { $a cmp $b } @ms ) {
         my $nom = $m;
         $nom =~ s/\.tgz$//i;
+        utf8::decode($nom);
         my $desc_text = __ "(no description)";
         my $tar       = Archive::Tar->new();
         if ( $tar->read( $rep . "/$m" ) ) {
             my @desc = grep { /description.xml$/ } ( $tar->list_files() );
             if ( $desc[0] ) {
-                my $d =
-                  XMLin( $tar->get_content( $desc[0] ), SuppressEmpty => '' );
-                $nom       = $d->{title} if ( $d->{title} );
-                $desc_text = $d->{text}  if ( $d->{text} );
+                my $d = eval {
+                    XMLin( $tar->get_content( $desc[0] ), SuppressEmpty => '' );
+                };
+                if ($@) {
+                    debug_and_stderr "Error while parsing description.xml: $@";
+                    $desc_text = __ "This template is broken.";
+                } else {
+                    $nom       = $d->{title} if ( $d->{title} );
+                    $desc_text = $d->{text}  if ( $d->{text} );
+                }
             }
             debug "Adding model $m";
             debug "NAME=$nom DESC=$desc_text";
+            my $path = $rep . "/$m";
+            utf8::decode($path);
             $self->{models_store}->set(
                 $self->{models_store}->append($parent),
-                MODEL_NOM, $nom, MODEL_PATH, $rep . "/$m",
+                MODEL_NOM, $nom, MODEL_PATH, $path,
                 MODEL_DESC, $desc_text
             );
         } else {
@@ -477,8 +491,8 @@ sub install_source {
                         $self->copy_latex( "$temp_dir/$ff.0enc", "$temp_dir/$ff" );
                     }
                 }
-                if ( system( "mv", "$temp_dir/$ff", "$hd/$ff" ) != 0 ) {
-                    debug "ERR: Move failed: $temp_dir/$ff --> $hd/$ff -- $!";
+                if ( system( "mv", "$temp_dir/$ff", $hd ) != 0 ) {
+                    debug_and_stderr "ERR: Move failed: $temp_dir/$ff --> $hd -- $!";
                     debug "(already exists)" if ( -e "$hd/$ff" );
                 }
             }

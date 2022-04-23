@@ -166,10 +166,21 @@ sub add_to_archive {
     return (0) if ( $f eq 'description.xml' );
 
     if ( -f $af ) {
-        debug "Adding to template archive: $f\n";
+        debug "Adding to template archive: $f from $af\n";
         my $tf = Archive::Tar::File->new( file => $af );
-        $tf->rename($f);
-        $tar->add_files($tf);
+
+        # If the new name is not encoded, the resulting tgz file is
+        # broken…
+        utf8::encode($f);
+
+        if ( $tf->rename($f) ) {
+            $tar->add_files($tf);
+        } else {
+            debug_and_stderr(
+                "Error while renaming the archive file! " . $tar->error() );
+        }
+    } else {
+        debug_and_stderr("File not found: $af");
     }
 
     return (0);
@@ -198,6 +209,9 @@ sub build {
         $buf->get_text( $buf->get_start_iter, $buf->get_end_iter, 1 ) );
     $writer->endTag('description');
     $writer->end();
+
+    # add_data needs bytes content…
+    utf8::encode($desc);
 
     $tar->add_data( 'description.xml', $desc );
 

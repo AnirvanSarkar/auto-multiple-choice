@@ -1,7 +1,7 @@
 
 import os
 import os.path
-from shutil import copyfile, rmtree
+from shutil import copyfile, copytree, rmtree
 import csv
 import subprocess
 import time
@@ -85,15 +85,21 @@ class AMC:
         else:
             return self.project_name
 
+    def template_file(self, name):
+        return os.getenv("HOME") + '/.AMC.d/Models/' + name + '.tgz'
+
     def project_dir(self):
         return self.tmp_dir + '/' + self.project_name
 
     def src_dir(self):
         return self.tmp_dir + '/' + self.src_dirname
 
-    def copy_in_src_dir(self, path):
+    def check_src_dir(self):
         if not os.path.isdir(self.src_dir()):
             os.mkdir(self.src_dir())
+
+    def copy_in_src_dir(self, path):
+        self.check_src_dir()
         base = os.path.basename(path)
         copyfile(path, self.src_dir() + '/' + base)
         return base
@@ -108,8 +114,22 @@ class AMC:
         dialog.grab_focus()
         dialog.child(button).click()
 
-    def launch(self):
-        if os.path.exists(self.src_dir()):
+    def find_description(self, d):
+        return self.gui.findChildren(
+            dogtail.predicate.GenericPredicate(
+                description=d))[0]
+
+    def find_along_with(self, name, with_name):
+        for i in self.gui.findChildren(
+                dogtail.predicate.GenericPredicate(
+                    name=name)):
+            if i.parent.findChildren(
+                dogtail.predicate.GenericPredicate(
+                    name=with_name)):
+                return i
+
+    def launch(self, delete_sources=True):
+        if delete_sources and os.path.exists(self.src_dir()):
             rmtree(self.src_dir())
         copyfile(self.config_file, os.getenv("HOME")
                  + '/.AMC.d/cf.TEST.xml')
@@ -245,6 +265,57 @@ class AMC:
     def tab(self, tabname):
         return self.gui.child(tabname, roleName='page tab')
 
+    def open_project(self, name, source_dir):
+        self.project_name = name
+        # First remove project if already existing
+        if os.path.isdir(self.project_dir()):
+            rmtree(self.project_dir())
+        # Copy files to project directory
+        copytree(source_dir, self.project_dir())
+        # Go to AMC window and click 'Open'
+        self.gui.grab_focus()
+        self.gui.child('Open').click()
+        # Choose project
+        dialog = self.gui.child('Open a MC project')
+        dialog.grab_focus()
+        dialog.child(name).click()
+        dialog.child('Open').click()
+
+    def create_template(self, name, with_files=None):
+        t = self.template_file(name)
+        if os.path.exists(t):
+            os.remove(t)
+        self.gui.grab_focus()
+        self.find_description('Menu').click()
+        time.sleep(1)
+        self.find_along_with('Project', 'Plugins').click()
+        time.sleep(1)
+        self.gui.child('Export as template', roleName='push button').click()
+        time.sleep(1)
+        # Fill dialog
+        dialog = self.gui.child('Save as a template')
+        entry = sorted([(a.position[1], a.position[0], a)
+                        for a in dialog.findChildren(
+                                dogtail.predicate.GenericPredicate(
+                                    roleName='text'))])
+        entry[0][2].text = name
+        entry[1][2].text = 'Template ' + name
+        entry[2][2].text = 'This is a test template named '+ name
+        time.sleep(1)
+        
+        if with_files is not None:
+            dialog.child('Add').click()
+            time.sleep(1)
+            file_dialog = self.gui.child('Add files to template')
+            for f in with_files:
+                file_dialog.child(f).click()
+                time.sleep(1)
+            file_dialog.child('Add').click()
+            time.sleep(1)
+
+        dialog.child('OK').click()
+        time.sleep(2)
+
     def new_project_base(self):
         # First remove project if already existing
         if os.path.isdir(self.project_dir()):
@@ -284,8 +355,9 @@ class AMC:
         self.new_project_base()
         self.new_project_mode('Template')
         dialog = self.gui.child('Template selection')
-        endoc = dialog.child(section)
-        endoc.actions['expand or contract'].do()
+        if section is not None:
+            endoc = dialog.child(section)
+            endoc.actions['expand or contract'].do()
         dialog.child(template).click()
         dialog.child('Apply').click()
 
@@ -414,11 +486,13 @@ class AMC:
         self.click_dialog(button="No")
 
     def scan_from_blank_copy(self, student=2, dest='scan-blank-2.jpg'):
+        self.check_src_dir()
         os.system("convert -density 300 \"%s/%s/sheet-%04d.pdf\" \"%s/%s\""
                   % (self.project_dir(), self.print_subdir, student,
                      self.src_dir(), dest))
 
     def scan_from_individual_solution(self, pages=[3], dest='scan-sol-3.pdf'):
+        self.check_src_dir()
         p = " ".join([str(x) for x in pages])
         os.system(("qpdf \"%s/DOC-indiv-solution.pdf\"" +
                    " --pages \"%s/DOC-indiv-solution.pdf\" %s" +
@@ -707,8 +781,12 @@ class AMC:
         dialog.child('OK').click()
         time.sleep(2)
 
-    def finished(self):
+    def quit(self):
         self.gui.child('Close').click()
+        time.sleep(1)
+
+    def finished(self):
+        self.quit()
         print("")
         print("********************")
         print("*     SUCCESS!     *")

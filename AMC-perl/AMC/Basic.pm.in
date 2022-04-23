@@ -570,7 +570,7 @@ sub set_debug {
         debug(@debug_memory);
         @debug_memory = ();
 
-        debug("$0 enters debugging mode, PERL_UNICODE=$ENV{PERL_UNICODE}");
+        debug("$0 enters debugging mode, PERL_UNICODE=${^UNICODE} ($ENV{PERL_UNICODE})");
     } else {
 
         # Leave debugging mode…

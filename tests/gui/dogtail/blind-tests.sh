@@ -7,7 +7,7 @@ TESTS=$@
 if [ ! "$TESTS" ];
 then
     echo "Standard tests"
-    TESTS="cups manual pdfform postcorrect simple utf8"
+    TESTS="cups manual pdfform postcorrect simple utf8 template template-2"
 fi
 
 echo "Tests: $TESTS"

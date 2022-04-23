@@ -1,0 +1,120 @@
+%
+% Copyright (C) 2012-2021 Alexis Bienvenüe
+%
+% This file is part of Auto-Multiple-Choice
+%
+% Auto-Multiple-Choice is free software: you can redistribute it
+% and/or modify it under the terms of the GNU General Public License
+% as published by the Free Software Foundation, either version 2 of
+% the License, or (at your option) any later version.
+%
+% Auto-Multiple-Choice is distributed in the hope that it will be
+% useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+% of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+% General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Auto-Multiple-Choice.  If not, see
+% <http://www.gnu.org/licenses/>.
+%
+\documentclass[a4paper]{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{multicol}
+
+\usepackage[frenchb]{babel}
+
+\usepackage[bloc,completemulti,calibration,correcindiv]{automultiplechoice}
+
+\begin{document}
+
+\AMCinterIrep=.75ex
+\AMCrandomseed{1237893}
+
+\setlength{\multicolsep}{.7ex}
+
+\element{gro}{
+  \begin{question}{gro-1}
+    Général/1
+    \begin{choiceshoriz}
+      \correctchoice{Parfait !}
+      \wrongchoice{Pas du tout}
+      \wrongchoice{Ce n'est pas ça}
+      \wrongchoice{Ça non plus}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\element{gro}{
+  \begin{question}{gro-2}
+    Général/2
+    \begin{choiceshoriz}
+      \correctchoice{Oui}
+      \wrongchoice{Erronée}
+      \wrongchoice{Ce n'est pas la bonne}
+      \wrongchoice{Ne convient pas}
+      \wrongchoice{Non}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\element{gro}{
+  \begin{question}{gro-3}
+    Général/3
+    \begin{choiceshoriz}
+      \correctchoice{Splendide}
+      \wrongchoice{Inutile}
+      \wrongchoice{Négatif}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\exemplaire{5}{
+\noindent{\bf AMC  \hfill Mélange de rien du tout}
+
+\begin{center}\em
+  Exemple pour faire fonctionner les modèles
+\end{center}
+\vspace{1ex}
+
+
+{\setlength{\parindent}{0pt}\hspace*{\fill}\AMCcode{etu}{8}\hspace*{\fill}
+\begin{minipage}{5.5cm}
+$\longleftarrow{}$\hspace{0pt plus 1cm} codez votre numéro d'étu\-diant ci-contre, et écrivez votre nom et prénom ci-dessous.
+
+\vspace{3ex}
+
+\champnom{\fbox{    
+    \begin{minipage}{.86\linewidth}
+      Nom et prénom :
+      
+      \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}\end{minipage}\hspace*{\fill}
+}
+
+\vspace{1ex}
+
+\noindent\hrulefill
+
+\vspace{2ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\shufflegroup{gro}
+\insertgroup{gro}
+
+
+}
+
+\end{document}
