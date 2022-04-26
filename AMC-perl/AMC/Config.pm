@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# Copyright (C) 2017-2021 Alexis Bienvenüe <paamc@passoire.fr>
+# Copyright (C) 2017-2022 Alexis Bienvenüe <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #

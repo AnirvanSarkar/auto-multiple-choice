@@ -1,7 +1,7 @@
 #! /usr/bin/env perl
 # -*- coding:utf-8 -*-
 #
-# Copyright (C) 2008-2021 Alexis Bienvenüe <paamc@passoire.fr>
+# Copyright (C) 2008-2022 Alexis Bienvenüe <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
