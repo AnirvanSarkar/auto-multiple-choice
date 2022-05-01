@@ -37,13 +37,11 @@ my $dpi = 300;
 my $progress    = 0;
 my $progress_id = '';
 
-unpack_args();
-
-GetOptions(
-    "src=s"            => \$src,
-    "data=s"           => \$data_dir,
-    "progression-id=s" => \$progress_id,
-    "progression=s"    => \$progress,
+GetProjectOptions(
+    ":doc_setting:file|src=s" => \$src,
+    ":data:dir|data=s"        => \$data_dir,
+    "progression-id=s"        => \$progress_id,
+    "progression=s"           => \$progress,
 );
 
 die "No src file $src"      if ( !-f $src );

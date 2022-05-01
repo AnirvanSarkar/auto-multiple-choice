@@ -72,27 +72,25 @@ my $try_three            = 1;
 my $tag_overwritten      = 1;
 my $unlink_on_global_err = 0;
 
-unpack_args();
-
-GetOptions(
-    "data=s"                => \$data_dir,
-    "cr=s"                  => \$cr_dir,
-    "tol-marque=s"          => \$tol_mark,
-    "prop=s"                => \$prop,
-    "bw-threshold=s"        => \$bw_threshold,
-    "debug-pixels!"         => \$debug_pixels,
-    "progression=s"         => \$progress,
-    "progression-id=s"      => \$progress_id,
-    "liste-fichiers=s"      => \$scans_list,
-    "projet=s"              => \$project_dir,
-    "n-procs=s"             => \$n_procs,
-    "debug-image-dir=s"     => \$debug_image_dir,
-    "multiple!"             => \$multiple,
-    "ignore-red!"           => \$ignore_red,
-    "pre-allocate=s"        => \$pre_allocate,
-    "try-three!"            => \$try_three,
-    "tag-overwritten!"      => \$tag_overwritten,
-    "unlink-on-global-err!" => \$unlink_on_global_err,
+GetProjectOptions(
+    ":data:dir|data=s"               => \$data_dir,
+    ":cr:dir|cr=s"                   => \$cr_dir,
+    ":tolerance_marque|tol-marque=s" => \$tol_mark,
+    ":box_size_proportion|prop=s"    => \$prop,
+    ":bw_threshold|bw-threshold=s"   => \$bw_threshold,
+    "debug-pixels!"                  => \$debug_pixels,
+    "progression=s"                  => \$progress,
+    "progression-id=s"               => \$progress_id,
+    "liste-fichiers=s"               => \$scans_list,
+    ":project_dir|projet=s"          => \$project_dir,
+    ":n_procs|n-procs=s"             => \$n_procs,
+    "debug-image-dir=s"              => \$debug_image_dir,
+    ":auto_capture_mode|multiple!"   => \$multiple,
+    ":ignore_red|ignore-red!"        => \$ignore_red,
+    "pre-allocate=s"                 => \$pre_allocate,
+    ":try_three|try-three!"          => \$try_three,
+    "tag-overwritten!"               => \$tag_overwritten,
+    "unlink-on-global-err!"          => \$unlink_on_global_err,
 );
 
 $tag_overwritten = 0 if ($multiple);

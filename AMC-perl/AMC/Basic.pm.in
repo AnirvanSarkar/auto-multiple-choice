@@ -27,7 +27,8 @@ use Locale::gettext ':libintl_h';
 
 use File::Temp qw/ tempdir /;
 use File::Spec;
-use File::Spec::Functions qw/tmpdir/;
+use File::Spec::Functions qw/tmpdir splitpath catpath /;
+use Cwd;
 use IO::File;
 use IPC::Open3;
 use Fcntl qw(:flock :seek);
@@ -39,6 +40,7 @@ use Module::Load;
 use Module::Load::Conditional qw/check_install can_load/;
 use Glib qw/TRUE FALSE/;
 use Getopt::Long;
+use Data::Dumper;
 
 use constant {
     COMBO_ID   => 1,
@@ -62,7 +64,8 @@ BEGIN {
           &amc_user_confdir &use_amc_plugins &find_latex_file &file_mimetype &file_content
           &blob_to_file &amc_component &annotate_source_change &join_nonempty &printable
           &string_to_usascii &string_to_filename &show_utf8 &path_to_filename &free_disk_mo
-          &dir_contents_u &clean_gtk_filenames &glib_filename &n_fich &unzip_to_temp );
+          &dir_contents_u &clean_gtk_filenames &glib_filename &n_fich &unzip_to_temp
+          &split_project_dir &GetProjectOptions );
     %EXPORT_TAGS = ();    # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -692,7 +695,7 @@ sub pack_args {
 
 sub braces_if_necessary {
     my ($s) = @_;
-    if($s eq '' || $s =~ /\s/) {
+    if($s eq '' || $s =~ /[\s<>\{\}\(\)\[\];,\!\?\*\#\%]/) {
         "\"".$s."\"";
     } else {
         $s;
@@ -709,10 +712,145 @@ sub unpack_args {
     if ($xmlargs) {
         my $xa = XMLin( $xmlargs, ForceArray => 1, SuppressEmpty => '' )->{arg};
         unshift( @ARGV, @$xa );
-        unlink($xmlargs) or debug("Could not unlink $xmlargs: $!");
+        if(!get_debug()) {
+            unlink($xmlargs) or debug("Could not unlink $xmlargs: $!");
+        }
         next_debug( "Unpacked args: "
               . join( ' ', map { braces_if_necessary($_); } @ARGV ) );
     }
+}
+
+sub split_project_dir {
+    my ($project_dir) = @_;
+
+    $project_dir = Cwd::realpath($project_dir);
+    utf8::decode($project_dir);
+    debug "ProjectDir: " . show_utf8($project_dir);
+    my ( $v, $d, $f ) = splitpath($project_dir);
+    my $r = catpath( $v, $d, '' );
+    debug "- Projects directory: " . show_utf8($r);
+    debug "- Project name: " . show_utf8($f);
+    $r =~ s/\/+$//;
+
+    return($r, $f);
+}
+
+sub GetProjectOptions {
+    my %bindings = @_;
+
+    unpack_args();
+    my $profile      = '';
+    my $profile_conf = '';
+    my $project_dir  = '';
+
+    my $p = Getopt::Long::Parser->new;
+    $p->configure('pass_through');
+    $p->getoptions(
+        "profile=s"      => \$profile,
+        "profile-conf=s" => \$profile_conf,
+        "project-dir=s"  => \$project_dir
+    );
+
+    load("AMC::Path");
+    my $shortcuts = AMC::Path::new();
+    load("AMC::Config");
+    my $config = AMC::Config::new(
+        global_file => $profile_conf,
+        profile     => $profile,
+        read_only   => 1,
+        shortcuts   => $shortcuts,
+    );
+    
+    if ($project_dir) {
+        my ( $projects_home, $project_name ) = split_project_dir($project_dir);
+        $config->set_projects_home($projects_home);
+        $config->open_project($project_name);
+    }
+
+    my %from_config = ();
+    my %parsed_bindings = ();
+    for my $k ( keys %bindings ) {
+        my $v = $bindings{$k};
+        if ( $k =~ s/^([a-z]*):([^:\|]+)(?::([^\|]+))?\|// ) {
+            my $config_domain = $1;
+            my $config_key    = $2;
+            my $config_opts   = $3;
+            $config_opts = '' if ( !defined($config_opts) );
+            my $value;
+            if ( $config_opts =~ /\benc\b/ ) {
+                $value = $config->bon_encodage($config_key);
+            } elsif ( $config_opts =~ /\bpasswd\b/) {
+                $value = $config->passwd_file($config_key);
+            } elsif ( $config_opts =~ /\bprintas\b/ ) {
+                $value = ( $config->get('options_impression/print_answersheet') eq
+                      $config_key ? 1 : 0 );
+            } elsif ( $config_key =~
+/^(csv_build_name|pre_association|moteur_latex|symbols|pdf_password|extract_with)$/
+              )
+            {
+                $value = $config->$config_key();
+            } elsif ( $config_key eq 'project_dir' ) {
+                $value = $config->{shortcuts}->absolu('%PROJET/');
+                $config_opts = 'dir';
+            } elsif ( $config_key eq 'projects_dir' ) {
+                $value = $config->{shortcuts}->absolu('%PROJETS/');
+                $config_opts = 'dir';
+            } elsif ( $config_key eq 'tolerance_marque' ) {
+                $value = $config->tolerance();
+            } else {
+                my $kk =
+                  $config_domain ? "$config_domain:$config_key" : $config_key;
+                $value = $config->get( $kk, undef );
+            }
+            if ( defined($value) ) {
+                if ( $config_opts =~ /\b(dir|file)\b/ ) {
+                    $value = $config->{shortcuts}->absolu($value);
+                }
+                if ( $config_opts =~ /\bbool\b/ ) {
+                    $value = ( $value ? 1 : 0 );
+                }
+                if ( ref($v) eq 'SCALAR' ) {
+                    debug "Scalar value from config for key $k: $value";
+                    $$v = $value;
+                    $from_config{$k} = 1;
+                } else {
+                    debug "WARNING: unexpected ref type for key $k";
+                }
+            }
+        }
+        $parsed_bindings{$k} = $v;
+    }
+
+    GetOptions(%parsed_bindings);
+
+    # Debugging : get command-line options back from project configuration
+
+    my @options = ();
+    for my $k (keys %from_config) {
+        my $v = $parsed_bindings{$k};
+
+        $k =~ s/\|[^=!]*//;
+        my $mode = '';
+        if($k =~ s/(=.*|\!)$//) {
+            $mode = $1;
+        }
+
+        my @vals = ();
+        if(ref($v) eq 'ARRAY') {
+            @vals = (@$v);
+        } else {
+            @vals = $$v;
+        }
+
+        for my $vv (@vals) {
+            if ( $mode eq '!' ) {
+                push @options, ( $vv ? "--$k" : "--no-$k" );
+            } else {
+                push @options, "--$k", braces_if_necessary($vv);
+            }
+        }
+    }
+    debug "Options from project configuration: " . join(" ", @options);
 }
 
 my $localisation;

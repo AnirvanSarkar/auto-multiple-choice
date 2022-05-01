@@ -49,9 +49,11 @@ sub new {
         system_encoding => 'UTF-8',
         shortcuts       => '',
         home_dir        => '',
+        global_file     => '',
         empty           => 0,
         gui             => 0,
         testing         => '',
+        read_only       => '',
     };
 
     for my $k ( keys %o ) {
@@ -525,9 +527,13 @@ sub defaults {
 sub load_profile {
     my ($self) = @_;
 
-    debug "Profile: $self->{profile}";
-    $self->{global_file} = $self->{o_dir} . "/cf." . $self->{profile} . ".xml";
-
+    if ( $self->{global_file} ) {
+        debug "Profile from: $self->{global_file}";
+    } else {
+        debug "Profile: $self->{profile}";
+        $self->{global_file} =
+          $self->{o_dir} . "/cf." . $self->{profile} . ".xml";
+    }
     $self->{global} = { pref_xml_lit( $self->{global_file} ) };
 
     $self->set_global_options_to_default();
@@ -737,6 +743,7 @@ sub project_options_file {
 
 sub open_project {
     my ( $self, $name ) = @_;
+    debug "AMC::Config: open project " . show_utf8($name);
     $self->{project_file} = $self->project_options_file($name);
     $self->{project}      = { pref_xml_lit( $self->{project_file} ) };
 
@@ -860,6 +867,89 @@ sub get_absolute {
     return ( $self->{shortcuts}->absolu( $self->get($key) ) );
 }
 
+sub bon_encodage {
+    my ( $self, $type ) = @_;
+    return ( $self->get("encodage_$type")
+          || $self->get("defaut_encodage_$type")
+          || "UTF-8" );
+}
+
+sub csv_build_0 {
+    my ( $self, $k, @default ) = @_;
+    push @default, grep { $_ } map { s/^\s+//; s/\s+$//; $_; }
+      split( /,+/, $self->get( 'csv_' . $k . '_headers' ) );
+    return ( "(" . join( "|", @default ) . ")" );
+}
+
+sub csv_build_name {
+    my ($self) = @_;
+    return ($self->csv_build_0( 'surname', 'nom', 'surname' ) . ' '
+          . $self->csv_build_0( 'name', 'prenom', 'name' ) );
+}
+
+sub moteur_latex {
+    my ($self) = @_;
+    return ( $self->get('moteur_latex_b')
+          || $self->get('defaut_moteur_latex_b') );
+}
+
+sub pdf_password {
+    my ($self) = @_;
+    return (
+          $self->get('pdf_password_use')
+        ? $self->get('pdf_password')
+        : ""
+    );
+}
+
+sub extract_with {
+    my ($self) = @_;
+    my $conf = $self->get('print_extract_with');
+    if ( $self->get('project:pdfform') ) {
+        if ( $conf =~ /^(qpdf|sejda|pdftk\+NA)/ ) {
+            return ($conf);
+        } else {
+            if ( commande_accessible('sejda-console') ) {
+                return ('sejda-console');
+            } elsif ( commande_accessible('qpdf') ) {
+                return ('qpdf');
+            } else {
+                return ('pdftk+NA');
+            }
+        }
+    } else {
+        return ($conf);
+    }
+}
+
+sub opt_symbole {
+    my ( $self, $s ) = @_;
+    my $k = $s;
+
+    $k =~ s/-/_/g;
+    my $type  = $self->get( 'symbole_' . $k . '_type',  'none' );
+    my $color = $self->get( 'symbole_' . $k . '_color', 'red' );
+
+    return ("$s:$type/$color");
+}
+
+sub symbols {
+    my ($self) = @_;
+    return join( ',', map { $self->opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/) );
+}
+
+sub tolerance {
+    my ($self) = @_;
+    return $self->get('tolerance_marque_inf') . ','
+        . $self->get('tolerance_marque_sup');
+}
+
+sub pre_association {
+    my ($self) = @_;
+    return ( $self->get('assoc_code') &&
+             $self->get('assoc_code') eq '<preassoc>' ? 1 : 0 );
+}
+
 sub set {
     my ( $self, $key, $value ) = @_;
     my $k   = $self->parse_key( $key, 'create' );
@@ -966,6 +1056,8 @@ sub list_all_keys {
 
 sub save {
     my ( $self, $dont_warn ) = @_;
+
+    return () if ( $self->{read_only} );
 
     for my $c (qw/project global state/) {
         if ( $self->{$c}->{_changed} ) {

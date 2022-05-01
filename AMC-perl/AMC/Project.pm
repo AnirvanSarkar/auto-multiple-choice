@@ -144,6 +144,15 @@ sub close {
     }
 }
 
+sub project_options {
+    my ($self) = @_;
+    $self->{config}->save();
+    return (
+        "--profile-conf", $self->{config}->{global_file},
+        "--project-dir",  $self->{config}->{shortcuts}->absolu('%PROJET/')
+    );
+}
+
 sub commande {
     my ( $self, @opts ) = @_;
     $self->{cmd_id}++;
@@ -188,25 +197,11 @@ sub export {
             "--debug",
             debug_file(),
             pack_args(
-                "--module",
-                $opts->{format},
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--useall",
-                $self->{config}->get('export_include_abs'),
-                "--sort",
-                $self->{config}->get('export_sort'),
-                "--fich-noms",
-                $self->{config}->get_absolute('listeetudiants'),
-                "--noms-encodage",
-                $self->bon_encodage('liste'),
-                "--csv-build-name",
-                $self->csv_build_name(),
-                ( $self->{config}->get('annote_rtl') ? "--rtl" : "--no-rtl" ),
-                "--output",
-                $opts->{output},
+                $self->project_options(),
+                "--module", $opts->{format},
+                "--output", $opts->{output},
                 @{ $opts->{o} },
-            ),
+              ),
         ],
         texte           => __ "Exporting marks...",
         'progres.id'    => 'export',
@@ -226,33 +221,10 @@ sub update_document {
             "--debug",
             debug_file(),
             pack_args(
-                "--with",
-                $self->moteur_latex(),
-                "--filter",
-                $self->{config}->get('filter'),
-                "--filtered-source",
-                $self->{config}->get_absolute('filtered_source'),
-                "--out-sujet",
-                $self->{config}->get_absolute('doc_question'),
-                "--out-corrige",
-                $self->{config}->get_absolute('doc_solution'),
-                "--out-corrige-indiv",
-                $self->{config}->get_absolute('doc_indiv_solution'),
-                "--out-catalog",
-                $self->{config}->get_absolute('doc_catalog'),
-                "--out-calage",
-                $self->{config}->get_absolute('doc_setting'),
-                "--mode",
-                $mode,
-                "--n-copies",
-                $self->{config}->get('nombre_copies'),
-                $self->{config}->get_absolute('texsrc'),
-                "--prefix",
-                $self->{config}->{shortcuts}->absolu('%PROJET/'),
+                $self->project_options(),
+                "--mode", $mode,
                 "--latex-stdout",
-                "--data",
-                $self->{config}->get_absolute('data'),
-            )
+              )
         ],
         signal          => 2,
         texte           => __ "Documents update...",
@@ -288,19 +260,9 @@ sub data_capture_detect_pdfform {
             "--debug",
             debug_file(),
             pack_args(
-                "--progression-id",
-                'analyse',
-                "--list",
-                $fh->filename,
-                (
-                    $self->{config}->get('auto_capture_mode')
-                    ? "--multiple"
-                    : "--no-multiple"
-                ),
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--password",
-                $self->{config}->get('pdf_password')
+                $self->project_options(),
+                "--progression-id", 'analyse',
+                "--list", $fh->filename,
             )
         ],
         signal       => 2,
@@ -317,14 +279,11 @@ sub data_capture_get_images {
 
     if ( $oo{getimages} ) {
         my @args = (
+            $self->project_options(),
             "--progression-id", 'analyse',
-            "--list",           $oo{fh}->filename,
-            "--vector-density", $self->{config}->get('vector_scan_density'),
-            "--password",       $self->{config}->get('pdf_password'),
+            "--list", $oo{fh}->filename,
         );
         push @args, "--copy-to", $oo{copy} if ( $oo{copy} );
-        push @args, "--force-convert"
-          if ( $self->{config}->get("force_convert") );
         $self->{_layout}->begin_transaction('Orie');
         my $orientation = $self->{_layout}->orientation();
         $self->{_layout}->end_transaction('Orie');
@@ -351,39 +310,10 @@ sub data_capture_get_images {
 sub data_capture_from_images {
     my ( $self, %oo ) = @_;
     my @args = (
-        (
-            $self->{config}->get('auto_capture_mode') ? "--multiple"
-            : "--no-multiple"
-        ),
-        "--tol-marque",
-        $self->{config}->get('tolerance_marque_inf') . ','
-          . $self->{config}->get('tolerance_marque_sup'),
-        "--prop",
-        $self->{config}->get('box_size_proportion'),
-        "--bw-threshold",
-        $self->{config}->get('bw_threshold'),
-        "--progression-id",
-        'analyse',
-        "--progression",
-        1,
-        "--n-procs",
-        $self->{config}->get('n_procs'),
-        "--data",
-        $self->{config}->get_absolute('data'),
-        "--projet",
-        $self->{config}->{shortcuts}->absolu('%PROJET/'),
-        "--cr",
-        $self->{config}->get_absolute('cr'),
-        "--liste-fichiers",
-        $oo{liste},
-        (
-            $self->{config}->get('ignore_red') ? "--ignore-red"
-            : "--no-ignore-red"
-        ),
-        (
-            $self->{config}->get('try_three') ? "--try-three"
-            : "--no-try-three"
-        ),
+        $self->project_options(),
+        "--progression-id", 'analyse',
+        "--progression", 1,
+        "--liste-fichiers", $oo{liste},
     );
 
     push @args, "--pre-allocate", $oo{allocate} if ( $oo{allocate} );
@@ -424,19 +354,10 @@ sub decode_name_fields {
             "--debug",
             debug_file(),
             pack_args(
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--cr",
-                $self->{config}->get_absolute('cr'),
-                "--project",
-                $self->{config}->{shortcuts}->absolu('%PROJET/'),
+                $self->project_options(),
                 ( $oo{all} ? "--all" : "--no-all" ),
-                "--decoder",
-                $self->{config}->get('name_field_type'),
-                "--progression-id",
-                'decode',
-                "--progression",
-                1,
+                "--progression-id", 'decode',
+                "--progression", 1,
             ),
         ],
         signal       => 2,
@@ -447,35 +368,14 @@ sub decode_name_fields {
     );
 }
 
-sub opt_symbole {
-    my ( $self, $s ) = @_;
-    my $k = $s;
-
-    $k =~ s/-/_/g;
-    my $type  = $self->{config}->get( 'symbole_' . $k . '_type',  'none' );
-    my $color = $self->{config}->get( 'symbole_' . $k . '_color', 'red' );
-
-    return ("$s:$type/$color");
-}
-
 sub bon_encodage {
     my ( $self, $type ) = @_;
-    return ( $self->{config}->get("encodage_$type")
-          || $self->{config}->get("defaut_encodage_$type")
-          || "UTF-8" );
-}
-
-sub csv_build_0 {
-    my ( $self, $k, @default ) = @_;
-    push @default, grep { $_ } map { s/^\s+//; s/\s+$//; $_; }
-      split( /,+/, $self->{config}->get( 'csv_' . $k . '_headers' ) );
-    return ( "(" . join( "|", @default ) . ")" );
+    return ( $self->{config}->bon_encodage($type) );
 }
 
 sub csv_build_name {
-    my ($self) = @_;
-    return ($self->csv_build_0( 'surname', 'nom', 'surname' ) . ' '
-          . $self->csv_build_0( 'name', 'prenom', 'name' ) );
+    my ( $self, @args ) = @_;
+    return ( $self->{config}->csv_build_name(@args) );
 }
 
 # Get the number of copies used to build the working documents
@@ -494,8 +394,7 @@ sub original_n_copies {
 
 sub moteur_latex {
     my ($self) = @_;
-    return ( $self->{config}->get('moteur_latex_b')
-          || $self->{config}->get('defaut_moteur_latex_b') );
+    return ( $self->{config}->moteur_latex() );
 }
 
 sub annotate {
@@ -533,85 +432,13 @@ sub annotate {
             "--debug",
             debug_file(),
             pack_args(
-                "--cr",
-                $self->{config}->get_absolute('cr'),
-                "--project",
-                $self->{config}->{shortcuts}->absolu('%PROJET/'),
-                "--projects",
-                $self->{config}->{shortcuts}->absolu('%PROJETS/'),
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--subject",
-                $self->{config}->get_absolute('doc_question'),
-                "--corrected",
-                $self->{config}->get_absolute('doc_indiv_solution'),
-                "--filename-model",
-                $self->{config}->get('modele_regroupement'),
-                (
-                    $self->{config}->get('ascii_filenames') ? "--force-ascii"
-                    : "--no-force-ascii"
-                ),
-                "--single-output",
-                $single_output,
-                "--sort",
-                $self->{config}->get('export_sort'),
-                "--id-file",
-                $oo{id_file},
-                "--progression-id",
-                'annotate',
-                "--progression",
-                1,
-                "--line-width",
-                $self->{config}->get('symboles_trait'),
-                "--font-name",
-                $self->{config}->get('annote_font_name'),
-                "--symbols",
-                join( ',', map { $self->opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/) ),
-                (
-                    $self->{config}->get('symboles_indicatives')
-                    ? "--indicatives"
-                    : "--no-indicatives"
-                ),
-                "--position",
-                $self->{config}->get('annote_position'),
-                "--dist-to-box",
-                $self->{config}->get('annote_ecart'),
-                "--n-digits",
-                $self->{config}->get('annote_chsign'),
-                "--verdict",
-                $self->{config}->get('verdict'),
-                "--verdict-question",
-                $self->{config}->get('verdict_q'),
-                "--verdict-question-cancelled",
-                $self->{config}->get('verdict_qc'),
-                "--names-file",
-                $self->{config}->get_absolute('listeetudiants'),
-                "--names-encoding",
-                $self->bon_encodage('liste'),
-                "--csv-build-name",
-                $self->csv_build_name(),
-                ( $self->{config}->get('annote_rtl') ? "--rtl" : "--no-rtl" ),
+                $self->project_options(),
+                "--single-output", $single_output,
+                "--id-file", $oo{id_file},
+                "--progression-id", 'annotate',
+                "--progression", 1,
                 "--changes-only",
-                1, "--sort",
-                $self->{config}->get('export_sort'),
-                "--compose",
-                $self->{config}->get('regroupement_compose'),
-                "--n-copies",
-                $self->original_n_copies(),
-                "--src",
-                $self->{config}->get_absolute('texsrc'),
-                "--with",
-                $self->moteur_latex(),
-                "--filter",
-                $self->{config}->get('filter'),
-                "--filtered-source",
-                $self->{config}->get_absolute('filtered_source'),
-                "--embedded-max-size",
-                $self->{config}->get('embedded_max_size'),
-                "--embedded-format",
-                $self->{config}->get('embedded_format'),
-                "--embedded-jpeg-quality",
-                $self->{config}->get('embedded_jpeg_quality'),
+                "--n-copies", $self->original_n_copies(),
             )
         ],
         texte        => __ "Annotating papers...",
@@ -626,30 +453,10 @@ sub auto_association {
 
     $self->commande(
         commande => [
-            "auto-multiple-choice",
-            "association-auto",
-            "--debug",
-            debug_file(),
-            pack_args(
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--notes-id",
-                $self->{config}->get('assoc_code'),
-                "--liste",
-                $self->{config}->get_absolute('listeetudiants'),
-                "--liste-key",
-                $self->{config}->get('liste_key'),
-                "--csv-build-name",
-                $self->csv_build_name(),
-                "--encodage-liste",
-                $self->bon_encodage('liste'),
-                (
-                    $self->{config}->get('assoc_code') eq '<preassoc>'
-                    ? "--pre-association"
-                    : "--no-pre-association"
-                ),
-            ),
-        ],
+            "auto-multiple-choice", "association-auto",
+            "--debug",              debug_file(),
+            pack_args( $self->project_options() ),
+          ],
         texte => __ "Automatic association...",
         o     => \%oo,
         fin   => $oo{callback},
@@ -687,19 +494,6 @@ sub print_exams {
     print $fh join( "\n", @{ $oo{exams} } ) . "\n";
     $fh->seek( 0, SEEK_END );
 
-    my @o_answer = ( '--no-split', '--no-answer-first' );
-    if ( $self->{config}->get('options_impression/print_answersheet') eq
-        'split' )
-    {
-        @o_answer = ( '--split', '--no-answer-first' );
-    } elsif ( $self->{config}->get('options_impression/print_answersheet') eq
-        'first' )
-    {
-        @o_answer = ( '--answer-first', '--no-split' );
-    }
-
-    my $extract_with = $self->project_extract_with();
-
     my $directory =
       $self->{config}->get_absolute('options_impression/repertoire');
     debug "Directory: " . show_utf8($directory);
@@ -716,41 +510,13 @@ sub print_exams {
             "--debug",
             debug_file(),
             pack_args(
-                "--methode",
-                $oo{printing_method},
-                "--imprimante",
-                $self->{config}->get('imprimante'),
-                "--options",
-                $oo{options_string},
-                "--output",
-                "$directory/$prefix-%e.pdf",
-                @o_answer,
-                "--print-command",
-                $self->{config}->get('print_command_pdf'),
-                "--sujet",
-                $self->{config}->get_absolute('doc_question'),
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--progression-id",
-                'impression',
-                "--progression",
-                1,
-                "--fich-numeros",
-                $fh->filename,
-                "--extract-with",
-                $extract_with,
-                "--password",
-                (
-                      $self->{config}->get('pdf_password_use')
-                    ? $self->{config}->get('pdf_password')
-                    : ""
-                ),
-                "--students-list",
-                $self->{config}->get_absolute('listeetudiants'),
-                "--list-key",
-                $self->{config}->get('liste_key'),
-                "--password-key",
-                $self->{config}->get('pdf_password_key'),
+                $self->project_options(),
+                "--methode", $oo{printing_method},
+                "--options", $oo{options_string},
+                "--output", "$directory/$prefix-%e.pdf",
+                "--progression-id", 'impression',
+                "--progression", 1,
+                "--fich-numeros", $fh->filename,
             ),
         ],
         quiet_regex  => 'Discarded not relevant field',
@@ -778,14 +544,9 @@ sub detect_layout {
             "--debug",
             debug_file(),
             pack_args(
-                "--src",
-                $self->{config}->get_absolute('doc_setting'),
-                "--progression-id",
-                'MEP',
-                "--progression",
-                1,
-                "--data",
-                $self->{config}->get_absolute('data'),
+                $self->project_options(),
+                "--progression-id", 'MEP',
+                "--progression", 1,
             ),
         ],
         texte        => __ "Detecting layouts...",
@@ -814,25 +575,11 @@ sub scoring_strategy_update {
             "--debug",
             debug_file(),
             pack_args(
-                "--out-corrige-indiv",
-                $pdf_corrected,
-                "--n-copies",
-                $self->original_n_copies(),
-                "--with",
-                $self->moteur_latex(),
-                "--filter",
-                $self->{config}->get('filter'),
-                "--filtered-source",
-                $self->{config}->get_absolute('filtered_source'),
-                "--progression-id",
-                'bareme',
-                "--progression",
-                1,
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--mode",
-                $mode,
-                $self->{config}->get_absolute('texsrc'),
+                $self->project_options(),
+                "--n-copies", $self->original_n_copies(),
+                "--progression-id", 'bareme',
+                "--progression", 1,
+                "--mode", $mode,
             ),
         ],
         texte        => __ "Extracting marking scale...",
@@ -866,41 +613,15 @@ sub compute_marks {
             "--debug",
             debug_file(),
             pack_args(
-                "--data",     $self->{config}->get_absolute('data'),
-                "--seuil",    $self->{config}->get('seuil'),
-                "--seuil-up", $self->{config}->get('seuil_up'),
-
-                "--grain",
-                $self->{config}->get('note_grain'),
-                "--arrondi",
-                $self->{config}->get('note_arrondi'),
-                "--notemax",
-                $self->{config}->get('note_max'),
-                (
-                    $self->{config}->get('note_max_plafond') ? "--plafond"
-                    : "--no-plafond"
-                ),
-                (
-                    $oo{gather_multi} ? "--multi-only"
-                    : "--no-multi-only"
-                ),
-                "--notenull",
-                $self->{config}->get('note_null'),
-                "--notemin",
-                $self->{config}->get('note_min'),
-                "--postcorrect-student",
-                $postcorrect_student,
-                "--postcorrect-copy",
-                $postcorrect_copy,
+                $self->project_options(),
+                "--postcorrect-student", $postcorrect_student,
+                "--postcorrect-copy", $postcorrect_copy,
                 (
                     $postcorrect_set_multiple ? "--postcorrect-set-multiple"
                     : "--no-postcorrect-set-multiple"
                 ),
-
-                "--progression-id",
-                'notation',
-                "--progression",
-                1,
+                "--progression-id", 'notation',
+                "--progression", 1,
             ),
         ],
         signal       => 2,
@@ -922,8 +643,7 @@ sub gather_multicode {
             "--debug",
             debug_file(),
             pack_args(
-                "--project",        $self->{config}->{shortcuts}->absolu('%PROJET/'),
-                "--data",           $self->{config}->get_absolute('data'),
+                $self->project_options(),
                 "--progression-id", 'gathermulticode',
                 "--progression",    1,
             ),
@@ -962,56 +682,17 @@ sub mailing {
     $fh->seek( 0, SEEK_END );
 
     my @mailing_args = (
-        "--project",
-        $self->{config}->{shortcuts}->absolu('%PROJET/'),
-        "--project-name",
-        $self->project_email_name(),
-        "--students-list",
-        $self->{config}->get_absolute('listeetudiants'),
-        "--preassoc-key",
-        $self->{config}->get('liste_key'),
-        "--list-encoding",
-        $self->bon_encodage('liste'),
-        "--csv-build-name",
-        $self->csv_build_name(),
-        "--ids-file",
-        $fh->filename,
-        "--report",
-        $oo{kind},
-        "--email-column",
-        $self->{config}->get('email_col'),
-        "--sender",
-        $self->{config}->get('email_sender'),
-        "--subject",
-        $self->{config}->get("project:$oo{kind_s}/email_subject"),
-        "--text",
-        $self->{config}->get("project:$oo{kind_s}/email_text"),
+        "--project-name", $self->project_email_name(),
+        "--ids-file", $fh->filename,
+        "--report", $oo{kind},
+        "--subject", $self->{config}->get("project:$oo{kind_s}/email_subject"),
+        "--text", $self->{config}->get("project:$oo{kind_s}/email_text"),
         "--text-content-type",
         (
             $self->{config}->get("project:$oo{kind_s}/email_use_html")
             ? 'text/html'
             : 'text/plain'
         ),
-        "--transport",
-        $self->{config}->get('email_transport'),
-        "--sendmail-path",
-        $self->{config}->get('email_sendmail_path'),
-        "--smtp-host",
-        $self->{config}->get('email_smtp_host'),
-        "--smtp-port",
-        $self->{config}->get('email_smtp_port'),
-        "--smtp-ssl",
-        $self->{config}->get('email_smtp_ssl'),
-        "--smtp-user",
-        $self->{config}->get('email_smtp_user'),
-        "--smtp-passwd-file",
-        $self->{config}->passwd_file("SMTP"),
-        "--cc",
-        $self->{config}->get('email_cc'),
-        "--bcc",
-        $self->{config}->get('email_bcc'),
-        "--delay",
-        $self->{config}->get('email_delay'),
     );
 
     for ( @{ $self->{config}->get("project:$oo{kind_s}/email_attachment") } ) {
@@ -1026,13 +707,11 @@ sub mailing {
             "--debug",
             debug_file(),
             pack_args(
+                $self->project_options(),
                 @mailing_args,
-                "--progression-id",
-                'mailing',
-                "--progression",
-                1,
-                "--log",
-                $self->{config}->{shortcuts}->absolu('mailing.log'),
+                "--progression-id", 'mailing',
+                "--progression", 1,
+                "--log", $self->{config}->{shortcuts}->absolu('mailing.log'),
             ),
         ],
         'progres.id' => 'mailing',
@@ -1049,82 +728,23 @@ sub anonymize {
         commande => [
             "auto-multiple-choice",
             "annotate",
-            "--debug",
-            debug_file(),
+            "--debug", debug_file(),
             pack_args(
-                "--cr",
-                $self->{config}->get_absolute('cr'),
-                "--project",
-                $self->{config}->{shortcuts}->absolu('%PROJET/'),
-                "--projects",
-                $self->{config}->{shortcuts}->absolu('%PROJETS/'),
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--subject",
-                $self->{config}->get_absolute('doc_question'),
-                "--corrected",
-                $self->{config}->get_absolute('doc_indiv_solution'),
-                "--progression-id",
-                'annotate',
-                "--progression",
-                1,
-                "--line-width",
-                $self->{config}->get('symboles_trait'),
-                "--font-name",
-                $self->{config}->get('annote_font_name'),
-                "--symbols",
-                join( ',', map { $self->opt_symbole($_); } (qw/0-0 0-1 1-0 1-1/) ),
-                (
-                    $self->{config}->get('symboles_indicatives')
-                    ? "--indicatives"
-                    : "--no-indicatives"
-                ),
-                "--position",
-                $self->{config}->get('annote_position'),
-                "--dist-to-box",
-                $self->{config}->get('annote_ecart'),
-                "--n-digits",
-                $self->{config}->get('annote_chsign'),
-                "--verdict",
-                $self->{config}->get('anonymous_header'),
-                ($self->{config}->get('anonymous_header_allpages') ? "--verdict-allpages" : "--no-verdict-allpages"),
-                $self->{config}->get('anonymous_header_allpages'),
-                "--verdict-question",
-                $self->{config}->get('verdict_q'),
-                "--verdict-question-cancelled",
-                $self->{config}->get('verdict_qc'),
-                "--names-file",
-                $self->{config}->get_absolute('listeetudiants'),
-                "--names-encoding",
-                $self->bon_encodage('liste'),
-                "--csv-build-name",
-                $self->csv_build_name(),
-                ( $self->{config}->get('annote_rtl') ? "--rtl" : "--no-rtl" ),
+                $self->project_options(),
+                "--progression-id", 'annotate',
+                "--progression", 1,
+                "--verdict", $self->{config}->get('anonymous_header'),
+                ($self->{config}->get('anonymous_header_allpages') ?
+                   "--verdict-allpages" : "--no-verdict-allpages"),
                 "--changes-only", 1,
-                "--n-copies",
-                $self->original_n_copies(),
-                "--src",
-                $self->{config}->get_absolute('texsrc'),
-                "--with",
-                $self->moteur_latex(),
-                "--filter",
-                $self->{config}->get('filter'),
-                "--filtered-source",
-                $self->{config}->get_absolute('filtered_source'),
-                "--embedded-max-size",
-                $self->{config}->get('embedded_max_size'),
-                "--embedded-format",
-                $self->{config}->get('embedded_format'),
-                "--embedded-jpeg-quality",
-                $self->{config}->get('embedded_jpeg_quality'),
+                "--n-copies", $self->original_n_copies(),
 
-                "--filename-model","(aID)",
-                "--single-output",'',
-                "--compose",0,
-                "--pdf-dir",
-                $self->{config}->{shortcuts}->absolu('%PROJET/anonymous'),
+                "--filename-model", "(aID)",
+                "--single-output", '',
+                "--compose", 0,
+                "--pdf-dir", $self->{config}->{shortcuts}->absolu('%PROJET/anonymous'),
                 "--header-only",
-                "--anonymous",$self->{config}->get('anonymous_model'),
+                "--anonymous", $self->{config}->get('anonymous_model'),
             ),
         ],
         texte => __ "Anonymizing...",
@@ -1140,13 +760,10 @@ sub get_external_scores {
         commande => [
             "auto-multiple-choice",
             "external",
-            "--debug",
-            debug_file(),
+            "--debug", debug_file(),
             pack_args(
-                "--data",
-                $self->{config}->get_absolute('data'),
-                "--source",
-                $oo{source}
+                $self->project_options(),
+                "--source", $oo{source}
             ),
         ],
         signal       => 2,

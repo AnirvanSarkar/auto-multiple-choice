@@ -35,17 +35,15 @@ my $data_dir       = '';
 my $preassoc       = '';
 my $hard_fail      = '';
 
-unpack_args();
-
-GetOptions(
-    "notes-id=s"       => \$notes_id,
-    "pre-association!" => \$preassoc,
-    "liste=s"          => \$liste_file,
-    "liste-key=s"      => \$liste_key,
-    "csv-build-name=s" => \$csv_build_name,
-    "data=s"           => \$data_dir,
-    "encodage-liste=s" => \$liste_enc,
-    "hard-fail!"       => \$hard_fail,
+GetProjectOptions(
+    ":assoc_code|notes-id=s"            => \$notes_id,
+    ":pre_association|pre-association!" => \$preassoc,
+    ":listeetudiants:dir|liste=s"       => \$liste_file,
+    ":liste_key|liste-key=s"            => \$liste_key,
+    ":csv_build_name|csv-build-name=s"  => \$csv_build_name,
+    ":data:dir|data=s"                  => \$data_dir,
+    ":liste:enc|encodage-liste=s"       => \$liste_enc,
+    "hard-fail!"                        => \$hard_fail,
 );
 
 die "Needs notes-id"   if ( !$notes_id && !$preassoc );

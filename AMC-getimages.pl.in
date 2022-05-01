@@ -44,21 +44,19 @@ my $force_convert    = 0;
 my $password         = '';
 my %use = ( pdfimages => 1, pdftk => 1, qpdf => 1, gs => 1 );
 
-unpack_args();
-
-GetOptions(
-    "list=s"             => \$list_file,
-    "progression-id=s"   => \$progress_id,
-    "copy-to=s"          => \$copy_to,
-    "vector-density=s"   => \$vector_density,
-    "orientation=s"      => \$orientation,
-    "rotate-direction=s" => \$rotate_direction,
-    "use-pdfimages!"     => \$use{pdfimages},
-    "use-pdftk!"         => \$use{pdftk},
-    "use-qpdf!"          => \$use{qpdf},
-    "use-gs!"            => \$use{gs},
-    "force-convert!"     => \$force_convert,
-    "password=s"         => \$password,
+GetProjectOptions(
+    "list=s"                                => \$list_file,
+    "progression-id=s"                      => \$progress_id,
+    "copy-to=s"                             => \$copy_to,
+    ":vector_scan_density|vector-density=s" => \$vector_density,
+    "orientation=s"                         => \$orientation,
+    "rotate-direction=s"                    => \$rotate_direction,
+    "use-pdfimages!"                        => \$use{pdfimages},
+    "use-pdftk!"                            => \$use{pdftk},
+    "use-qpdf!"                             => \$use{qpdf},
+    "use-gs!"                               => \$use{gs},
+    ":force_convert|force-convert!"         => \$force_convert,
+    ":pdf_password|password=s"              => \$password,
 );
 
 debug("Copy to $copy_to") if ($copy_to);

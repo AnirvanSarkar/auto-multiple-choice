@@ -85,33 +85,35 @@ my $out_catalog       = '';
 
 my $jobname = "amc-compiled";
 
+my $source = '';
 my $f_tex;
 
 my $epoch = '';
 
-unpack_args();
-
-GetOptions(
-    "mode=s"              => \$mode,
-    "with=s"              => \$latex_engine,
-    "data=s"              => \$data_dir,
-    "calage=s"            => \$calage,
-    "out-calage=s"        => \$out_calage,
-    "out-sujet=s"         => \$out_sujet,
-    "out-corrige=s"       => \$out_corrige,
-    "out-corrige-indiv=s" => \$out_corrige_indiv,
-    "out-catalog=s"       => \$out_catalog,
-    "latex-stdout!"       => \$latex_stdout,
-    "progression=s"       => \$progress,
-    "progression-id=s"    => \$progress_id,
-    "prefix=s"            => \$prefix,
-    "n-procs=s"           => \$n_procs,
-    "n-copies=s"          => \$number_of_copies,
-    "filter=s"            => \$filter,
-    "filtered-source=s"   => \$filtered_source,
-    "codedigit=s"         => \$codedigit,
-    "epoch=s"             => \$epoch,
+GetProjectOptions(
+    "mode=s"                                       => \$mode,
+    ":moteur_latex|with=s"                         => \$latex_engine,
+    ":data:dir|data=s"                             => \$data_dir,
+    "calage=s"                                     => \$calage,
+    ":texsrc:file|source=s"                        => \$source,
+    ":doc_setting:file|out-calage=s"               => \$out_calage,
+    ":doc_question:file|out-sujet=s"               => \$out_sujet,
+    ":doc_solution:file|out-corrige=s"             => \$out_corrige,
+    ":doc_indiv_solution:file|out-corrige-indiv=s" => \$out_corrige_indiv,
+    ":doc_catalog:file|out-catalog=s"              => \$out_catalog,
+    "latex-stdout!"                                => \$latex_stdout,
+    "progression=s"                                => \$progress,
+    "progression-id=s"                             => \$progress_id,
+    ":project_dir|prefix=s"                        => \$prefix,
+    "n-procs=s"                                    => \$n_procs,
+    ":nombre_copies|n-copies=s"                    => \$number_of_copies,
+    ":filter|filter=s"                             => \$filter,
+    ":filtered_source:file|filtered-source=s"      => \$filtered_source,
+    "codedigit=s"                                  => \$codedigit,
+    "epoch=s"                                      => \$epoch,
 );
+
+$source = $ARGV[0] if ( !$source );
 
 debug("AMC-prepare / DEBUG") if (get_debug());
 
@@ -179,9 +181,7 @@ sub set_filtered_source {
 
 my $avance = AMC::Gui::Avancement::new( $progress, id => $progress_id );
 
-# Get and test the source file
-
-my $source = $ARGV[0];
+# Test the source file
 
 die "Nonexistent source file: $source" if ( !-f $source );
 

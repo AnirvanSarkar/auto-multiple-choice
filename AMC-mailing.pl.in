@@ -69,42 +69,37 @@ my $progress_id       = '';
 my $report_kind       = REPORT_ANNOTATED_PDF;
 my $preassoc_key      = '';
 
-unpack_args();
-my @ARGV_ORIG = @ARGV;
-
-GetOptions(
-    "project=s"           => \$project_dir,
-    "project-name=s"      => \$project_name,
-    "data=s"              => \$data_dir,
-    "students-list=s"     => \$students_list,
-    "preassoc-key=s"      => \$preassoc_key,
-    "list-encoding=s"     => \$list_encoding,
-    "csv-build-name=s"    => \$csv_build_name,
-    "ids-file=s"          => \$ids_file,
-    "report=s"            => \$report_kind,
-    "email-column=s"      => \$email_column,
-    "sender=s"            => \$sender,
-    "text=s"              => \$text,
-    "text-content-type:s" => \$text_content_type,
-    "subject=s"           => \$subject,
-    "transport=s"         => \$transport,
-    "sendmail-path=s"     => \$sendmail_path,
-    "smtp-host=s"         => \$smtp_host,
-    "smtp-port=s"         => \$smtp_port,
-    "smtp-ssl=s"          => \$smtp_ssl,
-    "smtp-user=s"         => \$smtp_user,
-    "smtp-passwd-file=s"  => \$smtp_passwd_file,
-    "debug-smtp!"         => \$debug_smtp,
-    "progression=s"       => \$progress,
-    "progression-id=s"    => \$progress_id,
-    "attach=s"            => \@attach_files,
-    "delay=s"             => \$delay_s,
-    "log=s"               => \$log_file,
-    "cc=s"                => \$cc,
-    "bcc=s"               => \$bcc,
+GetProjectOptions(
+    ":project_dir|project=s"               => \$project_dir,
+    "project-name=s"                       => \$project_name,
+    ":data:dir|data=s"                     => \$data_dir,
+    ":listeetudiants:file|students-list=s" => \$students_list,
+    ":liste_key|preassoc-key=s"            => \$preassoc_key,
+    ":liste:enc|list-encoding=s"           => \$list_encoding,
+    ":csv_build_name|csv-build-name=s"     => \$csv_build_name,
+    "ids-file=s"                           => \$ids_file,
+    "report=s"                             => \$report_kind,
+    ":email_col|email-column=s"            => \$email_column,
+    ":email_sender|sender=s"               => \$sender,
+    "text=s"                               => \$text,
+    "text-content-type:s"                  => \$text_content_type,
+    "subject=s"                            => \$subject,
+    ":email_transport|transport=s"         => \$transport,
+    ":email_sendmail_path|sendmail-path=s" => \$sendmail_path,
+    ":email_smtp_host|smtp-host=s"         => \$smtp_host,
+    ":email_smtp_port|smtp-port=s"         => \$smtp_port,
+    ":email_smtp_ssl|smtp-ssl=s"           => \$smtp_ssl,
+    ":email_smtp_user|smtp-user=s"         => \$smtp_user,
+    ":SMTP:passwd|smtp-passwd-file=s"      => \$smtp_passwd_file,
+    "debug-smtp!"                          => \$debug_smtp,
+    "progression=s"                        => \$progress,
+    "progression-id=s"                     => \$progress_id,
+    "attach=s"                             => \@attach_files,
+    ":email_delay|delay=s"                 => \$delay_s,
+    "log=s"                                => \$log_file,
+    ":email_cc|cc=s"                       => \$cc,
+    ":email_bcc|bcc=s"                     => \$bcc,
 );
-
-debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
 
 my $report_filename =
     {

@@ -99,13 +99,9 @@ if ( -f $project_dir ) {
 $project_dir =~ s/\/+$//;
 
 if ( -d $project_dir ) {
-    debug "Opening project from directory $project_dir ...";
-    $project_dir = Cwd::realpath($project_dir);
-    my ( $v, $d, $f ) = splitpath($project_dir);
-    my $r = catpath( $v, $d, '' );
-    $r =~ s/\/+$//;
-    $config->set( 'rep_projets', $r );
-    @ARGV = $f;
+    my ( $projects_home, $project_name ) = split_project_dir($project_dir);
+    $config->set( 'rep_projets', $projects_home );
+    @ARGV = $project_name;
 }
 
 # creates projets and models directories if needed (if not present,

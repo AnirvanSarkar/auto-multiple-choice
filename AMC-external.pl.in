@@ -31,12 +31,8 @@ use AMC::Gui::Avancement;
 my $data_dir = '';
 my $source   = '';
 
-unpack_args();
-my @ARGV_ORIG = @ARGV;
-
-GetOptions( "data=s" => \$data_dir, "source=s" => \$source );
-
-debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
+GetProjectOptions( ":data:dir|data=s" => \$data_dir,
+                   "source=s" => \$source );
 
 sub error {
     my ($text) = @_;

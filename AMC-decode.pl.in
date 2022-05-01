@@ -44,20 +44,18 @@ my $n_procs      = 0;
 my $progress     = 0;
 my $progress_id  = 0;
 
-unpack_args();
-
-GetOptions(
-    "cr=s"      => \$cr_dir,
-    "project=s" => \$project_dir,
-    "projects-dir=s", \$projects_dir,
-    "data=s"           => \$data_dir,
-    "zone-type=s"      => \$zone_type,
-    "tag=s"            => \$tag,
-    "all!"             => \$all,
-    "decoder=s"        => \$decoder_name,
-    "n-procs=s"        => \$n_procs,
-    "progression=s"    => \$progress,
-    "progression-id=s" => \$progress_id,
+GetProjectOptions(
+    ":cr:dir|cr=s"               => \$cr_dir,
+    ":project_dir|project=s"     => \$project_dir,
+    "projects-dir=s"             => \$projects_dir,
+    ":data:dir|data=s"           => \$data_dir,
+    "zone-type=s"                => \$zone_type,
+    "tag=s"                      => \$tag,
+    "all!"                       => \$all,
+    ":name_field_type|decoder=s" => \$decoder_name,
+    "n-procs=s"                  => \$n_procs,
+    "progression=s"              => \$progress,
+    "progression-id=s"           => \$progress_id,
 );
 
 $project_dir = $projects_dir . '/' . $project_dir if ( $project_dir !~ /\// );

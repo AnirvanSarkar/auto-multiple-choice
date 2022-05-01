@@ -45,24 +45,19 @@ my $sort            = 'n';
 my $useall          = 1;
 my $rtl             = '';
 
-unpack_args();
-my @ARGV_ORIG = @ARGV;
-
-GetOptions(
-    "module=s"          => \$module,
-    "sort=s"            => \$sort,
-    "useall=s"          => \$useall,
-    "data=s"            => \$data_dir,
-    "fich-noms=s"       => \$fich_noms,
-    "association-key=s" => \$association_key,
-    "csv-build-name=s"  => \$csv_build_name,
-    "noms-encodage=s"   => \$noms_encodage,
-    "rtl!"              => \$rtl,
-    "option-out=s"      => \@o_out,
-    "output|o=s"        => \$output,
+GetProjectOptions(
+    "module=s"                         => \$module,
+    ":export_sort|sort=s"              => \$sort,
+    ":export_include_abs|useall=s"     => \$useall,
+    ":data:dir|data=s"                 => \$data_dir,
+    ":listeetudiants:dir|fich-noms=s"  => \$fich_noms,
+    "association-key=s"                => \$association_key,
+    ":csv_build_name|csv-build-name=s" => \$csv_build_name,
+    ":liste:enc|noms-encodage=s"       => \$noms_encodage,
+    ":annote_rtl|rtl!"                 => \$rtl,
+    "option-out=s"                     => \@o_out,
+    "output|o=s"                       => \$output,
 );
-
-debug "Parameters: " . join( " ", map { "<$_>" } @ARGV_ORIG );
 
 load("AMC::Export::$module");
 my $ex = "AMC::Export::$module"->new();

@@ -62,7 +62,7 @@ class AMC:
         self.cups_pdf_dir = os.getenv("HOME") + '/PDF'
         self.tmp_bookmark = 'AMC-tmp'
         self.project_name = 'test'
-        self.debug = False
+        self.debug = (os.getenv("AMC_DEBUG") == '1')
         self.src_dirname = 'sources'
         self.print_subdir = 'printed_copies'
         self.config_file = 'cf.xml'
@@ -702,6 +702,7 @@ class AMC:
                     cbx[o[0]][1].combovalue = o[1]
         # go
         export_button.click()
+        time.sleep(2)
 
     def check_csv_results(self, checks):
         errors = 0
@@ -733,7 +734,7 @@ class AMC:
                               + '/cr/corrections/pdf/' + f):
                 print("[Annotated] OK %s" % f)
             else:
-                print("[Annotated] MISSING %s" % f)
+                print("[Annotated] MISSING %s in %s" % (f, self.project_dir()))
                 errors += 1
         if errors > 0:
             raise ValueError("Some annotated answer sheets are missing.")
@@ -744,6 +745,7 @@ class AMC:
         annotated = reports.child('Annotated papers', roleName='panel')
         annotated.child(roleName='text').text = model
         reports.child('Annotate papers', roleName='push button').click()
+        time.sleep(4)
 
     def set_options(self,
                     description=['TEST EXAM', 'test'],

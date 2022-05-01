@@ -50,24 +50,22 @@ my $postcorrect_set_multiple = '';
 my $progres    = 1;
 my $progres_id = '';
 
-unpack_args();
-
-GetOptions(
-    "data=s"                    => \$data_dir,
-    "seuil=s"                   => \$darkness_threshold,
-    "seuil-up=s"                => \$darkness_threshold_up,
-    "grain=s"                   => \$granularity,
-    "arrondi=s"                 => \$rounding_scheme,
-    "notemax=s"                 => \$perfect_mark,
-    "plafond!"                  => \$ceiling,
-    "multi-only!"               => \$multi_only,
-    "notemin=s"                 => \$floor_mark,
-    "notenull=s"                => \$null_mark,
-    "postcorrect-student=s"     => \$postcorrect_student,
-    "postcorrect-copy=s"        => \$postcorrect_copy,
-    "postcorrect-set-multiple!" => \$postcorrect_set_multiple,
-    "progression-id=s"          => \$progres_id,
-    "progression=s"             => \$progres,
+GetProjectOptions(
+    ":data:dir|data=s"                => \$data_dir,
+    ":seuil|seuil=s"                  => \$darkness_threshold,
+    ":seuil_up|seuil-up=s"            => \$darkness_threshold_up,
+    ":note_grain|grain=s"             => \$granularity,
+    ":note_arrondi|arrondi=s"         => \$rounding_scheme,
+    ":note_max|notemax=s"             => \$perfect_mark,
+    ":note_max_plafond:bool|plafond!" => \$ceiling,
+    ":gather_multi:bool|multi-only!"  => \$multi_only,
+    ":note_min|notemin=s"             => \$floor_mark,
+    ":note_null|notenull=s"           => \$null_mark,
+    "postcorrect-student=s"           => \$postcorrect_student,
+    "postcorrect-copy=s"              => \$postcorrect_copy,
+    "postcorrect-set-multiple!"       => \$postcorrect_set_multiple,
+    "progression-id=s"                => \$progres_id,
+    "progression=s"                   => \$progres,
 );
 
 # fixes decimal separator ',' potential problem, replacing it with a

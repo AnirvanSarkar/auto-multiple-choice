@@ -54,26 +54,24 @@ my $students_list       = '';
 my $students_list_key   = '';
 my $password_key        = '';
 
-unpack_args();
-
-GetOptions(
-    "data=s"           => \$data_dir,
-    "sujet=s"          => \$sujet,
-    "fich-numeros=s"   => \$fich_nums,
-    "progression=s"    => \$progress,
-    "progression-id=s" => \$progress_id,
-    "print-command=s"  => \$print_cmd,
-    "methode=s"        => \$methode,
-    "imprimante=s"     => \$imprimante,
-    "output=s"         => \$output_file,
-    "split!"           => \$split,
-    "answer-first!"    => \$answer_first,
-    "options=s"        => \$options,
-    "extract-with=s"   => \$extract_with,
-    "password=s"       => \$password,
-    "students-list=s"  => \$students_list,
-    "list-key=s"       => \$students_list_key,
-    "password-key=s"   => \$password_key,
+GetProjectOptions(
+    ":data:dir|data=s"                     => \$data_dir,
+    ":doc_question:file|sujet=s"           => \$sujet,
+    "fich-numeros=s"                       => \$fich_nums,
+    "progression=s"                        => \$progress,
+    "progression-id=s"                     => \$progress_id,
+    ":print_command_pdf|print-command=s"   => \$print_cmd,
+    "methode=s"                            => \$methode,
+    ":imprimante|imprimante=s"             => \$imprimante,
+    "output=s"                             => \$output_file,
+    ":split:printas|split!"                => \$split,
+    ":first:printas|answer-first!"         => \$answer_first,
+    "options=s"                            => \$options,
+    ":extract_with|extract-with=s"         => \$extract_with,
+    ":pdf_password|password=s"             => \$password,
+    ":listeetudiants:file|students-list=s" => \$students_list,
+    ":liste_key|list-key=s"                => \$students_list_key,
+    ":pdf_password_key|password-key=s"     => \$password_key,
 );
 
 my $commandes = AMC::Exec::new('AMC-imprime');

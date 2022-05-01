@@ -34,13 +34,11 @@ my $data_dir    = '';
 my $progres     = 1;
 my $progres_id  = '';
 
-unpack_args();
-
-GetOptions(
-    "data=s"           => \$data_dir,
-    "project=s"        => \$project_dir,
-    "progression-id=s" => \$progres_id,
-    "progression=s"    => \$progres,
+GetProjectOptions(
+    ":data:dir|data=s"       => \$data_dir,
+    ":project_dir|project=s" => \$project_dir,
+    "progression-id=s"       => \$progres_id,
+    "progression=s"          => \$progres,
 );
 
 # Check directories
