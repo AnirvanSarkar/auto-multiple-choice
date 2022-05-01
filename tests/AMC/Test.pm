@@ -91,6 +91,7 @@ my $defaults = {
     export_full_csv     => [],
     export_columns      => 'student.copy',
     export_csv_ticked   => 'AB',
+    export_csv_decimal  => ',',
     export_ods          => '',
     blind               => 0,
     check_zooms         => {},
@@ -1010,6 +1011,7 @@ sub check_export {
             '--association-key', $self->{list_key},
             '--option-out',      'columns=' . $self->{export_columns},
             '--option-out',      'ticked=' . $self->{export_csv_ticked},
+            '--option-out',      'decimal=' . $self->{export_csv_decimal},
             '-o',                '%PROJ/export.csv',
         );
         push @args, '--fich-noms', '%PROJ/' . $self->{list}

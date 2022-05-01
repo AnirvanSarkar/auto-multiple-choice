@@ -209,16 +209,16 @@ sub set_variables_from_hashref {
 
 sub defined_variable {
     my ( $self, $vv ) = @_;
-    return ( $self->{variables}->{$vv}->[ $self->{type} ] ? 1 : 0 );
+    return (0) if ( !$self->{variables}->{$vv} );
+    return (0) if ( !$self->{variables}->{$vv}->[ $self->{type} ] );
+    return ( defined( $self->{variables}->{$vv}->[ $self->{type} ] ) );
 }
 
 # get variable value.
 
 sub get_variable {
     my ( $self, $vv ) = @_;
-    if (   $self->{variables}->{$vv}
-        && $self->{variables}->{$vv}->[ $self->{type} ] )
-    {
+    if ( $self->defined_variable($vv) ) {
         return ( $self->{variables}->{$vv}->[ $self->{type} ]->{value} );
     } else {
         return (undef);
@@ -386,8 +386,14 @@ sub process_directives {
 sub evaluate {
     my ( $self, $string ) = @_;
 
-    return (undef) if ( !defined($string) );
-    return ('') if ( $string eq '' );
+    if ( !defined($string) ) {
+        debug "Value is undef";
+        return (undef);
+    }
+    if ( $string eq '' ) {
+        debug "Value is empty";
+        return ('');
+    }
 
     my $string_orig = $string;
     for my $vv ( keys %{ $self->{variables} } ) {
@@ -403,8 +409,8 @@ sub evaluate {
         }
     }
     my $calc = eval($string);
-    $self->error("Syntax error (evaluation) : $string")
-      if ( !defined($calc) );
+    $self->error("Syntax error (evaluation of $string): $@")
+      if ($@);
     debug "Evaluation ["
       . printable( $self->{type} ) . "] : "
       . printable($string_orig) . " => "
@@ -434,6 +440,7 @@ sub get_directive {
 
     if ( $self->{directives}->{$key} ) {
         if ( !$self->{directives}->{$key}->{evaluated} ) {
+            debug "Evaluate directive $key";
             $self->{directives}->{$key}->{value} =
               $self->evaluate( $self->{directives}->{$key}->{def} );
             $self->{directives}->{$key}->{evaluated} = 1;

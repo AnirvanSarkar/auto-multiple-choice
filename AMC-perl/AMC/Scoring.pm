@@ -319,15 +319,15 @@ sub post_process {
         } else {
 
             # adds the 'd' shift value
-            if ( $self->defined_directive("d") ) {
-                my $d = $self->directive("d");
+            my $d = $self->directive("d");
+            if ( defined($d) ) {
                 debug "Shift: $d";
                 $$score += $d;
             }
 
             # applies the 'p' floor value
-            if ( $self->defined_directive("p") ) {
-                my $p = $self->directive("p");
+            my $p = $self->directive("p");
+            if ( defined($p) ) {
                 if ( $$score < $p ) {
                     debug "Floor: $p";
                     $$score = $p;
