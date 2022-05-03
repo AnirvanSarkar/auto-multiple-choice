@@ -315,6 +315,7 @@ sub compare {
             no warnings;
             $key_r = $a <=> $b;
         } else {
+            use locale;
             $key_r = $a cmp $b;
         }
         $key_r = -$key_r if ( $mode =~ /r/ );

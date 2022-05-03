@@ -18,6 +18,17 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use utf8;
+
+# Use and propagate French LANG to test sorting of accentuated strings
+
+use POSIX qw(:locale_h);
+
+for my $lc (qw/ LC_ALL LC_COLLATE LC_MESSAGES LANG /) {
+    setlocale( &$lc, "fr_FR.UTF-8" ) if($lc ne 'LANG');
+    $ENV{$lc} = "fr_FR.UTF-8";
+}
+
 require "./AMC/Test.pm";
 
 AMC::Test->new(
@@ -28,9 +39,18 @@ AMC::Test->new(
     code            => '<preassoc>',
     check_assoc     => { 2 => '002' },
     perfect_copy    => [],
+    export_columns  => 'student.copy,student.name',
     export_full_csv => [
+
+        # Test sorting…
+        { -irow => 1, -aname => 'GÜAC' },
+        { -irow => 2, -aname => 'GUÉRIN' },
+        { -irow => 3, -aname => 'GUILLEVIC' },
+
+        # Test checked boxes
         { -copy => 2, -question => 'bq1', -abc => 'B' },
         { -copy => 2, -question => 'bq2', -abc => '0B' },
+
     ],
 )->default_process;
 

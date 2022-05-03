@@ -1027,11 +1027,13 @@ sub check_export {
         if ( !defined($copy) && !defined($name) ) {
             $self->trace( "[E] CSV: "
                   . translate_column_title('copie') . ' or '
-                  . translate_column_title('name')
+                  . translate_column_title('nom')
                   . " columns not found" );
             $self->failed(1);
         }
+        my $irow = 0;
         while ( my $row = $c->getline($fh) ) {
+            $irow++;
             for my $t (@csv) {
                 my $goodrow = '';
                 if ( $t->{-copy} && $t->{-copy} eq $row->[$copy] ) {
@@ -1039,6 +1041,9 @@ sub check_export {
                 }
                 if ( $t->{-name} && $t->{-name} eq $row->[$name] ) {
                     $goodrow = 'name ' . $t->{-name};
+                }
+                if ( $t->{-irow} && $t->{-irow} == $irow ) {
+                    $goodrow = 'irow ' . $t->{-irow};
                 }
                 if (   $goodrow
                     && $t->{-question}
@@ -1058,6 +1063,13 @@ sub check_export {
                     $self->test( $row->[ $heads{ $t->{-question} } ],
                         $t->{-score},
                         "score for $goodrow Q=" . $t->{-question} );
+                    $t->{checked} = 1;
+                }
+                if (   $goodrow
+                    && $t->{-aname} )
+                {
+                    $self->test( $row->[ $name ],
+                        $t->{-aname}, "name for $goodrow" );
                     $t->{checked} = 1;
                 }
             }
