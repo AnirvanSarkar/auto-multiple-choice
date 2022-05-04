@@ -766,6 +766,29 @@ sub define_statements {
             sql => "SELECT count(*) as n,count(DISTINCT student) as ns"
                 . " FROM ".$self->table("external")
         },
+        QnAnswers => {
+            sql => "SELECT a.question, t.title, MAX(a.answer) as nanswers"
+                . " FROM ".$self->table("answer")." AS a"
+                . "     ,".$self->table("title")." AS t"
+                . " WHERE a.question=t.question"
+                . " GROUP BY a.question"
+        },
+        QfirstStudent => {
+            sql => "SELECT MIN(student)"
+                . " FROM ".$self->table("question")
+                . " WHERE question=?"
+        },
+        Qall => {
+            sql => "SELECT type,indicative,strategy"
+                . " FROM ".$self->table("question")
+                . " WHERE student=? AND question=?"
+        },
+        Ainfo => {
+            sql => "SELECT answer,correct,strategy"
+                . " FROM ".$self->table("answer")
+                . " WHERE student=? AND question=?"
+                . " ORDER BY answer"
+        },
     };
 }
 
@@ -1502,6 +1525,58 @@ sub add_question_external_score {
     if ( defined($x) && $x ne '' ) {
         $q->{external} = $x;
     }
+}
+
+# questions_n_answers returns an array of hashrefs with, for each
+# question, the question number ({question}), the question id
+# ({title}) and the maximum number of answers ({nanswers}, not
+# counting the "None of the above")
+
+sub questions_n_answers {
+    my ( $self ) = @_;
+    return (
+        @{
+            $self->dbh->selectall_arrayref(
+                $self->statement('QnAnswers'), { Slice => {} },
+            )
+        }
+    );
+}
+
+# question_first_student(qid) returns the first student number that
+# includes this question
+
+sub question_first_student {
+    my ( $self, $question ) = @_;
+    return (
+        $self->sql_single( $self->statement('QfirstStudent'), $question )
+    );
+}
+
+# question_info($student,$question) returns type, indicative, strategy
+# for one particular question.
+
+sub question_info {
+    my ( $self, $student, $question ) = @_;
+    return (
+        $self->dbh->selectrow_array( $self->statement('Qall'), {},
+            $student, $question )
+    );
+}
+
+# answers_info($student, $question) returns an arrayref to hashrefs
+# with info (answer, correct, strategy) for each answer corresponding
+# to a particular question.
+
+sub answers_info {
+    my ( $self, $student, $question ) = @_;
+    return (
+        $self->dbh->selectall_arrayref(
+            $self->statement('Ainfo'),
+            { Slice => {} },
+            $student, $question
+        )
+    );
 }
 
 1;

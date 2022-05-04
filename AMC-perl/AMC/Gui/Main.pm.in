@@ -50,6 +50,7 @@ use AMC::Gui::Prefs;
 use AMC::Gui::Printing;
 use AMC::Gui::ProjectManager;
 use AMC::Gui::SelectStudents;
+use AMC::Gui::Strategy;
 use AMC::Gui::StudentsList;
 use AMC::Gui::Template;
 use AMC::Gui::Unrecognized;
@@ -518,6 +519,19 @@ sub annule_apprentissage {
     my ($self) = @_;
 
     $self->{learning}->forget();
+}
+
+sub test_scoring {
+    my ($self) = @_;
+
+    my $gm = AMC::Gui::Strategy::new(
+        size_monitor => {
+            config => $self->{config},
+            key    => 'strategy_window_size'
+        },
+        project => $self->{project}
+    );
+
 }
 
 #########################################################################

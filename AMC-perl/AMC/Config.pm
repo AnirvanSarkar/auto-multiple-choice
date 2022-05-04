@@ -285,6 +285,7 @@ sub defaults {
         checklayout_window_size => '',
         manual_window_size      => '',
         marks_window_size       => '',
+        strategy_window_size    => '',
         conserve_taille         => 1,
         methode_impression      => 'CUPS',
         imprimante              => '',
