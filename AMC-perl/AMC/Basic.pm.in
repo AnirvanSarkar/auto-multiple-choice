@@ -752,7 +752,7 @@ sub GetProjectOptions {
     );
 
     load("AMC::Path");
-    my $shortcuts = AMC::Path::new();
+    my $shortcuts = AMC::Path::new( home_dir => Glib::get_home_dir() );
     load("AMC::Config");
     my $config = AMC::Config::new(
         global_file => $profile_conf,
