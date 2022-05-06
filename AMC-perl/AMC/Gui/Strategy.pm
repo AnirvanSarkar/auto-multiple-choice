@@ -131,6 +131,7 @@ sub new {
 
     $self->{gui}->connect_signals( undef, $self );
 
+    $self->{as_question} = '';
     $self->add_questions;
 
     $self->window->show;
@@ -195,7 +196,15 @@ sub do_import {
             }
         }
 
+        $self->{as_question} = $q;
+    }
+}
+
+sub question_changed {
+    my ($self) = @_;
+    if($self->{as_question} ne '') {
         $self->{import_cb}->set_active(0);
+        $self->{as_question} = '';
     }
 }
 
@@ -204,6 +213,7 @@ sub bool_edited {
     my ( $self, $col ) = @$args;
     my $iter = $self->{alist}->get_iter_from_string($path);
     $self->{alist}->set( $iter, $col => !$self->{alist}->get( $iter, $col ) );
+    $self->question_changed if($col != 2);
     $self->update;
 }
 
@@ -212,6 +222,7 @@ sub scoring_edited {
     my ($self, $col) = @$args;
     my $iter = $self->{alist}->get_iter_from_string($path);
     $self->{alist}->set( $iter, $col => $text );
+    $self->question_changed;
     $self->update;
 }
 
@@ -228,12 +239,20 @@ sub close {
 sub change_multiple {
     my ($self) = @_;
     $self->{none_of}->set_sensitive( $self->{multiple}->get_active );
+    $self->question_changed;
     $self->update;
 }
 
 sub change_none_of {
     my ($self) = @_;
     $self->{none_row}->set_visible( $self->{none_of}->get_active );
+    $self->question_changed;
+    $self->update;
+}
+
+sub update_scoring {
+    my ($self) = @_;
+    $self->question_changed;
     $self->update;
 }
 
@@ -258,6 +277,7 @@ sub update_answers {
         }
     }
     $self->{n} = $n;
+    $self->question_changed;
     $self->update;
 }
 
