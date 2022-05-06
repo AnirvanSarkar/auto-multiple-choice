@@ -157,6 +157,7 @@ sub add_questions {
         $self->{questions} =
           cb_model( "-1", "*", map { $_->{question}, $_->{title} } @q );
         $self->{import_cb}->set_model( $self->{questions} );
+        $self->{import_cb}->set_active(0);
 
         $any=1 if(@q);
     }
