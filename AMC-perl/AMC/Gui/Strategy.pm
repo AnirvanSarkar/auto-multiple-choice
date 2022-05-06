@@ -195,6 +195,7 @@ sub do_import {
                 $self->{alist}->set( $iter, 2, 0 );
             }
         }
+        $self->update;
 
         $self->{as_question} = $q;
     }
