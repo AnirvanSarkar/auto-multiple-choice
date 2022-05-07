@@ -813,8 +813,12 @@ sub GetProjectOptions {
                     debug "Scalar value from config for key $k: $value";
                     $$v = $value;
                     $from_config{$k} = 1;
+                } elsif ( ref($v) eq 'ARRAY' ) {
+                    debug "Array value from config for key $k: $value";
+                    @$v = split( /,+/, $value );
+                    $from_config{$k} = 1;
                 } else {
-                    debug "WARNING: unexpected ref type for key $k";
+                    debug "WARNING: unexpected ref type for key $k: " . ref($v);
                 }
             }
         }
