@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
 <article lang="en">
@@ -381,6 +381,14 @@ the best you can.
             <code>B6</code>, <code>letter</code>, <code>legal</code>,
             <code>ANSIA</code>, <code>ANSIB</code>, <code>ANSIC</code>,
             <code>ANSID</code>, <code>ANSIE</code>.</para>
+          </listitem>
+        </varlistentry>
+
+         <varlistentry>
+          <term>LaTeXEngine:</term>
+
+          <listitem>
+            <para>LaTeX engine : <code>xelatex -shell-escape</code>, for example. </para>
           </listitem>
         </varlistentry>
 
@@ -943,7 +951,11 @@ one plus one?
               name must contain only simple characters, without accents and
               LaTeX special characters such as <code>_</code>, <code>^</code>,
               <code>%</code>...</para>
-
+		
+        <important>
+          <para>See also <xref endterm="identifier.title" linkend="identifier"/>.</para>
+        </important>	
+				
               <para><option>name</option> can also be used instead of
               <option>id</option> for compatibility with old versions, but you
               should prefer using <option>id</option>.</para>
@@ -2586,7 +2598,7 @@ P=\protect\SI{\aCalculateVariable}{\newton}}{the scoring}
 
             <programlisting>{
   \AMCquestionNumberfalse
-  \def\AMCbeginQuestion#1#2{}
+  \def\AMCbeginQuestion##1##2{}
   \begin{question}
     ...
   \end{question}
@@ -3449,12 +3461,12 @@ Holded~\begin{choicescustom}[o]\wrongchoice{R1~}\scoring{b=0,m=-8}\wrongchoice{R
             <title>Use in mathematics</title>
 
             <programlisting>
-\begin{questionmultx}{formula}\scoring{mz=2}\AMCnoCompleteMulti
+\begin{questionmult}{formula}\scoring{mz=2}\AMCnoCompleteMulti
 How is the identity function defined?
   \begin{choicescustom}[o]
     \[f(x)=\correctchoice[$y$]{}\wrongchoice{[$x$]{}\correctchoice[$+$]{}\correctchoice[$x^2$]{}\]
   \end{choicescustom}
-\end{questionmultx}
+\end{questionmult}
 </programlisting>
           </sect5>
         </sect4>
@@ -3809,10 +3821,10 @@ and write your first and last names below.
             <para><code>\AMCtext{explain}{<replaceable>title</replaceable>}</code>
             replaces « <emphasis>Explanation</emphasis> » (the English default
             text) with the given <replaceable>title</replaceable> before the
-            explanations produced due to the <command>\explain</command>
+            explanations produced due to the <command>explain</command>
             command.</para>
 
-            <para>The default value for this command is:</para>
+            <para>The default option for this command is:</para>
 
             <programlisting>\AMCtext{explain}{\textit{\textbf{Explanation: }}}</programlisting>
           </listitem>
@@ -4152,6 +4164,15 @@ respective parameters \VQa{} and \VQb{}.
                 digit (even null digits) and for the sign. If
                 <code>false</code>, if some digits has no ticked box, they
                 will be set to zero. Defaults to <code>false</code>.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>ignoreblank=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>if <code>true</code>, can be used (only with number base 10)
+                 to ignore digits for which no box has been ticked.</para>
               </listitem>
             </varlistentry>
 
@@ -9952,4 +9973,3 @@ chmod 0600 /Users/<emphasis>user_name</emphasis>/.msmtprc
     </sect2>
   </sect1>
 </article>
-

@@ -385,6 +385,14 @@ lesquels sont positifs ?
             sera l'anglais qui sera choisi.</para>
           </listitem>
         </varlistentry>
+        
+         <varlistentry>
+          <term>LaTeXEngine:</term>
+
+          <listitem>
+            <para>Moteur de compilation : <code>xelatex -shell-escape</code>, par exemple </para>
+          </listitem>
+        </varlistentry>
 
         <varlistentry>
           <term>Title:</term>
@@ -982,7 +990,11 @@ un plus un ?
               notes exportés par AMC pour identifier la question plus
               facilement. Il ne doit comporter que des caractères simples non
               accentués.</para>
-
+		
+        <important>
+          <para>Voir aussi <xref endterm="identifiant.title" linkend="identifiant"/>.</para>
+        </important>			
+		
               <para><option>name</option> a le même rôle que l'option
               <option>id</option>. Cette option est présente pour assurer la
               compatibilité avec d'anciennes versions, préférez l'utilisation
@@ -2699,7 +2711,7 @@ P=\protect\SI{\aCalculateVariable}{\newton}}{le barème}
 
             <programlisting>{
   \AMCquestionNumberfalse
-  \def\AMCbeginQuestion#1#2{}
+  \def\AMCbeginQuestion##1#2#{}
   \begin{question}
     ...
   \end{question}
@@ -3588,12 +3600,12 @@ Durée : 10 minutes.
             <title>Utilisation en mathématiques</title>
 
             <programlisting>
-\begin{questionmultx}{formule}\bareme{mz=2}\AMCnoCompleteMulti
+\begin{questionmult}{formule}\bareme{mz=2}\AMCnoCompleteMulti
   Comment est définie la fonction identité ?
   \begin{reponsesperso}[o]
     \[f(x)=\bonne[$y$]{}\mauvaise[$x$]{}\bonne[$+$]{}\bonne[$x^2$]{}\]
   \end{reponsesperso}
-\end{questionmultx}
+\end{questionmult}
 </programlisting>
           </sect5>
         </sect4>
@@ -4360,6 +4372,16 @@ et inscrivez votre nom et prénom ci-dessous.
                 n'est cochée, ces chiffres seront fixés à la valeur 0.</para>
               </listitem>
             </varlistentry>
+            
+            
+            <varlistentry>
+              <term>ignoreblank=<replaceable>bool</replaceable></term>
+
+              <listitem>
+                <para>avec la valeur <code>true</code>, ignore les cases
+                non cochées. Valable uniquement en base 10.</para>
+              </listitem>
+            </varlistentry>            
 
             <varlistentry>
               <term>vertical=<replaceable>bool</replaceable></term>
