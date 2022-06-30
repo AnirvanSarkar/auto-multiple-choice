@@ -4784,7 +4784,9 @@ Three digits and two letters:\insertgroup{mixed}.
     \begin{picture}(#1,#1)(-#2,-#2)\thinlines\circle*{#1}\end{picture}}}
 \def\m@rqueCalage{\AMCcercle{3.6}{1.8}}
 \def\m@rque#1{\AMC@tracebox{1}{#1}{\m@rqueCalage}}
-\def\he@dtaille#1{\vbox to 1cm{#1}}
+\def\he@dtaille#1{% \par cancels the \leavevmode
+  % introduced by https://github.com/pietvo/fancyhdr/commit/6b1ad10eeb5bc3d804f3cd2cf193e6440d0229e6
+  \par\vbox to 1cm{#1}}
 \def\he@dbas#1{\he@dtaille{\vspace*{\fill}#1}}
 \def\he@dhaut#1{\he@dtaille{#1\vspace*{\fill}}}
 \def\AMC@intituleHead{\AMC@loc@corrected}
