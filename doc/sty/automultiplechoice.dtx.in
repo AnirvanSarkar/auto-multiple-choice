@@ -630,7 +630,8 @@ along with Auto-Multiple-Choice.  If not, see
 % |\insertgroup|\oarg{n}\marg{groupname} inserts elements of group
 % \meta{groupname} one after one. If optional parameter \meta{n} is
 % given, only the first \meta{n} elements of the group are inserted in
-% the document. The command
+% the document. If not, or if \meta{n} is negative, all the elements
+% are inserted. The command
 % |\insertgroupfrom|\oarg{n}\marg{groupname}\marg{i} does the same,
 % starting from element at index \meta{i} (the first element has index
 % 0).
@@ -677,11 +678,12 @@ Two of them:\insertgroup[2]{serie}.
 % The command |\cleargroup|\marg{groupname} clears all the elements of
 % group \meta{groupname}, making an empty group. The command
 % |\copygroup|\oarg{n}\marg{from}\marg{to} copies the elements of
-% group \meta{from} to grou \meta{to} -- if optional parameter
-% \meta{n} is given, only the \meta{n} first elements are copied. The
-% command |\copygroupfrom|\oarg{n}\marg{from}\marg{to}\marg{i} does the
-% same, starting from element at index \meta{i} (the first element has
-% index 0).
+% group \meta{from} to group \meta{to} -- if optional parameter
+% \meta{n} is given, only the \meta{n} first elements are copied. If
+% not, or if \meta{n} is negative, all the elements are copied. The
+% command |\copygroupfrom|\oarg{n}\marg{from}\marg{to}\marg{i} does
+% the same, starting from element at index \meta{i} (the first element
+% has index 0).
 %
 % As an example again without questions, consider the following
 % code:
@@ -2633,7 +2635,7 @@ Three digits and two letters:\insertgroup{mixed}.
 \newcommand{\AMCgrouploop@prep}[3]{%
   \AMCtok@size=#1\relax%
   \ifAMC@fullGroups\AMCtok@size=\z@\fi%
-  \ifnum\AMCtok@size<\@ne%
+  \ifnum\AMCtok@size<\z@%
     \AMCtok@size=\csname #2@k\endcsname%
   \fi%
   \AMCtok@ik=\csname AMC#2@j\endcsname%
@@ -2652,14 +2654,17 @@ Three digits and two letters:\insertgroup{mixed}.
   \AMCtok@ik=\csname AMC#1@j\endcsname%
   \advance\AMCtok@size\m@ne%
 }
-\newcommand{\insertgroupfrom}[3][0]{%
-  \AMCgrouploop@prep{#1}{#2}{#3}%
-  {\loop%
-    \AMCgrouploop@next{#2}%
-    {\the\csname #2@\romannumeral\AMCtok@ik\endcsname}%
-  \ifnum\AMCtok@size>\z@\repeat}%
+\newcommand{\insertgroupfrom}[3][-1]{%
+  \ifnum#1=0%
+  \else%
+    \AMCgrouploop@prep{#1}{#2}{#3}%
+    {\loop%
+      \AMCgrouploop@next{#2}%
+      {\the\csname #2@\romannumeral\AMCtok@ik\endcsname}%
+    \ifnum\AMCtok@size>\z@\repeat}%
+  \fi%  
 }
-\newcommand{\insertgroup}[2][0]{%
+\newcommand{\insertgroup}[2][-1]{%
   \insertgroupfrom[#1]{#2}{-1}%
 }
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}
@@ -2692,15 +2697,18 @@ Three digits and two letters:\insertgroup{mixed}.
   \csname #1@k\endcsname=\z@\relax%
   \csname AMC#1@j\endcsname=\z@\relax%
 }
-\newcommand{\copygroupfrom}[4][0]{%
-  \AMCgrouploop@prep{#1}{#2}{#4}%
-  {\loop%
-    \AMCgrouploop@next{#2}%
-    \AMC@prepare@element{#3}%    
-    \global\csname #3@\romannumeral\AMCtok@k\endcsname=\csname #2@\romannumeral\AMCtok@ik\endcsname%
-  \ifnum\AMCtok@size>\z@\repeat}%
+\newcommand{\copygroupfrom}[4][-1]{%
+  \ifnum#1=0%
+  \else%
+    \AMCgrouploop@prep{#1}{#2}{#4}%
+    {\loop%
+      \AMCgrouploop@next{#2}%
+      \AMC@prepare@element{#3}%    
+      \global\csname #3@\romannumeral\AMCtok@k\endcsname=\csname #2@\romannumeral\AMCtok@ik\endcsname%
+    \ifnum\AMCtok@size>\z@\repeat}%
+  \fi%
 }
-\newcommand{\copygroup}[3][0]{%
+\newcommand{\copygroup}[3][-1]{%
   \copygroupfrom[#1]{#2}{#3}{-1}%
 }
 %    \end{macrocode}

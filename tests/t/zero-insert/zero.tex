@@ -1,0 +1,72 @@
+\documentclass[a4paper]{article}
+
+\usepackage{automultiplechoice}
+
+\begin{document}
+
+\setdefaultgroupmode{withoutreplacement}
+
+\def\fillgroup#1{
+
+  \element{groupe#1}{
+
+    \begin{question}{#1-1}
+      Question #11
+      \begin{choices}
+        \correctchoice{Correct}
+        \wrongchoice{Wrong A}
+        \wrongchoice{Wrong B}
+      \end{choices}
+    \end{question}
+    
+  }
+  \element{groupe#1}{
+
+    \begin{question}{#1-2}
+      Question #12
+      \begin{choices}
+        \correctchoice{Correct}
+        \wrongchoice{Wrong A}
+        \wrongchoice{Wrong B}
+      \end{choices}
+    \end{question}
+    
+  }
+}
+
+\fillgroup{a}
+\fillgroup{b}
+\fillgroup{c}
+\fillgroup{d}
+\fillgroup{e}
+
+\onecopy{5}{
+
+  {\Large\bf TEST EXAM}
+  \vspace{2ex}
+
+  \namefield{\fbox{    
+    \begin{minipage}{.5\linewidth}
+      Name :
+      
+      \vspace*{.5cm}\dotfill
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+  \vspace{2ex}
+
+  \insertgroup[0]{groupea}
+  \insertgroupfrom[0]{groupeb}{1}
+
+  \cleargroup{general}
+  \copygroup[0]{groupec}{general}
+  \copygroupfrom[0]{grouped}{general}{1}
+
+  \copygroup{groupee}{general}
+
+  \insertgroup{general}
+}
+
+\end{document}
