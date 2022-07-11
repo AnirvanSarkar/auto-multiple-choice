@@ -3402,14 +3402,20 @@ Three digits and two letters:\insertgroup{mixed}.
 % \subsubsection{Explanations}
 %
 % \begin{macro}{\explain}
-%   The command |\explain| is used inside |question|-like environments
-%   to give the explanation for the answers of a question.
+%   The command |\explain|\marg{text} is used inside |question|-like environments
+%   to give the explanation for the answers of a question. The command
+%   |\explaincontext|\marg{text} inserts its argument only in the corrected paper.
 %    \begin{macrocode}
 \newcommand{\explain}[1]{%
 \ifAMC@correchead%
   \AMCif@env{question}{\par\noindent{\AMC@loc@explain #1}}{\AMC@error@explain}\vspace{1ex}%
 \else%
   \AMCif@env{question}{}{\AMC@error@explain}%
+\fi%
+}
+\newcommand{\explaincontext}[1]{%
+\ifAMC@correc%
+#1%
 \fi%
 }
 %    \end{macrocode}
