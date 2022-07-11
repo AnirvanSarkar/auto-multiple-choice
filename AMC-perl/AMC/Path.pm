@@ -65,11 +65,19 @@ sub proj2abs {
         } else {
             $fich =~ s/^([^\/]*)//;
             my $code = $1;
-            if ( !$surnoms->{$code} ) {
-                $fich = $code . $fich;
-                $code = $surnoms->{''};
-            }
             my $rep = $surnoms->{$code};
+            if ( !$rep ) {
+                if($code eq '%HOME') {
+                    $rep = $ENV{HOME};
+                } elsif($code eq '%PROJETS' && $surnoms->{'%PROJET'}) {
+                    $rep = $surnoms->{'%PROJET'};
+                    $rep =~ s:/[^/]+/?$::;
+                } else {
+                    $fich = $code . $fich;
+                    $code = $surnoms->{''};
+                    $rep = $surnoms->{$code};
+                }
+            }
             $rep .= "/" if ( $rep !~ /\/$/ );
             $rep .= $fich;
             $rep =~ s/\/{2,}/\//g;
