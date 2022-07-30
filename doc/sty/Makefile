@@ -57,7 +57,7 @@ sample-%.pdf: sample-%.datetex
 
 postclean:
 	-rm -f pexa-*
-	-rm -f $(foreach ext,amc aux dvi glo gls idx ilg ind log out toc xy xy1 xy2 xy3,*.$(ext))
+	-rm -f $(foreach ext,amc aux dvi glo gls idx ilg ind log out toc xy xy1 xy2 xy3 hd tmp,*.$(ext))
 
 clean: postclean
 	rm -f *~

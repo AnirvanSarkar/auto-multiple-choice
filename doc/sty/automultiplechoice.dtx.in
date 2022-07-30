@@ -64,8 +64,7 @@ along with Auto-Multiple-Choice.  If not, see
 \usepackage{verbatim}
 \usepackage{fp}
 \usepackage{multicol}
-\usepackage[linenumberformat={{}}]{examplep}
-\usepackage{codep}
+\usepackage{sverb}
 \usepackage[hyperindex=false]{hyperref}
 \usepackage{ifpdf}
 \usepackage{pdfpages}
@@ -507,10 +506,10 @@ along with Auto-Multiple-Choice.  If not, see
 % identifier. Each question must have a unique identifier, different
 % from the other questions identifiers.
 %
-% \vspace{2ex}
-% \begin{code}
+% \begin{demo}{Questions environments}
 %   \begin{question}{everest}
-%     What is the elevation of Mount Everest?
+%     What is the elevation of
+%     Mount Everest?
 %     \begin{choices}
 %       \correctchoice{8,848\,m}
 %       \wrongchoice{8,253\,m}
@@ -527,8 +526,7 @@ along with Auto-Multiple-Choice.  If not, see
 %       \wrongchoice{Cambodia}
 %     \end{choices}
 %   \end{questionmult}
-% \end{code}
-% \vspace{2ex}
+% \end{demo}
 %
 % \DescribeMacro{\AMCcompleteMulti}\DescribeMacro{\AMCnoCompleteMulti}
 % For multiple questions, it is sometimes useful to make the
@@ -539,8 +537,7 @@ along with Auto-Multiple-Choice.  If not, see
 % |\AMCnoCompleteMulti| can also be used to change this behaviour for a
 % single question.
 %
-% \vspace{2ex}
-% \begin{code}
+% \begin{demo}{Additional answer ``\emph{none}'' for a single question}
 %   \begin{questionmult}{americas}
 %     \AMCcompleteMulti
 %     Which contries are in the Americas?
@@ -551,8 +548,7 @@ along with Auto-Multiple-Choice.  If not, see
 %       \wrongchoice{Cambodia}
 %     \end{choices}
 %   \end{questionmult}
-% \end{code}
-% \vspace{2ex}
+% \end{demo}
 %
 % \DescribeEnv{choices}\DescribeEnv{choiceshoriz}\DescribeEnv{choicescustom}
 % Depending on the formatting style for answers, one can choose one of
@@ -560,7 +556,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \begin{itemize}
 % \item Environment |choices| is usualy chosen for long answers:
 % \amccode
-% \begin{code}
+% \begin{demo}{The |choices| environment}
 %  \begin{questionmult}{latex}
 %    What are the possible uses of latex?
 %    \begin{choices}
@@ -574,20 +570,19 @@ along with Auto-Multiple-Choice.  If not, see
 %        for some space launch vehicles.}
 %    \end{choices}
 %  \end{questionmult}
-% \end{code}
+% \end{demo}
 % \item environment |choiceshoriz| is chosen for short answers:
 % \amccode
-% \begin{code}
+% \begin{demo}{The |choiceshoriz| environment}
 %  \begin{question}{insect}
-%    From those animals, which
-%    is an insect?
+%    How many legs for an insect?
 %    \begin{choiceshoriz}
-%      \correctchoice{Ant}
-%      \wrongchoice{Horse}
-%      \wrongchoice{Turtle}
+%      \correctchoice{6}
+%      \wrongchoice{2}
+%      \wrongchoice{8}
 %    \end{choiceshoriz}
 %  \end{question}
-% \end{code}
+% \end{demo}
 %
 % \item environment |choicescustom| is provided to customize answers
 %   formatting. See~\ref{c:answers} for details.
@@ -636,43 +631,23 @@ along with Auto-Multiple-Choice.  If not, see
 % starting from element at index \meta{i} (the first element has index
 % 0).
 %
-% As an example without questions in groups elements, consider the
-% following code:
+% As an example without questions in groups elements, let us create a small group named |serie|, containing five elements, and play with it:
+% \AMCrandomseed{1237893}
+% \begin{demo}{Managing groups}
+% \element{serie}{ one}
+% \element{serie}{ two}
+% \element{serie}{ three}
+% \element{serie}{ four}
+% \element{serie}{ five}
+% Numbers:\insertgroup{serie}.
 %
-%\iffalse
-%<*doc>
-%\fi
-\begin{verbatim}
-\element{serie}{ one}
-\element{serie}{ two}
-\element{serie}{ three}
-\element{serie}{ four}
-\element{serie}{ five}
-Numbers:\insertgroup{serie}.
-
-Three numbers from the second (index=1) one:\insertgroupfrom[3]{serie}{1}.
-
-\shufflegroup{serie}
-Two of them:\insertgroup[2]{serie}.
-\end{verbatim}
-%\iffalse
-%</doc>
-%\fi
-%   which produces:
-%   \AMCrandomseed{1237893}
-%   \element{serie}{ one}
-%   \element{serie}{ two}
-%   \element{serie}{ three}
-%   \element{serie}{ four}
-%   \element{serie}{ five}
-%   \begin{center}\fbox{\begin{minipage}{.7\linewidth}
-%       Numbers:\insertgroup{serie}.
+% Three numbers from the second (index=1)
+% one:\insertgroupfrom[3]{serie}{1}.
 %
-%       Three numbers from the second (index=1) one:\insertgroupfrom[3]{serie}{1}.
-%
-%       \shufflegroup{serie}
-%       Two of them:\insertgroup[2]{serie}.
-%   \end{minipage}}\end{center}
+% \shufflegroup{serie}
+% Two of them after
+% shuffling:\insertgroup[2]{serie}.
+% \end{demo}
 %
 % \DescribeMacro{\cleargroup}\DescribeMacro{\copygroup}\DescribeMacro{\copygroupfrom}
 % The command |\cleargroup|\marg{groupname} clears all the elements of
@@ -685,76 +660,33 @@ Two of them:\insertgroup[2]{serie}.
 % the same, starting from element at index \meta{i} (the first element
 % has index 0).
 %
-% As an example again without questions, consider the following
-% code:
-%\iffalse
-%<*doc>
-%\fi
-\begin{verbatim}
-\element{digits}{ 1}\element{digits}{ 2}\element{digits}{ 3}
-\element{digits}{ 4}\element{digits}{ 5}\element{digits}{ 6}
-\element{digits}{ 7}\element{digits}{ 8}\element{digits}{ 9}
-\element{letters}{ A}\element{letters}{ B}\element{letters}{ C}
-\element{letters}{ D}\element{letters}{ E}\element{letters}{ F}
-
-\shufflegroup{letters}
-\cleargroup{mixed}
-\copygroupfrom[3]{digits}{mixed}{1}\copygroup[2]{letters}{mixed}
-\shufflegroup{mixed}
-Three digits from 2 to 4 and two letters:\insertgroup{mixed}.
-
-\shufflegroup{digits}\shufflegroup{letters}
-\cleargroup{mixed}
-\copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
-\shufflegroup{mixed}
-Three digits and two letters:\insertgroup{mixed}.
-
-\shufflegroup{digits}\shufflegroup{letters}
-\cleargroup{mixed}
-\copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
-\shufflegroup{mixed}
-Three digits and two letters:\insertgroup{mixed}.
-\end{verbatim}
-%\iffalse
-%</doc>
-%\fi
-% which produces:
+% As an example again without questions:
 % \AMCrandomseed{1237899}
-%     \element{digits}{ 1}
-%     \element{digits}{ 2}
-%     \element{digits}{ 3}
-%     \element{digits}{ 4}
-%     \element{digits}{ 5}
-%     \element{digits}{ 6}
-%     \element{digits}{ 7}
-%     \element{digits}{ 8}
-%     \element{digits}{ 9}
-%     \element{letters}{ A}
-%     \element{letters}{ B}
-%     \element{letters}{ C}
-%     \element{letters}{ D}
-%     \element{letters}{ E}
-%     \element{letters}{ F}
-%     \begin{center}\fbox{\begin{minipage}{.7\linewidth}
-%         \shufflegroup{letters}
-%         \cleargroup{mixed}
-%         \copygroupfrom[3]{digits}{mixed}{1}\copygroup[2]{letters}{mixed}
-%         \shufflegroup{mixed}
-%         Three digits from 2 to 4 and two letters:\insertgroup{mixed}.
-%
-%         \shufflegroup{digits}\shufflegroup{letters}
-%         \cleargroup{mixed}
-%         \copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
-%         \shufflegroup{mixed}
-%         Three digits and two letters:\insertgroup{mixed}.
-%
-%         \shufflegroup{digits}\shufflegroup{letters}
-%         \cleargroup{mixed}
-%         \copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
-%         \shufflegroup{mixed}
-%         Three digits and two letters:\insertgroup{mixed}.
-%       \end{minipage}}\end{center}
-%
+% \begin{demo}[w]{Copying elements from a group to another}
+% \element{digits}{ 1}\element{digits}{ 2}\element{digits}{ 3}
+% \element{digits}{ 4}\element{digits}{ 5}\element{digits}{ 6}
+% \element{digits}{ 7}\element{digits}{ 8}\element{digits}{ 9}
+% \element{letters}{ A}\element{letters}{ B}\element{letters}{ C}
+% \element{letters}{ D}\element{letters}{ E}\element{letters}{ F}
+% 
+% \shufflegroup{letters}
+% \cleargroup{mixed}
+% \copygroupfrom[3]{digits}{mixed}{1}\copygroup[2]{letters}{mixed}
+% \shufflegroup{mixed}
+% Three digits from 2 to 4 and two letters:\insertgroup{mixed}.
+% 
+% \shufflegroup{digits}\shufflegroup{letters}
+% \cleargroup{mixed}
+% \copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
+% \shufflegroup{mixed}
+% Three digits and two letters:\insertgroup{mixed}.
+% 
+% \shufflegroup{digits}\shufflegroup{letters}
+% \cleargroup{mixed}
+% \copygroup[3]{digits}{mixed}\copygroup[2]{letters}{mixed}
+% \shufflegroup{mixed}
+% Three digits and two letters:\insertgroup{mixed}.
+% \end{demo}
 %
 % You can find an example involving questions in
 % section~\ref{d:samples}.
@@ -771,15 +703,14 @@ Three digits and two letters:\insertgroup{mixed}.
 %   the |\namefield|\marg{descr} command. The \meta{descr} argument
 %   contains the \LaTeX{} code used to format the name field on the
 %   page. For example:
-% \vspace{2ex}
-%   \begin{code}
+%   \begin{demo}{The name field}
 %  \namefield{\fbox{    
 %    \begin{minipage}{15em}
 %      Name and surname:\vspace*{3ex}\par
 %      \noindent\dotfill\vspace{2mm}
 %    \end{minipage}
 %  }}
-%   \end{code}
+%   \end{demo}
 % \vspace{2ex}
 %   You can see that the |\namefield| command has no effect on the
 %   produced document. In fact, its only purpose is to log in the
@@ -792,18 +723,14 @@ Three digits and two letters:\insertgroup{mixed}.
 %   where \meta{key} is the key identifier, that can be used to
 %   retrieve coded student numbers from the scans, and \meta{ndigits}
 %   is the number of digits for numbers to be coded.  \vspace{2ex}
-%   \begin{code}
+%   \begin{demo}{Student ID}
 %  \AMCcodeGridInt{student}{6}
-%
-%   \end{code}
+%   \end{demo}
 %
 %   For smaller number of digits, the ``horizontal'' form can be preferred: 
-%   {\PexaDefaults{samplewidth=.7\PexaWidth}
-% \vspace{2ex}
-%   \begin{code}
+%   \begin{demo}[w]{Student ID, horizontal form}
 %  \AMCcodeGridInt[h]{student}{3}  
-%   \end{code}
-%   }
+%   \end{demo}
 % \end{itemize}
 %
 % \subsection{Separate answer sheet}\label{d:separate}
@@ -832,9 +759,8 @@ Three digits and two letters:\insertgroup{mixed}.
 % One can use the \LaTeX{} package \textsf{fp} to make random computation
 % questions, as can be seen in the following example (don't forget to
 % load package \textsf{fp}):
-% \amccode
 % {\makeatletter\AMC@correctrue\makeatother
-% \begin{code}
+% \begin{demo}[w]{Random computation questions}
 %  \begin{question}{simplesum}
 %    \FPeval\VQa{trunc(1+random*8,0)}
 %    \FPeval\VQb{trunc(4+random*5,0)}
@@ -850,7 +776,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %      \wrongchoice{\VQnoC}
 %    \end{choiceshoriz}
 %  \end{question}
-% \end{code}
+% \end{demo}
 % }
 % In this example, |\VQa| and |\VQb| are used to store two random
 % integers (the first between 1 and 8, and the second between 4 and
@@ -865,84 +791,40 @@ Three digits and two letters:\insertgroup{mixed}.
 % the interval $[\meta{x0},\meta{x1}[$, using |\correctchoice| when
 % \meta{x} lies in the interval, and |\wrongchoice| otherwise.
 %
-%\iffalse
-%<*doc>
-%\fi
-\begin{verbatim}
-\begin{question}{inf-expo-indep}
-  \FPeval\VQa{trunc(2 + random * 4,0)}
-  \FPeval\VQb{trunc(6 + random * 5,0)}
-  \FPeval\VQr{VQa/(VQa+VQb)}
-  Let $X$ and $Y$ be two independent random variables, following
-  exponential laws with respective parameters \VQa{} and \VQb{}.
-  In which interval lies the probability $\textrm{P}[X<Y]$?
-  \begin{multicols}{5}
-    \begin{reponses}[o]
-      \AMCIntervals{\VQr}{0}{1}{0.1}
-    \end{reponses}
-  \end{multicols}
-\end{question}
-\end{verbatim}
-%\iffalse
-%</doc>
-%\fi
 % {\makeatletter\AMC@correctrue\makeatother
-% \fbox{
-%  \begin{minipage}{.9\linewidth}
-%  \begin{question}{inf-expo-indep}
-%    \FPeval\VQa{trunc(2 + random * 4,0)}
-%    \FPeval\VQb{trunc(6 + random * 5,0)}
-%    \FPeval\VQr{VQa/(VQa+VQb)}
-%
-%    Let $X$ and $Y$ be two independent random variables, following
-%    exponential laws with respective parameters \VQa{} and \VQb{}.
-%    In which interval lies the probability $\textrm{P}[X<Y]$?
-%    \begin{multicols}{5}
-%      \begin{reponses}[o]
-%        \AMCIntervals{\VQr}{0}{1}{0.1}
-%      \end{reponses}
-%    \end{multicols}
-%  \end{question}
-%  \vspace*{.1ex}
-% \end{minipage}
-% }}
-%
-%   \DescribeMacro{\AMCnumericChoices}One can also use the
-%   |\AMCnumericChoices| command to ask the student to enter a
-%   numerical value as his answer, as in the following example:
-%\iffalse
-%<*doc>
-%\fi
-\begin{verbatim}
-  \begin{questionmultx}{sqrt}
-    \FPeval\VQa{trunc(5+random*15,0)}
-    \FPeval\VQs{VQa^0.5}
-
-    Compute $\sqrt{\VQa}$ and round it with two digits after period.
-
-    \AMCnumericChoices{\VQs}{digits=3,decimals=2,sign=true,
-      borderwidth=0pt,backgroundcol=lightgray,approx=5}
-  \end{questionmultx}
-\end{verbatim}
-%\iffalse
-%</doc>
-%\fi
-% \begin{center}
-% {\makeatletter\AMC@correctrue\AMC@outside@boxtrue\makeatother
-% \fbox{
-%  \begin{minipage}{.7\linewidth}
-%  \begin{questionmultx}{sqrt}
-%    \FPeval\VQa{trunc(5+random*15,0)}
-%    \FPeval\VQs{VQa^0.5}
-%
-%    Compute $\sqrt{\VQa}$ and round it up to two digits after period.
-%
-%    \AMCnumericChoices{\VQs}{digits=3,decimals=2,sign=true,
-%      borderwidth=0pt,backgroundcol=lightgray,approx=5}
-%  \end{questionmultx}
-%  \end{minipage}
-% }}
-% \end{center}
+% \begin{demo}[w]{Pick the right interval}
+% \begin{question}{inf-expo-indep}
+%   \FPeval\VQa{trunc(2 + random * 4,0)}
+%   \FPeval\VQb{trunc(6 + random * 5,0)}
+%   \FPeval\VQr{VQa/(VQa+VQb)}
+%   Let $X$ and $Y$ be two independent random variables, following
+%   exponential laws with respective parameters \VQa{} and \VQb{}.
+%   In which interval lies the probability $\textrm{P}[X<Y]$?
+%   \begin{multicols}{5}
+%     \begin{choices}[o]
+%       \AMCIntervals{\VQr}{0}{1}{0.1}
+%     \end{choices}
+%   \end{multicols}
+% \end{question}
+% \end{demo}
+% }
+%   
+% \DescribeMacro{\AMCnumericChoices}One can also use the
+% |\AMCnumericChoices| command to ask the student to enter a
+% numerical value as his answer, as in the following example:
+% {\makeatletter\AMC@correctrue\makeatother
+% \begin{demo}[w]{Numeric choices}
+%   \begin{questionmultx}{sqrt}
+%     \FPeval\VQa{trunc(5+random*15,0)}
+%     \FPeval\VQs{VQa^0.5}
+% 
+%     Compute $\sqrt{\VQa}$ and round it with two digits after period.
+% 
+%     \AMCnumericChoices{\VQs}{digits=3,decimals=2,sign=true,
+%       borderwidth=0pt,backgroundcol=lightgray,approx=5}
+%   \end{questionmultx}
+% \end{demo}
+% }
 %
 % Note the use of |questionmultx| environment: we need this question
 % to be \emph{multiple} as several boxes has to be ticked, but we
@@ -1142,20 +1024,32 @@ Three digits and two letters:\insertgroup{mixed}.
 %   the students and will be used for data capture). Use something
 %   that will be understood by the |xcolor| package.
 % \end{itemize}
-% Default values are |\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,rule=.5pt,outsidesep=.1em,color=black}|
+% Default values are
+%
+%\iffalse
+%<*doc>
+%\fi
+\begin{verbatim}
+\AMCboxStyle{shape=square,size=2.5ex,down=.4ex,
+             rule=.5pt,outsidesep=.1em,color=black}
+\end{verbatim}
+%\iffalse
+%</doc>
+%\fi
 %
 % {\makeatletter\AMC@inside@boxtrue\makeatother
 % Setting the box color allows to print the boxes with some color that
 % won't disturb too much the data capture (for example red, but some
 % light grey can also be considered).\amccode
-% \begin{code}
+% \begin{demo}{Boxes styling}
 %   \AMCboxStyle{shape=oval,color=red}
 %   \begin{question}{sum}$2+2={}$
 %   \begin{choiceshoriz}[o]
-%     \wrongchoice{1}\correctchoice{4}\wrongchoice{10}
+%     \wrongchoice{1}\correctchoice{4}
+%     \wrongchoice{10}
 %   \end{choiceshoriz}
 %   \end{question}
-% \end{code}
+% \end{demo}
 % }
 %
 % \subsubsection{Codes}
@@ -1177,7 +1071,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %   each answer) to format the answers. Redefining them properly, some
 %   different answers formatting can be achieved. However, this does
 %   not seem to work with non-trivial settings...  \amccode
-% \begin{code}
+% \begin{demo}[w]{The |choicescustom| environment}
 %  \begin{question}{add}
 %    \def\AMCbeginAnswer{$\Big($}
 %    \def\AMCendAnswer{$\Big)$}
@@ -1189,7 +1083,7 @@ Three digits and two letters:\insertgroup{mixed}.
 %      \wrongchoice{3}
 %    \end{choicescustom}
 %  \end{question}
-% \end{code}
+% \end{demo}
 %
 % \section{Implementation}
 %
