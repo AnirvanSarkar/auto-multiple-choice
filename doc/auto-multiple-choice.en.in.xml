@@ -170,7 +170,7 @@
     <sect2 id="prerequis.latex">
       <title>LaTeX</title>
 
-      <para>From version 1.1 of AMC, it is not mandatory anymore to write your
+      <para>It is not mandatory to write your
       questionnaires using LaTeX language (see <xref linkend="AMC-TXT"/> for a
       plain text alternative syntax). However, LaTeX is still the native AMC
       language for questionnaires descriptions, and allows the user to design
@@ -186,10 +186,9 @@
     <sect2 id="num.limits">
       <title>Numerical limitations</title>
 
-      <para>In the present version (starting with version 0.156), the maximum
-      number of students per test is limited to 4 095, and the maximum number
-      of pages per test is limited to 63 ( Modifiable default values, see
-      <xref endterm="binary.code.title" linkend="binary.code"/>).</para>
+      <para>The maximum number of students per test is limited to 4,095,
+      and the maximum number of pages per test is limited to 63
+      ( Modifiable default values, see <xref endterm="binary.code.title" linkend="binary.code"/>).</para>
 
       <para>The maximum number of answers for a given question is limited to
       199 (Unmodifiable default value).</para>
@@ -209,50 +208,6 @@
       when tests are corrected and graded). There are a few modifications
       which may interfere with AMC operating normally if you apply them while
       working with a given project:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para>If you have compiled and printed with a version of AMC earlier
-          than 0.155, and then handle the project with version 0.156 or later,
-          add the option <option>versionA</option> in the reference to the
-          package <package>automultiplechoice</package> in the LaTeX file.
-          Example:</para>
-
-          <programlisting>\usepackage[box,completemulti,versionA]{automultiplechoice}</programlisting>
-        </listitem>
-
-        <listitem>
-          <para>From version 0.262 on, the drawing of the checkboxes changed
-          to be slightly larger, which may alter the layout of the test
-          sheets.</para>
-        </listitem>
-
-        <listitem>
-          <para>From version 0.267, if you want to produce A4 format test
-          sheets, you have to state it explicitly in the LaTeX file:</para>
-
-          <programlisting>\documentclass[a4paper]{article} </programlisting>
-        </listitem>
-
-        <listitem>
-          <para>From version 0.394, if your LaTeX code needs package
-          <package>graphicx</package>, you have to load it explicitly (earlier
-          versions of AMC loaded it).</para>
-        </listitem>
-
-        <listitem>
-          <para>The LaTeX command <command>\AMCcode</command> was rewritten in
-          version 0.518. It is now more robust and configurable, but you will
-          have to adapt the LaTeX sources you wrote for older versions to keep
-          the same layout.</para>
-        </listitem>
-
-        <listitem>
-          <para>From version 1.1.0, all AMC data is stored in SQLite databases
-          instead of lots of XML files. The first time you open a project, old
-          XML files will be converted to the new format.</para>
-        </listitem>
-      </itemizedlist>
     </sect2>
 
     <sect2 id="install">
@@ -805,7 +760,7 @@ the best you can.
                 <term>PreAssociation:</term>
 
                 <listitem>
-                  <para>The list of the students' filename   
+                  <para>The list of the students' filename
                     <emphasis>with .csv extension</emphasis>.</para>
                 </listitem>
               </varlistentry>
@@ -844,7 +799,7 @@ the best you can.
 Boulix,Jojo,001,jojo@boulix.fr
 Golin,André,002,andre@golin.fr
 Moniuszko,Stanisław,003,Moniuszko@Stanisław.fr
-</programlisting> 
+</programlisting>
 
           <warning>
             <para>Do not use _ (underscore) with the student's name or
@@ -951,11 +906,11 @@ one plus one?
               name must contain only simple characters, without accents and
               LaTeX special characters such as <code>_</code>, <code>^</code>,
               <code>%</code>...</para>
-		
+
         <important>
           <para>See also <xref endterm="identifier.title" linkend="identifier"/>.</para>
-        </important>	
-				
+        </important>
+
               <para><option>name</option> can also be used instead of
               <option>id</option> for compatibility with old versions, but you
               should prefer using <option>id</option>.</para>
@@ -1387,44 +1342,44 @@ Presentation: Colorier en noir la case correspondante à la proposition correcte
  phrase.
 
 *([shuffle=true]<co id="ShuffleQuestions-groupe" linkends="ShuffleQuestions-groupe.exp"/>
- PARTIE I : Quelques connaissances du cours 
+ PARTIE I : Quelques connaissances du cours
 
-**[horiz,last<co id="lastquestion" linkends="lastquestion.exp"/>]Les aliments contiennent : 
+**[horiz,last<co id="lastquestion" linkends="lastquestion.exp"/>]Les aliments contiennent :
 + Des lipides
 - Des acides
 + Des sels minéraux
 
-**La dépense énergétique minimum de notre corps est : 
+**La dépense énergétique minimum de notre corps est :
 + Le métabolisme de base
 - Les besoins énergétiques
 - L'IMC
 
-**[columns=2]Les aliments nous apportent de : 
+**[columns=2]Les aliments nous apportent de :
 + La matière
-- Du diabète 
+- Du diabète
 + De l'énergie
 
-**[columns=2]Les besoins énergétiques d'une personne varient suivant : 
+**[columns=2]Les besoins énergétiques d'une personne varient suivant :
 + Le sexe
 + Les activités physiques
 - Les aliments consommés
 
-*[columns=2]Manger équilibré signifie : 
+*[columns=2]Manger équilibré signifie :
 + Equilibrer nos apports et nos dépenses
 - Manger ce qui nous fait envie
 - Manger plus que ce qu'on dépense
 
-**[columns=2]Manger en excès par rapport à ses besoins peut aboutir à : 
+**[columns=2]Manger en excès par rapport à ses besoins peut aboutir à :
 - Des carences
 + Des maladies cardio-vasculaires
 - Un manque de nutriments
 
-**[columns=2]L'IMC signifie : 
+**[columns=2]L'IMC signifie :
 - Indice de Maladies cardio-vasculaires
 + Indice de Masse Corporelle
 - Indice de Matière et de Composition
 
-*) 
+*)
 
 *(PARTIE II : Le goûter de Vanessa
 
@@ -1433,7 +1388,7 @@ Presentation: Colorier en noir la case correspondante à la proposition correcte
 + Les biscuits
 - les deux sont identiques.
 
-**[columns=2]Par rapport aux biscuits, les pruneaux contiennent  : 
+**[columns=2]Par rapport aux biscuits, les pruneaux contiennent  :
 + moins de protides
 - plus de glucides
 + moins de lipides
@@ -1446,7 +1401,7 @@ Presentation: Colorier en noir la case correspondante à la proposition correcte
 + Vrai
 
 *)
-</programlisting> 
+</programlisting>
 </para>
 
 <para><calloutlist>
@@ -1627,7 +1582,7 @@ Duration : 10 minutes.
           </callout>
 
           <callout arearefs="simple.namefielddots" id="simple.namefielddots.exp">
-            <para>The <command>namefielddots</command> command insert a dotted line 
+            <para>The <command>namefielddots</command> command insert a dotted line
             or a field to fill if the <option>pdfform</option> option is avaible
             (see <xref linkend="sec.package.options"/>).</para>
           </callout>
@@ -1943,7 +1898,7 @@ Duration : 10 minutes.
           </callout>
 
           <callout arearefs="ensemble.namefielddots" id="ensemble.namefielddots.exp">
-            <para>The <command>namefielddots</command> command insert a dotted line 
+            <para>The <command>namefielddots</command> command insert a dotted line
             or a field to fill if the <option>pdfform</option> option is avaible
             (see <xref linkend="sec.package.options"/>).</para>
           </callout>
@@ -2407,7 +2362,7 @@ Duration : 10 minutes.
 <warning>
   <itemizedlist>
     <listitem>
-<para> If the answer contains a comma or the equal sign, <replaceable>text</replaceable> 
+<para> If the answer contains a comma or the equal sign, <replaceable>text</replaceable>
  must be  bracketed by braces. </para>
   </listitem>
       <listitem>
@@ -2554,10 +2509,10 @@ P=\protect\SI{\aCalculateVariable}{\newton}}{the scoring}
         </important>
 
             <para>The style of the identifier may be
-        <programlisting>group.identifier</programlisting> or 
-        <programlisting>group:identifier</programlisting> (see 
+        <programlisting>group.identifier</programlisting> or
+        <programlisting>group:identifier</programlisting> (see
         <xref endterm="babel.french.title" linkend="babel.french"/>) to get
-        the total of a one group of questions when exporting notes 
+        the total of a one group of questions when exporting notes
         (see <xref endterm="sec.export.notes.title" linkend="sec.export.notes"/>).</para>
         </sect4>
 
@@ -2577,7 +2532,7 @@ P=\protect\SI{\aCalculateVariable}{\newton}}{the scoring}
 
           <sect5 id="reset">
           	     	<title>Reset the numeration</title>
-          
+
           <para>One can modify the number of the next question with the
           <code>\AMCnumero command</code>. At the beginning of each
           realization of the test, a call to</para>
@@ -2642,15 +2597,15 @@ P=\protect\SI{\aCalculateVariable}{\newton}}{the scoring}
 <programlisting>
 documentclass[a4paper]{article}
 
-\usepackage[utf8x]{inputenc}    
+\usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 
 \usepackage[english,box,completemulti]{automultiplechoice}
 \usepackage{totcount}
-\regtotcounter{AMCquestionaff}    
+\regtotcounter{AMCquestionaff}
 \begin{document}
 
-\exemplaire{10}{    
+\exemplaire{10}{
 
 There is \total{AMCquestionaff} questions.
 
@@ -2661,7 +2616,7 @@ There is \total{AMCquestionaff} questions.
 \vspace*{.5cm}
 \begin{minipage}{.4\linewidth}
 \centering\large\bf Test\end{minipage}
-\champnom{\fbox{    
+\champnom{\fbox{
                 \begin{minipage}{.5\linewidth}
                   Name and surname :
 
@@ -2671,7 +2626,7 @@ There is \total{AMCquestionaff} questions.
          }}
 
 
-   
+
 \begin{question}{prez}
     Among the following persons, which one has ever been a President of the French Republic?
     \begin{choices}
@@ -2692,13 +2647,13 @@ There is \total{AMCquestionaff} questions.
     \end{choices}
   \end{questionmult}
 
-% \AMCaddpagesto{3} 
+% \AMCaddpagesto{3}
 
 %\theAMCquestionaff
-}   
+}
 
 \end{document}
-</programlisting>	
+</programlisting>
            	</sect5>
         </sect4>
 
@@ -2794,8 +2749,10 @@ There is \total{AMCquestionaff} questions.
       </sect4>
 
       <sect4 id="latex.explain">
-        <title id="latex.explain.title">Explanation for the answers of a
-        question</title>
+<title id="latex.explain.title">Delving further into the answer</title>
+
+<sect5 id="explain.command">
+<title id="explain.command.title">Command \explain</title>
 
         <para>To provide explanation for the answers of a question, one can
         use the <command>\explain</command> command. The explanations are
@@ -2815,7 +2772,7 @@ There is \total{AMCquestionaff} questions.
   \fi%
 }
 \makeatother
-</programlisting>          
+</programlisting>
         </warning>
 
         <para>Here is a simple example:</para>
@@ -2888,6 +2845,14 @@ There is \total{AMCquestionaff} questions.
         <para>This will now print <emphasis>Explanation: </emphasis> before
         the explanations of first and third question but <emphasis>Reason:
         </emphasis> before the explanation of second question.</para>
+         </sect5>
+
+        <sect5 id="explaincontext.command">
+	 	<title id="explaincontext.command.title">Command \explaincontext</title>
+		<para>The command inserts its argument only in the corrected paper and
+		outside the question environment.</para>
+        </sect5>
+
       </sect4>
 
       	<sect4 id="keep.order.answers">
@@ -2929,7 +2894,7 @@ There is \total{AMCquestionaff} questions.
 \end{questionmult}</programlisting>
         </sect5>
     	</sect4>
-        
+
 
       <sect4 id="latex.numeric.toc">
         <title>Numerical answer (not available with AMC-TXT)</title>
@@ -2961,7 +2926,7 @@ There is \total{AMCquestionaff} questions.
           <para>The maximum number of answers for a given question is limited
           to 199.</para>
        	 </sect5>
-      	</sect4>  
+      	</sect4>
       </sect3>
 
 
@@ -3112,10 +3077,6 @@ There is \total{AMCquestionaff} questions.
         <para>Without any mode definition, the <code>fixed</code> mode is
         used.</para>
 
-        <para>Once a group is formed, it is possible to shuffle questions
-        inside this group using the <command>\shufflegroup</command> command.
-        For instance<programlisting>\shufflegroup{mygroup}</programlisting></para>
-
         <para>Groups of questions can be manipulated more precisely thanks to
         the following commands:</para>
 
@@ -3169,6 +3130,11 @@ There is \total{AMCquestionaff} questions.
             0).</para>
           </listitem>
         </itemizedlist>
+
+<note><para>
+A null value is allowed, if negative all the elements are copied.
+</para></note>
+
       </sect3>
 
       <sect3 id="latex.page">
@@ -4351,7 +4317,7 @@ respective parameters \VQa{} and \VQb{}.
               </listitem>
             </varlistentry>
           </variablelist>
-            
+
                 <warning>
                   <para>AMC converts all numbers (decimals included) to
                   integers (simply removing the decimal point) before
@@ -4378,7 +4344,7 @@ respective parameters \VQa{} and \VQb{}.
               <term>keepas=<replaceable>text</replaceable></term>
 
               <listitem>
-                <para>keeps the value entered by the student for 
+                <para>keeps the value entered by the student for
                 future use with <emphasis>alsocorrect</emphasis>
                 in another question.</para>
                 <para>All following questions must follow the
@@ -4410,7 +4376,7 @@ respective parameters \VQa{} and \VQb{}.
       \wronhchoice{5}\scoring{5,setglobal.Number=5}
     \end{reponseshoriz}
   \end{question}
-  
+
   \begin{questionmultx}{carre-b}
     \AMCdontAnnotate\bareme{MAX=2}
     What is his square?
@@ -4440,13 +4406,13 @@ respective parameters \VQa{} and \VQb{}.
       \AMCnumericChoices{pi*1.5^2}{digits=3,decimals=2,exponent=2,approx=2,sign=false,
       exposign=true,expovertical=true,keepas=Surface}
     \end{questionmultx}
-        
+
     \begin{questionmultx}{cone-b}
       What is the volume of the cone?
       \AMCnumericChoices{pi*1.5^2*5/3}{digits=3,decimals=2,exponent=2,approx=2,sign=false,
       exposign=true,expovertical=true,alsocorrect=Surface*5/3}
     \end{questionmultx}
-  \end{minipage}  
+  \end{minipage}
 
 
 
@@ -4458,7 +4424,7 @@ respective parameters \VQa{} and \VQb{}.
   \begin{questionmultx}{pipi2-b}
     What is the value  $\pi^2$ ?
     \AMCnumericChoices{pi^2}{digits=3,decimals=2,sign=false,approx=1,alsocorrect=Pi**2}
-  \end{questionmultx}  
+  \end{questionmultx}
 </programlisting>
 
 
@@ -4802,9 +4768,9 @@ Name :
 
       <itemizedlist>
         <listitem>
-        <para>You must prepare nominative sheets 
+        <para>You must prepare nominative sheets
         (see <xref endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>
-        (LaTeX) or 
+        (LaTeX) or
         <xref endterm="txt.Nominative.sheets.title" linkend="txt.Nominative.sheets"/>
         (AMC-TXT)).
         </para>
@@ -4828,7 +4794,7 @@ Name :
              <guimenuitem>Extracting method</guimenuitem>
              <guisubmenu>pdftk / gs (ghostscipt) / qpdf (default) / sejda-console (not installed)</guisubmenu>
              </menuchoice>.</para>
-             
+
 <warning><para>If option <option>pdfform</option> is available,
     		select sejda-console : (to install)</para>
  <programlisting>
@@ -4843,8 +4809,8 @@ sudo ln -s ~/sejda-console-3.2.85/bin/sejda-console /usr/local/bin
         <listitem>
         <para>Print the files.</para>
        </listitem>
-    
-      </itemizedlist> 
+
+      </itemizedlist>
 
              <note>
             <para>AMC allow to protect all the files with your
@@ -5671,7 +5637,7 @@ Name:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\shufflegroup{qqs}
+\setgroupmode{qqs}{withreplacement}
 
 \insertgroup{qqs}
 
@@ -6182,7 +6148,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
               et <xref endterm="Groups.questions.title" linkend="Groups.questions"/></para>
             </listitem>
           </varlistentry>
-          
+
         </variablelist>
       </sect3>
     </sect2>
@@ -6691,7 +6657,7 @@ Moniuszko,Stanisław,003</programlisting>
 
            <listitem>
             <para>The number of papers must be equal to zero (graphical interface).</para>
-           </listitem> 
+           </listitem>
 
         <listitem>
           <para>The LaTeX source file has to load csvsimple package,
@@ -9561,13 +9527,13 @@ sudo ./install-tl
 
 <note><para>TexLive-full is the setting default. If you don't want all the packages,
   press <emphasis>C</emphasis> then  select your packages then <emphasis>R</emphasis>
-  and finally <emphasis>I</emphasis>.</para></note> 
+  and finally <emphasis>I</emphasis>.</para></note>
 
 <programlisting>
 sudo apt install equivs --no-install-recommends
 mkdir -p /tmp/tl-equivs &amp;&amp; cd /tmp/tl-equivs
-equivs-control texlive-local  
-</programlisting>   
+equivs-control texlive-local
+</programlisting>
 
       <itemizedlist>
         <listitem>
@@ -9581,7 +9547,7 @@ wget -O texlive-local http://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt
 equivs-build texlive-local
 sudo dpkg -i texlive-local_20xx-x_all.deb
 sudo apt install -f
-</programlisting>   
+</programlisting>
 
       <itemizedlist>
         <listitem>
@@ -9591,7 +9557,7 @@ sudo apt install -f
 <programlisting>
 sudo add-apt-repository ppa:alexis.bienvenue/stable &amp;&amp; sudo apt-get update
 sudo apt-get install auto-multiple-choice &amp;&amp; sudo apt-get install msmtp
-</programlisting> 
+</programlisting>
 
       <itemizedlist>
         <listitem>
@@ -9602,7 +9568,7 @@ sudo apt-get install auto-multiple-choice &amp;&amp; sudo apt-get install msmtp
 sudo ln -s /usr/share/texmf/tex/latex/AMC /usr/local/texlive/texmf-local/tex/latex/AMC
 sudo mktexlsr
 sudo tlmgr update --self --all
-</programlisting>       
+</programlisting>
     </sect3>
 
   <sect3 id="texlive.installed">
@@ -9616,7 +9582,7 @@ sudo tlmgr update --self --all
 <programlisting>
 sudo ln -s /usr/share/texmf/tex/latex/AMC /usr/local/texlive/texmf-local/tex/latex/AMC
 sudo mktexlsr
-</programlisting>       
+</programlisting>
   </sect3>
     </sect2>
 
@@ -9659,7 +9625,7 @@ sudo mktexlsr
 
           <note>
             <para>Noneeded to do after the previous command:
-            <programlisting>mogrify -rotate +90 -crop 50%x100% *.pbm</programlisting> 
+            <programlisting>mogrify -rotate +90 -crop 50%x100% *.pbm</programlisting>
             <emphasis>all</emphasis> pages will be treated and automatically renamed with ImageMagick.</para>
             <para>You can force ImageMagick to apply simultaneous black/white threshold
               to the image to make  box  checking easier (here 80%).
@@ -9677,13 +9643,13 @@ sudo mktexlsr
 
     <sect2>
       <title>pythontex</title>
- <para>From <ulink url="https://project.auto-multiple-choice.net/attachments/450/Wiki_AMC_et_PythonTex.pdf"/> 
+ <para>From <ulink url="https://project.auto-multiple-choice.net/attachments/450/Wiki_AMC_et_PythonTex.pdf"/>
  and <ulink url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Calcul_formel_avec_Python_dans_AMC"/></para>
 
 
     <itemizedlist>
     <listitem><para>You need to add a script nammed prePythonTex4AMC and <emphasis>make it executable</emphasis>.</para></listitem>
-    </itemizedlist>     
+    </itemizedlist>
 
 <programlisting>
 #! /bin/sh
@@ -9708,13 +9674,13 @@ python3 /path/to/file/pythontex3.py
 
     <itemizedlist>
     <listitem><para>Add the following three lines to the beginning of the LaTex file.</para></listitem>
-    </itemizedlist> 
+    </itemizedlist>
 
 <programlisting>
 %%AMC:preprocess_command=/path/to/file/prePythonTex4AMC
 %%AMC:jobspecific=1
 %%AMC:latex_engine=pdflatex --shell-escape
-</programlisting>  
+</programlisting>
 
   <warning>
     <para>Some python modules need to be installed (sympy, pygments)</para>
@@ -9733,7 +9699,7 @@ python3 /path/to/file/pythontex3.py
 \documentclass[a4paper]{article}
 \usepackage[T1]{fontenc}
 
-\usepackage[english,bloc,completemulti]{automultiplechoice}    
+\usepackage[english,bloc,completemulti]{automultiplechoice}
 \usepackage{fancyhdr,amssymb,amsmath}
 
 % ---------- Utilisation de codes Python -----
@@ -9751,7 +9717,7 @@ def polyv2(b,p,d,q) :
   x=Symbol('x')
   myp = expand((x-b)**p*(x-d)**q)
   return latex(myp)
-  
+
 def dp1x(a,b,c) :
     x=Symbol('x')
     y=Symbol('y')
@@ -9761,7 +9727,7 @@ def dp1x(a,b,c) :
     g2=g/b
     g3=g*(-1)
     g4=g2*(-1)
-   
+
     gl = latex(g)
     g2l = latex(g2)
     g3l = latex(g3)
@@ -9798,7 +9764,7 @@ $\underline{Z} 2$~?
 \end{question}
 }%
 
-\onecopy{5}{    
+\onecopy{5}{
 
 
 %%% beginning of the test sheet header:
@@ -9821,28 +9787,28 @@ Duration : 10 minutes.
   zero, one or several correct answers.  Other questions have a single correct answer.
 
   Negative points may be attributed to \emph{very bad} answers.
- 
+
 \end{center}
 
   \end{minipage}\hspace*{\fill}
   }
-  
+
 \vspace{5ex}
 
 \begin{question}{deriv-px-1}
-      
-      \pyc{a=np.random.randint(2,7)} % 
-      \pyc{b=np.random.randint(2,5)} % 
-      \pyc{c=np.random.randint(2,5)} % 
+
+      \pyc{a=np.random.randint(2,7)} %
+      \pyc{b=np.random.randint(2,5)} %
+      \pyc{c=np.random.randint(2,5)} %
       \pyc{drvx=dp1x(a,b,c)}
 
-Let the following function: $f(x,y)= \dfrac{\py{a} y-1}{(\py{b} x-1)^{\py{c}}}$ 
-    
-What is the partial derivative $ \dfrac{\partial f(x,y)}{\partial x}$ ? 
+Let the following function: $f(x,y)= \dfrac{\py{a} y-1}{(\py{b} x-1)^{\py{c}}}$
+
+What is the partial derivative $ \dfrac{\partial f(x,y)}{\partial x}$ ?
 
 \begin{choiceshoriz}
 \correctchoice{$\py{drvx[0]}$}
-\wrongchoice{$\py{drvx[1]}$}         
+\wrongchoice{$\py{drvx[1]}$}
 \wrongchoice{$\py{drvx[2]}$}
 \wrongchoice{$\py{drvx[3]}$}
 \end{choiceshoriz}
@@ -9853,20 +9819,20 @@ What is the partial derivative $ \dfrac{\partial f(x,y)}{\partial x}$ ?
 %--------------
 
 \begin{question}{polynome-v2}
-      
+
       \pyc{b=np.random.randint(2,7)} % racine r = b
       \pyc{p=np.random.randint(2,4)} % p : ordre de mult de b
       \pyc{d=np.random.randint(2,5)} % racine r = d
-      \pyc{q=np.random.randint(2,3)}  % q : ordre de mult de d    
+      \pyc{q=np.random.randint(2,3)}  % q : ordre de mult de d
       \pyc{mypoly=polyv2(b,p,d,q)}    % construction de mypolyv2
 
-Let the polynomial: $\py{mypoly}$ 
-    
+Let the polynomial: $\py{mypoly}$
+
 What is the root multiplicity order $r = \py{b}$ ?
 
 \begin{choiceshoriz}
 \correctchoice{$\py{p}$}
-\wrongchoice{$\py{p+1}$}         
+\wrongchoice{$\py{p+1}$}
 \wrongchoice{$\py{p-1}$}
 \wrongchoice{$\py{p+2}$}
 \end{choiceshoriz}
@@ -9875,9 +9841,9 @@ What is the root multiplicity order $r = \py{b}$ ?
 
 \restituegroupe{Questions}
 
-}   
+}
 
-\end{document}    
+\end{document}
   </programlisting>
 </para>
 </sect3>
@@ -9914,8 +9880,20 @@ port 587
 auth login
 from <emphasis>your_user_name@gmail.com</emphasis>
 user <emphasis>your_user_name@gmail.com</emphasis>
-password <emphasis>your_password</emphasis>
+password <emphasis>See below</emphasis>
 </programlisting>
+
+<warning><para>Since May 30, 2022, ​​Google no longer supports the use
+of third-party apps or devices which ask you to sign in to your Google Account
+using only your username and password.</para>
+
+<itemizedlist>
+<listitem><para>Enable the 2-Step Verification</para></listitem>
+<listitem><para>Generate a new password. <ulink url="https://devanswers.co/create-application-specific-password-gmail/">
+https://devanswers.co/create-application-specific-password-gmail/</ulink>.</para></listitem>
+<listitem><para>Replace your password with the new one.</para></listitem>
+</itemizedlist>
+</warning>
 
         <para>Set up AMC : <menuchoice>
             <guimenu>Edit</guimenu>
@@ -9949,8 +9927,20 @@ port 587
 auth login
 from <emphasis>your_user_name@gmail.com</emphasis>
 user <emphasis>your_user_name@gmail.com</emphasis>
-password <emphasis>your_password</emphasis>
+password <emphasis>See below</emphasis>
 </programlisting>
+
+<warning><para>Since May 30, 2022, ​​Google no longer supports the use
+of third-party apps or devices which ask you to sign in to your Google Account
+using only your username and password.</para>
+
+<itemizedlist>
+<listitem><para>Enable the 2-Step Verification</para></listitem>
+<listitem><para>Generate a new password. <ulink url="https://devanswers.co/create-application-specific-password-gmail/">
+https://devanswers.co/create-application-specific-password-gmail/</ulink>.</para></listitem>
+<listitem><para>Replace your password with the new one.</para></listitem>
+</itemizedlist>
+</warning>
 
         <para>Modify the access rights:</para>
 
