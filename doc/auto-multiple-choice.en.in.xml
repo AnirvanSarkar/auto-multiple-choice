@@ -9498,6 +9498,30 @@ What is the return value of the following R code?
   <sect1 id="Miscellaneous">
     <title>Miscellaneous</title>
 
+    <sect2 id="Email.Address.module">
+    <title id="Email.Address.module.title">Perl module Email::Address</title>
+    
+      <para>This module is not installed.</para>
+
+      <itemizedlist>
+
+        <listitem><para>On Ubuntu</para>
+  <programlisting>sudo apt install libemail-address-perl libemail-mime-perl libemail-sender-perl</programlisting>
+        </listitem>
+
+        <listitem><para>Others</para>
+  <programlisting>cpanm install Email::Address</programlisting>
+  <para>ou</para>
+  <programlisting>
+ perl -MCPAN -e "shell"
+ install Email::Address
+ Exit 
+   </programlisting>
+        </listitem>
+
+  </itemizedlist>
+      </sect2>
+
     <sect2 id="texlive.vanilla">
       <title id="texlive.vanilla.title">AMC and TeXLive «vanilla» (ubuntu et debian)</title>
 
@@ -9529,6 +9553,12 @@ sudo ./install-tl
   press <emphasis>C</emphasis> then  select your packages then <emphasis>R</emphasis>
   and finally <emphasis>I</emphasis>.</para></note>
 
+    	<itemizedlist>
+    		<listitem>
+    			<para>Install fake packages</para>
+    		</listitem>
+    	</itemizedlist>
+
 <programlisting>
 sudo apt install equivs --no-install-recommends
 mkdir -p /tmp/tl-equivs &amp;&amp; cd /tmp/tl-equivs
@@ -9541,6 +9571,12 @@ equivs-control texlive-local
           <para>  <ulink url="https://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt"/>.</para>
         </listitem>
       </itemizedlist>
+
+    	<itemizedlist>
+    		<listitem>
+    			<para>Build the package and install it</para>
+    		</listitem>
+    	</itemizedlist>
 
 <programlisting>
 wget -O texlive-local http://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt
@@ -9555,7 +9591,7 @@ sudo apt install -f
         </listitem>
       </itemizedlist>
 <programlisting>
-sudo add-apt-repository ppa:alexis.bienvenue/stable &amp;&amp; sudo apt-get update
+sudo add-apt-repository ppa:alexis.bienvenue/amc-stable &amp;&amp; sudo apt-get update
 sudo apt-get install auto-multiple-choice &amp;&amp; sudo apt-get install msmtp
 </programlisting>
 
@@ -9572,8 +9608,9 @@ sudo tlmgr update --self --all
     </sect3>
 
   <sect3 id="texlive.installed">
-    <title id="texlive.installed.title">AMC is not installed and TeXLive is(/usr/local/)</title>
+    <title id="texlive.installed.title">AMC and TeXLive are installed (/usr/local/)</title>
     <itemizedlist>
+  
         <listitem>
           <para>Create a symbolic link.</para>
         </listitem>

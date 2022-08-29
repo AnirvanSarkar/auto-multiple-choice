@@ -1440,9 +1440,9 @@ Presentation: Colorier en noir la case correspondante à la proposition correcte
 + moins de lipides
 
 **[columns=2]Les dépenses énergétiques journalières d'une adolescente sont en moyenne de
-\SI{10000}{\kilo\joule} <co id="siunitxLaTeX" linkends="siunitxLaTeX.exp"/>.
- Vanessa a consommé \SI{3200}{kJ} au petit-déjeuner, \SI{3500}{kJ} à midi et
-  \SI{2400}{\kilo\joule} au diner. Elle a donc mangé équilibré :
+\qty{10000}{\kilo\joule} <co id="siunitxLaTeX" linkends="siunitxLaTeX.exp"/>.
+ Vanessa a consommé \qty{3200}{kJ} au petit-déjeuner, \qty{3500}{kJ} à midi et
+  \SI{qty}{\kilo\joule} au diner. Elle a donc mangé équilibré :
 - Faux
 + Vrai
 
@@ -3687,7 +3687,7 @@ Une valeur nulle est possible, une valeur négative copie tout le groupe.
       </sect3>
 
       <sect3 id="latex.codes">
-        <title>Saisie de codes</title>
+        <title id="latex.codes.title">Saisie de codes</title>
 
         <para>L'entrée de codes (par exemple pour que chaque étudiant
         codifie son numéro d'étudiant lui-même sur sa copie) peut être
@@ -3799,7 +3799,70 @@ et inscrivez votre nom et prénom ci-dessous.
               verticale.</para>
             </listitem>
           </varlistentry>
+  
+            <varlistentry>
+            <term>multi <emphasis>déconseillé</emphasis></term>
+  
+              <listitem>
+              <para>permet de copier sur chaque page la grille du code élève.</para>
+            <warning><para>Ne fonctionne qu'avec le mode photocopie (voir <xref endterm="alt.photocopy.title" linkend="alt.photocopy"/>)
+            et avec l'option <code>ensemble</code> (voir <xref endterm="sec.package.options.title"
+            linkend="sec.package.options"/>)</para>
+            
+            <para>L'utilisation de cette option nécessite une modification du code pour la position des marques de calage.</para>
+            <para>Le code ci-dessous permet cela et doit être placé avant ou après <command>\begin{document}</command>.</para>
+            </warning>
+            </listitem>
+          </varlistentry>
         </variablelist>
+
+<programlisting>
+\makeatletter
+
+\def\IDbox{% <co id="IDbox" linkends="IDbox.exp"/>
+	\begin{minipage}{10cm}
+		\noindent\AMCzone[id]{identification\thepage}{) <co id="zoneid" linkends="zoneid.exp"/>
+			\fbox{%
+				\begin{minipage}{\linewidth}
+					\noindent Darken the boxes corresponding to your student ID:\\[1.2ex]
+					\AMCcodeGrid[h,multi]{id}{ABCDEFGHJKLM,0123456789}
+				\end{minipage}%
+			}%
+		}%
+	\end{minipage}
+}
+\fancypagestyle{AMCpageFull}{% <co id="modificationcalage" linkends="modificationcalage.exp"/>
+	\fancyhf{}%
+	\fancyhead[L]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHG}}}}%
+	\fancyhead[R]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHD}}}}%
+	\fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}%
+	\fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}%
+	\fancyhead[C]{
+		\AMCIDBoxesABC\vspace{4mm}
+		\ifAMC@zoneformulaire\IDbox\fi
+	}%
+	\fancyhfoffset[EOLR]{5mm}%
+	\fancyfoot[C]{\AMC@note}%
+	\renewcommand{\headrulewidth}{0pt}%
+	\renewcommand{\footrulewidth}{0pt}%
+}
+\makeatother
+</programlisting> 
+  
+<para><calloutlist>
+  <callout arearefs="IDbox" id="IDbox.exp">
+    <para>Création d'une commande LaTeX qui entoure les cases à cocher pour l'étudiant. </para>
+</callout>
+
+  <callout arearefs="zoneid" id="zoneid.exp">
+    <para>Cette zone sera anonymée (voir <xref endterm="Anonymat.title" linkend="Anonymat"/>) mais ce n'est pas obligatoire. </para>
+</callout>
+
+  <callout arearefs="modificationcalage" id="modificationcalage.exp">
+    <para>Code qui modifie le comportement habituel d'AMC. Les longueurs seront peut-être à adapteravec vos marges. </para>
+</callout>
+
+</calloutlist></para>  
       </sect3>
 
 
@@ -4949,7 +5012,7 @@ Nom et prénom :
     </sect2>
 
     <sect2 id="gui.prepare">
-      <title>Préparation du sujet</title>
+      <title id="gui.prepare.sujet">Préparation du sujet</title>
 
       <para>La préparation du projet se fait en deux étapes. Il faut tout
       d'abord fabriquer les documents de référence à partir du fichier source.
@@ -5207,7 +5270,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
     </sect2>
 
     <sect2 id="gui.capture">
-      <title>Lecture des copies</title>
+      <title id="gui.capture.saisie">Lecture des copies</title>
 
       <para>Nous allons maintenant passer à la saisie des copies des
       étudiants, qui peut se faire de manière automatique et/ou
@@ -6809,7 +6872,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
     <title>Utilisations particulières</title>
 
     <sect2 id="alt.photocopy">
-      <title>Photocopie du sujet</title>
+      <title id="alt.photocopy.title">Photocopie du sujet</title>
 
       <para>Comme expliqué dans <xref endterm="impression.title"
       linkend="impression"/>, il n'est pas toujours possible de photocopier
@@ -7575,8 +7638,86 @@ What is the return value of the following R code?
     </refentry>
   </sect1>
 
+  <sect1 id="Anonymat">
+   <title id="Anonymat.title">Anonymat des copies (uniquement avec LaTeX)</title>
+   
+  <note><para> En utilisation classique, cette option n'est pas recommandée.</para></note>
+  
+      <sect2 id="Anonymat.activation">
+       <title id="Anonymat.activation.title">Activer le mode anonyme des copies</title>
+      		<para><menuchoice>
+             <guimenuitem>Préférences</guimenuitem>
+             <guimenuitem>Fonctions</guimenuitem>
+             <guimenuitem>Anonymisation</guimenuitem>
+             <guimenuitem>Afficher le panneau anonymisation</guimenuitem>
+             </menuchoice>.</para>
+      </sect2>
+  
+    <sect2 id="Principe">
+     <title id="Principe.title">Principe pour la création des fichiers pdf anonymes</title> 
+      <itemizedlist>
+       <listitem><para>Préparer votre sujet (<xref endterm="gui.prepare.sujet" linkend="gui.prepare"/>).</para></listitem> 
+       <listitem><para>Saisir les copies (<xref endterm="gui.capture.saisie" linkend="gui.capture"/>)</para></listitem>
+       <listitem><para>Dans l'onglet <guilabel>Notation</guilabel>, un nouveau menu est apparu :
+       cliquer sur <guilabel>Anonymiser</guilabel>. </para></listitem>
+       <listitem><para><guilabel>Ouvrir</guilabel> pour accéder aux fichier pdf anonymes.</para></listitem>
+       <listitem><para>Corriger manuellement certaines questions à partir de ces PDF.</para></listitem>
+       <listitem><para>Transmettre à AMC les notes de ces questions via le fichier csv.</para></listitem>
+      </itemizedlist>
+       
+      <warning><para>Ces fichiers ne sont pas modifiables et ne doivent pas être saisis pour une correction
+      automatique.</para></warning>
+</sect2>
+  
+    <sect2 id="Commandes.anonymat">
+      <title id="Commandes.anonymat.title">Les commandes utilisables avec l'option d'anonymat</title>
+  
+        <sect3 id="AMCzoneid">
+      	  <title id="AMCzoneid.title">AMCzone[id]{}</title>
+      	  <para> La commande <command>\AMCzone[id]{code LaTex}</command> permet de cacher une zone définie.</para>
+      	  <para>Par défaut, la zone <command>\champnom</command> sera invisble après l'anonymisation.</para>
+      	</sect3>
+  
+      	<sect3 id="AMCexternatQuestion">
+      	  <title id="AMCexternalQuestion.title">AMCexternalQuestion</title>
+      	  <para>La commande <command>\AMCexternalQuestion{identifiant à choisir}{score maxmal}</command>
+      	  permet de déclarer une question qui sera notée hors AMC, avec un score maximal.</para>
+      	  <para>Lorsque vous utilisez cette commande, vous pouvez gérer librement le numéro de la question et le texte
+      	  de la question (AMC ne s'en chargera pas).</para>
+      	  <warning><para>Il est impossible de rajouter cette commande après la préparation complète du sujet.</para></warning>
+      	  <para>Lors de l'anonymisation des copies, un fichier csv est créé. Ce fichien devra être rempli avec les notes puis
+      	  lu par AMC pour continuer avec la correction (voir <xref endterm="gui.marks.title" linkend="gui.marks"/>).</para>
+      	</sect3>
+    </sect2>
+  </sect1>
+
+
   <sect1 id="Divers">
     <title id="Divers.title">Divers</title>
+
+    <sect2 id="Email.Address.module">
+    <title id="Email.Address.module.title">Module perl Email::Address</title>
+    
+      <para>Le module n'est pas installé.</para>
+
+      <itemizedlist>
+
+        <listitem><para>Avec Ubuntu</para>
+  <programlisting>sudo apt install libemail-address-perl libemail-mime-perl libemail-sender-perl</programlisting>
+        </listitem>
+
+        <listitem><para>Autres</para>
+  <programlisting>cpanm install Email::Address</programlisting>
+  <para>ou</para>
+  <programlisting>
+ perl -MCPAN -e "shell"
+ install Email::Address
+ Exit 
+   </programlisting>
+        </listitem>
+
+  </itemizedlist>
+      </sect2>
 
     <sect2 id="texlive.vanilla">
     	<title id="texlive.vanilla.title">AMC et TeXLive «vanille» (ubuntu et debian)</title>
@@ -7610,6 +7751,12 @@ sudo ./install-tl
  <emphasis>C</emphasis> puis  sélectionnez vos paquets puis <emphasis>R</emphasis> puis
  <emphasis>I</emphasis>.</para></note>
 
+    	<itemizedlist>
+    		<listitem>
+    			<para>Installez les faux paquets</para>
+    		</listitem>
+    	</itemizedlist>
+
 <programlisting>
 sudo apt install equivs --no-install-recommends
 mkdir -p /tmp/tl-equivs &amp;&amp; cd /tmp/tl-equivs
@@ -7620,6 +7767,12 @@ equivs-control texlive-local
     		<listitem>
     			<para>Ouvrez le lien et notez le numéro de version :  </para>
     			<para>	<ulink url="https://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt"/>.</para>
+    		</listitem>
+    	</itemizedlist>
+
+    	<itemizedlist>
+    		<listitem>
+    			<para>Création et installation du paquet</para>
     		</listitem>
     	</itemizedlist>
 
@@ -7653,8 +7806,9 @@ sudo tlmgr update --self --all
     </sect3>
 
 	<sect3 id="texlive.installed">
-		<title id="texlive.installed.title">AMC n'est pas installé et TeXLive est installé (/usr/local/)</title>
+		<title id="texlive.installed.title">AMC et TeXLive sont installés (/usr/local/)</title>
 		<itemizedlist>
+  
     		<listitem>
     			<para>Créez un lien symbolique.</para>
     		</listitem>
