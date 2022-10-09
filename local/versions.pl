@@ -67,7 +67,8 @@ if ( available("git") && -d ".git" ) {
     }
     chomp( $s = `git log -1 --date=short --format=%cd` );
     if ( $s =~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ ) {
-        $k{deb} =~ s/\+(hg|git)[0-9]{4}-[0-9]{2}-[0-9]{2}/+git$s/;
+        $vj = $ENV{AMC_GIT_VERSION_VARIANT} || "";
+        $k{deb} =~ s/\+(hg|git)[0-9]{4}-[0-9]{2}-[0-9]{2}/+git$s$vj/;
     }
 }
 
