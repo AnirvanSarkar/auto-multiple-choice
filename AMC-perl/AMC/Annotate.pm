@@ -34,6 +34,7 @@ use AMC::Export;
 use AMC::Subprocess;
 use AMC::NamesFile;
 use AMC::Substitute;
+use AMC::Data;
 use AMC::DataModule::report ':const';
 use AMC::DataModule::capture qw/:zone :position/;
 use AMC::DataModule::layout qw/:flags/;

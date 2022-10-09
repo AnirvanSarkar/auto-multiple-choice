@@ -24,6 +24,7 @@ package AMC::Gui::Zooms;
 use File::Spec::Functions qw/tmpdir/;
 
 use AMC::Basic;
+use AMC::Data;
 use AMC::DataModule::capture ':zone';
 use AMC::Gui::Prefs;
 

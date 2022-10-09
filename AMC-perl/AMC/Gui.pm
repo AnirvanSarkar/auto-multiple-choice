@@ -23,6 +23,7 @@ use 5.012;
 
 package AMC::Gui;
 
+use AMC::Gui::Prefs;
 use AMC::Basic;
 
 sub new {

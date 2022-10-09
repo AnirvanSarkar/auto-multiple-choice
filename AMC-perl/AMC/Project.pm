@@ -26,6 +26,8 @@ package AMC::Project;
 use File::Temp qw/ tempfile tempdir :seekable /;
 
 use AMC::Basic;
+use AMC::Data;
+use AMC::NamesFile;
 
 sub new {
     my ( $class, %oo ) = @_;
