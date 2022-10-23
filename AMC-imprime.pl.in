@@ -288,13 +288,21 @@ sub process_pages {
     if ( $methode =~ /^cups/i ) {
         $cups->print_file( $fn, "QCM : sheet $elong [$suffix]" );
     } elsif ( $methode =~ /^file/i ) {
-        $f_dest .= "-%e.pdf" if ( $f_dest !~ /[%]e/ );
+        if ( $f_dest !~ /[%]e/ ) {
+            if ( -d $f_dest ) {
+                $f_dest .= '/' if ( $f_dest !~ m:/$: );
+                $f_dest .= '%e';
+            } else {
+                $f_dest .= '-%e';
+            }
+        }
+        $f_dest .= '.pdf' if ( $f_dest !~ /\.pdf$/i );
         if ($suggested_filename) {
-            debug "FDEST=".show_utf8($f_dest)."\n";
-            debug "SUGG=".show_utf8($suggested_filename)."\n";
-            $f_dest =~ s/[%]e/$suggested_filename/g;
+            debug "FDEST=" . show_utf8($f_dest) . "\n";
+            debug "SUGG=" . show_utf8($suggested_filename) . "\n";
+            $f_dest =~ s/[%]e(\{(.*)\})?/$suggested_filename/g;
         } else {
-            $f_dest =~ s/[%]e/$suffixed_elong/g;
+            $f_dest =~ s/[%]e(\{(.*)\})?/$2$suffixed_elong/g;
         }
         debug "Moving to " . show_utf8($f_dest);
         if ( move( $fn, $f_dest ) ) {

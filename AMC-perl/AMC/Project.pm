@@ -515,7 +515,7 @@ sub print_exams {
                 $self->project_options(),
                 "--methode", $oo{printing_method},
                 "--options", $oo{options_string},
-                "--output", "$directory/$prefix-%e.pdf",
+                "--output", "$directory/%e{$prefix-}",
                 "--progression-id", 'impression',
                 "--progression", 1,
                 "--fich-numeros", $fh->filename,
