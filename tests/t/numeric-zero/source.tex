@@ -1,0 +1,51 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fp}
+\usepackage{automultiplechoice}
+
+\begin{document}
+
+\AMCnumericOpts{sign=true,digits=3,decimals=2}
+
+\element{grq}{
+
+  \begin{questionmultx}{0-simple}
+    Simple zero.
+    \AMCnumericChoices{0}{}
+  \end{questionmultx}
+
+}
+
+\element{grq}{
+
+  \begin{questionmultx}{0-strict}
+    Strict zero.
+    \AMCnumericChoices{0}{strict=true}
+  \end{questionmultx}
+
+}
+
+\element{grq}{
+
+  \begin{questionmultx}{0-}
+    Ignoreblank zero.
+    \AMCnumericChoices{0}{ignoreblank=true}
+  \end{questionmultx}
+
+}
+
+\onecopy{5}{
+
+  \hspace*{\fill}\namefield{\fbox{
+      \begin{minipage}{15em}
+        Name and surname:\vspace*{3ex}\par
+        \noindent\dotfill\vspace{2mm}
+      \end{minipage}
+    }}
+
+  \shufflegroup{grq}
+  \insertgroup{grq}
+
+}
+
+\end{document}

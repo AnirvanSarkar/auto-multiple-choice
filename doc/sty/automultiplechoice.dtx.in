@@ -4028,7 +4028,7 @@ along with Auto-Multiple-Choice.  If not, see
 % Finally, |\amc_num_integer_boxes:NnnNN|\marg{correct
 % digits}\marg{prefix}\marg{decimals}\marg{sign bool}\marg{sign} draws
 % boxes for integer entry, including the sign if \meta{sign bool} is
-% true.
+% true. When using the |strict| option, check the + box for a null value.
 %    \begin{macrocode}
 
 \cs_new:Npn \amc_num_integer_boxes:NnnNN #1 #2 #3 #4 #5 {
@@ -4037,7 +4037,15 @@ along with Auto-Multiple-Choice.  If not, see
       \vbox{
         \ifx\AMCntextSign\@empty\@empty\else
         \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi
-        \amc_num_sign_boxes:Nn { #5 } { #2 }
+        \bool_if:NTF \amc_num_strict_bool {
+          \int_compare:nNnTF { #5 } = 0 {
+            \amc_num_sign_boxes:Nn { 1 } { #2 }
+          }{
+            \amc_num_sign_boxes:Nn { #5 } { #2 }
+          }
+        }{
+          \amc_num_sign_boxes:Nn { #5 } { #2 }
+        }
       }
       \hspace{.5em}
       \vrule
