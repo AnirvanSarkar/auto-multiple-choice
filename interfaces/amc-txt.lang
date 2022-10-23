@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
- Copyright (C) 2011-2021 Alexis Bienvenüe <paamc@passoire.fr>
+ Copyright (C) 2011-2022 Alexis Bienvenüe <paamc@passoire.fr>
 
  This file is part of Auto-Multiple-Choice
 
@@ -20,7 +20,7 @@
  <http://www.gnu.org/licenses/>.
 
 -->
-<language id="amc-txt" _name="AMC-TXT" version="2.0" _section="Sources">
+<language id="amc-txt" _name="AMC-TXT" version="2.0" _section="Source">
   <metadata>
     <property name="mimetypes">text/x-amc-txt</property>
   </metadata>
@@ -42,113 +42,113 @@
   <definitions>
     <context id="amc-txt">
       <include>
-      <define-regex id="endgroup">(?=^\s*([a-zA-Z]+:|\+|-|\*|#))</define-regex>
+        <define-regex id="endgroup">(?=^\s*([a-zA-Z]+:|\+|-|\*|#))</define-regex>
 
         <context id="comment" style-ref="comment">
-          <start>#</start>
+          <start>^\s*#</start>
           <end>$</end>
-	  <include>
-	    <context id="filterid" first-line-only="true" style-ref="keyword">
-	      <keyword>AMC-TXT</keyword>
-	    </context>
-	  </include>
+          <include>
+            <context id="filterid" first-line-only="true" style-ref="keyword">
+              <keyword>AMC-TXT</keyword>
+            </context>
+          </include>
         </context>
 
-	<context id="options" end-parent="true" style-ref="keyword">
-	  <prefix>^</prefix>
-	  <suffix>:</suffix>
-	  <keyword>AnswerSheetColumns</keyword>
-	  <keyword>AnswerSheetPresentation</keyword>
-	  <keyword>AnswerSheetTitle</keyword>
-	  <keyword>Arabic</keyword>
-	  <keyword>ArabicFont</keyword>
-	  <keyword>AutoMarks</keyword>
-	  <keyword>BoxColor</keyword>
-	  <keyword>Code</keyword>
-	  <keyword>CodeDigitsDirection</keyword>
-	  <keyword>Columns</keyword>
-	  <keyword>CompleteMulti</keyword>
-	  <keyword>DefaultScoringM</keyword>
-	  <keyword>DefaultScoringS</keyword>
-	  <keyword>Disable</keyword>
-	  <keyword>Font</keyword>
-	  <keyword>Group</keyword>
-	  <keyword>IncludeFile</keyword>
-	  <keyword>L-Name</keyword>
-	  <keyword>L-None</keyword>
-	  <keyword>L-OpenReserved</keyword>
-	  <keyword>L-OpenText</keyword>
-	  <keyword>L-Question</keyword>
-	  <keyword>L-Student</keyword>
-	  <keyword>LaTeX-BeginCopy</keyword>
-	  <keyword>LaTeX-BeginDocument</keyword>
-	  <keyword>LaTeX-EndCopy</keyword>
-	  <keyword>LaTeX-Preambule</keyword>
-	  <keyword>LaTeX</keyword>
-	  <keyword>LaTeXEngine</keyword>
-	  <keyword>Lang</keyword>
-	  <keyword>ManualDuplex</keyword>
-	  <keyword>NameFieldLines</keyword>
-	  <keyword>NameFieldLinespace</keyword>
-	  <keyword>NameFieldWidth</keyword>
-	  <keyword>PackageOptions</keyword>
+        <context id="options" end-parent="true" style-ref="keyword">
+          <prefix>^</prefix>
+          <suffix>:</suffix>
+          <keyword>AnswerSheetColumns</keyword>
+          <keyword>AnswerSheetPresentation</keyword>
+          <keyword>AnswerSheetTitle</keyword>
+          <keyword>Arabic</keyword>
+          <keyword>ArabicFont</keyword>
+          <keyword>AutoMarks</keyword>
+          <keyword>BoxColor</keyword>
+          <keyword>Code</keyword>
+          <keyword>CodeDigitsDirection</keyword>
+          <keyword>Columns</keyword>
+          <keyword>CompleteMulti</keyword>
+          <keyword>DefaultScoringM</keyword>
+          <keyword>DefaultScoringS</keyword>
+          <keyword>Disable</keyword>
+          <keyword>Font</keyword>
+          <keyword>Group</keyword>
+          <keyword>IncludeFile</keyword>
+          <keyword>L-Name</keyword>
+          <keyword>L-None</keyword>
+          <keyword>L-OpenReserved</keyword>
+          <keyword>L-OpenText</keyword>
+          <keyword>L-Question</keyword>
+          <keyword>L-Student</keyword>
+          <keyword>LaTeX-BeginCopy</keyword>
+          <keyword>LaTeX-BeginDocument</keyword>
+          <keyword>LaTeX-EndCopy</keyword>
+          <keyword>LaTeX-Preambule</keyword>
+          <keyword>LaTeX</keyword>
+          <keyword>LaTeXEngine</keyword>
+          <keyword>Lang</keyword>
+          <keyword>ManualDuplex</keyword>
+          <keyword>NameFieldLines</keyword>
+          <keyword>NameFieldLinespace</keyword>
+          <keyword>NameFieldWidth</keyword>
+          <keyword>PackageOptions</keyword>
           <keyword>Pages</keyword>
-	  <keyword>PaperSize</keyword>
+          <keyword>PaperSize</keyword>
           <keyword>PDF-BeginCopy</keyword>
           <keyword>PDF-EndCopy</keyword>
           <keyword>PreAssociation</keyword>
           <keyword>PreAssociationKey</keyword>
           <keyword>PreAssociationName</keyword>
-	  <keyword>Presentation</keyword>
-	  <keyword>QuestionBlocks</keyword>
+          <keyword>Presentation</keyword>
+          <keyword>QuestionBlocks</keyword>
           <keyword>RandomSeed</keyword>
-	  <keyword>SeparateAnswerSheet</keyword>
-	  <keyword>ShuffleQuestions</keyword>
-	  <keyword>SingleSided</keyword>
-	  <keyword>Title</keyword>
-	  <keyword>TitleWidth</keyword>
+          <keyword>SeparateAnswerSheet</keyword>
+          <keyword>ShuffleQuestions</keyword>
+          <keyword>SingleSided</keyword>
+          <keyword>Title</keyword>
+          <keyword>TitleWidth</keyword>
           <keyword>xltxtra</keyword>
-	</context>
+        </context>
 
-	<context id="groups" end-parent="true" style-ref="grouptext">
-	  <start>^(\*[\(\)])(?:\[([^\]]+)\])?</start>
-	  <end>\%{endgroup}</end>
-	  <include>
-	    <context style-ref="gopener" where="start" sub-pattern="1"/>
-	    <context style-ref="goptions" where="start" sub-pattern="2"/>
-	  </include>
-	</context>
+        <context id="groups" end-parent="true" style-ref="grouptext">
+          <start>^(\*[\(\)])(?:\[([^\]]+)\])?</start>
+          <end>\%{endgroup}</end>
+          <include>
+            <context style-ref="gopener" where="start" sub-pattern="1"/>
+            <context style-ref="goptions" where="start" sub-pattern="2"/>
+          </include>
+        </context>
 
-	<context id="questions" end-parent="true" style-ref="questiontext">
-	  <start>^(\*{1,2})(?:&lt;([^>]+)>)?(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
-	  <end>\%{endgroup}</end>
-	  <include>
-	    <context style-ref="opener" where="start" sub-pattern="1"/>
-	    <context style-ref="ooptions" where="start" sub-pattern="2"/>
-	    <context style-ref="qoptions" where="start" sub-pattern="3"/>
-	    <context style-ref="scoring" where="start" sub-pattern="4"/>
-	  </include>
-	</context>
+        <context id="questions" end-parent="true" style-ref="questiontext">
+          <start>^(\*{1,2})(?:&lt;([^>]+)>)?(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
+          <end>\%{endgroup}</end>
+          <include>
+            <context style-ref="opener" where="start" sub-pattern="1"/>
+            <context style-ref="ooptions" where="start" sub-pattern="2"/>
+            <context style-ref="qoptions" where="start" sub-pattern="3"/>
+            <context style-ref="scoring" where="start" sub-pattern="4"/>
+          </include>
+        </context>
 
-	<context id="correctanswer" end-parent="true" style-ref="correct">
-	  <start>^(\+)(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
-	  <end>\%{endgroup}</end>
-	  <include>
-	    <context style-ref="opener" where="start" sub-pattern="1"/>
-	    <context style-ref="letter" where="start" sub-pattern="2"/>
-	    <context style-ref="scoring" where="start" sub-pattern="3"/>
-	  </include>
-	</context>
+        <context id="correctanswer" end-parent="true" style-ref="correct">
+          <start>^(\+)(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
+          <end>\%{endgroup}</end>
+          <include>
+            <context style-ref="opener" where="start" sub-pattern="1"/>
+            <context style-ref="letter" where="start" sub-pattern="2"/>
+            <context style-ref="scoring" where="start" sub-pattern="3"/>
+          </include>
+        </context>
 
-	<context id="wronganswer" end-parent="true" style-ref="wrong">
-	  <start>^(-)(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
-	  <end>\%{endgroup}</end>
-	  <include>
-	    <context style-ref="opener" where="start" sub-pattern="1"/>
-	    <context style-ref="letter" where="start" sub-pattern="2"/>
-	    <context style-ref="scoring" where="start" sub-pattern="3"/>
-	  </include>
-	</context>
+        <context id="wronganswer" end-parent="true" style-ref="wrong">
+          <start>^(-)(?:\[([^\]]+)\])?(?:\{([^\}]+)\})?</start>
+          <end>\%{endgroup}</end>
+          <include>
+            <context style-ref="opener" where="start" sub-pattern="1"/>
+            <context style-ref="letter" where="start" sub-pattern="2"/>
+            <context style-ref="scoring" where="start" sub-pattern="3"/>
+          </include>
+        </context>
 
       </include>
     </context>
