@@ -42,10 +42,6 @@ LINES: while (<CHL>) {
     }
 }
 
-$ENV{TZ} = "UTC";
-POSIX::tzset();
-$k{epoch} = POSIX::mktime( 0, 0, 0, $k{day}, $k{month} - 1, $k{year} - 1900 );
-
 if ( available("svnversion") ) {
     $s = `svnversion`;
     if ( $s =~ /([0-9]+)[SM]*$/ ) {
@@ -61,16 +57,32 @@ if ( available("hg") && -d ".hg" ) {
 }
 
 if ( available("git") && -d ".git" ) {
+    # get revision
     chomp( $s = `git rev-parse --short HEAD` );
     if ( $s =~ /^([0-9a-f]+\+?)/ ) {
         $k{vc} = "r:$1";
     }
-    chomp( $s = `git log -1 --date=short --format=%cd` );
-    if ( $s =~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ ) {
+    # if no revision tag, force +git string in version name
+    chomp( $s = `git tag --points-at` );
+    if ( $s !~ /(^|\n)[0-9]+\.[0-9]/ ) {
+        $k{deb} .= "+" if ( $k{deb} !~ /\+/ );
+    }
+    # get date of commit
+    chomp( $s = `git log -1 --date=format:%Y%m%d%H%M%S --format=%cd` );
+    if ( $s =~ /^[0-9]+$/ ) {
+        if ( $s =~ /^([0-9]{4})([0-9]{2})([0-9]{2})/ ) {
+            $k{year}  = $1;
+            $k{month} = $2;
+            $k{day}   = $3;
+        }
         $vj = $ENV{AMC_GIT_VERSION_VARIANT} || "";
-        $k{deb} =~ s/\+(hg|git)[0-9]{4}-[0-9]{2}-[0-9]{2}/+git$s$vj/;
+        $k{deb} =~ s/\+.*/+git$s$vj/;
     }
 }
+
+$ENV{TZ} = "UTC";
+POSIX::tzset();
+$k{epoch} = POSIX::mktime( 0, 0, 0, $k{day}, $k{month} - 1, $k{year} - 1900 );
 
 $k{sty} = "$k{year}/$k{month}/$k{day} v$k{deb} $k{vc}";
 $k{sty} =~ s/\s+/ /;
