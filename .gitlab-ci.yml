@@ -40,10 +40,9 @@ pack-sources:
   image: jojoboulix/amc-build
   script:
     - make sources
-    - export TARBALL_V=$(grep PACKAGE_V_DEB Makefile.versions | sed 's/.*=//')
     - mkdir artifacts
-    - "mv tarballs/auto-multiple-choice_*_precomp.tar.gz artifacts/auto-multiple-choice_${TARBALL_V}_dist.tar.gz"
-    - "mv tarballs/auto-multiple-choice_*_sources.tar.gz artifacts/auto-multiple-choice_${TARBALL_V}_sources.tar.gz"
+    - "mv tarballs/auto-multiple-choice_*_dist.tar.gz artifacts"
+    - "mv tarballs/auto-multiple-choice_*_sources.tar.gz artifacts"
   artifacts:
     paths:
       - artifacts/
@@ -53,9 +52,8 @@ pack-portable:
   image: jojoboulix/amc-build
   script:
     - make portable
-    - export TARBALL_V=$(grep PACKAGE_V_DEB Makefile.versions | sed 's/.*=//')
     - mkdir artifacts
-    - "mv tarballs/auto-multiple-choice_*_portable.tar.gz artifacts/auto-multiple-choice_${TARBALL_V}_portable.tar.gz"
+    - "mv tarballs/auto-multiple-choice_*_portable.tar.gz artifacts"
   artifacts:
     paths:
       - artifacts/

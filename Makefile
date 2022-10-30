@@ -418,7 +418,7 @@ sources_vok:
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean_IN
 	$(MAKE) -C $(TMP_SOURCE_DIR) auto-multiple-choice.spec
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
-	cd $(TMP_DIR) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_precomp.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
+	cd $(TMP_DIR) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_dist.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 	mv $(TMP_DIR)/auto-multiple-choice_$(PACKAGE_V_DEB)_*.tar.gz $(TARBALLS_DIR)
 	rm -rf $(TMP_SOURCE_DIR)
 

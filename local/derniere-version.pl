@@ -48,7 +48,7 @@ for my $d (@d) {
         opendir( DIR, $d );
         push @v, map { "$d/$_" } grep {
             /^auto-multiple-choice_.*$ext$/
-              && ( $precomp || !/precomp/ )
+              && ( $precomp || !/dist/ )
               && !/current/
         } readdir(DIR);
         closedir(DIR);
