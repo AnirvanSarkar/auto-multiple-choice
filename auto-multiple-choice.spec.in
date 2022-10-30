@@ -42,7 +42,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 URL: https://www.auto-multiple-choice.net/
-Packager: Alexis Bienvenüe <paamc@passoire.fr>
 BuildRequires: gcc-c++
 
 BuildRequires: pkgconfig(cairo)
@@ -81,7 +80,14 @@ Requires: perl >= 5.12
 %endif
 
 Requires: texlive
-Requires: ghostscript
+%if 0%{?fedora:1}%{?suse_version:1}
+Requires: tex(bophook.sty), tex(csvsimple.sty), tex(environ.sty)
+%endif
+%if 0%{?mageia}
+Requires: texlive-dist
+%endif
+
+Requires: ghostscript, qpdf, poppler
 Requires: /usr/bin/ppmtoxpm
 Requires: /usr/bin/pdftoppm
 Requires: /usr/bin/dvipdfm
@@ -93,8 +99,13 @@ Requires: perl(File::MimeInfo::Magic)
 Requires: perl(Text::Unidecode)
 Requires: perl(Sys::CPU)
 
+%if 0%{?suse_version}
+Requires: typelib-1_0-Gtk-3_0, typelib(GdkPixdata), typelib(Notify)
+%endif
+
 Recommends: perl(Net::CUPS), perl(Net::CUPS::PPD)
 Recommends: perl(OpenOffice::OODoc)
+Recommends: (linux-libertine-fonts or fonts-ttf-libertine)
 
 Requires: perl(Archive::Tar)
 Requires: perl(Archive::Zip)
@@ -127,7 +138,6 @@ Requires: perl(IPC::Open3)
 Requires: perl(IPC::Run)
 Requires: perl(List::Util)
 Requires: perl(Locale::gettext)
-Requires: perl(Locale::PO)
 Requires: perl(Module::Load)
 Requires: perl(Module::Load::Conditional)
 Requires: perl(Pango)
@@ -154,10 +164,10 @@ Requires(postun): texlive
 %{?perl_default_filter}
 
 %description
-Utility to manage multiple choice questionnaires, with optionnaly
+Utility to manage multiple choice questionnaires, with optionally
 mixed questions and answers. AMC provides automatic marking from papers'
 scans. Annotated papers are produced. Marks can be exported as a
-OpenOffice.org sheet file.
+LibreOffice sheet file.
 
 #'
 
@@ -227,11 +237,11 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{AMC_texdocdir}
 
 %dir /usr/share/auto-multiple-choice
+
+%if 0%{?suse_version}
 %dir /usr/share/texmf
 %dir /usr/share/texmf/tex
 %dir /usr/share/texmf/tex/latex
-
-%if 0%{?suse_version}
 %dir /usr/share/texmf/doc
 %dir /usr/share/auto-multiple-choice/gtk
 %dir /usr/share/gtksourceview-4
@@ -290,7 +300,7 @@ texhash
 texconfig-sys rehash
 %endif
 %if 0%{?mageia}
-texconfig-sys rehash
+texhash
 %endif
 
 %postun
