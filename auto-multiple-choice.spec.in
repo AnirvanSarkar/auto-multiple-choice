@@ -2,18 +2,12 @@
 
 %define AMC_modsdir %{_libdir}/AMC
 %define AMC_modelsdir /usr/share/auto-multiple-choice/models
-%define AMC_texdocdir /usr/share/texmf/doc/latex/AMC
 %define AMC_texdir /usr/share/texmf/tex/latex/AMC
 %define AMC_bindir %{_bindir}
 %define AMC_pixdir /usr/share/pixmaps
 %define AMC_iconsdir /usr/share/auto-multiple-choice/icons
-
-%define AMC_texdocdir /usr/share/texmf-texlive/doc/AMC
-%if 0%{?suse_version}
-%define AMC_texdocdir /usr/lib/texmf/doc/AMC
-%else
+%define AMC_perlpath /usr/bin/perl
 %define AMC_texdocdir /usr/share/texmf/doc/latex/AMC
-%endif
 
 %if 0%{?fedora}
 %define AMC_perldir %{perl_privlib}
@@ -24,7 +18,7 @@
 %define AMC_man1dir %{_mandir}/man1
 %define AMC_docdir %{_docdir}/%{name}
 
-%define AMC_OPENCV -I /usr/include/opencv
+%define AMC_OPENCV -I /usr/include/opencv4
 
 %if 0%{?suse_version}
 %define AMC_cat Education;Teaching;
@@ -32,7 +26,7 @@
 %define AMC_cat Education;
 %endif
 
-%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDOCDIR=%{AMC_texdocdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}" GCC_OPENCV="%{AMC_OPENCV}"
+%define AMC_makepass SYSTEM_TYPE=rpm MODSDIR=%{AMC_modsdir} MODELSDIR=%{AMC_modelsdir} TEXDOCDIR=%{AMC_texdocdir} TEXDIR=%{AMC_texdir} BINDIR=%{AMC_bindir} ICONSDIR=%{AMC_iconsdir} PIXDIR=%{AMC_pixdir} PERLDIR=%{AMC_perldir} MAN1DIR=%{AMC_man1dir} DOCDIR=%{AMC_docdir} DESKTOPDIR="" DESKTOP_CAT="%{AMC_cat}" GCC_OPENCV="%{AMC_OPENCV}" PERLPATH="%{AMC_perlpath}"
 
 Name: auto-multiple-choice
 Summary: Auto Multiple Choice - Multiple Choice Papers Management
@@ -41,23 +35,40 @@ Release: 1%{?dist}
 License: GPLv2+
 Group: Productivity/Other
 Source: auto-multiple-choice_@/PACKAGE_V_DEB/@_precomp.tar.gz
+
 %if 0%{?fedora}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
 %else
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 URL: https://www.auto-multiple-choice.net/
-Packager: Alexis Bienvenüe <pado@passoire.fr>
+Packager: Alexis Bienvenüe <paamc@passoire.fr>
 BuildRequires: gcc-c++
+
+BuildRequires: pkgconfig(cairo)
+BuildRequires: (pkgconfig(opencv4) or pkgconfig(opencv))
+BuildRequires: pkgconfig(pangocairo)
+BuildRequires: pkgconfig(poppler-glib)
+
+BuildRequires: texlive
+
+%if 0%{?fedora}
+BuildRequires: libxslt
+%else
+BuildRequires: xsltproc
+%endif
+
 %if 0%{?suse_version}
-BuildRequires: update-desktop-files, libnetpbm-devel, texlive, fontconfig-devel, opencv-devel
+BuildRequires: update-desktop-files, fontconfig-devel
 %endif
 %if 0%{?fedora}
-BuildRequires: desktop-file-utils, netpbm-devel, texlive, fontconfig-devel, opencv-devel
+BuildRequires: desktop-file-utils, fontconfig-devel
 %endif
-%if 0%{?mandriva_version}
-BuildRequires: desktop-file-utils, libnetpbm-devel, libfontconfig-devel, opencv-devel
+%if 0%{?mageia}
+BuildRequires: desktop-file-utils, libfontconfig-devel
 %endif
+
+## Requirements
 
 %if 0%{?suse_version}
 %if 0%{?suse_version} < 1140
@@ -66,67 +77,75 @@ Requires: perl = %{perl_version}
 %{perl_requires}
 %endif
 %else
-Requires: perl >= 5.8
+Requires: perl >= 5.12
 %endif
 
+Requires: texlive
 Requires: ghostscript
 Requires: /usr/bin/ppmtoxpm
+Requires: /usr/bin/pdftoppm
 Requires: /usr/bin/dvipdfm
 
-%if 0%{?suse_version} > 1000
-Suggests: perl(Email::Simple), perl(Email::MIME), perl(Email::Address), perl(Email::Sender), perl(Email::Sender::Simple), perl(Email::Date::Format)
-%else
-Requires: perl(Email::Simple), perl(Email::MIME), perl(Email::Address), perl(Email::Sender), perl(Email::Sender::Simple), perl(Email::Date::Format)
-%endif
-
 Requires: perl(DBI), perl(DBD::SQLite)
+Requires: (perl(Graphics::Magick) or perl(Image::Magick))
 
-%if 0%{?mandriva_version}
-Requires: poppler, graphicsmagick, imagemagick, tetex-cmsuper
-%else
-Requires: /usr/bin/pdftoppm, GraphicsMagick, ImageMagick
-%endif
+Requires: perl(File::MimeInfo::Magic)
+Requires: perl(Text::Unidecode)
+Requires: perl(Sys::CPU)
 
-%if 0%{?suse_version}
-Requires: poppler >= 0.12.3, poppler-tools >= 0.12.3
-Requires: texlive, texlive-bin-latex, texlive-latex
-BuildRequires: texlive, texlive-bin-latex, texlive-latex
-Requires: perl(Archive::Tar), perl(Data::Dumper), perl(Encode), perl(Exporter), perl(Fcntl)
-Requires: perl(File::Copy), perl(File::Path), perl(File::Spec), perl(File::Spec::Functions)
-Requires: perl(File::Temp), perl(Getopt::Long), perl(Gtk2), perl(I18N::Langinfo)
-Requires: perl(IO::File), perl(IO::Select), perl(IPC::Open2), perl(Locale::gettext)
-Requires: perl(Module::Load), perl(Module::Load::Conditional), perl(POSIX)
-Requires: perl(Unicode::Normalize), perl(Time::Local), perl(XML::Simple), perl(XML::Writer)
-Requires: perl(constant), perl(encoding), perl(Digest::MD5), perl(Archive::Zip)
-Requires: perl(Text::CSV), perl(List::Util), perl(Text::ParseWords), perl(Cwd)
-%endif
+Recommends: perl(Net::CUPS), perl(Net::CUPS::PPD)
+Recommends: perl(OpenOffice::OODoc)
 
-%if 0%{?fedora}
-Requires: perl(Image::Magick)
-%else
-Requires: perl(Graphics::Magick)
-%endif
+Requires: perl(Archive::Tar)
+Requires: perl(Archive::Zip)
+Requires: perl(Cairo)
+Requires: perl(Cwd)
+Requires: perl(Data::Dumper)
+Requires: perl(Digest::MD5)
+Requires: perl(Email::Address)
+Requires: perl(Email::MIME)
+Requires: perl(Email::Sender)
+Requires: perl(Email::Sender::Simple)
+Requires: perl(Encode)
+Requires: perl(Exporter)
+Requires: perl(Fcntl)
+Requires: perl(File::Copy)
+Requires: perl(File::Find)
+Requires: perl(File::Path)
+Requires: perl(File::Spec)
+Requires: perl(File::Spec::Functions)
+Requires: perl(File::stat)
+Requires: perl(File::Temp)
+Requires: perl(Getopt::Long)
+Requires: perl(Glib)
+Requires: perl(Glib::Object::Introspection)
+Requires: perl(Gtk3)
+Requires: perl(I18N::Langinfo)
+Requires: perl(IO::File)
+Requires: perl(IPC::Open2)
+Requires: perl(IPC::Open3)
+Requires: perl(IPC::Run)
+Requires: perl(List::Util)
+Requires: perl(Locale::gettext)
+Requires: perl(Locale::PO)
+Requires: perl(Module::Load)
+Requires: perl(Module::Load::Conditional)
+Requires: perl(Pango)
+Requires: perl(POSIX)
+Requires: perl(Scalar::Util)
+Requires: perl(Storable)
+Requires: perl(Text::CSV)
+Requires: perl(Text::ParseWords)
+Requires: perl(Time::HiRes)
+Requires: perl(Time::Local)
+Requires: perl(Time::localtime)
+Requires: perl(Unicode::Normalize)
+Requires: perl(XML::LibXML)
+Requires: perl(XML::Simple)
+Requires: perl(XML::Writer)
 
-%if 0%{?fedora}
-Requires: texlive-latex, perl(Net::CUPS), perl(Net::CUPS::PPD), perl(Gtk2::Notify)
-BuildRequires: texlive-latex
-%if 0%{?fedora} < 18
-Requires: texlive-texmf-latex
-BuildRequires: texlive-texmf-latex
-%endif
-%endif
-%if 0%{?mandriva_version}
-Requires: tetex, tetex-latex, perl(Net::CUPS), perl(Net::CUPS::PPD), perl(Gtk2::Notify)
-BuildRequires: tetex, tetex-latex
-%endif
-
-%if 0%{?mandriva_version}
-Requires(post): tetex
-Requires(postun): tetex
-%else
 Requires(post): texlive
 Requires(postun): texlive
-%endif
 
 #################################################################
 # DESCRIPTION                                                   #
@@ -180,12 +199,12 @@ make %{AMC_makepass} GCC="gcc" GCC_PP="g++" CFLAGS="$RPM_OPT_FLAGS -Wall" CXXFLA
 %install
 make DESTDIR=$RPM_BUILD_ROOT %{AMC_makepass} install
 
-%if 0%{?fedora:1}%{?mandriva_version:1}
-desktop-file-install --delete-original --dir=%{buildroot}%{_datadir}/applications auto-multiple-choice.desktop
+%if 0%{?fedora:1}%{?mageia:1}
+desktop-file-install --delete-original --dir=%{buildroot}%{_datadir}/applications net.auto_multiple_choice.amc.desktop
 %endif
 
 %if 0%{?suse_version}
-%suse_update_desktop_file -i %{name}
+%suse_update_desktop_file -i net.auto_multiple_choice.amc
 %endif
 
 %find_lang %{name}
@@ -206,7 +225,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %doc COPYING ChangeLog doc/html doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf
 %doc %{AMC_texdocdir}
-%doc %{AMC_docdir}
 
 %dir /usr/share/auto-multiple-choice
 %dir /usr/share/texmf
@@ -214,7 +232,29 @@ rm -rf $RPM_BUILD_ROOT
 %dir /usr/share/texmf/tex/latex
 
 %if 0%{?suse_version}
-%dir /usr/lib/texmf/doc
+%dir /usr/share/texmf/doc
+%dir /usr/share/auto-multiple-choice/gtk
+%dir /usr/share/gtksourceview-4
+%dir /usr/share/gtksourceview-4/language-specs
+%dir /usr/share/icons/hicolor
+%dir /usr/share/icons/hicolor/16x16
+%dir /usr/share/icons/hicolor/16x16/apps
+%dir /usr/share/icons/hicolor/22x22
+%dir /usr/share/icons/hicolor/22x22/apps
+%dir /usr/share/icons/hicolor/24x24
+%dir /usr/share/icons/hicolor/24x24/apps
+%dir /usr/share/icons/hicolor/256x256
+%dir /usr/share/icons/hicolor/256x256/apps
+%dir /usr/share/icons/hicolor/32x32
+%dir /usr/share/icons/hicolor/32x32/apps
+%dir /usr/share/icons/hicolor/48x48
+%dir /usr/share/icons/hicolor/48x48/apps
+%dir /usr/share/icons/hicolor/512x512
+%dir /usr/share/icons/hicolor/512x512/apps
+%dir /usr/share/icons/hicolor/64x64
+%dir /usr/share/icons/hicolor/64x64/apps
+%dir /usr/share/icons/hicolor/scalable
+%dir /usr/share/icons/hicolor/scalable/apps
 %endif
 
 %{AMC_modsdir}
@@ -224,15 +264,18 @@ rm -rf $RPM_BUILD_ROOT
 %{AMC_bindir}/auto-multiple-choice
 %{AMC_pixdir}/auto-multiple-choice.xpm
 %{AMC_perldir}/AMC
-%{_datadir}/applications/auto-multiple-choice.desktop
+%{_datadir}/applications/net.auto_multiple_choice.amc.desktop
 %{AMC_man1dir}/auto-multiple-choice.*.1*
 %{AMC_man1dir}/auto-multiple-choice.1*
-%{AMC_man1dir}/AMC-*.1*
+%{AMC_man1dir}/auto-multiple-choice-*.1*
 
-/usr/share/gtksourceview-3.0
-/usr/share/gtksourceview-3.0/language-specs
-/usr/share/gtksourceview-3.0/language-specs/amc-txt.lang
+/usr/share/gtksourceview-4/language-specs/amc-txt.lang
 /usr/share/mime/packages/auto-multiple-choice.xml
+
+/usr/share/auto-multiple-choice/gtk/auto-multiple-choice.css
+/usr/share/icons/hicolor/*/apps/auto-multiple-choice.png
+/usr/share/icons/hicolor/scalable/apps/auto-multiple-choice.svgz
+/usr/share/metainfo/net.auto_multiple_choice.amc.metainfo.xml
 
 #################################################################
 # POST                                                          #
@@ -246,7 +289,7 @@ texhash
 %if 0%{?suse_version}
 texconfig-sys rehash
 %endif
-%if 0%{?mandriva_version}
+%if 0%{?mageia}
 texconfig-sys rehash
 %endif
 
@@ -258,7 +301,7 @@ texhash
 %if 0%{?suse_version}
 texconfig-sys rehash
 %endif
-%if 0%{?mandriva_version}
+%if 0%{?mageia}
 texhash
 %endif
 
@@ -268,6 +311,6 @@ texhash
 
 %changelog
 
-* @/DATE_RPMCHL/@ Alexis Bienvenüe <pado@passoire.fr> @/PACKAGE_V_DEB/@-1
+* @/DATE_RPMCHL/@ Alexis Bienvenüe <paamc@passoire.fr> @/PACKAGE_V_DEB/@
 
-  - auto spec file for Fedora and SUSE. See ChangeLog for information.
+  - auto spec file. See ChangeLog for information.
