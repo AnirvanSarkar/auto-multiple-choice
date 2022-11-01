@@ -823,8 +823,10 @@ if ( $max_enter > 1 && $multiple && !$multi ) {
             debug $s->{scan};
         }
         print "ERR: "
-          # TRANSLATORS: Message displayed when not all scans are recognized (AMC don't know which subject page some scans come from), after automatic data capture.
-          . sprintf( __("%d scans are not recognized:"), @unrecognized )."\n";
+
+# TRANSLATORS: Message displayed when not all scans are recognized (AMC don't know which subject page some scans come from), after automatic data capture.
+          . sprintf( __("%d scans are not recognized:"), 0 + @unrecognized )
+          . "\n";
         for my $i ( 0 .. min( 4, $#unrecognized ) ) {
             print "ERR: " . $unrecognized[$i]->{scan} . "\n";
         }
