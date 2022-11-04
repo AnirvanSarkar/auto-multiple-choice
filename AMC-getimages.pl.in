@@ -587,6 +587,9 @@ for my $fich (@f) {
 
 if ($orientation) {
 
+    $p->text(__"Checking pages orientation...") if($p);
+    $dp = 1 / @f if(@f);
+
     my $temp_dir = tempdir(
         DIR     => tmpdir(),
         CLEANUP => ( !get_debug() )
@@ -615,8 +618,12 @@ if ($orientation) {
         } else {
             push @fs, $fich;
         }
+
+        $p->progres($dp) if($p);
     }
     @f = @fs;
+
+    $p->text('') if($p);
 
 }
 
