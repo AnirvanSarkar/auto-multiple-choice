@@ -755,13 +755,30 @@ s/^([A-Z_]+)(.*):\s([^\[]+)( \[.*\]|\.)$/"[$1$2] " . translate_error($1, $3) . $
 
 sub global_error {
     my ($scans) = @_;
+
+    # register failed detection of page IDs
+    my $capture = AMC::Data->new($data_dir)->module('capture');
+    $capture->begin_transaction('gFLD');
+    for my $s (@$scans) {
+        if ( !defined( $s->{ids} ) ) {
+            debug "Register unrecognized scan: $s->{scan}";
+            $capture->failed( $s->{scan} );
+            $s->{registered} = 1;
+        }
+    }
+    $capture->end_transaction('gFLD');
+
+    # unlink all scans, except those with unrecognized ID, which has
+    # been registered for analysis
     if ($unlink_on_global_err) {
         for my $s (@$scans) {
-            if ( -f $s->{scan} ) {
-                debug "Unlink scan: $s->{scan}";
-                unlink( $s->{scan} );
-            } else {
-                debug "Scan to unlink not found: $s->{scan}";
+            if ( !$s->{registered} ) {
+                if ( -f $s->{scan} ) {
+                    debug "Unlink scan: $s->{scan}";
+                    unlink( $s->{scan} );
+                } else {
+                    debug "Scan to unlink not found: $s->{scan}";
+                }
             }
         }
     }
