@@ -42,6 +42,7 @@ my $orientation      = "";
 my $rotate_direction = "90";
 my $force_convert    = 0;
 my $password         = '';
+my $pdfimages_opts   = '';
 my %use = ( pdfimages => 1, pdftk => 1, qpdf => 1, gs => 1 );
 
 GetProjectOptions(
@@ -49,6 +50,7 @@ GetProjectOptions(
     "progression-id=s"                      => \$progress_id,
     "copy-to=s"                             => \$copy_to,
     ":vector_scan_density|vector-density=s" => \$vector_density,
+    ":pdfimages_opts|pdfimages-opts=s"      => \$pdfimages_opts,
     "orientation=s"                         => \$orientation,
     "rotate-direction=s"                    => \$rotate_direction,
     "use-pdfimages!"                        => \$use{pdfimages},
@@ -254,7 +256,10 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
 
                     my @pdfimages_command = ("pdfimages");
                     push @pdfimages_command, "-upw", $password
-                      if ( $password ne '' );
+                        if ( $password ne '' );
+                    push @pdfimages_command,
+                      grep { $_ ne '' } split( /\s+/, $pdfimages_opts )
+                      if ($pdfimages_opts);
 
                     if (
                         system_debug(

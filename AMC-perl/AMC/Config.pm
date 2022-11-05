@@ -269,6 +269,7 @@ sub defaults {
         seuil_sens              => 8.0,
         saisie_dpi              => 150,
         vector_scan_density     => 250,
+        pdfimages_opts          => '-png -j',
         force_convert           => '',
         n_procs                 => 0,
         delimiteur_decimal      => ',',
