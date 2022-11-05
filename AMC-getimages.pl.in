@@ -232,7 +232,7 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
         $p->text( __("Splitting multi-page PDF files...") ) if ($p);
 
       PDF: for my $file (@f) {
-            if ( $file !~ /\.pdf$/i ) {
+            if ( $file->{path} !~ /\.pdf$/i ) {
                 push @fs, $file;
             } else {
 
