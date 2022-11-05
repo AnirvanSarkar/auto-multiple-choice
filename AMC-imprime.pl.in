@@ -302,6 +302,7 @@ sub process_pages {
             debug "SUGG=" . show_utf8($suggested_filename) . "\n";
             $f_dest =~ s/[%]e(\{(.*)\})?/$suggested_filename/g;
         } else {
+            no warnings 'uninitialized'; # $2=undef when no {}
             $f_dest =~ s/[%]e(\{(.*)\})?/$2$suffixed_elong/g;
         }
         debug "Moving to " . show_utf8($f_dest);
