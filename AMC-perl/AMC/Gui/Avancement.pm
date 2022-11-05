@@ -64,6 +64,7 @@ sub progres {
 
 sub text {
     my ( $self, $text ) = (@_);
+    $self->{progres} = 0;
     print "===<" . $self->{id} . ">=T($text)\n" if ( $self->{id} );
 }
 
