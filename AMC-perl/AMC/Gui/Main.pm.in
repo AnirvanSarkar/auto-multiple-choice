@@ -3196,12 +3196,11 @@ sub delete_line {
                 #
                 $self->{project}->capture->delete_page_data(@id);
 
-                if ( $self->get('auto_capture_mode') == 1 ) {
-                    $self->{project}
-                      ->scoring->delete_scoring_data( @id[ 0, 2 ] );
-                    $self->{project}
-                      ->association->delete_association_data( @id[ 0, 2 ] );
-                }
+                # Also delete all scoring and association data for
+                # this student, for it is now obsolete
+                $self->{project}->scoring->delete_scoring_data( @id[ 0, 2 ] );
+                $self->{project}
+                  ->association->delete_association_data( @id[ 0, 2 ] );
 
                 push @iters, $iter;
             }
