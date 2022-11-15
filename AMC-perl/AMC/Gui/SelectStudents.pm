@@ -43,9 +43,7 @@ sub new {
         %oo
     );
 
-    $self->dialog();
-
-    return $self;
+    return ( $self->dialog() );
 }
 
 sub dialog {
@@ -164,7 +162,7 @@ sub dialog {
 
     $self->get_ui('choose_students')->destroy;
 
-    if ( $resp == 1 ) {
+    if ( $resp == 1 && @k ) {
         open( IDS, ">", $self->{id_file} );
         for (@k) {
             print IDS studentids_string(@$_) . "\n";

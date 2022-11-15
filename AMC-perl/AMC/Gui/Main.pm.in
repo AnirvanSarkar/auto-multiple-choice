@@ -4396,13 +4396,15 @@ sub export_done_callback {
 sub select_students {
     my ( $self, $id_file ) = @_;
 
-    AMC::Gui::SelectStudents->new(
-        parent_window => $self->get_ui('main_window'),
-        config        => $self->{config},
-        capture       => $self->{project}->capture,
-        association   => $self->{project}->association,
-        students_list => $self->{project}->students_list,
-        id_file       => $id_file,
+    return (
+        AMC::Gui::SelectStudents->new(
+            parent_window => $self->get_ui('main_window'),
+            config        => $self->{config},
+            capture       => $self->{project}->capture,
+            association   => $self->{project}->association,
+            students_list => $self->{project}->students_list,
+            id_file       => $id_file,
+        )
     );
 
 }
