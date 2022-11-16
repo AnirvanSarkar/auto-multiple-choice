@@ -44,7 +44,7 @@ clean: FORCE
 	rm -f *.po
 
 %.mo: %.po
-	msgfmt $< -f -o $@
+	msgfmt $< -o $@
 
 ###############################################################
 # The following targets are only for packaging :
