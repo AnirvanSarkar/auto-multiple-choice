@@ -160,7 +160,8 @@ sub pref_xml_lit {
         my $data = XMLin(
             $file,
             SuppressEmpty => '',
-            ForceArray    => [ 'docs', 'email_attachment', 'printer' ]
+            ForceArray    =>
+              [ 'docs', 'email_attachment', 'printer', 'recent_projects' ]
         );
         return (%$data);
     }
@@ -422,6 +423,8 @@ sub defaults {
         anonymous_model  => 'edddds',
         anonymous_header => '%(aID)',
         anonymous_header_allpages => 1,
+
+        recent_projects => [],
     };
 
     $self->{project_default} = {
@@ -589,7 +592,10 @@ sub set_global_option_to_default {
                     if ( $kind eq 'command' ) {
                         $self->{global}->{$key} =
                           commande_accessible( \@values );
-                        if ( !$self->{global}->{$key} ) {
+                        if ( $self->{global}->{$key} ) {
+                            debug "New global command: $key = "
+                              . $self->{global}->{$key};
+                        } else {
                             debug
 "No available command for option $key: using the first one";
                             $self->{global}->{$key} = $values[0];
@@ -598,21 +604,25 @@ sub set_global_option_to_default {
                         debug "ERR: unknown option kind : $kind";
                     }
                 } else {
+                    debug "New global empty array: $key";
                     $self->{global}->{$key} = [];
                 }
             } elsif ( ref( $self->{o_default}->{$key} ) eq 'HASH' ) {
 
                 # HASH value: copy it
                 $self->{global}->{$key} = { %{ $self->{o_default}->{$key} } };
+
+                debug "New global hash: $key";
             } else {
                 $self->{global}->{$key} = $self->{o_default}->{$key};
 
                 # default value for encoding options:
                 $self->{global}->{$key} = $self->{system_encoding}
                   if ( $key =~ /^encodage_/ && !$self->{global}->{$key} );
+
+                debug "New global parameter: $key = $self->{global}->{$key}"
+                    if ( $self->{global}->{$key} );
             }
-            debug "New global parameter : $key = $self->{global}->{$key}"
-              if ( $self->{global}->{$key} );
         } else {
 
             # already defined option: go with sub-options if any
@@ -743,11 +753,52 @@ sub project_options_file {
     return "$dir/$name/options.xml";
 }
 
+sub add_recent_project {
+    my ( $self, $dir, $name ) = @_;
+
+    # The global option recent_projects should be an array. If not, free it.
+    if ( ref( $self->{global}->{recent_projects} ) ne 'ARRAY' ) {
+        debug "WARNING: global recent_projects is "
+          . $self->{global}->{recent_projects};
+        $self->{global}->{recent_projects} = [];
+    }
+
+    # First remove already existing same entries
+    my $full_dir = $dir . "/" . $name;
+
+    @{ $self->{global}->{recent_projects} } =
+      grep { $_->{dir} . '/' . $_->{project} ne $full_dir }
+      @{ $self->{global}->{recent_projects} };
+
+    # Add entry at beginning
+    unshift @{ $self->{global}->{recent_projects} },
+      { dir => $self->{global}->{rep_projets}, project => $name };
+
+    # Keep only 40 entries
+    splice @{ $self->{global}->{recent_projects} }, 40;
+
+    # Tag global options to be saved
+    $self->{global}->{_changed} = 1;
+}
+
+sub recent_projects_list {
+    my ( $self, $max ) = @_;
+    my @p = grep { -f $self->project_options_file( $_->{project}, $_->{dir} ) }
+      @{ $self->{global}->{recent_projects} };
+    if ($max) {
+        splice @p, $max;
+    }
+    return(@p);
+}
+
 sub open_project {
     my ( $self, $name ) = @_;
     debug "AMC::Config: open project " . show_utf8($name);
     $self->{project_file} = $self->project_options_file($name);
     $self->{project}      = { pref_xml_lit( $self->{project_file} ) };
+
+    # Adds the project in the recent projects list
+    $self->add_recent_project( $self->{global}->{rep_projets}, $name );
 
     # Get old style working documents names
     if ( ref( $self->{project}->{docs} ) eq 'ARRAY' ) {

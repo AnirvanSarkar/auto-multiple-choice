@@ -20,6 +20,7 @@
 
 use warnings;
 use 5.012;
+use utf8;
 
 package AMC::Gui::Main;
 
@@ -354,10 +355,12 @@ sub main_window {
     my $glade_xml = __FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->read_glade( $glade_xml,
+    $self->read_glade(
+        $glade_xml,
         qw/main_window
           onglets_projet onglet_preparation
           documents_popover toggle_documents
+          recent_popover recent_search recent_treeview
           but_question but_solution but_indiv_solution but_catalog doc_line1
           prepare_docs prepare_layout prepare_src
           send_subject_config_button send_subject_action
@@ -387,7 +390,7 @@ sub main_window {
           notation_c_regroupement_type notation_c_regroupement_compose
           pref_prep_s_nombre_copies pref_prep_c_filter
           partie_anonymity
-          /, @widgets_only_when_opened
+          /, @widgets_only_when_opened,
     );
 
     # Grid lines are not well-positioned in RTL environments, I don't know
@@ -1097,6 +1100,83 @@ sub projet_nouveau {
 
 sub projet_charge {
     my ($self) = @_;
+    $self->{recent} = [ $self->{config}->recent_projects_list() ];
+    $self->recent_create_store();
+    if($self->recent_build_list()) {
+        $self->get_ui('recent_popover')->show_all();
+    } else {
+        $self->projet_charge_all();
+    }
+}
+
+sub recent_filter {
+    my ( $model, $iter, $self ) = @_;
+    my $s    = $self->get_ui('recent_search')->get_text();
+    my $dir  = $model->get( $iter, 1 );
+    my $name = $model->get( $iter, 2 );
+    return ( $dir =~ /\Q$s\E/i || $name =~ /\Q$s\E/i );
+}
+
+sub recent_create_store {
+    my ($self) = @_;
+    if ( !$self->{recent_store} ) {
+        $self->{recent_store} =
+          Gtk3::ListStore->new( 'Glib::String', 'Glib::String',
+            'Glib::String' );
+        $self->{recent_store_filtered} =
+          Gtk3::TreeModelFilter->new( $self->{recent_store} );
+        $self->{recent_store_filtered}
+          ->set_visible_func( \&recent_filter, $self );
+        my $view = $self->get_ui('recent_treeview');
+        $view->set_model( $self->{recent_store_filtered} );
+        my ( $renderer, $column );
+        $renderer = Gtk3::CellRendererText->new;
+        $column =
+          Gtk3::TreeViewColumn->new_with_attributes( "project", $renderer,
+            markup => 0 );
+        $view->append_column($column);
+    }
+}
+
+sub recent_build_list {
+    my ($self) = @_;
+    my @p = @{ $self->{recent} };
+
+    $self->{recent_store}->clear();
+
+    my $i = 0;
+    for my $pp (@p) {
+        $self->{recent_store}->insert_with_values( $i, 0,
+            "<b>$pp->{project}</b>\n  <span alpha=\"50%\">$pp->{dir}</span>",
+            1, $pp->{dir}, 2, $pp->{project} );
+        $i++;
+    }
+    
+    return(0+@p);
+}
+
+sub recent_update_list {
+    my ($self) = @_;
+    $self->{recent_store_filtered}->refilter();
+}
+
+sub recent_select {
+    my ($self) = @_;
+    my $selected =
+      $self->get_ui('recent_treeview')->get_selection->get_selected();
+    if ( defined($selected) ) {
+        my $dir  = $self->{recent_store_filtered}->get( $selected, 1 );
+        my $name = $self->{recent_store_filtered}->get( $selected, 2 );
+        debug "Select from recent projects: $dir / $name";
+        $self->get_ui('recent_popover')->hide();
+        $self->open_project( $dir, $name );
+    }
+}
+
+sub projet_charge_all {
+    my ($self) = @_;
+
+    $self->get_ui('recent_popover')->hide();
 
     AMC::Gui::ProjectManager->new(
         parent_window => $self->get_ui('main_window'),
