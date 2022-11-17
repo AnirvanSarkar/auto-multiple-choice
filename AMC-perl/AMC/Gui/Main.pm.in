@@ -1084,6 +1084,7 @@ sub update_visibility {
     } else {
         $self->get_ui('partie_anonymity')->hide();
     }
+    $self->anonymize_update();
 }
 
 sub projet_nouveau {
@@ -4135,19 +4136,27 @@ sub assoc_state {
 
 sub anonymize_update {
     my ($self) = @_;
-    my $ok     = 'info';
-    my $s      = '';
 
-    $self->{project}->data->begin_read_transaction('anUP');
-    my ( $n, $ns ) = $self->{project}->scoring->n_external();
-    my $n_reports =
-      $self->{project}->report->type_count(REPORT_ANONYMIZED_PDF);
-    $self->{project}->data->end_transaction('anUP');
+    if (   $self->get('view_anonymity')
+        && $self->{project}
+        && $self->{project}->{_data} )
+    {
+        my $ok = 'info';
+        my $s  = '';
 
-    $s = sprintf( __("%d anonymized sheets"), $n_reports );
-    $s .= " / " . sprintf( __("%d scores from %d students"), $n, $ns );
+        $self->{project}->data->begin_read_transaction('anUP');
+        my ( $n, $ns ) = $self->{project}->scoring->n_external();
+        my $n_reports =
+          $self->{project}->report->type_count(REPORT_ANONYMIZED_PDF);
+        $self->{project}->data->end_transaction('anUP');
 
-    $self->set_state( 'anonymity', $ok, $s );
+        $s = sprintf( __("%d anonymized sheets"), $n_reports );
+        $s .= " / " . sprintf( __("%d scores from %d students"), $n, $ns );
+
+        $self->set_state( 'anonymity', $ok, $s );
+    } else {
+        $self->set_state( 'anonymity', 'none', '' );
+    }
 }
 
 sub anonymize_go {
