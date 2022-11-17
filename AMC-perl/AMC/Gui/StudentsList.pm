@@ -103,7 +103,7 @@ sub dialog_with_key {
     my $glade_xml = __FILE__;
     $glade_xml =~ s/\.p[ml]$/Key.glade/i;
 
-    $self->read_glade( $glade_xml, qw/studentslist sl_f_listeetudiants/ );
+    $self->read_glade( $glade_xml, qw/studentslist sl_f_listeetudiants sl_c_liste_key/ );
 
     $self->{prefs}->transmet_pref(
         $self->{main},
@@ -117,14 +117,16 @@ sub dialog_with_key {
         keys   => ['liste_key']
     );
 
-    $self->get_ui('studentslist')->run;
+    my $response = $self->get_ui('studentslist')->run;
 
-    $self->{prefs}->reprend_pref( prefix => 'sl' );
-    $self->{main_prefs}->transmet_pref(
-        $self->{main_gui},
-        prefix => 'pref_assoc',
-        keys   => ['project:liste_key']
-    );
+    if($response eq 'apply') {
+        $self->{prefs}->reprend_pref( prefix => 'sl' );
+        $self->{main_prefs}->transmet_pref(
+            $self->{main_gui},
+            prefix => 'pref_assoc',
+            keys   => ['project:liste_key']
+            );
+    }
 
     $self->get_ui('studentslist')->destroy;
 

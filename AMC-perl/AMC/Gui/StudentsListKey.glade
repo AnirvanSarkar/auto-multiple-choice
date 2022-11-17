@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
+<!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">emblem-ok-symbolic</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">edit-undo-symbolic</property>
+  </object>
   <object class="GtkListStore" id="liststore1">
     <columns>
       <!-- column-name text -->
@@ -14,37 +24,23 @@
     </data>
   </object>
   <object class="GtkDialog" id="studentslist">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Students list</property>
-    <property name="type_hint">dialog</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <property name="type-hint">dialog</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="boxgenerale">
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="boutons">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
             <child>
               <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="button1">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -56,26 +52,27 @@
         <child>
           <object class="GtkBox" id="entrees">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkLabel" id="explications">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="label" translatable="yes">AMC needs a CSV file with all students and their emails.
 Please choose the file to use, and a column that can be used as a primary key for students in this file.</property>
                 <property name="wrap">True</property>
+                <property name="max-width-chars">40</property>
               </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkSeparator" id="separe">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
               </object>
               <packing>
@@ -87,11 +84,11 @@ Please choose the file to use, and a column that can be used as a primary key fo
             <child>
               <object class="GtkBox" id="fichier">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkFileChooserButton" id="sl_f_listeetudiants">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="title" translatable="yes">Students list</property>
                     <signal name="file-set" handler="config_file" swapped="no"/>
                   </object>
@@ -117,11 +114,11 @@ Please choose the file to use, and a column that can be used as a primary key fo
             <child>
               <object class="GtkBox" id="cle">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkLabel" id="label_cle">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Primary key from this list:</property>
                   </object>
                   <packing>
@@ -133,7 +130,7 @@ Please choose the file to use, and a column that can be used as a primary key fo
                 <child>
                   <object class="GtkComboBox" id="sl_c_liste_key">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="model">liststore1</property>
                     <child>
                       <object class="GtkCellRendererText" id="renderer"/>
@@ -164,8 +161,41 @@ Please choose the file to use, and a column that can be used as a primary key fo
         </child>
       </object>
     </child>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="headerbar">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="title" translatable="yes">Students list</property>
+        <child>
+          <object class="GtkButton" id="button_cancel">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Cancel</property>
+            <property name="image">image2</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_apply">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Apply</property>
+            <property name="image">image1</property>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
     <action-widgets>
-      <action-widget response="1">button1</action-widget>
+      <action-widget response="apply">button_apply</action-widget>
+      <action-widget response="cancel">button_cancel</action-widget>
     </action-widgets>
   </object>
 </interface>
