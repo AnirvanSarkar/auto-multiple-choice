@@ -67,7 +67,7 @@ sub dialog {
     );
     
     my $r = $self->get_ui('filter_details')->run();
-    if ( $r == 10 ) {
+    if ( $r eq 'apply' ) {
         $self->set_local_keys('filter');
         debug "Filter details: new value->local";
         $self->{prefs}->reprend_pref(
