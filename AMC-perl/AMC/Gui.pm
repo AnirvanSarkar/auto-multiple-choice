@@ -99,14 +99,21 @@ sub read_glade {
 
     if ( $monitor ne 'none' && @widgets) {
         my $window = $self->get_ui( $widgets[0] );
-        if ( $window && $window->isa("Gtk3::Window") ) {
-            AMC::Gui::WindowSize::size_monitor(
-                $window,
-                {
-                    config => $self->{config},
-                    key    => "global:" . $monitor . "_window_size"
-                }
-            );
+        if ( $window ) {
+            if( $window->isa("Gtk3::Window") ) {
+                debug "Monitoring window size: $monitor";
+                AMC::Gui::WindowSize::size_monitor(
+                    $window,
+                    {
+                        config => $self->{config},
+                        key    => "global:" . $monitor . "_window_size"
+                    }
+                    );
+            } else {
+                debug_and_stderr "WARNING: can't monitor: widget $widgets[0] is not a window ($window)";
+            }
+        } else {
+            debug_and_stderr "WARNING: can't monitor: widget $widgets[0] not found";
         }
     }
 }
