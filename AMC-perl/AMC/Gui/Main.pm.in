@@ -3448,7 +3448,8 @@ sub noter_postcorrect {
         my $pc = AMC::Gui::Postcorrect->new(
             parent_window => $self->get_ui('main_window'),
             config        => $self->{config},
-            capture       => $self->{project}->capture
+            capture       => $self->{project}->capture,
+            monitor       => 'none',
         );
         $pc->choose_reference(
             sub {

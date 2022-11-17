@@ -76,7 +76,7 @@ sub choose_reference {
         $glade_xml, qw/choix_postcorrect
           postcorrect_student postcorrect_copy
           postcorrect_set_multiple
-          postcorrect_photo postcorrect_apply/
+          postcorrect_photo button_apply button_cancel/
     );
 
     AMC::Gui::PageArea::add_feuille( $self->get_ui('postcorrect_photo') );
@@ -180,7 +180,7 @@ sub change_copy {
     my $student = $self->get_ui('postcorrect_student')->get_value();
     my $copy    = $self->get_ui('postcorrect_copy')->get_value();
 
-    $self->get_ui('postcorrect_apply')
+    $self->get_ui('button_apply')
       ->set_sensitive( $self->{ids}->{$student}->{$copy} );
 
     $self->{capture}->begin_read_transaction('PCCN');
