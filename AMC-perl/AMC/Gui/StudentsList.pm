@@ -54,8 +54,9 @@ sub dialog {
     my $glade_xml = __FILE__;
     $glade_xml =~ s/\.p[ml]$/.glade/i;
 
-    $self->read_glade( $glade_xml, qw/liste_dialog/ );
+    $self->read_glade( $glade_xml, qw/liste_dialog button_apply/ );
     my $dial = $self->get_ui('liste_dialog');
+    $self->get_ui('button_apply')->get_style_context()->add_class("suggested-action");
 
     # Choose starting directory from the last students list file (if
     # existing), or the project directory
@@ -76,12 +77,12 @@ sub dialog {
     my $file = clean_gtk_filenames( $dial->get_filename() );
     $dial->destroy();
 
-    if ( $ret eq '1' ) {
+    if ( $ret eq 'apply' ) {
 
         # file chosen
         debug( "List: " . $file );
         &{ $self->{callback} }( $self->{callback_self}, set => $file );
-    } elsif ( $ret eq '2' ) {
+    } elsif ( $ret eq 'none' ) {
 
         # No list
         &{ $self->{callback} }( $self->{callback_self}, set => '' );
