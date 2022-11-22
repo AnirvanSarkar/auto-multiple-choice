@@ -12,6 +12,19 @@ fi
 
 echo "Tests: $TESTS"
 
+if echo $TESTS | grep -q cups;
+then
+    # Tests using CUPS needs a PDF printer named 'CUPS-PDF-Printer'
+    # With debian, install the package printer-driver-cups-pdf
+    if lpstat -a | grep -q "^CUPS-PDF-Printer ";
+    then
+        echo "CUPS printer OK"
+    else
+        echo "ERROR: missing CUPS-PDF-Printer"
+        exit 1;
+    fi
+fi
+
 if [ ! -d $HOME/AMC-tmp ];
 then
     echo "Creating $HOME/AMC-tmp ..."

@@ -70,6 +70,7 @@ class AMC:
         self.global_password = 'ABCDEF'
         self.password_column = 'id'
         self.amc_path = os.getenv("AMC_PATH")
+        self.delimiter = ';'
         if not self.amc_path:
             self.amc_path = 'auto-multiple-choice'
 
@@ -90,6 +91,9 @@ class AMC:
 
     def project_dir(self):
         return self.tmp_dir + '/' + self.project_name
+
+    def printed_dir(self):
+        return self.project_dir() + '/' + self.print_subdir
 
     def src_dir(self):
         return self.tmp_dir + '/' + self.src_dirname
@@ -230,7 +234,7 @@ class AMC:
         return (table, scrollbar, 1)
 
     def select_in_current_dir(self, filename,
-                              buttonName='Apply',
+                              buttonName='Apply', buttonDescription='',
                               double=False, enter=False,
                               hold_control=False):
         self.scroll_and_click(self.chooser_files_table(),
@@ -238,9 +242,13 @@ class AMC:
                               double=double, enter=enter,
                               hold_control=hold_control)
         chooser = self.file_chooser_or_dialog()
-        if buttonName != '':
+
+        if buttonDescription != '':
             time.sleep(0.5)
-            chooser.child(buttonName).click()
+            chooser.child(description=buttonDescription).click()
+        elif buttonName != '':
+            time.sleep(0.5)
+            chooser.child(name=buttonName).click()
         return chooser
 
     def select_multiple_in_src_dir(self, files, buttonName='OK'):
@@ -310,7 +318,7 @@ class AMC:
             for f in with_files:
                 file_dialog.child(f).click()
                 time.sleep(1)
-            file_dialog.child('Add').click()
+            file_dialog.child(name='Add', roleName='push button').click()
             time.sleep(1)
 
         dialog.child('OK').click()
@@ -485,6 +493,14 @@ class AMC:
         # few sheets to print -> photocopy mode = No
         self.click_dialog(button="No")
 
+    def check_printed(self, files=[]):
+        d = self.printed_dir() + '/'
+        for f in files:
+            if os.path.getsize(d+f) >= 100:
+                print("Printed file %s: size=%d" % (f, os.path.getsize(d+f)))
+            else:
+                raise Exception("Can't find printed file %s" % f)
+
     def scan_from_blank_copy(self, student=2, dest='scan-blank-2.jpg'):
         self.check_src_dir()
         os.system("convert -density 300 \"%s/%s/sheet-%04d.pdf\" \"%s/%s\""
@@ -642,7 +658,7 @@ class AMC:
         marking = self.tab('Marking')
         marking.select()
         marking.child('Set file', roleName='push button').click()
-        self.select_in_current_dir(students_file)
+        self.select_in_current_dir(students_file, buttonDescription='Apply')
         # select uid/code for association
         cbs = sorted([(a.position[1], a)
                       for a in marking.findChildren(
@@ -671,6 +687,10 @@ class AMC:
         """Build the report, where output_format can be 'OpenOffice',
         'CSV', 'PDF list' (or other if plugins are installed)."""
 
+        if output_format=='CSV':
+            # select delimiter
+            options_cb.append((0,self.delimiter))
+        
         reports = self.gui.child('Reports', roleName='page tab')
         reports.select()
         export_button = reports.child('Export', roleName='push button')
@@ -708,7 +728,7 @@ class AMC:
         errors = 0
         with open(self.project_dir() + "/exports/" +
                   self.code() + '.csv') as csv_file:
-            csv_reader = csv.DictReader(csv_file, delimiter=';')
+            csv_reader = csv.DictReader(csv_file, delimiter=self.delimiter)
             for row in csv_reader:
                 e = row["Exam"]
                 if e in checks:
@@ -786,6 +806,15 @@ class AMC:
     def quit(self):
         self.gui.child('Close').click()
         time.sleep(1)
+
+    def screenshot(self, name):
+        print("Screenshot " + name)
+        f = "%s/screenshot-%s.jpg" % (self.project_dir(), name)
+        try:
+            # works only with X
+            os.system("import", "window", "root", f)
+        except:
+            print("Screenshot failed")
 
     def finished(self):
         self.quit()
