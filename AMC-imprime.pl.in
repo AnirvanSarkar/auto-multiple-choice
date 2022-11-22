@@ -247,7 +247,7 @@ sub process_pages {
         my @qpdfcommand = ("qpdf");
         if ($password) {
             push @qpdfcommand, "--encrypt", $user_password, $owner_password,
-              128, "--";
+              256, "--";
         }
         push @qpdfcommand, $sujet, "--pages", $sujet,
           join( ",", map { $_->{first} . "-" . $_->{last} } @$slices ),
