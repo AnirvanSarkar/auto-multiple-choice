@@ -1281,6 +1281,8 @@ along with Auto-Multiple-Choice.  If not, see
 %   question, in standard mode (without package option |box|).
 % \item |\AMCinterBquest| is the amount of vertical space left after a
 %   question, in 'boxed' mode (with package option |box|).
+% \item |\AMCpostNquest| is the amount of vertical space left after a
+%   numeric question.
 % \item |\AMCpostOquest| is the amount of vertical space left after an
 %   open question.
 % \end{description}
@@ -1291,6 +1293,7 @@ along with Auto-Multiple-Choice.  If not, see
 \newdimen\AMCinterBrep\AMCinterBrep=.5ex
 \newdimen\AMCinterIquest\AMCinterIquest=\z@
 \newdimen\AMCinterBquest\AMCinterBquest=3ex
+\newdimen\AMCpostNquest\AMCpostNquest=1.5ex
 \newdimen\AMCpostOquest\AMCpostOquest=7mm
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
@@ -4310,7 +4313,7 @@ along with Auto-Multiple-Choice.  If not, see
 %    \end{macrocode}
 % And tell AMC that we finished with this question:
 %    \begin{macrocode}
-  \ifAMC@ensemble\else\vspace{1.5ex}\par\fi
+  \ifAMC@ensemble\else\vspace{\AMCpostNquest}\par\fi
   \ifAMC@ensemble\ifAMCformulaire@dedans
     \AMCmessage{FQ}
   \fi\fi
