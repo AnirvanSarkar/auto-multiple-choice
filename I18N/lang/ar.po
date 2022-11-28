@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto Multiple Choice\n"
 "Report-Msgid-Bugs-To: paamc@passoire.fr\n"
-"POT-Creation-Date: 2022-11-16 10:39 +0100\n"
+"POT-Creation-Date: 2022-11-28 19:50 +0100\n"
 "PO-Revision-Date: 2016-12-25 12:18+0300\n"
 "Last-Translator: Alexis Bienvenüe <paamc@passoire.fr>\n"
 "Language-Team: Hatim Alahmadi <dr.hatim@hotmail.com>\n"
@@ -134,37 +134,59 @@ msgstr "إحدى الإجابات خارج بيئة السؤال, بعد الس�
 msgid "Answer number ID used several times for the same question: %s"
 msgstr "معرف الإجابة مستخدم أكثر من مرة لنفس السؤال: %s"
 
-#: ../AMC-prepare.pl:768
+#: ../AMC-prepare.pl:785
 #, perl-format
 msgid "%d errors during LaTeX compiling"
 msgstr "%d خطأ أثناء تصيير لتيك"
 
-#: ../AMC-prepare.pl:839
+#: ../AMC-prepare.pl:856
 #, perl-format
 msgid "LaTeX command configured is not present (%s). Install it or change configuration, and then rerun."
 msgstr "إعداد امر لتيك غير موجود (%s) . ركبه أو قم بإعادة إعداده, ثم اعد التشغيل."
 
-#: ../AMC-prepare.pl:872
+#: ../AMC-prepare.pl:889
+msgid "Building the solution"
+msgstr ""
+
+#: ../AMC-prepare.pl:892
 msgid "solution"
 msgstr "الحل"
 
-#: ../AMC-prepare.pl:887
+#: ../AMC-prepare.pl:906
+msgid "Building the catalog"
+msgstr ""
+
+#: ../AMC-prepare.pl:910
 #, fuzzy
 msgid "catalog"
 msgstr "الفهرس"
 
-#: ../AMC-prepare.pl:928
+#: ../AMC-prepare.pl:951
+#, fuzzy
+msgid "Building the question sheet"
+msgstr "الأسئلة"
+
+#: ../AMC-prepare.pl:954
 msgid "question sheet"
 msgstr "الأسئلة"
 
-#: ../AMC-prepare.pl:962
+#: ../AMC-prepare.pl:988
 #, perl-format
 msgid "please remove accentuated or non-standard characters from the following question ID: \"%s\""
 msgstr "فضلا احذف الحد أو الحروف غير القياسية من معرف السؤال التالي: \"%s\""
 
-#: ../AMC-prepare.pl:972
+#: ../AMC-prepare.pl:998
 msgid "some question IDs seems to have accentuated or non-standard characters. This may break future processings."
 msgstr "يبدو أن بعض معرفات الأسئلة تحتوي حدود أو حروف غير قياسية. هذا ربما يوقف عملية المعالجة مستقبلا."
+
+#: ../AMC-prepare.pl:1093
+#, fuzzy
+msgid "Processing the source file"
+msgstr "خطأ في معالجة الملف المصدري."
+
+#: ../AMC-prepare.pl:1106
+msgid "Extracting marking scale..."
+msgstr "استخراج مقياس الدرجات..."
 
 #: ../AMC-read-pdfform.pl:184
 #, fuzzy
@@ -334,74 +356,66 @@ msgstr "يونيكود"
 msgid "Exporting marks..."
 msgstr "تصدير النقاط..."
 
-#: ../AMC-perl/AMC/Project.pm:232
-msgid "Documents update..."
-msgstr "تحديث المستندات..."
-
-#: ../AMC-perl/AMC/Project.pm:366
+#: ../AMC-perl/AMC/Project.pm:365
 msgid "Decoding name field images..."
 msgstr ""
 
 #. TRANSLATORS: File name for single annotated
 #. answer sheets with only some selected
 #. students. Please use simple characters.
-#: ../AMC-perl/AMC/Project.pm:415
+#: ../AMC-perl/AMC/Project.pm:414
 msgid "Selected_students"
 msgstr "كل الطلاب"
 
 #. TRANSLATORS: File name for single annotated
 #. answer sheets with all students. Please use
 #. simple characters.
-#: ../AMC-perl/AMC/Project.pm:424
+#: ../AMC-perl/AMC/Project.pm:423
 msgid "All_students"
 msgstr "كل_الطلاب"
 
-#: ../AMC-perl/AMC/Project.pm:446
+#: ../AMC-perl/AMC/Project.pm:445
 msgid "Annotating papers..."
 msgstr "الرصد على الاوراق..."
 
-#: ../AMC-perl/AMC/Project.pm:462
+#: ../AMC-perl/AMC/Project.pm:461
 msgid "Automatic association..."
 msgstr "الربط لآلي..."
 
-#: ../AMC-perl/AMC/Project.pm:502
+#: ../AMC-perl/AMC/Project.pm:501
 msgid "sheet [filename prefix when printing to files]"
 msgstr ""
 
-#: ../AMC-perl/AMC/Project.pm:526
+#: ../AMC-perl/AMC/Project.pm:525
 msgid "Print papers one by one..."
 msgstr "طباعة الاوراق ورقة ورقة..."
 
-#: ../AMC-perl/AMC/Project.pm:554
+#: ../AMC-perl/AMC/Project.pm:553
 msgid "Detecting layouts..."
 msgstr "فحص التصميم..."
 
-#: ../AMC-perl/AMC/Project.pm:587
-msgid "Extracting marking scale..."
-msgstr "استخراج مقياس الدرجات..."
-
-#: ../AMC-perl/AMC/Project.pm:631
+#: ../AMC-perl/AMC/Project.pm:628
 #, fuzzy
 msgid "Reading codes..."
 msgstr "اعادة استخراج التكبير..."
 
-#: ../AMC-perl/AMC/Project.pm:632
+#: ../AMC-perl/AMC/Project.pm:629
 msgid "Computing marks..."
 msgstr "حساب النقاط..."
 
-#: ../AMC-perl/AMC/Project.pm:654
+#: ../AMC-perl/AMC/Project.pm:651
 msgid "Gathering pages with the same code..."
 msgstr ""
 
-#: ../AMC-perl/AMC/Project.pm:720
+#: ../AMC-perl/AMC/Project.pm:717
 msgid "Sending emails..."
 msgstr "إرسال البرد الإلكترونية..."
 
-#: ../AMC-perl/AMC/Project.pm:752
+#: ../AMC-perl/AMC/Project.pm:749
 msgid "Anonymizing..."
 msgstr ""
 
-#: ../AMC-perl/AMC/Project.pm:772
+#: ../AMC-perl/AMC/Project.pm:769
 #, fuzzy
 msgid "Reading external scores..."
 msgstr "اعادة استخراج التكبير..."
@@ -875,7 +889,7 @@ msgstr "- <b>%s</b> تمثل الفراغ بين مواقع العلامات ف�
 #. the four corner marks on the scan and the location where they should
 #. be if the scan was not distorted at all) in the table showing the
 #. results of data captures.
-#: ../AMC-perl/AMC/Gui/Learning.pm:130 ../AMC-perl/AMC/Gui/Main.pm:2882
+#: ../AMC-perl/AMC/Gui/Learning.pm:130 ../AMC-perl/AMC/Gui/Main.pm:2883
 #: ../AMC-perl/AMC/Gui/Manuel.pm:233 ../AMC-perl/AMC/Gui/Main.glade:165
 msgid "MSE"
 msgstr "نسبة الخطأ"
@@ -891,7 +905,7 @@ msgstr "- أفضل قيمة ل <b>%s</b> تكون عندما قريبة جداً
 #. tells that some darkness ratios are very near the threshold, so that
 #. the capture is very sensitive to the threshold. A small value is a
 #. good thing) in the table showing the results of data captures.
-#: ../AMC-perl/AMC/Gui/Learning.pm:136 ../AMC-perl/AMC/Gui/Main.pm:2900
+#: ../AMC-perl/AMC/Gui/Learning.pm:136 ../AMC-perl/AMC/Gui/Main.pm:2901
 #: ../AMC-perl/AMC/Gui/Manuel.pm:243
 msgid "sensitivity"
 msgstr "الحساسية"
@@ -904,7 +918,7 @@ msgstr "يمكنك أيضا الاستعراض في اداة ضبط المسح (
 #. TRANSLATORS: One of the popup menu that appears when right-clicking
 #. on a page in the data capture diagnosis table. Choosing this entry,
 #. an image will be opened to see where the corner marks were detected.
-#: ../AMC-perl/AMC/Gui/Learning.pm:142 ../AMC-perl/AMC/Gui/Main.pm:2794
+#: ../AMC-perl/AMC/Gui/Learning.pm:142 ../AMC-perl/AMC/Gui/Main.pm:2795
 msgid "page adjustment"
 msgstr "تخطيط الصفحة"
 
@@ -913,7 +927,7 @@ msgstr "تخطيط الصفحة"
 #. a window will be opened were the user can see all boxes on the scans
 #. and how they were filled by the students, and correct detection of
 #. ticked-or-not if needed.
-#: ../AMC-perl/AMC/Gui/Learning.pm:143 ../AMC-perl/AMC/Gui/Main.pm:2801
+#: ../AMC-perl/AMC/Gui/Learning.pm:143 ../AMC-perl/AMC/Gui/Main.pm:2802
 msgid "boxes zooms"
 msgstr "تكبير المربعات"
 
@@ -1070,14 +1084,14 @@ msgid "Please install <b>libnotify</b> to make desktop notifications available."
 msgstr "فضلا ركب حزمة بيرل  <b>Gtk2::Notify</b> لجعل إخطارات سطح المكتب متاحة."
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
-#: ../AMC-perl/AMC/Gui/Main.pm:229 ../AMC-perl/AMC/Gui/Main.pm:3794
+#: ../AMC-perl/AMC/Gui/Main.pm:229 ../AMC-perl/AMC/Gui/Main.pm:3796
 msgid "(none) [No primary key found in association list]"
 msgstr "(لا شئ) [لا يوجد مفتاح رئيسي في قائمة الربط]"
 
 #. TRANSLATORS: you can omit the [...] part, just here to explain context
 #. TRANSLATORS: you can omit the [...] part, just here to explain
 #. context
-#: ../AMC-perl/AMC/Gui/Main.pm:234 ../AMC-perl/AMC/Gui/Main.pm:3604
+#: ../AMC-perl/AMC/Gui/Main.pm:234 ../AMC-perl/AMC/Gui/Main.pm:3606
 msgid "(none) [No code found in LaTeX file]"
 msgstr "(لا شئ) [لا يوجد كود في ملف لتيك]"
 
@@ -1260,127 +1274,127 @@ msgstr "خطأ أثناء نقل الإضافة إلى دليل الإضافة: 
 msgid "Please restart AMC before using the new plugin..."
 msgstr "فضلا أعد تشغيل آمسي قبل استخدام الإضافة الجديدة..."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1214
+#: ../AMC-perl/AMC/Gui/Main.pm:1215
 #, perl-format
 msgid "You selected directory <b>%s</b> as a project to open."
 msgstr "اخترت المجلد <b>%s</b> كمشروع."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1217
+#: ../AMC-perl/AMC/Gui/Main.pm:1218
 msgid "However, this directory does not seem to contain a project. Do you still want to try?"
 msgstr "ومع ذلك، هذا المسار لا يبدو أنه يحتوي على المشروع. هل ما زلت تريد أن تحاول؟"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1239
+#: ../AMC-perl/AMC/Gui/Main.pm:1240
 #, perl-format
 msgid "You selected project <b>%s</b> from directory <i>%s</i>."
 msgstr "اخترت المشروع <b>%s</b> من المسار <i>%s</i>."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1243
+#: ../AMC-perl/AMC/Gui/Main.pm:1244
 msgid "Do you want to copy this project to your projects directory before opening it?"
 msgstr "هل ترغب بحفظ هذا المشروع في مسار المشروعات قبل فتحه؟"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1408
+#: ../AMC-perl/AMC/Gui/Main.pm:1409
 #, perl-format
 msgid "File %s already exists in project directory: do you want to replace it?"
 msgstr "الملف %s موجود في مجلد المشروع: هل تريد استبداله؟"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1412
+#: ../AMC-perl/AMC/Gui/Main.pm:1413
 msgid "Click yes to replace it and loose pre-existing contents, or No to cancel source file import."
 msgstr "انقر نعم لاستبداله, أو لا لإلغاء استيراد الملف المصدري."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1438
+#: ../AMC-perl/AMC/Gui/Main.pm:1439
 msgid "The source file has been copied to project directory."
 msgstr "تم نسخ الملف المصدري إلى مجلد المشروع."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1440
+#: ../AMC-perl/AMC/Gui/Main.pm:1441
 #, perl-format
 msgid "You can now edit it with button \"%s\" or with any editor."
 msgstr "يمكنك تحريره بالنقر على الزر \"%s\" أو أي محرر آخر."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1441 ../AMC-perl/AMC/Gui/Main.glade:270
+#: ../AMC-perl/AMC/Gui/Main.pm:1442 ../AMC-perl/AMC/Gui/Main.glade:270
 msgid "Edit source file"
 msgstr "تحرير الملف المصدري"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1449
+#: ../AMC-perl/AMC/Gui/Main.pm:1450
 #, perl-format
 msgid "Error copying source file: %s"
 msgstr "فشل نسخ الملف المصدري: %s"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1591
+#: ../AMC-perl/AMC/Gui/Main.pm:1592
 msgid "The working documents are already prepared with the current file format. If you change the file format, working documents and all other data for this project will be ereased."
 msgstr "المستند الحالي معد مسبقا بهذه الهيئة. إذا قمت بتغيير هيئة الملف, سيتم مسح المستند وجميع البيانات الخاصة بالمشروع."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1594 ../AMC-perl/AMC/Gui/Main.pm:1606
-#: ../AMC-perl/AMC/Gui/Main.pm:1675 ../AMC-perl/AMC/Gui/Main.pm:1710
+#: ../AMC-perl/AMC/Gui/Main.pm:1595 ../AMC-perl/AMC/Gui/Main.pm:1607
+#: ../AMC-perl/AMC/Gui/Main.pm:1676 ../AMC-perl/AMC/Gui/Main.pm:1711
 msgid "Do you wish to continue?"
 msgstr "هل ترغب بالاستمرار؟"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1596 ../AMC-perl/AMC/Gui/Main.pm:1608
+#: ../AMC-perl/AMC/Gui/Main.pm:1597 ../AMC-perl/AMC/Gui/Main.pm:1609
 msgid "Click on Ok to erease old working documents and change file format, and on Cancel to get back to the same file format."
 msgstr "انقر على موافق لمسح المستند القديم وتغيير هيئة الملف, أو على إلغاء للعودة للهيئة السابقة للملف."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1599 ../AMC-perl/AMC/Gui/Main.pm:1680
-#: ../AMC-perl/AMC/Gui/Main.pm:1716
+#: ../AMC-perl/AMC/Gui/Main.pm:1600 ../AMC-perl/AMC/Gui/Main.pm:1681
+#: ../AMC-perl/AMC/Gui/Main.pm:1717
 msgid "To allow the use of an already printed question, cancel!"
 msgstr "والسماح باستخدام أوراق الاختبار التي سبق طباعتها!"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1603
+#: ../AMC-perl/AMC/Gui/Main.pm:1604
 msgid "The working documents are already prepared with the current file format. If you change the file format, working documents will be ereased."
 msgstr "المستند الحالي معد مسبقا بهذه الهيئة. إذا قمت بتغيير هيئة الملف, سيتم مسح المستند."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1650
+#: ../AMC-perl/AMC/Gui/Main.pm:1651
 msgid "LaTeX packages:"
 msgstr "حزم لتيك:"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1651
+#: ../AMC-perl/AMC/Gui/Main.pm:1652
 msgid "Commands:"
 msgstr "الأوامر:"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1652
+#: ../AMC-perl/AMC/Gui/Main.pm:1653
 msgid "Fonts:"
 msgstr "الخطوط:"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1664
+#: ../AMC-perl/AMC/Gui/Main.pm:1665
 msgid "Papers analysis was already made on the basis of the current working documents."
 msgstr "تم تحليل الأوراق على أساس المستند الحالي."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1668
+#: ../AMC-perl/AMC/Gui/Main.pm:1669
 msgid "You already made the examination on the basis of these documents."
 msgstr "لقد قمت بالفعل بإنتاج الاختبار على أساس المستند الحالي."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1672
+#: ../AMC-perl/AMC/Gui/Main.pm:1673
 msgid "If you modify working documents, you will not be capable any more of analyzing the papers you have already distributed!"
 msgstr "إذا قمت بتعديل المستند, فلن تكون قادراً على تحليل أوراق الاختبار التي تم طبعتها سابقا."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1677 ../AMC-perl/AMC/Gui/Main.pm:1712
+#: ../AMC-perl/AMC/Gui/Main.pm:1678 ../AMC-perl/AMC/Gui/Main.pm:1713
 msgid "Click on OK to erase the former layouts and update working documents, or on Cancel to cancel this operation."
 msgstr "انقر على موافق  لمحو تصميم المستند وإعادة تحديثه, أو على زر إلغاء لإلغاء هذه العملية."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1704
+#: ../AMC-perl/AMC/Gui/Main.pm:1705
 msgid "Layouts are already calculated for the current documents."
 msgstr "تم تنفيذ التصميم للمستند الحالي."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1707
+#: ../AMC-perl/AMC/Gui/Main.pm:1708
 msgid "Updating working documents, the layouts will become obsolete and will thus be erased."
 msgstr "لتحديث المستند الحالي, التصميمات القديمة سوف تمحى."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1749
+#: ../AMC-perl/AMC/Gui/Main.pm:1750
 #, perl-format
 msgid "To handle properly <i>%s</i> files, AMC needs the following components, that are currently missing:"
 msgstr "للتعامل بشكل صحيح مع الملفات <i>%s</i> , يحتاج آمسي لبعض المكونات, وهي حاليا مفقودة:"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1766
+#: ../AMC-perl/AMC/Gui/Main.pm:1767
 msgid "Install these components on your system and try again."
 msgstr "ثبت هذه المكونات على النظام الخاص بك وحاول مرة أخرى."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1815
+#: ../AMC-perl/AMC/Gui/Main.pm:1816
 msgid "Your AMC version and LaTeX style file version differ. Even if the documents are properly generated, this can lead to many problems using AMC."
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1819
+#: ../AMC-perl/AMC/Gui/Main.pm:1820
 msgid "<b>Please check your installation to get matching AMC and LaTeX style file versions.</b>"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1823
+#: ../AMC-perl/AMC/Gui/Main.pm:1824
 #, perl-format
 msgid ""
 "AMC version: %s\n"
@@ -1388,15 +1402,15 @@ msgid ""
 "sty path: %s"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1847
+#: ../AMC-perl/AMC/Gui/Main.pm:1848
 msgid "Problems while preparing documents"
 msgstr "خطأ أثناء إعداد المستند"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1849
+#: ../AMC-perl/AMC/Gui/Main.pm:1850
 msgid "Problems while processing the source file."
 msgstr "خطأ في معالجة الملف المصدري."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1853
+#: ../AMC-perl/AMC/Gui/Main.pm:1854
 msgid "You have to correct the source file and re-run documents update."
 msgstr "يجب عليك تصحيح الكود المصدري ثم إعادة تحديث المستند."
 
@@ -1404,7 +1418,7 @@ msgstr "يجب عليك تصحيح الكود المصدري ثم إعادة ت�
 #. "Command output details", and refers to the small expandable part at
 #. the bottom of AMC main window, where one can see the output of the
 #. commands lauched by AMC.
-#: ../AMC-perl/AMC/Gui/Main.pm:1867
+#: ../AMC-perl/AMC/Gui/Main.pm:1868
 #, perl-format
 msgid "See also the processing log in '%s' below."
 msgstr "انظر سجل المعالجة في  الأسفل '%s' ."
@@ -1412,258 +1426,258 @@ msgstr "انظر سجل المعالجة في  الأسفل '%s' ."
 #. TRANSLATORS: Title of the small expandable part at the bottom of AMC
 #. main window, where one can see the output of the commands lauched by
 #. AMC.
-#: ../AMC-perl/AMC/Gui/Main.pm:1872 ../AMC-perl/AMC/Gui/Main.glade:2911
+#: ../AMC-perl/AMC/Gui/Main.pm:1873 ../AMC-perl/AMC/Gui/Main.glade:2911
 msgid "Command output details"
 msgstr "أوامر تفاصيل المخرجات"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1875
+#: ../AMC-perl/AMC/Gui/Main.pm:1876
 msgid "Use LaTeX editor or latex command for a precise diagnosis."
 msgstr "استخدام محرر لتيك أو أوامر لتيك للتشخيص الدقيق."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1888
+#: ../AMC-perl/AMC/Gui/Main.pm:1889
 msgid "Documents have been prepared"
 msgstr "تم إعداد الوثائق"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1946
+#: ../AMC-perl/AMC/Gui/Main.pm:1947
 msgid "Your question has a separate answers sheet."
 msgstr "إجابة السؤال في صفحة الأجوبة المنفصلة."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1948
+#: ../AMC-perl/AMC/Gui/Main.pm:1949
 msgid "In this case, letters are shown inside boxes."
 msgstr "في هذه الحالة, سيتم عرض الحروف داخل المربعات."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1950
+#: ../AMC-perl/AMC/Gui/Main.pm:1951
 msgid "Your question is set to present labels inside the boxes to be ticked."
 msgstr "سؤالك معين بحيث تعلّم المربعات عند الإجابة."
 
 #. TRANSLATORS: Here, %s will be replaced with the translation of
 #. "darkness threshold".
-#: ../AMC-perl/AMC/Gui/Main.pm:1959
+#: ../AMC-perl/AMC/Gui/Main.pm:1960
 #, perl-format
 msgid "For better ticking detection, ask students to fill out completely boxes, and choose parameter \"%s\" around 0.5 for this project."
 msgstr "لأفضل نتيجة اطلب من طلابك تظليل المربعات بالكامل, واجعل قيمة \"%s\" حول 0.5 لهذا المشروع."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1964
+#: ../AMC-perl/AMC/Gui/Main.pm:1965
 #, perl-format
 msgid "At the moment, this parameter is set to %.02f."
 msgstr "في الوقت الحالي, هذه القيمة تساوي %.02f."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:1966
+#: ../AMC-perl/AMC/Gui/Main.pm:1967
 msgid "Would you like to set it to 0.5?"
 msgstr "هل ترغب بجعلها 0.5 ؟"
 
 #. TRANSLATORS: This parameter is the ratio of dark pixels number over
 #. total pixels number inside box above which a box is considered to be
 #. ticked.
-#: ../AMC-perl/AMC/Gui/Main.pm:1973
+#: ../AMC-perl/AMC/Gui/Main.pm:1974
 msgid "darkness threshold"
 msgstr "عتبة الإظلام"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2051
+#: ../AMC-perl/AMC/Gui/Main.pm:2052
 msgid "Working documents are not readable"
 msgstr "المستند الحالي غير قابل للقراءة"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2054
+#: ../AMC-perl/AMC/Gui/Main.pm:2055
 msgid "No working documents"
 msgstr "لا يوجد مستند للعمل"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2057
+#: ../AMC-perl/AMC/Gui/Main.pm:2058
 msgid "Working documents last update:"
 msgstr "آخر تحديث للمستند الحالي:"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2115
+#: ../AMC-perl/AMC/Gui/Main.pm:2116
 msgid "Working documents are in an old format, which is not supported anymore."
 msgstr "المستند مصمم بهيئة قديمة , والتي لم تعد مدعومة من البرنامج."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2118
+#: ../AMC-perl/AMC/Gui/Main.pm:2119
 msgid "Please generate again the working documents!"
 msgstr "فضلا انتج المستند الحالي مرة أخرى!"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2162
+#: ../AMC-perl/AMC/Gui/Main.pm:2163
 msgid "No layout detected."
 msgstr "لم يتم العثور على تصميم."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2164
+#: ../AMC-perl/AMC/Gui/Main.pm:2165
 msgid "<b>Don't go through the examination</b> before fixing this problem, otherwise you won't be able to use AMC for correction."
 msgstr "<b>لا تستمر في إعداد الاختبار</b> قبل إصلاح المشكلة, لأن المشكلة ستعيق استخدام البرنامج في التصحيح."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2210
+#: ../AMC-perl/AMC/Gui/Main.pm:2211
 msgid "No layout"
 msgstr "لا يوجد تصميم"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2213
+#: ../AMC-perl/AMC/Gui/Main.pm:2214
 #, perl-format
 msgid "Processed %d pages"
 msgstr "الصفحات المعالجة %d"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2215
+#: ../AMC-perl/AMC/Gui/Main.pm:2216
 msgid "but some defects were detected."
 msgstr "تم الكشف عن بعض العيوب."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2233
+#: ../AMC-perl/AMC/Gui/Main.pm:2234
 msgid "The \\namefield command is not used. Writing subjects without name field is not recommended"
 msgstr "الأمر \\nغير مستخدم. وكتابة مشروع بدون اسم الحقل غير مفضل."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2236
+#: ../AMC-perl/AMC/Gui/Main.pm:2237
 msgid "The \\namefield command is used several times for the same subject. This should not be the case, as each student should write his name only once"
 msgstr "الأمر \\nمستخدم لأكثر من مرة في نفس المشروع. هذا غير مسموح به , كما أن الطالب لا يسمح له بكتابة اسمه إلا على ورقة إجابة واحدة."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2238
+#: ../AMC-perl/AMC/Gui/Main.pm:2239
 msgid "No box to be ticked"
 msgstr "لا يوجد مربعات لتعليمها"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2240
+#: ../AMC-perl/AMC/Gui/Main.pm:2241
 msgid "The corner marks and binary boxes are not at the same location on all pages"
 msgstr "علامات الأركان ومربعات المعرف ليست عند نفس المكان في كل الأوراق"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2243
+#: ../AMC-perl/AMC/Gui/Main.pm:2244
 msgid "Some material has been placed out of the page. This is often a result of a multiple columns question group starting too close from the page bottom. In such a case, use \"needspace\"."
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2245
+#: ../AMC-perl/AMC/Gui/Main.pm:2246
 msgid "AMCcode[multi] is missing on some pages."
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2269
+#: ../AMC-perl/AMC/Gui/Main.pm:2270
 msgid "Some potential defects were detected for this subject. Correct them in the source and update the working documents."
 msgstr "تم الكشف عن بعض العيوب المحتملة في المشروع. فضلا صححها في الكود المصدري ثم حدثّ مستندات المشروع."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2278
+#: ../AMC-perl/AMC/Gui/Main.pm:2279
 #, perl-format
 msgid "(See for example pages %s and %s)"
 msgstr "(كمثال أنظر الصفحات %s و %s )"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2286
+#: ../AMC-perl/AMC/Gui/Main.pm:2287
 #, fuzzy, perl-format
 msgid "(Concerns %1$d pages, see for example page %2$s)"
 msgstr "(متعلقات الاختبار %1$d ، كمثال أنظر الورقة %2$d)"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2297
+#: ../AMC-perl/AMC/Gui/Main.pm:2298
 #, perl-format
 msgid "(Concerns %1$d exams, see for example sheet %2$d)"
 msgstr "(متعلقات الاختبار %1$d ، كمثال أنظر الورقة %2$d)"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2453
+#: ../AMC-perl/AMC/Gui/Main.pm:2454
 msgid "No layout for this project."
 msgstr "لا يوجد تصميم لهذا المشروع."
 
 #. TRANSLATORS: Here, %1$s will be replaced with "Layout detection" (a
 #. button title), and %2$s with "Preparation" (the tab title where one
 #. can find this button).
-#: ../AMC-perl/AMC/Gui/Main.pm:2460
+#: ../AMC-perl/AMC/Gui/Main.pm:2461
 #, fuzzy, perl-format
 msgid "Please use button <i>%1$s</i> in <i>%2$s</i> before manual data capture."
 msgstr "فضلا استخدم هذا الزر <i>%s</i> في <i>%s</i> قبل قراءة البيانات يدويا."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2463 ../AMC-perl/AMC/Gui/Main.glade:549
+#: ../AMC-perl/AMC/Gui/Main.pm:2464 ../AMC-perl/AMC/Gui/Main.glade:549
 msgid "Layout detection"
 msgstr "فحص التصميم"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2464 ../AMC-perl/AMC/Gui/Main.glade:758
+#: ../AMC-perl/AMC/Gui/Main.pm:2465 ../AMC-perl/AMC/Gui/Main.glade:758
 msgid "Preparation"
 msgstr "التجهيز"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2501
+#: ../AMC-perl/AMC/Gui/Main.pm:2502
 msgid "Automatic data capture..."
 msgstr "قراءة البيانات آليا..."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2589
+#: ../AMC-perl/AMC/Gui/Main.pm:2590
 msgid "Automatic data capture has been completed"
 msgstr "تمت قراءة البيانات آليا"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2598
+#: ../AMC-perl/AMC/Gui/Main.pm:2599
 #, perl-format
 msgid "Some of the pages you submitted (%d of them) have already been processed before. Old data has been overwritten."
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2612
+#: ../AMC-perl/AMC/Gui/Main.pm:2613
 #, fuzzy
 msgid "Data capture errors"
 msgstr "قراءة البيانات"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2614
+#: ../AMC-perl/AMC/Gui/Main.pm:2615
 msgid "AMC had problems with your scans."
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2619
+#: ../AMC-perl/AMC/Gui/Main.pm:2620
 #, fuzzy
 msgid "Please have a look at these scans."
 msgstr "فضلا اختر كل الأوراق الممسوحة"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2657
+#: ../AMC-perl/AMC/Gui/Main.pm:2658
 #, fuzzy, perl-format
 msgid "Data capture from %d complete papers, and %d papers to be matched."
 msgstr "بيانات مستخرجة من %d ورقة مكتملة و %d ورقة غير مكتملة"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2663
+#: ../AMC-perl/AMC/Gui/Main.pm:2664
 #, perl-format
 msgid "Data capture from %d complete papers and %d incomplete papers"
 msgstr "بيانات مستخرجة من %d ورقة مكتملة و %d ورقة غير مكتملة"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2670
+#: ../AMC-perl/AMC/Gui/Main.pm:2671
 #, perl-format
 msgid "Data capture from %d complete papers"
 msgstr "بيانات مقروءة من %d ورقة أجابة كاملة"
 
 #. TRANSLATORS: this text points out that no data capture has been
 #. made yet.
-#: ../AMC-perl/AMC/Gui/Main.pm:2678
+#: ../AMC-perl/AMC/Gui/Main.pm:2679
 msgid "No data"
 msgstr "لا توجد بيانات"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2686
+#: ../AMC-perl/AMC/Gui/Main.pm:2687
 #, perl-format
 msgid "Overwritten pages: %d"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2694
+#: ../AMC-perl/AMC/Gui/Main.pm:2695
 msgid "All scans were properly recognized."
 msgstr "تم التعرف على جميع الأوراق الممسوحة بشكل صحيح."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2701
+#: ../AMC-perl/AMC/Gui/Main.pm:2702
 #, perl-format
 msgid "%d scans were not recognized."
 msgstr "الأوراق %d لم يتم التعرف عليها."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2745
+#: ../AMC-perl/AMC/Gui/Main.pm:2746
 msgid "Pages that miss data capture to complete students sheets:"
 msgstr "الأوراق التي تحتوي على بيانات مفقودة لإكمال أوراق الطلاب:"
 
 #. TRANSLATORS: This is the title of the column containing student/copy
 #. identifier in the table showing the results of data captures.
-#: ../AMC-perl/AMC/Gui/Main.pm:2854
+#: ../AMC-perl/AMC/Gui/Main.pm:2855
 msgid "identifier"
 msgstr "المعرف"
 
 #. TRANSLATORS: This is the title of the column containing data capture
 #. date/time in the table showing the results of data captures.
-#: ../AMC-perl/AMC/Gui/Main.pm:2868
+#: ../AMC-perl/AMC/Gui/Main.pm:2869
 msgid "updated"
 msgstr "التحديث"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:2910
+#: ../AMC-perl/AMC/Gui/Main.pm:2911
 #, fuzzy
 msgid "scan file"
 msgstr "%s ملفات"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3067
+#: ../AMC-perl/AMC/Gui/Main.pm:3068
 msgid "Looking for analysis..."
 msgstr "انتظار المعالجة..."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3217
+#: ../AMC-perl/AMC/Gui/Main.pm:3218
 #, perl-format
 msgid "You requested to delete all data capture results for %d page(s)"
 msgstr "طلبت حذف جميع نتائج البيانات المقروءة من الأوراق %d"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3224
+#: ../AMC-perl/AMC/Gui/Main.pm:3225
 msgid "All data and image files related to these pages will be deleted."
 msgstr "جميع البيانات والصور المرتبطة بهذه الأوراق تم حذفها."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3227
+#: ../AMC-perl/AMC/Gui/Main.pm:3228
 msgid "Do you really want to continue?"
 msgstr "هل تريد حقيقة الاستمرار؟"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3398
+#: ../AMC-perl/AMC/Gui/Main.pm:3399
 #, perl-format
 msgid "Papers are not yet corrected: use button \"%s\"."
 msgstr "لم يتم تصحيح الأوراق: استخدم الزر \"%s\" ."
@@ -1671,40 +1685,40 @@ msgstr "لم يتم تصحيح الأوراق: استخدم الزر \"%s\" ."
 #. TRANSLATORS: This is a button: "Mark" is here an action to be called
 #. by the user. When clicking this button, the user requests scores to
 #. be computed for all students.
-#: ../AMC-perl/AMC/Gui/Main.pm:3402 ../AMC-perl/AMC/Gui/Main.glade:1689
+#: ../AMC-perl/AMC/Gui/Main.pm:3403 ../AMC-perl/AMC/Gui/Main.glade:1689
 msgid "Mark"
 msgstr "التصحيح"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3484
+#: ../AMC-perl/AMC/Gui/Main.pm:3486
 msgid "Grading has been completed"
 msgstr "تم حساب الدرجات"
 
 #. TRANSLATORS: This is the marks mean for all students.
-#: ../AMC-perl/AMC/Gui/Main.pm:3502
+#: ../AMC-perl/AMC/Gui/Main.pm:3504
 #, perl-format
 msgid "Mean: %.2f"
 msgstr "المتوسط: %.2f"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3505
+#: ../AMC-perl/AMC/Gui/Main.pm:3507
 msgid "No marks computed"
 msgstr "لم يتم احتساب نقاط"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3531
+#: ../AMC-perl/AMC/Gui/Main.pm:3533
 #, perl-format
 msgid "You selected the decoder \"<i>%s</i>\", which requires some tools that are missing on your system:"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3536
+#: ../AMC-perl/AMC/Gui/Main.pm:3538
 #, fuzzy
 msgid "<b>Perl module(s):</b>"
 msgstr "<b>قبل المعالجة</b>"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3540
+#: ../AMC-perl/AMC/Gui/Main.pm:3542
 #, fuzzy
 msgid "<b>Command(s):</b>"
 msgstr "الأوامر:"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3543
+#: ../AMC-perl/AMC/Gui/Main.pm:3545
 #, fuzzy
 msgid "Install these dependencies and try again"
 msgstr "ثبت هذه المكونات على النظام الخاص بك وحاول مرة أخرى."
@@ -1712,7 +1726,7 @@ msgstr "ثبت هذه المكونات على النظام الخاص بك وح�
 #. TRANSLATORS: menu item when choosing the code to use for association
 #. from the completed answer sheets. This item corresponds to
 #. pre-association (each student has an individualized sheet)
-#: ../AMC-perl/AMC/Gui/Main.pm:3574
+#: ../AMC-perl/AMC/Gui/Main.pm:3576
 msgid "Pre-association"
 msgstr "اعادة الربط"
 
@@ -1720,16 +1734,16 @@ msgstr "اعادة الربط"
 #. from the completed answer sheets. This item corresponds to the
 #. decoded name field (eg. when a barcode identifying the student has
 #. been sticked in the name field)
-#: ../AMC-perl/AMC/Gui/Main.pm:3581
+#: ../AMC-perl/AMC/Gui/Main.pm:3583
 msgid "Decoded name field"
 msgstr ""
 
 #. TRANSLATORS: Names list file : (none)
-#: ../AMC-perl/AMC/Gui/Main.pm:3705
+#: ../AMC-perl/AMC/Gui/Main.pm:3707
 msgid "(none)"
 msgstr "(لا شئ)"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3722
+#: ../AMC-perl/AMC/Gui/Main.pm:3724
 #, perl-format
 msgid "Unsuitable names file: %d errors, first on line %d."
 msgstr "ملف الأسماء غير صالح: %d خطأ , بداية من السطر %d ."
@@ -1737,57 +1751,57 @@ msgstr "ملف الأسماء غير صالح: %d خطأ , بداية من ال�
 #. TRANSLATORS: Here, do not translate 'name' and 'surname' (except in
 #. french), as the column names in the students list file has to be
 #. named in english in order to be properly detected.
-#: ../AMC-perl/AMC/Gui/Main.pm:3745
+#: ../AMC-perl/AMC/Gui/Main.pm:3747
 #, fuzzy, perl-format
 msgid "Found %1$d empty names in names file <i>%2$s</i>. Check that <b>name</b> or <b>surname</b> column is present, and always filled."
 msgstr "تم العثور على %d حقول أسماء فارغة في ملف الأسماء <i>%s</i>. تأكد من العمود الحالي لـ <b>الاسم</b> أو <b>اللقب</b>, واجعلها ممتلئه دائما."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3752 ../AMC-perl/AMC/Gui/Main.pm:3774
+#: ../AMC-perl/AMC/Gui/Main.pm:3754 ../AMC-perl/AMC/Gui/Main.pm:3776
 msgid "Edit the names file to correct it, and re-read."
 msgstr "حرر ملف الأسماء لتصحيحه, ثم أعد قراءته."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3770
+#: ../AMC-perl/AMC/Gui/Main.pm:3772
 #, perl-format
 msgid "Found duplicate names: <i>%s</i>. Check that all names are different."
 msgstr "تم العثور على أسماء مكررة: <i>%s</i>. يجب أن تكون الأسماء مختلفة."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3824
+#: ../AMC-perl/AMC/Gui/Main.pm:3826
 #, perl-format
 msgid "You can't choose column '%s' as a key in the students list, as it contains duplicates (value '%s')"
 msgstr "لا تستطيع اختيار العمود '%s' كمفتاح أساسي في قائمة الطلاب,تحتوي على التكرارات (القيمة '%s')"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3876 ../AMC-perl/AMC/Gui/Main.pm:3920
+#: ../AMC-perl/AMC/Gui/Main.pm:3878 ../AMC-perl/AMC/Gui/Main.pm:3922
 #, perl-format
 msgid "The primary key from the students list has been set to \"%s\", which is not the value from the association data."
 msgstr "المفتاح الاساسي في قائمة الطلاب \"%s\" ، غير موجود في بيانات الربط."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3883
+#: ../AMC-perl/AMC/Gui/Main.pm:3885
 #, perl-format
 msgid "Some manual association data has be found, which will be lost if the primary key is changed. Do you want to switch back to the primary key \"%s\" and keep association data?"
 msgstr "بعض بيانات الربط اليدوي سيتم فقدها، اذا تم تغيير المفتاح الاساسي. هل تريد العودة لمفتاح الربط \"%s\" ثم حفظ؟"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3926
+#: ../AMC-perl/AMC/Gui/Main.pm:3928
 msgid "Automatic papers/students association will be re-run to update the association data."
 msgstr "الربط الآلي للاوراق/الطلاب سيعاد لتحديث بيانات الربط."
 
 #. TRANSLATORS: Here, %s will be replaced with the name
 #. of the tab "Data capture".
-#: ../AMC-perl/AMC/Gui/Main.pm:3953
+#: ../AMC-perl/AMC/Gui/Main.pm:3955
 #, perl-format
 msgid "Before associating names to papers, you must choose a students list file in tab \"%s\"."
 msgstr "قبل ربط الأسماء بالأوراق , يجب اختيار ملف قائمة الأسماء من لسان التبويب \"%s\" ."
 
 #. One of the "notify the user at the end of the following actions" checkbox: for automatic data capture.
-#: ../AMC-perl/AMC/Gui/Main.pm:3955 ../AMC-perl/AMC/Gui/Main.glade:1360
+#: ../AMC-perl/AMC/Gui/Main.pm:3957 ../AMC-perl/AMC/Gui/Main.glade:1360
 #: ../AMC-perl/AMC/Gui/Preferences.glade:1892
 msgid "Data capture"
 msgstr "قراءة البيانات"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3965
+#: ../AMC-perl/AMC/Gui/Main.pm:3967
 msgid "Please choose a key from primary keys in students list before association."
 msgstr "فضلا حدد المفتاح الرئيسي في قائمة الطلاب قبل الربط."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:3975
+#: ../AMC-perl/AMC/Gui/Main.pm:3977
 #, fuzzy
 msgid "Please choose a code (made with LaTeX command \\AMCcodeGrid or equivalent) before automatic association."
 msgstr "فضلا اختر الكود (made with LaTeX command \\AMCcode) قبل الربط الآلي."
@@ -1795,16 +1809,16 @@ msgstr "فضلا اختر الكود (made with LaTeX command \\AMCcode) قبل 
 #. TRANSLATORS: Here, %s will be replaced with "Students
 #. identification", which refers to a paragraph in the tab "Marking"
 #. from AMC main window.
-#: ../AMC-perl/AMC/Gui/Main.pm:4030
+#: ../AMC-perl/AMC/Gui/Main.pm:4032
 #, perl-format
 msgid "Before associating names to papers, you must choose a students list file in paragraph \"%s\"."
 msgstr "قبل ربط الاسماء بالاوراق يجب اختيار ملف قائمة الطلاب في  \"%s\"."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4033
+#: ../AMC-perl/AMC/Gui/Main.pm:4035
 msgid "Students identification"
 msgstr "معرفات الطلاب"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4074
+#: ../AMC-perl/AMC/Gui/Main.pm:4076
 #, perl-format
 msgid "Automatic association completed: %d students recognized."
 msgstr "انجز الربط الآلي: %d طالب تم التعرف عليه."
@@ -1812,95 +1826,95 @@ msgstr "انجز الربط الآلي: %d طالب تم التعرف عليه."
 #. TRANSLATORS: Here %s and %s will be replaced with two parameters
 #. names: "Primary key from this list" and "Code name for automatic
 #. association".
-#: ../AMC-perl/AMC/Gui/Main.pm:4086
+#: ../AMC-perl/AMC/Gui/Main.pm:4088
 #, perl-format
 msgid "Please check \"%s\" and \"%s\" values and try again."
 msgstr "فضلا افحص القيمة \"%s\" و \"%s\" ثم اعد المحاولة."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4087
+#: ../AMC-perl/AMC/Gui/Main.pm:4089
 msgid "Primary key from this list"
 msgstr "المفتاح الأساسي من هذه القائمة:"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4088
+#: ../AMC-perl/AMC/Gui/Main.pm:4090
 msgid "Code name for automatic association"
 msgstr "اسم كود ربط أوراق الإجابة بالطلاب آليا"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4107
+#: ../AMC-perl/AMC/Gui/Main.pm:4109
 msgid "No students list file"
 msgstr "ملف قائمة الطلاب غير موجود"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4109
+#: ../AMC-perl/AMC/Gui/Main.pm:4111
 msgid "No primary key from students list file"
 msgstr "لا يوجد مفتاح الأساسي في ملف قائمة الطلاب"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4118
+#: ../AMC-perl/AMC/Gui/Main.pm:4120
 #, perl-format
 msgid "Missing identification for %d answer sheets"
 msgstr "فقد معرفات أوراق الإجابة %d "
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4123
+#: ../AMC-perl/AMC/Gui/Main.pm:4125
 msgid "All completed answer sheets are associated with a student name"
 msgstr "جميع أوراق الإجابة تم ربطها بأسماء الطلاب"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4146
+#: ../AMC-perl/AMC/Gui/Main.pm:4153
 #, perl-format
 msgid "%d anonymized sheets"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4147
+#: ../AMC-perl/AMC/Gui/Main.pm:4154
 #, perl-format
 msgid "%d scores from %d students"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4168
+#: ../AMC-perl/AMC/Gui/Main.pm:4178
 msgid "Are you sure you want to delete all external scores?"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4188
+#: ../AMC-perl/AMC/Gui/Main.pm:4198
 msgid "Read external scores from CSV"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4194
+#: ../AMC-perl/AMC/Gui/Main.pm:4204
 #, fuzzy
 msgid "CSV files"
 msgstr "ملفات بيانات CSV"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4225
+#: ../AMC-perl/AMC/Gui/Main.pm:4235
 #, fuzzy
 msgid "Problems while reading scores."
 msgstr "خطأ أثناء إعداد المستند"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4231
+#: ../AMC-perl/AMC/Gui/Main.pm:4241
 msgid "Success!"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4373
+#: ../AMC-perl/AMC/Gui/Main.pm:4383
 #, perl-format
 msgid "Exporting to '%s' needs some perl modules that are not installed: %s. Please install these modules or switch to another export format."
 msgstr "للتصدير إلى الصيغة '%s' يجب وجود بعض إضافات بيرل غير المركبة: %s. فضلا ركب هذه الإضافات أو اختر صيغة أخرى."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4397
+#: ../AMC-perl/AMC/Gui/Main.pm:4407
 msgid "When referring to a particular answer in the export, the letter used will be the one found in the catalog. However, the catalog has not yet been built. Do you want to build it now?"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4466
+#: ../AMC-perl/AMC/Gui/Main.pm:4476
 #, perl-format
 msgid "Export to %s did not work: file not created..."
 msgstr "التصدير إلى الصيغة %s لا يعمل: لم ينشأ الملف..."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4517
+#: ../AMC-perl/AMC/Gui/Main.pm:4527
 msgid "Annotations have been completed"
 msgstr "تم الرصد"
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4599
+#: ../AMC-perl/AMC/Gui/Main.pm:4609
 msgid "Cancelled."
 msgstr "الغي."
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4604
+#: ../AMC-perl/AMC/Gui/Main.pm:4614
 msgid "SMTP authentication failed: check SMTP configuration and password."
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Main.pm:4607
+#: ../AMC-perl/AMC/Gui/Main.pm:4617
 #, perl-format
 msgid "%d message(s) has been sent."
 msgstr "تم إرسال الرسالة %d ."
@@ -2405,8 +2419,11 @@ msgid "Add files to template"
 msgstr "إضافة ملف للنموذج"
 
 #: ../AMC-perl/AMC/Gui/Template.pm:240 ../AMC-perl/AMC/Gui/Cleanup.glade:25
+#: ../AMC-perl/AMC/Gui/FilterDetails.glade:119
+#: ../AMC-perl/AMC/Gui/Postcorrect.glade:196
 #: ../AMC-perl/AMC/Gui/ProjectManager.glade:386
-#: ../AMC-perl/AMC/Gui/StudentsList.glade:91
+#: ../AMC-perl/AMC/Gui/StudentsList.glade:83
+#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:174
 msgid "Cancel"
 msgstr "الغاء"
 
@@ -2827,17 +2844,24 @@ msgstr "لديك ملف مضغوط بصيغة  tgz أو zip ويحتوي على 
 msgid "ZIP file choice"
 msgstr "ملف مضغوط"
 
-#: ../AMC-perl/AMC/Gui/FilterDetails.glade:7
-msgid "Formats details"
-msgstr "تفاصيل الهيئة"
-
-#: ../AMC-perl/AMC/Gui/FilterDetails.glade:66
+#: ../AMC-perl/AMC/Gui/FilterDetails.glade:40
 msgid "AMC supports different formats for the source file. Here are some details about each of them."
 msgstr "آمسي يدعم هيئات مختلفة للملف المصدري. هنا بعض التفاصيل عن كل منها."
 
-#: ../AMC-perl/AMC/Gui/FilterDetails.glade:115
+#: ../AMC-perl/AMC/Gui/FilterDetails.glade:89
 msgid "<b>Description:</b>"
 msgstr "<b>الوصف:</b>"
+
+#: ../AMC-perl/AMC/Gui/FilterDetails.glade:116
+msgid "Formats details"
+msgstr "تفاصيل الهيئة"
+
+#: ../AMC-perl/AMC/Gui/FilterDetails.glade:127
+#: ../AMC-perl/AMC/Gui/Postcorrect.glade:205
+#: ../AMC-perl/AMC/Gui/StudentsList.glade:96
+#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:183
+msgid "Apply"
+msgstr "تطبيق"
 
 #: ../AMC-perl/AMC/Gui/Mailing.glade:13 ../AMC-perl/AMC/Gui/Mailing.glade:19
 msgid "Mailing"
@@ -3076,7 +3100,7 @@ msgid "Code name for automatic association:"
 msgstr "اسم الكود المستخدم لربط أوراق الإجابة بالطلاب آليا"
 
 #: ../AMC-perl/AMC/Gui/Main.glade:2036
-#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:125
+#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:122
 msgid "Primary key from this list:"
 msgstr "المفتاح الأساسي من هذه القائمة:"
 
@@ -3334,21 +3358,21 @@ msgstr ""
 msgid "List of pages with overwritten data:"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Postcorrect.glade:20
-msgid "Post-correction"
-msgstr "التصحيح"
-
-#: ../AMC-perl/AMC/Gui/Postcorrect.glade:95
+#: ../AMC-perl/AMC/Gui/Postcorrect.glade:69
 msgid "Please enter the teacher score sheet number and copy number to get the correct answers from:"
 msgstr "فضلا ادخل رقم نموذج إجابة المدرس وعدد النسخ للحصول على الإجابات الصحيحة:"
 
-#: ../AMC-perl/AMC/Gui/Postcorrect.glade:189
+#: ../AMC-perl/AMC/Gui/Postcorrect.glade:165
 msgid "Guess simple/multiple status"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/Postcorrect.glade:194
+#: ../AMC-perl/AMC/Gui/Postcorrect.glade:170
 msgid "Sets type of all questions for which 2 or more answers are ticked on the teacher answer sheet to multiple"
 msgstr ""
+
+#: ../AMC-perl/AMC/Gui/Postcorrect.glade:193
+msgid "Post-correction"
+msgstr "التصحيح"
 
 #: ../AMC-perl/AMC/Gui/Preferences.glade:231
 #: ../AMC-perl/AMC/Gui/Preferences.glade:244
@@ -4253,29 +4277,22 @@ msgstr ""
 msgid "Test strategy"
 msgstr ""
 
-#: ../AMC-perl/AMC/Gui/StudentsList.glade:48
-msgid "No names list"
-msgstr "لا توجد أسماء قوائم"
-
-#: ../AMC-perl/AMC/Gui/StudentsList.glade:134
-msgid "Apply"
-msgstr "تطبيق"
-
-#: ../AMC-perl/AMC/Gui/StudentsList.glade:163
-msgid "Choose your students names list file"
-msgstr "اختر ملف قائمة أسماء الطلاب"
-
-#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:12
-msgid "test"
-msgstr ""
-
-#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:18
-#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:95
+#: ../AMC-perl/AMC/Gui/StudentsList.glade:63
+#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:92
+#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:168
 #, fuzzy
 msgid "Students list"
 msgstr "قائمة الطلاب:"
 
-#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:65
+#: ../AMC-perl/AMC/Gui/StudentsList.glade:70
+msgid "No names list"
+msgstr "لا توجد أسماء قوائم"
+
+#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:22
+msgid "test"
+msgstr ""
+
+#: ../AMC-perl/AMC/Gui/StudentsListKey.glade:61
 msgid ""
 "AMC needs a CSV file with all students and their emails.\n"
 "Please choose the file to use, and a column that can be used as a primary key for students in this file."
@@ -4348,6 +4365,12 @@ msgstr "المربعات غير المعلّمة"
 #: ../AMC-perl/AMC/Gui/Zooms.glade:272
 msgid "Checked boxes"
 msgstr "المربعات المعلّمة"
+
+#~ msgid "Documents update..."
+#~ msgstr "تحديث المستندات..."
+
+#~ msgid "Choose your students names list file"
+#~ msgstr "اختر ملف قائمة أسماء الطلاب"
 
 #~ msgid "As students are requested to write on more than one page, you must create as many exam sheets as necessary for all your students, with different sheets numbers, and print them all."
 #~ msgstr "عندما نريد من الطلاب أن يجيبوا على أكثر من صفحة واحدة ، يجب أن تكون كل ورقة برقم معرف مختلف، ثم يتم طباعتها كلها."
