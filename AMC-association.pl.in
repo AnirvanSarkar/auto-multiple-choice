@@ -34,7 +34,7 @@ my $copy     = 0;
 my $id       = undef;
 my $raw      = '';
 
-GetOptions(
+GetProjectOptions(
     "cr=s"      => \$cr_dir,
     "liste=s"   => \$liste,
     "data=s"    => \$data_dir,
@@ -45,6 +45,8 @@ GetOptions(
     "copy=s"    => \$copy,
     "id=s"      => \$id,
 );
+
+debug("AMC-association / DEBUG") if (get_debug());
 
 if ($list) {
     require AMC::Data;
