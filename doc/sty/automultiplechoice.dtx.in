@@ -4784,11 +4784,14 @@ along with Auto-Multiple-Choice.  If not, see
   \ifx\AMCNombreCopies\undefined\AMCnum@copies=#1%
   \else\AMCnum@copies=\AMCNombreCopies\fi%
   \AMCmessage{TOTAL=\the\AMCnum@copies}%
+  \message{^^JAMC:copies:total=\the\AMCnum@copies^^J}%
   \AMCid@etud=\AMCid@etudstart%
   \ifnum\AMCid@etud=0\AMCid@etud=\AMC@premierecopie\fi%
   \AMCid@etudfin=\AMCnum@copies%
   \advance\AMCid@etudfin\AMCid@etud\relax%
-  \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie\fi
+  \ifAMC@correchead\AMCid@etudfin=\AMC@premierecopie%
+    \message{^^JAMC:copies:total=1^^J}%
+  \fi
   \ifAMC@pdfform\begin{Form}\fi%
   \loop{%
     \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
@@ -4803,6 +4806,7 @@ along with Auto-Multiple-Choice.  If not, see
       #2%
     \ifAMC@keepmemory\else\AMC@mem@clear\fi%
     \clearpage}%
+    \message{^^JAMC:copies:add=1^^J}%
   \advance\AMCid@etud\@ne\ifnum\AMCid@etud<\AMCid@etudfin\repeat%
   \global\AMCid@etudstart=\AMCid@etud%
   \ifAMC@pdfform\end{Form}\fi%

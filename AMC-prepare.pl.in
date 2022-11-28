@@ -564,11 +564,15 @@ sub execute {
     my $max_runs = 2;     # maximum number of runs
     my $n_run    = 0;     # number of runs so far
     my $rerun    = 0;     # has to re-run?
+    my $delta    = 0;
     my $format   = '';    # output format
 
     do {
 
         $n_run++;
+
+        $avance->text( $oo{text} . ( $oo{once} ? "" : " ($n_run)" ) );
+        $avance->progres(0.1);
 
         # clears errors from previous run
 
@@ -586,7 +590,20 @@ sub execute {
 
         # parses the output
 
+        EXEC->autoflush(1);
+
         while (<EXEC>) {
+
+            # progression...
+            if (/^AMC:copies:total=([0-9]+)/) {
+                my $nc = $1;
+                if ( $nc > 0 ) {
+                    $delta = 0.9 / $nc;
+                }
+            }
+            if (/^AMC:copies:add=([0-9]+)/) {
+                $avance->progres( $1 * $delta );
+            }
 
             # LaTeX Warning: Label(s) may have changed. Rerun to get
             # cross-references right. -> has to re-run
@@ -867,7 +884,10 @@ if ( $to_do{f} ) {
 ############################################################################
 
 sub build_solution {
-    execute( command_opts => [ %global_opts, CorrigeExterne => 1 ] );
+    execute(
+        command_opts => [ %global_opts, CorrigeExterne => 1 ],
+        text         => __ "Building the solution"
+    );
     transfer( "$jobname.pdf", $out_corrige );
     give_latex_errors( __ "solution" );
 }
@@ -881,7 +901,10 @@ if ( $to_do{S} ) {
 ############################################################################
 
 sub build_catalog {
-    execute( command_opts => [ %global_opts, CatalogExterne => 1 ] );
+    execute(
+        command_opts => [ %global_opts, CatalogExterne => 1 ],
+        text         => __ "Building the catalog"
+    );
     transfer( "$jobname.pdf", $out_catalog );
     analyse_cslog("$jobname.amc");
     give_latex_errors( __ "catalog" );
@@ -923,7 +946,10 @@ if ( $to_do{s} ) {
     $report->printed_clear();
     $report->end_transaction("prtX");
 
-    execute( command_opts => [ %global_opts, SujetExterne => 1 ] );
+    execute(
+        command_opts => [ %global_opts, SujetExterne => 1 ],
+        text         => __ "Building the question sheet"
+    );
     analyse_amclog("$jobname.amc");
     give_latex_errors( __ "question sheet" );
 
@@ -1012,7 +1038,10 @@ if ( $to_do{k} ) {
 
     @output_files = ($of);
 
-    execute( command_opts => [ %global_opts, qw/CorrigeIndivExterne 1/ ] );
+    execute(
+        command_opts => [ %global_opts, qw/CorrigeIndivExterne 1/ ],
+        text         => __ "Building the individual solution"
+    );
     transfer( "$jobname.pdf", $of );
     give_latex_errors( __ "individual solution" );
 }
@@ -1061,6 +1090,7 @@ if ( $to_do{b} ) {
         command_opts => [@opts],
         once         => 1,
         latex_only   => 1,
+        text         => __ "Processing the source file"
     );
 
     open( AMCLOG, "$jobname.amc" ) or die "Unable to open $jobname.amc : $!";
@@ -1072,6 +1102,8 @@ if ( $to_do{b} ) {
     my $finished_with_student = 0;
 
     # and parse the log...
+
+    $avance->text( __ "Extracting marking scale..." );
 
     $scoring->begin_transaction('ScEx');
     annotate_source_change($capture);

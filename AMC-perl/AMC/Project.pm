@@ -225,13 +225,12 @@ sub update_document {
             pack_args(
                 $self->project_options(),
                 "--mode", $mode,
+                "--progression-id", "MAJ",
                 "--latex-stdout",
               )
         ],
         signal          => 2,
-        texte           => __ "Documents update...",
         'progres.id'    => 'MAJ',
-        'progres.pulse' => 0.01,
         fin             => $oo{callback},
         o               => \%oo
     );
@@ -580,11 +579,9 @@ sub scoring_strategy_update {
                 $self->project_options(),
                 "--n-copies", $self->original_n_copies(),
                 "--progression-id", 'bareme',
-                "--progression", 1,
                 "--mode", $mode,
             ),
         ],
-        texte        => __ "Extracting marking scale...",
         'progres.id' => 'bareme',
         %command_opts
     );
