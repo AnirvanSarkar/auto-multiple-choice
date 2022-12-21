@@ -1373,10 +1373,7 @@ LaTex-Preambule: \geometry{hmargin=2cm,headheight=2cm,headsep=.3cm,footskip=1cm,
 bottom=2cm}  <co id="packagegeometry" linkends="packagesSuppl.exp"/>
 
 \usepackage{siunitx}  <co id="packagesiunitx" linkends="packagesSuppl.exp"/>
-\sisetup{locale = FR,detect-all,per-mode=symbol,quotient-mode=fraction,input-product=*,%
-list-final-separator = { \translate{et} },list-pair-separator = { \translate{et} },%
-range-phrase = { \translate{à} },separate-uncertainty = true,group-minimum-digits=3,%
-per-mode=symbol,inter-unit-product=\ensuremath{{}\!\cdot{}\!{}}}
+\sisetup{locale = FR,detect-all,group-minimum-digits=3,per-mode=symbol}
 
 \usepackage[french]{babel}  <co id="packagebabel" linkends="packagesSuppl.exp"/>
 
@@ -1442,7 +1439,7 @@ Presentation: Colorier en noir la case correspondante à la proposition correcte
 **[columns=2]Les dépenses énergétiques journalières d'une adolescente sont en moyenne de
 \qty{10000}{\kilo\joule} <co id="siunitxLaTeX" linkends="siunitxLaTeX.exp"/>.
  Vanessa a consommé \qty{3200}{kJ} au petit-déjeuner, \qty{3500}{kJ} à midi et
-  \SI{qty}{\kilo\joule} au diner. Elle a donc mangé équilibré :
+  \qty{2400}{\kilo\joule} au diner. Elle a donc mangé équilibré :
 - Faux
 + Vrai
 
@@ -2281,7 +2278,7 @@ Durée : 10 minutes.
         intégrant les résultats des questions ouvertes dans la notation  :
         <programlisting>\begin{question}{ouverte}
   Donnez la d\'efinition de l'inflation.
-  \AMCOpen{lines=5}{\wrongchoice[F]{f}\scoring{0}\wrongchoice[P]{p}\scoring{1}\correctchoice[J]{j}\scoring{2}}
+  \AMCOpen{lines=5}{\mauvaise[F]{f}\bareme{0}\mauvaise[P]{p}\bareme{1}\bonne[J]{j}\bareme{2}}
 \end{question}
 </programlisting></para>
 
@@ -2464,8 +2461,8 @@ Durée : 10 minutes.
 \FPeval\aRandomVariable{round(3+8*random,2)}
 \FPeval\aCalculateVariable{round(\aRandomVariable*9.81,2)}
 
-\AMCOpen{answer={m=\protect\SI{\aRandomVariable}{\kilo\gram},%
-P=\protect\SI{\aCalculateVariable}{\newton}}{le barème}
+\AMCOpen{answer={m=\protect\qty{\aRandomVariable}{\kilo\gram},%
+P=\protect\qty{\aCalculateVariable}{\newton}}{le barème}
 </programlisting>
 </warning>
 
@@ -2550,22 +2547,39 @@ P=\protect\SI{\aCalculateVariable}{\newton}}{le barème}
           l'astuce ci-dessous (<command>\parbox</command>) pour obliger un
           passage à la ligne.</para>
 
-          <programlisting>\AMCOpen{lines=6}{
-          \hbox{\parbox{8.5cm}{
-          \mauvaise[F]{F}\scoring{0}
-          \mauvaise[1]{1}\scoring{1}
-          \mauvaise[2]{2}\scoring{2}
-          \mauvaise[3]{3}\scoring{3}
-          \mauvaise[4]{4}\scoring{4}
-          \mauvaise[5]{5}\scoring{5}
-          \mauvaise[6]{6}\scoring{6}
-          \mauvaise[7]{7}\scoring{7}
-          \mauvaise[8]{8}\scoring{8}
-          \mauvaise[9]{9}\scoring{9}
-          \bonne[10]{10}\scoring{10}
-              }}
-            }
-        </programlisting>
+   <programlisting>\AMCOpen{lines=6}{
+  \hbox{\parbox{8.5cm}{
+  \mauvaise[F]{F}\bareme{0}
+  \mauvaise[1]{1}\bareme{1}
+  \mauvaise[2]{2}\bareme{2}
+  \mauvaise[3]{3}\bareme{3}
+  \mauvaise[4]{4}\bareme{4}
+  \mauvaise[5]{5}\bareme{5}
+  \mauvaise[6]{6}\bareme{6}
+  \mauvaise[7]{7}\bareme{7}
+  \mauvaise[8]{8}\bareme{8}
+  \mauvaise[9]{9}\bareme{9}
+  \bonne[10]{10}\bareme{10}}}
+}
+ </programlisting>
+        </tip>
+  
+  
+        <tip>
+         <para>Vous pouvez utiliser l'environnement <code>questionmultx</code>
+         (voir <xref endterm="latex.numeric.title" linkend="latex.numeric"/>)</para> 
+   
+  <programlisting>
+\begin{questionmultx}{ouverte}\bareme{MAX=6}
+Donnez la définition de l’inflation.
+\AMCOpen{lines=5}{\bonne[1]{1}\bareme{b=1}\bonne[2]{2}\bareme{b=2}%
+\bonne[3]{3}\bareme{b=3}\bonne[4]{4}\bareme{b=4}%
+\bonne[5]{5}\bareme{b=5}\bonne[6]{6}\bareme{b=6}%
+\bonne[1/2]{1/2}\bareme{b=0.5}}
+\end{questionmultx}</programlisting>
+
+        <para>Dans cet exemple, en cochant la première (1) et la dernière (0.5)
+        case, l'étudiant aura 1,5 point. Le maximun est 6 points.</para>
         </tip>
       </sect4>
 
@@ -2831,8 +2845,8 @@ Durée : 10 minutes.
 
         <programlisting>\begin{question}{bras}
   Quelle lettre désigne le \textit{bras} sur le diagramme ?
-  \AMCBoxOnly{ordered=true}{\wrongchoice[A]{}\correctchoice[B]{}%
-    \wrongchoice[C]{}\wrongchoice[D]{}}
+  \AMCBoxOnly{ordered=true}{\mauvaise[A]{}\bonne[B]{}%
+    \mauvaise[C]{}\mauvaise[D]{}}
 \end{question}</programlisting>
 
         <para>Le premier argument de <command>\AMCBoxOnly</command> est une
@@ -2969,25 +2983,25 @@ Durée : 10 minutes.
           <programlisting>\begin{question}{color}
   Which color?
   \begin{choiceshoriz}
-    \wrongchoice{red}
-    \wrongchoice{blue}
-    \wrongchoice{yellow}
+    \mauvaise{red}
+    \mauvaise{blue}
+    \mauvaise{yellow}
     \lastchoices
-    \correctchoice{transparent}
-    \wrongchoice{can't say}
+    \bonne{transparent}
+    \mauvaise{can't say}
   \end{choiceshoriz}
 \end{question}
 
 \begin{questionmult}{number}
   How many?
   \begin{choiceshoriz}
-    \wrongchoice{none}
-    \correctchoice{one}
-    \wrongchoice{two}
-    \wrongchoice{three}
+    \mauvaise{none}
+    \bonne{one}
+    \mauvaise{two}
+    \mauvaise{three}
     \lastchoices
-    \correctchoice{not so much}
-    \wrongchoice{a lot}
+    \bonne{not so much}
+    \mauvaise{a lot}
   \end{choiceshoriz}
 \end{questionmult}       </programlisting>
         </sect5>
@@ -3575,6 +3589,7 @@ Une valeur nulle est possible, une valeur négative copie tout le groupe.
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
 \AMCinterBquest=3ex
+\AMCpostNquest=1.5ex
 \AMCpostOquest=7mm
 \setlength{\AMChorizAnswerSep}{3em plus 4em}
 \setlength{\AMChorizBoxSep}{1em}</programlisting>
@@ -3584,7 +3599,7 @@ Une valeur nulle est possible, une valeur négative copie tout le groupe.
           (<code>rep</code>), en mode boîte (<code>B</code>, obtenu avec
           <command>\AMCBoxedAnswers</command> ou l'option de package
           <option>bloc</option>) ou standard (<code>I</code>), l'espace après
-          une question ouverte. Les deux dernières longueurs sont utilisées
+          une question numérique, ouverte. Les deux dernières longueurs sont utilisées
           pour l’environnement <option>reponsesperso</option>.</para>
         </sect4>
       </sect3>
@@ -3859,7 +3874,7 @@ et inscrivez votre nom et prénom ci-dessous.
 </callout>
 
   <callout arearefs="modificationcalage" id="modificationcalage.exp">
-    <para>Code qui modifie le comportement habituel d'AMC. Les longueurs seront peut-être à adapteravec vos marges. </para>
+    <para>Code qui modifie le comportement habituel d'AMC. Les longueurs seront peut-être à adapter avec vos marges. </para>
 </callout>
 
 </calloutlist></para>  
@@ -4270,7 +4285,7 @@ et inscrivez votre nom et prénom ci-dessous.
         </sect4>
 
         <sect4 id="latex.numeric">
-          <title>Codage du résultat</title>
+          <title id="latex.numeric.title">Codage du résultat</title>
 
           <para>Vous pouvez également demander aux étudiants de coder leur
           réponse numérique, grâce à la commande
@@ -4639,10 +4654,10 @@ et inscrivez votre nom et prénom ci-dessous.
     \QuestionIndicative
     Choisissez le nombre que vous voulez
     \begin{reponseshoriz}[o]
-      \mauvaise{2}\scoring{2,setglobal.Nombre=2}
-      \mauvaise{3}\scoring{3,setglobal.Nombre=3}
-      \mauvaise{4}\scoring{4,setglobal.Nombre=4}
-      \mauvaise{5}\scoring{5,setglobal.Nombre=5}
+      \mauvaise{2}\bareme{2,setglobal.Nombre=2}
+      \mauvaise{3}\bareme{3,setglobal.Nombre=3}
+      \mauvaise{4}\bareme{4,setglobal.Nombre=4}
+      \mauvaise{5}\bareme{5,setglobal.Nombre=5}
     \end{reponseshoriz}
   \end{question}
 
@@ -7069,11 +7084,11 @@ num\'ero d'\'etudiant &amp; classe &amp; sujet\\
 
         <programlisting>\begin{question}{01}
   \begin{reponsesperso}
-    \wrongchoice{A }%
-    \wrongchoice{B }%
-    \wrongchoice{C }%
-    \wrongchoice{D }%
-    \wrongchoice{E }%
+    \mauvaise{A }%
+    \mauvaise{B }%
+    \mauvaise{C }%
+    \mauvaise{D }%
+    \mauvaise{E }%
   \end{reponsesperso}
 \end{question}</programlisting>
       </note>
@@ -7674,18 +7689,18 @@ What is the return value of the following R code?
   
         <sect3 id="AMCzoneid">
       	  <title id="AMCzoneid.title">AMCzone[id]{}</title>
-      	  <para> La commande <command>\AMCzone[id]{code LaTex}</command> permet de cacher une zone définie.</para>
+      	  <para> La commande <command>\AMCzone[id]{code LaTeX}</command> permet de cacher une zone définie.</para>
       	  <para>Par défaut, la zone <command>\champnom</command> sera invisble après l'anonymisation.</para>
       	</sect3>
   
       	<sect3 id="AMCexternatQuestion">
       	  <title id="AMCexternalQuestion.title">AMCexternalQuestion</title>
-      	  <para>La commande <command>\AMCexternalQuestion{identifiant à choisir}{score maxmal}</command>
+      	  <para>La commande <command>\AMCexternalQuestion{identifiant à choisir}{score maximal}</command>
       	  permet de déclarer une question qui sera notée hors AMC, avec un score maximal.</para>
       	  <para>Lorsque vous utilisez cette commande, vous pouvez gérer librement le numéro de la question et le texte
       	  de la question (AMC ne s'en chargera pas).</para>
       	  <warning><para>Il est impossible de rajouter cette commande après la préparation complète du sujet.</para></warning>
-      	  <para>Lors de l'anonymisation des copies, un fichier csv est créé. Ce fichien devra être rempli avec les notes puis
+      	  <para>Lors de l'anonymisation des copies, un fichier csv est créé. Ce fichier devra être rempli avec les notes puis
       	  lu par AMC pour continuer avec la correction (voir <xref endterm="gui.marks.title" linkend="gui.marks"/>).</para>
       	</sect3>
     </sect2>

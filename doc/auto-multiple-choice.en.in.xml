@@ -1327,10 +1327,7 @@ LaTex-Preambule: \geometry{hmargin=2cm,headheight=2cm,headsep=.3cm,footskip=1cm,
 bottom=2cm}  <co id="packagegeometry" linkends="addpackages.exp"/>
 
 \usepackage{siunitx}  <co id="packagesiunitx" linkends="addpackages.exp"/>
-\sisetup{locale = FR,detect-all,per-mode=symbol,quotient-mode=fraction,input-product=*,%
-list-final-separator = { \translate{et} },list-pair-separator = { \translate{et} },%
-range-phrase = { \translate{à} },separate-uncertainty = true,group-minimum-digits=3,%
-per-mode=symbol,inter-unit-product=\ensuremath{{}\!\cdot{}\!{}}}
+\sisetup{locale = FR,detect-all,group-minimum-digits=3,per-mode=symbol}
 
 \usepackage[french]{babel}  <co id="packagebabel" linkends="addpackages.exp"/>
 
@@ -1394,9 +1391,9 @@ Presentation: Colorier en noir la case correspondante à la proposition correcte
 + moins de lipides
 
 **[columns=2]Les dépenses énergétiques journalières d'une adolescente sont en moyenne de
-\SI{10000}{\kilo\joule} <co id="siunitxLaTeX" linkends="siunitxLaTeX.exp"/>.
- Vanessa a consommé \SI{3200}{kJ} au petit-déjeuner, \SI{3500}{kJ} à midi et
-  \SI{2400}{\kilo\joule} au diner. Elle a donc mangé équilibré :
+\qty{10000}{\kilo\joule} <co id="siunitxLaTeX" linkends="siunitxLaTeX.exp"/>.
+ Vanessa a consommé \qty{3200}{kJ} au petit-déjeuner, \qty{3500}{kJ} à midi et
+  \qty{2400}{\kilo\joule} au diner. Elle a donc mangé équilibré :
 - Faux
 + Vrai
 
@@ -2207,7 +2204,7 @@ Duration : 10 minutes.
 </programlisting></para>
 
         <para>In this example, the teacher will get three boxes. If the first
-        (labeled W for wrong) is ticked, the student will get 0 points. If the
+        (labeled W for wrong) is ticked, the student will get 0 point. If the
         second (labeled P for partial) is ticked, the student will get 1
         point. If the third (labeled C for correct) is ticked, the student
         will get 2 points.</para>
@@ -2376,8 +2373,8 @@ Duration : 10 minutes.
 \FPeval\aRandomVariable{round(3+8*random,2)}
 \FPeval\aCalculateVariable{round(\aRandomVariable*9.81,2)}
 
-\AMCOpen{answer={m=\protect\SI{\aRandomVariable}{\kilo\gram},%
-P=\protect\SI{\aCalculateVariable}{\newton}}{the scoring}
+\AMCOpen{answer={m=\protect\qty{\aRandomVariable}{\kilo\gram},%
+P=\protect\qty{\aCalculateVariable}{\newton}}{the scoring}
 </programlisting>
 </warning>
 
@@ -2457,23 +2454,41 @@ P=\protect\SI{\aCalculateVariable}{\newton}}{the scoring}
           <para>if the number of boxes is significant, use this tip
           (<command>\parbox</command>) to force a linebreak.</para>
 
-          <programlisting>\AMCOpen{lines=6}{
-          \hbox{\parbox{8.5cm}{
-          \wrongchoice[F]{F}\scoring{0}
-			    \wrongchoice[1]{1}\scoring{1}
-			    \wrongchoice[2]{2}\scoring{2}
-			    \wrongchoice[3]{3}\scoring{3}
-			    \wrongchoice[4]{4}\scoring{4}
-			    \wrongchoice[5]{5}\scoring{5}
-			    \wrongchoice[6]{6}\scoring{6}
-			    \wrongchoice[7]{7}\scoring{7}
-			    \wrongchoice[8]{8}\scoring{8}
-			    \wrongchoice[9]{9}\scoring{9}
-			    \correctchoice[10]{10}\scoring{10}
-                    }}
-            }
+<programlisting>\AMCOpen{lines=6}{
+\hbox{\parbox{8.5cm}{
+\wrongchoice[F]{F}\scoring{0}
+\wrongchoice[1]{1}\scoring{1}
+\wrongchoice[2]{2}\scoring{2}
+\wrongchoice[3]{3}\scoring{3}
+\wrongchoice[4]{4}\scoring{4}
+\wrongchoice[5]{5}\scoring{5}
+\wrongchoice[6]{6}\scoring{6}
+\wrongchoice[7]{7}\scoring{7}
+\wrongchoice[8]{8}\scoring{8}
+\wrongchoice[9]{9}\scoring{9}
+\correctchoice[10]{10}\scoring{10}
+}}
+  }
 	      </programlisting>
         </tip>
+ 
+ 
+         <tip>
+         <para>You may use <code>questionmultx</code> environment
+         (see <xref endterm="latex.numeric.title" linkend="latex.numeric"/>)</para> 
+   
+  <programlisting>
+\begin{questionmultx}{ouverte}\bareme{MAX=6}
+Donnez la définition de l’inflation.
+\AMCOpen{lines=5}{\bonne[1]{1}\bareme{b=1}\bonne[2]{2}\bareme{b=2}%
+\bonne[3]{3}\bareme{b=3}\bonne[4]{4}\bareme{b=4}%
+\bonne[5]{5}\bareme{b=5}\bonne[6]{6}\bareme{b=6}%
+\bonne[1/2]{1/2}\bareme{b=0.5}}
+\end{questionmultx}</programlisting>
+
+        <para>In this example, if the first  box (1) and the last are ticked, the student will get 1.5 point.
+        Maximum score is 6 points.</para>
+        </tip> 
       </sect4>
 
         <sect4>
@@ -3447,17 +3462,18 @@ How is the identity function defined?
 \AMCinterBrep=.5ex
 \AMCinterIquest=0pt
 \AMCinterBquest=3ex
+\AMCpostNquest=1.5ex
 \AMCpostOquest=7mm
 \setlength{\AMChorizAnswerSep}{3em plus 4em}
 \setlength{\AMChorizBoxSep}{1em}
 </programlisting>
 
-          <para>These dimensions are the vertical space between questions
+          <para>These dimensions are the vertical spaces between questions
           (<code>quest</code>) or answers (<code>rep</code>), in boxed mode
           (<code>B</code>, with <command>\AMCBoxedAnswers</command> or
           <option>box</option> package option) or standard mode
-          (<code>I</code>) and the space left after an open question. The two
-          last lengths are used in environment:
+          (<code>I</code>) and the space left after a numeric and open question.
+	  The two last lengths are used in environment:
           <option>choicescustom</option></para>
         </sect4>
       </sect3>
@@ -3649,7 +3665,71 @@ and write your first and last names below.
               direction.</para>
             </listitem>
           </varlistentry>
+  
+              <varlistentry>
+            <term>multi <emphasis>not recommanded</emphasis></term>
+  
+              <listitem>
+              <para>copy the code acquisition grid to each page.</para>
+            <warning><para>Only workes with photocopied subjects (see <xref endterm="alt.photocopy.title" linkend="alt.photocopy"/>)
+            and with option <code>separateanswersheet</code> (see <xref endterm="sec.package.options.title"
+            linkend="sec.package.options"/>.)</para>
+            
+            <para>Using this option requires to change the original  code for the position of the four corner marks.</para>
+            <para>The code below allows this and should be placed before or after<command>\begin{document}</command>.</para>
+            </warning>
+            </listitem>
+          </varlistentry>
         </variablelist>
+  
+<programlisting>
+\makeatletter
+
+\def\IDbox{% <co id="IDbox" linkends="IDbox.exp"/>
+	\begin{minipage}{10cm}
+		\noindent\AMCzone[id]{identification\thepage}{) <co id="zoneid" linkends="zoneid.exp"/>
+			\fbox{%
+				\begin{minipage}{\linewidth}
+					\noindent Darken the boxes corresponding to your student ID:\\[1.2ex]
+					\AMCcodeGrid[h,multi]{id}{ABCDEFGHJKLM,0123456789}
+				\end{minipage}%
+			}%
+		}%
+	\end{minipage}
+}
+\fancypagestyle{AMCpageFull}{% <co id="modificationcalage" linkends="modificationcalage.exp"/>
+	\fancyhf{}%
+	\fancyhead[L]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHG}}}}%
+	\fancyhead[R]{\AMC@LR{\he@dbas{\leavevmode\m@rque{positionHD}}}}%
+	\fancyfoot[L]{\AMC@LR{\leavevmode\m@rque{positionBG}}}%
+	\fancyfoot[R]{\AMC@LR{\leavevmode\m@rque{positionBD}}}%
+	\fancyhead[C]{
+		\AMCIDBoxesABC\vspace{4mm}
+		\ifAMC@zoneformulaire\IDbox\fi
+	}%
+	\fancyhfoffset[EOLR]{5mm}%
+	\fancyfoot[C]{\AMC@note}%
+	\renewcommand{\headrulewidth}{0pt}%
+	\renewcommand{\footrulewidth}{0pt}%
+}
+\makeatother
+</programlisting> 
+  
+<para><calloutlist>
+  <callout arearefs="IDbox" id="IDbox.exp">
+    <para>This LaTeX command frame the code acquisition  grid students'.</para>
+</callout>
+
+  <callout arearefs="zoneid" id="zoneid.exp">
+    <para>This area will be anonymized (see <xref endterm="Anonymat.title" linkend="Anonymat"/>) but it is optional. </para>
+</callout>
+
+  <callout arearefs="modificationcalage" id="modificationcalage.exp">
+    <para>Code modifies the usual of AMC's performance. The lengths may need to be adjust with your margins. </para>
+</callout>
+
+</calloutlist></para>    
+  
       </sect3>
 
 
@@ -4011,7 +4091,7 @@ respective parameters \VQa{} and \VQb{}.
         </sect4>
 
         <sect4 id="latex.numeric">
-          <title>Coding the result</title>
+          <title id="latex.numeric.title">Coding the result</title>
 
           <para>The students can also be asked to code the numerical answer,
           using the <command>\AMCnumericChoices</command> command, as in the
@@ -4726,7 +4806,7 @@ Name :
     </sect2>
 
     <sect2 id="gui.prepare">
-      <title>Preparing the subject</title>
+      <title id="gui.prepare.sujet">Preparing the subject</title>
 
       <para>Preparing a project is done in two steps. First we must make the
       reference documents from the LaTeX source file. This can be done by
@@ -4936,7 +5016,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
     </sect2>
 
     <sect2 id="gui.capture">
-      <title>Reading the copies</title>
+      <title id="gui.capture.saisie">Reading the copies</title>
 
       <para>Now we shall describe the input from students' copies, which can
       be done automatically and/or manually.</para>
@@ -6411,7 +6491,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
     <title>Alternative usages</title>
 
     <sect2 id="alt.photocopy">
-      <title>Photocopied subject</title>
+      <title id="alt.photocopy.title">Photocopied subject</title>
 
       <para>As explained in <xref endterm="printing.title"
       linkend="printing"/>, it is not always possible to photocopy one answer
@@ -9493,6 +9573,58 @@ What is the return value of the following R code?
 &lt;/arguments&gt;</programlisting>
       </refsect1>
     </refentry>
+  </sect1>
+
+ <sect1 id="Anonymat">
+   <title id="Anonymat.title">Copy anonymity (LaTeX only)</title>
+   
+  <note><para> In conventional use, this option is not recommended.</para></note>
+  
+      <sect2 id="Anonymat.activation">
+       <title id="Anonymat.activation.title">Start anonymous mode</title>
+      		<para><menuchoice>
+             <guimenuitem>Preferences</guimenuitem>
+             <guimenuitem>Features</guimenuitem>
+             <guimenuitem>Anonimization</guimenuitem>
+             <guimenuitem>Display anonymization panel</guimenuitem>
+             </menuchoice>.</para>
+      </sect2>
+  
+    <sect2 id="Principe">
+     <title id="Principe.title">Approach creation of anonymous pdf filess</title> 
+      <itemizedlist>
+       <listitem><para>Prepare your subject (<xref endterm="gui.prepare.sujet" linkend="gui.prepare"/>).</para></listitem> 
+       <listitem><para>Input students' copies(<xref endterm="gui.capture.saisie" linkend="gui.capture"/>)</para></listitem>
+       <listitem><para><guilabel>Data capture</guilabel> tab , a new menu is displayed :
+       click on <guilabel>Anonymize</guilabel>. </para></listitem>
+       <listitem><para><guilabel>Open</guilabel> to access anonymized pdf files.</para></listitem>
+       <listitem><para>Manually correct some questions from these PDFs.</para></listitem>
+       <listitem><para>Marks are passed to AMC by the csv file.</para></listitem>
+      </itemizedlist>
+       
+      <warning><para>This files are uneditable; do notrerun a automatic recognition.</para></warning>
+</sect2>
+  
+    <sect2 id="Commandes.anonymat">
+      <title id="Commandes.anonymat.title">Useful commands with  this option</title>
+  
+        <sect3 id="AMCzoneid">
+      	  <title id="AMCzoneid.title">AMCzone[id]{}</title>
+      	  <para>The command <command> \AMCzone[id]{LaTeX code}</command> is used to hide a defined area.</para>
+      	  <para>After anonymization, the <command>\namefield</command> zone is hidded.</para>
+      	</sect3>
+  
+      	<sect3 id="AMCexternatQuestion">
+      	  <title id="AMCexternalQuestion.title">AMCexternalQuestion</title>
+          <para>The command <command>AMCexternalQuestion{identifier to choose}{score maximal}</command>
+          allows  to brand an external question that will be scored outside AMC, with a maximum score.</para>
+      	  <para>When using this command, you can freely handle the question number and the question text
+      	  (AMC will not do this). (AMC will not do this)</para>
+      	  <warning><para>It is not possible to add this command after the subject has been fully prepared.</para></warning>
+      	  <para>During anonymization, a csv file is created. This file will have to be filled in with the marks and then 
+      	  read by AMC to continue with the correction (see <xref endterm="gui.marks.title" linkend="gui.marks"/>).</para>
+      	</sect3>
+    </sect2>
   </sect1>
 
   <sect1 id="Miscellaneous">
