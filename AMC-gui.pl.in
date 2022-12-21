@@ -38,16 +38,6 @@ use AMC::Config;
 use AMC::Project;
 use AMC::Gui::Main;
 
-Gtk3::IconTheme::get_default->prepend_search_path( amc_specdir('icons') );
-Gtk3::Window::set_default_icon_list(
-    [
-        map {
-            Gtk3::IconTheme::get_default->load_icon( "auto-multiple-choice",
-                $_, "force-svg" )
-        } ( 8, 16, 32, 48, 64, 128 )
-    ]
-);
-
 use_gettext;
 use_amc_plugins();
 
@@ -76,6 +66,16 @@ if ( $debug || $debug_file ) {
 }
 
 debug_pm_version("Gtk3");
+
+Gtk3::IconTheme::get_default->prepend_search_path( amc_specdir('icons') );
+Gtk3::Window::set_default_icon_list(
+    [
+        map {
+            Gtk3::IconTheme::get_default->load_icon( "auto-multiple-choice",
+                $_, "force-svg" )
+        } ( 8, 16, 32, 48, 64, 128 )
+    ]
+);
 
 my %w = ();
 

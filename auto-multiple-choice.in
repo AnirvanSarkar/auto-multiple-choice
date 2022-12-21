@@ -76,6 +76,12 @@ if($#ARGV==0) {
     $action='gui';
 }
 
+if ( $action eq "gui" ) {
+    # Force WM_CLASS value, to be matched with desktop file
+    unshift @ARGV, "--class", "auto-multiple-choice", "--name",
+      "auto-multiple-choice";
+}
+
 my $f=mod_path($action);
 
 if($f) {

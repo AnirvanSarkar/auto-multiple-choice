@@ -140,7 +140,7 @@ class AMC:
         os.environ["LANG"] = "en_US.UTF-8"
         dogtail.utils.run(self.amc_cmd(), timeout=3,
                           appName='auto-multiple-choice')
-        self.gui = root.application('AMC-gui.pl')
+        self.gui = root.application('auto-multiple-choice')
         self.gui.grab_focus()
         if self.debug:
             self.click_dialog()
