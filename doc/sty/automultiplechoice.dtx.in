@@ -3332,7 +3332,7 @@ along with Auto-Multiple-Choice.  If not, see
 %         |\QuestionIndicative| tells that the current question is not
 %         no be taken into account in the global mark.
 %    \begin{macrocode}
-\def\scoring#1{\ifAMC@calibration\AMCmessage{B=#1}\fi}
+\def\scoring#1{\ifAMC@calibration\AMCmessage{B=#1}\fi\ignorespaces}
 \def\scoringDefaultS#1{\ifAMC@calibration\AMCmessage{BDS=#1}\fi}
 \def\scoringDefaultM#1{\ifAMC@calibration\AMCmessage{BDM=#1}\fi}
 \def\QuestionIndicative{\ifAMC@calibration\AMCmessage{INDIC}\fi}

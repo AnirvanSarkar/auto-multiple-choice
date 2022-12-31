@@ -23,7 +23,7 @@ require "./AMC/Test.pm";
 AMC::Test->new(
     dir             => __FILE__,
     tex_engine      => 'pdflatex',
-    seuil           => 0.5,
+    seuil           => 0.4,
     perfect_copy    => '',
     export_full_csv => [
         { -copy => 1, -question => 'capitalist', -abc   => 'A' },

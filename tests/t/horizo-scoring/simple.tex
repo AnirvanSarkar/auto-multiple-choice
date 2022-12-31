@@ -1,0 +1,90 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[bloc,completemulti]{automultiplechoice}    
+\begin{document}
+
+\def\AMCanswer#1#2{#1 #2 $\bullet$ }
+
+\exemplaire{5}{    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ horiz-ordered\end{minipage}
+\champnom{\fbox{    
+                \begin{minipage}{.5\linewidth}
+                  Name:
+
+                  \vspace*{.5cm}\namefielddots   
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\begin{center}\em
+  This test is related to bug \#866: with choiceshoriz and ordered
+  mode, scorings lead to an individual solution document not matching
+  the layout of the subject document...
+\end{center}
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\begin{question}{horizo}
+  Which is the largest?
+  \begin{choiceshoriz}[o]
+    \wrongchoice{-100}\scoring{-1}
+    \wrongchoice{-50}\scoring{-2}
+    \wrongchoice{-25}\scoring{-2}
+    \wrongchoice{9}\scoring{-1}
+    \wrongchoice{13}\scoring{0}
+    \wrongchoice{28}\scoring{0}
+    \correctchoice{54}\scoring{2}
+  \end{choiceshoriz}
+\end{question}
+
+\begin{question}{horiz}
+  Which is the largest?
+  \begin{choiceshoriz}
+    \wrongchoice{-100}\scoring{-1}
+    \wrongchoice{-50}\scoring{-2}
+    \wrongchoice{-25}\scoring{-2}
+    \wrongchoice{9}\scoring{-1}
+    \wrongchoice{13}\scoring{0}
+    \wrongchoice{28}\scoring{0}
+    \correctchoice{54}\scoring{2}
+  \end{choiceshoriz}
+\end{question}
+
+\begin{question}{customo}
+  Which is the largest?
+  \begin{choicescustom}[o]
+    \wrongchoice{-100}\scoring{-1}
+    \wrongchoice{-50}\scoring{-2}
+    \wrongchoice{-25}\scoring{-2}
+    \wrongchoice{9}\scoring{-1}
+    \wrongchoice{13}\scoring{0}
+    \wrongchoice{28}\scoring{0}
+    \correctchoice{54}\scoring{2}
+  \end{choicescustom}
+\end{question}
+
+\begin{question}{custom}
+  Which is the largest?
+  \begin{choicescustom}
+    \wrongchoice{-100}\scoring{-1}
+    \wrongchoice{-50}\scoring{-2}
+    \wrongchoice{-25}\scoring{-2}
+    \wrongchoice{9}\scoring{-1}
+    \wrongchoice{13}\scoring{0}
+    \wrongchoice{28}\scoring{0}
+    \correctchoice{54}\scoring{2}
+  \end{choicescustom}
+\end{question}
+
+}   
+
+\end{document}
