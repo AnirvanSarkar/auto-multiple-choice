@@ -95,7 +95,7 @@ pack-debian:
     - 'export GBP_UPSTREAM="$GBP_V+git$GBP_DATE"'
     - 'gbp import-orig --upstream-version=$GBP_UPSTREAM --import-msg "New upstream version from git @$CI_COMMIT_SHORT_SHA" ../../artifacts/*_sources.tar.gz'
     - perl -i -ne 'print if(/conf/)' debian/patches/series
-    - git commit debian/patches/series -m "Skip patches, except for Makefile.conf"
+    - git diff --quiet -- debian/patches || git commit debian/patches/series -m "Skip patches, except for Makefile.conf"
     - gbp dch -N "$GBP_UPSTREAM-1" --git-author --commit
     - gbp buildpackage
   artifacts:
