@@ -697,7 +697,8 @@ lesquels sont positifs ?
             <code>images</code> (voir <xref linkend="parse_images"/>),
             <code>embf</code> (voir <xref linkend="parse_embf"/>) et
             <code>local_latex</code> (voir <xref
-            linkend="parse_local_latex"/>).</para>
+            linkend="parse_local_latex"/>),
+            <code>latex</code> (voir <xref linkend="parse_latex"/>).</para>
           </listitem>
         </varlistentry>
 
@@ -1175,6 +1176,33 @@ main( )
       l'exemple suivant :</para>
 
       <programlisting>Les questions marquées d'un [[\multiSymbole{}]] peuvent avoir zéro, une ou plusieurs bonnes réponses.</programlisting>
+    </sect2>
+
+    <sect2 id="parse_latex">
+      <title>Fragments de LaTeX</title>
+
+      <para>Pour inclure un fragment de code LaTeX sur plusieurs
+      lignes, entourez-le de <code>[latex]</code> et
+      <code>[/latex]</code> :</para>
+
+      <programlisting>* La matrice suivante est
+
+[latex]
+\[
+\left[\begin{array}{ccccc}
+1 & 0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 1 \\
+\end{array}
+\right]\]
+[/latex]
+
+- diagonale
++ triangulaire
+- symétrique
+      </programlisting>
     </sect2>
 
     <sect2 id="sec.txt-groups">
@@ -2956,7 +2984,7 @@ Durée : 10 minutes.
 \end{questionmult}</programlisting></para>
 
         <para><emphasis>Explication :</emphasis> sera affiché avant les
-        explications de la première et troisième réponse, <emphasis>Raison
+        explications de la première et troisième question, <emphasis>Raison
         :</emphasis> avant les explications de la deuxième question.</para>
         </sect5>
 
@@ -5264,7 +5292,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
         comprise entre le <guilabel>seuil de noirceur</guilabel> et le
         <guilabel>seuil de noirceur supérieur</guilabel> sera considérée comme
         cochée. Si cette proportion dépasse le <guilabel>Seuil de noirceur
-        supérieur</guilabel>, la case sera considérér comme non-cochée.</para>
+        supérieur</guilabel>, la case sera considérée comme non-cochée.</para>
       </sect3>
 
       <sect3 id="gui.correct">
@@ -5483,7 +5511,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
 
               <listitem>
                 <para>sélectionnez la question que vous voulez corriger (menu
-                déroulant au-dessus de la liste des pages) .</para>
+                déroulant au-dessus de la liste des pages).</para>
               </listitem>
             </itemizedlist>
 

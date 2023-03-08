@@ -207,7 +207,7 @@
       project (between the time when the test sheets are printed and the time
       when tests are corrected and graded). There are a few modifications
       which may interfere with AMC operating normally if you apply them while
-      working with a given project:</para>
+      working with a given project.</para>
     </sect2>
 
     <sect2 id="install">
@@ -680,8 +680,9 @@ the best you can.
             implemented features are <code>verbatim</code> (see <xref
             linkend="parse_verbatim"/>), <code>images</code> (see <xref
             linkend="parse_images"/>), <code>embf</code> (see <xref
-            linkend="parse_embf"/>) and <code>local_latex</code> (see <xref
-            linkend="parse_local_latex"/>).</para>
+            linkend="parse_embf"/>), <code>local_latex</code> (see <xref
+            linkend="parse_local_latex"/>) and <code>latex</code> (see <xref
+	    linkend="parse_latex"/>).</para>
           </listitem>
         </varlistentry>
 
@@ -1135,12 +1136,38 @@ main( )
     </sect2>
 
     <sect2 id="parse_local_latex">
-      <title>Pieces of LaTeX code</title>
+      <title>Short pieces of LaTeX code</title>
 
       <para>You can include some small parts of LaTeX code in your document,
       including it in double square brackets, as in:</para>
 
       <programlisting>Questions with a [[\multiSymbole{}]] may have zero, one or more right answers.</programlisting>
+    </sect2>
+
+    <sect2 id="parse_latex">
+      <title>LaTeX fragments</title>
+
+      <para>To include a multi line LaTeX fragment, enclose it between
+      <code>[latex]</code> and <code>[/latex]</code>:</para>
+
+      <programlisting>* The following matrix is
+
+[latex]
+\[
+\left[\begin{array}{ccccc}
+1 & 0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 1 \\
+\end{array}
+\right]\]
+[/latex]
+
+- diagonal
++ triangular
+- symmetric
+      </programlisting>
     </sect2>
 
     <sect2 id="sec.txt-groups">
