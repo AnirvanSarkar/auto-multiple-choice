@@ -138,7 +138,7 @@ sub new {
     # Disable global option won't be used.
 
     $self->{parse_modules} =
-      [ 'verbatim', 'local_latex', 'images', 'embf', 'title', 'text' ];
+      [ 'verbatim', 'latex', 'local_latex', 'images', 'embf', 'title', 'text' ];
 
     # current question number among questions for which no ID is given
     # in the source
@@ -403,7 +403,7 @@ sub read_source {
     my ( $self, $input_file ) = @_;
 
     $self->{reader_state} = {
-        follow => '',    # variable where to add content comming from
+        follow => '',    # variable where to add content coming from
                          # following lines
         group    => $self->group_by_id('_main_'),    # current group
         question => '',                              # current question
@@ -733,11 +733,28 @@ sub verbatim_content {
     );
 }
 
+# content from a latex block is copied unaltered
+sub latex_content {
+    my ( $self, $latex ) = @_;
+    return (
+	{ type => 'latex',
+	  string => $latex
+	}
+    );
+}
+
 # parse [verbatim] ... [/verbatim] constructs
 sub parse_verbatim {
     my ( $self, @components ) = @_;
     return ( $self->parse_tags( "verbatim", \&verbatim_content, @components ) );
 }
+
+# parse [latex] ... [/latex] constructs
+sub parse_latex {
+    my ( $self, @components ) = @_;
+    return ( $self->parse_tags( "latex", \&latex_content, @components ) );
+}
+
 
 # generic code to parse '[xxx ... xxx]' constructs
 sub parse_brackets {
