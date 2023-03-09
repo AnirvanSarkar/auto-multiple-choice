@@ -172,5 +172,44 @@ $t->test_scoring(
     3
 );
 
+$t->begin("Scoring::interval");
+
+$t->test_scoring(
+    {
+        multiple => 1,
+        strategy => "p=2,P=5"
+    },
+    [
+        { correct => 1, strategy => "b=1", ticked => 1 },
+        { correct => 1, strategy => "b=2", ticked => 1 },
+        { correct => 1, strategy => "b=4", ticked => 1 },
+    ],
+    5
+);
+$t->test_scoring(
+    {
+        multiple => 1,
+        strategy => "p=3,P=4"
+    },
+    [
+        { correct => 1, strategy => "b=1", ticked => 1 },
+        { correct => 1, strategy => "b=2", ticked => 0 },
+        { correct => 1, strategy => "b=4", ticked => 0 },
+    ],
+    3
+);
+$t->test_scoring(
+    {
+        multiple => 1,
+        strategy => "p=2,P=4"
+    },
+    [
+        { correct => 1, strategy => "b=1", ticked => 1 },
+        { correct => 1, strategy => "b=2", ticked => 1 },
+        { correct => 1, strategy => "b=4", ticked => 0 },
+    ],
+    3
+);
+
 $t->ok;
 

@@ -334,6 +334,16 @@ sub post_process {
                     $$why   = 'P';
                 }
             }
+
+            # applies the 'P' ceiling value
+            my $ceiling = $self->directive("P");
+            if ( defined($ceiling) ) {
+                if ( $$score > $ceiling ) {
+                    debug "Ceiling: $ceiling";
+                    $$score = $ceiling;
+                    $$why   = 'C';
+                }
+            }
         }
     }
 }
