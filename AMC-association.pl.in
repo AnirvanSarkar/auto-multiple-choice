@@ -1,6 +1,6 @@
 #! @/PERLPATH/@
 #
-# Copyright (C) 2008-2022 Alexis Bienvenüe <paamc@passoire.fr>
+# Copyright (C) 2008-2023 Alexis Bienvenüe <paamc@passoire.fr>
 #
 # This file is part of Auto-Multiple-Choice
 #
@@ -29,8 +29,9 @@ my $liste    = '';
 my $data_dir = '';
 my $list     = '';
 my $set      = '';
+my $set_from = '';
 my $student  = '';
-my $copy     = 0;
+my $copy     = '';
 my $id       = undef;
 my $raw      = '';
 
@@ -41,12 +42,17 @@ GetProjectOptions(
     "list!"                       => \$list,
     "raw!"                        => \$raw,
     "set!"                        => \$set,
+    "set-from=s"                  => \$set_from,
     "student=s"                   => \$student,
     "copy=s"                      => \$copy,
     "id=s"                        => \$id,
 );
 
 debug("AMC-association / DEBUG") if (get_debug());
+
+if ( ( $list ? 1 : 0 ) + ( $set ? 1 : 0 ) + ( $set_from ? 1 : 0 ) > 1 ) {
+    die "Cannot select more that one options from --list, --set, --set-from";
+}
 
 if ($list) {
     require AMC::Data;
@@ -86,8 +92,49 @@ if ($list) {
     my $data  = AMC::Data->new($data_dir);
     my $assoc = $data->module('association');
     $data->begin_transaction('ASET');
+    $copy=0 if($copy eq '');
     $assoc->set_manual( $student, $copy, $id );
     $data->end_transaction('ASET');
+} elsif($set_from) {
+    require AMC::Data;
+    require Text::CSV;
+
+    if ( !-f $set_from ) {
+        die "Could not find file $set_from";
+    }
+    die "Needs a column name for the sheet numbers" if ( !$student );
+    die "Needs a column name for the student IDs"   if ( !$id );
+
+    my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
+    open my $fh, "<:encoding(utf8)", $set_from
+      or error("Error opening $set_from: $!");
+    my %headers = map { $_ => 1 } (
+        $csv->header(
+            $fh, { sep_set => [ ";", ",", "\t" ], munge_column_names => 'none' }
+        )
+    );
+    for my $h ( $student, $copy, $id ) {
+        if ( $h && !$headers{$h} ) {
+            die "Could not find column \"$h\" in the CSV file";
+        }
+    }
+    my $data  = AMC::Data->new($data_dir);
+    my $assoc = $data->module('association');
+    $data->begin_transaction('ASTF');
+    while ( my $row = $csv->getline_hr($fh) ) {
+        my $s = $row->{$student};
+        my $c = 0;
+        $c = $row->{$copy} if ($copy ne '');
+        my $i = $row->{$id};
+        $i = undef if ( $i eq '' );
+        if ( $s ne '' ) {
+            $assoc->set_manual( $s, $c, $i );
+        } else {
+            debug "Warning: no student found";
+        }
+    }
+    $data->end_transaction('ASTF');
+    close $fh;
 } else {
     require AMC::Gui::Association;
 
