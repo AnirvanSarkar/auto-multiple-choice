@@ -3683,7 +3683,7 @@ along with Auto-Multiple-Choice.  If not, see
 
 \cs_new:Npn \amc_fp_n_digits:Nnn #1 #2 #3 {
   \fp_set:Nn #1
-    { round((#2) * 10^(#3)) }
+    { round((#2) * \amc_num_base_int^(#3)) }
 }
 
 \int_new:N \amc_todigits_int
@@ -4104,7 +4104,7 @@ along with Auto-Multiple-Choice.  If not, see
     \tl_put_left:Nn #1 { ( 0 + ( }
     \tl_put_right:Nn #1 { ) ) }
     \int_compare:nNnTF \amc_num_decd_int > 0 {
-      \tl_put_right:Nx #1 { * ( 10 ** \int_eval:n { #5 } ) }
+      \tl_put_right:Nx #1 { * ( \int_use:N \amc_num_base_int ** \int_eval:n { #5 } ) }
     } { }
   } {
     \tl_put_left:Nn #1 { ( }
@@ -4171,7 +4171,7 @@ along with Auto-Multiple-Choice.  If not, see
        \amc_fp_decompose:NNn \amc_num_mantissa_fp \amc_num_correct_expo_int { #1 }
        \int_compare:nNnTF { \amc_num_ndigits_int - \amc_num_decd_int } > 1 {
          \fp_set:Nn \amc_num_mantissa_fp {
-           \amc_num_mantissa_fp * 10^( \amc_num_ndigits_int - \amc_num_decd_int - 1 )
+           \amc_num_mantissa_fp * \amc_num_base_int^( \amc_num_ndigits_int - \amc_num_decd_int - 1 )
          }
          \int_set:Nn \amc_num_correct_expo_int {
            \amc_num_correct_expo_int - ( \amc_num_ndigits_int - \amc_num_decd_int - 1 )

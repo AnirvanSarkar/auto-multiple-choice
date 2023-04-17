@@ -1,0 +1,124 @@
+%
+% Copyright (C) 2023 Alexis Bienvenüe
+%
+% This file is part of Auto-Multiple-Choice
+%
+% Auto-Multiple-Choice is free software: you can redistribute it
+% and/or modify it under the terms of the GNU General Public License
+% as published by the Free Software Foundation, either version 2 of
+% the License, or (at your option) any later version.
+%
+% Auto-Multiple-Choice is distributed in the hope that it will be
+% useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+% of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+% General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Auto-Multiple-Choice.  If not, see
+% <http://www.gnu.org/licenses/>.
+%
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{automultiplechoice}
+\usepackage{fp} 
+
+\begin{document}
+
+\element{Base 10}{
+  \begin{questionmultx}{73sd}
+    73
+    \begin{center}
+      \AMCnumericChoices{73}{decimals=0,digits=4,sign=false}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{73ad}
+    73
+    \begin{center}
+      \AMCnumericChoices{73}{decimals=2,digits=4,sign=false}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{730sd}
+    73.0
+    \begin{center}
+      \AMCnumericChoices{73.0}{decimals=0,digits=4,sign=false}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{730ad}
+    73.0
+    \begin{center}
+      \AMCnumericChoices{73.0}{decimals=2,digits=4,sign=false}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{7375sd}
+    73.75 arrondi à 74
+    \begin{center}
+      \AMCnumericChoices{73.75}{decimals=0,digits=4,sign=false}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{7375ad}
+    73.75
+    \begin{center}
+      \AMCnumericChoices{73.75}{decimals=2,digits=4,sign=false}
+    \end{center}
+  \end{questionmultx}
+}
+
+\element{Base 2}{
+  \begin{questionmultx}{2-73sd}
+    73 - base 2 - 1001001
+    \begin{center}
+      \AMCnumericChoices{73}{decimals=0,digits=12,sign=false,base=2,vertical=true}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{2-73ad}
+    73 - base 2 - 1001001
+    \begin{center}
+      \AMCnumericChoices{73}{decimals=5,digits=12,sign=false,base=2,vertical=true}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{2-730sd}
+    73.0 - base 2 - 1001001
+    \begin{center}
+      \AMCnumericChoices{73.0}{decimals=0,digits=12,sign=false,base=2,vertical=true}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{2-730ad}
+    73.0 - base 2 - 1001001
+    \begin{center}
+      \AMCnumericChoices{73.0}{decimals=5,digits=12,sign=false,base=2,vertical=true}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{2-7375sd}
+    73.75 - base 2 - arrondi à 74 = 1001010
+    \begin{center}
+      \AMCnumericChoices{73.75}{decimals=0,digits=12,sign=false,base=2,vertical=true}
+    \end{center}
+  \end{questionmultx}
+  
+  \begin{questionmultx}{2-7375ad}
+    73.75 - base 2 - 1001001.11
+    \begin{center}
+      \AMCnumericChoices{73.75}{decimals=5,digits=12,sign=false,base=2,vertical=true}
+    \end{center}
+  \end{questionmultx}
+}
+
+\exemplaire{1}{
+  \AMCsection{Base 10}
+  \restituegroupe{Base 10}
+  \AMCsection{Base 2}
+  \restituegroupe{Base 2}
+}
+
+\end{document}
