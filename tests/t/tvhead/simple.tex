@@ -1,0 +1,107 @@
+%
+% Copyright (C) 2023 Alexis Bienvenüe
+%
+% This file is part of Auto-Multiple-Choice
+%
+% Auto-Multiple-Choice is free software: you can redistribute it
+% and/or modify it under the terms of the GNU General Public License
+% as published by the Free Software Foundation, either version 2 of
+% the License, or (at your option) any later version.
+%
+% Auto-Multiple-Choice is distributed in the hope that it will be
+% useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+% of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+% General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Auto-Multiple-Choice.  If not, see
+% <http://www.gnu.org/licenses/>.
+%
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[francais,bloc,completemulti]{automultiplechoice}    
+\begin{document}
+
+\exemplaire{10}{    
+
+%%% debut de l'en-tête des copies :    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{    
+                \begin{minipage}{.5\linewidth}
+                  Nom et prénom :
+
+                  \vspace*{.5cm}\namefielddots   
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\begin{center}\em
+Durée : 10 minutes.
+
+  Aucun document n'est autorisé.
+  L'usage de la calculatrice est interdit.
+
+  Les questions faisant apparaître le symbole \multiSymbole{} peuvent
+  présenter zéro, une ou plusieurs bonnes réponses. Les autres ont
+  une unique bonne réponse.
+
+  Des points négatifs pourront être affectés à de \emph{très
+    mauvaises} réponses.
+\end{center}
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\begin{question}{prez}    
+  Parmi les personnalités suivantes, laquelle a été présidente
+  de la république française~?
+  \begin{reponses}
+    \bonne{René Coty}
+    \mauvaise{Alain Prost}
+    \mauvaise{Marcel Proust}
+    \mauvaise{Claude Monet}
+  \end{reponses}
+\end{question}
+
+\begin{questionmultx}{div}
+  Coder 5/7
+  \AMCnumericChoices{5/7}{
+    digits=5,
+    decimals=3,
+    sign=true,
+    approx=1,
+    vertical=true,
+    vhead=true,
+    Tvhead={Mil,Cent,Diz,Unit,d,c,m,dm},
+    vheadunitindex=5
+  }
+\end{questionmultx}
+
+\begin{questionmultx}{bin}
+  Coder 57 en binaire
+  \AMCnumericChoices{57}{
+    digits=8,base=2,sign=false,vertical=true,vhead=true}
+\end{questionmultx}
+
+\begin{questionmult}{pref}    
+  Parmi les villes suivantes, lesquelles sont des préfectures~?
+  \begin{reponses}
+    \bonne{Poitiers}
+    \mauvaise{Sainte-Menehould}
+    \bonne{Avignon}
+  \end{reponses}
+\end{questionmult}
+
+% \AMCaddpagesto{3} 
+
+}   
+
+\end{document}
