@@ -871,6 +871,14 @@ along with Auto-Multiple-Choice.  If not, see
 %     |\AMCntextVHead| that is originally defined as
 %     |\def\AMCntextVHead#1{\emph{b#1}}|. This default value is
 %     useful to number the binary digits. Default value is |false|.
+%   \item[|Tvhead=|\meta{text}] A coma separated list as |{H,T,O,t,h,th}|
+%     for header in vhead vertical mode. Needs |vhead| to be set
+%     (defaults to the empty list |{}|).
+%   \item[|vheadunitindex=|\meta{num}] The index
+%     of the Ones place in the |Tvhead| list, counting from the right.
+%     If zero, changed to |decimals + 1| (defaults to zero).
+%     For example, if |Tvhead={H,T,O,t,h,th}|, should be set as
+%     |vheadunitindex=4| (at least if |decimals| is not set to 3).
 %   \item[|hspace=|\meta{space}] sets the horizontal space between
 %     boxes (defaults to |.5em|).
 %   \item[|vspace=|\meta{space}] sets the certical space between
@@ -3798,6 +3806,10 @@ along with Auto-Multiple-Choice.  If not, see
   vhead .bool_set:N = \amc_num_vhead_bool,
   vhead .initial:n = { false },
   vhead .default:n = { true },
+  Tvhead .code:n = {\clist_set:Nx \amc_tvhead_clist {\clist_reverse:n {#1}}},
+  Tvhead .initial:n = {}, % \c_empty_clist does not work with \clist_reverse:n
+  vheadunitindex .int_set:N = \amc_vheadunitindex_int,
+  vheadunitindex .initial:n = 0,
   nozero .bool_set:N = \amc_num_nozero_bool,
   nozero .initial:n = { false },
   nozero .default:n = { true },
@@ -3977,8 +3989,8 @@ along with Auto-Multiple-Choice.  If not, see
 %    \begin{macrocode}
     \hbox{\vbox{
         \bool_if:NTF \amc_num_vhead_bool {
-          \vbox{\hbox{\AMCntextVHead{ \int_eval:n
-                { \amc_num_digit_int - 1 } }}}
+          \vbox{\hbox to \AMC@boxedwidth{\hfill\AMCntextVHead{ \int_eval:n
+                { \amc_num_digit_int - 1 } }\hfill}}
           \vspace{\AMCnumeric@Vspace}
         } { }
         \bool_if:NTF \amc_num_reverse_bool {
@@ -4147,6 +4159,23 @@ along with Auto-Multiple-Choice.  If not, see
 % Then we parse the options from \meta{opts}:
 %    \begin{macrocode}
   {\keys_set:nn { amcnumeric } { #2 }
+%    \end{macrocode}
+%  if Tvhead is set, we adapt the AMCntextVHead macro
+%    \begin{macrocode}
+	\int_compare:nTF {\amc_vheadunitindex_int = 0}
+		{\int_set:Nn \amc_vheadunitindex_int {\amc_num_decd_int + 1}}
+		{}
+
+	\clist_if_empty:NTF \amc_tvhead_clist
+		{}
+		{
+		 \def\AMCntextVHead##1{
+		    \int_set:Nn \l_tmpa_int
+			   {\int_max:nn
+				{(##1) - \amc_num_decd_int + \amc_vheadunitindex_int}
+				{0}}
+			\emph{\clist_item:Nn \amc_tvhead_clist {\l_tmpa_int}}}}
+
     \bool_if:nTF { \bool_if_p:N\amc_num_significant_bool
       && \int_compare_p:n { \amc_num_base_int != 10 } } {
       \message{^^J!~AMCnumeric~Error:~significant=true~can't~be~used~with~base!=10.^^J}
