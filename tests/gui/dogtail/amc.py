@@ -672,6 +672,12 @@ class AMC:
             # validate result
             self.click_dialog()
 
+    def auto_association(self):
+        marking = self.tab('Marking')
+        marking.select()
+        marking.child('Automatic', roleName='push button').click()
+        self.click_dialog()
+
     def manual_association(self, sequence=[]):
         marking = self.tab('Marking')
         marking.select()
@@ -769,7 +775,9 @@ class AMC:
 
     def set_options(self,
                     description=['TEST EXAM', 'test'],
-                    printing_method = None):
+                    printing_method = None,
+                    namefield = None):
+        namefield_change=False
         self.gui.child('Properties', roleName='push button').click()
         dialog = self.gui.child('AMC Preferences')
         dialog.grab_focus()
@@ -799,9 +807,21 @@ class AMC:
             ts[0][1].text = description[0]
             ts[1][1].text = description[1]
             self.shortcode = description[1]
+        if namefield:
+            time.sleep(1)
+            capture = dialog.child('Automatic data capture')
+            nf = sorted([(a.position[1], a)
+                         for a in capture.findChildren(
+                                dogtail.predicate.GenericPredicate(
+                                    roleName='combo box'))])
+            if nf[0][1].combovalue != namefield:
+                nf[0][1].combovalue = namefield
+                namefield_change=True
         time.sleep(2)
         dialog.child('OK').click()
         time.sleep(2)
+        if namefield_change:
+            self.click_dialog()
 
     def quit(self):
         self.gui.child('Close').click()

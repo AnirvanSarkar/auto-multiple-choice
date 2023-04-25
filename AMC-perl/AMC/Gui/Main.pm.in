@@ -3525,6 +3525,7 @@ sub decode_name_fields {
 
     my $type = $self->get('name_field_type');
     if ($type) {
+        load("AMC::Decoder::register::$type");
         my $reg  = "AMC::Decoder::register::$type"->new();
         my $deps = $reg->check_dependencies();
         if ( !$deps->{ok} ) {
