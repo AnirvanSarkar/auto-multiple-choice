@@ -341,7 +341,7 @@ sub post_process {
                 if ( $$score > $ceiling ) {
                     debug "Ceiling: $ceiling";
                     $$score = $ceiling;
-                    $$why   = 'C';
+                    $$why   = 'P';
                 }
             }
         }
