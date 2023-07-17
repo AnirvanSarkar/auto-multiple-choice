@@ -4297,6 +4297,146 @@ respective parameters \VQa{} and \VQb{}.
             </varlistentry>
 
             <varlistentry>
+              <term>Tvhead=<replaceable>{text}</replaceable></term>
+
+              <listitem>
+               <para>A comma separated list as {km,hm,dam,m,dm,cm,mm}
+               for header in vhead vertical mode. Needs <code>head</code> to be set
+               (defaults to the empty list  <code>{}</code>).</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>vheadunitindex=<replaceable>num</replaceable></term>
+
+              <listitem>
+                <para>The index of the Ones place in the <code>Tvhead</code> list, counting from the right
+                (defaults to zero).</para>
+                <para>The element on the right has an index value of 0.</para>
+
+<programlisting>
+%%Correct%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{%
+digits=7,%
+decimals=3,%
+sign=false,%
+hspace=0.75em,%%
+vertical=true,%
+vhead=true,%
+vheadunitindex=0,%
+Tvhead={km,hm,dam,m,dm,cm,mm}%
+}
+\end{questionmultx}
+  </programlisting>
+
+<programlisting>
+%%Correct%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{%
+digits=7,%
+decimals=3,%
+sign=false,%
+hspace=0.75em,%%
+vertical=true,%
+Tvhead={km,hm,dam,m,dm,cm,mm}%
+}
+\end{questionmultx}
+  </programlisting>
+  
+<programlisting>
+%%Correct%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{%
+digits=7,%
+decimals=3,%
+sign=false,%
+hspace=0.75em,%%
+vertical=true,%
+vheadunitindex=0,%
+Tvhead={km,{},{},m,{},{},mm}%
+}
+\end{questionmultx}
+  </programlisting>
+  
+<programlisting>
+%%Correct%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{
+digits=10,%
+decimals=6,%
+sign=false,%
+vertical=true,%
+vhead=true,%
+vheadunitindex=0,%
+Tvhead={km,{},{},m,{},{},mm,{} ,{}, $\mu$m},
+}
+\end{questionmultx}
+  </programlisting>
+  
+  <programlisting>
+%%Incorrect%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{
+digits=10,%
+decimals=6,%
+sign=false,%
+vertical=true,%
+vhead=true,%
+vheadunitindex=0,%
+Tvhead={km,{},{},m,{},{},mm},
+}
+\end{questionmultx}
+  </programlisting>
+  
+    <programlisting>
+%%Correct%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{
+digits=10,%
+decimals=6,%
+sign=false,%
+vertical=true,%
+vhead=true,%
+vheadunitindex=7,%
+Tvhead={km,{},{},m,{},{},mm},
+}
+\end{questionmultx}
+  </programlisting>
+  
+<programlisting>
+%%Correct%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{
+digits=10,%
+decimals=6,%
+sign=false,%
+vertical=true,%
+vhead=true,%
+vheadunitindex=4,%
+Tvhead={km,{},{},m,{},{},mm},
+}
+\end{questionmultx}
+</programlisting>
+
+<programlisting>
+%%Correct%%
+\begin{questionmultx}{div}
+\AMCnumericChoices{12059/7}{
+digits=10,%
+decimals=6,%
+sign=false,%
+vertical=true,%
+vhead=true,%
+vheadunitindex=7,%
+Tvhead={km,{},{},m,{},{},mm,{},{},$\mu$m},
+}
+\end{questionmultx}
+</programlisting>
+              </listitem>
+              </varlistentry>
+
+            <varlistentry>
               <term>hspace=<replaceable>space</replaceable></term>
 
               <listitem>
@@ -5379,6 +5519,22 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
               </row>
 
               <row>
+                <entry>P</entry>
+
+                <entry/>
+
+                <entry/>
+
+                <entry>●</entry>
+
+                <entry/>
+
+                <entry>The ceiling score. If the calculation of the score in
+                that question yields a value above the ceiling value, the sore
+                is set to the ceiling value.</entry>
+              </row>
+
+              <row>
                 <entry>b</entry>
 
                 <entry>●</entry>
@@ -5389,7 +5545,9 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
 
                 <entry>●</entry>
 
-                <entry>Score for a good response to a question.</entry>
+                <entry>Score for a good response to a question. 
+                <warning><para>A good reponse checked gives b points
+                and a bad reponse non-checked gives b points.</para></warning></entry>
               </row>
 
               <row>
@@ -5403,7 +5561,10 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
 
                 <entry>●</entry>
 
-                <entry>Score for a bad response to a question.</entry>
+                <entry>Score for a bad response to a question.
+                <warning><para>A bad reponse checked gives m points
+                and a good reponse checked gives m points.</para></warning>  
+                </entry>
               </row>
 
               <row>
@@ -5848,6 +6009,60 @@ Name:
             multiple and 0 if not.</para>
           </listitem>
         </itemizedlist>
+
+       <sect4 id="hacking-bareme-individuel">
+          <title>Hacking : individual scoring</title>
+            <para> <ulink url="https://project.auto-multiple-choice.net/boards/4/topics/13413"/></para>
+            <para>After <command>\begin{document}</command></para>
+  <programlisting>
+\ExplSyntaxOn
+
+\prop_new:N \amc_scoring_q_prop
+
+\cs_new:Npn \amc_scoring_q_add:nn #1 #2 {
+  \prop_put:Nnn \amc_scoring_q_prop { #1 } { #2 }
+}
+
+\tl_new:N \amc_scoring_q_value
+\cs_new:Npn \amc_scoring_q_apply:n #1 {
+  \prop_get:NnNTF \amc_scoring_q_prop { #1 } \amc_scoring_q_value
+  { \scoring{ \amc_scoring_q_value } } { }
+}
+
+\cs_new_eq:NN \AMCsetScoring \amc_scoring_q_add:nn
+\cs_new_eq:NN \AMCapplyScoring \amc_scoring_q_apply:n
+
+\ExplSyntaxOff
+
+\AMCsetScoring{question1}{b=4}
+\AMCsetScoring{question2}{mz=2}
+  </programlisting>
+  
+  <programlisting>
+\element{general}{
+\begin{question}{question1}\AMCapplyScoring{question1}
+Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
+\begin{reponses}
+\bonne{René Coty}
+\mauvaise{Alain Prost}
+\mauvaise{Marcel Proust}
+\mauvaise{Claude Monet}
+\end{reponses}
+\end{question}
+}
+
+\element{general}{
+\begin{questionmult}{question2}\AMCapplyScoring{question2}
+Parmi les villes suivantes, lesquelles sont des préfectures~?
+\begin{reponses}
+\bonne{Poitiers}
+\mauvaise{Sainte-Menehould}
+\bonne{Avignon}
+\end{reponses}
+\end{questionmult}
+}
+  </programlisting>
+        </sect4>
       </sect3>
 
       <sect3 id="scoring-result">
@@ -9883,7 +10098,7 @@ python3 /path/to/file/pythontex3.py
   </warning>
 
   <sect3 id="pythontex.exemple">
-    <title>An french example with python (from José OUIN : http://www.joseouin.fr)</title>
+    <title>A french example with python (from José OUIN : <ulink url="http://www.joseouin.fr"/> and Gloria FACCANONI)</title>
 
 <para><!--NAME: Un exemple avec python
   DESC: Utilisation de pythontex-->
@@ -10036,6 +10251,25 @@ What is the root multiplicity order $r = \py{b}$ ?
 \end{question}
 
 \restituegroupe{Questions}
+
+\pyc{ok = 42}
+\pyc{nbch = len(str(abs(ok)))}
+\begin{questionmultx}{maquestion}
+The Ultimate Question of Life, the Universe and Everything
+
+\pys{
+ \AMCnumericChoices{!{ok}}{digits=!{nbch}, decimals=0,sign=true,scoreexact=1,scorewrong=-0.25,vspace=0em,hspace=2em,borderwidth=0pt}
+}
+\end{questionmultx}
+
+\pyc{z = 42}
+\begin{question}{ouverte}
+The Ultimate Question of Life, the Universe and Everything
+\pys{
+  \AMCOpen{lines=0,framerule=1pt,dots=false,annotate=true, answer={!{z}}}
+  {\correctchoice{$B$}\scoring{1}\wrongchoice{$M$}\scoring{-0.25}}
+}
+\end{question}
 
 }
 
