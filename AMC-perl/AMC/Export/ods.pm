@@ -24,6 +24,8 @@ package AMC::Export::ods;
 
 use AMC::Basic;
 use AMC::Export;
+use AMC::Topics;
+
 use Encode;
 use File::Spec;
 
@@ -91,8 +93,10 @@ sub text_width {
             $height = $text_y if ( $text_y > $height );
         }
 
-        return ( 0.002772 * $width + 0.019891 + 0.3,
-            0.002772 * $height + 0.019891 );
+        return (
+            0.002772 * $width + 0.019891 + 0.3,
+            0.002772 * $height + 0.019891
+        );
 
     } else {
         $width = length($title);
@@ -203,7 +207,8 @@ my %largeurs = (
       note 1.5cm
       total 1.2cm
       max 1cm
-      heads 3cm/
+      heads 3cm
+      topic 1.5cm/
 );
 
 my %style_col = (
@@ -216,6 +221,7 @@ my %style_col = (
       GSp NoteGSp
       MAX NoteQ
       HEAD General
+      TOPIC NoteT
       /
 );
 my %style_col_abs = (
@@ -223,6 +229,7 @@ my %style_col_abs = (
       ID NoteX
       TOTAL NoteX
       MAX NoteX
+      TOPIC NoteX
       /
 );
 
@@ -265,6 +272,7 @@ sub build_stats_table {
 
     my %y_name = (
         all => __(
+
             # TRANSLATORS: this is a row label in the table with
             # questions basic statistics in the ODS exported
             # spreadsheet. The corresponding row contains the total
@@ -273,20 +281,22 @@ sub build_stats_table {
         ),
 
         empty => __(
-           # TRANSLATORS: this is a row label in the table with
-           # questions basic statistics in the ODS exported
-           # spreadsheet. The corresponding row contains the number of
-           # sheets for which the question did not get an
-           # answer. Please let this label short.
+
+            # TRANSLATORS: this is a row label in the table with
+            # questions basic statistics in the ODS exported
+            # spreadsheet. The corresponding row contains the number of
+            # sheets for which the question did not get an
+            # answer. Please let this label short.
             "NA"
         ),
 
         invalid => __(
-           # TRANSLATORS: this is a row label in the table with
-           # questions basic statistics in the ODS exported
-           # spreadsheet. The corresponding row contains the number of
-           # sheets for which the question got an invalid
-           # answer. Please let this label short.
+
+            # TRANSLATORS: this is a row label in the table with
+            # questions basic statistics in the ODS exported
+            # spreadsheet. The corresponding row contains the number of
+            # sheets for which the question got an invalid
+            # answer. Please let this label short.
             "INVALID"
         )
     );
@@ -324,11 +334,11 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains the reference of the boxes. Please let
-                   # this name short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains the reference of the boxes. Please let
+                    # this name short.
                     "Box"
                 )
             )
@@ -342,12 +352,12 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains the number of items (ticked boxes, or
-                   # invalid or empty questions). Please let this name
-                   # short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains the number of items (ticked boxes, or
+                    # invalid or empty questions). Please let this name
+                    # short.
                     "Nb"
                 )
             )
@@ -361,12 +371,12 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains percentage of questions for which the
-                   # corresponding box is ticked over all
-                   # questions. Please let this name short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains percentage of questions for which the
+                    # corresponding box is ticked over all
+                    # questions. Please let this name short.
                     "/all"
                 )
             )
@@ -380,14 +390,14 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains percentage of questions for which the
-                   # corresponding box is ticked over the expressed
-                   # questions (counting only questions that did not
-                   # get empty or invalid answers). Please let this
-                   # name short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains percentage of questions for which the
+                    # corresponding box is ticked over the expressed
+                    # questions (counting only questions that did not
+                    # get empty or invalid answers). Please let this
+                    # name short.
                     "/expr"
                 )
             )
@@ -423,6 +433,7 @@ sub build_stats_table {
                     $ya = 4 + $amax;
 
                     $name = __
+
                       # TRANSLATORS: this is a row label in the table
                       # with questions basic statistics in the ODS
                       # exported spreadsheet. The corresponding row
@@ -518,6 +529,12 @@ sub export {
 
     $self->{_scoring}->begin_read_transaction('XODS');
 
+    my $topics = AMC::Topics->new(
+        project_dir => $self->{"fich.projectdir"},
+        data        => $self->{_data}
+    );
+    my @topics      = @{ $topics->{config}->{topics} };
+
     my $rd = $self->{_scoring}->variable('rounding');
     $rd = '' if ( !defined($rd) );
 
@@ -564,6 +581,12 @@ sub export {
         container => $archive,
         part      => 'content',
     );
+    if ( $topics->n_topics ) {
+        $doc->setAttribute( $doc->getRootElement, "xmlns:calcext",
+"urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0"
+        );
+    }
+
     my $styles = odfConnector(
         container => $archive,
         part      => 'styles',
@@ -598,9 +621,9 @@ sub export {
         namespace  => 'number',
         type       => 'number-style',
         properties => {
-            'number:decimal-places'     => "2",
-            'number:min-integer-digits' => "1",
-            'number:grouping'           => 'true',  # espace tous les 3 chiffres
+            'number:decimal-places'      => "2",
+            'number:min-integer-digits'  => "1",
+            'number:grouping'            => 'true', # espace tous les 3 chiffres
             'number:decimal-replacement' =>
               "",    # n'ecrit pas les decimales nulles
         },
@@ -622,9 +645,9 @@ sub export {
         namespace  => 'number',
         type       => 'number-style',
         properties => {
-            'number:decimal-places'     => "0",
-            'number:min-integer-digits' => "0",
-            'number:grouping'           => 'true',  # espace tous les 3 chiffres
+            'number:decimal-places'      => "0",
+            'number:min-integer-digits'  => "0",
+            'number:grouping'            => 'true', # espace tous les 3 chiffres
             'number:decimal-replacement' =>
               "",    # n'ecrit pas les decimales nulles
         },
@@ -869,6 +892,37 @@ sub export {
         references => { 'style:data-style-name' => 'NombreVide' },
     );
 
+    # NoteT : topic
+    $styles->createStyle(
+        'NoteT',
+        parent     => 'NoteQ',
+        family     => 'table-cell',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#eaeaea",
+        },
+        references => { 'style:data-style-name' => 'Percentage' },
+                        );
+    for my $t (@topics) {
+        my $n_levels = $topics->n_levels($t);
+        if ( $n_levels > 0 ) {
+            for my $l ( 1 .. $n_levels ) {
+                my $col=$topics->level_color($t,$l) || "#eaeaea";
+
+                $styles->createStyle(
+                    'NoteT' . $t->{id} . x2ooo($l-1),
+                    parent     => 'NoteQ',
+                    family     => 'table-cell',
+                    properties => {
+                        -area                 => 'table-cell',
+                        'fo:background-color' => $col,
+                    },
+                    references => { 'style:data-style-name' => 'Percentage' },
+                );
+            }
+        }
+    }
+
     # NoteGS : score total pour un groupe
     $styles->createStyle(
         'NoteGS',
@@ -1012,7 +1066,7 @@ sub export {
             'vertical-align'   => "bottom",
             'horizontal-align' => "middle",
             'fo:padding'       => '1mm',          # espace entourant le contenu
-            'fo:border' => "0.039cm solid \#000000"
+            'fo:border'        => "0.039cm solid \#000000"
             ,    # epaisseur trait / solid|double / couleur
         },
     );
@@ -1041,6 +1095,17 @@ sub export {
         properties => {
             -area                  => 'table-cell',
             'style:rotation-angle' => "90",
+        },
+    );
+
+    # EnteteTopic : en-tete, ecrit verticalement
+    $styles->createStyle(
+        'EnteteTopic',
+        parent     => 'EnteteVertical',
+        family     => 'table-cell',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#baffcf",
         },
     );
 
@@ -1075,12 +1140,17 @@ sub export {
     my @questions_0 = grep { $_->{indic0} } @questions;
     my @questions_1 = grep { $_->{indic1} } @questions;
 
+    debug "Topics: " . join( ', ', map { $_->{id} } (@topics) );
     debug "Questions: "
       . join( ', ', map { $_->{question} . '=' . $_->{title} } @questions );
     debug "Questions PLAIN: " . join( ', ', map { $_->{title} } @questions_0 );
     debug "Questions INDIC: " . join( ', ', map { $_->{title} } @questions_1 );
 
-    my $nq = 1 + $#student_columns + 1 + $#questions_0 + 1 + $#questions_1;
+    my $nq =
+      1 + $#student_columns + 1 +
+      $#topics + 1 +
+      $#questions_0 + 1 +
+      $#questions_1;
 
     my $dimx = 3 + $nq + 1 + $#codes;
     my $dimy = 6 + 1 + $#{ $self->{marks} };
@@ -1092,12 +1162,14 @@ sub export {
         encode(
             'utf-8',
             (
-                $self->{'out.code'} ? $self->{'out.code'}
-                :
-             __(
-                # TRANSLATORS: table name in the exported ODS
-                # spreadsheet for the table that contains the marks.
-                "Marks")
+                  $self->{'out.code'}
+                ? $self->{'out.code'}
+                : __(
+
+                    # TRANSLATORS: table name in the exported ODS
+                    # spreadsheet for the table that contains the marks.
+                    "Marks"
+                )
             )
         )
     );
@@ -1108,12 +1180,15 @@ sub export {
             encode( 'utf-8', $self->{'out.nom'} ) );
     }
 
+    my $xt = 0;
     my $x0 = 0;
     my $x1 = 0;
     my $y0 = 2;
     my $y1 = 0;
+    my $y2 = 0;
     my $ii;
     my %code_col    = ();
+    my %q_col       = ();
     my %code_row    = ();
     my %col_cells   = ();
     my %col_content = ();
@@ -1156,6 +1231,16 @@ sub export {
         $ii++;
     }
 
+    $xt = $ii;
+
+    for my $t (@topics) {
+        $doc->columnStyle( $feuille, $ii, 'col.topic' );
+        $doc->cellStyle( $feuille, $y0, $ii, 'EnteteTopic' );
+        $doc->cellValue( $feuille, $y0, $ii, encode( 'utf-8', $t->{id} ) );
+
+        $ii++;
+    }
+
     $x1 = $ii;
 
     for (@questions_0) {
@@ -1164,6 +1249,7 @@ sub export {
             ( $_->{group_sum} ? 'EnteteGS' : 'EnteteVertical' ) );
         my $t = get_title($_);
         push @titles, $t;
+        $q_col{ $_->{question} } = $ii;
         $doc->cellValue( $feuille, $y0, $ii++, $t );
     }
     for (@questions_1) {
@@ -1262,6 +1348,8 @@ sub export {
     for my $m ( @{ $self->{marks} } ) {
         $jj++;
 
+        my $topic_columns = {};
+
         # @presents collects the indices of the rows corresponding to
         # students that where present at the exam.
         push @presents, $jj if ( !$m->{abs} );
@@ -1274,6 +1362,8 @@ sub export {
         # score is added to this list.
         %scores         = ();
         @scores_columns = ();
+
+        my %topic_cols = ();
 
         # first: special columns (association key, name, mark, sheet
         # number, total score, max score)
@@ -1322,6 +1412,12 @@ sub export {
         $ii++;    # see later for SUM column value...
         set_cell( $doc, $feuille, $jj, $ii++, $m->{abs},
             'MAX', $m->{max}, numeric => 1 );
+
+        # see later for columns for topics...
+
+        for my $t (@topics) {
+            $ii++;
+        }
 
         # second: columns for all questions scores
 
@@ -1380,20 +1476,23 @@ sub export {
                       ->question_result( $m->{student}, $m->{copy},
                         $q->{question} );
                     $doc->cellValueType( $feuille, $jj, $ii, 'float' );
+                    my $effective = 0;
                     if ( $self->{_scoring}
                         ->indicative( $m->{student}, $q->{question} ) )
                     {
                         $doc->cellStyle( $feuille, $jj, $ii, 'CodeV' );
+                        $effective = 1;
                     } else {
                         if ( defined( $r->{score} ) ) {
                             if ( !$scores{ $q->{question} } ) {
                                 $scores{ $q->{question} } = 1;
-                                push @scores_columns, $ii;
+                                push @scores_columns,      $ii;
                                 push @{ $col_cells{$ii} }, $jj;
                                 if ( $q->{group} ) {
                                     push @group_columns, $ii;
                                     $group_maxsum += $r->{max};
                                 }
+                                $effective = 1;
                                 if ( $r->{why} =~ /c/i ) {
                                     $doc->cellStyle( $feuille, $jj, $ii,
                                         'NoteC' );
@@ -1413,6 +1512,13 @@ sub export {
                         } else {
                             $doc->cellStyle( $feuille, $jj, $ii, 'NoteX' );
                         }
+                        if ($effective) {
+                            for my $t ( $topics->get_topics( $q->{question} ) )
+                            {
+                                push @{ $topic_cols{$t} }, $ii;
+                            }
+                        }
+
                     }
                     $doc->cellValue( $feuille, $jj, $ii, $r->{score} );
                 }
@@ -1437,11 +1543,74 @@ sub export {
             formula => "oooc:=SUM("
               . subrow_condensed( $jj, @scores_columns ) . ")"
         );
+
+        # come back to add topics
+
+        $ii = $xt;
+        for my $t (@topics) {
+            my $cols = $topic_cols{ $t->{id} };
+            if ($cols) {
+                my $formula =
+                    "oooc:=SUM("
+                  . subrow_condensed( $jj, @$cols )
+                  . ")/SUM("
+                  . subrow_condensed( $code_row{max}, @$cols ) . ")";
+                set_cell(
+                    $doc, $feuille, $jj, $ii, $m->{abs}, 'TOPIC', '',
+                    pc      => 1,
+                    formula => $formula
+                );
+                push @{ $col_cells{$ii} }, $jj;
+            } else {
+                $doc->cellStyle( $feuille, $jj, $ii, 'NoteX' );
+            }
+
+            $ii++;
+        }
     }
+
+    $y2=$jj;
 
     ##########################################################################
     # back to row for means
     ##########################################################################
+
+    if ( $topics->n_topics ) {
+        my $cfs = $doc->appendElement( '//table:table', 0,
+            'calcext:conditional-formats' );
+        $ii = $xt;
+        for my $t (@topics) {
+            my $n_levels = $topics->n_levels($t);
+            if ($n_levels) {
+                my $lacol = x2ooo($ii);
+                my $domain =
+                  "." . $lacol . ( $y1 + 1 ) . ":." . $lacol . ( $y2 + 1 );
+                for my $l ( 1 .. $n_levels ) {
+                    my $cf = $doc->appendElement(
+                        $cfs,
+                        'calcext:conditional-format',
+                        attributes => {
+                            'calcext:target-range-address' => $domain
+                        }
+                    );
+                    $doc->appendElement(
+                        $cf,
+                        'calcext:condition',
+                        attributes => {
+                            'calcext:apply-style-name' => 'NoteT'
+                              . $t->{id}
+                              . x2ooo( $l - 1 ),
+                            'calcext:value' => 'formula-is('
+                              . $topics->level_test_odf( $t, $l, '[.A1]' )
+                              . ')',
+                            'calcext:base-cell-address' => '.A1'
+                        }
+                    );
+                }
+            }
+            $ii++;
+        }
+    }
 
     $ii = $x1;
     for my $q (@questions_0) {
@@ -1485,7 +1654,7 @@ sub export {
             $doc->cellValue( $feuille, $j0, $i0, $group_single{$g}->{maxsum} );
             $doc->cellStyle( $feuille, $code_row{average}, $i0, 'QpcGS' );
         } else {
-            $doc->cellStyle( $feuille, $j0, $i0, 'NoteX' );
+            $doc->cellStyle( $feuille, $j0,                $i0, 'NoteX' );
             $doc->cellStyle( $feuille, $code_row{average}, $i0, 'NoteX' );
         }
     }
@@ -1575,8 +1744,8 @@ sub export {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: Label of the table with questions
-                   # basic statistics in the exported ODS spreadsheet.
+                    # TRANSLATORS: Label of the table with questions
+                    # basic statistics in the exported ODS spreadsheet.
                     "Questions statistics"
                 )
             )
@@ -1592,9 +1761,9 @@ sub export {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: Label of the table with indicative
-                   # questions basic statistics in the exported ODS
-                   # spreadsheet.
+                    # TRANSLATORS: Label of the table with indicative
+                    # questions basic statistics in the exported ODS
+                    # spreadsheet.
                     "Indicative questions statistics"
                 )
             )
@@ -1612,9 +1781,9 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: Label of the table with a legend
-               # (explaination of the colors used) in the exported ODS
-               # spreadsheet.
+                # TRANSLATORS: Label of the table with a legend
+                # (explaination of the colors used) in the exported ODS
+                # spreadsheet.
                 "Legend"
             )
         ),
@@ -1635,9 +1804,9 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that have
-               # not been asked to some students.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that have
+                # not been asked to some students.
                 "Non applicable"
             )
         )
@@ -1650,9 +1819,9 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that have
-               # not been answered.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that have
+                # not been answered.
                 "No answer"
             )
         )
@@ -1665,10 +1834,10 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that have
-               # not been answered, but are cancelled by the use of
-               # allowempty scoring strategy.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that have
+                # not been answered, but are cancelled by the use of
+                # allowempty scoring strategy.
                 "Cancelled"
             )
         )
@@ -1681,9 +1850,9 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that got an
-               # invalid answer.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that got an
+                # invalid answer.
                 "Invalid answer"
             )
         )
@@ -1712,9 +1881,9 @@ sub export {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: From the legend in the exported ODS
-                   # spreadsheet. This refers to the questions that
-                   # got an invalid answer.
+                    # TRANSLATORS: From the legend in the exported ODS
+                    # spreadsheet. This refers to the questions that
+                    # got an invalid answer.
                     "Wrong answer"
                 )
             )
@@ -1728,8 +1897,8 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the indicative questions.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the indicative questions.
                 "Indicative"
             )
         )

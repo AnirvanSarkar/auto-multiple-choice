@@ -27,6 +27,8 @@ use AMC::Data;
 use AMC::NamesFile;
 use AMC::Messages;
 
+use Cwd;
+
 our @ISA = ("AMC::Messages");
 
 use_gettext;
@@ -41,7 +43,8 @@ my %sorting = (
 
 sub new {
     my $class = shift;
-    my $self  = {
+    my $self = {
+        'fich.projectdir' => '',
         'fich.datadir'    => '',
         'fich.noms'       => '',
         'association.key' => '',
@@ -94,6 +97,15 @@ sub opts_spec {
 
 sub load {
     my ($self) = @_;
+
+    if ( $self->{'fich.datadir'} && !$self->{'fich.projectdir'} ) {
+        $self->{'fich.projectdir'} =
+          Cwd::realpath( $self->{'fich.datadir'} . "/.." );
+    }
+    if ( $self->{'fich.projectdir'} && !$self->{'fich.datadir'} ) {
+        $self->{'fich.datadir'} = $self->{'fich.projectdir'} . "/data";
+    }
+
     die "Needs data directory" if ( !-d $self->{'fich.datadir'} );
 
     $self->{_data}    = AMC::Data->new( $self->{'fich.datadir'} );
