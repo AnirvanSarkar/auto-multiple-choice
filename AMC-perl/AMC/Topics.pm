@@ -20,6 +20,8 @@
 use warnings;
 use 5.012;
 
+use utf8;
+
 package AMC::Topics;
 
 use AMC::Basic;
@@ -31,6 +33,7 @@ use Cwd;
 my $merger = Hash::Merge->new('LEFT_PRECEDENT');
 
 $YAML::Syck::ImplicitTyping = 1;
+$YAML::Syck::ImplicitUnicode = 1;
 
 sub new {
     my ( $class, %o ) = @_;
@@ -98,6 +101,11 @@ sub load_yaml {
     return ($content);
 }
 
+sub all_topics {
+    my ($self) = @_;
+    return(@{$self->{config}->{topics}});
+}
+
 sub add_conf {
     my ($self, $topics) = @_;
     for my $t ( values(%{$topics->{conf}}), @{$topics->{topics}} ) {
@@ -159,7 +167,7 @@ sub build_questions_lists {
     $self->{qid_to_topics}={};
     for my $t ( @{ $self->{config}->{topics} } ) {
         my $re = $self->match_re( $t->{questions} );
-        debug "RE for TOPIC $t is $re";
+        debug "RE for TOPIC $t->{id} is $re";
         $t->{questions_list} = [grep { $_->{name} =~ /$re/ } @questions];
         for my $q (@{$t->{questions_list}}) {
             push @{$self->{qid_to_topics}->{$q->{question}}}, $t->{id};
@@ -227,6 +235,78 @@ sub level_test_odf {
     }
     push @cond, $self->level_test_single_odf($topic, $i_level, $value);
     return $self->and_odf(@cond);
+}
+
+sub value_in_level {
+    my ($self,$level,$value)=@_;
+    return (0) if ( defined($level->{min}) && $value <  $level->{min} );
+    return (0) if ( defined($level->{max}) && $value >= $level->{max} );
+    return(1);
+}
+
+sub value_level {
+    my ( $self, $topic, $value ) = @_;
+    if ( $topic->{levels} ) {
+        my $n_levels = 1 + $#{ $topic->{levels} };
+        my $i_level  = 0;
+        while ( $i_level < $n_levels
+            && !$self->value_in_level( $topic->{levels}->[$i_level], $value ) )
+        {
+            $i_level++;
+        }
+        return ( $topic->{levels}->[$i_level] );
+    } else {
+        return (undef);
+    }
+}
+
+sub student_topic_calc {
+    my ( $self, $student, $copy, $topic ) = @_;
+    my @x   = ();
+    for my $q ( @{ $topic->{questions_list} } ) {
+        my $r =
+          $self->{scoring}->question_result( $student, $copy, $q->{question} );
+        if ( defined( $r->{score} ) ) {
+            debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max})";
+            push @x, [ $r->{score}, $r->{max} ];
+        }
+    }
+
+    my $s    = 0;
+    my $smax = 0;
+    for my $xm (@x) {
+        $s    += $xm->[0];
+        $smax += $xm->[1];
+    }
+    if ( $smax > 0 ) {
+        return { score => $s, max => $smax, ratio => $s / $smax };
+    } else {
+        return undef;
+    }
+}
+
+sub student_topic_message {
+    my ( $self, $student, $copy, $topic ) = @_;
+    my $x = $self->student_topic_calc( $student, $copy, $topic );
+    if ($x) {
+        $x->{'ratio:pc'} = sprintf( "%.0f %%", $x->{ratio} * 100 );
+        my $s = $topic->{format} || "⬤ %{name}: %{message} (%{ratio:pc})";
+        for my $k (qw/score max ratio ratio:pc/) {
+            $s =~ s/\%\{$k\}/$x->{$k}/g;
+        }
+        for my $k (qw/id name/) {
+            $s =~ s/\%\{$k\}/$topic->{$k}/g;
+        }
+        my $l =
+          $self->value_level( $topic, $x->{ $topic->{value} || 'ratio' } )
+          || { message => "", color=>"" };
+        for my $k (qw/message/) {
+            $s =~ s/\%\{$k\}/$l->{$k}/g;
+        }
+        return { message=>$s, color=>$l->{color} };
+    } else {
+        return { message => '', color => '' };
+    }
 }
 
 1;

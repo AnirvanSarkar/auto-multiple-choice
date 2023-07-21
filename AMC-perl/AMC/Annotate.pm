@@ -41,6 +41,7 @@ use AMC::DataModule::layout qw/:flags/;
 use AMC::Gui::Avancement;
 use AMC::Calage;
 use AMC::Boite;
+use AMC::Topics;
 
 use utf8;
 
@@ -117,7 +118,7 @@ sub new {
         $self->{position} = 'none';
     }
 
-    # chacks that the embedded_format is ok
+    # checks that the embedded_format is ok
     $self->{embedded_format} = lc( $self->{embedded_format} );
     if ( $self->{embedded_format} !~ /^(jpeg|png)$/i ) {
         debug "ERROR: invalid <embedded_format>: $self->{embedded_format}";
@@ -357,15 +358,26 @@ sub connects_to_database {
     # If they are not already given by the user, read association_key
     # and darkness_threshold from the variables in the database.
 
+    $self->{data}->begin_read_transaction('AnSU');
+
     $self->{association_key} =
-      $self->{association}->variable_transaction('key_in_list')
+      $self->{association}->variable('key_in_list')
       if( !$self->{association_key} );
     $self->{darkness_threshold} =
-      $self->{scoring}->variable_transaction('darkness_threshold')
+      $self->{scoring}->variable('darkness_threshold')
       if ( !$self->{darkness_threshold} );
     $self->{darkness_threshold_up} =
-      $self->{scoring}->variable_transaction('darkness_threshold_up')
+      $self->{scoring}->variable('darkness_threshold_up')
       if ( !$self->{darkness_threshold_up} );
+
+    # Setup Topics
+
+    $self->{topics} = AMC::Topics->new(
+        project_dir => $self->{project_dir},
+        data        => $self->{data}
+    );
+
+    $self->{data}->end_transaction('AnSU');
 
     # But darkness_threshold_up is not defined for old projects… set it
     # to an inactive value in this case
@@ -1103,7 +1115,18 @@ sub page_header {
               . " "
               . ( $self->{dist_margin_globaltext} * $self->{dpi} ) . " "
               . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0"
-        );
+                      );
+
+        # Add topics...
+
+        for my $t ($self->{topics}->all_topics()) {
+            debug "Topic $t->{id}";
+            my $s = $self->{topics}->student_topic_message(@$student, $t);
+            if($s) {
+                $self->set_color($s->{color} || $self->{text_color});
+                $self->command("nexttext ".( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 ". $s->{message});
+            }
+        }
 
         $self->{header_drawn} = 1;
 

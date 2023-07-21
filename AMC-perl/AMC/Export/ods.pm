@@ -533,7 +533,7 @@ sub export {
         project_dir => $self->{"fich.projectdir"},
         data        => $self->{_data}
     );
-    my @topics      = @{ $topics->{config}->{topics} };
+    my @topics      = $topics->all_topics();
 
     my $rd = $self->{_scoring}->variable('rounding');
     $rd = '' if ( !defined($rd) );

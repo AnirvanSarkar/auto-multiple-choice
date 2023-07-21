@@ -141,6 +141,8 @@ int main(int argc, char** argv )
       } else if(sscanf(command, "text %lf %lf %lf %lf %ln",
 		       &a, &b, &c, &d, &i) >= 4) {
 	PDF.draw_text(a, b, c, d, command + i);
+      } else if(sscanf(command, "nexttext %lf %lf %ln", &a, &b, &i) >= 2) {
+	PDF.draw_next_text(a, b, command + i);
       } else if(sscanf(command, "text margin %ld %lf %lf %lf %ln",
 		       &n, &b, &c, &d, &i) >= 4) {
 	PDF.draw_text_margin(n, b, c, d, command + i);

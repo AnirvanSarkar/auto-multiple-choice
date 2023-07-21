@@ -332,6 +332,16 @@ public:
   void draw_text(double x, double y,
 		 double xpos, double ypos, const char *text);
 
+  /* cr_move moves the current point by (dx,dy) */
+  
+  void cr_move(double dx, double dy);
+
+  /* draw_next_text draws a text at the following line */
+  
+  void draw_next_text(PangoLayout* local_layout,
+                      double xpos, double ypos, const char * text);
+  void draw_next_text(double xpos, double ypos, const char * text);
+
   /* draw_text_margin writes a text in the margin (left margin if
      xside=0, and right margin if xside=1). The point used is a point
      at the border of the margin, so that xpos=0.0 should be used for
@@ -1179,12 +1189,47 @@ void BuildPdf::draw_text(PangoLayout* local_layout,
 		x - xpos * extents.width - extents.x,
 		y - ypos * extents.height - extents.y);
   pango_cairo_show_layout(cr, local_layout);
+  cr_move(xpos * extents.width, extents.height);
+}
+
+void BuildPdf::cr_move(double dx, double dy) {
+  double x,y;
+  cairo_get_current_point(cr, &x, &y);
+  x += dx;
+  y += dy;
+  cairo_move_to(cr, x, y);
+}
+
+void BuildPdf::draw_next_text(PangoLayout* local_layout,
+                              double xpos, double ypos,
+                              const char *text) {
+  if(debug) {
+    printf("; draw next text\n");
+  }
+
+  PangoRectangle extents;
+
+  pango_layout_set_text(local_layout, text, -1);
+  pango_layout_get_pixel_extents(local_layout, &extents, NULL);
+
+  if(debug) {
+    printf("TEXT=\"%s\"\n", text);
+  }
+
+  cr_move(-xpos * extents.width, (0.25-ypos) * extents.height);
+  pango_cairo_show_layout(cr, local_layout);
+  cr_move(xpos * extents.width,
+          ypos * extents.height + extents.height);
 }
 
 void BuildPdf::draw_text(double x, double y,
 			 double xpos, double ypos,
 			 const char *text) {
   draw_text(layout, x, y, xpos, ypos, text);
+}
+
+void BuildPdf::draw_next_text(double xpos, double ypos, const char *text) {
+  draw_next_text(layout, xpos, ypos, text);
 }
 
 void BuildPdf::draw_text_margin(int xside, double y,
