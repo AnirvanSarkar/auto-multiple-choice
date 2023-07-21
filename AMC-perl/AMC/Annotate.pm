@@ -223,6 +223,8 @@ sub student_uptodate {
         debug "Registered filename " . show_utf8($filename);
         my $source_change =
           $self->{capture}->variable('annotate_source_change');
+        my $topic_change = $self->{topics}->last_modified();
+        $source_change = $topic_change if ( $topic_change > $source_change );
         debug
 "Registered answer sheet: updated at $timestamp, source change at $source_change";
 

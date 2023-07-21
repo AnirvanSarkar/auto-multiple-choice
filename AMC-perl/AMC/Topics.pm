@@ -106,6 +106,16 @@ sub all_topics {
     return(@{$self->{config}->{topics}});
 }
 
+sub last_modified {
+    my ($self) = @_;
+    my $m = 0;
+    for my $file ( @{ $self->{config}->{include} } ) {
+        my @stats = stat($file);
+        $m = $stats[9] if ( $stats[9] > $m );
+    }
+    return ($m);
+}
+
 sub add_conf {
     my ($self, $topics) = @_;
     for my $t ( values(%{$topics->{conf}}), @{$topics->{topics}} ) {
@@ -146,10 +156,11 @@ sub load_topics {
     my $topics_file = $self->{project_dir} . "/topics.yml";
     if ( -f $topics_file ) {
         $self->{config} = $self->add_conf( $self->load_yaml($topics_file) );
+        push @{$self->{config}->{include}}, $topics_file;
         $self->defaults();
         $self->build_questions_lists();
     } else {
-        $self->{config} = { topics => [] };
+        $self->{config} = { topics => [], include=>[] };
     }
 }
 
