@@ -145,6 +145,11 @@ sub defaults {
         $valuekey    = '%{score}/%{max}' if ( $t->{value} eq 'score' );
         $t->{format} = "⬤ %{name}: %{message} ($valuekey)"
           if ( !defined( $t->{format} ) );
+
+        $t->{levels} = [] if ( !$t->{levels} );
+        for my $l ( @{ $t->{levels} } ) {
+            $l->{message} = "" if ( !$l->{message} );
+        }
     }
 }
 
@@ -271,7 +276,7 @@ sub value_in_level {
 
 sub value_level {
     my ( $self, $topic, $value ) = @_;
-    if ( $topic->{levels} ) {
+    if ( @{ $topic->{levels} } ) {
         my $n_levels = 1 + $#{ $topic->{levels} };
         my $i_level  = 0;
         while ( $i_level < $n_levels
