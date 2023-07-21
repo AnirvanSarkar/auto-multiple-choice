@@ -25,15 +25,13 @@ use utf8;
 package AMC::Topics;
 
 use AMC::Basic;
-use YAML::Syck;
 use Hash::Merge;
 use File::Spec;
 use Cwd;
+use Module::Load;
+use Module::Load::Conditional qw/check_install/;
 
 my $merger = Hash::Merge->new('LEFT_PRECEDENT');
-
-$YAML::Syck::ImplicitTyping = 1;
-$YAML::Syck::ImplicitUnicode = 1;
 
 sub new {
     my ( $class, %o ) = @_;
@@ -69,6 +67,11 @@ sub error {
     debug "ERROR $text";
 }
 
+sub errors {
+    my ($self) = @_;
+    return ( @{ $self->{errors} } );
+}
+
 sub load_yaml {
     my ($self, $file) = @_;
 
@@ -78,7 +81,7 @@ sub load_yaml {
     my $base = File::Spec->catpath( $volume, $directories );
 
     my $content = {};
-    eval { $content = LoadFile($file); };
+    eval { $content = YAML::Syck::LoadFile($file); };
     $self->error("Unable to parse YAML file $file: $@") if($@);
 
     if ( ref($content) eq 'HASH' && $content->{include} ) {
@@ -93,7 +96,7 @@ sub load_yaml {
                 my $c = load_yaml($f);
                 $content = $merger->merge( $content, $c );
             } else {
-                $self->error("File not found: $f");
+                $self->error("File not found: $f (included from $file)");
             }
         }
     }
@@ -160,10 +163,19 @@ sub load_topics {
 
     my $topics_file = $self->{project_dir} . "/topics.yml";
     if ( -f $topics_file ) {
-        $self->{config} = $self->add_conf( $self->load_yaml($topics_file) );
-        push @{$self->{config}->{include}}, $topics_file;
-        $self->defaults();
-        $self->build_questions_lists();
+        if ( check_install( module => 'YAML::Syck' ) ) {
+            load('YAML::Syck');
+            $YAML::Syck::ImplicitTyping = 1;
+            $YAML::Syck::ImplicitUnicode = 1;
+
+            $self->{config} = $self->add_conf( $self->load_yaml($topics_file) );
+            push @{$self->{config}->{include}}, $topics_file;
+            $self->defaults();
+            $self->build_questions_lists();
+        } else {
+            $self->{config} = { topics => [], include=>[] };
+            $self->error('Unable to load perl module YAML::Syck');
+        }
     } else {
         $self->{config} = { topics => [], include=>[] };
     }

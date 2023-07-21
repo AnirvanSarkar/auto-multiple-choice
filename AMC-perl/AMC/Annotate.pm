@@ -378,6 +378,15 @@ sub connects_to_database {
         project_dir => $self->{project_dir},
         data        => $self->{data}
     );
+    my @err = $self->{topics}->errors();
+    if (@err) {
+        $self->error(
+            sprintf(
+                __("Errors while trying to parse the topics file: %s"),
+                join( ", ", @err )
+            )
+        );
+    }
 
     $self->{data}->end_transaction('AnSU');
 
@@ -390,7 +399,7 @@ sub connects_to_database {
 sub error {
     my ( $self, $message ) = @_;
 
-    debug_and_stderr("**ERROR** $message");
+    debug_and_stderr("ERROR: $message");
 }
 
 sub needs_data {

@@ -535,7 +535,17 @@ sub export {
         project_dir => $self->{"fich.projectdir"},
         data        => $self->{_data}
     );
-    my @topics      = $topics->all_topics();
+    my @err = $topics->errors();
+    if (@err) {
+        $self->add_message(
+            'ERR',
+            sprintf(
+                __("Errors while trying to parse the topics file: %s"),
+                join( ", ", @err )
+            )
+        );
+    }
+    my @topics = $topics->all_topics();
 
     my $rd = $self->{_scoring}->variable('rounding');
     $rd = '' if ( !defined($rd) );
