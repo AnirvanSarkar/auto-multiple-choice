@@ -125,6 +125,19 @@ sub add_conf {
     return ($topics);
 }
 
+sub defaults {
+    my ($self) = @_;
+    for my $t ( $self->all_topics ) {
+        $t->{value} = 'ratio' if ( !$t->{value} );
+
+        my $valuekey = '%{' . $t->{value} . '}';
+        $valuekey    = '%{ratio:pc}'     if ( $t->{value} eq 'ratio' );
+        $valuekey    = '%{score}/%{max}' if ( $t->{value} eq 'score' );
+        $t->{format} = "⬤ %{name}: %{message} ($valuekey)"
+          if ( !defined( $t->{format} ) );
+    }
+}
+
 sub load_topics {
     my ($self, $force) = @_;
 
@@ -133,6 +146,7 @@ sub load_topics {
     my $topics_file = $self->{project_dir} . "/topics.yml";
     if ( -f $topics_file ) {
         $self->{config} = $self->add_conf( $self->load_yaml($topics_file) );
+        $self->defaults();
         $self->build_questions_lists();
     } else {
         $self->{config} = { topics => [] };
@@ -290,7 +304,7 @@ sub student_topic_message {
     my $x = $self->student_topic_calc( $student, $copy, $topic );
     if ($x) {
         $x->{'ratio:pc'} = sprintf( "%.0f %%", $x->{ratio} * 100 );
-        my $s = $topic->{format} || "⬤ %{name}: %{message} (%{ratio:pc})";
+        my $s = $topic->{format};
         for my $k (qw/score max ratio ratio:pc/) {
             $s =~ s/\%\{$k\}/$x->{$k}/g;
         }
@@ -298,7 +312,7 @@ sub student_topic_message {
             $s =~ s/\%\{$k\}/$topic->{$k}/g;
         }
         my $l =
-          $self->value_level( $topic, $x->{ $topic->{value} || 'ratio' } )
+          $self->value_level( $topic, $x->{ $topic->{value} } )
           || { message => "", color=>"" };
         for my $k (qw/message/) {
             $s =~ s/\%\{$k\}/$l->{$k}/g;

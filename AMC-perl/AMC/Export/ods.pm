@@ -222,6 +222,7 @@ my %style_col = (
       MAX NoteQ
       HEAD General
       TOPIC NoteT
+      TOPICpc NoteT
       /
 );
 my %style_col_abs = (
@@ -230,6 +231,7 @@ my %style_col_abs = (
       TOTAL NoteX
       MAX NoteX
       TOPIC NoteX
+      TOPICpc NoteX
       /
 );
 
@@ -892,7 +894,7 @@ sub export {
         references => { 'style:data-style-name' => 'NombreVide' },
     );
 
-    # NoteT : topic
+    # NoteT : topic (percentage)
     $styles->createStyle(
         'NoteT',
         parent     => 'NoteQ',
@@ -901,23 +903,40 @@ sub export {
             -area                 => 'table-cell',
             'fo:background-color' => "#eaeaea",
         },
+    );
+
+    # NoteTP : topic (percentage)
+    $styles->createStyle(
+        'NoteTP',
+        parent     => 'NoteQ',
+        family     => 'table-cell',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#eaeaea",
+        },
         references => { 'style:data-style-name' => 'Percentage' },
-                        );
+    );
     for my $t (@topics) {
         my $n_levels = $topics->n_levels($t);
         if ( $n_levels > 0 ) {
             for my $l ( 1 .. $n_levels ) {
-                my $col=$topics->level_color($t,$l) || "#eaeaea";
+                my $col = $topics->level_color( $t, $l ) || "#eaeaea";
+
+                my @opts = ();
+                if ( $t->{value} eq 'ratio' ) {
+                    push @opts,
+                      references => { 'style:data-style-name' => 'Percentage' };
+                }
 
                 $styles->createStyle(
-                    'NoteT' . $t->{id} . x2ooo($l-1),
+                    'NoteT' . $t->{id} . x2ooo( $l - 1 ),
                     parent     => 'NoteQ',
                     family     => 'table-cell',
                     properties => {
                         -area                 => 'table-cell',
                         'fo:background-color' => $col,
                     },
-                    references => { 'style:data-style-name' => 'Percentage' },
+                    @opts,
                 );
             }
         }
@@ -1550,14 +1569,23 @@ sub export {
         for my $t (@topics) {
             my $cols = $topic_cols{ $t->{id} };
             if ($cols) {
-                my $formula =
-                    "oooc:=SUM("
-                  . subrow_condensed( $jj, @$cols )
-                  . ")/SUM("
-                  . subrow_condensed( $code_row{max}, @$cols ) . ")";
+                my $formula;
+                my $formula_score;
+                my $formula_max;
+                $formula_score = "SUM(" . subrow_condensed( $jj, @$cols ) . ")";
+                $formula_max =
+                  "SUM(" . subrow_condensed( $code_row{max}, @$cols ) . ")";
+                if($t->{value} eq 'score') {
+                    $formula = "oooc:=".$formula_score;
+                } else { # value = ratio (default value)
+                    $formula = "oooc:=".$formula_score."/".$formula_max;
+                }
+                my $pc = ($t->{value} eq 'ratio' ? 1 : 0);
                 set_cell(
-                    $doc, $feuille, $jj, $ii, $m->{abs}, 'TOPIC', '',
-                    pc      => 1,
+                    $doc, $feuille, $jj, $ii, $m->{abs},
+                    'TOPIC' . ( $pc ? 'pc' : '' ), '',
+                    pc      => $pc,
+                    numeric => !$pc,
                     formula => $formula
                 );
                 push @{ $col_cells{$ii} }, $jj;
