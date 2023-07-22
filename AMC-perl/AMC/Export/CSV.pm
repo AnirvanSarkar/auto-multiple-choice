@@ -24,6 +24,7 @@ package AMC::Export::CSV;
 
 use AMC::Basic;
 use AMC::Export;
+use AMC::Topics;
 
 use Encode;
 
@@ -92,6 +93,8 @@ sub export {
 
     $self->pre_process();
 
+    my @topics = $self->{_topics}->all_topics();
+
     open( OUT, ">:encoding(" . $self->{'out.encodage'} . ")", $fichier );
 
     $self->{_scoring}->begin_read_transaction('XCSV');
@@ -133,6 +136,11 @@ sub export {
     }
 
     push @columns, @codes;
+
+    for my $t (@topics) {
+        push @columns, "$t->{id}:score", "$t->{id}:max", "$t->{id}:ratio";
+        push @columns, "$t->{id}:level" if(@{$t->{levels}});
+    }
 
     print OUT join( $sep, map { $self->parse_string($_) } @columns ) . "\n";
 
@@ -189,6 +197,26 @@ sub export {
         for my $c (@codes) {
             push @columns,
               $self->parse_string( $self->{_scoring}->student_code( @sc, $c ) );
+        }
+
+        for my $t (@topics) {
+            my $s = $self->{_topics}->student_topic_calc( @sc, $t );
+            if ($s) {
+                push @columns, "$s->{score}", "$s->{max}", "$s->{ratio}";
+                if ( @{ $t->{levels} } ) {
+                    my $l =
+                      $self->{_topics}->value_level( $t, $s->{ $t->{value} } );
+                    if ($l) {
+                        push @columns,
+                          ( defined( $l->{code} ) ? $l->{code} : $l->{i} );
+                    } else {
+                        push @columns, "?";
+                    }
+                }
+            } else {
+                push @columns, "", "", "";
+                push @columns, "" if ( @{ $t->{levels} } );
+            }
         }
 
         print OUT join( $sep, @columns ) . "\n";

@@ -150,7 +150,9 @@ sub defaults {
           if ( !defined( $t->{format} ) );
 
         $t->{levels} = [] if ( !$t->{levels} );
+        my $i = 1;
         for my $l ( @{ $t->{levels} } ) {
+            $l->{i}       = $i++;
             $l->{message} = "" if ( !$l->{message} );
         }
     }

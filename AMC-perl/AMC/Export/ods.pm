@@ -528,24 +528,10 @@ sub export {
     my ( $self, $fichier ) = @_;
 
     $self->pre_process();
+    my $topics= $self->{_topics};
+    my @topics = $topics->all_topics();
 
     $self->{_scoring}->begin_read_transaction('XODS');
-
-    my $topics = AMC::Topics->new(
-        project_dir => $self->{"fich.projectdir"},
-        data        => $self->{_data}
-    );
-    my @err = $topics->errors();
-    if (@err) {
-        $self->add_message(
-            'ERR',
-            sprintf(
-                __("Errors while trying to parse the topics file: %s"),
-                join( ", ", @err )
-            )
-        );
-    }
-    my @topics = $topics->all_topics();
 
     my $rd = $self->{_scoring}->variable('rounding');
     $rd = '' if ( !defined($rd) );
@@ -593,7 +579,7 @@ sub export {
         container => $archive,
         part      => 'content',
     );
-    if ( $topics->n_topics ) {
+    if ( @topics ) {
         $doc->setAttribute( $doc->getRootElement, "xmlns:calcext",
 "urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0"
         );
@@ -1613,7 +1599,7 @@ sub export {
     # back to row for means
     ##########################################################################
 
-    if ( $topics->n_topics ) {
+    if ( @topics ) {
         my $cfs = $doc->appendElement( '//table:table', 0,
             'calcext:conditional-formats' );
         $ii = $xt;

@@ -226,6 +226,21 @@ sub pre_process {
 
     $self->{_scoring}->begin_read_transaction('EXPP');
 
+    $self->{_topics}=AMC::Topics->new(
+        project_dir => $self->{"fich.projectdir"},
+        data        => $self->{_data}
+    );
+    my @err = $self->{_topics}->errors();
+    if (@err) {
+        $self->add_message(
+            'ERR',
+            sprintf(
+                __("Errors while trying to parse the topics file: %s"),
+                join( ", ", @err )
+            )
+        );
+    }
+
     my $lk = $self->{'association.key'}
       || $self->{_assoc}->variable('key_in_list');
     my %keys         = ();
