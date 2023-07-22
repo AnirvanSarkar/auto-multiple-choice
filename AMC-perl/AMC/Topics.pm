@@ -344,8 +344,8 @@ sub student_topic_message {
         my $l =
           $self->value_level( $topic, $x->{ $topic->{value} } )
           || { message => "", color=>"" };
-        for my $k (qw/message/) {
-            $s =~ s/\%\{$k\}/$l->{$k}/g;
+        for my $k (qw/message code i/) {
+            $s =~ s/\%\{$k\}/$l->{$k}/g if ( defined( $l->{$k} ) );
         }
         return { message=>$s, color=>$l->{color} };
     } else {
