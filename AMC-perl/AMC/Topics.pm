@@ -322,8 +322,37 @@ sub student_topic_calc {
         $s    += $xm->[0];
         $smax += $xm->[1];
     }
+
     if ( $smax > 0 ) {
-        return { score => $s, max => $smax, ratio => $s / $smax };
+        my $x = {
+            score      => $s,
+            max        => $smax,
+            ratio      => $s / $smax,
+            'ratio:pc' => 100 * $s / $smax,
+        };
+
+        # Applies ceil and floor to topic value
+        my $k = $topic->{value};
+        if ( defined( $topic->{ceil} ) ) {
+            $x->{ $topic->{value} } = $topic->{ceil}
+              if ( $x->{ $topic->{value} } > $topic->{ceil} );
+        }
+        if ( defined( $topic->{floor} ) ) {
+            $x->{ $topic->{value} } = $topic->{floor}
+              if ( $x->{ $topic->{value} } < $topic->{floor} );
+        }
+
+        # Updates ratio:pc if ratio has been updated, and ratio if
+        # ratio:pc has been updated
+        my $k_alter = $k;
+        if ( $k_alter =~ s/:pc$// ) {
+            $x->{$k_alter} = $x->{$k} / 100;
+        } else {
+            $k_alter .= ':pc';
+            $x->{$k_alter} = $x->{$k} * 100;
+        }
+
+        return ($x);
     } else {
         return undef;
     }

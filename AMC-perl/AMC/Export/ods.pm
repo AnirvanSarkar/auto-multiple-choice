@@ -1572,9 +1572,15 @@ sub export {
                 $formula_max =
                   "SUM(" . subrow_condensed( $code_row{max}, @$cols ) . ")";
                 if($t->{value} eq 'score') {
-                    $formula = "oooc:=".$formula_score;
+                    $formula = $formula_score;
                 } else { # value = ratio (default value)
-                    $formula = "oooc:=".$formula_score."/".$formula_max;
+                    $formula = $formula_score."/".$formula_max;
+                }
+                if($t->{ceil}) {
+                    $formula="MIN($t->{ceil};$formula)";
+                }
+                if($t->{floor}) {
+                    $formula="MAX($t->{floor};$formula)";
                 }
                 my $pc = ($t->{value} eq 'ratio' ? 1 : 0);
                 set_cell(
@@ -1582,7 +1588,7 @@ sub export {
                     'TOPIC' . ( $pc ? 'pc' : '' ), '',
                     pc      => $pc,
                     numeric => !$pc,
-                    formula => $formula
+                    formula => "oooc:=" . $formula
                 );
                 push @{ $col_cells{$ii} }, $jj;
             } else {
