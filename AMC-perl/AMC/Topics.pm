@@ -202,11 +202,13 @@ sub match_re {
         if ( $target =~ /^\^/ ) {
             return $target;
         } elsif ( $target =~ /[\*\?]/ ) {
-            return join( '',
+            return '^'
+              . join( '',
                 map { ( $_ eq '*' ? '.*' : $_ eq '?' ? '.' : "\Q$_\E" ) }
-                  split( /(\*|\?)/, $target ) );
+                  split( /(\*|\?)/, $target ) )
+              . '$';
         } else {
-            return "\Q$target\E";
+            return ( '^' . "\Q$target\E" . '$' );
         }
     }
 }
