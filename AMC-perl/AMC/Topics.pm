@@ -141,13 +141,19 @@ sub add_conf {
 sub defaults {
     my ($self) = @_;
     for my $t ( $self->all_topics ) {
-        $t->{value} = 'ratio' if ( !$t->{value} );
+        $t->{value} = 'ratio:pc' if ( !$t->{value} );
 
-        my $valuekey = '%{' . $t->{value} . '}';
-        $valuekey    = '%{ratio:pc}'     if ( $t->{value} eq 'ratio' );
-        $valuekey    = '%{score}/%{max}' if ( $t->{value} eq 'score' );
+        my $valuekey;
+        if ( $t->{value} eq 'score' ) {
+            $valuekey = '%{score}/%{max}';
+        } else {
+            $valuekey = '%{' . $t->{value} . '}';
+        }
         $t->{format} = "⬤ %{name}: %{message} ($valuekey)"
-          if ( !defined( $t->{format} ) );
+            if ( !defined( $t->{format} ) );
+
+        $t->{decimals}   = 1 if ( !defined( $t->{decimals} ) );
+        $t->{decimalspc} = 0 if ( !defined( $t->{decimalspc} ) );
 
         $t->{levels} = [] if ( !$t->{levels} );
         my $i = 1;
@@ -206,15 +212,20 @@ sub match_re {
 }
 
 sub build_questions_lists {
-    my ($self) = @_;
-    my @questions = $self->{layout}->questions_list();
-    $self->{qid_to_topics}={};
+    my ($self)             = @_;
+    my $code_digit_pattern = $self->{layout}->code_digit_pattern();
+    my @codes              = $self->{scoring}->codes();
+    my $codes_re =
+      "(" . join( "|", map { "\Q$_\E" } @codes ) . ")" . $code_digit_pattern;
+    my @questions =
+      grep { $_->{name} !~ /$codes_re/ } ( $self->{layout}->questions_list() );
+    $self->{qid_to_topics} = {};
     for my $t ( @{ $self->{config}->{topics} } ) {
         my $re = $self->match_re( $t->{questions} );
         debug "RE for TOPIC $t->{id} is $re";
-        $t->{questions_list} = [grep { $_->{name} =~ /$re/ } @questions];
-        for my $q (@{$t->{questions_list}}) {
-            push @{$self->{qid_to_topics}->{$q->{question}}}, $t->{id};
+        $t->{questions_list} = [ grep { $_->{name} =~ /$re/ } @questions ];
+        for my $q ( @{ $t->{questions_list} } ) {
+            push @{ $self->{qid_to_topics}->{ $q->{question} } }, $t->{id};
         }
     }
 }
@@ -334,12 +345,12 @@ sub student_topic_calc {
         # Applies ceil and floor to topic value
         my $k = $topic->{value};
         if ( defined( $topic->{ceil} ) ) {
-            $x->{ $topic->{value} } = $topic->{ceil}
-              if ( $x->{ $topic->{value} } > $topic->{ceil} );
+            $x->{$k} = $topic->{ceil}
+              if ( $x->{$k} > $topic->{ceil} );
         }
         if ( defined( $topic->{floor} ) ) {
-            $x->{ $topic->{value} } = $topic->{floor}
-              if ( $x->{ $topic->{value} } < $topic->{floor} );
+            $x->{$k} = $topic->{floor}
+              if ( $x->{$k} < $topic->{floor} );
         }
 
         # Updates ratio:pc if ratio has been updated, and ratio if
@@ -362,10 +373,20 @@ sub student_topic_message {
     my ( $self, $student, $copy, $topic ) = @_;
     my $x = $self->student_topic_calc( $student, $copy, $topic );
     if ($x) {
-        $x->{'ratio:pc'} = sprintf( "%.0f %%", $x->{ratio} * 100 );
         my $s = $topic->{format};
         for my $k (qw/score max ratio ratio:pc/) {
-            $s =~ s/\%\{$k\}/$x->{$k}/g;
+            my $v;
+            if ( $k =~ /:pc$/ ) {
+                my $kk = $k;
+                $kk =~ s/:pc$//;
+                $x->{$k} = $x->{$kk} * 100;
+                my $d = $topic->{decimalspc};
+                $v = sprintf( "%.${d}f %%", $x->{$k} );
+            } else {
+                my $d = $topic->{decimals};
+                $v = sprintf( "%.${d}f", $x->{$k} );
+            }
+            $s =~ s/\%\{$k\}/$v/g;
         }
         for my $k (qw/id name/) {
             $s =~ s/\%\{$k\}/$topic->{$k}/g;

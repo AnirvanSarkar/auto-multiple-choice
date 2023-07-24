@@ -221,7 +221,6 @@ my %style_col = (
       GSp NoteGSp
       MAX NoteQ
       HEAD General
-      TOPIC NoteT
       TOPICpc NoteT
       /
 );
@@ -230,7 +229,6 @@ my %style_col_abs = (
       ID NoteX
       TOTAL NoteX
       MAX NoteX
-      TOPIC NoteX
       TOPICpc NoteX
       /
 );
@@ -614,18 +612,30 @@ sub export {
         $col_styles{$_} = 1;
     }
 
-    $styles->createStyle(
-        'DeuxDecimales',
-        namespace  => 'number',
-        type       => 'number-style',
-        properties => {
-            'number:decimal-places'      => "2",
-            'number:min-integer-digits'  => "1",
-            'number:grouping'            => 'true', # espace tous les 3 chiffres
-            'number:decimal-replacement' =>
-              "",    # n'ecrit pas les decimales nulles
-        },
-    );
+    for my $d ( 0 .. 5 ) {
+        $styles->createStyle(
+            'Decimales' . $d,
+            namespace  => 'number',
+            type       => 'number-style',
+            properties => {
+                'number:decimal-places'     => $d,
+                'number:min-integer-digits' => "1",
+                'number:grouping' => 'true',    # espace tous les 3 chiffres
+                'number:decimal-replacement' =>
+                  "",    # n'ecrit pas les decimales nulles
+            },
+        );
+        my $sty = $styles->createStyle(
+            'Decimales' . $d . 'pc',
+            namespace  => 'number',
+            type       => 'percentage-style',
+            properties => {
+                'number:decimal-places'     => $d,
+                'number:min-integer-digits' => "1",
+            },
+        );
+        $styles->appendElement( $sty, 'number:text', text => '%' );
+   }
 
     my $pc = $styles->createStyle(
         'Percentage',
@@ -843,7 +853,7 @@ sub export {
         'NoteQ',
         parent     => 'NoteQbase',
         family     => 'table-cell',
-        references => { 'style:data-style-name' => 'DeuxDecimales' },
+        references => { 'style:data-style-name' => 'Decimales2' },
     );
 
     # NoteQp : note pour une question, en pourcentage
@@ -890,7 +900,7 @@ sub export {
         references => { 'style:data-style-name' => 'NombreVide' },
     );
 
-    # NoteT : topic (percentage)
+    # NoteT : topic
     $styles->createStyle(
         'NoteT',
         parent     => 'NoteQ',
@@ -913,29 +923,48 @@ sub export {
         references => { 'style:data-style-name' => 'Percentage' },
     );
     for my $t (@topics) {
+        my $pc  = ( $t->{value} =~ /:pc$/ ? "pc" : "" );
         my $n_levels = $topics->n_levels($t);
         if ( $n_levels > 0 ) {
             for my $l ( 1 .. $n_levels ) {
                 my $col = $topics->level_color( $t, $l ) || "#eaeaea";
 
-                my @opts = ();
-                if ( $t->{value} eq 'ratio' ) {
-                    push @opts,
-                      references => { 'style:data-style-name' => 'Percentage' };
-                }
+                my $refs =
+                  {     'style:data-style-name' => 'Decimales'
+                      . $t->{"decimals$pc"}
+                      . $pc };
+
+                my $style_name = 'NoteT' . $t->{id} . x2ooo( $l - 1 );
 
                 $styles->createStyle(
-                    'NoteT' . $t->{id} . x2ooo( $l - 1 ),
+                    $style_name,
                     parent     => 'NoteQ',
                     family     => 'table-cell',
+                    references => $refs,
                     properties => {
                         -area                 => 'table-cell',
                         'fo:background-color' => $col,
                     },
-                    @opts,
                 );
             }
         }
+        my $style_name = 'NoteT' . $t->{id};
+        $style_col{"TOPIC$t->{id}"}     = $style_name;
+        $style_col_abs{"TOPIC$t->{id}"} = 'NoteX';
+        $styles->createStyle(
+            $style_name,
+            parent     => 'NoteQ',
+            family     => 'table-cell',
+            references => {
+                    'style:data-style-name' => 'Decimales'
+                  . $t->{"decimals$pc"}
+                  . $pc
+            },
+            properties => {
+                -area                 => 'table-cell',
+                'fo:background-color' => "#eaeaea",
+            },
+        );
     }
 
     # NoteGS : score total pour un groupe
@@ -947,7 +976,7 @@ sub export {
             -area                 => 'table-cell',
             'fo:background-color' => "#c4eeba",
         },
-        references => { 'style:data-style-name' => 'DeuxDecimales' },
+        references => { 'style:data-style-name' => 'Decimales2' },
     );
 
     # NoteGSp : pourcentage global pour un groupe
@@ -1585,7 +1614,7 @@ sub export {
                 my $pc = ($t->{value} eq 'ratio' ? 1 : 0);
                 set_cell(
                     $doc, $feuille, $jj, $ii, $m->{abs},
-                    'TOPIC' . ( $pc ? 'pc' : '' ), '',
+                    'TOPIC'.$t->{id}, '',
                     pc      => $pc,
                     numeric => !$pc,
                     formula => "oooc:=" . $formula
