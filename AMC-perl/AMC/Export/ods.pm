@@ -1175,6 +1175,20 @@ sub export {
         },
     );
 
+    $styles->createPageLayout(
+        "DefaultPage",
+        properties => {
+            "fo:page-width"           => '29.7cm', # (landscape)
+            "fo:page-height"          => '21.0cm',
+            "fo:margin-top"           => "1cm",
+            "fo:margin-bottom"        => "1cm",
+            "fo:margin-left"          => "1cm",
+            "fo:margin-right"         => "1cm",
+            "style:scale-to-X"        => "1",
+        }
+                             );
+    $styles->pageLayout("Default", "DefaultPage");
+
     my @student_columns = split( /,+/, $self->{'out.columns'} );
 
     my @codes;
@@ -1200,6 +1214,9 @@ sub export {
     my $dimy = 6 + 1 + $#{ $self->{marks} };
 
     my $feuille = $doc->getTable( 0, $dimy, $dimx );
+
+    $doc->setAttribute( $feuille, 'table:print' => 'true' );
+
     $doc->expandTable( $feuille, $dimy, $dimx );
     $doc->renameTable(
         $feuille,
@@ -1849,6 +1866,7 @@ sub export {
         9,
         2
     );
+    $doc->setAttribute( $legend, 'table:print' => 'false' );
 
     $doc->cellSpan( $legend, 0, 0, 2 );
     $doc->cellStyle( $legend, 0, 0, 'Titre' );
