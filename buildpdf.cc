@@ -68,6 +68,9 @@
 #define FORMAT_JPEG 1
 #define FORMAT_PNG 2
 
+#define HIDE_ALPHA 0.95
+#define HIDE_MARGIN 3.0
+
 /*
 
   Helpers to read PNG files from memory (as an array or as a vector)
@@ -289,11 +292,35 @@ public:
   /* color sets the color for next drawings, either with RBG or
      RGBA. Color values must be between 0.0 and 1.0. */
 
-  void color(double r,double g, double b, double a) {
+  double current_r, current_g, current_b, current_a;
+
+  void temp_color(double r,double g, double b, double a) {
     cairo_set_source_rgba(cr, r, g, b, a);
   }
+
+  void restore_color() {
+    cairo_set_source_rgba(cr, current_r, current_g, current_b, current_a);
+  }
+
+  void color(double r,double g, double b, double a) {
+    cairo_set_source_rgba(cr, r, g, b, a);
+    current_r = r;
+    current_g = g;
+    current_b = b;
+    current_a = a;
+  }
   void color(double r,double g, double b) {
-    cairo_set_source_rgb(cr, r, g, b);
+    color(r, g, b, 1.0);
+  }
+
+  void background_rectangle(double x0, double y0,
+                            PangoRectangle *extents) {
+    x0 += extents->x;
+    y0 += extents->y;
+    temp_color( 1.0, 1.0, 1.0, HIDE_ALPHA );
+    fill_rectangle(x0 - HIDE_MARGIN, x0 + extents->width + 2*HIDE_MARGIN,
+                   y0 - HIDE_MARGIN, y0 + extents->height + 2*HIDE_MARGIN);
+    restore_color();
   }
 
   /* set_matrix_to_scan sets the matrix that transforms layout (subject)
@@ -330,7 +357,11 @@ public:
      y-direction. */
 
   void draw_text(double x, double y,
-		 double xpos, double ypos, const char *text);
+		 double xpos, double ypos, const char *text,
+                 int hide_background = 0);
+  void draw_text(PangoLayout* local_layout,
+		 double x, double y, double xpos, double ypos, const char *text,
+                 int hide_background = 0);
 
   /* cr_move moves the current point by (dx,dy) */
   
@@ -339,8 +370,10 @@ public:
   /* draw_next_text draws a text at the following line */
   
   void draw_next_text(PangoLayout* local_layout,
-                      double xpos, double ypos, const char * text);
-  void draw_next_text(double xpos, double ypos, const char * text);
+                      double xpos, double ypos, const char * text,
+                      int hide_background = 0);
+  void draw_next_text(double xpos, double ypos, const char * text,
+                      int hide_background = 0);
 
   /* draw_text_margin writes a text in the margin (left margin if
      xside=0, and right margin if xside=1). The point used is a point
@@ -417,8 +450,6 @@ private:
   PangoLayout* r_font_size_layout(double ratio);
   PangoFontDescription *font_description;
   int new_page_from_image_surface(cairo_surface_t *is);
-  void draw_text(PangoLayout* local_layout,
-		 double x, double y, double xpos, double ypos, const char *text);
   void free_buffer();
 };
 
@@ -1168,7 +1199,8 @@ void BuildPdf::draw_mark(double xmin, double xmax, double ymin, double ymax) {
 void BuildPdf::draw_text(PangoLayout* local_layout,
 			 double x, double y,
 			 double xpos, double ypos,
-			 const char *text) {
+			 const char *text,
+                         int hide_background) {
   if(debug) {
     printf("; draw text\n");
   }
@@ -1185,9 +1217,14 @@ void BuildPdf::draw_text(PangoLayout* local_layout,
 	   extents.x, extents.y,
 	   extents.width, extents.height);
   }
-  cairo_move_to(cr,
-		x - xpos * extents.width - extents.x,
-		y - ypos * extents.height - extents.y);
+  double x0 = x - xpos * extents.width - extents.x;
+  double y0 = y - ypos * extents.height - extents.y;
+
+  if(hide_background) {
+    background_rectangle(x0, y0, &extents);
+  }
+
+  cairo_move_to(cr, x0, y0);
   pango_cairo_show_layout(cr, local_layout);
   cr_move(xpos * extents.width, extents.height);
 }
@@ -1202,7 +1239,8 @@ void BuildPdf::cr_move(double dx, double dy) {
 
 void BuildPdf::draw_next_text(PangoLayout* local_layout,
                               double xpos, double ypos,
-                              const char *text) {
+                              const char *text,
+                              int hide_background) {
   if(debug) {
     printf("; draw next text\n");
   }
@@ -1217,6 +1255,14 @@ void BuildPdf::draw_next_text(PangoLayout* local_layout,
   }
 
   cr_move(-xpos * extents.width, (0.25-ypos) * extents.height);
+
+  if(hide_background) {
+    double x0, y0;
+    cairo_get_current_point(cr, &x0, &y0);
+    background_rectangle(x0, y0, &extents);
+    cairo_move_to(cr, x0, y0);
+  }
+  
   pango_cairo_show_layout(cr, local_layout);
   cr_move(xpos * extents.width,
           ypos * extents.height + extents.height);
@@ -1224,12 +1270,14 @@ void BuildPdf::draw_next_text(PangoLayout* local_layout,
 
 void BuildPdf::draw_text(double x, double y,
 			 double xpos, double ypos,
-			 const char *text) {
-  draw_text(layout, x, y, xpos, ypos, text);
+			 const char *text,
+                         int hide_background) {
+  draw_text(layout, x, y, xpos, ypos, text, hide_background);
 }
 
-void BuildPdf::draw_next_text(double xpos, double ypos, const char *text) {
-  draw_next_text(layout, xpos, ypos, text);
+void BuildPdf::draw_next_text(double xpos, double ypos, const char *text,
+                              int hide_background) {
+  draw_next_text(layout, xpos, ypos, text, hide_background);
 }
 
 void BuildPdf::draw_text_margin(int xside, double y,

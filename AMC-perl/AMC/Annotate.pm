@@ -1116,7 +1116,7 @@ sub page_header {
         $self->stext(
             $self->{subst}->substitute( $self->{verdict}, @$student ) );
         $self->command(
-            "stext "
+            "hstext "
               . (
                   $self->{rtl}
                 ? $self->{width} -
@@ -1135,7 +1135,7 @@ sub page_header {
             my $s = $self->{topics}->student_topic_message(@$student, $t);
             if($s) {
                 $self->set_color($s->{color} || $self->{text_color});
-                $self->command("nexttext ".( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 ". $s->{message});
+                $self->command("hnexttext ".( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 ". $s->{message});
             }
         }
 

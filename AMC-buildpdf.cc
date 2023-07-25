@@ -143,6 +143,8 @@ int main(int argc, char** argv )
 	PDF.draw_text(a, b, c, d, command + i);
       } else if(sscanf(command, "nexttext %lf %lf %ln", &a, &b, &i) >= 2) {
 	PDF.draw_next_text(a, b, command + i);
+      } else if(sscanf(command, "hnexttext %lf %lf %ln", &a, &b, &i) >= 2) {
+	PDF.draw_next_text(a, b, command + i, 1);
       } else if(sscanf(command, "text margin %ld %lf %lf %lf %ln",
 		       &n, &b, &c, &d, &i) >= 4) {
 	PDF.draw_text_margin(n, b, c, d, command + i);
@@ -155,6 +157,9 @@ int main(int argc, char** argv )
       } else if(sscanf(command, "stext %lf %lf %lf %lf",
 		       &a, &b, &c, &d) == 4) {
 	PDF.draw_text(a, b, c, d, saved_text.c_str());
+      } else if(sscanf(command, "hstext %lf %lf %lf %lf",
+		       &a, &b, &c, &d) == 4) {
+	PDF.draw_text(a, b, c, d, saved_text.c_str(), 1);
       } else if(strcmp(command, "stext begin") == 0) {
 	saved_text = "";
 	while(getline(&command, &command_t, stdin) >= 0) {
