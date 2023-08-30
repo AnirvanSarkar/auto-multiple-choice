@@ -46,7 +46,7 @@ AMC::Test->new(
         { -copy => 2, -question => 'A0:level', -score => 'F' },
         { -copy => 2, -question => 'A:score',  -score => -2 },
         { -copy => 2, -question => 'A:max',    -score => 28 },
-        { -copy => 2, -question => 'A:ratio',  -score => -2 / 28, -digits => 4 },
+        { -copy => 2, -question => 'A:ratio', -score => -2 / 28, -digits => 4 },
         { -copy => 2, -question => 'A:level', -score => 'Z' },
         { -copy => 2, -question => 'B:score', -score => -1 },
         { -copy => 2, -question => 'B:max',   -score => 16 },
@@ -57,7 +57,7 @@ AMC::Test->new(
 
         { -copy => 3, -question => 'A0:score', -score => 5 },
         { -copy => 3, -question => 'A0:max',   -score => 19 },
-        { -copy => 3, -question => 'A0:ratio', -score => 5/19, -digits => 4 },
+        { -copy => 3, -question => 'A0:ratio', -score => 5 / 19, -digits => 4 },
         { -copy => 3, -question => 'A0:level', -score => 'C' },
         { -copy => 3, -question => 'A:score',  -score => 9 },
         { -copy => 3, -question => 'A:max',    -score => 28 },
@@ -65,13 +65,33 @@ AMC::Test->new(
         { -copy => 3, -question => 'A:level',  -score => 'C' },
         { -copy => 3, -question => 'B:score',  -score => 10 },
         { -copy => 3, -question => 'B:max',    -score => 17 },
-        { -copy => 3, -question => 'B:ratio',  -score => 10 / 17, -digits => 4 },
+        { -copy => 3, -question => 'B:ratio', -score => 10 / 17, -digits => 4 },
         { -copy => 3, -question => 'Bi:score', -score => '' },
         { -copy => 3, -question => 'Bi:max',   -score => '' },
         { -copy => 3, -question => 'Bi:ratio', -score => '' },
         { -copy => 3, -question => 'M:score',  -score => 7 },
         { -copy => 3, -question => 'M:max',    -score => 17 },
-        { -copy => 3, -question => 'M:ratio',  -score => 7/17, -digits => 4 },
+        { -copy => 3, -question => 'M:ratio',  -score => 7 / 17, -digits => 4 },
+    ],
+
+    export_full_ods => [
+        { -copy => 1, -question => 'A0', -score => 21 / 19, -digits => 2 },
+        { -copy => 1, -question => 'A',  -score => '107%' },
+        { -copy => 1, -question => 'B',  -score => '100%' },
+        { -copy => 1, -question => 'Bi', -score => '100%' },
+        { -copy => 1, -question => 'M',  -score => '106%' },
+
+        { -copy => 2, -question => 'A0', -score => -3 / 19, -digits => 2 },
+        { -copy => 2, -question => 'A',  -score => '-7%' },
+        { -copy => 2, -question => 'B',  -score => '-6%' },
+        { -copy => 2, -question => 'Bi', -score => '-33%' },
+        { -copy => 2, -question => 'M',  -score => '6%' },
+
+        { -copy => 3, -question => 'A0', -score => 5 / 19, -digits => 2 },
+        { -copy => 3, -question => 'A',  -score => '32%' },
+        { -copy => 3, -question => 'B',  -score => '59%' },
+        { -copy => 3, -question => 'Bi', -score => '' },
+        { -copy => 3, -question => 'M',  -score => '41%' },
       ],
 )->default_process;
 

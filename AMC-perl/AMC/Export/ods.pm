@@ -87,10 +87,12 @@ sub text_width {
         $font->set_weight('normal');
         $layout->set_font_description($font);
         for my $text (@t) {
-            $layout->set_text($text);
-            my ( $text_x, $text_y ) = $layout->get_pixel_size();
-            $width  = $text_x if ( $text_x > $width );
-            $height = $text_y if ( $text_y > $height );
+            if($text) {
+                $layout->set_text($text);
+                my ( $text_x, $text_y ) = $layout->get_pixel_size();
+                $width  = $text_x if ( $text_x > $width );
+                $height = $text_y if ( $text_y > $height );
+            }
         }
 
         return (
@@ -188,7 +190,7 @@ sub condensed {
             $fin   = $i;
         }
     }
-    push @sets, &$range( $column, $debut, $fin );
+    push @sets, &$range( $column, $debut, $fin ) if($debut ne '');
     return ( join( ";", @sets ) );
 }
 

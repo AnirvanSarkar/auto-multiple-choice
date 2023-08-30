@@ -89,6 +89,7 @@ my $defaults = {
     ok_checksums_file   => '',
     to_check            => [],
     export_full_csv     => [],
+    export_full_ods     => [],
     export_columns      => 'student.copy',
     export_csv_ticked   => 'AB',
     export_csv_decimal  => ',',
@@ -1002,24 +1003,60 @@ sub defects {
 
 sub check_export {
     my ($self) = @_;
-    my @csv = @{ $self->{export_full_csv} };
+    $self->check_export_csv( key => 'export_full_csv' );
+    $self->check_export_csv( key => 'export_full_ods', via_ods => 1 );
+}
+
+sub check_export_csv {
+    my ($self, %opts) = @_;
+    my @csv = @{ $self->{$opts{key}} };
     if (@csv) {
-        $self->begin( "CSV full export test (" . ( 1 + $#csv ) . " scores)" );
+        $self->begin( ( $opts{via_ods} ? "ODS" : "CSV" )
+            . " full export test ("
+              . ( 1 + $#csv )
+              . " scores)" );
         my @args = (
-            '--data',            '%DATA',
-            '--module',          'CSV',
-            '--association-key', $self->{list_key},
-            '--option-out',      'columns=' . $self->{export_columns},
-            '--option-out',      'ticked=' . $self->{export_csv_ticked},
-            '--option-out',      'decimal=' . $self->{export_csv_decimal},
-            '-o',                '%PROJ/export.csv',
+            '--data',       '%DATA', '--association-key', $self->{list_key},
+            '--option-out', 'columns=' . $self->{export_columns},
         );
+        if ( $opts{via_ods} ) {
+            push @args, "--module", "ods", "-o", '%PROJ/export.ods';
+        } else {
+            push @args,
+              '--option-out', 'ticked=' . $self->{export_csv_ticked},
+              '--option-out', 'decimal=' . $self->{export_csv_decimal},
+              '--module',     'CSV',
+              '-o',           '%PROJ/export.csv';
+        }
         push @args, '--fich-noms', '%PROJ/' . $self->{list}
           if ( $self->{list} );
         $self->amc_command( 'export', @args );
+
+        my $skip_lines = 0;
+
+        if ( $opts{via_ods} ) {
+            my $ok;
+            {
+                local $ENV{LANG} = 'C';
+                $ok =
+                  run( ["unoconv", "-f", "csv", "$self->{temp_dir}/export.ods"],
+                    '2>>', '/dev/null' );
+            }
+            if ( !$ok ) {
+                $self->trace("[E] Command `unoconv' returned with $?");
+                $self->failed(1);
+            }
+            $skip_lines = 2;
+        }
+
         my $c = Text::CSV->new();
         open my $fh, "<:encoding(utf-8)", $self->{temp_dir} . '/export.csv';
         my $i     = 0;
+        if($skip_lines) {
+            for my $ii (1..$skip_lines) {
+                $c->getline($fh);
+            }
+        }
         my %heads = map { $_ => $i++ } ( @{ $c->getline($fh) } );
         my $copy  = $heads{ translate_column_title('copie') };
         my $name  = $heads{ translate_column_title('nom') };
