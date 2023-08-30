@@ -1,0 +1,47 @@
+---
+topics:
+  - id: A0
+    name: A seul, positif
+    questions:
+      - A-*
+    floor: 0
+    value: ratio
+    levels:
+      - min: 1.01
+        code: X
+      - min: 0.8
+        code: A
+      - min: 0.5
+        code: B
+      - min: 0.2
+        code: C
+      - min: 0
+        code: F
+      - code: Z
+  - id: A
+    name: A
+    questions: A*
+    levels:
+      - min: 101
+        code: X
+      - min: 75
+        code: A
+      - min: 50
+        code: B
+      - min: 25
+        code: C
+      - min: 0
+        code: F
+      - code: Z
+  - id: B
+    name: B
+    questions: '*B*'
+  - id: Bi
+    name: B, questions impaires
+    questions:
+      - B-1
+      - B-3
+  - id: M
+    name: Questions multiples
+    questions:
+      - ^.*M.*

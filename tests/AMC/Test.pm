@@ -1060,9 +1060,12 @@ sub check_export {
                     && defined( $heads{ $t->{-question} } )
                     && defined( $t->{-score} ) )
                 {
-                    $self->test( $row->[ $heads{ $t->{-question} } ],
+                    $self->test(
+                        $row->[ $heads{ $t->{-question} } ],
                         $t->{-score},
-                        "score for $goodrow Q=" . $t->{-question} );
+                        "score for $goodrow Q=" . $t->{-question},
+                        digits => $t->{-digits}
+                    );
                     $t->{checked} = 1;
                 }
                 if (   $goodrow
@@ -1281,16 +1284,21 @@ sub datadump {
 }
 
 sub test {
-    my ( $self, $x, $v, $subtest ) = @_;
+    my ( $self, $x, $v, $subtest, %opts ) = @_;
     if ( !defined($subtest) ) {
         $subtest = ++$self->{'n.subt'};
     }
     if ( ref($x) eq 'ARRAY' ) {
         for my $i ( 0 .. $#$x ) {
-            $self->test( $x->[$i], $v->[$i], 1 );
+            $self->test( $x->[$i], $v->[$i], 1, %opts );
         }
     } else {
         no warnings 'uninitialized';
+        if ( defined( $opts{digits} ) && $opts{digits} ne '' ) {
+            for my $z ( \$x, \$v ) {
+                $$z = sprintf( "%.$opts{digits}f", $$z );
+            }
+        }
         if ( $x ne $v ) {
             $self->trace( "[E] "
                   . $self->{test_title}
