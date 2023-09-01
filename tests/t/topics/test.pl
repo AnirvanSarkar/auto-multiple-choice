@@ -18,6 +18,8 @@
 # along with Auto-Multiple-Choice.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+use utf8;
+
 require "./AMC/Test.pm";
 
 AMC::Test->new(
@@ -25,7 +27,7 @@ AMC::Test->new(
     filter          => 'plain',
     tex_engine      => 'xelatex',
     seuil           => 0.5,
-    perfect_copy    => [],
+    perfect_copy    => '',
     export_full_csv => [
         { -copy => 1, -question => 'A0:score', -score => 21 },
         { -copy => 1, -question => 'A0:max',   -score => 19 },
@@ -92,6 +94,16 @@ AMC::Test->new(
         { -copy => 3, -question => 'B',  -score => '59%' },
         { -copy => 3, -question => 'Bi', -score => '' },
         { -copy => 3, -question => 'M',  -score => '41%' },
-      ],
+    ],
+
+    check_topics => [
+        {
+            -id      => 'A0',
+            -copy    => 1,
+            -message => 'X : acquis avec bonus (21 > 19)'
+        },
+        { -id => 'A0', -copy => 2, -message => 'F : à travailler' },
+        { -id => 'A0', -copy => 3, -message => 'C : à renforcer (0.263)' },
+    ],
 )->default_process;
 

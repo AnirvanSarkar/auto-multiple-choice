@@ -30,6 +30,7 @@ use AMC::DataModule::scoring qw(:question);
 use AMC::Scoring;
 use AMC::NamesFile;
 use AMC::Queue;
+use AMC::Topics;
 
 use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
@@ -118,6 +119,7 @@ my $defaults = {
     exitonerror         => 1,
     postinstall         => '',
     additional_test     => '',
+    check_topics        => [],
 };
 
 sub new {
@@ -1001,6 +1003,60 @@ sub defects {
     }
 }
 
+sub check_topics {
+    my ($self) = @_;
+    my @tests = @{ $self->{check_topics} };
+    if (@tests) {
+        $self->begin("Topics test (".(1+$#tests)." values)");
+        my $data   = AMC::Data->new( $self->{temp_dir} . "/data" );
+        my $topics = AMC::Topics->new(
+            project_dir => $self->{temp_dir},
+            data        => $data
+        );
+        $data->begin_read_transaction("ttop");
+        for my $test (@tests) {
+            if ( $test->{-copy} && !$test->{-student} ) {
+                if ( $test->{-copy} =~ /^(.*):(.*)$/ ) {
+                    $test->{-student} = $1;
+                    $test->{-copy}    = $2;
+                } else {
+                    $test->{-student} = $test->{-copy};
+                    $test->{-copy}    = 0;
+                }
+            }
+            my $id = $test->{-id};
+            my ($t) = grep { $_->{id} eq $id } ( $topics->all_topics );
+            if ($t) {
+                my $m = $topics->student_topic_message( $test->{-student},
+                                                        ($test->{-copy} || 0), $t );
+                my $i = 0;
+                for my $key (qw/message color/) {
+                    if ( defined( $test->{ "-" . $key } ) ) {
+                        $self->test(
+                            $m->{$key},
+                            $test->{ "-" . $key },
+"Topic '$id' $key for copy ($test->{-student},$test->{-copy})"
+                        );
+                        $i++;
+                    }
+                }
+                if ( !$i ) {
+                    $self->trace(
+"[E] Empty test for topic '$id' and copy ($test->{-student},$test->{-copy})"
+                    );
+                    $self->failed(1);
+                }
+            } else {
+                $self->trace("[E] Topic not found: $id");
+                $self->failed(1);
+            }
+        }
+        $data->end_transaction("ttop");
+        $data->disconnect;
+        $self->end;
+    }
+}
+
 sub check_export {
     my ($self) = @_;
     $self->check_export_csv( key => 'export_full_csv' );
@@ -1500,6 +1556,7 @@ sub default_process {
     $self->check_perfect;
     $self->check_assoc;
     $self->annote;
+    $self->check_topics;
     $self->check_export;
     $self->report_hardware;
 
