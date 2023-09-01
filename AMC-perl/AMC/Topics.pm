@@ -93,7 +93,7 @@ sub load_yaml {
               @{ $content->{include} } ];
         for my $f ( @{ $content->{include} } ) {
             if ( -f $f ) {
-                my $c = load_yaml($f);
+                my $c = $self->load_yaml($f);
                 $content = $merger->merge( $content, $c );
             } else {
                 $self->error("File not found: $f (included from $file)");
@@ -120,18 +120,38 @@ sub last_modified {
 }
 
 sub add_conf {
-    my ($self, $topics) = @_;
-    for my $t ( values(%{$topics->{conf}}), @{$topics->{topics}} ) {
+    my ( $self, $topics ) = @_;
+    my @domains = ();
+    if ( $topics->{conf} ) {
+        if(ref($topics->{conf}) eq 'HASH') {
+            push @domains, values( %{ $topics->{conf} } );
+        } else {
+            $self->error("'conf' section should include keys");
+        }
+    }
+    if ( $topics->{topics} ) {
+        if ( ref( $topics->{topics} ) eq 'ARRAY' ) {
+            push @domains, @{ $topics->{topics} };
+        } else {
+            $self->error("'topics' section should be a list");
+        }
+    }
+    for my $t (@domains) {
         if ( $t->{conf} ) {
             if ( !ref( $t->{conf} ) ) {
                 $t->{conf} = [ $t->{conf} ];
             }
-            for my $c ( @{ $t->{conf} } ) {
-                if ( $topics->{conf}->{$c} ) {
-                    %$t = %{ $merger->merge( $t, $topics->{conf}->{$c} ) };
-                } else {
-                    $self->error("Unknown configuration: $c");
+            if ( ref( $t->{conf} ) eq 'ARRAY' ) {
+                for my $c ( @{ $t->{conf} } ) {
+                    debug "Applying conf $c...";
+                    if ( $topics->{conf}->{$c} ) {
+                        %$t = %{ $merger->merge( $t, $topics->{conf}->{$c} ) };
+                    } else {
+                        $self->error("Unknown configuration: $c");
+                    }
                 }
+            } else {
+                $self->error("'conf' section should be a text or list");
             }
         }
     }

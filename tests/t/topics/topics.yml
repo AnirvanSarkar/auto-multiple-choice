@@ -1,39 +1,19 @@
 ---
+
+include:
+  - standard.yml
+
 topics:
   - id: A0
     name: A seul, positif
     questions:
       - A-*
     floor: 0
-    value: ratio
-    decimals: 2
-    levels:
-      - min: 1.01
-        code: X
-      - min: 0.8
-        code: A
-      - min: 0.5
-        code: B
-      - min: 0.2
-        code: C
-      - min: 0
-        code: F
-      - code: Z
+    conf: ratiolevels
   - id: A
     name: A
     questions: A*
-    levels:
-      - min: 101
-        code: X
-      - min: 75
-        code: A
-      - min: 50
-        code: B
-      - min: 25
-        code: C
-      - min: 0
-        code: F
-      - code: Z
+    conf: pclevels
   - id: B
     name: B
     questions: '*B*'
