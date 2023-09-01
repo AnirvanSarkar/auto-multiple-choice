@@ -925,7 +925,10 @@ sub export {
         references => { 'style:data-style-name' => 'Percentage' },
     );
     for my $t (@topics) {
-        my $pc  = ( $t->{value} =~ /:pc$/ ? "pc" : "" );
+        my $pc =
+          (   $t->{value} =~ /:pc$/ ? "pc"
+            : $t->{value} eq 'ratio' ? 'ratio'
+            :                          "" );
         my $n_levels = $topics->n_levels($t);
         if ( $n_levels > 0 ) {
             for my $l ( 1 .. $n_levels ) {

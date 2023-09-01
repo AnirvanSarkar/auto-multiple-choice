@@ -163,17 +163,12 @@ sub defaults {
     for my $t ( $self->all_topics ) {
         $t->{value} = 'ratio:pc' if ( !$t->{value} );
 
-        my $valuekey;
-        if ( $t->{value} eq 'score' ) {
-            $valuekey = '%{score}/%{max}';
-        } else {
-            $valuekey = '%{' . $t->{value} . '}';
-        }
-        $t->{format} = "⬤ %{name}: %{message} ($valuekey)"
+        $t->{format} = "⬤ %{name}: %{message} (%{value})"
             if ( !defined( $t->{format} ) );
 
-        $t->{decimals}   = 1 if ( !defined( $t->{decimals} ) );
-        $t->{decimalspc} = 0 if ( !defined( $t->{decimalspc} ) );
+        $t->{decimals}      = 0 if ( !defined( $t->{decimals} ) );
+        $t->{decimalsratio} = 2 if ( !defined( $t->{decimalsratio} ) );
+        $t->{decimalspc}    = 0 if ( !defined( $t->{decimalspc} ) );
 
         $t->{levels} = [] if ( !$t->{levels} );
         my $i = 1;
@@ -399,6 +394,20 @@ sub student_topic_message {
     my $x = $self->student_topic_calc( $student, $copy, $topic );
     if ($x) {
         my $s = $topic->{format};
+        my $l =
+          $self->value_level( $topic, $x->{ $topic->{value} } )
+          || { message => "", color=>"" };
+
+        for my $k (qw/message/) {
+            $s =~ s/\%\{$k\}/$l->{$k}/g if ( defined( $l->{$k} ) );
+        }
+
+        my $value = '%{'.$topic->{value}.'}';
+        if($topic eq 'score') {
+            $value = '%{score}/%{max}';
+        }
+        $s =~ s/\%\{value\}/$value/g;
+
         for my $k (qw/score max ratio ratio:pc/) {
             my $v;
             if ( $k =~ /:pc$/ ) {
@@ -408,7 +417,10 @@ sub student_topic_message {
                 my $d = $topic->{decimalspc};
                 $v = sprintf( "%.${d}f %%", $x->{$k} );
             } else {
-                my $d = $topic->{decimals};
+                my $d =
+                  (   $k eq 'ratio'
+                    ? $topic->{decimalsratio}
+                    : $topic->{decimals} );
                 $v = sprintf( "%.${d}f", $x->{$k} );
             }
             $s =~ s/\%\{$k\}/$v/g;
@@ -416,15 +428,12 @@ sub student_topic_message {
         for my $k (qw/id name/) {
             $s =~ s/\%\{$k\}/$topic->{$k}/g;
         }
-        my $l =
-          $self->value_level( $topic, $x->{ $topic->{value} } )
-          || { message => "", color=>"" };
-        for my $k (qw/message code i/) {
+        for my $k (qw/code i/) {
             $s =~ s/\%\{$k\}/$l->{$k}/g if ( defined( $l->{$k} ) );
         }
-        return { message=>$s, color=>$l->{color} };
+        return { message => $s, color => $l->{color}, calc => $x };
     } else {
-        return { message => '', color => '' };
+        return { message => '', color => '', calc => $x };
     }
 }
 
