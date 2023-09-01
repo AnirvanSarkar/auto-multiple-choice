@@ -372,6 +372,8 @@ sub connects_to_database {
       $self->{scoring}->variable('darkness_threshold_up')
       if ( !$self->{darkness_threshold_up} );
 
+    $self->{data}->end_transaction('AnSU');
+
     # Setup Topics
 
     $self->{topics} = AMC::Topics->new(
@@ -387,8 +389,6 @@ sub connects_to_database {
             )
         );
     }
-
-    $self->{data}->end_transaction('AnSU');
 
     # But darkness_threshold_up is not defined for old projects… set it
     # to an inactive value in this case

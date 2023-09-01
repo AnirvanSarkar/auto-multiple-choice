@@ -224,12 +224,12 @@ sub pre_process {
 
     $self->load();
 
-    $self->{_scoring}->begin_read_transaction('EXPP');
-
     $self->{_topics}=AMC::Topics->new(
         project_dir => $self->{"fich.projectdir"},
         data        => $self->{_data}
     );
+    $self->{_scoring}->begin_read_transaction('EXPP');
+
     my @err = $self->{_topics}->errors();
     if (@err) {
         $self->add_message(

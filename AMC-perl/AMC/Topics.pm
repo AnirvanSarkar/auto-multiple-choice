@@ -235,12 +235,15 @@ sub match_re {
 
 sub build_questions_lists {
     my ($self)             = @_;
+    $self->{data}->begin_read_transaction("topP");
     my $code_digit_pattern = $self->{layout}->code_digit_pattern();
     my @codes              = $self->{scoring}->codes();
     my $codes_re =
       "(" . join( "|", map { "\Q$_\E" } @codes ) . ")" . $code_digit_pattern;
     my @questions =
       grep { $_->{name} !~ /$codes_re/ } ( $self->{layout}->questions_list() );
+    $self->{data}->end_transaction("topP");
+
     $self->{qid_to_topics} = {};
     for my $t ( @{ $self->{config}->{topics} } ) {
         my $re = $self->match_re( $t->{questions} );
