@@ -1301,9 +1301,12 @@ sub question_score {
 
 sub question_result {
     my ( $self, $student, $copy, $question ) = @_;
-    my $sth = $self->statement('getScoreC');
-    $sth->execute( $student, $copy, $question );
-    return ( $sth->fetchrow_hashref );
+    return (
+        $self->sql_row_hashref(
+            $self->statement('getScoreC'),
+            $student, $copy, $question
+        )
+    );
 }
 
 # student_code($student,$copy,$code) returns the value of the code

@@ -209,6 +209,17 @@ sub sql_row {
     }
 }
 
+# same as sql_single, but returns a hashref with all the columns of the first
+# row of the result.
+
+sub sql_row_hashref {
+    my ( $self, $sql, @bind ) = @_;
+    debug_and_stderr "WARNING: sql_row with no transaction -- $sql"
+      if ( !$self->{data}->{trans} );
+    my $x = $self->dbh->selectrow_hashref( $sql, {}, @bind );
+    return($x);
+}
+
 # _embedded versions of the last two methods embeds these methods in a
 # read transaction
 
