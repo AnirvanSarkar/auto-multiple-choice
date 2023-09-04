@@ -1009,6 +1009,8 @@ sub check_topics {
     my ($self) = @_;
     my @tests = @{ $self->{check_topics} };
     if (@tests) {
+        set_debug( $self->{debug_file} );
+
         $self->begin("Topics test (".(1+$#tests)." values)");
         my $data   = AMC::Data->new( $self->{temp_dir} . "/data" );
         my $topics = AMC::Topics->new(
@@ -1054,7 +1056,10 @@ sub check_topics {
             }
         }
         $data->end_transaction("ttop");
-        $data->disconnect;
+        $data->disconnect("topics");
+
+        set_debug('');
+
         $self->end;
     }
 }
