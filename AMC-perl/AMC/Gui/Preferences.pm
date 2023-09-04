@@ -471,7 +471,7 @@ sub accept {
         for (
             qw/annote_chsign symboles_trait
             embedded_format embedded_max_size embedded_jpeg_quality
-            symboles_indicatives annote_font_name annote_ecart/
+            symboles_indicatives annote_font_name annote_ecart annote_color/
           )
         {
             $changed = 1 if ( $gm{$_} );

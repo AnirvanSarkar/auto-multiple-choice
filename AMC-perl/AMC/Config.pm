@@ -322,6 +322,7 @@ sub defaults {
         symbole_1_0_color    => $hex_red,
         symbole_1_1_type     => 'mark',
         symbole_1_1_color    => $hex_blue,
+        annote_color         => $hex_red,
 
         annote_font_name => 'Linux Libertine O 12',
         annote_ecart     => 5.5,
