@@ -254,6 +254,20 @@ sub statement {
     }
 }
 
+# active_statements() returns a list of active statement ids
+
+sub active_statements {
+    my ($self) = @_;
+    my @ids = ();
+    for my $k ( keys %{ $self->{statements} } ) {
+        my $st = $self->{statements}->{$k};
+        if ( $st->{s} && $st->{s}->{Active} ) {
+            push @ids, $k;
+        }
+    }
+    return (@ids);
+}
+
 # query($query,@bind) calls the SQL query named $query (see the
 # available query names in the define_statements function) and returns
 # a single value answer. In the query statement, ? are replaced by the
