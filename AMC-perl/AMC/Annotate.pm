@@ -291,9 +291,8 @@ sub pdf_output_filename {
         my $name = 'XXX';
         my $n;
 
-        debug "Association -> ID=$i";
-
         if ( defined($i) ) {
+            debug "Association -> ID=$i";
             debug "Looking for student $self->{association_key} = $i";
             ($n) = $self->{names}
               ->data( $self->{association_key}, $i, test_numeric => 1 );
@@ -301,6 +300,8 @@ sub pdf_output_filename {
                 debug "Found";
                 $f = $self->{names}->substitute( $n, $f );
             }
+        } else {
+            debug "Association: none";
         }
 
         debug "F[n]=" . show_utf8($f);
