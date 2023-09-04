@@ -82,6 +82,7 @@ my $defaults = {
     annote_files        => [],
     annote_ascii        => 0,
     annote_position     => 'marge',
+    annote_color        => 'red',
     annotate_single     => '',
     verdict             => '%(id) %(ID)' . "\n" . 'TOTAL : %S/%M => %s/%m',
     verdict_question    => "\"%" . "s/%" . "m\"",
@@ -876,6 +877,7 @@ sub annote {
         '--verdict',          $self->{verdict},
         '--verdict-question', $self->{verdict_question},
         '--position',         $self->{annote_position},
+        '--text-color',       $self->{annote_color},
         '--project',          '%PROJ',
         '--data',             '%DATA',
         ( $self->{annote_ascii}

@@ -28,6 +28,10 @@ AMC::Test->new(
     tex_engine      => 'xelatex',
     seuil           => 0.5,
     perfect_copy    => '',
+    annote          => [3],
+    annote_position => 'marges',
+    annote_color    => 'grey',
+    verdict         => 'TOTAL : %S/%M => %s/%m',
     export_full_csv => [
         { -copy => 1, -question => 'A0:score', -score => 21 },
         { -copy => 1, -question => 'A0:max',   -score => 19 },
@@ -102,8 +106,15 @@ AMC::Test->new(
             -copy    => 1,
             -message => 'X : acquis avec bonus (21 > 19)'
         },
+        {
+            -id      => 'A0',
+            -copy    => 1,
+            -color => '#00b935'
+        },
         { -id => 'A0', -copy => 2, -message => 'F : à travailler' },
+        { -id => 'A0', -copy => 2, -color => '#ff2d3a' },
         { -id => 'A0', -copy => 3, -message => 'C : à renforcer (0.263)' },
+        { -id => 'A0', -copy => 3, -color => '#ff9f2d' },
     ],
 )->default_process;
 
