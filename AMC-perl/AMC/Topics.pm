@@ -335,17 +335,59 @@ sub value_level {
     }
 }
 
+sub range {
+    my ( $start, $end ) = @_;
+    if ( $start eq $end ) {
+        return ($start);
+    } elsif ( $end == $start + 1 ) {
+        return ( $start . ", " . $end );
+    } else {
+        return ( $start . "-" . $end );
+    }
+}
+
+sub nums_string {
+    my (@x) = @_;
+    @x = sort { $a <=> $b || $a cmp $b } @x;
+    my $simple = join( ", ", @x );
+    my $start  = '';
+    my $end    = '';
+    my @sets   = ();
+    for my $i (@x) {
+        if ($start) {
+            if ( $i == $end + 1 ) {
+                $end = $i;
+            } else {
+                push @sets, range( $start, $end );
+                $start = $i;
+                $end   = $i;
+            }
+        } else {
+            $start = $i;
+            $end   = $i;
+        }
+    }
+    push @sets, range( $start, $end ) if ( $start ne '' );
+    my $merged = join( ", ", @sets );
+    return ( $simple, $merged );
+}
+
 sub student_topic_calc {
     my ( $self, $student, $copy, $topic ) = @_;
-    my @x   = ();
+    my @x    = ();
+    my @nums = ();
     for my $q ( @{ $topic->{questions_list} } ) {
         my $r =
           $self->{scoring}->question_result( $student, $copy, $q->{question} );
         if ( defined( $r->{score} ) ) {
             debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max})";
             push @x, [ $r->{score}, $r->{max} ];
+            push @nums,
+              $self->{layout}->question_number( $student, $q->{question} );
         }
     }
+
+    my ( $nums_simple, $nums_condensed ) = nums_string(@nums);
 
     my $s    = 0;
     my $smax = 0;
@@ -360,6 +402,8 @@ sub student_topic_calc {
             max        => $smax,
             ratio      => $s / $smax,
             'ratio:pc' => 100 * $s / $smax,
+            'nums:s'   => $nums_simple,
+            'nums:c'   => $nums_condensed,
         };
 
         # Applies ceil and floor to topic value
@@ -427,6 +471,9 @@ sub student_topic_message {
         }
         for my $k (qw/id name/) {
             $s =~ s/\%\{$k\}/$topic->{$k}/g;
+        }
+        for my $k (qw/nums:s nums:c/) {
+            $s =~ s/\%\{$k\}/$x->{$k}/g;
         }
         for my $k (qw/code i/) {
             $s =~ s/\%\{$k\}/$l->{$k}/g if ( defined( $l->{$k} ) );
