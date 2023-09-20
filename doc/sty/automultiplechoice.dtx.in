@@ -3268,6 +3268,7 @@ along with Auto-Multiple-Choice.  If not, see
   \AMCtype@multifalse\ifAMC@qbloc\ifAMC@textPos\vbox\bgroup\AMC@tracepos{1}{qtext:#2:\the\AMCid@quest,0}\hbox\bgroup\AMC@tracepos{1}{qtext:#2:\the\AMCid@quest,0}\fi\noindent\begin{minipage}{\linewidth}\fi%
   \ifAMC@affichekeys\index{\texttt{#2}}\ifAMC@keysline[\texttt{#2}]\newline\fi\fi%
   \AMCbeginQuestion{\ifAMC@affichekeys\ifAMC@ensemble\AMC@qaff\ \fi\ifAMC@keysline\else[\texttt{#2}]\fi\else\AMC@qaff\fi}{#1}%
+  \ifAMC@calibration\immediate\write\AMC@XYFILE{\string\questionnum{\the\AMCid@etud}{\the\AMCid@quest}{\AMC@qaff}}\fi%
   \ifx\@empty\AMC@sz@callin\@empty\else%
     \csname\AMC@sz@callin\endcsname%
   \fi%

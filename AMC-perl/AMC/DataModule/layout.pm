@@ -126,6 +126,16 @@ package AMC::DataModule::layout;
 #
 # * name is the question identifier from the LaTeX file
 #
+# layout_questionnum stores the questions numbers (written on the
+# subject) for each student
+#
+# * student is the student number
+#
+# * question is the question ID (see explanation in layout_box)
+#
+# * number is the question number (as seen by the student on her
+#   subject)
+#
 # layout_association contains the pre-association data
 #
 # * student is the student sheet number
@@ -180,7 +190,7 @@ use XML::Simple;
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (9);
+    return (10);
 }
 
 sub drop_box_table {
@@ -386,6 +396,13 @@ sub version_upgrade {
         );
         $self->sql_do( "DROP TABLE IF EXISTS " . $self->table("namefield") );
         return (9);
+    }
+    if ( $old_version == 9 ) {
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("questionnum")
+              . " (student INTEGER, question INTEGER, number TEXT,"
+              . " PRIMARY KEY(student,question))" );
+        return (10);
     }
     return ('');
 }
@@ -880,6 +897,12 @@ sub define_statements {
               . " WHERE q.question=b.question"
               . " AND name=? AND student=? AND role=?"
               . " GROUP BY page ORDER BY page" },
+        questionNum => { sql => "INSERT OR REPLACE INTO "
+              . $self->table("questionnum")
+              . " (student,question,number) VALUES (?,?,?)" },
+        getQuestionNum => { sql => "SELECT number FROM "
+              . $self->table("questionnum")
+              . " WHERE student=? AND question=?" },
     };
 }
 
@@ -1239,7 +1262,7 @@ sub question_name {
 
 sub clear_mep {
     my ($self) = @_;
-    for my $t (qw/page mark zone box digit source question association/) {
+    for my $t (qw/page mark zone box digit source question questionnum association/) {
         $self->sql_do( "DELETE FROM " . $self->table($t) );
     }
 }
@@ -1501,6 +1524,27 @@ sub questions_with_no_box {
     my $r = $self->dbh->selectall_arrayref( $self->statement('questionNoBox'),
         { Slice => {} }, BOX_ROLE_ANSWER );
     return ($r);
+}
+
+# question_number(student,question,number) sets the question
+# number (as seen by the student) corresponding to the question ID.
+#
+# question_number(student,question) gets the question number
+# corresponding to question ID.
+
+sub question_number {
+    my ( $self, $student, $question, $number ) = @_;
+    if ( defined($number) ) {
+        $self->statement("questionNum")
+          ->execute( $student, $question, $number );
+    } else {
+        return (
+            $self->sql_single(
+                $self->statement('getQuestionNum'),
+                $student, $question
+            )
+        );
+    }
 }
 
 1;
