@@ -1131,12 +1131,16 @@ sub page_header {
 
         # Add topics...
 
-        for my $t ($self->{topics}->all_topics()) {
+        for my $t ( $self->{topics}->all_topics() ) {
             debug "Topic $t->{id}";
-            my $s = $self->{topics}->student_topic_message(@$student, $t);
-            if($s) {
-                $self->set_color($s->{color} || $self->{text_color});
-                $self->command("hnexttext ".( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 ". $s->{message});
+            my $s = $self->{topics}->student_topic_message( @$student, $t );
+            if ($s) {
+                for my $line ( split( /\n/, $s->{message} ) ) {
+                    $self->set_color( $s->{color} || $self->{text_color} );
+                    $self->command( "hnexttext "
+                          . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 "
+                          . $line );
+                }
             }
         }
 
