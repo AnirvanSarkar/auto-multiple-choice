@@ -161,6 +161,10 @@ sub add_conf {
 sub defaults {
     my ($self) = @_;
     for my $t ( $self->all_topics ) {
+        $self->error( __
+"Topic id <$t->{id}> must only contain alphanumeric characters, without spaces and accentuated characters"
+        ) if ( $t->{id} =~ /[^a-zA-Z0-9]/ );
+
         $t->{value} = 'ratio:pc' if ( !$t->{value} );
 
         $t->{format} = "⬤ %{name}: %{message} (%{value})"
