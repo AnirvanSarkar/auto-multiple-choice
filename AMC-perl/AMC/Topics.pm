@@ -64,7 +64,7 @@ sub new {
 sub error {
     my ($self, $text) = @_;
     push @{$self->{errors}}, $text;
-    debug "ERROR $text";
+    debug "ERROR(Topic) $text";
 }
 
 sub errors {
@@ -192,14 +192,22 @@ sub load_topics {
             $YAML::Syck::ImplicitUnicode = 1;
 
             $self->{config} = $self->add_conf( $self->load_yaml($topics_file) );
-            push @{$self->{config}->{include}}, $topics_file;
-            $self->defaults();
-            $self->build_questions_lists();
+
+            if ( ref( $self->{config} ) ) {
+                $self->{config}->{include} = []
+                  if ( !$self->{config}->{include} );
+                push @{ $self->{config}->{include} }, $topics_file;
+                if ( ref( $self->{config}->{topics} ) ) {
+                    $self->defaults();
+                    $self->build_questions_lists();
+                }
+            }
         } else {
             $self->{config} = { topics => [], include=>[] };
             $self->error('Unable to load perl module YAML::Syck');
         }
     } else {
+        debug "Topics: file not found - $topics_file";
         $self->{config} = { topics => [], include=>[] };
     }
 }

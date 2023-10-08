@@ -400,7 +400,8 @@ sub connects_to_database {
 sub error {
     my ( $self, $message ) = @_;
 
-    debug_and_stderr("ERROR: $message");
+    # Pass error message to calling process, for GUI
+    print "ERR: $message\n";
 }
 
 sub needs_data {
