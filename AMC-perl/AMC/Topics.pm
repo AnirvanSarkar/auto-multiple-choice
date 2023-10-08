@@ -300,17 +300,25 @@ sub and_odf {
     }
 }
 
+sub level_threshold_odf {
+    my ( $self, $topic, $l, $k ) = @_;
+    my $v = $l->{$k};
+    $v /= 100.0 if ( $topic->{value} =~ /:pc$/ );
+    return ($v);
+}
+
 sub level_test_single_odf {
-    my ($self, $topic, $i_level, $value) = @_;
+    my ( $self, $topic, $i_level, $value ) = @_;
     my @cond = ();
-    my $l=$topic->{levels}->[$i_level-1];
-    if(defined($l->{max})) {
-        push @cond, "$value<$l->{max}";
+    my $l    = $topic->{levels}->[ $i_level - 1 ];
+    if ( defined( $l->{max} ) ) {
+        push @cond, "$value<" . $self->level_threshold_odf( $topic, $l, 'max' );
     }
-    if(defined($l->{min})) {
-        push @cond, "$value>=$l->{min}";
+    if ( defined( $l->{min} ) ) {
+        push @cond,
+          "$value>=" . $self->level_threshold_odf( $topic, $l, 'min' );
     }
-    return($self->and_odf(@cond));
+    return ( $self->and_odf(@cond) );
 }
 
 sub level_test_odf {
