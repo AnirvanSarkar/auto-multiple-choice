@@ -236,14 +236,19 @@ sub build_questions_lists {
     my $codes_re =
       "(" . join( "|", map { "\Q$_\E" } @codes ) . ")" . $code_digit_pattern;
     my @questions =
-      grep { $_->{name} !~ /$codes_re/ } ( $self->{layout}->questions_list() );
+      grep { $_->{title} !~ /$codes_re/ } ( $self->{scoring}->questions() );
     $self->{data}->end_transaction("topP");
+    debug "All questions: "
+      . join( ", ", map { "$_->{question}=$_->{title}" } (@questions) );
 
     $self->{qid_to_topics} = {};
     for my $t ( @{ $self->{config}->{topics} } ) {
         my $re = $self->match_re( $t->{questions} );
         debug "RE for TOPIC $t->{id} is $re";
-        $t->{questions_list} = [ grep { $_->{name} =~ /$re/ } @questions ];
+        $t->{questions_list} = [ grep { $_->{title} =~ /$re/ } @questions ];
+        debug "matching: "
+          . join( ", ",
+            map { "$_->{question}=$_->{title}" } ( @{ $t->{questions_list} } ) );
         for my $q ( @{ $t->{questions_list} } ) {
             push @{ $self->{qid_to_topics}->{ $q->{question} } }, $t->{id};
         }
