@@ -656,8 +656,9 @@ sub color_rgb {
 # set color for drawing
 
 sub set_color {
-    my ( $self, $color_string ) = @_;
-    $self->command( join( ' ', "color", color_rgb($color_string) ) );
+    my ( $self, $color_string, $domain ) = @_;
+    $domain = "" if ( !$domain );
+    $self->command( join( ' ', $domain . "color", color_rgb($color_string) ) );
 }
 
 # inserts a page from a pdf file
@@ -1109,11 +1110,13 @@ sub page_qids {
 sub page_header {
     my ( $self, $student ) = @_;
 
-    if ( $self->{verdict_allpages} || !$self->{header_drawn} ) {
+    if ( !$self->{header_drawn} ) {
 
         $self->needs_names;
 
-        $self->set_color( $self->{text_color} );
+        $self->command("begin header ".($self->{single_output} ? 0 : 1));
+
+        $self->set_color( $self->{text_color}, "h" );
         $self->command("matrix identity");
         $self->stext(
             $self->{subst}->substitute( $self->{verdict}, @$student ) );
@@ -1137,7 +1140,7 @@ sub page_header {
             my $s = $self->{topics}->student_topic_message( @$student, $t );
             if ($s) {
                 for my $line ( split( /\n/, $s->{message} ) ) {
-                    $self->set_color( $s->{color} || $self->{text_color} );
+                    $self->set_color( $s->{color} || $self->{text_color}, "h" );
                     $self->command( "hnexttext "
                           . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 "
                           . $line );
@@ -1147,6 +1150,12 @@ sub page_header {
 
         $self->{header_drawn} = 1;
 
+        $self->command("show header");
+
+    } else {
+        if($self->{verdict_allpages}) {
+            $self->command("show header");
+        }
     }
 }
 
@@ -1293,6 +1302,10 @@ sub go {
 
 sub quit {
     my ($self) = @_;
+
+    debug "Annotate QUIT";
+
+    $self->command("finish");
 
     $self->{process}->ferme_commande if ( $self->{process} );
     $self->{avance}->fin() if ( $self->{avance} );

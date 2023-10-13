@@ -45,6 +45,7 @@ int main(int argc, char** argv )
   char* command = NULL;
   std::string saved_text = "";
   int processing_error = 0;
+  int finished = 0;
 
   double width_in_pixels, height_in_pixels;
   double dppt;
@@ -70,13 +71,17 @@ int main(int argc, char** argv )
   BuildPdf PDF(width_in_pixels, height_in_pixels, dppt);
   PDF.set_line_width(line_width);
 
-  while(getline(&command, &command_t, stdin) >= 6) {
+  while(!finished) {
+    getline(&command, &command_t, stdin);
     strip_endline(command);
 
     printf("> %s\n", command);
 
-    if(processing_error == 0) {
-
+    if(strcmp(command, "quit") == 0) {
+      printf(": Exit!\n");
+      finished = 1;
+    } else if(processing_error == 0) {
+      i = 0;
       if(strncmp(command, "output ", 7) == 0) {
 	processing_error = PDF.start_output(command + 7);
       } else if(strcmp(command, "debug") == 0) {
@@ -100,6 +105,9 @@ int main(int argc, char** argv )
       } else if(sscanf(command, "color %lf %lf %lf",
 		       &a, &b, &c) == 3) {
 	PDF.color(a, b, c);
+      } else if(sscanf(command, "hcolor %lf %lf %lf",
+		       &a, &b, &c) == 3) {
+	PDF.header_color(a, b, c);
       } else if(sscanf(command, "rectangle %lf %lf %lf %lf",
 		       &a, &b, &c, &d) == 4 ||
 		sscanf(command, "box %lf %lf %lf %lf",
@@ -169,6 +177,14 @@ int main(int argc, char** argv )
 	  if(saved_text.length() > 0) saved_text += "\n";
 	  saved_text += command;
 	}
+      } else if(strcmp(command, "show header") == 0) {
+        PDF.show_header();
+      } else if(sscanf(command, "begin header %ld",
+		       &n) == 1) {
+        PDF.clear_header(n);
+        PDF.start_header();
+      } else if(strcmp(command, "finish") == 0) {
+        PDF.close_output();
       } else {
 	printf("! ERROR: SYNTAX => %s\n", command + i);
 	processing_error = 2;
@@ -181,8 +197,6 @@ int main(int argc, char** argv )
     printf("__END__\n");
     fflush(stdout);
   }
-
-  PDF.close_output();
 
   return(processing_error);
 }
