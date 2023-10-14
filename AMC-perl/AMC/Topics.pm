@@ -373,7 +373,8 @@ sub range {
 
 sub nums_string {
     my (@x) = @_;
-    @x = sort { $a <=> $b || $a cmp $b } @x;
+    my %x = map { $_ => 1 } (@x);
+    @x = sort { $a <=> $b || $a cmp $b } (keys %x);
     my $simple = join( ", ", @x );
     my $start  = '';
     my $end    = '';
