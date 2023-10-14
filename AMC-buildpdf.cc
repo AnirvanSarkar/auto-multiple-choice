@@ -179,9 +179,10 @@ int main(int argc, char** argv )
 	}
       } else if(strcmp(command, "show header") == 0) {
         PDF.show_header();
-      } else if(sscanf(command, "begin header %ld",
-		       &n) == 1) {
+      } else if(sscanf(command, "begin header %ld %lf",
+		       &n, &a) == 2) {
         PDF.clear_header(n);
+        PDF.set_header_width(a);
         PDF.start_header();
       } else if(strcmp(command, "finish") == 0) {
         PDF.close_output();

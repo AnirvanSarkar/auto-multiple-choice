@@ -1114,7 +1114,14 @@ sub page_header {
 
         $self->needs_names;
 
-        $self->command("begin header ".($self->{single_output} ? 0 : 1));
+        $self->command(
+                "begin header "
+              . ( $self->{single_output} ? 0 : 1 ) . " "
+              . (
+                 $self->{width}
+                 - $self->{dist_margin_globaltext} * $self->{dpi} * 2
+              )
+        );
 
         $self->set_color( $self->{text_color}, "h" );
         $self->command("matrix identity");

@@ -158,6 +158,7 @@ public:
     document(NULL), layout(NULL), surface(NULL), cr(NULL),
     image_cr(NULL), image_surface(NULL), fake_image_buffer(NULL),
     header_surface(NULL), header_cr(NULL), header_layout(NULL),
+    header_width(-1.0),
     font_description(NULL),
     line_width(1.0), font("Linux Libertine O 12"), debug(0),
     scan_expansion(1.0), scan_resize_factor(1.0),
@@ -331,6 +332,8 @@ public:
 
   void show_header();
 
+  void set_header_width(double width) { header_width = width; }
+
   /* set_matrix_to_scan sets the matrix that transforms layout (subject)
      coordinates to scan coordinates (as recorded in the layout AMC
      database). */
@@ -423,6 +426,7 @@ private:
   // Header
   cairo_surface_t *header_surface ;
   cairo_t *header_cr;
+  double header_width;
   // Cairo environment used to draw the background image (scan)
   cairo_t *image_cr;
   cairo_surface_t *image_surface;
@@ -528,6 +532,10 @@ void BuildPdf::start_header() {
   pango_cairo_context_set_resolution(pango_layout_get_context(header_layout),
 				     user_one_point * 72.);
   pango_cairo_update_layout(header_cr, header_layout);
+
+  pango_layout_set_width(header_layout,
+                         (header_width < 0 ? -1 :
+                          header_width * PANGO_SCALE));
   
   pango_layout_set_font_description(header_layout, font_description);
 }
@@ -1336,7 +1344,7 @@ void BuildPdf::draw_text(cairo_t *local_cr,
 
   cairo_move_to(local_cr, x0, y0);
   pango_cairo_show_layout(local_cr, local_layout);
-  cr_move(local_cr, xpos * extents.width, extents.height);
+  cr_move(local_cr, xpos * extents.width, extents.height + 0.25 * em);
 }
 
 void BuildPdf::cr_move(cairo_t *local_cr, double dx, double dy) {
@@ -1370,11 +1378,11 @@ void BuildPdf::draw_next_text(cairo_t *local_cr,
   }
 
   cr_move(local_cr,
-          -xpos * extents.width, (0.25-ypos) * extents.height);
+          -xpos * extents.width, -ypos * extents.height);
 
   pango_cairo_show_layout(local_cr, local_layout);
   cr_move(local_cr, xpos * extents.width,
-          ypos * extents.height + extents.height);
+          ypos * extents.height + extents.height + 0.25 * em);
 }
 
 void BuildPdf::draw_text(double x, double y,
