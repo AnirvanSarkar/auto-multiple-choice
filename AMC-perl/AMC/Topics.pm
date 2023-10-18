@@ -181,6 +181,18 @@ sub defaults {
             $l->{message} = "" if ( !$l->{message} );
         }
     }
+
+    $self->{config}->{preferences} = $merger->merge(
+        $self->{config}->{preferences} || {},
+        {
+            intervalsep => '-',
+        }
+    );
+}
+
+sub get_option {
+    my ( $self, $k ) = @_;
+    return ( $self->{config}->{preferences}->{$k} );
 }
 
 sub load_topics {
@@ -201,8 +213,8 @@ sub load_topics {
                 $self->{config}->{include} = []
                   if ( !$self->{config}->{include} );
                 push @{ $self->{config}->{include} }, $topics_file;
+                $self->defaults();
                 if ( ref( $self->{config}->{topics} ) ) {
-                    $self->defaults();
                     $self->build_questions_lists();
                 }
             }
@@ -361,30 +373,60 @@ sub value_level {
 }
 
 sub range {
-    my ( $start, $end ) = @_;
+    my ( $self, $start, $end ) = @_;
     if ( $start eq $end ) {
         return ($start);
     } elsif ( $end == $start + 1 ) {
         return ( $start . ", " . $end );
     } else {
-        return ( $start . "-" . $end );
+        return ( $start . $self->get_option('intervalsep') . $end );
     }
 }
 
+sub last_int {
+    my ($self, $s) = @_;
+    if($s =~ /([0-9]+)\s*$/) {
+        return($1);
+    } else {
+        return(-99);
+    }
+}
+
+sub combined_cmp {
+    my ( $self, $a, $b ) = @_;
+
+    if ( $a =~ /^[0-9]+$/ && $b =~ /^[0-9]+$/ ) {
+        return ( $a <=> $b );
+    }
+
+    if ( $a =~ /^([0-9]+)[^0-9]+([0-9]+)$/ ) {
+        my $ax = $1;
+        my $ay = $2;
+        if ( $b =~ /^([0-9]+)[^0-9]+([0-9]+)$/ ) {
+            my $bx = $1;
+            my $by = $2;
+            return ( $ax <=> $bx || $ay <=> $by );
+        }
+    }
+
+    return ( $a cmp $b );
+}
+
+
 sub nums_string {
-    my (@x) = @_;
+    my ($self, @x) = @_;
     my %x = map { $_ => 1 } (@x);
-    @x = sort { $a <=> $b || $a cmp $b } (keys %x);
+    @x = sort { $self->combined_cmp( $a, $b ) } ( keys %x );
     my $simple = join( ", ", @x );
     my $start  = '';
     my $end    = '';
     my @sets   = ();
     for my $i (@x) {
         if ($start) {
-            if ( $i == $end + 1 ) {
+            if ( $self->last_int($i) == $self->last_int($end) + 1 ) {
                 $end = $i;
             } else {
-                push @sets, range( $start, $end );
+                push @sets, $self->range( $start, $end );
                 $start = $i;
                 $end   = $i;
             }
@@ -393,7 +435,7 @@ sub nums_string {
             $end   = $i;
         }
     }
-    push @sets, range( $start, $end ) if ( $start ne '' );
+    push @sets, $self->range( $start, $end ) if ( $start ne '' );
     my $merged = join( ", ", @sets );
     return ( $simple, $merged );
 }
@@ -413,7 +455,7 @@ sub student_topic_calc {
         }
     }
 
-    my ( $nums_simple, $nums_condensed ) = nums_string(@nums);
+    my ( $nums_simple, $nums_condensed ) = $self->nums_string(@nums);
 
     my $s    = 0;
     my $smax = 0;
