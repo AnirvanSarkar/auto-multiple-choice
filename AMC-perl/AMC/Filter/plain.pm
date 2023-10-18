@@ -509,6 +509,7 @@ sub read_file {
             my $action  = $1;
             my $options = $2;
             my $text    = $3;
+            $self->value_cleanup( $self->{reader_state}->{follow} );
             debug "Group A=" . printable($action) . " O=" . printable($options);
             my %oo = $self->read_options($options);
             if ( $action eq '(' ) {
