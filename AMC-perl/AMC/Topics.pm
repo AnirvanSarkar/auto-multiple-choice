@@ -109,6 +109,25 @@ sub all_topics {
     return(@{$self->{config}->{topics}});
 }
 
+sub exam_topics {
+    my ($self) = @_;
+    my @exam_questions = $self->{scoring}->questions();
+    my @topics = ();
+    for my $t ($self->all_topics()) {
+        my $included = 0;
+        my $re = $self->match_re( $t->{questions} );
+    QUEST: for my $q (@exam_questions) {
+            if($q->{title} =~ /$re/) {
+                debug "Exam topics: topic $t->{id} included by question $q->{title}";
+                $included = 1;
+                last QUEST;
+            }
+        }
+        push @topics, $t if($included);
+    }
+    return(@topics);
+}
+
 sub last_modified {
     my ($self) = @_;
     my $m = 0;

@@ -93,11 +93,11 @@ sub export {
 
     $self->pre_process();
 
-    my @topics = $self->{_topics}->all_topics();
-
     open( OUT, ">:encoding(" . $self->{'out.encodage'} . ")", $fichier );
 
     $self->{_scoring}->begin_read_transaction('XCSV');
+
+    my @topics = $self->{_topics}->exam_topics();
 
     my $dt  = $self->{_scoring}->variable('darkness_threshold');
     my $dtu = $self->{_scoring}->variable('darkness_threshold_up');

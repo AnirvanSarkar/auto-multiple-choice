@@ -529,9 +529,10 @@ sub export {
 
     $self->pre_process();
     my $topics= $self->{_topics};
-    my @topics = $topics->all_topics();
 
     $self->{_scoring}->begin_read_transaction('XODS');
+
+    my @topics = $topics->exam_topics();
 
     my $rd = $self->{_scoring}->variable('rounding');
     $rd = '' if ( !defined($rd) );
