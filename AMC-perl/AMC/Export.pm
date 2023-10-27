@@ -26,6 +26,7 @@ use AMC::Basic;
 use AMC::Data;
 use AMC::NamesFile;
 use AMC::Messages;
+use AMC::Topics;
 
 use Cwd;
 

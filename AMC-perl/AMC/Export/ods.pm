@@ -24,7 +24,6 @@ package AMC::Export::ods;
 
 use AMC::Basic;
 use AMC::Export;
-use AMC::Topics;
 
 use Encode;
 use File::Spec;
