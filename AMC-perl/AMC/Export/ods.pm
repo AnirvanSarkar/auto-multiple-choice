@@ -1698,10 +1698,10 @@ sub export {
                 } else { # value = ratio (default value)
                     $formula = $formula_score."/".$formula_max;
                 }
-                if($t->{ceil}) {
+                if(defined($t->{ceil})) {
                     $formula="MIN($t->{ceil};$formula)";
                 }
-                if($t->{floor}) {
+                if(defined($t->{floor})) {
                     $formula="MAX($t->{floor};$formula)";
                 }
                 my $pc = ($t->{value} eq 'ratio' ? 1 : 0);
