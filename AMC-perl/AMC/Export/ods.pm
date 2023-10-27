@@ -210,7 +210,8 @@ my %largeurs = (
       total 1.2cm
       max 1cm
       heads 3cm
-      topic 1.5cm/
+      topic 1.5cm
+      level 1cm/
 );
 
 my %style_col = (
@@ -224,6 +225,7 @@ my %style_col = (
       MAX NoteQ
       HEAD General
       TOPICpc NoteT
+      TOPIC_LEVEL TopicLevel
       /
 );
 my %style_col_abs = (
@@ -232,6 +234,7 @@ my %style_col_abs = (
       TOTAL NoteX
       MAX NoteX
       TOPICpc NoteX
+      TOPIC_LEVEL LevelX
       /
 );
 
@@ -533,6 +536,7 @@ sub export {
     $self->{_scoring}->begin_read_transaction('XODS');
 
     my @topics = $topics->exam_topics();
+    my @level_topics = grep { $topics->n_levels($_) } @topics;
 
     my $rd = $self->{_scoring}->variable('rounding');
     $rd = '' if ( !defined($rd) );
@@ -699,6 +703,16 @@ sub export {
         references => { 'style:data-style-name' => 'Percentage' },
     );
 
+    # Topic level value
+    $styles->createStyle(
+        'TopicLevel',
+        parent     => 'Tableau',
+        family     => 'table-cell',
+        properties => {
+            -area           => 'paragraph',
+            'fo:text-align' => "center",
+        },
+    );
     # Qpc : pourcentage de reussite global pour une question
     $styles->createStyle(
         'Qpc',
@@ -940,13 +954,23 @@ sub export {
                       . $t->{"decimals$pc"}
                       . $pc };
 
-                my $style_name = 'NoteT' . $t->{id} . x2ooo( $l - 1 );
+                my $level_id = $t->{id} . x2ooo( $l - 1 );
 
                 $styles->createStyle(
-                    $style_name,
+                    'NoteT' . $level_id,
                     parent     => 'NoteQ',
                     family     => 'table-cell',
                     references => $refs,
+                    properties => {
+                        -area                 => 'table-cell',
+                        'fo:background-color' => $col,
+                    },
+                );
+
+                $styles->createStyle(
+                    'TLevel' . $level_id,
+                    parent     => 'TopicLevel',
+                    family     => 'table-cell',
                     properties => {
                         -area                 => 'table-cell',
                         'fo:background-color' => $col,
@@ -1022,6 +1046,25 @@ sub export {
 
     $styles->updateStyle(
         'NoteX',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#b3b3b3",
+        },
+    );
+
+    # LevelX
+    $styles->createStyle(
+        'LevelX',
+        parent     => 'Tableau',
+        family     => 'table-cell',
+        properties => {
+            -area           => 'paragraph',
+            'fo:text-align' => "center",
+        },
+    );
+
+    $styles->updateStyle(
+        'LevelX',
         properties => {
             -area                 => 'table-cell',
             'fo:background-color' => "#b3b3b3",
@@ -1205,6 +1248,7 @@ sub export {
     my @questions_1 = grep { $_->{indic1} } @questions;
 
     debug "Topics: " . join( ', ', map { $_->{id} } (@topics) );
+    debug "Topics with levels: " . join( ', ', map { $_->{id} } (@level_topics) );
     debug "Questions: "
       . join( ', ', map { $_->{question} . '=' . $_->{title} } @questions );
     debug "Questions PLAIN: " . join( ', ', map { $_->{title} } @questions_0 );
@@ -1213,6 +1257,7 @@ sub export {
     my $nq =
       1 + $#student_columns + 1 +
       $#topics + 1 +
+      $#level_topics + 1 +
       $#questions_0 + 1 +
       $#questions_1;
 
@@ -1300,11 +1345,38 @@ sub export {
 
     $xt = $ii;
 
+    my $topics_visibility = $topics->get_option('odscolumns');
+
     for my $t (@topics) {
         $doc->columnStyle( $feuille, $ii, 'col.topic' );
+
+        $doc->setAttribute(
+            $doc->getTableColumn( $feuille, $ii ),
+            'table:visibility' => "collapse"
+          )
+          unless (
+            $topics_visibility =~ /value/
+            || (   $topics_visibility =~ /\blevel\b/
+                && $topics->n_levels($t) == 0 )
+          );
+
         $doc->cellStyle( $feuille, $y0, $ii, 'EnteteTopic' );
         $doc->cellValue( $feuille, $y0, $ii, encode( 'utf-8', $t->{id} ) );
+        $code_col{ "__TOPIC_" . $t->{id} } = $ii;
+        $ii++;
+    }
 
+    for my $t (@level_topics) {
+        $doc->columnStyle( $feuille, $ii, 'col.level' );
+
+        $doc->setAttribute(
+            $doc->getTableColumn( $feuille, $ii ),
+            'table:visibility' => "collapse"
+        ) unless ( $topics_visibility =~ /\blevel\b/ );
+
+        $doc->cellStyle( $feuille, $y0, $ii, 'EnteteTopic' );
+        $doc->cellValue( $feuille, $y0, $ii, encode( 'utf-8', $t->{id} ) );
+        $code_col{ "__TOPIC_LEVEL_" . $t->{id} } = $ii;
         $ii++;
     }
 
@@ -1482,9 +1554,7 @@ sub export {
 
         # see later for columns for topics...
 
-        for my $t (@topics) {
-            $ii++;
-        }
+        $ii += @topics + @level_topics;
 
         # second: columns for all questions scores
 
@@ -1649,12 +1719,26 @@ sub export {
 
             $ii++;
         }
+
+        # topics levels
+
+        for my $t (@level_topics) {
+            my $formula = $topics->level_value_odf($t, yx2ooo($jj, $code_col{"__TOPIC_".$t->{id}}));
+            set_cell(
+                     $doc, $feuille, $jj, $ii, '',
+                     'TOPIC_LEVEL', '',
+                     pc      => 0,
+                     numeric => 0,
+                     formula => "oooc:=" . $formula
+                    );
+            $ii++;
+        }
     }
 
     $y2=$jj;
 
     ##########################################################################
-    # back to row for means
+    # topics cell colors
     ##########################################################################
 
     if ( @topics ) {
@@ -1692,7 +1776,57 @@ sub export {
             }
             $ii++;
         }
+        for my $t (@level_topics) {
+            my $lacol = x2ooo($ii);
+            my $domain =
+                "." . $lacol . ( $y1 + 1 ) . ":." . $lacol . ( $y2 + 1 );
+            my $cf = $doc->appendElement(
+                $cfs,
+                'calcext:conditional-format',
+                attributes => {
+                    'calcext:target-range-address' => $domain
+                }
+            );
+            $doc->appendElement(
+                $cf,
+                'calcext:condition',
+                attributes => {
+                    'calcext:apply-style-name' => 'LevelX',
+                    'calcext:value' => 'formula-is('
+                      . 'OR(ISBLANK([.A1]);[.A1]="")'
+                      . ')',
+                    'calcext:base-cell-address' => '.A1'
+                }
+            );
+            for my $l ( @{ $t->{levels} } ) {
+                $cf = $doc->appendElement(
+                    $cfs,
+                    'calcext:conditional-format',
+                    attributes => {
+                        'calcext:target-range-address' => $domain
+                    }
+                );
+                $doc->appendElement(
+                    $cf,
+                    'calcext:condition',
+                    attributes => {
+                        'calcext:apply-style-name' => 'TLevel'
+                          . $t->{id}
+                          . x2ooo( $l->{i} - 1 ),
+                        'calcext:value' => 'formula-is('
+                          . '[.A1]='
+                          . $topics->level_short_odf($l) . ')',
+                        'calcext:base-cell-address' => '.A1'
+                    }
+                );
+            }
+            $ii++;
+        }
     }
+
+    ##########################################################################
+    # back to row for means
+    ##########################################################################
 
     $ii = $x1;
     for my $q (@questions_0) {

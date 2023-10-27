@@ -1114,13 +1114,27 @@ sub check_export_csv {
 
         my $c = Text::CSV->new();
         open my $fh, "<:encoding(utf-8)", $self->{temp_dir} . '/export.csv';
-        my $i     = 0;
+
         if($skip_lines) {
             for my $ii (1..$skip_lines) {
                 $c->getline($fh);
             }
         }
-        my %heads = map { $_ => $i++ } ( @{ $c->getline($fh) } );
+        my %heads = ();
+        my $i=0;
+        my $h = $c->getline($fh);
+        while ( my ( $i, $h ) = each @$h ) {
+            if ( defined( $heads{$h} ) ) {
+                my $ni = 2;
+                while ( defined( $heads{ $h . "#$ni" } ) ) {
+                    $ni++;
+                }
+                $heads{ $h . "#$ni" } = $i;
+            } else {
+                $heads{$h} = $i;
+            }
+        }
+
         my $copy  = $heads{ translate_column_title('copie') };
         my $name  = $heads{ translate_column_title('nom') };
 

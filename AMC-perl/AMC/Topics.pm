@@ -205,6 +205,7 @@ sub defaults {
         $self->{config}->{preferences} || {},
         {
             intervalsep => '-',
+            odscolumns  => 'value',
         }
     );
 }
@@ -331,7 +332,7 @@ sub and_odf {
             return ( $c[0] );
         }
     } else {
-        return "TRUE";
+        return 1;
     }
 }
 
@@ -342,18 +343,23 @@ sub level_threshold_odf {
     return ($v);
 }
 
-sub level_test_single_odf {
-    my ( $self, $topic, $i_level, $value ) = @_;
+sub level_test_single_odf_l {
+    my ( $self, $topic, $level, $value ) = @_;
     my @cond = ();
-    my $l    = $topic->{levels}->[ $i_level - 1 ];
-    if ( defined( $l->{max} ) ) {
-        push @cond, "$value<" . $self->level_threshold_odf( $topic, $l, 'max' );
+    if ( defined( $level->{max} ) ) {
+        push @cond, "$value<" . $self->level_threshold_odf( $topic, $level, 'max' );
     }
-    if ( defined( $l->{min} ) ) {
+    if ( defined( $level->{min} ) ) {
         push @cond,
-          "$value>=" . $self->level_threshold_odf( $topic, $l, 'min' );
+          "$value>=" . $self->level_threshold_odf( $topic, $level, 'min' );
     }
     return ( $self->and_odf(@cond) );
+}
+
+sub level_test_single_odf {
+    my ( $self, $topic, $i_level, $value ) = @_;
+    my $l    = $topic->{levels}->[ $i_level - 1 ];
+    return($self->level_test_single_odf_l($topic, $l, $value));
 }
 
 sub level_test_odf {
@@ -366,6 +372,24 @@ sub level_test_odf {
     }
     push @cond, $self->level_test_single_odf($topic, $i_level, $value);
     return $self->and_odf(@cond);
+}
+
+sub level_short_odf {
+    my ( $self, $level ) = @_;
+    my $v = $level->{code} || $level->{i};
+    $v = '"' . $v . '"' if ( $v !~ /^[0-9]+$/ );
+    return ($v);
+}
+
+sub level_value_odf {
+    my ( $self, $topic, $value ) = @_;
+    my @cond = ( 'ISBLANK(' . $value . ')', '""' );
+    for my $l ( @{ $topic->{levels} } ) {
+        my $v = $self->level_short_odf($l);
+        push @cond, $self->level_test_single_odf_l( $topic, $l, $value ), $v;
+    }
+    push @cond, 1, '"?"';
+    return ( "IFS(" . join( ";", @cond ) . ")" );
 }
 
 sub value_in_level {
