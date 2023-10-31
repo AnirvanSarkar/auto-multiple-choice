@@ -110,22 +110,14 @@ sub all_topics {
 }
 
 sub exam_topics {
-    my ($self) = @_;
+    my ($self)         = @_;
     my @exam_questions = $self->{scoring}->questions();
-    my @topics = ();
-    for my $t ($self->all_topics()) {
-        my $included = 0;
-        my $re = $self->match_re( $t->{questions} );
-    QUEST: for my $q (@exam_questions) {
-            if($q->{title} =~ /$re/) {
-                debug "Exam topics: topic $t->{id} included by question $q->{title}";
-                $included = 1;
-                last QUEST;
-            }
-        }
-        push @topics, $t if($included);
+    my @topics         = ();
+    for my $t ( $self->all_topics() ) {
+        push @topics, $t
+          if ( $self->topic_filter_questions( $t, @exam_questions ) );
     }
-    return(@topics);
+    return (@topics);
 }
 
 sub last_modified {
@@ -255,7 +247,9 @@ sub n_topics {
 
 sub match_re {
     my ( $self, $target ) = @_;
-    if ( ref($target) eq 'ARRAY' ) {
+    if ( !$target ) {
+        return '';
+    } elsif ( ref($target) eq 'ARRAY' ) {
         return "(" . join( '|', map { $self->match_re($_) } (@$target) ) . ")";
     } else {
         if ( $target =~ /^\^/ ) {
@@ -270,6 +264,17 @@ sub match_re {
             return ( '^' . "\Q$target\E" . '$' );
         }
     }
+}
+
+sub topic_filter_questions {
+    my ( $self, $topic, @q ) = @_;
+    my $re = $self->match_re( $topic->{questions} );
+    debug "RE for TOPIC $topic->{id} is $re";
+    @q = grep { $_->{title} =~ /$re/ } @q if ($re);
+    my $xre = $self->match_re( $topic->{exclude_questions} );
+    debug "XRE for TOPIC $topic->{id} is $xre";
+    @q = grep { $_->{title} !~ /$xre/ } @q if ($xre);
+    return (@q);
 }
 
 sub build_questions_lists {
@@ -287,12 +292,12 @@ sub build_questions_lists {
 
     $self->{qid_to_topics} = {};
     for my $t ( @{ $self->{config}->{topics} } ) {
-        my $re = $self->match_re( $t->{questions} );
-        debug "RE for TOPIC $t->{id} is $re";
-        $t->{questions_list} = [ grep { $_->{title} =~ /$re/ } @questions ];
+        $t->{questions_list} =
+          [ $self->topic_filter_questions( $t, @questions ) ];
         debug "matching: "
           . join( ", ",
-            map { "$_->{question}=$_->{title}" } ( @{ $t->{questions_list} } ) );
+            map { "$_->{question}=$_->{title}" }
+              ( @{ $t->{questions_list} } ) );
         for my $q ( @{ $t->{questions_list} } ) {
             push @{ $self->{qid_to_topics}->{ $q->{question} } }, $t->{id};
         }
