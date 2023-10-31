@@ -196,8 +196,9 @@ sub defaults {
     $self->{config}->{preferences} = $merger->merge(
         $self->{config}->{preferences} || {},
         {
-            intervalsep => '-',
-            odscolumns  => 'value',
+            intervalsep      => '-',
+            odscolumns       => 'value',
+            skip_indicatives => 1,
         }
     );
 }
@@ -494,8 +495,11 @@ sub student_topic_calc {
     my @nums = ();
     for my $q ( @{ $topic->{questions_list} } ) {
         my $r =
-          $self->{scoring}->question_result( $student, $copy, $q->{question} );
-        if ( defined( $r->{score} ) ) {
+            $self->{scoring}->question_result( $student, $copy, $q->{question} );
+        my $indic = 0;
+        $indic = $self->{scoring}->indicative( $student, $q->{question} )
+            if($self->get_option('skip_indicatives'));
+        if ( defined( $r->{score} ) && ! $indic ) {
             debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max})";
             push @x, [ $r->{score}, $r->{max} ];
             push @nums,
