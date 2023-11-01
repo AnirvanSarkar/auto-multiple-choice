@@ -1617,7 +1617,8 @@ sub export {
                         ->indicative( $m->{student}, $q->{question} ) )
                     {
                         $doc->cellStyle( $feuille, $jj, $ii, 'CodeV' );
-                        $effective = 1;
+                        $effective = 1 if(!$topics->get_option('skip_indicatives')
+);
                     } else {
                         if ( defined( $r->{score} ) ) {
                             if ( !$scores{ $q->{question} } ) {
@@ -1648,13 +1649,11 @@ sub export {
                         } else {
                             $doc->cellStyle( $feuille, $jj, $ii, 'NoteX' );
                         }
-                        if ($effective) {
-                            for my $t ( $topics->get_topics( $q->{question} ) )
-                            {
-                                push @{ $topic_cols{$t} }, $ii;
-                            }
+                    }
+                    if ($effective) {
+                        for my $t ( $topics->get_topics( $q->{question} ) ) {
+                            push @{ $topic_cols{$t} }, $ii;
                         }
-
                     }
                     $doc->cellValue( $feuille, $jj, $ii, $r->{score} );
                 }
