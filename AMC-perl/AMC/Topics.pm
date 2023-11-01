@@ -553,6 +553,18 @@ sub student_topic_calc {
     }
 }
 
+sub with_decimals {
+    my ( $self, $decimals, $x, $pc ) = @_;
+    my $force = 0;
+    $force = 1 if ( $decimals =~ s/\!$// );
+    my $s = sprintf( "%.${decimals}f", $x );
+    if ( $s =~ /\./ && !$force ) {
+        $s =~ s/\.?0+$//;
+    }
+    $s .= " %" if($pc);
+    return ($s);
+}
+
 sub student_topic_message {
     my ( $self, $student, $copy, $topic ) = @_;
     my $x = $self->student_topic_calc( $student, $copy, $topic );
@@ -579,13 +591,13 @@ sub student_topic_message {
                 $kk =~ s/:pc$//;
                 $x->{$k} = $x->{$kk} * 100;
                 my $d = $topic->{decimalspc};
-                $v = sprintf( "%.${d}f %%", $x->{$k} );
+                $v = $self->with_decimals( $d, $x->{$k}, 1 );
             } else {
                 my $d =
                   (   $k eq 'ratio'
                     ? $topic->{decimalsratio}
                     : $topic->{decimals} );
-                $v = sprintf( "%.${d}f", $x->{$k} );
+                $v = $self->with_decimals( $d, $x->{$k} );
             }
             $s =~ s/\%\{$k\}/$v/g;
         }

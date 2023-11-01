@@ -526,6 +526,12 @@ sub ods_locked_file {
     return ( -e $fichier );
 }
 
+sub pure_decimals {
+    my ($d) = @_;
+    $d =~ s/[^0-9]//g;
+    return ($d);
+}
+
 sub export {
     my ( $self, $fichier ) = @_;
 
@@ -950,7 +956,7 @@ sub export {
 
                 my $refs =
                   {     'style:data-style-name' => 'Decimales'
-                      . $t->{"decimals$pc"}
+                      . pure_decimals($t->{"decimals$pc"})
                       . $pc };
 
                 my $level_id = $t->{id} . x2ooo( $l - 1 );
@@ -986,7 +992,7 @@ sub export {
             family     => 'table-cell',
             references => {
                     'style:data-style-name' => 'Decimales'
-                  . $t->{"decimals$pc"}
+                  . pure_decimals($t->{"decimals$pc"})
                   . $pc
             },
             properties => {
