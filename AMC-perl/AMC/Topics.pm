@@ -500,7 +500,7 @@ sub student_topic_calc {
         $indic = $self->{scoring}->indicative( $student, $q->{question} )
             if($self->get_option('skip_indicatives'));
         if ( defined( $r->{score} ) && ! $indic ) {
-            debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max})";
+            debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max}) for question $q->{title}";
             push @x, [ $r->{score}, $r->{max} ];
             push @nums,
               $self->{layout}->question_number( $student, $q->{question} );
