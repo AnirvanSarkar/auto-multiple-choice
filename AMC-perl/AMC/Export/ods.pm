@@ -1464,6 +1464,15 @@ sub export {
         }
     }
 
+    if ( !$topics->get_option('skip_indicatives') ) {
+        for (@questions_1) {
+            $doc->cellStyle( $feuille, $jj, $ii, 'NoteQ' );
+            $doc->cellValueType( $feuille, $jj, $ii, 'float' );
+            $doc->cellValue( $feuille, $jj, $ii++,
+                $self->{_scoring}->question_maxmax( $_->{question} ) );
+        }
+    }
+
     $code_row{max} = $jj;
 
     ##########################################################################
