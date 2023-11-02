@@ -179,7 +179,7 @@ sub set_number_variables {
 # processes set.X directives from ticked answers
 
 sub process_ticked_answers_setx {
-    my ( $self, $question_data, $correct ) = @_;
+    my ( $self, $question_data, $correct, $exclude_setglobal ) = @_;
 
     for my $a ( @{ $question_data->{answers} } ) {
         my $c = $a->{correct};
@@ -189,7 +189,7 @@ sub process_ticked_answers_setx {
             $a->{strategy},
             set       => 1,
             setx      => 1,
-            setglobal => 1
+            setglobal => !$exclude_setglobal
         ) if ($t);
     }
 }
@@ -409,7 +409,7 @@ sub simple_standard_score {
 # returns the score for a particular student-sheet/question, applying
 # the given scoring strategy.
 sub score_question {
-    my ( $self, $etu, $question_data, $correct ) = @_;
+    my ( $self, $etu, $question_data, $correct, $exclude_setglobal ) = @_;
     my $answers = $question_data->{answers};
 
     my $xx  = '';
@@ -425,13 +425,13 @@ sub score_question {
     } else {
 
         $self->set_number_variables( $question_data, $correct );
-        $self->process_ticked_answers_setx( $question_data, $correct );
+        $self->process_ticked_answers_setx( $question_data, $correct, $exclude_setglobal );
         $self->{env}->variables_from_directives(
             default   => 1,
             set       => 1,
             setx      => 1,
             requires  => 1,
-            setglobal => 1,
+            setglobal => !$exclude_setglobal,
         );
 
         if ( $self->{env}->n_errors() ) {
@@ -488,9 +488,7 @@ sub score_question {
 }
 
 # returns the maximum score for a question: MAX parameter value, or,
-# if not present:
-# - for indicative questions, the student score
-# - for standard questions, the score for a perfect copy
+# if not present, the score for a perfect copy
 
 sub score_max_question {
     my ( $self, $etu, $question_data ) = @_;
@@ -500,8 +498,16 @@ sub score_max_question {
         return ( $m, 'M' );
     } else {
         if ( $question_data->{indicative} ) {
-            debug "MARK: scoring STUDENT answers for MAX";
-            return ( $self->score_question( $etu, $question_data, 0 ) );
+            debug "MARK: scoring correct answers for MAX(1)";
+            my @score = $self->score_question( $etu, $question_data, 1, 1 );
+
+            # For indicative questions, run with student answers to get
+            # proper values for setglobal directives
+
+            debug "MARK: scoring STUDENT answers for MAX(2)";
+            $self->score_question( $etu, $question_data, 0 );
+
+            return (@score);
         } else {
             debug "MARK: scoring correct answers for MAX";
             return ( $self->score_question( $etu, $question_data, 1 ) );

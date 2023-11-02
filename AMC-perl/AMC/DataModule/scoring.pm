@@ -135,7 +135,7 @@ package AMC::DataModule::scoring;
 #     X means that an external score has been applied.
 #
 # * max is the question score associated to a copy where all answers
-#   are correct (or 1 for indicative questions).
+#   are correct.
 #
 # external holds the question scores that are not computed by AMC, but
 # given from external data.
