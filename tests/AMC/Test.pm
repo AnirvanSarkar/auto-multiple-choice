@@ -121,6 +121,7 @@ my $defaults = {
     postinstall         => '',
     additional_test     => '',
     check_topics        => [],
+    move_files          => [],
 };
 
 sub new {
@@ -131,8 +132,6 @@ sub new {
     for ( keys %oo ) {
         $self->{$_} = $oo{$_} if ( exists( $self->{$_} ) );
     }
-
-    $self->{dir} =~ s:/[^/]*$::;
 
     bless( $self, $class );
 
@@ -146,8 +145,6 @@ sub new {
         "extract-with=s" => \$self->{extract_with},
         "tmp=s"          => \$self->{tmpdir},
     );
-
-    $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
 
     $self->{tracedest} = \*STDOUT if ($to_stdout);
     binmode $self->{tracedest}, ":utf8";
@@ -165,6 +162,10 @@ sub clean {
 
 sub setup {
     my ($self)=@_;
+
+    $self->{dir} =~ s:/[^/]*$::;
+
+    $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
 
     if ( !$self->{src} ) {
         opendir( my $dh, $self->{dir} )
@@ -246,6 +247,15 @@ sub install {
         system( "cp", "-r", $self->{dir} . '/' . $f, $self->{temp_dir} );
     }
     closedir $sh;
+
+    for my $mv ( @{ $self->{move_files} } ) {
+        debug("Move $mv->{from} to $mv->{to}");
+        system(
+            "mv",
+            $self->{temp_dir} . '/' . $mv->{from},
+            $self->{temp_dir} . '/' . $mv->{to}
+        );
+    }
 
     print { $self->{tracedest} } "[>] Installed in $self->{temp_dir}\n";
 

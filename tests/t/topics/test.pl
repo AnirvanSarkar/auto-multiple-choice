@@ -22,7 +22,11 @@ use utf8;
 
 require "./AMC/Test.pm";
 
-AMC::Test->new(
+my $t = AMC::Test->new( setup => 0, exitonerror => 0 );
+
+my @failed = ();
+
+$t->set(
     dir             => __FILE__,
     filter          => 'plain',
     tex_engine      => 'xelatex',
@@ -32,6 +36,7 @@ AMC::Test->new(
     annote_position => 'marges',
     annote_color    => 'grey',
     verdict         => 'TOTAL : %S/%M => %s/%m',
+    move_files      => [ { from => 'topics0.yml', to => 'topics.yml' } ],
     export_full_csv => [
         { -copy => 1, -question => 'A0:score', -score => 21 },
         { -copy => 1, -question => 'A0:max',   -score => 19 },
@@ -104,7 +109,7 @@ AMC::Test->new(
         { -copy => 3, -question => 'M',    -score => '41%' },
         { -copy => 3, -question => 'A0#2', -score => 'C' },
         { -copy => 3, -question => 'A#2',  -score => 'C' },
-      ],
+    ],
 
     check_topics => [
         {
@@ -113,14 +118,128 @@ AMC::Test->new(
             -message => 'X : acquis avec bonus (21 > 19)'
         },
         {
-            -id      => 'A0',
-            -copy    => 1,
+            -id    => 'A0',
+            -copy  => 1,
             -color => '#00b935'
         },
         { -id => 'A0', -copy => 2, -message => 'F : à travailler' },
-        { -id => 'A0', -copy => 2, -color => '#ff2d3a' },
+        { -id => 'A0', -copy => 2, -color   => '#ff2d3a' },
         { -id => 'A0', -copy => 3, -message => 'C : à renforcer (0.263)' },
-        { -id => 'A0', -copy => 3, -color => '#ff9f2d' },
+        { -id => 'A0', -copy => 3, -color   => '#ff9f2d' },
     ],
-)->default_process;
+);
+$t->setup();
+$t->default_process;
+if ( $t->{error} ) {
+    push @failed, "default";
+}
+
+$t->clean();
+$t->set(
+    tmpdir     => '',
+    move_files => [
+        { from => 'topics_indic.yml',  to => 'topics.yml' },
+        { from => 'options_indic.xml', to => 'options.xml' }
+    ],
+    export_full_csv => [
+        { -copy => 1, -question => 'A0:score', -score => 25 },
+        { -copy => 1, -question => 'A0:max',   -score => 25 },
+        { -copy => 1, -question => 'A0:level', -score => 'A' },
+        { -copy => 1, -question => 'A:score',  -score => 34 },
+        { -copy => 1, -question => 'A:max',    -score => 34 },
+        { -copy => 1, -question => 'A:level',  -score => 'A' },
+        { -copy => 1, -question => 'B:score',  -score => 15 },
+        { -copy => 1, -question => 'B:max',    -score => 17 },
+        { -copy => 1, -question => 'Bi:score', -score => '' },
+        { -copy => 1, -question => 'Bi:max',   -score => '' },
+        { -copy => 1, -question => 'M:score',  -score => 18 },
+        { -copy => 1, -question => 'M:max',    -score => 17 },
+
+        { -copy => 2, -question => 'A0:score', -score => -2 },
+        { -copy => 2, -question => 'A0:max',   -score => 25 },
+        { -copy => 2, -question => 'A0:ratio', -score => 0 },
+        { -copy => 2, -question => 'A0:level', -score => 'F' },
+        { -copy => 2, -question => 'A:score',  -score => -1 },
+        { -copy => 2, -question => 'A:max',    -score => 34 },
+        { -copy => 2, -question => 'A:ratio', -score => -1 / 34, -digits => 4 },
+        { -copy => 2, -question => 'A:level', -score => 'Z' },
+        { -copy => 2, -question => 'B:score', -score => -1 },
+        { -copy => 2, -question => 'B:max',   -score => 16 },
+        { -copy => 2, -question => 'B:ratio', -score => -1 / 16, -digits => 4 },
+        { -copy => 2, -question => 'M:score', -score => 1 },
+        { -copy => 2, -question => 'M:max',   -score => 17 },
+        { -copy => 2, -question => 'M:ratio', -score => 0.0588, -digits => 4 },
+
+        { -copy => 3, -question => 'A0:score', -score => 9 },
+        { -copy => 3, -question => 'A0:max',   -score => 25 },
+        { -copy => 3, -question => 'A0:ratio', -score => 9 / 25, -digits => 4 },
+        { -copy => 3, -question => 'A0:level', -score => 'C' },
+        { -copy => 3, -question => 'A:score',  -score => 13 },
+        { -copy => 3, -question => 'A:max',    -score => 34 },
+        { -copy => 3, -question => 'A:ratio',  -score => 13 / 34, -digits => 4 },
+        { -copy => 3, -question => 'A:level',  -score => 'C' },
+        { -copy => 3, -question => 'B:score',  -score => 10 },
+        { -copy => 3, -question => 'B:max',    -score => 17 },
+        { -copy => 3, -question => 'B:ratio', -score => 10 / 17, -digits => 4 },
+        { -copy => 3, -question => 'Bi:score', -score => '' },
+        { -copy => 3, -question => 'Bi:max',   -score => '' },
+        { -copy => 3, -question => 'Bi:ratio', -score => '' },
+        { -copy => 3, -question => 'M:score',  -score => 7 },
+        { -copy => 3, -question => 'M:max',    -score => 17 },
+        { -copy => 3, -question => 'M:ratio',  -score => 7 / 17, -digits => 4 },
+    ],
+
+    export_full_ods => [
+        { -copy => 1, -question => 'A0',   -score => 1, -digits => 2 },
+        { -copy => 1, -question => 'A',    -score => '100%' },
+        { -copy => 1, -question => 'B',    -score => '88%' },
+        { -copy => 1, -question => 'Bi',   -score => '' },
+        { -copy => 1, -question => 'M',    -score => '106%' },
+        { -copy => 1, -question => 'A0#2', -score => 'A' },
+        { -copy => 1, -question => 'A#2',  -score => 'A' },
+
+        { -copy => 2, -question => 'A0',   -score => 0, -digits => 2 },
+        { -copy => 2, -question => 'A',    -score => '-3%' },
+        { -copy => 2, -question => 'B',    -score => '-6%' },
+        { -copy => 2, -question => 'Bi',   -score => '-33%' },
+        { -copy => 2, -question => 'M',    -score => '6%' },
+        { -copy => 2, -question => 'A0#2', -score => 'F' },
+        { -copy => 2, -question => 'A#2',  -score => 'Z' },
+
+        { -copy => 3, -question => 'A0',   -score => 9 / 25, -digits => 2 },
+        { -copy => 3, -question => 'A',    -score => '38%' },
+        { -copy => 3, -question => 'B',    -score => '59%' },
+        { -copy => 3, -question => 'Bi',   -score => '' },
+        { -copy => 3, -question => 'M',    -score => '41%' },
+        { -copy => 3, -question => 'A0#2', -score => 'C' },
+        { -copy => 3, -question => 'A#2',  -score => 'C' },
+    ],
+
+    check_topics => [
+        {
+            -id      => 'A0',
+            -copy    => 1,
+            -message => 'A : pleinement acquis (1)'
+        },
+        {
+            -id    => 'A0',
+            -copy  => 1,
+            -color => '#47b900'
+        },
+        { -id => 'A0', -copy => 2, -message => 'F : à travailler' },
+        { -id => 'A0', -copy => 2, -color   => '#ff2d3a' },
+        { -id => 'A0', -copy => 3, -message => 'C : à renforcer (0.36)' },
+        { -id => 'A0', -copy => 3, -color   => '#ff9f2d' },
+    ],
+);
+$t->setup();
+$t->default_process;
+if ( $t->{error} ) {
+    push @failed, "including indicatives";
+}
+
+for my $f (@failed) {
+    $t->trace("[F] Failed: $f");
+}
+exit(1) if (@failed);
 
