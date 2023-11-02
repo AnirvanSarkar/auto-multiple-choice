@@ -163,7 +163,7 @@ sub clean {
 sub setup {
     my ($self)=@_;
 
-    $self->{dir} =~ s:/[^/]*$::;
+    $self->{dir} =~ s:/[^/]*$:: if(-f $self->{dir});
 
     $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
 
@@ -1019,9 +1019,12 @@ sub check_topics {
     my ($self) = @_;
     my @tests = @{ $self->{check_topics} };
     if (@tests) {
+        my @checks = ();
+        my @errs   = ();
+
         set_debug( $self->{debug_file} );
 
-        $self->begin("Topics test (".(1+$#tests)." values)");
+        $self->begin( "Topics test (" . @tests . " values)" );
         my $data   = AMC::Data->new( $self->{temp_dir} . "/data" );
         my $topics = AMC::Topics->new(
             project_dir => $self->{temp_dir},
@@ -1046,29 +1049,34 @@ sub check_topics {
                 my $i = 0;
                 for my $key (qw/message color/) {
                     if ( defined( $test->{ "-" . $key } ) ) {
-                        $self->test(
+                        push @checks,
+                          [
                             $m->{$key},
                             $test->{ "-" . $key },
 "Topic '$id' $key for copy ($test->{-student},$test->{-copy})"
-                        );
+                          ];
                         $i++;
                     }
                 }
                 if ( !$i ) {
-                    $self->trace(
-"[E] Empty test for topic '$id' and copy ($test->{-student},$test->{-copy})"
-                    );
-                    $self->failed(1);
+                    push @errs, "[E] Empty test for topic '$id' and copy ($test->{-student},$test->{-copy})";
                 }
             } else {
-                $self->trace("[E] Topic not found: $id");
-                $self->failed(1);
+                push @errs, "[E] Topic not found: $id";
             }
         }
         $data->end_transaction("ttop");
         $data->disconnect("topics");
 
         set_debug('');
+
+        for my $c (@checks) {
+            $self->test(@$c);
+        }
+        for my $e (@errs) {
+            $self->trace($e);
+            $self->failed(1);
+        }
 
         $self->end;
     }
@@ -1160,10 +1168,16 @@ sub check_export_csv {
             $irow++;
             for my $t (@csv) {
                 my $goodrow = '';
-                if ( $t->{-copy} && $t->{-copy} eq $row->[$copy] ) {
+                if (   $t->{-copy}
+                    && defined($copy)
+                    && $t->{-copy} eq $row->[$copy] )
+                {
                     $goodrow = 'copy ' . $t->{-copy};
                 }
-                if ( $t->{-name} && $t->{-name} eq $row->[$name] ) {
+                if (   $t->{-name}
+                    && defined($name)
+                    && $t->{-name} eq $row->[$name] )
+                {
                     $goodrow = 'name ' . $t->{-name};
                 }
                 if ( $t->{-irow} && $t->{-irow} == $irow ) {
