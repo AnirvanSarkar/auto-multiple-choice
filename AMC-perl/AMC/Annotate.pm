@@ -1054,7 +1054,9 @@ sub write_qscore {
 
     my $xy      = "qtext_position_" . $position;
     my $command = $self->$xy( $student, $page, $question );
+    my $color   = $self->{topics}->get_question_color($question);
 
+    $self->set_color($color) if ($color);
     if ( ref($command) eq 'ARRAY' ) {
         if ( $#$command >= 0 ) {
             $self->stext($text);
@@ -1066,6 +1068,7 @@ sub write_qscore {
         $self->stext($text);
         $self->command($command);
     }
+    $self->set_color( $self->{text_color} ) if ($color);
 }
 
 # writes question scores on one page

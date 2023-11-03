@@ -292,6 +292,7 @@ sub build_questions_lists {
       . join( ", ", map { "$_->{question}=$_->{title}" } (@questions) );
 
     $self->{qid_to_topics} = {};
+    $self->{question_color} = {};
     for my $t ( @{ $self->{config}->{topics} } ) {
         $t->{questions_list} =
           [ $self->topic_filter_questions( $t, @questions ) ];
@@ -301,8 +302,15 @@ sub build_questions_lists {
               ( @{ $t->{questions_list} } ) );
         for my $q ( @{ $t->{questions_list} } ) {
             push @{ $self->{qid_to_topics}->{ $q->{question} } }, $t->{id};
+            $self->{question_color}->{ $q->{question} } = $t->{annotate_color}
+              if ( $t->{annotate_color} );
         }
     }
+}
+
+sub get_question_color {
+    my ( $self, $question_id ) = @_;
+    return ( $self->{question_color}->{$question_id} );
 }
 
 sub get_topics {
