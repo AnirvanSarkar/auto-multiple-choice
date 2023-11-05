@@ -274,7 +274,8 @@ sub topic_filter_questions {
     my ( $self, $topic, @q ) = @_;
     my $re = $self->match_re( $topic->{questions} );
     debug "RE for TOPIC $topic->{id} is $re";
-    @q = grep { $_->{title} =~ /$re/ } @q if ($re);
+    return() if(!$re);
+    @q = grep { $_->{title} =~ /$re/ } @q;
     my $xre = $self->match_re( $topic->{exclude_questions} );
     debug "XRE for TOPIC $topic->{id} is $xre";
     @q = grep { $_->{title} !~ /$xre/ } @q if ($xre);
@@ -692,6 +693,11 @@ sub adjusted_value {
 
 sub student_topic_message {
     my ( $self, $student, $copy, $topic ) = @_;
+    if ( $topic->{text} ) {
+        return (
+            { message => $topic->{text}, color => $topic->{color}, calc => {} }
+        );
+    }
     my $x = $self->student_topic_calc( $student, $copy, $topic );
     if ($x) {
         my $s = $topic->{format};
