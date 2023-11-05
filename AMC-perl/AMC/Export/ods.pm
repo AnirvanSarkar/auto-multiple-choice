@@ -945,19 +945,16 @@ sub export {
         references => { 'style:data-style-name' => 'Percentage' },
     );
     for my $t (@topics) {
-        my $pc =
-          (   $t->{value} =~ /:pc$/ ? "pc"
-            : $t->{value} eq 'ratio' ? 'ratio'
-            :                          "" );
+        my $pc = ( $t->{value} =~ /:pc$/ ? "pc" : "" );
+        my ( $s, $decimals ) =
+            $topics->adjusted_value( $t, $t->{value}, 0, '_self' );
         my $n_levels = $topics->n_levels($t);
         if ( $n_levels > 0 ) {
             for my $l ( 1 .. $n_levels ) {
                 my $col = $topics->level_color( $t, $l ) || "#eaeaea";
-
                 my $refs =
-                  {     'style:data-style-name' => 'Decimales'
-                      . pure_decimals($t->{"decimals$pc"})
-                      . $pc };
+                  { 'style:data-style-name' => 'Decimales'
+                      . pure_decimals($decimals) . $pc };
 
                 my $level_id = $t->{id} . x2ooo( $l - 1 );
 
@@ -992,7 +989,7 @@ sub export {
             family     => 'table-cell',
             references => {
                     'style:data-style-name' => 'Decimales'
-                  . pure_decimals($t->{"decimals$pc"})
+                  . pure_decimals($decimals)
                   . $pc
             },
             properties => {
@@ -1700,24 +1697,11 @@ sub export {
         for my $t (@topics) {
             my $cols = $topic_cols{ $t->{id} };
             if ($cols) {
-                my $formula;
-                my $formula_score;
-                my $formula_max;
-                $formula_score = "SUM(" . subrow_condensed( $jj, @$cols ) . ")";
-                $formula_max =
-                  "SUM(" . subrow_condensed( $code_row{max}, @$cols ) . ")";
-                if($t->{value} eq 'score') {
-                    $formula = $formula_score;
-                } else { # value = ratio (default value)
-                    $formula = $formula_score."/".$formula_max;
-                }
-                if(defined($t->{ceil})) {
-                    $formula="MIN($t->{ceil};$formula)";
-                }
-                if(defined($t->{floor})) {
-                    $formula="MAX($t->{floor};$formula)";
-                }
-                my $pc = ($t->{value} eq 'ratio' ? 1 : 0);
+                my $score_cells = subrow_condensed( $jj,            @$cols );
+                my $max_cells   = subrow_condensed( $code_row{max}, @$cols );
+                my $formula =
+                  $topics->value_calc_odf( $t, $score_cells, $max_cells );
+                my $pc = ( $t->{value} =~ /:pc/ ? 1 : 0 );
                 set_cell(
                     $doc, $feuille, $jj, $ii, $m->{abs},
                     'TOPIC'.$t->{id}, '',

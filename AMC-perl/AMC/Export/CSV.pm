@@ -137,7 +137,7 @@ sub export {
     push @columns, @codes;
 
     for my $t (@topics) {
-        push @columns, "$t->{id}:score", "$t->{id}:max", "$t->{id}:ratio";
+        push @columns, "$t->{id}:score", "$t->{id}:max", "$t->{id}:value";
         push @columns, "$t->{id}:level" if(@{$t->{levels}});
     }
 
@@ -201,10 +201,10 @@ sub export {
         for my $t (@topics) {
             my $s = $self->{_topics}->student_topic_calc( @sc, $t );
             if ($s) {
-                push @columns, "$s->{score}", "$s->{max}", "$s->{ratio}";
+                push @columns, "$s->{score}", "$s->{max}", "$s->{value}";
                 if ( @{ $t->{levels} } ) {
                     my $l =
-                      $self->{_topics}->value_level( $t, $s->{ $t->{value} } );
+                      $self->{_topics}->value_level( $t, $s );
                     if ($l) {
                         push @columns,
                           ( defined( $l->{code} ) ? $l->{code} : $l->{i} );

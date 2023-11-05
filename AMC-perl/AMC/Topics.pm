@@ -30,6 +30,7 @@ use File::Spec;
 use Cwd;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
+use Data::Dumper;
 
 my $merger = Hash::Merge->new('LEFT_PRECEDENT');
 
@@ -196,9 +197,11 @@ sub defaults {
     $self->{config}->{preferences} = $merger->merge(
         $self->{config}->{preferences} || {},
         {
-            intervalsep      => '-',
-            odscolumns       => 'value',
-            skip_indicatives => 1,
+            intervalsep       => '-',
+            odscolumns        => 'value',
+            skip_indicatives  => 1,
+            decimal_separator => '.',
+            pc_suffix         => ' %',
         }
     );
 }
@@ -406,6 +409,54 @@ sub level_value_odf {
     return ( "IFS(" . join( ";", @cond ) . ")" );
 }
 
+sub value_calc_odf {
+    my ( $self, $topic, $scores, $maxs ) = @_;
+    my $formula;
+
+    my $key      = $topic->{value};
+    my $modifier = '';
+    if ( $key =~ /^([^:]+):(.*)$/ ) {
+        $key      = $1;
+        $modifier = $2;
+    }
+
+    if($key eq 'score') {
+        $formula = "SUM($scores)";
+    } elsif($key eq 'ratio') {
+        $formula = "SUM($scores)/SUM($maxs)";
+    } else {
+        die "Topic value '$key' can't be handled";
+    }
+
+    if ( $modifier =~ /^[0-9]+(\.[0-9]+)?$/ ) {
+        $formula = "$modifier*($formula)";
+    } elsif ( $modifier =~ /^([0-9]+(?:\.[0-9]+)?):([0-9]+(?:\.[0-9]+)?)$/ ) {
+        my $mult = $1;
+        my $prec = $2;
+        $formula = "$prec*ROUND($mult*($formula)/$prec)";
+    } elsif ( $modifier =~ /^([0-9]+(?:\.[0-9]+)?)-([0-9]+(?:\.[0-9]+)?)$/ ) {
+        my $low  = $1;
+        my $high = $2;
+        $formula="$low+($high-$low)*($formula)";
+    } elsif ( $modifier =~
+        /^([0-9]+(?:\.[0-9]+)?)-([0-9]+(?:\.[0-9]+)?):([0-9]+(?:\.[0-9]+)?)$/ )
+    {
+        my $low  = $1;
+        my $high = $2;
+        my $prec = $3;
+        $formula="$prec*ROUND(($low+($high-$low)*($formula))/$prec)";
+    }
+
+    if(defined($topic->{ceil})) {
+        $formula="MIN($topic->{ceil};$formula)";
+    }
+    if(defined($topic->{floor})) {
+        $formula="MAX($topic->{floor};$formula)";
+    }
+
+    return($formula);
+}
+
 sub value_in_level {
     my ($self,$level,$value)=@_;
     return (0) if ( defined($level->{min}) && $value <  $level->{min} );
@@ -414,8 +465,10 @@ sub value_in_level {
 }
 
 sub value_level {
-    my ( $self, $topic, $value ) = @_;
+    my ( $self, $topic, $scores ) = @_;
     if ( @{ $topic->{levels} } ) {
+        my $value = $scores->{value};
+
         my $n_levels = 1 + $#{ $topic->{levels} };
         my $i_level  = 0;
         while ( $i_level < $n_levels
@@ -529,31 +582,23 @@ sub student_topic_calc {
             score      => $s,
             max        => $smax,
             ratio      => $s / $smax,
-            'ratio:pc' => 100 * $s / $smax,
             'nums:s'   => $nums_simple,
             'nums:c'   => $nums_condensed,
         };
 
-        # Applies ceil and floor to topic value
-        my $k = $topic->{value};
-        if ( defined( $topic->{ceil} ) ) {
-            $x->{$k} = $topic->{ceil}
-              if ( $x->{$k} > $topic->{ceil} );
-        }
-        if ( defined( $topic->{floor} ) ) {
-            $x->{$k} = $topic->{floor}
-              if ( $x->{$k} < $topic->{floor} );
-        }
+        $x->{'ratio:pc'} =
+          $self->adjusted_value( $topic, 'ratio', $x->{ratio}, 'pc' );
 
-        # Updates ratio:pc if ratio has been updated, and ratio if
-        # ratio:pc has been updated
-        my $k_alter = $k;
-        if ( $k_alter =~ s/:pc$// ) {
-            $x->{$k_alter} = $x->{$k} / 100;
-        } else {
-            $k_alter .= ':pc';
-            $x->{$k_alter} = $x->{$k} * 100;
+        my $key      = $topic->{value};
+        my $modifier = '';
+        if ( $key =~ /^([^:]+):(.*)$/ ) {
+            $key      = $1;
+            $modifier = $2;
         }
+        my $v = $x->{$key};
+
+        ( $x->{value}, $x->{value_decimals} ) =
+          $self->adjusted_value( $topic, $key, $v, $modifier );
 
         return ($x);
     } else {
@@ -573,42 +618,107 @@ sub with_decimals {
     return ($s);
 }
 
+sub round_to_multiple {
+    my ( $self, $x, $prec ) = @_;
+    my $decimals = 0;
+    if ( $prec =~ /\./ ) {
+        my @xx = split( /\./, $prec );
+        $decimals = length( $xx[1] );
+    }
+    $x = sprintf( "%.0f", $x / $prec ) * $prec;
+    my $s = $self->with_decimals( $decimals, $x );
+    return(wantarray ? ($s, $decimals) : $s);
+}
+
+sub intervaled {
+    my ( $self, $topic, $v ) = @_;
+
+    # Applies ceil and floor to topic value
+    if ( defined( $topic->{ceil} ) ) {
+        $v = $topic->{ceil}
+          if ( $v > $topic->{ceil} );
+    }
+    if ( defined( $topic->{floor} ) ) {
+        $v = $topic->{floor}
+          if ( $v < $topic->{floor} );
+    }
+    return ($v);
+}
+
+sub adjusted_value {
+    my ( $self, $topic, $key, $x, $modifier ) = @_;
+    my $s   = '?';
+    my $dec;
+    if ( $modifier eq '_self' ) {
+        if ( $key =~ /^([^:]+):(.*)$/ ) {
+            $key      = $1;
+            $modifier = $2;
+        }
+    }
+    my $d = ( $key eq 'ratio' ? 'decimalsratio' : 'decimals' );
+    $dec = $topic->{$d};
+    if ( $modifier eq '' ) {
+        $s   = $self->with_decimals( $dec, $self->intervaled( $topic, $x ) );
+    } elsif ( $modifier eq 'pc' ) {
+        $dec = $topic->{decimalspc};
+        $s =
+          $self->with_decimals( $dec, $self->intervaled( $topic, $x * 100 ) );
+    } elsif ( $modifier =~ /^[0-9]+(\.[0-9]+)?$/ ) {
+        $s   = $self->with_decimals( $dec,
+            $self->intervaled( $topic, $x * $modifier ) );
+    } elsif ( $modifier =~ /^([0-9]+(?:\.[0-9]+)?):([0-9]+(?:\.[0-9]+)?)$/ ) {
+        my $mult = $1;
+        my $prec = $2;
+        ( $s, $dec ) =
+          $self->round_to_multiple( $self->intervaled( $topic, $x * $mult ),
+            $prec );
+    } elsif ( $modifier =~ /^([0-9]+(?:\.[0-9]+)?)-([0-9]+(?:\.[0-9]+)?)$/ ) {
+        my $low  = $1;
+        my $high = $2;
+        $s   = $self->with_decimals( $dec,
+            $self->intervaled( $topic, $x * ( $high - $low ) + $low ) );
+    } elsif ( $modifier =~
+        /^([0-9]+(?:\.[0-9]+)?)-([0-9]+(?:\.[0-9]+)?):([0-9]+(?:\.[0-9]+)?)$/ )
+    {
+        my $low  = $1;
+        my $high = $2;
+        my $prec = $3;
+        ( $s, $dec ) =
+          $self->round_to_multiple(
+            $self->intervaled( $topic, $x * ( $high - $low ) + $low ), $prec );
+    }
+    return ( wantarray ? ($s, $dec) : $s );
+}
+
 sub student_topic_message {
     my ( $self, $student, $copy, $topic ) = @_;
     my $x = $self->student_topic_calc( $student, $copy, $topic );
     if ($x) {
         my $s = $topic->{format};
         my $l =
-          $self->value_level( $topic, $x->{ $topic->{value} } )
+          $self->value_level( $topic, $x )
           || { message => "", color=>"" };
 
         for my $k (qw/message/) {
             $s =~ s/\%\{$k\}/$l->{$k}/g if ( defined( $l->{$k} ) );
         }
 
-        my $value = '%{'.$topic->{value}.'}';
-        if($topic eq 'score') {
-            $value = '%{score}/%{max}';
+        if ( $topic->{value} eq 'score' ) {
+            my $value = '%{score}/%{max}';
+            $s =~ s/\%\{value\}/$value/g;
         }
-        $s =~ s/\%\{value\}/$value/g;
 
-        for my $k (qw/score max ratio ratio:pc/) {
-            my $v;
-            if ( $k =~ /:pc$/ ) {
-                my $kk = $k;
-                $kk =~ s/:pc$//;
-                $x->{$k} = $x->{$kk} * 100;
-                my $d = $topic->{decimalspc};
-                $v = $self->with_decimals( $d, $x->{$k}, 1 );
-            } else {
-                my $d =
-                  (   $k eq 'ratio'
-                    ? $topic->{decimalsratio}
-                    : $topic->{decimals} );
-                $v = $self->with_decimals( $d, $x->{$k} );
+        for my $k (qw/score max ratio value/) {
+            my $v= $x->{$k};
+            my $dp = $self->get_option('decimal_separator');
+            $v =~ s/\./$dp/;
+            if($k eq 'value' && $topic->{value} =~ /:pc/) {
+                $v .= $self->get_option('pc_suffix');
             }
+
             $s =~ s/\%\{$k\}/$v/g;
         }
+
         for my $k (qw/id name/) {
             $s =~ s/\%\{$k\}/$topic->{$k}/g;
         }
@@ -618,8 +728,12 @@ sub student_topic_message {
         for my $k (qw/code i/) {
             $s =~ s/\%\{$k\}/$l->{$k}/g if ( defined( $l->{$k} ) );
         }
-        return { message => $s, color => $l->{color}, calc => $x };
+
+        my $c = { message => $s, color => $l->{color}, calc => $x };
+        debug( "Topic($student,$copy,$topic->{id}):\n" . Dumper($c) );
+        return($c);
     } else {
+        debug("Topic($student,$copy,$topic->{id}): empty calc");
         return { message => '', color => '', calc => $x };
     }
 }
