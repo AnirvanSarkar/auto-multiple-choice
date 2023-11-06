@@ -88,7 +88,7 @@ sub new {
         verdict_question_cancelled => '',
         progress                   => '',
         progress_id                => '',
-        compose                    => 0,
+        compose                    => '',
         pdf_corrected              => '',
         pdf_background             => '',
         changes_only               => '',
@@ -96,6 +96,7 @@ sub new {
         embedded_format            => 'jpeg',
         embedded_jpeg_quality      => 80,
         rtl                        => '',
+        add_corrected              => '',
         debug                      => ( get_debug() ? 1 : 0 ),
     };
 
@@ -143,18 +144,10 @@ sub new {
         $self->{filename_model} .= '.pdf';
     }
 
-    # if the corrected answer sheet is not given, use the subject
-    # instead.
-    if ( $self->{compose} == 2 && !-f $self->{pdf_corrected} ) {
-        $self->{compose} = 1;
-    }
-
     # which pdf file will be used as a background when scans are not
     # available?
-    if ( $self->{compose} == 1 ) {
+    if ( $self->{compose} ) {
         $self->{pdf_background} = $self->{pdf_subject};
-    } elsif ( $self->{compose} == 2 ) {
-        $self->{pdf_background} = $self->{pdf_corrected};
     }
 
     # set up the object to send progress to calling program
@@ -894,7 +887,7 @@ sub page_symbols {
     # goes through all the boxes on the page
 
     # the question boxes (in separate answer sheet mode)
-    if ( $self->{compose} == 1 ) {
+    if ( $self->{compose} ) {
         my $sth = $self->{layout}->statement('pageQuestionBoxes');
         $sth->execute( $student->[0], $page );
         while ( my $box = $sth->fetchrow_hashref ) {
@@ -1237,6 +1230,21 @@ sub process_student {
     $self->{header_drawn} = 0;
     for my $page ( $self->student_pages($student) ) {
         $self->student_draw_page( $student, $page );
+    }
+
+    if ( $self->{add_corrected} ) {
+        if ( -f $self->{pdf_corrected} ) {
+            my @p = sort { $a <=> $b }
+              ( $self->{layout}->student_correctedpages( $student->[0] ) );
+            debug "ADD_CORRECTED[$student->[0]] from $self->{pdf_corrected}: pages "
+              . join( ", ", @p );
+            for my $page (@p) {
+                $self->insert_pdf_page( $self->{pdf_corrected}, $page );
+            }
+        } else {
+            debug
+"ADD_CORRECTED called but no PDF file found at $self->{pdf_corrected}";
+        }
     }
 
     $self->{data}->end_transaction('aOST');

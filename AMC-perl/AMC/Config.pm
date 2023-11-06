@@ -327,6 +327,8 @@ sub defaults {
         annote_font_name => 'Linux Libertine O 12',
         annote_ecart     => 5.5,
         annote_chsign    => 4,
+        defaut_regroupement_compose => '',
+        defaut_add_corrected => '',
 
         nonascii_projectnames => '',
         ascii_filenames       => 1,
@@ -448,7 +450,7 @@ sub defaults {
         filtered_source    => 'DOC-filtered.tex',
 
         modele_regroupement  => '',
-        regroupement_compose => 0,
+        regroupement_compose => '',
         regroupement_type    => 'STUDENTS',
         regroupement_copies  => 'ALL',
 
@@ -479,6 +481,7 @@ sub defaults {
         export_include_abs => '',
 
         annote_position => 'marges',
+        add_corrected => '',
 
         verdict    => '',
         verdict_q  => '',

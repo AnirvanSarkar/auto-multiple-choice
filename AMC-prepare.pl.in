@@ -316,6 +316,34 @@ sub analyse_cslog {
     $layout->end_transaction('Char');
 }
 
+# analyse_cxylog gets the pages data from the individual corrected
+# answer sheets
+
+sub analyse_cxylog {
+    my ($xy_file) = @_;
+
+    my @pages=();
+
+    open( CXYFILE, $xy_file ) or die "Unable to open $xy_file : $!";
+  CXY: while (<CXYFILE>) {
+        if (/^\\page\{([^}]+)\}/) {
+            my $id  = $1;
+            my @ids = split( /\//, $id );
+            push @pages, { id => $1, student => $ids[0] };
+        }
+    }
+    close(CXYFILE);
+
+    my $layout = $data->module('layout');
+
+    $layout->begin_transaction('cxyp');
+    $layout->clear_correctedpages();
+    for my $page (0..$#pages) {
+        $layout->add_correctedpage($pages[$page]->{student}, $page+1);
+    }
+    $layout->end_transaction('cxyp');
+}
+
 # analyse_amclog checks common errors in LaTeX about questions:
 #
 # * same question ID used multiple times for the same paper, or same
@@ -1031,19 +1059,27 @@ if ( $to_do{k} ) {
     $of = $out_corrige            if ( !$of && !$to_do{s} );
     $of = $prefix . "corrige.pdf" if ( !$of );
 
-    if ( -f $of ) {
-        debug "Removing already existing file: $of";
-        unlink($of);
-    }
-
     @output_files = ($of);
+
+    for my $f (@output_files) {
+        if ( -f $f ) {
+            debug "Removing already existing file: $f";
+            unlink($f);
+        }
+    }
 
     execute(
         command_opts => [ %global_opts, qw/CorrigeIndivExterne 1/ ],
         text         => __ "Building the individual solution"
     );
     transfer( "$jobname.pdf", $of );
+
     give_latex_errors( __ "individual solution" );
+
+    analyse_cxylog("$jobname.xy");
+
+    my $capture = $data->module('capture');
+    annotate_source_change( $capture, 1 );
 }
 
 ############################################################################

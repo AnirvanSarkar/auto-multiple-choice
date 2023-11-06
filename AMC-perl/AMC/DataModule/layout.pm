@@ -153,6 +153,13 @@ package AMC::DataModule::layout;
 # * answer is the answer number
 #
 # * char is the character written inside the box
+#
+# layout_correctedpages contains data about the pages from the
+# individual corrected answer sheets
+#
+# * student is the student number
+#
+# * page is the page number from the PDF
 
 use Exporter qw(import);
 
@@ -190,7 +197,7 @@ use XML::Simple;
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (10);
+    return (11);
 }
 
 sub drop_box_table {
@@ -403,6 +410,20 @@ sub version_upgrade {
               . " (student INTEGER, question INTEGER, number TEXT,"
               . " PRIMARY KEY(student,question))" );
         return (10);
+    }
+    if ( $old_version == 10 ) {
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("correctedpages")
+              . " (student INTEGER, page INTEGER)" );
+        $self->sql_do( "CREATE INDEX "
+              . $self->index("index_cp_student") . " ON "
+              . $self->table( "correctedpages", "self" )
+              . " (student)" );
+        $self->sql_do( "CREATE INDEX "
+              . $self->index("index_cp_page") . " ON "
+              . $self->table( "correctedpages", "self" )
+              . " (page)" );
+        return (11);
     }
     return ('');
 }
@@ -903,7 +924,16 @@ sub define_statements {
         getQuestionNum => { sql => "SELECT number FROM "
               . $self->table("questionnum")
               . " WHERE student=? AND question=?" },
+        clearCPages =>
+          { sql => "DELETE FROM " . $self->table("correctedpages") },
+        addCPage => { sql => "INSERT INTO "
+                          . $self->table("correctedpages")
+                          . " (student,page) VALUES (?,?)" },
+        studentCPages => { sql => "SELECT page FROM "
+                               . $self->table("correctedpages")
+                               . " WHERE student = ?" },
     };
+
 }
 
 # clear_page_layout($student,$page) clears all the layout data for a
@@ -1545,6 +1575,30 @@ sub question_number {
             )
         );
     }
+}
+
+# clear_correctedpages() clears the page data for the individual
+# corrected answer sheets
+
+sub clear_correctedpages {
+    my ($self) = @_;
+    $self->statement("clearCPages")->execute();
+}
+
+# add_correctedpage($student, $page) associates the page $page from
+# the individual corrected answer sheets PDF to student $student
+
+sub add_correctedpage {
+    my ($self, $student, $page) = @_;
+    $self->statement("addCPage")->execute($student, $page);
+}
+
+# student_correctedpages($student) returns a list of individual
+# corrected PDF pages corresponding to student $student
+
+sub student_correctedpages {
+    my ( $self, $student ) = @_;
+    return ( $self->sql_list( $self->statement('studentCPages'), $student ) );
 }
 
 1;

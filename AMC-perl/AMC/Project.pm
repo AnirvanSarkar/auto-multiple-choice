@@ -740,7 +740,7 @@ sub anonymize {
 
                 "--filename-model", "(aID)",
                 "--single-output", '',
-                "--compose", 0,
+                "--no-compose",
                 "--pdf-dir", $self->{config}->{shortcuts}->absolu('%PROJET/anonymous'),
                 "--header-only",
                 "--anonymous", $self->{config}->get('anonymous_model'),

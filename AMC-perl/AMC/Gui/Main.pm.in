@@ -307,27 +307,6 @@ sub stores {
                 "One file for all students"),
         ),
 
-        regroupement_compose => cb_model(
-            0 => __(
-# TRANSLATORS: One of the possible way to annotate answer sheets: here
-# we only select pages where the student has written something (in
-# separate answer sheet mode, these are the pages from the answer
-# sheet and not the pages from the subject).
-                "Only pages with answers"),
-            1 => __(
-# TRANSLATORS: One of the possible way to annotate answer sheets: here
-# we take the pages were the students has nothing to write (often
-# question pages from a subject with separate answer sheet option)
-# from the subject.
-                "Question pages from subject"),
-            2 => __(
-# TRANSLATORS: One of the possible way to annotate answer sheets: here
-# we take the pages were the students has nothing to write (often
-# question pages from a subject with separate answer sheet option)
-# from the correction.
-                "Question pages from correction"),
-        ),
-
         regroupement_copies => cb_model(
             ALL => __(
 # TRANLATORS: For which students do you want to annotate papers? This
@@ -387,7 +366,8 @@ sub main_window {
           export_c_format_export
           export_c_export_sort export_cb_export_include_abs
           config_export_modules standard_export_options
-          notation_c_regroupement_type notation_c_regroupement_compose
+          notation_c_regroupement_type
+          notation_cb_regroupement_compose notation_cb_add_corrected
           pref_prep_s_nombre_copies pref_prep_c_filter
           partie_anonymity
           /, @widgets_only_when_opened,
@@ -4551,7 +4531,8 @@ sub annote_copies_callback {
 sub valide_options_notation {
     my ($self, @args) = self_first(@_);
     $self->{prefs}->valide_options_for_domain( 'notation', '', @args );
-    if ( $self->{config}->key_changed("regroupement_compose") ) {
+    if ( $self->{config}->key_changed("regroupement_compose")
+        || $self->{config}->key_changed("add_corrected") ) {
         annotate_source_change( $self->{project}->capture, 1 );
     }
     $self->get_ui('groupe_model')

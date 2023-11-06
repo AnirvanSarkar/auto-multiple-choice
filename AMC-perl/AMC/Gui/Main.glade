@@ -2629,22 +2629,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBox" id="notation_c_regroupement_compose">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <signal name="changed" handler="valide_options_notation" swapped="no"/>
-                                <child>
-                                  <object class="GtkCellRendererText" id="cellrenderertext9"/>
-                                  <attributes>
-                                    <attribute name="text">0</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">1</property>
-                              </packing>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -2691,6 +2676,34 @@
                             <property name="expand">False</property>
                             <property name="fill">False</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="notation_cb_regroupement_compose">
+                            <property name="label" translatable="yes">Insert subject pages to complete</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="notation_cb_add_corrected">
+                            <property name="label" translatable="yes">Append corrected sheet</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -2812,7 +2825,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">2</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -2840,7 +2853,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">3</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                       </object>
@@ -3707,6 +3720,9 @@
                 <property name="headers-clickable">False</property>
                 <property name="show-expanders">False</property>
                 <signal name="row-activated" handler="recent_select" swapped="no"/>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="selection314"/>
+                </child>
               </object>
             </child>
             <style>
