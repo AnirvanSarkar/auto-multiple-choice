@@ -41,6 +41,7 @@ use AMC::DataModule::layout qw/:flags/;
 use AMC::Gui::Avancement;
 use AMC::Calage;
 use AMC::Boite;
+use AMC::Topics;
 
 use utf8;
 
@@ -117,7 +118,7 @@ sub new {
         $self->{position} = 'none';
     }
 
-    # chacks that the embedded_format is ok
+    # checks that the embedded_format is ok
     $self->{embedded_format} = lc( $self->{embedded_format} );
     if ( $self->{embedded_format} !~ /^(jpeg|png)$/i ) {
         debug "ERROR: invalid <embedded_format>: $self->{embedded_format}";
@@ -222,6 +223,8 @@ sub student_uptodate {
         debug "Registered filename " . show_utf8($filename);
         my $source_change =
           $self->{capture}->variable('annotate_source_change');
+        my $topic_change = $self->{topics}->last_modified();
+        $source_change = $topic_change if ( $topic_change > $source_change );
         debug
 "Registered answer sheet: updated at $timestamp, source change at $source_change";
 
@@ -288,9 +291,8 @@ sub pdf_output_filename {
         my $name = 'XXX';
         my $n;
 
-        debug "Association -> ID=$i";
-
         if ( defined($i) ) {
+            debug "Association -> ID=$i";
             debug "Looking for student $self->{association_key} = $i";
             ($n) = $self->{names}
               ->data( $self->{association_key}, $i, test_numeric => 1 );
@@ -298,6 +300,8 @@ sub pdf_output_filename {
                 debug "Found";
                 $f = $self->{names}->substitute( $n, $f );
             }
+        } else {
+            debug "Association: none";
         }
 
         debug "F[n]=" . show_utf8($f);
@@ -357,15 +361,35 @@ sub connects_to_database {
     # If they are not already given by the user, read association_key
     # and darkness_threshold from the variables in the database.
 
+    $self->{data}->begin_read_transaction('AnSU');
+
     $self->{association_key} =
-      $self->{association}->variable_transaction('key_in_list')
+      $self->{association}->variable('key_in_list')
       if( !$self->{association_key} );
     $self->{darkness_threshold} =
-      $self->{scoring}->variable_transaction('darkness_threshold')
+      $self->{scoring}->variable('darkness_threshold')
       if ( !$self->{darkness_threshold} );
     $self->{darkness_threshold_up} =
-      $self->{scoring}->variable_transaction('darkness_threshold_up')
+      $self->{scoring}->variable('darkness_threshold_up')
       if ( !$self->{darkness_threshold_up} );
+
+    $self->{data}->end_transaction('AnSU');
+
+    # Setup Topics
+
+    $self->{topics} = AMC::Topics->new(
+        project_dir => $self->{project_dir},
+        data        => $self->{data}
+    );
+    my @err = $self->{topics}->errors();
+    if (@err) {
+        $self->error(
+            sprintf(
+                __("Errors while trying to parse the topics file: %s"),
+                join( ", ", @err )
+            )
+        );
+    }
 
     # But darkness_threshold_up is not defined for old projects… set it
     # to an inactive value in this case
@@ -376,7 +400,8 @@ sub connects_to_database {
 sub error {
     my ( $self, $message ) = @_;
 
-    debug_and_stderr("**ERROR** $message");
+    # Pass error message to calling process, for GUI
+    print "ERR: $message\n";
 }
 
 sub needs_data {
@@ -631,8 +656,9 @@ sub color_rgb {
 # set color for drawing
 
 sub set_color {
-    my ( $self, $color_string ) = @_;
-    $self->command( join( ' ', "color", color_rgb($color_string) ) );
+    my ( $self, $color_string, $domain ) = @_;
+    $domain = "" if ( !$domain );
+    $self->command( join( ' ', $domain . "color", color_rgb($color_string) ) );
 }
 
 # inserts a page from a pdf file
@@ -1028,7 +1054,9 @@ sub write_qscore {
 
     my $xy      = "qtext_position_" . $position;
     my $command = $self->$xy( $student, $page, $question );
+    my $color   = $self->{topics}->get_question_color($question);
 
+    $self->set_color($color) if ($color);
     if ( ref($command) eq 'ARRAY' ) {
         if ( $#$command >= 0 ) {
             $self->stext($text);
@@ -1040,6 +1068,7 @@ sub write_qscore {
         $self->stext($text);
         $self->command($command);
     }
+    $self->set_color( $self->{text_color} ) if ($color);
 }
 
 # writes question scores on one page
@@ -1084,16 +1113,25 @@ sub page_qids {
 sub page_header {
     my ( $self, $student ) = @_;
 
-    if ( $self->{verdict_allpages} || !$self->{header_drawn} ) {
+    if ( !$self->{header_drawn} ) {
 
         $self->needs_names;
 
-        $self->set_color( $self->{text_color} );
+        $self->command(
+                "begin header "
+              . ( $self->{single_output} ? 0 : 1 ) . " "
+              . (
+                 $self->{width}
+                 - $self->{dist_margin_globaltext} * $self->{dpi} * 2
+              )
+        );
+
+        $self->set_color( $self->{text_color}, "h" );
         $self->command("matrix identity");
         $self->stext(
             $self->{subst}->substitute( $self->{verdict}, @$student ) );
         $self->command(
-            "stext "
+            "hstext "
               . (
                   $self->{rtl}
                 ? $self->{width} -
@@ -1103,10 +1141,31 @@ sub page_header {
               . " "
               . ( $self->{dist_margin_globaltext} * $self->{dpi} ) . " "
               . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0"
-        );
+                      );
+
+        # Add topics...
+
+        for my $t ( $self->{topics}->all_topics() ) {
+            debug "Topic $t->{id}";
+            my $s = $self->{topics}->student_topic_message( @$student, $t );
+            if ($s) {
+                for my $line ( split( /\n/, $s->{message} ) ) {
+                    $self->set_color( $s->{color} || $self->{text_color}, "h" );
+                    $self->command( "hnexttext "
+                          . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 "
+                          . $line );
+                }
+            }
+        }
 
         $self->{header_drawn} = 1;
 
+        $self->command("show header");
+
+    } else {
+        if($self->{verdict_allpages}) {
+            $self->command("show header");
+        }
     }
 }
 
@@ -1253,6 +1312,10 @@ sub go {
 
 sub quit {
     my ($self) = @_;
+
+    debug "Annotate QUIT";
+
+    $self->command("finish");
 
     $self->{process}->ferme_commande if ( $self->{process} );
     $self->{avance}->fin() if ( $self->{avance} );

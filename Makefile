@@ -317,6 +317,72 @@ endif
 
 install: install_nodoc install_doc ;
 
+######################################################################################
+
+FILES_ICONS=$(notdir $(wildcard icons/*.svg))
+FILES_TEXDOC=$(notdir $(wildcard doc/sty/*.pdf doc/sty/*.tex))
+
+uninstall_lang: FORCE
+	-rm $(DESTDIR)/$(LOCALEDIR)/*/LC_MESSAGES/auto-multiple-choice.mo
+
+uninstall_models_%: FORCE
+	-rm -r $(DESTDIR)/$(MODELSDIR)/$*
+
+uninstall_models: $(addprefix uninstall_models_,$(SUBMODS))
+	rmdir $(DESTDIR)/$(MODELSDIR) || echo "Directory $(DESTDIR)/$(MODELSDIR) not empty..."
+
+uninstall_nodoc: uninstall_lang uninstall_models FORCE
+ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_installmime
+ifneq ($(SHARED_MIMEINFO_DIR),)
+	-rm $(DESTDIR)/$(SHARED_MIMEINFO_DIR)/auto-multiple-choice.xml
+	rmdir $(DESTDIR)/$(SHARED_MIMEINFO_DIR) || echo "Directory $(DESTDIR)/$(SHARED_MIMEINFO_DIR) not empty..."
+endif
+endif
+ifneq ($(LANG_GTKSOURCEVIEW_DIR),)
+	-rm $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR)/amc-txt.lang
+	rmdir $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR) || echo "Directory $(DESTDIR)/$(LANG_GTKSOURCEVIEW_DIR) not empty..."
+endif
+	-rm -r $(DESTDIR)/$(MODSDIR)
+	-rm $(DESTDIR)/$(TEXDIR)/automultiplechoice.sty
+	rmdir $(DESTDIR)/$(TEXDIR) || echo "Directory $(DESTDIR)/$(TEXDIR) not empty..."
+ifneq ($(CSSDIR),)
+	-rm $(DESTDIR)/$(CSSDIR)/auto-multiple-choice.css
+	rmdir $(DESTDIR)/$(CSSDIR) || echo "Directory $(DESTDIR)/$(CSSDIR) not empty..."
+endif
+ifneq ($(DESKTOPDIR),)
+	-rm $(DESTDIR)/$(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop
+endif
+ifneq ($(METAINFODIR),)
+	-rm $(DESTDIR)/$(METAINFODIR)/net.auto_multiple_choice.amc.metainfo.xml
+endif
+	-rm $(DESTDIR)/$(BINDIR)/auto-multiple-choice
+	-cd $(DESTDIR)/$(ICONSDIR)/ ; rm $(FILES_ICONS)
+	rmdir $(DESTDIR)/$(ICONSDIR) || echo "Directory $(DESTDIR)/$(ICONSDIR) not empty..."
+ifneq ($(APPICONDIR),)
+	-rm $(DESTDIR)/$(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz
+	-rm $(DESTDIR)/$(APPICONDIR)/*/apps/auto-multiple-choice.png
+endif
+ifneq ($(PIXDIR),)
+	-rm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
+endif
+	-rm -r $(DESTDIR)/$(PERLDIR)/AMC
+
+uninstall_doc: FORCE
+	@echo "Uninstalling doc..."
+ifneq ($(TEXDOCDIR),)
+	-cd $(DESTDIR)/$(TEXDOCDIR)/ ; rm $(FILES_TEXDOC)
+	rmdir $(DESTDIR)/$(TEXDOCDIR) || echo "Directory $(DESTDIR)/$(TEXDOCDIR) not empty..."
+endif
+ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
+	-rm $(DESTDIR)/$(DOCDIR)/auto-multiple-choice.??.xml
+	-rm $(DESTDIR)/$(DOCDIR)/auto-multiple-choice.??.pdf
+	-rm -r $(DESTDIR)/$(DOCDIR)/html
+	rmdir $(DESTDIR)/$(DOCDIR) || echo "Directory $(DESTDIR)/$(DOCDIR) not empty..."
+	-rm $(DESTDIR)/$(MAN1DIR)/auto-multiple-choice*.1
+endif
+
+uninstall: uninstall_nodoc uninstall_doc ;
+
 # Test
 
 manual-test:

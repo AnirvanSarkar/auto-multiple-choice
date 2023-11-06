@@ -92,6 +92,8 @@ sub has_warnings_or_errors {
 sub format_markup {
     my ( $self, $t ) = @_;
     $t =~ s/\&/\&amp;/g;
+    $t =~ s/</\&lt;/g;
+    $t =~ s/>/\&gt;/g;
     return ($t);
 }
 

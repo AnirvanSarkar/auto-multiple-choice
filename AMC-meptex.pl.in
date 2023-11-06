@@ -100,9 +100,10 @@ sub ajoute {
     }
 }
 
-my @pages     = ();
-my @flags     = ();
-my @pre_assoc = ();
+my @pages       = ();
+my @flags       = ();
+my @pre_assoc   = ();
+my @questionnum = ();
 my $cases;
 my $page_number   = 0;
 my %build_vars    = ();
@@ -206,6 +207,9 @@ while (<SRC>) {
     }
     if (/\\question\{([0-9]+)\}\{(.*)\}/) {
         $question_name{$1} = $2;
+    }
+    if (/\\questionnum\{([0-9]+)\}\{([0-9]+)\}\{(.*)\}/) {
+        push @questionnum, [ $1, $2, $3 ];
     }
 }
 close(SRC);
@@ -336,6 +340,12 @@ debug "Flagging questions...";
 for my $f (@flags) {
     $layout->add_question_flag( $f->{student}, $f->{question}, BOX_ROLE_ANSWER,
         $f->{flags} );
+}
+
+debug "Register question numbers...";
+
+for my $qn (@questionnum) {
+    $layout->question_number(@$qn);
 }
 
 debug "Ending transaction...";

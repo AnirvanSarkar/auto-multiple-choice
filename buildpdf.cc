@@ -68,6 +68,9 @@
 #define FORMAT_JPEG 1
 #define FORMAT_PNG 2
 
+#define HIDE_ALPHA 0.95
+#define HIDE_MARGIN 0.5
+
 /*
 
   Helpers to read PNG files from memory (as an array or as a vector)
@@ -154,6 +157,8 @@ public:
     user_one_point(0), margin(0),
     document(NULL), layout(NULL), surface(NULL), cr(NULL),
     image_cr(NULL), image_surface(NULL), fake_image_buffer(NULL),
+    header_surface(NULL), header_cr(NULL), header_layout(NULL),
+    header_width(-1.0),
     font_description(NULL),
     line_width(1.0), font("Linux Libertine O 12"), debug(0),
     scan_expansion(1.0), scan_resize_factor(1.0),
@@ -289,12 +294,45 @@ public:
   /* color sets the color for next drawings, either with RBG or
      RGBA. Color values must be between 0.0 and 1.0. */
 
-  void color(double r,double g, double b, double a) {
+  double current_r, current_g, current_b, current_a;
+
+  void temp_color(double r, double g, double b, double a) {
     cairo_set_source_rgba(cr, r, g, b, a);
   }
-  void color(double r,double g, double b) {
-    cairo_set_source_rgb(cr, r, g, b);
+
+  void restore_color() {
+    cairo_set_source_rgba(cr, current_r, current_g, current_b, current_a);
   }
+
+  void color(double r, double g, double b, double a) {
+    cairo_set_source_rgba(cr, r, g, b, a);
+    current_r = r;
+    current_g = g;
+    current_b = b;
+    current_a = a;
+  }
+
+  void color(double r,double g, double b) {
+    color(r, g, b, 1.0);
+  }
+
+  void header_color(double r,double g, double b) {
+    cairo_set_source_rgba(header_cr, r, g, b, 1.0);
+  }
+
+  void background_rectangle(double x0, double y0, double width, double height) {
+    temp_color( 1.0, 1.0, 1.0, HIDE_ALPHA );
+    fill_rectangle(x0 - HIDE_MARGIN * em, x0 + width + 2*HIDE_MARGIN * em,
+                   y0 - HIDE_MARGIN * em, y0 + height + 2*HIDE_MARGIN * em);
+    restore_color();
+  }
+
+  void clear_header(int destroy);
+  void start_header();
+
+  void show_header();
+
+  void set_header_width(double width) { header_width = width; }
 
   /* set_matrix_to_scan sets the matrix that transforms layout (subject)
      coordinates to scan coordinates (as recorded in the layout AMC
@@ -330,7 +368,24 @@ public:
      y-direction. */
 
   void draw_text(double x, double y,
-		 double xpos, double ypos, const char *text);
+		 double xpos, double ypos, const char *text,
+                 int hide_background = 0);
+  void draw_text(cairo_t *local_cr, PangoLayout* local_layout,
+		 double x, double y, double xpos, double ypos, const char *text,
+                 int hide_background = 0);
+
+  /* cr_move moves the current point by (dx,dy) */
+  
+  void cr_move(double dx, double dy);
+  void cr_move(cairo_t *local_cr, double dx, double dy);
+
+  /* draw_next_text draws a text at the following line */
+  
+  void draw_next_text(cairo_t *local_cr, PangoLayout* local_layout,
+                      double xpos, double ypos, const char * text,
+                      int hide_background = 0);
+  void draw_next_text(double xpos, double ypos, const char * text,
+                      int hide_background = 0);
 
   /* draw_text_margin writes a text in the margin (left margin if
      xside=0, and right margin if xside=1). The point used is a point
@@ -363,10 +418,15 @@ private:
   PopplerDocument *document;
   // Pango layout used to write texts
   PangoLayout *layout;
+  PangoLayout *header_layout;
   // Cairo environment used to draw on the page
   cairo_surface_t *surface;
   cairo_t *cr;
   cairo_matrix_t matrix;
+  // Header
+  cairo_surface_t *header_surface ;
+  cairo_t *header_cr;
+  double header_width;
   // Cairo environment used to draw the background image (scan)
   cairo_t *image_cr;
   cairo_surface_t *image_surface;
@@ -387,6 +447,7 @@ private:
   double scan_resize_factor;
 
   // drawing parameters
+  double em;
   double margin;
   double line_width;
   std::string font;
@@ -407,14 +468,90 @@ private:
   PangoLayout* r_font_size_layout(double ratio);
   PangoFontDescription *font_description;
   int new_page_from_image_surface(cairo_surface_t *is);
-  void draw_text(PangoLayout* local_layout,
-		 double x, double y, double xpos, double ypos, const char *text);
   void free_buffer();
 };
 
 BuildPdf::~BuildPdf() {
   close_output();
   if(document != NULL) g_object_unref(document);
+}
+
+void BuildPdf::clear_header(int destroy) {
+
+  if(destroy) {  
+    printf(": header_surface...\n");
+    if(header_surface != NULL) {
+      cairo_surface_destroy(header_surface);
+    }
+  }
+  if(header_cr != NULL) {
+    cairo_destroy(header_cr);
+    header_cr = NULL;
+  }
+  printf(": header_layout...\n");
+  if(header_layout != NULL) {
+    g_object_unref(header_layout);
+    header_layout = NULL;
+  }
+  
+  header_surface=NULL;
+}
+
+void BuildPdf::start_header() {
+  cairo_status_t status;
+
+  header_surface = cairo_recording_surface_create(CAIRO_CONTENT_COLOR_ALPHA, NULL);
+  status = cairo_surface_status(header_surface);
+  if(status != CAIRO_STATUS_SUCCESS) {
+    printf("! ERROR : creating header surface - %s\n",
+	   cairo_status_to_string(status));
+    cairo_surface_destroy(header_surface);
+    header_surface = NULL;
+  }
+  
+  header_cr = cairo_create(header_surface);
+  if(cairo_status(header_cr) != CAIRO_STATUS_SUCCESS) {
+    printf("! ERROR : creating header cairo - %s\n",
+	   cairo_status_to_string(cairo_status(header_cr)));
+    cairo_surface_destroy(header_surface);
+    cairo_destroy(header_cr);
+    header_surface = NULL;
+    header_cr = NULL;
+  }
+
+  header_layout = pango_cairo_create_layout(header_cr);
+  if(header_layout == NULL) {
+     printf("! ERROR : creating pango/cairo header layout - %s\n",
+	   cairo_status_to_string(status));
+    cairo_surface_destroy(header_surface);
+    cairo_destroy(header_cr);
+    header_surface = NULL;
+    header_cr = NULL;
+  }
+
+  pango_cairo_context_set_resolution(pango_layout_get_context(header_layout),
+				     user_one_point * 72.);
+  pango_cairo_update_layout(header_cr, header_layout);
+
+  pango_layout_set_width(header_layout,
+                         (header_width < 0 ? -1 :
+                          header_width * PANGO_SCALE));
+  
+  pango_layout_set_font_description(header_layout, font_description);
+}
+
+void BuildPdf::show_header() {
+  // Header background
+  double x0, y0, width, height;
+  cairo_recording_surface_ink_extents(header_surface, &x0, &y0, &width, &height);
+  if(debug) {
+    printf("; ink extents (%f,%f)+(%f,%f) em=%f\n", x0, y0, width, height, em);
+  }
+  background_rectangle(x0, y0, width, height);
+  
+  // Header
+  cairo_set_source_surface(cr, header_surface, 0.0, 0.0);
+  cairo_paint(cr);
 }
 
 int BuildPdf::start_output(char* output_filename) {
@@ -501,18 +638,33 @@ void BuildPdf::close_output() {
 
     printf(": closing...\n");
     next_page();
-    cairo_surface_finish(surface);
-    cairo_surface_destroy(surface);
-    surface = NULL;
-    cairo_destroy(cr);
-    cr = NULL;
-    if(image_cr != NULL) cairo_destroy(image_cr);
-    image_cr = NULL;
+
+    printf(": surface...\n");
+    if(surface != NULL) {
+      cairo_surface_finish(surface);
+      cairo_surface_destroy(surface);
+      surface = NULL;
+    }
+    if(cr != NULL) {
+      cairo_destroy(cr);
+      cr = NULL;
+    }
+    if(image_cr != NULL) {
+      cairo_destroy(image_cr);
+      image_cr = NULL;
+    }
+
+    printf(": layout...\n");
     if(layout != NULL) {
       g_object_unref(layout);
       layout = NULL;
     }
+
+    clear_header(1);
+
     n_pages = -1;
+  } else {
+    printf(": closing unnecessary (not created)\n");
   }
 }
 
@@ -525,10 +677,12 @@ int BuildPdf::next_page() {
 
     // Adds current page to PDF output
 
-    cairo_show_page(cr);
     if(debug) {
       printf("; Show page\n");
     }
+
+    // Show page
+    cairo_show_page(cr);
 
     // Destroy objects used to insert the background scan
 
@@ -966,6 +1120,7 @@ int BuildPdf::validate_font() {
     return(1);
   }
   pango_layout_set_font_description(layout, font_description);
+
   return(0);
 }
 
@@ -1108,7 +1263,14 @@ void BuildPdf::set_matrix(cairo_matrix_t *m) {
   pango_cairo_context_set_resolution(pango_layout_get_context(layout),
 				     user_one_point * 72.);
   pango_cairo_update_layout(cr, layout);
+
   validate_font();
+
+  // get em size, to be used with HIDE_MARGIN
+  PangoRectangle extents;
+  pango_layout_set_text(layout, "m", -1);
+  pango_layout_get_pixel_extents(layout, &extents, NULL);
+  em = extents.width;
 }
 
 void BuildPdf::identity_matrix() {
@@ -1155,10 +1317,12 @@ void BuildPdf::draw_mark(double xmin, double xmax, double ymin, double ymax) {
   cairo_stroke(cr);
 }
 
-void BuildPdf::draw_text(PangoLayout* local_layout,
+void BuildPdf::draw_text(cairo_t *local_cr,
+                         PangoLayout* local_layout,
 			 double x, double y,
 			 double xpos, double ypos,
-			 const char *text) {
+			 const char *text,
+                         int hide_background) {
   if(debug) {
     printf("; draw text\n");
   }
@@ -1175,16 +1339,66 @@ void BuildPdf::draw_text(PangoLayout* local_layout,
 	   extents.x, extents.y,
 	   extents.width, extents.height);
   }
-  cairo_move_to(cr,
-		x - xpos * extents.width - extents.x,
-		y - ypos * extents.height - extents.y);
-  pango_cairo_show_layout(cr, local_layout);
+  double x0 = x - xpos * extents.width - extents.x;
+  double y0 = y - ypos * extents.height - extents.y;
+
+  cairo_move_to(local_cr, x0, y0);
+  pango_cairo_show_layout(local_cr, local_layout);
+  cr_move(local_cr, xpos * extents.width, extents.height + 0.25 * em);
+}
+
+void BuildPdf::cr_move(cairo_t *local_cr, double dx, double dy) {
+  double x,y;
+  cairo_get_current_point(local_cr, &x, &y);
+  x += dx;
+  y += dy;
+  cairo_move_to(local_cr, x, y);
+}
+
+void BuildPdf::cr_move(double dx, double dy) {
+  cr_move(cr, dx, dy);
+}
+
+void BuildPdf::draw_next_text(cairo_t *local_cr,
+                              PangoLayout* local_layout,
+                              double xpos, double ypos,
+                              const char *text,
+                              int hide_background) {
+  if(debug) {
+    printf("; draw next text\n");
+  }
+
+  PangoRectangle extents;
+
+  pango_layout_set_text(local_layout, text, -1);
+  pango_layout_get_pixel_extents(local_layout, &extents, NULL);
+
+  if(debug) {
+    printf("TEXT=\"%s\"\n", text);
+  }
+
+  cr_move(local_cr,
+          -xpos * extents.width, -ypos * extents.height);
+
+  pango_cairo_show_layout(local_cr, local_layout);
+  cr_move(local_cr, xpos * extents.width,
+          ypos * extents.height + extents.height + 0.25 * em);
 }
 
 void BuildPdf::draw_text(double x, double y,
 			 double xpos, double ypos,
-			 const char *text) {
-  draw_text(layout, x, y, xpos, ypos, text);
+			 const char *text,
+                         int hide_background) {
+  draw_text((hide_background ? header_cr : cr),
+            (hide_background ? header_layout : layout),
+            x, y, xpos, ypos, text, hide_background);
+}
+
+void BuildPdf::draw_next_text(double xpos, double ypos, const char *text,
+                              int hide_background) {
+  draw_next_text((hide_background ? header_cr : cr),
+                 (hide_background ? header_layout : layout),
+                 xpos, ypos, text, hide_background);
 }
 
 void BuildPdf::draw_text_margin(int xside, double y,
@@ -1227,7 +1441,7 @@ int BuildPdf::draw_text_rectangle(double xmin, double xmax,
     printf("! ERROR: r_font_size_layout failed.");
     return(1);
   }
-  draw_text(local_layout,
+  draw_text(cr, local_layout,
 	    (xmin + xmax) / 2, (ymin + ymax) / 2,
 	    0.5, 0.5, text);
 

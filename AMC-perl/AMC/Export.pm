@@ -26,6 +26,9 @@ use AMC::Basic;
 use AMC::Data;
 use AMC::NamesFile;
 use AMC::Messages;
+use AMC::Topics;
+
+use Cwd;
 
 our @ISA = ("AMC::Messages");
 
@@ -41,7 +44,8 @@ my %sorting = (
 
 sub new {
     my $class = shift;
-    my $self  = {
+    my $self = {
+        'fich.projectdir' => '',
         'fich.datadir'    => '',
         'fich.noms'       => '',
         'association.key' => '',
@@ -94,6 +98,15 @@ sub opts_spec {
 
 sub load {
     my ($self) = @_;
+
+    if ( $self->{'fich.datadir'} && !$self->{'fich.projectdir'} ) {
+        $self->{'fich.projectdir'} =
+          Cwd::realpath( $self->{'fich.datadir'} . "/.." );
+    }
+    if ( $self->{'fich.projectdir'} && !$self->{'fich.datadir'} ) {
+        $self->{'fich.datadir'} = $self->{'fich.projectdir'} . "/data";
+    }
+
     die "Needs data directory" if ( !-d $self->{'fich.datadir'} );
 
     $self->{_data}    = AMC::Data->new( $self->{'fich.datadir'} );
@@ -212,7 +225,22 @@ sub pre_process {
 
     $self->load();
 
+    $self->{_topics}=AMC::Topics->new(
+        project_dir => $self->{"fich.projectdir"},
+        data        => $self->{_data}
+    );
     $self->{_scoring}->begin_read_transaction('EXPP');
+
+    my @err = $self->{_topics}->errors();
+    if (@err) {
+        $self->add_message(
+            'ERR',
+            sprintf(
+                __("Errors while trying to parse the topics file: %s"),
+                join( ", ", @err )
+            )
+        );
+    }
 
     my $lk = $self->{'association.key'}
       || $self->{_assoc}->variable('key_in_list');

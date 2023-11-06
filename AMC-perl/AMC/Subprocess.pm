@@ -101,6 +101,8 @@ sub commande {
         push @r, $o;
     }
 
+    debug "Readline failed: $!" if($!);
+
     return (@r);
 }
 
@@ -109,6 +111,7 @@ sub ferme_commande {
     if ( $self->{ipc} ) {
         debug "Image sending QUIT";
         $self->commande("quit");
+        debug "Wait for PID $self->{ipc}";
         waitpid $self->{ipc}, 0;
         $self->{ipc}     = '';
         $self->{ipc_in}  = '';

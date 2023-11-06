@@ -4524,9 +4524,28 @@ sub annote_copies {
 sub annote_copies_callback {
     my ( $self, $c, %data ) = self_first(@_);
 
-    $self->notify_end_of_work( 'annotation',
-        __ "Annotations have been completed" )
-      if ( !$data{cancelled} );
+    if ( !$data{cancelled} ) {
+        if ( $c->has_warnings_or_errors ) {
+            debug "Errors annotating!";
+            $self->notify_end_of_work( 'annotation',
+                __ "Problems while annotating" );
+
+            my $message = __("Problems while annotating.");
+            $message .= $c->problems_markup;
+
+            debug "Annotation message: $message";
+            annotate_source_change( $self->{project}->capture, 1 );
+
+            my $dialog = Gtk3::MessageDialog->new( $self->get_ui('main_window'),
+                'destroy-with-parent', 'error', 'ok', '' );
+            $dialog->set_markup($message);
+            $dialog->run;
+            $dialog->destroy;
+        } else {
+            $self->notify_end_of_work( 'annotation',
+                __ "Annotations have been completed" );
+        }
+    }
 }
 
 sub valide_options_notation {

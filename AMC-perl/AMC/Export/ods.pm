@@ -24,6 +24,7 @@ package AMC::Export::ods;
 
 use AMC::Basic;
 use AMC::Export;
+
 use Encode;
 use File::Spec;
 
@@ -85,14 +86,18 @@ sub text_width {
         $font->set_weight('normal');
         $layout->set_font_description($font);
         for my $text (@t) {
-            $layout->set_text($text);
-            my ( $text_x, $text_y ) = $layout->get_pixel_size();
-            $width  = $text_x if ( $text_x > $width );
-            $height = $text_y if ( $text_y > $height );
+            if($text) {
+                $layout->set_text($text);
+                my ( $text_x, $text_y ) = $layout->get_pixel_size();
+                $width  = $text_x if ( $text_x > $width );
+                $height = $text_y if ( $text_y > $height );
+            }
         }
 
-        return ( 0.002772 * $width + 0.019891 + 0.3,
-            0.002772 * $height + 0.019891 );
+        return (
+            0.002772 * $width + 0.019891 + 0.3,
+            0.002772 * $height + 0.019891
+        );
 
     } else {
         $width = length($title);
@@ -184,7 +189,7 @@ sub condensed {
             $fin   = $i;
         }
     }
-    push @sets, &$range( $column, $debut, $fin );
+    push @sets, &$range( $column, $debut, $fin ) if($debut ne '');
     return ( join( ";", @sets ) );
 }
 
@@ -203,7 +208,9 @@ my %largeurs = (
       note 1.5cm
       total 1.2cm
       max 1cm
-      heads 3cm/
+      heads 3cm
+      topic 1.5cm
+      level 1cm/
 );
 
 my %style_col = (
@@ -216,6 +223,8 @@ my %style_col = (
       GSp NoteGSp
       MAX NoteQ
       HEAD General
+      TOPICpc NoteT
+      TOPIC_LEVEL TopicLevel
       /
 );
 my %style_col_abs = (
@@ -223,6 +232,8 @@ my %style_col_abs = (
       ID NoteX
       TOTAL NoteX
       MAX NoteX
+      TOPICpc NoteX
+      TOPIC_LEVEL LevelX
       /
 );
 
@@ -265,6 +276,7 @@ sub build_stats_table {
 
     my %y_name = (
         all => __(
+
             # TRANSLATORS: this is a row label in the table with
             # questions basic statistics in the ODS exported
             # spreadsheet. The corresponding row contains the total
@@ -273,20 +285,22 @@ sub build_stats_table {
         ),
 
         empty => __(
-           # TRANSLATORS: this is a row label in the table with
-           # questions basic statistics in the ODS exported
-           # spreadsheet. The corresponding row contains the number of
-           # sheets for which the question did not get an
-           # answer. Please let this label short.
+
+            # TRANSLATORS: this is a row label in the table with
+            # questions basic statistics in the ODS exported
+            # spreadsheet. The corresponding row contains the number of
+            # sheets for which the question did not get an
+            # answer. Please let this label short.
             "NA"
         ),
 
         invalid => __(
-           # TRANSLATORS: this is a row label in the table with
-           # questions basic statistics in the ODS exported
-           # spreadsheet. The corresponding row contains the number of
-           # sheets for which the question got an invalid
-           # answer. Please let this label short.
+
+            # TRANSLATORS: this is a row label in the table with
+            # questions basic statistics in the ODS exported
+            # spreadsheet. The corresponding row contains the number of
+            # sheets for which the question got an invalid
+            # answer. Please let this label short.
             "INVALID"
         )
     );
@@ -324,11 +338,11 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains the reference of the boxes. Please let
-                   # this name short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains the reference of the boxes. Please let
+                    # this name short.
                     "Box"
                 )
             )
@@ -342,12 +356,12 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains the number of items (ticked boxes, or
-                   # invalid or empty questions). Please let this name
-                   # short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains the number of items (ticked boxes, or
+                    # invalid or empty questions). Please let this name
+                    # short.
                     "Nb"
                 )
             )
@@ -361,12 +375,12 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains percentage of questions for which the
-                   # corresponding box is ticked over all
-                   # questions. Please let this name short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains percentage of questions for which the
+                    # corresponding box is ticked over all
+                    # questions. Please let this name short.
                     "/all"
                 )
             )
@@ -380,14 +394,14 @@ sub build_stats_table {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: this is a head name in the table
-                   # with questions basic statistics in the ODS
-                   # exported spreadsheet. The corresponding column
-                   # contains percentage of questions for which the
-                   # corresponding box is ticked over the expressed
-                   # questions (counting only questions that did not
-                   # get empty or invalid answers). Please let this
-                   # name short.
+                    # TRANSLATORS: this is a head name in the table
+                    # with questions basic statistics in the ODS
+                    # exported spreadsheet. The corresponding column
+                    # contains percentage of questions for which the
+                    # corresponding box is ticked over the expressed
+                    # questions (counting only questions that did not
+                    # get empty or invalid answers). Please let this
+                    # name short.
                     "/expr"
                 )
             )
@@ -423,6 +437,7 @@ sub build_stats_table {
                     $ya = 4 + $amax;
 
                     $name = __
+
                       # TRANSLATORS: this is a row label in the table
                       # with questions basic statistics in the ODS
                       # exported spreadsheet. The corresponding row
@@ -511,12 +526,22 @@ sub ods_locked_file {
     return ( -e $fichier );
 }
 
+sub pure_decimals {
+    my ($d) = @_;
+    $d =~ s/[^0-9]//g;
+    return ($d);
+}
+
 sub export {
     my ( $self, $fichier ) = @_;
 
     $self->pre_process();
+    my $topics= $self->{_topics};
 
     $self->{_scoring}->begin_read_transaction('XODS');
+
+    my @topics = $topics->exam_topics();
+    my @level_topics = grep { $topics->n_levels($_) } @topics;
 
     my $rd = $self->{_scoring}->variable('rounding');
     $rd = '' if ( !defined($rd) );
@@ -564,6 +589,12 @@ sub export {
         container => $archive,
         part      => 'content',
     );
+    if ( @topics ) {
+        $doc->setAttribute( $doc->getRootElement, "xmlns:calcext",
+"urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0"
+        );
+    }
+
     my $styles = odfConnector(
         container => $archive,
         part      => 'styles',
@@ -593,18 +624,30 @@ sub export {
         $col_styles{$_} = 1;
     }
 
-    $styles->createStyle(
-        'DeuxDecimales',
-        namespace  => 'number',
-        type       => 'number-style',
-        properties => {
-            'number:decimal-places'     => "2",
-            'number:min-integer-digits' => "1",
-            'number:grouping'           => 'true',  # espace tous les 3 chiffres
-            'number:decimal-replacement' =>
-              "",    # n'ecrit pas les decimales nulles
-        },
-    );
+    for my $d ( 0 .. 5 ) {
+        $styles->createStyle(
+            'Decimales' . $d,
+            namespace  => 'number',
+            type       => 'number-style',
+            properties => {
+                'number:decimal-places'     => $d,
+                'number:min-integer-digits' => "1",
+                'number:grouping' => 'true',    # espace tous les 3 chiffres
+                'number:decimal-replacement' =>
+                  "",    # n'ecrit pas les decimales nulles
+            },
+        );
+        my $sty = $styles->createStyle(
+            'Decimales' . $d . 'pc',
+            namespace  => 'number',
+            type       => 'percentage-style',
+            properties => {
+                'number:decimal-places'     => $d,
+                'number:min-integer-digits' => "1",
+            },
+        );
+        $styles->appendElement( $sty, 'number:text', text => '%' );
+   }
 
     my $pc = $styles->createStyle(
         'Percentage',
@@ -622,9 +665,9 @@ sub export {
         namespace  => 'number',
         type       => 'number-style',
         properties => {
-            'number:decimal-places'     => "0",
-            'number:min-integer-digits' => "0",
-            'number:grouping'           => 'true',  # espace tous les 3 chiffres
+            'number:decimal-places'      => "0",
+            'number:min-integer-digits'  => "0",
+            'number:grouping'            => 'true', # espace tous les 3 chiffres
             'number:decimal-replacement' =>
               "",    # n'ecrit pas les decimales nulles
         },
@@ -665,6 +708,16 @@ sub export {
         references => { 'style:data-style-name' => 'Percentage' },
     );
 
+    # Topic level value
+    $styles->createStyle(
+        'TopicLevel',
+        parent     => 'Tableau',
+        family     => 'table-cell',
+        properties => {
+            -area           => 'paragraph',
+            'fo:text-align' => "center",
+        },
+    );
     # Qpc : pourcentage de reussite global pour une question
     $styles->createStyle(
         'Qpc',
@@ -822,7 +875,7 @@ sub export {
         'NoteQ',
         parent     => 'NoteQbase',
         family     => 'table-cell',
-        references => { 'style:data-style-name' => 'DeuxDecimales' },
+        references => { 'style:data-style-name' => 'Decimales2' },
     );
 
     # NoteQp : note pour une question, en pourcentage
@@ -869,6 +922,83 @@ sub export {
         references => { 'style:data-style-name' => 'NombreVide' },
     );
 
+    # NoteT : topic
+    $styles->createStyle(
+        'NoteT',
+        parent     => 'NoteQ',
+        family     => 'table-cell',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#eaeaea",
+        },
+    );
+
+    # NoteTP : topic (percentage)
+    $styles->createStyle(
+        'NoteTP',
+        parent     => 'NoteQ',
+        family     => 'table-cell',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#eaeaea",
+        },
+        references => { 'style:data-style-name' => 'Percentage' },
+    );
+    for my $t (@topics) {
+        my $pc = ( $t->{value} =~ /:pc$/ ? "pc" : "" );
+        my ( $s, $decimals ) =
+            $topics->adjusted_value( $t, $t->{value}, 0, '_self' );
+        my $n_levels = $topics->n_levels($t);
+        if ( $n_levels > 0 ) {
+            for my $l ( 1 .. $n_levels ) {
+                my $col = $topics->level_color( $t, $l ) || "#eaeaea";
+                my $refs =
+                  { 'style:data-style-name' => 'Decimales'
+                      . pure_decimals($decimals) . $pc };
+
+                my $level_id = $t->{id} . x2ooo( $l - 1 );
+
+                $styles->createStyle(
+                    'NoteT' . $level_id,
+                    parent     => 'NoteQ',
+                    family     => 'table-cell',
+                    references => $refs,
+                    properties => {
+                        -area                 => 'table-cell',
+                        'fo:background-color' => $col,
+                    },
+                );
+
+                $styles->createStyle(
+                    'TLevel' . $level_id,
+                    parent     => 'TopicLevel',
+                    family     => 'table-cell',
+                    properties => {
+                        -area                 => 'table-cell',
+                        'fo:background-color' => $col,
+                    },
+                );
+            }
+        }
+        my $style_name = 'NoteT' . $t->{id};
+        $style_col{"TOPIC$t->{id}"}     = $style_name;
+        $style_col_abs{"TOPIC$t->{id}"} = 'NoteX';
+        $styles->createStyle(
+            $style_name,
+            parent     => 'NoteQ',
+            family     => 'table-cell',
+            references => {
+                    'style:data-style-name' => 'Decimales'
+                  . pure_decimals($decimals)
+                  . $pc
+            },
+            properties => {
+                -area                 => 'table-cell',
+                'fo:background-color' => "#eaeaea",
+            },
+        );
+    }
+
     # NoteGS : score total pour un groupe
     $styles->createStyle(
         'NoteGS',
@@ -878,7 +1008,7 @@ sub export {
             -area                 => 'table-cell',
             'fo:background-color' => "#c4eeba",
         },
-        references => { 'style:data-style-name' => 'DeuxDecimales' },
+        references => { 'style:data-style-name' => 'Decimales2' },
     );
 
     # NoteGSp : pourcentage global pour un groupe
@@ -918,6 +1048,25 @@ sub export {
 
     $styles->updateStyle(
         'NoteX',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#b3b3b3",
+        },
+    );
+
+    # LevelX
+    $styles->createStyle(
+        'LevelX',
+        parent     => 'Tableau',
+        family     => 'table-cell',
+        properties => {
+            -area           => 'paragraph',
+            'fo:text-align' => "center",
+        },
+    );
+
+    $styles->updateStyle(
+        'LevelX',
         properties => {
             -area                 => 'table-cell',
             'fo:background-color' => "#b3b3b3",
@@ -1012,7 +1161,7 @@ sub export {
             'vertical-align'   => "bottom",
             'horizontal-align' => "middle",
             'fo:padding'       => '1mm',          # espace entourant le contenu
-            'fo:border' => "0.039cm solid \#000000"
+            'fo:border'        => "0.039cm solid \#000000"
             ,    # epaisseur trait / solid|double / couleur
         },
     );
@@ -1044,6 +1193,17 @@ sub export {
         },
     );
 
+    # EnteteTopic : en-tete, ecrit verticalement
+    $styles->createStyle(
+        'EnteteTopic',
+        parent     => 'EnteteVertical',
+        family     => 'table-cell',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#baffcf",
+        },
+    );
+
     # EnteteIndic : en-tete d'une question indicative
     $styles->createStyle(
         'EnteteIndic',
@@ -1066,6 +1226,20 @@ sub export {
         },
     );
 
+    $styles->createPageLayout(
+        "DefaultPage",
+        properties => {
+            "fo:page-width"           => '29.7cm', # (landscape)
+            "fo:page-height"          => '21.0cm',
+            "fo:margin-top"           => "1cm",
+            "fo:margin-bottom"        => "1cm",
+            "fo:margin-left"          => "1cm",
+            "fo:margin-right"         => "1cm",
+            "style:scale-to-X"        => "1",
+        }
+                             );
+    $styles->pageLayout("Default", "DefaultPage");
+
     my @student_columns = split( /,+/, $self->{'out.columns'} );
 
     my @codes;
@@ -1075,29 +1249,41 @@ sub export {
     my @questions_0 = grep { $_->{indic0} } @questions;
     my @questions_1 = grep { $_->{indic1} } @questions;
 
+    debug "Topics: " . join( ', ', map { $_->{id} } (@topics) );
+    debug "Topics with levels: " . join( ', ', map { $_->{id} } (@level_topics) );
     debug "Questions: "
       . join( ', ', map { $_->{question} . '=' . $_->{title} } @questions );
     debug "Questions PLAIN: " . join( ', ', map { $_->{title} } @questions_0 );
     debug "Questions INDIC: " . join( ', ', map { $_->{title} } @questions_1 );
 
-    my $nq = 1 + $#student_columns + 1 + $#questions_0 + 1 + $#questions_1;
+    my $nq =
+      1 + $#student_columns + 1 +
+      $#topics + 1 +
+      $#level_topics + 1 +
+      $#questions_0 + 1 +
+      $#questions_1;
 
     my $dimx = 3 + $nq + 1 + $#codes;
     my $dimy = 6 + 1 + $#{ $self->{marks} };
 
     my $feuille = $doc->getTable( 0, $dimy, $dimx );
+
+    $doc->setAttribute( $feuille, 'table:print' => 'true' );
+
     $doc->expandTable( $feuille, $dimy, $dimx );
     $doc->renameTable(
         $feuille,
         encode(
             'utf-8',
             (
-                $self->{'out.code'} ? $self->{'out.code'}
-                :
-             __(
-                # TRANSLATORS: table name in the exported ODS
-                # spreadsheet for the table that contains the marks.
-                "Marks")
+                  $self->{'out.code'}
+                ? $self->{'out.code'}
+                : __(
+
+                    # TRANSLATORS: table name in the exported ODS
+                    # spreadsheet for the table that contains the marks.
+                    "Marks"
+                )
             )
         )
     );
@@ -1108,12 +1294,15 @@ sub export {
             encode( 'utf-8', $self->{'out.nom'} ) );
     }
 
+    my $xt = 0;
     my $x0 = 0;
     my $x1 = 0;
     my $y0 = 2;
     my $y1 = 0;
+    my $y2 = 0;
     my $ii;
     my %code_col    = ();
+    my %q_col       = ();
     my %code_row    = ();
     my %col_cells   = ();
     my %col_content = ();
@@ -1156,6 +1345,43 @@ sub export {
         $ii++;
     }
 
+    $xt = $ii;
+
+    my $topics_visibility = $topics->get_option('odscolumns');
+
+    for my $t (@topics) {
+        $doc->columnStyle( $feuille, $ii, 'col.topic' );
+
+        $doc->setAttribute(
+            $doc->getTableColumn( $feuille, $ii ),
+            'table:visibility' => "collapse"
+          )
+          unless (
+            $topics_visibility =~ /value/
+            || (   $topics_visibility =~ /\blevel\b/
+                && $topics->n_levels($t) == 0 )
+          );
+
+        $doc->cellStyle( $feuille, $y0, $ii, 'EnteteTopic' );
+        $doc->cellValue( $feuille, $y0, $ii, encode( 'utf-8', $t->{id} ) );
+        $code_col{ "__TOPIC_" . $t->{id} } = $ii;
+        $ii++;
+    }
+
+    for my $t (@level_topics) {
+        $doc->columnStyle( $feuille, $ii, 'col.level' );
+
+        $doc->setAttribute(
+            $doc->getTableColumn( $feuille, $ii ),
+            'table:visibility' => "collapse"
+        ) unless ( $topics_visibility =~ /\blevel\b/ );
+
+        $doc->cellStyle( $feuille, $y0, $ii, 'EnteteTopic' );
+        $doc->cellValue( $feuille, $y0, $ii, encode( 'utf-8', $t->{id} ) );
+        $code_col{ "__TOPIC_LEVEL_" . $t->{id} } = $ii;
+        $ii++;
+    }
+
     $x1 = $ii;
 
     for (@questions_0) {
@@ -1164,6 +1390,7 @@ sub export {
             ( $_->{group_sum} ? 'EnteteGS' : 'EnteteVertical' ) );
         my $t = get_title($_);
         push @titles, $t;
+        $q_col{ $_->{question} } = $ii;
         $doc->cellValue( $feuille, $y0, $ii++, $t );
     }
     for (@questions_1) {
@@ -1234,6 +1461,15 @@ sub export {
         }
     }
 
+    if ( !$topics->get_option('skip_indicatives') ) {
+        for (@questions_1) {
+            $doc->cellStyle( $feuille, $jj, $ii, 'NoteQ' );
+            $doc->cellValueType( $feuille, $jj, $ii, 'float' );
+            $doc->cellValue( $feuille, $jj, $ii++,
+                $self->{_scoring}->question_maxmax( $_->{question} ) );
+        }
+    }
+
     $code_row{max} = $jj;
 
     ##########################################################################
@@ -1262,6 +1498,8 @@ sub export {
     for my $m ( @{ $self->{marks} } ) {
         $jj++;
 
+        my $topic_columns = {};
+
         # @presents collects the indices of the rows corresponding to
         # students that where present at the exam.
         push @presents, $jj if ( !$m->{abs} );
@@ -1274,6 +1512,8 @@ sub export {
         # score is added to this list.
         %scores         = ();
         @scores_columns = ();
+
+        my %topic_cols = ();
 
         # first: special columns (association key, name, mark, sheet
         # number, total score, max score)
@@ -1322,6 +1562,10 @@ sub export {
         $ii++;    # see later for SUM column value...
         set_cell( $doc, $feuille, $jj, $ii++, $m->{abs},
             'MAX', $m->{max}, numeric => 1 );
+
+        # see later for columns for topics...
+
+        $ii += @topics + @level_topics;
 
         # second: columns for all questions scores
 
@@ -1380,20 +1624,24 @@ sub export {
                       ->question_result( $m->{student}, $m->{copy},
                         $q->{question} );
                     $doc->cellValueType( $feuille, $jj, $ii, 'float' );
+                    my $effective = 0;
                     if ( $self->{_scoring}
                         ->indicative( $m->{student}, $q->{question} ) )
                     {
                         $doc->cellStyle( $feuille, $jj, $ii, 'CodeV' );
+                        $effective = 1 if(!$topics->get_option('skip_indicatives')
+);
                     } else {
                         if ( defined( $r->{score} ) ) {
                             if ( !$scores{ $q->{question} } ) {
                                 $scores{ $q->{question} } = 1;
-                                push @scores_columns, $ii;
+                                push @scores_columns,      $ii;
                                 push @{ $col_cells{$ii} }, $jj;
                                 if ( $q->{group} ) {
                                     push @group_columns, $ii;
                                     $group_maxsum += $r->{max};
                                 }
+                                $effective = 1;
                                 if ( $r->{why} =~ /c/i ) {
                                     $doc->cellStyle( $feuille, $jj, $ii,
                                         'NoteC' );
@@ -1412,6 +1660,11 @@ sub export {
                             }
                         } else {
                             $doc->cellStyle( $feuille, $jj, $ii, 'NoteX' );
+                        }
+                    }
+                    if ($effective) {
+                        for my $t ( $topics->get_topics( $q->{question} ) ) {
+                            push @{ $topic_cols{$t} }, $ii;
                         }
                     }
                     $doc->cellValue( $feuille, $jj, $ii, $r->{score} );
@@ -1437,6 +1690,135 @@ sub export {
             formula => "oooc:=SUM("
               . subrow_condensed( $jj, @scores_columns ) . ")"
         );
+
+        # come back to add topics
+
+        $ii = $xt;
+        for my $t (@topics) {
+            my $cols = $topic_cols{ $t->{id} };
+            if ($cols) {
+                my $score_cells = subrow_condensed( $jj,            @$cols );
+                my $max_cells   = subrow_condensed( $code_row{max}, @$cols );
+                my $formula =
+                  $topics->value_calc_odf( $t, $score_cells, $max_cells );
+                my $pc = ( $t->{value} =~ /:pc/ ? 1 : 0 );
+                set_cell(
+                    $doc, $feuille, $jj, $ii, $m->{abs},
+                    'TOPIC'.$t->{id}, '',
+                    pc      => $pc,
+                    numeric => !$pc,
+                    formula => "oooc:=" . $formula
+                );
+                push @{ $col_cells{$ii} }, $jj;
+            } else {
+                $doc->cellStyle( $feuille, $jj, $ii, 'NoteX' );
+            }
+
+            $ii++;
+        }
+
+        # topics levels
+
+        for my $t (@level_topics) {
+            my $formula = $topics->level_value_odf($t, yx2ooo($jj, $code_col{"__TOPIC_".$t->{id}}));
+            set_cell(
+                     $doc, $feuille, $jj, $ii, '',
+                     'TOPIC_LEVEL', '',
+                     pc      => 0,
+                     numeric => 0,
+                     formula => "oooc:=" . $formula
+                    );
+            $ii++;
+        }
+    }
+
+    $y2=$jj;
+
+    ##########################################################################
+    # topics cell colors
+    ##########################################################################
+
+    if ( @topics ) {
+        my $cfs = $doc->appendElement( '//table:table', 0,
+            'calcext:conditional-formats' );
+        $ii = $xt;
+        for my $t (@topics) {
+            my $n_levels = $topics->n_levels($t);
+            if ($n_levels) {
+                my $lacol = x2ooo($ii);
+                my $domain =
+                  "." . $lacol . ( $y1 + 1 ) . ":." . $lacol . ( $y2 + 1 );
+                for my $l ( 1 .. $n_levels ) {
+                    my $cf = $doc->appendElement(
+                        $cfs,
+                        'calcext:conditional-format',
+                        attributes => {
+                            'calcext:target-range-address' => $domain
+                        }
+                    );
+                    $doc->appendElement(
+                        $cf,
+                        'calcext:condition',
+                        attributes => {
+                            'calcext:apply-style-name' => 'NoteT'
+                              . $t->{id}
+                              . x2ooo( $l - 1 ),
+                            'calcext:value' => 'formula-is('
+                              . $topics->level_test_odf( $t, $l, '[.A1]' )
+                              . ')',
+                            'calcext:base-cell-address' => '.A1'
+                        }
+                    );
+                }
+            }
+            $ii++;
+        }
+        for my $t (@level_topics) {
+            my $lacol = x2ooo($ii);
+            my $domain =
+                "." . $lacol . ( $y1 + 1 ) . ":." . $lacol . ( $y2 + 1 );
+            my $cf = $doc->appendElement(
+                $cfs,
+                'calcext:conditional-format',
+                attributes => {
+                    'calcext:target-range-address' => $domain
+                }
+            );
+            $doc->appendElement(
+                $cf,
+                'calcext:condition',
+                attributes => {
+                    'calcext:apply-style-name' => 'LevelX',
+                    'calcext:value' => 'formula-is('
+                      . 'OR(ISBLANK([.A1]);[.A1]="")'
+                      . ')',
+                    'calcext:base-cell-address' => '.A1'
+                }
+            );
+            for my $l ( @{ $t->{levels} } ) {
+                $cf = $doc->appendElement(
+                    $cfs,
+                    'calcext:conditional-format',
+                    attributes => {
+                        'calcext:target-range-address' => $domain
+                    }
+                );
+                $doc->appendElement(
+                    $cf,
+                    'calcext:condition',
+                    attributes => {
+                        'calcext:apply-style-name' => 'TLevel'
+                          . $t->{id}
+                          . x2ooo( $l->{i} - 1 ),
+                        'calcext:value' => 'formula-is('
+                          . '[.A1]='
+                          . $topics->level_short_odf($l) . ')',
+                        'calcext:base-cell-address' => '.A1'
+                    }
+                );
+            }
+            $ii++;
+        }
     }
 
     ##########################################################################
@@ -1485,7 +1867,7 @@ sub export {
             $doc->cellValue( $feuille, $j0, $i0, $group_single{$g}->{maxsum} );
             $doc->cellStyle( $feuille, $code_row{average}, $i0, 'QpcGS' );
         } else {
-            $doc->cellStyle( $feuille, $j0, $i0, 'NoteX' );
+            $doc->cellStyle( $feuille, $j0,                $i0, 'NoteX' );
             $doc->cellStyle( $feuille, $code_row{average}, $i0, 'NoteX' );
         }
     }
@@ -1575,8 +1957,8 @@ sub export {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: Label of the table with questions
-                   # basic statistics in the exported ODS spreadsheet.
+                    # TRANSLATORS: Label of the table with questions
+                    # basic statistics in the exported ODS spreadsheet.
                     "Questions statistics"
                 )
             )
@@ -1592,9 +1974,9 @@ sub export {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: Label of the table with indicative
-                   # questions basic statistics in the exported ODS
-                   # spreadsheet.
+                    # TRANSLATORS: Label of the table with indicative
+                    # questions basic statistics in the exported ODS
+                    # spreadsheet.
                     "Indicative questions statistics"
                 )
             )
@@ -1612,15 +1994,16 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: Label of the table with a legend
-               # (explaination of the colors used) in the exported ODS
-               # spreadsheet.
+                # TRANSLATORS: Label of the table with a legend
+                # (explaination of the colors used) in the exported ODS
+                # spreadsheet.
                 "Legend"
             )
         ),
         9,
         2
     );
+    $doc->setAttribute( $legend, 'table:print' => 'false' );
 
     $doc->cellSpan( $legend, 0, 0, 2 );
     $doc->cellStyle( $legend, 0, 0, 'Titre' );
@@ -1635,9 +2018,9 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that have
-               # not been asked to some students.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that have
+                # not been asked to some students.
                 "Non applicable"
             )
         )
@@ -1650,9 +2033,9 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that have
-               # not been answered.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that have
+                # not been answered.
                 "No answer"
             )
         )
@@ -1665,10 +2048,10 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that have
-               # not been answered, but are cancelled by the use of
-               # allowempty scoring strategy.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that have
+                # not been answered, but are cancelled by the use of
+                # allowempty scoring strategy.
                 "Cancelled"
             )
         )
@@ -1681,9 +2064,9 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the questions that got an
-               # invalid answer.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the questions that got an
+                # invalid answer.
                 "Invalid answer"
             )
         )
@@ -1712,9 +2095,9 @@ sub export {
             encode(
                 'utf-8',
                 __(
-                   # TRANSLATORS: From the legend in the exported ODS
-                   # spreadsheet. This refers to the questions that
-                   # got an invalid answer.
+                    # TRANSLATORS: From the legend in the exported ODS
+                    # spreadsheet. This refers to the questions that
+                    # got an invalid answer.
                     "Wrong answer"
                 )
             )
@@ -1728,8 +2111,8 @@ sub export {
         encode(
             'utf-8',
             __(
-               # TRANSLATORS: From the legend in the exported ODS
-               # spreadsheet. This refers to the indicative questions.
+                # TRANSLATORS: From the legend in the exported ODS
+                # spreadsheet. This refers to the indicative questions.
                 "Indicative"
             )
         )

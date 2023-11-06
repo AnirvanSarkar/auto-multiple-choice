@@ -86,18 +86,25 @@ sub connect {
 # Disconnects...
 
 sub disconnect {
-    my ($self) = @_;
+    my ($self, $where) = @_;
     $self->{version_checked} = {};
     if ( $self->{dbh} ) {
 
-        # record the loaded modules, to be able to load them back with connect()
         for my $m ( keys %{ $self->{modules} } ) {
+            # warn for active handles
+            my @i = $self->{modules}->{$m}->active_statements;
+            if (@i) {
+                debug "WARNING: active statements for module $m: "
+                  . join( ',', @i );
+            }
+            # record the loaded modules, to be able to load them back with connect()
             $self->{version_checked}->{$m} =
               $self->{modules}->{$m}->{version_checked};
         }
 
         # disconnect and drop all references
         $self->{modules} = {};
+        debug "Disconnecting for $where" if($where);
         $self->{dbh}->disconnect;
         $self->{dbh} = '';
     }

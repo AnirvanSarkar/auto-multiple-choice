@@ -96,6 +96,8 @@ sub export {
 
     $self->{_scoring}->begin_read_transaction('XCSV');
 
+    my @topics = $self->{_topics}->exam_topics();
+
     my $dt  = $self->{_scoring}->variable('darkness_threshold');
     my $dtu = $self->{_scoring}->variable('darkness_threshold_up');
     $dtu = 1 if ( !defined($dtu) );
@@ -133,6 +135,11 @@ sub export {
     }
 
     push @columns, @codes;
+
+    for my $t (@topics) {
+        push @columns, "$t->{id}:score", "$t->{id}:max", "$t->{id}:value";
+        push @columns, "$t->{id}:level" if(@{$t->{levels}});
+    }
 
     print OUT join( $sep, map { $self->parse_string($_) } @columns ) . "\n";
 
@@ -189,6 +196,26 @@ sub export {
         for my $c (@codes) {
             push @columns,
               $self->parse_string( $self->{_scoring}->student_code( @sc, $c ) );
+        }
+
+        for my $t (@topics) {
+            my $s = $self->{_topics}->student_topic_calc( @sc, $t );
+            if ($s) {
+                push @columns, "$s->{score}", "$s->{max}", "$s->{value}";
+                if ( @{ $t->{levels} } ) {
+                    my $l =
+                      $self->{_topics}->value_level( $t, $s );
+                    if ($l) {
+                        push @columns,
+                          ( defined( $l->{code} ) ? $l->{code} : $l->{i} );
+                    } else {
+                        push @columns, "?";
+                    }
+                }
+            } else {
+                push @columns, "", "", "";
+                push @columns, "" if ( @{ $t->{levels} } );
+            }
         }
 
         print OUT join( $sep, @columns ) . "\n";

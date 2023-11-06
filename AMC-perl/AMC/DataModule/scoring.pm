@@ -135,7 +135,7 @@ package AMC::DataModule::scoring;
 #     X means that an external score has been applied.
 #
 # * max is the question score associated to a copy where all answers
-#   are correct (or 1 for indicative questions).
+#   are correct.
 #
 # external holds the question scores that are not computed by AMC, but
 # given from external data.
@@ -1301,9 +1301,12 @@ sub question_score {
 
 sub question_result {
     my ( $self, $student, $copy, $question ) = @_;
-    my $sth = $self->statement('getScoreC');
-    $sth->execute( $student, $copy, $question );
-    return ( $sth->fetchrow_hashref );
+    return (
+        $self->sql_row_hashref(
+            $self->statement('getScoreC'),
+            $student, $copy, $question
+        )
+    );
 }
 
 # student_code($student,$copy,$code) returns the value of the code

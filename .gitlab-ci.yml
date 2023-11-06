@@ -25,6 +25,32 @@ tests:
     - make install && texhash
     - make -C tests blind-test
 
+test-uninstall:
+  stage: test
+  needs:
+    - job: pack-sources
+      artifacts: true
+  image: jojoboulix/amc-build
+  script:
+    - mkdir files
+    - touch files/f-before files/d-before files/f-after files/d-after
+    - mkdir u
+    - cd u
+    - "tar xvzf ../artifacts/auto-multiple-choice_*_dist.tar.gz"
+    - cd auto-multiple-choice-*
+    - make
+    - find / -path /proc -prune -o -type f | sort > ../../files/f-before ; find / -path /proc -prune -o -type d | sort > ../../files/d-before
+    - make install
+    - make uninstall
+    - cd ../..
+    - find / -path /proc -prune -o -type f | sort > files/f-after ; find / -path /proc -prune -o -type d | sort > files/d-after
+    - cd files
+    - diff d-before d-after || true
+    - diff f-before f-after
+  artifacts:
+    paths:
+      - files/
+
 doc-xml:
   stage: test
   needs: []
@@ -80,6 +106,7 @@ pack-debian:
       artifacts: true
   image: debian:testing-slim
   before_script:
+    - perl ./local/deb822toplain.pl >> /etc/apt/sources.list
     - apt-get update
     - apt-get install -y git git-buildpackage
   script:

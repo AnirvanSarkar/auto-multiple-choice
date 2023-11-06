@@ -30,6 +30,7 @@ use AMC::DataModule::scoring qw(:question);
 use AMC::Scoring;
 use AMC::NamesFile;
 use AMC::Queue;
+use AMC::Topics;
 
 use Text::CSV;
 use File::Spec::Functions qw(tmpdir);
@@ -81,6 +82,7 @@ my $defaults = {
     annote_files        => [],
     annote_ascii        => 0,
     annote_position     => 'marge',
+    annote_color        => 'red',
     annotate_single     => '',
     verdict             => '%(id) %(ID)' . "\n" . 'TOTAL : %S/%M => %s/%m',
     verdict_question    => "\"%" . "s/%" . "m\"",
@@ -89,6 +91,7 @@ my $defaults = {
     ok_checksums_file   => '',
     to_check            => [],
     export_full_csv     => [],
+    export_full_ods     => [],
     export_columns      => 'student.copy',
     export_csv_ticked   => 'AB',
     export_csv_decimal  => ',',
@@ -117,6 +120,8 @@ my $defaults = {
     exitonerror         => 1,
     postinstall         => '',
     additional_test     => '',
+    check_topics        => [],
+    move_files          => [],
 };
 
 sub new {
@@ -127,8 +132,6 @@ sub new {
     for ( keys %oo ) {
         $self->{$_} = $oo{$_} if ( exists( $self->{$_} ) );
     }
-
-    $self->{dir} =~ s:/[^/]*$::;
 
     bless( $self, $class );
 
@@ -142,8 +145,6 @@ sub new {
         "extract-with=s" => \$self->{extract_with},
         "tmp=s"          => \$self->{tmpdir},
     );
-
-    $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
 
     $self->{tracedest} = \*STDOUT if ($to_stdout);
     binmode $self->{tracedest}, ":utf8";
@@ -161,6 +162,10 @@ sub clean {
 
 sub setup {
     my ($self)=@_;
+
+    $self->{dir} =~ s:/[^/]*$:: if(-f $self->{dir});
+
+    $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
 
     if ( !$self->{src} ) {
         opendir( my $dh, $self->{dir} )
@@ -242,6 +247,15 @@ sub install {
         system( "cp", "-r", $self->{dir} . '/' . $f, $self->{temp_dir} );
     }
     closedir $sh;
+
+    for my $mv ( @{ $self->{move_files} } ) {
+        debug("Move $mv->{from} to $mv->{to}");
+        system(
+            "mv",
+            $self->{temp_dir} . '/' . $mv->{from},
+            $self->{temp_dir} . '/' . $mv->{to}
+        );
+    }
 
     print { $self->{tracedest} } "[>] Installed in $self->{temp_dir}\n";
 
@@ -873,6 +887,7 @@ sub annote {
         '--verdict',          $self->{verdict},
         '--verdict-question', $self->{verdict_question},
         '--position',         $self->{annote_position},
+        '--text-color',       $self->{annote_color},
         '--project',          '%PROJ',
         '--data',             '%DATA',
         ( $self->{annote_ascii}
@@ -1000,27 +1015,144 @@ sub defects {
     }
 }
 
+sub check_topics {
+    my ($self) = @_;
+    my @tests = @{ $self->{check_topics} };
+    if (@tests) {
+        my @checks = ();
+        my @errs   = ();
+
+        set_debug( $self->{debug_file} );
+
+        $self->begin( "Topics test (" . @tests . " values)" );
+        my $data   = AMC::Data->new( $self->{temp_dir} . "/data" );
+        my $topics = AMC::Topics->new(
+            project_dir => $self->{temp_dir},
+            data        => $data
+        );
+        $data->begin_read_transaction("ttop");
+        for my $test (@tests) {
+            if ( $test->{-copy} && !$test->{-student} ) {
+                if ( $test->{-copy} =~ /^(.*):(.*)$/ ) {
+                    $test->{-student} = $1;
+                    $test->{-copy}    = $2;
+                } else {
+                    $test->{-student} = $test->{-copy};
+                    $test->{-copy}    = 0;
+                }
+            }
+            my $id = $test->{-id};
+            my ($t) = grep { $_->{id} eq $id } ( $topics->all_topics );
+            if ($t) {
+                my $m = $topics->student_topic_message( $test->{-student},
+                                                        ($test->{-copy} || 0), $t );
+                my $i = 0;
+                for my $key (qw/message color/) {
+                    if ( defined( $test->{ "-" . $key } ) ) {
+                        push @checks,
+                          [
+                            $m->{$key},
+                            $test->{ "-" . $key },
+"Topic '$id' $key for copy ($test->{-student},$test->{-copy})"
+                          ];
+                        $i++;
+                    }
+                }
+                if ( !$i ) {
+                    push @errs, "[E] Empty test for topic '$id' and copy ($test->{-student},$test->{-copy})";
+                }
+            } else {
+                push @errs, "[E] Topic not found: $id";
+            }
+        }
+        $data->end_transaction("ttop");
+        $data->disconnect("topics");
+
+        set_debug('');
+
+        for my $c (@checks) {
+            $self->test(@$c);
+        }
+        for my $e (@errs) {
+            $self->trace($e);
+            $self->failed(1);
+        }
+
+        $self->end;
+    }
+}
+
 sub check_export {
     my ($self) = @_;
-    my @csv = @{ $self->{export_full_csv} };
+    $self->check_export_csv( key => 'export_full_csv' );
+    $self->check_export_csv( key => 'export_full_ods', via_ods => 1 );
+}
+
+sub check_export_csv {
+    my ($self, %opts) = @_;
+    my @csv = @{ $self->{$opts{key}} };
     if (@csv) {
-        $self->begin( "CSV full export test (" . ( 1 + $#csv ) . " scores)" );
+        $self->begin( ( $opts{via_ods} ? "ODS" : "CSV" )
+            . " full export test ("
+              . ( 1 + $#csv )
+              . " scores)" );
         my @args = (
-            '--data',            '%DATA',
-            '--module',          'CSV',
-            '--association-key', $self->{list_key},
-            '--option-out',      'columns=' . $self->{export_columns},
-            '--option-out',      'ticked=' . $self->{export_csv_ticked},
-            '--option-out',      'decimal=' . $self->{export_csv_decimal},
-            '-o',                '%PROJ/export.csv',
+            '--data',       '%DATA', '--association-key', $self->{list_key},
+            '--option-out', 'columns=' . $self->{export_columns},
         );
+        if ( $opts{via_ods} ) {
+            push @args, "--module", "ods", "-o", '%PROJ/export.ods';
+        } else {
+            push @args,
+              '--option-out', 'ticked=' . $self->{export_csv_ticked},
+              '--option-out', 'decimal=' . $self->{export_csv_decimal},
+              '--module',     'CSV',
+              '-o',           '%PROJ/export.csv';
+        }
         push @args, '--fich-noms', '%PROJ/' . $self->{list}
           if ( $self->{list} );
         $self->amc_command( 'export', @args );
+
+        my $skip_lines = 0;
+
+        if ( $opts{via_ods} ) {
+            my $ok;
+            {
+                local $ENV{LANG} = 'C';
+                $ok =
+                  run( ["unoconv", "-f", "csv", "$self->{temp_dir}/export.ods"],
+                    '2>>', '/dev/null' );
+            }
+            if ( !$ok ) {
+                $self->trace("[E] Command `unoconv' returned with $?");
+                $self->failed(1);
+            }
+            $skip_lines = 2;
+        }
+
         my $c = Text::CSV->new();
         open my $fh, "<:encoding(utf-8)", $self->{temp_dir} . '/export.csv';
-        my $i     = 0;
-        my %heads = map { $_ => $i++ } ( @{ $c->getline($fh) } );
+
+        if($skip_lines) {
+            for my $ii (1..$skip_lines) {
+                $c->getline($fh);
+            }
+        }
+        my %heads = ();
+        my $i=0;
+        my $h = $c->getline($fh);
+        while ( my ( $i, $h ) = each @$h ) {
+            if ( defined( $heads{$h} ) ) {
+                my $ni = 2;
+                while ( defined( $heads{ $h . "#$ni" } ) ) {
+                    $ni++;
+                }
+                $heads{ $h . "#$ni" } = $i;
+            } else {
+                $heads{$h} = $i;
+            }
+        }
+
         my $copy  = $heads{ translate_column_title('copie') };
         my $name  = $heads{ translate_column_title('nom') };
 
@@ -1036,10 +1168,16 @@ sub check_export {
             $irow++;
             for my $t (@csv) {
                 my $goodrow = '';
-                if ( $t->{-copy} && $t->{-copy} eq $row->[$copy] ) {
+                if (   $t->{-copy}
+                    && defined($copy)
+                    && $t->{-copy} eq $row->[$copy] )
+                {
                     $goodrow = 'copy ' . $t->{-copy};
                 }
-                if ( $t->{-name} && $t->{-name} eq $row->[$name] ) {
+                if (   $t->{-name}
+                    && defined($name)
+                    && $t->{-name} eq $row->[$name] )
+                {
                     $goodrow = 'name ' . $t->{-name};
                 }
                 if ( $t->{-irow} && $t->{-irow} == $irow ) {
@@ -1060,9 +1198,12 @@ sub check_export {
                     && defined( $heads{ $t->{-question} } )
                     && defined( $t->{-score} ) )
                 {
-                    $self->test( $row->[ $heads{ $t->{-question} } ],
+                    $self->test(
+                        $row->[ $heads{ $t->{-question} } ],
                         $t->{-score},
-                        "score for $goodrow Q=" . $t->{-question} );
+                        "score for $goodrow Q=" . $t->{-question},
+                        digits => $t->{-digits}
+                    );
                     $t->{checked} = 1;
                 }
                 if (   $goodrow
@@ -1281,16 +1422,21 @@ sub datadump {
 }
 
 sub test {
-    my ( $self, $x, $v, $subtest ) = @_;
+    my ( $self, $x, $v, $subtest, %opts ) = @_;
     if ( !defined($subtest) ) {
         $subtest = ++$self->{'n.subt'};
     }
     if ( ref($x) eq 'ARRAY' ) {
         for my $i ( 0 .. $#$x ) {
-            $self->test( $x->[$i], $v->[$i], 1 );
+            $self->test( $x->[$i], $v->[$i], 1, %opts );
         }
     } else {
         no warnings 'uninitialized';
+        if ( defined( $opts{digits} ) && $opts{digits} ne '' ) {
+            for my $z ( \$x, \$v ) {
+                $$z = sprintf( "%.$opts{digits}f", $$z );
+            }
+        }
         if ( $x ne $v ) {
             $self->trace( "[E] "
                   . $self->{test_title}
@@ -1455,6 +1601,7 @@ sub default_process {
     $self->check_perfect;
     $self->check_assoc;
     $self->annote;
+    $self->check_topics;
     $self->check_export;
     $self->report_hardware;
 

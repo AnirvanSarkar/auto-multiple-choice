@@ -1,0 +1,60 @@
+---
+
+include:
+  - ratio.yml
+
+conf:
+
+  ratiolevels:
+    conf: ratio
+    levels:
+      - min: 1.01
+        code: X
+        message: "acquis avec bonus (%{score} > %{max})"
+        color: "#00b935"
+      - min: 0.8
+        code: A
+        message: "pleinement acquis (%{value})"
+        color: "#47b900"
+      - min: 0.5
+        code: B
+        message: "acquis (%{value})"
+        color: "#00b9b2"
+      - min: 0.2
+        code: C
+        message: "à renforcer (%{value})"
+        color: "#ff9f2d"
+      - min: 0
+        code: F
+        message: à travailler
+        color: "#ff2d3a"
+      - code: Z
+        message: à revoir
+        color: "#800007"
+
+  pclevels:
+    decimalspc: 2
+    levels:
+      - min: 101
+        code: X
+        message: level X
+        color: "#006b1b"
+      - min: 75
+        code: A
+        message: level A
+        color: "#216b00"
+      - min: 50
+        code: B
+        message: level B
+        color: "#576b00"
+      - min: 25
+        code: C
+        message: level C
+        color: "#6b4d00"
+      - min: 0
+        code: F
+        message: level F
+        color: "#6b0001"
+      - code: Z
+        message: level Z
+        color: "#6b002c"
