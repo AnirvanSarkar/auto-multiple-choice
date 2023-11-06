@@ -441,7 +441,7 @@ sub analyse {
 
     $self->start_clock();
 
-    if ( ($self->{perfect_copy} || $self->{full_scans}) && !$oo{directory} ) {
+    if ( ( $self->{perfect_copy} || $self->{full_scans} ) && !$oo{directory} ) {
         $self->amc_command(
             'prepare',           '--filter',
             $self->{filter},     '--with',
@@ -449,7 +449,8 @@ sub analyse {
             'k',                 '--epoch',
             946684800,           '--n-copies',
             $self->{n_copies},   '--prefix',
-            '%PROJ/',            '%PROJ/' . $self->{src},
+            '%PROJ/',            '--data',
+            '%DATA',             '%PROJ/' . $self->{src},
         );
     }
 
