@@ -526,7 +526,8 @@ sub combined_cmp {
 
 sub nums_string {
     my ($self, @x) = @_;
-    my %x = map { $_ => 1 } (@x);
+    my %x = ();
+    for (@x) { $x{$_} = 1 if(defined($_)); }
     @x = sort { $self->combined_cmp( $a, $b ) } ( keys %x );
     my $simple = join( ", ", @x );
     my $start  = '';
@@ -726,10 +727,10 @@ sub student_topic_message {
         }
 
         for my $k (qw/id name/) {
-            $s =~ s/\%\{$k\}/$topic->{$k}/g;
+            $s =~ s/\%\{$k\}/$topic->{$k}/g if ( defined( $topic->{$k} ) );
         }
         for my $k (qw/nums:s nums:c/) {
-            $s =~ s/\%\{$k\}/$x->{$k}/g;
+            $s =~ s/\%\{$k\}/$x->{$k}/g if ( defined( $x->{$k} ) );
         }
         for my $k (qw/code i/) {
             $s =~ s/\%\{$k\}/$l->{$k}/g if ( defined( $l->{$k} ) );

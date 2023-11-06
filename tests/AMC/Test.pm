@@ -1570,7 +1570,10 @@ sub report_uninitialized {
     my $u = 0;
     open( LOG, $self->{debug_file} );
     while (<LOG>) {
-        $u += 1 if ( /uninitialized/i && !/at \(eval [0-9]+\) line/ );
+        if ( /uninitialized/i && !/at \(eval [0-9]+\) line/ ) {
+            $u += 1 ;
+            print STDERR;
+        }
     }
     close LOG;
     $self->trace("[i] uninitialized: $u") if ($u);
