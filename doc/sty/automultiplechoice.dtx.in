@@ -3313,7 +3313,7 @@ along with Auto-Multiple-Choice.  If not, see
 %   |\explaincontext|\marg{text} inserts its argument only in the corrected paper.
 %    \begin{macrocode}
 \newcommand{\explain}[1]{%
-\ifAMC@correchead%
+\ifAMC@correc%
   \AMCif@env{question}{\par\noindent{\AMC@loc@explain #1}}{\AMC@error@explain}\vspace{1ex}%
 \else%
   \AMCif@env{question}{}{\AMC@error@explain}%
