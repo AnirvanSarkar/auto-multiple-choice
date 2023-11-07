@@ -661,6 +661,8 @@ sub adjusted_value {
         if ( $key =~ /^([^:]+):(.*)$/ ) {
             $key      = $1;
             $modifier = $2;
+        } else {
+            $modifier = '';
         }
     }
     my $d = ( $key eq 'ratio' ? 'decimalsratio' : 'decimals' );
@@ -722,7 +724,12 @@ sub student_topic_message {
         }
 
         for my $k (qw/score max ratio value/) {
-            my $v= $x->{$k};
+            my $v;
+            if ( $k eq 'value' ) {
+                $v = $x->{$k};
+            } else {
+                $v = $self->adjusted_value( $topic, $k, $x->{$k}, '_self' );
+            }
             my $dp = $self->get_option('decimal_separator');
             $v =~ s/\./$dp/;
             if($k eq 'value' && $topic->{value} =~ /:pc/) {
