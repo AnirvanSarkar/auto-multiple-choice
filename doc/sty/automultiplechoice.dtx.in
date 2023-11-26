@@ -3282,13 +3282,13 @@ along with Auto-Multiple-Choice.  If not, see
 {\end{question}}
 \newenvironment{variable-single}[2]
 {\def\AMCbeginQuestion##1##2{}  
-\begin{questionmult}{#1}\scoring{v=#2}
+\begin{question}{#1}\scoring{v=#2}\QuestionIndicative
 \begin{tikz-single}[o]}
 {\end{tikz-single}
-\end{questionmult}}
+\end{question}}
 \newenvironment{variable-multi}[4]
 {\def\AMCbeginQuestion##1##2{}  
-\begin{questionmult}{#1}\scoring{v=#4}
+\begin{questionmult}{#1}\scoring{v=#4}\QuestionIndicative
 \begin{tikz-multi}[o]
 \node[#3] (var) at (0,0) {#2};}		
 {\end{tikz-multi}
