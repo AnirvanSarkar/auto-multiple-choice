@@ -262,6 +262,11 @@ sub set_cell {
       if ( $oo{pc} && !$abs );
     if ( $oo{formula} ) {
         $doc->cellFormula( $feuille, $jj, $ii, $oo{formula} );
+        if( $oo{matrix} ) {
+            my $cell=$doc->getTableCell($feuille,$jj,$ii);
+            $cell->set_att("table:number-matrix-columns-spanned","1");
+            $cell->set_att("table:number-matrix-rows-spanned","1");
+        }
     } else {
         $doc->cellValue( $feuille, $jj, $ii, $value );
     }
@@ -1699,15 +1704,16 @@ sub export {
             if ($cols) {
                 my $score_cells = subrow_condensed( $jj,            @$cols );
                 my $max_cells   = subrow_condensed( $code_row{max}, @$cols );
-                my $formula =
+                my ($formula, $matrix) =
                   $topics->value_calc_odf( $t, $score_cells, $max_cells );
                 my $pc = ( $t->{value} =~ /:pc/ ? 1 : 0 );
                 set_cell(
                     $doc, $feuille, $jj, $ii, $m->{abs},
-                    'TOPIC'.$t->{id}, '',
+                    'TOPIC' . $t->{id}, '',
                     pc      => $pc,
                     numeric => !$pc,
-                    formula => "oooc:=" . $formula
+                    formula => "oooc:=" . $formula,
+                    matrix  => $matrix
                 );
                 push @{ $col_cells{$ii} }, $jj;
             } else {

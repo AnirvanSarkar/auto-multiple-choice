@@ -34,6 +34,22 @@ use Data::Dumper;
 
 my $merger = Hash::Merge->new('LEFT_PRECEDENT');
 
+sub min {
+    my $x = shift;
+    for my $y (@_) {
+        $x = $y if ( $y < $x );
+    }
+    return ($x);
+}
+
+sub max {
+    my $x = shift;
+    for my $y (@_) {
+        $x = $y if ( $y > $x );
+    }
+    return ($x);
+}
+
 sub new {
     my ( $class, %o ) = @_;
     my $self = {
@@ -184,6 +200,7 @@ sub defaults {
         ) if ( $t->{id} =~ /[^a-zA-Z0-9]/ );
 
         $t->{value} = 'ratio:pc' if ( !$t->{value} );
+        $t->{aggregate} = 'sumscores' if ( !$t->{aggregate} );
 
         $t->{format} = "⬤ %{name}: %{message} (%{value})"
             if ( !defined( $t->{format} ) );
@@ -419,18 +436,44 @@ sub level_value_odf {
 sub value_calc_odf {
     my ( $self, $topic, $scores, $maxs ) = @_;
     my $formula;
+    my $matrix = 0;
 
     my $key      = $topic->{value};
+    my $agg      = $topic->{aggregate};
     my $modifier = '';
     if ( $key =~ /^([^:]+):(.*)$/ ) {
         $key      = $1;
         $modifier = $2;
     }
 
-    if($key eq 'score') {
-        $formula = "SUM($scores)";
-    } elsif($key eq 'ratio') {
-        $formula = "SUM($scores)/SUM($maxs)";
+    if ( $key eq 'score' ) {
+        if ( $agg eq 'sumscores' ) {
+            $formula = "SUM($scores)";
+        } elsif ( $agg eq 'sumratios' ) {
+            $formula = "SUM(($scores)/($maxs))";
+            $matrix  = 1;
+        } elsif ( $agg =~ /(max|min)score/ ) {
+            $formula = uc($1) . "($scores)";
+        } elsif ( $agg =~ /(max|min)ratio/ ) {
+            $formula = uc($1) . "(($scores)/($maxs))";
+            $matrix  = 1;
+        } else {
+            die "Topic agregate '$agg' can't be handled";
+        }
+    } elsif ( $key eq 'ratio' ) {
+        if ( $agg eq 'sumscores' ) {
+            $formula = "SUM($scores)/SUM($maxs)";
+        } elsif ( $agg eq 'sumratios' ) {
+            $formula = "SUM(($scores)/($maxs))/SUM($maxs>0)";
+            $matrix  = 1;
+        } elsif ( $agg =~ /(max|min)score/ ) {
+            $formula = uc($1) . "($scores)/" . uc($1) . "($maxs)";
+        } elsif ( $agg =~ /(max|min)ratio/ ) {
+            $formula = uc($1) . "(($scores)/($maxs))";
+            $matrix  = 1;
+        } else {
+            die "Topic agregate '$agg' can't be handled";
+        }
     } else {
         die "Topic value '$key' can't be handled";
     }
@@ -461,7 +504,7 @@ sub value_calc_odf {
         $formula="MAX($topic->{floor};$formula)";
     }
 
-    return($formula);
+    return($formula, $matrix);
 }
 
 sub value_in_level {
@@ -562,6 +605,7 @@ sub student_topic_calc {
     my ( $self, $student, $copy, $topic ) = @_;
     my @x    = ();
     my @nums = ();
+    my $agg  = $topic->{aggregate};
     for my $q ( @{ $topic->{questions_list} } ) {
         my $r =
             $self->{scoring}->question_result( $student, $copy, $q->{question} );
@@ -580,9 +624,40 @@ sub student_topic_calc {
 
     my $s    = 0;
     my $smax = 0;
+    if ( $agg =~ /^min/ ) {
+        $s    = "Inf";
+        $smax = "Inf";
+    }
+    if ( $agg =~ /^(min|max)ratio$/ ) {
+        $smax = 1;
+    }
     for my $xm (@x) {
-        $s    += $xm->[0];
-        $smax += $xm->[1];
+        my $s1 = $xm->[0];
+        my $m1 = $xm->[1];
+        if ( $agg eq 'sumscores' ) {
+            $s    += $s1;
+            $smax += $m1;
+        } elsif ( $agg eq 'sumratios' ) {
+            if ( $m1 > 0 ) {
+                $s    += $s1 / $m1;
+                $smax += 1;
+            }
+        } elsif ( $agg =~ /(max|min)score/ ) {
+            my $f = $1;
+            {
+                no strict 'refs';
+                $s    = &{$f}( $s,    $s1 );
+                $smax = &{$f}( $smax, $m1 );
+            }
+        } elsif ( $agg =~ /(max|min)ratio/ ) {
+            my $f = $1;
+            if ( $m1 > 0 ) {
+                no strict 'refs';
+                $s = &{$f}( $s, $s1 / $m1 );
+            }
+        } else {
+            die "Unknown aggregate function : $topic->{aggregate}";
+        }
     }
 
     if ( $smax > 0 ) {
