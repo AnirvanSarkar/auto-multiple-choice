@@ -560,7 +560,6 @@ sub global_score {
 
     if ( $max <= 0 ) {
         debug "Warning: Nonpositive value for MAX.";
-        $max = 1;
     }
 
     return ( $total, $max );

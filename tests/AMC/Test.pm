@@ -753,8 +753,7 @@ sub check_perfect {
 
     for my $m ( @{ $self->{marks} } ) {
         $p{ $m->{student} } = 0
-          if ( $m->{total} == $m->{max}
-            && $m->{total} > 0 );
+          if ( $m->{total} == $m->{max} );
     }
 
     for my $i ( keys %p ) {
