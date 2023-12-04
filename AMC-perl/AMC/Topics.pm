@@ -94,6 +94,7 @@ sub load_yaml {
 
     debug "Loading YAML: $file";
 
+    utf8::decode($file);
     my ( $volume, $directories, undef ) = File::Spec->splitpath($file);
     my $base = File::Spec->catpath( $volume, $directories );
 
