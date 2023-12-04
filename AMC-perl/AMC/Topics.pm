@@ -189,7 +189,12 @@ sub add_conf {
 
 sub defaults {
     my ($self) = @_;
+    my $i = 0;
     for my $t ( $self->all_topics ) {
+        $i++;
+        $t->{id} = "_topic" . $i if ( !$t->{id} );
+        $t->{i} = $i;
+
         $self->error(
             sprintf(
                 (
@@ -198,7 +203,7 @@ sub defaults {
                 ),
                 $t->{id}
             )
-        ) if ( $t->{id} =~ /[^a-zA-Z0-9]/ );
+        ) if ( $t->{id} =~ /[^_a-zA-Z0-9]/ );
 
         $t->{value} = 'ratio:pc' if ( !$t->{value} );
         $t->{aggregate} = 'sumscores' if ( !$t->{aggregate} );
