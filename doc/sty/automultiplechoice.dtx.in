@@ -3280,19 +3280,20 @@ along with Auto-Multiple-Choice.  If not, see
   \AMCtype@multitrue\ifAMC@calibration%
   \AMCmessage{MULT}\fi}%
 {\end{question}}
+\newif\ifSurveySingleAnswer\SurveySingleAnswerfalse
 \newenvironment{variable-single}[2]
 {\def\AMCbeginQuestion##1##2{}  
-\begin{question}{#1}\scoring{v=#2}\QuestionIndicative
+\begin{question}{#1}\scoring{v=#2}\QuestionIndicative\ifSurveySingleAnswer\else\AMCmessage{MULT}\fi
 \begin{tikz-single}[o]}
 {\end{tikz-single}
 \end{question}}
 \newenvironment{variable-multi}[4]
 {\def\AMCbeginQuestion##1##2{}  
-\begin{questionmult}{#1}\scoring{v=#4}\QuestionIndicative
+\begin{question}{#1}\scoring{v=#4}\QuestionIndicative\ifSurveySingleAnswer\else\AMCmessage{MULT}\fi
 \begin{tikz-multi}[o]
 \node[#3] (var) at (0,0) {#2};}		
 {\end{tikz-multi}
-\end{questionmult}}
+\end{question}}
 \newenvironment{questionmultx}[1]{%
   \begingroup\def\multiSymbole{}\begin{questionmult}{#1}}%
 {\end{questionmult}\endgroup}

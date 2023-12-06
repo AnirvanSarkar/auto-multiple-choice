@@ -21,19 +21,20 @@
 % question text
 \textbf{Question 1: Does the shop in which you work belong to a capitalist or to a limited company?}
 %
+\SurveySingleAnswertrue
 \vskip5mm
 
 % select oval answer boxes
 \AMCboxStyle{shape=oval}
 %
-% single-choice format 
+% single-choice format
 \begin{variable-single}{capitalist}{99}
 	\begin{values}
-		\answer{Capitalist \dotfill}{0,3}{vallab-sc}{checkbox-sc}\scoring{b=3}
-		\answer{Limited company \dotfill}{0,2}{vallab-sc}{checkbox-sc}\scoring{b=2}
-		\answer{Don’t know \dotfill}{0,1}{vallab-sc}{checkbox-sc}\scoring{b=1}
+		\answer{Capitalist \dotfill}{0,3}{vallab-sc}{checkbox-sc}\scoring{3}
+		\answer{Limited company \dotfill}{0,2}{vallab-sc}{checkbox-sc}\scoring{2}
+		\answer{Don’t know \dotfill}{0,1}{vallab-sc}{checkbox-sc}\scoring{1}
 	\end{values}
-\end{variable-single} 
+\end{variable-single}
 
 \vskip10mm
 
@@ -51,15 +52,15 @@
 		(.2,-.8) -- (9,-.8);
 	% answer options
 	\begin{values}
-		\answer{< 13 \\ years}{0,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=7}
-		\answer{13 \\ years}{1.25,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=6}
-		\answer{14 \\ years}{2.5,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=5}
-		\answer{15 \\ years}{3.75,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=4}
-		\answer{16 \\ years}{5,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=3}		
-		\answer{> 16 \\ years}{6.25,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=2}				
-		\answer{Don't \\ know}{9,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{b=1}						
+		\answer{< 13 \\ years}{0,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{7}
+		\answer{13 \\ years}{1.25,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{6}
+		\answer{14 \\ years}{2.5,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{5}
+		\answer{15 \\ years}{3.75,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{4}
+		\answer{16 \\ years}{5,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{3}
+		\answer{> 16 \\ years}{6.25,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{2}
+		\answer{Don't \\ know}{9,0}{vallab-sc, font=\footnotesize, align=center, text width=10mm}{checkbox-sc, below=of lab\thecsvrow}\scoring{1}
 	\end{values}
-\end{variable-single} 
+\end{variable-single}
 
 \vskip10mm
 
@@ -74,8 +75,8 @@
 \begin{variable-single}{local}{99}
 	% answer options
 	\begin{values}
-		\answer{Town \dotfill}{0,1}{vallab-sc}{checkbox-sc}\scoring{b=2}
-		\answer{Village \dotfill}{0,0}{vallab-sc}{checkbox-sc}\scoring{b=1}
+		\answer{Town \dotfill}{0,1}{vallab-sc}{checkbox-sc}\scoring{2}
+		\answer{Village \dotfill}{0,0}{vallab-sc}{checkbox-sc}\scoring{1}
 	\end{values}
 	% filter instructions
 	\node[minimum width=25mm, font=\footnotesize] at (5.75,1) {Go on with question 5};
@@ -83,7 +84,7 @@
 	% arrows
 	\draw[->] (2.75,1) -- (4,1);
 	\draw[->] (2.75,0) -- (4,0);
-\end{variable-single} 
+\end{variable-single}
 
 \vskip10mm
 
@@ -98,10 +99,10 @@
 \begin{variable-single}{existence}{99}
 	% answer options
 	\begin{values}
-		\answer{Sufficient work in the factory \dotfill}{0,1}{vallab-sc, text width=6.5cm}{checkbox-sc}\scoring{b=2}
-		\answer{Combine it with agricultural labor \dotfill}{0,0}{vallab-sc, text width=6.5cm}{checkbox-sc}\scoring{b=1}
+		\answer{Sufficient work in the factory \dotfill}{0,1}{vallab-sc, text width=6.5cm}{checkbox-sc}\scoring{2}
+		\answer{Combine it with agricultural labor \dotfill}{0,0}{vallab-sc, text width=6.5cm}{checkbox-sc}\scoring{1}
 	\end{values}
-\end{variable-single} 
+\end{variable-single}
 
 \vskip10mm
 
@@ -113,6 +114,7 @@
 \vskip5mm
 %
 \AMCboxStyle{shape=square}
+\SurveySingleAnswerfalse
 %
 % multiple-choice format
 \foreach \label [count=\num from 1] in {engine, transmission, machinery}{
@@ -123,11 +125,11 @@
 	\end{variable-multi}
 }
 
-\pagebreak 
+\pagebreak
 
 % ---------------------------
 % Question 6
-% 
+%
 % reset question counter
 \setcounter{AMCquestionaff}{6}
 %
@@ -139,17 +141,18 @@
 % matrix/grid format
 %
 % first row with scale
+\SurveySingleAnswertrue
 \begin{variable-multi}{hyg1}{Size of the room space \dotfill}{varlab-mc}{99}
-	\begin{values}
-		% connected answer boxes
-		\draw[double, thick] (2.5,0) -- (11,0);
-		% answer options
-		\answer{Very satisfied}{2.1,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=1}
-		\answer{Somewhat satisfied}{4.2,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=2}		 
-		\answer{Somewhat dissatisfied}{6.3,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=3}		
-		\answer{Very dissatisfied}{8.4,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=4}
-		\answer{Don't know}{10.5,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=5}				
-	\end{values}
+  \begin{values}
+    % connected answer boxes
+    \draw[double, thick] (2.5,0) -- (11,0);
+    % answer options
+    \answer{Very satisfied}{2.1,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{1}
+    \answer{Somewhat satisfied}{4.2,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{2}
+    \answer{Somewhat dissatisfied}{6.3,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{3}
+    \answer{Very dissatisfied}{8.4,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{4}
+    \answer{Don't know}{10.5,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=5}
+  \end{values}
 \end{variable-multi}
 %
 % remaining rows
@@ -162,20 +165,20 @@
 	General cleanliness,
 	Noise of Machinery,
 	Metallic Dust,
-	Dampness		
+	Dampness
 }{
-	\begin{variable-multi}{hyg\num}{\label \dotfill}{varlab-mc}{99}
-	\begin{values}
-		% connected answer boxes
-		\draw[double, thick] (2.5,0) -- (11,0);
-		% answer options
-		\answer{}{2.1,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=1}
-		\answer{}{4.2,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=2}		 
-		\answer{}{6.3,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=3}		
-		\answer{}{8.4,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=4}
-		\answer{}{10.5,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{b=5}				
-	\end{values}
-	\end{variable-multi}
+  \begin{variable-multi}{hyg\num}{\label \dotfill}{varlab-mc}{99}
+    \begin{values}
+      % connected answer boxes
+      \draw[double, thick] (2.5,0) -- (11,0);
+      % answer options
+      \answer{}{2.1,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{1}
+      \answer{}{4.2,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{2}
+      \answer{}{6.3,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{3}
+      \answer{}{8.4,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{4}
+      \answer{}{10.5,0}{vallab-mc, font=\small}{checkbox-mc,xshift=5mm}\scoring{5}
+    \end{values}
+  \end{variable-multi}
 }
 
 % END QUESTIONNAIRE
