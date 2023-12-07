@@ -36,3 +36,22 @@ topics:
     aggregate: minratio
     questions:
       - A-*
+  - id: c3
+    name: count 3
+    aggregate: count(3)
+    value: score
+    questions:
+      - A-1
+      - A-2
+      - B-1
+      - B-3
+  - id: c23
+    name: count between 2 and 3
+    aggregate: count(1.8,3.2)
+    value: ratio:pc
+    questions:
+      - A-1
+      - A-2
+      - B-1
+      - B-3
+

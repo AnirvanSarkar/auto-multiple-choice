@@ -42,6 +42,10 @@ AMC::Test->new(
         { -copy => 2, -question => 'AMr:max',   -score => 1 },
         { -copy => 2, -question => 'Amr:score', -score => 0.7 },
         { -copy => 2, -question => 'Amr:max',   -score => 1 },
+        { -copy => 2, -question => 'c3:score',  -score => 2 },
+        { -copy => 2, -question => 'c3:max',    -score => 4 },
+        { -copy => 2, -question => 'c23:score', -score => 3 },
+        { -copy => 2, -question => 'c23:max',   -score => 4 },
     ],
     export_full_ods => [
         { -copy => 2, -question => 'ASs', -score => 14 / 19, -digits => 4 },
@@ -55,5 +59,7 @@ AMC::Test->new(
         { -copy => 2, -question => 'Ams', -score => 3 },
         { -copy => 2, -question => 'AMr', -score => '80%' },
         { -copy => 2, -question => 'Amr', -score => '70%' },
+        { -copy => 2, -question => 'c3',  -score => 2 },
+        { -copy => 2, -question => 'c23', -score => '75%' },
     ],
 )->default_process;
