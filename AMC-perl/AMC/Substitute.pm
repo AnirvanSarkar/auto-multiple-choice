@@ -72,6 +72,9 @@ s/\%[m]/$self->format_note($self->{scoring}->variable('mark_max'))/ge;
 
     $text =~ s/\%[n]/$self->{name}/ge;
 
+    $text =~s/\%[I]/$student/g;
+    $text =~s/\%[i]/$copy/g;
+
     if ( $self->{assoc} && $self->{anonymous} && $text =~ /\%\(aID\)/ ) {
         my $aid =
           $self->{assoc}->anonymized( $student, $copy, $self->{anonymous} );
