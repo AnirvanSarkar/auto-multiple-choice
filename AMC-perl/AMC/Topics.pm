@@ -27,7 +27,6 @@ package AMC::Topics;
 use AMC::Basic;
 use Hash::Merge;
 use File::Spec;
-use Cwd;
 use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 use Data::Dumper;
@@ -92,22 +91,27 @@ sub errors {
 sub load_yaml {
     my ($self, $file) = @_;
 
-    debug "Loading YAML: $file";
+    debug( "Loading YAML: " . show_utf8($file) );
 
-    utf8::decode($file);
     my ( $volume, $directories, undef ) = File::Spec->splitpath($file);
     my $base = File::Spec->catpath( $volume, $directories );
+    debug( "Base path: " . show_utf8($base) );
 
     my $content = {};
-    eval { $content = YAML::Syck::LoadFile($file); };
-    $self->error("Unable to parse YAML file $file: $@") if($@);
+
+    if ( -s $file ) {
+        eval { $content = YAML::Syck::LoadFile($file); };
+        $self->error("Unable to parse YAML file $file: $@") if ($@);
+    } else {
+        debug("File not found, or empty: $file");
+    }
 
     if ( ref($content) eq 'HASH' && $content->{include} ) {
         if ( !ref( $content->{include} ) ) {
             $content->{include} = [ $content->{include} ];
         }
         $content->{include} =
-          [ map { Cwd::realpath( File::Spec->rel2abs( $_, $base ) ); }
+          [ map { File::Spec->rel2abs( $_, $base ); }
               @{ $content->{include} } ];
         for my $f ( @{ $content->{include} } ) {
             if ( -f $f ) {
