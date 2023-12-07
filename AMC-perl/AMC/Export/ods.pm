@@ -1704,8 +1704,10 @@ sub export {
             if ($cols) {
                 my $score_cells = subrow_condensed( $jj,            @$cols );
                 my $max_cells   = subrow_condensed( $code_row{max}, @$cols );
-                my ($formula, $matrix) =
-                  $topics->value_calc_odf( $t, $score_cells, $max_cells );
+                my $n_cells     = @$cols;
+                my ( $formula, $matrix ) =
+                  $topics->value_calc_odf( $t, $score_cells, $max_cells,
+                    $n_cells );
                 my $pc = ( $t->{value} =~ /:pc/ ? 1 : 0 );
                 set_cell(
                     $doc, $feuille, $jj, $ii, $m->{abs},

@@ -440,7 +440,7 @@ sub level_value_odf {
 }
 
 sub value_calc_odf {
-    my ( $self, $topic, $scores, $maxs ) = @_;
+    my ( $self, $topic, $scores, $maxs, $n_cells ) = @_;
     my $formula;
     my $matrix = 0;
 
@@ -450,6 +450,22 @@ sub value_calc_odf {
     if ( $key =~ /^([^:]+):(.*)$/ ) {
         $key      = $1;
         $modifier = $2;
+    }
+
+    my $subformula = '';
+    if ( $agg =~ /count\(([\d.]+)(?:,([\d.]+))?\)/ ) {
+        my $min = $1;
+        my $max = $2;
+        $agg = 'count';
+        my @parts = ();
+        for my $range (split(/;/,$scores)) {
+            if(defined($max)) {
+                push @parts, "SUM(IFS(($range)<$min;0;($range)>$max;0;1;1))";
+            } else {
+                push @parts, "SUM(($range)=$min)";
+            }
+        }
+        $subformula = join('+', @parts);
     }
 
     if ( $key eq 'score' ) {
@@ -463,6 +479,9 @@ sub value_calc_odf {
         } elsif ( $agg =~ /(max|min)ratio/ ) {
             $formula = uc($1) . "(($scores)/($maxs))";
             $matrix  = 1;
+        } elsif ( $agg eq 'count') {
+            $formula = "$subformula";
+            $matrix = 1;
         } else {
             die "Topic agregate '$agg' can't be handled";
         }
@@ -470,13 +489,16 @@ sub value_calc_odf {
         if ( $agg eq 'sumscores' ) {
             $formula = "SUM($scores)/SUM($maxs)";
         } elsif ( $agg eq 'sumratios' ) {
-            $formula = "SUM(($scores)/($maxs))/SUM($maxs>0)";
+            $formula = "SUM(($scores)/($maxs))/$n_cells";
             $matrix  = 1;
         } elsif ( $agg =~ /(max|min)score/ ) {
             $formula = uc($1) . "($scores)/" . uc($1) . "($maxs)";
         } elsif ( $agg =~ /(max|min)ratio/ ) {
             $formula = uc($1) . "(($scores)/($maxs))";
             $matrix  = 1;
+        } elsif ( $agg eq 'count') {
+            $formula = "($subformula)/$n_cells";
+            $matrix = 1;
         } else {
             die "Topic agregate '$agg' can't be handled";
         }
@@ -661,6 +683,12 @@ sub student_topic_calc {
                 no strict 'refs';
                 $s = &{$f}( $s, $s1 / $m1 );
             }
+        } elsif ( $agg =~ /count\(([\d.]+)(?:,([\d.]+))?\)/ ) {
+            my $min = $1;
+            my $max = $2;
+            $max = $min if ( !defined($max) );
+            $s += 1 if ( $s1 >= $min && $s1 <= $max );
+            $smax += 1;
         } else {
             die "Unknown aggregate function : $topic->{aggregate}";
         }
