@@ -64,6 +64,7 @@ sub lesson_full {
         if ( !( $force || $garde->get_active() ) ) {
             debug "Learning : $key";
             $self->set( "apprentissage/$key", 1 );
+            $self->{config}->save();
         }
 
         $dialog->destroy;

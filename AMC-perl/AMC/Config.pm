@@ -67,6 +67,7 @@ sub new {
         $self->check_odir();
         $self->load_state();
         $self->load_profile();
+        $self->save();
     }
 
     return ($self);
@@ -200,6 +201,7 @@ sub load_state {
     # set profile from options, or from state file
     if ( $self->{profile} ) {
         $self->{state}->{profile} = $self->{profile};
+        $self->{state}->{_changed} .= ",profile";
     } else {
         $self->{profile} = $self->{state}->{profile} || 'default';
     }
