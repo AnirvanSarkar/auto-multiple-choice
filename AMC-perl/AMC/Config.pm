@@ -229,16 +229,18 @@ sub defaults {
             'localc',  'oocalc',
         ],
         ods_viewer => [ 'command', 'libreoffice', 'localc', 'oocalc', ],
-        xml_viewer =>
-          [ 'command', 'gedit', 'kedit', 'kwrite', 'mousepad', 'leafpad', ],
+        xml_viewer => [
+            'command', 'gnome-text-editor', 'gedit', 'kedit',
+            'kwrite',  'mousepad',          'leafpad',
+        ],
         tex_editor => [
-            'command',  'texmaker', 'kile',  'gummi',
-            'emacs',    'gedit',    'kedit', 'kwrite',
-            'mousepad', 'leafpad',
+            'command', 'texmaker',          'kile',  'gummi',
+            'emacs',   'gnome-text-editor', 'gedit', 'kedit',
+            'kwrite',  'mousepad',          'leafpad',
         ],
         txt_editor => [
-            'command',  'gedit', 'kedit', 'kwrite',
-            'mousepad', 'emacs', 'leafpad',
+            'command', 'gnome-text-editor', 'gedit', 'kedit',
+            'kwrite',  'mousepad',          'emacs', 'leafpad',
         ],
         html_browser => [
             'command',
@@ -258,9 +260,10 @@ sub defaults {
             'dolphin %d',
         ],
         print_command_pdf  => [ 'command', 'cupsdoprint %f', 'lpr %f', ],
-        print_extract_with => [ 'command', 'gs',             'pdftk', 'qpdf' ],
+        print_extract_with => [ 'command', 'gs', 'pdftk', 'qpdf' ],
 
         rep_projets => $self->{home_dir} . '/' . __
+
           # TRANSLATORS: directory name for projects. This directory will be
           # created (if needed) in the home directory of the user. Please use
           # only alphanumeric characters, and - or _. No accentuated characters.
@@ -293,7 +296,7 @@ sub defaults {
         conserve_taille         => 1,
         methode_impression      => 'CUPS',
         imprimante              => '',
-        printer_useful_options =>
+        printer_useful_options  =>
           'Staple Stapling StapleLocation StapleSet StapleOption',
         options_impression => {
             sides             => 'two-sided-long-edge',
@@ -326,11 +329,11 @@ sub defaults {
         symbole_1_1_color    => $hex_blue,
         annote_color         => $hex_red,
 
-        annote_font_name => 'Linux Libertine O 12',
-        annote_ecart     => 5.5,
-        annote_chsign    => 4,
+        annote_font_name            => 'Linux Libertine O 12',
+        annote_ecart                => 5.5,
+        annote_chsign               => 4,
         defaut_regroupement_compose => '',
-        defaut_add_corrected => '',
+        defaut_add_corrected        => '',
 
         nonascii_projectnames => '',
         ascii_filenames       => 1,
@@ -344,8 +347,8 @@ sub defaults {
 
         defaut_annote_rtl => '',
 
-        defaut_verdict => "%(ID)\n" .
-          __(
+        defaut_verdict => "%(ID)\n" . __(
+
             # TRANSLATORS: This is the default text to be written on the
             # top of the first page of each paper when annotating. From
             # this string, %s will be replaced with the student final
@@ -353,7 +356,7 @@ sub defaults {
             # student total score, and %M with the maximum score the
             # student can obtain.
             "Mark: %s/%m (total score: %S/%M)"
-          ),
+        ),
         defaut_verdict_q      => "\"%" . "s/%" . "m\"",
         defaut_verdict_qc     => "\"X\"",
         embedded_max_size     => '1000x1500',
@@ -381,11 +384,13 @@ sub defaults {
         SMTP            => '',
 
         df_subjectemail_email_subject => __
+
           # TRANSLATORS: Subject of the emails which can be sent to the students
           # to give them their subject.
           "Exam question",
 
         df_subjectemail_email_text => __
+
           # TRANSLATORS: Body text of the emails which can be sent to the
           # students to give them their subject.
           "Please find enclosed your question sheet.\nRegards.",
@@ -393,11 +398,13 @@ sub defaults {
         df_subjectemail_email_attachment => [],
 
         df_annotatedemail_email_subject => __
+
           # TRANSLATORS: Subject of the emails which can be sent to the students
           # to give them their annotated completed answer sheet.
           "Exam result",
 
         df_annotatedemail_email_text => __(
+
             # TRANSLATORS: Body text of the emails which can be sent to the
             # students to give them their annotated completed answer sheet.
             "Please find enclosed your annotated"
@@ -424,9 +431,9 @@ sub defaults {
 
         defaut_name_field_type => '',
 
-        view_anonymity   => '',
-        anonymous_model  => 'edddds',
-        anonymous_header => '%(aID)',
+        view_anonymity            => '',
+        anonymous_model           => 'edddds',
+        anonymous_header          => '%(aID)',
         anonymous_header_allpages => 1,
 
         recent_projects => [],
