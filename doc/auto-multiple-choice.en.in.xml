@@ -62,7 +62,7 @@
     </author>
 
     <copyright>
-      <year>2008-2022</year>
+      <year>2008-2024</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -2601,19 +2601,18 @@ Donnez la définition de l’inflation.
   \end{question}
 }</programlisting>
 
-        <warning>
-          <para>With nominative sheets (see <xref
-          endterm="Nominative.sheets.title" linkend="Nominative.sheets"/>),
-          set up it with a new command in the preamble.</para>
+          <para>With a command in preamble.</para>
 
-          <informalexample>
-            <programlisting>\def\Iswitch{\def\AMCbeginQuestion##1##2{}\AMCquestionNumberfalse}</programlisting>
-          </informalexample>
+<programlisting>
+\makeatletter
+\def\Iswitch{\def\AMCbeginQuestion##1##2{\ifAMC@catalog\textbf{##1}\fi}
+\AMCquestionNumberfalse}
+\makeatother
+</programlisting>
 
-          <para>and use it when you need it. (Do not forget to type inside
-          brackets to limit the effect) :</para>
+<para>Do not forget to type inside brackets to limit the effect:</para>
 
-          <programlisting>{\Iswitch
+<programlisting>{\Iswitch
  \begin{question}{Number}
    Choose the greater.
    \begin{choiceshoriz}[o]
@@ -2621,12 +2620,10 @@ Donnez la définition de l’inflation.
    \end{choiceshoriz}
  \end{question}
 }
-      </programlisting>
+</programlisting>
 
           <para><emphasis> In this example, the question number will not be
-          displayed through the command
-          <command>\AMCquestionNumberfalse</command>. </emphasis></para>
-        </warning>
+          displayed through the command <command>\AMCquestionNumberfalse</command>. </emphasis></para>
 
            	</sect5>
 
@@ -2801,22 +2798,6 @@ There is \total{AMCquestionaff} questions.
         optional and are only displayed in the Solution and Catalog
         file.</para>
 
-        <warning>
-          <para>Not displayed in the individual solution.
-          To get around this, type in preamble:</para>
-<programlisting>
-\makeatletter
-\renewcommand{\explain}[1]{%
-  \ifAMC@correc%
-  \AMCif@env{question}{\par\noindent{\AMC@loc@explain#1}}{\AMC@error@explain}\vspace{1ex}%
-  \else%
-  \AMCif@env{question}{}{\AMC@error@explain}%
-  \fi%
-}
-\makeatother
-</programlisting>
-        </warning>
-
         <para>Here is a simple example:</para>
 
         <para><programlisting>\begin{question}{explanation}
@@ -2943,16 +2924,6 @@ There is \total{AMCquestionaff} questions.
         <para> see <xref linkend="latex.numeric"/></para>
       </sect4>
 
-
-      <sect4 id="latex.choices.space">
-        <title>Space between answers</title>
-
-        <para>Let us note that it is also possible to parameterize the
-        vertical space between many answer blocks, thanks to the dimension
-        <parameter>AMCinterIrep</parameter>:</para>
-
-        <para><programlisting>\AMCinterIrep=.75ex</programlisting></para>
-      </sect4>
 
       	<sect4 id="remarks">
       	  <title>Remarks</title>
@@ -3479,10 +3450,10 @@ How is the identity function defined?
           </sect5>
         </sect4>
 
-        <sect4 id="spacing">
-          <title>Spacing</title>
+        <sect4 id="latex.choices.space">
+          <title>Spaces</title>
 
-          <para>One can also change spacing redefining the following
+          <para>Let us note that it is also possible to parameterize the 
           dimensions (here are the default values):</para>
 
           <programlisting>\AMCinterIrep=0pt
@@ -5563,7 +5534,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
 
                 <entry>Score for a bad response to a question.
                 <warning><para>A bad reponse checked gives m points
-                and a good reponse checked gives m points.</para></warning>  
+                and a good reponse non-checked gives m points.</para></warning>  
                 </entry>
               </row>
 
@@ -6416,7 +6387,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
       available).</para>
 
       <sect3 id="gui.export.ods">
-        <title>Export to ODS (OpenOffice, LibreOffice)</title>
+        <title id="gui.export.ods.title">Export to ODS (OpenOffice, LibreOffice)</title>
 
         <para>In the exported file, the following colors are used:</para>
 
@@ -6599,38 +6570,452 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
       this field empty, a default value is built up based on the student's
       name and student number.</para>
 
-      <sect3 id="Options.annotation.separateanswersheet">
-        <title id="Options.annotation.separateanswersheet.title">Options with
-        the option <option>separateanswersheet</option></title>
+      <sect3 id="topics">
+       <title id="topics.title">File topics.yml</title>
+  
+      <para>The aim is to combine a set of questions to calculate a score and obtain a level of success.
+      These indications will be displayed on the header of the corrected copy.</para>
 
-        <itemizedlist>
-          <listitem>
-            <para><command>Only pages with answers</command> : the answer
-            sheets will be annoted.</para>
-          </listitem>
-        </itemizedlist>
+      <para>These groups will be described in a YAML file named topics.yml, to be placed in the AMC project directory.</para>
+      <para>AMC will require the following additional perl packages, which must be installed in your environment:
+      <package>YAML::Syck</package>, <package>Hash::Merge</package>.</para>
+  
+         <sect4 id="variables.topics"> 
+          <title id="variables.topics.title"> The variables</title>
+            <para>General topic values:</para>
 
-        <itemizedlist>
-          <listitem>
-            <para><command>Question pages from subject</command> : the answer
-            sheets will be annoted and the subject will be inclued to the pdf
-            file.</para>
-          </listitem>
-        </itemizedlist>
+          <itemizedlist>
+            <listitem><para>%{id} :  topic's id</para></listitem>
+            <listitem><para>%{name} :  topic's name</para></listitem>
+          </itemizedlist>
+  
+        <para>Relative values  to  student's score :</para>
 
-        <itemizedlist>
+          <itemizedlist>
+              <listitem><para>%{score} : student’s total score</para></listitem>
+              <listitem><para>%{max} : maximum total score</para></listitem>
+              <listitem><para>%{ratio} : quotient of score divided by maximum score (between 0 and 1)</para></listitem>
+              <listitem><para>%{value} : likewise but in percent</para></listitem>
+          </itemizedlist>
+
+        <para>Relative values  to  questions'  topic :</para>
+          <itemizedlist>
+          <listitem><para>%{nums:s} : list of  question numbers</para></listitem>
+          <listitem><para>%{nums:c} : llist of question numbers by intervals (ex: 2-4 instead of 2,3,4)</para></listitem>
+          </itemizedlist>
+
+         <para>Values derived from the level reached:</para>
+           <itemizedlist>
+             <listitem><para>%{message}</para></listitem>
+             <listitem><para>%{code} </para></listitem> 
+            <listitem><para>%{i}: level</para></listitem>
+          </itemizedlist>
+
+        </sect4>
+  
+       <sect4 id="principle.yml">
+          <title id="principle.yml.title">Principe</title>
+       <warning><para>The YAML file format is very sensitive to indentation. You must then respect the number of spaces at each beginning of lines.</para>
+          <para>To help you, each space is represented by the @ symbol, which must not be reproduced.</para></warning>
+<programlisting>
+---
+preferences:
+@@key level 1:@value
+
+topics:
+@@-@key level 1@value
+@@@@key level 2:@value
+@@@@@@key level 3:@value
+@@@@@@@@key level 4:@value
+</programlisting>
+       </sect4>  
+
+
+        <sect4 id="file.yml">
+          <title id="file.yml.title">Exemples de fichiers</title>
+          
+            <sect5 id="example.yml">
+            <title id="example.yml.title">Full example</title>
+<programlisting>
+---
+preferences:
+@@odscolumns:@level <co id="preferences.odsexport" linkends="preferences.odsexport.exp"></co>
+@@skip_indicatives:@0 <co id="preferences.skipindicatives" linkends="preferences.skipindicatives.exp"></co>
+@@decimal_separator:@"," <co id="preferences.decimalseparator" linkends="preferences.decimalseparator.exp"></co>
+
+topics:
+@@-@:text:"Rappel : Ne pas oublier les retenues dans les opérations" <co id="topics.text" linkends="topics.text.exp"></co>
+@@-@id:@addition2 <co id="topics.id" linkends="topics.id.exp"></co>
+@@@@name:@Savoir calculer la somme de deux nombres à deux chiffres <co id="topics.name" linkends="topics.name.exp"></co>
+@@@@questions: <co id="topics.questions" linkends="topics.questions.exp"></co>
+@@@@@@-@"add2:*" <co id="topics.question.etoile" linkends="topics.question.etoile.exp"></co>
+@@@@@@-@somme2ch <co id="topics.question.unique" linkends="topics.question.unique.exp"></co>
+@@@@annotate_color:@"#B22222" <co id="topics.annotate" linkends="topics.annotate.exp"></co>
+@@@@levels: <co id="topics.levels" linkends="topics.levels.exp"></co>
+@@@@@@-@min:@75 <co id="topics.levels.min" linkends="topics.levels.min.exp"></co>
+@@@@@@@@message: @très bonne maîtrise <co id="topics.levels.message" linkends="topics.levels.message.exp"></co>
+@@@@@@@@color:@"#1ab407" <co id="topics.levels.message.color" linkends="topics.levels.message.color.exp"></co>
+@@@@@@@@code:@4 <co id="topics.code" linkends="topics.code.exp"></co>
+@@@@@@-@min:@50
+@@@@@@@@message:@maîtrise satisfaisante
+@@@@@@@@color:@"#2aea62"
+@@@@@@@@code:@3
+@@@@@@-@min:@25
+@@@@@@@@message:@maîtrise fragile
+@@@@@@@@color:@"#ffad26"
+@@@@@@@@code:@2
+@@@@@@-@message:@maîtrise insuffisante
+@@@@@@@@color:@"#ff262c"
+@@@@@@@@code:@1
+@@@@decimals:@0 <co id="topics.decimals" linkends="topics.decimals.exp"></co>
+@@@@decimalsratio:@2 <co id="topics.decimalsratio" linkends="topics.decimalsratio.exp"></co>
+@@@@decimalspc:@0 <co id="topics.decimalspc" linkends="topics.decimalspc.exp"></co>
+@@@@floor:@0  <co id="topics.floor" linkends="topics.floor.exp"></co>
+# Comment to lighten code. <co id="topics.comment" linkends="topics.comment.exp"></co>
+@@-@id:@soustraction2
+@@@@name:@Savoir calculer la différenc de deux nombres à deux chiffres
+@@@@format:@"%{name}@:@%{score}/%{max}" <co id="topics.format" linkends="topics.format.exp"></co>
+@@@@questions:
+@@@@@@-@"sous2:*"
+@@@@@@-@"sous1:*"
+@@@@annotate_color:<co id="topics.annotate.empty" linkends="topics.annotate.exp"></co>
+#
+@@-@:text:"-------bilan--------" <co id="topics.text.bilan" linkends="topics.text.exp"></co>
+@@-@id:@global
+@@@@questions:@"*" <co id="topics.joker" linkends="topics.joker.exp"></co>
+@@@@value:@"ratio:20:0.25" <co id="topics.value" linkends="topics.value.exp"></co>
+@@@@decimals:@2 <co id="topics.decimals.global" linkends="topics.decimals.global.exp"></co>
+@@@@decimalspc:@2 <co id="topics.decimalspc.global" linkends="topics.decimals.global.exp"></co>
+@@@@format:@| <co id="topics.list" linkends="topics.list.exp"></co>
+@@@@@@%{name}@:@%{code}@%{message}
+@@@@@@Pour les questions %{nums:c} (addition et soustraction), ton score est de  %{score}
+@@@@@@ta note est de %{value}/20
+@@@@exclude_questions: <co id="topics.exclude" linkends="topics.exclude.exp"></co>
+@@@@@-@bonus
+@@@@@-@question-difficile
+#
+@@-@text:@"key aggregate"
+@@-@id:@aggregate
+@@@@name:@options
+@@@@aggregate:@<replaceable>xxx</replaceable><co id="topics.aggregate" linkends="topics.aggregate.exp"></co>
+@@@@value:@<replaceable>xxx</replaceable><co id="topics.aggregate.value" linkends="topics.aggregate.value.exp"></co>
+</programlisting>
+
+<para><calloutlist>
+
+<callout arearefs="preferences.odsexport" id="preferences.odsexport.exp">
+<para>New columns (<xref linkend="gui.export.ods"/>)
+will be displayed with the text of each <replaceable>id</replaceable> ( <xref linkend="example.yml"/> <xref linkend="topics.id"/>)
+and the percentage of the level. You can choose to display the value of the variable <replaceable>code</replaceable> .</para>
+</callout>
+
+<callout arearefs="preferences.skipindicatives" id="preferences.skipindicatives.exp">
+<para>To include the indicative questions.</para>
+</callout>
+
+<callout arearefs="preferences.decimalseparator" id="preferences.decimalseparator.exp">
+<para>Decimal separator</para></callout>
+
+<callout arearefs="topics.text topics.text.bilan" id="topics.text.exp">
+<para>A plain text.</para></callout>
+
+<callout arearefs="topics.id" id="topics.id.exp">
+<para>Identifier without accented or spaced letters.</para>
+</callout>
+
+<callout arearefs="topics.name" id="topics.name.exp">
+<para>Full skill name.</para>
+</callout>
+
+<callout arearefs="topics.questions" id="topics.questions.exp">
+<para>Questions related to skill.</para>
+</callout>
+
+<callout arearefs="topics.question.etoile" id="topics.question.etoile.exp">
+<para>All questions with the identifier beginnig with add2: are included
+(see <xref endterm="identifier.title" linkend="identifier"/>).</para>
+</callout>
+
+<callout arearefs="topics.question.unique" id="topics.question.unique.exp">
+<para>Only one  question with a unique identifier somme2ch is included.
+(see <xref endterm="identifier.title" linkend="identifier"/>).</para>
+</callout>
+
+<callout arearefs="topics.annotate topics.annotate.empty" id="topics.annotate.exp">
+<para>Color annotation related to scores.</para>
+<para>If a question does not be a par of <code>id</code> or <code>annotate_color</code> option
+ is not filled out, <code>Annotations color</code> use default.
+  <menuchoice>
+<guimenuitem>Edition</guimenuitem>
+<guisubmenu>Preferences</guisubmenu>
+<guimenuitem>Annotation</guimenuitem>
+</menuchoice></para>
+</callout>
+
+<callout arearefs="topics.levels" id="topics.levels.exp">
+<para>Skill level (percent).</para>
+</callout>
+
+<callout arearefs="topics.levels.min" id="topics.levels.min.exp">
+<para>Minimum required for this level.</para>
+</callout>
+
+<callout arearefs="topics.levels.message" id="topics.levels.message.exp">
+<para>Text written on the first page according the level.</para>
+</callout>
+
+<callout arearefs="topics.levels.message.color" id="topics.levels.message.color.exp">
+<para>Color text written on the first page according the levelu.</para>
+</callout>
+
+<callout arearefs="topics.code" id="topics.code.exp">
+<para><replaceable>code</replaceable> a new column with exporting ods. See
+<xref endterm="gui.export.ods.title" linkend="gui.export.ods"/> .</para>
+</callout>
+
+<callout arearefs="topics.decimals" id="topics.decimals.exp">
+<para>Number of decimals for <code>%{score}</code> and <code>%{code}</code>, 0 default option.</para>
+</callout>
+
+<callout arearefs="topics.decimalsratio" id="topics.decimalsratio.exp">
+<para>Number of decimals for <code>%{ratio}</code>, 2 default option.</para>
+</callout>
+
+<callout arearefs="topics.decimalspc" id="topics.decimalspc.exp">
+<para>Number of decimals for <code>%{value}</code>, 0 default option.</para>
+</callout>
+
+<callout arearefs="topics.floor" id="topics.floor.exp">
+<para>Bottom value. If the calculation of the score in that question yields a value below
+the bottom value, the sore is set to the bottom value.</para>
+</callout>
+
+<callout arearefs="topics.comment" id="topics.comment.exp">
+<para>Comments begin with the hash symbol.</para>
+</callout>
+
+<callout arearefs="topics.format" id="topics.format.exp">
+<para>Formatting.</para>
+<para>Formating by default:
+<code>format:@"%{name}: %{message} (%{value})"</code>
+</para>
+</callout>
+
+<callout arearefs="topics.value" id="topics.value.exp">
+<para>The corresponding score will be the ratio multiplied by 20 and rounded to the nearest multiple of 0.25.</para>
+</callout>
+
+<callout arearefs="topics.decimals.global topics.decimalspc.global" id="topics.decimals.global.exp">
+<para>Change number of decimal.</para>
+</callout>
+ 
+<callout arearefs="topics.list" id="topics.list.exp">
+<para>To write a list.</para></callout>
+
+<callout arearefs="topics.joker" id="topics.joker.exp">
+<para>Joker which selects all questions.</para>
+</callout>
+
+<callout arearefs="topics.exclude" id="topics.exclude.exp">
+<para>Next questions are exclude.</para>
+</callout>
+
+<callout arearefs="topics.aggregate" id="topics.aggregate.exp">
+<para>Peut prendre plusieurs options :</para>
+
+      <variablelist>
+
+        <varlistentry>
+          <term>sumscore:</term>
           <listitem>
-            <para><command>Question pages from correction</command> : the
-            answer sheets will be annoted and the corrected will be inclued to
-            the pdf fil.</para>
+            <para>we take the sum of the scores, and in the denominator the sum of the maximum scores.</para>
           </listitem>
-        </itemizedlist>
+        </varlistentry>
+
+        <varlistentry>
+          <term>sumratio:</term>
+          <listitem>
+          <para>We take the sum of the quotients between the question score and the maximum score for the question.
+          In the denominator, we have the number of questions.</para>
+          <para>If we want the topic to be equal to the sum of the quotients, we take <replaceable>value:score</replaceable>,
+          and if we want the topic to be the average of the ratios (so between 0 and 1), we take <replaceable>value:ratio</replaceable>
+          or <replaceable>value:ratio</replaceable> or <replaceable>value:"ratio:pc"</replaceable>.</para>
+        </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>minscore:</term>
+          <listitem>
+         <para>we take the minimum of the scores, and in the denominator the minimum of the maximum scores to the questions.</para>
+          <para>If we want the topic to be equal to the min of the scores we choose <replaceable>value:score</replaceable>, 
+          and if we want the topic to be equal to the ratio of the two, we take <replaceable>value:ratio</replaceable>.</para>
+        </listitem>
+        </varlistentry>
+
+
+        <varlistentry>
+          <term>maxscore:</term>
+          <listitem>
+          <para>we take the maximum of the scores, and in the denominator the maximum of the maximum scores to the questions.</para>
+          <para>If we want the topic to be equal to the max of the scores we choose <replaceable>value:score</replaceable>, 
+          and if we want the topic to be equal to the ratio of the two, we take <replaceable>value:ratio</replaceable>.</para>
+        </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>maxratio:</term>
+          <listitem>
+          <para>we take the maximum value of the ratio, for each question, between the score obtained for the question
+         and the optimal score that can be obtained for the question. With this aggregate value,
+         <replaceable>value:score</replaceable> and <replaceable>value:ratio</replaceable> give the same thing.</para>
+        </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>minratio:</term>
+          <listitem>
+          <para>we take the minimum value of the ratio, for each question, between the score obtained for the question
+         and the optimal score that can be obtained for the question. With this aggregate value,
+         <replaceable>value:score</replaceable> and <replaceable>value:ratio</replaceable> give the same thing.</para>
+        </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>count(a) :</term>
+          <listitem>
+          <para>number of questions with score <replaceable>a</replaceable>.</para>
+        </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>count(a,b) :</term>
+          <listitem>
+          <para>number of questions with score between <replaceable>a</replaceable> and <replaceable>b</replaceable>.</para>
+        </listitem>
+        </varlistentry>
+
+      </variablelist>
+</callout>
+
+<callout arearefs="topics.aggregate.value" id="topics.aggregate.value.exp">
+<para>Several options are available:
+<replaceable>score</replaceable>, <replaceable>ratio</replaceable>, <replaceable>"ratio:pc"</replaceable>,
+<replaceable>"ratio:a:b"</replaceable>.</para>
+</callout>
+
+</calloutlist></para>
+
+          </sect5>
+
+        <sect5 id="shared.levels">
+          <title id="shared.levels.title">Shared levels</title>
+<programlisting>
+---
+conf:
+@@niveauxstandard: <co id="topics.shared.levels" linkends="topics.shared.levels.exp"></co>
+@@@@levels:
+@@@@@@-@min:@75
+@@@@@@@@message:@très bonne maîtrise
+@@@@@@@@color:@"#1ab407"
+@@@@@@-@min:@50
+@@@@@@@@message:@maîtrise satisfaisante
+@@@@@@@@color:@"#2aea62"
+@@@@@@-@min:@25
+@@@@@@@@message:@maîtrise fragile
+@@@@@@@@color:@"#ffad26"
+@@@@@@-@message:@maîtrise@insuffisante
+@@@@@@@@color:@"#ff262c@
+@@@@decimals:@2 
+@@@@decimalsratio:@2 
+@@@@decimalspc:@0 
+@@@@floor:@0 
+
+topics:
+@@-@id:@addition2
+@@@@name:@Savoir calculer la somme de deux nombres à deux chiffres
+@@@@questions:
+@@@@@@-@"add2:*"
+@@@@@@-@somme2ch
+@@@@conf:@niveauxstandard <co id="topics.shared.levels.conf" linkends="topics.shared.levels.conf.exp"></co>
+@@-@id:@soustraction2
+@@@@name:@Savoir calculer la différence de deux nombres à deux chiffres
+@@@@format:@"%{name}@:@%{score}/%{max}"
+@@@@questions:
+@@@@@@-@"sous2:*"
+@@@@@@-@"sous1:*"
+@@@@conf:@niveauxstandard <co id="topics.shared.levels.confbis" linkends="topics.shared.levels.conf.exp"></co>
+</programlisting>
+
+<para><calloutlist>
+<callout arearefs="topics.shared.levels" id="topics.shared.levels.exp">
+<para>The several levels expressed as a percentage for all the questions.</para>
+</callout>
+
+<callout arearefs="topics.shared.levels.conf topics.shared.levels.confbis" id="topics.shared.levels.conf.exp">
+<para>Call to the scale.</para>
+</callout>
+</calloutlist></para>
+          </sect5>
+
+          <sect5 id="inclusion.file.yml">
+            <title id="inclusion.file.yml.title">Include file</title>
+             <para>Create a levels.yml file  located in the parent directory of the project director
+              (therefore the directory common to all AMC projects).</para>
+  <programlisting>
+# name fil:e levels.yml
+preferences:
+@@odscolumns: level
+@@decimal_separator:@"," 
+#
+conf:
+@@niveauxstandard: 
+@@@@levels:
+@@@@@@-@min:@75
+@@@@@@@@message:@très bonne maîtrise
+@@@@@@@@color:@"#1ab407"
+@@@@@@-@min:@50
+@@@@@@@@message:@maîtrise satisfaisante
+@@@@@@@@color:@"#2aea62"
+@@@@@@-@min:@25
+@@@@@@@@message:@maîtrise fragile
+@@@@@@@@color:@"#ffad26"
+@@@@@@-@message:@maîtrise@insuffisante
+@@@@@@@@color:@"#ff262c@
+@@@@decimals:@2
+@@@@decimalsratio:@2 
+@@@@decimalspc:@2
+@@@@floor:@0
+  </programlisting>
+
+  <programlisting>
+---
+include:
+@@-@../levels.yml
+
+topics:
+@@-@id:@addition2
+@@@@name:@Savoir calculer la somme de deux nombres à deux chiffres
+@@@@questions:
+@@@@@@-@"add2:*"
+@@@@@@-@somme2ch
+@@@@conf:@niveauxstandard
+@@-@id:@soustraction2
+@@@@name:@Savoir calculer la différence de deux nombres à deux chiffres
+@@@@format:@"%{name}@:@%{score}/%{max}"
+@@@@questions:
+@@@@@@-@"sous2:*"
+@@@@@@-@"sous1:*"
+@@@@conf:@niveauxstandard
+  </programlisting>
+          </sect5>
+        </sect4>  
+  
       </sect3>
 
       <sect3 id="marks.position">
         <title id="marks.position.title">Marks' position</title>
 
-        <para>You may choose marks's position with the menu <menuchoice>
+        <para>You may choose marks' positions with the menu <menuchoice>
             <guimenu>Edit</guimenu>
 
             <guimenuitem>Preference</guimenuitem>
@@ -9941,19 +10326,19 @@ equivs-control texlive-local
 
       <itemizedlist>
         <listitem>
-          <para>Open the web link and note the version number:  </para>
-          <para>  <ulink url="https://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt"/>.</para>
+          <para>Edit texlive-local: </para>
+          <para><ulink url="https://www.tug.org/texlive/files/debian-equivs-2022-ex.txt"/>.</para>
+                  <para>Open the file and change the year 2022 to the actual.</para>
         </listitem>
       </itemizedlist>
 
     	<itemizedlist>
     		<listitem>
-    			<para>Build the package and install it</para>
+    			<para>Build and install fake packages</para>
     		</listitem>
     	</itemizedlist>
 
 <programlisting>
-wget -O texlive-local http://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt
 equivs-build texlive-local
 sudo dpkg -i texlive-local_20xx-x_all.deb
 sudo apt install -f
