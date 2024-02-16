@@ -235,6 +235,7 @@ sub defaults {
             skip_indicatives  => 1,
             decimal_separator => '.',
             pc_suffix         => ' %',
+            answered_only     => 0,
         }
     );
 }
@@ -638,6 +639,7 @@ sub student_topic_calc {
     my @x    = ();
     my @nums = ();
     my $agg  = $topic->{aggregate};
+    my $all_empty = 1;
     for my $q ( @{ $topic->{questions_list} } ) {
         my $r =
             $self->{scoring}->question_result( $student, $copy, $q->{question} );
@@ -648,7 +650,8 @@ sub student_topic_calc {
             debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max}) for question $q->{title}";
             push @x, [ $r->{score}, $r->{max} ];
             push @nums,
-              $self->{layout}->question_number( $student, $q->{question} );
+                $self->{layout}->question_number( $student, $q->{question} );
+            $all_empty = 0 if($r->{why} ne 'V');
         }
     }
 
@@ -700,11 +703,12 @@ sub student_topic_calc {
 
     if ( $smax > 0 ) {
         my $x = {
-            score      => $s,
-            max        => $smax,
-            ratio      => $s / $smax,
-            'nums:s'   => $nums_simple,
-            'nums:c'   => $nums_condensed,
+            score     => $s,
+            max       => $smax,
+            ratio     => $s / $smax,
+            'nums:s'  => $nums_simple,
+            'nums:c'  => $nums_condensed,
+            all_empty => $all_empty,
         };
 
         $x->{'ratio:pc'} =
@@ -822,6 +826,11 @@ sub student_topic_message {
     }
     my $x = $self->student_topic_calc( $student, $copy, $topic );
     if ($x) {
+        if($x->{all_empty} && $self->get_option('answered_only')) {
+            debug("Topic($student,$copy,$topic->{id}): all empty");
+            return { message => '', color => '', calc => $x };
+        }
+
         my $s = $topic->{format};
         my $l =
           $self->value_level( $topic, $x )
