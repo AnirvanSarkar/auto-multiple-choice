@@ -101,7 +101,8 @@ sub load {
 
     if ( $self->{'fich.datadir'} && !$self->{'fich.projectdir'} ) {
         $self->{'fich.projectdir'} =
-          Cwd::realpath( $self->{'fich.datadir'} . "/.." );
+            Cwd::realpath( $self->{'fich.datadir'} . "/.." );
+        utf8::decode($self->{'fich.projectdir'});
     }
     if ( $self->{'fich.projectdir'} && !$self->{'fich.datadir'} ) {
         $self->{'fich.datadir'} = $self->{'fich.projectdir'} . "/data";
