@@ -4777,24 +4777,24 @@ Tvhead={km,{},{},m,{},{},mm,{},{},$\mu$m},
             comme des entiers <code>intV</code> (en enlevant la virgule) avant de faire la
             différence et de comparer avec <code>exact</code> ou <code>approx</code>. </para>
             <orderedlist>
-              <listitem><para>Réponse = 3.1415 &#8594; <code>intV =  31415</code>, <code>exact = <replaceable>20</replaceable></code>, <code>approx = <replaceable>150</replaceable></code></para>
+              <listitem><para>Réponse = 3.1415 → <code>intV =  31415</code>, <code>exact = <replaceable>20</replaceable></code>, <code>approx = <replaceable>150</replaceable></code></para>
                     <itemizedlist>
-                      <listitem><para><code>3.1400</code> &#8594; | 31400 &minus; 31415 | &le; 20 &#8594; <code>scoreexact</code></para></listitem>
-                      <listitem><para><code>3.1435</code> &#8594; | 31435 &minus; 31415 | &le; 20 &#8594; <code>scoreexact</code></para></listitem>
-                      <listitem><para><code>3.1500</code> &#8594; | 31500 &minus; 31415 | &le; 150 &#8594; <code>scoreapprox</code></para></listitem>
-                      <listitem><para><code>3.1300</code> &#8594; | 31300 &minus; 31415 | &le; 150 &#8594; <code>scoreapprox</code></para></listitem>
-                    <listitem><para><code>3.1610</code> &#8594; | 31610 &minus; 31415 | &ge; 150 &#8594; <code>scorewrong</code></para></listitem>
+                      <listitem><para><code>3.1400</code> → | 31400 - 31415 | ≤ 20 → <code>scoreexact</code></para></listitem>
+                      <listitem><para><code>3.1435</code> → | 31435 - 31415 | ≤ 20 → <code>scoreexact</code></para></listitem>
+                      <listitem><para><code>3.1500</code> → | 31500 - 31415 | ≤ 150 → <code>scoreapprox</code></para></listitem>
+                      <listitem><para><code>3.1300</code> → | 31300 - 31415 | ≤ 150 → <code>scoreapprox</code></para></listitem>
+                    <listitem><para><code>3.1610</code> → | 31610 - 31415 | > 150 → <code>scorewrong</code></para></listitem>
                    </itemizedlist>
               </listitem>
 
-              <listitem><para>Réponse = 2.00e30 &#8594; <code>intV=200</code>, <code>exact = <replaceable>15</replaceable></code>, <code>approx = <replaceable>100</replaceable></code></para>
+              <listitem><para>Réponse = 2.00e30 → <code>intV=200</code>, <code>exact = <replaceable>15</replaceable></code>, <code>approx = <replaceable>100</replaceable></code></para>
                     <itemizedlist>
-                      <listitem><para><code>2.10e30</code> &#8594; | 210 &minus; 200| &le; 15 &#8594; <code>scoreexact</code></para></listitem>
-                      <listitem><para><code>1.85e30</code> &#8594; | 185 &minus; 200| &le; 15 &#8594; <code>scoreexact</code></para></listitem>
-                      <listitem><para><code>1.00e30</code> &#8594; | 100 &minus; 200| &le; 100 &#8594; <code>scoreapprox</code></para></listitem>
-                      <listitem><para><code>2.81e30</code> &#8594; | 281 &minus; 200 | &le; 100 &#8594; <code>scoreapprox</code></para></listitem>
-                    <listitem><para><code>2.81e29</code> &#8594; | 28.1 &minus; 200 | &ge; 100 &#8594; <code>scorewrong</code></para></listitem>
-                      <listitem><para><code>2.00e31</code> &#8594; | 2000 &minus; 200 | &ge; 100 &#8594; <code>scorewrong</code></para></listitem>
+                      <listitem><para><code>2.10e30</code> → | 210 - 200| ≤ 15 → <code>scoreexact</code></para></listitem>
+                      <listitem><para><code>1.85e30</code> → | 185 - 200| ≤ 15 → <code>scoreexact</code></para></listitem>
+                      <listitem><para><code>1.00e30</code> → | 100 - 200| ≤ 100 → <code>scoreapprox</code></para></listitem>
+                      <listitem><para><code>2.81e30</code> → | 281 - 200 | ≤ 100 → <code>scoreapprox</code></para></listitem>
+                    <listitem><para><code>2.81e29</code> → | 28.1 - 200 | > 100 → <code>scorewrong</code></para></listitem>
+                      <listitem><para><code>2.00e31</code> → | 2000 - 200 | > 100 → <code>scorewrong</code></para></listitem>
                    </itemizedlist>
               </listitem>
             </orderedlist>
