@@ -7023,7 +7023,7 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
               <listitem><para>%{score} : score atteint par l'étudiant</para></listitem>
               <listitem><para>%{max} : score maximal</para></listitem>
               <listitem><para>%{ratio} : quotient du score sur le score maximal (entre 0 et 1)</para></listitem>
-              <listitem><para>%{ratio:pc} : même chose mais en pourcentage</para></listitem>
+              <listitem><para>%{value} : même chose mais en pourcentage</para></listitem>
           </itemizedlist>
 
         <para>Valeurs relatives aux questions du topic :</para>
@@ -7043,17 +7043,17 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
        <sect4 id="principle.yml">
           <title id="principle.yml.title">Principe</title>
               <warning><para>Le format de fichier YAML est très sensible à l'indentation. Vous devez donc bien respecter le nombre d'espaces au début des lignes.</para>
-              <para>Pour vous aider, chaque espace est représenté par le symbole <code>@</code> qu'il ne faut pas reproduire.</para></warning>
+              <para>Pour vous aider, chaque espace est représenté par le symbole <code>`</code> qu'il ne faut pas reproduire.</para></warning>
 <programlisting>
 ---
 preferences:
-@@clé niveau 1:@valeur
+``clé niveau 1:`valeur
 
 topics:
-@@-@clé niveau 1:@valeur
-@@@@clé niveau 2:@valeur
-@@@@@@clé niveau 3:@valeur
-@@@@@@@@clé niveau 4:@valeur
+``-`clé niveau 1:`valeur
+````clé niveau 2:`valeur
+``````clé niveau 3:`valeur
+````````clé niveau 4:`valeur
 </programlisting>
        </sect4>
 
@@ -7062,69 +7062,73 @@ topics:
 
             <sect5 id="example.yml">
             <title id="example.yml.title">Exemple complet</title>
+  
 <programlisting>
 ---
 preferences:
-@@odscolumns:@level <co id="preferences.odsexport" linkends="preferences.odsexport.exp"></co>
-@@skip_indicatives:@0 <co id="preferences.skipindicatives" linkends="preferences.skipindicatives.exp"></co>
-@@decimal_separator:@"," <co id="preferences.decimalseparator" linkends="preferences.decimalseparator.exp"></co>
+``odscolumns:`level <co id="preferences.odsexport" linkends="preferences.odsexport.exp"></co>
+``skip_indicatives:`0 <co id="preferences.skipindicatives" linkends="preferences.skipindicatives.exp"></co>
+``decimal_separator:`"," <co id="preferences.decimalseparator" linkends="preferences.decimalseparator.exp"></co>
+``answered_only:`1 <co id="preferences.answeredonly" linkends="preferences.answeredonly.exp"></co>
 
 topics:
-@@-@text:@"Rappel : Ne pas oublier les retenues dans les opérations" <co id="topics.text" linkends="topics.text.exp"></co>
-@@-@id:@addition2 <co id="topics.id" linkends="topics.id.exp"></co>
-@@@@name:@Savoir calculer la somme de deux nombres à deux chiffres <co id="topics.name" linkends="topics.name.exp"></co>
-@@@@questions: <co id="topics.questions" linkends="topics.questions.exp"></co>
-@@@@@@-@"add2:*" <co id="topics.question.etoile" linkends="topics.question.etoile.exp"></co>
-@@@@@@-@somme2ch <co id="topics.question.unique" linkends="topics.question.unique.exp"></co>
-@@@@annotate_color:@"#B22222" <co id="topics.annotate" linkends="topics.annotate.exp"></co>
-@@@@levels: <co id="topics.levels" linkends="topics.levels.exp"></co>
-@@@@@@-@min:@75 <co id="topics.levels.min" linkends="topics.levels.min.exp"></co>
-@@@@@@@@message: @très bonne maîtrise <co id="topics.levels.message" linkends="topics.levels.message.exp"></co>
-@@@@@@@@color:@"#1ab407" <co id="topics.levels.message.color" linkends="topics.levels.message.color.exp"></co>
-@@@@@@@@code:@4 <co id="topics.code" linkends="topics.code.exp"></co>
-@@@@@@-@min:@50
-@@@@@@@@message:@maîtrise satisfaisante
-@@@@@@@@color:@"#2aea62"
-@@@@@@@@code:@3
-@@@@@@-@min:@25
-@@@@@@@@message:@maîtrise fragile
-@@@@@@@@color:@"#ffad26"
-@@@@@@@@code:@2
-@@@@@@-@message:@maîtrise insuffisante
-@@@@@@@@color:@"#ff262c"
-@@@@@@@@code:@1
-@@@@decimals:@0 <co id="topics.decimals" linkends="topics.decimals.exp"></co>
-@@@@decimalsratio:@2 <co id="topics.decimalsratio" linkends="topics.decimalsratio.exp"></co>
-@@@@decimalspc:@0 <co id="topics.decimalspc" linkends="topics.decimalspc.exp"></co>
-@@@@floor:@0  <co id="topics.floor" linkends="topics.floor.exp"></co>
+``-`text:`"Rappel : Ne pas oublier les retenues dans les opérations" <co id="topics.text" linkends="topics.text.exp"></co>
+``-`id:`addition2 <co id="topics.id" linkends="topics.id.exp"></co>
+````name:`Savoir calculer la somme de deux nombres à deux chiffres <co id="topics.name" linkends="topics.name.exp"></co>
+````questions: <co id="topics.questions" linkends="topics.questions.exp"></co>
+``````-`"add2:*" <co id="topics.question.etoile" linkends="topics.question.etoile.exp"></co>
+``````-`somme2ch <co id="topics.question.unique" linkends="topics.question.unique.exp"></co>
+````annotate_color:`"#B22222" <co id="topics.annotate" linkends="topics.annotate.exp"></co>
+````levels: <co id="topics.levels" linkends="topics.levels.exp"></co>
+``````-`min:`75 <co id="topics.levels.min" linkends="topics.levels.min.exp"></co>
+````````message: `très bonne maîtrise <co id="topics.levels.message" linkends="topics.levels.message.exp"></co>
+````````color:`"#1ab407" <co id="topics.levels.message.color" linkends="topics.levels.message.color.exp"></co>
+````````code:`4 <co id="topics.code" linkends="topics.code.exp"></co>
+``````-`min:`50
+````````message:`maîtrise satisfaisante
+````````color:`"#2aea62"
+````````code:`3
+``````-`min:`25
+````````message:`maîtrise fragile
+````````color:`"#ffad26"
+````````code:`2
+``````-`message:`maîtrise insuffisante
+````````color:`"#ff262c"
+````````code:`1
+````decimals:`0 <co id="topics.decimals" linkends="topics.decimals.exp"></co>
+````decimalsratio:`2 <co id="topics.decimalsratio" linkends="topics.decimalsratio.exp"></co>
+````decimalspc:`0 <co id="topics.decimalspc" linkends="topics.decimalspc.exp"></co>
+````floor:`0  <co id="topics.floor" linkends="topics.floor.exp"></co>
 # Commentaire pour aérer le code. <co id="topics.comment" linkends="topics.comment.exp"></co>
-@@-@id:@soustraction2
-@@@@name:@Savoir calculer la différenc de deux nombres à deux chiffres
-@@@@format:@"%{name}@:@%{score}/%{max}" <co id="topics.format" linkends="topics.format.exp"></co>
-@@@@questions:
-@@@@@@-@"sous2:*"
-@@@@@@-@"sous1:*"
-@@@@annotate_color:<co id="topics.annotate.empty" linkends="topics.annotate.exp"></co>
+``-`id:`soustraction2
+````name:`Savoir calculer la différenc de deux nombres à deux chiffres
+````format:`"%{name}`:`%{score}/%{max}" <co id="topics.format" linkends="topics.format.exp"></co>
+````questions:
+``````-`"sous2"
+``````-`"sous1"
+````annotate_color:<co id="topics.annotate.empty" linkends="topics.annotate.exp"></co>
 #
-@@-@text:@"-------bilan--------" <co id="topics.text.bilan" linkends="topics.text.exp"></co>
-@@-@id:@global
-@@@@questions:@"*" <co id="topics.joker" linkends="topics.joker.exp"></co>
-@@@@value:@"ratio:20:0.25" <co id="topics.value" linkends="topics.value.exp"></co>
-@@@@decimals:@2 <co id="topics.decimals.global" linkends="topics.decimals.global.exp"></co>
-@@@@decimalspc:@2 <co id="topics.decimalspc.global" linkends="topics.decimals.global.exp"></co>
-@@@@format:@| <co id="topics.list" linkends="topics.list.exp"></co>
-@@@@@@%{name}@:@%{code}@%{message}
-@@@@@@Pour les questions %{nums:c} (addition et soustraction), ton score est de  %{score}
-@@@@@@ta note est de %{value}/20
-@@@@exclude_questions: <co id="topics.exclude" linkends="topics.exclude.exp"></co>
-@@@@@-@bonus
-@@@@@-@question-difficile
+``-`text:`"-------bilan--------" <co id="topics.text.bilan" linkends="topics.text.exp"></co>
+``-`id:`global
+````questions:`"*" <co id="topics.joker" linkends="topics.joker.exp"></co>
+````value:`"ratio:20:0.25" <co id="topics.value" linkends="topics.value.exp"></co>
+````decimals:`2 <co id="topics.decimals.global" linkends="topics.decimals.global.exp"></co>
+````decimalspc:`2 <co id="topics.decimalspc.global" linkends="topics.decimals.global.exp"></co>
+````format:`| <co id="topics.list" linkends="topics.list.exp"></co>
+``````%{name}`:`%{code}`%{message}
+``````Pour les questions %{nums:c} (addition et soustraction), ton score est de  %{score}
+``````ta note est de %{value}/20
+````exclude_questions: <co id="topics.exclude" linkends="topics.exclude.exp"></co>
+`````-`bonus
+`````-`question-difficile
 #
-@@-@text:@"la clé aggregate"
-@@-@id:@aggregate
-@@@@name:@les options
-@@@@aggregate:@<replaceable>xxx</replaceable><co id="topics.aggregate" linkends="topics.aggregate.exp"></co>
-@@@@value:@<replaceable>xxx</replaceable><co id="topics.aggregate.value" linkends="topics.aggregate.value.exp"></co>
+``-`text:`"la clé aggregate"
+``-`id:`aggregate
+````name:`les options
+````aggregate:`<replaceable>xxx</replaceable><co id="topics.aggregate" linkends="topics.aggregate.exp"></co>
+````value:`<replaceable>xxx</replaceable><co id="topics.aggregate.value" linkends="topics.aggregate.value.exp"></co>
+````questions:
+``````-`"*"
 
 </programlisting>
 
@@ -7142,6 +7146,9 @@ et le pourcentage du niveau. Vous pouvez choisir d'afficher la valeur  de la var
 
 <callout arearefs="preferences.decimalseparator" id="preferences.decimalseparator.exp">
 <para>Séparteur décimal</para></callout>
+
+<callout arearefs="preferences.answeredonly" id="preferences.answeredonly.exp">
+<para>N'affiche pas les topics si toutes les réponses sont vides.</para></callout>
 
 <callout arearefs="topics.text topics.text.bilan" id="topics.text.exp">
 <para>Un texte brut quelconque affiché sans condition de score.</para></callout>
@@ -7224,16 +7231,16 @@ cette valeur est ramenée à la valeur plancher.</para>
 <callout arearefs="topics.format" id="topics.format.exp">
 <para>La mise en forme de l'affichage.</para>
 <para>Par défaut l'affichage est :
-<code>format:@"%{name}: %{message} (%{value})"</code>
+<code>format:`"● %{name}: %{message} (%{value})"</code>
 </para>
 </callout>
 
 <callout arearefs="topics.value" id="topics.value.exp">
-<para>La note correspondante sera le ratio multiplié par 20 et arrondi au multiple de 0.25 le plus proche</para>
+<para>La note correspondante sera le ratio multiplié par 20 et arrondi au multiple de 0.25 le plus proche.</para>
 </callout>
 
 <callout arearefs="topics.decimals.global topics.decimalspc.global" id="topics.decimals.global.exp">
-<para>Changement du nombre de décimales</para>
+<para>Changement du nombre de décimales.</para>
 </callout>
  
 <callout arearefs="topics.list" id="topics.list.exp">
@@ -7265,8 +7272,8 @@ cette valeur est ramenée à la valeur plancher.</para>
           <para>on prend la somme des quotients entre le score de la question et
           le score maximal pour la question. Au dénominateur, le nombre de questions.</para>
           <para>Si on veut que le topic soit égal à la somme des ratios, on prend <replaceable>value:score</replaceable>,
-          et si on veut que le topic soit la moyenne des ratios (donc entre 0 et 1), on prend <replaceable>value:ratio</replaceable>
-          ou <replaceable>value:"ratio:pc"</replaceable>.</para>
+          et si on veut que le topic soit la moyenne des ratios (donc entre 0 et 1), on prend <replaceable>value:ratio</replaceable>.
+          Si laissé <emphasis>vide</emphasis>, le pourcentage sera affiché.</para>
         </listitem>
         </varlistentry>
 
@@ -7275,7 +7282,7 @@ cette valeur est ramenée à la valeur plancher.</para>
           <listitem>
           <para> on prend le minimum des scores, et au dénominateur le minimum des scores maximaux aux questions.</para>
           <para>Si on veut que le topic soit égal au min des scores on choisit <replaceable>value:score</replaceable>, 
-          et si on veut que le topic soit égal au rapport des deux, on prend <replaceable>value:ratio</replaceable></para>
+          et si on veut que le topic soit égal au rapport des deux, on prend <replaceable>value:ratio</replaceable>.</para>
         </listitem>
         </varlistentry>
 
@@ -7285,7 +7292,7 @@ cette valeur est ramenée à la valeur plancher.</para>
           <listitem>
           <para> on prend le maximum des scores, et au dénominateur le maximum des scores maximaux aux questions.</para>
           <para>Si on veut que le topic soit égal au max des scores on choisit <replaceable>value:score</replaceable>, 
-          et si on veut que le topic soit égal au rapport des deux, on prend <replaceable>value:ratio</replaceable></para>
+          et si on veut que le topic soit égal au rapport des deux, on prend <replaceable>value:ratio</replaceable>.</para>
         </listitem>
         </varlistentry>
 
@@ -7294,7 +7301,7 @@ cette valeur est ramenée à la valeur plancher.</para>
           <listitem>
           <para>on prend la valeur maximale du rapport, pour chaque question, entre le score obtenu pour la
          question et le score optimal pouvant être obtenu pour la question. Avec cette valeur d'aggregate,
-         <replaceable>value:score</replaceable> et <replaceable>value:ratio</replaceable> donnent la même chose </para>
+         <replaceable>value:score</replaceable> et <replaceable>value:ratio</replaceable> donnent la même chose.</para>
         </listitem>
         </varlistentry>
 
@@ -7303,14 +7310,14 @@ cette valeur est ramenée à la valeur plancher.</para>
           <listitem>
           <para>on prend la valeur minimale du rapport, pour chaque question, entre le score obtenu pour la
          question et le score optimal pouvant être obtenu pour la question. Avec cette valeur d'aggregate,
-         <replaceable>value:score</replaceable> et <replaceable>value:ratio</replaceable> donnent la même chose </para>
+         <replaceable>value:score</replaceable> et <replaceable>value:ratio</replaceable> donnent la même chose .</para>
         </listitem>
         </varlistentry>
 
         <varlistentry>
           <term>count(a) :</term>
           <listitem>
-          <para>nombre de questions ayant le score <replaceable>a</replaceable></para>
+          <para>nombre de questions ayant le score <replaceable>a</replaceable>.</para>
         </listitem>
         </varlistentry>
 
@@ -7326,8 +7333,8 @@ cette valeur est ramenée à la valeur plancher.</para>
 
 <callout arearefs="topics.aggregate.value" id="topics.aggregate.value.exp">
 <para>Peut prendre plusieurs options :
-<replaceable>score</replaceable>, <replaceable>ratio</replaceable>, <replaceable>"ratio:pc"</replaceable>,
-<replaceable>"ratio:a:b"</replaceable>.</para>
+<replaceable>score</replaceable>, <replaceable>ratio</replaceable>, <replaceable>"ratio:a:b"</replaceable>.
+Si laissé <emphasis>vide</emphasis>, le pourcentage sera affiché.</para>
 </callout>
 
 </calloutlist></para>
@@ -7339,38 +7346,38 @@ cette valeur est ramenée à la valeur plancher.</para>
 <programlisting>
 ---
 conf:
-@@niveauxstandard: <co id="topics.shared.levels" linkends="topics.shared.levels.exp"></co>
-@@@@levels:
-@@@@@@-@min:@75
-@@@@@@@@message:@très bonne maîtrise
-@@@@@@@@color:@"#1ab407"
-@@@@@@-@min:@50
-@@@@@@@@message:@maîtrise satisfaisante
-@@@@@@@@color:@"#2aea62"
-@@@@@@-@min:@25
-@@@@@@@@message:@maîtrise fragile
-@@@@@@@@color:@"#ffad26"
-@@@@@@-@message:@maîtrise@insuffisante
-@@@@@@@@color:@"#ff262c@
-@@@@decimals:@2 
-@@@@decimalsratio:@2 
-@@@@decimalspc:@0 
-@@@@floor:@0 
+``niveauxstandard: <co id="topics.shared.levels" linkends="topics.shared.levels.exp"></co>
+````levels:
+``````-`min:`75
+````````message:`très bonne maîtrise
+````````color:`"#1ab407"
+``````-`min:`50
+````````message:`maîtrise satisfaisante
+````````color:`"#2aea62"
+``````-`min:`25
+````````message:`maîtrise fragile
+````````color:`"#ffad26"
+``````-`message:`maîtrise insuffisante
+````````color:`"#ff262c"
+````decimals:`2 
+````decimalsratio:`2 
+````decimalspc:`0 
+````floor:`0 
 
 topics:
-@@-@id:@addition2
-@@@@name:@Savoir calculer la somme de deux nombres à deux chiffres
-@@@@questions:
-@@@@@@-@"add2:*"
-@@@@@@-@somme2ch
-@@@@conf:@niveauxstandard <co id="topics.shared.levels.conf" linkends="topics.shared.levels.conf.exp"></co>
-@@-@id:@soustraction2
-@@@@name:@Savoir calculer la différence de deux nombres à deux chiffres
-@@@@format:@"%{name}@:@%{score}/%{max}"
-@@@@questions:
-@@@@@@-@"sous2:*"
-@@@@@@-@"sous1:*"
-@@@@conf:@niveauxstandard <co id="topics.shared.levels.confbis" linkends="topics.shared.levels.conf.exp"></co>
+``-`id:`addition2
+````name:`Savoir calculer la somme de deux nombres à deux chiffres
+````questions:
+``````-`"add2:*"
+``````-`somme2ch
+````conf:`niveauxstandard <co id="topics.shared.levels.conf" linkends="topics.shared.levels.conf.exp"></co>
+``-`id:`soustraction2
+````name:`Savoir calculer la différence de deux nombres à deux chiffres
+````format:`"%{name}`:`%{score}/%{max}"
+````questions:
+``````-`"sous2:*"
+``````-`"sous1:*"
+````conf:`niveauxstandard <co id="topics.shared.levels.confbis" linkends="topics.shared.levels.conf.exp"></co>
 </programlisting>
 
 <para><calloutlist>
@@ -7391,48 +7398,48 @@ topics:
   <programlisting>
 # fichier nommé levels.yml
 preferences:
-@@odscolumns: level
-@@decimal_separator:@"," 
+``odscolumns: level
+``decimal_separator:`"," 
 #
 conf:
-@@niveauxstandard: 
-@@@@levels:
-@@@@@@-@min:@75
-@@@@@@@@message:@très bonne maîtrise
-@@@@@@@@color:@"#1ab407"
-@@@@@@-@min:@50
-@@@@@@@@message:@maîtrise satisfaisante
-@@@@@@@@color:@"#2aea62"
-@@@@@@-@min:@25
-@@@@@@@@message:@maîtrise fragile
-@@@@@@@@color:@"#ffad26"
-@@@@@@-@message:@maîtrise@insuffisante
-@@@@@@@@color:@"#ff262c@
-@@@@decimals:@2
-@@@@decimalsratio:@2 
-@@@@decimalspc:@2
-@@@@floor:@0
+``niveauxstandard: 
+````levels:
+``````-`min:`75
+````````message:`très bonne maîtrise
+````````color:`"#1ab407"
+``````-`min:`50
+````````message:`maîtrise satisfaisante
+````````color:`"#2aea62"
+``````-`min:`25
+````````message:`maîtrise fragile
+````````color:`"#ffad26"
+``````-`message:`maîtrise`insuffisante
+````````color:`"#ff262c`
+````decimals:`2
+````decimalsratio:`2 
+````decimalspc:`2
+````floor:`0
   </programlisting>
 
   <programlisting>
 ---
 include:
-@@-@../levels.yml
+``-`../levels.yml
 
 topics:
-@@-@id:@addition2
-@@@@name:@Savoir calculer la somme de deux nombres à deux chiffres
-@@@@questions:
-@@@@@@-@"add2:*"
-@@@@@@-@somme2ch
-@@@@conf:@niveauxstandard
-@@-@id:@soustraction2
-@@@@name:@Savoir calculer la différence de deux nombres à deux chiffres
-@@@@format:@"%{name}@:@%{score}/%{max}"
-@@@@questions:
-@@@@@@-@"sous2:*"
-@@@@@@-@"sous1:*"
-@@@@conf:@niveauxstandard
+``-`id:`addition2
+````name:`Savoir calculer la somme de deux nombres à deux chiffres
+````questions:
+``````-`"add2:*"
+``````-`somme2ch
+````conf:`niveauxstandard
+``-`id:`soustraction2
+````name:`Savoir calculer la différence de deux nombres à deux chiffres
+````format:`"%{name}`:`%{score}/%{max}"
+````questions:
+``````-`"sous2:*"
+``````-`"sous1:*"
+````conf:`niveauxstandard
   </programlisting>
           </sect5>
 
