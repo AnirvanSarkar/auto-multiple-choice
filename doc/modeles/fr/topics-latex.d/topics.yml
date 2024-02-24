@@ -1,0 +1,82 @@
+---
+#
+# les dièses servent à générer des commentaires qui ne seront pas lus par YAML.
+#
+preferences: # préférences globales 
+  odscolumns: level #  pour l'export en ODS ;  afficher code à la place de value, à utiliser avec code mis dans levels (voir plus bas).
+  skip_indicatives: 0 # Pour tenir compte des questions indicatives dans les pourcentages.
+  decimal_separator: "," # choix du séparateur décimal, par défautc'est le point.
+#
+##
+#
+topics: # les paramétrages des compétences en elles-mêmes 
+  - text: "Rappel : Ne pas oublier les retenues dans les opérations" # texte automatiquement ajouté AVANT les éléments de compétences
+#
+#
+#
+  - id: addition2
+   # à choisir sans signe de ponctuation et diacritique
+    name: Savoir calculer la somme de deux nombres à deux chiffres.
+    # accents et espaces possibles
+#
+    questions: # la liste des questions concernées par cette compétence
+      - "add2:*" # possibilité de sélectionner toutes les questions commençant par add2:
+      - somme2ch # seulement cette question là
+    annotate color: "#B22222" # voir note 11
+#
+    levels: # les différents niveaux choisis et les codages correspondants
+      - min: 75 # minimum à atteindre pour ce niveau
+        message: très bonne maîtrise # le message choisi pour ce niveau, à utliliser avec format (voir plus bas)
+        color: "#1ab407" #code hexadécimal de la couleur choisi pour ce niveau
+        code: 4 # codage correspondant à ce niveau pour odscolumns (voir plus haut)
+      - min: 50
+        message: maîtrise satisfaisante
+        color: "#2aea62" 
+        code: 3
+      - min: 25
+        message: maîtrise fragile
+        color: "#ffad26" 
+        code: 2
+      - message: maîtrise insuffisante
+        color: "#ff262c" 
+        code: 1
+    decimals: 0 # Nombre de décimales pour %{score} et %{code}, 0 par défaut.
+    decimalsratio: 2 # Nombre de décimales pour %{ratio}, 2 par défaut.
+    decimalspc: 0 # Nombre de décimales pour %{value}, 0 par défaut.
+    floor: 0 # valeur plancher, voir note 20
+#
+#
+#
+  - id: soustraction # autre compétence
+    name: Savoir calculer la différenc de deux nombres à deux chiffres
+    format: "%{name} : %{score}/%{max}" # mise en forme de l'affichage
+#
+    questions:
+      - "sous2*" 
+      - "sous1*" 
+    annotate color: 22 # voir note 10
+#
+#
+# L'ordre des clés n'est pas important tant que les espaces sont respectées.
+  - id: bilan
+    name: Savoir calculer
+    levels: # les différents niveaux choisis et les codages correspondants qui peuvent être différents pour chaque compétence.
+      - min: 85 # minimum à atteindre pour ce niveau
+        message: très bonne maîtrise # le message choisi pour ce niveau, à utliliser avec format (voir plus bas)
+        color: "#1ab407" #code hexadécimal de la couleur choisi pour ce niveau
+        code: 4 # codage correspondant à ce niveau pour odscolumns (voir plus haut)
+      - min: 65
+        message: maîtrise satisfaisante
+        color: "#2aea62" 
+        code: 3
+      - min: 40
+        message: maîtrise fragile
+        color: "#ffad26" 
+        code: 2
+      - message: maîtrise insuffisante
+        color: "#ff262c" 
+        code: 1    
+    format: "%{name} : taux de réussite = %{value} soit le niveau %{code} atteint."
+    decimalspc: 2
+    questions:
+      - "*" # Toutes les questions sont sélectionnées

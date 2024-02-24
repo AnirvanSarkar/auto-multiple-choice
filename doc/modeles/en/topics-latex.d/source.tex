@@ -1,0 +1,103 @@
+\documentclass[a4paper]{article}
+
+\usepackage[bloc,completemulti,insidebox]{automultiplechoice}
+\begin{document}
+
+%%% préparation des groupes
+
+\setdefaultgroupmode{withreplacement}
+
+\element{addition}{
+  \begin{questionmultx}{add2:a}
+Add $25+17$
+
+\AMCnumericChoices{42}{digits=2,decimals=0,sign=false}
+  \end{questionmultx}
+}
+
+\element{addition}{
+  \begin{questionmultx}{add2:b}
+Add $39+19$
+
+\AMCnumericChoices{58}{digits=2,decimals=0,sign=false}
+  \end{questionmultx}
+}
+
+\element{addition}{
+  \begin{questionmultx}{somme2ch}
+Add $21+12$
+
+\AMCnumericChoices{33}{digits=2,decimals=0,sign=false}
+  \end{questionmultx}
+}
+
+
+\element{subtraction}{
+  \begin{questionmultx}{sous1}
+Subtract $59 - 17$
+
+\AMCnumericChoices{42}{digits=2,decimals=0,sign=false}
+  \end{questionmultx}
+}
+
+\element{subtraction}{
+  \begin{questionmultx}{sous2}
+Subtract $39-19$
+
+\AMCnumericChoices{20}{digits=2,decimals=0,sign=false}
+  \end{questionmultx}
+}
+%%% fabrication des copies
+
+\exemplaire{10}{
+
+%%% beginning of the test sheet header:
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examination on Jan., 1st, 2008\end{minipage}
+\namefield{\fbox{
+                \begin{minipage}{.5\linewidth}
+                  Firstname and lastname:
+
+                  \vspace*{.5cm}\namefielddots
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\begin{center}\em
+Duration : 10 minutes.
+
+  No documents allowed. The use of electronic calculators is forbidden.
+
+
+  Questions using the sign \multiSymbole{} may have
+  zero, one or several correct answers.  Other questions have a single correct answer.
+
+  Negative points may be attributed to \emph{very
+    bad} answers.
+\end{center}
+\vspace{1ex}
+
+%%% end of the header
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large Addition
+  \vspace{1mm}\hrule
+\end{center}
+
+\restituegroupe{addition}
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large Subtraction
+  \vspace{2mm}\hrule
+\end{center}
+
+\restituegroupe{subtraction}
+}
+
+\end{document}

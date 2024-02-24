@@ -1,0 +1,82 @@
+---
+#
+# the hash marks are used to generate comments that will not be read by YAML
+#
+preferences: # the global preferences
+  odscolumns: level # for export to ODS to display code instead of value, to be used with code set in levels (see below).
+  skip_indicatives: 0 # To include indicative questions in the percentages.
+  decimal_separator: "," # choice of decimal separator, the default is the point.
+#
+##
+#
+topics: # settings the skills 
+  - text: "Reminder: Don't forget carried numbers" # text automatically added BEFORE skill elements
+#
+#
+#
+  - id: addition2
+   # id topic must only contain alphanumeric characters, without spaces and accented characters
+    name: Your description
+    #  characters with spaces and accented characters are possible
+#
+    questions: # the questions list related to this skill
+      - "add2:*" # all questions with ID add2: 
+      - somme2ch # only this question with this ID 
+    annotate color: "#B22222" # see note 10
+#
+    levels: # the different levels and the corresponding transcription
+      - min: 75 # minimum level to be achieved
+        message: your message # the printed message for this level, to be used with format (see below)
+        color: "#1ab407" #hexadecimal code appropriate to the selected color regarding this level
+        code: 4 # transcription appropriate regarding this level to ods export (see above)
+      - min: 50
+        message: your message
+        color: "#2aea62" 
+        code: 3
+      - min: 25
+        message: your message
+        color: "#ffad26" 
+        code: 2
+      - message: your message
+        color: "#ff262c" 
+        code: 1
+    decimals: 0 # Number of decimals for %{score} and %{code}, 0 default.
+    decimalsratio: 2 # Number of decimals for %{ratio}, 2 default.
+    decimalspc: 0 # Number of decimals for %{value}, 0 default.
+    floor: 0 # floor score, see note 20
+#
+#
+#
+  - id: soustraction # other skill
+    name: Your description
+    format: "%{name} : %{score}/%{max}" # display layout
+#
+    questions:
+      - "sous2*" 
+      - "sous1*" 
+    annotate color: 22 # see note 11
+#
+#
+# key order is not important as long as the blank spaces are complied.
+  - id: bilan
+    name: Your description
+    levels: # the different levels and the corresponding transcription
+      - min: 85 # minimum level to be achieved
+        message: your message # the printed message for this level, to be used with format (see below)
+        color: "#1ab407" #hexadecimal code appropriate to the selected color regarding this level
+        code: 4 # transcription appropriate regarding this level to ods export  (see above)
+      - min: 65
+        message: your message
+        color: "#2aea62" 
+        code: 3
+      - min: 40
+        message: your message
+        color: "#ffad26" 
+        code: 2
+      - message: your message
+        color: "#ff262c" 
+        code: 1    
+    format: "%{name} : success rate = %{value} so level %{code} achevied."
+    decimalspc: 2
+    questions:
+      - "*" # All questions are included
