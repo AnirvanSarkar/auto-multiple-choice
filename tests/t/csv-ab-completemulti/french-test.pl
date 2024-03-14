@@ -22,13 +22,6 @@ use utf8;
 
 # Use and propagate French LANG to test sorting of accentuated strings
 
-use POSIX qw(:locale_h);
-
-for my $lc (qw/ LC_ALL LC_COLLATE LC_MESSAGES LANG /) {
-    setlocale( &$lc, "fr_FR.UTF-8" ) if($lc ne 'LANG');
-    $ENV{$lc} = "fr_FR.UTF-8";
-}
-
 require "./AMC/Test.pm";
 
 AMC::Test->new(
