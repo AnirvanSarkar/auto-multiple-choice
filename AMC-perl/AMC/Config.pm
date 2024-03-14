@@ -312,6 +312,7 @@ sub defaults {
         bw_threshold         => 0.6,
         ignore_red           => 0,
         try_three            => 1,
+        defaut_multi_scan_mode   => 'strict',
 
         prepare_solution       => 1,
         prepare_indiv_solution => 1,
@@ -447,6 +448,7 @@ sub defaults {
         notes              => 'notes.xml',
         seuil              => '',
         seuil_up           => '',
+        multi_scan_mode    => '',
         encodage_csv       => '',
         encodage_liste     => '',
         maj_bareme         => 1,

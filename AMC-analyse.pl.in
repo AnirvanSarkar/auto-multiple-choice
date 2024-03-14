@@ -71,26 +71,28 @@ my $pre_allocate         = 0;
 my $try_three            = 1;
 my $tag_overwritten      = 1;
 my $unlink_on_global_err = 0;
+my $multi_scan_mode      = 'strict';
 
 GetProjectOptions(
-    ":data:dir|data=s"               => \$data_dir,
-    ":cr:dir|cr=s"                   => \$cr_dir,
-    ":tolerance_marque|tol-marque=s" => \$tol_mark,
-    ":box_size_proportion|prop=s"    => \$prop,
-    ":bw_threshold|bw-threshold=s"   => \$bw_threshold,
-    "debug-pixels!"                  => \$debug_pixels,
-    "progression=s"                  => \$progress,
-    "progression-id=s"               => \$progress_id,
-    "liste-fichiers=s"               => \$scans_list,
-    ":project_dir|projet=s"          => \$project_dir,
-    ":n_procs|n-procs=s"             => \$n_procs,
-    "debug-image-dir=s"              => \$debug_image_dir,
-    ":auto_capture_mode|multiple!"   => \$multiple,
-    ":ignore_red|ignore-red!"        => \$ignore_red,
-    "pre-allocate=s"                 => \$pre_allocate,
-    ":try_three|try-three!"          => \$try_three,
-    "tag-overwritten!"               => \$tag_overwritten,
-    "unlink-on-global-err!"          => \$unlink_on_global_err,
+    ":data:dir|data=s"                   => \$data_dir,
+    ":cr:dir|cr=s"                       => \$cr_dir,
+    ":tolerance_marque|tol-marque=s"     => \$tol_mark,
+    ":box_size_proportion|prop=s"        => \$prop,
+    ":bw_threshold|bw-threshold=s"       => \$bw_threshold,
+    "debug-pixels!"                      => \$debug_pixels,
+    "progression=s"                      => \$progress,
+    "progression-id=s"                   => \$progress_id,
+    "liste-fichiers=s"                   => \$scans_list,
+    ":project_dir|projet=s"              => \$project_dir,
+    ":n_procs|n-procs=s"                 => \$n_procs,
+    "debug-image-dir=s"                  => \$debug_image_dir,
+    ":auto_capture_mode|multiple!"       => \$multiple,
+    ":ignore_red|ignore-red!"            => \$ignore_red,
+    "pre-allocate=s"                     => \$pre_allocate,
+    ":try_three|try-three!"              => \$try_three,
+    "tag-overwritten!"                   => \$tag_overwritten,
+    "unlink-on-global-err!"              => \$unlink_on_global_err,
+    ":multi_scan_mode|multi-scan-mode=s" => \$multi_scan_mode,
 );
 
 $tag_overwritten = 0 if ($multiple);
@@ -753,7 +755,7 @@ s/^([A-Z_]+)(.*):\s([^\[]+)( \[.*\]|\.)$/"[$1$2] " . translate_error($1, $3) . $
     $progress_h->progres($delta);
 }
 
-sub global_error {
+sub register_unrecognized {
     my ($scans) = @_;
 
     # register failed detection of page IDs
@@ -763,93 +765,36 @@ sub global_error {
         if ( !defined( $s->{ids} ) ) {
             debug "Register unrecognized scan: $s->{scan}";
             $capture->failed( $s->{scan} );
-            $s->{registered} = 1;
         }
     }
     $capture->end_transaction('gFLD');
+
+    @$scans = grep { defined($_->{ids}) } @$scans;
+}
+
+sub global_error {
+    my ($scans) = @_;
+
+    register_unrecognized($scans);
 
     # unlink all scans, except those with unrecognized ID, which has
     # been registered for analysis
     if ($unlink_on_global_err) {
         for my $s (@$scans) {
-            if ( !$s->{registered} ) {
-                if ( -f $s->{scan} ) {
-                    debug "Unlink scan: $s->{scan}";
-                    unlink( $s->{scan} );
-                } else {
-                    debug "Scan to unlink not found: $s->{scan}";
-                }
+            if ( -f $s->{scan} ) {
+                debug "Unlink scan: $s->{scan}";
+                unlink( $s->{scan} );
+            } else {
+                debug "Scan to unlink not found: $s->{scan}";
             }
         }
     }
+
     exit(1);
 }
 
-if ( $max_enter > 1 && $multiple && !$multi ) {
-
-    # photocopy mode, with more than 1 page per student copy: we must
-    # check first that we will be able to know which scans belongs to
-    # the same student…
-
-    debug "Photocopy mode with $max_enter answers pages";
-
-    my @allocate = ();
-    my $scan_i;
-
-    # first read ID from the scans…
-
-    $queue = AMC::Queue::new( 'max.procs', $n_procs, get_returned_values => 1 );
-
-    for my $s (@scans) {
-        $queue->add_process( \&one_scan, $s, 0, 1 );
-    }
-
-    $queue->run;
-
-    my $scan_ids = $queue->returned_values();
-
-    # merge scan files with result
-
-    for my $i ( 0 .. $#scans ) {
-        $scan_ids->[$i]->{scan} = $scans[$i];
-    }
-
-    # remove blank scans from list
-
-    $scan_ids = [
-        grep {
-            if ( $_->{blank} ) {
-                debug "Blank page: $_->{scan}";
-                if ($unlink_on_global_err) {
-                    debug "Unlink scan: $_->{scan}";
-                    unlink $_->{scan};
-                }
-                0;
-            } else {
-                1;
-            }
-        } @$scan_ids
-    ];
-
-    # Is there any unrecognized scan ? Abort if so.
-
-    my @unrecognized = grep { !defined( $_->{ids} ) } @$scan_ids;
-    if (@unrecognized) {
-        debug "UNRECOGNIZED:";
-        for my $s (@unrecognized) {
-            debug $s->{scan};
-        }
-        print "ERR: "
-
-# TRANSLATORS: Message displayed when not all scans are recognized (AMC don't know which subject page some scans come from), after automatic data capture.
-          . sprintf( __("%d scans are not recognized:"), 0 + @unrecognized )
-          . "\n";
-        for my $i ( 0 .. min( 4, $#unrecognized ) ) {
-            print "ERR: " . $unrecognized[$i]->{scan} . "\n";
-        }
-        print "ERR: ...\n" if ( @unrecognized > 5 );
-        global_error($scan_ids);
-    }
+sub multi_scan_allocate_strict {
+    my ($scan_ids) = @_;
 
     # check that the scans are grouped by student copy number, and
     # allocate a copy number.
@@ -924,6 +869,149 @@ if ( $max_enter > 1 && $multiple && !$multi ) {
           . __("Student sheet:") . " "
           . join( ',', @student_nbfail ) . "\n";
         global_error($scan_ids);
+    }
+}
+
+sub multi_scan_allocate_increasing {
+    my ($scan_ids) = @_;
+
+    my $current_student = -1;
+    my $current_page = -1;
+    my $current_copy = {};
+
+    for my $s (@$scan_ids) {
+        my ( $student, $page ) = @{ $s->{ids} };
+
+        if($student != $current_student ||
+           $page <= $current_page) {
+            $current_copy->{$current_student} ++;
+        }
+
+        $s->{copy} = $current_copy->{$current_student};
+        $current_student= $student;
+        $current_page = $page;
+    }
+}
+
+sub multi_scan_allocate_file {
+    my ($scan_ids) = @_;
+
+    # Get scans origin file index, that should be at the beginning of
+    # the filename if the scans were copied in the project directory
+
+    for my $s (@$scan_ids) {
+        my $f = $s->{scan};
+        $f =~ s:.*/::;
+        if($f =~ /^([0-9]+)_/) {
+            $s->{index} = $1;
+        } else {
+            print "ERR: The scan files must be copied inside the project directory by AMC for the `file' multi_scan_mode to run.";
+            exit(1);
+        }
+    }
+
+    my $done = {};
+
+    for my $s (@$scan_ids) {
+        my ( $student, $page ) = @{ $s->{ids} };
+        my $copy = $s->{index};
+
+        my $spc = "$student:$page:$copy";
+
+        if($done->{$spc}) {
+            delete $s->{ids};
+        } else {
+            $s->{copy} = $copy;
+            $done->{$spc} = 1;
+        }
+    }
+
+    register_unrecognized($scan_ids);
+}
+
+if ( $max_enter > 1 && $multiple && !$multi ) {
+
+    # photocopy mode, with more than 1 page per student copy: we must
+    # check first that we will be able to know which scans belongs to
+    # the same student…
+
+    debug "Photocopy mode with $max_enter answers pages";
+
+    # first read ID from the scans…
+
+    $queue = AMC::Queue::new( 'max.procs', $n_procs, get_returned_values => 1 );
+
+    for my $s (@scans) {
+        $queue->add_process( \&one_scan, $s, 0, 1 );
+    }
+
+    $queue->run;
+
+    my $scan_ids = $queue->returned_values();
+
+    # merge scan files with result
+
+    for my $i ( 0 .. $#scans ) {
+        $scan_ids->[$i]->{scan} = $scans[$i];
+    }
+
+    # remove blank scans from list
+
+    $scan_ids = [
+        grep {
+            if ( $_->{blank} ) {
+                debug "Blank page: $_->{scan}";
+                if ($unlink_on_global_err) {
+                    debug "Unlink scan: $_->{scan}";
+                    unlink $_->{scan};
+                }
+                0;
+            } else {
+                1;
+            }
+        } @$scan_ids
+    ];
+
+    # Is there any unrecognized scan ?
+
+    my @unrecognized = grep { !defined( $_->{ids} ) } @$scan_ids;
+    if (@unrecognized) {
+        debug "UNRECOGNIZED:";
+        for my $s (@unrecognized) {
+            debug $s->{scan};
+        }
+        # With the --multi-scan-mode option other than strict, these
+        # unrecognized pages are allowed (maybe we have extra pages
+        # with instructions for the sudents, unrelated to AMC).
+        #
+        # Without the --multi-scan-mode strict option, these unrecognized pages
+        # could break the grouping of scans by student, so all is
+        # cancelled.
+        if($multi_scan_mode ne 'strict') {
+            register_unrecognized($scan_ids);
+        } else {
+            print "ERR: "
+# TRANSLATORS: Message displayed when not all scans are recognized (AMC don't know which subject page some scans come from), after automatic data capture.
+                . sprintf( __("%d scans are not recognized:"), 0 + @unrecognized )
+                . "\n";
+            for my $i ( 0 .. min( 4, $#unrecognized ) ) {
+                print "ERR: " . $unrecognized[$i]->{scan} . "\n";
+            }
+            print "ERR: ...\n" if ( @unrecognized > 5 );
+            global_error($scan_ids);
+        }
+    }
+
+    if($multi_scan_mode eq 'strict' ||
+       $multi_scan_mode eq 'skip-unrecognized') {
+        multi_scan_allocate_strict($scan_ids);
+    } elsif($multi_scan_mode eq 'increasing') {
+        multi_scan_allocate_increasing($scan_ids);
+    } elsif($multi_scan_mode eq 'file') {
+        multi_scan_allocate_file($scan_ids);
+    } else {
+        print "ERR: Unknown multi_scan_mode $multi_scan_mode";
+        exit(1);
     }
 
     # All is OK: we can launch the full data capture!

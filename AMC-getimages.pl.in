@@ -90,17 +90,21 @@ $copy_to =~ s:(?<=.)/+$::;
 # original_file builds a hashref for a original scan file (not yet
 # processed or split or moved)
 
+my $original_file_index = 1;
+
 sub original_file {
     my ($file_path) = @_;
-    return ( { path => $file_path, orig => 1 } );
+    return ( { path => $file_path,
+               orig => 1,
+               index => $original_file_index++ } );
 }
 
 # derivative_file builds a hashref for a file that has already been
 # processed in some way by AMC-getimages
 
 sub derivative_file {
-    my ($file_path) = @_;
-    return ( { path => $file_path } );
+    my ($origin, $file_path) = @_;
+    return ( { path => $file_path, index => $origin->{index} } );
 }
 
 # check_split_path($f,$force) computes (if $force is set, or if not
@@ -188,7 +192,7 @@ sub move_derivative {
 sub replace_by {
     my ( $origin, @derivative_paths ) = @_;
     my @fd =
-      map { move_derivative( $origin, derivative_file($_) ) } @derivative_paths;
+      map { move_derivative( $origin, derivative_file($origin, $_) ) } @derivative_paths;
     unlink $origin->{path}
       if ( !$origin->{orig} );
     return (@fd);
@@ -649,7 +653,7 @@ if ( $copy_to && @f ) {
         # this could break the process somewere...
         my $fb = string_to_filename( $fich->{file}, 'scan' );
 
-        my $dest = $copy_to . "/" . $fb;
+        my $dest = $copy_to . "/" . $fich->{index} . '_' . $fb;
 
         my $deplace = 0;
 
@@ -663,14 +667,14 @@ if ( $copy_to && @f ) {
             }
             debug "$fich->{path} --> $dest";
             if ( copy( $fich->{path}, $dest ) ) {
-                push @fl, derivative_file($dest);
+                push @fl, derivative_file($fich, $dest);
                 $deplace = 1;
             } else {
                 debug "COPY ERROR: $!";
             }
         }
         $c += $deplace;
-        push @fl, derivative_file( $fich->{path} )
+        push @fl, derivative_file( $fich, $fich->{path} )
           if ( !$deplace );
 
         $p->progres($dp) if ($p);
