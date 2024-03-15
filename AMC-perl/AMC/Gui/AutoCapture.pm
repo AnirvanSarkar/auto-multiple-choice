@@ -64,6 +64,16 @@ sub new {
                 # subjects. This is a menu entry.
                 "Some answer sheets were photocopied")
         ),
+        multi_scan_mode => cb_model(
+            # TRANSLATORS: One of the multi_scan_mode. This is a menu entry.
+            'strict' => __("Strict"),
+            # TRANSLATORS: One of the multi_scan_mode. This is a menu entry.
+            'skip-unrecognized' => __("Ignore unrecognized"),
+            # TRANSLATORS: One of the multi_scan_mode. This is a menu entry.
+            'increasing' => __("Increasing"),
+            # TRANSLATORS: One of the multi_scan_mode. This is a menu entry.
+            'file' => __("One student per file"),
+        ),
     );
 
     $self->set_env();
@@ -84,6 +94,7 @@ sub set_env {
         $self->{capture}->begin_read_transaction('ckev');
         $self->{n} = $self->{capture}->n_copies;
         $self->{mcopy} = $self->{capture}->max_copy_number() + 1;
+        $self->{max_enter} = $self->{layout}->max_enter();
 
         $self->{multi} = $self->{layout}->variable("build:multi");
         if ( $self->{multi} ) {
@@ -125,6 +136,8 @@ sub dialog {
           saisie_auto_chooser
           saisie_auto_c_auto_capture_mode
           saisie_auto_cb_allocate_ids
+          saisie_auto_c_multi_scan_mode
+          multi_scan_mode_box
           button_capture_go/
     );
 
@@ -201,12 +214,20 @@ sub auto_mode_update {
     my $acm = $self->get('local:auto_capture_mode');
     $acm = -1 if ( !defined($acm) );
     $self->get_ui('button_capture_go')->set_sensitive( $acm >= 0 );
-    my $w = $self->get_ui('saisie_auto_cb_allocate_ids');
+    my $w  = $self->get_ui('saisie_auto_cb_allocate_ids');
+    my $wm = $self->get_ui('multi_scan_mode_box');
     if ($w) {
         if ( $acm == 1 ) {
             $w->show();
         } else {
             $w->hide();
+        }
+    }
+    if ($wm) {
+        if( $acm == 1 && $self->{max_enter} > 1 && !$self->{multi} ) {
+            $wm->show();
+        } else {
+            $wm->hide();
         }
     }
 }
