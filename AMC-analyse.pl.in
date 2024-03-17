@@ -882,12 +882,16 @@ sub multi_scan_allocate_increasing {
     for my $s (@$scan_ids) {
         my ( $student, $page ) = @{ $s->{ids} };
 
+        debug("Scan ($student,$page)");
+
         if($student != $current_student ||
            $page <= $current_page) {
-            $current_copy->{$current_student} ++;
+            debug("-> next copy");
+            $current_copy->{$student} ++;
         }
 
-        $s->{copy} = $current_copy->{$current_student};
+        $s->{copy} = $current_copy->{$student};
+        debug("-> to copy $s->{copy}");
         $current_student= $student;
         $current_page = $page;
     }
@@ -917,6 +921,8 @@ sub multi_scan_allocate_file {
         my $copy = $s->{index};
 
         my $spc = "$student:$page:$copy";
+
+        debug("Scan ($student,$page) file-index=$copy");
 
         if($done->{$spc}) {
             delete $s->{ids};
