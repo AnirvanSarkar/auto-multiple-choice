@@ -103,6 +103,7 @@ my $defaults = {
     skip_scans          => 0,
     tracedest           => \*STDERR,
     debug_file          => '',
+    log_to              => '',
     pages               => '',
     extract_with        => 'qpdf',
     force_convert       => 0,
@@ -127,7 +128,7 @@ my $defaults = {
 sub new {
     my ( $class, %oo ) = @_;
 
-    my $self = { error=>0, %$defaults };
+    my $self = { error => 0, %$defaults };
 
     for ( keys %oo ) {
         $self->{$_} = $oo{$_} if ( exists( $self->{$_} ) );
@@ -140,7 +141,7 @@ sub new {
     GetOptions(
         "debug!"         => \$self->{debug},
         "blind!"         => \$self->{blind},
-        "log-to=s"       => \$self->{debug_file},
+        "log-to=s"       => \$self->{log_to},
         "to-stdout!"     => \$to_stdout,
         "extract-with=s" => \$self->{extract_with},
         "tmp=s"          => \$self->{tmpdir},
@@ -157,7 +158,7 @@ sub new {
 sub clean {
     my ($self) = @_;
 
-    $self->set( src => '', scans => '', names => '', list => '' );
+    $self->set( src => '', scans => '', names => '', list => '', error => 0 );
 }
 
 sub setup {
@@ -280,9 +281,12 @@ sub install {
         mkdir( $self->{temp_dir} . "/$d" ) if ( !-d $self->{temp_dir} . "/$d" );
     }
 
-    $self->{debug_file} = $self->{temp_dir} . "/debug.log"
-      if ( !$self->{debug_file} );
-    open( DB, ">", $self->{debug_file} );
+    if ( $self->{log_to} ) {
+        $self->{debug_file} = $self->{log_to};
+    } else {
+        $self->{debug_file} = $self->{temp_dir} . "/debug.log";
+    }
+    open( DB, ">>", $self->{debug_file} );
     print DB "Test\n";
     close(DB);
 
