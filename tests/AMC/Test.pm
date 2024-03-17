@@ -594,7 +594,7 @@ sub analyse {
         '--tol-marque',
         $self->{tol_marque},
         ( $self->{ignore_red} ? '--ignore-red' : '--no-ignore-red' ),
-        '--projet',
+        '--project-dir',
         '%PROJ',
         '--data',
         '%DATA',
@@ -617,7 +617,7 @@ sub analyse {
                  $self->{debug}
               || $self->{debug_pixels} ? '--debug-pixels' : '--no-debug-pixels'
         ),
-        '--projet',
+        '--project-dir',
         '%PROJ', '--data', '%DATA',
         '--liste-fichiers',
         $scans_list,
