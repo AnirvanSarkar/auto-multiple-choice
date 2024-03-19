@@ -25,6 +25,7 @@ use File::Copy;
 use File::Spec::Functions
   qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
 use File::Temp qw/ tempfile tempdir /;
+use File::Path qw/ make_path /;
 
 use Module::Load;
 
@@ -65,6 +66,7 @@ my $latex_engine    = 'latex';
 my @engine_args     = ();
 my $engine_topdf    = '';
 my $prefix          = '';
+my $build_dir       = './';
 my $filter          = '';
 my $filtered_source = '';
 my $codedigit       = '';
@@ -96,6 +98,8 @@ GetProjectOptions(
     ":data:dir|data=s"                             => \$data_dir,
     "calage=s"                                     => \$calage,
     ":texsrc:file|source=s"                        => \$source,
+    ":jobname:file|jobname=s"			   => \$jobname,
+    ":build_dir:dir|builddir=s"                    => \$build_dir,
     ":doc_setting:file|out-calage=s"               => \$out_calage,
     ":doc_question:file|out-sujet=s"               => \$out_sujet,
     ":doc_solution:file|out-corrige=s"             => \$out_corrige,
@@ -114,6 +118,19 @@ GetProjectOptions(
 );
 
 $source = $ARGV[0] if ( !$source );
+make_path ($build_dir, {error => \my $err} );
+if ($err && @$err) {
+    for my $diag (@$err) {
+        my ($file, $message) = %$diag;
+        if ($file eq '') {
+            print "general error: $message\n";
+        }
+        else {
+            print "problem creating $file: $message\n";
+        }
+    }
+    exit (2);
+}
 
 debug("AMC-prepare / DEBUG") if (get_debug());
 
@@ -194,7 +211,7 @@ $base =~ s/\.[a-zA-Z0-9]{1,4}$//gi;
 # $filtered_source is the LaTeX fil made from the source file by the
 # filter (for exemple, LaTeX or AMC-TXT).
 
-$filtered_source = $base . '_filtered.tex' if ( !$filtered_source );
+$filtered_source = "$build_dir/$base" . '_filtered.tex' if ( !$filtered_source );
 
 # default $data_dir value (hardly ever used):
 
@@ -574,9 +591,9 @@ sub execute {
     # first removes previous run's outputs
 
     for my $ext (qw/pdf dvi ps/) {
-        if ( -f "$jobname.$ext" ) {
+        if ( -f "$build_dir/$jobname.$ext" ) {
             debug "Removing old $ext";
-            unlink("$jobname.$ext");
+            unlink("$build_dir/$jobname.$ext");
         }
     }
 
@@ -693,7 +710,7 @@ sub execute {
     if ( $format eq 'dvi' ) {
         if ( $oo{latex_only} ) {
             debug "No need to build the PDF file.";
-        } elsif ( -f "$jobname.dvi" ) {
+        } elsif ( -f "$build_dir/$jobname.dvi" ) {
 
             # default DVI->PDF engine is dvipdfmx
 
@@ -717,12 +734,12 @@ sub execute {
                 debug "Converting DVI to PDF with $engine_topdf ...";
                 if ( $engine_topdf eq 'dvipdf' ) {
                     system_debug( cmd =>
-                          [ $engine_topdf, "$jobname.dvi", "$jobname.pdf" ] );
+                          [ $engine_topdf, "$build_dir/$jobname.dvi", "$build_dir/$jobname.pdf" ] );
                 } else {
                     system_debug(
                         cmd => [
                             $engine_topdf,  "-o",
-                            "$jobname.pdf", "$jobname.dvi"
+                            "$build_dir/$jobname.pdf", "$build_dir/$jobname.dvi"
                         ]
                     );
                 }
@@ -747,7 +764,7 @@ sub prepare_filter {
     if ($filter) {
         if ( !$filter_engine ) {
             load("AMC::Filter::$filter");
-            $filter_engine = "AMC::Filter::$filter"->new( jobname => $jobname );
+            $filter_engine = "AMC::Filter::$filter"->new( jobname => "$build_dir/$jobname" );
             $filter_engine->pre_filter($source);
 
             # sometimes the filter says that the source file don't need to
@@ -860,7 +877,7 @@ sub latex_cmd {
 
     # build a configuration tex file, that will be read by the
     # autoultiplechoice LaTeX package, from the %o options:
-    open( CONFIG, ">:utf8", "$jobname-config.tex" )
+    open( CONFIG, ">:utf8", "$build_dir/$jobname-config.tex" )
       or die "Unable to open config file: $!";
     print CONFIG latex_reproducible_commands($latex_engine) if ($epoch);
     for my $k ( keys %o ) {
@@ -916,7 +933,7 @@ sub build_solution {
         command_opts => [ %global_opts, CorrigeExterne => 1 ],
         text         => __ "Building the solution"
     );
-    transfer( "$jobname.pdf", $out_corrige );
+    transfer( "$build_dir/$jobname.pdf", $out_corrige );
     give_latex_errors( __ "solution" );
 }
 
@@ -933,8 +950,8 @@ sub build_catalog {
         command_opts => [ %global_opts, CatalogExterne => 1 ],
         text         => __ "Building the catalog"
     );
-    transfer( "$jobname.pdf", $out_catalog );
-    analyse_cslog("$jobname.amc");
+    transfer( "$build_dir/$jobname.pdf", $out_catalog );
+    analyse_cslog("$build_dir/$jobname.amc");
     give_latex_errors( __ "catalog" );
 }
 
@@ -952,10 +969,11 @@ if ( $to_do{s} ) {
 
     @output_files = ( $out_sujet, $out_calage, $out_corrige, $out_catalog );
 
-    $out_calage  = $prefix . "calage.xy"   if ( !$out_calage );
-    $out_corrige = $prefix . "corrige.pdf" if ( !$out_corrige );
-    $out_catalog = $prefix . "catalog.pdf" if ( !$out_catalog );
-    $out_sujet   = $prefix . "sujet.pdf"   if ( !$out_sujet );
+    $out_calage  = $prefix . "calage.xy"                if ( !$out_calage );
+    $out_corrige = $prefix . "corrige.pdf"              if ( !$out_corrige );
+    $out_catalog = $prefix . "catalog.pdf"              if ( !$out_catalog );
+    $out_sujet   = $prefix . "sujet.pdf"                if ( !$out_sujet );
+    $out_corrige_indiv = $prefix . "indiv-solution.pdf" if ( !$out_corrige_indiv );
 
     for my $f ( $out_calage, $out_corrige, $out_corrige_indiv, $out_sujet,
         $out_catalog )
@@ -978,7 +996,7 @@ if ( $to_do{s} ) {
         command_opts => [ %global_opts, SujetExterne => 1 ],
         text         => __ "Building the question sheet"
     );
-    analyse_amclog("$jobname.amc");
+    analyse_amclog("$build_dir/$jobname.amc");
     give_latex_errors( __ "question sheet" );
 
     if ( $a_errors > 0 ) {
@@ -986,8 +1004,8 @@ if ( $to_do{s} ) {
         exit_with_error();
     }
 
-    transfer( "$jobname.pdf", $out_sujet );
-    transfer( "$jobname.xy",  $out_calage );
+    transfer( "$build_dir/$jobname.pdf", $out_sujet );
+    transfer( "$build_dir/$jobname.xy",  $out_calage );
 
     # Looks for accents problems in question IDs...
 
@@ -1072,11 +1090,11 @@ if ( $to_do{k} ) {
         command_opts => [ %global_opts, qw/CorrigeIndivExterne 1/ ],
         text         => __ "Building the individual solution"
     );
-    transfer( "$jobname.pdf", $of );
+    transfer( "$build_dir/$jobname.pdf", $of );
 
     give_latex_errors( __ "individual solution" );
 
-    analyse_cxylog("$jobname.xy");
+    analyse_cxylog("$build_dir/$jobname.xy");
 
     my $capture = $data->module('capture');
     annotate_source_change( $capture, 1 );
@@ -1129,7 +1147,7 @@ if ( $to_do{b} ) {
         text         => __ "Processing the source file"
     );
 
-    open( AMCLOG, "$jobname.amc" ) or die "Unable to open $jobname.amc : $!";
+    open( AMCLOG, "$build_dir/$jobname.amc" ) or die "Unable to open $build_dir/$jobname.amc : $!";
 
     my $qs                    = {};
     my $qs0                   = {}; # memory for student 0 (when using AMCformS)
