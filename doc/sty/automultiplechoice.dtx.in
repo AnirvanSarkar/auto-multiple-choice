@@ -1099,7 +1099,9 @@ along with Auto-Multiple-Choice.  If not, see
 %    \begin{macrocode}
 \RequirePackage{xcolor} % \fcolorbox to fill (or not) a box
 \RequirePackage{fancyhdr} % \pagestyle{empty}
-\RequirePackage{bophook} % \AtBeginPage
+\@ifl@t@r\fmtversion{2020/10/01}
+    {}
+    {\RequirePackage{atbegshi}} % \AtBeginShipout
 \RequirePackage{xkeyval} % \setkeys
 \RequirePackage{rotating} % \rotatebox
 \RequirePackage{fancybox} % \boxput
@@ -4750,11 +4752,15 @@ along with Auto-Multiple-Choice.  If not, see
   \hbox{\vbox{\noindent\AMCIDBoxesA\\
     \noindent\AMCIDBoxesB\AMCIDBoxesC}}%
 }
-\AtBeginPage{\ifAMC@pagelayout\global\advance\AMCid@check\m@ne%
-  \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
+\def\AMC@pageHook{%
   \AMC@pagepos%
+  \ifAMC@pagelayout\global\advance\AMCid@check\m@ne%
+  \ifnum\AMCid@check<1\global\AMCid@check=\AMCid@checkmax\fi%
   \ifAMC@watermark\ifAMC@correchead\else\AMCw@terprint{\AMCw@termark}%
   \fi\fi\fi}
+\@ifl@t@r\fmtversion{2020/10/01}
+    {\AddToHook{shipout/background}{\put(0in,0in){\AMC@pageHook}}}
+    {\AtBeginShipout{\AtBeginShipoutUpperLeft{\AMC@pageHook}}}
 \fancypagestyle{AMCpageHeadOnly}{%
   \fancyhf{}\fancyhead[C]{\textsc{\AMC@intituleHead}}%
   \renewcommand{\headrulewidth}{0pt}%
@@ -5252,7 +5258,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 %
 % Initialisation of the check counter:
 %    \begin{macrocode}
-\AMCid@check=\AMCid@checkmax\advance\AMCid@check\@ne
+\AMCid@check=\AMCid@checkmax
 %    \end{macrocode}
 %
 % Telling outside if separate answer sheet, and boxes labelling, are requested:
