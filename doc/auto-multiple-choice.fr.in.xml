@@ -116,31 +116,6 @@
           graphique</para>
         </listitem>
       </itemizedlist>
-
-      <sect3 id="prerequis.soft.v">
-        <title>Versions conseillées pour les logiciels utilisés par
-        AMC</title>
-
-        <para>Quelques anciens bugs des logiciels utilisés par AMC sont
-        particulièrement préjudiciables à son bon fonctionnement :</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>Avec d'anciennes versions de <package>Net::CUPS</package>
-            (paquet debian <package>libnet-cups-perl</package>), la demande
-            d'impression du sujet provoque la fermeture prématurée de toute
-            l'interface graphique d'AMC. Ce bug a été corrigé à partir de la
-            version 0.61 de <package>Net::CUPS</package>.</para>
-          </listitem>
-
-          <listitem>
-            <para>Avec d'anciennes versions de ImageMagick, le regroupement
-            des pages corrigées en un fichier PDF par étudiant ne fonctionne
-            pas dans le cas où ces copies comprennent plusieurs pages. Ce bug
-            a été corrigé à partie de la version 6.5.5 de ImageMagick.</para>
-          </listitem>
-        </itemizedlist>
-      </sect3>
     </sect2>
 
     <sect2 id="prerequis.latex">
@@ -169,11 +144,6 @@
       <para>Le nombre de réponses proposées pour une même question est limité
       à 199 (valeur par défaut non modifiable).</para>
 
-      <para>Par ailleurs, les limitations de LaTeX pourront bloquer la
-      compilation avant ces limites (erreur du type « <errortext>No room for a
-      new \toks</errortext> »). Dans ce cas, essayez en utilisant le package
-      <package>etex</package>, grâce à la commande
-      <code>\usepackage{etex}</code>.</para>
     </sect2>
 
     <sect2 id="versions">
@@ -185,7 +155,7 @@
       imprimées et le moment où les notes sont calculées et les copies
       annotées). Il existe quelques modifications qui risquent de perturber le
       fonctionnement d'AMC si vous les appliquez au cours de la gestion d'un
-      projet :</para>
+      projet.</para>
 
     </sect2>
 
@@ -1354,9 +1324,7 @@ main( )
       <warning>
         <para>Dans ce cas, AMC utilisera <command>pTex</command> comme moteur
         LaTeX. Une version <emphasis>récente</emphasis> de
-        <command>pTex</command> est nécessaire. La distribution texlive 2009,
-        disponible par exemple sur certaines anciennes versions de
-        distributions linux, n'est <emphasis>pas</emphasis> suffisante.</para>
+        <command>pTex</command> est nécessaire.</para>
       </warning>
     </sect2>
 
@@ -2247,9 +2215,7 @@ Durée : 10 minutes.
 
         <note>
           <para>Cette dernière syntaxe utilise le paquet
-          <package>environ</package>, qui n'est pas disponible dans la
-          distribution TeX Live 2007, encore utilisée dans des distributions
-          Ubuntu jusqu'à la version 9.10 (Karmic Koala).</para>
+          <package>environ</package>.</para>
         </note>
 
         <para>Pour différencier les copies, la commande
@@ -2591,24 +2557,7 @@ P=\protect\qty{\aCalculateVariable}{\newton}}{le barème}
 }
  </programlisting>
         </tip>
-  
-  
-        <tip>
-         <para>Vous pouvez utiliser l'environnement <code>questionmultx</code>
-         (voir <xref endterm="latex.numeric.title" linkend="latex.numeric"/>)</para> 
-   
-  <programlisting>
-\begin{questionmultx}{ouverte}\bareme{MAX=6}
-Donnez la définition de l’inflation.
-\AMCOpen{lines=5}{\bonne[1]{1}\bareme{b=1}\bonne[2]{2}\bareme{b=2}%
-\bonne[3]{3}\bareme{b=3}\bonne[4]{4}\bareme{b=4}%
-\bonne[5]{5}\bareme{b=5}\bonne[6]{6}\bareme{b=6}%
-\bonne[1/2]{1/2}\bareme{b=0.5}}
-\end{questionmultx}</programlisting>
 
-        <para>Dans cet exemple, en cochant la première (1) et la dernière (0.5)
-        case, l'étudiant aura 1,5 point. Le maximun est 6 points.</para>
-        </tip>
       </sect4>
 
       <sect4>
@@ -5343,22 +5292,18 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
         <listitem>
           <para>La deuxième méthode consiste à produire un petit nombre de
           copies (éventuellement une seule), à les imprimer, puis à les
-          photocopier en grand nombre pour en avoir une par étudiant. Avec
-          cette méthode, le mélange des questions et réponses perd de son
-          efficacité, et si vous fournissez plusieurs fois la même page
-          scannée à AMC, il ne pourra pas s'en rendre compte et la comptera
-          deux fois.</para>
+          photocopier en grand nombre. Avec cette méthode, le mélange des
+          questions et réponses perd de son efficacité, et si vous fournissez
+          plusieurs fois la même page scannée à AMC, il ne pourra pas s'en
+          rendre compte et la comptera deux fois.</para>
         </listitem>
       </itemizedlist>
 
       <warning>
         <para>Pour cette deuxième méthode utilisant des photocopies, il est
-        nécessaire que les étudiants n'aient à remplir qu'une seule page (ce
-        résultat peut être obtenu en utilisant une feuille de réponses
-        séparée). Dans le cas contraire, vous ne pourriez pas traiter les
-        scans par AMC ensuite ! En effet, il serait impossible pour AMC de
-        faire le lien entre plusieurs pages correspondant à un même
-        étudiant.</para>
+        nécessaire de faire attention lors du scan que les pages d'un même
+        étudiant soient à la suite les unes des autres. Dans le cas contraire,
+        vous ne pourriez pas traiter les scans par AMC ensuite ! </para>
       </warning>
 
       <para>Une fois la préparation effectuée, nous pouvons imprimer le sujet,
@@ -5414,7 +5359,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
       </important>
 
       <para>Il est préférable que les étudiants utilisent un stylo noir ou
-      bleu ou un crayon à papier de type B ou HB.</para>
+      bleu ou un crayon à papier de type B.</para>
 
       <para>Suivant les situations, on peut demander aux étudiants de
       <emphasis>cocher</emphasis> ou de <emphasis>noircir
@@ -5470,7 +5415,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
       de l'interface graphique.</para>
 
       <sect3 id="gui.capture.auto">
-        <title>Saisie automatique</title>
+        <title id="gui.capture.auto.title">Saisie automatique</title>
 
         <para>Pour une reconnaissance automatisée des cases cochées dans les
         copies des étudiants, il faut tout d'abord les numériser. J'utilise
@@ -5487,12 +5432,12 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
           seront convertis au format PNG par AMC avant leur analyse.</para>
         </note>
 
-        <note>
+        <important>
           <para>Lors de la première saisie automatique, vous aurez à indiquer
           à AMC quelle méthode vous avez choisie : sujets différents pour tous
           les étudiants, ou photocopie de certains sujets (voir <xref
           endterm="impression.title" linkend="impression"/>).</para>
-        </note>
+        </important>
 
         <para>On sélectionne alors l'ensemble des fichiers obtenus à partir du
         dialogue ouvert par le bouton <guibutton>Automatique</guibutton> de la
@@ -5502,6 +5447,18 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
         (OMR) sur les scans afin de détecter les quatre marques circulaires
         des coins, en déduire la position des cases à cocher et mesurer la
         proportion de noir à l'intérieur de chacune d'entre elles.</para>
+
+          <note id="gui.capture.auto.photocopy.note"><title id="gui.capture.auto.photocopy.note.title">Sujets photocopiés</title>
+          <para>Avec ce mode, il existe 4 options pour indiquer à AMC 
+          la manière dont vous avez numérisé les feuilles :</para>
+            <itemizedlist>
+              <listitem><para><option>Strict</option> : le fichier ne contient que les pages du sujet AMC.</para></listitem>
+              <listitem><para><option>Ignore unrecognized</option> : pour ignorer les pages non reconnues.</para></listitem>
+              <listitem><para><option>Increasing</option> : si les pages sont numérisées dans l'ordre croissant.</para></listitem>
+              <listitem><para><option>One student per file</option> : si chaque fichier numérisé est associé à un étudiant.</para></listitem>
+            </itemizedlist>
+            <para>Avec ce mode, il est <emphasis>impossible</emphasis> de remplacer une  copie d'élève déjà analysée.</para>
+            </note>
 
         <para>Le résultat de l'analyse de chaque page est indiqué dans les
         listes de la section <guilabel>Diagnostic</guilabel> :</para>
@@ -5524,7 +5481,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
             scannée et le cadre et les cases tels qu'ils sont
             détectés).</para>
 
-            <note>
+            <note><title></title>
               <itemizedlist>
                 <listitem>
                   <para>AMC dispose d'une option
@@ -5740,6 +5697,12 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
 
       <sect3 id="bareme">
         <title id="bareme.title">Barème</title>
+
+<note><para>Un outil permet de vérifier votre barème et les résultats attendus.</para>
+<para><menuchoice><guimenu>Menu</guimenu> <guisubmenu>Aide</guisubmenu>
+<guimenuitem>Test du barème...</guimenuitem></menuchoice></para>
+</note>
+
 
         <para>Le barème utilisé pour la notation des copies est indiqué dans
         le fichier source LaTeX du questionnaire, à l'aide de la commande
@@ -6971,6 +6934,14 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"        </programlisting>
 
           <listitem>
             <para>est remplacé par le nom de l'étudiant.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>%(N)</literal></term>
+
+          <listitem>
+            <para>est remplacé par le numéro de l'étudiant (copie).</para>
           </listitem>
         </varlistentry>
 
@@ -8409,30 +8380,36 @@ What is the return value of the following R code?
     		<title id="fresh.install.title">AMC et TeXLive ne sont pas installés</title>
     	<itemizedlist>
     		<listitem>
-    			<para>Installez texlive en ligne (voir ci-dessous) ou avec un DVD
-    			(<ulink url="https://www.xm1math.net/doculatex/install_texlive_ubuntu.html"/>.</para>
+    			<para>Téléchargez TeXLive en ligne.</para>
     		</listitem>
     	</itemizedlist>
 
 <programlisting>
 wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 tar -xzf install-tl-unx.tar.gz
-cd install-tl-20xxxx
-sudo ./install-tl
+cd install-tl-20xx
 </programlisting>
 
-	<note><para>Remplacez xxxx par les chiffres ou appuyez sur la touche TABULATION.</para></note>
+	<note><para>Remplacez xx par les chiffres ou appuyez sur la touche TABULATION.</para></note>
 
     	<itemizedlist>
     		<listitem>
-    			<para>Installez TeXLive en suivant le point 6 de cette documentation.
-    				(<ulink url="https://www.xm1math.net/doculatex/install_texlive_ubuntu.html"/>.</para>
+    			<para>Installez TeXLive.</para>
+<programlisting>
+sudo ./install-tl
+</programlisting>
+    		</listitem>
+
+
+    		<listitem>
+    			<para>Tapez <code>O</code> puis <code>L</code> puis
+    			tapez 3 fois sur <code>Entrée</code> sans compléter les chemins
+    			puis tapez <code>R</code> puis <code>I</code>.</para>
     		</listitem>
     	</itemizedlist>
-
+	
 <note><para>Par défaut, tout est installé. Si vous ne voulez pas tous les paquets, appuyez sur
- <emphasis>C</emphasis> puis  sélectionnez vos paquets puis <emphasis>R</emphasis> puis
- <emphasis>I</emphasis>.</para></note>
+ <code>C</code> puis  sélectionnez vos paquets puis <code>R</code> puis <code>I</code>.</para></note>
 
     	<itemizedlist>
     		<listitem>
@@ -8443,16 +8420,18 @@ sudo ./install-tl
 <programlisting>
 sudo apt install equivs --no-install-recommends
 mkdir -p /tmp/tl-equivs &amp;&amp; cd /tmp/tl-equivs
-equivs-control texlive-local
+wget -O texlive-local https://www.tug.org/texlive/files/debian-equivs-20xx-ex.txt
 </programlisting>
 
-    	<itemizedlist>
-    		<listitem>
-    			<para>Éditez texlive-local:  </para>
-    			<para><ulink url="https://www.tug.org/texlive/files/debian-equivs-2022-ex.txt"/>.</para>
-	    		<para>Ouvrez le fichier et changez l'année 2022</para>
-    		</listitem>
-    	</itemizedlist>
+<note>
+<para>Si le dernier téléchargement n'est pas possible, il faut le faire manuellement sur le site ci-dessous
+ puis le copier dans le dossier <code>/tmp/tl-equivs</code> en le renommant <code>texlive-local</code>.</para>
+<para><ulink url="https://github.com/ascherer/tl-equivs"/></para>
+
+<para>Autre solution, télécharger le paquet l'année précédente (ici, 2023) en le changeant l'année  (2024) dans le fichier.</para>
+<programlisting>wget -O texlive-local https://www.tug.org/texlive/files/debian-equivs-2023-ex.txt</programlisting>
+<para><parameter>Version: 2023.99999999-1</parameter> en <parameter>Version: 2024.99999999-1</parameter></para>
+ </note>
 
     	<itemizedlist>
     		<listitem>
@@ -8587,7 +8566,7 @@ rm -rf ./pythontex-files-*
 rm -f $AMC_JOBNAME.pytxcode
 $AMC_CMD
 echo "***** PYTHON"
-python /chemin/vers/fichier/pythontex.py $AMC_JOBNAME.pytxcode
+python /chemin/absolu/vers/fichier/pythontex.py $AMC_JOBNAME.pytxcode
 echo "***** END FILTER"
 </programlisting>
 
@@ -8604,7 +8583,7 @@ python3 /chemin/vers/fichier/pythontex3.py
  		</itemizedlist>
 
 <programlisting>
-%%AMC:preprocess_command=/chemin/vers/fichier/prePythonTex4AMC
+%%AMC:preprocess_command=/chemin/absolu/vers/fichier/prePythonTex4AMC
 %%AMC:jobspecific=1
 %%AMC:latex_engine=pdflatex --shell-escape
 </programlisting>

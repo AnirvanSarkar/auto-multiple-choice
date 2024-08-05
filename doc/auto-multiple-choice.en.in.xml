@@ -142,29 +142,6 @@
         </listitem>
       </itemizedlist>
 
-      <sect3 id="prerequis.soft.v">
-        <title>Recommended versions for software used by AMC</title>
-
-        <para>A few bugs in old versions of software used by AMC are
-        particularly detrimental to its operating normally:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>With old versions of <package>Net::CUPS</package> (debian
-            package <package>libnet-cups-perl</package>), the command for
-            printing the test sheets leads to a premature exit from the AMC
-            graphical user interface. This bug is fixed in versions 0.61 and
-            later of <package>Net::CUPS</package>.</para>
-          </listitem>
-
-          <listitem>
-            <para>With old versions of ImageMagick, the merging of corrected
-            answer sheets into a single PDF file per student does not work
-            when answer sheets comprise more than one page. This bug is fixed
-            in versions 6.5.5 ad later of ImageMagick.</para>
-          </listitem>
-        </itemizedlist>
-      </sect3>
     </sect2>
 
     <sect2 id="prerequis.latex">
@@ -192,12 +169,7 @@
 
       <para>The maximum number of answers for a given question is limited to
       199 (Unmodifiable default value).</para>
-
-      <para>LaTeX's own limitations may make compilation impossible, producing
-      e.g. a « <errortext>No room for a new \toks</errortext> » error. In that
-      case, try again using the package <package>etex</package>, thanks to the
-      <code>\usepackage{etex}</code> command.</para>
-    </sect2>
+   </sect2>
 
     <sect2 id="versions">
       <title>Versions</title>
@@ -1308,9 +1280,7 @@ main( )
         <para>In this case, AMC will use <command>pTex</command> to process
         the LaTeX file made from your AMC-TXT source file. AMC needs a
         <emphasis>recent</emphasis> version of <command>pTex</command> to
-        work. Versions of pTex from texlive 2009, that can be found on old
-        versions of some linux distributions, are <emphasis>not</emphasis>
-        compatible.</para>
+        work. </para>
       </warning>
     </sect2>
 
@@ -2171,9 +2141,7 @@ Duration : 10 minutes.
 
         <note>
           <para>To use examcopy, you need the <package>environ</package>
-          package to be installed, which is not available in the TeX Live 2007
-          distribution, still used in Ubuntu distributions up to version 9.10
-          (Karmic Koala).</para>
+          package to be installed.</para>
         </note>
 
         <para>To differentiate between odd and even-numbered copy, use
@@ -2498,24 +2466,6 @@ P=\protect\qty{\aCalculateVariable}{\newton}}{the scoring}
   }
 	      </programlisting>
         </tip>
- 
- 
-         <tip>
-         <para>You may use <code>questionmultx</code> environment
-         (see <xref endterm="latex.numeric.title" linkend="latex.numeric"/>)</para> 
-   
-  <programlisting>
-\begin{questionmultx}{ouverte}\bareme{MAX=6}
-Donnez la définition de l’inflation.
-\AMCOpen{lines=5}{\bonne[1]{1}\bareme{b=1}\bonne[2]{2}\bareme{b=2}%
-\bonne[3]{3}\bareme{b=3}\bonne[4]{4}\bareme{b=4}%
-\bonne[5]{5}\bareme{b=5}\bonne[6]{6}\bareme{b=6}%
-\bonne[1/2]{1/2}\bareme{b=0.5}}
-\end{questionmultx}</programlisting>
-
-        <para>In this example, if the first  box (1) and the last are ticked, the student will get 1.5 point.
-        Maximum score is 6 points.</para>
-        </tip> 
       </sect4>
 
         <sect4>
@@ -5084,9 +5034,9 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
       </itemizedlist>
 
       <warning>
-        <para>To use this second workflow using photocopies, there must be
-        only one page for students to write on (using a separate answer sheet
-        can help you for this). If not, you won't be able to continue with
+        <para>To use this second workflow using photocopies, it is necessary to
+        take care that digitized pages of the same student are in
+        sequence. If not, you won't be able to continue with
         AMC! Indeed, it would be impossible for AMC to make the link between
         two pages from the same student.</para>
       </warning>
@@ -5111,8 +5061,7 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
         remain identical to distributed copies.</para>
       </important>
 
-      <para>It is preferable that students use a black or blue pen or B or HB
-      pencil.</para>
+      <para>It is preferable that students use a black or blue pen or B pencil.</para>
 
       <para>Depending on the situation, you can ask the students to
       <emphasis>tick</emphasis> or <emphasis>fill</emphasis> the boxes.</para>
@@ -5146,8 +5095,8 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
         boxes, as AMC can't make the difference between a box with a letter
         and ticked box.</para>
 
-        <para>The stiudents can correct a ticked box ereasing their mark with
-        a eraser or white-out fluid, but they don't have any other solution to
+        <para>The students can correct a ticked box erasing their mark with
+        a rubber or white-out fluid, but they don't have any other solution to
         correct a ticked box. You must set the <guilabel>upper darkness
         threshold</guilabel> to 1.<guilabel/></para>
       </sect3>
@@ -5195,12 +5144,23 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
         marks on the scans, position the boxes, and detects the amount of
         black pixels in each box.</para>
 
+          <note id="gui.capture.auto.photocopy.note"><title id="gui.capture.auto.photocopy.note.title">Some answer sheets were photocopied</title>
+          <para>With this mode, there is four options depending the way you digitized the sheets. :</para>
+            <itemizedlist>
+              <listitem><para><option>Strict</option> :  if there are only pages from AMC subject.</para></listitem>
+              <listitem><para><option>Ignore unrecognized</option> : if you want to ignore pages that are not recognized.</para></listitem>
+              <listitem><para><option>Increasing</option> : if the pages are always scanned in increasing order.</para></listitem>
+              <listitem><para><option>One student per file</option> : if each scan file contains scans for only one student.</para></listitem>
+            </itemizedlist>
+            <para>With this mode, it is <emphasis>impossible</emphasis> to replace a scan.</para>
+            </note>
+
         <para>The result of the analysis of each page is indicated in the
         lists of the section <guilabel>Diagnosis</guilabel>:</para>
 
         <itemizedlist>
           <listitem>
-            <para>The value<option>update</option> displays the date the date
+            <para>The value <option>update</option> displays the date 
             the page was last modified. Hided by default. Click on the button
             <guimenuitem>columns</guimenuitem> to show it.</para>
           </listitem>
@@ -5375,6 +5335,12 @@ Noël,Père,003,pere.noel@pole-nord.xx,clavierbepo
 
       <sect3 id="bareme">
         <title id="bareme.title">Scoring strategy</title>
+
+<note><para>Check your scoring strategy with the tool.</para>
+<para><menuchoice><guimenu>Menu</guimenu> <guisubmenu>Help</guisubmenu>
+<guimenuitem>Test scoring…</guimenuitem></menuchoice></para>
+</note>
+
 
         <para>The strategy used to score the copies is indicated in the LaTeX
         source file, with the command <command>scoring</command>. It can be
@@ -6548,6 +6514,14 @@ Boulix,Jojo,"jojo@boulix.fr,parents@boulix.com"       </programlisting>
           </listitem>
         </varlistentry>
 
+        <varlistentry>
+          <term><literal>%(N)</literal></term>
+
+          <listitem>
+            <para>is replaced by the student number (sheet).</para>
+          </listitem>
+        </varlistentry>
+        
         <varlistentry>
           <term><literal>%(<replaceable>COL</replaceable>)</literal></term>
 
@@ -9505,7 +9479,7 @@ What is the return value of the following R code?
 
                 <variablelist>
                   <varlistentry>
-                    <term><literal>(N)</literal></term>
+                    <term><literal>(ID)</literal></term>
 
                     <listitem>
                       <para>is replaced by the student's name (see
@@ -9514,7 +9488,7 @@ What is the return value of the following R code?
                   </varlistentry>
 
                   <varlistentry>
-                    <term><literal>(ID)</literal></term>
+                    <term><literal>(N)</literal></term>
 
                     <listitem>
                       <para>is replaced by the student number.</para>
@@ -10463,7 +10437,7 @@ rm -rf ./pythontex-files-*
 rm -f $AMC_JOBNAME.pytxcode
 $AMC_CMD
 echo "***** PYTHON"
-python /path/to/file/pythontex.py $AMC_JOBNAME.pytxcode
+python /absolute/path/to/file/pythontex.py $AMC_JOBNAME.pytxcode
 echo "***** END FILTER"
 </programlisting>
 
@@ -10480,7 +10454,7 @@ python3 /path/to/file/pythontex3.py
     </itemizedlist>
 
 <programlisting>
-%%AMC:preprocess_command=/path/to/file/prePythonTex4AMC
+%%AMC:preprocess_command=/absolute/path/to/file/prePythonTex4AMC
 %%AMC:jobspecific=1
 %%AMC:latex_engine=pdflatex --shell-escape
 </programlisting>
