@@ -2632,6 +2632,8 @@ along with Auto-Multiple-Choice.  If not, see
 % |\AMCload@counter|${}=199$.
 %    \begin{macrocode}
 \newcount\AMCrep@count
+\newcount\AMCrep@nn
+\newcount\AMCrep@nnmax
 \AMCload@counter=199
 \@whilenum\AMCload@counter>0\do{%
   \expandafter\newtoks\csname reponse@\romannumeral\AMCload@counter\endcsname%
@@ -2915,6 +2917,103 @@ along with Auto-Multiple-Choice.  If not, see
   \fi}
 %    \end{macrocode}\end{macro}\end{macro}\end{macro}\end{macro}
 %
+% \begin{macro}{\AMCtableForm}
+%   |\AMCtableForm|\oarg{options} is a variant of |\AMCform| that
+%   displays the boxes as a multi-column table.
+%
+%   The argument \meta{options} is a key-value list, where:
+%   \begin{itemize}
+%   \item |nanswers=|\meta{n} gives the numer of answers that are
+%     labeled in the table (defaults to the maximal number of answers
+%     of the subject).
+%   \item |ncols=|\meta{n} gives the number of columns to use
+%     (defaults to the largest possible number of columns).
+%   \item |idtext=|\meta{text} gives a text to be inserted before each
+%     question number.
+%   \item |idtitle=|\meta{text} gives a text to be used as a column
+%     title for question numbers.
+%   \item |columnsep=|\meta{dim} and |columnseprule=|\meta{dim} are
+%     passed to the |multicols| environment.
+%   \item |headers=|\meta{bool} tells if the headers with boxes
+%     letters are to be added at the top of the columns (defaults to
+%     true).
+%   \item |inside=|\meta{bool} tells if letters are to be written
+%     inside the boxes (defaults to false).
+%   \end{itemize}
+%    \begin{macrocode}
+\newcounter{AMC@specsi}
+\def\AMC@formspecs#1{%
+  \noindent\hbox to \AMCformTH{\hspace*{\fill}\textbf{\AMC@tf@idtitle}\hspace{\AMCformHSpace}}%
+  \setcounter{AMC@specsi}{0}%
+  \loop%
+    \addtocounter{AMC@specsi}{1}%
+    \AMCformAnswer{\bf\AMCchoiceLabel{AMC@specsi}}%
+  \ifnum\value{AMC@specsi}<#1\repeat%
+}
+\newcount\AMC@coli
+\def\AMC@formcolspecs#1#2{{%
+  \columnseprule=0pt%
+  \begin{multicols}{#1}
+  \AMC@coli=\z@%
+  \@whilenum\AMC@coli<#1\do{
+    \advance\AMC@coli\@ne%
+    \AMC@formspecs{#2}\par
+  }
+  \end{multicols}
+}}
+\newcount\AMC@tf@ncols
+\newdimen\AMCformTH
+\newdimen\AMC@tfcolw
+\newdimen\AMC@tfaw
+\def\AMC@tf@idtext{}
+\def\AMC@tf@idtitle{}
+\newbox\AMC@tfbox
+\define@key{AMCtf}{nanswers}[0]{\def\AMC@tf@nanswers{#1}}
+\define@key{AMCtf}{ncols}[0]{\AMC@tf@ncols=#1}
+\define@key{AMCtf}{idtext}{\def\AMC@tf@idtext{#1}}
+\define@key{AMCtf}{idtitle}{\def\AMC@tf@idtitle{#1}}
+\define@key{AMCtf}{idwidth}[0pt]{\AMCformTH=#1}
+\define@key{AMCtf}{columnsep}[0.5em]{\columnsep=#1}
+\define@key{AMCtf}{columnseprule}[0.5pt]{\columnseprule=#1}
+\define@boolkey{AMCtf}{headers}[true]{}
+\define@boolkey{AMCtf}{inside}[false]{}
+\setkeys{AMCtf}{nanswers,ncols,idwidth,columnsep,columnseprule,headers,inside}
+\newcommand\AMCtableForm[1][]{%
+  \setkeys{AMCtf}{#1}%
+  \ifnum\AMC@tf@nanswers=0%
+    \def\AMC@tf@nanswers{\the\AMCrep@nnmax}%
+  \fi%
+  \newdimen\AMC@tf@colW\AMC@tf@colW=\AMCformHSpace%
+  \advance\AMC@tf@colW by \AMC@boxedwidth%
+  \def\AMCformBeforeQuestion{\vspace{\AMCformVSpace}\par}%
+  \def\AMCformQuestion##1{\noindent\hbox to \AMCformTH{\hspace*{\fill}\textbf{\AMC@tf@idtext{}##1}\hspace{\AMCformHSpace}}}%
+  \def\AMCformAnswer##1{\hbox to \AMC@tf@colW{\hspace*{\fill}##1\hspace*{\fill}}}%
+  \ifnum\AMCformTH=0%
+    \setbox\AMC@tfbox=\hbox{\textbf{\AMC@tf@idtext{}999}}%
+    \AMCformTH=\wd\AMC@tfbox%
+  \fi%
+  \ifnum\AMC@tf@ncols=0%
+    \AMC@tfcolw=\AMC@tf@nanswers\AMC@tf@colW%
+    \advance\AMC@tfcolw by \AMCformTH%
+    \advance\AMC@tfcolw by \columnsep%
+    \AMC@tfaw=\linewidth%
+    \loop%
+    \ifnum\AMC@tfaw>\AMC@tfcolw%
+      \advance\AMC@tfaw by -\AMC@tfcolw%
+      \advance\AMC@tf@ncols\@ne%
+    \repeat%
+  \fi%
+  \ifKV@AMCtf@headers%
+    \AMC@formcolspecs{\the\AMC@tf@ncols}{\AMC@tf@nanswers}%
+    \vspace{\AMCformVSpace}\vspace{-2\multicolsep}
+  \fi%
+  {\raggedcolumns
+    \begin{multicols}{\the\AMC@tf@ncols}
+      \ifKV@AMCtf@inside\else\def\AMCchoiceLabel##1{}\fi%
+      \AMCform
+    \end{multicols}}
+}
+%    \end{macrocode}\end{macro}
 % \begin{macro}{\AMCsection}\begin{macro}{\AMCsubsection}
 %     The |\AMCsection| and |\AMCsubsection| commands issue their
 %     standard counterparts (|\section| and |\subsection| with the
@@ -2947,25 +3046,29 @@ along with Auto-Multiple-Choice.  If not, see
 %       multicolumn answers formatting.
 %    \begin{macrocode}
 \def\AMCBoxedAnswers{\AMC@rbloctrue}
+\newcommand{\start@Answers}{%
+  \global\AMCrep@count=\z@%
+  \global\AMCrep@nn=\z@%
+}
 \newenvironment{choices}[1][r]{%
-  \AMCrep@count=\z@\def\une@rep{\AMCrep@itemize}%
+  \start@Answers\def\une@rep{\AMCrep@itemize}%
   \ifAMC@rbloc\def\une@rep{\AMCrep@bloc}%
   \else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi%
     \AMCrep@init{#1}}%
   {\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
 \newenvironment{choiceshoriz}[1][r]{%
-  \AMCrep@count=\z@\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}%
+  \start@Answers\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}%
   \par\begin{center}}%
   {\AMC@fin@rep\end{center}}
 \newenvironment{choicescustom}[1][r]{%
-  \AMCrep@count=\z@\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}%
+  \start@Answers\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}%
   \AMCbeginAnswer\ignorespaces}%
   {\AMC@fin@rep\AMCendAnswer}
 \newenvironment{tikz-single}[1][r]{
-\AMCrep@count=\z@\def\une@rep{\AMCrep@tikz}\AMCrep@init{#1}%
+\start@Answers\def\une@rep{\AMCrep@tikz}\AMCrep@init{#1}%
 \begin{tikzpicture}}{\AMC@fin@rep\end{tikzpicture}} 
 \newenvironment{tikz-multi}[1][r]{
-\AMCrep@count=\z@\def\une@rep{\AMCrep@tikzmat}\AMCrep@init{#1}%
+\start@Answers\def\une@rep{\AMCrep@tikzmat}\AMCrep@init{#1}%
 \begin{tikzpicture}[remember picture]}{\AMC@fin@rep\end{tikzpicture}}
 %    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}
 %
@@ -3020,12 +3123,21 @@ along with Auto-Multiple-Choice.  If not, see
 %     specify if they are to be tocked by the students or not.
 %
 %    \begin{macrocode}
-\newcommand{\correctchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
+\newcommand{\next@Answer}{%
+  \global\advance\AMCrep@count\@ne\relax%
+  \global\advance\AMCrep@nn\@ne\relax%
+  \ifnum\AMCrep@nn>\AMCrep@nnmax%
+    \global\AMCrep@nnmax=\AMCrep@nn%
+  \fi%
+}
+\newcommand{\correctchoice}[2][]{%
+  \next@Answer%
   \ifAMC@calibration\AMCmessage{REP=\the\AMCrep@count:B}\fi%
   \global\AMCune@bonnetrue%
   \AMCload@@reponse{\une@rep{\ifAMC@correc\AMC@box{#1}{\AMC@checkedbox}%
       \else\AMC@box{#1}{}\fi}{#2}}{\the\AMCrep@count}\ignorespaces}
-\newcommand{\wrongchoice}[2][]{\global\advance\AMCrep@count\@ne\relax%
+\newcommand{\wrongchoice}[2][]{%
+  \next@Answer%
   \ifAMC@calibration\AMCmessage{REP=\the\AMCrep@count:M}\fi%
   \AMCload@@reponse{\une@rep{\AMC@box{#1}{}}{#2}}{\the\AMCrep@count}%
   \ignorespaces}
@@ -4834,6 +4946,7 @@ along with Auto-Multiple-Choice.  If not, see
   \fi
   \ifAMC@pdfform\begin{Form}\fi%
   \loop{%
+    \global\AMCrep@nnmax=0%
     \ifAMC@calibration\protected@write\AMC@XYFILE{}{%
       \string\rngstate{\the\AMCid@etud}{\the\AMC@SR}%
     }\fi%
