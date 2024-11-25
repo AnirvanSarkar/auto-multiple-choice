@@ -2977,8 +2977,9 @@ along with Auto-Multiple-Choice.  If not, see
 \define@key{AMCtf}{columnseprule}[0.5pt]{\columnseprule=#1}
 \define@boolkey{AMCtf}{headers}[true]{}
 \define@boolkey{AMCtf}{inside}[false]{}
-\setkeys{AMCtf}{nanswers,ncols,idwidth,columnsep,columnseprule,headers,inside}
+\setkeys{AMCtf}{nanswers,ncols,idwidth,headers,inside}
 \newcommand\AMCtableForm[1][]{%
+  \setkeys{AMCtf}{columnsep,columnseprule}
   \setkeys{AMCtf}{#1}%
   \ifnum\AMC@tf@nanswers=0%
     \def\AMC@tf@nanswers{\the\AMCrep@nnmax}%
