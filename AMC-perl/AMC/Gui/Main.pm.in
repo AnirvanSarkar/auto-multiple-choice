@@ -54,6 +54,7 @@ use AMC::Gui::SelectStudents;
 use AMC::Gui::Strategy;
 use AMC::Gui::StudentsList;
 use AMC::Gui::Template;
+use AMC::Gui::TopicsErrors;
 use AMC::Gui::Unrecognized;
 use AMC::Gui::WindowSize;
 use AMC::Gui::Zooms;
@@ -844,6 +845,19 @@ sub notify_end_of_work {
                   "ERROR: command '$cmd[0]' not found when trying to notify";
             }
         }
+    }
+}
+
+# returns true if can continue (either syntax ok, either user wants to
+# continue anyway)
+sub check_topics_file {
+    my ($self) = @_;
+    my $result = $self->{project}->check_topics();
+    if($result->failed()) {
+        my $d = AMC::Gui::TopicsErrors->new(result=>$result);
+        return $d->dialog();
+    } else {
+        return 1;
     }
 }
 
@@ -4396,6 +4410,10 @@ sub exporte {
             }
         }
     }
+
+    # Check topics.yml syntax
+
+    return if(!$self->check_topics_file());
 
     # wait for GUI update before going on with the table
     Glib::Idle->add(

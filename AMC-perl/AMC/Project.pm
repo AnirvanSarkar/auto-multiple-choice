@@ -28,6 +28,7 @@ use File::Temp qw/ tempfile tempdir :seekable /;
 use AMC::Basic;
 use AMC::Data;
 use AMC::NamesFile;
+use AMC::TopicsTest;
 
 sub new {
     my ( $class, %oo ) = @_;
@@ -91,6 +92,11 @@ sub students_list {
     return ( $self->{_students_list} );
 }
 
+sub project_dir {
+    my ($self)= @_;
+    return($self->{config}->{shortcuts}->absolu('%PROJET/'));
+}
+
 sub set_students_list {
     my ( $self, $path ) = @_;
 
@@ -151,7 +157,7 @@ sub project_options {
     $self->{config}->save();
     return (
         "--profile-conf", $self->{config}->{global_file},
-        "--project-dir",  $self->{config}->{shortcuts}->absolu('%PROJET/')
+        "--project-dir",  $self->project_dir()
     );
 }
 
@@ -770,6 +776,12 @@ sub get_external_scores {
         o            => \%oo,
         fin          => $oo{callback},
     );
+}
+
+sub check_topics {
+    my ( $self ) = @_;
+    my $topics_file = $self->{config}->{shortcuts}->absolu('%PROJET/topics.yml');
+    my $result = check_topics_main_file($topics_file);
 }
 
 1;
