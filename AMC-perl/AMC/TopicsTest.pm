@@ -230,6 +230,7 @@ my $topic_conditions = {
     id        => { str           => 1 },
     name      => { str           => 1 },
     questions => { scalarorarray => { str  => 1 } },
+    exclude_questions => { scalarorarray => { str  => 1 } },
     conf      => { scalarorarray => { str  => 1 } },
     levels    => { array         => { hash => $level_conditions } },
     aggregate => {
