@@ -331,7 +331,7 @@ sub defaults {
         annote_color         => $hex_red,
 
         annote_font_name            => 'Linux Libertine O 12',
-        annote_ecart                => 5.5,
+        annote_ecart                => '1cm',
         annote_chsign               => 4,
         defaut_regroupement_compose => '',
         defaut_add_corrected        => '',
