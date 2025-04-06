@@ -221,7 +221,7 @@ sub defaults {
 
     $self->{o_default} = {
         pdf_viewer =>
-          [ 'command', 'evince', 'acroread', 'gpdf', 'okular', 'xpdf', ],
+          [ 'command', 'papers', 'evince', 'acroread', 'gpdf', 'okular', 'xpdf', ],
         img_viewer =>
           [ 'command', 'eog', 'ristretto', 'gpicview', 'mirage', 'gwenview', ],
         csv_viewer => [
