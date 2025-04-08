@@ -100,9 +100,9 @@ sub text_width {
         );
 
     } else {
-        $width = length($title);
+        $width = length($title) if($title);
         for my $text (@t) {
-            $width = length($text) if ( length($text) > $width );
+            $width = length($text) if ( $text && length($text) > $width );
         }
         return ( 0.22 * $width + 0.3, 0.5 );
     }
