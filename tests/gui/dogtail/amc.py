@@ -137,7 +137,7 @@ class AMC:
             rmtree(self.src_dir())
         copyfile(self.config_file, os.getenv("HOME")
                  + '/.AMC.d/cf.TEST.xml')
-        os.environ["LANG"] = "en_US.UTF-8"
+        os.environ["LANG"] = "C"
         dogtail.utils.run(self.amc_cmd(), timeout=3,
                           appName='auto-multiple-choice')
         self.gui = root.application('auto-multiple-choice')
@@ -298,7 +298,7 @@ class AMC:
         time.sleep(1)
         self.find_along_with('Project', 'Plugins').click()
         time.sleep(1)
-        self.gui.child('Export as template', roleName='push button').click()
+        self.gui.child('Export as template', roleName='button').click()
         time.sleep(1)
         # Fill dialog
         dialog = self.gui.child('Save as a template')
@@ -318,7 +318,7 @@ class AMC:
             for f in with_files:
                 file_dialog.child(f).click()
                 time.sleep(1)
-            file_dialog.child(name='Add', roleName='push button').click()
+            file_dialog.child(name='Add', roleName='button').click()
             time.sleep(1)
 
         dialog.child('OK').click()
@@ -419,7 +419,7 @@ class AMC:
             dogtail.predicate.GenericPredicate(
                 description='Update the document',
                 roleName='panel'))])[i][1]
-        up.child(roleName='push button').click()
+        up.child(roleName='button').click()
         time.sleep(2)
         documents.click()
 
@@ -429,7 +429,7 @@ class AMC:
             rmtree(self.cups_pdf_dir)
         os.mkdir(self.cups_pdf_dir)
         self.tab('Preparation').child('Print papers',
-                                      roleName='push button').click()
+                                      roleName='button').click()
         dialog = self.gui.child(roleName='dialog')
         dialog.grab_focus()
         # select copies
@@ -461,7 +461,7 @@ class AMC:
 
     def print_to_file(self, copies=[1, 2, 3], password=False):
         self.tab('Preparation').child('Print papers',
-                                      roleName='push button').click()
+                                      roleName='button').click()
         dialog = self.gui.child(roleName='dialog')
         dialog.grab_focus()
         # select copies
@@ -524,7 +524,7 @@ class AMC:
         capture = self.tab('Data capture')
         capture.select()
         # Launch automatic data capture
-        self.gui.child('Automatic', roleName='push button').click()
+        self.gui.child('Automatic', roleName='button').click()
         # Choose mode
         choix = self.file_chooser_or_dialog()
         i = choix.menuItem(mode)
@@ -640,7 +640,7 @@ class AMC:
         marking = self.tab('Marking')
         marking.select()
         time.sleep(1)
-        marking.child('Mark', roleName='push button').click()
+        marking.child('Mark', roleName='button').click()
         time.sleep(3)
 
     def postcorrect(self, student, copy=0):
@@ -657,7 +657,7 @@ class AMC:
                           uid='id', code='Pre-association'):
         marking = self.tab('Marking')
         marking.select()
-        marking.child('Set file', roleName='push button').click()
+        marking.child('Set file', roleName='button').click()
         self.select_in_current_dir(students_file, buttonDescription='Apply')
         # select uid/code for association
         cbs = sorted([(a.position[1], a)
@@ -668,20 +668,20 @@ class AMC:
         if auto:
             cbs[1][1].combovalue = code
             # go for automatic association
-            marking.child('Automatic', roleName='push button').click()
+            marking.child('Automatic', roleName='button').click()
             # validate result
             self.click_dialog()
 
     def auto_association(self):
         marking = self.tab('Marking')
         marking.select()
-        marking.child('Automatic', roleName='push button').click()
+        marking.child('Automatic', roleName='button').click()
         self.click_dialog()
 
     def manual_association(self, sequence=[]):
         marking = self.tab('Marking')
         marking.select()
-        marking.child('Manual', roleName='push button').click()
+        marking.child('Manual', roleName='button').click()
         dialog = self.gui.child('Manual association')
         for n in sequence:
             time.sleep(0.5)
@@ -699,7 +699,7 @@ class AMC:
         
         reports = self.gui.child('Reports', roleName='page tab')
         reports.select()
-        export_button = reports.child('Export', roleName='push button')
+        export_button = reports.child('Export', roleName='button')
         export_bar = export_button.parent
         cbx = sorted([(a.position[0], a)
                       for a in export_bar.findChildren(
@@ -770,7 +770,7 @@ class AMC:
         reports.select()
         annotated = reports.child('Annotated papers', roleName='panel')
         annotated.child(roleName='text').text = model
-        reports.child('Annotate papers', roleName='push button').click()
+        reports.child('Annotate papers', roleName='button').click()
         time.sleep(4)
 
     def set_options(self,
@@ -778,7 +778,7 @@ class AMC:
                     printing_method = None,
                     namefield = None):
         namefield_change=False
-        self.gui.child('Properties', roleName='push button').click()
+        self.gui.child('Properties', roleName='button').click()
         dialog = self.gui.child('AMC Preferences')
         dialog.grab_focus()
         tab = dialog.child('Main', roleName='page tab')
