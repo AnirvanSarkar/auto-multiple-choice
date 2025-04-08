@@ -1,0 +1,152 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+\usepackage{ProfCollege}
+
+\usepackage[francais,bloc,completemulti,ensemble]{automultiplechoice}    
+\begin{document}
+
+\AMCrandomseed{1237893}
+
+\def\AMCformQuestion#1{\vspace{\AMCformVSpace}\par {\sc Question #1 :} }    
+
+\element{general}{
+  \begin{question}{prez}    
+    Parmi les personnalités suivantes, laquelle a été présidente de la république française~?
+    \begin{reponses}
+      \bonne{René Coty}
+      \mauvaise{Alain Prost}
+      \mauvaise{Marcel Proust}
+      \mauvaise{Claude Monet}
+    \end{reponses}
+  \end{question}
+}
+
+\element{general}{
+  \begin{question}{nb-ue}
+    Combien d'états sont membres de l'Union Européenne en janvier 2009 ?
+    \begin{reponseshoriz}[o]
+      \mauvaise{15}
+      \mauvaise{21}
+      \mauvaise{25}
+      \bonne{27}
+      \mauvaise{31}
+    \end{reponseshoriz}
+  \end{question}
+}
+
+\element{general}{
+  \begin{questionmult}{fx}
+    On considère la fonction $f:\mathbb{R}\longrightarrow\mathbb{R}$ définie par
+    $f(x)=4x+2$. Alors :
+    \vspace{1ex}
+    
+    \MultiCol[t]{0.25/0.70}{
+      {\AMCnoCompleteMulti\begin{reponses}
+          \bonne{$f(3)=14$}
+          \mauvaise{$f(3)=20$}
+        \end{reponses}}
+      §
+      \begin{reponses}
+        \mauvaise{On ne peut pas calculer $f(3)$ car 3 est un nombre entier}
+      \end{reponses}
+    }
+  \end{questionmult}
+}
+
+\element{general}{
+\begin{questionmult}{R.ect-a}\bareme{default.A=0,default.AA=0,default.B=0,default.BB=0,default.C=0,default.CC=0,formula="max(0,A+AA)+max(0,B+BB)+max(0,C+CC)"}
+  Un écart type est un indicateur\dots
+  \vspace{1ex}
+  
+  \MultiCol[t]{0.28/0.36/0.36}{
+    {\AMCnoCompleteMulti\begin{reponses}
+    \mauvaise{de tendance centrale}\bareme{set.A=-1}
+    \bonne{de dispersion}\bareme{set.AA=1}
+    \end{reponses}}
+    §
+    {\AMCnoCompleteMulti\begin{reponses}
+    \bonne{sensible aux valeurs extrêmes}\bareme{set.BB=1}
+    \mauvaise{peu sensible aux extrêmes}\bareme{set.B=-1}
+    \end{reponses}}
+    §
+    \begin{reponses}
+    \bonne{de même unité que les valeurs}\bareme{set.CC=1}
+    \mauvaise{d'unité différente des valeurs}\bareme{set.C=-1}
+    \end{reponses}
+  }
+\end{questionmult}
+}
+
+\element{general}{
+\begin{questionmult}{R.ect-b}\bareme{default.A=0,default.AA=0,default.B=0,default.BB=0,default.C=0,default.CC=0,formula="max(0,A+AA)+max(0,B+BB)+max(0,C+CC)"}
+  Un écart type est un indicateur\dots
+  \AMCnoCompleteMulti
+
+  \emph{(concernant son objectif)}
+  \begin{reponses}
+    \mauvaise{de tendance centrale}\bareme{set.A=-1}
+    \bonne{de dispersion}\bareme{set.AA=1}
+  \end{reponses}
+
+  \emph{(concernant sa sensibilité)}
+  \begin{reponses}
+    \bonne{sensible aux valeurs extrêmes}\bareme{set.BB=1}
+    \mauvaise{peu sensible aux valeurs extrêmes}\bareme{set.B=-1}
+  \end{reponses}
+
+  \emph{(concernant sa dimension)}
+  \begin{reponses}
+    \bonne{de même unité que les valeurs}\bareme{set.CC=1}
+    \mauvaise{d'unité différente des valeurs}\bareme{set.C=-1}
+  \end{reponses}
+\end{questionmult}
+}
+
+\exemplaire{5}{    
+
+%%% debut de l'en-tête des copies :    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\begin{center}
+  \large\bf QUESTIONS
+\end{center}
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\melangegroupe{general}
+\restituegroupe{general}
+
+\AMCcleardoublepage    
+
+\AMCdebutFormulaire    
+
+%%% début de l'en-tête de la feuille de réponses
+
+{\large\bf Feuille de réponses :}
+\hfill \champnom{\fbox{    
+    \begin{minipage}{.5\linewidth}
+      Nom et prénom :
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\begin{center}
+  \bf\em Les réponses aux questions sont à donner exclusivement sur cette feuille :
+  les réponses données sur les feuilles précédentes ne seront pas prises en compte.
+\end{center}
+
+%%% fin de l'en-tête de la feuille de réponses
+
+\formulaire    
+
+\clearpage    
+
+}  
+
+\end{document}

@@ -3052,24 +3052,24 @@ along with Auto-Multiple-Choice.  If not, see
   \global\AMCrep@nn=\z@%
 }
 \newenvironment{choices}[1][r]{%
-  \start@Answers\def\une@rep{\AMCrep@itemize}%
+  \def\une@rep{\AMCrep@itemize}%
   \ifAMC@rbloc\def\une@rep{\AMCrep@bloc}%
   \else\begin{itemize}\setlength{\itemsep}{\AMCinterIrep}\fi%
     \AMCrep@init{#1}}%
   {\AMC@fin@rep\ifAMC@rbloc\else\end{itemize}\fi}
 \newenvironment{choiceshoriz}[1][r]{%
-  \start@Answers\def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}%
+  \def\une@rep{\AMCrep@ligne}\AMCrep@init{#1}%
   \par\begin{center}}%
   {\AMC@fin@rep\end{center}}
 \newenvironment{choicescustom}[1][r]{%
-  \start@Answers\def\une@rep{\AMCrep@perso}\AMCrep@init{#1}%
+  \def\une@rep{\AMCrep@perso}\AMCrep@init{#1}%
   \AMCbeginAnswer\ignorespaces}%
   {\AMC@fin@rep\AMCendAnswer}
 \newenvironment{tikz-single}[1][r]{
-\start@Answers\def\une@rep{\AMCrep@tikz}\AMCrep@init{#1}%
+\def\une@rep{\AMCrep@tikz}\AMCrep@init{#1}%
 \begin{tikzpicture}}{\AMC@fin@rep\end{tikzpicture}} 
 \newenvironment{tikz-multi}[1][r]{
-\start@Answers\def\une@rep{\AMCrep@tikzmat}\AMCrep@init{#1}%
+\def\une@rep{\AMCrep@tikzmat}\AMCrep@init{#1}%
 \begin{tikzpicture}[remember picture]}{\AMC@fin@rep\end{tikzpicture}}
 %    \end{macrocode}\end{macro}\end{environment}\end{environment}\end{environment}\end{environment}\end{environment}
 %
@@ -3363,6 +3363,7 @@ along with Auto-Multiple-Choice.  If not, see
     \AMCmessage{Q=\the\AMCid@quest}%
     \immediate\write\AMC@XYFILE{\string\question{\the\AMCid@quest}{\AMCid@name}}%
   \fi%
+  \start@Answers%
 }
 \newcommand\AMCexternalQuestion[2]{%
   \AMCstartWithQuestion{#1}%
