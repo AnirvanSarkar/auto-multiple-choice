@@ -208,10 +208,10 @@ die "Nonexistent source file: $source" if ( !-f $source );
 my $base = $source;
 $base =~ s/\.[a-zA-Z0-9]{1,4}$//gi;
 
-# $filtered_source is the LaTeX fil made from the source file by the
+# $filtered_source is the LaTeX file made from the source file by the
 # filter (for exemple, LaTeX or AMC-TXT).
 
-$filtered_source = "$build_dir/$base" . '_filtered.tex' if ( !$filtered_source );
+$filtered_source = "$base" . '_filtered.tex' if ( !$filtered_source );
 
 # default $data_dir value (hardly ever used):
 
@@ -569,6 +569,21 @@ sub analyse_amclog {
 
 my $filter_engine;
 
+sub announce_run {
+    my ($n, %oo) = @_;
+    $avance->text( $oo{text} . ( $oo{once} ? "" : " ($n)" ) );
+    $avance->progres(0.1);
+}
+
+sub get_builddir {
+    my ($file) = @_;
+    if($file =~ m|(.*)/|) {
+        my $lmk_builddir = $1;
+        $info_vars{lmkbuilddir} = $lmk_builddir;
+        $build_dir = $lmk_builddir;
+    }
+}
+
 sub execute {
     my %oo   = (@_);
     my $errs = 0;
@@ -610,14 +625,14 @@ sub execute {
     my $n_run    = 0;     # number of runs so far
     my $rerun    = 0;     # has to re-run?
     my $delta    = 0;
+    my $latexmk  = 0;
     my $format   = '';    # output format
 
     do {
 
         $n_run++;
 
-        $avance->text( $oo{text} . ( $oo{once} ? "" : " ($n_run)" ) );
-        $avance->progres(0.1);
+        announce_run($n_run, %oo);
 
         # clears errors from previous run
 
@@ -638,6 +653,23 @@ sub execute {
         EXEC->autoflush(1);
 
         while (<EXEC>) {
+
+            # use of latexmk
+            $latexmk = 1 if(/^Latexmk:/);
+
+            if($latexmk && /^Run number (\d+) of/) {
+                if($n_run < $1) {
+                    $n_run = $1;
+                    announce_run($n_run, %oo);
+                }
+            }
+
+            if($latexmk && /^Latexmk:.*log file '(.*)'/) {
+                get_builddir($1);
+            }
+            if($latexmk && /^Latexmk: All targets \((.*)\)/) {
+                get_builddir($1);
+            }
 
             # progression...
             if (/^AMC:copies:total=([0-9]+)/) {
@@ -692,7 +724,7 @@ sub execute {
         $cmd_pid = '';
 
     } while ( ( ( $n_run < $min_runs ) || ( $rerun && $n_run < $max_runs ) )
-        && !$oo{once} );
+        && !$oo{once} && !$latexmk );
 
     # For these engines, we already know what is the output format:
     # override detected one
@@ -764,7 +796,7 @@ sub prepare_filter {
     if ($filter) {
         if ( !$filter_engine ) {
             load("AMC::Filter::$filter");
-            $filter_engine = "AMC::Filter::$filter"->new( jobname => "$build_dir/$jobname" );
+            $filter_engine = "AMC::Filter::$filter"->new( jobname => "$jobname" );
             $filter_engine->pre_filter($source);
 
             # sometimes the filter says that the source file don't need to
@@ -876,8 +908,8 @@ sub latex_cmd {
     $o{AMCNombreCopies} = $number_of_copies if ( $number_of_copies > 0 );
 
     # build a configuration tex file, that will be read by the
-    # autoultiplechoice LaTeX package, from the %o options:
-    open( CONFIG, ">:utf8", "$build_dir/$jobname-config.tex" )
+    # automultiplechoice LaTeX package, from the %o options:
+    open( CONFIG, ">:utf8", "$jobname-config.tex" )
       or die "Unable to open config file: $!";
     print CONFIG latex_reproducible_commands($latex_engine) if ($epoch);
     for my $k ( keys %o ) {

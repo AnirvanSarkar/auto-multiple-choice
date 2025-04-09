@@ -1887,6 +1887,15 @@ sub document_updated_callback {
         return ();
     }
 
+    # save tex variables
+
+    my %vars = $c->variables;
+    $self->{project}->data->begin_transaction('texV');
+    for my $k ( keys %vars ) {
+        $self->{project}->layout->variable( "tex:$k", $vars{$k} );
+    }
+    $self->{project}->data->end_transaction('texV');
+    
     # verif que tout y est
 
     my $ok = 1;
